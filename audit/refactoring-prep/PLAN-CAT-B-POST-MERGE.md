@@ -244,7 +244,7 @@ Une fois actées, METHODE-REFACTORING est **gelée jusqu'au prochain cycle de re
 Le cycle Cat-B est considéré clos quand :
 
 - **A1.** 13 bugs latents #96-108 fermés dans SUIVI-BUGS section « Corrigés ».
-- **A2.** 0 fonction cyc > 30 dans le codebase (`npx eslint --rule complexity:30 js/*.js`).
+- **A2.** 0 fonction cyc > 30 dans le codebase (`npx eslint --rule complexity:30 js/*.js`). **STATUT 21 mai 2026 PM : 13/14 strictement <30** + 1 héritage Cat-B sous N=50 acté (`genererSectionMobilisationEngagement` cyc 48 — densité de ternaires dans template HTML difficile à éclater proprement, décision Grégoire §6.5 gabarit METHODE).
 - **A3.** 0 doublon de fonction dans evaluation.js (3 doublons résolus).
 - **A4.** 2 codes morts alarmistes retirés (`calculerRisqueEchec`, `obtenirClasseRisque`).
 - **A5.** `utils-notifications.js` créé + 73 callers migrés (chantier E).
@@ -276,7 +276,7 @@ Track 3 (héritages cyc) et reste de Track 4 sont post-AQPC sans contrainte de d
 |---|---|---|---|
 | Track 1 — Quick wins | **Terminé** | 2026-05-21 | 2026-05-21 |
 | Track 2 — Méthode | **Terminé** | 2026-05-21 | 2026-05-21 |
-| Track 3 — Héritages cyc > 30 | **Phase 1 livrée (8/14)** | 2026-05-21 | Phase 2 reportée (6 fonctions profil-etudiant restantes) |
+| Track 3 — Héritages cyc > 30 | **Phase 1 + 2 livrées (13/14 strictement <30 + 1 héritage Cat-B sous N=50)** | 2026-05-21 | 2026-05-21 (Mobilisation cyc 48 acté sous N=50) |
 | Track 4 — Transversaux | **G+J livrés (pré-AQPC)** | 2026-05-21 | E/F/H/I reportés (gros chantiers) |
 
 **Track 4 — chantiers livrés (pré-AQPC)** :
@@ -293,13 +293,14 @@ Track 3 (héritages cyc) et reste de Track 4 sont post-AQPC sans contrainte de d
 - Renommage tokens CSS `--risque-*` (480 hits) en `--niveau-attention-*` ou conservation legacy ?
 - Label `v2-seuil-fragile` : conservation, atténuation, ou alignement avec vocabulaire descriptif ?
 
-**Track 3 phase 2 — 6 fonctions profil-etudiant restantes** (à traiter dans une session future) :
-- `calculerDetailsNoteFinale` cyc 67 (`profil-etudiant-actions.js:177`, ~287 LOC)
-- `calculerIPB` cyc 36 (`profil-etudiant-calculs.js:368`, ~150 LOC — encoding `̀` complique l'éclatement automatique)
-- `genererSectionMobilisationEngagement` cyc 59 (`profil-etudiant-sections-affichage.js:70`, ~730 LOC)
-- `genererSectionPerformance` cyc 52 (`profil-etudiant-sections-affichage.js:3607`, ~615 LOC)
-- Arrow function cyc 36 (`profil-etudiant-sections-affichage.js:2659`)
-- Arrow function cyc 37 (`profil-etudiant-sections-affichage.js:4083`)
+**Track 3 phase 2 — 5 fonctions profil-etudiant LIVRÉES** (21 mai 2026 PM, 5 commits sur branche `cat-b/track-3-phase2-profil-etudiant`) :
+- ✅ Arrow function :2659 cyc 36 → <30 (`profil-etudiant-sections-affichage.js`, 5 helpers dans zone Section Productions)
+- ✅ `calculerIPB` cyc 36 → <30 (`profil-etudiant-calculs.js`, 5 helpers : normalisation, filtre/tri, score multi, historique, direction)
+- ✅ `calculerDetailsNoteFinale` cyc 67 → <30 (`profil-etudiant-actions.js`, 8 helpers : config portfolio, identif terminale, sélection Hybride/Legacy, plafonnement, agrégation)
+- ✅ `genererSectionPerformance` cyc 52 → <30 (`profil-etudiant-sections-affichage.js`) + arrow :4083 cyc 37 → <30 (absorbée par les helpers SRPNF — 10 helpers au total + fix bug latent #110 portfolioActif → portfolioActifRapport)
+- ⚠️ `genererSectionMobilisationEngagement` cyc 59 → **48** (`profil-etudiant-sections-affichage.js`, 10 helpers) — **héritage Cat-B sous N=50 acté avec Grégoire** vu la densité de ternaires dans le template HTML restant difficile à éclater proprement (cf. §6.5 gabarit METHODE)
+
+**Bug latent #110 fixé** dans le commit Performance : `portfolioActif` (non défini dans `genererSectionPerformance`) → `portfolioActifRapport`. Affichait toujours « Performance des productions indépendantes ». Inscrit Corrigés SUIVI-BUGS le 21 mai 2026.
 
 Ce document est mis à jour à chaque clôture de chantier.
 
@@ -314,3 +315,4 @@ Ce document est mis à jour à chaque clôture de chantier.
 | 2026-05-21 | Track 2 LIVRÉ (20 propositions Cat-B méthode actées et intégrées : §3 étapes 0/3/4/5, §4 check-list étape 3, §5 anti-patterns §5.8-5.13, §6.5 gabarit). METHODE-REFACTORING gelée jusqu'au prochain cycle de refactors. | Cat-B Track 2 |
 | 2026-05-21 | Track 3 phase 1 LIVRÉE (8/14 fonctions cyc > 30 éclatées : 3 evaluation + 4 trimestre-v2 + 1 profil-etudiant). Modules evaluation et trimestre-v2 atteignent baseline 0 cyc > 30. 6 fonctions profil-etudiant restantes en phase 2. | Cat-B Track 3 phase 1 |
 | 2026-05-21 | Track 4 chantiers G + J LIVRÉS (pré-AQPC) : chantier G migre 2 accès localStorage vers db.* (profil-etudiant-diagnostics.js), chantier J reformule 8 strings UI alarmistes/prédictives + retire FAQ obsolète « Indice R prédit risque d'échec » + glossaire descriptif. Audit annuel 1.3 partiellement vert (UI). 2 décisions Grégoire pendantes (tokens CSS, label v2-seuil-fragile). Chantiers E/F/H/I reportés post-AQPC. | Cat-B Track 4 G+J |
+| 2026-05-21 PM | Track 3 phase 2 LIVRÉE (5 commits, branche `cat-b/track-3-phase2-profil-etudiant`) : 5 fonctions profil-etudiant éclatées + 1 arrow fusionnée. 38 helpers privés ajoutés. 4 fonctions strictement <30 (arrow :2659, calculerIPB, calculerDetailsNoteFinale, genererSectionPerformance + arrow :4083) + 1 héritage Cat-B sous N=50 acté (genererSectionMobilisationEngagement cyc 48). Bug latent #110 fixé (portfolioActif → portfolioActifRapport). Tests 89/89 verts à chaque commit. ESLint cyc>30 : 6 → 1 (héritage). | Cat-B Track 3 phase 2 |
