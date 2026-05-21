@@ -2339,7 +2339,7 @@ async function creerPratiqueV2() {
     fermerWizardV2();
 
     // Notification de succès
-    afficherNotificationSucces(`Pratique "${pratique.nom}" créée avec succès !`);
+    notifications.succes(`Pratique "${pratique.nom}" créée avec succès !`);
 
     // Rafraîchir l'interface si nécessaire
     if (typeof chargerPratiques === 'function') {

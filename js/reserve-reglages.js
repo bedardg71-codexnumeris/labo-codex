@@ -266,8 +266,8 @@ async function actionLierDossier() {
     if (!Reserve || typeof Reserve.obtenirHandle !== 'function') return;
     try {
         var handle = await Reserve.obtenirHandle({ forcer: true });
-        if (handle && typeof window.afficherNotificationSucces === 'function') {
-            window.afficherNotificationSucces('Dossier d’archives lié', handle.name || '');
+        if (handle) {
+            notifications.succes('Dossier d’archives lié', handle.name || '');
         }
         if (handle && typeof Reserve.hydrateDepuisFSAPI === 'function') {
             try { await Reserve.hydrateDepuisFSAPI(handle); }
@@ -284,9 +284,7 @@ async function actionEffacerLiaison() {
     if (!Reserve || typeof Reserve.effacerLiaisonFSAPI !== 'function') return;
     try {
         await Reserve.effacerLiaisonFSAPI();
-        if (typeof window.afficherNotificationSucces === 'function') {
-            window.afficherNotificationSucces('Liaison effacée', 'Le dossier d’archives n\'est plus lié.');
-        }
+        notifications.succes('Liaison effacée', 'Le dossier d’archives n\'est plus lié.');
     } catch (e) {
         console.warn('[ReserveReglages] Effacement liaison échoué', e.message || e);
     }
@@ -299,23 +297,17 @@ async function actionVerifierDossier() {
     try {
         var handle = await Reserve.obtenirHandle();
         if (!handle) {
-            if (typeof window.afficherNotificationErreur === 'function') {
-                window.afficherNotificationErreur('Aucun dossier lié', 'Lie d\'abord un dossier d’archives.');
-            }
+            notifications.erreur('Aucun dossier lié', 'Lie d\'abord un dossier d’archives.');
             return;
         }
         var stats = await Reserve.hydrateDepuisFSAPI(handle);
-        if (typeof window.afficherNotificationSucces === 'function') {
-            var msg = stats.total + ' archive(s) dans le manifeste FSAPI';
-            if (stats.ajoutes) msg += ' · ' + stats.ajoutes + ' ajouté(s) localement';
-            if (stats.mis_a_jour) msg += ' · ' + stats.mis_a_jour + ' mis à jour';
-            window.afficherNotificationSucces('Dossier vérifié', msg);
-        }
+        var msg = stats.total + ' archive(s) dans le manifeste FSAPI';
+        if (stats.ajoutes) msg += ' · ' + stats.ajoutes + ' ajouté(s) localement';
+        if (stats.mis_a_jour) msg += ' · ' + stats.mis_a_jour + ' mis à jour';
+        notifications.succes('Dossier vérifié', msg);
     } catch (e) {
         console.warn('[ReserveReglages] Vérification dossier échouée', e.message || e);
-        if (typeof window.afficherNotificationErreur === 'function') {
-            window.afficherNotificationErreur('Vérification impossible', e.message || 'Erreur inconnue');
-        }
+        notifications.erreur('Vérification impossible', e.message || 'Erreur inconnue');
     }
     rafraichir();
 }
@@ -326,9 +318,7 @@ function actionPurgerEntree(dossier) {
     if (!dossier) return;
     try {
         Reserve.purgerEntreeManifeste(dossier);
-        if (typeof window.afficherNotificationSucces === 'function') {
-            window.afficherNotificationSucces('Entrée retirée', dossier);
-        }
+        notifications.succes('Entrée retirée', dossier);
     } catch (e) {
         console.warn('[ReserveReglages] Purge échouée', e.message || e);
     }

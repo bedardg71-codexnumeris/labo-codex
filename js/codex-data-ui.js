@@ -13,7 +13,7 @@
      - Reserve (window.Reserve) — supporteFSAPI, lireManifesteLocal,
        obtenirHandle (utilisé indirectement via CodexData)
      - echapperHtml (window.echapperHtml)
-     - afficherNotificationSucces / afficherNotificationErreur
+     - window.notifications (utils-notifications.js)
 */
 
 (function() {
@@ -82,19 +82,11 @@ function _toggleHide(el, masque) {
 }
 
 function _notifSucces(titre, msg) {
-    if (typeof window.afficherNotificationSucces === 'function') {
-        window.afficherNotificationSucces(titre, msg);
-    } else {
-        console.warn('[CodexDataUI]', titre, '—', msg);
-    }
+    notifications.succes(titre, msg);
 }
 
 function _notifErreur(titre, msg) {
-    if (typeof window.afficherNotificationErreur === 'function') {
-        window.afficherNotificationErreur(titre, msg);
-    } else {
-        console.error('[CodexDataUI]', titre, '—', msg);
-    }
+    notifications.erreur(titre, msg);
 }
 
 /* ===============================

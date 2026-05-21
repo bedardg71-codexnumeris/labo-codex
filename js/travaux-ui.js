@@ -3811,14 +3811,12 @@
 
         afficherImport();
 
-        if (typeof afficherNotificationSucces === 'function') {
-            const msg = `${resultat.importes} fichier(s) import\u00e9(s)`;
-            var details = [];
-            if (resultat.erreurs > 0) details.push(resultat.erreurs + ' erreur(s)');
-            if (resultat.doublons && resultat.doublons.length > 0) details.push(resultat.doublons.length + ' doublon(s) traité(s)');
-            if (nbJetons > 0) details.push(nbJetons + ' jeton(s) de reprise appliqué(s)');
-            afficherNotificationSucces(msg, details.join(' — '));
-        }
+        const msg = `${resultat.importes} fichier(s) import\u00e9(s)`;
+        var details = [];
+        if (resultat.erreurs > 0) details.push(resultat.erreurs + ' erreur(s)');
+        if (resultat.doublons && resultat.doublons.length > 0) details.push(resultat.doublons.length + ' doublon(s) traité(s)');
+        if (nbJetons > 0) details.push(nbJetons + ' jeton(s) de reprise appliqué(s)');
+        notifications.succes(msg, details.join(' — '));
     }
 
     /**
@@ -3913,7 +3911,7 @@
                                 if (!d.fichierExistant.evaluationId) {
                                     travauxStockage.mettreAJourFichier(d.fichierExistant.id, { evaluationId: evalActive.id });
                                 }
-                                afficherNotificationSucces('Jeton de reprise appliqu\u00e9 pour ' + echapperHtml(nomEtudiant));
+                                notifications.succes('Jeton de reprise appliqu\u00e9 pour ' + echapperHtml(nomEtudiant));
                             }
                         }
                     }
@@ -4050,7 +4048,7 @@
 
         // Notification consolidée
         if (echecsSansEval.length > 0) {
-            afficherNotificationErreur(
+            notifications.erreur(
                 'Jetons non appliqués',
                 'Aucune évaluation existante trouvée pour : ' + echecsSansEval.join(', ') +
                 '. Les fichiers ont été importés, mais le jeton doit être appliqué manuellement.'
@@ -4290,9 +4288,7 @@
 
         const ok = await travauxStockage.convertirEnFacsimile(fichierId);
         if (ok) {
-            if (typeof afficherNotificationSucces === 'function') {
-                afficherNotificationSucces('Fichier allégé en fac-similé');
-            }
+            notifications.succes('Fichier allégé en fac-similé');
             rafraichirUI();
         } else {
             alert('Erreur lors de l\'allègement');
@@ -5949,12 +5945,10 @@
             afficherImport();
 
             // Notification
-            if (typeof afficherNotificationSucces === 'function') {
-                const message = estFusion
-                    ? 'Fichiers fusionnés (' + nbPages + ' pages)'
-                    : 'Document mis à jour (' + nbPages + ' pages)';
-                afficherNotificationSucces(message);
-            }
+            const message = estFusion
+                ? 'Fichiers fusionnés (' + nbPages + ' pages)'
+                : 'Document mis à jour (' + nbPages + ' pages)';
+            notifications.succes(message);
         } catch (err) {
             console.error('[Editeur Pages] Erreur sauvegarde:', err);
             alert('Erreur lors de la sauvegarde : ' + err.message);
@@ -6209,9 +6203,7 @@
             // Re-rendre l'editeur
             renderEditeurPages();
 
-            if (typeof afficherNotificationSucces === 'function') {
-                afficherNotificationSucces(idsSelectionnes.length + ' document(s) ajouté(s) à la fusion');
-            }
+            notifications.succes(idsSelectionnes.length + ' document(s) ajouté(s) à la fusion');
         } catch (err) {
             console.error('[Fusion Editeur] Erreur chargement:', err);
             alert('Erreur lors du chargement des documents : ' + err.message);
@@ -6489,13 +6481,9 @@
         fermerModalRetroaction();
 
         if (resultat === true) {
-            if (typeof afficherNotificationSucces === 'function') {
-                afficherNotificationSucces('Rétroaction sauvegardée');
-            }
+            notifications.succes('Rétroaction sauvegardée');
         } else if (resultat === 'quota') {
-            if (typeof afficherNotificationErreur === 'function') {
-                afficherNotificationErreur('Espace de stockage insuffisant', 'Impossible de sauvegarder la rétroaction.');
-            }
+            notifications.erreur('Espace de stockage insuffisant', 'Impossible de sauvegarder la rétroaction.');
         }
     }
 
@@ -6683,9 +6671,7 @@
         afficherImport();
 
         // Notification
-        if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces(`${nb} fichier(s) transféré(s) vers le groupe cible`);
-        }
+        notifications.succes(`${nb} fichier(s) transféré(s) vers le groupe cible`);
 
     }
 

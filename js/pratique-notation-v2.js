@@ -690,7 +690,7 @@
         sauvegarderJetonsV2();
 
         // Afficher notification
-        afficherNotificationSuccesV2('Pratique de notation sauvegardée avec succès');
+        notifications.succes('Pratique de notation sauvegardée avec succès');
     }
 
     // =========================================================================
@@ -1072,7 +1072,7 @@
         }
 
         db.setSync('modalitesEvaluation', modalites);
-        afficherNotificationSuccesV2('Configuration sauvegardée');
+        notifications.succes('Configuration sauvegardée');
     }
 
     /**
@@ -1858,18 +1858,6 @@
     // =========================================================================
     // NOTIFICATIONS
     // =========================================================================
-
-    /**
-     * Affiche une notification de succès
-     */
-    function afficherNotificationSuccesV2(message) {
-        if (typeof window.afficherNotificationSucces === 'function') {
-            window.afficherNotificationSucces(message);
-        } else if (typeof window.afficherMessage === 'function') {
-            window.afficherMessage(message, 'succes');
-        } else {
-        }
-    }
 
     // =========================================================================
     // WRAPPERS POUR DÉLÉGATION data-on-change (Phase 5)

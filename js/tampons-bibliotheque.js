@@ -42,9 +42,7 @@ async function ajouterALaBibliotheque(tampon) {
     if (!tamponSafe.id) return false;
     var items = await obtenirTous();
     if (items.find(function(t) { return t.id === tamponSafe.id; })) {
-        if (typeof afficherNotificationErreur === 'function') {
-            afficherNotificationErreur('Doublon', 'Ce tampon est déjà dans la bibliothèque');
-        }
+        notifications.erreur('Doublon', 'Ce tampon est déjà dans la bibliothèque');
         return false;
     }
     var entree = Object.assign({}, tamponSafe, {
@@ -113,9 +111,7 @@ async function partagerTampon(tamponId) {
         ? travauxOutils.obtenirAutocollants() : [];
     var tampon = autocollants.find(function(a) { return a.id === tamponId; });
     if (!tampon) {
-        if (typeof afficherNotificationErreur === 'function') {
-            afficherNotificationErreur('Erreur', 'Tampon introuvable');
-        }
+        notifications.erreur('Erreur', 'Tampon introuvable');
         return;
     }
 
@@ -134,8 +130,8 @@ async function partagerTampon(tamponId) {
     };
 
     var ok = await ajouterALaBibliotheque(entry);
-    if (ok && typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('Tampon "' + tampon.nom + '" ajouté à la bibliothèque');
+    if (ok) {
+        notifications.succes('Tampon "' + tampon.nom + '" ajouté à la bibliothèque');
     }
     rafraichirModal();
 }
@@ -152,9 +148,7 @@ async function ajouterDepuisBibliotheque(tamponId) {
     // Vérifier qu'il n'est pas déjà dans les tampons personnalisés
     var customs = db.getSync('tamponsPersonnalises', []);
     if (customs.find(function(c) { return c.id === tampon.id; })) {
-        if (typeof afficherNotificationErreur === 'function') {
-            afficherNotificationErreur('Déjà présent', 'Ce tampon est déjà dans ta palette');
-        }
+        notifications.erreur('Déjà présent', 'Ce tampon est déjà dans ta palette');
         return;
     }
 
@@ -173,9 +167,7 @@ async function ajouterDepuisBibliotheque(tamponId) {
         db.setSync('tamponsImages', imagesCustom);
     }
 
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('Tampon "' + tampon.nom + '" ajouté à ta palette');
-    }
+    notifications.succes('Tampon "' + tampon.nom + '" ajouté à ta palette');
     rafraichirModal();
 }
 
@@ -186,9 +178,7 @@ async function ajouterDepuisBibliotheque(tamponId) {
 async function exporterBibliotheque() {
     var items = obtenirTousSync();
     if (!items || items.length === 0) {
-        if (typeof afficherNotificationErreur === 'function') {
-            afficherNotificationErreur('Aucune donnée', 'La bibliothèque est vide');
-        }
+        notifications.erreur('Aucune donnée', 'La bibliothèque est vide');
         return;
     }
 
@@ -225,9 +215,7 @@ async function exporterBibliotheque() {
             window.SecuriteExportValidation.validerExportTampons(payload);
         } catch (e) {
             console.error(e);
-            if (typeof afficherNotificationErreur === 'function') {
-                afficherNotificationErreur('Export bloqué', e.message);
-            }
+            notifications.erreur('Export bloqué', e.message);
             return;
         }
     }
@@ -254,9 +242,7 @@ async function exporterBibliotheque() {
     document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
 
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(items.length + ' tampon(s) exporté(s)');
-    }
+    notifications.succes(items.length + ' tampon(s) exporté(s)');
 }
 
 // Limites de surface — équivalent JSON de validerZipSecurite pour le canal
@@ -272,9 +258,7 @@ async function importerFichier(event) {
 
     try {
         if (file.size > TAMPONS_FICHIER_TAILLE_MAX_OCTETS) {
-            if (typeof afficherNotificationErreur === 'function') {
-                afficherNotificationErreur('Fichier trop volumineux', 'Limite : ' + Math.round(TAMPONS_FICHIER_TAILLE_MAX_OCTETS / (1024 * 1024)) + ' Mo.');
-            }
+            notifications.erreur('Fichier trop volumineux', 'Limite : ' + Math.round(TAMPONS_FICHIER_TAILLE_MAX_OCTETS / (1024 * 1024)) + ' Mo.');
             event.target.value = '';
             return;
         }
@@ -283,17 +267,13 @@ async function importerFichier(event) {
         var data = JSON.parse(texte);
 
         if (data.type !== 'monitorage-tampons' || !Array.isArray(data.tampons)) {
-            if (typeof afficherNotificationErreur === 'function') {
-                afficherNotificationErreur('Format invalide', 'Ce fichier n\'est pas une collection de tampons Labo Codex');
-            }
+            notifications.erreur('Format invalide', 'Ce fichier n\'est pas une collection de tampons Labo Codex');
             event.target.value = '';
             return;
         }
 
         if (data.tampons.length > TAMPONS_NOMBRE_MAX_PAR_IMPORT) {
-            if (typeof afficherNotificationErreur === 'function') {
-                afficherNotificationErreur('Trop de tampons', 'Limite : ' + TAMPONS_NOMBRE_MAX_PAR_IMPORT + ' tampons par import.');
-            }
+            notifications.erreur('Trop de tampons', 'Limite : ' + TAMPONS_NOMBRE_MAX_PAR_IMPORT + ' tampons par import.');
             event.target.value = '';
             return;
         }
@@ -301,19 +281,15 @@ async function importerFichier(event) {
         var resultat = await importerDansBibliotheque(data.tampons);
         var ajoutes = (typeof resultat === 'object' && resultat !== null) ? resultat.ajoutes : resultat;
         var sceauAltere = (typeof resultat === 'object' && resultat !== null) ? resultat.sceauAltere : 0;
-        if (typeof afficherNotificationSucces === 'function') {
-            var msg = ajoutes + ' tampon(s) importé(s) dans la bibliothèque';
-            if (sceauAltere > 0) {
-                msg += '\n\n⚠ ' + sceauAltere + ' tampon(s) avec sceau invalide (modifié(s) après l\'export). Vérifie avant utilisation.';
-            }
-            afficherNotificationSucces(msg);
+        var msg = ajoutes + ' tampon(s) importé(s) dans la bibliothèque';
+        if (sceauAltere > 0) {
+            msg += '\n\n⚠ ' + sceauAltere + ' tampon(s) avec sceau invalide (modifié(s) après l\'export). Vérifie avant utilisation.';
         }
+        notifications.succes(msg);
         rafraichirModal();
     } catch (e) {
         console.error('[Tampons-Biblio] Erreur import:', e);
-        if (typeof afficherNotificationErreur === 'function') {
-            afficherNotificationErreur('Erreur', 'Impossible de lire le fichier JSON');
-        }
+        notifications.erreur('Erreur', 'Impossible de lire le fichier JSON');
     }
 
     // Reset input pour permettre de re-sélectionner le même fichier
@@ -447,9 +423,7 @@ function rafraichirModal() {
 
 async function supprimerDeBibliotheque(tamponId) {
     await retirerDeLaBibliotheque(tamponId);
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('Tampon retiré de la bibliothèque');
-    }
+    notifications.succes('Tampon retiré de la bibliothèque');
     rafraichirModal();
 }
 
@@ -514,9 +488,7 @@ function _obtenirTamponsDCategorie(catId) {
 function exporterCategorie(catId) {
     var tampons = _obtenirTamponsDCategorie(catId);
     if (tampons.length === 0) {
-        if (typeof afficherNotificationErreur === 'function') {
-            afficherNotificationErreur('Catégorie vide', 'Aucun tampon dans cette catégorie');
-        }
+        notifications.erreur('Catégorie vide', 'Aucun tampon dans cette catégorie');
         return;
     }
 
@@ -555,9 +527,7 @@ function exporterCategorie(catId) {
     document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
 
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(tamponsExport.length + ' tampon(s) "' + nomCat + '" exporté(s)');
-    }
+    notifications.succes(tamponsExport.length + ' tampon(s) "' + nomCat + '" exporté(s)');
 }
 
 async function partagerCategorie(catId) {
@@ -584,9 +554,7 @@ async function partagerCategorie(catId) {
         if (ok) ajoutes++;
     }
 
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(ajoutes + '/' + tampons.length + ' tampon(s) "' + nomCat + '" ajouté(s) à la bibliothèque');
-    }
+    notifications.succes(ajoutes + '/' + tampons.length + ' tampon(s) "' + nomCat + '" ajouté(s) à la bibliothèque');
     rafraichirModal();
 }
 

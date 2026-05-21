@@ -930,7 +930,7 @@ async function importerCommentaires() {
         await calculerPourcentageComplete();
         annulerImportCommentaires();
         
-        afficherNotificationSucces(`${compteur} commentaire(s) importé(s) avec succès !`);
+        notifications.succes(`${compteur} commentaire(s) importé(s) avec succès !`);
         
     } catch (error) {
         console.error('Erreur d\'import:', error);
@@ -1669,7 +1669,7 @@ async function exporterCartouches() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    afficherNotificationSucces(`${nbCartouches} cartouche(s) exportée(s) avec succès`);
+    notifications.succes(`${nbCartouches} cartouche(s) exportée(s) avec succès`);
 }
 
 /**
@@ -1883,7 +1883,7 @@ window.confirmerImportCartouches = async function(donnees) {
         if (nbAjoutees > 0) message += `${nbAjoutees} nouvelle(s) cartouche(s) ajoutée(s).\n`;
         if (nbMisesAJour > 0) message += `${nbMisesAJour} cartouche(s) mise(s) à jour.\n`;
         message += `\nConsulte « Cartouches disponibles » pour les ajouter à ta sélection.`;
-        afficherNotificationSucces(message);
+        notifications.succes(message);
 
     } catch (error) {
         console.error('Erreur lors de l\'import:', error);
@@ -2126,7 +2126,7 @@ function importerCartoucheDepuisTxt(eventOuEl) {
             await afficherMatriceRetroaction();
             await calculerPourcentageComplete();
 
-            afficherNotificationSucces(`${compteur} commentaire(s) importé(s) depuis le fichier !`);
+            notifications.succes(`${compteur} commentaire(s) importé(s) depuis le fichier !`);
 
         } catch (error) {
             console.error('Erreur d\'import depuis .txt:', error);
@@ -2229,7 +2229,7 @@ async function exporterCartoucheEnTexte() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    afficherNotificationSucces('Cartouche exportée en format texte');
+    notifications.succes('Cartouche exportée en format texte');
 }
 
 /* ===============================
@@ -2362,7 +2362,7 @@ async function exporterCartoucheActive() {
     a.click();
     URL.revokeObjectURL(url);
 
-    afficherNotificationSucces('Cartouche exportée avec succès');
+    notifications.succes('Cartouche exportée avec succès');
 }
 
 /**
@@ -2459,11 +2459,7 @@ function importerDansCartoucheActive(event) {
             // Recharger la cartouche dans le formulaire
             await chargerCartouchePourModif(cartoucheId, grilleId);
 
-            if (typeof afficherNotificationSucces === 'function') {
-                afficherNotificationSucces('Cartouche importée et remplacée avec succès');
-            } else {
-                alert('Cartouche importée et remplacée avec succès !');
-            }
+            notifications.succes('Cartouche importée et remplacée avec succès');
 
         } catch (error) {
             console.error('Erreur lors de l\'import:', error);
@@ -3073,7 +3069,7 @@ function importerDepuisMarkdown() {
         });
 
         // Notification succès
-        afficherNotificationSucces(`${nbCommentaires} commentaires importés avec succès !`);
+        notifications.succes(`${nbCommentaires} commentaires importés avec succès !`);
 
         // Vider le textarea
         textarea.value = '';
@@ -3152,7 +3148,7 @@ function importerPartiel() {
     });
 
     if (nbImportes > 0) {
-        afficherNotificationSucces(`${nbImportes} commentaires importés (critères sélectionnés)`);
+        notifications.succes(`${nbImportes} commentaires importés (critères sélectionnés)`);
         textarea.value = '';
         calculerPourcentageComplet();
     } else {
@@ -3209,7 +3205,7 @@ function importerCartoucheJSON(event) {
             await afficherBanqueCartouches();
             await chargerCartouchePourModif(cartouche.id, grilleId);
 
-            afficherNotificationSucces('Cartouche importée avec succès !');
+            notifications.succes('Cartouche importée avec succès !');
 
         } catch (error) {
             console.error('Erreur import JSON:', error);

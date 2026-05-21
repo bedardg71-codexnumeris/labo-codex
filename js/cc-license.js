@@ -1513,9 +1513,7 @@ async function sauvegarderMetadonnees() {
     }
 
     // Notification
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('Métadonnées mises à jour');
-    }
+    notifications.succes('Métadonnées mises à jour');
 }
 
 // ============================================

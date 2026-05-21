@@ -1111,7 +1111,7 @@ function confirmerSeances() {
     const message = nbSeances === 1
         ? 'Séance sauvegardée avec succès'
         : `${nbSeances} séances sauvegardées avec succès`;
-    afficherNotificationSucces(message);
+    notifications.succes(message);
 
     // Réinitialiser seancesEnCours
     seancesEnCours = [];
@@ -1336,7 +1336,7 @@ function sauvegarderEditionSeanceEnPlace(index) {
     // Recharger l'affichage
     afficherSeancesExistantes();
 
-    afficherNotificationSucces('Séance modifiée');
+    notifications.succes('Séance modifiée');
 }
 
 /**
@@ -1370,7 +1370,7 @@ function supprimerSeance(index) {
     // Recharger l'affichage
     afficherSeancesExistantes();
 
-    afficherNotificationSucces('Séance supprimée');
+    notifications.succes('Séance supprimée');
 }
 
 /**
@@ -1535,7 +1535,7 @@ function confirmerAjoutSeance() {
     // Recharger l'affichage
     afficherSeancesExistantes();
 
-    afficherNotificationSucces('Séance ajoutée');
+    notifications.succes('Séance ajoutée');
 }
 
 /**
@@ -1601,7 +1601,7 @@ function nettoyerDoublons() {
     // Recharger
     afficherSeancesExistantes();
 
-    afficherNotificationSucces(`${doublonsTrouves.length} doublon(s) supprimé(s)`);
+    notifications.succes(`${doublonsTrouves.length} doublon(s) supprimé(s)`);
 }
 
 /* ===============================

@@ -1349,7 +1349,7 @@ function enregistrerPresences() {
 
     // Protection : bloquer en mode anonymisation (lecture seule)
     if (!sauvegarderDonneesSelonMode('presences', presences)) {
-        afficherNotificationErreur('Modification impossible', 'Impossible de sauvegarder les présences en mode anonymisation');
+        notifications.erreur('Modification impossible', 'Impossible de sauvegarder les présences en mode anonymisation');
         return;
     }
 

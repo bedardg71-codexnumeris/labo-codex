@@ -1365,9 +1365,7 @@ function renommerFichierDepuisListe(fichierId) {
         nouveau += ext;
     }
     travauxStockage.mettreAJourFichier(fichierId, { nomFichier: nouveau });
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('Fichier renommé : ' + nouveau);
-    }
+    notifications.succes('Fichier renommé : ' + nouveau);
     // Rafraîchir la liste pour refléter le nouveau nom (notamment dans la modale Propriétés)
     if (typeof initialiserListeEvaluations === 'function') {
         initialiserListeEvaluations();
@@ -1501,9 +1499,7 @@ function ouvrirProprieteFichier(fichierId) {
         }
 
         if (modifie) {
-            if (typeof afficherNotificationSucces === 'function') {
-                afficherNotificationSucces('Propri\u00e9t\u00e9s mises \u00e0 jour');
-            }
+            notifications.succes('Propri\u00e9t\u00e9s mises \u00e0 jour');
         }
         fermer();
     };
@@ -1516,9 +1512,7 @@ window.ouvrirProprieteFichier = ouvrirProprieteFichier;
 function associerProductionDepuisListe(fichierId, da) {
     const productions = obtenirDonneesSelonMode('productions');
     if (productions.length === 0) {
-        if (typeof afficherNotificationErreur === 'function') {
-            afficherNotificationErreur('Aucune production', 'Crée d\'abord des productions dans « Construction de la note ».');
-        }
+        notifications.erreur('Aucune production', 'Crée d\'abord des productions dans « Construction de la note ».');
         return;
     }
 
@@ -1676,9 +1670,7 @@ function confirmerSuppressionFichier(fichierId, da) {
     document.getElementById('supprimer-fichier-btn-confirmer').onclick = () => {
         travauxStockage.deplacerEnCorbeille(fichierId);
         overlay.remove();
-        if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces(`Fichier de ${nomEtudiant} déplacé à la corbeille.`);
-        }
+        notifications.succes(`Fichier de ${nomEtudiant} déplacé à la corbeille.`);
         if (typeof appliquerFiltres === 'function') {
             appliquerFiltres();
         }
@@ -1960,11 +1952,7 @@ function supprimerEvaluation(evaluationId) {
             });
         }
         if (fichierExiste) {
-            if (typeof afficherNotificationErreur === 'function') {
-                afficherNotificationErreur('Suppression impossible', 'Cette évaluation est verrouillée. Déverrouillez-la d\'abord.');
-            } else {
-                alert('Suppression impossible : cette évaluation est verrouillée. Déverrouillez-la d\'abord.');
-            }
+            notifications.erreur('Suppression impossible', 'Cette évaluation est verrouillée. Déverrouillez-la d\'abord.');
             return;
         }
         // Fichier absent → évaluation orpheline, on permet la suppression
@@ -1977,7 +1965,7 @@ function supprimerEvaluation(evaluationId) {
     const evaluationsFiltered = evaluations.filter(ev => ev.id !== evaluationId);
 
     if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluationsFiltered)) {
-        afficherNotificationErreur('Erreur', 'Impossible de supprimer en mode anonymisation');
+        notifications.erreur('Erreur', 'Impossible de supprimer en mode anonymisation');
         return;
     }
 
@@ -1991,9 +1979,7 @@ function supprimerEvaluation(evaluationId) {
     initialiserListeEvaluations();
 
     // Notification de succès
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('Évaluation supprimée');
-    }
+    notifications.succes('Évaluation supprimée');
 }
 
 /**
@@ -2010,7 +1996,7 @@ function modifierEvaluationRemplacee(evaluationId) {
     var evaluation = evaluations.find(function(e) { return e.id === evaluationId; });
 
     if (!evaluation) {
-        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        notifications.erreur('Erreur', 'Évaluation introuvable');
         return;
     }
 
@@ -2620,9 +2606,7 @@ function restaurerFichierCorbeille(id) {
 
     travauxStockage.restaurerDeCorbeille(id);
 
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('Fichier restauré.');
-    }
+    notifications.succes('Fichier restauré.');
 
     mettreAJourBoutonCorbeille();
     if (vueCorbeilleActive) {
@@ -2691,9 +2675,7 @@ function supprimerFichierDefinitivement(id) {
         }
 
         overlay.remove();
-        if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces('Fichier et évaluation supprimés définitivement.');
-        }
+        notifications.succes('Fichier et évaluation supprimés définitivement.');
         mettreAJourBoutonCorbeille();
         if (vueCorbeilleActive) {
             afficherVueCorbeille();
@@ -2766,9 +2748,7 @@ function viderTouteCorbeille() {
         }
 
         overlay.remove();
-        if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces('Corbeille vidée.');
-        }
+        notifications.succes('Corbeille vidée.');
         mettreAJourBoutonCorbeille();
         if (vueCorbeilleActive) {
             afficherVueCorbeille();

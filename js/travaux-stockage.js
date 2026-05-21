@@ -194,9 +194,7 @@
             const tailleMB = (blob.size / 1024 / 1024).toFixed(1);
             const msg = `Blob trop volumineux: ${tailleMB} MB (limite: ${LIMITE_BLOB_MB} MB)`;
             console.error(`[Travaux-Stockage] ${msg}`);
-            if (typeof afficherNotificationErreur === 'function') {
-                afficherNotificationErreur('Fichier trop volumineux', `Le fichier dépasse la limite de ${LIMITE_BLOB_MB} MB.`);
-            }
+            notifications.erreur('Fichier trop volumineux', `Le fichier dépasse la limite de ${LIMITE_BLOB_MB} MB.`);
             // Throw plutot que return silencieux : sinon le caller croit que le
             // blob est stocke alors qu'il ne l'est pas, et la metadata associee
             // (entree dans fichiersTravaux) devient orpheline.
@@ -220,9 +218,7 @@
             });
         } catch (err) {
             if (err?.name === 'QuotaExceededError') {
-                if (typeof afficherNotificationErreur === 'function') {
-                    afficherNotificationErreur('Stockage plein', 'L\'espace de stockage est insuffisant. Supprimez des fichiers.');
-                }
+                notifications.erreur('Stockage plein', 'L\'espace de stockage est insuffisant. Supprimez des fichiers.');
             }
             console.error(`[Travaux-Stockage] Erreur stockage blob: ${id}`, err);
             throw err;

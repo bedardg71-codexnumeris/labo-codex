@@ -1091,9 +1091,7 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
     var gc = _resoudreGroupeCours(trimestre, groupeCoursId);
     if (!gc) {
         var m = 'Groupe-cours introuvable pour le trimestre ' + trimestre + '.';
-        if (typeof window.afficherNotificationErreur === 'function') {
-            window.afficherNotificationErreur('Archivage impossible', m);
-        }
+        notifications.erreur('Archivage impossible', m);
         throw new Error(m);
     }
 
@@ -1107,9 +1105,7 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
 
     if (!modeFSAPI && typeof JSZip === 'undefined') {
         var msgZip = 'Bibliotheque de compression non chargee.';
-        if (typeof window.afficherNotificationErreur === 'function') {
-            window.afficherNotificationErreur('Erreur', msgZip);
-        }
+        notifications.erreur('Erreur', msgZip);
         throw new Error(msgZip);
     }
 
@@ -1126,9 +1122,7 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
         if (statsDonnees.nombreEtudiants === 0 && statsDonnees.nombreCles === 0) {
             _progHide();
             var msgVide = 'Aucune donnée trouvée pour ce groupe-cours dans ' + trimestre + '.';
-            if (typeof window.afficherNotificationErreur === 'function') {
-                window.afficherNotificationErreur('Archivage vide', msgVide);
-            }
+            notifications.erreur('Archivage vide', msgVide);
             throw new Error(msgVide);
         }
 
@@ -1229,15 +1223,13 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
             await new Promise(function(r) { setTimeout(r, 600); });
             _progHide();
 
-            if (typeof window.afficherNotificationSucces === 'function') {
-                var nomDossierRacine = handleReserve.name || 'Archives';
-                window.afficherNotificationSucces(
-                    'Archive enregistrée',
-                    statsDonnees.nombreEtudiants + ' étudiant(s), ' +
-                    collecteBlobs.trouves + ' fichier(s) — ' +
-                    nomDossierRacine + '/' + ecriture.cheminDossier
-                );
-            }
+            var nomDossierRacine = handleReserve.name || 'Archives';
+            notifications.succes(
+                'Archive enregistrée',
+                statsDonnees.nombreEtudiants + ' étudiant(s), ' +
+                collecteBlobs.trouves + ' fichier(s) — ' +
+                nomDossierRacine + '/' + ecriture.cheminDossier
+            );
 
             return {
                 succes: true,
@@ -1335,13 +1327,11 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
         await new Promise(function(r) { setTimeout(r, 600); });
         _progHide();
 
-        if (typeof window.afficherNotificationSucces === 'function') {
-            window.afficherNotificationSucces(
-                'Archive téléchargée',
-                statsDonnees.nombreEtudiants + ' étudiant(s), ' +
-                collecteBlobs.trouves + ' fichier(s) (' + _formaterTaille(zipBlob.size) + ')'
-            );
-        }
+        notifications.succes(
+            'Archive téléchargée',
+            statsDonnees.nombreEtudiants + ' étudiant(s), ' +
+            collecteBlobs.trouves + ' fichier(s) (' + _formaterTaille(zipBlob.size) + ')'
+        );
 
         return {
             succes: true,
@@ -1362,9 +1352,7 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
     } catch (err) {
         _progHide();
         console.error('[Archives] Erreur d’archivage:', err);
-        if (typeof window.afficherNotificationErreur === 'function') {
-            window.afficherNotificationErreur('Erreur de archive', err.message || String(err));
-        }
+        notifications.erreur('Erreur de archive', err.message || String(err));
         throw err;
     }
 }
@@ -1565,8 +1553,8 @@ async function actionChangerDossier() {
     await _supprimerHandlePersiste();
     var nouveau = await _obtenirHandleReserve();
     await _majBandeauStatut();
-    if (nouveau && typeof window.afficherNotificationSucces === 'function') {
-        window.afficherNotificationSucces('Dossier d’archives mis à jour', nouveau.name || '');
+    if (nouveau) {
+        notifications.succes('Dossier d’archives mis à jour', nouveau.name || '');
     }
 }
 
@@ -1586,10 +1574,8 @@ async function lancerDepuisDialogue() {
     var trimestre = selT.value;
     var groupeId = selG.value;
     if (!trimestre || !groupeId) {
-        if (typeof window.afficherNotificationErreur === 'function') {
-            window.afficherNotificationErreur('Sélection incomplète',
-                'Choisis un trimestre et un groupe-cours.');
-        }
+        notifications.erreur('Sélection incomplète',
+            'Choisis un trimestre et un groupe-cours.');
         return;
     }
 

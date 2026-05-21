@@ -258,22 +258,6 @@ function evaluerProduction(da, productionId) {
 }
 
 
-/**
- * Affiche une notification de succès
- */
-function afficherNotificationSucces(message, details = '') {
-    const notification = document.createElement('div');
-    notification.className = 'notification-succes';
-    notification.innerHTML = details
-        ? `<div style="font-weight:600;margin-bottom:4px">${echapperHtml(message)}</div><div>${echapperHtml(details)}</div>`
-        : echapperHtml(message);
-    document.body.appendChild(notification);
-
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
-}
-
 /* ===============================
    REFONTE MODULE EVALUATION: LISTE DES ÉVALUATIONS
    Nouvelles fonctions pour la liste avec calcul des indices
@@ -3629,7 +3613,6 @@ window.ouvrirProfilDepuisEvaluation = ouvrirProfilDepuisEvaluation;
 window.ouvrirTravailDepuisEvaluation = ouvrirTravailDepuisEvaluation;
 window.mettreAJourBoutonVoirTravail = mettreAJourBoutonVoirTravail;
 window.rechargerFiltreProduction = rechargerFiltreProduction; // Pour mise à jour du filtre après ajout/modification de productions
-window.afficherNotificationSucces = afficherNotificationSucces; // Utilisé par trimestre-v2.js et autres modules
 
 // ============================================
 // FONCTIONS POUR JETONS PERSONNALISÉS

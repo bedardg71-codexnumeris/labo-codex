@@ -1218,9 +1218,7 @@
                     travauxStockage.sauvegarderFichiersTravaux(fichiers);
                 }
 
-                if (typeof afficherNotificationSucces === 'function') {
-                    afficherNotificationSucces('Fichier reimporte avec succes');
-                }
+                notifications.succes('Fichier reimporte avec succes');
 
                 // Rafraichir l'UI
                 if (typeof travauxUI !== 'undefined' && typeof travauxUI.rafraichirUI === 'function') {

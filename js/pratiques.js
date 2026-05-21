@@ -323,9 +323,7 @@ function definirPratiqueParDefaut(pratiqueId) {
     const nomPratique = pratiqueId === 'sommative' ? 'Sommative traditionnelle' : 'PAN-Standards';
 
     // Afficher notification
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(`Pratique par défaut : ${nomPratique}`);
-    }
+    notifications.succes(`Pratique par défaut : ${nomPratique}`);
 }
 
 /**
@@ -1210,7 +1208,7 @@ function sauvegarderPratiqueNotation() {
     // Sauvegarder toutes les configurations (portfolio et jetons)
     sauvegarderConfigurationPAN();
 
-    afficherNotificationSucces('Toutes les configurations ont été sauvegardées !');
+    notifications.succes('Toutes les configurations ont été sauvegardées !');
     mettreAJourStatutModalites();
 
 }

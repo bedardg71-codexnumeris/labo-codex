@@ -661,9 +661,7 @@ function supprimerGroupeCoursV2() {
     }
 
     // Notification
-    if (typeof afficherNotificationSucces === 'function') {
-        notifications.succes('Groupe-cours supprimé', nomGC);
-    }
+    notifications.succes('Groupe-cours supprimé', nomGC);
 }
 
 /**
@@ -813,9 +811,7 @@ function activerGroupeCoursDepuisBibliotheque(gcId) {
     fermerModalBibliothequeGroupeCours();
     ouvrirModalBibliothequeGroupeCours();
 
-    if (typeof afficherNotificationSucces === 'function') {
-        notifications.succes('Groupe-cours activé');
-    }
+    notifications.succes('Groupe-cours activé');
 }
 
 function supprimerGroupeCoursDepuisBibliotheque(gcId, nomGC) {
@@ -848,9 +844,7 @@ function supprimerGroupeCoursDepuisBibliotheque(gcId, nomGC) {
         ouvrirModalBibliothequeGroupeCours();
     }
 
-    if (typeof afficherNotificationSucces === 'function') {
-        notifications.succes('Groupe-cours supprimé', nomGC);
-    }
+    notifications.succes('Groupe-cours supprimé', nomGC);
 }
 
 /**
@@ -882,9 +876,7 @@ function masquerGroupeCoursDepuisBibliotheque(gcId) {
         fermerModalBibliothequeGroupeCours();
         ouvrirModalBibliothequeGroupeCours();
 
-        if (typeof afficherNotificationSucces === 'function') {
-            notifications.succes('Groupe-cours masqué');
-        }
+        notifications.succes('Groupe-cours masqué');
     }
 }
 
@@ -911,9 +903,7 @@ function afficherGroupeCoursDepuisBibliotheque(gcId) {
         fermerModalBibliothequeGroupeCours();
         ouvrirModalBibliothequeGroupeCours();
 
-        if (typeof afficherNotificationSucces === 'function') {
-            notifications.succes('Groupe-cours affiché');
-        }
+        notifications.succes('Groupe-cours affiché');
     }
 }
 

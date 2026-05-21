@@ -871,15 +871,11 @@
         }
         try {
             db.setSync(cle, null);
-            if (typeof afficherNotificationSucces === 'function') {
-                afficherNotificationSucces('Paramètre « ' + label + ' » supprimé');
-            }
+            notifications.succes('Paramètre « ' + label + ' » supprimé');
             afficherTableauParametresV2(document.getElementById('table-ressources-container'));
         } catch(e) {
             console.error('[donnees-v2] Erreur suppression paramètre:', e);
-            if (typeof afficherNotificationErreur === 'function') {
-                afficherNotificationErreur('Erreur lors de la suppression');
-            }
+            notifications.erreur('Erreur lors de la suppression');
         }
     }
 
@@ -1518,11 +1514,7 @@
                 if (typePluriel) afficherTableauRessource(typePluriel);
 
                 // Notification
-                if (typeof afficherNotificationSucces === 'function') {
-                    afficherNotificationSucces(`${formaterTypeRessource(type)} "${nom}" supprimée`);
-                } else {
-                    alert(`${nom} a été supprimé(e) définitivement.`);
-                }
+                notifications.succes(`${formaterTypeRessource(type)} "${nom}" supprimée`);
             } else {
                 alert('Erreur lors de la suppression.');
             }

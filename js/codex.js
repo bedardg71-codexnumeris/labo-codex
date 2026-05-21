@@ -1825,12 +1825,10 @@ async function _executerAutoSave() {
 
         _derniereAutoSave = new Date().toISOString();
 
-        if (typeof window.afficherNotificationSucces === 'function') {
-            window.afficherNotificationSucces(
-                'Auto-save',
-                _formaterTaille(resultat.blob.size) + ' — ' + _formaterHeureLocale(_derniereAutoSave)
-            );
-        }
+        notifications.succes(
+            'Auto-save',
+            _formaterTaille(resultat.blob.size) + ' — ' + _formaterHeureLocale(_derniereAutoSave)
+        );
     } catch (e) {
         console.warn('📂 Auto-save échoué :', e.message);
         // Restaurer le marqueur de modifications : genererCodex a deja mis
@@ -2091,12 +2089,10 @@ async function actionOuvrir() {
 
     try {
         var resultat = await chargerCodex(fichier);
-        if (typeof window.afficherNotificationSucces === 'function') {
-            window.afficherNotificationSucces(
-                'Codex ouvert : ' + resultat.manifeste.nom,
-                resultat.stats.nbCles + ' clés, ' + resultat.stats.nbBlobs + ' fichiers'
-            );
-        }
+        notifications.succes(
+            'Codex ouvert : ' + resultat.manifeste.nom,
+            resultat.stats.nbCles + ' clés, ' + resultat.stats.nbBlobs + ' fichiers'
+        );
         // Proposer de recharger pour appliquer les données
         if (confirm('Codex chargé avec succès !\n\nRecharger la page pour appliquer les données ?')) {
             window.location.reload();
@@ -2121,15 +2117,13 @@ async function actionEnregistrer() {
 
         if (sauvegarde.methode === 'annule') return;
 
-        if (typeof window.afficherNotificationSucces === 'function') {
-            var methodeLabel = avaitHandle ? 'même emplacement' :
-                               sauvegarde.methode === 'fsapi' ? 'emplacement choisi' :
-                               sauvegarde.methode === 'share' ? 'Fichiers' : 'Téléchargements';
-            window.afficherNotificationSucces(
-                'Codex enregistré',
-                _formaterTaille(resultat.blob.size) + ' — ' + methodeLabel
-            );
-        }
+        var methodeLabel = avaitHandle ? 'même emplacement' :
+                           sauvegarde.methode === 'fsapi' ? 'emplacement choisi' :
+                           sauvegarde.methode === 'share' ? 'Fichiers' : 'Téléchargements';
+        notifications.succes(
+            'Codex enregistré',
+            _formaterTaille(resultat.blob.size) + ' — ' + methodeLabel
+        );
     } catch (e) {
         console.error('📂 Erreur enregistrement codex:', e);
         alert('Erreur : ' + e.message);
@@ -2148,14 +2142,12 @@ async function actionEnregistrerSous() {
 
         if (sauvegarde.methode === 'annule') return;
 
-        if (typeof window.afficherNotificationSucces === 'function') {
-            var methodeLabel = sauvegarde.methode === 'fsapi' ? 'nouvel emplacement' :
-                               sauvegarde.methode === 'share' ? 'Fichiers' : 'Téléchargements';
-            window.afficherNotificationSucces(
-                'Codex enregistré',
-                _formaterTaille(resultat.blob.size) + ' — ' + methodeLabel
-            );
-        }
+        var methodeLabel = sauvegarde.methode === 'fsapi' ? 'nouvel emplacement' :
+                           sauvegarde.methode === 'share' ? 'Fichiers' : 'Téléchargements';
+        notifications.succes(
+            'Codex enregistré',
+            _formaterTaille(resultat.blob.size) + ' — ' + methodeLabel
+        );
     } catch (e) {
         console.error('📂 Erreur enregistrement codex:', e);
         alert('Erreur : ' + e.message);
@@ -2179,9 +2171,7 @@ function actionNouveau() {
     _sauvegarderEtat();
     _mettreAJourIndicateur();
 
-    if (typeof window.afficherNotificationSucces === 'function') {
-        window.afficherNotificationSucces('Nouveau codex : ' + nom);
-    }
+    notifications.succes('Nouveau codex : ' + nom);
 }
 
 /**
@@ -2815,12 +2805,10 @@ async function actionExporterSelection() {
 
     if (resultatSave.methode !== 'annule') {
 
-        if (typeof window.afficherNotificationSucces === 'function') {
-            window.afficherNotificationSucces(
-                'Export sélectif enregistré',
-                nomsTrimestres + ' — ' + _formaterTaille(zipBlob.size)
-            );
-        }
+        notifications.succes(
+            'Export sélectif enregistré',
+            nomsTrimestres + ' — ' + _formaterTaille(zipBlob.size)
+        );
     }
 
     } catch (erreur) {
@@ -2858,9 +2846,7 @@ function actionFermer() {
 
     fermerCodex();
 
-    if (typeof window.afficherNotificationSucces === 'function') {
-        window.afficherNotificationSucces('Codex fermé');
-    }
+    notifications.succes('Codex fermé');
 }
 
 /**

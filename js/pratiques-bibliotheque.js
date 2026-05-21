@@ -1100,11 +1100,7 @@ async function appliquerModeleSelectionne() {
 
     if (succes) {
         // Afficher confirmation
-        if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces('Configuration appliquée avec succès');
-        } else {
-            alert('Configuration appliquée !');
-        }
+        notifications.succes('Configuration appliquée avec succès');
     } else {
         alert('Erreur lors de l\'application de la configuration.');
     }
@@ -1125,11 +1121,7 @@ async function ouvrirModaleSauvegardeConfig() {
         // Rafraîchir le dropdown AVANT d'afficher la notification
         await chargerDropdownModelesPratiques();
 
-        if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces(`Configuration "${config.nom}" sauvegardée`);
-        } else {
-            alert(`Configuration "${config.nom}" sauvegardée !`);
-        }
+        notifications.succes(`Configuration "${config.nom}" sauvegardée`);
     } catch (err) {
         console.error('[Bibliothèque Pratiques] Erreur sauvegarde:', err);
         alert('Erreur lors de la sauvegarde.');

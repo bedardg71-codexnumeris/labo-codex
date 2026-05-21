@@ -1425,9 +1425,7 @@ function copierExportMD() {
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(md).then(function() {
-            if (typeof afficherNotificationSucces === 'function') {
-                afficherNotificationSucces('Plan copié dans le presse-papiers');
-            }
+            notifications.succes('Plan copié dans le presse-papiers');
             fermerModaleExport();
         }).catch(function() {
             // Fallback : sélection textarea
@@ -1447,9 +1445,7 @@ function copierMDFallback(md) {
     ta.select();
     document.execCommand('copy');
     document.body.removeChild(ta);
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('Plan copié dans le presse-papiers');
-    }
+    notifications.succes('Plan copié dans le presse-papiers');
     fermerModaleExport();
 }
 
@@ -1539,13 +1535,11 @@ function confirmerImportMD() {
     fermerModaleExport();
     reinitialiserImport();
 
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(
-            resultat.sequences + ' séquence' + (resultat.sequences > 1 ? 's' : '') +
-            ' et ' + resultat.lecons + ' leçon' + (resultat.lecons > 1 ? 's' : '') +
-            ' importées'
-        );
-    }
+    notifications.succes(
+        resultat.sequences + ' séquence' + (resultat.sequences > 1 ? 's' : '') +
+        ' et ' + resultat.lecons + ' leçon' + (resultat.lecons > 1 ? 's' : '') +
+        ' importées'
+    );
 }
 
 function reinitialiserImport() {

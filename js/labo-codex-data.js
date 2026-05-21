@@ -21,7 +21,7 @@
    Dépendances
      - CodexData (window.CodexData) — chargerDepuisFichier, verifierIntegrite
      - echapperHtml (window.echapperHtml)
-     - afficherNotificationSucces / afficherNotificationErreur
+     - window.notifications (utils-notifications.js)
      - afficherSousSection (utilisé pour rafraîchir l'affichage du Labo)
 */
 
@@ -60,24 +60,6 @@ function _formaterDate(iso) {
     }
 }
 
-function _notifSucces(titre, msg) {
-    if (typeof window.afficherNotificationSucces === 'function') {
-        window.afficherNotificationSucces(titre, msg);
-    }
-}
-
-function _notifErreur(titre, msg) {
-    if (typeof window.afficherNotificationErreur === 'function') {
-        window.afficherNotificationErreur(titre, msg);
-    } else {
-        console.error('[LaboCodexData]', titre, '—', msg);
-    }
-}
-
-function _notifAvertissement(titre, msg) {
-    notifications.info(titre, msg);
-}
-
 /* ===============================
    ACTIONS PUBLIQUES
    =============================== */
@@ -101,7 +83,7 @@ async function onFichierSelectionne(el) {
     var file = el.files[0];
 
     if (!window.CodexData || typeof window.CodexData.chargerDepuisFichier !== 'function') {
-        _notifErreur('Erreur', 'Module Codex Data non charg&eacute;.');
+        notifications.erreur('Erreur', 'Module Codex Data non charg&eacute;.');
         return;
     }
 
@@ -111,7 +93,7 @@ async function onFichierSelectionne(el) {
         // Vérifier l'intégrité (non bloquant — averti si mauvais)
         var integrite = await window.CodexData.verifierIntegrite(codexData);
         if (integrite.hashAttendu && !integrite.valide) {
-            _notifAvertissement(
+            notifications.info(
                 'Int&eacute;grit&eacute; non v&eacute;rifi&eacute;e',
                 'Le hash du fichier ne correspond pas. Le fichier peut avoir &eacute;t&eacute; modifi&eacute; depuis son extraction. Le chargement continue.'
             );
@@ -125,13 +107,13 @@ async function onFichierSelectionne(el) {
         _rafraichirSousSectionActive();
 
         var nbGroupes = _nbGroupes();
-        _notifSucces(
+        notifications.succes(
             'Codex data charg&eacute;',
             nbGroupes + ' groupe(s)-cours disponible(s) dans le Labo.'
         );
     } catch (err) {
         console.error('[LaboCodexData] Chargement &eacute;chou&eacute; :', err);
-        _notifErreur(
+        notifications.erreur(
             'Chargement impossible',
             err && err.message ? err.message : String(err)
         );
@@ -146,7 +128,7 @@ function actionDecharger() {
     _groupeSelectionne = 'tous';
     _masquerBandeau();
     _rafraichirSousSectionActive();
-    _notifSucces('Codex data d&eacute;charg&eacute;', 'Le Labo affiche &agrave; nouveau les donn&eacute;es du trimestre actif.');
+    notifications.succes('Codex data d&eacute;charg&eacute;', 'Le Labo affiche &agrave; nouveau les donn&eacute;es du trimestre actif.');
 }
 
 /**

@@ -289,7 +289,7 @@ function _rafraichirProfilEtudiantSiVisible() {
  * (17 mai 2026) selon Écart #8 MODULES-MAP §2.4.
  *
  * @param {string} valeurHeader Valeur à mettre dans selectGroupeCoursHeader.value
- * @param {string} messageNotification Texte passé à afficherNotificationSucces
+ * @param {string} messageNotification Texte passé à notifications.succes
  * @param {boolean} regenererCalendrier true en mode GROUPE-COURS (regen
  *   calendrier complet pour les bons jours), false en mode COURS.
  */
@@ -301,9 +301,7 @@ function _rafraichirVuesContextDependantes(valeurHeader, messageNotification, re
         mettreAJourContexteEntete();
     }
 
-    if (typeof afficherNotificationSucces === 'function') {
-        notifications.succes(messageNotification);
-    }
+    notifications.succes(messageNotification);
 
     // Mode GROUPE-COURS uniquement : régénérer le calendrier avec les bons jours
     if (regenererCalendrier && typeof genererCalendrierComplet === 'function') {

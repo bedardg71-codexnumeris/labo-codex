@@ -774,9 +774,9 @@ function sauvegarderCours() {
 
     // Notification
     if (coursEnEdition) {
-        afficherNotificationSucces('Configuration du cours modifiée avec succès !');
+        notifications.succes('Configuration du cours modifiée avec succès !');
     } else {
-        afficherNotificationSucces('Configuration du cours ajoutée avec succès !');
+        notifications.succes('Configuration du cours ajoutée avec succès !');
     }
 }
 
@@ -839,7 +839,7 @@ function dupliquerCours(id) {
         cours.push(nouveauCours);
         db.setSync('listeCours', cours);
         afficherTableauCours();
-        afficherNotificationSucces('Cours dupliqué avec succès !');
+        notifications.succes('Cours dupliqué avec succès !');
     }
 }
 
@@ -913,7 +913,7 @@ function dupliquerCoursPourTrimestreActif(id) {
         afficherListeCoursSidebar();
     }
 
-    afficherNotificationSucces(`Cours dupliqué pour ${trimestreActif.nom} !`);
+    notifications.succes(`Cours dupliqué pour ${trimestreActif.nom} !`);
 }
 
 /* ===============================
@@ -959,7 +959,7 @@ function activerCours(id) {
     
     db.setSync('listeCours', cours);
     afficherTableauCours();
-    afficherNotificationSucces('Cours activé !');
+    notifications.succes('Cours activé !');
 }
 
 /* ===============================
@@ -1084,7 +1084,7 @@ function supprimerCours(id) {
 
     // 7. Rafraîchir l'affichage
     afficherTableauCours();
-    afficherNotificationSucces('Cours et toutes ses données supprimés !');
+    notifications.succes('Cours et toutes ses données supprimés !');
 
     // 8. Recharger les vues si une fonction globale existe
     if (typeof rafraichirToutesLesVues === 'function') {

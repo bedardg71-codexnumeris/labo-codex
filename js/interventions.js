@@ -1351,7 +1351,7 @@ function sauvegarderPresencesIntervention(interventionId) {
     afficherListeInterventions();
 
     // Notification de succès
-    afficherNotificationSucces('Intervention sauvegardée avec succès');
+    notifications.succes('Intervention sauvegardée avec succès');
 
 }
 

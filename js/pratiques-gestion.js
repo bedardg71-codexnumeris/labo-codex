@@ -521,9 +521,7 @@ async function ajouterPratiqueALaSelection(pratiqueId) {
     await afficherListePratiquesMateriel();
     fermerModalBibliothequePratiques();
 
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(`Pratique "${configSource.nom}" ajoutée`);
-    }
+    notifications.succes(`Pratique "${configSource.nom}" ajoutée`);
 }
 
 /**
@@ -547,9 +545,7 @@ async function retirerPratiqueDeLaSelection(pratiqueId) {
         fermerModalBibliothequePratiques();
         await afficherBibliothequePratiques();
 
-        if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces('Pratique retirée de la sélection');
-        }
+        notifications.succes('Pratique retirée de la sélection');
     }
 }
 
@@ -1077,9 +1073,7 @@ async function sauvegarderConfigPratiqueMat() {
             { id: echelleIdCourante, collection: 'echellesTemplates', labelType: 'échelle' }
         ]);
         if (violationDemo) {
-            if (typeof afficherNotificationErreur === 'function') {
-                afficherNotificationErreur('Référence démo non autorisée', violationDemo.message);
-            }
+            notifications.erreur('Référence démo non autorisée', violationDemo.message);
             // Revert le champ pour que l'utilisateur ne soit pas bloqué
             setValeurChamp('mat-echelle-id', '');
             return;
@@ -1222,19 +1216,13 @@ async function sauvegarderPratiqueMaterielComplet() {
         const pratiqueTrouvee = verification.find(p => p.id === pratiqueEnEditionMateriel);
 
         if (pratiqueTrouvee) {
-            if (typeof afficherNotificationSucces === 'function') {
-                afficherNotificationSucces('Pratique enregistrée');
-            }
+            notifications.succes('Pratique enregistrée');
         } else {
             throw new Error('Pratique introuvable après sauvegarde');
         }
     } catch (erreur) {
         console.error('[pratiques-gestion] ❌ Erreur sauvegarde complète:', erreur);
-        if (typeof afficherNotificationErreur === 'function') {
-            afficherNotificationErreur('Erreur lors de la sauvegarde. Vérifie la console.');
-        } else {
-            alert('Erreur lors de la sauvegarde. Vérifie la console.');
-        }
+        notifications.erreur('Erreur lors de la sauvegarde. Vérifie la console.');
     }
 }
 
@@ -1612,16 +1600,10 @@ async function creerNouvellePratique() {
         await afficherListePratiquesMateriel();
         await chargerPratiquePourModif(nouvelId);
 
-        if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces('Nouvelle pratique créée et sauvegardée');
-        }
+        notifications.succes('Nouvelle pratique créée et sauvegardée');
     } catch (erreur) {
         console.error('[pratiques-gestion] ❌ Erreur sauvegarde pratique:', erreur);
-        if (typeof afficherNotificationErreur === 'function') {
-            afficherNotificationErreur('Erreur : la pratique n\'a pas pu être sauvegardée. Veuillez réessayer.');
-        } else {
-            alert('Erreur : la pratique n\'a pas pu être sauvegardée. Veuillez réessayer.');
-        }
+        notifications.erreur('Erreur : la pratique n\'a pas pu être sauvegardée. Veuillez réessayer.');
     }
 }
 
@@ -1702,9 +1684,7 @@ async function dupliquerPratiqueMateriel(pratiqueId) {
     await afficherListePratiquesMateriel();
     await chargerPratiquePourModif(copie.id);
 
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('Pratique dupliquée');
-    }
+    notifications.succes('Pratique dupliquée');
 }
 
 /**
@@ -1730,9 +1710,7 @@ async function supprimerPratiqueMateriel(pratiqueId) {
     if (conteneurEdition) conteneurEdition.classList.add('u-hide');
     if (accueil) accueil.classList.remove('u-hide');
 
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('Pratique supprimée');
-    }
+    notifications.succes('Pratique supprimée');
 }
 
 /**
@@ -1743,9 +1721,7 @@ async function appliquerPratiqueAuCours(pratiqueId) {
     if (typeof appliquerConfigurationPratique === 'function') {
         const succes = await appliquerConfigurationPratique(pratiqueId);
         if (succes) {
-            if (typeof afficherNotificationSucces === 'function') {
-                afficherNotificationSucces('Configuration appliquée au cours actif');
-            }
+            notifications.succes('Configuration appliquée au cours actif');
         } else {
             alert('Erreur lors de l\'application de la configuration.');
         }
@@ -1767,9 +1743,7 @@ async function sauvegarderPratiqueMateriel() {
     // Les modifications sont déjà sauvegardées au fur et à mesure
     // Cette fonction sert de confirmation visuelle
 
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('Pratique enregistrée');
-    }
+    notifications.succes('Pratique enregistrée');
 }
 
 /**
@@ -1806,9 +1780,7 @@ async function partagerPratiqueMateriel(pratiqueId) {
     a.click();
     URL.revokeObjectURL(url);
 
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('Fichier de partage téléchargé');
-    }
+    notifications.succes('Fichier de partage téléchargé');
 }
 
 /**
@@ -1870,9 +1842,7 @@ async function exporterPratiquesUtilisateur() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(`${configurations.length} pratique(s) exportée(s) avec succès`);
-    }
+    notifications.succes(`${configurations.length} pratique(s) exportée(s) avec succès`);
 }
 
 /**

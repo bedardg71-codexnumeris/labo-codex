@@ -14,7 +14,7 @@
    - Helpers globaux : db, echapperHtml, genererNomFichierExport,
      demanderMetadonneesEnrichies, ajouterMetadonnéesCC, verifierLicenceCC,
      genererBadgeCC, avertirSansLicence, ApercuSandbox, filtrerRessourcesNonDemo,
-     afficherNotificationSucces
+     window.notifications (utils-notifications.js)
    =============================== */
 
 (function() {
@@ -76,9 +76,7 @@ async function exporterProductions() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(`${productions.length} production(s) exportée(s) avec succès`);
-    }
+    notifications.succes(`${productions.length} production(s) exportée(s) avec succès`);
 }
 
 /**
@@ -166,9 +164,7 @@ async function exporterProductionActive() {
     a.click();
     URL.revokeObjectURL(url);
 
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(`Production "${production.activiteApprentissage || production.description || production.titre}" exportée avec succès`);
-    }
+    notifications.succes(`Production "${production.activiteApprentissage || production.description || production.titre}" exportée avec succès`);
 }
 
 /**
@@ -272,11 +268,7 @@ async function importerDansProductionActive(event) {
             // Rafraîchir la liste
             await afficherListeProductions();
 
-            if (typeof afficherNotificationSucces === 'function') {
-                afficherNotificationSucces('Production importée et remplacée avec succès');
-            } else {
-                alert('Production importée et remplacée avec succès !');
-            }
+            notifications.succes('Production importée et remplacée avec succès');
 
         } catch (error) {
             console.error('Erreur lors de l\'import:', error);
@@ -627,11 +619,7 @@ async function sauvegarderMigrationCategories() {
         await db.set(getCleProductions(), productions);
 
         // Notification
-        if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces(`${nbMises} catégorie(s) assignée(s)`, 'Les productions ont été mises à jour.');
-        } else {
-            alert(`✅ ${nbMises} catégorie(s) assignée(s) avec succès !`);
-        }
+        notifications.succes(`${nbMises} catégorie(s) assignée(s)`, 'Les productions ont été mises à jour.');
 
         // Rafraîchir l'affichage si visible
         if (typeof afficherTableauProductions === 'function') {

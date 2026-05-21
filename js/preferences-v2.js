@@ -319,7 +319,7 @@
         if (seuilBon) seuilBon.value = 85;
 
         sauvegarderSeuilsV2();
-        afficherNotificationSuccesV2('Seuils d\'interprétation restaurés');
+        notifications.succes('Seuils d\'interprétation restaurés');
     }
 
     /**
@@ -348,7 +348,7 @@
 
         sauvegarderSeuilsV2();
         sauvegarderPreferencesV2(); // Pour sauvegarder fenetrePatterns
-        afficherNotificationSuccesV2('Seuils de détection restaurés');
+        notifications.succes('Seuils de détection restaurés');
     }
 
     /**
@@ -378,23 +378,12 @@
     function sauvegarderToutesPreferencesV2() {
         sauvegarderPreferencesV2();
         sauvegarderSeuilsV2();
-        afficherNotificationSuccesV2('Préférences sauvegardées avec succès');
+        notifications.succes('Préférences sauvegardées avec succès');
     }
 
     // =========================================================================
     // NOTIFICATIONS
     // =========================================================================
-
-    /**
-     * Affiche une notification de succès
-     */
-    function afficherNotificationSuccesV2(message) {
-        if (typeof window.afficherNotificationSucces === 'function') {
-            window.afficherNotificationSucces(message);
-        } else if (typeof window.afficherMessage === 'function') {
-            window.afficherMessage(message, 'succes');
-        }
-    }
 
     // =========================================================================
     // 🆕 BETA 95.1 : FORMATAGE DE L'ASSIDUITÉ SELON PRÉFÉRENCE

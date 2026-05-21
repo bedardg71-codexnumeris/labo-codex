@@ -587,12 +587,10 @@ function sauvegarderDonneesSelonMode(cle, donnees) {
         if (error.name === 'QuotaExceededError' ||
             (error.message && error.message.includes('quota'))) {
             console.error('❌ Quota de stockage dépassé:', error);
-            if (typeof afficherNotificationErreur === 'function') {
-                afficherNotificationErreur(
-                    'Espace de stockage presque plein',
-                    'Les données sont sauvegardées, mais l\'espace disponible est limité. Tu peux nettoyer les anciens trimestres dans Réglages.'
-                );
-            }
+            notifications.erreur(
+                'Espace de stockage presque plein',
+                'Les données sont sauvegardées, mais l\'espace disponible est limité. Tu peux nettoyer les anciens trimestres dans Réglages.'
+            );
             return 'quota';
         }
         // Autre erreur

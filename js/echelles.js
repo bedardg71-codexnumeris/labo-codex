@@ -411,7 +411,7 @@ async function dupliquerEchelle(echelleId) {
     // ✅ AJOUT (8 décembre 2025) : Rafraîchir la barre latérale
     await afficherListeEchelles();
 
-    afficherNotificationSucces(`📑 Échelle «${nouvelleEchelle.nom}» créée avec succès !`);
+    notifications.succes(`📑 Échelle «${nouvelleEchelle.nom}» créée avec succès !`);
 }
 
 /* ===============================
@@ -975,7 +975,7 @@ async function enregistrerCommeEchelle() {
 
     document.getElementById('selectEchelleTemplate').value = echelleTemplateActuelle.id;
 
-    afficherNotificationSucces(`Échelle «${nomEchelle}» enregistrée avec succès !`);
+    notifications.succes(`Échelle «${nomEchelle}» enregistrée avec succès !`);
 
     // Retourner à l'accueil après la sauvegarde
     setTimeout(() => {
@@ -1023,7 +1023,7 @@ async function dupliquerEchelleActuelle() {
     document.getElementById('selectEchelleTemplate').value = nouvelleEchelle.id;
     document.getElementById('nomEchelleTemplate').value = nouvelleEchelle.nom;
 
-    afficherNotificationSucces(`📑 Échelle «${nouvelleEchelle.nom}» créée avec succès !`);
+    notifications.succes(`📑 Échelle «${nouvelleEchelle.nom}» créée avec succès !`);
 }
 
 /**
@@ -1060,7 +1060,7 @@ async function supprimerEchelle(echelleId) {
     await afficherListeEchelles();
 
     afficherEchellesPerformance();
-    afficherNotificationSucces('Échelle supprimée');
+    notifications.succes('Échelle supprimée');
 }
 
 /* ===============================
@@ -1586,7 +1586,7 @@ async function reinitialiserNiveauxDefaut() {
     await db.set('niveauxEchelle',  niveauxDefaut);
     afficherTableauNiveaux(niveauxDefaut);
     afficherApercuEchelle(niveauxDefaut);
-    afficherNotificationSucces('Échelle réinitialisée aux valeurs par défaut');
+    notifications.succes('Échelle réinitialisée aux valeurs par défaut');
 }
 
 /**
@@ -1630,7 +1630,7 @@ async function sauvegarderNiveaux() {
         return;
     }
 
-    afficherNotificationSucces('Échelle de performance sauvegardée !');
+    notifications.succes('Échelle de performance sauvegardée !');
 }
 
 /* ===============================
@@ -1906,9 +1906,7 @@ async function exporterEchelles() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(`${echelles.length} échelle(s) exportée(s) avec succès`);
-    }
+    notifications.succes(`${echelles.length} échelle(s) exportée(s) avec succès`);
 }
 
 /**
@@ -1984,9 +1982,7 @@ async function exporterEchelleActive() {
     a.click();
     URL.revokeObjectURL(url);
 
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(`Échelle "${echelle.nom}" exportée avec succès`);
-    }
+    notifications.succes(`Échelle "${echelle.nom}" exportée avec succès`);
 }
 
 /**
@@ -2082,11 +2078,7 @@ async function importerDansEchelleActive(event) {
             // Rafraîchir la liste
             afficherEchellesExistantes();
 
-            if (typeof afficherNotificationSucces === 'function') {
-                afficherNotificationSucces('Échelle importée et remplacée avec succès');
-            } else {
-                alert('Échelle importée et remplacée avec succès !');
-            }
+            notifications.succes('Échelle importée et remplacée avec succès');
 
         } catch (error) {
             console.error('Erreur lors de l\'import:', error);

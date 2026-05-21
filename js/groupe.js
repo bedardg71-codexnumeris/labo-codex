@@ -44,22 +44,6 @@
    🚀 INITIALISATION
    =============================== */
 
-function afficherNotificationErreur(titre, details = '') {
-    const notification = document.createElement('div');
-    notification.className = 'notification-succes';
-    notification.style.background = 'var(--rouge-erreur)';
-    notification.innerHTML = `
-        <div style="font-weight: 600; margin-bottom: 5px;">${echapperHtml(titre)}</div>
-        ${details ? `<div class="notification-details">${echapperHtml(details)}</div>` : ''}
-    `;
-    document.body.appendChild(notification);
-    setTimeout(() => {
-        notification.style.opacity = '0';
-        notification.style.transform = 'translateX(400px)';
-        setTimeout(() => notification.remove(), 300);
-    }, 5000);
-}
-
 /**
  * Variable globale pour l'import temporaire
  */
@@ -147,7 +131,7 @@ function addStudent() {
 
 
     if (!champNom || !champPrenom) {
-        afficherNotificationErreur('Erreur technique', 'Les champs du formulaire sont introuvables. Vérifie les IDs.');
+        notifications.erreur('Erreur technique', 'Les champs du formulaire sont introuvables. Vérifie les IDs.');
         return;
     }
 
@@ -156,7 +140,7 @@ function addStudent() {
 
 
     if (!nom || !prenom) {
-        afficherNotificationErreur('Informations manquantes', 'Le nom et le prénom sont obligatoires');
+        notifications.erreur('Informations manquantes', 'Le nom et le prénom sont obligatoires');
         return;
     }
 
@@ -240,13 +224,13 @@ function addStudent() {
 
         const details = `${student.nom}, ${student.prenom} (DA: ${student.da})`;
         const messageSucces = modeModification ? 'Étudiant·e modifié·e avec succès !' : 'Étudiant·e ajouté·e avec succès !';
-        afficherNotificationSucces(messageSucces, details);
+        notifications.succes(messageSucces, details);
 
         afficherListeEtudiants();
         remplirSelectFiltreGroupe();
 
     } catch (error) {
-        afficherNotificationErreur('Erreur lors de l\'ajout', error.message);
+        notifications.erreur('Erreur lors de l\'ajout', error.message);
         console.error('Erreur ajout:', error);
     }
 }
@@ -303,7 +287,7 @@ function handleFileImport(event) {
 function previewPastedData() {
     const content = document.getElementById('donneesCollees').value;
     if (!content.trim()) {
-        afficherNotificationErreur('Aucune donnée', 'Collez des données avant de prévisualiser');
+        notifications.erreur('Aucune donnée', 'Collez des données avant de prévisualiser');
         return;
     }
     parseAndPreview(content);
@@ -338,7 +322,7 @@ function parseAndPreview(content) {
 
         const lines = content.trim().split('\n').filter(l => l.trim());
         if (lines.length === 0) {
-            afficherNotificationErreur('Fichier vide', 'Le fichier ne contient aucune données.');
+            notifications.erreur('Fichier vide', 'Le fichier ne contient aucune données.');
             return;
         }
 
@@ -499,7 +483,7 @@ function parseAndPreview(content) {
 
 
         if (tempImportData.length === 0) {
-            afficherNotificationErreur('Aucune donnée valide',
+            notifications.erreur('Aucune donnée valide',
                 'Impossible de trouver des noms d\'étudiants.\n' +
                 'Format attendu (flexible) :\n' +
                 '- Minimum : Nom, Prénom\n' +
@@ -510,7 +494,7 @@ function parseAndPreview(content) {
         afficherPrevisualisation(tempImportData, `Import de ${tempImportData.length} étudiant(s)`);
 
     } catch (error) {
-        afficherNotificationErreur('Erreur de parsing', error.message);
+        notifications.erreur('Erreur de parsing', error.message);
         console.error('Erreur parsing:', error);
     }
 }
@@ -560,7 +544,7 @@ function afficherPrevisualisation(data, titre) {
  */
 function confirmImport() {
     if (tempImportData.length === 0) {
-        afficherNotificationErreur('Aucune donnée', 'Aucune donnée à importer');
+        notifications.erreur('Aucune donnée', 'Aucune donnée à importer');
         return;
     }
 
@@ -574,7 +558,7 @@ function confirmImport() {
         // Vérifier mode anonymisation
         const modeActuel = db.getSync('modeApplication', 'normal');
         if (modeActuel === 'anonymisation') {
-            afficherNotificationErreur('Modification impossible', 'Impossible d\'importer en mode anonymisation');
+            notifications.erreur('Modification impossible', 'Impossible d\'importer en mode anonymisation');
             return;
         }
 
@@ -593,7 +577,7 @@ function confirmImport() {
         db.setSync(cleEtudiants, students);
 
         const details = `Groupe : ${ancienTotal} → ${students.length} étudiant·es (+ ${tempImportData.length})`;
-        afficherNotificationSucces('Importation réussie !', details);
+        notifications.succes('Importation réussie !', details);
 
         // Nettoyer
         tempImportData = [];
@@ -605,7 +589,7 @@ function confirmImport() {
         remplirSelectFiltreGroupe();
 
     } catch (error) {
-        afficherNotificationErreur('Erreur lors de l\'importation', error.message);
+        notifications.erreur('Erreur lors de l\'importation', error.message);
         console.error('Erreur importation:', error);
     }
 }
@@ -904,7 +888,7 @@ function modifierEtudiant(da) {
         const student = students.find(s => s.da === da);
 
         if (!student) {
-            afficherNotificationErreur('Erreur', 'Étudiant·e introuvable');
+            notifications.erreur('Erreur', 'Étudiant·e introuvable');
             return;
         }
 
@@ -955,10 +939,10 @@ function modifierEtudiant(da) {
             btnAjouter.style.background = 'var(--orange-accent)';
         }
 
-        afficherNotificationSucces('Modification en cours', 'Modifiez les champs et cliquez sur "Mettre à jour"');
+        notifications.succes('Modification en cours', 'Modifiez les champs et cliquez sur "Mettre à jour"');
 
     } catch (error) {
-        afficherNotificationErreur('Erreur modification', error.message);
+        notifications.erreur('Erreur modification', error.message);
         console.error('Erreur modification:', error);
     }
 }
@@ -986,14 +970,14 @@ function deleteStudent(id, silent = false) {
 
         if (!silent && student) {
             const details = `${student.nom}, ${student.prenom}`;
-            afficherNotificationSucces('Étudiant·e supprimé·e', details);
+            notifications.succes('Étudiant·e supprimé·e', details);
         }
 
         afficherListeEtudiants();
         remplirSelectFiltreGroupe();
 
     } catch (error) {
-        afficherNotificationErreur('Erreur suppression', error.message);
+        notifications.erreur('Erreur suppression', error.message);
         console.error('Erreur delete:', error);
     }
 }
@@ -1010,7 +994,7 @@ function exportStudentsData() {
         const students = obtenirDonneesSelonMode('groupeEtudiants');
 
         if (students.length === 0) {
-            afficherNotificationErreur('Aucune donnée', 'Aucun·e étudiant·e à exporter');
+            notifications.erreur('Aucune donnée', 'Aucun·e étudiant·e à exporter');
             return;
         }
 
@@ -1032,10 +1016,10 @@ function exportStudentsData() {
         link.click();
         document.body.removeChild(link);
 
-        afficherNotificationSucces('Export réussi !', `${students.length} étudiant·es exporté·es`);
+        notifications.succes('Export réussi !', `${students.length} étudiant·es exporté·es`);
 
     } catch (error) {
-        afficherNotificationErreur('Erreur export', error.message);
+        notifications.erreur('Erreur export', error.message);
         console.error('Erreur export:', error);
     }
 }
@@ -1077,10 +1061,10 @@ function resetStudentsData() {
             `;
         }
 
-        afficherNotificationSucces('Groupe réinitialisé', 'Toutes les données ont été supprimées');
+        notifications.succes('Groupe réinitialisé', 'Toutes les données ont été supprimées');
 
     } catch (error) {
-        afficherNotificationErreur('Erreur réinitialisation', error.message);
+        notifications.erreur('Erreur réinitialisation', error.message);
         console.error('Erreur reset:', error);
     }
 }
@@ -1122,7 +1106,7 @@ function supprimerEtudiant(id) {
     // Vérifier mode anonymisation
     const modeActuel = db.getSync('modeApplication', 'normal');
     if (modeActuel === 'anonymisation') {
-        afficherNotificationErreur('Modification impossible', 'Impossible de supprimer en mode anonymisation');
+        notifications.erreur('Modification impossible', 'Impossible de supprimer en mode anonymisation');
         return;
     }
 
@@ -1174,7 +1158,6 @@ window.confirmImport = confirmImport;
 window.cancelImport = cancelImport;
 window.addStudent = addStudent;
 window.filtrerParGroupe = filtrerParGroupe;
-window.afficherNotificationErreur = afficherNotificationErreur; // Utilisé par trimestre-v2.js et autres modules
 window.resetFiltreGroupe = resetFiltreGroupe;
 
 
@@ -1186,7 +1169,7 @@ window.resetFiltreGroupe = resetFiltreGroupe;
 /*
  * DÉPENDANCES:
  * - 01-config.js (echapperHtml)
- * - 14-utilitaires.js (afficherNotificationSucces, afficherNotificationErreur)
+ * - utils-notifications.js (window.notifications.succes/erreur)
  * 
  * MODULES DÉPENDANTS:
  * - 03-etudiants.js : Lit 'groupeEtudiants' pour afficher les profils
