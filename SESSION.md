@@ -1,5 +1,5 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 21 mai 2026 soir, post-Cat-B Track 4 chantier F)
+     IDENTIFICATION DE CE FICHIER  (mis à jour 21 mai 2026 soir, post-Cat-B Track 4 chantier E)
      Ce SESSION.md vit sur la branche `main` du worktree principal et sert
      de relai entre les sessions Claude. Il décrit l'état du cycle Cat-B
      post-merge des 5 god modules et donne la consigne de démarrage pour
@@ -11,12 +11,12 @@
 > - **Cycle en cours** : Catégorie B post-merge (dette résiduelle des 5 refactors god modules)
 > - **Document maître** : `audit/refactoring-prep/PLAN-CAT-B-POST-MERGE.md`
 
-# SESSION — État au 21 mai 2026 soir (cycle Cat-B post-merge — Tracks 1+2+3 complets, Track 4 G+J+F livrés)
+# SESSION — État au 21 mai 2026 soir (cycle Cat-B post-merge — Tracks 1+2+3 complets, Track 4 G+J+F+E livrés)
 
-**Beta / build** : 99.61 / 0521-1108 (pas de bump pour le cycle Cat-B — décision Grégoire 21 mai)
-**Branche `main`** : HEAD `f88730b` (cycle Cat-B Tracks 1+2+3-phase1+3-phase2+4-G+J+F livrés et pushés).
+**Beta / build** : 99.61 / 0521-1717 (pas de bump beta pour le cycle Cat-B — décision Grégoire 21 mai, juste rafraîchir le build)
+**Branche `main`** : HEAD à mettre à jour après merge FF de `cat-b/track-4-chantier-E` (cycle Cat-B Tracks 1+2+3-phase1+3-phase2+4-G+J+F+E livrés).
 
-**Tests** : 80 Vitest + 12 Playwright = **92/92 verts** à chaque commit (+3 nouvelles sentinelles chantier F).
+**Tests** : 85 Vitest + 12 Playwright = **97/97 verts** à chaque commit (+5 nouveaux tests chantier E : 4 API + 1 sentinelle stricte).
 
 ---
 
@@ -30,6 +30,8 @@
 - ❌ **Ne pas tenter de descendre `genererSectionMobilisationEngagement` sous cyc 30 sans nouvelle validation Grégoire**. Cyc 48 acté **héritage Cat-B sous N=50** le 21 mai PM. Le template HTML est dense en ternaires (`${nb > 1 ? 's' : ''}` × ~20) qui sont difficiles à éclater sans sur-fragmenter (cf. §6.5 gabarit METHODE). Si réouverture, valider d'abord avec Grégoire qu'il accepte la sur-fragmentation.
 - ❌ **Ne pas re-fix le bug latent #110 (`portfolioActif` → `portfolioActifRapport`)** : déjà corrigé dans le commit `47651cb` (Track 3 phase 2 Performance). Inscrit Corrigés SUIVI-BUGS le 21 mai PM.
 - ❌ **Ne pas écrire `window.evaluationEnCours = ...` ni `.X = ...` depuis un module hors whitelist** (config.js + evaluation*.js). Sentinelle Vitest `tests/unit/sentinelle-evaluation-en-cours.test.js` verrouille cet invariant (chantier F livré 21 mai soir). Toute amorce du pivot depuis un module externe passe par `window.demarrerEvaluationDepuisFichier(fichier, opts)` exportée par `evaluation-chargement.js`.
+- ❌ **Ne pas définir une fonction `function afficherNotificationX(...)` dans `js/*.js`** (hors `_archives/`). Sentinelle Vitest `tests/unit/utils-notifications.test.js` verrouille cet invariant (chantier E livré 21 mai soir). Utiliser `window.notifications.{succes, erreur, info}` (utils-notifications.js) pour toute notification toast.
+- ❌ **Ne pas réintroduire un wrapper local défensif `if (typeof window.afficherNotificationX === 'function')`**. L'API `notifications.X` est garantie chargée via `utils-notifications.js` (ligne 15969 d'index.html, après modes.js). Les 149 guards typeof orphelins ont été retirés ; tout nouveau guard est une régression Cat-B.
 
 ---
 
@@ -97,9 +99,9 @@ Voir `Retours des testeurs/SUIVI-BUGS.md` section « Corrigés (21 mai 2026 — 
 - ✅ **Chantier G** : 2 accès localStorage direct migrés vers `db.getSync`/`db.setSync` (`profil-etudiant-diagnostics.js`)
 - ✅ **Chantier J** : 8 reformulations UI vocabulaire alarmiste + retrait FAQ « Indice R prédit risque d'échec » + glossaire descriptif
 - ✅ **Chantier F** (soir, branche `cat-b/track-4-chantier-F`) : Couplage travaux-ui ↔ `window.evaluationEnCours` découplé via API `evaluation.demarrerEvaluationDepuisFichier(fichier, opts)` exportée par `evaluation-chargement.js`. Audit révèle 8 sites d'écriture cross-module dans travaux-ui (1 réassignation L4639 + 7 mutations Zone 1 `basculerMode` + Zone 2 `afficherPalettesEval`) — scope plus profond que les ~1-3h annoncées PLAN-CAT-B chantier F. Décision (b) découpler actée avec Grégoire. Sentinelle Vitest `tests/unit/sentinelle-evaluation-en-cours.test.js` (3 sub-tests) verrouille l'invariant : whitelist = `config.js` + 7 modules `evaluation*.js`. Tests 92/92 verts (80 Vitest + 12 Playwright).
+- ✅ **Chantier E** (soir, branche `cat-b/track-4-chantier-E`) : Consolidation `utils-notifications.js` — **scope réel ~7x plus gros que les 73 annoncés**. Audit révèle ~525 sites d'appel (54 guardés + ~440 bare refs résolues via scope chain → window). Migration en 6 commits livrés sur la branche. État final : 0 def `function afficherNotificationX`, 0 export `window.afficherNotificationX`, 0 wrapper local, 0 guard typeof, 0 cas spécial. Source unique : `window.notifications.{succes, erreur, info}` (utils-notifications.js, textContent → immunisé XSS sans dépendance à echapperHtml). Sentinelle Vitest stricte `tests/unit/utils-notifications.test.js` verrouille l'invariant. 3 bugs latents fixés : #111 XSS trimestre.js (résolu gratuitement par retrait def), #112 type ignoré (`'warning'`/`'erreur'`/`'succes'` en 2e param), #113 shadow local wizard-pratique-v2 1-param. Tests 97/97 verts (85 Vitest + 12 Playwright). −469 LOC nettes.
 
 **Reporté post-AQPC** :
-- ⏳ **Chantier E** : Consolidation `utils-notifications.js` (~3-5h, risque Moyen)
 - ⏳ **Chantier H** (OPTIONNEL) : Sous-découpage résidus (~4-6h)
 - ⏳ **Chantier I** : 6 tests Playwright rendus DOM (~3-5h)
 
@@ -119,7 +121,7 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 | A2 | 0 fonction cyc > 30 dans le codebase | **13/14 strictement <30 + 1 héritage Cat-B sous N=50** (Mobilisation cyc 48) |
 | A3 | 0 doublon dans evaluation.js (3 résolus) | ✅ |
 | A4 | 2 codes morts alarmistes retirés | ✅ |
-| A5 | `utils-notifications.js` créé + 73 callers migrés | ⏳ Track 4 chantier E |
+| A5 | `utils-notifications.js` créé + 73 callers migrés | ✅ Track 4 chantier E livré (scope réel ~525 sites dans 39 modules, +3 bugs fix #111-113) |
 | A6 | Couplage `travaux-ui.js:4639` documenté ou découplé | ✅ Track 4 chantier F découplé via API + sentinelle Vitest |
 | A7 | 3 accès localStorage profil-etudiant migrés | ✅ (audit réel = 2 accès, tous migrés) |
 | A8 | 6 tests Playwright rendus DOM ajoutés | ⏳ Track 4 chantier I |
@@ -127,7 +129,7 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 | A10 | 20 propositions Cat-B méthode actées | ✅ |
 | **Bonus** | Bug latent #110 (`portfolioActif`) fixé | ✅ (commit `47651cb`) |
 
-**7 critères pleinement atteints (A1, A3, A4, A6, A7, A9, A10) + A2 acté avec exception N=50.** 2 critères restants (A5, A8).
+**8 critères pleinement atteints (A1, A3, A4, A5, A6, A7, A9, A10) + A2 acté avec exception N=50.** 1 critère restant (A8 — tests Playwright rendus DOM, reporté post-AQPC).
 
 **Objectif pré-AQPC 3 juin dépassé** : Track 1 + Track 2 + chantier J livrés + Track 3 phase 2 livrée + chantier F livré (initialement post-AQPC, anticipé le 21 mai soir). Codebase quasi-propre côté cyc > 30 (1 héritage acté). Pivot `evaluationEnCours` désormais clos cross-module (sentinelle Vitest). Méthode gelée et publiable. Statut audit annuel 1.3 partiellement Vert (UI uniquement, CSS tokens en attente).
 
@@ -202,25 +204,21 @@ Si rouge dès le départ → diagnostic prioritaire AVANT tout chantier. Ne pas 
 
 ### Étape 6 — Choisir le track à attaquer
 
-**Priorité recommandée** (par valeur/effort, ordre actualisé post-Track-4-chantier-F) :
+**Priorité recommandée** (par valeur/effort, ordre actualisé post-Track-4-chantier-E) :
 
 1. **Track 4 chantier I** — 6 tests Playwright rendus DOM (~3-5h)
    - Bilan-reflexif (rendu éditeur), productions (modale CC), trimestre-v2 (calendrier), profil-etudiant (section Productions), evaluation (palette + rétroaction Bilan).
    - Voir aussi note dette résiduelle profil-etudiant METHODE §7 (test Section Productions par défaut suggéré).
+   - **Test visuel Grégoire chantier E recommandé** : 6 scénarios déclenchant des notifications (sauvegarde production, sauvegarde évaluation, erreur import ZIP, archivage réserve, ajout enseignant, fermeture codex) — sur Safari Mac + iPad Air, modes sombre + clair. Comportement attendu : couleur correcte (vert succes, rouge erreur, neutre info), durée correcte (3s succes/info, 5s erreur), animation slide-out 300ms.
 
-2. **Track 4 chantier E** — Consolidation `utils-notifications.js` (~3-5h, **risque Moyen**)
-   - Audit complet des 73 sites (variations signatures, guards `typeof`).
-   - Migration progressive module par module, 1 commit par module.
-   - **Tests visuels Grégoire recommandés en fin de chantier.**
-
-3. **Track 4 chantier H** (OPTIONNEL) — Sous-découpage résidus (~4-6h)
+2. **Track 4 chantier H** (OPTIONNEL) — Sous-découpage résidus (~4-6h)
    - Décision Grégoire 18 mai : reporter sauf si la dette devient gênante au quotidien. NE PAS attaquer sans nouvelle validation.
 
-4. **Décisions Grégoire pendantes Track 4 chantier J reliquat** (sans code)
+3. **Décisions Grégoire pendantes Track 4 chantier J reliquat** (sans code)
    - Renommage tokens CSS `--risque-*` → `--niveau-attention-*` ? (480 hits, breaking change visuel)
    - Label `v2-seuil-fragile` : maintenu, atténué, ou aligné ?
 
-5. **Réouverture Mobilisation cyc 48 → <30** (héritage Cat-B sous N=50 acté)
+4. **Réouverture Mobilisation cyc 48 → <30** (héritage Cat-B sous N=50 acté)
    - **NE PAS attaquer sans validation Grégoire**. Le templating HTML dense en ternaires demanderait une sur-fragmentation jugée disproportionnée le 21 mai PM.
 
 ### Étape 7 — Conventions de travail Cat-B
@@ -230,7 +228,7 @@ Si rouge dès le départ → diagnostic prioritaire AVANT tout chantier. Ne pas 
 - **1 commit par chantier** (ou par fonction si grosse — ex Track 3 phase 2 = 5 commits pour 5 fonctions).
 - **Hook pré-push Vitest** vert obligatoire à chaque commit (installé par défaut sur les worktrees créés depuis main — confirmé 21 mai PM).
 - **Sécurité non-négociable** (CLAUDE.md) : tout `innerHTML` avec données utilisateur → `echapperHtml()`. Aucun acquittement `// security-ok` sans justification absolue inscrite SUIVI-BUGS.
-- **Tests** : 92/92 minimum à chaque commit (post-chantier F). Si régression, investigation prioritaire avant de continuer.
+- **Tests** : 97/97 minimum à chaque commit (post-chantier E). Si régression, investigation prioritaire avant de continuer.
 - **Audit ESLint complexity** après chaque extraction. Cible dure cyc ≤ 30 — héritage Cat-B sous N=50 acceptable si template HTML dense.
 - **Fallback Python pour Edit JSON-based** : si Edit échoue sur du contenu contenant `̀-ͯ` (escapes regex Unicode) ou autres séquences problématiques, utiliser `python3 - <<'PYEOF' ... PYEOF` avec lecture/écriture explicites + invariants `assert`. Pattern éprouvé Track 3 phase 2 (calculerIPB, calculerDetailsNoteFinale, Performance, Mobilisation).
 
@@ -313,3 +311,4 @@ git branch -D cat-b/<track-name>   # -D obligatoire : voir note §3 étape 2
 | 2026-05-21 (après-midi) | Réécriture complète pour cycle Cat-B post-merge : §0 garde-fou, §1 récap Tracks 1-4, §2 critères clôture, §3 consigne démarrage prochaine session, §4 trouvailles méthode. | Cat-B session 1 (Claude autonome) |
 | 2026-05-21 (PM, post-Track 3 phase 2) | Réécriture complète après livraison Track 3 phase 2 (5 commits + 1 docs PLAN, 38 helpers privés ajoutés, bug #110 fixé, Mobilisation acté héritage Cat-B sous N=50). HEAD main `3fe5165` → `88bcaf1`. Worktrees catb + catb2 supprimés. Garde-fou §0 enrichi (ne pas re-fix #110, ne pas tenter Mobilisation <30 sans validation). §3 consigne démarrage actualisée (priorité Track 4 F/I/E + chantier J reliquat). §4 trouvailles enrichies (Python fallback systématique, IIFE templates ne pèsent pas, ternaires denses = héritage légitime, bug pendant extraction = fix immédiat, factorisation cross-fonctions interdite par scope). | Cat-B Track 3 phase 2 (Claude autonome) |
 | 2026-05-21 (soir, post-Track 4 chantier F) | MAJ après livraison Track 4 chantier F (1 commit refactor `6532f75` + 1 commit docs). API `evaluation.demarrerEvaluationDepuisFichier(fichier, opts)` exportée par `evaluation-chargement.js` ; 8 sites d'écriture cross-module éliminés dans travaux-ui.js (1 réassignation + 7 mutations Zone 1 `basculerMode` + Zone 2 `afficherPalettesEval`) ; sentinelle Vitest `tests/unit/sentinelle-evaluation-en-cours.test.js` (3 sub-tests). Tests 89→92/92 verts. Critère A6 atteint. Garde-fou §0 enrichi (ne pas écrire le pivot hors whitelist). §1 Track 4 enrichi (chantier F livré). §2 critères : 7 atteints au lieu de 6 + 2 restants au lieu de 3. §3 étape 6 réordonnée (Track 4 F retiré, I devient priorité 1). | Cat-B Track 4 chantier F (Claude autonome) |
+| 2026-05-21 (soir, post-Track 4 chantier E) | MAJ après livraison Track 4 chantier E (6 commits sur la branche `cat-b/track-4-chantier-E`). Consolidation `utils-notifications.js` — **scope réel ~7x plus gros que les 73 annoncés** : ~525 callers migrés dans 39 modules. 0 def, 0 export, 0 wrapper, 0 guard typeof restants ; source unique `window.notifications.{succes, erreur, info}` (textContent immunisé XSS). Sentinelle Vitest stricte `tests/unit/utils-notifications.test.js` verrouille la régression. 3 bugs latents fixés : #111 XSS trimestre.js innerHTML sans echapperHtml (résolu par retrait def), #112 type `'warning'` ignoré en 2e param, #113 shadow local wizard-pratique-v2 1-param. Tests 92→97/97 verts (+5 nouveaux : 4 API + 1 sentinelle stricte). Build refresh 0521-1108 → 0521-1717. Critère A5 atteint. Garde-fou §0 enrichi (ne pas définir `function afficherNotificationX`, ne pas réintroduire guards). §2 critères : 8 atteints au lieu de 7 + 1 restant au lieu de 2 (A8 chantier I). §3 étape 6 réordonnée (chantier E retiré). −469 LOC nettes. | Cat-B Track 4 chantier E (Claude autonome) |

@@ -1,13 +1,23 @@
 # Suivi des bugs testeurs
 
 > **Objectif** : Tracker les bugs rapportés par les testeurs pour éviter le travail en double.
-> **Dernière mise à jour** : 21 mai 2026 (Cat-B Track 1 chantier A — 13 bugs latents #96-108 fermés en un commit, 89/89 tests verts)
+> **Dernière mise à jour** : 21 mai 2026 (Cat-B Track 4 chantier E — utils-notifications.js consolidé + 3 bugs latents #111-113 corrigés, 97/97 tests verts)
 
 ---
 
 ## Ouverts
 
 _(Aucun bug ouvert.)_
+
+---
+
+## Corrigés (21 mai 2026 — Cat-B Track 4 chantier E)
+
+| # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
+|---|---------|--------------|---------|-------|-------------|------------|
+| 111 | Claude (Cat-B chantier E — audit migration notifications) | 21 mai 2026 | 21 mai 2026 | 0521-1717 (99.61) | XSS `trimestre.js:1018` `function afficherNotification(message, details)` — innerHTML interpole `${message}` et `${details}` SANS `echapperHtml()` (viole CLAUDE.md). Non exploitable aujourd'hui (5 callers internes passent des chaînes statiques `'Bornes du trimestre sauvegardées'`, `'Événement modifié'`, etc.), mais violation des règles sécurité. | Résolu par retrait de la def au profit de `window.notifications.succes(...)` (utils-notifications.js, créé au sous-lot 1 du chantier E). La nouvelle API utilise `textContent` au lieu d'innerHTML → immunisée par construction contre XSS. |
+| 112 | Claude (Cat-B chantier E — audit signatures wrappers) | 21 mai 2026 | 21 mai 2026 | 0521-1717 (99.61) | 3 sites passaient `'warning'` / `'erreur'` / `'succes'` en 2e argument à `afficherNotification(message, type)`, attendant un changement de couleur. Mais la fonction traitait ce 2e arg comme `details` (sous-titre), pas comme type → s'affichait tel quel sous le message. Sites : `labo-codex-data.js:79` (`'warning'`), `wizard-pratique-v2.js:2545` (`'erreur'`), `_archives/entites-ui.js:909` (`'succes'`, ignoré car archive). | Migration vers la nouvelle API `notifications.{succes,erreur,info}` qui choisit la bonne couleur par méthode. `labo-codex-data.js:79` → `notifications.info(titre, msg)` (neutre pour avertissement). `wizard-pratique-v2.js` → `notifications.erreur(message)` (rouge) après retrait du shadow local. |
+| 113 | Claude (Cat-B chantier E — audit signatures wrappers) | 21 mai 2026 | 21 mai 2026 | 0521-1717 (99.61) | `wizard-pratique-v2.js:2543` redéfinit localement `function afficherNotificationErreur(message)` 1-param (sans `details`) — shadowait le global `groupe.js:47` qui avait signature 2-param `(titre, details = '')`. Si un caller dans wizard-pratique-v2 appelait `afficherNotificationErreur('Titre', 'détails')`, le `details` était ignoré silencieusement. | Retrait du shadow local + migration des 2 callers (L1944, L2545) vers `notifications.erreur(message)` direct. Signatures alignées sur l'API unique. |
 
 ---
 
