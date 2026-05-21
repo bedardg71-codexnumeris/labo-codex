@@ -4378,21 +4378,14 @@
                 remplirLabelsIdentite(fichier);
                 const prodIdEff = fichier.productionId ||
                     (typeof travauxResolution !== 'undefined' ? travauxResolution.trouverProductionPourFichier(fichier) : null);
-                // Nettoyer les critères et le mode modification si l'élève ou la production a changé
-                // (évite de conserver les critères de l'évaluation précédente ET
-                // un idModification stale qui empêcherait la sauvegarde d'une nouvelle évaluation)
-                if (window.evaluationEnCours &&
-                    (window.evaluationEnCours.etudiantDA !== (fichier.etudiantDA || '') ||
-                     window.evaluationEnCours.productionId !== (prodIdEff || fichier.productionId || ''))) {
-                    window.evaluationEnCours.criteres = {};
-                    window.evaluationEnCours.donneesAlgorithmiques = {};
-                    window.evaluationEnCours.etudiantDA = fichier.etudiantDA || '';
-                    window.evaluationEnCours.productionId = prodIdEff || fichier.productionId || '';
-                    delete window.evaluationEnCours.idModification;
-                    // Réactiver le formulaire si le fichier précédent l'avait verrouillé
-                    if (typeof desactiverFormulaireEvaluation === 'function') {
-                        desactiverFormulaireEvaluation(false);
-                    }
+                // Chantier F Cat-B (21 mai 2026) — l'API évaluation encapsule le reset
+                // critères/identité + delete idModification + desactiverFormulaireEvaluation.
+                // travaux-ui ne touche plus window.evaluationEnCours directement.
+                if (typeof window.demarrerEvaluationDepuisFichier === 'function') {
+                    window.demarrerEvaluationDepuisFichier(fichier, {
+                        recreer: false,
+                        productionIdEffective: prodIdEff || fichier.productionId
+                    });
                 }
                 preRemplirEvaluation(fichier.etudiantDA, prodIdEff || fichier.productionId);
             } else {
@@ -4609,87 +4602,14 @@
         if (typeof chargerGrillesDansSelect === 'function') chargerGrillesDansSelect();
         if (typeof chargerEchellePerformance === 'function') chargerEchellePerformance();
 
-        // Pré-remplir les selects cachés directement depuis fichier (synchrone, fiable)
-        // Ces selects sont dans travaux-eval-correction (u-hide) et lus par sauvegarderEvaluation()
-        const selEtud = document.getElementById('selectEtudiantEval');
-        if (selEtud && fichier.etudiantDA) {
-            selEtud.value = fichier.etudiantDA;
-        }
-
-        // Pré-remplir la production depuis le fichier ou l'évaluation liée (via fichierId)
-        const productionIdDuFichier = fichier.productionId || '';
-        let productionIdEffective = productionIdDuFichier;
-        if (!productionIdEffective) {
-            const evalLiee = travauxResolution.trouverEvaluationPourFichier(fichier);
-            if (evalLiee?.productionId) {
-                productionIdEffective = evalLiee.productionId;
-            }
-        }
-
-        const selProd = document.getElementById('selectProduction1');
-        if (selProd && productionIdEffective) {
-            selProd.value = productionIdEffective;
-        }
-
-        // Réinitialiser evaluationEnCours si absent OU si l'élève/production a changé
-        // (évite de conserver les critères de l'évaluation précédente dans le bilan)
-        var daChange = window.evaluationEnCours && window.evaluationEnCours.etudiantDA !== (fichier.etudiantDA || '');
-        var prodChange = window.evaluationEnCours && window.evaluationEnCours.productionId !== (productionIdEffective || '');
-        if (!window.evaluationEnCours || daChange || prodChange) {
-            window.evaluationEnCours = {
-                etudiantDA: fichier.etudiantDA || '',
-                productionId: productionIdEffective || '',
-                grilleId: '',
-                echelleId: '',
-                cartoucheId: '',
-                criteres: {},
-                donneesAlgorithmiques: {},
-                statutRemise: 'evalue'
-            };
-        }
-
-        // Pré-sélectionner la grille associée à la production (si disponible)
-        const productions = (typeof obtenirDonneesSelonMode === 'function')
-            ? obtenirDonneesSelonMode('productions')
-            : (typeof db !== 'undefined' ? db.getSync(cle('productions'), []) : []);
-        const prod = productionIdEffective ? productions.find(p => p.id === productionIdEffective) : null;
-        if (prod && prod.grilleId) {
-            const selG = document.getElementById('selectGrille1');
-            if (selG && Array.from(selG.options).some(o => o.value === prod.grilleId)) {
-                selG.value = prod.grilleId;
-                window.evaluationEnCours.grilleId = prod.grilleId;
-            }
-
-            // Pré-sélectionner l'échelle AVANT chargerGrilleSelectionnee
-            // (sinon echelleId est vide et les critères ne s'affichent pas)
-            if (prod.echelleId) {
-                const selE = document.getElementById('selectEchelle1');
-                if (selE && Array.from(selE.options).some(o => o.value === prod.echelleId)) {
-                    selE.value = prod.echelleId;
-                    window.evaluationEnCours.echelleId = prod.echelleId;
-                }
-            }
-
-            // Charger la grille (utilise echelleId pour afficher les critères)
-            if (typeof chargerGrilleSelectionnee === 'function') chargerGrilleSelectionnee();
-
-            // Pré-sélectionner la cartouche (retry car les données IDB peuvent ne pas être prêtes)
-            if (prod.cartoucheId) {
-                var _tentativesCartouche = 0;
-                var _essayerCartouche = function() {
-                    _tentativesCartouche++;
-                    var selC = document.getElementById('selectCartoucheEval');
-                    if (selC && Array.from(selC.options).some(function(o) { return o.value === prod.cartoucheId; })) {
-                        selC.value = prod.cartoucheId;
-                        window.evaluationEnCours.cartoucheId = prod.cartoucheId;
-                        selC.dispatchEvent(new Event('change', { bubbles: true }));
-                    } else if (_tentativesCartouche < 8) {
-                        setTimeout(_essayerCartouche, 250);
-                    }
-                };
-                setTimeout(_essayerCartouche, 150);
-            }
-        }
+        // Chantier F Cat-B (21 mai 2026) — pivot window.evaluationEnCours, selects
+        // cachés (étudiant, production), et pré-sélection grille/échelle/cartouche
+        // depuis la production : tout est encapsulé dans evaluation.demarrerEvaluation
+        // DepuisFichier (evaluation-chargement.js). travaux-ui ne touche plus jamais
+        // le pivot directement (sentinelle Vitest tests/unit/sentinelle-evaluation-en-cours.test.js).
+        const productionIdEffective = (typeof window.demarrerEvaluationDepuisFichier === 'function')
+            ? window.demarrerEvaluationDepuisFichier(fichier)
+            : (fichier.productionId || '');
 
         // Statut de remise par défaut : importé (fichier importé)
         const selRemise = document.getElementById('remiseProduction1');
