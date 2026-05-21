@@ -277,7 +277,21 @@ Track 3 (héritages cyc) et reste de Track 4 sont post-AQPC sans contrainte de d
 | Track 1 — Quick wins | **Terminé** | 2026-05-21 | 2026-05-21 |
 | Track 2 — Méthode | **Terminé** | 2026-05-21 | 2026-05-21 |
 | Track 3 — Héritages cyc > 30 | **Phase 1 livrée (8/14)** | 2026-05-21 | Phase 2 reportée (6 fonctions profil-etudiant restantes) |
-| Track 4 — Transversaux | À démarrer | — | — |
+| Track 4 — Transversaux | **G+J livrés (pré-AQPC)** | 2026-05-21 | E/F/H/I reportés (gros chantiers) |
+
+**Track 4 — chantiers livrés (pré-AQPC)** :
+- **Chantier G** : 2 accès localStorage direct migrés vers `db.getSync`/`db.setSync` (`profilOngletDeveloppementActif` dans `profil-etudiant-diagnostics.js`). Le plan théorique en prévoyait 3, audit réel = 2.
+- **Chantier J** : 8 reformulations UI vocabulaire alarmiste/prédictif + retrait FAQ « Indice R prédit risque d'échec » + tableau obsolète + glossaire « Indice composite (R) » descriptif. Audit annuel 1.3 passe Jaune → Vert pour la partie UI.
+
+**Track 4 — chantiers reportés (post-AQPC, gros effort)** :
+- **Chantier E** : Consolidation `utils-notifications.js` (73 sites cross-projet, ~3-5h, risque Moyen — régression silencieuse possible)
+- **Chantier F** : Investigation couplage `travaux-ui.js:4639 → window.evaluationEnCours` (~1-3h, décision a/b à acter avec Grégoire)
+- **Chantier H** (OPTIONNEL) : Sous-découpage résidus `profil-etudiant-sections-affichage.js` 4 654 LOC + `evaluation.js` 3 984 LOC (~4-6h)
+- **Chantier I** : 6 tests Playwright rendus DOM (~3-5h)
+
+**Track 4 — décisions Grégoire pendantes (chantier J reliquat)** :
+- Renommage tokens CSS `--risque-*` (480 hits) en `--niveau-attention-*` ou conservation legacy ?
+- Label `v2-seuil-fragile` : conservation, atténuation, ou alignement avec vocabulaire descriptif ?
 
 **Track 3 phase 2 — 6 fonctions profil-etudiant restantes** (à traiter dans une session future) :
 - `calculerDetailsNoteFinale` cyc 67 (`profil-etudiant-actions.js:177`, ~287 LOC)
@@ -299,3 +313,4 @@ Ce document est mis à jour à chaque clôture de chantier.
 | 2026-05-21 | Track 1 LIVRÉ (13 bugs latents #96-108 fermés + 3 doublons evaluation résolus + 2 codes morts alarmistes retirés). 89/89 tests verts. Beta 99.61 b0521-1108. | Cat-B Track 1 |
 | 2026-05-21 | Track 2 LIVRÉ (20 propositions Cat-B méthode actées et intégrées : §3 étapes 0/3/4/5, §4 check-list étape 3, §5 anti-patterns §5.8-5.13, §6.5 gabarit). METHODE-REFACTORING gelée jusqu'au prochain cycle de refactors. | Cat-B Track 2 |
 | 2026-05-21 | Track 3 phase 1 LIVRÉE (8/14 fonctions cyc > 30 éclatées : 3 evaluation + 4 trimestre-v2 + 1 profil-etudiant). Modules evaluation et trimestre-v2 atteignent baseline 0 cyc > 30. 6 fonctions profil-etudiant restantes en phase 2. | Cat-B Track 3 phase 1 |
+| 2026-05-21 | Track 4 chantiers G + J LIVRÉS (pré-AQPC) : chantier G migre 2 accès localStorage vers db.* (profil-etudiant-diagnostics.js), chantier J reformule 8 strings UI alarmistes/prédictives + retire FAQ obsolète « Indice R prédit risque d'échec » + glossaire descriptif. Audit annuel 1.3 partiellement vert (UI). 2 décisions Grégoire pendantes (tokens CSS, label v2-seuil-fragile). Chantiers E/F/H/I reportés post-AQPC. | Cat-B Track 4 G+J |

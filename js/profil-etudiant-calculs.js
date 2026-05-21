@@ -1219,7 +1219,7 @@ function determinerAlerteContextuelle(da) {
         return {
             niveau: 'fragile',
             label: 'Fragile',
-            description: 'Alerte : Contexte fragile. Risque de décrochage si la tendance se maintient.',
+            description: 'Contexte fragile. La tendance actuelle invite à un suivi rapproché.',
             badgeClasse: 'badge-engagement-fragile',
             A: (A * 100).toFixed(0) + '%',
             C: (C * 100).toFixed(0) + '%',
@@ -1231,7 +1231,7 @@ function determinerAlerteContextuelle(da) {
     return {
         niveau: 'insuffisant',
         label: 'Insuffisant',
-        description: 'Alerte critique : Contexte insuffisant. Décrochage imminent.',
+        description: 'Contexte insuffisant. Une rencontre individuelle est recommandée.',
         badgeClasse: 'badge-engagement-insuffisant',
         A: (A * 100).toFixed(0) + '%',
         C: (C * 100).toFixed(0) + '%',
