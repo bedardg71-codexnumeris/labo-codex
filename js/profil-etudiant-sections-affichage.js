@@ -67,6 +67,304 @@
  * @param {string} da - Numéro de DA
  * @returns {string} - HTML de la section
  */
+function _calculerIndicesEtDirectionsMobilisation(da, modeComparatif, pratiqueConfig) {
+    if (modeComparatif) {
+        return {
+            indicesSOM: calculerTousLesIndices(da, 'SOM'),
+            indicesPAN: calculerTousLesIndices(da, 'PAN'),
+            directionSOM: calculerDirectionEngagement(da, 'SOM'),
+            directionPAN: calculerDirectionEngagement(da, 'PAN')
+        };
+    }
+    const indicesActifs = calculerTousLesIndices(da);
+    const directionActive = calculerDirectionEngagement(da);
+    if (pratiqueConfig === 'sommative') {
+        return {
+            indicesSOM: indicesActifs,
+            indicesPAN: { A: indicesActifs.A, C: 0, P: 0, M: 0 },
+            directionSOM: directionActive,
+            directionPAN: { direction: 'stable', emoji: '→' }
+        };
+    }
+    return {
+        indicesPAN: indicesActifs,
+        indicesSOM: { A: indicesActifs.A, C: 0, P: 0, M: 0 },
+        directionPAN: directionActive,
+        directionSOM: { direction: 'stable', emoji: '→' }
+    };
+}
+
+function _trouverEvaluationActiveMobilisation(evaluationsProduction) {
+    if (evaluationsProduction.length === 0) return null;
+    // PRIORITÉ 1 : reprise active (repriseDeId + non remplacée)
+    const reprise = evaluationsProduction.find(e => e.repriseDeId && !e.remplaceeParId);
+    if (reprise) return reprise;
+    // PRIORITÉ 2 : évaluation avec jeton de délai actif
+    const avecDelai = evaluationsProduction.find(e => e.jetonDelaiApplique && !e.remplaceeParId);
+    if (avecDelai) return avecDelai;
+    // PRIORITÉ 3 : toute évaluation active (non remplacée)
+    const active = evaluationsProduction.find(e => !e.remplaceeParId);
+    if (active) return active;
+    // PRIORITÉ 4 : si toutes remplacées, première (cas rare)
+    return evaluationsProduction[0];
+}
+
+function _construireArtefactMobilisation(art, evaluation) {
+    const statutRemise = evaluation?.statutRemise || 'non-remis';
+    const statutIntegrite = evaluation?.statutIntegrite || 'recevable';
+    const estNonRecevable = statutIntegrite === 'plagiat' || statutIntegrite === 'ia';
+    const estRemis = evaluation &&
+        (statutRemise !== 'non-remis' && statutRemise !== 'retard') &&
+        !estNonRecevable;
+    return {
+        id: art.id,
+        titre: art.titre,
+        description: art.description || art.titre,
+        remis: estRemis,
+        note: evaluation?.noteFinale ?? null,
+        niveau: evaluation?.niveauFinal ?? null,
+        statutRemise: statutRemise,
+        statutIntegrite: statutIntegrite,
+        estNonRecevable: estNonRecevable,
+        jetonReprise: evaluation?.repriseDeId ? true : false,
+        jetonDelai: evaluation?.jetonDelaiApplique ? true : false,
+        retenu: false
+    };
+}
+
+function _construireListeArtefactsMobilisation(da, productions, evaluations) {
+    const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
+    const artefactsPortfolioIds = new Set(artefactsPortfolio.map(a => a.id));
+    const artefactsDonnes = [];
+    evaluations.forEach(evaluation => {
+        if (artefactsPortfolioIds.has(evaluation.productionId)) {
+            if (!artefactsDonnes.find(a => a.id === evaluation.productionId)) {
+                const production = artefactsPortfolio.find(p => p.id === evaluation.productionId);
+                if (production) artefactsDonnes.push(production);
+            }
+        }
+    });
+    const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da);
+    const artefacts = artefactsDonnes.map(art => {
+        const evaluationsProduction = evaluationsEleve.filter(e => e.productionId === art.id);
+        const evaluation = _trouverEvaluationActiveMobilisation(evaluationsProduction);
+        return _construireArtefactMobilisation(art, evaluation);
+    });
+    return { artefacts, evaluationsEleve, artefactsPortfolio };
+}
+
+function _selectionnerArtefactsMobilisation(artefactsRemis, productions, configCategories, methodeSelection, nombreARetenir, modeHybride, portfolioActif) {
+    if (!portfolioActif) {
+        return { artefactsSelectionnes: [], nombreARetenir, methodeSelection };
+    }
+    if (modeHybride) {
+        // MODE HYBRIDE : N meilleures Sélection + toutes les Obligatoires
+        const { nombreARetenir: nSelection } = configCategories.selection || { nombreARetenir: 4, ponderation: 65 };
+        const productionsNonPortfolio = productions.filter(p => p.type !== 'portfolio');
+        const artefactsSelection = artefactsRemis.filter(a => {
+            const prod = productionsNonPortfolio.find(p => p.id === a.id);
+            return prod && prod.categorie === 'selection';
+        });
+        const artefactsObligatoires = artefactsRemis.filter(a => {
+            const prod = productionsNonPortfolio.find(p => p.id === a.id);
+            return prod && prod.categorie === 'obligatoire';
+        });
+        const meilleuresSelection = [...artefactsSelection]
+            .sort((a, b) => (b.note || 0) - (a.note || 0))
+            .slice(0, nSelection);
+        return {
+            artefactsSelectionnes: [...meilleuresSelection, ...artefactsObligatoires],
+            nombreARetenir: nSelection,
+            methodeSelection: 'hybride-categories'
+        };
+    }
+    // Legacy switch sur la méthode de sélection
+    switch (methodeSelection) {
+        case 'meilleurs':
+            return {
+                artefactsSelectionnes: [...artefactsRemis]
+                    .sort((a, b) => (b.note || 0) - (a.note || 0))
+                    .slice(0, nombreARetenir),
+                nombreARetenir, methodeSelection
+            };
+        case 'recents':
+            return {
+                artefactsSelectionnes: [...artefactsRemis]
+                    .sort((a, b) => new Date(b.dateRemise || b.dateEvaluation || 0) - new Date(a.dateRemise || a.dateEvaluation || 0))
+                    .slice(0, nombreARetenir),
+                nombreARetenir, methodeSelection
+            };
+        case 'recents-meilleurs': {
+            const nombreMeilleurs = Math.max(1, Math.ceil(artefactsRemis.length * 0.5));
+            const topMeilleurs = [...artefactsRemis]
+                .sort((a, b) => (b.note || 0) - (a.note || 0))
+                .slice(0, nombreMeilleurs);
+            return {
+                artefactsSelectionnes: [...topMeilleurs]
+                    .sort((a, b) => new Date(b.dateRemise || b.dateEvaluation || 0) - new Date(a.dateRemise || a.dateEvaluation || 0))
+                    .slice(0, nombreARetenir),
+                nombreARetenir, methodeSelection
+            };
+        }
+        case 'tous':
+            return { artefactsSelectionnes: artefactsRemis, nombreARetenir, methodeSelection };
+        default:
+            // Fallback meilleurs
+            return {
+                artefactsSelectionnes: [...artefactsRemis]
+                    .sort((a, b) => (b.note || 0) - (a.note || 0))
+                    .slice(0, nombreARetenir),
+                nombreARetenir, methodeSelection
+            };
+    }
+}
+
+function _genererTexteMethodePerformanceMobilisation(performanceInsuffisante, portfolioActif, methodeSelection, nombreARetenir, configCategories, nbRemis, minimumCompletion) {
+    if (performanceInsuffisante) {
+        return `Minimum ${minimumCompletion} évaluations requises (${nbRemis}/${minimumCompletion} complétées)`;
+    }
+    if (!portfolioActif) {
+        return 'Performance des productions indépendantes';
+    }
+    if (methodeSelection === 'hybride-categories') {
+        const pondSel = configCategories?.selection?.ponderation || 65;
+        const pondObl = configCategories?.obligatoires?.ponderation || 35;
+        return `Performance du portfolio actuel (${nombreARetenir} meilleure${nombreARetenir > 1 ? 's' : ''} Sélection ${pondSel}% + Obligatoires ${pondObl}%)`;
+    }
+    const textesPerformance = {
+        'meilleurs': `Performance du portfolio actuel (${nombreARetenir} meilleur${nombreARetenir > 1 ? 's' : ''}, maîtrise de standards)`,
+        'recents': `Performance du portfolio actuel (${nombreARetenir} plus récent${nombreARetenir > 1 ? 's' : ''}, niveau terminal)`,
+        'recents-meilleurs': `Performance du portfolio actuel (${nombreARetenir} récent${nombreARetenir > 1 ? 's' : ''} parmi les meilleurs, hybride)`,
+        'tous': `Performance du portfolio actuel (tous les artefacts, moyenne complète)`
+    };
+    return textesPerformance[methodeSelection] || textesPerformance['meilleurs'];
+}
+
+function _genererTitreArtefactsRetenusMobilisation(portfolioActif, methodeSelection, nbRetenus, nombreARetenir) {
+    if (!portfolioActif) return 'Productions indépendantes';
+    if (methodeSelection === 'hybride-categories') {
+        return `${nbRetenus} artefact${nbRetenus > 1 ? 's' : ''} retenus (${nombreARetenir} meilleures Sélection + Obligatoires)`;
+    }
+    const textesTitres = {
+        'meilleurs': `${nbRetenus} meilleur${nbRetenus > 1 ? 's' : ''} artefact${nbRetenus > 1 ? 's' : ''}`,
+        'recents': `${nbRetenus} plus récent${nbRetenus > 1 ? 's' : ''} artefact${nbRetenus > 1 ? 's' : ''}`,
+        'recents-meilleurs': `${nbRetenus} récent${nbRetenus > 1 ? 's' : ''} parmi les meilleurs`,
+        'tous': `Tous les artefacts (${nbRetenus})`
+    };
+    return textesTitres[methodeSelection] || textesTitres['meilleurs'];
+}
+
+function _collecterBadgesJetonsMobilisation(evaluations, productions, da) {
+    const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da);
+    const productionsNonPortfolio = productions.filter(p => p.type !== 'portfolio');
+    const badgesJetons = [];
+    evaluationsEleve.forEach(evaluation => {
+        let typeJeton = null;
+        let badgeClass = '';
+        let badgeNumeroClass = '';
+        if (evaluation.jetonRepriseCibleeApplique === true) {
+            typeJeton = 'Reprise ciblée';
+            badgeClass = 'badge-jeton-reprise-ciblee-wrapper';
+            badgeNumeroClass = 'badge-jeton-numero-reprise-ciblee';
+        } else if (evaluation.jetonRepriseApplique === true) {
+            typeJeton = 'Reprise';
+            badgeClass = 'badge-jeton-reprise-wrapper';
+            badgeNumeroClass = 'badge-jeton-numero-reprise';
+        } else if (evaluation.jetonDelaiApplique === true) {
+            typeJeton = 'Délai';
+            badgeClass = 'badge-jeton-delai-wrapper';
+            badgeNumeroClass = 'badge-jeton-numero-delai';
+        }
+        if (typeJeton) {
+            const indexProduction = productionsNonPortfolio.findIndex(p => p.id === evaluation.productionId);
+            if (indexProduction !== -1) {
+                badgesJetons.push({
+                    type: typeJeton,
+                    badge: 'A' + (indexProduction + 1),
+                    class: badgeClass,
+                    numeroClass: badgeNumeroClass
+                });
+            }
+        }
+    });
+    return badgesJetons;
+}
+
+function _genererBadgesJetonsHTML(evaluations, productions, da) {
+    const badgesJetons = _collecterBadgesJetonsMobilisation(evaluations, productions, da);
+    if (badgesJetons.length === 0) return '';
+    const badgesHTML = badgesJetons.map(jeton =>
+        '<span class="' + jeton.class + '">' +
+            '<span class="badge-jeton-titre">' + jeton.type + '</span>' +
+            '<span class="badge-jeton-numero ' + jeton.numeroClass + '">' + jeton.badge + '</span>' +
+        '</span>'
+    ).join('');
+    return '<div class="u-flex-gap-8 u-mt-10">' + badgesHTML + '</div>';
+}
+
+function _genererBlocGestionJetons(statutJetons, evaluations, productions, da) {
+    if (typeof obtenirStatutJetonsEtudiant !== 'function') return '';
+    const totalJetonsUtilisesTousTypes = Object.values(statutJetons).reduce((sum, info) => sum + info.utilises, 0);
+    const configBeta = db.getSync('modalitesEvaluation', {});
+    const quotaGlobal = configBeta.configPAN?.jetons?.nombreParEleve || 2;  // Beta 95.7 : défaut 2
+    return `
+        <!-- Encadré pour le titre et la barre de progression globale -->
+        <div class="profil-encadre-jetons">
+            <div class="profil-encadre-jetons-header">
+                <strong class="profil-encadre-jetons-titre">
+                    Gestion des jetons
+                </strong>
+                <span class="profil-encadre-jetons-compteur">
+                    ${totalJetonsUtilisesTousTypes} / ${quotaGlobal} utilisés
+                </span>
+            </div>
+            <div class="profil-encadre-jetons-barre">
+                <div class="profil-encadre-jetons-progression" style="width: ${(totalJetonsUtilisesTousTypes / quotaGlobal * 100)}%;"></div>
+            </div>
+        </div>
+
+        <!-- Badges des jetons utilisés -->
+        ${_genererBadgesJetonsHTML(evaluations, productions, da)}
+
+        <hr class="profil-separateur">
+    `;
+}
+
+function _genererBlocInterventionsRaIMobilisation(da) {
+    if (typeof obtenirInterventionsEtudiant !== 'function') return '';
+    const interventions = obtenirInterventionsEtudiant(da);
+    const interventionsParticipees = interventions.filter(intervention => {
+        return intervention.statut === 'completee' &&
+               intervention.etudiants &&
+               intervention.etudiants.includes(da);
+    });
+    if (interventionsParticipees.length === 0) return '';
+    interventionsParticipees.sort((a, b) => new Date(b.date) - new Date(a.date));
+    return `
+        <hr class="profil-separateur">
+        <h4 class="profil-section-titre">
+            ${interventionsParticipees.length} intervention${interventionsParticipees.length > 1 ? 's' : ''} RàI
+        </h4>
+        <div class="badges-centres u-mb-20">
+            ${interventionsParticipees.map(intervention => {
+                const date = new Date(intervention.date + 'T12:00:00');
+                const options = { weekday: 'short', day: 'numeric', month: 'short' };
+                const dateFormatee = date.toLocaleDateString('fr-CA', options);
+                const duree = intervention.duree || 2;
+                const typeIcone = intervention.type === 'individuel' ? '👤' : intervention.type === 'mio' ? '✉️' : '👥';
+                return `
+                    <span class="badge-intervention-vert" data-action="naviguerVersIntervention" data-param="${intervention.id}">
+                        ${typeIcone} ${dateFormatee}
+                        <span class="badge-analyse-count">
+                            ${duree} pér.
+                        </span>
+                    </span>
+                `;
+            }).join('')}
+        </div>
+    `;
+}
+
 function genererSectionMobilisationEngagement(da) {
     if (typeof obtenirPreference === 'function' && obtenirPreference('depistageAcp') === false) {
         return '';
@@ -75,42 +373,15 @@ function genererSectionMobilisationEngagement(da) {
     const A = indices.A / 100;
     const C = indices.C / 100;
 
-    // NOUVEAU (Beta 90): Calcul dual pour mode comparatif
+    // Calcul dual pour mode comparatif (Beta 90 + correctif 7 déc 2025 :
+    // vérifier === true pour éviter le mode comparatif par défaut)
     const config = db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
-
-    // ✅ CORRECTION (7 déc 2025): Vérifier explicitement === true pour éviter mode comparatif par défaut
     const afficherSom = affichage.afficherSommatif === true;
     const afficherPan = affichage.afficherAlternatif === true;
     const modeComparatif = afficherSom && afficherPan;
 
-    // ✅ OPTIMISATION (7 déc 2025): Calculer uniquement la pratique active sauf en mode comparatif
-    let indicesSOM, indicesPAN, directionSOM, directionPAN;
-
-    if (modeComparatif) {
-        // Mode comparatif: calculer les deux pratiques
-        indicesSOM = calculerTousLesIndices(da, 'SOM');
-        indicesPAN = calculerTousLesIndices(da, 'PAN');
-        directionSOM = calculerDirectionEngagement(da, 'SOM');
-        directionPAN = calculerDirectionEngagement(da, 'PAN');
-    } else {
-        // Mode normal: calculer seulement la pratique active
-        const indicesActifs = calculerTousLesIndices(da);
-        const directionActive = calculerDirectionEngagement(da);
-
-        // Assigner aux bonnes variables selon la pratique active
-        if (config.pratique === 'sommative') {
-            indicesSOM = indicesActifs;
-            indicesPAN = { A: indicesActifs.A, C: 0, P: 0, M: 0 }; // Valeurs nulles pour PAN
-            directionSOM = directionActive;
-            directionPAN = { direction: 'stable', emoji: '→' };
-        } else {
-            indicesPAN = indicesActifs;
-            indicesSOM = { A: indicesActifs.A, C: 0, P: 0, M: 0 }; // Valeurs nulles pour SOM
-            directionPAN = directionActive;
-            directionSOM = { direction: 'stable', emoji: '→' };
-        }
-    }
+    const { indicesSOM, indicesPAN, directionSOM, directionPAN } = _calculerIndicesEtDirectionsMobilisation(da, modeComparatif, config.pratique);
 
     // Récupérer les données pour les trois sections
     const detailsA = obtenirDetailsAssiduite(da);
@@ -127,73 +398,13 @@ function genererSectionMobilisationEngagement(da) {
     // Détecter si aucune donnée n'est saisie pour cet étudiant
     const aucuneDonneeAssiduite = periodesOffertes === 0;
 
-    // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
+    // Sources de données (respectent le mode actuel via obtenirDonneesSelonMode)
     const productions = obtenirDonneesSelonMode('productions') || [];
     const portfolio = productions.find(p => p.type === 'portfolio');
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
-    const artefactsPortfolioIds = new Set(artefactsPortfolio.map(a => a.id));
-    const artefactsDonnes = [];
-    evaluations.forEach(evaluation => {
-        if (artefactsPortfolioIds.has(evaluation.productionId)) {
-            if (!artefactsDonnes.find(a => a.id === evaluation.productionId)) {
-                const production = artefactsPortfolio.find(p => p.id === evaluation.productionId);
-                if (production) {
-                    artefactsDonnes.push(production);
-                }
-            }
-        }
-    });
-    const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da);
-    const artefacts = artefactsDonnes.map(art => {
-        // Trouver l'évaluation ACTIVE (non remplacée) pour cette production
-        const evaluationsProduction = evaluationsEleve.filter(e => e.productionId === art.id);
-        let evaluation = null;
-        if (evaluationsProduction.length > 0) {
-            // PRIORITÉ 1 : Chercher une reprise active (repriseDeId ET non remplacée)
-            evaluation = evaluationsProduction.find(e => e.repriseDeId && !e.remplaceeParId);
 
-            // PRIORITÉ 2 : Si pas de reprise, chercher une évaluation avec jeton de délai actif
-            if (!evaluation) {
-                evaluation = evaluationsProduction.find(e => e.jetonDelaiApplique && !e.remplaceeParId);
-            }
-
-            // PRIORITÉ 3 : Si pas de jeton, chercher toute évaluation active (non remplacée)
-            if (!evaluation) {
-                evaluation = evaluationsProduction.find(e => !e.remplaceeParId);
-            }
-
-            // PRIORITÉ 4 : Si toutes sont remplacées, prendre la première (cas rare)
-            if (!evaluation) {
-                evaluation = evaluationsProduction[0];
-            }
-        }
-
-        // Vérifier le statut de remise (source unique de vérité)
-        const statutRemise = evaluation?.statutRemise || 'non-remis';
-        const statutIntegrite = evaluation?.statutIntegrite || 'recevable';
-
-        // Un travail non-recevable (plagiat, IA) n'est PAS considéré comme remis
-        const estNonRecevable = statutIntegrite === 'plagiat' || statutIntegrite === 'ia';
-        const estRemis = evaluation &&
-            (statutRemise !== 'non-remis' && statutRemise !== 'retard') &&
-            !estNonRecevable;
-
-        return {
-            id: art.id,
-            titre: art.titre,
-            description: art.description || art.titre, // Utiliser description ou fallback sur titre
-            remis: estRemis,
-            note: evaluation?.noteFinale ?? null,  // Utiliser ?? pour supporter la note 0
-            niveau: evaluation?.niveauFinal ?? null,
-            statutRemise: statutRemise,
-            statutIntegrite: statutIntegrite,
-            estNonRecevable: estNonRecevable,
-            jetonReprise: evaluation?.repriseDeId ? true : false,
-            jetonDelai: evaluation?.jetonDelaiApplique ? true : false,
-            retenu: false // Par défaut, sera mis à true pour les meilleurs
-        };
-    });
+    // Construction de la liste des artefacts avec leur évaluation active
+    const { artefacts, evaluationsEleve, artefactsPortfolio } = _construireListeArtefactsMobilisation(da, productions, evaluations);
 
     // 🆕 LIRE LA CONFIGURATION DE LA PRATIQUE DE NOTATION
     // Source de vérité : pratiquesConfigurables (Material Settings), fallback sur modalitesEvaluation
@@ -212,79 +423,12 @@ function genererSectionMobilisationEngagement(da) {
         || (typeof obtenirConfigCategories === 'function' ? obtenirConfigCategories() : null);
     const modeHybride = !!(configCategories && configCategories.actif);
 
-    // Appliquer la logique de sélection selon la modalité configurée
-    let artefactsSelectionnes = [];
+    // Sélection des artefacts selon la modalité configurée (Hybride ou Legacy)
     const artefactsRemis = artefacts.filter(a => a.remis);
-
-    if (!portfolioActif) {
-        // Portfolio désactivé : aucun artefact retenu
-        artefactsSelectionnes = [];
-    } else if (modeHybride) {
-        // MODE HYBRIDE : N meilleures du pool Sélection + Obligatoires
-        const { nombreARetenir: nSelection, ponderation: pondSelection } = configCategories.selection || { nombreARetenir: 4, ponderation: 65 };
-        const { ponderation: pondOblig } = configCategories.obligatoires || { ponderation: 35 };
-        const productionsNonPortfolio = productions.filter(p => p.type !== 'portfolio');
-
-        // Séparer les artefacts remis par catégorie
-        const artefactsSelection = artefactsRemis.filter(a => {
-            const prod = productionsNonPortfolio.find(p => p.id === a.id);
-            return prod && prod.categorie === 'selection';
-        });
-        const artefactsObligatoires = artefactsRemis.filter(a => {
-            const prod = productionsNonPortfolio.find(p => p.id === a.id);
-            return prod && prod.categorie === 'obligatoire';
-        });
-
-        // Prendre les N meilleures du pool Sélection
-        const meilleuresSelection = [...artefactsSelection]
-            .sort((a, b) => (b.note || 0) - (a.note || 0))
-            .slice(0, nSelection);
-
-        // Toutes les Obligatoires comptent
-        artefactsSelectionnes = [...meilleuresSelection, ...artefactsObligatoires];
-
-        // Mettre à jour nombreARetenir pour l'affichage
-        nombreARetenir = nSelection;
-        methodeSelection = 'hybride-categories';
-    } else {
-        // Appliquer la modalité de sélection legacy
-        switch (methodeSelection) {
-            case 'meilleurs':
-                artefactsSelectionnes = artefactsRemis
-                    .sort((a, b) => (b.note || 0) - (a.note || 0))
-                    .slice(0, nombreARetenir);
-                break;
-
-            case 'recents':
-                // Trier par date de remise (plus récents en premier)
-                artefactsSelectionnes = [...artefactsRemis]
-                    .sort((a, b) => new Date(b.dateRemise || b.dateEvaluation || 0) - new Date(a.dateRemise || a.dateEvaluation || 0))
-                    .slice(0, nombreARetenir);
-                break;
-
-            case 'recents-meilleurs':
-                // 1. Garder les 50% meilleurs
-                const nombreMeilleurs = Math.max(1, Math.ceil(artefactsRemis.length * 0.5));
-                const topMeilleurs = [...artefactsRemis]
-                    .sort((a, b) => (b.note || 0) - (a.note || 0))
-                    .slice(0, nombreMeilleurs);
-                // 2. Parmi ceux-ci, prendre les N plus récents
-                artefactsSelectionnes = [...topMeilleurs]
-                    .sort((a, b) => new Date(b.dateRemise || b.dateEvaluation || 0) - new Date(a.dateRemise || a.dateEvaluation || 0))
-                    .slice(0, nombreARetenir);
-                break;
-
-            case 'tous':
-                artefactsSelectionnes = artefactsRemis;
-                break;
-
-            default:
-                // Fallback sur meilleurs
-                artefactsSelectionnes = artefactsRemis
-                    .sort((a, b) => (b.note || 0) - (a.note || 0))
-                    .slice(0, nombreARetenir);
-        }
-    }
+    const resultatSelection = _selectionnerArtefactsMobilisation(artefactsRemis, productions, configCategories, methodeSelection, nombreARetenir, modeHybride, portfolioActif);
+    const artefactsSelectionnes = resultatSelection.artefactsSelectionnes;
+    nombreARetenir = resultatSelection.nombreARetenir;
+    methodeSelection = resultatSelection.methodeSelection;
 
     // Marquer les artefacts sélectionnés comme retenus
     const idsRetenus = new Set(artefactsSelectionnes.map(a => a.id));
@@ -447,51 +591,7 @@ function genererSectionMobilisationEngagement(da) {
                 `}
 
                 <!-- Interventions RàI -->
-                ${(() => {
-                    // Récupérer les interventions de l'étudiant (où il était présent)
-                    const interventions = typeof obtenirInterventionsEtudiant === 'function'
-                        ? obtenirInterventionsEtudiant(da)
-                        : [];
-
-                    // Filtrer seulement les interventions complétées où l'étudiant était participant
-                    const interventionsParticipees = interventions.filter(intervention => {
-                        return intervention.statut === 'completee' &&
-                               intervention.etudiants &&
-                               intervention.etudiants.includes(da);
-                    });
-
-                    if (interventionsParticipees.length === 0) {
-                        return '';
-                    }
-
-                    // Trier par date décroissante
-                    interventionsParticipees.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-                    return `
-                        <hr class="profil-separateur">
-                        <h4 class="profil-section-titre">
-                            ${interventionsParticipees.length} intervention${interventionsParticipees.length > 1 ? 's' : ''} RàI
-                        </h4>
-                        <div class="badges-centres u-mb-20">
-                            ${interventionsParticipees.map(intervention => {
-                                const date = new Date(intervention.date + 'T12:00:00');
-                                const options = { weekday: 'short', day: 'numeric', month: 'short' };
-                                const dateFormatee = date.toLocaleDateString('fr-CA', options);
-                                const duree = intervention.duree || 2;
-                                const typeIcone = intervention.type === 'individuel' ? '👤' : intervention.type === 'mio' ? '✉️' : '👥';
-
-                                return `
-                                    <span class="badge-intervention-vert" data-action="naviguerVersIntervention" data-param="${intervention.id}">
-                                        ${typeIcone} ${dateFormatee}
-                                        <span class="badge-analyse-count">
-                                            ${duree} pér.
-                                        </span>
-                                    </span>
-                                `;
-                            }).join('')}
-                        </div>
-                    `;
-                })()}
+                ${_genererBlocInterventionsRaIMobilisation(da)}
             </div>
 
             <!-- FICHE COMPLÉTION -->
@@ -583,170 +683,17 @@ function genererSectionMobilisationEngagement(da) {
 
                 <!-- Statistiques -->
                 <ul class="profil-liste-simple">
-                    <li><strong>• ${(() => {
-                        if (performanceInsuffisante) {
-                            return `Minimum ${minimumCompletion} évaluations requises (${nbRemis}/${minimumCompletion} complétées)`;
-                        }
-                        if (!portfolioActif) {
-                            return 'Performance des productions indépendantes';
-                        }
-
-                        // Textes selon la modalité de sélection
-                        if (methodeSelection === 'hybride-categories') {
-                            const pondSel = configCategories?.selection?.ponderation || 65;
-                            const pondObl = configCategories?.obligatoires?.ponderation || 35;
-                            return `Performance du portfolio actuel (${nombreARetenir} meilleure${nombreARetenir > 1 ? 's' : ''} Sélection ${pondSel}% + Obligatoires ${pondObl}%)`;
-                        }
-
-                        const textesPerformance = {
-                            'meilleurs': `Performance du portfolio actuel (${nombreARetenir} meilleur${nombreARetenir > 1 ? 's' : ''}, maîtrise de standards)`,
-                            'recents': `Performance du portfolio actuel (${nombreARetenir} plus récent${nombreARetenir > 1 ? 's' : ''}, niveau terminal)`,
-                            'recents-meilleurs': `Performance du portfolio actuel (${nombreARetenir} récent${nombreARetenir > 1 ? 's' : ''} parmi les meilleurs, hybride)`,
-                            'tous': `Performance du portfolio actuel (tous les artefacts, moyenne complète)`
-                        };
-
-                        return textesPerformance[methodeSelection] || textesPerformance['meilleurs'];
-                    })()}</strong></li>
+                    <li><strong>• ${_genererTexteMethodePerformanceMobilisation(performanceInsuffisante, portfolioActif, methodeSelection, nombreARetenir, configCategories, nbRemis, minimumCompletion)}</strong></li>
                 </ul>
 
                 <hr class="profil-separateur">
 
                 <!-- Gestion des jetons (prédéfinis + personnalisés) -->
-                ${typeof obtenirStatutJetonsEtudiant === 'function' ? (() => {
-                    // Calculer le total de jetons utilisés tous types confondus
-                    const totalJetonsUtilisesTousTypes = Object.values(statutJetons).reduce((sum, info) => sum + info.utilises, 0);
-
-                    // Récupérer le quota global depuis la configuration
-                    const config = db.getSync('modalitesEvaluation', {});
-                    const quotaGlobal = config.configPAN?.jetons?.nombreParEleve || 2;  // 🆕 Beta 95.7 : défaut 2
-
-                    // Déterminer si le quota global est atteint
-                    const quotaGlobalAtteint = totalJetonsUtilisesTousTypes >= quotaGlobal;
-
-                    // Fonction pour obtenir les badges des artefacts où un type de jeton a été utilisé
-                    const obtenirBadgesJetons = (typeJeton) => {
-                        const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da);
-                        const productionsNonPortfolio = productions.filter(p => p.type !== 'portfolio');
-                        const badges = [];
-
-                        evaluationsEleve.forEach(evaluation => {
-                            let jetonUtilise = false;
-                            if (typeJeton === 'delai' && evaluation.jetonDelaiApplique === true) {
-                                jetonUtilise = true;
-                            } else if (typeJeton === 'reprise' && evaluation.jetonRepriseApplique === true) {
-                                jetonUtilise = true;
-                            } else if (typeJeton === 'repriseCiblee' && evaluation.jetonRepriseCibleeApplique === true) {
-                                jetonUtilise = true;
-                            }
-
-                            if (jetonUtilise) {
-                                // Rang chronologique de la production
-                                var prodJeton = productionsNonPortfolio.find(p => p.id === evaluation.productionId);
-                                var rangJeton = prodJeton ? _rangProduction(prodJeton) : 0;
-                                if (rangJeton > 0) {
-                                    badges.push(`P${rangJeton}`);
-                                }
-                            }
-                        });
-
-                        return badges;
-                    };
-
-                    return `
-                        <!-- Encadré pour le titre et la barre de progression globale -->
-                        <div class="profil-encadre-jetons">
-                            <div class="profil-encadre-jetons-header">
-                                <strong class="profil-encadre-jetons-titre">
-                                    Gestion des jetons
-                                </strong>
-                                <span class="profil-encadre-jetons-compteur">
-                                    ${totalJetonsUtilisesTousTypes} / ${quotaGlobal} utilisés
-                                </span>
-                            </div>
-                            <div class="profil-encadre-jetons-barre">
-                                <div class="profil-encadre-jetons-progression" style="width: ${(totalJetonsUtilisesTousTypes / quotaGlobal * 100)}%;"></div>
-                            </div>
-                        </div>
-
-                        <!-- Badges des jetons utilisés -->
-                        ${(() => {
-                            const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da);
-                            const productionsNonPortfolio = productions.filter(p => p.type !== 'portfolio');
-                            const badgesJetons = [];
-
-                            evaluationsEleve.forEach(evaluation => {
-                                // Vérifier quel type de jeton a été utilisé
-                                let typeJeton = null;
-                                let badgeClass = '';
-                                let badgeNumeroClass = '';
-
-                                if (evaluation.jetonRepriseCibleeApplique === true) {
-                                    typeJeton = 'Reprise ciblée';
-                                    badgeClass = 'badge-jeton-reprise-ciblee-wrapper';
-                                    badgeNumeroClass = 'badge-jeton-numero-reprise-ciblee';
-                                } else if (evaluation.jetonRepriseApplique === true) {
-                                    typeJeton = 'Reprise';
-                                    badgeClass = 'badge-jeton-reprise-wrapper';
-                                    badgeNumeroClass = 'badge-jeton-numero-reprise';
-                                } else if (evaluation.jetonDelaiApplique === true) {
-                                    typeJeton = 'Délai';
-                                    badgeClass = 'badge-jeton-delai-wrapper';
-                                    badgeNumeroClass = 'badge-jeton-numero-delai';
-                                }
-
-                                if (typeJeton) {
-                                    // Trouver l'index de la production
-                                    const indexProduction = productionsNonPortfolio.findIndex(p => p.id === evaluation.productionId);
-                                    if (indexProduction !== -1) {
-                                        const badge = 'A' + (indexProduction + 1);
-                                        badgesJetons.push({
-                                            type: typeJeton,
-                                            badge: badge,
-                                            class: badgeClass,
-                                            numeroClass: badgeNumeroClass
-                                        });
-                                    }
-                                }
-                            });
-
-                            if (badgesJetons.length > 0) {
-                                const badgesHTML = badgesJetons.map(jeton =>
-                                    '<span class="' + jeton.class + '">' +
-                                        '<span class="badge-jeton-titre">' + jeton.type + '</span>' +
-                                        '<span class="badge-jeton-numero ' + jeton.numeroClass + '">' + jeton.badge + '</span>' +
-                                    '</span>'
-                                ).join('');
-
-                                return '<div class="u-flex-gap-8 u-mt-10">' + badgesHTML + '</div>';
-                            }
-                            return '';
-                        })()}
-
-                        <hr class="profil-separateur">
-                    `;
-                })() : ''}
+                ${_genererBlocGestionJetons(statutJetons, evaluations, productions, da)}
 
                 <!-- Artefacts sélectionnés avec notes (badges colorés avec checkboxes) -->
                 <h4 class="profil-section-titre">
-                    ${(() => {
-                        if (!portfolioActif) {
-                            return 'Productions indépendantes';
-                        }
-
-                        if (methodeSelection === 'hybride-categories') {
-                            return `${nbRetenus} artefact${nbRetenus > 1 ? 's' : ''} retenus (${nombreARetenir} meilleures Sélection + Obligatoires)`;
-                        }
-
-                        // Textes selon la modalité de sélection
-                        const textesTitres = {
-                            'meilleurs': `${nbRetenus} meilleur${nbRetenus > 1 ? 's' : ''} artefact${nbRetenus > 1 ? 's' : ''}`,
-                            'recents': `${nbRetenus} plus récent${nbRetenus > 1 ? 's' : ''} artefact${nbRetenus > 1 ? 's' : ''}`,
-                            'recents-meilleurs': `${nbRetenus} récent${nbRetenus > 1 ? 's' : ''} parmi les meilleurs`,
-                            'tous': `Tous les artefacts (${nbRetenus})`
-                        };
-
-                        return textesTitres[methodeSelection] || textesTitres['meilleurs'];
-                    })()}
+                    ${_genererTitreArtefactsRetenusMobilisation(portfolioActif, methodeSelection, nbRetenus, nombreARetenir)}
                 </h4>
                 ${artefactsRetenus.length > 0 ? `
                     <div class="badges-centres u-mb-20">
