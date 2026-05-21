@@ -2616,6 +2616,79 @@ function genererSectionAssiduite(da) {
  * @param {string} da - Numéro de DA
  * @returns {string} - HTML de la section
  */
+function _trouverEvaluationActive(evaluationsEleve, productionId) {
+    const evaluationsProduction = evaluationsEleve.filter(e => e.productionId === productionId);
+    if (evaluationsProduction.length === 0) return null;
+    // PRIORITÉ 1 : reprise ciblée active (jetonRepriseCibleeApplique + non remplacée)
+    const repriseCiblee = evaluationsProduction.find(e => e.jetonRepriseCibleeApplique === true && !e.remplaceeParId);
+    if (repriseCiblee) return repriseCiblee;
+    // PRIORITÉ 2 : reprise active (repriseDeId + non remplacée)
+    const repriseActive = evaluationsProduction.find(e => e.repriseDeId && !e.remplaceeParId);
+    if (repriseActive) return repriseActive;
+    // PRIORITÉ 3 : évaluation normale non remplacée
+    return evaluationsProduction.find(e => !e.remplaceeParId) || null;
+}
+
+function _calculerEcheanceFormateeProduction(production) {
+    // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
+    const infoCours = db.getSync('infoCours', null);
+    const gcId = infoCours ? (infoCours._groupeCoursId || infoCours.id || null) : null;
+    const echeance = (typeof obtenirEcheanceEffective === 'function')
+        ? obtenirEcheanceEffective(production, gcId).date
+        : production.dateEcheance;
+    if (!echeance) return '—';
+    // Note: +T12:00:00 évite le décalage de fuseau horaire (UTC vs local)
+    return new Date(echeance + 'T12:00:00').toLocaleDateString('fr-CA');
+}
+
+function _determinerBadgeTypeEvaluation(evaluation) {
+    if (evaluation.remplaceeParId) return 'remplacee';
+    if (evaluation.jetonRepriseCibleeApplique === true) return 'reprise-ciblee';
+    if (evaluation.repriseDeId || evaluation.id.startsWith('EVAL_REPRISE_')) return 'nouvelle-reprise';
+    if (evaluation.jetonDelaiApplique && !evaluation.repriseDeId && !evaluation.jetonRepriseCibleeApplique) return 'delai';
+    return null;
+}
+
+function _construireLigneProductionEvaluee(production, evaluation, indexArtefact) {
+    const statutRemise = evaluation.statutRemise || 'evalue';
+    const statutIntegrite = evaluation.statutIntegrite || 'recevable';
+    const estNonRemis = statutRemise === 'non-remis' || statutRemise === 'retard';
+    const estNonRecevable = statutIntegrite === 'plagiat' || statutIntegrite === 'ia';
+    return {
+        production: production.titre,
+        description: production.activiteApprentissage || production.description || production.titre,
+        note: `${evaluation.niveauFinal} ${evaluation.noteFinale}%`,
+        date: _calculerEcheanceFormateeProduction(production),
+        statut: estNonRemis ? 'non-remis' : 'evalue',
+        statutRemise: statutRemise,
+        statutIntegrite: statutIntegrite,
+        estNonRecevable: estNonRecevable,
+        verrouille: evaluation.verrouillee || false,
+        evaluationId: evaluation.id,
+        productionId: production.id,
+        badgeType: _determinerBadgeTypeEvaluation(evaluation),
+        indexArtefact: `P${indexArtefact}`
+    };
+}
+
+function _construireLigneProductionNonRemise(production, indexArtefact) {
+    return {
+        production: production.titre,
+        description: production.activiteApprentissage || production.description || production.titre,
+        note: null,
+        date: _calculerEcheanceFormateeProduction(production),
+        statut: 'non-evalue',
+        statutRemise: 'non-remis',
+        statutIntegrite: 'recevable',
+        estNonRecevable: false,
+        verrouille: false,
+        evaluationId: null,
+        productionId: production.id,
+        badgeType: null,
+        indexArtefact: `P${indexArtefact}`
+    };
+}
+
 /**
  * Génère la section Productions et évaluations pour un élève
  * Affiche un tableau similaire à celui de la liste des évaluations
@@ -2657,105 +2730,11 @@ function genererSectionProductions(da) {
 
     // Construire les lignes du tableau
     const lignes = productionsAEvaluer.map((production, index) => {
-        // Trouver l'évaluation ACTIVE (non remplacée) pour cette production
-        const evaluationsProduction = evaluationsEleve.filter(e => e.productionId === production.id);
-        let evaluation = null;
-        if (evaluationsProduction.length > 0) {
-            // PRIORITÉ 1 : Chercher une reprise ciblée active (jetonRepriseCibleeApplique ET non remplacée)
-            evaluation = evaluationsProduction.find(e => e.jetonRepriseCibleeApplique === true && !e.remplaceeParId);
-
-            // PRIORITÉ 2 : Chercher une reprise active (repriseDeId ET non remplacée)
-            if (!evaluation) {
-                evaluation = evaluationsProduction.find(e => e.repriseDeId && !e.remplaceeParId);
-            }
-
-            // PRIORITÉ 3 : Chercher l'évaluation normale non remplacée
-            if (!evaluation) {
-                evaluation = evaluationsProduction.find(e => !e.remplaceeParId);
-            }
-        }
+        const evaluation = _trouverEvaluationActive(evaluationsEleve, production.id);
         const indexArtefact = _rangsProductions[production.id] || (index + 1);
-
-        if (evaluation) {
-            // Production évaluée
-            // ✅ CORRECTIF (16 déc 2025) : Utiliser dateEcheance de la production, pas dateEvaluation
-            // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
-            const infoCoursProf = db.getSync('infoCours', null);
-            const gcIdProf = infoCoursProf ? (infoCoursProf._groupeCoursId || infoCoursProf.id || null) : null;
-            const echeanceProf = (typeof obtenirEcheanceEffective === 'function')
-                ? obtenirEcheanceEffective(production, gcIdProf).date
-                : production.dateEcheance;
-            // Note: +T12:00:00 évite le décalage de fuseau horaire (UTC vs local)
-            const dateEcheance = echeanceProf || '';
-            const dateFormatee = dateEcheance ? new Date(dateEcheance + 'T12:00:00').toLocaleDateString('fr-CA') : '—';
-
-            // Détecter les jetons appliqués
-            const estOriginaleRemplacee = evaluation.remplaceeParId ? true : false;
-            const estNouvelleReprise = evaluation.repriseDeId || evaluation.id.startsWith('EVAL_REPRISE_');
-            const estRepriseCiblee = evaluation.jetonRepriseCibleeApplique === true;
-            const aJetonDelai = evaluation.jetonDelaiApplique && !evaluation.repriseDeId && !evaluation.jetonRepriseCibleeApplique;
-
-            // Déterminer le type de badge
-            let badgeType = null;
-            if (estOriginaleRemplacee) {
-                badgeType = 'remplacee';
-            } else if (estRepriseCiblee) {
-                badgeType = 'reprise-ciblee';
-            } else if (estNouvelleReprise) {
-                badgeType = 'nouvelle-reprise';
-            } else if (aJetonDelai) {
-                badgeType = 'delai';
-            }
-
-            // Déterminer le statut final basé sur statutRemise (priorité)
-            const statutRemise = evaluation.statutRemise || 'evalue';
-            const statutIntegrite = evaluation.statutIntegrite || 'recevable';
-            const estNonRemis = statutRemise === 'non-remis' || statutRemise === 'retard';
-            const estNonRecevable = statutIntegrite === 'plagiat' || statutIntegrite === 'ia';
-
-            return {
-                production: production.titre,
-                description: production.activiteApprentissage || production.description || production.titre,
-                note: `${evaluation.niveauFinal} ${evaluation.noteFinale}%`,
-                date: dateFormatee,
-                statut: estNonRemis ? 'non-remis' : 'evalue',
-                statutRemise: statutRemise,
-                statutIntegrite: statutIntegrite,
-                estNonRecevable: estNonRecevable,
-                verrouille: evaluation.verrouillee || false,
-                evaluationId: evaluation.id,
-                productionId: production.id,
-                badgeType: badgeType,
-                indexArtefact: `P${indexArtefact}`
-            };
-        } else {
-            // Production non remise
-            // ✅ CORRECTIF (16 déc 2025) : Afficher dateEcheance même si non évaluée
-            // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
-            const infoCoursNonEval = db.getSync('infoCours', null);
-            const gcIdNonEval = infoCoursNonEval ? (infoCoursNonEval._groupeCoursId || infoCoursNonEval.id || null) : null;
-            const echeanceNonEval = (typeof obtenirEcheanceEffective === 'function')
-                ? obtenirEcheanceEffective(production, gcIdNonEval).date
-                : production.dateEcheance;
-            // Note: +T12:00:00 évite le décalage de fuseau horaire (UTC vs local)
-            const dateEcheance = echeanceNonEval || '';
-            const dateFormateeNonEval = dateEcheance ? new Date(dateEcheance + 'T12:00:00').toLocaleDateString('fr-CA') : '—';
-            return {
-                production: production.titre,
-                description: production.activiteApprentissage || production.description || production.titre,
-                note: null,
-                date: dateFormateeNonEval,
-                statut: 'non-evalue',
-                statutRemise: 'non-remis',
-                statutIntegrite: 'recevable',
-                estNonRecevable: false,
-                verrouille: false,
-                evaluationId: null,
-                productionId: production.id,
-                badgeType: null,
-                indexArtefact: `P${indexArtefact}`
-            };
-        }
+        return evaluation
+            ? _construireLigneProductionEvaluee(production, evaluation, indexArtefact)
+            : _construireLigneProductionNonRemise(production, indexArtefact);
     });
 
     // Calculer les détails de la note finale de session
