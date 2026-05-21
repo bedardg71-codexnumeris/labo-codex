@@ -1,30 +1,33 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 18 mai 2026 post-étape-4)
+     IDENTIFICATION DE CE FICHIER  (mis à jour 21 mai 2026 post-étape-6)
      Ce SESSION.md vit sur la branche `refactor/evaluation` (worktree
-     `Monitorage_v6-evaluation`). Relai entre étape 4 LIVRÉE (6 monstres
-     cyc 55-78 éclatés + fix #109) et étape 5 (validation manuelle Grégoire
-     Safari Mac sombre+clair sur 6 cas-tests utilisateur).
+     `Monitorage_v6-evaluation`). Refactor TERMINÉ — étape 6 livrée le
+     21 mai 2026 : capitalisation MODULES-MAP §2.1 + METHODE §7 + 5
+     mémoires feedback + bump version 99.48 → 99.61 b0521-0840.
+     Merge FF refactor/evaluation → main + tag refactor-evaluation-2026-05-21.
+     Le worktree peut être supprimé après le merge (cf. profil-etudiant /
+     trimestre-v2 / productions / bilan-reflexif).
      ===================================================================== -->
 
 > **📌 Identification**
 > - **Chemin** : `Monitorage_v6-evaluation/SESSION.md` (worktree)
-> - **Branche** : `refactor/evaluation` (15 commits locaux non-pushés depuis `b4c0dae` — 9 session A+B + 1 fix #109 + 6 éclatements étape 4)
-> - **Rôle** : relai entre étape 4 LIVRÉE COMPLÈTE et étape 5 (validation manuelle Grégoire). Lu par la prochaine instance Claude au démarrage.
+> - **Branche** : `refactor/evaluation` (TERMINÉE — mergée FF sur `main` le 21 mai 2026, tag `refactor-evaluation-2026-05-21`)
+> - **Rôle** : archive historique du refactor evaluation.js (5e et dernier god module PLAN-MOYEN-TERME §4.5)
 
-# SESSION — État au 18 mai 2026 (refactor evaluation.js — Étape 4 LIVRÉE 6/6 éclatements)
+# SESSION — État au 21 mai 2026 (refactor evaluation.js — TERMINÉ, étapes 1→6 LIVRÉES)
 
-**Beta / build** : 99.48 / 0518-1040 (bumpé fin étape 4)
-**Branche `refactor/evaluation`** : HEAD à venir après bump (commit 327d3db = dernier éclatement)
-**Commits cumulés depuis la base `b4c0dae`** : **16** (9 session A+B + fix #109 + 6 éclatements + bump build)
+**Beta / build** : 99.61 / 0521-0840 (bumpé étape 6 capitalisation)
+**Branche `refactor/evaluation`** : 19 commits cumulés depuis la base `b4c0dae` (9 session A+B + 1 fix #109 + 6 éclatements étape 4 + bump 99.48 + 4 commits capitalisation/bump étape 6)
+**Merge** : FF sur `main`, tag `refactor-evaluation-2026-05-21`.
 
-**Tests** : 77 Vitest + 12 Playwright = **89/89 verts** (sentinelles élargies à 6 modules).
+**Tests** : 77 Vitest + 12 Playwright = **89/89 verts** à chaque jalon.
 
-**Statut global** :
+**Statut global — REFACTOR TERMINÉ** :
 - Étapes 0+1+2 livrées session A (worktree + baseline + 9 écarts MODULES-MAP §2.1 + canari/sentinelle)
-- Étape 3 LIVRÉE COMPLÈTE session A+B (5 sous-modules extraits — 2 session A + 3 session B)
-- **Étape 4 LIVRÉE COMPLÈTE** (1 fix #109 + 6 monstres cyc 55-78 éclatés sous N=50 acté avec Grégoire)
-- **Étape 5 à faire** (validation manuelle Grégoire Safari Mac sombre+clair sur 6 cas-tests)
-- Étape 6 à faire (capitalisation + merge FF + push origin + tag)
+- Étape 3 LIVRÉE COMPLÈTE session A+B (5 sous-modules extraits — 2 session A + 3 session B + 1 ajout `-jetons.js`)
+- Étape 4 LIVRÉE COMPLÈTE (1 fix #109 + 6 monstres cyc 55-78 éclatés sous N=50 acté avec Grégoire)
+- **Étape 5 LIVRÉE 21 mai** — validation manuelle Grégoire OK 13 évaluations sans problème majeur sur Safari Mac.
+- **Étape 6 LIVRÉE 21 mai** — capitalisation MODULES-MAP §2.1 (rétrospective post-refactoring) + METHODE §7 entrée `evaluation.js` (+ historique révisions) + 5 mémoires feedback + bump 99.48 → 99.61 b0521-0840 + SUIVI-BUGS build #109 renseigné + merge FF → `main` + tag `refactor-evaluation-2026-05-21` + push origin.
 
 ---
 
