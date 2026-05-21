@@ -1,7 +1,7 @@
 # Suivi des bugs testeurs
 
 > **Objectif** : Tracker les bugs rapportés par les testeurs pour éviter le travail en double.
-> **Dernière mise à jour** : 18 mai 2026 (#109 _timerAutoSave promotion window.X CORRIGÉ — refactor evaluation étape 4 ; +2 bugs latents refactor evaluation session A étape 3 — #107 initialiserModuleEvaluation dead code silencieux + #108 chargerEchellePerformance doublon cross-module ; +2 bugs latents refactor profil-etudiant sessions B+D — #105 chargerProfilEtudiant + #106 progression&&progressionVisible)
+> **Dernière mise à jour** : 21 mai 2026 (validation manuelle Grégoire OK — 13 évaluations sans problème majeur ; refactor evaluation étape 5 LIVRÉE → étape 6 capitalisation + merge FF en cours ; build #109 corrigé renseigné `0521-0840`)
 
 ---
 
@@ -29,7 +29,7 @@
 
 | # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
 |---|---------|--------------|---------|-------|-------------|------------|
-| 109 | Claude (refactor evaluation session B 3e sous-module — audit pivot pré-extraction) | 18 mai 2026 | 18 mai 2026 | (à bumper en fin de session) | ReferenceError au runtime de `sauvegarderEvaluation` — `_timerAutoSave` et `_pendingAutoSaveSnapshot` déclarés `let` privés IIFE dans `evaluation-chargement.js` L1086-1087 (anti-pattern §5.10 session A) — bare references cross-IIFE jetaient ReferenceError au runtime à 4+ sites résidu/sauvegarde | Promotion `window._timerAutoSave` + `window._pendingAutoSaveSnapshot` dans evaluation-chargement.js (L1086-1087 — drop `let`, écriture directe sur window). Patches §5.6 sur **les 11 sites internes** chargement.js (`_debouncerAutoSave`, `_flusherAutoSave`, `_autoSauvegarderCriteres`) **+ 3 sites cross-IIFE résidu evaluation.js** (`nouvelleEvaluation` L140, `modifierEvaluation` L2115, `sauvegarderEvaluationModifiee` L2409-2410) **+ 1 site cross-IIFE evaluation-sauvegarde.js** (`sauvegarderEvaluation` L153-154). Source unique de vérité, plus de dual-scope. 89/89 tests verts. |
+| 109 | Claude (refactor evaluation session B 3e sous-module — audit pivot pré-extraction) | 18 mai 2026 | 18 mai 2026 | 0521-0840 (99.61) | ReferenceError au runtime de `sauvegarderEvaluation` — `_timerAutoSave` et `_pendingAutoSaveSnapshot` déclarés `let` privés IIFE dans `evaluation-chargement.js` L1086-1087 (anti-pattern §5.10 session A) — bare references cross-IIFE jetaient ReferenceError au runtime à 4+ sites résidu/sauvegarde | Promotion `window._timerAutoSave` + `window._pendingAutoSaveSnapshot` dans evaluation-chargement.js (L1086-1087 — drop `let`, écriture directe sur window). Patches §5.6 sur **les 11 sites internes** chargement.js (`_debouncerAutoSave`, `_flusherAutoSave`, `_autoSauvegarderCriteres`) **+ 3 sites cross-IIFE résidu evaluation.js** (`nouvelleEvaluation` L140, `modifierEvaluation` L2115, `sauvegarderEvaluationModifiee` L2409-2410) **+ 1 site cross-IIFE evaluation-sauvegarde.js** (`sauvegarderEvaluation` L153-154). Source unique de vérité, plus de dual-scope. 89/89 tests verts. |
 
 ---
 
