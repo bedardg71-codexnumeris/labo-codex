@@ -60,12 +60,9 @@
        #4 §2.1 session A). Pré-peuplé dans le test sandbox via le
        fauxDocument du helper chargerScript.
 
-   Patches §5.6 appliqués DANS ce sous-module :
-     · 2 sites `afficherNotificationSucces(...)` → `_notifSucces(...)`
-       wrapper local (copierRetroaction L1362 + copierToutRetroaction
-       L1720). Pattern profil-etudiant — wrappers dupliqués dans chaque
-       sous-module au lieu de §5.6 vers une consolidation utils-
-       notifications.js (toujours reportée, 73 sites cross-projet).
+   Migration Cat-B Track 4 chantier E (21 mai 2026) :
+     · 2 sites `_notifSucces(...)` → `notifications.succes(...)` (API
+       unifiée utils-notifications.js). Wrapper local `_notifSucces` retiré.
 
    Helpers cross-module consommés (script-scope globaux, bare access OK) :
      · evaluationEnCours (let global config.js L145)
@@ -97,14 +94,6 @@
 
 (function() {
 'use strict';
-
-// Wrapper notification local (§5.6 pattern profil-etudiant — duplication
-// préférée à consolidation utils-notifications.js, toujours reportée).
-function _notifSucces(message) {
-    if (typeof window.afficherNotificationSucces === 'function') {
-        window.afficherNotificationSucces(message);
-    }
-}
 
 /**
  * Génère la rétroaction finale automatiquement
@@ -386,7 +375,7 @@ function copierRetroaction(num) {
     }
 
     navigator.clipboard.writeText(texte.trim()).then(function() {
-        _notifSucces('Rétroaction copiée dans le presse-papier !');
+        notifications.succes('Rétroaction copiée dans le presse-papier !');
     }).catch(function(err) {
         console.error('Erreur de copie:', err);
         alert('Erreur lors de la copie. Utilise Cmd+A puis Cmd+C manuellement.');
@@ -782,7 +771,7 @@ function copierToutRetroaction() {
     }
 
     navigator.clipboard.writeText(texteComplet).then(function() {
-        _notifSucces('Rétroaction complète copiée (générale + spécifique + bilan) !');
+        notifications.succes('Rétroaction complète copiée (générale + spécifique + bilan) !');
     }).catch(function(err) {
         console.error('Erreur de copie:', err);
         alert('Erreur lors de la copie.');

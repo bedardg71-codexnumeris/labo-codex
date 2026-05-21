@@ -151,17 +151,17 @@ function _lireEntreesFormulaireSauv() {
 
 function _validerReferencesSauv(etudiant, production, grille, etudiantDA, productionId, grilleId) {
     if (!etudiant) {
-        afficherNotificationErreur('Étudiant introuvable', `L'étudiant ${etudiantDA} n'existe pas dans le groupe actif.`);
+        notifications.erreur('Étudiant introuvable', `L'étudiant ${etudiantDA} n'existe pas dans le groupe actif.`);
         console.error('[Évaluation] ❌ Référence invalide: etudiantDA', etudiantDA);
         return false;
     }
     if (!production) {
-        afficherNotificationErreur('Production introuvable', `La production sélectionnée n'existe plus.`);
+        notifications.erreur('Production introuvable', `La production sélectionnée n'existe plus.`);
         console.error('[Évaluation] ❌ Référence invalide: productionId', productionId);
         return false;
     }
     if (!grille) {
-        afficherNotificationErreur('Grille introuvable', `La grille de critères sélectionnée n'existe plus.`);
+        notifications.erreur('Grille introuvable', `La grille de critères sélectionnée n'existe plus.`);
         console.error('[Évaluation] ❌ Référence invalide: grilleId', grilleId);
         return false;
     }
@@ -175,7 +175,7 @@ function _validerReferencesNonDemoSauv(productionId, grilleId) {
         { id: grilleId, collection: 'grillesTemplates', labelType: 'grille' }
     ]);
     if (violationDemo) {
-        afficherNotificationErreur('Référence démo non autorisée', violationDemo.message);
+        notifications.erreur('Référence démo non autorisée', violationDemo.message);
         return false;
     }
     return true;
@@ -270,7 +270,7 @@ function _appliquerJetonDelaiSiCocheSauv(evaluation, etudiantDA, maintenant) {
         checkboxDelai.checked = false;
         const config = obtenirConfigJetons();
         const utilises = compterJetonsUtilises(etudiantDA, 'delai');
-        afficherNotificationErreur(
+        notifications.erreur(
             'Jetons épuisés',
             `Plus de jetons de délai disponibles (${utilises}/${config.delai.nombre} utilisés)`
         );
@@ -288,17 +288,17 @@ function _basculerEnModificationActiveSauv(existanteActive) {
 
 function _gererErreurPersistanceSauv(resultatSauvegarde) {
     if (resultatSauvegarde === 'quota') {
-        afficherNotificationErreur(
+        notifications.erreur(
             'Espace de stockage insuffisant',
             'Le quota de stockage du navigateur est dépassé. Exporte tes données (Réglages → Gestion des données) puis supprime des évaluations anciennes.'
         );
     } else if (resultatSauvegarde === false) {
-        afficherNotificationErreur(
+        notifications.erreur(
             'Modification impossible',
             'Les modifications sont impossibles en mode Anonymisé. Passe en mode Normal pour sauvegarder.'
         );
     } else {
-        afficherNotificationErreur(
+        notifications.erreur(
             'Erreur de sauvegarde',
             'Une erreur inattendue s\'est produite. Consulte la console pour plus de détails.'
         );
@@ -327,7 +327,7 @@ function _postSauvegardeSauv(evaluation, groupeCoursActif) {
     window._moyennesQualifies = null;
     window._moyennesToutes = null;
 
-    afficherNotificationSucces(`Évaluation sauvegardée : ${evaluation.etudiantNom} - ${evaluation.productionNom}`);
+    notifications.succes(`Évaluation sauvegardée : ${evaluation.etudiantNom} - ${evaluation.productionNom}`);
 
     if (typeof travauxUI !== 'undefined' && travauxUI.arreterChrono) {
         travauxUI.arreterChrono();
@@ -846,7 +846,7 @@ function gererChangementCheckboxJetonReprise() {
     if (!evaluationId) {
         console.warn('⚠️ Jeton de reprise : Impossible d\'appliquer sur une nouvelle évaluation (pas encore sauvegardée)');
         checkbox.checked = false;
-        afficherNotificationErreur('Erreur', 'Veuillez d\'abord sauvegarder l\'évaluation avant d\'appliquer un jeton');
+        notifications.erreur('Erreur', 'Veuillez d\'abord sauvegarder l\'évaluation avant d\'appliquer un jeton');
         return;
     }
 
@@ -891,7 +891,7 @@ function gererChangementCheckboxJetonRepriseCiblee() {
     if (!evaluationId) {
         console.warn('⚠️ Jeton de reprise ciblée : Impossible d\'appliquer sur une nouvelle évaluation (pas encore sauvegardée)');
         checkbox.checked = false;
-        afficherNotificationErreur('Erreur', 'Veuillez d\'abord sauvegarder l\'évaluation avant d\'appliquer un jeton');
+        notifications.erreur('Erreur', 'Veuillez d\'abord sauvegarder l\'évaluation avant d\'appliquer un jeton');
         return;
     }
 
@@ -920,7 +920,7 @@ function gererChangementCheckboxJetonRepriseCiblee() {
                 }
             } else {
                 console.error('❌ Fonction appliquerJetonRepriseCiblee non disponible');
-                afficherNotificationErreur('Erreur', 'Module jetons non disponible');
+                notifications.erreur('Erreur', 'Module jetons non disponible');
                 checkbox.checked = false;
             }
         } else {
@@ -945,7 +945,7 @@ function retirerJetonDepuisSidebar(evaluationId, typeJeton) {
             retirerJetonReprise(evaluationId);
         } else {
             console.error('❌ Fonction retirerJetonReprise non disponible');
-            afficherNotificationErreur('Erreur', 'Module jetons non disponible');
+            notifications.erreur('Erreur', 'Module jetons non disponible');
         }
     } else if (typeJeton === 'delai') {
         // Utiliser le module evaluation-jetons.js pour retirer le jeton de délai
@@ -958,7 +958,7 @@ function retirerJetonDepuisSidebar(evaluationId, typeJeton) {
             }
         } else {
             console.error('❌ Fonction retirerJetonDelai non disponible');
-            afficherNotificationErreur('Erreur', 'Module jetons non disponible');
+            notifications.erreur('Erreur', 'Module jetons non disponible');
         }
     }
 }

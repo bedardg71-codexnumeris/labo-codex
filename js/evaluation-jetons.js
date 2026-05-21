@@ -134,7 +134,7 @@ function appliquerJetonDelai(evaluationId) {
     const evaluation = evaluations.find(e => e.id === evaluationId);
 
     if (!evaluation) {
-        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        notifications.erreur('Erreur', 'Évaluation introuvable');
         return false;
     }
 
@@ -143,7 +143,7 @@ function appliquerJetonDelai(evaluationId) {
     if (!verifierDisponibiliteJeton(da, 'delai')) {
         const config = obtenirConfigJetons();
         const utilises = compterJetonsUtilises(da, 'delai');
-        afficherNotificationErreur(
+        notifications.erreur(
             'Jetons épuisés',
             `Plus de jetons de délai disponibles (${utilises}/${config.delai.nombre} utilisés)`
         );
@@ -152,7 +152,7 @@ function appliquerJetonDelai(evaluationId) {
 
     // Vérifier qu'il n'y a pas déjà un jeton de reprise
     if (evaluation.repriseDeId || evaluation.remplaceeParId) {
-        afficherNotificationErreur('Conflit', 'Cette évaluation a déjà un jeton de reprise');
+        notifications.erreur('Conflit', 'Cette évaluation a déjà un jeton de reprise');
         return false;
     }
 
@@ -199,7 +199,7 @@ function appliquerJetonDelai(evaluationId) {
         setTimeout(() => initialiserListeEvaluations(), 150);
     }
 
-    afficherNotificationSucces('Jeton de délai appliqué');
+    notifications.succes('Jeton de délai appliqué');
     return true;
 }
 
@@ -215,7 +215,7 @@ function retirerJetonDelai(evaluationId) {
     const evaluation = evaluations.find(e => e.id === evaluationId);
 
     if (!evaluation) {
-        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        notifications.erreur('Erreur', 'Évaluation introuvable');
         return false;
     }
 
@@ -251,7 +251,7 @@ function retirerJetonDelai(evaluationId) {
         setTimeout(() => initialiserListeEvaluations(), 150);
     }
 
-    afficherNotificationSucces('Jeton de délai retiré');
+    notifications.succes('Jeton de délai retiré');
     return true;
 }
 
@@ -277,7 +277,7 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale, options
     const indexOriginal = evaluations.findIndex(e => e.id === evaluationOriginaleId);
 
     if (indexOriginal === -1) {
-        if (!silencieux) afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        if (!silencieux) notifications.erreur('Erreur', 'Évaluation introuvable');
         return null;
     }
 
@@ -288,7 +288,7 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale, options
     if (!verifierDisponibiliteJeton(da, 'reprise')) {
         const config = obtenirConfigJetons();
         const utilises = compterJetonsUtilises(da, 'reprise');
-        if (!silencieux) afficherNotificationErreur(
+        if (!silencieux) notifications.erreur(
             'Jetons épuisés',
             'Plus de jetons de reprise disponibles (' + utilises + '/' + config.reprise.nombre + ' utilisés)'
         );
@@ -307,7 +307,7 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale, options
     ).length;
 
     if (reprisesExistantes >= config.reprise.maxParProduction) {
-        if (!silencieux) afficherNotificationErreur(
+        if (!silencieux) notifications.erreur(
             'Limite atteinte',
             'Maximum de reprises atteint pour cette production (' + reprisesExistantes + '/' + config.reprise.maxParProduction + ')'
         );
@@ -379,7 +379,7 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale, options
         setTimeout(() => initialiserListeEvaluations(), 150);
     }
 
-    if (!silencieux) afficherNotificationSucces('Jeton de reprise appliqué (' + (archiverOriginale ? 'originale archivée' : 'originale supprimée') + ')');
+    if (!silencieux) notifications.succes('Jeton de reprise appliqué (' + (archiverOriginale ? 'originale archivée' : 'originale supprimée') + ')');
     return nouvelleEvaluation;
 }
 
@@ -397,7 +397,7 @@ function retirerJetonReprise(evaluationId) {
     const indexReprise = evaluations.findIndex(e => e.id === evaluationId);
 
     if (indexReprise === -1) {
-        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        notifications.erreur('Erreur', 'Évaluation introuvable');
         return false;
     }
 
@@ -431,7 +431,7 @@ function retirerJetonReprise(evaluationId) {
 
             // L'originale reste archivée (ne rien changer)
 
-            afficherNotificationSucces('Reprise conservée, originale archivée');
+            notifications.succes('Reprise conservée, originale archivée');
         } else {
             // Supprimer la reprise, restaurer l'originale
 
@@ -444,7 +444,7 @@ function retirerJetonReprise(evaluationId) {
             // Supprimer la reprise
             evaluations.splice(indexReprise, 1);
 
-            afficherNotificationSucces('Reprise supprimée, originale restaurée');
+            notifications.succes('Reprise supprimée, originale restaurée');
 
             // Recharger l'originale
             if (window.evaluationEnCours?.idModification === evaluationId) {
@@ -461,7 +461,7 @@ function retirerJetonReprise(evaluationId) {
         delete evaluationReprise.jetonRepriseApplique;
         delete evaluationReprise.dateApplicationJetonReprise;
 
-        afficherNotificationSucces('Jeton de reprise retiré');
+        notifications.succes('Jeton de reprise retiré');
     }
 
     // Sauvegarder via sauvegarderDonneesSelonMode (bloque en mode anonymisation)
@@ -682,7 +682,7 @@ function appliquerJetonRepriseCiblee(evaluationOriginaleId, critereId = null, ar
     const indexOriginal = evaluations.findIndex(e => e.id === evaluationOriginaleId);
 
     if (indexOriginal === -1) {
-        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        notifications.erreur('Erreur', 'Évaluation introuvable');
         return null;
     }
 
@@ -697,7 +697,7 @@ function appliquerJetonRepriseCiblee(evaluationOriginaleId, critereId = null, ar
     const configRepriseCiblee = configPAN.jetons?.repriseCiblee || {};
 
     if (!configRepriseCiblee.actif) {
-        afficherNotificationErreur('Fonction désactivée', 'Les jetons de reprise ciblée sont désactivés');
+        notifications.erreur('Fonction désactivée', 'Les jetons de reprise ciblée sont désactivés');
         return null;
     }
 
@@ -771,7 +771,7 @@ function appliquerJetonRepriseCiblee(evaluationOriginaleId, critereId = null, ar
         setTimeout(() => initialiserListeEvaluations(), 150);
     }
 
-    afficherNotificationSucces(`Jeton de reprise ciblée appliqué (${archiverOriginale ? 'originale archivée' : 'originale supprimée'})`);
+    notifications.succes(`Jeton de reprise ciblée appliqué (${archiverOriginale ? 'originale archivée' : 'originale supprimée'})`);
     return nouvelleEvaluation;
 }
 
