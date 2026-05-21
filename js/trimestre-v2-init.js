@@ -20,28 +20,6 @@
 (function() {
 'use strict';
 
-// Wrappers défensifs notifications — duplication assumée (cf. autres sous-modules).
-function afficherNotificationSucces(message, details) {
-    if (typeof window.afficherNotificationSucces === 'function') {
-        window.afficherNotificationSucces(message, details);
-    }
-}
-
-function afficherNotificationErreur(message, details) {
-    if (typeof window.afficherNotificationErreur === 'function') {
-        window.afficherNotificationErreur(message, details);
-    } else {
-        console.warn('[Trimestre V2 Init] Erreur :', message, details || '');
-    }
-}
-
-// Wrapper défensif pour afficherNotification (sans suffixe) défini dans js/trimestre.js
-function afficherNotification(message, details) {
-    if (typeof window.afficherNotification === 'function') {
-        window.afficherNotification(message, details);
-    }
-}
-
 /* ===============================
    INITIALISATION
    =============================== */
@@ -298,7 +276,7 @@ function sauvegarderCadreCalendrierV2() {
 
     if (manquants.length > 0) {
         const details = manquants.map(c => '• ' + c.label).join('\n');
-        afficherNotificationErreur(
+        notifications.erreur(
             'Dates obligatoires manquantes',
             'Renseigne ces champs avant de continuer :\n' + details
         );
@@ -324,7 +302,7 @@ function sauvegarderCadreCalendrierV2() {
 
     // Notification
     if (typeof afficherNotification === 'function') {
-        afficherNotification('Cadre du trimestre sauvegardé');
+        notifications.succes('Cadre du trimestre sauvegardé');
     }
 }
 
@@ -368,7 +346,7 @@ function reinitialiserBornesTrimestreV2() {
 
     // Notification
     if (typeof afficherNotification === 'function') {
-        afficherNotification('Bornes du trimestre réinitialisées');
+        notifications.succes('Bornes du trimestre réinitialisées');
     }
 }
 
@@ -403,7 +381,7 @@ function reinitialiserSemainesSpecialesV2() {
 
     // Notification
     if (typeof afficherNotification === 'function') {
-        afficherNotification('Semaines spéciales réinitialisées');
+        notifications.succes('Semaines spéciales réinitialisées');
     }
 }
 
@@ -746,7 +724,7 @@ function confirmerEvenementPrevuV2() {
     window.afficherStatistiquesTrimestreV2();
 
     if (typeof afficherNotification === 'function') {
-        afficherNotification(evenementPrevuEnEditionV2 ? 'Événement modifié' : 'Événement ajouté');
+        notifications.succes(evenementPrevuEnEditionV2 ? 'Événement modifié' : 'Événement ajouté');
     }
     evenementPrevuEnEditionV2 = null;
 }
@@ -828,7 +806,7 @@ function confirmerEvenementImprevuV2() {
     window.afficherStatistiquesTrimestreV2();
 
     if (typeof afficherNotification === 'function') {
-        afficherNotification(evenementImprevuEnEditionV2 ? 'Événement modifié' : 'Événement ajouté');
+        notifications.succes(evenementImprevuEnEditionV2 ? 'Événement modifié' : 'Événement ajouté');
     }
     evenementImprevuEnEditionV2 = null;
 }
@@ -870,7 +848,7 @@ function supprimerEvenementV2(id, type) {
     window.afficherStatistiquesTrimestreV2();
 
     if (typeof afficherNotification === 'function') {
-        afficherNotification('Événement supprimé');
+        notifications.succes('Événement supprimé');
     }
 }
 

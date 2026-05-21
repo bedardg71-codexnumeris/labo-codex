@@ -40,21 +40,6 @@
     post-refactor — voir SESSION.md L78.)
    =============================== */
 
-function afficherNotificationSucces(message, details) {
-    if (typeof window.afficherNotificationSucces === 'function') {
-        window.afficherNotificationSucces(message, details);
-    } else {
-    }
-}
-
-function afficherNotificationErreur(message, details) {
-    if (typeof window.afficherNotificationErreur === 'function') {
-        window.afficherNotificationErreur(message, details);
-    } else {
-        console.warn('[Trimestre V2 orchestre] Erreur :', message, details || '');
-    }
-}
-
 let enseignantEnEditionUI = null;
 
 /**
@@ -317,7 +302,7 @@ function _rafraichirVuesContextDependantes(valeurHeader, messageNotification, re
     }
 
     if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(messageNotification);
+        notifications.succes(messageNotification);
     }
 
     // Mode GROUPE-COURS uniquement : régénérer le calendrier avec les bons jours

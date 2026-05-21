@@ -18,23 +18,6 @@
 (function() {
 'use strict';
 
-// Wrappers défensifs notifications — duplication assumée (consolidation
-// `utils-notifications.js` reportée à un chantier post-refactor pour éviter
-// de modifier les 73 sites d'appel dans trimestre-v2.js pendant la session A).
-function afficherNotificationSucces(message, details) {
-    if (typeof window.afficherNotificationSucces === 'function') {
-        window.afficherNotificationSucces(message, details);
-    }
-}
-
-function afficherNotificationErreur(message, details) {
-    if (typeof window.afficherNotificationErreur === 'function') {
-        window.afficherNotificationErreur(message, details);
-    } else {
-        console.warn('[Trimestre V2 Enseignants] Erreur :', message, details || '');
-    }
-}
-
 function chargerProfilEnseignantV2() {
     // Migration: copier profilEnseignant vers enseignants si nécessaire
     const profilAncien = db.getSync('profilEnseignant', null);
@@ -217,15 +200,15 @@ async function sauvegarderEnseignantV2() {
 
     // Validation
     if (!prenom || !nom) {
-        afficherNotificationErreur('Le prénom et le nom sont requis');
+        notifications.erreur('Le prénom et le nom sont requis');
         return;
     }
     if (!courriel) {
-        afficherNotificationErreur('Le courriel est requis');
+        notifications.erreur('Le courriel est requis');
         return;
     }
     if (!institution) {
-        afficherNotificationErreur('L\'institution est requise');
+        notifications.erreur('L\'institution est requise');
         return;
     }
 
@@ -247,7 +230,7 @@ async function sauvegarderEnseignantV2() {
         if (index >= 0) {
             enseignants[index] = { ...enseignants[index], ...profil };
         }
-        afficherNotificationSucces('Profil enseignant modifié');
+        notifications.succes('Profil enseignant modifié');
     } else {
         // Nouveau profil
         const nouveauProfil = {
@@ -257,7 +240,7 @@ async function sauvegarderEnseignantV2() {
         };
         enseignants.push(nouveauProfil);
         enseignantEnEditionId = nouveauProfil.id;
-        afficherNotificationSucces('Profil enseignant créé');
+        notifications.succes('Profil enseignant créé');
     }
 
     db.setSync('enseignants', enseignants);
@@ -285,7 +268,7 @@ function annulerFormEnseignantV2() {
     } else {
         viderFormulaireEnseignantV2();
     }
-    afficherNotificationSucces('Modifications annulées');
+    notifications.succes('Modifications annulées');
 }
 
 /**
@@ -293,7 +276,7 @@ function annulerFormEnseignantV2() {
  */
 async function supprimerProfilEnseignantV2() {
     if (!enseignantEnEditionId) {
-        afficherNotificationErreur('Aucun profil sélectionné');
+        notifications.erreur('Aucun profil sélectionné');
         return;
     }
 
@@ -301,7 +284,7 @@ async function supprimerProfilEnseignantV2() {
     const enseignant = enseignants.find(e => e.id === enseignantEnEditionId);
 
     if (!enseignant) {
-        afficherNotificationErreur('Profil non trouvé');
+        notifications.erreur('Profil non trouvé');
         return;
     }
 
@@ -331,7 +314,7 @@ async function supprimerProfilEnseignantV2() {
     const titre = document.getElementById('v2-titreFormEnseignant');
     if (titre) titre.textContent = 'Nouveau profil';
 
-    afficherNotificationSucces('Profil enseignant supprimé');
+    notifications.succes('Profil enseignant supprimé');
 }
 
 // Exports globaux

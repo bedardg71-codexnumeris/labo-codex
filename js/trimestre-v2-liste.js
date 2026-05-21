@@ -17,21 +17,6 @@
 (function() {
 'use strict';
 
-// Wrappers défensifs notifications — duplication assumée (cf. autres sous-modules).
-function afficherNotificationSucces(message, details) {
-    if (typeof window.afficherNotificationSucces === 'function') {
-        window.afficherNotificationSucces(message, details);
-    }
-}
-
-function afficherNotificationErreur(message, details) {
-    if (typeof window.afficherNotificationErreur === 'function') {
-        window.afficherNotificationErreur(message, details);
-    } else {
-        console.warn('[Trimestre V2 Liste] Erreur :', message, details || '');
-    }
-}
-
 /* ===============================
    DROPDOWN TRIMESTRE
    =============================== */
