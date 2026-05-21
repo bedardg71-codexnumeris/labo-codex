@@ -75,11 +75,7 @@ function _notifErreur(titre, msg) {
 }
 
 function _notifAvertissement(titre, msg) {
-    if (typeof window.afficherNotification === 'function') {
-        window.afficherNotification(titre + ' — ' + msg, 'warning');
-    } else {
-        console.warn('[LaboCodexData]', titre, '—', msg);
-    }
+    notifications.info(titre, msg);
 }
 
 /* ===============================

@@ -237,7 +237,7 @@ function sauvegarderCadreCalendrier() {
     genererCalendrierComplet();
     afficherStatistiquesTrimestre();
 
-    afficherNotification('Bornes du trimestre sauvegardées');
+    notifications.succes('Bornes du trimestre sauvegardées');
 }
 
 /* ===============================
@@ -428,7 +428,7 @@ function confirmerAjoutEvenement() {
     chargerEvenementsPrevus();
     afficherStatistiquesTrimestre();
     annulerFormEvenement();
-    afficherNotification(editId ? 'Événement modifié' : 'Événement ajouté');
+    notifications.succes(editId ? 'Événement modifié' : 'Événement ajouté');
 }
 
 function supprimerEvenement(id, type) {
@@ -448,7 +448,7 @@ function supprimerEvenement(id, type) {
         chargerEvenementsImprevus();
     }
     afficherStatistiquesTrimestre();
-    afficherNotification('Événement supprimé');
+    notifications.succes('Événement supprimé');
 }
 
 /**
@@ -539,7 +539,7 @@ function sauvegarderEditionEnPlace(id, type) {
             chargerEvenementsImprevus();
         }
         afficherStatistiquesTrimestre();
-        afficherNotification('Événement modifié');
+        notifications.succes('Événement modifié');
     }
 }
 
@@ -729,7 +729,7 @@ function confirmerAjoutEvenementImprevu() {
     chargerEvenementsImprevus();
     afficherStatistiquesTrimestre();
     annulerFormEvenementImprevu();
-    afficherNotification(editId ? 'Événement imprévu modifié' : 'Événement imprévu ajouté');
+    notifications.succes(editId ? 'Événement imprévu modifié' : 'Événement imprévu ajouté');
 }
 
 /* ===============================
@@ -1015,27 +1015,6 @@ function estDansPlage(date, debut, fin) {
     return date >= debut && date <= fin;
 }
 
-function afficherNotification(message, details = '') {
-
-    // Créer l'élément de notification
-    const notification = document.createElement('div');
-    notification.className = 'notification-succes';
-    notification.innerHTML = `
-        <div>${message}</div>
-        ${details ? `<div class="notification-details">${details}</div>` : ''}
-    `;
-
-    // Ajouter au body
-    document.body.appendChild(notification);
-
-    // Supprimer après 3 secondes
-    setTimeout(() => {
-        notification.style.opacity = '0';
-        notification.style.transform = 'translateX(400px)';
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
-}
-
 /* ===============================
    FONCTIONS UI (formulaires)
    =============================== */
@@ -1257,9 +1236,5 @@ window.annulerFormEvenementImprevu = annulerFormEvenementImprevu;
 window.majAffichageRepriseFormPrevu = majAffichageRepriseFormPrevu;
 window.majAffichageRepriseFormImprevu = majAffichageRepriseFormImprevu;
 window.majAffichageRepriseEditionEnPlace = majAffichageRepriseEditionEnPlace;
-
-// Exports utilitaires (utilisés par d'autres modules)
-window.afficherNotification = afficherNotification;
-
 
 })();

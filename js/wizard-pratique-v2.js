@@ -1941,7 +1941,7 @@ function validerEtape(etapeId) {
         const message = champsInvalides.length > 0
             ? `Veuillez remplir: ${champsInvalides.join(', ')}`
             : 'Veuillez remplir tous les champs obligatoires.';
-        afficherNotificationErreur(message);
+        notifications.erreur(message);
     }
 
     return valide;
@@ -2537,16 +2537,6 @@ function chargerPratiqueExistante(pratiqueId) {
     }
 }
 
-/**
- * Affiche une notification d'erreur
- */
-function afficherNotificationErreur(message) {
-    if (typeof afficherNotification === 'function') {
-        afficherNotification(message, 'erreur');
-    } else {
-        alert(message);
-    }
-}
 
 // ============================================================================
 // EXPORTS

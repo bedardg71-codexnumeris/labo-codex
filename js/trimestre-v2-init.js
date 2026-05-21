@@ -301,9 +301,7 @@ function sauvegarderCadreCalendrierV2() {
     }, 300);
 
     // Notification
-    if (typeof afficherNotification === 'function') {
-        notifications.succes('Cadre du trimestre sauvegardé');
-    }
+    notifications.succes('Cadre du trimestre sauvegardé');
 }
 
 /**
@@ -345,9 +343,7 @@ function reinitialiserBornesTrimestreV2() {
     if (elemConges) elemConges.textContent = '0';
 
     // Notification
-    if (typeof afficherNotification === 'function') {
-        notifications.succes('Bornes du trimestre réinitialisées');
-    }
+    notifications.succes('Bornes du trimestre réinitialisées');
 }
 
 /**
@@ -380,9 +376,7 @@ function reinitialiserSemainesSpecialesV2() {
     db.setSync(cle('cadreCalendrier'), cadre);
 
     // Notification
-    if (typeof afficherNotification === 'function') {
-        notifications.succes('Semaines spéciales réinitialisées');
-    }
+    notifications.succes('Semaines spéciales réinitialisées');
 }
 
 /**
@@ -723,9 +717,7 @@ function confirmerEvenementPrevuV2() {
     chargerEvenementsPrevusV2();
     window.afficherStatistiquesTrimestreV2();
 
-    if (typeof afficherNotification === 'function') {
-        notifications.succes(evenementPrevuEnEditionV2 ? 'Événement modifié' : 'Événement ajouté');
-    }
+    notifications.succes(evenementPrevuEnEditionV2 ? 'Événement modifié' : 'Événement ajouté');
     evenementPrevuEnEditionV2 = null;
 }
 
@@ -805,9 +797,7 @@ function confirmerEvenementImprevuV2() {
     chargerEvenementsImprevusV2();
     window.afficherStatistiquesTrimestreV2();
 
-    if (typeof afficherNotification === 'function') {
-        notifications.succes(evenementImprevuEnEditionV2 ? 'Événement modifié' : 'Événement ajouté');
-    }
+    notifications.succes(evenementImprevuEnEditionV2 ? 'Événement modifié' : 'Événement ajouté');
     evenementImprevuEnEditionV2 = null;
 }
 
@@ -847,9 +837,7 @@ function supprimerEvenementV2(id, type) {
     // Mettre à jour les statistiques du trimestre
     window.afficherStatistiquesTrimestreV2();
 
-    if (typeof afficherNotification === 'function') {
-        notifications.succes('Événement supprimé');
-    }
+    notifications.succes('Événement supprimé');
 }
 
 // Exports — 21 fonctions migrées du bloc principal résidu (L4007-4026 originelles
