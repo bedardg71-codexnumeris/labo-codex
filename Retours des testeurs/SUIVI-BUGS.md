@@ -11,6 +11,14 @@ _(Aucun bug ouvert.)_
 
 ---
 
+## Corrigés (21 mai 2026 — Cat-B Track 3 phase 2)
+
+| # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
+|---|---------|--------------|---------|-------|-------------|------------|
+| 110 | Claude (Cat-B Track 3 phase 2 — extraction IIFE genererSectionPerformance) | 21 mai 2026 | 21 mai 2026 | (99.61) | Référence à `portfolioActif` (non définie dans le scope de `genererSectionPerformance`) dans le IIFE "Méthode de calcul explicite" du template HTML (anciennement L4127). La variable correcte dans cette fonction est `portfolioActifRapport`. Effet observable : `!portfolioActif` toujours truthy (undefined) → la branche affiche TOUJOURS « Performance des productions indépendantes » au lieu du libellé portfolio-spécifique configuré (`meilleurs`/`recents`/`recents-meilleurs`/`tous`/`hybride-categories`). | Renommage `portfolioActif` → `portfolioActifRapport` dans le nouveau helper `_genererTextePerformanceMethodeBloc(portfolioActifRapport, methodeSelectionRapport, nombreARetenirConfig, configCategoriesRapport)`. Le helper reçoit désormais la variable correcte au site d'appel. |
+
+---
+
 ## Corrigés (21 mai 2026 — Cat-B Track 1 chantier A)
 
 | # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
