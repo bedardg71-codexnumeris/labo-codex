@@ -700,8 +700,7 @@ function genererOngletsDeveloppement(da, contenus) {
             contenu: contenus.gestesCognitifs || '' });
     }
 
-    let actifPersiste = null;
-    try { actifPersiste = localStorage.getItem(CLE_PERSISTANCE); } catch (e) {}
+    const actifPersiste = db.getSync(CLE_PERSISTANCE, null);
     let idActif = onglets.find(o => o.id === actifPersiste) ? actifPersiste : 'criteres';
     if (!onglets.find(o => o.id === idActif)) idActif = 'criteres';
 
@@ -753,7 +752,7 @@ function changerOngletDeveloppement(idOnglet, da) {
         else panel.setAttribute('hidden', '');
     });
 
-    try { localStorage.setItem('profilOngletDeveloppementActif', idOnglet); } catch (e) {}
+    db.setSync('profilOngletDeveloppementActif', idOnglet);
 
     // Chart.js ne rend pas dans un parent caché : relancer au besoin
     setTimeout(function() {
