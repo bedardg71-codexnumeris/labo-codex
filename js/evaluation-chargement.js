@@ -11,12 +11,18 @@
    cartoucheSelectionnee, afficherCriteresDepuisGrille, niveauSelectionne,
    _debouncerAutoSave, _flusherAutoSave, _autoSauvegarderCriteres (cyc 55).
 
+   + 1 fonction ajoutée Track 4 chantier F Cat-B (21 mai 2026, beta 99.61) :
+   demarrerEvaluationDepuisFichier — API découplage travaux-ui ↔ window.evaluationEnCours.
+   Encapsule la création/reset du pivot + selects cachés + pré-sélection grille/échelle/
+   cartouche depuis la production. Sentinelle Vitest associée empêche toute écriture
+   du pivot depuis un module externe à evaluation*.js + config.js.
+
    Variables module-scope promues window.X (étape 4 fix #109, 2026-05-18) :
    window._timerAutoSave, window._pendingAutoSaveSnapshot. Initialement déclarées
    `let` IIFE-local (session A), promues à window après audit empirique session B
    (bare cross-IIFE refs résidu/sauvegarde jetaient ReferenceError au runtime).
 
-   12 exports window.X :
+   13 exports window.X :
      · Bloc principal evaluation.js (10) : chargerListeEtudiantsEval,
        chargerGroupesEval, filtrerEtudiantsParGroupe, chargerGrillesDansSelect,
        chargerEchellePerformance, chargerEvaluationsEtudiant, chargerProduction,
@@ -24,6 +30,8 @@
      · Dispersé L7026 d'origine (1) : chargerProductionsDansSelect
      · Promotion nouvelle §5.6 (1) : afficherCriteresDepuisGrille (consommée L5521
        du résidu — patch call-site fait dans evaluation.js)
+     · API Track 4 chantier F Cat-B (1) : demarrerEvaluationDepuisFichier
+       (consommée par travaux-ui.js — basculerMode + afficherPalettesEval)
 
    NON exportées (préservation comportementale stricte) :
      · _selectionnerCartoucheProduction, _debouncerAutoSave, _flusherAutoSave,
@@ -454,13 +462,128 @@ function chargerEvaluationsEtudiant() {
 }
 
 /**
+ * Démarre (ou réinitialise) une évaluation depuis un fichier de la visionneuse Travaux.
+ *
+ * Encapsule la création/reset du pivot window.evaluationEnCours + le peuplement
+ * des selects cachés (étudiant, production) + la pré-sélection grille/échelle/
+ * cartouche depuis la production. Chantier F Cat-B (21 mai 2026) : SEUL appelant
+ * cross-module autorisé à écrire window.evaluationEnCours en dehors du module
+ * evaluation*.js. Toute autre tentative d'écriture du pivot depuis travaux-ui ou
+ * un autre module externe doit passer par cette API (sentinelle Vitest associée).
+ *
+ * @param {Object} fichier - { etudiantDA, productionId, ... } depuis travaux
+ * @param {Object} [opts]
+ * @param {string} [opts.productionIdEffective] - Production à utiliser (sinon
+ *                 fallback fichier.productionId, puis travauxResolution).
+ * @param {boolean} [opts.recreer=true] - true : création complète + pré-sélection
+ *                 grille/échelle/cartouche (1re ouverture palettes éval).
+ *                 false : reset partiel critères + identité (palettes déjà
+ *                 créées, on change juste de fichier dans basculerMode).
+ * @returns {string} La productionIdEffective utilisée (utile à l'appelant pour
+ *                   remplirLabelsIdentite + preRemplirEvaluation).
+ */
+function demarrerEvaluationDepuisFichier(fichier, opts) {
+    opts = Object.assign({ recreer: true }, opts || {});
+
+    let productionIdEffective = opts.productionIdEffective || fichier.productionId || '';
+    if (!productionIdEffective && typeof window.travauxResolution !== 'undefined') {
+        const evalLiee = window.travauxResolution.trouverEvaluationPourFichier(fichier);
+        if (evalLiee && evalLiee.productionId) {
+            productionIdEffective = evalLiee.productionId;
+        }
+    }
+
+    if (!opts.recreer) {
+        // Reset partiel (palettes éval déjà existantes, on change de fichier)
+        if (window.evaluationEnCours &&
+            (window.evaluationEnCours.etudiantDA !== (fichier.etudiantDA || '') ||
+             window.evaluationEnCours.productionId !== (productionIdEffective || ''))) {
+            window.evaluationEnCours.criteres = {};
+            window.evaluationEnCours.donneesAlgorithmiques = {};
+            window.evaluationEnCours.etudiantDA = fichier.etudiantDA || '';
+            window.evaluationEnCours.productionId = productionIdEffective || '';
+            delete window.evaluationEnCours.idModification;
+            if (typeof desactiverFormulaireEvaluation === 'function') {
+                desactiverFormulaireEvaluation(false);
+            }
+        }
+        return productionIdEffective;
+    }
+
+    // === Création complète (1re ouverture palettes éval) ===
+
+    // Pivot : réinitialiser si absent OU si élève/production a changé
+    var daChange = window.evaluationEnCours && window.evaluationEnCours.etudiantDA !== (fichier.etudiantDA || '');
+    var prodChange = window.evaluationEnCours && window.evaluationEnCours.productionId !== (productionIdEffective || '');
+    if (!window.evaluationEnCours || daChange || prodChange) {
+        window.evaluationEnCours = {
+            etudiantDA: fichier.etudiantDA || '',
+            productionId: productionIdEffective || '',
+            grilleId: '',
+            echelleId: '',
+            cartoucheId: '',
+            criteres: {},
+            donneesAlgorithmiques: {},
+            statutRemise: 'evalue'
+        };
+    }
+
+    // Selects cachés (lus par sauvegarderEvaluation)
+    const selEtud = document.getElementById('selectEtudiantEval');
+    if (selEtud && fichier.etudiantDA) selEtud.value = fichier.etudiantDA;
+    const selProd = document.getElementById('selectProduction1');
+    if (selProd && productionIdEffective) selProd.value = productionIdEffective;
+
+    // Pré-sélection grille/échelle/cartouche depuis la production
+    const productions = (typeof obtenirDonneesSelonMode === 'function')
+        ? obtenirDonneesSelonMode('productions')
+        : (typeof db !== 'undefined' ? db.getSync(cle('productions'), []) : []);
+    const prod = productionIdEffective ? productions.find(p => p.id === productionIdEffective) : null;
+    if (prod && prod.grilleId) {
+        const selG = document.getElementById('selectGrille1');
+        if (selG && Array.from(selG.options).some(o => o.value === prod.grilleId)) {
+            selG.value = prod.grilleId;
+            window.evaluationEnCours.grilleId = prod.grilleId;
+        }
+
+        if (prod.echelleId) {
+            const selE = document.getElementById('selectEchelle1');
+            if (selE && Array.from(selE.options).some(o => o.value === prod.echelleId)) {
+                selE.value = prod.echelleId;
+                window.evaluationEnCours.echelleId = prod.echelleId;
+            }
+        }
+
+        if (typeof chargerGrilleSelectionnee === 'function') chargerGrilleSelectionnee();
+
+        if (prod.cartoucheId) {
+            var _tentativesCartouche = 0;
+            var _essayerCartouche = function() {
+                _tentativesCartouche++;
+                var selC = document.getElementById('selectCartoucheEval');
+                if (selC && Array.from(selC.options).some(function(o) { return o.value === prod.cartoucheId; })) {
+                    selC.value = prod.cartoucheId;
+                    if (window.evaluationEnCours) window.evaluationEnCours.cartoucheId = prod.cartoucheId;
+                    selC.dispatchEvent(new Event('change', { bubbles: true }));
+                } else if (_tentativesCartouche < 8) {
+                    setTimeout(_essayerCartouche, 250);
+                }
+            };
+            setTimeout(_essayerCartouche, 150);
+        }
+    }
+
+    return productionIdEffective;
+}
+
+/**
  * Charge une production sélectionnée pour évaluation
- * 
+ *
  * FONCTIONNEMENT:
  * 1. Récupère la production sélectionnée
  * 2. Met à jour evaluationEnCours
  * 3. Affiche les informations de la production
- * 
+ *
  * UTILISÉ PAR:
  * - onchange="#selectProduction1" dans le HTML
  */
@@ -1212,5 +1335,9 @@ window.chargerProductionsDansSelect = chargerProductionsDansSelect;
 
 // Promotion §5.6 nouvelle (consommée L5521 résidu — patch call-site fait) :
 window.afficherCriteresDepuisGrille = afficherCriteresDepuisGrille;
+
+// Chantier F Cat-B (21 mai 2026) — API découplage travaux-ui ↔ evaluationEnCours.
+// Seul appelant cross-module autorisé à écrire le pivot. Sentinelle Vitest associée.
+window.demarrerEvaluationDepuisFichier = demarrerEvaluationDepuisFichier;
 
 })();
