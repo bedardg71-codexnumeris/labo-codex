@@ -1,146 +1,253 @@
-# Registre de propriete des cles de stockage
+# Registre de propriété des clés de stockage
 
-> **Version** : Beta 99.03 (3 avril 2026)
-> **Source** : Audit SSOT du 2 avril 2026 + verification code du 3 avril
-> **Objectif** : Documenter qui a le droit d'ecrire dans chaque cle pour prevenir les violations SSOT.
+> **Version** : Beta 99.62 (22 mai 2026, Sprint A)
+> **Source** : `scripts/audit-ssot.py` (auto-régénérable) — Livrable 1 du Sprint A
+>             + chantiers Cat-B post-merge (21 mai) + cycle AQPC pré-3-juin (22 mai)
+> **Audit annuel de référence** : `audit/reports/03-1-ssot.md` (Beta 99.42, 12 mai 2026)
+> **Objectif** : documenter qui a le droit d'écrire dans chaque clé pour prévenir
+>               les violations SSOT, et tracer la dette résiduelle pour Sprint C.
 
 ---
 
 ## Conventions
 
-- **Proprietaire** : le module qui CREE et MET A JOUR la donnee canonique. Un seul par cle.
+- **Propriétaire** : le module qui CRÉE et MET À JOUR la donnée canonique. Un seul par clé.
 - **Lecteurs** : modules qui lisent via `obtenirDonneesSelonMode()` ou `db.getSync()`.
-- **Contourneurs** : modules qui ecrivent directement sans passer par le proprietaire. A migrer vers des API du proprietaire (Tier 6.4).
-- **NS** : namespacee par trimestre (via `cle('nomCle')`). **G** : globale.
+- **Contourneurs** : modules qui écrivent directement sans passer par le propriétaire.
+- **NS** : namespacée par trimestre (via `cle('nomCle')`). **G** : globale.
+
+**Méthode de mise à jour** : `python3 scripts/audit-ssot.py` régénère
+`scripts/audit-ssot.{json,md}` à partir du code. Pour chaque clé en violation,
+le présent registre déclare l'owner cible et liste les contourneurs comme dette.
+Le script ne capture pas les écritures via variable opaque (`const CLE_X = 'foo';
+db.setSync(CLE_X, …)`) — ces cas sont marqués « via variable » dans les notes
+ci-dessous.
 
 ---
 
-## Donnees etudiantes (critiques)
+## Données étudiantes (critiques)
 
-| Cle | NS/G | Proprietaire | Lecteurs principaux | Contourneurs | Taille |
+| Clé | NS/G | Propriétaire | Lecteurs principaux | Contourneurs | Taille |
 |-----|------|-------------|---------------------|-------------|--------|
-| `groupeEtudiants` | NS | `trimestre-v2.js` | evaluation, travaux-import, indices, profil-etudiant, interventions | migrations (direct setSync) | < 200 Ko |
-| `evaluationsSauvegardees` | NS | `evaluation.js` | liste-evaluations, profil-etudiant, travaux-resolution, export-pdf | import-export (bulk import) | ~1.2 Mo (IDB) |
-| `presences` | NS | `saisie-presences.js` | indices, profil-etudiant, presences-apercu | **interventions.js**, **profil-etudiant.js** | < 200 Ko |
-| `fichiersTravaux` | NS | `travaux-stockage.js` | travaux-ui, travaux-export-pdf | travaux-import (blobs directs) | ~3.8 Mo (IDB) |
-| `annotationsTravaux` | NS | `travaux-stockage.js` | travaux-ui, travaux-export-pdf | — | < 200 Ko |
-| `corbeilleFichiers` | NS | `travaux-stockage.js` | travaux-ui | — | < 200 Ko |
-| `portfoliosEleves` | NS | `portfolio.js` | indices, profil-etudiant | — | < 200 Ko |
-| `interventions` | NS | `interventions.js` | evaluation, trimestres | primo-modal | < 200 Ko |
+| `groupeEtudiants` | NS | `trimestre-v2.js` (via variable, 32 lecteurs) | etudiants, evaluation-*, indices, portfolio, profil-etudiant-*, travaux-*, statistiques | migrations (init), demo-activation | < 200 Ko |
+| `evaluationsSauvegardees` | NS | `evaluation-sauvegarde.js` (post-refactor 21 mai) | liste-evaluations, profil-etudiant-*, travaux-resolution, export-pdf (36 lecteurs) | **7 contourneurs : echelles, evaluation-jetons, evaluation-chargement, evaluation, liste-evaluations, migration-diagnostic, travaux-ui** (violation #2 ci-dessous) | ~1.2 Mo (IDB) |
+| `presences` | NS | `saisie-presences.js` | indices, profil-etudiant, presences-apercu (7 lecteurs) | — (corrigé Tier 6.4, avril 2026) | < 200 Ko |
+| `fichiersTravaux` | NS | `travaux-stockage.js` | travaux-ui, travaux-export-pdf | `migration-diagnostic.js` (rétention IDB) | ~3.8 Mo (IDB) |
+| `annotationsTravaux` | NS | `travaux-stockage.js` | travaux-ui, travaux-export-pdf | `modelisation.js` (cas particulier outils) | < 200 Ko |
+| `corbeilleFichiers` | NS | `travaux-stockage.js` | travaux-ui | `migration-diagnostic.js` (rétention) | < 200 Ko |
+| `portfoliosEleves` | NS | `portfolio.js` | indices, profil-etudiant-sections-affichage (réflecteur lecture seule) | `profil-etudiant-sections-affichage.js` (écrit aussi — à investiguer, voir §Violations) | < 200 Ko |
+| `interventions` | NS | `interventions.js` | evaluation, trimestres | — | < 200 Ko |
 
-### Notes de schema
+### Notes de schéma
 
-- `evaluationsSauvegardees[i].actionsRLO` : `{reperage, liaison, ouverture, incertain, incomplet, inexact, total} | null` — peuple par `actions-rlo.js` au moment de `sauvegarderEvaluation()` si la preference `activerActionsRLO` est active. Absent si la preference est desactivee. `null` explicite si aucune annotation n'est resolue pour l'evaluation.
+- `evaluationsSauvegardees[i].actionsRLO` : `{reperage, liaison, ouverture, incertain, incomplet, inexact, total} | null` — peuplé par `actions-rlo.js` au moment de `sauvegarderEvaluation()` si la préférence `activerActionsRLO` est active. Absent si la préférence est désactivée. `null` explicite si aucune annotation n'est résolue pour l'évaluation.
+- `evaluationsSauvegardees` est écrit littéralement dans **8 modules** (audit 22 mai). 5 contourneurs hérités du god module `evaluation.js` pré-refactor (split en `evaluation-chargement` / `evaluation-sauvegarde` / `evaluation-jetons` lors du refactor du 21 mai). Plan Tier 6.6 documenté en violation #2.
 
 ---
 
-## Structure pedagogique (templates)
+## Structure pédagogique (templates)
 
-| Cle | NS/G | Proprietaire | Lecteurs principaux | Contourneurs | Taille |
+| Clé | NS/G | Propriétaire | Lecteurs principaux | Contourneurs | Taille |
 |-----|------|-------------|---------------------|-------------|--------|
-| `productions` | NS | `productions.js` | evaluation, travaux-ui, export-pdf | primo-modal, import-export | < 200 Ko |
-| `grillesTemplates` | G | `grilles.js` | evaluation, grilles-bibliotheque, export-pdf | **import-export**, **primo-modal**, **donnees-demo**, **spe-specifications** | < 200 Ko |
-| `echellesTemplates` | G | `echelles.js` | evaluation, echelles-bibliotheque | **import-export**, **primo-modal**, **donnees-demo** | < 200 Ko |
-| `cartouches_[grilleId]` | G | `cartouches.js` | evaluation, cartouches-bibliotheque | import-export, primo-modal | < 100 Ko |
-| `pratiquesConfigurables` | G | `pratiques.js` | evaluation, wizard-pratique-v2 | import-export, primo-modal, wizard | < 200 Ko |
-| `modalitesEvaluation` | NS | `evaluation.js` | horaire, tous les modules d'evaluation | **25+ modules** (violation #1, reportee post-AQPC) | < 50 Ko |
+| `productions` | NS | `productions.js` (via variable `cleProductions`, 41 lecteurs) | evaluation-*, travaux-ui, export-pdf | `migrations.js` (init, 1 écriture littérale) | < 200 Ko |
+| `grillesTemplates` | G | `grilles.js` | evaluation-*, grilles-bibliotheque, export-pdf (multi-lecteurs) | **6 contourneurs : cartouches, demo-activation, donnees-v2, import-export, spe-specifications, wizard-pratique-v2** (violation #3) | < 200 Ko |
+| `echellesTemplates` | G | `echelles.js` | evaluation-*, echelles-bibliotheque | **3 contourneurs : demo-activation, donnees-v2, import-export** (violation #4) | < 200 Ko |
+| `cartouches_[grilleId]` | G | `cartouches.js` | evaluation-*, cartouches-bibliotheque | import-export, primo-modal (au cas par cas) | < 100 Ko |
+| `pratiquesConfigurables` | G | `pratiques.js` | evaluation-*, wizard-pratique-v2, pratique-* | **4 contourneurs : donnees-v2, import-export, pratique-manager, wizard-pratique-v2** (violation #5) | < 200 Ko |
+| `modalitesEvaluation` | NS | `evaluation.js` (cible — actuellement aucun owner unique) | horaire, evaluation-*, pratique-notation-v2, pratiques (41 lecteurs) | **15 écrivains, ~48 call-sites** — violation #1 CRITIQUE, **Tier 6.5 reporté Sprint C (été 2026)** | < 50 Ko |
 
 ---
 
-## Indices (donnees calculees)
+## Indices (données calculées)
 
-| Cle | NS/G | Proprietaire | Lecteurs principaux | Notes |
+| Clé | NS/G | Propriétaire | Lecteurs principaux | Notes |
 |-----|------|-------------|---------------------|-------|
-| `indicesCP` | NS | `portfolio.js` | indices, evaluation, profil-etudiant, etudiants | Source unique C/P/E. Calcul via `calculerEtStockerIndicesCP()` |
-| `indicesAssiduite` | NS | `indices.js` | indices, evaluation, profil-etudiant | Source unique A. Calcul via `calculerEtSauvegarderIndicesAssiduite()` |
-| `indicesEvaluation` | NS | ~~aucun~~ | ~~aucun~~ | **ORPHELINE** — ecritures supprimees Tier 6.2 (3 avril 2026) |
+| `indicesCP` | NS | `portfolio.js` (via variable) | indices, evaluation, liste-evaluations, pratique-configurable, tableau-bord-apercu, trimestres (6 lecteurs) | Source unique C/P/E. Calcul via `calculerEtStockerIndicesCP()` |
+| `indicesAssiduite` | NS | `indices.js` | indices, evaluation, profil-etudiant-* (7 lecteurs) | Source unique A. Calcul via `calculerEtSauvegarderIndicesAssiduite()` |
+| `indicesPatternsRaI` | NS | `profil-etudiant-actions.js` (post-refactor) | profil-etudiant-*, statistiques (2 lecteurs) | Patterns groupe RaI — `calculerEtStockerPatternsGroupe()` |
+| ~~`indicesEvaluation`~~ | NS | ~~aucun~~ | ~~aucun~~ | **ORPHELINE** — écritures supprimées Tier 6.2 (3 avril 2026) |
 
 ---
 
 ## Planification et calendrier
 
-| Cle | NS/G | Proprietaire | Lecteurs principaux | Notes |
+| Clé | NS/G | Propriétaire | Lecteurs principaux | Notes |
 |-----|------|-------------|---------------------|-------|
-| `calendrierComplet` | NS | `trimestre.js` | calendrier-vue, saisie-presences, productions | Pattern exemplaire : un seul ecrivain (ligne ~842) |
-| `cadreCalendrier` | NS | `trimestre.js` | horaire, productions, snapshots | |
-| `horaireHebdo` | NS | `horaire.js` | calendrier-vue, saisie-presences, organisateur | |
-| `planification_mindmap` | NS | `planification-donnees.js` | planification-carte, planification | |
-| `snapshots` | NS | `snapshots.js` | trimestres, trimestre | Cle composite : `h2026_snapshots_[coursId]` |
-| `groupesCours` | NS | `trimestres.js` | organisateur, travaux-ui, modes | |
+| `calendrierComplet` | NS | `trimestre.js` (12 lecteurs) | calendrier-vue, saisie-presences, productions | Pattern exemplaire : un seul écrivain (ligne 842) |
+| `cadreCalendrier` | NS | `trimestre.js` | horaire, productions, snapshots (multi-lecteurs) | `trimestre-v2-init.js` co-écrit pendant l'initialisation (cas particulier init, violation mineure #6) |
+| `horaireHebdo` | NS | `trimestre-v2-orchestre.js` (cible — était `horaire.js` mais celui-ci est lecteur seul) | calendrier-vue, saisie-presences, organisateur (5 lecteurs) | **3 contourneurs : entites/groupe-cours, trimestre.js (legacy), trimestre-v2-orchestre** (violation mineure #7 — owner cible à confirmer Sprint C) |
+| `seancesHoraire` | NS | `horaire.js` (cible) | horaire, trimestre-v2 | **3 écrivains : entites/groupe-cours, horaire, trimestre-v2-orchestre** (violation mineure #8) |
+| `evenementsPrevus`, `evenementsImprevus` | NS | `trimestre.js` | calendrier-vue, productions | `trimestre-v2-init.js` co-écrit pendant init (violation mineure héritée) |
+| `planification_mindmap` | NS | `planification-donnees.js` | planification-carte, planification | Pattern exemplaire (1 écrivain) |
+| `snapshots` | NS | `snapshots.js` (via variable composite `cleSnap`) | trimestres, trimestre | Clé composite : `h2026_snapshots_[coursId]` |
+| `groupesCours` | NS | `trimestres.js` (via variable) | organisateur, travaux-ui, modes, calendrier-vue, productions, rythme, tableau-bord-apercu, travaux-import, trimestre-v2 (7 lecteurs) | OK SSOT — écriture via variable `cleGroupesCours` |
 
 ---
 
-## Configuration et preferences
+## Contexte trimestre / groupe-cours (cluster cross-cutting)
 
-| Cle | NS/G | Proprietaire | Lecteurs principaux | Notes |
+| Clé | NS/G | Propriétaire | Lecteurs principaux | Notes |
 |-----|------|-------------|---------------------|-------|
-| `profilEnseignant` | G | `cc-license.js` | export-pdf, bibliotheques | Auteur pour metadonnees CC |
-| `preferencesUtilisateur` | G | `preferences.js` | tous les modules UI (via `obtenirPreference`/`definirPreference`) | Source unique pour 23 preferences (anciens `preferencesAffichage` + 5 champs de `modalitesEvaluation`). Migration V3 + nettoyage legacy automatiques. |
-| `modeApplication` | G | `modes.js` | tous les modules (via obtenirDonneesSelonMode) | `'normal'` ou `'anonymisation'` |
-| `cours` | G | `cours.js` | large usage (lookup cours) | Cle legacy `listeCours` = fallback |
-| `enseignants` | G | `enseignants.js` | export-pdf, primo-questions | |
-| `groupeCoursActif` | G | `trimestre-v2.js` | evaluation, horaire, travaux-ui, filtrage | |
+| `trimestres` | G | `trimestres.js` (7 écritures littérales) | 18 lecteurs cross-modules | **4 écrivains : demo-activation, migrations, trimestre-v2-init, trimestres** (violation mineure #9 — owner cible OK, contourneurs init/migration justifiables structurellement) |
+| `trimestreActif` | G | `trimestres.js` (cible) | trimestre-v2, evaluation-*, productions (7 lecteurs) | **4 écrivains : demo-activation, migrations, trimestre-v2-init, trimestres** (violation mineure #10 — même profil que `trimestres`) |
+| `infoCours` | NS | `trimestre-v2-cours.js` (cible) | 33 lecteurs cross-modules | **7 écrivains : contexte, demo-activation, entites/groupe-cours, trimestre-v2-cours, trimestre-v2-etudiants, trimestre-v2-orchestre, trimestres** (violation critique #11 — **non listée en mai**, découverte 22 mai par audit-ssot.py) |
+| `groupeCoursActif` | G | `trimestre-v2-groupes-cours.js` (cible — post-refactor 17 mai) | 14 lecteurs (evaluation, horaire, travaux-ui, filtrage) | **6 écrivains : contexte, demo-activation, entites/groupe-cours, trimestre-v2-groupes-cours, trimestre-v2-orchestre, trimestres** (violation critique #12 — non documentée en avril) |
+| `listeCours` | G | `cours.js` (11 écritures littérales) | 14 lecteurs | **5 écrivains : contexte, cours, demo-activation, migrations, trimestre-v2-cours** (violation critique #13) |
+| `cours` | G | `cours.js` (cible) | large usage (lookup cours) | **3 écrivains : demo-activation, migrations, trimestre-v2-cours** (violation mineure héritée, clé legacy `listeCours` = fallback) |
+| `enseignants` | G | `trimestre-v2-enseignants.js` (cible — post-refactor 17 mai) | export-pdf, primo-questions | **4 écrivains : demo-activation, import-export, migrations, trimestre-v2-enseignants** (violation critique #14) |
 
 ---
 
-## Bibliotheques (partage entre collegues)
+## Configuration et préférences
 
-| Cle | NS/G | Proprietaire | Notes |
+| Clé | NS/G | Propriétaire | Lecteurs principaux | Notes |
+|-----|------|-------------|---------------------|-------|
+| `profilEnseignant` | G | `trimestre-v2-enseignants.js` (post-refactor — était `cc-license.js` mais celui-ci est lecteur seul) | export-pdf, bibliothèques, cc-license (5 lecteurs) | Auteur pour métadonnées CC. **Owner corrigé 22 mai** (audit 12 mai → `cc-license.js` était incorrect) |
+| `preferencesUtilisateur` | G | `preferences.js` (via variable `CLE_STOCKAGE`) | tous les modules UI via `obtenirPreference`/`definirPreference` | **2 contourneurs littéraux : `accompagnement.js:156` (système d'aide, historique) + `main.js:289` (migration AQPC 22 mai, `migration_decoupler_pn_done` & `migration_rapports_bug_20_done`)** (violation mineure #15) |
+| `modeApplication` | G | `modes.js` | tous les modules via `obtenirDonneesSelonMode` | **2 écrivains : demo-activation, modes** (violation mineure héritée — demo-activation force le mode au démarrage). Valeurs : `'normal'` ou `'anonymisation'` |
+| `seuilsInterpretation` | G | `interpretation-config.js` (cible) | preferences-v2, profil-etudiant-*, indices | **2 écrivains : interpretation-config, preferences-v2** (violation mineure #16 — découverte 22 mai) |
+| `rapportsBugArchives` | G | `rapport-bug.js` | main (audit AQPC seuil 20) | Phase 6.2 AQPC 22 mai : seuil 50 → 20 + migration idempotente |
+
+---
+
+## Bibliothèques (partage entre collègues)
+
+| Clé | NS/G | Propriétaire | Notes |
 |-----|------|-------------|-------|
-| `bibliothequeGrilles` | G | `grilles-bibliotheque.js` | |
-| `bibliothequeEchelles` | G | `echelles-bibliotheque.js` | |
-| `bibliothequeCartouches` | G | `cartouches-bibliotheque.js` | |
-| `bibliothequeProductions` | G | `productions-bibliotheque.js` | |
-| `bibliothequeAlignements` | G | `planification-bibliotheque.js` | |
+| `bibliothequeGrilles` | G | `grilles-bibliotheque.js` (via variable) | |
+| `bibliothequeEchelles` | G | `echelles-bibliotheque.js` (via variable) | |
+| `bibliothequeCartouches` | G | `cartouches-bibliotheque.js` (via variable) | |
+| `bibliothequeProductions` | G | `donnees-v2.js` (init) + `productions-bibliotheque-ui.js` (CRUD, via variable) | 1 écrivain littéral détecté (init) |
+| `bibliothequeAlignements` | G | `planification-bibliotheque.js` (via variable) | |
+| `bibliothequePratiques` | G | `main.js` (init pratiques) | Lecteur unique : `tableau-bord-apercu.js` |
+| `tamponsPersonnalises` | G | `tampons-bibliotheque.js` (cible) | **3 écrivains : reserve-ouvrir, tampons-bibliotheque, travaux-outils** (violation mineure #17) |
 
 ---
 
-## Patterns exemplaires (a reproduire)
+## Migrations et flags d'état (init/boot)
 
-### 1. `calendrierComplet` — Un seul ecrivain
-`trimestre.js:842` est le seul module qui ecrit dans cette cle. Tous les autres (calendrier-vue, saisie-presences, productions) lisent uniquement. Zero risque de donnees incoherentes.
+Ces clés sont des flags one-shot, lues une fois au démarrage, écrites une fois lors d'une migration. Pattern SSOT-OK acceptable :
 
-### 2. `indicesAssiduite` — Calcul + stockage centralise
-`indices.js:260` (`calculerEtSauvegarderIndicesAssiduite()`) est le seul point d'ecriture. Le calcul et le stockage sont dans la meme fonction. Les lecteurs obtiennent toujours un resultat coherent.
-
-### 3. `indicesCP` — Source unique pour C/P/E
-`portfolio.js:719` (`calculerEtStockerIndicesCP()`) centralise le calcul des trois indices. Tous les modules (profil, tableau de bord, evaluations) lisent depuis cette source unique au lieu de recalculer.
+| Clé | Owner | Rôle |
+|-----|-------|------|
+| `migration-cles-globales-done` | `trimestres.js` | Migration namespacing Beta 95 |
+| `migration-phase5-done` | `demo-activation.js` | Migration mode démo Phase 5 |
+| `migrationBeta96Effectuee` | `migrations.js` | Migration Beta 96 |
+| `migrationLegacyEffectuee` | `migrations.js` | Migration data legacy pré-Beta 95 |
+| `migrationConfigsSpecifiques` | `pratiques.js` | Migration config v2 pratiques |
+| `migrationBibliothequeV2` | `pratique-manager.js` | Migration bibliothèque pratiques |
+| `migrationCleProductionsFaite` | `migrations.js` | Migration clé productions |
+| `migration_decoupler_pn_done` | `main.js` | Migration AQPC 22 mai : decouplerPR → decouplerPN |
+| `migration_rapports_bug_20_done` | `main.js` | Migration AQPC 22 mai : seuil rétention 50 → 20 |
+| `migration_onboarding_v6_21_done` | `main.js` | Migration onboarding v6.21 |
+| `_migration_fichiers_done` | `db.js` | Migration interne db |
+| `_migration_thumbnails_done` | `travaux-stockage.js` | Extraction thumbnails 27 mars 2026 |
 
 ---
 
-## Violations connues (a corriger)
+## Patterns exemplaires (à reproduire)
 
-| # | Cle | Severite | Description | Plan |
-|---|-----|----------|-------------|------|
-| #1 | `modalitesEvaluation` | CRITIQUE | 25+ ecrivains, 36 lecteurs | Reporte post-AQPC (trop risque) |
-| #2 | `grillesTemplates` | HAUTE | API `importerGrillesExternes()` creee | Tier 6.4 — API en place, migration contourneurs en cours |
-| #3 | `echellesTemplates` | HAUTE | API `importerEchellesExternes()` creee | Tier 6.4 — API en place, migration contourneurs en cours |
-| #5 | ~~`presences`~~ | ~~MOYENNE~~ | ~~2 contourneurs~~ | **CORRIGE** Tier 6.4 (3 avril 2026) — API `modifierNotesPresence()` + `ajouterPresencesIntervention()` |
-| #7 | ~~`calculerTauxCompletion`~~ | ~~MOYENNE~~ | ~~Recalcul divergent de l'indice C~~ | **CORRIGE** Tier 6.1 (3 avril 2026) |
-| #9 | ~~`_moyennesQualifies`~~ | ~~FAIBLE~~ | ~~Cache jamais invalide~~ | **CORRIGE** Tier 6.3 (3 avril 2026) |
+### 1. `calendrierComplet` — Un seul écrivain
+`trimestre.js:842` est le seul module qui écrit dans cette clé. Tous les autres (calendrier-vue, saisie-presences, productions) lisent uniquement. Zéro risque de données incohérentes. 12 lecteurs.
+
+### 2. `indicesAssiduite` — Calcul + stockage centralisé
+`indices.js` (`calculerEtSauvegarderIndicesAssiduite()`) est le seul point d'écriture. 7 lecteurs.
+
+### 3. `presences` — Refactorée Tier 6.4
+`saisie-presences.js` est le seul écrivain depuis avril 2026 (API `modifierNotesPresence()` + `ajouterPresencesIntervention()` créées pour migrer interventions.js et profil-etudiant.js).
+
+### 4. `interventions` — Owner unique
+`interventions.js` seul écrivain. 1 lecteur (evaluation).
+
+### 5. `profilEnseignant` — Owner corrigé 22 mai
+`trimestre-v2-enseignants.js:249` est le seul écrivain littéral. Auteur pour CC. 5 lecteurs dont `cc-license.js` (consommateur, pas écrivain — erreur du registre d'avril 2026 corrigée Sprint A).
+
+---
+
+## Violations connues (à corriger)
+
+### Synthèse — 22 mai 2026
+
+| # | Clé | Sévérité | # écrivains | Plan |
+|---|-----|----------|---:|------|
+| #1 | `modalitesEvaluation` | CRITIQUE | 15 | **Tier 6.5 — Sprint C été 2026** (cf. SESSION.md §3 + PLAN-MOYEN-TERME §1 hors périmètre) |
+| #2 | `evaluationsSauvegardees` | HAUTE | 8 | Tier 6.6 — Sprint C : créer API publique `evaluation-sauvegarde.js`, migrer 5 contourneurs hérités du god module pré-refactor |
+| #3 | `grillesTemplates` | HAUTE | 7 | API `importerGrillesExternes()` existante — migration des 6 contourneurs (Tier 6.4 en cours) |
+| #4 | `echellesTemplates` | HAUTE | 4 | API `importerEchellesExternes()` existante — migration des 3 contourneurs (Tier 6.4) |
+| #5 | `pratiquesConfigurables` | HAUTE | 5 | Sprint B/C — examiner si tous les contourneurs sont justifiables ou s'il faut une API publique |
+| #6 | `cadreCalendrier` | MINEURE | 2 | Init-only contournement par `trimestre-v2-init.js` — justifiable structurellement |
+| #7 | `horaireHebdo` | MINEURE | 3 | Owner cible à confirmer (`trimestre-v2-orchestre.js` post-refactor) |
+| #8 | `seancesHoraire` | MINEURE | 3 | Cluster horaire — Sprint C |
+| #9 | `trimestres` | MINEURE | 4 | Init/migration contournements justifiables |
+| #10 | `trimestreActif` | MINEURE | 4 | Idem #9 (même cluster) |
+| #11 | `infoCours` | **CRITIQUE (nouvelle)** | 7 | **Découverte 22 mai par audit-ssot.py** — non listée en mai. Cluster contexte cours, planifier Sprint C |
+| #12 | `groupeCoursActif` | CRITIQUE | 6 | Sprint C — cluster contexte cours/groupe |
+| #13 | `listeCours` | CRITIQUE | 5 | Sprint C — clé legacy + clé `cours` actuelle, à consolider |
+| #14 | `enseignants` | HAUTE | 4 | Sprint C — migration des contourneurs `demo-activation`, `import-export`, `migrations` |
+| #15 | `preferencesUtilisateur` | MINEURE | 2 | `accompagnement.js:156` historique + `main.js:289` migrations AQPC — justifiables (init/migration) mais à confirmer |
+| #16 | `seuilsInterpretation` | MINEURE | 2 | Sprint C — clarifier rôle preferences-v2 vs interpretation-config |
+| #17 | `tamponsPersonnalises` | MINEURE | 3 | Sprint C — examiner duplication tampons-bibliotheque/travaux-outils |
+
+### Violations résolues
+
+| # | Clé | Sévérité originale | Résolution |
+|---|-----|---|---|
+| ~~#R1~~ | ~~`presences`~~ | ~~MOYENNE~~ | **CORRIGÉ Tier 6.4** (3 avril 2026) — API `modifierNotesPresence()` + `ajouterPresencesIntervention()` |
+| ~~#R2~~ | ~~`calculerTauxCompletion`~~ | ~~MOYENNE~~ | **CORRIGÉ Tier 6.1** (3 avril 2026) — recalcul divergent indice C retiré |
+| ~~#R3~~ | ~~`_moyennesQualifies`~~ | ~~FAIBLE~~ | **CORRIGÉ Tier 6.3** (3 avril 2026) — cache jamais invalidé |
+| ~~#R4~~ | ~~Notifications dispersées~~ | ~~MOYENNE~~ | **CORRIGÉ Cat-B Track 4 chantier E** (21 mai 2026) — `js/utils-notifications.js` consolidé, ~525 sites migrés, source unique `window.notifications.{succes, erreur, info}`, sentinelle Vitest stricte. Cf. SESSION.md §1bis Track 4 |
+| ~~#R5~~ | ~~`window.evaluationEnCours` cross-module~~ | ~~HAUTE~~ | **CORRIGÉ Cat-B Track 4 chantier F** (21 mai 2026) — pivot encapsulé via API `evaluation.demarrerEvaluationDepuisFichier(fichier, opts)` exportée par `evaluation-chargement.js`, sentinelle Vitest verrouille la whitelist d'écrivains (config.js + 7 modules `evaluation*.js`). Cf. SESSION.md §1bis Track 4 |
+| ~~#R6~~ | ~~2 accès `localStorage` direct profil-etudiant~~ | ~~MOYENNE~~ | **CORRIGÉ Cat-B Track 4 chantier G** (21 mai 2026) — `profil-etudiant-diagnostics.js` migré vers `db.getSync`/`db.setSync` |
+| ~~#R7~~ | ~~Vocabulaire alarmiste `--risque-*`~~ | ~~FAIBLE (UX)~~ | **CORRIGÉ Cat-B Track 4 chantier J + reliquat tokens** (21 mai 2026) — 49 substitutions R → N + 97 tokens CSS `--risque-*` → `--niveau-attention-*` |
+| ~~#R8~~ | ~~`decouplerPR`/`indiceR`/`risque` propriété~~ | ~~CRITIQUE (vocabulaire)~~ | **CORRIGÉ AQPC Phase 6.1 reliquat** (22 mai 2026) — refactor R → N, source unique `decouplerPN`/`indiceN`/`niveauAttention`, migration de données idempotente dans `main.js` (`migration_decoupler_pn_done`) |
+
+---
+
+## Opérations destructives globales
+
+À surveiller — chaque `localStorage.clear()` / `db.clear()` doit être encadré par une confirmation UX :
+
+| Fichier:ligne | Opération | Encadrement |
+|---|---|---|
+| `js/db.js:475` | `localStorage.clear()` | Interne à l'API d'abstraction — utilisé par `db.clear()` |
+| `js/import-export.js:1101` | `localStorage.clear()` | Confirmation `'EFFACER'` requise. **Note Sprint B/C : 03-1-ssot zone grise** — doublon avec `db.clear()` ligne 1105 (cf. interprétation A/B audit) |
+| `js/import-export.js:1105` | `db.clear()` | Suit immédiatement le `localStorage.clear()` |
 
 ---
 
 ## Architecture de stockage
 
 ```
-Petites cles (< 200 Ko)
-  localStorage = source de verite
+Petites clés (< 200 Ko)
+  localStorage = source de vérité
   IDB = backup asynchrone
 
-Grosses cles (> 200 Ko) : fichiersTravaux, evaluationsSauvegardees
-  IDB + memoryCache = source de verite
+Grosses clés (> 200 Ko) : fichiersTravaux, evaluationsSauvegardees
+  IDB + memoryCache = source de vérité
   localStorage = cache synchrone (si quota le permet)
 
 Filtrage par cours/mode :
-  obtenirDonneesSelonMode('cle')  → lecture filtree
-  sauvegarderDonneesSelonMode('cle', data) → ecriture protegee (bloque en anonymisation)
+  obtenirDonneesSelonMode('cle')  → lecture filtrée
+  sauvegarderDonneesSelonMode('cle', data) → écriture protégée (bloque en anonymisation)
 
 Namespacing par trimestre :
   cle('presences') → 'h2026_presences'
-  Liste des cles namespacees : trimestres.js lignes 40-80
+  Liste des clés namespacées : trimestres.js lignes 40-80
 ```
 
 ---
 
-**Derniere mise a jour** : 3 avril 2026
+## Méthodologie — comment ce registre est mis à jour
+
+1. Lancer `python3 scripts/audit-ssot.py` à la racine du repo.
+2. Lire `scripts/audit-ssot.md` (synthèse Markdown) ou `scripts/audit-ssot.json` (données structurées).
+3. Pour chaque clé en `violation-critique` ou `violation-mineure` non listée ici, ajouter une entrée dans la table « Violations connues ».
+4. Pour chaque clé qui apparaît comme `no-literal-writer`, vérifier manuellement quel module l'écrit via variable (grep `const CLE_X = 'nom-cle'` ou `cle('nom-cle')`) — ces écrivains via variable sont annotés ici par « via variable ».
+5. Mettre à jour l'en-tête : Beta courante + date + source.
+
+**Fréquence recommandée** : à chaque cycle de refactoring majeur (god modules, consolidation SSOT, migrations de clés).
+
+---
+
+**Dernière mise à jour** : 22 mai 2026, Sprint A (Beta 99.62, build 0522-0650).
+**Prochaine mise à jour prévue** : à la clôture du Sprint B (cartographies 3.2 + 3.3) post-AQPC, puis à la clôture du Sprint C (Tier 6.5 `modalitesEvaluation`) été 2026.
