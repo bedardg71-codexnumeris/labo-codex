@@ -14,13 +14,15 @@
 > - **Cycle en cours** : AQPC pré-3-juin (PLAN-COURT-TERME) — Phase 7 tests manuels Grégoire restante
 > - **Document maître** : `audit/PLAN-COURT-TERME.md` (avec `PLAN-AQPC.md` en archive du plan pré-pivot)
 
-# SESSION — État au 22 mai 2026 matin (cycle AQPC pré-3-juin livré, reste Phase 7 tests manuels)
+# SESSION — État au 22 mai 2026 (post-AQPC, prochaine priorité : Sprint A axes 2 & 3)
 
 **Beta / build** : 99.62 / 0522-0650 (bump validé par Grégoire à la clôture du cycle AQPC).
-**Branche `main`** : HEAD à `1312a6b` post-merge FF de `aqpc/privacy` (6 commits AQPC) + bump version.
+**Branche `main`** : HEAD à `7c30d64` (release 99.62) post-merge FF de `aqpc/privacy` (6 commits AQPC) + bump.
 **Branche `aqpc/privacy`** : retirée localement + remotement (mergée et propre).
 
 **Tests** : 85 Vitest verts à chaque commit (hook pré-push vert sur les 6 commits AQPC + commit release 99.62). Playwright non re-vérifié dans le worktree aqpc (pas de modif de zone DOM nouvelle).
+
+**Cycle suivant demandé par Grégoire (22 mai 2026 matin)** : attaquer la santé du code (Axe 2) et l'architecture SSOT (Axe 3) de l'audit annuel. Le plan est séquencé en 3 sprints A → B → C. **La prochaine session démarre par le Sprint A** (~1-2 h, 0 risque applicatif). Voir §3 ci-dessous.
 
 ---
 
@@ -202,17 +204,194 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
 ---
 
-## §3 — Consigne de démarrage pour la prochaine session
+## §3 — Consigne de démarrage pour la prochaine session (Sprint A — santé code + SSOT)
 
-> Pour la prochaine instance Claude qui prend le relai. **Le cycle Cat-B est clos à 10/10 — la prochaine session est essentiellement non-code** (prep AQPC, test visuel chantier E, décision label `v2-seuil-fragile`, ou nouveau backlog). Suivre dans l'ordre.
+> Pour la prochaine instance Claude qui prend le relai. **Le cycle AQPC est livré, la prochaine priorité est le Sprint A** demandé par Grégoire le 22 mai matin : capitaliser sur les améliorations Cat-B + AQPC pour faire basculer formellement l'Axe 2 de l'audit (Rouge → Jaune presque Vert) et préparer le terrain pour Axe 3 (qui reste Rouge). **Effort ~1-2 h, 0 risque applicatif** (mise à jour de documentation + mesures auto-régénérables, pas de modification de code métier).
+
+### Sprint A — contexte
+
+L'audit annuel de mai 2026 a classé :
+
+- **Axe 2 (Santé du code)** : Rouge — 3 R + 1 J + 1 V (cf. `audit/reports/02-summary.md`)
+- **Axe 3 (Architecture / SSOT)** : Rouge — 3 R (cf. `audit/reports/03-summary.md`)
+
+Mais **le cycle Cat-B post-merge (clos 21 mai, 10/10 critères) + le cycle AQPC (clos 22 mai matin)** ont changé la donne sans que les rapports d'audit ne soient mis à jour. Notamment :
+
+**Axe 2** :
+- 5 god modules refactorés en 32 sous-modules (LOC répartie, 2.1 R → J)
+- 13/14 fonctions cyc > 30 descendues sous 30 (2.2 R → J presque V, 1 héritage acté sous N=50)
+- 3 doublons evaluation résolus + utils-notifications consolidé (2.3 J → V)
+- 4 fonctions code mort retirées (Track 1 + AQPC)
+- 85 Vitest + 12 Playwright verts à chaque commit (2.5 R → J)
+
+**Axe 3** (partiellement amélioré) :
+- `utils-notifications.js` source unique pour 525 sites (chantier E)
+- Pivot `window.evaluationEnCours` encapsulé + sentinelle Vitest (chantier F)
+- 2 accès `localStorage` direct profil-etudiant migrés vers `db.*` (chantier G)
+- Refactor R → N cohérent SSOT (AQPC Phase 6.1 reliquat, 49 substitutions)
+- Tokens CSS `--risque-*` → `--niveau-attention-*` (chantier J)
+
+Mais `docs/DATA-OWNERSHIP.md` est figé au 3 avril 2026 (Beta 99.03) — 7 semaines de retard, 4 owners erronés, 8 violations non listées selon `PLAN-MOYEN-TERME.md` §5.2.
+
+Le Sprint A vise à **rattraper cette dette documentaire** et à **mesurer factuellement le delta Cat-B** dans un addendum à `audit/reports/02-summary.md`. Aucune modification de code applicatif. Sprint B (cartographies SSOT 3.1/3.2/3.3) et Sprint C (Tier 6.5 `modalitesEvaluation`, 14 écrivains, 47 sites) sont la suite logique mais à attaquer plus tard (Sprint B post-AQPC, Sprint C été 2026).
 
 ### Étape 1 — Vérifier l'état du repo (1-2 min)
 
 ```bash
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
+git status                              # branche actuelle ? attendu : audit/2026-mai (l'autre instance)
+git log --oneline main -5               # HEAD main attendu : `7c30d64 release(aqpc): Beta 99.62 build 0522-0650` ou plus récent
+git worktree list                       # 1 seul worktree attendu (le principal sur audit/2026-mai)
+```
+
+**Si HEAD main au-delà de `7c30d64`** : un autre chantier a été fait depuis. Vérifier `git log main` pour comprendre. Pas de panique, ce SESSION.md sera mis à jour par cet autre chantier.
+
+### Étape 2 — Créer un worktree dédié main
+
+`audit/2026-mai` a son propre cycle de vie avec des modifs uncommitted (audits, rapports, docs sécurité). **NE PAS écraser**. Créer un worktree dédié :
+
+```bash
+git worktree add ../Monitorage_v6-sprintA -b sprint-a/data-ownership main
+```
+
+> ⚠️ Pattern observé : `git checkout main` avec modifs uncommitted sur `audit/2026-mai` → git refuse. **Solution propre = worktree dédié à main**.
+
+### Étape 3 — Lecture obligatoire (10 min)
+
+Ordre strict :
+1. **Ce SESSION.md** (relai courant + garde-fou §0)
+2. `docs/DATA-OWNERSHIP.md` — l'**état actuel** du registre SSOT (à actualiser). Daté du 3 avril 2026, Beta 99.03.
+3. `audit/reports/02-summary.md` et `audit/reports/03-summary.md` (sur branche `audit/2026-mai` — lecture seulement, NE PAS modifier le worktree principal) — base de référence statuts V/J/R
+4. `audit/refactoring-prep/MODULES-MAP.md` §2.1-2.5 — cartographies par module post-refactoring
+5. `audit/PLAN-MOYEN-TERME.md` §5.2 — précise les 4 owners erronés et 8 violations non listées
+6. `CLAUDE.md` racine — règles sécurité et conventions
+
+### Étape 4 — Charger les skills
+
+**Obligatoire** :
+- `Skills pour Claude Code/SKILL_labo_codex.md` — architecture, indices A-C-P, workflow
+- `Skills pour Claude Code/SKILL_integrite_globaux.md` — collections globales partagées (relevant pour DATA-OWNERSHIP)
+- `Skills pour Claude Code/SKILL_hygiene_donnees_partagees.md` — principes abstraits SSOT
+
+### Étape 5 — Lancer la suite de tests (baseline)
+
+```bash
+cd tests && npm install      # première fois après nouveau worktree
+cd tests && npm run test:unit    # attendu : 85 Vitest verts
+```
+
+Si rouge dès le départ → diagnostic prioritaire AVANT tout chantier. Sprint A ne touche pas au code applicatif donc cette baseline ne devrait pas bouger pendant le sprint.
+
+### Étape 6 — Exécution Sprint A (1-2 h)
+
+Trois livrables séquentiels.
+
+#### Livrable 1 — Audit auto-régénérable des écrivains/lecteurs SSOT (~20 min)
+
+Script de cartographie automatique. Ne dépend pas d'une vérité humaine, lit le code et produit la carte.
+
+```bash
+# Produit la liste des écrivains réels par clé (depuis le code source)
+grep -rn "db\.setSync\|setItem" js/ | grep -v "test\|_archives" > /tmp/ecrivains-bruts.txt
+
+# Produit la liste des lecteurs par clé
+grep -rn "db\.getSync\|getItem" js/ | grep -v "test\|_archives" > /tmp/lecteurs-bruts.txt
+```
+
+À transformer en script Python ou Node qui sort un Markdown ou JSON exploitable. Cible : pouvoir le re-lancer dans 3 mois et obtenir la même structure auto-régénérée. **À déposer dans `scripts/audit-ssot.{js|py}`** (créer le dossier si besoin). C'est aussi le pre-work du Sprint B.
+
+#### Livrable 2 — Actualiser `docs/DATA-OWNERSHIP.md` (~45 min)
+
+À partir des données du Livrable 1 et de la connaissance des chantiers récents :
+
+1. **Mettre à jour l'en-tête** : Beta courante (au moment du sprint), date du jour, source = audit auto-régénéré (script du Livrable 1) + chantiers Cat-B/AQPC livrés
+2. **Corriger les 4 owners erronés** identifiés par PLAN-MOYEN-TERME §5.2 (les lister explicitement)
+3. **Ajouter les 8 violations multi-écrivains non listées** (idem)
+4. **Mesurer le vrai chiffre `modalitesEvaluation`** (le tableau actuel dit « 25+ écrivains » alors que la mesure de la session du 22 mai en a trouvé **14 modules écrivains, 47 call-sites `db.setSync`**)
+5. **Refléter les chantiers livrés** :
+   - `utils-notifications.js` = source unique notifications (chantier E)
+   - `window.evaluationEnCours` encapsulé via API + sentinelle Vitest (chantier F)
+   - `profil-etudiant-diagnostics.js` : 2 accès `localStorage` migrés vers `db.*` (chantier G)
+   - Refactor R → N : `decouplerPR` → `decouplerPN`, `indiceR` → `indiceN`, propriété `risque` → `niveauAttention` (AQPC Phase 6.1)
+   - 4 fonctions code mort alarmiste retirées (`calculerRisqueEchec`, `obtenirClasseRisque`, `calculerNiveauRaI`, `afficherAlertesPrioritaires`, + bonus `afficherDistributionRisques` détecté pendant AQPC)
+6. **Marquer les violations résolues** dans le tableau « Violations connues » (#5 `presences` déjà clos antérieurement ; ajouter celles fermées par Cat-B/AQPC)
+7. **Garder Tier 6.5 `modalitesEvaluation` (violation #1)** comme dette résiduelle pour le Sprint C
+
+#### Livrable 3 — Addendum à `audit/reports/02-summary.md` (~30 min)
+
+⚠️ **Attention** : `audit/reports/02-summary.md` vit sur la branche `audit/2026-mai` (l'autre instance). NE PAS y écrire depuis le worktree sprintA (main). Deux options :
+
+- **Option A (recommandée)** : créer `audit/refactoring-prep/02-DELTA-CAT-B-AQPC.md` sur main, qui se référence depuis `audit/reports/02-summary.md` au moment où `audit/2026-mai` sera mergé sur main. Pas de collision.
+- **Option B** : préparer un patch texte (diff prêt à appliquer) à intégrer manuellement quand la branche `audit/2026-mai` sera mergée. Le déposer dans `audit/refactoring-prep/02-DELTA-PATCH.diff` ou équivalent.
+
+Contenu de l'addendum : tableau avant/après par sous-audit, mesures factuelles (cloc, eslint complexity, jscpd, baseline tests), statut révisé.
+
+Mesures à produire avec :
+
+```bash
+# Métriques santé du code post-Cat-B/AQPC
+find js -maxdepth 2 -name "*.js" -not -path "*/_archives/*" | xargs wc -l | tail -1
+find js -maxdepth 2 -name "*.js" -not -path "*/_archives/*" | wc -l
+# eslint complexity si la config est présente dans tests/ ou audit/
+```
+
+### Étape 7 — Conventions de travail Sprint A
+
+- **0 modification de code applicatif**. Si une régression latente est détectée pendant le grep, NE PAS la fixer dans ce sprint — inscrire dans `Retours des testeurs/SUIVI-BUGS.md` section « Détectés Sprint A » pour traitement ultérieur (Sprint B ou C selon la nature).
+- **1 commit par livrable** (script auto-régénérable, MAJ DATA-OWNERSHIP, addendum/patch).
+- **Sécurité** : pas pertinent puisqu'aucune modif applicative. Mais le hook pré-push Vitest reste vert obligatoire à chaque commit (= rien ne touche au code, donc trivialement vert).
+
+### Étape 8 — Bump version en fin de Sprint A
+
+**ATTENTION** : demander à Grégoire AVANT de bumper. Convention CLAUDE.md.
+
+Si pas de modification de code applicatif, **probablement pas de bump beta**. Juste un refresh build (`version.json` + `js/init-inline.js`) pour marquer la livraison documentaire. À confirmer avec Grégoire.
+
+### Étape 9 — Merge FF + push en fin de Sprint A
+
+Depuis le worktree sprintA :
+```bash
+git push origin sprint-a/data-ownership:main    # FF merge
+```
+
+Pas de tag obligatoire pour Sprint A (c'est de la documentation). Si Grégoire le souhaite : `sprint-a-data-ownership-2026-MM-DD`.
+
+### Étape 10 — Cleanup worktree en fin de Sprint A
+
+```bash
+# Depuis le repo principal :
+cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
+git worktree remove ../Monitorage_v6-sprintA
+git branch -D sprint-a/data-ownership
+
+# Suppression remote (si gh disponible, évite hook pré-push) :
+gh api -X DELETE repos/bedardg71-codexnumeris/Monitorage_v6/git/refs/heads/sprint-a/data-ownership
+```
+
+### Étape 11 — Préparation Sprint B (à signaler à Grégoire)
+
+Une fois Sprint A clos, signaler à Grégoire que **Sprint B (cartographies 3.1 + 3.2 + 3.3 de l'Axe 3)** peut s'attaquer post-AQPC :
+
+- 3.1 : étendre le script du Livrable 1 pour produire la cartographie complète (lecteurs + écrivains + violations) en MD
+- 3.2 : utiliser `npx madge --json js/` pour produire le graphe fan-in/fan-out et le présenter dans `docs/architecture/`
+- 3.3 : capitaliser sur `audit/refactoring-prep/MODULES-MAP.md` §2.x + détecter les imports circulaires éventuels
+
+Effort estimé Sprint B : 3-4 h. Risque : faible (production de documentation et de scripts d'analyse).
+
+---
+
+## §3bis — Archive consigne de démarrage Cat-B (clos 21 mai 2026)
+
+> Consigne précédente — conservée comme référence pour les conventions worktree, hook pré-push, etc.
+
+### Étape 1 — Vérifier l'état du repo (1-2 min, période Cat-B)
+
+```bash
+cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
+
 git status                              # branche actuelle ?
-git log --oneline main -3               # HEAD main attendu : `cdd8a23 refactor(cat-b): chantier J reliquat — tokens CSS` ou plus récent
+git log --oneline main -3               # HEAD main attendu pendant Cat-B : `cdd8a23 refactor(cat-b): chantier J reliquat — tokens CSS` ou plus récent
 git tag -l "cat-b-*" | sort             # 9 tags attendus :
                                         #   cat-b-track-1-2026-05-21
                                         #   cat-b-track-2-2026-05-21
@@ -223,125 +402,9 @@ git tag -l "cat-b-*" | sort             # 9 tags attendus :
                                         #   cat-b-track-4-chantierE-2026-05-21
                                         #   cat-b-track-4-chantierI-2026-05-21
                                         #   cat-b-track-4-chantierJ-tokens-2026-05-21
-git worktree list                       # 1 seul worktree attendu (le principal sur main ou audit/2026-mai)
 ```
 
-**Si HEAD main au-delà de `cdd8a23`** : un autre chantier a été fait depuis (vérifier `git log main` pour les commits récents). Pas de panique, ce SESSION.md sera mis à jour par cet autre chantier.
-
-### Étape 2 — Créer un worktree dédié à main
-
-`audit/2026-mai` a son propre cycle de vie avec des modifs uncommitted (audits, rapports, docs sécurité). **NE PAS écraser**. Créer un worktree dédié :
-
-```bash
-# Choisir un nom de track parlant ; exemple Track 4 chantier I (la prochaine priorité) :
-git worktree add ../Monitorage_v6-catbI -b cat-b/track-4-chantier-I main
-```
-
-> ⚠️ Pattern observé 21 mai : `git checkout main` avec modifs uncommitted sur `audit/2026-mai` → git refuse. Solution propre = **worktree dédié à main** (acté Grégoire 21 mai matin).
-
-> ⚠️ Pattern observé 21 mai PM : `git branch -d` refuse de supprimer une branche cat-b mergée sur main si le HEAD du worktree courant (audit/2026-mai) diverge. Utiliser `git branch -D` (force) — safe puisque les commits sont sur main + tag origin.
-
-### Étape 3 — Lecture obligatoire (10-15 min)
-
-Ordre strict :
-1. **Ce SESSION.md** (relai courant + garde-fou §0)
-2. `audit/refactoring-prep/PLAN-CAT-B-POST-MERGE.md` — plan 4 tracks + §5 critères + §7 statut + §8 historique
-3. `audit/refactoring-prep/METHODE-REFACTORING.md` — §3-§5 méthode et anti-patterns (gelée Track 2, §7 rétrospectives par module)
-4. `audit/refactoring-prep/MODULES-MAP.md` §2.1-2.5 (post-refactoring snapshots)
-5. `Retours des testeurs/SUIVI-BUGS.md` — section « Corrigés (21 mai — Cat-B Track 3 phase 2) » pour le bug #110, et toutes les sections Corrigés du 21 mai. Section Ouverts vide.
-6. `CLAUDE.md` (racine) — règles sécurité, conventions, version, design system
-7. `BACKLOG.md` — items utilisateur en attente
-
-### Étape 4 — Charger les skills
-
-**Obligatoire** (CLAUDE.md L172) :
-- `Skills pour Claude Code/SKILL_labo_codex.md` — architecture, indices A-C-P, workflow
-
-**Selon track choisi** :
-- Test visuel chantier E (notifications) → 6 scénarios listés dans §3 étape 6 priorité 2 ; pas de code, juste validation manuelle Grégoire sur Safari Mac + iPad Air
-- Décision label `v2-seuil-fragile` → décision Grégoire d'abord, pas de code
-- Préparation présentation AQPC 3 juin → consulter `docs/AQPC Colloque 2026-Labo Codex v2 (8 mai).pptx` + `docs/AQPC-2026-suggestions-deuxieme-partie.md` + `audit/reports/SUMMARY-aqpc.md`
-- Chantier H optionnel (sous-découpage résidus) → relire METHODE §6.5 + acté D-21M-5 post-AQPC, NE PAS attaquer sans nouvelle validation Grégoire
-- Reprise éventuelle Mobilisation cyc 48 (héritage Cat-B sous N=50) → relire METHODE §6.5 gabarit AVANT de proposer fragmentation supplémentaire
-- Reprise audit annuel (4.3 onboarding tiers ou 6.2/6.3 tests manuels) → lire `audit/SESSION.md` (sujet distinct)
-
-### Étape 5 — Lancer la suite de tests (baseline)
-
-```bash
-cd tests && npm install      # première fois après nouveau worktree (catbX etc.)
-cd tests && npm test         # attendu : 85 Vitest + 18 Playwright = 103/103 verts
-                             # (+6 chantier I rendus DOM bilan-reflexif/productions/trimestre-v2/profil-etudiant + 2× evaluation)
-```
-
-Si rouge dès le départ → diagnostic prioritaire AVANT tout chantier. Ne pas démarrer si baseline pas verte.
-
-### Étape 6 — Choisir le track à attaquer
-
-**État** : cycle Cat-B **clos à 10/10 critères**. Audit annuel **25/25 livrés**. Tests **103/103 verts**. Audit 1.3 **complètement Vert** (UI + tokens CSS).
-
-**Priorité recommandée** (par valeur/effort, ordre actualisé post-Track-4-chantier-J-tokens) :
-
-1. **Préparation présentation AQPC 3 juin (J−13)** : pptx du 8 mai (`docs/AQPC Colloque 2026-Labo Codex v2 (8 mai).pptx`) + démos + script. Codebase dans un état exceptionnellement propre. C'est la chose de la plus haute valeur sur les 13 jours restants.
-
-2. **Test visuel Grégoire chantier E** : 6 scénarios déclenchant des notifications (sauvegarde production, sauvegarde évaluation, erreur import ZIP, archivage réserve, ajout enseignant, fermeture codex) — sur Safari Mac + iPad Air, modes sombre + clair. Comportement attendu : couleur correcte (vert succes, rouge erreur, neutre info), durée correcte (3s succes/info, 5s erreur), animation slide-out 300ms. **Recommandé pré-AQPC** : ~30 min de validation manuelle.
-
-3. **1 décision Grégoire pendante Track 4 chantier J reliquat** (sans code)
-   - Label `v2-seuil-fragile` : maintenu, atténué, ou aligné ?
-   - (Tokens CSS `--risque-*` → `--niveau-attention-*` LIVRÉ 21 mai soir, 97 hits / 10 fichiers / mapping 1:1.)
-
-4. **Reprise audit annuel** (sujet distinct, branche `audit/2026-mai`)
-   - 4.3 onboarding tiers (protocole `audit/04-sustainability/4.3-protocole-execution.md`) — session Claude « fraîche » nécessaire.
-   - 6.2/6.3 tests manuels Grégoire (VoiceOver Mac + iPad réel, ~3 h 30).
-   - Lire `audit/SESSION.md` pour reprendre l'audit.
-
-5. **Track 4 chantier H** (OPTIONNEL, post-AQPC) — Sous-découpage résidus (~4-6h)
-   - Décision Grégoire 18 mai + acté D-21M-5 le 21 mai soir : reporter sauf si la dette devient gênante au quotidien. NE PAS attaquer sans nouvelle validation.
-
-6. **Réouverture Mobilisation cyc 48 → <30** (héritage Cat-B sous N=50 acté)
-   - **NE PAS attaquer sans validation Grégoire**. Le templating HTML dense en ternaires demanderait une sur-fragmentation jugée disproportionnée le 21 mai PM.
-
-### Étape 7 — Conventions de travail Cat-B
-
-- **Préservation comportementale stricte LEVÉE** pour les bugs latents. Si on découvre un nouveau bug, le FIX + inscription SUIVI-BUGS (vs le préserver pendant les refactors antérieurs). Cf. bug #110 fix Track 3 phase 2.
-- **NE PAS étendre le scope** au-delà du track en cours.
-- **1 commit par chantier** (ou par fonction si grosse — ex Track 3 phase 2 = 5 commits pour 5 fonctions).
-- **Hook pré-push Vitest** vert obligatoire à chaque commit (installé par défaut sur les worktrees créés depuis main — confirmé 21 mai PM).
-- **Sécurité non-négociable** (CLAUDE.md) : tout `innerHTML` avec données utilisateur → `echapperHtml()`. Aucun acquittement `// security-ok` sans justification absolue inscrite SUIVI-BUGS.
-- **Tests** : 103/103 minimum à chaque commit (post-chantier I). Si régression, investigation prioritaire avant de continuer.
-- **Audit ESLint complexity** après chaque extraction. Cible dure cyc ≤ 30 — héritage Cat-B sous N=50 acceptable si template HTML dense.
-- **Fallback Python pour Edit JSON-based** : si Edit échoue sur du contenu contenant `̀-ͯ` (escapes regex Unicode) ou autres séquences problématiques, utiliser `python3 - <<'PYEOF' ... PYEOF` avec lecture/écriture explicites + invariants `assert`. Pattern éprouvé Track 3 phase 2 (calculerIPB, calculerDetailsNoteFinale, Performance, Mobilisation).
-
-### Étape 8 — Bump version en fin de track
-
-**ATTENTION** : demander à Grégoire AVANT de bumper. Convention CLAUDE.md : « Demander le numéro de beta. Ne jamais renumeroter automatiquement. »
-
-Sites à modifier (une fois Grégoire confirme) :
-- `version.json` : `{"build":"MMJJ-HHMM","beta":"XX.X"}`
-- `js/init-inline.js` lignes 121-122 : `VERSION_MAJEURE` + `BUILD_ID`
-
-Cycle Cat-B est resté en 99.61 pour les 5 tracks + chantier E par décision Grégoire 21 mai. Build refresh seulement (0521-1108 → 0521-1717 au chantier E).
-
-### Étape 9 — Merge FF + tag + push en fin de track
-
-Depuis le worktree (Track 4 chantier E en exemple — pattern éprouvé) :
-```bash
-git push . HEAD:main
-git tag cat-b-track-4-chantierX-2026-MM-DD cat-b/track-4-chantier-X
-git push origin main cat-b-track-4-chantierX-2026-MM-DD
-```
-
-Le hook pré-push lance Vitest automatiquement. Si rouge → abort.
-
-Mettre à jour PLAN-CAT-B-POST-MERGE.md §5 critères + §7 statut + §8 historique.
-Mettre à jour ce SESSION.md (§0 garde-fou + §1 statut Track + §2 critères + §3 étape 6 priorités + §5 historique).
-
-### Étape 10 — Cleanup worktree en fin de session
-
-Depuis le repo principal :
-```bash
-git worktree remove ../Monitorage_v6-catbX
-git branch -D cat-b/track-4-chantier-X   # -D obligatoire : voir note §3 étape 2
-```
+(Consigne Cat-B complète omise — voir versions précédentes de SESSION.md dans `git log` si besoin.)
 
 ---
 
@@ -396,3 +459,4 @@ git branch -D cat-b/track-4-chantier-X   # -D obligatoire : voir note §3 étape
 | 2026-05-21 (soir, post-Track 4 chantier I) | MAJ après livraison Track 4 chantier I (1 commit refactor `a16aefa` + 1 commit docs sur la branche `cat-b/track-4-chantier-I`, build 0521-2046). 6 tests Playwright rendus DOM répartis dans 5 fichiers `tests/integration/*-rendu.spec.js` : bilan-reflexif éditeur, productions badge CC (+ vérif XSS E-β), trimestre-v2 carte résumé horaires, profil-etudiant Section Productions par défaut, evaluation palette critères + rétroaction Bilan. Tests 97→103/103 verts (85 Vitest + 18 Playwright). Critère A8 atteint. **10/10 critères Cat-B atteints** (A2 sous exception N=50). Cycle Cat-B clos pré-AQPC. §0 garde-fou inchangé. §1 Track 4 enrichi (chantier I livré). §2 critères : tous 10 atteints. §3 étape 6 réordonnée (chantier I retiré, priorité 1 devient test visuel Grégoire + décisions J reliquat + prep AQPC). Pattern technique éprouvé : `page.evaluate()` + fixtures `db.setSync` + `page.on('dialog')` pour auto-dismiss alert. Convention `*-rendu.spec.js` (rendus DOM) complète `*-chargement.spec.js` (sentinelles d'exports) déjà en place. | Cat-B Track 4 chantier I (Claude autonome) |
 | 2026-05-21 (soir, post-Track 4 chantier J reliquat tokens CSS) | MAJ après livraison chantier J reliquat tokens CSS (1 commit, branche `cat-b/track-4-chantier-J-tokens`). Renommage 7 tokens `--risque-{nul,minimal,faible,modere,eleve,tres-eleve,critique}` → `--niveau-attention-*` (mapping 1:1). Scope réel : 97 hits dans 10 fichiers (styles.css 34 + index.html 29 + 8 modules JS 34). L'estimation initiale 480 incluait commentaires + JSON ESLint historiques (préservés intacts). Tests 103/103 verts (aucune régression). Audit annuel 1.3 désormais **complètement Vert** côté tokens CSS. §1 Track 4 enrichi (chantier J reliquat tokens livré). §3 étape 6 : retirer item tokens CSS de la décision pendante (reste seulement label `v2-seuil-fragile`). Pattern technique : substitution `perl -i -pe 's/--risque-/--niveau-attention-/g'` sur liste explicite de fichiers (préserve les rapports historiques). | Cat-B Track 4 chantier J reliquat tokens (Claude autonome) |
 | 2026-05-22 (matin, cycle AQPC pré-3-juin) | Bascule du cycle Cat-B (clos) vers le cycle AQPC pré-3-juin. 6 commits livrés sur la branche `aqpc/privacy` (créée depuis main `e50cf61`, mergée FF sur main au commit `1312a6b`) couvrant Phase 1.5 + 2 + 3 + 4 + 5 (sauf 5.1/5.2 délégués ds-update passe 3) + 6.1 + 6.2 du PLAN-COURT-TERME. Documents publics nouveaux : PRIVACY.md (~400 l.), INCIDENTS.md (~250 l.), INFO-ELEVES.md (~175 l.), DEPLOY.md (~315 l.), netlify.toml (consolide _headers). README.md refondu (8 références mortes retirées, double licence AGPL+CC). Refactor R → N (Niveau d'attention) : 49 substitutions dans 8 modules + cohérent avec renommage tokens CSS du chantier J. 4 fonctions code mort alarmiste retirées au total (2 Cat-B Track 1 + 2 AQPC). Audit `rapportsBugArchives` avec seuil 50→20, migration idempotente, alerte UI dans formulaire bug. Phase 5 axe-core : T-A1/T-A2 ARIA + prefers-reduced-motion + prefers-contrast: more + aria-live notifications. Tests Vitest 85/85 verts à chaque commit (hook pré-push). Bump version 99.61 → 99.62 (build 0521-2101 → 0522-0650) à la clôture. Branche `aqpc/privacy` supprimée localement et remotement après merge. §0 garde-fou réécrit (retrait mention 99.62 reverté, ajout decouplerPN + MAX_RAPPORTS 20 + 1.4/1.6 reportés audit/2026-mai). §1 réécrit pour cycle AQPC ; ancien §1 Cat-B déclassé en §1bis archive. Dette explicite documentée : « Direction du risque » UI, « Seuils d'alerte critiques » doc, ~10 références JS au mot « risque » dans commentaires, `_headers` à retirer post-validation deploy. Démarche externe à engager par Grégoire : demande d'avis PRP du Cégep de Drummondville (Loi 25, délai 2-6 semaines). | Cycle AQPC (Claude autonome) |
+| 2026-05-22 (matin, post-AQPC, préparation Sprint A) | Mise à jour du relai post-clôture cycle AQPC. Grégoire demande un cycle dédié aux axes Rouge 2 (Santé du code) et 3 (Architecture SSOT) de l'audit annuel. Plan séquencé en 3 sprints A → B → C présenté et validé : Sprint A (1-2 h, MAJ DATA-OWNERSHIP.md + addendum 02-summary delta Cat-B/AQPC, 0 risque applicatif) — priorité immédiate. Sprint B (3-4 h, cartographies 3.1/3.2/3.3) — post-AQPC. Sprint C (5-8 h, Tier 6.5 `modalitesEvaluation` 14 écrivains/47 sites) — été 2026. §3 réécrit pour donner consigne Sprint A complète (11 étapes, livrables explicites, conventions pas-de-code-applicatif). Ancien §3 Cat-B déclassé en §3bis archive (consigne tronquée — référence aux versions précédentes du fichier via `git log`). Header mis à jour : prochaine priorité = Sprint A. Aucun bump version (juste un commit doc + refresh build). | Préparation Sprint A (Claude autonome) |
