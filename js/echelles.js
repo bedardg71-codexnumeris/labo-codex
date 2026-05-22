@@ -72,7 +72,7 @@ const niveauxDefaut = [
         min: 0,
         max: 64.99,
         valeurCalcul: 32,
-        couleur: 'var(--risque-critique)'
+        couleur: 'var(--niveau-attention-critique)'
     },
     {
         code: 'D',
@@ -81,7 +81,7 @@ const niveauxDefaut = [
         min: 65,
         max: 74.99,
         valeurCalcul: 69.5,
-        couleur: 'var(--risque-modere)'
+        couleur: 'var(--niveau-attention-modere)'
     },
     {
         code: 'M',
@@ -90,7 +90,7 @@ const niveauxDefaut = [
         min: 75,
         max: 84.99,
         valeurCalcul: 79.5,
-        couleur: 'var(--risque-minimal)'
+        couleur: 'var(--niveau-attention-minimal)'
     },
     {
         code: 'E',
@@ -99,7 +99,7 @@ const niveauxDefaut = [
         min: 85,
         max: 100,
         valeurCalcul: 92.5,
-        couleur: 'var(--risque-nul)'
+        couleur: 'var(--niveau-attention-nul)'
     }
 ];
 
@@ -112,19 +112,19 @@ const niveauxDefaut = [
  * 20 couleurs organisées par teintes
  */
 const paletteCouleurs = [
-    { nom: 'Rouge critique', valeur: 'var(--risque-critique)' },
+    { nom: 'Rouge critique', valeur: 'var(--niveau-attention-critique)' },
     { nom: 'Rouge foncé', valeur: '#c0392b' },
     { nom: 'Rouge', valeur: '#e74c3c' },
-    { nom: 'Orange critique', valeur: 'var(--risque-eleve)' },
+    { nom: 'Orange critique', valeur: 'var(--niveau-attention-eleve)' },
     { nom: 'Orange', valeur: '#e67e22' },
     { nom: 'Orange clair', valeur: '#f39c12' },
-    { nom: 'Jaune modéré', valeur: 'var(--risque-modere)' },
+    { nom: 'Jaune modéré', valeur: 'var(--niveau-attention-modere)' },
     { nom: 'Jaune', valeur: '#f1c40f' },
     { nom: 'Jaune-vert', valeur: '#9b59b6' },
-    { nom: 'Vert minimal', valeur: 'var(--risque-minimal)' },
+    { nom: 'Vert minimal', valeur: 'var(--niveau-attention-minimal)' },
     { nom: 'Vert', valeur: '#27ae60' },
     { nom: 'Vert foncé', valeur: '#1e8449' },
-    { nom: 'Vert nul', valeur: 'var(--risque-nul)' },
+    { nom: 'Vert nul', valeur: 'var(--niveau-attention-nul)' },
     { nom: 'Turquoise', valeur: '#16a085' },
     { nom: 'Bleu clair', valeur: '#3498db' },
     { nom: 'Bleu moyen', valeur: 'var(--bleu-moyen)' },

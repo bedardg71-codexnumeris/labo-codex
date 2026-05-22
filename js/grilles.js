@@ -1211,13 +1211,13 @@ function calculerTotalPonderationCriteres(criteres) {
     totalSpan.textContent = total + '%';
 
     if (total === 100) {
-        totalSpan.style.color = 'var(--risque-minimal)';
+        totalSpan.style.color = 'var(--niveau-attention-minimal)';
         statutSpan.innerHTML = '<span class="grille-texte-minimal">✓ Pondération complète</span>';
     } else if (total < 100) {
-        totalSpan.style.color = 'var(--risque-modere)';
+        totalSpan.style.color = 'var(--niveau-attention-modere)';
         statutSpan.innerHTML = `<span class="grille-texte-modere">${100 - total}% manquant</span>`;
     } else {
-        totalSpan.style.color = 'var(--risque-critique)';
+        totalSpan.style.color = 'var(--niveau-attention-critique)';
         statutSpan.innerHTML = `<span class="grille-texte-critique">${total - 100}% en trop</span>`;
     }
 }
@@ -1325,10 +1325,10 @@ async function afficherToutesLesGrillesCriteres() {
         let texteStatut = '';
 
         if (total < 100) {
-            couleur = 'var(--risque-eleve)';
+            couleur = 'var(--niveau-attention-eleve)';
             texteStatut = '⚠️ Incomplet';
         } else if (total > 100) {
-            couleur = 'var(--risque-critique)';
+            couleur = 'var(--niveau-attention-critique)';
             texteStatut = '❌ Dépasse 100%';
         } else {
             couleur = 'var(--vert-valide)';

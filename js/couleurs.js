@@ -34,13 +34,13 @@ const COULEURS = (() => {
 
     // Niveaux de risque RàI
     const risque = {
-        nul:       lireCSS('--risque-nul')       || '#6aacb8',
-        minimal:   lireCSS('--risque-minimal')    || '#34c759',
-        faible:    lireCSS('--risque-faible')     || '#7ae8a0',
-        modere:    lireCSS('--risque-modere')     || '#ffc107',
-        eleve:     lireCSS('--risque-eleve')      || '#fd7e14',
-        tresEleve: lireCSS('--risque-tres-eleve') || '#e84057',
-        critique:  lireCSS('--risque-critique')   || '#a02030'
+        nul:       lireCSS('--niveau-attention-nul')       || '#6aacb8',
+        minimal:   lireCSS('--niveau-attention-minimal')    || '#34c759',
+        faible:    lireCSS('--niveau-attention-faible')     || '#7ae8a0',
+        modere:    lireCSS('--niveau-attention-modere')     || '#ffc107',
+        eleve:     lireCSS('--niveau-attention-eleve')      || '#fd7e14',
+        tresEleve: lireCSS('--niveau-attention-tres-eleve') || '#e84057',
+        critique:  lireCSS('--niveau-attention-critique')   || '#a02030'
     };
 
     // Niveaux IDME

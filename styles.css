@@ -106,13 +106,13 @@
     --rai-niveau-3: #a78bfa;     /* Violet — niveau 3 */
 
     /* === INDICATEURS DE RISQUE === */
-    --risque-nul: #6aacb8;
-    --risque-minimal: #34c759;
-    --risque-faible: #7ae8a0;
-    --risque-modere: #ffc107;
-    --risque-eleve: #fd7e14;
-    --risque-tres-eleve: #e84057;
-    --risque-critique: #a02030;
+    --niveau-attention-nul: #6aacb8;
+    --niveau-attention-minimal: #34c759;
+    --niveau-attention-faible: #7ae8a0;
+    --niveau-attention-modere: #ffc107;
+    --niveau-attention-eleve: #fd7e14;
+    --niveau-attention-tres-eleve: #e84057;
+    --niveau-attention-critique: #a02030;
 
     /* === NIVEAUX IDME (zones spaghetti) === */
     --idme-etendu: #64B5F6;
@@ -1933,11 +1933,11 @@ h1, h2, h3, h4 {
     transition: transform 0.2s;
 }
 
-.note-maitrise { background: var(--risque-minimal); color: white; }
-.note-intermediaire { background: var(--risque-faible); color: #1a5f1a; }
-.note-developpement { background: var(--risque-modere); color: #7a5900; }
-.note-base { background: var(--risque-eleve); color: white; }
-.note-observation { background: var(--risque-critique); color: white; }
+.note-maitrise { background: var(--niveau-attention-minimal); color: white; }
+.note-intermediaire { background: var(--niveau-attention-faible); color: #1a5f1a; }
+.note-developpement { background: var(--niveau-attention-modere); color: #7a5900; }
+.note-base { background: var(--niveau-attention-eleve); color: white; }
+.note-observation { background: var(--niveau-attention-critique); color: white; }
 
 .badge-statut {
     padding: 4px 8px;
@@ -2377,7 +2377,7 @@ input[type="number"].controle-form {
 }
 .badge-categorie-evenement.badge-personnel {
     background: rgba(255, 193, 7, 0.15);
-    color: var(--risque-modere);
+    color: var(--niveau-attention-modere);
 }
 
 /* === BADGES DE RISQUE (sans émojis) - OBSOLÈTE - Gardé pour compatibilité === */
@@ -2393,17 +2393,17 @@ input[type="number"].controle-form {
 
 .badge-risque-modere {
     background: rgba(255, 193, 7, 0.12);
-    color: var(--risque-modere);
+    color: var(--niveau-attention-modere);
 }
 
 .badge-risque-eleve {
     background: rgba(253, 126, 20, 0.12);
-    color: var(--risque-eleve);
+    color: var(--niveau-attention-eleve);
 }
 
 .badge-risque-tres-eleve {
     background: rgba(232, 64, 87, 0.12);
-    color: var(--risque-tres-eleve);
+    color: var(--niveau-attention-tres-eleve);
 }
 
 .badge-risque-critique {
@@ -2424,12 +2424,12 @@ input[type="number"].controle-form {
 
 .badge-engagement-modere {
     background: rgba(255, 193, 7, 0.12);
-    color: var(--risque-modere);
+    color: var(--niveau-attention-modere);
 }
 
 .badge-engagement-fragile {
     background: rgba(253, 126, 20, 0.12);
-    color: var(--risque-eleve);
+    color: var(--niveau-attention-eleve);
 }
 
 .badge-engagement-insuffisant {
@@ -2650,22 +2650,22 @@ input[type="number"].controle-form {
 
 .badge-risque-analyse-eleve {
     background: rgba(253, 126, 20, 0.12);
-    color: var(--risque-eleve);
+    color: var(--niveau-attention-eleve);
 }
 
 .badge-risque-analyse-eleve .badge-analyse-count {
-    background: var(--risque-eleve);
+    background: var(--niveau-attention-eleve);
 }
 
 .badge-risque-analyse-tres-eleve,
 .badge-risque-analyse-critique {
     background: rgba(232, 64, 87, 0.12);
-    color: var(--risque-tres-eleve);
+    color: var(--niveau-attention-tres-eleve);
 }
 
 .badge-risque-analyse-tres-eleve .badge-analyse-count,
 .badge-risque-analyse-critique .badge-analyse-count {
-    background: var(--risque-tres-eleve);
+    background: var(--niveau-attention-tres-eleve);
 }
 
 /* Badge de risque par défaut (gris neutre) */
@@ -5530,43 +5530,43 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 .carte-metrique-verte,
 .carte-metrique-standard.carte-metrique-minimal {
     background: var(--surface-carte, #1a3040);
-    border-color: var(--risque-minimal);
+    border-color: var(--niveau-attention-minimal);
 }
 
 .carte-metrique-verte .valeur,
 .carte-metrique-standard.carte-metrique-minimal .valeur {
-    color: var(--risque-minimal);
+    color: var(--niveau-attention-minimal);
 }
 
 .carte-metrique-violette,
 .carte-metrique-standard.carte-metrique-nul {
     background: var(--surface-carte, #1a3040);
-    border-color: var(--risque-nul);
+    border-color: var(--niveau-attention-nul);
 }
 
 .carte-metrique-violette .valeur,
 .carte-metrique-standard.carte-metrique-nul .valeur {
-    color: var(--risque-nul);
+    color: var(--niveau-attention-nul);
 }
 
 .carte-metrique-terracotta,
 .carte-metrique-standard.carte-metrique-modere {
     background: var(--surface-carte, #1a3040);
-    border-color: var(--risque-modere);
+    border-color: var(--niveau-attention-modere);
 }
 
 .carte-metrique-terracotta .valeur,
 .carte-metrique-standard.carte-metrique-modere .valeur {
-    color: var(--risque-modere);
+    color: var(--niveau-attention-modere);
 }
 
 .carte-metrique-standard.carte-metrique-critique {
     background: var(--surface-carte, #1a3040);
-    border-color: var(--risque-critique);
+    border-color: var(--niveau-attention-critique);
 }
 
 .carte-metrique-standard.carte-metrique-critique .valeur {
-    color: var(--risque-critique);
+    color: var(--niveau-attention-critique);
 }
 
 /* ===============================
@@ -6022,7 +6022,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
    Le numéro de semaine reste affiché (le rôle pédagogique compte normalement). */
 .calendrier-jour-conge.calendrier-jour-conge-personnel {
     background: rgba(255, 193, 7, 0.10);
-    border: 2px dashed var(--risque-modere);
+    border: 2px dashed var(--niveau-attention-modere);
     color: var(--texte-principal);
 }
 
@@ -7315,15 +7315,15 @@ body.mode-clair .bloc-rlo-separateur {
 }
 
 .grille-texte-critique {
-    color: var(--risque-critique);
+    color: var(--niveau-attention-critique);
 }
 
 .grille-texte-modere {
-    color: var(--risque-modere);
+    color: var(--niveau-attention-modere);
 }
 
 .grille-texte-minimal {
-    color: var(--risque-minimal);
+    color: var(--niveau-attention-minimal);
 }
 
 /* 🆕 BETA 91: Sous-critères avec pondération différenciée */

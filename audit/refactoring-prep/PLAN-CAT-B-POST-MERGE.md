@@ -165,21 +165,21 @@ Couverture actuelle : 2 tests par module refactoré (chargement + sentinelle exp
 
 ### Chantier J — Chantier vocabulaire alarmiste (audit annuel 1.3)
 
-Source : `audit/reports/01-3-lexicon.md` — statut Jaune. 6 strings UI-VIVES + 2 UI-DOC alarmistes/prédictives + ~30 hits CSS `--risque-*` à arbitrer.
+Source : `audit/reports/01-3-lexicon.md` — statut Jaune. 6 strings UI-VIVES + 2 UI-DOC alarmistes/prédictives + 97 hits réels code applicatif sur 7 tokens CSS `--risque-*` (LIVRÉS → renommés `--niveau-attention-*` 21 mai 2026 soir).
 
 Trouvailles à traiter (résumé) :
 - `profil-etudiant.js:5379` et `:5391` — strings « Alerte : Contexte fragile » / « Alerte critique »
 - `index.html:11471, 11478, 10645, 10024` — 4 strings « intelligence prédictive » / « Détection précoce »
 - `index.html:15355-15401` — FAQ entière « L'indice R prédit le risque d'échec » + tableau (formule obsolète)
 - `index.html:15611, 15647` — glossaire « Indice R » + « Dépistage » (formules obsolètes)
-- Tokens CSS `--risque-*` (480 hits, palette historique) — décision Grégoire pendante (renommer ou conserver ?)
+- Tokens CSS `--risque-*` (97 hits réels code applicatif, l'estimation initiale 480 incluait commentaires/doc/JSON ESLint historiques) — ✅ **renommés en `--niveau-attention-*`** le 21 mai 2026 soir (mapping 1:1 sur 7 variantes : nul/minimal/faible/modere/eleve/tres-eleve/critique). Rapports ESLint historiques `audit/reports/02-{2,5}-eslint-*.json` préservés (snapshots datés).
 - Label `v2-seuil-fragile` — décision Grégoire pendante
 
 **Action recommandée** :
 1. Reformuler les 8 strings UI vers vocabulaire descriptif (réfs. SKILL_RaI).
 2. Retirer la FAQ « Indice R prédit » + tableau (lien chantier D — `calculerRisqueEchec` retiré).
 3. Glossaire `index.html:15611, 15647` aligné sur la nouvelle posture.
-4. Décision Grégoire sur tokens CSS `--risque-*` (renommage `--niveau-attention-*` ou conservation legacy ?).
+4. ✅ Tokens CSS `--risque-*` renommés en `--niveau-attention-*` (livré 21 mai 2026 soir, 97 hits / 10 fichiers, mapping 1:1).
 5. Décision Grégoire sur label `v2-seuil-fragile` (conservation, atténuation, ou alignement ?).
 
 **Effort total chantier J : ~2-3 h** (priorité haute audit 1.3) — visibilité externe AQPC. Risque : Faible.
@@ -308,7 +308,7 @@ Track 3 (héritages cyc) et reste de Track 4 sont post-AQPC sans contrainte de d
 - **Chantier H** (OPTIONNEL) : Sous-découpage résidus `profil-etudiant-sections-affichage.js` 4 654 LOC + `evaluation.js` 3 984 LOC (~4-6h)
 
 **Track 4 — décisions Grégoire pendantes (chantier J reliquat)** :
-- Renommage tokens CSS `--risque-*` (480 hits) en `--niveau-attention-*` ou conservation legacy ?
+- ✅ Renommage tokens CSS `--risque-*` → `--niveau-attention-*` LIVRÉ 21 mai 2026 soir (97 hits réels, mapping 1:1 sur 7 variantes).
 - Label `v2-seuil-fragile` : conservation, atténuation, ou alignement avec vocabulaire descriptif ?
 
 **Track 3 phase 2 — 5 fonctions profil-etudiant LIVRÉES** (21 mai 2026 PM, 5 commits sur branche `cat-b/track-3-phase2-profil-etudiant`) :
@@ -337,3 +337,4 @@ Ce document est mis à jour à chaque clôture de chantier.
 | 2026-05-21 soir | Track 4 chantier F LIVRÉ (1 commit refactor, branche `cat-b/track-4-chantier-F`). Couplage travaux-ui.js ↔ window.evaluationEnCours découplé via API `evaluation.demarrerEvaluationDepuisFichier(fichier, opts)`. Audit révèle 8 sites d'écriture cross-module (vs 1 annoncé §2 chantier F) : 1 réassignation L4639 + 7 mutations (Zone 1 basculerMode L4387-90 + Zone 2 afficherPalettesEval L4660/4669/4684). Décision (b) découpler actée. Sentinelle Vitest `tests/unit/sentinelle-evaluation-en-cours.test.js` (3 sub-tests) verrouille l'invariant : whitelist config.js + 7 modules evaluation*.js ; travaux-ui à 0 site d'écriture. Critère A6 atteint. Tests 92/92 verts (80 Vitest + 12 Playwright). | Cat-B Track 4 chantier F |
 | 2026-05-21 soir | Track 4 chantier E LIVRÉ (6 commits, branche `cat-b/track-4-chantier-E`, build 0521-1717). Consolidation `utils-notifications.js` — **scope réel ~7x plus gros que les 73 annoncés** : ~525 callers migrés dans 39 modules. État final : 0 def, 0 export, 0 wrapper, 0 guard typeof. Source unique `window.notifications.{succes, erreur, info}` (textContent, immunisé XSS). 3 bugs latents fixés (#111 XSS trimestre.js, #112 type ignoré, #113 shadow local wizard). Sentinelle Vitest stricte verrouille la régression. Critère A5 atteint. −469 LOC nettes, 97/97 tests verts (+5 vs baseline 92). | Cat-B Track 4 chantier E |
 | 2026-05-21 soir | **Track 4 chantier I LIVRÉ** (1 commit refactor + 1 commit docs, branche `cat-b/track-4-chantier-I`, build 0521-2046). 6 tests Playwright rendus DOM couvrant les 5 modules refactorés : bilan-reflexif éditeur (initialiserBilanReflexif), productions badge CC (genererBadgeCC + fix XSS E-β sur contributeurs[].modifications), trimestre-v2 carte résumé horaires (chargerHorairesV2 → jours/heures/local), profil-etudiant Section Productions par défaut (afficherProfilComplet → sidebar 2col + production fixture), evaluation palette critères (afficherCriteresDepuisGrille → cartes critères + 4 options IDME), evaluation rétroaction Bilan (basculerVueRetroaction('bilan') → préambule + défis + forces, exerce genererRetroactionBilan cyc 75). Tests : 85 Vitest + 18 Playwright = **103/103 verts** (+6 chantier I vs baseline 97). Critère A8 atteint. **10/10 critères Cat-B atteints** (A2 sous exception N=50). Pattern technique : `page.evaluate()` + fixtures `db.setSync` + auto-dismiss alert via `page.on('dialog')`. | Cat-B Track 4 chantier I |
+| 2026-05-21 soir | **Track 4 chantier J reliquat tokens CSS LIVRÉ** (1 commit, branche `cat-b/track-4-chantier-J-tokens`). Renommage des 7 tokens CSS `--risque-{nul,minimal,faible,modere,eleve,tres-eleve,critique}` → `--niveau-attention-*` (mapping 1:1 préservant la sémantique exacte). Audit réel : 97 hits dans 10 fichiers (styles.css 34 + index.html 29 + 8 modules JS 34). L'estimation initiale 480 hits comptait commentaires/doc/JSON ESLint historiques. Substitution perl in-place ; rapports ESLint figés `audit/reports/02-{2,5}-eslint-*.json` préservés (snapshots datés). Tests 103/103 verts (aucune régression). Conformité avec vocabulaire descriptif « niveau d'attention » établi côté UI (chantier J matin) + ADR-007 (vocabulaire descriptif). Audit annuel 1.3 désormais **complètement vert côté tokens CSS**. Reste 1 décision Grégoire pendante (label `v2-seuil-fragile`). | Cat-B Track 4 chantier J tokens |
