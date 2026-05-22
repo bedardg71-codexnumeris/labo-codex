@@ -1,0 +1,67 @@
+# Configuration Netlify — Labo Codex
+# Source unique versionnée. Documentation : DEPLOY.md
+#
+# Consolide l'ancien fichier `_headers` (à retirer après validation du deploy).
+# Pas d'env vars sensibles ici — toute configuration sensible reste dans le
+# dashboard Netlify.
+
+[build]
+  # Le repo est servi tel quel (pas de build step — vanilla HTML/CSS/JS)
+  publish = "."
+
+# ============================================================================
+# Headers de cache — évite que les navigateurs (Safari iPad en particulier)
+# servent des versions périmées après un déploiement.
+# ============================================================================
+
+# HTML : toujours revalider (porte d'entrée de l'app)
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# JavaScript : revalider à chaque accès (ETag gère l'efficacité)
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Feuilles de style : idem
+[[headers]]
+  for = "/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/styles.css"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Source de vérité de la version : jamais cacher
+[[headers]]
+  for = "/version.json"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+# Données de configuration JSON : revalider
+[[headers]]
+  for = "/*.json"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Icônes SVG : peuvent être cachées (changent rarement, noms stables)
+[[headers]]
+  for = "/icons/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, must-revalidate"
+
+# Images (non-icônes) : cache modéré
+[[headers]]
+  for = "/img/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, must-revalidate"
