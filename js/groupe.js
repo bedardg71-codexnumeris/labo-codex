@@ -107,135 +107,6 @@ function initialiserModuleGroupe() {
 }
 
 /* ===============================
-   ➕ AJOUT MANUEL
-   =============================== */
-
-/**
- * Ajoute un étudiant manuellement via le formulaire
- */
-function addStudent() {
-    // DEBUG : Logs pour identifier le problème
-
-    // ============================================
-    // VÉRIFIER SI ON EST EN MODE MODIFICATION
-    // ============================================
-    const daEnModification = sessionStorage.getItem('etudiantEnModification');
-    let modeModification = false;
-
-    if (daEnModification) {
-        modeModification = true;
-    }
-
-    const champNom = document.getElementById('etudiantNom');
-    const champPrenom = document.getElementById('etudiantPrenom');
-
-
-    if (!champNom || !champPrenom) {
-        notifications.erreur('Erreur technique', 'Les champs du formulaire sont introuvables. Vérifie les IDs.');
-        return;
-    }
-
-    const nom = champNom.value.trim();
-    const prenom = champPrenom.value.trim();
-
-
-    if (!nom || !prenom) {
-        notifications.erreur('Informations manquantes', 'Le nom et le prénom sont obligatoires');
-        return;
-    }
-
-    try {
-        // ✅ CORRECTION CRITIQUE (Beta 95 - 27 déc 2025) : Ajouter coursId
-        const coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
-
-        const student = {
-            id: genererIdUnique('ETU_'),
-            da: document.getElementById('etudiantDA').value.trim() || `AUTO-${Date.now()}`,
-            groupe: document.getElementById('etudiantGroupe').value.trim() || '1',
-            nom: nom,
-            prenom: prenom,
-            programme: document.getElementById('etudiantProgramme').value.trim() || '---',
-            sa: document.getElementById('etudiantSA').value || '',
-            caf: document.getElementById('etudiantCAF').value || '',
-            coursId: coursId  // ✅ Lier l'étudiant au cours actif
-        };
-
-        // ✅ CORRECTION CRITIQUE (Beta 95 - 2 jan 2026)
-        // Utiliser obtenirTousLesEtudiants() pour ne pas perdre les autres cours
-        let tousLesEtudiants = obtenirTousLesEtudiants();
-
-        // Pour les vérifications, utiliser la liste du cours actif
-        let studentsCours = tousLesEtudiants.filter(s => s.coursId === coursId);
-
-        // ============================================
-        // SI MODE MODIFICATION : SUPPRIMER L'ANCIEN
-        // ============================================
-        if (modeModification) {
-            // Supprimer de la liste complète (pas seulement du cours)
-            tousLesEtudiants = tousLesEtudiants.filter(s => s.da !== daEnModification);
-        }
-
-        // Vérifier doublons DA dans le cours actif (sauf si c'est le même DA en modification)
-        if (student.da !== '' && !student.da.startsWith('AUTO-')) {
-            const existe = studentsCours.find(s => s.da === student.da);
-            if (existe && (!modeModification || student.da !== daEnModification)) {
-                if (!confirm(`Un·e étudiant·e avec le DA ${student.da} existe déjà dans ce cours.\nContinuer quand même ?`)) {
-                    return;
-                }
-            }
-        }
-
-        tousLesEtudiants.push(student);
-        sauvegarderTousLesEtudiants(tousLesEtudiants);
-
-        // Prévisualisation
-        const actionTexte = modeModification ? 'Étudiant·e modifié·e' : 'Étudiant·e ajouté·e';
-        afficherPrevisualisation([student], actionTexte);
-
-        // Réinitialiser formulaire
-        document.getElementById('etudiantDA').value = '';
-        document.getElementById('etudiantGroupe').value = '';
-        document.getElementById('etudiantNom').value = '';
-        document.getElementById('etudiantPrenom').value = '';
-        document.getElementById('etudiantProgramme').value = '';
-        document.getElementById('etudiantSA').value = '';
-        document.getElementById('etudiantCAF').value = '';
-
-        // ============================================
-        // NETTOYER LE MODE MODIFICATION
-        // ============================================
-        if (modeModification) {
-            sessionStorage.removeItem('etudiantEnModification');
-
-            // Réinitialiser le bouton - chercher d'abord dans l'accordéon V2
-            const accordeonGroupe = document.getElementById('accordeon-groupe');
-            let btnAjouter = null;
-            if (accordeonGroupe) {
-                btnAjouter = accordeonGroupe.querySelector('button[data-action="addStudent"], button[data-action="ajouterEtudiant"]');
-            }
-            if (!btnAjouter) {
-                btnAjouter = document.querySelector('button[data-action="addStudent"], button[data-action="ajouterEtudiant"]');
-            }
-            if (btnAjouter) {
-                btnAjouter.textContent = 'Ajouter';
-                btnAjouter.style.background = '';
-            }
-        }
-
-        const details = `${student.nom}, ${student.prenom} (DA: ${student.da})`;
-        const messageSucces = modeModification ? 'Étudiant·e modifié·e avec succès !' : 'Étudiant·e ajouté·e avec succès !';
-        notifications.succes(messageSucces, details);
-
-        afficherListeEtudiants();
-        remplirSelectFiltreGroupe();
-
-    } catch (error) {
-        notifications.erreur('Erreur lors de l\'ajout', error.message);
-        console.error('Erreur ajout:', error);
-    }
-}
-
-/* ===============================
    IMPORT CSV/TSV
    =============================== */
 
@@ -776,11 +647,7 @@ function filtrerParGroupe() {
                 if (groupeSelectionné) {
                     noMsg.innerHTML = `
                         <p style="font-size: 1.1rem; margin-bottom: 10px;">🔍 Aucun·e étudiant·e dans le groupe ${echapperHtml(groupeSelectionné)}</p>
-                        <p style="font-size: 0.9rem;">
-                            <button data-action="resetFiltreGroupe" class="btn btn-secondaire" style="padding: 8px 15px;">
-                                ← Voir tous les groupes
-                            </button>
-                        </p>
+                        <p style="font-size: 0.9rem;">Désélectionne le groupe dans le filtre pour voir tous les étudiants.</p>
                     `;
                 } else {
                     noMsg.innerHTML = `
@@ -854,17 +721,6 @@ function filtrerParGroupe() {
     attacherEventListenersEtudiants();
 }
 
-/**
- * Réinitialise le filtre
- */
-function resetFiltreGroupe() {
-    const selectFiltre = document.getElementById('filtreGroupe');
-    if (selectFiltre) {
-        selectFiltre.value = '';
-    }
-    filtrerParGroupe();
-}
-
 /* ===============================
    MODIFICATION
    =============================== */
@@ -925,13 +781,13 @@ function modifierEtudiant(da) {
             formulaire.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
-        // Changer le texte du bouton (chercher addStudent ou ajouterEtudiant)
+        // Changer le texte du bouton
         let btnAjouter = null;
         if (accordeonGroupe) {
-            btnAjouter = accordeonGroupe.querySelector('button[data-action="addStudent"], button[data-action="ajouterEtudiant"]');
+            btnAjouter = accordeonGroupe.querySelector('button[data-action="ajouterEtudiant"]');
         }
         if (!btnAjouter) {
-            btnAjouter = document.querySelector('button[data-action="ajouterEtudiant"], button[data-action="addStudent"]');
+            btnAjouter = document.querySelector('button[data-action="ajouterEtudiant"]');
         }
 
         if (btnAjouter) {
@@ -944,41 +800,6 @@ function modifierEtudiant(da) {
     } catch (error) {
         notifications.erreur('Erreur modification', error.message);
         console.error('Erreur modification:', error);
-    }
-}
-
-/* ===============================
-   SUPPRESSION
-   =============================== */
-
-/**
- * Supprime un étudiant
- */
-function deleteStudent(id, silent = false) {
-    if (!silent && !confirm('Supprimer cet·te étudiant·e ?')) {
-        return;
-    }
-
-    try {
-        // ✅ CORRECTION CRITIQUE (Beta 95 - 2 jan 2026)
-        // Utiliser obtenirTousLesEtudiants() pour ne pas perdre les autres cours
-        let tousLesEtudiants = obtenirTousLesEtudiants();
-        const student = tousLesEtudiants.find(s => s.id === id);
-
-        tousLesEtudiants = tousLesEtudiants.filter(s => s.id !== id);
-        sauvegarderTousLesEtudiants(tousLesEtudiants);
-
-        if (!silent && student) {
-            const details = `${student.nom}, ${student.prenom}`;
-            notifications.succes('Étudiant·e supprimé·e', details);
-        }
-
-        afficherListeEtudiants();
-        remplirSelectFiltreGroupe();
-
-    } catch (error) {
-        notifications.erreur('Erreur suppression', error.message);
-        console.error('Erreur delete:', error);
     }
 }
 
@@ -1133,12 +954,6 @@ function supprimerEtudiant(id) {
     }
 }
 
-/* Alias pour compatibilité
-*/
-function deleteStudent(id) {
-    supprimerEtudiant(id);
-}
-
 // ============================================
 // EXPORT DES FONCTIONS GLOBALES
 // ============================================
@@ -1149,16 +964,13 @@ window.modifierEtudiant = modifierEtudiant;
 window.afficherListeEtudiants = afficherListeEtudiants;
 window.resetStudentsData = resetStudentsData;
 window.exportStudentsData = exportStudentsData;
-window.deleteStudent = deleteStudent;
 
 // Fonctions d'import (utilisées par l'accordéon Groupe dans Trimestre V2)
 window.handleFileImport = handleFileImport;
 window.previewPastedData = previewPastedData;
 window.confirmImport = confirmImport;
 window.cancelImport = cancelImport;
-window.addStudent = addStudent;
 window.filtrerParGroupe = filtrerParGroupe;
-window.resetFiltreGroupe = resetFiltreGroupe;
 
 
 
