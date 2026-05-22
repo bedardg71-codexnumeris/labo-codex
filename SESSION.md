@@ -14,8 +14,8 @@
 
 > **📌 Identification**
 > - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
-> - **Cycle en cours** : aucun — Phase 2 + sub-cleanup tableau cours livrés, prochaine session à orienter (cf. §3)
-> - **Documents maîtres récents** : `audit/refactoring-prep/PLAN-PHASE2-CASCADE-LEGACY-95.md` (Phase 2, livrée)
+> - **Cycle en cours** : **tests manuels Grégoire** — priorité unique prochaine session (cf. §3)
+> - **Document maître prochaine session** : `Retours des testeurs/TESTS-MANUELS-PENDING-2026-05-22.md` (créé 22 mai PM)
 
 # SESSION — État au 22 mai 2026 (post-sub-cleanup tableau Réglages → Cours legacy)
 
@@ -25,11 +25,7 @@
 
 **Tests** : 85 Vitest verts à chaque commit. Playwright non re-vérifié (les fonctions retirées sont legacy Réglages non couvertes).
 
-**Cycle suivant** : à orienter avec Grégoire. Pistes possibles (cf. §3) :
-1. Reprise audit annuel sur `audit/2026-mai` (Phase 7 Synthèse globale, tests manuels Grégoire 6.2/6.3)
-2. Préparation présentation AQPC du 3 juin (J−12)
-3. Tests manuels Grégoire des phases 7.1/7.2 PLAN-COURT-TERME (⏳ encore ouvertes)
-4. Continuer le démantèlement legacy si d'autres modules le justifient (à investiguer)
+**Cycle suivant — tests manuels Grégoire** : Grégoire a terminé ses dernières évaluations du trimestre (22 mai PM) et est disponible pour exécuter tous les tests manuels accumulés. Document maître : `Retours des testeurs/TESTS-MANUELS-PENDING-2026-05-22.md` (6 sections A-F, ~5-6 h, peut être étalé sur 2 sessions). Voir §3 pour la consigne détaillée.
 
 ---
 
@@ -329,71 +325,51 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
 ## §3 — Consigne de démarrage pour la prochaine session
 
-> Cycle Phase 2 cascade legacy 95 + sub-cleanup tableau Réglages → Cours legacy LIVRÉS. La prochaine session doit être orientée par Grégoire. Pistes documentées ci-dessous, par ordre d'élan technique.
+> **Priorité unique de la prochaine session** : Grégoire vient de terminer ses dernières évaluations du trimestre et est disponible pour tous les tests manuels accumulés. La prochaine session = session **tests manuels** (pas de chantier code).
 
-### Piste 1 — Reprise audit annuel sur `audit/2026-mai`
+### Document maître
 
-**Effort estimé** : variable. **Branche** : `audit/2026-mai` (existante).
+**`Retours des testeurs/TESTS-MANUELS-PENDING-2026-05-22.md`** — check-list complète (~5-6 h, 6 sections A-F), créée le 22 mai PM. Couvre :
 
-Items restants documentés dans `audit/SESSION.md` (sujet distinct) :
-- Phase 7 Synthèse globale (axes 1+5+6)
-- Tests manuels 6.2 / 6.3 (Grégoire)
-- 4.3 onboarding tiers
-- Phases 1.4 + 1.6 PLAN-COURT-TERME reportées (CC BY-NC-SA + lien docs/adr/)
+| Section | Sujet | Temps |
+|---|---|---|
+| **A** | Tests critiques — non-régression bug latent fixé chantier 2.3 (snapshots, calendrier, modules Réglages) | ~30 min |
+| **B** | Tests visuels post-fixes a11y (T-A3 contraste, T-A5 focus visible, T-A10 touch targets) | ~30 min |
+| **C** | Audit 6.2 partie 2 — Parcours clavier + VoiceOver Mac (5 parcours) | ~1 h 30 |
+| **D** | Audit 6.3 partie 2 — iPad réel (viewport, touch targets mesurés, interactions tactiles, performance, IndexedDB) | ~2 h |
+| **E** | Test visuel Cat-B Track 4 chantier E (6 scénarios notifications Safari Mac + iPad Air, modes sombre + clair) | ~45 min |
+| **F** | PLAN-COURT-TERME 7.1 + 7.2 (smoke test global + écrans démo AQPC) | ~30 min |
 
-### Piste 2 — Préparation AQPC 3 juin (J−12)
-
-- Tests visuels Grégoire chantier E (6 scénarios notifications Safari Mac + iPad Air, modes sombre + clair) — pendant
-- Décision label `v2-seuil-fragile` (conservation / atténuation / alignement)
-- Présentation AQPC à finaliser
-
-### Piste 3 — Tests manuels Grégoire phases 7.1 / 7.2 PLAN-COURT-TERME
-
-⏳ Toujours ouvertes (cf. §1 tableau).
-
----
-
-### Étape 1 — Vérifier l'état du repo (commune à toutes les pistes)
+### Étapes de démarrage
 
 ```bash
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
-git status                              # branche actuelle
-git log --oneline main -5               # HEAD main attendu : bd37072 ou plus récent
-git worktree list
+git status                              # branche actuelle = main attendu, état propre côté tracké
+git log --oneline main -5               # HEAD attendu : 00f2f40 ou plus récent
+npx http-server -p 8080 -c-1            # serveur local pour Safari (et iPad via IP locale)
 ```
 
-**Si HEAD main au-delà de `22914ac`** : un autre chantier a été fait depuis. Vérifier `git log main` pour comprendre.
+Puis lire `Retours des testeurs/TESTS-MANUELS-PENDING-2026-05-22.md` et exécuter section par section. Le document contient les protocoles détaillés, les sélecteurs à cibler, les cases à cocher.
 
-### Étape 2 — Worktree dédié si besoin
+**Si HEAD main au-delà de `00f2f40`** : un autre chantier a été fait depuis. Vérifier `git log main` pour comprendre, mais le document de tests reste applicable.
 
-`audit/2026-mai` a son propre cycle de vie avec des modifs uncommitted (audits, rapports, docs sécurité). Pour un chantier code sur main, créer un worktree dédié :
+### Rôle de Claude dans cette session
 
-```bash
-git fetch origin main
-git worktree add ../Monitorage_v6-<sujet> -b <branche-dédiée> main
-cd ../Monitorage_v6-<sujet>
-```
+- **Pas de chantier code** sauf si Grégoire trouve un bug bloquant pendant les tests qui requiert un fix rapide.
+- **Accompagnement** : aider Grégoire à interpréter les résultats, à reporter les cases cochées dans `audit/reports/06-2-manual.md` + `06-3-ipad.md`, à mettre à jour `audit/reports/06-summary.md` après les tests, à ouvrir des bugs dans `Retours des testeurs/SUIVI-BUGS.md` si besoin.
+- **Mise à jour SESSION.md** en fin de session : §1 nouvelle sous-section « Tests manuels Grégoire — LIVRÉS » + entrée historique §5 + révision §3 pour le cycle suivant (probablement merge audit→main + préparation AQPC).
 
-### Étape 3 — Lecture obligatoire (10-15 min)
+### Conventions
 
-Ordre strict :
-1. **Ce SESSION.md** (relai courant + garde-fou §0)
-2. `CLAUDE.md` racine — règles sécurité (innerHTML, handlers inline, zones protégées) et convention de bump version
-3. `BACKLOG.md` — items potentiellement liés
-4. Pour piste 1 : commit `dd493cc` (chantier 2.1) section « NON RETIRÉ »
-5. Pour piste 2 : `audit/SESSION.md`
+- **Pas de bump beta** sans demander (cf. §0 garde-fou).
+- **Hook pré-push vert** obligatoire si commits déclenchés (corrections ponctuelles).
+- **Worktree non nécessaire** — on travaille en lecture/test sur main, pas de risque conflit avec `audit/2026-mai`.
 
-### Étape 4 — Charger les skills
+### Décisions de Grégoire pendantes (rappel pour ne pas oublier)
 
-**Obligatoire** : `Skills pour Claude Code/SKILL_labo_codex.md`.
-
-### Étape 5 — Baseline tests + chantier
-
-```bash
-cd tests && npm run test:unit    # attendu : 85 Vitest verts
-```
-
-Puis exécuter le chantier choisi avec les conventions habituelles : commits ciblés, hook pré-push vert, pas de bump beta sans demander à Grégoire (cf. §0).
+- Label `v2-seuil-fragile` — conservation / atténuation / alignement ? (Cat-B Track 4 chantier J reliquat).
+- Convergence audit/2026-mai ↔ main — à planifier post-AQPC (récupère sur main : `audit/PLAN-*.md`, `audit/CONTEXTE-COWORK.md`, `audit/reports/`, T-A1+T-A2 fixés, ADR-008 corrigé ; et porte sur audit/2026-mai : `utils-notifications.js` consolidé qui rend T-A8 trivial).
+- Demande d'avis PRP Cégep de Drummondville (Loi 25) — à envoyer (délai réponse 2-6 semaines, conditionne PRIVACY.md v1.1).
 
 ---
 
@@ -479,6 +455,7 @@ git tag -l "cat-b-*" | sort             # 9 tags attendus :
 | 2026-05-22 (matin, cleanup résidus risque) | MAJ après livraison cleanup résidus système risque (1 commit `c697a29` sur branche `cleanup/risque-residus`, mergée FF main puis branche/worktree supprimés). Audit ciblé sur dette §1 SESSION main « ~10 réf JS risque » révèle 99 hits stricts (\brisque) sur 25 fichiers, dont 5 systèmes morts complémentaires aux dettes #1-4 livrées le matin par autre instance : A.1 fonction `genererBadgeRisqueProfil` + export, A.2 `COULEURS.risque`, A.3 `SEUILS_PAR_DEFAUT.risque` (9 niveaux échelle), A.4 6 classes CSS `.badge-risque-*`, A.5 8 classes CSS `.badge-risque-analyse-*`. Sentinelle Vitest mise à jour. Build refresh 0522-0925 → 0522-0945 (pas de bump beta). Tests 85/85 verts. Rebase nécessaire car 11 commits divergents sur origin/main (Sprint A + Phases legacy 95 + dettes #1-4) — conflits BUILD_ID uniquement, résolus en gardant 0522-0945. En-tête §1 mis à jour avec HEAD `c697a29` et chronologie 19 commits depuis `7c30d64`. Sous-section « Cleanup résidus système risque » ajoutée à §1 après « Cleanup Beta 95 legacy étendu ». UI vivante « Direction du risque » (slider + `calculerDirectionRisque`) NON touchée — chantier renommage R → N futur. | Cleanup résidus risque (Claude autonome) |
 | 2026-05-22 (matin, cleanup palettes COULEURS + plan Phase 2) | 2 commits sur branche `cleanup/couleurs-phase2plan` mergée FF main. (1) Commit `128ae0c` : retrait 3 palettes mortes `COULEURS.pratiques`, `COULEURS.idme`, `COULEURS.graphiques` du module `js/couleurs.js` (audit cross-codebase confirme 0 caller — seules `indices` et `correlations` restent consommées par correlations-longitudinales.js et graphiques-progression.js). −28 LOC, JSDoc actualisée, return Object.freeze rétréci à 2 entrées. (2) Commit `9940975` : rédaction de `audit/refactoring-prep/PLAN-PHASE2-CASCADE-LEGACY-95.md` (237 lignes) couvrant le chantier successeur des Phases 1+2 legacy 95 — audit préliminaire des 3 modules cours.js/groupe.js/trimestre.js avec call-graph vérifié, ordre d'exécution recommandé (trimestre → cours → groupe), risques identifiés (navigation.js protégé pour appel `initialiserModuleTrimestre`, config.js commentaires à mettre à jour, régressions silencieuses via `window[X]` dynamique). **Découvertes audit modifiant la dette §1 SESSION main** : `ouvrirModalBibliothequeCours` est en fait VIVANTE (bouton `index.html:6815` actif) ; `trimestre.js` contient 3 fonctions vivantes à PRÉSERVER (`genererCalendrierComplet`, `obtenirCalendrierComplet`, `obtenirInfosJour`) — pas un module à retirer en bloc. Build refresh 0522-0945 → 0522-1115. Tests 85/85 verts. En-tête §1 mis à jour : HEAD `9940975`, 22 commits depuis `7c30d64`. Sous-section « Prochaine session — chantier Phase 2 cascade legacy 95 (plan documenté) » remplace l'ancienne version courte. | Cleanup palettes COULEURS + plan Phase 2 (Claude autonome) |
 | 2026-05-22 (matin, relai consigne Phase 2) | Bascule du relai vers le chantier Phase 2 cascade legacy 95. En-tête principal réécrit (titre H1, identification, cycle en cours = Phase 2, document maître = PLAN-PHASE2-CASCADE-LEGACY-95.md). HEAD attendu `d1363fc`, build `0522-1115`. §0 enrichi avec sous-section « Garde-fous spécifiques Phase 2 » : 5 règles (`ouvrirModalBibliothequeCours` VIVANTE ; 3 fonctions trimestre.js à préserver ; `navigation.js:250-251` protégé — laisser guard ; doublon `deleteStudent` à clarifier ; test manuel UI obligatoire post-chantier). §3 entièrement réécrit — ancienne consigne Sprint A (livrée) supprimée (retrouvable via `git log SESSION.md`) ; nouvelle consigne pointe vers PLAN-PHASE2 comme document maître et donne 9 étapes (vérif repo, worktree dédié, lecture obligatoire, skills, tests baseline, exécution ordre PLAN-PHASE2 §3, bump version, merge FF push, cleanup + MAJ SESSION). §3bis Cat-B archive renommée « Archives des consignes de démarrage précédentes » (regroupe Sprint A déclassée + Cat-B). Aucune modif code applicatif. | Préparation relai Phase 2 (Claude autonome) |
+| 2026-05-22 (fin après-midi, préparation tests manuels Grégoire) | Grégoire a terminé ses dernières évaluations du trimestre et signale disponibilité pour exécuter tous les tests manuels accumulés (6.2 partie 2 + 6.3 partie 2 + test visuel Cat-B chantier E + vérifs post-fixes a11y du 22 mai PM + non-régression bug latent fixé chantier 2.3 + PLAN-COURT-TERME 7.1/7.2). Création du document maître `Retours des testeurs/TESTS-MANUELS-PENDING-2026-05-22.md` (6 sections A-F, ~5-6 h, check-list structurée par section avec cases à cocher + protocoles VoiceOver Mac + iPad Web Inspector + sélecteurs précis). En-tête §1 « Cycle suivant » réécrit : priorité unique = tests manuels (pas de chantier code). §3 entièrement réécrit : Document maître pointé + étapes de démarrage (http-server localhost 8080) + rôle Claude dans la session (accompagnement + reporting dans `audit/reports/06-2-manual.md` + `06-3-ipad.md` + `SUIVI-BUGS.md`) + 3 décisions Grégoire pendantes rappelées (label `v2-seuil-fragile`, convergence audit↔main post-AQPC, demande PRP Cégep). Aucune modif code applicatif. | Préparation tests manuels (Claude autonome) |
 | 2026-05-22 (après-midi, T-A10 touch targets + bug fix doubles box-shadow LIVRÉS) | 2 commits sur branche `cleanup/a11y-t-a10-touch-targets` (mergée FF main puis supprimée). `91668ac` corrige une régression introduite par le cherry-pick T-A5 du même jour (`eff9950` avait ajouté `box-shadow: var(--focus-ring)` au début de 7 blocs `:focus` qui avaient déjà un `box-shadow` plus loin → le 2e écrasait le focus-ring) — fusion en `box-shadow: var(--focus-ring), <original>` sur 7 sélecteurs (`.controle-form`, `.cc-meta-ligne input/select`, `.cc-meta-textarea`, `.btn-codex-header`, `.wizard-v2-champ input/textarea/select`, `.travaux-retro-modal .travaux-retro-textarea`, `.travaux-retro-nom-input`). `22914ac` traite T-A10 touch targets Apple HIG / WCAG 2.5.5 : `.btn-codex-header` min-height 36→44px (cas signalé Lighthouse `boundingRect` 44×36) + section `@media (pointer: coarse)` ajoutée en fin de styles.css garantissant `.btn` + `.btn-action-header` min-height 44px et `.btn-icon-header` 32→44 sur tactile (préserve densité desktop). T-A10 délégué initialement ds-update passe 3 mais ds-update n'avait pas de commit dédié — fix appliqué directement sur main avec approche systématique. Sous-audit 6.3 T-A10 passe À-vérifier → Vert côté outils statiques. Validation iPad par Grégoire (tests manuels 6.3 partie 2) nécessaire pour confirmation empirique sur ~237 éléments interactifs. Tests 85/85 Vitest verts. Pas de bump beta. | T-A10 + bug fix régression (Claude autonome) |
 | 2026-05-22 (après-midi, portage a11y T-A3 + T-A5 depuis ds-update LIVRÉ) | 3 commits cherry-pickés depuis `ds-update/2026-mai` sur branche `cleanup/a11y-passe3-fixes-mineurs` (mergée FF main puis supprimée). `36a7a81` T-A3 : variables `--texte-muted` + `--gris-clair` ajustées WCAG AA ≥ 4.5:1 dans 3 modes (sombre, clair, print) — styles.css + fallback index.html. `f546215` T-A5 fondation : 4 tokens focus-ring créés dans `:root` (couleur, largeur 3px, offset 2px, composite). `eff9950` T-A5 finition : 22 sites `outline: none` désormais accompagnés d'un `box-shadow: var(--focus-ring)` restorant un focus visible clavier (WCAG 2.1 AA technique G195). Conflits cherry-pick résolus en `git rm` des 3 brouillons `ds-update/passe-2-diff/` + `ds-update/v8-drafts/` qui ne vivent pas sur main. Audit annuel sous-audit 6.1 (Phase 5.1+5.2 PLAN-COURT-TERME) passe Jaune → **Vert** côté outils statiques (T-A3 + T-A5 traités, T-A7 déjà fait Phase 5.3+5.4 AQPC, T-A1+T-A2 fixés 21 mai). Restent : tests manuels 6.2/6.3 par Grégoire + T-A10 touch targets 44px (non couvert par ds-update — chantier séparé ~3-5 h si souhaité). Pas de bump beta. Tests 85/85 Vitest verts. | Portage a11y T-A3+T-A5 (Claude autonome) |
 | 2026-05-22 (après-midi, sub-cleanup tableau Réglages → Cours legacy LIVRÉ) | 1 commit `bd37072` sur branche `cleanup/tableau-reglages-cours-legacy` (mergée FF main puis supprimée). Suite directe du chantier 2.1 dont le scope avait explicitement exclu cette chaîne morte (cf. plan PLAN-PHASE2 §8). **cours.js réduit de 1215 → 669 l. (−546 LOC)**. 7 fonctions retirées + 4 exports (`afficherTableauCours`, `obtenirTousLesCoursBibliotheque` orphelin, `obtenirNomPratiqueFallback`, `afficherPratiqueEnLectureSeule`, `dupliquerCours`, `activerCours`, `supprimerCours`). 6 sections delimiters de commentaire orphelines retirées (`AFFICHAGE DU TABLEAU`, `FORMULAIRE D'AJOUT/ÉDITION` trompeur, `⭐ ACTIVATION DU COURS`, `SUPPRESSION`, `🔔 NOTIFICATIONS` vide, `📌 NOTES D'UTILISATION` ~55 l. obsolète). Cleanups annexes : `main.js` event listener `[data-sous-onglet="reglages-cours"]` (−10 l.), `config.js` ligne 274 « 08-cours.js (utilise coursEnEdition) » du JSDoc des modules dépendants. Doublon `supprimerCours` clarifié : faux doublon (cours-entite.js en IIFE isolée exposée via `window.CoursEntite.supprimer` — pas de conflit). Tests 85/85 Vitest verts. En-tête HEAD `bd37072`. §1 : nouvelle sous-section « Sub-cleanup tableau Réglages → Cours legacy LIVRÉ » remplace l'ancienne « Découvertes hors scope » avec bilan cumulé Phase 2 + sub-cleanup = **~−1677 LOC nettes** sur 4 commits. §3 : piste 1 (sub-cleanup) retirée puisque livrée ; renumérotation 2→1, 3→2, 4→3. | Sub-cleanup tableau Réglages → Cours legacy (Claude autonome) |
