@@ -44,16 +44,6 @@ const SEUILS_PAR_DEFAUT = {
     // Score en dessous duquel un critère est considéré comme un défi
     defiSpecifique: 0.70,  // 70% - Seuil d'autonomie empirique (validation 101→102)
 
-    // Niveaux de risque (échelle visuelle)
-    // Seuils de transition entre les zones de risque
-    risque: {
-        minimal: 0.20,      // 0-19% = Minimal
-        faible: 0.35,       // 20-34% = Faible
-        modere: 0.50,       // 35-49% = Modéré
-        eleve: 0.60,        // 50-59% = Élevé (intervention intensive niveau 3)
-        critique: 0.70      // ≥70% = Critique (urgence maximale)
-    },
-
     // Seuils d'interprétation A-C-M (Assiduité, Complétion, Mobilisation)
     // Utilisés pour classifier les niveaux de performance
     interpretation: {

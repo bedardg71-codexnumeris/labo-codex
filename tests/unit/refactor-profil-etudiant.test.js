@@ -154,7 +154,6 @@ describe('profil-etudiant — régression refactoring 2026-mai (canari + sentine
             'obtenirCriteresAvecValeurs',
             'initialiserModuleProfilEtudiant',
             'genererBadgePratiqueProfil',
-            'genererBadgeRisqueProfil',
             'genererBadgePatternProfil',
             'interpreterMobilisation',
             'interpreterPerformance',
