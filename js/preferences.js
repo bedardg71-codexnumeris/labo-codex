@@ -55,7 +55,7 @@
         // --- Dépistage (RàI) ---
         activerRai: true,
         grilleReferenceDepistage: '',
-        decouplerPR: false,
+        decouplerPN: false,
         fenetrePatterns: 3,
 
         // --- Affichage ---
@@ -218,7 +218,7 @@
         { source: 'modalitesEvaluation', champ: 'afficherDescriptionsSOLO', cible: 'afficherDescriptionsSOLO' },
         { source: 'modalitesEvaluation', champ: 'activerRai',               cible: 'activerRai' },
         { source: 'modalitesEvaluation', champ: 'grilleReferenceDepistage', cible: 'grilleReferenceDepistage' },
-        { source: 'modalitesEvaluation', champ: 'decouplerPR',              cible: 'decouplerPR' },
+        { source: 'modalitesEvaluation', champ: 'decouplerPN',              cible: 'decouplerPN' },
         { source: 'modalitesEvaluation', champ: 'fenetrePatterns',          cible: 'fenetrePatterns' },
 
         // Depuis preferencesAffichage
@@ -310,7 +310,7 @@
             'afficherDescriptionsSOLO',
             'activerRai',
             'grilleReferenceDepistage',
-            'decouplerPR',
+            'decouplerPN',
             'fenetrePatterns'
         ];
 

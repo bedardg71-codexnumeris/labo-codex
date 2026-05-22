@@ -86,7 +86,7 @@ function migrerConfigurationsSpecifiques() {
                 minimumCompletion: 7,
                 nombreTotal: 10,
                 methodeSelection: 'meilleurs',
-                decouplerPR: false
+                decouplerPN: false
             };
         }
 
@@ -775,9 +775,9 @@ function chargerConfigurationPAN() {
         inputNombreTotal.value = configPortfolio.nombreTotal || 10;
     }
 
-    const checkDecouplerPR = document.getElementById('decouplerPR');
+    const checkDecouplerPR = document.getElementById('decouplerPN');
     if (checkDecouplerPR) {
-        checkDecouplerPR.checked = configPortfolio.decouplerPR || false; // Par défaut false (couplé)
+        checkDecouplerPR.checked = configPortfolio.decouplerPN || false; // Par défaut false (couplé)
     }
 
     // Jetons - valeurs par défaut
@@ -1016,8 +1016,8 @@ function sauvegarderConfigurationPAN() {
     const inputNombreTotal = document.getElementById('configNombreTotal');
     const nombreTotal = inputNombreTotal ? parseInt(inputNombreTotal.value) : 10;
 
-    const checkDecouplerPR = document.getElementById('decouplerPR');
-    const decouplerPR = checkDecouplerPR ? checkDecouplerPR.checked : false;
+    const checkDecouplerPR = document.getElementById('decouplerPN');
+    const decouplerPN = checkDecouplerPR ? checkDecouplerPR.checked : false;
 
     // Jetons
     const checkJetonsActif = document.getElementById('jetonsActif');
@@ -1072,7 +1072,7 @@ function sauvegarderConfigurationPAN() {
             minimumCompletion: minimumCompletion,
             nombreTotal: nombreTotal,
             methodeSelection: methodeSelection,
-            decouplerPR: decouplerPR,
+            decouplerPN: decouplerPN,
             reglesConformite: getReglesConformiteConfig()
         },
 
@@ -1390,9 +1390,9 @@ function chargerConfigurationPAN(configPAN) {
             inputNombreTotal.value = configPAN.portfolio.nombreTotal;
         }
 
-        const checkDecoupler = document.getElementById('decouplerPR');
+        const checkDecoupler = document.getElementById('decouplerPN');
         if (checkDecoupler) {
-            checkDecoupler.checked = configPAN.portfolio.decouplerPR === true;
+            checkDecoupler.checked = configPAN.portfolio.decouplerPN === true;
         }
 
         // Charger les règles de conformité

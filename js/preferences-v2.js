@@ -158,9 +158,9 @@
         }
 
         // Découpler Performance et Risque
-        const decouplerPR = document.getElementById('v2-pref-decoupler-pr');
-        if (decouplerPR) {
-            decouplerPR.checked = obtenirPreference('decouplerPR') === true;
+        const decouplerPN = document.getElementById('v2-pref-decoupler-pn');
+        if (decouplerPN) {
+            decouplerPN.checked = obtenirPreference('decouplerPN') === true;
         }
 
         // Fenêtre d'analyse des patterns
@@ -240,7 +240,7 @@
         definirPreference('afficherDescriptionsSOLO', document.getElementById('v2-pref-solo')?.checked !== false);
         definirPreference('activerActionsRLO', document.getElementById('v2-pref-actions-rlo')?.checked === true);
         definirPreference('grilleReferenceDepistage', document.getElementById('v2-pref-grille-reference')?.value || '');
-        definirPreference('decouplerPR', document.getElementById('v2-pref-decoupler-pr')?.checked === true);
+        definirPreference('decouplerPN', document.getElementById('v2-pref-decoupler-pn')?.checked === true);
         definirPreference('fenetrePatterns', parseInt(document.getElementById('v2-pref-fenetre-patterns')?.value) || 3);
 
         definirPreference('depistageAcp', document.getElementById('v2-pref-depistage-acp')?.checked !== false);

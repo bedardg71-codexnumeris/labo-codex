@@ -146,8 +146,8 @@ const TOOLTIPS = {
 
     // --- Dépistage ---
 
-    'depist-decoupler-pr':
-        'S\u00e9pare le calcul de la note (P, selon ta pratique) du calcul de risque (R, bas\u00e9 sur les N derni\u00e8res productions). Recommand\u00e9 avec la pratique \u00abN meilleurs\u00bb.',
+    'depist-decoupler-pn':
+        'S\u00e9pare le calcul de la note (P, selon ta pratique) du calcul du niveau d\'attention (N, bas\u00e9 sur les N derni\u00e8res productions). Recommand\u00e9 avec la pratique \u00abN meilleurs\u00bb.',
     'depist-fenetre':
         'Nombre de derni\u00e8res productions analys\u00e9es pour d\u00e9tecter les tendances. Valeur basse = d\u00e9tection pr\u00e9coce. Valeur \u00e9lev\u00e9e = d\u00e9tection plus fiable, mais plus tardive.',
     'depist-grille':
