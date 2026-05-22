@@ -504,15 +504,6 @@ async function afficherPratiqueEnLectureSeule() {
 }
 
 /**
- * Navigue vers la section Pratique de notation
- * Appelée par le bouton "Modifier la pratique de notation"
- */
-function naviguerVersPratiqueNotation() {
-    // Naviguer vers Conception → Pratiques de notation
-    afficherSousSection('conception-pratiques-notation');
-}
-
-/**
  * Affiche le formulaire d'ajout ou d'édition
  * 
  * FONCTIONNEMENT:
@@ -1582,7 +1573,6 @@ window.retirerCoursDeBibliotheque = retirerCoursDeBibliotheque;
 window.ajouterCoursIndividuel = ajouterCoursIndividuel;
 window.exporterCoursSimple = exporterCoursSimple;
 window.importerCoursSimple = importerCoursSimple;
-window.naviguerVersPratiqueNotation = naviguerVersPratiqueNotation;
 window.partagerCours = partagerCours;
 window.partagerTousLesCours = partagerTousLesCours;
 window.ouvrirFilePickerImportCours = ouvrirFilePickerImportCours;
