@@ -36,7 +36,10 @@ function getVersionApp() {
 // ===============================
 
 const CLE_RAPPORTS_ARCHIVES = 'rapportsBugArchives';
-const MAX_RAPPORTS_ARCHIVES = 50;
+// Phase 6.2 PLAN-AQPC (22 mai 2026) : seuil réduit 50 → 20 pour réduire
+// l'empreinte de PII potentielle (descriptions libres pouvant contenir
+// indirectement des noms d'étudiants saisis par les testeurs).
+const MAX_RAPPORTS_ARCHIVES = 20;
 
 const CLE_PRENOM_TESTEUR = 'prenomTesteurBug';
 
@@ -894,11 +897,16 @@ function ouvrirModalRapportBug() {
 - J'étais dans la section Réglages > Cours
 - J'ai cliqué sur le bouton «Ajouter un cours»
 - Rien ne s'est passé (ou message d'erreur...)
-- Je m'attendais à voir le formulaire de création" style="
+- Je m'attendais à voir le formulaire de création
+
+Évite de nommer un·e étudiant·e par son nom dans la description (utilise « l'étudiant·e A » ou « un·e étudiant·e » à la place)." style="
                             width: 100%; height: 100px; padding: 12px;
                             border: 1px solid var(--gris-clair); border-radius: var(--radius-moyen);
                             font-family: inherit; font-size: 0.95rem; resize: vertical; box-sizing: border-box;
                         " data-on-input="mettreAJourRapport"></textarea>
+                        <small style="display: block; margin-top: 6px; color: var(--gris-moyen); font-size: 0.85rem; line-height: 1.4;">
+                            🔒 Pour la confidentialité étudiante (Loi 25) : évite de nommer des étudiant·e·s nominalement dans la description. Utilise plutôt « l'étudiant·e A » ou « un·e étudiant·e du groupe X ». Les rapports sont conservés localement (max 20, rotation automatique).
+                        </small>
                     </div>
 
                     <!-- Rapport généré -->

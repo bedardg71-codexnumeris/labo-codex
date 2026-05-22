@@ -243,6 +243,23 @@ document.addEventListener('DOMContentLoaded', function () {
             db.setSync('migration_onboarding_v6_21_done', true);
         }
 
+        // Migration rétention rapportsBugArchives (22 mai 2026, Phase 6.2
+        // PLAN-AQPC) : seuil réduit de 50 → 20 rapports max pour limiter
+        // l'empreinte de PII potentielle. Tronque immédiatement si la liste
+        // dépasse 20. Idempotent.
+        if (!db.getSync('migration_rapports_bug_20_done', false)) {
+            try {
+                const archives = db.getSync('rapportsBugArchives', []);
+                if (Array.isArray(archives) && archives.length > 20) {
+                    archives.length = 20;
+                    db.setSync('rapportsBugArchives', archives);
+                }
+            } catch(e) {
+                console.warn('[migration_rapports_bug_20] erreur ignorée:', e);
+            }
+            db.setSync('migration_rapports_bug_20_done', true);
+        }
+
         // Migration vocabulaire descriptif (22 mai 2026, Phase 6.1 PLAN-AQPC) :
         // renomme la propriété `decouplerPR` → `decouplerPN` (Découpler
         // Performance / Niveau d'attention) dans toutes les structures

@@ -113,23 +113,39 @@ seul l'accès à l'application elle-même est filtré.
 
 Lorsque l'auteur (ou, plus rarement, une personne ayant reçu un accès)
 signale un bug via la fonction intégrée, l'application **archive localement**
-le rapport dans la clé `rapportsBugArchives` (IndexedDB, max 50 rapports,
-~126 Ko cumulés au 22 mai 2026).
+le rapport dans la clé `rapportsBugArchives` (IndexedDB, **maximum 20
+rapports avec rotation automatique**, abaissé depuis 50 le 22 mai 2026
+en réponse à la Phase 6.2 PLAN-AQPC).
 
-Un rapport peut contenir :
-- Prénom du testeur (collègue ou auteur)
-- Description libre du problème
-- État technique : trace d'exécution, dernières actions, **contexte de
-  données au moment du signalement**
-- Le « contexte de données » peut inclure **indirectement** des noms
-  d'étudiants ou des notes, selon ce qui était à l'écran au moment du
-  signalement.
+**Audit technique réalisé le 22 mai 2026** sur la structure stockée par
+`js/rapport-bug.js` :
 
-**Statut actuel** : ces archives n'ont pas encore été inventoriées pour
-identifier précisément les renseignements personnels qu'elles contiennent.
-Une **revue manuelle est planifiée** (Phase 6.2 du plan court terme,
-échéance 3 juin 2026). La politique de rétention sera précisée dans la
-version 1.1 de ce document après cette revue.
+| Champ | Sensibilité | Source |
+|---|---|---|
+| `id`, `date`, `envoye`, `type` | Faible | Généré automatiquement |
+| `prenom` | **PII testeur** | Saisi par le testeur dans le formulaire |
+| `description` | **PII potentielle** | Texte libre — peut contenir des noms d'étudiants si le testeur les nomme explicitement |
+| `rapport.stack` | Faible (technique) | Trace d'exécution JavaScript |
+| `rapport.contexte` | Faible | Section active, compteurs (nb étudiants, nb productions), `infoCours.enseignant` (PII enseignant) |
+| `rapport.actions` | Faible | 10 dernières actions (clics, navigation) |
+| `rapport.etat` | Faible | 5 clés localStorage tronquées à 50 caractères |
+
+**Données par construction NON présentes dans les rapports** :
+- Noms ou prénoms d'étudiants directement
+- DA d'étudiants
+- Notes individuelles
+- Contenu de travaux (photos, PDF)
+
+**Le seul vecteur de PII étudiante** dans un rapport archivé est la
+description libre saisie par le testeur. Pour réduire ce risque :
+- Le formulaire de saisie affiche désormais (depuis 22 mai 2026) une
+  note explicite invitant à éviter de nommer des étudiants nominalement
+  (« utilise plutôt l'étudiant·e A »).
+- Le seuil de rétention est passé de 50 à 20 rapports.
+
+Pour consulter ou supprimer les rapports archivés, ouvrir l'application
+puis aller dans le menu Bug → **« Voir les rapports archivés »**. Chaque
+rapport peut être supprimé individuellement.
 
 ### 3.5 Code source (GitHub, public)
 
@@ -339,9 +355,15 @@ attendu avant fin juin 2026 ; il pourra imposer une durée précise.
 
 ### 8.3 Rapports de bug archivés
 
-50 derniers rapports, rotation automatique (`MAX_RAPPORTS_ARCHIVES`
-dans `js/rapport-bug.js:39`). Politique de rétention plus fine à
-préciser après l'audit de la Phase 6.2 (échéance 3 juin 2026).
+**20 derniers rapports**, rotation automatique (`MAX_RAPPORTS_ARCHIVES`
+dans `js/rapport-bug.js`). Seuil abaissé de 50 à 20 le 22 mai 2026
+suite à l'audit technique Phase 6.2 PLAN-AQPC (cf. §3.4). Migration
+de tronquage idempotente exécutée au démarrage de l'application si
+l'utilisateur avait des rapports excédentaires.
+
+L'utilisateur peut à tout moment supprimer un rapport individuellement
+via le menu Bug → **« Voir les rapports archivés »**, ou vider toute
+la liste via le bouton « Vider les archives ».
 
 ### 8.4 Code source (GitHub)
 
@@ -462,8 +484,11 @@ Par souci de transparence :
 1. **L'avis du responsable PRP du Cégep n'est pas encore reçu** (demande
    envoyée en mai 2026, délai de réponse 2-6 semaines). Plusieurs points
    sont marqués « à confirmer » et seront précisés dans la version 1.1.
-2. **L'inventaire détaillé de `rapportsBugArchives` n'a pas encore été
-   conduit** (Phase 6.2 du plan court terme, échéance 3 juin 2026).
+2. **L'inventaire technique de `rapportsBugArchives` a été conduit le
+   22 mai 2026** (audit Phase 6.2 PLAN-AQPC). La structure stockée est
+   désormais documentée (§3.4). Une revue manuelle du contenu réel des
+   rapports actuels par l'auteur reste recommandée si un doute persiste
+   sur des descriptions ayant nommé des étudiants.
 3. **L'ÉFVP formelle est en préparation** — pas encore disponible.
 4. **Les logs Cloudflare ne sont conservés que 24 h** sur le plan gratuit.
    L'historique précis des accès depuis janvier 2026 n'est donc pas
@@ -488,6 +513,5 @@ PRP, collègue, étudiant, parent) de juger sur pièces.
 ---
 
 **Document à mettre à jour** en version 1.1 lorsque :
-- L'inventaire `rapportsBugArchives` est conduit (politique de rétention §3.4 et §8.3).
 - L'avis du responsable PRP du Cégep est reçu (coordonnées §11, mentions formelles §10).
 - L'ÉFVP est produite.
