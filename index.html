@@ -114,13 +114,13 @@
             --btn-supprimer-hover: #6a2a2a;
 
             /* === INDICATEURS DE RISQUE === */
-            --risque-nul: #6aacb8;
-            --risque-minimal: #34c759;
-            --risque-faible: #7ae8a0;
-            --risque-modere: #ffc107;
-            --risque-eleve: #fd7e14;
-            --risque-tres-eleve: #e84057;
-            --risque-critique: #a02030;
+            --niveau-attention-nul: #6aacb8;
+            --niveau-attention-minimal: #34c759;
+            --niveau-attention-faible: #7ae8a0;
+            --niveau-attention-modere: #ffc107;
+            --niveau-attention-eleve: #fd7e14;
+            --niveau-attention-tres-eleve: #e84057;
+            --niveau-attention-critique: #a02030;
 
             /* === COULEURS GRISES (inversées pour fond sombre) === */
             --gris-tres-fonce: #d0e0e4;
@@ -1472,7 +1472,7 @@
         }
 
         #aide-recherche-clear:hover {
-            color: var(--risque-critique);
+            color: var(--niveau-attention-critique);
             transform: translateY(-50%) scale(1.2);
         }
 
@@ -1542,21 +1542,21 @@
             background: var(--alerte-fond-attention);
             padding: 15px;
             border-radius: var(--radius-grand);
-            border: 2px solid var(--risque-eleve);
+            border: 2px solid var(--niveau-attention-eleve);
         }
 
         .carte-metrique-orange {
             background: var(--alerte-fond-attention);
             padding: 15px;
             border-radius: var(--radius-grand);
-            border: 2px solid var(--risque-tres-eleve);
+            border: 2px solid var(--niveau-attention-tres-eleve);
         }
 
         .carte-metrique-rouge {
             background: var(--alerte-fond-erreur);
             padding: 15px;
             border-radius: var(--radius-grand);
-            border: 2px solid var(--risque-critique);
+            border: 2px solid var(--niveau-attention-critique);
         }
 
         /* Contenu de carte métrique */
@@ -1583,17 +1583,17 @@
 
         .carte-metrique-valeur-jaune {
             font-size: 1.8rem;
-            color: var(--risque-eleve);
+            color: var(--niveau-attention-eleve);
         }
 
         .carte-metrique-valeur-orange {
             font-size: 1.8rem;
-            color: var(--risque-tres-eleve);
+            color: var(--niveau-attention-tres-eleve);
         }
 
         .carte-metrique-valeur-rouge {
             font-size: 1.8rem;
-            color: var(--risque-critique);
+            color: var(--niveau-attention-critique);
         }
 
         .carte-metrique-valeur-violette {
@@ -1624,7 +1624,7 @@
         }
 
         .barre-progression-jaune {
-            background: var(--risque-modere);
+            background: var(--niveau-attention-modere);
         }
 
         .barre-progression-rouge {
@@ -1644,7 +1644,7 @@
             background: var(--alerte-fond-attention);
             padding: 15px;
             border-radius: var(--radius-grand);
-            border: 2px solid var(--risque-modere);
+            border: 2px solid var(--niveau-attention-modere);
         }
 
         /* Carte métrique rouge-attention pour difficulté persistante */
@@ -1950,7 +1950,7 @@
         .ligne-separee-danger {
             padding: 10px;
             border-bottom: 1px solid var(--bordure-claire);
-            color: var(--risque-tres-eleve);
+            color: var(--niveau-attention-tres-eleve);
         }
 
         .ligne-separee-success {
@@ -1961,13 +1961,13 @@
         .ligne-separee-warning {
             padding: 10px;
             border-bottom: 1px solid var(--bordure-claire);
-            color: var(--risque-modere);
+            color: var(--niveau-attention-modere);
         }
 
         .ligne-separee-info {
             padding: 10px;
             border-bottom: 1px solid var(--bordure-claire);
-            color: var(--risque-faible);
+            color: var(--niveau-attention-faible);
         }
 
         .ligne-separee-bleu {
@@ -2449,11 +2449,11 @@
             margin-bottom: 10px;
         }
         .text-warning-bold {
-            color: var(--risque-modere);
+            color: var(--niveau-attention-modere);
             font-weight: bold;
         }
         .text-danger { color: #e74c3c; }
-        .text-danger-bs { color: var(--risque-tres-eleve); }
+        .text-danger-bs { color: var(--niveau-attention-tres-eleve); }
         .text-warning-856-mt0 {
             color: var(--alerte-texte-attention);
             margin-top: 0;
@@ -2609,7 +2609,7 @@
         .td-orange {
             padding: 10px;
             border-bottom: 1px solid var(--bordure-claire);
-            color: var(--risque-eleve);
+            color: var(--niveau-attention-eleve);
         }
         .td-nowrap-bold {
             padding: 10px 20px;
@@ -3098,7 +3098,7 @@
         .stat-2rem-bold-minimal {
             font-size: 2rem;
             font-weight: bold;
-            color: var(--risque-minimal);
+            color: var(--niveau-attention-minimal);
         }
         .stat-2rem-bold-bleu {
             font-size: 2rem;
@@ -3478,11 +3478,11 @@
             margin-bottom: 10px;
         }
         .text-risque-critique {
-            color: var(--risque-critique);
+            color: var(--niveau-attention-critique);
         }
 
         /* Autres couleurs */
-        .text-warning { color: var(--risque-modere); }
+        .text-warning { color: var(--niveau-attention-modere); }
         .text-orange-bold {
             color: #ff9800;
             font-weight: bold;
@@ -3491,9 +3491,9 @@
             color: #f44336;
             font-weight: bold;
         }
-        .text-info { color: var(--risque-faible); }
+        .text-info { color: var(--niveau-attention-faible); }
         .text-info-bold {
-            color: var(--risque-faible);
+            color: var(--niveau-attention-faible);
             font-weight: bold;
         }
         .text-success-green { color: #5cb85c; }
@@ -14534,7 +14534,7 @@
                         </div>
 
                         <div class="alerte-danger-rouge">
-                            <h4 class="u-mb-10" style="color: var(--risque-tres-eleve)">Difficulté émergente</h4>
+                            <h4 class="u-mb-10" style="color: var(--niveau-attention-tres-eleve)">Difficulté émergente</h4>
                             <p><strong>Conditions :</strong> Performance &lt; 75% (en développement) ET au moins un défi identifié sur un critère</p>
                             <p><strong>Intervention :</strong> RàI Niveau 2 — Intervention préventive ciblée</p>
                             <p><strong>Action :</strong> Remédiation ciblée sur le critère en difficulté</p>
@@ -14805,7 +14805,7 @@
                                     <tr>
                                         <td>&lt; 70%</td>
                                         <td>Insuffisant</td>
-                                        <td class="u-texte-bold" style="color: var(--risque-tres-eleve)">Rouge</td>
+                                        <td class="u-texte-bold" style="color: var(--niveau-attention-tres-eleve)">Rouge</td>
                                         <td>Mobilisation problématique, intervention</td>
                                     </tr>
                                 </tbody>

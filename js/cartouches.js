@@ -1077,7 +1077,7 @@ async function calculerPourcentageComplete() {
     } else if (pourcentage >= 50) {
         element.style.background = 'var(--orange-accent)20';
     } else {
-        element.style.background = 'var(--risque-critique)20';
+        element.style.background = 'var(--niveau-attention-critique)20';
     }
 }
 

@@ -1508,7 +1508,7 @@ function mettreAJourStatutModalites() {
 
     // Vérifier le statut selon la pratique choisie
     if (!modalites.pratique) {
-        statutDiv.innerHTML = '<span style="color: var(--risque-critique);">✗ À configurer</span>';
+        statutDiv.innerHTML = '<span style="color: var(--niveau-attention-critique);">✗ À configurer</span>';
     } else if (modalites.pratique === 'sommative') {
         statutDiv.innerHTML = '<span style="color: var(--vert-moyen);">✓ Sommative traditionnelle (en %)</span>';
     } else if (modalites.pratique === 'pan-standards' && modalites.typePAN) {

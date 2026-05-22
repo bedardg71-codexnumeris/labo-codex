@@ -1415,9 +1415,9 @@ function genererSectionMobilisation(da) {
  * @returns {string} - Code couleur
  */
 function obtenirCouleurIndice(taux) {
-    if (taux >= 85) return 'var(--risque-minimal)'; // Vert
-    if (taux >= 70) return 'var(--risque-modere)';  // Jaune
-    return 'var(--risque-tres-eleve)';              // Rouge
+    if (taux >= 85) return 'var(--niveau-attention-minimal)'; // Vert
+    if (taux >= 70) return 'var(--niveau-attention-modere)';  // Jaune
+    return 'var(--niveau-attention-tres-eleve)';              // Rouge
 }
 
 /**

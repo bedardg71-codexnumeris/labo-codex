@@ -2892,10 +2892,10 @@ function afficherDistributionRisques(etudiants) {
     
     // Couleurs selon le niveau
     const couleurs = {
-        'minimal': 'var(--risque-nul)',
-        'faible': 'var(--risque-minimal)',
-        'modéré': 'var(--risque-modere)',
-        'élevé': 'var(--risque-eleve)',
+        'minimal': 'var(--niveau-attention-nul)',
+        'faible': 'var(--niveau-attention-minimal)',
+        'modéré': 'var(--niveau-attention-modere)',
+        'élevé': 'var(--niveau-attention-eleve)',
         'très élevé': '#c0392b',
         'critique': '#7f0000'
     };
