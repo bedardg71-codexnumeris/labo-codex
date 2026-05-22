@@ -313,6 +313,14 @@ document.addEventListener('DOMContentLoaded', function () {
         const container = document.getElementById('bulles-container');
         if (!container) return;
 
+        // Accessibilité (Phase 5.3 axe-core) : court-circuiter complètement si
+        // l'utilisateur a activé « Réduire les animations » dans son OS.
+        // Évite de polluer le DOM avec 18 éléments décoratifs invisibles.
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            container.innerHTML = '';
+            return;
+        }
+
         container.innerHTML = '';
         const tailles = ['petite', 'moyenne', 'grande'];
 

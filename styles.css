@@ -22755,3 +22755,70 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     color: var(--texte-secondaire);
 }
 
+/* ============================================================================
+   ACCESSIBILITÉ — prefers-reduced-motion (Phase 5.3 axe-core, 22 mai 2026)
+   ----------------------------------------------------------------------------
+   Respecte la préférence système « Réduire les animations » de macOS / iPadOS.
+   - Animations CSS et transitions ramenées à 0.01ms (= immédiat) plutôt qu'à 0
+     pour préserver les listeners `transitionend` / `animationend` que certaines
+     state machines de l'app utilisent.
+   - scroll-behavior smooth désactivé.
+   - La création JS des bulles parallaxe (js/main.js:312 genererBullesApprentissage)
+     est court-circuitée séparément via window.matchMedia, ce qui évite de
+     polluer le DOM avec 18 éléments invisibles.
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ============================================================================
+   ACCESSIBILITÉ — prefers-contrast: more (Phase 5.4 axe-core, 22 mai 2026)
+   ----------------------------------------------------------------------------
+   Respecte la préférence système « Augmenter le contraste » de macOS / iPadOS
+   (Réglages système → Accessibilité → Affichage → Augmenter le contraste).
+   - Texte assombri (mode clair) ou éclairci (mode sombre) pour atteindre un
+     ratio ≥ 7:1 (WCAG AAA pour les utilisateurs avec déficience visuelle).
+   - Bordures et gris intermédiaires renforcés.
+   - Couvre par effet de bord la majorité des nodes T-A3 (contraste 17 nodes
+     accueil) pour les utilisateurs qui activent ce mode.
+   ============================================================================ */
+
+@media (prefers-contrast: more) {
+    /* Mode sombre (palette par défaut sur :root) : éclaircir le texte gris */
+    :root {
+        --texte-principal: #ffffff;
+        --texte-secondaire: #c0d0d8;
+        --texte-muted: #8aa4b0;
+        --gris-clair: #8aa4b0;
+        --gris-moyen: #b0c4cc;
+    }
+
+    /* Mode clair : foncer le texte gris */
+    .mode-clair {
+        --texte-principal: #000000;
+        --texte-secondaire: #333344;
+        --texte-muted: #444455;
+        --gris-clair: #555566;
+        --gris-moyen: #333344;
+    }
+
+    /* Renforcement universel des bordures pour les éléments interactifs */
+    button,
+    input,
+    select,
+    textarea,
+    .btn,
+    .carte,
+    .bandeau {
+        border-width: 2px !important;
+    }
+}
+
