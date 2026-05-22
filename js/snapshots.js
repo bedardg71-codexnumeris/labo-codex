@@ -1075,6 +1075,24 @@ async function afficherStatutSnapshots() {
         derniereCapture = dernier.id || '—';
     }
 
+    // Bandeau contextuel : groupe-cours actif (V2 uniquement) — évite l'ambiguïté entre groupes-cours du même trimestre
+    const elemContexteGC = document.getElementById('v2-snapshots-contexte-groupe-cours');
+    if (elemContexteGC) {
+        const infoCours = db.getSync('infoCours', null);
+        if (!infoCours) {
+            elemContexteGC.textContent = 'Aucun groupe-cours actif';
+            elemContexteGC.style.color = 'var(--orange-attention, #ff9800)';
+        } else {
+            const sigle = infoCours.codeCours || infoCours.sigle || '';
+            const groupeNumBrut = infoCours.groupe;
+            const groupeNum = groupeNumBrut ? parseInt(groupeNumBrut, 10) : null;
+            const groupeLabel = (groupeNum && !isNaN(groupeNum)) ? 'Groupe ' + groupeNum : '';
+            const label = [sigle, groupeLabel].filter(Boolean).join(' — ');
+            elemContexteGC.textContent = label || '—';
+            elemContexteGC.style.color = '';
+        }
+    }
+
     // Mettre à jour les cartes métriques (V1 + V2)
     const elemHebdo = document.getElementById('stat-snapshots-hebdo');
     const elemInterventions = document.getElementById('stat-snapshots-interventions');
