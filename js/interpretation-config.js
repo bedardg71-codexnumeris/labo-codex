@@ -64,38 +64,6 @@ const SEUILS_PAR_DEFAUT = {
 };
 
 /* ===============================
-   DESCRIPTIONS DES SEUILS
-   (pour l'interface utilisateur)
-   =============================== */
-
-const DESCRIPTIONS_SEUILS = {
-    progressionArtefacts: {
-        titre: 'Progression des artefacts',
-        description: 'Différence minimale (en points de pourcentage) entre la moyenne des 3 artefacts récents et la moyenne des 3 suivants pour considérer qu\'il y a progression (↗) ou régression (↘). En dessous de ce seuil, la progression est considérée comme stable (→).',
-        unite: 'points (%)',
-        min: 0.05,
-        max: 0.20,
-        pas: 0.01
-    },
-    directionRisque: {
-        titre: 'Direction du risque',
-        description: 'Variation minimale du risque (en points de pourcentage) pour afficher une flèche indiquant que le risque augmente (→) ou diminue (←). En dessous de ce seuil, un tiret (—) indique un plateau.',
-        unite: 'points (%)',
-        min: 0.03,
-        max: 0.15,
-        pas: 0.01
-    },
-    defiSpecifique: {
-        titre: 'Défi spécifique (SRPNF)',
-        description: 'Score en dessous duquel un critère SRPNF est considéré comme un défi spécifique nécessitant une attention particulière.',
-        unite: '%',
-        min: 0.60,
-        max: 0.80,
-        pas: 0.01
-    }
-};
-
-/* ===============================
    FONCTIONS D'ACCÈS AUX SEUILS
    =============================== */
 
@@ -216,7 +184,6 @@ function initialiserModuleInterpretation() {
     window.reinitialiserSeuilsInterpretation = reinitialiserSeuilsInterpretation;
     window.obtenirSeuil = obtenirSeuil;
     window.SEUILS_PAR_DEFAUT = SEUILS_PAR_DEFAUT;
-    window.DESCRIPTIONS_SEUILS = DESCRIPTIONS_SEUILS;
 
 }
 
