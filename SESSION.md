@@ -1,9 +1,11 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 22 mai 2026 matin, post-cycle AQPC)
+     IDENTIFICATION DE CE FICHIER  (mis à jour 22 mai 2026 matin, post-cleanup
+     palettes COULEURS + plan Phase 2 documenté)
      Ce SESSION.md vit sur la branche `main` du worktree principal et sert
      de relai entre les sessions Claude. Il décrit l'état post-livraison
-     du cycle AQPC pré-3-juin (PLAN-COURT-TERME) et donne la consigne de
-     démarrage pour la prochaine instance.
+     du cycle AQPC + Sprint A + dettes #1-4 + cleanups (résidus risque,
+     palettes COULEURS) et donne la consigne de démarrage pour exécuter
+     le chantier Phase 2 cascade legacy 95.
      L'archive complète du cycle Cat-B post-merge (clos 21 mai, 10/10
      critères atteints) reste dans les §§ suivants comme référence
      historique.
@@ -11,18 +13,18 @@
 
 > **📌 Identification**
 > - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
-> - **Cycle en cours** : AQPC pré-3-juin (PLAN-COURT-TERME) — Phase 7 tests manuels Grégoire restante
-> - **Document maître** : `audit/PLAN-COURT-TERME.md` (avec `PLAN-AQPC.md` en archive du plan pré-pivot)
+> - **Cycle en cours** : Phase 2 cascade legacy 95 — chantier de nettoyage (~3-4 h, 3 commits)
+> - **Document maître** : `audit/refactoring-prep/PLAN-PHASE2-CASCADE-LEGACY-95.md` (commit `9940975`, 237 lignes)
 
-# SESSION — État au 22 mai 2026 (post-AQPC, prochaine priorité : Sprint A axes 2 & 3)
+# SESSION — État au 22 mai 2026 (prochaine priorité : Phase 2 cascade legacy 95)
 
 **Beta / build** : 99.62 / 0522-1115 (build refresh post-cleanup palettes COULEURS).
-**Branche `main`** : HEAD à `9940975` (plan Phase 2 cascade legacy 95 documenté) post-merge FF de `aqpc/privacy` (6 commits AQPC) + Sprint A livrée (3 commits) + dettes #1-4 closes (4 commits) + cleanup Beta 95 legacy Phases 1+2 (2 commits) + cleanup résidus risque (1 commit) + cleanup palettes COULEURS (1 commit) + plan Phase 2 (1 commit) + refreshs builds + tracking SESSION.md (4 commits) = 22 commits depuis `7c30d64`.
+**Branche `main`** : HEAD à `d1363fc` (tracking SESSION.md post-cleanup COULEURS + plan Phase 2) post-merge FF de `aqpc/privacy` (6 commits AQPC) + Sprint A livrée (3 commits) + dettes #1-4 closes (4 commits) + cleanup Beta 95 legacy Phases 1+2 (2 commits) + cleanup résidus risque (1 commit) + cleanup palettes COULEURS (1 commit) + plan Phase 2 (1 commit) + refreshs builds + tracking SESSION.md (5 commits) = 23 commits depuis `7c30d64`.
 **Branche `aqpc/privacy`** : retirée localement + remotement (mergée et propre).
 
-**Tests** : 85 Vitest verts à chaque commit (hook pré-push vert sur les 6 commits AQPC + commit release 99.62). Playwright non re-vérifié dans le worktree aqpc (pas de modif de zone DOM nouvelle).
+**Tests** : 85 Vitest verts à chaque commit (hook pré-push vert sur tous les commits récents). Playwright non re-vérifié sur les derniers cleanups (pas de modif de zone DOM).
 
-**Cycle suivant demandé par Grégoire (22 mai 2026 matin)** : attaquer la santé du code (Axe 2) et l'architecture SSOT (Axe 3) de l'audit annuel. Le plan est séquencé en 3 sprints A → B → C. **La prochaine session démarre par le Sprint A** (~1-2 h, 0 risque applicatif). Voir §3 ci-dessous.
+**Cycle suivant** : exécuter le chantier **Phase 2 cascade legacy 95** documenté dans `audit/refactoring-prep/PLAN-PHASE2-CASCADE-LEGACY-95.md`. 3 commits sur 3 modules (`trimestre.js` → `cours.js` → `groupe.js`), ~3-4 h, retrait estimé ~500-800 LOC de code mort en cascade. **Garde-fou crucial** : 3 fonctions de `trimestre.js` sont vivantes et doivent être préservées (cf. §0 et §3). Voir §3 ci-dessous pour la consigne complète.
 
 ---
 
@@ -41,6 +43,18 @@
 - ❌ **Ne pas écrire `window.evaluationEnCours = ...` ni `.X = ...` depuis un module hors whitelist** (config.js + evaluation*.js). Sentinelle Vitest `tests/unit/sentinelle-evaluation-en-cours.test.js` verrouille cet invariant (chantier F livré 21 mai soir). Toute amorce du pivot depuis un module externe passe par `window.demarrerEvaluationDepuisFichier(fichier, opts)` exportée par `evaluation-chargement.js`.
 - ❌ **Ne pas définir une fonction `function afficherNotificationX(...)` dans `js/*.js`** (hors `_archives/`). Sentinelle Vitest `tests/unit/utils-notifications.test.js` verrouille cet invariant (chantier E livré 21 mai soir). Utiliser `window.notifications.{succes, erreur, info}` (utils-notifications.js) pour toute notification toast.
 - ❌ **Ne pas réintroduire un wrapper local défensif `if (typeof window.afficherNotificationX === 'function')`**. L'API `notifications.X` est garantie chargée via `utils-notifications.js` (ligne 15969 d'index.html, après modes.js). Les 149 guards typeof orphelins ont été retirés ; tout nouveau guard est une régression Cat-B.
+
+### Garde-fous spécifiques Phase 2 cascade legacy 95 (chantier prochain)
+
+- ❌ **Ne PAS retirer `ouvrirModalBibliothequeCours` de `js/cours.js`**. Annoncée morte dans la dette §1 originale, mais l'audit du 22 mai PM révèle qu'elle est **VIVANTE** — branchée sur le bouton `index.html:6815` dans la section `accordeon-cours` (Réglages → Cours, sous-section active). Toucher = casser le bouton « Bibliothèque » côté UI. Le plan PLAN-PHASE2 §2.1 l'exclut explicitement.
+- ❌ **Ne PAS retirer ces 3 fonctions de `js/trimestre.js`** (vivantes, consommées hors-module) :
+  - `genererCalendrierComplet` (L583) → utilisée par `trimestres.js:344-346`
+  - `obtenirCalendrierComplet` (L584) → utilisée par `snapshots.js:398, 443, 690`
+  - `obtenirInfosJour` (L585) → utilisée par `saisie-presences.js:158-159`
+  Le module `trimestre.js` n'est PAS un fichier mort à supprimer en bloc — c'est un retrait sélectif.
+- ❌ **Ne PAS toucher `js/navigation.js:250-251` sans validation Grégoire**. Ce fichier est dans la liste « Zones protégées » CLAUDE.md. Il appelle `initialiserModuleTrimestre` via `if (typeof X === 'function')` — si on retire la fonction, le guard devient simplement faux (pas de régression boot). **Solution recommandée : retirer la fonction sans toucher au guard `navigation.js`** — cohérent CLAUDE.md.
+- ❌ **Ne PAS retirer le doublon `deleteStudent` de `js/groupe.js` (L957 ou L1138) sans tester manuellement**. La 2e définition shadow la 1ère en JavaScript ; le retrait de la mauvaise version peut introduire une régression silencieuse. Lire les deux versions, identifier laquelle est invoquée par les callers, retirer l'autre. Documenter la décision dans le commit.
+- ⚠️ **Régression silencieuse possible via `window[X]` dynamique**. Le grep statique ne capture pas les appels du type `window[nomFonction]()`. Mitigation obligatoire après chaque chantier 2.x : tester manuellement la zone Réglages correspondante dans l'app (boot + clic sous-sections Cours / Groupe / Trimestre + ouverture modales associées).
 
 ---
 
@@ -238,75 +252,54 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
 ---
 
-## §3 — Consigne de démarrage pour la prochaine session (Sprint A — santé code + SSOT)
 
-> Pour la prochaine instance Claude qui prend le relai. **Le cycle AQPC est livré, la prochaine priorité est le Sprint A** demandé par Grégoire le 22 mai matin : capitaliser sur les améliorations Cat-B + AQPC pour faire basculer formellement l'Axe 2 de l'audit (Rouge → Jaune presque Vert) et préparer le terrain pour Axe 3 (qui reste Rouge). **Effort ~1-2 h, 0 risque applicatif** (mise à jour de documentation + mesures auto-régénérables, pas de modification de code métier).
+## §3 — Consigne de démarrage pour la prochaine session (chantier Phase 2 cascade legacy 95)
 
-### Sprint A — contexte
+> Pour la prochaine instance Claude qui prend le relai. **Le cycle AQPC est livré (22 mai matin), le Sprint A est livré, les dettes #1-4 sont closes, les cleanups complémentaires (résidus risque + palettes COULEURS) sont faits. La prochaine priorité est l'exécution du chantier Phase 2 cascade legacy 95** : retirer le code mort en cascade de `js/cours.js`, `js/groupe.js`, `js/trimestre.js` qui dépend des IDs HTML retirés en Phase 1 (commit `479422c`) mais n'a pas été nettoyé en Phase 2 (commit `6b2da4b`, scope trop large). **Effort ~3-4 h, 3 commits, retrait estimé ~500-800 LOC.**
 
-L'audit annuel de mai 2026 a classé :
+### Contexte
 
-- **Axe 2 (Santé du code)** : Rouge — 3 R + 1 J + 1 V (cf. `audit/reports/02-summary.md`)
-- **Axe 3 (Architecture / SSOT)** : Rouge — 3 R (cf. `audit/reports/03-summary.md`)
-
-Mais **le cycle Cat-B post-merge (clos 21 mai, 10/10 critères) + le cycle AQPC (clos 22 mai matin)** ont changé la donne sans que les rapports d'audit ne soient mis à jour. Notamment :
-
-**Axe 2** :
-- 5 god modules refactorés en 32 sous-modules (LOC répartie, 2.1 R → J)
-- 13/14 fonctions cyc > 30 descendues sous 30 (2.2 R → J presque V, 1 héritage acté sous N=50)
-- 3 doublons evaluation résolus + utils-notifications consolidé (2.3 J → V)
-- 4 fonctions code mort retirées (Track 1 + AQPC)
-- 85 Vitest + 12 Playwright verts à chaque commit (2.5 R → J)
-
-**Axe 3** (partiellement amélioré) :
-- `utils-notifications.js` source unique pour 525 sites (chantier E)
-- Pivot `window.evaluationEnCours` encapsulé + sentinelle Vitest (chantier F)
-- 2 accès `localStorage` direct profil-etudiant migrés vers `db.*` (chantier G)
-- Refactor R → N cohérent SSOT (AQPC Phase 6.1 reliquat, 49 substitutions)
-- Tokens CSS `--risque-*` → `--niveau-attention-*` (chantier J)
-
-Mais `docs/DATA-OWNERSHIP.md` est figé au 3 avril 2026 (Beta 99.03) — 7 semaines de retard, 4 owners erronés, 8 violations non listées selon `PLAN-MOYEN-TERME.md` §5.2.
-
-Le Sprint A vise à **rattraper cette dette documentaire** et à **mesurer factuellement le delta Cat-B** dans un addendum à `audit/reports/02-summary.md`. Aucune modification de code applicatif. Sprint B (cartographies SSOT 3.1/3.2/3.3) et Sprint C (Tier 6.5 `modalitesEvaluation`, 14 écrivains, 47 sites) sont la suite logique mais à attaquer plus tard (Sprint B post-AQPC, Sprint C été 2026).
+Le **plan détaillé** est dans `audit/refactoring-prep/PLAN-PHASE2-CASCADE-LEGACY-95.md` (commit `9940975`, 237 lignes). **Lire ce document en premier — il contient l'audit call-graph vérifié, l'ordre d'exécution, les conventions, les risques, la check-list pré-démarrage.** Ce §3 SESSION.md ne fait que pointer vers le plan, pas le dupliquer.
 
 ### Étape 1 — Vérifier l'état du repo (1-2 min)
 
 ```bash
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
-git status                              # branche actuelle ? attendu : audit/2026-mai (l'autre instance)
-git log --oneline main -5               # HEAD main attendu : `7c30d64 release(aqpc): Beta 99.62 build 0522-0650` ou plus récent
+git status                              # branche actuelle ? attendu : audit/2026-mai (l'instance principale)
+git log --oneline main -5               # HEAD main attendu : d1363fc ou plus récent
 git worktree list                       # 1 seul worktree attendu (le principal sur audit/2026-mai)
 ```
 
-**Si HEAD main au-delà de `7c30d64`** : un autre chantier a été fait depuis. Vérifier `git log main` pour comprendre. Pas de panique, ce SESSION.md sera mis à jour par cet autre chantier.
+**Si HEAD main au-delà de `d1363fc`** : un autre chantier a été fait depuis. Vérifier `git log main` pour comprendre. Pas de panique, ce SESSION.md sera mis à jour par cet autre chantier.
 
 ### Étape 2 — Créer un worktree dédié main
 
-`audit/2026-mai` a son propre cycle de vie avec des modifs uncommitted (audits, rapports, docs sécurité). **NE PAS écraser**. Créer un worktree dédié :
+`audit/2026-mai` a son propre cycle de vie avec des modifs uncommitted (audits, rapports, docs sécurité). **NE PAS écraser**. Créer un worktree dédié au chantier :
 
 ```bash
-git worktree add ../Monitorage_v6-sprintA -b sprint-a/data-ownership main
+git fetch origin main                                    # synchroniser local main avec origin
+git worktree add ../Monitorage_v6-phase2 -b cleanup/phase2-cascade-legacy-95 main
+cd ../Monitorage_v6-phase2
 ```
 
 > ⚠️ Pattern observé : `git checkout main` avec modifs uncommitted sur `audit/2026-mai` → git refuse. **Solution propre = worktree dédié à main**.
 
-### Étape 3 — Lecture obligatoire (10 min)
+### Étape 3 — Lecture obligatoire (10-15 min)
 
 Ordre strict :
-1. **Ce SESSION.md** (relai courant + garde-fou §0)
-2. `docs/DATA-OWNERSHIP.md` — l'**état actuel** du registre SSOT (à actualiser). Daté du 3 avril 2026, Beta 99.03.
-3. `audit/reports/02-summary.md` et `audit/reports/03-summary.md` (sur branche `audit/2026-mai` — lecture seulement, NE PAS modifier le worktree principal) — base de référence statuts V/J/R
-4. `audit/refactoring-prep/MODULES-MAP.md` §2.1-2.5 — cartographies par module post-refactoring
-5. `audit/PLAN-MOYEN-TERME.md` §5.2 — précise les 4 owners erronés et 8 violations non listées
-6. `CLAUDE.md` racine — règles sécurité et conventions
+1. **Ce SESSION.md** (relai courant + garde-fou §0 — règles spécifiques Phase 2 en fin de §0)
+2. **`audit/refactoring-prep/PLAN-PHASE2-CASCADE-LEGACY-95.md`** — plan détaillé du chantier (audit call-graph, ordre, risques)
+3. `CLAUDE.md` racine — règles sécurité (innerHTML, handlers inline, zones protégées) et convention de bump version
+4. `BACKLOG.md` — items potentiellement liés au cleanup
 
 ### Étape 4 — Charger les skills
 
 **Obligatoire** :
-- `Skills pour Claude Code/SKILL_labo_codex.md` — architecture, indices A-C-P, workflow
-- `Skills pour Claude Code/SKILL_integrite_globaux.md` — collections globales partagées (relevant pour DATA-OWNERSHIP)
-- `Skills pour Claude Code/SKILL_hygiene_donnees_partagees.md` — principes abstraits SSOT
+- `Skills pour Claude Code/SKILL_labo_codex.md` — architecture, workflow
+
+**Thématique** :
+- Aucun skill supplémentaire requis — le chantier est du nettoyage de code mort, pas de refactor profond ni de modification métier.
 
 ### Étape 5 — Lancer la suite de tests (baseline)
 
@@ -315,111 +308,79 @@ cd tests && npm install      # première fois après nouveau worktree
 cd tests && npm run test:unit    # attendu : 85 Vitest verts
 ```
 
-Si rouge dès le départ → diagnostic prioritaire AVANT tout chantier. Sprint A ne touche pas au code applicatif donc cette baseline ne devrait pas bouger pendant le sprint.
+Si rouge dès le départ → diagnostic prioritaire AVANT tout chantier. Le chantier Phase 2 ne devrait introduire AUCUNE régression sur la suite Vitest (les fonctions retirées n'ont pas de sentinelle dédiée, à vérifier au cas par cas).
 
-### Étape 6 — Exécution Sprint A (1-2 h)
+### Étape 6 — Exécution selon ordre PLAN-PHASE2 §3
 
-Trois livrables séquentiels.
+Ordre recommandé : **trimestre.js → cours.js → groupe.js** (du plus simple au plus complexe). Voir PLAN-PHASE2 §2.1, §2.2, §2.3 pour le détail par module et §4 pour les conventions de travail.
 
-#### Livrable 1 — Audit auto-régénérable des écrivains/lecteurs SSOT (~20 min)
+**Vérifications pré-chantier** (cf. PLAN-PHASE2 §5) : re-grep les callers de chaque fonction listée morte AVANT le retrait — les call-sites peuvent avoir bougé depuis la rédaction du plan le 22 mai matin.
 
-Script de cartographie automatique. Ne dépend pas d'une vérité humaine, lit le code et produit la carte.
+**Conventions** :
+- 1 commit par module (3 commits total)
+- Hook pré-push Vitest vert obligatoire
+- Format message : `refactor(legacy-95-cascade): chantier 2.X — retrait code mort cascade <module>`
+- Test manuel UI après chaque chantier (boot complet + clic sous-section Réglages associée + ouverture modales)
 
+### Étape 7 — Bump version à la clôture du chantier
+
+**ATTENTION** : demander à Grégoire AVANT de bumper la beta. Convention CLAUDE.md §0 ❌.
+
+Si Grégoire confirme : 99.62 → 99.63 (bump léger, fin de Phase 2). Sites à modifier :
+- `version.json` : `{"build":"MMJJ-HHMM","beta":"99.XX"}`
+- `js/init-inline.js` lignes 103-104 : `VERSION_MAJEURE` + `BUILD_ID`
+
+Sinon : juste un refresh de build (`0522-XXXX`, beta inchangée à 99.62).
+
+### Étape 8 — Merge FF + push
+
+Depuis le worktree :
 ```bash
-# Produit la liste des écrivains réels par clé (depuis le code source)
-grep -rn "db\.setSync\|setItem" js/ | grep -v "test\|_archives" > /tmp/ecrivains-bruts.txt
-
-# Produit la liste des lecteurs par clé
-grep -rn "db\.getSync\|getItem" js/ | grep -v "test\|_archives" > /tmp/lecteurs-bruts.txt
+git push origin cleanup/phase2-cascade-legacy-95:main    # FF push direct sur main
 ```
 
-À transformer en script Python ou Node qui sort un Markdown ou JSON exploitable. Cible : pouvoir le re-lancer dans 3 mois et obtenir la même structure auto-régénérée. **À déposer dans `scripts/audit-ssot.{js|py}`** (créer le dossier si besoin). C'est aussi le pre-work du Sprint B.
+Tag optionnel `phase2-cascade-legacy-95-2026-05-XX` si Grégoire le souhaite.
 
-#### Livrable 2 — Actualiser `docs/DATA-OWNERSHIP.md` (~45 min)
-
-À partir des données du Livrable 1 et de la connaissance des chantiers récents :
-
-1. **Mettre à jour l'en-tête** : Beta courante (au moment du sprint), date du jour, source = audit auto-régénéré (script du Livrable 1) + chantiers Cat-B/AQPC livrés
-2. **Corriger les 4 owners erronés** identifiés par PLAN-MOYEN-TERME §5.2 (les lister explicitement)
-3. **Ajouter les 8 violations multi-écrivains non listées** (idem)
-4. **Mesurer le vrai chiffre `modalitesEvaluation`** (le tableau actuel dit « 25+ écrivains » alors que la mesure de la session du 22 mai en a trouvé **14 modules écrivains, 47 call-sites `db.setSync`**)
-5. **Refléter les chantiers livrés** :
-   - `utils-notifications.js` = source unique notifications (chantier E)
-   - `window.evaluationEnCours` encapsulé via API + sentinelle Vitest (chantier F)
-   - `profil-etudiant-diagnostics.js` : 2 accès `localStorage` migrés vers `db.*` (chantier G)
-   - Refactor R → N : `decouplerPR` → `decouplerPN`, `indiceR` → `indiceN`, propriété `risque` → `niveauAttention` (AQPC Phase 6.1)
-   - 4 fonctions code mort alarmiste retirées (`calculerRisqueEchec`, `obtenirClasseRisque`, `calculerNiveauRaI`, `afficherAlertesPrioritaires`, + bonus `afficherDistributionRisques` détecté pendant AQPC)
-6. **Marquer les violations résolues** dans le tableau « Violations connues » (#5 `presences` déjà clos antérieurement ; ajouter celles fermées par Cat-B/AQPC)
-7. **Garder Tier 6.5 `modalitesEvaluation` (violation #1)** comme dette résiduelle pour le Sprint C
-
-#### Livrable 3 — Addendum à `audit/reports/02-summary.md` (~30 min)
-
-⚠️ **Attention** : `audit/reports/02-summary.md` vit sur la branche `audit/2026-mai` (l'autre instance). NE PAS y écrire depuis le worktree sprintA (main). Deux options :
-
-- **Option A (recommandée)** : créer `audit/refactoring-prep/02-DELTA-CAT-B-AQPC.md` sur main, qui se référence depuis `audit/reports/02-summary.md` au moment où `audit/2026-mai` sera mergé sur main. Pas de collision.
-- **Option B** : préparer un patch texte (diff prêt à appliquer) à intégrer manuellement quand la branche `audit/2026-mai` sera mergée. Le déposer dans `audit/refactoring-prep/02-DELTA-PATCH.diff` ou équivalent.
-
-Contenu de l'addendum : tableau avant/après par sous-audit, mesures factuelles (cloc, eslint complexity, jscpd, baseline tests), statut révisé.
-
-Mesures à produire avec :
-
-```bash
-# Métriques santé du code post-Cat-B/AQPC
-find js -maxdepth 2 -name "*.js" -not -path "*/_archives/*" | xargs wc -l | tail -1
-find js -maxdepth 2 -name "*.js" -not -path "*/_archives/*" | wc -l
-# eslint complexity si la config est présente dans tests/ ou audit/
-```
-
-### Étape 7 — Conventions de travail Sprint A
-
-- **0 modification de code applicatif**. Si une régression latente est détectée pendant le grep, NE PAS la fixer dans ce sprint — inscrire dans `Retours des testeurs/SUIVI-BUGS.md` section « Détectés Sprint A » pour traitement ultérieur (Sprint B ou C selon la nature).
-- **1 commit par livrable** (script auto-régénérable, MAJ DATA-OWNERSHIP, addendum/patch).
-- **Sécurité** : pas pertinent puisqu'aucune modif applicative. Mais le hook pré-push Vitest reste vert obligatoire à chaque commit (= rien ne touche au code, donc trivialement vert).
-
-### Étape 8 — Bump version en fin de Sprint A
-
-**ATTENTION** : demander à Grégoire AVANT de bumper. Convention CLAUDE.md.
-
-Si pas de modification de code applicatif, **probablement pas de bump beta**. Juste un refresh build (`version.json` + `js/init-inline.js`) pour marquer la livraison documentaire. À confirmer avec Grégoire.
-
-### Étape 9 — Merge FF + push en fin de Sprint A
-
-Depuis le worktree sprintA :
-```bash
-git push origin sprint-a/data-ownership:main    # FF merge
-```
-
-Pas de tag obligatoire pour Sprint A (c'est de la documentation). Si Grégoire le souhaite : `sprint-a-data-ownership-2026-MM-DD`.
-
-### Étape 10 — Cleanup worktree en fin de Sprint A
+### Étape 9 — Cleanup worktree et MAJ SESSION.md
 
 ```bash
 # Depuis le repo principal :
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
-git worktree remove ../Monitorage_v6-sprintA
-git branch -D sprint-a/data-ownership
-
-# Suppression remote (si gh disponible, évite hook pré-push) :
-gh api -X DELETE repos/bedardg71-codexnumeris/Monitorage_v6/git/refs/heads/sprint-a/data-ownership
+git worktree remove ../Monitorage_v6-phase2
+git branch -D cleanup/phase2-cascade-legacy-95
 ```
 
-### Étape 11 — Préparation Sprint B (à signaler à Grégoire)
+Puis créer un worktree dédié à la MAJ SESSION.md :
+- En-tête §1 : HEAD `d1363fc` → nouveau HEAD, build courant
+- §1 nouvelle sous-section « Chantier Phase 2 livré » documentant les 3 commits + LOC retirée par module
+- §5 nouvelle ligne historique
+- §0 retirer les garde-fous spécifiques Phase 2 (la dette est close)
+- §3 réécrire pour le chantier suivant (selon backlog ou directive Grégoire)
 
-Une fois Sprint A clos, signaler à Grégoire que **Sprint B (cartographies 3.1 + 3.2 + 3.3 de l'Axe 3)** peut s'attaquer post-AQPC :
+### Garde-fous spécifiques au chantier Phase 2
 
-- 3.1 : étendre le script du Livrable 1 pour produire la cartographie complète (lecteurs + écrivains + violations) en MD
-- 3.2 : utiliser `npx madge --json js/` pour produire le graphe fan-in/fan-out et le présenter dans `docs/architecture/`
-- 3.3 : capitaliser sur `audit/refactoring-prep/MODULES-MAP.md` §2.x + détecter les imports circulaires éventuels
+Récap des règles §0 spécifiques (voir §0 pour le détail) :
 
-Effort estimé Sprint B : 3-4 h. Risque : faible (production de documentation et de scripts d'analyse).
+1. **`ouvrirModalBibliothequeCours` est VIVANTE** — ne pas retirer (bouton index.html:6815 actif).
+2. **3 fonctions de `trimestre.js` à PRÉSERVER** : `genererCalendrierComplet`, `obtenirCalendrierComplet`, `obtenirInfosJour`.
+3. **`navigation.js:250-251` est dans Zones protégées** — laisser le guard `if (typeof initialiserModuleTrimestre === 'function')` intact, retirer juste la fonction.
+4. **Doublon `deleteStudent` dans groupe.js (L957+L1138)** — lire les deux versions, identifier laquelle est invoquée, retirer l'autre. Documenter dans le commit.
+5. **Régression silencieuse via `window[X]` dynamique** — test manuel UI obligatoire après chaque chantier.
+
+### En cas de découverte hors scope
+
+Si l'audit cascade révèle du code mort dans **d'autres modules** (horaire.js, snapshots.js, etc.) :
+- **NE PAS l'embarquer** dans les 3 commits du chantier Phase 2 (préserver la cohérence du scope).
+- L'inscrire dans `BACKLOG.md` ou dans une nouvelle dette dans SESSION.md §1 pour traitement ultérieur.
+- Continuer le chantier sur les 3 modules cibles uniquement.
 
 ---
 
-## §3bis — Archive consigne de démarrage Cat-B (clos 21 mai 2026)
+## §3bis — Archives des consignes de démarrage précédentes
 
-> Consigne précédente — conservée comme référence pour les conventions worktree, hook pré-push, etc.
+> Anciennes consignes — déclassées car cycles clos. Sprint A (livrée 22 mai matin) + Cat-B (clos 21 mai). Conservées comme référence pour les conventions worktree, hook pré-push, etc. **Pour le détail Sprint A : voir `git log SESSION.md` ou commit `ad4d0ec`.** Pour Cat-B, voir ci-dessous.
 
-### Étape 1 — Vérifier l'état du repo (1-2 min, période Cat-B)
+### Archive Cat-B — Étape 1 — Vérifier l'état du repo (1-2 min, période Cat-B)
 
 ```bash
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
@@ -496,3 +457,4 @@ git tag -l "cat-b-*" | sort             # 9 tags attendus :
 | 2026-05-22 (matin, post-AQPC, préparation Sprint A) | Mise à jour du relai post-clôture cycle AQPC. Grégoire demande un cycle dédié aux axes Rouge 2 (Santé du code) et 3 (Architecture SSOT) de l'audit annuel. Plan séquencé en 3 sprints A → B → C présenté et validé : Sprint A (1-2 h, MAJ DATA-OWNERSHIP.md + addendum 02-summary delta Cat-B/AQPC, 0 risque applicatif) — priorité immédiate. Sprint B (3-4 h, cartographies 3.1/3.2/3.3) — post-AQPC. Sprint C (5-8 h, Tier 6.5 `modalitesEvaluation` 14 écrivains/47 sites) — été 2026. §3 réécrit pour donner consigne Sprint A complète (11 étapes, livrables explicites, conventions pas-de-code-applicatif). Ancien §3 Cat-B déclassé en §3bis archive (consigne tronquée — référence aux versions précédentes du fichier via `git log`). Header mis à jour : prochaine priorité = Sprint A. Aucun bump version (juste un commit doc + refresh build). | Préparation Sprint A (Claude autonome) |
 | 2026-05-22 (matin, cleanup résidus risque) | MAJ après livraison cleanup résidus système risque (1 commit `c697a29` sur branche `cleanup/risque-residus`, mergée FF main puis branche/worktree supprimés). Audit ciblé sur dette §1 SESSION main « ~10 réf JS risque » révèle 99 hits stricts (\brisque) sur 25 fichiers, dont 5 systèmes morts complémentaires aux dettes #1-4 livrées le matin par autre instance : A.1 fonction `genererBadgeRisqueProfil` + export, A.2 `COULEURS.risque`, A.3 `SEUILS_PAR_DEFAUT.risque` (9 niveaux échelle), A.4 6 classes CSS `.badge-risque-*`, A.5 8 classes CSS `.badge-risque-analyse-*`. Sentinelle Vitest mise à jour. Build refresh 0522-0925 → 0522-0945 (pas de bump beta). Tests 85/85 verts. Rebase nécessaire car 11 commits divergents sur origin/main (Sprint A + Phases legacy 95 + dettes #1-4) — conflits BUILD_ID uniquement, résolus en gardant 0522-0945. En-tête §1 mis à jour avec HEAD `c697a29` et chronologie 19 commits depuis `7c30d64`. Sous-section « Cleanup résidus système risque » ajoutée à §1 après « Cleanup Beta 95 legacy étendu ». UI vivante « Direction du risque » (slider + `calculerDirectionRisque`) NON touchée — chantier renommage R → N futur. | Cleanup résidus risque (Claude autonome) |
 | 2026-05-22 (matin, cleanup palettes COULEURS + plan Phase 2) | 2 commits sur branche `cleanup/couleurs-phase2plan` mergée FF main. (1) Commit `128ae0c` : retrait 3 palettes mortes `COULEURS.pratiques`, `COULEURS.idme`, `COULEURS.graphiques` du module `js/couleurs.js` (audit cross-codebase confirme 0 caller — seules `indices` et `correlations` restent consommées par correlations-longitudinales.js et graphiques-progression.js). −28 LOC, JSDoc actualisée, return Object.freeze rétréci à 2 entrées. (2) Commit `9940975` : rédaction de `audit/refactoring-prep/PLAN-PHASE2-CASCADE-LEGACY-95.md` (237 lignes) couvrant le chantier successeur des Phases 1+2 legacy 95 — audit préliminaire des 3 modules cours.js/groupe.js/trimestre.js avec call-graph vérifié, ordre d'exécution recommandé (trimestre → cours → groupe), risques identifiés (navigation.js protégé pour appel `initialiserModuleTrimestre`, config.js commentaires à mettre à jour, régressions silencieuses via `window[X]` dynamique). **Découvertes audit modifiant la dette §1 SESSION main** : `ouvrirModalBibliothequeCours` est en fait VIVANTE (bouton `index.html:6815` actif) ; `trimestre.js` contient 3 fonctions vivantes à PRÉSERVER (`genererCalendrierComplet`, `obtenirCalendrierComplet`, `obtenirInfosJour`) — pas un module à retirer en bloc. Build refresh 0522-0945 → 0522-1115. Tests 85/85 verts. En-tête §1 mis à jour : HEAD `9940975`, 22 commits depuis `7c30d64`. Sous-section « Prochaine session — chantier Phase 2 cascade legacy 95 (plan documenté) » remplace l'ancienne version courte. | Cleanup palettes COULEURS + plan Phase 2 (Claude autonome) |
+| 2026-05-22 (matin, relai consigne Phase 2) | Bascule du relai vers le chantier Phase 2 cascade legacy 95. En-tête principal réécrit (titre H1, identification, cycle en cours = Phase 2, document maître = PLAN-PHASE2-CASCADE-LEGACY-95.md). HEAD attendu `d1363fc`, build `0522-1115`. §0 enrichi avec sous-section « Garde-fous spécifiques Phase 2 » : 5 règles (`ouvrirModalBibliothequeCours` VIVANTE ; 3 fonctions trimestre.js à préserver ; `navigation.js:250-251` protégé — laisser guard ; doublon `deleteStudent` à clarifier ; test manuel UI obligatoire post-chantier). §3 entièrement réécrit — ancienne consigne Sprint A (livrée) supprimée (retrouvable via `git log SESSION.md`) ; nouvelle consigne pointe vers PLAN-PHASE2 comme document maître et donne 9 étapes (vérif repo, worktree dédié, lecture obligatoire, skills, tests baseline, exécution ordre PLAN-PHASE2 §3, bump version, merge FF push, cleanup + MAJ SESSION). §3bis Cat-B archive renommée « Archives des consignes de démarrage précédentes » (regroupe Sprint A déclassée + Cat-B). Aucune modif code applicatif. | Préparation relai Phase 2 (Claude autonome) |
