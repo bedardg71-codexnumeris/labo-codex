@@ -183,20 +183,8 @@ function peupleSelecteurTrimestre() {
  * - Sortie silencieuse si les éléments n'existent pas
  */
 function initialiserModuleCours() {
-
-    // Exécuter les migrations
     migrerCoursVersPratiques();
     migrerCoursDansBibliotheque();
-
-    // Vérifier que nous sommes dans la bonne section
-    const tableauContainer = document.getElementById('listeCoursSidebar');
-    if (!tableauContainer) {
-        return;
-    }
-
-    // Afficher la liste des cours dans la sidebar
-    afficherListeCoursSidebar();
-
 }
 
 /* ===============================
@@ -214,7 +202,6 @@ function initialiserModuleCours() {
  * 
  * UTILISÉ PAR:
  * - initialiserModuleCours()
- * - sauvegarderCours()
  * - activerCours()
  * - dupliquerCours()
  * - supprimerCours()
@@ -344,60 +331,6 @@ function afficherTableauCours() {
     }
 }
 
-/* ===============================
-   AFFICHAGE SIDEBAR
-   =============================== */
-
-/**
- * Affiche la liste des cours dans la sidebar
- *
- * FONCTIONNEMENT:
- * 1. Récupère les cours avec dansBibliotheque === true
- * 2. Génère la liste HTML avec items cliquables
- * 3. Met en surbrillance le cours actif
- *
- * UTILISÉ PAR:
- * - initialiserModuleCours()
- * - sauvegarderCours()
- * - retirerCoursDeBibliotheque()
- * - ajouterCoursIndividuel()
- */
-async function afficherListeCoursSidebar() {
-    const tousLesCours = await db.get('listeCours') || [];
-    const coursDansBibliotheque = tousLesCours.filter(c => c.dansBibliotheque === true);
-    const container = document.getElementById('listeCoursSidebar');
-
-    if (!container) return;
-
-    if (coursDansBibliotheque.length === 0) {
-        container.innerHTML = `
-            <p class="text-muted text-italic" style="font-size: 0.9rem; text-align: center; padding: 20px 10px;">
-                Crée un nouveau cours ou puise dans la bibliothèque
-            </p>
-        `;
-        return;
-    }
-
-    let html = '';
-    coursDansBibliotheque.forEach(c => {
-        const activeClass = c.actif ? ' active' : '';
-
-        html += `
-            <div class="sidebar-item${activeClass}" data-action="afficherFormCours" data-param="${c.id}">
-                <div class="sidebar-item-titre">
-                    ${echapperHtml(c.codeCours)}
-                </div>
-                <div style="font-size: 0.85rem; color: var(--gris-moyen); margin-top: 3px;">
-                    ${echapperHtml(c.session)}${echapperHtml(c.annee)}
-                </div>
-                ${c.actif ? '<div style="margin-top: 5px;"><span class="sidebar-item-badge">Actif</span></div>' : ''}
-            </div>
-        `;
-    });
-
-    container.innerHTML = html;
-}
-
 /**
  * Récupère tous les cours de la bibliothèque (disponibles à ajouter)
  *
@@ -501,291 +434,6 @@ async function afficherPratiqueEnLectureSeule() {
     }
 
     affichage.textContent = nomPratique;
-}
-
-/**
- * Affiche le formulaire d'ajout ou d'édition
- * 
- * FONCTIONNEMENT:
- * 1. Affiche le formulaire, masque le bouton d'ajout
- * 2. Si id fourni: mode édition (charge les données)
- * 3. Sinon: mode création (champs vides)
- * 4. Met à jour le titre et le bouton
- * 
- * PARAMÈTRES:
- * @param {string|null} id - ID du cours à éditer (null pour nouveau)
- * 
- * UTILISÉ PAR:
- * - Bouton «Ajouter un cours»
- * - modifierCours()
- * 
- * MODES:
- * - Ajout: coursEnEdition = null, titre = "Nouvelle configuration"
- * - Édition: coursEnEdition = id, titre = "Modifier la configuration"
- */
-function afficherFormCours(id = null) {
-    const formulaire = document.getElementById('formulaireCours');
-    const btnAjouter = document.getElementById('btnAjouterCours');
-    const titre = document.getElementById('titreFormCours');
-    const btnTexte = document.getElementById('btnTexteCours');
-
-    if (!formulaire) return;
-
-    formulaire.classList.remove('u-hide');
-    if (btnAjouter) btnAjouter.classList.add('u-hide');
-
-    // Peupler le sélecteur de trimestre (Beta 93.5)
-    peupleSelecteurTrimestre();
-
-    // ✅ CORRECTION (2 jan 2026) : La pratique est maintenant sélectionnable par cours
-    // Ne plus appeler afficherPratiqueEnLectureSeule(), le dropdown est dans le HTML
-
-    if (id) {
-        // Mode édition
-        const cours = db.getSync('listeCours', []);
-        const c = cours.find(cours => cours.id === id);
-
-        if (c) {
-            coursEnEdition = id;
-            if (titre) titre.textContent = 'Modifier la configuration';
-            if (btnTexte) btnTexte.textContent = 'Sauvegarder';
-
-            // Remplir les champs
-            // 🆕 FIX (4 fév 2026) : Chercher code dans plusieurs champs (Primo utilise 'code')
-            document.getElementById('codeCours').value = c.codeCours || c.sigle || c.code || '';
-            document.getElementById('nomCours').value = c.nomCours || c.titre || c.nom || '';
-            document.getElementById('numeroCompetence').value = c.numeroCompetence || '';
-            document.getElementById('competence').value = c.competence || '';
-            document.getElementById('elementsCompetence').value = c.elementsCompetence || '';
-            document.getElementById('prenomEnseignant').value = c.prenomEnseignant || '';
-            document.getElementById('nomEnseignant').value = c.nomEnseignant || '';
-            document.getElementById('departement').value = c.departement || '';
-            document.getElementById('local').value = c.local || '';
-            // 🆕 BETA 92: Champs pour métadonnées CC
-            document.getElementById('courrielEnseignant').value = c.courriel || '';
-            document.getElementById('siteWebEnseignant').value = c.siteWeb || '';
-            document.getElementById('disciplineEnseignant').value = c.discipline || '';
-            document.getElementById('institutionEnseignant').value = c.institution || '';
-            document.getElementById('session').value = c.session || 'H';
-            document.getElementById('annee').value = c.annee || '2025';
-            document.getElementById('heuresParSemaine').value = c.heuresParSemaine || '4';
-            document.getElementById('formatHoraire').value = c.formatHoraire || '2x2';
-            // Beta 93.5: Charger trimestreId
-            if (document.getElementById('trimestreId')) {
-                document.getElementById('trimestreId').value = c.trimestreId || '';
-            }
-
-            // ✅ CORRECTION (2 jan 2026) : Pré-sélectionner la pratique du cours
-            const selectPratique = document.getElementById('pratiqueIdCours');
-            if (selectPratique && c.pratiqueId) {
-                selectPratique.value = c.pratiqueId;
-            }
-        }
-    } else {
-        // Mode ajout - MAIS vérifier s'il y a déjà un cours (créé par Primo par ex)
-        const cours = db.getSync('listeCours', []);
-        const coursActif = cours.find(c => c.actif);
-
-        if (coursActif && cours.length > 0) {
-            // Pré-remplir avec le premier cours ou le cours actif
-            // 🆕 FIX (4 fév 2026) : Chercher code dans plusieurs champs (Primo utilise 'code')
-            const premierCours = coursActif || cours[0];
-            document.getElementById('codeCours').value = premierCours.codeCours || premierCours.sigle || premierCours.code || '';
-            document.getElementById('nomCours').value = premierCours.nomCours || premierCours.titre || premierCours.nom || '';
-            document.getElementById('numeroCompetence').value = premierCours.numeroCompetence || '';
-            document.getElementById('competence').value = premierCours.competence || '';
-            document.getElementById('elementsCompetence').value = premierCours.elementsCompetence || '';
-            document.getElementById('prenomEnseignant').value = premierCours.prenomEnseignant || '';
-            document.getElementById('nomEnseignant').value = premierCours.nomEnseignant || '';
-            document.getElementById('departement').value = premierCours.departement || '';
-            document.getElementById('local').value = premierCours.local || '';
-            document.getElementById('session').value = premierCours.session || 'H';
-            document.getElementById('annee').value = premierCours.annee || '2025';
-            document.getElementById('heuresParSemaine').value = premierCours.heuresParSemaine || '4';
-            document.getElementById('formatHoraire').value = premierCours.formatHoraire || '2x2';
-
-            // ✅ CORRECTION (2 jan 2026) : Pré-sélectionner la pratique du cours existant
-            const selectPratique1 = document.getElementById('pratiqueIdCours');
-            if (selectPratique1 && premierCours.pratiqueId) {
-                selectPratique1.value = premierCours.pratiqueId;
-            }
-
-            if (titre) titre.textContent = 'Configuration du cours';
-            coursEnEdition = premierCours.id; // Permettre la modification
-        } else {
-            // Vraiment aucun cours - formulaire vide
-            coursEnEdition = null;
-            if (titre) titre.textContent = 'Nouvelle configuration de cours';
-            if (btnTexte) btnTexte.textContent = 'Ajouter';
-
-            // Réinitialiser les champs
-            document.getElementById('codeCours').value = '';
-            document.getElementById('nomCours').value = '';
-            document.getElementById('numeroCompetence').value = '';
-            document.getElementById('competence').value = '';
-            document.getElementById('elementsCompetence').value = '';
-            document.getElementById('prenomEnseignant').value = '';
-            document.getElementById('nomEnseignant').value = '';
-            document.getElementById('departement').value = '';
-            document.getElementById('local').value = '';
-            document.getElementById('session').value = 'H';
-            document.getElementById('annee').value = new Date().getFullYear().toString();
-            document.getElementById('heuresParSemaine').value = '4';
-            document.getElementById('formatHoraire').value = '2x2';
-
-            // ✅ CORRECTION (2 jan 2026) : Pratique par défaut pour nouveau cours
-            const selectPratique2 = document.getElementById('pratiqueIdCours');
-            if (selectPratique2) {
-                const pratiqueDefaut = db.getSync('pratiqueParDefaut', 'pan-standards');
-                selectPratique2.value = pratiqueDefaut;
-            }
-        }
-    }
-}
-
-/**
- * Annule le formulaire d'ajout/édition
- * Masque le formulaire et réaffiche le bouton d'ajout
- * 
- * UTILISÉ PAR:
- * - Bouton «Annuler» dans le formulaire
- */
-function annulerFormCours() {
-    const formulaire = document.getElementById('formulaireCours');
-    const btnAjouter = document.getElementById('btnAjouterCours');
-    
-    if (formulaire) formulaire.classList.add('u-hide');
-    if (btnAjouter) btnAjouter.classList.remove('u-hide');
-    
-    coursEnEdition = null;
-}
-
-/**
- * Sauvegarde un cours (ajout ou modification)
- * 
- * FONCTIONNEMENT:
- * 1. Récupère les valeurs des champs du formulaire
- * 2. Crée l'objet cours
- * 3. Si coursEnEdition: met à jour le cours existant
- * 4. Sinon: ajoute un nouveau cours
- * 5. Sauvegarde dans localStorage
- * 6. Rafraîchit l'affichage
- * 7. Ferme le formulaire
- * 
- * UTILISÉ PAR:
- * - Bouton «Ajouter» / «Sauvegarder» du formulaire
- * 
- * STRUCTURE COURS:
- * {
- *   id: string,
- *   codeCours: string,
- *   nomCours: string,
- *   numeroCompetence: string,
- *   competence: string,
- *   elementsCompetence: string,
- *   prenomEnseignant: string,
- *   nomEnseignant: string,
- *   departement: string,
- *   local: string,
- *   session: string (H/A),
- *   annee: string,
- *   heuresParSemaine: string,
- *   formatHoraire: string,
- *   verrouille: boolean,
- *   actif: boolean,
- *   dateEnregistrement: string ISO
- * }
- * 
- * VALIDATION:
- * - Aucune validation stricte (tous les champs optionnels)
- * - L'utilisateur peut laisser des champs vides
- */
-function sauvegarderCours() {
-    let cours = db.getSync('listeCours', []);
-
-    // ✅ CORRECTION (2 jan 2026) : Lire depuis le sélecteur du formulaire
-    // Chaque cours peut avoir sa propre pratique de notation
-    const selectPratique = document.getElementById('pratiqueIdCours');
-    const pratiqueId = selectPratique ? selectPratique.value : db.getSync('pratiqueParDefaut', 'pan-standards');
-
-    const nouveauCours = {
-        id: coursEnEdition || genererIdUnique('COURS_'),
-        codeCours: document.getElementById('codeCours').value,
-        nomCours: document.getElementById('nomCours').value,
-        numeroCompetence: document.getElementById('numeroCompetence').value,
-        competence: document.getElementById('competence').value,
-        elementsCompetence: document.getElementById('elementsCompetence').value,
-        prenomEnseignant: document.getElementById('prenomEnseignant').value,
-        nomEnseignant: document.getElementById('nomEnseignant').value,
-        departement: document.getElementById('departement').value,
-        local: document.getElementById('local').value,
-        // 🆕 BETA 92: Champs pour métadonnées CC
-        courriel: document.getElementById('courrielEnseignant').value,
-        siteWeb: document.getElementById('siteWebEnseignant').value,
-        discipline: document.getElementById('disciplineEnseignant').value,
-        institution: document.getElementById('institutionEnseignant').value,
-        session: document.getElementById('session').value,
-        annee: document.getElementById('annee').value,
-        heuresParSemaine: document.getElementById('heuresParSemaine').value,
-        formatHoraire: document.getElementById('formatHoraire').value,
-        pratiqueId: pratiqueId, // ✅ Association à une pratique (sélectionnable par cours)
-        trimestreId: document.getElementById('trimestreId')?.value || '', // ✅ BETA 93.5 : Association à un trimestre
-        dansBibliotheque: true, // ✅ NOUVEAU : Visible dans sidebar par défaut
-        verrouille: false,
-        actif: false,
-        dateEnregistrement: new Date().toISOString()
-    };
-    
-    if (coursEnEdition) {
-        // Modification - conserver l'état de verrouillage, actif, dansBibliotheque et pratiqueId si non modifié
-        const index = cours.findIndex(c => c.id === coursEnEdition);
-        if (index !== -1) {
-            nouveauCours.verrouille = cours[index].verrouille;
-            nouveauCours.actif = cours[index].actif;
-            nouveauCours.dansBibliotheque = cours[index].dansBibliotheque; // Conserver flag bibliothèque
-            // Si aucune pratique sélectionnée, conserver l'ancienne
-            if (!nouveauCours.pratiqueId && cours[index].pratiqueId) {
-                nouveauCours.pratiqueId = cours[index].pratiqueId;
-            }
-            cours[index] = nouveauCours;
-        }
-    } else {
-        // Ajout - si c'est le premier cours, le rendre actif par défaut
-        if (cours.length === 0) {
-            nouveauCours.actif = true;
-        }
-        cours.push(nouveauCours);
-    }
-    
-    db.setSync('listeCours', cours);
-
-    // Mettre à jour la sidebar au lieu du tableau
-    afficherListeCoursSidebar();
-    annulerFormCours();
-
-    // Notification
-    if (coursEnEdition) {
-        notifications.succes('Configuration du cours modifiée avec succès !');
-    } else {
-        notifications.succes('Configuration du cours ajoutée avec succès !');
-    }
-}
-
-/* ===============================
-   MODIFICATION
-   =============================== */
-
-/**
- * Ouvre le formulaire d'édition pour un cours
- * 
- * PARAMÈTRES:
- * @param {string} id - ID du cours à modifier
- * 
- * UTILISÉ PAR:
- * - Bouton «Modifier» dans le tableau
- */
-function modifierCours(id) {
-    afficherFormCours(id);
 }
 
 /* ===============================
@@ -897,11 +545,6 @@ function dupliquerCoursPourTrimestreActif(id) {
     // Rafraîchir le tableau legacy si visible
     if (typeof afficherTableauCours === 'function') {
         afficherTableauCours();
-    }
-
-    // Rafraîchir la sidebar
-    if (typeof afficherListeCoursSidebar === 'function') {
-        afficherListeCoursSidebar();
     }
 
     notifications.succes(`Cours dupliqué pour ${trimestreActif.nom} !`);
@@ -1266,7 +909,6 @@ async function retirerCoursDeBibliotheque(id) {
 
         await db.set('listeCours', cours);
         fermerModalBibliothequeCours();
-        await afficherListeCoursSidebar();
         alert('Cours retiré de ta sélection');
     }
 }
@@ -1285,7 +927,6 @@ async function ajouterCoursIndividuel(id) {
 
         await db.set('listeCours', cours);
         fermerModalBibliothequeCours();
-        await afficherListeCoursSidebar();
         alert('Cours ajouté à ta sélection avec succès !');
     }
 }
@@ -1456,9 +1097,8 @@ async function partagerCours(id) {
         // Sauvegarder
         await db.set('listeCours', cours);
 
-        // Rafraîchir modal et sidebar
+        // Rafraîchir modal
         fermerModalBibliothequeCours();
-        await afficherListeCoursSidebar();
         await ouvrirModalBibliothequeCours();
 
         alert('Cours partagé avec succès !\n\nIl est maintenant disponible dans la section "Cours disponibles à ajouter".');
@@ -1556,17 +1196,12 @@ function ouvrirFilePickerImportCours() {
    =============================== */
 
 window.obtenirCoursActifId = obtenirCoursActifId;
-window.afficherFormCours = afficherFormCours;
-window.sauvegarderCours = sauvegarderCours;
-window.annulerFormCours = annulerFormCours;
-window.modifierCours = modifierCours;
 window.dupliquerCours = dupliquerCours;
 window.dupliquerCoursPourTrimestreActif = dupliquerCoursPourTrimestreActif;
 window.supprimerCours = supprimerCours;
 window.activerCours = activerCours;
 window.afficherTableauCours = afficherTableauCours;
 window.initialiserModuleCours = initialiserModuleCours;
-window.afficherListeCoursSidebar = afficherListeCoursSidebar;
 window.ouvrirModalBibliothequeCours = ouvrirModalBibliothequeCours;
 window.fermerModalBibliothequeCours = fermerModalBibliothequeCours;
 window.retirerCoursDeBibliotheque = retirerCoursDeBibliotheque;
