@@ -86,12 +86,28 @@ Puis bump version `99.61 → 99.62` (build `0521-2101 → 0522-0650`) à la clô
 | 6.2 audit `rapportsBugArchives` | ✅ Livré (seuil 50→20, migration, alerte UI) |
 | 7.1 + 7.2 tests manuels Grégoire | ⏳ À toi |
 
-### Dettes explicites documentées (à fermer plus tard, hors urgence)
+### Dettes explicites documentées — toutes closes le 22 mai 2026
 
-1. **UI « Direction du risque »** (`seuil-risque`, `valeur-risque`, `exemple-risque` + fonctions `sauvegarderSeuilDirectionRisque` etc.) — ~30 min
-2. **« Seuils d'alerte critiques »** dans la doc aide → « Seuils de vigilance »
-3. **~10 références JS internes** au mot « risque » dans commentaires/variables locales
-4. **`_headers`** doit être supprimé après validation deploy `netlify.toml`
+| # | Dette | Commit | Note |
+|---|---|---|---|
+| #1 | UI Direction du risque (bloc `reglages-interpretation-legacy` complet) | `5c4338b` | −408 lignes |
+| #2 | « Seuils d'alerte critiques » → « Seuils de vigilance » | `6e7455d` | 1 site |
+| #3 | 3 tooltips UI « risque » → « niveau d'attention » + `DESCRIPTIONS_SEUILS` orphelin | `92480f1` | Bonus zéro-dette |
+| #4 | Retrait `_headers` (netlify.toml prend le relai) | `ad396f4` | Deploy validé |
+
+**Cleanup Beta 95 legacy étendu** (22 mai 2026 matin) :
+- Phase 1 (commit `479422c`) : retrait des 7 autres blocs `reglages-*-legacy` masqués depuis Beta 95 (apercu, trimestre, cours, horaire, groupe, snapshots, import-export) — **−1314 lignes index.html**
+- Phase 2 (commit `6b2da4b`) : retrait de 19 fonctions JS orphelines associées dans trimestre.js, horaire.js, trimestre-v2-init.js, trimestre-v2.js, cours.js, import-export.js — **−931 lignes JS**
+
+### Prochaine session — chantier dédié modules cours/groupe/trimestre.js cleanup
+
+Reste du code mort en cascade qui dépend des IDs legacy retirés mais n'a pas été nettoyé en Phase 2 (scope trop large, lecture complète des modules requise) :
+
+- **`js/cours.js`** : `afficherFormCours`, `annulerFormCours`, `sauvegarderCours`, `ouvrirModalBibliothequeCours`, `afficherListeCoursSidebar` — chaîne morte profonde (cherche `getElementById('listeCoursSidebar')`, ID retiré Phase 1)
+- **`js/groupe.js`** : `addStudent`, `resetFiltreGroupe` + leurs callers internes morts en cascade (querySelectors sur `button[data-action="addStudent"]` inexistant)
+- **`js/trimestre.js`** : `chargerCadreCalendrier`, `chargerEvenementsPrevus`, `chargerEvenementsImprevus`, `migrerEvenementsAvecIDs`, `afficherStatistiquesTrimestre`, `supprimerEvenement`, `modifierEvenementEnPlace`, `sauvegarderEditionEnPlace`, `annulerEditionEnPlace`, `majAffichageRepriseEditionEnPlace`, `genererCarteEvenement*` — chaîne morte. `initialiserModuleTrimestre` est devenue no-op (cherche `debutTrimestre` inexistant → early return) mais reste appelée par `main.js:467` — à simplifier au seul appel `initialiserTrimestreV2()`
+
+**Estimation effort** : ~3-4 h. Lecture complète des 3 modules + identification précise de l'état legacy/v2 + retraits en bloc avec validation tests. Cohérent CLAUDE.md « Stabilité zéro-dette ».
 
 ### Démarches externes à engager
 
