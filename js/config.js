@@ -188,13 +188,10 @@ let filtreGroupeMemoire = '';
 let filtreTypeProductionMemoire = '';
 
 /**
- * Variable globale pour édition de cours
- * ID du cours actuellement en cours d'édition
- * Valeur: null si création d'un nouveau cours
- * 
- * UTILISÉ PAR:
- * - afficherFormCours() pour charger les données
- * - sauvegarderCours() pour savoir si c'est une création ou modification
+ * Variable globale pour édition de cours (résidu legacy Beta 95).
+ * Plus aucun caller actif depuis le chantier Phase 2 cascade legacy 95
+ * (22 mai 2026). Conservée ici (Zone protégée CLAUDE.md) en attendant
+ * un retrait autorisé dans un chantier futur dédié à config.js.
  */
 let coursEnEdition = null;
 
