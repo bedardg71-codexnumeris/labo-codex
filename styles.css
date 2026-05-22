@@ -5596,7 +5596,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     backdrop-filter: blur(5px);
     white-space: nowrap;
     position: relative;
-    min-height: 36px;
+    min-height: 44px;
     min-width: 44px;
 }
 
@@ -22759,3 +22759,31 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     }
 }
 
+
+/* ============================================================
+   T-A10 — Cibles tactiles 44×44 px (Apple HIG + WCAG 2.5.5)
+   Sur device tactile (`pointer: coarse` = iPad, mobile), garantir
+   que tous les boutons et contrôles interactifs atteignent au
+   moins 44 px sur les deux axes. Sur desktop avec souris (`pointer:
+   fine`), la densité visuelle existante reste inchangée.
+   ============================================================ */
+@media (pointer: coarse) {
+    .btn,
+    .entete-controles-droite .btn-action-header,
+    .entete-ligne2-droite .btn-action-header {
+        min-height: 44px;
+    }
+
+    .btn-icon-header {
+        width: 44px;
+        height: 44px;
+    }
+
+    /* Élargir les zones cliquables des icônes inline dans l'en-tête
+       (icônes 18×18 px dans un padding 6 px = ~30 px de cible — passe
+       à 44×44 px). */
+    .btn-icon-header .header-icon {
+        width: 20px;
+        height: 20px;
+    }
+}
