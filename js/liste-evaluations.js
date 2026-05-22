@@ -2096,9 +2096,9 @@ function toggleVerrouillerEvaluation(evaluationId) {
 // ============================================
 
 /**
- * Récupère les indices A-C-P-R pour un étudiant
+ * Récupère les indices A-C-P-N pour un étudiant
  * @param {string} da - Numéro DA de l'étudiant
- * @returns {Object} - Objet avec {A, C, P, R}
+ * @returns {Object} - Objet avec {A, C, P, N} (N = Niveau d'attention)
  */
 function obtenirIndicesEtudiant(da) {
     // Récupérer les indices selon la pratique active
@@ -2118,28 +2118,28 @@ function obtenirIndicesEtudiant(da) {
     const P = donneesCP.P ?? 0;
 
     // ========================================
-    // DÉCOUPLAGE P/R : Utiliser P_recent pour le calcul de R si activé
+    // DÉCOUPLAGE P/N : Utiliser P_recent pour le calcul du niveau d'attention si activé
     // ========================================
-    let P_pourRisque = P;
-    if (donneesCP.details && donneesCP.details.decouplerPR &&
+    let P_pourNiveauAttention = P;
+    if (donneesCP.details && donneesCP.details.decouplerPN &&
         donneesCP.details.P_recent !== null && donneesCP.details.P_recent !== undefined) {
-        P_pourRisque = donneesCP.details.P_recent; // Déjà en pourcentage
+        P_pourNiveauAttention = donneesCP.details.P_recent; // Déjà en pourcentage
     }
 
     // ========================================
-    // CALCUL DE R : Formule expérimentale basée sur P uniquement
-    // Seuil critique à 65% : P < 65% → échec probable (données empiriques)
-    // A et C servent de contexte diagnostique, pas de prédiction
+    // CALCUL DE N (Niveau d'attention) : basé sur P uniquement
+    // Seuil 65% : sous ce seuil, le niveau d'attention est maximal.
+    // A et C servent de contexte diagnostique, pas de prédiction.
     // ========================================
-    let R;
-    const P_decimal = P_pourRisque / 100;  // Convertir en proportion 0-1
+    let N;
+    const P_decimal = P_pourNiveauAttention / 100;  // Convertir en proportion 0-1
     if (P_decimal < 0.65) {
-        R = 1.0;  // 100% - Risque critique
+        N = 1.0;  // Niveau d'attention maximal
     } else {
-        R = Math.pow((1.0 - P_decimal) / 0.35, 3);  // Décroissance cubique
+        N = Math.pow((1.0 - P_decimal) / 0.35, 3);  // Décroissance cubique
     }
 
-    return { A, C, P, R };
+    return { A, C, P, N };
 }
 
 /**
@@ -2195,12 +2195,12 @@ function trierLignes(lignes, critere) {
                 valeurB = indicesP_B.P;
                 break;
 
-            case 'risque':
-                // Tri par indice R
-                const indicesR_A = obtenirIndicesEtudiant(a.da);
-                const indicesR_B = obtenirIndicesEtudiant(b.da);
-                valeurA = indicesR_A.R;
-                valeurB = indicesR_B.R;
+            case 'niveau-attention':
+                // Tri par indice N (Niveau d'attention)
+                const indicesN_A = obtenirIndicesEtudiant(a.da);
+                const indicesN_B = obtenirIndicesEtudiant(b.da);
+                valeurA = indicesN_A.N;
+                valeurB = indicesN_B.N;
                 break;
 
             default:

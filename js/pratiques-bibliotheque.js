@@ -111,7 +111,7 @@ const MODELES_PRATIQUES_PREDEFINIS = {
                 nombreARetenir: 7,
                 minimumCompletion: 7,
                 nombreTotal: 10,
-                decouplerPR: false
+                decouplerPN: false
             }
         }
     },
@@ -131,7 +131,7 @@ const MODELES_PRATIQUES_PREDEFINIS = {
                 nombreARetenir: 5,
                 minimumCompletion: 5,
                 nombreTotal: 10,
-                decouplerPR: false
+                decouplerPN: false
             }
         }
     },
@@ -151,7 +151,7 @@ const MODELES_PRATIQUES_PREDEFINIS = {
                 nombreARetenir: 5,
                 minimumCompletion: 5,
                 nombreTotal: 10,
-                decouplerPR: true
+                decouplerPN: true
             },
             parObjectifs: {
                 modeCalcul: 'comptage',
@@ -184,7 +184,7 @@ const MODELES_PRATIQUES_PREDEFINIS = {
                 nombreARetenir: 5,
                 minimumCompletion: 5,
                 nombreTotal: 10,
-                decouplerPR: false
+                decouplerPN: false
             },
             parObjectifs: {
                 modeCalcul: 'moyenne-ponderee',
@@ -218,7 +218,7 @@ const MODELES_PRATIQUES_PREDEFINIS = {
                 nombreARetenir: 1,  // Meilleur résultat par standard
                 minimumCompletion: 1,
                 nombreTotal: 12,    // 12 occasions formelles
-                decouplerPR: true   // Critères par standard, pas par éval
+                decouplerPN: true   // Critères par standard, pas par éval
             },
             parObjectifs: {
                 modeCalcul: 'comptage',
@@ -265,7 +265,7 @@ const MODELES_PRATIQUES_PREDEFINIS = {
                 nombreARetenir: 1,
                 minimumCompletion: 1,
                 nombreTotal: 3,     // 3 évaluations (projet, examen pratique, examens théoriques)
-                decouplerPR: true
+                decouplerPN: true
             },
             parObjectifs: {
                 modeCalcul: 'seuils-critiques',
@@ -474,7 +474,7 @@ const MODELES_PRATIQUES_PREDEFINIS = {
             portfolio: {
                 methodeSelection: 'tous',
                 nombreTotal: 11,
-                decouplerPR: true
+                decouplerPN: true
             },
             parObjectifs: {
                 modeCalcul: 'holistique',
@@ -810,7 +810,7 @@ async function sauvegarderConfigurationActuelle(nom, description = '') {
                 nombreARetenir: modalites.portfolio.nombreARetenir || 5,
                 minimumCompletion: modalites.portfolio.minimumCompletion || 5,
                 nombreTotal: modalites.portfolio.nombreTotal || 10,
-                decouplerPR: modalites.portfolio.decouplerPR || false
+                decouplerPN: modalites.portfolio.decouplerPN || false
             } : null,
 
             // Configuration par-objectifs (si applicable)
@@ -938,9 +938,9 @@ async function appliquerConfigurationPratique(configId) {
             portfolioTotal.value = modalites.portfolio.nombreTotal;
         }
 
-        const decouplerPR = document.getElementById('v2-decoupler-pr');
-        if (decouplerPR && modalites.portfolio?.decouplerPR !== undefined) {
-            decouplerPR.checked = modalites.portfolio.decouplerPR;
+        const decouplerPN = document.getElementById('v2-decoupler-pn');
+        if (decouplerPN && modalites.portfolio?.decouplerPN !== undefined) {
+            decouplerPN.checked = modalites.portfolio.decouplerPN;
         }
 
         // 3. Charger la configuration par-objectifs si applicable

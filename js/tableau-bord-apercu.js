@@ -2867,53 +2867,6 @@ function determinerPattern(indices) {
 */
 
 
-/**
- * Affiche la distribution des niveaux de risque
- *
- * @param {Array} etudiants - Étudiants avec indices calculés
- */
-function afficherDistributionRisques(etudiants) {
-    const container = document.getElementById('tb-distribution-risques');
-    if (!container) return;
-    
-    // Compter par niveau de risque
-    const distribution = {
-        'minimal': 0,
-        'faible': 0,
-        'modéré': 0,
-        'élevé': 0,
-        'très élevé': 0,
-        'critique': 0
-    };
-    
-    etudiants.forEach(e => {
-        distribution[e.niveauRisque]++;
-    });
-    
-    // Couleurs selon le niveau
-    const couleurs = {
-        'minimal': 'var(--niveau-attention-nul)',
-        'faible': 'var(--niveau-attention-minimal)',
-        'modéré': 'var(--niveau-attention-modere)',
-        'élevé': 'var(--niveau-attention-eleve)',
-        'très élevé': '#c0392b',
-        'critique': '#7f0000'
-    };
-    
-    // Générer le HTML
-    container.innerHTML = Object.entries(distribution).map(([niveau, nombre]) => `
-        <div style="padding: 15px; background: var(--surface-conteneur, #142428); border-left: 4px solid ${couleurs[niveau]}; 
-                    border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-            <div style="font-size: 1.5rem; font-weight: bold; color: ${couleurs[niveau]};">
-                ${nombre}
-            </div>
-            <div style="font-size: 0.85rem; color: var(--gris-moyen); text-transform: capitalize;">
-                ${niveau}
-            </div>
-        </div>
-    `).join('');
-}
-
 /* ===============================
    FONCTIONS UTILITAIRES
    =============================== */
@@ -3201,8 +3154,7 @@ window._majSousTitreTrajectoires = _majSousTitreTrajectoires;
  * - tb-completion-moyenne
  * - tb-performance-moyenne
  * - tb-interventions-requises
- * - tb-distribution-risques
- * 
+ *
  * FORMULES UTILISÉES (Guide de monitorage):
  * - Assiduité (A) : SOMME(heures présent) / TOTAL(heures cours)
  * - Complétion (C) : NOMBRE(remis) / NOMBRE(attendus)

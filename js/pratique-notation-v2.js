@@ -176,9 +176,9 @@
         }
 
         // Découpler P et R
-        const decouplerPR = document.getElementById('v2-decoupler-pr');
-        if (decouplerPR) {
-            decouplerPR.checked = portfolio.decouplerPR || false;
+        const decouplerPN = document.getElementById('v2-decoupler-pn');
+        if (decouplerPN) {
+            decouplerPN.checked = portfolio.decouplerPN || false;
         }
 
         const portfolioNombre = document.getElementById('v2-portfolio-nombre');
@@ -579,7 +579,7 @@
             modalites.portfolio.nombreARetenir = parseInt(document.getElementById('v2-portfolio-nombre')?.value) || 5;
             modalites.portfolio.minimumCompletion = parseInt(document.getElementById('v2-portfolio-minimum')?.value) || 7;
             modalites.portfolio.nombreTotal = parseInt(document.getElementById('v2-portfolio-total')?.value) || 10;
-            modalites.portfolio.decouplerPR = document.getElementById('v2-decoupler-pr')?.checked || false;
+            modalites.portfolio.decouplerPN = document.getElementById('v2-decoupler-pn')?.checked || false;
         }
 
         // Standards (ancien format, conservé pour rétrocompatibilité)

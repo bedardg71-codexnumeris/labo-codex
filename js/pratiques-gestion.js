@@ -779,7 +779,7 @@ function remplirFormulairePratique(pratique) {
             setValeurChamp('mat-portfolio-nombre', valNombre);
             setValeurChamp('mat-portfolio-minimum', config.portfolio.minAvantCalculFormatif || config.portfolio.minimumCompletion || 7);
             setValeurChamp('mat-portfolio-total', config.portfolio.nbArtefactsSoumis || config.portfolio.nombreTotal || 10);
-            setCheckbox('mat-decoupler-pr', config.portfolio.decouplerPR || false);
+            setCheckbox('mat-decoupler-pn', config.portfolio.decouplerPN || false);
         }
 
         // 🆕 Beta 95.4 : Catégories Sélection/Obligatoires
@@ -1118,7 +1118,7 @@ async function sauvegarderConfigPratiqueMat() {
                 nombreARetenir: parseInt(getValeurChamp('mat-portfolio-nombre')) || 5,
                 minimumCompletion: parseInt(getValeurChamp('mat-portfolio-minimum')) || 7,
                 nombreTotal: parseInt(getValeurChamp('mat-portfolio-total')) || 10,
-                decouplerPR: getCheckbox('mat-decoupler-pr')
+                decouplerPN: getCheckbox('mat-decoupler-pn')
             };
 
             // 🆕 Beta 95.4 : Configuration Catégories Sélection/Obligatoires
@@ -1560,7 +1560,7 @@ async function creerNouvellePratique() {
                 nombreARetenir: 5,
                 minimumCompletion: 5,
                 nombreTotal: 10,
-                decouplerPR: false
+                decouplerPN: false
             }
         },
         metadata_cc: {

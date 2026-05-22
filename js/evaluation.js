@@ -416,8 +416,8 @@ function chargerListeEvaluationsRefonte() {
         const indiceC = indicesCPEtudiant && typeof indicesCPEtudiant.C === 'number' ? indicesCPEtudiant.C / 100 : 0;
         const indiceP = indicesCPEtudiant && typeof indicesCPEtudiant.P === 'number' ? indicesCPEtudiant.P / 100 : 0;
 
-        // Calculer l'indice R (Risque) = 1 - (A × C × P)
-        const indiceR = 1 - (indiceA * indiceC * indiceP);
+        // Calculer l'indice N (Niveau d'attention) = 1 - (A × C × P)
+        const indiceN = 1 - (indiceA * indiceC * indiceP);
 
         return {
             ...etudiant,
@@ -426,7 +426,7 @@ function chargerListeEvaluationsRefonte() {
                 assiduite: indiceA,
                 completion: indiceC,
                 performance: indiceP,
-                risque: indiceR
+                niveauAttention: indiceN
             }
         };
     });
@@ -868,12 +868,12 @@ function trierListeEvaluations() {
             donneesTries.sort((a, b) => b.indices.performance - a.indices.performance);
             break;
 
-        case 'risque-asc':
-            donneesTries.sort((a, b) => a.indices.risque - b.indices.risque);
+        case 'niveau-attention-asc':
+            donneesTries.sort((a, b) => a.indices.niveauAttention - b.indices.niveauAttention);
             break;
 
-        case 'risque-desc':
-            donneesTries.sort((a, b) => b.indices.risque - a.indices.risque);
+        case 'niveau-attention-desc':
+            donneesTries.sort((a, b) => b.indices.niveauAttention - a.indices.niveauAttention);
             break;
     }
 

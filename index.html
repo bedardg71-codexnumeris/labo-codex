@@ -10017,16 +10017,16 @@
                         </p>
                     </div>
 
-                    <!-- Option avancée : Découplage P et R -->
+                    <!-- Option avancée : Découplage Performance et Niveau d'attention -->
                     <div class="form-group u-mb-20 u-p-12" style="background: var(--alerte-fond-attention); border-left: 3px solid #ffc107; border-radius: var(--radius-moyen)">
                         <label class="u-align-center" style="cursor: pointer; display: flex">
-                            <input type="checkbox" id="decouplerPR">
-                            <strong style="margin-left: 8px;">Découpler Performance (P) et Risque (R)</strong>
+                            <input type="checkbox" id="decouplerPN">
+                            <strong style="margin-left: 8px;">Découpler Performance (P) et Niveau d'attention (N)</strong>
                         </label>
                         <small class="u-texte-petit" style="display: block; color: var(--gris-moyen); margin-top: 8px; margin-left: 28px; line-height: 1.5">
                             <strong>P (notation)</strong> : Utilise la modalité choisie ci-dessus pour calculer la note finale.<br>
-                            <strong>R (dépistage)</strong> : Toujours basé sur les N dernières productions pour détecter les tendances et intervenir au bon moment.<br>
-                            <em>Recommandé avec modalité "N meilleurs" pour valoriser le progrès tout en détectant les décrochages.</em>
+                            <strong>N (dépistage)</strong> : Toujours basé sur les N dernières productions pour détecter les tendances et orienter les interventions.<br>
+                            <em>Recommandé avec modalité « N meilleurs » pour valoriser le progrès tout en identifiant les besoins d'intervention.</em>
                         </small>
                     </div>
 
@@ -10715,16 +10715,16 @@
                             </small>
                         </div>
 
-                        <!-- Option : Découpler Performance et Risque -->
+                        <!-- Option : Découpler Performance et Niveau d'attention -->
                         <div class="groupe-form u-mt-15">
-                            <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="depist-decoupler-pr">
-                                <input type="checkbox" id="v2-pref-decoupler-pr" data-on-change="sauvegarderPreferencesV2">
-                                <strong style="margin-left: 8px;">Découpler Performance (P) et Risque (R)</strong>
+                            <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="depist-decoupler-pn">
+                                <input type="checkbox" id="v2-pref-decoupler-pn" data-on-change="sauvegarderPreferencesV2">
+                                <strong style="margin-left: 8px;">Découpler Performance (P) et Niveau d'attention (N)</strong>
                             </label>
                             <small class="u-texte-petit" style="display: block; color: var(--gris-moyen); margin-top: 8px; margin-left: 28px; line-height: 1.5">
                                 <strong>P (notation)</strong> : Utilise la méthode de la pratique pour calculer la note finale.<br>
-                                <strong>R (dépistage)</strong> : Toujours basé sur les N dernières productions pour détecter les tendances.<br>
-                                <em>Recommandé avec «N meilleurs» pour valoriser le progrès tout en détectant les décrochages.</em>
+                                <strong>N (dépistage)</strong> : Toujours basé sur les N dernières productions pour détecter les tendances.<br>
+                                <em>Recommandé avec « N meilleurs » pour valoriser le progrès tout en identifiant les besoins d'intervention.</em>
                             </small>
                         </div>
 
@@ -13640,7 +13640,7 @@
                             <li><strong>Assiduité (AE/AI)</strong> : Sommative et alternative (3 derniers cours)</li>
                             <li><strong>Complétion (C)</strong> : % d'artefacts remis</li>
                             <li><strong>Performance (P)</strong> : Qualité moyenne</li>
-                            <li><strong>Risque (R)</strong> : Calcul automatique 1-(A×C×P)</li>
+                            <li><strong>Niveau d'attention (N)</strong> : Calcul automatique 1-(A×C×P)</li>
                         </ul>
 
                         <p><strong>Seuils d'alerte critiques :</strong></p>

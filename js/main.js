@@ -243,6 +243,64 @@ document.addEventListener('DOMContentLoaded', function () {
             db.setSync('migration_onboarding_v6_21_done', true);
         }
 
+        // Migration vocabulaire descriptif (22 mai 2026, Phase 6.1 PLAN-AQPC) :
+        // renomme la propriété `decouplerPR` → `decouplerPN` (Découpler
+        // Performance / Niveau d'attention) dans toutes les structures
+        // stockées. Cohérent avec le renommage des tokens CSS --risque-*
+        // → --niveau-attention-* livré au chantier J du 21 mai 2026.
+        // Idempotent.
+        if (!db.getSync('migration_decoupler_pn_done', false)) {
+            try {
+                const renommerDansObjet = (obj) => {
+                    if (obj && Object.prototype.hasOwnProperty.call(obj, 'decouplerPR')) {
+                        obj.decouplerPN = obj.decouplerPR;
+                        delete obj.decouplerPR;
+                        return true;
+                    }
+                    return false;
+                };
+
+                // 1. modalitesEvaluation.portfolio.decouplerPR
+                const modalites = db.getSync('modalitesEvaluation', {});
+                if (modalites && modalites.portfolio && renommerDansObjet(modalites.portfolio)) {
+                    db.setSync('modalitesEvaluation', modalites);
+                }
+
+                // 2. preferencesUtilisateur.decouplerPR (préférence v2)
+                const prefs = db.getSync('preferencesUtilisateur', {});
+                if (prefs && renommerDansObjet(prefs)) {
+                    db.setSync('preferencesUtilisateur', prefs);
+                }
+
+                // 3. bibliothequePratiques[*].config.portfolio.decouplerPR
+                const biblioPratiques = db.getSync('bibliothequePratiques', []);
+                let biblioModifiee = false;
+                if (Array.isArray(biblioPratiques)) {
+                    biblioPratiques.forEach(p => {
+                        if (p?.config?.portfolio && renommerDansObjet(p.config.portfolio)) {
+                            biblioModifiee = true;
+                        }
+                    });
+                    if (biblioModifiee) db.setSync('bibliothequePratiques', biblioPratiques);
+                }
+
+                // 4. pratiquesPersonnalisees[*].config.portfolio.decouplerPR
+                const pratiquesPerso = db.getSync('pratiquesPersonnalisees', []);
+                let persoModifiee = false;
+                if (Array.isArray(pratiquesPerso)) {
+                    pratiquesPerso.forEach(p => {
+                        if (p?.config?.portfolio && renommerDansObjet(p.config.portfolio)) {
+                            persoModifiee = true;
+                        }
+                    });
+                    if (persoModifiee) db.setSync('pratiquesPersonnalisees', pratiquesPerso);
+                }
+            } catch(e) {
+                console.warn('[migration_decoupler_pn] erreur partielle ignorée:', e);
+            }
+            db.setSync('migration_decoupler_pn_done', true);
+        }
+
         // ✅ NOUVEAU (30 déc 2025): Recalculer les indices C et P si demandé (après chargement démo)
         recalculerIndicesSiDemande();
 
