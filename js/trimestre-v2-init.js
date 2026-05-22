@@ -295,6 +295,11 @@ function sauvegarderCadreCalendrierV2() {
         console.warn('[Trimestre V2] Fonction genererCalendrierComplet non disponible');
     }
 
+    // Rafraîchir la vue calendaire si visible (sinon stale jusqu'au prochain changement d'onglet)
+    if (typeof afficherCalendrierScolaire === 'function') {
+        afficherCalendrierScolaire();
+    }
+
     // Mettre à jour les statistiques après un délai pour laisser le temps à la synchronisation
     setTimeout(() => {
         window.afficherStatistiquesTrimestreV2();
@@ -669,6 +674,11 @@ function confirmerEvenementPrevuV2() {
         genererSeancesCompletes();
     }
 
+    // Rafraîchir la vue calendaire si visible
+    if (typeof afficherCalendrierScolaire === 'function') {
+        afficherCalendrierScolaire();
+    }
+
     annulerFormEvenementPrevuV2();
     chargerEvenementsPrevusV2();
     window.afficherStatistiquesTrimestreV2();
@@ -749,6 +759,11 @@ function confirmerEvenementImprevuV2() {
         genererSeancesCompletes();
     }
 
+    // Rafraîchir la vue calendaire si visible
+    if (typeof afficherCalendrierScolaire === 'function') {
+        afficherCalendrierScolaire();
+    }
+
     annulerFormEvenementImprevuV2();
     chargerEvenementsImprevusV2();
     window.afficherStatistiquesTrimestreV2();
@@ -781,6 +796,11 @@ function supprimerEvenementV2(id, type) {
     // Régénérer le calendrier
     if (typeof genererCalendrierComplet === 'function') {
         genererCalendrierComplet();
+    }
+
+    // Rafraîchir la vue calendaire si visible
+    if (typeof afficherCalendrierScolaire === 'function') {
+        afficherCalendrierScolaire();
     }
 
     // Recharger l'affichage

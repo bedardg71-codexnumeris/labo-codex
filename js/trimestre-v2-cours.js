@@ -5,7 +5,8 @@
 
    Périmètre : CRUD cours + synthèses sidebar (cours, enseignant, groupe-étudiants,
    horaire, groupe-cours), formulaire cours, dropdown pratiques de notation,
-   helper `setValue` privé.
+   helper `setValue` partagé via `window.setValue` (consommé aussi par
+   trimestre-v2-init.js et trimestre-v2-horaires.js — fix régression 22 mai 2026).
 
    Variable module-scope `coursEnEditionV2` migrée ici (consommée uniquement par
    les fonctions de la zone 3).
@@ -1037,5 +1038,10 @@ window.afficherSyntheseGroupeEtudiants = afficherSyntheseGroupeEtudiants;
 window.afficherSyntheseHoraire = afficherSyntheseHoraire;
 window.afficherSyntheseGroupeCours = afficherSyntheseGroupeCours;
 window.ouvrirModalNouveauCours = ouvrirModalNouveauCours;
+
+// Helper partagé via window pour les autres sous-modules trimestre-v2-*
+// (init.js, horaires.js) — sinon ReferenceError cross-IIFE.
+// Régression silencieuse du refactor 17 mai 2026 corrigée 22 mai 2026.
+window.setValue = setValue;
 
 })();

@@ -354,6 +354,11 @@ function _rafraichirVuesContextDependantes(valeurHeader, messageNotification, re
         initialiserListeEvaluations();
     }
 
+    // Rafraîchir le bandeau contextuel du panneau Captures de progression (groupe-cours actif)
+    if (typeof afficherStatutSnapshots === 'function') {
+        afficherStatutSnapshots();
+    }
+
     // Rafraîchir le module travaux si visible
     if (typeof travauxUI !== 'undefined') {
         var si = document.getElementById('evaluations-contenu-import');

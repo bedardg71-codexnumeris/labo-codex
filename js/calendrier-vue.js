@@ -598,10 +598,10 @@ function afficherCalendrierScolaire() {
         return evt.dateReprise && evt.dateReprise !== '';
     }).length;
 
-    // Carte 3 : Congés avec reprises
+    // Carte 3 : Congés institutionnels et fériés
     htmlStats += '<div class="cal-carte-importante">';
     htmlStats += '<div class="u-flex-between">';
-    htmlStats += '<span class="cal-texte-gris">Congés avec reprises</span>';
+    htmlStats += '<span class="cal-texte-gris">Congés institutionnels et fériés</span>';
     htmlStats += '<strong class="cal-valeur-grande-bleu">' + congesAvecReprise + '</strong>';
     htmlStats += '</div>';
     htmlStats += '</div>';

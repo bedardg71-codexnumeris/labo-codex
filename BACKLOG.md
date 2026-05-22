@@ -391,6 +391,17 @@
   - **Impact attendu** : `afficherFormProduction`, `lireDonneesFormulaireProduction`, `construireProductionData`, `prerenseignerFormulaireProduction` (tous helpers issus de l'étape 4 du refactor — `productions.js` résidu). Affichage côté étudiant/consultation à prévoir aussi.
   - **Hors scope initial** : versionnage des consignes, templates pré-remplis, génération PDF du gabarit.
 
+### Captures de progression — Unifier les actions (22 mai 2026)
+
+- [ ] **#280** Fusionner « Capturer maintenant » et « Reconstruire l'historique » en une seule action
+  - **Contexte** : retour Grégoire pendant tests manuels Section A.2 du 22 mai 2026. Il dit toujours utiliser « Reconstruire l'historique » à chaque clic pour être certain que tout est propre — la distinction avec « Capturer maintenant » lui est inutile en pratique.
+  - **Diagnostic** : « Capturer maintenant » a un comportement complexe et bogué (cf. bug `#116` SUIVI-BUGS — fallback semaine 1 hors trimestre, captures phantômes inter-groupes, no dedup). « Reconstruire l'historique » fait un calcul complet propre depuis le début du trimestre et est de fait l'action « clean ».
+  - **Proposition** : retirer le bouton « Capturer maintenant » et son chemin de code (`capturerSnapshotManuel`, `capturerSnapshotHebdomadaire` LEGACY). Garder uniquement « Reconstruire l'historique » avec libellé clarifié, par exemple « Recalculer toutes les captures » ou « Mettre à jour les captures ». Zéro-dette CLAUDE.md : retirer en même temps les définitions devenues mortes (`obtenirNumeroSemaineActuelle` si plus de caller, etc.).
+  - **Effet sur bug #116** : la fusion résout les 4 facettes A/B/C/D en un coup (phantômes, no dedup, métrique figée, fallback semaine 1) parce que `reconstruireSnapshotsHistoriques` opère sur l'ensemble du trimestre proprement.
+  - **Effort estimé** : ~1 h-1 h 30 (retrait bouton + handler + fonctions devenues mortes + sentinelle Vitest si applicable).
+  - **Bloqueur d'amont** : confirmer que `reconstruireSnapshotsHistoriques` traite correctement le cas multi-groupes-cours (un namespace par groupe) — sinon les captures phantômes inter-groupes persisteraient.
+  - **Sous-tâche labels des cartes** : pendant la fusion, renommer les 3 cartes d'info au-dessus des boutons (`v2-stat-snapshots-hebdo` / `v2-stat-snapshots-interventions` / `v2-stat-derniere-capture`) pour les aligner sur le modèle par séance. Suggestion : « Captures hebdomadaires » → « Captures de séances » ou simplement « Captures » ; « Captures interventions » garde son sens ; « Dernière capture » reste correct une fois le bug #116 résolu. Retour Grégoire 22 mai 2026 : « les trois cartes d'information au-dessus des 3 boutons portent également à confusion » — la confusion vient à la fois de la terminologie obsolète (hebdo vs séance) et des valeurs incorrectes affichées (count gonflé par les duplicatas, date figée). Le renommage seul ne suffit pas ; la fusion + le fix #116 sont les correctifs amont.
+
 ### Rythme Phase 5 — Raffinements (selon usage, post-AQPC)
 
 - [ ] **#268** Courbe d'apprentissage de l'evaluateur (tendance temporelle par activite)
