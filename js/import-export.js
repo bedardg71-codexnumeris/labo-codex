@@ -1127,17 +1127,6 @@ function reinitialiserDonnees() {
 let configCompleteEnAttente = null;
 
 /**
- * Ouvre le sélecteur de fichier pour importer une configuration complète
- */
-function ouvrirImportConfigComplete() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = previsualiserConfigComplete;
-    input.click();
-}
-
-/**
  * Prévisualise une configuration complète avant import
  * Supporte deux formats :
  * - Nouveau format (Beta 91+) : { metadata: { type: 'configuration-complete' }, contenu: {...} }
@@ -3326,7 +3315,6 @@ window.reinitialiserDonnees = reinitialiserDonnees;
 window.executerImportConfigComplete = executerImportConfigComplete;
 window.fermerModalPreviewConfigComplete = fermerModalPreviewConfigComplete;
 window.exporterConfigurationComplete = exporterConfigurationComplete;
-window.ouvrirImportConfigComplete = ouvrirImportConfigComplete;
 window.executerImportVersBibliotheques = executerImportVersBibliotheques; // 🆕 BETA 95.1
 window.executerImportSelectif = executerImportSelectif; // 🆕 BETA 95.1
 

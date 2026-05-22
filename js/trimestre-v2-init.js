@@ -551,50 +551,6 @@ function majAffichageRepriseV2Imprevu() {
 }
 
 /**
- * Ajoute un bouton pour revenir à la vue v2
- */
-function ajouterBoutonRetourV2(sectionLegacy) {
-    // Vérifier si le bouton existe déjà
-    if (document.getElementById('btnRetourV2')) return;
-
-    const btnRetour = document.createElement('div');
-    btnRetour.id = 'btnRetourV2';
-    btnRetour.style.cssText = 'position: sticky; top: 60px; z-index: 100; background: var(--orange-accent); color: white; padding: 10px 20px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;';
-    btnRetour.innerHTML = `
-        <span>Mode édition (ancienne interface)</span>
-        <button class="btn" style="background: var(--surface-conteneur, #162c36); color: var(--orange-accent); padding: 5px 15px;" data-action="retournerVueV2">
-            ← Retour à la nouvelle interface
-        </button>
-    `;
-    sectionLegacy.insertBefore(btnRetour, sectionLegacy.firstChild);
-}
-
-/**
- * Retourne à la vue v2
- */
-function retournerVueV2() {
-    const sectionLegacy = document.getElementById('contexte-trimestre-legacy');
-    const sectionV2 = document.getElementById('calendrier-trimestre');
-    const btnRetour = document.getElementById('btnRetourV2');
-
-    if (sectionLegacy) {
-        sectionLegacy.classList.add('legacy-hidden');
-        sectionLegacy.style.display = '';
-    }
-    if (sectionV2) {
-        sectionV2.style.display = '';
-        sectionV2.scrollIntoView({ behavior: 'smooth' });
-    }
-    if (btnRetour) {
-        btnRetour.remove();
-    }
-
-    // Recharger les données dans la vue v2
-    chargerEvenementsPrevusV2();
-    chargerEvenementsImprevusV2();
-}
-
-/**
  * Modifie un événement (pré-remplit le formulaire v2)
  */
 function modifierEvenementV2(id, type) {
@@ -860,7 +816,6 @@ window.confirmerEvenementImprevuV2 = confirmerEvenementImprevuV2;
 window.annulerFormEvenementImprevuV2 = annulerFormEvenementImprevuV2;
 window.majAffichageRepriseV2Prevu = majAffichageRepriseV2Prevu;
 window.majAffichageRepriseV2Imprevu = majAffichageRepriseV2Imprevu;
-window.retournerVueV2 = retournerVueV2;
 
 })();
 
