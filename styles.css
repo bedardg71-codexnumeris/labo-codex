@@ -2827,9 +2827,8 @@ input[type="number"].controle-form {
 
 .controle-form:focus {
     outline: none;
-    box-shadow: var(--focus-ring);
     border-color: var(--bleu-clair);
-    box-shadow: 0 0 0 3px rgba(106, 172, 184, 0.2);
+    box-shadow: var(--focus-ring), 0 0 0 3px rgba(106, 172, 184, 0.2);
 }
 
 /* Style de base pour TOUS les textarea - fix texte invisible */
@@ -3087,9 +3086,8 @@ body:not(.mode-clair) .badge-source--demo {
 .cc-meta-ligne input:focus,
 .cc-meta-ligne select:focus {
     outline: none;
-    box-shadow: var(--focus-ring);
     border-color: var(--bleu-clair);
-    box-shadow: 0 0 0 3px rgba(106, 172, 184, 0.2);
+    box-shadow: var(--focus-ring), 0 0 0 3px rgba(106, 172, 184, 0.2);
 }
 .cc-meta-radio {
     display: flex;
@@ -3137,9 +3135,8 @@ body:not(.mode-clair) .badge-source--demo {
 }
 .cc-meta-textarea:focus {
     outline: none;
-    box-shadow: var(--focus-ring);
     border-color: var(--bleu-clair);
-    box-shadow: 0 0 0 3px rgba(106, 172, 184, 0.2);
+    box-shadow: var(--focus-ring), 0 0 0 3px rgba(106, 172, 184, 0.2);
 }
 .cc-meta-textarea--grand {
     min-height: 120px;
@@ -5610,9 +5607,8 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 .btn-codex-header:focus {
     outline: none;
-    box-shadow: var(--focus-ring);
     border-color: rgba(106, 172, 184, 0.6);
-    box-shadow: 0 0 0 3px rgba(106, 172, 184, 0.1);
+    box-shadow: var(--focus-ring), 0 0 0 3px rgba(106, 172, 184, 0.1);
 }
 
 .codex-indicateur {
@@ -11025,9 +11021,8 @@ label:has(+ textarea:disabled) {
 .wizard-v2-champ textarea:focus,
 .wizard-v2-champ select:focus {
     outline: none;
-    box-shadow: var(--focus-ring);
     border-color: var(--accent-primaire);
-    box-shadow: 0 0 0 3px rgba(26, 82, 102, 0.1);
+    box-shadow: var(--focus-ring), 0 0 0 3px rgba(26, 82, 102, 0.1);
 }
 
 .wizard-v2-champ textarea {
@@ -21713,9 +21708,8 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 
 .travaux-retro-modal .travaux-retro-textarea:focus {
     outline: none;
-    box-shadow: var(--focus-ring);
     border-color: var(--primary-500, #3b82f6);
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+    box-shadow: var(--focus-ring), 0 0 0 2px rgba(59, 130, 246, 0.15);
 }
 
 .travaux-retro-actions {
@@ -21778,9 +21772,8 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 
 .travaux-retro-nom-input:focus {
     outline: none;
-    box-shadow: var(--focus-ring);
     border-color: var(--primary-500, #3b82f6);
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+    box-shadow: var(--focus-ring), 0 0 0 2px rgba(59, 130, 246, 0.15);
 }
 .travaux-retro-btn-supprimer {
     flex-shrink: 0;
