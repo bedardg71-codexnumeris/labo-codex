@@ -73,24 +73,6 @@ function importerFichierEtudiantsV2FromEl(el) {
     importerFichierEtudiantsV2({ target: el });
 }
 
-// Seuils d'interprétation (ancien) : inline avait parseInt/parseFloat(this.value)
-// Note : quand data-param est présent, dispatcher appelle fn(param, el)
-function sauvegarderSeuilNombreProductions(el) {
-    sauvegarderSeuil('nombreProductionsAnalyse', parseInt(el.value));
-}
-function sauvegarderSeuilProgressionArtefacts(paramIgnore, el) {
-    if (!el) el = paramIgnore; // fallback si appelé sans data-param
-    sauvegarderSeuil('progressionArtefacts', parseFloat(el.value));
-}
-function sauvegarderSeuilDirectionRisque(paramIgnore, el) {
-    if (!el) el = paramIgnore;
-    sauvegarderSeuil('directionRisque', parseFloat(el.value));
-}
-function sauvegarderSeuilDefiSpecifique(paramIgnore, el) {
-    if (!el) el = paramIgnore;
-    sauvegarderSeuil('defiSpecifique', parseFloat(el.value));
-}
-
 // Thème : radios sombre/clair, inline avait definirTheme(false) / definirTheme(true)
 function definirThemeFromRadio(el) {
     definirTheme(el.value === 'clair');
@@ -469,46 +451,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-});
-
-// ===============================
-// SECTION: Seuils d'interprétation init (ex-ligne 17333)
-// ===============================
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Charger les seuils d'interprétation dans l'interface dès que la page est chargée
-    if (typeof chargerSeuilsInterpretationUI === 'function') {
-        // Attendre que la sous-section soit potentiellement affichée
-        setTimeout(() => {
-            const sectionInterpretation = document.getElementById('reglages-interpretation');
-            if (sectionInterpretation) {
-                chargerSeuilsInterpretationUI();
-            }
-        }, 100);
-    }
-
-    // Observer les changements de sous-section pour recharger les seuils si nécessaire
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                const section = mutation.target;
-                if (section.id === 'reglages-interpretation' && section.classList.contains('actif')) {
-                    if (typeof chargerSeuilsInterpretationUI === 'function') {
-                        chargerSeuilsInterpretationUI();
-                    }
-                }
-            }
-        });
-    });
-
-    // Observer la sous-section des réglages d'interprétation
-    const sectionInterpretation = document.getElementById('reglages-interpretation');
-    if (sectionInterpretation) {
-        observer.observe(sectionInterpretation, {
-            attributes: true,
-            attributeFilter: ['class']
-        });
-    }
 });
 
 // ===============================
