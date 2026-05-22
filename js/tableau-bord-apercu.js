@@ -3133,7 +3133,7 @@ window._majSousTitreTrajectoires = _majSousTitreTrajectoires;
  * DÉPENDANCES DE CE MODULE:
  * - config.js : echapperHtml()
  * - 09-2-saisie-presences.js : calculerNombreSeances() (optionnel)
- * - styles.css : classes badge-risque, carte-metrique, tableau
+ * - styles.css : classes carte-metrique, tableau
  * 
  * MODULES QUI DÉPENDENT DE CELUI-CI:
  * - Aucun (module autonome)

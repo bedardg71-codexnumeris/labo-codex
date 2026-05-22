@@ -32,17 +32,6 @@ const COULEURS = (() => {
         DEN: lireCSS('--den-violet') || '#8b5cf6'
     };
 
-    // Niveaux de risque RàI
-    const risque = {
-        nul:       lireCSS('--niveau-attention-nul')       || '#6aacb8',
-        minimal:   lireCSS('--niveau-attention-minimal')    || '#34c759',
-        faible:    lireCSS('--niveau-attention-faible')     || '#7ae8a0',
-        modere:    lireCSS('--niveau-attention-modere')     || '#ffc107',
-        eleve:     lireCSS('--niveau-attention-eleve')      || '#fd7e14',
-        tresEleve: lireCSS('--niveau-attention-tres-eleve') || '#e84057',
-        critique:  lireCSS('--niveau-attention-critique')   || '#a02030'
-    };
-
     // Niveaux IDME
     const idme = {
         E: lireCSS('--idme-etendu')        || '#64B5F6',
@@ -68,7 +57,6 @@ const COULEURS = (() => {
     return Object.freeze({
         indices,
         pratiques,
-        risque,
         idme,
         graphiques,
         correlations

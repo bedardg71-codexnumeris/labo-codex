@@ -2380,38 +2380,7 @@ input[type="number"].controle-form {
     color: var(--niveau-attention-modere);
 }
 
-/* === BADGES DE RISQUE (sans émojis) - OBSOLÈTE - Gardé pour compatibilité === */
-.badge-risque-minimal {
-    background: rgba(106, 172, 184, 0.12);
-    color: #6aacb8;
-}
-
-.badge-risque-faible {
-    background: rgba(52, 199, 89, 0.12);
-    color: #5ae080;
-}
-
-.badge-risque-modere {
-    background: rgba(255, 193, 7, 0.12);
-    color: var(--niveau-attention-modere);
-}
-
-.badge-risque-eleve {
-    background: rgba(253, 126, 20, 0.12);
-    color: var(--niveau-attention-eleve);
-}
-
-.badge-risque-tres-eleve {
-    background: rgba(232, 64, 87, 0.12);
-    color: var(--niveau-attention-tres-eleve);
-}
-
-.badge-risque-critique {
-    background: rgba(160, 32, 48, 0.12);
-    color: #d04050;
-}
-
-/* === BADGES D'ENGAGEMENT (remplace les badges de risque) === */
+/* === BADGES D'ENGAGEMENT === */
 .badge-engagement-tres-favorable {
     background: rgba(106, 172, 184, 0.12);
     color: var(--bleu-clair);
@@ -2624,58 +2593,6 @@ input[type="number"].controle-form {
 
 .badge-rai-analyse-3 .badge-analyse-count {
     background: #7c3aed;
-}
-
-/* === Badges de risque pour analyse === */
-/* Styles uniformisés - fonds semi-transparents */
-.badge-risque-analyse-minimal,
-.badge-risque-analyse-faible {
-    background: rgba(52, 199, 89, 0.12);
-    color: #5ae080;
-}
-
-.badge-risque-analyse-minimal .badge-analyse-count,
-.badge-risque-analyse-faible .badge-analyse-count {
-    background: #34c759;
-}
-
-.badge-risque-analyse-modere {
-    background: rgba(200, 160, 96, 0.15);
-    color: var(--alerte-texte-attention);
-}
-
-.badge-risque-analyse-modere .badge-analyse-count {
-    background: var(--btn-annuler);
-}
-
-.badge-risque-analyse-eleve {
-    background: rgba(253, 126, 20, 0.12);
-    color: var(--niveau-attention-eleve);
-}
-
-.badge-risque-analyse-eleve .badge-analyse-count {
-    background: var(--niveau-attention-eleve);
-}
-
-.badge-risque-analyse-tres-eleve,
-.badge-risque-analyse-critique {
-    background: rgba(232, 64, 87, 0.12);
-    color: var(--niveau-attention-tres-eleve);
-}
-
-.badge-risque-analyse-tres-eleve .badge-analyse-count,
-.badge-risque-analyse-critique .badge-analyse-count {
-    background: var(--niveau-attention-tres-eleve);
-}
-
-/* Badge de risque par défaut (gris neutre) */
-.badge-risque-analyse-defaut {
-    background: rgba(106, 172, 184, 0.08);
-    color: var(--texte-secondaire, #8aa4b0);
-}
-
-.badge-risque-analyse-defaut .badge-analyse-count {
-    background: var(--texte-muted, #5a7a88);
 }
 
 /* === Badge pattern d'apprentissage (neutre gris) === */

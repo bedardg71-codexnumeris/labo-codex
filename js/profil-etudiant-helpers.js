@@ -7,7 +7,7 @@
    - Terminologie configurable (artefact/production)
    - Accesseurs (pratique actuelle, grille de référence, critères avec valeurs)
    - Init module (initialiserModuleProfilEtudiant)
-   - Badges (pratique, risque, pattern)
+   - Badges (pratique, pattern)
    - Interprétations des indices A-C-P-M (mobilisation, performance, complétion, assiduité)
 
    Tous les helpers sont promus `window.X` (Écart #4 MODULES-MAP §2.3 + décision
@@ -306,38 +306,6 @@ function genererBadgePratiqueProfil(pratiqueUtilisee, modeComparatif = false) {
 }
 
 /**
- * Génère un badge de risque (Beta 84)
- * @param {number} risque - Valeur du risque (0-1)
- * @returns {string} - HTML du badge
- */
-function genererBadgeRisqueProfil(risque) {
-    let classe = '';
-    let label = '';
-
-    if (risque <= 0.20) {
-        classe = 'badge-sys badge-risque-minimal';
-        label = 'Minimal';
-    } else if (risque <= 0.30) {
-        classe = 'badge-sys badge-risque-faible';
-        label = 'Faible';
-    } else if (risque <= 0.40) {
-        classe = 'badge-sys badge-risque-modere';
-        label = 'Modéré';
-    } else if (risque <= 0.50) {
-        classe = 'badge-sys badge-risque-eleve';
-        label = 'Élevé';
-    } else if (risque <= 0.70) {
-        classe = 'badge-sys badge-risque-tres-eleve';
-        label = 'Très élevé';
-    } else {
-        classe = 'badge-sys badge-risque-critique';
-        label = 'Critique';
-    }
-
-    return `<span class="${classe}">${label}</span>`;
-}
-
-/**
  * Génère un badge de pattern (Beta 84)
  * @param {string} pattern - Pattern d'apprentissage
  * @returns {string} - HTML du badge
@@ -620,7 +588,6 @@ window.obtenirGrilleReferenceDepistage = obtenirGrilleReferenceDepistage;
 window.obtenirCriteresAvecValeurs = obtenirCriteresAvecValeurs;
 window.initialiserModuleProfilEtudiant = initialiserModuleProfilEtudiant;
 window.genererBadgePratiqueProfil = genererBadgePratiqueProfil;
-window.genererBadgeRisqueProfil = genererBadgeRisqueProfil;
 window.genererBadgePatternProfil = genererBadgePatternProfil;
 window.interpreterMobilisation = interpreterMobilisation;
 window.interpreterPerformance = interpreterPerformance;
