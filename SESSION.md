@@ -1,11 +1,10 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 22 mai 2026 matin, post-cleanup
-     palettes COULEURS + plan Phase 2 documenté)
+     IDENTIFICATION DE CE FICHIER  (mis à jour 22 mai 2026 après-midi,
+     post-livraison chantier Phase 2 cascade legacy 95)
      Ce SESSION.md vit sur la branche `main` du worktree principal et sert
      de relai entre les sessions Claude. Il décrit l'état post-livraison
      du cycle AQPC + Sprint A + dettes #1-4 + cleanups (résidus risque,
-     palettes COULEURS) et donne la consigne de démarrage pour exécuter
-     le chantier Phase 2 cascade legacy 95.
+     palettes COULEURS) + chantier Phase 2 cascade legacy 95.
      L'archive complète du cycle Cat-B post-merge (clos 21 mai, 10/10
      critères atteints) reste dans les §§ suivants comme référence
      historique.
@@ -13,18 +12,23 @@
 
 > **📌 Identification**
 > - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
-> - **Cycle en cours** : Phase 2 cascade legacy 95 — chantier de nettoyage (~3-4 h, 3 commits)
-> - **Document maître** : `audit/refactoring-prep/PLAN-PHASE2-CASCADE-LEGACY-95.md` (commit `9940975`, 237 lignes)
+> - **Cycle en cours** : aucun — chantier Phase 2 livré, prochaine session à orienter (cf. §3)
+> - **Documents maîtres récents** : `audit/refactoring-prep/PLAN-PHASE2-CASCADE-LEGACY-95.md` (Phase 2, désormais livrée)
 
-# SESSION — État au 22 mai 2026 (prochaine priorité : Phase 2 cascade legacy 95)
+# SESSION — État au 22 mai 2026 (post-livraison Phase 2 cascade legacy 95)
 
-**Beta / build** : 99.62 / 0522-1115 (build refresh post-cleanup palettes COULEURS).
-**Branche `main`** : HEAD à `d1363fc` (tracking SESSION.md post-cleanup COULEURS + plan Phase 2) post-merge FF de `aqpc/privacy` (6 commits AQPC) + Sprint A livrée (3 commits) + dettes #1-4 closes (4 commits) + cleanup Beta 95 legacy Phases 1+2 (2 commits) + cleanup résidus risque (1 commit) + cleanup palettes COULEURS (1 commit) + plan Phase 2 (1 commit) + refreshs builds + tracking SESSION.md (5 commits) = 23 commits depuis `7c30d64`.
+**Beta / build** : 99.62 / 0522-1115 (pas de bump à la clôture Phase 2 — convention §0 garde-fou).
+**Branche `main`** : HEAD à `137411c` (chantier 2.2 groupe.js — dernier commit Phase 2) post-merge FF de `cleanup/phase2-cascade-legacy-95` (3 commits : trimestre.js → cours.js → groupe.js).
 **Branche `aqpc/privacy`** : retirée localement + remotement (mergée et propre).
+**Branche `cleanup/phase2-cascade-legacy-95`** : retirée après merge FF.
 
-**Tests** : 85 Vitest verts à chaque commit (hook pré-push vert sur tous les commits récents). Playwright non re-vérifié sur les derniers cleanups (pas de modif de zone DOM).
+**Tests** : 85 Vitest verts à chaque commit (baseline + après chaque chantier Phase 2). Playwright non re-vérifié (les fonctions retirées sont legacy Réglages non couvertes).
 
-**Cycle suivant** : exécuter le chantier **Phase 2 cascade legacy 95** documenté dans `audit/refactoring-prep/PLAN-PHASE2-CASCADE-LEGACY-95.md`. 3 commits sur 3 modules (`trimestre.js` → `cours.js` → `groupe.js`), ~3-4 h, retrait estimé ~500-800 LOC de code mort en cascade. **Garde-fou crucial** : 3 fonctions de `trimestre.js` sont vivantes et doivent être préservées (cf. §0 et §3). Voir §3 ci-dessous pour la consigne complète.
+**Cycle suivant** : à orienter avec Grégoire. Pistes possibles (cf. §3) :
+1. Sub-cleanup « tableau Réglages → Cours legacy » (révélé par audit cascade chantier 2.1) — `afficherTableauCours`, `dupliquerCours`, `activerCours`, `supprimerCours` du legacy + doublon `supprimerCours` dans `js/entites/cours-entite.js` à clarifier
+2. Reprise audit annuel sur `audit/2026-mai` (Phase 7 Synthèse globale, tests manuels Grégoire 6.2/6.3)
+3. Préparation présentation AQPC du 3 juin (J−12)
+4. Tests manuels Grégoire des phases 7.1/7.2 PLAN-COURT-TERME (✅ ⏳ encore ouvertes)
 
 ---
 
@@ -44,17 +48,11 @@
 - ❌ **Ne pas définir une fonction `function afficherNotificationX(...)` dans `js/*.js`** (hors `_archives/`). Sentinelle Vitest `tests/unit/utils-notifications.test.js` verrouille cet invariant (chantier E livré 21 mai soir). Utiliser `window.notifications.{succes, erreur, info}` (utils-notifications.js) pour toute notification toast.
 - ❌ **Ne pas réintroduire un wrapper local défensif `if (typeof window.afficherNotificationX === 'function')`**. L'API `notifications.X` est garantie chargée via `utils-notifications.js` (ligne 15969 d'index.html, après modes.js). Les 149 guards typeof orphelins ont été retirés ; tout nouveau guard est une régression Cat-B.
 
-### Garde-fous spécifiques Phase 2 cascade legacy 95 (chantier prochain)
+### Garde-fous résiduels post-Phase 2
 
-- ❌ **Ne PAS retirer `ouvrirModalBibliothequeCours` de `js/cours.js`**. Annoncée morte dans la dette §1 originale, mais l'audit du 22 mai PM révèle qu'elle est **VIVANTE** — branchée sur le bouton `index.html:6815` dans la section `accordeon-cours` (Réglages → Cours, sous-section active). Toucher = casser le bouton « Bibliothèque » côté UI. Le plan PLAN-PHASE2 §2.1 l'exclut explicitement.
-- ❌ **Ne PAS retirer ces 3 fonctions de `js/trimestre.js`** (vivantes, consommées hors-module) :
-  - `genererCalendrierComplet` (L583) → utilisée par `trimestres.js:344-346`
-  - `obtenirCalendrierComplet` (L584) → utilisée par `snapshots.js:398, 443, 690`
-  - `obtenirInfosJour` (L585) → utilisée par `saisie-presences.js:158-159`
-  Le module `trimestre.js` n'est PAS un fichier mort à supprimer en bloc — c'est un retrait sélectif.
-- ❌ **Ne PAS toucher `js/navigation.js:250-251` sans validation Grégoire**. Ce fichier est dans la liste « Zones protégées » CLAUDE.md. Il appelle `initialiserModuleTrimestre` via `if (typeof X === 'function')` — si on retire la fonction, le guard devient simplement faux (pas de régression boot). **Solution recommandée : retirer la fonction sans toucher au guard `navigation.js`** — cohérent CLAUDE.md.
-- ❌ **Ne PAS retirer le doublon `deleteStudent` de `js/groupe.js` (L957 ou L1138) sans tester manuellement**. La 2e définition shadow la 1ère en JavaScript ; le retrait de la mauvaise version peut introduire une régression silencieuse. Lire les deux versions, identifier laquelle est invoquée par les callers, retirer l'autre. Documenter la décision dans le commit.
-- ⚠️ **Régression silencieuse possible via `window[X]` dynamique**. Le grep statique ne capture pas les appels du type `window[nomFonction]()`. Mitigation obligatoire après chaque chantier 2.x : tester manuellement la zone Réglages correspondante dans l'app (boot + clic sous-sections Cours / Groupe / Trimestre + ouverture modales associées).
+- ❌ **`navigation.js:250-251`** appelle encore `initialiserModuleTrimestre` via `if (typeof X === 'function')` — Zone protégée CLAUDE.md, guard intact (devient simplement faux, pas de régression boot). Ne pas toucher sans validation Grégoire.
+- ❌ **`coursEnEdition` (config.js L199)** est désormais orphelin (plus aucun caller après chantier 2.1). Zone protégée → laissé en place. À retirer dans un chantier dédié config.js si Grégoire autorise.
+- ⚠️ **Tests manuels UI obligatoires** côté zone Réglages (Cours / Groupe / Trimestre) — la suite Vitest ne couvre pas ces flows ; un appel `window[nomFonction]()` dynamique pourrait avoir été manqué par l'audit statique.
 
 ---
 
@@ -129,17 +127,45 @@ Puis bump version `99.61 → 99.62` (build `0521-2101 → 0522-0650`) à la clô
 - Seules `COULEURS.indices` (correlations-longitudinales.js + graphiques-progression.js) et `COULEURS.correlations` (correlations-longitudinales.js) restent consommées.
 - JSDoc d'en-tête actualisée. Bilan : −28 LOC nettes dans couleurs.js, return Object.freeze rétréci à 2 entrées. Tests 85/85 Vitest verts.
 
-### Prochaine session — chantier Phase 2 cascade legacy 95 (plan documenté)
+### Chantier Phase 2 cascade legacy 95 — LIVRÉ (22 mai 2026 après-midi)
 
-**Plan détaillé** : `audit/refactoring-prep/PLAN-PHASE2-CASCADE-LEGACY-95.md` (commit `9940975`, 22 mai 2026 matin). Document de 237 lignes couvrant le périmètre, l'audit préliminaire avec call-graph vérifié, l'ordre d'exécution recommandé, les conventions de travail, les risques et points d'attention.
+**Branche dédiée** : `cleanup/phase2-cascade-legacy-95` (créée depuis `main` `f51aeb1`, 3 commits, mergée FF sur `main`, puis supprimée).
 
-**Périmètre confirmé par l'audit du plan** :
+**3 commits livrés (du plus simple au plus complexe)** :
 
-- **`js/cours.js`** : 4 fonctions mortes confirmées (`afficherFormCours`, `annulerFormCours`, `sauvegarderCours`, `afficherListeCoursSidebar`). ⚠️ `ouvrirModalBibliothequeCours` **VIVANTE** contrairement à l'annonce initiale — bouton `index.html:6815` actif dans section `accordeon-cours` Réglages → Cours. NE PAS retirer sans validation Grégoire.
-- **`js/groupe.js`** : `addStudent` (L116) + `resetFiltreGroupe` (L860) confirmées mortes. Audit cascade plus profond requis pour les callers internes. Doublon `deleteStudent` L957+L1138 à clarifier dans le même chantier.
-- **`js/trimestre.js`** : 10+ fonctions chaîne événements confirmées mortes. `initialiserModuleTrimestre` no-op (early return car `debutTrimestre` retiré). ⚠️ 3 fonctions à PRÉSERVER : `genererCalendrierComplet` (utilisée par trimestres.js), `obtenirCalendrierComplet` (snapshots.js × 3), `obtenirInfosJour` (saisie-presences.js). ⚠️ `navigation.js:250-251` appelle `initialiserModuleTrimestre` — fichier protégé CLAUDE.md, demander validation avant modification.
+| Commit | Module | LOC retirée | Note |
+|---|---|---:|---|
+| `5ccb306` | `js/trimestre.js` | **−563** (601 → 38 l.) | + retrait caller `main.js:467-468`. **Bug latent fixé** : exports cassés L583+L586 introduits par commit `6b2da4b` faisaient crasher l'IIFE → ni `obtenirCalendrierComplet` ni `obtenirInfosJour` n'étaient sur window (sites `snapshots.js:398/443/690` et `calendrier-vue.js:500` plantaient silencieusement). Le retrait global restore les exports. |
+| `dd493cc` | `js/cours.js` | **−365** (1580 → 1215 l.) | Retrait `afficherFormCours`, `annulerFormCours`, `sauvegarderCours`, `afficherListeCoursSidebar`, `modifierCours` + 5 exports. JSDoc `coursEnEdition` MAJ dans `config.js` (Zone protégée — commentaire only). |
+| `137411c` | `js/groupe.js` | **−188** (1190 → 1002 l.) | Retrait `addStudent`, `resetFiltreGroupe`, doublon `deleteStudent` × 2 + 3 exports. Bouton HTML `data-action="resetFiltreGroupe"` retiré du HTML généré par `filtrerParGroupe`. QuerySelectors `addStudent` simplifiés dans `modifierEtudiant`. |
 
-**Ordre recommandé** : trimestre.js → cours.js → groupe.js (du plus simple au plus complexe). **Effort estimé : ~3-4 h, 3 commits**. Branche dédiée `cleanup/phase2-cascade-legacy-95`.
+**Bilan total** : **5 fichiers touchés**, **−1124 LOC nettes** (+25 / −1149), tests 85/85 Vitest verts à chaque jalon.
+
+### Bug latent fixé en cascade (à inscrire SUIVI-BUGS)
+
+Le commit `6b2da4b` (Phase 2 legacy 95, 22 mai matin) avait retiré les définitions de `function genererCalendrierComplet()` et `function afficherStatistiquesTrimestre()` dans `trimestre.js` **mais oublié de retirer les exports L583 + L586** qui les référençaient. Conséquence vérifiée via node :
+
+```
+ReferenceError: genererCalendrierComplet is not defined
+```
+
+→ L'IIFE de trimestre.js crashait au chargement, ni `obtenirCalendrierComplet` ni `obtenirInfosJour` n'étaient en réalité sur window depuis 6 h ce matin. Sites cassés silencieusement (sans guard typeof) :
+- `snapshots.js:398, 443, 690` (création de snapshots)
+- `calendrier-vue.js:500` (vue calendrier)
+
+Le retrait du module legacy entier dans le chantier 2.3 fixe gratuitement le bug. **Vérifié** : `node -e "require('./js/trimestre.js'); ..."` expose désormais bien les 2 getters.
+
+### Découvertes hors scope (à traiter ultérieurement)
+
+L'audit cascade du chantier 2.1 a révélé que **toute la chaîne Réglages → Cours legacy est morte fonctionnellement** (early returns car les IDs HTML ont disparu Phase 1) :
+- `afficherTableauCours` (cherche `#tableauCoursContainer` retiré)
+- `dupliquerCours`, `activerCours`, `supprimerCours` (référencés uniquement par le tableau qui ne s'affiche plus)
+- Helpers `obtenirNomPratiqueFallback`, `afficherPratiqueEnLectureSeule` (potentiellement orphelins)
+- **Doublon `supprimerCours`** entre `js/cours.js` (L982) et `js/entites/cours-entite.js:171` — à clarifier
+
+Le scope du plan PLAN-PHASE2 §8 demandait explicitement de ne pas étendre — ces trouvailles sont à reprendre dans un chantier sub-cleanup dédié (cf. §3).
+
+Bug HTML mort : `index.html` ligne du HTML généré par `afficherTableauCours` contient encore `data-action="modifierCours"` (fonction retirée). Comme le tableau ne s'affiche plus, ce bouton n'est jamais rendu. Sera nettoyé dans le même chantier futur.
 
 ### Démarches externes à engager
 
@@ -253,126 +279,87 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 ---
 
 
-## §3 — Consigne de démarrage pour la prochaine session (chantier Phase 2 cascade legacy 95)
+## §3 — Consigne de démarrage pour la prochaine session
 
-> Pour la prochaine instance Claude qui prend le relai. **Le cycle AQPC est livré (22 mai matin), le Sprint A est livré, les dettes #1-4 sont closes, les cleanups complémentaires (résidus risque + palettes COULEURS) sont faits. La prochaine priorité est l'exécution du chantier Phase 2 cascade legacy 95** : retirer le code mort en cascade de `js/cours.js`, `js/groupe.js`, `js/trimestre.js` qui dépend des IDs HTML retirés en Phase 1 (commit `479422c`) mais n'a pas été nettoyé en Phase 2 (commit `6b2da4b`, scope trop large). **Effort ~3-4 h, 3 commits, retrait estimé ~500-800 LOC.**
+> Cycle Phase 2 cascade legacy 95 LIVRÉ. La prochaine session doit être orientée par Grégoire. Quatre pistes documentées ci-dessous, par ordre d'élan technique.
 
-### Contexte
+### Piste 1 — Sub-cleanup tableau Réglages → Cours legacy (révélé par audit cascade)
 
-Le **plan détaillé** est dans `audit/refactoring-prep/PLAN-PHASE2-CASCADE-LEGACY-95.md` (commit `9940975`, 237 lignes). **Lire ce document en premier — il contient l'audit call-graph vérifié, l'ordre d'exécution, les conventions, les risques, la check-list pré-démarrage.** Ce §3 SESSION.md ne fait que pointer vers le plan, pas le dupliquer.
+**Effort estimé** : ~1-2 h. **Branche** : `cleanup/tableau-reglages-cours-legacy`.
 
-### Étape 1 — Vérifier l'état du repo (1-2 min)
+L'audit du chantier 2.1 a révélé que l'ensemble du tableau Réglages → Cours legacy est mort fonctionnellement :
+
+- `afficherTableauCours` (js/cours.js) : cherche `#tableauCoursContainer` retiré Phase 1 → early return systématique
+- `dupliquerCours`, `activerCours`, `supprimerCours` : 0 caller externe, référencés uniquement par le HTML de `afficherTableauCours` qui ne s'affiche jamais
+- Helpers possiblement orphelins : `obtenirNomPratiqueFallback`, `afficherPratiqueEnLectureSeule` (à vérifier par grep)
+- **Doublon `supprimerCours`** entre `js/cours.js:982` et `js/entites/cours-entite.js:171` — clarifier laquelle est invoquée
+- Bug HTML mort : le HTML généré contient encore `data-action="modifierCours"` (fonction retirée chantier 2.1) — bouton jamais rendu, sera nettoyé avec `afficherTableauCours`
+
+Lire le commit `dd493cc` (chantier 2.1) — la section « NON RETIRÉ hors scope » documente ces trouvailles.
+
+### Piste 2 — Reprise audit annuel sur `audit/2026-mai`
+
+**Effort estimé** : variable. **Branche** : `audit/2026-mai` (existante).
+
+Items restants documentés dans `audit/SESSION.md` (sujet distinct) :
+- Phase 7 Synthèse globale (axes 1+5+6)
+- Tests manuels 6.2 / 6.3 (Grégoire)
+- 4.3 onboarding tiers
+- Phases 1.4 + 1.6 PLAN-COURT-TERME reportées (CC BY-NC-SA + lien docs/adr/)
+
+### Piste 3 — Préparation AQPC 3 juin (J−12)
+
+- Tests visuels Grégoire chantier E (6 scénarios notifications Safari Mac + iPad Air, modes sombre + clair) — pendant
+- Décision label `v2-seuil-fragile` (conservation / atténuation / alignement)
+- Présentation AQPC à finaliser
+
+### Piste 4 — Tests manuels Grégoire phases 7.1 / 7.2 PLAN-COURT-TERME
+
+⏳ Toujours ouvertes (cf. §1 tableau).
+
+---
+
+### Étape 1 — Vérifier l'état du repo (commune à toutes les pistes)
 
 ```bash
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
-
-git status                              # branche actuelle ? attendu : audit/2026-mai (l'instance principale)
-git log --oneline main -5               # HEAD main attendu : d1363fc ou plus récent
-git worktree list                       # 1 seul worktree attendu (le principal sur audit/2026-mai)
+git status                              # branche actuelle
+git log --oneline main -5               # HEAD main attendu : 137411c ou plus récent
+git worktree list
 ```
 
-**Si HEAD main au-delà de `d1363fc`** : un autre chantier a été fait depuis. Vérifier `git log main` pour comprendre. Pas de panique, ce SESSION.md sera mis à jour par cet autre chantier.
+**Si HEAD main au-delà de `137411c`** : un autre chantier a été fait depuis. Vérifier `git log main` pour comprendre.
 
-### Étape 2 — Créer un worktree dédié main
+### Étape 2 — Worktree dédié si besoin
 
-`audit/2026-mai` a son propre cycle de vie avec des modifs uncommitted (audits, rapports, docs sécurité). **NE PAS écraser**. Créer un worktree dédié au chantier :
+`audit/2026-mai` a son propre cycle de vie avec des modifs uncommitted (audits, rapports, docs sécurité). Pour un chantier code sur main, créer un worktree dédié :
 
 ```bash
-git fetch origin main                                    # synchroniser local main avec origin
-git worktree add ../Monitorage_v6-phase2 -b cleanup/phase2-cascade-legacy-95 main
-cd ../Monitorage_v6-phase2
+git fetch origin main
+git worktree add ../Monitorage_v6-<sujet> -b <branche-dédiée> main
+cd ../Monitorage_v6-<sujet>
 ```
-
-> ⚠️ Pattern observé : `git checkout main` avec modifs uncommitted sur `audit/2026-mai` → git refuse. **Solution propre = worktree dédié à main**.
 
 ### Étape 3 — Lecture obligatoire (10-15 min)
 
 Ordre strict :
-1. **Ce SESSION.md** (relai courant + garde-fou §0 — règles spécifiques Phase 2 en fin de §0)
-2. **`audit/refactoring-prep/PLAN-PHASE2-CASCADE-LEGACY-95.md`** — plan détaillé du chantier (audit call-graph, ordre, risques)
-3. `CLAUDE.md` racine — règles sécurité (innerHTML, handlers inline, zones protégées) et convention de bump version
-4. `BACKLOG.md` — items potentiellement liés au cleanup
+1. **Ce SESSION.md** (relai courant + garde-fou §0)
+2. `CLAUDE.md` racine — règles sécurité (innerHTML, handlers inline, zones protégées) et convention de bump version
+3. `BACKLOG.md` — items potentiellement liés
+4. Pour piste 1 : commit `dd493cc` (chantier 2.1) section « NON RETIRÉ »
+5. Pour piste 2 : `audit/SESSION.md`
 
 ### Étape 4 — Charger les skills
 
-**Obligatoire** :
-- `Skills pour Claude Code/SKILL_labo_codex.md` — architecture, workflow
+**Obligatoire** : `Skills pour Claude Code/SKILL_labo_codex.md`.
 
-**Thématique** :
-- Aucun skill supplémentaire requis — le chantier est du nettoyage de code mort, pas de refactor profond ni de modification métier.
-
-### Étape 5 — Lancer la suite de tests (baseline)
+### Étape 5 — Baseline tests + chantier
 
 ```bash
-cd tests && npm install      # première fois après nouveau worktree
 cd tests && npm run test:unit    # attendu : 85 Vitest verts
 ```
 
-Si rouge dès le départ → diagnostic prioritaire AVANT tout chantier. Le chantier Phase 2 ne devrait introduire AUCUNE régression sur la suite Vitest (les fonctions retirées n'ont pas de sentinelle dédiée, à vérifier au cas par cas).
-
-### Étape 6 — Exécution selon ordre PLAN-PHASE2 §3
-
-Ordre recommandé : **trimestre.js → cours.js → groupe.js** (du plus simple au plus complexe). Voir PLAN-PHASE2 §2.1, §2.2, §2.3 pour le détail par module et §4 pour les conventions de travail.
-
-**Vérifications pré-chantier** (cf. PLAN-PHASE2 §5) : re-grep les callers de chaque fonction listée morte AVANT le retrait — les call-sites peuvent avoir bougé depuis la rédaction du plan le 22 mai matin.
-
-**Conventions** :
-- 1 commit par module (3 commits total)
-- Hook pré-push Vitest vert obligatoire
-- Format message : `refactor(legacy-95-cascade): chantier 2.X — retrait code mort cascade <module>`
-- Test manuel UI après chaque chantier (boot complet + clic sous-section Réglages associée + ouverture modales)
-
-### Étape 7 — Bump version à la clôture du chantier
-
-**ATTENTION** : demander à Grégoire AVANT de bumper la beta. Convention CLAUDE.md §0 ❌.
-
-Si Grégoire confirme : 99.62 → 99.63 (bump léger, fin de Phase 2). Sites à modifier :
-- `version.json` : `{"build":"MMJJ-HHMM","beta":"99.XX"}`
-- `js/init-inline.js` lignes 103-104 : `VERSION_MAJEURE` + `BUILD_ID`
-
-Sinon : juste un refresh de build (`0522-XXXX`, beta inchangée à 99.62).
-
-### Étape 8 — Merge FF + push
-
-Depuis le worktree :
-```bash
-git push origin cleanup/phase2-cascade-legacy-95:main    # FF push direct sur main
-```
-
-Tag optionnel `phase2-cascade-legacy-95-2026-05-XX` si Grégoire le souhaite.
-
-### Étape 9 — Cleanup worktree et MAJ SESSION.md
-
-```bash
-# Depuis le repo principal :
-cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
-git worktree remove ../Monitorage_v6-phase2
-git branch -D cleanup/phase2-cascade-legacy-95
-```
-
-Puis créer un worktree dédié à la MAJ SESSION.md :
-- En-tête §1 : HEAD `d1363fc` → nouveau HEAD, build courant
-- §1 nouvelle sous-section « Chantier Phase 2 livré » documentant les 3 commits + LOC retirée par module
-- §5 nouvelle ligne historique
-- §0 retirer les garde-fous spécifiques Phase 2 (la dette est close)
-- §3 réécrire pour le chantier suivant (selon backlog ou directive Grégoire)
-
-### Garde-fous spécifiques au chantier Phase 2
-
-Récap des règles §0 spécifiques (voir §0 pour le détail) :
-
-1. **`ouvrirModalBibliothequeCours` est VIVANTE** — ne pas retirer (bouton index.html:6815 actif).
-2. **3 fonctions de `trimestre.js` à PRÉSERVER** : `genererCalendrierComplet`, `obtenirCalendrierComplet`, `obtenirInfosJour`.
-3. **`navigation.js:250-251` est dans Zones protégées** — laisser le guard `if (typeof initialiserModuleTrimestre === 'function')` intact, retirer juste la fonction.
-4. **Doublon `deleteStudent` dans groupe.js (L957+L1138)** — lire les deux versions, identifier laquelle est invoquée, retirer l'autre. Documenter dans le commit.
-5. **Régression silencieuse via `window[X]` dynamique** — test manuel UI obligatoire après chaque chantier.
-
-### En cas de découverte hors scope
-
-Si l'audit cascade révèle du code mort dans **d'autres modules** (horaire.js, snapshots.js, etc.) :
-- **NE PAS l'embarquer** dans les 3 commits du chantier Phase 2 (préserver la cohérence du scope).
-- L'inscrire dans `BACKLOG.md` ou dans une nouvelle dette dans SESSION.md §1 pour traitement ultérieur.
-- Continuer le chantier sur les 3 modules cibles uniquement.
+Puis exécuter le chantier choisi avec les conventions habituelles : commits ciblés, hook pré-push vert, pas de bump beta sans demander à Grégoire (cf. §0).
 
 ---
 
@@ -458,3 +445,4 @@ git tag -l "cat-b-*" | sort             # 9 tags attendus :
 | 2026-05-22 (matin, cleanup résidus risque) | MAJ après livraison cleanup résidus système risque (1 commit `c697a29` sur branche `cleanup/risque-residus`, mergée FF main puis branche/worktree supprimés). Audit ciblé sur dette §1 SESSION main « ~10 réf JS risque » révèle 99 hits stricts (\brisque) sur 25 fichiers, dont 5 systèmes morts complémentaires aux dettes #1-4 livrées le matin par autre instance : A.1 fonction `genererBadgeRisqueProfil` + export, A.2 `COULEURS.risque`, A.3 `SEUILS_PAR_DEFAUT.risque` (9 niveaux échelle), A.4 6 classes CSS `.badge-risque-*`, A.5 8 classes CSS `.badge-risque-analyse-*`. Sentinelle Vitest mise à jour. Build refresh 0522-0925 → 0522-0945 (pas de bump beta). Tests 85/85 verts. Rebase nécessaire car 11 commits divergents sur origin/main (Sprint A + Phases legacy 95 + dettes #1-4) — conflits BUILD_ID uniquement, résolus en gardant 0522-0945. En-tête §1 mis à jour avec HEAD `c697a29` et chronologie 19 commits depuis `7c30d64`. Sous-section « Cleanup résidus système risque » ajoutée à §1 après « Cleanup Beta 95 legacy étendu ». UI vivante « Direction du risque » (slider + `calculerDirectionRisque`) NON touchée — chantier renommage R → N futur. | Cleanup résidus risque (Claude autonome) |
 | 2026-05-22 (matin, cleanup palettes COULEURS + plan Phase 2) | 2 commits sur branche `cleanup/couleurs-phase2plan` mergée FF main. (1) Commit `128ae0c` : retrait 3 palettes mortes `COULEURS.pratiques`, `COULEURS.idme`, `COULEURS.graphiques` du module `js/couleurs.js` (audit cross-codebase confirme 0 caller — seules `indices` et `correlations` restent consommées par correlations-longitudinales.js et graphiques-progression.js). −28 LOC, JSDoc actualisée, return Object.freeze rétréci à 2 entrées. (2) Commit `9940975` : rédaction de `audit/refactoring-prep/PLAN-PHASE2-CASCADE-LEGACY-95.md` (237 lignes) couvrant le chantier successeur des Phases 1+2 legacy 95 — audit préliminaire des 3 modules cours.js/groupe.js/trimestre.js avec call-graph vérifié, ordre d'exécution recommandé (trimestre → cours → groupe), risques identifiés (navigation.js protégé pour appel `initialiserModuleTrimestre`, config.js commentaires à mettre à jour, régressions silencieuses via `window[X]` dynamique). **Découvertes audit modifiant la dette §1 SESSION main** : `ouvrirModalBibliothequeCours` est en fait VIVANTE (bouton `index.html:6815` actif) ; `trimestre.js` contient 3 fonctions vivantes à PRÉSERVER (`genererCalendrierComplet`, `obtenirCalendrierComplet`, `obtenirInfosJour`) — pas un module à retirer en bloc. Build refresh 0522-0945 → 0522-1115. Tests 85/85 verts. En-tête §1 mis à jour : HEAD `9940975`, 22 commits depuis `7c30d64`. Sous-section « Prochaine session — chantier Phase 2 cascade legacy 95 (plan documenté) » remplace l'ancienne version courte. | Cleanup palettes COULEURS + plan Phase 2 (Claude autonome) |
 | 2026-05-22 (matin, relai consigne Phase 2) | Bascule du relai vers le chantier Phase 2 cascade legacy 95. En-tête principal réécrit (titre H1, identification, cycle en cours = Phase 2, document maître = PLAN-PHASE2-CASCADE-LEGACY-95.md). HEAD attendu `d1363fc`, build `0522-1115`. §0 enrichi avec sous-section « Garde-fous spécifiques Phase 2 » : 5 règles (`ouvrirModalBibliothequeCours` VIVANTE ; 3 fonctions trimestre.js à préserver ; `navigation.js:250-251` protégé — laisser guard ; doublon `deleteStudent` à clarifier ; test manuel UI obligatoire post-chantier). §3 entièrement réécrit — ancienne consigne Sprint A (livrée) supprimée (retrouvable via `git log SESSION.md`) ; nouvelle consigne pointe vers PLAN-PHASE2 comme document maître et donne 9 étapes (vérif repo, worktree dédié, lecture obligatoire, skills, tests baseline, exécution ordre PLAN-PHASE2 §3, bump version, merge FF push, cleanup + MAJ SESSION). §3bis Cat-B archive renommée « Archives des consignes de démarrage précédentes » (regroupe Sprint A déclassée + Cat-B). Aucune modif code applicatif. | Préparation relai Phase 2 (Claude autonome) |
+| 2026-05-22 (après-midi, Phase 2 cascade legacy 95 LIVRÉE) | 3 commits sur branche `cleanup/phase2-cascade-legacy-95` (mergée FF main puis supprimée) : `5ccb306` chantier 2.3 trimestre.js (−563 LOC, 601 → 38 l. ; **bug latent fixé** — exports cassés L583+L586 du commit `6b2da4b` faisaient crasher l'IIFE → `obtenirCalendrierComplet`/`obtenirInfosJour` désormais à nouveau exposés ; `main.js:467-468` retiré ; `navigation.js:250-251` préservé Zone protégée), `dd493cc` chantier 2.1 cours.js (−365 LOC, 1580 → 1215 l. ; `afficherFormCours`/`annulerFormCours`/`sauvegarderCours`/`afficherListeCoursSidebar`/`modifierCours` + 5 exports retirés ; `coursEnEdition` config.js MAJ JSDoc seulement = Zone protégée), `137411c` chantier 2.2 groupe.js (−188 LOC, 1190 → 1002 l. ; `addStudent`/`resetFiltreGroupe`/doublon `deleteStudent` ×2 + 3 exports retirés ; bouton HTML `data-action="resetFiltreGroupe"` retiré du HTML généré par `filtrerParGroupe` ; querySelectors `addStudent` simplifiés dans `modifierEtudiant`). Bilan total : 5 fichiers touchés, **−1124 LOC nettes** (+25 / −1149). Tests 85/85 Vitest verts à chaque jalon. Pas de bump beta (convention §0). §1 sous-section « Prochaine session — chantier Phase 2 (plan documenté) » remplacée par « Chantier Phase 2 cascade legacy 95 — LIVRÉ » avec tableau récap par module + section « Bug latent fixé en cascade » à inscrire SUIVI-BUGS + section « Découvertes hors scope » (tableau Réglages → Cours legacy mort = piste 1 §3). §0 garde-fous Phase 2 remplacés par 3 règles résiduelles. §3 entièrement réécrit avec 4 pistes pour la prochaine session (sub-cleanup tableau cours legacy / reprise audit annuel / prep AQPC / tests manuels Grégoire). En-tête HEAD `137411c`. | Phase 2 cascade legacy 95 (Claude autonome) |
