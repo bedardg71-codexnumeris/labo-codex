@@ -463,11 +463,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // Ces modules créent les sources uniques de vérité
     // ===============================
 
-    // MODULE TRIMESTRE: Génère calendrierComplet (source unique)
-    if (typeof initialiserModuleTrimestre === 'function') {
-        initialiserModuleTrimestre();
-    }
-
     // MODULE HORAIRE: Génère seancesCompletes (source unique)
     if (typeof initialiserModuleHoraire === 'function') {
         initialiserModuleHoraire();
