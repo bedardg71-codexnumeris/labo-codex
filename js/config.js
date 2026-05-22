@@ -271,7 +271,6 @@ function echapperHtml(texte) {
  * - 04-productions.js (utilise productionEnEdition, evaluationEnCours)
  * - 05-grilles.js (utilise grilleActuelle, grilleTemplateActuelle)
  * - 07-cartouches.js (utilise cartoucheActuel)
- * - 08-cours.js (utilise coursEnEdition)
  * - 14-utilitaires.js (utilise echapperHtml)
  * 
  * ORDRE DE CHARGEMENT:

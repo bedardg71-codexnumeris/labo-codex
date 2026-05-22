@@ -645,17 +645,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Affichage du tableau des cours
-    document.addEventListener('click', function (e) {
-        if (e.target.matches('[data-sous-onglet="reglages-cours"]')) {
-            setTimeout(() => {
-                if (typeof afficherTableauCours === 'function') {
-                    afficherTableauCours();
-                }
-            }, 50);
-        }
-    });
-
     // Délégation des accordéons (remplace 78+ onclick inline)
     document.addEventListener('click', function (e) {
         var header = e.target.closest('.accordeon-header');
