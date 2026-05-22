@@ -2914,73 +2914,6 @@ function afficherDistributionRisques(etudiants) {
     `).join('');
 }
 
-/**
- * Affiche les alertes prioritaires (étudiants à risque)
- * 
- * @param {Array} etudiants - Étudiants avec indices calculés
- */
-function afficherAlertesPrioritaires(etudiants) {
-    const container = document.getElementById('tb-alertes-prioritaires');
-    if (!container) return;
-    
-    // Filtrer les étudiants avec risque ≥ élevé (seuil 0.4)
-    const etudiantsARisque = etudiants
-        .filter(e => e.risque >= 0.4)
-        .sort((a, b) => b.risque - a.risque);  // Tri décroissant
-    
-    if (etudiantsARisque.length === 0) {
-        container.innerHTML = `
-            <p class="tb-zone-succes">
-                ✅ Aucune intervention urgente requise
-            </p>
-        `;
-        return;
-    }
-    
-    // Générer le tableau
-    container.innerHTML = `
-        <table class="tableau u-mt-15">
-            <thead>
-                <tr>
-                    <th>Nom</th>
-                    <th>Prénom</th>
-                    <th>Groupe</th>
-                    <th>Assiduité</th>
-                    <th>Complétion</th>
-                    <th>Performance</th>
-                    <th>Niveau de risque</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${etudiantsARisque.map(e => `
-                    <tr>
-                        <td><strong>${echapperHtml(e.nom)}</strong></td>
-                        <td>${echapperHtml(e.prenom)}</td>
-                        <td>${echapperHtml(e.groupe || '—')}</td>
-                        <td>${formatPourcentage(e.assiduite)}</td>
-                        <td>${formatPourcentage(e.completion)}</td>
-                        <td>${formatPourcentage(e.performance)}</td>
-                        <td>
-                            <span class="badge-risque risque-${e.niveauRisque.replace(' ', '-')}" 
-                                  class="tb-texte-capitalize">
-                                ${e.niveauRisque}
-                            </span>
-                        </td>
-                        <td>
-                            <button class="btn btn-principal"
-                                    data-action="tbNavigerVersProfil" data-param="${e.da}"
-                                    class="tb-padding-compact">
-                                Voir profil
-                            </button>
-                        </td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
-}
-
 /* ===============================
    FONCTIONS UTILITAIRES
    =============================== */
@@ -3269,7 +3202,6 @@ window._majSousTitreTrajectoires = _majSousTitreTrajectoires;
  * - tb-performance-moyenne
  * - tb-interventions-requises
  * - tb-distribution-risques
- * - tb-alertes-prioritaires
  * 
  * FORMULES UTILISÉES (Guide de monitorage):
  * - Assiduité (A) : SOMME(heures présent) / TOTAL(heures cours)
