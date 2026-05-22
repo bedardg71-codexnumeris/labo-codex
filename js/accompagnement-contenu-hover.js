@@ -161,7 +161,7 @@ const TOOLTIPS = {
     'depist-seuil-defi':
         'Score (%) sous lequel un crit\u00e8re est identifi\u00e9 comme un d\u00e9fi n\u00e9cessitant attention. Seuil bas = plus exigeant, seuil \u00e9lev\u00e9 = moins exigeant.',
     'depist-seuil-direction':
-        'Variation minimale (%) pour afficher une tendance du risque. Contr\u00f4le la sensibilit\u00e9 de l\'indicateur directionnel.',
+        'Variation minimale (%) pour afficher une tendance du niveau d\'attention. Contr\u00f4le la sensibilit\u00e9 de l\'indicateur directionnel.',
     'depist-seuil-fragile':
         'Indice sous lequel la situation est pr\u00e9occupante (rouge). N\u00e9cessite une intervention.',
     'depist-seuil-progression':
