@@ -1,22 +1,26 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 21 mai 2026 soir, post-Cat-B Track 4 chantier E)
+     IDENTIFICATION DE CE FICHIER  (mis à jour 22 mai 2026 matin, post-cycle AQPC)
      Ce SESSION.md vit sur la branche `main` du worktree principal et sert
-     de relai entre les sessions Claude. Il décrit l'état du cycle Cat-B
-     post-merge des 5 god modules et donne la consigne de démarrage pour
-     la prochaine instance.
+     de relai entre les sessions Claude. Il décrit l'état post-livraison
+     du cycle AQPC pré-3-juin (PLAN-COURT-TERME) et donne la consigne de
+     démarrage pour la prochaine instance.
+     L'archive complète du cycle Cat-B post-merge (clos 21 mai, 10/10
+     critères atteints) reste dans les §§ suivants comme référence
+     historique.
      ===================================================================== -->
 
 > **📌 Identification**
 > - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
-> - **Cycle en cours** : Catégorie B post-merge (dette résiduelle des 5 refactors god modules)
-> - **Document maître** : `audit/refactoring-prep/PLAN-CAT-B-POST-MERGE.md`
+> - **Cycle en cours** : AQPC pré-3-juin (PLAN-COURT-TERME) — Phase 7 tests manuels Grégoire restante
+> - **Document maître** : `audit/PLAN-COURT-TERME.md` (avec `PLAN-AQPC.md` en archive du plan pré-pivot)
 
-# SESSION — État au 21 mai 2026 soir (cycle Cat-B post-merge — Tracks 1+2+3 complets, Track 4 G+J+F+E+I livrés, **10/10 critères atteints**)
+# SESSION — État au 22 mai 2026 matin (cycle AQPC pré-3-juin livré, reste Phase 7 tests manuels)
 
-**Beta / build** : 99.61 / 0521-2046 (pas de bump beta pour le cycle Cat-B — décision Grégoire 21 mai, juste rafraîchir le build)
-**Branche `main`** : HEAD à mettre à jour après merge FF de `cat-b/track-4-chantier-I` (cycle Cat-B Tracks 1+2+3-phase1+3-phase2+4-G+J+F+E+I livrés).
+**Beta / build** : 99.62 / 0522-0650 (bump validé par Grégoire à la clôture du cycle AQPC).
+**Branche `main`** : HEAD à `1312a6b` post-merge FF de `aqpc/privacy` (6 commits AQPC) + bump version.
+**Branche `aqpc/privacy`** : retirée localement + remotement (mergée et propre).
 
-**Tests** : 85 Vitest + 18 Playwright = **103/103 verts** à chaque commit (+6 nouveaux tests chantier I : rendus DOM bilan-reflexif/productions/trimestre-v2/profil-etudiant + 2× evaluation).
+**Tests** : 85 Vitest verts à chaque commit (hook pré-push vert sur les 6 commits AQPC + commit release 99.62). Playwright non re-vérifié dans le worktree aqpc (pas de modif de zone DOM nouvelle).
 
 ---
 
@@ -24,7 +28,10 @@
 
 **Ce qui est INTERDIT dans la prochaine session :**
 
-- ❌ **Ne pas bumper la beta sans demander à Grégoire**. Le bump 99.62 a été reverté (commit `5a12236`). Toute modification version.json/init-inline.js doit confirmer le numéro avec Grégoire en début de session.
+- ❌ **Ne pas bumper la beta sans demander à Grégoire**. Le bump 99.62 (build 0522-0650) a été acté à la clôture du cycle AQPC le 22 mai matin. Toute nouvelle modification version.json/init-inline.js doit confirmer le numéro suivant avec Grégoire en début de session.
+- ❌ **Ne pas re-livrer les Phase 1.4 ni 1.6 du PLAN-COURT-TERME sur ce worktree main**. Les fichiers cibles (`audit/04-sustainability/`, `audit/package.json`, `docs/adr/`) vivent uniquement sur la branche `audit/2026-mai` — c'est là que ces fixes doivent être appliqués, pas sur main.
+- ❌ **Ne pas redéfinir `decouplerPR` ni `indiceR` ni `risque` comme propriété**. Le refactor R → N (Niveau d'attention) du 22 mai a éliminé ce vocabulaire. Source unique : `decouplerPN` / `indiceN` / propriété `niveauAttention` sur l'objet `indices`. Migration de données idempotente dans `main.js` (`migration_decoupler_pn_done`).
+- ❌ **Ne pas remettre `MAX_RAPPORTS_ARCHIVES` à 50** dans `js/rapport-bug.js`. Seuil abaissé à 20 le 22 mai (Phase 6.2 PLAN-AQPC, audit PII). Migration de tronquage dans `main.js` (`migration_rapports_bug_20_done`).
 - ❌ **Ne pas démarrer une nouvelle session Cat-B sur `audit/2026-mai`**. Cette branche a son propre cycle (audits, rapports, docs sécurité) — créer un nouveau worktree depuis `main`.
 - ❌ **Ne pas réactiver `initialiserModuleEvaluation`** : le bug #107 a été corrigé par RETRAIT du code (stabilité zéro-dette CLAUDE.md), pas par activation. La fonction n'a jamais servi en prod depuis 5 mois.
 - ❌ **Ne pas tenter de descendre `genererSectionMobilisationEngagement` sous cyc 30 sans nouvelle validation Grégoire**. Cyc 48 acté **héritage Cat-B sous N=50** le 21 mai PM. Le template HTML est dense en ternaires (`${nb > 1 ? 's' : ''}` × ~20) qui sont difficiles à éclater sans sur-fragmenter (cf. §6.5 gabarit METHODE). Si réouverture, valider d'abord avec Grégoire qu'il accepte la sur-fragmentation.
@@ -35,7 +42,64 @@
 
 ---
 
-## §1 — Récap du cycle Cat-B livré (21 mai 2026)
+## §1 — Récap du cycle AQPC pré-3-juin livré (22 mai 2026)
+
+**Branche dédiée** : `aqpc/privacy` (créée depuis main `e50cf61`, mergée FF sur `main` au commit `1312a6b`, puis supprimée localement + remotement).
+
+**6 commits livrés** (du plus ancien au plus récent) :
+
+```
+2e5a86c  docs(aqpc): documentation Loi 25 + déploiement (Phase 2-3)
+32d931a  docs(aqpc): refonte README + MAJ versions Beta 99.61 (Phase 1.5 + 4)
+4401ac6  a11y(aqpc): Phase 5 axe-core — T-A1 + T-A2 + 5.3 + 5.4 + 5.5
+c018b44  refactor(aqpc): Phase 6.1 — retirer 2 fonctions code mort alarmistes
+52b2ebf  refactor(aqpc): R (Risque) → N (Niveau d'attention) — Phase 6.1 reliquat
+1312a6b  refactor(aqpc): Phase 6.2 — audit + rétention rapportsBugArchives
+```
+
+Puis bump version `99.61 → 99.62` (build `0521-2101 → 0522-0650`) à la clôture, commit séparé.
+
+### Bilan PLAN-COURT-TERME
+
+| Phase | Statut |
+|---|---|
+| 1.1 typo eval | ✅ Déjà corrigé antérieurement |
+| 1.2 + 1.3 (T-A1, T-A2 ARIA) | ✅ Livré |
+| 1.4 (CC BY-SA → CC BY-NC-SA) | ⏳ Reporté `audit/2026-mai` (fichiers cibles n'existent pas sur main) |
+| 1.5 (MAJ Beta CLAUDE.md + START-HERE) | ✅ Livré |
+| 1.6 (lien docs/adr/) | ⏳ Reporté `audit/2026-mai` (dossier n'existe pas sur main) |
+| 2.1 PRIVACY.md | ✅ Livré (≈ 400 l., 7 sections requises + mentions formelles + limites assumées) |
+| 2.2 INCIDENTS.md | ✅ Livré (registre conforme art. 63.5 Loi 25) |
+| 2.3 INFO-ELEVES.md | ✅ Livré (gabarit à distribuer aux étudiants) |
+| 3.1 DEPLOY.md | ✅ Livré (chaîne GitHub → Netlify → Cloudflare Access) |
+| 3.2 netlify.toml | ✅ Livré (consolide `_headers` — à supprimer après validation deploy) |
+| 4 refonte README.md | ✅ Livré (8 références mortes retirées) |
+| 5.1 T-A3 contraste 17 nodes | ⏳ Délégué ds-update passe 3 |
+| 5.2 22 outline:none | ⏳ Délégué ds-update passe 3 |
+| 5.3 prefers-reduced-motion | ✅ Livré |
+| 5.4 prefers-contrast: more | ✅ Livré |
+| 5.5 aria-live notifications | ✅ Livré |
+| 6.1 (a) chaînes alarmistes UI | ✅ Déjà retiré Cat-B Track 4 chantier J + refactor R → N (49 substitutions) |
+| 6.1 (b) 4 fonctions code mort | ✅ 4/4 retirées (2 Cat-B Track 1 + 2 AQPC) |
+| 6.2 audit `rapportsBugArchives` | ✅ Livré (seuil 50→20, migration, alerte UI) |
+| 7.1 + 7.2 tests manuels Grégoire | ⏳ À toi |
+
+### Dettes explicites documentées (à fermer plus tard, hors urgence)
+
+1. **UI « Direction du risque »** (`seuil-risque`, `valeur-risque`, `exemple-risque` + fonctions `sauvegarderSeuilDirectionRisque` etc.) — ~30 min
+2. **« Seuils d'alerte critiques »** dans la doc aide → « Seuils de vigilance »
+3. **~10 références JS internes** au mot « risque » dans commentaires/variables locales
+4. **`_headers`** doit être supprimé après validation deploy `netlify.toml`
+
+### Démarches externes à engager
+
+- **Demande d'avis au responsable PRP du Cégep de Drummondville** (Loi 25) — délai réponse 2-6 semaines. À envoyer par Grégoire. Conditionne la version 1.1 de PRIVACY.md.
+
+---
+
+## §1bis — Archive du cycle Cat-B post-merge (clos 21 mai 2026)
+
+> Cycle précédent — 10/10 critères atteints. Conservé pour référence.
 
 ### Track 1 — Quick wins (✅ complet, matin)
 
@@ -331,3 +395,4 @@ git branch -D cat-b/track-4-chantier-X   # -D obligatoire : voir note §3 étape
 | 2026-05-21 (soir, post-Track 4 chantier E) | MAJ après livraison Track 4 chantier E (6 commits sur la branche `cat-b/track-4-chantier-E`). Consolidation `utils-notifications.js` — **scope réel ~7x plus gros que les 73 annoncés** : ~525 callers migrés dans 39 modules. 0 def, 0 export, 0 wrapper, 0 guard typeof restants ; source unique `window.notifications.{succes, erreur, info}` (textContent immunisé XSS). Sentinelle Vitest stricte `tests/unit/utils-notifications.test.js` verrouille la régression. 3 bugs latents fixés : #111 XSS trimestre.js innerHTML sans echapperHtml (résolu par retrait def), #112 type `'warning'` ignoré en 2e param, #113 shadow local wizard-pratique-v2 1-param. Tests 92→97/97 verts (+5 nouveaux : 4 API + 1 sentinelle stricte). Build refresh 0521-1108 → 0521-1717. Critère A5 atteint. Garde-fou §0 enrichi (ne pas définir `function afficherNotificationX`, ne pas réintroduire guards). §2 critères : 8 atteints au lieu de 7 + 1 restant au lieu de 2 (A8 chantier I). §3 étape 6 réordonnée (chantier E retiré). −469 LOC nettes. | Cat-B Track 4 chantier E (Claude autonome) |
 | 2026-05-21 (soir, post-Track 4 chantier I) | MAJ après livraison Track 4 chantier I (1 commit refactor `a16aefa` + 1 commit docs sur la branche `cat-b/track-4-chantier-I`, build 0521-2046). 6 tests Playwright rendus DOM répartis dans 5 fichiers `tests/integration/*-rendu.spec.js` : bilan-reflexif éditeur, productions badge CC (+ vérif XSS E-β), trimestre-v2 carte résumé horaires, profil-etudiant Section Productions par défaut, evaluation palette critères + rétroaction Bilan. Tests 97→103/103 verts (85 Vitest + 18 Playwright). Critère A8 atteint. **10/10 critères Cat-B atteints** (A2 sous exception N=50). Cycle Cat-B clos pré-AQPC. §0 garde-fou inchangé. §1 Track 4 enrichi (chantier I livré). §2 critères : tous 10 atteints. §3 étape 6 réordonnée (chantier I retiré, priorité 1 devient test visuel Grégoire + décisions J reliquat + prep AQPC). Pattern technique éprouvé : `page.evaluate()` + fixtures `db.setSync` + `page.on('dialog')` pour auto-dismiss alert. Convention `*-rendu.spec.js` (rendus DOM) complète `*-chargement.spec.js` (sentinelles d'exports) déjà en place. | Cat-B Track 4 chantier I (Claude autonome) |
 | 2026-05-21 (soir, post-Track 4 chantier J reliquat tokens CSS) | MAJ après livraison chantier J reliquat tokens CSS (1 commit, branche `cat-b/track-4-chantier-J-tokens`). Renommage 7 tokens `--risque-{nul,minimal,faible,modere,eleve,tres-eleve,critique}` → `--niveau-attention-*` (mapping 1:1). Scope réel : 97 hits dans 10 fichiers (styles.css 34 + index.html 29 + 8 modules JS 34). L'estimation initiale 480 incluait commentaires + JSON ESLint historiques (préservés intacts). Tests 103/103 verts (aucune régression). Audit annuel 1.3 désormais **complètement Vert** côté tokens CSS. §1 Track 4 enrichi (chantier J reliquat tokens livré). §3 étape 6 : retirer item tokens CSS de la décision pendante (reste seulement label `v2-seuil-fragile`). Pattern technique : substitution `perl -i -pe 's/--risque-/--niveau-attention-/g'` sur liste explicite de fichiers (préserve les rapports historiques). | Cat-B Track 4 chantier J reliquat tokens (Claude autonome) |
+| 2026-05-22 (matin, cycle AQPC pré-3-juin) | Bascule du cycle Cat-B (clos) vers le cycle AQPC pré-3-juin. 6 commits livrés sur la branche `aqpc/privacy` (créée depuis main `e50cf61`, mergée FF sur main au commit `1312a6b`) couvrant Phase 1.5 + 2 + 3 + 4 + 5 (sauf 5.1/5.2 délégués ds-update passe 3) + 6.1 + 6.2 du PLAN-COURT-TERME. Documents publics nouveaux : PRIVACY.md (~400 l.), INCIDENTS.md (~250 l.), INFO-ELEVES.md (~175 l.), DEPLOY.md (~315 l.), netlify.toml (consolide _headers). README.md refondu (8 références mortes retirées, double licence AGPL+CC). Refactor R → N (Niveau d'attention) : 49 substitutions dans 8 modules + cohérent avec renommage tokens CSS du chantier J. 4 fonctions code mort alarmiste retirées au total (2 Cat-B Track 1 + 2 AQPC). Audit `rapportsBugArchives` avec seuil 50→20, migration idempotente, alerte UI dans formulaire bug. Phase 5 axe-core : T-A1/T-A2 ARIA + prefers-reduced-motion + prefers-contrast: more + aria-live notifications. Tests Vitest 85/85 verts à chaque commit (hook pré-push). Bump version 99.61 → 99.62 (build 0521-2101 → 0522-0650) à la clôture. Branche `aqpc/privacy` supprimée localement et remotement après merge. §0 garde-fou réécrit (retrait mention 99.62 reverté, ajout decouplerPN + MAX_RAPPORTS 20 + 1.4/1.6 reportés audit/2026-mai). §1 réécrit pour cycle AQPC ; ancien §1 Cat-B déclassé en §1bis archive. Dette explicite documentée : « Direction du risque » UI, « Seuils d'alerte critiques » doc, ~10 références JS au mot « risque » dans commentaires, `_headers` à retirer post-validation deploy. Démarche externe à engager par Grégoire : demande d'avis PRP du Cégep de Drummondville (Loi 25, délai 2-6 semaines). | Cycle AQPC (Claude autonome) |
