@@ -140,7 +140,7 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
 ## §3 — Consigne de démarrage pour la prochaine session
 
-> Pour la prochaine instance Claude qui prend le relai du cycle Cat-B. Suivre dans l'ordre.
+> Pour la prochaine instance Claude qui prend le relai. **Le cycle Cat-B est clos à 10/10 — la prochaine session est essentiellement non-code** (prep AQPC, test visuel chantier E, décision label `v2-seuil-fragile`, ou nouveau backlog). Suivre dans l'ordre.
 
 ### Étape 1 — Vérifier l'état du repo (1-2 min)
 
@@ -148,8 +148,8 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
 git status                              # branche actuelle ?
-git log --oneline main -3               # HEAD main attendu : `864a756 docs(cat-b): Track 4 chantier E sous-lot 6 LIVRÉ` ou plus récent
-git tag -l "cat-b-*" | sort             # 7 tags attendus :
+git log --oneline main -3               # HEAD main attendu : `cdd8a23 refactor(cat-b): chantier J reliquat — tokens CSS` ou plus récent
+git tag -l "cat-b-*" | sort             # 9 tags attendus :
                                         #   cat-b-track-1-2026-05-21
                                         #   cat-b-track-2-2026-05-21
                                         #   cat-b-track-3-phase1-2026-05-21
@@ -157,10 +157,12 @@ git tag -l "cat-b-*" | sort             # 7 tags attendus :
                                         #   cat-b-track-4-gj-2026-05-21
                                         #   cat-b-track-4-chantierF-2026-05-21
                                         #   cat-b-track-4-chantierE-2026-05-21
-git worktree list                       # 1 seul worktree attendu (le principal sur audit/2026-mai)
+                                        #   cat-b-track-4-chantierI-2026-05-21
+                                        #   cat-b-track-4-chantierJ-tokens-2026-05-21
+git worktree list                       # 1 seul worktree attendu (le principal sur main ou audit/2026-mai)
 ```
 
-**Si HEAD main au-delà de `864a756`** : un autre chantier a été fait depuis (vérifier `git log main` pour les commits récents). Pas de panique, ce SESSION.md sera mis à jour par cet autre chantier.
+**Si HEAD main au-delà de `cdd8a23`** : un autre chantier a été fait depuis (vérifier `git log main` pour les commits récents). Pas de panique, ce SESSION.md sera mis à jour par cet autre chantier.
 
 ### Étape 2 — Créer un worktree dédié à main
 
@@ -192,37 +194,46 @@ Ordre strict :
 - `Skills pour Claude Code/SKILL_labo_codex.md` — architecture, indices A-C-P, workflow
 
 **Selon track choisi** :
-- Track 4 chantier I (tests Playwright rendus DOM) → lire `docs/securite/TESTS-AUTOMATISES.md` + lire les sentinelles existantes (`tests/unit/sentinelle-evaluation-en-cours.test.js` et `tests/unit/utils-notifications.test.js`) comme références de structure
-- Test visuel chantier E (notifications) → 6 scénarios listés dans §3 étape 6 priorité 1 ; pas de code, juste validation manuelle Grégoire sur Safari Mac + iPad Air
-- Track 4 chantier J reliquat (tokens CSS `--risque-*`, label `v2-seuil-fragile`) → décision Grégoire d'abord, pas de code
+- Test visuel chantier E (notifications) → 6 scénarios listés dans §3 étape 6 priorité 2 ; pas de code, juste validation manuelle Grégoire sur Safari Mac + iPad Air
+- Décision label `v2-seuil-fragile` → décision Grégoire d'abord, pas de code
+- Préparation présentation AQPC 3 juin → consulter `docs/AQPC Colloque 2026-Labo Codex v2 (8 mai).pptx` + `docs/AQPC-2026-suggestions-deuxieme-partie.md` + `audit/reports/SUMMARY-aqpc.md`
+- Chantier H optionnel (sous-découpage résidus) → relire METHODE §6.5 + acté D-21M-5 post-AQPC, NE PAS attaquer sans nouvelle validation Grégoire
 - Reprise éventuelle Mobilisation cyc 48 (héritage Cat-B sous N=50) → relire METHODE §6.5 gabarit AVANT de proposer fragmentation supplémentaire
+- Reprise audit annuel (4.3 onboarding tiers ou 6.2/6.3 tests manuels) → lire `audit/SESSION.md` (sujet distinct)
 
 ### Étape 5 — Lancer la suite de tests (baseline)
 
 ```bash
 cd tests && npm install      # première fois après nouveau worktree (catbX etc.)
-cd tests && npm test         # attendu : 85 Vitest + 12 Playwright = 97/97 verts
-                             # (+3 sentinelles chantier F + 4 API utils-notifications + 1 sentinelle stricte chantier E)
+cd tests && npm test         # attendu : 85 Vitest + 18 Playwright = 103/103 verts
+                             # (+6 chantier I rendus DOM bilan-reflexif/productions/trimestre-v2/profil-etudiant + 2× evaluation)
 ```
 
 Si rouge dès le départ → diagnostic prioritaire AVANT tout chantier. Ne pas démarrer si baseline pas verte.
 
 ### Étape 6 — Choisir le track à attaquer
 
-**Priorité recommandée** (par valeur/effort, ordre actualisé post-Track-4-chantier-I, cycle Cat-B clos 10/10) :
+**État** : cycle Cat-B **clos à 10/10 critères**. Audit annuel **25/25 livrés**. Tests **103/103 verts**. Audit 1.3 **complètement Vert** (UI + tokens CSS).
 
-1. **Test visuel Grégoire chantier E** : 6 scénarios déclenchant des notifications (sauvegarde production, sauvegarde évaluation, erreur import ZIP, archivage réserve, ajout enseignant, fermeture codex) — sur Safari Mac + iPad Air, modes sombre + clair. Comportement attendu : couleur correcte (vert succes, rouge erreur, neutre info), durée correcte (3s succes/info, 5s erreur), animation slide-out 300ms. **Recommandé pré-AQPC** : ~30 min de validation manuelle.
+**Priorité recommandée** (par valeur/effort, ordre actualisé post-Track-4-chantier-J-tokens) :
 
-2. **1 décision Grégoire pendante Track 4 chantier J reliquat** (sans code)
+1. **Préparation présentation AQPC 3 juin (J−13)** : pptx du 8 mai (`docs/AQPC Colloque 2026-Labo Codex v2 (8 mai).pptx`) + démos + script. Codebase dans un état exceptionnellement propre. C'est la chose de la plus haute valeur sur les 13 jours restants.
+
+2. **Test visuel Grégoire chantier E** : 6 scénarios déclenchant des notifications (sauvegarde production, sauvegarde évaluation, erreur import ZIP, archivage réserve, ajout enseignant, fermeture codex) — sur Safari Mac + iPad Air, modes sombre + clair. Comportement attendu : couleur correcte (vert succes, rouge erreur, neutre info), durée correcte (3s succes/info, 5s erreur), animation slide-out 300ms. **Recommandé pré-AQPC** : ~30 min de validation manuelle.
+
+3. **1 décision Grégoire pendante Track 4 chantier J reliquat** (sans code)
    - Label `v2-seuil-fragile` : maintenu, atténué, ou aligné ?
-   - (Renommage tokens CSS `--risque-*` → `--niveau-attention-*` LIVRÉ 21 mai soir, 97 hits / 10 fichiers / mapping 1:1.)
+   - (Tokens CSS `--risque-*` → `--niveau-attention-*` LIVRÉ 21 mai soir, 97 hits / 10 fichiers / mapping 1:1.)
 
-3. **Préparation présentation AQPC 3 juin (J−13)** : pptx du 8 mai + démos + script. Codebase dans un état exceptionnellement propre (audit annuel 25/25 + Cat-B 10/10) : pas de chantier code urgent restant.
+4. **Reprise audit annuel** (sujet distinct, branche `audit/2026-mai`)
+   - 4.3 onboarding tiers (protocole `audit/04-sustainability/4.3-protocole-execution.md`) — session Claude « fraîche » nécessaire.
+   - 6.2/6.3 tests manuels Grégoire (VoiceOver Mac + iPad réel, ~3 h 30).
+   - Lire `audit/SESSION.md` pour reprendre l'audit.
 
-4. **Track 4 chantier H** (OPTIONNEL, post-AQPC) — Sous-découpage résidus (~4-6h)
+5. **Track 4 chantier H** (OPTIONNEL, post-AQPC) — Sous-découpage résidus (~4-6h)
    - Décision Grégoire 18 mai + acté D-21M-5 le 21 mai soir : reporter sauf si la dette devient gênante au quotidien. NE PAS attaquer sans nouvelle validation.
 
-5. **Réouverture Mobilisation cyc 48 → <30** (héritage Cat-B sous N=50 acté)
+6. **Réouverture Mobilisation cyc 48 → <30** (héritage Cat-B sous N=50 acté)
    - **NE PAS attaquer sans validation Grégoire**. Le templating HTML dense en ternaires demanderait une sur-fragmentation jugée disproportionnée le 21 mai PM.
 
 ### Étape 7 — Conventions de travail Cat-B
@@ -232,7 +243,7 @@ Si rouge dès le départ → diagnostic prioritaire AVANT tout chantier. Ne pas 
 - **1 commit par chantier** (ou par fonction si grosse — ex Track 3 phase 2 = 5 commits pour 5 fonctions).
 - **Hook pré-push Vitest** vert obligatoire à chaque commit (installé par défaut sur les worktrees créés depuis main — confirmé 21 mai PM).
 - **Sécurité non-négociable** (CLAUDE.md) : tout `innerHTML` avec données utilisateur → `echapperHtml()`. Aucun acquittement `// security-ok` sans justification absolue inscrite SUIVI-BUGS.
-- **Tests** : 97/97 minimum à chaque commit (post-chantier E). Si régression, investigation prioritaire avant de continuer.
+- **Tests** : 103/103 minimum à chaque commit (post-chantier I). Si régression, investigation prioritaire avant de continuer.
 - **Audit ESLint complexity** après chaque extraction. Cible dure cyc ≤ 30 — héritage Cat-B sous N=50 acceptable si template HTML dense.
 - **Fallback Python pour Edit JSON-based** : si Edit échoue sur du contenu contenant `̀-ͯ` (escapes regex Unicode) ou autres séquences problématiques, utiliser `python3 - <<'PYEOF' ... PYEOF` avec lecture/écriture explicites + invariants `assert`. Pattern éprouvé Track 3 phase 2 (calculerIPB, calculerDetailsNoteFinale, Performance, Mobilisation).
 
