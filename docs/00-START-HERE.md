@@ -63,7 +63,7 @@ Ce pattern est utilise dans :
 
 ## Etat actuel du projet
 
-**Version** : Beta 99.11 (Build 0411-2010)
+**Version** : Beta 99.61 (Build 0521-2101)
 **Objectif** : Suivi de l'apprentissage (dépistage SOLO) — Phase 6 nettoyage complet
 **Priorite** : **Securite + Proprete > Nouvelles fonctionnalites**
 
