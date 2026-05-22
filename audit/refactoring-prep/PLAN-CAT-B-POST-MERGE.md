@@ -250,7 +250,7 @@ Le cycle Cat-B est considéré clos quand :
 - **A5.** ✅ `utils-notifications.js` créé + ~525 callers migrés (chantier E livré 21 mai 2026 soir — scope réel ~7x plus gros que les 73 annoncés ; bilan : 39 modules touchés, 2 défs canoniques + 23 wrappers locaux + 4 cas spéciaux + 149 guards typeof + 5 guards composites tous retirés ; sentinelle Vitest stricte ; 3 bugs latents fixés #111-113 ; −469 LOC nettes).
 - **A6.** ✅ Couplage `travaux-ui.js:4639` découplé via `evaluation.demarrerEvaluationDepuisFichier` + sentinelle Vitest (chantier F livré 21 mai 2026 PM). 8 sites d'écriture cross-module éliminés (1 réassignation + 7 mutations) ; travaux-ui.js n'écrit plus jamais window.evaluationEnCours.
 - **A7.** 3 accès localStorage profil-etudiant migrés vers `db.*` (chantier G).
-- **A8.** 6 tests Playwright rendus DOM ajoutés (chantier I).
+- **A8.** ✅ 6 tests Playwright rendus DOM ajoutés (chantier I livré 21 mai 2026 soir, build 0521-2046). Couvrent : bilan-reflexif éditeur, productions badge CC + fix XSS E-β, trimestre-v2 carte résumé horaires, profil-etudiant Section Productions par défaut, evaluation palette critères (IDME), evaluation rétroaction Bilan (via `basculerVueRetroaction('bilan')` → `genererRetroactionBilan`). Tests 103/103 verts (85 Vitest + 18 Playwright, +6 chantier I vs baseline 97).
 - **A9.** Strings UI alarmistes reformulées + FAQ « Indice R » retirée + glossaire aligné (chantier J).
 - **A10.** 20 propositions Cat-B méthode actées + METHODE-REFACTORING §3/§4/§5/§6 intégrées.
 
@@ -277,7 +277,7 @@ Track 3 (héritages cyc) et reste de Track 4 sont post-AQPC sans contrainte de d
 | Track 1 — Quick wins | **Terminé** | 2026-05-21 | 2026-05-21 |
 | Track 2 — Méthode | **Terminé** | 2026-05-21 | 2026-05-21 |
 | Track 3 — Héritages cyc > 30 | **Phase 1 + 2 livrées (13/14 strictement <30 + 1 héritage Cat-B sous N=50)** | 2026-05-21 | 2026-05-21 (Mobilisation cyc 48 acté sous N=50) |
-| Track 4 — Transversaux | **G+J+F+E livrés** | 2026-05-21 | H/I reportés post-AQPC |
+| Track 4 — Transversaux | **G+J+F+E+I livrés** | 2026-05-21 | H reporté post-AQPC (optionnel) |
 
 **Track 4 — chantiers livrés (21 mai 2026)** :
 - **Chantier G** (matin) : 2 accès localStorage direct migrés vers `db.getSync`/`db.setSync` (`profilOngletDeveloppementActif` dans `profil-etudiant-diagnostics.js`). Le plan théorique en prévoyait 3, audit réel = 2.
@@ -293,9 +293,19 @@ Track 3 (héritages cyc) et reste de Track 4 sont post-AQPC sans contrainte de d
 
   **Bilan chantier E** : −469 LOC nettes, 39 modules touchés, 97/97 tests verts (+5 vs baseline). État final : 0 def `function afficherNotificationX`, 0 export `window.afficherNotificationX`, 0 wrapper local, 0 guard typeof. Source unique : `window.notifications.{succes, erreur, info}`. Critère A5 atteint.
 
-**Track 4 — chantiers reportés (post-AQPC, gros effort)** :
+**Track 4 — chantier I LIVRÉ** (21 mai 2026 soir, 1 commit refactor + 1 commit docs, branche `cat-b/track-4-chantier-I`, build 0521-2046) :
+- 5 fichiers `tests/integration/*-rendu.spec.js` créés couvrant 6 tests :
+  - `bilan-reflexif-rendu.spec.js` : initialiserBilanReflexif → #bilan-vue-editeur (titre, préambule, blocs Likert, panneau aide)
+  - `productions-rendu.spec.js` : genererBadgeCC(metadata) → badge CC complet + fix XSS E-β
+  - `trimestre-v2-rendu.spec.js` : chargerHorairesV2 → #v2-carteResumeHoraire (Lundi/Mercredi + 08:30/13:00 + local A-101)
+  - `profil-etudiant-rendu.spec.js` : afficherProfilComplet(da) → #contenuProfilEtudiant (sidebar 2col + Section Productions)
+  - `evaluation-rendu.spec.js` (2 tests) : afficherCriteresDepuisGrille → #listeCriteresGrille1 + basculerVueRetroaction('bilan') → #contenuRetroBilan
+- Tests : 85 Vitest + 18 Playwright = **103/103 verts** (+6 chantier I).
+- Critère A8 atteint. **10/10 critères Cat-B atteints** (A2 sous exception N=50).
+- Pattern technique : tests utilisent `page.evaluate()` pour appeler les fonctions de rendu publiques après préparation de fixtures (db.setSync), évite les setTimeout en cascade des flux navigation. Auto-dismiss alert via `page.on('dialog')`.
+
+**Track 4 — chantier reporté (post-AQPC, gros effort, OPTIONNEL)** :
 - **Chantier H** (OPTIONNEL) : Sous-découpage résidus `profil-etudiant-sections-affichage.js` 4 654 LOC + `evaluation.js` 3 984 LOC (~4-6h)
-- **Chantier I** : 6 tests Playwright rendus DOM (~3-5h)
 
 **Track 4 — décisions Grégoire pendantes (chantier J reliquat)** :
 - Renommage tokens CSS `--risque-*` (480 hits) en `--niveau-attention-*` ou conservation legacy ?
@@ -326,3 +336,4 @@ Ce document est mis à jour à chaque clôture de chantier.
 | 2026-05-21 PM | Track 3 phase 2 LIVRÉE (5 commits, branche `cat-b/track-3-phase2-profil-etudiant`) : 5 fonctions profil-etudiant éclatées + 1 arrow fusionnée. 38 helpers privés ajoutés. 4 fonctions strictement <30 (arrow :2659, calculerIPB, calculerDetailsNoteFinale, genererSectionPerformance + arrow :4083) + 1 héritage Cat-B sous N=50 acté (genererSectionMobilisationEngagement cyc 48). Bug latent #110 fixé (portfolioActif → portfolioActifRapport). Tests 89/89 verts à chaque commit. ESLint cyc>30 : 6 → 1 (héritage). | Cat-B Track 3 phase 2 |
 | 2026-05-21 soir | Track 4 chantier F LIVRÉ (1 commit refactor, branche `cat-b/track-4-chantier-F`). Couplage travaux-ui.js ↔ window.evaluationEnCours découplé via API `evaluation.demarrerEvaluationDepuisFichier(fichier, opts)`. Audit révèle 8 sites d'écriture cross-module (vs 1 annoncé §2 chantier F) : 1 réassignation L4639 + 7 mutations (Zone 1 basculerMode L4387-90 + Zone 2 afficherPalettesEval L4660/4669/4684). Décision (b) découpler actée. Sentinelle Vitest `tests/unit/sentinelle-evaluation-en-cours.test.js` (3 sub-tests) verrouille l'invariant : whitelist config.js + 7 modules evaluation*.js ; travaux-ui à 0 site d'écriture. Critère A6 atteint. Tests 92/92 verts (80 Vitest + 12 Playwright). | Cat-B Track 4 chantier F |
 | 2026-05-21 soir | Track 4 chantier E LIVRÉ (6 commits, branche `cat-b/track-4-chantier-E`, build 0521-1717). Consolidation `utils-notifications.js` — **scope réel ~7x plus gros que les 73 annoncés** : ~525 callers migrés dans 39 modules. État final : 0 def, 0 export, 0 wrapper, 0 guard typeof. Source unique `window.notifications.{succes, erreur, info}` (textContent, immunisé XSS). 3 bugs latents fixés (#111 XSS trimestre.js, #112 type ignoré, #113 shadow local wizard). Sentinelle Vitest stricte verrouille la régression. Critère A5 atteint. −469 LOC nettes, 97/97 tests verts (+5 vs baseline 92). | Cat-B Track 4 chantier E |
+| 2026-05-21 soir | **Track 4 chantier I LIVRÉ** (1 commit refactor + 1 commit docs, branche `cat-b/track-4-chantier-I`, build 0521-2046). 6 tests Playwright rendus DOM couvrant les 5 modules refactorés : bilan-reflexif éditeur (initialiserBilanReflexif), productions badge CC (genererBadgeCC + fix XSS E-β sur contributeurs[].modifications), trimestre-v2 carte résumé horaires (chargerHorairesV2 → jours/heures/local), profil-etudiant Section Productions par défaut (afficherProfilComplet → sidebar 2col + production fixture), evaluation palette critères (afficherCriteresDepuisGrille → cartes critères + 4 options IDME), evaluation rétroaction Bilan (basculerVueRetroaction('bilan') → préambule + défis + forces, exerce genererRetroactionBilan cyc 75). Tests : 85 Vitest + 18 Playwright = **103/103 verts** (+6 chantier I vs baseline 97). Critère A8 atteint. **10/10 critères Cat-B atteints** (A2 sous exception N=50). Pattern technique : `page.evaluate()` + fixtures `db.setSync` + auto-dismiss alert via `page.on('dialog')`. | Cat-B Track 4 chantier I |
