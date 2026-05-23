@@ -1185,7 +1185,7 @@ function genererDropdownActions(ligne) {
 
     // Éditer — si fichier importé, sauf remplacée/non-recevable
     if (fichierId && ligne.statut !== 'remplacee' && ligne.statut !== 'non-recevable') {
-        options.push(`<option value="editer|${fichierId}">Éditer</option>`);
+        options.push(`<option value="editer|${fichierId}">Modifier</option>`);
     }
 
     // Beta 99.30 : Renommer — si fichier importé, sauf remplacée/non-recevable

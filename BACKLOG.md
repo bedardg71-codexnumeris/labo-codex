@@ -412,7 +412,7 @@
 
 ### Modal Bibliothèque cours — Migration storage legacy → V2 (23 mai 2026)
 
-- [ ] **#282** Migrer `js/cours.js` de la clé legacy `listeCours` vers la clé V2 `cours`
+- [ ] **#282** ⚠️ **PRIORITÉ HAUTE — À TRAITER ABSOLUMENT** (retour Grégoire 23 mai 2026 PM : « il faudra y revenir absolument ») — Migrer `js/cours.js` de la clé legacy `listeCours` vers la clé V2 `cours`
   - **Contexte** : retour Grégoire pendant tests manuels Section A.5 du 23 mai 2026. Il ouvre Réglages → Cours → Bibliothèque → modal s'ouvre, pas d'erreur console, mais les 2 sections (« Cours dans ta sélection » + « Cours disponibles à ajouter ») sont vides alors que son trimestre H26 contient bien le cours « 601-101-MQ Écriture et littérature ». Question légitime : « Comment fait-on pour ajouter ou sauvegarder des cours ? »
   - **Diagnostic** : 10 sites dans `js/cours.js` lisent `db.get('listeCours')` ou `db.getSync('listeCours', [])` (clé legacy, non alimentée par le V2). Sites : L64, 96, 126, 207, 272 (ouvrirModalBibliothequeCours), 357, 376, 401, 455, 530. Le V2 (trimestre-v2-cours.js et contexte.js) stocke et lit depuis `cours` (clé V2 non-namespacée). Migration partielle — `listeCours` n'est plus peuplée mais `cours.js` n'a pas été mis à jour.
   - **Effet visible** : la modal bibliothèque est essentiellement décorative en mode V2 — aucun cours ne s'y affiche tant que la migration n'est pas faite. Le flow « exporter tous mes cours » → « importer dans autre trimestre » est cassé pour les cours créés via V2.

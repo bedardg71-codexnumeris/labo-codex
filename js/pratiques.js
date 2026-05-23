@@ -1822,7 +1822,7 @@ function genererCartePratique(pratique, estActive, modifiable) {
         : `<button class="btn btn-tres-compact btn-secondaire" data-action="desactiverPratique" data-param="${pratique.id}">Désactiver</button>`;
 
     const boutonsModification = modifiable ? `
-        <button class="btn btn-tres-compact btn-modifier" data-action="editerPratique" data-param="${pratique.id}">Éditer</button>
+        <button class="btn btn-tres-compact btn-modifier" data-action="editerPratique" data-param="${pratique.id}">Modifier</button>
         <button class="btn btn-tres-compact btn-secondaire" data-action="dupliquerPratique" data-param="${pratique.id}">Dupliquer</button>
         <button class="btn btn-tres-compact btn-secondaire" data-action="exporterPratiqueVersJSON" data-param="${pratique.id}">Exporter</button>
         <button class="btn btn-tres-compact btn-supprimer" data-action="supprimerPratique" data-param="${pratique.id}">Supprimer</button>

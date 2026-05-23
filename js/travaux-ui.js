@@ -1063,7 +1063,7 @@
                                 <button class="actions-item" id="travaux-btn-annoter" data-action="travauxUI.basculerMode" data-param="annoter">Annoter</button>
                                 <button class="actions-item actions-item-vert" id="travaux-btn-evaluer" data-action="travauxUI.basculerMode" data-param="evaluer">Évaluer</button>
                                 <div class="actions-separateur"></div>
-                                <button class="actions-item" id="travaux-btn-editer" data-action="editerFichierDepuisEvaluation">Éditer</button>
+                                <button class="actions-item" id="travaux-btn-editer" data-action="editerFichierDepuisEvaluation">Modifier</button>
                                 <!-- Alléger et Re-importer : opérations sur fichier, disponibles dans Exporter et archiver -->
                             </div>
                         </div>
