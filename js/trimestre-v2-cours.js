@@ -31,20 +31,69 @@
  * Charge la liste des cours dans le dropdown
  * Filtre par trimestre actif (Beta 95)
  */
+function _tupleCoursNaturel(c) {
+    const code = (c.codeCours || c.sigle || c.code || '').toString().trim().toUpperCase();
+    if (!code) return null;
+    const session = (c.session || '').toString().charAt(0).toUpperCase();
+    const annee = (c.annee || '').toString().trim();
+    if (!session || !annee) return code; // tuple dégradé (legacy minimal)
+    return `${code}|${session}${annee}`;
+}
+
+function _migrerListeCoursVersCoursV2() {
+    const anciensListeCours = db.getSync('listeCours', []);
+    if (!Array.isArray(anciensListeCours) || anciensListeCours.length === 0) return;
+
+    const coursExistants = db.getSync('cours', []);
+    const tuplesV2 = new Map();
+    coursExistants.forEach(c => {
+        const t = _tupleCoursNaturel(c);
+        if (t) tuplesV2.set(t, c);
+    });
+    const idsV2 = new Set(coursExistants.filter(c => c.id).map(c => c.id));
+
+    const ajoutsLegacy = [];
+    const doublonsIgnores = [];
+
+    anciensListeCours.forEach(c => {
+        const t = _tupleCoursNaturel(c);
+        if (t && tuplesV2.has(t)) {
+            doublonsIgnores.push({ tuple: t, legacyId: c.id, v2Id: tuplesV2.get(t).id });
+        } else if (!t) {
+            if (c.id && !idsV2.has(c.id)) ajoutsLegacy.push(c);
+        } else {
+            ajoutsLegacy.push(c);
+            tuplesV2.set(t, c);
+        }
+    });
+
+    if (ajoutsLegacy.length > 0) {
+        db.setSync('cours', [...coursExistants, ...ajoutsLegacy]); // security-ok: cours legacy locaux, déjà persistés dans listeCours
+        console.info(`[Migration listeCours] ${ajoutsLegacy.length} cours legacy fusionné(s) dans « cours »`);
+    }
+    db.setSync('listeCours', []); // security-ok: vidage clé legacy après migration
+
+    if (doublonsIgnores.length > 0) {
+        console.warn(
+            `[Migration listeCours] ${doublonsIgnores.length} doublon(s) détecté(s) et ignoré(s) — V2 préservée`,
+            doublonsIgnores
+        );
+        if (typeof notifications !== 'undefined' && notifications.info) {
+            notifications.info(
+                `Migration cours : ${doublonsIgnores.length} doublon(s) ignoré(s)`,
+                'La version V2 a été préservée. Détails dans la console.'
+            );
+        }
+    }
+}
+
 function chargerDropdownCoursV2() {
     const select = document.getElementById('v2-selectCours');
     if (!select) return;
 
-    // Récupérer les cours depuis le stockage
-    // Migration one-shot : fusionner listeCours → cours (clé canonique)
-    const anciensListeCours = db.getSync('listeCours', []);
-    if (anciensListeCours.length > 0) {
-        const coursExistants = db.getSync('cours', []);
-        const coursMap = new Map(coursExistants.map(c => [c.id, c]));
-        anciensListeCours.forEach(c => { if (c.id && !coursMap.has(c.id)) coursMap.set(c.id, c); });
-        db.setSync('cours', Array.from(coursMap.values()));
-        db.setSync('listeCours', []);
-    }
+    // Migration one-shot listeCours (legacy) → cours (canonique V2), fusion par tuple naturel
+    _migrerListeCoursVersCoursV2();
+
     const tousCours = db.getSync('cours', []);
     const coursActif = db.getSync('infoCours', null);
 
