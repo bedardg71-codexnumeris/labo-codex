@@ -11620,6 +11620,18 @@ tr.etudiant-inactif td {
     line-height: 1.4;
 }
 
+#calendrier-trimestre .apercu-badge-actif {
+    display: inline-block;
+    margin-bottom: 6px;
+    padding: 2px 8px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--alerte-texte-succes);
+    background: var(--alerte-fond-succes);
+    border: 1px solid var(--alerte-bordure-succes);
+    border-radius: var(--radius-petit);
+}
+
 /* Score de complétude groupe-cours */
 #calendrier-trimestre .score-completude {
     display: flex;

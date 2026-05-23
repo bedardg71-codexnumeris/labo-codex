@@ -142,7 +142,9 @@ function chargerDropdownCoursV2() {
         coursAfficher.forEach((c, index) => {
             const option = document.createElement('option');
             option.value = c.id || `cours-${index}`;
-            option.textContent = obtenirTexteCours(c);
+            const texteBase = obtenirTexteCours(c);
+            const estActif = coursActif && c.id === coursActif.id;
+            option.textContent = estActif ? `${texteBase} (actif)` : texteBase;
 
             // Sélectionner le cours déterminé (coursASelectionner)
             if (coursASelectionner && c.id === coursASelectionner.id) {
@@ -199,6 +201,8 @@ function changerCoursSelectionneV2(coursId) {
         if (btnSupprimer) btnSupprimer.classList.add('u-hide');
         afficherSyntheseCours(null);  // Beta 95.3 : vider la synthèse
         coursEnEditionV2 = null;
+        _cacherBandeauEdition();
+        _mettreAJourBoutonActiverCours(null);
         return;
     }
 
@@ -209,6 +213,8 @@ function changerCoursSelectionneV2(coursId) {
     if (coursSelectionne) {
         // Afficher le formulaire en mode édition
         coursEnEditionV2 = coursId;
+        _afficherBandeauEdition(coursSelectionne.codeCours || coursSelectionne.sigle || coursSelectionne.code);
+        _mettreAJourBoutonActiverCours(coursId);
         if (etatVide) etatVide.classList.add('u-hide');
         if (formulaire) formulaire.classList.remove('u-hide');
         if (btnSupprimer) btnSupprimer.classList.remove('u-hide');
@@ -267,6 +273,8 @@ function supprimerCoursV2() {
 
     // Réinitialiser l'interface
     coursEnEditionV2 = null;
+    _cacherBandeauEdition();
+    _mettreAJourBoutonActiverCours(null);
     chargerDropdownCoursV2();
 
     // Masquer le bouton supprimer et afficher l'état vide
@@ -382,6 +390,59 @@ function afficherDetailsCoursV2(cours) {
 // Variable pour stocker l'ID du cours en édition
 let coursEnEditionV2 = null;
 
+function _afficherBandeauEdition(codeCours) {
+    const bandeau = document.getElementById('v2-bandeauModeEdition');
+    const codeSpan = document.getElementById('v2-bandeauCodeCours');
+    if (codeSpan) codeSpan.textContent = codeCours || '(sans code)';
+    if (bandeau) bandeau.classList.remove('u-hide');
+}
+
+function _cacherBandeauEdition() {
+    const bandeau = document.getElementById('v2-bandeauModeEdition');
+    if (bandeau) bandeau.classList.add('u-hide');
+}
+
+function _mettreAJourBoutonActiverCours(coursId) {
+    const btn = document.getElementById('v2-btnActiverCours');
+    if (!btn) return;
+    if (!coursId) {
+        btn.classList.add('u-hide');
+        return;
+    }
+    const infoCours = db.getSync('infoCours', null);
+    const dejaActif = infoCours && infoCours.id === coursId;
+    if (dejaActif) {
+        btn.classList.add('u-hide');
+    } else {
+        btn.classList.remove('u-hide');
+    }
+}
+
+function activerCoursV2() {
+    if (!coursEnEditionV2) {
+        console.warn('[Trimestre V2] Aucun cours sélectionné pour activation');
+        return;
+    }
+    let tousLesCours = db.getSync('cours', []);
+    const cible = tousLesCours.find(c => c.id === coursEnEditionV2);
+    if (!cible) {
+        console.warn('[Trimestre V2] Cours non trouvé pour activation:', coursEnEditionV2);
+        return;
+    }
+    // Invariant single-active : ce cours actif, les autres non
+    tousLesCours.forEach(c => { c.actif = (c.id === coursEnEditionV2); });
+    db.setSync('cours', tousLesCours);
+    db.setSync('infoCours', cible);
+
+    notifications.succes('Cours activé', cible.codeCours || cible.nomCours || cible.id);
+
+    _mettreAJourBoutonActiverCours(coursEnEditionV2);
+    if (typeof chargerDropdownCoursV2 === 'function') chargerDropdownCoursV2();
+    if (typeof window.peuplerDropdownGroupeCoursActif === 'function') {
+        window.peuplerDropdownGroupeCoursActif();
+    }
+}
+
 /**
  * Affiche le formulaire pour créer un nouveau cours
  */
@@ -395,6 +456,8 @@ async function afficherFormCoursV2() {
  */
 async function nouveauCoursV2() {
     coursEnEditionV2 = null;
+    _cacherBandeauEdition();
+    _mettreAJourBoutonActiverCours(null);
 
     const etatVide = document.getElementById('cours-etat-vide');
     const formulaire = document.getElementById('cours-formulaire-edition');
@@ -442,6 +505,8 @@ async function modifierCoursSelectionneV2() {
     }
 
     coursEnEditionV2 = coursId;
+    _afficherBandeauEdition(coursSelectionne.codeCours || coursSelectionne.sigle || coursSelectionne.code);
+    _mettreAJourBoutonActiverCours(coursId);
 
     const formulaire = document.getElementById('v2-formulaireCours');
     const apercu = document.getElementById('v2-apercuCours');
@@ -492,6 +557,8 @@ function dupliquerCoursSelectionneV2() {
 
     // Ouvrir le formulaire en mode création (pas d'édition)
     coursEnEditionV2 = null;
+    _cacherBandeauEdition();
+    _mettreAJourBoutonActiverCours(null);
 
     const formulaire = document.getElementById('v2-formulaireCours');
     const apercu = document.getElementById('v2-apercuCours');
@@ -578,7 +645,12 @@ function afficherSyntheseCours(cours) {
     const discipline = cours.discipline || '—';
     const competence = cours.numeroCompetence || cours.competence || '—';
 
+    const infoCours = db.getSync('infoCours', null);
+    const estActif = infoCours && infoCours.id === cours.id;
+    const badgeActif = estActif ? '<div class="apercu-badge-actif">Cours actif</div>' : '';
+
     sidebar.innerHTML = `
+        ${badgeActif}
         <div class="apercu-titre">${echapperHtml(nom)}</div>
         <div class="apercu-code">${echapperHtml(code)}</div>
         <div class="apercu-detail">Discipline : ${echapperHtml(discipline)}</div>
@@ -860,6 +932,8 @@ function setValue(id, value) {
  */
 function annulerFormCoursV2() {
     coursEnEditionV2 = null;
+    _cacherBandeauEdition();
+    _mettreAJourBoutonActiverCours(null);
 
     const etatVide = document.getElementById('cours-etat-vide');
     const formulaire = document.getElementById('cours-formulaire-edition');
@@ -954,7 +1028,6 @@ function _construireObjetCoursV2(d, groupe) {
         periodesParSemaine: d.periodesParSemaine,
         formatHoraire: d.formatHoraire,
         groupe: groupe,
-        actif: true,
         pratiqueId: d.pratiqueId
     };
 }
@@ -964,16 +1037,28 @@ function _persisterCoursV2(cours) {
     if (coursEnEditionV2) {
         const index = tousLesCours.findIndex(c => c.id === coursEnEditionV2);
         if (index >= 0) {
-            tousLesCours[index] = { ...tousLesCours[index], ...cours };
+            const actifPrecedent = tousLesCours[index].actif === true;
+            tousLesCours[index] = { ...tousLesCours[index], ...cours, actif: actifPrecedent };
         } else {
-            tousLesCours.push(cours);
+            tousLesCours.push({ ...cours, actif: false });
         }
     } else {
-        tousLesCours.push(cours);
+        const estPremier = tousLesCours.length === 0;
+        tousLesCours.push({ ...cours, actif: estPremier });
     }
     db.setSync('cours', tousLesCours);
-    if (tousLesCours.length === 1 || cours.actif) {
-        db.setSync('infoCours', cours);
+
+    // Re-synchroniser infoCours si on a modifié le cours actuellement actif
+    const infoCoursActuel = db.getSync('infoCours', null);
+    if (coursEnEditionV2 && infoCoursActuel && infoCoursActuel.id === coursEnEditionV2) {
+        const coursMaj = tousLesCours.find(c => c.id === coursEnEditionV2);
+        if (coursMaj) db.setSync('infoCours', coursMaj);
+    }
+
+    // Auto-activation : uniquement le PREMIER cours créé.
+    // Pour activer un autre cours après coup, utiliser le bouton « Activer ce cours ».
+    if (!coursEnEditionV2 && tousLesCours.length === 1) {
+        db.setSync('infoCours', tousLesCours[0]);
     }
 }
 
@@ -1027,6 +1112,7 @@ window.afficherDetailsCoursV2 = afficherDetailsCoursV2;
 window.afficherFormCoursV2 = afficherFormCoursV2;
 window.nouveauCoursV2 = nouveauCoursV2;
 window.supprimerCoursV2 = supprimerCoursV2;
+window.activerCoursV2 = activerCoursV2;
 window.modifierCoursSelectionneV2 = modifierCoursSelectionneV2;
 window.dupliquerCoursSelectionneV2 = dupliquerCoursSelectionneV2;
 window.annulerFormCoursV2 = annulerFormCoursV2;
