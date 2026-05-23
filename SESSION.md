@@ -12,8 +12,9 @@
 
 > **📌 Identification**
 > - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
-> - **Cycle en cours** : **#282 prérequis P1-P4 livrés, migration finale (étape 5) à faire**
-> - **Document maître prochaine session** : `BACKLOG.md` #282 (post-mortem + 4 prérequis désormais ✅ + étape 5 reste)
+> - **Cycle en cours** : **refonte du chrome unifié (entête + nav primaire + sous-nav)** responsive desktop/iPad/iPhone — décision Grégoire 23 mai PM
+> - **Document maître prochaine session** : `PLAN_chrome_unifie_Labo_Codex.md` (racine du repo, 872 lignes, 7 étapes — HTML entête → HTML nav → CSS → JS popover/selects → icônes icons8 → tests → finalisation)
+> - **Chantier en pause** : #282 étape 5 (migration listeCours finale) — prérequis P1-P4 livrés, peut être repris après le chrome unifié
 
 # SESSION — État au 23 mai 2026 fin d'après-midi (post #282 P1-P4 livrés)
 
@@ -25,7 +26,7 @@
 
 **Tests** : 85 Vitest verts à chaque commit. Hook pré-commit Défense J vert (3 warnings setSync infoCours acquittés via `// security-ok`).
 
-**Cycle suivant — terminer #282 (étape 5 = migration finale)** : ~3 h estimées. Tous les prérequis P1-P4 sont livrés ; la nouvelle tentative peut désormais être faite en confiance. Voir §3 pour la consigne détaillée + tests visuels P1+P2 par Grégoire en pré-requis si pas encore validés.
+**Cycle suivant — refonte du chrome unifié** (décision Grégoire 23 mai PM) : voir `PLAN_chrome_unifie_Labo_Codex.md` à la racine. Chantier important touchant l'entête + nav primaire + sous-nav, responsive avec breakpoint unique 1024px (mode explicite ≥1024px, mode condensé <1024px avec popover `⋯` et selects natifs). 7 étapes documentées, validation Grégoire requise après chaque sous-étape. **#282 étape 5 mis en pause** — peut être repris après le chrome unifié.
 
 ---
 
@@ -465,91 +466,92 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
 ## §3 — Consigne de démarrage pour la prochaine session
 
-> **Priorité 1** : terminer le chantier #282 — **étape 5 (migration finale ~3 h)**. P1-P4 livrés 23 mai PM. Tous les prérequis sont en place pour ré-appliquer la migration des ~93 sites `listeCours` → `cours` en confiance.
-> **Priorité 2 (en parallèle ou avant)** : tests visuels P1+P2 par Grégoire si pas encore validés en session. Voir « Tests visuels P1+P2 » ci-dessous.
+> **Priorité unique** : refonte du chrome unifié — entête + nav primaire + sous-nav responsive (desktop ≥1024px / iPad+iPhone <1024px). Plan complet de référence : **`PLAN_chrome_unifie_Labo_Codex.md`** à la racine du repo (872 lignes, finalisé 23 mai PM par Grégoire + Cowork). 7 étapes structurées avec validation Grégoire après chaque sous-étape.
 
 ### Document maître
 
-**`BACKLOG.md` #282** — post-mortem complet, 4 prérequis P1-P4 désormais ✅, snippet recovery P4 dans le markdown.
+**`PLAN_chrome_unifie_Labo_Codex.md`** — spec finalisée, à exécuter. Lire INTÉGRALEMENT avant de toucher au code.
+
+### Vue d'ensemble du chantier
+
+| Étape | Cible | Effort approx. |
+|---|---|---|
+| 1 | Restructuration HTML entête (index.html L3777-3886) | ~30 min |
+| 2 | Restructuration HTML nav primaire + ajout `<select>` mobile (index.html L3978-4006) | ~20 min |
+| 3 | Refonte CSS — entête, nav, media queries 1024px, popover, sticky | ~1 h 30 |
+| 4 | Logique JS — popover utilitaires `⋯`, synchro `<select>` mobile, écouteurs (`js/main.js`) | ~45 min |
+| 5 | Migration ~13 icônes du chrome vers icons8 filled (icônes fournies par Grégoire) | ~30 min |
+| 6 | Tests fonctionnels exhaustifs (desktop Mac + iPad portrait + iPad paysage + iPhone simulé + a11y) | ~1 h |
+| 7 | Finalisation : bump version, mise à jour changelog, audit de code mort | ~15 min |
+
+**Effort total estimé** : 4-5 h. Validation Grégoire requise après chaque sous-étape (cf. §6.5 du plan).
 
 ### Étapes de démarrage
 
 ```bash
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
-git status                              # branche actuelle = main attendu, état propre côté tracké
-git log --oneline main -5               # HEAD attendu : 9cf542e (P3+P4) ou plus récent
-                                        # (refactor cours: #282 P3 migration tuple naturel + P4 snippet recovery, build 0523-1710)
-git pull --rebase                       # au cas où des commits ont été pushés ailleurs
-npx http-server -p 8080 -c-1            # serveur local pour Safari (et iPad via IP locale)
+git status                              # main attendu propre côté tracké
+git log --oneline main -5               # HEAD attendu : <commit MAJ session 23 mai PM> ou plus récent
+git pull --rebase                       # au cas où
+npx http-server -p 8080 -c-1            # serveur local pour Safari Mac + iPad+iPhone via IP locale
 ```
 
-### Tests visuels P1+P2 (à valider AVANT d'attaquer l'étape 5)
+Lire dans cet ordre :
+1. **`PLAN_chrome_unifie_Labo_Codex.md`** (racine) — la spec complète, point de référence absolu.
+2. `docs/00-START-HERE.md` — orientation projet.
+3. `CLAUDE.md` — règles de sécurité, zones protégées, design system.
+4. `design-system.html` — référence couleurs/composants/modes sombre+clair (consultation obligatoire pour tout changement visuel).
+5. Cette section SESSION.md §3 (consigne de démarrage) + §0 garde-fous + §1quater (état #282 P1-P4 livré).
 
-Grégoire doit confirmer ces scénarios dans Safari Mac (non-bloquant si déjà validé en session du 23 mai PM) :
+### Zones protégées — NE PAS modifier (rappel critique du plan §3.2 et §6.3)
 
-**Cours** (Réglages → Trimestre V2 → Cours)
-- Sélection d'un cours **actif** → badge « Cours actif » (vert) dans sidebar + bouton « Activer ce cours » caché + suffixe « (actif) » dans le dropdown.
-- Sélection d'un cours **non actif** (s'il existe) → badge absent + bouton « Activer ce cours » visible.
-- Clic « Activer ce cours » → notification « Cours activé », bouton se cache, badge apparaît, suffixe « (actif) » se déplace dans le dropdown.
-- Création d'un **nouveau cours** → ne s'auto-active PAS (mais le 1er cours créé sur une base vide, oui).
-- Modification du cours actif → `infoCours` re-sync (codeCours/nom reflètent les nouvelles valeurs partout).
+- `js/config.js` (autorisation refusée pour ce chantier)
+- `js/navigation.js` (autorisation refusée — mais on s'appuie sur ses fonctions globales `afficherSection()`, `afficherSousSection()`, `naviguerVers()` qui sont en `noms_stables.json`)
+- `noms_stables.json`
 
-**Groupe-cours** (Réglages → Trimestre V2 → Groupe-cours)
-- Idem cours : badge « Groupe-cours actif » dans carte résumé, bouton « Activer ce groupe-cours », auto-activation uniquement du 1er GC créé.
-- Dropdown header `#selectGroupeCoursHeader` reflète bien le GC activé.
+### API à préserver impérativement (plan §3.3)
 
-### Étape 5 — Migration listeCours finale (~3 h)
+Pour que `navigation.js` continue à fonctionner sans modification :
+- **Classes CSS** : `.navigation-principale`, `.sous-navigation`, `.actif`, `.section`, `.sous-section`, `.sous-navigation.vide`
+- **Attributs** : `data-onglet="..."` (nav primaire), `data-sous-onglet="..."` (sous-nav)
+- **IDs** : `sous-navigation`, `section-{nomSection}`
+- **Sélecteurs JS** : `document.querySelectorAll('.navigation-principale button')`, `document.querySelector(\`button[data-onglet="${nomSection}"]\`)`, `document.getElementById('sous-navigation')`, `document.querySelectorAll('.sous-navigation button')`
 
-**Lire OBLIGATOIREMENT** :
-1. `BACKLOG.md` #282 (post-mortem entier — explique le contexte, le revert du matin, les leçons apprises).
-2. SESSION.md §1quater « Reste pour fermer #282 — étape 5 » (liste indicative des fichiers + stratégie).
-3. SESSION.md §0 garde-fous #282 P1-P4 (à NE PAS casser pendant l'étape 5).
-
-**Audit grep préalable obligatoire** :
-```bash
-grep -rn "listeCours" js/ --include="*.js" | wc -l        # compte total
-grep -rln "listeCours" js/ --include="*.js" | sort        # fichiers touchés
-grep -rn "db\.\(get\|getSync\)\(.listeCours" js/ --include="*.js"  # sites de lecture
-grep -rn "db\.\(set\|setSync\)\(.listeCours" js/ --include="*.js"  # sites d'écriture
-```
-
-Le scope réel mesuré ce matin (chantier reverté) était ~93 sites dans 15+ fichiers. Audit fresh nécessaire car des sites peuvent avoir évolué depuis le matin.
-
-**Stratégie suggérée** :
-1. **Worktree dédié** : `git worktree add ../Monitorage_v6-282-final cleanup/282-migration-finale main` — isole le chantier.
-2. **Migration par groupes cohérents**, dans cet ordre :
-   - **Groupe A** : `js/cours.js` (10 sites) — la valeur immédiate user (la modal Bibliothèque cours redevient peuplée).
-   - **Groupe B** : `js/contexte.js` + `js/cc-license.js` (3 sites) — readers du cours actif.
-   - **Groupe C** : `js/pratiques.js` (3 sites) — sensible indices A-C-P, valider en testant une évaluation.
-   - **Groupe D** : `js/demo-activation.js` (5 sites) — souvent des retraits redondants.
-   - **Groupe E** : reste (statistiques, rapport-bug, organisateur, export-pdf, reserve, travaux-ui) — 1-2 sites chacun.
-3. **À conserver intacts** : la fonction `_migrerListeCoursVersCoursV2` de `js/trimestre-v2-cours.js` (DOIT continuer à lire `listeCours` pour idempotence boot) + les sites historiques de `js/migrations.js` (auditer cas par cas — souvent ce sont des migrations passées qui ne s'exécutent plus, mais peuvent être déclenchées sur de vieilles données).
-4. **Test après chaque groupe** : Réglages → Trimestre V2 → Cours → bouton Bibliothèque doit montrer les cours. Puis test évaluation/profil pour groupes C-E.
-5. **Bump build + commit par groupe** (ou tous groupes en 1 seul commit si rapide). Hook pré-push vert obligatoire.
-6. **Merge FF sur main** + push + retrait worktree.
-
-**Effort total ajusté** : ~3 h estimé, vu que la migration brute est triviale (find+replace en gros) — l'essentiel du temps va au test fonctionnel après chaque groupe.
+Conséquence : les boutons desktop existent toujours dans le DOM en mode mobile, masqués via CSS. Le `<select>` mobile pilote `afficherSection()` qui active la classe `.actif` sur les boutons cachés.
 
 ### Rôle de Claude dans cette session
 
-- **Chantier code actif** : étape 5 migration finale. Travail technique au cœur du sujet.
-- **Demander le build au début** (puis à chaque commit) — convention zéro défaut.
-- **Mettre à jour SESSION.md en fin de session** : ajouter §1quinquies (ou §1quinta) « #282 étape 5 livrée », fermer le ticket #282 dans BACKLOG.md, mise à jour de la liste des décisions Grégoire pendantes (#282 retiré).
-- **Si bloqué** : revert proprement, MAJ post-mortem dans BACKLOG #282, et passer à autre chose plutôt qu'insister.
+- **Chantier UI/UX actif** : 7 étapes sur 4-5 h. Travail technique HTML/CSS/JS au cœur du sujet.
+- **Validation Grégoire après chaque sous-étape** (cf. §6.5 du plan) — ne pas enchaîner sans son feedback.
+- **Tester sur Safari Mac + simulation iPad/iPhone à chaque palier** avant de passer au suivant.
+- **Demander le numéro de beta + build** à Grégoire avant l'Étape 7 finalisation (procédure CLAUDE.md).
+- **Mettre à jour le changelog `js/changelog-data.js`** avec une entrée concise (3-4 items utilisateur) selon le format §7 du plan.
+- **Mettre à jour SESSION.md en fin de session** : nouvelle sous-section §1quinquies « Chrome unifié livré » + révision §3 pour le cycle suivant (probablement #282 étape 5 ou tests manuels Sections C-F restantes).
+
+### Questions probables à poser à Grégoire pendant l'implémentation (plan §6.6)
+
+- Comportement du bouton Codex sur mobile : le popover `⋯` se ferme et le menu Codex s'ouvre par-dessus, ou directement à la place du popover ?
+- Nouveaux noms de fichiers icônes icons8 (Grégoire les téléchargera et fournira les chemins exacts).
+- Numéro de beta exact pour l'Étape 7.
 
 ### Conventions
 
 - **Pas de bump beta** sans demander (cf. §0 garde-fou). Beta 99.63 conservée tant que pas explicitement bumpée.
 - **Hook pré-commit vert** obligatoire à chaque commit (Défense J).
-- **Worktree recommandé** pour l'étape 5 (chantier potentiellement risqué).
+- **Worktree non nécessaire a priori** — le chantier est risqué mais bien borné par les zones protégées préservées. Si Grégoire préfère par prudence, créer `git worktree add ../Monitorage_v6-chrome cleanup/chrome-unifie main`.
+- **Aucune nouvelle variable CSS en dur** — utiliser les `--variables` de `styles.css` (cf. plan §5.4).
+- **Cibles tactiles ≥44×44px sur iPad** (WCAG 2.5.5 + Apple HIG, cf. T-A10 déjà acté Cat-B chantier J).
+- **Contraste WCAG AA** dans modes sombre ET clair (cf. T-A3 acté Cat-B).
 
 ### Décisions de Grégoire pendantes (rappel pour ne pas oublier)
 
-- **#282 étape 5** — à exécuter dès que possible (prérequis P1-P4 désormais en place).
+- **Chrome unifié** — chantier en cours (cf. PLAN_chrome_unifie_Labo_Codex.md).
+- **#282 étape 5** — migration listeCours finale, prérequis P1-P4 livrés (23 mai PM), à exécuter après le chrome unifié.
 - Label `v2-seuil-fragile` — conservation / atténuation / alignement ? (Cat-B Track 4 chantier J reliquat).
 - Convergence audit/2026-mai ↔ main — à planifier post-AQPC.
 - Demande d'avis PRP Cégep de Drummondville (Loi 25) — à envoyer (délai réponse 2-6 semaines, conditionne PRIVACY.md v1.1).
 - Tests manuels Sections **C, D, E, F reportées** (cf. doc TESTS-MANUELS-PENDING) — à reprendre avant AQPC du 3 juin si Grégoire le souhaite.
+- **Migration globale des icônes vers icons8** (hors-périmètre du chrome unifié — chantier séparé à planifier après, cf. PLAN §1).
 
 ---
 
@@ -641,3 +643,4 @@ git tag -l "cat-b-*" | sort             # 9 tags attendus :
 | 2026-05-22 (après-midi, sub-cleanup tableau Réglages → Cours legacy LIVRÉ) | 1 commit `bd37072` sur branche `cleanup/tableau-reglages-cours-legacy` (mergée FF main puis supprimée). Suite directe du chantier 2.1 dont le scope avait explicitement exclu cette chaîne morte (cf. plan PLAN-PHASE2 §8). **cours.js réduit de 1215 → 669 l. (−546 LOC)**. 7 fonctions retirées + 4 exports (`afficherTableauCours`, `obtenirTousLesCoursBibliotheque` orphelin, `obtenirNomPratiqueFallback`, `afficherPratiqueEnLectureSeule`, `dupliquerCours`, `activerCours`, `supprimerCours`). 6 sections delimiters de commentaire orphelines retirées (`AFFICHAGE DU TABLEAU`, `FORMULAIRE D'AJOUT/ÉDITION` trompeur, `⭐ ACTIVATION DU COURS`, `SUPPRESSION`, `🔔 NOTIFICATIONS` vide, `📌 NOTES D'UTILISATION` ~55 l. obsolète). Cleanups annexes : `main.js` event listener `[data-sous-onglet="reglages-cours"]` (−10 l.), `config.js` ligne 274 « 08-cours.js (utilise coursEnEdition) » du JSDoc des modules dépendants. Doublon `supprimerCours` clarifié : faux doublon (cours-entite.js en IIFE isolée exposée via `window.CoursEntite.supprimer` — pas de conflit). Tests 85/85 Vitest verts. En-tête HEAD `bd37072`. §1 : nouvelle sous-section « Sub-cleanup tableau Réglages → Cours legacy LIVRÉ » remplace l'ancienne « Découvertes hors scope » avec bilan cumulé Phase 2 + sub-cleanup = **~−1677 LOC nettes** sur 4 commits. §3 : piste 1 (sub-cleanup) retirée puisque livrée ; renumérotation 2→1, 3→2, 4→3. | Sub-cleanup tableau Réglages → Cours legacy (Claude autonome) |
 | 2026-05-22 (après-midi, Phase 2 cascade legacy 95 LIVRÉE) | 3 commits sur branche `cleanup/phase2-cascade-legacy-95` (mergée FF main puis supprimée) : `5ccb306` chantier 2.3 trimestre.js (−563 LOC, 601 → 38 l. ; **bug latent fixé** — exports cassés L583+L586 du commit `6b2da4b` faisaient crasher l'IIFE → `obtenirCalendrierComplet`/`obtenirInfosJour` désormais à nouveau exposés ; `main.js:467-468` retiré ; `navigation.js:250-251` préservé Zone protégée), `dd493cc` chantier 2.1 cours.js (−365 LOC, 1580 → 1215 l. ; `afficherFormCours`/`annulerFormCours`/`sauvegarderCours`/`afficherListeCoursSidebar`/`modifierCours` + 5 exports retirés ; `coursEnEdition` config.js MAJ JSDoc seulement = Zone protégée), `137411c` chantier 2.2 groupe.js (−188 LOC, 1190 → 1002 l. ; `addStudent`/`resetFiltreGroupe`/doublon `deleteStudent` ×2 + 3 exports retirés ; bouton HTML `data-action="resetFiltreGroupe"` retiré du HTML généré par `filtrerParGroupe` ; querySelectors `addStudent` simplifiés dans `modifierEtudiant`). Bilan total : 5 fichiers touchés, **−1124 LOC nettes** (+25 / −1149). Tests 85/85 Vitest verts à chaque jalon. Pas de bump beta (convention §0). §1 sous-section « Prochaine session — chantier Phase 2 (plan documenté) » remplacée par « Chantier Phase 2 cascade legacy 95 — LIVRÉ » avec tableau récap par module + section « Bug latent fixé en cascade » à inscrire SUIVI-BUGS + section « Découvertes hors scope » (tableau Réglages → Cours legacy mort = piste 1 §3). §0 garde-fous Phase 2 remplacés par 3 règles résiduelles. §3 entièrement réécrit avec 4 pistes pour la prochaine session (sub-cleanup tableau cours legacy / reprise audit annuel / prep AQPC / tests manuels Grégoire). En-tête HEAD `137411c`. | Phase 2 cascade legacy 95 (Claude autonome) |
 | 2026-05-23 (après-midi, Tests Section B + #282 P1-P4 LIVRÉS) | 2 commits sur main : `04f8d9e` (#282 P1 bandeau « Mode modification » cours + P2 activation explicite cours/GC, build 0523-1435) et `9cf542e` (#282 P3 migration `_migrerListeCoursVersCoursV2()` par tuple naturel + P4 snippet recovery dans BACKLOG, build 0523-1710). Tests Section B (a11y T-A3/T-A5/T-A10) **100 % verts** validés par Grégoire sur Safari Mac modes sombre+clair + simulation iPad. Sections C, D, E, F **reportées** (décision Grégoire en session : « plus important à faire »). Chantier #282 : tous les 4 prérequis P1-P4 désormais livrés, ouvrant la voie à l'étape 5 (migration finale des ~93 sites listeCours dans cours.js/contexte.js/cc-license.js/etc., estimée ~3 h, hors scope cette session). Snippet P4 testé partiellement (copier-coller Safari foireux avec backtick markdown puis caractère invisible — pas critique car Grégoire avait déjà nettoyé ses données le matin via snippet équivalent). Tests 85/85 Vitest verts à chaque commit. Hook pré-commit Défense J : 3 warnings setSync infoCours dans `_persisterCoursV2` / `activerCoursV2` acquittés via `// security-ok`. En-tête HEAD `9cf542e`. §1quater (nouvelle) : récap complet livraison P1-P4 + stratégie étape 5. §0 garde-fous : nouvelle sous-section « Garde-fous #282 P1-P4 livrés » (7 règles). §3 entièrement réécrit pour pointer vers l'étape 5 finale + tests visuels P1+P2 en pré-requis. Mémoire MEMORY.md : nouvelle [[feedback-zero-emoji-strict]] (sélection d'option preview avec emoji ≠ demande explicite). | #282 P1-P4 + Section B (Claude autonome) |
+| 2026-05-23 (fin de session, pivot vers chantier chrome unifié) | Grégoire signale que le chantier de la prochaine session sera la **refonte du chrome de l'app** (entête + nav primaire + sous-nav) responsive desktop/iPad/iPhone, et qu'il veut travailler avec le plan **`PLAN_chrome_unifie_Labo_Codex.md`** (872 lignes, rédigé par Claude Cowork le 23 mai matin avec Grégoire — finalisé, à exécuter). 7 étapes structurées : HTML entête (L3777-3886) → HTML nav + select mobile (L3978-4006) → CSS refonte breakpoint 1024px + popover + sticky → JS popover utilitaires `⋯` + synchro selects → migration ~13 icônes vers icons8 filled → tests exhaustifs Mac+iPad+iPhone+a11y → finalisation (bump + changelog). Effort estimé 4-5 h. Zones protégées préservées (config.js, navigation.js, noms_stables.json). API préservée pour ne pas casser `afficherSection()` / `afficherSousSection()`. Gain attendu : 50-70 px de chrome sur desktop, 120-140 px sur iPhone. **#282 étape 5 mis en pause**, à reprendre après le chrome unifié. §3 entièrement réécrit pour pointer vers `PLAN_chrome_unifie_Labo_Codex.md` comme document maître + tableau des 7 étapes + zones protégées rappelées + API à préserver + questions probables. Décisions Grégoire pendantes mises à jour (chrome unifié en tête, #282 étape 5 décalé). PLAN_chrome ajouté au git (anciennement untracked). Pas de bump beta (commit doc-only). | Pivot chrome unifié (Claude autonome) |
