@@ -1,33 +1,31 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 23 mai 2026 midi,
-     post-livraison Tests manuels Section A — 8/9 — + 3 régressions
-     chantier Phase 2 fixées + chantier #282 listeCours→cours TENTÉ
-     ET REVERTÉ + renommage UI Éditer→Modifier)
+     IDENTIFICATION DE CE FICHIER  (mis à jour 23 mai 2026 fin d'après-midi,
+     post-livraison Tests manuels Section A — 8/9 — + Section B 100 %
+     + 3 régressions chantier Phase 2 fixées + chantier #282 prérequis
+     P1+P2+P3+P4 LIVRÉS, prêts pour la migration finale étape 5)
      Ce SESSION.md vit sur la branche `main` du worktree principal et sert
-     de relai entre les sessions Claude. Il décrit l'état post-Section A
-     des tests manuels avec les 3 régressions fixées en session et le
-     post-mortem du chantier listeCours→cours abandonné.
-     L'historique complet (cycle AQPC, Cat-B post-merge clos 21 mai)
-     reste dans les §§ suivants comme référence.
+     de relai entre les sessions Claude. Il décrit l'état post-Section A+B
+     des tests manuels et la livraison complète des 4 prérequis du #282.
+     L'historique complet (cycle AQPC, Cat-B post-merge clos 21 mai) reste
+     dans les §§ suivants comme référence.
      ===================================================================== -->
 
 > **📌 Identification**
 > - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
-> - **Cycle en cours** : **tests manuels Grégoire** — Section A livrée 23 mai matin, Sections B-F restantes (cf. §3)
-> - **Document maître prochaine session** : `Retours des testeurs/TESTS-MANUELS-PENDING-2026-05-22.md` (sections B-F restantes, ~5h cumulé)
+> - **Cycle en cours** : **#282 prérequis P1-P4 livrés, migration finale (étape 5) à faire**
+> - **Document maître prochaine session** : `BACKLOG.md` #282 (post-mortem + 4 prérequis désormais ✅ + étape 5 reste)
 
-# SESSION — État au 23 mai 2026 midi (post Tests manuels Section A 8/9 + chantier #282 reverté)
+# SESSION — État au 23 mai 2026 fin d'après-midi (post #282 P1-P4 livrés)
 
-**Beta / build** : 99.63 / 0523-0955 (bump confirmé par Grégoire au commit `80fc6d1`).
-**Branche `main`** : HEAD à `80fc6d1` (renommage UI Éditer → Modifier + bump 99.63) post-merge des 3 commits du 23 mai matin :
-  - `a191fb5` fix(tests-manuels) : 3 régressions chantier Phase 2 matin + UI snapshots (bandeau contextuel, Congés institutionnels)
-  - `731c3a3` docs(backlog) : post-mortem chantier listeCours→cours reverté + prérequis P1-P4
-  - `80fc6d1` ui(libelle) : renommer Éditer → Modifier (6 sites visibles) + bump 99.63
-**Branches retirées** : aucune nouvelle branche créée ce matin (travail direct sur main).
+**Beta / build** : 99.63 / 0523-1710 (bump confirmé par Grégoire au commit `9cf542e`).
+**Branche `main`** : HEAD à `9cf542e` (P3+P4) post-merge des commits du 23 mai :
+  - **Matin** : `a191fb5` (3 régressions Phase 2) · `731c3a3` (post-mortem #282) · `80fc6d1` (renommage Éditer→Modifier + bump 99.63) · `557e1c3` (docs/session relai)
+  - **Après-midi** : `04f8d9e` (#282 P1 bandeau modification + P2 activation explicite cours/GC) · `9cf542e` (#282 P3 migration tuple naturel + P4 snippet recovery)
+**Branches retirées** : aucune nouvelle branche créée (travail direct sur main).
 
-**Tests** : 85 Vitest verts à chaque commit. Hook pré-push vert.
+**Tests** : 85 Vitest verts à chaque commit. Hook pré-commit Défense J vert (3 warnings setSync infoCours acquittés via `// security-ok`).
 
-**Cycle suivant — continuer tests manuels** : Sections B-F restantes (~5h cumulé), à exécuter dans l'ordre B → F. Document maître : `Retours des testeurs/TESTS-MANUELS-PENDING-2026-05-22.md`. Voir §3 pour la consigne détaillée + chantier #282 PRIORITÉ HAUTE à reprendre post-tests.
+**Cycle suivant — terminer #282 (étape 5 = migration finale)** : ~3 h estimées. Tous les prérequis P1-P4 sont livrés ; la nouvelle tentative peut désormais être faite en confiance. Voir §3 pour la consigne détaillée + tests visuels P1+P2 par Grégoire en pré-requis si pas encore validés.
 
 ---
 
@@ -46,6 +44,16 @@
 - ❌ **Ne pas écrire `window.evaluationEnCours = ...` ni `.X = ...` depuis un module hors whitelist** (config.js + evaluation*.js). Sentinelle Vitest `tests/unit/sentinelle-evaluation-en-cours.test.js` verrouille cet invariant (chantier F livré 21 mai soir). Toute amorce du pivot depuis un module externe passe par `window.demarrerEvaluationDepuisFichier(fichier, opts)` exportée par `evaluation-chargement.js`.
 - ❌ **Ne pas définir une fonction `function afficherNotificationX(...)` dans `js/*.js`** (hors `_archives/`). Sentinelle Vitest `tests/unit/utils-notifications.test.js` verrouille cet invariant (chantier E livré 21 mai soir). Utiliser `window.notifications.{succes, erreur, info}` (utils-notifications.js) pour toute notification toast.
 - ❌ **Ne pas réintroduire un wrapper local défensif `if (typeof window.afficherNotificationX === 'function')`**. L'API `notifications.X` est garantie chargée via `utils-notifications.js` (ligne 15969 d'index.html, après modes.js). Les 149 guards typeof orphelins ont été retirés ; tout nouveau guard est une régression Cat-B.
+
+### Garde-fous #282 P1-P4 (livrés 23 mai PM, à préserver pendant l'étape 5 migration finale)
+
+- ❌ **Ne pas retirer le bandeau `#v2-bandeauModeEdition`** dans `index.html` (formulaire cours) ni le badge `#v2-bandeauCodeCours`. Texte canonique : « Mode modification — Cours <code>. Pour créer un nouveau cours, clique + Nouveau cours. » (sans emoji — cf. [[feedback-zero-emoji-strict]]).
+- ❌ **Ne pas retirer ou réordonner les appels à `_afficherBandeauEdition()` / `_cacherBandeauEdition()`** dans les 6 entry points de `trimestre-v2-cours.js` (nouveau, changer si !coursId/si cours, modifier, dupliquer, annuler, supprimer). Toute nouvelle voie d'ouverture du formulaire doit appeler l'un ou l'autre.
+- ❌ **Ne pas remettre l'auto-activation `if (cours.actif)` dans `_persisterCoursV2`**. Seul le PREMIER cours créé s'auto-active désormais (et seulement si la liste passe de 0 à 1 entrée). Idem pour `sauvegarderGroupeCoursV2` : seul le PREMIER GC s'auto-active. Toute activation ultérieure passe par les boutons explicites `activerCoursV2` / `activerGroupeCoursV2` (ou `activerGroupeCoursDepuisBibliotheque`).
+- ❌ **Ne pas retirer le flag `actif: true` lors de la création du premier cours / GC** : il est posé conditionnellement dans `_persisterCoursV2` / `sauvegarderGroupeCoursV2` pour maintenir l'invariant single-active (`cours.find(c => c.actif)` reste un reader valide).
+- ❌ **Ne pas retirer les boutons `#v2-btnActiverCours` et `#v2-btnActiverGroupeCours`** d'index.html ni leurs helpers `_mettreAJourBoutonActiverCours(coursId)` / `_mettreAJourBoutonActiverGroupeCours(gcId)`. La visibilité est dynamique : caché si déjà actif, visible sinon.
+- ❌ **Ne pas modifier `_tupleCoursNaturel(c)` ni `_migrerListeCoursVersCoursV2()`** dans `trimestre-v2-cours.js` (P3) sans bien comprendre l'invariant V2-wins-sur-tuple-naturel. La migration s'exécute au chargement de `chargerDropdownCoursV2` (idempotent : la clé `listeCours` est vidée après).
+- ⚠️ **La migration finale étape 5 (#282) reste à faire** : ~93 sites lisant `db.getSync('listeCours', ...)` dans `js/cours.js` + `contexte.js` + `cc-license.js` + `pratiques.js` + `travaux-ui.js` + `demo-activation.js` + `migrations.js` + `statistiques.js` + `rapport-bug.js` + `organisateur.js` + `export-pdf.js` + `reserve.js`. Cf. consigne §3.
 
 ### Garde-fous résiduels post-Phase 2
 
@@ -269,11 +277,87 @@ Le doublon `supprimerCours` documenté dans le chantier 2.1 s'est révélé êtr
 
 - **#280** Fusion « Capturer maintenant » + « Reconstruire l'historique » snapshots (Priorité Moyenne).
 - **#281** Uniformiser style notifications — migrer le custom HTML restant dans saisie-presences.js:1357 vers `notifications.succes`.
-- **#282** **⚠️ PRIORITÉ HAUTE** Refonte listeCours → cours avec prérequis P1-P4 documentés.
+- **#282** **⚠️ PRIORITÉ HAUTE** Refonte listeCours → cours avec prérequis P1-P4 documentés (P1-P4 désormais ✅ livrés 23 mai PM, cf. §1quater — reste étape 5 migration finale).
 
 ---
 
-## §1bis — Archive du cycle Cat-B post-merge (clos 21 mai 2026)
+## §1quater — #282 prérequis P1-P4 + tests Section B LIVRÉS (23 mai 2026 PM)
+
+**2 commits sur main** (post-Section A et chantier #282 reverté du matin) :
+
+| Commit | Sujet | Build |
+|---|---|---|
+| `04f8d9e` | feat(cours-gc): #282 P1 bandeau modification + P2 activation explicite cours/GC | 0523-1435 |
+| `9cf542e` | refactor(cours): #282 P3 migration listeCours par tuple naturel + P4 snippet recovery | 0523-1710 |
+
+### Tests manuels Section B livrée (a11y T-A3/T-A5/T-A10)
+
+Grégoire a validé visuellement les 17 sous-tests B.1-B.3 sur Safari Mac, modes sombre et clair, simulation iPad Web Inspector. Aucune régression. Document `Retours des testeurs/TESTS-MANUELS-PENDING-2026-05-22.md` mis à jour avec ✅ partout. Sections C, D, E, F **reportées** (décision Grégoire en session).
+
+### #282 P1 — Bandeau « Mode modification » (cours)
+
+- `index.html` : bandeau `.alerte-information` ajouté dans `#cours-formulaire-edition`, texte « Mode modification — Cours <code>. Pour créer un nouveau cours, clique + Nouveau cours. » (sans emoji — cf. nouvelle [[feedback-zero-emoji-strict]]).
+- `js/trimestre-v2-cours.js` : helpers `_afficherBandeauEdition(codeCours)` + `_cacherBandeauEdition()`, wire dans 6 entry points (nouveau, changer si !coursId, changer si cours, modifier, dupliquer, annuler, supprimer).
+
+### #282 P2 — Activation explicite cours + groupe-cours
+
+**Cours (`trimestre-v2-cours.js`)** :
+- `_persisterCoursV2` : retrait de la condition `|| cours.actif` (l'ancien déclencheur auto-activation). Auto-active uniquement le **PREMIER cours créé** (`tousLesCours.length === 1` après push). Re-sync `infoCours` si modification du cours actuellement actif (pour conserver champs codeCours/nom synchronisés).
+- `_construireObjetCoursV2` : retrait du flag `actif: true` hardcodé (géré conditionnellement dans `_persister`).
+- `activerCoursV2()` (nouvelle) : handler bouton « Activer ce cours » avec invariant single-active (forEach pour marquer les autres `c.actif = false`) + `setSync infoCours` + notifications.succes.
+- `_mettreAJourBoutonActiverCours(coursId)` : helper visibilité bouton (visible si pas déjà actif, caché sinon).
+- Suffixe « (actif) » dans le `<option>` du dropdown V2 cours.
+- Badge « Cours actif » (vert, classe `.apercu-badge-actif`) dans `afficherSyntheseCours` (sidebar aperçu).
+- `index.html` : bouton `#v2-btnActiverCours` dans `.actions-formulaire`.
+
+**Groupe-cours (`trimestre-v2-groupes-cours.js`)** : symétrique des cours
+- `sauvegarderGroupeCoursV2` : auto-active uniquement le PREMIER GC créé (groupesCours.length === 0 avant push).
+- `activerGroupeCoursV2()` + `_mettreAJourBoutonActiverGroupeCours(gcId)`.
+- `activerGroupeCoursDepuisBibliotheque` : sync bouton formulaire si le GC activé est en cours d'édition.
+- Badge « Groupe-cours actif » dans `mettreAJourCarteResumeGroupeCoursV2` (carte résumé).
+- `index.html` : bouton `#v2-btnActiverGroupeCours`.
+
+**CSS** : nouvelle classe `.apercu-badge-actif` dans `styles.css` (vert succès via tokens `--alerte-{fond,bordure,texte}-succes`).
+
+### #282 P3 — Migration listeCours → cours, fusion par tuple naturel
+
+`_migrerListeCoursVersCoursV2()` extrait de l'inline (anciennement L40-47 de `chargerDropdownCoursV2`) :
+- Fusion par tuple `(codeCours, sessionAnnee)` au lieu de `id` seul → détecte les doublons cross-storage (cas : un cours présent à la fois dans `listeCours` legacy avec id générique `COURS_177...` ET dans `cours` V2 avec id `h2026-XXX-MQ-00001`, anciennement non détecté).
+- `_tupleCoursNaturel(c)` : helper pur exportable, retourne `code|sessionAnnee` (ex. `"601-101-MQ|H2026"`) ou code seul si session/annee manquantes (tuple dégradé legacy minimal).
+- **V2 wins** : les entrées legacy dont le tuple matche V2 sont ignorées (pas écrasées).
+- Audit : `console.warn` avec détails `[{tuple, legacyId, v2Id}, ...]` + `notifications.info` à l'utilisateur si N > 0 (« Migration cours : N doublon(s) ignoré(s) — V2 préservée »).
+- Idempotent : clé `listeCours` vidée après migration → ré-exécutions ultérieures = no-op.
+
+### #282 P4 — Snippet console de recovery
+
+Snippet autonome inscrit dans `BACKLOG.md` #282 P4 (block markdown ```js). Compatible Safari console (functions traditionnelles, var, pas d'arrow, pas de const, peut être collé en une seule ligne). Logique :
+1. Groupe les cours par tuple naturel.
+2. Détecte les groupes de 2+ entrées.
+3. Retire les entrées non-V2 (id ne matchant pas `^[ah]\d{4}`) si V2 existe pour le même tuple.
+4. Re-sync `infoCours` si pointait vers une entrée retirée (redirection vers V2 équivalent).
+
+Grégoire avait déjà nettoyé ses données ce matin via un snippet équivalent (cf. SESSION.md §1ter), donc P4 sert de référence pour le futur (autres machines, autres utilisateurs si éventuels).
+
+### Reste pour fermer #282 — étape 5 (migration finale, ~3 h, hors scope ce commit)
+
+Migration des **~93 sites** lisant `db.getSync('listeCours', ...)` ou `db.get('listeCours')` vers la clé canonique `cours`. Liste indicative des fichiers touchés (à valider avec un audit grep frais) :
+- **js/cours.js** : 10 sites (L64, 96, 126, 207, 272, 357, 376, 401, 455, 530) — la modal Bibliothèque cours, principalement.
+- **js/contexte.js** : 2 sites (L156 forEach actif + L194)
+- **js/cc-license.js** : 1 site (L520 `coursActif = listeCours.find(c => c.actif)`)
+- **js/pratiques.js** : 3 sites (sensibles indices A-C-P)
+- **js/travaux-ui.js** : 1 site (à vérifier)
+- **js/demo-activation.js** : 5 sites (retraits redondants)
+- **js/migrations.js** : 13 sites historiques (peut nécessiter conservation pour idempotence des migrations passées — auditer)
+- **js/statistiques.js**, **js/rapport-bug.js**, **js/organisateur.js**, **js/export-pdf.js**, **js/reserve.js** : 1-2 sites chacun
+- **js/trimestre-v2-cours.js** : 1 site (la fonction de migration `_migrerListeCoursVersCoursV2` lit `listeCours` — doit RESTER pour idempotence boot)
+
+Stratégie suggérée :
+1. Faire l'audit grep complet avec `grep -rn "listeCours" js/ --include="*.js"` pour le compte réel.
+2. Identifier les sites de **lecture** (à migrer vers `cours`) vs les sites **historiques de migration** (à conserver).
+3. Migrer par groupes cohérents (cours.js d'abord = la valeur immédiate user, puis contexte.js + cc-license.js + le reste).
+4. Tester après chaque groupe via Réglages → Cours → Bibliothèque qui doit afficher les cours.
+
+Idéal : créer un worktree dédié `cleanup/282-migration-finale` pour ne pas polluer main si quelque chose casse en cours de route.
 
 > Cycle précédent — 10/10 critères atteints. Conservé pour référence.
 
@@ -381,66 +465,91 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
 ## §3 — Consigne de démarrage pour la prochaine session
 
-> **Priorité 1** : continuer les tests manuels — **Sections B → F restantes** (~5h cumulé). Section A livrée 23 mai matin (8/9, A.6 reporté). **Priorité 2 (post-tests ou session dédiée)** : reprendre le chantier #282 listeCours → cours (PRIORITÉ HAUTE, post-mortem dans BACKLOG.md).
+> **Priorité 1** : terminer le chantier #282 — **étape 5 (migration finale ~3 h)**. P1-P4 livrés 23 mai PM. Tous les prérequis sont en place pour ré-appliquer la migration des ~93 sites `listeCours` → `cours` en confiance.
+> **Priorité 2 (en parallèle ou avant)** : tests visuels P1+P2 par Grégoire si pas encore validés en session. Voir « Tests visuels P1+P2 » ci-dessous.
 
-### Document maître tests manuels
+### Document maître
 
-**`Retours des testeurs/TESTS-MANUELS-PENDING-2026-05-22.md`** — sections B-F restantes.
-
-| Section | Sujet | Temps |
-|---|---|---|
-| ~~A~~ | ~~Tests critiques — non-régression bug latent~~ | ✅ **LIVRÉE 23 mai matin (8/9, A.6 reporté #282)** |
-| **B** | Tests visuels post-fixes a11y (T-A3 contraste, T-A5 focus visible, T-A10 touch targets) | ~30 min |
-| **C** | Audit 6.2 partie 2 — Parcours clavier + VoiceOver Mac (5 parcours) | ~1 h 30 |
-| **D** | Audit 6.3 partie 2 — iPad réel (viewport, touch targets mesurés, interactions tactiles, performance, IndexedDB) | ~2 h |
-| **E** | Test visuel Cat-B Track 4 chantier E (6 scénarios notifications Safari Mac + iPad Air, modes sombre + clair) | ~45 min |
-| **F** | PLAN-COURT-TERME 7.1 + 7.2 (smoke test global + écrans démo AQPC) | ~30 min |
+**`BACKLOG.md` #282** — post-mortem complet, 4 prérequis P1-P4 désormais ✅, snippet recovery P4 dans le markdown.
 
 ### Étapes de démarrage
 
 ```bash
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 git status                              # branche actuelle = main attendu, état propre côté tracké
-git log --oneline main -5               # HEAD attendu : 80fc6d1 ou plus récent
-                                        # (renommage Éditer→Modifier + bump 99.63 b0523-0955)
+git log --oneline main -5               # HEAD attendu : 9cf542e (P3+P4) ou plus récent
+                                        # (refactor cours: #282 P3 migration tuple naturel + P4 snippet recovery, build 0523-1710)
+git pull --rebase                       # au cas où des commits ont été pushés ailleurs
 npx http-server -p 8080 -c-1            # serveur local pour Safari (et iPad via IP locale)
 ```
 
-Puis lire `Retours des testeurs/TESTS-MANUELS-PENDING-2026-05-22.md` et exécuter sections **B → F** dans l'ordre. Le document contient les protocoles détaillés, sélecteurs à cibler, cases à cocher.
+### Tests visuels P1+P2 (à valider AVANT d'attaquer l'étape 5)
 
-**Si HEAD main au-delà de `80fc6d1`** : un autre chantier a été fait depuis. Vérifier `git log main` pour comprendre, mais le document de tests reste applicable.
+Grégoire doit confirmer ces scénarios dans Safari Mac (non-bloquant si déjà validé en session du 23 mai PM) :
+
+**Cours** (Réglages → Trimestre V2 → Cours)
+- Sélection d'un cours **actif** → badge « Cours actif » (vert) dans sidebar + bouton « Activer ce cours » caché + suffixe « (actif) » dans le dropdown.
+- Sélection d'un cours **non actif** (s'il existe) → badge absent + bouton « Activer ce cours » visible.
+- Clic « Activer ce cours » → notification « Cours activé », bouton se cache, badge apparaît, suffixe « (actif) » se déplace dans le dropdown.
+- Création d'un **nouveau cours** → ne s'auto-active PAS (mais le 1er cours créé sur une base vide, oui).
+- Modification du cours actif → `infoCours` re-sync (codeCours/nom reflètent les nouvelles valeurs partout).
+
+**Groupe-cours** (Réglages → Trimestre V2 → Groupe-cours)
+- Idem cours : badge « Groupe-cours actif » dans carte résumé, bouton « Activer ce groupe-cours », auto-activation uniquement du 1er GC créé.
+- Dropdown header `#selectGroupeCoursHeader` reflète bien le GC activé.
+
+### Étape 5 — Migration listeCours finale (~3 h)
+
+**Lire OBLIGATOIREMENT** :
+1. `BACKLOG.md` #282 (post-mortem entier — explique le contexte, le revert du matin, les leçons apprises).
+2. SESSION.md §1quater « Reste pour fermer #282 — étape 5 » (liste indicative des fichiers + stratégie).
+3. SESSION.md §0 garde-fous #282 P1-P4 (à NE PAS casser pendant l'étape 5).
+
+**Audit grep préalable obligatoire** :
+```bash
+grep -rn "listeCours" js/ --include="*.js" | wc -l        # compte total
+grep -rln "listeCours" js/ --include="*.js" | sort        # fichiers touchés
+grep -rn "db\.\(get\|getSync\)\(.listeCours" js/ --include="*.js"  # sites de lecture
+grep -rn "db\.\(set\|setSync\)\(.listeCours" js/ --include="*.js"  # sites d'écriture
+```
+
+Le scope réel mesuré ce matin (chantier reverté) était ~93 sites dans 15+ fichiers. Audit fresh nécessaire car des sites peuvent avoir évolué depuis le matin.
+
+**Stratégie suggérée** :
+1. **Worktree dédié** : `git worktree add ../Monitorage_v6-282-final cleanup/282-migration-finale main` — isole le chantier.
+2. **Migration par groupes cohérents**, dans cet ordre :
+   - **Groupe A** : `js/cours.js` (10 sites) — la valeur immédiate user (la modal Bibliothèque cours redevient peuplée).
+   - **Groupe B** : `js/contexte.js` + `js/cc-license.js` (3 sites) — readers du cours actif.
+   - **Groupe C** : `js/pratiques.js` (3 sites) — sensible indices A-C-P, valider en testant une évaluation.
+   - **Groupe D** : `js/demo-activation.js` (5 sites) — souvent des retraits redondants.
+   - **Groupe E** : reste (statistiques, rapport-bug, organisateur, export-pdf, reserve, travaux-ui) — 1-2 sites chacun.
+3. **À conserver intacts** : la fonction `_migrerListeCoursVersCoursV2` de `js/trimestre-v2-cours.js` (DOIT continuer à lire `listeCours` pour idempotence boot) + les sites historiques de `js/migrations.js` (auditer cas par cas — souvent ce sont des migrations passées qui ne s'exécutent plus, mais peuvent être déclenchées sur de vieilles données).
+4. **Test après chaque groupe** : Réglages → Trimestre V2 → Cours → bouton Bibliothèque doit montrer les cours. Puis test évaluation/profil pour groupes C-E.
+5. **Bump build + commit par groupe** (ou tous groupes en 1 seul commit si rapide). Hook pré-push vert obligatoire.
+6. **Merge FF sur main** + push + retrait worktree.
+
+**Effort total ajusté** : ~3 h estimé, vu que la migration brute est triviale (find+replace en gros) — l'essentiel du temps va au test fonctionnel après chaque groupe.
 
 ### Rôle de Claude dans cette session
 
-- **Pas de chantier code** sauf si Grégoire trouve un bug bloquant pendant les tests (exception déjà appliquée Section A : 3 régressions fixées #117/#119/#120). Si nouveau bug bloquant détecté, fixer immédiatement et logger SUIVI-BUGS comme Corrigés.
-- **Accompagnement** : interpréter résultats, reporter dans `audit/reports/06-2-manual.md` + `06-3-ipad.md`, mettre à jour `audit/reports/06-summary.md` après les tests, ouvrir bugs dans `Retours des testeurs/SUIVI-BUGS.md` si besoin (prochain ID = #121).
-- **Mise à jour SESSION.md en fin de session** : ajouter une sous-section §1quater « Tests manuels Sections X-Y livrées » + révision §3 pour cycle suivant (probablement chantier #282 listeCours, ou merge audit→main + préparation AQPC).
-
-### Chantier #282 listeCours → cours (PRIORITÉ HAUTE)
-
-Une fois les tests manuels terminés (ou en session dédiée si Grégoire préfère), reprendre #282. **Lire OBLIGATOIREMENT le post-mortem dans BACKLOG.md #282 avant de toucher au code** — il documente les 2 problèmes qui ont causé le revert du 23 mai matin et les 4 prérequis P1-P4 à fixer.
-
-Ordre suggéré pour la réussite :
-- **P1 d'abord** (~30 min) : reset `coursEnEditionV2 = null` au clic « + Nouveau cours ». Bloqueur amont — sans ce fix, le risque d'éditer par erreur le mauvais cours persiste.
-- **P2 ensuite** (~1 h) : UX activation explicite cours/groupe-cours (bouton « Activer » séparé du save, indicateur visuel partout).
-- **P3 ensuite** (~1 h) : réécrire la migration listeCours → cours pour fusionner par tuple naturel (codeCours, session, annee) au lieu de id, avec log des doublons détectés.
-- **P4 en parallèle** : préparer un snippet console de recovery pour les utilisateurs qui auraient déjà des doublons (cf. snippet fourni à Grégoire le 23 mai matin).
-- **Puis** : la migration des 93 sites peut être ré-appliquée en confiance.
-
-Effort total révisé : **5-7 h** (pas 2-3 h initialement annoncé).
+- **Chantier code actif** : étape 5 migration finale. Travail technique au cœur du sujet.
+- **Demander le build au début** (puis à chaque commit) — convention zéro défaut.
+- **Mettre à jour SESSION.md en fin de session** : ajouter §1quinquies (ou §1quinta) « #282 étape 5 livrée », fermer le ticket #282 dans BACKLOG.md, mise à jour de la liste des décisions Grégoire pendantes (#282 retiré).
+- **Si bloqué** : revert proprement, MAJ post-mortem dans BACKLOG #282, et passer à autre chose plutôt qu'insister.
 
 ### Conventions
 
-- **Pas de bump beta** sans demander (cf. §0 garde-fou).
-- **Hook pré-push vert** obligatoire si commits déclenchés.
-- **Worktree non nécessaire** — on travaille en lecture/test sur main.
+- **Pas de bump beta** sans demander (cf. §0 garde-fou). Beta 99.63 conservée tant que pas explicitement bumpée.
+- **Hook pré-commit vert** obligatoire à chaque commit (Défense J).
+- **Worktree recommandé** pour l'étape 5 (chantier potentiellement risqué).
 
 ### Décisions de Grégoire pendantes (rappel pour ne pas oublier)
 
-- **#282 listeCours → cours** — à reprendre dès que possible après tests manuels (Grégoire : « il faudra y revenir absolument »).
+- **#282 étape 5** — à exécuter dès que possible (prérequis P1-P4 désormais en place).
 - Label `v2-seuil-fragile` — conservation / atténuation / alignement ? (Cat-B Track 4 chantier J reliquat).
 - Convergence audit/2026-mai ↔ main — à planifier post-AQPC.
 - Demande d'avis PRP Cégep de Drummondville (Loi 25) — à envoyer (délai réponse 2-6 semaines, conditionne PRIVACY.md v1.1).
+- Tests manuels Sections **C, D, E, F reportées** (cf. doc TESTS-MANUELS-PENDING) — à reprendre avant AQPC du 3 juin si Grégoire le souhaite.
 
 ---
 
@@ -531,3 +640,4 @@ git tag -l "cat-b-*" | sort             # 9 tags attendus :
 | 2026-05-22 (après-midi, portage a11y T-A3 + T-A5 depuis ds-update LIVRÉ) | 3 commits cherry-pickés depuis `ds-update/2026-mai` sur branche `cleanup/a11y-passe3-fixes-mineurs` (mergée FF main puis supprimée). `36a7a81` T-A3 : variables `--texte-muted` + `--gris-clair` ajustées WCAG AA ≥ 4.5:1 dans 3 modes (sombre, clair, print) — styles.css + fallback index.html. `f546215` T-A5 fondation : 4 tokens focus-ring créés dans `:root` (couleur, largeur 3px, offset 2px, composite). `eff9950` T-A5 finition : 22 sites `outline: none` désormais accompagnés d'un `box-shadow: var(--focus-ring)` restorant un focus visible clavier (WCAG 2.1 AA technique G195). Conflits cherry-pick résolus en `git rm` des 3 brouillons `ds-update/passe-2-diff/` + `ds-update/v8-drafts/` qui ne vivent pas sur main. Audit annuel sous-audit 6.1 (Phase 5.1+5.2 PLAN-COURT-TERME) passe Jaune → **Vert** côté outils statiques (T-A3 + T-A5 traités, T-A7 déjà fait Phase 5.3+5.4 AQPC, T-A1+T-A2 fixés 21 mai). Restent : tests manuels 6.2/6.3 par Grégoire + T-A10 touch targets 44px (non couvert par ds-update — chantier séparé ~3-5 h si souhaité). Pas de bump beta. Tests 85/85 Vitest verts. | Portage a11y T-A3+T-A5 (Claude autonome) |
 | 2026-05-22 (après-midi, sub-cleanup tableau Réglages → Cours legacy LIVRÉ) | 1 commit `bd37072` sur branche `cleanup/tableau-reglages-cours-legacy` (mergée FF main puis supprimée). Suite directe du chantier 2.1 dont le scope avait explicitement exclu cette chaîne morte (cf. plan PLAN-PHASE2 §8). **cours.js réduit de 1215 → 669 l. (−546 LOC)**. 7 fonctions retirées + 4 exports (`afficherTableauCours`, `obtenirTousLesCoursBibliotheque` orphelin, `obtenirNomPratiqueFallback`, `afficherPratiqueEnLectureSeule`, `dupliquerCours`, `activerCours`, `supprimerCours`). 6 sections delimiters de commentaire orphelines retirées (`AFFICHAGE DU TABLEAU`, `FORMULAIRE D'AJOUT/ÉDITION` trompeur, `⭐ ACTIVATION DU COURS`, `SUPPRESSION`, `🔔 NOTIFICATIONS` vide, `📌 NOTES D'UTILISATION` ~55 l. obsolète). Cleanups annexes : `main.js` event listener `[data-sous-onglet="reglages-cours"]` (−10 l.), `config.js` ligne 274 « 08-cours.js (utilise coursEnEdition) » du JSDoc des modules dépendants. Doublon `supprimerCours` clarifié : faux doublon (cours-entite.js en IIFE isolée exposée via `window.CoursEntite.supprimer` — pas de conflit). Tests 85/85 Vitest verts. En-tête HEAD `bd37072`. §1 : nouvelle sous-section « Sub-cleanup tableau Réglages → Cours legacy LIVRÉ » remplace l'ancienne « Découvertes hors scope » avec bilan cumulé Phase 2 + sub-cleanup = **~−1677 LOC nettes** sur 4 commits. §3 : piste 1 (sub-cleanup) retirée puisque livrée ; renumérotation 2→1, 3→2, 4→3. | Sub-cleanup tableau Réglages → Cours legacy (Claude autonome) |
 | 2026-05-22 (après-midi, Phase 2 cascade legacy 95 LIVRÉE) | 3 commits sur branche `cleanup/phase2-cascade-legacy-95` (mergée FF main puis supprimée) : `5ccb306` chantier 2.3 trimestre.js (−563 LOC, 601 → 38 l. ; **bug latent fixé** — exports cassés L583+L586 du commit `6b2da4b` faisaient crasher l'IIFE → `obtenirCalendrierComplet`/`obtenirInfosJour` désormais à nouveau exposés ; `main.js:467-468` retiré ; `navigation.js:250-251` préservé Zone protégée), `dd493cc` chantier 2.1 cours.js (−365 LOC, 1580 → 1215 l. ; `afficherFormCours`/`annulerFormCours`/`sauvegarderCours`/`afficherListeCoursSidebar`/`modifierCours` + 5 exports retirés ; `coursEnEdition` config.js MAJ JSDoc seulement = Zone protégée), `137411c` chantier 2.2 groupe.js (−188 LOC, 1190 → 1002 l. ; `addStudent`/`resetFiltreGroupe`/doublon `deleteStudent` ×2 + 3 exports retirés ; bouton HTML `data-action="resetFiltreGroupe"` retiré du HTML généré par `filtrerParGroupe` ; querySelectors `addStudent` simplifiés dans `modifierEtudiant`). Bilan total : 5 fichiers touchés, **−1124 LOC nettes** (+25 / −1149). Tests 85/85 Vitest verts à chaque jalon. Pas de bump beta (convention §0). §1 sous-section « Prochaine session — chantier Phase 2 (plan documenté) » remplacée par « Chantier Phase 2 cascade legacy 95 — LIVRÉ » avec tableau récap par module + section « Bug latent fixé en cascade » à inscrire SUIVI-BUGS + section « Découvertes hors scope » (tableau Réglages → Cours legacy mort = piste 1 §3). §0 garde-fous Phase 2 remplacés par 3 règles résiduelles. §3 entièrement réécrit avec 4 pistes pour la prochaine session (sub-cleanup tableau cours legacy / reprise audit annuel / prep AQPC / tests manuels Grégoire). En-tête HEAD `137411c`. | Phase 2 cascade legacy 95 (Claude autonome) |
+| 2026-05-23 (après-midi, Tests Section B + #282 P1-P4 LIVRÉS) | 2 commits sur main : `04f8d9e` (#282 P1 bandeau « Mode modification » cours + P2 activation explicite cours/GC, build 0523-1435) et `9cf542e` (#282 P3 migration `_migrerListeCoursVersCoursV2()` par tuple naturel + P4 snippet recovery dans BACKLOG, build 0523-1710). Tests Section B (a11y T-A3/T-A5/T-A10) **100 % verts** validés par Grégoire sur Safari Mac modes sombre+clair + simulation iPad. Sections C, D, E, F **reportées** (décision Grégoire en session : « plus important à faire »). Chantier #282 : tous les 4 prérequis P1-P4 désormais livrés, ouvrant la voie à l'étape 5 (migration finale des ~93 sites listeCours dans cours.js/contexte.js/cc-license.js/etc., estimée ~3 h, hors scope cette session). Snippet P4 testé partiellement (copier-coller Safari foireux avec backtick markdown puis caractère invisible — pas critique car Grégoire avait déjà nettoyé ses données le matin via snippet équivalent). Tests 85/85 Vitest verts à chaque commit. Hook pré-commit Défense J : 3 warnings setSync infoCours dans `_persisterCoursV2` / `activerCoursV2` acquittés via `// security-ok`. En-tête HEAD `9cf542e`. §1quater (nouvelle) : récap complet livraison P1-P4 + stratégie étape 5. §0 garde-fous : nouvelle sous-section « Garde-fous #282 P1-P4 livrés » (7 règles). §3 entièrement réécrit pour pointer vers l'étape 5 finale + tests visuels P1+P2 en pré-requis. Mémoire MEMORY.md : nouvelle [[feedback-zero-emoji-strict]] (sélection d'option preview avec emoji ≠ demande explicite). | #282 P1-P4 + Section B (Claude autonome) |
