@@ -1,31 +1,33 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 22 mai 2026 après-midi,
-     post-livraison Phase 2 cascade legacy 95 + sub-cleanup tableau
-     Réglages → Cours legacy)
+     IDENTIFICATION DE CE FICHIER  (mis à jour 23 mai 2026 midi,
+     post-livraison Tests manuels Section A — 8/9 — + 3 régressions
+     chantier Phase 2 fixées + chantier #282 listeCours→cours TENTÉ
+     ET REVERTÉ + renommage UI Éditer→Modifier)
      Ce SESSION.md vit sur la branche `main` du worktree principal et sert
-     de relai entre les sessions Claude. Il décrit l'état post-livraison
-     du cycle AQPC + Sprint A + dettes #1-4 + cleanups (résidus risque,
-     palettes COULEURS) + Phase 2 cascade legacy 95 + sub-cleanup
-     tableau Réglages → Cours legacy.
-     L'archive complète du cycle Cat-B post-merge (clos 21 mai, 10/10
-     critères atteints) reste dans les §§ suivants comme référence
-     historique.
+     de relai entre les sessions Claude. Il décrit l'état post-Section A
+     des tests manuels avec les 3 régressions fixées en session et le
+     post-mortem du chantier listeCours→cours abandonné.
+     L'historique complet (cycle AQPC, Cat-B post-merge clos 21 mai)
+     reste dans les §§ suivants comme référence.
      ===================================================================== -->
 
 > **📌 Identification**
 > - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
-> - **Cycle en cours** : **tests manuels Grégoire** — priorité unique prochaine session (cf. §3)
-> - **Document maître prochaine session** : `Retours des testeurs/TESTS-MANUELS-PENDING-2026-05-22.md` (créé 22 mai PM)
+> - **Cycle en cours** : **tests manuels Grégoire** — Section A livrée 23 mai matin, Sections B-F restantes (cf. §3)
+> - **Document maître prochaine session** : `Retours des testeurs/TESTS-MANUELS-PENDING-2026-05-22.md` (sections B-F restantes, ~5h cumulé)
 
-# SESSION — État au 22 mai 2026 (post-sub-cleanup tableau Réglages → Cours legacy)
+# SESSION — État au 23 mai 2026 midi (post Tests manuels Section A 8/9 + chantier #282 reverté)
 
-**Beta / build** : 99.62 / 0522-1115 (pas de bump — convention §0 garde-fou).
-**Branche `main`** : HEAD à `22914ac` (T-A10 touch targets) post-merge FF de Phase 2 (3 commits) + sub-cleanup tableau (1 commit) + portage a11y T-A3/T-A5 (3 cherry-picks) + bug fix doubles box-shadow + T-A10 = 11 commits sur main depuis `f51aeb1` + docs/session.
-**Branches retirées après merge** : `aqpc/privacy`, `cleanup/phase2-cascade-legacy-95`, `cleanup/tableau-reglages-cours-legacy`, `cleanup/a11y-passe3-fixes-mineurs`, `cleanup/a11y-t-a10-touch-targets`.
+**Beta / build** : 99.63 / 0523-0955 (bump confirmé par Grégoire au commit `80fc6d1`).
+**Branche `main`** : HEAD à `80fc6d1` (renommage UI Éditer → Modifier + bump 99.63) post-merge des 3 commits du 23 mai matin :
+  - `a191fb5` fix(tests-manuels) : 3 régressions chantier Phase 2 matin + UI snapshots (bandeau contextuel, Congés institutionnels)
+  - `731c3a3` docs(backlog) : post-mortem chantier listeCours→cours reverté + prérequis P1-P4
+  - `80fc6d1` ui(libelle) : renommer Éditer → Modifier (6 sites visibles) + bump 99.63
+**Branches retirées** : aucune nouvelle branche créée ce matin (travail direct sur main).
 
-**Tests** : 85 Vitest verts à chaque commit. Playwright non re-vérifié (les fonctions retirées sont legacy Réglages non couvertes).
+**Tests** : 85 Vitest verts à chaque commit. Hook pré-push vert.
 
-**Cycle suivant — tests manuels Grégoire** : Grégoire a terminé ses dernières évaluations du trimestre (22 mai PM) et est disponible pour exécuter tous les tests manuels accumulés. Document maître : `Retours des testeurs/TESTS-MANUELS-PENDING-2026-05-22.md` (6 sections A-F, ~5-6 h, peut être étalé sur 2 sessions). Voir §3 pour la consigne détaillée.
+**Cycle suivant — continuer tests manuels** : Sections B-F restantes (~5h cumulé), à exécuter dans l'ordre B → F. Document maître : `Retours des testeurs/TESTS-MANUELS-PENDING-2026-05-22.md`. Voir §3 pour la consigne détaillée + chantier #282 PRIORITÉ HAUTE à reprendre post-tests.
 
 ---
 
@@ -217,6 +219,60 @@ Le doublon `supprimerCours` documenté dans le chantier 2.1 s'est révélé êtr
 
 ---
 
+## §1ter — Tests manuels Section A LIVRÉS (23 mai 2026 matin + midi)
+
+**8/9 tests Section A passés**. A.6 reporté car bloqué par bug #282 (modale Bibliothèque cours vide en V2, chantier de réparation tenté et reverté — cf. ci-dessous).
+
+| Test | Statut | Sortie clé |
+|---|---|---|
+| **A.1** Boot console | ✅ | Mac console propre. 2 bugs prod logés #114 (CSP Cloudflare beacon sur app.codexnumeris.org) + #115 (`icon-files.svg` 404 dans modal « Plusieurs fichiers par étudiant »). |
+| **A.2** Snapshot Codex | ✅ critère strict (pas de ReferenceError) | **Bug #116 logé Priorité Moyenne** : `capturerSnapshotManuel` a 4 facettes problématiques (phantômes inter-groupes-cours, no dedup, métrique « Dernière capture » figée hors trimestre, fallback semaine 1 silencieux). **UI ajoutée** : bandeau contextuel « Groupe-cours actif : sigle — Groupe N » sous le titre du panneau Captures de progression (index.html + snapshots.js + trimestre-v2-orchestre.js). **Backlog #280** : fusionner « Capturer maintenant » + « Reconstruire l'historique » (retour Grégoire — il fait toujours Reconstruire). |
+| **A.3** Vue Calendrier | ✅ | Renommage UI : « Congés avec reprises » → « Congés institutionnels et fériés » (calendrier-vue.js:604). Layout overflow #118 logé (sous-onglet Trimestre dépasse sur 1470px). **3 régressions critiques fixées en cascade** : #117 (ReferenceError `setValue` cross-IIFE, bouton Modifier événement no-op, fix `window.setValue` dans trimestre-v2-cours.js), #119 (vue calendaire pas rafraîchie après modif trimestre, 4 handlers patchés avec `afficherCalendrierScolaire`), **#120 RÉGRESSION MAJEURE** : `genererCalendrierComplet` (190 LOC) + 5 helpers date retirés à tort par commit `6b2da4b` Phase 2 cascade legacy 95 du matin précédent. Restaurés depuis `git show 6b2da4b^`. Le module trimestre.js est passé de 38 → 270 LOC. |
+| **A.4** Saisie présences | ✅ | Console propre, Sem. 16 disparue après fix #120 (la séquence des numéros de semaine respecte désormais les fériés institutionnels sans reprise). |
+| **A.5** Modal Bibliothèque cours | ✅ critère strict (modal s'ouvre, pas d'erreur console) | **Bug #282 découvert** : modal vide en V2 — lit `db.get('listeCours')` (clé legacy) au lieu de `cours` (clé canonique V2 cf. trimestres.js:72). Audit révèle ~23 sites actifs lisant `listeCours` cross-codebase (scope >2-3h annoncé initialement). |
+| **A.6** Dupliquer cours | ⏸ **Reporté** | Bloqué par #282 — impossible de tester depuis bibliothèque vide. |
+| **A.7** Ajouter étudiant V2 | ✅ | Liste se met à jour, console propre. |
+| **A.8** Modifier puis supprimer étudiant | ✅ | + **UI : renommage « Éditer » → « Modifier »** sur 6 sites visibles (dropdown étudiant trimestre-v2-etudiants.js, bouton pratique pratiques.js, bouton fichier travaux-ui.js, bouton grille grilles.js, option évaluation liste-evaluations.js, doc index.html). Préserve les commentaires de code (`// Éditer`) et les `value="editer"` (références internes stables). |
+| **A.9** Modifier dates trimestre V2 | ✅ | Confirme que le fix #119 fonctionne — modifier une date Début/Fin trimestre régénère le calendrier ET rafraîchit la vue calendaire sans changer d'onglet. |
+
+### Chantier #282 listeCours → cours — TENTÉ ET REVERTÉ (23 mai 2026 matin)
+
+**Grégoire a explicitement choisi « refonte complète zéro-dette »** plutôt qu'un fix minimal. 6 étapes (audit + migration boot + 5 vagues de migration) exécutées en ~1h30 :
+
+- **12 fichiers JS touchés** : cours.js (10 sites + migration boot `migrerListeCoursVersCours` + helper `_normaliserCoursVersShapeV2`), trimestres.js (5 sites + comment registre), pratiques.js (3 sites — sensible indices A-C-P), travaux-ui.js (1 site simplifié), contexte.js (2 sites), cc-license.js (1 site + accès enseignant nested), demo-activation.js (5 sites — retraits redondants), migrations.js (13 sites historiques), statistiques.js + rapport-bug.js + organisateur.js + export-pdf.js + reserve.js (1-2 sites chacun), trimestre-v2-cours.js (retrait migration lazy redondante), main.js (appel migration ajouté + réordonné AVANT `executerMigrationsBeta935`).
+- **93 sites migrés** à seulement **2** restants (tous dans la fonction de migration légitime).
+- **Syntaxe OK** (`node --check` vert sur tous les fichiers), **zéro erreur console** au boot.
+
+**Problèmes graves détectés au test fonctionnel** :
+
+1. **Migration crée des doublons silencieux** : fusion par `id` seulement, pas par tuple naturel (codeCours, session, annee). Le setup Grégoire avait 2 versions du cours 601-101 : V2 (id `h2026-601-101-MQ-00001`) + legacy migré (id générique `COURS_1779535633370_...`). Post-migration, les 2 coexistent dans `cours`.
+2. **Bug pré-existant de form state cours révélé** : clic « + Nouveau cours » ne reset pas `coursEnEditionV2`. Grégoire pensait créer un cours 102 mais a édité le V2 601-101 → contenu 601-102 sur id 601-101. Désynchro id immutable / codeCours.
+3. **Bug pré-existant `_persisterCoursV2` auto-active** : tout save avec `cours.actif === true` (default) écrase silencieusement `infoCours`. Confusion sur « comment activer un cours ».
+
+**Revert** : `git checkout HEAD -- ` sur 15 fichiers JS. BACKLOG.md gardé (entrées #281 et #282 enrichies). Snippet console fourni à Grégoire pour restaurer son cours 601-101 et retirer le doublon legacy de `cours`. Recovery validé par Grégoire.
+
+**Le backlog #282 contient le post-mortem complet avec 4 prérequis P1-P4** :
+- **P1** : fixer le form state cours — clic « + Nouveau cours » DOIT reset `coursEnEditionV2 = null` (~30 min)
+- **P2** : clarifier UX activation cours/groupe-cours — bouton « Activer » explicite + indicateur visuel partout (~1 h)
+- **P3** : migration listeCours → cours doit fusionner par (codeCours, session, annee) + log doublons (~1 h)
+- **P4** : audit data utilisateur — snippet recovery si doublons existants
+
+**Estimation révisée** : 5-7 h (pas 2-3 h). **#282 marqué PRIORITÉ HAUTE** « À TRAITER ABSOLUMENT » dans BACKLOG.md (retour Grégoire).
+
+### Bilan SUIVI-BUGS post-Section A
+
+- **4 bugs Ouverts** : #114 (CSP Cloudflare prod), #115 (icon-files.svg 404), #116 (snapshots manuels 4 facettes), #118 (layout overflow Trimestre).
+- **3 bugs Corrigés** (section dédiée 22 mai 2026 dans SUIVI-BUGS) : #117 (setValue cross-IIFE), #119 (vue calendaire refresh), #120 (genererCalendrierComplet restaurée).
+- **Prochain ID** : #121.
+
+### Bilan BACKLOG post-Section A
+
+- **#280** Fusion « Capturer maintenant » + « Reconstruire l'historique » snapshots (Priorité Moyenne).
+- **#281** Uniformiser style notifications — migrer le custom HTML restant dans saisie-presences.js:1357 vers `notifications.succes`.
+- **#282** **⚠️ PRIORITÉ HAUTE** Refonte listeCours → cours avec prérequis P1-P4 documentés.
+
+---
+
 ## §1bis — Archive du cycle Cat-B post-merge (clos 21 mai 2026)
 
 > Cycle précédent — 10/10 critères atteints. Conservé pour référence.
@@ -325,15 +381,15 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
 ## §3 — Consigne de démarrage pour la prochaine session
 
-> **Priorité unique de la prochaine session** : Grégoire vient de terminer ses dernières évaluations du trimestre et est disponible pour tous les tests manuels accumulés. La prochaine session = session **tests manuels** (pas de chantier code).
+> **Priorité 1** : continuer les tests manuels — **Sections B → F restantes** (~5h cumulé). Section A livrée 23 mai matin (8/9, A.6 reporté). **Priorité 2 (post-tests ou session dédiée)** : reprendre le chantier #282 listeCours → cours (PRIORITÉ HAUTE, post-mortem dans BACKLOG.md).
 
-### Document maître
+### Document maître tests manuels
 
-**`Retours des testeurs/TESTS-MANUELS-PENDING-2026-05-22.md`** — check-list complète (~5-6 h, 6 sections A-F), créée le 22 mai PM. Couvre :
+**`Retours des testeurs/TESTS-MANUELS-PENDING-2026-05-22.md`** — sections B-F restantes.
 
 | Section | Sujet | Temps |
 |---|---|---|
-| **A** | Tests critiques — non-régression bug latent fixé chantier 2.3 (snapshots, calendrier, modules Réglages) | ~30 min |
+| ~~A~~ | ~~Tests critiques — non-régression bug latent~~ | ✅ **LIVRÉE 23 mai matin (8/9, A.6 reporté #282)** |
 | **B** | Tests visuels post-fixes a11y (T-A3 contraste, T-A5 focus visible, T-A10 touch targets) | ~30 min |
 | **C** | Audit 6.2 partie 2 — Parcours clavier + VoiceOver Mac (5 parcours) | ~1 h 30 |
 | **D** | Audit 6.3 partie 2 — iPad réel (viewport, touch targets mesurés, interactions tactiles, performance, IndexedDB) | ~2 h |
@@ -345,30 +401,45 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 ```bash
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 git status                              # branche actuelle = main attendu, état propre côté tracké
-git log --oneline main -5               # HEAD attendu : 00f2f40 ou plus récent
+git log --oneline main -5               # HEAD attendu : 80fc6d1 ou plus récent
+                                        # (renommage Éditer→Modifier + bump 99.63 b0523-0955)
 npx http-server -p 8080 -c-1            # serveur local pour Safari (et iPad via IP locale)
 ```
 
-Puis lire `Retours des testeurs/TESTS-MANUELS-PENDING-2026-05-22.md` et exécuter section par section. Le document contient les protocoles détaillés, les sélecteurs à cibler, les cases à cocher.
+Puis lire `Retours des testeurs/TESTS-MANUELS-PENDING-2026-05-22.md` et exécuter sections **B → F** dans l'ordre. Le document contient les protocoles détaillés, sélecteurs à cibler, cases à cocher.
 
-**Si HEAD main au-delà de `00f2f40`** : un autre chantier a été fait depuis. Vérifier `git log main` pour comprendre, mais le document de tests reste applicable.
+**Si HEAD main au-delà de `80fc6d1`** : un autre chantier a été fait depuis. Vérifier `git log main` pour comprendre, mais le document de tests reste applicable.
 
 ### Rôle de Claude dans cette session
 
-- **Pas de chantier code** sauf si Grégoire trouve un bug bloquant pendant les tests qui requiert un fix rapide.
-- **Accompagnement** : aider Grégoire à interpréter les résultats, à reporter les cases cochées dans `audit/reports/06-2-manual.md` + `06-3-ipad.md`, à mettre à jour `audit/reports/06-summary.md` après les tests, à ouvrir des bugs dans `Retours des testeurs/SUIVI-BUGS.md` si besoin.
-- **Mise à jour SESSION.md** en fin de session : §1 nouvelle sous-section « Tests manuels Grégoire — LIVRÉS » + entrée historique §5 + révision §3 pour le cycle suivant (probablement merge audit→main + préparation AQPC).
+- **Pas de chantier code** sauf si Grégoire trouve un bug bloquant pendant les tests (exception déjà appliquée Section A : 3 régressions fixées #117/#119/#120). Si nouveau bug bloquant détecté, fixer immédiatement et logger SUIVI-BUGS comme Corrigés.
+- **Accompagnement** : interpréter résultats, reporter dans `audit/reports/06-2-manual.md` + `06-3-ipad.md`, mettre à jour `audit/reports/06-summary.md` après les tests, ouvrir bugs dans `Retours des testeurs/SUIVI-BUGS.md` si besoin (prochain ID = #121).
+- **Mise à jour SESSION.md en fin de session** : ajouter une sous-section §1quater « Tests manuels Sections X-Y livrées » + révision §3 pour cycle suivant (probablement chantier #282 listeCours, ou merge audit→main + préparation AQPC).
+
+### Chantier #282 listeCours → cours (PRIORITÉ HAUTE)
+
+Une fois les tests manuels terminés (ou en session dédiée si Grégoire préfère), reprendre #282. **Lire OBLIGATOIREMENT le post-mortem dans BACKLOG.md #282 avant de toucher au code** — il documente les 2 problèmes qui ont causé le revert du 23 mai matin et les 4 prérequis P1-P4 à fixer.
+
+Ordre suggéré pour la réussite :
+- **P1 d'abord** (~30 min) : reset `coursEnEditionV2 = null` au clic « + Nouveau cours ». Bloqueur amont — sans ce fix, le risque d'éditer par erreur le mauvais cours persiste.
+- **P2 ensuite** (~1 h) : UX activation explicite cours/groupe-cours (bouton « Activer » séparé du save, indicateur visuel partout).
+- **P3 ensuite** (~1 h) : réécrire la migration listeCours → cours pour fusionner par tuple naturel (codeCours, session, annee) au lieu de id, avec log des doublons détectés.
+- **P4 en parallèle** : préparer un snippet console de recovery pour les utilisateurs qui auraient déjà des doublons (cf. snippet fourni à Grégoire le 23 mai matin).
+- **Puis** : la migration des 93 sites peut être ré-appliquée en confiance.
+
+Effort total révisé : **5-7 h** (pas 2-3 h initialement annoncé).
 
 ### Conventions
 
 - **Pas de bump beta** sans demander (cf. §0 garde-fou).
-- **Hook pré-push vert** obligatoire si commits déclenchés (corrections ponctuelles).
-- **Worktree non nécessaire** — on travaille en lecture/test sur main, pas de risque conflit avec `audit/2026-mai`.
+- **Hook pré-push vert** obligatoire si commits déclenchés.
+- **Worktree non nécessaire** — on travaille en lecture/test sur main.
 
 ### Décisions de Grégoire pendantes (rappel pour ne pas oublier)
 
+- **#282 listeCours → cours** — à reprendre dès que possible après tests manuels (Grégoire : « il faudra y revenir absolument »).
 - Label `v2-seuil-fragile` — conservation / atténuation / alignement ? (Cat-B Track 4 chantier J reliquat).
-- Convergence audit/2026-mai ↔ main — à planifier post-AQPC (récupère sur main : `audit/PLAN-*.md`, `audit/CONTEXTE-COWORK.md`, `audit/reports/`, T-A1+T-A2 fixés, ADR-008 corrigé ; et porte sur audit/2026-mai : `utils-notifications.js` consolidé qui rend T-A8 trivial).
+- Convergence audit/2026-mai ↔ main — à planifier post-AQPC.
 - Demande d'avis PRP Cégep de Drummondville (Loi 25) — à envoyer (délai réponse 2-6 semaines, conditionne PRIVACY.md v1.1).
 
 ---
