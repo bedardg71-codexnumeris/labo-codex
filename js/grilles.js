@@ -1377,7 +1377,7 @@ async function afficherToutesLesGrillesCriteres() {
                             + Ajouter un critère à cette grille
                         </button>
                         <button class="btn btn-modifier" data-action="chargerGrilleTemplate" data-param="${grille.id}">
-                            ✏️ Éditer la grille
+                            ✏️ Modifier la grille
                         </button>
                         <button class="btn btn-principal" data-action="dupliquerGrille" data-param="${grille.id}">
                             📋 Dupliquer

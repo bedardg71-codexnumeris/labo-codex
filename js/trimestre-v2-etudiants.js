@@ -123,7 +123,7 @@ async function chargerListeEtudiantsV2() {
                 <td style="text-align: center;">
                     <select class="controle-form controle-form-compact" data-on-change="actionEtudiantV2Handler" data-da="${e.da}">
                         <option value="">—</option>
-                        <option value="editer">Éditer</option>
+                        <option value="editer">Modifier</option>
                         <option value="supprimer">Supprimer</option>
                     </select>
                 </td>
