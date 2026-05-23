@@ -428,10 +428,45 @@
       - **c)** Le mécanisme d'auto-activation `if (cours.actif)` dans `_persisterCoursV2:975` (qui setSync infoCours sur tout save avec actif=true) est trop implicite — devrait être un toggle explicite "Activer ce cours" séparé du save.
       - **d)** Le shape `enseignant` nested vs flat peut rester dual-write tant qu'on n'a pas migré tous les readers (~10+ sites dans import-export.js, cc-license.js, etc.). Faire le strict mode (nested only) en sous-chantier dédié post-migration.
   - **Prérequis avant nouvelle tentative** :
-    - **P1** : fixer le form state cours — clic sur « + Nouveau cours » DOIT reset `coursEnEditionV2 = null` et vider tous les champs `v2-*Cours`. Effort ~30 min.
-    - **P2** : clarifier UX activation cours/groupe-cours — bouton « Activer ce cours/GC » explicite + indicateur visuel actif/inactif partout. Effort ~1 h.
-    - **P3** : améliorer la migration pour fusion par (codeCours, session, annee), avec audit log des doublons détectés. Effort ~1 h.
-    - **P4** : audit data Grégoire post-revert — il a 2 entrées `cours` dont une corrompue (id 101, contenu 102). Lui fournir un snippet console de recovery, ou il édite manuellement via UI.
+    - **P1** ✅ LIVRÉ commit `04f8d9e` (23 mai 2026) : bandeau « Mode modification — Cours <code> » dans le formulaire cours, distingue clairement mode édition vs mode création.
+    - **P2** ✅ LIVRÉ commit `04f8d9e` (23 mai 2026) : auto-activation cours retirée (sauf premier cours), bouton « Activer ce cours » explicite + indicateur « (actif) » dropdown + badge sidebar. Symétrique pour groupe-cours.
+    - **P3** ✅ LIVRÉ (23 mai 2026, à committer) : migration `_migrerListeCoursVersCoursV2()` extraite dans `js/trimestre-v2-cours.js`, fusion par tuple naturel `(codeCours, session+annee)` via `_tupleCoursNaturel(c)`. V2 wins, doublons legacy ignorés avec log `console.warn` + `notifications.info` à l'utilisateur si N > 0. Tuple dégradé sur le code seul si session/annee manquantes (rétrocompat legacy minimaux).
+    - **P4** ✅ Snippet console de recovery (23 mai 2026) — copier-coller dans la console Safari (une instance à la fois, Safari ne tolère pas les const redéclarés) :
+      ```js
+      (function recoverDoublonsCours(){
+        var cours = db.getSync('cours', []);
+        var infoActuel = db.getSync('infoCours', null);
+        function tnat(c){
+          var code = ((c.codeCours||c.sigle||c.code||'')+'').trim().toUpperCase();
+          if (!code) return null;
+          var s = ((c.session||'')+'').charAt(0).toUpperCase();
+          var a = ((c.annee||'')+'').trim();
+          return (s && a) ? code+'|'+s+a : code;
+        }
+        var groupes = new Map();
+        cours.forEach(function(c){
+          var t = tnat(c); if (!t) return;
+          if (!groupes.has(t)) groupes.set(t, []);
+          groupes.get(t).push(c);
+        });
+        var aRetirer = new Set();
+        groupes.forEach(function(grp, t){
+          if (grp.length < 2) return;
+          var v2 = grp.find(function(c){ return /^[ah]\d{4}/i.test(c.id||''); });
+          if (!v2) { console.warn('[Recovery] '+t+' : doublons sans V2 prioritaire, ignoré'); return; }
+          grp.forEach(function(c){ if (c !== v2) aRetirer.add(c.id); });
+        });
+        if (aRetirer.size === 0) { console.log('[Recovery] Aucun doublon à nettoyer.'); return; }
+        console.log('[Recovery] Retrait de '+aRetirer.size+' entrée(s) legacy :', Array.from(aRetirer));
+        var clean = cours.filter(function(c){ return !aRetirer.has(c.id); });
+        db.setSync('cours', clean);
+        if (infoActuel && aRetirer.has(infoActuel.id)) {
+          var eq = clean.find(function(c){ return tnat(c) === tnat(infoActuel); });
+          if (eq) { db.setSync('infoCours', eq); console.log('[Recovery] infoCours redirigée vers '+eq.id); }
+        }
+        console.log('[Recovery] Terminé. Recharge la page (Cmd+R).');
+      })();
+      ```
   - **État après revert** : 15 fichiers JS revertés à HEAD `a191fb5`. Bibliothèque cours redevient vide (bug original #282 toujours actif). Data Grégoire corrompue à nettoyer.
 
 ### Rythme Phase 5 — Raffinements (selon usage, post-AQPC)
