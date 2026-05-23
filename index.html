@@ -6848,6 +6848,11 @@
 
                                         <!-- Formulaire (caché par défaut) -->
                                         <div id="cours-formulaire-edition" class="u-hide">
+                                            <!-- Bandeau mode édition (caché en création) -->
+                                            <div id="v2-bandeauModeEdition" class="alerte alerte-information u-hide u-mb-15">
+                                                <strong>Mode modification</strong> — Cours <strong id="v2-bandeauCodeCours"></strong>.
+                                                Pour créer un nouveau cours, clique <strong>+ Nouveau cours</strong>.
+                                            </div>
                                             <h4 id="v2-titreFormCours" class="titre-formulaire">
                                                 Nouveau cours
                                             </h4>
@@ -7031,9 +7036,14 @@
 
                                             <!-- Boutons d'action -->
                                             <div class="actions-formulaire">
-                                                <button id="v2-btnSupprimerCours" class="btn btn-supprimer u-hide" data-action="supprimerCoursV2">
-                                                    Supprimer
-                                                </button>
+                                                <div>
+                                                    <button id="v2-btnSupprimerCours" class="btn btn-supprimer u-hide" data-action="supprimerCoursV2">
+                                                        Supprimer
+                                                    </button>
+                                                    <button id="v2-btnActiverCours" class="btn btn-confirmer u-hide" data-action="activerCoursV2">
+                                                        Activer ce cours
+                                                    </button>
+                                                </div>
                                                 <div>
                                                     <button class="btn btn-annuler" data-action="annulerFormCoursV2">
                                                         Annuler
@@ -7704,9 +7714,14 @@
 
                                         <!-- Boutons d'action -->
                                         <div class="actions-formulaire">
-                                            <button id="v2-btnSupprimerGroupeCours" class="btn btn-supprimer u-hide" data-action="supprimerGroupeCoursV2">
-                                                Supprimer
-                                            </button>
+                                            <div>
+                                                <button id="v2-btnSupprimerGroupeCours" class="btn btn-supprimer u-hide" data-action="supprimerGroupeCoursV2">
+                                                    Supprimer
+                                                </button>
+                                                <button id="v2-btnActiverGroupeCours" class="btn btn-confirmer u-hide" data-action="activerGroupeCoursV2">
+                                                    Activer ce groupe-cours
+                                                </button>
+                                            </div>
                                             <div>
                                                 <button class="btn btn-annuler" data-action="annulerFormGroupeCoursV2">
                                                     Annuler

@@ -42,9 +42,10 @@ Pour les tests iPad (D), noter l'IP locale du Mac et ouvrir sur iPad `http://<IP
 
 ---
 
-## Section B — Tests visuels post-fixes a11y (22 mai PM)
+## Section B — Tests visuels post-fixes a11y (22 mai PM) — ✅ LIVRÉE 23 mai 2026
 
 > Commits livrés : `36a7a81` (T-A3 contraste), `f546215`+`eff9950` (T-A5 focus-ring), `91668ac` (fix régression doubles box-shadow), `22914ac` (T-A10 touch targets).
+> **Résultat Grégoire (23 mai 2026)** : « tout est beau » — aucune régression, lisibilité OK modes sombre+clair, focus ring 3 px visible partout, touch targets desktop inchangés.
 
 ### B.1 — Lisibilité couleurs ajustées (T-A3)
 
@@ -52,12 +53,12 @@ Variables modifiées : `--texte-muted` et `--gris-clair` (3 modes : sombre, clai
 
 | # | Zone à vérifier | Comportement attendu | Statut |
 |---|---|---|:---:|
-| B.1.1 | Cartes étudiants (texte secondaire : DA, groupe, programme) | Lisibles, contraste suffisant, pas trop sombres | ☐ |
-| B.1.2 | Badges et métadonnées de listes (productions, grilles, biblios) | Métadonnées « par X · discipline · date » lisibles | ☐ |
-| B.1.3 | En-tête tableaux (titres colonnes) | Lisibles | ☐ |
-| B.1.4 | Texte d'aide / placeholder dans formulaires | Lisibles | ☐ |
-| B.1.5 | Mode clair : mêmes vérifs | Lisibles | ☐ |
-| B.1.6 | Apparence générale | Pas de zone qui devient trop foncée (au point d'être désagréable à lire) | ☐ |
+| B.1.1 | Cartes étudiants (texte secondaire : DA, groupe, programme) | Lisibles, contraste suffisant, pas trop sombres | ✅ |
+| B.1.2 | Badges et métadonnées de listes (productions, grilles, biblios) | Métadonnées « par X · discipline · date » lisibles | ✅ |
+| B.1.3 | En-tête tableaux (titres colonnes) | Lisibles | ✅ |
+| B.1.4 | Texte d'aide / placeholder dans formulaires | Lisibles | ✅ |
+| B.1.5 | Mode clair : mêmes vérifs | Lisibles | ✅ |
+| B.1.6 | Apparence générale | Pas de zone qui devient trop foncée (au point d'être désagréable à lire) | ✅ |
 
 **Si zone problématique** : noter localisation précise + screenshot. Les variables peuvent être affinées ponctuellement.
 
@@ -67,13 +68,13 @@ Variables modifiées : `--texte-muted` et `--gris-clair` (3 modes : sombre, clai
 
 | # | Site | Test | Statut |
 |---|---|---|:---:|
-| B.2.1 | Inputs formulaires (.controle-form) | Tab vers un input → focus ring 3px sarcelle | ☐ |
-| B.2.2 | Wizard pratique V2 inputs/textarea/select | Focus ring visible | ☐ |
-| B.2.3 | `#btn-codex` (en-tête) | Focus ring visible | ☐ |
-| B.2.4 | Modal rétroaction travaux (textarea + nom-input) | Focus ring visible | ☐ |
-| B.2.5 | Metadata CC ligne (input/select) | Focus ring visible | ☐ |
-| B.2.6 | Boutons d'action `.btn` divers | Focus ring visible | ☐ |
-| B.2.7 | Mode clair : refaire B.2.1 et B.2.3 | Focus ring visible en mode clair | ☐ |
+| B.2.1 | Inputs formulaires (.controle-form) | Tab vers un input → focus ring 3px sarcelle | ✅ |
+| B.2.2 | Wizard pratique V2 inputs/textarea/select | Focus ring visible | ✅ |
+| B.2.3 | `#btn-codex` (en-tête) | Focus ring visible | ✅ |
+| B.2.4 | Modal rétroaction travaux (textarea + nom-input) | Focus ring visible | ✅ |
+| B.2.5 | Metadata CC ligne (input/select) | Focus ring visible | ✅ |
+| B.2.6 | Boutons d'action `.btn` divers | Focus ring visible | ✅ |
+| B.2.7 | Mode clair : refaire B.2.1 et B.2.3 | Focus ring visible en mode clair | ✅ |
 
 ### B.3 — Touch targets 44×44 px (T-A10)
 
@@ -81,16 +82,17 @@ Variables modifiées : `--texte-muted` et `--gris-clair` (3 modes : sombre, clai
 
 | # | Élément | Test | Statut |
 |---|---|---|:---:|
-| B.3.1 | `#btn-codex` (en-tête) | Bouton clairement tactile, ≥ 44×44 px | ☐ |
-| B.3.2 | `.btn-icon-header` (anonymisation, thème) | Cibles élargies à 44×44 sur iPad | ☐ |
-| B.3.3 | Boutons d'action en tableaux denses | Cibles ≥ 44 px de haut sur iPad | ☐ |
-| B.3.4 | Aucune régression desktop (souris) | Densité visuelle inchangée sur Mac | ☐ |
+| B.3.1 | `#btn-codex` (en-tête) | Bouton clairement tactile, ≥ 44×44 px | ✅ |
+| B.3.2 | `.btn-icon-header` (anonymisation, thème) | Cibles élargies à 44×44 sur iPad | ✅ |
+| B.3.3 | Boutons d'action en tableaux denses | Cibles ≥ 44 px de haut sur iPad | ✅ |
+| B.3.4 | Aucune régression desktop (souris) | Densité visuelle inchangée sur Mac | ✅ |
 
 ---
 
-## Section C — Audit 6.2 partie 2 — Parcours clavier + VoiceOver Mac (~1h30)
+## Section C — Audit 6.2 partie 2 — Parcours clavier + VoiceOver Mac (~1h30) — ⏸ REPORTÉE (23 mai 2026)
 
 > Source : `audit/reports/06-2-manual.md` §3.3.
+> **Décision Grégoire (23 mai 2026)** : section sautée pour cette session, à reprendre ultérieurement (pas une priorité immédiate). Aucun parcours C.1-C.5 exécuté.
 
 **Préparation** : activer VoiceOver Mac (`Cmd+F5` ou Touch ID 3×). Désactiver avec le même raccourci.
 
@@ -114,9 +116,10 @@ Pour chaque parcours, cocher 3 colonnes : Focus visible / VoiceOver lisible / Ve
 
 ---
 
-## Section D — Audit 6.3 partie 2 — Tests iPad réel (~2h)
+## Section D — Audit 6.3 partie 2 — Tests iPad réel (~2h) — ⏸ REPORTÉE (23 mai 2026)
 
 > Source : `audit/reports/06-3-ipad.md` §3.2.
+> **Décision Grégoire (23 mai 2026)** : section sautée pour cette session, à reprendre ultérieurement (pas une priorité immédiate). Aucun test D.A-D.F exécuté.
 
 ### D.A — Viewport et mise en page
 
@@ -182,9 +185,10 @@ Mesurer 5 éléments-clés. Méthode : Web Inspector → sélectionner l'éléme
 
 ---
 
-## Section E — Test visuel Cat-B Track 4 chantier E (notifications, reporté du 21 mai)
+## Section E — Test visuel Cat-B Track 4 chantier E (notifications, reporté du 21 mai) — ⏸ REPORTÉE (23 mai 2026)
 
 > Source : MEMORY.md « Session 21 mai 2026 soir — Cat-B Track 4 chantier E ». Le module `utils-notifications.js` a remplacé 525 sites d'appel — vérifier qu'aucune notification ne s'est cassée.
+> **Décision Grégoire (23 mai 2026)** : section sautée pour cette session, à reprendre ultérieurement (pas une priorité immédiate). Aucun scénario E.1-E.6 exécuté.
 
 6 scénarios à déclencher, sur Safari Mac + iPad Air, en modes sombre + clair :
 
@@ -201,9 +205,10 @@ Pour chaque : vérifier que le toast s'affiche, que les couleurs sont correctes 
 
 ---
 
-## Section F — PLAN-COURT-TERME 7.1 + 7.2 (pré-AQPC)
+## Section F — PLAN-COURT-TERME 7.1 + 7.2 (pré-AQPC) — ⏸ REPORTÉE (23 mai 2026)
 
 > Source : `audit/PLAN-COURT-TERME.md` Phase 7. Ces tests sont moins formels que C/D mais doivent être faits avant la présentation AQPC du 3 juin.
+> **Décision Grégoire (23 mai 2026)** : section sautée pour cette session, à reprendre avant AQPC du 3 juin. Aucun test F.7.1-F.7.2 exécuté.
 
 | # | Test | Statut |
 |---|---|:---:|

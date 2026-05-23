@@ -38,6 +38,48 @@
 // Variable pour tracker le groupe-cours en édition
 let groupeCoursEnEditionId = null;
 
+function _mettreAJourBoutonActiverGroupeCours(gcId) {
+    const btn = document.getElementById('v2-btnActiverGroupeCours');
+    if (!btn) return;
+    if (!gcId) {
+        btn.classList.add('u-hide');
+        return;
+    }
+    const gcActif = db.getSync('groupeCoursActif', null);
+    const dejaActif = gcActif && gcActif.id === gcId;
+    if (dejaActif) {
+        btn.classList.add('u-hide');
+    } else {
+        btn.classList.remove('u-hide');
+    }
+}
+
+function activerGroupeCoursV2() {
+    if (!groupeCoursEnEditionId) {
+        console.warn('[Trimestre V2] Aucun groupe-cours sélectionné pour activation');
+        return;
+    }
+    const cleGC = cle('groupesCours');
+    let groupesCours = db.getSync(cleGC, []);
+    const cible = groupesCours.find(g => g.id === groupeCoursEnEditionId);
+    if (!cible) {
+        console.warn('[Trimestre V2] Groupe-cours non trouvé pour activation:', groupeCoursEnEditionId);
+        return;
+    }
+    // Invariant single-active : ce GC actif, les autres non
+    groupesCours.forEach(g => { g.actif = (g.id === groupeCoursEnEditionId); });
+    db.setSync(cleGC, groupesCours);
+    db.setSync('groupeCoursActif', cible);
+
+    notifications.succes('Groupe-cours activé', cible.nom || cible.id);
+
+    _mettreAJourBoutonActiverGroupeCours(groupeCoursEnEditionId);
+    populerDropdownGroupeCoursV2();
+    if (typeof window.peuplerDropdownGroupeCoursActif === 'function') {
+        window.peuplerDropdownGroupeCoursActif();
+    }
+}
+
 /**
  * Charge et initialise l'accordéon Groupe-cours
  */
@@ -328,7 +370,12 @@ function mettreAJourCarteResumeGroupeCoursV2(gc) {
     const classeCompletude = estComplet ? 'complet' : 'incomplet';
     const texteCompletude = estComplet ? 'Complet' : `${score}/5 configurés`;
 
+    const gcActif = db.getSync('groupeCoursActif', null);
+    const estActif = gcActif && gcActif.id === gc.id;
+    const badgeActif = estActif ? '<div class="apercu-badge-actif">Groupe-cours actif</div>' : '';
+
     carte.innerHTML = `
+        ${badgeActif}
         <div class="resume-gc-nom">${echapperHtml(gc.nom || gc.id)}</div>
         <div class="resume-gc-details">
             <div><span class="label-gc">Cours</span><span>${echapperHtml(coursNom)}</span></div>
@@ -352,6 +399,7 @@ function afficherEtatVideGroupeCoursV2() {
     if (etatVide) etatVide.classList.remove('u-hide');
     if (formulaire) formulaire.classList.add('u-hide');
     groupeCoursEnEditionId = null;
+    _mettreAJourBoutonActiverGroupeCours(null);
 }
 
 /**
@@ -381,6 +429,7 @@ function afficherTrimestreGroupeCoursV2() {
  */
 function nouveauGroupeCoursV2() {
     groupeCoursEnEditionId = null;
+    _mettreAJourBoutonActiverGroupeCours(null);
 
     // Afficher le trimestre actif
     afficherTrimestreGroupeCoursV2();
@@ -445,6 +494,7 @@ function nouveauGroupeCoursV2() {
  */
 function editerGroupeCoursV2(gc) {
     groupeCoursEnEditionId = gc.id;
+    _mettreAJourBoutonActiverGroupeCours(gc.id);
 
     // Rafraîchir les dropdowns
     if (typeof window.populerDropdownsAssemblageV2 === 'function') {
@@ -494,6 +544,7 @@ function editerGroupeCoursV2(gc) {
  */
 function annulerFormGroupeCoursV2() {
     afficherEtatVideGroupeCoursV2();
+    _mettreAJourBoutonActiverGroupeCours(null);
 
     const select = document.getElementById('v2-selectGroupeCours');
     if (select) select.value = '';
@@ -571,7 +622,10 @@ function sauvegarderGroupeCoursV2() {
         }
         notifications.succes('Groupe-cours modifié');
     } else {
-        // Ajout
+        // Ajout : actif = true SEULEMENT si premier groupe-cours créé.
+        // Pour activer un autre GC après coup, utiliser le bouton « Activer ce groupe-cours »
+        // (formulaire) ou « Activer » (bibliothèque GC).
+        const estPremier = groupesCours.length === 0;
         const nouveauGC = {
             id: genererIdUnique('GC_'),
             nom,
@@ -582,10 +636,13 @@ function sauvegarderGroupeCoursV2() {
             enseignantId,
             pratiqueId,   // Beta 95.3
             dateCreation: new Date().toISOString(),
-            actif: true
+            actif: estPremier
         };
         groupesCours.push(nouveauGC);
         groupeCoursEnEditionId = nouveauGC.id;
+        if (estPremier) {
+            db.setSync('groupeCoursActif', nouveauGC);
+        }
         notifications.succes('Groupe-cours créé');
     }
 
@@ -598,6 +655,7 @@ function sauvegarderGroupeCoursV2() {
 
     const gc = groupesCours.find(g => g.id === groupeCoursEnEditionId);
     mettreAJourCarteResumeGroupeCoursV2(gc);
+    _mettreAJourBoutonActiverGroupeCours(groupeCoursEnEditionId);
 
     // Mettre à jour le dropdown dans l'en-tête de l'application
     if (typeof window.peuplerDropdownGroupeCoursActif === 'function') {
@@ -647,6 +705,7 @@ function supprimerGroupeCoursV2() {
 
     // Réinitialiser l'interface
     groupeCoursEnEditionId = null;
+    _mettreAJourBoutonActiverGroupeCours(null);
     chargerGroupeCoursV2();
     afficherEtatVideGroupeCoursV2();
     mettreAJourCarteResumeGroupeCoursV2(null);
@@ -806,6 +865,9 @@ function activerGroupeCoursDepuisBibliotheque(gcId) {
         window.peuplerDropdownGroupeCoursActif();
     }
     chargerGroupeCoursV2();
+    if (groupeCoursEnEditionId) {
+        _mettreAJourBoutonActiverGroupeCours(groupeCoursEnEditionId);
+    }
 
     // Rafraîchir la modal
     fermerModalBibliothequeGroupeCours();
@@ -917,6 +979,7 @@ window.annulerFormGroupeCoursV2 = annulerFormGroupeCoursV2;
 window.sauvegarderGroupeCoursV2 = sauvegarderGroupeCoursV2;
 window.mettreAJourNomGroupeCoursV2 = mettreAJourNomGroupeCoursV2;
 window.supprimerGroupeCoursV2 = supprimerGroupeCoursV2;
+window.activerGroupeCoursV2 = activerGroupeCoursV2;
 window.ouvrirModalBibliothequeGroupeCours = ouvrirModalBibliothequeGroupeCours;
 window.fermerModalBibliothequeGroupeCours = fermerModalBibliothequeGroupeCours;
 window.activerGroupeCoursDepuisBibliotheque = activerGroupeCoursDepuisBibliotheque;
