@@ -2789,11 +2789,16 @@ function genererSectionProductions(da) {
             const titreObligatoires = `Obligatoires (${obligatoiresTous.length} production${obligatoiresTous.length > 1 ? 's' : ''})` + badgePondObl;
 
             // Calcul de la moyenne de chaque catégorie + contribution pondérée.
-            // La moyenne ignore les non-remis (cohérent avec _selectionnerArtefactsHybride).
-            // La contribution = moyenne × pondération / 100, exprimée en « points » qui
-            // s'additionnent pour donner la note finale.
-            const calculCategorie = (items, ponderation) => {
-                const notes = items.map(i => i.note).filter(n => typeof n === 'number');
+            // Pour les obligatoires, les non-remises comptent comme 0 (règle UI
+            // explicite : « Note = 0 si production non remise »), cohérent avec
+            // _selectionnerArtefactsHybride. Pour la sélection, les non évalués
+            // sont simplement ignorés (seules les meilleures comptent).
+            // La contribution = moyenne × pondération / 100, exprimée en « points ».
+            const calculCategorie = (items, ponderation, comptenonRemisCommeZero = false) => {
+                const notes = items.map(i => {
+                    if (typeof i.note === 'number') return i.note;
+                    return comptenonRemisCommeZero ? 0 : null;
+                }).filter(n => n !== null);
                 if (notes.length === 0 || ponderation == null) return null;
                 const somme = notes.reduce((s, n) => s + n, 0);
                 const moyenne = somme / notes.length;
@@ -2805,8 +2810,8 @@ function genererSectionProductions(da) {
                 return `(${addition}) ÷ ${calc.notes.length} = <strong>${calc.moyenne.toFixed(1)}%</strong>`
                      + ` × ${ponderation}% = <strong>${calc.contribution.toFixed(1)} pts</strong>`;
             };
-            const calcSel = calculCategorie(selection, pondSel);
-            const calcObl = calculCategorie(obligatoiresTous, pondObl);
+            const calcSel = calculCategorie(selection, pondSel, false);
+            const calcObl = calculCategorie(obligatoiresTous, pondObl, detailsNoteFinale.estFinale === true);
             const calculSelHtml = calcSel ? formaterCalcul(calcSel, pondSel) : `<span class="note-finale-ponderation">× ${pondSel != null ? pondSel + '%' : '—'}</span>`;
             const calculOblHtml = calcObl ? formaterCalcul(calcObl, pondObl) : `<span class="note-finale-ponderation">× ${pondObl != null ? pondObl + '%' : '—'}</span>`;
 

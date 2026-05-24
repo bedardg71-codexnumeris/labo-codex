@@ -575,9 +575,15 @@
         };
 
         // Calcul détaillé par catégorie : (75% + 75% + 75% + 73%) ÷ 4 = 74.5% × 65% = 48.4 pts
-        // La moyenne ignore les non-remis (cohérent avec le calculateur hybride).
-        const calculerCategorie = (items, ponderation) => {
-            const notes = items.map(i => i.note).filter(n => typeof n === 'number');
+        // Pour les obligatoires, les non-remises comptent comme 0 (règle UI
+        // explicite : « Note = 0 si production non remise »), cohérent avec
+        // _selectionnerArtefactsHybride. Pour la sélection, les non évalués
+        // sont ignorés.
+        const calculerCategorie = (items, ponderation, comptenonRemisCommeZero) => {
+            const notes = items.map(i => {
+                if (typeof i.note === 'number') return i.note;
+                return comptenonRemisCommeZero ? 0 : null;
+            }).filter(n => n !== null);
             if (notes.length === 0 || ponderation == null) return null;
             const somme = notes.reduce((s, n) => s + n, 0);
             const moyenne = somme / notes.length;
@@ -589,8 +595,8 @@
             return `(${addition}) &divide; ${calc.notes.length} = <b>${calc.moyenne.toFixed(1)} %</b>`
                  + ` &times; ${ponderation} % = <b>${calc.contribution.toFixed(1)} pts</b>`;
         };
-        const calcSel = estHybride ? calculerCategorie(note.selection, note.ponderationSelection) : null;
-        const calcObl = estHybride ? calculerCategorie(note.obligatoires || [], note.ponderationObligatoires) : null;
+        const calcSel = estHybride ? calculerCategorie(note.selection, note.ponderationSelection, false) : null;
+        const calcObl = estHybride ? calculerCategorie(note.obligatoires || [], note.ponderationObligatoires, estFinale) : null;
 
         // ----- Colonne gauche : sélection (les N meilleures) + calcul -----
         const badgePondSel = (estHybride && note.ponderationSelection != null) ? ` (${esc(note.ponderationSelection)} %)` : '';
