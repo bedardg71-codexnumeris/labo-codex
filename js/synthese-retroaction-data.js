@@ -817,11 +817,17 @@
             })
             : [];
 
+        // Nombre d'évaluations dans le pool de sélection (= total évalués − obligatoires
+        // RÉELLEMENT évaluées). Sert au titre « les N meilleures sur M évaluées ».
+        const obligatoiresEvaluees = obligatoiresTous.filter(o => typeof o.note === 'number').length;
+        const nombreEvaluesSelection = Math.max(0, (portfolio.nombreEvalues || 0) - obligatoiresEvaluees);
+
         return {
             estHybride:               estHybride,
             estFinale:                estFinale,
             selection:                selection,
             nombreSelection:          selection.length,
+            nombreEvaluesSelection:   nombreEvaluesSelection,
             obligatoires:             obligatoiresTous,
             obligatoiresRetenus:      obligatoiresRetenus.length,
             ponderationSelection:     ponderationSelection,
