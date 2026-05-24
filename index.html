@@ -3659,66 +3659,6 @@
             border-bottom: 2px solid var(--bleu-leger);
         }
 
-        /* Contrôles gauche : dropdown mode + toggle thème */
-        .entete-controles-gauche {
-            display: flex;
-            flex-direction: row;
-            gap: 12px;
-            align-items: center;
-            z-index: 1;
-            padding: 4px 0;
-        }
-
-        /* Contrôle droite : signaler un bug */
-        .entete-controles-droite {
-            display: flex;
-            align-items: center;
-            z-index: 1;
-            padding: 4px 0;
-        }
-
-        /* Bouton signaler un bug (droite) */
-        .entete-controles-droite .btn-action-header {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 6px 12px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: var(--radius-moyen);
-            color: white;
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-        }
-
-        .entete-controles-droite .btn-action-header:hover {
-            background: rgba(255, 255, 255, 0.18);
-            border-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-1px);
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Ajustement layout navigation principale : navigation centrée */
-        .navigation-principale {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 12px 40px 15px 40px;
-        }
-
-        /* Container pour les boutons de navigation (centrés) */
-        .navigation-boutons {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-
         /* ===============================
            BADGES D'INTÉGRITÉ ACADÉMIQUE
            =============================== */
@@ -3774,7 +3714,7 @@
 </head>
 
 <body>
-        <!-- EN-TÊTE - Layout compact Option 1 (8 décembre 2025) -->
+        <!-- EN-TÊTE - Chrome unifié (23 mai 2026) -->
         <header class="entete">
             <!-- Bulles flottantes animées (générées dynamiquement par JS) -->
             <div id="bulles-container" class="bulles-container">
@@ -3782,20 +3722,10 @@
             </div>
 
             <div class="entete-conteneur">
-                <!-- LIGNE 1 : Logo + Titre + Version + Boutons -->
+                <!-- LIGNE 1 : Codex (gauche) + Titre/Meta (centre) + Utilitaires (droite) -->
                 <div class="entete-ligne1">
-                    <!-- Titre et version -->
-                    <div class="titre-section">
-                        <h1>Labo Codex</h1>
-                        <p class="meta" data-tooltip="entete-version">
-                            <span class="meta-version"><span id="version-entete"></span> <span id="build-numero"></span></span>
-                            <span id="entete-date" class="meta-date"></span>
-                        </p>
-                    </div>
-
-                    <!-- Contrôle gauche : codex -->
-                    <div class="entete-controles-gauche">
-                        <!-- Bouton Codex -->
+                    <!-- Bouton Codex (gauche) — HTML/JS intégralement préservé -->
+                    <div class="entete-codex">
                         <div id="codex-controle" class="codex-controle">
                             <button id="btn-codex" class="btn-codex-header" data-action="Codex.toggleMenu" data-tooltip="entete-codex" aria-label="Codex — ouvrir le menu">
                                 <span id="codex-indicateur" class="codex-indicateur u-hide"></span>
@@ -3855,33 +3785,75 @@
                         </div>
                     </div>
 
-                    <!-- Contrôle droite : bug + anonymisation + thème -->
-                    <div class="entete-controles-droite">
-                        <button data-action="ouvrirModalRapportBug" class="btn-action-header btn-icon-header" data-tooltip="entete-signaler-bug" title="Signaler un bug"><img src="icons/icon-bug.svg" alt="" class="header-icon"></button>
-                        <button id="btn-toggle-anonymisation-nav" class="btn-action-header btn-icon-header" data-tooltip="entete-mode-affichage" title="Mode normal / anonymisé" data-action="basculerModeAnonymisation"><img src="icons/icons8-anonymous-mask.svg" alt="" class="header-icon"></button>
-                        <button id="btn-toggle-theme-nav" class="btn-action-header btn-icon-header" title="Mode clair / sombre" data-action="basculerTheme"><img src="icons/icon-black-and-white.svg" alt="" class="header-icon"></button>
+                    <!-- Titre et métadonnées (centre, en flux normal) -->
+                    <div class="titre-section">
+                        <h1>Labo Codex</h1>
+                        <p class="meta" data-tooltip="entete-version">
+                            <span class="meta-version"><span id="version-entete"></span> <span id="build-numero"></span></span>
+                            <span class="meta-separateur" aria-hidden="true">·</span>
+                            <span id="entete-date" class="meta-date"></span>
+                        </p>
                     </div>
+
+                    <!-- Utilitaires desktop (5 icônes, 2 clusters séparés par une ligne verticale) -->
+                    <div class="entete-utilitaires">
+                        <div class="utilitaires-groupe">
+                            <button data-action="ouvrirModalRapportBug" class="btn-action-header btn-icon-header" data-tooltip="entete-signaler-bug" title="Signaler un bug"><img src="icons/icon-bug.svg" alt="" class="header-icon"></button>
+                            <button id="btn-toggle-anonymisation-nav" class="btn-action-header btn-icon-header" data-tooltip="entete-mode-affichage" title="Mode normal / anonymisé" data-action="basculerModeAnonymisation"><img src="icons/icons8-anonymous-mask.svg" alt="" class="header-icon"></button>
+                            <button id="btn-toggle-theme-nav" class="btn-action-header btn-icon-header" title="Mode clair / sombre" data-action="basculerTheme"><img src="icons/icon-black-and-white.svg" alt="" class="header-icon"></button>
+                        </div>
+                        <div class="utilitaires-separateur" aria-hidden="true"></div>
+                        <div class="utilitaires-groupe">
+                            <button data-action="afficherSection" data-param="aide" class="btn-action-header btn-icon-header" data-tooltip="nav-aide" title="Aide"><img src="icons/icon-wordbook.svg" alt="" class="header-icon"></button>
+                            <button data-action="afficherSection" data-param="reglages" class="btn-action-header btn-icon-header" data-tooltip="entete-reglages" title="R&eacute;glages"><img src="icons/icon-tune.svg" alt="" class="header-icon"></button>
+                        </div>
+                    </div>
+
+                    <!-- Bouton "⋯" mobile (masqué desktop par CSS) -->
+                    <button id="btn-utilitaires-mobile" class="btn-utilitaires-mobile" data-action="ouvrirPopoverUtilitaires" aria-label="Plus d'options" aria-haspopup="menu" aria-expanded="false">
+                        <span aria-hidden="true">⋯</span>
+                    </button>
                 </div>
 
-                <!-- LIGNE 2 : Informations contextuelles -->
-                <div class="entete-ligne2">
-                    <!-- Sélecteur groupe-cours actif (centre, sous le séparateur) -->
+                <!-- LIGNE 2 : Bande de contexte — sélecteur groupe-cours centré, sans label -->
+                <div class="entete-ligne2 bandeau-contexte">
                     <div id="bandeau-groupe-cours" class="bandeau-groupe-cours">
                         <div class="bandeau-groupe-cours-contenu">
-                            <label for="selectGroupeCoursHeader">Groupe-cours actif :</label>
-                            <select id="selectGroupeCoursHeader" class="dropdown-groupe-cours-header" data-on-change="changerGroupeCoursDepuisHeader" data-tooltip="entete-groupe-cours">
+                            <select id="selectGroupeCoursHeader" class="dropdown-groupe-cours-header" data-on-change="changerGroupeCoursDepuisHeader" data-tooltip="entete-groupe-cours" aria-label="Groupe-cours actif">
                                 <option value="">-- Aucun groupe-cours --</option>
                             </select>
                         </div>
                     </div>
-
-                    <!-- Boutons utilitaires (droite, alignés sous Bug/Mode de la ligne 1) -->
-                    <div class="entete-ligne2-droite">
-                        <button data-action="afficherSection" data-param="aide" class="btn-action-header btn-icon-header" data-tooltip="nav-aide" title="Aide"><img src="icons/icon-wordbook.svg" alt="" class="header-icon"></button>
-                        <button data-action="afficherSection" data-param="reglages" class="btn-action-header btn-icon-header" data-tooltip="entete-reglages" title="R&eacute;glages"><img src="icons/icon-tune.svg" alt="" class="header-icon"></button>
-                    </div>
-
                 </div>
+            </div>
+
+            <!-- Popover utilitaires mobile (caché par défaut, ouvert par le bouton "⋯") -->
+            <div id="popover-utilitaires-mobile" class="popover-utilitaires u-hide" role="menu" aria-hidden="true">
+                <button class="popover-item" data-action="Codex.toggleMenu" role="menuitem">
+                    <span id="popover-codex-indicateur" class="popover-codex-indicateur u-hide"></span>
+                    <span>Codex</span>
+                </button>
+                <button class="popover-item" data-action="ouvrirModalRapportBug" role="menuitem">
+                    <img src="icons/icon-bug.svg" alt="" class="popover-icon">
+                    <span>Signaler un bug</span>
+                </button>
+                <button class="popover-item" data-action="basculerModeAnonymisation" role="menuitem">
+                    <img src="icons/icons8-anonymous-mask.svg" alt="" class="popover-icon">
+                    <span>Anonymisation</span>
+                </button>
+                <button class="popover-item" data-action="basculerTheme" role="menuitem">
+                    <img src="icons/icon-black-and-white.svg" alt="" class="popover-icon">
+                    <span>Thème clair/sombre</span>
+                </button>
+                <div class="popover-separateur" aria-hidden="true"></div>
+                <button class="popover-item" data-action="afficherSection" data-param="aide" role="menuitem">
+                    <img src="icons/icon-wordbook.svg" alt="" class="popover-icon">
+                    <span>Aide</span>
+                </button>
+                <button class="popover-item" data-action="afficherSection" data-param="reglages" role="menuitem">
+                    <img src="icons/icon-tune.svg" alt="" class="popover-icon">
+                    <span>Réglages</span>
+                </button>
             </div>
         </header>
 
@@ -3976,7 +3948,7 @@
 
         <!-- NAVIGATION PRINCIPALE -->
         <nav class="navigation-principale">
-            <!-- Boutons de navigation — format uniforme icône Icons8 + label -->
+            <!-- Boutons de navigation desktop — format uniforme icône Icons8 + label -->
             <div class="navigation-boutons">
                 <button data-onglet="accueil" data-tooltip="nav-accueil">
                     <img src="icons/icon-home.svg" alt="" class="nav-icon"><span class="nav-label">Accueil</span>
@@ -4000,10 +3972,24 @@
                     <img src="icons/icon-juggler.svg" alt="" class="nav-icon"><span class="nav-label">Labo</span>
                 </button>
             </div>
+
+            <!-- Select mobile (caché desktop par CSS) -->
+            <select id="select-nav-mobile" class="select-nav-mobile" aria-label="Section" data-on-change="changerSectionDepuisSelectMobile">
+                <option value="accueil">Accueil</option>
+                <option value="apercu">Aper&ccedil;u</option>
+                <option value="conception">Conception</option>
+                <option value="calendrier">Calendrier</option>
+                <option value="suivi">Suivi</option>
+                <option value="evaluations">&Eacute;valuation</option>
+                <option value="labo">Labo</option>
+            </select>
         </nav>
 
         <!-- SOUS-NAVIGATION (générée dynamiquement par 02-navigation.js) -->
         <div id="sous-navigation" class="sous-navigation"></div>
+
+        <!-- Select mobile pour la sous-nav (caché par défaut, peuplé dynamiquement par chrome-unifie.js) -->
+        <select id="select-sous-nav-mobile" class="select-sous-nav-mobile u-hide" aria-label="Sous-section" data-on-change="changerSousSectionDepuisSelectMobile"></select>
 
     <div class="conteneur">
 
@@ -14674,6 +14660,7 @@
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
     <script src="js/main.js?v=2026050543"></script> <!-- Refonte nav SP5 : naviguerVers calendrier-trimestre -->
+    <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
     <script src="js/init-inline.js?v=20260518a"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->

@@ -1,11 +1,30 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 18 mai 2026 (Beta 99.48, Build 0518-0540) — refactor `profil-etudiant.js` sessions A+B+C+D LIVRÉES (étape 3 + étape 4 partielle) sur worktree `refactor/profil-etudiant`. **EN ATTENTE validation Safari Mac Grégoire** (étape 5) avant merge FF main. 7 sous-modules autonomes (helpers + calculs + rapport session A + diagnostics + confidentiel session B + actions cascade session C + sections-affichage session D, renommage du résidu) : 102 fonctions extraites/réparties. profil-etudiant.js : 8 818 LOC monolithique → renommé, plus de résidu central. afficherProfilComplet cyc 58 → < 30 éclaté en 5 helpers (étape 4 cible dure atteinte sur le monstre central). 5 fonctions cyc > 30 héritées documentées comme à traiter cycle dédié Catégorie B post-merge. +2 bugs latents SUIVI-BUGS #105 (chargerProfilEtudiant dead code) + #106 (branche `progression && progressionVisible` manquante dans afficherProfilComplet). 23 items ouverts.
+> **Derniere mise a jour** : 24 mai 2026 (Beta 99.64, Build 0524-0548) — chantier chrome unifié LIVRÉ : refonte entête (Codex / Titre+Meta / Utilitaires en grid 3 colonnes), bande contexte ligne 2, nav primaire sticky avec gradient maritime continu, sous-nav vide masquée carré, breakpoint unique 1024px avec bouton ⋯ mobile + selects natifs nav/sous-nav, module `js/chrome-unifie.js`. +2 items #283 (harmonisation responsive pages à sidebar en mobile) + #284 (harmonisation structure titres+sous-titres) hors-scope chantier chrome.
 
 ---
 
 ## A faire
+
+### Post-chantier chrome unifié (24 mai 2026) — observations hors-scope
+
+> Observations relevées pendant les tests manuels du chrome unifié (Beta 99.64,
+> b0524-0548). Bugs et incohérences identifiés mais non traités dans le chantier
+> chrome (qui ne touche que entête + nav + sous-nav).
+
+- [ ] **#283** Harmonisation responsive des pages à sidebar en mobile (<1024 px)
+  - Pages concernées : Conception → Productions étudiantes / Grilles de critères / Échelles de performance / Pratiques de notation / Cartouches de rétroaction ; Évaluation → Liste des évaluations ; possiblement Calendrier → Trimestre.
+  - Symptôme actuel : sidebar gauche (cartes) + détails à droite. En mobile <1024 px, la zone détails apparaît en dessous de la sidebar mais le contenu est tronqué horizontalement (overflow), formulaires inutilisables au pouce.
+  - Bug pré-existant (reproductible en prod main et worktree), pas introduit par le chrome unifié.
+  - Options de fix : (a) basculer en sidebar empilée verticalement par-dessus les détails ; (b) push/slide-in modal pour les détails ; (c) cacher la sidebar derrière un bouton de retour.
+  - Lié au chantier d'harmonisation des pages (cf. #284).
+
+- [ ] **#284** Harmonisation de la structure des pages (titres + sous-titres descriptifs manquants)
+  - Pages avec titre + sous-titre descriptif : Aperçu, Suivi (Liste des élèves), Calendrier (Trimestre), Évaluation (Préparer et importer).
+  - Pages **sans** titre : Conception → Alignement pédagogique (carte mentale plein écran sans h1) ; Labo → Tirage au sort (2 cartes côte-à-côte directement, sans titre de page).
+  - Décision : ajouter un h1 + sous-titre 1-ligne descriptif sur toutes les sous-sections pour cohérence (pattern type « Préparer et importer ») OU décider que certaines pages sont délibérément plein écran.
+  - À traiter dans un chantier d'harmonisation UX post-AQPC.
 
 ### Reserve — Suite du chantier ecosysteme de donnees (26 avril 2026)
 

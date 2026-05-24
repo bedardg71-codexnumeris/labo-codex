@@ -860,70 +860,51 @@ h1, h2, h3, h4 {
     gap: 8px;
 }
 
-/* === LIGNE 1 : Logo + Titre + Version + Boutons === */
+/* === CHROME UNIFIÉ (23 mai 2026) ====================================
+   Ligne 1 : Codex (gauche) | Titre + Meta (centre) | Utilitaires (droite)
+             + bouton ⋯ mobile (caché desktop)
+   Ligne 2 : Bande contexte — sélecteur groupe-cours centré
+   Popover utilitaires mobile (caché par défaut, ouvert par ⋯)
+   ==================================================================== */
 
+/* Grid 3 colonnes 1fr | auto | 1fr — garantit le titre parfaitement
+   centré dans la viewport même si Codex (gauche) et utilitaires (droite)
+   ont des largeurs très différentes. */
 .entete-ligne1 {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
     gap: 20px;
-    justify-content: space-between;
-    position: relative;
     min-height: 64px;
     padding-bottom: 8px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.logo-section {
-    flex-shrink: 0;
+/* Codex (colonne 1, aligné à gauche) */
+.entete-codex {
+    grid-column: 1;
+    justify-self: start;
     display: flex;
     align-items: center;
-    gap: 12px;
     z-index: 1;
+    padding: 4px 0;
 }
 
-.logo {
-    width: 50px;
-    height: 50px;
-    background: var(--surface-carte, #1a3040);
-    border-radius: var(--radius-grand);  /* 12px - conteneur */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px;
-    box-shadow: var(--shadow-normal);
-}
-
-.logo img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
-.logo-meta {
-    font-size: 0.75rem;
-    color: var(--bleu-meta);
-    line-height: 1.2;
-    max-width: 150px;
-}
-
-/* === TITRE ET DESCRIPTION === */
-
+/* Titre + meta (colonne 2 — centré par le grid) */
 .titre-section {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    grid-column: 2;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 4px;
-    pointer-events: none;
+    min-width: 0;
 }
 
 .titre-section h1 {
     font-size: 2rem;
     font-weight: bold;
     margin: 0;
-    letter-spacing: 0px;
+    letter-spacing: 0;
     color: white;
     white-space: nowrap;
 }
@@ -933,9 +914,11 @@ h1, h2, h3, h4 {
     color: var(--bleu-meta);
     margin: 4px 0 0;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 2px;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
 }
 
 .titre-section .meta > .meta-version,
@@ -943,26 +926,154 @@ h1, h2, h3, h4 {
     white-space: nowrap;
 }
 
-/* Boutons utilitaires alignés à droite de la ligne 2 (sous Bug/Mode) */
-.entete-ligne2-droite {
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
+.meta-separateur {
+    color: rgba(255, 255, 255, 0.45);
+    user-select: none;
+}
+
+/* Utilitaires (colonne 3, aligné à droite) — 2 clusters séparés par
+   une ligne verticale */
+.entete-utilitaires {
+    grid-column: 3;
+    justify-self: end;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
+    z-index: 1;
+    padding: 4px 0;
 }
 
-/* Numéro de build dans l'entête */
-.build-numero {
-    font-size: 0.75rem;
-    color: inherit;
-    font-weight: normal;
-    margin-left: 4px;
+.utilitaires-groupe {
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
-/* Pastille de notification nouveautés (point rouge) */
+.utilitaires-separateur {
+    width: 1px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.18);
+    margin: 0 4px;
+}
+
+/* Bouton "⋯" mobile (caché par défaut sur desktop, montré <1024px).
+   Même colonne grid que les utilitaires desktop — l'un est caché,
+   l'autre visible selon le breakpoint. */
+.btn-utilitaires-mobile {
+    display: none;
+    grid-column: 3;
+    justify-self: end;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-moyen);
+    color: white;
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-utilitaires-mobile:hover,
+.btn-utilitaires-mobile:focus {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-utilitaires-mobile:focus {
+    box-shadow: var(--focus-ring);
+    outline: none;
+}
+
+/* Popover utilitaires mobile */
+.popover-utilitaires {
+    position: absolute;
+    top: 60px;
+    right: 12px;
+    z-index: 250;
+    background: var(--surface-carte, #142a38);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: var(--radius-grand);
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    box-shadow: var(--shadow-prononce);
+    min-width: 220px;
+}
+
+.popover-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    min-height: 44px;
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    border-radius: var(--radius-moyen);
+    font-size: 0.95rem;
+    width: 100%;
+    text-align: left;
+    transition: background 0.15s ease;
+}
+
+.popover-item:hover,
+.popover-item:focus {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.popover-item:focus {
+    box-shadow: var(--focus-ring);
+    outline: none;
+}
+
+.popover-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    flex-shrink: 0;
+}
+
+.popover-codex-indicateur {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--vert-succes, #4caf50);
+    flex-shrink: 0;
+}
+
+.popover-separateur {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.12);
+    margin: 4px 0;
+}
+
+/* === LIGNE 2 : Bande de contexte (sélecteur GC centré) === */
+
+.entete-ligne2 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 0 4px;
+}
+
+.entete-ligne2.bandeau-contexte {
+    background: rgba(106, 172, 184, 0.10);
+    border-top: 1px solid rgba(106, 172, 184, 0.18);
+    margin: 0 -30px -10px;
+    padding: 8px 30px;
+}
+
+/* Pastille de notification nouveautés (point rouge) — utilisé hors entête */
 .pastille-nouveautes {
     display: inline-block;
     font-size: 0.6rem;
@@ -1002,89 +1113,8 @@ h1, h2, h3, h4 {
     }
 }
 
-/* === CONTRÔLES HEADER GAUCHE + DROITE === */
-
-.entete-controles-gauche {
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: row;
-    gap: 12px;
-    align-items: center;
-    z-index: 1;
-    padding: 4px 0;
-}
-
-.entete-controles-droite {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    z-index: 1;
-    padding: 4px 0;
-}
-
-/* === LIGNE 2 : Informations contextuelles + Mode === */
-
-.entete-ligne2 {
-    position: relative; /* Pour positionner l'émoji Primo */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2px 0;
-}
-
-.separateur-contexte {
-    margin: 0 8px;
-    color: rgba(255, 255, 255, 0.60);
-    font-weight: normal;
-}
-
-/* ✅ BETA 95 : Dropdown de sélection de cours dans l'en-tête */
-.dropdown-cours-entete {
-    background: rgba(106, 172, 184, 0.12);
-    border: 1px solid rgba(106, 172, 184, 0.25);
-    border-radius: var(--radius-moyen);
-    color: white;
-    font-size: 0.95rem;
-    padding: 4px 28px 4px 10px;
-    cursor: pointer;
-    outline: none;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 8px center;
-    min-width: 150px;
-    transition: background 0.2s ease, border-color 0.2s ease;
-}
-
-.dropdown-cours-entete:hover {
-    background: rgba(106, 172, 184, 0.22);
-    border-color: rgba(106, 172, 184, 0.4);
-}
-
-.dropdown-cours-entete:focus {
-    background: rgba(106, 172, 184, 0.28);
-    border-color: rgba(106, 172, 184, 0.5);
-    box-shadow: var(--focus-ring);
-}
-
-.dropdown-cours-entete option {
-    background: var(--bleu-principal);
-    color: white;
-    padding: 8px;
-}
-
-/* Sélecteur de mode dans la navigation (à droite) */
-.selecteur-mode-nav {
-    margin-left: auto;
-    padding-right: 20px;
-}
-
-/* Boutons utilitaires de l'en-tête (Bug, Mode, Aide, Réglages) */
-.entete-controles-droite .btn-action-header,
-.entete-ligne2-droite .btn-action-header {
+/* === Boutons utilitaires header (Bug, Anonym, Thème, Aide, Réglages) === */
+.entete-utilitaires .btn-action-header {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1103,16 +1133,14 @@ h1, h2, h3, h4 {
     white-space: nowrap;
 }
 
-.entete-controles-droite .btn-action-header:hover,
-.entete-ligne2-droite .btn-action-header:hover {
+.entete-utilitaires .btn-action-header:hover {
     background: rgba(255, 255, 255, 0.18);
     border-color: rgba(255, 255, 255, 0.3);
     transform: translateY(-1px);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-.entete-controles-droite .btn-action-header.actif,
-.entete-ligne2-droite .btn-action-header.actif {
+.entete-utilitaires .btn-action-header.actif {
     background: rgba(255, 255, 255, 0.3);
     border-color: rgba(255, 255, 255, 0.5);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
@@ -1154,52 +1182,16 @@ h1, h2, h3, h4 {
     filter: brightness(0) invert(0.85);
 }
 
-/* === RESPONSIVE === */
+/* === RESPONSIVE — Breakpoint unique 1024px (Chrome unifié) === */
 
 @media (max-width: 1024px) {
-    /* Tablettes : réduire les gaps et tailles */
-    .entete-ligne1 {
-        gap: 15px;
-    }
-
-    .titre-section h1 {
-        font-size: 1.2rem;
-    }
-
-    .titre-section .meta {
-        font-size: 0.65rem;
-    }
-
-    .logo-meta {
-        font-size: 0.7rem;
-    }
-}
-
-@media (max-width: 768px) {
-    /* Mobile : empiler verticalement */
     .entete {
-        padding: 12px 20px;
+        padding: 12px 16px 8px;
     }
 
     .entete-ligne1 {
-        flex-direction: column;
-        gap: 10px;
-        text-align: center;
-    }
-
-    .entete-ligne2 {
-        flex-direction: column;
-        gap: 10px;
-        text-align: center;
-    }
-
-    .logo-section {
-        flex-direction: column;
-    }
-
-    .titre-section {
-        flex-direction: column;
-        gap: 5px;
+        gap: 12px;
+        min-height: 48px;
     }
 
     .titre-section h1 {
@@ -1208,23 +1200,43 @@ h1, h2, h3, h4 {
     }
 
     .titre-section .meta {
+        font-size: 0.7rem;
         white-space: normal;
     }
 
-    .logo-meta {
-        max-width: 100%;
+    /* Masquer build et séparateur sur mobile (gain d'espace) */
+    .titre-section .meta #build-numero,
+    .titre-section .meta-separateur {
+        display: none;
     }
 
-    .entete-controles-gauche {
-        justify-content: center;
-        gap: 6px;
-    }
-    .entete-controles-droite {
-        justify-content: center;
+    /* Cacher utilitaires desktop, montrer le bouton ⋯ */
+    .entete-utilitaires {
+        display: none;
     }
 
-    .separateur-contexte {
-        display: none; /* Masquer les séparateurs sur mobile */
+    .btn-utilitaires-mobile {
+        display: inline-flex;
+    }
+
+    /* Bande contexte mobile : pleine largeur, sélecteur en stretch */
+    .entete-ligne2.bandeau-contexte {
+        margin: 0 -16px -8px;
+        padding: 8px 16px;
+    }
+
+    .bandeau-groupe-cours {
+        width: 100%;
+        padding: 0;
+    }
+
+    .bandeau-groupe-cours-contenu {
+        width: 100%;
+    }
+
+    .dropdown-groupe-cours-header {
+        width: 100%;
+        min-width: 0;
     }
 }
 
@@ -1362,11 +1374,73 @@ h1, h2, h3, h4 {
    =============================== */
 
 .navigation-principale {
-    background: transparent;
-    padding: 24px 20px 15px 20px;
+    /* Continuation du gradient maritime de l'entête — pas de bande
+       disgracieuse à l'état initial, fond cohérent quand sticky au scroll. */
+    background: linear-gradient(135deg, #0a1820 0%, #142a38 40%, #1a3848 70%, #0e2028 100%);
+    padding: 12px 20px 15px;
     display: flex;
     justify-content: center;
+    align-items: center;
     gap: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.navigation-boutons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Selects mobile (cachés desktop, montrés <1024px) */
+.select-nav-mobile,
+.select-sous-nav-mobile {
+    display: none;
+    width: 100%;
+    height: 44px;
+    padding: 0 36px 0 14px;
+    background-color: rgba(106, 172, 184, 0.12);
+    border: 1px solid rgba(106, 172, 184, 0.25);
+    border-radius: var(--radius-moyen);
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.select-nav-mobile:hover,
+.select-sous-nav-mobile:hover {
+    background-color: rgba(106, 172, 184, 0.22);
+    border-color: rgba(106, 172, 184, 0.4);
+}
+
+.select-nav-mobile:focus,
+.select-sous-nav-mobile:focus {
+    background-color: rgba(106, 172, 184, 0.28);
+    border-color: rgba(106, 172, 184, 0.5);
+    box-shadow: var(--focus-ring);
+}
+
+.select-nav-mobile option,
+.select-sous-nav-mobile option {
+    background: var(--bleu-principal);
+    color: white;
+    padding: 10px;
+}
+
+.select-sous-nav-mobile {
+    font-size: 0.9rem;
+    font-weight: 500;
 }
 
 .navigation-principale button {
@@ -1469,10 +1543,10 @@ h1, h2, h3, h4 {
     box-shadow: var(--shadow-normal);
 }
 
+/* Sous-nav masquée carré quand la section n'a pas de sous-sections
+   (Accueil, Aperçu) — le contenu remonte et le layout danse visiblement. */
 .sous-navigation.vide {
-    background: transparent;
-    padding: 0;
-    border: none;
+    display: none;
 }
 
 .sous-navigation .vide {
@@ -4702,7 +4776,7 @@ body:not(.mode-clair) .badge-source--demo {
    RESPONSIVE
    =============================== */
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     body {
         padding: 0;
     }
@@ -4712,17 +4786,43 @@ body:not(.mode-clair) .badge-source--demo {
         margin: 0;
     }
 
+    /* Nav primaire mobile : cache les boutons, montre le select natif.
+       Reste sticky en haut (single source of stickiness pour la nav). */
     .navigation-principale {
-        flex-wrap: wrap;
+        padding: 8px 12px;
+        gap: 0;
     }
 
-    .navigation-principale button {
-        flex: 1;
-        min-width: 150px;
+    .navigation-boutons {
+        display: none;
     }
 
+    .select-nav-mobile {
+        display: block;
+    }
+
+    /* Sous-nav mobile : cache les boutons, montre le select sticky
+       collé sous la nav primaire (l'accès permanent compense le coût
+       de scroll sur petit écran). */
     .sous-navigation {
-        padding: 10px;
+        display: none;
+    }
+
+    .select-sous-nav-mobile:not(.u-hide) {
+        display: block;
+        position: sticky;
+        top: 60px;
+        z-index: 99;
+        margin: 0 12px 8px;
+        width: calc(100% - 24px);
+    }
+
+    .contenu {
+        padding: var(--espacement-moyen);
+    }
+
+    .carte {
+        padding: 15px;
     }
 
     .grille-statistiques {
@@ -4737,28 +4837,11 @@ body:not(.mode-clair) .badge-source--demo {
     .tableau td {
         padding: 8px 6px;
     }
-
-    .contenu {
-        padding: var(--espacement-moyen);
-    }
-
-    .carte {
-        padding: 15px;
-    }
 }
 
 @media (max-width: 480px) {
     .entete h1 {
-        font-size: 1.5rem;
-    }
-
-    .entete h2 {
-        font-size: 1rem;
-    }
-
-    .navigation-principale button {
-        font-size: 0.85rem;
-        padding: 12px 15px;
+        font-size: 1.2rem;
     }
 
     .carte-statistique .valeur {
@@ -19656,12 +19739,71 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     color: var(--bleu-meta);
 }
 
-.mode-clair .logo-meta {
-    color: var(--bleu-meta);
+.mode-clair .meta-separateur {
+    color: rgba(255, 255, 255, 0.50);
 }
 
-.mode-clair .separateur-contexte {
-    color: rgba(255, 255, 255, 0.60);
+/* Bande contexte (ligne 2) — fond légèrement contrasté en mode clair aussi */
+.mode-clair .entete-ligne2.bandeau-contexte {
+    background: rgba(255, 255, 255, 0.06);
+    border-top-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Popover utilitaires mobile — fond surface en mode clair */
+.mode-clair .popover-utilitaires {
+    background: var(--surface-carte);
+    border-color: rgba(3, 46, 92, 0.18);
+    color: var(--texte-principal);
+}
+
+.mode-clair .popover-item {
+    color: var(--texte-principal);
+}
+
+.mode-clair .popover-item:hover,
+.mode-clair .popover-item:focus {
+    background: rgba(3, 46, 92, 0.06);
+}
+
+.mode-clair .popover-icon {
+    filter: brightness(0) invert(0.25);
+}
+
+.mode-clair .popover-separateur {
+    background: rgba(3, 46, 92, 0.12);
+}
+
+/* Selects mobile (nav + sous-nav) — bleu principal en mode clair */
+.mode-clair .select-nav-mobile,
+.mode-clair .select-sous-nav-mobile {
+    background-color: rgba(3, 46, 92, 0.6);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: white;
+}
+
+.mode-clair .select-nav-mobile:hover,
+.mode-clair .select-sous-nav-mobile:hover {
+    background-color: rgba(3, 46, 92, 0.75);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.mode-clair .select-nav-mobile option,
+.mode-clair .select-sous-nav-mobile option {
+    color: white;
+    background: var(--bleu-fonce);
+}
+
+/* Bouton ⋯ mobile — bleu principal en mode clair */
+.mode-clair .btn-utilitaires-mobile {
+    background: rgba(3, 46, 92, 0.6);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: white;
+}
+
+.mode-clair .btn-utilitaires-mobile:hover,
+.mode-clair .btn-utilitaires-mobile:focus {
+    background: rgba(3, 46, 92, 0.75);
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 /* Dropdown cours dans en-tête — même bleu que la navigation */
@@ -19708,6 +19850,11 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 .mode-clair .dropdown-cours-entete option {
     color: white;
     background: var(--bleu-fonce);
+}
+
+/* Navigation principale mode clair — continuation du gradient de l'entête */
+.mode-clair .navigation-principale {
+    background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
 }
 
 /* Navigation principale — bleu principal solide */
@@ -22781,8 +22928,7 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
    ============================================================ */
 @media (pointer: coarse) {
     .btn,
-    .entete-controles-droite .btn-action-header,
-    .entete-ligne2-droite .btn-action-header {
+    .entete-utilitaires .btn-action-header {
         min-height: 44px;
     }
 
