@@ -293,6 +293,20 @@
             critere.sub
         ].filter(Boolean).join(' · ');
 
+        // Ligne compacte de calcul pour les critères algorithmiques :
+        //   « 15 erreurs sur 584 mots → 7.16/20 (35.8%) »
+        // Données lues depuis l'évaluation (donneesAlgorithmiques) + la
+        // pondération du critère (grille). Aucun hard-code.
+        let ligneAlgo = '';
+        if (critere.algo) {
+            const a = critere.algo;
+            const noteTxt = (typeof a.noteCalculee === 'number') ? a.noteCalculee.toFixed(2) : '—';
+            const pctTxt  = (typeof a.pourcentage === 'number')  ? a.pourcentage.toFixed(1) : '—';
+            ligneAlgo = `<div style="font-family: ${FONT_MONO}; font-size: 9px; color: ${MUTED}; margin-bottom: 3px;">`
+                      + `${esc(a.erreurs)} erreurs sur ${esc(a.mots)} mots &rarr; <b style="color: ${INK};">${esc(noteTxt)}/${esc(a.ponderation)}</b> (${esc(pctTxt)} %)`
+                      + `</div>`;
+        }
+
         return `
             <div style="display: grid; grid-template-columns: 130px 135px 1fr; gap: 10px; align-items: center; padding: 8px 10px; ${isLast ? '' : `border-bottom: 1px solid ${LINE};`}">
                 <div>
@@ -300,7 +314,10 @@
                     ${sub ? `<div style="font-family: ${FONT_MONO}; font-size: 7.5px; color: ${MUTED}; letter-spacing: 0.3px;">${esc(sub)}</div>` : ''}
                 </div>
                 <div style="display: flex; gap: 3px; align-items: center;">${segments}</div>
-                <div style="font-size: 10px; line-height: 1.35;">${esc(critere.comment || '')}</div>
+                <div style="font-size: 10px; line-height: 1.35;">
+                    ${ligneAlgo}
+                    ${esc(critere.comment || '')}
+                </div>
             </div>`;
     }
 

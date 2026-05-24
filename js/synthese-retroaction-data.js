@@ -281,14 +281,16 @@
             const def = grilleCriteres.find(gc => gc.id === c.critereId || gc.nom === c.critereNom) || {};
             const niveau = c.niveauSelectionne || '';
             const cleCart = c.critereId && niveau ? `${c.critereId}_${niveau}` : null;
+            const estAlgorithmique = def.type === 'algorithmique';
+            const donneesAlgoCrit = (estAlgorithmique && donneesAlgo[c.critereId]) ? donneesAlgo[c.critereId] : null;
+            const ponderationCrit = (typeof c.ponderation === 'number') ? c.ponderation : (def.ponderation || 0);
+
             // Rétroaction algorithmique (ex. Français écrit : « Ta rédaction
             // contient X erreurs… ») persistée sur l'évaluation au moment de
             // la saisie. Sans ce fallback, le PDF affiche le placeholder
             // « Saisissez les erreurs et le nombre de mots ».
-            const retroAlgo = (def.type === 'algorithmique'
-                && donneesAlgo[c.critereId]
-                && donneesAlgo[c.critereId].retroaction)
-                ? String(donneesAlgo[c.critereId].retroaction).trim()
+            const retroAlgo = (donneesAlgoCrit && donneesAlgoCrit.retroaction)
+                ? String(donneesAlgoCrit.retroaction).trim()
                 : '';
             const commentaire =
                 (c.retroaction && c.retroaction.trim()) ||
@@ -296,13 +298,26 @@
                 (cartouche && cleCart && cartouche.commentaires && cartouche.commentaires[cleCart]) ||
                 '';
 
+            // Données chiffrées du critère algorithmique : sert au rendu d'une
+            // ligne compacte « N erreurs sur M mots → X/P (Y%) » dans le PDF,
+            // analogue à la boîte de résultat de l'app. Le commentaire texte
+            // (générique ou personnalisé) est préservé tel quel.
+            const algo = (donneesAlgoCrit && typeof donneesAlgoCrit.erreurs === 'number' && typeof donneesAlgoCrit.mots === 'number') ? {
+                erreurs:      donneesAlgoCrit.erreurs,
+                mots:         donneesAlgoCrit.mots,
+                noteCalculee: (typeof donneesAlgoCrit.noteCalculee === 'number') ? donneesAlgoCrit.noteCalculee : null,
+                pourcentage:  (typeof donneesAlgoCrit.pourcentage === 'number') ? donneesAlgoCrit.pourcentage : null,
+                ponderation:  ponderationCrit
+            } : null;
+
             return {
                 key:     c.critereId || c.critereNom || '',
                 name:    c.critereNom || def.nom || '',
-                weight:  typeof c.ponderation === 'number' ? c.ponderation : (def.ponderation || 0),
+                weight:  ponderationCrit,
                 sub:     def.description || '',
                 code:    niveau,
-                comment: commentaire
+                comment: commentaire,
+                algo:    algo
             };
         });
     }
