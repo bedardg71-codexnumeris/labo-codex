@@ -779,9 +779,10 @@
             margin-bottom: 24px;
         }
 
-        /* Carte raccourci (action) — repose directement sur le fond `--surface-section`
-           visible derrière la navigation principale, sans wrapper intermédiaire.
-           `--surface-carte` (#1a3040) est la teinte des cartes standard de l'app. */
+        /* Carte raccourci (action) — layout horizontal harmonisé avec
+           les cartes Utilitaires/Aide : icône à gauche + titre/desc empilés
+           à droite (grid 2 colonnes, icône à cheval sur les 2 rangées).
+           Réduit la hauteur de chaque carte → moins de scroll sur device. */
         .accueil-action {
             background: var(--surface-carte, #1a3040);
             border: 1px solid rgba(106, 172, 184, 0.15);
@@ -790,6 +791,14 @@
             cursor: pointer;
             transition: border-color 0.15s, background 0.15s, transform 0.15s;
             text-align: left;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            grid-template-areas:
+                "icone titre"
+                "icone desc";
+            column-gap: 14px;
+            row-gap: 4px;
+            align-items: start;
         }
         .accueil-action:hover {
             border-color: var(--accent-primaire);
@@ -797,16 +806,19 @@
             transform: translateY(-1px);
         }
         .accueil-action-icone {
+            grid-area: icone;
             font-size: 1.5rem;
-            margin-bottom: 8px;
+            align-self: start;
+            margin-top: 2px;
         }
         .accueil-action-titre {
+            grid-area: titre;
             font-weight: 600;
             color: var(--texte-principal);
             font-size: 0.95rem;
-            margin-bottom: 4px;
         }
         .accueil-action-desc {
+            grid-area: desc;
             font-size: 0.82rem;
             color: var(--texte-secondaire);
             line-height: 1.4;
@@ -979,7 +991,16 @@
                 grid-template-columns: 1fr;
             }
             .accueil-grille-labels {
-                display: none; /* labels redondants quand chaque carte est sur sa propre ligne */
+                /* Masqués en 1 colonne : le label "Aide" à droite du label
+                   "Utilitaires" pointerait visuellement vers les cartes
+                   utilitaires empilées en dessous, ce qui est trompeur. */
+                display: none;
+            }
+            .accueil-grille-bas {
+                /* Compense l'absence des labels masqués pour conserver
+                   la séparation visuelle entre les raccourcis et les
+                   cartes utilitaires/aide. */
+                margin-top: 28px;
             }
             .accueil-page {
                 padding: 25px 15px 40px;
