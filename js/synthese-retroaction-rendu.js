@@ -547,12 +547,23 @@
         const titreBloc  = estFinale ? 'Note finale' : 'Note provisoire';
         const nbSelection = note.nombreSelection || note.selection.length;
 
+        // Formate « niveau, note % » si les deux sont présents ; tombe sur le
+        // seul présent sinon (ex. obligatoire non remis = pas de note).
+        const formaterNiveauNote = (niveau, n) => {
+            const noteAffichee = (typeof n === 'number') ? `${Math.round(n * 10) / 10} %` : null;
+            if (niveau && noteAffichee) return `${niveau}, ${noteAffichee}`;
+            if (niveau) return niveau;
+            if (noteAffichee) return noteAffichee;
+            return '';
+        };
+
         // ----- Colonne gauche : sélection (les N meilleurs) -----
         const libelleSelection = estHybride
             ? `Sélection (les ${esc(nbSelection)} meilleurs)`
             : `Voici les ${esc(nbSelection)} meilleurs artefacts que tu as produits`;
         const itemsSelection = note.selection.map(art => {
-            const ligne = `${esc(art.titre)} (${esc(art.niveau)})${art.activite ? ' : ' + esc(art.activite) : ''}`;
+            const marqueur = formaterNiveauNote(art.niveau, art.note);
+            const ligne = `${esc(art.titre)}${marqueur ? ` (${esc(marqueur)})` : ''}${art.activite ? ' : ' + esc(art.activite) : ''}`;
             return `<li style="margin-bottom: 2px;">${ligne}</li>`;
         }).join('');
         const colGauche = `<div>${libelleSelection} :</div><ul style="margin: 2px 0 0 0; padding-left: 14px;">${itemsSelection}</ul>`;
@@ -562,9 +573,10 @@
         if (estHybride && Array.isArray(note.obligatoires) && note.obligatoires.length) {
             const items = note.obligatoires.map(o => {
                 let ligne = esc(o.titre);
-                ligne += o.niveau ? ` (${esc(o.niveau)})` : ' (non remis)';
+                const marqueur = formaterNiveauNote(o.niveau, o.note);
+                ligne += marqueur ? ` (${esc(marqueur)})` : ' (non remis)';
                 if (o.activite) ligne += ' : ' + esc(o.activite);
-                if (o.echeance) ligne += ` (échéance : ${esc(formaterDateLongue(o.echeance))})`;
+                if (o.echeance && !estFinale) ligne += ` (échéance : ${esc(formaterDateLongue(o.echeance))})`;
                 return `<li style="margin-bottom: 2px;">${ligne}</li>`;
             }).join('');
             blocsDroite.push(`<div>Obligatoires (${esc(note.obligatoires.length)} production${note.obligatoires.length > 1 ? 's' : ''}) :</div><ul style="margin: 2px 0 6px 0; padding-left: 14px;">${items}</ul>`);
@@ -590,7 +602,7 @@
         const messages = [];
         if (typeof note.moyenne === 'number' && !isNaN(note.moyenne)) {
             const phraseChiffree = estFinale
-                ? `Ta note finale de portfolio est ${esc(note.moyenne)} %.`
+                ? `Ta note finale est ${esc(note.moyenne)} %.`
                 : `La note chiffrée provisoire de ton portfolio est ${esc(note.moyenne)} %. Cette note peut changer en fonction de tes prochains travaux et des jetons que tu appliques.`;
             messages.push(phraseChiffree);
         }
