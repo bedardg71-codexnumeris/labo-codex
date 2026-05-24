@@ -98,7 +98,8 @@
         if (ponderationTotal === 0) return null;
         const pctGlobal = noteTotal / ponderationTotal;
         const niveauGlobal = determinerNiveauIDME(pctGlobal, echelle);
-        return { noteFinale: pctGlobal, niveauFinal: niveauGlobal || '' };
+        // Arrondir à 1 décimale comme convention app (cf. evaluation.js:2147)
+        return { noteFinale: Math.round(pctGlobal * 10) / 10, niveauFinal: niveauGlobal || '' };
     }
 
     function obtenirFichierEtAnnotation(evaluation) {

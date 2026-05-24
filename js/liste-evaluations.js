@@ -875,7 +875,7 @@ function obtenirNoteAffichee(evaluation, estPAN) {
     if (estPAN) {
         return evaluation.niveauFinal || '-';
     } else {
-        return evaluation.noteFinale != null && evaluation.noteFinale !== 0 ? `${evaluation.noteFinale}%` : '-';
+        return evaluation.noteFinale != null && evaluation.noteFinale !== 0 ? `${(Math.round(evaluation.noteFinale * 10) / 10)}%` : '-';
     }
 }
 
@@ -1042,7 +1042,7 @@ function genererLigneHTML(ligne) {
                 parties.push(ligne.scoresOriginaux.niveauFinal);
             }
             if (ligne.scoresOriginaux.noteFinale != null) {
-                parties.push(ligne.scoresOriginaux.noteFinale + '%');
+                parties.push((Math.round(ligne.scoresOriginaux.noteFinale * 10) / 10) + '%');
             }
             if (parties.length > 0) {
                 infoOriginale = ' <span class="badge-jeton-original">(était ' + parties.join(' · ') + ')</span>';
@@ -1427,7 +1427,7 @@ function ouvrirProprieteFichier(fichierId) {
         var prod = productions.find(function(p) { return p.id === e.productionId; });
         var nomProd = prod ? (prod.titre || prod.nom) : (e.productionId || '?');
         var type = e.remplaceeParId ? ' (Remplac\u00e9e)' : (e.repriseDeId ? ' (Reprise)' : '');
-        var note = e.noteFinale != null ? ' \u2014 ' + e.niveauFinal + ' ' + e.noteFinale + '%' : '';
+        var note = e.noteFinale != null ? ' \u2014 ' + e.niveauFinal + ' ' + (Math.round(e.noteFinale * 10) / 10) + '%' : '';
         var label = nomProd + type + note;
         var selected = (e.id === fichier.evaluationId) ? ' selected' : '';
         return '<option value="' + echapperHtml(e.id) + '"' + selected + '>' + echapperHtml(label) + '</option>';
