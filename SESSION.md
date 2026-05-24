@@ -1,32 +1,32 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 24 mai 2026 fin de matinée,
-     post-livraison refonte pratique active + namespacing — Phases A, E,
-     F, G1, G2-a + wizard fix CLE_PRATIQUES_CONFIGURATIONS. Beta 99.64
-     b0524-1035 — même beta, bump build seulement.)
-     Ce SESSION.md vit sur la branche `main` du worktree principal et sert
-     de relai entre les sessions Claude. Il décrit l'état post-refonte
-     pratique active, prêt pour la reprise des phases B (PDF rétroaction),
-     C (UI profil), D (retrait legacy mat-variante-calcul), G2-b (les 30
-     sites legacy de configPAN.portfolio).
-     L'historique complet (chrome unifié 24 mai matin, #282 P1-P4 du 23
-     mai, cycle AQPC clos 22 mai, Cat-B clos 21 mai) reste dans les §§
-     suivants comme référence.
+     IDENTIFICATION DE CE FICHIER  (mis à jour 24 mai 2026 fin de
+     journée, post-livraison Phase B + Phase C + chasse au bug
+     auto-save race condition. Beta 99.64 b0524-1640 — même beta toute
+     la journée, bump de build seulement entre chantiers.)
+     Ce SESSION.md vit sur la branche `main` du worktree principal et
+     sert de relai entre les sessions Claude. Il décrit l'état
+     post-livraison Phase B/C + fix critique race-condition autosave,
+     prêt pour la REPRISE DE L'AUDIT ANNUEL (priorité explicite de
+     Grégoire pour la prochaine session).
+     L'historique complet (refonte pratique active 24 mai matin, chrome
+     unifié 24 mai matin, #282 P1-P4 du 23 mai, cycle AQPC clos 22 mai,
+     Cat-B clos 21 mai) reste dans les §§ suivants comme référence.
      ===================================================================== -->
 
 > **📌 Identification**
 > - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
-> - **Cycle qui vient d'être livré** : **refonte pratique active + namespacing** — Phases A (type explicite terminale + retrait fallbacks 60/40), E (namespacing modalitesEvaluation), F (namespacing pratiquesConfigurables), G1 (migration types→ids configurables), G2-a (retrait fallback configPAN.portfolio dans calculateur principal), wizard fix CLE_PRATIQUES_CONFIGURATIONS. Beta 99.64 b0524-1035, commit `6f85512`.
-> - **Cycle suivant** : Phase B (PDF rétroaction — besoin pédagogique original), Phase C (UI profil — cacher bloc terminale fantôme), Phase D (retrait legacy `mat-variante-calcul`), puis G2-b (30 sites legacy `configPAN.portfolio`).
-> - **Document de référence du chantier livré** : `plans de travail/PLAN-refonte-note-finale-portfolio.md`
+> - **Cycle qui vient d'être livré** : **Phase B + Phase C + fix race-condition autosave** — refonte du PDF rétroaction Note finale (Phase B), section Note finale du profil étudiant alignée sur le PDF (Phase C), placeholder « 500 » trompeur retiré, et fix critique d'une race condition d'auto-save qui causait la perte silencieuse de `donneesAlgorithmiques` (nombre de mots/erreurs) entre les évaluations. Beta 99.64 b0524-1640, HEAD `b46185f`.
+> - **Cycle suivant** : **REPRISE DE L'AUDIT ANNUEL** sur la branche `audit/2026-mai`. Convergence post-AQPC à planifier. Voir §3 pour la consigne complète.
+> - **Documents de référence du cycle livré** : `plans de travail/PLAN-refonte-note-finale-portfolio.md` + mémoires `feedback-autosave-race-condition` + `project-autosaves-a-auditer`.
 
-# SESSION — État au 24 mai 2026 fin de matinée (post refonte pratique active livrée)
+# SESSION — État au 24 mai 2026 fin de journée (Phase B + C livrées + bug auto-save critique fixé)
 
-**Beta / build** : 99.64 / 0524-1035 (bump de build seulement, beta conservée à la demande de Grégoire).
-**Branche `main`** : HEAD à `6f85512` refactor(pratique-active) post-commit direct sur main (pas de worktree dédié).
-  - **Commit unique** : `6f85512` — 51 fichiers touchés, +700 / −337 LOC. Inclut Phases A + E + F + G1 + G2-a + wizard fix + version bump + plan markdown.
-**Tests** : 85 Vitest + 18 Playwright = 103/103 verts au moment du commit. Hook pré-push Défense J : 91 warnings sur écritures sensibles (lectures internes, pas d'input externe — `// security-ok` peut être ajouté plus tard pour acquitter).
+**Beta / build** : 99.64 / 0524-1640 (10 bumps de build sur la journée, beta conservée).
+**Branche `main`** : HEAD à `b46185f` fix(eval): suspendre auto-save pendant le chargement d'une évaluation (race condition).
+  - **Commits du 24 mai PM (10)** : `f4cbea7` Phase B → `aa9f26d` polish PDF → `2da9d9f` Phase C hybride → `41f77cb` titre dynamique + lien réglages → `678770d` calcul détaillé → `6e31fce` ligne compacte critère algo → `28e9d45` non-remis=0 en mode finale → `a633763` retrait placeholder « 500 » → `2259889` fix race-condition `donneesAlgorithmiques` → `b46185f` flag suspension auto-save générique.
+**Tests** : 85 Vitest + 18 Playwright = 103/103 verts à chaque commit. Hook pré-push vert.
 
-**Cycle suivant immédiat** : (1) Reprise dans une nouvelle session des phases B/C/D + G2-b. Plan détaillé dans `plans de travail/PLAN-refonte-note-finale-portfolio.md` et §1sexies ci-dessous. (2) Le besoin pédagogique original (refonte PDF rétroaction de l'élève) reste pendant : Grégoire ne pourra finaliser sa remise des notes a2025 qu'après Phase B. (3) Aucune action de cleanup post-merge nécessaire (commit direct sur main, pas de worktree à retirer).
+**Cycle suivant immédiat** : **Reprise de l'audit annuel** sur la branche `audit/2026-mai`. Cette branche est divergée de `main` depuis le 12 mai et accumule du retard. Grégoire a explicitement demandé de la finaliser. Voir §3 pour le détail. Note : aucune action de cleanup nécessaire (tous commits directs sur main, pas de worktree à retirer ; les modifications doc-mémoire sont locales et non versionnées).
 
 ---
 
@@ -61,6 +61,15 @@
 - ❌ **`navigation.js:250-251`** appelle encore `initialiserModuleTrimestre` via `if (typeof X === 'function')` — Zone protégée CLAUDE.md, guard intact (devient simplement faux, pas de régression boot). Ne pas toucher sans validation Grégoire.
 - ❌ **`coursEnEdition` (config.js L199)** est désormais orphelin (plus aucun caller après chantier 2.1). Zone protégée → laissé en place. À retirer dans un chantier dédié config.js si Grégoire autorise.
 - ⚠️ **Tests manuels UI obligatoires** côté zone Réglages (Cours / Groupe / Trimestre) — la suite Vitest ne couvre pas ces flows ; un appel `window[nomFonction]()` dynamique pourrait avoir été manqué par l'audit statique.
+
+### Garde-fous Phase B/C + race-condition autosave (livrés 24 mai PM, commits `f4cbea7` → `b46185f`)
+
+- ❌ **Ne pas réintroduire le pattern fallback `||` pour les objets snapshot d'auto-save**. En JS, `{}` et `[]` sont TRUTHY donc `snapshot.X || target.X || {}` retourne TOUJOURS le snapshot, même vide → écrasement silencieux de données déjà persistées. Bug réel observé le 24 mai sur `donneesAlgorithmiques` (les nombres de mots des évaluations a2025 disparaissaient après quelques aller-retours). Toujours utiliser `if (snapshot.X && Object.keys(snapshot.X).length > 0)`. Cf. [[feedback-autosave-race-condition]].
+- ❌ **Ne pas retirer le flag `window._autoSaveSuspendu`** ni la fonction `_suspendreAutoSaveTemporairement()` dans `evaluation-chargement.js`. Suspendre l'auto-save pendant 500 ms est essentiel pour éviter qu'un snapshot pris pendant la cascade de chargement (`reset partiel sync` puis `restauration async via setTimeout + dispatchEvent`) ne capture un état tronqué/vide. Les 3 entry points à protéger sont : `chargerEvaluationsEtudiant`, `demarrerEvaluationDepuisFichier`, `verifierEtChargerEvaluationExistante`. Si tu ajoutes une 4e entry point de chargement, ajoute-y aussi l'appel.
+- ❌ **Ne pas réintroduire le placeholder `"500"` dans le champ « Nombre de mots »** (`evaluation-chargement.js` lignes ~857/892/1037). Trompeur : Grégoire pensait que c'était une vraie valeur saisie et ne tapait pas le bon nombre → calcul algorithmique jamais déclenché → PDF rétroaction sans rétroaction du critère Français écrit + note finale fausse. Le placeholder « 0 » du champ « Nombre d'erreurs » est conservé (auto-propagé depuis les tampons, donc pas trompeur).
+- ❌ **Ne pas modifier la sémantique « obligatoires non remises = 0 » dans `_selectionnerArtefactsHybride`** sans considérer le flag `estFinale`. Cette pénalité s'applique UNIQUEMENT quand `configuration.notesFinales === true` (mode finale). En mode provisoire, les obligatoires non remises sont IGNORÉES (ne pénalisent pas la note tant que la session continue). Le calculateur reçoit `estFinale` en paramètre depuis `calculerDetailsNoteFinale`. Cf. réglage UI « Note = 0 si production non remise » du wizard pratique.
+- ❌ **Ne pas dupliquer le calcul de la note finale entre app et PDF**. Le PDF (`synthese-retroaction-rendu.js renderRangeeNote`) et l'app (`profil-etudiant-sections-affichage.js`, bloc note-finale) doivent rester structurellement identiques : 2 cartes (Sélection / Obligatoires) avec calcul détaillé `(N1 + N2 + ...) ÷ N = moyenne × P% = pts`, puis bloc résultat final encadré. Toute divergence pédagogique = bug. Source unique : `calculerDetailsNoteFinale(da)` (qui lit `obtenirConfigPratiqueActive()`).
+- ⚠️ **Audit à mener** : autres auto-saves du projet (wizard pratique, formulaires cours/groupe, mind map, etc.) peuvent avoir le même bug pattern. Cf. [[project-autosaves-a-auditer]] pour la liste et la démarche.
 
 ### Garde-fous refonte pratique active (livrée 24 mai fin de matinée, commit `6f85512`)
 
@@ -537,6 +546,43 @@ La pratique « PAN-Littérature A25 » avait l'auteur Bruno V. / Cégep Laurende
 
 ---
 
+## §1septies — Phase B + Phase C + fix race-condition autosave LIVRÉS (24 mai 2026 PM/soir)
+
+**10 commits sur main** (chronologique du PM/soir) : `f4cbea7` → `b46185f`. Tous direct sur main (pas de worktree), tests 103/103 verts à chaque jalon. Beta inchangée 99.64, 10 bumps de build (`0524-1240` → `0524-1640`).
+
+### Récap des chantiers livrés
+
+| # | Commit | Beta/build | Chantier | Effet |
+|---|---|---|---|---|
+| 1 | `f4cbea7` | 99.64 b0524-1240 | **Phase B** | Refonte data shape `construireNoteProvisoire` (sépare `selection` vs `obligatoires`, retire fallbacks `\|\|65`/`\|\|35`) + refonte rendu `renderRangeeNote` (titre dynamique Provisoire/Finale, formule explicite, doublon éliminé). Toggle « Notes finalisées » dans le wizard pratique (case à cocher dans la carte « Informations de base ») piloté par `configuration.notesFinales`. |
+| 2 | `aa9f26d` | 99.64 b0524-1320 | Polish PDF | « Ta note finale de portfolio » → « Ta note finale ». Note chiffrée par artefact `(M, 78 %)`. Échéances obligatoires masquées en mode finale. Rétroaction algorithmique Français écrit lue depuis `evaluation.donneesAlgorithmiques[id].retroaction` (fallback pour critère algo). Bloc résultat algo coloré dans l'app via `_appliquerStyleResultatAlgo` (bande verticale + fond tinté selon `obtenirCouleurNiveau`). |
+| 3 | `2da9d9f` | 99.64 b0524-1340 | **Phase C** | Section Note finale du profil étudiant : 3 cas distingués selon `terminal.present` et `estHybride`. En mode hybride sans terminale (cas h2026) : carte gauche = Sélection, carte droite = Obligatoires (retenus + non remis). Pondérations lues depuis `obtenirConfigCategories()`. La carte « Évaluation terminale × 0% » fantôme disparaît. |
+| 4 | `41f77cb` | 99.64 b0524-1420 | Titre dynamique + lien réglages | Titre « Note finale de session » ou « Note provisoire de session » selon `configuration.notesFinales` (plus de contradiction « finale (provisoire) »). `calculerDetailsNoteFinale` expose `estFinale` + `pratiqueId`. Bouton « Réglages de la pratique » à droite du titre → `ouvrirReglagesPratique(id)` enchaîne `afficherSection('conception')` + `afficherSousSection('conception-pratiques-notation')` + `chargerPratiquePourModif`. Format lignes aligné sur PDF : `Artefact N (M 75.0%) : Activité`. |
+| 5 | `678770d` | 99.64 b0524-1450 | Calcul détaillé + rendu PDF = app | Sous chaque liste (app + PDF) : `(75% + 75% + 75% + 73%) ÷ 4 = 74.5% × 65% = 48.4 pts`. PDF refondu : bloc résultat final EN BAS (était en haut) avec grand chiffre `71.6%` encadré, identique au pattern de l'app. Mention italique « Note provisoire — peut changer… » uniquement en mode provisoire. Titres enrichis : « Sélection (les 4 meilleures sur 8 évaluées) (65%) ». Helper `calculCategorie(items, ponderation, comptenonRemisCommeZero)`. |
+| 6 | `6e31fce` | 99.64 b0524-1505 | Ligne compacte critère algo PDF | Pour critères algorithmiques (Français écrit) : « 15 erreurs sur 584 mots → 7.16/20 (35.8 %) » au-dessus du commentaire texte. Data shape ajoute `critere.algo = {erreurs, mots, noteCalculee, pourcentage, ponderation}`. |
+| 7 | `28e9d45` | 99.64 b0524-1515 | Non-remis = 0 en mode finale UNIQUEMENT | `_selectionnerArtefactsHybride` reçoit `estFinale` en paramètre. Dénominateur de la moyenne obligatoires : pool total si mode finale (non-remises = 0), sinon nb d'obligatoires évaluées seulement. `calculerDetailsNoteFinale` calcule `estFinale` tôt (avant l'appel au sélecteur). En cours de session (provisoire), les obligatoires non remises restent IGNORÉES. |
+| 8 | `a633763` | 99.64 b0524-1605 | Placeholder « 500 » trompeur | 3 occurrences de `placeholder="500"` retirées des champs `eval_mots_*` dans `evaluation-chargement.js`. Grégoire pensait que c'était une vraie valeur saisie → ne tapait pas le nombre → calcul jamais déclenché → PDF vide. Maintenant le champ apparaît vide tant que rien n'est saisi explicitement. |
+| 9 | `2259889` | 99.64 b0524-1630 | **Fix race-condition `donneesAlgorithmiques`** | Bug grave : `mots` (et autres valeurs algo) disparaissaient silencieusement après plusieurs allers-retours entre élèves. Cause : `_majEvaluationExistanteAutoSave` faisait `ec.donneesAlgo \|\| evalExistante.donneesAlgo \|\| {}` → en JS `{}` est truthy → snapshot vide écrasait la DB. Fix : test explicite `if (ec.donneesAlgo && Object.keys(ec.donneesAlgo).length > 0)`. |
+| 10 | `b46185f` | 99.64 b0524-1640 | **Flag suspension auto-save générique** | Même bug pattern pouvait affecter `criteres` (5 niveaux → 2 tronqués) et autres valeurs. Solution : flag `window._autoSaveSuspendu` activé 500 ms via `_suspendreAutoSaveTemporairement()` au début de chaque entry point de chargement (3 sites : `chargerEvaluationsEtudiant`, `demarrerEvaluationDepuisFichier`, `verifierEtChargerEvaluationExistante`). `_debouncerAutoSave` ignore tant que le flag est actif. Couvre toutes les valeurs sans protection individuelle. |
+
+### Découvertes pédagogiques
+
+- **Le PDF et l'app doivent être structurellement identiques pour la Note finale** : Grégoire ne tolère aucune divergence entre la vue prof (app) et la vue élève (PDF). Même format, mêmes calculs visibles, mêmes données lues depuis les réglages.
+- **Le mode finale est un toggle explicite, pas une inférence** : c'est l'enseignant qui décide quand passer en « finalisé ». Tant que le flag `configuration.notesFinales` est `false`, on est en provisoire et les obligatoires non remises ne pénalisent PAS.
+- **Le placeholder gris ressemble trop à une vraie valeur saisie** : leçon UX. Pour les champs où la valeur a un impact métier critique (calcul de note), ne PAS mettre de placeholder numérique. Préférer une étiquette texte ou pas de placeholder du tout.
+- **Le bug race-condition autosave est probablement répandu** : Grégoire l'a observé d'abord dans evaluation, mais le pattern (reset partiel synchrone + restauration async via dispatchEvent) existe aussi dans `pratiques-gestion.js sauvegarderConfigPratiqueMat`, `trimestre-v2-cours.js`, `productions.js`, etc. Cf. [[project-autosaves-a-auditer]] pour la liste à investiguer.
+
+### Mémoires créées le 24 mai PM
+
+- **`feedback-autosave-race-condition`** : pattern bug + fix défensif (flag + Object.keys check). Indispensable pour les futures sessions qui touchent un auto-save.
+- **`project-autosaves-a-auditer`** : liste des auto-saves du projet à auditer + démarche. Référence Grégoire « il y a d'autres cas comme ça, par exemple le radio note chiffrée / niveau de performance ».
+
+### Récupération des données perdues
+
+Les évaluations a2025 qui ont eu leur `donneesAlgorithmiques` écrasé à `{}` ne peuvent pas être restaurées automatiquement. Pour chacune : rouvrir l'évaluation, re-saisir le nombre de mots (les erreurs auto-propagées via les tampons reviennent seules). Action manuelle ponctuelle pour Grégoire avant la remise des notes a2025.
+
+---
+
 ## §2 — Critères de clôture du cycle Cat-B (statut)
 
 Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
@@ -564,71 +610,88 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
 ## §3 — Consigne de démarrage pour la prochaine session
 
-> **Priorité 1** : Phase B — refonte de la section « Note finale » du PDF rétroaction envoyé à l'élève. **C'est le besoin pédagogique original** de la session du 24 mai. Grégoire ne pourra finaliser sa remise de notes a2025 qu'après. **Priorité 2** : Phase C (UI profil). **Priorité 3** : Phase D (retrait legacy `mat-variante-calcul`). **Priorité 4** : G2-b (les 30 sites legacy `configPAN.portfolio`).
+> **Priorité 1 — REPRISE DE L'AUDIT ANNUEL**. Grégoire l'a explicitement demandé en fin de session du 24 mai : « il faudra reprendre l'implémentation de l'audit annuel si on veut que ça finisse un jour ». La branche `audit/2026-mai` est divergée de `main` depuis le 12 mai et accumule du retard. Tous les chantiers récents (Cat-B, AQPC, refonte pratique active, Phases B+C, fix race-condition) ont été livrés sur `main` SANS toucher à `audit/2026-mai`. Il faut maintenant **converger ou retravailler ce qui reste en suspens**.
+>
+> **Priorité 2 — Audit des autres auto-saves** (cf. [[project-autosaves-a-auditer]]). Le bug pattern race-condition du 24 mai PM est probablement répandu (wizard pratique, mind map, etc.). Grégoire a explicitement signalé le radio « note chiffrée / niveau de performance » comme premier suspect.
+>
+> **Priorité 3 — Phases restantes refonte pratique active** : Phase D (retrait legacy `mat-variante-calcul`) + G2-b (30 sites `configPAN.portfolio`). Pas urgent (le calculateur principal est déjà neutralisé), juste du ménage zéro-dette.
 
 ### Étapes de démarrage immédiat
 
 ```bash
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 git status                                              # main attendu propre
-git log --oneline main -3                               # HEAD attendu : `6f85512` refactor(pratique-active)
-git pull --rebase                                       # au cas où
+git log --oneline main -3                               # HEAD attendu : `b46185f` fix(eval): suspendre auto-save…
+git fetch origin
+git branch -a | grep audit                              # vérifier audit/2026-mai
 
-# Lire la documentation de référence :
-cat "plans de travail/PLAN-refonte-note-finale-portfolio.md"
+# Voir où en est la branche audit/2026-mai par rapport à main
+git log --oneline main..origin/audit/2026-mai          # commits sur audit absents de main
+git log --oneline origin/audit/2026-mai..main          # commits sur main absents d'audit (gros liste)
+git diff --stat main origin/audit/2026-mai             # ampleur de la divergence
 
-# Vérifier que les tests sont toujours verts (smoke test)
+# Vérifier que les tests sont toujours verts (smoke test sur main)
 cd tests && npm test
 ```
 
 ### Avant toute écriture de code
 
-1. **Charger les skills** : `Skills pour Claude Code/SKILL_labo_codex.md` + `SKILL_Ecosysteme_classe.md` (cadre pédagogique IDME / cartouches).
-2. **Charger les mémoires** : [[feedback-zero-fallback-arbitraire]] et [[project-pratique-active-ssot]] (architecture issue de la session du 24 mai).
-3. **Lire le plan** : `plans de travail/PLAN-refonte-note-finale-portfolio.md` — modèle pédagogique de Grégoire, décisions architecturales actées, phases restantes.
-4. **Lire le code de la zone touchée** AVANT de planifier (Phase B = `js/synthese-retroaction-data.js` + `js/synthese-retroaction-rendu.js`).
+1. **Charger les skills** : `Skills pour Claude Code/SKILL_labo_codex.md` (architecture générale).
+2. **Charger les mémoires** (essentielles pour cette session) :
+   - [[feedback-autosave-race-condition]] — pour comprendre le pattern bug fixé le 24 mai PM (à éviter ailleurs)
+   - [[project-autosaves-a-auditer]] — liste des autres auto-saves suspects
+   - [[feedback-zero-fallback-arbitraire]] — principe directeur métier
+   - [[project-pratique-active-ssot]] — architecture pratique active (post-refonte 24 mai matin)
+3. **Lire le SESSION.md complet** (ce fichier) pour comprendre le contexte récent. Le §1septies décrit ce qui vient juste d'être livré (10 commits du 24 mai PM).
+4. **Pour l'audit annuel** : consulter les fichiers de la branche `audit/2026-mai` (`audit/PLAN-AQPC.md`, `audit/PLAN-COURT-TERME.md`, `audit/PLAN-MOYEN-TERME.md`, `audit/04-sustainability/`, `audit/reports/`, `docs/adr/`). Ces fichiers ne sont PAS sur main — il faut soit checker la branche, soit consulter via `git show origin/audit/2026-mai:audit/PLAN-AQPC.md`.
 
-### Priorité 1 — Phase B : refonte section Note finale du PDF rétroaction
+### Priorité 1 — Reprise de l'audit annuel
 
-**Objectif** : la rétroaction PDF envoyée à l'élève doit expliciter honnêtement la construction de la note. Aujourd'hui elle est trompeuse (cf. captures du 24 mai dans la conversation).
+**Contexte** : La branche `audit/2026-mai` héberge l'audit annuel de la plateforme. Elle a été créée et travaillée jusqu'au 12 mai 2026, puis mise en pause pour livrer Cat-B, AQPC, refonte pratique active, et les fixes urgents a2025. Elle accumule donc du retard structurel par rapport à main.
 
-**Décisions actées par Grégoire le 24 mai** :
-- **Titre de section** : toggle manuel dans l'app (« Note provisoire » / « Note finale » — l'enseignant choisit explicitement quand basculer). Emplacement du toggle à définir au début de Phase B.
-- **Pondération affichée** : par bloc seulement (« Les 4 meilleurs (65%) » et « Obligatoires (35%) »). Pas par artefact individuel.
+**Première action recommandée** : faire un diagnostic clair de l'écart.
 
-**Fichiers concernés** :
-- `js/synthese-retroaction-data.js:678-779` (`construireNoteProvisoire`) — refonte du data shape : séparer `selection` vs `obligatoires`, exposer les pondérations numériques, ajouter flags `estHybride` et `estFinale`.
-- `js/synthese-retroaction-rendu.js:542-605` (`renderRangeeNote`) — refonte du rendu : éliminer le doublon Sélection / Obligatoires, titre dynamique, formule explicite (4×16,25% + 2×17,5% = 100%).
+```bash
+# Voir tous les commits de main absents d'audit
+git log --oneline origin/audit/2026-mai..main | wc -l  # combien ?
 
-**Bugs PDF identifiés (cf. PLAN §2 Bug 3)** :
-- Titre « 6 meilleurs artefacts » alors que 2 sont obligatoires (pas « meilleurs »).
-- Artefacts 9 et 10 listés deux fois (dans « les 6 meilleurs » + dans « Artefacts obligatoires »).
-- Pondérations absentes du rendu (`pondSel` / `pondObl` calculés dans data.js mais jamais utilisés dans rendu.js).
-- Le calcul 65/35 = 100% n'est pas explicité.
+# Voir les fichiers les plus divergents
+git diff --stat main origin/audit/2026-mai | sort -k3 -n -r | head -20
+```
 
-### Priorité 2 — Phase C : cohérence du panneau Note finale dans le profil
+**Questions à poser à Grégoire au début de la session** :
+1. **Stratégie de convergence** : Veux-tu (a) merger main → audit (rebase audit sur main, garde le contenu audit), (b) merger audit → main (porte les ajouts audit), (c) cherry-pick sélectif des modifs audit pertinentes, (d) abandonner la branche et refaire l'audit directement sur main, OU (e) autre approche ?
+2. **Périmètre de l'audit qui reste à faire** : quelles sections de l'audit sont incomplètes/à reprendre ? (À déterminer après lecture des PLAN-* sur la branche audit)
+3. **Délai cible** : l'audit a-t-il un deadline (présentation AQPC du 3 juin déjà passé) ou peut-il s'étaler ?
 
-**Objectif** : ne plus afficher de bloc « Évaluation terminale × 0% » fantôme quand aucune terminale n'existe.
+**Risques attendus** :
+- **Conflits de merge importants** vu le nombre de commits accumulés sur main depuis le 12 mai (Cat-B Tracks 1-4, AQPC complet, refonte pratique active, Phases B+C, chrome unifié, etc.).
+- **Certaines décisions audit peuvent être obsolètes** (audit signalait des problèmes qui ont depuis été fixés sur main, ex: T-A8 `aria-live` notifications résolu par `utils-notifications.js` consolidé le 21 mai).
+- **Certains fixes audit doivent être portés sur main** (ex: Phase 1.4 CC BY-SA → CC BY-NC-SA et Phase 1.6 lien docs/adr/ du PLAN-COURT-TERME, qui n'ont jamais été livrés sur main car les fichiers cibles `audit/04-sustainability/`, `audit/package.json`, `docs/adr/` vivent uniquement sur la branche audit).
 
-**Fichier** : `js/profil-etudiant-sections-affichage.js:2728-2779`. Conditionner l'affichage du bloc terminale sur `detailsNoteFinale.terminal.present` (déjà exposé par Phase A). Adapter la formule (« 100% » au lieu de « 60% + 40% = 100% » si pas de terminale).
+### Priorité 2 — Audit des autres auto-saves
 
-### Priorité 3 — Phase D : retrait du champ legacy `mat-variante-calcul`
+Cf. [[project-autosaves-a-auditer]] pour la liste détaillée et la démarche.
 
-**Objectif** : supprimer la confusion entre les deux sélecteurs dans le wizard pratique (« Comment construis-tu la note finale ? » et « Mode de sélection »).
+**Sites à inspecter en priorité** :
+1. **Radio « Note chiffrée / Niveau de performance »** dans le wizard pratique (signalé explicitement par Grégoire). Lu via `pratique.affichageNote` ou `pratique.configuration.affichageNote`. Grégoire dit « c'est supposé être lu dans les réglages, mais souvent ce n'est pas le cas » — symptôme probable du même bug.
+2. **`pratiques-gestion.js sauvegarderConfigPratiqueMat`** : auto-save sur chaque input du wizard pratique.
+3. **`trimestre-v2-cours.js`** : formulaires cours/groupe-cours.
+4. Autres : `productions.js`, `grilles.js`, `cartouches.js`, `objectifs.js`, `planification-carte.js`, `Rythme.sauvegarderPreferences`.
 
-**Fichiers** :
-- `index.html:5798-5814` : retrait du bloc `mat-variante-pan-standards`.
-- `js/pratiques-gestion.js:961-997` (`changerVariantePANStandardsMat`) + tous les readers de `configuration.varianteCalcul`.
+**Pattern à chercher** : tout site qui fait `target.X = ec.X || target.X || {}` ou `[]` (truthy en JS). Remplacer par `if (ec.X && Object.keys(ec.X).length > 0) target.X = ec.X`.
 
-**Question ouverte** : la bascule entre « Portfolio » et « Par-Objectifs » que pilotait ce champ — où la migrer ? Probablement ajouter une option `par-objectifs` au sélecteur « Mode de sélection » (`mat-portfolio-selection`), ou un autre mécanisme explicite. À décider avec Grégoire au début de Phase D.
+**Fix générique applicable** : étendre le flag `window._autoSaveSuspendu` (créé dans `evaluation-chargement.js`) à un module utilitaire global, et l'appeler depuis tous les flux de chargement qui ont un reset partiel + restauration async.
 
-### Priorité 4 — G2-b : ménage des 30 sites `configPAN.portfolio`
+### Priorité 3 — Phases restantes refonte pratique active
 
-**Objectif** : retirer entièrement le snapshot legacy.
+**Phase D** — Retrait du champ legacy `mat-variante-calcul` du wizard pratique (« Comment construis-tu la note finale ? »).
+- Fichiers : `index.html:5798-5814` (bloc `mat-variante-pan-standards`) + `js/pratiques-gestion.js:961-997` (`changerVariantePANStandardsMat`) + tous les readers de `configuration.varianteCalcul`.
+- Question ouverte : la bascule Portfolio / Par-Objectifs que pilotait ce champ — où la migrer ? Probablement ajouter une option `par-objectifs` au sélecteur « Mode de sélection » (`mat-portfolio-selection`). À décider avec Grégoire au début de Phase D.
 
-**Sites** : `js/pratiques.js` (21) + `js/pratiques/pratique-pan-standards.js` (9). Migrer vers `obtenirConfigPratiqueActive()`. Puis boot migration pour retirer la propriété `configPAN.portfolio` de chaque `${trim}_modalitesEvaluation`.
-
-**Pas urgent** — le snapshot est déjà neutralisé pour le calculateur principal (Phase G2-a). Toucher pour cohérence et zéro-dette.
+**G2-b** — Ménage des 30 sites `configPAN.portfolio` legacy.
+- `js/pratiques.js` (21) + `js/pratiques/pratique-pan-standards.js` (9). Migrer vers `obtenirConfigPratiqueActive()`. Puis boot migration pour retirer la propriété `configPAN.portfolio` de chaque `${trim}_modalitesEvaluation`.
+- Pas urgent (le calculateur principal est déjà neutralisé par Phase G2-a). Toucher pour cohérence et zéro-dette.
 
 ### Zones protégées — rappel permanent
 
@@ -637,20 +700,23 @@ cd tests && npm test
 ### Conventions
 
 - **Pas de bump beta sans demander** Grégoire (cf. §0). Beta 99.64 conservée tant que non bumpée.
-- **Hook pré-push vert** obligatoire (Défense J — 85 Vitest verts au minimum). Notre commit `6f85512` a généré 91 warnings sur écritures sensibles (acceptés — lectures internes uniquement, pas d'input externe). Si Grégoire veut acquitter, ajouter `// security-ok: <raison>` aux lignes.
-- **Worktree dédié** recommandé pour tout chantier > 1 h. Notre session du 24 mai a livré directement sur main (commit unique cohérent).
+- **Hook pré-push vert** obligatoire (Défense J — 85 Vitest verts au minimum). Les commits du 24 mai PM ont tous passé le hook (103/103 tests verts).
+- **Worktree dédié** recommandé pour tout chantier > 1 h. La session du 24 mai PM a livré 10 commits directement sur main (chaque commit était petit et autonome, tests verts à chaque jalon).
 - **Test simulation Safari Responsive Design Mode** insuffisant pour valider mobile : toujours valider sur vrai device.
+- **Charger la cache** : pour les nouveaux fichiers JS ou modifications, faire `Cmd+Q` complet de Safari puis ré-ouverture. Le cache buster `?v=` est inopérant en `file://`.
 
 ### Décisions de Grégoire pendantes (rappel pour ne pas oublier)
 
-- **Phase B / C / D / G2-b** — à attaquer dans cette session.
-- **Cleanup worktree chrome unifié** (legacy du matin) — encore à faire si pas déjà fait : `git worktree remove ../Monitorage_v6-chrome` puis `git branch -d cleanup/chrome-unifie`.
+- **Audit annuel** — priorité 1 cette session (cf. ci-dessus).
+- **Audit des autres auto-saves** — priorité 2 (cf. [[project-autosaves-a-auditer]]).
+- **Phase D + G2-b** — priorité 3 (zéro-dette, pas urgent).
+- **Récupération données a2025** — Grégoire doit re-saisir manuellement le nombre de mots dans les évaluations a2025 dont `donneesAlgorithmiques` a été écrasé. One-shot, post-fix b46185f.
+- **Cleanup worktree chrome unifié** (legacy 24 mai matin) — encore à faire si pas déjà fait : `git worktree remove ../Monitorage_v6-chrome` puis `git branch -d cleanup/chrome-unifie`.
 - **Test vrai iPhone chrome unifié** — après déploiement Netlify (orthogonal).
-- **#282 étape 5** — migration `listeCours` finale (~3 h, plan dans §1quater du 23 mai). Indépendant de Phase B/C/D.
+- **#282 étape 5** — migration `listeCours` finale (~3 h, plan dans §1quater du 23 mai). Indépendant.
 - Label `v2-seuil-fragile` — conservation / atténuation / alignement ? (Cat-B Track 4 chantier J reliquat).
-- Convergence audit/2026-mai ↔ main — à planifier post-AQPC.
 - Demande d'avis PRP Cégep de Drummondville (Loi 25) — à envoyer (délai réponse 2-6 semaines, conditionne PRIVACY.md v1.1).
-- Tests manuels Sections **C, D, E, F reportées** (cf. doc TESTS-MANUELS-PENDING) — à reprendre avant AQPC du 3 juin si Grégoire le souhaite.
+- Tests manuels Sections **C, D, E, F reportées** (cf. doc TESTS-MANUELS-PENDING) — à reprendre si Grégoire le souhaite.
 - **Migration globale des icônes vers icons8** — chantier séparé à planifier.
 
 ---
@@ -725,6 +791,7 @@ git tag -l "cat-b-*" | sort             # 9 tags attendus :
 
 | Date | Modification | Auteur |
 |---|---|---|
+| 2026-05-24 (fin de journée, Phase B + C + race-condition autosave LIVRÉS) | Réécriture complète de l'en-tête + ajout §1septies + ajout sous-section garde-fous §0 (race-condition autosave + Phase B/C) + réécriture §3 (consigne démarrage prochaine session = REPRISE AUDIT ANNUEL). 10 commits livrés sur main entre 12h40 et 16h40 : `f4cbea7` Phase B refonte PDF Note finale (data shape + rendu + toggle Notes finalisées wizard pratique), `aa9f26d` polish PDF (« Ta note finale », note chiffrée par artefact, échéances obligatoires masquées en mode finale, rétroaction algo lue, bloc résultat algo coloré app), `2da9d9f` Phase C section Note finale profil (3 cas distingués, mode hybride Sélection/Obligatoires), `41f77cb` titre dynamique Provisoire/Finale + bouton « Réglages de la pratique » + format aligné PDF, `678770d` calcul détaillé par catégorie (`(N1+N2)÷N=moy×P%=pts`) + rendu PDF identique app (bloc résultat encadré en bas), `6e31fce` ligne compacte critère algo dans PDF (`15 erreurs sur 584 mots → 7.16/20 (35.8%)`), `28e9d45` obligatoires non remises = 0 EN MODE FINALE UNIQUEMENT (param `estFinale` au sélecteur hybride), `a633763` retrait placeholder « 500 » trompeur (3 occurrences eval_mots_*), `2259889` fix race-condition `donneesAlgorithmiques` perdues (`{}` truthy en JS, fix Object.keys check), `b46185f` flag `_autoSaveSuspendu` 500ms générique au début de 3 entry points de chargement éval (couvre criteres + donneesAlgo + futurs). Beta inchangée 99.64, 10 bumps build `0524-1240`→`0524-1640`. Tests 103/103 verts à chaque jalon. 2 nouvelles mémoires créées : [[feedback-autosave-race-condition]] (pattern bug + fix défensif, à éviter ailleurs) et [[project-autosaves-a-auditer]] (liste des auto-saves suspects du projet à investiguer, notamment radio « note chiffrée / niveau performance » signalé explicitement par Grégoire). §3 entièrement réécrit : priorité 1 = REPRISE AUDIT ANNUEL sur branche `audit/2026-mai` (divergée depuis 12 mai, Grégoire demande explicitement « si on veut que ça finisse un jour »), priorité 2 = audit autres auto-saves, priorité 3 = Phase D + G2-b. | Phase B/C + chasse bug autosave (Claude autonome) |
 | 2026-05-24 (matin, chrome unifié LIVRÉ) | Bascule post-livraison du chantier chrome unifié (commit unique `cbdf7d7` sur main via merge FF depuis `cleanup/chrome-unifie`, tag `chrome-unifie-2026-05-24`, bump 99.63 → 99.64 b0524-0548). En-tête réécrit pour refléter livraison. §1quinquies (nouvelle) : récap 7 étapes du plan, 2 bugs détectés et corrigés en session (selects mobile câblage défensif + `_gererClicGlobal` auto-désattachement), 3 observations hors-scope logées (BACKLOG #283 harmonisation pages à sidebar mobile, #284 harmonisation titres de page, SUIVI-BUGS #121 bouton fantôme Tirage au sort). §3 entièrement réécrit : priorité 1 = cleanup worktree + test vrai iPhone post-déploiement Netlify ; priorité 2 = reprise #282 étape 5 (migration `listeCours` finale, ~3 h). Module `js/chrome-unifie.js` créé (200 LOC IIFE) : popover utilitaires + selects mobile + resynchronisation `sectionAffichee`. CSS refonte L863-1229 (grid 3 colonnes pour centrage parfait du titre, bande contexte ligne 2, nav primaire sticky avec gradient maritime continu, sous-nav vide masquée carré, breakpoint unique 1024px). Audit zéro-dette : classes mortes `.entete-controles-gauche/droite`, `.entete-ligne2-droite`, `.logo-section`, `.logo-meta`, `.separateur-contexte` retirées. 8 fichiers touchés, +676 / −321 LOC nettes. Étape 5 (migration icônes icons8 filled) reportée hors-scope par décision Grégoire. | Chrome unifié (Claude autonome) |
 | 2026-05-21 (matin) | Identification refactor evaluation TERMINÉ étape 6, archive historique. | Cat-B session (Claude) |
 | 2026-05-21 (après-midi) | Réécriture complète pour cycle Cat-B post-merge : §0 garde-fou, §1 récap Tracks 1-4, §2 critères clôture, §3 consigne démarrage prochaine session, §4 trouvailles méthode. | Cat-B session 1 (Claude autonome) |
