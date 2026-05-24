@@ -856,7 +856,6 @@ function cartoucheSelectionnee() {
                        id="eval_mots_${critere.id}"
                        class="controle-form"
                        min="1"
-                       placeholder="500"
                        data-on-input="calculerNoteAlgoCatHandler" data-critere-id="${critere.id}" data-ponderation="${ponderation}" data-facteur="${facteur}" data-critere-grille-id="${critereGrille?.id || ''}">
             </div>
         </div>
@@ -891,7 +890,6 @@ function cartoucheSelectionnee() {
                        id="eval_mots_${critere.id}"
                        class="controle-form"
                        min="1"
-                       placeholder="500"
                        data-on-input="calculerNoteAlgoSimpleHandler" data-critere-id="${critere.id}" data-ponderation="${ponderation}" data-facteur="${facteur}">
             </div>
         </div>
@@ -1036,7 +1034,6 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
                                    id="eval_mots_${critere.id}"
                                    class="controle-form"
                                    min="1"
-                                   placeholder="500"
                                    data-on-input="calculerNoteAlgoSimpleHandler" data-critere-id="${critere.id}" data-ponderation="${ponderation}" data-facteur="${facteur}">
                         </div>
                     </div>
