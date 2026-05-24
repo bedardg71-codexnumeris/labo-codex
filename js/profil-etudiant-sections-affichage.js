@@ -2701,71 +2701,129 @@ function genererSectionProductions(da) {
     } else if (detailsNoteFinale) {
         const portfolio = detailsNoteFinale.portfolio;
         const terminal = detailsNoteFinale.terminal;
+        const estHybride = String(portfolio.methodeSelection || '').toLowerCase().indexOf('hybride') !== -1;
 
-        // Construire la liste des artefacts retenus (format liste verticale)
-        let listeArtefacts = '';
-        if (portfolio.artefactsRetenus.length > 0) {
-            const productionsMap = {};
-            productions.forEach(p => { productionsMap[p.id] = p; });
+        const productionsMap = {};
+        productions.forEach(p => { productionsMap[p.id] = p; });
 
-            listeArtefacts = '<ul class="note-finale-liste-artefacts">' +
-                portfolio.artefactsRetenus.map((art, i) => {
-                    const prod = productionsMap[art.productionId];
-                    const titre = prod?.activiteApprentissage || prod?.description || prod?.titre || `Artefact ${i + 1}`;
-                    return `<li>${echapperHtml(titre)} <strong>${art.niveau} ${art.note.toFixed(1)}%</strong></li>`;
-                }).join('') +
-                '</ul>';
-        }
+        const decrireRetenu = (art, i) => {
+            const prod = productionsMap[art.productionId];
+            return {
+                titre:     prod?.activiteApprentissage || prod?.description || prod?.titre || `Artefact ${i + 1}`,
+                niveau:    art.niveau,
+                note:      art.note,
+                categorie: prod?.categorie || null
+            };
+        };
+        const retenusDecrits = portfolio.artefactsRetenus
+            .map(decrireRetenu)
+            .sort((a, b) => (b.note || 0) - (a.note || 0));
 
-        htmlNoteFinale = `
-        <!-- Note finale de session -->
-        <div class="note-finale-section">
-            <h3 class="note-finale-titre">
-                Note finale de session
-                ${detailsNoteFinale.estProvisoire ? '<span class="note-finale-badge-provisoire">(provisoire)</span>' : ''}
-            </h3>
+        const renderLigneRetenu = (r) => {
+            const noteTxt = (typeof r.note === 'number') ? `${r.note.toFixed(1)}%` : '—';
+            return `<li>${echapperHtml(r.titre)} <strong>${echapperHtml(r.niveau || '?')} ${noteTxt}</strong></li>`;
+        };
+        const renderLigneObligatoire = (o) => {
+            const noteTxt = (typeof o.note === 'number') ? `${o.note.toFixed(1)}%` : null;
+            const marqueur = (o.niveau && noteTxt) ? `${echapperHtml(o.niveau)} ${noteTxt}` : 'non remis';
+            return `<li>${echapperHtml(o.titre)} <strong>${marqueur}</strong></li>`;
+        };
 
-            ${portfolio.plafonnement ? `
-                <div class="alerte alerte-attention" style="margin-bottom: 15px;">
-                    ${portfolio.plafonnement.echec
-                        ? `<strong>Échec automatique :</strong> L'élève n'a remis que ${portfolio.nombreEvalues} production${portfolio.nombreEvalues > 1 ? 's' : ''} sur les ${portfolio.minimumRequis} requises. Selon les règles de conformité, un déficit de ${portfolio.plafonnement.deficit} production${portfolio.plafonnement.deficit > 1 ? 's' : ''} ou plus entraîne un échec automatique.`
-                        : `<strong>Note plafonnée :</strong> L'élève n'a remis que ${portfolio.nombreEvalues} production${portfolio.nombreEvalues > 1 ? 's' : ''} sur les ${portfolio.minimumRequis} requises. Selon les règles de conformité, un déficit de ${portfolio.plafonnement.deficit} production${portfolio.plafonnement.deficit > 1 ? 's' : ''} plafonne la note du portfolio au niveau ${portfolio.plafonnement.niveauCode} (maximum ${portfolio.plafonnement.seuilMax}%).`
-                    }
-                </div>
-            ` : ''}
+        const enteteBandeauPlafonnement = portfolio.plafonnement ? `
+            <div class="alerte alerte-attention" style="margin-bottom: 15px;">
+                ${portfolio.plafonnement.echec
+                    ? `<strong>Échec automatique :</strong> L'élève n'a remis que ${portfolio.nombreEvalues} production${portfolio.nombreEvalues > 1 ? 's' : ''} sur les ${portfolio.minimumRequis} requises. Selon les règles de conformité, un déficit de ${portfolio.plafonnement.deficit} production${portfolio.plafonnement.deficit > 1 ? 's' : ''} ou plus entraîne un échec automatique.`
+                    : `<strong>Note plafonnée :</strong> L'élève n'a remis que ${portfolio.nombreEvalues} production${portfolio.nombreEvalues > 1 ? 's' : ''} sur les ${portfolio.minimumRequis} requises. Selon les règles de conformité, un déficit de ${portfolio.plafonnement.deficit} production${portfolio.plafonnement.deficit > 1 ? 's' : ''} plafonne la note du portfolio au niveau ${portfolio.plafonnement.niveauCode} (maximum ${portfolio.plafonnement.seuilMax}%).`
+                }
+            </div>
+        ` : '';
 
-            <div class="note-finale-grid">
-                <!-- Portfolio -->
-                <div class="note-finale-composante ${portfolio.plafonnement ? 'note-finale-composante-plafonnee' : ''}">
-                    <div class="note-finale-composante-titre">
-                        Portfolio (${portfolio.nombreRetenus} ${portfolio.methodeSelection} artefacts sur ${portfolio.nombreEvalues} évalués)
-                    </div>
-                    <div class="note-finale-artefacts">
-                        ${listeArtefacts || '<span class="note-finale-non-evalue">Aucun artefact retenu</span>'}
-                    </div>
-                    ${portfolio.plafonnement ? `
+        // ----- Mode HYBRIDE sans terminale : Sélection (gauche) / Obligatoires (droite) -----
+        // Lit les pondérations Sélection/Obligatoires depuis la config catégories
+        // de la pratique active. Pas de fallback arbitraire — si la config est
+        // incomplète, message d'erreur explicite.
+        if (estHybride && !terminal.present) {
+            const selection = retenusDecrits.filter(r => r.categorie !== 'obligatoire');
+            const productionsObligatoires = productions.filter(p => p.categorie === 'obligatoire' && p.type !== 'portfolio');
+            const evaluationsEleveValides = evaluationsEleve.filter(e => !e.remplaceeParId && e.noteFinale != null);
+            const obligatoiresTous = productionsObligatoires.map(prod => {
+                const evalObl = evaluationsEleveValides.find(e => e.productionId === prod.id);
+                return {
+                    titre:  prod.activiteApprentissage || prod.description || prod.titre || 'Artefact',
+                    niveau: evalObl ? (evalObl.niveauFinal || null) : null,
+                    note:   evalObl && typeof evalObl.noteFinale === 'number' ? evalObl.noteFinale : null
+                };
+            });
+
+            const cats = (typeof obtenirConfigCategories === 'function') ? obtenirConfigCategories() : null;
+            const pondSel = cats?.selection?.ponderation;
+            const pondObl = cats?.obligatoires?.ponderation;
+            const nbSelARetenir = cats?.selection?.nombreARetenir;
+            const erreurPond = (pondSel == null || pondObl == null);
+
+            const listeSelection = selection.length
+                ? '<ul class="note-finale-liste-artefacts">' + selection.map(renderLigneRetenu).join('') + '</ul>'
+                : '<span class="note-finale-non-evalue">Aucun artefact retenu</span>';
+            const listeObligatoires = obligatoiresTous.length
+                ? '<ul class="note-finale-liste-artefacts">' + obligatoiresTous.map(renderLigneObligatoire).join('') + '</ul>'
+                : '<span class="note-finale-non-evalue">Aucune production obligatoire configurée</span>';
+
+            const titreSelection = nbSelARetenir != null
+                ? `Sélection (les ${nbSelARetenir} meilleurs sur ${portfolio.nombreEvalues - obligatoiresTous.length} évalués)`
+                : `Sélection (${selection.length} meilleurs)`;
+            const titreObligatoires = `Obligatoires (${obligatoiresTous.length} production${obligatoiresTous.length > 1 ? 's' : ''})`;
+
+            const formule = erreurPond
+                ? `<span class="note-finale-tiret">⚠ Pondérations Sélection/Obligatoires manquantes dans la configuration de la pratique.</span>`
+                : `Note finale pondérée (Sélection ${pondSel}% + Obligatoires ${pondObl}% = ${pondSel + pondObl}%)`;
+
+            htmlNoteFinale = `
+            <!-- Note finale de session (hybride sans terminale) -->
+            <div class="note-finale-section">
+                <h3 class="note-finale-titre">
+                    Note finale de session
+                    ${detailsNoteFinale.estProvisoire ? '<span class="note-finale-badge-provisoire">(provisoire)</span>' : ''}
+                </h3>
+
+                ${enteteBandeauPlafonnement}
+
+                <div class="note-finale-grid">
+                    <div class="note-finale-composante ${portfolio.plafonnement ? 'note-finale-composante-plafonnee' : ''}">
+                        <div class="note-finale-composante-titre">${titreSelection}</div>
+                        <div class="note-finale-artefacts">${listeSelection}</div>
                         <div class="note-finale-valeur-ligne">
-                            <span class="note-finale-valeur">
-                                <span class="note-finale-valeur-originale">${portfolio.plafonnement.moyenneOriginale.toFixed(1)}%</span>
-                                → ${portfolio.moyenne !== null ? portfolio.moyenne.toFixed(1) + '%' : '0%'}
-                            </span>
-                            <span class="note-finale-ponderation">× ${portfolio.ponderationNormalisee}%</span>
+                            <span class="note-finale-ponderation">${erreurPond ? '' : '× ' + pondSel + '%'}</span>
                         </div>
-                    ` : `
+                    </div>
+
+                    <div class="note-finale-composante">
+                        <div class="note-finale-composante-titre">${titreObligatoires}</div>
+                        <div class="note-finale-artefacts">${listeObligatoires}</div>
                         <div class="note-finale-valeur-ligne">
-                            <span class="note-finale-valeur">
-                                ${portfolio.moyenne !== null ? portfolio.moyenne.toFixed(1) + '%' : '<span class="note-finale-tiret">—</span>'}
-                            </span>
-                            <span class="note-finale-ponderation">× ${portfolio.ponderationNormalisee}%</span>
+                            <span class="note-finale-ponderation">${erreurPond ? '' : '× ' + pondObl + '%'}</span>
                         </div>
-                    `}
+                    </div>
                 </div>
 
-                <!-- Évaluation terminale -->
+                <div class="note-finale-resultat">
+                    <div class="note-finale-formule">${formule}</div>
+                    <div class="note-finale-total ${detailsNoteFinale.noteFinale === null ? 'note-finale-tiret' : ''}">
+                        ${detailsNoteFinale.noteFinale !== null ? detailsNoteFinale.noteFinale.toFixed(1) + '%' : '—'}
+                    </div>
+                </div>
+            </div>
+            `;
+        } else {
+            // ----- Mode classique : Portfolio (gauche) / Terminale (droite si présente) -----
+            const listeArtefacts = retenusDecrits.length
+                ? '<ul class="note-finale-liste-artefacts">' + retenusDecrits.map(renderLigneRetenu).join('') + '</ul>'
+                : '<span class="note-finale-non-evalue">Aucun artefact retenu</span>';
+
+            const carteTerminale = terminal.present ? `
                 <div class="note-finale-composante">
-                    <div class="note-finale-composante-titre">${terminal.nom}</div>
+                    <div class="note-finale-composante-titre">${echapperHtml(terminal.nom)}</div>
                     <div class="note-finale-artefacts">
-                        ${terminal.niveau ? `Niveau atteint : <strong>${terminal.niveau}</strong>` : '<span class="note-finale-non-evalue">Non évaluée</span>'}
+                        ${terminal.niveau ? `Niveau atteint : <strong>${echapperHtml(terminal.niveau)}</strong>` : '<span class="note-finale-non-evalue">Non évaluée</span>'}
                     </div>
                     <div class="note-finale-valeur-ligne">
                         <span class="note-finale-valeur ${terminal.note === null ? 'note-finale-tiret' : ''}">
@@ -2773,21 +2831,58 @@ function genererSectionProductions(da) {
                         </span>
                         <span class="note-finale-ponderation">× ${terminal.ponderationNormalisee}%</span>
                     </div>
-                </div>
-            </div>
+                </div>` : '';
 
-            <!-- Note finale agrégée -->
-            <div class="note-finale-resultat">
-                <div class="note-finale-formule">
-                    Note finale pondérée (${portfolio.ponderationNormalisee}% + ${terminal.ponderationNormalisee}% = 100%)
+            const formuleClassique = terminal.present
+                ? `Note finale pondérée (${portfolio.ponderationNormalisee}% + ${terminal.ponderationNormalisee}% = 100%)`
+                : `Note finale (portfolio à 100%)`;
+
+            htmlNoteFinale = `
+            <!-- Note finale de session (classique) -->
+            <div class="note-finale-section">
+                <h3 class="note-finale-titre">
+                    Note finale de session
+                    ${detailsNoteFinale.estProvisoire ? '<span class="note-finale-badge-provisoire">(provisoire)</span>' : ''}
+                </h3>
+
+                ${enteteBandeauPlafonnement}
+
+                <div class="note-finale-grid${terminal.present ? '' : ' note-finale-grid-single'}">
+                    <div class="note-finale-composante ${portfolio.plafonnement ? 'note-finale-composante-plafonnee' : ''}">
+                        <div class="note-finale-composante-titre">
+                            Portfolio (${portfolio.nombreRetenus} ${portfolio.methodeSelection} artefacts sur ${portfolio.nombreEvalues} évalués)
+                        </div>
+                        <div class="note-finale-artefacts">${listeArtefacts}</div>
+                        ${portfolio.plafonnement ? `
+                            <div class="note-finale-valeur-ligne">
+                                <span class="note-finale-valeur">
+                                    <span class="note-finale-valeur-originale">${portfolio.plafonnement.moyenneOriginale.toFixed(1)}%</span>
+                                    → ${portfolio.moyenne !== null ? portfolio.moyenne.toFixed(1) + '%' : '0%'}
+                                </span>
+                                <span class="note-finale-ponderation">× ${portfolio.ponderationNormalisee}%</span>
+                            </div>
+                        ` : `
+                            <div class="note-finale-valeur-ligne">
+                                <span class="note-finale-valeur">
+                                    ${portfolio.moyenne !== null ? portfolio.moyenne.toFixed(1) + '%' : '<span class="note-finale-tiret">—</span>'}
+                                </span>
+                                <span class="note-finale-ponderation">× ${portfolio.ponderationNormalisee}%</span>
+                            </div>
+                        `}
+                    </div>
+                    ${carteTerminale}
                 </div>
-                <div class="note-finale-total ${detailsNoteFinale.noteFinale === null ? 'note-finale-tiret' : ''}">
-                    ${detailsNoteFinale.noteFinale !== null ? detailsNoteFinale.noteFinale.toFixed(1) + '%' : '—'}
+
+                <div class="note-finale-resultat">
+                    <div class="note-finale-formule">${formuleClassique}</div>
+                    <div class="note-finale-total ${detailsNoteFinale.noteFinale === null ? 'note-finale-tiret' : ''}">
+                        ${detailsNoteFinale.noteFinale !== null ? detailsNoteFinale.noteFinale.toFixed(1) + '%' : '—'}
+                    </div>
+                    ${detailsNoteFinale.estProvisoire && terminal.present ? '<div class="note-finale-message-provisoire">Basée uniquement sur le portfolio (évaluation terminale non complétée)</div>' : ''}
                 </div>
-                ${detailsNoteFinale.estProvisoire ? '<div class="note-finale-message-provisoire">Basée uniquement sur le portfolio (évaluation terminale non complétée)</div>' : ''}
             </div>
-        </div>
-        `;
+            `;
+        }
     }
 
     // Générer le HTML (productions d'abord, puis note finale)
