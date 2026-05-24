@@ -229,7 +229,7 @@
                 code:        code,
                 obligatoire: !!production.obligatoire,
                 retenu:      idsRetenus.has(production.id),
-                due:         status === 'todo' ? obtenirDue(production) : null
+                due:         obtenirDue(production)
             };
         });
     }

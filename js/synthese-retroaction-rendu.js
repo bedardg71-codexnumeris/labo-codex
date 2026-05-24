@@ -172,24 +172,34 @@
             let contenu = t.n != null ? String(t.n) : '';
 
             if (active) {
-                bg = INK; color = PAPER; border = `1px solid ${INK}`;
+                // L'artefact courant est marqué par un ▼ au-dessus de la case
+                // (cf. indicateurHaut plus bas) ; la case elle-même prend la
+                // couleur IDME comme un done normal — plus de fond noir.
+                bg = ctx.codeColor[t.code] || MUTED; color = PAPER; border = `1px solid ${bg}`;
                 contenu = t.code || (t.n != null ? String(t.n) : '');
             } else if (done) {
                 bg = ctx.codeColor[t.code] || MUTED; color = PAPER; border = `1px solid ${bg}`;
                 contenu = t.code || (t.n != null ? String(t.n) : '');
             }
 
-            // Encadrement des 4 meilleures retenues : bordure noire 1px
-            // (override la bordure de fond ; box-sizing préserve 22×22).
+            // Encadrement des artefacts retenus dans le portfolio : double bordure
+            // noire (override la bordure de fond ; box-sizing préserve 22×22 mais
+            // réduit l'espace intérieur à ~16px ce qui reste lisible pour 1 lettre IDME).
             if (t.retenu) {
-                border = `1px solid ${INK}`;
+                border = `3px double ${INK}`;
             }
 
-            const pastilleObligatoire = t.obligatoire
-                ? `<div style="height: 7px; font-size: 8px; line-height: 1; color: ${INK};">●</div>`
-                : `<div style="height: 7px;"></div>`;
+            // Indicateur au-dessus de la case : ▼ pour l'artefact courant,
+            // sinon ● si obligatoire, sinon espace vide pour préserver l'alignement.
+            const indicateurHaut = active
+                ? `<div style="height: 7px; font-size: 8px; line-height: 1; color: ${INK}; font-weight: 700;">&#x25BC;</div>`
+                : (t.obligatoire
+                    ? `<div style="height: 7px; font-size: 8px; line-height: 1; color: ${INK};">●</div>`
+                    : `<div style="height: 7px;"></div>`);
 
-            const dateDue = (todo && t.due)
+            // Date d'échéance sous la case pour tous les artefacts (rendue
+            // disponible pour tous les status par construireTrimestre).
+            const dateDue = t.due
                 ? `<div style="font-family: ${FONT_MONO}; font-size: 6px; color: ${MUTED}; letter-spacing: 0.2px; line-height: 1;">${esc(formaterDateCourte(t.due))}</div>`
                 : '';
 
@@ -204,7 +214,7 @@
 
             return `
                 <div style="width: 26px; display: flex; flex-direction: column; align-items: center; gap: 1px;">
-                    ${pastilleObligatoire}
+                    ${indicateurHaut}
                     <div style="box-sizing: border-box; width: 22px; height: 22px; border-radius: 2px; background: ${bg}; color: ${color}; border: ${border}; display: flex; align-items: center; justify-content: center; font-family: ${FONT_MONO}; font-weight: 700; font-size: 10px;">${esc(contenu)}</div>
                     ${numero}
                     ${dateDue}
@@ -723,7 +733,11 @@
         try {
             const d = new Date(String(iso).indexOf('T') >= 0 ? iso : iso + 'T00:00:00');
             if (isNaN(d.getTime())) return iso;
-            return d.toLocaleDateString('fr-CA', { day: 'numeric', month: 'short' }).replace('.', '');
+            // Format jj/mm (cf. demande Grégoire 24 mai 2026) — affichage compact
+            // sous les cases de la barre de progression du trimestre.
+            const jj = String(d.getDate()).padStart(2, '0');
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            return jj + '/' + mm;
         } catch (e) {
             return iso;
         }
