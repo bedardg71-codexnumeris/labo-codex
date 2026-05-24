@@ -1186,6 +1186,15 @@ function verifierEtChargerEvaluationExistante() {
         return;
     }
 
+    // Suspendre l'auto-save pendant la cascade de restauration (selects de
+    // critères dispatch des events 'change' qui trigger niveauSelectionne →
+    // _debouncerAutoSave). Sans cette suspension, un snapshot pris entre le
+    // reset partiel et la restauration finale peut écraser les valeurs déjà
+    // persistées en DB (criteres, donneesAlgorithmiques) par un état tronqué.
+    if (typeof _suspendreAutoSaveTemporairement === 'function') {
+        _suspendreAutoSaveTemporairement();
+    }
+
     const etudiantDA = document.getElementById('selectEtudiantEval')?.value;
     const productionId = document.getElementById('selectProduction1')?.value;
 

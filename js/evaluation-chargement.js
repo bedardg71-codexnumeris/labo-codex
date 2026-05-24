@@ -342,6 +342,8 @@ function chargerEvaluationsEtudiant() {
     // Flusher l'auto-save en attente AVANT de charger le nouvel étudiant
     // (sauvegarde les erreurs de français et critères non encore persistés)
     _flusherAutoSave();
+    // Suspendre les nouveaux debounces pendant la cascade de chargement.
+    _suspendreAutoSaveTemporairement();
 
     const etudiantDA = document.getElementById('selectEtudiantEval').value;
     const btnVoirProfil = document.getElementById('btnVoirProfilDepuisEval');
@@ -484,6 +486,10 @@ function chargerEvaluationsEtudiant() {
  */
 function demarrerEvaluationDepuisFichier(fichier, opts) {
     opts = Object.assign({ recreer: true }, opts || {});
+    // Suspendre l'auto-save pendant le reset partiel + restauration depuis DB.
+    // Sans ça, un snapshot capturé entre les deux peut écrire `criteres: []`
+    // ou `donneesAlgorithmiques: {}` en DB, écrasant les valeurs persistées.
+    _suspendreAutoSaveTemporairement();
 
     let productionIdEffective = opts.productionIdEffective || fichier.productionId || '';
     if (!productionIdEffective && typeof window.travauxResolution !== 'undefined') {
@@ -1158,7 +1164,25 @@ function niveauSelectionne(critereId) {
 window._timerAutoSave = null;
 window._pendingAutoSaveSnapshot = null;
 
+/**
+ * Suspend l'auto-save temporairement (500 ms). Utilisé pendant le chargement
+ * d'une évaluation (reset partiel + restauration depuis DB + dispatch d'events
+ * sur les selects de critères), pour éviter qu'un snapshot capturé dans la
+ * fenêtre de race condition écrase les valeurs déjà persistées (criteres,
+ * donneesAlgorithmiques, etc.) par un état intermédiaire vide ou tronqué.
+ */
+function _suspendreAutoSaveTemporairement() {
+    window._autoSaveSuspendu = true;
+    clearTimeout(window._autoSaveSuspendreTimer);
+    window._autoSaveSuspendreTimer = setTimeout(function() {
+        window._autoSaveSuspendu = false;
+    }, 500);
+}
+
 function _debouncerAutoSave() {
+    // Ignorer les debounces pendant le chargement d'une évaluation (cf.
+    // `_suspendreAutoSaveTemporairement`).
+    if (window._autoSaveSuspendu) return;
     if (window._timerAutoSave) clearTimeout(window._timerAutoSave);
     // Snapshot de l'état ACTUEL pour pouvoir flusher si l'utilisateur change d'élève
     window._pendingAutoSaveSnapshot = {
