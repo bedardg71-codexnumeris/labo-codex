@@ -275,13 +275,24 @@
     function construireCriteres(evaluation, grille, cartouche) {
         const criteres = Array.isArray(evaluation.criteres) ? evaluation.criteres : [];
         const grilleCriteres = (grille && Array.isArray(grille.criteres)) ? grille.criteres : [];
+        const donneesAlgo = evaluation.donneesAlgorithmiques || {};
 
         return criteres.map(c => {
             const def = grilleCriteres.find(gc => gc.id === c.critereId || gc.nom === c.critereNom) || {};
             const niveau = c.niveauSelectionne || '';
             const cleCart = c.critereId && niveau ? `${c.critereId}_${niveau}` : null;
+            // Rétroaction algorithmique (ex. Français écrit : « Ta rédaction
+            // contient X erreurs… ») persistée sur l'évaluation au moment de
+            // la saisie. Sans ce fallback, le PDF affiche le placeholder
+            // « Saisissez les erreurs et le nombre de mots ».
+            const retroAlgo = (def.type === 'algorithmique'
+                && donneesAlgo[c.critereId]
+                && donneesAlgo[c.critereId].retroaction)
+                ? String(donneesAlgo[c.critereId].retroaction).trim()
+                : '';
             const commentaire =
                 (c.retroaction && c.retroaction.trim()) ||
+                retroAlgo ||
                 (cartouche && cleCart && cartouche.commentaires && cartouche.commentaires[cleCart]) ||
                 '';
 
@@ -744,12 +755,14 @@
 
         // Croise un artefact retenu (depuis le calculateur) avec sa production
         // pour récupérer titre + catégorie. La catégorie pilote le bucket
-        // (sélection vs obligatoires) en mode hybride.
+        // (sélection vs obligatoires) en mode hybride. La note chiffrée
+        // (`art.note`) est conservée pour l'affichage individuel dans le PDF.
         const decrireRetenu = (art) => {
             const prod = productions.find(p => p.id === art.productionId);
             return {
                 titre:     prod ? (prod.titre || 'Artefact') : 'Artefact',
                 niveau:    art.niveau || '?',
+                note:      (typeof art.note === 'number') ? art.note : null,
                 activite:  obtenirActivite(art.productionId),
                 categorie: prod ? (prod.categorie || null) : null
             };
@@ -797,6 +810,7 @@
                 return {
                     titre:    prod.titre || 'Artefact',
                     niveau:   evalObl ? (evalObl.niveauFinal || null) : null,
+                    note:     evalObl && typeof evalObl.noteFinale === 'number' ? evalObl.noteFinale : null,
                     activite: prod.activiteApprentissage || prod.description || '',
                     echeance: obtenirEcheance(prod)
                 };

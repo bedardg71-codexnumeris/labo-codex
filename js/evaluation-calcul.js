@@ -63,6 +63,28 @@
 'use strict';
 
 /**
+ * Colore le bloc résultat (.eval-resultat-algo) selon le niveau calculé,
+ * pour aligner visuellement les critères algorithmiques sur les autres
+ * critères (qui ont un select dropdown coloré). Passer `null`/`'--'` pour
+ * retirer le style (état pas-encore-calculé).
+ */
+function _appliquerStyleResultatAlgo(critereId, niveau) {
+    const bloc = document.getElementById(`resultat_algo_${critereId}`);
+    const nivAlgo = document.getElementById(`niveau_algo_${critereId}`);
+    if (!bloc) return;
+    if (niveau && niveau !== '--' && typeof obtenirCouleurNiveau === 'function') {
+        const couleur = obtenirCouleurNiveau(niveau);
+        bloc.style.borderLeft = `4px solid ${couleur}`;
+        bloc.style.background = couleur + '20';
+        if (nivAlgo) { nivAlgo.style.color = couleur; nivAlgo.style.fontWeight = '700'; }
+    } else {
+        bloc.style.borderLeft = '';
+        bloc.style.background = '';
+        if (nivAlgo) { nivAlgo.style.color = ''; nivAlgo.style.fontWeight = ''; }
+    }
+}
+
+/**
  * Calcule automatiquement la note pour un critère algorithmique
  * Formule: Note = Pondération − (Erreurs ÷ Mots × Facteur)
  *
@@ -84,6 +106,7 @@ function calculerNoteAlgorithmique(critereId, ponderation, facteur) {
         document.getElementById(`note_algo_${critereId}`).textContent = '--';
         document.getElementById(`pct_algo_${critereId}`).textContent = '--';
         document.getElementById(`niveau_algo_${critereId}`).textContent = '--';
+        _appliquerStyleResultatAlgo(critereId, null);
         return;
     }
 
@@ -116,6 +139,7 @@ function calculerNoteAlgorithmique(critereId, ponderation, facteur) {
     if (noteAlgoEl) noteAlgoEl.textContent = noteCalculee.toFixed(2);
     if (pctAlgoEl) pctAlgoEl.textContent = pctFinal.toFixed(1);
     if (nivAlgoEl) nivAlgoEl.textContent = niveauIDME;
+    _appliquerStyleResultatAlgo(critereId, niveauIDME);
 
     // Sauvegarder dans evaluationEnCours
     evaluationEnCours.criteres[critereId] = niveauIDME;
@@ -200,6 +224,7 @@ function _resetAffichageAlgoCategories(critereId) {
     document.getElementById(`pct_algo_${critereId}`).textContent = '--';
     document.getElementById(`niveau_algo_${critereId}`).textContent = '--';
     document.getElementById(`cat_dominante_${critereId}`).textContent = '--';
+    _appliquerStyleResultatAlgo(critereId, null);
     const retroDiv = document.getElementById(`retroaction_cat_${critereId}`);
     if (retroDiv) retroDiv.classList.add('u-hide');
 }
@@ -247,6 +272,7 @@ function _appliquerResultatsAlgoCategories(critereId, noteCalculee, pctFinal, ni
     if (noteAlgoEl) noteAlgoEl.textContent = noteCalculee.toFixed(2);
     if (pctAlgoEl) pctAlgoEl.textContent = pctFinal.toFixed(1);
     if (nivAlgoEl) nivAlgoEl.textContent = niveauIDME;
+    _appliquerStyleResultatAlgo(critereId, niveauIDME);
     evaluationEnCours.criteres[critereId] = niveauIDME;
     const selectAlgoCat = document.getElementById(`eval_${critereId}`);
     if (selectAlgoCat && selectAlgoCat.value) {
@@ -373,6 +399,7 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
         if (nivEl) nivEl.textContent = '--';
         if (totalErreursElem) totalErreursElem.textContent = '--';
         if (motsElem) motsElem.textContent = '--';
+        _appliquerStyleResultatAlgo(critereId, null);
         return;
     }
 
@@ -405,6 +432,7 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
     if (noteAlgoEl) noteAlgoEl.textContent = noteCalculee.toFixed(2);
     if (pctAlgoEl) pctAlgoEl.textContent = pctFinal.toFixed(1);
     if (nivAlgoEl) nivAlgoEl.textContent = niveauIDME;
+    _appliquerStyleResultatAlgo(critereId, niveauIDME);
 
     // Construire la rétroaction générique simple
     let retroactionGenerique = `Ta rédaction contient ${erreurs} erreur${erreurs > 1 ? 's' : ''} de français pour ${mots} mots.`;
