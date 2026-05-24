@@ -10826,11 +10826,32 @@ label:has(+ textarea:disabled) {
     gap: 10px;
 }
 
-/* Badge provisoire */
+/* Badge provisoire (legacy — gardé pour compat éventuelle) */
 .note-finale-badge-provisoire {
     font-size: 0.8rem;
     color: var(--orange-accent);
     font-weight: normal;
+}
+
+/* Lien Réglages de la pratique (à droite du titre Note finale/provisoire) */
+.note-finale-lien-reglages {
+    margin-left: auto;
+    background: transparent;
+    border: 1px solid var(--bordure-claire);
+    color: var(--gris-moyen);
+    font-size: 0.8rem;
+    font-weight: normal;
+    padding: 4px 10px;
+    border-radius: var(--radius-petit, 4px);
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+.note-finale-lien-reglages:hover,
+.note-finale-lien-reglages:focus {
+    background: var(--accent-primaire);
+    color: var(--surface-fond, white);
+    border-color: var(--accent-primaire);
+    outline: none;
 }
 
 /* Grille 2 colonnes pour Portfolio + Terminal */

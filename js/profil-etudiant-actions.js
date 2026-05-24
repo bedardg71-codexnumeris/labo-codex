@@ -445,9 +445,19 @@ function calculerDetailsNoteFinale(da) {
 
     const normaliser = (pond) => totalPonderation > 0 ? (pond / totalPonderation * 100).toFixed(0) : '0';
 
+    // Statut Provisoire/Finale : lu depuis la pratique active (toggle
+    // `configuration.notesFinales` géré par le wizard pratique). Aucune
+    // inférence ad hoc ; si l'utilisateur n'a pas coché « Notes finalisées »
+    // dans les réglages, la note reste affichée comme provisoire.
+    const cfgPratiqueActive = (typeof obtenirConfigPratiqueActive === 'function') ? obtenirConfigPratiqueActive() : null;
+    const estFinale = !!(cfgPratiqueActive && cfgPratiqueActive.notesFinales);
+    const pratiqueId = (typeof obtenirPratiqueActiveGroupeCours === 'function') ? obtenirPratiqueActiveGroupeCours() : null;
+
     return {
         pratique: 'PAN-Standards',
         erreur: erreurConfiguration,
+        pratiqueId: pratiqueId,
+        estFinale: estFinale,
         portfolio: {
             nombreARetenir: nombreARetenir,
             nombreEvalues: evaluationsArtefacts.length,

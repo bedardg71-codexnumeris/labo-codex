@@ -2706,10 +2706,15 @@ function genererSectionProductions(da) {
         const productionsMap = {};
         productions.forEach(p => { productionsMap[p.id] = p; });
 
+        // Format aligné sur le PDF rétroaction : « Artefact N (M 75.0%) : Activité ».
+        // Le « Artefact N » vient du titre de la production (`prod.titre`) ; l'activité
+        // est lue depuis `prod.activiteApprentissage`. La note finale est une vue
+        // synoptique, donc niveau ET note chiffrée sont affichés en parallèle.
         const decrireRetenu = (art, i) => {
             const prod = productionsMap[art.productionId];
             return {
-                titre:     prod?.activiteApprentissage || prod?.description || prod?.titre || `Artefact ${i + 1}`,
+                titreProd: prod?.titre || `Artefact ${i + 1}`,
+                activite:  prod?.activiteApprentissage || prod?.description || '',
                 niveau:    art.niveau,
                 note:      art.note,
                 categorie: prod?.categorie || null
@@ -2721,12 +2726,15 @@ function genererSectionProductions(da) {
 
         const renderLigneRetenu = (r) => {
             const noteTxt = (typeof r.note === 'number') ? `${r.note.toFixed(1)}%` : '—';
-            return `<li>${echapperHtml(r.titre)} <strong>${echapperHtml(r.niveau || '?')} ${noteTxt}</strong></li>`;
+            const marqueur = `${echapperHtml(r.niveau || '?')} ${noteTxt}`;
+            const activite = r.activite ? ` : ${echapperHtml(r.activite)}` : '';
+            return `<li>${echapperHtml(r.titreProd)} <strong>(${marqueur})</strong>${activite}</li>`;
         };
         const renderLigneObligatoire = (o) => {
             const noteTxt = (typeof o.note === 'number') ? `${o.note.toFixed(1)}%` : null;
             const marqueur = (o.niveau && noteTxt) ? `${echapperHtml(o.niveau)} ${noteTxt}` : 'non remis';
-            return `<li>${echapperHtml(o.titre)} <strong>${marqueur}</strong></li>`;
+            const activite = o.activite ? ` : ${echapperHtml(o.activite)}` : '';
+            return `<li>${echapperHtml(o.titreProd)} <strong>(${marqueur})</strong>${activite}</li>`;
         };
 
         const enteteBandeauPlafonnement = portfolio.plafonnement ? `
@@ -2749,9 +2757,10 @@ function genererSectionProductions(da) {
             const obligatoiresTous = productionsObligatoires.map(prod => {
                 const evalObl = evaluationsEleveValides.find(e => e.productionId === prod.id);
                 return {
-                    titre:  prod.activiteApprentissage || prod.description || prod.titre || 'Artefact',
-                    niveau: evalObl ? (evalObl.niveauFinal || null) : null,
-                    note:   evalObl && typeof evalObl.noteFinale === 'number' ? evalObl.noteFinale : null
+                    titreProd: prod.titre || 'Artefact',
+                    activite:  prod.activiteApprentissage || prod.description || '',
+                    niveau:    evalObl ? (evalObl.niveauFinal || null) : null,
+                    note:      evalObl && typeof evalObl.noteFinale === 'number' ? evalObl.noteFinale : null
                 };
             });
 
@@ -2781,8 +2790,8 @@ function genererSectionProductions(da) {
             <!-- Note finale de session (hybride sans terminale) -->
             <div class="note-finale-section">
                 <h3 class="note-finale-titre">
-                    Note finale de session
-                    ${detailsNoteFinale.estProvisoire ? '<span class="note-finale-badge-provisoire">(provisoire)</span>' : ''}
+                    ${detailsNoteFinale.estFinale ? 'Note finale de session' : 'Note provisoire de session'}
+                    ${detailsNoteFinale.pratiqueId ? `<button type="button" class="note-finale-lien-reglages" data-action="ouvrirReglagesPratique" data-param="${echapperHtml(detailsNoteFinale.pratiqueId)}" title="Modifier le statut (provisoire / finale) et les pondérations dans les réglages de la pratique">Réglages de la pratique</button>` : ''}
                 </h3>
 
                 ${enteteBandeauPlafonnement}
@@ -2841,8 +2850,8 @@ function genererSectionProductions(da) {
             <!-- Note finale de session (classique) -->
             <div class="note-finale-section">
                 <h3 class="note-finale-titre">
-                    Note finale de session
-                    ${detailsNoteFinale.estProvisoire ? '<span class="note-finale-badge-provisoire">(provisoire)</span>' : ''}
+                    ${detailsNoteFinale.estFinale ? 'Note finale de session' : 'Note provisoire de session'}
+                    ${detailsNoteFinale.pratiqueId ? `<button type="button" class="note-finale-lien-reglages" data-action="ouvrirReglagesPratique" data-param="${echapperHtml(detailsNoteFinale.pratiqueId)}" title="Modifier le statut (provisoire / finale) et les pondérations dans les réglages de la pratique">Réglages de la pratique</button>` : ''}
                 </h3>
 
                 ${enteteBandeauPlafonnement}

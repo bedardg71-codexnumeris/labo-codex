@@ -2650,6 +2650,26 @@ window.retirerPratiqueDeBibliothequeMateriel = retirerPratiqueDeBibliothequeMate
 
 // Édition
 window.chargerPratiquePourModif = chargerPratiquePourModif;
+
+/**
+ * Navigation directe vers les réglages d'une pratique précise depuis n'importe
+ * où dans l'app (utilisé par le lien « Réglages de la pratique » dans la
+ * section Note finale du profil étudiant). Enchaîne section → sous-section →
+ * chargement de la pratique. Les setTimeout laissent la cascade
+ * `afficherSousSection → afficherListePratiquesMateriel` (async) peupler la
+ * sidebar avant qu'on tente de sélectionner l'item.
+ */
+function ouvrirReglagesPratique(pratiqueId) {
+    if (!pratiqueId) return;
+    if (typeof afficherSection === 'function') afficherSection('conception');
+    setTimeout(() => {
+        if (typeof afficherSousSection === 'function') afficherSousSection('conception-pratiques-notation');
+        setTimeout(() => {
+            if (typeof chargerPratiquePourModif === 'function') chargerPratiquePourModif(pratiqueId);
+        }, 150);
+    }, 50);
+}
+window.ouvrirReglagesPratique = ouvrirReglagesPratique;
 window.dupliquerEtEditerPratique = dupliquerEtEditerPratique;
 window.creerNouvellePratique = creerNouvellePratique;
 window.dupliquerPratiqueMateriel = dupliquerPratiqueMateriel;
