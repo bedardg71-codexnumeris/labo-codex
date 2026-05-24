@@ -1,0 +1,290 @@
+/**
+ * reparation-donnees-algorithmiques.js
+ *
+ * Répare les évaluations dont `donneesAlgorithmiques[critereId].erreurs`
+ * ne correspond pas au comptage live des tampons `errfr_*` de l'annotation
+ * du fichier lié. Les mots sont LAISSÉS TELS QUELS (typés manuellement,
+ * impossibles à reconstituer automatiquement).
+ *
+ * Pour chaque divergence : remplace erreurs, recalcule noteCalculee/
+ * pourcentage/niveau/retroaction depuis l'échelle de la grille, met à jour
+ * dateModification. La note finale globale (`noteFinale`/`niveauFinal`) est
+ * recalculée pour rester cohérente avec le nouveau pourcentage algo.
+ *
+ * Usage console :
+ *   1. Coller ce fichier en entier → mode PREVIEW (rien n'est écrit).
+ *   2. Vérifier window.__reparationAlgo.aReparer (liste des modifications).
+ *   3. Pour appliquer pour de vrai : window.__reparationAlgo.appliquer()
+ */
+(function() {
+    'use strict';
+
+    function compterErrfrAnnotation(annotation) {
+        if (!annotation || !annotation.pages) return 0;
+        let total = 0;
+        for (const k of Object.keys(annotation.pages)) {
+            const p = annotation.pages[k];
+            if (!p || !p.shapes) continue;
+            for (const s of p.shapes) {
+                if (s.type && s.type.indexOf('errfr_') === 0) total++;
+            }
+        }
+        return total;
+    }
+
+    function resoudreEchelle(echelleId) {
+        if (!echelleId) return null;
+        if (echelleId.indexOf('pratique-') === 0) {
+            const pratiqueId = echelleId.replace('pratique-', '');
+            const pratiques = (typeof db !== 'undefined' && db.getSync)
+                ? (db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []))
+                : [];
+            const p = pratiques.find(x => x.id === pratiqueId);
+            return p && p.config && p.config.echelle && p.config.echelle.niveaux
+                ? { niveaux: p.config.echelle.niveaux }
+                : null;
+        }
+        const echelles = db.getSync('echellesTemplates', []) || [];
+        return echelles.find(e => e.id === echelleId) || null;
+    }
+
+    function determinerNiveauIDME(pctFinal, echelle) {
+        if (!echelle || !echelle.niveaux) return null;
+        const n = echelle.niveaux.find(niv => {
+            if (niv.code === '0' || niv.code === 0) return false;
+            return pctFinal >= niv.min && pctFinal <= niv.max;
+        });
+        return n ? n.code : null;
+    }
+
+    function genererRetroactionEUF(erreurs, mots) {
+        if (erreurs === 0) return ' En prévision de l\'EUF, l\'absence d\'erreur est exceptionnelle.';
+        if (mots === 0) return '';
+        const motsParErreur = mots / erreurs;
+        let txt = ` Tu fais en moyenne 1 erreur à chaque ${Math.round(motsParErreur)} mots.`;
+        if (motsParErreur >= 100) txt += ' En prévision de l\'EUF, ce ratio est excellent.';
+        else if (motsParErreur >= 75) txt += ' En prévision de l\'EUF, ce ratio est très bien.';
+        else if (motsParErreur >= 60) txt += ' En prévision de l\'EUF, ce ratio est bien.';
+        else if (motsParErreur >= 30) txt += ' En prévision de l\'EUF, ce ratio est risqué parce qu\'il est près du seuil de l\'échec. Il est recommandé de t\'inscrire au Centre d\'aide en français (CAF).';
+        else txt += ' En prévision de l\'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t\'inscrire au Centre d\'aide en français (CAF).';
+        return txt;
+    }
+
+    function recalculerNoteFinale(evaluation, grille, echelle) {
+        if (!grille || !grille.criteres || !echelle || !echelle.niveaux) return null;
+        const valeurs = {};
+        echelle.niveaux.forEach(n => {
+            valeurs[n.code] = (typeof n.valeurCalcul === 'number') ? n.valeurCalcul : ((n.min + n.max) / 2);
+        });
+        const criteresMap = {};
+        (evaluation.criteres || []).forEach(c => { criteresMap[c.critereId] = c; });
+
+        let noteTotal = 0;
+        let ponderationTotal = 0;
+        grille.criteres.forEach(crit => {
+            const c = criteresMap[crit.id];
+            if (!c || !c.niveauSelectionne) return;
+            const pond = (crit.ponderation || 0) / 100;
+            let valeur = valeurs[c.niveauSelectionne];
+            // Pour critère algo : préférer le pourcentage exact si présent
+            const da = evaluation.donneesAlgorithmiques && evaluation.donneesAlgorithmiques[crit.id];
+            if (crit.type === 'algorithmique' && da && typeof da.pourcentage === 'number') {
+                valeur = da.pourcentage;
+            }
+            if (valeur === undefined) return;
+            noteTotal += valeur * pond;
+            ponderationTotal += pond;
+        });
+        if (ponderationTotal === 0) return null;
+        const pctGlobal = noteTotal / ponderationTotal;
+        const niveauGlobal = determinerNiveauIDME(pctGlobal, echelle);
+        return { noteFinale: pctGlobal, niveauFinal: niveauGlobal || '' };
+    }
+
+    function obtenirFichierEtAnnotation(evaluation) {
+        if (typeof travauxResolution === 'undefined') return { fichier: null, annotation: null };
+        const fichier = travauxResolution.trouverFichierPourEvaluation(evaluation);
+        if (!fichier || typeof travauxStockage === 'undefined') return { fichier: null, annotation: null };
+        const annotation = travauxStockage.obtenirAnnotationFichier(fichier.id);
+        return { fichier: fichier, annotation: annotation };
+    }
+
+    function calculerReparations() {
+        const cleEvals = cle('evaluationsSauvegardees');
+        const evaluations = db.getSync(cleEvals, []) || [];
+        const grilles = db.getSync('grillesTemplates', []) || [];
+        const aReparer = [];
+        const ignores = [];
+
+        evaluations.forEach(ev => {
+            if (ev.remplaceeParId) return;
+            if (!ev.donneesAlgorithmiques) return;
+            const cles = Object.keys(ev.donneesAlgorithmiques);
+            if (!cles.length) return;
+
+            const grille = grilles.find(g => g.id === ev.grilleId);
+            if (!grille || !grille.criteres) return;
+
+            const { annotation } = obtenirFichierEtAnnotation(ev);
+            if (!annotation) {
+                cles.forEach(critereId => {
+                    const crit = grille.criteres.find(c => c.id === critereId);
+                    if (crit && crit.type === 'algorithmique') {
+                        ignores.push({ evalId: ev.id, etudiantDA: ev.etudiantDA, raison: 'pas-annotation' });
+                    }
+                });
+                return;
+            }
+            const errfrLive = compterErrfrAnnotation(annotation);
+
+            cles.forEach(critereId => {
+                const da = ev.donneesAlgorithmiques[critereId] || {};
+                const crit = grille.criteres.find(c => c.id === critereId);
+                if (!crit || crit.type !== 'algorithmique') return;
+
+                const erreursActuel = (typeof da.erreurs === 'number')
+                    ? da.erreurs
+                    : (typeof da.totalErreurs === 'number' ? da.totalErreurs : null);
+                if (erreursActuel === null) return;
+                if (erreursActuel === errfrLive) return; // déjà cohérent
+
+                const mots = (typeof da.mots === 'number') ? da.mots : 0;
+                const ponderation = (typeof crit.ponderation === 'number') ? crit.ponderation : 20;
+                const facteur = (typeof crit.facteurNormalisation === 'number') ? crit.facteurNormalisation : 500;
+                const echelle = resoudreEchelle(ev.echelleId);
+
+                let nouvelleNoteCalculee = null;
+                let nouveauPct = null;
+                let nouveauNiveau = null;
+                let nouvelleRetroaction = da.retroaction || '';
+
+                if (mots > 0) {
+                    nouvelleNoteCalculee = ponderation - (errfrLive / mots * facteur);
+                    const pctRaw = (nouvelleNoteCalculee / ponderation) * 100;
+                    nouveauPct = Math.max(0, Math.min(100, pctRaw));
+                    nouveauNiveau = determinerNiveauIDME(nouveauPct, echelle);
+                    nouvelleRetroaction = `Ta rédaction contient ${errfrLive} erreur${errfrLive > 1 ? 's' : ''} de français pour ${mots} mots.${genererRetroactionEUF(errfrLive, mots)}`;
+                }
+
+                aReparer.push({
+                    evalId: ev.id,
+                    etudiantDA: ev.etudiantDA,
+                    etudiantNom: ev.etudiantNom || '',
+                    productionId: ev.productionId,
+                    productionNom: ev.productionNom || '',
+                    critereId: critereId,
+                    critereNom: crit.nom,
+                    avant: {
+                        erreurs: erreursActuel,
+                        mots: mots,
+                        noteCalculee: da.noteCalculee,
+                        pourcentage: da.pourcentage,
+                        niveau: da.niveau
+                    },
+                    apres: {
+                        erreurs: errfrLive,
+                        mots: mots, // inchangé volontairement
+                        noteCalculee: nouvelleNoteCalculee,
+                        pourcentage: nouveauPct,
+                        niveau: nouveauNiveau,
+                        retroaction: nouvelleRetroaction
+                    },
+                    motsInchange: true
+                });
+            });
+        });
+
+        return { aReparer: aReparer, ignores: ignores };
+    }
+
+    function appliquerReparations() {
+        const cleEvals = cle('evaluationsSauvegardees');
+        const evaluations = db.getSync(cleEvals, []) || [];
+        const grilles = db.getSync('grillesTemplates', []) || [];
+        const { aReparer } = calculerReparations();
+        if (!aReparer.length) {
+            console.log('[Réparation] Rien à réparer.');
+            return { applique: 0 };
+        }
+
+        // Indexer par evalId pour accès rapide
+        const evalParId = {};
+        evaluations.forEach((ev, idx) => { evalParId[ev.id] = idx; });
+
+        const maintenant = new Date().toISOString();
+        let nbModifs = 0;
+
+        aReparer.forEach(rep => {
+            const idx = evalParId[rep.evalId];
+            if (idx === undefined) return;
+            const ev = evaluations[idx];
+            if (!ev.donneesAlgorithmiques) ev.donneesAlgorithmiques = {};
+
+            // Préserver les champs existants qu'on ne touche pas (codes, niveau manuel, etc.)
+            const ancien = ev.donneesAlgorithmiques[rep.critereId] || {};
+            const nouveau = Object.assign({}, ancien, {
+                erreurs: rep.apres.erreurs
+            });
+            if (rep.apres.noteCalculee !== null) nouveau.noteCalculee = rep.apres.noteCalculee;
+            if (rep.apres.pourcentage !== null) nouveau.pourcentage = rep.apres.pourcentage;
+            if (rep.apres.niveau) nouveau.niveau = rep.apres.niveau;
+            if (rep.apres.retroaction) nouveau.retroaction = rep.apres.retroaction;
+            // Si totalErreurs (mode catégories) existait, l'aligner aussi
+            if (typeof ancien.totalErreurs === 'number') nouveau.totalErreurs = rep.apres.erreurs;
+
+            ev.donneesAlgorithmiques[rep.critereId] = nouveau;
+            ev.dateModification = maintenant;
+            nbModifs++;
+        });
+
+        // Recalculer la note finale globale pour chaque éval touchée
+        const evalsTouchees = {};
+        aReparer.forEach(rep => { evalsTouchees[rep.evalId] = true; });
+        Object.keys(evalsTouchees).forEach(evalId => {
+            const idx = evalParId[evalId];
+            if (idx === undefined) return;
+            const ev = evaluations[idx];
+            const grille = grilles.find(g => g.id === ev.grilleId);
+            const echelle = resoudreEchelle(ev.echelleId);
+            const nouvelleNote = recalculerNoteFinale(ev, grille, echelle);
+            if (nouvelleNote) {
+                ev.noteFinale = nouvelleNote.noteFinale;
+                ev.niveauFinal = nouvelleNote.niveauFinal;
+            }
+        });
+
+        // Persister (db.setSync direct, accès intentionnel — réparation one-shot
+        // qui doit écrire dans la clé namespacée du trimestre actif)
+        db.setSync(cleEvals, evaluations);
+
+        console.log(`[Réparation] ${nbModifs} divergences corrigées sur ${Object.keys(evalsTouchees).length} évaluations.`);
+        console.log('[Réparation] Rouvre l\'app ou recharge la page pour voir les changements dans les PDF.');
+        return { applique: nbModifs, evalsTouchees: Object.keys(evalsTouchees).length };
+    }
+
+    // === MODE PREVIEW (par défaut) ===
+    const preview = calculerReparations();
+    console.group('[Réparation Algo] Mode PREVIEW (rien n\'est écrit en DB)');
+    console.log('À réparer :', preview.aReparer.length, 'divergences erreurs');
+    console.log('Ignorés (pas d\'annotation) :', preview.ignores.length);
+    if (preview.aReparer.length > 0) {
+        console.table(preview.aReparer.map(r => ({
+            etudiant: r.etudiantNom || r.etudiantDA,
+            production: r.productionNom,
+            avant: r.avant.erreurs + '/' + r.avant.mots + ' → ' + (typeof r.avant.pourcentage === 'number' ? r.avant.pourcentage.toFixed(1) + '%' : '—'),
+            apres: r.apres.erreurs + '/' + r.apres.mots + ' → ' + (typeof r.apres.pourcentage === 'number' ? r.apres.pourcentage.toFixed(1) + '%' : '—'),
+            niveauAvant: r.avant.niveau,
+            niveauApres: r.apres.niveau
+        })));
+    }
+    console.groupEnd();
+    console.log('Pour appliquer : window.__reparationAlgo.appliquer()');
+
+    window.__reparationAlgo = {
+        aReparer: preview.aReparer,
+        ignores: preview.ignores,
+        appliquer: appliquerReparations,
+        recalculer: calculerReparations
+    };
+    return window.__reparationAlgo;
+})();
