@@ -1215,7 +1215,16 @@ function _majEvaluationExistanteAutoSave(evalExistante, ec, criteres) {
     var retroEl = document.getElementById('retroactionFinale1');
     if (retroEl) evalExistante.retroactionFinale = retroEl.value;
     evalExistante.dateModification = new Date().toISOString();
-    evalExistante.donneesAlgorithmiques = ec.donneesAlgorithmiques || evalExistante.donneesAlgorithmiques || {};
+    // Ne PAS écraser donneesAlgorithmiques avec un objet vide. En JS `{}` est
+    // truthy donc `ec.donneesAlgorithmiques || evalExistante.donneesAlgorithmiques`
+    // retourne TOUJOURS le snapshot, même quand celui-ci a été pris dans la
+    // fenêtre de race condition entre le reset partiel
+    // (`demarrerEvaluationDepuisFichier` l.502 met `donneesAlgorithmiques = {}`)
+    // et la restauration depuis la DB. Le test explicite préserve les valeurs
+    // déjà persistées (nombre d'erreurs, nombre de mots, etc.).
+    if (ec.donneesAlgorithmiques && Object.keys(ec.donneesAlgorithmiques).length > 0) {
+        evalExistante.donneesAlgorithmiques = ec.donneesAlgorithmiques;
+    }
 }
 
 function _lireChampsDOMAutoSave() {
