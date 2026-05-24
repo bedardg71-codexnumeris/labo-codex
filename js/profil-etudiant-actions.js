@@ -226,7 +226,7 @@ function _filtrerEvaluationsArtefactsValides(evaluations, da, artefactsIds, term
     });
 }
 
-function _selectionnerArtefactsHybride(evalsArtefacts, productions, configCategories) {
+function _selectionnerArtefactsHybride(evalsArtefacts, productions, configCategories, estFinale) {
     const { nombreARetenir: nSelection, ponderation: pondSel } = configCategories.selection || { nombreARetenir: 4, ponderation: 65 };
     const { ponderation: pondObl } = configCategories.obligatoires || { ponderation: 35 };
     const productionsNonPortfolio = productions.filter(p => p.type !== 'portfolio');
@@ -247,14 +247,22 @@ function _selectionnerArtefactsHybride(evalsArtefacts, productions, configCatego
 
     const artefactsRetenus = [...meilleuresSelection, ...evalsObligatoires];
 
+    // Règle UI (wizard pratique) : « Note = 0 si production non remise ».
+    // S'applique UNIQUEMENT en mode finale (notesFinales coché). En mode
+    // provisoire (au fil de la session), les obligatoires non remises sont
+    // ignorées — elles ne pénalisent pas la note tant que la session n'est
+    // pas terminée.
+    const nombreObligatoiresTotal = productionsNonPortfolio.filter(p => p.categorie === 'obligatoire').length;
+    const denominateurObl = estFinale ? nombreObligatoiresTotal : evalsObligatoires.length;
+
     // Moyenne pondérée Hybride
     let moyennePortfolio = null;
-    if (meilleuresSelection.length > 0 || evalsObligatoires.length > 0) {
+    if (meilleuresSelection.length > 0 || denominateurObl > 0) {
         const moySel = meilleuresSelection.length > 0
             ? meilleuresSelection.reduce((s, e) => s + e.noteFinale, 0) / meilleuresSelection.length : 0;
-        const moyObl = evalsObligatoires.length > 0
-            ? evalsObligatoires.reduce((s, e) => s + e.noteFinale, 0) / evalsObligatoires.length : 0;
-        if (meilleuresSelection.length > 0 && evalsObligatoires.length > 0) {
+        const moyObl = denominateurObl > 0
+            ? evalsObligatoires.reduce((s, e) => s + e.noteFinale, 0) / denominateurObl : 0;
+        if (meilleuresSelection.length > 0 && denominateurObl > 0) {
             moyennePortfolio = (moySel * pondSel + moyObl * pondObl) / (pondSel + pondObl);
         } else if (meilleuresSelection.length > 0) {
             moyennePortfolio = moySel;
@@ -393,9 +401,16 @@ function calculerDetailsNoteFinale(da) {
     const artefactsIds = _obtenirArtefactsIdsPortfolio(productions, terminalId);
     const evaluationsArtefacts = _filtrerEvaluationsArtefactsValides(evaluations, da, artefactsIds, terminalId);
 
+    // Statut Provisoire/Finale lu tôt — pilote la règle « obligatoires non
+    // remises = 0 » : appliquée uniquement en mode finale. En provisoire,
+    // les non-remises restent simplement ignorées.
+    const cfgPratiqueActive = (typeof obtenirConfigPratiqueActive === 'function') ? obtenirConfigPratiqueActive() : null;
+    const estFinale = !!(cfgPratiqueActive && cfgPratiqueActive.notesFinales);
+    const pratiqueId = (typeof obtenirPratiqueActiveGroupeCours === 'function') ? obtenirPratiqueActiveGroupeCours() : null;
+
     // Sélection des artefacts retenus + moyenne (Hybride ou Legacy)
     const { artefactsRetenus, moyennePortfolio: moyenneBrute } = modeHybrideNote
-        ? _selectionnerArtefactsHybride(evaluationsArtefacts, productions, configCategoriesNote)
+        ? _selectionnerArtefactsHybride(evaluationsArtefacts, productions, configCategoriesNote, estFinale)
         : _selectionnerArtefactsLegacy(evaluationsArtefacts, productions, methodeSelection, nombreARetenir);
 
     // Plafonnement conformité (déficit d'artefacts)
@@ -444,14 +459,9 @@ function calculerDetailsNoteFinale(da) {
     };
 
     const normaliser = (pond) => totalPonderation > 0 ? (pond / totalPonderation * 100).toFixed(0) : '0';
-
-    // Statut Provisoire/Finale : lu depuis la pratique active (toggle
-    // `configuration.notesFinales` géré par le wizard pratique). Aucune
-    // inférence ad hoc ; si l'utilisateur n'a pas coché « Notes finalisées »
-    // dans les réglages, la note reste affichée comme provisoire.
-    const cfgPratiqueActive = (typeof obtenirConfigPratiqueActive === 'function') ? obtenirConfigPratiqueActive() : null;
-    const estFinale = !!(cfgPratiqueActive && cfgPratiqueActive.notesFinales);
-    const pratiqueId = (typeof obtenirPratiqueActiveGroupeCours === 'function') ? obtenirPratiqueActiveGroupeCours() : null;
+    // `estFinale` et `pratiqueId` sont déjà calculés plus haut (avant l'appel
+    // au calculateur hybride, car le flag pilote le traitement des obligatoires
+    // non remises).
 
     return {
         pratique: 'PAN-Standards',
