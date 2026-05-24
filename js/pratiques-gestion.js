@@ -242,7 +242,12 @@ function genererBadgeCaracteristiques(pratique) {
         caracteristiques.push(`${nbJetons} jetons`);
     }
 
-    // 4. Échelle associée (nom abrégé)
+    // 4. Notes finalisées (toggle Provisoire/Finale activé)
+    if (pratique.configuration?.notesFinales) {
+        caracteristiques.push('notes finalisées');
+    }
+
+    // 5. Échelle associée (nom abrégé)
     if (pratique.configuration?.echelleId) {
         const echelles = db.getSync('echellesTemplates', []);
         const echelle = echelles.find(e => e.id === pratique.configuration.echelleId);
@@ -739,6 +744,9 @@ function remplirFormulairePratique(pratique) {
     if (affNote === 'lettre' && radioLettre) radioLettre.checked = true;
     else if (radioComplet) radioComplet.checked = true;
 
+    // Toggle Provisoire/Finale (lit configuration.notesFinales)
+    setCheckbox('mat-notes-finales', pratique.configuration?.notesFinales === true);
+
     // Afficher la description taxonomique selon le type
     afficherDescriptionTaxonomiqueMat(pratique.type);
 
@@ -1105,6 +1113,10 @@ async function sauvegarderConfigPratiqueMat() {
     if (!configurations[index].configuration) {
         configurations[index].configuration = {};
     }
+
+    // Toggle Provisoire/Finale (pilote le titre du bloc Note dans le PDF rétroaction
+    // via construireNoteProvisoire → renderRangeeNote).
+    configurations[index].configuration.notesFinales = getCheckbox('mat-notes-finales');
 
     // Sauvegarder selon le type
     if (type === 'pan-standards') {

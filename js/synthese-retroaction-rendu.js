@@ -540,19 +540,36 @@
     }
 
     function renderRangeeNote(note) {
-        if (!note || !Array.isArray(note.retenus) || !note.retenus.length) return null;
+        if (!note || !Array.isArray(note.selection) || !note.selection.length) return null;
 
-        // ----- Colonne gauche : 4 meilleurs -----
-        const titreRetenus = `Voici les ${esc(note.nombreRetenus)} meilleurs artefacts que tu as produits :`;
-        const itemsRetenus = note.retenus.map(art => {
+        const estHybride = note.estHybride === true;
+        const estFinale  = note.estFinale  === true;
+        const titreBloc  = estFinale ? 'Note finale' : 'Note provisoire';
+        const nbSelection = note.nombreSelection || note.selection.length;
+
+        // ----- Colonne gauche : sélection (les N meilleurs) -----
+        const libelleSelection = estHybride
+            ? `Sélection (les ${esc(nbSelection)} meilleurs)`
+            : `Voici les ${esc(nbSelection)} meilleurs artefacts que tu as produits`;
+        const itemsSelection = note.selection.map(art => {
             const ligne = `${esc(art.titre)} (${esc(art.niveau)})${art.activite ? ' : ' + esc(art.activite) : ''}`;
             return `<li style="margin-bottom: 2px;">${ligne}</li>`;
         }).join('');
-        const colGauche = `<div>${titreRetenus}</div><ul style="margin: 2px 0 0 0; padding-left: 14px;">${itemsRetenus}</ul>`;
+        const colGauche = `<div>${libelleSelection} :</div><ul style="margin: 2px 0 0 0; padding-left: 14px;">${itemsSelection}</ul>`;
 
-        // ----- Colonne droite : à venir + obligatoires -----
+        // ----- Colonne droite : obligatoires (hybride) puis à venir -----
         const blocsDroite = [];
-        if (Array.isArray(note.avenir) && note.avenir.length) {
+        if (estHybride && Array.isArray(note.obligatoires) && note.obligatoires.length) {
+            const items = note.obligatoires.map(o => {
+                let ligne = esc(o.titre);
+                ligne += o.niveau ? ` (${esc(o.niveau)})` : ' (non remis)';
+                if (o.activite) ligne += ' : ' + esc(o.activite);
+                if (o.echeance) ligne += ` (échéance : ${esc(formaterDateLongue(o.echeance))})`;
+                return `<li style="margin-bottom: 2px;">${ligne}</li>`;
+            }).join('');
+            blocsDroite.push(`<div>Obligatoires (${esc(note.obligatoires.length)} production${note.obligatoires.length > 1 ? 's' : ''}) :</div><ul style="margin: 2px 0 6px 0; padding-left: 14px;">${items}</ul>`);
+        }
+        if (Array.isArray(note.avenir) && note.avenir.length && !estFinale) {
             const items = note.avenir.map(a => {
                 let ligne = esc(a.titre);
                 if (a.activite) {
@@ -565,24 +582,27 @@
                 }
                 return `<li style="margin-bottom: 2px;">${ligne}</li>`;
             }).join('');
-            blocsDroite.push(`<div>Artefacts à venir :</div><ul style="margin: 2px 0 6px 0; padding-left: 14px;">${items}</ul>`);
-        }
-        if (Array.isArray(note.obligatoires) && note.obligatoires.length) {
-            const items = note.obligatoires.map(o => {
-                let ligne = esc(o.titre);
-                ligne += o.niveau ? ` (${esc(o.niveau)})` : ' (non remis)';
-                if (o.activite) ligne += ' : ' + esc(o.activite);
-                if (o.echeance) ligne += ` (échéance : ${esc(formaterDateLongue(o.echeance))})`;
-                return `<li style="margin-bottom: 2px;">${ligne}</li>`;
-            }).join('');
-            blocsDroite.push(`<div>Artefacts obligatoires :</div><ul style="margin: 2px 0 0 0; padding-left: 14px;">${items}</ul>`);
+            blocsDroite.push(`<div>Artefacts à venir :</div><ul style="margin: 2px 0 0 0; padding-left: 14px;">${items}</ul>`);
         }
         const colDroite = blocsDroite.join('');
 
-        // ----- Note chiffrée provisoire + plafonnement éventuel (en tête, pleine largeur) -----
+        // ----- En-tête : phrase chiffrée + formule pondération + plafonnement -----
         const messages = [];
         if (typeof note.moyenne === 'number' && !isNaN(note.moyenne)) {
-            messages.push(`La note chiffrée provisoire de ton portfolio est ${esc(note.moyenne)} %. Cette note peut changer en fonction de tes prochains travaux et des jetons que tu appliques.`);
+            const phraseChiffree = estFinale
+                ? `Ta note finale de portfolio est ${esc(note.moyenne)} %.`
+                : `La note chiffrée provisoire de ton portfolio est ${esc(note.moyenne)} %. Cette note peut changer en fonction de tes prochains travaux et des jetons que tu appliques.`;
+            messages.push(phraseChiffree);
+        }
+        if (estHybride && !note.erreurPonderation && note.ponderationSelection != null && note.ponderationObligatoires != null) {
+            const total = note.ponderationSelection + note.ponderationObligatoires;
+            const nbObl = Array.isArray(note.obligatoires) ? note.obligatoires.length : 0;
+            const formule = `Construction : Sélection (les ${esc(nbSelection)} meilleurs) ${esc(note.ponderationSelection)} %`
+                + ` + Obligatoires (${esc(nbObl)} production${nbObl > 1 ? 's' : ''}) ${esc(note.ponderationObligatoires)} %`
+                + ` = ${esc(total)} %.`;
+            messages.push(formule);
+        } else if (estHybride && note.erreurPonderation) {
+            messages.push(`⚠ ${esc(note.erreurPonderation)}`);
         }
         if (note.plafonnement && note.plafonnement.actif) {
             messages.push(note.plafonnement.echec
@@ -593,7 +613,7 @@
             ? `<div style="margin-bottom: 6px;">${messages.map(m => `<div>${m}</div>`).join('')}</div>`
             : '';
 
-        // ----- Composition : en-tête (chiffré + plafonnement) puis 2 colonnes -----
+        // ----- Composition : en-tête (chiffré + formule + plafonnement) puis 2 colonnes -----
         const cols = colDroite
             ? `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
                    <div>${colGauche}</div>
@@ -601,7 +621,7 @@
                </div>`
             : colGauche;
 
-        return renderRangeeBilan('Note provisoire', enTete + cols, true);
+        return renderRangeeBilan(titreBloc, enTete + cols, true);
     }
 
     function formaterDateLongue(iso) {
