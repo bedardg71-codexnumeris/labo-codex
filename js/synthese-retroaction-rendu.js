@@ -557,20 +557,44 @@
             return '';
         };
 
-        // ----- Colonne gauche : sélection (les N meilleurs) -----
+        // Calcul détaillé par catégorie : (75% + 75% + 75% + 73%) ÷ 4 = 74.5% × 65% = 48.4 pts
+        // La moyenne ignore les non-remis (cohérent avec le calculateur hybride).
+        const calculerCategorie = (items, ponderation) => {
+            const notes = items.map(i => i.note).filter(n => typeof n === 'number');
+            if (notes.length === 0 || ponderation == null) return null;
+            const somme = notes.reduce((s, n) => s + n, 0);
+            const moyenne = somme / notes.length;
+            return { notes, somme, moyenne, contribution: moyenne * ponderation / 100 };
+        };
+        const formaterCalcul = (calc, ponderation) => {
+            if (!calc) return '';
+            const addition = calc.notes.map(n => `${n.toFixed(1)} %`).join(' + ');
+            return `(${addition}) &divide; ${calc.notes.length} = <b>${calc.moyenne.toFixed(1)} %</b>`
+                 + ` &times; ${ponderation} % = <b>${calc.contribution.toFixed(1)} pts</b>`;
+        };
+        const calcSel = estHybride ? calculerCategorie(note.selection, note.ponderationSelection) : null;
+        const calcObl = estHybride ? calculerCategorie(note.obligatoires || [], note.ponderationObligatoires) : null;
+
+        // ----- Colonne gauche : sélection (les N meilleures) + calcul -----
+        const badgePondSel = (estHybride && note.ponderationSelection != null) ? ` (${esc(note.ponderationSelection)} %)` : '';
+        const evaluesSel = (note.nombreEvaluesSelection != null) ? note.nombreEvaluesSelection : nbSelection;
         const libelleSelection = estHybride
-            ? `Sélection (les ${esc(nbSelection)} meilleurs)`
+            ? `Sélection (les ${esc(nbSelection)} meilleures sur ${esc(evaluesSel)} évaluées)${badgePondSel}`
             : `Voici les ${esc(nbSelection)} meilleurs artefacts que tu as produits`;
         const itemsSelection = note.selection.map(art => {
             const marqueur = formaterNiveauNote(art.niveau, art.note);
             const ligne = `${esc(art.titre)}${marqueur ? ` (${esc(marqueur)})` : ''}${art.activite ? ' : ' + esc(art.activite) : ''}`;
             return `<li style="margin-bottom: 2px;">${ligne}</li>`;
         }).join('');
-        const colGauche = `<div>${libelleSelection} :</div><ul style="margin: 2px 0 0 0; padding-left: 14px;">${itemsSelection}</ul>`;
+        const calculSelHtml = calcSel
+            ? `<div style="margin-top: 6px; padding-top: 4px; border-top: 1px solid ${LINE}; font-size: 9.5px; color: ${MUTED};">${formaterCalcul(calcSel, note.ponderationSelection)}</div>`
+            : '';
+        const colGauche = `<div>${libelleSelection} :</div><ul style="margin: 2px 0 0 0; padding-left: 14px;">${itemsSelection}</ul>${calculSelHtml}`;
 
-        // ----- Colonne droite : obligatoires (hybride) puis à venir -----
+        // ----- Colonne droite : obligatoires (hybride) + calcul, puis à venir -----
         const blocsDroite = [];
         if (estHybride && Array.isArray(note.obligatoires) && note.obligatoires.length) {
+            const badgePondObl = (note.ponderationObligatoires != null) ? ` (${esc(note.ponderationObligatoires)} %)` : '';
             const items = note.obligatoires.map(o => {
                 let ligne = esc(o.titre);
                 const marqueur = formaterNiveauNote(o.niveau, o.note);
@@ -579,7 +603,10 @@
                 if (o.echeance && !estFinale) ligne += ` (échéance : ${esc(formaterDateLongue(o.echeance))})`;
                 return `<li style="margin-bottom: 2px;">${ligne}</li>`;
             }).join('');
-            blocsDroite.push(`<div>Obligatoires (${esc(note.obligatoires.length)} production${note.obligatoires.length > 1 ? 's' : ''}) :</div><ul style="margin: 2px 0 6px 0; padding-left: 14px;">${items}</ul>`);
+            const calculOblHtml = calcObl
+                ? `<div style="margin-top: 6px; padding-top: 4px; border-top: 1px solid ${LINE}; font-size: 9.5px; color: ${MUTED};">${formaterCalcul(calcObl, note.ponderationObligatoires)}</div>`
+                : '';
+            blocsDroite.push(`<div>Obligatoires (${esc(note.obligatoires.length)} production${note.obligatoires.length > 1 ? 's' : ''})${badgePondObl} :</div><ul style="margin: 2px 0 0 0; padding-left: 14px;">${items}</ul>${calculOblHtml}`);
         }
         if (Array.isArray(note.avenir) && note.avenir.length && !estFinale) {
             const items = note.avenir.map(a => {
@@ -594,38 +621,40 @@
                 }
                 return `<li style="margin-bottom: 2px;">${ligne}</li>`;
             }).join('');
-            blocsDroite.push(`<div>Artefacts à venir :</div><ul style="margin: 2px 0 0 0; padding-left: 14px;">${items}</ul>`);
+            blocsDroite.push(`<div style="margin-top: 8px;">Artefacts à venir :</div><ul style="margin: 2px 0 0 0; padding-left: 14px;">${items}</ul>`);
         }
         const colDroite = blocsDroite.join('');
 
-        // ----- En-tête : phrase chiffrée + formule pondération + plafonnement -----
-        const messages = [];
+        // ----- Bloc résultat final (en BAS, comme l'app) -----
+        // Phrase calculée + grand chiffre encadré + plafonnement + mention provisoire.
+        let resultatFinal = '';
         if (typeof note.moyenne === 'number' && !isNaN(note.moyenne)) {
-            const phraseChiffree = estFinale
-                ? `Ta note finale est ${esc(note.moyenne)} %.`
-                : `La note chiffrée provisoire de ton portfolio est ${esc(note.moyenne)} %. Cette note peut changer en fonction de tes prochains travaux et des jetons que tu appliques.`;
-            messages.push(phraseChiffree);
+            let phraseFinale;
+            if (estHybride && !note.erreurPonderation && calcSel && calcObl) {
+                phraseFinale = `Note finale = ${calcSel.contribution.toFixed(1)} pts + ${calcObl.contribution.toFixed(1)} pts = ${esc(note.moyenne)} %`;
+            } else if (estHybride && note.erreurPonderation) {
+                phraseFinale = `⚠ ${esc(note.erreurPonderation)}`;
+            } else {
+                phraseFinale = `Note finale = ${esc(note.moyenne)} %`;
+            }
+            const mentionPlafonnement = (note.plafonnement && note.plafonnement.actif)
+                ? `<div style="margin-top: 4px; font-size: 9px; color: ${MUTED};">${note.plafonnement.echec
+                    ? 'Note plafonnée (échec) : déficit de ' + esc(note.plafonnement.deficit) + ' production(s).'
+                    : 'Note plafonnée par déficit de ' + esc(note.plafonnement.deficit) + ' production(s).'}</div>`
+                : '';
+            const mentionProvisoire = (!estFinale)
+                ? `<div style="margin-top: 4px; font-size: 9px; color: ${MUTED}; font-style: italic;">Note provisoire — peut changer selon tes prochains travaux et l'application de jetons.</div>`
+                : '';
+            resultatFinal = `
+                <div style="margin-top: 12px; padding: 12px; border: 1px solid ${LINE}; border-radius: 4px; text-align: center;">
+                    <div style="font-size: 10px; color: ${MUTED};">${phraseFinale}</div>
+                    <div style="font-size: 28px; font-weight: 800; margin-top: 6px;">${esc(note.moyenne)} %</div>
+                    ${mentionPlafonnement}
+                    ${mentionProvisoire}
+                </div>`;
         }
-        if (estHybride && !note.erreurPonderation && note.ponderationSelection != null && note.ponderationObligatoires != null) {
-            const total = note.ponderationSelection + note.ponderationObligatoires;
-            const nbObl = Array.isArray(note.obligatoires) ? note.obligatoires.length : 0;
-            const formule = `Construction : Sélection (les ${esc(nbSelection)} meilleurs) ${esc(note.ponderationSelection)} %`
-                + ` + Obligatoires (${esc(nbObl)} production${nbObl > 1 ? 's' : ''}) ${esc(note.ponderationObligatoires)} %`
-                + ` = ${esc(total)} %.`;
-            messages.push(formule);
-        } else if (estHybride && note.erreurPonderation) {
-            messages.push(`⚠ ${esc(note.erreurPonderation)}`);
-        }
-        if (note.plafonnement && note.plafonnement.actif) {
-            messages.push(note.plafonnement.echec
-                ? `Note plafonnée (échec) : déficit de ${esc(note.plafonnement.deficit)} production(s).`
-                : `Note plafonnée par déficit de ${esc(note.plafonnement.deficit)} production(s).`);
-        }
-        const enTete = messages.length
-            ? `<div style="margin-bottom: 6px;">${messages.map(m => `<div>${m}</div>`).join('')}</div>`
-            : '';
 
-        // ----- Composition : en-tête (chiffré + formule + plafonnement) puis 2 colonnes -----
+        // ----- Composition : 2 colonnes (Sélection / Obligatoires) puis bloc résultat -----
         const cols = colDroite
             ? `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
                    <div>${colGauche}</div>
@@ -633,7 +662,7 @@
                </div>`
             : colGauche;
 
-        return renderRangeeBilan(titreBloc, enTete + cols, true);
+        return renderRangeeBilan(titreBloc, cols + resultatFinal, true);
     }
 
     function formaterDateLongue(iso) {

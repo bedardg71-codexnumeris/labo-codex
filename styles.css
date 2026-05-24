@@ -10936,6 +10936,20 @@ label:has(+ textarea:disabled) {
     background: var(--gris-fonce, #333);
 }
 
+/* Bloc calcul détaillé d'une catégorie (Sélection / Obligatoires) :
+   (75% + 75% + 75% + 73%) ÷ 4 = 74.5% × 65% = 48.4 pts */
+.note-finale-calcul-categorie {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--bordure-claire);
+    font-size: 0.9rem;
+    color: var(--gris-moyen);
+    line-height: 1.5;
+}
+.note-finale-calcul-categorie strong {
+    color: var(--texte-principal);
+}
+
 /* Carte de résultat final */
 .note-finale-resultat {
     background: var(--surface-carte, #1a3040);

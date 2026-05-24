@@ -2777,14 +2777,44 @@ function genererSectionProductions(da) {
                 ? '<ul class="note-finale-liste-artefacts">' + obligatoiresTous.map(renderLigneObligatoire).join('') + '</ul>'
                 : '<span class="note-finale-non-evalue">Aucune production obligatoire configurée</span>';
 
-            const titreSelection = nbSelARetenir != null
-                ? `Sélection (les ${nbSelARetenir} meilleurs sur ${portfolio.nombreEvalues - obligatoiresTous.length} évalués)`
-                : `Sélection (${selection.length} meilleurs)`;
-            const titreObligatoires = `Obligatoires (${obligatoiresTous.length} production${obligatoiresTous.length > 1 ? 's' : ''})`;
+            const badgePondSel = (pondSel != null) ? ` (${pondSel}%)` : '';
+            const badgePondObl = (pondObl != null) ? ` (${pondObl}%)` : '';
+            // Nombre d'obligatoires réellement évaluées (pas seulement définies),
+            // sinon les non-remises sous-estimeraient à tort le pool de sélection.
+            const obligatoiresEvaluees = obligatoiresTous.filter(o => typeof o.note === 'number').length;
+            const evaluesSelection = Math.max(0, portfolio.nombreEvalues - obligatoiresEvaluees);
+            const titreSelection = (nbSelARetenir != null
+                ? `Sélection (les ${nbSelARetenir} meilleures sur ${evaluesSelection} évaluées)`
+                : `Sélection (${selection.length} meilleures)`) + badgePondSel;
+            const titreObligatoires = `Obligatoires (${obligatoiresTous.length} production${obligatoiresTous.length > 1 ? 's' : ''})` + badgePondObl;
+
+            // Calcul de la moyenne de chaque catégorie + contribution pondérée.
+            // La moyenne ignore les non-remis (cohérent avec _selectionnerArtefactsHybride).
+            // La contribution = moyenne × pondération / 100, exprimée en « points » qui
+            // s'additionnent pour donner la note finale.
+            const calculCategorie = (items, ponderation) => {
+                const notes = items.map(i => i.note).filter(n => typeof n === 'number');
+                if (notes.length === 0 || ponderation == null) return null;
+                const somme = notes.reduce((s, n) => s + n, 0);
+                const moyenne = somme / notes.length;
+                return { notes, somme, moyenne, contribution: moyenne * ponderation / 100 };
+            };
+            const formaterCalcul = (calc, ponderation) => {
+                if (!calc) return '';
+                const addition = calc.notes.map(n => `${n.toFixed(1)}%`).join(' + ');
+                return `(${addition}) ÷ ${calc.notes.length} = <strong>${calc.moyenne.toFixed(1)}%</strong>`
+                     + ` × ${ponderation}% = <strong>${calc.contribution.toFixed(1)} pts</strong>`;
+            };
+            const calcSel = calculCategorie(selection, pondSel);
+            const calcObl = calculCategorie(obligatoiresTous, pondObl);
+            const calculSelHtml = calcSel ? formaterCalcul(calcSel, pondSel) : `<span class="note-finale-ponderation">× ${pondSel != null ? pondSel + '%' : '—'}</span>`;
+            const calculOblHtml = calcObl ? formaterCalcul(calcObl, pondObl) : `<span class="note-finale-ponderation">× ${pondObl != null ? pondObl + '%' : '—'}</span>`;
 
             const formule = erreurPond
                 ? `<span class="note-finale-tiret">⚠ Pondérations Sélection/Obligatoires manquantes dans la configuration de la pratique.</span>`
-                : `Note finale pondérée (Sélection ${pondSel}% + Obligatoires ${pondObl}% = ${pondSel + pondObl}%)`;
+                : (calcSel && calcObl
+                    ? `Note finale = ${calcSel.contribution.toFixed(1)} pts + ${calcObl.contribution.toFixed(1)} pts = ${(calcSel.contribution + calcObl.contribution).toFixed(1)} %`
+                    : `Note finale pondérée (Sélection ${pondSel}% + Obligatoires ${pondObl}% = ${pondSel + pondObl}%)`);
 
             htmlNoteFinale = `
             <!-- Note finale de session (hybride sans terminale) -->
@@ -2800,17 +2830,13 @@ function genererSectionProductions(da) {
                     <div class="note-finale-composante ${portfolio.plafonnement ? 'note-finale-composante-plafonnee' : ''}">
                         <div class="note-finale-composante-titre">${titreSelection}</div>
                         <div class="note-finale-artefacts">${listeSelection}</div>
-                        <div class="note-finale-valeur-ligne">
-                            <span class="note-finale-ponderation">${erreurPond ? '' : '× ' + pondSel + '%'}</span>
-                        </div>
+                        <div class="note-finale-calcul-categorie">${calculSelHtml}</div>
                     </div>
 
                     <div class="note-finale-composante">
                         <div class="note-finale-composante-titre">${titreObligatoires}</div>
                         <div class="note-finale-artefacts">${listeObligatoires}</div>
-                        <div class="note-finale-valeur-ligne">
-                            <span class="note-finale-ponderation">${erreurPond ? '' : '× ' + pondObl + '%'}</span>
-                        </div>
+                        <div class="note-finale-calcul-categorie">${calculOblHtml}</div>
                     </div>
                 </div>
 
