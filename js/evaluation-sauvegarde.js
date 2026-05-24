@@ -377,6 +377,12 @@ function sauvegarderEvaluation() {
     if (!_validerReferencesSauv(etudiant, production, grille, etudiantDA, productionId, grilleId)) return;
     if (!_validerReferencesNonDemoSauv(productionId, grilleId)) return;
 
+    // Fix #110 v3 (restauré 24 mai 2026) : forcer recalcul algo depuis le DOM
+    // avant collecte, sinon donneesAlgorithmiques peut être stale.
+    if (typeof window._forcerRecalculAlgorithmiqueAvantSauvegarde === 'function') {
+        window._forcerRecalculAlgorithmiqueAvantSauvegarde(grille);
+    }
+
     const criteres = _collecterCriteresSauv(grille);
     const coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
     const groupeCoursActif = db.getSync('groupeCoursActif', null);

@@ -2545,6 +2545,12 @@ function sauvegarderEvaluationModifiee() {
     if (!_validerReferencesMod(etudiant, production, grille, etudiantDA, productionId, grilleId)) return;
     if (!_validerReferencesNonDemoMod(productionId, grilleId)) return;
 
+    // Fix #110 v3 (restauré 24 mai 2026) : forcer recalcul algo depuis le DOM
+    // avant collecte, sinon donneesAlgorithmiques peut être stale.
+    if (typeof window._forcerRecalculAlgorithmiqueAvantSauvegarde === 'function') {
+        window._forcerRecalculAlgorithmiqueAvantSauvegarde(grille);
+    }
+
     const criteres = _collecterCriteresMod(grille);
     const maintenant = new Date();
     const proprietesJetons = _extraireProprietesJetons(evaluations[indexEval]);

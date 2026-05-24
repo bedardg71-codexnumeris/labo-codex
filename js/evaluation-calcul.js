@@ -324,6 +324,14 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
 
     if (mots === 0 || totalErreurs === 0) {
         _resetAffichageAlgoCategories(critereId);
+        // Fix #110 v3 (restauré 24 mai 2026, perdu lors du refactoring du 20 mai) :
+        // préserver mots+codes+totalErreurs même quand le calcul ne tourne pas,
+        // sinon la sauvegarde persiste l'ancienne valeur de donneesAlgorithmiques.
+        if (!evaluationEnCours.donneesAlgorithmiques) evaluationEnCours.donneesAlgorithmiques = {};
+        evaluationEnCours.donneesAlgorithmiques[critereId] = Object.assign(
+            evaluationEnCours.donneesAlgorithmiques[critereId] || {},
+            { codes: codesSousCriteres, mots: mots, totalErreurs: totalErreurs }
+        );
         return;
     }
 
@@ -400,6 +408,14 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
         if (totalErreursElem) totalErreursElem.textContent = '--';
         if (motsElem) motsElem.textContent = '--';
         _appliquerStyleResultatAlgo(critereId, null);
+        // Fix #110 v3 (restauré 24 mai 2026, perdu lors du refactoring du 20 mai) :
+        // préserver erreurs+mots même quand le calcul ne tourne pas, sinon la
+        // sauvegarde persiste l'ancienne valeur de donneesAlgorithmiques.
+        if (!evaluationEnCours.donneesAlgorithmiques) evaluationEnCours.donneesAlgorithmiques = {};
+        evaluationEnCours.donneesAlgorithmiques[critereId] = Object.assign(
+            evaluationEnCours.donneesAlgorithmiques[critereId] || {},
+            { erreurs: erreurs, mots: mots }
+        );
         return;
     }
 
@@ -687,8 +703,58 @@ function obtenirCouleurNiveau(codeNiveau) {
     return niveau ? niveau.couleur : 'transparent';
 }
 
+/**
+ * Fix #110 v3 (restauré 24 mai 2026, perdu lors du refactoring du 20 mai) :
+ * force un dernier recalcul algorithmique pour chaque critère algo de la grille
+ * avant la sauvegarde. Garantit que `evaluationEnCours.donneesAlgorithmiques`
+ * reflète les valeurs DOM courantes — défense contre les états désynchronisés
+ * (race condition au chargement, re-render, focus/blur, navigation entre élèves).
+ *
+ * Renforcement v3.1 (24 mai 2026) : déclenche d'abord `mettreAJourCompteursErreurs`
+ * qui propage le comptage live des tampons errfr_* de l'annotation vers le champ
+ * eval_erreurs_*. Sans ça, si l'utilisateur clique Sauvegarder dans les ~2 secondes
+ * après navigation (avant que le setTimeout 2000ms d'afficherPalettesEval ne fire),
+ * le DOM affiche encore la valeur DB héritée d'avant — et la sauvegarde la persiste,
+ * propageant la corruption. Bug historique de toute la session a2025.
+ *
+ * À appeler depuis sauvegarderEvaluation et sauvegarderEvaluationModifiee,
+ * AVANT la collecte des critères.
+ */
+function _forcerRecalculAlgorithmiqueAvantSauvegarde(grille) {
+    if (!grille || !grille.criteres) return;
+
+    // v3.1 : propager le comptage live des tampons errfr_* AVANT le recalcul
+    // (sinon le DOM peut afficher une valeur stale héritée du chargement DB).
+    if (typeof travauxOutils !== 'undefined'
+        && typeof travauxOutils.mettreAJourCompteursErreurs === 'function') {
+        try { travauxOutils.mettreAJourCompteursErreurs(); }
+        catch (e) { console.warn('[_forcerRecalculAlgorithmiqueAvantSauvegarde] mettreAJour échec', e); }
+    }
+
+    grille.criteres.forEach(function(critere) {
+        if (critere.type !== 'algorithmique') return;
+        const ponderation = critere.ponderation || 20;
+        const facteur = critere.facteurNormalisation || 500;
+        const aCategories = critere.sousCriteres
+            && Array.isArray(critere.sousCriteres)
+            && critere.sousCriteres.length > 0;
+        try {
+            if (aCategories && typeof calculerNoteAlgorithmiqueAvecCategories === 'function') {
+                // Guard : si le DOM input n'existe pas (hors mode Évaluer), skip
+                if (!document.getElementById('eval_categories_' + critere.id)) return;
+                calculerNoteAlgorithmiqueAvecCategories(critere.id, ponderation, facteur, critere.id);
+            } else if (typeof calculerNoteAlgorithmiqueSimple === 'function') {
+                if (!document.getElementById('eval_erreurs_' + critere.id)) return;
+                calculerNoteAlgorithmiqueSimple(critere.id, ponderation, facteur);
+            }
+        } catch (e) {
+            console.warn('[_forcerRecalculAlgorithmiqueAvantSauvegarde] échec critère', critere.id, e);
+        }
+    });
+}
+
 // =====================================================================
-// Exports window.X (4) — voir en-tête pour détails
+// Exports window.X (5) — voir en-tête pour détails
 // =====================================================================
 
 // Préservés depuis bloc principal evaluation.js (session A) :
@@ -698,5 +764,9 @@ window.calculerNoteAlgorithmiqueSimple = calculerNoteAlgorithmiqueSimple;
 // Promotions §5.6 nouvelles (session B) :
 window.calculerNote = calculerNote;
 window.obtenirCouleurNiveau = obtenirCouleurNiveau;
+
+// Restauration fix #110 v3 (24 mai 2026) — appelé par sauvegarderEvaluation
+// (evaluation-sauvegarde.js) et sauvegarderEvaluationModifiee (evaluation.js) :
+window._forcerRecalculAlgorithmiqueAvantSauvegarde = _forcerRecalculAlgorithmiqueAvantSauvegarde;
 
 })();
