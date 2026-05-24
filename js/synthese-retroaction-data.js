@@ -673,7 +673,17 @@
         return { types: types };
     }
 
-    /* ----- J.4 — Note provisoire (portfolio) ----- */
+    /* ----- J.4 — Note finale / provisoire (portfolio) -----
+       Le titre du bloc dans le PDF dépend du flag explicite
+       `configuration.notesFinales` de la pratique active (par défaut false →
+       « Note provisoire »). Aucun fallback arbitraire sur les pondérations :
+       en mode hybride, si la config catégories est incomplète, on lève une
+       erreur explicite plutôt que d'inventer 65/35.
+
+       Le data shape sépare strictement `selection` (les N meilleurs retenus)
+       de `obligatoires` (les productions obligatoires, retenues d'office) pour
+       éliminer le doublon visible côté rendu.
+    */
 
     function construireNoteProvisoire(da) {
         if (!da || typeof calculerDetailsNoteFinale !== 'function') return null;
@@ -687,18 +697,28 @@
         const productions = lireDonneesNamespace('productions');
         const evaluations = lireDonneesNamespace('evaluationsSauvegardees');
 
-        const estHybride = String(portfolio.methodeSelection || '').indexOf('hybride') !== -1;
+        const cfgPrat = (typeof obtenirConfigPratiqueActive === 'function') ? obtenirConfigPratiqueActive() : null;
+        const cfgConfiguration = cfgPrat && cfgPrat.configuration ? cfgPrat.configuration : (cfgPrat || {});
 
-        // Pondérations en mode hybride
-        let pondSel = '';
-        let pondObl = '';
+        const estHybride = String(portfolio.methodeSelection || '').indexOf('hybride') !== -1;
+        const estFinale = cfgConfiguration.notesFinales === true;
+
+        // Pondérations en mode hybride — uniquement depuis la config catégories.
+        // Pas de fallback arbitraire (cf. feedback-zero-fallback-arbitraire).
+        let ponderationSelection = null;
+        let ponderationObligatoires = null;
+        let erreurPonderation = null;
         if (estHybride) {
-            const cfgPrat = (typeof obtenirConfigPratiqueActive === 'function') ? obtenirConfigPratiqueActive() : null;
             let cats = cfgPrat && cfgPrat.categories ? cfgPrat.categories : null;
+            if (!cats && cfgConfiguration.categories) cats = cfgConfiguration.categories;
             if (!cats && typeof obtenirConfigCategories === 'function') cats = obtenirConfigCategories();
-            if (cats) {
-                if (cats.selection) pondSel = ` (${cats.selection.ponderation || 65}%)`;
-                if (cats.obligatoires) pondObl = ` (${cats.obligatoires.ponderation || 35}%)`;
+            const pondSel = cats && cats.selection ? cats.selection.ponderation : null;
+            const pondObl = cats && cats.obligatoires ? cats.obligatoires.ponderation : null;
+            if (pondSel == null || pondObl == null) {
+                erreurPonderation = 'Pondérations Sélection/Obligatoires manquantes dans la configuration de la pratique.';
+            } else {
+                ponderationSelection = pondSel;
+                ponderationObligatoires = pondObl;
             }
         }
 
@@ -722,17 +742,31 @@
             return null;
         };
 
-        // Retenus triés par note décroissante
-        const retenus = portfolio.artefactsRetenus.slice()
+        // Croise un artefact retenu (depuis le calculateur) avec sa production
+        // pour récupérer titre + catégorie. La catégorie pilote le bucket
+        // (sélection vs obligatoires) en mode hybride.
+        const decrireRetenu = (art) => {
+            const prod = productions.find(p => p.id === art.productionId);
+            return {
+                titre:     prod ? (prod.titre || 'Artefact') : 'Artefact',
+                niveau:    art.niveau || '?',
+                activite:  obtenirActivite(art.productionId),
+                categorie: prod ? (prod.categorie || null) : null
+            };
+        };
+
+        const retenusDecrits = portfolio.artefactsRetenus.slice()
             .sort((a, b) => (b.note || 0) - (a.note || 0))
-            .map(art => {
-                const prod = productions.find(p => p.id === art.productionId);
-                return {
-                    titre:    prod ? (prod.titre || 'Artefact') : 'Artefact',
-                    niveau:   art.niveau || '?',
-                    activite: obtenirActivite(art.productionId)
-                };
-            });
+            .map(decrireRetenu);
+
+        // En hybride, séparer strictement sélection / obligatoires depuis la
+        // catégorie de la production. En non-hybride, tout va dans `selection`.
+        const selection = estHybride
+            ? retenusDecrits.filter(r => r.categorie !== 'obligatoire')
+            : retenusDecrits;
+        const obligatoiresRetenus = estHybride
+            ? retenusDecrits.filter(r => r.categorie === 'obligatoire')
+            : [];
 
         // Sélection des artefacts portfolio (priorité au type explicite, fallback non-portfolio)
         let artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
@@ -754,7 +788,10 @@
                 echeance: obtenirEcheance(prod)
             }));
 
-        const obligatoires = estHybride
+        // Liste complète des obligatoires (retenus + non remis) pour le rendu
+        // de la colonne dédiée. Les retenus ont déjà leur niveau ; les non
+        // remis sont signalés par `niveau: null`.
+        const obligatoiresTous = estHybride
             ? artefactsPortfolio.filter(p => p.categorie === 'obligatoire').map(prod => {
                 const evalObl = evaluations.find(e => e.productionId === prod.id && e.etudiantDA === da && !e.remplaceeParId && e.noteFinale != null);
                 return {
@@ -767,14 +804,18 @@
             : [];
 
         return {
-            retenus:                  retenus,
-            nombreRetenus:            portfolio.nombreRetenus || retenus.length,
+            estHybride:               estHybride,
+            estFinale:                estFinale,
+            selection:                selection,
+            nombreSelection:          selection.length,
+            obligatoires:             obligatoiresTous,
+            obligatoiresRetenus:      obligatoiresRetenus.length,
+            ponderationSelection:     ponderationSelection,
+            ponderationObligatoires:  ponderationObligatoires,
+            erreurPonderation:        erreurPonderation,
             moyenne:                  Math.round((portfolio.moyenne || 0) * 10) / 10,
             plafonnement:             portfolio.plafonnement || null,
-            ponderationSelection:     pondSel,
-            ponderationObligatoires:  pondObl,
-            avenir:                   avenir,
-            obligatoires:             obligatoires
+            avenir:                   avenir
         };
     }
 
