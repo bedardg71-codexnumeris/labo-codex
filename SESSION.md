@@ -1,32 +1,33 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 23 mai 2026 fin d'après-midi,
-     post-livraison Tests manuels Section A — 8/9 — + Section B 100 %
-     + 3 régressions chantier Phase 2 fixées + chantier #282 prérequis
-     P1+P2+P3+P4 LIVRÉS, prêts pour la migration finale étape 5)
+     IDENTIFICATION DE CE FICHIER  (mis à jour 24 mai 2026 matin,
+     post-livraison chantier chrome unifié — entête + nav + sous-nav
+     responsive, breakpoint unique 1024px, bouton ⋯ mobile + popover,
+     selects natifs nav/sous-nav. Beta 99.64 b0524-0548.)
      Ce SESSION.md vit sur la branche `main` du worktree principal et sert
-     de relai entre les sessions Claude. Il décrit l'état post-Section A+B
-     des tests manuels et la livraison complète des 4 prérequis du #282.
-     L'historique complet (cycle AQPC, Cat-B post-merge clos 21 mai) reste
-     dans les §§ suivants comme référence.
+     de relai entre les sessions Claude. Il décrit l'état post-chrome
+     unifié, prêt pour la reprise du chantier #282 étape 5 (migration
+     finale listeCours) après test sur vrai iPhone post-déploiement.
+     L'historique complet (cycle AQPC, Cat-B post-merge clos 21 mai,
+     #282 P1-P4 livrés 23 mai) reste dans les §§ suivants comme référence.
      ===================================================================== -->
 
 > **📌 Identification**
 > - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
-> - **Cycle en cours** : **refonte du chrome unifié (entête + nav primaire + sous-nav)** responsive desktop/iPad/iPhone — décision Grégoire 23 mai PM
-> - **Document maître prochaine session** : `PLAN_chrome_unifie_Labo_Codex.md` (racine du repo, 872 lignes, 7 étapes — HTML entête → HTML nav → CSS → JS popover/selects → icônes icons8 → tests → finalisation)
-> - **Chantier en pause** : #282 étape 5 (migration listeCours finale) — prérequis P1-P4 livrés, peut être repris après le chrome unifié
+> - **Cycle qui vient d'être livré** : **chantier chrome unifié** — refonte entête + nav primaire + sous-nav responsive desktop/iPad/iPhone (Beta 99.64 b0524-0548, tag `chrome-unifie-2026-05-24`)
+> - **Cycle suivant** : test sur vrai iPhone post-déploiement (option A actée) puis reprise **#282 étape 5** (migration finale listeCours, ~3 h, plan dans SESSION §1quater du 23 mai)
+> - **Document de référence du chantier livré** : `PLAN_chrome_unifie_Labo_Codex.md` (racine du repo)
 
-# SESSION — État au 23 mai 2026 fin d'après-midi (post #282 P1-P4 livrés)
+# SESSION — État au 24 mai 2026 matin (post chrome unifié livré)
 
-**Beta / build** : 99.63 / 0523-1710 (bump confirmé par Grégoire au commit `9cf542e`).
-**Branche `main`** : HEAD à `9cf542e` (P3+P4) post-merge des commits du 23 mai :
-  - **Matin** : `a191fb5` (3 régressions Phase 2) · `731c3a3` (post-mortem #282) · `80fc6d1` (renommage Éditer→Modifier + bump 99.63) · `557e1c3` (docs/session relai)
-  - **Après-midi** : `04f8d9e` (#282 P1 bandeau modification + P2 activation explicite cours/GC) · `9cf542e` (#282 P3 migration tuple naturel + P4 snippet recovery)
-**Branches retirées** : aucune nouvelle branche créée (travail direct sur main).
+**Beta / build** : 99.64 / 0524-0548 (bump volontaire mineur acté avec Grégoire).
+**Branche `main`** : HEAD à `cbdf7d7` (chantier chrome unifié) post-merge FF depuis `cleanup/chrome-unifie`.
+  - **Commit unique** : `cbdf7d7` feat(chrome): refonte chrome unifié (entête + nav + sous-nav responsive). 8 fichiers touchés, +676 / −321 LOC nettes.
+  - **Tag** : `chrome-unifie-2026-05-24` (poussé sur origin).
+**Branches** : `cleanup/chrome-unifie` mergée FF + worktree `Monitorage_v6-chrome` à supprimer en début de session suivante (`git worktree remove ../Monitorage_v6-chrome` + `git branch -d cleanup/chrome-unifie`).
 
-**Tests** : 85 Vitest verts à chaque commit. Hook pré-commit Défense J vert (3 warnings setSync infoCours acquittés via `// security-ok`).
+**Tests** : 85 Vitest verts à chaque commit. Hook pré-push Défense J vert au moment du push.
 
-**Cycle suivant — refonte du chrome unifié** (décision Grégoire 23 mai PM) : voir `PLAN_chrome_unifie_Labo_Codex.md` à la racine. Chantier important touchant l'entête + nav primaire + sous-nav, responsive avec breakpoint unique 1024px (mode explicite ≥1024px, mode condensé <1024px avec popover `⋯` et selects natifs). 7 étapes documentées, validation Grégoire requise après chaque sous-étape. **#282 étape 5 mis en pause** — peut être repris après le chrome unifié.
+**Cycle suivant immédiat** : (1) Grégoire déploie sur Netlify pour test sur vrai iPhone (gestes tactiles, picker iOS natif, pull-to-refresh). Si bug device-spécifique : hotfix. (2) Si tests OK, reprise du chantier **#282 étape 5** : migration finale des ~93 sites lisant `db.getSync('listeCours', ...)` vers la clé canonique `cours` (cours.js 10 sites, contexte.js, cc-license.js, pratiques.js, etc. — plan détaillé dans SESSION §1quater du 23 mai). Estimation 3 h. (3) Optionnel : chantier d'harmonisation des pages selon BACKLOG #283-284 (sidebar mobile + titres de page) si Grégoire le souhaite.
 
 ---
 
@@ -439,6 +440,47 @@ Voir `Retours des testeurs/SUIVI-BUGS.md` section « Corrigés (21 mai 2026 — 
 
 ---
 
+## §1quinquies — Chrome unifié LIVRÉ (24 mai 2026 matin)
+
+**Worktree dédié** : `Monitorage_v6-chrome` (créé depuis main `f71f412` le 23 mai soir, mergé FF sur main au commit `cbdf7d7` puis prêt à supprimer).
+
+**1 commit livré** : `cbdf7d7` feat(chrome): refonte chrome unifié (entête + nav + sous-nav responsive). 8 fichiers touchés, +676 / −321 LOC nettes.
+
+**Tag** : `chrome-unifie-2026-05-24` poussé sur origin.
+
+**Bump version** : 99.63 (b0523-1710) → 99.64 (b0524-0548).
+
+### Récapitulatif des 7 étapes du PLAN_chrome_unifie_Labo_Codex.md
+
+| Étape | Statut | Détail |
+|---|---|---|
+| 1. HTML entête | ✅ | Refonte L3777-3886 : Codex (gauche) / Titre+Meta (centre) / Utilitaires 5 icônes 2 clusters (droite) / Bouton ⋯ mobile. Ligne 2 : sélecteur GC seul sans label. Popover utilitaires mobile (6 items) ajouté en fin de `<header>`. HTML/JS du bouton Codex et son menu intégralement préservés. |
+| 2. HTML nav + selects mobile | ✅ | Wrapper `.navigation-boutons` + `<select id="select-nav-mobile">` (7 options) + `<select id="select-sous-nav-mobile" class="u-hide">` ajoutés. data-onglet des 7 boutons inchangés. |
+| 3. Refonte CSS | ✅ | styles.css : refonte L863-1229 (zone entête) + adaptation nav primaire L1364+ + media query unique L4715+. Grid 3 colonnes `1fr auto 1fr` sur `.entete-ligne1` pour centrer le titre. Bande de contexte ligne 2 avec fond `rgba(106,172,184,0.10)`. Nav primaire `position: sticky; top: 0; z-index: 100` avec gradient maritime continu (mode sombre + mode clair). `.sous-navigation.vide { display: none }` masquage carré. Breakpoint unique `@media (max-width: 1024px)` : cache utilitaires desktop / montre ⋯, cache `.navigation-boutons` / montre select natif, cache `.sous-navigation` / montre select sous-nav sticky top 60px. Mode clair : overrides pour popover, selects, bouton ⋯. T-A10 pointer:coarse adapté à `.entete-utilitaires .btn-action-header`. Audit zéro-dette : classes mortes `.entete-controles-gauche/droite`, `.entete-ligne2-droite`, `.logo-section`, `.logo-meta`, `.separateur-contexte` retirées + CSS inline dans index.html L3663-3713 retiré. 0 référence orpheline. |
+| 4. Logique JS popover + selects | ✅ | Nouveau module `js/chrome-unifie.js` (~200 LOC, IIFE) : `ouvrirPopoverUtilitaires` / `fermerPopoverUtilitaires` avec auto-désattachement défensif des écouteurs si popover caché (corrige bug détecté en tests : `_gererClicGlobal` restait attaché et bloquait les clics utilitaires après une session de tests mobile). `synchroniserSelectNavMobile` (lit `window.sectionActive`) + `regenererSelectSousNav` (peuple depuis `#sous-navigation` à chaque event `sectionAffichee`). Double câblage des selects mobile : via dispatcher `data-on-change` ET via `addEventListener('change')` direct (double sécurité). Inscrit dans `index.html` après `js/main.js` (priorité 8). |
+| 5. Migration icônes icons8 filled | ⏸ **REPORTÉ** | Décision Grégoire : faire les icônes plus tard, hors-scope de ce chantier. Les icônes actuelles restent en place. |
+| 6. Tests fonctionnels | ✅ | Test 1 desktop (Accueil + navigation + scroll sticky + mode sombre/clair) : PASS. Test simulation Safari Responsive Design Mode iPhone Pro Max 440×956 + custom 1404×956 : PASS après fix défensif chrome-unifie.js. Tests vrai iPad / vrai iPhone : reportés post-déploiement (option A actée — Grégoire teste sur device après push prod). |
+| 7. Finalisation | ✅ | Bump 99.64 (b0524-0548), changelog +2 items en tête de Beta 99 (desktop + adaptation iPad/iPhone), BACKLOG +#283 (harmonisation pages à sidebar mobile) +#284 (harmonisation titres de page), SUIVI-BUGS +#121 (bouton fantôme « Charger un codex data » Tirage au sort, pré-existant), commit + merge FF main + tag + push. |
+
+### Bugs détectés pendant les tests et corrigés en session
+
+- **Bug 1** : Selects mobile ne déclenchaient pas `afficherSection` au change (Responsive Mode Safari). Cause : dispatcher `data-on-change` de main.js fonctionne mais protocole d'event dans Responsive Mode possiblement différent. **Fix** : ajout d'un `addEventListener('change')` direct sur les selects dans `chrome-unifie.js` en plus du dispatcher (double sécurité).
+- **Bug 2** : Tous les boutons utilitaires header (Bug, Anonym, Thème, Aide, Réglages) ne répondaient plus aux clics souris après quelques tests mobile. Cause : `_gererClicGlobal` (handler ajouté dynamiquement par `ouvrirPopoverUtilitaires`) restait attaché au document même quand le popover était caché — il interceptait silencieusement les clics et appelait `fermerPopoverUtilitaires` (no-op). **Fix** : `_gererClicGlobal` auto-détecte si le popover est caché et se détache immédiatement (garantit aucune interférence avec les clics ailleurs).
+
+### Observations hors-scope logées au backlog (à traiter séparément)
+
+- **BACKLOG #283** : Harmonisation responsive des pages à sidebar en mobile (Productions étudiantes, Grilles de critères, Échelles de performance, Pratiques de notation, Cartouches de rétroaction, Trimestre, etc.) — en mobile <1024px, la zone détails apparaît tronquée. Bug pré-existant (visible aussi en prod main).
+- **BACKLOG #284** : Harmonisation de la structure des pages (Conception → Alignement pédagogique et Labo → Tirage au sort n'ont pas de titre h1 ni de sous-titre descriptif, contrairement aux autres pages).
+- **SUIVI-BUGS #121** : Bouton fantôme « ← Charger un codex data... » en haut à droite de Labo → Tirage au sort (déplacé / illogique dans ce contexte). Visible aussi en prod, pré-existant.
+
+### À ne pas oublier pour la prochaine session
+
+- **Cleanup post-merge** : `git worktree remove ../Monitorage_v6-chrome` puis `git branch -d cleanup/chrome-unifie` depuis le repo principal.
+- **Test sur vrai iPhone après déploiement Netlify** : si bug device-spécifique, hotfix immédiat. Si OK, on peut clôturer définitivement le chantier chrome.
+- **Mémoires à créer éventuellement** : pattern « double sécurité dispatcher data-action + addEventListener direct pour les contrôles UI critiques mobile » + pattern « auto-désattachement défensif des écouteurs globaux dynamiques ».
+
+---
+
 ## §2 — Critères de clôture du cycle Cat-B (statut)
 
 Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
@@ -466,92 +508,77 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
 ## §3 — Consigne de démarrage pour la prochaine session
 
-> **Priorité unique** : refonte du chrome unifié — entête + nav primaire + sous-nav responsive (desktop ≥1024px / iPad+iPhone <1024px). Plan complet de référence : **`PLAN_chrome_unifie_Labo_Codex.md`** à la racine du repo (872 lignes, finalisé 23 mai PM par Grégoire + Cowork). 7 étapes structurées avec validation Grégoire après chaque sous-étape.
+> **Priorité 1** : cleanup worktree + test sur vrai iPhone post-déploiement du chrome unifié. **Priorité 2** : reprise du chantier **#282 étape 5** (migration finale `listeCours` → `cours`, ~3 h, plan détaillé dans §1quater du 23 mai PM).
 
-### Document maître
-
-**`PLAN_chrome_unifie_Labo_Codex.md`** — spec finalisée, à exécuter. Lire INTÉGRALEMENT avant de toucher au code.
-
-### Vue d'ensemble du chantier
-
-| Étape | Cible | Effort approx. |
-|---|---|---|
-| 1 | Restructuration HTML entête (index.html L3777-3886) | ~30 min |
-| 2 | Restructuration HTML nav primaire + ajout `<select>` mobile (index.html L3978-4006) | ~20 min |
-| 3 | Refonte CSS — entête, nav, media queries 1024px, popover, sticky | ~1 h 30 |
-| 4 | Logique JS — popover utilitaires `⋯`, synchro `<select>` mobile, écouteurs (`js/main.js`) | ~45 min |
-| 5 | Migration ~13 icônes du chrome vers icons8 filled (icônes fournies par Grégoire) | ~30 min |
-| 6 | Tests fonctionnels exhaustifs (desktop Mac + iPad portrait + iPad paysage + iPhone simulé + a11y) | ~1 h |
-| 7 | Finalisation : bump version, mise à jour changelog, audit de code mort | ~15 min |
-
-**Effort total estimé** : 4-5 h. Validation Grégoire requise après chaque sous-étape (cf. §6.5 du plan).
-
-### Étapes de démarrage
+### Étapes de démarrage immédiat
 
 ```bash
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
-git status                              # main attendu propre côté tracké
-git log --oneline main -5               # HEAD attendu : <commit MAJ session 23 mai PM> ou plus récent
-git pull --rebase                       # au cas où
-npx http-server -p 8080 -c-1            # serveur local pour Safari Mac + iPad+iPhone via IP locale
+git status                                              # main attendu propre
+git log --oneline main -3                               # HEAD attendu : `cbdf7d7` chrome unifié (ou plus récent si Grégoire a déployé)
+git pull --rebase                                       # au cas où
+
+# Cleanup post-merge du chantier chrome unifié :
+git worktree remove ../Monitorage_v6-chrome             # retire le worktree
+git branch -d cleanup/chrome-unifie                     # branche déjà mergée FF
+git tag -l "chrome-unifie-*"                            # vérifie tag `chrome-unifie-2026-05-24` présent
+
+npx http-server -p 8080 -c-1                            # serveur local pour tests éventuels
 ```
 
-Lire dans cet ordre :
-1. **`PLAN_chrome_unifie_Labo_Codex.md`** (racine) — la spec complète, point de référence absolu.
-2. `docs/00-START-HERE.md` — orientation projet.
-3. `CLAUDE.md` — règles de sécurité, zones protégées, design system.
-4. `design-system.html` — référence couleurs/composants/modes sombre+clair (consultation obligatoire pour tout changement visuel).
-5. Cette section SESSION.md §3 (consigne de démarrage) + §0 garde-fous + §1quater (état #282 P1-P4 livré).
+### Priorité 1 — Cleanup + test device chrome unifié
 
-### Zones protégées — NE PAS modifier (rappel critique du plan §3.2 et §6.3)
+1. **Cleanup worktree** (commandes ci-dessus).
+2. **Si Grégoire a déployé sur Netlify** : tester sur vrai iPhone via `app.codexnumeris.org`. Points à vérifier en priorité :
+   - Bouton ⋯ ouvre/ferme le popover au tap
+   - Tap sur un item du popover (Codex / Bug / Anonym / Thème / Aide / Réglages) déclenche l'action ET ferme le popover
+   - Tap sur le select nav primaire ouvre le picker iOS plein écran (UX confortable au pouce)
+   - Changement de section via select bascule la section affichée
+   - Select sous-nav apparaît/disparaît selon la section (Accueil/Aperçu = absent ; Conception/Calendrier/etc. = présent)
+   - Au scroll, les deux selects mobile (nav + sous-nav) restent collés en haut
+   - Mode sombre + mode clair OK
+   - Aucun chevauchement visuel (le bug iPhone d'origine est corrigé)
+3. **Si bug device-spécifique** : hotfix immédiat depuis main directement (le chantier chrome est mergé). Sinon clôture définitive.
 
-- `js/config.js` (autorisation refusée pour ce chantier)
-- `js/navigation.js` (autorisation refusée — mais on s'appuie sur ses fonctions globales `afficherSection()`, `afficherSousSection()`, `naviguerVers()` qui sont en `noms_stables.json`)
-- `noms_stables.json`
+### Priorité 2 — #282 étape 5 (migration finale `listeCours` → `cours`)
 
-### API à préserver impérativement (plan §3.3)
+Si Priorité 1 OK, attaquer la migration finale documentée dans §1quater (23 mai PM) :
 
-Pour que `navigation.js` continue à fonctionner sans modification :
-- **Classes CSS** : `.navigation-principale`, `.sous-navigation`, `.actif`, `.section`, `.sous-section`, `.sous-navigation.vide`
-- **Attributs** : `data-onglet="..."` (nav primaire), `data-sous-onglet="..."` (sous-nav)
-- **IDs** : `sous-navigation`, `section-{nomSection}`
-- **Sélecteurs JS** : `document.querySelectorAll('.navigation-principale button')`, `document.querySelector(\`button[data-onglet="${nomSection}"]\`)`, `document.getElementById('sous-navigation')`, `document.querySelectorAll('.sous-navigation button')`
+- **Audit grep complet** : `grep -rn "listeCours" js/ --include="*.js"` pour compte réel des sites à migrer.
+- **~93 sites estimés** dans : `cours.js` (10 sites — Bibliothèque cours), `contexte.js` (2 sites), `cc-license.js` (1 site), `pratiques.js` (3 sites — sensibles indices A-C-P), `travaux-ui.js`, `demo-activation.js` (5 sites — retraits redondants), `migrations.js` (13 sites historiques, à AUDITER avant migration — peut nécessiter conservation pour idempotence), `statistiques.js`, `rapport-bug.js`, `organisateur.js`, `export-pdf.js`, `reserve.js`, `trimestre-v2-cours.js` (la fonction `_migrerListeCoursVersCoursV2` doit RESTER pour idempotence boot).
+- **Stratégie** : migrer par groupes cohérents (cours.js d'abord = valeur immédiate user, puis contexte.js + cc-license.js + le reste). Tester après chaque groupe via Réglages → Cours → Bibliothèque qui doit afficher les cours.
+- **Worktree dédié recommandé** : `git worktree add ../Monitorage_v6-282-migration cleanup/282-migration-finale main`.
+- **Garde-fous P1-P4 livrés** (cf. §0) : ne pas casser le bandeau modification, l'activation explicite cours/GC, ni la migration par tuple naturel.
 
-Conséquence : les boutons desktop existent toujours dans le DOM en mode mobile, masqués via CSS. Le `<select>` mobile pilote `afficherSection()` qui active la classe `.actif` sur les boutons cachés.
+### Autres pistes (post-#282 étape 5)
 
-### Rôle de Claude dans cette session
+- **Tests Sections C, D, E, F** : reportées le 23 mai par Grégoire. À reprendre avant AQPC 3 juin si souhaité.
+- **Harmonisation pages à sidebar mobile (BACKLOG #283)** : ouvrir un chantier séparé pour empiler/pusher la zone détails sur les pages bibliothèque (Productions étudiantes, Grilles de critères, etc.) — gros chantier UX.
+- **Harmonisation structure titres de page (BACKLOG #284)** : ajouter h1 + sous-titre descriptif à Conception → Alignement et Labo → Tirage au sort pour cohérence.
+- **Bug fantôme Tirage au sort (SUIVI-BUGS #121)** : grep `Charger un codex data` pour identifier l'origine.
+- **Migration globale icônes icons8** : chantier séparé non encore planifié.
 
-- **Chantier UI/UX actif** : 7 étapes sur 4-5 h. Travail technique HTML/CSS/JS au cœur du sujet.
-- **Validation Grégoire après chaque sous-étape** (cf. §6.5 du plan) — ne pas enchaîner sans son feedback.
-- **Tester sur Safari Mac + simulation iPad/iPhone à chaque palier** avant de passer au suivant.
-- **Demander le numéro de beta + build** à Grégoire avant l'Étape 7 finalisation (procédure CLAUDE.md).
-- **Mettre à jour le changelog `js/changelog-data.js`** avec une entrée concise (3-4 items utilisateur) selon le format §7 du plan.
-- **Mettre à jour SESSION.md en fin de session** : nouvelle sous-section §1quinquies « Chrome unifié livré » + révision §3 pour le cycle suivant (probablement #282 étape 5 ou tests manuels Sections C-F restantes).
+### Zones protégées — rappel permanent
 
-### Questions probables à poser à Grégoire pendant l'implémentation (plan §6.6)
-
-- Comportement du bouton Codex sur mobile : le popover `⋯` se ferme et le menu Codex s'ouvre par-dessus, ou directement à la place du popover ?
-- Nouveaux noms de fichiers icônes icons8 (Grégoire les téléchargera et fournira les chemins exacts).
-- Numéro de beta exact pour l'Étape 7.
+- `js/config.js` · `js/navigation.js` · `noms_stables.json` — NE PAS MODIFIER sans autorisation explicite.
 
 ### Conventions
 
-- **Pas de bump beta** sans demander (cf. §0 garde-fou). Beta 99.63 conservée tant que pas explicitement bumpée.
-- **Hook pré-commit vert** obligatoire à chaque commit (Défense J).
-- **Worktree non nécessaire a priori** — le chantier est risqué mais bien borné par les zones protégées préservées. Si Grégoire préfère par prudence, créer `git worktree add ../Monitorage_v6-chrome cleanup/chrome-unifie main`.
-- **Aucune nouvelle variable CSS en dur** — utiliser les `--variables` de `styles.css` (cf. plan §5.4).
-- **Cibles tactiles ≥44×44px sur iPad** (WCAG 2.5.5 + Apple HIG, cf. T-A10 déjà acté Cat-B chantier J).
-- **Contraste WCAG AA** dans modes sombre ET clair (cf. T-A3 acté Cat-B).
+- **Pas de bump beta sans demander** Grégoire (cf. §0). Beta 99.64 conservée tant que non bumpée.
+- **Hook pré-push vert** obligatoire (Défense J — 85 Vitest verts au minimum).
+- **Worktree dédié** recommandé pour tout chantier > 1 h ou risqué (`git worktree add`).
+- **Test simulation Safari Responsive Design Mode** insuffisant pour valider mobile : toujours valider sur vrai device.
 
 ### Décisions de Grégoire pendantes (rappel pour ne pas oublier)
 
-- **Chrome unifié** — chantier en cours (cf. PLAN_chrome_unifie_Labo_Codex.md).
-- **#282 étape 5** — migration listeCours finale, prérequis P1-P4 livrés (23 mai PM), à exécuter après le chrome unifié.
+- **Cleanup worktree chrome unifié** — à faire en début de prochaine session.
+- **Test vrai iPhone chrome unifié** — après déploiement Netlify.
+- **#282 étape 5** — migration `listeCours` finale, à reprendre quand tests chrome OK.
 - Label `v2-seuil-fragile` — conservation / atténuation / alignement ? (Cat-B Track 4 chantier J reliquat).
 - Convergence audit/2026-mai ↔ main — à planifier post-AQPC.
 - Demande d'avis PRP Cégep de Drummondville (Loi 25) — à envoyer (délai réponse 2-6 semaines, conditionne PRIVACY.md v1.1).
 - Tests manuels Sections **C, D, E, F reportées** (cf. doc TESTS-MANUELS-PENDING) — à reprendre avant AQPC du 3 juin si Grégoire le souhaite.
-- **Migration globale des icônes vers icons8** (hors-périmètre du chrome unifié — chantier séparé à planifier après, cf. PLAN §1).
+- **Migration globale des icônes vers icons8** — chantier séparé à planifier.
 
 ---
 
@@ -625,6 +652,7 @@ git tag -l "cat-b-*" | sort             # 9 tags attendus :
 
 | Date | Modification | Auteur |
 |---|---|---|
+| 2026-05-24 (matin, chrome unifié LIVRÉ) | Bascule post-livraison du chantier chrome unifié (commit unique `cbdf7d7` sur main via merge FF depuis `cleanup/chrome-unifie`, tag `chrome-unifie-2026-05-24`, bump 99.63 → 99.64 b0524-0548). En-tête réécrit pour refléter livraison. §1quinquies (nouvelle) : récap 7 étapes du plan, 2 bugs détectés et corrigés en session (selects mobile câblage défensif + `_gererClicGlobal` auto-désattachement), 3 observations hors-scope logées (BACKLOG #283 harmonisation pages à sidebar mobile, #284 harmonisation titres de page, SUIVI-BUGS #121 bouton fantôme Tirage au sort). §3 entièrement réécrit : priorité 1 = cleanup worktree + test vrai iPhone post-déploiement Netlify ; priorité 2 = reprise #282 étape 5 (migration `listeCours` finale, ~3 h). Module `js/chrome-unifie.js` créé (200 LOC IIFE) : popover utilitaires + selects mobile + resynchronisation `sectionAffichee`. CSS refonte L863-1229 (grid 3 colonnes pour centrage parfait du titre, bande contexte ligne 2, nav primaire sticky avec gradient maritime continu, sous-nav vide masquée carré, breakpoint unique 1024px). Audit zéro-dette : classes mortes `.entete-controles-gauche/droite`, `.entete-ligne2-droite`, `.logo-section`, `.logo-meta`, `.separateur-contexte` retirées. 8 fichiers touchés, +676 / −321 LOC nettes. Étape 5 (migration icônes icons8 filled) reportée hors-scope par décision Grégoire. | Chrome unifié (Claude autonome) |
 | 2026-05-21 (matin) | Identification refactor evaluation TERMINÉ étape 6, archive historique. | Cat-B session (Claude) |
 | 2026-05-21 (après-midi) | Réécriture complète pour cycle Cat-B post-merge : §0 garde-fou, §1 récap Tracks 1-4, §2 critères clôture, §3 consigne démarrage prochaine session, §4 trouvailles méthode. | Cat-B session 1 (Claude autonome) |
 | 2026-05-21 (PM, post-Track 3 phase 2) | Réécriture complète après livraison Track 3 phase 2 (5 commits + 1 docs PLAN, 38 helpers privés ajoutés, bug #110 fixé, Mobilisation acté héritage Cat-B sous N=50). HEAD main `3fe5165` → `88bcaf1`. Worktrees catb + catb2 supprimés. Garde-fou §0 enrichi (ne pas re-fix #110, ne pas tenter Mobilisation <30 sans validation). §3 consigne démarrage actualisée (priorité Track 4 F/I/E + chantier J reliquat). §4 trouvailles enrichies (Python fallback systématique, IIFE templates ne pèsent pas, ternaires denses = héritage légitime, bug pendant extraction = fix immédiat, factorisation cross-fonctions interdite par scope). | Cat-B Track 3 phase 2 (Claude autonome) |
