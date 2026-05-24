@@ -1,33 +1,32 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 24 mai 2026 matin,
-     post-livraison chantier chrome unifié — entête + nav + sous-nav
-     responsive, breakpoint unique 1024px, bouton ⋯ mobile + popover,
-     selects natifs nav/sous-nav. Beta 99.64 b0524-0548.)
+     IDENTIFICATION DE CE FICHIER  (mis à jour 24 mai 2026 fin de matinée,
+     post-livraison refonte pratique active + namespacing — Phases A, E,
+     F, G1, G2-a + wizard fix CLE_PRATIQUES_CONFIGURATIONS. Beta 99.64
+     b0524-1035 — même beta, bump build seulement.)
      Ce SESSION.md vit sur la branche `main` du worktree principal et sert
-     de relai entre les sessions Claude. Il décrit l'état post-chrome
-     unifié, prêt pour la reprise du chantier #282 étape 5 (migration
-     finale listeCours) après test sur vrai iPhone post-déploiement.
-     L'historique complet (cycle AQPC, Cat-B post-merge clos 21 mai,
-     #282 P1-P4 livrés 23 mai) reste dans les §§ suivants comme référence.
+     de relai entre les sessions Claude. Il décrit l'état post-refonte
+     pratique active, prêt pour la reprise des phases B (PDF rétroaction),
+     C (UI profil), D (retrait legacy mat-variante-calcul), G2-b (les 30
+     sites legacy de configPAN.portfolio).
+     L'historique complet (chrome unifié 24 mai matin, #282 P1-P4 du 23
+     mai, cycle AQPC clos 22 mai, Cat-B clos 21 mai) reste dans les §§
+     suivants comme référence.
      ===================================================================== -->
 
 > **📌 Identification**
 > - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
-> - **Cycle qui vient d'être livré** : **chantier chrome unifié** — refonte entête + nav primaire + sous-nav responsive desktop/iPad/iPhone (Beta 99.64 b0524-0548, tag `chrome-unifie-2026-05-24`)
-> - **Cycle suivant** : test sur vrai iPhone post-déploiement (option A actée) puis reprise **#282 étape 5** (migration finale listeCours, ~3 h, plan dans SESSION §1quater du 23 mai)
-> - **Document de référence du chantier livré** : `PLAN_chrome_unifie_Labo_Codex.md` (racine du repo)
+> - **Cycle qui vient d'être livré** : **refonte pratique active + namespacing** — Phases A (type explicite terminale + retrait fallbacks 60/40), E (namespacing modalitesEvaluation), F (namespacing pratiquesConfigurables), G1 (migration types→ids configurables), G2-a (retrait fallback configPAN.portfolio dans calculateur principal), wizard fix CLE_PRATIQUES_CONFIGURATIONS. Beta 99.64 b0524-1035, commit `6f85512`.
+> - **Cycle suivant** : Phase B (PDF rétroaction — besoin pédagogique original), Phase C (UI profil — cacher bloc terminale fantôme), Phase D (retrait legacy `mat-variante-calcul`), puis G2-b (30 sites legacy `configPAN.portfolio`).
+> - **Document de référence du chantier livré** : `plans de travail/PLAN-refonte-note-finale-portfolio.md`
 
-# SESSION — État au 24 mai 2026 matin (post chrome unifié livré)
+# SESSION — État au 24 mai 2026 fin de matinée (post refonte pratique active livrée)
 
-**Beta / build** : 99.64 / 0524-0548 (bump volontaire mineur acté avec Grégoire).
-**Branche `main`** : HEAD à `cbdf7d7` (chantier chrome unifié) post-merge FF depuis `cleanup/chrome-unifie`.
-  - **Commit unique** : `cbdf7d7` feat(chrome): refonte chrome unifié (entête + nav + sous-nav responsive). 8 fichiers touchés, +676 / −321 LOC nettes.
-  - **Tag** : `chrome-unifie-2026-05-24` (poussé sur origin).
-**Branches** : `cleanup/chrome-unifie` mergée FF + worktree `Monitorage_v6-chrome` à supprimer en début de session suivante (`git worktree remove ../Monitorage_v6-chrome` + `git branch -d cleanup/chrome-unifie`).
+**Beta / build** : 99.64 / 0524-1035 (bump de build seulement, beta conservée à la demande de Grégoire).
+**Branche `main`** : HEAD à `6f85512` refactor(pratique-active) post-commit direct sur main (pas de worktree dédié).
+  - **Commit unique** : `6f85512` — 51 fichiers touchés, +700 / −337 LOC. Inclut Phases A + E + F + G1 + G2-a + wizard fix + version bump + plan markdown.
+**Tests** : 85 Vitest + 18 Playwright = 103/103 verts au moment du commit. Hook pré-push Défense J : 91 warnings sur écritures sensibles (lectures internes, pas d'input externe — `// security-ok` peut être ajouté plus tard pour acquitter).
 
-**Tests** : 85 Vitest verts à chaque commit. Hook pré-push Défense J vert au moment du push.
-
-**Cycle suivant immédiat** : (1) Grégoire déploie sur Netlify pour test sur vrai iPhone (gestes tactiles, picker iOS natif, pull-to-refresh). Si bug device-spécifique : hotfix. (2) Si tests OK, reprise du chantier **#282 étape 5** : migration finale des ~93 sites lisant `db.getSync('listeCours', ...)` vers la clé canonique `cours` (cours.js 10 sites, contexte.js, cc-license.js, pratiques.js, etc. — plan détaillé dans SESSION §1quater du 23 mai). Estimation 3 h. (3) Optionnel : chantier d'harmonisation des pages selon BACKLOG #283-284 (sidebar mobile + titres de page) si Grégoire le souhaite.
+**Cycle suivant immédiat** : (1) Reprise dans une nouvelle session des phases B/C/D + G2-b. Plan détaillé dans `plans de travail/PLAN-refonte-note-finale-portfolio.md` et §1sexies ci-dessous. (2) Le besoin pédagogique original (refonte PDF rétroaction de l'élève) reste pendant : Grégoire ne pourra finaliser sa remise des notes a2025 qu'après Phase B. (3) Aucune action de cleanup post-merge nécessaire (commit direct sur main, pas de worktree à retirer).
 
 ---
 
@@ -62,6 +61,17 @@
 - ❌ **`navigation.js:250-251`** appelle encore `initialiserModuleTrimestre` via `if (typeof X === 'function')` — Zone protégée CLAUDE.md, guard intact (devient simplement faux, pas de régression boot). Ne pas toucher sans validation Grégoire.
 - ❌ **`coursEnEdition` (config.js L199)** est désormais orphelin (plus aucun caller après chantier 2.1). Zone protégée → laissé en place. À retirer dans un chantier dédié config.js si Grégoire autorise.
 - ⚠️ **Tests manuels UI obligatoires** côté zone Réglages (Cours / Groupe / Trimestre) — la suite Vitest ne couvre pas ces flows ; un appel `window[nomFonction]()` dynamique pourrait avoir été manqué par l'audit statique.
+
+### Garde-fous refonte pratique active (livrée 24 mai fin de matinée, commit `6f85512`)
+
+- ❌ **Ne pas réintroduire de fallback codé en dur sur les pondérations métier** (60/40, 65/35, etc.). Principe directeur sauvegardé en mémoire : [[feedback-zero-fallback-arbitraire]]. Les valeurs viennent toujours de la configuration utilisateur. Les conséquences logiques explicites (« pas de terminale → portfolio = 100% ») restent permises.
+- ❌ **Ne pas réintroduire l'heuristique titre/desc/pondération dans `_identifierProductionTerminale`** (`js/profil-etudiant-actions.js:188`). La fonction est volontairement réduite à `find(p => p.type === 'terminale')`. Une production terminale est identifiée **uniquement** par son type explicite.
+- ❌ **Ne pas remettre `'modalitesEvaluation'` ni `'pratiquesConfigurables'` dans `CLES_GLOBALES`** (`js/trimestres.js`). Les deux sont namespacés par trimestre depuis Phases E et F. Migrations boot idempotentes : `migration_modalites_namespacees_done`, `migration_pratiques_namespacees_done`.
+- ❌ **Ne pas écrire dans `pratiquesConfigurables` (global) ni dans `modalitesEvaluation` (global) depuis le code applicatif**. Toujours `db.setSync(cle('xxx'), ...)`. La constante `CLE_PRATIQUES_CONFIGURATIONS` dans `pratiques-gestion.js` reste pour rétrocompat de lecture, mais les écritures sont déjà migrées.
+- ❌ **Ne pas écrire un id de type général** (`"pan-standards"`, `"sommative"`, etc.) dans `groupesCours[].pratiqueId` ni dans `groupeCoursActif.pratiqueId`. La source canonique = id de pratique configurable (ex. `"pan-standards-bedard"`). Migration boot `migration_pratiqueId_to_configurable_id_done` (Phase G1) effectue le remappage idempotent.
+- ❌ **Ne pas lire `modalitesEvaluation.configPAN.portfolio` comme source du calcul** dans un nouveau code. La source canonique est désormais `obtenirConfigPratiqueActive()` (qui lit la bibliothèque namespacée). Le snapshot reste en stockage mais n'est plus lu par `_obtenirConfigPortfolioCalcul`. Les 30 sites legacy de `pratiques.js` + `pratique-pan-standards.js` qui lisent encore le snapshot seront migrés en G2-b.
+- ❌ **Ne pas renommer l'id `pan-standards-bedard`** (la pratique PAN-Littérature A25 de Grégoire) sans coordonner avec lui. C'est l'id qu'utilise son a2025 et l'attribution est désormais correcte (Grégoire Bédard / Cégep de Drummondville). Référence : [[project-pratique-active-ssot]].
+- ⚠️ **Plan détaillé** : `plans de travail/PLAN-refonte-note-finale-portfolio.md` documente les 6 bugs identifiés, les décisions architecturales, et les phases restantes. Lire avant toute reprise.
 
 ---
 
@@ -481,6 +491,52 @@ Voir `Retours des testeurs/SUIVI-BUGS.md` section « Corrigés (21 mai 2026 — 
 
 ---
 
+## §1sexies — Refonte pratique active + namespacing LIVRÉE (24 mai 2026 fin de matinée)
+
+**Commit unique sur main** : `6f85512` refactor(pratique-active) — 51 fichiers touchés, +700 / −337 LOC. Pas de worktree dédié, commit direct.
+
+**Beta / build** : 99.64 / 0524-1035 (bump build seulement, beta conservée à la demande de Grégoire).
+
+### Phases livrées (résumé)
+
+| Phase | Effet |
+|---|---|
+| **A** | Type `terminale` explicite dans le formulaire production. `_identifierProductionTerminale` réduit à `find(p => p.type === 'terminale')`. Retrait des fallbacks codés en dur 60/40 dans `calculerDetailsNoteFinale`. Propagation d'un champ `erreur` au rendu profil si config incomplète. |
+| **E** | `modalitesEvaluation` déplacée de `CLES_GLOBALES` vers `CLES_NAMESPACEES`. Boot migration `migration_modalites_namespacees_done` (copie global → namespacé). 175 sites migrés. |
+| **F** | `pratiquesConfigurables` namespacée pareillement. Boot migration `migration_pratiques_namespacees_done`. 69 sites migrés. Chaque trimestre a sa propre bibliothèque locale. |
+| **G1** | Boot migration `migration_pratiqueId_to_configurable_id_done` : remappe les `groupesCours[].pratiqueId` qui contenaient un type général (ex. `"pan-standards"`) vers le premier id configurable du même type dans la bibliothèque locale du trimestre. Idem pour `groupeCoursActif.pratiqueId`. |
+| **G2-a** | `_obtenirConfigPortfolioCalcul` lit uniquement la bibliothèque via `obtenirConfigPratiqueActive()`. Plus de fallback sur le snapshot `modalitesEvaluation.configPAN.portfolio`. Si la bibliothèque retourne null, erreur explicite affichée dans le profil. |
+| **Wizard fix** | La constante `CLE_PRATIQUES_CONFIGURATIONS = 'pratiquesConfigurables'` dans `pratiques-gestion.js` (67 sites du fichier) écrivait à la clé globale, masquant Phase F. Sites migrés vers `cle('pratiquesConfigurables')`. **C'est ce fix qui a finalement permis à l'édition wizard de se propager au calculateur.** |
+
+### Métadonnées de pratique corrigées (snippet console)
+
+La pratique « PAN-Littérature A25 » avait l'auteur Bruno V. / Cégep Laurendeau (résidu de cloning). Re-attribuée à **Grégoire Bédard / Cégep de Drummondville**. Id renommé `pan-standards-bruno` → `pan-standards-bedard` dans toutes les références (pratiquesConfigurables, groupesCours, modalitesEvaluation, groupeCoursActif).
+
+### Validation arithmétique
+
+- a2025 Bermudez Ambriz, mode « N meilleurs avec N=4 » : **73,5%** (Léa transmis 73,2% en décembre, écart 0,3% = bruit d'arrondi).
+- a2025 Bermudez Ambriz, mode « tous, 4 retenus » : 65,9% (vérifié).
+- a2025 Bermudez Ambriz, mode « tous, 8 retenus » : 64,2% (vérifié — Formuler 5 HOC compté à 0%).
+- Wizard édite → bibliothèque namespacée → calcul → rendu : **chaîne validée bout en bout**.
+
+### Plan détaillé
+
+`plans de travail/PLAN-refonte-note-finale-portfolio.md` — documente les 6 bugs identifiés au début, les décisions architecturales (5 sources de vérité partielles consolidées en 1 canonique au niveau groupe-cours), les phases livrées et restantes.
+
+### Mémoires Claude créées
+
+- `feedback-zero-fallback-arbitraire.md` — principe directeur (aucune valeur métier codée en dur).
+- `project-pratique-active-ssot.md` — architecture SSOT de la pratique active (groupesCours[].pratiqueId, bibliothèque namespacée).
+
+### Phases restantes (pour la session suivante)
+
+- **Phase B** — Refonte section Note finale du PDF rétroaction (besoin pédagogique original de la session : `synthese-retroaction-data.js` + `synthese-retroaction-rendu.js`). Décisions actées : toggle manuel Provisoire/Finale dans l'app, pondération par bloc seulement (pas par artefact individuel). Cf. PLAN §3.B.
+- **Phase C** — UI profil : cacher le bloc Évaluation terminale quand `terminal.present === false` (`profil-etudiant-sections-affichage.js:2728-2779`).
+- **Phase D** — Retrait du champ legacy `mat-variante-calcul` dans le wizard (« Comment construis-tu la note finale ? »). Sa fonction de bascule Portfolio/Par-Objectifs doit migrer vers le sélecteur « Mode de sélection ».
+- **G2-b** — Migrer 30 sites restants de `configPAN.portfolio` dans `pratiques.js` (21) + `pratique-pan-standards.js` (9) vers `obtenirConfigPratiqueActive()`. Puis boot migration pour retirer le snapshot du stockage. Pas urgent — le snapshot est neutralisé pour le calculateur principal.
+
+---
+
 ## §2 — Critères de clôture du cycle Cat-B (statut)
 
 Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
@@ -508,55 +564,71 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
 ## §3 — Consigne de démarrage pour la prochaine session
 
-> **Priorité 1** : cleanup worktree + test sur vrai iPhone post-déploiement du chrome unifié. **Priorité 2** : reprise du chantier **#282 étape 5** (migration finale `listeCours` → `cours`, ~3 h, plan détaillé dans §1quater du 23 mai PM).
+> **Priorité 1** : Phase B — refonte de la section « Note finale » du PDF rétroaction envoyé à l'élève. **C'est le besoin pédagogique original** de la session du 24 mai. Grégoire ne pourra finaliser sa remise de notes a2025 qu'après. **Priorité 2** : Phase C (UI profil). **Priorité 3** : Phase D (retrait legacy `mat-variante-calcul`). **Priorité 4** : G2-b (les 30 sites legacy `configPAN.portfolio`).
 
 ### Étapes de démarrage immédiat
 
 ```bash
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 git status                                              # main attendu propre
-git log --oneline main -3                               # HEAD attendu : `cbdf7d7` chrome unifié (ou plus récent si Grégoire a déployé)
+git log --oneline main -3                               # HEAD attendu : `6f85512` refactor(pratique-active)
 git pull --rebase                                       # au cas où
 
-# Cleanup post-merge du chantier chrome unifié :
-git worktree remove ../Monitorage_v6-chrome             # retire le worktree
-git branch -d cleanup/chrome-unifie                     # branche déjà mergée FF
-git tag -l "chrome-unifie-*"                            # vérifie tag `chrome-unifie-2026-05-24` présent
+# Lire la documentation de référence :
+cat "plans de travail/PLAN-refonte-note-finale-portfolio.md"
 
-npx http-server -p 8080 -c-1                            # serveur local pour tests éventuels
+# Vérifier que les tests sont toujours verts (smoke test)
+cd tests && npm test
 ```
 
-### Priorité 1 — Cleanup + test device chrome unifié
+### Avant toute écriture de code
 
-1. **Cleanup worktree** (commandes ci-dessus).
-2. **Si Grégoire a déployé sur Netlify** : tester sur vrai iPhone via `app.codexnumeris.org`. Points à vérifier en priorité :
-   - Bouton ⋯ ouvre/ferme le popover au tap
-   - Tap sur un item du popover (Codex / Bug / Anonym / Thème / Aide / Réglages) déclenche l'action ET ferme le popover
-   - Tap sur le select nav primaire ouvre le picker iOS plein écran (UX confortable au pouce)
-   - Changement de section via select bascule la section affichée
-   - Select sous-nav apparaît/disparaît selon la section (Accueil/Aperçu = absent ; Conception/Calendrier/etc. = présent)
-   - Au scroll, les deux selects mobile (nav + sous-nav) restent collés en haut
-   - Mode sombre + mode clair OK
-   - Aucun chevauchement visuel (le bug iPhone d'origine est corrigé)
-3. **Si bug device-spécifique** : hotfix immédiat depuis main directement (le chantier chrome est mergé). Sinon clôture définitive.
+1. **Charger les skills** : `Skills pour Claude Code/SKILL_labo_codex.md` + `SKILL_Ecosysteme_classe.md` (cadre pédagogique IDME / cartouches).
+2. **Charger les mémoires** : [[feedback-zero-fallback-arbitraire]] et [[project-pratique-active-ssot]] (architecture issue de la session du 24 mai).
+3. **Lire le plan** : `plans de travail/PLAN-refonte-note-finale-portfolio.md` — modèle pédagogique de Grégoire, décisions architecturales actées, phases restantes.
+4. **Lire le code de la zone touchée** AVANT de planifier (Phase B = `js/synthese-retroaction-data.js` + `js/synthese-retroaction-rendu.js`).
 
-### Priorité 2 — #282 étape 5 (migration finale `listeCours` → `cours`)
+### Priorité 1 — Phase B : refonte section Note finale du PDF rétroaction
 
-Si Priorité 1 OK, attaquer la migration finale documentée dans §1quater (23 mai PM) :
+**Objectif** : la rétroaction PDF envoyée à l'élève doit expliciter honnêtement la construction de la note. Aujourd'hui elle est trompeuse (cf. captures du 24 mai dans la conversation).
 
-- **Audit grep complet** : `grep -rn "listeCours" js/ --include="*.js"` pour compte réel des sites à migrer.
-- **~93 sites estimés** dans : `cours.js` (10 sites — Bibliothèque cours), `contexte.js` (2 sites), `cc-license.js` (1 site), `pratiques.js` (3 sites — sensibles indices A-C-P), `travaux-ui.js`, `demo-activation.js` (5 sites — retraits redondants), `migrations.js` (13 sites historiques, à AUDITER avant migration — peut nécessiter conservation pour idempotence), `statistiques.js`, `rapport-bug.js`, `organisateur.js`, `export-pdf.js`, `reserve.js`, `trimestre-v2-cours.js` (la fonction `_migrerListeCoursVersCoursV2` doit RESTER pour idempotence boot).
-- **Stratégie** : migrer par groupes cohérents (cours.js d'abord = valeur immédiate user, puis contexte.js + cc-license.js + le reste). Tester après chaque groupe via Réglages → Cours → Bibliothèque qui doit afficher les cours.
-- **Worktree dédié recommandé** : `git worktree add ../Monitorage_v6-282-migration cleanup/282-migration-finale main`.
-- **Garde-fous P1-P4 livrés** (cf. §0) : ne pas casser le bandeau modification, l'activation explicite cours/GC, ni la migration par tuple naturel.
+**Décisions actées par Grégoire le 24 mai** :
+- **Titre de section** : toggle manuel dans l'app (« Note provisoire » / « Note finale » — l'enseignant choisit explicitement quand basculer). Emplacement du toggle à définir au début de Phase B.
+- **Pondération affichée** : par bloc seulement (« Les 4 meilleurs (65%) » et « Obligatoires (35%) »). Pas par artefact individuel.
 
-### Autres pistes (post-#282 étape 5)
+**Fichiers concernés** :
+- `js/synthese-retroaction-data.js:678-779` (`construireNoteProvisoire`) — refonte du data shape : séparer `selection` vs `obligatoires`, exposer les pondérations numériques, ajouter flags `estHybride` et `estFinale`.
+- `js/synthese-retroaction-rendu.js:542-605` (`renderRangeeNote`) — refonte du rendu : éliminer le doublon Sélection / Obligatoires, titre dynamique, formule explicite (4×16,25% + 2×17,5% = 100%).
 
-- **Tests Sections C, D, E, F** : reportées le 23 mai par Grégoire. À reprendre avant AQPC 3 juin si souhaité.
-- **Harmonisation pages à sidebar mobile (BACKLOG #283)** : ouvrir un chantier séparé pour empiler/pusher la zone détails sur les pages bibliothèque (Productions étudiantes, Grilles de critères, etc.) — gros chantier UX.
-- **Harmonisation structure titres de page (BACKLOG #284)** : ajouter h1 + sous-titre descriptif à Conception → Alignement et Labo → Tirage au sort pour cohérence.
-- **Bug fantôme Tirage au sort (SUIVI-BUGS #121)** : grep `Charger un codex data` pour identifier l'origine.
-- **Migration globale icônes icons8** : chantier séparé non encore planifié.
+**Bugs PDF identifiés (cf. PLAN §2 Bug 3)** :
+- Titre « 6 meilleurs artefacts » alors que 2 sont obligatoires (pas « meilleurs »).
+- Artefacts 9 et 10 listés deux fois (dans « les 6 meilleurs » + dans « Artefacts obligatoires »).
+- Pondérations absentes du rendu (`pondSel` / `pondObl` calculés dans data.js mais jamais utilisés dans rendu.js).
+- Le calcul 65/35 = 100% n'est pas explicité.
+
+### Priorité 2 — Phase C : cohérence du panneau Note finale dans le profil
+
+**Objectif** : ne plus afficher de bloc « Évaluation terminale × 0% » fantôme quand aucune terminale n'existe.
+
+**Fichier** : `js/profil-etudiant-sections-affichage.js:2728-2779`. Conditionner l'affichage du bloc terminale sur `detailsNoteFinale.terminal.present` (déjà exposé par Phase A). Adapter la formule (« 100% » au lieu de « 60% + 40% = 100% » si pas de terminale).
+
+### Priorité 3 — Phase D : retrait du champ legacy `mat-variante-calcul`
+
+**Objectif** : supprimer la confusion entre les deux sélecteurs dans le wizard pratique (« Comment construis-tu la note finale ? » et « Mode de sélection »).
+
+**Fichiers** :
+- `index.html:5798-5814` : retrait du bloc `mat-variante-pan-standards`.
+- `js/pratiques-gestion.js:961-997` (`changerVariantePANStandardsMat`) + tous les readers de `configuration.varianteCalcul`.
+
+**Question ouverte** : la bascule entre « Portfolio » et « Par-Objectifs » que pilotait ce champ — où la migrer ? Probablement ajouter une option `par-objectifs` au sélecteur « Mode de sélection » (`mat-portfolio-selection`), ou un autre mécanisme explicite. À décider avec Grégoire au début de Phase D.
+
+### Priorité 4 — G2-b : ménage des 30 sites `configPAN.portfolio`
+
+**Objectif** : retirer entièrement le snapshot legacy.
+
+**Sites** : `js/pratiques.js` (21) + `js/pratiques/pratique-pan-standards.js` (9). Migrer vers `obtenirConfigPratiqueActive()`. Puis boot migration pour retirer la propriété `configPAN.portfolio` de chaque `${trim}_modalitesEvaluation`.
+
+**Pas urgent** — le snapshot est déjà neutralisé pour le calculateur principal (Phase G2-a). Toucher pour cohérence et zéro-dette.
 
 ### Zones protégées — rappel permanent
 
@@ -565,15 +637,16 @@ Si Priorité 1 OK, attaquer la migration finale documentée dans §1quater (23 m
 ### Conventions
 
 - **Pas de bump beta sans demander** Grégoire (cf. §0). Beta 99.64 conservée tant que non bumpée.
-- **Hook pré-push vert** obligatoire (Défense J — 85 Vitest verts au minimum).
-- **Worktree dédié** recommandé pour tout chantier > 1 h ou risqué (`git worktree add`).
+- **Hook pré-push vert** obligatoire (Défense J — 85 Vitest verts au minimum). Notre commit `6f85512` a généré 91 warnings sur écritures sensibles (acceptés — lectures internes uniquement, pas d'input externe). Si Grégoire veut acquitter, ajouter `// security-ok: <raison>` aux lignes.
+- **Worktree dédié** recommandé pour tout chantier > 1 h. Notre session du 24 mai a livré directement sur main (commit unique cohérent).
 - **Test simulation Safari Responsive Design Mode** insuffisant pour valider mobile : toujours valider sur vrai device.
 
 ### Décisions de Grégoire pendantes (rappel pour ne pas oublier)
 
-- **Cleanup worktree chrome unifié** — à faire en début de prochaine session.
-- **Test vrai iPhone chrome unifié** — après déploiement Netlify.
-- **#282 étape 5** — migration `listeCours` finale, à reprendre quand tests chrome OK.
+- **Phase B / C / D / G2-b** — à attaquer dans cette session.
+- **Cleanup worktree chrome unifié** (legacy du matin) — encore à faire si pas déjà fait : `git worktree remove ../Monitorage_v6-chrome` puis `git branch -d cleanup/chrome-unifie`.
+- **Test vrai iPhone chrome unifié** — après déploiement Netlify (orthogonal).
+- **#282 étape 5** — migration `listeCours` finale (~3 h, plan dans §1quater du 23 mai). Indépendant de Phase B/C/D.
 - Label `v2-seuil-fragile` — conservation / atténuation / alignement ? (Cat-B Track 4 chantier J reliquat).
 - Convergence audit/2026-mai ↔ main — à planifier post-AQPC.
 - Demande d'avis PRP Cégep de Drummondville (Loi 25) — à envoyer (délai réponse 2-6 semaines, conditionne PRIVACY.md v1.1).
