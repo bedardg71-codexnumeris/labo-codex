@@ -1736,7 +1736,7 @@ function genererRecapitulatif() {
         html += `<p><strong>Approche\u00a0:</strong> ${approcheLabels[r.approcheEvaluation] || r.approcheEvaluation}</p>`;
 
         if (r.approcheEvaluation === 'par-artefacts') {
-            const modalites = db.getSync('modalitesEvaluation', {});
+            const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
             const nbSoumis = modalites.nArtefactsPAN || r.nbArtefactsSoumis || '?';
             const nbRetenus = modalites.nArtefactsRetenus || r.nbArtefactsRetenus || '?';
             html += `<p><strong>Artefacts à soumettre\u00a0:</strong> ${nbSoumis}</p>`;
@@ -2249,7 +2249,7 @@ async function creerPratiqueV2() {
 
         if (r.approcheEvaluation === 'par-artefacts') {
             // 🆕 Beta 95.7 : Lire depuis modalitesEvaluation (Primo) OU wizardState (#4)
-            const modalites = db.getSync('modalitesEvaluation', {});
+            const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
 
             // Priorité : valeur Primo > valeur wizard > défaut
             // 🆕 Beta 95.7 : Utiliser noms Primo corrects (#4)
@@ -2359,7 +2359,7 @@ async function creerPratiqueV2() {
  */
 async function sauvegarderPratique(pratique) {
     // Récupérer les pratiques existantes
-    let pratiques = db.getSync('pratiquesConfigurables', []);
+    let pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
 
     // Mise à jour ou ajout
     const index = pratiques.findIndex(p => p.id === pratique.id);
@@ -2370,15 +2370,15 @@ async function sauvegarderPratique(pratique) {
     }
 
     // Sauvegarde localStorage + IndexedDB (setSync écrit dans les deux stores)
-    db.setSync('pratiquesConfigurables', pratiques);
+    db.setSync(cle('pratiquesConfigurables'), pratiques);
 
     // Mettre à jour les modalités d'évaluation si c'est la pratique active
-    const modalites = db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     if (!modalites.pratiqueId || modalites.pratiqueId === pratique.id) {
         modalites.pratiqueId = pratique.id;
         modalites.pratique = pratique.type;
         modalites.approcheEvaluation = pratique.configuration?.approcheEvaluation || null;
-        db.setSync('modalitesEvaluation', modalites);
+        db.setSync(cle('modalitesEvaluation'), modalites);
     }
 }
 
@@ -2477,7 +2477,7 @@ function fermerWizardV2() {
  * @param {string} pratiqueId - ID de la pratique
  */
 function chargerPratiqueExistante(pratiqueId) {
-    const pratiques = db.getSync('pratiquesConfigurables', []);
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
     const pratique = pratiques.find(p => p.id === pratiqueId);
 
     if (!pratique) {

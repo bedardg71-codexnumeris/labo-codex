@@ -307,7 +307,7 @@ function calculerTauxCompletion(da) {
     // Le recalcul de secours a été supprimé pour éviter deux algorithmes divergents.
     // Si indicesCP n'est pas encore calculé, retourner null (les appelants gèrent ce cas).
     if (typeof obtenirIndicesCP === 'function') {
-        const config = db.getSync('modalitesEvaluation', {});
+        const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
         const pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
 
         const indicesCP = obtenirIndicesCP(da, pratique);
@@ -339,7 +339,7 @@ function calculerPerformance(da) {
     // LIRE depuis la source unique de vérité (portfolio.js)
     if (typeof obtenirIndicesCP === 'function') {
         // Détecter la pratique active
-        const config = db.getSync('modalitesEvaluation', {});
+        const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
         const pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
 
         const indicesCP = obtenirIndicesCP(da, pratique);
@@ -373,7 +373,7 @@ function obtenirCouleurPerformance(performance) {
  */
 function genererExplicationCalculIndices() {
     // Récupérer la configuration de la pratique active
-    const config = db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const pratique = config.pratique || 'pan-maitrise';
     const isPAN = pratique === 'pan-maitrise';
 
@@ -449,7 +449,7 @@ function mettreAJourExplicationCalculIndices() {
  * @returns {string} - HTML du badge
  */
 function genererBadgePratiqueListeEtudiants() {
-    const config = db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const pratique = config.pratique || 'pan-maitrise';
     const typePAN = config.typePAN || 'maitrise';
 
@@ -773,7 +773,7 @@ function afficherListeEtudiantsConsultation() {
     // Vérifier si le modèle RàI est activé (préférence utilisateur)
     const activerRai = obtenirPreference('activerRai') !== false;
     // Config de pratique (utilisée plus bas pour affichageTableauBord)
-    const config = db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
 
     // Afficher/masquer les colonnes Pattern et RàI dans les headers
     masquerColonnesRaiSiDesactive(activerRai);
@@ -909,7 +909,7 @@ function afficherListeEtudiantsConsultation() {
 
     // Déterminer le seuil minimum d'évaluations pour P
     const configPratiqueActiveTab = typeof obtenirConfigPratiqueActive === 'function' ? obtenirConfigPratiqueActive() : null;
-    const modalitesTab = db.getSync('modalitesEvaluation', {});
+    const modalitesTab = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const configPortfolioTab = configPratiqueActiveTab?.portfolio || modalitesTab.configPAN?.portfolio || {};
     const minimumCompletionTab = configPortfolioTab.minimumCompletion || modalitesTab.configPAN?.portfolio?.minimumCompletion || 3;
 

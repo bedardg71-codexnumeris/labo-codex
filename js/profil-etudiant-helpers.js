@@ -41,7 +41,7 @@
  * @returns {string} - Le terme approprié ("artefact", "production", "travail", etc.)
  */
 function obtenirTermeProduction(context = 'singulier', majuscule = false) {
-    const config = db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const pratique = config.pratique || 'pan-maitrise';
 
     // Définir les termes selon la pratique
@@ -146,7 +146,7 @@ function obtenirNombreProductionsPourPatterns() {
  * @returns {Array<string>} - IDs des productions évaluables
  */
 function obtenirIdsProductionsEvaluables(productions) {
-    var config = db.getSync('modalitesEvaluation', {});
+    var config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     var estPAN = config.pratique === 'alternative';
     if (estPAN) {
         return productions.filter(function(p) { return p.type === 'artefact-portfolio'; }).map(function(p) { return p.id; });
@@ -160,7 +160,7 @@ function obtenirIdsProductionsEvaluables(productions) {
  * @returns {Object} - Instance de la pratique (PratiquePANMaitrise ou PratiqueSommative)
  */
 function obtenirPratiqueActuelle() {
-    const modalites = db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const pratiqueId = modalites.pratique || 'pan-maitrise';
 
     // Obtenir l'instance depuis le registre

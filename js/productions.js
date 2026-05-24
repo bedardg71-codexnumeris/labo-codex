@@ -1318,7 +1318,8 @@ function gererChangementTypeProduction() {
         'stage': '<strong>Stage :</strong> Expérience pratique dans une entreprise pour découvrir un métier, un secteur ou valider un projet professionnel. Le stage vise l\'apprentissage (découverte/exploration) plutôt que la production. Sa durée varie de quelques heures à quelques semaines et il est suivi par un tuteur.',
         'autre': '<strong>Autre :</strong> Tout autre type de production (participation, activités, etc.).',
         'portfolio': '<strong>Portfolio (conteneur) :</strong> Regroupement d\'artefacts permettant d\'évaluer la progression. Le portfolio inclura automatiquement toutes les productions de type «Artefact». Il n\'est pas comptabilisé dans l\'indice de <strong>Complétion (C)</strong>.',
-        'artefact-portfolio': '<strong>Artefact :</strong> Production ciblée sur une tâche de nature variée et rattachée au portfolio.<br><br>Les artefacts n\'ont pas de pondération propre. C\'est le portfolio conteneur qui définit la pondération globale.<br><br><em>Pour paramétrer la valeur des artefacts, allez dans « Structure des évaluations » dans les Pratiques de notation.</em>'
+        'artefact-portfolio': '<strong>Artefact :</strong> Production ciblée sur une tâche de nature variée et rattachée au portfolio.<br><br>Les artefacts n\'ont pas de pondération propre. C\'est le portfolio conteneur qui définit la pondération globale.<br><br><em>Pour paramétrer la valeur des artefacts, allez dans « Structure des évaluations » dans les Pratiques de notation.</em>',
+        'terminale': '<strong>Évaluation terminale :</strong> Production qui clôt la session et qui s\'ajoute au portfolio dans le calcul de la note finale. Sa pondération est explicite (par exemple 40 %) et elle se combine au portfolio (par exemple 60 %) pour produire la note finale.<br><br>Une seule production de ce type par trimestre.'
     };
 
     // Éléments Définition (carte dynamique)
@@ -1625,6 +1626,7 @@ function getTypeLabel(type) {
         'presentation': 'Présentation',
         'portfolio': '📁 Portfolio (conteneur)',
         'artefact-portfolio': 'Artefact d\'un portfolio',
+        'terminale': 'Évaluation terminale',
         'autre': 'Autre'
     };
     return labels[type] || type;

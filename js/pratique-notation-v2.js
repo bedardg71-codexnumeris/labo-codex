@@ -126,7 +126,7 @@
     function chargerValeursDepuisStorage() {
         let modalites = {};
         try {
-            modalites = db.getSync('modalitesEvaluation') || {};
+            modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         } catch (e) {
             console.error('[pratique-notation-v2] Erreur chargement:', e);
             modalites = {};
@@ -534,7 +534,7 @@
     function sauvegarderPratiqueBaseV2() {
         let modalites = {};
         try {
-            modalites = db.getSync('modalitesEvaluation') || {};
+            modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         } catch (e) {
             console.error('[pratique-notation-v2] Erreur lecture modalitesEvaluation:', e);
             modalites = {};
@@ -552,7 +552,7 @@
         }
 
         try {
-            db.setSync('modalitesEvaluation', modalites);
+            db.setSync(cle('modalitesEvaluation'), modalites);
         } catch (e) {
             console.error('[pratique-notation-v2] ❌ Erreur sauvegarde:', e);
         }
@@ -564,7 +564,7 @@
     function sauvegarderStructureV2() {
         let modalites = {};
         try {
-            modalites = db.getSync('modalitesEvaluation') || {};
+            modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         } catch (e) {
             modalites = {};
         }
@@ -596,7 +596,7 @@
             modalites.specifications.type = document.getElementById('v2-spec-type')?.value || 'binaire';
         }
 
-        db.setSync('modalitesEvaluation', modalites);
+        db.setSync(cle('modalitesEvaluation'), modalites);
     }
 
     /**
@@ -609,7 +609,7 @@
 
         let modalites = {};
         try {
-            modalites = db.getSync('modalitesEvaluation') || {};
+            modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         } catch (e) {
             modalites = {};
         }
@@ -650,7 +650,7 @@
             }
         };
 
-        db.setSync('modalitesEvaluation', modalites);
+        db.setSync(cle('modalitesEvaluation'), modalites);
     }
 
     /**
@@ -753,7 +753,7 @@
     function chargerConfigParObjectifs() {
         let modalites = {};
         try {
-            modalites = db.getSync('modalitesEvaluation') || {};
+            modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         } catch (e) {
             modalites = {};
         }
@@ -770,7 +770,7 @@
                     grilleConversion: modalites.comptageObjectifs.grilleConversion || {}
                 }
             };
-            db.setSync('modalitesEvaluation', modalites);
+            db.setSync(cle('modalitesEvaluation'), modalites);
         }
 
         const config = modalites.parObjectifs || CONFIG_PAR_OBJECTIFS_DEFAUT;
@@ -822,7 +822,7 @@
      * Charge les paramètres spécifiques au mode sélectionné
      */
     function chargerParametresMode(mode) {
-        const modalites = db.getSync('modalitesEvaluation') || {};
+        const modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         const config = modalites.parObjectifs || CONFIG_PAR_OBJECTIFS_DEFAUT;
 
         switch (mode) {
@@ -857,7 +857,7 @@
      * Sauvegarde le mode de calcul sélectionné
      */
     function sauvegarderModeCalculObjectifs() {
-        let modalites = db.getSync('modalitesEvaluation') || {};
+        let modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         if (!modalites.parObjectifs) {
             modalites.parObjectifs = { ...CONFIG_PAR_OBJECTIFS_DEFAUT };
         }
@@ -867,7 +867,7 @@
             modalites.parObjectifs.modeCalcul = modeEl.value;
         }
 
-        db.setSync('modalitesEvaluation', modalites);
+        db.setSync(cle('modalitesEvaluation'), modalites);
     }
 
     /**
@@ -974,7 +974,7 @@
      * Ajoute un nouvel objectif
      */
     function ajouterObjectif() {
-        let modalites = db.getSync('modalitesEvaluation') || {};
+        let modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         if (!modalites.parObjectifs) {
             modalites.parObjectifs = { ...CONFIG_PAR_OBJECTIFS_DEFAUT };
         }
@@ -992,7 +992,7 @@
         });
 
         modalites.parObjectifs.objectifs = objectifs;
-        db.setSync('modalitesEvaluation', modalites);
+        db.setSync(cle('modalitesEvaluation'), modalites);
 
         afficherListeObjectifs(objectifs, mode);
         if (mode === 'comptage') {
@@ -1004,11 +1004,11 @@
      * Modifie une propriété d'un objectif
      */
     function modifierObjectif(index, propriete, valeur) {
-        let modalites = db.getSync('modalitesEvaluation') || {};
+        let modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         if (!modalites.parObjectifs || !modalites.parObjectifs.objectifs) return;
 
         modalites.parObjectifs.objectifs[index][propriete] = valeur;
-        db.setSync('modalitesEvaluation', modalites);
+        db.setSync(cle('modalitesEvaluation'), modalites);
 
         // Rafraîchir l'affichage si nécessaire
         const mode = modalites.parObjectifs.modeCalcul || 'comptage';
@@ -1021,11 +1021,11 @@
      * Supprime un objectif
      */
     function supprimerObjectif(index) {
-        let modalites = db.getSync('modalitesEvaluation') || {};
+        let modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         if (!modalites.parObjectifs || !modalites.parObjectifs.objectifs) return;
 
         modalites.parObjectifs.objectifs.splice(index, 1);
-        db.setSync('modalitesEvaluation', modalites);
+        db.setSync(cle('modalitesEvaluation'), modalites);
 
         const mode = modalites.parObjectifs.modeCalcul || 'comptage';
         afficherListeObjectifs(modalites.parObjectifs.objectifs, mode);
@@ -1038,7 +1038,7 @@
      * Sauvegarde les paramètres du mode actuel
      */
     function sauvegarderParametresMode() {
-        let modalites = db.getSync('modalitesEvaluation') || {};
+        let modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         if (!modalites.parObjectifs) {
             modalites.parObjectifs = { ...CONFIG_PAR_OBJECTIFS_DEFAUT };
         }
@@ -1071,7 +1071,7 @@
                 break;
         }
 
-        db.setSync('modalitesEvaluation', modalites);
+        db.setSync(cle('modalitesEvaluation'), modalites);
         notifications.succes('Configuration sauvegardée');
     }
 
@@ -1079,7 +1079,7 @@
      * Régénère la grille de conversion automatiquement selon le nombre d'objectifs
      */
     function regenererGrilleConversion() {
-        let modalites = db.getSync('modalitesEvaluation') || {};
+        let modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         if (!modalites.parObjectifs) return;
 
         const objectifs = modalites.parObjectifs.objectifs || [];
@@ -1091,7 +1091,7 @@
 
         if (nbObjectifs === 0) {
             modalites.parObjectifs.comptage.grilleConversion = {};
-            db.setSync('modalitesEvaluation', modalites);
+            db.setSync(cle('modalitesEvaluation'), modalites);
             afficherGrilleConversion({});
             return;
         }
@@ -1104,7 +1104,7 @@
         }
 
         modalites.parObjectifs.comptage.grilleConversion = grille;
-        db.setSync('modalitesEvaluation', modalites);
+        db.setSync(cle('modalitesEvaluation'), modalites);
 
         afficherGrilleConversion(grille);
     }
@@ -1153,7 +1153,7 @@
      * Modifie une valeur dans la grille de conversion
      */
     function modifierGrilleConversion(nbObjectifs, note) {
-        let modalites = db.getSync('modalitesEvaluation') || {};
+        let modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         if (!modalites.parObjectifs || !modalites.parObjectifs.comptage) return;
 
         if (!modalites.parObjectifs.comptage.grilleConversion) {
@@ -1161,14 +1161,14 @@
         }
 
         modalites.parObjectifs.comptage.grilleConversion[nbObjectifs] = parseInt(note) || 0;
-        db.setSync('modalitesEvaluation', modalites);
+        db.setSync(cle('modalitesEvaluation'), modalites);
     }
 
     /**
      * Initialise la section par-objectifs si la variante est sélectionnée
      */
     function initialiserParObjectifsV2() {
-        let modalites = db.getSync('modalitesEvaluation') || {};
+        let modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
 
         // Vérifier si la variante est "par-objectifs"
         if (modalites.varianteCalcul === 'par-objectifs') {
@@ -1204,7 +1204,7 @@
     function chargerConfigSpecifications() {
         let modalites = {};
         try {
-            modalites = db.getSync('modalitesEvaluation') || {};
+            modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         } catch (e) {
             modalites = {};
         }
@@ -1237,7 +1237,7 @@
     function sauvegarderConfigSpecifications() {
         let modalites = {};
         try {
-            modalites = db.getSync('modalitesEvaluation') || {};
+            modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         } catch (e) {
             modalites = {};
         }
@@ -1252,7 +1252,7 @@
             modalites.specifications.seuilAcceptable = parseInt(seuilEl.value) || 75;
         }
 
-        db.setSync('modalitesEvaluation', modalites);
+        db.setSync(cle('modalitesEvaluation'), modalites);
     }
 
     // -------------------------------------------------------------------------
@@ -1407,7 +1407,7 @@
         }
 
         // Ajouter comme type de production
-        let modalites = db.getSync('modalitesEvaluation') || {};
+        let modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         if (!modalites.specifications) {
             modalites.specifications = { ...CONFIG_SPECIFICATIONS_DEFAUT };
         }
@@ -1434,7 +1434,7 @@
         });
 
         modalites.specifications.typesTravaux = typesTravaux;
-        db.setSync('modalitesEvaluation', modalites);
+        db.setSync(cle('modalitesEvaluation'), modalites);
 
         // Rafraîchir l'affichage
         afficherTypesTravauxSpec(typesTravaux);
@@ -1449,7 +1449,7 @@
      * Ajoute un nouveau type de travail
      */
     function ajouterTypeTravailSpec() {
-        let modalites = db.getSync('modalitesEvaluation') || {};
+        let modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         if (!modalites.specifications) {
             modalites.specifications = { ...CONFIG_SPECIFICATIONS_DEFAUT };
         }
@@ -1466,7 +1466,7 @@
         });
 
         modalites.specifications.typesTravaux = typesTravaux;
-        db.setSync('modalitesEvaluation', modalites);
+        db.setSync(cle('modalitesEvaluation'), modalites);
 
         afficherTypesTravauxSpec(typesTravaux);
         // Rafraîchir aussi les forfaits pour inclure le nouveau type
@@ -1477,13 +1477,13 @@
      * Modifie une propriété d'un type de travail
      */
     function modifierTypeTravailSpec(id, propriete, valeur) {
-        let modalites = db.getSync('modalitesEvaluation') || {};
+        let modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         if (!modalites.specifications || !modalites.specifications.typesTravaux) return;
 
         const type = modalites.specifications.typesTravaux.find(t => t.id === id);
         if (type) {
             type[propriete] = valeur;
-            db.setSync('modalitesEvaluation', modalites);
+            db.setSync(cle('modalitesEvaluation'), modalites);
 
             // Rafraîchir les forfaits si le nom a changé
             if (propriete === 'nom') {
@@ -1499,7 +1499,7 @@
      * Supprime un type de travail
      */
     function supprimerTypeTravailSpec(id) {
-        let modalites = db.getSync('modalitesEvaluation') || {};
+        let modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         if (!modalites.specifications || !modalites.specifications.typesTravaux) return;
 
         // Vérifier si le type est utilisé dans des forfaits
@@ -1519,7 +1519,7 @@
         }
 
         modalites.specifications.typesTravaux = modalites.specifications.typesTravaux.filter(t => t.id !== id);
-        db.setSync('modalitesEvaluation', modalites);
+        db.setSync(cle('modalitesEvaluation'), modalites);
 
         afficherTypesTravauxSpec(modalites.specifications.typesTravaux);
         afficherForfaitsSpec(modalites.specifications.forfaits || [], modalites.specifications.typesTravaux);
@@ -1633,7 +1633,7 @@
      * Ajoute un nouveau forfait
      */
     function ajouterForfaitSpec() {
-        let modalites = db.getSync('modalitesEvaluation') || {};
+        let modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         if (!modalites.specifications) {
             modalites.specifications = { ...CONFIG_SPECIFICATIONS_DEFAUT };
         }
@@ -1675,7 +1675,7 @@
         });
 
         modalites.specifications.forfaits = forfaits;
-        db.setSync('modalitesEvaluation', modalites);
+        db.setSync(cle('modalitesEvaluation'), modalites);
 
         afficherForfaitsSpec(forfaits, typesTravaux);
     }
@@ -1684,13 +1684,13 @@
      * Modifie une propriété d'un forfait
      */
     function modifierForfaitSpec(id, propriete, valeur) {
-        let modalites = db.getSync('modalitesEvaluation') || {};
+        let modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         if (!modalites.specifications || !modalites.specifications.forfaits) return;
 
         const forfait = modalites.specifications.forfaits.find(f => f.id === id);
         if (forfait) {
             forfait[propriete] = valeur;
-            db.setSync('modalitesEvaluation', modalites);
+            db.setSync(cle('modalitesEvaluation'), modalites);
 
             // Rafraîchir l'affichage si la note a changé (pour re-trier)
             if (propriete === 'note') {
@@ -1706,14 +1706,14 @@
      * Modifie la quantité d'un type de travail dans un forfait
      */
     function modifierTravailForfaitSpec(forfaitId, typeId, quantite) {
-        let modalites = db.getSync('modalitesEvaluation') || {};
+        let modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         if (!modalites.specifications || !modalites.specifications.forfaits) return;
 
         const forfait = modalites.specifications.forfaits.find(f => f.id === forfaitId);
         if (forfait) {
             if (!forfait.travaux) forfait.travaux = {};
             forfait.travaux[typeId] = quantite || 0;
-            db.setSync('modalitesEvaluation', modalites);
+            db.setSync(cle('modalitesEvaluation'), modalites);
         }
     }
 
@@ -1721,11 +1721,11 @@
      * Supprime un forfait
      */
     function supprimerForfaitSpec(id) {
-        let modalites = db.getSync('modalitesEvaluation') || {};
+        let modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         if (!modalites.specifications || !modalites.specifications.forfaits) return;
 
         modalites.specifications.forfaits = modalites.specifications.forfaits.filter(f => f.id !== id);
-        db.setSync('modalitesEvaluation', modalites);
+        db.setSync(cle('modalitesEvaluation'), modalites);
 
         afficherForfaitsSpec(
             modalites.specifications.forfaits,
@@ -1796,7 +1796,7 @@
 
         let modalites = {};
         try {
-            modalites = db.getSync('modalitesEvaluation') || {};
+            modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         } catch (e) {
             modalites = {};
         }
@@ -1817,7 +1817,7 @@
             modalites.specifications.seuilAcceptable = 75;
         }
 
-        db.setSync('modalitesEvaluation', modalites);
+        db.setSync(cle('modalitesEvaluation'), modalites);
 
         return true;
     }

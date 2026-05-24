@@ -499,7 +499,7 @@ function calculerTousLesIndices(da, pratique = null) {
 
     // DÉTERMINER LA PRATIQUE À UTILISER
     if (!pratique) {
-        const config = db.getSync('modalitesEvaluation', {});
+        const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
         pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
     }
 

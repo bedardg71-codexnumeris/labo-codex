@@ -428,7 +428,7 @@ function obtenirEtatApplication() {
         const pratiqueDefaut = db.getSync('pratiqueParDefaut', 'non définie');
         etat.pratiqueParDefaut = pratiqueDefaut;
 
-        const modalites = db.getSync('modalitesEvaluation', {});
+        const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
         etat.pratiqueActive = modalites.pratique || 'non définie';
     } catch (e) {
         etat.pratiqueParDefaut = 'erreur lecture';
@@ -506,7 +506,7 @@ function obtenirContexteSection() {
 
             case 'evaluations':
                 contexte.nbEvaluations = (db.getSync(cle('evaluationsSauvegardees'), []) || []).length;
-                contexte.pratiqueActive = db.getSync('modalitesEvaluation', {})?.pratique || 'non définie';
+                contexte.pratiqueActive = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {})?.pratique || 'non définie';
                 break;
 
             case 'presences':

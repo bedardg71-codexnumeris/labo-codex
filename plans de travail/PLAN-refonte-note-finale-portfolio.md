@@ -1,0 +1,184 @@
+# Plan — Refonte de la construction de la note finale du portfolio
+
+**Démarré** : 24 mai 2026 matin
+**Contexte** : remise des notes en cours. La rétroaction PDF envoyée à l'élève doit expliciter la construction de la note. Plusieurs bugs et incohérences identifiés.
+**Principe directeur** : zéro-dette technique. Aucune pondération codée en dur arbitrairement — toutes les pondérations doivent être déterminées par l'utilisateur.
+
+---
+
+## 1. Modèle pédagogique (clarifié avec Grégoire)
+
+Pratique active h2026 (`PAN-SDT-Litt H26`) :
+
+- **10 artefacts** prévus au total dans la session (mais pas tous les élèves les produisent).
+- Sur ces 10 : **8 forment le pool « Sélection »** + **2 sont « Obligatoires »** (toujours comptés).
+- **Méthode** : Hybride. On retient les **4 meilleures** de la Sélection (16,25% chacune) + les **2 Obligatoires** (17,5% chacune) = **6 productions retenues sur 10**.
+- **Pondérations** : 4 × 16,25 + 2 × 17,5 = 65 + 35 = **100%**.
+- **Pas d'évaluation terminale séparée** en h2026. Les « Obligatoires » du portfolio ne sont pas une terminale — ce sont des productions du portfolio à pondération rehaussée.
+
+Pratique a2025 (automne, historique) :
+
+- 9 artefacts portfolio + 1 production de type « travail » titrée « Évaluation terminale » (ponderation 40).
+- 1 conteneur `type: 'portfolio'` (ponderation 60).
+- Méthode probable au moment de la transmission : **4 meilleurs** sur 7 évalués → Léa transmis = 73.2%.
+
+---
+
+## 2. Diagnostic des bugs
+
+### Bug 1 — Fallback 60/40 codé en dur dans `calculerDetailsNoteFinale`
+
+`js/profil-etudiant-actions.js:397-399` (avant correction) :
+
+```js
+const ponderationPortfolio = productionPortfolio?.ponderation || 60;
+const ponderationTerminale = productionTerminale?.ponderation || 40;
+```
+
+Quand `productionPortfolio === null` ET `productionTerminale === null` (cas h2026), le fallback impose 60/40 fantôme. Le profil élève montre « × 60% / × 40% » alors que rien ne dit ça.
+
+### Bug 2 — Heuristique de détection de la terminale fragile
+
+`_identifierProductionTerminale` (avant correction) matchait sur titre/description (`titreLC.includes('terminal')`) et pondération > 0. Pouvait promouvoir n'importe quel artefact à « terminale » par erreur.
+
+### Bug 3 — Rendu PDF de la note dans la rétroaction
+
+`synthese-retroaction-data.js` + `synthese-retroaction-rendu.js` :
+- `note.retenus` contient **les 6 retenus fusionnés** (Sélection + Obligatoires).
+- Le titre dit « Voici les 6 meilleurs artefacts » → faux, ils ne sont pas tous meilleurs.
+- La colonne droite « Artefacts obligatoires » liste **encore** les 2 obligatoires → doublon visible.
+- Les pondérations `pondSel` et `pondObl` sont calculées dans `data.js` mais **jamais utilisées** dans le rendu.
+- Le titre est codé en dur en « Note provisoire » — Grégoire veut un toggle manuel Provisoire/Finale.
+
+### Bug 4 — Profil élève affiche un découpage Portfolio/Terminale fantôme
+
+`profil-etudiant-sections-affichage.js:2728-2768` : le bloc Évaluation terminale est toujours rendu, même quand aucune terminale n'existe. La formule « 60% + 40% = 100% » est affichée artificiellement.
+
+### Bug 5 — Champ legacy `mat-variante-calcul` dans le wizard pratique
+
+`index.html:5800-5812` + `pratiques-gestion.js:961-997` : le sélecteur « Comment construis-tu la note finale ? » dédouble le sélecteur « Mode de sélection » plus bas (les deux peuvent être désynchronisés). Crée la confusion observée dans l'UI.
+
+### Bug 6 — `modalitesEvaluation` n'est pas namespacée par trimestre
+
+`js/trimestres.js:62-74` : `modalitesEvaluation` est dans `CLES_GLOBALES` — la pratique active est partagée entre tous les trimestres. Conséquence : quand Grégoire consulte a2025 aujourd'hui, l'app applique la pratique h2026 et **recalcule** différemment de ce qui a été transmis à Léa en décembre. Mismatch 64.0% (app) vs 73.2% (Léa).
+
+---
+
+## 3. Plan de travail — phases
+
+### Phase A — Type explicite `terminale` + retrait fallbacks 60/40 — **LIVRÉE 24 mai 2026 matin**
+
+| # | Fichier | Changement |
+|---|---|---|
+| A.0 | `index.html:4878-4880` | Ajout optgroup « Évaluation terminale » avec option `<option value="terminale">` |
+| A.0 | `js/productions.js:1631` | `getTypeLabel` étendu : `'terminale': 'Évaluation terminale'` |
+| A.0 | `js/productions.js:1322` | Définition explicative ajoutée pour le type `'terminale'` |
+| A.1 | `js/profil-etudiant-actions.js:188-189` | `_identifierProductionTerminale` réduit à `find(p => p.type === 'terminale')`. Plus de heuristique. |
+| A.2 | `js/profil-etudiant-actions.js:388-416` | Retrait des fallbacks `\|\| 60` / `\|\| 40`. Logique explicite : pas de terminale → portfolio 100% ; terminale présente sans pondération → erreur. |
+| A.2 | `js/profil-etudiant-actions.js:428-456` | Helper `normaliser()` (guard div/0) + champs `erreur` + `terminal.present`. |
+| A.3 | `js/profil-etudiant-sections-affichage.js:2690-2700` | Branche dédiée pour afficher l'erreur de configuration. |
+
+**Migration manuelle requise** :
+- a2025 : Grégoire a re-typé manuellement la production « Évaluation terminale » de `'travail'` à `'terminale'` (confirmé livré).
+
+**Tests** : 85 Vitest + 18 Playwright = 103/103 verts.
+
+### Phase E — Namespacing complet de `modalitesEvaluation` — **EN COURS**
+
+**Décision Grégoire (24 mai matin)** : namespacing complet plutôt qu'archive a2025. Stratégie progressive.
+
+**Approche** :
+- Pas de nouveau helper — `cle()` (`js/trimestres.js:211`) fait déjà le travail.
+- Suffit de **reclasser** `'modalitesEvaluation'` : retirer de `CLES_GLOBALES` (`trimestres.js:69`) et ajouter à `CLES_NAMESPACEES` (`trimestres.js:~30-60`).
+- **Boot migration** dans `js/main.js` : pour chaque trimestre du registre, si `${trimestreId}_modalitesEvaluation` est absent, **copier** le global dedans. Flag `migration_modalites_namespacees_done`.
+- **Callers à migrer** : tout `db.getSync('modalitesEvaluation', ...)` devient `db.getSync(cle('modalitesEvaluation'), ...)`. Idem pour setSync.
+
+**Lots de callers** (ordre de migration progressive) :
+
+| Lot | Modules | Sites | Statut |
+|---|---|---|---|
+| Prérequis | `trimestres.js` (reclassement) + `main.js` (boot migration) | 2 | À faire |
+| 1 — Profil | `profil-etudiant-actions.js` (déjà touchée), `profil-etudiant-calculs.js` | 5 | À faire |
+| 2 — Évaluation | `evaluation.js`, `evaluation-chargement.js` | 8 | À faire |
+| 3 — Pratiques/Wizard | `pratiques.js`, `wizard-pratique-v2.js`, `modes.js` | 8 | À faire |
+| 4 — Misc | `travaux-export-pdf.js`, `trimestres.js:1153`, autres | ~5 | À faire |
+| Final | Retrait du fallback global (la clé `modalitesEvaluation` non-namespacée) | — | À faire |
+
+**Note importante** : `horaire.js:287, 296, 298` utilise **déjà** `cle('modalitesEvaluation')`. Quand on reclasse la clé, ces sites commenceront automatiquement à lire/écrire la version namespacée. Comportement attendu : aucune régression sur horaires.
+
+**Conséquence pour Grégoire** :
+- Après migration boot, `h2026_modalitesEvaluation` et `a2025_modalitesEvaluation` seront initialisés avec la valeur globale actuelle (Hybride h2026).
+- Pour retrouver le 71% transmis à Léa : Grégoire bascule sur a2025, édite la pratique pour passer à « 4 meilleurs », sauvegarde → écrit dans `a2025_modalitesEvaluation`. h2026 ne bouge pas.
+
+### Phase B — Refonte section Note finale du PDF rétroaction — **À FAIRE après Phase E**
+
+**Objectif** : la rétroaction PDF que l'élève reçoit doit expliciter honnêtement la construction de la note.
+
+**Décisions prises** :
+- Titre : **toggle manuel** dans l'app (« Note provisoire » / « Note finale »). Emplacement à définir au début de Phase B.
+- Pondération : **par bloc seulement** (« Les 4 meilleurs (65%) », « Obligatoires (35%) »). Pas par artefact individuel.
+
+**Fichiers concernés** :
+- `js/synthese-retroaction-data.js:678-779` (`construireNoteProvisoire`) : refonte du data shape — séparer `selection` vs `obligatoires`, exposer pondérations numériques, flag `estHybride`, flag `estFinale` piloté par toggle utilisateur.
+- `js/synthese-retroaction-rendu.js:542-605` (`renderRangeeNote`) : refonte du rendu — éliminer doublon, titre dynamique, formule explicite.
+
+### Phase C — Cohérence du panneau Note finale dans le profil — **À FAIRE après Phase B**
+
+**Objectif** : ne plus afficher de bloc « Évaluation terminale × 0% » fantôme quand aucune terminale n'existe.
+
+**Fichier** : `js/profil-etudiant-sections-affichage.js:2728-2779`. Conditionner l'affichage du bloc terminale sur `detailsNoteFinale.terminal.present`. Adapter la formule (« 100% » au lieu de « 60% + 40% = 100% » si pas de terminale).
+
+### Phase D — Retrait du champ legacy `mat-variante-calcul` — **À FAIRE en dernier**
+
+**Décision Grégoire** : retrait pur (option a).
+
+**Fichiers** :
+- `index.html:5798-5814` : retrait du bloc `mat-variante-pan-standards`.
+- `js/pratiques-gestion.js:961-997` (`changerVariantePANStandardsMat`) + tous les readers de `configuration.varianteCalcul`.
+- **Question ouverte** : la bascule entre « Portfolio » et « Par-Objectifs » que pilotait ce champ — où la migrer ? Probablement ajouter une option `par-objectifs` au sélecteur « Mode de sélection » (`mat-portfolio-selection`).
+
+---
+
+## 4. Décisions architecturales prises (à respecter dans toutes les phases)
+
+1. **Zéro fallback arbitraire** : les pondérations 60/40, 65/35, 100/0 etc. viennent toujours de la configuration utilisateur. Le seul cas implicite légitime : « pas de terminale → portfolio = 100% » (conséquence logique, pas un défaut).
+2. **Pas d'heuristique fragile** : la production terminale est identifiée **uniquement** par `type === 'terminale'`. Plus de matching sur titre, description, ou pondération.
+3. **Erreur visible** : si la configuration est incomplète (terminale présente sans pondération), l'app **refuse de calculer** et affiche un message dans le profil — pas de calcul silencieux trompeur.
+4. **Namespacing strict** : la pratique de notation doit suivre le principe de namespacing du projet (par trimestre). Plus de pratique globale qui écrase les trimestres antérieurs.
+5. **Toggle manuel Provisoire/Finale** : pas d'inférence automatique du statut de la note. C'est l'enseignant qui décide.
+6. **Pondération PDF par bloc** : pas par artefact, pour rester lisible côté élève.
+
+---
+
+## 5. État actuel (24 mai 2026 fin de matinée — bug initial résolu)
+
+- **Phase A** : livrée, tests verts. Validation utilisateur OK pour h2026.
+- **Phase E** : livrée. `modalitesEvaluation` namespacée. 175 sites migrés.
+- **Phase F** : livrée. `pratiquesConfigurables` namespacée. 69 sites migrés. Isolation a2025/h2026 vérifiée.
+- **Phase G1** : livrée. Boot migration qui convertit les `pratiqueId` de type général (ex. `"pan-standards"`) vers des ids configurables réels (ex. `"pan-standards-bedard"`).
+- **Phase G2-a** : livrée. Le calculateur (`_obtenirConfigPortfolioCalcul`) lit uniquement la bibliothèque via `obtenirConfigPratiqueActive()`. Si la pratique active est introuvable, erreur explicite affichée dans le profil.
+- **Wizard fix (pratiques-gestion.js)** : livré. La constante `CLE_PRATIQUES_CONFIGURATIONS` (67 sites dans ce fichier) écrivait vers la clé globale, masquant Phase F. Maintenant migrée vers `cle()`. C'est ce fix-là qui a finalement débloqué la propagation wizard → calcul.
+- **Métadonnées de pratique** : corrigées via snippet. La pratique « PAN-Littérature A25 » est désormais attribuée à Grégoire Bédard (Cégep de Drummondville). Id renommé `pan-standards-bruno` → `pan-standards-bedard` dans toutes les références.
+- **Validation arithmétique finale** : a2025 Bermudez Ambriz = 73,5% avec mode « N meilleurs, 4 » — cohérent à 0,3% près avec les 73,2% transmis à Léa en décembre 2025.
+- **Phases B, C, D, G2-b** : en attente.
+
+### Synthèse architecturale (nouvelle conception)
+
+- **Source canonique de la pratique active d'un groupe-cours** : `groupesCours[id].pratiqueId` (un id de pratique configurable, jamais un type général).
+- **Source canonique de la config d'une pratique** : `${trim}_pratiquesConfigurables[id].configuration`.
+- **Snapshot `modalitesEvaluation.configPAN.portfolio`** : neutralisé pour le calcul de la note (G2-a). Reste utilisé par 30 sites legacy (`pratiques.js`, `pratique-pan-standards.js`) à migrer en G2-b.
+- **Namespacing** : chaque trimestre a sa propre bibliothèque locale, ses propres modalités d'évaluation, ses propres groupes-cours. Pratique évolue librement d'un trimestre à l'autre sans contaminer le passé.
+
+## 6. Tâches actives (référence)
+
+- #3 — Appliquer le modèle aux notes réelles et valider (pending)
+- #5 — Phase B — Refonte section Note finale du PDF rétroaction (pending)
+- #6 — Phase C — Cohérence du panneau Note finale de session dans le profil (pending)
+- #7 — Phase D — Retrait du champ legacy mat-variante-calcul (pending)
+- #8 — Phase E — Namespacing complet de modalitesEvaluation (pending, prochaine action)
+
+---
+
+## 7. Fichier de diagnostic console (utile pour reprise)
+
+`audit-productions-console.js` à la racine du repo. Inspecte productions a2025/h2026 et identifie portfolio + terminale (heuristique vs type explicite). À coller dans la console Safari.

@@ -488,7 +488,7 @@ ajouterEntrees({
             direction: 'haut',
             priorite: 10,
             condition: function() {
-                var locales = (db.getSync('pratiquesConfigurables', []) || [])
+                var locales = (db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []) || [])
                     .filter(function(p) { return p.dansBibliotheque !== false; });
                 return locales.length === 0;
             }

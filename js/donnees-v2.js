@@ -240,7 +240,7 @@
 
         // Source principale : pratiquesConfigurables (même source que le modal bibliothèque)
         try {
-            pratiques = db.getSync('pratiquesConfigurables') || [];
+            pratiques = db.getSync(cle('pratiquesConfigurables')) || db.getSync('pratiquesConfigurables') || [];
         } catch (e) {
             console.error('[donnees-v2] Erreur lecture pratiquesConfigurables:', e);
         }
@@ -253,7 +253,7 @@
      */
     function obtenirPratiqueActiveId() {
         try {
-            const modalites = db.getSync('modalitesEvaluation') || {};
+            const modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
             return modalites.pratique || modalites.pratiqueActiveId || modalites.configurationSTDAppliquee?.id || null;
         } catch (e) {
             return null;
@@ -992,7 +992,7 @@
 
         // Parcourir les pratiques configurables
         try {
-            const pratiques = db.getSync('pratiquesConfigurables') || [];
+            const pratiques = db.getSync(cle('pratiquesConfigurables')) || db.getSync('pratiquesConfigurables') || [];
             pratiques.forEach(p => {
                 if (p.echelleId && usages[p.echelleId]) {
                     usages[p.echelleId].pratiquesCount++;
@@ -1139,7 +1139,7 @@
 
         // Vérifier les pratiques qui utilisent cette échelle
         try {
-            const pratiques = db.getSync('pratiquesConfigurables') || [];
+            const pratiques = db.getSync(cle('pratiquesConfigurables')) || db.getSync('pratiquesConfigurables') || [];
             const pratiquesUtilisant = pratiques.filter(p => p.echelleId === echelleId);
             if (pratiquesUtilisant.length > 0) {
                 dependances.push(`Utilisée par ${pratiquesUtilisant.length} pratique(s) de notation`);
@@ -1539,9 +1539,9 @@
 
         // Retirer des pratiques configurables
         try {
-            let configurables = db.getSync('pratiquesConfigurables') || [];
+            let configurables = db.getSync(cle('pratiquesConfigurables')) || db.getSync('pratiquesConfigurables') || [];
             configurables = configurables.filter(p => p.id !== pratiqueId);
-            db.setSync('pratiquesConfigurables', configurables);
+            db.setSync(cle('pratiquesConfigurables'), configurables);
         } catch (e) {
             console.warn('[donnees-v2] Erreur calcul usages:', e.message);
         }

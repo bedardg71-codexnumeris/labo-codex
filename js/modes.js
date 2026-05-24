@@ -1056,7 +1056,7 @@ function obtenirPratiqueActiveGroupeCours() {
     }
 
     // 4. Fallback : lire depuis modalitesEvaluation (ancienne méthode)
-    const modalites = db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     if (modalites.pratiqueNotation) {
         return modalites.pratiqueNotation;
     }

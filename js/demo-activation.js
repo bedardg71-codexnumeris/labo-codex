@@ -218,7 +218,7 @@ function fusionnerDemoVersGlobaux() {
     // 6. modalitesEvaluation : écrasement (mêmes contraintes que legacy)
     var modDemo = db.getSync('demo_modalitesEvaluation', null);
     if (modDemo) {
-        db.setSync('modalitesEvaluation', modDemo);
+        db.setSync(cle('modalitesEvaluation'), modDemo);
     }
 
     // 7. cartouches_* : lire depuis PACK_DEMARRAGE (Phase 1 ne les peuple pas
@@ -266,7 +266,7 @@ async function activerModeDemo() {
             infoCours: db.getSync('infoCours', null),
             groupeCoursActif: db.getSync('groupeCoursActif', null),
             modeApplication: db.getSync('modeApplication', 'normal'),
-            modalitesEvaluation: db.getSync('modalitesEvaluation', null),
+            modalitesEvaluation: db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', null),
             trimestres: trimestresAvant,
             listeCours: db.getSync('listeCours', []),
             cours: db.getSync('cours', []),
@@ -516,7 +516,7 @@ async function desactiverModeDemo() {
             else db.removeSync('groupeCoursActif');
 
             if (etat.modalitesEvaluation) {
-                db.setSync('modalitesEvaluation', etat.modalitesEvaluation);
+                db.setSync(cle('modalitesEvaluation'), etat.modalitesEvaluation);
             }
 
             // Force normal si valeur legacy 'simulation'

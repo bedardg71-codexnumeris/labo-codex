@@ -895,8 +895,8 @@
                 modeNotePreview = evaluation.optionsAffichage.affichageNote;
             } else {
                 try {
-                    const cfgs = db.getSync('pratiquesConfigurables', []);
-                    const mods = db.getSync('modalitesEvaluation', {});
+                    const cfgs = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+                    const mods = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
                     const pId = mods.pratique;
                     const pActive = pId ? (cfgs.find(p => p.id === pId) || cfgs.find(p => p.type === pId)) : null;
                     if (pActive?.affichageNote === 'lettre') modeNotePreview = 'lettre';

@@ -87,7 +87,7 @@
         // Mode comparatif : dérive de modalitesEvaluation (paramètre de pratique)
         const comparatif = document.getElementById('v2-pref-comparatif');
         if (comparatif) {
-            const modalites = db.getSync('modalitesEvaluation') || {};
+            const modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
             comparatif.checked = !!(modalites.afficherSommatif && modalites.afficherAlternatif);
         }
 
@@ -218,7 +218,7 @@
      */
     function sauvegarderPreferencesV2() {
         // Mode comparatif : paramètre de pratique, pas une préférence utilisateur
-        const modalites = db.getSync('modalitesEvaluation') || {};
+        const modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         const comparatif = document.getElementById('v2-pref-comparatif')?.checked || false;
         if (comparatif) {
             modalites.afficherSommatif = true;
@@ -233,7 +233,7 @@
                 modalites.afficherAlternatif = true;
             }
         }
-        db.setSync('modalitesEvaluation', modalites);
+        db.setSync(cle('modalitesEvaluation'), modalites);
 
         // Préférences utilisateur : via l'API centralisée
         definirPreference('activerRai', document.getElementById('v2-pref-rai')?.checked !== false);

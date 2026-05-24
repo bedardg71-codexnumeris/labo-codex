@@ -30,7 +30,7 @@ const PratiqueManager = {
      * Compatible avec l'architecture existante
      */
     async chargerPratiqueActive() {
-        const modalites = db.getSync('modalitesEvaluation', {});
+        const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
         const pratiqueId = modalites.pratique; // Ex: 'pan-standards-bruno'
 
         if (!pratiqueId) {
@@ -45,7 +45,7 @@ const PratiqueManager = {
         }
 
         // Pratique configurable JSON
-        const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
+        const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
         const pratiqueData = pratiquesConfigurables.find(p => p.id === pratiqueId);
 
         if (!pratiqueData) {
@@ -62,11 +62,11 @@ const PratiqueManager = {
      * @param {string} pratiqueId - ID de la pratique à activer
      */
     async changerPratiqueActive(pratiqueId) {
-        const modalites = db.getSync('modalitesEvaluation', {});
+        const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
         modalites.pratique = pratiqueId;
         modalites.dateConfiguration = new Date().toISOString();
 
-        db.setSync('modalitesEvaluation', modalites);
+        db.setSync(cle('modalitesEvaluation'), modalites);
 
         // Invalider le cache de pratique-registre.js
         if (window.invaliderCachePratique) {
@@ -84,7 +84,7 @@ const PratiqueManager = {
      */
     async listerPratiques() {
         const pratiquesCodees = window.listerPratiquesDisponibles(); // De pratique-registre.js
-        const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
+        const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
 
         return {
             codees: pratiquesCodees,
@@ -101,7 +101,7 @@ const PratiqueManager = {
      * - Pratiques CRÉÉES PAR UTILISATEUR → dansBibliotheque = true (visibles dans sidebar)
      */
     migrerVersBibliotheque() {
-        const pratiques = db.getSync('pratiquesConfigurables', []);
+        const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
 
         // Vérifier si migration v2 déjà effectuée
         const migrationV2Effectuee = db.getSync('migrationBibliothequeV2', false);
@@ -117,7 +117,7 @@ const PratiqueManager = {
             });
 
             if (nbMigrees > 0) {
-                db.setSync('pratiquesConfigurables', pratiques);
+                db.setSync(cle('pratiquesConfigurables'), pratiques);
             }
             return;
         }
@@ -150,7 +150,7 @@ const PratiqueManager = {
         });
 
         if (nbCorrigees > 0) {
-            db.setSync('pratiquesConfigurables', pratiques);
+            db.setSync(cle('pratiquesConfigurables'), pratiques);
             db.setSync('migrationBibliothequeV2', true); // Marquer migration comme effectuée
             if (nbPredefinesRetirees > 0) {
             }
@@ -167,7 +167,7 @@ const PratiqueManager = {
      * @param {object} pratique - Objet { id, nom, auteur, description, config, dansBibliotheque }
      */
     async sauvegarderPratique(pratique) {
-        const pratiques = db.getSync('pratiquesConfigurables', []);
+        const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
 
         // Vérifier unicité de l'ID
         if (pratiques.some(p => p.id === pratique.id)) {
@@ -183,7 +183,7 @@ const PratiqueManager = {
         }
 
         pratiques.push(pratique);
-        db.setSync('pratiquesConfigurables', pratiques);
+        db.setSync(cle('pratiquesConfigurables'), pratiques);
 
     },
 
@@ -192,7 +192,7 @@ const PratiqueManager = {
      * @param {string} pratiqueId - ID de la pratique à supprimer
      */
     async supprimerPratique(pratiqueId) {
-        const pratiques = db.getSync('pratiquesConfigurables', []);
+        const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
         const index = pratiques.findIndex(p => p.id === pratiqueId);
 
         if (index === -1) {
@@ -200,13 +200,13 @@ const PratiqueManager = {
         }
 
         // Vérifier que ce n'est pas la pratique active
-        const modalites = db.getSync('modalitesEvaluation', {});
+        const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
         if (modalites.pratique === pratiqueId) {
             throw new Error('Impossible de supprimer la pratique active');
         }
 
         pratiques.splice(index, 1);
-        db.setSync('pratiquesConfigurables', pratiques);
+        db.setSync(cle('pratiquesConfigurables'), pratiques);
 
     },
 
@@ -234,7 +234,7 @@ const PratiqueManager = {
      * @returns {object} Objet JSON de la pratique
      */
     async exporterPratique(pratiqueId) {
-        const pratiques = db.getSync('pratiquesConfigurables', []);
+        const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
         const pratique = pratiques.find(p => p.id === pratiqueId);
 
         if (!pratique) {
@@ -249,7 +249,7 @@ const PratiqueManager = {
      * À appeler lors du premier lancement
      */
     async initialiserPratiquesPredefines() {
-        const pratiques = db.getSync('pratiquesConfigurables', []);
+        const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
 
         if (pratiques.length > 0) {
             return;

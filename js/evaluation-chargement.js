@@ -240,12 +240,12 @@ function chargerGrillesDansSelect() {
 function _obtenirPratiqueIdActive() {
     const coursActifId = getCoursActifId();
     if (coursActifId) return getPratiqueCours(coursActifId);
-    const modalites = db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     return modalites.pratique || 'sommative';
 }
 
 function _synchroniserJetonsPratique(jetons) {
-    const modalites = db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     modalites.configPAN = modalites.configPAN || {};
     modalites.configPAN.jetons = {
         actif: jetons.actif !== false,
@@ -260,7 +260,7 @@ function _synchroniserJetonsPratique(jetons) {
             plafondNote: jetons.cibleePlafond || null
         }
     };
-    db.setSync('modalitesEvaluation', modalites);
+    db.setSync(cle('modalitesEvaluation'), modalites);
 }
 
 function _resoudreEchellePratique() {
@@ -268,7 +268,7 @@ function _resoudreEchellePratique() {
     const pratiqueId = _obtenirPratiqueIdActive();
     const pratiquesCodeesDur = ['pan-standards', 'pan-maitrise', 'sommative', 'pan-specifications'];
     if (!pratiqueId || pratiquesCodeesDur.includes(pratiqueId)) return null;
-    const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
+    const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
     const pratiqueData = pratiquesConfigurables.find(p => p.id === pratiqueId);
     if (!pratiqueData) return null;
     if (pratiqueData.jetons) _synchroniserJetonsPratique(pratiqueData.jetons);
@@ -788,7 +788,7 @@ function cartoucheSelectionnee() {
     // Vérifier si c'est une échelle de pratique configurable
     if (echelleId && echelleId.startsWith('pratique-')) {
         const pratiqueId = echelleId.replace('pratique-', '');
-        const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
+        const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
         const pratiqueData = pratiquesConfigurables.find(p => p.id === pratiqueId);
 
         if (pratiqueData && pratiqueData.config && pratiqueData.config.echelle) {
@@ -817,7 +817,7 @@ function cartoucheSelectionnee() {
         const facteur = critereGrille?.facteurNormalisation || 500;
 
         // Vérifier si la catégorisation des erreurs est activée
-        const modalites = db.getSync('modalitesEvaluation', {});
+        const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
         let categorisationActive = modalites.activerCategorisationErreurs === true;
 
         // DÉTECTION AUTOMATIQUE : Si l'évaluation a des codes sauvegardés, forcer le mode catégorisation
@@ -978,7 +978,7 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
 
     if (echelleId && echelleId.startsWith('pratique-')) {
         const pratiqueId = echelleId.replace('pratique-', '');
-        const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
+        const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
         const pratiqueData = pratiquesConfigurables.find(p => p.id === pratiqueId);
         if (pratiqueData?.config?.echelle?.niveaux) {
             niveauxDisponibles = pratiqueData.config.echelle.niveaux;

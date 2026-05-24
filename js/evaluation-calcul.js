@@ -481,7 +481,7 @@ function calculerNote() {
     // Vérifier si c'est une échelle de pratique configurable
     if (echelleId && echelleId.startsWith('pratique-')) {
         const pratiqueId = echelleId.replace('pratique-', '');
-        const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
+        const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
         const pratiqueData = pratiquesConfigurables.find(p => p.id === pratiqueId);
 
         if (pratiqueData && pratiqueData.config && pratiqueData.config.echelle) {
