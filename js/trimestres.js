@@ -56,7 +56,17 @@
         // 🆕 FIX (17 fév 2026) : Carte mentale doit être namespacée pour le mode démo
         'planification_mindmap',
         // 🆕 Corbeille fichiers travaux (4 mars 2026)
-        'corbeilleFichiers'
+        'corbeilleFichiers',
+        // 🆕 (24 mai 2026) Pratique de notation active : namespacée par trimestre
+        // pour que chaque session conserve sa propre pratique (modèle qui évolue
+        // d'un semestre à l'autre — Hybride h2026 vs 4-meilleurs a2025).
+        // Migration au boot dans main.js (migration_modalites_namespacees_done).
+        'modalitesEvaluation',
+        // 🆕 (24 mai 2026) Bibliothèque locale de templates de pratiques :
+        // namespacée pour isoler chaque trimestre (modèle C). Le partage
+        // inter-utilisateurs passera par la Voûte (future), pas par cette clé.
+        // Migration au boot dans main.js (migration_pratiques_namespacees_done).
+        'pratiquesConfigurables'
     ];
 
     // Clés globales (partagées entre trimestres)
@@ -65,8 +75,6 @@
         'trimestres',
         'grillesTemplates',
         'echellesTemplates',
-        'pratiquesConfigurables',
-        'modalitesEvaluation',
         'modeApplication',
         'etatsAccordeonsV2',
         'cours',       // Bibliothèque de cours partagée (clé canonique, remplace listeCours)
@@ -538,7 +546,7 @@
             // Récupérer tous les templates globaux
             const toutesGrilles = db.getSync('grillesTemplates', []);
             const toutesEchelles = db.getSync('echellesTemplates', []);
-            const toutesPratiques = db.getSync('pratiquesConfigurables', []);
+            const toutesPratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
 
             // Filtrer pour ne garder que les utilisés
             const grillesUtilisees = toutesGrilles.filter(g => grilleIds.has(g.id));
@@ -1150,7 +1158,7 @@
             const snapshots = snapshotsRaw.hebdomadaires || [];
             const grilles = db.getSync('grillesTemplates', []);
             const echelles = db.getSync('echellesTemplates', []);
-            const modalites = db.getSync('modalitesEvaluation', {});
+            const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
             const indicesCP = db.getSync(cle('indicesCP'), {});
             const cours = db.getSync('listeCours', []);
             const coursActif = cours.find(c => c.actif);

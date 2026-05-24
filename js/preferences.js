@@ -315,7 +315,7 @@
         ];
 
         try {
-            const modalites = db.getSync('modalitesEvaluation', null);
+            const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', null);
             if (modalites && typeof modalites === 'object') {
                 let modifie = false;
                 for (const champ of CHAMPS_LEGACY_MODALITES) {
@@ -325,7 +325,7 @@
                     }
                 }
                 if (modifie) {
-                    db.setSync('modalitesEvaluation', modalites);
+                    db.setSync(cle('modalitesEvaluation'), modalites);
                 }
             }
 

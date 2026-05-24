@@ -305,7 +305,7 @@ function _genererBadgesJetonsHTML(evaluations, productions, da) {
 function _genererBlocGestionJetons(statutJetons, evaluations, productions, da) {
     if (typeof obtenirStatutJetonsEtudiant !== 'function') return '';
     const totalJetonsUtilisesTousTypes = Object.values(statutJetons).reduce((sum, info) => sum + info.utilises, 0);
-    const configBeta = db.getSync('modalitesEvaluation', {});
+    const configBeta = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const quotaGlobal = configBeta.configPAN?.jetons?.nombreParEleve || 2;  // Beta 95.7 : défaut 2
     return `
         <!-- Encadré pour le titre et la barre de progression globale -->
@@ -375,7 +375,7 @@ function genererSectionMobilisationEngagement(da) {
 
     // Calcul dual pour mode comparatif (Beta 90 + correctif 7 déc 2025 :
     // vérifier === true pour éviter le mode comparatif par défaut)
-    const config = db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
     const afficherSom = affichage.afficherSommatif === true;
     const afficherPan = affichage.afficherAlternatif === true;
@@ -409,7 +409,7 @@ function genererSectionMobilisationEngagement(da) {
     // 🆕 LIRE LA CONFIGURATION DE LA PRATIQUE DE NOTATION
     // Source de vérité : pratiquesConfigurables (Material Settings), fallback sur modalitesEvaluation
     const configPratiqueActive = typeof obtenirConfigPratiqueActive === 'function' ? obtenirConfigPratiqueActive() : null;
-    const modalites = db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const configPortfolio = configPratiqueActive?.portfolio || modalites.configPAN?.portfolio || {};
     const portfolioActif = configPortfolio.actif !== false;
     let nombreARetenir = configPortfolio.nombreARetenir || portfolio?.regles?.nombreARetenir || 3;
@@ -982,7 +982,7 @@ function genererSectionAccompagnement(da) {
                         const niveau = pct >= 85 ? 'E' : pct >= 75 ? 'M' : pct >= 65 ? 'D' : 'I';
 
                         // Obtenir la configuration pour afficher le nombre d'artefacts retenus
-                        const config = db.getSync('modalitesEvaluation', {});
+                        const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
                         const pratique = config.pratique || 'pan-maitrise';
 
                         let noteExplicative = '';
@@ -2151,7 +2151,7 @@ function genererValeursComparatives(valeurSOM, valeurPAN, modeComparatif, affich
 
     if (!modeComparatif) {
         // Mode normal: afficher seulement la valeur de la pratique active
-        const config = db.getSync('modalitesEvaluation', {});
+        const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
         const pratique = config.pratique || 'sommative';
         const valeur = pratique === 'sommative' ? valeurSOM : valeurPAN;
         return `<strong class="profil-valeur-grande-bleu">${valeur}%</strong>`;
@@ -2310,7 +2310,7 @@ function afficherProfilComplet(daOuEl) {
     const interpM = interpreterMobilisation(A, C);
 
     // 3. Calcul dual SOM/PAN
-    const config = db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const { indicesSOM, indicesPAN, modeComparatif } = _calculerIndicesDualPourProfil(da, config);
 
     // 4. Préférences UI (pour résolution section + sidebar)
@@ -2689,7 +2689,16 @@ function genererSectionProductions(da) {
 
     // Générer le HTML de la section Note finale
     let htmlNoteFinale = '';
-    if (detailsNoteFinale) {
+    if (detailsNoteFinale && detailsNoteFinale.erreur) {
+        htmlNoteFinale = `
+        <div class="note-finale-section">
+            <h3 class="note-finale-titre">Note finale de session</h3>
+            <div class="alerte alerte-attention" style="margin-top: 12px;">
+                <strong>Note finale non calculable.</strong> ${echapperHtml(detailsNoteFinale.erreur)}
+            </div>
+        </div>
+        `;
+    } else if (detailsNoteFinale) {
         const portfolio = detailsNoteFinale.portfolio;
         const terminal = detailsNoteFinale.terminal;
 
@@ -3661,7 +3670,7 @@ function _genererBarreCritereSRPNF(cle, contexte) {
 
 function _genererBlocForcesDefisSRPNF(da) {
     const { niveaux, gradientCSS } = _obtenirNiveauxEtGradientSRPNF();
-    const config = db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
     const afficherSom = affichage.afficherSommatif !== false;
     const afficherPan = affichage.afficherAlternatif !== false;
@@ -4026,7 +4035,7 @@ function genererSectionPerformance(da) {
 
     // Calcul dual pour mode comparatif (Beta 90 + correctif 7 déc 2025 :
     // vérifier === true pour éviter le mode comparatif par défaut)
-    const config = db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
     const afficherSom = affichage.afficherSommatif === true;
     const afficherPan = affichage.afficherAlternatif === true;

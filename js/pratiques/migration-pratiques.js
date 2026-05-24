@@ -45,7 +45,10 @@
             return false;
         }
 
-        // Lire la configuration actuelle (db.getSync retourne déjà un objet parsé)
+        // ⚠️ Migration historique : opère sur la clé globale (l'ancienne source
+        // de vérité, avant le namespacing du 24 mai 2026). La migration
+        // namespacing dans main.js copiera le résultat dans les clés par
+        // trimestre. Ne pas utiliser cle() ici.
         const config = db.getSync('modalitesEvaluation', null);
         if (!config) {
             db.setSync(CLE_MIGRATION_EFFECTUEE, 'true');
@@ -93,7 +96,7 @@
      * Affiche des messages informatifs dans la console
      */
     function verifierMigration() {
-        const config = db.getSync('modalitesEvaluation', {});
+        const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
         const pratiqueActive = config.pratique;
 
         if (!pratiqueActive) {

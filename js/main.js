@@ -130,7 +130,7 @@ window.formaterDateComplete = function(dateISO) {
  * @returns {string} - HTML du badge avec classes CSS
  */
 window.genererBadgePratique = function(type, compact = false) {
-    const config = db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const typePAN = config.typePAN || 'maitrise';
 
     let texte = '';
@@ -278,6 +278,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 };
 
                 // 1. modalitesEvaluation.portfolio.decouplerPR
+                // ⚠️ Migration historique : opère sur la clé globale (l'ancienne
+                // source de vérité, avant le namespacing du 24 mai 2026). La
+                // migration namespacing ci-dessous copiera le résultat dans les
+                // clés par trimestre. Ne pas utiliser cle() ici.
                 const modalites = db.getSync('modalitesEvaluation', {});
                 if (modalites && modalites.portfolio && renommerDansObjet(modalites.portfolio)) {
                     db.setSync('modalitesEvaluation', modalites);
@@ -316,6 +320,122 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.warn('[migration_decoupler_pn] erreur partielle ignorée:', e);
             }
             db.setSync('migration_decoupler_pn_done', true);
+        }
+
+        // Migration namespacing de modalitesEvaluation (24 mai 2026) :
+        // la pratique de notation devient namespacée par trimestre pour que
+        // chaque session conserve sa propre pratique (modèle qui évolue d'un
+        // semestre à l'autre). On copie le global existant dans la clé
+        // namespacée de chaque trimestre encore dépourvu. Le global est
+        // conservé en lecture seule pendant la transition des callers ;
+        // sa lecture deviendra inutile une fois tous les sites migrés.
+        // Idempotent.
+        if (!db.getSync('migration_modalites_namespacees_done', false)) {
+            try {
+                const modalitesGlobales = db.getSync('modalitesEvaluation', null);
+                if (modalitesGlobales) {
+                    const trimestres = db.getSync('trimestres', []);
+                    if (Array.isArray(trimestres)) {
+                        trimestres.forEach(t => {
+                            if (!t || !t.id) return;
+                            const cleNamespacee = `${t.id}_modalitesEvaluation`;
+                            if (db.getSync(cleNamespacee, null) === null) {
+                                db.setSync(cleNamespacee, modalitesGlobales);
+                            }
+                        });
+                    }
+                }
+            } catch(e) {
+                console.warn('[migration_modalites_namespacees] erreur ignorée:', e);
+            }
+            db.setSync('migration_modalites_namespacees_done', true);
+        }
+
+        // Migration namespacing de pratiquesConfigurables (24 mai 2026) :
+        // la bibliothèque de templates de pratiques devient namespacée par
+        // trimestre. Chaque trimestre conserve sa propre bibliothèque, isolée
+        // des autres (modèle C — décision Grégoire). Le partage inter-
+        // utilisateurs passera par la Voûte (future). On copie le global
+        // existant dans la clé namespacée de chaque trimestre encore
+        // dépourvu. Idempotent.
+        if (!db.getSync('migration_pratiques_namespacees_done', false)) {
+            try {
+                const pratiquesGlobales = db.getSync('pratiquesConfigurables', null);
+                if (Array.isArray(pratiquesGlobales) && pratiquesGlobales.length > 0) {
+                    const trimestres = db.getSync('trimestres', []);
+                    if (Array.isArray(trimestres)) {
+                        trimestres.forEach(t => {
+                            if (!t || !t.id) return;
+                            const cleNamespacee = `${t.id}_pratiquesConfigurables`;
+                            if (db.getSync(cleNamespacee, null) === null) {
+                                db.setSync(cleNamespacee, pratiquesGlobales);
+                            }
+                        });
+                    }
+                }
+            } catch(e) {
+                console.warn('[migration_pratiques_namespacees] erreur ignorée:', e);
+            }
+            db.setSync('migration_pratiques_namespacees_done', true);
+        }
+
+        // Migration Phase G1 (24 mai 2026) : groupesCours[].pratiqueId qui
+        // contient un type ('pan-standards', 'sommative', etc.) est remplacé
+        // par un id de pratique configurable réel (premier entry avec ce type
+        // dans la bibliothèque locale du trimestre). Source canonique de la
+        // pratique active = groupe-cours, pas le trimestre (décision Grégoire).
+        // Idempotent.
+        if (!db.getSync('migration_pratiqueId_to_configurable_id_done', false)) {
+            try {
+                const typesLegacy = new Set([
+                    'pan-standards', 'pan-maitrise', 'sommative',
+                    'pan-specifications', 'specifications', 'pan-denotation'
+                ]);
+                const trimestres = db.getSync('trimestres', []);
+                if (Array.isArray(trimestres)) {
+                    trimestres.forEach(t => {
+                        if (!t || !t.id) return;
+                        const cleGC = `${t.id}_groupesCours`;
+                        const groupesCours = db.getSync(cleGC, []);
+                        if (!Array.isArray(groupesCours) || groupesCours.length === 0) return;
+
+                        const clePratiques = `${t.id}_pratiquesConfigurables`;
+                        const pratiques = db.getSync(clePratiques, []);
+                        if (!Array.isArray(pratiques) || pratiques.length === 0) return;
+
+                        let modifie = false;
+                        groupesCours.forEach(gc => {
+                            if (!gc || !typesLegacy.has(gc.pratiqueId)) return;
+                            const cible = pratiques.find(p => p && p.type === gc.pratiqueId);
+                            if (cible) {
+                                console.warn(`[migration_pratiqueId G1] ${t.id}/${gc.id} : "${gc.pratiqueId}" → "${cible.id}" (${cible.nom})`);
+                                gc.pratiqueId = cible.id;
+                                modifie = true;
+                            } else {
+                                console.warn(`[migration_pratiqueId G1] ${t.id}/${gc.id} : aucune pratique configurable de type "${gc.pratiqueId}" trouvée — laissé en l'état`);
+                            }
+                        });
+                        if (modifie) db.setSync(cleGC, groupesCours);
+                    });
+                }
+
+                // Aussi groupeCoursActif (global, pointeur dynamique)
+                const gcActif = db.getSync('groupeCoursActif', null);
+                if (gcActif && typesLegacy.has(gcActif.pratiqueId) && gcActif.trimestreId && gcActif.id) {
+                    const pratiques = db.getSync(`${gcActif.trimestreId}_pratiquesConfigurables`, []);
+                    if (Array.isArray(pratiques)) {
+                        const cible = pratiques.find(p => p && p.type === gcActif.pratiqueId);
+                        if (cible) {
+                            console.warn(`[migration_pratiqueId G1] groupeCoursActif : "${gcActif.pratiqueId}" → "${cible.id}" (${cible.nom})`);
+                            gcActif.pratiqueId = cible.id;
+                            db.setSync('groupeCoursActif', gcActif);
+                        }
+                    }
+                }
+            } catch(e) {
+                console.warn('[migration_pratiqueId_to_configurable_id] erreur ignorée:', e);
+            }
+            db.setSync('migration_pratiqueId_to_configurable_id_done', true);
         }
 
         // ✅ NOUVEAU (30 déc 2025): Recalculer les indices C et P si demandé (après chargement démo)

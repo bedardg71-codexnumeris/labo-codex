@@ -2194,7 +2194,7 @@ async function executerImportConfigComplete() {
 
         // 5. Importer les paramètres du cours (fusion avec paramètres existants)
         if (contenu.parametres) {
-            const modalitesActuelles = db.getSync('modalitesEvaluation', {});
+            const modalitesActuelles = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
             const modalitesFusionnees = {
                 ...modalitesActuelles,
                 systemeJetons: contenu.parametres.systeme_jetons,
@@ -2203,7 +2203,7 @@ async function executerImportConfigComplete() {
                 pratiqueActive: contenu.parametres.pratique_active,
                 modeComparatif: contenu.parametres.mode_comparatif
             };
-            db.setSync('modalitesEvaluation', modalitesFusionnees);
+            db.setSync(cle('modalitesEvaluation'), modalitesFusionnees);
         }
 
         // Afficher résumé des remappages si nécessaire
@@ -2346,7 +2346,7 @@ async function executerImportVersBibliotheques() {
         if (donnees.pratiquesConfigurables) {
             const pratiquesImport = parseValeur(donnees.pratiquesConfigurables);
             if (Array.isArray(pratiquesImport) && pratiquesImport.length > 0) {
-                const pratiquesExistantes = db.getSync('pratiquesConfigurables', []);
+                const pratiquesExistantes = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
                 const idsPratiquesExistants = new Set(pratiquesExistantes.map(p => p.id));
 
                 // 🆕 FIX (31 jan 2026) : Préserver les IDs originaux pour maintenir les références
@@ -2362,7 +2362,7 @@ async function executerImportVersBibliotheques() {
 
                 if (pratiquesNouvelles.length > 0) {
                     const pratiquesFusionnees = verifierUniciteIds([...pratiquesExistantes, ...pratiquesNouvelles], 'pratiques');
-                    db.setSync('pratiquesConfigurables', pratiquesFusionnees);
+                    db.setSync(cle('pratiquesConfigurables'), pratiquesFusionnees);
                     compteurs.pratiques = pratiquesNouvelles.length;
                 }
             }
@@ -2666,7 +2666,7 @@ async function executerImportSelectif() {
             const selectedIds = getCheckedItemIds('pratiques');
 
             if (Array.isArray(pratiquesImport) && pratiquesImport.length > 0) {
-                const pratiquesExistantes = db.getSync('pratiquesConfigurables', []);
+                const pratiquesExistantes = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
                 const idsPratiquesExistants = new Set(pratiquesExistantes.map(p => p.id));
                 // 🆕 FIX (31 jan 2026) : Filtrer par ID (pas par nom) pour préserver les références
                 const pratiquesNouvelles = pratiquesImport
@@ -2679,7 +2679,7 @@ async function executerImportSelectif() {
                         auteurOriginal: assainirChaine(auteurSource || p.auteurOriginal || '', 100)
                     }));
                 if (pratiquesNouvelles.length > 0) {
-                    db.setSync('pratiquesConfigurables', verifierUniciteIds([...pratiquesExistantes, ...pratiquesNouvelles], 'pratiques'));
+                    db.setSync(cle('pratiquesConfigurables'), verifierUniciteIds([...pratiquesExistantes, ...pratiquesNouvelles], 'pratiques'));
                     compteurs.ressources += pratiquesNouvelles.length;
                     details.push(`${pratiquesNouvelles.length} pratique(s)`);
                 }
@@ -3132,7 +3132,7 @@ async function exporterConfigurationComplete() {
     }
 
     // Paramètres du cours
-    const modalitesEvaluation = db.getSync('modalitesEvaluation', {});
+    const modalitesEvaluation = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const parametres = {
         systeme_jetons: modalitesEvaluation.systemeJetons || false,
         reprises_autorisees: modalitesEvaluation.reprisesAutorisees || false,

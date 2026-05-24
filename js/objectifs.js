@@ -1023,7 +1023,7 @@ function activerPratiqueMultiObjectifs(ensembleId) {
     }
 
     // Lire la configuration actuelle
-    const modalites = db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
 
     // Créer configPAN si nécessaire
     if (!modalites.configPAN) {
@@ -1034,7 +1034,7 @@ function activerPratiqueMultiObjectifs(ensembleId) {
     modalites.configPAN.ensembleObjectifsId = ensembleId;
 
     // Sauvegarder
-    db.setSync('modalitesEvaluation', modalites);
+    db.setSync(cle('modalitesEvaluation'), modalites);
 
 
     return true;
@@ -1046,11 +1046,11 @@ function activerPratiqueMultiObjectifs(ensembleId) {
  * @returns {boolean} - true si désactivation réussie
  */
 function desactiverPratiqueMultiObjectifs() {
-    const modalites = db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
 
     if (modalites.configPAN) {
         delete modalites.configPAN.ensembleObjectifsId;
-        db.setSync('modalitesEvaluation', modalites);
+        db.setSync(cle('modalitesEvaluation'), modalites);
         return true;
     }
 
@@ -1063,7 +1063,7 @@ function desactiverPratiqueMultiObjectifs() {
  * @returns {Object|null} - { actif: boolean, ensembleId: string, ensemble: Object } ou null
  */
 function verifierPratiqueMultiObjectifs() {
-    const modalites = db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const ensembleId = modalites.configPAN?.ensembleObjectifsId;
 
     if (!ensembleId) {

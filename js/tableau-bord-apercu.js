@@ -758,7 +758,7 @@ function calculerDistributionPerformance(etudiants) {
  * @returns {string} - HTML du badge avec icône et texte
  */
 function genererBadgePratique() {
-    const config = db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const pratique = config.pratique || 'alternative';
     const typePAN = config.typePAN || 'maitrise';
     const affichage = config.affichageTableauBord || {};
@@ -804,7 +804,7 @@ function genererBadgePratique() {
  * @returns {string} - HTML du badge
  */
 function genererBadgeSourceDonnees() {
-    const config = db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
     const afficherSommatif = affichage.afficherSommatif === true;
     const afficherAlternatif = affichage.afficherAlternatif === true;
@@ -1077,7 +1077,7 @@ function chargerTableauBordApercu() {
         // Ajouter l'indicateur de pratique ou les checkboxes selon le mode
         const titre = document.querySelector('#apercu-contenu h2');
         if (titre) {
-            const config = db.getSync('modalitesEvaluation', {});
+            const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
             const affichage = config.affichageTableauBord || {};
 
             // NOUVEAU Beta 90 : Détection automatique du mode comparatif
@@ -1324,7 +1324,7 @@ function initialiserEvenementsToggle() {
  * @returns {string} HTML du badge ou des checkboxes
  */
 function genererIndicateurPratiqueOuCheckboxes() {
-    const config = db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
     const afficherSom = affichage.afficherSommatif === true;
     const afficherPan = affichage.afficherAlternatif === true;
@@ -1362,7 +1362,7 @@ function genererIndicateurPratiqueOuCheckboxes() {
  * @param {Array} etudiants - Étudiants avec indices calculés
  */
 function afficherMetriquesGlobales(etudiants) {
-    const config = db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
 
     // 🆕 BETA 95.7: Valeurs par défaut si aucun mode n'est configuré
@@ -1410,7 +1410,7 @@ function afficherMetriquesGlobales(etudiants) {
     // 1. Chercher dans la configuration de la pratique active
     if (groupeActif && groupeActif.pratiqueId) {
         // 1a. Chercher dans pratiquesConfigurables
-        const pratiquesConfig = db.getSync('pratiquesConfigurables', []);
+        const pratiquesConfig = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
         let pratiqueActive = pratiquesConfig.find(p => p.id === groupeActif.pratiqueId);
 
         // 1b. Si pas trouvée, chercher dans la bibliothèque partagée
@@ -2597,7 +2597,7 @@ function afficherAlerteNonParticipation(etudiants) {
 }
 
 function afficherPatternsApprentissage(etudiants) {
-    const config = db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
     const afficherSom = affichage.afficherSommatif === true;
     const afficherPan = affichage.afficherAlternatif === true;
@@ -2747,7 +2747,7 @@ function genererCarteRaI(label, description, valeurSomPct, valeurPanPct, valeurS
  * @param {Array} etudiants - Étudiants avec indices calculés
  */
 function afficherNiveauxRaI(etudiants) {
-    const config = db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
     const afficherSom = affichage.afficherSommatif === true;
     const afficherPan = affichage.afficherAlternatif === true;

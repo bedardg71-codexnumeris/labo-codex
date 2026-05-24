@@ -66,7 +66,7 @@ class PratiquePANStandards {
         }
 
         // ✅ NOUVEAU (Beta 95) : Vérifier si la variante est "par-objectifs"
-        const modalites = db.getSync('modalitesEvaluation', {});
+        const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
         if (modalites.varianteCalcul === 'par-objectifs') {
             return this._calculerPerformanceParObjectifs(da);
         }
@@ -693,7 +693,7 @@ class PratiquePANStandards {
      * @private
      */
     _lireConfiguration() {
-        const config = db.getSync('modalitesEvaluation', {});
+        const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
         const configPAN = config.configPAN || {};
 
         // ✅ PHASE 3: SINGLE SOURCE OF TRUTH centralisé dans modalitesEvaluation.configPAN.portfolio
@@ -1350,7 +1350,7 @@ class PratiquePANStandards {
      * @private
      */
     _calculerPerformanceParObjectifs(da) {
-        const modalites = db.getSync('modalitesEvaluation', {});
+        const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
         const config = modalites.parObjectifs || {};
         const mode = config.modeCalcul || 'comptage';
 

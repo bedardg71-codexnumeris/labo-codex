@@ -90,7 +90,7 @@ function cocherOptionsParDefaut() {
     try {
         const pratiqueId = typeof obtenirPratiqueActiveGroupeCours === 'function'
             ? obtenirPratiqueActiveGroupeCours() : null;
-        const configurations = db.getSync('pratiquesConfigurables', []);
+        const configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
         // ✅ CORRIGÉ (16 mars 2026) : chercher par id, puis fallback par type
         // (les anciens groupe-cours stockent le type 'pan-standards' au lieu de l'ID unique)
         var pratiqueActive = pratiqueId ? configurations.find(function(p) { return p.id === pratiqueId; }) : null;
@@ -391,7 +391,7 @@ function chargerListeEvaluationsRefonte() {
     const indicesCP = db.getSync(cle('indicesCP'), {});
 
     // Détecter la pratique active
-    const config = db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
 
     // Grouper les évaluations par étudiant
@@ -461,7 +461,7 @@ function chargerListeEvaluationsRefonte() {
 function genererBadgeCompletion(etudiant) {
     // 🎯 Lire depuis la source unique : portfolio.js génère indicesCP
     // Détecter la pratique active pour lire le bon indice C
-    const config = db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
 
     // Compter uniquement les artefacts distincts (exclure les évaluations remplacées)
@@ -1150,7 +1150,7 @@ function restaurerSelectionsEvaluation() {
                 try {
                     var _pratiqueId = typeof obtenirPratiqueActiveGroupeCours === 'function'
                         ? obtenirPratiqueActiveGroupeCours() : null;
-                    var _configs = db.getSync('pratiquesConfigurables', []);
+                    var _configs = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
                     var _pratique = _pratiqueId ? _configs.find(function(p) { return p.id === _pratiqueId; }) : null;
                     if (!_pratique && _pratiqueId) {
                         _pratique = _configs.find(function(p) { return p.type === _pratiqueId; });
@@ -1725,7 +1725,7 @@ function _afficherCriteresDepuisEvaluation(evaluation) {
     const echelleId = evaluation.echelleId;
     if (echelleId && echelleId.startsWith('pratique-')) {
         const pratiqueId = echelleId.replace('pratique-', '');
-        const pratiques = db.getSync('pratiquesConfigurables', []);
+        const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
         const p = pratiques.find(pr => pr.id === pratiqueId);
         if (p?.config?.echelle?.niveaux) {
             p.config.echelle.niveaux.forEach(n => { niveauxMap[n.code] = n.nom || n.code; });
@@ -3628,7 +3628,7 @@ function afficherJetonsPersonnalisesEvaluation() {
     }
 
     // Récupérer les jetons personnalisés depuis la configuration
-    const config = db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const jetonsPersonnalises = config.jetons?.typesPersonnalises || [];
 
     if (jetonsPersonnalises.length === 0) {
@@ -3667,7 +3667,7 @@ function appliquerJetonPersonnalise(jetonId) {
     }
 
     // Récupérer les informations du jeton
-    const config = db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const jeton = config.jetons?.typesPersonnalises?.find(j => j.id === jetonId);
 
     if (!jeton) {

@@ -773,7 +773,7 @@ async function retirerPratiqueDeLaBibliotheque(configId) {
 async function sauvegarderConfigurationActuelle(nom, description = '') {
     let modalites = {};
     try {
-        modalites = db.getSync('modalitesEvaluation') || {};
+        modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
     } catch (e) {
         modalites = {};
     }
@@ -839,7 +839,7 @@ async function appliquerConfigurationPratique(configId) {
 
     let modalites = {};
     try {
-        modalites = db.getSync('modalitesEvaluation') || {};
+        modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
     } catch (e) {
         modalites = {};
     }
@@ -887,7 +887,7 @@ async function appliquerConfigurationPratique(configId) {
         };
     }
 
-    db.setSync('modalitesEvaluation', modalites);
+    db.setSync(cle('modalitesEvaluation'), modalites);
 
     // Rafraîchir l'interface selon le type
     if (config.type === 'pan-specifications') {

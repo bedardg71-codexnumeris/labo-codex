@@ -56,7 +56,7 @@
  * qui n'en ont pas encore, avec des valeurs par défaut.
  */
 function migrerConfigurationsSpecifiques() {
-    const pratiques = db.getSync('pratiquesConfigurables', []);
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
     const migrationEffectuee = db.getSync('migrationConfigsSpecifiques', false);
 
     if (migrationEffectuee) {
@@ -103,7 +103,7 @@ function migrerConfigurationsSpecifiques() {
     });
 
     if (nbMigrees > 0) {
-        db.setSync('pratiquesConfigurables', pratiques);
+        db.setSync(cle('pratiquesConfigurables'), pratiques);
         db.setSync('migrationConfigsSpecifiques', true);
     } else {
         db.setSync('migrationConfigsSpecifiques', true);
@@ -156,7 +156,7 @@ function initialiserModulePratiques() {
     afficherCartesExtras();
 
     // Charger les valeurs du portfolio et jetons depuis localStorage
-    const modalites = db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
 
     // Initialiser les règles de conformité (événements checkbox) - AVANT chargerConfigurationPAN
     // ✅ CORRECTIF (16 déc 2025) : Doit être appelé AVANT chargerConfigurationPAN sinon
@@ -187,7 +187,7 @@ function initialiserModulePratiques() {
         }
 
         // Restaurer la checkbox de catégorisation des erreurs (config de pratique)
-        const modalitesDB = db.getSync('modalitesEvaluation', {});
+        const modalitesDB = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
         const checkCategorisation = document.getElementById('activerCategorisationErreurs');
         if (checkCategorisation) {
             checkCategorisation.checked = modalitesDB.activerCategorisationErreurs === true;
@@ -281,7 +281,7 @@ function getCoursActifId() {
  */
 function getCoursUtilisantPratique(pratiqueId) {
     const cours = db.getSync('listeCours', []);
-    const modalites = db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const pratiqueActive = modalites.pratique || 'sommative';
 
     // Si cette pratique est la pratique active, tous les cours l'utilisent
@@ -394,7 +394,7 @@ function mettreAJourUIPratiqueDefaut() {
  */
 function migrerConfigurationPortfolio() {
     // Lire modalitésEvaluation
-    let modalites = db.getSync('modalitesEvaluation', {});
+    let modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
 
     // Vérifier si migration déjà effectuée
     if (modalites.configPAN && modalites.configPAN.portfolio && modalites.configPAN._migrationV1Complete) {
@@ -423,7 +423,7 @@ function migrerConfigurationPortfolio() {
         };
 
         modalites.configPAN._migrationV1Complete = true;
-        db.setSync('modalitesEvaluation', modalites);
+        db.setSync(cle('modalitesEvaluation'), modalites);
 
         return true;
     }
@@ -450,7 +450,7 @@ function migrerConfigurationPortfolio() {
     modalites.configPAN._migrationDate = new Date().toISOString();
 
     // Sauvegarder
-    db.setSync('modalitesEvaluation', modalites);
+    db.setSync(cle('modalitesEvaluation'), modalites);
 
 
     return true;
@@ -545,10 +545,10 @@ function changerPratiqueNotation() {
     }
 
     // Sauvegarder dans modalitesEvaluation
-    let modalites = db.getSync('modalitesEvaluation', {});
+    let modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     modalites.pratique = pratique;
     modalites.typePAN = pratique === 'pan-standards' ? modalites.typePAN : null;
-    db.setSync('modalitesEvaluation', modalites);
+    db.setSync(cle('modalitesEvaluation'), modalites);
 
     // Gérer l'affichage des options d'affichage
     afficherOptionsAffichage();
@@ -588,9 +588,9 @@ function afficherInfoPAN() {
         infoPAN.classList.remove('u-hide');
 
         // Sauvegarder le type de PAN
-        let modalites = db.getSync('modalitesEvaluation', {});
+        let modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
         modalites.typePAN = typePAN;
-        db.setSync('modalitesEvaluation', modalites);
+        db.setSync(cle('modalitesEvaluation'), modalites);
 
         mettreAJourStatutModalites();
     } else {
@@ -656,7 +656,7 @@ function sauvegarderOptionsAffichage() {
     const modeComparatif = checkComparatif.checked;
 
     // Récupérer la config existante
-    let modalites = db.getSync('modalitesEvaluation', {});
+    let modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
 
     // Récupérer la pratique active depuis modalites (nouvelle architecture Beta 91)
     const pratique = modalites.pratique || 'sommative';
@@ -684,7 +684,7 @@ function sauvegarderOptionsAffichage() {
         }
     }
 
-    db.setSync('modalitesEvaluation', modalites);
+    db.setSync(cle('modalitesEvaluation'), modalites);
 
     // ✅ NOUVEAU (9 décembre 2025) : Sauvegarder aussi dans la pratique active
     sauvegarderDansConfiguration('affichage', { modeComparatif });
@@ -731,7 +731,7 @@ function afficherParametresPAN() {
  * Charge la configuration PAN depuis localStorage
  */
 function chargerConfigurationPAN() {
-    const modalites = db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const configPAN = modalites.configPAN || {};
 
     // Période d'évaluation
@@ -994,7 +994,7 @@ function afficherCartesExtras() {
  * Sauvegarde la configuration PAN
  */
 function sauvegarderConfigurationPAN() {
-    const modalites = db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
 
     // Période d'évaluation
     const radioPeriode = document.querySelector('input[name="periodePAN"]:checked');
@@ -1103,7 +1103,7 @@ function sauvegarderConfigurationPAN() {
         }
     };
 
-    db.setSync('modalitesEvaluation', modalites);
+    db.setSync(cle('modalitesEvaluation'), modalites);
 
     // ✅ NOUVEAU (9 décembre 2025) : Sauvegarder aussi dans la pratique active
     sauvegarderDansConfiguration('portfolio', modalites.configPAN.portfolio);
@@ -1129,7 +1129,7 @@ function sauvegarderConfigurationPAN() {
  */
 function sauvegarderPratiqueNotation() {
     // Lire la pratique active depuis localStorage (nouveau système de cartes)
-    let modalites = db.getSync('modalitesEvaluation', {});
+    let modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const pratique = modalites.pratique;
 
     // Les sélecteurs suivants n'existent que dans l'ancien système
@@ -1203,7 +1203,7 @@ function sauvegarderPratiqueNotation() {
         modalites.activerCategorisationErreurs = false;
     }
 
-    db.setSync('modalitesEvaluation', modalites);
+    db.setSync(cle('modalitesEvaluation'), modalites);
 
     // Sauvegarder toutes les configurations (portfolio et jetons)
     sauvegarderConfigurationPAN();
@@ -1225,7 +1225,7 @@ function sauvegarderPratiqueNotation() {
  * 6. Met à jour le statut
  */
 function chargerModalites() {
-    const modalites = db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
 
     const selectPratique = document.getElementById('pratiqueNotation');
     const colonnePAN = document.getElementById('colonnePAN');
@@ -1245,7 +1245,7 @@ function chargerModalites() {
             afficherSommatif: true,
             afficherAlternatif: false
         };
-        db.setSync('modalitesEvaluation', modalites);
+        db.setSync(cle('modalitesEvaluation'), modalites);
 
         selectPratique.value = '';
         colonnePAN.classList.add('u-hide');
@@ -1294,7 +1294,7 @@ function chargerModalites() {
                 afficherAlternatif: false
             };
         }
-        db.setSync('modalitesEvaluation', modalites);
+        db.setSync(cle('modalitesEvaluation'), modalites);
     }
 
     // Initialiser la checkbox mode comparatif
@@ -1498,7 +1498,7 @@ function chargerConfigurationPAN(configPAN) {
  * 3. Met à jour #statutModalites avec HTML formaté
  */
 function mettreAJourStatutModalites() {
-    const modalites = db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const statutDiv = document.getElementById('statutModalites');
 
     if (!statutDiv) {
@@ -1622,7 +1622,7 @@ window.supprimerTypeJetonPersonnalise = supprimerTypeJetonPersonnalise;
  * - Module statistiques pour les calculs
  */
 function obtenirConfigurationNotation() {
-    return db.getSync('modalitesEvaluation', {});
+    return db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
 }
 
 /* ===============================
@@ -1696,7 +1696,7 @@ function chargerGrillesDisponibles() {
  * Migration: Ajoute les établissements manquants aux pratiques existantes
  */
 function migrerEtablissementsPratiques() {
-    const pratiques = db.getSync('pratiquesConfigurables', []);
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
     let modifie = false;
 
     // Mapping des auteurs vers établissements
@@ -1712,7 +1712,7 @@ function migrerEtablissementsPratiques() {
     });
 
     if (modifie) {
-        db.setSync('pratiquesConfigurables', pratiques);
+        db.setSync(cle('pratiquesConfigurables'), pratiques);
         return true;
     }
 
@@ -1904,7 +1904,7 @@ function togglePratique(pratiqueId) {
  */
 async function activerPratique(id, confirmer = true) {
     // Vérifier si la pratique est déjà active
-    const modalites = db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     if (modalites.pratique === id) {
         // ✅ NOUVEAU (9 décembre 2025) : Même si déjà active, recharger sa config
         // pour afficher ses options spécifiques à droite
@@ -1946,7 +1946,7 @@ async function activerPratique(id, confirmer = true) {
  * @param {object} valeur - Valeur à sauvegarder
  */
 function sauvegarderDansConfiguration(cle, valeur) {
-    const modalites = db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const pratiqueActiveId = modalites.pratique;
 
     if (!pratiqueActiveId) {
@@ -1955,7 +1955,7 @@ function sauvegarderDansConfiguration(cle, valeur) {
     }
 
     // Charger la pratique depuis pratiquesConfigurables
-    const pratiques = db.getSync('pratiquesConfigurables', []);
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
     const index = pratiques.findIndex(p => p.id === pratiqueActiveId);
 
     if (index === -1) {
@@ -1972,7 +1972,7 @@ function sauvegarderDansConfiguration(cle, valeur) {
     pratiques[index].config[cle] = valeur;
 
     // Sauvegarder les pratiques
-    db.setSync('pratiquesConfigurables', pratiques);
+    db.setSync(cle('pratiquesConfigurables'), pratiques);
 
 }
 
@@ -1984,7 +1984,7 @@ function sauvegarderDansConfiguration(cle, valeur) {
 function chargerConfigurationPratique(id) {
 
     // Charger la pratique depuis pratiquesConfigurables
-    const pratiques = db.getSync('pratiquesConfigurables', []);
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
     const pratique = pratiques.find(p => p.id === id);
 
     if (!pratique || !pratique.config) {
@@ -1995,7 +1995,7 @@ function chargerConfigurationPratique(id) {
     }
 
     const config = pratique.config;
-    const modalites = db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
 
     // ✅ NOUVEAU (9 décembre 2025) : Stocker l'ID de la pratique sélectionnée pour l'affichage sidebar
     sessionStorage.setItem('pratiqueSelectionnee', id);
@@ -2071,7 +2071,7 @@ function chargerConfigurationPratique(id) {
     }
 
     // Sauvegarder dans modalitesEvaluation
-    db.setSync('modalitesEvaluation', modalites);
+    db.setSync(cle('modalitesEvaluation'), modalites);
 
     // ✅ 4. Masquer/afficher les sections selon la configuration
     afficherSectionsSelonConfig(config);
@@ -2181,7 +2181,7 @@ async function desactiverPratique(id) {
  * Ouvre le wizard pour éditer la pratique actuellement active
  */
 async function editerPratiqueActive() {
-    const modalites = db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const pratiqueActiveId = modalites.pratique;
 
     if (!pratiqueActiveId) {
@@ -2225,7 +2225,7 @@ async function activerPratiqueAffichee() {
  */
 async function editerPratique(id) {
     try {
-        const pratiques = db.getSync('pratiquesConfigurables', []);
+        const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
         const pratique = pratiques.find(p => p.id === id);
         if (!pratique) {
             throw new Error('Pratique introuvable');
@@ -2252,7 +2252,7 @@ async function dupliquerPratique(id) {
     if (!nouveauNom) return;
 
     try {
-        const pratiques = db.getSync('pratiquesConfigurables', []);
+        const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
         const original = pratiques.find(p => p.id === id);
 
         if (!original) {
@@ -2295,11 +2295,11 @@ async function dupliquerPratique(id) {
  * @param {string} id - ID de la pratique à supprimer
  */
 async function supprimerPratique(id) {
-    const pratiques = db.getSync('pratiquesConfigurables', []);
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
     const pratique = pratiques.find(p => p.id === id);
 
     // Vérifier que la pratique n'est pas active
-    const modalites = db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     if (modalites.pratique === id) {
         alert(`❌ Impossible de supprimer cette pratique\n\nElle est actuellement active.\n\nVous devez d'abord activer une autre pratique.`);
         return;
@@ -2452,7 +2452,7 @@ function peuplerDropdownPlafondNoteCiblee() {
     }
 
     // 2. Obtenir la pratique depuis pratiquesConfigurables
-    const pratiques = db.getSync('pratiquesConfigurables', []);
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
     const pratique = pratiques.find(p => p.id === pratiqueId);
 
     if (!pratique || !pratique.configuration?.echelleId) {
@@ -2529,7 +2529,7 @@ window.traiterImportPratique = traiterImportPratique;
  * Filtre uniquement les pratiques avec dansBibliotheque !== false
  */
 async function afficherListePratiquesSidebar() {
-    const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
+    const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
 
     // IDs des 3 CANEVAS DE BASE (pratiques codées) qui ne doivent PAS apparaître dans la sidebar
     // (ils sont dans le modal "Bibliothèque de pratiques" > section "Canevas de base")
@@ -2554,7 +2554,7 @@ async function afficherListePratiquesSidebar() {
 
     if (!container) return;
 
-    const modalites = db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const pratiqueActiveId = modalites.pratique;
 
     // ✅ NOUVEAU (9 décembre 2025) : Récupérer la pratique sélectionnée pour l'affichage
@@ -2590,7 +2590,7 @@ async function afficherListePratiquesSidebar() {
  * ✅ AVEC Creative Commons (pratiques personnalisées)
  */
 async function ouvrirModalBibliothequePratiques() {
-    const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
+    const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
 
     // Définir les 3 CANEVAS DE BASE (structures fondamentales codées - templates immuables)
     // Ces IDs correspondent aux pratiques codées en JavaScript (pas aux configurations JSON)
@@ -2798,7 +2798,7 @@ function fermerModalBibliothequePratiques() {
  * Retire une pratique de la bibliothèque
  */
 async function retirerPratiqueDeBibliotheque(pratiqueId) {
-    const pratiques = db.getSync('pratiquesConfigurables', []);
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
     const pratique = pratiques.find(p => p.id === pratiqueId);
 
     if (!pratique) {
@@ -2807,7 +2807,7 @@ async function retirerPratiqueDeBibliotheque(pratiqueId) {
     }
 
     pratique.dansBibliotheque = false;
-    db.setSync('pratiquesConfigurables', pratiques);
+    db.setSync(cle('pratiquesConfigurables'), pratiques);
 
 
     // Rafraîchir la sidebar d'abord
@@ -2822,7 +2822,7 @@ async function retirerPratiqueDeBibliotheque(pratiqueId) {
  * Ajoute une pratique individuelle à la bibliothèque
  */
 async function ajouterPratiqueIndividuelle(pratiqueId) {
-    const pratiques = db.getSync('pratiquesConfigurables', []);
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
     const pratique = pratiques.find(p => p.id === pratiqueId);
 
     if (!pratique) {
@@ -2831,7 +2831,7 @@ async function ajouterPratiqueIndividuelle(pratiqueId) {
     }
 
     pratique.dansBibliotheque = true;
-    db.setSync('pratiquesConfigurables', pratiques);
+    db.setSync(cle('pratiquesConfigurables'), pratiques);
 
 
     // Rafraîchir la sidebar d'abord
@@ -2848,7 +2848,7 @@ async function ajouterPratiqueIndividuelle(pratiqueId) {
  * Permet de supprimer des pratiques qui ne sont pas dans la sidebar
  */
 async function supprimerPratiqueHorsBibliotheque(pratiqueId) {
-    const pratiques = db.getSync('pratiquesConfigurables', []);
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
     const pratique = pratiques.find(p => p.id === pratiqueId);
 
     if (!pratique) {
@@ -2857,7 +2857,7 @@ async function supprimerPratiqueHorsBibliotheque(pratiqueId) {
     }
 
     // Vérifier que la pratique n'est pas active
-    const modalites = db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     if (modalites.pratique === pratiqueId) {
         alert(`❌ Impossible de supprimer cette pratique\n\nElle est actuellement active.\n\nVous devez d'abord activer une autre pratique.`);
         return;
@@ -2883,7 +2883,7 @@ async function supprimerPratiqueHorsBibliotheque(pratiqueId) {
         const index = pratiques.findIndex(p => p.id === pratiqueId);
         if (index !== -1) {
             pratiques.splice(index, 1);
-            db.setSync('pratiquesConfigurables', pratiques);
+            db.setSync(cle('pratiquesConfigurables'), pratiques);
         }
 
 
@@ -2909,7 +2909,7 @@ async function supprimerPratiqueHorsBibliotheque(pratiqueId) {
  */
 async function partagerPratique(pratiqueId) {
     try {
-        const pratiques = db.getSync('pratiquesConfigurables', []);
+        const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
         const pratique = pratiques.find(p => p.id === pratiqueId);
 
         if (!pratique) {
@@ -2931,7 +2931,7 @@ async function partagerPratique(pratiqueId) {
         pratique.metadata_cc = metadata;
 
         // Sauvegarder
-        db.setSync('pratiquesConfigurables', pratiques);
+        db.setSync(cle('pratiquesConfigurables'), pratiques);
 
         // Rafraîchir modal et sidebar
         fermerModalBibliothequePratiques();
@@ -2951,7 +2951,7 @@ async function partagerPratique(pratiqueId) {
  */
 async function exporterPratiqueActive(pratiqueId) {
     try {
-        const pratiques = db.getSync('pratiquesConfigurables', []);
+        const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
         const pratique = pratiques.find(p => p.id === pratiqueId);
 
         if (!pratique) {
@@ -3188,7 +3188,7 @@ window.genererObjectifsSpec = genererObjectifsSpec;
  * Utile pour identifier les IDs de pratiques à supprimer
  */
 function listerPratiquesConfigurables() {
-    const pratiques = db.getSync('pratiquesConfigurables', []);
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
     console.table(pratiques.map(p => ({
         id: p.id,
         nom: p.nom,
@@ -3203,7 +3203,7 @@ function listerPratiquesConfigurables() {
  * @param {string} nomRecherche - Partie du nom à rechercher (ex: "Littérature")
  */
 async function supprimerPratiqueParNom(nomRecherche) {
-    const pratiques = db.getSync('pratiquesConfigurables', []);
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
     const pratiqueTrouvee = pratiques.find(p =>
         p.nom && p.nom.toLowerCase().includes(nomRecherche.toLowerCase())
     );
@@ -3650,7 +3650,7 @@ window.importerPratiquesExternes = function(nouvellesPratiques, options) {
     if (!nouvellesPratiques || nouvellesPratiques.length === 0) return 0;
     options = options || {};
 
-    var pratiques = db.getSync('pratiquesConfigurables', []) || [];
+    var pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []) || [];
     if (!Array.isArray(pratiques)) pratiques = [];
     var compteur = 0;
 
@@ -3671,7 +3671,7 @@ window.importerPratiquesExternes = function(nouvellesPratiques, options) {
     }
 
     if (compteur > 0) {
-        db.setSync('pratiquesConfigurables', pratiques);
+        db.setSync(cle('pratiquesConfigurables'), pratiques);
 
         if (!options.silencieux) {
             if (typeof afficherListePratiques === 'function') afficherListePratiques();

@@ -137,7 +137,7 @@ async function afficherListePratiquesMateriel() {
 
     // 🆕 FIX v3 (20 jan 2026) : Utiliser localStorage (cache synchrone) comme source principale
     // localStorage est toujours à jour grâce à la double écriture (setSync + set)
-    const configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    const configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
 
     // Filtrer les pratiques dans la bibliothèque (affichées dans la sidebar)
     // Beta 99.39 (A.0) : masque les items démo en mode normal
@@ -306,7 +306,7 @@ function genererBadgeTypePratique(pratique) {
  */
 async function afficherBibliothequePratiques() {
     // Beta 99.39 Phase B : migration vers BibliothequeUI (sortir de l'outlier).
-    const configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    const configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
 
     // Beta 99.39 (A.0) : masque les items démo en mode normal
     const pratiquesDansBibliotheque = BibliothequeUI.filtrerParModeDemo(
@@ -489,7 +489,7 @@ async function ajouterPratiqueALaSelection(pratiqueId) {
     }
 
     // Charger les configurations existantes (utiliser getSync pour cohérence)
-    const configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    const configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
 
     // Vérifier si déjà présente
     const existante = configurations.find(p => p.id === pratiqueId);
@@ -504,7 +504,7 @@ async function ajouterPratiqueALaSelection(pratiqueId) {
         // La pratique existe mais a été retirée - la réactiver
         existante.dansBibliotheque = true;
         existante.dateAjout = new Date().toISOString();
-        db.setSync(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+        db.setSync(cle('pratiquesConfigurables'), configurations);
     } else {
         // Ajouter avec le flag dansBibliotheque
         const nouvelleConfig = {
@@ -514,7 +514,7 @@ async function ajouterPratiqueALaSelection(pratiqueId) {
         };
 
         configurations.push(nouvelleConfig);
-        db.setSync(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+        db.setSync(cle('pratiquesConfigurables'), configurations);
     }
 
     // Rafraîchir la sidebar et fermer le modal
@@ -530,13 +530,13 @@ async function ajouterPratiqueALaSelection(pratiqueId) {
 async function retirerPratiqueDeLaSelection(pratiqueId) {
 
     // Utiliser getSync/setSync pour cohérence avec afficherListePratiquesMateriel
-    const configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    const configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
 
     // Marquer comme retirée (au lieu de supprimer complètement)
     const index = configurations.findIndex(p => p.id === pratiqueId);
     if (index !== -1) {
         configurations[index].dansBibliotheque = false;
-        db.setSync(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+        db.setSync(cle('pratiquesConfigurables'), configurations);
 
         // Rafraîchir la sidebar AVANT de réouvrir le modal
         await afficherListePratiquesMateriel();
@@ -559,7 +559,7 @@ async function retirerPratiqueDeBibliothequeMateriel(pratiqueId) {
  * @param {string} pratiqueId - ID de la pratique à supprimer
  */
 async function supprimerPratiqueDefinitivement(pratiqueId) {
-    const configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    const configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     const pratique = configurations.find(p => p.id === pratiqueId);
 
     if (!pratique) return;
@@ -571,7 +571,7 @@ async function supprimerPratiqueDefinitivement(pratiqueId) {
 
     // Suppression définitive
     const nouvellesConfigurations = configurations.filter(p => p.id !== pratiqueId);
-    db.setSync(CLE_PRATIQUES_CONFIGURATIONS, nouvellesConfigurations);
+    db.setSync(cle('pratiquesConfigurables'), nouvellesConfigurations);
 
     // Rafraîchir UI
     fermerModalBibliothequePratiques();
@@ -585,7 +585,7 @@ async function supprimerPratiqueDefinitivement(pratiqueId) {
  * @param {string} pratiqueId - ID de la pratique à dupliquer
  */
 async function dupliquerPratiqueBibliotheque(pratiqueId) {
-    const configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    const configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     const pratique = configurations.find(p => p.id === pratiqueId);
 
     if (!pratique) {
@@ -614,7 +614,7 @@ async function dupliquerPratiqueBibliotheque(pratiqueId) {
 
     // Ajouter à la liste
     configurations.push(nouvellePratique);
-    db.setSync(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+    db.setSync(cle('pratiquesConfigurables'), configurations);
 
     // Rafraîchir UI
     fermerModalBibliothequePratiques();
@@ -639,7 +639,7 @@ async function chargerPratiquePourModif(pratiqueId) {
     let pratique = null;
 
     // 🆕 FIX v3 (20 jan 2026) : localStorage comme source principale
-    const configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    const configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     pratique = configurations.find(p => p.id === pratiqueId);
 
     // Si pas trouvée, chercher dans la bibliothèque globale
@@ -684,7 +684,7 @@ async function chargerPratiquePourModif(pratiqueId) {
  * Phase 4.B : fork une pratique démo et charge la copie en édition.
  */
 async function dupliquerEtEditerPratique(id) {
-    const configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    const configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     let pratique = configurations.find(p => p.id === id);
     if (!pratique && typeof obtenirConfigurationPratiqueParId === 'function') {
         pratique = await obtenirConfigurationPratiqueParId(id);
@@ -693,7 +693,7 @@ async function dupliquerEtEditerPratique(id) {
 
     const copie = BibliothequeUI.forkerItem(pratique, 'pratique_');
     configurations.push(copie);
-    db.setSync(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+    db.setSync(cle('pratiquesConfigurables'), configurations);
 
     if (typeof afficherListePratiquesSidebar === 'function') {
         await afficherListePratiquesSidebar();
@@ -1003,12 +1003,12 @@ async function mettreAJourNomPratiqueMat() {
     const nouveauNom = getValeurChamp('mat-pratique-nom');
     if (!pratiqueEnEditionMateriel) return;
 
-    let configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
 
     if (index !== -1) {
         configurations[index].nom = nouveauNom;
-        await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+        await db.set(cle('pratiquesConfigurables'), configurations);
 
         // Mettre à jour le titre et la sidebar
         const titre = document.getElementById('mat-titre-pratique');
@@ -1025,12 +1025,12 @@ async function mettreAJourDescriptionPratiqueMat() {
 
     const nouvelleDescription = getValeurChamp('mat-pratique-description');
 
-    let configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
 
     if (index !== -1) {
         configurations[index].description = nouvelleDescription;
-        await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+        await db.set(cle('pratiquesConfigurables'), configurations);
 
         // Mettre à jour l'en-tête
         const descriptionPratique = document.getElementById('mat-description-pratique');
@@ -1046,12 +1046,12 @@ async function mettreAJourDescriptionPratiqueMat() {
 async function mettreAJourDisciplinePratiqueMat() {
     if (!pratiqueEnEditionMateriel) return;
 
-    let configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
 
     if (index !== -1) {
         configurations[index].discipline = getValeurChamp('mat-pratique-discipline');
-        await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+        await db.set(cle('pratiquesConfigurables'), configurations);
     }
 }
 
@@ -1081,7 +1081,7 @@ async function sauvegarderConfigPratiqueMat() {
     }
 
     // 🆕 FIX v3 (20 jan 2026) : localStorage comme source principale
-    let configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
 
     if (index === -1) {
@@ -1194,10 +1194,10 @@ async function sauvegarderConfigPratiqueMat() {
 
     // Sauvegarde IndexedDB + localStorage (db.set écrit dans les deux stores)
     try {
-        await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+        await db.set(cle('pratiquesConfigurables'), configurations);
     } catch (e) {
         console.warn('[pratiques-gestion] Erreur db.set, fallback setSync:', e);
-        db.setSync(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+        db.setSync(cle('pratiquesConfigurables'), configurations);
     }
 }
 
@@ -1212,7 +1212,7 @@ async function sauvegarderPratiqueMaterielComplet() {
         await mettreAJourDisciplinePratiqueMat();
 
         // Vérification que la pratique existe toujours
-        const verification = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+        const verification = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
         const pratiqueTrouvee = verification.find(p => p.id === pratiqueEnEditionMateriel);
 
         if (pratiqueTrouvee) {
@@ -1370,7 +1370,7 @@ function afficherTypesTravauxMat(typesTravaux) {
 async function ajouterTypeTravailMat() {
     if (!pratiqueEnEditionMateriel) return;
 
-    let configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
 
     if (index === -1) return;
@@ -1385,32 +1385,32 @@ async function ajouterTypeTravailMat() {
         description: ''
     });
 
-    await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+    await db.set(cle('pratiquesConfigurables'), configurations);
     afficherTypesTravauxMat(configurations[index].configuration.typesTravaux);
 }
 
 async function modifierTypeTravailMat(indexType, propriete, valeur) {
     if (!pratiqueEnEditionMateriel) return;
 
-    let configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
 
     if (index === -1 || !configurations[index].configuration?.typesTravaux) return;
 
     configurations[index].configuration.typesTravaux[indexType][propriete] = valeur;
-    await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+    await db.set(cle('pratiquesConfigurables'), configurations);
 }
 
 async function supprimerTypeTravailMat(indexType) {
     if (!pratiqueEnEditionMateriel) return;
 
-    let configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
 
     if (index === -1 || !configurations[index].configuration?.typesTravaux) return;
 
     configurations[index].configuration.typesTravaux.splice(indexType, 1);
-    await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+    await db.set(cle('pratiquesConfigurables'), configurations);
     afficherTypesTravauxMat(configurations[index].configuration.typesTravaux);
 }
 
@@ -1460,7 +1460,7 @@ function afficherForfaitsMat(forfaits, typesTravaux) {
 async function ajouterForfaitMat() {
     if (!pratiqueEnEditionMateriel) return;
 
-    let configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
 
     if (index === -1) return;
@@ -1476,7 +1476,7 @@ async function ajouterForfaitMat() {
         travaux: {}
     });
 
-    await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+    await db.set(cle('pratiquesConfigurables'), configurations);
     afficherForfaitsMat(
         configurations[index].configuration.forfaits,
         configurations[index].configuration.typesTravaux || []
@@ -1486,20 +1486,20 @@ async function ajouterForfaitMat() {
 async function modifierForfaitMat(indexForfait, propriete, valeur) {
     if (!pratiqueEnEditionMateriel) return;
 
-    let configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
 
     if (index === -1 || !configurations[index].configuration?.forfaits) return;
 
     if (propriete === 'note') valeur = parseInt(valeur) || 0;
     configurations[index].configuration.forfaits[indexForfait][propriete] = valeur;
-    await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+    await db.set(cle('pratiquesConfigurables'), configurations);
 }
 
 async function modifierTravailForfaitMat(indexForfait, typeTravailId, valeur) {
     if (!pratiqueEnEditionMateriel) return;
 
-    let configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
 
     if (index === -1 || !configurations[index].configuration?.forfaits) return;
@@ -1509,19 +1509,19 @@ async function modifierTravailForfaitMat(indexForfait, typeTravailId, valeur) {
     }
 
     configurations[index].configuration.forfaits[indexForfait].travaux[typeTravailId] = parseInt(valeur) || 0;
-    await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+    await db.set(cle('pratiquesConfigurables'), configurations);
 }
 
 async function supprimerForfaitMat(indexForfait) {
     if (!pratiqueEnEditionMateriel) return;
 
-    let configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
 
     if (index === -1 || !configurations[index].configuration?.forfaits) return;
 
     configurations[index].configuration.forfaits.splice(indexForfait, 1);
-    await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+    await db.set(cle('pratiquesConfigurables'), configurations);
     afficherForfaitsMat(
         configurations[index].configuration.forfaits,
         configurations[index].configuration.typesTravaux || []
@@ -1571,25 +1571,25 @@ async function creerNouvellePratique() {
     };
 
     // 🆕 FIX v3 (20 jan 2026) : localStorage comme source principale
-    let configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
 
     configurations.push(nouvellePratique);
 
     // 🆕 FIX (20 jan 2026) : Sauvegarde avec vérification explicite
     try {
-        await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+        await db.set(cle('pratiquesConfigurables'), configurations);
 
         // Vérifier que la sauvegarde a réussi en relisant les données
-        const verification = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+        const verification = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
         const pratiqueTrouvee = verification.find(p => p.id === nouvelId);
 
         if (!pratiqueTrouvee) {
             // Sauvegarde échouée - essayer localStorage directement
             console.error('[pratiques-gestion] ❌ Vérification échouée, tentative localStorage...');
-            db.setSync(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+            db.setSync(cle('pratiquesConfigurables'), configurations);
 
             // Re-vérifier
-            const verif2 = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+            const verif2 = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
             if (!verif2.find(p => p.id === nouvelId)) {
                 throw new Error('Sauvegarde impossible dans IndexedDB et localStorage');
             }
@@ -1614,12 +1614,12 @@ async function creerNouvellePratique() {
 async function mettreAJourNomPratique(nouveauNom) {
     if (!pratiqueEnEditionMateriel) return;
 
-    let configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
 
     if (index !== -1) {
         configurations[index].nom = nouveauNom;
-        await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+        await db.set(cle('pratiquesConfigurables'), configurations);
 
         // Mettre à jour le titre dans l'interface
         const titre = document.getElementById('titreEditionPratique');
@@ -1633,24 +1633,24 @@ async function mettreAJourNomPratique(nouveauNom) {
 async function mettreAJourDescriptionPratique(nouvelleDescription) {
     if (!pratiqueEnEditionMateriel) return;
 
-    let configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
 
     if (index !== -1) {
         configurations[index].description = nouvelleDescription;
-        await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+        await db.set(cle('pratiquesConfigurables'), configurations);
     }
 }
 
 async function mettreAJourDisciplinePratique(nouvelleDiscipline) {
     if (!pratiqueEnEditionMateriel) return;
 
-    let configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
 
     if (index !== -1) {
         configurations[index].discipline = nouvelleDiscipline;
-        await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+        await db.set(cle('pratiquesConfigurables'), configurations);
     }
 }
 
@@ -1662,7 +1662,7 @@ async function mettreAJourDisciplinePratique(nouvelleDiscipline) {
  * Duplique une pratique existante
  */
 async function dupliquerPratiqueMateriel(pratiqueId) {
-    let configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     const original = configurations.find(p => p.id === pratiqueId);
 
     if (!original) {
@@ -1679,7 +1679,7 @@ async function dupliquerPratiqueMateriel(pratiqueId) {
     copie.dateCreation = new Date().toISOString();
 
     configurations.push(copie);
-    await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+    await db.set(cle('pratiquesConfigurables'), configurations);
 
     await afficherListePratiquesMateriel();
     await chargerPratiquePourModif(copie.id);
@@ -1695,9 +1695,9 @@ async function supprimerPratiqueMateriel(pratiqueId) {
         return;
     }
 
-    let configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     configurations = configurations.filter(p => p.id !== pratiqueId);
-    await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+    await db.set(cle('pratiquesConfigurables'), configurations);
 
     pratiqueEnEditionMateriel = null;
 
@@ -1750,7 +1750,7 @@ async function sauvegarderPratiqueMateriel() {
  * Partage une pratique (export JSON)
  */
 async function partagerPratiqueMateriel(pratiqueId) {
-    let configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     const pratique = configurations.find(p => p.id === pratiqueId);
 
     if (!pratique) {
@@ -1788,7 +1788,7 @@ async function partagerPratiqueMateriel(pratiqueId) {
  * MODIFIÉ (8 jan 2026) : Support métadonnées CC comme les autres modules
  */
 async function exporterPratiquesUtilisateur() {
-    const toutesConfigurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    const toutesConfigurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
 
     // ✅ MODIFIÉ (8 jan 2026) : Utiliser détection heuristique pour filtrer démo + importées
     const configurations = typeof filtrerRessourcesNonDemo === 'function'
@@ -2231,7 +2231,7 @@ async function chargerConfigParObjectifsMat() {
 
     let configurations = [];
     try {
-        configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+        configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     } catch (e) {
         configurations = [];
     }
@@ -2379,7 +2379,7 @@ async function rafraichirListeObjectifsMat() {
 
     let configurations = [];
     try {
-        configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+        configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     } catch (e) {
         configurations = [];
     }
@@ -2397,7 +2397,7 @@ async function rafraichirListeObjectifsMat() {
 async function ajouterObjectifMat() {
     if (!pratiqueEnEditionMateriel) return;
 
-    let configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
 
     if (index === -1) return;
@@ -2421,7 +2421,7 @@ async function ajouterObjectifMat() {
         ponderation: 0
     });
 
-    await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+    await db.set(cle('pratiquesConfigurables'), configurations);
     afficherListeObjectifsMat(configurations[index].configuration.parObjectifs.objectifs);
 }
 
@@ -2431,7 +2431,7 @@ async function ajouterObjectifMat() {
 async function modifierObjectifMat(indexObjectif, propriete, valeur) {
     if (!pratiqueEnEditionMateriel) return;
 
-    let configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
 
     if (index === -1 || !configurations[index].configuration?.parObjectifs?.objectifs) return;
@@ -2441,7 +2441,7 @@ async function modifierObjectifMat(indexObjectif, propriete, valeur) {
     }
 
     configurations[index].configuration.parObjectifs.objectifs[indexObjectif][propriete] = valeur;
-    await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+    await db.set(cle('pratiquesConfigurables'), configurations);
 
     // Rafraîchir si mode moyenne-ponderee (pour mettre à jour le total)
     if (propriete === 'ponderation') {
@@ -2455,13 +2455,13 @@ async function modifierObjectifMat(indexObjectif, propriete, valeur) {
 async function supprimerObjectifMat(indexObjectif) {
     if (!pratiqueEnEditionMateriel) return;
 
-    let configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
 
     if (index === -1 || !configurations[index].configuration?.parObjectifs?.objectifs) return;
 
     configurations[index].configuration.parObjectifs.objectifs.splice(indexObjectif, 1);
-    await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+    await db.set(cle('pratiquesConfigurables'), configurations);
     afficherListeObjectifsMat(configurations[index].configuration.parObjectifs.objectifs);
 
     // Regénérer la grille de conversion si mode comptage
@@ -2509,7 +2509,7 @@ function afficherGrilleConversionMat(grille) {
 async function genererGrilleConversionMat() {
     if (!pratiqueEnEditionMateriel) return;
 
-    let configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
 
     if (index === -1) return;
@@ -2535,7 +2535,7 @@ async function genererGrilleConversionMat() {
     }
     configurations[index].configuration.parObjectifs.comptage.grilleConversion = grille;
 
-    await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+    await db.set(cle('pratiquesConfigurables'), configurations);
     afficherGrilleConversionMat(grille);
 }
 
@@ -2545,7 +2545,7 @@ async function genererGrilleConversionMat() {
 async function modifierGrilleConversionMat(indexLigne, valeur) {
     if (!pratiqueEnEditionMateriel) return;
 
-    let configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
 
     if (index === -1) return;
@@ -2554,7 +2554,7 @@ async function modifierGrilleConversionMat(indexLigne, valeur) {
     if (!grille) return;
 
     grille[indexLigne].note = parseInt(valeur) || 0;
-    await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+    await db.set(cle('pratiquesConfigurables'), configurations);
 }
 
 /* ===============================

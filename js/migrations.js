@@ -342,7 +342,7 @@ function migrerSeancesVersPeriodes() {
     }
 
     // Obtenir la durée de période (défaut: 55 min)
-    const modalites = db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const dureePeriode = modalites.dureePeriodeMinutes || 55;
 
     let nbSeancesMigrees = 0;
@@ -406,7 +406,7 @@ function migrerSeancesVersPeriodes() {
  */
 function migrerPresencesVersPeriodes() {
     // Obtenir la durée de période (défaut: 55 min)
-    const modalites = db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const dureePeriode = modalites.dureePeriodeMinutes || 55;
 
     // Lire les présences (utiliser clé namespacée si disponible)

@@ -4562,7 +4562,7 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
  */
 function obtenirLabelNoteFinale() {
     try {
-        const config = db.getSync('modalitesEvaluation', {});
+        const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
         const pratique = config.pratique || 'pan-maitrise';
         return (pratique === 'pan-maitrise') ? 'Note chiffrée' : 'Note finale';
     } catch (e) {

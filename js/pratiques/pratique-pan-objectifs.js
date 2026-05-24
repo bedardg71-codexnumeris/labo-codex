@@ -368,7 +368,7 @@ class PratiquePANObjectifs {
      * @returns {Object} Configuration avec objectifs
      */
     _lireConfiguration() {
-        const modalites = db.getSync('modalitesEvaluation', {});
+        const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
 
         // Configuration par défaut PAN-Objectifs
         const configDefaut = {

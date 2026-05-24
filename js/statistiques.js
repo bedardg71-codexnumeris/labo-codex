@@ -113,7 +113,7 @@ function chargerInfosCours() {
  */
 function chargerMaterielConfigure() {
     // Pratique de notation
-    const modalites = db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     let pratique = 'Non configurée';
     
     if (modalites.pratique === 'sommative') {
@@ -155,7 +155,7 @@ function chargerMaterielConfigure() {
     setStatText('stat-cartouches', totalCartouches);
 
     // Pratiques de notation
-    const pratiques = db.getSync('pratiquesConfigurables', []);
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
     setStatText('stat-pratiques', pratiques.length);
 }
 

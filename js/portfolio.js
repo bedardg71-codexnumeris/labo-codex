@@ -132,7 +132,7 @@ function chargerPortfolioEleveDetail(da) {
         const selectionEleve = selectionsPortfolios[da]?.[portfolio.id] || { artefactsRetenus: [] };
 
         // ✅ Configuration depuis modalitesEvaluation (avec fallback sur portfolio.regles)
-        const modalites = db.getSync('modalitesEvaluation', {});
+        const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
         const configPortfolio = modalites.configPAN?.portfolio || {};
 
         // Lire depuis nouvelle source (Phase 3), sinon ancienne source (rétrocompatibilité)
@@ -1034,7 +1034,7 @@ function calculerNoteAvecCategories(da, configCategories) {
  * @returns {object|null} - Objet configuration { portfolio, categories, ... } ou null
  */
 function obtenirConfigPratiqueActive() {
-    const pratiquesConfig = db.getSync('pratiquesConfigurables', []);
+    const pratiquesConfig = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
 
     // Utiliser obtenirPratiqueActiveGroupeCours() qui gère tous les fallbacks
     // (groupeCoursActif → infoCours → groupesCours → modalitesEvaluation)

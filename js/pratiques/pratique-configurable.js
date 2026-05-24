@@ -185,7 +185,7 @@ class PratiqueConfigurable {
         }
 
         // Déterminer quelle branche utiliser (SOM ou PAN)
-        const modalites = db.getSync('modalitesEvaluation', {});
+        const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
         const pratique = modalites.pratique;
 
         let P_pct = 0;

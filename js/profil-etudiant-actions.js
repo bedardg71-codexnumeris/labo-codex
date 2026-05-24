@@ -168,34 +168,31 @@ function supprimerEvaluationDepuisProfil(evaluationId) {
 }
 
 function _obtenirConfigPortfolioCalcul(modalites) {
+    // Phase G2-a (24 mai 2026) : la pratique active est lue UNIQUEMENT depuis
+    // la bibliothèque (pratiquesConfigurables, via obtenirConfigPratiqueActive).
+    // Plus de fallback sur le snapshot modalitesEvaluation.configPAN.portfolio,
+    // qui drift quand l'utilisateur édite la pratique dans le wizard.
     const configPratiqueActive = typeof obtenirConfigPratiqueActive === 'function' ? obtenirConfigPratiqueActive() : null;
-    const configPAN = modalites.configPAN || {};
-    const configPortfolio = configPratiqueActive?.portfolio || configPAN.portfolio || {};
+    if (!configPratiqueActive || !configPratiqueActive.portfolio) {
+        return { erreur: 'Pratique active introuvable ou config portfolio absente. Vérifier l\'assignation de la pratique au groupe-cours dans Réglages → Pratiques de notation.' };
+    }
+    const configPortfolio = configPratiqueActive.portfolio;
     let methodeSelection = configPortfolio.methodeSelection || 'meilleurs';
     if (methodeSelection === 'derniers') methodeSelection = 'recents';
-    const configCategories = configPratiqueActive?.categories
+    const configCategories = configPratiqueActive.categories
         || (typeof obtenirConfigCategories === 'function' ? obtenirConfigCategories() : null);
     return {
         nombreARetenir: configPortfolio.nombreARetenir || 4,
         minimumRequis: configPortfolio.minimumCompletion || 7,
         methodeSelection,
-        reglesConformite: configPortfolio.reglesConformite || configPAN.portfolio?.reglesConformite || { actif: false },
+        reglesConformite: configPortfolio.reglesConformite || { actif: false },
         modeHybride: !!(configCategories && configCategories.actif),
         configCategories
     };
 }
 
 function _identifierProductionTerminale(productions) {
-    return productions.find(p => {
-        if (p.type === 'portfolio' || p.type === 'artefact-portfolio') return false;
-        const typeLC = (p.type || '').toLowerCase();
-        if (typeLC.includes('terminal') || typeLC.includes('examen') || typeLC.includes('final')) return true;
-        const titreLC = (p.titre || '').toLowerCase();
-        const descLC = (p.description || '').toLowerCase();
-        if (titreLC.includes('terminal') || titreLC.includes('finale') ||
-            descLC.includes('terminal') || descLC.includes('finale')) return true;
-        return p.ponderation > 0;
-    }) || null;
+    return productions.find(p => p.type === 'terminale') || null;
 }
 
 function _obtenirArtefactsIdsPortfolio(productions, terminalId) {
@@ -362,15 +359,27 @@ function _calculerNoteFinaleAggregee(moyennePortfolio, noteTerminale, pondP, pon
  * @returns {Object|null} - Détails de la note finale ou null si pas de données
  */
 function calculerDetailsNoteFinale(da) {
-    const modalites = db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const pratique = modalites.pratique || 'pan-maitrise';
 
     // Pour l'instant, on gère seulement PAN-Standards (toutes variantes contenant "pan")
     const pratiqueLower = pratique.toLowerCase();
     if (!pratiqueLower.includes('pan') && pratiqueLower !== 'alternative') return null;
 
-    // Lecture config portfolio (source de vérité : pratiquesConfigurables, fallback modalitesEvaluation)
+    // Lecture config portfolio (source canonique : pratiquesConfigurables, via
+    // obtenirConfigPratiqueActive). Plus de fallback sur configPAN.portfolio
+    // (Phase G2-a, 24 mai 2026).
     const cfg = _obtenirConfigPortfolioCalcul(modalites);
+    if (cfg.erreur) {
+        return {
+            pratique: 'PAN-Standards',
+            erreur: cfg.erreur,
+            portfolio: null,
+            terminal: null,
+            noteFinale: null,
+            estProvisoire: false
+        };
+    }
     const { nombreARetenir, minimumRequis, reglesConformite, modeHybride: modeHybrideNote, configCategories: configCategoriesNote } = cfg;
     let methodeSelection = cfg.methodeSelection;
 
@@ -394,14 +403,35 @@ function calculerDetailsNoteFinale(da) {
     const deficit = minimumRequis - nombreEvalues;
     const { moyenne: moyennePortfolio, plafonnement } = _appliquerPlafonnementConformite(moyenneBrute, reglesConformite, deficit);
 
-    // Pondérations
-    const ponderationPortfolio = productionPortfolio?.ponderation || 60;
-    const ponderationTerminale = productionTerminale?.ponderation || 40;
+    // Pondérations : déterminées par l'utilisateur, jamais de fallback arbitraire.
+    // - Pas de terminale → portfolio = 100% (conséquence logique, pas un défaut codé en dur).
+    // - Terminale présente → pondérations explicites obligatoires sur les deux productions.
+    let ponderationPortfolio;
+    let ponderationTerminale;
+    let erreurConfiguration = null;
+    if (productionTerminale === null) {
+        ponderationPortfolio = 100;
+        ponderationTerminale = 0;
+    } else {
+        const pondP = productionPortfolio?.ponderation;
+        const pondT = productionTerminale.ponderation;
+        if (pondP == null || pondT == null) {
+            const champsManquants = [];
+            if (productionPortfolio == null) champsManquants.push('production portfolio absente');
+            else if (pondP == null) champsManquants.push('pondération du portfolio');
+            if (pondT == null) champsManquants.push('pondération de l\'évaluation terminale');
+            erreurConfiguration = 'Pondération manquante (' + champsManquants.join(', ') + '). Corriger la configuration des productions pour que la note finale soit calculable.';
+        }
+        ponderationPortfolio = pondP ?? 0;
+        ponderationTerminale = pondT ?? 0;
+    }
     const totalPonderation = ponderationPortfolio + ponderationTerminale;
 
     // Note terminale + agrégation finale
     const { noteTerminale, evaluationTerminale } = _obtenirNoteTerminaleEtudiant(evaluations, da, productionTerminale);
-    const noteFinale = _calculerNoteFinaleAggregee(moyennePortfolio, noteTerminale, ponderationPortfolio, ponderationTerminale, totalPonderation);
+    const noteFinale = erreurConfiguration
+        ? null
+        : _calculerNoteFinaleAggregee(moyennePortfolio, noteTerminale, ponderationPortfolio, ponderationTerminale, totalPonderation);
 
     // Label méthode de sélection en français (forcer 'hybride' si actif)
     if (modeHybrideNote) methodeSelection = 'hybride';
@@ -413,8 +443,11 @@ function calculerDetailsNoteFinale(da) {
         'hybride': 'hybride (catégories)'
     };
 
+    const normaliser = (pond) => totalPonderation > 0 ? (pond / totalPonderation * 100).toFixed(0) : '0';
+
     return {
         pratique: 'PAN-Standards',
+        erreur: erreurConfiguration,
         portfolio: {
             nombreARetenir: nombreARetenir,
             nombreEvalues: evaluationsArtefacts.length,
@@ -423,7 +456,7 @@ function calculerDetailsNoteFinale(da) {
             methodeSelection: methodesLabels[methodeSelection] || methodeSelection,
             moyenne: moyennePortfolio,
             ponderation: ponderationPortfolio,
-            ponderationNormalisee: (ponderationPortfolio / totalPonderation * 100).toFixed(0),
+            ponderationNormalisee: normaliser(ponderationPortfolio),
             artefactsRetenus: artefactsRetenus.map(e => ({
                 productionId: e.productionId,
                 note: e.noteFinale,
@@ -436,7 +469,8 @@ function calculerDetailsNoteFinale(da) {
             note: noteTerminale,
             niveau: evaluationTerminale?.niveauFinal || null,
             ponderation: ponderationTerminale,
-            ponderationNormalisee: (ponderationTerminale / totalPonderation * 100).toFixed(0)
+            ponderationNormalisee: normaliser(ponderationTerminale),
+            present: productionTerminale !== null
         },
         noteFinale: noteFinale,
         estProvisoire: noteTerminale === null

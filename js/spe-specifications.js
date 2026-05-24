@@ -201,7 +201,7 @@
         await creerGabaritsSPE();
 
         // Initialiser le compteur si on est en mode SPE
-        const modalites = db.getSync('modalitesEvaluation') || {};
+        const modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         if (modalites.pratique === 'pan-specifications') {
         }
 
@@ -330,7 +330,7 @@
      * @returns {Object} { forfaitAtteint, detailParType, noteFinale }
      */
     async function calculerForfaitEtudiant(etudiantDA) {
-        const modalites = db.getSync('modalitesEvaluation') || {};
+        const modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         const specifications = modalites.specifications || {};
         const typesTravaux = specifications.typesTravaux || [];
         const forfaits = specifications.forfaits || [];
@@ -509,7 +509,7 @@
         const etudiants = (typeof obtenirDonneesSelonMode === 'function')
             ? obtenirDonneesSelonMode('groupeEtudiants')
             : db.getSync(cle('groupeEtudiants'), []);
-        const modalites = db.getSync('modalitesEvaluation') || {};
+        const modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         const specifications = modalites.specifications || {};
         const typesTravaux = specifications.typesTravaux || [];
         const forfaits = specifications.forfaits || [];
@@ -703,7 +703,7 @@
      * Ouvre le modal de création d'une grille de spécifications
      */
     function creerGrilleSpecificationsSPE() {
-        const modalites = db.getSync('modalitesEvaluation') || {};
+        const modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
         const specifications = modalites.specifications || {};
         const typesTravaux = specifications.typesTravaux || [];
 

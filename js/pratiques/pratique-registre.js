@@ -202,7 +202,7 @@ function construireConfigComplete(pratiqueData) {
  */
 function obtenirIdPratiqueActive() {
     try {
-        const config = db.getSync('modalitesEvaluation', null);
+        const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', null);
 
         if (!config) {
             // Fraîche installation — modalitesEvaluation pas encore initialisé. Silent.
@@ -223,13 +223,13 @@ function obtenirIdPratiqueActive() {
             console.warn(`⚠️ Pratique "${idPratique}" détectée, migration automatique vers "pan-standards"`);
             idPratique = 'pan-standards';
             config.pratique = 'pan-standards';
-            db.setSync('modalitesEvaluation', config);
+            db.setSync(cle('modalitesEvaluation'), config);
         }
         if (idPratique === 'specifications') {
             console.warn('⚠️ Pratique "specifications" détectée, migration automatique vers "pan-specifications"');
             idPratique = 'pan-specifications';
             config.pratique = 'pan-specifications';
-            db.setSync('modalitesEvaluation', config);
+            db.setSync(cle('modalitesEvaluation'), config);
         }
 
         return idPratique;
@@ -278,7 +278,7 @@ function obtenirPratiqueActive() {
     // MISE À JOUR (Beta 96.2): Utilise construireConfigComplete pour normaliser les formats
     if (!instance && window.PratiqueManager) {
 
-        const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
+        const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
         const pratiqueData = pratiquesConfigurables.find(p => p.id === idActif);
 
         if (pratiqueData) {
@@ -380,7 +380,7 @@ function obtenirPratiqueParId(id) {
 
     // Si non trouvée dans le registre, chercher dans les pratiques configurables
     if (!instance && window.PratiqueManager) {
-        const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
+        const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
         const pratiqueData = pratiquesConfigurables.find(p => p.id === id);
 
         if (pratiqueData) {

@@ -224,7 +224,7 @@ function calculerMoyennesCriteres(da) {
 function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
     // Lire le nombre d'artefacts depuis la config si non fourni
     if (nombreArtefacts === null) {
-        const config = db.getSync('modalitesEvaluation', {});
+        const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
         nombreArtefacts = config.configPAN?.nombreCours || 3; // Par défaut 3 cours = 6 artefacts
         nombreArtefacts = nombreArtefacts * 2; // 3 cours = 6 artefacts (2 par cours)
     }
@@ -682,7 +682,7 @@ function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
         nombreArtefacts = obtenirNombreProductionsPourPatterns(); // Défaut 3
     } else {
         // Pour performance finale : N meilleurs artefacts (Réglages › Portfolio)
-        const config = db.getSync('modalitesEvaluation', {});
+        const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
         nombreArtefacts = config.configPAN?.portfolio?.nombreARetenir || 4; // Défaut 4
     }
 
@@ -1023,7 +1023,7 @@ function determinerNiveauRaiPedagogique(da) {
     const P = indices.P / 100; // Convertir en décimal 0-1
 
     // Déterminer quelle fonction utiliser selon la pratique
-    const config = db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const pratique = config.pratique || 'alternative';
 
     // Calculer moyennes SRPNF
@@ -1307,7 +1307,7 @@ function _resoudreCibleStable(M, N, I) {
 
 function determinerCibleIntervention(da) {
     const indices = calculerTousLesIndices(da);
-    const config = db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const pratique = config.pratique || 'alternative';
 
     const moyennes = (pratique === 'alternative')
