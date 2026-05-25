@@ -454,7 +454,6 @@ function afficherEnteteCalendrier(leconId) {
         var horaires = db.getSync(window.cle('horaires'), null) || [];
         var calendrier = db.getSync(window.cle('calendrierComplet'), null) || {};
         var cours = db.getSync('cours', []);
-        var listeCours = db.getSync('listeCours', []);
 
         // Filtrer groupes du même cours
         var gcActif = db.getSync('groupeCoursActif', null);
