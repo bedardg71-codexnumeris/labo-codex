@@ -985,14 +985,18 @@ async function executerImport() {
         return;
     }
 
+    // Snapshot local : la fonction est async et fermerModalImport() peut
+    // reset donneesImportEnAttente à null pendant les await ci-dessous.
+    const donnees = donneesImportEnAttente;
+
     try {
         // ✅ CORRECTION: Utiliser db.set() (async/IndexedDB) au lieu de db.setSync()
         // Pour éviter QuotaExceededError sur localStorage avec gros fichiers
-        const cles = Object.keys(donneesImportEnAttente).filter(c => !c.startsWith('_'));
+        const cles = Object.keys(donnees).filter(c => !c.startsWith('_'));
         let nbCles = 0;
 
         for (const cle of cles) {
-            let valeur = donneesImportEnAttente[cle];
+            let valeur = donnees[cle];
 
             // ✅ CORRECTION: Parser les strings JSON (backups de l'ancienne version localStorage)
             // Si la valeur est une string JSON, la parser avant de stocker
@@ -1010,12 +1014,12 @@ async function executerImport() {
 
         // Détecter si ce sont les données de démo (pour déclencher tutoriel)
         const clesDemoPresentes = ['groupeEtudiants', 'artefacts', 'modalitesEvaluation'].every(cle =>
-            donneesImportEnAttente.hasOwnProperty(cle)
+            donnees.hasOwnProperty(cle)
         );
 
-        if (clesDemoPresentes && donneesImportEnAttente.groupeEtudiants &&
-            Array.isArray(donneesImportEnAttente.groupeEtudiants) &&
-            donneesImportEnAttente.groupeEtudiants.length > 0) {
+        if (clesDemoPresentes && donnees.groupeEtudiants &&
+            Array.isArray(donnees.groupeEtudiants) &&
+            donnees.groupeEtudiants.length > 0) {
             // Marquer que les données de démo ont été chargées
             await db.set('donnees_demo_chargees', true);
         }
@@ -1025,7 +1029,7 @@ async function executerImport() {
         await db.syncToLocalStorageCache();
 
         // 🆕 Restauration des blobs travaux depuis le ZIP
-        const nbRestores = await _restaurerBlobsDepuisZip(donneesImportEnAttente);
+        const nbRestores = await _restaurerBlobsDepuisZip(donnees);
 
         fermerModalImport();
 
