@@ -1,32 +1,36 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 24 mai 2026 fin de
-     journée, post-livraison Phase B + Phase C + chasse au bug
-     auto-save race condition. Beta 99.64 b0524-1640 — même beta toute
-     la journée, bump de build seulement entre chantiers.)
+     IDENTIFICATION DE CE FICHIER  (mis à jour 25 mai 2026 fin de
+     journée, post-livraison du chantier « Corrections conséquences
+     audit annuel » : Hygiène GitHub + Fix CodeQL critiques + Port
+     audit annuel complet sur main + Cleanup zéro-dette −1249 LOC.
+     Beta 99.64 b0525-0609 — même beta toute la journée, bumps de
+     build entre chantiers.)
      Ce SESSION.md vit sur la branche `main` du worktree principal et
      sert de relai entre les sessions Claude. Il décrit l'état
-     post-livraison Phase B/C + fix critique race-condition autosave,
-     prêt pour la REPRISE DE L'AUDIT ANNUEL (priorité explicite de
-     Grégoire pour la prochaine session).
-     L'historique complet (refonte pratique active 24 mai matin, chrome
-     unifié 24 mai matin, #282 P1-P4 du 23 mai, cycle AQPC clos 22 mai,
-     Cat-B clos 21 mai) reste dans les §§ suivants comme référence.
+     post-livraison « corrections conséquences audit annuel » : audit
+     largement clos, AUDIT.md publique à la racine, 4 axes sur 6 au
+     Vert post-remédiation. Prêt pour la prochaine priorité (voir §3).
+     L'historique complet (Phase B/C 24 mai PM, refonte pratique
+     active 24 mai matin, chrome unifié 24 mai matin, #282 P1-P4 du
+     23 mai, cycle AQPC clos 22 mai, Cat-B clos 21 mai) reste dans
+     les §§ suivants comme référence.
      ===================================================================== -->
 
 > **📌 Identification**
 > - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
-> - **Cycle qui vient d'être livré** : **Phase B + Phase C + fix race-condition autosave** — refonte du PDF rétroaction Note finale (Phase B), section Note finale du profil étudiant alignée sur le PDF (Phase C), placeholder « 500 » trompeur retiré, et fix critique d'une race condition d'auto-save qui causait la perte silencieuse de `donneesAlgorithmiques` (nombre de mots/erreurs) entre les évaluations. Beta 99.64 b0524-1640, HEAD `b46185f`.
-> - **Cycle suivant** : **REPRISE DE L'AUDIT ANNUEL** sur la branche `audit/2026-mai`. Convergence post-AQPC à planifier. Voir §3 pour la consigne complète.
-> - **Documents de référence du cycle livré** : `plans de travail/PLAN-refonte-note-finale-portfolio.md` + mémoires `feedback-autosave-race-condition` + `project-autosaves-a-auditer`.
+> - **Cycle qui vient d'être livré** : **Corrections conséquences audit annuel** — Hygiène GitHub (SECURITY.md + Dependabot + workflows CI tests/CodeQL + BRANCH-PROTECTION), fix 7 erreurs CodeQL critiques (reserve-ouvrir versements + import-export snapshot async), port 12 ADRs + AUDIT.md racine + libs/VERSIONS.md depuis audit/2026-mai, ADR-013 dérogation SPDX, cleanup −1249 LOC (4 fichiers obsolètes/orphelins), fix 5 warnings CodeQL résiduels, dismiss 3 faux positifs. Beta 99.64 b0525-0609, HEAD `c601806`.
+> - **Cycle suivant** : Voir §3. Plusieurs candidats : actions UI Grégoire (Branch Protection + Allow Auto-merge + 4 PRs Dependabot restantes), chantier zéro-dette CodeQL résiduel (~80 alertes), #282 listeCours étape 5, audit autres auto-saves, Phase D + G2-b refonte pratique active.
+> - **Documents de référence du cycle livré** : `AUDIT.md` (synthèse publique + bloc « Statuts post-remédiation au 25 mai »), `libs/VERSIONS.md`, `docs/adr/` (12 ADRs portés + ADR-013 prospectif), `SECURITY.md`, `.github/BRANCH-PROTECTION.md`.
 
-# SESSION — État au 24 mai 2026 fin de journée (Phase B + C livrées + bug auto-save critique fixé)
+# SESSION — État au 25 mai 2026 fin de journée (chantier « Corrections conséquences audit annuel » LIVRÉ)
 
-**Beta / build** : 99.64 / 0524-1640 (10 bumps de build sur la journée, beta conservée).
-**Branche `main`** : HEAD à `b46185f` fix(eval): suspendre auto-save pendant le chargement d'une évaluation (race condition).
-  - **Commits du 24 mai PM (10)** : `f4cbea7` Phase B → `aa9f26d` polish PDF → `2da9d9f` Phase C hybride → `41f77cb` titre dynamique + lien réglages → `678770d` calcul détaillé → `6e31fce` ligne compacte critère algo → `28e9d45` non-remis=0 en mode finale → `a633763` retrait placeholder « 500 » → `2259889` fix race-condition `donneesAlgorithmiques` → `b46185f` flag suspension auto-save générique.
-**Tests** : 85 Vitest + 18 Playwright = 103/103 verts à chaque commit. Hook pré-push vert.
+**Beta / build** : 99.64 / 0525-0609 (multiples bumps de build sur la journée, beta conservée).
+**Branche `main`** : HEAD à `c601806` fix(codeql): résoudre 5 warnings CodeQL résiduels.
+  - **17 commits livrés ce jour** (14 directs + 2 squash Dependabot + 1 merge FF worktree hygiene) : `861048a` SECURITY.md → `44c3ee6` dependabot.yml → `7ab6147` workflows CI → `f588077` BRANCH-PROTECTION + build refresh → `1436803` fix reserve-ouvrir → `de0e6a7` fix import-export → `565bb43` port 12 ADRs → `2c84976` AUDIT.md racine → `44d8b9c` bloc statuts post-remédiation → `954148a` (squash PR #20 codeql-action) → `b6a5a48` (squash PR #22 playwright) → `213349d` libs/VERSIONS.md → `1ad2e46` ADR-013 SPDX → `22dcbfb` cleanup −1249 LOC → `c601806` fix 5 warnings CodeQL.
+**Tests** : 85 Vitest + 18 Playwright = 103/103 verts à chaque commit. Hook pré-push vert. CodeQL CI vert post-fix critiques.
+**Tag poussé** : `hygiene-github-2026-05-25`.
 
-**Cycle suivant immédiat** : **Reprise de l'audit annuel** sur la branche `audit/2026-mai`. Cette branche est divergée de `main` depuis le 12 mai et accumule du retard. Grégoire a explicitement demandé de la finaliser. Voir §3 pour le détail. Note : aucune action de cleanup nécessaire (tous commits directs sur main, pas de worktree à retirer ; les modifications doc-mémoire sont locales et non versionnées).
+**Cycle suivant immédiat** : voir §3. Plusieurs options présentées (actions UI Grégoire d'abord pour finaliser la chaîne hygiène GitHub, puis choix : zéro-dette CodeQL ~80 alertes / #282 étape 5 / audit autres auto-saves / Phase D-G2b). Note cleanup post-session : 1 worktree éphémère `cleanup/hygiene-github` créé puis supprimé en début de journée, plus aucun worktree actif. Branche locale supprimée.
 
 ---
 
@@ -583,6 +587,106 @@ Les évaluations a2025 qui ont eu leur `donneesAlgorithmiques` écrasé à `{}` 
 
 ---
 
+## §1octies — Hygiène GitHub + Audit annuel finalisé (25 mai 2026)
+
+**17 commits livrés sur main** entre `861048a` et `c601806`, beta inchangée 99.64 (bumps build seulement `0525-0428` → `0525-0609`). Tests 103/103 verts à chaque commit (hook pré-push toujours OK). 1 worktree éphémère (`cleanup/hygiene-github`) créé pour le bloc Hygiène GitHub initial, mergé FF puis supprimé. Tag `hygiene-github-2026-05-25` poussé.
+
+**Acteurs distincts** : la quasi-totalité des chantiers de remédiation post-audit annuel 2026 (PLAN-COURT-TERME items 1.6 + 4, PLAN-MOYEN-TERME §5.3 + §5.4 + §5.5, Phase 7 transparence publique) a été livrée en une journée. **+9 sous-audits passés au Vert** (5→14 V, cf. bloc « Statuts post-remédiation » dans AUDIT.md). **4 axes audit sur 6 au Vert** (1 Conformité, 4 Soutenabilité, 5 Sécurité, 6 Accessibilité). Reste 2 Jaune (santé code 2, architecture 3) avec chantier résiduel identifié.
+
+### A. Hygiène GitHub (chantier OpenSSF Scorecard §5.3) — 4 commits
+
+- **SECURITY.md** racine (176 l.) — protocole signalement vulnérabilités via GitHub Security Advisories + canal courriel `labo@codexnumeris.org`, SLA solo dev (72 h accusé, 30 j correctif Critique/Élevée), modèle de menace résumé, hors-scope distingué de INCIDENTS.md.
+- **.github/dependabot.yml** (54 l.) — surveillance hebdo `tests/` (Vitest+Playwright+jszip) + GitHub Actions. Pas d'`audit/` (untracked sur main).
+- **.github/workflows/tests.yml** (65 l.) — Vitest + Playwright WebKit sur ubuntu-latest, node 20, `npx playwright install webkit --with-deps`, upload traces on failure.
+- **.github/workflows/codeql.yml** (53 l.) — SAST javascript-typescript hebdo lundi 07:00 UTC + push/PR main, queries `security-and-quality`.
+- **.github/BRANCH-PROTECTION.md** (101 l.) — règles à appliquer côté UI GitHub par Grégoire (force-push interdit, history linéaire, status checks tests+codeql, PR review désactivée car solo dev).
+
+**Statut OpenSSF Scorecard impacté** : Security-Policy 0→10, CI-Tests 0→10, SAST 0→10, Dependency-Update-Tool 0→10. Branch-Protection 0→9 (10 si signed commits, optionnel).
+
+**3 labels GitHub créés** (signalé par Dependabot) : `dependencies`, `github-actions`, `tests`.
+
+### B. Fix 7 erreurs CodeQL critiques — 2 commits
+
+Premier scan CodeQL post-livraison a détecté 7 erreurs `js/property-access-on-non-object` dans 2 modules sensibles :
+
+- **`js/reserve-ouvrir.js` L563-583** (alertes #414+#415) — **VRAI BUG LATENT** : renommage incomplet `versements` → `archives`. La variable locale `versements` déclarée mais jamais assignée (assignations ciblaient `archives` variable globale implicite). Symptôme utilisateur : ouvrir une réserve via FSAPI échouait silencieusement (Chrome/Edge ; non détecté Safari Mac/iPad). Fix : 2 renommages.
+
+- **`js/import-export.js` L995-1018** (alertes #409-#413) — faux positif théorique mais code durci : `executerImport()` est async et lit `donneesImportEnAttente` après plusieurs `await`. `fermerModalImport()` peut reset le global pendant l'attente. Fix : snapshot local `const donnees = donneesImportEnAttente;` au début + 7 substitutions. **Pattern défensif standard pour state global mutable lu par fonction async** — à appliquer ailleurs si même motif rencontré.
+
+### C. Port audit annuel complet — 5 commits
+
+- **12 ADRs portés** depuis branche audit/2026-mai (ADR-001 à ADR-012, statut « Acté rétroactivement »). Pointers ajoutés dans `README.md` (section Architecture) et `docs/00-START-HERE.md` (nouvelle section « Décisions architecturales »).
+
+- **ADR-013** rédigé from scratch (180 l.) — **première décision ADR prospective** (post-rétroactive) : dérogation aux `SPDX-License-Identifier` dans les 129 fichiers JS. 4 alternatives écartées documentées (mass-edit complet, SPDX partiel, scancode CI, REUSE compliance). Couverture licence via `LICENSE.md` racine + badges README + ADR-009.
+
+- **AUDIT.md** racine (323 l.) — version publique GitHub adaptée de SUMMARY-institutional.md. Section nouvelle « Remédiation livrée depuis le 14 mai 2026 » + **bloc « Statuts post-remédiation au 25 mai 2026 »** (25 sous-audits cartographiés avec preuve de remédiation, distribution comparée 5 V/10 J/8 R → 14 V/6 J/3 R).
+
+- **libs/VERSIONS.md** (~190 l.) — inventaire 7 librairies vendored : Chart.js 4.4.1, chartjs-plugin-annotation 3.0.1, html2canvas 1.4.1, jsPDF 2.5.1, jsPDF AutoTable 3.8.1, JSZip 3.10.1, PDF.js 3.11.174. Toutes compatibles AGPL v3 + CC BY-NC-SA 4.0. JSZip dual MIT/GPL v3 : option MIT retenue (sans contamination). Procédure de mise à jour + référence ADR-009.
+
+### D. Cleanup zéro-dette : −1249 LOC — 1 commit
+
+Retrait de 4 fichiers obsolètes/orphelins (scope cascade CLAUDE.md) :
+- `docs/operations/PROTOCOLE_MISE_A_JOUR_BETA.md` (271 l.) — refs `index.html:14122` inexistantes après migration version.json, BETA_95_CHANGELOG (on est en 99.64), contacts testeurs Bruno/Olivier n'ayant jamais répondu (cf. MEMORY).
+- `scripts/update-version.sh` (275 l.) — ne touche pas version.json, hard-code « janvier 2026 » L87.
+- `scripts/generer-resolutions.js` (348 l.) — orphelin cascade (seul caller = update-version.sh).
+- `resolutions.json` (355 l.) — orphelin cascade (généré mais lu par aucun module js/ ni index.html).
+
+CLAUDE.md couvre déjà la procédure version actuelle (section « Avant chaque commit », version.json source unique + fallback init-inline.js).
+
+### E. Fix 5 warnings CodeQL résiduels — 1 commit
+
+- `js/planification-carte.js` L2167-2168 (alertes #407+408) — retrait 2 self-assignments `conteneur.x = conteneur.x` (vestige refactoring).
+- `tests/integration/evaluation-chargement.spec.js` (alertes #405+406) — retrait 2 propriétés dupliquées + 2 expects doublons dans l'objet `surface` (JS écrasait silencieusement la 1re définition, pas de régression mais signal CodeQL valide).
+- `js/pratiques.js` L1775 (alerte #404) — **VRAI BUG TYPO** : `pratiqueDefaut === 'pan-standards' || pratiqueDefaut === 'pan-standards'` corrigé en `=== 'standards'` (forme courte) — radio « pan-standards » n'était pas pré-coché si pratiqueDefaut stocké en forme courte.
+
+### F. Triage 6 PRs Dependabot — 2/6 mergées
+
+Premier scan Dependabot a ouvert 6 PRs (1 codeql-action major, 1 playwright minor, 1 vitest 2→4, 3 actions GitHub major). Toutes les 6 CI vertes (Tests + CodeQL + Netlify preview).
+
+Stratégie initiale : `@dependabot squash and merge` posté sur les 6, mais Dependabot a tardé (probablement à cause des 5 nouveaux commits sur main entre-temps + `mergeable=UNKNOWN`). Bascule vers merge manuel `gh pr merge --squash --delete-branch`.
+
+**Mergées** :
+- PR #20 codeql-action 3→4 (squash commit `954148a`)
+- PR #22 playwright 1.59.1→1.60.0 (squash commit `b6a5a48`)
+
+**Restées ouvertes (à traiter par Grégoire côté UI ou avec scope workflow)** :
+- PR #23 vitest 2.1.9→4.1.7 : conflit avec #22 sur lockfile, Dependabot doit rebase.
+- PR #18 checkout 4→6, PR #19 upload-artifact 4→7, PR #21 setup-node 4→6 : **scope `workflow` manquant** sur le token gh CLI. Pour débloquer : `gh auth refresh --scopes workflow,repo` dans un terminal natif (interaction navigateur), OU merger directement sur l'UI GitHub.
+
+### G. Dismiss 3 faux positifs CodeQL — via gh API
+
+3 alertes dismissed avec raison documentée :
+- #366 `js/missing-await` sur `grilles-bibliotheque.js:103` — `assainirObjet()` est synchrone (`js/import-export.js:224`), CodeQL ne peut pas inférer cross-file en vanilla JS sans modules ES6.
+- #358+#359 `js/missing-variable-declaration` sur `js/cartouches.js:407+481` — `cartoucheActuel` est déclarée globalement dans `js/config.js:178` (`let cartoucheActuel = null;`), CodeQL ne voit pas les variables globales cross-file.
+
+**Pattern récurrent en vanilla JS sans modules ES6 : CodeQL produit beaucoup de faux positifs cross-file** — chaque alerte doit être validée contextuellement, pas appliquée mécaniquement.
+
+### Bilan chiffré
+
+- **17 commits** sur main (14 directs + 2 squash Dependabot + 1 merge FF worktree hygiene)
+- **+1042 / −1255 = −213 LOC nettes** (gain qualité significatif)
+- **103/103 tests verts** à chaque commit, hook pré-push toujours OK
+- **7 erreurs CodeQL critiques** fixées + 5 warnings + 3 faux positifs dismissed
+- **4 axes audit sur 6** passés au Vert post-remédiation
+- **14 ADRs sur main** (12 rétroactifs portés + 1 prospectif neuf + template + README)
+- **3 labels GitHub** créés
+
+### Baseline CodeQL résiduel reporté
+
+~80 alertes zéro-dette CodeQL identifiées au scan complet post-v4 (queries `security-and-quality`), à traiter dans un chantier dédié hors scope « corrections conséquences audit » :
+- 37 `js/useless-assignment-to-local` — assignations à variables locales jamais utilisées (~1-2 h cleanup module par module)
+- 37 `js/unneeded-defensive-code` — guards inutiles type `if (x !== null && x !== undefined && x)` (analyse cas par cas)
+- 6 `js/superfluous-trailing-arguments` — arguments passés mais ignorés par signature
+
+Les 5 erreurs `js/property-access-on-non-object` résiduelles dans `js/import-export.js` sont **déjà fixées** par le commit `de0e6a7` ; elles seront automatiquement marquées « fixed » par CodeQL au prochain re-scan complet.
+
+### Mémoires potentielles à créer (signalées pour traitement futur)
+
+- **Pattern défensif « snapshot local pour state global mutable lu par async »** — extrait du fix `js/import-export.js` ce matin. Proche de [[feedback-autosave-race-condition]] mais distinct (le pattern autosave = `{}` truthy fallback ; le pattern snapshot = async + reset entre await). Ces 2 patterns devraient peut-être être consolidés dans une mémoire commune « État global mutable + opérations différées : 2 anti-patterns courants ».
+- **Pattern « CodeQL produit beaucoup de faux positifs cross-file en vanilla JS sans modules ES6 »** — observable à long terme, à documenter si plusieurs autres faux positifs émergent.
+
+---
+
 ## §2 — Critères de clôture du cycle Cat-B (statut)
 
 Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
@@ -610,88 +714,70 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
 ## §3 — Consigne de démarrage pour la prochaine session
 
-> **Priorité 1 — REPRISE DE L'AUDIT ANNUEL**. Grégoire l'a explicitement demandé en fin de session du 24 mai : « il faudra reprendre l'implémentation de l'audit annuel si on veut que ça finisse un jour ». La branche `audit/2026-mai` est divergée de `main` depuis le 12 mai et accumule du retard. Tous les chantiers récents (Cat-B, AQPC, refonte pratique active, Phases B+C, fix race-condition) ont été livrés sur `main` SANS toucher à `audit/2026-mai`. Il faut maintenant **converger ou retravailler ce qui reste en suspens**.
->
-> **Priorité 2 — Audit des autres auto-saves** (cf. [[project-autosaves-a-auditer]]). Le bug pattern race-condition du 24 mai PM est probablement répandu (wizard pratique, mind map, etc.). Grégoire a explicitement signalé le radio « note chiffrée / niveau de performance » comme premier suspect.
->
-> **Priorité 3 — Phases restantes refonte pratique active** : Phase D (retrait legacy `mat-variante-calcul`) + G2-b (30 sites `configPAN.portfolio`). Pas urgent (le calculateur principal est déjà neutralisé), juste du ménage zéro-dette.
+> **L'audit annuel et ses corrections conséquences sont LARGEMENT LIVRÉS** (cf. §1octies). Reste un baseline zéro-dette CodeQL d'environ 80 alertes (chantier optionnel) et plusieurs candidats applicatifs. Pas de priorité absolue imposée — choix Grégoire selon humeur.
+
+### Priorité 1 — Actions UI Grégoire pour finaliser la chaîne hygiène GitHub (~5 min)
+
+Trois actions qui nécessitent l'interface GitHub web et que Claude ne peut pas faire :
+
+1. **Activer Allow Auto-merge** dans Settings → General → Pull Requests. Sinon les commandes `@dependabot squash and merge` continuent de tarder ou échouent (cf. §1octies F). Plus tard, ça facilite tous les merges Dependabot.
+2. **Appliquer Branch Protection** sur `main` selon la procédure dans `.github/BRANCH-PROTECTION.md`. Attendre que `tests.yml` + `codeql.yml` aient eu un premier run vert (déjà fait — cf. tag `hygiene-github-2026-05-25`) pour que les status checks apparaissent dans le sélecteur.
+3. **Finaliser les 4 PRs Dependabot restantes** :
+   - PR #23 vitest 2→4 : conflit avec #22 sur lockfile → `@dependabot rebase` en commentaire, ou merger côté UI après rebase.
+   - PR #18, #19, #21 (checkout/upload-artifact/setup-node, tous touchent `.github/workflows/`) : nécessitent scope `workflow` sur le token gh, OU merger directement sur l'UI GitHub. Pour ajouter le scope : `gh auth refresh --scopes workflow,repo` dans un terminal natif (interaction navigateur).
+
+### Priorité 2 — Continuer le chantier zéro-dette CodeQL résiduel (optionnel, ~3-5 h)
+
+Baseline ~80 alertes CodeQL zéro-dette (cf. §1octies « Baseline CodeQL résiduel reporté ») :
+- **37 `js/useless-assignment-to-local`** : assignations à variables locales jamais utilisées. Cleanup module par module (~1-2 h).
+- **37 `js/unneeded-defensive-code`** : guards inutiles type `if (x !== null && x !== undefined && x)`. **Analyse cas par cas obligatoire** (risque de retirer un guard utile en edge case). Beaucoup peuvent être des faux positifs cross-file en vanilla JS sans modules ES6.
+- **6 `js/superfluous-trailing-arguments`** : arguments passés mais ignorés par signature.
+
+**Stratégie suggérée** : module par module, pas en masse. Commit séparé par module. Hook pré-push à chaque jalon. Marquer les faux positifs `dismissed` via gh API avec raison documentée (cf. pattern §1octies G).
+
+### Priorité 3 — Continuer projets applicatifs en cours
+
+**Backlog projet** (`BACKLOG.md`) :
+- **#282** étape 5 finale **listeCours → cours** (~3 h, plan détaillé dans §1quater du 23 mai). PRIORITÉ HAUTE actée par Grégoire le 23 mai PM.
+- **#283 + #284** Harmonisation responsive mobile + structure pages.
+- **#280** Fusion « Capturer maintenant » + « Reconstruire l'historique » snapshots.
+- **#281** Migration notifications custom HTML résiduelles vers `notifications.X`.
+
+**Priorités SESSION.md historiques toujours valides** :
+- **Audit autres auto-saves** (cf. [[project-autosaves-a-auditer]]) — pattern race-condition probablement répandu. Sites prioritaires : radio « note chiffrée / niveau performance » dans wizard pratique (signalé Grégoire), `pratiques-gestion.js sauvegarderConfigPratiqueMat`, `trimestre-v2-cours.js`.
+- **Phase D + G2-b refonte pratique active** — Phase D = retrait legacy `mat-variante-calcul`, G2-b = 30 sites `configPAN.portfolio`. Zéro-dette, pas urgent.
+
+**Bugs SUIVI-BUGS ouverts** : #114 CSP Cloudflare prod, #115 `icon-files.svg` 404, #116 snapshots manuels 4 facettes, #118 layout overflow Trimestre, #121 bouton fantôme Tirage.
 
 ### Étapes de démarrage immédiat
 
 ```bash
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 git status                                              # main attendu propre
-git log --oneline main -3                               # HEAD attendu : `b46185f` fix(eval): suspendre auto-save…
+git log --oneline main -5                               # HEAD attendu : `c601806` fix(codeql): résoudre 5 warnings…
 git fetch origin
-git branch -a | grep audit                              # vérifier audit/2026-mai
-
-# Voir où en est la branche audit/2026-mai par rapport à main
-git log --oneline main..origin/audit/2026-mai          # commits sur audit absents de main
-git log --oneline origin/audit/2026-mai..main          # commits sur main absents d'audit (gros liste)
-git diff --stat main origin/audit/2026-mai             # ampleur de la divergence
+git tag -l "hygiene-github-*" | tail -5                 # tag hygiene-github-2026-05-25 attendu
 
 # Vérifier que les tests sont toujours verts (smoke test sur main)
-cd tests && npm test
+cd tests && npm test                                    # 103/103 attendu (85 Vitest + 18 Playwright)
+
+# Vérifier état CodeQL actuel
+gh api '/repos/bedardg71-codexnumeris/Monitorage_v6/code-scanning/alerts?per_page=100' \
+  --jq '[.[] | select(.state == "open")] | group_by(.rule.severity) | map({severity: .[0].rule.severity, count: length})'
+# Attendu : ~85-93 alertes (5 errors will auto-fix post re-scan, ~80 zéro-dette)
 ```
 
 ### Avant toute écriture de code
 
 1. **Charger les skills** : `Skills pour Claude Code/SKILL_labo_codex.md` (architecture générale).
-2. **Charger les mémoires** (essentielles pour cette session) :
-   - [[feedback-autosave-race-condition]] — pour comprendre le pattern bug fixé le 24 mai PM (à éviter ailleurs)
-   - [[project-autosaves-a-auditer]] — liste des autres auto-saves suspects
+2. **Charger les mémoires** essentielles :
+   - [[feedback-autosave-race-condition]] — pattern bug fixé 24 mai PM (à éviter ailleurs)
+   - [[project-autosaves-a-auditer]] — liste des auto-saves suspects
    - [[feedback-zero-fallback-arbitraire]] — principe directeur métier
    - [[project-pratique-active-ssot]] — architecture pratique active (post-refonte 24 mai matin)
-3. **Lire le SESSION.md complet** (ce fichier) pour comprendre le contexte récent. Le §1septies décrit ce qui vient juste d'être livré (10 commits du 24 mai PM).
-4. **Pour l'audit annuel** : consulter les fichiers de la branche `audit/2026-mai` (`audit/PLAN-AQPC.md`, `audit/PLAN-COURT-TERME.md`, `audit/PLAN-MOYEN-TERME.md`, `audit/04-sustainability/`, `audit/reports/`, `docs/adr/`). Ces fichiers ne sont PAS sur main — il faut soit checker la branche, soit consulter via `git show origin/audit/2026-mai:audit/PLAN-AQPC.md`.
-
-### Priorité 1 — Reprise de l'audit annuel
-
-**Contexte** : La branche `audit/2026-mai` héberge l'audit annuel de la plateforme. Elle a été créée et travaillée jusqu'au 12 mai 2026, puis mise en pause pour livrer Cat-B, AQPC, refonte pratique active, et les fixes urgents a2025. Elle accumule donc du retard structurel par rapport à main.
-
-**Première action recommandée** : faire un diagnostic clair de l'écart.
-
-```bash
-# Voir tous les commits de main absents d'audit
-git log --oneline origin/audit/2026-mai..main | wc -l  # combien ?
-
-# Voir les fichiers les plus divergents
-git diff --stat main origin/audit/2026-mai | sort -k3 -n -r | head -20
-```
-
-**Questions à poser à Grégoire au début de la session** :
-1. **Stratégie de convergence** : Veux-tu (a) merger main → audit (rebase audit sur main, garde le contenu audit), (b) merger audit → main (porte les ajouts audit), (c) cherry-pick sélectif des modifs audit pertinentes, (d) abandonner la branche et refaire l'audit directement sur main, OU (e) autre approche ?
-2. **Périmètre de l'audit qui reste à faire** : quelles sections de l'audit sont incomplètes/à reprendre ? (À déterminer après lecture des PLAN-* sur la branche audit)
-3. **Délai cible** : l'audit a-t-il un deadline (présentation AQPC du 3 juin déjà passé) ou peut-il s'étaler ?
-
-**Risques attendus** :
-- **Conflits de merge importants** vu le nombre de commits accumulés sur main depuis le 12 mai (Cat-B Tracks 1-4, AQPC complet, refonte pratique active, Phases B+C, chrome unifié, etc.).
-- **Certaines décisions audit peuvent être obsolètes** (audit signalait des problèmes qui ont depuis été fixés sur main, ex: T-A8 `aria-live` notifications résolu par `utils-notifications.js` consolidé le 21 mai).
-- **Certains fixes audit doivent être portés sur main** (ex: Phase 1.4 CC BY-SA → CC BY-NC-SA et Phase 1.6 lien docs/adr/ du PLAN-COURT-TERME, qui n'ont jamais été livrés sur main car les fichiers cibles `audit/04-sustainability/`, `audit/package.json`, `docs/adr/` vivent uniquement sur la branche audit).
-
-### Priorité 2 — Audit des autres auto-saves
-
-Cf. [[project-autosaves-a-auditer]] pour la liste détaillée et la démarche.
-
-**Sites à inspecter en priorité** :
-1. **Radio « Note chiffrée / Niveau de performance »** dans le wizard pratique (signalé explicitement par Grégoire). Lu via `pratique.affichageNote` ou `pratique.configuration.affichageNote`. Grégoire dit « c'est supposé être lu dans les réglages, mais souvent ce n'est pas le cas » — symptôme probable du même bug.
-2. **`pratiques-gestion.js sauvegarderConfigPratiqueMat`** : auto-save sur chaque input du wizard pratique.
-3. **`trimestre-v2-cours.js`** : formulaires cours/groupe-cours.
-4. Autres : `productions.js`, `grilles.js`, `cartouches.js`, `objectifs.js`, `planification-carte.js`, `Rythme.sauvegarderPreferences`.
-
-**Pattern à chercher** : tout site qui fait `target.X = ec.X || target.X || {}` ou `[]` (truthy en JS). Remplacer par `if (ec.X && Object.keys(ec.X).length > 0) target.X = ec.X`.
-
-**Fix générique applicable** : étendre le flag `window._autoSaveSuspendu` (créé dans `evaluation-chargement.js`) à un module utilitaire global, et l'appeler depuis tous les flux de chargement qui ont un reset partiel + restauration async.
-
-### Priorité 3 — Phases restantes refonte pratique active
-
-**Phase D** — Retrait du champ legacy `mat-variante-calcul` du wizard pratique (« Comment construis-tu la note finale ? »).
-- Fichiers : `index.html:5798-5814` (bloc `mat-variante-pan-standards`) + `js/pratiques-gestion.js:961-997` (`changerVariantePANStandardsMat`) + tous les readers de `configuration.varianteCalcul`.
-- Question ouverte : la bascule Portfolio / Par-Objectifs que pilotait ce champ — où la migrer ? Probablement ajouter une option `par-objectifs` au sélecteur « Mode de sélection » (`mat-portfolio-selection`). À décider avec Grégoire au début de Phase D.
-
-**G2-b** — Ménage des 30 sites `configPAN.portfolio` legacy.
-- `js/pratiques.js` (21) + `js/pratiques/pratique-pan-standards.js` (9). Migrer vers `obtenirConfigPratiqueActive()`. Puis boot migration pour retirer la propriété `configPAN.portfolio` de chaque `${trim}_modalitesEvaluation`.
-- Pas urgent (le calculateur principal est déjà neutralisé par Phase G2-a). Toucher pour cohérence et zéro-dette.
+   - [[feedback-fix-perdu-refactoring-extraction]] — pattern bug perdu lors d'extraction
+3. **Lire le SESSION.md complet** (ce fichier). §1octies décrit ce qui vient d'être livré (25 mai), §1septies décrit la veille (24 mai PM), §1sexies/quinquies/quater/ter remontent les jours précédents.
+4. **Si chantier zéro-dette CodeQL** : consulter `AUDIT.md` racine pour la cartographie post-remédiation + branche `audit/2026-mai` pour les rapports techniques complets via `git show origin/audit/2026-mai:audit/reports/SUMMARY-internal.md`.
 
 ### Zones protégées — rappel permanent
 
@@ -700,24 +786,26 @@ Cf. [[project-autosaves-a-auditer]] pour la liste détaillée et la démarche.
 ### Conventions
 
 - **Pas de bump beta sans demander** Grégoire (cf. §0). Beta 99.64 conservée tant que non bumpée.
-- **Hook pré-push vert** obligatoire (Défense J — 85 Vitest verts au minimum). Les commits du 24 mai PM ont tous passé le hook (103/103 tests verts).
-- **Worktree dédié** recommandé pour tout chantier > 1 h. La session du 24 mai PM a livré 10 commits directement sur main (chaque commit était petit et autonome, tests verts à chaque jalon).
+- **Hook pré-push vert** obligatoire (Défense J — 85 Vitest verts au minimum). Les 14 commits du 25 mai ont tous passé le hook.
+- **Worktree dédié** recommandé pour tout chantier > 1 h. La session du 25 mai a livré 14 commits dont 13 directement sur main + 1 worktree éphémère pour le bloc Hygiène GitHub initial.
 - **Test simulation Safari Responsive Design Mode** insuffisant pour valider mobile : toujours valider sur vrai device.
 - **Charger la cache** : pour les nouveaux fichiers JS ou modifications, faire `Cmd+Q` complet de Safari puis ré-ouverture. Le cache buster `?v=` est inopérant en `file://`.
+- **Dismiss CodeQL false positives** via gh API : `gh api -X PATCH /repos/.../code-scanning/alerts/{N} -f state=dismissed -f dismissed_reason="false positive" -f dismissed_comment="..."`. Raison documentée obligatoire.
 
-### Décisions de Grégoire pendantes (rappel pour ne pas oublier)
+### Décisions Grégoire pendantes (rappel)
 
-- **Audit annuel** — priorité 1 cette session (cf. ci-dessus).
-- **Audit des autres auto-saves** — priorité 2 (cf. [[project-autosaves-a-auditer]]).
-- **Phase D + G2-b** — priorité 3 (zéro-dette, pas urgent).
-- **Récupération données a2025** — Grégoire doit re-saisir manuellement le nombre de mots dans les évaluations a2025 dont `donneesAlgorithmiques` a été écrasé. One-shot, post-fix b46185f.
-- **Cleanup worktree chrome unifié** (legacy 24 mai matin) — encore à faire si pas déjà fait : `git worktree remove ../Monitorage_v6-chrome` puis `git branch -d cleanup/chrome-unifie`.
-- **Test vrai iPhone chrome unifié** — après déploiement Netlify (orthogonal).
-- **#282 étape 5** — migration `listeCours` finale (~3 h, plan dans §1quater du 23 mai). Indépendant.
-- Label `v2-seuil-fragile` — conservation / atténuation / alignement ? (Cat-B Track 4 chantier J reliquat).
-- Demande d'avis PRP Cégep de Drummondville (Loi 25) — à envoyer (délai réponse 2-6 semaines, conditionne PRIVACY.md v1.1).
-- Tests manuels Sections **C, D, E, F reportées** (cf. doc TESTS-MANUELS-PENDING) — à reprendre si Grégoire le souhaite.
+- **Actions UI** — priorité 1 cette session (Allow Auto-merge + Branch Protection + 4 PRs Dependabot restantes, cf. ci-dessus).
+- **Chantier zéro-dette CodeQL résiduel** — priorité 2 optionnelle.
+- **#282 étape 5** — PRIORITÉ HAUTE actée le 23 mai PM, ~3 h. Indépendant.
+- **Audit autres auto-saves** — toujours pertinent (race-condition pattern probable ailleurs).
+- **Phase D + G2-b refonte pratique active** — zéro-dette pas urgent.
+- **Récupération données a2025** — Grégoire doit re-saisir manuellement le nombre de mots dans les évals dont `donneesAlgorithmiques` a été écrasé. One-shot. La corruption a2025 a été réparée par commit `3b8577a` du 24 mai (à vérifier si encore nécessaire).
+- **Label `v2-seuil-fragile`** — conservation / atténuation / alignement ? (Cat-B Track 4 chantier J reliquat).
+- **Demande d'avis PRP Cégep de Drummondville** (Loi 25) — à envoyer (délai 2-6 semaines, conditionne PRIVACY.md v1.1).
+- **Tests manuels Sections C, D, E, F** reportés (cf. doc TESTS-MANUELS-PENDING) — à reprendre si Grégoire le souhaite.
 - **Migration globale des icônes vers icons8** — chantier séparé à planifier.
+- **Test vrai iPhone chrome unifié** — après déploiement Netlify (orthogonal).
+- **Convergence audit/2026-mai ↔ main** — la branche audit reste divergée. Désormais avec les ports d'aujourd'hui (12 ADRs + AUDIT.md + libs/VERSIONS.md) la convergence est partiellement faite. Une décision globale reste à prendre (merger / cherry-pick / abandonner) mais ce n'est plus urgent.
 
 ---
 
@@ -791,6 +879,7 @@ git tag -l "cat-b-*" | sort             # 9 tags attendus :
 
 | Date | Modification | Auteur |
 |---|---|---|
+| 2026-05-25 (fin de journée, chantier « Corrections conséquences audit annuel » LIVRÉ) | Réécriture complète de l'en-tête + ajout §1octies + réécriture §3 (consigne démarrage prochaine session = actions UI Grégoire en priorité 1 puis choix entre chantier zéro-dette CodeQL / #282 / autres). 17 commits livrés sur main : (A) 4 commits hygiène GitHub avec worktree `cleanup/hygiene-github` éphémère merged FF + tag `hygiene-github-2026-05-25` — SECURITY.md (176 l.) + dependabot.yml (54 l.) + workflows tests.yml + codeql.yml (118 l.) + BRANCH-PROTECTION.md (101 l.). (B) 2 commits fix 7 erreurs CodeQL critiques — `reserve-ouvrir.js` (vrai bug latent versements jamais assignés en mode FSAPI) + `import-export.js` (snapshot local async durci). (C) 5 commits port audit annuel sur main — 12 ADRs depuis audit/2026-mai (statut « Acté rétroactivement »), AUDIT.md racine 323 l. (synthèse publique adaptée de SUMMARY-institutional + bloc nouveau « Statuts post-remédiation au 25 mai » avec cartographie 25/25 sous-audits + distribution 5V/10J/8R+2P → 14V/6J/3R+2P), libs/VERSIONS.md 190 l. (inventaire 7 libs vendored : Chart.js 4.4.1 / chartjs-plugin-annotation 3.0.1 / html2canvas 1.4.1 / jsPDF 2.5.1 / jsPDF AutoTable 3.8.1 / JSZip 3.10.1 / PDF.js 3.11.174), ADR-013 prospectif 180 l. (dérogation aux SPDX-License-Identifier dans les 129 fichiers JS). (D) 1 commit cleanup zéro-dette −1249 LOC — retrait PROTOCOLE_MISE_A_JOUR_BETA.md (271 l. obsolète) + update-version.sh (275 l. ne touche pas version.json) + generer-resolutions.js (348 l. orphelin cascade) + resolutions.json (355 l. orphelin cascade). (E) 1 commit fix 5 warnings CodeQL résiduels — planification-carte self-assignment + spec doublons + pratiques typo `'pan-standards' === 'pan-standards'` corrigé en `=== 'standards'`. (F) 2 squash-merges Dependabot — PR #20 codeql-action 3→4 + PR #22 playwright 1.59→1.60 ; 4 PRs restées ouvertes : PR #23 vitest 2→4 (conflit lockfile à rebase) + PR #18/#19/#21 (scope `workflow` manquant sur token gh, à débloquer via `gh auth refresh` ou UI GitHub). (G) 3 alertes CodeQL dismissed via gh API avec raison documentée (faux positifs cross-file en vanilla JS sans modules ES6). Beta inchangée 99.64, bumps build 0525-0428 → 0525-0609. Tests 103/103 verts à chaque commit, hook pré-push toujours OK. CodeQL CI vert post-fix critiques. **Baseline CodeQL résiduel reporté : ~80 alertes zéro-dette** (37 useless-assignment + 37 unneeded-defensive + 6 superfluous-trailing-arguments) à traiter dans un chantier dédié hors scope. CLAUDE.md + docs/00-START-HERE.md MAJ Beta 99.62 → 99.64. **+9 sous-audits passés au Vert** en 11 jours (5 → 14, distribution post-remédiation Jaune dominant). **4 axes sur 6 au Vert** (Conformité 1, Soutenabilité 4, Sécurité 5, Accessibilité 6) ; 2 Jaune résiduels (Santé code 2, Architecture 3) avec chantier identifié. **L'audit annuel et ses corrections conséquences sont LARGEMENT LIVRÉS**, la branche audit/2026-mai reste pour les annexes techniques (rapports détaillés). Convergence globale audit↔main partielle — pas urgent. | Hygiène GitHub + audit annuel finalisé (Claude autonome) |
 | 2026-05-24 (fin de journée, Phase B + C + race-condition autosave LIVRÉS) | Réécriture complète de l'en-tête + ajout §1septies + ajout sous-section garde-fous §0 (race-condition autosave + Phase B/C) + réécriture §3 (consigne démarrage prochaine session = REPRISE AUDIT ANNUEL). 10 commits livrés sur main entre 12h40 et 16h40 : `f4cbea7` Phase B refonte PDF Note finale (data shape + rendu + toggle Notes finalisées wizard pratique), `aa9f26d` polish PDF (« Ta note finale », note chiffrée par artefact, échéances obligatoires masquées en mode finale, rétroaction algo lue, bloc résultat algo coloré app), `2da9d9f` Phase C section Note finale profil (3 cas distingués, mode hybride Sélection/Obligatoires), `41f77cb` titre dynamique Provisoire/Finale + bouton « Réglages de la pratique » + format aligné PDF, `678770d` calcul détaillé par catégorie (`(N1+N2)÷N=moy×P%=pts`) + rendu PDF identique app (bloc résultat encadré en bas), `6e31fce` ligne compacte critère algo dans PDF (`15 erreurs sur 584 mots → 7.16/20 (35.8%)`), `28e9d45` obligatoires non remises = 0 EN MODE FINALE UNIQUEMENT (param `estFinale` au sélecteur hybride), `a633763` retrait placeholder « 500 » trompeur (3 occurrences eval_mots_*), `2259889` fix race-condition `donneesAlgorithmiques` perdues (`{}` truthy en JS, fix Object.keys check), `b46185f` flag `_autoSaveSuspendu` 500ms générique au début de 3 entry points de chargement éval (couvre criteres + donneesAlgo + futurs). Beta inchangée 99.64, 10 bumps build `0524-1240`→`0524-1640`. Tests 103/103 verts à chaque jalon. 2 nouvelles mémoires créées : [[feedback-autosave-race-condition]] (pattern bug + fix défensif, à éviter ailleurs) et [[project-autosaves-a-auditer]] (liste des auto-saves suspects du projet à investiguer, notamment radio « note chiffrée / niveau performance » signalé explicitement par Grégoire). §3 entièrement réécrit : priorité 1 = REPRISE AUDIT ANNUEL sur branche `audit/2026-mai` (divergée depuis 12 mai, Grégoire demande explicitement « si on veut que ça finisse un jour »), priorité 2 = audit autres auto-saves, priorité 3 = Phase D + G2-b. | Phase B/C + chasse bug autosave (Claude autonome) |
 | 2026-05-24 (matin, chrome unifié LIVRÉ) | Bascule post-livraison du chantier chrome unifié (commit unique `cbdf7d7` sur main via merge FF depuis `cleanup/chrome-unifie`, tag `chrome-unifie-2026-05-24`, bump 99.63 → 99.64 b0524-0548). En-tête réécrit pour refléter livraison. §1quinquies (nouvelle) : récap 7 étapes du plan, 2 bugs détectés et corrigés en session (selects mobile câblage défensif + `_gererClicGlobal` auto-désattachement), 3 observations hors-scope logées (BACKLOG #283 harmonisation pages à sidebar mobile, #284 harmonisation titres de page, SUIVI-BUGS #121 bouton fantôme Tirage au sort). §3 entièrement réécrit : priorité 1 = cleanup worktree + test vrai iPhone post-déploiement Netlify ; priorité 2 = reprise #282 étape 5 (migration `listeCours` finale, ~3 h). Module `js/chrome-unifie.js` créé (200 LOC IIFE) : popover utilitaires + selects mobile + resynchronisation `sectionAffichee`. CSS refonte L863-1229 (grid 3 colonnes pour centrage parfait du titre, bande contexte ligne 2, nav primaire sticky avec gradient maritime continu, sous-nav vide masquée carré, breakpoint unique 1024px). Audit zéro-dette : classes mortes `.entete-controles-gauche/droite`, `.entete-ligne2-droite`, `.logo-section`, `.logo-meta`, `.separateur-contexte` retirées. 8 fichiers touchés, +676 / −321 LOC nettes. Étape 5 (migration icônes icons8 filled) reportée hors-scope par décision Grégoire. | Chrome unifié (Claude autonome) |
 | 2026-05-21 (matin) | Identification refactor evaluation TERMINÉ étape 6, archive historique. | Cat-B session (Claude) |
