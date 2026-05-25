@@ -222,7 +222,7 @@ function initialiserModulePratiques() {
  */
 function getPratiqueCours(coursId) {
     // Récupérer tous les cours
-    const cours = db.getSync('listeCours', []);
+    const cours = db.getSync('cours', []);
 
     // Trouver le cours spécifique
     const coursActuel = cours.find(c => c.id === coursId);
@@ -252,7 +252,7 @@ function getPratiqueCours(coursId) {
  * @returns {string|null} - ID du cours actif ou null si aucun
  */
 function getCoursActifId() {
-    const cours = db.getSync('listeCours', []);
+    const cours = db.getSync('cours', []);
     const coursActif = cours.find(c => c.actif === true);
 
     if (!coursActif) {
@@ -280,7 +280,7 @@ function getCoursActifId() {
  * @returns {Array} - Tableau des cours utilisant cette pratique
  */
 function getCoursUtilisantPratique(pratiqueId) {
-    const cours = db.getSync('listeCours', []);
+    const cours = db.getSync('cours', []);
     const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const pratiqueActive = modalites.pratique || 'sommative';
 
