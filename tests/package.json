@@ -12,7 +12,7 @@
         "test:debug": "playwright test --debug"
     },
     "devDependencies": {
-        "@playwright/test": "^1.45.0",
+        "@playwright/test": "^1.60.0",
         "jszip": "^3.10.1",
         "vitest": "^2.0.0"
     }
