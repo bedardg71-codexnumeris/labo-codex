@@ -26,6 +26,16 @@
   - Décision : ajouter un h1 + sous-titre 1-ligne descriptif sur toutes les sous-sections pour cohérence (pattern type « Préparer et importer ») OU décider que certaines pages sont délibérément plein écran.
   - À traiter dans un chantier d'harmonisation UX post-AQPC.
 
+### Cache Safari — Étendre la sentinelle BUILD_ID aux scripts critiques (25 mai 2026)
+
+> Bug rencontré en session le 25 mai 2026 (beta 99.65 b0525-0840) : tous les boutons à `data-action` de l'en-tête (btn-codex, X bandeau mise à jour, utilitaires Aide/Réglages/bug/thème/anonymisation) sont devenus insensibles. Diagnostic : Safari file:// avait gardé en cache une version périmée de `js/main.js` dans laquelle l'attachement du dispatcher `data-action` (ligne 780, dans le handler `DOMContentLoaded`) ne se faisait pas. `init-inline.js` et `version.json` étaient pourtant synchros (BUILD_ID identique partout). Le mécanisme de détection « Scripts périmés » introduit par le commit `1ef2800` (28 mars 2026) ne surveille **que** `init-inline.js` via son snapshot `_SCRIPT_BUILD` ligne 106 — d'où le trou noir : aucun bandeau rouge, aucune erreur console, comportement étrange. Résolution ad hoc : modifier `main.js` (ajouter un commentaire ou un log) force Safari à recharger la version fraîche du disque.
+
+- [x] **#285** Étendre la sentinelle `_SCRIPT_BUILD` à `main.js` pour détecter les versions périmées en cache Safari file:// (livré 25 mai 2026, build 0525-0840, alternative légère retenue : couverture limitée à `main.js` pour l'instant)
+  - **Implémentation livrée** : `js/main.js` embarque désormais `window._SCRIPT_BUILD_main = '0525-0840'` en haut de l'IIFE (ligne 19). `js/init-inline.js` `chargerVersionJSON()` itère sur `snapshotsAVerifier` = `{ 'init-inline.js': _SCRIPT_BUILD, 'main.js': window._SCRIPT_BUILD_main }` et collecte les périmés. Si la liste n'est pas vide → flux reload+bandeau identique à avant (1 tentative auto, puis bandeau rouge nommant les scripts en cause).
+  - **Coût opérationnel acté** : à chaque bump de build, mettre à jour AUSSI le snapshot dans `js/main.js:19` (en plus de `version.json` + `js/init-inline.js:104`). Documenté dans CLAUDE.md « Avant chaque commit ».
+  - **Reste possible** : étendre à `codex.js`, `evaluation-chargement.js`, etc. si le bug se reproduit sur ces fichiers. Pas urgent — `main.js` couvre le cas du dispatcher `data-action` global qui était le symptôme principal du 25 mai.
+  - **Origine** : bug 25 mai 2026 (tous les boutons à `data-action` morts sous Safari, aucune erreur console — cf. §1nonies de SESSION.md). Le mécanisme historique du commit `1ef2800` (28 mars 2026) ne couvrait que `init-inline.js` lui-même.
+
 ### Reserve — Suite du chantier ecosysteme de donnees (26 avril 2026)
 
 > **Contexte** : Le 26 avril 2026, l'architecture de l'ecosysteme de donnees a ete

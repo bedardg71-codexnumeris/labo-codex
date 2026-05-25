@@ -101,7 +101,7 @@ function definirModeExpertFromEl(el) {
 // VERSION_MAJEURE et BUILD_ID sont lus depuis version.json au chargement (source unique)
 // Les valeurs ici servent de fallback si version.json n'est pas disponible
 let VERSION_MAJEURE = '99.65';
-let BUILD_ID = '0525-0840';
+let BUILD_ID = '0525-1055';
 // Snapshot du build contenu dans CE fichier script (pour détecter les scripts périmés)
 const _SCRIPT_BUILD = BUILD_ID;
 
@@ -233,8 +233,27 @@ async function chargerVersionJSON() {
         window.VERSION_MAJEURE = VERSION_MAJEURE;
         window.BUILD_ID = BUILD_ID;
 
-        // Détecter les scripts périmés (fallback du script != version.json)
-        if (BUILD_ID !== _SCRIPT_BUILD) {
+        // BACKLOG #285 — Détecter les scripts périmés en cache Safari file://.
+        // Chaque script critique inscrit dans cet objet doit embarquer un snapshot
+        // du build. Comparer chaque snapshot au BUILD_ID lu depuis version.json :
+        // - snapshot != BUILD_ID → périmé
+        // - snapshot absent (undefined) → AUSSI considéré périmé, car le script
+        //   est attendu dans la liste mais n'a pas exposé son snapshot. C'est
+        //   exactement le cas d'une version cachée AVANT introduction de #285.
+        // Pour retirer un script de la surveillance, retirer son entrée de l'objet.
+        var snapshotsAVerifier = {
+            'init-inline.js': _SCRIPT_BUILD,
+            'main.js': window._SCRIPT_BUILD_main
+        };
+        var scriptsPerimes = [];
+        for (var nomScript in snapshotsAVerifier) {
+            var snap = snapshotsAVerifier[nomScript];
+            if (snap !== BUILD_ID) {
+                scriptsPerimes.push(nomScript + ' (' + (snap || 'snapshot manquant') + ')');
+            }
+        }
+
+        if (scriptsPerimes.length > 0) {
             var cleReload = '_monitorage_reload_' + BUILD_ID;
             if (!sessionStorage.getItem(cleReload)) {
                 // Première tentative : recharger la page pour forcer la relecture des fichiers
@@ -243,11 +262,11 @@ async function chargerVersionJSON() {
                 return;
             }
             // Le rechargement n'a pas suffi — avertir l'utilisateur
-            console.warn('[init] Scripts p\u00e9rim\u00e9s. Build attendu : ' + BUILD_ID + ', scripts charg\u00e9s : ' + _SCRIPT_BUILD);
+            console.warn('[init] Scripts p\u00e9rim\u00e9s. Build attendu : ' + BUILD_ID + '. P\u00e9rim\u00e9s : ' + scriptsPerimes.join(', '));
             setTimeout(function() {
                 var bandeau = document.createElement('div');
                 bandeau.style.cssText = 'position:fixed;top:0;left:0;right:0;padding:10px 16px;background:#e84057;color:#fff;text-align:center;z-index:99999;font-size:14px;font-family:system-ui,sans-serif';
-                bandeau.innerHTML = 'Scripts p\u00e9rim\u00e9s (build ' + _SCRIPT_BUILD + ' au lieu de ' + BUILD_ID + '). <strong>Quitter Safari (Cmd+Q) et le relancer.</strong>';
+                bandeau.innerHTML = 'Scripts p\u00e9rim\u00e9s : ' + scriptsPerimes.join(', ') + ' au lieu de build ' + BUILD_ID + '. <strong>Quitter Safari (Cmd+Q) et le relancer.</strong>';
                 document.body.prepend(bandeau);
             }, 300);
         } else {

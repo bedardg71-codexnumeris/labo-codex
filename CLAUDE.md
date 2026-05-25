@@ -230,12 +230,17 @@ Gregoire a la memoire contextuelle reelle du projet.
 ```
 Format BUILD : mois-jour-heure-minute (Toronto). Exemple : `"0201-0840"` = 1er fevrier, 08h40.
 L'en-tete de l'app charge `version.json` au demarrage et synchronise `VERSION_MAJEURE` et `BUILD_ID` automatiquement. Les valeurs dans `index.html` ne sont que des fallback hors-ligne.
-3. **Mettre a jour les fallback** dans `index.html` (ligne ~17166) :
+3. **Mettre a jour les fallback** dans `js/init-inline.js` (lignes 103-104) :
 ```javascript
 let VERSION_MAJEURE = 'XX.X';
 let BUILD_ID = 'MMJJ-HHMM';
 ```
-Les deux endroits doivent avoir les memes valeurs que `version.json`.
+Ces valeurs servent de fallback quand `version.json` n'est pas accessible (hors-ligne). Doivent etre identiques a `version.json`.
+4. **Mettre a jour le snapshot dans `js/main.js`** (ligne ~19) :
+```javascript
+window._SCRIPT_BUILD_main = 'MMJJ-HHMM';
+```
+Ce snapshot est compare au `BUILD_ID` lu de `version.json` au boot. Si different, Safari file:// a probablement un `main.js` perime en cache et le mecanisme « Scripts perimes » declenche reload+bandeau (cf. BACKLOG #285 livre le 25 mai 2026). MEME valeur que `version.json` et que les fallback de l'etape 3.
 
 ---
 
