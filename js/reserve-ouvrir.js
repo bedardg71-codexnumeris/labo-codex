@@ -562,10 +562,10 @@ async function _afficherListeVersements() {
 
     var versements;
     try {
-        archives = await _listerVersementsDansHandle(handle);
+        versements = await _listerVersementsDansHandle(handle);
     } catch (e) {
         console.error('[ReserveOuvrir] Listage archives échoué', e);
-        archives = [];
+        versements = [];
     }
     _versementsListes = versements;
 
