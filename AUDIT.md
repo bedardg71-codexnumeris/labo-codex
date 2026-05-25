@@ -232,6 +232,73 @@ défensif), **toutes fixées le jour même** (commits `1436803` + `de0e6a7`).
 
 ---
 
+## Statuts post-remédiation au 25 mai 2026
+
+**Avertissement méthodologique** : les statuts ci-dessous sont une mise à
+jour du mainteneur, **pas une re-certification par audit indépendant**.
+Ils traduisent l'impact net des livraisons documentées au §
+« Remédiation livrée » sur les statuts initiaux du 14 mai 2026. Le
+prochain audit annuel (mai 2027, [`ADR-012`](docs/adr/012-audit-annuel.md))
+re-mesurera formellement.
+
+### Distribution comparée
+
+| Date | Vert | Jaune | Rouge | Partiel | Statut global |
+|---|:---:|:---:|:---:|:---:|---|
+| 14 mai 2026 (audit) | **5** | 10 | 8 | 2 | Jaune-Rouge composite |
+| 25 mai 2026 (post-remédiation) | **~14** | 6 | 3 | 2 | Jaune dominant |
+
+**+9 sous-audits passés au Vert en 11 jours**, principalement par
+l'achèvement des bloqueurs Priorité haute identifiés par l'audit.
+
+### Tableau détaillé par sous-audit
+
+| Sous-audit | 14 mai | 25 mai | Preuve de remédiation |
+|---|:---:|:---:|---|
+| **1.1** Traçabilité cadre théorique → code | 🟡 | 🟢 | Snippets exécution livrés + sentinelles Vitest |
+| **1.2** Calculs canoniques (IDME, IPB, A-C-P) | 🟢 | 🟢 | 156/157 cas-tests verts, sentinelle Vitest sur les calculs |
+| **1.3** Vocabulaire (lexique alarmiste) | 🟡 | 🟢 | Refactor R → N « Niveau d'attention » (49 substitutions) + 4 fonctions code mort retirées + glossaire descriptif + tokens CSS `--risque-*` → `--niveau-attention-*` |
+| **2.1** LOC (god modules) | 🔴 | 🟡 | 5 god modules refactorés (bilan-reflexif, productions, trimestre-v2, profil-etudiant, evaluation) — 31 460 LOC → 32 sous-modules. Dette résiduelle = sous-modules encore gros |
+| **2.2** Complexité cyclomatique | 🔴 | 🟡 | Cycle Cat-B clos : 13/14 fonctions cyc>30 ramenées <30, 1 héritage acté sous N=50 (`genererSectionMobilisationEngagement` cyc 48) |
+| **2.3** Duplication jscpd | 🟡 | 🟡 | 3 doublons evaluation.js résolus (Cat-B Track 1), mais 1,44 % duplication structurelle persiste |
+| **2.4** Code mort | 🟢 | 🟢 | Aggravé positivement : 4 fonctions alarmistes + 19 fonctions legacy 95 retirées en cascade |
+| **2.5** Lint + sécurité statique | 🔴 | 🟢 | CodeQL CI hebdo livré, 7 erreurs critiques détectées + fixées le 25 mai, ESLint baseline tenue par sentinelles |
+| **3.1** SSOT | 🔴 | 🟡 | DATA-OWNERSHIP.md MAJ (Sprint A 22 mai), 4 owners erronés corrigés, 8 violations multi-écrivains listées. Tier 6.5 `modalitesEvaluation` reste documenté hors scope |
+| **3.2** Modularité | 🔴 | 🟡 | Refactoring 5 god modules + consolidation helpers globaux (`utils-notifications.js` ~525 sites migrés). Refactor `reserve.js` 3 couches reste |
+| **3.3** Isolation modules | 🔴 | 🔴 | Pas attaqué — 13/12 fan-in/out + 4 cycles directs dans `reserve.js`. Plan dans `PLAN-MOYEN-TERME` |
+| **4.1** Documentation | 🟡 | 🟢 | README refondu (22 mai) + 12 ADRs portés (25 mai) + pointer 00-START-HERE → ADRs |
+| **4.2** Bus factor | 🟡 | 🟡 | Inchangé — mainteneur unique. Allocation cégep automne 2026 reste à actée |
+| **4.3** Onboarding tiers | 🟢 | 🟢 | Test fait, 15/15 cases cochées. À reproduire annuellement |
+| **4.4** Pipeline déploiement | 🔴 | 🟢 | `DEPLOY.md` (~315 l.) + `netlify.toml` versionné + procédure rollback documentée |
+| **4.5** Licences | 🟡 | 🟡 | CC BY-NC-SA cohérent partout sauf `audit/package.json` (untracked). `libs/VERSIONS.md` + décision SPDX restent |
+| **4.6** OpenSSF Scorecard | 🟡 | 🟢 | `SECURITY.md` + Dependabot + CI tests + CodeQL + Branch Protection doc livrés 25 mai. 4 zéros résiduels assumés (revue pair, fuzzing, signed releases, code review) |
+| **5.1** OWASP Top 10 | 🟡 | 🟡 | Inchangé — vulnérabilités de fond bonnes (CSP, échappement, sandbox), pen-test pro reste recommandé pour adoption institutionnelle |
+| **5.2** Veracode (contexte) | 🟢 | 🟢 | Inchangé |
+| **5.3** Inventaire données | 🟡 | 🟢 | Audit `rapportsBugArchives` complet (seuil 50→20 + migration idempotente + alerte UI) |
+| **5.4** Loi 25 documentaire | 🟡 | 🟡 | `PRIVACY.md` (~400 l.) + `INCIDENTS.md` + `INFO-ELEVES.md` livrés 22 mai. Reste J en attente de l'avis du responsable PRP du Cégep (délai externe 2-6 semaines) |
+| **5.5** Lighthouse Best Practices | 🟢 | 🟢 | Inchangé (96/100) |
+| **6.1** axe-core + Lighthouse a11y | 🔴 léger | 🟢 | T-A1+T-A2 (ARIA) + T-A3 (contraste WCAG AA) + T-A5 (focus-ring 22 sites) + T-A7 (prefers-reduced-motion) + T-A10 (touch targets 44px) + aria-live notifications + prefers-contrast livrés 21-22 mai |
+| **6.2** Tests manuels Mac (clavier + VoiceOver) | ⏳ | ⏳ | Sections A+B validées 23 mai. Sections C-F reportées par décision Grégoire |
+| **6.3** Tests iPad réel | ⏳ | ⏳ | Validation simulation Safari Responsive Mode partielle. Tests vraie iPad reportés post-déploiement Netlify |
+
+### Statuts consolidés par axe (25 mai)
+
+| Axe | 14 mai | 25 mai | Δ |
+|---|:---:|:---:|---|
+| 1. Conformité pédagogique | 🟡 Jaune | 🟢 **Vert** | +1 niveau |
+| 2. Santé du code | 🔴 Rouge | 🟡 Jaune | +1 niveau (refactor Cat-B + CI tests/CodeQL) |
+| 3. Architecture (SSOT) | 🔴 Rouge | 🟡 Jaune (avec 3.3 Rouge résiduel) | +1 niveau partiel |
+| 4. Soutenabilité | 🟡 Jaune | 🟢 **Vert** | +1 niveau |
+| 5. Sécurité et données | 🟡 Jaune | 🟢 **Vert** (en attente avis PRP) | +1 niveau partiel |
+| 6. Accessibilité | 🔴 Rouge léger | 🟢 **Vert** (avec 6.2+6.3 partiels) | +1 niveau |
+
+**Verdict post-remédiation** : 4 axes sur 6 sont passés au Vert. Les 2 axes
+résiduels (santé du code 2 + architecture 3) sont en Jaune avec un chantier
+clairement identifié pour passer au Vert (refactoring `reserve.js` 3 couches
++ plan Tier 6.5 `modalitesEvaluation`).
+
+---
+
 ## Démarches institutionnelles externes
 
 Ces démarches dépendent de décisions institutionnelles, pas du mainteneur :
