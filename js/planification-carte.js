@@ -2164,8 +2164,6 @@ function reLayoutConteneur(conteneurId) {
         if (zone) zone.classList.remove('planif-vide');
     }
 
-    conteneur.x = conteneur.x;
-    conteneur.y = conteneur.y;
     mettreAJourLiens(conteneurId);
 
     _layoutEnCours.delete(conteneurId);

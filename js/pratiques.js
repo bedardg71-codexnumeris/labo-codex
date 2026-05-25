@@ -1772,7 +1772,7 @@ function genererSelecteurPratiqueParDefaut() {
                         type="radio"
                         name="pratiqueDefaut"
                         value="pan-standards"
-                        ${pratiqueDefaut === 'pan-standards' || pratiqueDefaut === 'pan-standards' ? 'checked' : ''}
+                        ${pratiqueDefaut === 'pan-standards' || pratiqueDefaut === 'standards' ? 'checked' : ''}
                         data-on-change="changerPratiqueParDefaut" data-param="pan-standards">
                     <span style="margin-left: 8px;">PAN-Standards</span>
                 </label>
