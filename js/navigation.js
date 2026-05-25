@@ -169,6 +169,7 @@ const TOOLTIPS_SOUS_NAV = {
     'evaluations-annoter': 'nav-eval-annoter',
     'evaluations-exporter': 'nav-eval-exporter',
     // Boîte à outils
+    'labo-accompagnement': 'nav-labo-accompagnement',
     'labo-tirage': 'nav-labo-tirage',
     'labo-modelisation': 'nav-labo-modelisation',
     'labo-rythme': 'nav-labo-rythme',
@@ -177,7 +178,6 @@ const TOOLTIPS_SOUS_NAV = {
     // Aide (tooltips gérés séparément si existants)
     // Réglages
     'reglages-preferences': 'nav-reg-preferences',
-    'reglages-depistage': 'nav-reg-depistage',
     'reglages-donnees': 'nav-reg-donnees',
     'reglages-a-propos': 'nav-reg-apropos'
 };
@@ -304,6 +304,11 @@ const INITIALISATEURS_SOUS_SECTION = {
     },
 
     // === BOÎTE À OUTILS ===
+    'labo-accompagnement': function () {
+        if (typeof initialiserPreferencesV2 === 'function') {
+            setTimeout(initialiserPreferencesV2, 100);
+        }
+    },
     'labo-tirage': function () {
         if (typeof initialiserTirage === 'function') {
             setTimeout(initialiserTirage, 100);
@@ -338,11 +343,6 @@ const INITIALISATEURS_SOUS_SECTION = {
 
     // === RÉGLAGES ===
     'reglages-preferences': function () {
-        if (typeof initialiserPreferencesV2 === 'function') {
-            setTimeout(initialiserPreferencesV2, 100);
-        }
-    },
-    'reglages-depistage': function () {
         if (typeof initialiserPreferencesV2 === 'function') {
             setTimeout(initialiserPreferencesV2, 100);
         }
