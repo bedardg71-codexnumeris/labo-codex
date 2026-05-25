@@ -1,0 +1,54 @@
+# Dependabot — surveillance des dépendances tests/
+#
+# L'app principale est en vanilla JS sans bundler — aucune dépendance npm
+# côté production. Les seules dépendances managées vivent dans tests/
+# (Vitest + Playwright + jszip) pour la suite Défense I.
+#
+# Les 8 libs vendored dans libs/ (Chart.js, jsPDF, html2canvas, jszip,
+# pdf.js, etc.) ne sont pas surveillées par Dependabot — leur mise à jour
+# manuelle est documentée dans libs/VERSIONS.md (à créer).
+#
+# Référence : audit/PLAN-MOYEN-TERME.md §5.3 (OpenSSF Scorecard).
+
+version: 2
+updates:
+  # Dépendances de tests (Vitest, Playwright, jszip)
+  - package-ecosystem: "npm"
+    directory: "/tests"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "America/Toronto"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps-tests)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "tests"
+    groups:
+      playwright:
+        patterns:
+          - "@playwright/*"
+          - "playwright*"
+      vitest:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
+
+  # Actions GitHub elles-mêmes (versions des actions utilisées en CI)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "America/Toronto"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps-ci)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "github-actions"
