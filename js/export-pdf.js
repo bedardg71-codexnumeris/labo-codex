@@ -232,7 +232,7 @@ function obtenirInfosCoursPDF() {
         }
 
         // 3. Récupérer la liste des cours
-        let cours = db.getSync('listeCours', []);
+        let cours = db.getSync('cours', []);
         if (!cours || cours.length === 0) {
             cours = db.getSync('cours', []);
         }

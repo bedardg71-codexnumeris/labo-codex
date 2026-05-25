@@ -6514,18 +6514,13 @@
 
         // Hydrater les labels (pattern entites-ui.js)
         const cours = db.getSync('cours', []);
-        const listeCours = db.getSync('listeCours', []);
         const enseignants = db.getSync('enseignants', []);
         const horaires = db.getSync(cle('horaires'), []);
 
         const groupesCibles = groupesCours
             .filter(gc => gc.id !== gcActifId)
             .map(gc => {
-                let coursInfo = cours.find(c => c.id === gc.coursId);
-                if (!coursInfo) {
-                    coursInfo = listeCours.find(c => c.id === gc.coursId || c.sigle === gc.coursId);
-                }
-                coursInfo = coursInfo || {};
+                const coursInfo = cours.find(c => c.id === gc.coursId) || {};
                 const ens = enseignants.find(e => e.id === gc.enseignantId) || {};
                 const sigle = coursInfo.codeCours || coursInfo.code || coursInfo.sigle || null;
                 const groupe = gc.groupeNum || gc.groupe || '00001';
