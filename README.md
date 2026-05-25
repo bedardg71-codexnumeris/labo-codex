@@ -100,9 +100,12 @@ chaîne de déploiement complète.
 
 ### Audit
 
-- [`audit/`](audit/) — rapports de l'audit annuel volontaire (mai 2026) :
-  fidélité, santé du code, architecture, soutenabilité, sécurité,
-  accessibilité
+- [`AUDIT.md`](AUDIT.md) — synthèse publique de l'audit annuel 2026
+  (6 axes, 25 sous-audits, statuts Vert/Jaune/Rouge, plan de remédiation)
+- [`SECURITY.md`](SECURITY.md) — politique de signalement des vulnérabilités
+- Rapports techniques complets : branche
+  [`audit/2026-mai`](https://github.com/bedardg71-codexnumeris/Monitorage_v6/tree/audit/2026-mai/audit/reports)
+  (`SUMMARY-internal.md` 639 lignes + 25 sous-audits détaillés)
 
 ### Publications académiques
 
