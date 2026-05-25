@@ -82,7 +82,7 @@ test('Défense refactor · sentinelle exports browser evaluation', async ({ page
         cartoucheSelectionnee: typeof window.cartoucheSelectionnee,
         niveauSelectionne: typeof window.niveauSelectionne,
         // Zone Calcul (4 exports depuis evaluation-calcul.js — session B)
-        calculerNoteAlgorithmiqueAvecCategories: typeof window.calculerNoteAlgorithmiqueAvecCategories,
+        // calculerNoteAlgorithmiqueAvecCategories déjà couvert L73 (monstre)
         calculerNoteAlgorithmiqueSimple: typeof window.calculerNoteAlgorithmiqueSimple,
         calculerNote: typeof window.calculerNote,                  // promotion §5.6 session B
         obtenirCouleurNiveau: typeof window.obtenirCouleurNiveau,  // promotion §5.6 session B
@@ -93,7 +93,7 @@ test('Défense refactor · sentinelle exports browser evaluation', async ({ page
         copierToutRetroaction: typeof window.copierToutRetroaction,
         mettreAJourCompteurMots: typeof window.mettreAJourCompteurMots, // promotion §5.6 session B
         // Zone Sauvegarde (extraits dans -sauvegarde.js session B 3e sous-module)
-        sauvegarderEvaluation: typeof window.sauvegarderEvaluation,
+        // sauvegarderEvaluation déjà couvert L71 (monstre)
         mettreAJourPillStatut: typeof window.mettreAJourPillStatut,
         peuplementOptJetons: typeof window.peuplementOptJetons,
         majBadgesApresEvaluation: typeof window.majBadgesApresEvaluation, // promotion §5.6 session B 3e
@@ -118,7 +118,6 @@ test('Défense refactor · sentinelle exports browser evaluation', async ({ page
     expect(surface.chargerProduction).toBe('function');
     expect(surface.cartoucheSelectionnee).toBe('function');
     expect(surface.niveauSelectionne).toBe('function');
-    expect(surface.calculerNoteAlgorithmiqueAvecCategories).toBe('function');
     expect(surface.calculerNoteAlgorithmiqueSimple).toBe('function');
     expect(surface.calculerNote).toBe('function');
     expect(surface.obtenirCouleurNiveau).toBe('function');
@@ -127,7 +126,6 @@ test('Défense refactor · sentinelle exports browser evaluation', async ({ page
     expect(surface.basculerVueRetroaction).toBe('function');
     expect(surface.copierToutRetroaction).toBe('function');
     expect(surface.mettreAJourCompteurMots).toBe('function');
-    expect(surface.sauvegarderEvaluation).toBe('function');
     expect(surface.mettreAJourPillStatut).toBe('function');
     expect(surface.peuplementOptJetons).toBe('function');
     expect(surface.majBadgesApresEvaluation).toBe('function');
