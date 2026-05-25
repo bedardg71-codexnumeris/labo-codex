@@ -38,7 +38,7 @@
    - Champs du formulaire : voir structure ci-dessous
    
    LocalStorage utilisé:
-   - 'listeCours' : Array des cours configurés
+   - 'cours' : Array des cours configurés
    =============================== */
 
 /* ===============================
@@ -61,7 +61,7 @@
  * @returns {number} - Nombre de cours migrés
  */
 function migrerCoursVersPratiques() {
-    const cours = db.getSync('listeCours', []);
+    const cours = db.getSync('cours', []);
     let nbMigres = 0;
 
     cours.forEach(c => {
@@ -72,7 +72,7 @@ function migrerCoursVersPratiques() {
     });
 
     if (nbMigres > 0) {
-        db.setSync('listeCours', cours);
+        db.setSync('cours', cours);
     }
 
     return nbMigres;
@@ -93,7 +93,7 @@ function migrerCoursVersPratiques() {
  * @returns {number} - Nombre de cours migrés
  */
 function migrerCoursDansBibliotheque() {
-    const cours = db.getSync('listeCours', []);
+    const cours = db.getSync('cours', []);
     let nbMigres = 0;
 
     cours.forEach(c => {
@@ -104,7 +104,7 @@ function migrerCoursDansBibliotheque() {
     });
 
     if (nbMigres > 0) {
-        db.setSync('listeCours', cours);
+        db.setSync('cours', cours);
     }
 
     return nbMigres;
@@ -123,7 +123,7 @@ function peupleSelecteurTrimestre() {
     const select = document.getElementById('trimestreId');
     if (!select) return;
 
-    const cours = db.getSync('listeCours', []);
+    const cours = db.getSync('cours', []);
 
     // Extraire trimestres uniques
     const trimestres = new Set();
@@ -204,7 +204,7 @@ function initialiserModuleCours() {
  * @param {string} id - ID du cours à dupliquer
  */
 function dupliquerCoursPourTrimestreActif(id) {
-    const cours = db.getSync('listeCours', []);
+    const cours = db.getSync('cours', []);
     const coursOriginal = cours.find(c => c.id === id);
 
     if (!coursOriginal) {
@@ -240,7 +240,7 @@ function dupliquerCoursPourTrimestreActif(id) {
     }
 
     cours.push(nouveauCours);
-    db.setSync('listeCours', cours);
+    db.setSync('cours', cours);
 
     // Fermer le modal et rafraîchir
     fermerModalBibliothequeCours();
@@ -269,7 +269,7 @@ function dupliquerCoursPourTrimestreActif(id) {
  * PAS de métadonnées CC car il s'agit de données ministérielles publiques
  */
 async function ouvrirModalBibliothequeCours() {
-    const tousLesCours = await db.get('listeCours') || [];
+    const tousLesCours = await db.get('cours') || [];
     const coursDansBibliotheque = tousLesCours.filter(c => c.dansBibliotheque === true);
     const coursDisponibles = tousLesCours.filter(c => c.dansBibliotheque === false);
 
@@ -354,14 +354,14 @@ function fermerModalBibliothequeCours() {
  * @param {string} id - ID du cours à retirer
  */
 async function retirerCoursDeBibliotheque(id) {
-    const cours = await db.get('listeCours') || [];
+    const cours = await db.get('cours') || [];
     const coursIndex = cours.findIndex(c => c.id === id);
 
     if (coursIndex !== -1) {
         cours[coursIndex].dansBibliotheque = false;
         cours[coursIndex].actif = false; // Un cours retiré ne peut plus être actif
 
-        await db.set('listeCours', cours);
+        await db.set('cours', cours);
         fermerModalBibliothequeCours();
         alert('Cours retiré de ta sélection');
     }
@@ -373,13 +373,13 @@ async function retirerCoursDeBibliotheque(id) {
  * @param {string} id - ID du cours à ajouter
  */
 async function ajouterCoursIndividuel(id) {
-    const cours = await db.get('listeCours') || [];
+    const cours = await db.get('cours') || [];
     const coursIndex = cours.findIndex(c => c.id === id);
 
     if (coursIndex !== -1) {
         cours[coursIndex].dansBibliotheque = true;
 
-        await db.set('listeCours', cours);
+        await db.set('cours', cours);
         fermerModalBibliothequeCours();
         alert('Cours ajouté à ta sélection avec succès !');
     }
@@ -398,7 +398,7 @@ async function ajouterCoursIndividuel(id) {
  * - Nom fichier : cours-YYYY-MM-DD.json
  */
 async function exporterCoursSimple() {
-    const tousLesCours = await db.get('listeCours') || [];
+    const tousLesCours = await db.get('cours') || [];
     const coursDansBibliotheque = tousLesCours.filter(c => c.dansBibliotheque === true);
 
     if (coursDansBibliotheque.length === 0) {
@@ -452,7 +452,7 @@ async function importerCoursSimple(eventOuEl) {
                 return;
             }
 
-            const coursExistants = await db.get('listeCours') || [];
+            const coursExistants = await db.get('cours') || [];
             let nbAjoutes = 0;
             let nbDoublons = 0;
 
@@ -482,7 +482,7 @@ async function importerCoursSimple(eventOuEl) {
             });
 
             if (nbAjoutes > 0) {
-                await db.set('listeCours', coursExistants);
+                await db.set('cours', coursExistants);
             }
 
             // Message récapitulatif
@@ -527,7 +527,7 @@ async function importerCoursSimple(eventOuEl) {
  */
 async function partagerCours(id) {
     try {
-        const cours = await db.get('listeCours') || [];
+        const cours = await db.get('cours') || [];
         const coursAPartager = cours.find(c => c.id === id);
 
         if (!coursAPartager) {
@@ -549,7 +549,7 @@ async function partagerCours(id) {
         coursAPartager.metadata_cc = metadata;
 
         // Sauvegarder
-        await db.set('listeCours', cours);
+        await db.set('cours', cours);
 
         // Rafraîchir modal
         fermerModalBibliothequeCours();
@@ -571,7 +571,7 @@ async function partagerCours(id) {
  * 3. Génère fichier JSON téléchargeable
  */
 async function partagerTousLesCours() {
-    const tousLesCours = await db.get('listeCours') || [];
+    const tousLesCours = await db.get('cours') || [];
     const coursDansBibliotheque = tousLesCours.filter(c => c.dansBibliotheque === true);
 
     if (coursDansBibliotheque.length === 0) {
@@ -630,8 +630,8 @@ function obtenirCoursActifId() {
     }
 
     // Fallback: chercher dans listeCours
-    const listeCours = db.getSync('listeCours', []);
-    const coursActif = listeCours.find(c => c.actif);
+    const tousLesCours = db.getSync('cours', []);
+    const coursActif = tousLesCours.find(c => c.actif);
     return coursActif ? coursActif.id : null;
 }
 
