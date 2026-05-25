@@ -61,6 +61,16 @@ Ce pattern est utilise dans :
 
 ---
 
+## Decisions architecturales (ADRs)
+
+Les choix structurants du projet sont formalises dans des **Architecture Decision Records** (format Michael Nygard) :
+
+**Index complet** : [`adr/README.md`](adr/README.md)
+
+Consulter avant de remettre en cause une decision (framework, stockage, echelles pedagogiques, licences, mode hors-ligne, etc.). 12 ADRs au total, tous actes retroactivement le 14 mai 2026 sur la base de l'usage existant — produits dans le cadre du sous-audit 4.1 Documentation de l'audit annuel 2026.
+
+---
+
 ## Etat actuel du projet
 
 **Version** : Beta 99.62 (Build 0522-0650)
