@@ -1,0 +1,65 @@
+# Tests Vitest + Playwright (Défense I) en intégration continue
+#
+# Trigger : push sur main + toute pull request vers main.
+# Runner : ubuntu-latest (gratuit illimité repos publics).
+# Note : Playwright WebKit Linux ≠ Safari macOS — la validation device-
+# spécifique (Safari Mac, iPad Air) reste manuelle locale par Grégoire.
+#
+# Référence : audit/PLAN-MOYEN-TERME.md §5.3 (OpenSSF Scorecard).
+
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Vitest + Playwright (WebKit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: tests/package-lock.json
+
+      - name: Install dependencies
+        working-directory: tests
+        run: npm ci
+
+      - name: Install Playwright WebKit + system deps
+        working-directory: tests
+        run: npx playwright install --with-deps webkit
+
+      - name: Run unit tests (Vitest)
+        working-directory: tests
+        run: npm run test:unit
+
+      - name: Run integration tests (Playwright WebKit)
+        working-directory: tests
+        run: npm run test:int
+
+      - name: Upload Playwright traces on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: tests/test-results/
+          retention-days: 7
