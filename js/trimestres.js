@@ -396,7 +396,7 @@
         }
 
         // Récupérer le cours demo depuis listeCours
-        const listeCours = db.getSync('listeCours', []);
+        const listeCours = db.getSync('cours', []);
         const coursDemo = listeCours.find(c => c.isDemo || c.id?.includes('9999'));
         const coursId = coursDemo?.id || '601-101-h2026-9999';
         const groupeNum = coursDemo?.groupe || '9999';
@@ -652,7 +652,7 @@
     function calculerStatistiquesFinales(trimestreId) {
         try {
             // Obtenir les cours liés à ce trimestre
-            const listeCours = db.getSync('listeCours', []);
+            const listeCours = db.getSync('cours', []);
             const coursTrimestr = listeCours.filter(c => c.trimestreId === trimestreId);
 
             if (coursTrimestr.length === 0) {
@@ -712,7 +712,7 @@
             });
 
             // Cours liés au trimestre
-            const listeCours = db.getSync('listeCours', []);
+            const listeCours = db.getSync('cours', []);
             exportData.donnees.cours = listeCours.filter(c => c.trimestreId === id);
 
             // Étudiants, évaluations, présences liés aux cours du trimestre
@@ -1160,7 +1160,7 @@
             const echelles = db.getSync('echellesTemplates', []);
             const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
             const indicesCP = db.getSync(cle('indicesCP'), {});
-            const cours = db.getSync('listeCours', []);
+            const cours = db.getSync('cours', []);
             const coursActif = cours.find(c => c.actif);
 
             // 3. Déterminer le trimestre à partir du cours actif (où sont les données)
@@ -1767,7 +1767,7 @@
         if (!container) return;
 
         // Déterminer le trimestre du cours actif (comme dans exporterFormatRecherche)
-        const cours = db.getSync('listeCours', []);
+        const cours = db.getSync('cours', []);
         const coursActif = cours.find(c => c.actif);
         const trimestres = db.getSync('trimestres', []);
 

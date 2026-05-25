@@ -516,7 +516,7 @@ function demanderMetadonneesEnrichies(typeContenu, nomContenu) {
             }
         }
         const infoCours = db.getSync('infoCours', {});
-        const listeCours = db.getSync('listeCours', []);
+        const listeCours = db.getSync('cours', []);
         const coursActif = listeCours.find(c => c.actif) || listeCours[0] || {};
 
         // Construire le nom complet (priorité: profilEnseignant > listeCours > infoCours)

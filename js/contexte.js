@@ -141,7 +141,7 @@ function changerCoursDepuisEntete(id, estGroupeCours) {
 
     } else {
         // Mode legacy (listeCours)
-        const listeCours = db.getSync('listeCours', []);
+        const listeCours = db.getSync('cours', []);
         const coursSelectionne = listeCours.find(c => c.id === id);
 
         if (!coursSelectionne) {
@@ -154,7 +154,7 @@ function changerCoursDepuisEntete(id, estGroupeCours) {
 
         // Mettre à jour le flag actif dans listeCours
         listeCours.forEach(c => c.actif = (c.id === id));
-        db.setSync('listeCours', listeCours);
+        db.setSync('cours', listeCours);
 
     }
 
