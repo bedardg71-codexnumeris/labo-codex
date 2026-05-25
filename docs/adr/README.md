@@ -2,7 +2,7 @@
 
 **Format** : Michael Nygard, *Documenting Architecture Decisions* (2011).
 **Création** : 14 mai 2026, dans le cadre du sous-audit 4.1 Documentation (axe 4 Soutenabilité de l'audit annuel 2026).
-**Statut global** : ADRs rétroactifs — les décisions ont été prises au fil du développement entre octobre 2025 et mai 2026 ; ces fiches les formalisent a posteriori à des fins de transparence et d'onboarding tiers.
+**Statut global** : 12 ADRs rétroactifs (ADR-001 à ADR-012) formalisant les décisions prises entre octobre 2025 et mai 2026, + nouveaux ADRs prospectifs (à partir d'ADR-013) datés et actés à la décision. Les ADRs servent la transparence et l'onboarding tiers.
 
 ---
 
@@ -34,6 +34,7 @@ Les ADRs ne décrivent pas le code en détail — ils décrivent **la décision*
 | [ADR-010](010-vibe-coding-claude-code.md) | Développement en vibe coding avec Claude Code | Acté rétroactivement |
 | [ADR-011](011-quatre-espaces-donnees.md) | Architecture quatre espaces de données (Codex / Réserve / Codex data / Voûte) | Acté rétroactivement |
 | [ADR-012](012-audit-annuel.md) | Politique d'audit annuel | Acté rétroactivement |
+| [ADR-013](013-derogation-spdx-headers.md) | Dérogation aux SPDX-License-Identifier dans les fichiers JavaScript | Accepté (2026-05-25) |
 
 ---
 
