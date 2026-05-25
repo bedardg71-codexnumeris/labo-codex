@@ -698,8 +698,8 @@ const TOOLTIPS = {
         'Assemble ta pratique de notation compl\u00e8te (SOM, STD, SPE, DEN) en associant \u00e9chelle, structure et jetons.',
     'nav-reg-preferences':
         'Personnalise ton interface : outils actifs, ressources affich\u00e9es, effets visuels et comportement de navigation.',
-    'nav-reg-depistage':
-        'Outils d\'observation des apprentissages (SOLO, actions RLO) et configuration du d\u00e9pistage R\u00e0I (seuils de d\u00e9tection et d\'interpr\u00e9tation).',
+    'nav-labo-accompagnement':
+        'Outils d\'observation des apprentissages (SOLO, actions RLO, ACP) et configuration du d\u00e9pistage R\u00e0I (seuils de d\u00e9tection et d\'interpr\u00e9tation).',
     'nav-reg-donnees':
         'Sauvegarde, restauration, captures A-C-P, export anonymis\u00e9, r\u00e9initialisation et maintenance.',
     'nav-reg-apropos':

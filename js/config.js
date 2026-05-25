@@ -63,6 +63,7 @@ const configurationsOnglets = {
         { id: 'exporter', label: 'Exporter et archiver' }
     ],
     'labo': [
+        { id: 'accompagnement', label: "Outils d'observation" },
         { id: 'tirage', label: 'Tirage au sort' },
         { id: 'modelisation', label: 'Modélisation' },
         { id: 'rythme', label: 'Rythme de travail' },
@@ -79,7 +80,6 @@ const configurationsOnglets = {
     ],
     'reglages': [
         { id: 'preferences', label: 'Préférences' },
-        { id: 'depistage', label: 'Accompagnement' },
         { id: 'donnees', label: 'Données' },
         { id: 'a-propos', label: 'À propos' }
     ]
