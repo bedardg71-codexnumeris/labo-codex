@@ -687,6 +687,84 @@ Les 5 erreurs `js/property-access-on-non-object` résiduelles dans `js/import-ex
 
 ---
 
+## §1nonies — Suite 25 mai 2026 (matin) — Accompagnement + bug data-action diagnostiqué
+
+**Beta 99.64 → 99.65** suite à 4 commits livrés ce matin (du plus ancien au plus récent) :
+
+| Commit | Sujet | Build |
+|---|---|---|
+| `2600871` | bump 99.64 → 99.65 | 0525-0720 |
+| `11ac55f` | feat(accompagnement) : uniformisation page Observation et dépistage (patron `.option-accompagnement` + pliable `<details>` + repositionnement seuils d'interprétation à l'intérieur de l'option ACP) | 0525-0755 |
+| `79fc325` | feat(nav) : migration sous-onglet Accompagnement de Réglages vers Labo (« Outils d'observation » en 1ʳᵉ position dans Labo) | 0525-0823 |
+| `f96e3f0` | refactor(labo) : déplacer « Charger un codex data… » dans le menu Codex (retire la barre `.labo-actions-globales`) | 0525-0840 |
+
+`HEAD main` = `f96e3f0`. Tests : non re-exécutés sur ces 4 commits (validations visuelles Grégoire en session pour les 3 premiers ; le 4e est un déplacement HTML sans changement JS).
+
+### Bug rencontré et diagnostiqué : tous les boutons à `data-action` morts
+
+**Symptômes** : btn-codex, X du bandeau « mise à jour », et tous les utilitaires de l'en-tête (Aide, Réglages, bug, anonymisation, thème) insensibles au clic. Aucune erreur console. Toutes les fonctions cible (`window.Codex.toggleMenu`, `window.basculerTheme`, `window.ouvrirModalRapportBug`, `window.fermerBandeauMiseAJour`) existaient et fonctionnaient correctement quand appelées depuis la console. Les onglets principaux de navigation continuaient à fonctionner.
+
+**Diagnostic** : Safari file:// avait gardé en cache une version périmée de `js/main.js`. Dans cette version cachée, le dispatcher `data-action` global (main.js:780, à l'intérieur du handler `DOMContentLoaded`) n'était pas correctement attaché — alors que le fichier sur disque est correct. Aucun signal d'alerte : `init-inline.js` et `version.json` étaient synchros (`BUILD_ID = 0525-0840` partout), donc le mécanisme « Scripts périmés » de `init-inline.js` (commit historique `1ef2800`, 28 mars 2026) ne déclenchait pas — il ne surveille **que** son propre fichier via le snapshot `_SCRIPT_BUILD` (init-inline.js ligne 106), pas les autres scripts.
+
+**Résolution ad hoc** : modifier `main.js` (ajout temporaire de console.log) → Safari recharge la version fraîche → tout fonctionne. Les logs ont ensuite été retirés (aucune trace dans le diff final).
+
+**Inscrit BACKLOG comme #285** : « Cache Safari — Étendre la sentinelle `_SCRIPT_BUILD` aux scripts critiques » — extension du mécanisme historique à `main.js` (et possiblement `codex.js`, `evaluation-chargement.js`) pour combler le trou noir. Approche, coût opérationnel et alternative légère documentés dans le BACKLOG.
+
+### #285 LIVRÉ (25 mai 2026 vers 10h30) — Sentinelle BUILD_ID étendue à `main.js`
+
+Suite à une RÉPÉTITION du bug data-action dans la même session (Cmd+Q + relance Safari n'a pas suffi à recharger `main.js`), décision de livrer #285 immédiatement plutôt que d'attendre. Validation diagnostique préalable sous Chrome : tout fonctionne normalement → confirmation à 100% que le code est sain et que c'est bien un problème de cache Safari file://.
+
+**Implémentation** (3 fichiers touchés, ~30 LOC nettes, alternative légère retenue) :
+
+| Fichier | Modification |
+|---|---|
+| `js/main.js:19` | Ajout `window._SCRIPT_BUILD_main = '0525-0840';` en haut de l'IIFE, avec commentaire explicatif. |
+| `js/init-inline.js:236-253` | Refactor de `chargerVersionJSON()`. Remplace la vérification unique `BUILD_ID !== _SCRIPT_BUILD` par une boucle sur `snapshotsAVerifier = { 'init-inline.js': _SCRIPT_BUILD, 'main.js': window._SCRIPT_BUILD_main }` qui collecte les périmés. Snapshot absent (undefined) = ignoré. Si liste non vide → même flux reload+bandeau qu'avant, avec message identifiant les scripts en cause. |
+| `CLAUDE.md` § « Avant chaque commit » | Étape 3 mise à jour (le fallback est dans `js/init-inline.js:103-104`, pas dans `index.html:17166` — info obsolète corrigée gratuitement). Nouvelle étape 4 documentant la consigne de bumper aussi `js/main.js:19`. |
+
+**Tests** : `node --check js/init-inline.js && node --check js/main.js` → OK. Tests Vitest/Playwright non re-exécutés (modification dans des chemins de boot non couverts par la suite ; à valider manuellement par Grégoire au prochain bump de build).
+
+**Coût opérationnel acté** : 3 fichiers à synchroniser à chaque bump de build (au lieu de 2) : `version.json`, `js/init-inline.js:104`, `js/main.js:19`. Documenté dans CLAUDE.md.
+
+#### Patch en cascade (fix du fix v1, ~10h45)
+
+La v1 de la boucle de détection (`if (snap && snap !== BUILD_ID)`) avait un défaut : elle ignorait le cas où `window._SCRIPT_BUILD_main` est `undefined` — ce qui est précisément le cas quand Safari sert une version CACHÉE de `main.js` antérieure à #285 (donc sans `window._SCRIPT_BUILD_main`). Le `undefined && anything` est falsy, donc le snapshot manquant était silencieusement ignoré → le bandeau ne s'affichait pas.
+
+**Observation Grégoire** : `Cmd+Q` + relance Safari ne déclenchait pas le bandeau, mais `Cmd+Option+R` (recharger sans cache) faisait fonctionner l'app. Confirme que Safari servait `main.js` depuis le cache et que la détection était inopérante.
+
+**Fix v2** (livré ~10h45) : retrait du test `snap &&`, ajout d'un fallback descriptif `(snap || 'snapshot manquant')` dans le message du bandeau. Désormais, snapshot absent = considéré périmé. Pour retirer un script de la surveillance, retirer son entrée de l'objet `snapshotsAVerifier` (déclaration explicite). Commentaire de tête mis à jour pour expliciter cette sémantique.
+
+#### Bump build 0525-0840 → 0525-1055 + diagnostic final macOS 26.5 (~10h50-11h10)
+
+Pour déclencher le mécanisme de reload+bandeau (qui repose sur la comparaison `BUILD_ID !== _SCRIPT_BUILD`), un bump de build a été appliqué : `version.json`, `js/init-inline.js:104`, `js/main.js:19` passent à `0525-1055`. Hypothèse : l'ancien `init-inline.js` cache verrait la nouvelle valeur dans `version.json` et déclencherait le reload.
+
+**Constat à la relance Safari** : le bandeau **bleu** de mise à jour s'affiche bien (preuve que `version.json` est lu côté frais), MAIS le bandeau **rouge** « Scripts périmés » NE s'affiche PAS, le X du bandeau bleu est inerte, et btn-codex reste mort. Conclusion : Safari sert encore l'ancien `main.js` depuis son cache file://, et probablement aussi l'ancien `init-inline.js` (sinon le mécanisme aurait dû s'enclencher).
+
+**Test branche `test/etat-pre-accompagnement` (depuis `11ac55f`)** : Grégoire propose un revert temporaire pour vérifier si le bug vient des 3 commits du matin. Branche créée, modifs locales stashées, Cmd+Option+R demandé. **Résultat** : le bug est TOUJOURS présent même sur l'état pré-Accompagnement. **Le bug n'est donc PAS dans le code.**
+
+**Diagnostic final** : Grégoire signale une mise à jour macOS hier (macOS 26.5). Vérification du menu Safari > Développement : l'option historique « Désactiver les caches » a **disparu** dans macOS 26.5. Seul « Vider les caches » (⌥⌘E, action one-shot) subsiste. C'est cohérent avec un changement de comportement Safari volontaire d'Apple, qui rend le cache file:// plus persistant et retire le contrôle utilisateur historique.
+
+**Implications pour le projet** :
+- Le mécanisme #285 (sentinelle BUILD_ID multi-fichiers) reste utile structurellement et restera en place — il s'enclenchera correctement quand Safari respectera à nouveau ses propres conventions de cache.
+- En attendant un fix Apple : **Chrome devient le navigateur de développement par défaut**. Safari reste utilisable mais nécessite ⌥⌘E (Vider les caches) suivi de Cmd+R à chaque session.
+- Le bug `data-action` n'est PAS un bug du code Labo Codex — c'est un symptôme du cache pathologique. Aucune entrée SUIVI-BUGS nécessaire côté Labo Codex (le code fonctionne sous Chrome ET sous Safari après ⌥⌘E).
+
+**Branche `test/etat-pre-accompagnement` conservée localement** (non pushée). À supprimer plus tard une fois que la confiance est rétablie.
+
+### Erreurs Chrome console (relevées en passant)
+
+Pendant le test diagnostic sous Chrome, plusieurs erreurs console ont été relevées :
+
+- `XMLHttpRequest version.json from origin 'null' blocked by CORS` (init-inline.js:223) → **Comportement attendu sous Chrome file://**. Le `try/catch` ligne 220 attrape silencieusement, le code utilise les fallback. Pas un bug.
+- `icon-files.svg net::ERR_FILE_NOT_FOUND` → bug **#115** déjà connu (SUIVI-BUGS).
+- `x:1 net::ERR_FILE_NOT_FOUND` → **mystérieux**. Aucun `src="x"` ni `href="x"` trouvé par grep dans index.html. À investiguer si reproductible (peut-être un fichier référencé dynamiquement quelque part).
+- `Executing inline event handler violates CSP 'script-src self'` (deux fois, reportées à index.html:15591 = `</html>` dernière ligne, donc handler attribué dynamiquement par JS) → **violation réelle de la convention CLAUDE.md « Zero handler inline »**. À investiguer et fixer (un module attribue probablement un `element.onclick = function...` quelque part). À inscrire BACKLOG ou SUIVI-BUGS au choix.
+- `Unsafe attempt to load URL file:// from frame with URL file://` → un iframe ou fetch pointant vers index.html lui-même. À identifier.
+
+**Pas de bump de beta** acté pour cette session — seul le snapshot `_SCRIPT_BUILD_main` est bumpé en routine au prochain build officiel.
+
+---
+
 ## §2 — Critères de clôture du cycle Cat-B (statut)
 
 Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
