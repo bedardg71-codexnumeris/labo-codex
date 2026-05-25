@@ -630,13 +630,6 @@
             filter: brightness(0) invert(1);
         }
 
-        /* Barre d'actions Labo (bouton « Charger un codex data ») */
-        .labo-actions-globales {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 12px;
-        }
-
         /* ===============================
            Page d'accueil (Chantier 3)
            Conforme au Design System :
@@ -3798,6 +3791,10 @@
                                 <button id="codex-menu-ouvrir-versement" class="codex-menu-item" data-action="ReserveOuvrir.actionOuvrir">
                                     <span class="codex-menu-icone"><img src="icons/icon-import.svg" alt=""></span> Ouvrir une archive...
                                 </button>
+                                <button id="codex-menu-charger-codex-data" class="codex-menu-item" data-action="LaboCodexData.actionOuvrirChargement" data-tooltip="labo-charger-codex-data">
+                                    <span class="codex-menu-icone"><img src="icons/icon-import.svg" alt=""></span> Charger un codex data...
+                                </button>
+                                <input type="file" id="labo-codex-data-input" accept=".json" class="u-hide" data-on-change="LaboCodexData.onFichierSelectionne">
                                 <div class="codex-menu-sep"></div>
                                 <button id="codex-menu-fermer" class="codex-menu-item codex-menu-item--danger u-hide" data-action="Codex.actionFermer">
                                     <span class="codex-menu-icone"><img src="icons/icon-cancel.svg" alt=""></span> Fermer le codex
@@ -8553,18 +8550,6 @@
                             </button>
                         </span>
                     </div>
-                </div>
-
-                <!-- Barre d'actions Labo : charger un codex data (#252) -->
-                <div id="labo-actions-globales" class="labo-actions-globales">
-                    <button data-action="LaboCodexData.actionOuvrirChargement"
-                            class="btn-secondaire u-texte-petit"
-                            data-tooltip="labo-charger-codex-data">
-                        <img src="icons/icon-import.svg" alt="" class="btn-inline-icon">
-                        Charger un codex data&hellip;
-                    </button>
-                    <input type="file" id="labo-codex-data-input" accept=".json" class="u-hide"
-                           data-on-change="LaboCodexData.onFichierSelectionne">
                 </div>
 
                 <div id="labo-accompagnement" class="sous-section">
