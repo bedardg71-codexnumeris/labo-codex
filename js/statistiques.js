@@ -81,7 +81,7 @@ function chargerStatistiquesApercu() {
  * Charge les informations du cours actif
  */
 function chargerInfosCours() {
-    const listeCours = db.getSync('listeCours', []);
+    const listeCours = db.getSync('cours', []);
     const coursActif = listeCours.find(c => c.actif) || listeCours[0] || null;
 
     // Nombre de cours configurés

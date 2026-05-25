@@ -446,7 +446,7 @@ function obtenirEtatApplication() {
 
     // Nombre de cours et cours actif
     try {
-        const cours = db.getSync('listeCours', []);
+        const cours = db.getSync('cours', []);
         etat.nbCours = Array.isArray(cours) ? cours.length : 0;
         // Utiliser infoCours (source de vérité) plutôt que chercher dans listeCours
         const infoCours = db.getSync('infoCours', null);
