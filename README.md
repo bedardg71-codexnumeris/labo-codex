@@ -84,6 +84,10 @@ chaîne de déploiement complète.
   Archives, Codex data, Voûte)
 - [`docs/DATA-OWNERSHIP.md`](docs/DATA-OWNERSHIP.md) — registre de propriété
   des clés de stockage (Single Source of Truth)
+- [`docs/adr/`](docs/adr/README.md) — Architecture Decision Records :
+  12 décisions structurantes formalisées (format Michael Nygard) sur le
+  choix vanilla JS, stockage hybride, mode hors-ligne, échelle IDME,
+  licences, etc.
 
 ### Conformité et opérations
 
