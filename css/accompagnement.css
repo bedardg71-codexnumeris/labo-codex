@@ -429,7 +429,19 @@ nav [data-tooltip],
     display: block;
 }
 
-/* --- Bouton ✴️ (.btn-aide-contextuelle[data-aide]) ------------------- */
+/* --- Icône info dans bouton aide (.btn-aide-icon) -------------------- */
+.btn-aide-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    vertical-align: middle;
+    filter: brightness(0) invert(0.85);
+}
+.mode-clair .btn-aide-icon {
+    filter: brightness(0) invert(0.25);
+}
+
+/* --- Bouton aide contextuelle (.btn-aide-contextuelle[data-aide]) ---- */
 .btn-aide-contextuelle {
     display: none;
     align-items: center;
