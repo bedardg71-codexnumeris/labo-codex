@@ -16,6 +16,34 @@
 
 ---
 
+## Items livrés après la bascule du 25 mai 2026
+
+### Session du 26 mai 2026 — bugs des testeurs + petits items backlog (Beta 99.66, builds 0526-0345 → 0526-0503)
+
+- [x] **Bug 25 mai 07:19 — modale migration legacy au démarrage** ✅ LIVRÉ (commit `aabc0d3`, build 0526-0345)
+  - Modale « Mise à jour de tes données » apparaissait sur iPad alors qu'elle avait été conditionnée pour ne plus apparaître. Retrait complet zéro-dette : 6 fonctions (`detecterDonneesLegacy`, `afficherModalMigrationLegacy`, `fermerModalMigrationLegacy`, `reporterMigrationLegacy`, `executerMigrationLegacy`, `verifierEtProposerMigrationLegacy`) + 6 exports + 1 appel dans main.js. −380 LOC net.
+
+- [x] **Bug 21 mai (3 rapports) — doublons original/reprise dans Travaux soumis + clic confus** ✅ LIVRÉ (commit `7574c75`, build 0526-0441)
+  - Audit 17 paires (DA, productionId) : 16 saines + 1 orpheline (Houle/Artefact 5, fichier reprise orphelin supprimé séparément côté données). Fix code : `genererSectionTravaux` (profil-etudiant-sections-affichage.js:4595) filtre désormais les fichiers dont l'éval est `remplaceeParId`. Ne reste affichée que la reprise active.
+
+- [x] **Bug console 26 mai — ReferenceError `verifierEtChargerEvaluationExistante`** ✅ LIVRÉ (commit `71286d5`, build 0526-0455)
+  - Découvert pendant vérification du déploiement précédent. Audit complet d'evaluation.js : 10 fonctions définies localement appelées depuis sous-modules sans avoir été exportées sur window — séquelles de l'extraction des sous-modules `evaluation-*.js` (18-21 mai 2026). 6 ReferenceErrors potentiels + 4 échecs silencieux (guard typeof). 10 exports ajoutés en bas d'evaluation.js (purement additif).
+  - Cause directe du bug du 21 mai « rien ne s'affiche au clic » : `verifierEtChargerEvaluationExistante` crashait à chaque changement d'étudiant ou de production → l'éval existante n'était jamais pré-chargée. [[feedback-fix-perdu-refactoring-extraction]] confirmé.
+
+- [x] **#281** Migrer les notifications HTML custom résiduelles vers `window.notifications.{succes, erreur, info}` ✅ LIVRÉ (commit `c1c8abd`, build 0526-0503)
+  - Audit complémentaire (pattern strict createElement + position:fixed + setTimeout remove) : 3 sites trouvés. 1 vrai toast custom migré (`saisie-presences.js:1357`, 18 lignes → 1 ligne). 1 faux positif (overlay PDF preview). 1 banner d'avertissement (`travaux-ui.js:793`, 8s + cliquable) hors scope — pattern différent non couvert par l'API toast standard, à traiter dans un chantier d'élargissement d'API banner si nécessaire.
+
+- [x] **#278** Bilan réflexif — scroll reset au top en passant à l'onglet « Importer les résultats » ✅ LIVRÉ (commit `c1c8abd`, build 0526-0503)
+  - Fix option (a) recommandée : `scrollIntoView({block:'start'})` explicite sur le conteneur en début d'`afficherVue` (bilan-reflexif.js:124). Stable pour toutes les transitions vue-haute → vue-courte, pas seulement Questionnaire → Importer.
+
+- [x] **#280** Fusionner « Capturer maintenant » et « Reconstruire l'historique » en une seule action ✅ LIVRÉ (commit `c1c8abd`, build 0526-0503)
+  - Vérification amont : `reconstruireSnapshotsHistoriques` régénère le calendrier avec l'union de tous les horaires (genererCalendrierComplet), gère donc le multi-groupes-cours. Pas de bloqueur.
+  - Retraits : bouton « Capturer maintenant » (index.html), `capturerSnapshotManuel` (snapshots.js, -20 LOC) + son export window + `obtenirNumeroSemaineActuelle` (-27 LOC, code mort après). Conservé : `capturerSnapshotHebdomadaire` (utilisée par `verifierEtCapturerSnapshotHebdomadaire` flux auto).
+  - Renommages UX : « Reconstruire l'historique » → « Recalculer les captures », « Captures hebdomadaires » → « Captures de séances », grid 3 colonnes → 2 colonnes.
+  - Effet collatéral : résout les 4 facettes du bug #116 puisque le chemin `capturerSnapshotManuel` est éliminé.
+
+---
+
 ## Contenu archive (à partir d'ici, contenu identique au BACKLOG.md d'origine du 24 mai 2026)
 
 > **Derniere mise a jour avant bascule** : 24 mai 2026 (Beta 99.64, Build 0524-0548) — chantier chrome unifié LIVRÉ : refonte entête (Codex / Titre+Meta / Utilitaires en grid 3 colonnes), bande contexte ligne 2, nav primaire sticky avec gradient maritime continu, sous-nav vide masquée carré, breakpoint unique 1024px avec bouton ⋯ mobile + selects natifs nav/sous-nav, module `js/chrome-unifie.js`. +2 items #283 (harmonisation responsive pages à sidebar en mobile) + #284 (harmonisation structure titres+sous-titres) hors-scope chantier chrome.

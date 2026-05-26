@@ -2,8 +2,9 @@
 
 > **Pour Claude** : Ce fichier liste les **items ouverts** uniquement. L'historique complet des items livrés (313 items, fév-mai 2026) vit dans `BACKLOG-ARCHIVE.md`.
 >
-> **Dernière bascule** : 25 mai 2026 fin de journée — extraction des items livrés vers BACKLOG-ARCHIVE.md. 30 items ouverts conservés ici, organisés par thème.
-> **État courant** : Beta 99.64-99.65 (Build 0525-1055), HEAD main `0bd482c`. Audit annuel LIVRÉ et largement absorbé sur main. Présentation AQPC le 3 juin 2026 (J−9).
+> **Dernière bascule** : 25 mai 2026 fin de journée — extraction des items livrés vers BACKLOG-ARCHIVE.md.
+> **État courant** : Beta 99.66 (Build 0526-0503), HEAD main `c1c8abd`. 27 items ouverts (session 26 mai matin : 3 items #278/#280/#281 livrés + 3 bugs testeurs résolus).
+> **Présentation AQPC** : 3 juin 2026 (J−8).
 > **Pour ajouter un item** : `- [ ] **#XX** Description courte` + sous-puces de contexte. Dernier ID utilisé : **#285** (livré).
 
 ---
@@ -29,22 +30,6 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - Modal Bibliothèque cours vide en V2 — 10 sites dans cours.js lisent encore `listeCours`.
   - Effort estimé révisé : 5-7 h (scope réel 93 sites dans 15+ fichiers d'après post-mortem du 23 mai matin, tentative revertée).
   - **Prérequis P1-P4 LIVRÉS** : bandeau mode édition, activation explicite, migration tuple naturel, snippet recovery (cf. BACKLOG-ARCHIVE.md pour le post-mortem et le snippet).
-
-- [ ] 🟡 **#280** Fusionner « Capturer maintenant » et « Reconstruire l'historique » en une seule action
-  - Retour Grégoire 22 mai : il utilise toujours « Reconstruire » à chaque fois.
-  - Fusion résout le bug #116 (snapshots manuels 4 facettes) en un coup.
-  - Effort estimé : 1 h - 1 h 30. Bloqueur amont : confirmer que `reconstruireSnapshotsHistoriques` traite le multi-groupes-cours.
-  - Renommer aussi les 3 cartes d'info au-dessus des boutons pour cohérence séance.
-
-- [ ] 🟡 **#281** Migrer les notifications HTML custom résiduelles vers `window.notifications.{succes, erreur, info}`
-  - 1 site identifié : `saisie-presences.js:1357-1374` (« ✅ Présences enregistrées avec succès » fond teal, échappé à la migration Cat-B Track 4 E du 21 mai car pattern HTML custom).
-  - Audit complémentaire à grepper : `document\.createElement.*notification|innerHTML.*notification`.
-  - Effort estimé : ~30 min.
-
-- [ ] 🟡 **#278** Bilan réflexif — scroll reset au top en passant à l'onglet « Importer les résultats »
-  - Bug pré-existant confirmé (pas une régression du refactor 15 mai).
-  - Cause : `afficherVue` cache vue précédente par `display:none`, contenu suivant plus court → shrink du DOM → Safari reset scrollTop.
-  - Piste recommandée : scroll explicite vers le haut du conteneur bilan à chaque `afficherVue` (option a).
 
 - [ ] 🟢 **#283** Harmonisation responsive des pages à sidebar en mobile (<1024 px)
   - Pages : Conception (Productions/Grilles/Échelles/Pratiques/Cartouches), Évaluation (Liste), possiblement Calendrier.
