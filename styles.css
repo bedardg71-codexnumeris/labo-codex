@@ -255,51 +255,57 @@
 
     /* ═══════════════════════════════════════════
        PALETTE ACCOMPAGNEMENT
-       Fond orange, texte sombre — identique 2 modes
-       Base : #e8923a
-       Validée 19 avril 2026 (palette-accompagnement.md)
+       Fond jaune doré chaud, texte sombre — identique 2 modes
+       Base : #e8c43a (bascule du 26 mai 2026, anciennement #e8923a orange
+       libéré pour servir d'accent navigation active — cf. Lot J du
+       PLAN-MIGRATION-ICONES-SVG.md)
+       Validée 19 avril 2026 (palette-accompagnement.md), bascule jaune
+       validée 26 mai 2026 (REFERENTIEL-COULEURS-JAUNE.html)
        NE PAS REDÉFINIR DANS .mode-clair
        ═══════════════════════════════════════════ */
 
     /* Surfaces */
-    --acc-fond:            #e8923a;   /* Fond principal de tous les composants */
-    --acc-surface:         #d4822e;   /* En-têtes, zones surélevées */
-    --acc-surface-hover:   #c87828;   /* Hover sur surfaces */
+    --acc-fond:            #e8c43a;   /* Fond principal de tous les composants */
+    --acc-surface:         #d4b330;   /* En-têtes, zones surélevées */
+    --acc-surface-hover:   #c0a020;   /* Hover sur surfaces */
 
     /* Bordures */
-    --acc-bordure:         #b06820;   /* Bordure standard */
-    --acc-bordure-active:  #8a5018;   /* Bordure focus/active */
+    --acc-bordure:         #a08020;   /* Bordure standard */
+    --acc-bordure-active:  #806015;   /* Bordure focus/active */
 
     /* Texte */
-    --acc-texte:           #2a1404;   /* Texte principal (brun très foncé) */
+    --acc-texte:           #2a1404;   /* Texte principal (brun très foncé) — contraste AAA sur jaune */
     --acc-texte-doux:      #4a2e10;   /* Texte secondaire */
     --acc-texte-leger:     #6a4820;   /* Texte tertiaire, annotations */
 
-    /* Accent (texte foncé sur fond orange) */
+    /* Accent (texte foncé sur fond jaune) */
     --acc-accent:          #3a1e08;   /* Titres, liens, termes glossaire */
     --acc-accent-vif:      #2a1404;   /* Titres principaux */
 
-    /* Bouton primaire (foncé sur orange) */
+    /* Bouton primaire (foncé sur jaune) */
     --acc-btn-prim:        #2a1404;
     --acc-btn-prim-hover:  #3a1e08;
     --acc-btn-prim-txt:    #f8e8d0;   /* Texte clair sur bouton foncé */
 
-    /* Bouton secondaire (contour foncé sur orange) */
+    /* Bouton secondaire (contour foncé sur jaune) */
     --acc-btn-sec-bord:    #4a2e10;
     --acc-btn-sec-txt:     #2a1404;
 
     /* Blocs internes (conseil, exemple, alerte) */
-    --acc-conseil-fond:    #f0a858;   /* Orange plus clair */
-    --acc-conseil-bord:    #8a5018;
-    --acc-exemple-fond:    #eba64e;   /* Orange chaud */
-    --acc-exemple-bord:    #3a5a78;   /* Bleu discret pour différencier */
-    --acc-alerte-fond:     #e07830;   /* Orange plus foncé/rouge */
-    --acc-alerte-bord:     #8a2e10;
+    --acc-conseil-fond:    #f0d860;   /* Jaune plus clair */
+    --acc-conseil-bord:    #806015;
+    --acc-exemple-fond:    #e8d050;   /* Jaune chaud, légèrement plus pâle */
+    --acc-exemple-bord:    #3a5a78;   /* Bleu discret pour différencier — INCHANGÉ (contraste excellent sur jaune) */
+    --acc-alerte-fond:     #d49a30;   /* Ocre vif pour distinguer du jaune fond (signal alerte) */
+    --acc-alerte-bord:     #806015;
 
     /* Dots progression tour guidé */
-    --acc-dot-inactif:     #c87828;
+    --acc-dot-inactif:     #a08020;
     --acc-dot-actif:       #2a1404;
     --acc-dot-vu:          #6a4820;
+
+    /* Icônes header aide + réglages (même teinte que le fond accompagnement) */
+    --icone-aide-config:   #e8c43a;
 }
 
 /* ===============================
@@ -1147,13 +1153,40 @@ h1, h2, h3, h4 {
 }
 
 /* === Icônes SVG en-tête === */
-.header-icon {
+/* Forme <img> : 3 boutons header restants (bug, anonymisation, thème) en blanc translucide */
+img.header-icon {
     width: 16px;
     height: 16px;
     object-fit: contain;
     filter: brightness(0) invert(1);
     vertical-align: middle;
 }
+/* Forme <span> + mask-image : boutons aide + réglages en jaune permanent (Lot I) */
+span.header-icon {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    vertical-align: middle;
+    background-color: var(--icone-aide-config);
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+}
+/* SVG inlinés en data:URI pour éviter le blocage CORS du mask-image
+   sur WebKit file:// (Origin null sans Access-Control-Allow-Origin).
+   Source : icons/icon-wordbook.svg + icons/icon-tune.svg (inchangés). */
+.ico-wordbook {
+    -webkit-mask-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPiAgICA8cGF0aCBkPSJNIDEyIDIgQyA4LjY5MSAyIDYgNC42OTEgNiA4IEwgNiA0Mi40MTc5NjkgQyA2IDQ1LjQ5NTk2OSA4LjY5MSA0OCAxMiA0OCBMIDQ0IDQ4IEwgNDQgNDYgTCAxMiA0NiBDIDkuODMyIDQ2IDggNDQuMzU5OTY5IDggNDIuNDE3OTY5IEMgOCA0MC41MDE5NjkgOS43NTcgMzkgMTIgMzkgTCA0NCAzOSBMIDQ0IDIgTCAxMiAyIHogTSAxNi45NDMzNTkgMTUgTCAxOS4wNTY2NDEgMTUgTCAyMyAyNS41MTU2MjUgTCAyMyAyNiBMIDIxLjA2MjUgMjYuMDQ4ODI4IEwgMjEgMjUuODc4OTA2IEwgMjAuMjk2ODc1IDI0IEwgMTUuNzA1MDc4IDI0IEwgMTQuOTM3NSAyNi4wNDg4MjggTCAxNC44MTA1NDcgMjYgTCAxMyAyNiBMIDEzIDI1LjUxNTYyNSBMIDE2Ljk0MzM1OSAxNSB6IE0gMjkuMjUgMTUgTCAzNyAxNSBMIDM3IDE2LjgzMjAzMSBMIDMxLjYyNSAyNCBMIDM3IDI0IEwgMzcgMjYgTCAyOSAyNiBMIDI5IDI0LjE2Nzk2OSBMIDM0LjM3NSAxNyBMIDI5LjI1IDE3IEwgMjkuMjUgMTUgeiBNIDE4IDE3Ljg3ODkwNiBMIDE2LjQ1NTA3OCAyMiBMIDE5LjU0Njg3NSAyMiBMIDE4IDE3Ljg3ODkwNiB6IE0gMjQgMTkgTCAyOCAxOSBMIDI4IDIxIEwgMjQgMjEgTCAyNCAxOSB6Ii8+PC9zdmc+");
+            mask-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPiAgICA8cGF0aCBkPSJNIDEyIDIgQyA4LjY5MSAyIDYgNC42OTEgNiA4IEwgNiA0Mi40MTc5NjkgQyA2IDQ1LjQ5NTk2OSA4LjY5MSA0OCAxMiA0OCBMIDQ0IDQ4IEwgNDQgNDYgTCAxMiA0NiBDIDkuODMyIDQ2IDggNDQuMzU5OTY5IDggNDIuNDE3OTY5IEMgOCA0MC41MDE5NjkgOS43NTcgMzkgMTIgMzkgTCA0NCAzOSBMIDQ0IDIgTCAxMiAyIHogTSAxNi45NDMzNTkgMTUgTCAxOS4wNTY2NDEgMTUgTCAyMyAyNS41MTU2MjUgTCAyMyAyNiBMIDIxLjA2MjUgMjYuMDQ4ODI4IEwgMjEgMjUuODc4OTA2IEwgMjAuMjk2ODc1IDI0IEwgMTUuNzA1MDc4IDI0IEwgMTQuOTM3NSAyNi4wNDg4MjggTCAxNC44MTA1NDcgMjYgTCAxMyAyNiBMIDEzIDI1LjUxNTYyNSBMIDE2Ljk0MzM1OSAxNSB6IE0gMjkuMjUgMTUgTCAzNyAxNSBMIDM3IDE2LjgzMjAzMSBMIDMxLjYyNSAyNCBMIDM3IDI0IEwgMzcgMjYgTCAyOSAyNiBMIDI5IDI0LjE2Nzk2OSBMIDM0LjM3NSAxNyBMIDI5LjI1IDE3IEwgMjkuMjUgMTUgeiBNIDE4IDE3Ljg3ODkwNiBMIDE2LjQ1NTA3OCAyMiBMIDE5LjU0Njg3NSAyMiBMIDE4IDE3Ljg3ODkwNiB6IE0gMjQgMTkgTCAyOCAxOSBMIDI4IDIxIEwgMjQgMjEgTCAyNCAxOSB6Ii8+PC9zdmc+");
+}
+.ico-tune {
+    -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPjxwYXRoIGQ9Ik0gMTYgMiBDIDE0LjMwMDc4MSAyIDEzIDMuMzAwNzgxIDEzIDUgTCAxMyA3IEwgMyA3IEMgMi45Njg3NSA3IDIuOTM3NSA3IDIuOTA2MjUgNyBDIDIuODc1IDcgMi44NDM3NSA3IDIuODEyNSA3IEMgMi4yNjE3MTkgNy4wNTA3ODEgMS44NTU0NjkgNy41NDI5NjkgMS45MDYyNSA4LjA5Mzc1IEMgMS45NTcwMzEgOC42NDQ1MzEgMi40NDkyMTkgOS4wNTA3ODEgMyA5IEwgMTMgOSBMIDEzIDExIEMgMTMgMTIuNjk5MjE5IDE0LjMwMDc4MSAxNCAxNiAxNCBMIDE4IDE0IEMgMTkuNjk5MjE5IDE0IDIxIDEyLjY5OTIxOSAyMSAxMSBMIDIxIDUgQyAyMSAzLjMwMDc4MSAxOS42OTkyMTkgMiAxOCAyIFogTSAyMiA3IEwgMjIgOSBMIDQ3IDkgQyA0Ny4zNTkzNzUgOS4wMDM5MDYgNDcuNjk1MzEzIDguODE2NDA2IDQ3Ljg3ODkwNiA4LjUwMzkwNiBDIDQ4LjA1ODU5NCA4LjE5MTQwNiA0OC4wNTg1OTQgNy44MDg1OTQgNDcuODc4OTA2IDcuNDk2MDk0IEMgNDcuNjk1MzEzIDcuMTgzNTk0IDQ3LjM1OTM3NSA2Ljk5NjA5NCA0NyA3IFogTSAzNCAxOSBDIDMyLjMwMDc4MSAxOSAzMSAyMC4zMDA3ODEgMzEgMjIgTCAzMSAyNCBMIDMgMjQgQyAyLjk2ODc1IDI0IDIuOTM3NSAyNCAyLjkwNjI1IDI0IEMgMi44NzUgMjQgMi44NDM3NSAyNCAyLjgxMjUgMjQgQyAyLjI2MTcxOSAyNC4wNTA3ODEgMS44NTU0NjkgMjQuNTQyOTY5IDEuOTA2MjUgMjUuMDkzNzUgQyAxLjk1NzAzMSAyNS42NDQ1MzEgMi40NDkyMTkgMjYuMDUwNzgxIDMgMjYgTCAzMSAyNiBMIDMxIDI4IEMgMzEgMjkuNjk5MjE5IDMyLjMwMDc4MSAzMSAzNCAzMSBMIDM2IDMxIEMgMzcuNjk5MjE5IDMxIDM5IDI5LjY5OTIxOSAzOSAyOCBMIDM5IDIyIEMgMzkgMjAuMzAwNzgxIDM3LjY5OTIxOSAxOSAzNiAxOSBaIE0gNDAgMjQgTCA0MCAyNiBMIDQ3IDI2IEMgNDcuMzU5Mzc1IDI2LjAwMzkwNiA0Ny42OTUzMTMgMjUuODE2NDA2IDQ3Ljg3ODkwNiAyNS41MDM5MDYgQyA0OC4wNTg1OTQgMjUuMTkxNDA2IDQ4LjA1ODU5NCAyNC44MDg1OTQgNDcuODc4OTA2IDI0LjQ5NjA5NCBDIDQ3LjY5NTMxMyAyNC4xODM1OTQgNDcuMzU5Mzc1IDIzLjk5NjA5NCA0NyAyNCBaIE0gMTMgMzYgQyAxMS4zMDA3ODEgMzYgMTAgMzcuMzAwNzgxIDEwIDM5IEwgMTAgNDEgTCAzIDQxIEMgMi45Njg3NSA0MSAyLjkzNzUgNDEgMi45MDYyNSA0MSBDIDIuODc1IDQxIDIuODQzNzUgNDEgMi44MTI1IDQxIEMgMi4yNjE3MTkgNDEuMDUwNzgxIDEuODU1NDY5IDQxLjU0Mjk2OSAxLjkwNjI1IDQyLjA5Mzc1IEMgMS45NTcwMzEgNDIuNjQ0NTMxIDIuNDQ5MjE5IDQzLjA1MDc4MSAzIDQzIEwgMTAgNDMgTCAxMCA0NSBDIDEwIDQ2LjY5OTIxOSAxMS4zMDA3ODEgNDggMTMgNDggTCAxNSA0OCBDIDE2LjY5OTIxOSA0OCAxOCA0Ni42OTkyMTkgMTggNDUgTCAxOCAzOSBDIDE4IDM3LjMwMDc4MSAxNi42OTkyMTkgMzYgMTUgMzYgWiBNIDE5IDQxIEwgMTkgNDMgTCA0NyA0MyBDIDQ3LjM1OTM3NSA0My4wMDM5MDYgNDcuNjk1MzEzIDQyLjgxNjQwNiA0Ny44Nzg5MDYgNDIuNTAzOTA2IEMgNDguMDU4NTk0IDQyLjE5MTQwNiA0OC4wNTg1OTQgNDEuODA4NTk0IDQ3Ljg3ODkwNiA0MS40OTYwOTQgQyA0Ny42OTUzMTMgNDEuMTgzNTk0IDQ3LjM1OTM3NSA0MC45OTYwOTQgNDcgNDEgWiIvPjwvc3ZnPg==");
+            mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPjxwYXRoIGQ9Ik0gMTYgMiBDIDE0LjMwMDc4MSAyIDEzIDMuMzAwNzgxIDEzIDUgTCAxMyA3IEwgMyA3IEMgMi45Njg3NSA3IDIuOTM3NSA3IDIuOTA2MjUgNyBDIDIuODc1IDcgMi44NDM3NSA3IDIuODEyNSA3IEMgMi4yNjE3MTkgNy4wNTA3ODEgMS44NTU0NjkgNy41NDI5NjkgMS45MDYyNSA4LjA5Mzc1IEMgMS45NTcwMzEgOC42NDQ1MzEgMi40NDkyMTkgOS4wNTA3ODEgMyA5IEwgMTMgOSBMIDEzIDExIEMgMTMgMTIuNjk5MjE5IDE0LjMwMDc4MSAxNCAxNiAxNCBMIDE4IDE0IEMgMTkuNjk5MjE5IDE0IDIxIDEyLjY5OTIxOSAyMSAxMSBMIDIxIDUgQyAyMSAzLjMwMDc4MSAxOS42OTkyMTkgMiAxOCAyIFogTSAyMiA3IEwgMjIgOSBMIDQ3IDkgQyA0Ny4zNTkzNzUgOS4wMDM5MDYgNDcuNjk1MzEzIDguODE2NDA2IDQ3Ljg3ODkwNiA4LjUwMzkwNiBDIDQ4LjA1ODU5NCA4LjE5MTQwNiA0OC4wNTg1OTQgNy44MDg1OTQgNDcuODc4OTA2IDcuNDk2MDk0IEMgNDcuNjk1MzEzIDcuMTgzNTk0IDQ3LjM1OTM3NSA2Ljk5NjA5NCA0NyA3IFogTSAzNCAxOSBDIDMyLjMwMDc4MSAxOSAzMSAyMC4zMDA3ODEgMzEgMjIgTCAzMSAyNCBMIDMgMjQgQyAyLjk2ODc1IDI0IDIuOTM3NSAyNCAyLjkwNjI1IDI0IEMgMi44NzUgMjQgMi44NDM3NSAyNCAyLjgxMjUgMjQgQyAyLjI2MTcxOSAyNC4wNTA3ODEgMS44NTU0NjkgMjQuNTQyOTY5IDEuOTA2MjUgMjUuMDkzNzUgQyAxLjk1NzAzMSAyNS42NDQ1MzEgMi40NDkyMTkgMjYuMDUwNzgxIDMgMjYgTCAzMSAyNiBMIDMxIDI4IEMgMzEgMjkuNjk5MjE5IDMyLjMwMDc4MSAzMSAzNCAzMSBMIDM2IDMxIEMgMzcuNjk5MjE5IDMxIDM5IDI5LjY5OTIxOSAzOSAyOCBMIDM5IDIyIEMgMzkgMjAuMzAwNzgxIDM3LjY5OTIxOSAxOSAzNiAxOSBaIE0gNDAgMjQgTCA0MCAyNiBMIDQ3IDI2IEMgNDcuMzU5Mzc1IDI2LjAwMzkwNiA0Ny42OTUzMTMgMjUuODE2NDA2IDQ3Ljg3ODkwNiAyNS41MDM5MDYgQyA0OC4wNTg1OTQgMjUuMTkxNDA2IDQ4LjA1ODU5NCAyNC44MDg1OTQgNDcuODc4OTA2IDI0LjQ5NjA5NCBDIDQ3LjY5NTMxMyAyNC4xODM1OTQgNDcuMzU5Mzc1IDIzLjk5NjA5NCA0NyAyNCBaIE0gMTMgMzYgQyAxMS4zMDA3ODEgMzYgMTAgMzcuMzAwNzgxIDEwIDM5IEwgMTAgNDEgTCAzIDQxIEMgMi45Njg3NSA0MSAyLjkzNzUgNDEgMi45MDYyNSA0MSBDIDIuODc1IDQxIDIuODQzNzUgNDEgMi44MTI1IDQxIEMgMi4yNjE3MTkgNDEuMDUwNzgxIDEuODU1NDY5IDQxLjU0Mjk2OSAxLjkwNjI1IDQyLjA5Mzc1IEMgMS45NTcwMzEgNDIuNjQ0NTMxIDIuNDQ5MjE5IDQzLjA1MDc4MSAzIDQzIEwgMTAgNDMgTCAxMCA0NSBDIDEwIDQ2LjY5OTIxOSAxMS4zMDA3ODEgNDggMTMgNDggTCAxNSA0OCBDIDE2LjY5OTIxOSA0OCAxOCA0Ni42OTkyMTkgMTggNDUgTCAxOCAzOSBDIDE4IDM3LjMwMDc4MSAxNi42OTkyMTkgMzYgMTUgMzYgWiBNIDE5IDQxIEwgMTkgNDMgTCA0NyA0MyBDIDQ3LjM1OTM3NSA0My4wMDM5MDYgNDcuNjk1MzEzIDQyLjgxNjQwNiA0Ny44Nzg5MDYgNDIuNTAzOTA2IEMgNDguMDU4NTk0IDQyLjE5MTQwNiA0OC4wNTg1OTQgNDEuODA4NTk0IDQ3Ljg3ODkwNiA0MS40OTYwOTQgQyA0Ny42OTUzMTMgNDEuMTgzNTk0IDQ3LjM1OTM3NSA0MC45OTYwOTQgNDcgNDEgWiIvPjwvc3ZnPg==");
+}
+
 /* Boutons icône-seule dans l'en-tête (bug, thème) */
 .btn-icon-header {
     padding: 6px;
