@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260526o"> <!-- Lot J phase 2 : 5 couleurs sections + multiply -->
+    <link rel="stylesheet" href="styles.css?v=20260526p"> <!-- Lot J extension : bug violet + anonymisation cyan -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -3816,8 +3816,8 @@
                     <!-- Utilitaires desktop (5 icônes, 2 clusters séparés par une ligne verticale) -->
                     <div class="entete-utilitaires">
                         <div class="utilitaires-groupe">
-                            <button data-action="ouvrirModalRapportBug" class="btn-action-header btn-icon-header" data-tooltip="entete-signaler-bug" title="Signaler un bug"><img src="icons/icon-bug.svg" alt="" class="header-icon"></button>
-                            <button id="btn-toggle-anonymisation-nav" class="btn-action-header btn-icon-header" data-tooltip="entete-mode-affichage" title="Mode normal / anonymisé" data-action="basculerModeAnonymisation"><img src="icons/icons8-anonymous-mask.svg" alt="" class="header-icon"></button>
+                            <button data-action="ouvrirModalRapportBug" class="btn-action-header btn-icon-header" data-tooltip="entete-signaler-bug" title="Signaler un bug"><span class="header-icon ico-bug" aria-hidden="true"></span></button>
+                            <button id="btn-toggle-anonymisation-nav" class="btn-action-header btn-icon-header" data-tooltip="entete-mode-affichage" title="Mode normal / anonymisé" data-action="basculerModeAnonymisation"><span class="header-icon ico-mask-anon" aria-hidden="true"></span></button>
                             <button id="btn-toggle-theme-nav" class="btn-action-header btn-icon-header" title="Mode clair / sombre" data-action="basculerTheme"><img src="icons/icon-black-and-white.svg" alt="" class="header-icon"></button>
                         </div>
                         <div class="utilitaires-separateur" aria-hidden="true"></div>
