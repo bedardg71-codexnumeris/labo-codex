@@ -1,28 +1,60 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 26 mai 2026 PM,
-     post-livraison du cycle chromatique du Lot J extension : 3 lots
-     du plan migration icônes livrés dans la même journée (Lot F
-     nettoyage 15 PNG legacy, Lot I bascule palette aide orange →
-     jaune, Lot J phase 2 directe 5 couleurs sections via multiply),
-     + design-system documenté + audit chromatique + référentiels
-     visuels + 2 boutons header bug/anonymisation colorisés.
-     Beta 99.66 builds 0526-0345 → 0526-1120, HEAD main attendu
-     post-commit final ~`<hex>`.)
+     IDENTIFICATION DE CE FICHIER  (mis à jour 26 mai 2026 PM2, post-
+     livraison du Lot A migration icônes ✴ + interversion jaune/orange
+     + désaturation des 5 couleurs sections + pattern V4 sur nav active.
+     Beta 99.71 b0526-1758, HEAD main post-commit `01fde5b` (local,
+     non pushé — accumulation demandée par Grégoire avec le commit
+     SESSION + LOT-B doc qui suit cette session).
      Ce SESSION.md vit sur la branche `main` du worktree principal et
-     sert de relai entre les sessions Claude. Il décrit l'état après
-     deux sessions productives du 26 mai (matin = 6 bugs+items+plan ;
-     PM = 3 lots du plan icônes + 2 référentiels + 1 audit). Présentation
+     sert de relai entre les sessions Claude. La session 26 mai a duré
+     toute la journée : matin = 6 livraisons + plan icônes ; PM = 3 lots
+     (F+I+J) + référentiels ; PM2 (cette session) = Lot A complet, refonte
+     chromatique nav/header, ménage référentiel, début Lot B. Présentation
      AQPC le 3 juin 2026 (J−8 au moment du relai). L'historique complet
-     précédent (audit annuel livré 25 mai, refonte pratique active 24
-     mai, #282 P1-P4 du 23 mai, cycle AQPC clos 22 mai, Cat-B clos
-     21 mai) reste dans les §§ suivants comme référence.
+     précédent (audit annuel 25 mai, refonte pratique active 24 mai,
+     #282 P1-P4 du 23 mai, cycle AQPC clos 22 mai, Cat-B clos 21 mai)
+     reste dans les §§ suivants comme référence.
      ===================================================================== -->
 
 > **📌 Identification**
 > - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
-> - **Cycle qui vient d'être livré** : **Session 26 mai PM** — chantier chromatique du plan migration icônes (#286) : Lots F + I + J phase 2 livrés en cascade, design-system documenté (§1 palette + §8 navigation), audit chromatique WCAG/ΔE76/daltonisme produit, 2 référentiels visuels HTML, mémoire conventions chromatiques étendue. Voir § « 26 mai PM » ci-dessous.
-> - **Cycle suivant** : Voir §3. **Lot A migration icônes** (bouton aide ✴ → SVG icon-info, 76 sites, ~45 min) recommandé en premier — reste plus simple maintenant que les conventions chromatiques sont posées et le pattern `<span>` + mask-image base64 éprouvé. Plan détaillé : `plans de travail/PLAN-MIGRATION-ICONES-SVG.md` (mis à jour avec historique des livraisons §9).
-> - **Documents clés de la session PM** : `plans de travail/PLAN-MIGRATION-ICONES-SVG.md` (§9 historique), `plans de travail/AUDIT-COULEURS-SECTIONS.md` (audit WCAG/ΔE/daltonisme), `plans de travail/REFERENTIEL-COULEURS-JAUNE.html` + `REFERENTIEL-COULEURS-SECTIONS.html` (référentiels visuels), `design-system.html` §1 + §8, `memory/project-palette-couleurs-contraintes.md`.
+> - **Dernier cycle livré** : **Session 26 mai PM2** — Lot A complet en 4 sous-lots (icônes info ✴ → SVG `icons8-info.svg` puis migration vers mask-image jaune), interversion jaune ↔ orange (Conception ← jaune, Aide ← orange), désaturation des 5 couleurs sections (-20 sat / +7 lum), pattern V4 unique appliqué à toute la nav active + sous-nav + header aide/réglages. Refonte complète du référentiel `REFERENTIEL-COULEURS-SECTIONS.html`, début Lot B (audit emojis UI). Voir §0 ci-dessous.
+> - **Cycle suivant** : **Lot B audit visuel par Grégoire** — naviguer dans l'app pour identifier les emojis encore visibles dans l'UI active (l'audit grep a montré que beaucoup de templates JS sont dans des conteneurs `u-hide` legacy invisible). Document checklist : `plans de travail/LOT-B-EMOJIS-ILLUSTRATIONS.html`. Une fois identifiés, migration ciblée. **Aussi à planifier post-AQPC** : un lot dédié au nettoyage des rendus legacy invisibles (fonctions actives mais conteneurs `u-hide`).
+> - **Documents clés** : `plans de travail/REFERENTIEL-COULEURS-SECTIONS.html` (refonte complète, sarcelle original + V4 default), `plans de travail/LOT-B-EMOJIS-ILLUSTRATIONS.html` (checklist Lot B), `plans de travail/PLAN-MIGRATION-ICONES-SVG.md` (§9 historique).
+
+---
+
+## §0 — Récap session 26 mai 2026 PM2 (Lot A complet + refonte chromatique nav + début Lot B)
+
+**Beta / build** : 99.71 / 0526-1758. **Commits cette session** : 5 sur main (4 pushés `377a1af` `b6e52a2` `d2579be` `614e0ac` du Lot A + 1 local non pushé `01fde5b` interversion + désaturation + V4). Tags poussés : `lot-A-icones-aide-2026-05-26`, `lot-A-jaune-aide-2026-05-26`.
+
+**1. Lot A icônes info ✴ → SVG** (4 sous-lots, ~104 sites migrés au total) :
+- Sous-lot 1 (`377a1af`) : index.html 67 sites + nouvelle classe `.btn-aide-icon`
+- Sous-lot 2 (`b6e52a2`) : 13 modules JS, 34 sites + sentinelle Vitest (88 → 89 tests)
+- Sous-lot 3 (`d2579be`) : finition CSS + design-system + suppression `icons/icon-info.svg` orphelin + sentinelle étendue (89 → 90 tests)
+- Extension jaune (`614e0ac`) : migration `<img>` → `<span class="icone-info-aide">` mask-image base64 + couleur palette aide jaune (1 exception conservée : menu Codex). Pattern Lot I/J pour cohérence.
+
+**2. Refonte chromatique nav + header** (`01fde5b`, local) :
+- **Interversion jaune/orange** : `--section-conception #ff6f00` → `#dac16c` (jaune désaturé). `--icone-aide-config #e8c43a` → `#e8923a` (orange chaud doré tempéré). Le système d'aide passe en orange, Conception passe en jaune.
+- **Désaturation systémique** : shift HSL uniforme -20 sat / +7 lum sur les 5 couleurs sections. Conception `#dac16c`, Calendrier `#30b85d`, Suivi `#56cadc`, Évaluations `#6ec1e7`, Labo `#d1aff4`.
+- **Pattern V4 unique** appliqué aux 20 blocs nav active (5 sections × 4 zones : sombre nav, sombre sous-nav, clair nav, clair sous-nav) + 1 bloc header aide/réglages : multiply alpha 1.0 → 0.5 ; `border-color: var(--section-X)` → `border: 1.5px solid rgba(255, 255, 255, 0.2)` ; ajout `box-shadow: 0 2px 8px rgba(couleur, 0.15)`.
+- **Sous-nav** : texte des sous-boutons actifs reste blanc (retrait `color: var(--section-X)`).
+- **Boutons d'action préservés** : audit grep préalable, aucun bouton sauvegarder/annuler/etc. n'utilise les variables modifiées.
+
+**3. Refonte référentiel `REFERENTIEL-COULEURS-SECTIONS.html`** :
+- Décisions design itératives validées (interversion, désaturation, V4 unique, bordure blanche discrète, glow alpha 0.15, sarcelle original `#1a4a5e → #0c1a22` retenu).
+- Ménage final : retrait sections 0/3/3bis de comparaison, variantes V2/V3 abandonnées, classes `.sat-actuel/leger/modere/marque` supprimées, en-tête de l'app reproduite fidèlement dans les deux thèmes (sombre + clair empilés).
+
+**4. Lot B icônes décoratives (début)** :
+- Document checklist créé : `plans de travail/LOT-B-EMOJIS-ILLUSTRATIONS.html`.
+- Constat important : l'audit grep initial a confondu templates JS avec UI rendue. Beaucoup de sites pointent vers des conteneurs `u-hide` legacy (ex. `echelles.js:276` rend dans `<div id="vueEchellesNiveaux">` qui est dans `<div class="u-hide">`).
+- Décision Grégoire : audit visuel manuel (lui navigue, identifie les sites encore visibles), migration ciblée ensuite. Le nettoyage du code legacy (fonctions actives mais conteneurs cachés) sera un lot dédié post-AQPC.
+
+**Tests** : 88 Vitest + 18 Playwright = 106/106 verts à chaque étape (Lot A ajoute 2 sentinelles : sentinelle-icones-aide.test.js). Pas de régression.
+
+**État au moment du relai** :
+- Commit `01fde5b` (refonte chromatique) **local, non pushé** — accumulation demandée. À pousser avec ce commit SESSION + LOT-B doc.
+- Backlog : audit visuel Lot B par Grégoire (à son rythme), puis migration ciblée. Plus tard : lot nettoyage rendus legacy `u-hide`.
 
 ---
 

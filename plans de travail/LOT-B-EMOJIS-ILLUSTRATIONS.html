@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Lot B — Emojis illustrations à remplacer par icônes SVG</title>
+<style>
+  :root {
+    --fond: #0e1e28;
+    --carte: #1a3340;
+    --carte-hover: #234356;
+    --bordure: rgba(255, 255, 255, 0.12);
+    --texte: #d0e0e4;
+    --texte-doux: #8aa4b0;
+    --accent: #e8c43a;
+    --ok: #6ec1e7;
+    --manque: #e8923a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 32px 24px 80px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--fond);
+    color: var(--texte);
+    line-height: 1.55;
+  }
+  main { max-width: 1200px; margin: 0 auto; }
+  h1 { font-size: 1.6rem; margin: 0 0 6px; }
+  .sous-titre { color: var(--texte-doux); font-size: 0.9rem; margin: 0 0 24px; }
+  .legende {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    margin-bottom: 28px;
+  }
+  .legende ul { margin: 6px 0 0; padding-left: 22px; }
+  .legende code {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 0.85em;
+  }
+  .grille {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 16px;
+  }
+  .carte-emoji {
+    background: var(--carte);
+    border: 1px solid var(--bordure);
+    border-radius: 10px;
+    padding: 18px 20px;
+    transition: background 0.15s;
+  }
+  .carte-emoji:hover { background: var(--carte-hover); }
+  .carte-entete {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+  .emoji-grand {
+    font-size: 2.5rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .carte-titre {
+    flex: 1;
+  }
+  .carte-titre .nom {
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+  }
+  .carte-titre .meta {
+    font-size: 0.8rem;
+    color: var(--texte-doux);
+    margin-top: 2px;
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .badge.ok { background: rgba(110, 193, 231, 0.18); color: var(--ok); }
+  .badge.manque { background: rgba(232, 146, 58, 0.18); color: var(--manque); }
+  .section {
+    font-size: 0.85rem;
+    margin: 10px 0;
+  }
+  .section-titre {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--texte-doux);
+    margin-bottom: 4px;
+  }
+  .exemples {
+    background: rgba(0, 0, 0, 0.25);
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: #b8d0d8;
+    overflow-x: auto;
+  }
+  .exemples .file { color: var(--accent); }
+  .mapping {
+    margin: 10px 0;
+    padding: 10px 12px;
+    background: rgba(110, 193, 231, 0.06);
+    border-left: 3px solid var(--ok);
+    border-radius: 0 4px 4px 0;
+    font-size: 0.85rem;
+  }
+  .mapping.manque {
+    background: rgba(232, 146, 58, 0.08);
+    border-left-color: var(--manque);
+  }
+  .liens {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    font-size: 0.82rem;
+  }
+  .liens a {
+    color: var(--ok);
+    text-decoration: none;
+    padding: 4px 10px;
+    background: rgba(110, 193, 231, 0.12);
+    border-radius: 4px;
+    transition: background 0.15s;
+  }
+  .liens a:hover { background: rgba(110, 193, 231, 0.25); }
+  .choix {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 5px;
+    border: 1px dashed var(--bordure);
+  }
+  .choix .section-titre { margin-bottom: 4px; }
+  .choix input {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--bordure);
+    border-radius: 4px;
+    padding: 6px 10px;
+    color: white;
+    font-size: 0.85rem;
+    font-family: inherit;
+  }
+  .choix input::placeholder { color: var(--texte-doux); opacity: 0.5; }
+  .stats {
+    background: rgba(255, 255, 255, 0.04);
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin: 16px 0 24px;
+    font-size: 0.88rem;
+    color: var(--texte-doux);
+  }
+  .stats strong { color: var(--texte); }
+</style>
+</head>
+<body>
+
+<main>
+
+<h1>Lot B — Emojis illustrations à remplacer par icônes SVG</h1>
+<p class="sous-titre">Checklist des 11 emojis « décoratifs » à rechercher dans l'app réelle. Audit visuel par Grégoire — version révisée 26 mai 2026 PM après constat d'écart entre code source et UI active.</p>
+
+<div class="legende">
+  <strong>Méthode validée (Grégoire, 26 mai PM)</strong> :
+  <ul>
+    <li>Mon audit initial (117 occurrences puis 75 « UI ») surestimait le scope : beaucoup de templates JS contiennent des emojis mais rendent dans des conteneurs <code>u-hide</code> (legacy invisible) ou ne sont plus appelés. Ex. <code>echelles.js:276</code> rend <code>📊</code> dans <code>&lt;div id="vueEchellesNiveaux"&gt;</code> qui est dans <code>&lt;div class="u-hide"&gt;</code>.</li>
+    <li><strong>Nouvelle approche</strong> : tu navigues dans l'app (Safari, Mac + iPad au besoin) et tu repères visuellement les sites où tu vois encore un emoji décoratif. Tu me les listes (section + libellé), je grep pour localiser le code et je migre uniquement ces sites.</li>
+    <li>Les rendus legacy (fonctions actives mais conteneurs <code>u-hide</code>/orphelins) seront traités séparément dans un futur lot « nettoyage rendus legacy invisibles », après l'AQPC du 3 juin.</li>
+    <li>Les cartes ci-dessous restent comme <strong>référence visuelle</strong> des emojis à chercher : pour chaque emoji, le glyphe à reconnaître + suggestion mapping + lien icons8 si à ajouter.</li>
+  </ul>
+</div>
+
+<div class="stats">
+  <strong>Total emojis à reconnaître visuellement</strong> : 10 (📂 hors scope, presque exclusivement séparateurs JS).
+  <strong>9 icônes</strong> SVG déjà présentes dans <code>icons/</code> si tu retrouves les emojis.
+  <strong>3 icônes</strong> à ajouter (clipboard 📋, document 📄, group/users 👥).
+</div>
+
+<div class="grille">
+
+  <div class="carte-emoji">
+    <div class="carte-entete">
+      <div class="emoji-grand">📝</div>
+      <div class="carte-titre">
+        <div class="nom">Crayon / écriture</div>
+        <div class="meta">~10 sites UI (badges, en-têtes de bloc Productions/Évaluations)</div>
+      </div>
+      <span class="badge ok">disponible</span>
+    </div>
+    <div class="section">
+      <div class="section-titre">Exemples de contexte</div>
+      <div class="exemples">
+<span class="file">productions.js:1805</span> &lt;span&gt;📝 Évaluations sommatives&lt;/span&gt;<br>
+<span class="file">travaux-doublons-ui.js:132</span> { icone: '📝', texte: 'statuts mixtes' }
+      </div>
+    </div>
+    <div class="mapping">
+      <strong>Mapping suggéré</strong> : <code>icon-pencil.svg</code> ou <code>icon-edit.svg</code> (déjà présents)
+    </div>
+    <div class="liens">
+      <a href="https://icons8.com/icons/set/edit" target="_blank">Parcourir icons8 → edit/pencil</a>
+    </div>
+    <div class="choix">
+      <div class="section-titre">Icône retenue</div>
+      <input type="text" placeholder="ex. icon-edit-pencil.svg ou URL icons8">
+    </div>
+  </div>
+
+  <div class="carte-emoji">
+    <div class="carte-entete">
+      <div class="emoji-grand">📋</div>
+      <div class="carte-titre">
+        <div class="nom">Clipboard / presse-papier</div>
+        <div class="meta">~12 sites UI (messages licence, listes grilles, menus Dupliquer)</div>
+      </div>
+      <span class="badge manque">à ajouter</span>
+    </div>
+    <div class="section">
+      <div class="section-titre">Exemples de contexte</div>
+      <div class="exemples">
+<span class="file">grilles.js:1352</span> &lt;span&gt;📋 ${grille.nom}&lt;/span&gt;<br>
+<span class="file">grilles.js:1383</span> 📋 Dupliquer
+      </div>
+    </div>
+    <div class="mapping manque">
+      <strong>Mapping suggéré</strong> : <code>icon-clipboard.svg</code> à télécharger depuis icons8
+    </div>
+    <div class="liens">
+      <a href="https://icons8.com/icons/set/clipboard" target="_blank">Parcourir icons8 → clipboard</a>
+    </div>
+    <div class="choix">
+      <div class="section-titre">Icône retenue</div>
+      <input type="text" placeholder="ex. icon-clipboard.svg ou URL icons8">
+    </div>
+  </div>
+
+  <div class="carte-emoji">
+    <div class="carte-entete">
+      <div class="emoji-grand">📊</div>
+      <div class="carte-titre">
+        <div class="nom">Barres / statistiques</div>
+        <div class="meta">~7 sites UI (titres de diagnostic, en-têtes)</div>
+      </div>
+      <span class="badge ok">disponible</span>
+    </div>
+    <div class="section">
+      <div class="section-titre">Exemples de contexte</div>
+      <div class="exemples">
+<span class="file">echelles.js:276</span> &lt;span&gt;📊 ${echelle.nom}&lt;/span&gt;<br>
+<span class="file">profil-etudiant-diagnostics.js:296</span> titre = '📊 Irrégularité des résultats'
+      </div>
+    </div>
+    <div class="mapping">
+      <strong>Mapping suggéré</strong> : <code>icon-combo-chart.svg</code> (déjà présent, utilisé pour la nav Aperçu)
+    </div>
+    <div class="liens">
+      <a href="https://icons8.com/icons/set/bar-chart" target="_blank">Parcourir icons8 → bar-chart</a>
+    </div>
+    <div class="choix">
+      <div class="section-titre">Icône retenue</div>
+      <input type="text" placeholder="ex. icon-combo-chart.svg ou autre">
+    </div>
+  </div>
+
+  <div class="carte-emoji">
+    <div class="carte-entete">
+      <div class="emoji-grand">📈</div>
+      <div class="carte-titre">
+        <div class="nom">Tendance montante / évolution</div>
+        <div class="meta">~5 sites UI (en-têtes "Évolution temporelle", indicateur tendance)</div>
+      </div>
+      <span class="badge ok">disponible</span>
+    </div>
+    <div class="section">
+      <div class="section-titre">Exemples de contexte</div>
+      <div class="exemples">
+<span class="file">profil-etudiant-diagnostics.js:327</span> iconeTendance = '📈';<br>
+<span class="file">profil-etudiant-sections-affichage.js:3669</span> 📈 Évolution temporelle de la complétion
+      </div>
+    </div>
+    <div class="mapping">
+      <strong>Mapping suggéré</strong> : <code>icon-combo-chart.svg</code> ou icône dédiée trending-up (à ajouter si distinction sémantique souhaitée)
+    </div>
+    <div class="liens">
+      <a href="https://icons8.com/icons/set/trending-up" target="_blank">Parcourir icons8 → trending-up</a>
+      <a href="https://icons8.com/icons/set/positive-dynamic" target="_blank">positive-dynamic</a>
+    </div>
+    <div class="choix">
+      <div class="section-titre">Icône retenue</div>
+      <input type="text" placeholder="ex. icon-trending-up.svg">
+    </div>
+  </div>
+
+  <div class="carte-emoji">
+    <div class="carte-entete">
+      <div class="emoji-grand">📅</div>
+      <div class="carte-titre">
+        <div class="nom">Calendrier / date</div>
+        <div class="meta">~5 sites UI (messages "Créé le" dans dialogues confirmation export)</div>
+      </div>
+      <span class="badge ok">disponible</span>
+    </div>
+    <div class="section">
+      <div class="section-titre">Exemples de contexte</div>
+      <div class="exemples">
+<span class="file">echelles.js:2033</span> `📅 Créé le: ${metadata.date_creation}\n\n`<br>
+<span class="file">cartouches.js:2416</span> idem (5 fichiers : grilles, échelles, cartouches, productions, objectifs)
+      </div>
+    </div>
+    <div class="mapping">
+      <strong>Mapping suggéré</strong> : <code>icon-calendar.svg</code> (déjà présent, utilisé pour la nav Calendrier)
+    </div>
+    <div class="liens">
+      <a href="https://icons8.com/icons/set/calendar" target="_blank">Parcourir icons8 → calendar</a>
+    </div>
+    <div class="choix">
+      <div class="section-titre">Icône retenue</div>
+      <input type="text" placeholder="ex. icon-calendar.svg">
+    </div>
+  </div>
+
+  <div class="carte-emoji">
+    <div class="carte-entete">
+      <div class="emoji-grand">📁</div>
+      <div class="carte-titre">
+        <div class="nom">Dossier fermé</div>
+        <div class="meta">~5 sites UI (préfixe Portfolio, label "Portfolio (conteneur)")</div>
+      </div>
+      <span class="badge ok">disponible</span>
+    </div>
+    <div class="section">
+      <div class="section-titre">Exemples de contexte</div>
+      <div class="exemples">
+<span class="file">productions.js:203</span> ${estPortfolio ? '📁 ' : ''}${prod.titre}<br>
+<span class="file">productions.js:1627</span> 'portfolio': '📁 Portfolio (conteneur)'
+      </div>
+    </div>
+    <div class="mapping">
+      <strong>Mapping suggéré</strong> : <code>icon-filing-cabinet.svg</code> (déjà présent) ou icône dédiée folder
+    </div>
+    <div class="liens">
+      <a href="https://icons8.com/icons/set/folder" target="_blank">Parcourir icons8 → folder</a>
+    </div>
+    <div class="choix">
+      <div class="section-titre">Icône retenue</div>
+      <input type="text" placeholder="ex. icon-folder.svg">
+    </div>
+  </div>
+
+  <div class="carte-emoji">
+    <div class="carte-entete">
+      <div class="emoji-grand">📂</div>
+      <div class="carte-titre">
+        <div class="nom">Dossier ouvert</div>
+        <div class="meta">~0 site UI (24 occurrences au total mais toutes en commentaires JS)</div>
+      </div>
+      <span class="badge ok">disponible</span>
+    </div>
+    <div class="section">
+      <div class="section-titre">Statut</div>
+      <p style="margin: 6px 0 0; font-size: 0.85rem; color: var(--texte-doux);">
+        Toutes les occurrences sont des séparateurs de section dans les commentaires JS (`📂 MODULE: CODEX`, `📂 GESTION DES LISTES`, etc.). <strong>Hors scope Lot B</strong> puisqu'on ne traite que l'UI rendue.
+      </p>
+    </div>
+    <div class="mapping">
+      <strong>Mapping suggéré</strong> : <code>icon-filing-cabinet.svg</code> ou icône dédiée opened-folder
+    </div>
+    <div class="liens">
+      <a href="https://icons8.com/icons/set/opened-folder" target="_blank">Parcourir icons8 → opened-folder</a>
+    </div>
+    <div class="choix">
+      <div class="section-titre">Icône retenue</div>
+      <input type="text" placeholder="ex. icon-opened-folder.svg">
+    </div>
+  </div>
+
+  <div class="carte-emoji">
+    <div class="carte-entete">
+      <div class="emoji-grand">📄</div>
+      <div class="carte-titre">
+        <div class="nom">Document / feuille</div>
+        <div class="meta">~8 sites UI (Licence CC, "Travail", "PDF + image", "Préparer le PDF")</div>
+      </div>
+      <span class="badge manque">à ajouter</span>
+    </div>
+    <div class="section">
+      <div class="section-titre">Exemples de contexte</div>
+      <div class="exemples">
+<span class="file">import-export.js:1972</span> 📄 Licence &lt;strong&gt;CC BY-NC-SA 4.0&lt;/strong&gt;<br>
+<span class="file">export-pdf.js:2659</span> &lt;h3&gt;📄 Préparer le PDF&lt;/h3&gt;
+      </div>
+    </div>
+    <div class="mapping manque">
+      <strong>Mapping suggéré</strong> : <code>icon-document.svg</code> à télécharger depuis icons8
+    </div>
+    <div class="liens">
+      <a href="https://icons8.com/icons/set/document" target="_blank">Parcourir icons8 → document</a>
+      <a href="https://icons8.com/icons/set/file" target="_blank">file</a>
+    </div>
+    <div class="choix">
+      <div class="section-titre">Icône retenue</div>
+      <input type="text" placeholder="ex. icon-document.svg">
+    </div>
+  </div>
+
+  <div class="carte-emoji">
+    <div class="carte-entete">
+      <div class="emoji-grand">📚</div>
+      <div class="carte-titre">
+        <div class="nom">Bibliothèque / livres</div>
+        <div class="meta">~6 sites UI (banque évaluations, bibliothèque trimestres, illustration import)</div>
+      </div>
+      <span class="badge ok">disponible</span>
+    </div>
+    <div class="section">
+      <div class="section-titre">Exemples de contexte</div>
+      <div class="exemples">
+<span class="file">import-export.js:1930</span> &lt;span style="font-size: 2rem;"&gt;📚&lt;/span&gt;<br>
+<span class="file">trimestre-v2-liste.js:300</span> titre: '📚 Bibliothèque des trimestres'
+      </div>
+    </div>
+    <div class="mapping">
+      <strong>Mapping suggéré</strong> : <code>icon-book-shelf.svg</code> ou <code>icon-book.svg</code> (déjà présents)
+    </div>
+    <div class="liens">
+      <a href="https://icons8.com/icons/set/books" target="_blank">Parcourir icons8 → books</a>
+      <a href="https://icons8.com/icons/set/library" target="_blank">library</a>
+    </div>
+    <div class="choix">
+      <div class="section-titre">Icône retenue</div>
+      <input type="text" placeholder="ex. icon-book-shelf.svg">
+    </div>
+  </div>
+
+  <div class="carte-emoji">
+    <div class="carte-entete">
+      <div class="emoji-grand">👤</div>
+      <div class="carte-titre">
+        <div class="nom">Personne / profil individuel</div>
+        <div class="meta">~12 sites UI (boutons profil élève dans tableau de bord, type intervention, auteur)</div>
+      </div>
+      <span class="badge ok">disponible</span>
+    </div>
+    <div class="section">
+      <div class="section-titre">Exemples de contexte</div>
+      <div class="exemples">
+<span class="file">index.html:4170</span> title="Voir le profil de l'élève sélectionné"<br>
+<span class="file">profil-etudiant-sections-affichage.js:354</span> intervention.type === 'individuel' ? '👤' : '👥'
+      </div>
+    </div>
+    <div class="mapping">
+      <strong>Mapping suggéré</strong> : <code>icon-profile.svg</code> (déjà présent, utilisé pour la nav Suivi)
+    </div>
+    <div class="liens">
+      <a href="https://icons8.com/icons/set/user" target="_blank">Parcourir icons8 → user</a>
+      <a href="https://icons8.com/icons/set/person" target="_blank">person</a>
+    </div>
+    <div class="choix">
+      <div class="section-titre">Icône retenue</div>
+      <input type="text" placeholder="ex. icon-profile.svg">
+    </div>
+  </div>
+
+  <div class="carte-emoji">
+    <div class="carte-entete">
+      <div class="emoji-grand">👥</div>
+      <div class="carte-titre">
+        <div class="nom">Groupe / collectif</div>
+        <div class="meta">~4 sites UI (type intervention "groupe", en-tête Assiduité)</div>
+      </div>
+      <span class="badge manque">à ajouter</span>
+    </div>
+    <div class="section">
+      <div class="section-titre">Exemples de contexte</div>
+      <div class="exemples">
+<span class="file">profil-etudiant-sections-affichage.js:354</span> ... '👤' : ... '✉️' : '👥'<br>
+<span class="file">profil-etudiant-sections-affichage.js:4296</span> 👥 ASSIDUITÉ
+      </div>
+    </div>
+    <div class="mapping manque">
+      <strong>Mapping suggéré</strong> : <code>icon-group.svg</code> ou <code>icon-users.svg</code> à télécharger depuis icons8
+    </div>
+    <div class="liens">
+      <a href="https://icons8.com/icons/set/group" target="_blank">Parcourir icons8 → group</a>
+      <a href="https://icons8.com/icons/set/conference" target="_blank">conference / collective</a>
+    </div>
+    <div class="choix">
+      <div class="section-titre">Icône retenue</div>
+      <input type="text" placeholder="ex. icon-group.svg ou icon-users.svg">
+    </div>
+  </div>
+
+</div>
+
+</main>
+
+</body>
+</html>
