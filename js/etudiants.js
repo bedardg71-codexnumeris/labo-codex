@@ -505,11 +505,11 @@ function mettreAJourTitreListeEtudiants() {
         <span>Liste des étudiant·es</span>
     `;
 
-    // Partie droite : aide contextuelle ✴️
+    // Partie droite : aide contextuelle (icône info)
     const partieDroite = document.createElement('div');
     partieDroite.innerHTML = `
         <span class="primo-aide" data-target="note-calcul-indices-liste"
-              title="Explication du calcul des indices">✴️</span>
+              title="Explication du calcul des indices"><img src="icons/icons8-info.svg" alt="" class="btn-inline-icon"></span>
     `;
 
     conteneurTitre.appendChild(partieGauche);
@@ -1048,7 +1048,7 @@ function afficherListeEtudiantsConsultation() {
     // 🆕 BETA 91: Mettre à jour le titre avec toggle et badge pratique
     mettreAJourTitreListeEtudiants();
 
-    // Réattacher les événements Primo (pour l'icône ✴️)
+    // Réattacher les événements Primo (pour l'icône info)
     if (typeof reattacherEvenementsToggles === 'function') {
         reattacherEvenementsToggles();
     }

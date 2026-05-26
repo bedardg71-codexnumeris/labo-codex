@@ -1,6 +1,6 @@
 /**
  * accompagnement-contenu-popup.js
- * Catalogue de contenu pour le mode `popup` (modale riche ✴️).
+ * Catalogue de contenu pour le mode `popup` (modale riche, icône info).
  *
  * Types de sections supportés :
  * - texte : paragraphe simple
@@ -82,7 +82,7 @@ const AIDE_CONTEXTUELLE = {
             {
                 type: 'alerte',
                 niveau: 'important',
-                contenu: "Prendre le temps de réfléchir à tes objectifs d'apprentissage avant de configurer ton matériel peut t'aider à créer des grilles plus cohérentes. Clique sur le bouton ✴️ « Réfléchir à tes objectifs » si tu veux des pistes de réflexion."
+                contenu: "Prendre le temps de réfléchir à tes objectifs d'apprentissage avant de configurer ton matériel peut t'aider à créer des grilles plus cohérentes. Clique sur le bouton d'aide « Réfléchir à tes objectifs » si tu veux des pistes de réflexion."
             }
         ],
         voirAussi: ['construction-objectifs-reflexion', 'conception-productions', 'construction-grilles', 'construction-pratiques']

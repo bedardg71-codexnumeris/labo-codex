@@ -3097,7 +3097,7 @@ function afficherNiveauxNouvelleEchelle() {
                 </div>
                 <div class="groupe-form">
                     <label class="echelle-texte-detail">Min (%)
-                        <span class="primo-aide" data-target="echelle-plage-notes">✴️</span>
+                        <span class="primo-aide" data-target="echelle-plage-notes"><img src="icons/icons8-info.svg" alt="" class="btn-inline-icon"></span>
                     </label>
                     <input type="number"
                            class="controle-form"
@@ -3117,7 +3117,7 @@ function afficherNiveauxNouvelleEchelle() {
                 </div>
                 <div class="groupe-form">
                     <label class="echelle-texte-detail" data-tooltip="cn-echelle-valeur-ponctuelle">Valeur ponctuelle
-                        <span class="primo-aide" data-target="echelle-valeur-ponctuelle">✴️</span>
+                        <span class="primo-aide" data-target="echelle-valeur-ponctuelle"><img src="icons/icons8-info.svg" alt="" class="btn-inline-icon"></span>
                     </label>
                     <input type="number"
                            class="controle-form"
@@ -3385,7 +3385,7 @@ function afficherNiveauxEchelle(echelle) {
                 </div>
                 <div class="groupe-form">
                     <label class="echelle-texte-detail">Min (%)
-                        <span class="primo-aide" data-target="echelle-plage-notes">✴️</span>
+                        <span class="primo-aide" data-target="echelle-plage-notes"><img src="icons/icons8-info.svg" alt="" class="btn-inline-icon"></span>
                     </label>
                     <input type="number"
                            class="controle-form"
@@ -3405,7 +3405,7 @@ function afficherNiveauxEchelle(echelle) {
                 </div>
                 <div class="groupe-form">
                     <label class="echelle-texte-detail" data-tooltip="cn-echelle-valeur-ponctuelle">Valeur ponctuelle
-                        <span class="primo-aide" data-target="echelle-valeur-ponctuelle">✴️</span>
+                        <span class="primo-aide" data-target="echelle-valeur-ponctuelle"><img src="icons/icons8-info.svg" alt="" class="btn-inline-icon"></span>
                     </label>
                     <input type="number"
                            class="controle-form"

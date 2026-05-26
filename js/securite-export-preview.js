@@ -83,12 +83,12 @@
             var titre = document.createElement('h2');
             titre.className = 'modal-titre';
             titre.textContent = opts.titre || 'Confirmer l\'export';
-            // Bouton aide ✴️ (Défense K-β a son propre contenu d'aide)
+            // Bouton aide (icône info) (Défense K-β a son propre contenu d'aide)
             var btnAide = document.createElement('button');
             btnAide.className = 'btn-aide-contextuelle';
             btnAide.setAttribute('data-aide', 'modal-export-preview');
             btnAide.setAttribute('aria-label', 'Aide : aperçu de l\'export');
-            btnAide.textContent = '✴️';
+            btnAide.innerHTML = '<img src="icons/icons8-info.svg" alt="" class="btn-aide-icon">';
             titre.appendChild(document.createTextNode(' '));
             titre.appendChild(btnAide);
             modal.appendChild(titre);
