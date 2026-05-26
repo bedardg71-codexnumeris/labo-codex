@@ -1153,23 +1153,28 @@ h1, h2, h3, h4 {
 }
 
 /* === Icônes SVG en-tête === */
-/* Forme <img> : 3 boutons header restants (bug, anonymisation, thème) en blanc translucide */
-img.header-icon {
+/* Propriétés communes aux deux formes (img et span) */
+.header-icon {
     width: 16px;
     height: 16px;
-    object-fit: contain;
-    filter: brightness(0) invert(1);
     vertical-align: middle;
 }
-/* Forme <span> + mask-image : boutons aide + réglages en jaune permanent (Lot I) */
+/* Forme <img> : 3 boutons header restants (bug, anonymisation, thème) en blanc translucide */
+img.header-icon {
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+}
+/* Forme <span> + mask-image : boutons aide + réglages en jaune permanent (Lot I).
+   flex-shrink: 0 OBLIGATOIRE — le bouton parent est inline-flex avec content area
+   très étroit (32×32 - 24 padding horizontal = 6 px de large). Sans flex-shrink,
+   le span est compressé à 6 px. Les <img> ne sont pas concernés (replaced elements
+   gardent leur taille intrinsèque même en overflow). */
 span.header-icon {
-    width: 16px;
-    height: 16px;
     display: inline-block;
-    vertical-align: middle;
+    flex-shrink: 0;
     background-color: var(--icone-aide-config);
-    -webkit-mask-size: contain;
-    mask-size: contain;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
     -webkit-mask-position: center;
@@ -1194,6 +1199,13 @@ span.header-icon {
     height: 32px;
 }
 .btn-icon-header .header-icon {
+    width: 18px;
+    height: 18px;
+}
+/* Spécificité explicite pour les span (le sélecteur img/span.header-icon
+   ci-dessus a la même classe-count que .btn-icon-header .header-icon,
+   donc on ajoute un sélecteur plus spécifique pour garantir la taille). */
+.btn-icon-header span.header-icon {
     width: 18px;
     height: 18px;
 }
