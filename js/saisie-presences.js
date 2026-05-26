@@ -1353,25 +1353,7 @@ function enregistrerPresences() {
         return;
     }
 
-    // Notification visuelle
-    const message = document.createElement('div');
-    message.className = 'notification notification-succes';
-    message.innerHTML = '✅ Présences enregistrées avec succès';
-    message.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: var(--alerte-fond-succes, #d4edda);
-        color: var(--alerte-texte-succes);
-        padding: 12px 20px;
-        border-radius: 6px;
-        border: 1px solid var(--alerte-fond-succes, #c3e6cb);
-        z-index: 9999;
-        animation: slideIn 0.3s ease;
-    `;
-    document.body.appendChild(message);
-
-    setTimeout(() => message.remove(), 3000);
+    notifications.succes('Présences enregistrées avec succès');
 
     calculerEtSauvegarderIndicesAssiduite();
 

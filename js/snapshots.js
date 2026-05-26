@@ -1144,27 +1144,6 @@ async function afficherStatutSnapshots() {
 }
 
 /**
- * Capture manuelle (déclenchée par bouton UI)
- */
-async function capturerSnapshotManuel() {
-    try {
-        const semaine = obtenirNumeroSemaineActuelle();
-        if (!semaine) {
-            alert('Impossible de déterminer la semaine actuelle. Vérifie la configuration du trimestre.');
-            return;
-        }
-
-        await capturerSnapshotHebdomadaire(semaine);
-
-        alert(`Capture manuelle réussie pour la semaine ${semaine}!`);
-        afficherStatutSnapshots();
-    } catch (error) {
-        console.error('Erreur lors de la capture manuelle:', error);
-        alert('Erreur lors de la capture: ' + error.message);
-    }
-}
-
-/**
  * Lance la reconstruction rétroactive (déclenchée par bouton UI)
  */
 async function lancerReconstructionRetroactive() {
@@ -1225,33 +1204,6 @@ function confirmerNettoyageSnapshots() {
     }
 }
 
-/**
- * Fonction utilitaire pour obtenir le numéro de semaine actuelle
- */
-function obtenirNumeroSemaineActuelle() {
-    const calendrier = db.getSync(cle('calendrierComplet'), {});
-    if (!calendrier || Object.keys(calendrier).length === 0) {
-        return null;
-    }
-
-    // Chercher le jour le plus récent
-    const aujourdhui = new Date().toISOString().split('T')[0];
-    const jours = Object.keys(calendrier).sort();
-
-    // Trouver le jour le plus proche
-    let jourLePlusProche = jours[0];
-    for (const jour of jours) {
-        if (jour <= aujourdhui) {
-            jourLePlusProche = jour;
-        } else {
-            break;
-        }
-    }
-
-    const infoJour = calendrier[jourLePlusProche];
-    return infoJour?.numeroSemaine || 1;
-}
-
 /* ===============================
    EXPORTS
    =============================== */
@@ -1273,7 +1225,6 @@ window.cleSnapshots = cleSnapshots;
 
 // Fonctions UI
 window.afficherStatutSnapshots = afficherStatutSnapshots;
-window.capturerSnapshotManuel = capturerSnapshotManuel;
 window.lancerReconstructionRetroactive = lancerReconstructionRetroactive;
 window.confirmerNettoyageSnapshots = confirmerNettoyageSnapshots;
 
