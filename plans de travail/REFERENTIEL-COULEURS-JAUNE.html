@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Référentiel — Teintes de jaune (Lot I)</title>
+<style>
+  :root {
+    /* Couleurs reprises de styles.css */
+    --entete-sombre-bg: #1a4a5e;          /* --bleu-principal sombre */
+    --entete-sombre-bg-2: #0c1a22;        /* --bleu-fonce */
+    --fond-clair: #d4e6f5;                /* --fond-page-sature mode clair */
+    --fond-sombre: #0e1e28;               /* --fond-page-sature mode sombre */
+
+    /* Palette accompagnement actuelle (orange) */
+    --acc-fond-actuel: #e8923a;
+    --acc-surface-actuel: #d4822e;
+    --acc-bordure-actuel: #b06820;
+    --acc-texte-actuel: #2a1404;
+    --acc-texte-doux: #4a2e10;
+    --acc-btn-prim: #2a1404;
+    --acc-btn-prim-txt: #f8e8d0;
+    --acc-conseil-fond-actuel: #f0a858;
+    --acc-exemple-fond-actuel: #eba64e;
+    --acc-alerte-fond-actuel: #e07830;
+
+    /* Orange nav active (réservé) */
+    --orange-nav-actif: #e8923a;
+
+    /* Jaunes candidats */
+    --jaune-c1: #e8c43a;   /* Doré chaud (recommandé) */
+    --jaune-c2: #d4a630;   /* Ocre doré */
+    --jaune-c3: #c4992b;   /* Moutarde */
+
+    /* Contre-exemple à éviter */
+    --jaune-warning: #ffc107;   /* Material warning, à NE PAS confondre */
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--fond-clair);
+    color: #1a1a2e;
+    line-height: 1.5;
+  }
+  body.theme-sombre {
+    background: var(--fond-sombre);
+    color: #d0e0e4;
+  }
+
+  .topbar {
+    background: linear-gradient(180deg, var(--entete-sombre-bg) 0%, var(--entete-sombre-bg-2) 100%);
+    padding: 14px 24px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+  }
+  .topbar h1 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .topbar .meta { font-size: 0.8rem; opacity: 0.7; }
+
+  .toggle-theme {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .toggle-theme:hover { background: rgba(255,255,255,0.2); }
+
+  main { max-width: 1280px; margin: 0 auto; padding: 32px 24px 80px; }
+
+  h2 {
+    font-size: 1.4rem;
+    margin: 40px 0 8px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(0,0,0,0.1);
+  }
+  body.theme-sombre h2 { border-bottom-color: rgba(255,255,255,0.15); }
+  h3 { font-size: 1.05rem; margin: 24px 0 12px; opacity: 0.85; }
+
+  .intro {
+    background: rgba(0,0,0,0.04);
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin: 16px 0 24px;
+    font-size: 0.95rem;
+  }
+  body.theme-sombre .intro { background: rgba(255,255,255,0.05); }
+
+  /* ===== ENTÊTE RECONSTITUÉE ===== */
+  .entete-demo {
+    background: linear-gradient(180deg, var(--entete-sombre-bg) 0%, var(--entete-sombre-bg-2) 100%);
+    padding: 12px 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+  }
+  .entete-titre {
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-right: auto;
+  }
+  .btn-header {
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.20);
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    padding: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .btn-header:hover {
+    background: rgba(255,255,255,0.18);
+    border-color: rgba(255,255,255,0.30);
+  }
+  .btn-header .icon {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    background-color: white;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+  }
+  /* Icônes individuelles via mask */
+  .ico-bug    { -webkit-mask-image: url('../icons/icon-bug.svg');                mask-image: url('../icons/icon-bug.svg'); }
+  .ico-mask   { -webkit-mask-image: url('../icons/icons8-anonymous-mask.svg');   mask-image: url('../icons/icons8-anonymous-mask.svg'); }
+  .ico-theme  { -webkit-mask-image: url('../icons/icon-black-and-white.svg');    mask-image: url('../icons/icon-black-and-white.svg'); }
+  .ico-aide   { -webkit-mask-image: url('../icons/icon-wordbook.svg');           mask-image: url('../icons/icon-wordbook.svg'); }
+  .ico-regl   { -webkit-mask-image: url('../icons/icon-tune.svg');               mask-image: url('../icons/icon-tune.svg'); }
+
+  /* Variantes colorées */
+  .jaune-c1 .icon-cible { background-color: var(--jaune-c1); }
+  .jaune-c2 .icon-cible { background-color: var(--jaune-c2); }
+  .jaune-c3 .icon-cible { background-color: var(--jaune-c3); }
+  .jaune-warn .icon-cible { background-color: var(--jaune-warning); }
+  .orange-nav .icon-cible { background-color: var(--orange-nav-actif); }
+
+  /* ===== POPUP D'AIDE RECONSTITUÉE ===== */
+  .popup-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 16px;
+  }
+  @media (max-width: 900px) { .popup-grid { grid-template-columns: 1fr; } }
+
+  .popup {
+    border-radius: 12px;
+    padding: 0;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+    overflow: hidden;
+    border: 2px solid transparent;
+  }
+  .popup-header {
+    padding: 14px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+  .popup-corps {
+    padding: 16px 18px;
+    font-size: 0.92rem;
+  }
+  .popup-corps p { margin: 0 0 12px; }
+  .popup-corps p:last-child { margin-bottom: 0; }
+  .popup-actions {
+    padding: 12px 18px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    border-top: 1px solid rgba(0,0,0,0.08);
+  }
+  .popup .btn-prim {
+    background: var(--acc-btn-prim);
+    color: var(--acc-btn-prim-txt);
+    padding: 7px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.88rem;
+  }
+  .popup .btn-sec {
+    background: transparent;
+    color: var(--acc-texte-actuel);
+    padding: 7px 16px;
+    border: 1px solid var(--acc-texte-doux);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.88rem;
+  }
+
+  /* Popup orange actuelle */
+  .popup-orange         { background: var(--acc-fond-actuel); color: var(--acc-texte-actuel); }
+  .popup-orange .popup-header { background: var(--acc-surface-actuel); border-bottom: 1px solid var(--acc-bordure-actuel); }
+
+  /* Popups jaunes candidats (texte brun foncé conservé) */
+  .popup-jc1 { background: var(--jaune-c1); color: var(--acc-texte-actuel); }
+  .popup-jc1 .popup-header { background: #d4b330; border-bottom: 1px solid #a08020; }
+  .popup-jc2 { background: var(--jaune-c2); color: var(--acc-texte-actuel); }
+  .popup-jc2 .popup-header { background: #c09520; border-bottom: 1px solid #806015; }
+  .popup-jc3 { background: var(--jaune-c3); color: var(--acc-texte-actuel); }
+  .popup-jc3 .popup-header { background: #ad8625; border-bottom: 1px solid #735518; }
+
+  /* ===== TABLE DE COMPARAISON HEX ===== */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    background: rgba(0,0,0,0.02);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  body.theme-sombre .compare-table { background: rgba(255,255,255,0.04); }
+  .compare-table th, .compare-table td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    font-size: 0.92rem;
+  }
+  body.theme-sombre .compare-table th,
+  body.theme-sombre .compare-table td { border-bottom-color: rgba(255,255,255,0.10); }
+  .compare-table th { font-weight: 600; background: rgba(0,0,0,0.04); }
+  body.theme-sombre .compare-table th { background: rgba(255,255,255,0.06); }
+  .swatch {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    vertical-align: middle;
+    margin-right: 8px;
+    border: 1px solid rgba(0,0,0,0.1);
+  }
+  .swatch-orange { background: var(--orange-nav-actif); }
+  .swatch-jc1    { background: var(--jaune-c1); }
+  .swatch-jc2    { background: var(--jaune-c2); }
+  .swatch-jc3    { background: var(--jaune-c3); }
+  .swatch-warn   { background: var(--jaune-warning); }
+
+  /* ===== DISTINCTION ORANGE NAV vs JAUNE AIDE ===== */
+  .scenario-mixte {
+    background: linear-gradient(180deg, var(--entete-sombre-bg) 0%, var(--entete-sombre-bg-2) 100%);
+    padding: 12px 20px;
+    border-radius: 10px;
+    margin-top: 12px;
+    color: white;
+  }
+  .scenario-mixte .ligne {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+  }
+  .scenario-mixte .ligne + .ligne { border-top: 1px solid rgba(255,255,255,0.15); }
+  .scenario-mixte .ligne-titre { font-weight: 600; min-width: 220px; }
+  .scenario-mixte .ligne-boutons { display: flex; gap: 6px; align-items: center; }
+  .nav-btn-demo {
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.20);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: white;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .nav-btn-demo.actif .icon {
+    background-color: var(--orange-nav-actif);
+  }
+  .nav-btn-demo .icon {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    background-color: white;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-image: url('../icons/icon-home.svg');
+    mask-image: url('../icons/icon-home.svg');
+  }
+  .nav-btn-demo.ico-eval .icon  { -webkit-mask-image: url('../icons/icon-pencil.svg');        mask-image: url('../icons/icon-pencil.svg'); }
+  .nav-btn-demo.ico-cal .icon   { -webkit-mask-image: url('../icons/icon-calendar.svg');      mask-image: url('../icons/icon-calendar.svg'); }
+  .nav-btn-demo.ico-prof .icon  { -webkit-mask-image: url('../icons/icon-profile.svg');       mask-image: url('../icons/icon-profile.svg'); }
+
+  .legende {
+    font-size: 0.85rem;
+    opacity: 0.75;
+    margin-top: 8px;
+    font-style: italic;
+  }
+
+  .note-eviter {
+    background: rgba(220, 50, 50, 0.08);
+    border-left: 4px solid #c0392b;
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin-top: 16px;
+    font-size: 0.92rem;
+  }
+  body.theme-sombre .note-eviter {
+    background: rgba(232, 64, 87, 0.15);
+    border-left-color: #e84057;
+  }
+
+  .recap {
+    background: rgba(46, 125, 50, 0.08);
+    border-left: 4px solid #2e7d32;
+    padding: 14px 18px;
+    border-radius: 4px;
+    margin-top: 24px;
+    font-size: 0.93rem;
+  }
+  body.theme-sombre .recap {
+    background: rgba(74, 222, 128, 0.15);
+    border-left-color: #4ade80;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <h1>Référentiel — Teintes de jaune (Lot I)</h1>
+    <div class="meta">PLAN-MIGRATION-ICONES-SVG.md · 26 mai 2026</div>
+  </div>
+  <button class="toggle-theme" onclick="document.body.classList.toggle('theme-sombre')">Basculer thème clair/sombre</button>
+</div>
+
+<main>
+
+<div class="intro">
+  <strong>Objectif</strong> : choisir une teinte de jaune qui servira à la fois (a) de fond de la palette d'accompagnement (popups d'aide, tour guidé) et (b) de couleur des icônes des boutons <em>aide</em> et <em>réglages</em> dans l'entête.
+  <br><br>
+  <strong>Convention chromatique recherchée</strong> : orange <code>#e8923a</code> = navigation active (Lot J), jaune choisi = assistance/configuration. Les deux doivent se distinguer sans ambiguïté tout en restant dans la même famille chaude.
+</div>
+
+<h2>1. État actuel — pour référence</h2>
+
+<h3>Entête sombre actuelle (5 boutons en blanc translucide)</h3>
+<div class="entete-demo">
+  <div class="entete-titre">Labo Codex</div>
+  <button class="btn-header" title="Signaler un bug"><span class="icon ico-bug"></span></button>
+  <button class="btn-header" title="Mode anonymisé"><span class="icon ico-mask"></span></button>
+  <button class="btn-header" title="Thème clair/sombre"><span class="icon ico-theme"></span></button>
+  <button class="btn-header" title="Aide"><span class="icon ico-aide"></span></button>
+  <button class="btn-header" title="Réglages"><span class="icon ico-regl"></span></button>
+</div>
+<div class="legende">L'entête reste sombre dans les deux modes (cf. <code>styles.css:422-423</code>). Toutes les icônes en <code>filter: brightness(0) invert(1)</code> — perte de <code>currentColor</code>.</div>
+
+<h3>Popup d'aide actuelle (palette accompagnement orange)</h3>
+<div class="popup-grid">
+  <div class="popup popup-orange">
+    <div class="popup-header">
+      Comment évaluer une production
+      <span style="font-size:0.85rem; opacity:0.8;">étape 2/5</span>
+    </div>
+    <div class="popup-corps">
+      <p>Cliquez sur le bouton « Évaluer » pour ouvrir la grille critériée. Chaque critère reçoit un niveau IDME selon ce que vous observez dans le travail de l'élève.</p>
+      <p>Le bilan réflexif et la rétroaction sont générés automatiquement à partir des niveaux que vous attribuez.</p>
+    </div>
+    <div class="popup-actions">
+      <button class="btn-sec">Précédent</button>
+      <button class="btn-prim">Continuer</button>
+    </div>
+  </div>
+  <div style="padding: 20px; align-self: center; opacity: 0.7;">
+    <p style="margin:0 0 10px;"><strong>Fond actuel</strong> : <code>#e8923a</code> (--acc-fond)</p>
+    <p style="margin:0;">Texte brun foncé <code>#2a1404</code>. Contraste WCAG AAA confirmé. Cette couleur sera à libérer pour la nav active.</p>
+  </div>
+</div>
+
+<h2>2. Trois candidats de jaune</h2>
+
+<div class="intro">
+  Chaque candidat est testé sur les deux usages : (a) icônes <em>aide</em> et <em>réglages</em> de l'entête, et (b) fond de popup d'aide avec texte brun foncé conservé. Survolez les boutons header pour comparer les états repos/hover.
+</div>
+
+<!-- CANDIDAT 1 -->
+<h3>Candidat 1 — <code>#e8c43a</code> (doré chaud — recommandé)</h3>
+<div class="entete-demo jaune-c1">
+  <div class="entete-titre">Labo Codex</div>
+  <button class="btn-header" title="Signaler un bug"><span class="icon ico-bug"></span></button>
+  <button class="btn-header" title="Mode anonymisé"><span class="icon ico-mask"></span></button>
+  <button class="btn-header" title="Thème clair/sombre"><span class="icon ico-theme"></span></button>
+  <button class="btn-header" title="Aide"><span class="icon ico-aide icon-cible"></span></button>
+  <button class="btn-header" title="Réglages"><span class="icon ico-regl icon-cible"></span></button>
+</div>
+<div class="popup-grid">
+  <div class="popup popup-jc1">
+    <div class="popup-header">
+      Comment évaluer une production
+      <span style="font-size:0.85rem; opacity:0.8;">étape 2/5</span>
+    </div>
+    <div class="popup-corps">
+      <p>Cliquez sur le bouton « Évaluer » pour ouvrir la grille critériée. Chaque critère reçoit un niveau IDME selon ce que vous observez dans le travail de l'élève.</p>
+      <p>Le bilan réflexif et la rétroaction sont générés automatiquement à partir des niveaux que vous attribuez.</p>
+    </div>
+    <div class="popup-actions">
+      <button class="btn-sec">Précédent</button>
+      <button class="btn-prim">Continuer</button>
+    </div>
+  </div>
+  <div style="padding: 20px; align-self: center;">
+    <p style="margin:0 0 8px;"><strong>Caractère</strong> : vif, énergique.</p>
+    <p style="margin:0 0 8px;"><strong>Lien chromatique</strong> : même luminosité que l'orange nav <code>#e8923a</code>. Décalage uniquement sur la teinte. Famille « chaude » lisible immédiatement.</p>
+    <p style="margin:0;"><strong>Contraste</strong> : 10.2:1 avec texte brun foncé (WCAG AAA).</p>
+  </div>
+</div>
+
+<!-- CANDIDAT 2 -->
+<h3>Candidat 2 — <code>#d4a630</code> (ocre doré — sobre)</h3>
+<div class="entete-demo jaune-c2">
+  <div class="entete-titre">Labo Codex</div>
+  <button class="btn-header" title="Signaler un bug"><span class="icon ico-bug"></span></button>
+  <button class="btn-header" title="Mode anonymisé"><span class="icon ico-mask"></span></button>
+  <button class="btn-header" title="Thème clair/sombre"><span class="icon ico-theme"></span></button>
+  <button class="btn-header" title="Aide"><span class="icon ico-aide icon-cible"></span></button>
+  <button class="btn-header" title="Réglages"><span class="icon ico-regl icon-cible"></span></button>
+</div>
+<div class="popup-grid">
+  <div class="popup popup-jc2">
+    <div class="popup-header">
+      Comment évaluer une production
+      <span style="font-size:0.85rem; opacity:0.8;">étape 2/5</span>
+    </div>
+    <div class="popup-corps">
+      <p>Cliquez sur le bouton « Évaluer » pour ouvrir la grille critériée. Chaque critère reçoit un niveau IDME selon ce que vous observez dans le travail de l'élève.</p>
+      <p>Le bilan réflexif et la rétroaction sont générés automatiquement à partir des niveaux que vous attribuez.</p>
+    </div>
+    <div class="popup-actions">
+      <button class="btn-sec">Précédent</button>
+      <button class="btn-prim">Continuer</button>
+    </div>
+  </div>
+  <div style="padding: 20px; align-self: center;">
+    <p style="margin:0 0 8px;"><strong>Caractère</strong> : mature, professionnel.</p>
+    <p style="margin:0 0 8px;"><strong>Lien chromatique</strong> : un cran plus sombre que l'orange nav. Distinction moins immédiate qu'avec C1.</p>
+    <p style="margin:0;"><strong>Contraste</strong> : 8.9:1 avec texte brun foncé (WCAG AAA).</p>
+  </div>
+</div>
+
+<!-- CANDIDAT 3 -->
+<h3>Candidat 3 — <code>#c4992b</code> (moutarde — discret)</h3>
+<div class="entete-demo jaune-c3">
+  <div class="entete-titre">Labo Codex</div>
+  <button class="btn-header" title="Signaler un bug"><span class="icon ico-bug"></span></button>
+  <button class="btn-header" title="Mode anonymisé"><span class="icon ico-mask"></span></button>
+  <button class="btn-header" title="Thème clair/sombre"><span class="icon ico-theme"></span></button>
+  <button class="btn-header" title="Aide"><span class="icon ico-aide icon-cible"></span></button>
+  <button class="btn-header" title="Réglages"><span class="icon ico-regl icon-cible"></span></button>
+</div>
+<div class="popup-grid">
+  <div class="popup popup-jc3">
+    <div class="popup-header">
+      Comment évaluer une production
+      <span style="font-size:0.85rem; opacity:0.8;">étape 2/5</span>
+    </div>
+    <div class="popup-corps">
+      <p>Cliquez sur le bouton « Évaluer » pour ouvrir la grille critériée. Chaque critère reçoit un niveau IDME selon ce que vous observez dans le travail de l'élève.</p>
+      <p>Le bilan réflexif et la rétroaction sont générés automatiquement à partir des niveaux que vous attribuez.</p>
+    </div>
+    <div class="popup-actions">
+      <button class="btn-sec">Précédent</button>
+      <button class="btn-prim">Continuer</button>
+    </div>
+  </div>
+  <div style="padding: 20px; align-self: center;">
+    <p style="margin:0 0 8px;"><strong>Caractère</strong> : discret, presque éteint sur fond sombre.</p>
+    <p style="margin:0 0 8px;"><strong>Lien chromatique</strong> : peut sembler trop proche de l'orange. Risque que l'icône aide/réglages se confonde avec un onglet nav actif.</p>
+    <p style="margin:0;"><strong>Contraste</strong> : 7.6:1 avec texte brun foncé (WCAG AAA).</p>
+  </div>
+</div>
+
+<h2>3. Distinction orange (nav active) vs jaune (aide)</h2>
+
+<p>Scénario réel : un utilisateur regarde l'app, un onglet de navigation est actif (orange), et les icônes aide/réglages sont à droite (jaune). Les deux signaux doivent se lire indépendamment, sans qu'on confonde « l'onglet courant » avec « l'outil d'assistance ».</p>
+
+<div class="scenario-mixte">
+  <div class="ligne">
+    <div class="ligne-titre">Navigation principale (orange = actif)</div>
+    <div class="ligne-boutons">
+      <button class="nav-btn-demo orange-nav"><span class="icon"></span> Accueil</button>
+      <button class="nav-btn-demo orange-nav actif ico-eval"><span class="icon"></span> Évaluation</button>
+      <button class="nav-btn-demo orange-nav ico-cal"><span class="icon"></span> Calendrier</button>
+      <button class="nav-btn-demo orange-nav ico-prof"><span class="icon"></span> Profil</button>
+      <div style="margin-left:auto;"></div>
+      <button class="btn-header" title="Aide"><span class="icon ico-aide" style="background-color: var(--jaune-c1);"></span></button>
+      <button class="btn-header" title="Réglages"><span class="icon ico-regl" style="background-color: var(--jaune-c1);"></span></button>
+    </div>
+  </div>
+  <div class="ligne">
+    <div class="ligne-titre">Avec C2 (ocre doré)</div>
+    <div class="ligne-boutons">
+      <button class="nav-btn-demo orange-nav"><span class="icon"></span> Accueil</button>
+      <button class="nav-btn-demo orange-nav actif ico-eval"><span class="icon"></span> Évaluation</button>
+      <button class="nav-btn-demo orange-nav ico-cal"><span class="icon"></span> Calendrier</button>
+      <button class="nav-btn-demo orange-nav ico-prof"><span class="icon"></span> Profil</button>
+      <div style="margin-left:auto;"></div>
+      <button class="btn-header" title="Aide"><span class="icon ico-aide" style="background-color: var(--jaune-c2);"></span></button>
+      <button class="btn-header" title="Réglages"><span class="icon ico-regl" style="background-color: var(--jaune-c2);"></span></button>
+    </div>
+  </div>
+  <div class="ligne">
+    <div class="ligne-titre">Avec C3 (moutarde)</div>
+    <div class="ligne-boutons">
+      <button class="nav-btn-demo orange-nav"><span class="icon"></span> Accueil</button>
+      <button class="nav-btn-demo orange-nav actif ico-eval"><span class="icon"></span> Évaluation</button>
+      <button class="nav-btn-demo orange-nav ico-cal"><span class="icon"></span> Calendrier</button>
+      <button class="nav-btn-demo orange-nav ico-prof"><span class="icon"></span> Profil</button>
+      <div style="margin-left:auto;"></div>
+      <button class="btn-header" title="Aide"><span class="icon ico-regl" style="background-color: var(--jaune-c3);"></span></button>
+      <button class="btn-header" title="Réglages"><span class="icon ico-regl" style="background-color: var(--jaune-c3);"></span></button>
+    </div>
+  </div>
+</div>
+
+<h2>4. Contre-exemple à éviter</h2>
+
+<h3>Jaune Material warning <code>#ffc107</code> — NE PAS utiliser</h3>
+<div class="entete-demo jaune-warn">
+  <div class="entete-titre">Labo Codex</div>
+  <button class="btn-header" title="Signaler un bug"><span class="icon ico-bug"></span></button>
+  <button class="btn-header" title="Mode anonymisé"><span class="icon ico-mask"></span></button>
+  <button class="btn-header" title="Thème clair/sombre"><span class="icon ico-theme"></span></button>
+  <button class="btn-header" title="Aide"><span class="icon ico-aide icon-cible"></span></button>
+  <button class="btn-header" title="Réglages"><span class="icon ico-regl icon-cible"></span></button>
+</div>
+<div class="note-eviter">
+  <strong>Pourquoi pas ?</strong> Cette teinte est déjà utilisée dans le DS comme <code>--niveau-attention-modere: #ffc107</code> (alerte warning). L'utiliser pour aide+réglages crée un double sens : « ouvrir l'aide » devient sémantiquement proche d'« alerte modérée », ce qui dégrade le sens des deux signaux.
+</div>
+
+<h2>5. Récapitulatif des hex</h2>
+
+<table class="compare-table">
+  <thead>
+    <tr>
+      <th>Rôle</th>
+      <th>Couleur</th>
+      <th>Hex</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Nav active (Lot J)</td>
+      <td><span class="swatch swatch-orange"></span></td>
+      <td><code>#e8923a</code></td>
+      <td>Réservé après bascule du Lot I. Identique aux deux thèmes.</td>
+    </tr>
+    <tr>
+      <td><strong>Candidat 1 — recommandé</strong></td>
+      <td><span class="swatch swatch-jc1"></span></td>
+      <td><code>#e8c43a</code></td>
+      <td>Doré chaud. Même luminosité que l'orange nav. Famille chaude lisible immédiatement.</td>
+    </tr>
+    <tr>
+      <td>Candidat 2</td>
+      <td><span class="swatch swatch-jc2"></span></td>
+      <td><code>#d4a630</code></td>
+      <td>Ocre doré. Plus mature, plus sobre. Distinction d'avec l'orange moins immédiate.</td>
+    </tr>
+    <tr>
+      <td>Candidat 3</td>
+      <td><span class="swatch swatch-jc3"></span></td>
+      <td><code>#c4992b</code></td>
+      <td>Moutarde. Très discret sur fond sombre. Risque de confusion avec l'orange.</td>
+    </tr>
+    <tr>
+      <td>À éviter</td>
+      <td><span class="swatch swatch-warn"></span></td>
+      <td><code>#ffc107</code></td>
+      <td>Déjà <code>--niveau-attention-modere</code>. Conflit cognitif.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="recap">
+  <strong>Pour choisir</strong> : ouvrez ce fichier dans Safari, regardez les trois entêtes côte à côte, puis les trois popups. Basculez le thème clair/sombre (le fond de page change, l'entête reste sombre — c'est volontaire, cf. <code>styles.css:422-423</code>). La question à vous poser : <em>en mode « coup d'œil rapide », l'icône aide/réglages se distingue-t-elle nettement d'un onglet de navigation actif ?</em>
+</div>
+
+</main>
+
+</body>
+</html>
