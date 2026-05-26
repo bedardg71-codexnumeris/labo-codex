@@ -843,7 +843,7 @@ function afficherAideContextuelle(cleAide) {
 
     modal.innerHTML = `
         <div class="primo-popup-header">
-            <span id="aide-ctx-titre" class="primo-popup-titre"><img src="icons/icons8-info.svg" alt="" class="btn-inline-icon"> </span>
+            <span id="aide-ctx-titre" class="primo-popup-titre"><span class="icone-info-aide taille-inline" aria-hidden="true"></span> </span>
             <button class="primo-popup-fermer" data-action="fermerAideContextuelle" aria-label="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
         </div>
         <div class="primo-popup-body aide-contextuelle-body">
@@ -894,7 +894,7 @@ function afficherPopupPrimo(contentHTML) {
 
     popup.innerHTML = `
         <div class="primo-popup-header">
-            <span><span class="primo-icon"><img src="icons/icons8-info.svg" alt="" class="btn-inline-icon"></span> Conseil</span>
+            <span><span class="primo-icon"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span> Conseil</span>
             <button class="primo-popup-close" data-action="fermerPopupPrimo"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
         </div>
         <div class="primo-popup-body">

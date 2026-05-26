@@ -88,7 +88,7 @@
             btnAide.className = 'btn-aide-contextuelle';
             btnAide.setAttribute('data-aide', 'modal-export-preview');
             btnAide.setAttribute('aria-label', 'Aide : aperçu de l\'export');
-            btnAide.innerHTML = '<img src="icons/icons8-info.svg" alt="" class="btn-aide-icon">';
+            btnAide.innerHTML = '<span class="icone-info-aide taille-bouton" aria-hidden="true"></span>';
             titre.appendChild(document.createTextNode(' '));
             titre.appendChild(btnAide);
             modal.appendChild(titre);

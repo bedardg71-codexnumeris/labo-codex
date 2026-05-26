@@ -186,7 +186,7 @@ function genererSectionRapport(da) {
             <div class="profil-carte">
                 <!-- En-tête minimaliste -->
                 <h3 style="margin: 0 0 20px 0; color: var(--accent-primaire); font-size: 1.1rem; border-bottom: 2px solid var(--bleu-pale); padding-bottom: 10px;">
-                    <span class="primo-aide" data-target="conseil-rapport"><img src="icons/icons8-info.svg" alt="" class="btn-inline-icon"></span>
+                    <span class="primo-aide" data-target="conseil-rapport"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
                 </h3>
 
                 <!-- Conseil Primo: Informations sur le rapport -->

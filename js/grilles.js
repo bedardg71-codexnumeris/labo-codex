@@ -2696,7 +2696,7 @@ function afficherCriteresTemp() {
                 </div>
                 <div class="groupe-form">
                     <label data-tooltip="cn-grille-type-critere" style="font-size: 0.85rem; color: var(--gris-moyen);">Type
-                        <span class="primo-aide" data-target="grille-type-critere-detail"><img src="icons/icons8-info.svg" alt="" class="btn-inline-icon"></span>
+                        <span class="primo-aide" data-target="grille-type-critere-detail"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
                     </label>
                     <select class="controle-form"
                             data-on-change="modifierTypeCritereTempHandler" data-critere-index="${index}">
@@ -2716,7 +2716,7 @@ function afficherCriteresTemp() {
                 </div>
                 <div class="groupe-form">
                     <label style="font-size: 0.85rem; color: var(--gris-moyen);">Niveau SOLO
-                        <span class="primo-aide" data-target="grille-niveau-solo"><img src="icons/icons8-info.svg" alt="" class="btn-inline-icon"></span>
+                        <span class="primo-aide" data-target="grille-niveau-solo"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
                     </label>
                     <select class="controle-form"
                             data-on-change="modifierCritereTempHandler" data-critere-index="${index}" data-champ="niveauSOLO">
@@ -2992,7 +2992,7 @@ function afficherCriteresGrille(grille) {
                 </div>
                 <div class="groupe-form">
                     <label data-tooltip="cn-grille-type-critere" style="font-size: 0.85rem; color: var(--gris-moyen);">Type
-                        <span class="primo-aide" data-target="grille-type-critere-detail"><img src="icons/icons8-info.svg" alt="" class="btn-inline-icon"></span>
+                        <span class="primo-aide" data-target="grille-type-critere-detail"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
                     </label>
                     <select class="controle-form"
                             data-on-change="modifierTypeCritereGrilleHandler" data-grille-id="${grille.id}" data-critere-index="${index}">
@@ -3012,7 +3012,7 @@ function afficherCriteresGrille(grille) {
                 </div>
                 <div class="groupe-form">
                     <label style="font-size: 0.85rem; color: var(--gris-moyen);">Niveau SOLO
-                        <span class="primo-aide" data-target="grille-niveau-solo"><img src="icons/icons8-info.svg" alt="" class="btn-inline-icon"></span>
+                        <span class="primo-aide" data-target="grille-niveau-solo"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
                     </label>
                     <select class="controle-form"
                             data-on-change="modifierCritereGrilleHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-champ="niveauSOLO">

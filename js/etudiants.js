@@ -509,7 +509,7 @@ function mettreAJourTitreListeEtudiants() {
     const partieDroite = document.createElement('div');
     partieDroite.innerHTML = `
         <span class="primo-aide" data-target="note-calcul-indices-liste"
-              title="Explication du calcul des indices"><img src="icons/icons8-info.svg" alt="" class="btn-inline-icon"></span>
+              title="Explication du calcul des indices"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
     `;
 
     conteneurTitre.appendChild(partieGauche);
