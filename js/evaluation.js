@@ -3865,4 +3865,23 @@ window.naviguerEtudiantPrecedent = naviguerEtudiantPrecedent;
 window.naviguerEtudiantSuivant = naviguerEtudiantSuivant;
 window.retirerJeton = retirerJeton;
 
+// Exports manqués lors de l'extraction de evaluation-chargement.js et autres
+// sous-modules (refactor évaluation 18-21 mai 2026). Sans ces exports, les
+// fonctions définies ici déclenchent ReferenceError ou échec silencieux quand
+// appelées depuis evaluation-chargement.js, evaluation-calcul.js,
+// evaluation-retroaction.js, evaluation-sauvegarde.js, modes.js, travaux-ui.js,
+// liste-evaluations.js. Bug rapporté 21 mai 2026 (rien ne s'affiche au clic) :
+// verifierEtChargerEvaluationExistante crashait au changement d'étudiant ou de
+// production → l'éval existante n'était jamais pré-chargée.
+window.verifierEtChargerEvaluationExistante = verifierEtChargerEvaluationExistante;
+window.desactiverFormulaireEvaluation = desactiverFormulaireEvaluation;
+window.appliquerJetonDelaiDepuisSidebar = appliquerJetonDelaiDepuisSidebar;
+window.attacherEvenementsMemorisation = attacherEvenementsMemorisation;
+window.chargerListeEvaluationsRefonte = chargerListeEvaluationsRefonte;
+window.cocherOptionsParDefaut = cocherOptionsParDefaut;
+window.memoriserSelectionsEvaluation = memoriserSelectionsEvaluation;
+window.obtenirNomCartouche = obtenirNomCartouche;
+window.sauvegarderSelectionsEvaluation = sauvegarderSelectionsEvaluation;
+window.trierListeEvaluations = trierListeEvaluations;
+
 })();
