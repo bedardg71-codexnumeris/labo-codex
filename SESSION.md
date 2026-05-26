@@ -1,31 +1,87 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 26 mai 2026 matin,
-     post-livraison de 6 chantiers : retrait modale migration legacy,
-     filtrage doublons original/reprise dans Travaux soumis profil,
-     fix ReferenceError verifierEtChargerEvaluationExistante (10
-     exports manqués sur evaluation.js), 3 items backlog #278+#280+
-     #281, cartographie + plan migration emojis UI → SVG icons8 (#286).
-     Beta 99.66 builds 0526-0345 → 0526-0503, HEAD main `4df4f21`.)
+     IDENTIFICATION DE CE FICHIER  (mis à jour 26 mai 2026 PM,
+     post-livraison du cycle chromatique du Lot J extension : 3 lots
+     du plan migration icônes livrés dans la même journée (Lot F
+     nettoyage 15 PNG legacy, Lot I bascule palette aide orange →
+     jaune, Lot J phase 2 directe 5 couleurs sections via multiply),
+     + design-system documenté + audit chromatique + référentiels
+     visuels + 2 boutons header bug/anonymisation colorisés.
+     Beta 99.66 builds 0526-0345 → 0526-1120, HEAD main attendu
+     post-commit final ~`<hex>`.)
      Ce SESSION.md vit sur la branche `main` du worktree principal et
      sert de relai entre les sessions Claude. Il décrit l'état après
-     la session productive du 26 mai matin (5 commits push + 1 commit
-     cleanup backlog). Présentation AQPC le 3 juin 2026 (J−8 au moment
-     du relai). Plan de migration icônes prêt (lot A recommandé en
-     premier, voir §3). L'historique complet précédent (audit annuel
-     livré 25 mai, refonte pratique active 24 mai, #282 P1-P4 du
-     23 mai, cycle AQPC clos 22 mai, Cat-B clos 21 mai) reste dans
-     les §§ suivants comme référence.
+     deux sessions productives du 26 mai (matin = 6 bugs+items+plan ;
+     PM = 3 lots du plan icônes + 2 référentiels + 1 audit). Présentation
+     AQPC le 3 juin 2026 (J−8 au moment du relai). L'historique complet
+     précédent (audit annuel livré 25 mai, refonte pratique active 24
+     mai, #282 P1-P4 du 23 mai, cycle AQPC clos 22 mai, Cat-B clos
+     21 mai) reste dans les §§ suivants comme référence.
      ===================================================================== -->
 
 > **📌 Identification**
 > - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
-> - **Cycle qui vient d'être livré** : **Session 26 mai matin** — 6 livraisons enchaînées (3 bugs testeurs + 3 items backlog) + cartographie icônes UI. Détail § « 26 mai matin » ci-dessous et dans BACKLOG-ARCHIVE.md.
-> - **Cycle suivant** : Voir §3. **Lot A migration icônes** (bouton aide ✴ → SVG icon-info, 76 sites, ~45 min) recommandé en premier. Plan détaillé : `plans de travail/PLAN-MIGRATION-ICONES-SVG.md`. Autres items disponibles dans BACKLOG.md (28 items ouverts).
-> - **Documents clés de cette session** : `plans de travail/PLAN-MIGRATION-ICONES-SVG.md` (chantier #286), `BACKLOG.md` (#278/#280/#281 retirés + #286 ajouté), `BACKLOG-ARCHIVE.md` (livraisons 26 mai documentées).
+> - **Cycle qui vient d'être livré** : **Session 26 mai PM** — chantier chromatique du plan migration icônes (#286) : Lots F + I + J phase 2 livrés en cascade, design-system documenté (§1 palette + §8 navigation), audit chromatique WCAG/ΔE76/daltonisme produit, 2 référentiels visuels HTML, mémoire conventions chromatiques étendue. Voir § « 26 mai PM » ci-dessous.
+> - **Cycle suivant** : Voir §3. **Lot A migration icônes** (bouton aide ✴ → SVG icon-info, 76 sites, ~45 min) recommandé en premier — reste plus simple maintenant que les conventions chromatiques sont posées et le pattern `<span>` + mask-image base64 éprouvé. Plan détaillé : `plans de travail/PLAN-MIGRATION-ICONES-SVG.md` (mis à jour avec historique des livraisons §9).
+> - **Documents clés de la session PM** : `plans de travail/PLAN-MIGRATION-ICONES-SVG.md` (§9 historique), `plans de travail/AUDIT-COULEURS-SECTIONS.md` (audit WCAG/ΔE/daltonisme), `plans de travail/REFERENTIEL-COULEURS-JAUNE.html` + `REFERENTIEL-COULEURS-SECTIONS.html` (référentiels visuels), `design-system.html` §1 + §8, `memory/project-palette-couleurs-contraintes.md`.
 
 ---
 
-## §0bis — Récap session 26 mai 2026 matin (6 livraisons + cartographie icônes)
+## §0bis — Récap session 26 mai 2026 PM (cycle chromatique Lots F + I + J + extension)
+
+**Beta / build** : 99.66 / 0526-1120 (5 bumps de build sur la PM : 0526-0657 Lot I, 0526-0734 Lot J phase 1 abandonnée, 0526-1037 Lot J phase 2 livrée, 0526-1045 release, 0526-1120 Lot J extension).
+**Branche `main`** : 10+ commits push sur la journée PM, HEAD à acter au commit final.
+
+**3 lots du plan migration icônes livrés** :
+
+1. **Lot F** (commit `d41e25e`) — `chore(icons): retrait 15 PNG outils-* legacy non référencés`. 15 fichiers PNG supprimés, 0 ligne de code touchée. Audit confirmatoire pré-suppression. Pas de bump.
+
+2. **Lot I** (commits `9d70e07` + `b4d926a` fix flex-shrink) — `feat(theme): palette accompagnement orange → jaune doré #e8c43a`. Bump 0526-0657. ~30 variables `--acc-*` redéfinies en jaune. Boutons header aide + réglages migrés de `<img>` vers `<span class="header-icon ico-X">` avec mask-image SVG inlinées en base64 (contournement CORS file:// pour WebKit Playwright). Fix critique : `flex-shrink: 0` obligatoire sur les `<span>` dans un parent flex avec content area étroit (sinon compression à 6 px au lieu de 18×18 voulus).
+
+3. **Lot J phase 2 directe** (commit `0384361`) — `feat(theme): 5 couleurs sections par multiply + jaune aide actif`. Bump 0526-1045. **Phase 1 (couleur unique) sautée** au profit de la phase 2 (5 couleurs distinctes par grande section) à la demande de Grégoire. Convention chromatique :
+   - `--section-conception: #ff6f00` (orange — chantier)
+   - `--section-calendrier: #34c759` (vert succès — conflit hex avec --vert-succes documenté, lu par contexte)
+   - `--section-suivi: #22d3ee` (cyan)
+   - `--section-evaluations: #38bdf8` (bleu sky — attention pluriel data-onglet)
+   - `--section-labo: #c084fc` (violet pastel)
+   - `--bg-bandeau-mediane: #133248` sombre / `#09264b` clair (auto via `.mode-clair`)
+
+   Technique : `background-blend-mode: multiply` sur 2 couches (couleur opaque + bandeau médiane unie). Le bandeau parent garde son vrai gradient ; le bouton actif est uniforme à l'intérieur pour éviter une cassure de gradient. Bordure + icône SVG + label texte aussi colorés (signal multi-élément). Mode clair (spécif 0,4,1) doit doubler les règles spécifiques pour battre `.mode-clair .navigation-principale button.actif` (0,3,1).
+
+   **2 modifs autorisées dans `js/navigation.js` (protégé CLAUDE.md)** : (a) classe `section-${nomOnglet}` sur conteneur `.sous-navigation` pour permettre coloration sous-nav par section parente, (b) gestion classe `.actif` sur boutons header `[data-param="aide"|"reglages"]` pour qu'ils reçoivent le fond teinté jaune quand leur section est ouverte.
+
+4. **Lot J extension** (commit final ~après ce relai) — boutons header **bug** et **anonymisation** colorisés en permanence :
+   - bug → violet `var(--section-labo) #c084fc`
+   - anonymisation → cyan `var(--section-suivi) #22d3ee`
+
+   Refactor : retrait de `background-color: var(--icone-aide-config)` du sélecteur générique `span.header-icon`, couleur définie par classe spécifique (`.ico-wordbook`/`.ico-tune` jaune, `.ico-bug` violet, `.ico-mask-anon` cyan). Header présente désormais 4 couleurs distinctes (violet/cyan/blanc/jaune) en cohérence avec la palette nav.
+
+**Documentation produite** :
+- `plans de travail/AUDIT-COULEURS-SECTIONS.md` — audit chromatique WCAG 2.1 (contraste icône/texte sur fond teinté multiply, AA atteint partout), ΔE76 CIELAB (distances perceptives, paire Suivi/Évaluations à 22.2 = limite distinct), simulation daltonisme 3 types (Suivi/Évaluations indistinguables en protanopie ΔE 1.0 — mitigé par label texte WCAG 1.4.1), conflits hex DS documentés (Calendrier vs --vert-succes, Conception vs --som-orange).
+- `plans de travail/REFERENTIEL-COULEURS-JAUNE.html` — référentiel Lot I (comparaison teintes jaunes, header + popup, mode sombre/clair).
+- `plans de travail/REFERENTIEL-COULEURS-SECTIONS.html` — référentiel Lot J (vue d'ensemble palette + variantes hex par section + test cohérence multi-thèmes + comparatif blend modes).
+- `design-system.html` §1 (palette : nouveau bloc 5 couleurs sections + bloc jaune assistance) + §8 (Navigation : nouveau bloc « Bouton actif par section » avec snippet CSS et renvois audit/référentiel).
+- `memory/project-palette-couleurs-contraintes.md` — conventions tranchées + conflits hex acceptés + limites daltonisme + technique CSS multiply.
+- `plans de travail/PLAN-MIGRATION-ICONES-SVG.md` — Lots F/I/J marqués ✅ LIVRÉ, §5 ordre restant, §6 estimation actualisée, §7 décisions tranchées, §9 nouveau historique des livraisons.
+
+**Apprentissages techniques transférables aux lots suivants (A, B, C, D, E, H, G)** :
+- Pattern `<span class>` + `mask-image` SVG inlinés base64 marche bien et contourne CORS file:// sur WebKit (essentiel pour Playwright).
+- `flex-shrink: 0` obligatoire sur les span dans un parent flex avec content area étroit.
+- `background-blend-mode: multiply` donne un signal visuel fort sans écraser le contenu (icône, texte) et préserve le gradient du bandeau parent (à condition que la couche bandeau dans le bouton actif soit uniforme, pas un mini-gradient désaligné).
+- Spécificité CSS : `.mode-clair .navigation-principale button.actif` (0,3,1) écrase systématiquement les overrides par section sans `.mode-clair` (0,3,0). Toujours doubler les règles en mode clair pour préserver les overrides.
+- `--nav-actif` (phase 1 jamais utilisée) reste défini dans styles.css : candidat à un futur cleanup zéro-dette.
+
+**Tests** : 103/103 verts à chaque commit (85 Vitest + 18 Playwright WebKit).
+
+**Vérifications de déploiement Grégoire à faire** après ⌥⌘E + Cmd+R Safari :
+- ✅ Boutons header de droite à gauche : bug = violet, anonymisation = cyan, thème = blanc, aide = jaune, réglages = jaune.
+- ✅ Clic sur Conception/Calendrier/Suivi/Évaluations/Labo : icône + bordure + label colorés selon la section. Accueil et Aperçu restent blancs/neutres.
+- ✅ Sous-nav d'une section : le sous-onglet actif est colorée de la couleur de la section parente.
+- ✅ Ouvrir la section Aide ou Réglages : le bouton header correspondant devient teinté jaune (fond multiply).
+- ✅ Bascule thème clair/sombre : couleurs sections identiques dans les deux modes, fond bandeau s'adapte automatiquement.
+
+---
+
+## §0ter — Récap session 26 mai 2026 matin (6 livraisons + cartographie icônes)
 
 **Beta / build** : 99.66 / 0526-0503 (3 bumps de build sur la matinée).
 **Branche `main`** : HEAD à `4df4f21` chore(backlog) — déplacement #278/#280/#281 + 3 bugs testeurs vers archive.
@@ -830,50 +886,65 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
 ## §3 — Consigne de démarrage pour la prochaine session
 
-> **Session 26 mai matin productive** : 5 commits push + cleanup backlog. Cartographie + plan migration emojis UI → SVG icons8 (#286) PRÊT. **AQPC dans 8 jours (3 juin 2026)** — keynote Grégoire prête, filet captures d'écran en plan B si l'app plante (cf. mémoire `project-aqpc-keynote-filet`). Enjeu réel = solidité pour expérimentateurs post-AQPC, pas la démo elle-même.
+> **Session 26 mai PM productive** : cycle chromatique Lots F + I + J + extension livrés (commit ~final 0526-1120). Convention chromatique posée dans le code (orange/vert/cyan/bleu/violet pour les 5 sections de nav, jaune pour assistance/configuration). **Reste du plan migration icônes** : Lots A, B, D, C, E, H, G (~6h30-7h30 cumulés). **AQPC dans 8 jours (3 juin 2026)** — keynote Grégoire prête, filet captures d'écran en plan B (cf. mémoire `project-aqpc-keynote-filet`).
 
 ### Priorité 1 — Lot A migration icônes (chantier recommandé, ~45 min)
 
-**Item BACKLOG #286** — migration globale emojis UI → SVG icons8.
+**Item BACKLOG #286 — Lot A** = bouton aide ✴ (76 occurrences : 49 HTML + 27 JS hors commentaires). 1 mapping unique : `✴` → `icon-info.svg`.
 
-**Plan détaillé** : `plans de travail/PLAN-MIGRATION-ICONES-SVG.md` (cartographie complète, 5 lots A-E, mapping SVG par emoji, décisions Grégoire pendantes).
+**Plan détaillé** : `plans de travail/PLAN-MIGRATION-ICONES-SVG.md` (§5 ordre restant, §6 estimation par lot, §7 décisions encore pendantes, §9 historique des livraisons F+I+J).
 
-**Lot A** = bouton aide ✴ (76 occurrences : 49 HTML + 27 JS hors commentaires). 1 mapping unique : `✴` → `icon-info.svg`.
-
-**Pré-requis bloquant** : `icon-info.svg` n'existe pas encore dans `icons/`. Grégoire doit choisir un style icons8 cohérent avec les 70 SVG déjà présents (probablement style Material Outlined) et l'ajouter à `icons/`.
+**Pré-requis** : `icon-info.svg` **est déjà présent** dans `icons/` (vérifié au Lot I). À confirmer avec Grégoire qu'il convient esthétiquement (style icons8) ou le remplacer.
 
 **Procédure recommandée** :
-1. **Demander à Grégoire** le SVG `icon-info.svg` (ou lui suggérer 2-3 candidats depuis icons8).
-2. Ajouter à `icons/icon-info.svg`.
-3. Grep `'✴'` et `'✴️'` (avec et sans le variation selector U+FE0F) dans `*.js` et `*.html`.
-4. Remplacer le caractère par `<img src="icons/icon-info.svg" alt="Aide" class="btn-aide-icone">` ou équivalent CSS-only.
-5. Tests Vitest + Playwright (103/103 attendu).
-6. Test visuel Mac + iPad, modes sombre + clair.
-7. Commit + push avec bump build (Beta 99.66 conservée, juste nouveau timestamp).
+1. Confirmer avec Grégoire que `icons/icon-info.svg` actuel convient.
+2. Grep `'✴'` et `'✴️'` (avec et sans le variation selector U+FE0F) dans `*.js` et `*.html`.
+3. Remplacer le caractère par `<img src="icons/icon-info.svg" alt="Aide" class="btn-aide-icone">` (option simple) OU passer en `<span class="btn-aide-icone ico-info">` avec mask-image base64 si on veut pouvoir colorer (cohérence avec Lots I/J).
+4. Tests Vitest + Playwright (103/103 attendu).
+5. Test visuel Mac + iPad, modes sombre + clair.
+6. Commit + push avec bump build (Beta 99.66 conservée, juste nouveau timestamp).
 
-**Pourquoi Lot A en premier** : visible immédiatement (capture déclencheuse iPad 26 mai 05:15 le montre), 1 seul mapping, gros impact rapide. Valide la méthodologie avant les lots plus lourds.
+**Pourquoi Lot A en premier** : 76 sites visibles, 1 mapping unique, gros impact visuel rapide. Valide la méthodologie sur cas simple avant les lots plus lourds. SVG déjà présent, pas de blocage matériel.
+
+### Apprentissages techniques transférables (cycle chromatique 26 mai PM)
+
+À garder en tête pour les Lots A-H, surtout si on bascule des `<img>` en `<span>` avec mask-image :
+
+1. **Pattern `<span>` + mask-image SVG inlinés en base64** = solution éprouvée pour colorer des SVG via CSS. Contourne CORS file:// sur WebKit (essentiel pour Playwright). Cf. styles.css `.ico-wordbook`, `.ico-tune`, `.ico-bug`, `.ico-mask-anon` + les 7 `.ico-X` de la nav principale.
+
+2. **`flex-shrink: 0` OBLIGATOIRE** sur les `<span>` quand le parent est `display: inline-flex` avec content area étroit. Sinon le span est compressé (bug bouton header Lot I : box 6px au lieu de 18×18 voulus). Les `<img>` (replaced elements) ne sont pas concernés.
+
+3. **`background-blend-mode: multiply`** sur 2 couches (couleur opaque + bandeau médiane unie) = fond plein clairement teinté qui n'écrase ni icône ni texte. Pour préserver le gradient du bandeau parent, la couche bandeau dans le bouton actif doit être UNIFORME (`linear-gradient(var(X), var(X))`), pas un mini-gradient désaligné.
+
+4. **Spécificité CSS mode clair** : `.mode-clair .navigation-principale button.actif` (0,3,1) écrase systématiquement les overrides par section sans `.mode-clair` (0,3,0). **Toujours doubler les règles** : une pour mode sombre (par défaut), une pour `.mode-clair`.
+
+5. **Variables sémantiques disponibles** :
+   - `--section-conception #ff6f00`, `--section-calendrier #34c759`, `--section-suivi #22d3ee`, `--section-evaluations #38bdf8`, `--section-labo #c084fc`
+   - `--icone-aide-config #e8c43a` (jaune assistance/configuration)
+   - `--bg-bandeau-mediane #133248 sombre / #09264b clair`
+
+6. **`--nav-actif #e8923a`** est défini mais NON utilisé (phase 1 du Lot J jamais déployée). Candidat à cleanup zéro-dette quand on est confiant qu'on n'y reviendra pas.
 
 ### Priorité 2 — Items BACKLOG à plus court terme
 
-Si Grégoire préfère un autre item parmi les 28 ouverts :
+Si Grégoire préfère un autre item parmi les 27 ouverts :
 
-- **🟡 #279** Ajouter 3 champs au gabarit production (DESCRIPTION DÉTAILLÉE / FORMAT / REMISE). Bloqueur : Grégoire doit fournir une capture de référence (placement, type d'input). Effort ~1-2 h une fois la capture reçue.
+- **🟡 #279** Ajouter 3 champs au gabarit production (DESCRIPTION DÉTAILLÉE / FORMAT / REMISE). Bloqueur : Grégoire doit fournir une capture de référence (placement, type d'input). Effort ~1-2 h.
 - **🟡 #273** Évaluations démo à partir de vrais travaux d'élèves anonymisés (consentement obtenu plusieurs élèves H2026). 2-3 dossiers complets pour pack démo. Utile aux expérimentateurs post-AQPC. 1-2 séances.
-- **🟢 #283 + #284** Harmonisation UX responsive sidebar mobile + titres/sous-titres pages. Décisions UX en amont.
+- **🟢 #283 + #284** Harmonisation UX responsive sidebar mobile + titres/sous-titres pages.
 
-### Priorité 3 — Warnings console résiduels (observés mais non traités)
+### Priorité 3 — Warnings console résiduels (observés matin, non traités)
 
-Visibles dans la console Safari de Grégoire le 26 mai (cf. §0bis) :
-- **Quota localStorage `h2026_indicesCP` dépassé** (29 Ko/clé). Mécanisme défensif `db.js` bascule sur IDB+memoryCache. Pas critique mais signal d'un quota global proche du plafond. Lien avec la désaturation localStorage déjà documentée.
-- **Format de séance non reconnu — `SEANCE-2026-05-14-B`** × 2 (saisie-presences.js:338). Probablement une séance créée avec schéma incomplet. À tracer côté création de séances.
-- **`indicesCP non disponible` pour DA 9000176 et 9000040** — fallback recalcul à la volée, pas crash mais charge supplémentaire. Pipeline de pré-calcul incomplet pour ces 2 étudiants.
+- Quota localStorage `h2026_indicesCP` dépassé (29 Ko/clé) — défensif db.js bascule IDB+memoryCache.
+- Format de séance non reconnu — `SEANCE-2026-05-14-B` × 2 (saisie-presences.js:338).
+- `indicesCP non disponible` pour DA 9000176 et 9000040 — fallback recalcul à la volée.
 
 ### Étapes de démarrage immédiat
 
 ```bash
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 git status                                              # main attendu propre
-git log --oneline main -10                              # HEAD attendu : `4df4f21` chore(backlog) déplacement #278 #280 #281
+git log --oneline main -10                              # HEAD attendu : commit final du 26 mai PM (~0526-1120)
 git fetch origin
 
 # Vérifier que les tests sont toujours verts
@@ -889,54 +960,55 @@ grep -rn "'✴'\|'✴️'\|\"✴\"\|\"✴️\"\|>✴<\|>✴️<" --include="*.js
 
 1. **Charger les skills** : `Skills pour Claude Code/SKILL_labo_codex.md` (architecture générale).
 2. **Charger les mémoires** essentielles :
+   - [[project-palette-couleurs-contraintes]] — **À LIRE EN PRIORITÉ** : conventions chromatiques tranchées 26 mai (5 couleurs sections + jaune aide), conflits hex acceptés, limites daltonisme, technique CSS multiply.
    - [[project-aqpc-keynote-filet]] — AQPC 3 juin pilotée par keynote, pas l'app live. Filet captures si l'app plante. Enjeu réel = expérimentateurs post-AQPC.
-   - [[feedback-fix-perdu-refactoring-extraction]] — pattern confirmé encore une fois le 26 mai (10 exports manqués sur evaluation.js). Vigilance permanente sur les extractions de sous-modules.
-   - [[feedback-autosave-race-condition]] — pattern bug fixé 24 mai PM (à éviter ailleurs).
-   - [[project-autosaves-a-auditer]] — liste des auto-saves suspects.
+   - [[feedback-fix-perdu-refactoring-extraction]] — vigilance permanente sur les extractions de sous-modules.
    - [[feedback-zero-fallback-arbitraire]] — principe directeur métier.
-   - [[project-pratique-active-ssot]] — architecture pratique active (post-refonte 24 mai matin).
-3. **Lire le SESSION.md complet** (ce fichier). §0bis décrit ce qui vient d'être livré (26 mai matin), § « 25 mai fin de journée » remonte la veille, §§ suivants remontent les jours précédents.
-4. **Si chantier icônes** : lire `plans de travail/PLAN-MIGRATION-ICONES-SVG.md` AVANT toute action. Contient mapping détaillé, décisions pendantes Grégoire, ordre recommandé des lots.
+   - [[project-pratique-active-ssot]] — architecture pratique active.
+3. **Lire le SESSION.md** §0bis (26 mai PM cycle chromatique) + §0ter (26 mai matin). §§ suivants = jours précédents.
+4. **Si chantier icônes** : lire `plans de travail/PLAN-MIGRATION-ICONES-SVG.md` AVANT toute action. §5 ordre restant, §6 effort, §7 décisions encore pendantes, §9 historique livraisons.
+5. **Si chantier touche aux couleurs** : consulter `design-system.html` §1 (palette) + §8 (navigation) qui documentent les conventions chromatiques. Et `plans de travail/AUDIT-COULEURS-SECTIONS.md` pour les contraintes WCAG/daltonisme.
 
 ### Zones protégées — rappel permanent
 
 - `js/config.js` · `js/navigation.js` · `noms_stables.json` — NE PAS MODIFIER sans autorisation explicite.
+- **Exception 26 mai PM** : Grégoire a autorisé 2 modifs minimes dans `js/navigation.js` pour le Lot J (classe `section-${nomOnglet}` sur conteneur sous-nav + gestion `.actif` sur boutons header aide/réglages). Documenter si nouvelle modif nécessaire.
 
 ### Conventions
 
-- **Pas de bump beta sans demander** Grégoire (cf. §0). Beta 99.66 conservée tant que non bumpée.
-- **Hook pré-push vert** obligatoire (Défense J — 85 Vitest verts au minimum).
-- **Worktree dédié** recommandé pour tout chantier > 1 h. La session 26 mai matin a tout fait sur main (5 commits courts).
-- **Test simulation Safari Responsive Design Mode** insuffisant pour valider mobile : toujours valider sur vrai device.
-- **Charger la cache** : pour les nouveaux fichiers JS ou modifications, faire `Cmd+Q` complet de Safari puis ré-ouverture, OU ⌥⌘E pour vider les caches Safari. Le cache buster `?v=` est inopérant en `file://`. Sur macOS 26.5, le cache Safari file:// est devenu plus persistant — privilégier Chrome pour le dev quand possible.
-- **`window._SCRIPT_BUILD_main`** : à synchroniser à CHAQUE bump de build (cf. CLAUDE.md « Avant chaque commit » étape 4). Sentinelle #285 livrée 25 mai.
+- **Pas de bump beta sans demander** Grégoire. Beta 99.66 conservée tant que non bumpée.
+- **Hook pré-push vert** obligatoire (Défense J — 85 Vitest verts minimum).
+- **Worktree dédié** recommandé pour tout chantier > 1 h. La session 26 mai PM a tout fait sur main (commits courts).
+- **Cache Safari file://** : `⌥⌘E` + `Cmd+R` pour rafraîchir. Cache buster `?v=` inopérant. Sur macOS 26.5 le cache est très persistant — privilégier Chrome pour le dev.
+- **`window._SCRIPT_BUILD_main`** : synchroniser à CHAQUE bump (cf. CLAUDE.md « Avant chaque commit » étape 4).
 
 ### Vérifications de déploiement Grégoire à confirmer
 
-Si Grégoire n'a pas encore déployé la beta 99.66 b0526-0503 (commits 0526-0345 → 0526-0503), les changements ne sont pas encore visibles en production. **Confirmer en début de session** :
-- A-t-il déployé la dernière beta (Netlify push automatique sur main, ou autre flux) ?
-- A-t-il fait ⌥⌘E + Cmd+R sur Safari pour rafraîchir le cache file:// ?
-- Les 6 vérifications listées dans §0bis (modale legacy retirée, pas de ReferenceError console, Travaux soumis épuré, etc.) sont-elles OK ?
+Si Grégoire n'a pas encore déployé la beta 99.66 b0526-1120, les changements PM ne sont pas visibles en production.
+- A-t-il déployé la dernière beta (Netlify push automatique sur main) ?
+- A-t-il fait `⌥⌘E + Cmd+R` ou `Cmd+Q` complet Safari pour rafraîchir le cache ?
+- Les vérifications du §0bis (5 boutons header colorés correctement, sections nav avec leur couleur, sous-nav qui suit la section parente, etc.) sont-elles OK ?
 
-### Décisions Grégoire pendantes (rappel actualisé 26 mai)
+### Décisions Grégoire pendantes (rappel actualisé 26 mai PM)
 
-**Court terme (cycle icônes)** :
-- **Style icon-info pour ✴** : Material Outlined / Sharp / Filled / Color ? Cohérence avec 70 SVG existants.
-- **Refactor API `notifications.X`** (Lot C migration icônes) : accepter un paramètre `type` qui détermine l'icône, ou injecter `<img>` via `appendChild` ?
-- **Pastilles colorées 🟢🟡🔴🟠** (Lot D) : conserver les emojis (purement chromatique), passer à `●` Unicode, ou SVG ?
-- **Emojis dans le contenu pédagogique des popups d'aide** : migrer aussi ou laisser ?
+**Tranchées 26 mai 2026** :
+- Teinte jaune palette aide → `#e8c43a`
+- Approche technique coloration SVG → `mask-image` CSS avec base64
+- Phase 2 Lot J → livrée directement (saut phase 1)
+- Suppression PNG legacy Lot F → feu vert
+- Calendrier hex → `#34c759` (variante A, conflit DS documenté)
+- Bug / anonymisation header → violet Labo / cyan Suivi
 
-**Moyen terme** :
-- **#279** capture de référence à fournir pour les 3 champs production.
-- **#273** sélection 2-3 dossiers élèves H2026 à anonymiser pour pack démo.
-- **Demande d'avis PRP Cégep de Drummondville** (Loi 25) — à envoyer (délai 2-6 semaines, conditionne PRIVACY.md v1.1).
-- **Audit autres auto-saves** (cf. [[project-autosaves-a-auditer]]) — toujours pertinent.
+**Encore pendantes pour Lots A-H** :
+- **#1 Style `icon-info.svg`** : actuel convient ? (Lot A)
+- **#2 API `notifications.X`** (Lot C) : refactor `type` ou injection `<img>` ?
+- **#3 Pastilles 🟢🟡🔴🟠** (Lot D) : conserver / `●` Unicode / SVG ?
+- **#4 Emojis contenu pédagogique popups** : migrer ou laisser ?
+- **#5 Forme SVG jetons** (Lot E) : 3 SVG distincts ou 1 SVG paramétrique CSS ?
+- **#7 Style SVG tampons SOLO** (Lot H) : ré-applicable autres autocollants ou strict SOLO ?
+- **#8 Lot H repli PNG haute densité** si rendu canvas SVG insuffisant iPad ?
 
-**Long terme** :
-- **Convergence audit/2026-mai ↔ main** — branche audit divergée, convergence partielle déjà faite via port d'ADRs/AUDIT.md/libs/VERSIONS.md. Décision globale (merger / cherry-pick / abandonner) reste à prendre, pas urgent.
-- **Test vrai iPhone chrome unifié** — après déploiement Netlify (orthogonal).
-- **Chantier zéro-dette CodeQL résiduel** (~80 alertes) — optionnel.
-- **Label `v2-seuil-fragile`** — conservation / atténuation / alignement ? (Cat-B Track 4 chantier J reliquat).
+**Moyen / long terme** : #279 (capture champs production), #273 (anonymisation pack démo), PRP Cégep (Loi 25), audit auto-saves, convergence audit/2026-mai ↔ main, label v2-seuil-fragile.
 
 ### Tonalité Grégoire (rappel CLAUDE.md global)
 
