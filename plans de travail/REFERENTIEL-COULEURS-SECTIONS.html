@@ -6,8 +6,8 @@
 <style>
   :root {
     /* Fonds de page (app) */
-    --fond-clair: #d4e6f5;
     --fond-sombre: #0e1e28;
+    --fond-clair:  #d4e6f5;
 
     /* Nav sombre — aligné app (continuité avec entête + animation bulles) */
     --nav-sombre-bg-1: #1a4a5e;
@@ -17,26 +17,15 @@
     --nav-marine-bg-1: #032e5c;
     --nav-marine-bg-2: #0f1e3a;
 
-    /* Couleur médiane du bandeau (utilisée pour background-blend-mode: multiply).
-       Le bandeau parent garde son VRAI gradient intact, le bouton actif utilise
-       une couleur unie de transition pour éviter une cassure de gradient. */
-    --bg-bandeau-mediane: #133248;   /* milieu de #1a4a5e → #0c1a22 */
-
     /* PALETTE RETENUE GRÉGOIRE (variantes B/C/B/C/C, Calendrier ajusté post-audit) */
-    --conception:  #ff6f00;   /* B — orange saturé */
-    --calendrier:  #16a34a;   /* B post-audit — vert plus profond (évite conflit --vert-succes) */
-    --suivi:       #22d3ee;   /* B — cyan plus clair */
-    --evaluation:  #38bdf8;   /* C — bleu fluo / sky vif */
-    --labo:        #c084fc;   /* C — violet pastel */
+    --conception:  #dac16c;   /* B — jaune doré (révisé 26 mai PM, ex #e8923a orange réaffecté à l'aide) */
+    --calendrier:  #30b85d;   /* B post-audit — vert plus profond (évite conflit --vert-succes) */
+    --suivi:       #56cadc;   /* B — cyan plus clair */
+    --evaluation:  #6ec1e7;   /* C — bleu fluo / sky vif */
+    --labo:        #d1aff4;   /* C — violet pastel */
 
-    /* Jaune aide/config (Lot I) */
-    --icone-aide-config: #e8c43a;
-
-    /* Candidats Évaluation à tester */
-    --eval-a: #60a5fa;   /* bleu clair pastel */
-    --eval-b: #6366f1;   /* bleu indigo (bord violet) */
-    --eval-c: #38bdf8;   /* bleu fluo / sky vif */
-    --eval-d: #93c5fd;   /* bleu très pâle / glacial */
+    /* Orange aide/config (révisé 26 mai PM, ex #dac16c jaune Lot I réaffecté à Conception) */
+    --icone-aide-config: #e8923a;
   }
 
   * { box-sizing: border-box; }
@@ -48,36 +37,99 @@
     color: #d0e0e4;
     line-height: 1.5;
   }
-  body.theme-clair {
-    background: var(--fond-clair);
-    color: #1a1a2e;
-    --bg-bandeau-mediane: #09264b;   /* milieu de #032e5c → #0f1e3a */
-  }
 
-  .topbar {
+  /* ===== EN-TÊTE D'APP — reproduction fidèle (2 thèmes empilés) =====
+     Reproduit la topbar de l'app réelle : Codex (gauche), titre+meta+séparateur+
+     sélecteur de groupe-cours (centré), boutons header (droite). */
+  .app-header {
     background: linear-gradient(180deg, var(--nav-sombre-bg-1) 0%, var(--nav-sombre-bg-2) 100%);
-    padding: 14px 24px;
+    padding: 18px 24px 14px;
     color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+    border-radius: 10px;
+    margin: 8px 0;
+    --bg-bandeau-mediane: #133248;
+    position: relative;
+    overflow: hidden;
   }
-  body.theme-clair .topbar {
+  .app-header.mode-clair {
     background: linear-gradient(180deg, var(--nav-marine-bg-1) 0%, var(--nav-marine-bg-2) 100%);
+    --bg-bandeau-mediane: #09264b;
   }
-  .topbar h1 { margin: 0; font-size: 1.15rem; font-weight: 600; }
-  .topbar .meta { font-size: 0.8rem; opacity: 0.7; }
-  .toggle-theme {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.2);
+  .app-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .app-header-codex {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    padding: 8px 14px;
     color: white;
-    padding: 6px 14px;
+    font-size: 0.88rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: default;
+  }
+  .app-header-codex .codex-dot {
+    width: 8px;
+    height: 8px;
+    background: #4ade80;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 6px rgba(74, 222, 128, 0.5);
+  }
+  .app-header-titre {
+    text-align: center;
+    flex: 1;
+  }
+  .app-header-titre h1 { margin: 0; font-size: 1.45rem; font-weight: 700; color: white; }
+  .app-header-titre .app-meta { font-size: 0.78rem; opacity: 0.55; margin-top: 2px; color: white; }
+  .app-header-icons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .app-header-icons-group {
+    display: flex;
+    gap: 6px;
+    padding: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+  }
+  .app-header-separateur {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 14px 0;
+  }
+  .app-header-selecteur {
+    display: flex;
+    justify-content: center;
+  }
+  .app-header-selecteur .selecteur-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 6px;
-    cursor: pointer;
+    padding: 8px 18px;
+    color: white;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: default;
+  }
+  .app-header-selecteur .selecteur-btn::after {
+    content: '▾';
+    opacity: 0.5;
     font-size: 0.85rem;
   }
-  .toggle-theme:hover { background: rgba(255,255,255,0.2); }
+  .app-header.mode-clair .app-header-selecteur .selecteur-btn {
+    background: var(--nav-marine-bg-1);
+    border-color: rgba(255, 255, 255, 0.18);
+  }
 
   main { max-width: 1320px; margin: 0 auto; padding: 32px 24px 80px; }
 
@@ -87,7 +139,6 @@
     padding-bottom: 8px;
     border-bottom: 2px solid rgba(255,255,255,0.15);
   }
-  body.theme-clair h2 { border-bottom-color: rgba(0,0,0,0.1); }
   h3 { font-size: 1.05rem; margin: 24px 0 12px; opacity: 0.85; }
   h4 { font-size: 0.9rem; margin: 16px 0 6px; opacity: 0.7; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 
@@ -98,19 +149,38 @@
     margin: 16px 0 24px;
     font-size: 0.95rem;
   }
-  body.theme-clair .intro { background: rgba(0,0,0,0.04); }
 
-  /* ===== NAV RECONSTITUÉE — bascule sombre / marine ===== */
+  /* ===== BANDEAUX DE DÉMO — modes indépendants (vue dual systématique) =====
+     Le mode sombre est appliqué par défaut. La classe .mode-clair force le
+     gradient marine sur le même bandeau, indépendamment du body. */
   .nav-demo-bandeau {
+    /* Mode sombre par défaut */
+    --bg-bandeau-mediane: #133248;   /* milieu de #1a4a5e → #0c1a22 */
     background: linear-gradient(180deg, var(--nav-sombre-bg-1) 0%, var(--nav-sombre-bg-2) 100%);
     padding: 18px 24px;
     border-radius: 10px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.25);
-    margin: 12px 0;
+    margin: 8px 0;
   }
-  body.theme-clair .nav-demo-bandeau {
+  .nav-demo-bandeau.mode-clair {
+    --bg-bandeau-mediane: #09264b;   /* milieu de #032e5c → #0f1e3a */
     background: linear-gradient(180deg, var(--nav-marine-bg-1) 0%, var(--nav-marine-bg-2) 100%);
   }
+
+  .nav-demo-bandeau .mode-label {
+    display: inline-block;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    opacity: 0.5;
+    color: white;
+    margin-bottom: 8px;
+  }
+  /* Paire empilée : marqueur visuel des deux bandeaux ensemble */
+  .bandeau-paire { margin: 16px 0 24px; }
+  .bandeau-paire .nav-demo-bandeau:first-child { border-radius: 10px 10px 4px 4px; margin-bottom: 4px; }
+  .bandeau-paire .nav-demo-bandeau:last-child { border-radius: 4px 4px 10px 10px; margin-top: 4px; }
+
   .nav-grid {
     display: flex;
     gap: 10px;
@@ -133,18 +203,9 @@
     gap: 4px;
     transition: all 0.2s;
   }
-  body.theme-clair .nav-btn {
+  .nav-demo-bandeau.mode-clair .nav-btn:not(.actif) {
     background: var(--nav-marine-bg-1);
     border-color: rgba(255, 255, 255, 0.15);
-  }
-  .nav-btn.actif {
-    background: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.5);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.10);
-  }
-  body.theme-clair .nav-btn.actif {
-    background: #0a4a7e;
-    border-color: rgba(255, 255, 255, 0.4);
   }
   .nav-btn .icon {
     width: 22px;
@@ -178,75 +239,7 @@
   .ico-wordbook    { -webkit-mask-image: url('../icons/icon-wordbook.svg');   mask-image: url('../icons/icon-wordbook.svg'); }
   .ico-tune        { -webkit-mask-image: url('../icons/icon-tune.svg');       mask-image: url('../icons/icon-tune.svg'); }
 
-  /* === COMPARATIF BLEND MODES (test Conception orange) === */
-  .blend-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin: 12px 0;
-  }
-  @media (max-width: 900px) { .blend-grid { grid-template-columns: repeat(2, 1fr); } }
-  .blend-cellule {
-    background: linear-gradient(180deg, var(--nav-sombre-bg-1) 0%, var(--nav-sombre-bg-2) 100%);
-    padding: 18px;
-    border-radius: 8px;
-    text-align: center;
-  }
-  body.theme-clair .blend-cellule {
-    background: linear-gradient(180deg, var(--nav-marine-bg-1) 0%, var(--nav-marine-bg-2) 100%);
-  }
-  .blend-cellule .legende-blend {
-    color: white;
-    font-size: 0.78rem;
-    margin-top: 10px;
-    opacity: 0.9;
-    line-height: 1.4;
-  }
-
-  /* Variante A : alpha 0.10 actuel (référence) */
-  .blend-a {
-    background-color: rgba(255, 111, 0, 0.10);
-    border-color: var(--conception);
-  }
-  .blend-a .icon { background-color: var(--conception); }
-  .blend-a .lbl  { color: var(--conception); }
-
-  /* Variante B : mix-blend-mode multiply sur fond opaque */
-  .blend-b {
-    background-color: var(--conception);
-    border-color: var(--conception);
-    mix-blend-mode: multiply;
-  }
-  .blend-b .icon { background-color: var(--conception); }
-  .blend-b .lbl  { color: var(--conception); }
-
-  /* Variante C : background-blend-mode multiply (2 couches sur même élément) */
-  .blend-c {
-    background:
-      linear-gradient(rgba(255, 111, 0, 1), rgba(255, 111, 0, 1)),
-      linear-gradient(180deg, var(--nav-sombre-bg-1) 0%, var(--nav-sombre-bg-2) 100%);
-    background-blend-mode: multiply;
-    border-color: var(--conception);
-  }
-  body.theme-clair .blend-c {
-    background:
-      linear-gradient(rgba(255, 111, 0, 1), rgba(255, 111, 0, 1)),
-      linear-gradient(180deg, var(--nav-marine-bg-1) 0%, var(--nav-marine-bg-2) 100%);
-    background-blend-mode: multiply;
-  }
-  .blend-c .icon { background-color: var(--conception); }
-  .blend-c .lbl  { color: var(--conception); }
-
-  /* Variante D : mix-blend-mode color sur fond opaque */
-  .blend-d {
-    background-color: var(--conception);
-    border-color: var(--conception);
-    mix-blend-mode: color;
-  }
-  .blend-d .icon { background-color: var(--conception); }
-  .blend-d .lbl  { color: var(--conception); }
-
-  /* === BANDEAU HEADER (5 boutons utilitaires) === */
+  /* ===== BANDEAU HEADER (5 boutons utilitaires) ===== */
   .header-row {
     display: flex;
     gap: 10px;
@@ -255,9 +248,11 @@
     padding: 12px 16px;
     background: linear-gradient(180deg, var(--nav-sombre-bg-1) 0%, var(--nav-sombre-bg-2) 100%);
     border-radius: 10px;
-    margin: 12px 0;
+    margin: 4px 0;
+    --bg-bandeau-mediane: #133248;
   }
-  body.theme-clair .header-row {
+  .header-row.mode-clair {
+    --bg-bandeau-mediane: #09264b;
     background: linear-gradient(180deg, var(--nav-marine-bg-1) 0%, var(--nav-marine-bg-2) 100%);
   }
   .header-btn {
@@ -272,7 +267,7 @@
     justify-content: center;
     cursor: default;
   }
-  body.theme-clair .header-btn {
+  .header-row.mode-clair .header-btn {
     background: var(--nav-marine-bg-1);
     border-color: rgba(255, 255, 255, 0.15);
   }
@@ -289,28 +284,42 @@
     -webkit-mask-position: center;
     mask-position: center;
   }
-  /* Aide + réglages : icône permanente en jaune */
+  /* Icônes permanentes colorées :
+     - Bug : violet (var --labo)
+     - Anonymisation : cyan (var --suivi)
+     - Aide + Réglages : orange chaud doré (var --icone-aide-config) */
+  .header-btn.bug .icon-h    { background-color: var(--labo); }
+  .header-btn.anonym .icon-h { background-color: var(--suivi); }
   .header-btn.aide .icon-h,
   .header-btn.reglages .icon-h { background-color: var(--icone-aide-config); }
 
-  /* État actif sur aide / réglages : multiply jaune (même technique que nav) */
+  /* État actif sur aide / réglages : V4 retenu (multiply 0.5 + bordure blanche
+     discrète + glow orange léger, même pattern que la nav principale) */
   .header-btn.aide.actif,
   .header-btn.reglages.actif {
     background:
-      linear-gradient(rgba(232, 196, 58, 1), rgba(232, 196, 58, 1)),
+      linear-gradient(rgba(232, 146, 58, 0.5), rgba(232, 146, 58, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border-color: var(--icone-aide-config);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(232, 146, 58, 0.15);
   }
 
-  /* Sous-nav reconstituée */
+  /* ===== SOUS-NAV =====
+     Sur fond de page (--fond-sombre / --fond-clair selon mode), pas sur le
+     bandeau de nav. Visuellement séparée de la nav principale. */
   .sous-nav {
-    margin-top: 12px;
-    padding: 10px 16px;
+    margin: 12px -24px -18px;  /* déborde le padding du bandeau parent pour s'étendre */
+    padding: 12px 24px;
+    background: var(--fond-sombre);
+    border-radius: 0 0 10px 10px;
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
     justify-content: center;
+  }
+  .nav-demo-bandeau.mode-clair .sous-nav {
+    background: var(--fond-clair);
   }
   .sous-nav .sous-btn {
     padding: 6px 14px;
@@ -321,165 +330,113 @@
     font-size: 0.85rem;
     cursor: default;
   }
+  .nav-demo-bandeau.mode-clair .sous-nav .sous-btn {
+    background: var(--nav-marine-bg-1);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
   .sous-nav .sous-btn.actif {
     background: rgba(106, 172, 184, 0.22);
     border-color: rgba(106, 172, 184, 0.35);
   }
 
-  /* === APPLICATION DES COULEURS SECTIONS (palette retenue) === */
-  /* Bouton actif : background-blend-mode multiply entre couche teinte opaque
-     et couche bandeau médiane unie. Le bandeau parent garde son vrai gradient,
-     le bouton actif est uniforme (pas de mini-gradient interne désaligné).
-     Bordure + icône + label colorés en complément. */
+  /* ===== V1 (référence actuelle) — APPLICATION DES COULEURS SECTIONS =====
+     background-blend-mode multiply entre couche teinte opaque (alpha 1.0)
+     et couche bandeau médiane unie. Bordure 1.5px solide. */
   .nav-btn.section-conception.actif {
     background:
-      linear-gradient(rgba(255, 111, 0, 1), rgba(255, 111, 0, 1)),
+      linear-gradient(rgba(218, 193, 108, 0.5), rgba(218, 193, 108, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border-color: var(--conception);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(218, 193, 108, 0.15);
   }
   .nav-btn.section-conception.actif .icon { background-color: var(--conception); }
   .nav-btn.section-conception.actif .lbl  { color: var(--conception); }
   .nav-btn.section-calendrier.actif {
     background:
-      linear-gradient(rgba(22, 163, 74, 1), rgba(22, 163, 74, 1)),
+      linear-gradient(rgba(48, 184, 93, 0.5), rgba(48, 184, 93, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border-color: var(--calendrier);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(48, 184, 93, 0.15);
   }
   .nav-btn.section-calendrier.actif .icon { background-color: var(--calendrier); }
   .nav-btn.section-calendrier.actif .lbl  { color: var(--calendrier); }
   .nav-btn.section-suivi.actif {
     background:
-      linear-gradient(rgba(34, 211, 238, 1), rgba(34, 211, 238, 1)),
+      linear-gradient(rgba(86, 202, 220, 0.5), rgba(86, 202, 220, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border-color: var(--suivi);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(86, 202, 220, 0.15);
   }
   .nav-btn.section-suivi.actif .icon { background-color: var(--suivi); }
   .nav-btn.section-suivi.actif .lbl  { color: var(--suivi); }
   .nav-btn.section-evaluation.actif {
     background:
-      linear-gradient(rgba(56, 189, 248, 1), rgba(56, 189, 248, 1)),
+      linear-gradient(rgba(110, 193, 231, 0.5), rgba(110, 193, 231, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border-color: var(--evaluation);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(110, 193, 231, 0.15);
   }
   .nav-btn.section-evaluation.actif .icon { background-color: var(--evaluation); }
   .nav-btn.section-evaluation.actif .lbl  { color: var(--evaluation); }
   .nav-btn.section-labo.actif {
     background:
-      linear-gradient(rgba(192, 132, 252, 1), rgba(192, 132, 252, 1)),
+      linear-gradient(rgba(209, 175, 244, 0.5), rgba(209, 175, 244, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border-color: var(--labo);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(209, 175, 244, 0.15);
   }
   .nav-btn.section-labo.actif .icon { background-color: var(--labo); }
   .nav-btn.section-labo.actif .lbl  { color: var(--labo); }
 
-  /* Mode clair : doit redéfinir le pattern multiply complet (spécif 0,4,1 pour
-     écraser body.theme-clair .nav-btn.actif qui pose un fond marine uniforme). */
-  body.theme-clair .nav-btn.section-conception.actif {
-    background:
-      linear-gradient(rgba(255, 111, 0, 1), rgba(255, 111, 0, 1)),
-      linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
-    background-blend-mode: multiply;
-    border-color: var(--conception);
-  }
-  body.theme-clair .nav-btn.section-calendrier.actif {
-    background:
-      linear-gradient(rgba(22, 163, 74, 1), rgba(22, 163, 74, 1)),
-      linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
-    background-blend-mode: multiply;
-    border-color: var(--calendrier);
-  }
-  body.theme-clair .nav-btn.section-suivi.actif {
-    background:
-      linear-gradient(rgba(34, 211, 238, 1), rgba(34, 211, 238, 1)),
-      linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
-    background-blend-mode: multiply;
-    border-color: var(--suivi);
-  }
-  body.theme-clair .nav-btn.section-evaluation.actif {
-    background:
-      linear-gradient(rgba(56, 189, 248, 1), rgba(56, 189, 248, 1)),
-      linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
-    background-blend-mode: multiply;
-    border-color: var(--evaluation);
-  }
-  body.theme-clair .nav-btn.section-labo.actif {
-    background:
-      linear-gradient(rgba(192, 132, 252, 1), rgba(192, 132, 252, 1)),
-      linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
-    background-blend-mode: multiply;
-    border-color: var(--labo);
-  }
-
-  /* Sous-nav active = même traitement que nav principale : multiply + bordure + texte colorés */
+  /* Sous-nav active = pattern V4 retenu (multiply 0.5 + bordure blanche discrète + glow léger).
+     Texte coloré pour identifier la section. */
   .sous-nav-conception .sous-btn.actif {
     background:
-      linear-gradient(rgba(255, 111, 0, 1), rgba(255, 111, 0, 1)),
+      linear-gradient(rgba(218, 193, 108, 0.5), rgba(218, 193, 108, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    color: var(--conception); border-color: var(--conception);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(218, 193, 108, 0.15);
   }
   .sous-nav-calendrier .sous-btn.actif {
     background:
-      linear-gradient(rgba(22, 163, 74, 1), rgba(22, 163, 74, 1)),
+      linear-gradient(rgba(48, 184, 93, 0.5), rgba(48, 184, 93, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    color: var(--calendrier); border-color: var(--calendrier);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(48, 184, 93, 0.15);
   }
   .sous-nav-suivi .sous-btn.actif {
     background:
-      linear-gradient(rgba(34, 211, 238, 1), rgba(34, 211, 238, 1)),
+      linear-gradient(rgba(86, 202, 220, 0.5), rgba(86, 202, 220, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    color: var(--suivi); border-color: var(--suivi);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(86, 202, 220, 0.15);
   }
   .sous-nav-evaluation .sous-btn.actif {
     background:
-      linear-gradient(rgba(56, 189, 248, 1), rgba(56, 189, 248, 1)),
+      linear-gradient(rgba(110, 193, 231, 0.5), rgba(110, 193, 231, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    color: var(--evaluation); border-color: var(--evaluation);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(110, 193, 231, 0.15);
   }
   .sous-nav-labo .sous-btn.actif {
     background:
-      linear-gradient(rgba(192, 132, 252, 1), rgba(192, 132, 252, 1)),
+      linear-gradient(rgba(209, 175, 244, 0.5), rgba(209, 175, 244, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    color: var(--labo); border-color: var(--labo);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(209, 175, 244, 0.15);
   }
 
-  /* === VARIANTES ÉVALUATION (4 candidats) === */
-  .eval-a .nav-btn.section-evaluation.actif .icon { background-color: var(--eval-a); }
-  .eval-b .nav-btn.section-evaluation.actif .icon { background-color: var(--eval-b); }
-  .eval-c .nav-btn.section-evaluation.actif .icon { background-color: var(--eval-c); }
-  .eval-d .nav-btn.section-evaluation.actif .icon { background-color: var(--eval-d); }
-
-  /* Variation panel */
-  .variantes {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-  }
-  @media (max-width: 1000px) { .variantes { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 600px)  { .variantes { grid-template-columns: 1fr; } }
-  .variante-cellule {
-    background: linear-gradient(180deg, var(--nav-sombre-bg-1) 0%, var(--nav-sombre-bg-2) 100%);
-    padding: 14px;
-    border-radius: 8px;
-    text-align: center;
-  }
-  body.theme-clair .variante-cellule {
-    background: linear-gradient(180deg, var(--nav-marine-bg-1) 0%, var(--nav-marine-bg-2) 100%);
-  }
-  .variante-cellule .nav-grid { margin: 0; }
-  .variante-cellule .nav-btn { margin: 0 auto; }
-  .variante-cellule .legende { color: white; font-size: 0.78rem; margin-top: 8px; opacity: 0.9; }
-
-  /* Hex swatches */
+  /* ===== TABLE PALETTE ===== */
   .palette-table {
     width: 100%;
     border-collapse: collapse;
@@ -488,17 +445,13 @@
     overflow: hidden;
     margin: 12px 0;
   }
-  body.theme-clair .palette-table { background: rgba(0,0,0,0.02); }
   .palette-table th, .palette-table td {
     padding: 10px 14px;
     text-align: left;
     border-bottom: 1px solid rgba(255,255,255,0.10);
     font-size: 0.88rem;
   }
-  body.theme-clair .palette-table th,
-  body.theme-clair .palette-table td { border-bottom-color: rgba(0,0,0,0.08); }
   .palette-table th { font-weight: 600; background: rgba(255,255,255,0.06); }
-  body.theme-clair .palette-table th { background: rgba(0,0,0,0.04); }
   .swatch {
     display: inline-block;
     width: 22px;
@@ -517,251 +470,372 @@
     margin-top: 16px;
     font-size: 0.92rem;
   }
-  body.theme-clair .note {
-    background: rgba(46, 125, 50, 0.08);
-    border-left-color: #2e7d32;
-  }
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div>
-    <h1>Référentiel — 5 couleurs par section (Lot J phase 2)</h1>
-    <div class="meta">Piste 4 Grégoire · variantes B/C/B/?/C retenues · 26 mai 2026</div>
-  </div>
-  <button class="toggle-theme" onclick="document.body.classList.toggle('theme-clair')">Basculer thème sombre/clair</button>
-</div>
-
 <main>
 
+<h2 style="margin-top: 0;">En-tête de l'app — reproduction fidèle (sarcelle + marine)</h2>
+<p style="opacity: 0.75; font-size: 0.9rem;">Référentiel — 5 couleurs par section (Lot J phase 2) · Piste 4 Grégoire · variantes B/C/B/C/C retenues · 26 mai 2026 (révision PM : interversion jaune ↔ orange, vue dual sombre+marine systématique).</p>
+
+<div class="bandeau-paire">
+  <div class="app-header mode-sombre">
+    <div class="app-header-row">
+      <div class="app-header-codex"><span class="codex-dot"></span>Codex</div>
+      <div class="app-header-titre">
+        <h1>Labo Codex</h1>
+        <div class="app-meta">Beta 99.70 - Consolidation (Build 0526-1522) · mardi 26 mai 2026</div>
+      </div>
+      <div class="app-header-icons">
+        <div class="app-header-icons-group">
+          <button class="header-btn bug" title="Bug"><span class="icon-h ico-bug"></span></button>
+          <button class="header-btn anonym" title="Mode anonymisé"><span class="icon-h ico-mask-anon"></span></button>
+          <button class="header-btn" title="Thème"><span class="icon-h ico-theme"></span></button>
+        </div>
+        <div class="app-header-icons-group">
+          <button class="header-btn aide" title="Aide"><span class="icon-h ico-wordbook"></span></button>
+          <button class="header-btn reglages" title="Réglages"><span class="icon-h ico-tune"></span></button>
+        </div>
+      </div>
+    </div>
+    <div class="app-header-separateur"></div>
+    <div class="app-header-selecteur">
+      <div class="selecteur-btn">601-101-MQ gr.00008 - Grégoire B. (Mar-Jeu)</div>
+    </div>
+  </div>
+  <div class="app-header mode-clair">
+    <div class="app-header-row">
+      <div class="app-header-codex"><span class="codex-dot"></span>Codex</div>
+      <div class="app-header-titre">
+        <h1>Labo Codex</h1>
+        <div class="app-meta">Beta 99.70 - Consolidation (Build 0526-1522) · mardi 26 mai 2026</div>
+      </div>
+      <div class="app-header-icons">
+        <div class="app-header-icons-group">
+          <button class="header-btn bug" title="Bug"><span class="icon-h ico-bug"></span></button>
+          <button class="header-btn anonym" title="Mode anonymisé"><span class="icon-h ico-mask-anon"></span></button>
+          <button class="header-btn" title="Thème"><span class="icon-h ico-theme"></span></button>
+        </div>
+        <div class="app-header-icons-group">
+          <button class="header-btn aide" title="Aide"><span class="icon-h ico-wordbook"></span></button>
+          <button class="header-btn reglages" title="Réglages"><span class="icon-h ico-tune"></span></button>
+        </div>
+      </div>
+    </div>
+    <div class="app-header-separateur"></div>
+    <div class="app-header-selecteur">
+      <div class="selecteur-btn">601-101-MQ gr.00008 - Grégoire B. (Mar-Jeu)</div>
+    </div>
+  </div>
+</div>
+
 <div class="intro">
-  <strong>Toggle théme</strong> : bascule maintenant <em>réellement</em> le fond de la nav.
+  Référentiel pour ajuster la <strong>relation bouton actif ↔ fond</strong> dans les deux modes de la nav.
   <ul style="margin: 6px 0 0;">
-    <li><strong>Sombre</strong> : nav en gradient sarcelle sombre (<code>#1a4a5e → #0c1a22</code>)</li>
-    <li><strong>Clair</strong> : nav en gradient bleu marine (<code>#032e5c → #0f1e3a</code>) — cf. <code>styles.css:20109</code></li>
+    <li><strong>Mode sombre</strong> : nav en gradient sarcelle (<code>#1a4a5e → #0c1a22</code>) — fond <em>désaturé</em></li>
+    <li><strong>Mode clair</strong> : nav en gradient bleu marine (<code>#032e5c → #0f1e3a</code>) — fond <em>saturé</em>, cf. <code>styles.css:20109</code></li>
   </ul>
-  <strong>Palette retenue</strong> (variantes choisies par Grégoire après la 1ʳᵉ comparaison) :
+  Chaque démo affiche <strong>les deux fonds empilés</strong> (sarcelle dessus, marine dessous) pour évaluer le contraste sans toggle.
+  <p style="margin: 10px 0 0; font-size:0.88rem; opacity:0.85;">
+    <strong>Constat 26 mai PM</strong> : les 5 couleurs sections sont très saturées (jaune, vert, cyan, sky, violet) et tranchent sur le sarcelle désaturé — impression de « deux systèmes qui cohabitent ». Le marine clair, plus saturé, absorbe mieux. La section 3 explore la mécanique d'application (multiply + bordure + box-shadow) pour résoudre cette dissonance.
+  </p>
 </div>
 
 <table class="palette-table">
   <thead><tr><th>Section</th><th>Couleur</th><th>Hex</th><th>Note</th></tr></thead>
   <tbody>
-    <tr><td>Conception</td><td><span class="swatch" style="background:#ff6f00"></span></td><td><code>#ff6f00</code></td><td>Variante B — orange saturé (chantier/construction)</td></tr>
-    <tr><td>Calendrier</td><td><span class="swatch" style="background:#16a34a"></span></td><td><code>#16a34a</code></td><td>Variante B post-audit — vert plus profond (évite conflit avec --vert-succes)</td></tr>
-    <tr><td>Suivi</td><td><span class="swatch" style="background:#22d3ee"></span></td><td><code>#22d3ee</code></td><td>Variante B — cyan clair (primaire/distinct)</td></tr>
-    <tr><td>Évaluation</td><td><span class="swatch" style="background:#38bdf8"></span></td><td><code>#38bdf8</code></td><td>Variante C — bleu fluo / sky vif (tient sur les deux fonds)</td></tr>
-    <tr><td>Labo</td><td><span class="swatch" style="background:#c084fc"></span></td><td><code>#c084fc</code></td><td>Variante C — violet pastel (expérimental/funky)</td></tr>
+    <tr><td>Conception</td><td><span class="swatch" style="background:#dac16c"></span></td><td><code>#dac16c</code></td><td>Jaune doré — chantier/construction (révisé 26 mai PM, variante B initiale #e8923a orange réaffectée à l'aide)</td></tr>
+    <tr><td>Calendrier</td><td><span class="swatch" style="background:#30b85d"></span></td><td><code>#30b85d</code></td><td>Variante B post-audit — vert profond (évite conflit avec --vert-succes)</td></tr>
+    <tr><td>Suivi</td><td><span class="swatch" style="background:#56cadc"></span></td><td><code>#56cadc</code></td><td>Variante B — cyan clair (primaire/distinct)</td></tr>
+    <tr><td>Évaluation</td><td><span class="swatch" style="background:#6ec1e7"></span></td><td><code>#6ec1e7</code></td><td>Variante C — bleu fluo / sky vif (tient sur les deux fonds)</td></tr>
+    <tr><td>Labo</td><td><span class="swatch" style="background:#d1aff4"></span></td><td><code>#d1aff4</code></td><td>Variante C — violet pastel (expérimental/funky)</td></tr>
   </tbody>
 </table>
 
-<h2>1. Vue d'ensemble — palette retenue (Évaluation = candidat A par défaut)</h2>
+<h2>1. Vue d'ensemble — toutes les sections « actives » simultanément (test chromatique global)</h2>
 
-<div class="nav-demo-bandeau">
-  <h4 style="color:white; margin:0 0 10px; text-align:center;">Toutes les sections « actives » simultanément (test chromatique)</h4>
-  <div class="nav-grid">
-    <div class="nav-btn"><span class="icon ico-home"></span><span class="lbl">Accueil</span></div>
-    <div class="nav-btn"><span class="icon ico-combo-chart"></span><span class="lbl">Aperçu</span></div>
-    <div class="nav-btn section-conception actif"><span class="icon ico-mind-map"></span><span class="lbl">Conception</span></div>
-    <div class="nav-btn section-calendrier actif"><span class="icon ico-calendar"></span><span class="lbl">Calendrier</span></div>
-    <div class="nav-btn section-suivi actif"><span class="icon ico-profile"></span><span class="lbl">Suivi</span></div>
-    <div class="nav-btn section-evaluation actif"><span class="icon ico-pulse"></span><span class="lbl">Évaluation</span></div>
-    <div class="nav-btn section-labo actif"><span class="icon ico-juggler"></span><span class="lbl">Labo</span></div>
+<div class="bandeau-paire">
+  <div class="nav-demo-bandeau mode-sombre">
+    <span class="mode-label">Sarcelle (mode sombre)</span>
+    <div class="nav-grid">
+      <div class="nav-btn"><span class="icon ico-home"></span><span class="lbl">Accueil</span></div>
+      <div class="nav-btn"><span class="icon ico-combo-chart"></span><span class="lbl">Aperçu</span></div>
+      <div class="nav-btn section-conception actif"><span class="icon ico-mind-map"></span><span class="lbl">Conception</span></div>
+      <div class="nav-btn section-calendrier actif"><span class="icon ico-calendar"></span><span class="lbl">Calendrier</span></div>
+      <div class="nav-btn section-suivi actif"><span class="icon ico-profile"></span><span class="lbl">Suivi</span></div>
+      <div class="nav-btn section-evaluation actif"><span class="icon ico-pulse"></span><span class="lbl">Évaluation</span></div>
+      <div class="nav-btn section-labo actif"><span class="icon ico-juggler"></span><span class="lbl">Labo</span></div>
+    </div>
+  </div>
+  <div class="nav-demo-bandeau mode-clair">
+    <span class="mode-label">Marine (mode clair)</span>
+    <div class="nav-grid">
+      <div class="nav-btn"><span class="icon ico-home"></span><span class="lbl">Accueil</span></div>
+      <div class="nav-btn"><span class="icon ico-combo-chart"></span><span class="lbl">Aperçu</span></div>
+      <div class="nav-btn section-conception actif"><span class="icon ico-mind-map"></span><span class="lbl">Conception</span></div>
+      <div class="nav-btn section-calendrier actif"><span class="icon ico-calendar"></span><span class="lbl">Calendrier</span></div>
+      <div class="nav-btn section-suivi actif"><span class="icon ico-profile"></span><span class="lbl">Suivi</span></div>
+      <div class="nav-btn section-evaluation actif"><span class="icon ico-pulse"></span><span class="lbl">Évaluation</span></div>
+      <div class="nav-btn section-labo actif"><span class="icon ico-juggler"></span><span class="lbl">Labo</span></div>
+    </div>
   </div>
 </div>
 
-<h2>2. Variantes pour le bleu Évaluation</h2>
+<h2>2. Vue par section — chaque section active à tour de rôle (avec sous-nav)</h2>
 
-<p>Le bleu vif standard se dilue sur le fond bleu marine du mode clair. Quatre candidats à comparer. <strong>Basculez le thème</strong> pour voir le rendu sur sombre ET sur marine.</p>
-
-<div class="variantes">
-  <div class="variante-cellule eval-a">
-    <div class="nav-grid"><div class="nav-btn section-evaluation actif"><span class="icon ico-pulse"></span><span class="lbl">Évaluation</span></div></div>
-    <div class="legende"><strong>A · #60a5fa</strong><br>bleu clair pastel</div>
+<h3>Conception active</h3>
+<div class="bandeau-paire">
+  <div class="nav-demo-bandeau mode-sombre">
+    <span class="mode-label">Sarcelle</span>
+    <div class="nav-grid">
+      <div class="nav-btn"><span class="icon ico-home"></span><span class="lbl">Accueil</span></div>
+      <div class="nav-btn"><span class="icon ico-combo-chart"></span><span class="lbl">Aperçu</span></div>
+      <div class="nav-btn section-conception actif"><span class="icon ico-mind-map"></span><span class="lbl">Conception</span></div>
+      <div class="nav-btn"><span class="icon ico-calendar"></span><span class="lbl">Calendrier</span></div>
+      <div class="nav-btn"><span class="icon ico-profile"></span><span class="lbl">Suivi</span></div>
+      <div class="nav-btn"><span class="icon ico-pulse"></span><span class="lbl">Évaluation</span></div>
+      <div class="nav-btn"><span class="icon ico-juggler"></span><span class="lbl">Labo</span></div>
+    </div>
+    <div class="sous-nav sous-nav-conception">
+      <div class="sous-btn actif">Carte mentale</div>
+      <div class="sous-btn">Organisateur</div>
+      <div class="sous-btn">Séquences</div>
+    </div>
   </div>
-  <div class="variante-cellule eval-b">
-    <div class="nav-grid"><div class="nav-btn section-evaluation actif"><span class="icon ico-pulse"></span><span class="lbl">Évaluation</span></div></div>
-    <div class="legende"><strong>B · #6366f1</strong><br>indigo (bord violet)</div>
-  </div>
-  <div class="variante-cellule eval-c">
-    <div class="nav-grid"><div class="nav-btn section-evaluation actif"><span class="icon ico-pulse"></span><span class="lbl">Évaluation</span></div></div>
-    <div class="legende"><strong>C · #38bdf8</strong><br>bleu fluo / sky vif</div>
-  </div>
-  <div class="variante-cellule eval-d">
-    <div class="nav-grid"><div class="nav-btn section-evaluation actif"><span class="icon ico-pulse"></span><span class="lbl">Évaluation</span></div></div>
-    <div class="legende"><strong>D · #93c5fd</strong><br>bleu glacial très pâle</div>
-  </div>
-</div>
-
-<div class="note">
-  <strong>Critères de choix pour le bleu Évaluation</strong> :
-  <ul style="margin: 6px 0 0;">
-    <li>Visible sur fond bleu marine (mode clair de la nav)</li>
-    <li>Distinct du cyan Suivi <code>#22d3ee</code> (ne pas créer un dégradé bleu-cyan ambigu)</li>
-    <li>Distinct du violet Labo <code>#c084fc</code> (le candidat B indigo flirte avec le violet — risque)</li>
-    <li>Garde son sens de « stabilité / observation » (pas un bleu trop nerveux)</li>
-  </ul>
-</div>
-
-<h2>3. Vue complète — chaque section active à tour de rôle (avec candidat A pour Évaluation)</h2>
-
-<p>Basculez le thème pour vérifier chaque section dans les deux fonds.</p>
-
-<div class="nav-demo-bandeau">
-  <h4 style="color:white; margin:0 0 10px; text-align:center;">Conception active</h4>
-  <div class="nav-grid">
-    <div class="nav-btn"><span class="icon ico-home"></span><span class="lbl">Accueil</span></div>
-    <div class="nav-btn"><span class="icon ico-combo-chart"></span><span class="lbl">Aperçu</span></div>
-    <div class="nav-btn section-conception actif"><span class="icon ico-mind-map"></span><span class="lbl">Conception</span></div>
-    <div class="nav-btn"><span class="icon ico-calendar"></span><span class="lbl">Calendrier</span></div>
-    <div class="nav-btn"><span class="icon ico-profile"></span><span class="lbl">Suivi</span></div>
-    <div class="nav-btn"><span class="icon ico-pulse"></span><span class="lbl">Évaluation</span></div>
-    <div class="nav-btn"><span class="icon ico-juggler"></span><span class="lbl">Labo</span></div>
-  </div>
-  <div class="sous-nav sous-nav-conception">
-    <div class="sous-btn actif">Carte mentale</div>
-    <div class="sous-btn">Organisateur</div>
-    <div class="sous-btn">Séquences</div>
+  <div class="nav-demo-bandeau mode-clair">
+    <span class="mode-label">Marine</span>
+    <div class="nav-grid">
+      <div class="nav-btn"><span class="icon ico-home"></span><span class="lbl">Accueil</span></div>
+      <div class="nav-btn"><span class="icon ico-combo-chart"></span><span class="lbl">Aperçu</span></div>
+      <div class="nav-btn section-conception actif"><span class="icon ico-mind-map"></span><span class="lbl">Conception</span></div>
+      <div class="nav-btn"><span class="icon ico-calendar"></span><span class="lbl">Calendrier</span></div>
+      <div class="nav-btn"><span class="icon ico-profile"></span><span class="lbl">Suivi</span></div>
+      <div class="nav-btn"><span class="icon ico-pulse"></span><span class="lbl">Évaluation</span></div>
+      <div class="nav-btn"><span class="icon ico-juggler"></span><span class="lbl">Labo</span></div>
+    </div>
+    <div class="sous-nav sous-nav-conception">
+      <div class="sous-btn actif">Carte mentale</div>
+      <div class="sous-btn">Organisateur</div>
+      <div class="sous-btn">Séquences</div>
+    </div>
   </div>
 </div>
 
-<div class="nav-demo-bandeau">
-  <h4 style="color:white; margin:0 0 10px; text-align:center;">Calendrier actif</h4>
-  <div class="nav-grid">
-    <div class="nav-btn"><span class="icon ico-home"></span><span class="lbl">Accueil</span></div>
-    <div class="nav-btn"><span class="icon ico-combo-chart"></span><span class="lbl">Aperçu</span></div>
-    <div class="nav-btn"><span class="icon ico-mind-map"></span><span class="lbl">Conception</span></div>
-    <div class="nav-btn section-calendrier actif"><span class="icon ico-calendar"></span><span class="lbl">Calendrier</span></div>
-    <div class="nav-btn"><span class="icon ico-profile"></span><span class="lbl">Suivi</span></div>
-    <div class="nav-btn"><span class="icon ico-pulse"></span><span class="lbl">Évaluation</span></div>
-    <div class="nav-btn"><span class="icon ico-juggler"></span><span class="lbl">Labo</span></div>
+<h3>Calendrier actif</h3>
+<div class="bandeau-paire">
+  <div class="nav-demo-bandeau mode-sombre">
+    <span class="mode-label">Sarcelle</span>
+    <div class="nav-grid">
+      <div class="nav-btn"><span class="icon ico-home"></span><span class="lbl">Accueil</span></div>
+      <div class="nav-btn"><span class="icon ico-combo-chart"></span><span class="lbl">Aperçu</span></div>
+      <div class="nav-btn"><span class="icon ico-mind-map"></span><span class="lbl">Conception</span></div>
+      <div class="nav-btn section-calendrier actif"><span class="icon ico-calendar"></span><span class="lbl">Calendrier</span></div>
+      <div class="nav-btn"><span class="icon ico-profile"></span><span class="lbl">Suivi</span></div>
+      <div class="nav-btn"><span class="icon ico-pulse"></span><span class="lbl">Évaluation</span></div>
+      <div class="nav-btn"><span class="icon ico-juggler"></span><span class="lbl">Labo</span></div>
+    </div>
+    <div class="sous-nav sous-nav-calendrier">
+      <div class="sous-btn actif">Horaires</div>
+      <div class="sous-btn">Trimestres</div>
+      <div class="sous-btn">Cours</div>
+    </div>
   </div>
-  <div class="sous-nav sous-nav-calendrier">
-    <div class="sous-btn actif">Horaires</div>
-    <div class="sous-btn">Trimestres</div>
-    <div class="sous-btn">Cours</div>
-  </div>
-</div>
-
-<div class="nav-demo-bandeau">
-  <h4 style="color:white; margin:0 0 10px; text-align:center;">Suivi actif</h4>
-  <div class="nav-grid">
-    <div class="nav-btn"><span class="icon ico-home"></span><span class="lbl">Accueil</span></div>
-    <div class="nav-btn"><span class="icon ico-combo-chart"></span><span class="lbl">Aperçu</span></div>
-    <div class="nav-btn"><span class="icon ico-mind-map"></span><span class="lbl">Conception</span></div>
-    <div class="nav-btn"><span class="icon ico-calendar"></span><span class="lbl">Calendrier</span></div>
-    <div class="nav-btn section-suivi actif"><span class="icon ico-profile"></span><span class="lbl">Suivi</span></div>
-    <div class="nav-btn"><span class="icon ico-pulse"></span><span class="lbl">Évaluation</span></div>
-    <div class="nav-btn"><span class="icon ico-juggler"></span><span class="lbl">Labo</span></div>
-  </div>
-  <div class="sous-nav sous-nav-suivi">
-    <div class="sous-btn actif">Profils</div>
-    <div class="sous-btn">RaI</div>
-    <div class="sous-btn">Présences</div>
-  </div>
-</div>
-
-<div class="nav-demo-bandeau">
-  <h4 style="color:white; margin:0 0 10px; text-align:center;">Évaluation active</h4>
-  <div class="nav-grid">
-    <div class="nav-btn"><span class="icon ico-home"></span><span class="lbl">Accueil</span></div>
-    <div class="nav-btn"><span class="icon ico-combo-chart"></span><span class="lbl">Aperçu</span></div>
-    <div class="nav-btn"><span class="icon ico-mind-map"></span><span class="lbl">Conception</span></div>
-    <div class="nav-btn"><span class="icon ico-calendar"></span><span class="lbl">Calendrier</span></div>
-    <div class="nav-btn"><span class="icon ico-profile"></span><span class="lbl">Suivi</span></div>
-    <div class="nav-btn section-evaluation actif"><span class="icon ico-pulse"></span><span class="lbl">Évaluation</span></div>
-    <div class="nav-btn"><span class="icon ico-juggler"></span><span class="lbl">Labo</span></div>
-  </div>
-  <div class="sous-nav sous-nav-evaluation">
-    <div class="sous-btn actif">Critères</div>
-    <div class="sous-btn">Bilan</div>
-    <div class="sous-btn">Tampons</div>
+  <div class="nav-demo-bandeau mode-clair">
+    <span class="mode-label">Marine</span>
+    <div class="nav-grid">
+      <div class="nav-btn"><span class="icon ico-home"></span><span class="lbl">Accueil</span></div>
+      <div class="nav-btn"><span class="icon ico-combo-chart"></span><span class="lbl">Aperçu</span></div>
+      <div class="nav-btn"><span class="icon ico-mind-map"></span><span class="lbl">Conception</span></div>
+      <div class="nav-btn section-calendrier actif"><span class="icon ico-calendar"></span><span class="lbl">Calendrier</span></div>
+      <div class="nav-btn"><span class="icon ico-profile"></span><span class="lbl">Suivi</span></div>
+      <div class="nav-btn"><span class="icon ico-pulse"></span><span class="lbl">Évaluation</span></div>
+      <div class="nav-btn"><span class="icon ico-juggler"></span><span class="lbl">Labo</span></div>
+    </div>
+    <div class="sous-nav sous-nav-calendrier">
+      <div class="sous-btn actif">Horaires</div>
+      <div class="sous-btn">Trimestres</div>
+      <div class="sous-btn">Cours</div>
+    </div>
   </div>
 </div>
 
-<div class="nav-demo-bandeau">
-  <h4 style="color:white; margin:0 0 10px; text-align:center;">Labo actif</h4>
-  <div class="nav-grid">
-    <div class="nav-btn"><span class="icon ico-home"></span><span class="lbl">Accueil</span></div>
-    <div class="nav-btn"><span class="icon ico-combo-chart"></span><span class="lbl">Aperçu</span></div>
-    <div class="nav-btn"><span class="icon ico-mind-map"></span><span class="lbl">Conception</span></div>
-    <div class="nav-btn"><span class="icon ico-calendar"></span><span class="lbl">Calendrier</span></div>
-    <div class="nav-btn"><span class="icon ico-profile"></span><span class="lbl">Suivi</span></div>
-    <div class="nav-btn"><span class="icon ico-pulse"></span><span class="lbl">Évaluation</span></div>
-    <div class="nav-btn section-labo actif"><span class="icon ico-juggler"></span><span class="lbl">Labo</span></div>
+<h3>Suivi actif</h3>
+<div class="bandeau-paire">
+  <div class="nav-demo-bandeau mode-sombre">
+    <span class="mode-label">Sarcelle</span>
+    <div class="nav-grid">
+      <div class="nav-btn"><span class="icon ico-home"></span><span class="lbl">Accueil</span></div>
+      <div class="nav-btn"><span class="icon ico-combo-chart"></span><span class="lbl">Aperçu</span></div>
+      <div class="nav-btn"><span class="icon ico-mind-map"></span><span class="lbl">Conception</span></div>
+      <div class="nav-btn"><span class="icon ico-calendar"></span><span class="lbl">Calendrier</span></div>
+      <div class="nav-btn section-suivi actif"><span class="icon ico-profile"></span><span class="lbl">Suivi</span></div>
+      <div class="nav-btn"><span class="icon ico-pulse"></span><span class="lbl">Évaluation</span></div>
+      <div class="nav-btn"><span class="icon ico-juggler"></span><span class="lbl">Labo</span></div>
+    </div>
+    <div class="sous-nav sous-nav-suivi">
+      <div class="sous-btn actif">Profils</div>
+      <div class="sous-btn">RaI</div>
+      <div class="sous-btn">Présences</div>
+    </div>
   </div>
-  <div class="sous-nav sous-nav-labo">
-    <div class="sous-btn actif">Données</div>
-    <div class="sous-btn">Réserve</div>
-    <div class="sous-btn">Codex</div>
-  </div>
-</div>
-
-<h2>4. Comparatif blend modes — fond du bouton actif (Conception orange)</h2>
-
-<p>Quatre approches comparées sur le même bouton actif. Basculez le thème pour vérifier dans les deux fonds.</p>
-
-<div class="blend-grid">
-  <div class="blend-cellule">
-    <div class="nav-grid"><div class="nav-btn blend-a"><span class="icon ico-mind-map"></span><span class="lbl">Conception</span></div></div>
-    <div class="legende-blend"><strong>A — alpha 0.10 (référence)</strong><br><code>rgba(255,111,0,0.10)</code><br>Translucide. Voilé.</div>
-  </div>
-  <div class="blend-cellule">
-    <div class="nav-grid"><div class="nav-btn blend-b"><span class="icon ico-mind-map"></span><span class="lbl">Conception</span></div></div>
-    <div class="legende-blend"><strong>B — mix-blend-mode: multiply</strong><br>Fond orange opaque + multiply.<br>Affecte icône + texte aussi.</div>
-  </div>
-  <div class="blend-cellule">
-    <div class="nav-grid"><div class="nav-btn blend-c"><span class="icon ico-mind-map"></span><span class="lbl">Conception</span></div></div>
-    <div class="legende-blend"><strong>C — background-blend-mode: multiply</strong><br>2 couches BG mixées.<br>N'affecte ni icône ni texte.</div>
-  </div>
-  <div class="blend-cellule">
-    <div class="nav-grid"><div class="nav-btn blend-d"><span class="icon ico-mind-map"></span><span class="lbl">Conception</span></div></div>
-    <div class="legende-blend"><strong>D — mix-blend-mode: color</strong><br>Garde luminance du fond,<br>applique teinte. Affecte tout.</div>
+  <div class="nav-demo-bandeau mode-clair">
+    <span class="mode-label">Marine</span>
+    <div class="nav-grid">
+      <div class="nav-btn"><span class="icon ico-home"></span><span class="lbl">Accueil</span></div>
+      <div class="nav-btn"><span class="icon ico-combo-chart"></span><span class="lbl">Aperçu</span></div>
+      <div class="nav-btn"><span class="icon ico-mind-map"></span><span class="lbl">Conception</span></div>
+      <div class="nav-btn"><span class="icon ico-calendar"></span><span class="lbl">Calendrier</span></div>
+      <div class="nav-btn section-suivi actif"><span class="icon ico-profile"></span><span class="lbl">Suivi</span></div>
+      <div class="nav-btn"><span class="icon ico-pulse"></span><span class="lbl">Évaluation</span></div>
+      <div class="nav-btn"><span class="icon ico-juggler"></span><span class="lbl">Labo</span></div>
+    </div>
+    <div class="sous-nav sous-nav-suivi">
+      <div class="sous-btn actif">Profils</div>
+      <div class="sous-btn">RaI</div>
+      <div class="sous-btn">Présences</div>
+    </div>
   </div>
 </div>
 
-<p style="font-size: 0.9rem; opacity: 0.8;">
-  <strong>Notes attendues</strong> :
-  <br>• <strong>A</strong> = ce que vous voyez actuellement (voile subtil).
-  <br>• <strong>B</strong> = fond plus marqué mais l'icône blanche risque de s'estomper (multiply avec blanc = inchangé visuellement, mais avec couleur en dessous → assombrissement).
-  <br>• <strong>C</strong> = fond plein clairement teinté, icône et texte intacts. Probablement le meilleur compromis.
-  <br>• <strong>D</strong> = teinte appliquée uniformément en gardant la luminance — effet « passé à l'orange » sur le bouton entier.
-</p>
-
-<h2>5. Boutons header (aide + réglages) — état actif teinté jaune</h2>
-
-<p>Même traitement que pour la nav : quand l'utilisateur ouvre la section <em>Aide</em> ou <em>Réglages</em>, le bouton concerné reçoit fond teinté jaune + bordure jaune. L'icône reste jaune dans les trois états. Bug, anonymisation et thème restent neutres (boutons d'action, pas de section).</p>
-
-<div class="header-row">
-  <button class="header-btn" title="Bug"><span class="icon-h ico-bug"></span></button>
-  <button class="header-btn" title="Mode anonymisé"><span class="icon-h ico-mask-anon"></span></button>
-  <button class="header-btn" title="Thème"><span class="icon-h ico-theme"></span></button>
-  <button class="header-btn aide" title="Aide"><span class="icon-h ico-wordbook"></span></button>
-  <button class="header-btn reglages" title="Réglages"><span class="icon-h ico-tune"></span></button>
+<h3>Évaluation active</h3>
+<div class="bandeau-paire">
+  <div class="nav-demo-bandeau mode-sombre">
+    <span class="mode-label">Sarcelle</span>
+    <div class="nav-grid">
+      <div class="nav-btn"><span class="icon ico-home"></span><span class="lbl">Accueil</span></div>
+      <div class="nav-btn"><span class="icon ico-combo-chart"></span><span class="lbl">Aperçu</span></div>
+      <div class="nav-btn"><span class="icon ico-mind-map"></span><span class="lbl">Conception</span></div>
+      <div class="nav-btn"><span class="icon ico-calendar"></span><span class="lbl">Calendrier</span></div>
+      <div class="nav-btn"><span class="icon ico-profile"></span><span class="lbl">Suivi</span></div>
+      <div class="nav-btn section-evaluation actif"><span class="icon ico-pulse"></span><span class="lbl">Évaluation</span></div>
+      <div class="nav-btn"><span class="icon ico-juggler"></span><span class="lbl">Labo</span></div>
+    </div>
+    <div class="sous-nav sous-nav-evaluation">
+      <div class="sous-btn actif">Critères</div>
+      <div class="sous-btn">Bilan</div>
+      <div class="sous-btn">Tampons</div>
+    </div>
+  </div>
+  <div class="nav-demo-bandeau mode-clair">
+    <span class="mode-label">Marine</span>
+    <div class="nav-grid">
+      <div class="nav-btn"><span class="icon ico-home"></span><span class="lbl">Accueil</span></div>
+      <div class="nav-btn"><span class="icon ico-combo-chart"></span><span class="lbl">Aperçu</span></div>
+      <div class="nav-btn"><span class="icon ico-mind-map"></span><span class="lbl">Conception</span></div>
+      <div class="nav-btn"><span class="icon ico-calendar"></span><span class="lbl">Calendrier</span></div>
+      <div class="nav-btn"><span class="icon ico-profile"></span><span class="lbl">Suivi</span></div>
+      <div class="nav-btn section-evaluation actif"><span class="icon ico-pulse"></span><span class="lbl">Évaluation</span></div>
+      <div class="nav-btn"><span class="icon ico-juggler"></span><span class="lbl">Labo</span></div>
+    </div>
+    <div class="sous-nav sous-nav-evaluation">
+      <div class="sous-btn actif">Critères</div>
+      <div class="sous-btn">Bilan</div>
+      <div class="sous-btn">Tampons</div>
+    </div>
+  </div>
 </div>
-<div style="font-size:0.8rem; opacity:0.7; text-align:center; margin-top:-8px;">État au repos (aucun actif) — icône jaune permanente</div>
 
-<div class="header-row">
-  <button class="header-btn" title="Bug"><span class="icon-h ico-bug"></span></button>
-  <button class="header-btn" title="Mode anonymisé"><span class="icon-h ico-mask-anon"></span></button>
-  <button class="header-btn" title="Thème"><span class="icon-h ico-theme"></span></button>
-  <button class="header-btn aide actif" title="Aide"><span class="icon-h ico-wordbook"></span></button>
-  <button class="header-btn reglages" title="Réglages"><span class="icon-h ico-tune"></span></button>
+<h3>Labo actif</h3>
+<div class="bandeau-paire">
+  <div class="nav-demo-bandeau mode-sombre">
+    <span class="mode-label">Sarcelle</span>
+    <div class="nav-grid">
+      <div class="nav-btn"><span class="icon ico-home"></span><span class="lbl">Accueil</span></div>
+      <div class="nav-btn"><span class="icon ico-combo-chart"></span><span class="lbl">Aperçu</span></div>
+      <div class="nav-btn"><span class="icon ico-mind-map"></span><span class="lbl">Conception</span></div>
+      <div class="nav-btn"><span class="icon ico-calendar"></span><span class="lbl">Calendrier</span></div>
+      <div class="nav-btn"><span class="icon ico-profile"></span><span class="lbl">Suivi</span></div>
+      <div class="nav-btn"><span class="icon ico-pulse"></span><span class="lbl">Évaluation</span></div>
+      <div class="nav-btn section-labo actif"><span class="icon ico-juggler"></span><span class="lbl">Labo</span></div>
+    </div>
+    <div class="sous-nav sous-nav-labo">
+      <div class="sous-btn actif">Données</div>
+      <div class="sous-btn">Réserve</div>
+      <div class="sous-btn">Codex</div>
+    </div>
+  </div>
+  <div class="nav-demo-bandeau mode-clair">
+    <span class="mode-label">Marine</span>
+    <div class="nav-grid">
+      <div class="nav-btn"><span class="icon ico-home"></span><span class="lbl">Accueil</span></div>
+      <div class="nav-btn"><span class="icon ico-combo-chart"></span><span class="lbl">Aperçu</span></div>
+      <div class="nav-btn"><span class="icon ico-mind-map"></span><span class="lbl">Conception</span></div>
+      <div class="nav-btn"><span class="icon ico-calendar"></span><span class="lbl">Calendrier</span></div>
+      <div class="nav-btn"><span class="icon ico-profile"></span><span class="lbl">Suivi</span></div>
+      <div class="nav-btn"><span class="icon ico-pulse"></span><span class="lbl">Évaluation</span></div>
+      <div class="nav-btn section-labo actif"><span class="icon ico-juggler"></span><span class="lbl">Labo</span></div>
+    </div>
+    <div class="sous-nav sous-nav-labo">
+      <div class="sous-btn actif">Données</div>
+      <div class="sous-btn">Réserve</div>
+      <div class="sous-btn">Codex</div>
+    </div>
+  </div>
 </div>
-<div style="font-size:0.8rem; opacity:0.7; text-align:center; margin-top:-8px;">Aide active — fond teinté + bordure jaunes</div>
 
-<div class="header-row">
-  <button class="header-btn" title="Bug"><span class="icon-h ico-bug"></span></button>
-  <button class="header-btn" title="Mode anonymisé"><span class="icon-h ico-mask-anon"></span></button>
-  <button class="header-btn" title="Thème"><span class="icon-h ico-theme"></span></button>
-  <button class="header-btn aide" title="Aide"><span class="icon-h ico-wordbook"></span></button>
-  <button class="header-btn reglages actif" title="Réglages"><span class="icon-h ico-tune"></span></button>
+<h2>3. Boutons header (aide + réglages) — état actif teinté orange</h2>
+
+<p>Même traitement multiply que pour la nav, mais en orange aide. L'icône reste orange dans les trois états (repos, hover, actif). Bug, anonymisation et thème restent neutres (boutons d'action, pas de section).</p>
+
+<h3>État au repos (aucun actif) — icône orange permanente</h3>
+<div class="bandeau-paire">
+  <div class="header-row mode-sombre">
+    <button class="header-btn bug" title="Bug"><span class="icon-h ico-bug"></span></button>
+    <button class="header-btn anonym" title="Mode anonymisé"><span class="icon-h ico-mask-anon"></span></button>
+    <button class="header-btn" title="Thème"><span class="icon-h ico-theme"></span></button>
+    <button class="header-btn aide" title="Aide"><span class="icon-h ico-wordbook"></span></button>
+    <button class="header-btn reglages" title="Réglages"><span class="icon-h ico-tune"></span></button>
+  </div>
+  <div class="header-row mode-clair">
+    <button class="header-btn bug" title="Bug"><span class="icon-h ico-bug"></span></button>
+    <button class="header-btn anonym" title="Mode anonymisé"><span class="icon-h ico-mask-anon"></span></button>
+    <button class="header-btn" title="Thème"><span class="icon-h ico-theme"></span></button>
+    <button class="header-btn aide" title="Aide"><span class="icon-h ico-wordbook"></span></button>
+    <button class="header-btn reglages" title="Réglages"><span class="icon-h ico-tune"></span></button>
+  </div>
 </div>
-<div style="font-size:0.8rem; opacity:0.7; text-align:center; margin-top:-8px;">Réglages actif — fond teinté + bordure jaunes</div>
 
-<h2>6. Liens</h2>
+<h3>Aide active — fond teinté + bordure oranges</h3>
+<div class="bandeau-paire">
+  <div class="header-row mode-sombre">
+    <button class="header-btn bug" title="Bug"><span class="icon-h ico-bug"></span></button>
+    <button class="header-btn anonym" title="Mode anonymisé"><span class="icon-h ico-mask-anon"></span></button>
+    <button class="header-btn" title="Thème"><span class="icon-h ico-theme"></span></button>
+    <button class="header-btn aide actif" title="Aide"><span class="icon-h ico-wordbook"></span></button>
+    <button class="header-btn reglages" title="Réglages"><span class="icon-h ico-tune"></span></button>
+  </div>
+  <div class="header-row mode-clair">
+    <button class="header-btn bug" title="Bug"><span class="icon-h ico-bug"></span></button>
+    <button class="header-btn anonym" title="Mode anonymisé"><span class="icon-h ico-mask-anon"></span></button>
+    <button class="header-btn" title="Thème"><span class="icon-h ico-theme"></span></button>
+    <button class="header-btn aide actif" title="Aide"><span class="icon-h ico-wordbook"></span></button>
+    <button class="header-btn reglages" title="Réglages"><span class="icon-h ico-tune"></span></button>
+  </div>
+</div>
+
+<h3>Réglages actif — fond teinté + bordure oranges</h3>
+<div class="bandeau-paire">
+  <div class="header-row mode-sombre">
+    <button class="header-btn bug" title="Bug"><span class="icon-h ico-bug"></span></button>
+    <button class="header-btn anonym" title="Mode anonymisé"><span class="icon-h ico-mask-anon"></span></button>
+    <button class="header-btn" title="Thème"><span class="icon-h ico-theme"></span></button>
+    <button class="header-btn aide" title="Aide"><span class="icon-h ico-wordbook"></span></button>
+    <button class="header-btn reglages actif" title="Réglages"><span class="icon-h ico-tune"></span></button>
+  </div>
+  <div class="header-row mode-clair">
+    <button class="header-btn bug" title="Bug"><span class="icon-h ico-bug"></span></button>
+    <button class="header-btn anonym" title="Mode anonymisé"><span class="icon-h ico-mask-anon"></span></button>
+    <button class="header-btn" title="Thème"><span class="icon-h ico-theme"></span></button>
+    <button class="header-btn aide" title="Aide"><span class="icon-h ico-wordbook"></span></button>
+    <button class="header-btn reglages actif" title="Réglages"><span class="icon-h ico-tune"></span></button>
+  </div>
+</div>
+
+<h2>4. Liens</h2>
 <ul>
   <li>Plan : <code>plans de travail/PLAN-MIGRATION-ICONES-SVG.md</code> (Lot J phase 2)</li>
+  <li>Audit chromatique : <code>plans de travail/AUDIT-COULEURS-SECTIONS.md</code></li>
   <li>Référentiel jaune (Lot I) : <code>plans de travail/REFERENTIEL-COULEURS-JAUNE.html</code></li>
 </ul>
 

@@ -305,7 +305,7 @@
     --acc-dot-vu:          #6a4820;
 
     /* Icônes header aide + réglages (même teinte que le fond accompagnement) */
-    --icone-aide-config:   #e8c43a;
+    --icone-aide-config:   #e8923a;
 
     /* === Navigation active (Lot J phase 1) ===
        Conservé pour compatibilité éventuelle. Phase 2 utilise les 5 couleurs
@@ -316,14 +316,14 @@
        Appliquées via background-blend-mode: multiply au bouton actif de la
        section (nav principale + sous-nav + bordure + icône + label).
        Audit chromatique : `plans de travail/AUDIT-COULEURS-SECTIONS.md` (26 mai). */
-    --section-conception:  #ff6f00;   /* orange — chantier/construction */
-    --section-calendrier:  #34c759;   /* vert succès apple — calendrier officiel.
+    --section-conception:  #dac16c;   /* orange — chantier/construction */
+    --section-calendrier:  #30b85d;   /* vert succès apple — calendrier officiel.
                                          CONFLIT HEX EXACT avec --vert-succes (alertes).
                                          Acceptable car lu par contexte (nav vs alerte). */
-    --section-suivi:       #22d3ee;   /* cyan — primaire/distinct/nette */
-    --section-evaluations: #38bdf8;   /* bleu fluo sky — stabilité/observation
+    --section-suivi:       #56cadc;   /* cyan — primaire/distinct/nette */
+    --section-evaluations: #6ec1e7;   /* bleu fluo sky — stabilité/observation
                                          (data-onglet "evaluations" au pluriel). */
-    --section-labo:        #c084fc;   /* violet pastel — expérimental/funky */
+    --section-labo:        #d1aff4;   /* violet pastel — expérimental/funky */
 
     /* Couleur médiane du bandeau nav, utilisée pour background-blend-mode:
        multiply. Mode sombre = milieu du gradient sarcelle. Redéfinie en
@@ -1184,10 +1184,11 @@ h1, h2, h3, h4 {
 .entete-utilitaires .btn-action-header[data-param="aide"].actif,
 .entete-utilitaires .btn-action-header[data-param="reglages"].actif {
     background:
-      linear-gradient(rgba(232, 196, 58, 1), rgba(232, 196, 58, 1)),
+      linear-gradient(rgba(232, 146, 58, 0.5), rgba(232, 146, 58, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border-color: var(--icone-aide-config);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(232, 146, 58, 0.15);
 }
 
 /* === Icônes SVG en-tête === */
@@ -1610,50 +1611,55 @@ span.header-icon {
    Le label .nav-label est aussi coloré (via règle séparée). */
 .navigation-principale button[data-onglet="conception"].actif {
     background:
-      linear-gradient(rgba(255, 111, 0, 1), rgba(255, 111, 0, 1)),
+      linear-gradient(rgba(218, 193, 108, 0.5), rgba(218, 193, 108, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border-color: var(--section-conception);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(218, 193, 108, 0.15);
 }
 .navigation-principale button[data-onglet="conception"].actif span.nav-icon { background-color: var(--section-conception); }
 .navigation-principale button[data-onglet="conception"].actif .nav-label  { color: var(--section-conception); }
 
 .navigation-principale button[data-onglet="calendrier"].actif {
     background:
-      linear-gradient(rgba(52, 199, 89, 1), rgba(52, 199, 89, 1)),
+      linear-gradient(rgba(48, 184, 93, 0.5), rgba(48, 184, 93, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border-color: var(--section-calendrier);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(48, 184, 93, 0.15);
 }
 .navigation-principale button[data-onglet="calendrier"].actif span.nav-icon { background-color: var(--section-calendrier); }
 .navigation-principale button[data-onglet="calendrier"].actif .nav-label  { color: var(--section-calendrier); }
 
 .navigation-principale button[data-onglet="suivi"].actif {
     background:
-      linear-gradient(rgba(34, 211, 238, 1), rgba(34, 211, 238, 1)),
+      linear-gradient(rgba(86, 202, 220, 0.5), rgba(86, 202, 220, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border-color: var(--section-suivi);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(86, 202, 220, 0.15);
 }
 .navigation-principale button[data-onglet="suivi"].actif span.nav-icon { background-color: var(--section-suivi); }
 .navigation-principale button[data-onglet="suivi"].actif .nav-label  { color: var(--section-suivi); }
 
 .navigation-principale button[data-onglet="evaluations"].actif {
     background:
-      linear-gradient(rgba(56, 189, 248, 1), rgba(56, 189, 248, 1)),
+      linear-gradient(rgba(110, 193, 231, 0.5), rgba(110, 193, 231, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border-color: var(--section-evaluations);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(110, 193, 231, 0.15);
 }
 .navigation-principale button[data-onglet="evaluations"].actif span.nav-icon { background-color: var(--section-evaluations); }
 .navigation-principale button[data-onglet="evaluations"].actif .nav-label  { color: var(--section-evaluations); }
 
 .navigation-principale button[data-onglet="labo"].actif {
     background:
-      linear-gradient(rgba(192, 132, 252, 1), rgba(192, 132, 252, 1)),
+      linear-gradient(rgba(209, 175, 244, 0.5), rgba(209, 175, 244, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border-color: var(--section-labo);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(209, 175, 244, 0.15);
 }
 .navigation-principale button[data-onglet="labo"].actif span.nav-icon { background-color: var(--section-labo); }
 .navigation-principale button[data-onglet="labo"].actif .nav-label  { color: var(--section-labo); }
@@ -1687,43 +1693,43 @@ span.header-icon {
    Même pattern multiply + bordure + texte que la nav principale. */
 .sous-navigation.section-conception button.actif {
     background:
-      linear-gradient(rgba(255, 111, 0, 1), rgba(255, 111, 0, 1)),
+      linear-gradient(rgba(218, 193, 108, 0.5), rgba(218, 193, 108, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    color: var(--section-conception);
-    border-color: var(--section-conception);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(218, 193, 108, 0.15);
 }
 .sous-navigation.section-calendrier button.actif {
     background:
-      linear-gradient(rgba(52, 199, 89, 1), rgba(52, 199, 89, 1)),
+      linear-gradient(rgba(48, 184, 93, 0.5), rgba(48, 184, 93, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    color: var(--section-calendrier);
-    border-color: var(--section-calendrier);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(48, 184, 93, 0.15);
 }
 .sous-navigation.section-suivi button.actif {
     background:
-      linear-gradient(rgba(34, 211, 238, 1), rgba(34, 211, 238, 1)),
+      linear-gradient(rgba(86, 202, 220, 0.5), rgba(86, 202, 220, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    color: var(--section-suivi);
-    border-color: var(--section-suivi);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(86, 202, 220, 0.15);
 }
 .sous-navigation.section-evaluations button.actif {
     background:
-      linear-gradient(rgba(56, 189, 248, 1), rgba(56, 189, 248, 1)),
+      linear-gradient(rgba(110, 193, 231, 0.5), rgba(110, 193, 231, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    color: var(--section-evaluations);
-    border-color: var(--section-evaluations);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(110, 193, 231, 0.15);
 }
 .sous-navigation.section-labo button.actif {
     background:
-      linear-gradient(rgba(192, 132, 252, 1), rgba(192, 132, 252, 1)),
+      linear-gradient(rgba(209, 175, 244, 0.5), rgba(209, 175, 244, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    color: var(--section-labo);
-    border-color: var(--section-labo);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(209, 175, 244, 0.15);
 }
 
 /* Ancien format PNG — rétrocompatibilité */
@@ -20273,38 +20279,43 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
    --bg-bandeau-mediane est déjà redéfini à #09264b en mode clair. */
 .mode-clair .navigation-principale button[data-onglet="conception"].actif {
     background:
-      linear-gradient(rgba(255, 111, 0, 1), rgba(255, 111, 0, 1)),
+      linear-gradient(rgba(218, 193, 108, 0.5), rgba(218, 193, 108, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border-color: var(--section-conception);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(218, 193, 108, 0.15);
 }
 .mode-clair .navigation-principale button[data-onglet="calendrier"].actif {
     background:
-      linear-gradient(rgba(52, 199, 89, 1), rgba(52, 199, 89, 1)),
+      linear-gradient(rgba(48, 184, 93, 0.5), rgba(48, 184, 93, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border-color: var(--section-calendrier);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(48, 184, 93, 0.15);
 }
 .mode-clair .navigation-principale button[data-onglet="suivi"].actif {
     background:
-      linear-gradient(rgba(34, 211, 238, 1), rgba(34, 211, 238, 1)),
+      linear-gradient(rgba(86, 202, 220, 0.5), rgba(86, 202, 220, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border-color: var(--section-suivi);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(86, 202, 220, 0.15);
 }
 .mode-clair .navigation-principale button[data-onglet="evaluations"].actif {
     background:
-      linear-gradient(rgba(56, 189, 248, 1), rgba(56, 189, 248, 1)),
+      linear-gradient(rgba(110, 193, 231, 0.5), rgba(110, 193, 231, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border-color: var(--section-evaluations);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(110, 193, 231, 0.15);
 }
 .mode-clair .navigation-principale button[data-onglet="labo"].actif {
     background:
-      linear-gradient(rgba(192, 132, 252, 1), rgba(192, 132, 252, 1)),
+      linear-gradient(rgba(209, 175, 244, 0.5), rgba(209, 175, 244, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border-color: var(--section-labo);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(209, 175, 244, 0.15);
 }
 
 /* Conteneur — bordure ultra-subtile */
@@ -20402,43 +20413,43 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
    Spécif (0,4,1) bat .mode-clair .sous-navigation button.actif (0,3,1). */
 .mode-clair .sous-navigation.section-conception button.actif {
     background:
-      linear-gradient(rgba(255, 111, 0, 1), rgba(255, 111, 0, 1)),
+      linear-gradient(rgba(218, 193, 108, 0.5), rgba(218, 193, 108, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    color: var(--section-conception);
-    border-color: var(--section-conception);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(218, 193, 108, 0.15);
 }
 .mode-clair .sous-navigation.section-calendrier button.actif {
     background:
-      linear-gradient(rgba(52, 199, 89, 1), rgba(52, 199, 89, 1)),
+      linear-gradient(rgba(48, 184, 93, 0.5), rgba(48, 184, 93, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    color: var(--section-calendrier);
-    border-color: var(--section-calendrier);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(48, 184, 93, 0.15);
 }
 .mode-clair .sous-navigation.section-suivi button.actif {
     background:
-      linear-gradient(rgba(34, 211, 238, 1), rgba(34, 211, 238, 1)),
+      linear-gradient(rgba(86, 202, 220, 0.5), rgba(86, 202, 220, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    color: var(--section-suivi);
-    border-color: var(--section-suivi);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(86, 202, 220, 0.15);
 }
 .mode-clair .sous-navigation.section-evaluations button.actif {
     background:
-      linear-gradient(rgba(56, 189, 248, 1), rgba(56, 189, 248, 1)),
+      linear-gradient(rgba(110, 193, 231, 0.5), rgba(110, 193, 231, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    color: var(--section-evaluations);
-    border-color: var(--section-evaluations);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(110, 193, 231, 0.15);
 }
 .mode-clair .sous-navigation.section-labo button.actif {
     background:
-      linear-gradient(rgba(192, 132, 252, 1), rgba(192, 132, 252, 1)),
+      linear-gradient(rgba(209, 175, 244, 0.5), rgba(209, 175, 244, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    color: var(--section-labo);
-    border-color: var(--section-labo);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(209, 175, 244, 0.15);
 }
 
 /* Bouton principal — fond sombre, texte reste blanc */
