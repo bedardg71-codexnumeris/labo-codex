@@ -20,7 +20,7 @@
 // init-inline.js compare cette valeur au BUILD_ID lu depuis version.json :
 // si différent, Safari file:// a probablement un main.js périmé en cache,
 // et la séquence reload+bandeau s'enclenche. SYNCHRONISER À CHAQUE BUMP.
-window._SCRIPT_BUILD_main = '0525-1630';
+window._SCRIPT_BUILD_main = '0526-0345';
 
 /* ===============================
    FONCTION GLOBALE: Génération d'ID uniques
@@ -234,11 +234,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // ===============================
     // Recharger les données quand la synchronisation IndexedDB → localStorage est terminée
     window.addEventListener('db-ready', async function(event) {
-
-        // 🆕 BETA 95.1 (5 jan 2026): Vérifier si migration legacy nécessaire
-        if (typeof verifierEtProposerMigrationLegacy === 'function') {
-            verifierEtProposerMigrationLegacy();
-        }
 
         // Migration consolidation onboarding v6.21 (21 avril 2026) : nettoie
         // les flags localStorage + IDB orphelins après retrait des modules
