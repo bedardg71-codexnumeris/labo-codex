@@ -89,6 +89,12 @@ function afficherSection(nomSection) {
         boutonActif.classList.add('actif');
     }
 
+    // Lot J : gérer la classe .actif sur les boutons header (aide + réglages)
+    // pour qu'ils reçoivent le fond teinté jaune quand leur section est ouverte
+    document.querySelectorAll('.btn-action-header[data-param="aide"], .btn-action-header[data-param="reglages"]').forEach(b => b.classList.remove('actif'));
+    const boutonHeaderActif = document.querySelector(`.btn-action-header[data-param="${nomSection}"]`);
+    if (boutonHeaderActif) boutonHeaderActif.classList.add('actif');
+
     // Afficher la sous-navigation appropriée
     afficherSousNavigation(nomSection);
 
@@ -374,7 +380,7 @@ function afficherSousNavigation(nomOnglet) {
         }).join('');
 
         conteneurSousNav.innerHTML = boutonsHtml;
-        conteneurSousNav.className = 'sous-navigation';
+        conteneurSousNav.className = `sous-navigation section-${nomOnglet}`;
         conteneurSousNav.style.display = '';
 
         // Ajouter les événements aux sous-boutons

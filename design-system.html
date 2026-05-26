@@ -440,6 +440,50 @@
                 </div>
             </div>
         </div>
+
+        <h3 class="guide-component-title">Couleurs par grande section de navigation (Lot J phase 2 — 26 mai 2026)</h3>
+        <p class="guide-component-text">
+            Cinq couleurs identifiant les sections de navigation qui ont une <strong>sous-navigation</strong>
+            (Conception, Calendrier, Suivi, Évaluations, Labo). Appliquées au bouton actif via
+            <code>background-blend-mode: multiply</code> (cf. section 8 Navigation). Accueil et Aperçu
+            (sections plates sans sous-nav) ne reçoivent <strong>pas</strong> de couleur.
+            <strong>Identiques dans les deux modes</strong> (le bandeau change mais le multiply s'adapte
+            grâce à <code>--bg-bandeau-mediane</code>).
+        </p>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre &amp; clair (identiques)</div>
+                <div class="ref-swatch-grid">
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#ff6f00"></div><div class="ref-swatch-name">section-conception<br>#ff6f00</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#34c759"></div><div class="ref-swatch-name">section-calendrier<br>#34c759</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#22d3ee"></div><div class="ref-swatch-name">section-suivi<br>#22d3ee</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#38bdf8"></div><div class="ref-swatch-name">section-evaluations<br>#38bdf8</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#c084fc"></div><div class="ref-swatch-name">section-labo<br>#c084fc</div></div>
+                </div>
+            </div>
+        </div>
+        <p class="guide-component-text" style="font-size:0.85rem; opacity:0.85;">
+            <strong>Conflits hex acceptés</strong> :<br>
+            • <code>--section-conception</code> = <code>--som-orange</code> (SOM décoratif, cf. mémoire palette-couleurs-contraintes)<br>
+            • <code>--section-calendrier</code> = <code>--vert-succes</code> (lecture par contexte : nav vs alerte)<br>
+            <strong>Audit</strong> : <code>plans de travail/AUDIT-COULEURS-SECTIONS.md</code> — tous AA ou AA large.
+        </p>
+
+        <h3 class="guide-component-title">Jaune assistance / configuration (Lot I — 26 mai 2026)</h3>
+        <p class="guide-component-text">
+            Jaune doré chaud appliqué à la palette d'accompagnement (popups d'aide, tour guidé,
+            <code>--acc-*</code>) et aux icônes des boutons <em>aide</em> et <em>réglages</em> de l'entête.
+            Convention : « tout ce qui est assistance/configuration » est jaune. Identique aux deux modes.
+        </p>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre &amp; clair (identiques)</div>
+                <div class="ref-swatch-grid">
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#e8c43a"></div><div class="ref-swatch-name">icone-aide-config<br>#e8c43a</div></div>
+                    <div class="ref-swatch"><div class="ref-swatch-color" style="background:#e8c43a"></div><div class="ref-swatch-name">acc-fond<br>#e8c43a</div></div>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
@@ -880,6 +924,42 @@
                 </div>
             </div>
         </div>
+
+        <h3 class="guide-component-title">Bouton actif par section (Lot J phase 2 — 26 mai 2026)</h3>
+        <p class="guide-component-text">
+            Quand l'utilisateur est sur une section qui a une sous-navigation
+            (<em>Conception, Calendrier, Suivi, Évaluations, Labo</em>), le bouton actif reçoit la
+            <strong>couleur d'identité</strong> de la section sur trois éléments : <strong>fond</strong>
+            (teinté via multiply), <strong>bordure</strong>, <strong>icône SVG</strong> et
+            <strong>label texte</strong>. La sous-nav active hérite de la même couleur.
+            Accueil et Aperçu (sections plates) restent en blanc translucide neutre.
+            Boutons header <em>aide</em> et <em>réglages</em> = même technique mais en jaune.
+        </p>
+        <p class="guide-component-text" style="font-size:0.9rem;">
+            <strong>Technique CSS</strong> : <code>background-blend-mode: multiply</code> sur deux couches —
+            (1) la couleur de section en opaque + (2) la couleur médiane du bandeau
+            (<code>--bg-bandeau-mediane</code>, variable qui change automatiquement entre mode sombre et
+            mode clair). Le bandeau parent garde son vrai gradient ; le bouton actif est uniforme à
+            l'intérieur, pas de mini-gradient désaligné.
+        </p>
+        <p class="guide-component-text" style="font-size:0.85rem; opacity:0.85;">
+            <strong>Pattern type</strong> (Conception, mode sombre) :
+        </p>
+        <pre style="background:#0e1e28;color:#d0e0e4;padding:12px;border-radius:6px;font-size:0.78rem;line-height:1.5;overflow-x:auto;">
+.navigation-principale button[data-onglet="conception"].actif {
+    background:
+      linear-gradient(rgba(255, 111, 0, 1), rgba(255, 111, 0, 1)),
+      linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
+    background-blend-mode: multiply;
+    border-color: var(--section-conception);
+}</pre>
+        <p class="guide-component-text" style="font-size:0.85rem;">
+            <strong>Audit chromatique</strong> : <code>plans de travail/AUDIT-COULEURS-SECTIONS.md</code>
+            — tous AA WCAG ou AA large (icônes). <strong>Daltonisme</strong> :
+            Suivi/Évaluations sont indistinguables en protanopie/tritanopie ; mitigé par le label
+            texte toujours visible (WCAG 1.4.1 conforme par double signal).<br>
+            <strong>Référentiel visuel</strong> : <code>plans de travail/REFERENTIEL-COULEURS-SECTIONS.html</code>.
+        </p>
     </div>
 </section>
 
