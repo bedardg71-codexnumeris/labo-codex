@@ -128,6 +128,15 @@ function afficherVue(nomVue) {
     var conteneur = document.getElementById('bilan-conteneur-principal');
     if (!conteneur) return;
 
+    // Fix #278 : remonter au top avant le basculement de vue.
+    // Le changement de vue cache la précédente par display:none → scrollHeight
+    // chute brutalement → si scrollTop dépasse le nouveau scrollHeight,
+    // Safari reset à 0 de manière brutale. Scroller explicitement au top
+    // d'abord rend la transition cohérente et stable.
+    if (conteneur.scrollIntoView) {
+        conteneur.scrollIntoView({ block: 'start', behavior: 'auto' });
+    }
+
     var boutons = conteneur.querySelectorAll('.bilan-nav-btn');
     for (var i = 0; i < boutons.length; i++) {
         var btn = boutons[i];
