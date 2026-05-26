@@ -3,7 +3,8 @@
 > **Pour Claude** : Ce fichier liste les **items ouverts** uniquement. L'historique complet des items livrés (313 items, fév-mai 2026) vit dans `BACKLOG-ARCHIVE.md`.
 >
 > **Dernière bascule** : 25 mai 2026 fin de journée — extraction des items livrés vers BACKLOG-ARCHIVE.md.
-> **État courant** : Beta 99.66 (Build 0526-0503), HEAD main `c1c8abd`. 27 items ouverts (session 26 mai matin : 3 items #278/#280/#281 livrés + 3 bugs testeurs résolus).
+> **État courant** : Beta 99.66 (Build 0526-0503), HEAD main `4df4f21`. 28 items ouverts (session 26 mai matin : 3 items #278/#280/#281 livrés + 3 bugs testeurs résolus + 1 item #286 ajouté).
+> **Dernier ID utilisé** : #286 (migration emojis UI → SVG icons8, créé 26 mai 2026).
 > **Présentation AQPC** : 3 juin 2026 (J−8).
 > **Pour ajouter un item** : `- [ ] **#XX** Description courte` + sous-puces de contexte. Dernier ID utilisé : **#285** (livré).
 
@@ -62,6 +63,16 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 - [ ] 📦 **#2** Guide PDF pour utilisateurs — reformulé 11 mai 2026
   - Décision : ne PAS produire un guide générique. À fusionner avec le matériel pédagogique de la cohorte CoP (8 rencontres sept 2026 → avril 2027, voir `docs/CALENDRIER.md` §8.3).
   - Version « papier » pour AQPC peut être dérivée de `docs/securite/SECURITE-POUR-ENSEIGNANTS.md` (à écrire post-Défense E).
+
+### Cohérence visuelle UI
+
+- [ ] 🟡 **#286** Migration globale emojis UI → Icônes SVG icons8 (chantier en 5 lots)
+  - **Capture déclencheuse** : iPad 26 mai 05:15 — section « Préparer et importer » avec ✴ orange à droite du titre + 📝 papier-crayon au-dessus de « Annoter les travaux ».
+  - **Cartographie réalisée 26 mai 2026** : 593 occurrences UI (200 HTML + 393 JS hors `console.*`/commentaires), 56 emojis distincts. 70 SVG icons8 déjà présents dans `icons/` (crédit inscrit dans À propos).
+  - **Plan détaillé** : `plans de travail/PLAN-MIGRATION-ICONES-SVG.md` — table de mapping, lots A/B/C/D/E, ordre recommandé, décisions Grégoire pendantes.
+  - **Top 3 emojis** : ✴ ×76 (bouton aide, à mapper → `icon-info` à ajouter), ⚠ ×63 (warning), ✓ ×48 (check simple).
+  - **Effort total** : 5-6 h réparties sur 3-5 sessions.
+  - **Lot A** (bouton aide ✴, 45 min) recommandé en premier — gros impact visuel, mapping unique.
 
 ### Codex / Onboarding
 

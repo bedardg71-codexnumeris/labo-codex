@@ -1,26 +1,64 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 25 mai 2026 fin de
-     journée, post-livraison du chantier « Corrections conséquences
-     audit annuel » : Hygiène GitHub + Fix CodeQL critiques + Port
-     audit annuel complet sur main + Cleanup zéro-dette −1249 LOC.
-     Beta 99.64 b0525-0609 — même beta toute la journée, bumps de
-     build entre chantiers.)
+     IDENTIFICATION DE CE FICHIER  (mis à jour 26 mai 2026 matin,
+     post-livraison de 6 chantiers : retrait modale migration legacy,
+     filtrage doublons original/reprise dans Travaux soumis profil,
+     fix ReferenceError verifierEtChargerEvaluationExistante (10
+     exports manqués sur evaluation.js), 3 items backlog #278+#280+
+     #281, cartographie + plan migration emojis UI → SVG icons8 (#286).
+     Beta 99.66 builds 0526-0345 → 0526-0503, HEAD main `4df4f21`.)
      Ce SESSION.md vit sur la branche `main` du worktree principal et
-     sert de relai entre les sessions Claude. Il décrit l'état
-     post-livraison « corrections conséquences audit annuel » : audit
-     largement clos, AUDIT.md publique à la racine, 4 axes sur 6 au
-     Vert post-remédiation. Prêt pour la prochaine priorité (voir §3).
-     L'historique complet (Phase B/C 24 mai PM, refonte pratique
-     active 24 mai matin, chrome unifié 24 mai matin, #282 P1-P4 du
+     sert de relai entre les sessions Claude. Il décrit l'état après
+     la session productive du 26 mai matin (5 commits push + 1 commit
+     cleanup backlog). Présentation AQPC le 3 juin 2026 (J−8 au moment
+     du relai). Plan de migration icônes prêt (lot A recommandé en
+     premier, voir §3). L'historique complet précédent (audit annuel
+     livré 25 mai, refonte pratique active 24 mai, #282 P1-P4 du
      23 mai, cycle AQPC clos 22 mai, Cat-B clos 21 mai) reste dans
      les §§ suivants comme référence.
      ===================================================================== -->
 
 > **📌 Identification**
 > - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
-> - **Cycle qui vient d'être livré** : **Corrections conséquences audit annuel** — Hygiène GitHub (SECURITY.md + Dependabot + workflows CI tests/CodeQL + BRANCH-PROTECTION), fix 7 erreurs CodeQL critiques (reserve-ouvrir versements + import-export snapshot async), port 12 ADRs + AUDIT.md racine + libs/VERSIONS.md depuis audit/2026-mai, ADR-013 dérogation SPDX, cleanup −1249 LOC (4 fichiers obsolètes/orphelins), fix 5 warnings CodeQL résiduels, dismiss 3 faux positifs. Beta 99.64 b0525-0609, HEAD `c601806`.
-> - **Cycle suivant** : Voir §3. Plusieurs candidats : actions UI Grégoire (Branch Protection + Allow Auto-merge + 4 PRs Dependabot restantes), chantier zéro-dette CodeQL résiduel (~80 alertes), #282 listeCours étape 5, audit autres auto-saves, Phase D + G2-b refonte pratique active.
-> - **Documents de référence du cycle livré** : `AUDIT.md` (synthèse publique + bloc « Statuts post-remédiation au 25 mai »), `libs/VERSIONS.md`, `docs/adr/` (12 ADRs portés + ADR-013 prospectif), `SECURITY.md`, `.github/BRANCH-PROTECTION.md`.
+> - **Cycle qui vient d'être livré** : **Session 26 mai matin** — 6 livraisons enchaînées (3 bugs testeurs + 3 items backlog) + cartographie icônes UI. Détail § « 26 mai matin » ci-dessous et dans BACKLOG-ARCHIVE.md.
+> - **Cycle suivant** : Voir §3. **Lot A migration icônes** (bouton aide ✴ → SVG icon-info, 76 sites, ~45 min) recommandé en premier. Plan détaillé : `plans de travail/PLAN-MIGRATION-ICONES-SVG.md`. Autres items disponibles dans BACKLOG.md (28 items ouverts).
+> - **Documents clés de cette session** : `plans de travail/PLAN-MIGRATION-ICONES-SVG.md` (chantier #286), `BACKLOG.md` (#278/#280/#281 retirés + #286 ajouté), `BACKLOG-ARCHIVE.md` (livraisons 26 mai documentées).
+
+---
+
+## §0bis — Récap session 26 mai 2026 matin (6 livraisons + cartographie icônes)
+
+**Beta / build** : 99.66 / 0526-0503 (3 bumps de build sur la matinée).
+**Branche `main`** : HEAD à `4df4f21` chore(backlog) — déplacement #278/#280/#281 + 3 bugs testeurs vers archive.
+
+**5 commits push d'amélioration de code** (du premier au dernier) :
+1. `aabc0d3` **fix(migrations)** — retrait code mort modale migration legacy (zéro-dette) + bump 99.66 (build 0526-0345). −380 LOC. Résout BUG_grégoire_2026-05-25_07-19-19 (modale « Mise à jour de tes données » apparaissait sur iPad).
+2. `7574c75` **fix(profil)** — filtrer les originaux remplacés dans la grille « Travaux soumis » + bump 0526-0441. Résout BUG_grégoire_2026-05-21_13-15-45 et suivants (doublons original/reprise dans Travaux soumis du profil). Bilan : audit 17 paires (DA, productionId) sur h2026 → 16 saines + 1 orpheline (Houle/Artefact 5 fichier reprise orphelin supprimé séparément côté données).
+3. `71286d5` **fix(eval)** — exposer 10 fonctions manquées sur window après extraction des sous-modules + bump 0526-0455. Audit complet d'evaluation.js : 86 fonctions, 29 exportées, **10 manquantes** appelées cross-module (6 ReferenceErrors potentiels dont 1 confirmé : `verifierEtChargerEvaluationExistante` qui crashait à chaque changement d'étudiant/production). Cause directe du bug du 21 mai « rien ne s'affiche au clic ». Confirme [[feedback-fix-perdu-refactoring-extraction]] sur l'extraction des sous-modules evaluation-*.js du 18-21 mai.
+4. `c1c8abd` **fix(backlog) #281 + #278 + #280** — petits items backlog groupés + bump 0526-0503. −66 LOC net.
+   - #281 : 1 toast custom migré vers `notifications.succes` (saisie-presences.js)
+   - #278 : scroll explicite dans `afficherVue` du bilan-reflexif (fix Safari reset)
+   - #280 : retrait bouton « Capturer maintenant » + fonction + helper (`obtenirNumeroSemaineActuelle` devenue code mort). Renommages UX : « Reconstruire l'historique » → « Recalculer les captures » + « Captures hebdomadaires » → « Captures de séances ». Effet collatéral : résout les 4 facettes du bug #116.
+5. `4df4f21` **chore(backlog)** — déplacement des 6 livraisons (3 bugs + 3 items) de BACKLOG.md vers BACKLOG-ARCHIVE.md. 30 → 27 items ouverts.
+
+**1 livraison méta (organisation)** :
+6. **Cartographie + plan migration icônes** (#286 nouveau item BACKLOG). Capture iPad 26 mai 05:15 montre ✴ + 📝 dans « Préparer et importer » que Grégoire ne veut pas. Inventaire : **593 occurrences emojis UI** (200 HTML + 393 JS hors `console.*`/commentaires) répartis en 56 emojis distincts. Plan en 5 lots (A bouton aide, B illustrations sections, C statuts notifications, D pastilles couleur, E résidu) — voir `plans de travail/PLAN-MIGRATION-ICONES-SVG.md`. Total estimé 5-6 h sur 3-5 sessions. **Lot A recommandé en premier** (76 sites, 1 mapping unique, gros impact visuel rapide).
+
+**Tests** : 103/103 verts à chaque commit (85 Vitest + 18 Playwright WebKit).
+
+**Vérifications de déploiement Grégoire à faire** après ⌥⌘E + Cmd+R sur iPad/Mac :
+- ✅ La modale « Mise à jour de tes données » ne réapparaît plus au démarrage.
+- ✅ Console Safari sans `ReferenceError: verifierEtChargerEvaluationExistante` au changement d'étudiant/production.
+- ✅ Profil étudiant → Travaux soumis : 1 seule vignette par production reprise (la reprise active).
+- ✅ Saisie présences : notification au style cohérent (vert solide DS, sans emoji custom).
+- ✅ Bilan réflexif : transition Questionnaire → Importer remonte proprement au top du bloc Bilan.
+- ✅ Réglages → Données → Captures : 2 boutons (le « Capturer maintenant » a disparu), bouton renommé « Recalculer les captures ».
+
+**Warnings console résiduels observés mais non traités cette session** (à inscrire SUIVI-BUGS si besoin) :
+- ⚠ `[DB] Quota localStorage dépassé pour h2026_indicesCP (29669 bytes)` × 2
+- ⚠ `Format de séance non reconnu — SEANCE-2026-05-14-B` × 2 (saisie-presences.js:338)
+- ⚠ `calculerTauxCompletion(DA) : indicesCP non disponible — retourne null` pour DA 9000176 et 9000040
+
+---
 
 # SESSION — État au 25 mai 2026 fin de journée (chantier « Corrections conséquences audit annuel » LIVRÉ)
 
@@ -792,70 +830,73 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
 ## §3 — Consigne de démarrage pour la prochaine session
 
-> **L'audit annuel et ses corrections conséquences sont LARGEMENT LIVRÉS** (cf. §1octies). Reste un baseline zéro-dette CodeQL d'environ 80 alertes (chantier optionnel) et plusieurs candidats applicatifs. Pas de priorité absolue imposée — choix Grégoire selon humeur.
+> **Session 26 mai matin productive** : 5 commits push + cleanup backlog. Cartographie + plan migration emojis UI → SVG icons8 (#286) PRÊT. **AQPC dans 8 jours (3 juin 2026)** — keynote Grégoire prête, filet captures d'écran en plan B si l'app plante (cf. mémoire `project-aqpc-keynote-filet`). Enjeu réel = solidité pour expérimentateurs post-AQPC, pas la démo elle-même.
 
-### Priorité 1 — Actions UI Grégoire pour finaliser la chaîne hygiène GitHub (~5 min)
+### Priorité 1 — Lot A migration icônes (chantier recommandé, ~45 min)
 
-Trois actions qui nécessitent l'interface GitHub web et que Claude ne peut pas faire :
+**Item BACKLOG #286** — migration globale emojis UI → SVG icons8.
 
-1. **Activer Allow Auto-merge** dans Settings → General → Pull Requests. Sinon les commandes `@dependabot squash and merge` continuent de tarder ou échouent (cf. §1octies F). Plus tard, ça facilite tous les merges Dependabot.
-2. **Appliquer Branch Protection** sur `main` selon la procédure dans `.github/BRANCH-PROTECTION.md`. Attendre que `tests.yml` + `codeql.yml` aient eu un premier run vert (déjà fait — cf. tag `hygiene-github-2026-05-25`) pour que les status checks apparaissent dans le sélecteur.
-3. **Finaliser les 4 PRs Dependabot restantes** :
-   - PR #23 vitest 2→4 : conflit avec #22 sur lockfile → `@dependabot rebase` en commentaire, ou merger côté UI après rebase.
-   - PR #18, #19, #21 (checkout/upload-artifact/setup-node, tous touchent `.github/workflows/`) : nécessitent scope `workflow` sur le token gh, OU merger directement sur l'UI GitHub. Pour ajouter le scope : `gh auth refresh --scopes workflow,repo` dans un terminal natif (interaction navigateur).
+**Plan détaillé** : `plans de travail/PLAN-MIGRATION-ICONES-SVG.md` (cartographie complète, 5 lots A-E, mapping SVG par emoji, décisions Grégoire pendantes).
 
-### Priorité 2 — Continuer le chantier zéro-dette CodeQL résiduel (optionnel, ~3-5 h)
+**Lot A** = bouton aide ✴ (76 occurrences : 49 HTML + 27 JS hors commentaires). 1 mapping unique : `✴` → `icon-info.svg`.
 
-Baseline ~80 alertes CodeQL zéro-dette (cf. §1octies « Baseline CodeQL résiduel reporté ») :
-- **37 `js/useless-assignment-to-local`** : assignations à variables locales jamais utilisées. Cleanup module par module (~1-2 h).
-- **37 `js/unneeded-defensive-code`** : guards inutiles type `if (x !== null && x !== undefined && x)`. **Analyse cas par cas obligatoire** (risque de retirer un guard utile en edge case). Beaucoup peuvent être des faux positifs cross-file en vanilla JS sans modules ES6.
-- **6 `js/superfluous-trailing-arguments`** : arguments passés mais ignorés par signature.
+**Pré-requis bloquant** : `icon-info.svg` n'existe pas encore dans `icons/`. Grégoire doit choisir un style icons8 cohérent avec les 70 SVG déjà présents (probablement style Material Outlined) et l'ajouter à `icons/`.
 
-**Stratégie suggérée** : module par module, pas en masse. Commit séparé par module. Hook pré-push à chaque jalon. Marquer les faux positifs `dismissed` via gh API avec raison documentée (cf. pattern §1octies G).
+**Procédure recommandée** :
+1. **Demander à Grégoire** le SVG `icon-info.svg` (ou lui suggérer 2-3 candidats depuis icons8).
+2. Ajouter à `icons/icon-info.svg`.
+3. Grep `'✴'` et `'✴️'` (avec et sans le variation selector U+FE0F) dans `*.js` et `*.html`.
+4. Remplacer le caractère par `<img src="icons/icon-info.svg" alt="Aide" class="btn-aide-icone">` ou équivalent CSS-only.
+5. Tests Vitest + Playwright (103/103 attendu).
+6. Test visuel Mac + iPad, modes sombre + clair.
+7. Commit + push avec bump build (Beta 99.66 conservée, juste nouveau timestamp).
 
-### Priorité 3 — Continuer projets applicatifs en cours
+**Pourquoi Lot A en premier** : visible immédiatement (capture déclencheuse iPad 26 mai 05:15 le montre), 1 seul mapping, gros impact rapide. Valide la méthodologie avant les lots plus lourds.
 
-**Backlog projet** (`BACKLOG.md`) :
-- **#282** étape 5 finale **listeCours → cours** (~3 h, plan détaillé dans §1quater du 23 mai). PRIORITÉ HAUTE actée par Grégoire le 23 mai PM.
-- **#283 + #284** Harmonisation responsive mobile + structure pages.
-- **#280** Fusion « Capturer maintenant » + « Reconstruire l'historique » snapshots.
-- **#281** Migration notifications custom HTML résiduelles vers `notifications.X`.
+### Priorité 2 — Items BACKLOG à plus court terme
 
-**Priorités SESSION.md historiques toujours valides** :
-- **Audit autres auto-saves** (cf. [[project-autosaves-a-auditer]]) — pattern race-condition probablement répandu. Sites prioritaires : radio « note chiffrée / niveau performance » dans wizard pratique (signalé Grégoire), `pratiques-gestion.js sauvegarderConfigPratiqueMat`, `trimestre-v2-cours.js`.
-- **Phase D + G2-b refonte pratique active** — Phase D = retrait legacy `mat-variante-calcul`, G2-b = 30 sites `configPAN.portfolio`. Zéro-dette, pas urgent.
+Si Grégoire préfère un autre item parmi les 28 ouverts :
 
-**Bugs SUIVI-BUGS ouverts** : #114 CSP Cloudflare prod, #115 `icon-files.svg` 404, #116 snapshots manuels 4 facettes, #118 layout overflow Trimestre, #121 bouton fantôme Tirage.
+- **🟡 #279** Ajouter 3 champs au gabarit production (DESCRIPTION DÉTAILLÉE / FORMAT / REMISE). Bloqueur : Grégoire doit fournir une capture de référence (placement, type d'input). Effort ~1-2 h une fois la capture reçue.
+- **🟡 #273** Évaluations démo à partir de vrais travaux d'élèves anonymisés (consentement obtenu plusieurs élèves H2026). 2-3 dossiers complets pour pack démo. Utile aux expérimentateurs post-AQPC. 1-2 séances.
+- **🟢 #283 + #284** Harmonisation UX responsive sidebar mobile + titres/sous-titres pages. Décisions UX en amont.
+
+### Priorité 3 — Warnings console résiduels (observés mais non traités)
+
+Visibles dans la console Safari de Grégoire le 26 mai (cf. §0bis) :
+- **Quota localStorage `h2026_indicesCP` dépassé** (29 Ko/clé). Mécanisme défensif `db.js` bascule sur IDB+memoryCache. Pas critique mais signal d'un quota global proche du plafond. Lien avec la désaturation localStorage déjà documentée.
+- **Format de séance non reconnu — `SEANCE-2026-05-14-B`** × 2 (saisie-presences.js:338). Probablement une séance créée avec schéma incomplet. À tracer côté création de séances.
+- **`indicesCP non disponible` pour DA 9000176 et 9000040** — fallback recalcul à la volée, pas crash mais charge supplémentaire. Pipeline de pré-calcul incomplet pour ces 2 étudiants.
 
 ### Étapes de démarrage immédiat
 
 ```bash
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 git status                                              # main attendu propre
-git log --oneline main -5                               # HEAD attendu : `c601806` fix(codeql): résoudre 5 warnings…
+git log --oneline main -10                              # HEAD attendu : `4df4f21` chore(backlog) déplacement #278 #280 #281
 git fetch origin
-git tag -l "hygiene-github-*" | tail -5                 # tag hygiene-github-2026-05-25 attendu
 
-# Vérifier que les tests sont toujours verts (smoke test sur main)
+# Vérifier que les tests sont toujours verts
 cd tests && npm test                                    # 103/103 attendu (85 Vitest + 18 Playwright)
 
-# Vérifier état CodeQL actuel
-gh api '/repos/bedardg71-codexnumeris/Monitorage_v6/code-scanning/alerts?per_page=100' \
-  --jq '[.[] | select(.state == "open")] | group_by(.rule.severity) | map({severity: .[0].rule.severity, count: length})'
-# Attendu : ~85-93 alertes (5 errors will auto-fix post re-scan, ~80 zéro-dette)
+# Si on attaque Lot A : auditer les sites ✴
+cd ..
+grep -rn "'✴'\|'✴️'\|\"✴\"\|\"✴️\"\|>✴<\|>✴️<" --include="*.js" --include="*.html" | wc -l
+# Attendu : ~76 occurrences réparties HTML/JS
 ```
 
 ### Avant toute écriture de code
 
 1. **Charger les skills** : `Skills pour Claude Code/SKILL_labo_codex.md` (architecture générale).
 2. **Charger les mémoires** essentielles :
-   - [[feedback-autosave-race-condition]] — pattern bug fixé 24 mai PM (à éviter ailleurs)
-   - [[project-autosaves-a-auditer]] — liste des auto-saves suspects
-   - [[feedback-zero-fallback-arbitraire]] — principe directeur métier
-   - [[project-pratique-active-ssot]] — architecture pratique active (post-refonte 24 mai matin)
-   - [[feedback-fix-perdu-refactoring-extraction]] — pattern bug perdu lors d'extraction
-3. **Lire le SESSION.md complet** (ce fichier). §1octies décrit ce qui vient d'être livré (25 mai), §1septies décrit la veille (24 mai PM), §1sexies/quinquies/quater/ter remontent les jours précédents.
-4. **Si chantier zéro-dette CodeQL** : consulter `AUDIT.md` racine pour la cartographie post-remédiation + branche `audit/2026-mai` pour les rapports techniques complets via `git show origin/audit/2026-mai:audit/reports/SUMMARY-internal.md`.
+   - [[project-aqpc-keynote-filet]] — AQPC 3 juin pilotée par keynote, pas l'app live. Filet captures si l'app plante. Enjeu réel = expérimentateurs post-AQPC.
+   - [[feedback-fix-perdu-refactoring-extraction]] — pattern confirmé encore une fois le 26 mai (10 exports manqués sur evaluation.js). Vigilance permanente sur les extractions de sous-modules.
+   - [[feedback-autosave-race-condition]] — pattern bug fixé 24 mai PM (à éviter ailleurs).
+   - [[project-autosaves-a-auditer]] — liste des auto-saves suspects.
+   - [[feedback-zero-fallback-arbitraire]] — principe directeur métier.
+   - [[project-pratique-active-ssot]] — architecture pratique active (post-refonte 24 mai matin).
+3. **Lire le SESSION.md complet** (ce fichier). §0bis décrit ce qui vient d'être livré (26 mai matin), § « 25 mai fin de journée » remonte la veille, §§ suivants remontent les jours précédents.
+4. **Si chantier icônes** : lire `plans de travail/PLAN-MIGRATION-ICONES-SVG.md` AVANT toute action. Contient mapping détaillé, décisions pendantes Grégoire, ordre recommandé des lots.
 
 ### Zones protégées — rappel permanent
 
@@ -863,27 +904,46 @@ gh api '/repos/bedardg71-codexnumeris/Monitorage_v6/code-scanning/alerts?per_pag
 
 ### Conventions
 
-- **Pas de bump beta sans demander** Grégoire (cf. §0). Beta 99.64 conservée tant que non bumpée.
-- **Hook pré-push vert** obligatoire (Défense J — 85 Vitest verts au minimum). Les 14 commits du 25 mai ont tous passé le hook.
-- **Worktree dédié** recommandé pour tout chantier > 1 h. La session du 25 mai a livré 14 commits dont 13 directement sur main + 1 worktree éphémère pour le bloc Hygiène GitHub initial.
+- **Pas de bump beta sans demander** Grégoire (cf. §0). Beta 99.66 conservée tant que non bumpée.
+- **Hook pré-push vert** obligatoire (Défense J — 85 Vitest verts au minimum).
+- **Worktree dédié** recommandé pour tout chantier > 1 h. La session 26 mai matin a tout fait sur main (5 commits courts).
 - **Test simulation Safari Responsive Design Mode** insuffisant pour valider mobile : toujours valider sur vrai device.
-- **Charger la cache** : pour les nouveaux fichiers JS ou modifications, faire `Cmd+Q` complet de Safari puis ré-ouverture. Le cache buster `?v=` est inopérant en `file://`.
-- **Dismiss CodeQL false positives** via gh API : `gh api -X PATCH /repos/.../code-scanning/alerts/{N} -f state=dismissed -f dismissed_reason="false positive" -f dismissed_comment="..."`. Raison documentée obligatoire.
+- **Charger la cache** : pour les nouveaux fichiers JS ou modifications, faire `Cmd+Q` complet de Safari puis ré-ouverture, OU ⌥⌘E pour vider les caches Safari. Le cache buster `?v=` est inopérant en `file://`. Sur macOS 26.5, le cache Safari file:// est devenu plus persistant — privilégier Chrome pour le dev quand possible.
+- **`window._SCRIPT_BUILD_main`** : à synchroniser à CHAQUE bump de build (cf. CLAUDE.md « Avant chaque commit » étape 4). Sentinelle #285 livrée 25 mai.
 
-### Décisions Grégoire pendantes (rappel)
+### Vérifications de déploiement Grégoire à confirmer
 
-- **Actions UI** — priorité 1 cette session (Allow Auto-merge + Branch Protection + 4 PRs Dependabot restantes, cf. ci-dessus).
-- **Chantier zéro-dette CodeQL résiduel** — priorité 2 optionnelle.
-- **#282 étape 5** — PRIORITÉ HAUTE actée le 23 mai PM, ~3 h. Indépendant.
-- **Audit autres auto-saves** — toujours pertinent (race-condition pattern probable ailleurs).
-- **Phase D + G2-b refonte pratique active** — zéro-dette pas urgent.
-- **Récupération données a2025** — Grégoire doit re-saisir manuellement le nombre de mots dans les évals dont `donneesAlgorithmiques` a été écrasé. One-shot. La corruption a2025 a été réparée par commit `3b8577a` du 24 mai (à vérifier si encore nécessaire).
-- **Label `v2-seuil-fragile`** — conservation / atténuation / alignement ? (Cat-B Track 4 chantier J reliquat).
+Si Grégoire n'a pas encore déployé la beta 99.66 b0526-0503 (commits 0526-0345 → 0526-0503), les changements ne sont pas encore visibles en production. **Confirmer en début de session** :
+- A-t-il déployé la dernière beta (Netlify push automatique sur main, ou autre flux) ?
+- A-t-il fait ⌥⌘E + Cmd+R sur Safari pour rafraîchir le cache file:// ?
+- Les 6 vérifications listées dans §0bis (modale legacy retirée, pas de ReferenceError console, Travaux soumis épuré, etc.) sont-elles OK ?
+
+### Décisions Grégoire pendantes (rappel actualisé 26 mai)
+
+**Court terme (cycle icônes)** :
+- **Style icon-info pour ✴** : Material Outlined / Sharp / Filled / Color ? Cohérence avec 70 SVG existants.
+- **Refactor API `notifications.X`** (Lot C migration icônes) : accepter un paramètre `type` qui détermine l'icône, ou injecter `<img>` via `appendChild` ?
+- **Pastilles colorées 🟢🟡🔴🟠** (Lot D) : conserver les emojis (purement chromatique), passer à `●` Unicode, ou SVG ?
+- **Emojis dans le contenu pédagogique des popups d'aide** : migrer aussi ou laisser ?
+
+**Moyen terme** :
+- **#279** capture de référence à fournir pour les 3 champs production.
+- **#273** sélection 2-3 dossiers élèves H2026 à anonymiser pour pack démo.
 - **Demande d'avis PRP Cégep de Drummondville** (Loi 25) — à envoyer (délai 2-6 semaines, conditionne PRIVACY.md v1.1).
-- **Tests manuels Sections C, D, E, F** reportés (cf. doc TESTS-MANUELS-PENDING) — à reprendre si Grégoire le souhaite.
-- **Migration globale des icônes vers icons8** — chantier séparé à planifier.
+- **Audit autres auto-saves** (cf. [[project-autosaves-a-auditer]]) — toujours pertinent.
+
+**Long terme** :
+- **Convergence audit/2026-mai ↔ main** — branche audit divergée, convergence partielle déjà faite via port d'ADRs/AUDIT.md/libs/VERSIONS.md. Décision globale (merger / cherry-pick / abandonner) reste à prendre, pas urgent.
 - **Test vrai iPhone chrome unifié** — après déploiement Netlify (orthogonal).
-- **Convergence audit/2026-mai ↔ main** — la branche audit reste divergée. Désormais avec les ports d'aujourd'hui (12 ADRs + AUDIT.md + libs/VERSIONS.md) la convergence est partiellement faite. Une décision globale reste à prendre (merger / cherry-pick / abandonner) mais ce n'est plus urgent.
+- **Chantier zéro-dette CodeQL résiduel** (~80 alertes) — optionnel.
+- **Label `v2-seuil-fragile`** — conservation / atténuation / alignement ? (Cat-B Track 4 chantier J reliquat).
+
+### Tonalité Grégoire (rappel CLAUDE.md global)
+
+- Profil HPI-TDA, sessions structurées 90 min max, **une décision principale par session**.
+- Pas de superlatifs gratuits, pas de critique performative.
+- Signaux d'épuisement : faim oubliée, irritabilité, doute, syndrome d'imposteur. **Si plusieurs convergent : proposer arrêt ou réduction du périmètre, pas plus d'analyse dense.**
+- L'AQPC dans 8 jours est une pression réelle mais sa keynote est prête. Ne pas amplifier l'urgence si Grégoire ne le fait pas lui-même.
 
 ---
 
