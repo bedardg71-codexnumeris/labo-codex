@@ -1835,13 +1835,13 @@ function changerSectionProfil(section) {
     // Générer l'aide Primo selon la section (popup au clic)
     let toggleInfo = '';
     if (section === 'cible') {
-        toggleInfo = `<span class="primo-aide" data-target="details-calculs-risque-${da}"><img src="icons/icons8-info.svg" alt="" class="btn-inline-icon"></span>`;
+        toggleInfo = `<span class="primo-aide" data-target="details-calculs-risque-${da}"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>`;
     } else if (section === 'performance') {
-        toggleInfo = `<span class="primo-aide" data-target="details-calculs-performance-${da}"><img src="icons/icons8-info.svg" alt="" class="btn-inline-icon"></span>`;
+        toggleInfo = `<span class="primo-aide" data-target="details-calculs-performance-${da}"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>`;
     } else if (section === 'mobilisation') {
-        toggleInfo = `<span class="primo-aide" data-target="details-calculs-mobilisation-${da}"><img src="icons/icons8-info.svg" alt="" class="btn-inline-icon"></span>`;
+        toggleInfo = `<span class="primo-aide" data-target="details-calculs-mobilisation-${da}"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>`;
     } else if (section === 'accompagnement') {
-        toggleInfo = `<span class="primo-aide" data-target="details-calculs-accompagnement-${da}"><img src="icons/icons8-info.svg" alt="" class="btn-inline-icon"></span>`;
+        toggleInfo = `<span class="primo-aide" data-target="details-calculs-accompagnement-${da}"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>`;
     }
 
     contenuContainer.innerHTML = `
@@ -2437,7 +2437,7 @@ function afficherProfilComplet(daOuEl) {
                 <div class="profil-contenu-header">
                     <h2 class="u-flex-between-mb20">
                         <span data-tooltip="${{'productions':'profil-productions','mobilisation':'profil-mobilisation','progression':'profil-progression','performance':'profil-habiletes','accompagnement':'profil-accompagnement','travaux':'profil-travaux','rapport':'profil-rapport'}[sectionAffichee] || ''}">${titreSection}</span>
-                        <span class="primo-aide" data-target="details-calculs-risque-${da}"><img src="icons/icons8-info.svg" alt="" class="btn-inline-icon"></span>
+                        <span class="primo-aide" data-target="details-calculs-risque-${da}"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
                     </h2>
                 </div>
                 <div class="profil-contenu-body">

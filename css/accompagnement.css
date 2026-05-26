@@ -429,16 +429,31 @@ nav [data-tooltip],
     display: block;
 }
 
-/* --- Icône info dans bouton aide (.btn-aide-icon) -------------------- */
-.btn-aide-icon {
+/* --- Icône info du système d'aide (.icone-info-aide) ------------------
+   Pattern Lot I/J : <span> + mask-image (SVG inliné base64 pour éviter
+   le blocage CORS du mask-image en file://). La couleur unique du
+   système d'aide (--acc-fond, #e8c43a jaune doré, identique sombre/clair
+   cf. palette-accompagnement.md) s'applique via background-color. */
+.icone-info-aide {
+    display: inline-block;
+    background-color: var(--acc-fond, #e8c43a);
+    -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNjQgNjQiIHdpZHRoPSI2NHB4IiBoZWlnaHQ9IjY0cHgiPjxwYXRoIGQ9Ik0zMiw2QzE3LjY0MSw2LDYsMTcuNjQxLDYsMzJjMCwxNC4zNTksMTEuNjQxLDI2LDI2LDI2czI2LTExLjY0MSwyNi0yNkM1OCwxNy42NDEsNDYuMzU5LDYsMzIsNnogTTMyLjAyMSwxNiBDMzMuNTU1LDE2LDM1LDE3LjM0NiwzNSwxOC45ODFDMzUsMjAuNzI3LDMzLjU1NSwyMiwzMi4wMjEsMjJDMzAuMjI1LDIyLDI5LDIwLjcyNywyOSwxOC45ODFDMjksMTcuMzQ2LDMwLjIyNSwxNiwzMi4wMjEsMTZ6IE0zOSw0N2gtNWgtNGgtNXYtM2w1LTFWMzBoLTR2LTNsOC0xdjE3bDUsMVY0N3oiLz48L3N2Zz4=");
+            mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNjQgNjQiIHdpZHRoPSI2NHB4IiBoZWlnaHQ9IjY0cHgiPjxwYXRoIGQ9Ik0zMiw2QzE3LjY0MSw2LDYsMTcuNjQxLDYsMzJjMCwxNC4zNTksMTEuNjQxLDI2LDI2LDI2czI2LTExLjY0MSwyNi0yNkM1OCwxNy42NDEsNDYuMzU5LDYsMzIsNnogTTMyLjAyMSwxNiBDMzMuNTU1LDE2LDM1LDE3LjM0NiwzNSwxOC45ODFDMzUsMjAuNzI3LDMzLjU1NSwyMiwzMi4wMjEsMjJDMzAuMjI1LDIyLDI5LDIwLjcyNywyOSwxOC45ODFDMjksMTcuMzQ2LDMwLjIyNSwxNiwzMi4wMjEsMTZ6IE0zOSw0N2gtNWgtNGgtNXYtM2w1LTFWMzBoLTR2LTNsOC0xdjE3bDUsMVY0N3oiLz48L3N2Zz4=");
+    -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+            mask-position: center;
+    -webkit-mask-size: contain;
+            mask-size: contain;
+    vertical-align: middle;
+}
+.icone-info-aide.taille-bouton {
     width: 20px;
     height: 20px;
-    object-fit: contain;
-    vertical-align: middle;
-    filter: brightness(0) invert(0.85);
 }
-.mode-clair .btn-aide-icon {
-    filter: brightness(0) invert(0.25);
+.icone-info-aide.taille-inline {
+    width: 16px;
+    height: 16px;
 }
 
 /* --- Bouton aide contextuelle (.btn-aide-contextuelle[data-aide]) ---- */
