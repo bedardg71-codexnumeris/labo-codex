@@ -280,14 +280,14 @@ nav [data-tooltip],
 }
 
 /* =================================================================
-   MODE POPUP — Primo + Aide contextuelle (✴️)
+   MODE POPUP — Primo + Aide contextuelle (icône info)
    Ex-primo-tooltips.js + aide-contextuelle.js
    ================================================================= */
 
 /* --- Icône Primo cliquable (.primo-aide[data-target]) --------------- */
-/* Taille calée sur .btn-aide-contextuelle pour éviter qu'un emoji rendu
-   en mode `color` (✴️) hérite de la line-height du <h2> parent et
-   apparaisse plus grand que les boutons voisins. */
+/* Taille calée sur .btn-aide-contextuelle pour cohérence visuelle entre
+   les déclencheurs Primo (spans avec icône SVG inline) et les boutons
+   d'aide contextuelle (btn-aide-contextuelle). */
 .primo-aide {
     cursor: pointer;
     font-size: 1.2rem;
