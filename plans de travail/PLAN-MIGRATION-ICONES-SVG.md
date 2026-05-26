@@ -111,7 +111,9 @@
 - **Validation** : ouvrir un étudiant qui possède des jetons de 3 types différents avec 0, 1 et 2+ utilisations respectives. Vérifier les 3 visuels sur Mac + iPad, modes sombre + clair. La classe `.jeton-icone` doit garder la même taille apparente (sinon ajuster CSS).
 - **Effort estimé** : 30-45 min une fois les SVG disponibles (le code change est trivial ; l'effort principal est conceptuel et visuel).
 
-### Lot F — Nettoyage zéro-dette des PNG `outils-*` legacy (15 fichiers)
+### Lot F — Nettoyage zéro-dette des PNG `outils-*` legacy (15 fichiers) ✅ LIVRÉ
+
+**Livré le 26 mai 2026** — commit `d41e25e` `chore(icons): retrait 15 PNG outils-* legacy non référencés`. 15 fichiers PNG retirés, 0 ligne de code touchée. Pas de bump (assets non chargés à runtime).
 
 - **Scope** : les 15 PNG `outils-*.png` de `icons/` qui ne sont plus référencés nulle part. Audit du 26 mai 2026 : aucune référence dans `js/`, `index.html`, `styles.css`, `docs/`, `Skills pour Claude Code/`, `plans de travail/`, ni dans `_archives/`.
 
@@ -202,7 +204,13 @@
 
 - **Effort estimé** : 30-45 min côté code une fois les SVG disponibles. Le temps réel du chantier est dans la conception graphique des 4 SVG.
 
-### Lot I — Bascule de la palette d'accompagnement orange → jaune (~30 variables CSS)
+### Lot I — Bascule de la palette d'accompagnement orange → jaune (~30 variables CSS) ✅ LIVRÉ
+
+**Livré le 26 mai 2026** — commits `9d70e07` `feat(theme): palette accompagnement orange → jaune doré #e8c43a (Lot I)` + bump 0526-0657, et `b4d926a` `fix(theme): flex-shrink:0 sur span.header-icon (Lot I, complément)`. Teinte finale : **`#e8c43a`** (doré chaud, identique aux deux thèmes).
+
+Scope étendu pendant la livraison : boutons header **aide** et **réglages** migrés de `<img class="header-icon">` vers `<span class="header-icon ico-X">` avec mask-image SVG inlinées en base64 (contournement CORS file:// pour WebKit en tests Playwright). Fix flex-shrink rendu obligatoire — les boutons header utilisent `display: inline-flex` avec content area étroit (32×32 − 24 padding = 6 px), les `<span>` étaient compressés à 6 px sans `flex-shrink: 0`. À retenir comme pattern pour toute migration `<img>` → `<span class+mask>` à venir.
+
+Référentiel visuel : `REFERENTIEL-COULEURS-JAUNE.html`.
 
 - **Scope** : redéfinition des ~30 variables `--acc-*` de la palette d'accompagnement (popups d'aide, tour guidé, blocs conseil/exemple/alerte, dots de progression). Définies dans `styles.css:264-302`, avec mention explicite `NE PAS REDÉFINIR DANS .mode-clair` — palette identique aux deux thèmes. **Scope étendu** : la teinte jaune retenue s'applique aussi aux icônes des boutons aide (icon-wordbook.svg) et réglages (icon-tune.svg) de l'entête (`btn-action-header` lignes 1117-1147, `header-icon` ligne 1150). Convention chromatique : tout ce qui est « assistance / configuration » devient jaune.
 
@@ -237,65 +245,61 @@
 
 - **Effort estimé** : 1 h 30 – 2 h (calibration + tests visuels + ajustements de contraste).
 
-### Lot J — Couleur d'accent navigation active (phase 1 : couleur unique)
+### Lot J — Couleurs d'identité par section de navigation ✅ LIVRÉ (phase 2 directe)
 
-- **Scope phase 1** : marquer visuellement l'élément de navigation actif (onglet, bouton de menu) par une **couleur unique** appliquée à l'icône SVG. Couleur retenue : orange `#e8923a` (la même que celle libérée par le Lot I).
+**Livré le 26 mai 2026** — commit `0384361` `feat(theme): Lot J phase 2 — 5 couleurs sections par multiply + jaune aide actif` + bump 0526-1045. La phase 1 (couleur unique orange) prévue initialement a été **sautée** au profit de la phase 2 directement, à la demande de Grégoire.
 
-- **Origine de la décision** : l'utilisateur cède aux flèches Précédent/Suivant du navigateur, ce qui désoriente le repérage dans la navigation interne. L'état actif actuel (variation d'opacité 0.15 → 0.30 sur fond translucide blanc, cf. `styles.css:1474`) est trop subtil pour servir de repère spatial après un retour navigateur. Une couleur d'accent forte sur l'icône résout ce problème.
+#### Convention chromatique finale (5 sections + jaune aide hérité du Lot I)
 
-- **Phase 2 envisagée plus tard** : 5 couleurs distinctes par grande section (Conception / Calendrier / Suivi / Évaluation / Labo) pour transformer la couleur en double signal (« actif » ET « tu es dans cette section »). Pas dans le scope du chantier actuel — à concevoir une fois la phase 1 livrée et la palette mûre. Cf. [[project-palette-couleurs-contraintes]] pour les contraintes (SOM/STD/SPE/DEN libérables, IDME = palette utilisateur).
+| Section | Hex | Variable CSS | Sémantique |
+|---|---|---|---|
+| Conception | `#ff6f00` | `--section-conception` | Chantier, construction (proche du jaune Lot I) |
+| Calendrier | `#34c759` | `--section-calendrier` | Calendrier officiel, conformité |
+| Suivi | `#22d3ee` | `--section-suivi` | Primaire, distinct, nette |
+| Évaluations | `#38bdf8` | `--section-evaluations` | Stabilité, observation |
+| Labo | `#c084fc` | `--section-labo` | Funky, expérimental |
 
-- **Approche technique retenue** : **`mask-image` CSS** (validée le 26 mai 2026 — éprouvée dans `REFERENTIEL-COULEURS-JAUNE.html`). Pattern : `<span class="header-icon ico-{nom}"></span>` avec CSS `mask-image: url('icons/icon-{nom}.svg')` + `background-color: white` au repos, `background-color: var(--nav-actif)` quand `.actif`. Avantages : aucune modification des SVG, couleur exacte, modification HTML circonscrite, prépare la phase 2 (5 couleurs par section) trivialement.
+**Accueil et Aperçu** (sections plates sans sous-nav) **ne reçoivent PAS de couleur** — leur signal d'activation reste l'opacité du fond du bouton seul. La couleur dit donc à la fois « actif » ET « cette section a une profondeur de navigation ».
 
-- **Sites code à modifier** :
-  - **Nouvelle variable CSS** `--nav-actif: #e8923a` à définir **hors `:root` et hors `.mode-clair`** pour rester identique aux deux thèmes (suivre le modèle `--acc-*`, ligne 261 : `NE PAS REDÉFINIR DANS .mode-clair`).
-  - **`index.html`** : remplacer les `<img src="icons/icon-X.svg" class="nav-icon">` par `<span class="nav-icon ico-X"></span>` sur les boutons de nav principale, sous-nav, et entête utilitaire (boutons aide + réglages déjà concernés par Lot I avec couleur jaune au lieu d'orange).
-  - **`styles.css:1474`** (`.navigation-principale button.actif`) : retirer la variation d'opacité du fond blanc, garder le fond translucide repos, le signal vient désormais de l'icône.
-  - **`styles.css:1539`** (`.sous-navigation button.actif`) : idem.
-  - **`styles.css:1480-1486`** (`.navigation-principale button .nav-icon`) et **`styles.css:1495-1504`** (`.nav-icone`) : refonte du CSS pour basculer du pattern `<img>` + `filter` vers `<span>` + `mask-image` + `background-color`. Pattern type :
-    ```css
-    .nav-icon {
-      width: 22px;
-      height: 22px;
-      display: inline-block;
-      background-color: white;
-      -webkit-mask-size: contain;  mask-size: contain;
-      -webkit-mask-repeat: no-repeat;  mask-repeat: no-repeat;
-      -webkit-mask-position: center;  mask-position: center;
-    }
-    .ico-pencil   { -webkit-mask-image: url('icons/icon-pencil.svg');   mask-image: url('icons/icon-pencil.svg'); }
-    .ico-calendar { -webkit-mask-image: url('icons/icon-calendar.svg'); mask-image: url('icons/icon-calendar.svg'); }
-    /* ... une classe par icône nav ... */
-    .navigation-principale button.actif .nav-icon { background-color: var(--nav-actif); }
-    .sous-navigation button.actif .nav-icon { background-color: var(--nav-actif); }
-    ```
+#### Technique CSS retenue
 
-- **Pré-requis** :
-  - **Lot I terminé** : palette accompagnement bascule vers jaune, l'orange `#e8923a` est libéré.
-  - **Inventaire des icônes nav** : lister les SVG actuellement utilisés par la nav principale, la sous-nav et l'entête utilitaire (probablement 5-10 SVG distincts). Chaque SVG aura sa classe CSS dédiée (`.ico-X`).
-  - Aucun pré-requis sur le contenu des SVG : le `mask-image` ignore les couleurs internes, tout SVG monochrome fonctionne tel quel.
+`background-blend-mode: multiply` sur **deux couches** de `background` :
+1. Couche supérieure : couleur de section en opaque (`linear-gradient(rgba(R,G,B,1), rgba(R,G,B,1))`)
+2. Couche inférieure : couleur médiane du bandeau, unie pour éviter une cassure de gradient (`linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane))`)
 
-- **Migration** :
-  1. Ajouter `--nav-actif: #e8923a` dans `styles.css` (hors `:root` / `.mode-clair`).
-  2. Identifier toutes les icônes nav utilisées (grep `<img src="icons/.*\.svg".*nav-icon\|header-icon`).
-  3. Créer les classes CSS `.ico-X` correspondantes dans `styles.css` (une par icône, avec `mask-image`).
-  4. Modifier `index.html` : remplacer chaque `<img>` nav par `<span class="nav-icon ico-X"></span>`.
-  5. Modifier `.navigation-principale button.actif` et `.sous-navigation button.actif` pour appliquer `background-color: var(--nav-actif)` au descendant `.nav-icon`.
-  6. Retirer les `filter: brightness(0) invert(1)` devenus inutiles.
-  7. Tester l'effet visuel : icône blanche au repos, icône orange quand l'onglet est actif. Conteneur (fond du bouton) reste neutre transparent.
+La variable `--bg-bandeau-mediane` est `#133248` en mode sombre, redéfinie à `#09264b` dans `.mode-clair`. Le bandeau parent garde son **vrai gradient** intact tout autour ; le bouton actif est uniforme à l'intérieur (la couche bandeau est unie, pas un gradient désaligné).
 
-- **Validation** :
-  - Visuel Mac (Chrome + Safari) + iPad, modes sombre + clair.
-  - Naviguer entre les sections principales : confirmer que l'icône active est immédiatement repérable, qu'elle ne se confond pas avec un hover.
-  - Naviguer entre sous-sections d'une section : confirmer que la sous-nav active suit la même convention (icône orange).
-  - Tester un retour Précédent navigateur : confirmer que l'orange persiste sur l'élément actif après le retour (devrait, puisque c'est CSS pur basé sur la classe `.actif` posée par `navigation.js`).
-  - Vérifier qu'aucun autre élément de l'UI ne se retrouve avec une icône orange parasite (l'orange est désormais réservé au signal d'activation nav).
-  - Tests Vitest + Playwright (103/103 attendu — pas de régression sur les autres comportements).
+Bordure + icône SVG + label texte sont aussi colorés (signal multi-élément) — fond multiply seul donnerait un voile trop subtil.
 
-- **Risque** : faible. CSS isolé, pas de logique JS modifiée, classe `.actif` déjà posée par la nav existante.
-  - **Risque résiduel** : si certains SVG nav ont des `fill="..."` codés en dur (pas `currentColor`), il faudra les éditer un par un. Audit préalable nécessaire.
+#### Sites code modifiés
 
-- **Effort estimé** : 30-45 min de code une fois Lot I livré et les SVG nav vérifiés en `currentColor`. Temps de validation visuelle ~30 min.
+- **`styles.css`** :root (lignes ~308-326) : 5 variables `--section-X` + `--bg-bandeau-mediane`.
+- **`styles.css`** `.mode-clair` (lignes ~443-444) : override `--bg-bandeau-mediane: #09264b`.
+- **`styles.css:1574-1620`** : 5 règles multiply nav principale par `data-onglet` + icône + label.
+- **`styles.css:1690-1735`** : 5 règles multiply sous-nav (par classe `section-X` sur conteneur).
+- **`styles.css:1148-1163`** : règle multiply jaune sur `.btn-action-header[data-param="aide"|"reglages"].actif`.
+- **`styles.css:20240-20278`** : 5 overrides mode clair nav principale (spécif 0,4,1 pour battre `.mode-clair .navigation-principale button.actif` qui posait `#0a4a7e`).
+- **`styles.css:20379-20420`** : 5 overrides mode clair sous-nav.
+- **`js/navigation.js:90-93`** : gestion classe `.actif` sur boutons header aide/réglages (autorisée par Grégoire malgré la protection CLAUDE.md).
+- **`js/navigation.js:377`** : ajout classe `section-${nomOnglet}` au conteneur `.sous-navigation` pour permettre la coloration de la sous-nav par section parente.
+
+#### Limites connues et documentées
+
+- **Daltonisme** : Suivi `#22d3ee` et Évaluations `#38bdf8` sont quasi-indistinguables en protanopie/tritanopie (ΔE résiduel 1.0, ΔE76 22.2 en vision normale). **Mitigé par le label texte toujours visible** sous l'icône — WCAG 1.4.1 conforme par double signal. Si on retire un jour le label texte de la nav (mode très compact), ce conflit redevient bloquant.
+- **Conflit hex DS** : `--section-calendrier #34c759` match exact avec `--vert-succes` (alertes). Lecture par contexte (nav vs alerte). Bascule disponible vers `#16a34a` (vert plus profond, AA large) si confusion utilisateur signalée. Aussi : `--section-conception #ff6f00` match `--som-orange` (SOM décoratif, acceptable).
+
+#### Variable `--nav-actif` (phase 1 jamais utilisée)
+
+La variable `--nav-actif: #e8923a` reste définie dans `styles.css` à la mémoire de la phase 1 initialement prévue mais jamais déployée. Aucune règle CSS ne l'utilise. **Candidate à un futur cleanup zéro-dette** (cf. principe CLAUDE.md).
+
+#### Documentation produite
+
+- **Audit chromatique** : `plans de travail/AUDIT-COULEURS-SECTIONS.md` (calculs WCAG 2.1, ΔE76, daltonisme, conflits DS, verdicts par section). Script source `/tmp/audit-couleurs.py` (transient, non versionné).
+- **Référentiel visuel** : `plans de travail/REFERENTIEL-COULEURS-SECTIONS.html` (comparatif palettes, variantes hex, test cohérence multi-thèmes, comparatif blend modes).
+- **Design system** : `design-system.html` §1 (palette des 5 couleurs + jaune assistance) + §8 (convention bouton actif par section avec snippet CSS).
+- **Mémoire** : `memory/project-palette-couleurs-contraintes.md` mis à jour avec conventions tranchées, conflits hex, limites daltonisme.
+
+Tests : 103/103 verts (85 Vitest + 18 Playwright). Aucune régression.
 
 ## 4. Méthodologie et garde-fous
 
@@ -316,12 +320,14 @@
 
 ## 5. Ordre recommandé
 
-**Lot F (nettoyage) → Lot I (palette aide → jaune) → Lot J (nav active orange) → Lot A → Lot B → Lot D (décision) → Lot C → Lot E (jetons) → Lot H (SOLO) → Lot G**
+**État au 26 mai 2026 fin de journée** : Lots F, I, J ✅ livrés. Reste à faire : A, B, D, C, E, H, G.
+
+**Ordre restant** : **Lot A → Lot B → Lot D (décision) → Lot C → Lot E (jetons) → Lot H (SOLO) → Lot G**
 
 Justification :
-- **F en tout premier** : 15-20 min, suppression de 15 PNG legacy non référencés. Aucun risque, aucun mapping. Démarre le cycle par une réduction nette de la dette dans `icons/` avant d'y ajouter des fichiers.
-- **I en deuxième** : bascule palette d'aide orange → jaune. Pré-requis du Lot J (libère l'orange comme couleur d'accent nav). Doit précéder J pour éviter le double sens orange.
-- **J en troisième** : couleur d'accent nav active (orange unique). Gros impact visuel sur le repérage. Préférable de l'avoir tôt dans le cycle pour que les migrations d'icônes ultérieures (A, B) bénéficient déjà du nouveau pattern `currentColor`.
+- ~~**F en tout premier**~~ ✅ livré.
+- ~~**I en deuxième**~~ ✅ livré (bascule jaune `#e8c43a` validée).
+- ~~**J en troisième**~~ ✅ livré (phase 2 directe : 5 couleurs sections via multiply).
 - **A** : 76 sites visibles, 1 seul mapping, gros impact visuel rapide. Permet de valider la méthodologie sur un cas simple. Le SVG `icon-info.svg` est **déjà présent** dans `icons/` — prérequis levé.
 - **B** : illustrations de sections, ~30 sites, mappings multiples mais SVG majoritairement déjà présents.
 - **D avant C** : trancher la question des pastilles avant de toucher aux notifications (le mapping de 🟢🟡🔴🟠 pourrait influencer le design des toasts).
@@ -329,39 +335,61 @@ Justification :
 - **E et H** : visuels métier ad hoc (jetons + SOLO). Dépendent de visuels à concevoir par Grégoire. Peuvent se faire en parallèle des autres lots dès que les SVG sont disponibles. **E avant H** par convention alphabétique seulement — l'ordre réel dépend de quelle conception graphique Grégoire termine en premier.
 - **G à la fin** : nettoyage final des emojis résiduels.
 
+**Apprentissages des Lots F + I + J transférables aux suivants** :
+- Le pattern `<span class>` + `mask-image` SVG inlinés en base64 (Lot I) marche bien et contourne CORS file:// sur WebKit.
+- `flex-shrink: 0` obligatoire sur les span dans un parent flex avec content area étroit (Lot I fix).
+- `background-blend-mode: multiply` avec couches uniformes (Lot J) donne un signal visuel fort sans écraser le contenu (icône, texte) et préserve le gradient du bandeau parent.
+- Spécificité CSS attention aux overrides `.mode-clair .navigation-principale button.actif` (0,3,1) — il faut systématiquement doubler les règles spécifiques en mode clair pour préserver les overrides par section.
+
 ## 6. Estimation totale
 
-- **Lot F** : 15-20 min (nettoyage zéro-dette PNG legacy)
-- **Lot I** : 1 h 30 – 2 h (bascule palette aide orange → jaune)
-- **Lot J** : 30-45 min (couleur d'accent nav active, phase 1)
-- **Lot A** : 45 min
-- **Lot B** : 1 h
-- **Lot C** : 2 h (incluant refactor API si retenu)
-- **Lot D** : 30 min (décision + migration éventuelle)
-- **Lot E** : 30-45 min (jetons, hors temps de conception des SVG)
-- **Lot H** : 30-45 min (tampons SOLO, hors temps de conception des 4 SVG)
-- **Lot G** : 1-2 h
+| Lot | Statut | Effort |
+|---|---|---|
+| **F** | ✅ livré | 15 min effectif |
+| **I** | ✅ livré | ~2 h effectif (calibration + fix flex-shrink) |
+| **J** | ✅ livré | ~4 h effectif (au lieu de 30-45 min — itérations design avec Grégoire, audit, référentiel) |
+| A | à faire | 45 min |
+| B | à faire | 1 h |
+| C | à faire | 2 h (avec refactor API) |
+| D | à faire | 30 min (décision + migration) |
+| E | à faire | 30-45 min (hors conception SVG) |
+| H | à faire | 30-45 min (hors conception SVG) |
+| G | à faire | 1-2 h |
 
-**Total : 9-10 h** réparties sur 4-6 sessions selon l'énergie disponible. Le temps de conception graphique des SVG des Lots E et H s'ajoute en dehors du codage. La phase 2 du Lot J (5 couleurs par grande section) est hors scope du chantier actuel et sera estimée séparément.
+**Reste à faire : ~6 h 30 – 7 h 30** réparties sur 3-5 sessions. La conception graphique des SVG des Lots E et H s'ajoute en dehors du codage.
 
-## 7. Décisions Grégoire pendantes (avant de démarrer)
+## 7. Décisions Grégoire pendantes
 
-1. **SVG icon-info pour ✴** : style à choisir parmi icons8 (Material Outlined / Sharp / Filled / Color). Recommander le style cohérent avec les SVG déjà présents (probablement Material Outlined). **NOTE 26 mai 2026** : `icon-info.svg` est déjà présent dans `icons/` — vérifier qu'il convient ou le remplacer avant de démarrer le Lot A.
-2. **API notifications** : modifier pour accepter un `type` qui détermine l'icône (refactor) ou continuer à injecter des emojis dans le message ?
+**Tranchées 26 mai 2026** :
+- ~~#9 Teinte de jaune (Lot I)~~ → **`#e8c43a` doré chaud**, validé via `REFERENTIEL-COULEURS-JAUNE.html`.
+- ~~#10 Approche technique coloration SVG nav (Lot J)~~ → **`mask-image` CSS** (avec SVG inlinés base64 pour contourner CORS file:// WebKit).
+- ~~#11 Phase 2 Lot J~~ → **Phase 2 directement livrée** (saut de la phase 1). 5 couleurs par section via `background-blend-mode: multiply`. Voir `AUDIT-COULEURS-SECTIONS.md`.
+- ~~#6 Lot F suppression PNG legacy~~ → **Feu vert donné après audit confirmatoire**, livré commit `d41e25e`.
+
+**Encore pendantes** :
+1. **SVG icon-info pour ✴ (Lot A)** : `icon-info.svg` déjà présent dans `icons/` — vérifier qu'il convient ou le remplacer avant de démarrer.
+2. **API notifications (Lot C)** : modifier pour accepter un paramètre `type` qui détermine l'icône (refactor) ou continuer à injecter des emojis dans le message ?
 3. **Pastilles colorées (Lot D)** : conserver les emojis, passer à `●` Unicode, ou SVG ?
 4. **Emojis dans le contenu pédagogique des popups d'aide** : migrer aussi ou laisser ?
-5. **Forme des SVG jetons (Lot E)** : 3 SVG distincts (`icon-jeton-frais.svg`, `icon-jeton-partiel.svg`, `icon-jeton-sature.svg`) ou 1 SVG paramétrique avec 3 classes CSS qui activent les segments ?
-6. **Lot F — suppression des 15 PNG `outils-*` legacy** : feu vert pour la suppression nette après l'audit confirmatoire de l'Étape 1, ou conservation temporaire pour validation manuelle d'abord ?
+5. **Forme des SVG jetons (Lot E)** : 3 SVG distincts (`icon-jeton-frais.svg`, `icon-jeton-partiel.svg`, `icon-jeton-sature.svg`) ou 1 SVG paramétrique avec 3 classes CSS ?
 7. **Style des SVG tampons SOLO (Lot H)** : concevoir un style **ré-applicable** aux autres catégories d'autocollants (Action 6 + Observations 12 + legacy) pour préparer une transition globale vers SVG, ou rester strictement dans le scope SOLO ?
 8. **Lot H — repli PNG haute densité si rendu canvas SVG insuffisant sur iPad Air** : feu vert sur ce repli s'il s'avère nécessaire après tests, ou décision à reprendre à ce moment-là ?
-9. ~~**Teinte de jaune cible pour la palette d'aide (Lot I)**~~ → **Tranché 26 mai 2026 : `#e8c43a` (doré chaud)** après comparaison visuelle dans `REFERENTIEL-COULEURS-JAUNE.html`.
-10. ~~**Approche technique de coloration des icônes SVG nav actives (Lot J)**~~ → **Tranché 26 mai 2026 : `mask-image` CSS** (option (d), validée après démonstration dans `REFERENTIEL-COULEURS-JAUNE.html`). L'option (a) `currentColor` initialement recommandée a été écartée car elle exige du SVG inline (`<svg>` direct dans le HTML), incompatible avec les `<img src>` actuels.
-11. **Phase 2 du Lot J — 5 couleurs par grande section (Conception/Calendrier/Suivi/Évaluation/Labo)** : à acter comme item de backlog dédié pour traitement post-cycle actuel ? La phase 1 (orange unique) est suffisante pour livrer une amélioration utile du repérage spatial.
 
 ## 8. Liens
 
 - **Cartographie initiale** : session Claude du 26 mai 2026 matin.
 - **Capture déclencheuse** : `iPad 26 mai 05:15` (section Préparer et importer).
 - **Item BACKLOG** : à créer (#286 ou suivant disponible) référençant ce plan.
-- **Design system** : `design-system.html` — à mettre à jour à chaque lot.
+- **Design system** : `design-system.html` §1 (palette) + §8 (navigation) — à mettre à jour à chaque lot. **Mis à jour 26 mai 2026 pour Lots I et J.**
+- **Référentiels visuels** : `plans de travail/REFERENTIEL-COULEURS-JAUNE.html` (Lot I), `plans de travail/REFERENTIEL-COULEURS-SECTIONS.html` (Lot J).
+- **Audit chromatique** : `plans de travail/AUDIT-COULEURS-SECTIONS.md` (Lot J — WCAG, ΔE76, daltonisme).
+- **Mémoire conventions chromatiques** : `memory/project-palette-couleurs-contraintes.md`.
 - **Crédit Icons8** : `index.html:9868` déjà inscrit.
+
+## 9. Historique des livraisons
+
+| Date | Lot | Commit | Note |
+|---|---|---|---|
+| 26 mai 2026 | **F** | `d41e25e` | Retrait 15 PNG `outils-*` legacy. Pas de bump. |
+| 26 mai 2026 | **I** | `9d70e07` + `b4d926a` | Bascule palette aide orange → jaune `#e8c43a`. Bump 0526-0657. |
+| 26 mai 2026 | **J phase 2** | `0384361` | 5 couleurs sections via multiply + jaune aide actif. Bump 0526-1045. |
