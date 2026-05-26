@@ -4597,8 +4597,22 @@ function genererSectionTravaux(da) {
         return '<p class="texte-muted">Module Travaux non disponible</p>';
     }
 
-    const fichiers = travauxStockage.obtenirFichiersEtudiant(da);
+    const fichiersAll = travauxStockage.obtenirFichiersEtudiant(da);
     const productions = obtenirDonneesSelonMode('productions');
+
+    // Filtrer les originaux remplacés par une reprise : ne montrer que la reprise active.
+    // Sans ce filtre, l'enseignant voit 2 vignettes par production reprise (original + reprise),
+    // ce qui crée de la confusion et complique le clic vers « Annoter et évaluer ».
+    // Bug rapporté 21 mai 2026 (BUG_grégoire_2026-05-21_13-15-45).
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    const evalParId = {};
+    evaluations.forEach(function(e) { evalParId[e.id] = e; });
+    const fichiers = fichiersAll.filter(function(f) {
+        if (!f.evaluationId) return true;
+        const e = evalParId[f.evaluationId];
+        if (!e) return true;
+        return !e.remplaceeParId;
+    });
 
     if (fichiers.length === 0) {
         return `
