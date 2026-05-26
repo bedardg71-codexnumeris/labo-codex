@@ -1739,7 +1739,7 @@ async function afficherToutesLesProductionsParType() {
                         ` : ''}
                         ${prod.objectif || prod.tache ? `
                             <div class="production-compact-meta u-mt-6">
-                                ${prod.objectif ? `✴️ ${echapperHtml(prod.objectif)}` : ''}
+                                ${prod.objectif ? `<img src="icons/icons8-info.svg" alt="" class="btn-inline-icon"> ${echapperHtml(prod.objectif)}` : ''}
                                 ${prod.objectif && prod.tache ? ' • ' : ''}
                                 ${prod.tache ? `✏️ ${echapperHtml(prod.tache)}` : ''}
                             </div>

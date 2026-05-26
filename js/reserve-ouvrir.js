@@ -800,7 +800,7 @@ function _construirePanneauContenu(contenu, anonymiser) {
         '<div style="border: 1px solid var(--bordure-douce); border-radius: var(--radius-moyen); padding: 10px 12px; background: var(--bleu-tres-pale);">' +
             '<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px;">' +
                 '<strong style="font-size: 0.9rem;">Contenu de l’archive</strong>' +
-                '<button class="btn-aide-contextuelle" data-aide="reserve-contenu-versement" data-stop aria-label="Aide : contenu de l’archive">&#x2734;&#xFE0F;</button>' +
+                '<button class="btn-aide-contextuelle" data-aide="reserve-contenu-versement" data-stop aria-label="Aide : contenu de l’archive"><img src="icons/icons8-info.svg" alt="" class="btn-aide-icon"></button>' +
             '</div>' +
             '<div style="font-size: 0.85rem;">' + htmlStats + '</div>' +
             htmlListeEtudiants +

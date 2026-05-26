@@ -673,7 +673,7 @@
                 '<button ' + fermerAttr + ' class="modal-js-btn-fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>' +
                 '<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">' +
                     '<h2 style="margin: 0; color: var(--accent-primaire);">' + config.titre + '</h2>' +
-                    '<button class="btn-aide-contextuelle" data-aide="bibliotheque-fonctionnement" title="Comment fonctionne la bibliothèque">✴️</button>' +
+                    '<button class="btn-aide-contextuelle" data-aide="bibliotheque-fonctionnement" title="Comment fonctionne la bibliothèque"><img src="icons/icons8-info.svg" alt="" class="btn-aide-icon"></button>' +
                 '</div>' +
                 '<p style="color: var(--gris-clair); margin-bottom: 20px;">' + config.sousTitre + '</p>' +
 

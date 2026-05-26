@@ -753,7 +753,7 @@ function initialiserAutoReveal() {
 }
 
 // ============================================================================
-// MODE POPUP — modale riche au clic sur ✴️ (fusion primo-tooltips + aide-contextuelle)
+// MODE POPUP — modale riche au clic sur l'icône info (fusion primo-tooltips + aide-contextuelle)
 // ============================================================================
 
 let popupListenersAttaches = false;
@@ -843,7 +843,7 @@ function afficherAideContextuelle(cleAide) {
 
     modal.innerHTML = `
         <div class="primo-popup-header">
-            <span id="aide-ctx-titre" class="primo-popup-titre">✴️ ${aide.titre}</span>
+            <span id="aide-ctx-titre" class="primo-popup-titre"><img src="icons/icons8-info.svg" alt="" class="btn-inline-icon"> </span>
             <button class="primo-popup-fermer" data-action="fermerAideContextuelle" aria-label="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
         </div>
         <div class="primo-popup-body aide-contextuelle-body">
@@ -894,7 +894,7 @@ function afficherPopupPrimo(contentHTML) {
 
     popup.innerHTML = `
         <div class="primo-popup-header">
-            <span><span class="primo-icon">✴️</span> Conseil</span>
+            <span><span class="primo-icon"><img src="icons/icons8-info.svg" alt="" class="btn-inline-icon"></span> Conseil</span>
             <button class="primo-popup-close" data-action="fermerPopupPrimo"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
         </div>
         <div class="primo-popup-body">
@@ -1061,7 +1061,7 @@ const ETAPES_TOUR = [
     {
         id: 1,
         titre: 'R\u00e9glages',
-        texte: "C'est ici que tu poses les fondations\u00a0: ton trimestre (dates, cong\u00e9s), ton cours (comp\u00e9tence, \u00e9l\u00e9ments), ton groupe d'\u00e9tudiant\u00b7es et ton horaire. Ce sont les m\u00eames informations que dans ton plan de cours. Tu les saisis une fois et l'application g\u00e9n\u00e8re automatiquement le calendrier de tes s\u00e9ances.\n\nLes ic\u00f4nes \u2734\ufe0f t'en disent plus sur chaque section. Quand ton groupe-cours est assembl\u00e9, tu es pr\u00eat\u00b7e pour la suite.",
+        texte: "C'est ici que tu poses les fondations\u00a0: ton trimestre (dates, cong\u00e9s), ton cours (comp\u00e9tence, \u00e9l\u00e9ments), ton groupe d'\u00e9tudiant\u00b7es et ton horaire. Ce sont les m\u00eames informations que dans ton plan de cours. Tu les saisis une fois et l'application g\u00e9n\u00e8re automatiquement le calendrier de tes s\u00e9ances.\n\nLes ic\u00f4nes d'info t'en disent plus sur chaque section. Quand ton groupe-cours est assembl\u00e9, tu es pr\u00eat\u00b7e pour la suite.",
         actions: [
             { label: "J'ai compris",      type: 'primaire', action: 'avancerEtape' },
             { label: 'Passer cette \u00e9tape', type: 'secondaire', action: 'passerEtape' }
