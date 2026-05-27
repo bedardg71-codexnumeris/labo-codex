@@ -2038,9 +2038,28 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
                 .map(function(c) { return c.nom; });
         }
     }
-    var sousTitreMulti = nomsMulti.length > 0
-        ? '<div style="color: var(--texte-muted); font-size: 0.8rem; margin-bottom: 4px;">Critères multistructurels surveillés : ' + echapperHtml(nomsMulti.join(', ')) + '</div>'
+    var libelleMulti = nomsMulti.length > 0
+        ? 'Critères multistructurels surveillés : ' + echapperHtml(nomsMulti.join(', '))
         : '';
+    // Sous-titre + 2 micro-actions (édition critères, choix grille dépistage).
+    // Toujours rendu : si pas de critères, le libellé est vide mais les boutons restent accessibles.
+    var barreActionsSolo = `
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 4px; flex-wrap: wrap;">
+            <div style="color: var(--texte-muted); font-size: 0.8rem; flex: 1; min-width: 0;">${libelleMulti}</div>
+            <div style="display: flex; gap: 6px; flex-shrink: 0;">
+                <button type="button" class="btn btn-secondaire btn-tres-compact"
+                        data-action="naviguerVers" data-param="conception" data-param2="grille-criteres"
+                        title="Modifier les critères et leurs niveaux SOLO">
+                    <img src="icons/icon-edit.svg" alt="" class="btn-inline-icon"> Critères
+                </button>
+                <button type="button" class="btn btn-secondaire btn-tres-compact"
+                        data-action="ouvrirReferenceSoloAccompagnement"
+                        title="Choisir la grille de critères pour le dépistage SOLO">
+                    <img src="icons/icon-tune.svg" alt="" class="btn-inline-icon"> Préférences
+                </button>
+            </div>
+        </div>
+    `;
     // 🆕 BETA 95.6 : Gérer le cas où tous les étudiants sont sans données
     const nbAvecDonnees = (afficherPan ? etudiantsPAN.length : etudiantsSOM.length) || 0;
     const tousEnAttente = nbTotal > 0 && nbAvecDonnees === 0;
@@ -2049,7 +2068,7 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
         return `
             <div class="distribution-container u-mb-15">
                 <h4 class="tb-titre-metrique" data-tooltip="tdb-patterns">Structure des apprentissages fondamentaux (SOLO)</h4>
-                ${sousTitreMulti}
+                ${barreActionsSolo}
                 <div class="tb-texte-description" style="color: var(--texte-muted); font-style: italic;">
                     En attente de données pour ${nbTotal} étudiant${nbTotal > 1 ? 's' : ''}.
                 </div>
@@ -2243,7 +2262,7 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
     return `
         <div class="distribution-container u-mb-15">
             <h4 class="tb-titre-metrique" style="margin-bottom: 4px;" data-tooltip="tdb-patterns">Structure des apprentissages fondamentaux (SOLO)</h4>
-            ${sousTitreMulti}
+            ${barreActionsSolo}
             ${messageFiabilite}
             <div class="barre-patterns tb-barre-simple">
                 <div class="barre-patterns-overlay"></div>
@@ -3109,12 +3128,38 @@ function togglerCritereTrajectoires(el) {
     }
 }
 
+/**
+ * Ouvre Labo › Outils d'observation, déplie l'accordéon SOLO si fermé,
+ * et fait défiler vers le select « Grille de critères pour le dépistage ».
+ * Wrapper appelé depuis les boutons sous la barre patterns (genererBarrePatterns).
+ */
+function ouvrirReferenceSoloAccompagnement() {
+    if (typeof naviguerVers === 'function') {
+        naviguerVers('labo', 'accompagnement');
+    }
+    // Laisser le DOM se peindre (afficherSousSection + restauration accordéons)
+    setTimeout(function() {
+        var accordeon = document.getElementById('accordeon-acc-solo');
+        if (accordeon && accordeon.classList.contains('ferme')) {
+            var header = accordeon.querySelector('.accordeon-header');
+            if (header && typeof toggleAccordeonV2 === 'function') {
+                toggleAccordeonV2(header);
+            }
+        }
+        var select = document.getElementById('v2-pref-grille-reference');
+        if (select && typeof select.scrollIntoView === 'function') {
+            select.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, 80);
+}
+
 /* ===============================
    📤 EXPORTS GLOBAUX
    =============================== */
 
 // Export pour permettre le rafraîchissement depuis d'autres modules
 window.tbNavigerVersProfil = tbNavigerVersProfil;
+window.ouvrirReferenceSoloAccompagnement = ouvrirReferenceSoloAccompagnement;
 window.chargerTableauBordApercu = chargerTableauBordApercu;
 window.initialiserModuleTableauBordApercu = initialiserModuleTableauBordApercu;
 window.appliquerCouleursEtudiantsSuivis = appliquerCouleursEtudiantsSuivis;
