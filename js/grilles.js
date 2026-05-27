@@ -2110,6 +2110,20 @@ window.ajouterMesGrillesALaBibliotheque = ajouterMesGrillesALaBibliotheque;
    Layout 2 colonnes - Stubs minimaux
    =============================== */
 
+/**
+ * Génère le badge « Dépistage » si la grille est celle configurée comme
+ * référence pour le dépistage SOLO (preferences.grilleReferenceDepistage).
+ * Rendu vide sinon.
+ */
+function genererBadgeGrilleDepistage(grille) {
+    if (!grille || !grille.id) return '';
+    var refId = (typeof obtenirPreference === 'function')
+        ? obtenirPreference('grilleReferenceDepistage')
+        : '';
+    if (!refId || grille.id !== refId) return '';
+    return '<span class="badge-grille-depistage" title="Grille utilisée pour le dépistage SOLO (configurée dans Labo › Outils d’observation)">Dépistage</span>';
+}
+
 async function afficherListeGrilles() {
     const grilles = await db.get('grillesTemplates') || [];
     const container = document.getElementById('sidebarListeGrilles');
@@ -2143,10 +2157,11 @@ async function afficherListeGrilles() {
         const badgesPratiques = typeof GabaritsUtils !== 'undefined'
             ? GabaritsUtils.genererBadgesPratiques(grille)
             : '';
+        const badgeDepistage = genererBadgeGrilleDepistage(grille);
         return `
             <div class="sidebar-item" data-id="${grille.id}" data-action="chargerGrillePourModif" data-param="${grille.id}">
                 <div class="sidebar-item-titre">${echapperHtml(nomGrille)}</div>
-                <div class="sidebar-item-badges">${badgesPratiques} <span class="badge-caracteristique">${nbCriteres} critères</span></div>
+                <div class="sidebar-item-badges">${badgesPratiques}${badgeDepistage} <span class="badge-caracteristique">${nbCriteres} critères</span></div>
             </div>
         `;
     }).join('');
@@ -2206,7 +2221,7 @@ async function preparerDonneesBibliothequeGrilles() {
                 nom: BibliothequeUI.formaterTitreDemo(grille.nom || 'Sans titre', BibliothequeUI.estItemDemo(grille)),
                 id: grille.id,
                 badgeSource: BibliothequeUI.genererBadgeSource(grille, grillesDansBibliotheque),
-                badgesPratiques: typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(grille) : '',
+                badgesPratiques: (typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(grille) : '') + genererBadgeGrilleDepistage(grille),
                 metadonnees: BibliothequeUI.formaterMetadonnees(grille, {
                     quantite: `${grille.criteres?.length || 0} critère(s)`,
                     discipline: true
