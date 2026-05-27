@@ -1988,6 +1988,8 @@ span.header-icon {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
     cursor: pointer;
     user-select: none;
     margin: -20px -20px 0 -20px;
@@ -2001,6 +2003,8 @@ span.header-icon {
     background: none;
     margin: 0;
     padding: 0;
+    min-width: 0;
+    flex: 1 1 auto;
 }
 
 .carte.accordeon .accordeon-header .btn {
@@ -3158,6 +3162,20 @@ input[type="number"].controle-form {
     height: 18px;
     vertical-align: -3px;
     margin-right: 6px;
+}
+
+/* Navigation date dans saisie des présences : contraste suffisant sur le fond
+   sombre de la carte Enregistrement (le bleu marine de btn-principal se fondait
+   dans le fond --surface-carte) */
+#btn-cours-precedent,
+#btn-cours-suivant {
+    background: var(--accent-primaire);
+    color: var(--surface-carte);
+}
+#btn-cours-precedent:hover:not(:disabled),
+#btn-cours-suivant:hover:not(:disabled) {
+    background: var(--accent-primaire-hover, var(--accent-primaire));
+    filter: brightness(1.1);
 }
 
 .alerte-attention {
