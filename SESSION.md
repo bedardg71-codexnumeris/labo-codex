@@ -18,15 +18,20 @@
 
 > **📌 Identification**
 > - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
-> - **Dernier cycle livré** : **Session 26 mai PM2** — Lot A complet en 4 sous-lots (icônes info ✴ → SVG `icons8-info.svg` puis migration vers mask-image jaune), interversion jaune ↔ orange (Conception ← jaune, Aide ← orange), désaturation des 5 couleurs sections (-20 sat / +7 lum), pattern V4 unique appliqué à toute la nav active + sous-nav + header aide/réglages. Refonte complète du référentiel `REFERENTIEL-COULEURS-SECTIONS.html`, début Lot B (audit emojis UI). Voir §0 ci-dessous.
-> - **Cycle suivant** : **Lot B audit visuel par Grégoire** — naviguer dans l'app pour identifier les emojis encore visibles dans l'UI active (l'audit grep a montré que beaucoup de templates JS sont dans des conteneurs `u-hide` legacy invisible). Document checklist : `plans de travail/LOT-B-EMOJIS-ILLUSTRATIONS.html`. Une fois identifiés, migration ciblée. **Aussi à planifier post-AQPC** : un lot dédié au nettoyage des rendus legacy invisibles (fonctions actives mais conteneurs `u-hide`).
+> - **Dernier cycle livré** : **Session 26 mai PM2 + PM3** — PM2 : Lot A complet en 4 sous-lots, refonte chromatique nav + header (interversion jaune↔orange, désaturation, pattern V4). PM3 (soir, 22h-23h) : refonte panneau Paramètres d'accompagnement en 3 cartes accordéon (SOLO/ACP/RàI), renommages page Aperçu (« Observer » → « Observation des apprentissages », « Intervenir » → « Interventions pédagogiques », « Suivi de l'apprentissage des fondamentaux » → « Structure des apprentissages fondamentaux (SOLO) »), carte RàI déplacée à droite dans profil étudiant (CSS order). Voir §0 ci-dessous.
+> - **Cycle suivant — démarrage 27 mai matin** : **2 micro-chantiers de connexion** sur la barre « Structure des apprentissages fondamentaux (SOLO) » du tableau de bord Aperçu, puis **audit visuel Lot B** au gré (sans pression). Voir « Consignes démarrage 27 mai » à la fin du §0.
 > - **Documents clés** : `plans de travail/REFERENTIEL-COULEURS-SECTIONS.html` (refonte complète, sarcelle original + V4 default), `plans de travail/LOT-B-EMOJIS-ILLUSTRATIONS.html` (checklist Lot B), `plans de travail/PLAN-MIGRATION-ICONES-SVG.md` (§9 historique).
 
 ---
 
-## §0 — Récap session 26 mai 2026 PM2 (Lot A complet + refonte chromatique nav + début Lot B)
+## §0 — Récap session 26 mai 2026 PM2 + PM3 (Lot A + refonte chromatique nav + refonte panneau accompagnement + renommages + démarrage chantier dépistage)
 
-**Beta / build** : 99.71 / 0526-1758. **Commits cette session** : 5 sur main (4 pushés `377a1af` `b6e52a2` `d2579be` `614e0ac` du Lot A + 1 local non pushé `01fde5b` interversion + désaturation + V4). Tags poussés : `lot-A-icones-aide-2026-05-26`, `lot-A-jaune-aide-2026-05-26`.
+**Beta / build** : 99.71 b0526-1758 (PM2) → 99.72 b0526-2203 (refonte panneau) → 99.73 b0526-2236 (renommages + RàI droite, PM3 final).
+
+**Commits cette journée** (8 sur main) :
+- Pushés sur origin/main : `377a1af` `b6e52a2` `d2579be` `614e0ac` (Lot A 4 sous-lots), `01fde5b` (interversion+V4), `4d17227` (relai PM2).
+- **Locaux non pushés (à pousser)** : `d73abf1` (refonte panneau accompagnement, PM3), `719407f` (renommages Aperçu + RàI droite, PM3), + le commit SESSION qui suit ce relai.
+- Tags poussés : `lot-A-icones-aide-2026-05-26`, `lot-A-jaune-aide-2026-05-26`.
 
 **1. Lot A icônes info ✴ → SVG** (4 sous-lots, ~104 sites migrés au total) :
 - Sous-lot 1 (`377a1af`) : index.html 67 sites + nouvelle classe `.btn-aide-icon`
@@ -52,9 +57,62 @@
 
 **Tests** : 88 Vitest + 18 Playwright = 106/106 verts à chaque étape (Lot A ajoute 2 sentinelles : sentinelle-icones-aide.test.js). Pas de régression.
 
-**État au moment du relai** :
-- Commit `01fde5b` (refonte chromatique) **local, non pushé** — accumulation demandée. À pousser avec ce commit SESSION + LOT-B doc.
-- Backlog : audit visuel Lot B par Grégoire (à son rythme), puis migration ciblée. Plus tard : lot nettoyage rendus legacy `u-hide`.
+---
+
+### Suite PM3 (soir, 22h00-22h45)
+
+**5. Refonte panneau Paramètres d'accompagnement** (commit `d73abf1` Beta 99.72 b0526-2203) :
+- `#labo-accompagnement` (`index.html:8555-8881`) restructuré en **3 cartes accordéon** au lieu des 2 cartes plates précédentes. Gabarit Trimestre réutilisé (`.carte.accordeon` + `.accordeon-header` + chevron + `.accordeon-contenu`, délégation `toggleAccordeonV2` déjà branchée dans `js/main.js`).
+- **Carte 1 — Taxonomie SOLO** : checkbox activation + 4 sous-items (Développement habiletés, Observation actions, Grille de critères pour le dépistage, Paramètres avancés pliables avec découplage P/N + fenêtre patterns + seuils détection).
+- **Carte 2 — Micro données ACP** : checkbox activation + Unité affichage assiduité + Seuils interprétation pliables + Graphiques d'évolution ACP.
+- **Carte 3 — Intervention (RàI)** : juste la checkbox d'activation. Les sous-items historiques (grille critères, paramètres avancés) ont migré vers SOLO car ils n'étaient pas propres à RàI.
+- Tous les IDs `v2-pref-*` / `v2-seuil-*` préservés : aucune migration de préférences nécessaire. Texte bouton « Sauvegarder les paramètres de dépistage » → « Sauvegarder les paramètres d'accompagnement ».
+- Sémantique « toggle visibilité profil ↔ checkbox activation collecte » convenue mais pas encore implémentée : pour l'instant le pliage = effet UX accordéon seulement. Implémentation logique (lien pliage ↔ visibilité dans profil étudiant via nouvelle pref `v2-pref-section-X-visible`) à venir si besoin.
+
+**6. Renommages page Aperçu + carte RàI à droite profil** (commit `719407f` Beta 99.73 b0526-2236) :
+- Page Aperçu (`index.html`) : « Observer » → « Observation des apprentissages » (couvre SOLO+ACP), « Intervenir » → « Interventions pédagogiques » (couvre RàI).
+- Page Aperçu (`js/tableau-bord-apercu.js` 2 sites + `js/accompagnement-contenu-popup.js` popup) : « Suivi de l'apprentissage des fondamentaux » → « Structure des apprentissages fondamentaux (SOLO) ». Le titre reflète le module SOLO du nouveau vocabulaire.
+- Profil étudiant — sous-section Accompagnement (`js/profil-etudiant-sections-affichage.js`) : carte RàI passée de gauche à droite. Approche CSS `style="order: X"` (Contexte order 1 / SOLO order 2 / RàI order 3) au lieu de déplacer ~240 lignes. Cas « aucune donnée » : swap physique des 3 cartes. Compatible avec SOLO désactivé (grid-2col → Contexte + RàI sur 2 colonnes).
+
+**7. Découverte importante — page Aperçu déjà branchée dynamiquement à la grille de référence** :
+- Constat erroné en début de PM3 : on pensait que les critères « Structure, Rigueur » du sous-titre du graphique étaient hardcodés.
+- Audit fait : `genererBarrePatterns` (`tableau-bord-apercu.js:2030+`) appelle `obtenirGrilleReferenceDepistage()` et filtre `criteres.filter(c => c.niveauSOLO === 'multistructurel')`. Les noms affichés sont les **vrais critères** de la grille de référence configurée (FR-ALGO H26 chez Grégoire = Structure + Rigueur en multistructurel).
+- Idem `calculerIPB` (`profil-etudiant-calculs.js:461+`) qui filtre dynamiquement.
+- **Hardcoded restant** : les helpers `_resoudreCibleX` dans `profil-etudiant-calculs.js:1243-1306+` (comparaisons `N === 'Structure'`/`'Rigueur'`/etc.) appelés par `determinerCibleIntervention()` (marquée « Conservé pour compatibilité — sera retiré plus tard »). Affecte la carte RàI du profil étudiant pour les cibles d'intervention (badge + pattern texte). **À refactorer post-AQPC** : remplacer `N === 'Structure'` par `obtenirNiveauSOLOCritere(N) === 'multistructurel'` en lisant la grille de référence.
+- Helper `obtenirNiveauSOLO()` dans `js/trimestres.js:1422` existe mais est aussi hardcoded (mapping nom→niveau anglais `multistructural`). Pas réutilisable tel quel. Un nouveau helper à créer.
+
+---
+
+### Consignes de démarrage — 27 mai matin
+
+**Avant de plonger** : lire ce §0 PM2+PM3 (présent), vérifier que `git status` est clean, que tous les commits PM3 sont sur main (`d73abf1`, `719407f`, + le commit SESSION qui suit). **Le push reste à faire** (Grégoire l'a différé en fin de PM3).
+
+**Chantier prioritaire — 2 micro-connexions visuelles** (~1 h total) :
+
+**A. Deux boutons d'accès direct sous la barre « Structure des apprentissages fondamentaux (SOLO) »** dans le tableau de bord Aperçu :
+- Bouton 1 → ouvre **Conception › Grilles de critères** (où l'utilisateur édite les critères + leurs niveaux SOLO via menus select). Action JS de navigation à créer ou réutiliser.
+- Bouton 2 → ouvre **Labo › Paramètres d'accompagnement** et idéalement déroule la carte SOLO (accordéon `accordeon-acc-solo`) pour exposer le select « Grille de critères pour le dépistage » (id `v2-pref-grille-reference`).
+- Code à modifier : `js/tableau-bord-apercu.js` autour de `genererBarrePatterns()` ligne 2030+ (les 2 sites avec `<h4>Structure des apprentissages fondamentaux (SOLO)</h4>` à 2051 et 2245).
+- Style à choisir : petits boutons icône à droite du sous-titre « Critères multistructurels surveillés : … » ou sur la même ligne que le titre. Icons disponibles : `icon-edit.svg`, `icon-tune.svg`, `icon-arrow-out.svg` à voir.
+
+**B. Badge « Grille de dépistage »** dans :
+- La **sidebar des grilles** (composant gauche de la page Conception/Grilles, où on voit déjà les badges SOM/STD/X critères).
+- La **bibliothèque des grilles** (modale Bibliothèque d'échelles/grilles).
+- Affiché uniquement sur la grille qui correspond à `obtenirPreference('grilleReferenceDepistage')`.
+- Code à modifier : `js/grilles.js` (rendu sidebar + carte bibliothèque), plus probablement `js/bibliotheque-ui.js` (helper `renderCarte*` du Lot biblios #267).
+- Style : badge violet ou orange (couleur à choisir, doit se distinguer des SOM/STD/SPE/DEN existants — voir `[[project-palette-couleurs-contraintes]]` dans memory pour les contraintes chromatiques sidebar).
+
+**Optionnel — Chantier C post-AQPC** :
+- Refactor des helpers `_resoudreCibleDifficultePersistante/Emergente/DefiSpecifique/Stable` dans `js/profil-etudiant-calculs.js:1243-1306+` pour utiliser le `niveauSOLO` du critère au lieu du nom hardcoded.
+- Créer un helper `obtenirNiveauSOLOCritere(nomCritere)` qui lit la grille de référence et retourne le `niveauSOLO` français (`multistructurel`/`relationnel`/`abstrait_etendu`).
+- Logique pédagogique de mapping niveau→cible (à valider avec Grégoire) : multistructurel + score bas → remédiation, relationnel → pratique guidée, abstrait étendu → exploration. Pas trivial — vraie réflexion pédagogique nécessaire.
+
+**Audit visuel Lot B** (au gré) :
+- Document : `plans de travail/LOT-B-EMOJIS-ILLUSTRATIONS.html`.
+- Grégoire navigue dans l'app et identifie les emojis encore visibles dans l'UI active.
+- Une fois les sites identifiés, migration ciblée (3 icônes à ajouter : clipboard, document, group/users).
+
+**Présentation AQPC** : 3 juin 2026, J−7 au moment du relai. **Stabilité prime** sur les nouveaux chantiers à partir de fin mai.
 
 ---
 
