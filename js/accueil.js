@@ -103,14 +103,11 @@ function afficherAccueilContenu(conteneur) {
     // « Accompagnement » = ON uniquement si les 4 sous-systèmes sont actifs.
     const accChecked = accompagnementEstActif();
 
-    const heroTitre = 'Un espace de travail pour la pratique enseignante.';
+    // Hero h1 retiré le 27 mai 2026 : la phrase a été déplacée dans le bandeau global
+    // (entête .titre-section, à côté de la date).
     const banniereBienvenueHTML = genererBanniereBienvenue();
 
     conteneur.innerHTML = `
-        <div class="accueil-hero">
-            <h1>${heroTitre}</h1>
-        </div>
-
         ${banniereBienvenueHTML}
 
         <div class="accueil-section-label">Raccourcis</div>
@@ -185,7 +182,7 @@ function afficherAccueilContenu(conteneur) {
                 <div class="accueil-utilitaire-icone"><span class="accueil-icone-mask ico-acc-megaphone"></span><span class="pastille-nouveautes"></span></div>
                 <div>
                     <div class="accueil-utilitaire-titre">Nouveaut\u00e9s</div>
-                    <div class="accueil-utilitaire-desc">D\u00e9tails sur la derni\u00e8re mise \u00e0 jour.</div>
+                    <div class="accueil-utilitaire-desc">Beta ${window.VERSION_MAJEURE || ''} (Build ${window.BUILD_ID || ''})</div>
                 </div>
             </div>
 
