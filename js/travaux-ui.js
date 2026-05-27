@@ -981,9 +981,9 @@
 
         if (fichiersTravaux.length === 0) {
             conteneur.innerHTML = `
-                <div class="conteneur">
-                    <h2>Annoter et évaluer <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h2>
-                    <p class="text-muted">Aucun fichier importé. Importe des travaux depuis l'onglet « Préparer et importer ».</p>
+                <div class="conteneur" style="padding: 24px;">
+                    <h2 style="margin: 0 0 12px 0;">Annoter et évaluer <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h2>
+                    <p class="text-muted" style="margin: 0;">Aucun fichier importé. Importe des travaux depuis l'onglet « Préparer et importer ».</p>
                 </div>`;
             return;
         }
