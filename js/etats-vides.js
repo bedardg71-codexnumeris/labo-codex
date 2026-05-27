@@ -123,7 +123,7 @@ var ETATS_VIDES = {
     'suivi-saisie': {
         message: 'Aucune pr\u00e9sence saisie. Les s\u00e9ances sont g\u00e9n\u00e9r\u00e9es automatiquement \u00e0 partir de ton calendrier et de ton horaire. S\u00e9lectionne une s\u00e9ance pour saisir les pr\u00e9sences et absences.'
     },
-    'apercu': {
+    'suivi-groupe': {
         message: 'Le tableau de bord se remplit au fur et \u00e0 mesure que tu saisis les pr\u00e9sences et les \u00e9valuations. Les indices A-C-P, les patterns et les niveaux R\u00e0I appara\u00eetront d\u00e8s que tu auras enregistr\u00e9 quelques donn\u00e9es \u2014 c\u2019est le portrait de ton groupe qui se dessine.'
     },
     'suivi-interventions': {

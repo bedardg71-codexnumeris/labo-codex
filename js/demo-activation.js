@@ -367,9 +367,9 @@ async function activerModeDemo() {
             peuplerDropdownGroupeCoursActif();
         }
 
-        // 14. Navigation vers l'aperçu
-        if (typeof afficherSection === 'function') {
-            afficherSection('apercu');
+        // 14. Navigation vers Suivi › Suivi du groupe (anciennement section 'apercu').
+        if (typeof naviguerVers === 'function') {
+            naviguerVers('suivi', 'groupe');
         }
 
         // 15. Rerender complet selon le mode

@@ -158,8 +158,8 @@ function rafraichirContenuSelonMode() {
             'etudiants-profil': 'afficherProfilEtudiant',
             'evaluations-liste-evaluations': 'chargerListeEvaluationsRefonte',
             'suivi-saisie': 'afficherTableauPresences',
-            // Tier 6.7 fix : 'apercu' est une section plate, pas de sous-section.
-            // chargerTableauBordApercu() est appelé par afficherSection('apercu') dans navigation.js.
+            // 'suivi-groupe' (anciennement section plate 'apercu') :
+            // chargerTableauBordApercu() est appelé par le dispatcher dans navigation.js.
             'suivi-profil': 'afficherProfilComplet'  // AJOUT: Rafraîchir le profil lors du changement de mode
         };
 
@@ -201,9 +201,9 @@ function rafraichirContenuSelonMode() {
                     if (daAAfficher) {
                         window[fonctionAAppeler](daAAfficher);
                     } else {
-                        // Aucun étudiant disponible, retourner à l'aperçu (section plate)
-                        if (typeof afficherSection === 'function') {
-                            afficherSection('apercu');
+                        // Aucun étudiant disponible, retourner au suivi de groupe.
+                        if (typeof naviguerVers === 'function') {
+                            naviguerVers('suivi', 'groupe');
                         }
                     }
                 }
