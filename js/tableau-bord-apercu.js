@@ -2050,12 +2050,12 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
                 <button type="button" class="btn btn-secondaire btn-tres-compact"
                         data-action="naviguerVers" data-param="conception" data-param2="grille-criteres"
                         title="Modifier les critères et leurs niveaux SOLO">
-                    <img src="icons/icon-edit.svg" alt="" class="btn-inline-icon"> Critères
+                    Critères
                 </button>
                 <button type="button" class="btn btn-secondaire btn-tres-compact"
                         data-action="ouvrirReferenceSoloAccompagnement"
                         title="Choisir la grille de critères pour le dépistage SOLO">
-                    <img src="icons/icon-tune.svg" alt="" class="btn-inline-icon"> Préférences
+                    Paramètres d'accompagnement
                 </button>
             </div>
         </div>
