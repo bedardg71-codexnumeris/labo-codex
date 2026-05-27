@@ -932,7 +932,7 @@
                     const sansProduction = queue.filter(f => !f.productionId).length;
                     if (sansProduction > 0) {
                         return `<div class="info-box info-box--attention" style="margin-top: 12px;">
-                            ⚠️ ${sansProduction} fichier(s) ne sont associés à aucune production.
+                            <img src="icons/icons8-high-priority.svg" alt="" class="alerte-icone"> ${sansProduction} fichier(s) ne sont associés à aucune production.
                             Vérifie que les productions ont été créées dans « Construction de la note ».
                         </div>`;
                     }
@@ -3689,7 +3689,7 @@
             }).join('');
             bandeauDoublons = '<div class="travaux-bandeau-doublon">'
                 + '<p><strong>Doublon' + (doublonsDetectes.length > 1 ? 's' : '') + ' détecté' + (doublonsDetectes.length > 1 ? 's' : '') + ' :</strong></p>'
-                + '<p class="travaux-doublon-astuce u-texte-petit"><strong>💡 Astuce</strong> : si ce fichier est une partie complémentaire d’un travail <em>déjà évalué</em>, le plus direct est d’annuler ici, d’ouvrir l’évaluation existante et d’utiliser <strong>+ Ajouter des pages</strong>. Sinon, choisis ci-dessous.</p>'
+                + '<p class="travaux-doublon-astuce u-texte-petit"><strong>Astuce</strong> : si ce fichier est une partie complémentaire d’un travail <em>déjà évalué</em>, le plus direct est d’annuler ici, d’ouvrir l’évaluation existante et d’utiliser <strong>+ Ajouter des pages</strong>. Sinon, choisis ci-dessous.</p>'
                 + '<ul>' + lignesD + '</ul>'
                 + '<p class="texte-muted u-texte-petit">Tu peux importer quand même (un second fichier sera créé) ou annuler pour gérer manuellement le fichier existant. Pour distinguer les deux fichiers, renomme celui en cours d’import ci-dessus avant de confirmer.</p>'
                 + '</div>';
@@ -4196,7 +4196,7 @@
         const nouveauNom = (input.value || '').trim();
         if (!nouveauNom) {
             if (feedback) {
-                feedback.textContent = '⚠ Nom vide';
+                feedback.textContent = 'Nom vide';
                 feedback.style.color = 'var(--rouge-erreur)';
             }
             return;
@@ -4207,7 +4207,7 @@
             : false;
         if (!ok) {
             if (feedback) {
-                feedback.textContent = '⚠ Renommage échoué';
+                feedback.textContent = 'Renommage échoué';
                 feedback.style.color = 'var(--rouge-erreur)';
             }
             return;
@@ -4221,7 +4221,7 @@
         const btn = document.querySelector('[data-action="travauxUI.renommerDoublon"][data-param="' + idx + '"]');
         if (btn) btn.disabled = true;
         if (feedback) {
-            feedback.textContent = '✓ Renommé en ' + nomFinal;
+            feedback.textContent = 'Renommé en ' + nomFinal;
             feedback.style.color = 'var(--vert-succes)';
         }
     }

@@ -120,16 +120,16 @@
 
     function _libellePattern(pattern) {
         if (pattern === 'jeton') {
-            return { icone: '🟢', texte: 'Reprise via jeton — recommandé : garder les deux' };
+            return { texte: 'Reprise via jeton — recommandé : garder les deux' };
         }
-        return { icone: '🔵', texte: 'Plusieurs fichiers — décision manuelle' };
+        return { texte: 'Plusieurs fichiers — décision manuelle' };
     }
 
     function _libelleTagInformatif(indice) {
-        if (indice === 'mixte-pdf-image') return { icone: '📄', texte: 'PDF + image' };
-        if (indice === 'memes-noms')      return { icone: '🔁', texte: 'mêmes noms' };
-        if (indice === 'dates-proches')   return { icone: '⏱', texte: 'dates proches (< 5 min)' };
-        if (indice === 'statuts-mixtes')  return { icone: '📝', texte: 'statuts mixtes' };
+        if (indice === 'mixte-pdf-image') return { texte: 'PDF + image' };
+        if (indice === 'memes-noms')      return { texte: 'mêmes noms' };
+        if (indice === 'dates-proches')   return { texte: 'dates proches (< 5 min)' };
+        if (indice === 'statuts-mixtes')  return { texte: 'statuts mixtes' };
         return null;
     }
 
@@ -251,7 +251,7 @@
         (d.indicesCause || []).forEach(function(indice) {
             var tag = _libelleTagInformatif(indice);
             if (!tag) return;
-            tagsHtml += '<span class="td-tag-info">' + tag.icone + ' ' + echapperHtml(tag.texte) + '</span>';
+            tagsHtml += '<span class="td-tag-info">' + echapperHtml(tag.texte) + '</span>';
         });
 
         // Bouton « Valider ce cas » : raccourci pour cocher Garder sur tous les fichiers
@@ -260,13 +260,13 @@
             ' data-da="' + echapperHtml(d.da) + '"' +
             ' data-production-id="' + echapperHtml(d.productionId) + '"' +
             ' title="Marque ce cas comme validé : tous les fichiers restent actifs et le cas n\'apparaîtra plus dans le bandeau">' +
-            '✓ Valider ce cas</button>';
+            'Valider ce cas</button>';
 
         var html = '<div class="td-carte" data-pattern="' + pattern + '">';
         html += '<div class="td-carte-entete">';
         html += '<strong>' + echapperHtml(nomComplet) + '</strong>';
         html += '<span class="td-pattern-badge td-pattern-' + pattern + '">' +
-                lib.icone + ' ' + echapperHtml(lib.texte) + '</span>';
+                echapperHtml(lib.texte) + '</span>';
         html += '</div>';
         if (tagsHtml) html += '<div class="td-tags">' + tagsHtml + '</div>';
         html += '<div class="td-carte-actions">' + boutonValider + '</div>';
@@ -437,7 +437,7 @@
         var carte = elemBouton.closest('.td-carte');
         if (carte) carte.classList.add('td-carte-validee');
         elemBouton.disabled = true;
-        elemBouton.textContent = '✓ Validé (en attente)';
+        elemBouton.textContent = 'Validé (en attente)';
 
         _miseAJourFooter();
     }

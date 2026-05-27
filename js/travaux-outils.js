@@ -1658,12 +1658,12 @@
 
         html += '</div>'; // fin .palette-flottante-contenu
 
-        // Barre d'emojis en bas
+        // Barre d'outils en bas
         html += '<div class="palette-flottante-bas-btns">';
         html += '<button class="palette-flottante-aide-btn" data-action="tamponsBibliotheque.afficherBibliothequeTampons" title="Bibliothèque de tampons"><img src="' + ICONS_DIR + 'icons8-library-2.svg" alt="" class="outil-svg-icon palette-bas-icon"></button>';
-        html += '<button class="palette-flottante-aide-btn" id="btn-toggle-codes" data-action="travauxOutils.togglePaletteErreursFrancais" title="Afficher/masquer les codes">🚦</button>';
-        html += '<button class="palette-flottante-aide-btn" id="btn-toggle-tampons" data-action="travauxOutils.togglePaletteAutocollants" title="Afficher/masquer les tampons">🫥</button>';
-        html += '<button class="palette-flottante-aide-btn" id="btn-toggle-chrono" data-action="travauxOutils.togglePaletteChrono" title="Chronomètre">⏱️</button>';
+        html += '<button class="palette-flottante-aide-btn" id="btn-toggle-codes" data-action="travauxOutils.togglePaletteErreursFrancais" title="Afficher/masquer les codes"><img src="' + ICONS_DIR + 'icons8-traffic-light.svg" alt="" class="outil-svg-icon palette-bas-icon"></button>';
+        html += '<button class="palette-flottante-aide-btn" id="btn-toggle-tampons" data-action="travauxOutils.togglePaletteAutocollants" title="Afficher/masquer les tampons"><img src="' + ICONS_DIR + 'icons8-rubber-stamp.svg" alt="" class="outil-svg-icon palette-bas-icon"></button>';
+        html += '<button class="palette-flottante-aide-btn" id="btn-toggle-chrono" data-action="travauxOutils.togglePaletteChrono" title="Chronomètre"><img src="' + ICONS_DIR + 'icons8-stopwatch.svg" alt="" class="outil-svg-icon palette-bas-icon"></button>';
         html += '</div>';
 
         html += '</div>'; // fin .palette-flottante

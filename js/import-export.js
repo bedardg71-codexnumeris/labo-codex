@@ -1927,7 +1927,7 @@ function afficherModalPreviewConfigComplete(config) {
                 <div style="background: var(--alerte-fond-succes, #e8f5e9); border: 1px solid var(--vert-succes); border-radius: 8px;
                      padding: 15px; margin-bottom: 20px;">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="font-size: 2rem;">📚</span>
+                        <img src="icons/icons8-library-2.svg" alt="" style="width: 32px; height: 32px;">
                         <div>
                             <strong style="color: var(--vert-succes); font-size: 1.1rem;">Configuration pédagogique partagée</strong>
                             <p style="margin: 4px 0 0 0; font-size: 0.9rem; color: var(--gris-moyen);">
@@ -1969,7 +1969,7 @@ function afficherModalPreviewConfigComplete(config) {
                 <!-- Info CC -->
                 <div style="background: var(--bleu-pale); border-radius: 8px; padding: 12px; margin-bottom: 20px;">
                     <p style="margin: 0; font-size: 0.85rem; color: var(--bleu-clair);">
-                        📄 Licence <strong>CC BY-NC-SA 4.0</strong> — Tu peux utiliser et adapter ces ressources
+                        Licence <strong>CC BY-NC-SA 4.0</strong> — Tu peux utiliser et adapter ces ressources
                         en citant l'auteur.
                     </p>
                 </div>
