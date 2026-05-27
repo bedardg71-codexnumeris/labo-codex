@@ -8142,6 +8142,96 @@
                     </div>
                 </div><!-- FIN sous-section suivi-interventions -->
 
+                <!-- Sous-section: Animation (outils interactifs en classe — migré depuis Labo le 27 mai 2026) -->
+                <div id="suivi-animation" class="sous-section">
+                    <h2>Animation</h2>
+                    <p class="text-muted">Outils interactifs pour l'animation en classe : tirage au sort d'étudiants et questions flash.</p>
+
+                    <!-- Container flex pour les deux cartes -->
+                    <div class="outils-grid">
+
+                        <!-- CARTE 1: Questions Flash -->
+                        <div id="questions-container" class="outil-carte">
+                            <div class="outil-carte-header">
+                                <h3 class="outil-carte-titre">Questions Flash</h3>
+                                <button id="btn-params-questions"
+                                        class="btn-params-outil"
+                                        data-action="ouvrirModalParamsQuestions"
+                                        title="Gérer les questions">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Filtre par catégorie -->
+                            <div class="questions-filtre">
+                                <select id="questions-filtre-categorie" class="form-select" data-on-change="changerFiltreCategorieFromEl">
+                                    <option value="">Toutes les catégories</option>
+                                    <!-- Options ajoutées dynamiquement -->
+                                </select>
+                            </div>
+
+                            <!-- Zone d'affichage de la question -->
+                            <div id="questions-zone-affichage" class="outil-zone-affichage">
+                                <div id="questions-affichage" class="questions-affichage">
+                                    <span class="outil-placeholder">Clique sur "Tirer !" pour afficher une question</span>
+                                </div>
+                            </div>
+
+                            <!-- Bouton Tirer -->
+                            <button id="btn-tirer-question"
+                                    class="btn btn-principal"
+                                    data-action="lancerTirageQuestion">
+                                Tirer !
+                            </button>
+
+                            <!-- Compteur de questions -->
+                            <div class="outil-compteur">
+                                <span id="questions-nb-restantes">—</span> questions disponibles
+                            </div>
+                        </div>
+
+                        <!-- CARTE 2: Tirage au sort -->
+                        <div id="tirage-container" class="outil-carte">
+                            <div class="outil-carte-header">
+                                <h3 class="outil-carte-titre">Tirage au sort</h3>
+                                <button id="btn-params-tirage"
+                                        class="btn-params-outil"
+                                        data-action="ouvrirModalParamsTirage"
+                                        title="Paramètres du tirage">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Zone d'affichage de la roulette -->
+                            <div id="tirage-zone-roulette" class="outil-zone-affichage">
+                                <div id="tirage-affichage" class="tirage-affichage">
+                                    <span class="outil-placeholder">Clique sur "Tirer !" pour commencer</span>
+                                </div>
+                            </div>
+
+                            <!-- Bouton Tirer -->
+                            <button id="btn-tirer"
+                                    class="btn btn-principal"
+                                    data-action="lancerTirage">
+                                Tirer !
+                            </button>
+
+                            <!-- Compteur d'étudiants restants -->
+                            <div class="outil-compteur">
+                                <span id="tirage-nb-restants">—</span> étudiants disponibles
+                            </div>
+                        </div>
+
+                    </div><!-- fin outils-grid -->
+
+                </div><!-- FIN sous-section suivi-animation -->
+
                             </section><!-- fin section-suivi -->
 
             <!-- ===================================
@@ -8879,95 +8969,6 @@
                         </button>
                     </div>
                 </div>
-
-
-                <!-- Sous-section: Outils interactifs -->
-                <div id="labo-tirage" class="sous-section">
-
-                    <!-- Container flex pour les deux cartes -->
-                    <div class="outils-grid">
-
-                        <!-- CARTE 1: Questions Flash -->
-                        <div id="questions-container" class="outil-carte">
-                            <div class="outil-carte-header">
-                                <h3 class="outil-carte-titre">Questions Flash</h3>
-                                <button id="btn-params-questions"
-                                        class="btn-params-outil"
-                                        data-action="ouvrirModalParamsQuestions"
-                                        title="Gérer les questions">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <circle cx="12" cy="12" r="3"></circle>
-                                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                                    </svg>
-                                </button>
-                            </div>
-
-                            <!-- Filtre par catégorie -->
-                            <div class="questions-filtre">
-                                <select id="questions-filtre-categorie" class="form-select" data-on-change="changerFiltreCategorieFromEl">
-                                    <option value="">Toutes les catégories</option>
-                                    <!-- Options ajoutées dynamiquement -->
-                                </select>
-                            </div>
-
-                            <!-- Zone d'affichage de la question -->
-                            <div id="questions-zone-affichage" class="outil-zone-affichage">
-                                <div id="questions-affichage" class="questions-affichage">
-                                    <span class="outil-placeholder">Clique sur "Tirer !" pour afficher une question</span>
-                                </div>
-                            </div>
-
-                            <!-- Bouton Tirer -->
-                            <button id="btn-tirer-question"
-                                    class="btn btn-principal"
-                                    data-action="lancerTirageQuestion">
-                                Tirer !
-                            </button>
-
-                            <!-- Compteur de questions -->
-                            <div class="outil-compteur">
-                                <span id="questions-nb-restantes">—</span> questions disponibles
-                            </div>
-                        </div>
-
-                        <!-- CARTE 2: Tirage au sort (existant) -->
-                        <div id="tirage-container" class="outil-carte">
-                            <div class="outil-carte-header">
-                                <h3 class="outil-carte-titre">Tirage au sort</h3>
-                                <button id="btn-params-tirage"
-                                        class="btn-params-outil"
-                                        data-action="ouvrirModalParamsTirage"
-                                        title="Paramètres du tirage">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <circle cx="12" cy="12" r="3"></circle>
-                                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                                    </svg>
-                                </button>
-                            </div>
-
-                            <!-- Zone d'affichage de la roulette -->
-                            <div id="tirage-zone-roulette" class="outil-zone-affichage">
-                                <div id="tirage-affichage" class="tirage-affichage">
-                                    <span class="outil-placeholder">Clique sur "Tirer !" pour commencer</span>
-                                </div>
-                            </div>
-
-                            <!-- Bouton Tirer -->
-                            <button id="btn-tirer"
-                                    class="btn btn-principal"
-                                    data-action="lancerTirage">
-                                Tirer !
-                            </button>
-
-                            <!-- Compteur d'étudiants restants -->
-                            <div class="outil-compteur">
-                                <span id="tirage-nb-restants">—</span> étudiants disponibles
-                            </div>
-                        </div>
-
-                    </div><!-- fin outils-grid -->
-
-                </div><!-- fin sous-section tirage -->
 
 
                 <!-- Sous-section: Modélisation (annotation en projection) -->

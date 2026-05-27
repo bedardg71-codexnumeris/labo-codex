@@ -169,6 +169,7 @@ const TOOLTIPS_SOUS_NAV = {
     'suivi-saisie': 'nav-suivi-saisie',
     'suivi-profil': 'nav-suivi-profil',
     'suivi-interventions': 'nav-suivi-interventions',
+    'suivi-animation': 'nav-suivi-animation',
     // Évaluations
     'evaluations-importer': 'nav-eval-importer',
     'evaluations-liste': 'nav-eval-liste',
@@ -176,7 +177,6 @@ const TOOLTIPS_SOUS_NAV = {
     'evaluations-exporter': 'nav-eval-exporter',
     // Boîte à outils
     'labo-accompagnement': 'nav-labo-accompagnement',
-    'labo-tirage': 'nav-labo-tirage',
     'labo-modelisation': 'nav-labo-modelisation',
     'labo-rythme': 'nav-labo-rythme',
     'labo-etudes': 'nav-labo-etudes',
@@ -270,6 +270,14 @@ const INITIALISATEURS_SOUS_SECTION = {
         }
     },
     // suivi-saisie : pas d'initialisation spécifique requise
+    'suivi-animation': function () {
+        if (typeof initialiserTirage === 'function') {
+            setTimeout(initialiserTirage, 100);
+        }
+        if (typeof initialiserQuestions === 'function') {
+            setTimeout(initialiserQuestions, 100);
+        }
+    },
 
     // === ÉVALUATIONS ===
     'evaluations-importer': function () {
@@ -313,14 +321,6 @@ const INITIALISATEURS_SOUS_SECTION = {
     'labo-accompagnement': function () {
         if (typeof initialiserPreferencesV2 === 'function') {
             setTimeout(initialiserPreferencesV2, 100);
-        }
-    },
-    'labo-tirage': function () {
-        if (typeof initialiserTirage === 'function') {
-            setTimeout(initialiserTirage, 100);
-        }
-        if (typeof initialiserQuestions === 'function') {
-            setTimeout(initialiserQuestions, 100);
         }
     },
     'labo-modelisation': function () {

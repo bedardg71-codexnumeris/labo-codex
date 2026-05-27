@@ -54,7 +54,8 @@ const configurationsOnglets = {
         { id: 'liste', label: 'Liste des élèves' },
         { id: 'saisie', label: 'Saisie des présences' },
         { id: 'profil', label: 'Profils individuels' },
-        { id: 'interventions', label: 'Interventions' }
+        { id: 'interventions', label: 'Interventions' },
+        { id: 'animation', label: 'Animation' }
     ],
     'evaluations': [
         { id: 'importer', label: 'Préparer et importer' },
@@ -64,7 +65,6 @@ const configurationsOnglets = {
     ],
     'labo': [
         { id: 'accompagnement', label: "Outils d'observation" },
-        { id: 'tirage', label: 'Tirage au sort' },
         { id: 'modelisation', label: 'Modélisation' },
         { id: 'rythme', label: 'Rythme de travail' },
         { id: 'etudes', label: 'Études' },

@@ -76,8 +76,8 @@ const GUIDAGE_TEXTES = {
         titre: 'Productions \u00e9tudiantes',
         texte: 'Les productions sont les travaux que tes \u00e9tudiants doivent remettre (dissertations, examens, projets). La d\u00e9mo en contient 11, chacune associ\u00e9e \u00e0 une grille de crit\u00e8res.'
     },
-    'labo-tirage': {
-        titre: 'Labo',
+    'suivi-animation': {
+        titre: 'Animation',
         texte: 'Outils interactifs pour l\u2019animation en classe\u00a0: tirage au sort d\u2019\u00e9tudiants pour les mises en situation, les pr\u00e9sentations ou les exercices collaboratifs.'
     },
     'conception-carte': {
