@@ -1710,49 +1710,11 @@ span.header-icon {
 .ico-juggler     { -webkit-mask-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPiAgICA8cGF0aCBkPSJNIDI1IDIgQyAyMy4zNDYgMiAyMiAzLjM0NiAyMiA1IEMgMjIgNi42NTQgMjMuMzQ2IDggMjUgOCBDIDI2LjY1NCA4IDI4IDYuNjU0IDI4IDUgQyAyOCAzLjM0NiAyNi42NTQgMiAyNSAyIHogTSAxMiA3IEMgMTAuMzQ2IDcgOSA4LjM0NiA5IDEwIEMgOSAxMS42NTQgMTAuMzQ2IDEzIDEyIDEzIEMgMTMuNjU0IDEzIDE1IDExLjY1NCAxNSAxMCBDIDE1IDguMzQ2IDEzLjY1NCA3IDEyIDcgeiBNIDM4IDcgQyAzNi4zNDYgNyAzNSA4LjM0NiAzNSAxMCBDIDM1IDExLjY1NCAzNi4zNDYgMTMgMzggMTMgQyAzOS42NTQgMTMgNDEgMTEuNjU0IDQxIDEwIEMgNDEgOC4zNDYgMzkuNjU0IDcgMzggNyB6IE0gMjUgMTUgQyAyMS42OTEgMTUgMTkgMTcuNjkxIDE5IDIxIEMgMTkgMjQuMzA5IDIxLjY5MSAyNyAyNSAyNyBDIDI4LjMwOSAyNyAzMSAyNC4zMDkgMzEgMjEgQyAzMSAxNy42OTEgMjguMzA5IDE1IDI1IDE1IHogTSA0NCAxOCBDIDQyLjM0NiAxOCA0MSAxOS4zNDYgNDEgMjEgQyA0MSAyMi42NTQgNDIuMzQ2IDI0IDQ0IDI0IEMgNDUuNjU0IDI0IDQ3IDIyLjY1NCA0NyAyMSBDIDQ3IDE5LjM0NiA0NS42NTQgMTggNDQgMTggeiBNIDYgMTkgQyA0LjM0NiAxOSAzIDIwLjM0NiAzIDIyIEMgMyAyMy42NTQgNC4zNDYgMjUgNiAyNSBDIDcuNjU0IDI1IDkgMjMuNjU0IDkgMjIgQyA5IDIwLjM0NiA3LjY1NCAxOSA2IDE5IHogTSA1LjE3MzgyODEgMjcuMDA5NzY2IEMgNC41MzYzMjgxIDI3LjA2NzUxNiAzLjkyMDAxNTYgMjcuMzY4OTM3IDMuNDc4NTE1NiAyNy44OTg0MzggQyAzLjA1MTUxNTYgMjguNDEyNDM3IDIuODUwMTU2MiAyOS4wNTk2MDkgMi45MTAxNTYyIDI5LjcyNDYwOSBDIDIuOTcwMTU2MiAzMC4zODk2MDkgMy4yODU4MjgxIDMwLjk5MjkyMiAzLjc5ODgyODEgMzEuNDE5OTIyIEwgMTAuNDAwMzkxIDM2LjQxOTkyMiBDIDExLjA3NzM5MSAzNi45ODU5MjIgMTIuMTA2NzAzIDM3LjEyNjU2MiAxMi44NDU3MDMgMzYuODUxNTYyIEwgMTggMzUuNjY5OTIyIEwgMTggNDcgQyAxOCA0Ny41NTIgMTguNDQ4IDQ4IDE5IDQ4IEwgMzEgNDguMDAxOTUzIEMgMzEuNTUyIDQ4LjAwMTk1MyAzMiA0Ny41NTQ5NTMgMzIgNDcuMDAxOTUzIEwgMzIgMzcgTCAzNS4zNzMwNDcgMzkuMzk2NDg0IEMgMzYuMjI0MDQ3IDQwLjEyNDQ4NCAzNy41NDAxMjUgNDAuMTgyMjAzIDM4LjQ1MzEyNSAzOS41MzMyMDMgTCA0NS45MDYyNSAzNC41MzMyMDMgQyA0Ny4wMjkyNSAzMy43MzIyMDMgNDcuMjg5MjgxIDMyLjE2Njg3NSA0Ni40ODgyODEgMzEuMDQ2ODc1IEMgNDUuNjg4MjgxIDI5LjkyNDg3NSA0NC4xMjQgMjkuNjYzODQ0IDQzIDMwLjQ2NDg0NCBMIDM3LjE0MDYyNSAzNC4zMjYxNzIgTCAzMS42Mjg5MDYgMjkuNjAxNTYyIEMgMzEuMTc0OTA2IDI5LjIxMzU2MyAzMC41OTcgMjguOTk4MDQ3IDMwIDI4Ljk5ODA0NyBMIDI2IDI4Ljk5ODA0NyBMIDIwIDI4Ljk5ODA0NyBDIDE5LjcgMjguOTk4MDQ3IDE5LjQwMjA5NCAyOS4wNTMyMDMgMTkuMTIxMDk0IDI5LjE1ODIwMyBMIDEyLjQ4MjQyMiAzMS42NDY0ODQgTCA3IDI3LjU3ODEyNSBDIDYuNDcwNSAyNy4xMzY2MjUgNS44MTEzMjgxIDI2Ljk1MjAxNiA1LjE3MzgyODEgMjcuMDA5NzY2IHoiLz48L3N2Zz4=");
                            mask-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPiAgICA8cGF0aCBkPSJNIDI1IDIgQyAyMy4zNDYgMiAyMiAzLjM0NiAyMiA1IEMgMjIgNi42NTQgMjMuMzQ2IDggMjUgOCBDIDI2LjY1NCA4IDI4IDYuNjU0IDI4IDUgQyAyOCAzLjM0NiAyNi42NTQgMiAyNSAyIHogTSAxMiA3IEMgMTAuMzQ2IDcgOSA4LjM0NiA5IDEwIEMgOSAxMS42NTQgMTAuMzQ2IDEzIDEyIDEzIEMgMTMuNjU0IDEzIDE1IDExLjY1NCAxNSAxMCBDIDE1IDguMzQ2IDEzLjY1NCA3IDEyIDcgeiBNIDM4IDcgQyAzNi4zNDYgNyAzNSA4LjM0NiAzNSAxMCBDIDM1IDExLjY1NCAzNi4zNDYgMTMgMzggMTMgQyAzOS42NTQgMTMgNDEgMTEuNjU0IDQxIDEwIEMgNDEgOC4zNDYgMzkuNjU0IDcgMzggNyB6IE0gMjUgMTUgQyAyMS42OTEgMTUgMTkgMTcuNjkxIDE5IDIxIEMgMTkgMjQuMzA5IDIxLjY5MSAyNyAyNSAyNyBDIDI4LjMwOSAyNyAzMSAyNC4zMDkgMzEgMjEgQyAzMSAxNy42OTEgMjguMzA5IDE1IDI1IDE1IHogTSA0NCAxOCBDIDQyLjM0NiAxOCA0MSAxOS4zNDYgNDEgMjEgQyA0MSAyMi42NTQgNDIuMzQ2IDI0IDQ0IDI0IEMgNDUuNjU0IDI0IDQ3IDIyLjY1NCA0NyAyMSBDIDQ3IDE5LjM0NiA0NS42NTQgMTggNDQgMTggeiBNIDYgMTkgQyA0LjM0NiAxOSAzIDIwLjM0NiAzIDIyIEMgMyAyMy42NTQgNC4zNDYgMjUgNiAyNSBDIDcuNjU0IDI1IDkgMjMuNjU0IDkgMjIgQyA5IDIwLjM0NiA3LjY1NCAxOSA2IDE5IHogTSA1LjE3MzgyODEgMjcuMDA5NzY2IEMgNC41MzYzMjgxIDI3LjA2NzUxNiAzLjkyMDAxNTYgMjcuMzY4OTM3IDMuNDc4NTE1NiAyNy44OTg0MzggQyAzLjA1MTUxNTYgMjguNDEyNDM3IDIuODUwMTU2MiAyOS4wNTk2MDkgMi45MTAxNTYyIDI5LjcyNDYwOSBDIDIuOTcwMTU2MiAzMC4zODk2MDkgMy4yODU4MjgxIDMwLjk5MjkyMiAzLjc5ODgyODEgMzEuNDE5OTIyIEwgMTAuNDAwMzkxIDM2LjQxOTkyMiBDIDExLjA3NzM5MSAzNi45ODU5MjIgMTIuMTA2NzAzIDM3LjEyNjU2MiAxMi44NDU3MDMgMzYuODUxNTYyIEwgMTggMzUuNjY5OTIyIEwgMTggNDcgQyAxOCA0Ny41NTIgMTguNDQ4IDQ4IDE5IDQ4IEwgMzEgNDguMDAxOTUzIEMgMzEuNTUyIDQ4LjAwMTk1MyAzMiA0Ny41NTQ5NTMgMzIgNDcuMDAxOTUzIEwgMzIgMzcgTCAzNS4zNzMwNDcgMzkuMzk2NDg0IEMgMzYuMjI0MDQ3IDQwLjEyNDQ4NCAzNy41NDAxMjUgNDAuMTgyMjAzIDM4LjQ1MzEyNSAzOS41MzMyMDMgTCA0NS45MDYyNSAzNC41MzMyMDMgQyA0Ny4wMjkyNSAzMy43MzIyMDMgNDcuMjg5MjgxIDMyLjE2Njg3NSA0Ni40ODgyODEgMzEuMDQ2ODc1IEMgNDUuNjg4MjgxIDI5LjkyNDg3NSA0NC4xMjQgMjkuNjYzODQ0IDQzIDMwLjQ2NDg0NCBMIDM3LjE0MDYyNSAzNC4zMjYxNzIgTCAzMS42Mjg5MDYgMjkuNjAxNTYyIEMgMzEuMTc0OTA2IDI5LjIxMzU2MyAzMC41OTcgMjguOTk4MDQ3IDMwIDI4Ljk5ODA0NyBMIDI2IDI4Ljk5ODA0NyBMIDIwIDI4Ljk5ODA0NyBDIDE5LjcgMjguOTk4MDQ3IDE5LjQwMjA5NCAyOS4wNTMyMDMgMTkuMTIxMDk0IDI5LjE1ODIwMyBMIDEyLjQ4MjQyMiAzMS42NDY0ODQgTCA3IDI3LjU3ODEyNSBDIDYuNDcwNSAyNy4xMzY2MjUgNS44MTEzMjgxIDI2Ljk1MjAxNiA1LjE3MzgyODEgMjcuMDA5NzY2IHoiLz48L3N2Zz4="); }
 
-/* === Lot J phase 2 : sous-nav active teintée par section parente ===
-   Le conteneur .sous-navigation reçoit la classe section-X via navigation.js.
-   Même pattern multiply + bordure + texte que la nav principale. */
-.sous-navigation.section-conception button.actif {
-    background:
-      linear-gradient(rgba(218, 193, 108, 0.5), rgba(218, 193, 108, 0.5)),
-      linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
-    background-blend-mode: multiply;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 4px rgba(218, 193, 108, 0.15);
-}
-.sous-navigation.section-calendrier button.actif {
-    background:
-      linear-gradient(rgba(48, 184, 93, 0.5), rgba(48, 184, 93, 0.5)),
-      linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
-    background-blend-mode: multiply;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 4px rgba(48, 184, 93, 0.15);
-}
-.sous-navigation.section-suivi button.actif {
-    background:
-      linear-gradient(rgba(86, 202, 220, 0.5), rgba(86, 202, 220, 0.5)),
-      linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
-    background-blend-mode: multiply;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 4px rgba(86, 202, 220, 0.15);
-}
-.sous-navigation.section-evaluations button.actif {
-    background:
-      linear-gradient(rgba(110, 193, 231, 0.5), rgba(110, 193, 231, 0.5)),
-      linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
-    background-blend-mode: multiply;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 4px rgba(110, 193, 231, 0.15);
-}
-.sous-navigation.section-labo button.actif {
-    background:
-      linear-gradient(rgba(209, 175, 244, 0.5), rgba(209, 175, 244, 0.5)),
-      linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
-    background-blend-mode: multiply;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 4px rgba(209, 175, 244, 0.15);
-}
+/* Note : les overrides multiply par section (Lot J phase 2) ont été retirés
+   le 27 mai 2026 — l'effet assombrissant créait une confusion avec les boutons
+   sombres de la nav principale et les onglets actifs des autres sections.
+   La sous-nav .actif suit désormais le pattern de la nav principale : fond
+   plus pâle (blanc translucide), voir .sous-navigation button.actif plus bas. */
 
 /* Ancien format PNG — rétrocompatibilité */
 .nav-icone {
@@ -1800,8 +1762,8 @@ span.header-icon {
 }
 
 .sous-navigation button.actif {
-    background: rgba(106, 172, 184, 0.22);
-    border-color: rgba(106, 172, 184, 0.35);
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.4);
     color: white;
     box-shadow: var(--shadow-normal);
 }
@@ -20443,48 +20405,10 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     box-shadow: 0 4px 12px rgba(3, 46, 92, 0.3);
 }
 
-/* === Lot J phase 2 mode clair : sous-nav teintée par section parente ===
-   Spécif (0,4,1) bat .mode-clair .sous-navigation button.actif (0,3,1). */
-.mode-clair .sous-navigation.section-conception button.actif {
-    background:
-      linear-gradient(rgba(218, 193, 108, 0.5), rgba(218, 193, 108, 0.5)),
-      linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
-    background-blend-mode: multiply;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 4px rgba(218, 193, 108, 0.15);
-}
-.mode-clair .sous-navigation.section-calendrier button.actif {
-    background:
-      linear-gradient(rgba(48, 184, 93, 0.5), rgba(48, 184, 93, 0.5)),
-      linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
-    background-blend-mode: multiply;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 4px rgba(48, 184, 93, 0.15);
-}
-.mode-clair .sous-navigation.section-suivi button.actif {
-    background:
-      linear-gradient(rgba(86, 202, 220, 0.5), rgba(86, 202, 220, 0.5)),
-      linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
-    background-blend-mode: multiply;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 4px rgba(86, 202, 220, 0.15);
-}
-.mode-clair .sous-navigation.section-evaluations button.actif {
-    background:
-      linear-gradient(rgba(110, 193, 231, 0.5), rgba(110, 193, 231, 0.5)),
-      linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
-    background-blend-mode: multiply;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 4px rgba(110, 193, 231, 0.15);
-}
-.mode-clair .sous-navigation.section-labo button.actif {
-    background:
-      linear-gradient(rgba(209, 175, 244, 0.5), rgba(209, 175, 244, 0.5)),
-      linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
-    background-blend-mode: multiply;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 4px rgba(209, 175, 244, 0.15);
-}
+/* Note : les overrides multiply par section (Lot J phase 2) en mode clair
+   ont été retirés le 27 mai 2026 pour la même raison que le mode sombre —
+   l'actif suit le pattern générique .mode-clair .sous-navigation button.actif
+   plus haut (#0a4a7e plus clair que #032e5c du normal). */
 
 /* Bouton principal — fond sombre, texte reste blanc */
 .mode-clair .bouton-principal {
