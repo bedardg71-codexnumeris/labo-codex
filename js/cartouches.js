@@ -581,6 +581,7 @@ async function afficherMatriceRetroaction() {
     });
 
     let html = `
+        <div class="matrice-tableau-wrap">
         <table class="matrice-tableau">
             <thead>
                 <tr>
@@ -639,6 +640,7 @@ async function afficherMatriceRetroaction() {
     html += `
             </tbody>
         </table>
+        </div>
     `;
 
     container.innerHTML = html;

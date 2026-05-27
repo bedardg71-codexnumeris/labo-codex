@@ -9718,11 +9718,35 @@ body.mode-clair .bloc-rlo-separateur {
 }
 
 /* === MATRICE DE COMMENTAIRES EN TABLEAU === */
+.matrice-tableau-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
 .matrice-tableau {
     width: 100%;
     border-collapse: collapse;
     margin: 20px 0;
     box-shadow: var(--shadow-subtil);
+}
+
+/* Sous mobile : largeur minimale pour éviter que les colonnes soient trop
+   serrées (forcer scroll horizontal plutôt que troncation de mots) +
+   colonne Critère sticky à gauche pour garder le contexte */
+@media (max-width: 768px) {
+    .matrice-tableau {
+        min-width: 640px;
+    }
+    .matrice-tableau th:first-child,
+    .matrice-tableau td:first-child {
+        position: sticky;
+        left: 0;
+        background: var(--surface-section, #142428);
+        z-index: 1;
+    }
+    .matrice-tableau th:first-child {
+        background: var(--bleu-principal);
+    }
 }
 
 .matrice-tableau thead {
@@ -17654,6 +17678,35 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 
     .travaux-archivage-options {
         grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .travaux-archivage-options {
+        grid-template-columns: 1fr;
+    }
+    .travaux-archivage-filtres {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Grille d'édition des niveaux d'échelle : 7 colonnes sur desktop,
+   empilé sur mobile pour éviter la troncation des champs */
+.echelle-niveau-grille {
+    display: grid;
+    grid-template-columns: 60px 60px 2fr 80px 80px 100px 80px;
+    gap: 12px;
+    align-items: end;
+}
+@media (max-width: 640px) {
+    .echelle-niveau-grille {
+        grid-template-columns: 1fr 1fr;
+    }
+    .echelle-niveau-grille > .groupe-form:nth-child(1) {
+        grid-column: 1 / -1;
+    }
+    .echelle-niveau-grille > .groupe-form:nth-child(3) {
+        grid-column: 1 / -1;
     }
 }
 
