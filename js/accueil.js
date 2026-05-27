@@ -192,7 +192,7 @@ function afficherAccueilContenu(conteneur) {
             <label for="checkbox-accompagnement-accueil" class="accueil-aide-demi">
                 <div class="accueil-aide-icone">\uD83E\uDDED</div>
                 <div>
-                    <div class="accueil-aide-titre">Accompagnement</div>
+                    <div class="accueil-aide-titre">Assistance</div>
                     <div class="accueil-aide-desc">Tour guid\u00e9, info-bulles, aide contextuelle.</div>
                 </div>
                 <input type="checkbox" id="checkbox-accompagnement-accueil"
