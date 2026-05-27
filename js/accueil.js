@@ -116,52 +116,52 @@ function afficherAccueilContenu(conteneur) {
         <div class="accueil-section-label">Raccourcis</div>
         <div class="accueil-grille-actions">
 
-            <div class="accueil-action" data-action="ouvrirWizardPratique">
-                <div class="accueil-action-icone">\u2699\uFE0F</div>
-                <div class="accueil-action-titre">Configurer ta pratique</div>
-                <div class="accueil-action-desc">D\u00e9finis ce que tu mesures et comment tu le fais.</div>
+            <div class="accueil-action" data-section="conception" data-action="ouvrirWizardPratique">
+                <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-data-sheet"></span></div>
+                <div class="accueil-action-titre">Adopter ta pratique</div>
+                <div class="accueil-action-desc">L\u2019app s\u2019adapte \u00e0 ta notation : sommative, standards, sp\u00e9cifications, jetons.</div>
             </div>
 
-            <div class="accueil-action" data-action="naviguerAccueilCarte" data-param="conception|conception-carte">
-                <div class="accueil-action-icone">\uD83D\uDDFA\uFE0F</div>
+            <div class="accueil-action" data-section="conception" data-action="naviguerAccueilCarte" data-param="conception|conception-carte">
+                <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-puzzle"></span></div>
                 <div class="accueil-action-titre">Planifier ton cours</div>
-                <div class="accueil-action-desc">S\u00e9quences, le\u00e7ons et alignement p\u00e9dagogique.</div>
+                <div class="accueil-action-desc">Carte mentale, s\u00e9quences et le\u00e7ons align\u00e9es avec tes \u00e9valuations.</div>
             </div>
 
-            <div class="accueil-action" data-action="naviguerAccueilCarte" data-param="suivi|suivi-saisie">
-                <div class="accueil-action-icone">\uD83D\uDCCB</div>
+            <div class="accueil-action" data-section="suivi" data-action="naviguerAccueilCarte" data-param="suivi|suivi-saisie">
+                <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-people"></span></div>
                 <div class="accueil-action-titre">Saisir les pr\u00e9sences</div>
-                <div class="accueil-action-desc">Pr\u00e9sences du jour et observations.</div>
+                <div class="accueil-action-desc">Pr\u00e9sences et observations \u2014 premiers signaux des difficult\u00e9s.</div>
             </div>
 
-            <div class="accueil-action" data-action="naviguerAccueilCarte" data-param="evaluations|evaluations-importer">
-                <div class="accueil-action-icone">\uD83D\uDCE5</div>
-                <div class="accueil-action-titre">Importer des travaux</div>
-                <div class="accueil-action-desc">PDF et images de tes \u00e9tudiants.</div>
+            <div class="accueil-action" data-section="evaluations" data-action="naviguerAccueilCarte" data-param="evaluations|evaluations-importer">
+                <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-downloading"></span></div>
+                <div class="accueil-action-titre">Importer des productions \u00e9tudiantes</div>
+                <div class="accueil-action-desc">PDF et images, prêts à être annotés au stylet ou à la souris.</div>
             </div>
 
-            <div class="accueil-action" data-action="naviguerAccueilCarte" data-param="evaluations|evaluations-annoter">
-                <div class="accueil-action-icone">\u270F\uFE0F</div>
+            <div class="accueil-action" data-section="evaluations" data-action="naviguerAccueilCarte" data-param="evaluations|evaluations-annoter">
+                <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-edit"></span></div>
                 <div class="accueil-action-titre">Annoter et \u00e9valuer</div>
-                <div class="accueil-action-desc">Annote les travaux selon ta grille.</div>
+                <div class="accueil-action-desc">Annote au stylet, \u00e9value selon ta grille \u2014 le bilan s\u2019\u00e9crit tout seul.</div>
             </div>
 
-            <div class="accueil-action" data-action="afficherSection" data-param="apercu">
-                <div class="accueil-action-icone">\uD83D\uDCCA</div>
-                <div class="accueil-action-titre">Avoir un aper\u00e7u</div>
-                <div class="accueil-action-desc">Participation, r\u00e9sultats et progression.</div>
+            <div class="accueil-action" data-section="apercu" data-action="afficherSection" data-param="apercu">
+                <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-line-chart"></span></div>
+                <div class="accueil-action-titre">Avoir un aper\u00e7u du groupe</div>
+                <div class="accueil-action-desc">Engagement, structure des r\u00e9sultats d\u2019apprentissage, signaux \u00e0 surveiller.</div>
             </div>
 
-            <div class="accueil-action" data-action="naviguerAccueilCarte" data-param="suivi|suivi-profil">
-                <div class="accueil-action-icone">\uD83D\uDC64</div>
-                <div class="accueil-action-titre">Consulter un profil</div>
-                <div class="accueil-action-desc">Portrait d\u2019un \u00e9l\u00e8ve.</div>
+            <div class="accueil-action" data-section="suivi" data-action="naviguerAccueilCarte" data-param="suivi|suivi-profil">
+                <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-profile"></span></div>
+                <div class="accueil-action-titre">Consulter le profil d\u2019un\u00B7e \u00e9tudiant\u00B7e</div>
+                <div class="accueil-action-desc">Productions, progression et difficultés récurrentes pour ajuster ton soutien.</div>
             </div>
 
-            <div class="accueil-action" data-action="naviguerAccueilCarte" data-param="suivi|suivi-interventions">
-                <div class="accueil-action-icone">\uD83C\uDFAF</div>
-                <div class="accueil-action-titre">Interventions R\u00e0I</div>
-                <div class="accueil-action-desc">\u00c9l\u00e8ves \u00e0 risque, interventions diff\u00e9renci\u00e9es.</div>
+            <div class="accueil-action" data-section="suivi" data-action="naviguerAccueilCarte" data-param="suivi|suivi-interventions">
+                <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-pause-button"></span></div>
+                <div class="accueil-action-titre">Interventions</div>
+                <div class="accueil-action-desc">Mod\u00e8le R\u00e9ponse \u00e0 l\u2019intervention (R\u00e0I) : interventions diff\u00e9renci\u00e9es selon le besoin.</div>
             </div>
 
         </div>
@@ -174,23 +174,23 @@ function afficherAccueilContenu(conteneur) {
         <div class="accueil-grille-bas">
 
             <div class="accueil-utilitaire-demi" data-action="ouvrirModalBackup">
-                <div class="accueil-utilitaire-icone">\uD83D\uDCBE</div>
+                <div class="accueil-utilitaire-icone"><img src="icons/icon-usb-memory.svg" alt=""></div>
                 <div>
                     <div class="accueil-utilitaire-titre">Sauvegarder</div>
-                    <div class="accueil-utilitaire-desc">Exporter ou restaurer tes donn\u00e9es.</div>
+                    <div class="accueil-utilitaire-desc">Exporte ou restaure tes donn\u00e9es. Tout reste local.</div>
                 </div>
             </div>
 
             <div class="accueil-utilitaire-demi" data-action="afficherModalNouveautes">
-                <div class="accueil-utilitaire-icone">\uD83D\uDCF0<span class="pastille-nouveautes"></span></div>
+                <div class="accueil-utilitaire-icone"><img src="icons/icons8-megaphone.svg" alt=""><span class="pastille-nouveautes"></span></div>
                 <div>
                     <div class="accueil-utilitaire-titre">Nouveaut\u00e9s</div>
-                    <div class="accueil-utilitaire-desc">Derni\u00e8res mises \u00e0 jour.</div>
+                    <div class="accueil-utilitaire-desc">D\u00e9tails sur la derni\u00e8re mise \u00e0 jour.</div>
                 </div>
             </div>
 
             <label for="checkbox-accompagnement-accueil" class="accueil-aide-demi">
-                <div class="accueil-aide-icone">\uD83E\uDDED</div>
+                <div class="accueil-aide-icone"><img src="icons/icons8-info.svg" alt=""></div>
                 <div>
                     <div class="accueil-aide-titre">Assistance</div>
                     <div class="accueil-aide-desc">Tour guid\u00e9, info-bulles, aide contextuelle.</div>
@@ -201,10 +201,10 @@ function afficherAccueilContenu(conteneur) {
             </label>
 
             <label for="checkbox-demo-accueil" class="accueil-aide-demi">
-                <div class="accueil-aide-icone">\uD83D\uDD2C</div>
+                <div class="accueil-aide-icone"><img src="icons/icons8-binary-code.svg" alt=""></div>
                 <div>
                     <div class="accueil-aide-titre">Donn\u00e9es d\u00e9mo</div>
-                    <div class="accueil-aide-desc">Explore avec des donn\u00e9es fictives.</div>
+                    <div class="accueil-aide-desc">Explore l\u2019app avec un cours fictif d\u00e9j\u00e0 configur\u00e9.</div>
                 </div>
                 <input type="checkbox" id="checkbox-demo-accueil"
                     class="accueil-aide-checkbox" ${demoChecked ? 'checked' : ''}
