@@ -1640,7 +1640,7 @@
 
         // Barre d'emojis en bas
         html += '<div class="palette-flottante-bas-btns">';
-        html += '<button class="palette-flottante-aide-btn" data-action="tamponsBibliotheque.afficherBibliothequeTampons" title="Bibliothèque de tampons"><img src="' + ICONS_DIR + 'icon-book-shelf.svg" alt="" class="outil-svg-icon palette-bas-icon"></button>';
+        html += '<button class="palette-flottante-aide-btn" data-action="tamponsBibliotheque.afficherBibliothequeTampons" title="Bibliothèque de tampons"><img src="' + ICONS_DIR + 'icons8-library-2.svg" alt="" class="outil-svg-icon palette-bas-icon"></button>';
         html += '<button class="palette-flottante-aide-btn" id="btn-toggle-codes" data-action="travauxOutils.togglePaletteErreursFrancais" title="Afficher/masquer les codes">🚦</button>';
         html += '<button class="palette-flottante-aide-btn" id="btn-toggle-tampons" data-action="travauxOutils.togglePaletteAutocollants" title="Afficher/masquer les tampons">🫥</button>';
         html += '<button class="palette-flottante-aide-btn" id="btn-toggle-chrono" data-action="travauxOutils.togglePaletteChrono" title="Chronomètre">⏱️</button>';
