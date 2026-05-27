@@ -3058,7 +3058,7 @@ function afficherNiveauxNouvelleEchelle() {
                     ✕
                 </button>
             ` : ''}
-            <div style="display: grid; grid-template-columns: 60px 60px 2fr 80px 80px 100px 80px; gap: 12px; align-items: end;">
+            <div class="echelle-niveau-grille">
                 <div class="groupe-form echelle-text-center">
                     <label class="echelle-texte-detail">Ordre</label>
                     <div style="display: flex; flex-direction: column; gap: 4px;">
@@ -3346,7 +3346,7 @@ function afficherNiveauxEchelle(echelle) {
                     ✕
                 </button>
             ` : ''}
-            <div style="display: grid; grid-template-columns: 60px 60px 2fr 80px 80px 100px 80px; gap: 12px; align-items: end;">
+            <div class="echelle-niveau-grille">
                 <div class="groupe-form echelle-text-center">
                     <label class="echelle-texte-detail">Ordre</label>
                     <div style="display: flex; flex-direction: column; gap: 4px;">
