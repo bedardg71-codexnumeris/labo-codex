@@ -103,10 +103,6 @@ function afficherSection(nomSection) {
         afficherAccueil();
     }
 
-    // Section Aperçu (plate, sans sous-navigation) — charger le tableau de bord
-    if (nomSection === 'apercu' && typeof chargerTableauBordApercu === 'function') {
-        setTimeout(() => chargerTableauBordApercu(), 150);
-    }
 }
 
 /* ===============================
@@ -165,6 +161,7 @@ const TOOLTIPS_SOUS_NAV = {
     'calendrier-trimestre': 'nav-calendrier-trimestre',
     'calendrier-vue': 'nav-calendrier-vue',
     // Suivi
+    'suivi-groupe': 'nav-suivi-groupe',
     'suivi-liste': 'nav-suivi-liste',
     'suivi-saisie': 'nav-suivi-saisie',
     'suivi-profil': 'nav-suivi-profil',
@@ -264,6 +261,11 @@ const INITIALISATEURS_SOUS_SECTION = {
     },
 
     // === SUIVI ===
+    'suivi-groupe': function () {
+        if (typeof chargerTableauBordApercu === 'function') {
+            setTimeout(chargerTableauBordApercu, 150);
+        }
+    },
     'suivi-liste': function () {
         if (typeof rechargerListeEtudiants === 'function') {
             setTimeout(rechargerListeEtudiants, 100);
@@ -702,7 +704,7 @@ function naviguerVers(section, sousSection) {
  * });
  * 
  * // Afficher la section par défaut
- * afficherSection('apercu');
+ * afficherSection('accueil');
  * 
  * COMPATIBILITÉ:
  * - Nécessite ES6+ pour les arrow functions et template literals

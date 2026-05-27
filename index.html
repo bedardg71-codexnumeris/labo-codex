@@ -854,7 +854,8 @@
         .accueil-action[data-section="conception"]  .accueil-icone-mask { background-color: var(--section-conception); }
         .accueil-action[data-section="suivi"]       .accueil-icone-mask { background-color: var(--section-suivi); }
         .accueil-action[data-section="evaluations"] .accueil-icone-mask { background-color: var(--section-evaluations); }
-        .accueil-action[data-section="apercu"]      .accueil-icone-mask { background-color: var(--bleu-principal); }
+        /* Note : data-section="apercu" supprimé le 27 mai 2026 (carte Aperçu
+           du groupe migrée vers Suivi). La carte porte désormais data-section="suivi". */
 
         /* 8 SVG inlinés en base64 pour les raccourcis (contournement CORS file://). */
         .ico-acc-data-sheet    { -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgMzAgMzAiIHdpZHRoPSIzMHB4IiBoZWlnaHQ9IjMwcHgiPjxwYXRoIGQ9Ik0gOS45ODQzNzUgMy45ODYzMjgxIEEgMS4wMDAxIDEuMDAwMSAwIDAgMCA5LjgzOTg0MzggNCBMIDYgNCBDIDQuOTA2OTM3MiA0IDQgNC45MDY5MzcyIDQgNiBMIDQgOS44MzIwMzEyIEEgMS4wMDAxIDEuMDAwMSAwIDAgMCA0IDEwLjE1ODIwMyBMIDQgMTQuODMyMDMxIEEgMS4wMDAxIDEuMDAwMSAwIDAgMCA0IDE1LjE1ODIwMyBMIDQgMTkuODMyMDMxIEEgMS4wMDAxIDEuMDAwMSAwIDAgMCA0IDIwLjE1ODIwMyBMIDQgMjQgQyA0IDI1LjA5MzA2MyA0LjkwNjkzNzIgMjYgNiAyNiBMIDkuODMyMDMxMiAyNiBBIDEuMDAwMSAxLjAwMDEgMCAwIDAgMTAuMTU4MjAzIDI2IEwgMTQuODMyMDMxIDI2IEEgMS4wMDAxIDEuMDAwMSAwIDAgMCAxNS4xNTgyMDMgMjYgTCAxOS44MzIwMzEgMjYgQSAxLjAwMDEgMS4wMDAxIDAgMCAwIDIwLjE1ODIwMyAyNiBMIDI0IDI2IEMgMjUuMDkzMDYzIDI2IDI2IDI1LjA5MzA2MyAyNiAyNCBMIDI2IDIwLjE2Nzk2OSBBIDEuMDAwMSAxLjAwMDEgMCAwIDAgMjYgMTkuODQxNzk3IEwgMjYgMTUuMTY3OTY5IEEgMS4wMDAxIDEuMDAwMSAwIDAgMCAyNiAxNC44NDE3OTcgTCAyNiAxMC4xNjc5NjkgQSAxLjAwMDEgMS4wMDAxIDAgMCAwIDI2IDkuODQxNzk2OSBMIDI2IDYgQyAyNiA0LjkwNjkzNzIgMjUuMDkzMDYzIDQgMjQgNCBMIDIwLjE1NDI5NyA0IEEgMS4wMDAxIDEuMDAwMSAwIDAgMCAxOS45ODQzNzUgMy45ODYzMjgxIEEgMS4wMDAxIDEuMDAwMSAwIDAgMCAxOS44Mzk4NDQgNCBMIDE1LjE1NDI5NyA0IEEgMS4wMDAxIDEuMDAwMSAwIDAgMCAxNC45ODQzNzUgMy45ODYzMjgxIEEgMS4wMDAxIDEuMDAwMSAwIDAgMCAxNC44Mzk4NDQgNCBMIDEwLjE1NDI5NyA0IEEgMS4wMDAxIDEuMDAwMSAwIDAgMCA5Ljk4NDM3NSAzLjk4NjMyODEgeiBNIDYgNiBMIDkgNiBMIDkgOSBMIDYgOSBMIDYgNiB6IE0gMTEgNiBMIDE0IDYgTCAxNCA5IEwgMTEgOSBMIDExIDYgeiBNIDE2IDYgTCAxOSA2IEwgMTkgOSBMIDE2IDkgTCAxNiA2IHogTSAyMSA2IEwgMjQgNiBMIDI0IDkgTCAyMSA5IEwgMjEgNiB6IE0gNyA3IEwgNyA4IEwgOCA4IEwgOCA3IEwgNyA3IHogTSAxMiA3IEwgMTIgOCBMIDEzIDggTCAxMyA3IEwgMTIgNyB6IE0gMTcgNyBMIDE3IDggTCAxOCA4IEwgMTggNyBMIDE3IDcgeiBNIDIyIDcgTCAyMiA4IEwgMjMgOCBMIDIzIDcgTCAyMiA3IHogTSA2IDExIEwgOSAxMSBMIDkgMTQgTCA2IDE0IEwgNiAxMSB6IE0gMTEgMTEgTCAxNCAxMSBMIDE0IDE0IEwgMTEgMTQgTCAxMSAxMSB6IE0gMTYgMTEgTCAxOSAxMSBMIDE5IDE0IEwgMTYgMTQgTCAxNiAxMSB6IE0gMjEgMTEgTCAyNCAxMSBMIDI0IDE0IEwgMjEgMTQgTCAyMSAxMSB6IE0gNyAxMiBMIDcgMTMgTCA4IDEzIEwgOCAxMiBMIDcgMTIgeiBNIDYgMTYgTCA5IDE2IEwgOSAxOSBMIDYgMTkgTCA2IDE2IHogTSAxMSAxNiBMIDE0IDE2IEwgMTQgMTkgTCAxMSAxOSBMIDExIDE2IHogTSAxNiAxNiBMIDE5IDE2IEwgMTkgMTkgTCAxNiAxOSBMIDE2IDE2IHogTSAyMSAxNiBMIDI0IDE2IEwgMjQgMTkgTCAyMSAxOSBMIDIxIDE2IHogTSA3IDE3IEwgNyAxOCBMIDggMTggTCA4IDE3IEwgNyAxNyB6IE0gNiAyMSBMIDkgMjEgTCA5IDI0IEwgNiAyNCBMIDYgMjEgeiBNIDExIDIxIEwgMTQgMjEgTCAxNCAyNCBMIDExIDI0IEwgMTEgMjEgeiBNIDE2IDIxIEwgMTkgMjEgTCAxOSAyNCBMIDE2IDI0IEwgMTYgMjEgeiBNIDIxIDIxIEwgMjQgMjEgTCAyNCAyNCBMIDIxIDI0IEwgMjEgMjEgeiBNIDcgMjIgTCA3IDIzIEwgOCAyMyBMIDggMjIgTCA3IDIyIHoiLz48L3N2Zz4=");
@@ -4056,9 +4057,6 @@
                 <button data-onglet="accueil" data-tooltip="nav-accueil">
                     <span class="nav-icon ico-home" aria-hidden="true"></span><span class="nav-label">Accueil</span>
                 </button>
-                <button data-onglet="apercu" data-tooltip="nav-apercu">
-                    <span class="nav-icon ico-combo-chart" aria-hidden="true"></span><span class="nav-label">Aper&ccedil;u</span>
-                </button>
                 <div class="nav-separateur-vertical" aria-hidden="true"></div>
                 <button data-onglet="calendrier" data-tooltip="nav-calendrier">
                     <span class="nav-icon ico-calendar" aria-hidden="true"></span><span class="nav-label">Cadre</span>
@@ -4080,7 +4078,6 @@
             <!-- Select mobile (caché desktop par CSS) -->
             <select id="select-nav-mobile" class="select-nav-mobile" aria-label="Section" data-on-change="changerSectionDepuisSelectMobile">
                 <option value="accueil">Accueil</option>
-                <option value="apercu">Aper&ccedil;u</option>
                 <option value="calendrier">Cadre</option>
                 <option value="conception">Conception</option>
                 <option value="evaluations">&Eacute;valuation</option>
@@ -4111,13 +4108,14 @@
                 <!-- Accueil = section plate, contenu généré par accueil.js (toggles Découvrir/Parcourir/Piloter) -->
             </section>
 
-            <!-- ===================================
-     SECTION: APERÇU (anciennement Tableau de bord > Aperçu)
-     Section plate, sans sous-navigation
-     =================================== -->
-            <section id="section-apercu" class="section">
+            <!-- Sous-section Suivi › Suivi du groupe (anciennement section
+                 plate #section-apercu, migrée le 27 mai 2026).
+                 NOTE : le DOM est ici orphelin (en-dehors de #section-suivi) mais
+                 afficherSousSection() trouve par getElementById, donc fonctionne.
+                 À déplacer physiquement dans #section-suivi lors d'un futur cleanup. -->
+            <div id="suivi-groupe" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
-                        <span>Aperçu</span>
+                        <span>Suivi du groupe</span>
                         <span class="titre-emoji-container">
                             <button class="btn-aide-contextuelle" data-aide="tableau-bord-apercu" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>
                         </span>
@@ -4348,7 +4346,7 @@
 
                     <p id="tdb-horodatage" class="text-muted u-text-right" style="font-size: 0.72rem; opacity: 0.6; margin-top: 1.5rem"></p>
 
-            </section>
+            </div><!-- FIN sous-section suivi-groupe (DOM orphelin) -->
 
             <!-- ===================================
      SECTION: CONCEPTION

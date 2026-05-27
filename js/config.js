@@ -36,7 +36,6 @@ const configurationsOnglets = {
     // Sections supprimées: tableau-bord, presences, construction, planification
     // Sections créées: apercu (plate), structure, contexte, suivi
     'accueil': [],
-    'apercu': [],
     'conception': [
         { id: 'carte', label: 'Alignement pédagogique' },
         { id: 'organisateur', label: 'Plan de la leçon' },
@@ -51,6 +50,7 @@ const configurationsOnglets = {
         { id: 'vue', label: 'Vue calendaire' }
     ],
     'suivi': [
+        { id: 'groupe', label: 'Suivi du groupe' },
         { id: 'liste', label: 'Liste des élèves' },
         { id: 'saisie', label: 'Saisie des présences' },
         { id: 'profil', label: 'Profils individuels' },
@@ -93,7 +93,7 @@ const configurationsOnglets = {
 
 /**
  * Section actuellement affichée
- * Valeurs possibles: 'accueil' | 'apercu' | 'conception' | 'calendrier' | 'suivi' | 'evaluations' | 'labo' | 'aide' | 'reglages'
+ * Valeurs possibles: 'accueil' | 'conception' | 'calendrier' | 'suivi' | 'evaluations' | 'labo' | 'aide' | 'reglages'
  *
  * UTILISÉ PAR:
  * - afficherSection() pour mettre à jour l'état
@@ -101,7 +101,7 @@ const configurationsOnglets = {
  *
  * ⚠️ NE PAS MODIFIER - Référencé dans noms_stables.json
  */
-let sectionActive = 'apercu';
+let sectionActive = 'accueil';
 
 /**
  * Sous-section actuellement affichée

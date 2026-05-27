@@ -146,7 +146,7 @@ function afficherAccueilContenu(conteneur) {
                 <div class="accueil-action-desc">Annote au stylet, \u00e9value selon ta grille \u2014 le bilan s\u2019\u00e9crit tout seul.</div>
             </div>
 
-            <div class="accueil-action" data-section="apercu" data-action="afficherSection" data-param="apercu">
+            <div class="accueil-action" data-section="suivi" data-action="naviguerAccueilCarte" data-param="suivi|suivi-groupe">
                 <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-line-chart"></span></div>
                 <div class="accueil-action-titre">Avoir un aper\u00e7u du groupe</div>
                 <div class="accueil-action-desc">Engagement, structure des r\u00e9sultats d\u2019apprentissage, signaux \u00e0 surveiller.</div>

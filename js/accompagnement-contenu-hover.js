@@ -742,7 +742,7 @@ const TOOLTIPS = {
 
     'nav-tableau-bord':
         'Vue d\'ensemble du groupe : indices A-C-P, patterns d\'apprentissage, niveaux R\u00e0I et profils individuels.',
-    'nav-apercu':
+    'nav-suivi-groupe':
         'Observer les indices A-C-P, les patterns, les niveaux R\u00e0I et le d\u00e9veloppement du groupe via des graphiques.',
     'nav-suivi-liste':
         'Tableau complet des \u00e9tudiant\u00b7es avec indices, patterns et niveaux R\u00e0I. Filtrable et triable par colonne.',

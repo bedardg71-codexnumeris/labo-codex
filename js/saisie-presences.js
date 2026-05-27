@@ -1358,16 +1358,11 @@ function enregistrerPresences() {
     calculerEtSauvegarderIndicesAssiduite();
 
     // ========== NOUVEAU : Recharger le tableau de bord ==========
-    // Si le tableau de bord est visible, le rafraîchir
-    const sectionApercu = document.getElementById('section-apercu');
-    if (sectionApercu && sectionApercu.classList.contains('active')) {
-
-        // Recharger l'aperçu si c'est la sous-section active
-        const apercu = document.getElementById('apercu-contenu');
-        if (apercu && apercu.classList.contains('active')) {
-            if (typeof chargerTableauBordApercu === 'function') {
-                setTimeout(() => chargerTableauBordApercu(), 300);
-            }
+    // Si le sous-onglet Suivi > Suivi du groupe est actif, le rafraîchir.
+    const sousSectionGroupe = document.getElementById('suivi-groupe');
+    if (sousSectionGroupe && sousSectionGroupe.classList.contains('active')) {
+        if (typeof chargerTableauBordApercu === 'function') {
+            setTimeout(() => chargerTableauBordApercu(), 300);
         }
     }
 

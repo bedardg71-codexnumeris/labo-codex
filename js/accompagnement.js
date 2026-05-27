@@ -1105,7 +1105,7 @@ const ETAPES_TOUR = [
             { label: 'Passer cette \u00e9tape', type: 'secondaire', action: 'passerEtape' }
         ],
         correspond: function(idSousSection) {
-            if (idSousSection === 'apercu' || idSousSection === 'accueil-apercu') return true;
+            // 'suivi-groupe' couvre l'ancien id 'apercu' depuis la migration du 27 mai 2026.
             return typeof idSousSection === 'string' && idSousSection.indexOf('suivi-') === 0;
         }
     },
