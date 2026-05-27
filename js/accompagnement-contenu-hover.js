@@ -772,7 +772,7 @@ const TOOLTIPS = {
         'Utilitaires compl\u00e9mentaires pour l\'enseignement en classe.',
     'nav-labo-modelisation':
         'D\u00e9monstrations interactives et mod\u00e9lisations visuelles pour illustrer des concepts en classe.',
-    'nav-labo-tirage':
+    'nav-suivi-animation':
         'Tirage au sort al\u00e9atoire et questions flash pour l\'animation en classe.',
 
     // --- Labo > \u00c9tudes ---
