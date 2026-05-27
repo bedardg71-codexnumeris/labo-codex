@@ -7984,11 +7984,17 @@ body.mode-clair .bloc-rlo-separateur {
     margin-top: 4px;
 }
 
-/* Badges type de pratique (SOM, STD, SPE, DEN) */
+/* Badges type de pratique (SOM, STD, SPE, DEN, MULTI).
+   Style uniforme : fond blanc + bordure et texte noirs (#1a1a1a).
+   L'identité de la pratique se lit par le texte du badge, plus par sa
+   teinte. Libère l'espace chromatique pour les signaux fonctionnels
+   (Dépistage, sections, alertes). */
 .badge-type-pratique {
     display: inline-block;
-    color: white;
-    padding: 2px 6px;
+    background: #fff;
+    color: #1a1a1a;
+    padding: 1px 6px;
+    border: 1.5px solid #1a1a1a;
     border-radius: var(--radius-petit);  /* 5px - badge Tetris */
     font-size: 0.75rem;
     font-weight: bold;
@@ -7996,18 +8002,13 @@ body.mode-clair .bloc-rlo-separateur {
     text-transform: uppercase;
 }
 
-.badge-type-som { background: var(--som-orange); }
-.badge-type-std { background: var(--std-bleu); }
-.badge-type-spe { background: var(--spe-vert); }
-.badge-type-den { background: var(--den-violet); }
-.badge-type-multi {
-    background: linear-gradient(135deg,
-        var(--som-orange) 0%,
-        var(--std-bleu) 33%,
-        var(--spe-vert) 66%,
-        var(--den-violet) 100%
-    );
-}
+/* Variantes par pratique : neutralisées — héritent du style de base.
+   Conservées comme classes vides pour ne pas casser le markup existant. */
+.badge-type-som,
+.badge-type-std,
+.badge-type-spe,
+.badge-type-den,
+.badge-type-multi { /* style uniforme hérité de .badge-type-pratique */ }
 
 /* Badges caractéristiques (pills colorées selon le mode) */
 .badge-caracteristique {
@@ -9141,16 +9142,20 @@ body.mode-clair .bloc-rlo-separateur {
     line-height: 1.6;
 }
 
-/* === BADGES PRATIQUE (4 FAMILLES : SOM/STD/SPE/DEN) === */
+/* === BADGES PRATIQUE (SOM/STD/SPE/DEN/MULTI) ===
+   Style uniforme : fond blanc + bordure et texte noirs (#1a1a1a).
+   Identité de la pratique lue par le texte, plus par la teinte. */
 
-/* Badge normal (Compact pill) */
+/* Badge normal (pill) */
 .badge-pratique {
     display: inline-flex;
     align-items: center;
     gap: 4px;
     padding: 3px 10px;
+    background: #fff;
+    color: #1a1a1a;
+    border: 1.5px solid #1a1a1a;
     border-radius: var(--radius-pill);
-    border: 1.5px solid;
     font-size: 0.75rem;
     font-weight: 600;
     line-height: 1.2;
@@ -9170,8 +9175,10 @@ body.mode-clair .bloc-rlo-separateur {
     align-items: center;
     gap: 4px;
     padding: 2px 8px;
+    background: #fff;
+    color: #1a1a1a;
+    border: 1.5px solid #1a1a1a;
     border-radius: var(--radius-grand);
-    border: 1.5px solid;
     font-size: 0.7rem;
     font-weight: 600;
     line-height: 1.2;
@@ -9179,54 +9186,21 @@ body.mode-clair .bloc-rlo-separateur {
     vertical-align: middle;
 }
 
-/* Variante SOM (orange) - Sommative */
+/* Variantes par pratique (.som/.std/.spe/.den/.pan/.multi) : neutralisées —
+   héritent du style de base. Conservées comme classes vides pour ne pas
+   casser le markup existant. */
 .badge-pratique.som,
-.badge-pratique-compact.som {
-    background: color-mix(in srgb, var(--som-orange) 9%, transparent);
-    border-color: var(--som-orange);
-    color: var(--som-orange);
-}
-
-/* Variante STD (bleu) - Standards */
 .badge-pratique.std,
-.badge-pratique-compact.std {
-    background: color-mix(in srgb, var(--std-bleu) 9%, transparent);
-    border-color: var(--std-bleu);
-    color: var(--std-bleu);
-}
-
-/* Variante SPE (vert) - Spécifications */
 .badge-pratique.spe,
-.badge-pratique-compact.spe {
-    background: color-mix(in srgb, var(--spe-vert) 9%, transparent);
-    border-color: var(--spe-vert);
-    color: var(--spe-vert);
-}
-
-/* Variante DEN (violet) - Dénotation */
 .badge-pratique.den,
-.badge-pratique-compact.den {
-    background: color-mix(in srgb, var(--den-violet) 9%, transparent);
-    border-color: var(--den-violet);
-    color: var(--den-violet);
-}
-
-/* Rétrocompatibilité : .pan → .std */
 .badge-pratique.pan,
-.badge-pratique-compact.pan {
-    background: color-mix(in srgb, var(--std-bleu) 9%, transparent);
-    border-color: var(--std-bleu);
-    color: var(--std-bleu);
-}
-
-/* Variante Multi (violet) - Multi-pratiques / Gabarits universels */
 .badge-pratique.multi,
-.badge-pratique-compact.multi,
-.badge-pratique-compact:not(.som):not(.std):not(.spe):not(.den):not(.pan) {
-    background: color-mix(in srgb, #6f42c1 9%, transparent);
-    border-color: #6f42c1;
-    color: #6f42c1;
-}
+.badge-pratique-compact.som,
+.badge-pratique-compact.std,
+.badge-pratique-compact.spe,
+.badge-pratique-compact.den,
+.badge-pratique-compact.pan,
+.badge-pratique-compact.multi { /* style uniforme hérité */ }
 
 /* Ancienne classe pour rétrocompatibilité */
 .profil-badge-pratique {
