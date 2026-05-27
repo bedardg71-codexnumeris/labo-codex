@@ -850,16 +850,7 @@ function genererSectionAccompagnement(da) {
             </div>
 
             <div class="profil-grid-3col">
-                <!-- Carte 1 : Modèle de la Réponse à l'intervention (RàI) -->
-                <div class="profil-carte">
-                    <h2 class="profil-section-titre-sous" data-tooltip="profil-accomp-rai">Modèle de la Réponse à l'intervention (RàI)</h2>
-                    <div class="profil-message-vide" style="margin: 20px 0;">
-                        En attente de données
-                    </div>
-                    <p class="profil-texte-petit-gris">Les indicateurs RàI seront disponibles après la saisie des premières données.</p>
-                </div>
-
-                <!-- Carte 2 : Contexte d'apprentissage -->
+                <!-- Carte 1 : Contexte d'apprentissage (gauche) -->
                 <div class="profil-carte">
                     <h2 class="profil-section-titre-sous" data-tooltip="profil-accomp-contexte">Contexte d'apprentissage</h2>
                     <div class="profil-message-vide" style="margin: 20px 0;">
@@ -868,13 +859,22 @@ function genererSectionAccompagnement(da) {
                     <p class="profil-texte-petit-gris">Le contexte sera analysé après la saisie des premières données.</p>
                 </div>
 
-                <!-- Carte 3 : Observation SOLO -->
+                <!-- Carte 2 : Observation SOLO (centre) -->
                 <div class="profil-carte">
                     <h2 class="profil-section-titre-sous" data-tooltip="profil-accomp-solo">Observation de la structure des résultats d'apprentissage</h2>
                     <div class="profil-message-vide" style="margin: 20px 0;">
                         En attente de données
                     </div>
                     <p class="profil-texte-petit-gris">L'analyse SOLO sera disponible après les premières évaluations.</p>
+                </div>
+
+                <!-- Carte 3 : Modèle de la Réponse à l'intervention (RàI) (droite) -->
+                <div class="profil-carte">
+                    <h2 class="profil-section-titre-sous" data-tooltip="profil-accomp-rai">Modèle de la Réponse à l'intervention (RàI)</h2>
+                    <div class="profil-message-vide" style="margin: 20px 0;">
+                        En attente de données
+                    </div>
+                    <p class="profil-texte-petit-gris">Les indicateurs RàI seront disponibles après la saisie des premières données.</p>
                 </div>
             </div>
         `;
@@ -968,8 +968,8 @@ function genererSectionAccompagnement(da) {
             const afficherSOLO = obtenirPreference('afficherDescriptionsSOLO') !== false;
             return afficherSOLO ? 'profil-grid-3col' : 'profil-grid-2col';
         })()}">
-            <!-- Carte 1 : Modèle de la Réponse à l'intervention (RàI) -->
-            <div class="profil-carte">
+            <!-- Carte RàI : positionnée à droite via order (26 mai PM2) -->
+            <div class="profil-carte" style="order: 3">
                 <h2 class="profil-section-titre-sous" data-tooltip="profil-accomp-rai">Modèle de la Réponse à l'intervention (RàI)</h2>
 
                 <div class="badge-sys ${niveauRai.badgeClasse}">
@@ -1040,8 +1040,8 @@ function genererSectionAccompagnement(da) {
                 })()}
             </div>
 
-            <!-- Carte 2 : Contexte d'apprentissage -->
-            <div class="profil-carte">
+            <!-- Carte Contexte d'apprentissage : positionnée à gauche via order (26 mai PM2) -->
+            <div class="profil-carte" style="order: 1">
                 <h2 class="profil-section-titre-sous" data-tooltip="profil-accomp-contexte">Contexte d'apprentissage</h2>
 
                 <div class="badge-sys ${alerteContexte.badgeClasse}">
@@ -1092,7 +1092,8 @@ function genererSectionAccompagnement(da) {
                 // Vérifier s'il y a des forces ou défis à afficher (hors Français)
                 if (forcesSolo.length === 0 && defisSolo.length === 0) {
                     return `
-            <div class="profil-carte">
+            <!-- Carte SOLO : positionnée au centre via order (26 mai PM2) -->
+            <div class="profil-carte" style="order: 2">
                 <h2 class="profil-section-titre-sous" data-tooltip="profil-accomp-solo">Observation de la structure des résultats d'apprentissage</h2>
                 <p class="profil-texte-italique-gris">
                     Aucune force ni défi identifié selon la taxonomie SOLO.
@@ -1106,7 +1107,8 @@ function genererSectionAccompagnement(da) {
                 }
 
                 return `
-            <div class="profil-carte">
+            <!-- Carte SOLO : positionnée au centre via order (26 mai PM2) -->
+            <div class="profil-carte" style="order: 2">
                 <h2 class="profil-section-titre-sous" data-tooltip="profil-accomp-solo">Observation de la structure des résultats d'apprentissage</h2>
 
                 ${(() => {

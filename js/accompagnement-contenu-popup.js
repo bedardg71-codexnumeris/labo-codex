@@ -643,7 +643,7 @@ const AIDE_CONTEXTUELLE = {
     // =========================================================================
 
     'suivi-apprentissage-fondamentaux': {
-        titre: "Suivi de l'apprentissage des fondamentaux",
+        titre: "Structure des apprentissages fondamentaux (SOLO)",
         sections: [
             {
                 type: 'texte',
