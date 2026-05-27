@@ -1,30 +1,144 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 26 mai 2026 PM2, post-
-     livraison du Lot A migration icônes ✴ + interversion jaune/orange
-     + désaturation des 5 couleurs sections + pattern V4 sur nav active.
-     Beta 99.71 b0526-1758, HEAD main post-commit `01fde5b` (local,
-     non pushé — accumulation demandée par Grégoire avec le commit
-     SESSION + LOT-B doc qui suit cette session).
-     Ce SESSION.md vit sur la branche `main` du worktree principal et
-     sert de relai entre les sessions Claude. La session 26 mai a duré
-     toute la journée : matin = 6 livraisons + plan icônes ; PM = 3 lots
-     (F+I+J) + référentiels ; PM2 (cette session) = Lot A complet, refonte
-     chromatique nav/header, ménage référentiel, début Lot B. Présentation
-     AQPC le 3 juin 2026 (J−8 au moment du relai). L'historique complet
-     précédent (audit annuel 25 mai, refonte pratique active 24 mai,
-     #282 P1-P4 du 23 mai, cycle AQPC clos 22 mai, Cat-B clos 21 mai)
-     reste dans les §§ suivants comme référence.
+     IDENTIFICATION DE CE FICHIER  (mis à jour 27 mai 2026 fin de
+     journée, post-grosse session de refonte design système + nav +
+     iconographie + tampons d'annotation + page d'accueil. 19 commits
+     poussés sur main, beta 99.68 conservée toute la journée, builds
+     b0527-0533 → b0527-1245 (18 bumps de build). AQPC J−7 au moment
+     du relai. La session précédente (26 mai PM2/PM3) reste documentée
+     en §0bis. Tout l'historique antérieur (audit annuel 25 mai,
+     refonte pratique active 24 mai, #282 P1-P4 du 23 mai, cycle AQPC
+     clos 22 mai, Cat-B clos 21 mai) reste dans les §§ suivants.
      ===================================================================== -->
 
 > **📌 Identification**
 > - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
-> - **Dernier cycle livré** : **Session 26 mai PM2 + PM3** — PM2 : Lot A complet en 4 sous-lots, refonte chromatique nav + header (interversion jaune↔orange, désaturation, pattern V4). PM3 (soir, 22h-23h) : refonte panneau Paramètres d'accompagnement en 3 cartes accordéon (SOLO/ACP/RàI), renommages page Aperçu (« Observer » → « Observation des apprentissages », « Intervenir » → « Interventions pédagogiques », « Suivi de l'apprentissage des fondamentaux » → « Structure des apprentissages fondamentaux (SOLO) »), carte RàI déplacée à droite dans profil étudiant (CSS order). Voir §0 ci-dessous.
-> - **Cycle suivant — démarrage 27 mai matin** : **2 micro-chantiers de connexion** sur la barre « Structure des apprentissages fondamentaux (SOLO) » du tableau de bord Aperçu, puis **audit visuel Lot B** au gré (sans pression). Voir « Consignes démarrage 27 mai » à la fin du §0.
-> - **Documents clés** : `plans de travail/REFERENTIEL-COULEURS-SECTIONS.html` (refonte complète, sarcelle original + V4 default), `plans de travail/LOT-B-EMOJIS-ILLUSTRATIONS.html` (checklist Lot B), `plans de travail/PLAN-MIGRATION-ICONES-SVG.md` (§9 historique).
+> - **Dernier cycle livré** : **Session 27 mai matin** — refonte design système (palette assistance jaune→orange, badges pratique unifiés, séparateur nav, en-tête sans trait pleine largeur), inversion états nav/sous-nav (couleurs en permanence + actif neutre pâle), refonte iconographie (30+ icônes émoji→SVG icons8, dont 12 raccourcis accueil + 19 tampons annotation), réorganisation nav (Aperçu→Suivi›Suivi du groupe, Tirage→Suivi›Animation, Calendrier→Cadre, réordre Cadre/Conception/Évaluation/Suivi), refonte tampons d'annotation (noms généralisés hors discipline, descriptions par défaut RETROACTIONS_OBSERVATIONS_DEFAUT réécrite, 4 SVG SOLO migrés), refonte raccourcis page accueil (libellés axés novices, thématisation par section, beta+build déplacés dans carte Nouveautés). Voir §0 ci-dessous.
+> - **Cycle suivant — démarrage 28 mai matin** : reprise au choix selon priorité — soit attaquer **BACKLOG #287** (picker couleur custom HTML pour modale Personnaliser tampons, 1-2 h), soit **vérification visuelle complète post-refonte** (tour de l'app pour valider que rien n'est cassé, AQPC J−6), soit **audit visuel Lot B** (emojis UI résiduels). Voir « Consignes démarrage 28 mai » à la fin du §0.
+> - **Documents clés** : `BACKLOG.md` (#287 ajouté pour picker custom), `plans de travail/REFERENTIEL-COULEURS-SECTIONS.html`, `plans de travail/LOT-B-EMOJIS-ILLUSTRATIONS.html`, `plans de travail/PLAN-MIGRATION-ICONES-SVG.md` (Lot iconographie raccourcis accueil + tampons annotation considéré ad hoc dans cette session, à intégrer dans le plan).
 
 ---
 
-## §0 — Récap session 26 mai 2026 PM2 + PM3 (Lot A + refonte chromatique nav + refonte panneau accompagnement + renommages + démarrage chantier dépistage)
+## §0 — Récap session 27 mai 2026 matin (refonte design système + iconographie + nav + tampons + accueil)
+
+**Beta / build** : 99.68 conservée toute la journée. 18 bumps de build successifs (b0527-0533 → b0527-1245). HEAD main au moment du relai : `2466a6c` (déplacement beta/phrase).
+
+**Commits cette journée** (19 sur main, tous pushés) :
+
+| # | Hash | Description | Build |
+|---|------|-------------|-------|
+| 1 | `040bf09` | chore(version): rectifier renumérotation accidentelle 99.73 → 99.67 (mémoire `feedback_beta_build_convention` durcie : ne JAMAIS bumper beta sans demander) | 0527-0533 |
+| 2 | `25339a7` | feat(apercu+grilles): boutons accès SOLO + badge Dépistage jaune doré | 0527-0535 |
+| 3 | `d310e54` | feat(badges): style uniforme fond blanc + bordure et texte noirs sur SOM/STD/SPE/DEN/MULTI | 0527-0550 |
+| 4 | `6c6a6db` | feat(apercu): rename « Préférences » → « Paramètres d'accompagnement » + retrait icônes | 0527-0605 |
+| 5 | `efd7a70` | feat(nav): déplacer « Tirage au sort » de Labo vers Suivi › Animation | 0527-0620 |
+| 6 | `e1d8553` | feat(entete): retrait trait pleine largeur ligne 1 + ajout séparateur vertical nav | 0527-0630 |
+| 7 | `70d0017` | feat(nav): inverser états normal/actif + aligner border/glow modes sombre/clair | 0527-0645 |
+| 8 | `558f88c` | feat(nav): renommer « Calendrier » → « Cadre » + réordonner Cadre/Conception/Évaluation/Suivi | 0527-0650 |
+| 9 | `e0be66d` | feat(theme): palette acc-* jaune doré → orange + icône anonymisation icons8-anonymous | 0527-0705 |
+| 10 | `3e96d4b` | feat(sous-nav): retrait multiply assombrissant + actif blanc pâle (symétrie nav principale) | 0527-0715 |
+| 11 | `a6002a8` | feat(accueil): renommer carte « Accompagnement » → « Assistance » | 0527-0720 |
+| 12 | `c116e2b` | feat(accueil): refonte raccourcis page d'accueil — émojis → SVG icons8 + libellés axés novices + thématisation par section | 0527-0840 |
+| 13 | `d7ff3f4` | feat(accueil): icônes utilitaires Sauvegarder + Nouveautés en orange palette assistance | 0527-0850 |
+| 14 | `7743b91` | feat(nav): migration Aperçu → Suivi › Suivi du groupe + icône Évaluation nav (icons8-pulse) | 0527-0915 |
+| 15 | `c071a35` | feat(nav): icône Accueil maison → boussole (icons8-guide-2) | 0527-0920 |
+| 16 | `7f059db` | feat(theme): icône Bibliothèque (icons8-library-2) + icône Aide entête (icons8-guide) | 0527-0930 |
+| 17 | `2a36a25` | feat(tampons): refonte palette annotation — 19 SVG icons8 + 4 pictogrammes SOLO + descriptions par défaut généralisées | 0527-1225 |
+| 18 | `9facb3c` | feat(accueil): logo Codex Numeris 100% opaque (retrait opacity 0.7) | 0527-1230 |
+| 19 | `2466a6c` | feat(accueil+entete): déplacer phrase hero dans bandeau global + beta/build dans carte Nouveautés | 0527-1245 |
+
+**Bilan thématique** :
+
+**1. Convention beta restaurée + mémoire durcie** : la veille (26 mai), 7 bumps de beta non concertés (99.66 → 99.73 dans la même journée). Rectification 99.73 → 99.67 au commit 1, puis bump 99.68 (commit 2) qui a tenu TOUTE la journée du 27 mai (18 bumps de build seulement). Mémoire `feedback_beta_build_convention.md` réécrite : règle « jamais bumper la beta sans demander » durcie + ajout `js/main.js` comme 3ᵉ fichier à synchroniser (BACKLOG #285).
+
+**2. Design système chromatique** (commits 3, 7, 9, 10) :
+- Badges de pratique SOM/STD/SPE/DEN/MULTI : style fond plein coloré → fond blanc + bordure + texte noirs uniformes (3 classes, .badge-type-pratique + .badge-pratique + .badge-pratique-compact).
+- Palette assistance `--acc-*` : jaune doré `#e8c43a` → orange `#e8923a` (restauration historique). Résout collision visuelle avec `--section-conception #dac16c` (boutons d'aide et bouton Conception devenus indistinguables).
+- Mémoire `project_palette_couleurs_contraintes` mise à jour.
+- Inversion états nav principale + sous-nav : couleurs section visibles EN PERMANENCE en état normal, état actif neutre blanc translucide (parité visuelle complète sombre/clair, border 1px + glow 4px alignés entre modes).
+
+**3. Refonte iconographie** (commits 12, 13, 14, 15, 16, 17) — 30+ icônes :
+- Page d'accueil 12 raccourcis : 12 émojis natifs → SVG icons8 colorisés par section parente (data-section) via pattern `<span class="accueil-icone-mask">` + mask-image base64. Compensation viewBox pour puzzle (128×128) et downloading (50×50).
+- Nav principale : Accueil maison → boussole `icons8-guide-2`, Évaluation `icon-pulse` → `icons8-pulse` (viewBox 30×30 simplifié).
+- En-tête : Aide `icon-wordbook` → `icons8-guide`.
+- Bibliothèques : `icon-book-shelf.svg` → `icons8-library-2.svg` partout (5 sites HTML + 1 JS).
+- Tampons annotation : 19 SVG icons8 + nouveau tampon « Détour » (icons8-squiggly-arrow.svg) + 4 pictogrammes SOLO migrés dans sous-dossier `autocollants/solo/` + variant icons8-confusion-avec-pointe.svg (édité par Cowork).
+
+**4. Réorganisation navigation** (commits 5, 8, 14) :
+- Nav principale finale : Accueil · ‖ · Cadre · Conception · Évaluation · Suivi · Labo. Aperçu retiré, Calendrier renommé Cadre, réordonnance Cadre/Conception/Évaluation/Suivi.
+- Suivi a maintenant 6 sous-onglets : **Suivi du groupe** (anciennement section plate Aperçu, migrée comme 1ᵉʳ sous-onglet) · Liste des élèves · Saisie des présences · Profils individuels · Interventions · **Animation** (anciennement Labo › Tirage au sort, contient Questions Flash + Tirage).
+- Labo passe de 6 à 5 sous-onglets (perte de Tirage). Note technique : la sous-section `#suivi-groupe` est physiquement orpheline dans le DOM (en-dehors de `#section-suivi`) — `afficherSousSection` trouve par getElementById donc fonctionnel. Cleanup propre (déplacement physique HTML) inscrit en commentaire pour un futur passage post-AQPC.
+
+**5. Refonte page d'accueil** (commits 11, 12, 13, 18, 19) :
+- Carte AIDE « Accompagnement » → « Assistance » (éviter confusion avec accompagnement de l'élève).
+- 12 raccourcis : icônes thématisées + libellés axés novices (« Adopter ta pratique », « Avoir un aperçu du groupe », « Planifier ton cours », « Modèle Réponse à l'intervention (RàI) », etc.). Descriptions revues à partir du document de présentation fourni par Grégoire (carte mentale, stylet, structure des résultats d'apprentissage, etc.).
+- Hero « Un espace de travail pour la pratique enseignante. » retiré de la page d'accueil et déplacé dans le bandeau global (à côté de la date).
+- Beta + Build sortent du bandeau global et migrent dans la description de la carte Nouveautés (lus dynamiquement via `window.VERSION_MAJEURE` + `window.BUILD_ID`).
+- Logo Codex Numeris : opacity 0.7 → 1 (100% opaque).
+
+**6. Refonte tampons d'annotation** (commit 17, gros chantier) :
+- Tableau `AUTOCOLLANTS` : 23 entrées principales (6 actions + 13 observations + 4 compréhension) avec nouvelles icônes SVG icons8. PNG du dossier `autocollants/` remplacés (les 4 PNG `comprehension-*.png` supprimés).
+- Renommages pour généralisation (Grégoire ne veut plus de termes propres à sa discipline français/littérature dans les défauts de l'app) : HOC → « L'id. directrice », Mécanisme → « L'id. principale », Procédé → « L'id. secondaire », Soupçon → « Soupçon IA », Uni → Unistructurel, Multi → Multistructurel.
+- Nouveau tampon « Détour » (`obs-longueur`) pour signaler manque de synthèse/concision.
+- `RETROACTIONS_OBSERVATIONS_DEFAUT` (l. 451) entièrement réécrit avec les 23 nouveaux ids et descriptions généralisées (les 9 anciennes clés legacy `bon-lien`/`manque-lien`/`confusion`/`repetitif`/`preuve-absente`/`citation`/`approfondir`/`procedes`/`attention` supprimées).
+- Défaut couleur catégorie : `#888888` (gris) → `#000000` (noir).
+- Ordre du tableau reste alphabétique (Grégoire réordonnera via la modale Personnaliser, mécanisme `ordreAutocollants_observations` indépendant des défauts).
+
+**Items en suspens (non BACKLOG)** :
+- Taille pictogramme « Étendu » non résolue (viewBox 126×70 = ratio 1.8 vs autres SOLO 0.94 ; modifications viewBox + CSS box ciblée n'ont pas pris effet visuellement ; sans investigation plus poussée de la chaîne de rendu canvas + img, abandonné pour cette session, laissé tel quel).
+- Réordonnement logique des tampons (Grégoire le fera manuellement via la modale Personnaliser, sa configuration utilisateur est sauvegardée dans IDB sous `ordreAutocollants_observations`, indépendante des défauts du code).
+
+**Items reportés BACKLOG** :
+- `#287` 🟢 — Remplacer le picker de couleur natif macOS par une palette HTML custom (modale Personnaliser tampons). Pattern `<details>` + popover + grille `COULEURS` + bouton `.actif`. Effort estimé 1-2 h. 5 sites concernés (catégories + items tampon + outil dessin).
+
+**Mémoires durcies** :
+- `feedback_beta_build_convention.md` : règle « JAMAIS bumper la beta sans demander » + ajout `js/main.js` comme 3ᵉ source à synchroniser.
+- `project_palette_couleurs_contraintes.md` : palette assistance documentée comme orange `#e8923a` (au lieu de jaune `#e8c43a`), conflit hex résolu avec `--section-conception`.
+
+**Tests** : `node --check` vert sur chaque module modifié. Pas de Vitest/Playwright lancé sur cette session (refonte chromatique + iconographique, pas de modification logique métier).
+
+**Validation visuelle Grégoire** : OK à chaque commit (cycle de validation rapide tout au long de la journée).
+
+---
+
+### Consignes de démarrage — 28 mai matin
+
+**Avant de plonger** : 
+- Lire ce §0 (présent) en entier. Beaucoup de petits choix design accumulés sur la journée.
+- Vérifier `git status` propre, HEAD main à `2466a6c` ou plus récent, tous commits sur origin.
+- AQPC est le 3 juin = **J−6** au moment du démarrage 28 mai. Stabilité prime sur ajout de features.
+
+**3 voies possibles**, par ordre de priorité décroissante :
+
+**A. Vérification visuelle complète post-refonte (Recommandé)** ~1-2 h
+- Vu le volume de modifs cosmétiques accumulées (19 commits, 30+ icônes, palette acc-* basculée, nav restructurée, accueil refondu, tampons refondus), faire un tour complet de l'app pour détecter d'éventuelles régressions visuelles.
+- Sites prioritaires à parcourir :
+  - **Page d'accueil** : 12 raccourcis (icônes + couleurs section), carte Assistance/Données démo (orange), carte Nouveautés (beta+build dynamiques), absence du hero h1, logo Codex 100% opaque.
+  - **Bandeau global** : « Un espace de travail pour la pratique enseignante. · 28 mai 2026 », absence beta+build.
+  - **Nav principale** : Accueil(boussole)·‖·Cadre·Conception·Évaluation·Suivi·Labo, couleurs section en permanence, actif blanc pâle, séparateur vertical après Aperçu.
+  - **Suivi** : 6 sous-onglets dont Suivi du groupe (1ᵉʳ) et Animation (dernier).
+  - **Évaluations › Annoter** : palette tampons (devrait afficher les nouveaux noms et icônes SVG si Grégoire a fait Reset dans la modale Personnaliser ; sinon ses customs anciens persistent).
+  - **Modes sombre + clair** sur chacun de ces sites.
+
+**B. BACKLOG #287 — Picker couleur custom HTML** ~1-2 h
+- Modale Personnaliser les tampons : remplacer `<input type="color">` natif par popover HTML avec grille `COULEURS` + bouton `.actif`.
+- 5 sites concernés (cf. BACKLOG #287 pour détails techniques).
+
+**C. Audit visuel Lot B (emojis UI résiduels)** au gré
+- Grégoire navigue dans l'app et identifie les emojis résiduels visibles dans les rendus UI active (pas templates JS de conteneurs cachés). Document : `plans de travail/LOT-B-EMOJIS-ILLUSTRATIONS.html`.
+
+**Présentation AQPC** : 3 juin 2026, J−6. Filet captures d'écran si l'app plante (Keynote pilote). Enjeu réel de stabilité = expérimentateurs post-AQPC, pas la démo. À garder en tête pour les choix de cette semaine : stabilité + clarté visuelle > nouveautés.
+
+**Note pour Claude — comportements à éviter** :
+- ❌ **Ne JAMAIS bumper la beta sans demander à Grégoire** (cf. mémoire `feedback_beta_build_convention` durcie). Convention : 1 beta par journée, bumps de build uniquement entre les commits du même jour.
+- ❌ **Ne pas toucher à l'ID interne `apercu` dans le code historique non-migré** : la migration vers `suivi-groupe` est faite côté nav (config.js, navigation.js, accueil.js, etc.). Reste un commentaire `<div id="suivi-groupe">` orphelin dans le DOM hors de `#section-suivi` — fonctionnel mais à cleanup propre post-AQPC.
+- ❌ **Ne pas re-renommer les tampons « L'id. directrice/principale/secondaire »** sauf demande explicite. Grégoire a viré HOC/Mécanisme/Procédé pour généraliser hors discipline.
+- ❌ **Ne pas réordonner le tableau AUTOCOLLANTS dans le code** : Grégoire réordonne via UI utilisateur (mécanisme `ordreAutocollants_observations`).
+- ✅ **Si Grégoire signale un bug** : priorité absolue, on interrompt le plan en cours (cf. CLAUDE.md).
+- ✅ **Suivre le flux carte-par-carte** qui a bien marché aujourd'hui pour les icônes (« X = icons8-Y.svg » + je vérifie existence + je modifie + il valide visuellement → commit groupé à la fin).
+
+---
+
+## §0bis — Récap session 26 mai 2026 PM2 + PM3 (Lot A + refonte chromatique nav + refonte panneau accompagnement + renommages + démarrage chantier dépistage)
 
 **Beta / build** : 99.71 b0526-1758 (PM2) → 99.72 b0526-2203 (refonte panneau) → 99.73 b0526-2236 (renommages + RàI droite, PM3 final).
 
@@ -116,7 +230,7 @@
 
 ---
 
-## §0bis — Récap session 26 mai 2026 PM (cycle chromatique Lots F + I + J + extension)
+## §0ter — Récap session 26 mai 2026 PM (cycle chromatique Lots F + I + J + extension)
 
 **Beta / build** : 99.66 / 0526-1120 (5 bumps de build sur la PM : 0526-0657 Lot I, 0526-0734 Lot J phase 1 abandonnée, 0526-1037 Lot J phase 2 livrée, 0526-1045 release, 0526-1120 Lot J extension).
 **Branche `main`** : 10+ commits push sur la journée PM, HEAD à acter au commit final.
@@ -171,7 +285,7 @@
 
 ---
 
-## §0ter — Récap session 26 mai 2026 matin (6 livraisons + cartographie icônes)
+## §0quater — Récap session 26 mai 2026 matin (6 livraisons + cartographie icônes)
 
 **Beta / build** : 99.66 / 0526-0503 (3 bumps de build sur la matinée).
 **Branche `main`** : HEAD à `4df4f21` chore(backlog) — déplacement #278/#280/#281 + 3 bugs testeurs vers archive.
