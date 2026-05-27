@@ -1,20 +1,112 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 27 mai 2026 fin de
-     journée, post-grosse session de refonte design système + nav +
-     iconographie + tampons d'annotation + page d'accueil. 19 commits
-     poussés sur main, beta 99.68 conservée toute la journée, builds
-     b0527-0533 → b0527-1245 (18 bumps de build). AQPC J−7 au moment
-     du relai. La session précédente (26 mai PM2/PM3) reste documentée
-     en §0bis. Tout l'historique antérieur (audit annuel 25 mai,
-     refonte pratique active 24 mai, #282 P1-P4 du 23 mai, cycle AQPC
-     clos 22 mai, Cat-B clos 21 mai) reste dans les §§ suivants.
+     IDENTIFICATION DE CE FICHIER  (mis à jour 27 mai 2026 soir,
+     post-session correctifs responsive iPhone 16 Pro Max — chantiers
+     1+2+3 livrés. 5 commits poussés sur main, beta bumpée 99.68 →
+     99.71 (3 bumps mineurs intentionnels), builds b0527-1830 →
+     b0527-1850. AQPC J−7. La session précédente (27 mai matin, refonte
+     design système + nav + iconographie + tampons) reste documentée
+     en §0. Tout l'historique antérieur reste dans les §§ suivants.
      ===================================================================== -->
 
 > **📌 Identification**
 > - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
-> - **Dernier cycle livré** : **Session 27 mai matin** — refonte design système (palette assistance jaune→orange, badges pratique unifiés, séparateur nav, en-tête sans trait pleine largeur), inversion états nav/sous-nav (couleurs en permanence + actif neutre pâle), refonte iconographie (30+ icônes émoji→SVG icons8, dont 12 raccourcis accueil + 19 tampons annotation), réorganisation nav (Aperçu→Suivi›Suivi du groupe, Tirage→Suivi›Animation, Calendrier→Cadre, réordre Cadre/Conception/Évaluation/Suivi), refonte tampons d'annotation (noms généralisés hors discipline, descriptions par défaut RETROACTIONS_OBSERVATIONS_DEFAUT réécrite, 4 SVG SOLO migrés), refonte raccourcis page accueil (libellés axés novices, thématisation par section, beta+build déplacés dans carte Nouveautés). Voir §0 ci-dessous.
-> - **Cycle suivant — démarrage 28 mai matin** : reprise au choix selon priorité — soit attaquer **BACKLOG #287** (picker couleur custom HTML pour modale Personnaliser tampons, 1-2 h), soit **vérification visuelle complète post-refonte** (tour de l'app pour valider que rien n'est cassé, AQPC J−6), soit **audit visuel Lot B** (emojis UI résiduels). Voir « Consignes démarrage 28 mai » à la fin du §0.
-> - **Documents clés** : `BACKLOG.md` (#287 ajouté pour picker custom), `plans de travail/REFERENTIEL-COULEURS-SECTIONS.html`, `plans de travail/LOT-B-EMOJIS-ILLUSTRATIONS.html`, `plans de travail/PLAN-MIGRATION-ICONES-SVG.md` (Lot iconographie raccourcis accueil + tampons annotation considéré ad hoc dans cette session, à intégrer dans le plan).
+> - **Dernier cycle livré** : **Session 27 mai PM** — correctifs responsive iPhone 16 Pro Max à partir de 10 captures déposées dans `Retours des testeurs/gregoire/iPhone 16 pro Max/27 mai 2026/`. Trois chantiers livrés en série : **Chantier 1** retrait massif des émojis UI visible utilisateur (21 fichiers JS + styles.css + 5 SVG icons8), **Chantier 2** quatre fix visuels ciblés (#5 padding Annoter, #7 boutons saisie présences contraste, #8 toolbar Guide tronquée, #10 icône carte Démo manquante), **Chantier 3** trois tableaux qui débordent en largeur (#2 échelles min/max, #4 matrice commentaires, #6 archivage). **Chantier 4** (sidebar Modélisation PDF) explicitement reporté par Grégoire. Voir §0-pm ci-dessous.
+> - **Cycle suivant — démarrage 28 mai matin** : reprise au choix — soit **validation visuelle iPhone des 3 chantiers livrés** (Grégoire teste les 10 captures pour confirmer les correctifs sur device réel), soit **chantier 4 sidebar Modélisation PDF** (cadrage avec sidebar profil étudiant comme référence — structurant, demande exploration design préalable), soit reprise des items du cycle 27 matin (BACKLOG #287 picker couleur custom, audit visuel Lot B, etc.).
+> - **Documents clés** : `BACKLOG.md`, captures iPhone dans `Retours des testeurs/gregoire/iPhone 16 pro Max/27 mai 2026/` (10 PNG numérotés 2-10 + 1 sans suffixe = #1 par Finder).
+
+---
+
+## §0-pm — Récap session 27 mai 2026 PM (correctifs responsive iPhone — chantiers 1+2+3)
+
+**Beta / build** : 99.68 → **99.71** (3 bumps mineurs intentionnels, un par chantier). Builds b0527-1830 → b0527-1850. HEAD main au moment du relai : commit du build 0527-1850.
+
+**Contexte d'entrée** : Grégoire a livré 10 captures iPhone 16 Pro Max le 27 mai après-midi, déposées dans `Retours des testeurs/gregoire/iPhone 16 pro Max/27 mai 2026/`. Inventaire des problèmes :
+- Émojis non permis (CLAUDE.md interdit) dans le wizard, le bandeau Configuration incomplète, le panneau d'aide Bilan réflexif, et de nombreux autres écrans
+- #2 affichage tronqué — échelles min/max (« Inco », « en D », « Maî »)
+- #3 wizard pratique notation (étape 1/5 — autres étapes potentiellement concernées par émojis)
+- #4 matrice commentaires rétroaction (mots coupés type « compr é hens ion »)
+- #5 padding inadéquat — onglet Annoter et évaluer (état vide avec grande zone blanche)
+- #6 cartes superposées — Archivage des travaux (4 cartes serrées en 2 colonnes sur ~390px)
+- #7 boutons noir sur fond foncé — saisie des présences (Précédent/Suivant illisibles)
+- #8 toolbar tronquée — Paramètres d'accompagnement (boutons « Guide » coupés droite)
+- #9 sidebar nécessaire — visionneuse PDF Modélisation (toolbar « Ferm[e] » coupée, référence sidebar profil étudiant)
+- #10 icône manquante carte Données démo (clarifié : `icons8-binary-code.svg` non trackée dans le repo)
+
+**Commits cette session** (5 sur main, tous pushés) :
+
+| # | Hash | Description | Build | Beta |
+|---|------|-------------|-------|------|
+| 1 | `11f87a1` | feat(ui): retrait des émojis dans l'interface visible utilisateur — chantier 1 (Phases A+B+C, 21 fichiers JS + styles.css + 3 nouveaux SVG) | 0527-1830 | 99.69 |
+| 2 | `ffac9ac` | fix(icons): ajouter icons8-high-priority et icons8-library-2 référencés par le chantier 1 (étaient untracked) | 0527-1830 | 99.69 |
+| 3 | `cdef9f4` | fix(iphone): correctifs visuels chantier 2 (#5 padding, #7 contraste, #8 toolbar wrap, #10 SVG démo) | 0527-1838 | 99.70 |
+| 4 | `4bb8969` | fix(iphone): chantier 3 — tableaux qui débordent (#2 échelles 2-col mobile, #4 matrice scroll + sticky, #6 archivage 1-col) | 0527-1848 | 99.71 |
+| 5 | (ce commit) | docs(session): relai 27 mai PM (chantiers 1+2+3 livrés) + build 0527-1850 | 0527-1850 | 99.71 |
+
+**Chantier 1 — Retrait des émojis UI** (commit `11f87a1` + `ffac9ac`)
+
+Trois phases successives, validation visuelle entre Phase A et Phase B :
+
+**Phase A — 3 cibles explicitement signalées + cascade** :
+- `js/wizard-pratique-v2.js:1606` : `<span class="wizard-v2-info-icon">ℹ️</span>` → `<img src="icons/icons8-info.svg" alt="" class="wizard-v2-info-icon">`. CSS `.wizard-v2-info-icon` adapté (font-size:1.1rem → width/height:18px).
+- `js/saisie-presences.js:712` : `<strong>⚠️ Configuration incomplète</strong>` → `<strong><img src="icons/icons8-high-priority.svg" alt="" class="alerte-icone"> Configuration incomplète</strong>`. Nouvelle classe `.alerte-icone` (18px, vertical-align:-3px).
+- `js/bilan-reflexif-core.js:372` : `'<span class="bilan-aide-titre">❓ ' + titre + '</span>'` → titre nu (le « ? » du titre suffit).
+- `js/travaux-outils.js:1664-1666` (palette flottante) : `🚦 🫥 ⏱️` → 3 nouveaux SVG icons8-style créés (`icons/icons8-traffic-light.svg`, `icons/icons8-rubber-stamp.svg`, `icons/icons8-stopwatch.svg`).
+- `js/evaluation-chargement.js:311` : `'⚠️ Aucune échelle configurée'` → texte nu (option `<select>` ne supporte pas SVG).
+- `js/travaux-ui.js` : 4 sites (alerte sans-production, astuce doublon, feedback renommage).
+- `js/travaux-doublons-ui.js` : 7 émojis retirés de `_libellePattern`, `_libelleTagInformatif`, badges (classes CSS conservent code couleur).
+
+**Phase B — Pastilles RaI + profil étudiant** :
+- `js/profil-etudiant-diagnostics.js` : 16 émojis décoratifs retirés (`🎯 ⚠️ ⭐ ✓ 💡 📉 📊 📈 📝`) + variable `iconeTendance` retirée.
+- `js/profil-etudiant-calculs.js` : 22 propriétés `emoji:` retirées des retours de cibles RaI (couleur conservée).
+- `js/profil-etudiant-helpers.js` : 24 propriétés `emoji:` retirées via perl in-place (`interpreterMobilisation`, `interpreterPerformance`, `interpreterCompletion`, `interpreterAssiduite`).
+- `js/profil-etudiant-sections-affichage.js` : 4 sites consommateurs `${X.emoji}` adaptés en `<span class="pastille-rai" style="background:${X.couleur}"></span>`. Nouvelle classe CSS `.pastille-rai` (cercle 14px, box-shadow 1px noir 8%).
+- `js/pratiques/pratique-sommative.js` : 5 `cible.emoji = ...` retirés + valeur initiale.
+- `js/pratiques/pratique-pan-standards.js` : 4 `cible.emoji = ...` retirés + valeur initiale.
+
+**Phase C — Reste du codebase** :
+- `js/profil-etudiant-sections-affichage.js` : ~25 émojis supplémentaires retirés (interventions `👤 ✉️ 👥` → libellés texte, recommandations RaI `⚫ 💡`, statuts artefacts `⏸️ ✅ ⚠️` → pastille CSS + label, services CAF/SA `✓` → texte, titres sections `📝 ✅ 🎯 📊 📈 📂 ⚙️`, fonction morte `obtenirEmojiIndice` supprimée — zéro-dette).
+- `js/evaluation.js:1631,1638` : boutons `👤` `📄 Travail` → SVG `icon-profile.svg`, `icon-pdf.svg`.
+- `js/echelles.js` : 6 émojis retirés (option `<select>`, alerts import/export, header échelle template).
+- `js/modes.js:67` : `btnTheme.textContent = '🌑'` → `'Mode sombre'` (code mort `btn-toggle-theme` sans nav).
+- `js/import-export.js` : `📚` → SVG library-2, `📄` retiré (licence CC).
+- `js/objectifs.js:818-820` : 3 émojis retirés (alert metadata CC).
+- `js/trimestre-v2-groupes-cools.js:814` : `📚` retiré (titre modale biblio).
+- `js/productions-import-export.js` : 6 émojis retirés (alert, confirm).
+
+**Restes non touchés** (volontaire) : commentaires `//`, JSDoc `/* */`, bannières `// === 🎨 ===`, `console.warn/error/group/log`, caractères typographiques unicode noir (`★ ✕ ✓ → ▼ ●`) qui ne sont pas des émojis colorés.
+
+**Bilan Chantier 1** : −201 / +168 lignes nettes (zéro-dette : retrait propre, pas d'alias rétro-compatibilité). 21 fichiers JS + styles.css + 5 SVG. 2 commits : le premier avec les modifications principales, le second pour ajouter les 2 SVG (`icons8-high-priority`, `icons8-library-2`) qui étaient untracked dans le repo mais déjà utilisés par le code (sinon 404).
+
+**Chantier 2 — 4 fix visuels iPhone ciblés** (commit `cdef9f4`)
+
+- **#10 carte Données démo** : ajout du SVG `icons8-binary-code.svg` référencé par `js/accueil.js:201` mais absent du repo (image ne chargeait pas → zone vide à droite du titre). Grégoire a clarifié : les « carrés noirs » dans les cartes Assistance + Données démo sont en fait des checkboxes non cochées (comportement normal), seule l'icône SVG manquait.
+- **#7 saisie présences boutons Précédent/Suivant** : règle CSS ciblée `#btn-cours-precedent, #btn-cours-suivant` avec `background: var(--accent-primaire)` (sarcelle clair `#6aacb8`) + `color: var(--surface-carte)`. Avant : classe `btn-principal` (`#1a4a5e`) quasi indistinguable du fond `--surface-carte #1a3040` de la carte Enregistrement.
+- **#8 Paramètres d'accompagnement, boutons Guide tronqués** : sur `.carte.accordeon .accordeon-header` ajout de `flex-wrap: wrap` + `gap: 8px`. Sur le `h3` interne : `min-width: 0` + `flex: 1 1 auto`. Conséquence : sous largeur insuffisante, le bouton Guide passe sous le titre au lieu de déborder.
+- **#5 onglet Annoter et évaluer (état vide)** : `js/travaux-ui.js:983-987`, ajout `style="padding: 24px"` sur la div conteneur + marges réduites sur h2/p. Avant : texte se collait aux bords gauche/droite, grande zone blanche sans aération.
+
+**Chantier 3 — Tableaux qui débordent en largeur** (commit `4bb8969`)
+
+Stratégie unifiée : breakpoints CSS additionnels (sans toucher au layout desktop), passage en grille 1-2 colonnes sur mobile pour les grilles, scroll horizontal contrôlé pour les tableaux complexes.
+
+- **#6 Archivage des travaux** (`styles.css:17655+`) : sous 480px, `.travaux-archivage-options` passe de 2 colonnes (768px) à 1 colonne. `.travaux-archivage-filtres` (Production / Étudiant·e) aussi en 1 colonne sous 480px.
+- **#2 Échelles min/max** (`js/echelles.js:3061` + 2 sites + nouvelle classe CSS) : la grille inline 7 colonnes `60px 60px 2fr 80px 80px 100px 80px` extraite vers une classe `.echelle-niveau-grille`. Sous 640px : passage à 2 colonnes avec « Ordre » (col 1) et « Nom du niveau » (col 3) en pleine largeur. Fini la troncation « Inco », « en D », « Maî », « Éter ».
+- **#4 Matrice des commentaires de rétroaction** (`js/cartouches.js:583+642` + nouvelle classe CSS) : table enrobée dans `<div class="matrice-tableau-wrap">` avec `overflow-x: auto` + `-webkit-overflow-scrolling: touch`. Sous 768px : `min-width: 640px` sur le `<table>` pour empêcher la troncation des cellules + `position: sticky; left: 0` sur la colonne Critère (première colonne) pour garder le contexte pendant le scroll latéral. Fini les mots coupés type « compr é hens ion ».
+
+**Chantier 4 — Sidebar Modélisation PDF — REPORTÉ**
+
+Grégoire a explicitement décidé de ne pas faire ce chantier dans cette session. Référence corrigée en cours de session : la sidebar inspirante est celle du **profil étudiant** (pas celle de Conception comme initialement mentionné). Sera cadré séparément dans une session ultérieure (structurant : refonte UI, pas simple correctif).
+
+**Tâches du suivi (TaskCreate)** : 4 chantiers créés en début de session, 3 marqués `completed`, chantier 4 reste `pending` pour mémoire (à reprendre en session dédiée).
+
+**Mémoires à consulter pour la prochaine session** :
+- `feedback_beta_build_convention.md` : convention beta+build respectée (bumps mineurs concertés à chaque chantier livré).
+- `project_palette_couleurs_contraintes.md` : `--accent-primaire` (sarcelle clair `#6aacb8`) utilisé comme couleur de contraste pour les boutons Précédent/Suivant dans la carte Enregistrement (validé).
+
+**Tests** : `node --check` non lancé explicitement (modifications principalement CSS + retraits décoratifs), pas de Vitest/Playwright lancé. La validation a été visuelle via les captures iPhone (Grégoire) entre les phases du chantier 1.
+
+**Validation Grégoire** : « validé » entre Phase A et Phase B+C du chantier 1. Validation finale des chantiers 2 et 3 reportée à la prochaine session (chargement sur iPhone réel).
+
+---
 
 ---
 
