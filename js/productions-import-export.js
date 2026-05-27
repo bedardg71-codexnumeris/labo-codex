@@ -226,7 +226,7 @@ async function importerDansProductionActive(event) {
             // Confirmer le remplacement
             const confirmation = confirm(
                 messageConfirmation +
-                `⚠️ ATTENTION: Cette action va remplacer la production actuelle.\n\n` +
+                `ATTENTION : cette action va remplacer la production actuelle.\n\n` +
                 `Veux-tu continuer ?`
             );
 
@@ -348,7 +348,7 @@ function importerProductions(eventOuEl) {
 
         } catch (error) {
             console.error('Erreur lors de l\'import:', error);
-            alert('❌ Erreur lors de la lecture du fichier.\n' + error.message);
+            alert('Erreur lors de la lecture du fichier.\n' + error.message);
         }
     };
     reader.readAsText(file);
@@ -405,7 +405,7 @@ window.confirmerImportProductions = async function(donnees) {
         // Avertir l'utilisateur si des dépendances manquent
         if (grillesManquantes.length > 0) {
             const nbGrillesManquantes = grillesManquantes.length;
-            const message = `⚠️ Attention : ${nbGrillesManquantes} grille(s) de critères manquante(s)\n\n` +
+            const message = `Attention : ${nbGrillesManquantes} grille(s) de critères manquante(s)\n\n` +
                 `Les productions importées font référence à des grilles qui n'existent pas encore dans ton système.\n\n` +
                 `Grilles manquantes :\n${grillesManquantes.map(id => `  • ${id}`).join('\n')}\n\n` +
                 `Tu peux continuer l'import, mais ces productions ne fonctionneront correctement qu'après avoir importé les grilles manquantes.\n\n` +
@@ -447,7 +447,7 @@ window.confirmerImportProductions = async function(donnees) {
             }
         }
 
-        let message = `✅ Import réussi !\n\n`;
+        let message = `Import réussi.\n\n`;
         if (nbAjoutees > 0) message += `${nbAjoutees} nouvelle(s) production(s) ajoutée(s).\n`;
         if (nbMisesAJour > 0) message += `${nbMisesAJour} production(s) mise(s) à jour.\n`;
         message += `\nConsulte "Productions disponibles" pour les ajouter à ta barre latérale.`;
@@ -455,7 +455,7 @@ window.confirmerImportProductions = async function(donnees) {
 
     } catch (error) {
         console.error('Erreur lors de l\'import:', error);
-        alert('❌ Erreur lors de l\'import.\n' + error.message);
+        alert('Erreur lors de l\'import.\n' + error.message);
     }
 };
 
@@ -504,7 +504,7 @@ async function afficherAssistantMigrationCategories() {
     );
 
     if (sansCategorie.length === 0) {
-        alert('✅ Toutes les productions ont déjà une catégorie assignée.');
+        alert('Toutes les productions ont déjà une catégorie assignée.');
         return;
     }
 

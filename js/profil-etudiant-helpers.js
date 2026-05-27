@@ -351,7 +351,6 @@ function interpreterMobilisation(A, C, statutDecrochage = false) {
     if (statutDecrochage) {
         return {
             niveau: 'Décrochage',
-            emoji: '⚫',
             couleur: '#9e9e9e' // Gris
         };
     }
@@ -360,7 +359,6 @@ function interpreterMobilisation(A, C, statutDecrochage = false) {
     if (A < 0.7 && C < 0.7) {
         return {
             niveau: 'Assiduité ET complétion critiques',
-            emoji: '🔴',
             couleur: '#dc3545' // Rouge
         };
     }
@@ -369,7 +367,6 @@ function interpreterMobilisation(A, C, statutDecrochage = false) {
     if (A < 0.7) {
         return {
             niveau: 'Assiduité critique',
-            emoji: '🟠',
             couleur: '#ff9800' // Orange
         };
     }
@@ -378,7 +375,6 @@ function interpreterMobilisation(A, C, statutDecrochage = false) {
     if (C < 0.7) {
         return {
             niveau: 'Complétion critique',
-            emoji: '🟠',
             couleur: '#ff9800' // Orange
         };
     }
@@ -387,7 +383,6 @@ function interpreterMobilisation(A, C, statutDecrochage = false) {
     if (A < 0.8 && C < 0.8) {
         return {
             niveau: 'Mobilisation fragile',
-            emoji: '🟡',
             couleur: '#ffc107' // Jaune
         };
     }
@@ -396,7 +391,6 @@ function interpreterMobilisation(A, C, statutDecrochage = false) {
     if (A < 0.8 && C >= 0.8) {
         return {
             niveau: 'Assiduité fragile',
-            emoji: '🟡',
             couleur: '#ffc107' // Jaune
         };
     }
@@ -405,7 +399,6 @@ function interpreterMobilisation(A, C, statutDecrochage = false) {
     if (A >= 0.8 && C < 0.8) {
         return {
             niveau: 'Complétion fragile',
-            emoji: '🟡',
             couleur: '#ffc107' // Jaune
         };
     }
@@ -414,7 +407,6 @@ function interpreterMobilisation(A, C, statutDecrochage = false) {
     if (A >= 0.9 && C >= 0.9) {
         return {
             niveau: 'Favorable',
-            emoji: '🔵',
             couleur: '#2196F3' // Bleu
         };
     }
@@ -422,7 +414,6 @@ function interpreterMobilisation(A, C, statutDecrochage = false) {
     // 9. Acceptable (sinon: A≥0.8 ET C≥0.8, mais pas tous deux ≥0.9)
     return {
         niveau: 'Acceptable',
-        emoji: '🟢',
         couleur: '#28a745' // Vert
     };
 }
@@ -437,7 +428,6 @@ function interpreterPerformance(valeur) {
     if (p >= 0.85) {
         return {
             niveau: 'Performance excellente',
-            emoji: '🔵',
             couleur: '#2196F3', // Bleu
             description: 'Maîtrise étendue des compétences avec transfert à d\'autres contextes'
         };
@@ -445,7 +435,6 @@ function interpreterPerformance(valeur) {
     if (p >= 0.75) {
         return {
             niveau: 'Performance satisfaisante',
-            emoji: '🟢',
             couleur: '#28a745', // Vert
             description: 'Maîtrise globale avec liens établis entre les concepts'
         };
@@ -453,7 +442,6 @@ function interpreterPerformance(valeur) {
     if (p >= 0.65) {
         return {
             niveau: 'En développement',
-            emoji: '🟡',
             couleur: '#ffc107', // Jaune
             description: 'Points pertinents identifiés, liens à consolider'
         };
@@ -461,14 +449,12 @@ function interpreterPerformance(valeur) {
     if (p >= 0.40) {
         return {
             niveau: 'Performance insuffisante',
-            emoji: '🟠',
             couleur: '#ff9800', // Orange
             description: 'Compréhension superficielle, renforcement nécessaire'
         };
     }
     return {
         niveau: 'Performance très faible',
-        emoji: '🔴',
         couleur: '#dc3545', // Rouge
         description: 'Incompréhension majeure, intervention urgente requise'
     };
@@ -488,7 +474,6 @@ function interpreterCompletion(valeur) {
     if (c >= seuilExcellent) {
         return {
             niveau: 'Taux de complétion excellent',
-            emoji: '🔵',
             couleur: '#2196F3', // Bleu
             description: 'Remise régulière et complète des travaux'
         };
@@ -496,7 +481,6 @@ function interpreterCompletion(valeur) {
     if (c >= seuilBon) {
         return {
             niveau: 'Bon taux de complétion',
-            emoji: '🟢',
             couleur: '#28a745', // Vert
             description: 'Majorité des travaux remis'
         };
@@ -504,7 +488,6 @@ function interpreterCompletion(valeur) {
     if (c >= seuilAcceptable) {
         return {
             niveau: 'Complétion acceptable',
-            emoji: '🟡',
             couleur: '#ffc107', // Jaune
             description: 'Quelques travaux manquants, suivi recommandé'
         };
@@ -512,14 +495,12 @@ function interpreterCompletion(valeur) {
     if (c >= 0.60) {
         return {
             niveau: 'Complétion insuffisante',
-            emoji: '🟠',
             couleur: '#ff9800', // Orange
             description: 'Nombreux travaux manquants, intervention nécessaire'
         };
     }
     return {
         niveau: 'Complétion critique',
-        emoji: '🔴',
         couleur: '#dc3545', // Rouge
         description: 'Travaux non remis, situation critique'
     };
@@ -539,7 +520,6 @@ function interpreterAssiduite(valeur) {
     if (a >= seuilExcellent) {
         return {
             niveau: 'Assiduité exemplaire',
-            emoji: '🔵',
             couleur: '#2196F3', // Bleu
             description: 'Présence constante et engagement soutenu'
         };
@@ -547,7 +527,6 @@ function interpreterAssiduite(valeur) {
     if (a >= seuilBon) {
         return {
             niveau: 'Bonne assiduité',
-            emoji: '🟢',
             couleur: '#28a745', // Vert
             description: 'Présence régulière avec absences rares et justifiées'
         };
@@ -555,7 +534,6 @@ function interpreterAssiduite(valeur) {
     if (a >= seuilAcceptable) {
         return {
             niveau: 'Assiduité acceptable',
-            emoji: '🟡',
             couleur: '#ffc107', // Jaune
             description: 'Quelques absences, suivi recommandé'
         };
@@ -563,14 +541,12 @@ function interpreterAssiduite(valeur) {
     if (a >= 0.60) {
         return {
             niveau: 'Assiduité insuffisante',
-            emoji: '🟠',
             couleur: '#ff9800', // Orange
             description: 'Absences fréquentes, intervention nécessaire'
         };
     }
     return {
         niveau: 'Assiduité critique',
-        emoji: '🔴',
         couleur: '#dc3545', // Rouge
         description: 'Absences excessives, situation d\'urgence'
     };

@@ -3153,6 +3153,13 @@ input[type="number"].controle-form {
     line-height: 1.6;
 }
 
+.alerte-icone {
+    width: 18px;
+    height: 18px;
+    vertical-align: -3px;
+    margin-right: 6px;
+}
+
 .alerte-attention {
     background: var(--alerte-fond-attention);
     border-color: var(--alerte-bordure-attention);
@@ -7084,6 +7091,16 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 .profil-valeur-moyenne {
     font-size: 1.5rem;
+}
+
+.pastille-rai {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    vertical-align: middle;
+    margin-right: 6px;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
 }
 
 .profil-texte-detail-gris {
@@ -11634,7 +11651,8 @@ label:has(+ textarea:disabled) {
 }
 
 .wizard-v2-info-icon {
-    font-size: 1.1rem;
+    width: 18px;
+    height: 18px;
     flex-shrink: 0;
 }
 

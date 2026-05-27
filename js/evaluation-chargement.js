@@ -308,7 +308,7 @@ function chargerEchellePerformance() {
 
     if ((!echelles || echelles.length === 0) && !echellePratique) {
         console.error('❌ Aucune échelle de performance configurée');
-        select.innerHTML = '<option value="">⚠️ Aucune échelle configurée - Aller dans Matériel › Niveaux de performance</option>';
+        select.innerHTML = '<option value="">Aucune échelle configurée — Aller dans Matériel › Niveaux de performance</option>';
         document.getElementById('noteProduction1').textContent = '--';
         document.getElementById('niveauProduction1').textContent = '--';
         return;

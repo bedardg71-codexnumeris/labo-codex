@@ -273,7 +273,7 @@ async function afficherToutesLesEchellesNiveaux() {
                 <summary style="padding: 15px; background: linear-gradient(135deg, var(--accent-primaire) 0%, var(--bleu-moyen) 100%);
                          color: white; font-weight: 600; font-size: 1.05rem; cursor: pointer;
                          user-select: none; display: flex; justify-content: space-between; align-items: center;">
-                    <span>📊 ${echapperHtml(echelle.nom)}</span>
+                    <span>${echapperHtml(echelle.nom)}</span>
                     <span style="font-size: 0.9rem; font-weight: normal; opacity: 0.9;">
                         ${niveaux.length} niveau${niveaux.length > 1 ? 'x' : ''}
                     </span>
@@ -411,7 +411,7 @@ async function dupliquerEchelle(echelleId) {
     // ✅ AJOUT (8 décembre 2025) : Rafraîchir la barre latérale
     await afficherListeEchelles();
 
-    notifications.succes(`📑 Échelle «${nouvelleEchelle.nom}» créée avec succès !`);
+    notifications.succes(`Échelle «${nouvelleEchelle.nom}» créée avec succès.`);
 }
 
 /* ===============================
@@ -745,7 +745,7 @@ async function chargerEchellesTemplates() {
     const echelles = await db.get('echellesTemplates') ||  [];
 
     let options = '<option value="">-- Nouvelle échelle --</option>';
-    options += '<option value="new">➕ Créer une nouvelle échelle</option>';
+    options += '<option value="new">+ Créer une nouvelle échelle</option>';
 
     echelles.forEach(echelle => {
         const nomEchappe = echapperHtml(echelle.nom);
@@ -1023,7 +1023,7 @@ async function dupliquerEchelleActuelle() {
     document.getElementById('selectEchelleTemplate').value = nouvelleEchelle.id;
     document.getElementById('nomEchelleTemplate').value = nouvelleEchelle.nom;
 
-    notifications.succes(`📑 Échelle «${nouvelleEchelle.nom}» créée avec succès !`);
+    notifications.succes(`Échelle «${nouvelleEchelle.nom}» créée avec succès.`);
 }
 
 /**
@@ -2028,15 +2028,15 @@ async function importerDansEchelleActive(event) {
             // Afficher badge CC si présent
             let messageConfirmation = '';
             if (metadata && metadata.licence && metadata.licence.includes("CC")) {
-                messageConfirmation = `📋 Matériel sous licence ${metadata.licence}\n` +
-                    `👤 Auteur: ${metadata.auteur_original}\n` +
-                    `📅 Créé le: ${metadata.date_creation}\n\n`;
+                messageConfirmation = `Matériel sous licence ${metadata.licence}\n` +
+                    `Auteur: ${metadata.auteur_original}\n` +
+                    `Créé le: ${metadata.date_creation}\n\n`;
             }
 
             // Confirmer le remplacement
             const confirmation = confirm(
                 messageConfirmation +
-                `⚠️ ATTENTION: Cette action va remplacer l'échelle actuelle.\n\n` +
+                `ATTENTION : cette action va remplacer l'échelle actuelle.\n\n` +
                 `Veux-tu continuer ?`
             );
 
@@ -2158,7 +2158,7 @@ async function importerEchelles(eventOuEl) {
 
         } catch (error) {
             console.error('Erreur lors de l\'import:', error);
-            alert('❌ Erreur lors de la lecture du fichier.\n' + error.message);
+            alert('Erreur lors de la lecture du fichier.\n' + error.message);
         }
     };
     reader.readAsText(file);
@@ -2224,7 +2224,7 @@ window.confirmerImportEchelles = async function(donnees) {
             await afficherBibliothequeEchelles();
         }
 
-        let message = `✅ Import réussi !\n\n`;
+        let message = `Import réussi.\n\n`;
         if (nbAjoutees > 0) message += `${nbAjoutees} nouvelle(s) échelle(s) ajoutée(s).\n`;
         if (nbMisesAJour > 0) message += `${nbMisesAJour} échelle(s) mise(s) à jour.\n`;
         message += `\nConsultez "Échelles disponibles" pour les ajouter à ta barre latérale.`;
@@ -2232,7 +2232,7 @@ window.confirmerImportEchelles = async function(donnees) {
 
     } catch (error) {
         console.error('Erreur lors de l\'import:', error);
-        alert('❌ Erreur lors de l\'import.\n' + error.message);
+        alert('Erreur lors de l\'import.\n' + error.message);
     }
 };
 
@@ -2924,7 +2924,7 @@ async function importerToutEchellesTrimestreModal() {
     fermerModalBibliothequeEchelles();
     await afficherBibliothequeEchelles();
 
-    alert(`✅ Import terminé !\n\n${ajoutees} échelle(s) ajoutée(s).\n${existantes} déjà présente(s).`);
+    alert(`Import terminé.\n\n${ajoutees} échelle(s) ajoutée(s).\n${existantes} déjà présente(s).`);
 }
 
 /**
@@ -2947,7 +2947,7 @@ async function importerUneEchelleTrimestre(cleTrimestre, echelleId) {
         // Rafraîchir l'affichage
         fermerModalBibliothequeEchelles();
         await afficherBibliothequeEchelles();
-        alert(`✅ "${echelle.nom || 'Échelle'}" ajoutée à la bibliothèque !`);
+        alert(`"${echelle.nom || 'Échelle'}" ajoutée à la bibliothèque.`);
     } else {
         alert('Cette échelle est déjà dans la bibliothèque.');
     }

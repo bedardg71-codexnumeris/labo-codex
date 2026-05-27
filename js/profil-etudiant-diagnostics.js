@@ -76,7 +76,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
     return `
         <!-- DIAGNOSTIC CRITÈRES SRPNF -->
         <h4 class="profil-titre-bleu-mt20">
-            🎯 Diagnostic par critère (seuil force: 0.7125)
+            Diagnostic par critère (seuil force&nbsp;: 0.7125)
         </h4>
 
         <!-- Tableau des scores par critère -->
@@ -106,7 +106,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
                             </span>
                         </div>
                         <div style="text-align: right; font-size: 0.85rem; color: ${estForce ? 'var(--vert-succes)' : estDefi ? 'var(--orange-accent)' : 'var(--gris-moyen)'};">
-                            ${estForce ? '✓ Force' : estDefi ? '⚠ Défi' : '—'}
+                            ${estForce ? 'Force' : estDefi ? 'Défi' : '—'}
                         </div>
                     `;
                 }).join('')}
@@ -121,7 +121,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
             const grille = obtenirGrilleReferenceDepistage();
             if (!grille || !grille.criteres || grille.criteres.length === 0) {
                 return `<div class="info-box info-box--attention" style="margin-bottom: 10px;">
-                    <div style="font-weight: bold; color: var(--alerte-texte-attention);">⚠️ Aucune grille de référence configurée</div>
+                    <div style="font-weight: bold; color: var(--alerte-texte-attention);">Aucune grille de référence configurée</div>
                 </div>`;
             }
 
@@ -158,7 +158,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
                 html += `
                     <div style="background: ${couleur}22; border-left: 4px solid ${couleur}; padding: 12px; margin-bottom: 10px;">
                         <div style="font-weight: bold; color: ${couleur}; margin-bottom: 6px;">
-                            ⭐ ${parNiveau['E'].length > 1 ? 'Forces exceptionnelles (E)' : 'Force exceptionnelle (E)'}
+                            ${parNiveau['E'].length > 1 ? 'Forces exceptionnelles (E)' : 'Force exceptionnelle (E)'}
                             ${parNiveau['E'].length > 1 ? ` (${parNiveau['E'].length})` : ''}
                         </div>
                         <div style="color: ${couleur}; font-size: 0.9rem;">
@@ -174,7 +174,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
                 html += `
                     <div style="background: ${couleur}22; border-left: 4px solid ${couleur}; padding: 12px; margin-bottom: 10px;">
                         <div style="font-weight: bold; color: ${couleur}; margin-bottom: 6px;">
-                            ✓ ${parNiveau['M'].length > 1 ? 'Forces identifiées (M)' : 'Force identifiée (M)'}
+                            ${parNiveau['M'].length > 1 ? 'Forces identifiées (M)' : 'Force identifiée (M)'}
                             ${parNiveau['M'].length > 1 ? ` (${parNiveau['M'].length})` : ''}
                         </div>
                         <div style="color: ${couleur}; font-size: 0.9rem;">
@@ -190,7 +190,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
                 html += `
                     <div style="background: ${couleur}22; border-left: 4px solid ${couleur}; padding: 12px; margin-bottom: 10px;">
                         <div style="font-weight: bold; color: ${couleur}; margin-bottom: 6px;">
-                            🎯 ${parNiveau['D'].length > 1 ? 'Défis en développement (D)' : 'Défi en développement (D)'}
+                            ${parNiveau['D'].length > 1 ? 'Défis en développement (D)' : 'Défi en développement (D)'}
                             ${parNiveau['D'].length > 1 ? ` (${parNiveau['D'].length})` : ''}
                         </div>
                         <div style="color: ${couleur}; font-size: 0.9rem;">
@@ -206,14 +206,14 @@ function genererDiagnosticSRPNF(da, defisInfo) {
                 html += `
                     <div style="background: ${couleur}22; border-left: 4px solid ${couleur}; padding: 12px; margin-bottom: 15px;">
                         <div style="font-weight: bold; color: ${couleur}; margin-bottom: 6px;">
-                            ⚠️ ${parNiveau['I'].length > 1 ? 'Défis critiques (I)' : 'Défi critique (I)'}
+                            ${parNiveau['I'].length > 1 ? 'Défis critiques (I)' : 'Défi critique (I)'}
                             ${parNiveau['I'].length > 1 ? ` (${parNiveau['I'].length})` : ''}
                         </div>
                         <div style="color: ${couleur}; font-size: 0.9rem;">
                             ${parNiveau['I'].map(c => `<strong>${echapperHtml(c.nom)}</strong> (${Math.round(c.pourcentage)}%)`).join(', ')}
                         </div>
                         <div style="margin-top: 8px; font-size: 0.85rem; color: ${couleur};">
-                            💡 Cibler les efforts sur ${parNiveau['I'].length > 1 ? 'ces critères' : 'ce critère'}
+                            Cibler les efforts sur ${parNiveau['I'].length > 1 ? 'ces critères' : 'ce critère'}
                             pour maximiser l'impact des interventions.
                         </div>
                     </div>
@@ -225,7 +225,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
                 html = `
                     <div class="info-box info-box--attention" style="margin-bottom: 10px;">
                         <div style="font-weight: bold; color: var(--alerte-texte-attention);">
-                            ⚠️ Aucune donnée disponible pour l'analyse des critères
+                            Aucune donnée disponible pour l'analyse des critères
                         </div>
                     </div>
                 `;
@@ -245,7 +245,7 @@ function genererDiagnosticGenerique(da, defisInfo) {
         return `
             <div class="info-box info-box--succes" style="margin-bottom: 10px;">
                 <div style="font-weight: bold; color: var(--vert-succes);">
-                    ✓ Aucun défi majeur identifié
+                    Aucun défi majeur identifié
                 </div>
                 <div style="color: var(--vert-succes); font-size: 0.9rem; margin-top: 6px;">
                     Performance satisfaisante. Continuer le suivi régulier et encourager la constance.
@@ -257,7 +257,7 @@ function genererDiagnosticGenerique(da, defisInfo) {
     let html = `
         <!-- DIAGNOSTIC DÉFIS GÉNÉRIQUES -->
         <h4 class="profil-titre-bleu-mt20">
-            🎯 Défis identifiés
+            Défis identifiés
         </h4>
     `;
 
@@ -267,18 +267,18 @@ function genererDiagnosticGenerique(da, defisInfo) {
 
         if (defi.type === 'note-faible') {
             couleur = defi.priorite === 'haute' ? '#dc3545' : '#ff9800';
-            titre = `⚠️ Note faible : ${defi.production}`;
+            titre = `Note faible : ${defi.production}`;
             contenu = `
                 <div class="profil-texte-detail-gris">
                     Note obtenue : <strong style="color: ${couleur};">${defi.note}%</strong> (seuil : ${defi.seuil}%)
                 </div>
                 <div class="profil-texte-detail-compact">
-                    💡 Recommandation : Envisager une reprise avec jeton ou un rattrapage ciblé.
+                    Recommandation : Envisager une reprise avec jeton ou un rattrapage ciblé.
                 </div>
             `;
         } else if (defi.type === 'tendance-baisse') {
             couleur = '#ff9800';
-            titre = '📉 Tendance à la baisse détectée';
+            titre = 'Tendance à la baisse détectée';
             contenu = `
                 <div class="profil-texte-detail-gris">
                     Variation : <strong style="color: ${couleur};">${defi.variation.toFixed(1)}%</strong>
@@ -288,12 +288,12 @@ function genererDiagnosticGenerique(da, defisInfo) {
                     Moyenne ancienne : ${defi.moyenneAncienne.toFixed(1)}%
                 </div>
                 <div class="profil-texte-detail-compact">
-                    💡 Recommandation : Identifier les causes de la baisse et ajuster les stratégies d'apprentissage.
+                    Recommandation : Identifier les causes de la baisse et ajuster les stratégies d'apprentissage.
                 </div>
             `;
         } else if (defi.type === 'irregularite') {
             couleur = '#ffc107';
-            titre = '📊 Irrégularité des résultats';
+            titre = 'Irrégularité des résultats';
             contenu = `
                 <div class="profil-texte-detail-gris">
                     Écart-type : <strong style="color: ${couleur};">${defi.ecartType.toFixed(1)}</strong>
@@ -301,7 +301,7 @@ function genererDiagnosticGenerique(da, defisInfo) {
                     Moyenne : ${defi.moyenne.toFixed(1)}%
                 </div>
                 <div class="profil-texte-detail-compact">
-                    💡 Recommandation : Travailler la régularité et la constance dans les efforts.
+                    Recommandation : Travailler la régularité et la constance dans les efforts.
                 </div>
             `;
         }
@@ -320,19 +320,16 @@ function genererDiagnosticGenerique(da, defisInfo) {
     // Afficher tendance si disponible et pas déjà affichée
     if (defisInfo.tendance && !defisInfo.defis.find(d => d.type === 'tendance-baisse')) {
         const tendance = defisInfo.tendance;
-        let couleurTendance, iconeTendance, texteTendance;
+        let couleurTendance, texteTendance;
 
         if (tendance.direction === 'hausse') {
             couleurTendance = '#28a745';
-            iconeTendance = '📈';
             texteTendance = 'Tendance à la hausse';
         } else if (tendance.direction === 'baisse') {
             couleurTendance = '#ff9800';
-            iconeTendance = '📉';
             texteTendance = 'Tendance légère à la baisse';
         } else {
             couleurTendance = '#2196f3';
-            iconeTendance = '→';
             texteTendance = 'Tendance stable';
         }
 
@@ -340,7 +337,7 @@ function genererDiagnosticGenerique(da, defisInfo) {
             <div style="background: linear-gradient(to right, ${couleurTendance}22, ${couleurTendance}11);
                         border-left: 4px solid ${couleurTendance}; padding: 12px; margin-bottom: 10px;">
                 <div style="font-weight: bold; color: ${couleurTendance}; margin-bottom: 6px;">
-                    ${iconeTendance} ${texteTendance}
+                    ${texteTendance}
                 </div>
                 <div style="font-size: 0.9rem; color: var(--gris-fonce);">
                     Variation : ${tendance.variation > 0 ? '+' : ''}${tendance.variation.toFixed(1)}%
@@ -356,7 +353,7 @@ function genererDiagnosticGenerique(da, defisInfo) {
         html += `
             <div style="background: var(--surface-conteneur, #142428); padding: 12px; border-radius: 6px; border: 1px solid var(--bordure-claire); margin-bottom: 10px;">
                 <div style="font-weight: bold; color: var(--accent-primaire); margin-bottom: 8px;">
-                    📊 Statistiques descriptives
+                    Statistiques descriptives
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.9rem;">
                     <div>Moyenne : <strong>${stats.moyenne.toFixed(1)}%</strong></div>
@@ -544,7 +541,6 @@ function genererBlocProfilRLO(da) {
                 ${entete}
                 <div class="info-box info-box--info" style="margin: 0;">
                     <div style="display: flex; gap: 10px; align-items: start;">
-                        <span style="font-size: 1.3rem;">📝</span>
                         <div style="flex: 1;">
                             <strong style="color: var(--alerte-texte-information); display: block; margin-bottom: 5px;">Aucune action cognitive observée</strong>
                             <p style="margin: 0; color: var(--alerte-texte-information); font-size: 0.9rem; line-height: 1.5;">

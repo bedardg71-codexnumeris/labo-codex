@@ -64,7 +64,7 @@ function initialiserSystemeModes() {
     if (estModeClair()) {
         document.body.classList.add('mode-clair');
         var btnTheme = document.getElementById('btn-toggle-theme');
-        if (btnTheme) btnTheme.textContent = '🌑';
+        if (btnTheme) btnTheme.textContent = 'Mode sombre';
         // Synchroniser les radio buttons
         var radioClair = document.getElementById('radio-mode-clair');
         var radioSombre = document.getElementById('radio-mode-sombre');

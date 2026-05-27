@@ -815,9 +815,9 @@ function traiterImportObjectifs(event) {
             // Afficher les informations CC si disponibles
             if (metadata && metadata.licence) {
                 const infosCC = `
-📋 Matériel sous licence ${metadata.licence}
-👤 Auteur original : ${metadata.auteur_original}
-📅 Date de création : ${metadata.date_creation}
+Matériel sous licence ${metadata.licence}
+Auteur original : ${metadata.auteur_original}
+Date de création : ${metadata.date_creation}
 
 Tu peux utiliser, modifier et partager ce matériel selon les conditions de la licence CC BY-NC-SA 4.0.
                 `.trim();

@@ -465,15 +465,13 @@ class PratiqueSommative {
             strategies: [],
             ressources: [],
             niveau: 1,
-            couleur: pattern.couleur,
-            emoji: '🟢'
+            couleur: pattern.couleur
         };
 
         // DIFFICULTÉ PERSISTANTE (Niveau 3 RàI)
         if (pattern.type === 'difficulte-persistante') {
             cible.niveau = 3;
             cible.couleur = '#dc3545';
-            cible.emoji = '🔴';
 
             if (productionFaible) {
                 cible.cible = `Reprise obligatoire : ${productionFaible.production}`;
@@ -505,7 +503,6 @@ class PratiqueSommative {
         else if (pattern.type === 'difficulte-emergente') {
             cible.niveau = 2;
             cible.couleur = '#ff9800';
-            cible.emoji = '🟠';
 
             if (productionFaible) {
                 cible.cible = `Rattrapage ciblé : ${productionFaible.production}`;
@@ -535,7 +532,6 @@ class PratiqueSommative {
         else if (pattern.type === 'defi-specifique') {
             cible.niveau = 2;
             cible.couleur = '#ffc107';
-            cible.emoji = '🟡';
 
             if (productionFaible) {
                 cible.cible = `Amélioration : ${productionFaible.production}`;
@@ -571,7 +567,6 @@ class PratiqueSommative {
         else {
             cible.niveau = 1;
             cible.couleur = pattern.type === 'progression' ? '#388e3c' : '#4caf50';
-            cible.emoji = pattern.type === 'progression' ? '🟢' : '🟢';
             cible.cible = 'Maintien et consolidation';
             cible.strategies = [
                 'Encourager la persévérance',

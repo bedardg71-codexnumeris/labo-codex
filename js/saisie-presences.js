@@ -709,7 +709,7 @@ function verifierConfigurationFormatHoraire() {
         alerteDiv.classList.remove('u-hide');
         alerteDiv.innerHTML = `
             <div class="alerte alerte-avertissement">
-                <strong>⚠️ Configuration incomplète</strong><br>
+                <strong><img src="icons/icons8-high-priority.svg" alt="" class="alerte-icone"> Configuration incomplète</strong><br>
                 L'horaire des cours n'est pas configuré. 
                 <a href="#" data-prevent data-action="naviguerVersReglagesTrimestre">
                     Configurer l'horaire →

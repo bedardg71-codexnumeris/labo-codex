@@ -369,7 +369,7 @@ function rendreAideHTML(cle, titre, contenu) {
     var html = [];
     html.push('<div class="bilan-info-aide' + (replie ? ' replie' : '') + '" id="bilan-aide-' + cle + '">');
     html.push('<div class="bilan-aide-header" data-action="BilanReflexif.toggleAide" data-param="' + cle + '">');
-    html.push('<span class="bilan-aide-titre">❓ ' + titre + '</span>');
+    html.push('<span class="bilan-aide-titre">' + titre + '</span>');
     html.push('<span class="bilan-aide-chevron">▼</span>');
     html.push('</div>');
     html.push('<div class="bilan-aide-body">' + contenu + '</div>');

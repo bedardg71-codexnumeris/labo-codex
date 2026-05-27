@@ -1628,14 +1628,14 @@ function insererNavigationEvaluationSerie() {
                 data-action="ouvrirProfilDepuisEvaluation"
                 style="margin-left: 10px; display: none; padding: 6px 10px; min-width: auto; font-size: 0.85rem;"
                 title="Voir le profil de l'étudiant·e">
-            👤
+            <img src="icons/icon-profile.svg" alt="" class="btn-inline-icon">
         </button>
 
         <button id="btnVoirTravailDepuisEval" class="btn btn-secondaire btn-compact"
                 data-action="ouvrirTravailDepuisEvaluation"
                 style="margin-left: 6px; display: none; padding: 6px 10px; min-width: auto; font-size: 0.85rem;"
                 title="Voir le travail de l'étudiant·e">
-            📄 Travail
+            <img src="icons/icon-pdf.svg" alt="" class="btn-inline-icon"> Travail
         </button>
     `;
 

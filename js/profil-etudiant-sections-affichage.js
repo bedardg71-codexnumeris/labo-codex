@@ -351,10 +351,10 @@ function _genererBlocInterventionsRaIMobilisation(da) {
                 const options = { weekday: 'short', day: 'numeric', month: 'short' };
                 const dateFormatee = date.toLocaleDateString('fr-CA', options);
                 const duree = intervention.duree || 2;
-                const typeIcone = intervention.type === 'individuel' ? '👤' : intervention.type === 'mio' ? '✉️' : '👥';
+                const typeLibelle = intervention.type === 'individuel' ? 'Individuel' : intervention.type === 'mio' ? 'MIO' : 'Groupe';
                 return `
                     <span class="badge-intervention-vert" data-action="naviguerVersIntervention" data-param="${intervention.id}">
-                        ${typeIcone} ${dateFormatee}
+                        ${typeLibelle} ${dateFormatee}
                         <span class="badge-analyse-count">
                             ${duree} pér.
                         </span>
@@ -660,7 +660,7 @@ function genererSectionMobilisationEngagement(da) {
                                         ${echapperHtml(art.description)}
                                     </span>
                                     <span class="badge-completion-numero">
-                                        ${art.estNonRecevable ? '⚠️' : ''} P${art.indexOriginal}
+                                        ${art.estNonRecevable ? '<img src="icons/icons8-high-priority.svg" alt="" class="alerte-icone">' : ''}P${art.indexOriginal}
                                     </span>
                                 </span>
                             `).join('')}
@@ -1069,7 +1069,7 @@ function genererSectionAccompagnement(da) {
                 <div class="profil-separateur-section"></div>
 
                 <p class="profil-texte-detail-compact">
-                    <strong>Services adaptés :</strong> ${etudiant.caf === 'Oui' ? '✓ CAF' : ''} ${etudiant.sa === 'Oui' ? '✓ SA' : ''} ${etudiant.caf !== 'Oui' && etudiant.sa !== 'Oui' ? 'Aucun' : ''}
+                    <strong>Services adaptés :</strong> ${etudiant.caf === 'Oui' ? 'CAF' : ''}${etudiant.caf === 'Oui' && etudiant.sa === 'Oui' ? ', ' : ''}${etudiant.sa === 'Oui' ? 'SA' : ''} ${etudiant.caf !== 'Oui' && etudiant.sa !== 'Oui' ? 'Aucun' : ''}
                 </p>
 
                 <button data-action="ouvrirModalConfidentiel" data-param="${da}" class="btn btn-secondaire" style="margin-top: 12px; font-size: 0.85rem;" data-tooltip="profil-confidentiel">
@@ -1246,7 +1246,7 @@ function genererSectionAccompagnement(da) {
         const options = { weekday: 'short', day: 'numeric', month: 'short' };
         const dateFormatee = date.toLocaleDateString('fr-CA', options);
         const duree = intervention.duree || 2;
-        const typeIcone = intervention.type === 'individuel' ? '👤' : intervention.type === 'mio' ? '✉️' : '👥';
+        const typeLibelle = intervention.type === 'individuel' ? 'Individuel' : intervention.type === 'mio' ? 'MIO' : 'Groupe';
         const noteIndividuelle = intervention.notesIndividuelles?.[da] || '';
         const niveauRai = intervention.niveauRai || 3;
 
@@ -1262,7 +1262,7 @@ function genererSectionAccompagnement(da) {
             <div class="intervention-timeline-item">
                 <div class="u-flex-gap-12 u-align-center" style="flex: 1;">
                     <span class="badge-intervention-vert">
-                        ${typeIcone} ${badgeTexte}
+                        ${typeLibelle} · ${badgeTexte}
                     </span>
                     <span class="u-texte-bleu" style="font-weight: 600; font-size: 0.9rem;">
                         ${dateFormatee}
@@ -1328,26 +1328,26 @@ function genererSectionMobilisation(da) {
         <!-- INTERPRÉTATION QUALITATIVE -->
         <div class="profil-interpretation" style="background: linear-gradient(to right, ${interpM.couleur}22, ${interpM.couleur}11); border-left-color: ${interpM.couleur};">
             <div class="profil-interpretation-titre" style="color: ${interpM.couleur};">
-                ${interpM.emoji} ${interpM.niveau}
+                <span class="pastille-rai" style="background:${interpM.couleur}"></span> ${interpM.niveau}
             </div>
             <div class="profil-interpretation-texte">
                 ${interpM.niveau === 'Décrochage' ?
-                    "⚫ L'étudiant ne se présente plus au cours. Les interventions pédagogiques ne sont plus possibles. Référer aux services d'aide et à l'API." :
+                    "L'étudiant ne se présente plus au cours. Les interventions pédagogiques ne sont plus possibles. Référer aux services d'aide et à l'API." :
                   interpM.niveau === 'Assiduité ET complétion critiques' ?
-                    "🔴 Situation critique : présence ET remise des travaux sous 70%. Intervention RàI niveau 3 immédiate requise." :
+                    "Situation critique : présence ET remise des travaux sous 70%. Intervention RàI niveau 3 immédiate requise." :
                   interpM.niveau === 'Assiduité critique' ?
-                    "🟠 Assiduité critique (< 70%). La présence irrégulière compromet l'apprentissage. Intervention prioritaire sur l'engagement comportemental." :
+                    "Assiduité critique (< 70%). La présence irrégulière compromet l'apprentissage. Intervention prioritaire sur l'engagement comportemental." :
                   interpM.niveau === 'Complétion critique' ?
-                    "🟠 Complétion critique (< 70%). Les travaux ne sont pas remis. Investigation des obstacles organisationnels ou motivationnels nécessaire." :
+                    "Complétion critique (< 70%). Les travaux ne sont pas remis. Investigation des obstacles organisationnels ou motivationnels nécessaire." :
                   interpM.niveau === 'Mobilisation fragile' ?
-                    "🟡 Les deux composantes (A et C) sont entre 70-80%. Soutien proactif recommandé pour stabiliser l'engagement." :
+                    "Les deux composantes (A et C) sont entre 70-80%. Soutien proactif recommandé pour stabiliser l'engagement." :
                   interpM.niveau === 'Assiduité fragile' ?
-                    "🟡 L'assiduité est entre 70-80% alors que la complétion est satisfaisante. Renforcer la présence en classe." :
+                    "L'assiduité est entre 70-80% alors que la complétion est satisfaisante. Renforcer la présence en classe." :
                   interpM.niveau === 'Complétion fragile' ?
-                    "🟡 La complétion est entre 70-80% alors que l'assiduité est satisfaisante. Soutenir l'organisation et la planification." :
+                    "La complétion est entre 70-80% alors que l'assiduité est satisfaisante. Soutenir l'organisation et la planification." :
                   interpM.niveau === 'Favorable' ?
-                    "🔵 Excellent engagement comportemental ! Assiduité et complétion ≥ 90%. Maintenir cette dynamique positive." :
-                    "🟢 Engagement comportemental satisfaisant. Assiduité et complétion ≥ 80%. Continuer la surveillance de niveau 1."}
+                    "Excellent engagement comportemental. Assiduité et complétion ≥ 90%. Maintenir cette dynamique positive." :
+                    "Engagement comportemental satisfaisant. Assiduité et complétion ≥ 80%. Continuer la surveillance de niveau 1."}
             </div>
         </div>
 
@@ -1364,7 +1364,7 @@ function genererSectionMobilisation(da) {
         <!-- RECOMMANDATIONS SELON LE NIVEAU -->
         ${interpM.niveau === 'Décrochage' ? `
             <div style="background: var(--gris-tres-pale); border-left: 4px solid var(--gris-clair); padding: 15px;">
-                <h4 style="color: var(--gris-fonce); margin-bottom: 10px;">⚫ Actions requises</h4>
+                <h4 style="color: var(--gris-fonce); margin-bottom: 10px;">Actions requises</h4>
                 <ul style="margin: 0; padding-left: 20px; color: var(--gris-fonce); line-height: 1.6;">
                     <li>Contact immédiat avec l'aide pédagogique individuelle (API)</li>
                     <li>Tentative de contact direct (téléphone, courriel)</li>
@@ -1377,7 +1377,7 @@ function genererSectionMobilisation(da) {
                         border-left: 4px solid ${A < 0.7 && C < 0.7 ? '#e84057' : '#c8a060'};
                         padding: 15px; border-radius: 6px;">
                 <h4 style="color: ${A < 0.7 && C < 0.7 ? '#f06878' : '#d4b878'}; margin-bottom: 10px;">
-                    💡 Recommandations d'intervention (niveau critique)
+                    Recommandations d'intervention (niveau critique)
                 </h4>
                 <ul style="margin: 0; padding-left: 20px; color: ${A < 0.7 && C < 0.7 ? '#f06878' : '#d4b878'}; line-height: 1.6;">
                     ${A < 0.7 && C < 0.7 ?
@@ -1393,7 +1393,7 @@ function genererSectionMobilisation(da) {
             </div>
         ` : (A < 0.8 || C < 0.8) ? `
             <div class="info-box info-box--attention">
-                <h4 style="color: var(--alerte-texte-attention); margin-bottom: 10px;">💡 Recommandations préventives (niveau fragile)</h4>
+                <h4 style="color: var(--alerte-texte-attention); margin-bottom: 10px;">Recommandations préventives (niveau fragile)</h4>
                 <ul style="margin: 0; padding-left: 20px; color: var(--alerte-texte-attention); line-height: 1.6;">
                     ${A < 0.8 && C < 0.8 ?
                         '<li><strong>Mobilisation fragile :</strong> Soutien sur les deux composantes (présence ET remise)</li>' :
@@ -1420,17 +1420,6 @@ function obtenirCouleurIndice(taux) {
     if (taux >= 85) return 'var(--niveau-attention-minimal)'; // Vert
     if (taux >= 70) return 'var(--niveau-attention-modere)';  // Jaune
     return 'var(--niveau-attention-tres-eleve)';              // Rouge
-}
-
-/**
- * Obtient l'emoji selon le taux
- * @param {number} taux - Taux en pourcentage (0-100)
- * @returns {string} - Emoji
- */
-function obtenirEmojiIndice(taux) {
-    if (taux >= 85) return '🟢';
-    if (taux >= 70) return '🟡';
-    return '🔴';
 }
 
 /**
@@ -1594,7 +1583,7 @@ function genererCarteCibleIntervention(da) {
         console.error('[ProfilEtudiant] Aucune pratique active trouvée');
         return `
             <div class="info-box info-box--attention">
-                <strong>⚠️ Configuration requise</strong><br>
+                <strong><img src="icons/icons8-high-priority.svg" alt="" class="alerte-icone">Configuration requise</strong><br>
                 Veuillez configurer une pratique de notation dans Réglages › Pratique de notation.
             </div>
         `;
@@ -1618,12 +1607,12 @@ function genererCarteCibleIntervention(da) {
                        'RàI 1';
 
     const descriptionNiveau = cibleInfo.niveau === 3
-        ? '⚠️ <strong>Action immédiate requise</strong> - Intervention intensive pour prévenir un échec. Mobiliser les ressources d\'aide (CAF, aide à l\'apprentissage).'
+        ? '<strong>Action immédiate requise</strong> - Intervention intensive pour prévenir un échec. Mobiliser les ressources d\'aide (CAF, aide à l\'apprentissage).'
         : cibleInfo.niveau === 2
         ? '<strong>Intervention ciblée recommandée</strong> - Soutien spécifique pour consolider les apprentissages et prévenir l\'aggravation des difficultés.'
         : cibleInfo.cible.includes('Pratique autonome')
-        ? '✨ <strong>Enrichissement</strong> - L\'étudiant maîtrise les bases. Encourager l\'exploration, la créativité et le développement de l\'autonomie.'
-        : '✓ <strong>Maintien</strong> - Performance satisfaisante. Continuer le suivi régulier et encourager la constance.';
+        ? '<strong>Enrichissement</strong> - L\'étudiant maîtrise les bases. Encourager l\'exploration, la créativité et le développement de l\'autonomie.'
+        : '<strong>Maintien</strong> - Performance satisfaisante. Continuer le suivi régulier et encourager la constance.';
 
     return `
         <!-- Détails de la section (masqué par défaut) -->
@@ -1643,7 +1632,7 @@ function genererCarteCibleIntervention(da) {
         <div class="carte-cible-intervention" style="border-color: ${cibleInfo.couleur};">
             <div class="carte-cible-header">
                 <div class="carte-cible-titre" style="color: ${cibleInfo.couleur};">
-                    ${cibleInfo.emoji} Cible d'intervention recommandée
+                    <span class="pastille-rai" style="background:${cibleInfo.couleur}"></span> Cible d'intervention recommandée
                 </div>
                 <div class="carte-cible-badge-niveau" style="background: ${cibleInfo.couleur};">
                     ${niveauTexte}
@@ -2379,8 +2368,8 @@ function afficherProfilComplet(daOuEl) {
                         ${modeAnonymisation ? '' : `<div><strong>DA:</strong> ${echapperHtml(eleve.da)}</div>`}
                         ${eleve.groupe ? `<div><strong>Groupe:</strong> ${echapperHtml(eleve.groupe)}</div>` : ''}
                         ${eleve.programme ? `<div><strong>Programme:</strong> ${typeof obtenirNomProgramme === 'function' ? echapperHtml(obtenirNomProgramme(eleve.programme)) : echapperHtml(eleve.programme)}</div>` : ''}
-                        ${eleve.sa === 'Oui' ? '<div class="u-texte-bleu">✓ Services adaptés</div>' : ''}
-                        ${eleve.caf === 'Oui' ? '<div class="u-texte-bleu">✓ CAF</div>' : ''}
+                        ${eleve.sa === 'Oui' ? '<div class="u-texte-bleu">Services adaptés</div>' : ''}
+                        ${eleve.caf === 'Oui' ? '<div class="u-texte-bleu">CAF</div>' : ''}
                     </div>
                 </div>
 
@@ -2818,7 +2807,7 @@ function genererSectionProductions(da) {
             const calculOblHtml = calcObl ? formaterCalcul(calcObl, pondObl) : `<span class="note-finale-ponderation">× ${pondObl != null ? pondObl + '%' : '—'}</span>`;
 
             const formule = erreurPond
-                ? `<span class="note-finale-tiret">⚠ Pondérations Sélection/Obligatoires manquantes dans la configuration de la pratique.</span>`
+                ? `<span class="note-finale-tiret">Pondérations Sélection/Obligatoires manquantes dans la configuration de la pratique.</span>`
                 : (calcSel && calcObl
                     ? `Note finale = ${calcSel.contribution.toFixed(1)} pts + ${calcObl.contribution.toFixed(1)} pts = ${(calcSel.contribution + calcObl.contribution).toFixed(1)} %`
                     : `Note finale pondérée (Sélection ${pondSel}% + Obligatoires ${pondObl}% = ${pondSel + pondObl}%)`);
@@ -3070,12 +3059,12 @@ function genererTableauObjectifs(da, ensembleId, noteFinaleMultiObjectifs) {
         <!-- Résumé forces et défis -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
             <div style="background: var(--vert-pale, #e8f5e9); padding: 15px; border-radius: 6px; border-left: 4px solid var(--vert-succes);">
-                <div style="font-weight: bold; color: var(--vert-succes); margin-bottom: 5px;">✅ Forces (≥ ${(seuil * 100).toFixed(0)}%)</div>
+                <div style="font-weight: bold; color: var(--vert-succes); margin-bottom: 5px;">Forces (≥ ${(seuil * 100).toFixed(0)}%)</div>
                 <div style="font-size: 1.5rem; font-weight: bold; color: var(--vert-succes);">${forces.length}</div>
                 ${forces.length > 0 ? `<div class="u-texte-mini u-texte-gris" style="margin-top: 5px;">${forces.map(f => f.nom).join(', ')}</div>` : ''}
             </div>
             <div style="background: var(--orange-pale, #fff3e0); padding: 15px; border-radius: 6px; border-left: 4px solid var(--orange-accent);">
-                <div style="font-weight: bold; color: var(--orange-accent); margin-bottom: 5px;">⚠️ Défis (< ${(seuil * 100).toFixed(0)}%)</div>
+                <div style="font-weight: bold; color: var(--orange-accent); margin-bottom: 5px;">Défis (< ${(seuil * 100).toFixed(0)}%)</div>
                 <div style="font-size: 1.5rem; font-weight: bold; color: var(--orange-accent);">${defis.length}</div>
                 ${defis.length > 0 ? `<div class="u-texte-mini u-texte-gris" style="margin-top: 5px;">${defis.map(d => d.nom).join(', ')}</div>` : ''}
             </div>
@@ -3083,7 +3072,7 @@ function genererTableauObjectifs(da, ensembleId, noteFinaleMultiObjectifs) {
 
         <!-- Tableau détaillé des objectifs -->
         <h4 class="profil-section-titre-large" style="margin-bottom: 15px;">
-            🎯 Détail des ${ensemble.objectifs.length} objectifs d'apprentissage
+            Détail des ${ensemble.objectifs.length} objectifs d'apprentissage
         </h4>
 
         <div style="background: var(--surface-conteneur, #142428); border-radius: 6px; overflow: hidden;">
@@ -3106,7 +3095,6 @@ function genererTableauObjectifs(da, ensembleId, noteFinaleMultiObjectifs) {
 
                         let niveau = '--';
                         let couleurNiveau = 'var(--gris-clair)';
-                        let statut = '⏸️';
                         let couleurStatut = 'var(--gris-clair)';
                         let labelStatut = 'Non évalué';
 
@@ -3117,11 +3105,9 @@ function genererTableauObjectifs(da, ensembleId, noteFinaleMultiObjectifs) {
 
                             // Déterminer statut
                             if (P >= seuil * 100) {
-                                statut = '✅';
                                 couleurStatut = 'var(--vert-succes)';
                                 labelStatut = 'Force';
                             } else {
-                                statut = '⚠️';
                                 couleurStatut = 'var(--orange-accent)';
                                 labelStatut = 'Défi';
                             }
@@ -3166,7 +3152,7 @@ function genererTableauObjectifs(da, ensembleId, noteFinaleMultiObjectifs) {
                                     </span>
                                 </td>
                                 <td style="text-align: center; padding: 12px;">
-                                    <div style="font-size: 1.5rem;">${statut}</div>
+                                    <span class="pastille-rai" style="background:${couleurStatut}"></span>
                                     <div style="font-size: 0.75rem; color: ${couleurStatut}; font-weight: bold;">
                                         ${labelStatut}
                                     </div>
@@ -3273,7 +3259,7 @@ function genererSectionProgression(da) {
         return `
             <div class="profil-zone-moyenne-bleu">
                 <h4 class="profil-section-titre-large" style="margin-bottom: 15px;">
-                    📊 Aucune donnée de progression disponible
+                    Aucune donnée de progression disponible
                 </h4>
                 <p class="u-texte-gris u-mb-10" style="font-size: 0.95rem;">
                     Les graphiques de progression afficheront l'évolution temporelle des indices A-C-P-E une fois que des données auront été collectées.
@@ -3444,7 +3430,7 @@ function toggleDetailIndice(indice, da) {
         case 'C':
             html = `
                 <h3 class="profil-titre-bleu-large-pr40">
-                    ✅ Complétion détaillée
+                    Complétion détaillée
                 </h3>
                 ${genererSectionCompletion(da)}
             `;
@@ -3457,7 +3443,7 @@ function toggleDetailIndice(indice, da) {
         case 'M':
             html = `
                 <h3 class="profil-titre-bleu-large-pr40">
-                    🎯 Mobilisation détaillée
+                    Mobilisation détaillée
                 </h3>
                 ${genererSectionMobilisation(da)}
             `;
@@ -3582,12 +3568,12 @@ function genererSectionCompletion(da) {
         <div class="profil-carte-bordure-blanche">
 
             <h3 class="profil-titre-section-majeur">
-                📝 COMPLÉTION
+                COMPLÉTION
             </h3>
 
             <!-- Badge avec interprétation -->
             <div class="u-mb-15">
-                <span class="profil-valeur-moyenne">${interpC.emoji}</span>
+                <span class="pastille-rai" style="background:${interpC.couleur}"></span>
                 <strong style="font-size: 1.1rem; color: ${interpC.couleur};">${interpC.niveau}</strong>
                 <span style="font-size: 1.3rem; font-weight: bold; color: ${interpC.couleur}; margin-left: 10px;">(${indices.C}%)</span>
             </div>
@@ -3617,7 +3603,7 @@ function genererSectionCompletion(da) {
 
             <!-- Artefacts remis -->
             <h4 class="profil-titre-sous-section">
-                ✅ ARTEFACTS REMIS (${artefactsRemis.length})
+                ARTEFACTS REMIS (${artefactsRemis.length})
             </h4>
             ${artefactsRemis.length > 0 ? `
                 <div class="badges-centres u-mb-20">
@@ -3625,9 +3611,9 @@ function genererSectionCompletion(da) {
                         <div style="flex: 0 0 auto; min-width: 200px; max-width: 250px; padding: 12px;
                                     background: var(--vert-pale, #d4edda); border-left: 3px solid var(--vert-succes);">
                             <div style="color: var(--alerte-texte-succes); font-weight: 500; margin-bottom: 5px;">
-                                ✅ ${echapperHtml(art.description)}
-                                ${art.jetonReprise ? '<span style="color: #9c27b0; margin-left: 6px;" title="Jeton de reprise appliqué">⭐</span>' : ''}
-                                ${art.jetonDelai ? '<span style="color: #ff6f00; margin-left: 6px;" title="Jeton de délai appliqué">⭐</span>' : ''}
+                                ${echapperHtml(art.description)}
+                                ${art.jetonReprise ? '<span style="color: #9c27b0; margin-left: 6px;" title="Jeton de reprise appliqué">★</span>' : ''}
+                                ${art.jetonDelai ? '<span style="color: #ff6f00; margin-left: 6px;" title="Jeton de délai appliqué">★</span>' : ''}
                             </div>
                             <div class="profil-texte-detail">
                                 <strong>${art.note}</strong>${art.niveau ? ` · ${art.niveau}` : ''}
@@ -3643,7 +3629,7 @@ function genererSectionCompletion(da) {
 
             <!-- Artefacts non remis -->
             <h4 class="profil-titre-sous-section">
-                ⏳ ARTEFACTS NON REMIS (${artefactsNonRemis.length})
+                ARTEFACTS NON REMIS (${artefactsNonRemis.length})
             </h4>
             ${artefactsNonRemis.length > 0 ? `
                 <div class="badges-centres u-mb-20">
@@ -3651,7 +3637,7 @@ function genererSectionCompletion(da) {
                         <div style="flex: 0 0 auto; min-width: 200px; max-width: 250px; padding: 12px;
                                     background: var(--gris-tres-pale); border-left: 3px solid var(--bordure-claire); opacity: 0.6;">
                             <div style="color: var(--gris-moyen); font-weight: 500; margin-bottom: 5px;">
-                                ⏳ ${echapperHtml(art.description)}
+                                ${echapperHtml(art.description)}
                             </div>
                             <div class="text-muted" style="font-size: 0.9rem;">Non remis</div>
                         </div>
@@ -3659,7 +3645,7 @@ function genererSectionCompletion(da) {
                 </div>
             ` : `
                 <div class="profil-zone-centre-verte">
-                    ✅ Tous les artefacts ont été remis !
+                    Tous les artefacts ont été remis.
                 </div>
             `}
 
@@ -3668,7 +3654,7 @@ function genererSectionCompletion(da) {
             <!-- Placeholder graphique (en conclusion) -->
             <div style="background: var(--bleu-tres-pale); border: 2px dashed var(--bleu-pale); border-radius: 8px;
                         padding: 30px 20px; text-align: center; color: var(--texte-secondaire); font-style: italic;">
-                📈 Évolution temporelle de la complétion (à venir)
+                Évolution temporelle de la complétion (à venir)
             </div>
 
         </div>
@@ -3838,7 +3824,6 @@ function _genererBlocForcesDefisSRPNF(da) {
             return `
                 <div class="info-box info-box--attention" style="margin: 15px 0;">
                     <div style="display: flex; gap: 10px; align-items: start;">
-                        <span style="font-size: 1.3rem;">⚙️</span>
                         <div style="flex: 1;">
                             <strong style="color: var(--alerte-texte-attention); display: block; margin-bottom: 5px;">Configuration requise</strong>
                             <p style="margin: 0; color: var(--alerte-texte-attention); font-size: 0.9rem; line-height: 1.5;">
@@ -3853,7 +3838,6 @@ function _genererBlocForcesDefisSRPNF(da) {
         return `
             <div class="info-box info-box--info" style="margin: 15px 0;">
                 <div style="display: flex; gap: 10px; align-items: start;">
-                    <span style="font-size: 1.3rem;">📝</span>
                     <div style="flex: 1;">
                         <strong style="color: var(--alerte-texte-information); display: block; margin-bottom: 5px;">Aucune donnée disponible</strong>
                         <p style="margin: 0; color: var(--alerte-texte-information); font-size: 0.9rem; line-height: 1.5;">
@@ -4295,12 +4279,12 @@ function genererSectionAssiduiteLegacy(da) {
         <div class="profil-carte-bordure-blanche">
 
             <h3 class="profil-titre-section-majeur">
-                👥 ASSIDUITÉ
+                ASSIDUITÉ
             </h3>
 
             <!-- Badge avec interprétation -->
             <div class="u-mb-15">
-                <span class="profil-valeur-moyenne">${interpA.emoji}</span>
+                <span class="pastille-rai" style="background:${interpA.couleur}"></span>
                 <strong style="font-size: 1.1rem; color: ${interpA.couleur};">${interpA.niveau}</strong>
                 <span style="font-size: 1.3rem; font-weight: bold; color: ${interpA.couleur}; margin-left: 10px;">(${taux}%)</span>
             </div>
@@ -4352,7 +4336,7 @@ function genererSectionAssiduiteLegacy(da) {
             <!-- Placeholder graphique (en conclusion) -->
             <div style="background: var(--bleu-tres-pale); border: 2px dashed var(--bleu-pale); border-radius: 8px;
                         padding: 30px 20px; text-align: center; color: var(--texte-secondaire); font-style: italic;">
-                📈 Évolution temporelle de l'assiduité (à venir)
+                Évolution temporelle de l'assiduité (à venir)
             </div>
 
         </div>

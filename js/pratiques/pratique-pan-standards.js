@@ -1169,15 +1169,13 @@ class PratiquePANStandards {
             strategies: [],
             ressources: [],
             niveau: 1,
-            couleur: '#4caf50',
-            emoji: '🟢'
+            couleur: '#4caf50'
         };
 
         // DIFFICULTÉ PERSISTANTE (Niveau 3 RàI)
         if (pattern === 'Difficulté persistante') {
             cible.niveau = 3;
             cible.couleur = '#dc3545';
-            cible.emoji = '🔴';
 
             // ✅ NIVEAU 1 : Chercher intervention configurée dans la grille
             const interventionConfig = this._obtenirInterventionConfiguree(defiPrincipal, 3);
@@ -1200,7 +1198,6 @@ class PratiquePANStandards {
         else if (pattern === 'Difficulté émergente') {
             cible.niveau = 2;
             cible.couleur = '#ff9800';
-            cible.emoji = '🟠';
 
             // ✅ NIVEAU 1 : Chercher intervention configurée dans la grille
             const interventionConfig = this._obtenirInterventionConfiguree(defiPrincipal, 2);
@@ -1223,7 +1220,6 @@ class PratiquePANStandards {
         else if (pattern === 'Défi spécifique') {
             cible.niveau = 1;
             cible.couleur = '#ffc107';
-            cible.emoji = '🟡';
 
             // ✅ NIVEAU 1 : Chercher intervention configurée dans la grille
             const interventionConfig = this._obtenirInterventionConfiguree(defiPrincipal, 1);
@@ -1245,7 +1241,6 @@ class PratiquePANStandards {
         else {
             cible.niveau = 1;
             cible.couleur = '#4caf50';
-            cible.emoji = '🟢';
             cible.cible = 'Maintien et consolidation';
             cible.strategies = [
                 'Encourager la persévérance',
