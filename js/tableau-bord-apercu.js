@@ -2048,7 +2048,7 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
     if (tousEnAttente) {
         return `
             <div class="distribution-container u-mb-15">
-                <h4 class="tb-titre-metrique" data-tooltip="tdb-patterns">Suivi de l'apprentissage des fondamentaux</h4>
+                <h4 class="tb-titre-metrique" data-tooltip="tdb-patterns">Structure des apprentissages fondamentaux (SOLO)</h4>
                 ${sousTitreMulti}
                 <div class="tb-texte-description" style="color: var(--texte-muted); font-style: italic;">
                     En attente de données pour ${nbTotal} étudiant${nbTotal > 1 ? 's' : ''}.
@@ -2242,7 +2242,7 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
 
     return `
         <div class="distribution-container u-mb-15">
-            <h4 class="tb-titre-metrique" style="margin-bottom: 4px;" data-tooltip="tdb-patterns">Suivi de l'apprentissage des fondamentaux</h4>
+            <h4 class="tb-titre-metrique" style="margin-bottom: 4px;" data-tooltip="tdb-patterns">Structure des apprentissages fondamentaux (SOLO)</h4>
             ${sousTitreMulti}
             ${messageFiabilite}
             <div class="barre-patterns tb-barre-simple">
