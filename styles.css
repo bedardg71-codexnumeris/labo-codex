@@ -909,7 +909,6 @@ h1, h2, h3, h4 {
     gap: 20px;
     min-height: 64px;
     padding-bottom: 8px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 /* Codex (colonne 1, aligné à gauche) */
@@ -1103,6 +1102,16 @@ h1, h2, h3, h4 {
     border-top: 1px solid rgba(106, 172, 184, 0.18);
     margin: 0 -30px -10px;
     padding: 8px 30px;
+}
+
+/* Séparateur vertical dans la nav principale (entre Aperçu et Conception),
+   pour marquer la frontière entre sections plates (Accueil, Aperçu) et
+   sections avec sous-navigation (Conception, Calendrier, …). */
+.nav-separateur-vertical {
+    width: 1px;
+    align-self: stretch;
+    margin: 6px 6px;
+    background: rgba(255, 255, 255, 0.18);
 }
 
 /* Pastille de notification nouveautés (point rouge) — utilisé hors entête */
