@@ -4,7 +4,7 @@
 >
 > **Dernière bascule** : 25 mai 2026 fin de journée — extraction des items livrés vers BACKLOG-ARCHIVE.md.
 > **État courant** : Beta 99.66 (Build 0526-0503), HEAD main `4df4f21`. 28 items ouverts (session 26 mai matin : 3 items #278/#280/#281 livrés + 3 bugs testeurs résolus + 1 item #286 ajouté).
-> **Dernier ID utilisé** : #286 (migration emojis UI → SVG icons8, créé 26 mai 2026).
+> **Dernier ID utilisé** : #287 (picker couleur custom HTML, créé 27 mai 2026).
 > **Présentation AQPC** : 3 juin 2026 (J−8).
 > **Pour ajouter un item** : `- [ ] **#XX** Description courte` + sous-puces de contexte. Dernier ID utilisé : **#285** (livré).
 
@@ -65,6 +65,13 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - Version « papier » pour AQPC peut être dérivée de `docs/securite/SECURITE-POUR-ENSEIGNANTS.md` (à écrire post-Défense E).
 
 ### Cohérence visuelle UI
+
+- [ ] 🟢 **#287** Remplacer le picker de couleur natif macOS par une palette HTML custom (modale Personnaliser les tampons)
+  - **Motivation** : le `<input type="color">` natif (popup macOS) ne permet pas de mettre en surbrillance la couleur actuellement sélectionnée. Grégoire demande de mieux identifier visuellement quelle couleur est active sur chaque pastille de catégorie.
+  - **Sites concernés** (5 occurrences) : pastille catégorie (l. 2104 + l. 2746 dans `js/travaux-outils.js`), pastille item tampon (l. 2149 + l. 2687), couleur outil de dessin (l. 3135).
+  - **Implémentation suggérée** : `<details>` HTML5 (toggle natif) + popover en `position: absolute`, grille de la constante `COULEURS` (12 couleurs prédéfinies, déjà utilisée pour le palette des outils dessin), bouton actif via classe `.travaux-btn-couleur.actif` (déjà style CSS en place l. 16925), input hidden pour préserver le mécanisme de sauvegarde existant (lecture via `input[data-color-cat-id]` l. 2499).
+  - **Effort estimé** : 1-2 h (refactor + extension aux 5 sites + tests visuels modes sombre/clair).
+  - **Capture déclencheuse** : Grégoire 27 mai 2026 matin (modale Personnaliser tampons, picker macOS ouvert sans indication de la couleur active).
 
 - [ ] 🟡 **#286** Migration globale emojis UI → Icônes SVG icons8 (chantier en 5 lots)
   - **Capture déclencheuse** : iPad 26 mai 05:15 — section « Préparer et importer » avec ✴ orange à droite du titre + 📝 papier-crayon au-dessus de « Annoter les travaux ».

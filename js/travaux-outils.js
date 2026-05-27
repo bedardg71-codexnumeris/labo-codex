@@ -197,30 +197,31 @@
     const AUTOCOLLANTS = [
         // --- Action (RLO) (6) ---
         // Les fichiers PNG conservent leur nom physique `contenu-*.png` — le mapping vit ici.
-        { id: 'action-reperage',     nom: 'Rep\u00e9rage', fichier: 'contenu-exact.png',       categorie: 'action' },
-        { id: 'action-liaison',      nom: 'Liaison',      fichier: 'contenu-bien.png',         categorie: 'action' },
-        { id: 'action-ouverture',    nom: 'Ouverture',    fichier: 'contenu-tres-bien.png',    categorie: 'action' },
-        { id: 'action-incertain',    nom: 'Incertain',    fichier: 'contenu-incertain.png',    categorie: 'action' },
-        { id: 'action-incomplet',    nom: 'Incomplet',    fichier: 'contenu-incomplet.png',    categorie: 'action' },
-        { id: 'action-inexact',      nom: 'Inexact',      fichier: 'contenu-inexact.png',      categorie: 'action' },
+        { id: 'action-reperage',     nom: 'Rep\u00e9rage', fichier: 'icons8-check-mark.svg',   categorie: 'action' },
+        { id: 'action-liaison',      nom: 'Liaison',      fichier: 'icons8-verified-account.svg', categorie: 'action' },
+        { id: 'action-ouverture',    nom: 'Ouverture',    fichier: 'icons8-approval.svg',      categorie: 'action' },
+        { id: 'action-incertain',    nom: 'Incertain',    fichier: 'icons8-help.svg',          categorie: 'action' },
+        { id: 'action-incomplet',    nom: 'Incomplet',    fichier: 'icons8-in-progress.svg',   categorie: 'action' },
+        { id: 'action-inexact',      nom: 'Inexact',      fichier: 'icons8-cancel.svg',        categorie: 'action' },
         // --- Compréhension (4) ---
-        { id: 'comp-uni',            nom: 'Uni',          fichier: 'comprehension-uni.png',         categorie: 'comprehension' },
-        { id: 'comp-multi',          nom: 'Multi',        fichier: 'comprehension-multi.png',       categorie: 'comprehension' },
-        { id: 'comp-relationnel',    nom: 'Relationnel',  fichier: 'comprehension-relationnel.png', categorie: 'comprehension' },
-        { id: 'comp-etendu',         nom: '\u00c9tendu',  fichier: 'comprehension-etendu.png',      categorie: 'comprehension' },
+        { id: 'comp-uni',            nom: 'Unistructurel',   fichier: 'solo/comprehension-uni.svg',         categorie: 'comprehension' },
+        { id: 'comp-multi',          nom: 'Multistructurel', fichier: 'solo/comprehension-multi.svg',       categorie: 'comprehension' },
+        { id: 'comp-relationnel',    nom: 'Relationnel',  fichier: 'solo/comprehension-relationnel.svg', categorie: 'comprehension' },
+        { id: 'comp-etendu',         nom: '\u00c9tendu',       fichier: 'solo/comprehension-etendu.svg',      categorie: 'comprehension' },
         // --- Observations (12) ---
-        { id: 'obs-approfondir',     nom: 'Approfondir',      fichier: 'observations-approfondir.png',  categorie: 'observations' },
-        { id: 'obs-attention',       nom: 'Attention',         fichier: 'observations-attention.png',    categorie: 'observations' },
-        { id: 'obs-confusion',       nom: 'Confusion',         fichier: 'observations-confusion.png',   categorie: 'observations' },
-        { id: 'obs-hoc',             nom: 'HOC',               fichier: 'observations-hoc.png',         categorie: 'observations' },
-        { id: 'obs-integration',     nom: 'Int\u00e9gration',  fichier: 'observations-integration.png', categorie: 'observations' },
-        { id: 'obs-mecanisme',       nom: 'M\u00e9canisme',    fichier: 'observations-mecanisme.png',   categorie: 'observations' },
-        { id: 'obs-procede',         nom: 'Proc\u00e9d\u00e9', fichier: 'observations-procede.png',     categorie: 'observations' },
-        { id: 'obs-relation',        nom: 'Relation',          fichier: 'observations-relation.png',    categorie: 'observations' },
-        { id: 'obs-repetition',      nom: 'R\u00e9p\u00e9tition', fichier: 'observations-repetition.png', categorie: 'observations' },
-        { id: 'obs-rupture',         nom: 'Rupture',           fichier: 'observations-rupture.png',     categorie: 'observations' },
-        { id: 'obs-sans-preuve',     nom: 'Sans preuve',       fichier: 'observations-sans-preuve.png', categorie: 'observations' },
-        { id: 'obs-soupcon',         nom: 'Soup\u00e7on',      fichier: 'observations-soupcon.png',     categorie: 'observations' },
+        { id: 'obs-approfondir',     nom: 'Approfondir',      fichier: 'icons8-construction.svg',       categorie: 'observations' },
+        { id: 'obs-attention',       nom: 'Attention',         fichier: 'icons8-high-risk.svg',          categorie: 'observations' },
+        { id: 'obs-confusion',       nom: 'Confusion',         fichier: 'icons8-confusion-avec-pointe.svg', categorie: 'observations' },
+        { id: 'obs-hoc',             nom: "L'id. directrice",  fichier: 'icons8-development-skill.svg', categorie: 'observations' },
+        { id: 'obs-integration',     nom: 'Int\u00e9gration',  fichier: 'icons8-communication.svg',     categorie: 'observations' },
+        { id: 'obs-mecanisme',       nom: "L'id. principale",  fichier: 'icons8-gears.svg',         categorie: 'observations' },
+        { id: 'obs-procede',         nom: "L'id. secondaire",  fichier: 'icons8-advanced-search.svg', categorie: 'observations' },
+        { id: 'obs-relation',        nom: 'Relation',          fichier: 'icons8-link.svg',              categorie: 'observations' },
+        { id: 'obs-repetition',      nom: 'R\u00e9p\u00e9tition', fichier: 'icons8-refresh.svg',           categorie: 'observations' },
+        { id: 'obs-rupture',         nom: 'Rupture',           fichier: 'icons8-broken-link.svg',       categorie: 'observations' },
+        { id: 'obs-sans-preuve',     nom: 'Sans preuve',       fichier: 'icons8-delete-message.svg',    categorie: 'observations' },
+        { id: 'obs-soupcon',         nom: 'Soup\u00e7on IA',        fichier: 'icons8-science-fiction.svg',    categorie: 'observations' },
+        { id: 'obs-longueur',        nom: 'Détour',            fichier: 'icons8-squiggly-arrow.svg',    categorie: 'observations' },
         // --- Legacy (évaluations antérieures) ---
         { id: 'bien',           nom: 'Bien',             fichier: 'qualit\u00e9 1 bien.png',                    categorie: 'qualite', legacy: true },
         { id: 'tres-bien',      nom: 'Tr\u00e8s bien',   fichier: 'qualit\u00e9 2 tr\u00e8s bien.png',         categorie: 'qualite', legacy: true },
@@ -448,15 +449,34 @@
        =============================== */
 
     const RETROACTIONS_OBSERVATIONS_DEFAUT = {
-        'bon-lien':       "Bonne relation entre deux idées.",
-        'manque-lien':    "Manque de relation logique entre deux idées.",
-        'confusion':      "Plusieurs idées sont présentées dans une même phrase ou un même passage sans qu'elles ne soient clairement définies.",
-        'repetitif':      "Les mêmes mots ou les mêmes idées reviennent à plusieurs reprises dans une même phrase ou un même passage sans être approfondi. Parfois l'explication peut être tautologique.",
-        'preuve-absente': "L'idée ou l'argument présenté n'est pas étayé par une citation probante.",
-        'citation':       "L'intégration de la citation dans l'explication n'est pas fluide sur le plan syntaxique ou grammatical. Ce sont deux blocs distincts qui ne sont pas intégrés.",
-        'approfondir':    "La méthode, l'idée ou l'argument exprimé a un potentiel, mais l'utilisation ou l'explication reste en surface. Des idées plus riches pourraient émerger avec un peu plus de travail.",
-        'procedes':       "Les procédés ou les mécanismes littéraires ne sont pas identifiés.",
-        'attention':      "L'idée est une généralisation hâtive, un préjugé, une idée sans fondement."
+        // === Actions (RLO + qualité du raisonnement) ===
+        'action-reperage':    "L'élève repère un élément, le nomme correctement, le restitue avec exactitude.",
+        'action-liaison':     "L'élève infère, relie des éléments entre eux, interprète.",
+        'action-ouverture':   "L'élève transfère à d'autres contextes, généralise, dépasse le cadre immédiat.",
+        'action-incertain':   "L'explication ou le raisonnement est ambigu.",
+        'action-incomplet':   "L'explication ou le raisonnement est inachevé.",
+        'action-inexact':     "L'explication ou le raisonnement comporte une erreur factuelle.",
+
+        // === Observations ===
+        'obs-hoc':            "L'idée directrice n'est pas adéquatement identifiée.",
+        'obs-mecanisme':      "L'idée principale n'est pas adéquatement identifiée ou expliquée.",
+        'obs-procede':        "L'idée secondaire n'est pas adéquatement identifiée ou expliquée.",
+        'obs-relation':       "Les idées sont logiquement liées.",
+        'obs-rupture':        "Des idées distinctes sont juxtaposées sans lien logique entre elles.",
+        'obs-approfondir':    "L'idée a un potentiel à développer davantage.",
+        'obs-longueur':       "L'idée nécessite de la synthèse et de la concision.",
+        'obs-confusion':      "Plusieurs idées sont entremêlées dans une même explication sans relations explicites.",
+        'obs-repetition':     "L'idée est exprimée à plusieurs reprises sans approfondissement.",
+        'obs-sans-preuve':    "L'idée n'est pas soutenue par une preuve.",
+        'obs-integration':    "La preuve n'est pas syntaxiquement ou grammaticalement intégrée dans l'explication.",
+        'obs-attention':      "L'idée est une généralisation, un jugement de valeur ou un biais.",
+        'obs-soupcon':        "Il y a un soupçon d'utilisation non permise de l'intelligence artificielle.",
+
+        // === Compréhension (niveaux SOLO) ===
+        'comp-uni':           "Quelques concepts sont identifiés isolément.",
+        'comp-multi':         "Les concepts sont multiples mais isolés.",
+        'comp-relationnel':   "Les concepts sont multiples et reliés.",
+        'comp-etendu':        "Les concepts sont intégrés et étendus à d'autres contextes."
     };
 
     const RETROACTIONS_ERREURS_FR_DEFAUT = {
@@ -2074,7 +2094,7 @@
         ordreCategories.forEach(function(catId) {
             if (catsMasquees.indexOf(catId) !== -1) return;
             var estPerso = !!catPersoMap[catId];
-            var coulCat = couleursCat[catId] || '#888888';
+            var coulCat = couleursCat[catId] || '#000000';
             var menuCatHTML = BibliothequeUI.renderMenuActions([
                 { label: 'Supprimer la cat\u00e9gorie', action: 'travauxOutils.supprimerCategorieRetroObs', param: catId, classe: 'btn-supprimer', title: 'Supprimer cette cat\u00e9gorie' }
             ], 'cat-' + catId);
