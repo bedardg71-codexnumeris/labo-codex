@@ -174,7 +174,7 @@ function afficherAccueilContenu(conteneur) {
         <div class="accueil-grille-bas">
 
             <div class="accueil-utilitaire-demi" data-action="ouvrirModalBackup">
-                <div class="accueil-utilitaire-icone"><img src="icons/icon-usb-memory.svg" alt=""></div>
+                <div class="accueil-utilitaire-icone"><span class="accueil-icone-mask ico-acc-usb-memory"></span></div>
                 <div>
                     <div class="accueil-utilitaire-titre">Sauvegarder</div>
                     <div class="accueil-utilitaire-desc">Exporte ou restaure tes donn\u00e9es. Tout reste local.</div>
@@ -182,7 +182,7 @@ function afficherAccueilContenu(conteneur) {
             </div>
 
             <div class="accueil-utilitaire-demi" data-action="afficherModalNouveautes">
-                <div class="accueil-utilitaire-icone"><img src="icons/icons8-megaphone.svg" alt=""><span class="pastille-nouveautes"></span></div>
+                <div class="accueil-utilitaire-icone"><span class="accueil-icone-mask ico-acc-megaphone"></span><span class="pastille-nouveautes"></span></div>
                 <div>
                     <div class="accueil-utilitaire-titre">Nouveaut\u00e9s</div>
                     <div class="accueil-utilitaire-desc">D\u00e9tails sur la derni\u00e8re mise \u00e0 jour.</div>
