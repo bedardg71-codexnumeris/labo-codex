@@ -2486,7 +2486,7 @@
         return `<div class="annot-badge${estSelFusion ? ' annot-badge-fusion-selectionne' : ''}${estRemplacee ? ' eval-remplacee' : ''}" data-fichier-id="${f.id}" data-etudiant-da="${f.etudiantDA || ''}" draggable="true" data-drag-data="text/fichier-id:${f.id}" data-action="${actionName}" data-param="${f.id}" title="${echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.nomFichier, f.etudiantDA) : f.nomFichier)}${estRemplacee ? ' (Remplacée par reprise)' : ''}${estReprise ? ' (Reprise)' : ''}">
         ${checkboxFusion}
         <span class="annot-badge-nom">${nomEtudiant}</span>
-        <span class="travaux-badge-pill ${statutClasse}">${statutTexte}</span>${indicateurReprise}${evaluation ? `<button class="travaux-badge-retro" data-stop data-action="travauxUI.afficherRetroaction" data-param="${f.id}" title="Aperçu rétroaction"><img src="icons/icon-speech-bubble.svg" alt="" class="btn-inline-icon"></button>` : ''}${verrou}${boutonSupprimer}
+        <span class="travaux-badge-pill ${statutClasse}">${statutTexte}</span>${indicateurReprise}${evaluation ? `<button class="travaux-badge-retro" data-stop data-action="travauxUI.afficherRetroaction" data-param="${f.id}" title="Aperçu rétroaction"><img src="icons/icons8-speaker-notes.svg" alt="" class="btn-inline-icon"></button>` : ''}${verrou}${boutonSupprimer}
     </div>`;
     }
 
