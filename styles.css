@@ -1611,67 +1611,80 @@ span.header-icon {
     -webkit-mask-position: center;
     mask-position: center;
 }
-/* === Lot J phase 2 : bouton actif teinté par section (multiply) ===
-   Pattern : couche teinte opaque × couche bandeau médiane unie via blend-mode
-   multiply. Bandeau parent garde son vrai gradient intact (la couche bandeau
-   du bouton actif est UNIFORME, pas un gradient, pour éviter cassure visuelle).
-   Voir REFERENTIEL-COULEURS-SECTIONS.html et AUDIT-COULEURS-SECTIONS.md.
-   Spécif (0,3,1) = bat .navigation-principale button.actif (0,2,1).
-   Le label .nav-label est aussi coloré (via règle séparée). */
-.navigation-principale button[data-onglet="conception"].actif {
+/* === Couleurs par section — état NORMAL (inversion 27 mai 2026) ===
+   Chaque section affiche sa teinte en permanence ; l'état .actif
+   override ensuite avec un fond blanc translucide neutre (bloc plus bas).
+   Pattern : couche teinte opaque × couche bandeau médiane unie via
+   blend-mode multiply. Bandeau parent garde son vrai gradient intact
+   (la couche bandeau du bouton est UNIFORME, pas un gradient, pour
+   éviter cassure visuelle). Voir REFERENTIEL-COULEURS-SECTIONS.html
+   et AUDIT-COULEURS-SECTIONS.md. */
+.navigation-principale button[data-onglet="conception"] {
     background:
       linear-gradient(rgba(218, 193, 108, 0.5), rgba(218, 193, 108, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 8px rgba(218, 193, 108, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 4px rgba(218, 193, 108, 0.15);
 }
-.navigation-principale button[data-onglet="conception"].actif span.nav-icon { background-color: var(--section-conception); }
-.navigation-principale button[data-onglet="conception"].actif .nav-label  { color: var(--section-conception); }
+.navigation-principale button[data-onglet="conception"] span.nav-icon { background-color: var(--section-conception); }
+.navigation-principale button[data-onglet="conception"] .nav-label  { color: var(--section-conception); }
 
-.navigation-principale button[data-onglet="calendrier"].actif {
+.navigation-principale button[data-onglet="calendrier"] {
     background:
       linear-gradient(rgba(48, 184, 93, 0.5), rgba(48, 184, 93, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 8px rgba(48, 184, 93, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 4px rgba(48, 184, 93, 0.15);
 }
-.navigation-principale button[data-onglet="calendrier"].actif span.nav-icon { background-color: var(--section-calendrier); }
-.navigation-principale button[data-onglet="calendrier"].actif .nav-label  { color: var(--section-calendrier); }
+.navigation-principale button[data-onglet="calendrier"] span.nav-icon { background-color: var(--section-calendrier); }
+.navigation-principale button[data-onglet="calendrier"] .nav-label  { color: var(--section-calendrier); }
 
-.navigation-principale button[data-onglet="suivi"].actif {
+.navigation-principale button[data-onglet="suivi"] {
     background:
       linear-gradient(rgba(86, 202, 220, 0.5), rgba(86, 202, 220, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 8px rgba(86, 202, 220, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 4px rgba(86, 202, 220, 0.15);
 }
-.navigation-principale button[data-onglet="suivi"].actif span.nav-icon { background-color: var(--section-suivi); }
-.navigation-principale button[data-onglet="suivi"].actif .nav-label  { color: var(--section-suivi); }
+.navigation-principale button[data-onglet="suivi"] span.nav-icon { background-color: var(--section-suivi); }
+.navigation-principale button[data-onglet="suivi"] .nav-label  { color: var(--section-suivi); }
 
-.navigation-principale button[data-onglet="evaluations"].actif {
+.navigation-principale button[data-onglet="evaluations"] {
     background:
       linear-gradient(rgba(110, 193, 231, 0.5), rgba(110, 193, 231, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 8px rgba(110, 193, 231, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 4px rgba(110, 193, 231, 0.15);
 }
-.navigation-principale button[data-onglet="evaluations"].actif span.nav-icon { background-color: var(--section-evaluations); }
-.navigation-principale button[data-onglet="evaluations"].actif .nav-label  { color: var(--section-evaluations); }
+.navigation-principale button[data-onglet="evaluations"] span.nav-icon { background-color: var(--section-evaluations); }
+.navigation-principale button[data-onglet="evaluations"] .nav-label  { color: var(--section-evaluations); }
 
-.navigation-principale button[data-onglet="labo"].actif {
+.navigation-principale button[data-onglet="labo"] {
     background:
       linear-gradient(rgba(209, 175, 244, 0.5), rgba(209, 175, 244, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 8px rgba(209, 175, 244, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 4px rgba(209, 175, 244, 0.15);
 }
-.navigation-principale button[data-onglet="labo"].actif span.nav-icon { background-color: var(--section-labo); }
-.navigation-principale button[data-onglet="labo"].actif .nav-label  { color: var(--section-labo); }
+.navigation-principale button[data-onglet="labo"] span.nav-icon { background-color: var(--section-labo); }
+.navigation-principale button[data-onglet="labo"] .nav-label  { color: var(--section-labo); }
+
+/* === État ACTIF — neutre blanc translucide ===
+   Override les couleurs section ci-dessus. Sélecteur .actif[data-onglet]
+   = spécificité (0,3,1), bat [data-onglet="X"] = (0,2,1).
+   Pour span.nav-icon et .nav-label on monte à (0,3,2). */
+.navigation-principale button.actif[data-onglet] {
+    background: rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.navigation-principale button.actif[data-onglet] span.nav-icon { background-color: white; }
+.navigation-principale button.actif[data-onglet] .nav-label { color: white; }
 
 .navigation-principale button .nav-label {
     font-size: 0.75rem;
@@ -1705,40 +1718,40 @@ span.header-icon {
       linear-gradient(rgba(218, 193, 108, 0.5), rgba(218, 193, 108, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 8px rgba(218, 193, 108, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 4px rgba(218, 193, 108, 0.15);
 }
 .sous-navigation.section-calendrier button.actif {
     background:
       linear-gradient(rgba(48, 184, 93, 0.5), rgba(48, 184, 93, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 8px rgba(48, 184, 93, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 4px rgba(48, 184, 93, 0.15);
 }
 .sous-navigation.section-suivi button.actif {
     background:
       linear-gradient(rgba(86, 202, 220, 0.5), rgba(86, 202, 220, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 8px rgba(86, 202, 220, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 4px rgba(86, 202, 220, 0.15);
 }
 .sous-navigation.section-evaluations button.actif {
     background:
       linear-gradient(rgba(110, 193, 231, 0.5), rgba(110, 193, 231, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 8px rgba(110, 193, 231, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 4px rgba(110, 193, 231, 0.15);
 }
 .sous-navigation.section-labo button.actif {
     background:
       linear-gradient(rgba(209, 175, 244, 0.5), rgba(209, 175, 244, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 8px rgba(209, 175, 244, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 4px rgba(209, 175, 244, 0.15);
 }
 
 /* Ancien format PNG — rétrocompatibilité */
@@ -20270,49 +20283,74 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     box-shadow: 0 4px 12px rgba(3, 46, 92, 0.3);
 }
 
-/* === Lot J phase 2 mode clair : overrides multiply par section ===
-   Spécif (0,4,1) pour battre .mode-clair .navigation-principale button.actif (0,3,1).
-   --bg-bandeau-mediane est déjà redéfini à #09264b en mode clair. */
-.mode-clair .navigation-principale button[data-onglet="conception"].actif {
+/* === Couleurs par section en mode clair — état NORMAL (inversion 27 mai 2026) ===
+   Mêmes teintes par section qu'en mode sombre, appliquées en permanence.
+   L'état .actif override avec un bleu solide (bloc plus bas).
+   --bg-bandeau-mediane est redéfini à #09264b en mode clair. */
+.mode-clair .navigation-principale button[data-onglet="conception"] {
     background:
       linear-gradient(rgba(218, 193, 108, 0.5), rgba(218, 193, 108, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 8px rgba(218, 193, 108, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 4px rgba(218, 193, 108, 0.15);
 }
-.mode-clair .navigation-principale button[data-onglet="calendrier"].actif {
+.mode-clair .navigation-principale button[data-onglet="conception"] span.nav-icon { background-color: var(--section-conception); }
+.mode-clair .navigation-principale button[data-onglet="conception"] .nav-label  { color: var(--section-conception); }
+
+.mode-clair .navigation-principale button[data-onglet="calendrier"] {
     background:
       linear-gradient(rgba(48, 184, 93, 0.5), rgba(48, 184, 93, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 8px rgba(48, 184, 93, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 4px rgba(48, 184, 93, 0.15);
 }
-.mode-clair .navigation-principale button[data-onglet="suivi"].actif {
+.mode-clair .navigation-principale button[data-onglet="calendrier"] span.nav-icon { background-color: var(--section-calendrier); }
+.mode-clair .navigation-principale button[data-onglet="calendrier"] .nav-label  { color: var(--section-calendrier); }
+
+.mode-clair .navigation-principale button[data-onglet="suivi"] {
     background:
       linear-gradient(rgba(86, 202, 220, 0.5), rgba(86, 202, 220, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 8px rgba(86, 202, 220, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 4px rgba(86, 202, 220, 0.15);
 }
-.mode-clair .navigation-principale button[data-onglet="evaluations"].actif {
+.mode-clair .navigation-principale button[data-onglet="suivi"] span.nav-icon { background-color: var(--section-suivi); }
+.mode-clair .navigation-principale button[data-onglet="suivi"] .nav-label  { color: var(--section-suivi); }
+
+.mode-clair .navigation-principale button[data-onglet="evaluations"] {
     background:
       linear-gradient(rgba(110, 193, 231, 0.5), rgba(110, 193, 231, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 8px rgba(110, 193, 231, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 4px rgba(110, 193, 231, 0.15);
 }
-.mode-clair .navigation-principale button[data-onglet="labo"].actif {
+.mode-clair .navigation-principale button[data-onglet="evaluations"] span.nav-icon { background-color: var(--section-evaluations); }
+.mode-clair .navigation-principale button[data-onglet="evaluations"] .nav-label  { color: var(--section-evaluations); }
+
+.mode-clair .navigation-principale button[data-onglet="labo"] {
     background:
       linear-gradient(rgba(209, 175, 244, 0.5), rgba(209, 175, 244, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 8px rgba(209, 175, 244, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 4px rgba(209, 175, 244, 0.15);
 }
+.mode-clair .navigation-principale button[data-onglet="labo"] span.nav-icon { background-color: var(--section-labo); }
+.mode-clair .navigation-principale button[data-onglet="labo"] .nav-label  { color: var(--section-labo); }
+
+/* État ACTIF en mode clair — bleu solide neutre.
+   Sélecteur .actif[data-onglet] = (0,4,1), bat [data-onglet="X"] = (0,3,1). */
+.mode-clair .navigation-principale button.actif[data-onglet] {
+    background: #0a4a7e;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 12px rgba(3, 46, 92, 0.3);
+}
+.mode-clair .navigation-principale button.actif[data-onglet] span.nav-icon { background-color: white; }
+.mode-clair .navigation-principale button.actif[data-onglet] .nav-label { color: white; }
 
 /* Conteneur — bordure ultra-subtile */
 .mode-clair .conteneur {
@@ -20412,40 +20450,40 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
       linear-gradient(rgba(218, 193, 108, 0.5), rgba(218, 193, 108, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 8px rgba(218, 193, 108, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 4px rgba(218, 193, 108, 0.15);
 }
 .mode-clair .sous-navigation.section-calendrier button.actif {
     background:
       linear-gradient(rgba(48, 184, 93, 0.5), rgba(48, 184, 93, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 8px rgba(48, 184, 93, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 4px rgba(48, 184, 93, 0.15);
 }
 .mode-clair .sous-navigation.section-suivi button.actif {
     background:
       linear-gradient(rgba(86, 202, 220, 0.5), rgba(86, 202, 220, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 8px rgba(86, 202, 220, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 4px rgba(86, 202, 220, 0.15);
 }
 .mode-clair .sous-navigation.section-evaluations button.actif {
     background:
       linear-gradient(rgba(110, 193, 231, 0.5), rgba(110, 193, 231, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 8px rgba(110, 193, 231, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 4px rgba(110, 193, 231, 0.15);
 }
 .mode-clair .sous-navigation.section-labo button.actif {
     background:
       linear-gradient(rgba(209, 175, 244, 0.5), rgba(209, 175, 244, 0.5)),
       linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
     background-blend-mode: multiply;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 8px rgba(209, 175, 244, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 4px rgba(209, 175, 244, 0.15);
 }
 
 /* Bouton principal — fond sombre, texte reste blanc */
