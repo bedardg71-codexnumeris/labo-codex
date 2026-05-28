@@ -456,32 +456,9 @@ function afficherCalendrierScolaire() {
     const evenementsPrevus = db.getSync(cle('evenementsPrevus'), []);
     const evenementsImprevus = db.getSync(cle('evenementsImprevus'), []);
 
-    // Configuration du calendrier
-    const config = {
-        debutTrimestre: cadreCalendrier.dateDebut || '2025-08-21',
-        finCours: cadreCalendrier.finCours || '2025-12-12',
-        semainePlanification: {
-            debut: cadreCalendrier.semainePlanificationDebut || '2025-10-13',
-            fin: cadreCalendrier.semainePlanificationFin || '2025-10-17'
-        },
-        semaineExamens: {
-            debut: cadreCalendrier.semaineExamensDebut || '2025-12-15',
-            fin: cadreCalendrier.semaineExamensFin || '2025-12-22'
-        },
-        conges: []
-    };
-
-    // Fusionner tous les événements (prévus + imprévus)
+    // Fusionner tous les événements (prévus + imprévus) — utilisé plus bas
+    // pour les congés avec reprise (cf. congesAvecReprise).
     const tousEvenements = [...evenementsPrevus, ...evenementsImprevus];
-
-    // Convertir au format attendu par genererSemainesScolaires()
-    config.conges = tousEvenements.map(function (evt) {
-        return {
-            date: evt.dateEvenement,
-            reprise: evt.dateReprise || '',
-            motif: evt.description
-        };
-    });
 
     // ✅ UTILISER LES STATISTIQUES DÉJÀ CALCULÉES PAR TRIMESTRE.JS
     // Au lieu de recalculer, on lit directement depuis localStorage
@@ -502,13 +479,16 @@ function afficherCalendrierScolaire() {
     // Beta 99.30 : construire la carte des échéances pour le groupe-cours actif
     const mapEcheances = construireMapEcheancesProductions();
 
-    // Déterminer les mois à afficher selon la session
-    // Déduire la session à partir du mois de début (janvier-mai = Hiver, août-décembre = Automne)
+    // Déterminer les mois à afficher selon la session (3 sessions : H/E/A)
+    // Hiver = janvier–avril, Été = mai–juillet, Automne = août–décembre
     const dateDebut = cadreCalendrier.dateDebut || '2025-08-21';
     const moisDebut = parseInt(dateDebut.split('-')[1], 10);
-    const session = (moisDebut >= 1 && moisDebut <= 6) ? 'H' : 'A';
+    const session = window.sessionDepuisMois ? window.sessionDepuisMois(moisDebut)
+                  : ((moisDebut >= 1 && moisDebut <= 6) ? 'H' : 'A');
     const annee = parseInt(dateDebut.split('-')[0], 10);
-    const moisAAfficher = (session === 'A') ? [8, 9, 10, 11, 12] : [1, 2, 3, 4, 5];
+    const moisAAfficher = session === 'A' ? [8, 9, 10, 11, 12]
+                        : session === 'E' ? [5, 6, 7]
+                        : [1, 2, 3, 4, 5];
 
     // Générer le HTML du calendrier complet
     let htmlCalendrier = '<div class="cal-grid-2col">';

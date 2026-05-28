@@ -897,7 +897,7 @@ function reinitialiserFormCoursV2() {
 
     if (trimestreActif) {
         // Extraire session et année depuis l'ID du trimestre (ex: "a2025" → session="A", année=2025)
-        const match = trimestreActif.id.match(/^([ah])(\d{4})$/i);
+        const match = trimestreActif.id.match(/^([aeh])(\d{4})$/i);
         if (match) {
             session = match[1].toUpperCase();
             annee = parseInt(match[2]);

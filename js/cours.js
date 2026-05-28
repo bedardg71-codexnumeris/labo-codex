@@ -143,8 +143,8 @@ function peupleSelecteurTrimestre() {
         const option = document.createElement('option');
         option.value = tId;
 
-        // Formater le label: "h2026" → "Hiver 2026"
-        const session = tId.charAt(0).toUpperCase() === 'H' ? 'Hiver' : 'Automne';
+        // Formater le label: "h2026" → "Hiver 2026", "e2025" → "Été 2025"
+        const session = window.nomSession ? window.nomSession(tId.charAt(0)) : tId.charAt(0);
         const annee = tId.substring(1);
         option.textContent = `${session} ${annee}`;
 
@@ -157,14 +157,14 @@ function peupleSelecteurTrimestre() {
         if (calendrier.dateDebut) {
             // Extraire année depuis dateDebut (format: YYYY-MM-DD)
             const annee = calendrier.dateDebut.substring(0, 4);
-            // Déduire session: Janvier-Juin = Hiver, Juillet-Décembre = Automne
+            // Déduire la session (3 sessions : H/E/A) depuis le mois de début
             const mois = parseInt(calendrier.dateDebut.substring(5, 7));
-            const session = mois <= 6 ? 'h' : 'a';
+            const session = (window.sessionDepuisMois ? window.sessionDepuisMois(mois) : (mois <= 6 ? 'H' : 'A')).toLowerCase();
             const trimestreId = session + annee;
 
             const option = document.createElement('option');
             option.value = trimestreId;
-            option.textContent = `${session === 'h' ? 'Hiver' : 'Automne'} ${annee}`;
+            option.textContent = `${window.nomSession ? window.nomSession(session) : session} ${annee}`;
             select.appendChild(option);
         }
     }

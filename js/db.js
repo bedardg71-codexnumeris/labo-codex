@@ -921,7 +921,7 @@
             if (window._SSOT_DEV_MODE && db._SSOT_OWNERS) {
                 var cleBase = key;
                 // Extraire la clé de base si namespacée (ex: h2026_presences → presences)
-                var match = key.match(/^[ah]\d{4}_(.+)$/);
+                var match = key.match(/^[aeh]\d{4}_(.+)$/);
                 if (match) cleBase = match[1];
 
                 var proprietaire = db._SSOT_OWNERS[cleBase];

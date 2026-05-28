@@ -402,15 +402,16 @@ function ouvrirModalNouveauTrimestre() {
         'Créer un nouveau trimestre\n\n' +
         'Quelle session ?\n' +
         '  A = Automne\n' +
-        '  H = Hiver\n\n' +
-        'Entre A ou H :'
+        '  H = Hiver\n' +
+        '  E = Été\n\n' +
+        'Entre A, H ou E :'
     );
 
     if (!sessionChoix) return; // Annulé
 
     const session = sessionChoix.trim().toUpperCase();
-    if (session !== 'A' && session !== 'H') {
-        alert('Session invalide. Veuillez entrer A (Automne) ou H (Hiver).');
+    if (session !== 'A' && session !== 'H' && session !== 'E') {
+        alert('Session invalide. Veuillez entrer A (Automne), H (Hiver) ou E (Été).');
         return;
     }
 
@@ -434,13 +435,13 @@ function ouvrirModalNouveauTrimestre() {
     const trimestres = typeof obtenirTrimestres === 'function' ? obtenirTrimestres() : [];
     const id = `${session.toLowerCase()}${annee}`;
     if (trimestres.find(t => t.id === id)) {
-        alert(`Le trimestre ${session === 'H' ? 'Hiver' : 'Automne'} ${annee} existe déjà.`);
+        alert(`Le trimestre ${nomSession(session)} ${annee} existe déjà.`);
         return;
     }
 
     // Demander si on veut l'activer
     const activer = confirm(
-        `Créer le trimestre ${session === 'H' ? 'Hiver' : 'Automne'} ${annee} ?\n\n` +
+        `Créer le trimestre ${nomSession(session)} ${annee} ?\n\n` +
         `Veux-tu l'activer immédiatement ?\n` +
         `(Le trimestre actuel sera désactivé)`
     );

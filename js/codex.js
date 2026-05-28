@@ -457,7 +457,7 @@ async function genererCodex(options = {}) {
  */
 function _estBiblioPartagee(cle) {
     if (typeof cle !== 'string') return false;
-    var cleBase = cle.replace(/^[ah]\d{4}_/, '');
+    var cleBase = cle.replace(/^[aeh]\d{4}_/, '');
     var ciblesExactes = [
         'grillesTemplates',
         'echellesTemplates',
@@ -1445,8 +1445,8 @@ function _detecterTrimestresDisponibles(donnees) {
     var prefixes = new Set();
     var cles = Object.keys(donnees);
 
-    // Pattern : un préfixe de trimestre est [a|h|demo]NNNN_ ou "demo_"
-    var regex = /^([ah]\d{4}|demo)_/;
+    // Pattern : un préfixe de trimestre est [a|e|h|demo]NNNN_ ou "demo_"
+    var regex = /^([aeh]\d{4}|demo)_/;
 
     for (var i = 0; i < cles.length; i++) {
         var match = cles[i].match(regex);
@@ -1473,7 +1473,7 @@ function _detecterTrimestresDisponibles(donnees) {
 function _filtrerDonneesPourExport(donnees, trimestresChoisis, inclureGlobales) {
     if (inclureGlobales === undefined) inclureGlobales = true;
 
-    var regex = /^([ah]\d{4}|demo)_/;
+    var regex = /^([aeh]\d{4}|demo)_/;
     var setTrimestres = new Set(trimestresChoisis);
 
     var donneesFiltrees = {};
@@ -2865,8 +2865,9 @@ function _formaterNomTrimestre(prefixe) {
     if (prefixe === 'demo') return 'Démo';
     var saison = prefixe.charAt(0);
     var annee = prefixe.substring(1);
-    if (saison === 'h') return 'Hiver ' + annee;
-    if (saison === 'a') return 'Automne ' + annee;
+    if (saison === 'h' || saison === 'e' || saison === 'a') {
+        return (window.nomSession ? window.nomSession(saison) : saison) + ' ' + annee;
+    }
     return prefixe;
 }
 

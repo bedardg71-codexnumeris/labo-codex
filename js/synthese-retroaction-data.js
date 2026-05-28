@@ -134,7 +134,7 @@
         if (trimestre && trimestre.nom) return trimestre.nom;
         if (!sessionLettre) return '';
         const lettre = String(sessionLettre).toUpperCase();
-        const libelle = lettre === 'H' ? 'Hiver' : lettre === 'A' ? 'Automne' : lettre;
+        const libelle = window.nomSession ? window.nomSession(lettre) : lettre;
         return annee ? `${libelle} ${annee}` : libelle;
     }
 
