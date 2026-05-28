@@ -25,12 +25,20 @@
     };
 
     /**
-     * Détermine si un item est un exemple démo (Labo Codex).
-     * Détection par flag isDemo ou par auteur « Labo Codex » (chaîne
-     * réservée au matériel CC livré avec l'application).
+     * Détermine si un item est un exemple démo.
+     * Détection par flag isDemo ou par auteur démo. Deux chaînes acceptées
+     * pendant la transition (cf. BACKLOG #296) :
+     *   - 'Labo Codex' (legacy, encore présent dans echelles.js,
+     *     spe-specifications.js, gabarits-utils.js, demo-namespace.js, etc.)
+     *   - 'Demo Labo Codex' (nouvelle convention, voir #290 du 28 mai 2026)
+     * Le tri catégoriel (vraies démos vs canevas génériques vs résidus de
+     * tests) sera tranché par #296 post-AQPC, puis cette fonction sera
+     * réduite à la nouvelle chaîne uniquement.
      */
     BibliothequeUI.estItemDemo = function (item) {
-        return !!(item && (item.isDemo === true || item.auteur === 'Labo Codex'));
+        if (!item) return false;
+        if (item.isDemo === true) return true;
+        return item.auteur === 'Labo Codex' || item.auteur === 'Demo Labo Codex';
     };
 
     /**
