@@ -10,11 +10,54 @@
 
 > **📌 Identification**
 > - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
-> - **Dernier cycle livré** : **Session 28 mai après-midi** — 7 commits sur main (`ed206e9` → `ed83d74`). Beta bumpée 99.71 → **99.72**. Voir §0 ci-dessous. Faits saillants : (1) protocole de début de session formalisé (`SKILL_Debut_de_session.md` créé + pointeur CLAUDE.md + feedback memory globale) après détection d'un écart de 24h entre prémisse de relance et état réel ; (2) **#290 livré en 2 phases** (anonymisation seed `MODELES_PRATIQUES_PREDEFINIS` : 2 éliminations + 9 renommages d'IDs zéro-dette + 10 changements d'auteur 'Gabarit Labo Codex' + 3 modèles génériques en 'Demo Labo Codex' avec filtre transitoire OR) ; (3) **#292 livré** (déduplication défensive au chargement de codex via `verifierUniciteIds` exposé + helper `_estBiblioPartagee`) ; (4) 3 bugs UX résolus en cours de route (suppression copie IDB Michel B., débordement vertical surface `.contenu` en 2 commits — duplication CSS inline ↔ styles.css) ; (5) 3 items BACKLOG inscrits : **#295** (diagnostic mémoire/quota avant chargement Codex iPad/iPhone), **#296** (audit catégoriel des items 'Labo Codex' post-AQPC), **#297** (dette CSS dupliquée index.html ↔ styles.css post-AQPC).
+> - **Dernier cycle livré** : **Session 28 mai SOIR** — 2 commits sur main (`a45ccb2` onboarding + `eaab101` trimestre d'Été), poussés. Beta **99.72** conservée, builds 0528-1807 + 0528-1821. Voir le §0 (soir) ci-dessous. **NB** : l'ancien §0-prec0 (après-midi) et les lignes « Cycle suivant » / « ⚠️ AVANT AQPC » ci-dessous sont **périmés** — au démarrage de la session soir, un audit a confirmé que le **Lot C #286**, **#287/#288/#289/#293/#294** et le nouveau **#298** étaient déjà livrés et poussés (HEAD était `d587a53`). Voir §0 (soir) pour l'état réel.
+> - **Dernier cycle livré (précédent)** : **Session 28 mai après-midi** — 7 commits sur main (`ed206e9` → `ed83d74`). Beta bumpée 99.71 → **99.72**. Voir §0-prec0. Faits saillants : (1) protocole de début de session formalisé (`SKILL_Debut_de_session.md` créé + pointeur CLAUDE.md + feedback memory globale) après détection d'un écart de 24h entre prémisse de relance et état réel ; (2) **#290 livré en 2 phases** (anonymisation seed `MODELES_PRATIQUES_PREDEFINIS` : 2 éliminations + 9 renommages d'IDs zéro-dette + 10 changements d'auteur 'Gabarit Labo Codex' + 3 modèles génériques en 'Demo Labo Codex' avec filtre transitoire OR) ; (3) **#292 livré** (déduplication défensive au chargement de codex via `verifierUniciteIds` exposé + helper `_estBiblioPartagee`) ; (4) 3 bugs UX résolus en cours de route (suppression copie IDB Michel B., débordement vertical surface `.contenu` en 2 commits — duplication CSS inline ↔ styles.css) ; (5) 3 items BACKLOG inscrits : **#295** (diagnostic mémoire/quota avant chargement Codex iPad/iPhone), **#296** (audit catégoriel des items 'Labo Codex' post-AQPC), **#297** (dette CSS dupliquée index.html ↔ styles.css post-AQPC).
 > - **Cycle suivant — démarrage 29 mai 2026 ou ultérieur** : **Lot C du #286** (refactor API `notifications` + migration ~281 emojis ⚠ ✅ ❌ ✓ 💡 dans les notifications). Décision design actée par Grégoire : Option 1 (refactor API avec param `type` qui ajoute l'icône SVG automatiquement). **PRÉ-REQUIS GRÉGOIRE** : télécharger 2 SVG depuis icons8.com — `icons8-warning.svg` (pour le type warning ⚠ ×113 sites) et `icons8-lightbulb.svg` (pour 💡 ×29 sites). Cohérence avec `icons8-info.svg` et `icons8-check.svg` déjà présents. Cf. §2.5 du `plans de travail/PLAN-MIGRATION-ICONES-SVG.md` (Lot C — pré-requis pour démarrer).
 > - **⚠️ AVANT AQPC restant** : **#294** (configuration Netlify + Cloudflare pour la visite AQPC du 3 juin, 1-2h).
 > - **NB sur l'audit annuel** : on est sur **main**, PAS sur la branche `audit/2026-mai`. L'audit annuel reste en suspens (HEAD audit `097ce88`, divergence depuis 12 mai). Pas de mélange.
 > - **Documents clés** : `BACKLOG.md` (#295-#297 ajoutés cette session, #294 toujours ⚠️ AVANT AQPC), `Skills pour Claude Code/SKILL_Debut_de_session.md` (nouveau, versionné), `plans de travail/PLAN-MIGRATION-ICONES-SVG.md` (à mettre à jour pour acter les Lots A et D livrés au commit `11f87a1` du 27 mai PM).
+
+---
+
+## §0 — Récap session 28 mai 2026 SOIR (réconciliation état réel + onboarding + support trimestre d'Été)
+
+**Beta / build** : **99.72** conservée. Builds 0528-1807 (commit 1) → 0528-1821 (commit 2). **2 commits sur main, poussés sur origin** : `a45ccb2` (onboarding) + `eaab101` (trimestre d'Été — commit amendé pour y intégrer le nettoyage `calendrier-vue.js`).
+
+### Réconciliation à l'ouverture (l'en-tête était périmé)
+
+Au démarrage, audit git+tests : HEAD réel `d587a53` (≠ `ed83d74` annoncé par le §0-prec0). **Tout le « cycle suivant » annoncé était déjà livré et poussé** : Lot C #286 (refactor `utils-notifications.js` + émojis), #287 (picker couleur), #288 (élève→étudiant·e), #289 (audit palettes), #293 (toggle masquer sidebar), #294 (déploiement — action dashboard Cloudflare restant côté Grégoire), + nouveau #298 (recadrage Loi 25 + fenêtre publique 3-30 juin). À J−6 de l'AQPC, le code est prêt ; risque résiduel = action Cloudflare + validation visuelle iPad (limitée par saturation mémoire, cf. #295).
+
+### Commit 1 — Onboarding (`a45ccb2`, build 0528-1807)
+
+Signalé par Grégoire sur captures iPad : l'onboarding pointait vers une nav périmée (onglet « Réglages » éclaté entre **Cadre** = id interne `calendrier`, et **Conception** ; « Contexte »/« Structure » = noms encore antérieurs).
+
+- **Visite guidée** (`accompagnement.js`) : 6 titres alignés sur la nav réelle (Réglages→**Cadre**, Structure→**Conception**, Tableau de bord→**Suivi**). **Fix fonctionnel** : `correspond()` étape 1 cherchait `contexte-*` (inexistant) → corrigé en `calendrier-*`, sinon l'étape ne s'accrochait jamais à la page Cadre.
+- **Aides au survol** (`accompagnement-contenu-hover.js`) : `nav-conception` « Structure »→« Conception », `nav-calendrier` « Contexte »→« Cadre ».
+- **Accueil** (`accueil.js`) : encart Bienvenue réduit au seul bouton « Commencer la visite guidée » (retrait des doublons « Aller à Cadre » + « Explorer avec des données démo », couverts par les toggles du bas) ; retrait du handler orphelin `entrerEnDemoHandler` (zéro-dette) ; retrait mention « Cohorte 1 / CoP » ; adresse courriel rendue cliquable (`mailto:`).
+- **CSS** (`styles.css`) : fix spécificité `.banniere-bienvenue .banniere-bienvenue-acces p` — battait `.banniere-bienvenue p:last-of-type` (margin-bottom 18px) qui créait un faux « retour à la ligne » sous l'encadré d'accès.
+- **BACKLOG #299** inscrit : balayage des ~30 réf. d'onglets périmées « Réglages → X » dispersées (wizard pratiques, profils, cartouches…) à corriger post-AQPC. Dernier ID → **#299**.
+
+### Commit 2 — Support de la session d'Été (`eaab101`, build 0528-1821)
+
+Demande de Grégoire : créer un trimestre d'été (Cégep Drummondville, été 2025 = 28 mai → 30 juin, ~5 semaines). Audit (agent Explore) : ~28 points dans 7 fichiers, mais **terrain déjà à moitié prêt** (mapping `'E'↔'ete'` dans `trimestre-v2-init.js`, option HTML `<option value="ete">`, ~10 objets `{a,h,e}` déjà OK, `cle()` et génération d'ID génériques).
+
+- **Décision métier actée** : plages de mois de DÉBUT — **Hiver 1-4 · Été 5-7 · Automne 8-12** (mai → Été, capte le 28 mai ; août reste à l'automne).
+- **Helpers centralisés** (`trimestres.js`, exposés `window`) : `sessionDepuisMois(mois)` + `nomSession(lettre)` — remplacent **5** déductions binaires dupliquées (`(mois<=6)?'H':'A'`) et les ternaires de libellé. Tri fallback H>E>A.
+- **🔴 Sécurité données** : regex de préfixe namespacé `[ah]`→`[aeh]` — `codex.js` ×3 (`_estBiblioPartagee`, extraction + filtrage export), `db.js` (audit SSOT), `trimestre-v2-cours.js:900` (extraction session active). Sans ça, `e2026_*` aurait été **exclu silencieusement** de l'export/codex.
+- **Création** (`trimestre-v2-liste.js`) : prompt propose A/H/**E** + validation + libellés via `nomSession`.
+- **Calendrier** (`calendrier-vue.js`) : un trimestre Été affiche **mai–juillet** ; **+ retrait de l'objet `config` mort** (jamais lu, portait des dates de semaines spéciales codées en dur 2025).
+- **Libellés « Été »** via `nomSession` : `codex.js` (`_formaterNomTrimestre`), `synthese-retroaction-data.js`, `cours.js` ×2.
+- **Semaines spéciales** : Grégoire a confirmé que l'été n'a ni semaine de planification ni d'examens. **Déjà géré** : champs vides → `estDansPlage` renvoie `false` (via `obtenirInfosJour`) → aucune semaine spéciale marquée. Le `×` (`reinitialiserSemainesSpecialesV2`) les vide. Le `2026-05-28` affiché dans ces champs est un **placeholder**, pas une valeur.
+
+### Tests
+
+Suite complète **verte** (18 Playwright WebKit + Vitest) après chaque chantier, y compris après le nettoyage `calendrier-vue.js`. `node --check` vert sur tous les fichiers touchés.
+
+### Pour la prochaine session
+
+- **Validation visuelle Grégoire** (en cours) : création d'un trimestre Été (E/2026, 28 mai → 30 juin, semaines spéciales vides) + vérifier calendrier mai–juillet + **export Codex** contenant bien `e2026_*`.
+- **#299** (réf. onglets périmées) à traiter post-AQPC.
+- Priorités déférées inchangées : #282 (migration `cours.js`), #296, #291, #295, lots restants #286.
 
 ---
 
@@ -37,7 +80,7 @@ Cap conservé : on reste sur la priorité déjà inscrite en ligne 14 ci-dessus 
 
 ---
 
-## §0 — Récap session 28 mai 2026 après-midi (protocole début de session + #290 en 2 phases + 3 bugs UX + #292)
+## §0-prec0 — Récap session 28 mai 2026 après-midi (protocole début de session + #290 en 2 phases + 3 bugs UX + #292)
 
 **Beta / build** : **99.71 → 99.72**. Builds 0528-0644 (matin) → 0528-0941 → 0528-1001 → 0528-1012 → 0528-1028 → 0528-1039 → 0528-1045 (5 bumps de build successifs au fil des commits). HEAD main au moment du relai : `ed83d74`. Aucun push (commits restent locaux pour validation Grégoire avant push).
 
