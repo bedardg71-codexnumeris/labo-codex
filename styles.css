@@ -4970,6 +4970,10 @@ body:not(.mode-clair) .badge-source--demo {
     -webkit-mask-image: url('icons/icon-cancel.svg');
     mask-image: url('icons/icon-cancel.svg');
 }
+.icone-inline--info {
+    -webkit-mask-image: url('icons/icons8-info.svg');
+    mask-image: url('icons/icons8-info.svg');
+}
 
 @keyframes slideIn {
     from {
@@ -11785,6 +11789,12 @@ label:has(+ textarea:disabled) {
     width: 18px;
     height: 18px;
     flex-shrink: 0;
+    /* Override le 1em par défaut de .icone-inline pour préserver la taille
+       historique 18×18 ; couleur = bleu-clair (sémantique info, cohérente
+       avec le border-left du bloc). */
+    color: var(--bleu-clair);
+    margin-right: 0;
+    vertical-align: baseline;
 }
 
 .wizard-v2-info-block span {
