@@ -167,6 +167,8 @@ Utiliser `window.cle('nomCle')` pour obtenir la cle namespacee.
 
 ## Avant de coder
 
+**EN TOUT PREMIER, AU DEBUT DE CHAQUE SESSION** : executer le rituel de debut de session decrit dans `Skills pour Claude Code/SKILL_Debut_de_session.md`. Audit factuel git + tests + version + lecture SESSION.md/BACKLOG.md + comparaison avec la premisse de relance recue. Lecture seule, aucune modification. Acte le 28 mai 2026 PM apres ecart de 24h sur le Lot A ✴ (premisse demandait un travail deja livre la veille). Pendant inverse de `SKILL_Fin_de_session.md`.
+
 1. Lire `docs/00-START-HERE.md`
 2. **Charger les skills du projet** dans `Skills pour Claude Code/` :
    - `SKILL_labo_codex.md` — architecture, indices A-C-P, pratiques de notation, workflow
