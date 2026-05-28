@@ -36,13 +36,31 @@ function afficherAccueil() {
 }
 
 /**
- * Génère la bannière de bienvenue (nouvel utilisateur).
- * Affichée si aucun groupe-cours n'est configuré ET mode démo inactif.
+ * Génère la bannière de bienvenue.
+ *
+ * Comportement initial : affichée uniquement pour les nouveaux utilisateurs
+ * (aucun groupe-cours configuré ET mode démo inactif).
  * Source texte : docs/refonte-textes/textes-manquants-bloc4.md (validé 19 avril 2026)
+ *
+ * Fenêtre d'accès public 3-30 juin 2026 (consigne Cowork 28 mai PM) :
+ * pendant cette fenêtre, la bannière est affichée à TOUS les utilisateurs
+ * (y compris ceux ayant un groupe-cours configuré ou étant en mode démo)
+ * et contient en plus un paragraphe « Accès libre jusqu'au 30 juin 2026 »
+ * inséré entre « Par où commencer ? » et la rangée de boutons. Ce
+ * comportement est auto-nettoyant : au refermage de la fenêtre publique
+ * (1er juillet 2026 à 00h00 heure de Toronto, EDT UTC-4), la bannière
+ * revient à son comportement d'origine et le paragraphe disparaît, sans
+ * intervention manuelle requise — aligné avec le principe « stabilité
+ * zero-dette » du CLAUDE.md. Cf. DEPLOY.md v1.3 §3 + §3.6 et ADR-008
+ * révisé du 28 mai 2026.
  */
 function genererBanniereBienvenue() {
+    // Fenêtre d'accès public 3-30 juin 2026 : refermage 1er juillet 00:00 EDT.
+    const LIMITE_FENETRE_PUBLIC = new Date('2026-07-01T00:00:00-04:00').getTime();
+    const dansFenetrePublic = Date.now() < LIMITE_FENETRE_PUBLIC;
+
     const enDemo = typeof estEnModeDemo === 'function' && estEnModeDemo();
-    if (enDemo) return '';
+    if (!dansFenetrePublic && enDemo) return '';
 
     // Détection : au moins un groupe-cours configuré.
     // `groupeCoursActif` est une clé GLOBALE (pas préfixée par trimestre) qui
@@ -61,13 +79,18 @@ function genererBanniereBienvenue() {
         }
     } catch (e) { /* ignore */ }
 
-    if (aGroupeCours) return '';
+    if (!dansFenetrePublic && aGroupeCours) return '';
+
+    const paragrapheAccesCadre = dansFenetrePublic
+        ? `<p><strong>Accès libre jusqu’au 30 juin 2026.</strong> L’application est librement accessible sur <code>app.codexnumeris.org</code> jusqu’au 30 juin 2026, en marge du lancement de la Communauté de pratique Labo Codex au colloque AQPC. Pour conserver l’accès web après cette date, écris à <code>labo@codexnumeris.org</code> avant le 30 juin — il sera alors maintenu pour les membres de la Cohorte 1 pilote et les membres de la CoP qui en font la demande.</p>`
+        : '';
 
     return `
         <div class="banniere-bienvenue carte" id="banniere-bienvenue">
             <h2 class="banniere-bienvenue-titre">Bienvenue dans Labo Codex</h2>
             <p>Labo Codex num\u00e9rise le travail que tu fais d\u00e9j\u00e0\u00a0: planifier ton cours, concevoir tes activit\u00e9s d\u2019apprentissage, \u00e9valuer les travaux, suivre la progression de tes \u00e9tudiant\u00b7es. Tu y poses les m\u00eames gestes que sur papier avec calculette ou tableur, mais dans un seul outil portable.</p>
             <p><strong>Par o\u00f9 commencer\u00a0?</strong> Configure ton trimestre, ton cours et ton groupe dans R\u00e9glages. C\u2019est la m\u00eame information que dans ton plan de cours. Tu la saisis une fois, l\u2019application s\u2019en sert partout.</p>
+            ${paragrapheAccesCadre}
             <div class="banniere-bienvenue-actions">
                 <button class="btn btn-primaire" data-action="demarrerTourGuide">
                     Commencer la visite guid\u00e9e
