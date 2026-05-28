@@ -2951,14 +2951,14 @@ function afficherListeBanqueEvaluations(evaluations) {
                             <div style="margin-top: 10px; padding: 8px; background: var(--violet-pale, #f3e5f5); border-radius: 4px; font-size: 0.85rem; color: var(--violet-jeton, #7b1fa2); display: flex; justify-content: space-between; align-items: center;">
                                 <span>⭐ Jeton de reprise appliqué - Remplace l'évaluation précédente</span>
                                 <button class="btn-jeton-retirer" data-action="retirerJeton" data-param="${evaluation.id}" data-param2="reprise"
-                                        title="Retirer le jeton de reprise"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>
+                                        title="Retirer le jeton de reprise"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>
                             </div>
                         ` : ''}
                         ${estDelai ? `
                             <div style="margin-top: 10px; padding: 8px; background: var(--alerte-fond-attention); border-radius: 4px; font-size: 0.85rem; color: var(--orange-accent); display: flex; justify-content: space-between; align-items: center;">
                                 <span>⭐ Jeton de délai appliqué - Date limite étendue</span>
                                 <button class="btn-jeton-retirer" data-action="retirerJeton" data-param="${evaluation.id}" data-param2="delai"
-                                        title="Retirer le jeton de délai"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>
+                                        title="Retirer le jeton de délai"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>
                             </div>
                         ` : ''}
                     </div>

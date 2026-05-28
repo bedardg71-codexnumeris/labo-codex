@@ -622,7 +622,9 @@
             var nom = d[nomChamp] || 'Sans titre';
             var idsStr = '';
             if (d.ids) {
-                idsStr = ' (IDs: ' + d.ids.map(function (id) { return '#' + genId(id); }).join(', ') + ')';
+                idsStr = ' (IDs: ' + d.ids.map(function (id) {
+                    return '<span title="ID complet : ' + id + '" style="cursor: help; text-decoration: underline dotted;">#' + genId(id) + '</span>';
+                }).join(', ') + ')';
             }
             return '<li><strong>' + nom + '</strong> : ' + d.count + ' exemplaire(s)' + idsStr + '</li>';
         }).join('');
@@ -631,8 +633,11 @@
             '<div style="font-weight: bold; margin-bottom: 8px;">' +
                 '⚠️ ' + doublons.length + ' doublon(s) potentiel(s) détecté(s)' +
             '</div>' +
-            '<p style="font-size: 0.9em; margin: 0 0 10px 0;">' +
+            '<p style="font-size: 0.9em; margin: 0 0 8px 0;">' +
                 'Des éléments avec des noms similaires existent en plusieurs exemplaires.' +
+            '</p>' +
+            '<p style="font-size: 0.85em; margin: 0 0 10px 0; color: var(--texte-secondaire, #8aa4b0);">' +
+                '<strong>Pour résoudre :</strong> repère les exemplaires au même nom dans la liste ci-dessous, ouvre leur menu ⋮ et choisis « Retirer » (déplace hors de la barre latérale, données conservées) ou « Supprimer » (suppression définitive). Survole un ID pour voir sa valeur complète — IDs identiques = vraies copies, IDs différents = homonymes légitimes.' +
             '</p>' +
             '<details style="font-size: 0.85em;">' +
                 '<summary style="cursor: pointer; font-weight: 500;">Voir les détails</summary>' +

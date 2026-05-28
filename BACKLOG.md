@@ -4,7 +4,7 @@
 >
 > **Dernière bascule** : 25 mai 2026 fin de journée — extraction des items livrés vers BACKLOG-ARCHIVE.md.
 > **État courant** : Beta 99.66 (Build 0526-0503), HEAD main `4df4f21`. 28 items ouverts (session 26 mai matin : 3 items #278/#280/#281 livrés + 3 bugs testeurs résolus + 1 item #286 ajouté).
-> **Dernier ID utilisé** : #287 (picker couleur custom HTML, créé 27 mai 2026).
+> **Dernier ID utilisé** : #293 (toggle « masquer items déjà dans la sidebar » section 2 des modales biblio, créé 28 mai 2026).
 > **Présentation AQPC** : 3 juin 2026 (J−8).
 > **Pour ajouter un item** : `- [ ] **#XX** Description courte` + sous-puces de contexte. Dernier ID utilisé : **#285** (livré).
 
@@ -72,6 +72,68 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - **Implémentation suggérée** : `<details>` HTML5 (toggle natif) + popover en `position: absolute`, grille de la constante `COULEURS` (12 couleurs prédéfinies, déjà utilisée pour le palette des outils dessin), bouton actif via classe `.travaux-btn-couleur.actif` (déjà style CSS en place l. 16925), input hidden pour préserver le mécanisme de sauvegarde existant (lecture via `input[data-color-cat-id]` l. 2499).
   - **Effort estimé** : 1-2 h (refactor + extension aux 5 sites + tests visuels modes sombre/clair).
   - **Capture déclencheuse** : Grégoire 27 mai 2026 matin (modale Personnaliser tampons, picker macOS ouvert sans indication de la couleur active).
+
+- [ ] 🟢 **#293** Toggle « Masquer les items déjà dans la barre latérale » en section 2 des modales bibliothèque
+  - **Constat 28 mai 2026** (Bibliothèque de grilles de Grégoire) : la Section 2 montre toutes les entrées de la biblio partagée, y compris celles « Déjà dans la barre latérale ». Quand le ratio biblio/sidebar est lourd (ex. 5 entrées biblio pour 3 grilles sidebar = anciennes variantes accumulées), l'affichage devient encombrant et donne une fausse impression de doublons.
+  - **Architecture actuelle (rappel)** : Section 1 = `grillesTemplates` (sidebar du trimestre actif) ; Section 2 = `bibliothequeGrilles` (biblio partagée inter-trimestres). Une grille peut vivre dans les deux (cas courant). Liaison par `idOriginal`.
+  - **Proposition** : ajouter un toggle/case à cocher au-dessus de Section 2 (« Masquer les items déjà dans la barre latérale »), persisté en préférence utilisateur. Quand activé, filtre les items dont la propriété `dejaPresent` est `true`. Quand désactivé, affichage complet (utile pour ménage manuel des copies obsolètes).
+  - **Périmètre** : appliquer aux 5 modales biblio (grilles, échelles, cartouches, productions, pratiques) via le composant mutualisé `BibliothequeUI.creerModal`.
+  - **Effort estimé** : 1-2 h (toggle UI + helper de filtrage + persistance préférence + tests sur les 5 biblios).
+
+- [ ] 🟡 **#292** Déduplication défensive au chargement de codex — filet de sécurité contre la propagation de doublons d'ID
+  - **Constat 28 mai 2026** : `chargerCodex` (`js/codex.js:500`) fait un overwrite complet par clé (`db.set(cle, valeur)`). Si le codex source contient déjà des doublons d'ID dans `grillesTemplates`, `echellesTemplates`, `cartouches_*`, `bibliothequeProductions`, `bibliothequePratiques`, ils sont restaurés à l'identique à chaque ouverture. Les codex de Grégoire en sont infectés (3 doublons confirmés dans `grillesTemplates` au 28 mai).
+  - **Origine probable** : un ou plusieurs imports historiques contournaient `verifierUniciteIds` (`js/import-export.js:66`) ou ne déduplicaient pas avant `push`. Audit à faire : grep tous les sites qui font `grilles.push(...)` / `echelles.push(...)` / etc. sans passer par `verifierUniciteIds` ou `importerGrillesExternes` (dont la version actuelle déduplique correctement, ligne 3940).
+  - **Fix proposé** : dans `chargerCodex`, après `db.set(cle, valeur)`, si la clé correspond à une biblio partagée (liste connue), appliquer `verifierUniciteIds` sur la valeur AVANT le `set`. Idem pour les clés `cartouches_*` (pattern à matcher).
+  - **Hygiène data** : nettoyer le codex de Grégoire (snippet console fourni le 28 mai 2026 — déduplique en gardant le premier item de chaque ID, puis ré-export du codex pour avoir une version propre comme base de démo AQPC).
+  - **Effort estimé** : 1-2 h (fix `chargerCodex` + audit des chemins d'import historiques + un test).
+
+- [ ] 🟡 **#291** Workflow de résolution de doublons dans les bibliothèques (grilles, cartouches, échelles, productions, pratiques)
+  - **Constat 28 mai 2026** : la détection de doublons (`detecterDoublonsGrilles`, `detecterDoublonsCartouches`, etc.) affiche un avertissement informatif mais aucune action de résolution. Capture de Grégoire : 3 doublons détectés dans la Bibliothèque de grilles (« Global-4 (SRPN) H26 », « Global-5 (FR-HOLIS) H26 », « Global-5 (FR-ALGO) H26 »), tous avec 2 exemplaires.
+  - **Patch UX appliqué le 28 mai 2026 (build 0528-05XX)** : `BibliothequeUI.renderAvertissementDoublons` enrichi avec une consigne textuelle (« ouvre le menu ⋮ et choisis Retirer ou Supprimer ») et un tooltip sur les IDs courts qui affiche l'ID complet (permet de distinguer vraie collision vs homonyme légitime). Pas un vrai workflow, juste une aide à la résolution manuelle.
+  - **Vrai workflow attendu** :
+    - Pour chaque doublon détecté, proposer un sous-modal de comparaison côte-à-côte (nom, date de modification, contenu, nombre de critères pour grilles, etc.).
+    - Action « Garder X / Supprimer Y » en un clic, ou « Tout fusionner » pour les cas évidents.
+    - Distinguer **vraie collision d'ID** (anomalie data, IDs identiques) de **homonymie légitime** (2 entités distinctes au même nom, IDs différents).
+  - **Audit data préalable** : enquêter sur l'origine des collisions d'ID si elles existent vraiment (sur la capture du 28 mai, les IDs courts affichés sont identiques — mais c'est peut-être un faux positif du `genererIdCourt` qui ne prend que les 6 derniers caractères). Dump du stockage à faire pour confirmer.
+  - **Cas observé 28 mai 2026 (Bibliothèque de grilles de Grégoire)** : 5 grilles distinctes (IDs différents) dans `bibliothequeGrilles`, toutes des variantes des 3 grilles de `grillesTemplates`. Hypothèse : renommage + ré-import successifs ont créé des copies forkées (chaque copie a un `idOriginal` qui pointe vers une grille locale). La détection actuelle (par nom exact) ne les signale pas car les noms diffèrent (« Global-5 FR-HOLIS » vs « Global-5 (FR-HOLIS) H26 »). Le vrai workflow doit inclure une détection par **similarité** : nom approximatif + nombre de critères + structure des critères + lien `idOriginal`.
+  - **Effort estimé** : 4-6 h pour un vrai workflow (UI sous-modal + actions batch + heuristique de similarité + tests sur les 5 biblios concernées).
+
+- [ ] ⚠️ 🟡 **#290** Intégrer 4 pratiques personnelles anonymisées au seed `MODELES_PRATIQUES_PREDEFINIS` — **À FAIRE AVANT AQPC (3 juin 2026)**
+  - **Priorité actée par Grégoire le 28 mai 2026 matin** : les premiers expérimentateurs accéderont à l'application dès le 3 juin et iront probablement voir la bibliothèque de pratiques en premier (« existe-t-il une configuration de base pour ma discipline ? »). Le seed doit être enrichi avant cette date.
+  - **Calendrier** : à exécuter APRÈS le plan de vérification visuelle en cours (28 mai matin), avant le 3 juin. Probablement 28-29 mai.
+  - **Origine des données** : 4 pratiques actuellement dans le `bibliothequePratiques` IndexedDB local du Codex de Grégoire (importées de collègues du Cégep de Drummondville) — pas dans le code source. Grégoire conserve ces fichiers personnels **inchangés** en stockage, prêts à être récupérés pour le portage.
+    - Modèle Chimie (FAH) — François A.-H. — Chimie — Notation par contrats
+    - Par objectifs (Pondéré) — Michel B. — Mathématiques — Moyenne pondérée des objectifs
+    - Par objectifs (Comptage) — Bruno V. — Chimie — Comptage d'objectifs essentiels et complémentaires
+    - STD Chimie organique (BV) — Bruno V. — Chimie — Standards avec critères par standard
+    - STD Interfaces et BD (Xavier C.-T.) — Xavier C.-T. — Informatique — 6 objectifs niveau 3+, base 80% + bonus
+  - **Méthode suggérée** :
+    1. Grégoire dump son `bibliothequePratiques` IDB (script console à fournir) pour récupérer les configurations exactes (typesTravaux, forfaits, parObjectifs, seuilsCritiques, etc.).
+    2. Pour chaque pratique : extraire la configuration, **strip les initiales** en fin de `nom` (« STD Chimie organique (BV) » → « STD Chimie organique »), **anonymiser** `auteur: 'Gabarit Labo Codex'`, **nettoyer** tout `metadata_cc.auteur_original` et `metadata_cc.contributeurs`.
+    3. Ajouter au seed `js/pratiques-bibliotheque.js` `MODELES_PRATIQUES_PREDEFINIS` avec `estGabarit: true`, IDs **sans prénom** (ex. `SPE-chimie-contrats`, `STD-chimie-organique`, `STD-info-interfaces-bd` au lieu de `STD-Bruno-Chimie` / `STD-Xavier-Info`).
+    4. **Vérifier les IDs existants** dans le seed : `SPE-francois` (Modèle Chimie générique), `STD-par-objectifs-comptage`, `STD-par-objectifs-pondere`, `STD-Bruno-Chimie`, `STD-Xavier-Info` existent déjà avec `auteur: 'Labo Codex'`. Décider si on **remplace** la config existante par la version enrichie du collègue, ou si on **ajoute** une nouvelle entrée à côté. Recommandation : remplacer (le nom du seed actuel est générique, la config enrichie du collègue apporte plus de valeur pour les expérimentateurs).
+    5. Renommer `STD-Bruno-Chimie` → `STD-chimie-organique` et `STD-Xavier-Info` → `STD-info-interfaces-bd` dans la même passe (zéro-dette : les IDs contiennent des prénoms).
+  - **Convention auteur** : `auteur: 'Gabarit Labo Codex'` (et non « Anonyme » ni « Labo Codex » seul, pour distinguer les gabarits dérivés de pratiques de collègues anonymisées des modèles génériques originaux).
+  - **Effort estimé** : 1-2 h (dump + lecture des configs + ajout au seed + renommage IDs + test visuel modale).
+
+- [ ] 🟢 **#289** Audit visuel des palettes de création — appliquer le pattern « icônes 100 % + hover sur cercle »
+  - **Pattern de référence** (livré 28 mai 2026 sur la palette Nœuds d'Alignement pédagogique, build 0528-0448) : l'icône est pleinement visible en permanence (blanc 100 % en sombre, noir 100 % en clair), et l'effet hover porte sur le cercle qui entoure l'icône (fond + bordure plus saturés), pas sur l'icône elle-même qui reste à 100 %.
+  - **Classes concernées par le pattern de référence** : `.palette-icon` + `.planif-palette-aide-btn` (styles.css lignes 18707-18741).
+  - **Autres palettes à auditer visuellement** :
+    - **Travaux › Préparer et importer** : utilise `.prep-btn` (modèle différent, styles.css l. 14260+). À comparer.
+    - **Travaux › Annoter** : palette d'outils encore différente (cf. `.travaux-palette-eval`, `.outil-svg-icon`).
+    - Possiblement d'autres palettes flottantes ou modales avec icônes en footer.
+  - **Méthode suggérée** : grep `class="palette-icon"|outil-svg-icon|prep-btn ` sur HTML+JS, naviguer sur chaque palette, comparer visuellement le contraste icône vs cercle hover. Si même problème de visibilité réduite en normal, appliquer le pattern de référence.
+  - **Capture déclencheuse** : Grégoire 28 mai 2026 matin (palette Nœuds dans Alignement pédagogique — icônes du bas trop pâles en sombre).
+  - **Effort estimé** : 30 min à 1 h (audit + 1-3 patchs CSS ciblés si nécessaire).
+
+- [ ] 🟡 **#288** Terminologie collégiale : remplacer « élève(s) » par « étudiant·e(s) » dans l'UI
+  - **Convention** : au collégial le terme « élève » est réservé au primaire/secondaire. L'UI Labo Codex (Cégep de Drummondville) doit utiliser « étudiant·e(s) ».
+  - **Cartographie 28 mai 2026** : ~150 occurrences dans le code applicatif (31 dans `index.html` seul). 4 sites visibles déjà corrigés ce jour-là (1 dans `js/config.js` label nav, 3 dans `index.html` textes d'aide) — build 0528-0354.
+  - **Reste à traiter** : libellés secondaires UI (boutons, alertes, modales, tooltips), commentaires JSDoc, IDs/clés de stockage (à laisser tels quels si elles servent de SSOT déjà persisté), documentation `docs/` (rapports, plans, skills).
+  - **Méthode suggérée** : grep ciblé sur fichiers JS/HTML applicatifs uniquement (exclure `_archives/`, `audit/`, `Rapports/`), filtrer manuellement entre UI visible (à corriger) vs. commentaires/docs (à laisser ou traiter en lot séparé). Préserver les clés de stockage `localStorage` (ex. `groupeEtudiants` → ne pas renommer, c'est déjà OK).
+  - **Effort estimé** : 1-2 h pour balayage UI visible ciblé, séparé d'un éventuel chantier docs (post-AQPC).
+  - **Capture déclencheuse** : Grégoire 28 mai 2026 matin (vérification visuelle post-refonte zone 4 Suivi, libellé sous-onglet « Liste des élèves »).
 
 - [ ] 🟡 **#286** Migration globale emojis UI → Icônes SVG icons8 (chantier en 5 lots)
   - **Capture déclencheuse** : iPad 26 mai 05:15 — section « Préparer et importer » avec ✴ orange à droite du titre + 📝 papier-crayon au-dessus de « Annoter les travaux ».

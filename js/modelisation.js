@@ -142,7 +142,7 @@
                 '<div class="annot-badge' + actif + '" data-id="' + f.id + '" data-action="modelisation.ouvrirFichier" data-param="' + f.id + '" title="' + f.nomFichier + '">' +
                     '<span class="annot-badge-nom">' + tronquerNom(f.nomFichier, 22) + '</span>' +
                     '<span class="travaux-badge-pill ' + statut.classe + '">' + statut.texte + '</span>' +
-                    '<button class="annot-badge-supprimer" data-stop data-action="modelisation.supprimerFichier" data-param="' + f.id + '" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>' +
+                    '<button class="annot-badge-supprimer" data-stop data-action="modelisation.supprimerFichier" data-param="' + f.id + '" title="Supprimer"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>' +
                 '</div>';
         });
         zone.innerHTML = html;

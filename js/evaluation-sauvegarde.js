@@ -616,7 +616,7 @@ function afficherBadgesJetons() {
             <span class="statut-badge" style="background: var(--violet-jeton, #9c27b0); color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px;">
                 <span>⭐ Reprise</span>
                 <button class="btn-jeton-retirer" data-action="retirerJetonDepuisSidebar" data-param="${evaluation.id}" data-param2="reprise"
-                        title="Retirer le jeton de reprise"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>
+                        title="Retirer le jeton de reprise"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>
             </span>
         `);
     }
@@ -628,7 +628,7 @@ function afficherBadgesJetons() {
             <span class="statut-badge" style="background: var(--orange-accent); color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px;">
                 <span>⭐ Délai</span>
                 <button class="btn-jeton-retirer" data-action="retirerJetonDepuisSidebar" data-param="${evaluation.id}" data-param2="delai"
-                        title="Retirer le jeton de délai"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>
+                        title="Retirer le jeton de délai"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>
             </span>
         `);
     }

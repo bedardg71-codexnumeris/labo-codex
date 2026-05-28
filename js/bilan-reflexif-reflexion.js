@@ -165,7 +165,7 @@ function rendreQuestionMiroirLikertHTML(question, modeApres) {
 
     html.push('</div>');
     if (question.personnalisee) {
-        html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerQuestionReflexion" data-param="blocA" data-param2="' + question.id + '" data-confirm="Supprimer ?" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon" style="width:12px;height:12px;"></button>');
+        html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerQuestionReflexion" data-param="blocA" data-param2="' + question.id + '" data-confirm="Supprimer ?" title="Supprimer"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon" style="width:12px;height:12px;"></button>');
     }
     html.push('</div>');
     return html.join('');
@@ -238,7 +238,7 @@ function rendreQuestionSyntheseHTML(question, modeApres) {
 
     html.push('</div>');
     if (question.personnalisee) {
-        html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerQuestionReflexion" data-param="blocC" data-param2="' + question.id + '" data-confirm="Supprimer ?" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon" style="width:12px;height:12px;"></button>');
+        html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerQuestionReflexion" data-param="blocC" data-param2="' + question.id + '" data-confirm="Supprimer ?" title="Supprimer"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon" style="width:12px;height:12px;"></button>');
     }
     html.push('</div>');
     return html.join('');

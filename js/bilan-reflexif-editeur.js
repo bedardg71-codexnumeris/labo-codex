@@ -106,7 +106,7 @@ function rendreEditeur() {
                 html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.annulerEdition" title="Annuler"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon" style="width:12px;height:12px;"></button>');
             } else {
                 html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.editerQuestion" data-param="perso" data-param2="' + qp.id + '" title="Modifier">\u270E</button>');
-                html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerQuestion" data-param="perso" data-param2="' + qp.id + '" data-confirm="Supprimer cette question ?" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon" style="width:12px;height:12px;"></button>');
+                html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerQuestion" data-param="perso" data-param2="' + qp.id + '" data-confirm="Supprimer cette question ?" title="Supprimer"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon" style="width:12px;height:12px;"></button>');
             }
 
             html.push('</div>');
@@ -293,7 +293,7 @@ function rendreBlocHTML(bloc, indexBloc) {
                 html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.deplacerQuestion" data-param="' + bloc.id + '" data-param2="' + q.id + '" data-param3="1" title="Descendre">\u2193</button>');
             }
             html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.editerQuestion" data-param="' + bloc.id + '" data-param2="' + q.id + '" title="Modifier">\u270E</button>');
-            html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerQuestion" data-param="' + bloc.id + '" data-param2="' + q.id + '" data-confirm="Supprimer cette question ?" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon" style="width:12px;height:12px;"></button>');
+            html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerQuestion" data-param="' + bloc.id + '" data-param2="' + q.id + '" data-confirm="Supprimer cette question ?" title="Supprimer"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon" style="width:12px;height:12px;"></button>');
         }
 
         html.push('</div>');

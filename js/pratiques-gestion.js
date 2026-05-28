@@ -50,13 +50,17 @@ let enChargementFormulaire = false;
  * @returns {Array} Liste des doublons {nom, count, ids}
  */
 function detecterDoublonsPratiques(pratiquesLocales, pratiquesBibliotheque) {
-    const toutesPratiques = [...pratiquesLocales, ...pratiquesBibliotheque];
-    const parNom = {};
+    const parId = new Map();
+    [...pratiquesLocales, ...pratiquesBibliotheque].forEach(pratique => {
+        if (pratique && pratique.id && !parId.has(pratique.id)) {
+            parId.set(pratique.id, pratique);
+        }
+    });
 
-    toutesPratiques.forEach(pratique => {
+    const parNom = {};
+    parId.forEach(pratique => {
         const nom = (pratique.nom || '').trim().toLowerCase();
         if (!nom) return;
-
         if (!parNom[nom]) {
             parNom[nom] = { nom: pratique.nom, count: 0, ids: [] };
         }
@@ -424,7 +428,10 @@ async function afficherBibliothequePratiques() {
                 classeItem: 'pratique-dispo-item',
                 dataAttrs: `data-type="${pratique.type || ''}" data-discipline="${pratique.discipline || ''}"`,
                 styleExtra: estGabarit ? 'background: var(--gris-tres-pale);' : '',
-                boutonPrincipal: { label: 'Ajouter', action: 'ajouterPratiqueALaSelection', param: pratique.id, classe: 'btn-principal', title: 'Ajouter à ta sélection' }
+                boutonPrincipal: { label: 'Ajouter', action: 'ajouterPratiqueALaSelection', param: pratique.id, classe: 'btn-principal', title: 'Ajouter à ta sélection' },
+                actionsMenu: [
+                    { label: 'Supprimer', action: 'supprimerPratiqueDeBibliothequePartagee', param: pratique.id, classe: 'btn-supprimer', title: 'Supprimer de la bibliothèque', showAlways: true }
+                ]
             });
         });
     }
@@ -583,6 +590,34 @@ async function supprimerPratiqueDefinitivement(pratiqueId) {
     await afficherListePratiquesMateriel();
     await afficherBibliothequePratiques();
 
+}
+
+/**
+ * Supprime définitivement une pratique de la bibliothèque partagée
+ * (section 2 de la modale Bibliothèque). Refuse les gabarits prédéfinis
+ * (seeds présents dans MODELES_PRATIQUES_PREDEFINIS) qui seraient recréés
+ * au prochain chargement de toute façon.
+ * @param {string} pratiqueId - ID de la pratique à supprimer
+ */
+async function supprimerPratiqueDeBibliothequePartagee(pratiqueId) {
+    if (typeof MODELES_PRATIQUES_PREDEFINIS !== 'undefined' && MODELES_PRATIQUES_PREDEFINIS[pratiqueId]) {
+        alert('Ce gabarit est fourni par défaut avec l\'application et ne peut pas être supprimé.');
+        return;
+    }
+    let items = [];
+    if (typeof obtenirToutesLesPratiquesBibliotheque === 'function') {
+        items = await obtenirToutesLesPratiquesBibliotheque();
+    }
+    const pratique = items.find(p => p.id === pratiqueId);
+    const nom = (pratique && pratique.nom) || pratiqueId;
+    if (!confirm('Supprimer définitivement la pratique « ' + nom + ' » de la bibliothèque ?\n\nCette action est irréversible.')) return;
+    const ok = await retirerPratiqueDeLaBibliotheque(pratiqueId);
+    if (!ok) {
+        alert('Impossible de supprimer cette pratique (probablement un gabarit prédéfini).');
+        return;
+    }
+    fermerModalBibliothequePratiques();
+    await afficherBibliothequePratiques();
 }
 
 /**
@@ -1369,7 +1404,7 @@ function afficherTypesTravauxMat(typesTravaux) {
                 <td><input type="text" class="controle-form" value="${t.nom || ''}" data-on-change="modifierTypeTravailMatHandler" data-mat-index="${index}" data-champ="nom"></td>
                 <td><input type="text" class="controle-form" value="${t.description || ''}" data-on-change="modifierTypeTravailMatHandler" data-mat-index="${index}" data-champ="description"></td>
                 <td style="text-align: center;">
-                    <button data-action="supprimerTypeTravailMat" data-param="${index}" class="btn btn-supprimer btn-tres-compact"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>
+                    <button data-action="supprimerTypeTravailMat" data-param="${index}" class="btn btn-supprimer btn-tres-compact"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>
                 </td>
             </tr>
         `;
@@ -1462,7 +1497,7 @@ function afficherForfaitsMat(forfaits, typesTravaux) {
             html += `<td><input type="number" class="controle-form" value="${quantite}" style="width: 50px;" min="0" data-on-change="modifierTravailForfaitMatHandler" data-mat-index="${index}" data-type-id="${t.id}"></td>`;
         });
 
-        html += `<td style="text-align: center;"><button data-action="supprimerForfaitMat" data-param="${index}" class="btn btn-supprimer btn-tres-compact"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button></td></tr>`;
+        html += `<td style="text-align: center;"><button data-action="supprimerForfaitMat" data-param="${index}" class="btn btn-supprimer btn-tres-compact"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button></td></tr>`;
     });
 
     html += '</tbody></table>';
@@ -2364,7 +2399,7 @@ function afficherListeObjectifsMat(objectifs) {
         }
 
         html += `<td style="text-align: center;">
-            <button data-action="supprimerObjectifMat" data-param="${index}" class="btn btn-supprimer btn-tres-compact"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>
+            <button data-action="supprimerObjectifMat" data-param="${index}" class="btn btn-supprimer btn-tres-compact"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>
         </td>`;
         html += '</tr>';
     });
@@ -2734,6 +2769,7 @@ window.mettreAJourDisciplinePratique = mettreAJourDisciplinePratique;
 // Fonctions bibliothèque (manquantes avant Phase 5)
 window.dupliquerPratiqueBibliotheque = dupliquerPratiqueBibliotheque;
 window.supprimerPratiqueDefinitivement = supprimerPratiqueDefinitivement;
+window.supprimerPratiqueDeBibliothequePartagee = supprimerPratiqueDeBibliothequePartagee;
 
 // Wrappers délégation (Phase 5)
 window.modifierTypeTravailMatHandler = modifierTypeTravailMatHandler;

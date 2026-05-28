@@ -1648,7 +1648,7 @@
                 colGauche += `<div class="pipeline-groupe-encadre" data-groupe-id="${echapperHtml(groupeId)}">
                     <div class="pipeline-groupe-entete">
                         <span class="pipeline-groupe-badge">${indicesGroupe.length} pages &rarr; 1 PDF</span>
-                        <button class="pipeline-groupe-defaire" data-stop data-action="travauxUI.defaireGroupePipeline" data-param="${echapperHtml(groupeId)}" title="Défaire le regroupement"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>
+                        <button class="pipeline-groupe-defaire" data-stop data-action="travauxUI.defaireGroupePipeline" data-param="${echapperHtml(groupeId)}" title="Défaire le regroupement"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>
                     </div>`;
             }
 
@@ -1666,7 +1666,7 @@
                     <span class="pipeline-meta-resolution">${resolution}</span>
                     <span class="pipeline-meta-taille">${poids}</span>
                 </div>
-                <button class="pipeline-btn-retirer" data-stop data-action="travauxUI.retirerFichierPipeline" data-param="${index}" title="Retirer ce fichier"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>
+                <button class="pipeline-btn-retirer" data-stop data-action="travauxUI.retirerFichierPipeline" data-param="${index}" title="Retirer ce fichier"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>
             </div>`;
 
             // Fin d'un groupe multi-fichiers
@@ -2480,7 +2480,7 @@
         // Permet de retirer les copies multiples directement depuis la grille de fichiers.
         const estVueArchivage = (action === 'ouvrirPreviewInline');
         const boutonSupprimer = estVueArchivage
-            ? `<button class="travaux-badge-supprimer" data-stop data-action="travauxUI.supprimerFichierBadge" data-param="${f.id}" title="Déplacer ce fichier à la corbeille"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>`
+            ? `<button class="travaux-badge-supprimer" data-stop data-action="travauxUI.supprimerFichierBadge" data-param="${f.id}" title="Déplacer ce fichier à la corbeille"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>`
             : '';
 
         return `<div class="annot-badge${estSelFusion ? ' annot-badge-fusion-selectionne' : ''}${estRemplacee ? ' eval-remplacee' : ''}" data-fichier-id="${f.id}" data-etudiant-da="${f.etudiantDA || ''}" draggable="true" data-drag-data="text/fichier-id:${f.id}" data-action="${actionName}" data-param="${f.id}" title="${echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.nomFichier, f.etudiantDA) : f.nomFichier)}${estRemplacee ? ' (Remplacée par reprise)' : ''}${estReprise ? ' (Reprise)' : ''}">
@@ -5606,7 +5606,7 @@
                         <button class="editeur-page-btn" data-stop data-action="travauxUI.monterPageEditeur" data-param="${index}" ${index === 0 ? 'disabled' : ''} title="Monter"><img src="icons/icon-chevron-up.svg" alt="" class="editeur-page-icon"></button>
                         <button class="editeur-page-btn" data-stop data-action="travauxUI.descendrePageEditeur" data-param="${index}" ${index === editionPages.length - 1 ? 'disabled' : ''} title="Descendre"><img src="icons/icon-chevron-down.svg" alt="" class="editeur-page-icon"></button>
                         <button class="editeur-page-btn" data-stop data-action="travauxUI.pivoterPageEditeur" data-param="${index}" title="Pivoter 90°"><img src="icons/icon-rotate.svg" alt="" class="editeur-page-icon"></button>
-                        <button class="editeur-page-btn editeur-page-btn-supprimer" data-stop data-action="travauxUI.supprimerPageEditeur" data-param="${index}" title="Supprimer" ${editionPages.length <= 1 ? 'disabled' : ''}><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>
+                        <button class="editeur-page-btn editeur-page-btn-supprimer" data-stop data-action="travauxUI.supprimerPageEditeur" data-param="${index}" title="Supprimer" ${editionPages.length <= 1 ? 'disabled' : ''}><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>
                     </div>
                 </div>`;
         });
