@@ -1,19 +1,20 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 28 mai 2026 matin,
-     post-session vérification visuelle Mac 7 zones + correctifs iPhone
-     5 points. 2 commits poussés sur main, beta 99.71 conservée, builds
-     0528-0342 → 0528-0644 (~15 bumps de build cumulés). AQPC J−6.
-     Les sessions du 27 mai (matin refonte + PM correctifs iPhone)
-     restent documentées dans §§0-prec1 et §0-prec2. Tout l'historique
-     antérieur reste dans les §§ suivants.
+     IDENTIFICATION DE CE FICHIER  (mis à jour 28 mai 2026 après-midi,
+     post-session : protocole de début de session formalisé + #290
+     livré en 2 phases + 3 bugs UX livrés + #292 livré + #295/#296/#297
+     inscrits au backlog. 7 commits sur main, beta 99.71 → 99.72,
+     builds 0528-0941 → 0528-1045 (5 builds successifs). AQPC J−6.
+     Les sessions précédentes (28 mai matin, 27 mai PM/matin, ...)
+     restent documentées dans §§0-prec1 et suivants.
      ===================================================================== -->
 
 > **📌 Identification**
 > - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
-> - **Dernier cycle livré** : **Session 28 mai matin** — vérification visuelle post-refonte Mac (7 zones parcourues avec Grégoire) + correctifs iPhone (5 points relevés sur device, 5 fix livrés). 2 commits sur main, ~15 correctifs UX/UI cumulés, 2 nouvelles actions « Supprimer » dans modales bibliothèques, 5 fonctions `detecterDoublons*` corrigées (fix faux positifs), 6 items BACKLOG ajoutés (#288→#293) dont **#290 ⚠️ AVANT AQPC** (intégration de 4 pratiques personnelles anonymisées au seed code source). 1 utilitaire `scripts/dedoublonner-biblios.js` créé. Voir §0 ci-dessous.
-> - **Cycle suivant — démarrage 28 mai après-midi ou 29 mai** : **PRIORITÉ ⚠️ BACKLOG #290** (intégrer 4 pratiques personnelles anonymisées au seed `MODELES_PRATIQUES_PREDEFINIS` avec auteur « Gabarit Labo Codex » — Grégoire a explicitement demandé que ce soit fait AVANT AQPC le 3 juin). Tâche secondaire : validation iPad symétrique aux 5 fix iPhone (cache iPhone capricieux, iPad confirmé OK). Tâche tertiaire : re-tester l'iPhone après purge cache Safari iOS.
+> - **Dernier cycle livré** : **Session 28 mai après-midi** — 7 commits sur main (`ed206e9` → `ed83d74`). Beta bumpée 99.71 → **99.72**. Voir §0 ci-dessous. Faits saillants : (1) protocole de début de session formalisé (`SKILL_Debut_de_session.md` créé + pointeur CLAUDE.md + feedback memory globale) après détection d'un écart de 24h entre prémisse de relance et état réel ; (2) **#290 livré en 2 phases** (anonymisation seed `MODELES_PRATIQUES_PREDEFINIS` : 2 éliminations + 9 renommages d'IDs zéro-dette + 10 changements d'auteur 'Gabarit Labo Codex' + 3 modèles génériques en 'Demo Labo Codex' avec filtre transitoire OR) ; (3) **#292 livré** (déduplication défensive au chargement de codex via `verifierUniciteIds` exposé + helper `_estBiblioPartagee`) ; (4) 3 bugs UX résolus en cours de route (suppression copie IDB Michel B., débordement vertical surface `.contenu` en 2 commits — duplication CSS inline ↔ styles.css) ; (5) 3 items BACKLOG inscrits : **#295** (diagnostic mémoire/quota avant chargement Codex iPad/iPhone), **#296** (audit catégoriel des items 'Labo Codex' post-AQPC), **#297** (dette CSS dupliquée index.html ↔ styles.css post-AQPC).
+> - **Cycle suivant — démarrage 29 mai 2026 ou ultérieur** : **Lot C du #286** (refactor API `notifications` + migration ~281 emojis ⚠ ✅ ❌ ✓ 💡 dans les notifications). Décision design actée par Grégoire : Option 1 (refactor API avec param `type` qui ajoute l'icône SVG automatiquement). **PRÉ-REQUIS GRÉGOIRE** : télécharger 2 SVG depuis icons8.com — `icons8-warning.svg` (pour le type warning ⚠ ×113 sites) et `icons8-lightbulb.svg` (pour 💡 ×29 sites). Cohérence avec `icons8-info.svg` et `icons8-check.svg` déjà présents. Cf. §2.5 du `plans de travail/PLAN-MIGRATION-ICONES-SVG.md` (Lot C — pré-requis pour démarrer).
+> - **⚠️ AVANT AQPC restant** : **#294** (configuration Netlify + Cloudflare pour la visite AQPC du 3 juin, 1-2h).
 > - **NB sur l'audit annuel** : on est sur **main**, PAS sur la branche `audit/2026-mai`. L'audit annuel reste en suspens (HEAD audit `097ce88`, divergence depuis 12 mai). Pas de mélange.
-> - **Documents clés** : `BACKLOG.md` (items #288-293 actifs), captures iPhone du 28 mai dans `Retours des testeurs/gregoire/iPhone 16 pro Max/28 mai 2026/` (5 PNG), captures du 27 mai PM toujours dans `27 mai 2026/`.
+> - **Documents clés** : `BACKLOG.md` (#295-#297 ajoutés cette session, #294 toujours ⚠️ AVANT AQPC), `Skills pour Claude Code/SKILL_Debut_de_session.md` (nouveau, versionné), `plans de travail/PLAN-MIGRATION-ICONES-SVG.md` (à mettre à jour pour acter les Lots A et D livrés au commit `11f87a1` du 27 mai PM).
 
 ---
 
@@ -36,7 +37,145 @@ Cap conservé : on reste sur la priorité déjà inscrite en ligne 14 ci-dessus 
 
 ---
 
-## §0 — Récap session 28 mai 2026 matin (vérification visuelle Mac 7 zones + correctifs iPhone 5 points)
+## §0 — Récap session 28 mai 2026 après-midi (protocole début de session + #290 en 2 phases + 3 bugs UX + #292)
+
+**Beta / build** : **99.71 → 99.72**. Builds 0528-0644 (matin) → 0528-0941 → 0528-1001 → 0528-1012 → 0528-1028 → 0528-1039 → 0528-1045 (5 bumps de build successifs au fil des commits). HEAD main au moment du relai : `ed83d74`. Aucun push (commits restent locaux pour validation Grégoire avant push).
+
+**Commits cette session** (7 sur main, aucun push) :
+
+| # | Hash | Description | Build |
+|---|------|-------------|-------|
+| 1 | `ed206e9` | docs(skills) : protocole de début de session formalisé (SKILL_Debut_de_session.md créé) + versionner SKILL_Fin_de_session.md (était untracked) + pointeur en tête de CLAUDE.md « Avant de coder » + #295 inscrit | (pas de bump — doc/skill pur) |
+| 2 | `1fcad27` | feat(pratiques) : #290 phase 1 — anonymiser seed MODELES_PRATIQUES_PREDEFINIS + zéro-dette IDs + 2 éliminations | b0528-0941 (beta 99.72) |
+| 3 | `c791f1b` | feat(pratiques) : #290 phase 2 — 3 modèles génériques 'Demo Labo Codex' + filtre transitoire estItemDemo en mode OR + #296 inscrit | b0528-1001 |
+| 4 | `0d372b3` | fix(pratiques) : autoriser suppression copie IDB qui partage un ID avec un seed prédéfini | b0528-1012 |
+| 5 | `55a3230` | fix(ui) : retirer min-height: 500px de `.contenu` dans styles.css (tentative 1, incomplète) | b0528-1028 |
+| 6 | `2e42598` | fix(ui) : retirer min-height: 500px aussi du `<style>` inline d'index.html (tentative 2, complète) | b0528-1039 |
+| 7 | `ed83d74` | feat(codex) : #292 — déduplication défensive au chargement de codex + #297 inscrit | b0528-1045 |
+
+### Méthode
+
+**1. Audit factuel à l'ouverture** (issu du protocole tout juste formalisé) : grand écart détecté entre la prémisse de relance reçue (HEAD attendu 26 mai PM, Lot A ✴ à faire) et l'état réel (HEAD 28 mai matin, ✴ déjà retiré au commit `11f87a1` du 27 mai). Note de relance ajoutée dans SESSION.md (cf. ci-dessus) pour acter l'écart de 2 cycles.
+
+**2. Formalisation du protocole de début de session** (commit 1) après le constat précédent. Création de `Skills pour Claude Code/SKILL_Debut_de_session.md` : pendant inverse de SKILL_Fin_de_session.md, structuré en 7 étapes (inventaire git, tests, version, lecture SESSION.md, lecture BACKLOG.md, comparaison prémisse vs réel, rapport final). Lecture seule, aucune modification automatique. Pointeur en tête de la section « Avant de coder » de CLAUDE.md pour chargement systématique. Feedback memory globale `feedback-audit-factuel-debut-session` sauvegardée — survit au-delà de ce projet. Item BACKLOG #295 ajouté pour diagnostic mémoire/quota avant chargement Codex iPad/iPhone (signalé par Grégoire : son iPad sature, limite ses tests sur ces devices).
+
+### #290 livré en 2 phases (commits 2 et 3)
+
+**Phase 1** (`1fcad27`) — anonymisation du seed `MODELES_PRATIQUES_PREDEFINIS` :
+
+- Dump du `bibliothequePratiques` IDB de Grégoire : 9 pratiques personnelles dont 5 correspondent à des entrées du seed (FAH, BV ×2, Xavier C.-T., Michel B.). Les configs détaillées des collègues étaient déjà dans le seed sous des IDs non conformes (avec prénom), juste l'auteur étiqueté 'Labo Codex' au lieu de 'Gabarit Labo Codex'.
+- **2 éliminations** : `SPE-litterature` (test wizard sans valeur de référence, confirmé par Grégoire) + `STD-par-objectifs-comptage` (modèle générique squelette à 3 objectifs non nommés, doublon de `STD-chimie-organique` pour Bruno V.).
+- **9 renommages d'IDs zéro-dette** (CLAUDE.md principe acté) :
+
+| Ancien ID | Nouveau ID |
+|---|---|
+| `SPE-francois` | `SPE-chimie-contrats` |
+| `STD-Bruno-Chimie` | `STD-chimie-organique` |
+| `STD-Xavier-Info` | `STD-info-interfaces-bd` |
+| `SOM-Etienne-Admin` | `SOM-comptabilite` |
+| `SOM-Olivier-Geo` | `SOM-geographie` |
+| `SOM-Helene-Philo` | `SOM-philo-portfolio` |
+| `SOM-MarieHelene-Litt` | `SOM-litterature` |
+| `STD-Isabelle-Bio` | `STD-anatomie` |
+| `SOM-Jordan-Philo` | `SOM-philo-remplacement` |
+
+- **10 changements d'auteur** `'Labo Codex'` → `'Gabarit Labo Codex'` (pour les gabarits dérivés de collègues anonymisés). Modèles génériques (`SPE-simple`, `STD-n-meilleurs`, `STD-n-recents`) restent `'Labo Codex'` à ce stade.
+- **Mise à jour description** `SPE-chimie-contrats` : « Notation par contrats » (au lieu de « Basé sur une pratique en chimie »), aligné avec la version IDB de François A.-H..
+- **Audit grep call-sites** : aucune référence littérale aux anciens IDs hors du seed. Tous les accès passent par `MODELES_PRATIQUES_PREDEFINIS[configId]` dynamique. Renommage sans risque pour le code applicatif.
+- Seed passe de 15 à 13 entrées.
+
+**Phase 2** (`c791f1b`) — convention `'Demo Labo Codex'` pour les 3 modèles génériques :
+
+- Grégoire a clarifié pendant la session : `SPE-simple`, `STD-n-meilleurs`, `STD-n-recents` sont en réalité du **matériel démo lié au dataset de la checkbox d'accueil**, pas des canevas génériques. Ils ne doivent être visibles QU'en mode démo.
+- Découverte : le filtre `BibliothequeUI.estItemDemo` (`js/bibliotheque-ui.js:33`) considère tout item avec `auteur === 'Labo Codex'` comme « démo » et le masque hors mode démo. C'est ce qui cachait déjà les 3 modèles génériques chez Grégoire (constat : « 3 pratiques que je ne vois pas »).
+- Convention tranchée : `'Demo Labo Codex'` pour le matériel démo, `'Gabarit Labo Codex'` pour les gabarits de collègues anonymisés, `'Labo Codex'` (legacy) à terme retiré du filtre.
+- **Filet transitoire** : `estItemDemo` accepte temporairement les deux chaînes `'Labo Codex'` OR `'Demo Labo Codex'`. Permet de migrer progressivement les ~30 autres occurrences de `'Labo Codex'` dans 8 autres fichiers seed (echelles, gabarits-utils, spe-specifications, demo-namespace, etc.) sans casser le filtre démo.
+- **Item BACKLOG #296 inscrit** : audit catégoriel post-AQPC pour distinguer (A) vraies démos référencées par le dataset démo, (B) canevas génériques mal taggués, (C) résidus de tests de dev. Hypothèse de Grégoire : « beaucoup de ce matériel est en réalité des résidus de tests de dev que j'ai voulu supprimer mais qui sont restés ». 2-3h estimé.
+
+### Bug fix suppression copie IDB (commit 4)
+
+- Rapport BUG signalé par Grégoire 10:05 (`BUG_grégoire_2026-05-28_10-05-12.txt`, gravité GÊNANT) : impossible de supprimer la copie IDB de la pratique « Par objectifs (Pondéré) » de Michel B. depuis la modale Bibliothèque. Modale apparaît, confirmation, et « rien ne se passe ».
+- Diagnostic : 2 protections « gabarit prédéfini » (ligne 603 de pratiques-gestion.js + ligne 692 de pratiques-bibliotheque.js) refusaient toute suppression d'ID présent dans `MODELES_PRATIQUES_PREDEFINIS`. Or `STD-par-objectifs-pondere` reste dans le seed (juste auteur changé en phase 1) et l'IDB de Grégoire contient une copie avec auteur 'Michel B.'. L'`alert()` du refus était probablement affiché brièvement par Safari dans un handler async fork-and-forget, mais non perçu.
+- Fix : **assouplir la sémantique** — autoriser la suppression de la copie IDB. Logique : le seed vit dans le code source (jamais affecté par l'UI), et se réinjecte automatiquement au prochain rafraîchissement via `obtenirToutesLesPratiquesBibliotheque` (qui ajoute le gabarit du seed quand son ID n'est pas dans IDB). Notifications `notifications.info` / `notifications.erreur` à la place d'`alert()` pour le feedback de refus (utile uniquement quand l'ID n'est que dans le seed).
+- Conséquence pour Grégoire : ménage IDB possible, ses 6 entrées doublons (FAH, BV ×2, Xavier C.-T., Michel B., SPE-litterature de wizard) supprimables une à une. Confirmé après recharge : sidebar propre, ne reste que ses 2 pratiques perso PAN-Littérature A25 + PAN-SDT-Litt H26.
+
+### Bug fix débordement vertical surface .contenu (commits 5 + 6)
+
+- Signalé par Grégoire sur les pages Pratiques de notation, Grilles de critères, Échelles de performance : le rectangle sombre extérieur (surface `.contenu`) s'étendait bien au-delà du contenu réel → grand vide visuel en bas (« la bordure du bas est très large »).
+- **Première tentative** (commit 5) : retrait de `min-height: 500px` dans `styles.css:1789` après inspection DevTools. Insuffisant — débordement persistait après hard refresh.
+- **Diagnostic du persistant** : capture DevTools de Grégoire (10:38) révèle que la règle `.contenu { min-height: 500px }` vit AUSSI dans le `<style>` inline d'`index.html` ligne 1361-1364, qui surcharge le CSS externe (CSS critique inliné pour l'affichage initial — duplication non documentée).
+- **Deuxième tentative** (commit 6) : retrait également du `<style>` inline. Résolu après Cmd+Opt+E (vider caches Safari) + Cmd+Shift+R.
+- Notes méthodologiques :
+  - Le hard refresh seul (Cmd+Shift+R) **n'invalide pas toujours le cache CSS sur file://** dans Safari. Solutions : Cmd+Opt+E (Vider les caches) OU Développement > Désactiver les caches (tant que DevTools est ouverte).
+  - Pattern observé : CSS dupliqué entre `<style>` inline d'index.html et styles.css externe. Risque pour les fix futurs.
+- **Item BACKLOG #297 inscrit** : audit complet de la duplication CSS inline ↔ styles.css, post-AQPC. 1-2h estimé.
+
+### #292 livré (commit 7)
+
+- Fix de la source de propagation des doublons d'ID au chargement de codex.
+- `chargerCodex` (`js/codex.js:454`) faisait un overwrite complet par clé sans déduplication. Codex source avec doublons → restauration à l'identique à chaque ouverture. Le codex de Grégoire en est infecté (3 doublons confirmés dans `grillesTemplates`).
+- **Fix** :
+  - `import-export.js` : `verifierUniciteIds` (défini ligne 66) désormais exposé via `window.verifierUniciteIds` (1 ligne en bas de l'IIFE) — accessible depuis codex.js.
+  - `codex.js` : nouveau helper `_estBiblioPartagee(cle)` qui retourne true si la clé correspond à une bibliothèque partagée. Liste cible alignée avec les sites qui appliquent déjà `verifierUniciteIds` dans import-export.js : `grillesTemplates`, `echellesTemplates`, `pratiquesConfigurables`, `bibliothequePratiques`, `bibliothequeGrilles`, `bibliothequeEchelles`, `bibliothequeCartouches`, `bibliothequeProductions`, plus tous `cartouches_*`. Accepte les variantes namespacées (h2026_, a2025_) via regex.
+  - `codex.js` : boucle de `chargerCodex` modifiée pour appeler `verifierUniciteIds` AVANT `db.set` quand la clé est une biblio partagée et que la valeur est un tableau. Silencieux quand pas de doublons. Log via `console.warn` quand corrections.
+- Conséquence : tout codex chargé désormais nettoyé à la volée. Les doublons d'ID résiduels corrigés par `genererIdUnique` (le 2e exemplaire est ré-identifié).
+- **Hygiène data complémentaire** (à faire séparément si besoin) : nettoyer le codex actuel de Grégoire via un snippet console qui exporte → recharge le codex via la version 99.72+ → le ZIP re-exporté sera propre.
+
+### État du chantier #286 (migration émojis → SVG) au 28 mai PM
+
+Audit grep réel (excluant docs/changelog/popups pédagogiques) :
+
+| Lot | Statut | Détail |
+|---|---|---|
+| **F** | ✅ livré 26 mai | retrait 15 PNG `outils-*` legacy |
+| **I** | ✅ livré 26 mai | bascule palette aide orange → jaune `#e8c43a` |
+| **J** | ✅ livré 26 mai | 5 couleurs sections par `background-blend-mode: multiply` |
+| **A** (✴ bouton aide) | ✅ livré 27 mai | au commit `11f87a1` — 0 occurrence ✴ en code applicatif |
+| **D** (pastilles RaI 🟢🟡🔴🟠⚫) | ✅ livré 27 mai | même commit — remplacé par CSS `.pastille-rai` |
+| **B** (illustrations sections) | ⚠ partiel | reste ~140 occurrences (📋×11, 📚×10, 📝×8, ✕×8, 🗺×8, 📁×7, 🎯×7, 👤×6, etc.) |
+| **C** (notifications) | ❌ non commencé | **281 occurrences** : ⚠×113, ✅×54, ❌×44, ✓×41, 💡×29 |
+| **E** (jetons), **H** (SOLO), **G** (résiduels) | ❌ non commencés | dépendent de conceptions graphiques (E, H) ou nettoyage final (G) |
+
+**Total emojis UI restants** : 431 (38 emojis distincts). Lot C = 65 % du restant.
+
+### Pré-requis pour le Lot C (à faire par Grégoire AVANT prochaine session)
+
+Télécharger 2 SVG depuis [icons8.com](https://icons8.com) avec un style cohérent avec `icons8-info.svg` et `icons8-check.svg` déjà présents dans `icons/` (probablement « Material Outlined » ou « Color »). Inscription possible directement dans le commit Lot C — pas besoin de PR séparée.
+
+1. **`icons8-warning.svg`** — pour le nouveau type `notifications.warning(message)` qui couvrira 113 sites ⚠.
+2. **`icons8-lightbulb.svg`** — pour les 29 sites 💡 (à décider : type `info` avec lightbulb optionnel, ou nouveau type `conseil`).
+3. (Optionnel) `icons8-check-circle.svg` (vert) si Grégoire préfère un check-circle plein à l'`icons8-check.svg` simple actuel pour le type `succes`.
+
+### Cycle suivant — démarrage 29 mai 2026 ou ultérieur
+
+**Priorité 1** : **Lot C du #286** dès que les 2 SVG sont téléchargés. Décision design actée par Grégoire : **Option 1 (refactor API avec param `type`)** — l'API construit automatiquement le DOM toast avec l'icône SVG correspondante au type. Migration : retirer les emojis ⚠ ✅ ❌ ✓ 💡 des strings d'appel (l'API les ajoute désormais selon le type). Tests visuels Mac + iPad, modes sombre + clair. ~2-3h.
+
+**Priorité 2** : Lot B (reliquats illustrations, ~140 occurrences). Majoritairement des SVG déjà présents dans icons/. Pas de pré-requis. ~1h.
+
+**Priorité 3** : Lot G (résiduels ≤10 occurrences). Cas par cas, probablement du legacy à retirer plutôt qu'à migrer. 1-2h.
+
+**Items #286-293 restants après Lot C complet** : selon l'ordre acté début de session :
+- **#288** terminologie « élève » → « étudiant·e » résiduelle (~150 occurrences hors UI principale déjà faite), 1-2h
+- **#291** vrai workflow résolution de doublons (sous-modal côte-à-côte), 4-6h
+- **#287, #289, #293** items 🟢 sans urgence (picker couleur HTML, audit palettes, toggle masquer sidebar)
+- **#282** migration `cours.js` legacy → V2, 5-7h (⚠️ priorité haute actée — déborde post-AQPC)
+
+**⚠️ AVANT AQPC restant (J−6)** :
+- **#294** configuration Netlify + Cloudflare pour la visite AQPC du 3 juin, 1-2h
+
+### Notes méthodologiques pour les prochaines sessions
+
+1. **Cache Safari sur file://** : le hard refresh ne suffit pas toujours. Si après modification CSS / JS un fix ne semble pas appliqué, faire Cmd+Opt+E (Vider les caches) puis Cmd+Shift+R. Pratique : activer Développement > Désactiver les caches pendant les sessions de dev avec Claude.
+2. **Duplication CSS inline ↔ styles.css** : `index.html` contient un `<style>` inline qui duplique plusieurs règles de `styles.css`. Tout fix CSS sur `.contenu` ou autres règles dupliquées doit toucher les deux endroits, sinon la duplication inline surcharge silencieusement le fix externe. Item #297 inscrit pour audit complet post-AQPC.
+3. **Protections « seeds prédéfinis »** : avant d'ajouter une protection qui refuse une opération sur un ID présent dans un seed, vérifier si l'opération porte sur le seed lui-même (interdit, le seed est dans le code source) ou sur une **copie IDB** qui partage juste l'ID (légitime, le seed se réinjecte au refresh). Distinguer les deux cas.
+4. **Convention auteurs seed** (post-#290 + transition #296) :
+   - `'Gabarit Labo Codex'` : gabarits dérivés de pratiques de collègues anonymisées (10 entrées dans pratiques-bibliotheque.js)
+   - `'Demo Labo Codex'` : matériel démo lié au dataset démo de la checkbox d'accueil (3 entrées dans pratiques-bibliotheque.js)
+   - `'Labo Codex'` (legacy) : encore présent dans 8 autres fichiers seed (echelles, gabarits-utils, etc.) — à trier post-AQPC via #296. Filtre `estItemDemo` accepte les deux chaînes pendant la transition.
+
+---
+
+## §0-prec1 — Récap session 28 mai 2026 matin (vérification visuelle Mac 7 zones + correctifs iPhone 5 points)
 
 **Beta / build** : 99.71 conservée (aucun bump beta). Builds b0528-0342 → b0528-0644 (~15 bumps de build successifs au fil des fix). HEAD main au moment du relai : `a8ff194`.
 
