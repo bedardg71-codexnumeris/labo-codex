@@ -1027,7 +1027,7 @@ async function copierRapportBug(btn) {
         // Feedback visuel
         if (btn) {
             const texteOriginal = btn.textContent;
-            btn.textContent = '✓ Copié !';
+            btn.innerHTML = '<span class="icone-inline icone-inline--check" aria-hidden="true"></span>Copié !';
             btn.style.background = 'var(--vert-positif)';
 
             setTimeout(() => {
@@ -1102,7 +1102,7 @@ async function telechargerRapportTxt(btn) {
     // Feedback visuel
     if (btn && succes) {
         const texteOriginal = btn.textContent;
-        btn.textContent = '✓ Enregistré !';
+        btn.innerHTML = '<span class="icone-inline icone-inline--check" aria-hidden="true"></span>Enregistré !';
         btn.style.background = 'var(--vert-positif)';
         setTimeout(() => {
             btn.textContent = texteOriginal;
@@ -1179,7 +1179,7 @@ function envoyerRapportParCourriel(btn) {
         // Feedback visuel
         if (btn) {
             var texteOriginal = btn.textContent;
-            btn.textContent = '✓ Envoyé !';
+            btn.innerHTML = '<span class="icone-inline icone-inline--check" aria-hidden="true"></span>Envoyé !';
             btn.style.background = 'var(--vert-positif)';
             setTimeout(function() { btn.textContent = texteOriginal; btn.style.background = ''; }, 2000);
         }

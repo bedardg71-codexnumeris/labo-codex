@@ -253,7 +253,7 @@ function chargerPortfolioEleveDetail(da) {
                 <div class="portfolio-progression-header">
                     <span><strong>Progression :</strong> ${nbRemis}/${minimumRequis} remis ${nombreTotal > minimumRequis ? `(${nombreTotal} artefacts prévus)` : ''}</span>
                     <span style="color: ${nbRemis >= minimumRequis ? 'green' : 'orange'};">
-                        ${nbRemis >= minimumRequis ? '✓ Minimum atteint' : 'Minimum requis'}
+                        ${nbRemis >= minimumRequis ? '<span class="icone-inline icone-inline--check" aria-hidden="true"></span>Minimum atteint' : 'Minimum requis'}
                     </span>
                 </div>
                 <div class="portfolio-barre-progression">
@@ -284,7 +284,7 @@ function chargerPortfolioEleveDetail(da) {
                                 </div>
                                 <div class="portfolio-artefact-meta">
                                     ${art.remis
-                                        ? `<span class="u-texte-succes">✓ Remis</span>
+                                        ? `<span class="u-texte-succes"><span class="icone-inline icone-inline--check" aria-hidden="true"></span>Remis</span>
                                            <span><strong>Note :</strong> ${art.note}/100</span>
                                            <span><strong>Niveau :</strong> ${echapperHtml(art.niveau)}</span>`
                                         : '<span class="portfolio-texte-gris-fade">— Non remis</span>'}
@@ -311,7 +311,7 @@ function chargerPortfolioEleveDetail(da) {
             <!-- Calcul de la note -->
             <div class="portfolio-note-carte ${nbRetenus === nombreARetenir ? 'portfolio-note-finale' : 'portfolio-note-provisoire'}">
                 <h4>
-                    ${nbRetenus === nombreARetenir ? '✓ Mode FINAL actif' : '⚠️ Mode PROVISOIRE'}
+                    ${nbRetenus === nombreARetenir ? '<span class="icone-inline icone-inline--check" aria-hidden="true"></span>Mode FINAL actif' : '<span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Mode PROVISOIRE'}
                 </h4>
 
                 ${noteProvisoire !== null

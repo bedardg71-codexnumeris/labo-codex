@@ -1216,7 +1216,7 @@ function calculerTotalPonderationCriteres(criteres) {
 
     if (total === 100) {
         totalSpan.style.color = 'var(--niveau-attention-minimal)';
-        statutSpan.innerHTML = '<span class="grille-texte-minimal">✓ Pondération complète</span>';
+        statutSpan.innerHTML = '<span class="grille-texte-minimal"><span class="icone-inline icone-inline--check" aria-hidden="true"></span>Pondération complète</span>';
     } else if (total < 100) {
         totalSpan.style.color = 'var(--niveau-attention-modere)';
         statutSpan.innerHTML = `<span class="grille-texte-modere">${100 - total}% manquant</span>`;

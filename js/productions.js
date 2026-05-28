@@ -436,7 +436,7 @@ function verifierDateHorsTrimestre(inputDate, dateMin, dateMax, labelDebut, labe
         const span = document.createElement('span');
         span.className = 'warn-hors-trimestre';
         span.style.cssText = 'color: var(--btn-annuler); font-size: 0.85em; display: block; margin-top: 2px;';
-        span.textContent = `⚠ Hors trimestre (${labelDebut} – ${labelFin})`;
+        span.innerHTML = `<span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Hors trimestre (${echapperHtml(labelDebut)} – ${echapperHtml(labelFin)})`;
         inputDate.parentElement.appendChild(span);
     }
 }
@@ -1553,7 +1553,7 @@ async function mettreAJourPonderationTotale() {
 
     const statut = document.getElementById('statutPonderation');
     if (total === 100) {
-        statut.textContent = '✓ Pondération correcte';
+        statut.innerHTML = '<span class="icone-inline icone-inline--check" aria-hidden="true"></span>Pondération correcte';
         statut.style.color = 'var(--vert-succes)';
     } else if (total > 100) {
         statut.textContent = `${total - 100}% en trop`;

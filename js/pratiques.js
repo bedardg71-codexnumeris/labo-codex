@@ -1508,9 +1508,9 @@ function mettreAJourStatutModalites() {
 
     // Vérifier le statut selon la pratique choisie
     if (!modalites.pratique) {
-        statutDiv.innerHTML = '<span style="color: var(--niveau-attention-critique);">✗ À configurer</span>';
+        statutDiv.innerHTML = '<span style="color: var(--niveau-attention-critique);"><span class="icone-inline icone-inline--cancel" aria-hidden="true"></span>À configurer</span>';
     } else if (modalites.pratique === 'sommative') {
-        statutDiv.innerHTML = '<span style="color: var(--vert-moyen);">✓ Sommative traditionnelle (en %)</span>';
+        statutDiv.innerHTML = '<span style="color: var(--vert-moyen);"><span class="icone-inline icone-inline--check" aria-hidden="true"></span>Sommative traditionnelle (en %)</span>';
     } else if (modalites.pratique === 'pan-standards' && modalites.typePAN) {
         const types = {
             'maitrise': 'Maîtrise',
@@ -1518,13 +1518,13 @@ function mettreAJourStatutModalites() {
             'denotation': 'Dénotation'
         };
         statutDiv.innerHTML = `
-            <span style="color: var(--vert-moyen);">✓ Alternative (${types[modalites.typePAN]})</span>
+            <span style="color: var(--vert-moyen);"><span class="icone-inline icone-inline--check" aria-hidden="true"></span>Alternative (${types[modalites.typePAN]})</span>
             <button data-action="afficherParametresPAN" class="btn btn-secondaire" style="margin-left: 15px; padding: 4px 12px; font-size: 0.85rem;">
                 Modifier les paramètres
             </button>
         `;
     } else if (modalites.pratique === 'pan-standards' && !modalites.typePAN) {
-        statutDiv.innerHTML = '<span style="color: var(--orange-accent);">⚠ Choisir un type de PAN</span>';
+        statutDiv.innerHTML = '<span style="color: var(--orange-accent);"><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Choisir un type de PAN</span>';
     }
 }
 
@@ -2642,7 +2642,7 @@ async function ouvrirModalBibliothequePratiques() {
                     <!-- 🆕 Beta 95.7 : Message aide édition -->
                     <div style="background: var(--bleu-tres-pale, #e8f4f8); border-left: 3px solid var(--bleu-clair, #5dade2); padding: 10px 15px; margin-bottom: 20px; border-radius: 0 6px 6px 0;">
                         <p style="margin: 0; font-size: 0.9rem; color: var(--texte-secondaire, #555);">
-                            💡 <strong>Pour éditer une pratique</strong>, transférez-la d'abord dans la barre latérale en cliquant sur « Ajouter », puis allez dans <strong>Construction → Pratiques</strong> et cliquez dessus pour l'ouvrir en mode édition.
+                            <span class="icone-inline icone-inline--lightbulb" aria-hidden="true"></span><strong>Pour éditer une pratique</strong>, transférez-la d'abord dans la barre latérale en cliquant sur « Ajouter », puis allez dans <strong>Construction → Pratiques</strong> et cliquez dessus pour l'ouvrir en mode édition.
                         </p>
                     </div>
 

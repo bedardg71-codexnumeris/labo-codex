@@ -108,7 +108,7 @@ async function chargerListeEtudiantsV2() {
     `;
 
     etudiants.forEach((e, index) => {
-        const sa = e.sa === 'Oui' || e.sa === true ? '✓' : '';
+        const sa = e.sa === 'Oui' || e.sa === true ? '<span class="icone-inline icone-inline--check" aria-label="Oui"></span>' : '';
         // Formater le groupe sur 5 chiffres (ex: 00001)
         const groupe = e.groupe ? String(e.groupe).padStart(5, '0') : '—';
         const statut = e.statut || '';

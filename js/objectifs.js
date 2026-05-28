@@ -499,11 +499,11 @@ function calculerTotalPoidsEnsemble() {
 
     if (total === 100) {
         totalSpan.classList.add('u-texte-succes');
-        validationP.textContent = '✓ Total valide ! L\'ensemble peut être utilisé.';
+        validationP.innerHTML = '<span class="icone-inline icone-inline--check" aria-hidden="true"></span>Total valide ! L\'ensemble peut être utilisé.';
         validationP.classList.add('u-texte-succes');
     } else if (total > 100) {
         totalSpan.classList.add('u-texte-danger');
-        validationP.textContent = '⚠ Le total dépasse 100% (' + total + '%). Ajustez les pondérations.';
+        validationP.innerHTML = '<span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Le total dépasse 100% (' + total + '%). Ajustez les pondérations.';
         validationP.classList.add('u-texte-danger');
     } else {
         totalSpan.classList.add('u-texte-warning');

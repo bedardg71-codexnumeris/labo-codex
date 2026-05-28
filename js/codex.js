@@ -2620,7 +2620,7 @@ async function copierRapportComparaison() {
         var btn = document.querySelector('[data-action="Codex.copierRapportComparaison"]');
         if (btn) {
             var orig = btn.innerHTML;
-            btn.innerHTML = '✓ Copié';
+            btn.innerHTML = '<span class="icone-inline icone-inline--check" aria-hidden="true"></span>Copié';
             setTimeout(function() { btn.innerHTML = orig; }, 1500);
         }
     } catch (e) {

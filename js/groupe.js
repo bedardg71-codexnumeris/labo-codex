@@ -399,7 +399,7 @@ function afficherPrevisualisation(data, titre) {
                         <td>${echapperHtml(s.nom)}</td>
                         <td>${echapperHtml(s.prenom)}</td>
                         <td>${echapperHtml(s.programme || '---')}</td>
-                        <td style="text-align: center;">${s.sa === 'Oui' ? '✓' : ''}</td>
+                        <td style="text-align: center;">${s.sa === 'Oui' ? '<span class="icone-inline icone-inline--check" aria-label="Oui"></span>' : ''}</td>
                     </tr>
                 `).join('')}
             </tbody>
@@ -696,8 +696,8 @@ function filtrerParGroupe() {
                     <td class="td-left-auto">${nomEchappe}</td>
                     <td class="td-left-auto">${prenomEchappe}</td>
                     <td class="td-left-100">${programmeEchappe}</td>
-                    <td class="td-center-60">${s.sa === 'Oui' ? '✓' : ''}</td>
-                    <td class="td-center-60">${s.caf === 'Oui' ? '✓' : ''}</td>
+                    <td class="td-center-60">${s.sa === 'Oui' ? '<span class="icone-inline icone-inline--check" aria-label="Oui"></span>' : ''}</td>
+                    <td class="td-center-60">${s.caf === 'Oui' ? '<span class="icone-inline icone-inline--check" aria-label="Oui"></span>' : ''}</td>
                     <td class="td-center-200">
                         <button data-action="modifier" data-da="${s.da}" class="btn btn-modifier btn-tres-compact"
                                 style="margin-right: 4px;">
@@ -791,7 +791,7 @@ function modifierEtudiant(da) {
         }
 
         if (btnAjouter) {
-            btnAjouter.textContent = '✓ Mettre à jour';
+            btnAjouter.innerHTML = '<span class="icone-inline icone-inline--check" aria-hidden="true"></span>Mettre à jour';
             btnAjouter.style.background = 'var(--orange-accent)';
         }
 

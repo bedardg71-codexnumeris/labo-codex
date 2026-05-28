@@ -1331,7 +1331,7 @@ function copierDansPressePapiers(texte, btn) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(texte).then(function() {
             if (btn) {
-                btn.textContent = 'Copié ✓';
+                btn.innerHTML = 'Copié <span class="icone-inline icone-inline--check" aria-hidden="true"></span>';
                 setTimeout(function() { btn.textContent = 'Copier'; }, 1500);
             }
         });

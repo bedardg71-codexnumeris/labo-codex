@@ -1166,7 +1166,7 @@ function afficherListeEtudiantsConsultation() {
         html += '<td class="etud-text-center"><strong>' + groupe + '</strong></td>';
         html += '<td>' + nom + '</td>';
         html += '<td>' + prenom + '</td>';
-        html += '<td class="etud-text-center">' + (etudiant.sa === 'Oui' ? '✓' : '') + '</td>';
+        html += '<td class="etud-text-center">' + (etudiant.sa === 'Oui' ? '<span class="icone-inline icone-inline--check" aria-label="Oui"></span>' : '') + '</td>';
 
         // 🆕 BETA 95.7 (22 jan) : Détecter données manquantes INDIVIDUELLEMENT
         const tiret = '<span class="etud-texte-gris-clair">—</span>';
