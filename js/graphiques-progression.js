@@ -4338,7 +4338,7 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
             const nomAnon = (typeof anonymiserNom === 'function') ? anonymiserNom(daSurbrillance) : null;
             const nom = nomAnon || (eleve && eleve.prenom && eleve.nom
                 ? (eleve.prenom + ' ' + eleve.nom).trim()
-                : (eleve && eleve.nom ? eleve.nom : 'l\'élève'));
+                : (eleve && eleve.nom ? eleve.nom : 'l\'étudiant·e'));
             titreY = 'Habiletés de ' + nom;
         } else {
             titreY = (criteresActifs.size === 1)
@@ -4527,7 +4527,7 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
             if (mode === 'habiletes') {
                 const optTous = document.createElement('option');
                 optTous.value = 'TOUS';
-                optTous.textContent = 'Tous les élèves';
+                optTous.textContent = 'Tous les étudiant·e·s';
                 selecteur.appendChild(optTous);
             }
             etudiants.forEach(etu => {

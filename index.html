@@ -4240,11 +4240,11 @@
                                     </select>
                                 </div>
                                 <div class="u-align-center" style="display: flex; gap: 0.5rem">
-                                    <label style="color: rgba(255,255,255,0.8);" data-tooltip="tdb-selecteur-eleve-groupe">Élève en relief :</label>
+                                    <label style="color: rgba(255,255,255,0.8);" data-tooltip="tdb-selecteur-eleve-groupe">Étudiant·e en relief :</label>
                                     <select id="selecteur-etudiant-acp" data-on-change="selectionnerEtudiantACP" class="controle-form-header">
                                         <option value="" style="color: var(--gris-fonce);">-- Sélectionner --</option>
                                     </select>
-                                    <button type="button" id="btn-profil-acp" class="btn-voir-profil" data-action="ouvrirProfilEleveACP" title="Voir le profil de l'élève sélectionné" aria-label="Voir le profil de l'élève sélectionné" style="display: none;">👤</button>
+                                    <button type="button" id="btn-profil-acp" class="btn-voir-profil" data-action="ouvrirProfilEleveACP" title="Voir le profil de l'étudiant·e sélectionné·e" aria-label="Voir le profil de l'étudiant·e sélectionné·e" style="display: none;">👤</button>
                                 </div>
                             </div>
                         </h3>
@@ -4284,11 +4284,11 @@
                                     </select>
                                 </div>
                                 <div class="u-align-center" style="display: flex; gap: 0.5rem">
-                                    <label style="color: rgba(255,255,255,0.8);" for="selecteur-etudiant-trajectoires">Élève en relief :</label>
+                                    <label style="color: rgba(255,255,255,0.8);" for="selecteur-etudiant-trajectoires">Étudiant·e en relief :</label>
                                     <select id="selecteur-etudiant-trajectoires" data-on-change="selectionnerEtudiantTrajectoires" class="controle-form-header">
                                         <option value="" style="color: var(--gris-fonce);">-- Sélectionner --</option>
                                     </select>
-                                    <button type="button" id="btn-profil-trajectoires" class="btn-voir-profil" data-action="ouvrirProfilEleveTrajectoires" title="Voir le profil de l'élève sélectionné" aria-label="Voir le profil de l'élève sélectionné" style="display: none;">👤</button>
+                                    <button type="button" id="btn-profil-trajectoires" class="btn-voir-profil" data-action="ouvrirProfilEleveTrajectoires" title="Voir le profil de l'étudiant·e sélectionné·e" aria-label="Voir le profil de l'étudiant·e sélectionné·e" style="display: none;">👤</button>
                                 </div>
                                 <label class="u-align-center habiletes-toggle-mediane-label" style="display: flex; gap: 0.4rem; cursor: pointer; color: rgba(255,255,255,0.85);" for="trajectoires-toggle-mediane">
                                     <input type="checkbox" id="trajectoires-toggle-mediane" data-on-change="rafraichirGraphiqueTrajectoires">
@@ -4299,7 +4299,7 @@
 
                         <!-- Carte Note (info) -->
                         <div id="note-trajectoires" class="carte-info-toggle carte-info-note" style="display: none;">
-                            <strong>Trajectoires par production :</strong> chaque ligne représente la trajectoire d'un élève à travers les productions évaluables, dans l'ordre des échéances.
+                            <strong>Trajectoires par production :</strong> chaque ligne représente la trajectoire d'un·e étudiant·e à travers les productions évaluables, dans l'ordre des échéances.
                             <br><br>
                             Choisis la <strong>mesure</strong> à afficher :
                             <ul style="margin: 8px 0; padding-left: 20px;">
@@ -4310,12 +4310,12 @@
                             <br><br>
                             Active <strong>« Médiane du groupe »</strong> pour superposer deux repères statistiques :
                             <ul style="margin: 8px 0; padding-left: 20px;">
-                                <li>La <strong>ligne foncée avec losanges</strong> = score <strong>médian</strong> du groupe par production (50 % des élèves au-dessus, 50 % en-dessous).</li>
-                                <li>La <strong>bande grise</strong> = <strong>écart inter-quartile</strong> (Q25 à Q75) : couvre les 50 % d'élèves au centre. Plus la bande est étroite, plus le groupe est homogène.</li>
+                                <li>La <strong>ligne foncée avec losanges</strong> = score <strong>médian</strong> du groupe par production (50 % des étudiant·e·s au-dessus, 50 % en-dessous).</li>
+                                <li>La <strong>bande grise</strong> = <strong>écart inter-quartile</strong> (Q25 à Q75) : couvre les 50 % d'étudiant·e·s au centre. Plus la bande est étroite, plus le groupe est homogène.</li>
                             </ul>
-                            Les élèves marqués <em>inactifs / abandon</em> sont retirés du calcul de la médiane et de la bande.
+                            Les étudiant·e·s marqué·e·s <em>inactif·ve·s / abandon</em> sont retiré·e·s du calcul de la médiane et de la bande.
                             <br><br>
-                            Sélectionne un élève pour mettre sa courbe en relief, puis clique sur <strong>👤</strong> pour ouvrir son profil.
+                            Sélectionne un·e étudiant·e pour mettre sa courbe en relief, puis clique sur <strong>👤</strong> pour ouvrir son profil.
                         </div>
 
                         <!-- Barre de contrôle des critères (visible uniquement en mode Habiletés) -->
@@ -5062,7 +5062,7 @@
                                         <label style="font-weight: 600; margin-bottom: 4px; display: block;">Échéances par groupe
                                             <button class="btn-aide-contextuelle" data-aide="echeances-multigroupes" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>
                                         </label>
-                                        <p style="color: var(--gris-moyen); font-size: 0.82em; margin: 0 0 10px 0; line-height: 1.4;">Cocher = consignes transmises, production en attente de remise. Décoché = les élèves n'ont pas encore reçu le travail.</p>
+                                        <p style="color: var(--gris-moyen); font-size: 0.82em; margin: 0 0 10px 0; line-height: 1.4;">Cocher = consignes transmises, production en attente de remise. Décoché = les étudiant·e·s n'ont pas encore reçu le travail.</p>
                                         <div id="listeEcheancesGroupes" style="display: flex; flex-direction: column; gap: 8px;">
                                             <!-- Peuplé dynamiquement par JS -->
                                         </div>
@@ -6466,7 +6466,7 @@
                                             <!-- Nombre de jetons -->
                                             <div class="groupe-form u-mb-20">
                                                 <label for="mat-jetons-nombre" class="u-texte-gras" style="display: block; margin-bottom: 6px">
-                                                    Nombre de jetons alloués par élève
+                                                    Nombre de jetons alloués par étudiant·e
                                                 </label>
                                                 <input type="number" id="mat-jetons-nombre" class="controle-form" value="2" min="0" max="20" style="max-width: 100px;">
                                             </div>
@@ -7951,7 +7951,7 @@
                             <span class="texte-muted" style="font-size: 0.8rem; margin-left: 12px;">En-tête :</span>
                             <label><input type="checkbox" id="chk-entete-moy" checked data-on-change="toggleLigneEntete" data-param="moy"> Moy.</label>
                             <label><input type="checkbox" id="chk-entete-corr" checked data-on-change="toggleLigneEntete" data-param="corr"> r↔P</label>
-                            <label title="Griser les élèves sous le minimum d'évaluations et recalculer les moyennes"><input type="checkbox" id="chk-filtre-minimum" data-on-change="toggleFiltreMinimum"> ≥ Min. <span id="badge-nb-insuffisants" style="color: var(--gris-moyen); font-size: 0.75rem;"></span></label>
+                            <label title="Griser les étudiant·e·s sous le minimum d'évaluations et recalculer les moyennes"><input type="checkbox" id="chk-filtre-minimum" data-on-change="toggleFiltreMinimum"> ≥ Min. <span id="badge-nb-insuffisants" style="color: var(--gris-moyen); font-size: 0.75rem;"></span></label>
                         </div>
 
                         <!-- Note explicative : transparence sur le calcul des moyennes et corrélations -->
@@ -7965,13 +7965,13 @@
                                     <li><code>r ≈ 0</code> → aucun lien observable</li>
                                     <li><code>r ≈ −1</code> → lien inverse fort (quand l'un monte, l'autre descend)</li>
                                 </ul>
-                                <p class="u-mb-8">Repères usuels d'intensité : |r| &lt; 0,3 = faible · 0,3–0,5 = modérée · 0,5–0,7 = forte · &gt; 0,7 = très forte. Pour <strong>RàI</strong> et <strong>Interv.</strong>, un r négatif est <em>attendu</em> (un niveau RàI plus élevé ou plus d'interventions signalent un élève en difficulté, donc une P généralement plus basse).</p>
+                                <p class="u-mb-8">Repères usuels d'intensité : |r| &lt; 0,3 = faible · 0,3–0,5 = modérée · 0,5–0,7 = forte · &gt; 0,7 = très forte. Pour <strong>RàI</strong> et <strong>Interv.</strong>, un r négatif est <em>attendu</em> (un niveau RàI plus élevé ou plus d'interventions signalent un·e étudiant·e en difficulté, donc une P généralement plus basse).</p>
                                 <p class="u-mb-8"><strong>Comment interpréter une corrélation faible (|r| &lt; 0,3) ?</strong> Une r faible ne veut pas dire que l'indicateur est sans valeur. Plusieurs lectures sont possibles :</p>
                                 <ul class="u-mb-8" style="margin-left: 18px; padding-left: 4px;">
                                     <li><strong>Groupe homogène</strong> sur cet indicateur : si presque tout le monde est à A=90-100%, mathématiquement r doit être petit, même si l'absentéisme ferait chuter P. Vérifier en regardant la dispersion des points dans la barre Aperçu.</li>
                                     <li><strong>Effet plafond / plancher</strong> : si la majorité atteint le même palier (ex. P groupée autour de la note de passage), Pearson capte mal le lien.</li>
                                     <li><strong>Le levier dominant est ailleurs</strong> : si <code>r(A↔P)</code> est faible mais <code>r(C↔P)</code> élevé, c'est la <em>mobilisation</em> (remettre les travaux) qui prédit P, pas la simple présence en classe.</li>
-                                    <li><strong>Paradoxe du succès</strong> : une stratégie pédagogique qui ramène dans le rang les élèves à risque (reprises, acceptation des travaux en retard) <em>réduit la variance</em> de A et C, ce qui fait <em>chuter r mécaniquement</em>, même si le lien sous-jacent est inchangé. Une r en baisse d'une session à l'autre peut donc être le signe que votre intervention <em>fonctionne</em> — l'effet préventif fait disparaître le signal qu'il neutralise.</li>
+                                    <li><strong>Paradoxe du succès</strong> : une stratégie pédagogique qui ramène dans le rang les étudiant·e·s à risque (reprises, acceptation des travaux en retard) <em>réduit la variance</em> de A et C, ce qui fait <em>chuter r mécaniquement</em>, même si le lien sous-jacent est inchangé. Une r en baisse d'une session à l'autre peut donc être le signe que votre intervention <em>fonctionne</em> — l'effet préventif fait disparaître le signal qu'il neutralise.</li>
                                     <li><strong>Données encore peu nombreuses</strong> : avec peu d'évaluations ou peu d'étudiants actifs, r est instable. Attendre quelques productions de plus avant d'interpréter.</li>
                                     <li><strong>Vrai lien faible</strong> dans ce groupe à ce moment : information actionnable, à comparer aux autres r pour repérer le levier réel.</li>
                                 </ul>
@@ -9317,10 +9317,10 @@
                         <div id="note-consolidation" class="carte-info-toggle carte-info-note" style="display: none;">
                             <strong>Lecture de la matrice</strong>
                             <ul style="margin: 8px 0; padding-left: 18px; font-size: 0.85rem; line-height: 1.6;">
-                                <li><strong>Taux de rétention</strong> — pourcentage d'élèves ayant atteint la maîtrise (≥ M) à cet artefact et l'ayant maintenue sur ≥ 75 % des artefacts suivants.</li>
+                                <li><strong>Taux de rétention</strong> — pourcentage d'étudiant·e·s ayant atteint la maîtrise (≥ M) à cet artefact et l'ayant maintenue sur ≥ 75 % des artefacts suivants.</li>
                                 <li><strong>Vert foncé</strong> (≥ 75 %) : consolidation durable. <strong>Vert clair</strong> (65-74 %) : consolidation fragile. <strong>Rouge</strong> (&lt; 65 %) : non consolidé.</li>
                                 <li><strong>Point de consolidation</strong> (ligne du bas) : premier artefact où ≥ 75 % du groupe retient la maîtrise.</li>
-                                <li><strong>n</strong> = nombre d'élèves ayant atteint M sur cette cellule (base du calcul).</li>
+                                <li><strong>n</strong> = nombre d'étudiant·e·s ayant atteint M sur cette cellule (base du calcul).</li>
                                 <li><strong>Grisé</strong> = critère non évalué sur cet artefact (ex : Français sur A1, A3, A5, A7, A9).</li>
                                 <li><strong>A9-A10</strong> : pas assez d'artefacts suivants pour mesurer la rétention — le score moyen du groupe est affiché à la place.</li>
                             </ul>
@@ -10180,7 +10180,7 @@
 
                             <div class="alerte alerte-attention" style="margin-top: 15px;">
                                 <p><strong>Quelle différence avec le Suivi des fondamentaux&nbsp;?</strong></p>
-                                <p>Le modèle RàI classe les étudiants selon leur <strong>performance globale</strong> (indice P, qui intègre tous les critères). Le suivi des fondamentaux regarde uniquement les <strong>critères multistructurels</strong> — les bases. Les deux vues sont complémentaires&nbsp;: un élève peut maîtriser les fondamentaux mais avoir une performance globale faible (difficultés sur les critères de niveau supérieur), ou l'inverse.</p>
+                                <p>Le modèle RàI classe les étudiant·e·s selon leur <strong>performance globale</strong> (indice P, qui intègre tous les critères). Le suivi des fondamentaux regarde uniquement les <strong>critères multistructurels</strong> — les bases. Les deux vues sont complémentaires&nbsp;: un·e étudiant·e peut maîtriser les fondamentaux mais avoir une performance globale faible (difficultés sur les critères de niveau supérieur), ou l'inverse.</p>
                             </div>
                         </div>
                     </div>
@@ -10265,7 +10265,7 @@
                         </div>
                         <div class="accordeon-contenu">
                             <p><strong>Qu'est-ce que le suivi de l'apprentissage&nbsp;?</strong></p>
-                            <p>L'application observe la progression de chaque élève sur les <strong>critères fondamentaux</strong> (multistructurels) de ta grille d'évaluation. Un signal de dépistage apparaît quand la progression stagne sur ces fondations pendant plusieurs artefacts consécutifs.</p>
+                            <p>L'application observe la progression de chaque étudiant·e sur les <strong>critères fondamentaux</strong> (multistructurels) de ta grille d'évaluation. Un signal de dépistage apparaît quand la progression stagne sur ces fondations pendant plusieurs artefacts consécutifs.</p>
 
                             <p class="mt-10"><strong>Comment ça fonctionne&nbsp;?</strong></p>
                             <ul class="u-mt-5">
@@ -10276,7 +10276,7 @@
                             </ul>
 
                             <p class="mt-10"><strong>Pourquoi les critères multistructurels&nbsp;?</strong></p>
-                            <p>La taxonomie SOLO montre que les habiletés de base (organiser, être rigoureux, s'exprimer correctement) sont <strong>prérequises</strong> aux habiletés de niveau supérieur (interpréter, nuancer, transférer). Un élève qui stagne sur les fondations aura du mal à progresser sur les critères plus complexes — c'est un signal d'intervention précoce.</p>
+                            <p>La taxonomie SOLO montre que les habiletés de base (organiser, être rigoureux, s'exprimer correctement) sont <strong>prérequises</strong> aux habiletés de niveau supérieur (interpréter, nuancer, transférer). Un·e étudiant·e qui stagne sur les fondations aura du mal à progresser sur les critères plus complexes — c'est un signal d'intervention précoce.</p>
 
                             <div class="alerte alerte-information" style="margin-top: 10px;">
                                 <p><strong>💡 Transférable à toute discipline</strong></p>
@@ -10318,7 +10318,7 @@
 
                             <div class="alerte alerte-information" style="margin-top: 10px;">
                                 <p><strong>Quelle différence avec le modèle RàI&nbsp;?</strong></p>
-                                <p>Le suivi des fondamentaux surveille les <strong>critères multistructurels</strong> que tu as identifiés dans ta grille — est-ce que l'élève progresse sur les bases&nbsp;? Le modèle RàI se base sur la <strong>performance globale</strong> (indice P, tous critères confondus) pour déterminer le niveau d'intervention. Les deux vues se complètent&nbsp;: quand elles divergent, c'est un signal intéressant pour ton jugement professionnel.</p>
+                                <p>Le suivi des fondamentaux surveille les <strong>critères multistructurels</strong> que tu as identifiés dans ta grille — est-ce que l'étudiant·e progresse sur les bases&nbsp;? Le modèle RàI se base sur la <strong>performance globale</strong> (indice P, tous critères confondus) pour déterminer le niveau d'intervention. Les deux vues se complètent&nbsp;: quand elles divergent, c'est un signal intéressant pour ton jugement professionnel.</p>
                             </div>
                         </div>
                     </div>
@@ -12821,11 +12821,11 @@
                         <div class="accordeon-contenu">
                             <p><strong>Navigation :</strong> Évaluations → Liste des évaluations</p>
 
-                            <p>Les jetons sont des ressources limitées que chaque élève peut utiliser pour adapter son parcours d'apprentissage. Trois types : <strong>délai</strong> (report d'échéance), <strong>reprise</strong> (refaire l'artefact au complet) et <strong>reprise ciblée</strong> (reprendre un critère spécifique).</p>
+                            <p>Les jetons sont des ressources limitées que chaque étudiant·e peut utiliser pour adapter son parcours d'apprentissage. Trois types : <strong>délai</strong> (report d'échéance), <strong>reprise</strong> (refaire l'artefact au complet) et <strong>reprise ciblée</strong> (reprendre un critère spécifique).</p>
 
                             <div class="alerte alerte-information">
                                 <h4 class="u-mb-10 u-texte-bleu">Approche stratégique</h4>
-                                <p>L'enjeu pédagogique des jetons dépasse la mécanique : l'élève doit développer son <strong>jugement métacognitif</strong>. Brûler ses jetons pour des délais n'est pas une stratégie efficace. L'élève doit être en mesure d'évaluer si son apprentissage est assez solide pour ne pas prendre de jeton, et plutôt miser sur le prochain artefact.</p>
+                                <p>L'enjeu pédagogique des jetons dépasse la mécanique : l'étudiant·e doit développer son <strong>jugement métacognitif</strong>. Brûler ses jetons pour des délais n'est pas une stratégie efficace. L'étudiant·e doit être en mesure d'évaluer si son apprentissage est assez solide pour ne pas prendre de jeton, et plutôt miser sur le prochain artefact.</p>
                             </div>
 
                             <p><strong>Appliquer un jeton :</strong></p>
@@ -12941,7 +12941,7 @@
                                 <li><strong>Taux d'assiduité moyen</strong> : Pourcentage moyen de présence de l'ensemble du groupe</li>
                                 <li><strong>Séances données</strong> : Nombre total de séances enregistrées à ce jour</li>
                                 <li><strong>Prochaine séance</strong> : Date et heure de la prochaine séance planifiée</li>
-                                <li><strong>Nombre d'élèves</strong> : Effectif total du groupe</li>
+                                <li><strong>Nombre d'étudiant·e·s</strong> : Effectif total du groupe</li>
                             </ul>
 
                             <div class="alerte alerte-information">
@@ -13166,10 +13166,10 @@
 
                         <div class="alerte alerte-info u-mt-15">
                             <h4 class="u-mb-10 u-texte-bleu">RàI et mobilisation : deux systèmes complémentaires</h4>
-                            <p>Le <strong>niveau RàI</strong> évalue la progression <strong>cognitive</strong> (performance et patterns sur les critères). Il répond à la question : <em>est-ce que l'élève comprend et progresse ?</em></p>
-                            <p class="u-mt-10">La <strong>mobilisation</strong> évalue le <strong>comportement</strong> (assiduité A + complétion C). Elle répond à la question : <em>est-ce que l'élève se présente et fait le travail ?</em></p>
-                            <p class="u-mt-10">Les deux systèmes sont <strong>indépendants</strong>. Un élève peut être Niveau 1 (bonne performance) mais avoir une alerte de mobilisation (absences). Inversement, un élève très mobilisé (A et C élevés) peut quand même avoir besoin d'un soutien pédagogique intensif (Niveau 3).</p>
-                            <p class="u-mt-10"><strong>Pourquoi ne pas combiner P avec A et C ?</strong> Parce que la performance ne reflète pas toujours l'engagement cognitif. Un élève avec un P encore faible peut être cognitivement très engagé — sa progression est visible, mais il n'a pas encore atteint les seuils de maîtrise.</p>
+                            <p>Le <strong>niveau RàI</strong> évalue la progression <strong>cognitive</strong> (performance et patterns sur les critères). Il répond à la question : <em>est-ce que l'étudiant·e comprend et progresse ?</em></p>
+                            <p class="u-mt-10">La <strong>mobilisation</strong> évalue le <strong>comportement</strong> (assiduité A + complétion C). Elle répond à la question : <em>est-ce que l'étudiant·e se présente et fait le travail ?</em></p>
+                            <p class="u-mt-10">Les deux systèmes sont <strong>indépendants</strong>. Un·e étudiant·e peut être Niveau 1 (bonne performance) mais avoir une alerte de mobilisation (absences). Inversement, un·e étudiant·e très mobilisé·e (A et C élevés) peut quand même avoir besoin d'un soutien pédagogique intensif (Niveau 3).</p>
+                            <p class="u-mt-10"><strong>Pourquoi ne pas combiner P avec A et C ?</strong> Parce que la performance ne reflète pas toujours l'engagement cognitif. Un·e étudiant·e avec un P encore faible peut être cognitivement très engagé·e — sa progression est visible, mais il/elle n'a pas encore atteint les seuils de maîtrise.</p>
                         </div>
                         </div>
                     </div>
@@ -13532,7 +13532,7 @@
                             <ul>
                                 <li><strong>☐ Carré vide</strong> — séance sans jeton appliqué.</li>
                                 <li><strong>◼ Carré plein</strong> — séance avec au moins un jeton de reprise appliqué.</li>
-                                <li><strong>Menu « Élève »</strong> — affiche la courbe individuelle d'un étudiant ayant utilisé un jeton.</li>
+                                <li><strong>Menu « Étudiant·e »</strong> — affiche la courbe individuelle d'un·e étudiant·e ayant utilisé un jeton.</li>
                             </ul>
                             <p class="mt-10"><strong>Tooltip :</strong> pointe un ◼ pour voir la production concernée, la note originale → note de reprise, et le delta.</p>
                             <p>Le graphique se masque automatiquement si aucun jeton de reprise n'a été utilisé dans le trimestre.</p>
@@ -13616,7 +13616,7 @@
 
                         <div class="alerte alerte-information" style="margin-top: 15px;">
                             <h4 style="color: var(--bleu-principal)">Depuis le profil étudiant</h4>
-                            <p>Tu peux créer une intervention directement depuis l'onglet Accompagnement d'un étudiant. L'élève sera pré-coché et le niveau RàI dérivé de son profil.</p>
+                            <p>Tu peux créer une intervention directement depuis l'onglet Accompagnement d'un·e étudiant·e. L'étudiant·e sera pré-coché·e et le niveau RàI dérivé de son profil.</p>
                         </div>
                         </div>
                     </div>
@@ -14187,7 +14187,7 @@
 
                             <dl class="ml-10">
                                 <dt class="titre-section-aide">Jetons</dt>
-                                <dd class="ml-20-mb-10">Ressources limitées que l'apprenant·e peut utiliser pour adapter son parcours d'apprentissage. Chaque élève reçoit un nombre fixe de jetons par trimestre qu'il peut choisir d'utiliser selon ses besoins. Trois types de jetons sont disponibles : délai, reprise, et reprise ciblée. <em>(Configuration : Calendrier → Pratiques de notation → Système de jetons)</em></dd>
+                                <dd class="ml-20-mb-10">Ressources limitées que l'apprenant·e peut utiliser pour adapter son parcours d'apprentissage. Chaque étudiant·e reçoit un nombre fixe de jetons par trimestre qu'il/elle peut choisir d'utiliser selon ses besoins. Trois types de jetons sont disponibles : délai, reprise, et reprise ciblée. <em>(Configuration : Calendrier → Pratiques de notation → Système de jetons)</em></dd>
 
                                 <dt class="titre-section-aide">Jetons de délai</dt>
                                 <dd class="ml-20-mb-10">Permettent de prolonger l'échéance d'une évaluation d'un nombre de jours configuré (par défaut : 7 jours). L'étudiant·e utilise un jeton pour obtenir un délai supplémentaire sans pénalité. La nouvelle échéance est calculée automatiquement et visible dans son profil.</dd>

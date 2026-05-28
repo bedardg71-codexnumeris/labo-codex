@@ -450,9 +450,9 @@
 
     const RETROACTIONS_OBSERVATIONS_DEFAUT = {
         // === Actions (RLO + qualité du raisonnement) ===
-        'action-reperage':    "L'élève repère un élément, le nomme correctement, le restitue avec exactitude.",
-        'action-liaison':     "L'élève infère, relie des éléments entre eux, interprète.",
-        'action-ouverture':   "L'élève transfère à d'autres contextes, généralise, dépasse le cadre immédiat.",
+        'action-reperage':    "L'étudiant·e repère un élément, le nomme correctement, le restitue avec exactitude.",
+        'action-liaison':     "L'étudiant·e infère, relie des éléments entre eux, interprète.",
+        'action-ouverture':   "L'étudiant·e transfère à d'autres contextes, généralise, dépasse le cadre immédiat.",
         'action-incertain':   "L'explication ou le raisonnement est ambigu.",
         'action-incomplet':   "L'explication ou le raisonnement est inachevé.",
         'action-inexact':     "L'explication ou le raisonnement comporte une erreur factuelle.",

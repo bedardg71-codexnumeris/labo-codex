@@ -397,10 +397,10 @@ function afficherObjectif(leconId) {
     } else if (ideesM.length === 1) {
         var titre = (ideesM[0].titre || '...').toLowerCase();
         var prefixe = /^[aeiouyàâéèêëïîôùûüæœh]/i.test(titre) ? "d'" : 'de ';
-        objectifContenu.textContent = 'Au terme de la leçon, l\u2019élève sera capable ' + prefixe + titre + '.';
+        objectifContenu.textContent = 'Au terme de la leçon, l\u2019étudiant·e sera capable ' + prefixe + titre + '.';
         objectifContenu.classList.remove('org-placeholder');
     } else {
-        var html = 'Au terme de la leçon, l\u2019élève sera capable\u00a0:<br>';
+        var html = 'Au terme de la leçon, l\u2019étudiant·e sera capable\u00a0:<br>';
         for (var k = 0; k < ideesM.length; k++) {
             var t = (ideesM[k].titre || '...').toLowerCase();
             var p = /^[aeiouyàâéèêëïîôùûüæœh]/i.test(t) ? "d'" : 'de ';
@@ -1615,7 +1615,7 @@ function genererExportTXT(estEleve) {
 
     var txt = '═══════════════════════════════════════\n';
     txt += 'PLAN DE COURS — ' + nomCarte + '\n';
-    txt += (estEleve ? 'Document contractuel (élève)' : 'Document pédagogique (enseignant)') + '\n';
+    txt += (estEleve ? 'Document contractuel (étudiant·e)' : 'Document pédagogique (enseignant·e)') + '\n';
     txt += 'Exporté le ' + new Date().toLocaleDateString('fr-CA') + '\n';
     txt += '═══════════════════════════════════════\n\n';
 
@@ -1675,9 +1675,9 @@ function genererLeconTXT(lecon, etat, seances, carte, estEleve) {
         if (ideesM.length === 1) {
             var titre = (ideesM[0].titre || '...').toLowerCase();
             var prefixe = /^[aeiouyàâéèêëïîôùûüæœh]/i.test(titre) ? "d'" : 'de ';
-            objectif = 'Au terme de la leçon, l\u2019élève sera capable ' + prefixe + titre + '.';
+            objectif = 'Au terme de la leçon, l\u2019étudiant·e sera capable ' + prefixe + titre + '.';
         } else if (ideesM.length > 1) {
-            objectif = 'Au terme de la leçon, l\u2019élève sera capable :\n';
+            objectif = 'Au terme de la leçon, l\u2019étudiant·e sera capable :\n';
             for (var k = 0; k < ideesM.length; k++) {
                 var t = (ideesM[k].titre || '...').toLowerCase();
                 var p = /^[aeiouyàâéèêëïîôùûüæœh]/i.test(t) ? "d'" : 'de ';
@@ -1831,9 +1831,9 @@ function genererLeconMD(lecon, etat, seances, carte, estEleve) {
         if (ideesM.length === 1) {
             var titre = (ideesM[0].titre || '...').toLowerCase();
             var prefixe = /^[aeiouyàâéèêëïîôùûüæœh]/i.test(titre) ? "d'" : 'de ';
-            objectif = 'Au terme de la leçon, l\u2019élève sera capable ' + prefixe + titre + '.';
+            objectif = 'Au terme de la leçon, l\u2019étudiant·e sera capable ' + prefixe + titre + '.';
         } else if (ideesM.length > 1) {
-            objectif = 'Au terme de la leçon, l\u2019élève sera capable :\n';
+            objectif = 'Au terme de la leçon, l\u2019étudiant·e sera capable :\n';
             for (var k = 0; k < ideesM.length; k++) {
                 var t = (ideesM[k].titre || '...').toLowerCase();
                 var p = /^[aeiouyàâéèêëïîôùûüæœh]/i.test(t) ? "d'" : 'de ';

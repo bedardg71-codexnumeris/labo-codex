@@ -151,13 +151,12 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - **Capture déclencheuse** : Grégoire 28 mai 2026 matin (palette Nœuds dans Alignement pédagogique — icônes du bas trop pâles en sombre).
   - **Effort estimé** : 30 min à 1 h (audit + 1-3 patchs CSS ciblés si nécessaire).
 
-- [ ] 🟡 **#288** Terminologie collégiale : remplacer « élève(s) » par « étudiant·e(s) » dans l'UI
+- [x] 🟡 **#288** Terminologie collégiale : remplacer « élève(s) » par « étudiant·e(s) » dans l'UI — **balayage UI visible livré 28 mai 2026 PM**
   - **Convention** : au collégial le terme « élève » est réservé au primaire/secondaire. L'UI Labo Codex (Cégep de Drummondville) doit utiliser « étudiant·e(s) ».
-  - **Cartographie 28 mai 2026** : ~150 occurrences dans le code applicatif (31 dans `index.html` seul). 4 sites visibles déjà corrigés ce jour-là (1 dans `js/config.js` label nav, 3 dans `index.html` textes d'aide) — build 0528-0354.
-  - **Reste à traiter** : libellés secondaires UI (boutons, alertes, modales, tooltips), commentaires JSDoc, IDs/clés de stockage (à laisser tels quels si elles servent de SSOT déjà persisté), documentation `docs/` (rapports, plans, skills).
-  - **Méthode suggérée** : grep ciblé sur fichiers JS/HTML applicatifs uniquement (exclure `_archives/`, `audit/`, `Rapports/`), filtrer manuellement entre UI visible (à corriger) vs. commentaires/docs (à laisser ou traiter en lot séparé). Préserver les clés de stockage `localStorage` (ex. `groupeEtudiants` → ne pas renommer, c'est déjà OK).
-  - **Effort estimé** : 1-2 h pour balayage UI visible ciblé, séparé d'un éventuel chantier docs (post-AQPC).
-  - **Capture déclencheuse** : Grégoire 28 mai 2026 matin (vérification visuelle post-refonte zone 4 Suivi, libellé sous-onglet « Liste des élèves »).
+  - **Bilan migration livrée** : 56 sites visibles migrés (169 occurrences brutes → 113 restantes). Les 113 restantes sont volontairement préservées : commentaires `//` et JSDoc, format de donnée d'anonymisation `'Élève X'` (modes.js, evaluation-chargement.js, reserve-ouvrir.js — convention stockée), patterns de matching CSV import (groupe.js l. 209-210 — détectent les colonnes externes avec ces mots), banniers ASCII de section, commentaire CSS, et la citation bibliographique (index.html:14459, titre d'ouvrage de Gauthier-Bissonnette-Richard 2013).
+  - **Couverture** : index.html (24 libellés UI), 14 modules JS — descriptions SOLO (profil-etudiant-sections-affichage), objectifs pédagogiques d'organisateur et planification-carte, tooltips moyennes (etudiants, tableau-bord-apercu), bulles d'aide (accompagnement-contenu-popup), placeholders bilan réflexif (bilan-reflexif-editeur), alertes (liste-evaluations, profil-etudiant-sections-affichage), libellés tooltips d'action (travaux-outils, travaux-ui), descriptions RaI (profil-etudiant-calculs), dropdowns (graphiques-progression).
+  - **Convention de remplacement appliquée** : « élève » → « étudiant·e », « élèves » → « étudiant·e·s », « Élève » → « Étudiant·e », adjectifs adjacents migrés vers la forme épicène (« sélectionné » → « sélectionné·e ») quand le mot suit immédiatement, accord par défaut conservé sinon. Pour « un élève » → « un·e étudiant·e ».
+  - **Reste à faire post-AQPC** (si pertinent) : documentation `docs/` (rapports, plans, skills) — non inclus dans ce balayage UI.
 
 - [ ] 🟡 **#286** Migration globale emojis UI → Icônes SVG icons8 (chantier en 5 lots)
   - **Capture déclencheuse** : iPad 26 mai 05:15 — section « Préparer et importer » avec ✴ orange à droite du titre + 📝 papier-crayon au-dessus de « Annoter les travaux ».
