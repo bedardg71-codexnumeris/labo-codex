@@ -78,11 +78,12 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - **Phase 3 finale** : inscrire une convention en tête du bloc inline (encadré « CSS critique inliné délibérément » + règles de modification). Voir §5.3 du rapport.
   - **Calendrier** : phase 1 ✅ livrée. Phases 2-3 post-AQPC.
 
-- [ ] 🟢 **#287** Remplacer le picker de couleur natif macOS par une palette HTML custom (modale Personnaliser les tampons)
-  - **Motivation** : le `<input type="color">` natif (popup macOS) ne permet pas de mettre en surbrillance la couleur actuellement sélectionnée. Grégoire demande de mieux identifier visuellement quelle couleur est active sur chaque pastille de catégorie.
-  - **Sites concernés** (5 occurrences) : pastille catégorie (l. 2104 + l. 2746 dans `js/travaux-outils.js`), pastille item tampon (l. 2149 + l. 2687), couleur outil de dessin (l. 3135).
-  - **Implémentation suggérée** : `<details>` HTML5 (toggle natif) + popover en `position: absolute`, grille de la constante `COULEURS` (12 couleurs prédéfinies, déjà utilisée pour le palette des outils dessin), bouton actif via classe `.travaux-btn-couleur.actif` (déjà style CSS en place l. 16925), input hidden pour préserver le mécanisme de sauvegarde existant (lecture via `input[data-color-cat-id]` l. 2499).
-  - **Effort estimé** : 1-2 h (refactor + extension aux 5 sites + tests visuels modes sombre/clair).
+- [x] 🟢 **#287** Picker couleur custom (modale Personnaliser tampons + Codes erreurs FR) — **livré 28 mai 2026 PM**
+  - **Implémentation** : `<details>` HTML5 + popover absolute avec grille des 12 couleurs prédéfinies (constante `COULEURS`) + bouton « Personnalisé » qui rouvre le picker natif macOS pour les couleurs hors-palette. La couleur active dans la grille est marquée via `.actif`.
+  - **5 sites couverts** : pastille catégorie tampon (l. 2104 + l. 2746), pastille item tampon (l. 2149 + l. 2687), couleur outil de dessin avec numéro (l. 3135).
+  - **Architecture** : helper `_renderPickerCouleur(idAttr, idVal, couleur, opts)` paramétré (supporte un summary avec contenu — numéro pour le site 3135). Handlers `travauxOutils.choisirCouleurPalette(el)` et `travauxOutils.ouvrirCouleurPerso(el)` exposés via `data-action`. L'`<input type="color">` original est conservé en hidden (CSS `.travaux-retro-couleur-input`) — il reste la source de vérité pour la sauvegarde (`input[data-color-cat-id]` l. 2510, 2531, 3241, 3328) et reçoit un event `input` dispatché manuellement quand on clique une couleur de la grille. Le picker natif est appelé via `input.click()` depuis « Personnalisé ».
+  - **Auto-fermeture** : event `toggle` capture phase qui ferme tous les autres `<details.travaux-retro-couleur-picker>` quand l'un s'ouvre. Évite plusieurs popovers superposés.
+  - **Zéro-dette** : ancienne classe CSS `.travaux-retro-couleur-wrap` retirée (remplacée par le picker).
   - **Capture déclencheuse** : Grégoire 27 mai 2026 matin (modale Personnaliser tampons, picker macOS ouvert sans indication de la couleur active).
 
 - [x] ⚠️ 🟡 **#294** Configurer Netlify + Cloudflare pour accueillir la visite AQPC du 3 juin

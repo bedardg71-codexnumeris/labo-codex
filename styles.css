@@ -22599,7 +22599,8 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     background: var(--surface-2, #243244);
 }
 
-/* Pastille couleur (symboles) */
+/* Pastille couleur (symboles) — désormais un <summary> dans
+   .travaux-retro-couleur-picker (#287, 28 mai 2026 PM). */
 .travaux-retro-couleur {
     position: relative;
     flex-shrink: 0;
@@ -22613,6 +22614,69 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     position: absolute;
     opacity: 0;
     pointer-events: none;
+    width: 0;
+    height: 0;
+}
+
+/* #287 — Picker couleur custom. <details> + popover absolute + grille des
+   12 couleurs prédéfinies + bouton « Personnalisé » qui rouvre le picker
+   natif macOS. Remplace le <input type="color"> direct qui ne mettait pas
+   en évidence la couleur active. */
+.travaux-retro-couleur-picker {
+    position: relative;
+    flex-shrink: 0;
+    display: inline-block;
+}
+.travaux-retro-couleur-picker summary {
+    list-style: none;
+    cursor: pointer;
+}
+.travaux-retro-couleur-picker summary::-webkit-details-marker {
+    display: none;
+}
+.travaux-retro-couleur-popover {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 100;
+    padding: 8px;
+    background: var(--surface-carte, #1a3040);
+    border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-moyen);
+    box-shadow: var(--shadow-prononce);
+    min-width: 168px;
+}
+.travaux-retro-couleur-grille {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 8px;
+}
+.travaux-retro-couleur-grille .travaux-btn-couleur {
+    width: 28px;
+    height: 28px;
+}
+.travaux-btn-couleur-perso {
+    width: 100%;
+    padding: 4px 8px;
+    background: transparent;
+    color: var(--texte-secondaire, #8aa4b0);
+    border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-petit);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.travaux-btn-couleur-perso:hover {
+    background: var(--surface-element, #244858);
+    color: var(--texte-principal);
+}
+.mode-clair .travaux-retro-couleur-popover {
+    background: white;
+    border-color: var(--bordure-claire);
+}
+.mode-clair .travaux-btn-couleur-perso:hover {
+    background: var(--bleu-tres-pale);
 }
 
 /* Input icone Unicode (symboles) */
@@ -22664,28 +22728,8 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     opacity: 1;
 }
 
-/* Color picker (erreurs FR) */
-.travaux-retro-couleur-wrap {
-    position: relative;
-    width: 28px;
-    height: 28px;
-    flex-shrink: 0;
-}
-
-.travaux-retro-couleur-wrap input[type="color"] {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-    border: none;
-    padding: 0;
-}
-
-.travaux-retro-couleur-wrap .travaux-retro-numero {
-    margin-top: 0;
-}
+/* #287 — Color picker (erreurs FR) — .travaux-retro-couleur-wrap retirée :
+   le picker custom (.travaux-retro-couleur-picker) la remplace partout. */
 
 /* ===============================
    JOURNAL DE BORD DES PRODUCTIONS
