@@ -4,7 +4,7 @@
 >
 > **Dernière bascule** : 25 mai 2026 fin de journée — extraction des items livrés vers BACKLOG-ARCHIVE.md.
 > **État courant** : Beta 99.66 (Build 0526-0503), HEAD main `4df4f21`. 28 items ouverts (session 26 mai matin : 3 items #278/#280/#281 livrés + 3 bugs testeurs résolus + 1 item #286 ajouté).
-> **Dernier ID utilisé** : #295 (diagnostic mémoire/quota avant chargement Codex sur iPad/iPhone, créé 28 mai 2026 PM).
+> **Dernier ID utilisé** : #296 (audit catégoriel des items 'Labo Codex' dans les seed + migration vers 'Demo Labo Codex', créé 28 mai 2026 PM).
 > **Présentation AQPC** : 3 juin 2026 (J−8).
 > **Pour ajouter un item** : `- [ ] **#XX** Description courte` + sous-puces de contexte. Dernier ID utilisé : **#285** (livré).
 
@@ -175,6 +175,23 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - Mécanisme : namespace temporaire `__archive_a2025_*` séparé du trimestre actif, lecture seule. Panneau « Contenu de l'archive » + bouton « Réimporter dans mes bibliothèques actives ».
 
 ### Données démo (utiles AQPC et expérimentateurs)
+
+- [ ] 🟡 **#296** Audit catégoriel des items `'Labo Codex'` dans les seed + migration vers `'Demo Labo Codex'`
+  - **Constat 28 mai 2026 PM** (post-livraison #290) : ~30 occurrences de `auteur: 'Labo Codex'` dans 8 fichiers seed (`echelles.js` ×8, `gabarits-utils.js` ×7, `spe-specifications.js` ×4, `demo-namespace.js` ×4, `objectifs.js` ×1, `pratiques-gestion.js` ×1, `planification-bibliotheque.js` ×1, et `pratiques-bibliotheque.js` ×3 — ces 3 ont été migrées vers `'Demo Labo Codex'` dans #290). Le filtre `BibliothequeUI.estItemDemo` (`js/bibliotheque-ui.js:33`) considère tout item avec `auteur === 'Labo Codex'` comme « démo », ce qui masque ces ~30 items en mode normal.
+  - **Hypothèse de Grégoire 28 mai PM** : « Beaucoup de ce matériel est en réalité des résidus de tests de développement que j'ai voulu supprimer mais qui sont restés. »
+  - **Tri catégoriel à effectuer** (3 catégories) :
+    - **A. Vraies démos** : items référencés par le dataset démo (étudiants/productions/évaluations démo qui se chargent via la checkbox de la page d'accueil). Ces items DOIVENT rester visibles en mode démo et compatibles avec le dataset. Action : renommer `'Labo Codex'` → `'Demo Labo Codex'`.
+    - **B. Canevas génériques mal taggués** : modèles utiles aux nouveaux utilisateurs (ex. `SPE-simple`-équivalents dans d'autres biblios), pas du démo. Action : déterminer le marqueur approprié (auteur neutre, ou pas d'auteur seed, ou nouveau marqueur `'Canevas Labo Codex'`).
+    - **C. Résidus de tests** : anciennes données de dev orphelines, non utilisées ni en démo ni en normal. Action : supprimer du code source (zéro-dette).
+  - **Méthode suggérée** :
+    1. Lire `js/demo-activation.js` et `js/demo-namespace.js` pour identifier exhaustivement les IDs référencés par le dataset démo.
+    2. Pour chaque occurrence `'Labo Codex'` dans les 8 fichiers : croiser avec la liste des IDs du dataset démo. Si référencé → catégorie A. Sinon → catégorie B ou C selon utilité documentée.
+    3. Migrer les A vers `'Demo Labo Codex'`, déclasser les B (marqueur neutre), supprimer les C.
+    4. Finaliser `BibliothequeUI.estItemDemo` pour ne matcher QUE `'Demo Labo Codex'` (retirer la chaîne `'Labo Codex'` legacy une fois la migration complète).
+  - **Filet transitoire en place (livré dans le même commit que #290 phase 2)** : `estItemDemo` accepte temporairement les deux chaînes (`'Labo Codex'` OR `'Demo Labo Codex'`) pour éviter une régression du filtre démo pendant la transition.
+  - **Calendrier** : post-AQPC (3 juin 2026). Pas urgent — le système fonctionne correctement avec le filet transitoire.
+  - **Effort estimé** : 2-3 h (lecture demo-activation/namespace + croisement + tri + migration + ajustement filtre).
+  - **Lien** : #290 (livraison du 28 mai 2026 PM qui a soulevé la question).
 
 - [ ] 🟡 **#273** Évaluations démo basées sur de vrais travaux d'élèves anonymisés
   - Consentement obtenu de plusieurs élèves H2026. Travaux à anonymiser avant intégration au pack démo.
