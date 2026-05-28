@@ -1051,28 +1051,28 @@ const ETAPES_TOUR = [
     {
         id: 0,
         titre: 'Bienvenue',
-        texte: "Labo Codex num\u00e9rise le travail que tu fais d\u00e9j\u00e0. Ce parcours te guide \u00e0 travers les \u00e9tapes essentielles. Tu peux le quitter \u00e0 tout moment et y revenir depuis les Pr\u00e9f\u00e9rences. Commence par configurer ton espace de travail dans R\u00e9glages.",
+        texte: "Labo Codex num\u00e9rise le travail que tu fais d\u00e9j\u00e0. Ce parcours te guide \u00e0 travers les \u00e9tapes essentielles. Tu peux le quitter \u00e0 tout moment et y revenir depuis les Pr\u00e9f\u00e9rences. Commence par configurer ton espace de travail dans l'onglet Cadre.",
         actions: [
-            { label: 'Aller aux R\u00e9glages', type: 'primaire', action: 'naviguerVers', param: 'calendrier' },
+            { label: 'Aller \u00e0 Cadre', type: 'primaire', action: 'naviguerVers', param: 'calendrier' },
             { label: 'Explorer seul\u00b7e',     type: 'secondaire', action: 'passerEtape' }
         ],
         correspond: function(idSousSection) { return !idSousSection || idSousSection === 'accueil'; }
     },
     {
         id: 1,
-        titre: 'R\u00e9glages',
+        titre: 'Cadre',
         texte: "C'est ici que tu poses les fondations\u00a0: ton trimestre (dates, cong\u00e9s), ton cours (comp\u00e9tence, \u00e9l\u00e9ments), ton groupe d'\u00e9tudiant\u00b7es et ton horaire. Ce sont les m\u00eames informations que dans ton plan de cours. Tu les saisis une fois et l'application g\u00e9n\u00e8re automatiquement le calendrier de tes s\u00e9ances.\n\nLes ic\u00f4nes d'info t'en disent plus sur chaque section. Quand ton groupe-cours est assembl\u00e9, tu es pr\u00eat\u00b7e pour la suite.",
         actions: [
             { label: "J'ai compris",      type: 'primaire', action: 'avancerEtape' },
             { label: 'Passer cette \u00e9tape', type: 'secondaire', action: 'passerEtape' }
         ],
         correspond: function(idSousSection) {
-            return typeof idSousSection === 'string' && idSousSection.indexOf('contexte-') === 0;
+            return typeof idSousSection === 'string' && idSousSection.indexOf('calendrier-') === 0;
         }
     },
     {
         id: 2,
-        titre: 'Structure',
+        titre: 'Conception',
         texte: "Tu construis ici tes outils d'\u00e9valuation \u2014 les m\u00eames que sur papier, mais r\u00e9utilisables. Les productions d\u00e9finissent les occasions d'apprentissage de tes \u00e9tudiant\u00b7es. Les grilles fixent tes crit\u00e8res. Les \u00e9chelles \u00e9tablissent les niveaux de performance. Les cartouches pr\u00e9parent la r\u00e9troaction. La pratique assemble le tout.\n\nL'ordre n'est pas impos\u00e9, mais les productions et les grilles sont un bon point de d\u00e9part.",
         actions: [
             { label: "J'ai compris",      type: 'primaire', action: 'avancerEtape' },
@@ -1098,7 +1098,7 @@ const ETAPES_TOUR = [
     },
     {
         id: 4,
-        titre: 'Tableau de bord',
+        titre: 'Suivi',
         texte: "Le tableau de bord te montre ce que tu ne verrais pas facilement sur papier\u00a0: le portrait de ton groupe en un coup d'\u0153il. Les indices Assiduit\u00e9 (A), Compl\u00e9tion (C) et Performance (P) r\u00e9sument le contexte d'apprentissage observ\u00e9 de chaque \u00e9tudiant\u00b7e. Les zones de couleur t'aident \u00e0 rep\u00e9rer qui a besoin d'attention.\n\nExplore les quatre vues\u00a0: aper\u00e7u, liste, profil individuel et interventions R\u00e0I.",
         actions: [
             { label: "J'ai compris",      type: 'primaire', action: 'avancerEtape' },

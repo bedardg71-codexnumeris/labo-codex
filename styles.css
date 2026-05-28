@@ -23128,7 +23128,10 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     background: var(--alerte-fond-attention, rgba(200, 160, 96, 0.12));
     border-radius: 0 var(--radius-moyen, 6px) var(--radius-moyen, 6px) 0;
 }
-.banniere-bienvenue-acces p {
+/* Spécificité (0,2,1) pour battre `.banniere-bienvenue p:last-of-type`
+   (margin-bottom:18px) : le <p> unique de l'encadré est aussi :last-of-type,
+   sinon il hérite des 18px et crée un faux « retour à la ligne » en bas. */
+.banniere-bienvenue .banniere-bienvenue-acces p {
     margin: 0;
     line-height: 1.6;
 }
