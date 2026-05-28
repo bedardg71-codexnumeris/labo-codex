@@ -3135,11 +3135,13 @@ function afficherNiveauxNouvelleEchelle() {
                 </div>
                 <div class="groupe-form">
                     <label class="echelle-texte-detail">Couleur</label>
-                    <input type="color"
-                           class="controle-form"
-                           value="${echapperHtml(niveau.couleur)}"
-                           data-on-change="modifierNiveauTempHandler" data-niveau-index="${index}" data-champ="couleur"
-                           style="height: 38px; cursor: pointer;">
+                    ${window.travauxOutils.renderPickerCouleur(niveau.couleur, {
+                        dataAttrs: {
+                            'on-change': 'modifierNiveauTempHandler',
+                            'niveau-index': index,
+                            'champ': 'couleur'
+                        }
+                    })}
                 </div>
             </div>
         </div>
@@ -3423,11 +3425,14 @@ function afficherNiveauxEchelle(echelle) {
                 </div>
                 <div class="groupe-form">
                     <label class="echelle-texte-detail">Couleur</label>
-                    <input type="color"
-                           class="controle-form"
-                           value="${echapperHtml(niveau.couleur)}"
-                           data-on-change="modifierNiveauEchelleHandler" data-echelle-id="${echelle.id}" data-niveau-index="${index}" data-champ="couleur"
-                           style="height: 38px; cursor: pointer;">
+                    ${window.travauxOutils.renderPickerCouleur(niveau.couleur, {
+                        dataAttrs: {
+                            'on-change': 'modifierNiveauEchelleHandler',
+                            'echelle-id': echelle.id,
+                            'niveau-index': index,
+                            'champ': 'couleur'
+                        }
+                    })}
                 </div>
             </div>
         </div>
