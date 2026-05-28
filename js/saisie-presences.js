@@ -707,14 +707,10 @@ function verifierConfigurationFormatHoraire() {
 
     if (!formatHoraire || seancesHoraire.length === 0) {
         alerteDiv.classList.remove('u-hide');
-        alerteDiv.innerHTML = `
-            <div class="alerte alerte-avertissement">
-                <strong><img src="icons/icons8-high-priority.svg" alt="" class="alerte-icone"> Configuration incomplète</strong><br>
-                L'horaire des cours n'est pas configuré. 
-                <a href="#" data-prevent data-action="naviguerVersReglagesTrimestre">
-                    Configurer l'horaire →
-                </a>
-            </div>`;
+        alerteDiv.innerHTML =
+            '<strong><img src="icons/icons8-high-priority.svg" alt="" class="alerte-icone"> Configuration incomplète</strong><br>' +
+            'L\'horaire des cours n\'est pas configuré. ' +
+            '<a href="#" data-prevent data-action="naviguerVersReglagesTrimestre">Configurer l\'horaire →</a>';
     } else {
         alerteDiv.classList.add('u-hide');
     }

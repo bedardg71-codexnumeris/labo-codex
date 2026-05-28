@@ -2094,6 +2094,23 @@ span.header-icon {
     border-color: rgba(255, 255, 255, 0.28);
 }
 
+/* Mode clair : le bouton vit sur un header dégradé bleu marine, mais le
+   --texte-principal mode clair rend le label/icône sombres sur fond
+   sombre = invisible. On force le contraste blanc et on saturée un peu
+   le fond pour donner de la présence. */
+.mode-clair .option-accompagnement-guide-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+    color: white;
+}
+.mode-clair .option-accompagnement-guide-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.55);
+}
+.mode-clair .option-accompagnement-guide-btn img.btn-inline-icon {
+    filter: brightness(0) invert(1);
+}
+
 .option-accompagnement-description {
     font-size: 0.85rem;
     color: var(--gris-moyen);
@@ -3303,6 +3320,17 @@ textarea {
 #tbody-saisie-presences input[type="number"]:not(:placeholder-shown) {
     background: var(--surface-element, #244858);
     border: 1px solid var(--bleu-leger);
+}
+
+/* État vide d'un tableau (cellule colspan, message centré).
+   white-space: normal force le wrap pour éviter la troncation quand le
+   tableau est plus large que le viewport (cas iPhone < 500px). */
+.empty-state-center-30 {
+    text-align: center;
+    padding: 30px;
+    white-space: normal;
+    color: var(--texte-secondaire, #8aa4b0);
+    font-style: italic;
 }
 
 /* ===============================
@@ -12447,15 +12475,23 @@ tr.etudiant-inactif td {
         grid-template-columns: 1fr;
     }
 
+    /* Empiler aussi la grille intérieure 2 col (4 dates des bornes) — sinon
+       les inputs date natifs iOS sont écrasés à ~200px et tronquent. */
+    #calendrier-trimestre .grille-2col-gap15 {
+        grid-template-columns: 1fr;
+    }
+
     /* Empiler les dates Du/Au */
     #calendrier-trimestre .d-flex-gap-10-center {
         flex-direction: column;
         align-items: stretch;
     }
 
-    #calendrier-trimestre .d-flex-gap-10-center span {
+    /* Neutraliser le padding-top inline du « au » (utile en desktop pour
+       aligner avec les inputs, parasite en colonne mobile) */
+    #calendrier-trimestre .d-flex-gap-10-center > span {
         text-align: center;
-        padding: 5px 0;
+        padding: 5px 0 !important;
     }
 
     /* Grille identification : empiler sur mobile */
