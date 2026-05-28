@@ -787,9 +787,9 @@ const TOOLTIPS = {
     // --- Onglets principaux (navigation) ---
 
     'nav-conception':
-        'L\'onglet \u00ab\u00a0Structure\u00a0\u00bb regroupe la conception de tes outils d\'\u00e9valuation : productions, grilles, \u00e9chelles, cartouches et pratiques de notation.',
+        'L\'onglet \u00ab\u00a0Conception\u00a0\u00bb regroupe la conception de tes outils d\'\u00e9valuation : productions, grilles, \u00e9chelles, cartouches et pratiques de notation.',
     'nav-calendrier':
-        'L\'onglet \u00ab\u00a0Contexte\u00a0\u00bb regroupe la configuration de ton espace de travail : trimestre, cours, profil, \u00e9tudiant\u00b7es, horaire et assemblage du groupe-cours.',
+        'L\'onglet \u00ab\u00a0Cadre\u00a0\u00bb regroupe la configuration de ton espace de travail : trimestre, cours, profil, \u00e9tudiant\u00b7es, horaire et assemblage du groupe-cours.',
     'nav-suivi':
         'L\'onglet \u00ab\u00a0Suivi\u00a0\u00bb regroupe le portrait du groupe : liste des individus, profil \u00e9tudiant\u00b7e, interventions R\u00e0I et laboratoire d\'analyse.',
 

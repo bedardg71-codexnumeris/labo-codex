@@ -4,7 +4,7 @@
 >
 > **Dernière bascule** : 25 mai 2026 fin de journée — extraction des items livrés vers BACKLOG-ARCHIVE.md.
 > **État courant** : Beta 99.66 (Build 0526-0503), HEAD main `4df4f21`. 28 items ouverts (session 26 mai matin : 3 items #278/#280/#281 livrés + 3 bugs testeurs résolus + 1 item #286 ajouté).
-> **Dernier ID utilisé** : #298 (révision PRIVACY.md suite au retrait Cloudflare Access, créé 28 mai 2026 PM dans le cadre du chantier #294).
+> **Dernier ID utilisé** : #299 (balayage références d'onglets périmées dans les textes d'aide, créé 28 mai 2026 PM suite à l'audit onboarding).
 > **Présentation AQPC** : 3 juin 2026 (J−8).
 > **Pour ajouter un item** : `- [ ] **#XX** Description courte` + sous-puces de contexte. Dernier ID utilisé : **#285** (livré).
 
@@ -63,6 +63,14 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 - [ ] 📦 **#2** Guide PDF pour utilisateurs — reformulé 11 mai 2026
   - Décision : ne PAS produire un guide générique. À fusionner avec le matériel pédagogique de la cohorte CoP (8 rencontres sept 2026 → avril 2027, voir `docs/CALENDRIER.md` §8.3).
   - Version « papier » pour AQPC peut être dérivée de `docs/securite/SECURITE-POUR-ENSEIGNANTS.md` (à écrire post-Défense E).
+
+- [ ] 🟡 **#299** Balayage des références d'onglets périmées dans les textes d'aide (« Réglages → X », « onglet Contexte/Structure »)
+  - **Origine** : audit onboarding 28 mai 2026 PM (signalé par Grégoire sur capture iPad). La nav a été renommée/réorganisée : ancien « Réglages » éclaté entre **Cadre** (id interne `calendrier` — trimestre/cours/groupe/horaire), **Conception** (grilles, échelles, pratiques, cartouches) et **Réglages** résiduel (Préférences/Données/À propos, hors barre principale). « Contexte » et « Structure » sont des noms d'onglets encore antérieurs.
+  - **Déjà corrigé (onboarding, même session)** : visite guidée `js/accompagnement.js` étapes 0+1 (« Réglages » → « Cadre » + fix `correspond()` `contexte-` → `calendrier-`) ; aides hover `js/accompagnement-contenu-hover.js` (`nav-conception` « Structure » → « Conception », `nav-calendrier` « Contexte » → « Cadre »). Texte d'accueil `js/accueil.js` déjà à jour.
+  - **Reste à faire** : ~30 occurrences dispersées « Réglages → X » dans le reste du code, la plupart pointant en réalité vers **Conception** ou **Cadre**. Fichiers concernés repérés à l'audit : `wizard-pratique-v2.js` (l. 425, 723, 871, 959 — « Réglages → Ensembles d'objectifs / Pratique de notation / Critères d'évaluation »), `profil-etudiant-diagnostics.js` (l. 484), `profil-etudiant-calculs.js` (l. 613, 766, 857), `profil-etudiant-sections-affichage.js` (l. 1587, 3831), `cartouches.js` (l. 1199 — « Réglages → Grilles de critères »), `etudiants.js` (l. 425), `graphiques-progression.js` (l. 3967 — « Réglages › Productions »), `snapshots.js` (l. 859), `evaluation-sauvegarde.js` (l. 293), `codex-data.js` (l. 405), `import-export.js` (l. 1444), `interpretation-config.js`, `statistiques.js`, etc.
+  - **Méthode** : pour chaque occurrence, déterminer la destination réelle (Cadre / Conception / Réglages résiduel) et corriger le libellé. Distinguer les vraies références « Réglages » résiduelles (Préférences/Données/À propos — toujours valides : `securite-prefs.js`, `init-inline.js` « À propos », `reserve-reglages.js`, `accompagnement-contenu-popup.js:1357` « À propos ») qui ne doivent PAS être touchées.
+  - **Titres tour guidé — tranché et livré 28 mai PM** : étape 2 « Structure » → « Conception », étape 4 « Tableau de bord » → « Suivi » (Grégoire a choisi d'aligner sur les noms d'onglets).
+  - **Effort estimé** : 1-2 h.
 
 ### Cohérence visuelle UI
 

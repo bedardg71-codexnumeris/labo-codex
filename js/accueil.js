@@ -91,12 +91,12 @@ function genererBanniereBienvenue() {
     if (enTransitionUrgence) {
         paragrapheAccesCadre = `
             <div class="banniere-bienvenue-acces banniere-bienvenue-acces--urgent">
-                <p><strong>Plus que quelques jours.</strong> L’accès libre se termine le 30 juin 2026. Écris à <code>labo@codexnumeris.org</code> avant cette date pour conserver l’accès web — il sera maintenu pour les membres de la Cohorte 1 pilote et de la CoP qui en font la demande.</p>
+                <p><strong>Plus que quelques jours.</strong> L’accès libre se termine le 30 juin 2026. Écris à <a href="mailto:labo@codexnumeris.org"><code>labo@codexnumeris.org</code></a> avant cette date pour conserver l’accès web.</p>
             </div>`;
     } else if (dansFenetrePublic) {
         paragrapheAccesCadre = `
             <div class="banniere-bienvenue-acces">
-                <p><strong>Accès libre jusqu’au 30 juin 2026.</strong> L’application est librement accessible jusqu’au 30 juin 2026, en marge du lancement de la Communauté de pratique Labo Codex au colloque AQPC. Pour conserver l’accès web après cette date, écris à <code>labo@codexnumeris.org</code> avant le 30 juin — il sera alors maintenu pour les membres de la Cohorte 1 pilote et les membres de la CoP qui en font la demande.</p>
+                <p><strong>Accès libre jusqu’au 30 juin 2026.</strong> L’application est librement accessible jusqu’au 30 juin 2026, en marge du lancement de la Communauté de pratique Labo Codex au colloque AQPC. Pour conserver l’accès web après cette date, écris à <a href="mailto:labo@codexnumeris.org"><code>labo@codexnumeris.org</code></a> avant le 30 juin.</p>
             </div>`;
     }
 
@@ -109,12 +109,6 @@ function genererBanniereBienvenue() {
             <div class="banniere-bienvenue-actions">
                 <button class="btn btn-primaire" data-action="demarrerTourGuide">
                     Commencer la visite guid\u00e9e
-                </button>
-                <button class="btn btn-secondaire" data-action="afficherSection" data-param="calendrier">
-                    Aller \u00e0 Cadre
-                </button>
-                <button class="btn btn-secondaire" data-action="entrerEnDemoHandler">
-                    Explorer avec des donn\u00e9es d\u00e9mo
                 </button>
             </div>
         </div>
@@ -309,11 +303,6 @@ function toggleDemoHandler(el) {
     }
 }
 
-/** Entrer en mode démo (bouton de la bannière de bienvenue) */
-function entrerEnDemoHandler() {
-    if (typeof activerModeDemo === 'function') activerModeDemo();
-}
-
 /**
  * Toggle « Accompagnement » : pilote en bloc les 4 sous-systèmes d'aide
  * (tour guidé, info-bulles, aide contextuelle, flèches didactiques).
@@ -359,7 +348,6 @@ window.afficherAccueil = afficherAccueil;
 window.initialiserAccueil = initialiserAccueil;
 window.definirModeExpert = definirModeExpert;
 window.toggleDemoHandler = toggleDemoHandler;
-window.entrerEnDemoHandler = entrerEnDemoHandler;
 window.toggleAccompagnementHandler = toggleAccompagnementHandler;
 window.naviguerAccueilCarte = naviguerAccueilCarte;
 window.ouvrirWizardPratique = ouvrirWizardPratique;
