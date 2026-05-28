@@ -1603,7 +1603,7 @@ function genererInfo(champ) {
     return `
         <div class="wizard-v2-champ">
             <div class="wizard-v2-info-block">
-                <img src="icons/icons8-info.svg" alt="" class="wizard-v2-info-icon">
+                <span class="wizard-v2-info-icon icone-inline icone-inline--info" aria-hidden="true"></span>
                 <span>${champ.texte}</span>
             </div>
         </div>
