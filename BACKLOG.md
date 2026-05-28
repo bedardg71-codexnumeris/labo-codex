@@ -99,12 +99,10 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - **Effort estimé** : 2-3 h (analyse posture + rédaction + revue croisée avec ADR-008).
   - **Priorité** : post-AQPC, pas bloquant pour la conférence (l'app n'expose aucune donnée utilisateur côté serveur — l'enjeu est documentaire et de conformité formelle).
 
-- [ ] 🟢 **#293** Toggle « Masquer les items déjà dans la barre latérale » en section 2 des modales bibliothèque
+- [x] 🟢 **#293** Toggle « Masquer les items déjà dans la barre latérale » en section 2 des modales bibliothèque — **livré 28 mai 2026 PM**
   - **Constat 28 mai 2026** (Bibliothèque de grilles de Grégoire) : la Section 2 montre toutes les entrées de la biblio partagée, y compris celles « Déjà dans la barre latérale ». Quand le ratio biblio/sidebar est lourd (ex. 5 entrées biblio pour 3 grilles sidebar = anciennes variantes accumulées), l'affichage devient encombrant et donne une fausse impression de doublons.
-  - **Architecture actuelle (rappel)** : Section 1 = `grillesTemplates` (sidebar du trimestre actif) ; Section 2 = `bibliothequeGrilles` (biblio partagée inter-trimestres). Une grille peut vivre dans les deux (cas courant). Liaison par `idOriginal`.
-  - **Proposition** : ajouter un toggle/case à cocher au-dessus de Section 2 (« Masquer les items déjà dans la barre latérale »), persisté en préférence utilisateur. Quand activé, filtre les items dont la propriété `dejaPresent` est `true`. Quand désactivé, affichage complet (utile pour ménage manuel des copies obsolètes).
-  - **Périmètre** : appliquer aux 5 modales biblio (grilles, échelles, cartouches, productions, pratiques) via le composant mutualisé `BibliothequeUI.creerModal`.
-  - **Effort estimé** : 1-2 h (toggle UI + helper de filtrage + persistance préférence + tests sur les 5 biblios).
+  - **Périmètre réel livré** : 3 modales (grilles, échelles, cartouches) au lieu des 5 initialement prévues. Audit pendant l'implémentation : `productions-bibliotheque-ui.js` et `pratiques-gestion.js` filtrent NATIVEMENT les items « déjà dans la sélection » avant Section 2 (ligne 76-82 productions, ligne 411-412 pratiques). Le toggle y serait sans objet — items « déjà présents » jamais affichés.
+  - **Helpers ajoutés à `BibliothequeUI`** : `estMasquerDejaPresentActif()`, `filtrerParDejaPresent(cartes)`, `renderToggleMasquerDejaPresent(refreshFnName)`, `basculerMasquerDejaPresent(elementOuNom)`. Persistance dans `db` via la clé `biblio-masquer-deja-present` (préférence globale partagée par les 3 modales).
 
 - [ ] 🟡 **#292** Déduplication défensive au chargement de codex — filet de sécurité contre la propagation de doublons d'ID
   - **Constat 28 mai 2026** : `chargerCodex` (`js/codex.js:500`) fait un overwrite complet par clé (`db.set(cle, valeur)`). Si le codex source contient déjà des doublons d'ID dans `grillesTemplates`, `echellesTemplates`, `cartouches_*`, `bibliothequeProductions`, `bibliothequePratiques`, ils sont restaurés à l'identique à chaque ouverture. Les codex de Grégoire en sont infectés (3 doublons confirmés dans `grillesTemplates` au 28 mai).

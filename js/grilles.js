@@ -2277,12 +2277,14 @@ async function afficherBibliothequeGrilles() {
                 <option value="">Toutes les disciplines</option>
                 ${data.disciplines.map(d => `<option value="${d}">${d}</option>`).join('')}
             </select>
-        </div>`;
+        </div>
+        ${BibliothequeUI.renderToggleMasquerDejaPresent('afficherBibliothequeGrilles')}`;
 
-    // Section 2
+    // Section 2 — filtrage #293 (Masquer les items déjà dans la sidebar)
+    const cartesAffichables = BibliothequeUI.filtrerParDejaPresent(data.cartesSection2);
     let contenuSection2 = '';
     let groupeCourant = null;
-    data.cartesSection2.forEach(carte => {
+    cartesAffichables.forEach(carte => {
         if (carte.groupe && carte.groupe !== groupeCourant) {
             groupeCourant = carte.groupe;
             contenuSection2 += `<h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--gris-moyen);">${groupeCourant}</h4>`;
