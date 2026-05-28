@@ -1,18 +1,161 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 27 mai 2026 soir,
-     post-session correctifs responsive iPhone 16 Pro Max — chantiers
-     1+2+3 livrés. 5 commits poussés sur main, beta bumpée 99.68 →
-     99.71 (3 bumps mineurs intentionnels), builds b0527-1830 →
-     b0527-1850. AQPC J−7. La session précédente (27 mai matin, refonte
-     design système + nav + iconographie + tampons) reste documentée
-     en §0. Tout l'historique antérieur reste dans les §§ suivants.
+     IDENTIFICATION DE CE FICHIER  (mis à jour 28 mai 2026 matin,
+     post-session vérification visuelle Mac 7 zones + correctifs iPhone
+     5 points. 2 commits poussés sur main, beta 99.71 conservée, builds
+     0528-0342 → 0528-0644 (~15 bumps de build cumulés). AQPC J−6.
+     Les sessions du 27 mai (matin refonte + PM correctifs iPhone)
+     restent documentées dans §§0-prec1 et §0-prec2. Tout l'historique
+     antérieur reste dans les §§ suivants.
      ===================================================================== -->
 
 > **📌 Identification**
 > - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
-> - **Dernier cycle livré** : **Session 27 mai PM** — correctifs responsive iPhone 16 Pro Max à partir de 10 captures déposées dans `Retours des testeurs/gregoire/iPhone 16 pro Max/27 mai 2026/`. Trois chantiers livrés en série : **Chantier 1** retrait massif des émojis UI visible utilisateur (21 fichiers JS + styles.css + 5 SVG icons8), **Chantier 2** quatre fix visuels ciblés (#5 padding Annoter, #7 boutons saisie présences contraste, #8 toolbar Guide tronquée, #10 icône carte Démo manquante), **Chantier 3** trois tableaux qui débordent en largeur (#2 échelles min/max, #4 matrice commentaires, #6 archivage). **Chantier 4** (sidebar Modélisation PDF) explicitement reporté par Grégoire. Voir §0-pm ci-dessous.
-> - **Cycle suivant — démarrage 28 mai matin** : reprise au choix — soit **validation visuelle iPhone des 3 chantiers livrés** (Grégoire teste les 10 captures pour confirmer les correctifs sur device réel), soit **chantier 4 sidebar Modélisation PDF** (cadrage avec sidebar profil étudiant comme référence — structurant, demande exploration design préalable), soit reprise des items du cycle 27 matin (BACKLOG #287 picker couleur custom, audit visuel Lot B, etc.).
-> - **Documents clés** : `BACKLOG.md`, captures iPhone dans `Retours des testeurs/gregoire/iPhone 16 pro Max/27 mai 2026/` (10 PNG numérotés 2-10 + 1 sans suffixe = #1 par Finder).
+> - **Dernier cycle livré** : **Session 28 mai matin** — vérification visuelle post-refonte Mac (7 zones parcourues avec Grégoire) + correctifs iPhone (5 points relevés sur device, 5 fix livrés). 2 commits sur main, ~15 correctifs UX/UI cumulés, 2 nouvelles actions « Supprimer » dans modales bibliothèques, 5 fonctions `detecterDoublons*` corrigées (fix faux positifs), 6 items BACKLOG ajoutés (#288→#293) dont **#290 ⚠️ AVANT AQPC** (intégration de 4 pratiques personnelles anonymisées au seed code source). 1 utilitaire `scripts/dedoublonner-biblios.js` créé. Voir §0 ci-dessous.
+> - **Cycle suivant — démarrage 28 mai après-midi ou 29 mai** : **PRIORITÉ ⚠️ BACKLOG #290** (intégrer 4 pratiques personnelles anonymisées au seed `MODELES_PRATIQUES_PREDEFINIS` avec auteur « Gabarit Labo Codex » — Grégoire a explicitement demandé que ce soit fait AVANT AQPC le 3 juin). Tâche secondaire : validation iPad symétrique aux 5 fix iPhone (cache iPhone capricieux, iPad confirmé OK). Tâche tertiaire : re-tester l'iPhone après purge cache Safari iOS.
+> - **NB sur l'audit annuel** : on est sur **main**, PAS sur la branche `audit/2026-mai`. L'audit annuel reste en suspens (HEAD audit `097ce88`, divergence depuis 12 mai). Pas de mélange.
+> - **Documents clés** : `BACKLOG.md` (items #288-293 actifs), captures iPhone du 28 mai dans `Retours des testeurs/gregoire/iPhone 16 pro Max/28 mai 2026/` (5 PNG), captures du 27 mai PM toujours dans `27 mai 2026/`.
+
+---
+
+## §0 — Récap session 28 mai 2026 matin (vérification visuelle Mac 7 zones + correctifs iPhone 5 points)
+
+**Beta / build** : 99.71 conservée (aucun bump beta). Builds b0528-0342 → b0528-0644 (~15 bumps de build successifs au fil des fix). HEAD main au moment du relai : `a8ff194`.
+
+**Commits cette session** (2 sur main, tous pushés) :
+
+| # | Hash | Description | Build |
+|---|------|-------------|-------|
+| 1 | `ae58a8c` | feat(ux): cycle vérification visuelle 28 mai matin — correctifs UX/UI multiples (72 fichiers : 21 JS + styles.css + index.html + BACKLOG.md + 1 script + 51 SVG icons8 untracked) | 0528-0554 |
+| 2 | `a8ff194` | fix(iphone): 5 correctifs visuels iPhone 28 mai matin (6 fichiers : 2 JS + styles.css + version.json + init-inline.js + main.js) | 0528-0644 |
+
+### Méthode
+
+Le tour de vérification visuelle a été cadré au démarrage en **8 zones** (TaskCreate) couvrant les ~24 commits du 27 mai (matin refonte + PM correctifs iPhone). Grégoire navigue sur Safari Mac (file://), je tiens la checklist et corrige au fil. Pour chaque zone : modes sombre + clair vérifiés.
+
+**Zones 1-7 sur Mac** : Bandeau/En-tête · Nav principale + sous-nav · Accueil (12 raccourcis + 3 cartes) · Suivi (6 sous-onglets) · Suivi du groupe (ex-Aperçu) · Évaluations › Annoter (palette tampons) · Bibliothèques (icônes + détection doublons + action Supprimer).
+**Zone 8 sur iPhone 16 Pro Max** : validation des 8 correctifs du chantier PM 27 mai → 5 points résiduels identifiés sur 5 captures déposées dans `Retours des testeurs/gregoire/iPhone 16 pro Max/28 mai 2026/`.
+
+### Correctifs livrés (cumul ~15 fix)
+
+**Nav & contraste** :
+- Sous-nav actif plus visible : sombre rgba(255,255,255,0.18→0.28) + bordure 0.40→0.45 ; clair hover rgba(10,74,126,0.55) au lieu du #0a4a7e identique à l'actif (distinction hover/actif rétablie). Commit `ae58a8c`.
+
+**Terminologie collégiale** :
+- « Liste des élèves » → « Liste des étudiant·es » dans 4 sites visibles (config.js + 3 index.html). BACKLOG #288 inscrit pour le balayage complet (~150 occurrences résiduelles dans commentaires/labels secondaires/docs).
+- « Enregistrement quotidien » → « Saisie des présences ».
+- Titre + sous-titre Interventions reformulés : « Planification et documentation des interventions » + « Gardez une trace... » → « Interventions » + « Planification et documentation des interventions de niveau 2 et 3 ».
+- Suivi du groupe : « Observation des apprentissages » → « Observation globale des indices d'engagement » (singulier). « Interventions pédagogiques » → « Observation globale des besoins d'intervention ».
+
+**Émojis UI** :
+- 2 émojis 💡 retirés des paragraphes « Clique sur une courbe... » (Suivi du groupe sections 3+4).
+- 💡 retiré de l'encart d'aide « Pour éditer une pratique... » dans Bibliothèque de pratiques (fix iPhone #2).
+
+**Typographie** :
+- Paragraphes « Clique sur... » alignés en taille sur les interprétations dynamiques (`text-muted u-texte-petit` → `u-texte-gris u-texte-075` car `.text-muted` ligne 5119 forçait `font-size: 0.9rem` qui écrasait le `u-texte-075` ligne 617).
+
+**Icônes** :
+- icon-trash.svg → icons8-trash.svg (27 sites, 14 fichiers).
+- Palette Nœuds Alignement pédagogique : icônes 100% opacité (sombre blanc, clair noir) + effet hover déplacé sur le cercle (background + bordure plus saturés). Lignes 18707-18741 de styles.css. BACKLOG #289 inscrit pour audit des autres palettes (`.prep-btn`, `.travaux-palette-eval`, etc.).
+
+**Tampons d'annotation** :
+- Libellés défauts dans `js/travaux-outils.js:215-218` : « L'id. directrice » → « Id. directrice », « L'id. principale » → « Id. principale », « L'id. secondaire » → « Id. secondaire ».
+
+**Bibliothèques (UX + bugs)** :
+- Modale Bibliothèque d'alignements (`js/planification-bibliotheque.js`) : ajout action « Supprimer » section 1 (cartes du trimestre actif) via nouvelle fonction `supprimerAlignementDuTrimestre(carteId)` avec garde-fou « dernière carte » (refuse si <= 1 carte restante). Exposée sur window.
+- Modale Bibliothèque de pratiques (`js/pratiques-gestion.js`) : ajout action « Supprimer » section 2 (biblio partagée) via nouvelle fonction `supprimerPratiqueDeBibliothequePartagee(pratiqueId)` avec protection seeds prédéfinis (refuse si `MODELES_PRATIQUES_PREDEFINIS[id]`). Exposée sur window.
+- Avertissement doublons (`BibliothequeUI.renderAvertissementDoublons`) enrichi : ajout consigne textuelle d'action (« ouvre le menu ⋮ → Supprimer/Retirer ») + tooltip natif sur ID court (`title="ID complet : <id>"` + soulignement pointillé) pour distinguer **vraie collision** (IDs complets identiques) vs **homonyme légitime** (IDs distincts).
+- **5 fonctions `detecterDoublons*` corrigées** : `detecterDoublonsGrilles` (grilles.js:76), `detecterDoublonsEchelles` (echelles.js:168), `detecterDoublonsCartouches` (cartouches.js:88), `detecterDoublonsProductions` (productions.js:120), `detecterDoublonsPratiques` (pratiques-gestion.js:52). Pattern partagé : dédup par ID via `Map` AVANT groupement par nom/titre. Fix les **faux positifs** où la même entité (mêmes ID) dans la collection locale ET la biblio partagée était comptée 2 fois.
+
+**5 fix iPhone (commit `a8ff194`)** :
+1. Champs date coincés (Bornes du trimestre) : ajout `#calendrier-trimestre .grille-2col-gap15 { grid-template-columns: 1fr }` dans `@media (max-width: 767px)` + neutralisation du `padding-top: 15px` inline du span « au » avec `!important` en mobile.
+2. Émoji 💡 résiduel dans Biblio pratiques : retiré du texte (style visuel conservé via classe).
+3. Cartes superposées « Configuration incomplète » : `js/saisie-presences.js` avait un **double wrap d'alerte** — l'élément hôte `<div id="alerteFormatHoraire" class="alerte alerte-attention">` + une SECONDE div imbriquée `<div class="alerte alerte-avertissement">` (cette dernière classe n'existait même pas dans le CSS). Double padding/border + comportement de marge cassé. Fix : suppression du wrap interne, injection directe du contenu.
+4. « Sélectionne une date... » tronqué : la classe `.empty-state-center-30` était référencée dans `index.html:8185` mais **n'existait pas dans le CSS**. Ajout avec `text-align: center; padding: 30px; white-space: normal; color: --texte-secondaire; font-style: italic`.
+5. Boutons « Guide » peu visibles en mode clair : `.option-accompagnement-guide-btn` héritait de `--texte-principal` (sombre en mode clair) sur un fond `.accordeon-header` dégradé bleu marine (resté sombre même en mode clair). Override mode clair : `color: white` forcé + background `rgba(255,255,255,0.15)` + bordure `rgba(255,255,255,0.4)` + `filter: brightness(0) invert(1)` sur l'icône.
+
+### BACKLOG (6 items inscrits)
+
+| # | Priorité | Titre | Effort |
+|---|----------|-------|--------|
+| **#288** | 🟡 | Terminologie collégiale : balayage complet (~150 occurrences résiduelles) | 1-2 h |
+| **#289** | 🟢 | Audit visuel palettes de création (pattern « icônes 100% + hover cercle ») | 30 min - 1 h |
+| **#290** | ⚠️🟡 | **AVANT AQPC** : intégrer 4 pratiques personnelles anonymisées au seed `MODELES_PRATIQUES_PREDEFINIS` (auteur « Gabarit Labo Codex », strip initiales, renommer IDs prénomés `STD-Bruno-Chimie` → `STD-chimie-organique` etc.) | 1-2 h |
+| **#291** | 🟡 | Vrai workflow de résolution doublons (détection par similarité + sous-modal de comparaison + actions batch) | 4-6 h |
+| **#292** | 🟡 | Déduplication défensive au chargement de codex (filet de sécurité contre propagation de doublons d'ID via codex) | 1-2 h |
+| **#293** | 🟢 | Toggle « Masquer items déjà dans la sidebar » section 2 des 5 modales biblio | 1-2 h |
+
+**Dernier ID utilisé** : **#293**. Mettre à jour la ligne dans `BACKLOG.md` à chaque nouveau item.
+
+### Outillage
+
+- `scripts/dedoublonner-biblios.js` : utilitaire console pour dédoublonner le stockage local de Grégoire (5 biblios : `grillesTemplates`, `echellesTemplates`, `cartouches_*` via scan localStorage, `bibliothequeProductions`, `bibliothequePratiques`). Garde le premier item rencontré par ID. Exécution one-shot via copier-coller dans la console Safari. Compatible Safari Mac (pas d'arrow function ni `const` pour robustesse).
+- **Limites du script** : ne traite que les vrais doublons d'ID. Les homonymes avec IDs distincts (variantes accumulées par renommages successifs) doivent être gérés manuellement via le menu ⋮ Supprimer des modales. Cas observé sur les grilles de Grégoire : 5 entrées biblio pour 3 grilles sidebar = anciennes variantes (« Global-5 FR-HOLIS » sans parenthèses vs « Global-5 (FR-HOLIS) H26 ») à nettoyer manuellement.
+
+### Décisions actées en cours de session
+
+- **Auteur dans les pratiques** : c'est une feature légitime (CC BY, traçabilité). Pas de migration au boot ni de masquage automatique. Solution pour la démo AQPC : snippet console one-shot pour anonymiser le codex perso de Grégoire (validé option 2 « Anonyme », puis affiné en « Gabarit Labo Codex » au commit du seed via #290). Fichiers persos en stockage restent inchangés pour usage privé.
+- **#290 doit être fait AVANT AQPC** (acté par Grégoire) car les premiers expérimentateurs accéderont à l'app dès le 3 juin et iront vérifier la biblio de pratiques (« existe-t-il une configuration de base pour ma discipline ? »).
+- **Paramètres d'accompagnement reste dans Labo** (pas de déplacement vers Suivi). Séparation lecture/configuration claire.
+- **Émoji ⚠️** dans `BibliothequeUI.renderAvertissementDoublons` (le texte « ⚠️ 3 doublons potentiels détectés ») conservé pour cette session — cohérent avec le reste du fichier. Retrait global piloté par BACKLOG #286.
+
+### Validations Grégoire
+
+- Zones 1-7 toutes validées au fil de la session sur Mac (sombre + clair).
+- Zone 8 iPhone : 5 fix livrés au commit `a8ff194`, **iPad confirmé OK sur build 0528-0644**, iPhone capricieux (cache Safari iOS persistant malgré build à jour côté serveur). À retester après pause.
+- Snippet `dedoublonner-biblios.js` exécuté avec succès : 2 cartouches dédoublonnées (`cartouches_GRILLE1767642435304607` et `cartouches_GRILLE1767642435304263`, -3 chacun). 5 grilles homonymes restantes à nettoyer manuellement (BACKLOG #291 traitera l'automatisation).
+
+### Tests
+
+- `node --check` vert sur tous les fichiers JS modifiés (planification-bibliotheque, pratiques-gestion, grilles, echelles, cartouches, productions, saisie-presences, travaux-outils, bibliotheque-ui).
+- Pas de Vitest/Playwright lancé (modifications majoritairement CSS + libellés + handlers UI, pas de logique métier nouvelle).
+- Hook pré-push : passé sans bloquer sur les 2 push.
+
+### Infrastructure observée
+
+- **Netlify** : config `netlify.toml` propre (HTML/JS/CSS/JSON tous en `Cache-Control: must-revalidate, max-age=0`). Aucune raison côté origin de servir une version périmée.
+- **Cloudflare** devant Netlify avec challenge bot (impossible de vérifier la version via curl). Si futur problème de cache CDN agressif, voir Cloudflare dashboard → Purge cache.
+
+### Mémoires à consulter pour la prochaine session
+
+- `feedback-beta-build-convention.md` : respectée toute la session (beta 99.71 conservée, ~15 bumps de build).
+- `project-palette-couleurs-contraintes.md` : à enrichir éventuellement avec le pattern « icônes 100% + hover cercle » établi par BACKLOG #289 si #289 est livré.
+- Nouvelle mémoire candidate : pattern de fix **double wrap d'alerte** (`saisie-presences.js` #3) — quand un élément HTML hôte a déjà des classes d'alerte, ne pas re-wrapper dans le JS. Vérifier les autres `innerHTML` qui injectent une `<div class="alerte ...">` dans un conteneur déjà classé.
+
+---
+
+### Consignes de démarrage — 28 mai après-midi (ou 29 mai matin)
+
+**Avant de plonger** :
+- Lire ce §0 (présent) en entier. Beaucoup de petits correctifs accumulés.
+- Vérifier `git status` propre, HEAD main à `a8ff194` ou plus récent, tous commits sur origin.
+- AQPC est le **3 juin = J−6** au démarrage 28 mai après-midi (J−5 si reprise 29 mai matin). **Stabilité prime sur ajout de features.**
+- Charger les 7 skills du projet (cf. CLAUDE.md), en particulier `SKILL_labo_codex.md` et `SKILL_Ecosysteme_classe.md`.
+
+**Priorité 1 — ⚠️ BACKLOG #290 (AVANT AQPC)** : intégrer 4 pratiques personnelles anonymisées au seed `MODELES_PRATIQUES_PREDEFINIS` dans `js/pratiques-bibliotheque.js`.
+
+Pratiques à porter (issues du stockage IDB personnel de Grégoire, fichiers persos restent inchangés) :
+- Modèle Chimie (initiales FAH) — Chimie — Notation par contrats
+- Par objectifs (Pondéré) (initiales MB) — Mathématiques — Moyenne pondérée des objectifs
+- Par objectifs (Comptage) (initiales BV) — Chimie — Comptage d'objectifs essentiels et complémentaires
+- STD Chimie organique (initiales BV) — Chimie — Standards avec critères par standard
+- STD Interfaces et BD (initiales Xavier C.-T.) — Informatique — 6 objectifs niveau 3+, base 80% + bonus
+
+**Méthode** :
+1. Préparer un snippet console DUMP-ONLY pour que Grégoire récupère les configurations exactes de ses 4 pratiques depuis son IDB. Il colle le résultat ici.
+2. Pour chaque pratique : extraire la configuration complète (typesTravaux, forfaits, parObjectifs, seuilsCritiques, échelle associée, etc.), **strip les initiales** en fin de `nom`, **anonymiser** `auteur: 'Gabarit Labo Codex'`, **nettoyer** tout `metadata_cc.auteur_original` et `metadata_cc.contributeurs`.
+3. Ajouter au seed avec `estGabarit: true`, **renommer les IDs prénomés** : `STD-Bruno-Chimie` → `STD-chimie-organique`, `STD-Xavier-Info` → `STD-info-interfaces-bd`. Pour `SPE-francois` (Modèle Chimie générique existant) : décider remplacement vs ajout (recommandation : remplacer, le nom du seed actuel est générique, la config enrichie apporte plus de valeur).
+4. Vérifier visuellement la modale Bibliothèque de pratiques après chargement (mode démo + nouveau Codex).
+
+**Priorité 2 — Validation iPad** : Grégoire a confirmé que l'iPad voit bien les 5 fix iPhone sur build 0528-0644. Préparer une checklist symétrique pour qu'il valide les mêmes 8 zones (1-8) sur iPad en sombre + clair, et qu'il dépose des captures dans `Retours des testeurs/gregoire/iPad/28 mai 2026/` (créer le dossier si manque). Particulièrement vérifier les chantiers responsive (échelles min/max, matrice commentaires, archivage, Bornes du trimestre).
+
+**Priorité 3 — Re-test iPhone après pause** : si Grégoire arrive à purger son cache Safari iOS (Réglages > Safari > Effacer historique), revalider les 5 fix iPhone.
+
+**Priorités déférées (post-AQPC)** :
+- BACKLOG #288 (terminologie complète), #289 (audit palettes), #291 (workflow doublons), #292 (déduplication chargement codex), #293 (toggle masquer items présents).
+
+**Risques connus à l'iPad/iPhone** :
+- Cache Safari iOS récalcitrant. Si après recharge le build affiché reste l'ancien : forcer la fermeture de Safari (App Switcher) ou effacer données du site dans Réglages > Safari.
+- iPhone 16 Pro Max ~430px : breakpoint mobile à `< 767px` activé partout dans le code récent.
 
 ---
 
