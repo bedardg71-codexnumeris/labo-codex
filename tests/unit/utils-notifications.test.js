@@ -30,27 +30,34 @@ describe('utils-notifications · API publique', () => {
         expect(typeof fauxWindow.notifications).toBe('object');
     });
 
-    it('expose les 3 méthodes succes, erreur, info', () => {
+    it('expose les 4 méthodes succes, erreur, warning, info', () => {
         expect(typeof fauxWindow.notifications.succes).toBe('function');
         expect(typeof fauxWindow.notifications.erreur).toBe('function');
+        expect(typeof fauxWindow.notifications.warning).toBe('function');
         expect(typeof fauxWindow.notifications.info).toBe('function');
     });
 
-    it('chacune des 3 méthodes accepte (message) et (message, details)', () => {
+    it('chacune des 4 méthodes accepte (message), (message, details) et (message, details, options)', () => {
         // Pas d'assertions sur le DOM (sandbox Node n'a pas de vrai document),
         // mais on vérifie qu'aucun appel ne plante avec les signatures attendues.
         expect(() => fauxWindow.notifications.succes('msg')).not.toThrow();
         expect(() => fauxWindow.notifications.succes('msg', 'détails')).not.toThrow();
         expect(() => fauxWindow.notifications.erreur('titre')).not.toThrow();
         expect(() => fauxWindow.notifications.erreur('titre', 'détails')).not.toThrow();
+        expect(() => fauxWindow.notifications.warning('msg')).not.toThrow();
+        expect(() => fauxWindow.notifications.warning('msg', 'détails')).not.toThrow();
         expect(() => fauxWindow.notifications.info('msg')).not.toThrow();
         expect(() => fauxWindow.notifications.info('msg', 'détails')).not.toThrow();
+        // Option { icone: 'lightbulb' } sur info (Lot C #286 — 29 sites 💡)
+        expect(() => fauxWindow.notifications.info('msg', '', { icone: 'lightbulb' })).not.toThrow();
+        expect(() => fauxWindow.notifications.info('msg', 'détails', { icone: 'lightbulb' })).not.toThrow();
     });
 
     it('coerce les arguments non-string sans planter (defense en profondeur)', () => {
         expect(() => fauxWindow.notifications.succes(null)).not.toThrow();
         expect(() => fauxWindow.notifications.succes(undefined, 42)).not.toThrow();
         expect(() => fauxWindow.notifications.erreur({ toString: () => 'obj' })).not.toThrow();
+        expect(() => fauxWindow.notifications.warning(null)).not.toThrow();
     });
 });
 
