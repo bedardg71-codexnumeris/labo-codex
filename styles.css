@@ -4934,6 +4934,43 @@ body:not(.mode-clair) .badge-source--demo {
     min-width: 0;
 }
 
+/* Lot C #286 suite — helper d'icône SVG inline pour badges textuels.
+   Le SVG est rendu via mask-image et coloré par background-color: currentColor :
+   l'icône hérite donc automatiquement de la couleur sémantique du badge parent
+   (orange-attention pour ⚠, vert-succes pour ✓, jaune pour 💡). Aucune
+   dépendance à un filtre fragile. */
+.icone-inline {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.15em;
+    background-color: currentColor;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    margin-right: 0.3em;
+    flex-shrink: 0;
+}
+.icone-inline--warning {
+    -webkit-mask-image: url('icons/icons8-warning.svg');
+    mask-image: url('icons/icons8-warning.svg');
+}
+.icone-inline--check {
+    -webkit-mask-image: url('icons/icons8-check.svg');
+    mask-image: url('icons/icons8-check.svg');
+}
+.icone-inline--lightbulb {
+    -webkit-mask-image: url('icons/icons8-bulb.svg');
+    mask-image: url('icons/icons8-bulb.svg');
+}
+.icone-inline--cancel {
+    -webkit-mask-image: url('icons/icon-cancel.svg');
+    mask-image: url('icons/icon-cancel.svg');
+}
+
 @keyframes slideIn {
     from {
         transform: translateX(400px);

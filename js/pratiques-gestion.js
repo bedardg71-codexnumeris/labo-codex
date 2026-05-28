@@ -2111,11 +2111,11 @@ function validerPonderationsCategoriesMat() {
 
     if (validation) {
         if (total === 100) {
-            validation.innerHTML = `<span style="color: var(--vert-principal);">✓ Total : ${total}%</span>`;
+            validation.innerHTML = `<span style="color: var(--vert-principal);"><span class="icone-inline icone-inline--check" aria-hidden="true"></span>Total : ${total}%</span>`;
         } else if (total < 100) {
-            validation.innerHTML = `<span style="color: var(--orange-principal);">⚠ Total : ${total}% (il manque ${100 - total}%)</span>`;
+            validation.innerHTML = `<span style="color: var(--orange-principal);"><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Total : ${total}% (il manque ${100 - total}%)</span>`;
         } else {
-            validation.innerHTML = `<span style="color: var(--rouge-principal);">⚠ Total : ${total}% (dépasse de ${total - 100}%)</span>`;
+            validation.innerHTML = `<span style="color: var(--rouge-principal);"><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Total : ${total}% (dépasse de ${total - 100}%)</span>`;
         }
     }
 }
@@ -2430,7 +2430,7 @@ function afficherListeObjectifsMat(objectifs) {
         const total = objectifs.reduce((sum, obj) => sum + (parseInt(obj.ponderation) || 0), 0);
         const couleur = total === 100 ? 'var(--vert-succes)' : 'var(--rouge-erreur)';
         html += `<p style="margin-top: 10px; font-weight: 600; color: ${couleur};">
-            Total des pondérations : ${total}% ${total !== 100 ? '(devrait être 100%)' : '✓'}
+            Total des pondérations : ${total}% ${total !== 100 ? '(devrait être 100%)' : '<span class="icone-inline icone-inline--check" aria-hidden="true"></span>'}
         </p>`;
     }
 

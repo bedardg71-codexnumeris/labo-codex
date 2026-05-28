@@ -1094,10 +1094,10 @@ function genererLigneHTML(ligne) {
             <td class="td-left">${echapperHtml(ligne.prenom)}</td>
             <td class="td-left">${ligne.associationManquante
                 ? `${echapperHtml(ligne.productionNom)} ${ligne.estDoublon
-                    ? `<span style="color: var(--rouge-danger); font-size: 0.85em;" title="Doublon : ce fichier est déjà associé à ${echapperHtml(ligne.diagnosticDoublon || '')}. Suppression sécuritaire.">⚠ Doublon</span>`
-                    : `<span style="color: var(--attention); font-size: 0.85em;">⚠ Non associé</span>`}`
+                    ? `<span style="color: var(--rouge-danger); font-size: 0.85em;" title="Doublon : ce fichier est déjà associé à ${echapperHtml(ligne.diagnosticDoublon || '')}. Suppression sécuritaire."><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Doublon</span>`
+                    : `<span style="color: var(--attention); font-size: 0.85em;"><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Non associé</span>`}`
                 : ligne.fichierAutreProduction
-                    ? `${echapperHtml(ligne.productionNom)} <span style="color: var(--attention); font-size: 0.85em;">⚠ Fichier sous ${ligne.fichierAutreProductionNom ? echapperHtml(ligne.fichierAutreProductionNom) : 'autre production'}</span>`
+                    ? `${echapperHtml(ligne.productionNom)} <span style="color: var(--attention); font-size: 0.85em;"><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Fichier sous ${ligne.fichierAutreProductionNom ? echapperHtml(ligne.fichierAutreProductionNom) : 'autre production'}</span>`
                     : echapperHtml(ligne.productionNom)}</td>
             <td class="td-center">${badgeJeton}</td>
             <td class="td-center">${affichageNiveau}</td>

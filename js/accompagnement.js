@@ -767,7 +767,7 @@ function rendreSectionAide(section) {
             const itemsHTML = section.items.map(item => `<li>${item}</li>`).join('');
             return `${titreHTML}<ul class="aide-liste">${itemsHTML}</ul>`;
         case 'conseil':
-            return `<div class="aide-conseil"><span class="aide-icone">💡</span><div class="aide-conseil-contenu">${section.contenu}</div></div>`;
+            return `<div class="aide-conseil"><span class="aide-icone"><span class="icone-inline icone-inline--lightbulb" aria-hidden="true"></span></span><div class="aide-conseil-contenu">${section.contenu}</div></div>`;
         case 'exemple':
             const exTitre = section.titre ? `<strong>${section.titre}</strong><br>` : '';
             return `<div class="aide-exemple"><span class="aide-icone">📋</span><div class="aide-exemple-contenu">${exTitre}${section.contenu}</div></div>`;

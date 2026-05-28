@@ -680,7 +680,7 @@
             resultatDiv.style.border = `2px solid ${acceptable ? 'var(--vert-succes)' : 'var(--rouge-erreur)'}`;
             resultatDiv.innerHTML = `
                 <div style="color: ${acceptable ? 'var(--vert-succes)' : 'var(--rouge-erreur)'};">
-                    ${acceptable ? '✓ ACCEPTABLE' : '✗ NON ACCEPTABLE'}
+                    ${acceptable ? '<span class="icone-inline icone-inline--check" aria-hidden="true"></span>ACCEPTABLE' : '<span class="icone-inline icone-inline--cancel" aria-hidden="true"></span>NON ACCEPTABLE'}
                 </div>
                 <div style="font-size: 0.9rem; font-weight: normal; color: var(--gris-moyen); margin-top: 5px;">
                     ${coches} / ${total} spécifications respectées

@@ -190,9 +190,9 @@ var GUIDE_PAGES = [
             '<p>Cette carte t\u2019aide à vérifier que tout ce que tu enseignes est relié à ce que tu évalues. C\u2019est ça, l\u2019alignement pédagogique.</p>' +
             '<p>Chaque élément affiche deux <strong>badges</strong> (gauche\u00a0= amont, droite\u00a0= aval) qui t\u2019indiquent l\u2019état de ses connexions\u00a0:</p>' +
             '<ul>' +
-                '<li><strong>✓</strong> = cet élément est bien relié (le badge prend la couleur de l\u2019élément).</li>' +
+                '<li><span class="icone-inline icone-inline--check" aria-hidden="true"></span> = cet élément est bien relié (le badge prend la couleur de l\u2019élément).</li>' +
                 '<li><strong>!</strong> (badge gris) = il manque une connexion.</li>' +
-                '<li><strong>⚠</strong> = attention, une évaluation manque quelque part dans la chaîne.</li>' +
+                '<li><span class="icone-inline icone-inline--warning" aria-hidden="true"></span> = attention, une évaluation manque quelque part dans la chaîne.</li>' +
             '</ul>' +
             '<p>Ce guide te propose 7\u00a0étapes pour construire ta carte et utiliser l\u2019import\u00a0/\u00a0export. Tu peux le consulter à tout moment depuis la palette.</p>' +
             '<p class="planif-guide-ref">Anderson, L.\u00a0W. (2026). <em>Curricular alignment: A re-examination</em> (Educational Practices Series, No.\u00a037). UNESCO International Bureau of Education. <a href="https://unesdoc.unesco.org/ark:/48223/pf0000397143.locale=en" target="_blank" rel="noopener">unesdoc.unesco.org</a></p>'
@@ -214,7 +214,7 @@ var GUIDE_PAGES = [
             '<ol>' +
                 '<li>Glisse une <span class="planif-guide-type" style="background:var(--planif-couleur-idee-maitresse)"></span> <strong>Idée maîtresse</strong> sur le canevas.</li>' +
                 '<li>Relie-la à sa compétence en tirant un lien d\u2019un port à l\u2019autre. Le verbe <em>«\u00a0se décline en\u00a0»</em> s\u2019affiche automatiquement.</li>' +
-                '<li>Le badge d\u2019entrée de l\u2019idée maîtresse affiche <strong>✓</strong> — elle est connectée en amont.</li>' +
+                '<li>Le badge d\u2019entrée de l\u2019idée maîtresse affiche <span class="icone-inline icone-inline--check" aria-hidden="true"></span> — elle est connectée en amont.</li>' +
             '</ol>'
     },
     {
@@ -263,7 +263,7 @@ var GUIDE_PAGES = [
                 '<li>Relie-la aux éléments qu\u2019elle évalue\u00a0: idées maîtresses, connaissances ou activités. Le verbe <em>«\u00a0se vérifie par\u00a0»</em> apparaît.</li>' +
                 '<li>Quand une compétence est atteinte par au moins une évaluation à travers la chaîne, son badge d\u2019avertissement disparaît.</li>' +
             '</ol>' +
-            '<p class="planif-guide-conclusion">L\u2019objectif\u00a0: quand tous les badges de ta carte affichent <strong>✓</strong> et qu\u2019il n\u2019y a plus de <strong>⚠</strong>, ton cours est aligné — chaque compétence est enseignée et évaluée de manière cohérente.</p>'
+            '<p class="planif-guide-conclusion">L\u2019objectif\u00a0: quand tous les badges de ta carte affichent <span class="icone-inline icone-inline--check" aria-hidden="true"></span> et qu\u2019il n\u2019y a plus de <span class="icone-inline icone-inline--warning" aria-hidden="true"></span>, ton cours est aligné — chaque compétence est enseignée et évaluée de manière cohérente.</p>'
     },
     {
         titre: 'Exporter et importer un plan',

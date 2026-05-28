@@ -1520,7 +1520,7 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                         ${analyse.donnees.evaluations.count > 0 ? genererLigneDonnee('evaluations', 'Notes', analyse.donnees.evaluations.cles.length + ' ensemble(s)') : ''}
                     </div>
                     <p style="font-size: 0.75rem; color: var(--vert-succes); margin: 8px 0 0 12px;">
-                        ✓ Sauvegarde personnelle détectée – tes données peuvent être restaurées
+                        <span class="icone-inline icone-inline--check" aria-hidden="true"></span>Sauvegarde personnelle détectée – tes données peuvent être restaurées
                     </p>
                     `}
                     ` : ''}
@@ -1959,10 +1959,10 @@ function afficherModalPreviewConfigComplete(config) {
                         Ressources incluses (${totalRessources}) :
                     </p>
                     <div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.9rem;">
-                        ${nbEchelles > 0 ? `<span style="background: var(--surface-conteneur, #162c36); padding: 4px 10px; border-radius: 4px; border: 1px solid var(--bordure-claire);">✓ ${nbEchelles} échelle(s)</span>` : ''}
-                        ${nbGrilles > 0 ? `<span style="background: var(--surface-conteneur, #162c36); padding: 4px 10px; border-radius: 4px; border: 1px solid var(--bordure-claire);">✓ ${nbGrilles} grille(s)</span>` : ''}
-                        ${nbProductions > 0 ? `<span style="background: var(--surface-conteneur, #162c36); padding: 4px 10px; border-radius: 4px; border: 1px solid var(--bordure-claire);">✓ ${nbProductions} production(s)</span>` : ''}
-                        ${nbCartouches > 0 ? `<span style="background: var(--surface-conteneur, #162c36); padding: 4px 10px; border-radius: 4px; border: 1px solid var(--bordure-claire);">✓ ${nbCartouches} cartouche(s)</span>` : ''}
+                        ${nbEchelles > 0 ? `<span style="background: var(--surface-conteneur, #162c36); padding: 4px 10px; border-radius: 4px; border: 1px solid var(--bordure-claire);"><span class="icone-inline icone-inline--check" aria-hidden="true"></span>${nbEchelles} échelle(s)</span>` : ''}
+                        ${nbGrilles > 0 ? `<span style="background: var(--surface-conteneur, #162c36); padding: 4px 10px; border-radius: 4px; border: 1px solid var(--bordure-claire);"><span class="icone-inline icone-inline--check" aria-hidden="true"></span>${nbGrilles} grille(s)</span>` : ''}
+                        ${nbProductions > 0 ? `<span style="background: var(--surface-conteneur, #162c36); padding: 4px 10px; border-radius: 4px; border: 1px solid var(--bordure-claire);"><span class="icone-inline icone-inline--check" aria-hidden="true"></span>${nbProductions} production(s)</span>` : ''}
+                        ${nbCartouches > 0 ? `<span style="background: var(--surface-conteneur, #162c36); padding: 4px 10px; border-radius: 4px; border: 1px solid var(--bordure-claire);"><span class="icone-inline icone-inline--check" aria-hidden="true"></span>${nbCartouches} cartouche(s)</span>` : ''}
                     </div>
                 </div>
 
@@ -2232,12 +2232,12 @@ async function executerImportConfigComplete() {
 
         // Défense H — message d'alerte si des sceaux ont échoué.
         if (resumeSceauGlobal && resumeSceauGlobal.altere > 0) {
-            messageSucces += `\n\n⚠ ${resumeSceauGlobal.altere} ressource(s) avec sceau invalide ` +
+            messageSucces += `\n\n${resumeSceauGlobal.altere} ressource(s) avec sceau invalide ` +
                              `(modifiée(s) après l'export). Vérifie le contenu avant utilisation.`;
         } else if (resumeSceauGlobal && resumeSceauGlobal.valide > 0 && resumeSceauGlobal.altere === 0) {
             const tauxValide = Math.round((resumeSceauGlobal.valide / resumeSceauGlobal.total) * 100);
             if (tauxValide === 100) {
-                messageSucces += `\n\n✓ Sceaux SHA-256 valides sur les ${resumeSceauGlobal.total} ressources vérifiables.`;
+                messageSucces += `\n\nSceaux SHA-256 valides sur les ${resumeSceauGlobal.total} ressources vérifiables.`;
             } else {
                 messageSucces += `\n\n${resumeSceauGlobal.valide}/${resumeSceauGlobal.total} ressources avec sceau valide ` +
                                  `(${resumeSceauGlobal.sansSceau} sans sceau, export antérieur à Défense H).`;
