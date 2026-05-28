@@ -161,7 +161,7 @@ function ouvrirModalRapportsArchives() {
                     </div>
                     <button data-action="supprimerEtRafraichirArchive" data-param="${r.id}" style="
                         background: none; border: none; cursor: pointer; font-size: 1.2rem;
-                        padding: 0;" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>
+                        padding: 0;" title="Supprimer"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>
                 </div>
                 <p style="margin: 0 0 8px 0; font-size: 0.9rem; color: var(--gris-fonce);">
                     ${(r.description || 'Aucune description').substring(0, 100)}${r.description?.length > 100 ? '...' : ''}

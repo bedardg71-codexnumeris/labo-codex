@@ -188,7 +188,8 @@ async function afficherBibliothequeAlignements() {
                 metadonnees: nbNoeuds + ' noeud(s) \u00b7 ' + nbLiens + ' lien(s)',
                 boutonPrincipal: { label: 'Partager', action: 'partagerAlignement', param: carte.id, classe: 'btn-confirmer', title: 'Ajouter à la bibliothèque partagée' },
                 actionsMenu: [
-                    { label: 'Exporter', action: 'exporterAlignementJSON', param: carte.id, classe: 'btn-secondaire', title: 'Télécharger en JSON' }
+                    { label: 'Exporter', action: 'exporterAlignementJSON', param: carte.id, classe: 'btn-secondaire', title: 'Télécharger en JSON' },
+                    { label: 'Supprimer', action: 'supprimerAlignementDuTrimestre', param: carte.id, classe: 'btn-supprimer', title: 'Supprimer cette carte du trimestre actif', showAlways: true }
                 ]
             });
         });
@@ -392,6 +393,44 @@ async function exporterAlignementJSON(carteId) {
 }
 
 /**
+ * Supprime une carte d'alignement du trimestre actif.
+ * Refuse si c'est la dernière carte du trimestre (au moins 1 doit rester).
+ * Si la carte supprimée était l'active, bascule sur la première restante.
+ */
+async function supprimerAlignementDuTrimestre(carteId) {
+    var index = window.planificationDonnees && window.planificationDonnees.getIndex();
+    if (!index || !index.cartes) return;
+    var carte = index.cartes.find(function (c) { return c.id === carteId; });
+    if (!carte) return;
+    if (index.cartes.length <= 1) {
+        alert('Impossible de supprimer la dernière carte du trimestre actif.');
+        return;
+    }
+    if (!confirm('Supprimer définitivement la carte « ' + carte.nom + ' » du trimestre actif ?')) return;
+
+    window.planificationDonnees.supprimerCarte(carteId);
+    index.cartes = index.cartes.filter(function (c) { return c.id !== carteId; });
+    var nouvelleActive = index.active;
+    if (index.active === carteId) {
+        nouvelleActive = index.cartes[0].id;
+        index.active = nouvelleActive;
+    }
+    window.planificationDonnees.sauvegarderIndex(index);
+
+    if (window.planificationCarte) {
+        if (typeof window.planificationCarte.mettreAJourListeCartes === 'function') {
+            window.planificationCarte.mettreAJourListeCartes();
+        }
+        if (index.active === nouvelleActive && typeof window.planificationCarte.chargerCarte === 'function') {
+            window.planificationCarte.chargerCarte(nouvelleActive);
+        }
+    }
+
+    fermerModalBibliothequeAlignements();
+    await afficherBibliothequeAlignements();
+}
+
+/**
  * Supprime un alignement de la bibliothèque partagée
  */
 async function supprimerAlignementDeBibliotheque(id) {
@@ -570,6 +609,7 @@ window.fermerModalBibliothequeAlignements = fermerModalBibliothequeAlignements;
 window.partagerAlignement = partagerAlignement;
 window.ajouterAlignementDepuisBibliotheque = ajouterAlignementDepuisBibliotheque;
 window.exporterAlignementJSON = exporterAlignementJSON;
+window.supprimerAlignementDuTrimestre = supprimerAlignementDuTrimestre;
 window.supprimerAlignementDeBibliotheque = supprimerAlignementDeBibliotheque;
 window.importerAlignementFichier = importerAlignementFichier;
 window.importerAlignementsTrimestre = importerAlignementsTrimestre;

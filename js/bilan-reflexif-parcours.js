@@ -152,7 +152,7 @@ function rendreActiviteHTML(activite, index) {
             html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.deplacerActivite" data-param="' + activite.id + '" data-param2="1" title="Descendre">\u2193</button>');
         }
         html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.modifierActivite" data-param="' + activite.id + '" title="Modifier">\u270E</button>');
-        html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerActivite" data-param="' + activite.id + '" data-confirm="Supprimer cette activit\u00e9 ?" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon" style="width:12px;height:12px;"></button>');
+        html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerActivite" data-param="' + activite.id + '" data-confirm="Supprimer cette activit\u00e9 ?" title="Supprimer"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon" style="width:12px;height:12px;"></button>');
         html.push('</div>');
     }
 
@@ -190,7 +190,7 @@ function rendreQuestionParActiviteHTML(question, index, parcours) {
         html.push('<div class="bilan-question-actions">');
         html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.editerQuestionQPA" data-param="' + question.id + '" title="Modifier">\u270E</button>');
         if (question.personnalisee) {
-            html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerQuestionParActivite" data-param="' + question.id + '" data-confirm="Supprimer cette question ?" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon" style="width:12px;height:12px;"></button>');
+            html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerQuestionParActivite" data-param="' + question.id + '" data-confirm="Supprimer cette question ?" title="Supprimer"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon" style="width:12px;height:12px;"></button>');
         }
         html.push('</div>');
     }
@@ -233,7 +233,7 @@ function rendreQuestionParActiviteHTML(question, index, parcours) {
         for (var em = 0; em < parcours.emotionsDisponibles.length; em++) {
             html.push('<span class="bilan-emotion-tag">');
             html.push(echapperHtml(parcours.emotionsDisponibles[em]));
-            html.push(' <button class="bilan-btn-mini" data-action="BilanReflexif.supprimerEmotion" data-param="' + em + '" title="Retirer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon" style="width:12px;height:12px;"></button>');
+            html.push(' <button class="bilan-btn-mini" data-action="BilanReflexif.supprimerEmotion" data-param="' + em + '" title="Retirer"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon" style="width:12px;height:12px;"></button>');
             html.push('</span>');
         }
         html.push('</div>');

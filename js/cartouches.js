@@ -86,13 +86,17 @@ async function obtenirCartouchesGrille(grilleId) {
  * @returns {Array} Liste des doublons {nom, count, ids}
  */
 function detecterDoublonsCartouches(cartouchesLocales, cartouchesBibliotheque) {
-    const toutesCartouches = [...cartouchesLocales, ...cartouchesBibliotheque];
-    const parNom = {};
+    const parId = new Map();
+    [...cartouchesLocales, ...cartouchesBibliotheque].forEach(cartouche => {
+        if (cartouche && cartouche.id && !parId.has(cartouche.id)) {
+            parId.set(cartouche.id, cartouche);
+        }
+    });
 
-    toutesCartouches.forEach(cartouche => {
+    const parNom = {};
+    parId.forEach(cartouche => {
         const nom = (cartouche.nom || '').trim().toLowerCase();
         if (!nom) return;
-
         if (!parNom[nom]) {
             parNom[nom] = { nom: cartouche.nom, count: 0, ids: [] };
         }

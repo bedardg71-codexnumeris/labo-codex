@@ -74,13 +74,17 @@ let critereEnEdition = null;
  * @returns {Array} Liste des doublons {nom, count, ids}
  */
 function detecterDoublonsGrilles(grillesLocales, grillesBibliotheque) {
-    const toutesGrilles = [...grillesLocales, ...grillesBibliotheque];
-    const parNom = {};
+    const parId = new Map();
+    [...grillesLocales, ...grillesBibliotheque].forEach(grille => {
+        if (grille && grille.id && !parId.has(grille.id)) {
+            parId.set(grille.id, grille);
+        }
+    });
 
-    toutesGrilles.forEach(grille => {
+    const parNom = {};
+    parId.forEach(grille => {
         const nom = (grille.nom || '').trim().toLowerCase();
         if (!nom) return;
-
         if (!parNom[nom]) {
             parNom[nom] = { nom: grille.nom, count: 0, ids: [] };
         }

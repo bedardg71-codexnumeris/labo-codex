@@ -212,10 +212,10 @@
         { id: 'obs-approfondir',     nom: 'Approfondir',      fichier: 'icons8-construction.svg',       categorie: 'observations' },
         { id: 'obs-attention',       nom: 'Attention',         fichier: 'icons8-high-risk.svg',          categorie: 'observations' },
         { id: 'obs-confusion',       nom: 'Confusion',         fichier: 'icons8-confusion-avec-pointe.svg', categorie: 'observations' },
-        { id: 'obs-hoc',             nom: "L'id. directrice",  fichier: 'icons8-development-skill.svg', categorie: 'observations' },
+        { id: 'obs-hoc',             nom: 'Id. directrice',    fichier: 'icons8-development-skill.svg', categorie: 'observations' },
         { id: 'obs-integration',     nom: 'Int\u00e9gration',  fichier: 'icons8-communication.svg',     categorie: 'observations' },
-        { id: 'obs-mecanisme',       nom: "L'id. principale",  fichier: 'icons8-gears.svg',         categorie: 'observations' },
-        { id: 'obs-procede',         nom: "L'id. secondaire",  fichier: 'icons8-advanced-search.svg', categorie: 'observations' },
+        { id: 'obs-mecanisme',       nom: 'Id. principale',    fichier: 'icons8-gears.svg',         categorie: 'observations' },
+        { id: 'obs-procede',         nom: 'Id. secondaire',    fichier: 'icons8-advanced-search.svg', categorie: 'observations' },
         { id: 'obs-relation',        nom: 'Relation',          fichier: 'icons8-link.svg',              categorie: 'observations' },
         { id: 'obs-repetition',      nom: 'R\u00e9p\u00e9tition', fichier: 'icons8-refresh.svg',           categorie: 'observations' },
         { id: 'obs-rupture',         nom: 'Rupture',           fichier: 'icons8-broken-link.svg',       categorie: 'observations' },
@@ -1559,7 +1559,7 @@
         // Boutons d'action
         html += '<div class="groupe-boutons-colonne">';
         html += '<div class="groupe-boutons-ligne">';
-        html += '<button id="travaux-btn-supprimer" class="btn btn-secondaire btn-tres-compact btn-icon-compact u-flex-1" data-action="travauxAnnotation.supprimerSelection" disabled title="Supprimer la s\u00e9lection (Delete)"><img src="' + ICONS_DIR + 'icon-trash.svg" alt="Supprimer" class="outil-svg-icon"></button>';
+        html += '<button id="travaux-btn-supprimer" class="btn btn-secondaire btn-tres-compact btn-icon-compact u-flex-1" data-action="travauxAnnotation.supprimerSelection" disabled title="Supprimer la s\u00e9lection (Delete)"><img src="' + ICONS_DIR + 'icons8-trash.svg" alt="Supprimer" class="outil-svg-icon"></button>';
         html += '<button id="travaux-btn-undo" class="btn btn-secondaire btn-tres-compact btn-icon-compact u-flex-1" data-action="travauxAnnotation.annuler" disabled title="Annuler (Ctrl+Z)"><img src="' + ICONS_DIR + 'icon-undo.svg" alt="Annuler" class="outil-svg-icon"></button>';
         html += '<button id="travaux-btn-redo" class="btn btn-secondaire btn-tres-compact btn-icon-compact u-flex-1" data-action="travauxAnnotation.retablir" disabled title="R\u00e9tablir (Ctrl+Y)"><img src="' + ICONS_DIR + 'icon-redo.svg" alt="R\u00e9tablir" class="outil-svg-icon"></button>';
         html += '</div>';

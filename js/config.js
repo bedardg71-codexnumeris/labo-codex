@@ -51,7 +51,7 @@ const configurationsOnglets = {
     ],
     'suivi': [
         { id: 'groupe', label: 'Suivi du groupe' },
-        { id: 'liste', label: 'Liste des élèves' },
+        { id: 'liste', label: 'Liste des étudiant·es' },
         { id: 'saisie', label: 'Saisie des présences' },
         { id: 'profil', label: 'Profils individuels' },
         { id: 'interventions', label: 'Interventions' },

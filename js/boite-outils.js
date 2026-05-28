@@ -780,7 +780,7 @@ function ouvrirModalParamsQuestions() {
                                 ${etatQuestions.categories.map(c => `
                                     <span class="questions-categorie-tag">
                                         ${echapperHtml(c.nom)}
-                                        <button class="questions-categorie-suppr" data-action="supprimerCategorie" data-param="${c.id}" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>
+                                        <button class="questions-categorie-suppr" data-action="supprimerCategorie" data-param="${c.id}" title="Supprimer"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>
                                     </span>
                                 `).join('')}
                             </div>
@@ -997,7 +997,7 @@ function rafraichirListeQuestionsModal() {
         listeCategories.innerHTML = etatQuestions.categories.map(c => `
             <span class="questions-categorie-tag">
                 ${echapperHtml(c.nom)}
-                <button class="questions-categorie-suppr" data-action="supprimerCategorie" data-param="${c.id}" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>
+                <button class="questions-categorie-suppr" data-action="supprimerCategorie" data-param="${c.id}" title="Supprimer"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>
             </span>
         `).join('');
     }

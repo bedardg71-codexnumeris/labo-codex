@@ -166,13 +166,17 @@ let echelleTemplateActuelle = null;
  * @returns {Array} Liste des doublons {nom, count, ids}
  */
 function detecterDoublonsEchelles(echellesLocales, echellesBibliotheque) {
-    const toutesEchelles = [...echellesLocales, ...echellesBibliotheque];
-    const parNom = {};
+    const parId = new Map();
+    [...echellesLocales, ...echellesBibliotheque].forEach(echelle => {
+        if (echelle && echelle.id && !parId.has(echelle.id)) {
+            parId.set(echelle.id, echelle);
+        }
+    });
 
-    toutesEchelles.forEach(echelle => {
+    const parNom = {};
+    parId.forEach(echelle => {
         const nom = (echelle.nom || '').trim().toLowerCase();
         if (!nom) return;
-
         if (!parNom[nom]) {
             parNom[nom] = { nom: echelle.nom, count: 0, ids: [] };
         }

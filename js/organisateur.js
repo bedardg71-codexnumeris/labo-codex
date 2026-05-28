@@ -960,7 +960,7 @@ function genererActiviteMiniHTML(noeud, carte, etape) {
         h += '<span class="org-duree">' + noeud.metadata.duree + ' min</span>';
     }
     if (etape) {
-        h += '<button class="org-ee-retirer" data-noeud="' + noeud.id + '" data-etape="' + etape + '" title="Retirer de cette étape"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>';
+        h += '<button class="org-ee-retirer" data-noeud="' + noeud.id + '" data-etape="' + etape + '" title="Retirer de cette étape"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>';
     }
     h += '</div>';
     return h;

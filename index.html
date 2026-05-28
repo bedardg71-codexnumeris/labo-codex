@@ -4120,7 +4120,7 @@
                     <div class="carte" id="carte-indicateurs-acpe">
                         <h3 class="carte-titre-bleu carte-titre-avec-toggle u-flex-between u-flex-wrap" style="gap: 0.5rem">
                             <div class="u-align-center" style="display: flex; gap: 0.5rem" data-tooltip="tdb-observer">
-                                <span>Observation des apprentissages</span>
+                                <span>Observation globale des indices d'engagement</span>
                                 <span class="emoji-container">
                                     <span class="primo-aide" data-target="note-indicateurs"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
                                 </span>
@@ -4186,7 +4186,7 @@
                     <div class="carte" id="carte-indicateurs-apprentissage" style="margin-top: 2rem;">
                         <h3 class="carte-titre-bleu carte-titre-avec-toggle u-flex-between u-flex-wrap" style="gap: 0.5rem">
                             <div class="u-align-center" style="display: flex; gap: 0.5rem" data-tooltip="tdb-intervenir">
-                                <span>Interventions pédagogiques</span>
+                                <span>Observation globale des besoins d'intervention</span>
                                 <span class="emoji-container">
                                     <span class="primo-aide" data-target="note-apprentissage"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
                                 </span>
@@ -4254,8 +4254,8 @@
                             <canvas id="graphique-groupe-moyennes"></canvas>
                         </div>
 
-                        <p class="text-muted u-mt-16 u-texte-petit u-texte-italic">
-                            💡 Clique sur une courbe ou un nom pour la verrouiller. Clique ailleurs pour déverrouiller.
+                        <p class="u-texte-gris u-mt-16 u-texte-075 u-texte-italic">
+                            Clique sur une courbe ou un nom pour la verrouiller. Clique ailleurs pour déverrouiller.
                         </p>
                     </div>
 
@@ -4331,8 +4331,8 @@
                             <canvas id="graphique-trajectoires-production"></canvas>
                         </div>
 
-                        <p class="text-muted u-mt-16 u-texte-petit u-texte-italic">
-                            💡 Clique sur une courbe ou un nom pour la verrouiller. Bascule la mesure pour voir la note finale ou explorer les habiletés une par une.
+                        <p class="u-texte-gris u-mt-16 u-texte-075 u-texte-italic">
+                            Clique sur une courbe ou un nom pour la verrouiller. Bascule la mesure pour voir la note finale ou explorer les habiletés une par une.
                         </p>
                     </div>
 
@@ -4560,7 +4560,7 @@
                                 <div id="planif-panneau-extra"></div>
                                 <div id="planif-panneau-clone-info" style="display:none"></div>
                                 <button class="planif-btn-cloner" id="planif-btn-cloner" data-tooltip="planif-cloner"><img src="icons/icon-copy.svg" alt="" class="btn-inline-icon"> Cloner</button>
-                                <button class="planif-btn-supprimer" id="planif-btn-supprimer" data-tooltip="planif-supprimer-noeud"><img src="icons/icon-trash.svg" alt="" class="btn-inline-icon"> Supprimer ce n&oelig;ud</button>
+                                <button class="planif-btn-supprimer" id="planif-btn-supprimer" data-tooltip="planif-supprimer-noeud"><img src="icons/icons8-trash.svg" alt="" class="btn-inline-icon"> Supprimer ce n&oelig;ud</button>
                             </div>
 
                             <div id="planif-panneau-seances">
@@ -7856,7 +7856,7 @@
 
             <!-- ===================================
      SECTION: SUIVI
-     Liste des élèves, saisie des présences, profils, interventions
+     Liste des étudiant·es, saisie des présences, profils, interventions
      =================================== -->
             <section id="section-suivi" class="section">
 
@@ -8065,7 +8065,7 @@
 
                 <div id="suivi-saisie" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
-                        <span>Enregistrement quotidien</span>
+                        <span>Saisie des présences</span>
                         <span class="titre-emoji-container">
                             <button class="btn-aide-contextuelle" data-aide="suivi-saisie" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>
                         </span>
@@ -8207,12 +8207,12 @@
 
                 <div id="suivi-interventions" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
-                        <span data-tooltip="interv-titre">Planification et documentation des interventions</span>
+                        <span data-tooltip="interv-titre">Interventions</span>
                         <span class="titre-emoji-container">
                             <button class="btn-aide-contextuelle" data-aide="interventions-planification" aria-label="Aide : planifier les interventions RàI"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>
                         </span>
                     </h2>
-                    <p class="text-muted">Gardez une trace des interventions de niveau 2 et 3</p>
+                    <p class="text-muted">Planification et documentation des interventions de niveau 2 et 3</p>
 
                     <!-- Conteneur pour la liste des interventions ou le formulaire -->
                     <div id="conteneurPrincipal">
@@ -13187,7 +13187,7 @@
                         <p class="mb-20">Le profil étudiant est l'outil central de diagnostic et d'intervention. Il est organisé en 3 grandes sections, chacune fournissant des informations complémentaires pour une vision complète de la progression de l'étudiant.</p>
 
                         <div class="alerte alerte-info">
-                            <strong>Accès :</strong> Suivi → Profils individuels OU Suivi → Liste des élèves → Cliquer sur un nom
+                            <strong>Accès :</strong> Suivi → Profils individuels OU Suivi → Liste des étudiant·es → Cliquer sur un nom
                         </div>
 
                         <hr class="separateur-section">
@@ -13472,7 +13472,7 @@
 
                             <p class="mt-10"><strong>Workflow recommandé pour révision complète :</strong></p>
                             <ol>
-                                <li>Aller dans Suivi → Liste des élèves</li>
+                                <li>Aller dans Suivi → Liste des étudiant·es</li>
                                 <li>Cliquer sur le premier étudiant</li>
                                 <li>Consulter les 3 sections du profil</li>
                                 <li>Prendre des notes d'intervention si nécessaire</li>

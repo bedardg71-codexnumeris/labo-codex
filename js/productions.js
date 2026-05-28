@@ -118,13 +118,17 @@ function trierListeProductions() {
  * @returns {Array} Liste des doublons {titre, count, ids}
  */
 function detecterDoublonsProductions(productionsLocales, productionsBibliotheque) {
-    const toutesProductions = [...productionsLocales, ...productionsBibliotheque];
-    const parTitre = {};
+    const parId = new Map();
+    [...productionsLocales, ...productionsBibliotheque].forEach(prod => {
+        if (prod && prod.id && !parId.has(prod.id)) {
+            parId.set(prod.id, prod);
+        }
+    });
 
-    toutesProductions.forEach(prod => {
+    const parTitre = {};
+    parId.forEach(prod => {
         const titre = (prod.titre || '').trim().toLowerCase();
         if (!titre) return;
-
         if (!parTitre[titre]) {
             parTitre[titre] = { titre: prod.titre, count: 0, ids: [] };
         }
@@ -132,7 +136,6 @@ function detecterDoublonsProductions(productionsLocales, productionsBibliotheque
         parTitre[titre].ids.push(prod.id);
     });
 
-    // Retourner uniquement ceux avec count > 1
     return Object.values(parTitre).filter(d => d.count > 1);
 }
 
