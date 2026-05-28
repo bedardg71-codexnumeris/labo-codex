@@ -16,6 +16,32 @@
     'use strict';
 
     /* ===============================
+       HELPERS SESSION (3 sessions : Hiver, Été, Automne)
+       Plages de mois de DÉBUT du trimestre (acté 28 mai 2026, calendrier
+       Cégep ; ex. été 2025 = 28 mai → 30 juin) :
+         Hiver   = janvier–avril   (1-4)
+         Été     = mai–juillet     (5-7)
+         Automne = août–décembre   (8-12)
+       Centralisés ici pour éviter la duplication des déductions binaires
+       legacy (jan-juin / juil-déc) dispersées dans le code.
+       =============================== */
+
+    function sessionDepuisMois(mois) {
+        if (mois >= 1 && mois <= 4) return 'H';
+        if (mois >= 5 && mois <= 7) return 'E';
+        return 'A'; // 8-12
+    }
+
+    function nomSession(lettre) {
+        switch (String(lettre || '').toUpperCase()) {
+            case 'H': return 'Hiver';
+            case 'E': return 'Été';
+            case 'A': return 'Automne';
+            default:  return String(lettre || '');
+        }
+    }
+
+    /* ===============================
        CONSTANTES
        =============================== */
 
@@ -166,9 +192,8 @@
         const moisActuel = maintenant.getMonth() + 1; // 1-12
         const anneeActuelle = maintenant.getFullYear();
 
-        // Déterminer quel trimestre devrait être actif
-        // Hiver (H) = janvier-juin, Automne (A) = août-décembre
-        const sessionAttendue = (moisActuel >= 1 && moisActuel <= 6) ? 'H' : 'A';
+        // Déterminer quel trimestre devrait être actif (3 sessions : H/E/A)
+        const sessionAttendue = sessionDepuisMois(moisActuel);
         const idAttendu = `${sessionAttendue.toLowerCase()}${anneeActuelle}`;
 
         // Chercher ce trimestre
@@ -179,9 +204,11 @@
             const tries = trimestres
                 .filter(t => t.id !== 'demo')
                 .sort((a, b) => {
-                    // Trier par année décroissante, puis H avant A
+                    // Trier par année décroissante, puis par session (H > E > A,
+                    // préserve l'ordre H avant A legacy, insère Été au milieu)
                     if (b.annee !== a.annee) return b.annee - a.annee;
-                    return (b.session === 'H' ? 1 : 0) - (a.session === 'H' ? 1 : 0);
+                    const rangSession = s => (s === 'H' ? 2 : s === 'E' ? 1 : 0);
+                    return rangSession(b.session) - rangSession(a.session);
                 });
             trimestreAGarder = tries[0];
         }
@@ -269,14 +296,14 @@
     /**
      * Crée un nouveau trimestre
      *
-     * @param {string} session - 'A' (Automne) ou 'H' (Hiver)
+     * @param {string} session - 'A' (Automne), 'H' (Hiver) ou 'E' (Été)
      * @param {string} annee - Année (ex: '2025', '2026')
      * @param {boolean} activerImmediatement - Si true, active ce trimestre
      * @returns {Object} Le trimestre créé
      */
     function creerTrimestre(session, annee, activerImmediatement = false) {
         const id = `${session.toLowerCase()}${annee}`;
-        const nom = `${session === 'H' ? 'Hiver' : 'Automne'} ${annee}`;
+        const nom = `${nomSession(session)} ${annee}`;
 
         const trimestres = obtenirTrimestres();
 
@@ -825,7 +852,7 @@
                 const date = new Date(dateDebut);
                 annee = date.getFullYear().toString();
                 const mois = date.getMonth() + 1; // 1-12
-                session = (mois >= 1 && mois <= 6) ? 'H' : 'A';
+                session = sessionDepuisMois(mois);
             }
         }
 
@@ -835,7 +862,7 @@
         }
 
         const trimestreId = `${session.toLowerCase()}${annee}`;
-        const nomTrimestre = `${session === 'H' ? 'Hiver' : 'Automne'} ${annee}`;
+        const nomTrimestre = `${nomSession(session)} ${annee}`;
 
         // Créer l'entrée dans le registre
         const nouveauTrimestre = {
@@ -918,7 +945,7 @@
                 const date = new Date(cadreCalendrier.dateDebut);
                 annee = date.getFullYear().toString();
                 const mois = date.getMonth() + 1;
-                session = (mois >= 1 && mois <= 6) ? 'H' : 'A';
+                session = sessionDepuisMois(mois);
             }
             if (session && annee) {
                 prefixe = `${session.toLowerCase()}${annee}_`;
@@ -1872,6 +1899,8 @@
     window.obtenirTrimestreActif = obtenirTrimestreActif;
     window.obtenirTrimestreId = obtenirTrimestreId;
     window.cle = cle;
+    window.sessionDepuisMois = sessionDepuisMois;
+    window.nomSession = nomSession;
     window.creerTrimestre = creerTrimestre;
     window.changerTrimestreActif = changerTrimestreActif;
     window.forcerMigration = forcerMigration;
