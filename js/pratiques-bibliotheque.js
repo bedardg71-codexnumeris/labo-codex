@@ -25,12 +25,12 @@ const CLE_BIBLIOTHEQUE_PRATIQUES = 'bibliothequePratiques';
  */
 const MODELES_PRATIQUES_PREDEFINIS = {
     // === PAN-SPÉCIFICATIONS ===
-    'SPE-francois': {
-        id: 'SPE-francois',
+    'SPE-chimie-contrats': {
+        id: 'SPE-chimie-contrats',
         nom: 'Modèle Chimie',
-        description: 'Basé sur une pratique en chimie',
+        description: 'Notation par contrats',
         type: 'pan-specifications',
-        auteur: 'Labo Codex',
+        auteur: 'Gabarit Labo Codex',
         discipline: 'Chimie',
         estGabarit: true,
         pratiques: ['SPE'],
@@ -70,30 +70,6 @@ const MODELES_PRATIQUES_PREDEFINIS = {
             ]
         }
     },
-    'SPE-litterature': {
-        id: 'SPE-litterature',
-        nom: 'Modèle littérature',
-        description: 'Adapté aux cours de français et littérature',
-        type: 'pan-specifications',
-        auteur: 'Labo Codex',
-        discipline: 'Français',
-        estGabarit: true,
-        pratiques: ['SPE'],
-        configuration: {
-            seuilAcceptable: 75,
-            typesTravaux: [
-                { id: 1, nom: 'Analyse littéraire', description: 'Analyse d\'un texte ou d\'une œuvre' },
-                { id: 2, nom: 'Dissertation', description: 'Texte argumentatif structuré' },
-                { id: 3, nom: 'Portfolio de lecture', description: 'Traces de lecture et réflexions' }
-            ],
-            forfaits: [
-                { id: 1, lettre: 'A', note: 100, travaux: { 1: 2, 2: 1, 3: 1 } },
-                { id: 2, lettre: 'B', note: 80, travaux: { 1: 2, 2: 1, 3: 0 } },
-                { id: 3, lettre: 'C', note: 60, travaux: { 1: 1, 2: 1, 3: 0 } }
-            ]
-        }
-    },
-
     // === PAN-STANDARDS ===
     'STD-n-meilleurs': {
         id: 'STD-n-meilleurs',
@@ -135,45 +111,12 @@ const MODELES_PRATIQUES_PREDEFINIS = {
             }
         }
     },
-    'STD-par-objectifs-comptage': {
-        id: 'STD-par-objectifs-comptage',
-        nom: 'Par objectifs (Comptage)',
-        description: 'Mode chimie : comptage d\'objectifs essentiels et complémentaires',
-        type: 'pan-standards',
-        auteur: 'Labo Codex',
-        discipline: 'Chimie',
-        estGabarit: true,
-        pratiques: ['STD'],
-        configuration: {
-            varianteCalcul: 'par-objectifs',
-            portfolio: {
-                methodeSelection: 'meilleurs',
-                nombreARetenir: 5,
-                minimumCompletion: 5,
-                nombreTotal: 10,
-                decouplerPN: true
-            },
-            parObjectifs: {
-                modeCalcul: 'comptage',
-                objectifs: [
-                    { id: 1, nom: 'Objectif 1', essentiel: true, ponderation: 0 },
-                    { id: 2, nom: 'Objectif 2', essentiel: true, ponderation: 0 },
-                    { id: 3, nom: 'Objectif 3', essentiel: false, ponderation: 0 }
-                ],
-                comptage: {
-                    seuilMaitrise: 75,
-                    plafondSiEssentielNonMaitrise: 55,
-                    grilleConversion: { 0: 0, 1: 33, 2: 67, 3: 100 }
-                }
-            }
-        }
-    },
     'STD-par-objectifs-pondere': {
         id: 'STD-par-objectifs-pondere',
         nom: 'Par objectifs (Pondéré)',
         description: 'Mode mathématiques : moyenne pondérée des objectifs',
         type: 'pan-standards',
-        auteur: 'Labo Codex',
+        auteur: 'Gabarit Labo Codex',
         discipline: 'Mathématiques',
         estGabarit: true,
         pratiques: ['STD'],
@@ -201,12 +144,12 @@ const MODELES_PRATIQUES_PREDEFINIS = {
     // PRATIQUE PERSONNALISÉE : Chimie organique
     // Standards avec critères par standard, meilleurs résultats (N=1)
     // ============================================================================
-    'STD-Bruno-Chimie': {
-        id: 'STD-Bruno-Chimie',
+    'STD-chimie-organique': {
+        id: 'STD-chimie-organique',
         nom: 'STD Chimie organique',
         description: 'Standards avec critères par standard, meilleurs résultats. Reprises illimitées au bureau.',
         type: 'pan-standards',
-        auteur: 'Labo Codex',
+        auteur: 'Gabarit Labo Codex',
         discipline: 'Chimie',
         estGabarit: true,
         pratiques: ['STD'],
@@ -248,12 +191,12 @@ const MODELES_PRATIQUES_PREDEFINIS = {
     // PRATIQUE PERSONNALISÉE : Informatique
     // 6 objectifs, tous niveau 3+ requis, calcul conditionnel
     // ============================================================================
-    'STD-Xavier-Info': {
-        id: 'STD-Xavier-Info',
+    'STD-info-interfaces-bd': {
+        id: 'STD-info-interfaces-bd',
         nom: 'STD Interfaces et BD',
         description: '6 objectifs requis niveau 3+. Base 80% + bonus 3.33% par niveau 4. Hybride STD/SPE.',
         type: 'pan-standards',
-        auteur: 'Labo Codex',
+        auteur: 'Gabarit Labo Codex',
         discipline: 'Informatique',
         estGabarit: true,
         pratiques: ['STD'],
@@ -303,12 +246,12 @@ const MODELES_PRATIQUES_PREDEFINIS = {
     // PRATIQUE PERSONNALISÉE : Administration
     // Sommative traditionnelle - Comptabilité et numérique
     // ============================================================================
-    'SOM-Etienne-Admin': {
-        id: 'SOM-Etienne-Admin',
+    'SOM-comptabilite': {
+        id: 'SOM-comptabilite',
         nom: 'SOM Comptabilité',
         description: 'Sommative traditionnelle. Examens écrits et travaux pratiques. Moyenne pondérée.',
         type: 'sommative',
-        auteur: 'Labo Codex',
+        auteur: 'Gabarit Labo Codex',
         discipline: 'Administration',
         etablissement: 'Cégep de l\'Abitibi-Témiscamingue',
         estGabarit: true,
@@ -336,12 +279,12 @@ const MODELES_PRATIQUES_PREDEFINIS = {
     // PRATIQUE PERSONNALISÉE : Géographie
     // Sommative traditionnelle - Introduction en géographie
     // ============================================================================
-    'SOM-Olivier-Geo': {
-        id: 'SOM-Olivier-Geo',
+    'SOM-geographie': {
+        id: 'SOM-geographie',
         nom: 'SOM Géographie',
         description: 'Sommative traditionnelle. Examens 55%, travaux pratiques 45%. Quiz formatifs non notés.',
         type: 'sommative',
-        auteur: 'Labo Codex',
+        auteur: 'Gabarit Labo Codex',
         discipline: 'Géographie',
         etablissement: 'Collège Montmorency',
         estGabarit: true,
@@ -369,12 +312,12 @@ const MODELES_PRATIQUES_PREDEFINIS = {
     // PRATIQUE PERSONNALISÉE : Philosophie
     // Sommative hybride avec portfolio formatif
     // ============================================================================
-    'SOM-Helene-Philo': {
-        id: 'SOM-Helene-Philo',
+    'SOM-philo-portfolio': {
+        id: 'SOM-philo-portfolio',
         nom: 'SOM Philo + Portfolio',
         description: 'Hybride sommative/PAN. Portfolio 30% avec progression évaluée, erreurs non pénalisées.',
         type: 'sommative',
-        auteur: 'Labo Codex',
+        auteur: 'Gabarit Labo Codex',
         discipline: 'Philosophie',
         etablissement: 'Cégep Gérald-Godin',
         estGabarit: true,
@@ -413,12 +356,12 @@ const MODELES_PRATIQUES_PREDEFINIS = {
     // PRATIQUE PERSONNALISÉE : Littérature
     // Sommative avec critères fixes et double verrou
     // ============================================================================
-    'SOM-MarieHelene-Litt': {
-        id: 'SOM-MarieHelene-Litt',
+    'SOM-litterature': {
+        id: 'SOM-litterature',
         nom: 'SOM Littérature',
         description: 'Sommative avec analyse finale 50% (double verrou). Portfolio 20%. Critères fixes.',
         type: 'sommative',
-        auteur: 'Labo Codex',
+        auteur: 'Gabarit Labo Codex',
         discipline: 'Littérature',
         etablissement: 'Cégep de Valleyfield',
         estGabarit: true,
@@ -458,12 +401,12 @@ const MODELES_PRATIQUES_PREDEFINIS = {
     // PRATIQUE PERSONNALISÉE : Biologie
     // PAN-Standards avec jugement global (holistique)
     // ============================================================================
-    'STD-Isabelle-Bio': {
-        id: 'STD-Isabelle-Bio',
+    'STD-anatomie': {
+        id: 'STD-anatomie',
         nom: 'STD Anatomie',
         description: 'PAN-Standards avec jugement global. 11 évaluations. Progression qualitative sans calcul strict.',
         type: 'pan-standards',
-        auteur: 'Labo Codex',
+        auteur: 'Gabarit Labo Codex',
         discipline: 'Biologie',
         etablissement: 'Cégep',
         estGabarit: true,
@@ -503,12 +446,12 @@ const MODELES_PRATIQUES_PREDEFINIS = {
     // PRATIQUE PERSONNALISÉE : Philosophie
     // Sommative avec mécanisme de remplacement
     // ============================================================================
-    'SOM-Jordan-Philo': {
-        id: 'SOM-Jordan-Philo',
+    'SOM-philo-remplacement': {
+        id: 'SOM-philo-remplacement',
         nom: 'SOM Philo + Remplacement',
         description: 'Sommative avec remplacement progressif. Note finale peut remplacer mi-session si supérieure.',
         type: 'sommative',
-        auteur: 'Labo Codex',
+        auteur: 'Gabarit Labo Codex',
         discipline: 'Philosophie',
         etablissement: 'Cégep',
         estGabarit: true,
