@@ -447,6 +447,33 @@ async function genererCodex(options = {}) {
    =============================== */
 
 /**
+ * #292 : détermine si une clé de stockage correspond à une bibliothèque
+ * partagée susceptible de contenir des doublons d'ID (collection d'objets
+ * avec .id). Utilisé par chargerCodex pour appliquer verifierUniciteIds
+ * avant restauration. Accepte les variantes namespacées (h2026_, a2025_).
+ *
+ * Liste alignée avec les sites qui appliquent déjà verifierUniciteIds dans
+ * import-export.js (echelles/grilles/productions/cartouches/pratiques).
+ */
+function _estBiblioPartagee(cle) {
+    if (typeof cle !== 'string') return false;
+    var cleBase = cle.replace(/^[ah]\d{4}_/, '');
+    var ciblesExactes = [
+        'grillesTemplates',
+        'echellesTemplates',
+        'pratiquesConfigurables',
+        'bibliothequePratiques',
+        'bibliothequeGrilles',
+        'bibliothequeEchelles',
+        'bibliothequeCartouches',
+        'bibliothequeProductions'
+    ];
+    if (ciblesExactes.indexOf(cleBase) !== -1) return true;
+    if (cleBase.indexOf('cartouches_') === 0) return true;
+    return false;
+}
+
+/**
  * Charge un Codex ZIP dans IndexedDB.
  * @param {File|Blob} fichierZip - Le fichier ZIP à charger
  * @returns {Promise<{manifeste: Object, stats: Object}>}
@@ -497,7 +524,18 @@ async function chargerCodex(fichierZip) {
     var entreesData = Object.entries(donnees).filter(function(e) { return !e[0].startsWith('_'); });
     let nbCles = 0;
     for (var i = 0; i < entreesData.length; i++) {
-        await db.set(entreesData[i][0], entreesData[i][1]);
+        var cleEntree = entreesData[i][0];
+        var valeurEntree = entreesData[i][1];
+        // #292 : filet anti-doublons. Si la clé est une bibliothèque partagée
+        // (collection d'objets avec .id), appliquer verifierUniciteIds avant
+        // l'écriture pour éviter de propager les doublons d'ID d'un codex source
+        // infecté. Les chemins d'import historiques ont parfois contourné
+        // verifierUniciteIds (cf. BACKLOG #292) — ce filet sécurise désormais
+        // toute restauration de codex.
+        if (_estBiblioPartagee(cleEntree) && Array.isArray(valeurEntree) && typeof window.verifierUniciteIds === 'function') {
+            valeurEntree = window.verifierUniciteIds(valeurEntree, cleEntree);
+        }
+        await db.set(cleEntree, valeurEntree);
         nbCles++;
         if (i % 10 === 0) {
             _majProgression(

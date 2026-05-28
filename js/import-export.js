@@ -3339,5 +3339,6 @@ window.filtrerRessourcesNonDemo = filtrerRessourcesNonDemo;
 window.assainirObjet = assainirObjet;
 window.assainirChaine = assainirChaine;
 window.SCHEMAS_IMPORT = SCHEMAS_IMPORT;
+window.verifierUniciteIds = verifierUniciteIds; // #292 : exposé pour chargerCodex (codex.js)
 
 })();
