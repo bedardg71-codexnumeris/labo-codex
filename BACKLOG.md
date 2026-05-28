@@ -4,7 +4,7 @@
 >
 > **Dernière bascule** : 25 mai 2026 fin de journée — extraction des items livrés vers BACKLOG-ARCHIVE.md.
 > **État courant** : Beta 99.66 (Build 0526-0503), HEAD main `4df4f21`. 28 items ouverts (session 26 mai matin : 3 items #278/#280/#281 livrés + 3 bugs testeurs résolus + 1 item #286 ajouté).
-> **Dernier ID utilisé** : #294 (configuration Netlify + Cloudflare pour la visite AQPC 3 juin, créé 28 mai 2026).
+> **Dernier ID utilisé** : #295 (diagnostic mémoire/quota avant chargement Codex sur iPad/iPhone, créé 28 mai 2026 PM).
 > **Présentation AQPC** : 3 juin 2026 (J−8).
 > **Pour ajouter un item** : `- [ ] **#XX** Description courte` + sous-puces de contexte. Dernier ID utilisé : **#285** (livré).
 
@@ -150,6 +150,18 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - **Lot A** (bouton aide ✴, 45 min) recommandé en premier — gros impact visuel, mapping unique.
 
 ### Codex / Onboarding
+
+- [ ] 🟡 **#295** Diagnostic mémoire/quota avant la tentative d'ouverture d'un Codex (Mac + iPad + iPhone)
+  - **Constat 28 mai 2026 PM** : Grégoire est actuellement incapable d'ouvrir un Codex sur son iPad parce que l'espace mémoire est saturé. La tentative échoue après coup, sans signal préalable. Conséquence directe : **ses tests sur iPad et iPhone sont limités** depuis plusieurs sessions — facteur d'incertitude pour le projet (le poste iPad reste un cas d'usage majeur).
+  - **Comportement actuel** : `chargerCodex` (`js/codex.js`) déclenche les écritures `db.set(cle, valeur)` sans vérification préalable de l'espace disponible côté navigateur. Sur iPad Safari avec quota saturé, l'opération avorte en cours ou laisse l'état partiellement écrit.
+  - **Comportement souhaité** :
+    1. AVANT toute écriture, appeler `navigator.storage.estimate()` (retourne `{quota, usage}` en octets, supporté Safari iOS 17+) et calculer le ratio + l'espace restant.
+    2. Calculer le poids du ZIP du codex à charger (somme des `JSON.stringify(valeur).length` à venir).
+    3. Si `usage + poidsCodex > quota * 0.9` → bloquer le chargement et afficher une modale d'avertissement : « Votre espace de stockage navigateur est presque plein (X Mo / Y Mo). Le codex que vous tentez d'ouvrir pèse Z Mo. Libérez de l'espace avant de continuer. » + bouton « Voir comment libérer de l'espace » (renvoie vers une mini-doc avec Réglages Safari iOS).
+    4. Si ratio > 0.95 → bouton « Forcer le chargement » désactivé. Sinon proposer le forçage avec avertissement explicite (état partiel possible).
+  - **Affichage permanent suggéré** : badge discret quelque part dans les Réglages ou l'En-tête « Stockage : X% utilisé » (mêmes calculs) pour donner à l'utilisateur une visibilité en continu sur son quota.
+  - **Effort estimé** : 1-2 h pour le diagnostic préventif + modale. +1 h pour l'affichage permanent du quota.
+  - **Tests iPad/iPhone** : Grégoire devra vider partiellement son cache avant de pouvoir tester sur ses propres devices. Alternative : tester sur iPad/iPhone d'un tiers, ou en simulation desktop (DevTools Safari → quota artificiel).
 
 - [ ] 🟢 **#233** Simplifier le flux Codex pour l'utilisateur lambda (Mac + iPad)
   - Concept de fichier ZIP transportable complexe pour non-technicien. Safari sans FSAPI (chaque save = nouveau téléchargement). iPad WebKit imposé.

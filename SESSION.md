@@ -17,6 +17,25 @@
 
 ---
 
+## Note de relance — 28 mai 2026 après-midi
+
+Prémisse de la commande de relance reçue : HEAD attendu au commit final du 26 mai PM (~`0526-1120`) et un Lot A « nettoyage ✴ » d'environ 76 occurrences à exécuter.
+
+Audit réel à l'ouverture de session :
+
+| Vérification | Attendu par la prémisse | Réel mesuré |
+|---|---|---|
+| HEAD `main` | commit du 26 mai PM | `e307415` du 28 mai matin |
+| Occurrences `✴` / `✴️` dans `*.js` + `*.html` | ~76 | **0** |
+| Suite de tests | 103/103 (85 Vitest + 18 Playwright) | **106/106** (88 Vitest + 18 Playwright) |
+| État branche | main propre | à jour avec `origin/main`, tracked propre |
+
+Lecture : la prémisse est en retard de deux cycles. Les sessions du 27 mai matin (refonte UI), 27 mai PM (chantiers correctifs iPhone 1+2+3) et 28 mai matin (vérification visuelle 7 zones + 5 fix iPhone) sont déjà mergées. Le **Lot A « nettoyage ✴ » a été livré dès le commit `11f87a1` du 27 mai PM** (« retrait des émojis dans l'interface visible utilisateur — chantier 1 responsive iPhone »). Aucune action à prendre côté ✴.
+
+Cap conservé : on reste sur la priorité déjà inscrite en ligne 14 ci-dessus — **BACKLOG #290 (intégration des 4 pratiques personnelles anonymisées au seed `MODELES_PRATIQUES_PREDEFINIS`, à livrer AVANT AQPC du 3 juin)**.
+
+---
+
 ## §0 — Récap session 28 mai 2026 matin (vérification visuelle Mac 7 zones + correctifs iPhone 5 points)
 
 **Beta / build** : 99.71 conservée (aucun bump beta). Builds b0528-0342 → b0528-0644 (~15 bumps de build successifs au fil des fix). HEAD main au moment du relai : `a8ff194`.
