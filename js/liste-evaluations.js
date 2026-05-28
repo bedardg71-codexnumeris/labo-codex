@@ -1923,11 +1923,11 @@ function evaluerProduction(da, productionId) {
 function dupliquerEvaluation(evaluationId) {
     // TODO: Implémenter la duplication
 
-    if (!confirm('Veux-tu dupliquer cette évaluation pour un autre élève ?')) {
+    if (!confirm('Veux-tu dupliquer cette évaluation pour un·e autre étudiant·e ?')) {
         return;
     }
 
-    alert('Duplication à implémenter: sélection de l\'élève cible');
+    alert('Duplication à implémenter: sélection de l\'étudiant·e cible');
 }
 
 /**

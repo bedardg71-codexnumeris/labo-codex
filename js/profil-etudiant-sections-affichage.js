@@ -1132,7 +1132,7 @@ function genererSectionAccompagnement(da) {
                             ${forcesSolo.filter(f => f.valeur >= 0.85).map(f => f.nom).join(', ')} : Maîtrisé et étendu (E)
                         </div>
                         <div class="profil-texte-explicatif">
-                            À ce niveau abstrait étendu, l'élève a la capacité de généraliser la structure au-delà de l'information donnée. Il comprend et il est capable de transférer ses apprentissages à des contextes proches.
+                            À ce niveau abstrait étendu, l'étudiant·e a la capacité de généraliser la structure au-delà de l'information donnée. Il/elle comprend et il/elle est capable de transférer ses apprentissages à des contextes proches.
                         </div>
                     </div>
                 </div>
@@ -1151,7 +1151,7 @@ function genererSectionAccompagnement(da) {
                             ${forcesSolo.filter(f => f.valeur >= seuilMaitrise && f.valeur < 0.85).map(f => f.nom).join(', ')} : Maîtrisé (M)
                         </div>
                         <div class="profil-texte-explicatif">
-                            À ce niveau relationnel, l'élève peut comprendre, lier et intégrer plusieurs aspects d'une réponse dans un tout cohérent. Il voit plusieurs aspects d'une situation et sait l'aborder de différentes façons.
+                            À ce niveau relationnel, l'étudiant·e peut comprendre, lier et intégrer plusieurs aspects d'une réponse dans un tout cohérent. Il/elle voit plusieurs aspects d'une situation et sait l'aborder de différentes façons.
                         </div>
                     </div>
                 </div>
@@ -1170,7 +1170,7 @@ function genererSectionAccompagnement(da) {
                             ${defisSolo.filter(d => d.valeur >= obtenirSeuil('idme.insuffisant') && d.valeur < seuilDeveloppement).map(d => d.nom).join(', ')} : En développement (D)
                         </div>
                         <div class="profil-texte-explicatif">
-                            À ce niveau multistructurel, l'élève peut se concentrer sur plusieurs points pertinents à la fois. Cependant, il les considère indépendamment.
+                            À ce niveau multistructurel, l'étudiant·e peut se concentrer sur plusieurs points pertinents à la fois. Cependant, il/elle les considère indépendamment.
                         </div>
                     </div>
                 </div>
@@ -1189,7 +1189,7 @@ function genererSectionAccompagnement(da) {
                             ${defisSolo.filter(d => d.valeur < obtenirSeuil('idme.insuffisant')).map(d => d.nom).join(', ')} : Incomplet (I)
                         </div>
                         <div class="profil-texte-explicatif">
-                            À ce niveau unistructurel, l'élève ne traite que d'un seul aspect du savoir ou d'un savoir-faire à la fois. L'élève n'a pas encore de réelle compréhension.
+                            À ce niveau unistructurel, l'étudiant·e ne traite que d'un seul aspect du savoir ou d'un savoir-faire à la fois. L'étudiant·e n'a pas encore de réelle compréhension.
                         </div>
                     </div>
                 </div>
@@ -2278,7 +2278,7 @@ function afficherProfilComplet(daOuEl) {
     // 1. Résolution étudiant + état pivot atomique
     const { da, etudiants, eleve } = _resoudreEtudiantProfil(daOuEl);
     if (!eleve) {
-        alert('Élève introuvable');
+        alert('Étudiant·e introuvable');
         return;
     }
 
@@ -2731,8 +2731,8 @@ function genererSectionProductions(da) {
         const enteteBandeauPlafonnement = portfolio.plafonnement ? `
             <div class="alerte alerte-attention" style="margin-bottom: 15px;">
                 ${portfolio.plafonnement.echec
-                    ? `<strong>Échec automatique :</strong> L'élève n'a remis que ${portfolio.nombreEvalues} production${portfolio.nombreEvalues > 1 ? 's' : ''} sur les ${portfolio.minimumRequis} requises. Selon les règles de conformité, un déficit de ${portfolio.plafonnement.deficit} production${portfolio.plafonnement.deficit > 1 ? 's' : ''} ou plus entraîne un échec automatique.`
-                    : `<strong>Note plafonnée :</strong> L'élève n'a remis que ${portfolio.nombreEvalues} production${portfolio.nombreEvalues > 1 ? 's' : ''} sur les ${portfolio.minimumRequis} requises. Selon les règles de conformité, un déficit de ${portfolio.plafonnement.deficit} production${portfolio.plafonnement.deficit > 1 ? 's' : ''} plafonne la note du portfolio au niveau ${portfolio.plafonnement.niveauCode} (maximum ${portfolio.plafonnement.seuilMax}%).`
+                    ? `<strong>Échec automatique :</strong> L'étudiant·e n'a remis que ${portfolio.nombreEvalues} production${portfolio.nombreEvalues > 1 ? 's' : ''} sur les ${portfolio.minimumRequis} requises. Selon les règles de conformité, un déficit de ${portfolio.plafonnement.deficit} production${portfolio.plafonnement.deficit > 1 ? 's' : ''} ou plus entraîne un échec automatique.`
+                    : `<strong>Note plafonnée :</strong> L'étudiant·e n'a remis que ${portfolio.nombreEvalues} production${portfolio.nombreEvalues > 1 ? 's' : ''} sur les ${portfolio.minimumRequis} requises. Selon les règles de conformité, un déficit de ${portfolio.plafonnement.deficit} production${portfolio.plafonnement.deficit > 1 ? 's' : ''} plafonne la note du portfolio au niveau ${portfolio.plafonnement.niveauCode} (maximum ${portfolio.plafonnement.seuilMax}%).`
                 }
             </div>
         ` : '';

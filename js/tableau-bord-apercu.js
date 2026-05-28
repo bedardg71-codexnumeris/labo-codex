@@ -1995,7 +1995,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
             const etudiantsRef = afficherPan ? etudiantsPAN : etudiantsSOM;
             const nbAvecEval = etudiantsRef.filter(e => !e.sansEvaluation).length;
             const nbSans = etudiantsRef.length - nbAvecEval;
-            titreInfo = ` title="Moyenne sur ${nbAvecEval} élèves ayant au moins 1 évaluation (${nbSans} exclus). La liste des individus inclut tous les élèves."`;
+            titreInfo = ` title="Moyenne sur ${nbAvecEval} étudiant·e·s ayant au moins 1 évaluation (${nbSans} exclu·e·s). La liste des individus inclut tous les étudiant·e·s."`;
         }
         moyennePositionneeHTML = `<div${titreInfo} style="cursor: help; position: absolute; top: -20px; left: ${positionMoyenne}%; transform: translateX(-50%); z-index: 10; font-size: 0.9rem; font-weight: 700; color: ${couleurMoyenne};">${moyenneAffichee}%</div>`;
     }
@@ -2599,7 +2599,7 @@ function afficherAlerteNonParticipation(etudiants) {
     const nbEleves = nonParticipants.length;
     const html = `
         <div class="alerte-non-participation info-box info-box--attention" style="margin: 16px 20px 0;">
-            <strong>&#9888;&#65039; ${nbEleves} élève${nbEleves > 1 ? 's' : ''} présent${nbEleves > 1 ? 's' : ''} sans aucune production remise</strong>
+            <strong>&#9888;&#65039; ${nbEleves} étudiant·e${nbEleves > 1 ? '·s' : ''} présent·e${nbEleves > 1 ? '·s' : ''} sans aucune production remise</strong>
             <ul style="margin: 6px 0 0 16px; padding: 0; list-style: none;">
                 ${lignes}
             </ul>
@@ -2968,7 +2968,7 @@ function _sousTitreTrajectoires(mesure, termeSingulier) {
         }
         if (val !== '') {
             const opt = selecteur.options[selecteur.selectedIndex];
-            const nom = opt ? opt.textContent.replace(/\s*\(inactif\)\s*$/, '') : 'l\'élève';
+            const nom = opt ? opt.textContent.replace(/\s*\(inactif\)\s*$/, '') : 'l\'étudiant·e';
             return 'Habiletés de ' + nom + ', par ' + termeSingulier;
         }
         return 'Médiane du groupe par habileté, par ' + termeSingulier;

@@ -3592,10 +3592,10 @@ function afficherLeconOrganisateur() {
     } else if (ideesM.length === 1) {
         var titre = (ideesM[0].titre || '...').toLowerCase();
         var prefixe = /^[aeiouyàâéèêëïîôùûüæœh]/i.test(titre) ? "d'" : 'de ';
-        objContenu.textContent = 'Au terme de la leçon, l\'élève sera capable ' + prefixe + titre + '.';
+        objContenu.textContent = 'Au terme de la leçon, l\'étudiant·e sera capable ' + prefixe + titre + '.';
         objContenu.classList.remove('planif-org-placeholder');
     } else {
-        var html = 'Au terme de la leçon, l\u2019élève sera capable\u00a0:<br>';
+        var html = 'Au terme de la leçon, l\u2019étudiant·e sera capable\u00a0:<br>';
         for (var k = 0; k < ideesM.length; k++) {
             var t = (ideesM[k].titre || '...').toLowerCase();
             var p = /^[aeiouyàâéèêëïîôùûüæœh]/i.test(t) ? "d'" : 'de ';

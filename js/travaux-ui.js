@@ -1197,7 +1197,7 @@
                 <!-- Trimestre complet -->
                 <div class="travaux-archivage-carte">
                     <h4>Trimestre complet</h4>
-                    <p class="texte-muted">Toutes les productions en PDF classées par élève + évaluations en JSON</p>
+                    <p class="texte-muted">Toutes les productions en PDF classées par étudiant·e + évaluations en JSON</p>
                     <div class="travaux-archivage-filtres">
                         <div class="groupe-form">
                             <label>Production</label>

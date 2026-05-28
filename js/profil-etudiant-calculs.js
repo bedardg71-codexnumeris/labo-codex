@@ -1046,7 +1046,7 @@ function determinerNiveauRaiPedagogique(da) {
                 label: 'Non-participation',
                 pattern: 'Non-participation',
                 defi: 'Aucun',
-                description: 'Élève présent en classe mais aucune production remise. Profil prioritaire nécessitant une intervention immédiate.',
+                description: 'Étudiant·e présent·e en classe mais aucune production remise. Profil prioritaire nécessitant une intervention immédiate.',
                 badgeClasse: 'badge-rai-3',
                 patternBadge: 'badge-pattern-difficulte-persistante',
                 donneesSuffisantes: false,
@@ -1181,7 +1181,7 @@ function determinerAlerteContextuelle(da) {
         return {
             niveau: 'tres-favorable',
             label: 'Très favorable',
-            description: 'Contexte très favorable. L\'élève est assidu et mobilisé.',
+            description: 'Contexte très favorable. L\'étudiant·e est assidu·e et mobilisé·e.',
             badgeClasse: 'badge-engagement-tres-favorable',
             A: (A * 100).toFixed(0) + '%',
             C: (C * 100).toFixed(0) + '%',
@@ -1194,7 +1194,7 @@ function determinerAlerteContextuelle(da) {
         return {
             niveau: 'favorable',
             label: 'Favorable',
-            description: 'Contexte favorable. L\'élève est présent et mobilisé.',
+            description: 'Contexte favorable. L\'étudiant·e est présent·e et mobilisé·e.',
             badgeClasse: 'badge-engagement-favorable',
             A: (A * 100).toFixed(0) + '%',
             C: (C * 100).toFixed(0) + '%',
@@ -1224,7 +1224,7 @@ function determinerAlerteContextuelle(da) {
             badgeClasse: 'badge-engagement-fragile',
             A: (A * 100).toFixed(0) + '%',
             C: (C * 100).toFixed(0) + '%',
-            recommandation: 'Interventions recommandées : Rencontrer l\'élève pour comprendre les absences/non-remises, encourager la mobilisation, vérifier s\'il y a des obstacles (emploi, santé, etc.).'
+            recommandation: 'Interventions recommandées : Rencontrer l\'étudiant·e pour comprendre les absences/non-remises, encourager la mobilisation, vérifier s\'il y a des obstacles (emploi, santé, etc.).'
         };
     }
 

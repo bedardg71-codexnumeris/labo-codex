@@ -583,7 +583,7 @@ function mettreAJourEntetesAvecCorrelations(r_AP, r_CP, r_PatternP, r_RaiP, r_In
     }
     if (corrInterv) {
         corrInterv.textContent = fmtCorr(r_IntervP);
-        corrInterv.title = tooltipCorr(r_IntervP, 'le nombre d\'interventions', 'Sens attendu : négatif (plus d\'interventions = élève en plus grande difficulté).');
+        corrInterv.title = tooltipCorr(r_IntervP, 'le nombre d\'interventions', 'Sens attendu : négatif (plus d\'interventions = étudiant·e en plus grande difficulté).');
     }
 
 }
@@ -636,7 +636,7 @@ function toggleFiltreMinimum(actif) {
     if (moyP) {
         moyP.textContent = fmtMoy(moy.P);
         if (actif && window._moyennesQualifies) {
-            moyP.title = 'Moyenne P sur ' + window._moyennesQualifies.nb + ' élèves qualifiés (≥ minimum). ' + window._moyennesQualifies.nbInsuffisants + ' exclus.';
+            moyP.title = 'Moyenne P sur ' + window._moyennesQualifies.nb + ' étudiant·e·s qualifié·e·s (≥ minimum). ' + window._moyennesQualifies.nbInsuffisants + ' exclu·e·s.';
         }
     }
 }
