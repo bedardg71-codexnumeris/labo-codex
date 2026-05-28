@@ -1,8 +1,9 @@
 # ADR-008 : Cloudflare Access pour authentification
 
-**Statut** : Accepté (en production)
+**Statut** : **Révisé — retiré le 28 mai 2026** (cf. Notes de révision §28 mai 2026 ci-dessous)
 **Date de décision originale** : décembre 2025 - janvier 2026 (déploiement initial avec Beta 95 pour une première phase d'invitations alpha)
 **Formalisation ADR** : 14 mai 2026 (corrigé après le sous-audit 4.4 qui a confirmé que l'implémentation est en production, contrairement à la rédaction initiale de cet ADR qui supposait à tort un déploiement à venir)
+**Date de retrait** : 28 mai 2026 (préparation AQPC du 3 juin)
 **Auteur** : Grégoire Bédard
 
 ---
@@ -86,6 +87,57 @@ Aurait été pertinent si le projet restait limité au cégep. **Écartée** par
 ---
 
 ## Notes de révision
+
+**Révision 28 mai 2026 — retrait du Cloudflare Access**
+
+Décision actée par Grégoire le 28 mai 2026 PM (J−6 avant AQPC) : le
+Cloudflare Access est retiré, l'application `app.codexnumeris.org`
+devient publiquement accessible sans authentification.
+
+**Motivations** :
+- **Préparation AQPC** : permettre aux visiteurs de la conférence du
+  3 juin 2026 de tester l'application sans procédure d'inscription
+  préalable.
+- **Friction technique observée** : le challenge bot Cloudflare Bot
+  Management bloquait certains clients non-browser et risquait de
+  bloquer des appareils anciens / réseaux institutionnels stricts.
+- **Saturation du quota gratuit** : 50 utilisateurs maximum, dont 47
+  postes encore disponibles, mais Grégoire choisit de libérer toute
+  la liste plutôt que de la gérer.
+- **Constat d'usage alpha** : la phase janvier-mai 2026 a confirmé que
+  la liste blanche seule, sans accompagnement structuré, ne suffit pas
+  à enclencher un engagement. L'AQPC du 3 juin est la première vraie
+  amorce d'une vague significative.
+
+**Conséquences acceptées** :
+- **Perte des logs d'accès individuels** par identité courriel. Les
+  logs de janvier-mai 2026 avaient déjà été purgés automatiquement
+  par Cloudflare (rétention 24 h sur plan gratuit) — la perte
+  prospective est l'élément nouveau.
+- **Plus de base de consentement explicite Loi 25** par liste blanche.
+  `PRIVACY.md` (§3.3, §6, §7) doit être révisé séparément — inscrit
+  au BACKLOG comme `#298`.
+- **Voûte future** (cf. §Contexte) devra avoir son propre contrôle
+  d'accès au niveau applicatif si elle est implémentée — ce qui
+  était déjà la posture initiale (l'ADR-008 ne couvrait pas la Voûte
+  par sa politique).
+- **Reposture de sécurité** : l'application reste 100 % hors-ligne par
+  conception (ADR-003). Aucune donnée pédagogique ne transite par
+  Cloudflare ni Netlify. Le risque résiduel est limité à : (i) scraping
+  des assets statiques publics, (ii) DoS absorbable par le CDN
+  Cloudflare, (iii) image / réputation (n'importe qui peut maintenant
+  prendre des captures d'écran et publier).
+
+**Décision réversible** : la procédure documentée dans DEPLOY.md §3 (en
+version 1.0 puis conservée en historique en version 1.1) reste valide
+pour remettre Cloudflare Access en place en quelques minutes si une
+des conséquences acceptées devient bloquante.
+
+**Statut applicatif** : aucun changement de code. Le contrat reste « app
+servie telle quelle depuis Netlify, derrière DNS Cloudflare proxy
+orange » ; seule la couche Access intermédiaire est retirée.
+
+---
 
 **Révision 14 mai 2026** (initiale) : la première rédaction de cet ADR (commit `d571d90`) supposait à tort que Cloudflare Access était au statut « Proposé, implémentation à venir juin 2026 ». Le sous-audit 4.4 Reproductibilité du déploiement (commit suivant) a confirmé que Cloudflare Access est en production depuis janvier 2026 (Beta 95). Le statut, la date originale et les caractéristiques ont été corrigés. Le « juin 2026 » du `docs/CALENDRIER.md` désigne **l'ouverture à un public plus large**, pas le démarrage du déploiement.
 

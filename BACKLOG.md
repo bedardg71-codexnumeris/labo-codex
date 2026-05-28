@@ -4,7 +4,7 @@
 >
 > **Dernière bascule** : 25 mai 2026 fin de journée — extraction des items livrés vers BACKLOG-ARCHIVE.md.
 > **État courant** : Beta 99.66 (Build 0526-0503), HEAD main `4df4f21`. 28 items ouverts (session 26 mai matin : 3 items #278/#280/#281 livrés + 3 bugs testeurs résolus + 1 item #286 ajouté).
-> **Dernier ID utilisé** : #297 (dette technique : duplication des règles CSS entre <style> inline d'index.html et styles.css, créé 28 mai 2026 PM).
+> **Dernier ID utilisé** : #298 (révision PRIVACY.md suite au retrait Cloudflare Access, créé 28 mai 2026 PM dans le cadre du chantier #294).
 > **Présentation AQPC** : 3 juin 2026 (J−8).
 > **Pour ajouter un item** : `- [ ] **#XX** Description courte` + sous-puces de contexte. Dernier ID utilisé : **#285** (livré).
 
@@ -85,11 +85,19 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - **Effort estimé** : 1-2 h (refactor + extension aux 5 sites + tests visuels modes sombre/clair).
   - **Capture déclencheuse** : Grégoire 27 mai 2026 matin (modale Personnaliser tampons, picker macOS ouvert sans indication de la couleur active).
 
-- [ ] ⚠️ 🟡 **#294** Configurer Netlify + Cloudflare pour accueillir la visite AQPC du 3 juin
+- [x] ⚠️ 🟡 **#294** Configurer Netlify + Cloudflare pour accueillir la visite AQPC du 3 juin
   - **Acté par Grégoire 28 mai 2026 matin** : à faire en PM, avant AQPC.
-  - **Netlify** : vérifier que le déploiement automatique depuis main fonctionne, que `netlify.toml` (headers Cache-Control déjà bien configurés) est respecté, que le domaine `app.codexnumeris.org` pointe bien sur le bon site Netlify. Vérifier les analytics/logs Netlify pour anticiper la charge AQPC.
-  - **Cloudflare** : vérifier les règles de cache (que `Cache-Control: must-revalidate` du origin Netlify n'est PAS écrasé par une règle « Cache Everything » Cloudflare). Préparer le bouton **Purge Cache** au cas où un correctif post-démo doit être pushé. Vérifier SSL/TLS (Full strict recommandé), WAF (challenge bot actif observé le 28 mai matin — éventuellement assouplir pour les visiteurs AQPC qui pourraient être bloqués).
-  - **Effort estimé** : 1-2 h (vérifications de configuration + tests croisés navigateurs).
+  - **Décision majeure 28 mai 2026 PM** : retrait complet du Cloudflare Access pour ouvrir l'app publiquement (élimine le challenge bot bloquant, élimine la friction OTP pour les expérimentateurs AQPC, libère la liste blanche). Cf. ADR-008 révisé + DEPLOY.md v1.1.
+  - **Audit local livré** : `netlify.toml` ✅ propre (Cache-Control corrects). `labo.codexnumeris.org` n'a plus de DNS → URL réelle `app.codexnumeris.org` (substitution dans DEPLOY.md).
+  - **Action restante côté dashboard Grégoire** : levée effective du Cloudflare Access dans le tableau Zero Trust + re-test public. Procédure dans la note de session.
+  - **Post-AQPC** : `#298` créé pour révision PRIVACY.md (posture Loi 25 sans liste blanche).
+
+- [ ] 🟡 **#298** Révision PRIVACY.md suite au retrait du Cloudflare Access
+  - **Origine** : décision du 28 mai 2026 PM (cf. ADR-008 révisé) — l'app `app.codexnumeris.org` est désormais publique sans liste blanche d'emails.
+  - **Sections impactées dans PRIVACY.md** : §3.3 (Données d'accès Cloudflare Access), §6 (Cloudflare Access — entière), §7 (sécurité du canal Navigateur ↔ Cloudflare Access).
+  - **Question posture Loi 25** : la liste blanche servait de base de consentement explicite. Sans elle, quel est le nouveau cadre de consentement pour les visiteurs publics ? Bannière d'accueil ? Lien permanent vers `PRIVACY.md` ? À trancher avant de retoucher PRIVACY.md.
+  - **Effort estimé** : 2-3 h (analyse posture + rédaction + revue croisée avec ADR-008).
+  - **Priorité** : post-AQPC, pas bloquant pour la conférence (l'app n'expose aucune donnée utilisateur côté serveur — l'enjeu est documentaire et de conformité formelle).
 
 - [ ] 🟢 **#293** Toggle « Masquer les items déjà dans la barre latérale » en section 2 des modales bibliothèque
   - **Constat 28 mai 2026** (Bibliothèque de grilles de Grégoire) : la Section 2 montre toutes les entrées de la biblio partagée, y compris celles « Déjà dans la barre latérale ». Quand le ratio biblio/sidebar est lourd (ex. 5 entrées biblio pour 3 grilles sidebar = anciennes variantes accumulées), l'affichage devient encombrant et donne une fausse impression de doublons.

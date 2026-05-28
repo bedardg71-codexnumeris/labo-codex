@@ -1,6 +1,6 @@
 # Guide de déploiement — Labo Codex
 
-> **Version** : 1.0 (DRAFT du 22 mai 2026, soumis à validation)
+> **Version** : 1.1 (28 mai 2026 — substitution domaine `labo` → `app` + acte la levée du Cloudflare Access)
 > **Public** : Grégoire Bédard (mainteneur principal) + co-mainteneur éventuel
 > **Document apparenté** : [`PRIVACY.md`](PRIVACY.md), [`INCIDENTS.md`](INCIDENTS.md)
 
@@ -48,16 +48,21 @@ pour les personnes invitées.
 |---|---|---|
 | **GitHub** | Dépôt source, branche `main` = vérité | Gratuit (dépôt public) |
 | **Netlify** | Build + hébergement statique de l'application | Plan gratuit |
-| **Cloudflare DNS** | Résolution DNS du domaine `labo.codexnumeris.org` | Gratuit |
-| **Cloudflare Access** | Contrôle d'accès Zero Trust (OTP par courriel) | Plan gratuit (50 utilisateurs max — actuellement saturé) |
+| **Cloudflare DNS** | Résolution DNS du domaine `app.codexnumeris.org` | Gratuit |
+| **Cloudflare Access** | ~~Contrôle d'accès Zero Trust (OTP par courriel)~~ **Retiré le 28 mai 2026 en préparation AQPC** — voir §3 | n/a |
 
 ### 1.2 URL et domaines
 
 | URL | Rôle | Accessible |
 |---|---|---|
-| `labocodex.netlify.app` | URL Netlify par défaut | *À confirmer — restreinte par Cloudflare Access ?* |
-| `labo.codexnumeris.org` | URL publique principale | Soumise à Cloudflare Access (liste blanche) |
+| `labocodex.netlify.app` | URL Netlify par défaut | Accessible — origin Netlify, derrière le DNS Cloudflare via CNAME |
+| `app.codexnumeris.org` | URL publique principale | **Publique** depuis le 28 mai 2026 (Cloudflare Access retiré) |
 | `github.com/bedardg71-codexnumeris/Monitorage_v6` | Code source | Public en lecture |
+
+⚠️ L'ancien sous-domaine `labo.codexnumeris.org` (référencé dans la
+version 1.0 de ce document) n'a plus d'enregistrement DNS et n'est
+plus utilisé. Toute mention résiduelle dans la documentation est
+obsolète.
 
 ### 1.3 Principe directeur
 
@@ -92,11 +97,11 @@ est servie telle quelle, pas de transpilation/bundling).
    git push origin main
    ```
 6. **Netlify déclenche le build automatiquement** (webhook GitHub → Netlify).
-7. Le déploiement est en ligne en **~30-60 secondes** sur `labo.codexnumeris.org`.
+7. Le déploiement est en ligne en **~30-60 secondes** sur `app.codexnumeris.org`.
 
 ### 2.2 Vérification post-déploiement
 
-1. Ouvrir `labo.codexnumeris.org` dans un onglet **privé** (pour forcer un
+1. Ouvrir `app.codexnumeris.org` dans un onglet **privé** (pour forcer un
    nouveau login Cloudflare Access).
 2. Vérifier dans l'en-tête de l'application :
    - Numéro de Beta affiché correspond à `version.json`.
@@ -115,7 +120,35 @@ sur `main` — pas de configuration ad hoc dans le dashboard Netlify.
 
 ---
 
-## 3. Configuration Cloudflare Access (pas-à-pas)
+## 3. Configuration Cloudflare Access (HISTORIQUE — retiré le 28 mai 2026)
+
+> **⚠️ Section conservée à titre historique et pour permettre une réactivation rapide.**
+>
+> **Décision du 28 mai 2026** : retrait complet du Cloudflare Access en
+> préparation de la présentation AQPC du 3 juin 2026 (J−6 au moment de la
+> décision). La liste blanche de 50 places (dont 47 disponibles au moment
+> de la décision) est libérée. L'application devient publiquement accessible
+> sans authentification.
+>
+> **Motivations** :
+> - Permettre aux visiteurs de la conférence AQPC de tester l'application
+>   sans procédure d'inscription préalable.
+> - Éliminer le risque que le challenge bot Cloudflare bloque des visiteurs
+>   sur des appareils anciens ou réseaux institutionnels stricts.
+> - Sortir de la contrainte du quota gratuit (50 utilisateurs).
+>
+> **Conséquences acceptées** :
+> - Plus de logs d'accès individuels par identité courriel.
+> - Plus de base de consentement explicite Loi 25 par liste blanche (cf.
+>   PRIVACY.md §6, à réviser séparément — BACKLOG #298).
+> - L'app reste 100 % hors-ligne par conception (ADR-003) : aucune donnée
+>   pédagogique ne transite par les serveurs Netlify / Cloudflare.
+>
+> **Décision réversible** : la procédure ci-dessous reste valide pour
+> remettre Cloudflare Access en place si nécessaire (quelques minutes
+> dans le dashboard Zero Trust).
+>
+> Cf. ADR-008 (révisé le 28 mai 2026).
 
 ### 3.1 Tableau de bord
 
@@ -132,7 +165,7 @@ Organisation : *[À COMPLÉTER — nom de la team Zero Trust]*
 |---|---|---|
 | **Application name** | *[À COMPLÉTER — ex : « Labo Codex »]* | Nom affiché à l'authentification |
 | **Type** | Self-hosted | Type d'application Cloudflare Access |
-| **Application domain** | `labo.codexnumeris.org` | Domaine protégé |
+| **Application domain** | `app.codexnumeris.org` | Domaine protégé |
 | **Session duration** | **1 semaine** (confirmé 22 mai 2026) | Durée de cookie de session |
 | **App launcher visible** | Activé / Désactivé *[à confirmer]* | Visible dans le launcher Cloudflare |
 | **Authentication** | **One-time PIN (OTP) par courriel** (confirmé 22 mai 2026) | Méthode d'auth — seule méthode active |
@@ -170,14 +203,18 @@ contourné et l'app est accessible sans authentification.
 
 Test rapide depuis un terminal :
 ```bash
-curl -I https://labo.codexnumeris.org
+curl -I https://app.codexnumeris.org
 # Attendu : HTTP/2 302 (redirection vers Cloudflare Access login)
 # Pas : HTTP/2 200 (signifie que Cloudflare Access est contourné)
 ```
 
 ---
 
-## 4. Gestion des utilisateurs autorisés
+## 4. Gestion des utilisateurs autorisés (HISTORIQUE — retiré le 28 mai 2026)
+
+> **Section sans objet depuis le retrait de Cloudflare Access** (cf. §3).
+> Conservée à titre historique et pour permettre une réactivation rapide
+> si Access est remis en place.
 
 ### 4.1 Ajouter une personne à la liste blanche
 
@@ -187,7 +224,7 @@ curl -I https://labo.codexnumeris.org
    bien d'une personne invitée à participer)
 4. Sauvegarder
 5. Envoyer un courriel d'invitation à la personne en lui expliquant :
-   - L'URL : `labo.codexnumeris.org`
+   - L'URL : `app.codexnumeris.org`
    - Le mécanisme : code OTP envoyé sur son courriel à chaque session
    - Le fait que ses données pédagogiques restent locales sur sa machine
    - Le lien vers `PRIVACY.md` (politique de confidentialité)
@@ -284,7 +321,7 @@ git push origin main
 | Mot de passe GitHub oublié | Réinitialisation via GitHub → courriel d'auth |
 | Compte Netlify inaccessible | Réinitialisation via Netlify → courriel d'auth |
 | Compte Cloudflare inaccessible | Réinitialisation via Cloudflare → courriel d'auth |
-| Domaine `labo.codexnumeris.org` perdu (registrar) | Renouvellement chez le registrar de `codexnumeris.org` |
+| Domaine `app.codexnumeris.org` perdu (registrar) | Renouvellement chez le registrar de `codexnumeris.org` |
 
 ### 6.2 Sauvegarde de la configuration
 
@@ -400,13 +437,12 @@ Statut : **non activé au 22 mai 2026**. À activer post-AQPC.
 | Date | Version | Modification |
 |---|---|---|
 | 2026-05-22 | 1.0 DRAFT | Rédaction initiale, soumis à validation. Placeholders à confirmer sur 5 points marqués `[À COMPLÉTER]`. |
+| 2026-05-28 | 1.1 | (a) Substitution `labo.codexnumeris.org` → `app.codexnumeris.org` partout. L'ancien sous-domaine n'a plus d'enregistrement DNS. (b) Retrait du Cloudflare Access acté en préparation de l'AQPC du 3 juin. Sections 3 et 4 marquées historiques. PRIVACY.md à réviser séparément (BACKLOG #298). Cf. ADR-008 révisé. |
 
 ---
 
 **Document à compléter** :
-- §1.2 `labocodex.netlify.app` restreint par Access ? (à confirmer)
-- §3.1 nom de la team Cloudflare Zero Trust (à confirmer)
-- §3.2 nom exact de l'Access Application + statut « App launcher visible » (à confirmer)
-- §3.3 nom de la policy (à confirmer)
+- ~~§1.2 `labocodex.netlify.app` restreint par Access ?~~ Sans objet depuis le retrait de Access.
+- ~~§3.1 à §3.3 noms exacts de la team / app / policy Cloudflare Access~~ Sections historiques.
 - §7 registrar du domaine et coût annuel
 - §8.1 statut 2FA sur GitHub / Netlify / Cloudflare
