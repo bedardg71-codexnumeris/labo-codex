@@ -10,7 +10,7 @@
 
 > **📌 Identification**
 > - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
-> - **Dernier cycle livré** : **Session 28 mai SOIR** — 2 commits sur main (`a45ccb2` onboarding + `eaab101` trimestre d'Été), poussés. Beta **99.72** conservée, builds 0528-1807 + 0528-1821. Voir le §0 (soir) ci-dessous. **NB** : l'ancien §0-prec0 (après-midi) et les lignes « Cycle suivant » / « ⚠️ AVANT AQPC » ci-dessous sont **périmés** — au démarrage de la session soir, un audit a confirmé que le **Lot C #286**, **#287/#288/#289/#293/#294** et le nouveau **#298** étaient déjà livrés et poussés (HEAD était `d587a53`). Voir §0 (soir) pour l'état réel.
+> - **Dernier cycle livré** : **Session 28 mai SOIR** — 3 commits sur main (`a45ccb2` onboarding + `eaab101` trimestre d'Été + retouches UX build 0528-1900), poussés. Beta **99.72** conservée. **Trimestre d'Été validé terrain de bout en bout** (création + reprise cours biblio + horaire + groupe + association). Voir le §0 (soir) ci-dessous. **NB** : l'ancien §0-prec0 (après-midi) et les lignes « Cycle suivant » / « ⚠️ AVANT AQPC » ci-dessous sont **périmés** — au démarrage de la session soir, un audit a confirmé que le **Lot C #286**, **#287/#288/#289/#293/#294** et le nouveau **#298** étaient déjà livrés et poussés (HEAD était `d587a53`). Voir §0 (soir) pour l'état réel.
 > - **Dernier cycle livré (précédent)** : **Session 28 mai après-midi** — 7 commits sur main (`ed206e9` → `ed83d74`). Beta bumpée 99.71 → **99.72**. Voir §0-prec0. Faits saillants : (1) protocole de début de session formalisé (`SKILL_Debut_de_session.md` créé + pointeur CLAUDE.md + feedback memory globale) après détection d'un écart de 24h entre prémisse de relance et état réel ; (2) **#290 livré en 2 phases** (anonymisation seed `MODELES_PRATIQUES_PREDEFINIS` : 2 éliminations + 9 renommages d'IDs zéro-dette + 10 changements d'auteur 'Gabarit Labo Codex' + 3 modèles génériques en 'Demo Labo Codex' avec filtre transitoire OR) ; (3) **#292 livré** (déduplication défensive au chargement de codex via `verifierUniciteIds` exposé + helper `_estBiblioPartagee`) ; (4) 3 bugs UX résolus en cours de route (suppression copie IDB Michel B., débordement vertical surface `.contenu` en 2 commits — duplication CSS inline ↔ styles.css) ; (5) 3 items BACKLOG inscrits : **#295** (diagnostic mémoire/quota avant chargement Codex iPad/iPhone), **#296** (audit catégoriel des items 'Labo Codex' post-AQPC), **#297** (dette CSS dupliquée index.html ↔ styles.css post-AQPC).
 > - **Cycle suivant — démarrage 29 mai 2026 ou ultérieur** : **Lot C du #286** (refactor API `notifications` + migration ~281 emojis ⚠ ✅ ❌ ✓ 💡 dans les notifications). Décision design actée par Grégoire : Option 1 (refactor API avec param `type` qui ajoute l'icône SVG automatiquement). **PRÉ-REQUIS GRÉGOIRE** : télécharger 2 SVG depuis icons8.com — `icons8-warning.svg` (pour le type warning ⚠ ×113 sites) et `icons8-lightbulb.svg` (pour 💡 ×29 sites). Cohérence avec `icons8-info.svg` et `icons8-check.svg` déjà présents. Cf. §2.5 du `plans de travail/PLAN-MIGRATION-ICONES-SVG.md` (Lot C — pré-requis pour démarrer).
 > - **⚠️ AVANT AQPC restant** : **#294** (configuration Netlify + Cloudflare pour la visite AQPC du 3 juin, 1-2h).
@@ -21,7 +21,7 @@
 
 ## §0 — Récap session 28 mai 2026 SOIR (réconciliation état réel + onboarding + support trimestre d'Été)
 
-**Beta / build** : **99.72** conservée. Builds 0528-1807 (commit 1) → 0528-1821 (commit 2). **2 commits sur main, poussés sur origin** : `a45ccb2` (onboarding) + `eaab101` (trimestre d'Été — commit amendé pour y intégrer le nettoyage `calendrier-vue.js`).
+**Beta / build** : **99.72** conservée. Builds 0528-1807 → 0528-1821 → 0528-1900. **3 commits sur main, poussés sur origin** : `a45ccb2` (onboarding) + `eaab101` (trimestre d'Été — commit amendé pour y intégrer le nettoyage `calendrier-vue.js`) + commit 3 (retouches UX finales, build 0528-1900).
 
 ### Réconciliation à l'ouverture (l'en-tête était périmé)
 
@@ -53,9 +53,19 @@ Demande de Grégoire : créer un trimestre d'été (Cégep Drummondville, été 
 
 Suite complète **verte** (18 Playwright WebKit + Vitest) après chaque chantier, y compris après le nettoyage `calendrier-vue.js`. `node --check` vert sur tous les fichiers touchés.
 
+### Commit 3 — Retouches UX finales + validation terrain (build 0528-1900)
+
+Après validation terrain par Grégoire (création complète d'un trimestre Été 2026 de bout en bout) :
+
+- **Bouton biblio cours** « Dupliquer » → « **Reprendre dans ce trimestre** » (`cours.js`) — clarté pour les expérimentateurs (le bouton reprend le cours dans le trimestre actif ; le `title` explicatif est conservé).
+- **Message d'état vide étudiants** (`trimestre-v2-etudiants.js` + `index.html`) : « Utilise l'import à gauche ou le formulaire ci-dessous » → « Utilise le **formulaire ci-dessous** ou l'import **plus bas** » (l'import n'est pas à gauche mais sous le formulaire).
+- **Diagnostic corrigé** : j'avais d'abord supposé le cours « invisible dans la biblio » (flag `dansBibliotheque` undefined) — **c'était faux**. Le cours était bien présent ; `dupliquerCoursPourTrimestreActif` reprend correctement le cours dans le trimestre actif (`trimestreId`/`session`/`annee` du trimestre courant). Aucun fix de filtre nécessaire.
+
+**Validation terrain de bout en bout (Grégoire, 28 mai soir)** : trimestre Été 2026 créé → cours `601-101-MQ` repris depuis la Bibliothèque (→ `e2026`) → horaire des séances → groupe d'élèves → association du groupe-cours. **Tout fonctionne.** Le support de la session d'Été est validé en conditions réelles.
+
 ### Pour la prochaine session
 
-- **Validation visuelle Grégoire** (en cours) : création d'un trimestre Été (E/2026, 28 mai → 30 juin, semaines spéciales vides) + vérifier calendrier mai–juillet + **export Codex** contenant bien `e2026_*`.
+- **Validation visuelle Grégoire** : ✅ faite — trimestre Été 2026 créé de bout en bout (trimestre + cours repris + horaire + groupe + association). Reste à confirmer un **export Codex** contenant `e2026_*` à l'occasion.
 - **#299** (réf. onglets périmées) à traiter post-AQPC.
 - Priorités déférées inchangées : #282 (migration `cours.js`), #296, #291, #295, lots restants #286.
 

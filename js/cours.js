@@ -290,7 +290,7 @@ async function ouvrirModalBibliothequeCours() {
                 badgeSource: '',
                 metadonnees: meta,
                 description: cours.competence || '',
-                boutonPrincipal: { label: 'Dupliquer', action: 'dupliquerCoursPourTrimestreActif', param: cours.id, classe: 'btn-confirmer', title: 'Créer une copie de ce cours pour le trimestre actif' },
+                boutonPrincipal: { label: 'Reprendre dans ce trimestre', action: 'dupliquerCoursPourTrimestreActif', param: cours.id, classe: 'btn-confirmer', title: 'Créer une copie de ce cours pour le trimestre actif' },
                 actionsMenu: [
                     { label: 'Exporter', action: 'partagerCours', param: cours.id, classe: 'btn-secondaire', title: 'Exporter ce cours en JSON pour le partager' },
                     { label: 'Retirer', action: 'retirerCoursDeBibliotheque', param: cours.id, classe: 'btn-supprimer', title: 'Retirer de ta sélection' }

@@ -69,7 +69,7 @@ async function chargerListeEtudiantsV2() {
     if (etudiants.length === 0) {
         const message = groupeFiltre
             ? `Aucun étudiant dans le groupe ${echapperHtml(groupeFiltre)}.`
-            : 'Aucun étudiant. Utilise l\'import à gauche ou le formulaire ci-dessous.';
+            : 'Aucun étudiant. Utilise le formulaire ci-dessous ou l\'import plus bas.';
         conteneur.innerHTML = `<p class="etat-vide-liste">${message}</p>`;
         toggleDisplay(actionsEtudiants, tousLesEtudiants.length > 0);
         // Masquer le bouton supprimer groupe si pas d'étudiants
