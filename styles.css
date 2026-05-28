@@ -4901,12 +4901,37 @@ body:not(.mode-clair) .badge-source--demo {
        la notification de succès apparaît derrière la bibliothèque rafraîchie après import. */
     z-index: 11000;
     animation: slideIn 0.3s ease;
+    max-width: 420px;
 }
 
 .notification-details {
     margin-top: 5px;
     font-size: 0.9rem;
     opacity: 0.9;
+}
+
+/* Lot C #286 — injection auto d'icône SVG par type (utils-notifications.js).
+   Layout flex icône + texte ; l'icône est filtrée blanche pour s'aligner sur
+   la couleur du texte des toasts (fond coloré, texte blanc). */
+.notification-avec-icone {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.notification-icone {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    /* Force le SVG noir (icons8 par défaut) à devenir blanc, cohérent avec le
+       texte du toast quelle que soit la couleur de fond. */
+    filter: brightness(0) invert(1);
+}
+
+.notification-texte {
+    flex: 1;
+    min-width: 0;
 }
 
 @keyframes slideIn {
