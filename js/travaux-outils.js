@@ -30,6 +30,88 @@
     ];
 
     const COULEUR_DEFAUT = '#3b82f6'; // Bleu
+
+    /**
+     * BACKLOG #287 (28 mai 2026) — Picker couleur custom.
+     * Génère un <details> HTML5 (toggle natif) + popover absolute avec grille
+     * des 12 couleurs prédéfinies + bouton « Personnalisé » qui rouvre le
+     * picker natif macOS pour les couleurs hors palette. L'<input type="color">
+     * d'origine reste présent en hidden : il continue de porter `data-color-*`
+     * pour la sauvegarde, et reçoit toujours le même event `input` dispatché
+     * manuellement quand l'utilisateur clique une couleur de la grille (afin
+     * que les listeners de sync — pastille, icône à côté, numéro — restent
+     * compatibles).
+     *
+     * @param {string} idAttr - 'data-color-cat-id' ou 'data-color-id'
+     * @param {string} idVal - valeur de l'attribut id (catId ou itemId)
+     * @param {string} couleurCourante - hex (#rrggbb)
+     * @param {object} opts - { summaryContent: string (numéro p.ex.), summaryClass: 'travaux-retro-couleur' (def) | 'travaux-retro-numero' }
+     * @returns {string} HTML : <details>...</details><input type="color" hidden>
+     */
+    function _renderPickerCouleur(idAttr, idVal, couleurCourante, opts) {
+        opts = opts || {};
+        var summaryClass = opts.summaryClass || 'travaux-retro-couleur';
+        var summaryContent = opts.summaryContent || '';
+        var dataPastilleAttr = opts.dataPastilleId ? ' data-pastille-id="' + opts.dataPastilleId + '"' : '';
+        var couleurLower = (couleurCourante || '').toLowerCase();
+        var grille = COULEURS.map(function(c) {
+            var actif = (c.hex.toLowerCase() === couleurLower) ? ' actif' : '';
+            return '<button type="button" class="travaux-btn-couleur' + actif + '" '
+                 + 'style="background:' + c.hex + '" '
+                 + 'data-couleur="' + c.hex + '" '
+                 + 'data-action="travauxOutils.choisirCouleurPalette" '
+                 + 'title="' + c.nom + '"></button>';
+        }).join('');
+        return '<details class="travaux-retro-couleur-picker">'
+             +   '<summary class="' + summaryClass + '" style="background:' + couleurCourante + ';"' + dataPastilleAttr + ' title="Changer la couleur">' + summaryContent + '</summary>'
+             +   '<div class="travaux-retro-couleur-popover">'
+             +     '<div class="travaux-retro-couleur-grille">' + grille + '</div>'
+             +     '<button type="button" class="travaux-btn-couleur-perso" data-action="travauxOutils.ouvrirCouleurPerso">Personnalisé&hellip;</button>'
+             +   '</div>'
+             + '</details>'
+             + '<input type="color" class="travaux-retro-couleur-input" '
+             +   idAttr + '="' + idVal + '" '
+             +   'value="' + couleurCourante + '">';
+    }
+
+    /**
+     * Handler clic sur une couleur de la grille : sync l'input hidden frère
+     * + ferme le picker. Le sync visuel de la pastille/numéro/icône à côté
+     * est porté par le listener `input` câblé sur l'input couleur (l. ≈ 2252).
+     */
+    function choisirCouleurPalette(el) {
+        if (!el) return;
+        var couleur = el.getAttribute('data-couleur');
+        if (!couleur) return;
+        var details = el.closest('details');
+        if (!details) return;
+        var input = details.parentNode.querySelector('input[type="color"][data-color-cat-id], input[type="color"][data-color-id]');
+        if (!input) return;
+        input.value = couleur;
+        // Marquer l'actif dans la grille
+        details.querySelectorAll('.travaux-btn-couleur').forEach(function(b) { b.classList.remove('actif'); });
+        el.classList.add('actif');
+        // Déclencher l'event 'input' pour réactiver les sync existants
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        // Fermer le picker
+        details.open = false;
+    }
+
+    /**
+     * Handler clic sur « Personnalisé » : déclenche le picker natif macOS sur
+     * l'input couleur frère du <details>. Permet de choisir une couleur
+     * hors-palette tout en gardant la convention 12 couleurs prédéfinies.
+     */
+    function ouvrirCouleurPerso(el) {
+        if (!el) return;
+        var details = el.closest('details');
+        if (!details) return;
+        var input = details.parentNode.querySelector('input[type="color"][data-color-cat-id], input[type="color"][data-color-id]');
+        if (input) {
+            details.open = false;
+            input.click();
+        }
+    }
     const RESOLUTION_REFERENCE = 1000; // Largeur de reference pour normaliser l'epaisseur
 
     // Flag pour masquer le bouton « Codes d'erreurs » (mode Modelisation)
@@ -2100,9 +2182,7 @@
             ], 'cat-' + catId);
             html += '<div class="travaux-retro-cat-draggable" style="display:flex; gap:8px; align-items:center;" data-cat-row="' + catId + '"' + (estPerso ? ' data-cat-perso-id="' + catId + '"' : '') + ' draggable="true">';
             html += '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner" style="cursor:grab;">\u2630</span>';
-            html += '<div class="travaux-retro-couleur" style="background:' + coulCat + ';" data-couleur-cat-id="' + catId + '" title="Couleur de la cat\u00e9gorie">';
-            html += '<input type="color" class="travaux-retro-couleur-input" data-color-cat-id="' + catId + '" value="' + coulCat + '">';
-            html += '</div>';
+            html += _renderPickerCouleur('data-color-cat-id', catId, coulCat);
             html += '<input type="text" class="travaux-retro-nom-input" data-cat-id="' + catId + '"' + (estPerso ? ' data-cat-perso-id="' + catId + '"' : '') + ' value="' + (nomsCat[catId] || '') + '">';
             html += menuCatHTML;
             html += '</div>';
@@ -2145,9 +2225,7 @@
             var r = '<div class="travaux-retro-row' + (estCustom ? ' travaux-retro-draggable' : '') + '" data-obs-id="' + id + '"' + (estCustom ? ' data-sym-custom="true" draggable="true"' : '') + '>';
             r += '<div class="travaux-retro-row-haut">';
             if (estCustom) r += '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner">\u2630</span>';
-            r += '<div class="travaux-retro-couleur" style="background:' + couleur + ';" data-couleur-id="' + id + '" title="Changer la couleur">';
-            r += '<input type="color" class="travaux-retro-couleur-input" data-color-id="' + id + '" value="' + couleur + '">';
-            r += '</div>';
+            r += _renderPickerCouleur('data-color-id', id, couleur);
             r += '<input type="text" class="travaux-retro-icone-input" data-icone-id="' + id + '" value="' + outil.icone + '" title="Caract\u00e8re Unicode" style="color:' + couleur + ';">';
             r += '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + id + '" value="' + outil.nom + '"' + (estCustom ? ' placeholder="Nom du symbole"' : '') + '>';
             r += '<input type="text" class="travaux-retro-raccourci-input" data-raccourci-id="' + id + '" value="' + raccourci + '" maxlength="1" placeholder="\u2328" title="Raccourci clavier (1 touche)">';
@@ -2248,19 +2326,22 @@
             });
         });
 
-        // Wiring: clic sur pastille couleur → ouvre le color picker
-        overlay.querySelectorAll('.travaux-retro-couleur').forEach(function(pastille) {
-            var colorInput = pastille.querySelector('input[type="color"]');
-            pastille.addEventListener('click', function(e) {
-                if (e.target !== colorInput) colorInput.click();
-            });
+        // Wiring picker couleur custom (#287) : sync visuel pastille +
+        // icône-à-côté quand l'input couleur frère reçoit un changement
+        // (clic dans la grille via dispatchEvent, ou picker natif via
+        // « Personnalisé »). Le toggle du <details> est géré nativement.
+        overlay.querySelectorAll('details.travaux-retro-couleur-picker').forEach(function(details) {
+            var summary = details.querySelector('summary');
+            var colorInput = details.parentNode.querySelector('input[type="color"]');
+            if (!summary || !colorInput) return;
             colorInput.addEventListener('input', function() {
-                pastille.style.background = colorInput.value;
-                // Mettre a jour la couleur de l'input icone a cote
-                var row = pastille.closest('.travaux-retro-row');
+                summary.style.background = colorInput.value;
+                var row = details.closest('.travaux-retro-row');
                 if (row) {
                     var iconeInput = row.querySelector('.travaux-retro-icone-input');
                     if (iconeInput) iconeInput.style.color = colorInput.value;
+                    var numero = row.querySelector('.travaux-retro-numero');
+                    if (numero && numero !== summary) numero.style.background = colorInput.value;
                 }
             });
         });
@@ -2683,9 +2764,7 @@
         div.innerHTML =
             '<div class="travaux-retro-row-haut">' +
                 '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner">\u2630</span>' +
-                '<div class="travaux-retro-couleur" style="background:' + couleur + ';" data-couleur-id="' + id + '" title="Changer la couleur">' +
-                    '<input type="color" class="travaux-retro-couleur-input" data-color-id="' + id + '" value="' + couleur + '">' +
-                '</div>' +
+                _renderPickerCouleur('data-color-id', id, couleur) +
                 '<input type="text" class="travaux-retro-icone-input" data-icone-id="' + id + '" value="" placeholder="\u2605" title="Caract\u00e8re Unicode" style="color:' + couleur + ';">' +
                 '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + id + '" value="" placeholder="Nom du symbole">' +
                 menuSymHTML +
@@ -2694,17 +2773,17 @@
 
         liste.appendChild(div);
 
-        // Brancher le color picker
-        var pastille = div.querySelector('.travaux-retro-couleur');
-        var colorInput = pastille.querySelector('input[type="color"]');
-        pastille.addEventListener('click', function(e) {
-            if (e.target !== colorInput) colorInput.click();
-        });
-        colorInput.addEventListener('input', function() {
-            pastille.style.background = colorInput.value;
-            var iconeInput = div.querySelector('.travaux-retro-icone-input');
-            if (iconeInput) iconeInput.style.color = colorInput.value;
-        });
+        // Brancher le picker couleur custom (#287) : sync pastille + icône
+        var details = div.querySelector('details.travaux-retro-couleur-picker');
+        var summary = details ? details.querySelector('summary') : null;
+        var colorInput = div.querySelector('input[type="color"]');
+        if (summary && colorInput) {
+            colorInput.addEventListener('input', function() {
+                summary.style.background = colorInput.value;
+                var iconeInput = div.querySelector('.travaux-retro-icone-input');
+                if (iconeInput) iconeInput.style.color = colorInput.value;
+            });
+        }
 
         // Re-configurer le drag
         configurerDragRetroObs(liste);
@@ -2742,22 +2821,20 @@
         ], 'cat-' + id);
         rowDiv.innerHTML =
             '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner" style="cursor:grab;">\u2630</span>' +
-            '<div class="travaux-retro-couleur" style="background:' + coulDefaut + ';" data-couleur-cat-id="' + id + '" title="Couleur de la cat\u00e9gorie">' +
-                '<input type="color" class="travaux-retro-couleur-input" data-color-cat-id="' + id + '" value="' + coulDefaut + '">' +
-            '</div>' +
+            _renderPickerCouleur('data-color-cat-id', id, coulDefaut) +
             '<input type="text" class="travaux-retro-nom-input" data-cat-id="' + id + '" data-cat-perso-id="' + id + '" value="' + nom + '">' +
             menuNouveauCatHTML;
         catContainer.insertBefore(rowDiv, btnAjouter);
 
-        // Brancher le color picker de la nouvelle categorie
-        var pastille = rowDiv.querySelector('.travaux-retro-couleur');
-        var colorInput = pastille.querySelector('input[type="color"]');
-        pastille.addEventListener('click', function(e) {
-            if (e.target !== colorInput) colorInput.click();
-        });
-        colorInput.addEventListener('input', function() {
-            pastille.style.background = colorInput.value;
-        });
+        // Brancher le picker couleur custom (#287) sur la nouvelle catégorie
+        var details = rowDiv.querySelector('details.travaux-retro-couleur-picker');
+        var summary = details ? details.querySelector('summary') : null;
+        var colorInput = rowDiv.querySelector('input[type="color"]');
+        if (summary && colorInput) {
+            colorInput.addEventListener('input', function() {
+                summary.style.background = colorInput.value;
+            });
+        }
 
         // Ajouter la section de tampons dans le corps de la modale
         var modalContenu = catContainer.closest('.travaux-retro-modal');
@@ -3130,10 +3207,11 @@
             html += '<div class="travaux-retro-row travaux-retro-draggable" data-err-id="' + c.id + '" draggable="true">';
             html += '<div class="travaux-retro-row-haut">';
             html += '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner">\u2630</span>';
-            html += '<div class="travaux-retro-couleur-wrap">';
-            html += '<span class="travaux-retro-numero" style="background:' + outil.couleurBouton + '" data-pastille-id="' + c.id + '">' + (idx + 1) + '</span>';
-            html += '<input type="color" value="' + outil.couleurBouton + '" data-color-id="' + c.id + '" title="Changer la couleur">';
-            html += '</div>';
+            html += _renderPickerCouleur('data-color-id', c.id, outil.couleurBouton, {
+                summaryClass: 'travaux-retro-numero',
+                summaryContent: String(idx + 1),
+                dataPastilleId: c.id
+            });
             var raccourci = obtenirRaccourciPourItem(c.id) || '';
             html += '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + c.id + '" value="' + c.nom + '">';
             html += '<input type="text" class="travaux-retro-raccourci-input" data-raccourci-id="' + c.id + '" value="' + raccourci + '" maxlength="1" placeholder="\u2328" title="Raccourci clavier (1 touche)">';
@@ -3158,8 +3236,10 @@
         document.body.appendChild(overlay);
 
         // Wiring: changement couleur → met à jour la pastille en live
+        // (#287 : la pastille est maintenant un <summary> à l'intérieur du
+        // picker custom — sélecteur élargi pour matcher summary ou span).
         overlay.querySelectorAll('input[data-color-id]').forEach(colorInput => {
-            const pastille = overlay.querySelector('span[data-pastille-id="' + colorInput.dataset.colorId + '"]');
+            const pastille = overlay.querySelector('[data-pastille-id="' + colorInput.dataset.colorId + '"]');
             colorInput.addEventListener('input', function() {
                 if (pastille) pastille.style.background = colorInput.value;
             });
@@ -3434,6 +3514,16 @@
         fermerModalImportTampons();
     }
 
+    // #287 — Auto-fermeture des autres pickers couleur quand un nouveau
+    // s'ouvre. Évite plusieurs popovers superposés à l'écran.
+    document.addEventListener('toggle', function(e) {
+        if (!e.target.matches || !e.target.matches('details.travaux-retro-couleur-picker')) return;
+        if (!e.target.open) return;
+        document.querySelectorAll('details.travaux-retro-couleur-picker[open]').forEach(function(d) {
+            if (d !== e.target) d.open = false;
+        });
+    }, true);
+
     window.travauxOutils = {
         // Constantes
         COULEURS: COULEURS,
@@ -3542,7 +3632,10 @@
         fermerModalRetroObservations: fermerModalRetroObservations,
         fermerModalRetroErreursFr: fermerModalRetroErreursFr,
         fermerModalImportTampons: fermerModalImportTampons,
-        confirmerEtFermerImportTampons: confirmerEtFermerImportTampons
+        confirmerEtFermerImportTampons: confirmerEtFermerImportTampons,
+        // #287 — Picker couleur custom
+        choisirCouleurPalette: choisirCouleurPalette,
+        ouvrirCouleurPerso: ouvrirCouleurPerso
     };
 
 })();
