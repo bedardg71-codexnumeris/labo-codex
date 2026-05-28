@@ -4975,8 +4975,8 @@ body:not(.mode-clair) .badge-source--demo {
     mask-image: url('icons/icons8-info.svg');
 }
 .icone-inline--guide {
-    -webkit-mask-image: url('icons/icons8-guide.svg');
-    mask-image: url('icons/icons8-guide.svg');
+    -webkit-mask-image: url('icons/icons8-process.svg');
+    mask-image: url('icons/icons8-process.svg');
 }
 
 @keyframes slideIn {
