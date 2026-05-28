@@ -688,11 +688,12 @@ async function mettreAJourConfigurationPratique(configuration) {
  * @returns {Promise<boolean>} true si retirée, false si non trouvée ou prédéfinie
  */
 async function retirerPratiqueDeLaBibliotheque(configId) {
-    // Ne pas permettre la suppression des gabarits prédéfinis
-    if (MODELES_PRATIQUES_PREDEFINIS[configId]) {
-        return false;
-    }
-
+    // Bug fix 28 mai 2026 PM : on autorise la suppression de la copie IDB
+    // même si son ID partage avec un seed prédéfini. Le seed lui-même n'est
+    // pas affecté (il vit dans le code source) et se réinjecte automatiquement
+    // via obtenirToutesLesPratiquesBibliotheque au prochain rafraîchissement.
+    // La protection seeds prédéfinis vit désormais dans supprimerPratiqueDeBibliothequePartagee
+    // qui distingue correctement "copie IDB" vs "gabarit pur".
     let bibliotheque = await db.get(CLE_BIBLIOTHEQUE_PRATIQUES) || [];
 
     const indexAvant = bibliotheque.length;
