@@ -600,10 +600,25 @@ async function supprimerPratiqueDefinitivement(pratiqueId) {
  * @param {string} pratiqueId - ID de la pratique à supprimer
  */
 async function supprimerPratiqueDeBibliothequePartagee(pratiqueId) {
-    if (typeof MODELES_PRATIQUES_PREDEFINIS !== 'undefined' && MODELES_PRATIQUES_PREDEFINIS[pratiqueId]) {
-        alert('Ce gabarit est fourni par défaut avec l\'application et ne peut pas être supprimé.');
+    // Une pratique peut exister à deux endroits :
+    //   - dans bibliothequePratiques IDB (copie utilisateur, supprimable)
+    //   - dans MODELES_PRATIQUES_PREDEFINIS (seed code source, non supprimable depuis l'UI)
+    // Si l'ID partage entre les deux, on autorise la suppression de la copie IDB :
+    // le seed se réinjecte automatiquement au prochain rafraîchissement via
+    // obtenirToutesLesPratiquesBibliotheque (ligne 568 de pratiques-bibliotheque.js).
+    const bibliotheque = await db.get('bibliothequePratiques') || [];
+    const estDansIDB = bibliotheque.some(p => p.id === pratiqueId);
+
+    if (!estDansIDB) {
+        // L'ID n'existe que dans le seed — gabarit pur non supprimable
+        if (typeof notifications !== 'undefined' && notifications.info) {
+            notifications.info('Gabarit prédéfini', 'Ce gabarit est fourni par défaut avec l\'application et ne peut pas être supprimé. Il se réinjecte automatiquement au rafraîchissement.');
+        } else {
+            alert('Ce gabarit est fourni par défaut avec l\'application et ne peut pas être supprimé.');
+        }
         return;
     }
+
     let items = [];
     if (typeof obtenirToutesLesPratiquesBibliotheque === 'function') {
         items = await obtenirToutesLesPratiquesBibliotheque();
@@ -613,7 +628,11 @@ async function supprimerPratiqueDeBibliothequePartagee(pratiqueId) {
     if (!confirm('Supprimer définitivement la pratique « ' + nom + ' » de la bibliothèque ?\n\nCette action est irréversible.')) return;
     const ok = await retirerPratiqueDeLaBibliotheque(pratiqueId);
     if (!ok) {
-        alert('Impossible de supprimer cette pratique (probablement un gabarit prédéfini).');
+        if (typeof notifications !== 'undefined' && notifications.erreur) {
+            notifications.erreur('Suppression échouée', 'La pratique n\'a pas pu être supprimée de la bibliothèque.');
+        } else {
+            alert('Impossible de supprimer cette pratique.');
+        }
         return;
     }
     fermerModalBibliothequePratiques();
