@@ -4,7 +4,7 @@
 >
 > **Dernière bascule** : 25 mai 2026 fin de journée — extraction des items livrés vers BACKLOG-ARCHIVE.md.
 > **État courant** : Beta 99.66 (Build 0526-0503), HEAD main `4df4f21`. 28 items ouverts (session 26 mai matin : 3 items #278/#280/#281 livrés + 3 bugs testeurs résolus + 1 item #286 ajouté).
-> **Dernier ID utilisé** : #296 (audit catégoriel des items 'Labo Codex' dans les seed + migration vers 'Demo Labo Codex', créé 28 mai 2026 PM).
+> **Dernier ID utilisé** : #297 (dette technique : duplication des règles CSS entre <style> inline d'index.html et styles.css, créé 28 mai 2026 PM).
 > **Présentation AQPC** : 3 juin 2026 (J−8).
 > **Pour ajouter un item** : `- [ ] **#XX** Description courte` + sous-puces de contexte. Dernier ID utilisé : **#285** (livré).
 
@@ -65,6 +65,18 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - Version « papier » pour AQPC peut être dérivée de `docs/securite/SECURITE-POUR-ENSEIGNANTS.md` (à écrire post-Défense E).
 
 ### Cohérence visuelle UI
+
+- [ ] 🟢 **#297** Dette technique : duplication des règles CSS entre `<style>` inline d'index.html et styles.css
+  - **Constat 28 mai 2026 PM** (fix bug débordement surface) : la règle `.contenu` (et probablement d'autres) existe en double, une fois dans `styles.css:1789` et une fois dans le `<style>` inline d'`index.html` autour de la ligne 1361. Lors du fix initial (commit `55a3230`), j'ai retiré `min-height: 500px` uniquement dans styles.css, mais la duplication inline d'index.html surchargeait toujours → second fix nécessaire (commit `2e42598`).
+  - **Origine probable** : CSS critique inliné pour l'affichage initial (avant chargement de styles.css externe), ou vestige d'une refactorisation incomplète qui n'a pas retiré la source d'origine.
+  - **Risque actuel** : tout fix CSS futur sur `.contenu` ou les autres règles dupliquées risque d'être surchargé silencieusement par la version inline si on oublie de la synchroniser. Faux sentiment de bug persistant.
+  - **Méthode suggérée pour l'audit** :
+    1. Identifier la plage de lignes du `<style>` inline d'index.html (autour de 1300-1400+, à confirmer).
+    2. Pour chaque règle inlinée : grep son sélecteur dans styles.css pour repérer les duplications.
+    3. Décider pour chaque doublon : conserver seulement dans styles.css (si pas critique pour l'affichage initial), ou retirer de styles.css (si CSS critique inliné délibéré, et synchronisé).
+    4. Documenter la convention résultante en tête du `<style>` inline (« Ce bloc duplique délibérément X règles de styles.css pour l'affichage initial — ne pas modifier sans synchroniser » ou « CSS critique uniquement, le reste vit dans styles.css »).
+  - **Périmètre estimé** : 1-2 h (audit + 5-15 règles dupliquées probablement, à confirmer).
+  - **Calendrier** : post-AQPC (3 juin 2026). Pas urgent.
 
 - [ ] 🟢 **#287** Remplacer le picker de couleur natif macOS par une palette HTML custom (modale Personnaliser les tampons)
   - **Motivation** : le `<input type="color">` natif (popup macOS) ne permet pas de mettre en surbrillance la couleur actuellement sélectionnée. Grégoire demande de mieux identifier visuellement quelle couleur est active sur chaque pastille de catégorie.
