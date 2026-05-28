@@ -4,7 +4,7 @@
 >
 > **Dernière bascule** : 25 mai 2026 fin de journée — extraction des items livrés vers BACKLOG-ARCHIVE.md.
 > **État courant** : Beta 99.66 (Build 0526-0503), HEAD main `4df4f21`. 28 items ouverts (session 26 mai matin : 3 items #278/#280/#281 livrés + 3 bugs testeurs résolus + 1 item #286 ajouté).
-> **Dernier ID utilisé** : #293 (toggle « masquer items déjà dans la sidebar » section 2 des modales biblio, créé 28 mai 2026).
+> **Dernier ID utilisé** : #294 (configuration Netlify + Cloudflare pour la visite AQPC 3 juin, créé 28 mai 2026).
 > **Présentation AQPC** : 3 juin 2026 (J−8).
 > **Pour ajouter un item** : `- [ ] **#XX** Description courte` + sous-puces de contexte. Dernier ID utilisé : **#285** (livré).
 
@@ -72,6 +72,12 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - **Implémentation suggérée** : `<details>` HTML5 (toggle natif) + popover en `position: absolute`, grille de la constante `COULEURS` (12 couleurs prédéfinies, déjà utilisée pour le palette des outils dessin), bouton actif via classe `.travaux-btn-couleur.actif` (déjà style CSS en place l. 16925), input hidden pour préserver le mécanisme de sauvegarde existant (lecture via `input[data-color-cat-id]` l. 2499).
   - **Effort estimé** : 1-2 h (refactor + extension aux 5 sites + tests visuels modes sombre/clair).
   - **Capture déclencheuse** : Grégoire 27 mai 2026 matin (modale Personnaliser tampons, picker macOS ouvert sans indication de la couleur active).
+
+- [ ] ⚠️ 🟡 **#294** Configurer Netlify + Cloudflare pour accueillir la visite AQPC du 3 juin
+  - **Acté par Grégoire 28 mai 2026 matin** : à faire en PM, avant AQPC.
+  - **Netlify** : vérifier que le déploiement automatique depuis main fonctionne, que `netlify.toml` (headers Cache-Control déjà bien configurés) est respecté, que le domaine `app.codexnumeris.org` pointe bien sur le bon site Netlify. Vérifier les analytics/logs Netlify pour anticiper la charge AQPC.
+  - **Cloudflare** : vérifier les règles de cache (que `Cache-Control: must-revalidate` du origin Netlify n'est PAS écrasé par une règle « Cache Everything » Cloudflare). Préparer le bouton **Purge Cache** au cas où un correctif post-démo doit être pushé. Vérifier SSL/TLS (Full strict recommandé), WAF (challenge bot actif observé le 28 mai matin — éventuellement assouplir pour les visiteurs AQPC qui pourraient être bloqués).
+  - **Effort estimé** : 1-2 h (vérifications de configuration + tests croisés navigateurs).
 
 - [ ] 🟢 **#293** Toggle « Masquer les items déjà dans la barre latérale » en section 2 des modales bibliothèque
   - **Constat 28 mai 2026** (Bibliothèque de grilles de Grégoire) : la Section 2 montre toutes les entrées de la biblio partagée, y compris celles « Déjà dans la barre latérale ». Quand le ratio biblio/sidebar est lourd (ex. 5 entrées biblio pour 3 grilles sidebar = anciennes variantes accumulées), l'affichage devient encombrant et donne une fausse impression de doublons.
