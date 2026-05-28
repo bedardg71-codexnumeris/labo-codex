@@ -63,6 +63,69 @@
     };
 
     /**
+     * BACKLOG #293 (28 mai 2026) — Toggle « Masquer les items déjà dans la
+     * barre latérale » en Section 2 des modales biblio. Préférence globale
+     * partagée par les 5 modales (grilles, échelles, cartouches, productions,
+     * pratiques). Persistance via db (clé `biblio-masquer-deja-present`).
+     */
+    var CLE_MASQUER_DEJA_PRESENT = 'biblio-masquer-deja-present';
+
+    BibliothequeUI.estMasquerDejaPresentActif = function () {
+        if (typeof db === 'undefined' || !db.getSync) return false;
+        return db.getSync(CLE_MASQUER_DEJA_PRESENT, null) === 'true';
+    };
+
+    /**
+     * Filtre une collection d'objets-carte Section 2 : retire ceux dont
+     * `dejaPresent === true` quand la préférence est active. Préserve l'ordre.
+     */
+    BibliothequeUI.filtrerParDejaPresent = function (cartes) {
+        if (!Array.isArray(cartes)) return cartes;
+        if (!BibliothequeUI.estMasquerDejaPresentActif()) return cartes;
+        return cartes.filter(function (c) { return !(c && c.dejaPresent === true); });
+    };
+
+    /**
+     * Génère le HTML du toggle (case à cocher + label). Le data-action
+     * route via le dispatcher main.js vers basculerMasquerDejaPresent qui
+     * lit data-refresh-fn pour rafraîchir la bonne modale.
+     */
+    BibliothequeUI.renderToggleMasquerDejaPresent = function (refreshFnName) {
+        var actif = BibliothequeUI.estMasquerDejaPresentActif();
+        return '<div class="biblio-toggle-deja-present u-mb-15">' +
+            '<label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; color: var(--gris-moyen); font-size: 0.9rem;">' +
+                '<input type="checkbox" ' +
+                    'data-on-change="BibliothequeUI.basculerMasquerDejaPresent" ' +
+                    'data-refresh-fn="' + refreshFnName + '" ' +
+                    (actif ? 'checked' : '') + '>' +
+                'Masquer les items déjà dans la barre latérale' +
+            '</label>' +
+        '</div>';
+    };
+
+    /**
+     * Bascule la préférence + rafraîchit la modale en cours via la fonction
+     * de re-render dont le nom est passé via data-refresh-fn. Le re-render
+     * reconstruit la modale entière (creerModal retire l'ancienne avant
+     * insertion). Reçoit l'élément directement (dispatcher data-on-change).
+     */
+    BibliothequeUI.basculerMasquerDejaPresent = function (elementOuNom) {
+        var refreshFnName = null;
+        if (typeof elementOuNom === 'string') {
+            refreshFnName = elementOuNom;
+        } else if (elementOuNom && elementOuNom.getAttribute) {
+            refreshFnName = elementOuNom.getAttribute('data-refresh-fn');
+        }
+        var actuel = BibliothequeUI.estMasquerDejaPresentActif();
+        if (typeof db !== 'undefined' && db.setSync) {
+            db.setSync(CLE_MASQUER_DEJA_PRESENT, (!actuel).toString());
+        }
+        if (refreshFnName && typeof window[refreshFnName] === 'function') {
+            window[refreshFnName]();
+        }
+    };
+
+    /**
      * Construit la métadonnée `inspireDe` à poser sur toute copie forkée
      * d'un item existant (respect CC BY — on trace l'origine quelle que
      * soit la source). Retourne { nom, auteur, date } avec date au
