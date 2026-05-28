@@ -140,16 +140,16 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - **Convention auteur** : `auteur: 'Gabarit Labo Codex'` (et non « Anonyme » ni « Labo Codex » seul, pour distinguer les gabarits dérivés de pratiques de collègues anonymisées des modèles génériques originaux).
   - **Effort estimé** : 1-2 h (dump + lecture des configs + ajout au seed + renommage IDs + test visuel modale).
 
-- [ ] 🟢 **#289** Audit visuel des palettes de création — appliquer le pattern « icônes 100 % + hover sur cercle »
-  - **Pattern de référence** (livré 28 mai 2026 sur la palette Nœuds d'Alignement pédagogique, build 0528-0448) : l'icône est pleinement visible en permanence (blanc 100 % en sombre, noir 100 % en clair), et l'effet hover porte sur le cercle qui entoure l'icône (fond + bordure plus saturés), pas sur l'icône elle-même qui reste à 100 %.
-  - **Classes concernées par le pattern de référence** : `.palette-icon` + `.planif-palette-aide-btn` (styles.css lignes 18707-18741).
-  - **Autres palettes à auditer visuellement** :
-    - **Travaux › Préparer et importer** : utilise `.prep-btn` (modèle différent, styles.css l. 14260+). À comparer.
-    - **Travaux › Annoter** : palette d'outils encore différente (cf. `.travaux-palette-eval`, `.outil-svg-icon`).
-    - Possiblement d'autres palettes flottantes ou modales avec icônes en footer.
-  - **Méthode suggérée** : grep `class="palette-icon"|outil-svg-icon|prep-btn ` sur HTML+JS, naviguer sur chaque palette, comparer visuellement le contraste icône vs cercle hover. Si même problème de visibilité réduite en normal, appliquer le pattern de référence.
-  - **Capture déclencheuse** : Grégoire 28 mai 2026 matin (palette Nœuds dans Alignement pédagogique — icônes du bas trop pâles en sombre).
-  - **Effort estimé** : 30 min à 1 h (audit + 1-3 patchs CSS ciblés si nécessaire).
+- [x] 🟢 **#289** Audit visuel des palettes de création — pattern « icônes 100 % + hover sur le bouton » **livré 28 mai 2026 PM**
+  - **Pattern de référence** (livré 28 mai 2026 sur la palette Nœuds d'Alignement pédagogique, build 0528-0448) : l'icône est pleinement visible en permanence (blanc 100 % en sombre, noir 100 % en clair), et l'effet hover porte sur le bouton qui entoure l'icône (fond + bordure plus saturés), pas sur l'icône elle-même qui reste à 100 %.
+  - **Classes auditées et migrées** :
+    - `.outil-svg-icon` (palette annotation Travaux + ses variantes `.palette-toggle-icon`, `.palette-bas-icon`) — repos `invert(0.6/0.35)` → `invert(1)/brightness(0)`.
+    - `.planif-icon` (boutons vue/zoom carte mentale) — idem.
+    - `.nav-seq-icon` (chevrons navigation séquence/leçon, partagé entre planif et toolbars Travaux) — idem. État `:disabled` préservé à `invert(0.25/0.7)` pour signaler la désactivation.
+    - `.editeur-page-icon` (boutons éditeur de pages + pipeline) — idem.
+    - `.popover-icon` (mode clair uniquement) — passé de `invert(0.25)` à `brightness(0)` (100 % noir).
+    - Tous les `:hover .X-icon { filter: ... }` retirés.
+  - **Hors scope** (icônes sciemment pâles, design délibéré) : `.btn-inline-icon` (inline avec texte), `.modal-close-icon` (X de fermeture subtil), `.btn-delete-icon` (corbeille, action destructrice signalée par pâleur), `.drop-zone-icon` (zone drag&drop), `.codex-menu-icone img`, `.pipeline-icone-placeholder-img`. `.prep-btn` également hors scope (bouton purement textuel sans icône SVG).
 
 - [x] 🟡 **#288** Terminologie collégiale : remplacer « élève(s) » par « étudiant·e(s) » dans l'UI — **balayage UI visible livré 28 mai 2026 PM**
   - **Convention** : au collégial le terme « élève » est réservé au primaire/secondaire. L'UI Labo Codex (Cégep de Drummondville) doit utiliser « étudiant·e(s) ».
