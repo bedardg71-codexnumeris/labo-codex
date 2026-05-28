@@ -17039,15 +17039,15 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     filter: invert(1);
 }
 
-/* Icônes SVG dans la palette d'annotation */
+/* Icônes SVG dans la palette d'annotation — pattern « icône 100 % +
+   hover sur le bouton ». L'icône reste pleinement visible en permanence
+   (blanc en sombre, noir en clair), l'effet hover porte sur le fond
+   du bouton parent. Cf. BACKLOG #289 (28 mai 2026 PM). */
 .outil-svg-icon {
     width: 20px;
     height: 20px;
     object-fit: contain;
-    filter: brightness(0) invert(0.6);
-}
-.travaux-btn-outil:hover .outil-svg-icon {
-    filter: brightness(0) invert(0.85);
+    filter: brightness(0) invert(1);
 }
 .travaux-btn-outil.actif .outil-svg-icon {
     filter: brightness(0) invert(1);
@@ -17066,12 +17066,10 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     width: 14px;
     height: 14px;
 }
-/* Mode clair */
+/* Mode clair — icône noire 100 % au repos, blanche sur le fond bleu-clair
+   de l'état actif. Pas de :hover sur l'icône (pattern #289). */
 .mode-clair .outil-svg-icon {
-    filter: brightness(0) invert(0.35);
-}
-.mode-clair .travaux-btn-outil:hover .outil-svg-icon {
-    filter: brightness(0) invert(0.15);
+    filter: brightness(0);
 }
 .mode-clair .travaux-btn-outil.actif .outil-svg-icon {
     filter: brightness(0) invert(1);
@@ -18008,54 +18006,44 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     border-color: var(--planif-couleur-selection);
     color: var(--planif-couleur-texte);
 }
-/* Icônes SVG dans les boutons planification */
+/* Icônes SVG dans les boutons planification — pattern « icône 100 %
+   + hover sur le bouton » (BACKLOG #289). */
 .planif-icon {
     width: 16px;
     height: 16px;
     object-fit: contain;
-    filter: brightness(0) invert(0.55);
-}
-.planif-btn-vue:hover .planif-icon {
-    filter: brightness(0) invert(0.85);
+    filter: brightness(0) invert(1);
 }
 .mode-clair .planif-icon {
-    filter: brightness(0) invert(0.35);
+    filter: brightness(0);
 }
-.mode-clair .planif-btn-vue:hover .planif-icon {
-    filter: brightness(0) invert(0.15);
-}
-/* Icônes SVG dans les chevrons séquence/leçon */
+/* Icônes SVG dans les chevrons séquence/leçon — pattern « icône 100 %
+   + hover sur le bouton » (BACKLOG #289). État :disabled conserve une
+   pâleur explicite pour signaler la désactivation. */
 .nav-seq-icon {
     width: 14px;
     height: 14px;
     object-fit: contain;
-    filter: brightness(0) invert(0.55);
-}
-.planif-btn-nav-seq:hover .nav-seq-icon {
-    filter: brightness(0) invert(0.85);
+    filter: brightness(0) invert(1);
 }
 .planif-btn-nav-seq:disabled .nav-seq-icon {
     filter: brightness(0) invert(0.25);
 }
 .mode-clair .nav-seq-icon {
-    filter: brightness(0) invert(0.35);
+    filter: brightness(0);
 }
 .mode-clair .planif-btn-nav-seq:disabled .nav-seq-icon {
     filter: brightness(0) invert(0.7);
 }
-/* nav-seq-icon dans les toolbars Annoter/Évaluer et Modélisation */
+/* nav-seq-icon dans les toolbars Annoter/Évaluer et Modélisation —
+   icône à 100 % au repos comme la version palette. Hover sur l'icône
+   retiré (pattern #289). État :disabled préserve une pâleur explicite. */
 .travaux-btn-nav .nav-seq-icon {
     width: 14px;
     height: 14px;
 }
-.travaux-btn-nav:hover:not(:disabled) .nav-seq-icon {
-    filter: brightness(0) invert(0.85);
-}
 .travaux-btn-nav:disabled .nav-seq-icon {
     filter: brightness(0) invert(0.25);
-}
-.mode-clair .travaux-btn-nav:hover:not(:disabled) .nav-seq-icon {
-    filter: brightness(0) invert(0.15);
 }
 .mode-clair .travaux-btn-nav:disabled .nav-seq-icon {
     filter: brightness(0) invert(0.7);
@@ -20354,7 +20342,8 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 }
 
 .mode-clair .popover-icon {
-    filter: brightness(0) invert(0.25);
+    /* pattern #289 : icône 100 % noir en mode clair, cohérent avec le repos sombre invert(1). */
+    filter: brightness(0);
 }
 
 .mode-clair .popover-separateur {
@@ -22032,27 +22021,21 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     background: rgba(220, 53, 69, 0.15);
     color: var(--rouge-danger, #e74c3c);
 }
-/* Icône SVG dans les boutons éditeur de pages et pipeline */
+/* Icône SVG dans les boutons éditeur de pages et pipeline — pattern
+   « icône 100 % + hover sur le bouton » (BACKLOG #289). État :disabled
+   préserve une pâleur explicite pour signaler la désactivation. */
 .editeur-page-icon {
     width: 14px;
     height: 14px;
     object-fit: contain;
-    filter: brightness(0) invert(0.55);
-}
-.editeur-page-btn:hover:not(:disabled) .editeur-page-icon,
-.pipeline-btn-reorder:hover:not(:disabled) .editeur-page-icon {
-    filter: brightness(0) invert(0.85);
+    filter: brightness(0) invert(1);
 }
 .editeur-page-btn:disabled .editeur-page-icon,
 .pipeline-btn-reorder:disabled .editeur-page-icon {
     filter: brightness(0) invert(0.2);
 }
 .mode-clair .editeur-page-icon {
-    filter: brightness(0) invert(0.35);
-}
-.mode-clair .editeur-page-btn:hover:not(:disabled) .editeur-page-icon,
-.mode-clair .pipeline-btn-reorder:hover:not(:disabled) .editeur-page-icon {
-    filter: brightness(0) invert(0.15);
+    filter: brightness(0);
 }
 .editeur-pages-boutons {
     display: flex;
