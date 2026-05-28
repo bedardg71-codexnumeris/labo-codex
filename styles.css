@@ -4974,6 +4974,10 @@ body:not(.mode-clair) .badge-source--demo {
     -webkit-mask-image: url('icons/icons8-info.svg');
     mask-image: url('icons/icons8-info.svg');
 }
+.icone-inline--guide {
+    -webkit-mask-image: url('icons/icons8-guide.svg');
+    mask-image: url('icons/icons8-guide.svg');
+}
 
 @keyframes slideIn {
     from {
@@ -11533,6 +11537,15 @@ label:has(+ textarea:disabled) {
     font-size: 1.8rem;
     box-shadow: 0 4px 15px rgba(26, 82, 102, 0.3);
     flex-shrink: 0;
+}
+
+.wizard-v2-primo-avatar .icone-inline {
+    /* SVG centré dans le cercle gradient ; blanc pour contraster avec le fond bleu foncé. */
+    width: 28px;
+    height: 28px;
+    color: white;
+    margin-right: 0;
+    vertical-align: baseline;
 }
 
 .wizard-v2-header-texte {
