@@ -104,14 +104,14 @@ function genererBanniereBienvenue() {
         <div class="banniere-bienvenue carte" id="banniere-bienvenue">
             <h2 class="banniere-bienvenue-titre">Bienvenue dans Labo Codex</h2>
             <p>Labo Codex num\u00e9rise le travail que tu fais d\u00e9j\u00e0\u00a0: planifier ton cours, concevoir tes activit\u00e9s d\u2019apprentissage, \u00e9valuer les travaux, suivre la progression de tes \u00e9tudiant\u00b7es. Tu y poses les m\u00eames gestes que sur papier avec calculette ou tableur, mais dans un seul outil portable.</p>
-            <p><strong>Par o\u00f9 commencer\u00a0?</strong> Configure ton trimestre, ton cours et ton groupe dans l\u2019onglet Cadre. Tu saisis l\u2019information une fois et l\u2019application s\u2019en sert partout. Ensuite, tu peux cr\u00e9er et partager tout le mat\u00e9riel que tu veux\u00a0!</p>
+            <p><strong>Par o\u00f9 commencer\u00a0?</strong> Tu peux cocher les options d\u2019assistance et d\u2019exploration des donn\u00e9es de d\u00e9monstration. Puis configure ton trimestre, ton cours et ton groupe dans l\u2019onglet Cadre. Tu saisis l\u2019information une fois et l\u2019application s\u2019en sert partout. Ensuite, tu peux cr\u00e9er et partager tout le mat\u00e9riel que tu veux\u00a0!</p>
             ${paragrapheAccesCadre}
             <div class="banniere-bienvenue-actions">
                 <button class="btn btn-primaire" data-action="demarrerTourGuide">
                     Commencer la visite guid\u00e9e
                 </button>
                 <button class="btn btn-secondaire" data-action="afficherSection" data-param="calendrier">
-                    Aller aux R\u00e9glages
+                    Aller \u00e0 Cadre
                 </button>
                 <button class="btn btn-secondaire" data-action="entrerEnDemoHandler">
                     Explorer avec des donn\u00e9es d\u00e9mo
