@@ -23102,6 +23102,42 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     margin-bottom: 18px;
 }
 
+/* Encadré d'accès cadré 3-30 juin 2026 (consigne Cowork 28 mai PM) :
+   bord gauche orange-accent + fond ambre subtil pour signaler une
+   communication temporaire sans agresser. Strong d'amorce en couleur
+   d'accent pour le punch. La variante --urgent (J-7) intensifie en
+   rouge pour signaler la fin imminente. Cf. js/accueil.js. */
+.banniere-bienvenue-acces {
+    margin: 12px 0 18px 0;
+    padding: 12px 16px;
+    border-left: 4px solid var(--orange-accent, #c8a060);
+    background: var(--alerte-fond-attention, rgba(200, 160, 96, 0.12));
+    border-radius: 0 var(--radius-moyen, 6px) var(--radius-moyen, 6px) 0;
+}
+.banniere-bienvenue-acces p {
+    margin: 0;
+    line-height: 1.6;
+}
+.banniere-bienvenue-acces strong {
+    color: var(--alerte-texte-attention, #d4b878);
+}
+.banniere-bienvenue-acces code {
+    background: rgba(200, 160, 96, 0.18);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.92em;
+}
+.banniere-bienvenue-acces--urgent {
+    border-left-color: var(--rouge-erreur);
+    background: var(--alerte-fond-erreur, rgba(232, 64, 87, 0.10));
+}
+.banniere-bienvenue-acces--urgent strong {
+    color: var(--alerte-texte-erreur, #f06878);
+}
+.banniere-bienvenue-acces--urgent code {
+    background: rgba(232, 64, 87, 0.15);
+}
+
 .banniere-bienvenue-actions {
     display: flex;
     gap: 12px;

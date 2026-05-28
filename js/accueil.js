@@ -45,19 +45,25 @@ function afficherAccueil() {
  * Fenêtre d'accès public 3-30 juin 2026 (consigne Cowork 28 mai PM) :
  * pendant cette fenêtre, la bannière est affichée à TOUS les utilisateurs
  * (y compris ceux ayant un groupe-cours configuré ou étant en mode démo)
- * et contient en plus un paragraphe « Accès libre jusqu'au 30 juin 2026 »
- * inséré entre « Par où commencer ? » et la rangée de boutons. Ce
- * comportement est auto-nettoyant : au refermage de la fenêtre publique
- * (1er juillet 2026 à 00h00 heure de Toronto, EDT UTC-4), la bannière
- * revient à son comportement d'origine et le paragraphe disparaît, sans
- * intervention manuelle requise — aligné avec le principe « stabilité
- * zero-dette » du CLAUDE.md. Cf. DEPLOY.md v1.3 §3 + §3.6 et ADR-008
- * révisé du 28 mai 2026.
+ * et contient en plus un encadré « Accès libre jusqu'au 30 juin 2026 »
+ * inséré entre « Par où commencer ? » et la rangée de boutons. À partir
+ * du 23 juin 2026 00h00 EDT (J-7 avant le refermage), l'encadré bascule
+ * sur une formulation d'urgence (« Plus que quelques jours »). Au
+ * refermage le 1er juillet 2026 00h00 EDT, la bannière revient à son
+ * comportement d'origine et l'encadré disparaît, sans intervention
+ * manuelle requise — aligné avec le principe « stabilité zero-dette »
+ * du CLAUDE.md. Cf. DEPLOY.md v1.3 §3 + §3.6 et ADR-008 révisé du
+ * 28 mai 2026.
  */
 function genererBanniereBienvenue() {
-    // Fenêtre d'accès public 3-30 juin 2026 : refermage 1er juillet 00:00 EDT.
+    // Fenêtre d'accès public 3-30 juin 2026 : refermage 1er juillet 00:00 EDT
+    // (heure de Toronto, EDT UTC-4). Transition J-7 : à partir du 23 juin
+    // 00:00 EDT, le paragraphe bascule sur une formulation d'urgence.
     const LIMITE_FENETRE_PUBLIC = new Date('2026-07-01T00:00:00-04:00').getTime();
-    const dansFenetrePublic = Date.now() < LIMITE_FENETRE_PUBLIC;
+    const DEBUT_TRANSITION_URGENCE = new Date('2026-06-23T00:00:00-04:00').getTime();
+    const maintenant = Date.now();
+    const dansFenetrePublic = maintenant < LIMITE_FENETRE_PUBLIC;
+    const enTransitionUrgence = dansFenetrePublic && maintenant >= DEBUT_TRANSITION_URGENCE;
 
     const enDemo = typeof estEnModeDemo === 'function' && estEnModeDemo();
     if (!dansFenetrePublic && enDemo) return '';
@@ -81,9 +87,18 @@ function genererBanniereBienvenue() {
 
     if (!dansFenetrePublic && aGroupeCours) return '';
 
-    const paragrapheAccesCadre = dansFenetrePublic
-        ? `<p><strong>Accès libre jusqu’au 30 juin 2026.</strong> L’application est librement accessible sur <code>app.codexnumeris.org</code> jusqu’au 30 juin 2026, en marge du lancement de la Communauté de pratique Labo Codex au colloque AQPC. Pour conserver l’accès web après cette date, écris à <code>labo@codexnumeris.org</code> avant le 30 juin — il sera alors maintenu pour les membres de la Cohorte 1 pilote et les membres de la CoP qui en font la demande.</p>`
-        : '';
+    let paragrapheAccesCadre = '';
+    if (enTransitionUrgence) {
+        paragrapheAccesCadre = `
+            <div class="banniere-bienvenue-acces banniere-bienvenue-acces--urgent">
+                <p><strong>Plus que quelques jours.</strong> L’accès libre se termine le 30 juin 2026. Écris à <code>labo@codexnumeris.org</code> avant cette date pour conserver l’accès web — il sera maintenu pour les membres de la Cohorte 1 pilote et de la CoP qui en font la demande.</p>
+            </div>`;
+    } else if (dansFenetrePublic) {
+        paragrapheAccesCadre = `
+            <div class="banniere-bienvenue-acces">
+                <p><strong>Accès libre jusqu’au 30 juin 2026.</strong> L’application est librement accessible jusqu’au 30 juin 2026, en marge du lancement de la Communauté de pratique Labo Codex au colloque AQPC. Pour conserver l’accès web après cette date, écris à <code>labo@codexnumeris.org</code> avant le 30 juin — il sera alors maintenu pour les membres de la Cohorte 1 pilote et les membres de la CoP qui en font la demande.</p>
+            </div>`;
+    }
 
     return `
         <div class="banniere-bienvenue carte" id="banniere-bienvenue">
