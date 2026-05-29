@@ -325,23 +325,28 @@ let horaireEnEditionId = null;
 function chargerHorairesV2() {
     populerDropdownHorairesV2();
 
-    // ✅ CORRIGÉ (8 janvier 2026) : Restaurer le dernier horaire sélectionné
-    const horaireIdSauvegarde = db.getSync(cle('horaireSelectionne'), null) || db.getSync('horaireSelectionne', null);
-    if (horaireIdSauvegarde) {
-        const cleHoraires = cle('horaires');
-        const horaires = db.getSync(cleHoraires, []);
-        const horaire = horaires.find(h => h.id === horaireIdSauvegarde);
+    // Modèle « horaire propre au trimestre » (décision 29 mai 2026) : on ne lit QUE la
+    // sélection namespacée du trimestre actif — plus de fallback non-namespacé qui pouvait
+    // ramener un horaire d'un autre trimestre. Si aucun horaire valide pour ce trimestre,
+    // on réinitialise FRANCHEMENT l'éditeur (état vide) au lieu de laisser un formulaire
+    // périmé — sinon une sauvegarde ultérieure viserait le mauvais namespace (no-op
+    // silencieux + perte de la modif).
+    const horaireIdSauvegarde = db.getSync(cle('horaireSelectionne'), null);
+    const horaires = db.getSync(cle('horaires'), []);
+    const horaire = horaireIdSauvegarde ? horaires.find(h => h.id === horaireIdSauvegarde) : null;
 
-        if (horaire) {
-            const select = document.getElementById('v2-selectHoraire');
-            if (select) select.value = horaire.id;
-            mettreAJourCarteResumeHoraireV2(horaire);
-            editerHoraireV2(horaire);
-        } else {
-            mettreAJourCarteResumeHoraireV2(null);
-        }
+    if (horaire) {
+        const select = document.getElementById('v2-selectHoraire');
+        if (select) select.value = horaire.id;
+        mettreAJourCarteResumeHoraireV2(horaire);
+        editerHoraireV2(horaire);
     } else {
+        // Aucun horaire pour ce trimestre (ou sélection orpheline d'un autre trimestre) :
+        // nettoyer la sélection et réinitialiser l'éditeur (afficherEtatVideHoraireV2 remet
+        // horaireEnEditionId à null). On n'éditera jamais un horaire hors trimestre actif.
+        if (horaireIdSauvegarde) db.setSync(cle('horaireSelectionne'), null);
         mettreAJourCarteResumeHoraireV2(null);
+        afficherEtatVideHoraireV2();
     }
 }
 
@@ -638,17 +643,28 @@ function sauvegarderHoraireV2() {
     if (horaireEnEditionId) {
         // Modification
         const index = horaires.findIndex(h => h.id === horaireEnEditionId);
-        if (index >= 0) {
-            horaires[index] = {
-                ...horaires[index],
-                groupeAssocie,
-                nom,
-                periodesParSeance,
-                seances
-            };
-            // Supprimer l'ancien champ local global s'il existe (migration)
-            delete horaires[index].local;
+        if (index < 0) {
+            // Sentinelle défensive (modèle « horaire propre au trimestre », 29 mai 2026) :
+            // l'horaire édité n'est pas dans le trimestre actif. Ne devrait plus arriver
+            // depuis que l'éditeur est réinitialisé au changement de trimestre
+            // (changerTrimestreActifV2 + chargerHorairesV2). Sans ce garde, la branche ne
+            // faisait RIEN tout en affichant « modifié » → modification silencieusement perdue.
+            console.warn('[Horaire V2] Sauvegarde refusée : horaire', horaireEnEditionId, 'absent du trimestre actif', cleHoraires);
+            notifications.erreur(
+                'Impossible d\'enregistrer cet horaire',
+                'Il n\'appartient pas au trimestre actif. Bascule sur son trimestre pour le modifier.'
+            );
+            return;
         }
+        horaires[index] = {
+            ...horaires[index],
+            groupeAssocie,
+            nom,
+            periodesParSeance,
+            seances
+        };
+        // Supprimer l'ancien champ local global s'il existe (migration)
+        delete horaires[index].local;
         notifications.succes(`Horaire "${nom}" modifié`);
     } else {
         // Ajout
