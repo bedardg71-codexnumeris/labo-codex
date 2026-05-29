@@ -4,7 +4,7 @@
 >
 > **Dernière bascule** : 25 mai 2026 fin de journée — extraction des items livrés vers BACKLOG-ARCHIVE.md.
 > **État courant** : Beta 99.66 (Build 0526-0503), HEAD main `4df4f21`. 28 items ouverts (session 26 mai matin : 3 items #278/#280/#281 livrés + 3 bugs testeurs résolus + 1 item #286 ajouté).
-> **Dernier ID utilisé** : #299 (balayage références d'onglets périmées dans les textes d'aide, créé 28 mai 2026 PM suite à l'audit onboarding).
+> **Dernier ID utilisé** : #301 (résolution de pratique en consultation, créé 29 mai 2026 PM — chantier D). #300 = bug `getSync("trimestres")` désync. #299 = balayage références d'onglets périmées (28 mai PM).
 > **Présentation AQPC** : 3 juin 2026 (J−8).
 > **Pour ajouter un item** : `- [ ] **#XX** Description courte` + sous-puces de contexte. Dernier ID utilisé : **#285** (livré).
 
@@ -31,6 +31,15 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - Modal Bibliothèque cours vide en V2 — 10 sites dans cours.js lisent encore `listeCours`.
   - Effort estimé révisé : 5-7 h (scope réel 93 sites dans 15+ fichiers d'après post-mortem du 23 mai matin, tentative revertée).
   - **Prérequis P1-P4 LIVRÉS** : bandeau mode édition, activation explicite, migration tuple naturel, snippet recovery (cf. BACKLOG-ARCHIVE.md pour le post-mortem et le snippet).
+
+- [ ] 🟡 **#300** Bug `getSync("trimestres")` — désync localStorage↔IDB
+  - Découvert 29 mai 2026 (chantier D). `db.getSync("trimestres")` rend par moments 4 objets aux `.id` **vides** (`map(t=>t.id).join(",")` → `",,,"`), alors que `db.get("trimestres")` (async/IDB) rend la bonne structure.
+  - **Risque** : tout code qui énumère les trimestres via `getSync` (ou `t.id` issu de getSync) pour bâtir des clés `{t.id}_{suffixe}` travaille sur des ids vides → données introuvables / écritures mal placées.
+  - Piste : pourquoi `trimestres` part en localStorage amputé (cf. `db.js` `_prechargerDepuisIDB`/`syncToLocalStorageCache`, quota Safari file://) ; forcer lecture async ou re-sync au boot. Distinct du pattern autosave race-condition (ici = lecture). Cf. mémoire `project-bug-getsync-trimestres-desync`.
+
+- [ ] 🟢 **#301** Résolution de pratique en **consultation** : namespace du trimestre actif, pas du consulté
+  - Découvert 29 mai 2026 (chantier D). `obtenirConfigPratiqueActive()` lit `cle('pratiquesConfigurables')` = namespace du trimestre **actif**, et `obtenirPratiqueActiveGroupeCours()` démarre par `groupeCoursActif`/`infoCours` (globaux). En consultant un trimestre **archivé** (ex. A2025) alors qu'un autre est actif (ex. Été), la note finale dépend du contexte courant.
+  - Effet observé : « Note finale non calculable — Pratique active introuvable » sur un profil A2025 en consultation. Contourné en re-sélectionnant le bon groupe-cours.
 
 - [ ] 🟢 **#283** Harmonisation responsive des pages à sidebar en mobile (<1024 px)
   - Pages : Conception (Productions/Grilles/Échelles/Pratiques/Cartouches), Évaluation (Liste), possiblement Calendrier.

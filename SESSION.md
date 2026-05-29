@@ -11,7 +11,8 @@
 > **📌 Identification**
 > - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
 > - **Dernier cycle livré** : **Session 29 mai 2026 (après-midi)** — 3 commits sur main. Beta 99.76 → **99.77**, build 0529-1350. (1) **Chantier C** (refonte) : création/édition cours routée via `CoursEntite`, ID `COURS_*`, retrait du code mort période/assemblage (−158 l.). (2) **Fix horaire « propre au trimestre »** (#124) : plus de perte silencieuse quand on sauvegarde un horaire hors du trimestre actif ; éditeur réinitialisé au changement de trimestre. **Décision modèle actée** : l'horaire est propre au trimestre (recréation pure, jamais de duplication cross-trimestre) — cf. mémoire `project-modele-horaire-par-trimestre`. 110 tests verts (+4 sentinelles). Validé terrain (Mac, Safari) par Grégoire. Voir §0 (après-midi) ci-dessous.
-> - **▶ PROCHAIN BLOC — Chantier D (DESTRUCTIF), à attaquer après la pause** : voir la section **« ▶ AMORCE — Chantier D »** juste sous cet en-tête. Première étape impérative = **backup Codex FRAIS**. Le backup du matin ne suffit pas (manips de validation de l'après-midi non incluses). Plan directeur : `docs/PLAN-refonte-cours-description-independante.md` §Chantier D.
+> - **▶ CHANTIER D LIVRÉ (29 mai PM, suite)** : migration destructive exécutée (en console, sur backup frais confirmé). **601-101 consolidé sous un seul `COURS_*`** (`COURS_1780082553764_2_b771b27aca49`) ; A2024 (reconstitution jetable) + E2026 (test) + bruit 601-102 supprimés ; doublon `…2bac` fusionné. Scores réconciliés (présences 2558 = 1617 H2026 + 941 A2025, évals 715 = 410+305…), 0 doublon/orphelin 601-101, idempotent, notes finales H2026 + A2025 OK. **Aucun code applicatif touché → pas de bump** (version.json reste 99.77). Voir §0bis ci-dessous. **3 findings laissés** (non corrigés) : (1) bug `getSync("trimestres")` désync localStorage↔IDB ; (2) résolution de pratique en consultation lit le namespace du trimestre actif (pas le consulté) ; (3) résidus orphelins `GC_*`/`601-XSS` score 1. Le `pratiqueId` cassé du GC A2025 (`pan-standards` → `pan-standards-bedard`) a été **corrigé**.
+> - **▶ PROCHAIN BLOC — Chantier E** (refonte cours↔période, dernier) : voir **« ▶ AMORCE — Chantier E »** sous cet en-tête. Plan directeur : `docs/PLAN-refonte-cours-description-independante.md` §Chantier E.
 > - **Dernier cycle livré (matin-midi)** : **Session 29 mai 2026 (matin-midi)** — 4 commits sur main, **poussés** (`cddbd03..182e627`). Beta **99.72 → 99.76**, builds 0529-0639 → 0529-1139. Deux chantiers : (1) **conformité RREC heures-contact** (`0c64432`, déjà fait la veille, commité ce matin) ; (2) **refonte cours↔période chantiers 0/A/B** (`2654ff9` diagnostic read-only, `8774936` dropdown global, `182e627` lectures de période via trimestre actif). **Fausse alerte « données perdues » élucidée** : Grégoire regardait le trimestre Été vide ; aucun bug, données H2026/A2025 intactes. Voir §0 (29 mai) ci-dessous. Le §0 (28 mai soir) reste documenté plus bas.
 > - **Dernier cycle livré (28 mai soir)** : 3 commits sur main (`a45ccb2` onboarding + `eaab101` trimestre d'Été + retouches UX build 0528-1900), poussés. **Trimestre d'Été validé terrain de bout en bout**. Voir le §0 (soir) ci-dessous.
 > - **Dernier cycle livré (précédent)** : **Session 28 mai après-midi** — 7 commits sur main (`ed206e9` → `ed83d74`). Beta bumpée 99.71 → **99.72**. Voir §0-prec0. Faits saillants : (1) protocole de début de session formalisé (`SKILL_Debut_de_session.md` créé + pointeur CLAUDE.md + feedback memory globale) après détection d'un écart de 24h entre prémisse de relance et état réel ; (2) **#290 livré en 2 phases** (anonymisation seed `MODELES_PRATIQUES_PREDEFINIS` : 2 éliminations + 9 renommages d'IDs zéro-dette + 10 changements d'auteur 'Gabarit Labo Codex' + 3 modèles génériques en 'Demo Labo Codex' avec filtre transitoire OR) ; (3) **#292 livré** (déduplication défensive au chargement de codex via `verifierUniciteIds` exposé + helper `_estBiblioPartagee`) ; (4) 3 bugs UX résolus en cours de route (suppression copie IDB Michel B., débordement vertical surface `.contenu` en 2 commits — duplication CSS inline ↔ styles.css) ; (5) 3 items BACKLOG inscrits : **#295** (diagnostic mémoire/quota avant chargement Codex iPad/iPhone), **#296** (audit catégoriel des items 'Labo Codex' post-AQPC), **#297** (dette CSS dupliquée index.html ↔ styles.css post-AQPC).
@@ -22,53 +23,51 @@
 
 ---
 
-## ▶ AMORCE — Chantier D (refonte cours↔période) — à attaquer après la pause
+## §0bis — Session 29 mai 2026 (PM, suite) : Chantier D EXÉCUTÉ (migration 601-101)
 
-> **Nature : DESTRUCTIF.** Re-ID des cours + dédup par code + réécriture de TOUTES les FK
-> `coursId` sur des données réelles H2026 (présences, productions, évaluations, snapshots).
-> **Rien d'écrit tant que le backup frais n'est pas confirmé.**
+> Migration destructive jouée en **console** (pas dans le code app → pas de bump ; version.json reste 99.77).
+> Backup Codex frais confirmé par Grégoire avant exécution.
 
-### Séquence d'attaque (ordre impératif)
+### Déroulé (méthode DRY-RUN d'abord)
+- **Diagnostic + sondes read-only** (console) avant tout : confirmé que l'orphelin `COURS1766455789356`
+  (3761 réfs) = 601-101 réel sur **A2024 + A2025** (pas H2026 — les 2 groupes H2026 pointent vers le
+  canonique estampillé, `estOrphelin:false`, vérifié). Découverte : `getSync("trimestres")` rend des ids
+  vides ⇒ toute la migration lit en **async** (`db.get`).
+- **Confirmations de Grégoire** : A2024 = reconstitution rétroactive **jetable** (notes ≠ Omnivox, pas de
+  présence/production réelle) ; E2026 (doublon `…2bac`, 24 étudiants + GC 601-102) = **test** du jour.
+- **Script** `migrerCoursChantierD()` (fichier temporaire à la racine, **DRY-RUN par défaut**, exécution
+  via `{executer:true}`). Deux DRY-RUN successifs pour valider avant l'écriture réelle.
+- **Résultat** : 601-101 → `COURS_1780082553764_2_b771b27aca49` (whitelist pure, sans période/assemblage).
+  Réécritures FK (async) : H2026 1617 prés/410 évals/51 ét/10 prod/2 GC, A2025 941/305/30/11/1 — **0 perte**.
+  Supprimés : A2024 (jetable), E2026 601-101 (test), bruit 601-102, snapshot orphelin redondant.
+  Snapshots : 1 par (trim, canonique), priorité à la source réelle (collision résolue).
+  Pointeurs `infoCours`/`groupeCoursActif` invalidés (pointaient vers le GC de test) → re-sélectionner un GC.
+- **Vérifs OK** : rescan = 1 cours `COURS_*`, 0 doublon, 0 orphelin 601-101 ; idempotence (NO-OP) ;
+  notes finales **H2026 et A2025 calculées** (A2025 ≈ 2 pts d'écart avec Omnivox — attendu, données archivées).
+- **Ménage post-migration** : Grégoire avait créé 3 GC A2025 identiques en testant l'éditeur ; dédupliqués
+  à 1 GC, `pratiqueId` corrigé `pan-standards` → `pan-standards-bedard` (= PAN-Littérature A25).
 
-1. **Backup Codex complet FRAIS** (action de Grégoire) — AVANT toute écriture. Confirmer
-   explicitement avant de continuer. (Le backup du matin ne contient pas les manips de
-   validation de l'après-midi.)
-2. **Diagnostic « avant »** : en console, `await _diagnostiquerModeleCours()` → coller le
-   rapport. Capture l'état réel à jour des `coursId`, doublons et scores de données.
-3. **Trier le bruit de test** créé en validation cet après-midi (un cours de test + un
-   horaire et un groupe-cours `E2026-601-102-MQ-00001` en Été) : décider quoi écarter avant
-   la dédup, pour ne pas le canoniser.
-4. **Implémenter `migrerCoursVersDescriptionPure()`** (one-shot **idempotent**, après rapport
-   « avant » + confirmation) — 5 sous-étapes du plan directeur §Chantier D :
-   a. Re-ID `ancienId → COURS_*` par cours estampillé.
-   b. Dédup par code : canonique = **score de données max** (compléter ses champs manquants
-      depuis les doublons, jamais écraser ; mapper doublons → canonique).
-   c. Extraire l'assemblage des cours legacy → `{trim}_groupesCours` (harmoniser `groupe` vs `groupeNum`).
-   d. Réécrire **toutes** les FK `coursId` via le mapping (liste de fichiers dans le plan :
-      saisie-presences, productions, evaluation*, trimestre-v2-etudiants, snapshots, modes,
-      etudiants, organisateur, productions-bibliotheque-ui, synthese-retroaction-data,
-      exports trimestres.js, `infoCours`, `groupeCoursActif`).
-   e. Retirer période/assemblage des objets cours.
-5. **Test** : rescan → 0 `coursId` orphelin ; profil étudiant H2026 → présences/évals intactes ;
-   relance de la migration = no-op (idempotence).
+### Findings laissés (NON corrigés — chantiers distincts)
+1. **Bug `getSync("trimestres")`** : désync localStorage↔IDB (ids vides en sync). Cf. mémoire
+   `project-bug-getsync-trimestres-desync`. Lire les trimestres en async partout.
+2. **Résolution de pratique en consultation** : lit le namespace du trimestre **actif**, pas du
+   **consulté** → la note finale d'un trimestre archivé dépend du contexte courant.
+3. Résidus orphelins `GC_*`/`601-XSS` score 1 (snapshots indexés par GC) — bruit, nettoyage séparé.
 
-### Cible connue (mémoire `project-donnees-reelles-601-101`)
+---
 
-601-101 éclaté sur **3 coursId** : estampillé `h2026-601-101-MQ-00001` (≈2091 réfs, **canonique**),
-doublon `COURS_…2bac` (≈25 réfs, quasi vide), orphelin `COURS1766455789356` (≈3761 réfs,
-probable A2025). À reconfirmer via le diagnostic de l'étape 2 (l'état a pu bouger).
+## ▶ AMORCE — Chantier E (refonte cours↔période, dernier)
 
-### Pièges (plan directeur §Risques)
+> Non destructif. Remplacer la duplication legacy par une « reprise » qui ne crée jamais de doublon de cours.
 
-- `groupe` vs `groupeNum` à harmoniser entre entité et UI groupe-cours.
-- **Snapshots figés** : réécrire via le mapping (sinon orphelins), les lister au rapport.
-- `infoCours` / `groupeCoursActif` : maintenir cohérents après re-ID.
-
-### Pointeurs
-
-- Plan directeur : `docs/PLAN-refonte-cours-description-independante.md` (§Chantier D).
-- Mémoires : `project-donnees-reelles-601-101`, `project-modele-horaire-par-trimestre`.
-- Après D : **chantier E** (`reprendreCoursDansTrimestreActif` + retrait legacy).
+- Remplacer `dupliquerCoursPourTrimestreActif` (`js/cours.js` L206-254) par
+  `reprendreCoursDansTrimestreActif(coursId)` : garantit un groupe-cours dans le trimestre actif
+  pointant vers la **description existante** (no-op si présent ; sinon GC brouillon + ouvre l'assemblage).
+  **Aucune écriture dans `cours`** → zéro doublon.
+- Rebrancher le bouton « Reprendre » (`ouvrirModalBibliothequeCours` action L293) ; retirer l'ancienne fonction.
+- Test : reprendre un cours sous Été → 1 groupe-cours, 0 doublon.
+- Plan directeur : `docs/PLAN-refonte-cours-description-independante.md` (§Chantier E).
+- Mémoires : `project-donnees-reelles-601-101` (601-101 désormais consolidé sous `COURS_1780082553764_2_b771b27aca49`).
 
 ---
 
