@@ -1190,20 +1190,11 @@
             const cours = db.getSync('cours', []);
             const coursActif = cours.find(c => c.actif);
 
-            // 3. Déterminer le trimestre à partir du cours actif (où sont les données)
-            // Plutôt que d'utiliser le trimestre marqué "actif", on utilise celui du cours
+            // 3. Déterminer le trimestre — refonte chantier B : on cible le trimestre
+            // ACTIF (où vivent les données via le namespacing), plus celui qui était
+            // embarqué dans le cours (le cours ne porte plus de période).
             const trimestres = db.getSync('trimestres', []);
-            let trimestre = null;
-
-            if (coursActif && coursActif.trimestreId) {
-                // Utiliser le trimestre du cours actif
-                trimestre = trimestres.find(t => t.id === coursActif.trimestreId);
-            }
-
-            if (!trimestre) {
-                // Fallback : utiliser le trimestre marqué actif
-                trimestre = trimestres.find(t => t.actif);
-            }
+            let trimestre = trimestres.find(t => t.actif);
 
             if (!trimestre && trimestres.length > 0) {
                 // Dernier fallback : premier trimestre disponible
@@ -1793,23 +1784,11 @@
         const container = document.getElementById('export-trimestre-info');
         if (!container) return;
 
-        // Déterminer le trimestre du cours actif (comme dans exporterFormatRecherche)
-        const cours = db.getSync('cours', []);
-        const coursActif = cours.find(c => c.actif);
+        // Refonte chantier B : on cible le trimestre ACTIF (où vivent les données via
+        // le namespacing), plus celui qui était embarqué dans le cours actif.
         const trimestres = db.getSync('trimestres', []);
-
-        let trimestre = null;
-        let source = '';
-
-        if (coursActif && coursActif.trimestreId) {
-            trimestre = trimestres.find(t => t.id === coursActif.trimestreId);
-            source = 'cours actif';
-        }
-
-        if (!trimestre) {
-            trimestre = trimestres.find(t => t.actif);
-            source = 'trimestre actif';
-        }
+        let trimestre = trimestres.find(t => t.actif);
+        let source = trimestre ? 'trimestre actif' : '';
 
         if (!trimestre && trimestres.length > 0) {
             trimestre = trimestres[0];
