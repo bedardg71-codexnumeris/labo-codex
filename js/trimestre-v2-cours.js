@@ -97,24 +97,9 @@ function chargerDropdownCoursV2() {
     const tousCours = db.getSync('cours', []);
     const coursActif = db.getSync('infoCours', null);
 
-    // Obtenir le trimestre actif
-    const trimestreActifId = typeof obtenirTrimestreId === 'function' ? obtenirTrimestreId() : '';
-
-    // Helper: dériver trimestreId depuis session+annee
-    const deriverTrimestreId = (cours) => {
-        if (!cours) return null;
-        if (cours.trimestreId) return cours.trimestreId;
-        if (cours.session && cours.annee) {
-            // Gère les cas où session est "H" ou "A" (1 lettre)
-            const s = cours.session.length === 1 ? cours.session.toLowerCase() : cours.session.charAt(0).toLowerCase();
-            return s + cours.annee;
-        }
-        // Essayer de parser session combinée (ex: "H2026", "A2025")
-        if (cours.session && /^[AH]\d{4}$/i.test(cours.session)) {
-            return cours.session.toLowerCase();
-        }
-        return null;
-    };
+    // Refonte chantier A — bibliothèque globale : plus AUCUN filtre par trimestre.
+    // La période d'enseignement vit dans le groupe-cours, jamais dans le cours ;
+    // un cours créé sous un trimestre est donc visible sous tous les trimestres.
 
     // Helper: obtenir le texte d'affichage d'un cours
     // 🆕 BETA 95.2 : Le groupe ne fait plus partie du cours (entité indépendante)
@@ -126,55 +111,36 @@ function chargerDropdownCoursV2() {
         return texte || `Cours ${c.id || 'sans identifiant'}`;
     };
 
-    // Filtrer les cours par trimestre actif
-    // Critères d'inclusion:
-    // 1. trimestreId correspond exactement
-    // 2. trimestreId dérivé (session+annee) correspond
-    // 3. Pas de trimestreId ni session/annee (rétrocompatibilité)
-    const coursFiltres = trimestreActifId
-        ? tousCours.filter(c => {
-            const trimestreDerive = deriverTrimestreId(c);
-            const inclus = trimestreDerive === trimestreActifId || trimestreDerive === null;
-            if (!inclus) {
-            }
-            return inclus;
-        })
-        : tousCours;
-
     select.innerHTML = '<option value="">Sélectionner un cours...</option>';
 
-    // Déterminer le cours à sélectionner
-    let coursAfficher = [...coursFiltres];
+    // Toutes les descriptions de cours, sans distinction de période.
+    let coursAfficher = [...tousCours];
     let coursASelectionner = null;
 
-    // Vérifier si infoCours correspond au trimestre actif
-    const trimestreInfoCours = coursActif ? deriverTrimestreId(coursActif) : null;
-    const infoCoursDansTrimestre = !trimestreActifId || trimestreInfoCours === trimestreActifId || trimestreInfoCours === null;
-
-    if (coursActif && infoCoursDansTrimestre) {
-        // infoCours est dans le bon trimestre
+    if (coursActif) {
+        // Conserver le cours actif sélectionné s'il existe encore dans la bibliothèque.
         if (!coursAfficher.find(c => c.id === coursActif.id)) {
-            // Pas dans la liste, l'ajouter
             coursAfficher.unshift(coursActif);
         }
         coursASelectionner = coursActif;
-    } else if (coursFiltres.length > 0) {
-        // infoCours n'est pas dans le bon trimestre, utiliser le premier cours filtré
-        coursASelectionner = coursFiltres[0];
-
-        // Mettre à jour infoCours avec le bon cours
+    } else if (coursAfficher.length > 0) {
+        // Aucun cours actif mémorisé : sélectionner le premier et le mémoriser.
+        // CONSERVÉ tel quel pour ne pas casser la bascule de trimestre, qui remet
+        // infoCours à null puis s'appuie sur ce dropdown (cf. trimestres.js:364).
+        // Le découplage infoCours↔dropdown relève d'un chantier ultérieur (B/C).
+        coursASelectionner = coursAfficher[0];
         db.setSync('infoCours', coursASelectionner);
     }
 
     if (coursAfficher.length === 0) {
-        // Aucun cours disponible pour ce trimestre
+        // Aucune description de cours dans la bibliothèque (toutes périodes confondues)
         const option = document.createElement('option');
         option.value = '';
-        option.textContent = 'Aucun cours pour ce trimestre';
+        option.textContent = 'Aucun cours — crée ou importe un cours';
         option.disabled = true;
         select.appendChild(option);
 
-        // IMPORTANT: Réinitialiser infoCours pour éviter d'afficher des données d'un autre trimestre
+        // Aucun cours n'existe : pas de cours actif possible.
         db.setSync('infoCours', null);
 
         // Vider l'affichage des détails du cours
