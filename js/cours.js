@@ -646,9 +646,125 @@ function ouvrirFilePickerImportCours() {
 }
 
 /* ===============================
+   REFONTE COURS↔PÉRIODE — Chantier 0 : diagnostic read-only
+   Voir docs/PLAN-refonte-cours-description-independante.md
+   =============================== */
+
+/**
+ * Diagnostic LECTURE SEULE du modèle cours actuel, AVANT toute migration.
+ * N'écrit RIEN (aucun db.set/setSync) — uniquement des lectures + console.
+ * À lancer en console : await _diagnostiquerModeleCours()
+ *
+ * Produit, pour chaque codeCours :
+ *  - le nombre d'objets `cours` portant ce code (révèle les doublons inter-trimestres),
+ *  - pour chaque objet, son « score de données » = nombre de FK `coursId` le référençant
+ *    (présences + productions + groupeEtudiants + groupesCours + évaluations + snapshots),
+ *    tous trimestres confondus → identifie le canonique (score max) vs les doublons vides,
+ *  - le repère ID estampillé (h2026-…) vs ID canonique (COURS_*).
+ * Signale aussi les `coursId` orphelins (référencés par des données mais absents de `cours`).
+ *
+ * Lecture inter-trimestres : via `await db.get()` (source réelle IDB/localStorage), car
+ * `getSync` ne voit que le trimestre actif préchargé en memoryCache. Snapshots : énumère
+ * l'UNION des clés localStorage + IDB (le coursId est dans la clé `{trim}_snapshots_{id}`).
+ *
+ * @returns {Promise<{parCode:Object, scores:Object, orphelins:string[], nbCours:number, nbCanonique:number}>}
+ */
+async function _diagnostiquerModeleCours() {
+    const cours = db.getSync('cours', []);
+    const trimestres = db.getSync('trimestres', []);
+
+    // Suffixes de clés namespacées dont les items portent un champ .coursId
+    const SUFFIXES_FK = ['presences', 'productions', 'groupeEtudiants', 'groupesCours', 'evaluationsSauvegardees'];
+
+    // coursId -> compteur par type de donnée
+    const scores = {};
+    const ajouter = (coursId, type, n) => {
+        if (!coursId) return;
+        if (!scores[coursId]) {
+            scores[coursId] = { presences: 0, productions: 0, groupeEtudiants: 0, groupesCours: 0, evaluationsSauvegardees: 0, snapshots: 0 };
+        }
+        scores[coursId][type] += n;
+    };
+    const totalScore = (id) => {
+        const s = scores[id];
+        return s ? s.presences + s.productions + s.groupeEtudiants + s.groupesCours + s.evaluationsSauvegardees + s.snapshots : 0;
+    };
+
+    // Union des clés (localStorage + IDB) pour énumérer les snapshots
+    let toutesCles = [];
+    try {
+        const idbKeys = await db.keys();
+        toutesCles = Array.from(new Set([...Object.keys(localStorage), ...idbKeys]));
+    } catch (e) {
+        toutesCles = Object.keys(localStorage);
+    }
+
+    // Comptage des FK coursId, trimestre par trimestre
+    for (const t of trimestres) {
+        for (const suf of SUFFIXES_FK) {
+            const arr = await db.get(`${t.id}_${suf}`) || [];
+            if (Array.isArray(arr)) {
+                arr.forEach(item => { if (item && item.coursId) ajouter(item.coursId, suf, 1); });
+            }
+        }
+        // Snapshots : coursId encodé dans la clé {trim}_snapshots_{coursId}
+        const prefixe = `${t.id}_snapshots_`;
+        toutesCles.forEach(k => {
+            if (typeof k === 'string' && k.startsWith(prefixe)) {
+                ajouter(k.slice(prefixe.length), 'snapshots', 1);
+            }
+        });
+    }
+
+    // Regroupement des cours par codeCours
+    const parCode = {};
+    cours.forEach(c => {
+        const code = c.codeCours || '(sans code)';
+        (parCode[code] = parCode[code] || []).push(c);
+    });
+
+    const estCanonique = (id) => typeof id === 'string' && id.startsWith('COURS_');
+    const idsConnus = new Set(cours.map(c => c.id));
+    const orphelins = Object.keys(scores).filter(id => !idsConnus.has(id));
+    const nbCanonique = cours.filter(c => estCanonique(c.id)).length;
+
+    // Rapport console
+    const codesDoublons = Object.keys(parCode).filter(code => parCode[code].length > 1);
+    console.group(`[Diagnostic modèle cours] ${cours.length} cours · ${trimestres.length} trimestres`);
+    console.log(`Doublons par code : ${codesDoublons.length} code(s) sur ${Object.keys(parCode).length}`);
+    console.log(`IDs à ré-identifier (non COURS_*) : ${cours.length - nbCanonique} sur ${cours.length}`);
+
+    Object.keys(parCode).sort().forEach(code => {
+        const objets = parCode[code]
+            .map(c => ({ c, score: totalScore(c.id) }))
+            .sort((a, b) => b.score - a.score);
+        const marqueur = objets.length > 1 ? ' ⚠️ DOUBLON' : '';
+        console.group(`${code} : ${objets.length} objet(s)${marqueur}`);
+        objets.forEach(({ c, score }, i) => {
+            const s = scores[c.id] || {};
+            const detail = Object.entries(s).filter(([, n]) => n > 0).map(([k, n]) => `${k}:${n}`).join(', ') || 'aucune donnée';
+            const role = objets.length > 1 ? (i === 0 ? ' → canonique probable' : ' → doublon') : '';
+            const idType = estCanonique(c.id) ? 'COURS_*' : 'estampillé';
+            console.log(`${idType} | ${c.id} | ${(c.session || '?') + (c.annee || '')} | score ${score} (${detail})${role}`);
+        });
+        console.groupEnd();
+    });
+
+    if (orphelins.length) {
+        console.group(`⚠️ coursId orphelins (référencés par des données mais absents de 'cours') : ${orphelins.length}`);
+        orphelins.forEach(id => console.warn(`${id} | score ${totalScore(id)}`));
+        console.groupEnd();
+    }
+    console.groupEnd();
+
+    return { parCode, scores, orphelins, nbCours: cours.length, nbCanonique };
+}
+
+/* ===============================
    EXPORTS - Rendre les fonctions accessibles globalement
    =============================== */
 
+window._diagnostiquerModeleCours = _diagnostiquerModeleCours;
 window.obtenirCoursActifId = obtenirCoursActifId;
 window.dupliquerCoursPourTrimestreActif = dupliquerCoursPourTrimestreActif;
 window.initialiserModuleCours = initialiserModuleCours;
