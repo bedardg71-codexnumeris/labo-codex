@@ -19,6 +19,14 @@
 
 ---
 
+## Corrigés (29 mai 2026 — horaire propre au trimestre)
+
+| # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
+|---|---------|--------------|---------|-------|-------------|------------|
+| 124 | Grégoire (tests manuels post-chantier C — 29 mai 2026) | 29 mai 2026 | 29 mai 2026 | 0529-1350 (99.77) | En éditant un horaire (Lun-Jeu, 601-101) pendant que le trimestre actif était l'**Été** (alors que l'horaire vit en Hiver), « Enregistrer » affichait « Horaire modifié » mais **rien n'était sauvegardé** et l'horaire **disparaissait du select**. Cause : `sauvegarderHoraireV2` (branche modification) faisait `findIndex` dans `cle('horaires')` = `{trimestre actif}_horaires` ; l'horaire absent de ce namespace → index −1 → branche `if (index >= 0)` non exécutée mais notification « modifié » affichée quand même (no-op silencieux + perte de la modif). Exposé par la bascule de trimestre pendant que l'éditeur d'horaire restait ouvert : `changerTrimestreActifV2` rafraîchissait toutes les vues SAUF l'éditeur d'horaire (`horaireEnEditionId` périmé). Pré-existant, **non lié au chantier C** (qui ne touche pas le module horaires). **Décision modèle (Grégoire)** : l'horaire est propre au trimestre (recréation pure, jamais de récup/duplication cross-trimestre, UI explicite) — cf. mémoire `project-modele-horaire-par-trimestre`. | (1) `js/trimestre-v2-liste.js` `changerTrimestreActifV2` : ajout de `window.chargerHorairesV2()` au changement de trimestre → l'éditeur se réinitialise sur le nouveau trimestre. (2) `js/trimestre-v2-horaires.js` `chargerHorairesV2` : lecture de la seule sélection namespacée (retrait du fallback non-namespacé qui pouvait ramener un horaire d'un autre trimestre) + réinitialisation franche (`afficherEtatVideHoraireV2`, qui remet `horaireEnEditionId=null`) si aucun horaire dans le trimestre actif. (3) `sauvegarderHoraireV2` : garde défensif — si l'horaire édité n'est pas dans le trimestre actif (`index < 0`), `console.warn` + `notifications.erreur` + `return` au lieu d'un faux « modifié ». Sentinelle `tests/integration/horaire-par-trimestre.spec.js` (2 cas : garde défensif + réinitialisation éditeur). |
+
+---
+
 ## Corrigés (24 mai 2026 — arrondi noteFinale 1 décimale)
 
 | # | Testeur | Date rapport | Corrigé | Build | Description | Correction |

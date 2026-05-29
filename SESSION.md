@@ -10,13 +10,53 @@
 
 > **📌 Identification**
 > - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
-> - **Dernier cycle livré** : **Session 29 mai 2026 (matin-midi)** — 4 commits sur main, **poussés** (`cddbd03..182e627`). Beta **99.72 → 99.76**, builds 0529-0639 → 0529-1139. Deux chantiers : (1) **conformité RREC heures-contact** (`0c64432`, déjà fait la veille, commité ce matin) ; (2) **refonte cours↔période chantiers 0/A/B** (`2654ff9` diagnostic read-only, `8774936` dropdown global, `182e627` lectures de période via trimestre actif). **Fausse alerte « données perdues » élucidée** : Grégoire regardait le trimestre Été vide ; aucun bug, données H2026/A2025 intactes. Voir §0 (29 mai) ci-dessous. Le §0 (28 mai soir) reste documenté plus bas.
+> - **Dernier cycle livré** : **Session 29 mai 2026 (après-midi)** — 3 commits sur main. Beta 99.76 → **99.77**, build 0529-1350. (1) **Chantier C** (refonte) : création/édition cours routée via `CoursEntite`, ID `COURS_*`, retrait du code mort période/assemblage (−158 l.). (2) **Fix horaire « propre au trimestre »** (#124) : plus de perte silencieuse quand on sauvegarde un horaire hors du trimestre actif ; éditeur réinitialisé au changement de trimestre. **Décision modèle actée** : l'horaire est propre au trimestre (recréation pure, jamais de duplication cross-trimestre) — cf. mémoire `project-modele-horaire-par-trimestre`. 110 tests verts (+4 sentinelles). Validé terrain (Mac, Safari) par Grégoire. Voir §0 (après-midi) ci-dessous.
+> - **Dernier cycle livré (matin-midi)** : **Session 29 mai 2026 (matin-midi)** — 4 commits sur main, **poussés** (`cddbd03..182e627`). Beta **99.72 → 99.76**, builds 0529-0639 → 0529-1139. Deux chantiers : (1) **conformité RREC heures-contact** (`0c64432`, déjà fait la veille, commité ce matin) ; (2) **refonte cours↔période chantiers 0/A/B** (`2654ff9` diagnostic read-only, `8774936` dropdown global, `182e627` lectures de période via trimestre actif). **Fausse alerte « données perdues » élucidée** : Grégoire regardait le trimestre Été vide ; aucun bug, données H2026/A2025 intactes. Voir §0 (29 mai) ci-dessous. Le §0 (28 mai soir) reste documenté plus bas.
 > - **Dernier cycle livré (28 mai soir)** : 3 commits sur main (`a45ccb2` onboarding + `eaab101` trimestre d'Été + retouches UX build 0528-1900), poussés. **Trimestre d'Été validé terrain de bout en bout**. Voir le §0 (soir) ci-dessous.
 > - **Dernier cycle livré (précédent)** : **Session 28 mai après-midi** — 7 commits sur main (`ed206e9` → `ed83d74`). Beta bumpée 99.71 → **99.72**. Voir §0-prec0. Faits saillants : (1) protocole de début de session formalisé (`SKILL_Debut_de_session.md` créé + pointeur CLAUDE.md + feedback memory globale) après détection d'un écart de 24h entre prémisse de relance et état réel ; (2) **#290 livré en 2 phases** (anonymisation seed `MODELES_PRATIQUES_PREDEFINIS` : 2 éliminations + 9 renommages d'IDs zéro-dette + 10 changements d'auteur 'Gabarit Labo Codex' + 3 modèles génériques en 'Demo Labo Codex' avec filtre transitoire OR) ; (3) **#292 livré** (déduplication défensive au chargement de codex via `verifierUniciteIds` exposé + helper `_estBiblioPartagee`) ; (4) 3 bugs UX résolus en cours de route (suppression copie IDB Michel B., débordement vertical surface `.contenu` en 2 commits — duplication CSS inline ↔ styles.css) ; (5) 3 items BACKLOG inscrits : **#295** (diagnostic mémoire/quota avant chargement Codex iPad/iPhone), **#296** (audit catégoriel des items 'Labo Codex' post-AQPC), **#297** (dette CSS dupliquée index.html ↔ styles.css post-AQPC).
 > - **Cycle suivant — démarrage 29 mai 2026 ou ultérieur** : **Lot C du #286** (refactor API `notifications` + migration ~281 emojis ⚠ ✅ ❌ ✓ 💡 dans les notifications). Décision design actée par Grégoire : Option 1 (refactor API avec param `type` qui ajoute l'icône SVG automatiquement). **PRÉ-REQUIS GRÉGOIRE** : télécharger 2 SVG depuis icons8.com — `icons8-warning.svg` (pour le type warning ⚠ ×113 sites) et `icons8-lightbulb.svg` (pour 💡 ×29 sites). Cohérence avec `icons8-info.svg` et `icons8-check.svg` déjà présents. Cf. §2.5 du `plans de travail/PLAN-MIGRATION-ICONES-SVG.md` (Lot C — pré-requis pour démarrer).
 > - **⚠️ AVANT AQPC restant** : **#294** (configuration Netlify + Cloudflare pour la visite AQPC du 3 juin, 1-2h).
 > - **NB sur l'audit annuel** : on est sur **main**, PAS sur la branche `audit/2026-mai`. L'audit annuel reste en suspens (HEAD audit `097ce88`, divergence depuis 12 mai). Pas de mélange.
 > - **Documents clés** : `BACKLOG.md` (#295-#297 ajoutés cette session, #294 toujours ⚠️ AVANT AQPC), `Skills pour Claude Code/SKILL_Debut_de_session.md` (nouveau, versionné), `plans de travail/PLAN-MIGRATION-ICONES-SVG.md` (à mettre à jour pour acter les Lots A et D livrés au commit `11f87a1` du 27 mai PM).
+
+---
+
+## §0 — Session 29 mai 2026 (après-midi) : chantier C (refonte) + fix horaire « propre au trimestre »
+
+> 3 commits sur main. Beta 99.77, build 0529-1350. 110 tests verts (88 Vitest + 22 Playwright).
+
+### Chantier C — création/édition cours via la description pure (non destructif)
+- `js/trimestre-v2-cours.js` (−158 l.) : persistance routée via `CoursEntite.creer/mettreAJour`
+  (source unique), nouveaux cours → ID `COURS_*`, édition → ID préservé + champs legacy
+  conservés (601-101 intact jusqu'au chantier D). Retrait du code mort : lectures
+  enseignant/session, `_obtenirGroupeCoursExistant`, `_construireObjetCoursV2`,
+  `_persisterCoursV2`, fonctions de remplissage enseignant/horaire, `chargerDropdownPratiquesCours`.
+- **Découverte** : le « déplacement de champs vers le groupe-cours » du plan était déjà fait
+  au DOM (le formulaire cours ne contenait plus que les champs ministériels). Chantier C s'est
+  donc réduit à un nettoyage de la couche données.
+- Sentinelle `tests/integration/cours-refonte-rendu.spec.js` (création = `COURS_*` sans
+  période/assemblage ; édition legacy = ID préservé + champs legacy conservés).
+
+### Fix horaire « propre au trimestre » (#124) — bug testeur
+- **Bug** : éditer un horaire pendant que le trimestre actif basculait sous lui → sauvegarde
+  dans le mauvais namespace (`{trim}_horaires`) → `findIndex` = −1 → no-op silencieux + faux
+  « modifié » + **perte de la modif** + disparition du select. Pré-existant, non lié au chantier C.
+- **Décision modèle (Grégoire)** : horaire propre au trimestre, recréation pure, jamais de
+  récup/duplication cross-trimestre, UI explicite. Cf. mémoire `project-modele-horaire-par-trimestre`.
+- **Fix** (3 points) : (1) `changerTrimestreActifV2` réinitialise l'éditeur d'horaire au
+  changement de trimestre ; (2) `chargerHorairesV2` affiche franchement l'état vide si le
+  trimestre actif n'a pas d'horaire (plus de fallback non-namespacé) ; (3) garde défensif dans
+  `sauvegarderHoraireV2` (jamais de faux « modifié »). Sentinelle `horaire-par-trimestre.spec.js` (2 cas).
+
+### Note de procédé (acté en mémoire `feedback-bump-build-session-ouverte`)
+- Bumper le build pendant une session Safari file:// ouverte crée un **cache hybride** (scripts
+  à versions mêlées) qui simule de faux bugs (boutons/sélecteurs morts). Remède : `Cmd+Option+R`.
+  Suspecter le cache AVANT le code si comportement bizarre juste après un bump.
+
+### Reste à faire (refonte)
+- **Chantier D** (DESTRUCTIF) : re-ID `COURS_*`, dédup par code, réécriture FK `coursId`. Backup Codex obligatoire.
+- **Chantier E** : `reprendreCoursDansTrimestreActif` + retrait legacy.
+- **Question versée à la refonte** : périmètre des horaires (confirmé « par trimestre » — pas une dette).
 
 ---
 
