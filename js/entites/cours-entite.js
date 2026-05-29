@@ -26,6 +26,8 @@ const CLE_COURS = 'cours';
  * @property {string} numeroCompetence - Numéro de la compétence
  * @property {string} competence - Description de la compétence
  * @property {string} elementsCompetence - Éléments de compétence
+ * @property {number|null} heuresContact - Heures-contact attendues du cours (RREC). Source de vérité de la conformité.
+ * @property {string} ponderation - Pondération « théorie-labo-perso » (ex. "2-2-3"). Métadonnée de saisie ; propose heuresContact et le repère d'unités.
  * @property {string} dateCreation - Date de création ISO
  * @property {string} dateModification - Date de dernière modification ISO
  */
@@ -50,6 +52,8 @@ async function creerCours(donnees) {
         numeroCompetence: donnees.numeroCompetence || '',
         competence: donnees.competence || '',
         elementsCompetence: donnees.elementsCompetence || '',
+        heuresContact: (donnees.heuresContact === 0 || donnees.heuresContact) ? donnees.heuresContact : null,
+        ponderation: donnees.ponderation || '',
         dateCreation: new Date().toISOString(),
         dateModification: new Date().toISOString()
     };
@@ -144,7 +148,7 @@ async function mettreAJourCours(coursId, modifications) {
     }
 
     // Mettre à jour les champs (sauf id et dateCreation)
-    const champsModifiables = ['codeCours', 'nomCours', 'discipline', 'numeroCompetence', 'competence', 'elementsCompetence'];
+    const champsModifiables = ['codeCours', 'nomCours', 'discipline', 'numeroCompetence', 'competence', 'elementsCompetence', 'heuresContact', 'ponderation'];
 
     champsModifiables.forEach(champ => {
         if (modifications[champ] !== undefined) {

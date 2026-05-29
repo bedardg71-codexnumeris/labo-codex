@@ -19,6 +19,61 @@
 
 ---
 
+## 🤝 Apport Cowork — 29 mai 2026 (audit RREC + guides PAN + architecture pratiques)
+
+> Travail de **conception/rédaction produit en Cowork** par Grégoire + Claude, à refiler à
+> Claude Code **après** le chantier en cours (balises du cours / nombre de périodes RREC).
+> **Rien ici n'est urgent avant l'AQPC (J−5)** : ce sont des specs et des documents, pas du
+> code livré. L'aiguillage ci-dessous indique quoi attaquer quand la fenêtre s'ouvre.
+
+### Documents produits (tous versionnables)
+
+| Fichier | Nature | Statut |
+|---|---|---|
+| `Rapports/AUDIT-CONFORMITE-RREC-C29r4.md` | Audit de conformité de l'app au RREC (C-29, r.4) | Terminé (informationnel) |
+| `Plan Accompagnement/PLAN_guide_PAN_refonte_RREC.md` | Guide **« Cadre réglementaire »** (4 pages HTML) | Spec prête à intégrer |
+| `Plan Accompagnement/PLAN_guide_PAN_pedagogique_CSE.md` | Guide **« Modalités »** (4 pages, fondé sur le CSÉ) | Spec prête à intégrer |
+| `Refactorisations/PLAN_architecture_pratiques_SSOT.md` | Architecture cible : registre `IPratique` = source unique | Plan validé (post-AQPC) |
+| `Refactorisations/PLAN_unification_codes_pratiques.md` | Audit des call-sites des codes de pratiques | Audit = référence ; recommandation *superseded* par le plan SSOT |
+| `Refactorisations/SPEC_sessionA_identifiants.md` | Spec d'implémentation fichier-par-fichier (Phase 0) | **Prête à coder** |
+
+### Décisions actées (29 mai)
+
+- **Deux guides distincts** dans le futur module unifié (cf. `Plan Accompagnement/PLAN_guides_pedagogiques.md`) : *Cadre réglementaire* (id `pan-rrec`) et *Modalités* (id `pan`). Registre « cadre + responsabilité partagée » : les guides disent *aider/cadrer*, jamais *garantir* la conformité (le seuil 60 % et la PIEA restent hors app).
+- **Nommage neutre, dépersonnalisé** pour les pratiques : identifiants `sommative` / `standards` / `specifications` / `denotation` ; codes courts SOM/STD/SPE/DEN (lettres **inchangées** — pas de churn de données) ; « PAN » = libellé de **famille**, plus un préfixe technique ni un jeton de calcul.
+- **D1 tranchée** : « objectifs » **n'est pas** une pratique distincte (1 seul cas sur 6 cartographies, fonctionnellement du Standards-Based Grading à granularité fine). Le fold `pan-objectifs` → `standards` est rattaché à la **session calcul** (le module `standards` implémente déjà `_calculerPerformanceParObjectifs`). Aucune donnée de production en objectifs → capacité à conserver, pas donnée à migrer.
+- **Périmètre de préservation** (zéro-dette, pas de base d'utilisateurs) : **seules les données de Grégoire** (pratique `standards`, trimestres, grilles, évaluations, backups Codex). Packs démo et JSON du sondage = fixtures librement modifiables.
+
+### Bug latent à corriger (découvert à l'audit)
+
+`obtenirIdPratiqueActive()` (`js/pratiques/pratique-registre.js:226-231`) « migre » `specifications` → `pan-specifications` et réécrit en base — alors que l'instance est enregistrée et s'identifie sous `specifications` (`pratique-pan-specifications.js:671,88`). Résultat : `obtenirPratiqueActive()` fait `.get('pan-specifications')` → **échec** + `console.error`. La normalisation pousse dans le mauvais sens. Corrigé par la Session A.
+
+### Aiguillage pour Claude Code (post-AQPC, ordre impératif)
+
+1. **Session A — identifiants** (`SPEC_sessionA_identifiants.md`) : fondation. Canonicalisation neutre + correction du bug ci-dessus + constante `PRATIQUE_DEFAUT` + migration boot/tolérance import limitée aux données de Grégoire. **À faire avant les deux suivantes** (la résolution id→instance doit être fiable d'abord).
+2. **Session B — représentations** : étendre `IPratique` (`obtenirCode`/`obtenirCouleur`/`obtenirLabelFamille`), router tous les badges/couleurs vers le registre, **supprimer** les tables locales éparpillées (gabarits-utils, wizard, pratique-notation-v2, main.js, etudiants.js, echelles).
+3. **Session C — calcul** : router le moteur d'indices vers `pratique.calculerPerformance(da)`, **supprimer le jeton binaire `'SOM'|'PAN'`**, et y rattacher le fold `objectifs ⊂ standards` (invariant : indices identiques avant/après, tests chiffrés).
+
+Les **guides PAN** (Cadre + Modalités) sont indépendants de ce refactor ; leur intégration dépend de la création du module `js/guides-pedagogiques.js` (cf. `PLAN_guides_pedagogiques.md`), elle-même post-AQPC.
+
+### Lien avec le chantier en cours (périodes RREC)
+
+L'audit confirme que la notion de **« cours ≥ 45 périodes » et « unité = 45 h »** relève de l'art. 1 et de l'art. 18 du RREC — c'est une balise **institutionnelle**, cohérente avec l'ajout de balises de périodes au cours. Le seul article à portée matérielle pour la *notation* est l'**art. 27** (seuil de réussite 60 %), déjà respecté par défaut dans le code. Détails dans `Rapports/AUDIT-CONFORMITE-RREC-C29r4.md`.
+
+### Terminologie « heure d'enseignement » + mini-guide des balises du cours (ajout 29 mai)
+
+Recherche poussée (sources fiables) sur **période / heure-contact / unité**, en appui au chantier A en cours.
+
+- **Tranché par l'OQLF** (Grand dictionnaire terminologique, fiche « heure d'enseignement ») : le terme correct est **« heure d'enseignement »** (« heure pendant laquelle le professeur est en présence des étudiants pour un enseignement théorique ou pratique » ; unité de mesure de la charge). **« heure-contact » est DÉCONSEILLÉ** — calque de l'anglais *contact hour*. → L'app emploie partout l'anglicisme (`v2-heuresContact`, `proposerHeuresContactDepuisPonderation`, `ANALYSE-conformite-RREC-heures-contact.md`) : **chantier terminologique à prévoir** (libellés UI au minimum).
+- **Période ≠ heure d'enseignement** : la période est le bloc horaire (50 ou 55 min selon le collège — sources cégep Sainte-Foy 50 min, Rimouski 55 min ; le défaut `dureePeriodeMinutes` = 55 de `horaire.js:288` est donc une valeur légitime mais non universelle). L'heure d'enseignement est l'unité de compte : 1 période comptée pour 1 heure. Le RREC compte les cours **en périodes** (art. 1).
+- **Ambiguïté interne confirmée** : l'exigence (pondération × 15) compte 1 période = 60 min ; le réalisé de l'horaire convertit à 55 min → faux écart possible (ex. « 55 / 60 h » pour un cours pourtant conforme). **Recommandation** : compter les deux côtés dans la **même** unité, idéalement en **périodes / heures d'enseignement** (unité du RREC et du devis), pas en minutes d'horloge.
+
+**Livrable** : `Plan Accompagnement/SPEC_mini-guide_cours_balises.md` — aide contextuelle (mode *popup*) à greffer sur le formulaire du cours, onglet **Cadre**, près des champs Pondération / Heures d'enseignement. Définit période / heure d'enseignement / unité / pondération, avec exemple chiffré (2-2-3 → 60 h enseignement + 45 h perso = 105 h = 2 ⅓ unités) et encadré sur l'anglicisme. Sources notées dans la spec (OQLF, RREC art. 1, ministère « Prescriptions ministérielles » 2019, cégeps Trois-Rivières/Montmorency/Sainte-Foy/Rimouski).
+
+**Complément — bulle au survol** (`SPEC_mini-guide_cours_balises.md` §6) : en plus du *popup*, une bulle `data-tooltip="reglages-cours-ponderation-heures"` à poser sur la rangée Pondération / Heures du formulaire (`index.html` ~ l. 6977), texte court dans `accompagnement-contenu-hover.js`. Porte la nuance : pondération = théorie–labo–travail personnel (h/sem) ; (théorie+labo)×15 = heures d'enseignement ; 1 heure d'enseignement = 1 période (50-55 min selon le collège), pas 60 min ; en session intensive, l'invariant = le total d'heures. **Renommer en même temps** « Heures-contact attendues » (`index.html:6984`) → « Heures d'enseignement » (OQLF). ⚠️ **Collision** : ces champs (`v2-ponderation`/`v2-heuresContact`) sont ceux du chantier A en cours — intégrer la bulle **dans ce chantier**, pas en parallèle.
+
+---
+
 ## §0 — Récap session 28 mai 2026 SOIR (réconciliation état réel + onboarding + support trimestre d'Été)
 
 **Beta / build** : **99.72** conservée. Builds 0528-1807 → 0528-1821 → 0528-1900. **3 commits sur main, poussés sur origin** : `a45ccb2` (onboarding) + `eaab101` (trimestre d'Été — commit amendé pour y intégrer le nettoyage `calendrier-vue.js`) + commit 3 (retouches UX finales, build 0528-1900).
