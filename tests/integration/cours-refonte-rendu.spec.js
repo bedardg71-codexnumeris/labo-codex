@@ -164,3 +164,97 @@ test('Chantier C · édition d\'un cours legacy → ID préservé + champs legac
 
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });
+
+// Refonte cours↔période — chantier E (29 mai 2026).
+// « Reprendre dans ce trimestre » ne duplique JAMAIS la description : aucune écriture
+// dans `cours`. Verrouille deux régressions :
+//   (a) ré-apparition de l'ancienne duplication (dupliquerCoursPourTrimestreActif) qui
+//       créait un doublon de cours à chaque reprise ;
+//   (b) création silencieuse d'un groupe-cours en double quand la description est déjà
+//       reprise dans le trimestre actif (cas no-op).
+test('Chantier E · reprendre une description ne crée aucun doublon de cours (brouillon pré-sélectionné)', async ({ page }) => {
+    const erreurs = brancherEcouteurs(page);
+
+    await page.goto(indexHtml);
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
+
+    const resultat = await page.evaluate(async () => {
+        for (const dep of ['reprendreCoursDansTrimestreActif', 'GroupeCoursEntite', 'obtenirTrimestreActif', 'db']) {
+            if (typeof window[dep] === 'undefined') return { erreur: `window.${dep} absent` };
+        }
+        // Zéro-dette : l'ancienne duplication doit avoir disparu.
+        const ancienneRetiree = typeof window.dupliquerCoursPourTrimestreActif === 'undefined';
+
+        // Trimestre Été actif + table rase.
+        window.db.setSync('trimestres', [{ id: 'e2026', nom: 'Été 2026', actif: true }]);
+        window.db.setSync('trimestreActif', 'e2026');
+        await window.db.set('e2026_groupesCours', []);
+        const coursId = 'COURS_REPRISE_E';
+        window.db.setSync('cours', [{ id: coursId, codeCours: '601-101-MQ', nomCours: 'Écriture', dansBibliotheque: true, isDemo: false }]);
+
+        const nbCoursAvant = window.db.getSync('cours', []).length;
+        await window.reprendreCoursDansTrimestreActif(coursId);
+
+        const coursApres = window.db.getSync('cours', []);
+        const gcApres = await window.GroupeCoursEntite.obtenirTous('e2026');
+        const selCours = document.getElementById('v2-gc-cours');
+
+        return {
+            ancienneRetiree,
+            nbCoursAvant,
+            nbCoursApres: coursApres.length,
+            nbGCApres: gcApres.length,
+            coursPreselectionne: selCours ? selCours.value : null
+        };
+    });
+
+    expect(resultat.erreur, `Erreur eval : ${resultat.erreur}`).toBeUndefined();
+    expect(resultat.ancienneRetiree, 'dupliquerCoursPourTrimestreActif doit être retiré (zéro-dette)').toBe(true);
+    expect(resultat.nbCoursApres, 'reprendre ne doit créer AUCUN doublon de description').toBe(resultat.nbCoursAvant);
+    expect(resultat.nbCoursApres).toBe(1);
+    expect(resultat.nbGCApres, 'la reprise ouvre un brouillon, sans écrire de groupe-cours').toBe(0);
+    expect(resultat.coursPreselectionne, 'le cours doit être pré-sélectionné dans le formulaire d\'assemblage').toBe('COURS_REPRISE_E');
+
+    expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
+});
+
+test('Chantier E · reprendre une description déjà reprise est un no-op (pas de groupe-cours en double)', async ({ page }) => {
+    const erreurs = brancherEcouteurs(page);
+
+    await page.goto(indexHtml);
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
+
+    const resultat = await page.evaluate(async () => {
+        for (const dep of ['reprendreCoursDansTrimestreActif', 'GroupeCoursEntite', 'db']) {
+            if (typeof window[dep] === 'undefined') return { erreur: `window.${dep} absent` };
+        }
+        window.db.setSync('trimestres', [{ id: 'e2026', nom: 'Été 2026', actif: true }]);
+        window.db.setSync('trimestreActif', 'e2026');
+        const coursId = 'COURS_REPRISE_E';
+        window.db.setSync('cours', [{ id: coursId, codeCours: '601-101-MQ', nomCours: 'Écriture', dansBibliotheque: true, isDemo: false }]);
+        // Un groupe-cours pointe DÉJÀ vers cette description dans le trimestre actif.
+        await window.db.set('e2026_groupesCours', [
+            { id: 'GC_DEJA', trimestreId: 'e2026', coursId, enseignantId: 'E1', horaireId: 'H1', groupe: '00001', actif: true }
+        ]);
+
+        const nbCoursAvant = window.db.getSync('cours', []).length;
+        await window.reprendreCoursDansTrimestreActif(coursId);
+
+        const gcApres = await window.GroupeCoursEntite.obtenirTous('e2026');
+        return {
+            nbCoursAvant,
+            nbCoursApres: window.db.getSync('cours', []).length,
+            nbGCApres: gcApres.length,
+            idGC: gcApres.length === 1 ? gcApres[0].id : null
+        };
+    });
+
+    expect(resultat.erreur, `Erreur eval : ${resultat.erreur}`).toBeUndefined();
+    expect(resultat.nbGCApres, 'aucun groupe-cours en double ne doit être créé').toBe(1);
+    expect(resultat.idGC, 'le groupe-cours existant doit être préservé tel quel').toBe('GC_DEJA');
+    expect(resultat.nbCoursApres, 'aucun doublon de description').toBe(resultat.nbCoursAvant);
+
+    expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
+});

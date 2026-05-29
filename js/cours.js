@@ -9,7 +9,7 @@
    Contenu de ce module:
    - Affichage du tableau des cours
    - Ajout/modification de cours
-   - Duplication de cours
+   - Reprise d'un cours dans le trimestre actif (sans duplication)
    - Activation d'un cours (cours actif)
    - Suppression de cours
    =============================== */
@@ -188,69 +188,78 @@ function initialiserModuleCours() {
 }
 
 /* ===============================
-   🔄 DUPLICATION
+   🔄 REPRISE DANS LE TRIMESTRE ACTIF
    =============================== */
 /**
- * Duplique un cours pour le trimestre actuellement actif
- * Utilisé depuis le modal Bibliothèque pour créer une copie dans un nouveau trimestre
+ * Reprend un cours (description) dans le trimestre actif SANS dupliquer la description.
  *
- * FONCTIONNEMENT:
- * 1. Récupère le cours original
- * 2. Obtient le trimestre actif (session + année)
- * 3. Crée une copie avec session/année du trimestre actif
- * 4. Génère un nouvel ID et trimestreId
- * 5. Sauvegarde et rafraîchit
+ * Chantier E (refonte cours↔période, mai 2026) : remplace l'ancienne duplication, qui
+ * créait un doublon de cours à chaque reprise. Ici, AUCUNE écriture dans `cours` :
+ *  - si un groupe-cours pointe déjà vers cette description dans le trimestre actif → no-op
+ *    (on ouvre simplement l'assemblage sur le groupe-cours existant) ;
+ *  - sinon → on ouvre le formulaire d'assemblage en mode « nouveau », cours pré-sélectionné,
+ *    pour que l'enseignant·e complète enseignant·e / horaire / groupe (brouillon à compléter).
  *
- * @param {string} id - ID du cours à dupliquer
+ * Le trimestre actif est résolu via obtenirTrimestreActif() — la MÊME source que le
+ * namespacing cle() — pour rester cohérent avec le reste de l'UI d'assemblage.
+ *
+ * @param {string} coursId - ID de la description de cours à reprendre
  */
-function dupliquerCoursPourTrimestreActif(id) {
-    const cours = db.getSync('cours', []);
-    const coursOriginal = cours.find(c => c.id === id);
+async function reprendreCoursDansTrimestreActif(coursId) {
+    const tousLesCours = await db.get('cours') || [];
+    const coursCible = tousLesCours.find(c => c.id === coursId);
 
-    if (!coursOriginal) {
-        alert('Cours introuvable');
+    if (!coursCible) {
+        notifications.erreur('Cours introuvable');
         return;
     }
 
-    // Obtenir le trimestre actif
-    const trimestres = db.getSync('trimestres', []);
-    const trimestreActif = trimestres.find(t => t.actif) || trimestres[0];
-
-    if (!trimestreActif) {
-        alert('Aucun trimestre actif. Veuillez d\'abord créer un trimestre.');
+    const trimestreActif = typeof obtenirTrimestreActif === 'function' ? obtenirTrimestreActif() : null;
+    if (!trimestreActif || !trimestreActif.id) {
+        notifications.erreur('Aucun trimestre actif. Sélectionne ou crée un trimestre d\'abord.');
         return;
     }
 
-    // Créer la copie avec les infos du nouveau trimestre
-    const nouveauCours = {
-        ...coursOriginal,
-        id: genererIdUnique('COURS_'),
-        session: trimestreActif.session,
-        annee: trimestreActif.annee,
-        trimestreId: trimestreActif.id,
-        dateEnregistrement: new Date().toISOString(),
-        dansBibliotheque: true,
-        actif: false,
-        verrouille: false
-    };
+    // No-op : un groupe-cours référence-t-il déjà cette description dans le trimestre actif ?
+    const groupesCours = await window.GroupeCoursEntite.obtenirTous(trimestreActif.id);
+    const gcExistant = groupesCours.find(gc =>
+        gc.coursId === coursId ||
+        gc.coursId === coursCible.sigle ||
+        gc.coursId === coursCible.codeCours ||
+        gc.coursId === coursCible.code
+    );
 
-    // Ne pas copier le suffixe "(copie)" si déjà présent
-    if (!nouveauCours.codeCours.includes('(copie)')) {
-        // Garder le code original, pas de suffixe
-    }
-
-    cours.push(nouveauCours);
-    db.setSync('cours', cours);
-
-    // Fermer le modal et rafraîchir
     fermerModalBibliothequeCours();
 
-    // Rafraîchir le dropdown V2 si disponible
-    if (typeof chargerDropdownCoursV2 === 'function') {
-        chargerDropdownCoursV2();
+    // Déployer l'accordéon « Groupe-cours » (active la sous-section + scrolle)
+    if (typeof allerVersCarte === 'function') {
+        allerVersCarte('accordeon-groupe-cours');
     }
 
-    notifications.succes(`Cours dupliqué pour ${trimestreActif.nom} !`);
+    const libelleCours = coursCible.codeCours || coursCible.sigle || coursCible.nomCours || 'ce cours';
+    const nomTrimestre = trimestreActif.nom || trimestreActif.id;
+
+    if (gcExistant) {
+        // Ouvrir l'assemblage sur le groupe-cours déjà présent
+        const selectGC = document.getElementById('v2-selectGroupeCours');
+        if (selectGC) selectGC.value = gcExistant.id;
+        if (typeof changerGroupeCoursSelectionneV2 === 'function') {
+            changerGroupeCoursSelectionneV2(gcExistant.id);
+        }
+        notifications.info(`${libelleCours} a déjà un groupe-cours dans ${nomTrimestre}.`);
+        return;
+    }
+
+    // Nouveau groupe-cours brouillon, description pré-sélectionnée (aucun doublon de cours)
+    if (typeof nouveauGroupeCoursV2 === 'function') {
+        nouveauGroupeCoursV2();
+        const selectCours = document.getElementById('v2-gc-cours');
+        if (selectCours) selectCours.value = coursId;
+        if (typeof mettreAJourNomGroupeCoursV2 === 'function') {
+            mettreAJourNomGroupeCoursV2();
+        }
+    }
+    notifications.info(`Complète l'enseignant·e, l'horaire et le groupe pour reprendre ${libelleCours} dans ${nomTrimestre}.`);
 }
 
 /* ===============================
@@ -290,7 +299,7 @@ async function ouvrirModalBibliothequeCours() {
                 badgeSource: '',
                 metadonnees: meta,
                 description: cours.competence || '',
-                boutonPrincipal: { label: 'Reprendre dans ce trimestre', action: 'dupliquerCoursPourTrimestreActif', param: cours.id, classe: 'btn-confirmer', title: 'Créer une copie de ce cours pour le trimestre actif' },
+                boutonPrincipal: { label: 'Reprendre dans ce trimestre', action: 'reprendreCoursDansTrimestreActif', param: cours.id, classe: 'btn-confirmer', title: 'Créer un groupe-cours pour ce cours dans le trimestre actif (sans dupliquer le cours)' },
                 actionsMenu: [
                     { label: 'Exporter', action: 'partagerCours', param: cours.id, classe: 'btn-secondaire', title: 'Exporter ce cours en JSON pour le partager' },
                     { label: 'Retirer', action: 'retirerCoursDeBibliotheque', param: cours.id, classe: 'btn-supprimer', title: 'Retirer de ta sélection' }
@@ -766,7 +775,7 @@ async function _diagnostiquerModeleCours() {
 
 window._diagnostiquerModeleCours = _diagnostiquerModeleCours;
 window.obtenirCoursActifId = obtenirCoursActifId;
-window.dupliquerCoursPourTrimestreActif = dupliquerCoursPourTrimestreActif;
+window.reprendreCoursDansTrimestreActif = reprendreCoursDansTrimestreActif;
 window.initialiserModuleCours = initialiserModuleCours;
 window.ouvrirModalBibliothequeCours = ouvrirModalBibliothequeCours;
 window.fermerModalBibliothequeCours = fermerModalBibliothequeCours;
