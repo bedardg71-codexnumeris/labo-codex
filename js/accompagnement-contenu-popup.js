@@ -22,6 +22,53 @@
 const AIDE_CONTEXTUELLE = {
 
     // =========================================================================
+    // CADRE - BALISES DU COURS (pondération / heures d'enseignement / unité)
+    // =========================================================================
+
+    'cadre-cours-balises': {
+        titre: "Comprendre les balises du cours",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Trois grandeurs décrivent la « taille » d'un cours au collégial : la pondération, les heures d'enseignement et les unités. Elles viennent du Règlement sur le régime des études collégiales (RREC) et de la grille de cours de ton programme. Voici comment les lire."
+            },
+            {
+                type: 'liste',
+                titre: "La pondération (ex. : 2-2-3)",
+                items: [
+                    "1er chiffre : heures de théorie par semaine.",
+                    "2e chiffre : heures de laboratoire ou de pratique par semaine.",
+                    "3e chiffre : heures de travail personnel attendues par semaine (hors classe).",
+                    "Les deux premiers chiffres comptent le temps en présence de l'enseignant ; le troisième, le travail autonome de l'étudiant."
+                ]
+            },
+            {
+                type: 'texte',
+                contenu: "Les heures d'enseignement sont le temps où l'enseignant est en présence des étudiants, pour un enseignement théorique ou pratique. On les obtient en additionnant les deux premiers chiffres de la pondération et en multipliant par les 15 semaines du trimestre régulier. Exemple : pondération 2-2-3 → (2 + 2) × 15 = 60 heures d'enseignement."
+            },
+            {
+                type: 'alerte',
+                niveau: 'attention',
+                contenu: "Terminologie : le terme juste est « heure d'enseignement ». « Heure-contact » est un calque de l'anglais contact hour, déconseillé par l'Office québécois de la langue française."
+            },
+            {
+                type: 'texte',
+                contenu: "Ne confonds pas une période et une heure d'enseignement. Une période est le bloc à ton horaire : sa durée dépend du collège (souvent 50 ou 55 minutes, pause comprise). Une heure d'enseignement est l'unité de compte de la charge : une période compte pour une heure d'enseignement, même si elle dure moins de 60 minutes d'horloge. Le RREC compte d'ailleurs les cours en « périodes d'enseignement » (au moins 45 pour un cours typique)."
+            },
+            {
+                type: 'exemple',
+                titre: "L'unité (RREC)",
+                contenu: "Une unité équivaut à 45 heures d'activités d'apprentissage — travail personnel inclus. Le nombre d'unités d'un cours = somme des trois chiffres de la pondération ÷ 3. Exemple : 2-2-3 → (2+2+3) ÷ 3 = 2 ⅓ unités, soit 2 ⅓ × 45 = 105 heures au total (60 d'enseignement + 45 de travail personnel)."
+            },
+            {
+                type: 'conseil',
+                contenu: "Dans Labo Codex, les heures d'enseignement servent de repère de conformité (ce qui est prévu vs ce que ton horaire couvre réellement). Les unités sont un repère descriptif, dérivé de la pondération. En session intensive (été), la pondération « par semaine » devient trompeuse, mais le total d'heures d'enseignement, lui, reste le même : c'est l'invariant à viser."
+            }
+        ],
+        voirAussi: []
+    },
+
+    // =========================================================================
     // CONSTRUCTION - RÉFLEXION SUR LES OBJECTIFS (NOUVEAU)
     // =========================================================================
 
