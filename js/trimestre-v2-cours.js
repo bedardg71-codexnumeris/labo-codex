@@ -534,9 +534,6 @@ async function modifierCoursSelectionneV2() {
         if (titre) titre.textContent = 'Modifier le cours';
         if (btnTexte) btnTexte.textContent = 'Enregistrer';
 
-        // ✅ AJOUT (2 jan 2026) : Charger le dropdown des pratiques AVANT de remplir
-        await chargerDropdownPratiquesCours();
-
         // Remplir les champs avec les données du cours
         remplirFormCoursV2(coursSelectionne);
 
@@ -616,34 +613,11 @@ function _remplirChampsInfosCours(cours) {
     majRepereUnitesCours();
 }
 
-function _remplirChampsEnseignant(cours) {
-    const enseignant = cours.enseignant || {};
-    setValue('v2-prenomEnseignant', cours.prenomEnseignant || enseignant.prenom || '');
-    setValue('v2-nomEnseignant', cours.nomEnseignant || enseignant.nom || '');
-    setValue('v2-courrielEnseignant', cours.courriel || enseignant.courriel || '');
-    setValue('v2-disciplineEnseignant', cours.discipline || enseignant.discipline || '');
-    setValue('v2-departement', cours.departement || enseignant.departement || '');
-    setValue('v2-institutionEnseignant', cours.institution || enseignant.institution || '');
-}
-
-function _remplirChampsSessionHoraire(cours) {
-    // Refonte chantier B : session/année ne sont plus lues depuis le cours.
-    // Les champs #v2-session/#v2-annee n'existent plus dans le DOM et la période
-    // est dérivée du trimestre actif (cf. _deriverSessionAnneeTrimestreActif, lu par
-    // _lireChampsSessionDOM). On ne remplit donc plus que la config d'horaire.
-    const periodes = cours.periodesParSemaine || cours.heuresParSemaine || cours.heuresHebdo || 4;
-    setValue('v2-periodesParSemaine', periodes);
-    if (typeof window.mettreAJourFormatHoraire === 'function') {
-        window.mettreAJourFormatHoraire();
-    }
-    setValue('v2-formatHoraire', cours.formatHoraire || '2x2');
-}
-
 function remplirFormCoursV2(cours) {
+    // Refonte chantier C : le formulaire COURS ne porte plus que les champs
+    // ministériels. Enseignant/horaire/pratique/groupe sont édités dans le
+    // formulaire de groupe-cours ; la période se dérive du trimestre actif.
     _remplirChampsInfosCours(cours);
-    _remplirChampsEnseignant(cours);
-    _remplirChampsSessionHoraire(cours);
-    setValue('v2-pratiqueIdCours', cours.pratiqueId || 'pan-standards');
 }
 
 /* ===============================
@@ -919,17 +893,12 @@ function afficherSyntheseGroupeCours(gc) {
 }
 
 /**
- * Réinitialise le formulaire cours
- * 🆕 FIX (1er fév 2026) : Utilise le trimestre actif pour session et année
- */
-/**
  * Dérive { session, annee } depuis le trimestre actif (SSOT).
  * Source unique : l'ID du trimestre actif (ex. "e2026" → session "E", année 2026),
- * avec repli sur ses propriétés session/annee. Sert à estampiller les cours créés.
- * FIX (29 mai 2026) : extrait de reinitialiserFormCoursV2 pour être réutilisé par
- * _lireChampsSessionDOM — les champs DOM #v2-session/#v2-annee n'existent pas, ils
- * renvoyaient toujours H/2026 et estampillaient tout cours en h2026 (invisible hors
- * H2026, ex. trimestre Été). Le regex [aeh] couvre Hiver/Été/Automne.
+ * avec repli sur ses propriétés session/annee. Le regex [aeh] couvre Hiver/Été/Automne.
+ * Refonte chantier B/C : la période ne vit JAMAIS sur le cours. Ce helper est exporté
+ * et consommé par les lecteurs de période (statistiques.js, trimestres.js…) qui
+ * dérivent la session/année du trimestre actif plutôt que de l'objet cours.
  * @returns {{session: string, annee: number}}
  */
 function _deriverSessionAnneeTrimestreActif() {
@@ -950,76 +919,13 @@ function _deriverSessionAnneeTrimestreActif() {
 }
 
 function reinitialiserFormCoursV2() {
+    // Refonte chantier C : seuls les champs ministériels subsistent dans ce formulaire.
     const champs = [
         'v2-codeCours', 'v2-nomCours', 'v2-numeroCompetence', 'v2-competence', 'v2-disciplineCours',
-        'v2-elementsCompetence', 'v2-heuresContact', 'v2-ponderation',
-        'v2-prenomEnseignant', 'v2-nomEnseignant', 'v2-courrielEnseignant',
-        'v2-disciplineEnseignant', 'v2-departement', 'v2-institutionEnseignant'
+        'v2-elementsCompetence', 'v2-heuresContact', 'v2-ponderation'
     ];
     champs.forEach(id => setValue(id, ''));
     majRepereUnitesCours();
-
-    // Session et année depuis le trimestre actif (SSOT — cf. _deriverSessionAnneeTrimestreActif)
-    const { session, annee } = _deriverSessionAnneeTrimestreActif();
-
-    setValue('v2-session', session);
-    setValue('v2-annee', annee);
-    // ✅ MODIFIÉ (6 jan 2026) : Périodes au lieu d'heures
-    setValue('v2-periodesParSemaine', 4);
-    if (typeof window.mettreAJourFormatHoraire === 'function') {
-        window.mettreAJourFormatHoraire();
-    }
-    setValue('v2-formatHoraire', '2x2');
-    // ✅ AJOUT (2 jan 2026) : Pratique par défaut
-    setValue('v2-pratiqueIdCours', 'pan-standards');
-}
-
-/**
- * ✅ AJOUT (2 jan 2026) : Charge le dropdown des pratiques depuis la sidebar
- * Affiche les pratiques de pratiquesConfigurables (celles dans la sidebar)
- */
-async function chargerDropdownPratiquesCours() {
-    const select = document.getElementById('v2-pratiqueIdCours');
-    if (!select) return;
-
-    // Valeur actuelle pour la restaurer après le rechargement
-    const valeurActuelle = select.value;
-
-    // Option par défaut
-    let html = '<option value="">-- Sélectionner une pratique --</option>';
-
-    // Charger les pratiques depuis pratiquesConfigurables (même source que la sidebar)
-    let pratiques = [];
-    try {
-        pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
-        // Filtrer les pratiques dans la bibliothèque (affichées dans la sidebar)
-        pratiques = pratiques.filter(p => p.dansBibliotheque !== false);
-    } catch (e) {
-        console.warn('[trimestre-v2] Erreur chargement pratiques:', e);
-    }
-
-    // Ajouter les pratiques disponibles
-    if (pratiques.length > 0) {
-        pratiques.forEach(p => {
-            const badge = p.pratiques?.[0] || p.type || '';
-            const badgeHtml = badge ? `[${badge}] ` : '';
-            html += `<option value="${echapperHtml(p.id)}">${badgeHtml}${p.nom || 'Sans titre'}</option>`;
-        });
-    } else {
-        html += '<option value="" disabled>Aucune pratique configurée</option>';
-        html += '<option value="" disabled>→ Ajouter via Construction > Pratiques de notation</option>';
-    }
-
-    select.innerHTML = html;
-
-    // Restaurer la valeur précédente si elle existe encore
-    if (valeurActuelle) {
-        const optionExiste = Array.from(select.options).some(o => o.value === valeurActuelle);
-        if (optionExiste) {
-            select.value = valeurActuelle;
-        }
-    }
-
 }
 
 /**
@@ -1071,111 +977,34 @@ function _lireChampsInfosCoursDOM() {
     };
 }
 
-function _lireChampsEnseignantDOM() {
-    return {
-        prenomEnseignant: document.getElementById('v2-prenomEnseignant')?.value?.trim() || '',
-        nomEnseignant: document.getElementById('v2-nomEnseignant')?.value?.trim() || '',
-        courriel: document.getElementById('v2-courrielEnseignant')?.value?.trim() || '',
-        departement: document.getElementById('v2-departement')?.value?.trim() || '',
-        institution: document.getElementById('v2-institutionEnseignant')?.value?.trim() || ''
-    };
-}
-
-function _lireChampsSessionDOM() {
-    // FIX (29 mai 2026) : session/année dérivées du trimestre actif (SSOT), PAS des
-    // champs DOM #v2-session/#v2-annee qui n'existent pas dans le formulaire — ils
-    // renvoyaient toujours H/2026, estampillant tout cours créé en h2026 quel que soit
-    // le trimestre actif (cours invisibles hors H2026, ex. trimestre Été). En édition,
-    // l'ID du cours est préservé via coursEnEditionV2, donc pas de dédoublement.
-    const { session, annee } = _deriverSessionAnneeTrimestreActif();
-    return {
-        session: session,
-        annee: annee,
-        periodesParSemaine: parseInt(document.getElementById('v2-periodesParSemaine')?.value) || 4,
-        formatHoraire: document.getElementById('v2-formatHoraire')?.value || '2x2',
-        pratiqueId: document.getElementById('v2-pratiqueIdCours')?.value || 'pan-standards'
-    };
-}
-
 function _lireDonneesFormCoursV2() {
-    return {
-        ..._lireChampsInfosCoursDOM(),
-        ..._lireChampsEnseignantDOM(),
-        ..._lireChampsSessionDOM()
-    };
+    // Refonte chantier C : le cours est une DESCRIPTION ministérielle pure.
+    // On ne lit donc que les champs ministériels présents dans le formulaire.
+    // Enseignant/horaire/pratique/groupe vivent dans le groupe-cours ; session/année
+    // se dérivent du trimestre actif (cf. _deriverSessionAnneeTrimestreActif), jamais
+    // du cours.
+    return _lireChampsInfosCoursDOM();
 }
 
-function _obtenirGroupeCoursExistant() {
-    let groupe = '00001';
-    if (coursEnEditionV2) {
-        const coursListe = db.getSync('cours', []);
-        const coursExistant = coursListe.find(c => c.id === coursEnEditionV2);
-        if (coursExistant?.groupe) {
-            groupe = String(coursExistant.groupe).padStart(5, '0');
-        }
+// Re-synchronise infoCours quand on vient de modifier le cours actuellement actif.
+// CoursEntite.mettreAJour préserve les champs non ministériels (legacy : enseignant,
+// groupe, session…) tant que le chantier D (re-ID) n'a pas tourné — aucune perte sur
+// les cours estampillés réels (601-101).
+function _resyncInfoCoursSiActif(coursSauve) {
+    const info = db.getSync('infoCours', null);
+    if (info && coursSauve && info.id === coursSauve.id) {
+        db.setSync('infoCours', coursSauve);
     }
-    return groupe;
 }
 
-function _construireObjetCoursV2(d, groupe) {
-    const trimestreId = `${d.session.toLowerCase()}${d.annee}`;
-    return {
-        id: coursEnEditionV2 || `${trimestreId}-${d.codeCours}-${groupe}`,
-        sigle: d.codeCours,
-        codeCours: d.codeCours,
-        titre: d.nomCours,
-        nomCours: d.nomCours,
-        numeroCompetence: d.numeroCompetence,
-        competence: d.competence,
-        discipline: d.discipline,
-        elementsCompetence: d.elementsCompetence,
-        heuresContact: d.heuresContact,
-        ponderation: d.ponderation,
-        enseignant: {
-            prenom: d.prenomEnseignant,
-            nom: d.nomEnseignant,
-            courriel: d.courriel,
-            discipline: d.discipline,
-            departement: d.departement,
-            institution: d.institution
-        },
-        session: d.session,
-        annee: d.annee,
-        periodesParSemaine: d.periodesParSemaine,
-        formatHoraire: d.formatHoraire,
-        groupe: groupe,
-        pratiqueId: d.pratiqueId
-    };
-}
-
-function _persisterCoursV2(cours) {
-    let tousLesCours = db.getSync('cours', []);
-    if (coursEnEditionV2) {
-        const index = tousLesCours.findIndex(c => c.id === coursEnEditionV2);
-        if (index >= 0) {
-            const actifPrecedent = tousLesCours[index].actif === true;
-            tousLesCours[index] = { ...tousLesCours[index], ...cours, actif: actifPrecedent };
-        } else {
-            tousLesCours.push({ ...cours, actif: false });
-        }
-    } else {
-        const estPremier = tousLesCours.length === 0;
-        tousLesCours.push({ ...cours, actif: estPremier });
-    }
-    db.setSync('cours', tousLesCours);
-
-    // Re-synchroniser infoCours si on a modifié le cours actuellement actif
-    const infoCoursActuel = db.getSync('infoCours', null);
-    if (coursEnEditionV2 && infoCoursActuel && infoCoursActuel.id === coursEnEditionV2) {
-        const coursMaj = tousLesCours.find(c => c.id === coursEnEditionV2);
-        if (coursMaj) db.setSync('infoCours', coursMaj);
-    }
-
-    // Auto-activation : uniquement le PREMIER cours créé.
-    // Pour activer un autre cours après coup, utiliser le bouton « Activer ce cours ».
-    if (!coursEnEditionV2 && tousLesCours.length === 1) {
-        db.setSync('infoCours', tousLesCours[0]);
-    }
+// Auto-activation : uniquement le tout PREMIER cours créé. Pour activer un autre
+// cours après coup, utiliser le bouton « Activer ce cours ».
+function _activerSiPremierCours(coursSauve) {
+    const tous = db.getSync('cours', []);
+    if (tous.length !== 1) return;
+    const majs = tous.map(c => c.id === coursSauve.id ? { ...c, actif: true } : c);
+    db.setSync('cours', majs);
+    db.setSync('infoCours', { ...coursSauve, actif: true });
 }
 
 function _postSauvegardeCoursV2(cours) {
@@ -1195,7 +1024,7 @@ function _postSauvegardeCoursV2(cours) {
     }
 }
 
-function sauvegarderCoursV2() {
+async function sauvegarderCoursV2() {
     const d = _lireDonneesFormCoursV2();
 
     if (!d.codeCours) {
@@ -1207,10 +1036,24 @@ function sauvegarderCoursV2() {
         return;
     }
 
-    const groupe = _obtenirGroupeCoursExistant();
-    const cours = _construireObjetCoursV2(d, groupe);
-    _persisterCoursV2(cours);
-    _postSauvegardeCoursV2(cours);
+    // Refonte chantier C : persistance routée par CoursEntite (source unique du modèle
+    // cours = description ministérielle pure, ID COURS_*). Plus de fabrication d'objet
+    // gras ni d'ID embarquant la période. Édition = ID préservé (coursEnEditionV2),
+    // champs legacy conservés par mettreAJour jusqu'au chantier D.
+    let coursSauve;
+    if (coursEnEditionV2) {
+        coursSauve = await CoursEntite.mettreAJour(coursEnEditionV2, d);
+        if (!coursSauve) {
+            alert('Cours introuvable pour la mise à jour.');
+            return;
+        }
+        _resyncInfoCoursSiActif(coursSauve);
+    } else {
+        coursSauve = await CoursEntite.creer(d);
+        _activerSiPremierCours(coursSauve);
+    }
+
+    _postSauvegardeCoursV2(coursSauve);
 }
 
 /**
@@ -1233,7 +1076,6 @@ window.modifierCoursSelectionneV2 = modifierCoursSelectionneV2;
 window.dupliquerCoursSelectionneV2 = dupliquerCoursSelectionneV2;
 window.annulerFormCoursV2 = annulerFormCoursV2;
 window.sauvegarderCoursV2 = sauvegarderCoursV2;
-window.chargerDropdownPratiquesCours = chargerDropdownPratiquesCours;
 window.afficherSyntheseCours = afficherSyntheseCours;
 window.afficherSyntheseEnseignant = afficherSyntheseEnseignant;
 window.afficherSyntheseGroupeEtudiants = afficherSyntheseGroupeEtudiants;
