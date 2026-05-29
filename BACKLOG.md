@@ -4,7 +4,8 @@
 >
 > **Dernière bascule** : 25 mai 2026 fin de journée — extraction des items livrés vers BACKLOG-ARCHIVE.md.
 > **État courant** : Beta 99.66 (Build 0526-0503), HEAD main `4df4f21`. 28 items ouverts (session 26 mai matin : 3 items #278/#280/#281 livrés + 3 bugs testeurs résolus + 1 item #286 ajouté).
-> **Dernier ID utilisé** : #301 (résolution de pratique en consultation, créé 29 mai 2026 PM — chantier D). #300 = bug `getSync("trimestres")` désync. #299 = balayage références d'onglets périmées (28 mai PM).
+> **Dernier ID utilisé** : #305 (a11y modale d'aide sans nom accessible, créé 29 mai 2026 soir). #304 = nettoyage terminologique heures-contact (libellés UI faits par le mini-guide). #303 = refactor pratiques SSOT — **Session A-1 livrée (beta 99.80)**, reste A-2/B/C. #302 = module guides pédagogiques unifié + guides PAN. #301 = résolution de pratique en consultation (chantier D). #300 = bug `getSync("trimestres")` désync. #299 = balayage références d'onglets périmées (28 mai PM).
+> **Session 29 mai (soir)** : chantier E (refonte cours↔période close), mini-guide balises (#304 libellés), **Session A-1** (#303). Beta 99.77 → **99.80**.
 > **Présentation AQPC** : 3 juin 2026 (J−8).
 > **Pour ajouter un item** : `- [ ] **#XX** Description courte` + sous-puces de contexte. Dernier ID utilisé : **#285** (livré).
 
@@ -80,6 +81,31 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - **Méthode** : pour chaque occurrence, déterminer la destination réelle (Cadre / Conception / Réglages résiduel) et corriger le libellé. Distinguer les vraies références « Réglages » résiduelles (Préférences/Données/À propos — toujours valides : `securite-prefs.js`, `init-inline.js` « À propos », `reserve-reglages.js`, `accompagnement-contenu-popup.js:1357` « À propos ») qui ne doivent PAS être touchées.
   - **Titres tour guidé — tranché et livré 28 mai PM** : étape 2 « Structure » → « Conception », étape 4 « Tableau de bord » → « Suivi » (Grégoire a choisi d'aligner sur les noms d'onglets).
   - **Effort estimé** : 1-2 h.
+
+### Conception pédagogique et architecture des pratiques (chantiers Cowork 29 mai)
+
+- [ ] 🟢 **#302** Module guides pédagogiques unifié + intégration des guides (dont les 2 guides PAN)
+  - Créer `js/guides-pedagogiques.js` (module unifié) + panneau HTML générique + styles, selon `Plan Accompagnement/PLAN_guides_pedagogiques.md`.
+  - Intégrer les contenus : SOLO, RàI, ACP, Enseignement explicite, et les **2 nouveaux guides PAN** — Cadre réglementaire (`Plan Accompagnement/PLAN_guide_PAN_refonte_RREC.md`, id `pan-rrec`) et Modalités fondées sur le CSÉ (`Plan Accompagnement/PLAN_guide_PAN_pedagogique_CSE.md`, id `pan`).
+  - **État actuel** : boutons stubés dans `index.html`, module **absent** → aucun guide multi-pages fonctionnel pour l'instant. Provenance : conversation Cowork 29 mai 2026.
+
+- [ ] 🟢 **#303** Refactor des pratiques de notation → registre `IPratique` comme source unique (SSOT)
+  - Réf. maître : `Refactorisations/PLAN_architecture_pratiques_SSOT.md`. Ordre impératif **A → B → C**.
+  - **✅ Session A-1 LIVRÉE (29 mai soir, beta 99.80, commit `8de006a`)** — non destructif : `normaliserIdPratique` + `PRATIQUE_DEFAUT='standards'`, **bug latent corrigé** (plus de réécriture `specifications`→`pan-specifications` ; normalisation à la lecture **sans write-back**), instance Standards → `'standards'`, 3 sites `liste-evaluations.js` normalisés, test Vitest `pratique-normalisation`. **Décision : code Standards = `STD`** (`SDT` = libellé). Cf. mémoire `project-pratiques-ssot-decisions`.
+  - **▶ Session A-2 (RESTE de A, sur backup, à froid)** : 7 défauts `|| 'pan-maitrise'` → `PRATIQUE_DEFAUT` ; ~60 comparaisons sur base brute → canonique ; tables de représentation (badgeConfig/typeBadges/typeMapping) + corriger `code:'PAN'`→`'STD'` ; **migration des données stockées au boot** + tolérance import + round-trip codex ; retrait daté des alias. Interdépendantes (réécrire la base désync les comparaisons) → un seul bloc.
+  - ⚠️ Incohérence corpus à corriger avant B/C : `PLAN_architecture_pratiques_SSOT.md` §7 (découpage sessions) est obsolète vs §5 réordonné (Session A = identifiants, pas représentations) ; le guide PAN Modalités affiche « code SDT » incompatible avec la décision `STD`.
+  - **Session B (représentations)** : étendre le contrat (`obtenirCode`/`obtenirCouleur`/`obtenirLabelFamille`), tout lire du registre, supprimer les tables de codes éparpillées.
+  - **Session C (calcul)** : déléguer à `calculerPerformance(da)`, supprimer le jeton binaire `'SOM'|'PAN'`, et y rattacher le fold `objectifs ⊂ standards`.
+  - Décisions actées : nommage neutre (`sommative`/`standards`/`specifications`/`denotation` ; codes SOM/STD/SPE/DEN ; « PAN » = nom de famille). Audit des call-sites : `Refactorisations/PLAN_unification_codes_pratiques.md`. Post-AQPC.
+
+- [ ] 🟢 **#304** Nettoyage terminologique interne « heures-contact » → « heure d'enseignement »
+  - **✅ Libellés UI faits (mini-guide « balises du cours », beta 99.79, commit `8f23964`)** : « Heures-contact attendues » → « Heures d'enseignement » + « Total d'heures en classe » → « Total d'heures d'enseignement » (`index.html`). Reste : identifiants techniques `v2-heuresContact`, fonction `proposerHeuresContactDepuisPonderation`, commentaires « heures-contact » de `js/trimestre-v2-cours.js`, doc `docs/ANALYSE-conformite-RREC-heures-contact.md`.
+  - Justification : l'OQLF (Grand dictionnaire terminologique) **déconseille** « heure-contact » (calque de *contact hour*) au profit de « heure d'enseignement ».
+  - Lié au chantier A conformité RREC + à l'ambiguïté **période (50-55 min) vs heure** à trancher (compter exigence et réalisé dans la même unité, idéalement en périodes). Réf. `Plan Accompagnement/SPEC_mini-guide_cours_balises.md` §2 et §5.
+
+- [ ] 🟢 **#305** A11y : la modale d'aide contextuelle annonce un dialogue sans nom
+  - `afficherAideContextuelle()` (`js/accompagnement.js:846`) pose `aria-labelledby="aide-ctx-titre"`, mais ce `<span>` ne reçoit jamais le `titre` de l'entrée (il ne contient que l'icône) → lecteurs d'écran annoncent un dialogue sans nom. Vrai pour les ~40 entrées popup.
+  - Correctif d'une ligne (injecter `aide.titre` dans `#aide-ctx-titre` au rendu). Découvert 29 mai 2026 en livrant le mini-guide « balises du cours ».
 
 ### Cohérence visuelle UI
 
