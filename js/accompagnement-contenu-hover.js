@@ -66,6 +66,12 @@ const TOOLTIPS = {
         'Ta liste d\'\u00e9tudiant\u00b7es. Tu peux les ajouter s\u00e9par\u00e9ment ou les importer depuis un tableur ou Omnivox. Le marqueur SA identifie ceux et celles qui sont inscrit\u00b7es aux Services adapt\u00e9s.',
     'reglages-horaire':
         'L\'horaire de ton groupe : jours, heures, locaux. Combin\u00e9 au calendrier du trimestre, il g\u00e9n\u00e8re automatiquement la grille de tes s\u00e9ances.',
+    'reglages-cours-ponderation-heures':
+        'Pond\u00e9ration = th\u00e9orie\u2013laboratoire\u2013travail personnel, en heures par semaine. ' +
+        '(Th\u00e9orie + labo) \u00d7 15 = les heures d\'enseignement (pr\u00e9sence en classe). ' +
+        'Une heure d\'enseignement correspond \u00e0 une p\u00e9riode \u00e0 l\'horaire (50 \u00e0 55 min selon ' +
+        'le coll\u00e8ge), pas \u00e0 60 minutes d\'horloge. En session intensive, c\'est ce total ' +
+        'd\'heures qui reste l\'invariant, pas le rythme hebdomadaire.',
     'reglages-groupe-cours':
         'Ton espace de travail pour le trimestre \u2014 tu relies ici ton cours, ton groupe, ton horaire et ta fa\u00e7on de construire la note. C\'est le groupe-cours actif qui d\u00e9termine ce que tu vois partout dans l\'application.',
 
