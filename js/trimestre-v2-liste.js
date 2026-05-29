@@ -371,6 +371,14 @@ function changerTrimestreActifV2(valeur) {
             // Rafraîchir le dropdown des cours (filtré par trimestre)
             window.chargerDropdownCoursV2();
 
+            // Horaire propre au trimestre (décision 29 mai 2026) : réinitialiser l'éditeur
+            // d'horaire sur le nouveau trimestre. Sans ça, l'éditeur restait ouvert sur un
+            // horaire de l'ancien trimestre → sauvegarde dans le mauvais namespace (no-op
+            // silencieux + perte de la modif).
+            if (typeof window.chargerHorairesV2 === 'function') {
+                window.chargerHorairesV2();
+            }
+
             // 🆕 BETA 95.2 : Rafraîchir le dropdown groupe-cours actif
             if (typeof peuplerDropdownGroupeCoursActif === 'function') {
                 window.peuplerDropdownGroupeCoursActif();
