@@ -627,8 +627,10 @@ function _remplirChampsEnseignant(cours) {
 }
 
 function _remplirChampsSessionHoraire(cours) {
-    setValue('v2-session', cours.session || 'H');
-    setValue('v2-annee', cours.annee || new Date().getFullYear());
+    // Refonte chantier B : session/année ne sont plus lues depuis le cours.
+    // Les champs #v2-session/#v2-annee n'existent plus dans le DOM et la période
+    // est dérivée du trimestre actif (cf. _deriverSessionAnneeTrimestreActif, lu par
+    // _lireChampsSessionDOM). On ne remplit donc plus que la config d'horaire.
     const periodes = cours.periodesParSemaine || cours.heuresParSemaine || cours.heuresHebdo || 4;
     setValue('v2-periodesParSemaine', periodes);
     if (typeof window.mettreAJourFormatHoraire === 'function') {
@@ -1243,5 +1245,10 @@ window.ouvrirModalNouveauCours = ouvrirModalNouveauCours;
 // (init.js, horaires.js) — sinon ReferenceError cross-IIFE.
 // Régression silencieuse du refactor 17 mai 2026 corrigée 22 mai 2026.
 window.setValue = setValue;
+
+// Refonte chantier B : SSOT de dérivation de la période depuis le trimestre actif,
+// partagé avec les autres modules (statistiques.js, etc.) qui ne doivent plus lire
+// la période depuis l'objet cours.
+window._deriverSessionAnneeTrimestreActif = _deriverSessionAnneeTrimestreActif;
 
 })();

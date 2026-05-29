@@ -87,10 +87,11 @@ function chargerInfosCours() {
     // Nombre de cours configurés
     setStatText('stat-nb-cours', listeCours.length || '0');
 
-    // Trimestre du cours actif
-    if (coursActif) {
-        const trimestre = `${coursActif.session || ''}${coursActif.annee || ''}`;
-        setStatText('stat-trimestre', trimestre || '—');
+    // Trimestre actif — refonte chantier B : la période vient du trimestre actif,
+    // plus de l'objet cours (qui ne porte plus de période dans le modèle cible).
+    if (typeof window._deriverSessionAnneeTrimestreActif === 'function') {
+        const { session, annee } = window._deriverSessionAnneeTrimestreActif();
+        setStatText('stat-trimestre', (session && annee) ? `${session}${annee}` : '—');
     } else {
         setStatText('stat-trimestre', '—');
     }
