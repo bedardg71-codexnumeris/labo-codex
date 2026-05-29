@@ -333,7 +333,7 @@ function genererOptionsFiltres(groupes, productions) {
     const pratiqueIdFiltres = typeof obtenirPratiqueActiveGroupeCours === 'function'
         ? obtenirPratiqueActiveGroupeCours()
         : (typeof obtenirIdPratiqueActive === 'function' ? obtenirIdPratiqueActive() : 'sommative');
-    const estPANFiltres = pratiqueIdFiltres === 'pan-standards' || pratiqueIdFiltres === 'pan-maitrise';
+    const estPANFiltres = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(pratiqueIdFiltres) : pratiqueIdFiltres) === 'standards';
 
     if (selectNote) {
         selectNote.innerHTML = '<option value="">Toutes les notes</option>';
@@ -629,7 +629,7 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
     const pratiqueId = typeof obtenirPratiqueActiveGroupeCours === 'function'
         ? obtenirPratiqueActiveGroupeCours()
         : (typeof obtenirIdPratiqueActive === 'function' ? obtenirIdPratiqueActive() : 'sommative');
-    const estPAN = pratiqueId === 'pan-standards' || pratiqueId === 'pan-maitrise';
+    const estPAN = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(pratiqueId) : pratiqueId) === 'standards';
 
     // Productions à évaluer (exclure le portfolio lui-même)
     const productionsAEvaluer = productions.filter(p => p.type !== 'portfolio');
@@ -2105,7 +2105,7 @@ function obtenirIndicesEtudiant(da) {
     const pratiqueIdIndices = typeof obtenirPratiqueActiveGroupeCours === 'function'
         ? obtenirPratiqueActiveGroupeCours()
         : (typeof obtenirIdPratiqueActive === 'function' ? obtenirIdPratiqueActive() : 'sommative');
-    const pratique = (pratiqueIdIndices === 'pan-standards' || pratiqueIdIndices === 'pan-maitrise') ? 'PAN' : 'SOM';
+    const pratique = ((typeof normaliserIdPratique === 'function' ? normaliserIdPratique(pratiqueIdIndices) : pratiqueIdIndices) === 'standards') ? 'PAN' : 'SOM';
 
     // Indice A (Assiduité)
     const indicesAssiduiteDetailles = db.getSync(cle('indicesAssiduite'), {});

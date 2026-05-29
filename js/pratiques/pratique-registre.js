@@ -20,6 +20,39 @@
 'use strict';
 
 // ============================================================================
+// IDENTIFIANTS CANONIQUES (Session A — assainissement, mai 2026)
+// ============================================================================
+// Un seul identifiant neutre par pratique. La famille « PAN » n'est plus un
+// préfixe technique ni un jeton de calcul. Les codes courts (SOM/STD/SPE/DEN)
+// restent inchangés (décision 29 mai 2026 : STD demeure le code de Standards).
+
+const PRATIQUE_DEFAUT = 'standards';
+
+// Table de normalisation legacy → canonique.
+// NB : 'pan-objectifs' n'est PAS remappé en Session A — c'est une variante de
+// granularité de 'standards' (décision D1), consolidée en session calcul ; on le
+// laisse résoudre vers son instance actuelle d'ici là.
+const TABLE_NORMALISATION_PRATIQUE = {
+    'alternative': 'standards',
+    'pan-maitrise': 'standards',
+    'pan-maitrise-json': 'standards',
+    'pan-standards': 'standards',
+    'pan-specifications': 'specifications',
+    'pan-denotation': 'denotation'
+};
+
+/**
+ * Normalise un identifiant de pratique vers sa forme canonique neutre.
+ * Idempotent : normaliserIdPratique(normaliserIdPratique(x)) === normaliserIdPratique(x).
+ * @param {string} id - identifiant éventuellement legacy
+ * @returns {string} identifiant canonique (ou l'entrée telle quelle si déjà canonique / inconnue)
+ */
+function normaliserIdPratique(id) {
+    if (!id || typeof id !== 'string') return id;
+    return TABLE_NORMALISATION_PRATIQUE[id] || id;
+}
+
+// ============================================================================
 // ÉTAT DU REGISTRE
 // ============================================================================
 
@@ -216,23 +249,17 @@ function obtenirIdPratiqueActive() {
             return null;
         }
 
-        // Fallback automatique pour migrations
-        // Beta 89 → Beta 90 : 'alternative' → 'pan-standards'
-        // Beta 95 → Beta 95.2 : 'pan-maitrise' → 'pan-standards'
-        if (idPratique === 'alternative' || idPratique === 'pan-maitrise') {
-            console.warn(`⚠️ Pratique "${idPratique}" détectée, migration automatique vers "pan-standards"`);
-            idPratique = 'pan-standards';
-            config.pratique = 'pan-standards';
-            db.setSync(cle('modalitesEvaluation'), config);
-        }
-        if (idPratique === 'specifications') {
-            console.warn('⚠️ Pratique "specifications" détectée, migration automatique vers "pan-specifications"');
-            idPratique = 'pan-specifications';
-            config.pratique = 'pan-specifications';
-            db.setSync(cle('modalitesEvaluation'), config);
-        }
-
-        return idPratique;
+        // Normalisation vers l'identifiant canonique (point unique : normaliserIdPratique).
+        // Remplace les anciennes « migrations » dispersées — dont celle qui poussait
+        // specifications → pan-specifications alors que l'instance s'enregistre sous
+        // specifications (le .get échouait).
+        //
+        // Session A-1 : on normalise À LA LECTURE, SANS write-back. Réécrire
+        // modalitesEvaluation.pratique en base désynchroniserait les ~60 comparaisons
+        // qui lisent encore `config.pratique`/`modalites.pratique` brut (legacy). La
+        // migration des données stockées + le collapse de ces comparaisons sont traités
+        // ensemble en Session A-2 (étape 6), sur backup.
+        return normaliserIdPratique(idPratique);
     } catch (error) {
         console.error('Erreur lors de la lecture de la pratique active:', error);
         return null;
@@ -499,6 +526,8 @@ function initialiserRegistrePratiques() {
 window.enregistrerPratique = enregistrerPratique;
 window.obtenirPratiqueActive = obtenirPratiqueActive;
 window.obtenirIdPratiqueActive = obtenirIdPratiqueActive;
+window.normaliserIdPratique = normaliserIdPratique;
+window.PRATIQUE_DEFAUT = PRATIQUE_DEFAUT;
 window.listerPratiquesDisponibles = listerPratiquesDisponibles;
 window.pratiqueEstDisponible = pratiqueEstDisponible;
 window.obtenirPratiqueParId = obtenirPratiqueParId;
