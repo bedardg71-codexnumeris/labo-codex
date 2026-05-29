@@ -39,7 +39,7 @@ class PratiquePANStandards {
     }
 
     obtenirId() {
-        return "pan-standards";
+        return "standards";
     }
 
     obtenirDescription() {
@@ -1598,7 +1598,7 @@ class PratiquePANStandards {
     const instance = new PratiquePANStandards();
 
     try {
-        window.enregistrerPratique('pan-standards', instance);
+        window.enregistrerPratique('standards', instance);
         // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
     } catch (error) {
         console.error('[PAN-Standards] Erreur lors de l\'enregistrement:', error);
