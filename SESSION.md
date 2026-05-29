@@ -12,7 +12,7 @@
 > - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
 > - **Dernier cycle livré** : **Session 29 mai 2026 (après-midi)** — 3 commits sur main. Beta 99.76 → **99.77**, build 0529-1350. (1) **Chantier C** (refonte) : création/édition cours routée via `CoursEntite`, ID `COURS_*`, retrait du code mort période/assemblage (−158 l.). (2) **Fix horaire « propre au trimestre »** (#124) : plus de perte silencieuse quand on sauvegarde un horaire hors du trimestre actif ; éditeur réinitialisé au changement de trimestre. **Décision modèle actée** : l'horaire est propre au trimestre (recréation pure, jamais de duplication cross-trimestre) — cf. mémoire `project-modele-horaire-par-trimestre`. 110 tests verts (+4 sentinelles). Validé terrain (Mac, Safari) par Grégoire. Voir §0 (après-midi) ci-dessous.
 > - **▶ CHANTIER D LIVRÉ (29 mai PM, suite)** : migration destructive exécutée (en console, sur backup frais confirmé). **601-101 consolidé sous un seul `COURS_*`** (`COURS_1780082553764_2_b771b27aca49`) ; A2024 (reconstitution jetable) + E2026 (test) + bruit 601-102 supprimés ; doublon `…2bac` fusionné. Scores réconciliés (présences 2558 = 1617 H2026 + 941 A2025, évals 715 = 410+305…), 0 doublon/orphelin 601-101, idempotent, notes finales H2026 + A2025 OK. **Aucun code applicatif touché → pas de bump** (version.json reste 99.77). Voir §0bis ci-dessous. **3 findings laissés** (non corrigés) : (1) bug `getSync("trimestres")` désync localStorage↔IDB ; (2) résolution de pratique en consultation lit le namespace du trimestre actif (pas le consulté) ; (3) résidus orphelins `GC_*`/`601-XSS` score 1. Le `pratiqueId` cassé du GC A2025 (`pan-standards` → `pan-standards-bedard`) a été **corrigé**.
-> - **▶ PROCHAIN BLOC — Chantier E** (refonte cours↔période, dernier) : voir **« ▶ AMORCE — Chantier E »** sous cet en-tête. Plan directeur : `docs/PLAN-refonte-cours-description-independante.md` §Chantier E.
+> - **✅ CHANTIER E LIVRÉ (29 mai PM, suite — clôt la refonte cours↔période)** : commit `4e0fd2c`, beta **99.78** (b0529-1610), validé terrain (Mac/Safari) par Grégoire. `dupliquerCoursPourTrimestreActif` (créait un doublon de description à chaque reprise) **remplacée** par `reprendreCoursDansTrimestreActif(coursId)`, async, qui n'écrit **jamais** dans `cours` : no-op si un groupe-cours pointe déjà vers la description dans le trimestre actif (ouvre l'assemblage sur le GC existant) ; sinon ouvre le formulaire d'assemblage en mode « nouveau », description pré-sélectionnée (brouillon enseignant·e/horaire/groupe à compléter). Trimestre actif résolu via `obtenirTrimestreActif()` (même source que `cle()`). Zéro-dette : ancienne fonction + export + action de bouton retirés. **112 tests verts** (88 Vitest + 24 Playwright ; +2 cas E + sentinelle de disparition). **Refonte cours↔période COMPLÈTE (A+B+C+D+E).**
 > - **Dernier cycle livré (matin-midi)** : **Session 29 mai 2026 (matin-midi)** — 4 commits sur main, **poussés** (`cddbd03..182e627`). Beta **99.72 → 99.76**, builds 0529-0639 → 0529-1139. Deux chantiers : (1) **conformité RREC heures-contact** (`0c64432`, déjà fait la veille, commité ce matin) ; (2) **refonte cours↔période chantiers 0/A/B** (`2654ff9` diagnostic read-only, `8774936` dropdown global, `182e627` lectures de période via trimestre actif). **Fausse alerte « données perdues » élucidée** : Grégoire regardait le trimestre Été vide ; aucun bug, données H2026/A2025 intactes. Voir §0 (29 mai) ci-dessous. Le §0 (28 mai soir) reste documenté plus bas.
 > - **Dernier cycle livré (28 mai soir)** : 3 commits sur main (`a45ccb2` onboarding + `eaab101` trimestre d'Été + retouches UX build 0528-1900), poussés. **Trimestre d'Été validé terrain de bout en bout**. Voir le §0 (soir) ci-dessous.
 > - **Dernier cycle livré (précédent)** : **Session 28 mai après-midi** — 7 commits sur main (`ed206e9` → `ed83d74`). Beta bumpée 99.71 → **99.72**. Voir §0-prec0. Faits saillants : (1) protocole de début de session formalisé (`SKILL_Debut_de_session.md` créé + pointeur CLAUDE.md + feedback memory globale) après détection d'un écart de 24h entre prémisse de relance et état réel ; (2) **#290 livré en 2 phases** (anonymisation seed `MODELES_PRATIQUES_PREDEFINIS` : 2 éliminations + 9 renommages d'IDs zéro-dette + 10 changements d'auteur 'Gabarit Labo Codex' + 3 modèles génériques en 'Demo Labo Codex' avec filtre transitoire OR) ; (3) **#292 livré** (déduplication défensive au chargement de codex via `verifierUniciteIds` exposé + helper `_estBiblioPartagee`) ; (4) 3 bugs UX résolus en cours de route (suppression copie IDB Michel B., débordement vertical surface `.contenu` en 2 commits — duplication CSS inline ↔ styles.css) ; (5) 3 items BACKLOG inscrits : **#295** (diagnostic mémoire/quota avant chargement Codex iPad/iPhone), **#296** (audit catégoriel des items 'Labo Codex' post-AQPC), **#297** (dette CSS dupliquée index.html ↔ styles.css post-AQPC).
@@ -56,18 +56,24 @@
 
 ---
 
-## ▶ AMORCE — Chantier E (refonte cours↔période, dernier)
+## ✅ Chantier E LIVRÉ (refonte cours↔période, dernier — commit `4e0fd2c`)
 
-> Non destructif. Remplacer la duplication legacy par une « reprise » qui ne crée jamais de doublon de cours.
+> Non destructif. La duplication legacy est remplacée par une « reprise » qui ne crée jamais de doublon de cours.
 
-- Remplacer `dupliquerCoursPourTrimestreActif` (`js/cours.js` L206-254) par
-  `reprendreCoursDansTrimestreActif(coursId)` : garantit un groupe-cours dans le trimestre actif
-  pointant vers la **description existante** (no-op si présent ; sinon GC brouillon + ouvre l'assemblage).
-  **Aucune écriture dans `cours`** → zéro doublon.
-- Rebrancher le bouton « Reprendre » (`ouvrirModalBibliothequeCours` action L293) ; retirer l'ancienne fonction.
-- Test : reprendre un cours sous Été → 1 groupe-cours, 0 doublon.
+- `dupliquerCoursPourTrimestreActif` (`js/cours.js`, L206-254) **remplacée** par
+  `reprendreCoursDansTrimestreActif(coursId)` (async) : garantit un groupe-cours dans le trimestre actif
+  pointant vers la **description existante** (no-op si présent → ouvre l'assemblage sur le GC existant ;
+  sinon GC brouillon + ouvre l'assemblage, description pré-sélectionnée). **Aucune écriture dans `cours`** → zéro doublon.
+- Trimestre actif résolu via `obtenirTrimestreActif()` (même source que le namespacing `cle()`).
+- Bouton « Reprendre » rebranché (action `reprendreCoursDansTrimestreActif`) ; ancienne fonction + export retirés (zéro-dette).
+- Tests : `tests/integration/cours-refonte-rendu.spec.js` — 2 cas E (0 doublon + brouillon pré-sélectionné ; no-op GC) + sentinelle de disparition. 112 verts.
 - Plan directeur : `docs/PLAN-refonte-cours-description-independante.md` (§Chantier E).
-- Mémoires : `project-donnees-reelles-601-101` (601-101 désormais consolidé sous `COURS_1780082553764_2_b771b27aca49`).
+- Mémoires : `project-donnees-reelles-601-101` (601-101 consolidé sous `COURS_1780082553764_2_b771b27aca49`).
+
+### Findings du chantier D laissés (non corrigés — toujours valables)
+1. Bug `getSync("trimestres")` (ids vides en sync) — `project-bug-getsync-trimestres-desync`.
+2. Résolution de pratique en consultation lit le namespace du trimestre actif, pas du consulté.
+3. Résidus orphelins `GC_*`/`601-XSS` score 1 (bruit, nettoyage séparé).
 
 ---
 
