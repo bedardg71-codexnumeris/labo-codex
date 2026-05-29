@@ -645,6 +645,9 @@ function _remplirChampsInfosCours(cours) {
     setValue('v2-competence', cours.competence || '');
     setValue('v2-disciplineCours', cours.discipline || '');
     setValue('v2-elementsCompetence', cours.elementsCompetence || '');
+    setValue('v2-heuresContact', (cours.heuresContact === 0 || cours.heuresContact) ? cours.heuresContact : '');
+    setValue('v2-ponderation', cours.ponderation || '');
+    majRepereUnitesCours();
 }
 
 function _remplirChampsEnseignant(cours) {
@@ -673,6 +676,76 @@ function remplirFormCoursV2(cours) {
     _remplirChampsEnseignant(cours);
     _remplirChampsSessionHoraire(cours);
     setValue('v2-pratiqueIdCours', cours.pratiqueId || 'pan-standards');
+}
+
+/* ===============================
+   CONFORMITÉ RREC — pondération → heures-contact + repère d'unités (chantier A)
+   Heures-contact = source de vérité. Pondération = aide à la saisie.
+   Une unité = 45 h d'activités d'apprentissage (RREC, art. 1).
+   =============================== */
+
+/**
+ * Parse une pondération « théorie-labo-perso » (ex. "2-2-3").
+ * Tolérant : retourne null si le format n'est pas reconnu (3 nombres séparés
+ * par tirets). La saisie reste libre — aucun blocage.
+ * @returns {{theorie:number, labo:number, perso:number}|null}
+ */
+function _parserPonderation(str) {
+    if (!str) return null;
+    const parts = String(str).split('-').map(s => s.trim());
+    if (parts.length !== 3) return null;
+    const nums = parts.map(parseFloat);
+    if (nums.some(n => isNaN(n) || n < 0)) return null;
+    return { theorie: nums[0], labo: nums[1], perso: nums[2] };
+}
+
+/**
+ * Formate un nombre d'unités en tiers exacts (les unités tombent toujours sur
+ * des tiers : unités = somme_pondération / 3). Ex. 7 → "2 ⅓", 6 → "2".
+ * Si la pondération contient des décimales, repli sur 2 décimales.
+ */
+function _formaterUnites(theorie, labo, perso) {
+    const somme = theorie + labo + perso;
+    if ([theorie, labo, perso].every(n => Number.isInteger(n))) {
+        const entier = Math.floor(somme / 3);
+        const reste = somme % 3;
+        const frac = reste === 1 ? ' ⅓' : reste === 2 ? ' ⅔' : '';
+        // Cas entier == 0 sans fraction : afficher 0
+        return (entier === 0 && frac === '') ? '0' : (entier === 0 ? frac.trim() : entier + frac);
+    }
+    return (somme / 3).toFixed(2);
+}
+
+/**
+ * Met à jour le repère d'unités affiché (#v2-repereUnites) à partir de la
+ * pondération saisie. Repère descriptif, non normatif. Masqué si pondération
+ * absente ou malformée.
+ */
+function majRepereUnitesCours() {
+    const repere = document.getElementById('v2-repereUnites');
+    if (!repere) return;
+    const pond = _parserPonderation(document.getElementById('v2-ponderation')?.value);
+    if (!pond) {
+        repere.textContent = '';
+        return;
+    }
+    repere.textContent = '≈ ' + _formaterUnites(pond.theorie, pond.labo, pond.perso) + ' unités';
+}
+
+/**
+ * Handler live (data-on-input sur #v2-ponderation) : propose les heures-contact
+ * dérivées de la pondération — (théorie + labo) × 15 semaines — SANS écraser une
+ * valeur déjà saisie manuellement (heures-contact reste la source de vérité).
+ * Met aussi à jour le repère d'unités.
+ */
+function proposerHeuresContactDepuisPonderation() {
+    const champHeures = document.getElementById('v2-heuresContact');
+    const pond = _parserPonderation(document.getElementById('v2-ponderation')?.value);
+    if (champHeures && pond && (champHeures.value === '' || champHeures.value === undefined)) {
+        // Proposition seulement : ne remplit que si le champ est vide.
+        champHeures.value = (pond.theorie + pond.labo) * 15;
+    }
+    majRepereUnitesCours();
 }
 
 /**
@@ -881,32 +954,45 @@ function afficherSyntheseGroupeCours(gc) {
  * Réinitialise le formulaire cours
  * 🆕 FIX (1er fév 2026) : Utilise le trimestre actif pour session et année
  */
-function reinitialiserFormCoursV2() {
-    const champs = [
-        'v2-codeCours', 'v2-nomCours', 'v2-numeroCompetence', 'v2-competence', 'v2-disciplineCours',
-        'v2-elementsCompetence', 'v2-prenomEnseignant', 'v2-nomEnseignant', 'v2-courrielEnseignant',
-        'v2-disciplineEnseignant', 'v2-departement', 'v2-institutionEnseignant'
-    ];
-    champs.forEach(id => setValue(id, ''));
-
-    // 🆕 FIX (1er fév 2026) : Session et année depuis le trimestre actif
-    // Corrige le bug où un cours pour A2025 était sauvegardé comme H2026
+/**
+ * Dérive { session, annee } depuis le trimestre actif (SSOT).
+ * Source unique : l'ID du trimestre actif (ex. "e2026" → session "E", année 2026),
+ * avec repli sur ses propriétés session/annee. Sert à estampiller les cours créés.
+ * FIX (29 mai 2026) : extrait de reinitialiserFormCoursV2 pour être réutilisé par
+ * _lireChampsSessionDOM — les champs DOM #v2-session/#v2-annee n'existent pas, ils
+ * renvoyaient toujours H/2026 et estampillaient tout cours en h2026 (invisible hors
+ * H2026, ex. trimestre Été). Le regex [aeh] couvre Hiver/Été/Automne.
+ * @returns {{session: string, annee: number}}
+ */
+function _deriverSessionAnneeTrimestreActif() {
     const trimestreActif = typeof obtenirTrimestreActif === 'function' ? obtenirTrimestreActif() : null;
     let session = 'H';
     let annee = new Date().getFullYear();
-
     if (trimestreActif) {
-        // Extraire session et année depuis l'ID du trimestre (ex: "a2025" → session="A", année=2025)
         const match = trimestreActif.id.match(/^([aeh])(\d{4})$/i);
         if (match) {
             session = match[1].toUpperCase();
             annee = parseInt(match[2]);
         } else if (trimestreActif.session && trimestreActif.annee) {
-            // Fallback sur les propriétés du trimestre
             session = trimestreActif.session.charAt(0).toUpperCase();
             annee = trimestreActif.annee;
         }
     }
+    return { session, annee };
+}
+
+function reinitialiserFormCoursV2() {
+    const champs = [
+        'v2-codeCours', 'v2-nomCours', 'v2-numeroCompetence', 'v2-competence', 'v2-disciplineCours',
+        'v2-elementsCompetence', 'v2-heuresContact', 'v2-ponderation',
+        'v2-prenomEnseignant', 'v2-nomEnseignant', 'v2-courrielEnseignant',
+        'v2-disciplineEnseignant', 'v2-departement', 'v2-institutionEnseignant'
+    ];
+    champs.forEach(id => setValue(id, ''));
+    majRepereUnitesCours();
+
+    // Session et année depuis le trimestre actif (SSOT — cf. _deriverSessionAnneeTrimestreActif)
+    const { session, annee } = _deriverSessionAnneeTrimestreActif();
 
     setValue('v2-session', session);
     setValue('v2-annee', annee);
@@ -1002,13 +1088,18 @@ function annulerFormCoursV2() {
  * Sauvegarde le cours (création ou modification)
  */
 function _lireChampsInfosCoursDOM() {
+    const heuresBrut = document.getElementById('v2-heuresContact')?.value?.trim();
     return {
         codeCours: document.getElementById('v2-codeCours')?.value?.trim(),
         nomCours: document.getElementById('v2-nomCours')?.value?.trim(),
         discipline: document.getElementById('v2-disciplineCours')?.value?.trim(),
         numeroCompetence: document.getElementById('v2-numeroCompetence')?.value?.trim() || '',
         competence: document.getElementById('v2-competence')?.value?.trim() || '',
-        elementsCompetence: document.getElementById('v2-elementsCompetence')?.value?.trim() || ''
+        elementsCompetence: document.getElementById('v2-elementsCompetence')?.value?.trim() || '',
+        // Heures-contact = source de vérité de la conformité RREC (chantier A).
+        // Vide → null (cours sans exigence saisie), sinon nombre.
+        heuresContact: (heuresBrut === '' || heuresBrut === undefined) ? null : (parseFloat(heuresBrut) || null),
+        ponderation: document.getElementById('v2-ponderation')?.value?.trim() || ''
     };
 }
 
@@ -1023,9 +1114,15 @@ function _lireChampsEnseignantDOM() {
 }
 
 function _lireChampsSessionDOM() {
+    // FIX (29 mai 2026) : session/année dérivées du trimestre actif (SSOT), PAS des
+    // champs DOM #v2-session/#v2-annee qui n'existent pas dans le formulaire — ils
+    // renvoyaient toujours H/2026, estampillant tout cours créé en h2026 quel que soit
+    // le trimestre actif (cours invisibles hors H2026, ex. trimestre Été). En édition,
+    // l'ID du cours est préservé via coursEnEditionV2, donc pas de dédoublement.
+    const { session, annee } = _deriverSessionAnneeTrimestreActif();
     return {
-        session: document.getElementById('v2-session')?.value || 'H',
-        annee: document.getElementById('v2-annee')?.value || new Date().getFullYear(),
+        session: session,
+        annee: annee,
         periodesParSemaine: parseInt(document.getElementById('v2-periodesParSemaine')?.value) || 4,
         formatHoraire: document.getElementById('v2-formatHoraire')?.value || '2x2',
         pratiqueId: document.getElementById('v2-pratiqueIdCours')?.value || 'pan-standards'
@@ -1064,6 +1161,8 @@ function _construireObjetCoursV2(d, groupe) {
         competence: d.competence,
         discipline: d.discipline,
         elementsCompetence: d.elementsCompetence,
+        heuresContact: d.heuresContact,
+        ponderation: d.ponderation,
         enseignant: {
             prenom: d.prenomEnseignant,
             nom: d.nomEnseignant,
