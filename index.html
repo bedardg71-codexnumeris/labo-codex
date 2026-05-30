@@ -4101,245 +4101,6 @@
                 <!-- Accueil = section plate, contenu généré par accueil.js (toggles Découvrir/Parcourir/Piloter) -->
             </section>
 
-            <!-- Sous-section Suivi › Suivi du groupe (anciennement section
-                 plate #section-apercu, migrée le 27 mai 2026).
-                 NOTE : le DOM est ici orphelin (en-dehors de #section-suivi) mais
-                 afficherSousSection() trouve par getElementById, donc fonctionne.
-                 À déplacer physiquement dans #section-suivi lors d'un futur cleanup. -->
-            <div id="suivi-groupe" class="sous-section">
-                    <h2 class="titre-avec-emoji-toggles">
-                        <span>Suivi du groupe</span>
-                        <span class="titre-emoji-container">
-                            <button class="btn-aide-contextuelle" data-aide="tableau-bord-apercu" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>
-                        </span>
-                    </h2>
-                    <p class="text-muted">Suivi de l'apprentissage et priorisation des interventions</p>
-
-                    <!-- ========== SECTION 1: OBSERVATION DES APPRENTISSAGES ========== -->
-                    <div class="carte" id="carte-indicateurs-acpe">
-                        <h3 class="carte-titre-bleu carte-titre-avec-toggle u-flex-between u-flex-wrap" style="gap: 0.5rem">
-                            <div class="u-align-center" style="display: flex; gap: 0.5rem" data-tooltip="tdb-observer">
-                                <span>Observation globale des indices d'engagement</span>
-                                <span class="emoji-container">
-                                    <span class="primo-aide" data-target="note-indicateurs"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
-                                </span>
-                            </div>
-                            <div id="contexte-indicateurs-acpe" class="carte-contexte-ligne u-align-center" style="font-size: 0.8rem; font-weight: normal; opacity: 0.9; display: flex; gap: 0.75rem">
-                                <!-- Trimestre | Cours | Badge - rempli dynamiquement par JS -->
-                            </div>
-                            <div style="display: flex; gap: 6px; align-items: center;">
-                                <button id="btn-toggle-panneau-prioritaire" class="btn-toggle-suivi btn-toggle-prioritaire"
-                                        title="Afficher les indices A-C-P sur chaque étudiant">
-                                    Détails
-                                </button>
-                            </div>
-                        </h3>
-
-                        <!-- Panneau suivi d'étudiants (unifié avec détails) -->
-                        <div id="panneau-suivi-etudiants" class="panneau-suivi-etudiants">
-                            <div class="u-flex-between u-mb-8">
-                                <span class="u-texte-petit u-texte-gras" style="color: var(--texte-secondaire)">
-                                    Suivi d'étudiants <span id="compteur-suivi" style="opacity: 0.6;">(0/5)</span>
-                                </span>
-                                <span id="suivi-tri-boutons" class="prioritaire-tri-zone" style="display:none"></span>
-                                <div style="display: flex; gap: 6px; align-items: center;">
-                                    <span class="u-texte-petit" style="color: var(--gris-moyen); font-style: italic;">Cliquer un nom pour le suivre</span>
-                                    <button id="btn-reinitialiser-suivi" class="btn-toggle-suivi">Réinitialiser</button>
-                                </div>
-                            </div>
-                            <div id="liste-etudiants-suivi" class="liste-etudiants-suivi">
-                                <!-- Rempli dynamiquement -->
-                            </div>
-                        </div>
-
-                        <!-- Panneau étudiants prioritaires -->
-                        <div id="panneau-prioritaire" class="panneau-prioritaire">
-                            <div class="u-flex-between u-mb-8">
-                                <span class="u-texte-petit u-texte-gras" style="color: var(--texte-secondaire)">
-                                    Étudiants prioritaires <span id="compteur-prioritaire" style="opacity: 0.6;">(0)</span>
-                                </span>
-                                <span id="prioritaire-tri-boutons" class="prioritaire-tri-zone"></span>
-                                <span class="u-texte-petit" style="color: var(--gris-moyen)">Cliquer → profil</span>
-                            </div>
-                            <div id="liste-etudiants-prioritaire" class="liste-etudiants-prioritaire"></div>
-                        </div>
-
-                        <!-- Carte Note -->
-                        <div id="note-indicateurs" class="carte-info-toggle carte-info-note" style="display: none;">
-                            <strong>Note :</strong> Les indices A-C-P mesurent l'engagement des étudiants dans l'apprentissage.
-                            <br><br>
-                            <strong>Assiduité (A)</strong> : Proportion des heures de présence parmi les heures de cours <strong>effectivement données jusqu'à maintenant</strong>. Calculé uniquement sur les séances passées, pas sur le total prévu pour la session.
-                            <br><br>
-                            <strong>Complétion (C)</strong> : Proportion de travaux remis parmi les travaux <strong>effectivement réalisés jusqu'à maintenant</strong>. Un artefact devient «réalisé» dès qu'une première évaluation existe pour celui-ci.
-                            <br><br>
-                            <strong>Performance (P)</strong> : Calculé selon la pratique de notation en vigueur (Sommative : moyenne pondérée provisoire de toutes les évaluations, ou PAN-Standards : moyenne des N meilleurs artefacts selon l'échelle IDME).
-                            <br><br>
-                            <em class="u-texte-09" style="color: var(--gris-moyen)">💡 Les mini-courbes de Gauss montrent la distribution du groupe. La ligne blanche = moyenne (μ), les pointillés = ±1 écart-type (σ).</em>
-                        </div>
-
-                        <!-- Le contenu des indicateurs A-C-P est généré dynamiquement par tableau-bord-apercu.js -->
-                        <!-- Barres de distribution avec nuages de points et courbes de Gauss pour A, C, P -->
-                    </div>
-
-                    <!-- ========== SECTION 2: INTERVENTIONS PÉDAGOGIQUES ========== -->
-                    <div class="carte" id="carte-indicateurs-apprentissage" style="margin-top: 2rem;">
-                        <h3 class="carte-titre-bleu carte-titre-avec-toggle u-flex-between u-flex-wrap" style="gap: 0.5rem">
-                            <div class="u-align-center" style="display: flex; gap: 0.5rem" data-tooltip="tdb-intervenir">
-                                <span>Observation globale des besoins d'intervention</span>
-                                <span class="emoji-container">
-                                    <span class="primo-aide" data-target="note-apprentissage"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
-                                </span>
-                            </div>
-                            <div id="contexte-indicateurs-apprentissage" class="carte-contexte-ligne u-align-center" style="font-size: 0.8rem; font-weight: normal; opacity: 0.9; display: flex; gap: 0.75rem">
-                                <!-- Trimestre | Cours | Badge - rempli par JS -->
-                            </div>
-                        </h3>
-
-                        <!-- Carte Note -->
-                        <div id="note-apprentissage" class="carte-info-toggle carte-info-note" style="display: none;">
-                            <strong>Patterns d'apprentissage :</strong> Analyse de la trajectoire de chaque étudiant sur les dernières productions.
-                            <ul style="margin: 10px 0; padding-left: 20px;">
-                                <li><strong>Progression stable</strong> : Amélioration régulière ou maintien d'un bon niveau</li>
-                                <li><strong>Défi spécifique</strong> : Difficulté ponctuelle sur un type de tâche</li>
-                                <li><strong>Difficulté émergente</strong> : Début de difficulté nécessitant vigilance</li>
-                                <li><strong>Difficulté persistante</strong> : Difficulté soutenue nécessitant intervention</li>
-                            </ul>
-                            <strong>Modèle RàI (Réponse à l'intervention) :</strong> Classification selon l'intensité du soutien nécessaire.
-                            <ul style="margin: 10px 0; padding-left: 20px;">
-                                <li><strong>Niveau 1 - Universel</strong> : Enseignement régulier suffit</li>
-                                <li><strong>Niveau 2 - Préventif</strong> : Interventions ciblées en petit groupe</li>
-                                <li><strong>Niveau 3 - Intensif</strong> : Accompagnement individualisé requis</li>
-                            </ul>
-                        </div>
-
-                        <!-- Le contenu (Patterns + RàI) est généré dynamiquement par tableau-bord-apercu.js -->
-                        <div id="conteneur-indicateurs-apprentissage">
-                            <!-- Barres Patterns et RàI injectées ici -->
-                        </div>
-                    </div>
-
-                    <!-- ========== SECTION 3: ÉVOLUTION TEMPORELLE ========== -->
-                    <div class="carte" id="carte-evolution-temporelle" style="margin-top: 2rem;">
-                        <h3 class="carte-titre-bleu u-flex-col" style="display: flex; gap: 0.5rem">
-                            <div class="u-flex-between u-w-100 u-flex-wrap" style="gap: 0.5rem">
-                                <span data-tooltip="tdb-dev-groupe">Développement du groupe — par semaine</span>
-                                <div id="contexte-evolution-temporelle" class="carte-contexte-ligne u-align-center" style="font-size: 0.8rem; font-weight: normal; opacity: 0.9; display: flex; gap: 0.75rem">
-                                    <!-- Trimestre | Cours | Badge - rempli par JS -->
-                                </div>
-                            </div>
-                            <div class="entete-sous-titre u-texte-09" style="font-weight: normal; opacity: 0.85;">
-                                Indices A·C·P sur les snapshots hebdomadaires
-                            </div>
-                            <div class="u-texte-09 u-flex-wrap u-align-center" style="display: flex; gap: 1rem; font-weight: normal">
-                                <div class="u-align-center" style="display: flex; gap: 0.5rem">
-                                    <label style="color: rgba(255,255,255,0.8);" data-tooltip="tdb-selecteur-indice">Mesure :</label>
-                                    <select id="selecteur-indice-acp" data-on-change="rafraichirGraphiqueSpaghettiACP" class="controle-form-header">
-                                        <option value="A" selected style="color: var(--gris-fonce);">Assiduité (A)</option>
-                                        <option value="C" style="color: var(--gris-fonce);">Complétion (C)</option>
-                                        <option value="P" style="color: var(--gris-fonce);">Construction de P</option>
-                                    </select>
-                                </div>
-                                <div class="u-align-center" style="display: flex; gap: 0.5rem">
-                                    <label style="color: rgba(255,255,255,0.8);" data-tooltip="tdb-selecteur-eleve-groupe">Étudiant·e en relief :</label>
-                                    <select id="selecteur-etudiant-acp" data-on-change="selectionnerEtudiantACP" class="controle-form-header">
-                                        <option value="" style="color: var(--gris-fonce);">-- Sélectionner --</option>
-                                    </select>
-                                    <button type="button" id="btn-profil-acp" class="btn-voir-profil" data-action="ouvrirProfilEleveACP" title="Voir le profil de l'étudiant·e sélectionné·e" aria-label="Voir le profil de l'étudiant·e sélectionné·e" style="display: none;">👤</button>
-                                </div>
-                            </div>
-                        </h3>
-
-                        <div class="u-w-100" style="position: relative; height: 450px" data-tooltip="tdb-graphique-groupe">
-                            <canvas id="graphique-groupe-moyennes"></canvas>
-                        </div>
-
-                        <p class="u-texte-gris u-mt-16 u-texte-075 u-texte-italic">
-                            Clique sur une courbe ou un nom pour la verrouiller. Clique ailleurs pour déverrouiller.
-                        </p>
-                    </div>
-
-                    <!-- ========== SECTION 4: TRAJECTOIRES PAR PRODUCTION (note finale ou habiletés) ========== -->
-                    <div class="carte" id="carte-trajectoires-production" style="margin-top: 2rem;">
-                        <h3 class="carte-titre-bleu u-flex-col" style="display: flex; gap: 0.5rem">
-                            <div class="u-flex-between u-w-100 u-flex-wrap" style="gap: 0.5rem">
-                                <div class="u-align-center" style="display: flex; gap: 0.5rem" data-tooltip="tdb-trajectoires">
-                                    <span>Trajectoires par <span id="trajectoires-titre-terme">production</span></span>
-                                    <span class="emoji-container">
-                                        <span class="primo-aide" data-target="note-trajectoires"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
-                                    </span>
-                                </div>
-                                <div id="contexte-trajectoires-production" class="carte-contexte-ligne u-align-center" style="font-size: 0.8rem; font-weight: normal; opacity: 0.9; display: flex; gap: 0.75rem">
-                                    <!-- Trimestre | Cours | Badge - rempli par JS -->
-                                </div>
-                            </div>
-                            <div class="entete-sous-titre u-texte-09" id="trajectoires-sous-titre" style="font-weight: normal;">
-                                Note finale par production, dans l'ordre chronologique
-                            </div>
-                            <div class="u-texte-09 u-flex-wrap u-align-center" style="display: flex; gap: 1rem; font-weight: normal">
-                                <div class="u-align-center" style="display: flex; gap: 0.5rem">
-                                    <label style="color: rgba(255,255,255,0.8);" for="selecteur-mesure-trajectoires">Mesure :</label>
-                                    <select id="selecteur-mesure-trajectoires" data-on-change="changerMesureTrajectoires" class="controle-form-header">
-                                        <option value="noteFinale" selected style="color: var(--gris-fonce);">Note finale</option>
-                                        <option value="habiletes" style="color: var(--gris-fonce);">Habiletés</option>
-                                    </select>
-                                </div>
-                                <div class="u-align-center" style="display: flex; gap: 0.5rem">
-                                    <label style="color: rgba(255,255,255,0.8);" for="selecteur-etudiant-trajectoires">Étudiant·e en relief :</label>
-                                    <select id="selecteur-etudiant-trajectoires" data-on-change="selectionnerEtudiantTrajectoires" class="controle-form-header">
-                                        <option value="" style="color: var(--gris-fonce);">-- Sélectionner --</option>
-                                    </select>
-                                    <button type="button" id="btn-profil-trajectoires" class="btn-voir-profil" data-action="ouvrirProfilEleveTrajectoires" title="Voir le profil de l'étudiant·e sélectionné·e" aria-label="Voir le profil de l'étudiant·e sélectionné·e" style="display: none;">👤</button>
-                                </div>
-                                <label class="u-align-center habiletes-toggle-mediane-label" style="display: flex; gap: 0.4rem; cursor: pointer; color: rgba(255,255,255,0.85);" for="trajectoires-toggle-mediane">
-                                    <input type="checkbox" id="trajectoires-toggle-mediane" data-on-change="rafraichirGraphiqueTrajectoires">
-                                    <span>Médiane du groupe</span>
-                                </label>
-                            </div>
-                        </h3>
-
-                        <!-- Carte Note (info) -->
-                        <div id="note-trajectoires" class="carte-info-toggle carte-info-note" style="display: none;">
-                            <strong>Trajectoires par production :</strong> chaque ligne représente la trajectoire d'un·e étudiant·e à travers les productions évaluables, dans l'ordre des échéances.
-                            <br><br>
-                            Choisis la <strong>mesure</strong> à afficher :
-                            <ul style="margin: 8px 0; padding-left: 20px;">
-                                <li><strong>Note finale</strong> — la note globale par production (champ <em>Note chiffrée</em> de l'évaluation, /100).</li>
-                                <li><strong>Habiletés</strong> — moyenne des critères cochés (niveaux IDME convertis en %). Coche un seul critère pour isoler une habileté, combine-les pour une vue d'ensemble.</li>
-                            </ul>
-                            Les <strong>lignes pointillées</strong> aux seuils 65 % (D), 75 % (M), 85 % (E) viennent de l'échelle de notation utilisée. Les zones colorées en arrière-plan correspondent aux niveaux IDME (ou personnalisés).
-                            <br><br>
-                            Active <strong>« Médiane du groupe »</strong> pour superposer deux repères statistiques :
-                            <ul style="margin: 8px 0; padding-left: 20px;">
-                                <li>La <strong>ligne foncée avec losanges</strong> = score <strong>médian</strong> du groupe par production (50 % des étudiant·e·s au-dessus, 50 % en-dessous).</li>
-                                <li>La <strong>bande grise</strong> = <strong>écart inter-quartile</strong> (Q25 à Q75) : couvre les 50 % d'étudiant·e·s au centre. Plus la bande est étroite, plus le groupe est homogène.</li>
-                            </ul>
-                            Les étudiant·e·s marqué·e·s <em>inactif·ve·s / abandon</em> sont retiré·e·s du calcul de la médiane et de la bande.
-                            <br><br>
-                            Sélectionne un·e étudiant·e pour mettre sa courbe en relief, puis clique sur <strong>👤</strong> pour ouvrir son profil.
-                        </div>
-
-                        <!-- Barre de contrôle des critères (visible uniquement en mode Habiletés) -->
-                        <div id="trajectoires-controles-criteres" class="habiletes-controles" style="display: none;">
-                            <span class="habiletes-controles-label">Critères :</span>
-                            <div id="trajectoires-criteres-checkboxes" class="habiletes-criteres-liste" role="group" aria-label="Critères de la grille à afficher">
-                                <span class="habiletes-criteres-attente">Chargement des critères de la grille…</span>
-                            </div>
-                        </div>
-
-                        <div class="u-w-100" style="position: relative; height: 550px" data-tooltip="tdb-graphique-trajectoires">
-                            <canvas id="graphique-trajectoires-production"></canvas>
-                        </div>
-
-                        <p class="u-texte-gris u-mt-16 u-texte-075 u-texte-italic">
-                            Clique sur une courbe ou un nom pour la verrouiller. Bascule la mesure pour voir la note finale ou explorer les habiletés une par une.
-                        </p>
-                    </div>
-
-                    <!-- Graphiques "Dynamique des corrélations" et "Impact des jetons" déplacés vers Suivi > Labo -->
-
-                    <p id="tdb-horodatage" class="text-muted u-text-right" style="font-size: 0.72rem; opacity: 0.6; margin-top: 1.5rem"></p>
-
-            </div><!-- FIN sous-section suivi-groupe (DOM orphelin) -->
 
             <!-- ===================================
      SECTION: CONCEPTION
@@ -7871,6 +7632,245 @@
      Liste des étudiant·es, saisie des présences, profils, interventions
      =================================== -->
             <section id="section-suivi" class="section">
+
+            <!-- Sous-section Suivi › Suivi du groupe (anciennement section
+                 plate #section-apercu, migrée le 27 mai 2026 ; DOM replacé
+                 dans #section-suivi le 30 mai 2026). -->
+            <div id="suivi-groupe" class="sous-section">
+                    <h2 class="titre-avec-emoji-toggles">
+                        <span>Suivi du groupe</span>
+                        <span class="titre-emoji-container">
+                            <button class="btn-aide-contextuelle" data-aide="tableau-bord-apercu" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>
+                        </span>
+                    </h2>
+                    <p class="text-muted">Suivi de l'apprentissage et priorisation des interventions</p>
+
+                    <!-- ========== SECTION 1: OBSERVATION DES APPRENTISSAGES ========== -->
+                    <div class="carte" id="carte-indicateurs-acpe">
+                        <h3 class="carte-titre-bleu carte-titre-avec-toggle u-flex-between u-flex-wrap" style="gap: 0.5rem">
+                            <div class="u-align-center" style="display: flex; gap: 0.5rem" data-tooltip="tdb-observer">
+                                <span>Observation globale des indices d'engagement</span>
+                                <span class="emoji-container">
+                                    <span class="primo-aide" data-target="note-indicateurs"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
+                                </span>
+                            </div>
+                            <div id="contexte-indicateurs-acpe" class="carte-contexte-ligne u-align-center" style="font-size: 0.8rem; font-weight: normal; opacity: 0.9; display: flex; gap: 0.75rem">
+                                <!-- Trimestre | Cours | Badge - rempli dynamiquement par JS -->
+                            </div>
+                            <div style="display: flex; gap: 6px; align-items: center;">
+                                <button id="btn-toggle-panneau-prioritaire" class="btn-toggle-suivi btn-toggle-prioritaire"
+                                        title="Afficher les indices A-C-P sur chaque étudiant">
+                                    Détails
+                                </button>
+                            </div>
+                        </h3>
+
+                        <!-- Panneau suivi d'étudiants (unifié avec détails) -->
+                        <div id="panneau-suivi-etudiants" class="panneau-suivi-etudiants">
+                            <div class="u-flex-between u-mb-8">
+                                <span class="u-texte-petit u-texte-gras" style="color: var(--texte-secondaire)">
+                                    Suivi d'étudiants <span id="compteur-suivi" style="opacity: 0.6;">(0/5)</span>
+                                </span>
+                                <span id="suivi-tri-boutons" class="prioritaire-tri-zone" style="display:none"></span>
+                                <div style="display: flex; gap: 6px; align-items: center;">
+                                    <span class="u-texte-petit" style="color: var(--gris-moyen); font-style: italic;">Cliquer un nom pour le suivre</span>
+                                    <button id="btn-reinitialiser-suivi" class="btn-toggle-suivi">Réinitialiser</button>
+                                </div>
+                            </div>
+                            <div id="liste-etudiants-suivi" class="liste-etudiants-suivi">
+                                <!-- Rempli dynamiquement -->
+                            </div>
+                        </div>
+
+                        <!-- Panneau étudiants prioritaires -->
+                        <div id="panneau-prioritaire" class="panneau-prioritaire">
+                            <div class="u-flex-between u-mb-8">
+                                <span class="u-texte-petit u-texte-gras" style="color: var(--texte-secondaire)">
+                                    Étudiants prioritaires <span id="compteur-prioritaire" style="opacity: 0.6;">(0)</span>
+                                </span>
+                                <span id="prioritaire-tri-boutons" class="prioritaire-tri-zone"></span>
+                                <span class="u-texte-petit" style="color: var(--gris-moyen)">Cliquer → profil</span>
+                            </div>
+                            <div id="liste-etudiants-prioritaire" class="liste-etudiants-prioritaire"></div>
+                        </div>
+
+                        <!-- Carte Note -->
+                        <div id="note-indicateurs" class="carte-info-toggle carte-info-note" style="display: none;">
+                            <strong>Note :</strong> Les indices A-C-P mesurent l'engagement des étudiants dans l'apprentissage.
+                            <br><br>
+                            <strong>Assiduité (A)</strong> : Proportion des heures de présence parmi les heures de cours <strong>effectivement données jusqu'à maintenant</strong>. Calculé uniquement sur les séances passées, pas sur le total prévu pour la session.
+                            <br><br>
+                            <strong>Complétion (C)</strong> : Proportion de travaux remis parmi les travaux <strong>effectivement réalisés jusqu'à maintenant</strong>. Un artefact devient «réalisé» dès qu'une première évaluation existe pour celui-ci.
+                            <br><br>
+                            <strong>Performance (P)</strong> : Calculé selon la pratique de notation en vigueur (Sommative : moyenne pondérée provisoire de toutes les évaluations, ou PAN-Standards : moyenne des N meilleurs artefacts selon l'échelle IDME).
+                            <br><br>
+                            <em class="u-texte-09" style="color: var(--gris-moyen)">💡 Les mini-courbes de Gauss montrent la distribution du groupe. La ligne blanche = moyenne (μ), les pointillés = ±1 écart-type (σ).</em>
+                        </div>
+
+                        <!-- Le contenu des indicateurs A-C-P est généré dynamiquement par tableau-bord-apercu.js -->
+                        <!-- Barres de distribution avec nuages de points et courbes de Gauss pour A, C, P -->
+                    </div>
+
+                    <!-- ========== SECTION 2: INTERVENTIONS PÉDAGOGIQUES ========== -->
+                    <div class="carte" id="carte-indicateurs-apprentissage" style="margin-top: 2rem;">
+                        <h3 class="carte-titre-bleu carte-titre-avec-toggle u-flex-between u-flex-wrap" style="gap: 0.5rem">
+                            <div class="u-align-center" style="display: flex; gap: 0.5rem" data-tooltip="tdb-intervenir">
+                                <span>Observation globale des besoins d'intervention</span>
+                                <span class="emoji-container">
+                                    <span class="primo-aide" data-target="note-apprentissage"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
+                                </span>
+                            </div>
+                            <div id="contexte-indicateurs-apprentissage" class="carte-contexte-ligne u-align-center" style="font-size: 0.8rem; font-weight: normal; opacity: 0.9; display: flex; gap: 0.75rem">
+                                <!-- Trimestre | Cours | Badge - rempli par JS -->
+                            </div>
+                        </h3>
+
+                        <!-- Carte Note -->
+                        <div id="note-apprentissage" class="carte-info-toggle carte-info-note" style="display: none;">
+                            <strong>Patterns d'apprentissage :</strong> Analyse de la trajectoire de chaque étudiant sur les dernières productions.
+                            <ul style="margin: 10px 0; padding-left: 20px;">
+                                <li><strong>Progression stable</strong> : Amélioration régulière ou maintien d'un bon niveau</li>
+                                <li><strong>Défi spécifique</strong> : Difficulté ponctuelle sur un type de tâche</li>
+                                <li><strong>Difficulté émergente</strong> : Début de difficulté nécessitant vigilance</li>
+                                <li><strong>Difficulté persistante</strong> : Difficulté soutenue nécessitant intervention</li>
+                            </ul>
+                            <strong>Modèle RàI (Réponse à l'intervention) :</strong> Classification selon l'intensité du soutien nécessaire.
+                            <ul style="margin: 10px 0; padding-left: 20px;">
+                                <li><strong>Niveau 1 - Universel</strong> : Enseignement régulier suffit</li>
+                                <li><strong>Niveau 2 - Préventif</strong> : Interventions ciblées en petit groupe</li>
+                                <li><strong>Niveau 3 - Intensif</strong> : Accompagnement individualisé requis</li>
+                            </ul>
+                        </div>
+
+                        <!-- Le contenu (Patterns + RàI) est généré dynamiquement par tableau-bord-apercu.js -->
+                        <div id="conteneur-indicateurs-apprentissage">
+                            <!-- Barres Patterns et RàI injectées ici -->
+                        </div>
+                    </div>
+
+                    <!-- ========== SECTION 3: ÉVOLUTION TEMPORELLE ========== -->
+                    <div class="carte" id="carte-evolution-temporelle" style="margin-top: 2rem;">
+                        <h3 class="carte-titre-bleu u-flex-col" style="display: flex; gap: 0.5rem">
+                            <div class="u-flex-between u-w-100 u-flex-wrap" style="gap: 0.5rem">
+                                <span data-tooltip="tdb-dev-groupe">Développement du groupe — par semaine</span>
+                                <div id="contexte-evolution-temporelle" class="carte-contexte-ligne u-align-center" style="font-size: 0.8rem; font-weight: normal; opacity: 0.9; display: flex; gap: 0.75rem">
+                                    <!-- Trimestre | Cours | Badge - rempli par JS -->
+                                </div>
+                            </div>
+                            <div class="entete-sous-titre u-texte-09" style="font-weight: normal; opacity: 0.85;">
+                                Indices A·C·P sur les snapshots hebdomadaires
+                            </div>
+                            <div class="u-texte-09 u-flex-wrap u-align-center" style="display: flex; gap: 1rem; font-weight: normal">
+                                <div class="u-align-center" style="display: flex; gap: 0.5rem">
+                                    <label style="color: rgba(255,255,255,0.8);" data-tooltip="tdb-selecteur-indice">Mesure :</label>
+                                    <select id="selecteur-indice-acp" data-on-change="rafraichirGraphiqueSpaghettiACP" class="controle-form-header">
+                                        <option value="A" selected style="color: var(--gris-fonce);">Assiduité (A)</option>
+                                        <option value="C" style="color: var(--gris-fonce);">Complétion (C)</option>
+                                        <option value="P" style="color: var(--gris-fonce);">Construction de P</option>
+                                    </select>
+                                </div>
+                                <div class="u-align-center" style="display: flex; gap: 0.5rem">
+                                    <label style="color: rgba(255,255,255,0.8);" data-tooltip="tdb-selecteur-eleve-groupe">Étudiant·e en relief :</label>
+                                    <select id="selecteur-etudiant-acp" data-on-change="selectionnerEtudiantACP" class="controle-form-header">
+                                        <option value="" style="color: var(--gris-fonce);">-- Sélectionner --</option>
+                                    </select>
+                                    <button type="button" id="btn-profil-acp" class="btn-voir-profil" data-action="ouvrirProfilEleveACP" title="Voir le profil de l'étudiant·e sélectionné·e" aria-label="Voir le profil de l'étudiant·e sélectionné·e" style="display: none;">👤</button>
+                                </div>
+                            </div>
+                        </h3>
+
+                        <div class="u-w-100" style="position: relative; height: 450px" data-tooltip="tdb-graphique-groupe">
+                            <canvas id="graphique-groupe-moyennes"></canvas>
+                        </div>
+
+                        <p class="u-texte-gris u-mt-16 u-texte-075 u-texte-italic">
+                            Clique sur une courbe ou un nom pour la verrouiller. Clique ailleurs pour déverrouiller.
+                        </p>
+                    </div>
+
+                    <!-- ========== SECTION 4: TRAJECTOIRES PAR PRODUCTION (note finale ou habiletés) ========== -->
+                    <div class="carte" id="carte-trajectoires-production" style="margin-top: 2rem;">
+                        <h3 class="carte-titre-bleu u-flex-col" style="display: flex; gap: 0.5rem">
+                            <div class="u-flex-between u-w-100 u-flex-wrap" style="gap: 0.5rem">
+                                <div class="u-align-center" style="display: flex; gap: 0.5rem" data-tooltip="tdb-trajectoires">
+                                    <span>Trajectoires par <span id="trajectoires-titre-terme">production</span></span>
+                                    <span class="emoji-container">
+                                        <span class="primo-aide" data-target="note-trajectoires"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
+                                    </span>
+                                </div>
+                                <div id="contexte-trajectoires-production" class="carte-contexte-ligne u-align-center" style="font-size: 0.8rem; font-weight: normal; opacity: 0.9; display: flex; gap: 0.75rem">
+                                    <!-- Trimestre | Cours | Badge - rempli par JS -->
+                                </div>
+                            </div>
+                            <div class="entete-sous-titre u-texte-09" id="trajectoires-sous-titre" style="font-weight: normal;">
+                                Note finale par production, dans l'ordre chronologique
+                            </div>
+                            <div class="u-texte-09 u-flex-wrap u-align-center" style="display: flex; gap: 1rem; font-weight: normal">
+                                <div class="u-align-center" style="display: flex; gap: 0.5rem">
+                                    <label style="color: rgba(255,255,255,0.8);" for="selecteur-mesure-trajectoires">Mesure :</label>
+                                    <select id="selecteur-mesure-trajectoires" data-on-change="changerMesureTrajectoires" class="controle-form-header">
+                                        <option value="noteFinale" selected style="color: var(--gris-fonce);">Note finale</option>
+                                        <option value="habiletes" style="color: var(--gris-fonce);">Habiletés</option>
+                                    </select>
+                                </div>
+                                <div class="u-align-center" style="display: flex; gap: 0.5rem">
+                                    <label style="color: rgba(255,255,255,0.8);" for="selecteur-etudiant-trajectoires">Étudiant·e en relief :</label>
+                                    <select id="selecteur-etudiant-trajectoires" data-on-change="selectionnerEtudiantTrajectoires" class="controle-form-header">
+                                        <option value="" style="color: var(--gris-fonce);">-- Sélectionner --</option>
+                                    </select>
+                                    <button type="button" id="btn-profil-trajectoires" class="btn-voir-profil" data-action="ouvrirProfilEleveTrajectoires" title="Voir le profil de l'étudiant·e sélectionné·e" aria-label="Voir le profil de l'étudiant·e sélectionné·e" style="display: none;">👤</button>
+                                </div>
+                                <label class="u-align-center habiletes-toggle-mediane-label" style="display: flex; gap: 0.4rem; cursor: pointer; color: rgba(255,255,255,0.85);" for="trajectoires-toggle-mediane">
+                                    <input type="checkbox" id="trajectoires-toggle-mediane" data-on-change="rafraichirGraphiqueTrajectoires">
+                                    <span>Médiane du groupe</span>
+                                </label>
+                            </div>
+                        </h3>
+
+                        <!-- Carte Note (info) -->
+                        <div id="note-trajectoires" class="carte-info-toggle carte-info-note" style="display: none;">
+                            <strong>Trajectoires par production :</strong> chaque ligne représente la trajectoire d'un·e étudiant·e à travers les productions évaluables, dans l'ordre des échéances.
+                            <br><br>
+                            Choisis la <strong>mesure</strong> à afficher :
+                            <ul style="margin: 8px 0; padding-left: 20px;">
+                                <li><strong>Note finale</strong> — la note globale par production (champ <em>Note chiffrée</em> de l'évaluation, /100).</li>
+                                <li><strong>Habiletés</strong> — moyenne des critères cochés (niveaux IDME convertis en %). Coche un seul critère pour isoler une habileté, combine-les pour une vue d'ensemble.</li>
+                            </ul>
+                            Les <strong>lignes pointillées</strong> aux seuils 65 % (D), 75 % (M), 85 % (E) viennent de l'échelle de notation utilisée. Les zones colorées en arrière-plan correspondent aux niveaux IDME (ou personnalisés).
+                            <br><br>
+                            Active <strong>« Médiane du groupe »</strong> pour superposer deux repères statistiques :
+                            <ul style="margin: 8px 0; padding-left: 20px;">
+                                <li>La <strong>ligne foncée avec losanges</strong> = score <strong>médian</strong> du groupe par production (50 % des étudiant·e·s au-dessus, 50 % en-dessous).</li>
+                                <li>La <strong>bande grise</strong> = <strong>écart inter-quartile</strong> (Q25 à Q75) : couvre les 50 % d'étudiant·e·s au centre. Plus la bande est étroite, plus le groupe est homogène.</li>
+                            </ul>
+                            Les étudiant·e·s marqué·e·s <em>inactif·ve·s / abandon</em> sont retiré·e·s du calcul de la médiane et de la bande.
+                            <br><br>
+                            Sélectionne un·e étudiant·e pour mettre sa courbe en relief, puis clique sur <strong>👤</strong> pour ouvrir son profil.
+                        </div>
+
+                        <!-- Barre de contrôle des critères (visible uniquement en mode Habiletés) -->
+                        <div id="trajectoires-controles-criteres" class="habiletes-controles" style="display: none;">
+                            <span class="habiletes-controles-label">Critères :</span>
+                            <div id="trajectoires-criteres-checkboxes" class="habiletes-criteres-liste" role="group" aria-label="Critères de la grille à afficher">
+                                <span class="habiletes-criteres-attente">Chargement des critères de la grille…</span>
+                            </div>
+                        </div>
+
+                        <div class="u-w-100" style="position: relative; height: 550px" data-tooltip="tdb-graphique-trajectoires">
+                            <canvas id="graphique-trajectoires-production"></canvas>
+                        </div>
+
+                        <p class="u-texte-gris u-mt-16 u-texte-075 u-texte-italic">
+                            Clique sur une courbe ou un nom pour la verrouiller. Bascule la mesure pour voir la note finale ou explorer les habiletés une par une.
+                        </p>
+                    </div>
+
+                    <!-- Graphiques "Dynamique des corrélations" et "Impact des jetons" déplacés vers Suivi > Labo -->
+
+                    <p id="tdb-horodatage" class="text-muted u-text-right" style="font-size: 0.72rem; opacity: 0.6; margin-top: 1.5rem"></p>
+
+            </div><!-- FIN sous-section suivi-groupe -->
+
 
                 <div id="suivi-liste" class="sous-section">
                     <h2 id="titre-liste-etudiants" class="titre-avec-emoji-toggles">
