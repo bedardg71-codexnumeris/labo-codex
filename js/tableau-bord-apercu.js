@@ -759,7 +759,8 @@ function calculerDistributionPerformance(etudiants) {
  */
 function genererBadgePratique() {
     const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-    const pratique = config.pratique || 'alternative';
+    // Session A-2 : id canonique normalisé à la lecture, défaut = PRATIQUE_DEFAUT ('standards').
+    const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
     const typePAN = config.typePAN || 'maitrise';
     const affichage = config.affichageTableauBord || {};
 
@@ -2780,7 +2781,7 @@ function afficherNiveauxRaI(etudiants) {
 
     // NOUVEAU Beta 90 : Récupérer les pratiques spécifiques
     const pratiqueSOM = typeof obtenirPratiqueParId === 'function' ? obtenirPratiqueParId('sommative') : null;
-    const pratiquePAN = typeof obtenirPratiqueParId === 'function' ? obtenirPratiqueParId('pan-standards') : null;
+    const pratiquePAN = typeof obtenirPratiqueParId === 'function' ? obtenirPratiqueParId('standards') : null;
 
     // 🆕 NOUVEAU Beta 90+ : Utiliser determinerNiveauRaiPedagogique() pour cohérence
     // Cette fonction calcule le niveau RàI basé UNIQUEMENT sur P + SRPNF (sans A-C)

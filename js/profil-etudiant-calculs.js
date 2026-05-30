@@ -1024,10 +1024,11 @@ function determinerNiveauRaiPedagogique(da) {
 
     // Déterminer quelle fonction utiliser selon la pratique
     const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-    const pratique = config.pratique || 'alternative';
+    // Session A-2 : id canonique normalisé à la lecture, défaut = PRATIQUE_DEFAUT ('standards').
+    const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
 
     // Calculer moyennes SRPNF
-    const moyennes = (pratique === 'alternative')
+    const moyennes = (pratique === 'standards')
         ? calculerMoyennesCriteresRecents(da)
         : calculerMoyennesCriteres(da);
 
@@ -1308,9 +1309,10 @@ function _resoudreCibleStable(M, N, I) {
 function determinerCibleIntervention(da) {
     const indices = calculerTousLesIndices(da);
     const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-    const pratique = config.pratique || 'alternative';
+    // Session A-2 : id canonique normalisé à la lecture, défaut = PRATIQUE_DEFAUT ('standards').
+    const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
 
-    const moyennes = (pratique === 'alternative')
+    const moyennes = (pratique === 'standards')
         ? calculerMoyennesCriteresRecents(da)
         : calculerMoyennesCriteres(da);
 

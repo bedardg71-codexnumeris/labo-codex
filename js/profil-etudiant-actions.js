@@ -368,11 +368,12 @@ function _calculerNoteFinaleAggregee(moyennePortfolio, noteTerminale, pondP, pon
  */
 function calculerDetailsNoteFinale(da) {
     const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-    const pratique = modalites.pratique || 'pan-maitrise';
+    // Session A-2 : id canonique normalisé à la lecture, défaut = PRATIQUE_DEFAUT ('standards').
+    const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(modalites.pratique) : modalites.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
 
-    // Pour l'instant, on gère seulement PAN-Standards (toutes variantes contenant "pan")
-    const pratiqueLower = pratique.toLowerCase();
-    if (!pratiqueLower.includes('pan') && pratiqueLower !== 'alternative') return null;
+    // On gère seulement Standards (portfolio à note construite). Les autres pratiques
+    // (sommative, specifications, denotation) n'ont pas de détail de note finale portfolio.
+    if (pratique !== 'standards') return null;
 
     // Lecture config portfolio (source canonique : pratiquesConfigurables, via
     // obtenirConfigPratiqueActive). Plus de fallback sur configPAN.portfolio

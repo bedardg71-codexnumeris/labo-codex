@@ -117,16 +117,18 @@ function chargerMaterielConfigure() {
     const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     let pratique = 'Non configurée';
     
-    if (modalites.pratique === 'sommative') {
+    // Session A-2 : id canonique normalisé à la lecture (Standards = ex-'alternative'/'pan-maitrise').
+    const pratiqueId = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(modalites.pratique) : modalites.pratique);
+    if (pratiqueId === 'sommative') {
         pratique = 'Sommative (%)';
-    } else if (modalites.pratique === 'alternative' && modalites.typePAN) {
+    } else if (pratiqueId === 'standards' && modalites.typePAN) {
         const types = {
             'maitrise': 'PAN - Maîtrise',
             'specifications': 'PAN - Spécifications',
             'denotation': 'PAN - Dénotation'
         };
         pratique = types[modalites.typePAN] || 'PAN';
-    } else if (modalites.pratique === 'alternative') {
+    } else if (pratiqueId === 'standards') {
         pratique = 'Alternative (à préciser)';
     }
 
