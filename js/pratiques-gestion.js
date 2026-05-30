@@ -180,11 +180,11 @@ async function afficherListePratiquesMateriel() {
 function obtenirDescriptionCourtePratique(pratique) {
     if (!pratique) return '';
 
-    // Descriptions taxonomiques complètes selon le type
+    // Descriptions taxonomiques complètes selon le type (clés canoniques).
     const descriptions = {
         'sommative': 'Sommative (Traditional Grading) - Moyenne pondérée des évaluations',
-        'pan-standards': 'PAN-Standards (Standards-Based Grading) - Maîtrise de standards/objectifs',
-        'pan-specifications': 'PAN-Spécifications (Specifications Grading) - Évaluation dichotomique par forfaits',
+        'standards': 'PAN-Standards (Standards-Based Grading) - Maîtrise de standards/objectifs',
+        'specifications': 'PAN-Spécifications (Specifications Grading) - Évaluation dichotomique par forfaits',
         'denombrement': 'Dénombrement (Counting-Based) - Comptage de réussites'
     };
 
@@ -195,7 +195,10 @@ function obtenirDescriptionCourtePratique(pratique) {
         return desc.length > 100 ? desc.substring(0, 97) + '...' : desc;
     }
 
-    return descriptions[pratique.type] || pratique.type || '';
+    // Normalisation à la lecture (A-2 4c) : la table est indexée en canonique,
+    // mais pratique.type peut encore être legacy tant que le select n'est pas migré.
+    const typeCanon = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(pratique.type) : pratique.type);
+    return descriptions[typeCanon] || pratique.type || '';
 }
 
 /**
@@ -285,14 +288,16 @@ function genererBadgeTypePratique(pratique) {
     }
     // Source 2 : pratique.type (format alternatif)
     else if (pratique.type) {
-        // Convertir le type en code badge
+        // Convertir le type en code badge. Table indexée en canonique ;
+        // normalisation à la lecture (A-2 4c) car pratique.type peut être legacy.
         const typeMapping = {
             'sommative': 'SOM',
-            'pan-standards': 'STD',
-            'pan-specifications': 'SPE',
-            'pan-maitrise': 'PAN'
+            'standards': 'STD',
+            'specifications': 'SPE',
+            'denombrement': 'DEN'
         };
-        type = typeMapping[pratique.type.toLowerCase()] || pratique.type.toUpperCase().substring(0, 3);
+        const typeCanon = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(pratique.type.toLowerCase()) : pratique.type.toLowerCase());
+        type = typeMapping[typeCanon] || pratique.type.toUpperCase().substring(0, 3);
     }
 
     if (!type) return '';
@@ -773,6 +778,10 @@ function remplirFormulairePratique(pratique) {
     // 🆕 FIX #4 (20 jan 2026) : Bloquer les sauvegardes pendant le remplissage
     enChargementFormulaire = true;
 
+    // Normalisation à la lecture (A-2 4c) : type canonique pour les branches de
+    // configuration, tout en restant tolérant aux données legacy non migrées.
+    const typeCanon = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(pratique.type) : pratique.type);
+
     // En-tête
     const titrePratique = document.getElementById('mat-titre-pratique');
     const badgePratique = document.getElementById('mat-badge-pratique');
@@ -807,8 +816,8 @@ function remplirFormulairePratique(pratique) {
     // Afficher les sections de configuration selon le type
     afficherConfigurationTypeMat(pratique.type);
 
-    // Remplir les champs selon le type
-    if (pratique.type === 'pan-standards') {
+    // Remplir les champs selon le type (comparaisons sur la forme canonique)
+    if (typeCanon === 'standards') {
         const config = pratique.configuration || {};
 
         // 🆕 #24 : Déterminer le mode de sélection (hybride a priorité)
@@ -859,7 +868,7 @@ function remplirFormulairePratique(pratique) {
     // Note : sommative n'a pas de section ici — aucune configuration spécifique requise
     //        (utilise uniquement les pondérations des productions)
 
-    if (pratique.type === 'pan-specifications') {
+    if (typeCanon === 'specifications') {
         const config = pratique.configuration || {};
 
         // Seuil
@@ -946,6 +955,12 @@ function afficherDescriptionTaxonomiqueMat(type) {
  * Affiche les sections de configuration selon le type
  */
 function afficherConfigurationTypeMat(type) {
+    // Normalisation à la lecture (A-2 4c) : le select peut encore livrer une
+    // valeur legacy (pan-standards…) tant que le Temps 2 n'est pas fait.
+    // Les ids DOM ci-dessous (mat-config-pan-standards…) sont des identifiants
+    // d'éléments HTML, PAS des id de pratique — ils restent tels quels.
+    const typeCanon = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(type) : type);
+
     // Cacher toutes les sections (style.display pour surcharger le style inline du HTML)
     const sections = ['mat-config-pan-standards', 'mat-config-sommative', 'mat-config-pan-specifications', 'mat-config-defaut'];
     sections.forEach(id => {
@@ -955,33 +970,20 @@ function afficherConfigurationTypeMat(type) {
 
     // Variante PAN-Standards
     const variantePAN = document.getElementById('mat-variante-pan-standards');
-    toggleDisplay(variantePAN, type === 'pan-standards');
+    toggleDisplay(variantePAN, typeCanon === 'standards');
 
     // Afficher la section appropriée
     let configId = 'mat-config-defaut';
-    if (type === 'pan-standards' || type === 'pan-maitrise') {
+    if (typeCanon === 'standards') {
         configId = 'mat-config-pan-standards';
-    } else if (type === 'sommative') {
+    } else if (typeCanon === 'sommative') {
         configId = 'mat-config-sommative';
-    } else if (type === 'pan-specifications' || type === 'specifications') {
+    } else if (typeCanon === 'specifications') {
         configId = 'mat-config-pan-specifications';
     }
 
     const config = document.getElementById(configId);
     if (config) config.style.display = '';
-}
-
-/**
- * Retourne le libellé du type de pratique
- */
-function getTypePratiqueLabel(type) {
-    const labels = {
-        'pan-standards': 'PAN-Standards (STD)',
-        'pan-specifications': 'PAN-Spécifications (SPE)',
-        'sommative': 'Sommative (SOM)',
-        'denombrement': 'Dénombrement (DEN)'
-    };
-    return labels[type] || type || 'Type non défini';
 }
 
 /* ===============================
@@ -996,12 +998,14 @@ function changerTypePratiqueMat() {
     afficherDescriptionTaxonomiqueMat(type);
     afficherConfigurationTypeMat(type);
 
-    // Mettre à jour le badge
+    // Mettre à jour le badge (comparaison sur la forme canonique ; le select
+    // peut encore livrer une valeur legacy tant que le Temps 2 n'est pas fait).
     const badge = document.getElementById('mat-badge-pratique');
     if (badge) {
-        const pratiques = type === 'pan-standards' ? ['STD'] :
-                         type === 'pan-specifications' ? ['SPE'] :
-                         type === 'sommative' ? ['SOM'] : [];
+        const typeCanon = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(type) : type);
+        const pratiques = typeCanon === 'standards' ? ['STD'] :
+                         typeCanon === 'specifications' ? ['SPE'] :
+                         typeCanon === 'sommative' ? ['SOM'] : [];
         badge.innerHTML = genererBadgeTypePratique({ pratiques });
     }
 
@@ -1152,16 +1156,20 @@ async function sauvegarderConfigPratiqueMat() {
     }
 
     const type = getValeurChamp('mat-pratique-type');
+    // NB (A-2 4c) : on persiste `type` tel quel (legacy tant que le select n'est
+    // pas canonisé au Temps 2, fusionné avec 4d). typeCanon ne sert qu'aux
+    // comparaisons internes, qui restent ainsi correctes legacy OU migré.
     configurations[index].type = type;
+    const typeCanon = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(type) : type);
 
     // Affichage note
     configurations[index].affichageNote =
         document.querySelector('input[name="mat-affichage-note"]:checked')?.value || 'complet';
 
     // Mettre à jour pratiques[]
-    configurations[index].pratiques = type === 'pan-standards' ? ['STD'] :
-                                      type === 'pan-specifications' ? ['SPE'] :
-                                      type === 'sommative' ? ['SOM'] : [];
+    configurations[index].pratiques = typeCanon === 'standards' ? ['STD'] :
+                                      typeCanon === 'specifications' ? ['SPE'] :
+                                      typeCanon === 'sommative' ? ['SOM'] : [];
 
     // Initialiser la configuration si absente
     if (!configurations[index].configuration) {
@@ -1172,8 +1180,8 @@ async function sauvegarderConfigPratiqueMat() {
     // via construireNoteProvisoire → renderRangeeNote).
     configurations[index].configuration.notesFinales = getCheckbox('mat-notes-finales');
 
-    // Sauvegarder selon le type
-    if (type === 'pan-standards') {
+    // Sauvegarder selon le type (comparaison canonique)
+    if (typeCanon === 'standards') {
         const varianteCalcul = getValeurChamp('mat-variante-calcul');
         configurations[index].configuration.varianteCalcul = varianteCalcul;
 
@@ -1232,7 +1240,7 @@ async function sauvegarderConfigPratiqueMat() {
             }
             // moyenne-ponderee : les pondérations sont stockées dans les objectifs eux-mêmes
         }
-    } else if (type === 'pan-specifications') {
+    } else if (typeCanon === 'specifications') {
         configurations[index].configuration.seuilAcceptable = parseInt(getValeurChamp('mat-spec-seuil')) || 75;
         // typesTravaux et forfaits sont gérés par leurs propres fonctions
     }
