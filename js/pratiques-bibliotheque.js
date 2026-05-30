@@ -29,7 +29,7 @@ const MODELES_PRATIQUES_PREDEFINIS = {
         id: 'SPE-chimie-contrats',
         nom: 'Modèle Chimie',
         description: 'Notation par contrats',
-        type: 'pan-specifications',
+        type: 'specifications',
         auteur: 'Gabarit Labo Codex',
         discipline: 'Chimie',
         estGabarit: true,
@@ -53,7 +53,7 @@ const MODELES_PRATIQUES_PREDEFINIS = {
         id: 'SPE-simple',
         nom: 'Modèle simple',
         description: 'Pour débuter avec PAN-Spécifications',
-        type: 'pan-specifications',
+        type: 'specifications',
         auteur: 'Demo Labo Codex',
         discipline: 'Général',
         estGabarit: true,
@@ -75,7 +75,7 @@ const MODELES_PRATIQUES_PREDEFINIS = {
         id: 'STD-n-meilleurs',
         nom: 'N meilleures évaluations',
         description: 'Garde les 7 meilleures évaluations sur 10, valorise la progression',
-        type: 'pan-standards',
+        type: 'standards',
         auteur: 'Demo Labo Codex',
         discipline: 'Général',
         estGabarit: true,
@@ -95,7 +95,7 @@ const MODELES_PRATIQUES_PREDEFINIS = {
         id: 'STD-n-recents',
         nom: 'N plus récentes',
         description: 'Garde les 5 évaluations les plus récentes, valorise l\'état actuel',
-        type: 'pan-standards',
+        type: 'standards',
         auteur: 'Demo Labo Codex',
         discipline: 'Général',
         estGabarit: true,
@@ -115,7 +115,7 @@ const MODELES_PRATIQUES_PREDEFINIS = {
         id: 'STD-par-objectifs-pondere',
         nom: 'Par objectifs (Pondéré)',
         description: 'Mode mathématiques : moyenne pondérée des objectifs',
-        type: 'pan-standards',
+        type: 'standards',
         auteur: 'Gabarit Labo Codex',
         discipline: 'Mathématiques',
         estGabarit: true,
@@ -148,7 +148,7 @@ const MODELES_PRATIQUES_PREDEFINIS = {
         id: 'STD-chimie-organique',
         nom: 'STD Chimie organique',
         description: 'Standards avec critères par standard, meilleurs résultats. Reprises illimitées au bureau.',
-        type: 'pan-standards',
+        type: 'standards',
         auteur: 'Gabarit Labo Codex',
         discipline: 'Chimie',
         estGabarit: true,
@@ -195,7 +195,7 @@ const MODELES_PRATIQUES_PREDEFINIS = {
         id: 'STD-info-interfaces-bd',
         nom: 'STD Interfaces et BD',
         description: '6 objectifs requis niveau 3+. Base 80% + bonus 3.33% par niveau 4. Hybride STD/SPE.',
-        type: 'pan-standards',
+        type: 'standards',
         auteur: 'Gabarit Labo Codex',
         discipline: 'Informatique',
         estGabarit: true,
@@ -405,7 +405,7 @@ const MODELES_PRATIQUES_PREDEFINIS = {
         id: 'STD-anatomie',
         nom: 'STD Anatomie',
         description: 'PAN-Standards avec jugement global. 11 évaluations. Progression qualitative sans calcul strict.',
-        type: 'pan-standards',
+        type: 'standards',
         auteur: 'Gabarit Labo Codex',
         discipline: 'Biologie',
         etablissement: 'Cégep',
@@ -556,7 +556,7 @@ function obtenirToutesLesPratiquesBibliothequeSync(inclureGabarits = true) {
 
 /**
  * Obtenir les configurations d'un type de pratique spécifique
- * @param {string} typePratique - Type de pratique (pan-specifications, pan-standards, etc.)
+ * @param {string} typePratique - Type de pratique (specifications, standards, etc.)
  * @returns {Promise<Array>} Tableau des configurations de ce type
  */
 async function obtenirPratiquesParType(typePratique) {
@@ -726,15 +726,18 @@ async function sauvegarderConfigurationActuelle(nom, description = '') {
         id: genererIdUnique('config_'),
         nom: nom,
         description: description,
-        type: modalites.pratique || 'pan-specifications',
+        type: (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(modalites.pratique) : modalites.pratique) || 'specifications',
         auteur: 'Utilisateur',
         discipline: modalites.discipline || 'Général',
         dateCreation: new Date().toISOString(),
         configuration: {}
     };
 
+    // Session A-2 : id canonique normalisé à la lecture.
+    const pratiqueCanon = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(modalites.pratique) : modalites.pratique);
+
     // Selon le type de pratique, extraire la configuration pertinente
-    if (modalites.pratique === 'pan-specifications' || modalites.pratique === 'specifications') {
+    if (pratiqueCanon === 'specifications') {
         nouvelleConfig.pratiques = ['SPE'];
         nouvelleConfig.configuration = {
             seuilAcceptable: modalites.specifications?.seuilAcceptable || 75,
@@ -742,7 +745,7 @@ async function sauvegarderConfigurationActuelle(nom, description = '') {
             forfaits: JSON.parse(JSON.stringify(modalites.specifications?.forfaits || []))
         };
 
-    } else if (modalites.pratique === 'pan-standards') {
+    } else if (pratiqueCanon === 'standards') {
         nouvelleConfig.pratiques = ['STD'];
         nouvelleConfig.configuration = {
             // Variante de calcul
@@ -788,9 +791,12 @@ async function appliquerConfigurationPratique(configId) {
         modalites = {};
     }
 
+    // Session A-2 : id canonique normalisé à la lecture (config.type peut être legacy).
+    const typeConfig = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.type) : config.type);
+
     // Appliquer selon le type
-    if (config.type === 'pan-specifications') {
-        modalites.pratique = 'pan-specifications';
+    if (typeConfig === 'specifications') {
+        modalites.pratique = 'specifications';
 
         if (!modalites.specifications) {
             modalites.specifications = {};
@@ -802,8 +808,8 @@ async function appliquerConfigurationPratique(configId) {
         modalites.specifications.modeleChoisi = config.id;
         modalites.specifications.modeleNom = config.nom;
 
-    } else if (config.type === 'pan-standards') {
-        modalites.pratique = 'pan-standards';
+    } else if (typeConfig === 'standards') {
+        modalites.pratique = 'standards';
 
         // Variante de calcul (n-meilleurs, n-recents, par-objectifs, etc.)
         if (config.configuration?.varianteCalcul) {
@@ -834,7 +840,7 @@ async function appliquerConfigurationPratique(configId) {
     db.setSync(cle('modalitesEvaluation'), modalites);
 
     // Rafraîchir l'interface selon le type
-    if (config.type === 'pan-specifications') {
+    if (typeConfig === 'specifications') {
         // Rafraîchir interface SPE
         if (typeof chargerConfigSpecifications === 'function') {
             chargerConfigSpecifications();
@@ -848,7 +854,7 @@ async function appliquerConfigurationPratique(configId) {
                 modalites.specifications?.typesTravaux || []
             );
         }
-    } else if (config.type === 'pan-standards') {
+    } else if (typeConfig === 'standards') {
         // Rafraîchir interface STD
 
         // 1. Mettre à jour le dropdown de variante
