@@ -1621,7 +1621,7 @@ function genererRecapitulatif() {
     // ─── Section 1 : Diagnostic du type de notation (proéminent) ───
     const typeBadges = {
         'sommative': { code: 'SOM', couleur: '#4A90D9', label: 'Sommative', description: 'Ta note finale est calculée par une moyenne pondérée des évaluations. C\'est la méthode traditionnelle, largement utilisée.' },
-        'pan-standards': { code: 'PAN', couleur: '#E67E22', label: 'PAN \u2013 Standards', description: 'Tu évalues par niveaux de maîtrise (ex.\u00a0: I-D-M-E). La note est construite à partir de la démonstration de compétences, pas d\'une simple moyenne.' },
+        'pan-standards': { code: 'STD', couleur: '#E67E22', label: 'PAN \u2013 Standards', description: 'Tu évalues par niveaux de maîtrise (ex.\u00a0: I-D-M-E). La note est construite à partir de la démonstration de compétences, pas d\'une simple moyenne.' },
         'pan-specifications': { code: 'SPE', couleur: '#27AE60', label: 'PAN \u2013 Spécifications', description: 'Chaque travail est jugé acceptable ou non. La note finale dépend du nombre de spécifications réussies (forfaits).' }
     };
     const badge = typeBadges[classification.type] || { code: '?', couleur: '#888', label: 'Indéterminé', description: '' };
@@ -2118,12 +2118,13 @@ async function creerPratiqueV2() {
         r.nom = champNomRecap.value.trim();
     }
 
-    // Construire l'objet pratique
+    // Construire l'objet pratique. typeFinal vient de deduireTypePratique
+    // (jamais 'pan-maitrise') → l'entrée 'pan-maitrise':'PAN' était du code mort,
+    // retirée (A-2 4e, zéro-dette).
     const typeMapping = {
         'sommative': 'SOM',
         'pan-standards': 'STD',
-        'pan-specifications': 'SPE',
-        'pan-maitrise': 'PAN'
+        'pan-specifications': 'SPE'
     };
 
     // Utiliser la classification comportementale déduite
@@ -2485,12 +2486,20 @@ function chargerPratiqueExistante(pratiqueId) {
         return;
     }
 
-    // Mapper les données vers les réponses du wizard
-    // Déduire calcNoteFinale à partir du type stocké (rétro-compatibilité)
+    // Mapper les données vers les réponses du wizard.
+    // Normalisation à la lecture (A-2 4e) : pratique.type peut être canonique
+    // ('standards', 'specifications'…) si la donnée vient d'un seed canonisé
+    // (lot 4b) ou d'une migration future. Le wizard travaille en vocabulaire
+    // INTERNE legacy ('pan-standards'…) jusqu'à l'étape 6 ; on convertit donc à
+    // l'entrée, sinon une pratique Standards/Spécifications serait reconstruite
+    // en Sommative (bug latent réel). Tables indexées canonique ; la conversion
+    // canon→interne est transitoire (retirée à l'étape 6).
+    const typeCanon = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(pratique.type) : pratique.type);
+    const canonVersInterne = { 'standards': 'pan-standards', 'specifications': 'pan-specifications', 'sommative': 'sommative' };
     const calcNoteFinaleMap = {
         'sommative': 'moyenne',
-        'pan-standards': 'niveaux',
-        'pan-specifications': 'acceptable'
+        'standards': 'niveaux',
+        'specifications': 'acceptable'
     };
 
     wizardState.reponses = {
@@ -2499,8 +2508,8 @@ function chargerPratiqueExistante(pratiqueId) {
         etablissement: pratique.etablissement,
         description: pratique.description,
         discipline: pratique.discipline,
-        typePratique: pratique.type,
-        calcNoteFinale: calcNoteFinaleMap[pratique.type] || 'moyenne',
+        typePratique: canonVersInterne[typeCanon] || pratique.type,
+        calcNoteFinale: calcNoteFinaleMap[typeCanon] || 'moyenne',
         typeVariante: pratique.variante || null,
         reglesSommatives: pratique.reglesSpeciales || pratique.configuration?.reglesSommatives || [],
         nbEvaluationsPrevues: pratique.nbEvaluationsPrevues || null,
@@ -2513,10 +2522,10 @@ function chargerPratiqueExistante(pratiqueId) {
     if (pratique.configuration) {
         const config = pratique.configuration;
 
-        if (pratique.type === 'sommative') {
+        if (typeCanon === 'sommative') {
             wizardState.reponses.afficherRang = config.afficherRang;
             wizardState.reponses.afficherMoyenneGroupe = config.afficherMoyenneGroupe;
-        } else if (pratique.type === 'pan-standards') {
+        } else if (typeCanon === 'standards') {
             wizardState.reponses.approcheEvaluation = config.approcheEvaluation;
             wizardState.reponses.echelleId = config.echelleId;
             wizardState.reponses.grilleId = config.grilleId;
