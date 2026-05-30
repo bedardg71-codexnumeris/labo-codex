@@ -4,7 +4,7 @@
 >
 > **Dernière bascule** : 25 mai 2026 fin de journée — extraction des items livrés vers BACKLOG-ARCHIVE.md.
 > **État courant** : Beta 99.66 (Build 0526-0503), HEAD main `4df4f21`. 28 items ouverts (session 26 mai matin : 3 items #278/#280/#281 livrés + 3 bugs testeurs résolus + 1 item #286 ajouté).
-> **Dernier ID utilisé** : #305 (a11y modale d'aide sans nom accessible, créé 29 mai 2026 soir). #304 = nettoyage terminologique heures-contact (libellés UI faits par le mini-guide). #303 = refactor pratiques SSOT — **Session A-1 livrée (beta 99.80)**, reste A-2/B/C. #302 = module guides pédagogiques unifié + guides PAN. #301 = résolution de pratique en consultation (chantier D). #300 = bug `getSync("trimestres")` désync. #299 = balayage références d'onglets périmées (28 mai PM).
+> **Dernier ID utilisé** : #306 (uniformisation page d'assemblage groupe-cours, post-AQPC, créé 30 mai 2026 — plan prêt dans `plans de travail/`). #305 (a11y modale d'aide sans nom accessible, créé 29 mai 2026 soir). #304 = nettoyage terminologique heures-contact (libellés UI faits par le mini-guide). #303 = refactor pratiques SSOT — **Session A-1 livrée (beta 99.80)**, reste A-2/B/C. #302 = module guides pédagogiques unifié + guides PAN. #301 = résolution de pratique en consultation (chantier D). #300 = bug `getSync("trimestres")` désync. #299 = balayage références d'onglets périmées (28 mai PM).
 > **Session 29 mai (soir)** : chantier E (refonte cours↔période close), mini-guide balises (#304 libellés), **Session A-1** (#303). Beta 99.77 → **99.80**.
 > **Présentation AQPC** : 3 juin 2026 (J−8).
 > **Pour ajouter un item** : `- [ ] **#XX** Description courte` + sous-puces de contexte. Dernier ID utilisé : **#285** (livré).
@@ -50,6 +50,13 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 - [ ] 📐 🟢 **#284** Harmonisation de la structure des pages (titres + sous-titres descriptifs manquants)
   - Pages sans titre : Alignement pédagogique (carte mentale), Tirage au sort (Labo).
   - Décision : ajouter h1 + sous-titre 1-ligne partout, OU décider que certaines pages sont délibérément plein écran.
+
+- [ ] 📦 🟡 **#306** Uniformiser la page d'assemblage du groupe-cours (libellés « Créer/Enregistrer » + Trimestre en save explicite)
+  - **Origine** : retour testeur Grégoire — incohérence des boutons de la sous-section « Trimestre » (3 modèles de persistance y coexistent).
+  - **Plan détaillé prêt** : `plans de travail/PLAN-UNIFORMISATION-ASSEMBLAGE-GROUPE-COURS.md` (3 lots : libellés / save explicite Trimestre / test comportemental). Analyse source : `Rapports/analyse-coherence-assemblage-groupe-cours.md`.
+  - **Post-AQPC** : le Lot 2 bascule le modèle de persistance du trimestre (risque moyen) — ne pas remuer avant le 3 juin. Le Lot 1 (libellés, risque faible, ne touche pas la persistance) pourrait passer seul si besoin.
+  - **Au moment de coder** : revérifier la cartographie (numéros de ligne) — le formulaire cours a été refondu (chantiers C/E, 29 mai) et l'écosystème pratiques touché (A-2, 30 mai).
+  - Décision UX ouverte (notée dans le plan) : aligner ou non l'apparition du formulaire Enseignant·e sur « état vide masqué ». Estimation : Lot 1 ~1h, Lot 2 ~2-3h, Lot 3 ~1h.
 
 ### Fonctionnalités à compléter
 
