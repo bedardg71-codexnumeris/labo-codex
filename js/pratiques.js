@@ -49,6 +49,23 @@
    =============================== */
 
 /**
+ * A-2 4d : normalisation à la lecture de l'identifiant de pratique active.
+ * Les comparaisons sur `modalites.pratique` doivent rester correctes que la
+ * donnée soit legacy ('pan-standards', 'alternative'…) OU déjà canonisée
+ * ('standards'…). Le SSOT peut déjà contenir du canonique selon le chemin
+ * d'activation (cf. pratiques-bibliotheque.js lot 4b). Guard `typeof` car
+ * pratique-registre.js peut être chargé après ce fichier ; au runtime
+ * (handlers) il est présent.
+ * NB : la canonisation des <select> et des écritures de modalites.pratique est
+ * reportée à l'étape 6 (post-AQPC, sur backup) — ici, lecture seule.
+ * @param {string} p - identifiant éventuellement legacy
+ * @returns {string} forme canonique (ou l'entrée telle quelle)
+ */
+function _normPratique(p) {
+    return (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(p) : p);
+}
+
+/**
  * Migre les pratiques existantes pour ajouter les configurations spécifiques
  * ✅ NOUVEAU (9 décembre 2025)
  *
@@ -285,13 +302,14 @@ function getCoursUtilisantPratique(pratiqueId) {
     const pratiqueActive = modalites.pratique || 'sommative';
 
     // Si cette pratique est la pratique active, tous les cours l'utilisent
-    if (pratiqueId === pratiqueActive) {
+    // (comparaison normalisée : tolère legacy ↔ canonique des deux côtés).
+    if (_normPratique(pratiqueId) === _normPratique(pratiqueActive)) {
         return cours;
     }
 
     // Sinon, chercher les cours qui auraient explicitement ce pratiqueId
     // (pour compatibilité avec anciennes données)
-    return cours.filter(c => c.pratiqueId === pratiqueId);
+    return cours.filter(c => _normPratique(c.pratiqueId) === _normPratique(pratiqueId));
 }
 
 /**
@@ -352,7 +370,7 @@ function mettreAJourUIPratiqueDefaut() {
     const btnSommative = document.getElementById('btnDefautSommative');
 
     if (btnPanMaitrise && btnSommative) {
-        if (pratiqueDefaut === 'pan-standards') {
+        if (_normPratique(pratiqueDefaut) === 'standards') {
             // PAN-Standards est sélectionnée - classe btn-principal
             btnPanMaitrise.className = 'btn btn-principal';
             btnSommative.className = 'btn';
@@ -534,7 +552,11 @@ function changerPratiqueNotation() {
     const selectPAN = document.getElementById('typePAN');
     const infoPAN = document.getElementById('infoPAN');
 
-    if (pratique === 'pan-standards') {
+    // Comparaison normalisée (tolère legacy ↔ canonique). NB : la valeur écrite
+    // dans modalites.pratique reste celle du select (legacy tant que le <select>
+    // n'est pas canonisé en étape 6) — ici on ne touche pas l'écriture.
+    const pratiqueCanon = _normPratique(pratique);
+    if (pratiqueCanon === 'standards') {
         // Afficher le menu PAN
         colonnePAN.classList.remove('u-hide');
     } else {
@@ -547,7 +569,7 @@ function changerPratiqueNotation() {
     // Sauvegarder dans modalitesEvaluation
     let modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     modalites.pratique = pratique;
-    modalites.typePAN = pratique === 'pan-standards' ? modalites.typePAN : null;
+    modalites.typePAN = pratiqueCanon === 'standards' ? modalites.typePAN : null;
     db.setSync(cle('modalitesEvaluation'), modalites);
 
     // Gérer l'affichage des options d'affichage
@@ -617,12 +639,13 @@ function afficherOptionsAffichage() {
     const checkComparatif = document.getElementById('modeComparatif');
     const activationsExtras = document.getElementById('activationsExtras');
 
-    if (pratique === 'pan-standards' || pratique === 'sommative') {
+    const pratiqueCanon = _normPratique(pratique);
+    if (pratiqueCanon === 'standards' || pratiqueCanon === 'sommative') {
         // Afficher la section d'affichage au tableau de bord
         toggleDisplay(sectionAffichageTableauBord, true);
 
         // Afficher les checkboxes d'activation pour PAN
-        if (pratique === 'pan-standards' && activationsExtras) {
+        if (pratiqueCanon === 'standards' && activationsExtras) {
             activationsExtras.classList.remove('u-hide');
             // Initialiser l'affichage des cartes
             afficherCartesExtras();
@@ -670,12 +693,15 @@ function sauvegarderOptionsAffichage() {
         };
     } else {
         // Mode normal : afficher uniquement la pratique principale
-        if (pratique === 'sommative') {
+        // Comparaison normalisée ; on conserve le startsWith pour les variantes
+        // (pan-standards-json…) qui ne sont pas dans la table de normalisation.
+        const pratiqueCanon = _normPratique(pratique);
+        if (pratiqueCanon === 'sommative') {
             modalites.affichageTableauBord = {
                 afficherSommatif: true,
                 afficherAlternatif: false
             };
-        } else if (pratique && pratique.startsWith('pan-standards')) {
+        } else if (pratiqueCanon === 'standards' || (pratique && pratique.startsWith('pan-standards'))) {
             // ✅ CORRECTION (9 déc 2025) : Support des variantes pan-standards-json, pan-standards-*
             modalites.affichageTableauBord = {
                 afficherSommatif: false,
@@ -704,7 +730,7 @@ function afficherConfigurationPAN() {
 
     if (!configPAN) return;
 
-    if (pratique === 'pan-standards') {
+    if (_normPratique(pratique) === 'standards') {
         configPAN.classList.remove('u-hide');
         chargerConfigurationPAN();
     } else {
@@ -1144,14 +1170,15 @@ function sauvegarderPratiqueNotation() {
 
     // Valider typePAN uniquement si le sélecteur est VISIBLE (ancien système)
     const selecteurVisible = colonnePAN && !colonnePAN.classList.contains('u-hide');
-    if (pratique === 'pan-standards' && selecteurVisible && !typePAN) {
+    const pratiqueCanon = _normPratique(pratique);
+    if (pratiqueCanon === 'standards' && selecteurVisible && !typePAN) {
         alert('Veuillez choisir un type de pratique alternative');
         return;
     }
 
-    // Construire la configuration complète
+    // Construire la configuration complète (écriture conservée telle quelle ; canonisation en étape 6)
     modalites.pratique = pratique;
-    modalites.typePAN = pratique === 'pan-standards' ? typePAN : null;
+    modalites.typePAN = pratiqueCanon === 'standards' ? typePAN : null;
     modalites.dateConfiguration = new Date().toISOString();
 
     // Sauvegarder la grille de référence pour le dépistage (préférence utilisateur)
@@ -1177,7 +1204,7 @@ function sauvegarderPratiqueNotation() {
                 afficherSommatif: true,
                 afficherAlternatif: false
             };
-        } else if (pratique && pratique.startsWith('pan-standards')) {
+        } else if (_normPratique(pratique) === 'standards' || (pratique && pratique.startsWith('pan-standards'))) {
             // ✅ CORRECTION (9 déc 2025) : Support des variantes pan-standards-json, pan-standards-*
             modalites.affichageTableauBord = {
                 afficherSommatif: false,
@@ -1255,11 +1282,13 @@ function chargerModalites() {
         return;
     }
 
-    // Charger la pratique de notation
+    // Charger la pratique de notation (valeur brute ; le <select> garde ses
+    // options legacy tant que l'étape 6 ne les a pas canonisées).
     selectPratique.value = modalites.pratique;
+    const pratiqueCanon = _normPratique(modalites.pratique);
 
     // Gérer l'affichage du menu PAN
-    if (modalites.pratique === 'pan-standards') {
+    if (pratiqueCanon === 'standards') {
         colonnePAN.classList.remove('u-hide');
 
         // Charger le type de PAN si disponible
@@ -1277,12 +1306,12 @@ function chargerModalites() {
     // Charger les options d'affichage
     // Si affichageTableauBord n'existe pas, l'initialiser selon la pratique choisie
     if (!modalites.affichageTableauBord) {
-        if (modalites.pratique === 'sommative') {
+        if (pratiqueCanon === 'sommative') {
             modalites.affichageTableauBord = {
                 afficherSommatif: true,
                 afficherAlternatif: false
             };
-        } else if (modalites.pratique === 'pan-standards') {
+        } else if (pratiqueCanon === 'standards') {
             modalites.affichageTableauBord = {
                 afficherSommatif: false,
                 afficherAlternatif: true
@@ -1344,7 +1373,7 @@ function chargerModalites() {
     // Masquer la section configurationPAN au chargement
     // Elle sera affichée par le bouton "Modifier les paramètres"
     const configPAN = document.getElementById('configurationPAN');
-    if (configPAN && modalites.pratique === 'pan-standards') {
+    if (configPAN && pratiqueCanon === 'standards') {
         configPAN.classList.add('u-hide');
     }
 
@@ -1506,12 +1535,13 @@ function mettreAJourStatutModalites() {
         return;
     }
 
-    // Vérifier le statut selon la pratique choisie
+    // Vérifier le statut selon la pratique choisie (comparaison normalisée)
+    const pratiqueCanon = _normPratique(modalites.pratique);
     if (!modalites.pratique) {
         statutDiv.innerHTML = '<span style="color: var(--niveau-attention-critique);"><span class="icone-inline icone-inline--cancel" aria-hidden="true"></span>À configurer</span>';
-    } else if (modalites.pratique === 'sommative') {
+    } else if (pratiqueCanon === 'sommative') {
         statutDiv.innerHTML = '<span style="color: var(--vert-moyen);"><span class="icone-inline icone-inline--check" aria-hidden="true"></span>Sommative traditionnelle (en %)</span>';
-    } else if (modalites.pratique === 'pan-standards' && modalites.typePAN) {
+    } else if (pratiqueCanon === 'standards' && modalites.typePAN) {
         const types = {
             'maitrise': 'Maîtrise',
             'specifications': 'Spécifications',
@@ -1523,7 +1553,7 @@ function mettreAJourStatutModalites() {
                 Modifier les paramètres
             </button>
         `;
-    } else if (modalites.pratique === 'pan-standards' && !modalites.typePAN) {
+    } else if (pratiqueCanon === 'standards' && !modalites.typePAN) {
         statutDiv.innerHTML = '<span style="color: var(--orange-accent);"><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Choisir un type de PAN</span>';
     }
 }
@@ -2034,12 +2064,12 @@ function chargerConfigurationPratique(id) {
             };
         } else {
             // Mode normal : afficher uniquement la pratique principale
-            if (modalites.pratique === 'sommative') {
+            if (_normPratique(modalites.pratique) === 'sommative') {
                 modalites.affichageTableauBord = {
                     afficherSommatif: true,
                     afficherAlternatif: false
                 };
-            } else if (modalites.pratique === 'pan-standards') {
+            } else if (_normPratique(modalites.pratique) === 'standards') {
                 modalites.affichageTableauBord = {
                     afficherSommatif: false,
                     afficherAlternatif: true
@@ -2158,7 +2188,7 @@ function afficherSectionsSelonConfig(config) {
 async function desactiverPratique(id) {
     const pratiqueDefaut = getPratiqueParDefaut();
 
-    if (!confirm(`Désactiver cette pratique ?\n\nLa pratique par défaut (${pratiqueDefaut === 'pan-standards' ? 'PAN-Standards' : 'Sommative'}) sera activée à la place.`)) {
+    if (!confirm(`Désactiver cette pratique ?\n\nLa pratique par défaut (${_normPratique(pratiqueDefaut) === 'standards' ? 'PAN-Standards' : 'Sommative'}) sera activée à la place.`)) {
         return;
     }
 
@@ -2189,9 +2219,11 @@ async function editerPratiqueActive() {
         return;
     }
 
-    // Vérifier si c'est une pratique codée (canevas de base)
-    const pratiquesCodees = ['pan-standards', 'sommative', 'pan-specifications', 'pan-maitrise', 'specifications'];
-    if (pratiquesCodees.includes(pratiqueActiveId)) {
+    // Vérifier si c'est une pratique codée (canevas de base). On teste la forme
+    // canonique → tolère legacy ('pan-standards', 'pan-maitrise', 'specifications'…)
+    // ET migré ('standards', 'specifications'…). Miroir exact de l'ancien ensemble.
+    const canevasCanoniques = ['standards', 'specifications', 'sommative'];
+    if (canevasCanoniques.includes(_normPratique(pratiqueActiveId))) {
         alert('❌ Impossible de modifier un canevas de base\n\nLes canevas de base (PAN-Standards, Sommative, PAN-Spécifications) ne peuvent pas être modifiés.\n\nVous pouvez créer une nouvelle pratique basée sur ces canevas.');
         return;
     }
@@ -2534,19 +2566,14 @@ async function afficherListePratiquesSidebar() {
     // IDs des 3 CANEVAS DE BASE (pratiques codées) qui ne doivent PAS apparaître dans la sidebar
     // (ils sont dans le modal "Bibliothèque de pratiques" > section "Canevas de base")
     // Les autres pratiques sont des configurations dérivées qui peuvent apparaître dans la sidebar
-    const idsCanevasDeBase = [
-        'pan-standards',
-        'pan-maitrise',       // rétrocompat
-        'pan-specifications',
-        'specifications',     // rétrocompat
-        'sommative'
-    ];
-
-    // DEBUG: Afficher les flags dansBibliotheque de toutes les pratiques
+    // Canevas de base sous forme canonique (miroir de l'ancien ensemble
+    // pan-standards/pan-maitrise/pan-specifications/specifications/sommative).
+    // On normalise p.id à la comparaison → tolère legacy ET migré (A-2 4d).
+    const idsCanevasCanon = ['standards', 'specifications', 'sommative'];
 
     // Filtrer les pratiques : dans bibliothèque ET pas un canevas de base
     const pratiquesDansBibliotheque = pratiquesConfigurables.filter(p =>
-        p.dansBibliotheque !== false && !idsCanevasDeBase.includes(p.id)
+        p.dansBibliotheque !== false && !idsCanevasCanon.includes(_normPratique(p.id))
     );
 
 
@@ -2615,15 +2642,16 @@ async function ouvrirModalBibliothequePratiques() {
         }
     ];
 
-    // IDs des canevas de base à exclure des sections configurables
-    const idsCanevasDeBase = canevasDeBase.map(c => c.id);
+    // IDs des canevas de base à exclure des sections configurables.
+    // Normalisés pour tolérer legacy ↔ canonique des deux côtés (A-2 4d).
+    const idsCanevasCanon = canevasDeBase.map(c => _normPratique(c.id));
 
     // Filtrer les pratiques configurables pour exclure les canevas de base
     const pratiquesDansBibliotheque = pratiquesConfigurables.filter(p =>
-        p.dansBibliotheque !== false && !idsCanevasDeBase.includes(p.id)
+        p.dansBibliotheque !== false && !idsCanevasCanon.includes(_normPratique(p.id))
     );
     const pratiquesDisponibles = pratiquesConfigurables.filter(p =>
-        p.dansBibliotheque === false && !idsCanevasDeBase.includes(p.id)
+        p.dansBibliotheque === false && !idsCanevasCanon.includes(_normPratique(p.id))
     );
 
     const modalHTML = `
