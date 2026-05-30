@@ -42,7 +42,8 @@
  */
 function obtenirTermeProduction(context = 'singulier', majuscule = false) {
     const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-    const pratique = config.pratique || 'pan-maitrise';
+    // Session A-2 : normalisation à la lecture (id canonique), défaut = PRATIQUE_DEFAUT ('standards').
+    const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
 
     // Définir les termes selon la pratique
     let termes = {
@@ -51,8 +52,8 @@ function obtenirTermeProduction(context = 'singulier', majuscule = false) {
         partitif: "d'artefact"
     };
 
-    // PAN-Standards : terme "artefact" (portfolio d'apprentissage)
-    if (pratique === 'pan-maitrise') {
+    // Standards : terme "artefact" (portfolio d'apprentissage)
+    if (pratique === 'standards') {
         // Configuration personnalisée possible dans le futur
         const termePerso = config.termeProduction || 'artefact';
         termes = {
@@ -147,7 +148,8 @@ function obtenirNombreProductionsPourPatterns() {
  */
 function obtenirIdsProductionsEvaluables(productions) {
     var config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-    var estPAN = config.pratique === 'alternative';
+    // Session A-2 : normalisation à la lecture — tous les alias Standards résolvent vers 'standards'.
+    var estPAN = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) === 'standards';
     if (estPAN) {
         return productions.filter(function(p) { return p.type === 'artefact-portfolio'; }).map(function(p) { return p.id; });
     }
@@ -161,7 +163,8 @@ function obtenirIdsProductionsEvaluables(productions) {
  */
 function obtenirPratiqueActuelle() {
     const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-    const pratiqueId = modalites.pratique || 'pan-maitrise';
+    // Session A-2 : id canonique normalisé à la lecture, défaut = PRATIQUE_DEFAUT ('standards').
+    const pratiqueId = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(modalites.pratique) : modalites.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
 
     // Obtenir l'instance depuis le registre
     if (typeof obtenirPratiqueParId === 'function') {
@@ -173,15 +176,11 @@ function obtenirPratiqueActuelle() {
         // Sinon, continuer vers le fallback
     }
 
-    // Fallback : créer une instance directement
-    // ✅ CORRECTIF (10 déc 2025): Reconnaître les variantes d'ID
+    // Fallback : créer une instance directement (id déjà canonique).
     if (pratiqueId === 'sommative') {
         return new PratiqueSommative();
-    } else if (pratiqueId.startsWith('pan-maitrise')) {
-        // Reconnaît: pan-maitrise, pan-maitrise-json, etc.
-        return new PratiquePANMaitrise();
     } else {
-        // Par défaut, utiliser PAN-Standards
+        // Standards (et toutes ses variantes normalisées) par défaut.
         return new PratiquePANMaitrise();
     }
 }
