@@ -374,8 +374,9 @@ function obtenirCouleurPerformance(performance) {
 function genererExplicationCalculIndices() {
     // Récupérer la configuration de la pratique active
     const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-    const pratique = config.pratique || 'pan-maitrise';
-    const isPAN = pratique === 'pan-maitrise';
+    // Session A-2 : id canonique normalisé à la lecture, défaut = PRATIQUE_DEFAUT ('standards').
+    const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
+    const isPAN = pratique === 'standards';
 
     // Récupérer les paramètres de configuration
     const nbArtefacts = config.nombreArtefacts || 7;
@@ -450,7 +451,8 @@ function mettreAJourExplicationCalculIndices() {
  */
 function genererBadgePratiqueListeEtudiants() {
     const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-    const pratique = config.pratique || 'pan-maitrise';
+    // Session A-2 : id canonique normalisé à la lecture, défaut = PRATIQUE_DEFAUT ('standards').
+    const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
     const typePAN = config.typePAN || 'maitrise';
 
     let texte = '';

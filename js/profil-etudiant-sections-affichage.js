@@ -983,10 +983,11 @@ function genererSectionAccompagnement(da) {
 
                         // Obtenir la configuration pour afficher le nombre d'artefacts retenus
                         const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-                        const pratique = config.pratique || 'pan-maitrise';
+                        // Session A-2 : id canonique normalisé à la lecture, défaut = PRATIQUE_DEFAUT ('standards').
+                        const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
 
                         let noteExplicative = '';
-                        if (pratique === 'pan-maitrise') {
+                        if (pratique === 'standards') {
                             const nombreARetenir = config.nombreARetenir || 3;
                             const methodeSelection = config.methodeSelectionArtefacts || 'meilleurs';
                             const methodeTexte = methodeSelection === 'meilleurs' ? 'meilleurs' :
@@ -3701,7 +3702,7 @@ function _calculerMoyennesComparativesSRPNF(da, modeComparatif) {
     if (modeComparatif) {
         moyennesSOM = calculerMoyennesCriteres(da);
         directionsSOM = calculerDirectionsCriteres(da);
-        const pratiquePAN = obtenirPratiqueParId('pan-standards');
+        const pratiquePAN = obtenirPratiqueParId('standards');
         if (pratiquePAN && typeof pratiquePAN._calculerMoyennesCriteresRecents === 'function') {
             moyennesPAN = pratiquePAN._calculerMoyennesCriteresRecents(da);
         } else {
