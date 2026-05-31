@@ -69,7 +69,7 @@
         chronoEvaluation: false,
         sisDefaut: 'lea',
         modeExpert: false,
-        modeClair: false,
+        modeClair: true,
         accompagnementActif: true,
 
         // Flags de transitions pédagogiques (js/transitions.js) — suivent
