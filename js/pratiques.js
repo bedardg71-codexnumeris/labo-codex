@@ -2265,7 +2265,7 @@ async function editerPratique(id) {
 
         if (typeof ouvrirWizardV2 !== 'function') {
             console.error('[editerPratique] ouvrirWizardV2 indisponible');
-            alert('❌ Erreur : Le wizard d\'édition n\'est pas chargé.');
+            alert('❌ Erreur : L\'assistant d\'édition n\'est pas chargé.');
             return;
         }
         ouvrirWizardV2(true, id);
@@ -2400,7 +2400,7 @@ async function exporterPratiqueVersJSON(id) {
 function creerNouvellePratique() {
     if (typeof ouvrirWizardV2 !== 'function') {
         console.error('[creerNouvellePratique] ouvrirWizardV2 indisponible');
-        alert('❌ Erreur : Le wizard de création n\'est pas chargé.');
+        alert('❌ Erreur : L\'assistant de création n\'est pas chargé.');
         return;
     }
     ouvrirWizardV2(false, null);

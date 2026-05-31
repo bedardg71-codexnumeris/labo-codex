@@ -1412,11 +1412,11 @@ const AIDE_CONTEXTUELLE = {
     },
 
     'modal-wizard-pratique': {
-        titre: "Wizard de configuration — Pratique de notation",
+        titre: "Assistant de configuration — Pratique de notation",
         sections: [
             {
                 type: 'texte',
-                contenu: "Le wizard te guide en 8 étapes pour configurer une pratique de notation alignée avec tes intentions pédagogiques : type d'évaluation, sommative ou portfolio, règles de reprise, jetons, calcul de la note finale."
+                contenu: "L'assistant te guide en 8 étapes pour configurer une pratique de notation alignée avec tes intentions pédagogiques : type d'évaluation, sommative ou portfolio, règles de reprise, jetons, calcul de la note finale."
             },
             {
                 type: 'liste',
@@ -1434,7 +1434,7 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'conseil',
-                contenu: "Tu peux quitter le wizard à tout moment avec la croix — rien n'est sauvegardé tant que tu n'as pas atteint la dernière étape. Une pratique créée peut être éditée plus tard sans repasser par le wizard."
+                contenu: "Tu peux quitter l'assistant à tout moment avec la croix — rien n'est sauvegardé tant que tu n'as pas atteint la dernière étape. Une pratique créée peut être éditée plus tard sans repasser par l'assistant."
             }
         ],
         voirAussi: ['construction-pratiques']

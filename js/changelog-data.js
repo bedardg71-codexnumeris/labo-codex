@@ -56,7 +56,7 @@
                 'Nouvel onglet Planification\u00a0: carte mentale, alignement p\u00e9dagogique, clonage, verbes d\u2019Anderson.',
                 'Parcours d\u2019apprentissage guid\u00e9 (2\u00a0modes\u00a0: \u00e9tape par \u00e9tape ou exploration).',
                 'Module Travaux\u00a0: import, annotation au stylet, \u00e9valuation c\u00f4te \u00e0 c\u00f4te, export PDF.',
-                'Wizard de configuration\u00a0: d\u00e9tecte automatiquement ton type de pratique de notation.',
+                'Assistant de configuration\u00a0: d\u00e9tecte automatiquement ton type de pratique de notation.',
                 'Suivi d\u2019\u00e9tudiants color\u00e9s au tableau de bord (jusqu\u2019\u00e0 5\u00a0\u00e9l\u00e8ves).',
                 'Aide contextuelle compl\u00e8te (100\u00a0% des sections document\u00e9es).'
             ]
