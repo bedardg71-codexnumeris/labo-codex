@@ -38,8 +38,15 @@ const PratiqueManager = {
             return null;
         }
 
-        // Vérifier si c'est une pratique codée en dur ou configurable
-        if (pratiqueId === 'pan-standards' || pratiqueId === 'sommative' || pratiqueId === 'pan-specifications') {
+        // Vérifier si c'est une pratique codée en dur ou configurable.
+        // Session A volet B : normalisation à la lecture — le SSOT peut être legacy
+        // (pan-standards…) OU canonique (standards…). Les ids configurables (p. ex.
+        // pan-standards-bedard) ne figurent pas dans la table → restent inchangés et
+        // tombent dans la branche configurable JSON, comportement préservé.
+        const idCanonique = (typeof normaliserIdPratique === 'function')
+            ? normaliserIdPratique(pratiqueId)
+            : pratiqueId;
+        if (idCanonique === 'standards' || idCanonique === 'sommative' || idCanonique === 'specifications') {
             // Pratique codée en dur existante, utiliser pratique-registre.js
             return window.obtenirPratiqueActive();
         }

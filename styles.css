@@ -11369,6 +11369,18 @@ label:has(+ textarea:disabled) {
     outline: none;
 }
 
+/* Nom de la pratique active appliquée au calcul (#127 — pastille à gauche du bouton Réglages) */
+.note-finale-pratique-nom {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent-primaire);
+    background: transparent;
+    border: 1px solid var(--bordure-claire);
+    padding: 3px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
 /* Grille 2 colonnes pour Portfolio + Terminal */
 .note-finale-grid {
     display: grid;

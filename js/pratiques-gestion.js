@@ -1791,16 +1791,22 @@ async function supprimerPratiqueMateriel(pratiqueId) {
  * Applique une pratique au cours actif
  */
 async function appliquerPratiqueAuCours(pratiqueId) {
-
-    if (typeof appliquerConfigurationPratique === 'function') {
-        const succes = await appliquerConfigurationPratique(pratiqueId);
-        if (succes) {
-            notifications.succes('Configuration appliquée au cours actif');
-        } else {
-            alert('Erreur lors de l\'application de la configuration.');
-        }
-    } else {
+    // Bug 31 mai : message explicite (l'ancien « Erreur lors de l'application »
+    // n'expliquait pas la cause). On distingue les trois échecs possibles.
+    if (!pratiqueId) {
+        alert('Aucune pratique ouverte à appliquer. Ouvre d\'abord une pratique dans la liste, puis réessaie.');
+        return;
+    }
+    if (typeof appliquerConfigurationPratique !== 'function') {
         alert('Fonction d\'application non disponible.');
+        return;
+    }
+
+    const succes = await appliquerConfigurationPratique(pratiqueId);
+    if (succes) {
+        notifications.succes('Configuration appliquée au cours actif');
+    } else {
+        alert('Impossible d\'appliquer cette pratique : sa configuration est introuvable dans la bibliothèque. Enregistre-la d\'abord dans la bibliothèque, puis réessaie.');
     }
 }
 
@@ -2811,7 +2817,11 @@ window.confirmerEtFermerImportPratiques = confirmerEtFermerImportPratiques;
 
 // Constantes
 window.CLE_PRATIQUES_CONFIGURATIONS = CLE_PRATIQUES_CONFIGURATIONS;
-window.pratiqueEnEditionMateriel = pratiqueEnEditionMateriel;
+// ⚠️ Accesseur VIVANT (bug 31 mai) : exporter la valeur brute figeait un snapshot
+// à `null` au chargement (jamais re-synchronisé), car `pratiqueEnEditionMateriel` est
+// un `let` interne à cette IIFE. Les wrappers de main.js (Dupliquer/Supprimer/Appliquer)
+// lisaient ce null périmé. Un getter de closure renvoie toujours la valeur courante.
+window.obtenirPratiqueEnEditionMateriel = function() { return pratiqueEnEditionMateriel; };
 
 
 

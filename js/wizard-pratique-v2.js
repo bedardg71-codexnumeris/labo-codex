@@ -2131,6 +2131,15 @@ async function creerPratiqueV2() {
     const classification = deduireTypePratique(r);
     const typeFinal = classification.type || r.typePratique;
 
+    // Bug 31 mai : une pratique PAN-Standards calcule par conversion de niveaux (IDME)
+    // → elle DOIT avoir une échelle. On bloque la création plutôt que de produire une
+    // pratique invalide (qui échouerait ensuite à l'instanciation : « echelle manquante »).
+    // SOM (moyenne pondérée) et SPE (seuils) n'utilisent pas d'échelle IDME → non bloqués.
+    if (typeFinal === 'pan-standards' && !r.echelleId) {
+        alert('Choisis une échelle de performance (IDME) avant de créer cette pratique PAN-Standards. Reviens à l\'étape « Échelle de performance ».');
+        return;
+    }
+
     const pratique = {
         id: wizardState.pratiqueId || genererIdUnique('pratique_'),
         nom: r.nom,
@@ -2145,6 +2154,21 @@ async function creerPratiqueV2() {
         dateCreation: new Date().toISOString(),
         configuration: {}
     };
+
+    // Bug 31 mai : méthode de calcul EXPLICITE par famille. Sans ça,
+    // construireConfigComplete défaute tout à 'conversion_niveaux' (IDME) → une
+    // pratique Sommative ou Spécifications serait calculée comme une PAN et exigerait
+    // une échelle. Le switch de PratiqueConfigurable.calculerPerformance attend ces codes.
+    if (typeFinal === 'sommative') {
+        pratique.calcul_note = { methode: 'moyenne_ponderee' };
+    } else if (typeFinal === 'pan-specifications') {
+        pratique.calcul_note = { methode: 'specifications' };
+    } else {
+        // pan-standards : par objectifs → pan_par_objectif, sinon conversion de niveaux
+        pratique.calcul_note = {
+            methode: r.approcheEvaluation === 'par-objectifs' ? 'pan_par_objectif' : 'conversion_niveaux'
+        };
+    }
 
     // Seuils personnels (toutes branches)
     if (r.seuilVaBien || r.seuilDifficulte || r.seuilGrandeDifficulte) {
@@ -2350,6 +2374,14 @@ async function creerPratiqueV2() {
     // 🆕 FIX (20 jan 2026) : Rafraîchir aussi la sidebar de Construction > Pratiques
     if (typeof afficherListePratiquesMateriel === 'function') {
         afficherListePratiquesMateriel();
+    }
+
+    // 🆕 Bug 31 mai : rafraîchir AUSSI le select « Pratique de notation » de
+    // l'assemblage groupe-cours. La sidebar était rafraîchie mais pas les dropdowns
+    // d'assemblage → une pratique fraîchement créée restait invisible dans
+    // « Modifier le groupe-cours » jusqu'au rechargement du formulaire.
+    if (typeof window.populerDropdownsAssemblageV2 === 'function') {
+        window.populerDropdownsAssemblageV2();
     }
 }
 

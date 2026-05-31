@@ -167,6 +167,31 @@ function supprimerEvaluationDepuisProfil(evaluationId) {
     }
 }
 
+// #128 (31 mai) : message DIAGNOSTIQUE du « non calculable ». Objectif (retour Grégoire) :
+// que l'enseignant sache si c'est SON assignation/config à corriger, ou si c'est l'app qui
+// ne sait pas encore calculer cette famille (ses données étant cohérentes). Brique de la
+// future fonction « simuler / comparer des pratiques sur les mêmes données ».
+function _diagnostiquerNoteNonCalculable() {
+    const pratiqueId = (typeof obtenirPratiqueActiveGroupeCours === 'function') ? obtenirPratiqueActiveGroupeCours() : null;
+    if (!pratiqueId) {
+        return 'Aucune pratique de notation n\'est assignée à ce groupe-cours. Choisis-en une dans Réglages → Pratiques de notation.';
+    }
+    const pratiquesCfg = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+    const pratiqueData = pratiquesCfg.find(p => p.id === pratiqueId) || null;
+    if (!pratiqueData) {
+        return 'La pratique assignée à ce groupe-cours est introuvable dans la bibliothèque (supprimée, ou assignation vers un identifiant obsolète). Réassigne une pratique dans Réglages → Pratiques de notation.';
+    }
+    const famille = (typeof normaliserIdPratique === 'function') ? normaliserIdPratique(pratiqueData.type || '') : (pratiqueData.type || '');
+    const methode = pratiqueData.calcul_note && pratiqueData.calcul_note.methode;
+    if (famille === 'sommative' || methode === 'moyenne_ponderee') {
+        return 'Cette pratique est de type Sommative (moyenne pondérée). La note de session affichée ici se calcule par portfolio, propre aux PAN-Standards : le calcul Sommatif dans le profil n\'est pas encore branché. Tes données sont cohérentes — c\'est l\'affichage qui ne couvre pas encore cette famille (à venir).';
+    }
+    if (famille === 'specifications' || methode === 'specifications') {
+        return 'Cette pratique est de type Spécifications (exigences/seuils). Son calcul dans le profil n\'est pas encore branché. Tes données sont cohérentes — c\'est l\'affichage qui ne couvre pas encore cette famille (à venir).';
+    }
+    return 'Pratique PAN-Standards, mais sa configuration de portfolio (nombre d\'artefacts à retenir, minimum requis) est absente ou incomplète. Ouvre « Réglages de la pratique » pour la compléter.';
+}
+
 function _obtenirConfigPortfolioCalcul(modalites) {
     // Phase G2-a (24 mai 2026) : la pratique active est lue UNIQUEMENT depuis
     // la bibliothèque (pratiquesConfigurables, via obtenirConfigPratiqueActive).
@@ -174,7 +199,8 @@ function _obtenirConfigPortfolioCalcul(modalites) {
     // qui drift quand l'utilisateur édite la pratique dans le wizard.
     const configPratiqueActive = typeof obtenirConfigPratiqueActive === 'function' ? obtenirConfigPratiqueActive() : null;
     if (!configPratiqueActive || !configPratiqueActive.portfolio) {
-        return { erreur: 'Pratique active introuvable ou config portfolio absente. Vérifier l\'assignation de la pratique au groupe-cours dans Réglages → Pratiques de notation.' };
+        // Message précis selon la cause réelle (#128) au lieu d'un générique.
+        return { erreur: _diagnostiquerNoteNonCalculable() };
     }
     const configPortfolio = configPratiqueActive.portfolio;
     let methodeSelection = configPortfolio.methodeSelection || 'meilleurs';
@@ -375,6 +401,13 @@ function calculerDetailsNoteFinale(da) {
     // (sommative, specifications, denotation) n'ont pas de détail de note finale portfolio.
     if (pratique !== 'standards') return null;
 
+    // #127 (31 mai) : identifier la pratique active DÈS MAINTENANT, pour la nommer
+    // même dans le cas « non calculable » (retour Grégoire 05:26 : « celles qui ne
+    // sont pas calculables ne sont pas identifiées »). Lu depuis la bibliothèque.
+    const pratiqueId = (typeof obtenirPratiqueActiveGroupeCours === 'function') ? obtenirPratiqueActiveGroupeCours() : null;
+    const _pratiquesCfg = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+    const pratiqueNom = (_pratiquesCfg.find(p => p.id === pratiqueId)?.nom) || null;
+
     // Lecture config portfolio (source canonique : pratiquesConfigurables, via
     // obtenirConfigPratiqueActive). Plus de fallback sur configPAN.portfolio
     // (Phase G2-a, 24 mai 2026).
@@ -382,6 +415,8 @@ function calculerDetailsNoteFinale(da) {
     if (cfg.erreur) {
         return {
             pratique: 'PAN-Standards',
+            pratiqueId: pratiqueId,
+            pratiqueNom: pratiqueNom,
             erreur: cfg.erreur,
             portfolio: null,
             terminal: null,
@@ -407,7 +442,8 @@ function calculerDetailsNoteFinale(da) {
     // les non-remises restent simplement ignorées.
     const cfgPratiqueActive = (typeof obtenirConfigPratiqueActive === 'function') ? obtenirConfigPratiqueActive() : null;
     const estFinale = !!(cfgPratiqueActive && cfgPratiqueActive.notesFinales);
-    const pratiqueId = (typeof obtenirPratiqueActiveGroupeCours === 'function') ? obtenirPratiqueActiveGroupeCours() : null;
+    // pratiqueId / pratiqueNom : déjà résolus en tête de fonction (#127, pour couvrir
+    // aussi le cas « non calculable »).
 
     // Sélection des artefacts retenus + moyenne (Hybride ou Legacy)
     const { artefactsRetenus, moyennePortfolio: moyenneBrute } = modeHybrideNote
@@ -468,6 +504,7 @@ function calculerDetailsNoteFinale(da) {
         pratique: 'PAN-Standards',
         erreur: erreurConfiguration,
         pratiqueId: pratiqueId,
+        pratiqueNom: pratiqueNom,
         estFinale: estFinale,
         portfolio: {
             nombreARetenir: nombreARetenir,

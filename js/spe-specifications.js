@@ -200,11 +200,6 @@
         // Créer les gabarits SPE dans les bibliothèques
         await creerGabaritsSPE();
 
-        // Initialiser le compteur si on est en mode SPE
-        const modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
-        if (modalites.pratique === 'pan-specifications') {
-        }
-
     }
 
     /**
