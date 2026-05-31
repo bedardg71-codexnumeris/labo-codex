@@ -1575,7 +1575,7 @@ function wizardV2CreerGrilleDemo() {
     const grilleDemo = {
         id: genererIdUnique('GRILLE_'),
         nom: 'Grille de base',
-        description: 'Grille générique créée par le wizard. Modifiable dans Matériel → Critères.',
+        description: 'Grille générique créée par l\'assistant. Modifiable dans Matériel → Critères.',
         criteres: [
             { id: 'c1', nom: 'Compréhension du sujet', description: 'Démontrer une compréhension juste du sujet traité.', poids: 25 },
             { id: 'c2', nom: 'Qualité de la démarche', description: 'Appliquer une démarche méthodique et rigoureuse.', poids: 25 },
