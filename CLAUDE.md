@@ -22,6 +22,7 @@ Ce document te guidera vers :
 - **Objectif** : Suivi de l'apprentissage (dépistage SOLO) — Phase 6 nettoyage complet
 - **Session en cours** : Voir `SESSION.md`
 - **Backlog** : Voir `BACKLOG.md` (taches a faire)
+- **Etat du projet** : Voir `ETAT-PROJET.md` (situation vis-a-vis des objectifs de stabilite/perennite/qualite et des plans d'audit)
 
 ---
 
@@ -192,6 +193,7 @@ Utiliser `window.cle('nomCle')` pour obtenir la cle namespacee.
    sont obligatoires pour tout code touchant aux donnees.
 3. Consulter `BACKLOG.md` pour les taches en attente
 4. Consulter `SESSION.md` pour le contexte actuel
+   - Consulter aussi `ETAT-PROJET.md` pour se situer vis-a-vis des objectifs de stabilite/perennite/qualite et de l'avancement des plans (document de reference a tenir a jour, distinct du backlog)
 5. Identifier le module concerne dans `docs/modules/`
 6. Verifier `docs/legacy/` pour les problemes connus
 7. **Si travail visuel/UI** : consulter `design-system.html`
