@@ -337,8 +337,8 @@
            NOTIFICATION MISE À JOUR (toast chantier routier)
            =============================== */
         .bandeau-mise-a-jour {
-            background: var(--surface-carte);
-            color: var(--texte-principal);
+            background: var(--acc-fond);
+            color: var(--acc-texte);
             padding: 22px 24px;
             font-size: 0.9rem;
             position: fixed;
@@ -362,7 +362,7 @@
             right: 6px;
             bottom: 6px;
             left: 6px;
-            border: 2.5px solid var(--texte-principal);
+            border: 2.5px solid var(--acc-texte);
             border-radius: 9px;
             pointer-events: none;
             opacity: 0.5;
@@ -380,7 +380,7 @@
             right: 10px;
             background: none;
             border: none;
-            color: var(--texte-principal);
+            color: var(--acc-texte);
             font-size: 1.2rem;
             font-weight: 700;
             cursor: pointer;
@@ -408,7 +408,7 @@
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            color: var(--texte-principal);
+            color: var(--acc-accent);
         }
 
         .bandeau-mise-a-jour-texte {
@@ -418,7 +418,7 @@
             display: block;
             margin-bottom: 4px;
             margin-right: 16px;
-            color: var(--texte-principal);
+            color: var(--acc-texte);
         }
 
         .bandeau-mise-a-jour-footer {
@@ -432,12 +432,12 @@
         .bandeau-mise-a-jour-date {
             font-size: 0.72rem;
             font-weight: 600;
-            color: var(--texte-secondaire);
+            color: var(--acc-texte-leger);
         }
 
         .bandeau-mise-a-jour-btn {
-            background: var(--accent-primaire);
-            color: var(--surface-carte);
+            background: var(--acc-btn-prim);
+            color: var(--acc-btn-prim-txt);
             border: none;
             padding: 5px 14px;
             border-radius: 6px;
@@ -450,7 +450,7 @@
         }
 
         .bandeau-mise-a-jour-btn:hover {
-            filter: brightness(1.15);
+            background: var(--acc-btn-prim-hover);
         }
 
         /* ===============================
