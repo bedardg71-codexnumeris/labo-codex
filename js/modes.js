@@ -60,17 +60,19 @@ function initialiserSystemeModes() {
         document.body.classList.add('aide-contextuelle-active');
     }
 
-    // Appliquer le thème clair si la préférence est active
-    if (estModeClair()) {
-        document.body.classList.add('mode-clair');
-        var btnTheme = document.getElementById('btn-toggle-theme');
-        if (btnTheme) btnTheme.textContent = 'Mode sombre';
-        // Synchroniser les radio buttons
-        var radioClair = document.getElementById('radio-mode-clair');
-        var radioSombre = document.getElementById('radio-mode-sombre');
-        if (radioClair) radioClair.checked = true;
-        if (radioSombre) radioSombre.checked = false;
-    }
+    // Appliquer le thème selon la préférence (défaut = clair).
+    // Le <body> porte .mode-clair en statique dans index.html (anti-flash) ;
+    // on la retire ici seulement si l'utilisateur a explicitement choisi le
+    // mode sombre. Logique symétrique pour rester cohérent dans les deux sens.
+    var clair = estModeClair();
+    document.body.classList.toggle('mode-clair', clair);
+    var btnTheme = document.getElementById('btn-toggle-theme');
+    if (btnTheme) btnTheme.textContent = clair ? 'Mode sombre' : 'Mode clair';
+    // Synchroniser les radio buttons
+    var radioClair = document.getElementById('radio-mode-clair');
+    var radioSombre = document.getElementById('radio-mode-sombre');
+    if (radioClair) radioClair.checked = clair;
+    if (radioSombre) radioSombre.checked = !clair;
     // Synchroniser le bouton thème de la nav
     _syncBtnThemeNav();
 
