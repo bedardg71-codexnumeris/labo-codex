@@ -1,0 +1,48 @@
+import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+// Volet B étape 2 de #303 (31 mai 2026) — canonisation de la PRODUCTION : les nouvelles
+// données naissent en identifiants canoniques (standards/specifications), pour que les
+// ~80 expérimentateurs n'héritent pas du problème legacy. Non destructif. Le flux interne
+// du wizard reste en legacy (architecture 4e « interne legacy + canonique à la frontière »).
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const racineProjet = path.resolve(__dirname, '..', '..');
+const lire = (rel) => readFileSync(path.join(racineProjet, rel), 'utf8');
+
+describe('Volet B étape 2 · canonisation de la production', () => {
+    const indexHtml = lire('index.html');
+    const pratiques = lire('js/pratiques.js');
+    const wizard = lire('js/wizard-pratique-v2.js');
+    const gestion = lire('js/pratiques-gestion.js');
+
+    it('Unité 2 · le <select> mat-pratique-type a des options canoniques (plus de value legacy)', () => {
+        expect(indexHtml).toMatch(/<option value="standards">PAN-Standards<\/option>/);
+        expect(indexHtml).toMatch(/<option value="specifications">PAN-Spécifications<\/option>/);
+        expect(indexHtml).not.toMatch(/<option value="pan-standards">/);
+        expect(indexHtml).not.toMatch(/<option value="pan-specifications">/);
+    });
+
+    it('Unité 1 · les radios « pratique par défaut » émettent du canonique', () => {
+        expect(pratiques).toMatch(/data-param="standards"/);
+        expect(pratiques).toMatch(/data-param="specifications"/);
+        expect(pratiques).not.toMatch(/data-param="pan-standards"/);
+        expect(pratiques).not.toMatch(/data-param="pan-specifications"/);
+    });
+
+    it('Unité 3 · le wizard normalise le type STOCKÉ au point d\'écriture (production canonique)', () => {
+        expect(wizard).toMatch(/type:\s*\(typeof normaliserIdPratique === 'function' \? normaliserIdPratique\(typeFinal\)/);
+    });
+
+    it('Unité 2 · le chargement du formulaire matériel normalise pour retrouver l\'option', () => {
+        expect(gestion).toMatch(/setValeurChamp\('mat-pratique-type',.*normaliserIdPratique\(pratique\.type\)/);
+    });
+
+    it('le flux interne du wizard reste legacy (canonVersInterne conservé — architecture 4e)', () => {
+        // On ne churn PAS les 16 comparaisons internes : canonVersInterne fait le pont.
+        expect(wizard).toMatch(/canonVersInterne/);
+        expect(wizard).toMatch(/return \{ type: 'pan-standards'/); // deduireTypePratique reste legacy en interne
+    });
+});

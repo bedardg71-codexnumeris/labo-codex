@@ -1801,18 +1801,18 @@ function genererSelecteurPratiqueParDefaut() {
                     <input
                         type="radio"
                         name="pratiqueDefaut"
-                        value="pan-standards"
+                        value="standards"
                         ${pratiqueDefaut === 'pan-standards' || pratiqueDefaut === 'standards' ? 'checked' : ''}
-                        data-on-change="changerPratiqueParDefaut" data-param="pan-standards">
+                        data-on-change="changerPratiqueParDefaut" data-param="standards">
                     <span style="margin-left: 8px;">PAN-Standards</span>
                 </label>
                 <label style="cursor: pointer; display: flex; align-items: center;">
                     <input
                         type="radio"
                         name="pratiqueDefaut"
-                        value="pan-specifications"
+                        value="specifications"
                         ${pratiqueDefaut === 'pan-specifications' || pratiqueDefaut === 'specifications' ? 'checked' : ''}
-                        data-on-change="changerPratiqueParDefaut" data-param="pan-specifications">
+                        data-on-change="changerPratiqueParDefaut" data-param="specifications">
                     <span style="margin-left: 8px;">PAN-Spécifications</span>
                 </label>
                 <label style="cursor: pointer; display: flex; align-items: center; opacity: 0.5;" title="Bientôt disponible">

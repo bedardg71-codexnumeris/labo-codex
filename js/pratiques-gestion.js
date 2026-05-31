@@ -796,7 +796,10 @@ function remplirFormulairePratique(pratique) {
 
     // Informations de base
     setValeurChamp('mat-pratique-nom', pratique.nom || '');
-    setValeurChamp('mat-pratique-type', pratique.type || '');
+    // Volet B étape 2 : le <select> mat-pratique-type est désormais en valeurs canoniques.
+    // On normalise pratique.type à la lecture pour qu'une pratique stockée en legacy
+    // (pan-standards…) retrouve son option (standards…) sans rester non sélectionnée.
+    setValeurChamp('mat-pratique-type', (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(pratique.type) : pratique.type) || '');
     setValeurChamp('mat-pratique-description', pratique.description || '');
     setValeurChamp('mat-pratique-discipline', pratique.discipline || '');
 
