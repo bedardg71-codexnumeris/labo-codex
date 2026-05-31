@@ -402,13 +402,22 @@ function pratiqueEstDisponible(id) {
  * const pratiquePAN = obtenirPratiqueParId('pan-standards');
  */
 function obtenirPratiqueParId(id) {
+    // Session A volet B : normaliser l'id AU POINT DE RÉSOLUTION. Le SSOT peut
+    // contenir une valeur legacy non migrée (pan-standards…) ; or depuis A-1 les
+    // instances codées en dur sont enregistrées sous l'id canonique (standards…),
+    // donc une résolution sur la valeur brute échouait silencieusement (bug terrain
+    // 31 mai : portfolio.js → « Pratique pan-standards non disponible dans le
+    // registre » → indices C/P non calculés). Les ids configurables (pan-standards-
+    // bedard…) sont absents de la table → restent inchangés et résolvent comme avant.
+    const idCanonique = normaliserIdPratique(id);
+
     // Chercher dans le registre (pratiques codées en dur)
-    let instance = pratiquesEnregistrees.get(id);
+    let instance = pratiquesEnregistrees.get(idCanonique);
 
     // Si non trouvée dans le registre, chercher dans les pratiques configurables
     if (!instance && window.PratiqueManager) {
         const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
-        const pratiqueData = pratiquesConfigurables.find(p => p.id === id);
+        const pratiqueData = pratiquesConfigurables.find(p => p.id === idCanonique);
 
         if (pratiqueData) {
             try {
@@ -417,7 +426,7 @@ function obtenirPratiqueParId(id) {
                 const configComplete = construireConfigComplete(pratiqueData);
                 instance = new PratiqueConfigurable(configComplete);
             } catch (error) {
-                console.error(`Erreur lors du chargement de la pratique configurable "${id}":`, error);
+                console.error(`Erreur lors du chargement de la pratique configurable "${idCanonique}":`, error);
                 return null;
             }
         }

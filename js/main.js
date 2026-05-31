@@ -20,7 +20,7 @@
 // init-inline.js compare cette valeur au BUILD_ID lu depuis version.json :
 // si différent, Safari file:// a probablement un main.js périmé en cache,
 // et la séquence reload+bandeau s'enclenche. SYNCHRONISER À CHAQUE BUMP.
-window._SCRIPT_BUILD_main = '0530-1550';
+window._SCRIPT_BUILD_main = '0531-0556';
 
 /* ===============================
    FONCTION GLOBALE: Génération d'ID uniques
@@ -194,19 +194,31 @@ window.ouvrirImportTxtCartouche = function() {
     var el = document.getElementById('fichier-import-txt-cartouche');
     if (el) el.click();
 };
+// Bug 31 mai : lire l'id de la pratique en édition via le getter VIVANT
+// (l'ancien window.pratiqueEnEditionMateriel était un snapshot figé à null →
+// ces trois boutons passaient null silencieusement). On no-op proprement si
+// aucune pratique n'est ouverte plutôt que d'appeler avec null.
+function _idPratiqueEnEdition() {
+    return (typeof obtenirPratiqueEnEditionMateriel === 'function')
+        ? obtenirPratiqueEnEditionMateriel()
+        : null;
+}
 window.dupliquerPratiqueMaterielActive = function() {
-    if (typeof dupliquerPratiqueMateriel === 'function' && typeof pratiqueEnEditionMateriel !== 'undefined') {
-        dupliquerPratiqueMateriel(pratiqueEnEditionMateriel);
+    const id = _idPratiqueEnEdition();
+    if (typeof dupliquerPratiqueMateriel === 'function' && id) {
+        dupliquerPratiqueMateriel(id);
     }
 };
 window.supprimerPratiqueMaterielActive = function() {
-    if (typeof supprimerPratiqueMateriel === 'function' && typeof pratiqueEnEditionMateriel !== 'undefined') {
-        supprimerPratiqueMateriel(pratiqueEnEditionMateriel);
+    const id = _idPratiqueEnEdition();
+    if (typeof supprimerPratiqueMateriel === 'function' && id) {
+        supprimerPratiqueMateriel(id);
     }
 };
 window.appliquerPratiqueAuCoursActive = function() {
-    if (typeof appliquerPratiqueAuCours === 'function' && typeof pratiqueEnEditionMateriel !== 'undefined') {
-        appliquerPratiqueAuCours(pratiqueEnEditionMateriel);
+    const id = _idPratiqueEnEdition();
+    if (typeof appliquerPratiqueAuCours === 'function') {
+        appliquerPratiqueAuCours(id);
     }
 };
 document.addEventListener('DOMContentLoaded', function () {

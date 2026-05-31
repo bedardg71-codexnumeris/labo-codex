@@ -2684,7 +2684,11 @@ function genererSectionProductions(da) {
     if (detailsNoteFinale && detailsNoteFinale.erreur) {
         htmlNoteFinale = `
         <div class="note-finale-section">
-            <h3 class="note-finale-titre">Note finale de session</h3>
+            <h3 class="note-finale-titre">
+                Note finale de session
+                ${(detailsNoteFinale.pratiqueNom || detailsNoteFinale.pratique) ? `<span class="note-finale-pratique-nom" title="Pratique de notation active (note non calculable — vérifier ses paramètres)">${echapperHtml(detailsNoteFinale.pratiqueNom || detailsNoteFinale.pratique)}</span>` : ''}
+                ${detailsNoteFinale.pratiqueId ? `<button type="button" class="note-finale-lien-reglages" data-action="ouvrirReglagesPratique" data-param="${echapperHtml(detailsNoteFinale.pratiqueId)}" title="Ouvrir les réglages de cette pratique pour corriger ses paramètres">Réglages de la pratique</button>` : ''}
+            </h3>
             <div class="alerte alerte-attention" style="margin-top: 12px;">
                 <strong>Note finale non calculable.</strong> ${echapperHtml(detailsNoteFinale.erreur)}
             </div>
@@ -2818,6 +2822,7 @@ function genererSectionProductions(da) {
             <div class="note-finale-section">
                 <h3 class="note-finale-titre">
                     ${detailsNoteFinale.estFinale ? 'Note finale de session' : 'Note provisoire de session'}
+                    ${(detailsNoteFinale.pratiqueNom || detailsNoteFinale.pratique) ? `<span class="note-finale-pratique-nom" title="Pratique de notation appliquée pour ce calcul">${echapperHtml(detailsNoteFinale.pratiqueNom || detailsNoteFinale.pratique)}</span>` : ''}
                     ${detailsNoteFinale.pratiqueId ? `<button type="button" class="note-finale-lien-reglages" data-action="ouvrirReglagesPratique" data-param="${echapperHtml(detailsNoteFinale.pratiqueId)}" title="Modifier le statut (provisoire / finale) et les pondérations dans les réglages de la pratique">Réglages de la pratique</button>` : ''}
                 </h3>
 
@@ -2874,6 +2879,7 @@ function genererSectionProductions(da) {
             <div class="note-finale-section">
                 <h3 class="note-finale-titre">
                     ${detailsNoteFinale.estFinale ? 'Note finale de session' : 'Note provisoire de session'}
+                    ${(detailsNoteFinale.pratiqueNom || detailsNoteFinale.pratique) ? `<span class="note-finale-pratique-nom" title="Pratique de notation appliquée pour ce calcul">${echapperHtml(detailsNoteFinale.pratiqueNom || detailsNoteFinale.pratique)}</span>` : ''}
                     ${detailsNoteFinale.pratiqueId ? `<button type="button" class="note-finale-lien-reglages" data-action="ouvrirReglagesPratique" data-param="${echapperHtml(detailsNoteFinale.pratiqueId)}" title="Modifier le statut (provisoire / finale) et les pondérations dans les réglages de la pratique">Réglages de la pratique</button>` : ''}
                 </h3>
 

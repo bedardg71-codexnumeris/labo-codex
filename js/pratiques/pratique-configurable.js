@@ -35,16 +35,27 @@ class PratiqueConfigurable {
      * @throws {Error} Si la configuration est invalide
      */
     valider() {
-        // Vérifier champs obligatoires
-        const champsObligatoires = ['id', 'nom', 'echelle', 'calcul_note'];
+        // Champs TOUJOURS obligatoires (échelle traitée séparément ci-dessous)
+        const champsObligatoires = ['id', 'nom', 'calcul_note'];
         for (const champ of champsObligatoires) {
             if (!this.config[champ]) {
                 throw new Error(`Champ obligatoire manquant : ${champ}`);
             }
         }
 
-        // Vérifier cohérence échelle
-        if (this.config.echelle.type === 'niveaux' && !this.config.echelle.niveaux) {
+        // Bug 31 mai : l'échelle (IDME) n'est requise que pour les méthodes de calcul
+        // qui la CONSOMMENT (conversion de niveaux). Le Sommatif ('moyenne_ponderee')
+        // et les Spécifications ('specifications') notent en % / par seuils, sans échelle
+        // IDME. Avant, l'échelle était exigée pour TOUTES les pratiques → une SOM/SPE
+        // créée au wizard échouait à l'instanciation (« Champ obligatoire manquant : echelle »).
+        const methodesAvecEchelle = ['conversion_niveaux', 'pan_par_objectif'];
+        const echelleRequise = methodesAvecEchelle.includes(this.config.calcul_note?.methode);
+        if (echelleRequise && !this.config.echelle) {
+            throw new Error('Champ obligatoire manquant : echelle');
+        }
+
+        // Vérifier cohérence échelle (si présente)
+        if (this.config.echelle && this.config.echelle.type === 'niveaux' && !this.config.echelle.niveaux) {
             throw new Error('Échelle de type "niveaux" requiert le champ "niveaux"');
         }
 
