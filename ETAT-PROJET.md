@@ -12,7 +12,7 @@
 > bascule de session importante. Le §11 (journal) trace les révisions. Chaque ligne d'état porte
 > idéalement sa source et sa date de vérification, pour éviter de propager un état périmé.
 >
-> **Dernière mise à jour** : 31 mai 2026 — beta 99.86 / build 0531-0840 — HEAD `main` `32f7c7b`.
+> **Dernière mise à jour** : 31 mai 2026 (après-midi) — beta 99.86 / build 0531-1409 — HEAD `main` `1dce641`.
 
 ---
 
@@ -60,8 +60,8 @@ annuel (`AUDIT.md`, ADR-012). Trois objectifs orientent toute décision de déve
 | Branche `audit/2026-mai` (archivage doc) | **À faire** (post-AQPC) | §4 |
 | Plan long terme + chantiers long terme | **Long terme** | §4, §5 |
 
-**Seul chantier réellement urgent avant l'AQPC du 3 juin** : **#294** (Cloudflare/Netlify).
-La révision Loi 25 (#298) est importante mais sa fenêtre est « avant l'ouverture publique 3-30 juin »,
+**#294 (Cloudflare/Netlify) — FAIT le 31 mai** : déploiement lancé, en primeur pour les abonnés du
+blog. La révision Loi 25 (#298) reste à faire ; sa fenêtre est « avant l'ouverture publique 3-30 juin »,
 pas avant la démo.
 
 ---
@@ -237,3 +237,4 @@ Détail et contexte complet dans `BACKLOG.md` (≈41 items/sous-items ouverts au
 | Date | Build | Révision |
 |---|---|---|
 | 2026-05-31 | 0531-0840 | Création du document. État consolidé après audit du backlog et des plans Phase 2 ; vérification de l'état réel de `main` (docs de conformité + hygiène GitHub présents, plans d'audit périmés sur ces points). |
+| 2026-05-31 (PM) | 0531-1409 | #294 fait (déploiement lancé). UI : bandeau orange, thème clair par défaut, anti-flash. « wizard » → « assistant » (8 textes). Plan « Bêta publique 1.0.0 » prêt pour le 3 juin. Conventions terminologie mémorisées. Ménage entamé (plans réalisés sortis ; reste à gitignorer 36 Mo d'artefacts + trancher untracked ambigus). |
