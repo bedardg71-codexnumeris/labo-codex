@@ -2147,9 +2147,14 @@ async function creerPratiqueV2() {
         etablissement: r.etablissement || '',
         description: r.description || '',
         discipline: r.discipline || '',
-        type: typeFinal,
+        // Volet B étape 2 : la PRODUCTION naît canonique. On normalise le type STOCKÉ
+        // (pan-standards → standards) au seul point d'écriture. Le flux INTERNE du wizard
+        // reste en legacy (deduireTypePratique, les comparaisons, canonVersInterne) — c'est
+        // l'architecture 4e « interne legacy + canonique à la frontière ». La reconstruction
+        // à l'édition normalise déjà (typeCanon), donc le round-trip tient.
+        type: (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(typeFinal) : typeFinal),
         variante: classification.variante || null,
-        pratiques: [typeMapping[typeFinal] || 'STD'],  // Pour le badge
+        pratiques: [typeMapping[typeFinal] || 'STD'],  // Pour le badge (typeMapping indexé legacy, OK)
         dansBibliotheque: true,  // Pour apparaître dans la sidebar
         dateCreation: new Date().toISOString(),
         configuration: {}
