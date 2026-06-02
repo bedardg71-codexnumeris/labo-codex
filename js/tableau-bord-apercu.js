@@ -580,11 +580,11 @@ function genererDiagnosticNotePassage(etudiants) {
     const messages = [];
 
     if (enReussite > 0) {
-        messages.push(`${enReussite} étudiants (${pctReussite}%) ont une performance égale ou supérieure à la note de passage (60%)`);
+        messages.push(`${enReussite} ${window.pluriel(enReussite, 'étudiant·e', 'étudiant·es')} (${pctReussite}%) ont une performance égale ou supérieure à la note de passage (60%)`);
     }
 
     if (enDifficulte > 0) {
-        messages.push(`${enDifficulte} étudiants (${pctDifficulte}%) sont en difficulté avec une performance inférieure à 60%`);
+        messages.push(`${enDifficulte} ${window.pluriel(enDifficulte, 'étudiant·e', 'étudiant·es')} (${pctDifficulte}%) sont en difficulté avec une performance inférieure à 60%`);
     }
 
     return messages.length > 0 ? messages.join('. ') + '.' : '';
@@ -637,7 +637,7 @@ function genererInterpretationPerformance(etudiants, echelle) {
 
     if (objectifAtteint > 0) {
         const pct = Math.round((objectifAtteint / total) * 100);
-        messages.push(`${objectifAtteint} étudiants (${pct}%) ont atteint ou dépassé le niveau de maîtrise`);
+        messages.push(`${objectifAtteint} ${window.pluriel(objectifAtteint, 'étudiant·e', 'étudiant·es')} (${pct}%) ont atteint ou dépassé le niveau de maîtrise`);
     }
 
     // 2. Parmi les D, combien en progression (pattern favorable)
@@ -648,7 +648,7 @@ function genererInterpretationPerformance(etudiants, echelle) {
     });
 
     if (dEnProgression.length > 0) {
-        messages.push(`${dEnProgression.length} étudiants en Développement montrent une progression favorable et pourraient atteindre la maîtrise prochainement`);
+        messages.push(`${dEnProgression.length} ${window.pluriel(dEnProgression.length, 'étudiant·e', 'étudiant·es')} en Développement montrent une progression favorable et pourraient atteindre la maîtrise prochainement`);
     }
 
     // 3. Parmi les I, combien montrent des progrès (pattern pas difficulté persistante)
@@ -660,9 +660,9 @@ function genererInterpretationPerformance(etudiants, echelle) {
 
     if (niveauI.length > 0) {
         if (iAvecProgres.length > 0) {
-            messages.push(`Parmi les ${niveauI.length} étudiants en difficulté, ${iAvecProgres.length} montrent des signes de progrès`);
+            messages.push(`Parmi les ${niveauI.length} ${window.pluriel(niveauI.length, 'étudiant·e', 'étudiant·es')} en difficulté, ${iAvecProgres.length} montrent des signes de progrès`);
         } else {
-            messages.push(`${niveauI.length} étudiants en difficulté nécessitent un accompagnement intensif`);
+            messages.push(`${niveauI.length} ${window.pluriel(niveauI.length, 'étudiant·e', 'étudiant·es')} en difficulté nécessitent un accompagnement intensif`);
         }
     }
 
@@ -848,6 +848,24 @@ function genererBadgeSourceDonnees() {
  * Initialise le module du tableau de bord - aperçu
  * Appelée par main.js au chargement
  */
+/**
+ * Met à jour le terme de la note de Complétion selon la pratique de l'utilisateur·trice :
+ * « artefact » dès qu'au moins un portfolio est utilisé, « production » sinon.
+ * Le terme n'est jamais codé en dur — il reflète les productions réelles (type 'portfolio').
+ */
+function mettreAJourTermeCompletion() {
+    const el = document.getElementById('note-completion-realise');
+    if (!el) return;
+    let utiliseArtefacts = false;
+    try {
+        const prods = db.getSync(cle('productions'), []) || [];
+        utiliseArtefacts = Array.isArray(prods) && prods.some(p => p && p.type === 'portfolio');
+    } catch (e) { /* fallback : terme général « production » */ }
+    el.textContent = utiliseArtefacts
+        ? 'Un artefact devient «réalisé» dès qu\'une première évaluation existe pour celui-ci.'
+        : 'Une production devient «réalisée» dès qu\'une première évaluation existe pour celle-ci.';
+}
+
 function initialiserModuleTableauBordApercu() {
 
     // Charger les statistiques si la sous-section aperçu est active
@@ -855,6 +873,9 @@ function initialiserModuleTableauBordApercu() {
     if (apercu && apercu.classList.contains('active')) {
         chargerTableauBordApercu();
     }
+
+    // Terme de la note de Complétion (artefact en portfolio, production sinon) — jamais codé en dur
+    mettreAJourTermeCompletion();
 
     // Événements du panneau de suivi d'étudiants (délégation pour survivre aux rebuilds innerHTML)
     document.addEventListener('click', function(ev) {
@@ -1209,7 +1230,7 @@ function genererInterpretationSuiviFondamentaux() {
 
     // Fondamentaux acquis (IPB 0-1, ↗)
     if (maitrise > 0) {
-        messages.push(maitrise + ' étudiant' + (maitrise > 1 ? 's' : '') + ' (' + pct(maitrise) + '%) ' +
+        messages.push(maitrise + ' ' + window.pluriel(maitrise, 'étudiant·e', 'étudiant·es') + ' (' + pct(maitrise) + '%) ' +
             (maitrise > 1 ? 'maîtrisent' : 'maîtrise') + ' les fondamentaux multistructurels');
     }
 

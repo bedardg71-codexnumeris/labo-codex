@@ -7684,7 +7684,7 @@
                             <button class="btn-aide-contextuelle" data-aide="tableau-bord-apercu" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>
                         </span>
                     </h2>
-                    <p class="text-muted">Suivi de l'apprentissage et priorisation des interventions</p>
+                    <p class="text-muted">Observe où en est le groupe et repère qui prioriser.</p>
 
                     <!-- ========== SECTION 1: OBSERVATION DES APPRENTISSAGES ========== -->
                     <div class="carte" id="carte-indicateurs-acpe">
@@ -7710,7 +7710,7 @@
                         <div id="panneau-suivi-etudiants" class="panneau-suivi-etudiants">
                             <div class="u-flex-between u-mb-8">
                                 <span class="u-texte-petit u-texte-gras" style="color: var(--texte-secondaire)">
-                                    Suivi d'étudiants <span id="compteur-suivi" style="opacity: 0.6;">(0/5)</span>
+                                    Suivi d'étudiant·es <span id="compteur-suivi" style="opacity: 0.6;">(0/5)</span>
                                 </span>
                                 <span id="suivi-tri-boutons" class="prioritaire-tri-zone" style="display:none"></span>
                                 <div style="display: flex; gap: 6px; align-items: center;">
@@ -7727,7 +7727,7 @@
                         <div id="panneau-prioritaire" class="panneau-prioritaire">
                             <div class="u-flex-between u-mb-8">
                                 <span class="u-texte-petit u-texte-gras" style="color: var(--texte-secondaire)">
-                                    Étudiants prioritaires <span id="compteur-prioritaire" style="opacity: 0.6;">(0)</span>
+                                    Étudiant·es prioritaires <span id="compteur-prioritaire" style="opacity: 0.6;">(0)</span>
                                 </span>
                                 <span id="prioritaire-tri-boutons" class="prioritaire-tri-zone"></span>
                                 <span class="u-texte-petit" style="color: var(--gris-moyen)">Cliquer → profil</span>
@@ -7737,13 +7737,13 @@
 
                         <!-- Carte Note -->
                         <div id="note-indicateurs" class="carte-info-toggle carte-info-note" style="display: none;">
-                            <strong>Note :</strong> Les indices A-C-P mesurent l'engagement des étudiants dans l'apprentissage.
+                            <strong>Note :</strong> Les indices A-C-P mesurent l'engagement des étudiant·es dans l'apprentissage.
                             <br><br>
                             <strong>Assiduité (A)</strong> : Proportion des heures de présence parmi les heures de cours <strong>effectivement données jusqu'à maintenant</strong>. Calculé uniquement sur les séances passées, pas sur le total prévu pour la session.
                             <br><br>
-                            <strong>Complétion (C)</strong> : Proportion de travaux remis parmi les travaux <strong>effectivement réalisés jusqu'à maintenant</strong>. Un artefact devient «réalisé» dès qu'une première évaluation existe pour celui-ci.
+                            <strong>Complétion (C)</strong> : Proportion de travaux remis parmi les travaux <strong>effectivement réalisés jusqu'à maintenant</strong>. <span id="note-completion-realise">Une production devient «réalisée» dès qu'une première évaluation existe pour celle-ci.</span>
                             <br><br>
-                            <strong>Performance (P)</strong> : Calculé selon la pratique de notation en vigueur (Sommative : moyenne pondérée provisoire de toutes les évaluations, ou PAN-Standards : moyenne des N meilleurs artefacts selon l'échelle IDME).
+                            <strong>Performance (P)</strong> : Calculé selon la pratique de notation en vigueur (Sommative : moyenne pondérée provisoire de toutes les évaluations, ou par portfolio : moyenne des N meilleurs artefacts selon l'échelle IDME).
                             <br><br>
                             <em class="u-texte-09" style="color: var(--gris-moyen)">💡 Les mini-courbes de Gauss montrent la distribution du groupe. La ligne blanche = moyenne (μ), les pointillés = ±1 écart-type (σ).</em>
                         </div>
@@ -7768,7 +7768,7 @@
 
                         <!-- Carte Note -->
                         <div id="note-apprentissage" class="carte-info-toggle carte-info-note" style="display: none;">
-                            <strong>Patterns d'apprentissage :</strong> Analyse de la trajectoire de chaque étudiant sur les dernières productions.
+                            <strong>Profils d'apprentissage :</strong> Analyse de la trajectoire de chaque étudiant sur les dernières productions.
                             <ul style="margin: 10px 0; padding-left: 20px;">
                                 <li><strong>Progression stable</strong> : Amélioration régulière ou maintien d'un bon niveau</li>
                                 <li><strong>Défi spécifique</strong> : Difficulté ponctuelle sur un type de tâche</li>
@@ -7793,13 +7793,13 @@
                     <div class="carte" id="carte-evolution-temporelle" style="margin-top: 2rem;">
                         <h3 class="carte-titre-bleu u-flex-col" style="display: flex; gap: 0.5rem">
                             <div class="u-flex-between u-w-100 u-flex-wrap" style="gap: 0.5rem">
-                                <span data-tooltip="tdb-dev-groupe">Développement du groupe — par semaine</span>
+                                <span data-tooltip="tdb-dev-groupe">Développement du groupe, semaine par semaine</span>
                                 <div id="contexte-evolution-temporelle" class="carte-contexte-ligne u-align-center" style="font-size: 0.8rem; font-weight: normal; opacity: 0.9; display: flex; gap: 0.75rem">
                                     <!-- Trimestre | Cours | Badge - rempli par JS -->
                                 </div>
                             </div>
                             <div class="entete-sous-titre u-texte-09" style="font-weight: normal; opacity: 0.85;">
-                                Indices A·C·P sur les snapshots hebdomadaires
+                                Indices A-C-P sur les relevés hebdomadaires
                             </div>
                             <div class="u-texte-09 u-flex-wrap u-align-center" style="display: flex; gap: 1rem; font-weight: normal">
                                 <div class="u-align-center" style="display: flex; gap: 0.5rem">
@@ -7813,7 +7813,7 @@
                                 <div class="u-align-center" style="display: flex; gap: 0.5rem">
                                     <label style="color: rgba(255,255,255,0.8);" data-tooltip="tdb-selecteur-eleve-groupe">Étudiant·e en relief :</label>
                                     <select id="selecteur-etudiant-acp" data-on-change="selectionnerEtudiantACP" class="controle-form-header">
-                                        <option value="" style="color: var(--gris-fonce);">-- Sélectionner --</option>
+                                        <option value="" style="color: var(--gris-fonce);">— Sélectionner —</option>
                                     </select>
                                     <button type="button" id="btn-profil-acp" class="btn-voir-profil" data-action="ouvrirProfilEleveACP" title="Voir le profil de l'étudiant·e sélectionné·e" aria-label="Voir le profil de l'étudiant·e sélectionné·e" style="display: none;">👤</button>
                                 </div>
@@ -7857,7 +7857,7 @@
                                 <div class="u-align-center" style="display: flex; gap: 0.5rem">
                                     <label style="color: rgba(255,255,255,0.8);" for="selecteur-etudiant-trajectoires">Étudiant·e en relief :</label>
                                     <select id="selecteur-etudiant-trajectoires" data-on-change="selectionnerEtudiantTrajectoires" class="controle-form-header">
-                                        <option value="" style="color: var(--gris-fonce);">-- Sélectionner --</option>
+                                        <option value="" style="color: var(--gris-fonce);">— Sélectionner —</option>
                                     </select>
                                     <button type="button" id="btn-profil-trajectoires" class="btn-voir-profil" data-action="ouvrirProfilEleveTrajectoires" title="Voir le profil de l'étudiant·e sélectionné·e" aria-label="Voir le profil de l'étudiant·e sélectionné·e" style="display: none;">👤</button>
                                 </div>
@@ -7881,10 +7881,10 @@
                             <br><br>
                             Active <strong>« Médiane du groupe »</strong> pour superposer deux repères statistiques :
                             <ul style="margin: 8px 0; padding-left: 20px;">
-                                <li>La <strong>ligne foncée avec losanges</strong> = score <strong>médian</strong> du groupe par production (50 % des étudiant·e·s au-dessus, 50 % en-dessous).</li>
-                                <li>La <strong>bande grise</strong> = <strong>écart inter-quartile</strong> (Q25 à Q75) : couvre les 50 % d'étudiant·e·s au centre. Plus la bande est étroite, plus le groupe est homogène.</li>
+                                <li>La <strong>ligne foncée avec losanges</strong> = score <strong>médian</strong> du groupe par production (50 % des étudiant·es au-dessus, 50 % en-dessous).</li>
+                                <li>La <strong>bande grise</strong> = <strong>écart inter-quartile</strong> (Q25 à Q75) : couvre les 50 % d'étudiant·es au centre. Plus la bande est étroite, plus le groupe est homogène.</li>
                             </ul>
-                            Les étudiant·e·s marqué·e·s <em>inactif·ve·s / abandon</em> sont retiré·e·s du calcul de la médiane et de la bande.
+                            Les étudiant·es marqué·e·s <em>inactif·ve·s / abandon</em> sont retiré·e·s du calcul de la médiane et de la bande.
                             <br><br>
                             Sélectionne un·e étudiant·e pour mettre sa courbe en relief, puis clique sur <strong>👤</strong> pour ouvrir son profil.
                         </div>
