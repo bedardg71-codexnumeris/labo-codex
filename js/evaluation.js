@@ -637,7 +637,7 @@ function genererDetailsEtudiant(etudiant) {
             // Formater la note combinée
                                 const noteLettre = item.evaluation.niveauFinal || '--';
                                 const notePourcent = item.evaluation.noteFinale !== null ? Math.round(item.evaluation.noteFinale) : 0;
-                                const noteAffichage = noteLettre !== '--' ? `${noteLettre} (${notePourcent}%)` : `-- (${notePourcent}%)`;
+                                const noteAffichage = noteLettre !== '--' ? `${noteLettre} (${notePourcent}%)` : `— (${notePourcent}%)`;
 
                                 return `
                             <tr ${estRemplacee ? 'class="eval-desactive"' : ''}>
@@ -2112,7 +2112,7 @@ function _chargerCartoucheDropdownModif(evaluation) {
 
     // ✅ CORRIGÉ (31 déc 2025) : Peupler explicitement le dropdown avant de sélectionner
     const cartouches = db.getSync(`cartouches_${evaluation.grilleId}`, []);
-    selectCartouche.innerHTML = '<option value="">-- Choisir une cartouche --</option>';
+    selectCartouche.innerHTML = '<option value="">— Choisir une cartouche —</option>';
     cartouches.forEach(cartouche => {
         const option = document.createElement('option');
         option.value = cartouche.id;
@@ -2793,7 +2793,7 @@ function chargerFiltresBanqueEvaluations() {
     const selectEtudiant = document.getElementById('filtreBanqueEtudiant');
     if (selectEtudiant) {
         const etudiantsAvecEval = [...new Set(evaluations.map(e => e.etudiantDA))];
-        selectEtudiant.innerHTML = '<option value="">Tous les étudiants</option>';
+        selectEtudiant.innerHTML = '<option value="">Tous les étudiant·es</option>';
 
         etudiantsAvecEval.forEach(da => {
             const etudiant = etudiants.find(e => e.da === da);
@@ -3463,7 +3463,7 @@ function desactiverFormulaireEvaluation(desactiver) {
         '#evaluations-contenu-evaluation button, .travaux-palette-eval button'
     );
     boutonsSauvegarde.forEach(btn => {
-        if (btn.textContent.includes('Sauvegarder')) {
+        if (btn.textContent.includes('Enregistrer')) {
             btn.disabled = desactiver;
         }
     });
@@ -3502,7 +3502,7 @@ function ouvrirProfilDepuisEvaluation() {
     const etudiantDA = document.getElementById('selectEtudiantEval').value;
 
     if (!etudiantDA) {
-        alert('Veuillez sélectionner un·e étudiant·e');
+        alert('Sélectionne un·e étudiant·e');
         return;
     }
 
@@ -3553,7 +3553,7 @@ function ouvrirTravailDepuisEvaluation() {
     const productionId = document.getElementById('selectProduction1')?.value;
 
     if (!etudiantDA) {
-        alert('Veuillez sélectionner un·e étudiant·e');
+        alert('Sélectionne un·e étudiant·e');
         return;
     }
 
@@ -3732,7 +3732,7 @@ function appliquerJetonPersonnalise(jetonId) {
     window.afficherBadgesJetons();
     window.peuplementOptJetons();
 
-    notifications.succes('Succès', `Jeton «${jeton.nom}» appliqué avec succès`);
+    notifications.succes('Succès', `Jeton «${jeton.nom}» appliqué`);
 }
 
 /**
