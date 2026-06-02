@@ -19,6 +19,16 @@
 
 ---
 
+## Corrigés (2 juin 2026 — horaires des groupes-cours inversés, assiduité fausse)
+
+> Corrigé en **données (console one-shot, sur backup)** — aucun code modifié. Lié à la racine du #116 (le modèle horaire n'est pas robustement scopé par groupe-cours).
+
+| # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
+|---|---------|--------------|---------|-------|-------------|------------|
+| 129 | Grégoire (terrain — 2 juin 2026) | 2 juin 2026 | 2 juin 2026 (données, console) | — (pas de code) | Profil de Justin A. (DA 9000023, groupe-cours **00008** de 601-101 H2026) : fiche Assiduité à **62 %** avec **11 « absences ou retards »** dont la plupart des **lundis** + le **mercredi 8 avril** — alors que le groupe 8 a cours **mardi+jeudi**. Diagnostic console : `seancesCompletes` du groupe 8 = 15 jeudis + **14 lundis** + 1 mercredi, **aucun mardi** → l'assiduité était calculée avec l'horaire du **groupe 2** (Lun-Jeu). Cause racine : les `horaireId` des deux groupes-cours étaient **permutés** (`00008`→`HOR_1767871561490` Lun-Jeu au lieu de Mar-Jeu ; `00002`→`HOR_1768050643606` Mar-Jeu au lieu de Lun-Jeu), vraisemblablement lors de la création/tests du trimestre d'Été 2026. **Le code est sain** (`obtenirSeancesHoraire` priorité 1a `gc.horaireId` rend juste le mauvais horaire ; à défaut d'`horaireId`, le fallback global trimestre-scopé aurait aussi pollué). Les deux groupes étaient touchés (chacun calculé avec l'horaire de l'autre). | Script console `corrigerHorairesGroupes({executer:true})` (DRY-RUN d'abord, sur backup Codex frais) : réaffecte le bon `horaireId` à chaque groupe (00008→Mar-Jeu, 00002→Lun-Jeu), met à jour `groupeCoursActif.horaireId`, vide les caches `seancesCompletes_gc_<id>` (régénérés au bon horaire), recalcule `indicesAssiduite`. Validé terrain (assiduité de Justin revenue cohérente). **À traiter (fond, post-AQPC)** : robustifier le lien horaire↔groupe-cours pour empêcher la permutation et supprimer le fallback global silencieux (chantier commun avec #116, #300). Méthode de diagnostic réutilisable : comparer l'horaire résolu de chaque groupe-cours du trimestre (`gc.horaireId` → jours). |
+
+---
+
 ## Corrigés (31 mai 2026 — résolution de pratique + bouton « Appliquer au cours actif »)
 
 > ⚠️ Corrigés en **working tree** (non commités, validation terrain Safari en attente). Build à renseigner au bump.
