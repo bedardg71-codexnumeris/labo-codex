@@ -1760,6 +1760,14 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
                 </div>
             `);
         }
+        if (options.production && options.inclureDetailTache && options.production.detailTache) {
+            colonnes.push(`
+                <div style="flex: 1;">
+                    <div style="${styleSectionTitre} margin-bottom: 3px;">Détail de la tâche :</div>
+                    <p style="${styleTexteNormal} margin: 0; color: ${couleurTexte};">${escapeHtml(options.production.detailTache)}</p>
+                </div>
+            `);
+        }
         if (aContexte) {
             colonnes.push(`
                 <div style="flex: 1;">
@@ -1951,6 +1959,9 @@ async function genererPDFCombine(grille, echelle, cartouche = null, options = {}
     }
     if (options.production && options.inclureDescription && options.production.tache) {
         colonnesInfo.push({ titre: 'Description de la tâche :', texte: options.production.tache });
+    }
+    if (options.production && options.inclureDetailTache && options.production.detailTache) {
+        colonnesInfo.push({ titre: 'Détail de la tâche :', texte: options.production.detailTache });
     }
     if (cartouche && cartouche.contexte) {
         colonnesInfo.push({ titre: 'Contexte de la rétroaction :', texte: cartouche.contexte });
@@ -2469,6 +2480,7 @@ function rafraichirApercuPDF() {
     const inclureNomProduction = document.getElementById('apercuPDF-prod-nom')?.checked !== false;
     const inclureObjectif = document.getElementById('apercuPDF-prod-objectif')?.checked !== false;
     const inclureDescription = document.getElementById('apercuPDF-prod-description')?.checked !== false;
+    const inclureDetailTache = document.getElementById('apercuPDF-prod-detailTache')?.checked !== false;
     const inclureDescCriteres = document.getElementById('apercuPDF-prod-criteres')?.checked === true;
 
     // Options d'affichage combinees (taille fixe: petit)
@@ -2477,6 +2489,7 @@ function rafraichirApercuPDF() {
         inclureNomProduction: inclureNomProduction,
         inclureObjectif: inclureObjectif,
         inclureDescription: inclureDescription,
+        inclureDetailTache: inclureDetailTache,
         inclureDescCriteres: inclureDescCriteres,
         taillePolice: 'petit',
         orientation: orientation,
@@ -2541,6 +2554,7 @@ async function exporterPDFDepuisApercu() {
     const inclureNomProduction = document.getElementById('apercuPDF-prod-nom')?.checked !== false;
     const inclureObjectif = document.getElementById('apercuPDF-prod-objectif')?.checked !== false;
     const inclureDescription = document.getElementById('apercuPDF-prod-description')?.checked !== false;
+    const inclureDetailTache = document.getElementById('apercuPDF-prod-detailTache')?.checked !== false;
     const inclureDescCriteres = document.getElementById('apercuPDF-prod-criteres')?.checked === true;
 
     try {
@@ -2550,6 +2564,7 @@ async function exporterPDFDepuisApercu() {
             inclureNomProduction: inclureNomProduction,
             inclureObjectif: inclureObjectif,
             inclureDescription: inclureDescription,
+            inclureDetailTache: inclureDetailTache,
             inclureDescCriteres: inclureDescCriteres,
             taillePolice: 'petit',
             orientation: orientation,

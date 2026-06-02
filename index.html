@@ -4631,14 +4631,14 @@
                             <span class="primo-aide" data-target="note-productions"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
                         </span>
                     </h2>
-                    <p class="text-muted">Définir les évaluations du cours et leurs pondérations</p>
+                    <p class="text-muted">Définir les productions du cours et leurs pondérations</p>
 
                     <!-- Carte Note -->
                     <div id="note-productions" class="carte-info-toggle carte-info-note" style="display: none;">
-                        <strong>Note :</strong> Les productions représentent l'ensemble des travaux que les étudiants doivent réaliser
+                        <strong>Note :</strong> Les productions représentent l'ensemble des travaux que les étudiant·es doivent réaliser
                         durant le cours. Elles peuvent être de type formatif (pour l'apprentissage) ou certificatif (pour l'évaluation).
                         Chaque production peut être associée à une grille de critères et possède une pondération qui contribue à la note finale.
-                        Les portfolios permettent de regrouper plusieurs artefacts et de sélectionner automatiquement les N meilleurs selon
+                        Les portfolios permettent de regrouper plusieurs artefacts et de ne conserver que les meilleurs artefacts, selon
                         la pratique de notation configurée.
                     </div>
 
@@ -4687,7 +4687,7 @@
                                     <img src="icons/icon-pdf.svg" alt="" class="btn-inline-icon"> Pr&eacute;parer le PDF
                                 </button>
                                 <button id="btnExporterProductionsPDF" data-action="exporterProductionsEnPDF" class="btn btn-secondaire btn-export-pdf" title="Exporter la liste des productions en PDF">
-                                    <img src="icons/icon-pdf.svg" alt="" class="btn-inline-icon"> Exporter liste PDF
+                                    <img src="icons/icon-pdf.svg" alt="" class="btn-inline-icon"> Exporter la liste en PDF
                                 </button>
                                 <button data-action="creerNouvelleProduction" class="btn btn-principal">
                                     + Nouvelle production
@@ -4728,7 +4728,7 @@
                                         <label data-tooltip="cn-prod-type">Type</label>
                                         <select id="productionType" class="controle-form"
                                             data-on-change="gererChangementTypeProduction">
-                                            <option value="">Choisir...</option>
+                                            <option value="">— Sélectionner —</option>
                                             <optgroup label="Évaluations">
                                                 <option value="examen">Examen</option>
                                                 <option value="travail">Travail écrit</option>
@@ -4821,7 +4821,7 @@
                                         <label data-tooltip="cn-prod-objectif">Objectif d'apprentissage
                                             <button class="btn-aide-contextuelle" data-aide="objectif-verbes-actifs" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>
                                         </label>
-                                        <p class="u-texte-petit" style="color: var(--gris-moyen); margin: 0 0 6px 0">À la fin de cette activité, l'apprenant sera capable de...</p>
+                                        <p class="u-texte-petit" style="color: var(--gris-moyen); margin: 0 0 6px 0">À la fin de cette activité, l'étudiant·e sera capable de...</p>
                                         <textarea id="productionObjectif" class="controle-form" rows="3"
                                             placeholder="Ex: Reconnaître le propos du texte"></textarea>
                                     </div>
@@ -4831,6 +4831,14 @@
                                         <textarea id="productionTache" class="controle-form" rows="3"
                                             placeholder="Ex: Rédiger un texte de 500 mots..."></textarea>
                                     </div>
+                                </div>
+
+                                <!-- Détail de la tâche : consignes précises (pleine largeur) -->
+                                <div class="groupe-form u-mb-20">
+                                    <label for="productionDetailTache">Détail de la tâche</label>
+                                    <p class="u-texte-petit" style="color: var(--gris-moyen); margin: 0 0 6px 0">Les consignes précises remises à l'étudiant·e : étapes, contraintes, format attendu.</p>
+                                    <textarea id="productionDetailTache" class="controle-form" rows="5"
+                                        placeholder="Ex : format APA, 4 à 6 pages, sources primaires obligatoires…"></textarea>
                                 </div>
 
                                 <!-- ═══════════════════════════════════════════════════════════
@@ -4856,7 +4864,7 @@
                                         <label style="font-weight: 600; margin-bottom: 4px; display: block;">Échéances par groupe
                                             <button class="btn-aide-contextuelle" data-aide="echeances-multigroupes" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>
                                         </label>
-                                        <p style="color: var(--gris-moyen); font-size: 0.82em; margin: 0 0 10px 0; line-height: 1.4;">Cocher = consignes transmises, production en attente de remise. Décoché = les étudiant·e·s n'ont pas encore reçu le travail.</p>
+                                        <p style="color: var(--gris-moyen); font-size: 0.82em; margin: 0 0 10px 0; line-height: 1.4;">Cocher = consignes transmises, production en attente de remise. Décoché = les étudiant·es n'ont pas encore reçu le travail.</p>
                                         <div id="listeEcheancesGroupes" style="display: flex; flex-direction: column; gap: 8px;">
                                             <!-- Peuplé dynamiquement par JS -->
                                         </div>
@@ -4890,7 +4898,7 @@
                                     <div class="u-flex-gap-10">
                                         <button class="btn btn-annuler" data-action="annulerFormProduction">Annuler</button>
                                         <button class="btn btn-confirmer" data-action="sauvegarderProduction">
-                                            <span id="btnTexteEvaluation">Ajouter</span>
+                                            <span id="btnTexteEvaluation">Enregistrer</span>
                                         </button>
                                     </div>
                                 </div>
@@ -15041,6 +15049,10 @@
                     <label class="u-align-center" style="display: flex; gap: 4px; cursor: pointer">
                         <input type="checkbox" id="apercuPDF-prod-description" checked data-on-change="rafraichirApercuPDF">
                         <span>Tâche</span>
+                    </label>
+                    <label class="u-align-center" style="display: flex; gap: 4px; cursor: pointer">
+                        <input type="checkbox" id="apercuPDF-prod-detailTache" checked data-on-change="rafraichirApercuPDF">
+                        <span>Détail</span>
                     </label>
                     <label class="u-align-center" style="display: flex; gap: 4px; cursor: pointer">
                         <input type="checkbox" id="apercuPDF-prod-criteres" data-on-change="rafraichirApercuPDF">

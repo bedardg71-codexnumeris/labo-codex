@@ -625,7 +625,7 @@ async function prerenseignerFormulaireProduction(prod) {
 
     productionEnEdition = prod.id;
     if (titre) titre.textContent = 'Modifier l\'évaluation';
-    if (btnTexte) btnTexte.textContent = 'Sauvegarder';
+    if (btnTexte) btnTexte.textContent = 'Enregistrer';
 
     document.getElementById('productionTitre').value = prod.titre;
     document.getElementById('productionActivite').value = prod.activiteApprentissage || prod.description || '';
@@ -642,6 +642,7 @@ async function prerenseignerFormulaireProduction(prod) {
 
     document.getElementById('productionObjectif').value = prod.objectif || '';
     document.getElementById('productionTache').value = prod.tache || '';
+    document.getElementById('productionDetailTache').value = prod.detailTache || '';
 
     // ✨ NOUVEAU (Beta 94 - 10 déc 2025): Charger date d'échéance
     document.getElementById('productionDateEcheance').value = prod.dateEcheance || '';
@@ -675,7 +676,7 @@ function reinitialiserFormulaireProduction() {
 
     productionEnEdition = null;
     if (titre) titre.textContent = 'Nouvelle production';
-    if (btnTexte) btnTexte.textContent = 'Ajouter';
+    if (btnTexte) btnTexte.textContent = 'Enregistrer';
 
     // Réinitialiser les champs
     document.getElementById('productionTitre').value = '';
@@ -687,6 +688,7 @@ function reinitialiserFormulaireProduction() {
     if (selectCartouche) selectCartouche.innerHTML = '<option value="">Aucune</option>';
     document.getElementById('productionObjectif').value = '';
     document.getElementById('productionTache').value = '';
+    document.getElementById('productionDetailTache').value = '';
 
     // ✨ NOUVEAU (Beta 94 - 10 déc 2025): Réinitialiser date d'échéance
     document.getElementById('productionDateEcheance').value = '';
@@ -820,6 +822,7 @@ function lireDonneesFormulaireProduction() {
     const ponderation = parseInt(document.getElementById('productionPonderation').value) || 0;
     const objectif = document.getElementById('productionObjectif').value.trim();
     const tache = document.getElementById('productionTache').value.trim();
+    const detailTache = document.getElementById('productionDetailTache')?.value.trim() || '';
 
     // ✨ NOUVEAU (Beta 94 - 10 déc 2025): Date d'échéance
     // 🆕 Beta 98.3 : Lire les échéances multi-groupe si disponible
@@ -847,7 +850,7 @@ function lireDonneesFormulaireProduction() {
     const cartoucheSelect = document.getElementById('productionCartouche');
     const cartoucheId = cartoucheSelect ? cartoucheSelect.value : '';
 
-    return { titre, activiteApprentissage, type, ponderation, objectif, tache,
+    return { titre, activiteApprentissage, type, ponderation, objectif, tache, detailTache,
              echeancesParGroupe, dateEcheance, grilleId, echelleId, cartoucheId };
 }
 
@@ -963,6 +966,7 @@ function construireProductionData(d, evaluations) {
         ponderation: d.ponderation,
         objectif: d.objectif,
         tache: d.tache,
+        detailTache: d.detailTache,
         grilleId: d.grilleId,
         echelleId: d.echelleId,        // 🆕 Persistance échelle dans le gabarit
         cartoucheId: d.cartoucheId,    // 🆕 Persistance cartouche dans le gabarit
