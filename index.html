@@ -798,6 +798,18 @@
             background: var(--bleu-carte);
             transform: translateY(-1px);
         }
+        /* Focus clavier visible sur les cartes/demi-cartes rendues focusables
+           (role="button" tabindex="0") — conformité WCAG 2.1 AA, deux modes. */
+        .accueil-action:focus-visible,
+        .accueil-utilitaire-demi:focus-visible {
+            outline: 2px solid var(--accent-primaire);
+            outline-offset: 2px;
+        }
+        /* Conteneur de section focalisé par script (règle SPA) : pas d'outline
+           sur tout le bloc, ce n'est pas une cible interactive. */
+        .section[tabindex="-1"]:focus {
+            outline: none;
+        }
         .accueil-action-icone {
             grid-area: icone;
             font-size: 1.5rem;

@@ -71,6 +71,7 @@
         modeExpert: false,
         modeClair: true,
         accompagnementActif: true,
+        banniereAccueilRepliee: false,
 
         // Flags de transitions pédagogiques (js/transitions.js) — suivent
         // la progression de l'utilisateur entre les 4 étapes du parcours
