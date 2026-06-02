@@ -1922,7 +1922,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 const duration = (8 - (ampNum - 8) * 0.4).toFixed(1); // 8s à 4s selon amplitude
                 // 🆕 BETA 98.9: Traitement visuel distinct pour élèves sans évaluation
                 const classesSansEval = e.sansEvaluation ? ' barre-etudiant-sans-eval' : '';
-                const tooltipValeur = e.sansEvaluation ? 'aucune production évaluée' : `${Math.round(e.valeur * 100)}%`;
+                const tooltipValeur = e.sansEvaluation ? `${accordTermeProduction('aucun', 1)} ${obtenirTermeProduction('singulier')} ${accordTermeProduction('evalue', 1)}` : `${Math.round(e.valeur * 100)}%`;
                                 lignesSOM += `<div class="barre-etudiant barre-etudiant-som${classesSansEval}"
                     style="left: ${positionFinale}%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --jitterV: ${jitterV.toFixed(1)}px; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown}; --duration: ${duration}s;"
                     data-da="${e.da}"
@@ -1981,7 +1981,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 const duration = (8 - (ampNum - 8) * 0.4).toFixed(1); // 8s à 4s selon amplitude
                 // 🆕 BETA 98.9: Traitement visuel distinct pour élèves sans évaluation
                 const classesSansEval = e.sansEvaluation ? ' barre-etudiant-sans-eval' : '';
-                const tooltipValeur = e.sansEvaluation ? 'aucune production évaluée' : `${Math.round(e.valeur * 100)}%`;
+                const tooltipValeur = e.sansEvaluation ? `${accordTermeProduction('aucun', 1)} ${obtenirTermeProduction('singulier')} ${accordTermeProduction('evalue', 1)}` : `${Math.round(e.valeur * 100)}%`;
                                 lignesPAN += `<div class="barre-etudiant barre-etudiant-std${classesSansEval}"
                     style="left: ${positionFinale}%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --jitterV: ${jitterV.toFixed(1)}px; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown}; --duration: ${duration}s;"
                     data-da="${e.da}"
@@ -2657,7 +2657,7 @@ function afficherAlerteNonParticipation(etudiants) {
     const nbEleves = nonParticipants.length;
     const html = `
         <div class="alerte-non-participation info-box info-box--attention" style="margin: 16px 20px 0;">
-            <strong>&#9888;&#65039; ${nbEleves} étudiant·e${nbEleves > 1 ? '·s' : ''} présent·e${nbEleves > 1 ? '·s' : ''} sans aucune production remise</strong>
+            <strong>&#9888;&#65039; ${nbEleves} étudiant·e${nbEleves > 1 ? '·s' : ''} présent·e${nbEleves > 1 ? '·s' : ''} sans ${accordTermeProduction('aucun', 1)} ${obtenirTermeProduction('singulier')} ${accordTermeProduction('remis', 1)}</strong>
             <ul style="margin: 6px 0 0 16px; padding: 0; list-style: none;">
                 ${lignes}
             </ul>

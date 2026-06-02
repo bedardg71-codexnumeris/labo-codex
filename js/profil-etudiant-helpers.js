@@ -82,6 +82,57 @@ function obtenirTermeProduction(context = 'singulier', majuscule = false) {
 }
 
 /**
+ * Table d'accord (genre + nombre) des mots qui qualifient le terme production/artefact.
+ * #309 : quand le terme passe au féminin (« production »), ces mots doivent suivre,
+ * sinon « productions remis / totaux » au lieu de « remises / totales ».
+ * Ordre des formes : [masc-sing, masc-plur, fém-sing, fém-plur].
+ */
+const _ACCORDS_TERME_PRODUCTION = {
+    remis:     ['remis', 'remis', 'remise', 'remises'],
+    retenu:    ['retenu', 'retenus', 'retenue', 'retenues'],
+    evalue:    ['évalué', 'évalués', 'évaluée', 'évaluées'],
+    recevable: ['recevable', 'recevables', 'recevable', 'recevables'],
+    meilleur:  ['meilleur', 'meilleurs', 'meilleure', 'meilleures'],
+    recent:    ['récent', 'récents', 'récente', 'récentes'],
+    aucun:     ['aucun', 'aucuns', 'aucune', 'aucunes'],
+    total:     ['total', 'totaux', 'totale', 'totales'],
+    tous:      ['tout', 'tous', 'toute', 'toutes'],
+    dernier:   ['dernier', 'derniers', 'dernière', 'dernières']
+};
+
+/**
+ * Genre du terme production/artefact selon la pratique active. #309.
+ * 'standards' (portfolio) → « artefact » masculin (terme perso = masculin par défaut,
+ * décision Grégoire 2 juin 2026) ; toute autre pratique → « production » féminin.
+ * Même résolution de pratique que obtenirTermeProduction (id canonique normalisé).
+ * @returns {'m'|'f'}
+ */
+function genreTermeProduction() {
+    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
+    return pratique === 'standards' ? 'm' : 'f';
+}
+
+/**
+ * Renvoie un mot d'accord accordé au genre du terme actif ET au nombre. #309.
+ * @param {string} motCle - clé dans _ACCORDS_TERME_PRODUCTION (ex. 'remis', 'total', 'aucun')
+ * @param {number} nombre - quantité (>1 → pluriel)
+ * @param {boolean} majuscule - capitaliser la 1re lettre (ex. « Aucune » en début de phrase)
+ * @returns {string} la forme accordée ; renvoie motCle tel quel si la clé est inconnue
+ */
+function accordTermeProduction(motCle, nombre = 1, majuscule = false) {
+    const formes = _ACCORDS_TERME_PRODUCTION[motCle];
+    if (!formes) {
+        console.warn('[accordTermeProduction] mot-clé inconnu : ' + motCle);
+        return motCle;
+    }
+    const idx = (genreTermeProduction() === 'f' ? 2 : 0) + (nombre > 1 ? 1 : 0);
+    let forme = formes[idx];
+    if (majuscule) forme = forme.charAt(0).toUpperCase() + forme.slice(1);
+    return forme;
+}
+
+/**
  * Obtient la couleur d'un niveau IDME depuis l'échelle configurée
  * @param {string} codeNiveau - Code du niveau (I, D, M, E, 0)
  * @returns {string} - Couleur CSS (hex ou var(--...))
@@ -554,6 +605,8 @@ function interpreterAssiduite(valeur) {
 // Exporter les 16 fonctions vers window (décision étape 1 b — convention systématique
 // cross-zones, Écart #4 MODULES-MAP §2.3)
 window.obtenirTermeProduction = obtenirTermeProduction;
+window.genreTermeProduction = genreTermeProduction;
+window.accordTermeProduction = accordTermeProduction;
 window.obtenirCouleurNiveauIDME = obtenirCouleurNiveauIDME;
 window.obtenirNiveauIDMEDepuisPourcentage = obtenirNiveauIDMEDepuisPourcentage;
 window.obtenirNombreProductionsPourPatterns = obtenirNombreProductionsPourPatterns;

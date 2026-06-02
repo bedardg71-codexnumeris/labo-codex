@@ -232,10 +232,10 @@ function _genererTexteMethodePerformanceMobilisation(performanceInsuffisante, po
         return `Performance du portfolio actuel (${nombreARetenir} meilleure${nombreARetenir > 1 ? 's' : ''} Sélection ${pondSel}% + Obligatoires ${pondObl}%)`;
     }
     const textesPerformance = {
-        'meilleurs': `Performance du portfolio actuel (${nombreARetenir} meilleur${nombreARetenir > 1 ? 's' : ''}, maîtrise de standards)`,
-        'recents': `Performance du portfolio actuel (${nombreARetenir} plus récent${nombreARetenir > 1 ? 's' : ''}, niveau terminal)`,
-        'recents-meilleurs': `Performance du portfolio actuel (${nombreARetenir} récent${nombreARetenir > 1 ? 's' : ''} parmi les meilleurs, hybride)`,
-        'tous': `Performance du portfolio actuel (tous les artefacts, moyenne complète)`
+        'meilleurs': `Performance du portfolio actuel (${nombreARetenir} ${accordTermeProduction('meilleur', nombreARetenir)}, maîtrise de standards)`,
+        'recents': `Performance du portfolio actuel (${nombreARetenir} plus ${accordTermeProduction('recent', nombreARetenir)}, niveau terminal)`,
+        'recents-meilleurs': `Performance du portfolio actuel (${nombreARetenir} ${accordTermeProduction('recent', nombreARetenir)} parmi les ${accordTermeProduction('meilleur', 2)}, hybride)`,
+        'tous': `Performance du portfolio actuel (${accordTermeProduction('tous', 2)} les ${obtenirTermeProduction('pluriel')}, moyenne complète)`
     };
     return textesPerformance[methodeSelection] || textesPerformance['meilleurs'];
 }
@@ -243,13 +243,13 @@ function _genererTexteMethodePerformanceMobilisation(performanceInsuffisante, po
 function _genererTitreArtefactsRetenusMobilisation(portfolioActif, methodeSelection, nbRetenus, nombreARetenir) {
     if (!portfolioActif) return 'Productions indépendantes';
     if (methodeSelection === 'hybride-categories') {
-        return `${nbRetenus} artefact${nbRetenus > 1 ? 's' : ''} retenus (${nombreARetenir} meilleures Sélection + Obligatoires)`;
+        return `${nbRetenus} ${obtenirTermeProduction(nbRetenus > 1 ? 'pluriel' : 'singulier')} ${accordTermeProduction('retenu', nbRetenus)} (${nombreARetenir} meilleures Sélection + Obligatoires)`;
     }
     const textesTitres = {
-        'meilleurs': `${nbRetenus} meilleur${nbRetenus > 1 ? 's' : ''} artefact${nbRetenus > 1 ? 's' : ''}`,
-        'recents': `${nbRetenus} plus récent${nbRetenus > 1 ? 's' : ''} artefact${nbRetenus > 1 ? 's' : ''}`,
-        'recents-meilleurs': `${nbRetenus} récent${nbRetenus > 1 ? 's' : ''} parmi les meilleurs`,
-        'tous': `Tous les artefacts (${nbRetenus})`
+        'meilleurs': `${nbRetenus} ${accordTermeProduction('meilleur', nbRetenus)} ${obtenirTermeProduction(nbRetenus > 1 ? 'pluriel' : 'singulier')}`,
+        'recents': `${nbRetenus} plus ${accordTermeProduction('recent', nbRetenus)} ${obtenirTermeProduction(nbRetenus > 1 ? 'pluriel' : 'singulier')}`,
+        'recents-meilleurs': `${nbRetenus} ${accordTermeProduction('recent', nbRetenus)} parmi les ${accordTermeProduction('meilleur', 2)}`,
+        'tous': `${accordTermeProduction('tous', 2, true)} les ${obtenirTermeProduction('pluriel')} (${nbRetenus})`
     };
     return textesTitres[methodeSelection] || textesTitres['meilleurs'];
 }
@@ -533,9 +533,9 @@ function genererSectionMobilisationEngagement(da) {
             <br><br>
             <strong>Assiduité (A) :</strong> Indice A = ${indices.A}% — ${periodesPresentes} périodes présentes / ${periodesOffertes} périodes offertes
             <br><br>
-            <strong>Complétion (C) :</strong> Indice C = ${indices.C}% — ${nbRemis} ${obtenirTermeProduction('pluriel')} remis / ${nbTotal} ${obtenirTermeProduction('pluriel')} totaux
+            <strong>Complétion (C) :</strong> Indice C = ${indices.C}% — ${nbRemis} ${obtenirTermeProduction('pluriel')} ${accordTermeProduction('remis', nbRemis)} / ${nbTotal} ${obtenirTermeProduction('pluriel')} ${accordTermeProduction('total', nbTotal)}
             <br><br>
-            <strong>Performance (P) :</strong> Indice P = ${moyenneP}% — Moyenne des ${nbRetenus} meilleurs ${obtenirTermeProduction('pluriel')}
+            <strong>Performance (P) :</strong> Indice P = ${moyenneP}% — Moyenne des ${nbRetenus} ${accordTermeProduction('meilleur', nbRetenus)} ${obtenirTermeProduction('pluriel')}
         </div>
 
         <!-- GRILLE 3 COLONNES : ASSIDUITÉ, COMPLÉTION ET PERFORMANCE -->
@@ -603,14 +603,14 @@ function genererSectionMobilisationEngagement(da) {
 
                 <!-- Statistiques -->
                 <ul class="profil-liste-simple">
-                    <li><strong>• Productions remises :</strong> ${nbRemis}/${nbTotal}</li>
+                    <li><strong>• ${obtenirTermeProduction('pluriel', true)} ${accordTermeProduction('remis', 2)} :</strong> ${nbRemis}/${nbTotal}</li>
                 </ul>
 
                 <hr class="profil-separateur">
 
                 <!-- Artefacts remis (format badge comme Assiduité) -->
                 <h4 class="profil-section-titre">
-                    ${artefactsRemis.length} production${artefactsRemis.length > 1 ? 's' : ''} remise${artefactsRemis.length > 1 ? 's' : ''}
+                    ${artefactsRemis.length} ${obtenirTermeProduction(artefactsRemis.length > 1 ? 'pluriel' : 'singulier')} ${accordTermeProduction('remis', artefactsRemis.length)}
                 </h4>
                 ${artefactsRemis.length > 0 ? `
                     <div class="badges-centres u-mb-20">
@@ -635,13 +635,13 @@ function genererSectionMobilisationEngagement(da) {
                     </div>
                 ` : `
                     <div class="profil-message-vide u-mb-15">
-                        Aucun artefact remis
+                        ${accordTermeProduction('aucun', 1, true)} ${obtenirTermeProduction('singulier')} ${accordTermeProduction('remis', 1)}
                     </div>
                 `}
 
                 <!-- Artefacts non remis ou non recevables (format badge comme Assiduité) -->
                 <h4 class="profil-section-titre">
-                    ${artefactsNonRemis.length} production${artefactsNonRemis.length > 1 ? 's' : ''} non remise${artefactsNonRemis.length > 1 ? 's' : ''} ou non recevable${artefactsNonRemis.length > 1 ? 's' : ''}
+                    ${artefactsNonRemis.length} ${obtenirTermeProduction(artefactsNonRemis.length > 1 ? 'pluriel' : 'singulier')} non ${accordTermeProduction('remis', artefactsNonRemis.length)} ou non ${accordTermeProduction('recevable', artefactsNonRemis.length)}
                 </h4>
                 ${artefactsNonRemis.length > 0 ? `
                     <div class="badges-centres u-mb-20">
@@ -667,7 +667,7 @@ function genererSectionMobilisationEngagement(da) {
                     </div>
                 ` : `
                     <div class="${aucuneDonneeCompletion ? 'profil-message-vide' : 'profil-message-tous-remis'}">
-                        ${aucuneDonneeCompletion ? 'En attente de données' : 'Tous les artefacts remis !'}
+                        ${aucuneDonneeCompletion ? 'En attente de données' : `${accordTermeProduction('tous', 2, true)} les ${obtenirTermeProduction('pluriel')} ${accordTermeProduction('remis', 2)} !`}
                     </div>
                 `}
             </div>
@@ -744,7 +744,7 @@ function genererSectionMobilisationEngagement(da) {
                     </div>
                 ` : `
                     <div class="profil-message-vide u-mb-15">
-                        Aucun artefact évalué
+                        ${accordTermeProduction('aucun', 1, true)} ${obtenirTermeProduction('singulier')} ${accordTermeProduction('evalue', 1)}
                     </div>
                 `}
             </div>
@@ -1003,7 +1003,7 @@ function genererSectionAccompagnement(da) {
                     })()}
                 </p>
 
-                <p class="profil-texte-paragraphe" style="margin-top: 12px;"><strong>Progression par critère :</strong> <span class="u-texte-petit u-texte-gris-clair" style="font-weight: normal;">(moyennes sur tous les ${obtenirTermeProduction('pluriel')})</span></p>
+                <p class="profil-texte-paragraphe" style="margin-top: 12px;"><strong>Progression par critère :</strong> <span class="u-texte-petit u-texte-gris-clair" style="font-weight: normal;">(moyennes sur ${accordTermeProduction('tous', 2)} les ${obtenirTermeProduction('pluriel')})</span></p>
                 <ul style="margin-left: 20px; color: var(--gris-fonce); font-size: 0.9rem;">
                     ${criteres.map(c => {
                         const pct = c.valeur * 100;
@@ -1624,7 +1624,7 @@ function genererCarteCibleIntervention(da) {
             <br><br>
             <strong>Niveaux RàI :</strong> Niveau 1 (Universel) : suivi régulier en classe • Niveau 2 (Préventif) : interventions préventives ciblées • Niveau 3 (Intensif) : interventions intensives individuelles hors classe
             <br><br>
-            <strong>Méthodologie :</strong> Le système analyse l'engagement (E = A × C × P), le pattern d'apprentissage actuel (basé sur les ${nbArtefacts} dernier${nbArtefacts > 1 ? 's' : ''} ${obtenirTermeProduction(nbArtefacts > 1 ? 'pluriel' : 'singulier')}), et les défis identifiés sur les critères de la grille de référence. La logique de décision priorise les situations de décrochage, puis les difficultés persistantes et émergentes, avant de recommander des cibles d'enrichissement ou de maintien.
+            <strong>Méthodologie :</strong> Le système analyse l'engagement (E = A × C × P), le pattern d'apprentissage actuel (basé sur les ${nbArtefacts} ${accordTermeProduction('dernier', nbArtefacts)} ${obtenirTermeProduction(nbArtefacts > 1 ? 'pluriel' : 'singulier')}), et les défis identifiés sur les critères de la grille de référence. La logique de décision priorise les situations de décrochage, puis les difficultés persistantes et émergentes, avant de recommander des cibles d'enrichissement ou de maintien.
             <br><br>
             <strong>Utilisation :</strong> Cette section te guide dans le choix d'interventions appropriées. Les recommandations sont contextualisées selon les besoins spécifiques de l'étudiant. Consulte la section Accompagnement pour planifier et documenter tes interventions.
         </div>
@@ -1646,7 +1646,7 @@ function genererCarteCibleIntervention(da) {
 
             <div class="carte-cible-meta">
                 <strong>Pattern actuel :</strong> ${patternInfo.type} ·
-                <strong>Basé sur :</strong> ${nbArtefacts} dernier${nbArtefacts > 1 ? 's' : ''} ${obtenirTermeProduction(nbArtefacts > 1 ? 'pluriel' : 'singulier')}
+                <strong>Basé sur :</strong> ${nbArtefacts} ${accordTermeProduction('dernier', nbArtefacts)} ${obtenirTermeProduction(nbArtefacts > 1 ? 'pluriel' : 'singulier')}
             </div>
 
             <div class="carte-cible-description">
@@ -2753,7 +2753,7 @@ function genererSectionProductions(da) {
             const obligatoiresTous = productionsObligatoires.map(prod => {
                 const evalObl = evaluationsEleveValides.find(e => e.productionId === prod.id);
                 return {
-                    titreProd: prod.titre || 'Artefact',
+                    titreProd: prod.titre || obtenirTermeProduction('singulier', true),
                     activite:  prod.activiteApprentissage || prod.description || '',
                     niveau:    evalObl ? (evalObl.niveauFinal || null) : null,
                     note:      evalObl && typeof evalObl.noteFinale === 'number' ? evalObl.noteFinale : null
@@ -2768,7 +2768,7 @@ function genererSectionProductions(da) {
 
             const listeSelection = selection.length
                 ? '<ul class="note-finale-liste-artefacts">' + selection.map(renderLigneRetenu).join('') + '</ul>'
-                : '<span class="note-finale-non-evalue">Aucun artefact retenu</span>';
+                : '<span class="note-finale-non-evalue">' + accordTermeProduction('aucun', 1, true) + ' ' + obtenirTermeProduction('singulier') + ' ' + accordTermeProduction('retenu', 1) + '</span>';
             const listeObligatoires = obligatoiresTous.length
                 ? '<ul class="note-finale-liste-artefacts">' + obligatoiresTous.map(renderLigneObligatoire).join('') + '</ul>'
                 : '<span class="note-finale-non-evalue">Aucune production obligatoire configurée</span>';
@@ -2854,7 +2854,7 @@ function genererSectionProductions(da) {
             // ----- Mode classique : Portfolio (gauche) / Terminale (droite si présente) -----
             const listeArtefacts = retenusDecrits.length
                 ? '<ul class="note-finale-liste-artefacts">' + retenusDecrits.map(renderLigneRetenu).join('') + '</ul>'
-                : '<span class="note-finale-non-evalue">Aucun artefact retenu</span>';
+                : '<span class="note-finale-non-evalue">' + accordTermeProduction('aucun', 1, true) + ' ' + obtenirTermeProduction('singulier') + ' ' + accordTermeProduction('retenu', 1) + '</span>';
 
             const carteTerminale = terminal.present ? `
                 <div class="note-finale-composante">
@@ -2888,7 +2888,7 @@ function genererSectionProductions(da) {
                 <div class="note-finale-grid${terminal.present ? '' : ' note-finale-grid-single'}">
                     <div class="note-finale-composante ${portfolio.plafonnement ? 'note-finale-composante-plafonnee' : ''}">
                         <div class="note-finale-composante-titre">
-                            Portfolio (${portfolio.nombreRetenus} ${portfolio.methodeSelection} artefacts sur ${portfolio.nombreEvalues} évalués)
+                            Portfolio (${portfolio.nombreRetenus} ${portfolio.methodeSelection} ${obtenirTermeProduction('pluriel')} sur ${portfolio.nombreEvalues} ${accordTermeProduction('evalue', portfolio.nombreEvalues)})
                         </div>
                         <div class="note-finale-artefacts">${listeArtefacts}</div>
                         ${portfolio.plafonnement ? `
@@ -3126,7 +3126,7 @@ function genererTableauObjectifs(da, ensembleId, noteFinaleMultiObjectifs) {
                             <tr style="border-left: 4px solid ${couleurBordure};">
                                 <td style="padding: 12px;">
                                     <div style="font-weight: bold; margin-bottom: 3px;">${echapperHtml(obj.nom)}</div>
-                                    ${nbArtefacts > 0 ? `<div class="u-texte-mini u-texte-gris">${nbArtefacts} artefact${nbArtefacts > 1 ? 's' : ''}</div>` : ''}
+                                    ${nbArtefacts > 0 ? `<div class="u-texte-mini u-texte-gris">${nbArtefacts} ${obtenirTermeProduction(nbArtefacts > 1 ? 'pluriel' : 'singulier')}</div>` : ''}
                                 </td>
                                 <td style="text-align: center; padding: 12px;">
                                     <span style="
@@ -3610,7 +3610,7 @@ function genererSectionCompletion(da) {
 
             <!-- Artefacts remis -->
             <h4 class="profil-titre-sous-section">
-                ARTEFACTS REMIS (${artefactsRemis.length})
+                ${obtenirTermeProduction('pluriel', true).toUpperCase()} ${accordTermeProduction('remis', artefactsRemis.length).toUpperCase()} (${artefactsRemis.length})
             </h4>
             ${artefactsRemis.length > 0 ? `
                 <div class="badges-centres u-mb-20">
@@ -3630,13 +3630,13 @@ function genererSectionCompletion(da) {
                 </div>
             ` : `
                 <div class="profil-zone-centre-grise">
-                    Aucun artefact remis
+                    ${accordTermeProduction('aucun', 1, true)} ${obtenirTermeProduction('singulier')} ${accordTermeProduction('remis', 1)}
                 </div>
             `}
 
             <!-- Artefacts non remis -->
             <h4 class="profil-titre-sous-section">
-                ARTEFACTS NON REMIS (${artefactsNonRemis.length})
+                ${obtenirTermeProduction('pluriel', true).toUpperCase()} NON ${accordTermeProduction('remis', artefactsNonRemis.length).toUpperCase()} (${artefactsNonRemis.length})
             </h4>
             ${artefactsNonRemis.length > 0 ? `
                 <div class="badges-centres u-mb-20">
@@ -3652,7 +3652,7 @@ function genererSectionCompletion(da) {
                 </div>
             ` : `
                 <div class="profil-zone-centre-verte">
-                    Tous les artefacts ont été remis.
+                    ${accordTermeProduction('tous', 2, true)} les ${obtenirTermeProduction('pluriel')} ont été ${accordTermeProduction('remis', 2)}.
                 </div>
             `}
 
@@ -3969,7 +3969,7 @@ function _genererTextePerformanceMethodeBloc(portfolioActifRapport, methodeSelec
         'meilleurs': `Performance du portfolio actuel (${nombreARetenirConfig} meilleur${nombreARetenirConfig > 1 ? 's' : ''}, maîtrise de standards)`,
         'recents': `Performance du portfolio actuel (${nombreARetenirConfig} plus récent${nombreARetenirConfig > 1 ? 's' : ''}, niveau terminal)`,
         'recents-meilleurs': `Performance du portfolio actuel (${nombreARetenirConfig} récent${nombreARetenirConfig > 1 ? 's' : ''} parmi les meilleurs, hybride)`,
-        'tous': `Performance du portfolio actuel (tous les ${obtenirTermeProduction('pluriel')}, moyenne complète)`
+        'tous': `Performance du portfolio actuel (${accordTermeProduction('tous', 2)} les ${obtenirTermeProduction('pluriel')}, moyenne complète)`
     };
     return textesPerformance[methodeSelectionRapport] || textesPerformance['meilleurs'];
 }
@@ -4220,12 +4220,12 @@ function genererSectionPerformance(da) {
             <br><br>
             <strong>Règle de sélection :</strong> ${_genererTexteRegleSelectionPortfolio(portfolioActifRapport, methodeSelectionRapport, nombreARetenirConfig, configCategoriesRapport)}
             <br><br>
-            <strong>${obtenirTermeProduction('pluriel', true)} retenus :</strong> ${artefactsRetenus.length > 0 ? artefactsRetenus.map((art, idx) =>
+            <strong>${obtenirTermeProduction('pluriel', true)} ${accordTermeProduction('retenu', 2)} :</strong> ${artefactsRetenus.length > 0 ? artefactsRetenus.map((art, idx) =>
                 `${idx + 1}. ${art.description} → ${art.note.toFixed(1)}/100`
-            ).join(' • ') : 'Aucun artefact évalué'}
+            ).join(' • ') : `${accordTermeProduction('aucun', 1, true)} ${obtenirTermeProduction('singulier')} ${accordTermeProduction('evalue', 1)}`}
             <br><br>
             <strong>Calcul de l'indice P :</strong> ${artefactsRetenus.length > 0 ? `
-                Moyenne des ${artefactsRetenus.length} ${obtenirTermeProduction(artefactsRetenus.length > 1 ? 'pluriel' : 'singulier')} retenu${artefactsRetenus.length > 1 ? 's' : ''} — P = (${notesRetenues.map(n => n.toFixed(1)).join(' + ')}) / ${artefactsRetenus.length} = <strong>${indices.P}%</strong>
+                Moyenne des ${artefactsRetenus.length} ${obtenirTermeProduction(artefactsRetenus.length > 1 ? 'pluriel' : 'singulier')} ${accordTermeProduction('retenu', artefactsRetenus.length)} — P = (${notesRetenues.map(n => n.toFixed(1)).join(' + ')}) / ${artefactsRetenus.length} = <strong>${indices.P}%</strong>
             ` : 'Calcul impossible : aucune évaluation disponible'}
             <br><br>
             <strong>Calcul de la note de chaque ${obtenirTermeProduction('singulier')} :</strong> ${_genererTextePonderationCriteresActifs()}${selectionEleve.auto ? '<br><br><strong>Note :</strong> Sélection automatique basée sur les meilleures notes' : ''}
