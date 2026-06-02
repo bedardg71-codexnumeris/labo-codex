@@ -1101,7 +1101,7 @@ const ETAPES_TOUR = [
     {
         id: 4,
         titre: 'Suivi',
-        texte: "Le tableau de bord te montre ce que tu ne verrais pas facilement sur papier\u00a0: le portrait de ton groupe en un coup d'\u0153il. Les indices Assiduit\u00e9 (A), Compl\u00e9tion (C) et Performance (P) r\u00e9sument le contexte d'apprentissage observ\u00e9 de chaque \u00e9tudiant\u00b7e. Les zones de couleur t'aident \u00e0 rep\u00e9rer qui a besoin d'attention.\n\nExplore les quatre vues\u00a0: aper\u00e7u, liste, profil individuel et interventions R\u00e0I.",
+        texte: "L'aper\u00e7u (Suivi du groupe) te montre ce que tu ne verrais pas facilement sur papier\u00a0: le portrait de ton groupe en un coup d'\u0153il. Les indices Assiduit\u00e9 (A), Compl\u00e9tion (C) et Performance (P) r\u00e9sument le contexte d'apprentissage observ\u00e9 de chaque \u00e9tudiant\u00b7e. Les zones de couleur t'aident \u00e0 rep\u00e9rer qui a besoin d'attention.\n\nExplore les vues du Suivi\u00a0: Suivi du groupe, liste, profils individuels et interventions R\u00e0I.",
         actions: [
             { label: "J'ai compris",      type: 'primaire', action: 'avancerEtape' },
             { label: 'Passer cette \u00e9tape', type: 'secondaire', action: 'passerEtape' }
@@ -1113,8 +1113,8 @@ const ETAPES_TOUR = [
     },
     {
         id: 5,
-        titre: 'Planification (optionnelle)',
-        texte: "La carte mentale rend visible l'alignement p\u00e9dagogique de ton cours\u00a0: ce que tu vises, comment tu l'enseignes et comment tu le v\u00e9rifies. L'organisateur structure tes le\u00e7ons sur les 15 semaines du trimestre. Ce module est compl\u00e9mentaire. Tu peux l'explorer quand tu te sens \u00e0 l'aise avec les autres sections.",
+        titre: 'Alignement et plan de le\u00e7on (optionnel)',
+        texte: "La carte d'alignement rend visible l'alignement p\u00e9dagogique de ton cours\u00a0: ce que tu vises, comment tu l'enseignes et comment tu le v\u00e9rifies. Le plan de la le\u00e7on structure tes le\u00e7ons sur les semaines de ton trimestre. Ce module est compl\u00e9mentaire. Tu peux l'explorer quand tu te sens \u00e0 l'aise avec les autres sections.",
         actions: [
             { label: 'Terminer le parcours', type: 'primaire',   action: 'terminerTour' },
             { label: 'Relancer plus tard',   type: 'secondaire', action: 'terminerTour' }
@@ -1171,7 +1171,7 @@ function afficherPanneauEtape(etape) {
     panneau.id = ID_PANNEAU_TOUR;
     panneau.className = 'panneau-tour-guide';
     panneau.setAttribute('role', 'dialog');
-    panneau.setAttribute('aria-label', 'Parcours guid\u00e9');
+    panneau.setAttribute('aria-label', 'Visite guid\u00e9e');
 
     const header = document.createElement('div');
     header.className = 'tour-header';
@@ -1194,7 +1194,7 @@ function afficherPanneauEtape(etape) {
     const btnFermer = document.createElement('button');
     btnFermer.className = 'tour-fermer';
     btnFermer.type = 'button';
-    btnFermer.setAttribute('aria-label', 'Fermer le parcours guid\u00e9');
+    btnFermer.setAttribute('aria-label', 'Fermer la visite guid\u00e9e');
     btnFermer.textContent = '\u2715';
     btnFermer.addEventListener('click', quitterTourGuide);
     header.appendChild(btnFermer);
