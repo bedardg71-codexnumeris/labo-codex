@@ -3802,8 +3802,10 @@ function _genererBlocForcesDefisSRPNF(da) {
     const { niveaux, gradientCSS } = _obtenirNiveauxEtGradientSRPNF();
     const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
-    const afficherSom = affichage.afficherSommatif !== false;
-    const afficherPan = affichage.afficherAlternatif !== false;
+    // #308 : `=== true` (cf. tableau-bord-apercu.js) — clés absentes ne rallument
+    // plus le mode comparatif fantôme du bloc Forces/Défis SRPNF.
+    const afficherSom = affichage.afficherSommatif === true;
+    const afficherPan = affichage.afficherAlternatif === true;
     const modeComparatif = afficherSom && afficherPan;
 
     const moyennesCtx = _calculerMoyennesComparativesSRPNF(da, modeComparatif);

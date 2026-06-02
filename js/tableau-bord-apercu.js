@@ -1378,6 +1378,40 @@ function genererIndicateurPratiqueOuCheckboxes() {
    =============================== */
 
 /**
+ * Détermine quelles pratiques afficher dans la section « Observation globale »
+ * du tableau de bord, à partir de la configuration d'évaluation.
+ *
+ * Les clés afficherSommatif/afficherAlternatif ne sont posées QUE par l'ancien
+ * mode comparatif (en voie de retrait — cf. #308). Hors de ce mode elles sont
+ * absentes : on suit alors la pratique de notation ACTIVE du groupe (sommative
+ * → SOM, sinon → PAN), au lieu de forcer PAN. Forcer PAN était un résidu du
+ * mode comparatif qui faisait afficher « Performance (P) — alternatif » à 0 %
+ * sur un groupe sommatif (la performance PAN n'y est pas calculable).
+ *
+ * @param {object} config - objet modalitesEvaluation (pratique active + affichageTableauBord)
+ * @returns {{afficherSom: boolean, afficherPan: boolean}}
+ */
+function determinerModeAffichageTableauBord(config) {
+    const affichage = (config && config.affichageTableauBord) || {};
+    let afficherSom = affichage.afficherSommatif === true;
+    let afficherPan = affichage.afficherAlternatif === true;
+
+    // Aucun mode comparatif posé (cas normal) : suivre la pratique active.
+    if (!afficherSom && !afficherPan) {
+        const pratiqueActive = (typeof normaliserIdPratique === 'function'
+            ? normaliserIdPratique(config && config.pratique)
+            : (config && config.pratique)) || (window.PRATIQUE_DEFAUT || 'standards');
+        if (pratiqueActive === 'sommative') {
+            afficherSom = true;
+        } else {
+            afficherPan = true;
+        }
+    }
+
+    return { afficherSom, afficherPan };
+}
+
+/**
  * Affiche les métriques globales du groupe avec barres de distribution
  * Chaque étudiant est représenté par une ligne verticale sur l'échelle
  *
@@ -1387,15 +1421,9 @@ function afficherMetriquesGlobales(etudiants) {
     const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
 
-    // 🆕 BETA 95.7: Valeurs par défaut si aucun mode n'est configuré
-    // Par défaut, afficher PAN (pratique alternative/standards)
-    let afficherSom = affichage.afficherSommatif === true;
-    let afficherPan = affichage.afficherAlternatif === true;
-
-    // Si aucun mode n'est configuré, activer PAN par défaut
-    if (!afficherSom && !afficherPan) {
-        afficherPan = true;
-    }
+    // #308 (2 juin 2026) : hors mode comparatif, suivre la pratique active du
+    // groupe plutôt que de forcer PAN (logique extraite et testée ci-dessus).
+    let { afficherSom, afficherPan } = determinerModeAffichageTableauBord(config);
 
     // 🆕 BETA 95.7 (22 jan) : Calculer "en attente" au niveau du GROUPE
     // Compter les données disponibles pour le groupe entier :
@@ -1628,13 +1656,21 @@ function afficherMetriquesGlobales(etudiants) {
     // 🆕 BETA 95.7 (22 jan) : Passer le texte explicite "en attente" à chaque barre
     const nbTotal = etudiants.length;
 
+    // #308 : les suffixes « — sommatif » / « — alternatif » n'ont de sens qu'en
+    // mode comparatif (deux pratiques côte à côte). En mode simple, libellés nus —
+    // la pratique active est déjà signalée par le badge d'en-tête.
+    const modeComparatif = afficherSom && afficherPan;
+    const labelA = modeComparatif ? 'Assiduité (A) — sommatif' : 'Assiduité (A)';
+    const labelC = modeComparatif ? 'Complétion (C) — sommatif' : 'Complétion (C)';
+    const labelP = modeComparatif ? 'Performance (P) — alternatif' : 'Performance (P)';
+
     // Générer les 4 barres de distribution avec interprétations
     const html = `
         <div class="tb-p-20">
             ${legendeUnique}
-            ${genererBarreDistribution('Assiduité (A) — sommatif', etudiantsSOM_A, etudiantsPAN_A, 'A', afficherSom, afficherPan, r_AP, texteAttenteA, nbTotal)}
-            ${genererBarreDistribution('Complétion (C) — sommatif', etudiantsSOM_C, etudiantsPAN_C, 'C', afficherSom, afficherPan, r_CP, texteAttenteC, nbTotal)}
-            ${genererBarreDistribution('Performance (P) — alternatif', etudiantsSOM_P, etudiantsPAN_P, 'P', afficherSom, afficherPan, null, texteAttenteP, nbTotal)}
+            ${genererBarreDistribution(labelA, etudiantsSOM_A, etudiantsPAN_A, 'A', afficherSom, afficherPan, r_AP, texteAttenteA, nbTotal)}
+            ${genererBarreDistribution(labelC, etudiantsSOM_C, etudiantsPAN_C, 'C', afficherSom, afficherPan, r_CP, texteAttenteC, nbTotal)}
+            ${genererBarreDistribution(labelP, etudiantsSOM_P, etudiantsPAN_P, 'P', afficherSom, afficherPan, null, texteAttenteP, nbTotal)}
         </div>
     `;
 
@@ -3191,6 +3227,7 @@ window.initialiserCarteTrajectoiresProduction = initialiserCarteTrajectoiresProd
 window.togglerCritereTrajectoires = togglerCritereTrajectoires;
 window.changerMesureTrajectoires = changerMesureTrajectoires;
 window._majSousTitreTrajectoires = _majSousTitreTrajectoires;
+window.determinerModeAffichageTableauBord = determinerModeAffichageTableauBord;
 
 /* ===============================
    📌 NOTES D'UTILISATION
