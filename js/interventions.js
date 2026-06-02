@@ -408,7 +408,7 @@ function afficherListeInterventions() {
                 <p class="intervention-description">${echapperHtml(typeof anonymiserTexteRetroaction === 'function' ? anonymiserTexteRetroaction(intervention.description || '', null) : (intervention.description || ''))} <span class="text-muted">${formaterDateLisible(intervention.date)}${intervention.heure ? ` à ${echapperHtml(intervention.heure)}` : ''}</span></p>
 
                 ${(intervention.analyse || (intervention.notesIndividuelles && Object.keys(intervention.notesIndividuelles).length > 0)) ? `
-                    <h4 class="intervention-titre u-mb-10 u-mt-10">Aperçu du sous-groupe (${intervention.analyse ? intervention.analyse.nbEtudiants : 0} étudiant·e·s)</h4>
+                    <h4 class="intervention-titre u-mb-10 u-mt-10">Aperçu du sous-groupe (${formaterNbEtudiants(intervention.analyse ? intervention.analyse.nbEtudiants : 0)})</h4>
                     <div class="intervention-cartes-row">
                         ${intervention.analyse ? genererAffichageAnalyseCartes(intervention.analyse) : ''}
                         ${intervention.notesIndividuelles && Object.keys(intervention.notesIndividuelles).length > 0 ? genererAffichageNotesIndividuelles(intervention.notesIndividuelles) : ''}
@@ -716,7 +716,7 @@ function ouvrirIntervention(interventionId, options) {
                     ${echapperHtml(etudiant.prenom)} ${echapperHtml(etudiant.nom)}
                 </label>
                 <textarea id="note-${etudiant.da}" class="controle-form" rows="1"
-                          placeholder="Note individuelle..."
+                          placeholder="Note individuelle…"
                           style="font-size: 0.85rem; resize: vertical;">${echapperHtml(typeof anonymiserTexteRetroaction === 'function' ? anonymiserTexteRetroaction(noteExistante, etudiant.da) : noteExistante)}</textarea>
                 <span class="badge-rai-${niveauBadge}">Niveau ${niveauBadge}</span>
             </div>
@@ -749,7 +749,7 @@ function ouvrirIntervention(interventionId, options) {
                 '</label>';
         }).join('');
     } else {
-        criteresInitHtml = '<p class="text-muted" style="font-style: italic;">Configure une grille de référence dans Réglages pour activer le ciblage par critère.</p>';
+        criteresInitHtml = '<p class="text-muted" style="font-style: italic;">Configure une grille de référence dans Conception › Grilles de critères pour activer le ciblage par critère.</p>';
     }
 
     container.innerHTML = `
@@ -765,7 +765,7 @@ function ouvrirIntervention(interventionId, options) {
                         <div class="champ-formulaire u-m-0">
                             <label for="interventionTitre" class="label-formulaire">Titre :</label>
                             <input type="text" id="interventionTitre" class="controle-form" required
-                                   value="${echapperHtml(intervention.titre)}" placeholder="Ex: Intervention Rigueur et Nuance">
+                                   value="${echapperHtml(intervention.titre)}" placeholder="Ex. Intervention Rigueur et Nuance">
                         </div>
 
                         <div class="champ-formulaire u-m-0">
@@ -812,7 +812,7 @@ function ouvrirIntervention(interventionId, options) {
                     <div class="champ-formulaire u-m-0">
                         <label for="interventionDescription" class="label-formulaire">Description (optionnel) :</label>
                         <textarea id="interventionDescription" class="controle-form" rows="3"
-                                  placeholder="Objectifs de l'intervention, sujets abord\u00e9s...">${intervention.description || ''}</textarea>
+                                  placeholder="Objectifs de l'intervention, sujets abord\u00e9s\u2026">${intervention.description || ''}</textarea>
                     </div>
                 </div>
 
@@ -856,7 +856,7 @@ function ouvrirIntervention(interventionId, options) {
                 <div>
                     <h4 data-tooltip="interv-apercu-sous-groupe">Aperçu du sous-groupe</h4>
                     <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px;">
-                        Cette aggrégation des profils des étudiant·e·s vise à éclairer ta préparation.
+                        Cette agrégation des profils des étudiant·es vise à éclairer ta préparation.
                     </p>
                     <div id="analyseTempsReel"></div>
                 </div>
@@ -865,7 +865,7 @@ function ouvrirIntervention(interventionId, options) {
                 <div>
                     <h4 data-tooltip="interv-presences-notes">Marquer les présences et notes individuelles</h4>
                     <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px;">
-                        Coche les étudiant·e·s présent·e·s et documente tes observations spécifiques.
+                        Coche les étudiant·es présent·es et documente tes observations spécifiques.
                     </p>
 
                     <div id="listeEtudiantsIntervention" class="liste-etudiants-intervention">
@@ -893,7 +893,7 @@ function ouvrirIntervention(interventionId, options) {
                 <div style="display: flex; gap: 10px; align-items: start;">
                     <input type="text" id="objectifVise" class="controle-form" style="flex: 1;"
                            value="${echapperHtml(intervention.objectifVise || '')}"
-                           placeholder="Ex: Amener Structure au seuil D (65%)">
+                           placeholder="Ex. Amener Structure au seuil D (65%)">
                     <button data-action="suggererObjectifIntervention" data-param="${interventionId}" class="btn btn-secondaire" style="white-space: nowrap;">Suggérer</button>
                 </div>
             </div>
@@ -904,7 +904,7 @@ function ouvrirIntervention(interventionId, options) {
                 <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 10px;">
                     Note tes observations durant l'intervention (stratégies à nouveau enseignées, réception du groupe...)
                 </p>
-                <textarea id="observationsIntervention" class="controle-form" rows="6" placeholder="Ex: Stratégie de lecture n°3...">${intervention.observations || ''}</textarea>
+                <textarea id="observationsIntervention" class="controle-form" rows="6" placeholder="Ex. Stratégie de lecture n°3…">${intervention.observations || ''}</textarea>
             </div>
 
             ${(() => {
@@ -985,7 +985,7 @@ function ouvrirIntervention(interventionId, options) {
                     '</div>' +
                     '<div>' +
                         '<label for="observationsBilan" class="label-formulaire">Observations de bilan</label>' +
-                        '<textarea id="observationsBilan" class="controle-form" rows="3" placeholder="Réflexions sur l\'intervention, ajustements à apporter...">' + echapperHtml(bilan.observationsBilan || '') + '</textarea>' +
+                        '<textarea id="observationsBilan" class="controle-form" rows="3" placeholder="Réflexions sur l\'intervention, ajustements à apporter…">' + echapperHtml(bilan.observationsBilan || '') + '</textarea>' +
                     '</div>' +
                 '</div>';
             })()}
@@ -995,7 +995,7 @@ function ouvrirIntervention(interventionId, options) {
                     ? '<button data-action="annulerNouvelleIntervention" data-param="' + interventionId + '" class="btn btn-secondaire">Annuler</button>'
                     : '<button data-action="afficherListeInterventions" class="btn btn-secondaire">Annuler</button>'}
                 <button data-action="sauvegarderPresencesIntervention" data-param="${interventionId}" class="btn btn-principal">
-                    Sauvegarder
+                    Enregistrer
                 </button>
             </div>
         </div>
@@ -1033,7 +1033,7 @@ function afficherAnalyseTempsReel(interventionId) {
     const analyseDiv = document.getElementById('analyseTempsReel');
 
     if (dasSelectionnes.length === 0) {
-        analyseDiv.innerHTML = '<p class="text-muted" style="font-style: italic;">Coche des étudiant·e·s pour voir l\'analyse du sous-groupe.</p>';
+        analyseDiv.innerHTML = '<p class="text-muted" style="font-style: italic;">Coche des étudiant·es pour voir l\'analyse du sous-groupe.</p>';
         return;
     }
 
@@ -1215,7 +1215,7 @@ function afficherNotesIndividuelles(interventionId, dasSelectionnes) {
                     id="note-${da}"
                     class="controle-form"
                     rows="2"
-                    placeholder="Ex: Excellente participation, a bien saisi la stratégie enseignée..."
+                    placeholder="Ex. Excellente participation, a bien saisi la stratégie enseignée…"
                     class="u-texte-09">${noteExistante}</textarea>
             </div>
         `;
@@ -1351,7 +1351,7 @@ function sauvegarderPresencesIntervention(interventionId) {
     afficherListeInterventions();
 
     // Notification de succès
-    notifications.succes('Intervention sauvegardée avec succès');
+    notifications.succes('Intervention enregistrée');
 
 }
 
