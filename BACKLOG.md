@@ -65,6 +65,25 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - **Au moment de coder** : revérifier la cartographie (numéros de ligne) — le formulaire cours a été refondu (chantiers C/E, 29 mai) et l'écosystème pratiques touché (A-2, 30 mai).
   - Décision UX ouverte (notée dans le plan) : aligner ou non l'apparition du formulaire Enseignant·e sur « état vide masqué ». Estimation : Lot 1 ~1h, Lot 2 ~2-3h, Lot 3 ~1h.
 
+### Refonte des textes (juin 2026) — chantiers dérivés
+
+> Émergés de la refonte des textes page par page (briefs `refonte-textes-*.md` côté Cowork). Décisions transverses sorties du flux de retouche pure car ce sont de petits refactors, pas du texte.
+
+- [ ] 📐 🟡 **#309** Accord en genre pour `obtenirTermeProduction()`
+  - **Contexte** : `obtenirTermeProduction(context, maj)` (`profil-etudiant-helpers.js:43`) est la source unique du terme production/artefact (rend « artefact » en pratique portfolio `standards`, « production » en Sommative/autre). Décision Grégoire (2 juin) : router tout le texte visible par ce helper plutôt que coder le terme en dur.
+  - **Problème** : le helper ne renvoie que le **nom**. Les mots d'accord autour sont codés au **masculin** (« artefact ») ; dès que le terme bascule sur « production » (féminin), ils deviennent fautifs. **Bugs latents déjà présents** : `profil-etudiant-sections-affichage.js:536` (« productions remis / totaux ») et `:4226` (« productions retenus »). Idem aux états vides de la fiche Complétion (`638, 670`) une fois routés.
+  - **À trancher / coder** : (a) étendre le helper pour exposer le genre (ex. `{terme, genre}` ou helper compagnon `accordProduction(mot)` rendant « remis/remise », « totaux/totales »…), OU (b) réécrire les chaînes en tournures neutres. Recommandation (a), aligné Single Source of Truth.
+  - **Concerne** : Profils individuels, Liste des étudiant·es, et toute page consommant le helper. Prérequis avant d'appliquer le routage du terme dans ces briefs.
+
+- [ ] 📐 🟢 **#310** Note A/C/P statique de Suivi du groupe — convertir en JS-injecté + dédupliquer
+  - **Contexte** : la carte-note `#note-indicateurs` (`index.html` ~7740-7746) est du **HTML statique** : elle ne peut pas appeler `obtenirTermeProduction()` (CSP `script-src 'self'`) donc le terme production/artefact y reste figé, incohérent avec les notes dynamiques des autres pages.
+  - **De plus** : cette note **duplique mot pour mot** l'explication A/C/P de `etudiants.js:genererExplicationCalculIndices()` (page Liste des étudiant·es).
+  - **À trancher / coder** : (i, recommandé) convertir la note en contenu injecté par JS et **consolider une seule source** partagée par les deux pages (zéro-dette) ; ou (ii) garder statique avec terme en dur (7744 « production », 7746 « artefact »). Voir §A1 du brief `refonte-textes-suivi-groupe.md`.
+
+- [ ] 📐 🟢 **#311** Nom d'affichage des pratiques incohérent
+  - **Contexte** : la même pratique est nommée de **trois façons** dans l'UI : « PAN-Standards » (`profil-etudiant-actions.js:187, 192` ; `etudiants.js` note), « PAN (Portfolio à nombre limité) » et « SOM (Sommative provisoire) » (`profil-etudiant-sections-affichage.js:4217`).
+  - **À trancher** : choisir **une** forme d'affichage et l'appliquer partout. Lié à la décision déjà prise de **retirer « PAN-Standards »** des notes *explicatives* (la décrire « par portfolio ») — mais les libellés *fonctionnels* qui nomment la pratique active restaient en suspens. Voir §A3 du brief `refonte-textes-profils-individuels.md`.
+
 ### Fonctionnalités à compléter
 
 - [ ] 📐 🟡 **#279** Ajouter 3 champs au formulaire de production : DESCRIPTION DÉTAILLÉE des consignes, FORMAT ET MISE EN PAGE, REMISE
