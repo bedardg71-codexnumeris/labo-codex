@@ -343,13 +343,13 @@ function ouvrirModalParamsTirage() {
 
                     <!-- Nombre à tirer -->
                     <div class="form-groupe">
-                        <label for="param-nombre">Nombre d'étudiants à tirer</label>
+                        <label for="param-nombre">Nombre d'étudiant·es à tirer</label>
                         <select id="param-nombre" class="form-select">
-                            <option value="1" ${etatTirage.nombreATirer === 1 ? 'selected' : ''}>1 étudiant</option>
-                            <option value="2" ${etatTirage.nombreATirer === 2 ? 'selected' : ''}>2 étudiants</option>
-                            <option value="3" ${etatTirage.nombreATirer === 3 ? 'selected' : ''}>3 étudiants</option>
-                            <option value="4" ${etatTirage.nombreATirer === 4 ? 'selected' : ''}>4 étudiants</option>
-                            <option value="5" ${etatTirage.nombreATirer === 5 ? 'selected' : ''}>5 étudiants</option>
+                            <option value="1" ${etatTirage.nombreATirer === 1 ? 'selected' : ''}>1 étudiant·e</option>
+                            <option value="2" ${etatTirage.nombreATirer === 2 ? 'selected' : ''}>2 étudiant·es</option>
+                            <option value="3" ${etatTirage.nombreATirer === 3 ? 'selected' : ''}>3 étudiant·es</option>
+                            <option value="4" ${etatTirage.nombreATirer === 4 ? 'selected' : ''}>4 étudiant·es</option>
+                            <option value="5" ${etatTirage.nombreATirer === 5 ? 'selected' : ''}>5 étudiant·es</option>
                         </select>
                     </div>
 
@@ -680,7 +680,7 @@ function animerRouletteQuestion(pool, resultat) {
 
         // Afficher une question aléatoire
         const q = pool[Math.floor(Math.random() * pool.length)];
-        const texteAffiche = q.texte.length > 80 ? q.texte.substring(0, 80) + '...' : q.texte;
+        const texteAffiche = q.texte.length > 80 ? q.texte.substring(0, 80) + '…' : q.texte;
         affichage.innerHTML = `<span class="question-texte-anime">${echapperHtml(texteAffiche)}</span>`;
 
         // Ralentir progressivement
@@ -785,7 +785,7 @@ function ouvrirModalParamsQuestions() {
                                 `).join('')}
                             </div>
                             <div class="questions-ajouter-categorie">
-                                <input type="text" id="nouvelle-categorie" placeholder="Nouvelle catégorie..." class="form-input">
+                                <input type="text" id="nouvelle-categorie" placeholder="Nouvelle catégorie…" class="form-input">
                                 <button class="btn btn-modifier" data-action="ajouterCategorie">Ajouter</button>
                             </div>
                         </div>
@@ -797,7 +797,7 @@ function ouvrirModalParamsQuestions() {
                     <div class="form-groupe">
                         <label>Ajouter une question</label>
                         <div class="questions-ajouter-form">
-                            <textarea id="nouvelle-question" placeholder="Tape ta question..." class="form-textarea" rows="2"></textarea>
+                            <textarea id="nouvelle-question" placeholder="Tape ta question…" class="form-textarea" rows="2"></textarea>
                             <div class="questions-ajouter-actions">
                                 <select id="categorie-nouvelle-question" class="form-select">
                                     <option value="">Sans catégorie</option>
@@ -1028,7 +1028,7 @@ function ajouterCategorie() {
     const nom = input?.value.trim();
 
     if (!nom) {
-        alert('Veuillez entrer un nom de catégorie.');
+        alert('Entre un nom de catégorie.');
         return;
     }
 
@@ -1057,7 +1057,7 @@ function ajouterCategorie() {
  * Supprime une catégorie
  */
 function supprimerCategorie(categorieId) {
-    if (!confirm('Supprimer cette catégorie ? Les questions seront déplacées vers "Sans catégorie".')) {
+    if (!confirm('Supprimer cette catégorie ? Les questions seront déplacées vers «Sans catégorie».')) {
         return;
     }
 
@@ -1085,7 +1085,7 @@ function ajouterQuestion() {
 
     const texte = texteEl?.value.trim();
     if (!texte) {
-        alert('Veuillez entrer le texte de la question.');
+        alert('Entre le texte de la question.');
         return;
     }
 
