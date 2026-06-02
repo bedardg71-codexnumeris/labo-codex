@@ -47,7 +47,7 @@ function rendreReflexion() {
     html.push('<button class="bilan-btn ' + (modeApres ? 'bilan-btn-secondaire' : 'bilan-btn-principal') + '" data-action="BilanReflexif.changerEtatReflexion" data-param="avant_resultats">Avant les r\u00e9sultats</button>');
     html.push('<button class="bilan-btn ' + (modeApres ? 'bilan-btn-principal' : 'bilan-btn-secondaire') + '" data-action="BilanReflexif.changerEtatReflexion" data-param="apres_resultats">Apr\u00e8s les r\u00e9sultats</button>');
     html.push('<div style="flex:1"></div>');
-    html.push('<button class="bilan-btn bilan-btn-principal" data-action="BilanReflexif.sauvegarderReflexionExplicite">Sauvegarder</button>');
+    html.push('<button class="bilan-btn bilan-btn-principal" data-action="BilanReflexif.sauvegarderReflexionExplicite">Enregistrer</button>');
     html.push('</div>');
 
     // === BLOC A — Miroir Likert ===
