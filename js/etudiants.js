@@ -861,8 +861,11 @@ function afficherListeEtudiantsConsultation() {
     // IMPORTANT: Utiliser la même pratique que le tableau de bord (SOM ou PAN selon config)
     // Réutiliser la variable config déjà chargée à la ligne 847
     const affichage = config.affichageTableauBord || {};
-    const afficherSommatif = affichage.afficherSommatif !== false;
-    const afficherAlternatif = affichage.afficherAlternatif !== false;
+    // #308 : aligner sur `=== true` (cf. tableau-bord-apercu.js). Clés absentes →
+    // aucun mode → pratiqueAffichee null → calculerTousLesIndices déduit la
+    // pratique active. `!== false` rallumait un mode comparatif fantôme (PAN forcé).
+    const afficherSommatif = affichage.afficherSommatif === true;
+    const afficherAlternatif = affichage.afficherAlternatif === true;
 
     // Déterminer quelle pratique afficher (cohérence avec apercu-contenu.js)
     let pratiqueAffichee = null;
