@@ -281,12 +281,12 @@ function mettreAJourSousCategories() {
     const selectSousCategorie = document.getElementById('confidentiel-sous-categorie');
 
     if (!categorie) {
-        selectSousCategorie.innerHTML = '<option value="">-- Sélectionner une catégorie d\'abord --</option>';
+        selectSousCategorie.innerHTML = '<option value="">— Sélectionner une catégorie d\'abord —</option>';
         return;
     }
 
     const sousCategories = SOUS_CATEGORIES_SERVICES[categorie] || [];
-    selectSousCategorie.innerHTML = '<option value="">-- Sélectionner --</option>' + // security-ok: valeurs statiques SOUS_CATEGORIES_SERVICES + echapperHtml() défense profondeur (transfert refactor neutre depuis profil-etudiant.js)
+    selectSousCategorie.innerHTML = '<option value="">— Sélectionner —</option>' + // security-ok: valeurs statiques SOUS_CATEGORIES_SERVICES + echapperHtml() défense profondeur (transfert refactor neutre depuis profil-etudiant.js)
         sousCategories.map(sc => `<option value="${echapperHtml(sc)}">${echapperHtml(sc)}</option>`).join('');
 }
 

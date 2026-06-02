@@ -733,7 +733,7 @@ function genererSectionMobilisationEngagement(da) {
                                     ${art.jetonReprise ? '<span class="profil-texte-petit" title="Jeton de reprise appliqué">⭐</span>' : ''}
                                     ${art.jetonDelai ? '<span class="profil-texte-petit" title="Jeton de délai appliqué">⭐</span>' : ''}
                                     <span class="badge-artefact-note" style="background: ${couleurBadge};">
-                                        ${art.niveau || '--'}
+                                        ${art.niveau || '—'}
                                     </span>
                                     <span class="u-texte-petit u-texte-gris" style="font-weight: 500;">
                                         (${art.note})
@@ -1585,7 +1585,7 @@ function genererCarteCibleIntervention(da) {
         return `
             <div class="info-box info-box--attention">
                 <strong><img src="icons/icons8-high-priority.svg" alt="" class="alerte-icone">Configuration requise</strong><br>
-                Veuillez configurer une pratique de notation dans Réglages › Pratique de notation.
+                Configure une pratique de notation dans Conception › Pratiques de notation.
             </div>
         `;
     }
@@ -3100,7 +3100,7 @@ function genererTableauObjectifs(da, ensembleId, noteFinaleMultiObjectifs) {
                         const P = perf?.P ?? null;
                         const nbArtefacts = perf?.nbArtefacts ?? 0;
 
-                        let niveau = '--';
+                        let niveau = '—';
                         let couleurNiveau = 'var(--gris-clair)';
                         let couleurStatut = 'var(--gris-clair)';
                         let labelStatut = 'Non évalué';

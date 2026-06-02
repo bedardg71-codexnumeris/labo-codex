@@ -184,10 +184,10 @@ function _diagnostiquerNoteNonCalculable() {
     const famille = (typeof normaliserIdPratique === 'function') ? normaliserIdPratique(pratiqueData.type || '') : (pratiqueData.type || '');
     const methode = pratiqueData.calcul_note && pratiqueData.calcul_note.methode;
     if (famille === 'sommative' || methode === 'moyenne_ponderee') {
-        return 'Cette pratique est de type Sommative (moyenne pondérée). La note de session affichée ici se calcule par portfolio, propre aux PAN-Standards : le calcul Sommatif dans le profil n\'est pas encore branché. Tes données sont cohérentes — c\'est l\'affichage qui ne couvre pas encore cette famille (à venir).';
+        return 'Cette pratique est de type Sommative (moyenne pondérée). La note de session affichée ici se calcule par portfolio, propre aux PAN-Standards : le calcul Sommatif dans le profil n\'est pas encore branché. Tes données sont cohérentes – c\'est l\'affichage qui ne couvre pas encore cette famille (à venir).';
     }
     if (famille === 'specifications' || methode === 'specifications') {
-        return 'Cette pratique est de type Spécifications (exigences/seuils). Son calcul dans le profil n\'est pas encore branché. Tes données sont cohérentes — c\'est l\'affichage qui ne couvre pas encore cette famille (à venir).';
+        return 'Cette pratique est de type Spécifications (exigences/seuils). Son calcul dans le profil n\'est pas encore branché. Tes données sont cohérentes – c\'est l\'affichage qui ne couvre pas encore cette famille (à venir).';
     }
     return 'Pratique PAN-Standards, mais sa configuration de portfolio (nombre d\'artefacts à retenir, minimum requis) est absente ou incomplète. Ouvre « Réglages de la pratique » pour la compléter.';
 }

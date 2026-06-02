@@ -297,7 +297,7 @@ function copierRapport(da) {
     const textarea = document.getElementById(`textarea-rapport-${da}`);
 
     if (!textarea || !textarea.value || textarea.value.trim() === '') {
-        alert('Veuillez d\'abord générer un rapport avant de le copier.');
+        alert('Génère d\'abord un rapport avant de le copier.');
         return;
     }
 
@@ -315,7 +315,7 @@ function copierRapport(da) {
                 if (success) {
                     notifications.succes("Rapport copié dans le presse-papiers !");
                 } else {
-                    alert('Erreur lors de la copie. Veuillez sélectionner le texte manuellement (Ctrl+A puis Ctrl+C).');
+                    alert('La copie a échoué. Sélectionne le texte manuellement (Ctrl+A puis Ctrl+C).');
                 }
             });
         } else {
@@ -324,12 +324,12 @@ function copierRapport(da) {
             if (success) {
                 notifications.succes("Rapport copié dans le presse-papiers !");
             } else {
-                alert('Erreur lors de la copie. Veuillez sélectionner le texte manuellement (Ctrl+A puis Ctrl+C).');
+                alert('La copie a échoué. Sélectionne le texte manuellement (Ctrl+A puis Ctrl+C).');
             }
         }
     } catch (err) {
         console.error('Erreur copie:', err);
-        alert('Erreur lors de la copie. Veuillez sélectionner le texte manuellement (Ctrl+A puis Ctrl+C).');
+        alert('La copie a échoué. Sélectionne le texte manuellement (Ctrl+A puis Ctrl+C).');
     }
 
 }
@@ -343,7 +343,7 @@ function viderRapport(da) {
     const btnCopier = document.getElementById(`btn-copier-rapport-${da}`);
 
     if (textarea) {
-        textarea.value = 'Clique sur "Générer le rapport" pour afficher le contenu...';
+        textarea.value = 'Clique sur "Générer le rapport" pour afficher le contenu…';
     }
 
     if (btnCopier) {
