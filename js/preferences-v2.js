@@ -378,7 +378,7 @@
     function sauvegarderToutesPreferencesV2() {
         sauvegarderPreferencesV2();
         sauvegarderSeuilsV2();
-        notifications.succes('Préférences sauvegardées avec succès');
+        notifications.succes('Préférences enregistrées');
     }
 
     // =========================================================================
