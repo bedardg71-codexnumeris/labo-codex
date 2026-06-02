@@ -202,7 +202,7 @@ function afficherAccueilContenu(conteneur) {
 
         <div class="accueil-pied">
             <a href="https://codexnumeris.org" target="_blank" rel="noopener noreferrer" class="accueil-pied-logo-link">
-                <img src="img/logo-codex-numeris.png" alt="Logo Labo Codex" class="accueil-pied-logo">
+                <img src="img/logo-codex-numeris.svg" alt="Logo Codex Numeris" class="accueil-pied-logo">
             </a>
             <a href="https://codexnumeris.org" target="_blank" rel="noopener noreferrer" class="accueil-pied-lien-site">codexnumeris.org</a>
             <span class="accueil-pied-tagline">R\u00e9fl\u00e9chir, exp\u00e9rimenter, partager.</span>
