@@ -374,7 +374,7 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
         var donnees = calculerCorrelationsLongitudinales();
         if (!donnees || donnees.semaines.length < 2) {
             if (typeof afficherMessageAttente === 'function') {
-                afficherMessageAttente(canvas, 'Données insuffisantes', 'Au moins 2 semaines de snapshots nécessaires');
+                afficherMessageAttente(canvas, 'Données insuffisantes', 'Au moins 2 semaines de relevés nécessaires');
             }
             return;
         }
@@ -763,7 +763,7 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
                 if (donnees.n[dn] > 0) { dernierN = donnees.n[dn]; break; }
             }
             desc.textContent = 'Corrélation de Pearson (r) entre chaque indice et P, calculée sur ' +
-                nbSem + ' semaines (' + dernierN + ' étudiants). Lignes pointillées : seuils faible (±0,3) et modéré (±0,5).';
+                nbSem + ' semaines (' + dernierN + ' étudiant·es). Lignes pointillées : seuils faible (±0,3) et modéré (±0,5).';
         }
 
         // Générer les checkboxes intervention dynamiquement
