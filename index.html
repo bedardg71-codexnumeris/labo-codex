@@ -7920,7 +7920,7 @@
                             <button class="btn-aide-contextuelle" data-aide="suivi-liste" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>
                         </span>
                     </h2>
-                    <p class="text-muted">Consultation de la liste complète et accès aux portfolios individuels</p>
+                    <p class="text-muted">Parcours tout le groupe et ouvre le portfolio de chaque étudiant·e.</p>
 
                     <!-- Carte Note Détails Calcul (cachée par défaut) -->
                     <div id="note-calcul-indices-liste" class="carte-info-toggle carte-info-note u-mb-20" style="display: none">
@@ -7964,10 +7964,10 @@
                                     </select>
                                 </div>
                                 <div class="groupe-form">
-                                    <label for="filtre-pattern-liste" data-tooltip="liste-filtre-pattern">Pattern d'apprentissage</label>
+                                    <label for="filtre-pattern-liste" data-tooltip="liste-filtre-pattern">Profils d'apprentissage</label>
                                     <select id="filtre-pattern-liste" class="controle-form"
                                         data-on-change="afficherListeEtudiantsConsultation">
-                                        <option value="">Tous les patterns</option>
+                                        <option value="">Tous les profils</option>
                                         <option value="defi-specifique">Défi spécifique</option>
                                         <option value="stable">Stable</option>
                                         <option value="difficulte-emergente">Difficulté émergente</option>
@@ -7978,7 +7978,7 @@
                                 <div class="groupe-form">
                                     <label for="recherche-nom-liste" data-tooltip="liste-recherche">Recherche</label>
                                     <input type="text" id="recherche-nom-liste" class="controle-form"
-                                        placeholder="Nom, prénom ou DA..." data-on-input="afficherListeEtudiantsConsultation">
+                                        placeholder="Nom, prénom ou DA…" data-on-input="afficherListeEtudiantsConsultation">
                                 </div>
                                 <div class="groupe-form" style="display: flex; align-items: flex-end;">
                                     <button class="btn btn-secondaire" data-action="reinitialiserFiltresListeEtudiants" title="Réinitialiser tous les filtres">
@@ -7999,20 +7999,20 @@
                             <label><input type="checkbox" data-colonne="assiduite" checked data-on-change="toggleColonneListe"> A</label>
                             <label><input type="checkbox" data-colonne="completion" checked data-on-change="toggleColonneListe"> C</label>
                             <label><input type="checkbox" data-colonne="performance" checked data-on-change="toggleColonneListe"> P</label>
-                            <label><input type="checkbox" data-colonne="pattern" checked data-on-change="toggleColonneListe"> Pattern</label>
+                            <label><input type="checkbox" data-colonne="pattern" checked data-on-change="toggleColonneListe"> Profils</label>
                             <label><input type="checkbox" data-colonne="rai" checked data-on-change="toggleColonneListe"> RàI</label>
                             <label><input type="checkbox" data-colonne="interv" checked data-on-change="toggleColonneListe"> Interv.</label>
                             <span class="texte-muted" style="font-size: 0.8rem; margin-left: 12px;">En-tête :</span>
                             <label><input type="checkbox" id="chk-entete-moy" checked data-on-change="toggleLigneEntete" data-param="moy"> Moy.</label>
                             <label><input type="checkbox" id="chk-entete-corr" checked data-on-change="toggleLigneEntete" data-param="corr"> r↔P</label>
-                            <label title="Griser les étudiant·e·s sous le minimum d'évaluations et recalculer les moyennes"><input type="checkbox" id="chk-filtre-minimum" data-on-change="toggleFiltreMinimum"> ≥ Min. <span id="badge-nb-insuffisants" style="color: var(--gris-moyen); font-size: 0.75rem;"></span></label>
+                            <label title="Griser les étudiant·es sous le minimum d'évaluations et recalculer les moyennes"><input type="checkbox" id="chk-filtre-minimum" data-on-change="toggleFiltreMinimum"> ≥ Min. <span id="badge-nb-insuffisants" style="color: var(--gris-moyen); font-size: 0.75rem;"></span></label>
                         </div>
 
                         <!-- Note explicative : transparence sur le calcul des moyennes et corrélations -->
                         <details class="u-mb-8" style="font-size: 0.85rem; color: var(--texte-muted);">
                             <summary style="cursor: pointer; user-select: none;"><strong>Comment lire l'en-tête (moyennes et corrélations)</strong></summary>
                             <div class="u-mt-8" style="line-height: 1.5;">
-                                <p class="u-mb-8"><strong>Population utilisée pour les statistiques.</strong> Les <strong>moy=</strong> et les corrélations <strong>r↔P</strong> sont calculées sur les étudiants <strong>actifs</strong> uniquement. Les abandons et inactifs (statuts « abandon », « inactif », « décrochage ») sont toujours <em>affichés</em> dans le tableau pour consultation, mais <em>exclus</em> des statistiques : un étudiant qui a quitté la classe ne fait plus partie de la population pédagogique observée. Cocher <strong>≥ Min.</strong> exclut en plus les étudiants sous le seuil d'évaluations requis pour qu'un P soit jugé fiable.</p>
+                                <p class="u-mb-8"><strong>Population utilisée pour les statistiques.</strong> Les <strong>moy=</strong> et les corrélations <strong>r↔P</strong> sont calculées sur les étudiant·es <strong>actifs</strong> uniquement. Les abandons et inactifs (statuts « abandon », « inactif », « décrochage ») sont toujours <em>affichés</em> dans le tableau pour consultation, mais <em>exclus</em> des statistiques : un·e étudiant·e qui a quitté la classe ne fait plus partie de la population pédagogique observée. Cocher <strong>≥ Min.</strong> exclut en plus les étudiant·es sous le seuil d'évaluations requis pour qu'un P soit jugé fiable.</p>
                                 <p class="u-mb-8"><strong>Que veulent dire les <code>r=</code> ?</strong> Ce sont des coefficients de corrélation de Pearson : ils mesurent à quel point un indicateur (A, C, pattern, niveau RàI, nombre d'interventions) <em>varie en parallèle</em> avec la performance P. Échelle :</p>
                                 <ul class="u-mb-8" style="margin-left: 18px; padding-left: 4px;">
                                     <li><code>r ≈ +1</code> → lien positif fort (quand l'un monte, l'autre monte)</li>
@@ -8025,7 +8025,7 @@
                                     <li><strong>Groupe homogène</strong> sur cet indicateur : si presque tout le monde est à A=90-100%, mathématiquement r doit être petit, même si l'absentéisme ferait chuter P. Vérifier en regardant la dispersion des points dans la barre Aperçu.</li>
                                     <li><strong>Effet plafond / plancher</strong> : si la majorité atteint le même palier (ex. P groupée autour de la note de passage), Pearson capte mal le lien.</li>
                                     <li><strong>Le levier dominant est ailleurs</strong> : si <code>r(A↔P)</code> est faible mais <code>r(C↔P)</code> élevé, c'est la <em>mobilisation</em> (remettre les travaux) qui prédit P, pas la simple présence en classe.</li>
-                                    <li><strong>Paradoxe du succès</strong> : une stratégie pédagogique qui ramène dans le rang les étudiant·e·s à risque (reprises, acceptation des travaux en retard) <em>réduit la variance</em> de A et C, ce qui fait <em>chuter r mécaniquement</em>, même si le lien sous-jacent est inchangé. Une r en baisse d'une session à l'autre peut donc être le signe que votre intervention <em>fonctionne</em> — l'effet préventif fait disparaître le signal qu'il neutralise.</li>
+                                    <li><strong>Paradoxe du succès</strong> : une stratégie pédagogique qui ramène dans le rang les étudiant·es à risque (reprises, acceptation des travaux en retard) <em>réduit la variance</em> de A et C, ce qui fait <em>chuter r mécaniquement</em>, même si le lien sous-jacent est inchangé. Une r en baisse d'une session à l'autre peut donc être le signe que ton intervention <em>fonctionne</em> : l'effet préventif fait disparaître le signal qu'il neutralise.</li>
                                     <li><strong>Données encore peu nombreuses</strong> : avec peu d'évaluations ou peu d'étudiants actifs, r est instable. Attendre quelques productions de plus avant d'interpréter.</li>
                                     <li><strong>Vrai lien faible</strong> dans ce groupe à ce moment : information actionnable, à comparer aux autres r pour repérer le levier réel.</li>
                                 </ul>
@@ -8065,7 +8065,7 @@
                                             P<br><span class="text-xs-normal">(performance)</span><span id="tri-performance" class="ml-4">↕</span>
                                         </th>
                                         <th data-action="trierTableauPar" data-param="pattern" class="td-left-140-clickable" title="Cliquer pour trier">
-                                            Pattern<span id="tri-pattern" class="ml-4">↕</span>
+                                            Profils<span id="tri-pattern" class="ml-4">↕</span>
                                         </th>
                                         <th data-action="trierTableauPar" data-param="rai" class="td-center-100-clickable" title="Cliquer pour trier">
                                             RàI<span id="tri-rai" class="ml-4">↕</span>
@@ -8105,7 +8105,7 @@
                                     Aucun résultat avec les filtres actuels.
                                 </span>
                                 <span id="message-liste-vide" class="u-hide">
-                                    Va dans <strong>Réglages › Groupe</strong> pour ajouter des étudiant·es
+                                    Va dans <strong>Cadre › Trimestre</strong> pour ajouter des étudiant·es
                                 </span>
                             </p>
                             <button data-action="resetFiltresListe" id="btn-reset-filtres" class="btn btn-annuler">
