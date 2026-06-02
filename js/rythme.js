@@ -962,7 +962,7 @@
                 if (plage.estConge && plage.type !== 'ferie-travaille') {
                     html += '<div class="rythme-jour-info">Congé' + (plage.motif ? ' — ' + echapperHtml(plage.motif) : '') + '</div>';
                 } else if (plage.estWeekend && plage.heuresLibres === 0) {
-                    html += '<div class="rythme-jour-info">Weekend</div>';
+                    html += '<div class="rythme-jour-info">Fin de semaine</div>';
                 } else {
                     // Mention reprise
                     if (plage.estReprise && plage.jourEffectif !== plage.jourSemaine) {
@@ -985,7 +985,7 @@
 
                     if (plage.heuresLibres > 0) {
                         var labelType = plage.type === 'ferie-travaille' ? 'Journée libre'
-                            : plage.estWeekend ? 'Weekend'
+                            : plage.estWeekend ? 'Fin de semaine'
                             : plage.type === 'libre' ? 'Journée libre'
                             : plage.type === 'partiel' ? 'Demi-journée'
                             : 'Soirée';
@@ -1109,7 +1109,7 @@
         var pctSoir = total > 0 ? Math.round(totalSoir / total * 100) : 0;
         html += '<div class="rythme-portrait-resume u-mt-10">';
         if (pctWeekend > 0) {
-            html += '<span>' + pctWeekend + '% de tes évaluations sont en weekend</span>';
+            html += '<span>' + pctWeekend + '% de tes évaluations sont en fin de semaine</span>';
         }
         if (pctSoir > 0) {
             html += '<span>' + pctSoir + '% sont en soirée tardive ou la nuit</span>';
