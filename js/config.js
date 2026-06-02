@@ -47,7 +47,7 @@ const configurationsOnglets = {
     ],
     'calendrier': [
         { id: 'trimestre', label: 'Trimestre' },
-        { id: 'vue', label: 'Vue calendaire' }
+        { id: 'vue', label: 'Calendrier scolaire' }
     ],
     'suivi': [
         { id: 'groupe', label: 'Suivi du groupe' },

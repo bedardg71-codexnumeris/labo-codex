@@ -20,7 +20,7 @@
 // init-inline.js compare cette valeur au BUILD_ID lu depuis version.json :
 // si différent, Safari file:// a probablement un main.js périmé en cache,
 // et la séquence reload+bandeau s'enclenche. SYNCHRONISER À CHAQUE BUMP.
-window._SCRIPT_BUILD_main = '0602-1133';
+window._SCRIPT_BUILD_main = '0602-1156';
 
 /* ===============================
    FONCTION GLOBALE: Génération d'ID uniques
@@ -688,7 +688,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Ces modules lisent les données générées par les modules sources
     // ===============================
 
-    // MODULE 09-1: Vue calendaire (lit calendrierComplet)
+    // MODULE 09-1: Calendrier scolaire (lit calendrierComplet)
     if (typeof initialiserModuleVueCalendaire === 'function') {
         initialiserModuleVueCalendaire();
     }
