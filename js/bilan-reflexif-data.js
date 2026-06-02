@@ -53,7 +53,7 @@ var BLOCS_DEMO = [
         questions: [
             { id: 'q_retro_01', texte: 'Les r\u00e9troactions re\u00e7ues me permettent de m\u2019am\u00e9liorer.', type: 'likert4', obligatoire: true, personnalisee: false },
             { id: 'q_retro_02', texte: 'Je re\u00e7ois les r\u00e9troactions dans un d\u00e9lai raisonnable.', type: 'likert4', obligatoire: true, personnalisee: false },
-            { id: 'q_retro_03', texte: 'L\u2019enseignant est disponible quand j\u2019ai besoin d\u2019aide.', type: 'likert4', obligatoire: true, personnalisee: false },
+            { id: 'q_retro_03', texte: 'L\u2019enseignant·e est disponible quand j\u2019ai besoin d\u2019aide.', type: 'likert4', obligatoire: true, personnalisee: false },
             { id: 'q_retro_04', texte: 'Je me sens \u00e0 l\u2019aise de poser des questions en classe.', type: 'likert4', obligatoire: true, personnalisee: false },
             { id: 'q_retro_ouvert', texte: 'As-tu des commentaires sur l\u2019accompagnement re\u00e7u\u00a0?', type: 'ouvert', obligatoire: false, personnalisee: false }
         ]
@@ -217,7 +217,7 @@ function genererResultatsDemo() {
             'Posez des questions, l\u2019enseignant est vraiment l\u00e0 pour aider.',
             'Ne sous-estimez pas les travaux pratiques.',
             'C\u2019est un cours exigeant mais formateur.',
-            'Gardez vos notes \u00e0 jour, \u00e7a aide pour la r\u00e9vision.'
+            'Garde tes notes \u00e0 jour, \u00e7a aide pour la r\u00e9vision.'
         ]
     };
 

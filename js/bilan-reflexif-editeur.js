@@ -53,7 +53,7 @@ function rendreEditeur() {
 
     // Préambule (multi-lignes, optionnel) — affiché aux élèves dans le formulaire en ligne
     var preambuleVal = q.preambule ? String(q.preambule) : '';
-    html.push('<textarea class="bilan-preambule-input" id="bilan-preambule" data-on-change="BilanReflexif.modifierPreambule" placeholder="Préambule (optionnel) — texte d’introduction affiché aux étudiant·e·s dans le formulaire en ligne…" rows="2">' + echapperHtml(preambuleVal) + '</textarea>');
+    html.push('<textarea class="bilan-preambule-input" id="bilan-preambule" data-on-change="BilanReflexif.modifierPreambule" placeholder="Préambule (optionnel) — texte d’introduction affiché aux étudiant·es dans le formulaire en ligne…" rows="2">' + echapperHtml(preambuleVal) + '</textarea>');
 
     // Barre d'actions
     html.push('<div class="bilan-actions">');
@@ -266,7 +266,7 @@ function rendreBlocHTML(bloc, indexBloc) {
     // Description du bloc (optionnelle, multi-lignes courte)
     var descVal = bloc.description ? String(bloc.description) : '';
     html.push('<div class="bilan-bloc-description-zone">');
-    html.push('<textarea class="bilan-bloc-description-input" id="bilan-desc-' + bloc.id + '" data-on-change="BilanReflexif.modifierDescriptionBloc" data-param="' + bloc.id + '" placeholder="Description du bloc (optionnelle) — affichée aux étudiant·e·s comme cadrage de la section…" rows="1">' + echapperHtml(descVal) + '</textarea>');
+    html.push('<textarea class="bilan-bloc-description-input" id="bilan-desc-' + bloc.id + '" data-on-change="BilanReflexif.modifierDescriptionBloc" data-param="' + bloc.id + '" placeholder="Description du bloc (optionnelle) — affichée aux étudiant·es comme cadrage de la section…" rows="1">' + echapperHtml(descVal) + '</textarea>');
     html.push('</div>');
     for (var j = 0; j < bloc.questions.length; j++) {
         var q = bloc.questions[j];
