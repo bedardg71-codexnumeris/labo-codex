@@ -651,7 +651,7 @@ function obtenirSeancesJour(dateStr, coursId = null) {
 }
 
 /**
- * API publique : Détermine le rang de la séance dans sa semaine (1ère, 2ème, etc.)
+ * API publique : Détermine le rang de la séance dans sa semaine (1re, 2e, etc.)
  * 🎯 SOURCE UNIQUE DE VÉRITÉ pour le calcul du rang
  *
  * 🆕 BETA 95 : Support multi-cours avec coursId optionnel
@@ -662,7 +662,7 @@ function obtenirSeancesJour(dateStr, coursId = null) {
  *
  * @example
  * const rang = obtenirRangSeanceDansSemaine('2025-11-12');
- * // => { rang: 1, total: 2, ordinal: '1ère' }
+ * // => { rang: 1, total: 2, ordinal: '1re' }
  */
 function obtenirRangSeanceDansSemaine(dateStr, coursId = null) {
     try {
@@ -743,8 +743,8 @@ function obtenirRangSeanceDansSemaine(dateStr, coursId = null) {
         const total = joursAvecSeances.length;
 
         // Générer l'ordinal en français
-        const ordinaux = ['', '1ère', '2ème', '3ème', '4ème', '5ème'];
-        const ordinal = ordinaux[rang] || `${rang}ème`;
+        const ordinaux = ['', '1re', '2e', '3e', '4e', '5e'];
+        const ordinal = ordinaux[rang] || `${rang}e`;
 
         return { rang, total, ordinal };
     } catch (error) {

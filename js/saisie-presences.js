@@ -761,7 +761,7 @@ function initialiserSaisiePresences() {
         let messageCompteur = '';
         switch (validation.raison) {
             case 'vide':
-                messageTableau = 'Veuillez sélectionner une date';
+                messageTableau = 'Sélectionne une date';
                 messageCompteur = 'Sélectionne une date';
                 break;
             case 'conge':
@@ -1033,7 +1033,7 @@ function chargerTableauPresences(dateStr, estVerrouille) {
                        class="controle-form input-notes"
                        id="notes_${etudiant.da}"
                        value="${echapperHtml(notes)}"
-                       placeholder="Notes..."
+                       placeholder="Notes…"
                        ${estVerrouille ? 'disabled' : ''}>
             </td>
             <td><span id="heuresHisto_${etudiant.da}">${Math.round(totalPeriodesPresentes)} pér.</span></td>
@@ -1049,7 +1049,7 @@ function chargerTableauPresences(dateStr, estVerrouille) {
     // Mettre à jour le compteur
     const nbEtudiants = document.getElementById('nbEtudiantsPresences');
     if (nbEtudiants) {
-        nbEtudiants.textContent = etudiantsFiltres.length;
+        nbEtudiants.textContent = '(' + etudiantsFiltres.length + ' ' + window.pluriel(etudiantsFiltres.length, 'étudiant·e', 'étudiant·es') + ')';
     }
 
     // Mettre à jour le titre de la colonne Présence avec bouton
@@ -1252,7 +1252,7 @@ function mettreAJourLigne(da, dateStr) {
 function enregistrerPresences() {
     const dateInput = document.getElementById('date-cours');
     if (!dateInput || !dateInput.value) {
-        alert('Veuillez sélectionner une date');
+        alert('Sélectionne une date');
         return;
     }
 
@@ -1260,7 +1260,7 @@ function enregistrerPresences() {
     const validation = validerDateSaisie(dateStr);
 
     if (validation.verrouille) {
-        alert('Cette date est verrouillée. Déverrouillez-la d\'abord pour modifier les présences.');
+        alert('Cette date est verrouillée. Déverrouille-la d\'abord pour modifier les présences.');
         return;
     }
 
@@ -1349,7 +1349,7 @@ function enregistrerPresences() {
         return;
     }
 
-    notifications.succes('Présences enregistrées avec succès');
+    notifications.succes('Présences enregistrées');
 
     calculerEtSauvegarderIndicesAssiduite();
 
