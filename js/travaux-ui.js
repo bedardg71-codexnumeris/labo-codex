@@ -827,10 +827,10 @@
         const zeroStateHTML = (fichiersTravaux.length === 0 && queue.length === 0 && aideActive) ? `
             <div class="travaux-zero-state">
                 <div class="zero-state-icone">&#x1F4DD;</div>
-                <h3>Annoter les travaux de tes étudiants</h3>
+                <h3>Prépare et importe les copies de tes étudiant·es</h3>
                 <p class="texte-muted">
-                    L'annotation te permet de marquer directement sur les copies :
-                    surlignage, commentaires, symboles et autocollants de retroaction.
+                    Dépose les copies numérisées (PDF ou images) : le processus les optimise,
+                    regroupe les pages d'une même copie et les associe à une production, prêtes à annoter.
                 </p>
                 <div class="zero-state-etapes">
                     <div class="zero-state-etape">
@@ -844,7 +844,7 @@
                         <span class="etape-numero">2</span>
                         <div>
                             <strong>Traite et identifie</strong>
-                            <small>Le pipeline optimise et associe automatiquement</small>
+                            <small>Le processus optimise et associe automatiquement</small>
                         </div>
                     </div>
                     <div class="zero-state-etape">
@@ -862,10 +862,10 @@
 
                 <div class="travaux-import-header">
                     <h3>Préparer et importer
-                        <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>
+                        <button class="btn-aide-contextuelle" data-aide="evaluations-importer" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>
                     </h3>
                     <div class="pipeline-stats">
-                        ${queue.length > 0 ? `${queue.length} fichier(s) en file — ${travauxStockage.formaterTaille(queue.reduce((s, f) => s + f.tailleFichier, 0))}` : ''}
+                        ${queue.length > 0 ? `${queue.length} ${window.pluriel(queue.length, 'fichier', 'fichiers')} en file — ${travauxStockage.formaterTaille(queue.reduce((s, f) => s + f.tailleFichier, 0))}` : ''}
                     </div>
                 </div>
 
@@ -874,7 +874,7 @@
                     ${fsapiActif
                         ? '<span class="travaux-fsapi-statut actif">Stockage sur disque actif</span>'
                         : `<button class="btn btn-secondaire" data-action="travauxUI.configurerFSAPI">Configurer le stockage sur disque</button>
-                           <span class="texte-muted">Recommande sur Mac</span>`
+                           <span class="texte-muted">Recommandé sur Mac</span>`
                     }
                 </div>` : ''}
 
@@ -908,7 +908,7 @@
                         <div class="pipeline-etape-header">
                             <span class="pipeline-etape-numero">2</span>
                             <span class="pipeline-etape-titre" data-tooltip="travaux-pipeline-optimisation">Optimisation</span>
-                            <span class="pipeline-etape-compteur">${nbImages} image(s)</span>
+                            <span class="pipeline-etape-compteur">${nbImages} ${window.pluriel(nbImages, 'image', 'images')}</span>
                         </div>
                         ${genererEtape2Colonnes(queue, groupes)}
                     </div>
@@ -932,8 +932,8 @@
                     const sansProduction = queue.filter(f => !f.productionId).length;
                     if (sansProduction > 0) {
                         return `<div class="info-box info-box--attention" style="margin-top: 12px;">
-                            <img src="icons/icons8-high-priority.svg" alt="" class="alerte-icone"> ${sansProduction} fichier(s) ne sont associés à aucune production.
-                            Vérifie que les productions ont été créées dans « Construction de la note ».
+                            <img src="icons/icons8-high-priority.svg" alt="" class="alerte-icone"> ${sansProduction} ${window.pluriel(sansProduction, 'fichier', 'fichiers')} ${window.pluriel(sansProduction, "n'est associé", 'ne sont associés')} à aucune production.
+                            Vérifie que les productions ont été créées dans « Productions étudiantes » (onglet Conception).
                         </div>`;
                     }
                     return '';
@@ -1686,7 +1686,7 @@
         colCentre += `<div class="pipeline-production-selecteur">
             <label>Production</label>
             <select class="form-select" id="pipeline-select-production" data-on-change="travauxUI.associerProductionGlobale">
-                <option value="">-- Choisir une production --</option>
+                <option value="">— Choisir une production —</option>
                 ${productions.map(p => `<option value="${echapperHtml(p.id)}" ${prodActuelle === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
                 ${jetonsActifs ? `<option value="__jeton_reprise__" ${prodActuelle === '__jeton_reprise__' || modeJetonActif ? 'selected' : ''}>Jeton de reprise</option>` : ''}
             </select>
@@ -1699,7 +1699,7 @@
             colCentre += `<div class="pipeline-jeton-sous-select" id="pipeline-jeton-production">
                 <label>Pour quelle production ?</label>
                 <select class="form-select" data-on-change="travauxUI.associerJetonProduction">
-                    <option value="">-- Choisir --</option>
+                    <option value="">— Choisir —</option>
                     ${productions.map(p => `<option value="${echapperHtml(p.id)}" ${prodJeton === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
                 </select>
             </div>`;
@@ -1743,7 +1743,7 @@
             </div>`;
 
             // Metadata du fichier
-            colCentre += '<p class="texte-muted u-texte-petit" style="margin:10px 0 4px 0;">M\u00e9tadonn\u00e9es</p>';
+            colCentre += '<p class="texte-muted u-texte-petit" style="margin:10px 0 4px 0;">Informations du fichier</p>';
             const modeLea = f.modeImport !== 'autre';
             const dateVal = f.dateFichier ? new Date(f.dateFichier).toISOString().substring(0, 10) : '';
             const nomEtudiant = f.etudiantAssocie
@@ -1780,7 +1780,7 @@
             colCentre += `<div class="pipeline-champ">
                 <label>Production</label>
                 <select class="form-select pipeline-select-petit" data-on-change="travauxUI.changerProductionPipeline" data-param="${idx}">
-                    <option value="">--</option>
+                    <option value="">—</option>
                     ${productions.map(p => `<option value="${echapperHtml(p.id)}" ${f.productionId === p.id && !f.estReprise ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
                     ${jetonsActifs ? `<option value="__jeton_reprise__" ${f.estReprise ? 'selected' : ''}>Jeton de reprise</option>` : ''}
                 </select>
@@ -1790,7 +1790,7 @@
                 colCentre += `<div class="pipeline-champ pipeline-jeton-sous-select">
                     <label>Pour quelle production ?</label>
                     <select class="form-select pipeline-select-petit" data-on-change="travauxUI.changerJetonProductionPipeline" data-param="${idx}">
-                        <option value="">--</option>
+                        <option value="">—</option>
                         ${productions.map(p => `<option value="${echapperHtml(p.id)}" ${f.productionId === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
                     </select>
                 </div>`;
@@ -3022,7 +3022,7 @@
         const queue = travauxImport.obtenirFileDAttente();
 
         if (queue.length === 0) {
-            alert('Aucun fichier a importer');
+            alert('Aucun fichier à importer.');
             return;
         }
 
@@ -3034,7 +3034,7 @@
         const nomGroupe = selectGC?.selectedOptions[0]?.textContent?.trim() || '';
         const msgGroupe = nomGroupe ? `dans le groupe « ${nomGroupe} » et ` : '';
 
-        if (!confirm(`${queue.length} fichier(s) seront importés ${msgGroupe}${msgProd}.\n\nConfirmer l\u2019importation ?`)) return;
+        if (!confirm(`${queue.length} ${window.pluriel(queue.length, 'fichier', 'fichiers')} ${window.pluriel(queue.length, 'sera importé', 'seront importés')} ${msgGroupe}${msgProd}.\n\nConfirmer l\u2019importation ?`)) return;
 
         const progression = document.getElementById('travaux-progression-import');
         if (progression) progression.classList.remove('u-hide');
@@ -3044,7 +3044,7 @@
             const barre = document.getElementById('travaux-barre-progression');
             if (barre) barre.style.width = pourcent + '%';
             const texte = document.getElementById('travaux-texte-progression');
-            if (texte) texte.textContent = `${i}/${total} fichier(s) importés...`;
+            if (texte) texte.textContent = `${i}/${total} ${window.pluriel(total, 'fichier', 'fichiers')} importés...`;
         });
 
         if (progression) progression.classList.add('u-hide');
@@ -3052,7 +3052,7 @@
         // Rafraichir l'affichage
         afficherImport();
 
-        alert(`Import terminé : ${resultat.importes} fichier(s) importé(s), ${resultat.erreurs} erreur(s)`);
+        alert(`Import terminé : ${resultat.importes} ${window.pluriel(resultat.importes, 'fichier', 'fichiers')} ${window.pluriel(resultat.importes, 'importé', 'importés')}, ${resultat.erreurs} ${window.pluriel(resultat.erreurs, 'erreur', 'erreurs')}`);
     }
 
     /**
@@ -3567,7 +3567,7 @@
         if (selectProd && selectProd.value === '__jeton_reprise__') {
             var selectJetonProd = document.querySelector('#pipeline-jeton-production select');
             var nomProdCible = selectJetonProd?.selectedOptions[0]?.textContent?.trim() || '';
-            if (nomProdCible && nomProdCible !== '-- Choisir --') {
+            if (nomProdCible && nomProdCible !== '— Choisir —') {
                 nomProduction = 'Jeton de reprise pour ' + nomProdCible;
             }
         }
