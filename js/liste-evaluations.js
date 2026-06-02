@@ -268,7 +268,7 @@ function initialiserListeEvaluations() {
                 <p style="color: var(--rouge-erreur);">
                     <strong>Erreur de chargement</strong><br>
                     ${echapperHtml(error.message || '')}<br>
-                    <small>Consultez la console pour plus de détails.</small>
+                    <small>Réessaie ; si le problème persiste, signale-le.</small>
                 </p>
             `;
         }
@@ -543,7 +543,7 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
     if (lignesFiltrees.length === 0) {
         conteneurTableau.classList.add('u-hide');
         if (messageAucunResultat) messageAucunResultat.classList.remove('u-hide');
-        if (compteur) compteur.textContent = '0 évaluation(s)';
+        if (compteur) compteur.textContent = '0 ' + window.pluriel(0, 'évaluation', 'évaluations');
     } else {
         if (messageAucunResultat) messageAucunResultat.classList.add('u-hide');
         conteneurTableau.classList.remove('u-hide');
@@ -571,7 +571,7 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
             // Adapter le texte selon le filtre de statut
             const filtreStatut = document.getElementById('filtre-statut-eval')?.value;
             if (filtreStatut === 'non-evalue') {
-                compteur.textContent = `${nbTotal} non évalué(s)`;
+                compteur.textContent = `${nbTotal} ${window.pluriel(nbTotal, 'non évalué', 'non évalués')}`;
             } else if (filtreStatut === 'non-remis') {
                 compteur.textContent = `${nbTotal} non remis`;
             } else {
@@ -596,7 +596,7 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
 
         const elemNbProductions = document.getElementById('nb-productions');
         if (elemNbProductions) {
-            elemNbProductions.textContent = `${nbProductions} production(s)`;
+            elemNbProductions.textContent = `${nbProductions} ${window.pluriel(nbProductions, 'production', 'productions')}`;
         }
 
         // Générer les lignes HTML
@@ -1698,15 +1698,6 @@ function attacherEvenementsActions() {
 }
 
 /**
- * Ouvre la page de la cartouche dans les réglages
- */
-function ouvrirCartouche(cartoucheId, productionId) {
-    // Naviguer vers Réglages › Rétroaction
-    // TODO: Implémenter la navigation et la pré-sélection de la cartouche
-    alert('Navigation vers la cartouche à implémenter');
-}
-
-/**
  * Ouvre la page d'évaluation pour modifier une évaluation existante
  * RENOMMÉ consulterEvaluationDepuisListe pour éviter conflit avec evaluation.js
  */
@@ -1892,7 +1883,7 @@ function evaluerProduction(da, productionId) {
 
         if (!selectEtudiant || !selectProduction) {
             console.error('❌ Éléments de formulaire non trouvés');
-            alert('Erreur: Formulaire d\'évaluation non disponible');
+            alert('Le formulaire d\'évaluation n\'est pas disponible.');
             return;
         }
 
@@ -1915,19 +1906,6 @@ function evaluerProduction(da, productionId) {
 
         }, 100);
     }, 200);
-}
-
-/**
- * Duplique une évaluation pour un autre élève
- */
-function dupliquerEvaluation(evaluationId) {
-    // TODO: Implémenter la duplication
-
-    if (!confirm('Veux-tu dupliquer cette évaluation pour un·e autre étudiant·e ?')) {
-        return;
-    }
-
-    alert('Duplication à implémenter: sélection de l\'étudiant·e cible');
 }
 
 /**
@@ -2552,7 +2530,7 @@ function afficherVueCorbeille() {
     if (messageAucunResultat) messageAucunResultat.classList.add('u-hide');
     conteneurTableau.classList.remove('u-hide');
 
-    if (compteur) compteur.textContent = `Corbeille — ${corbeille.length} fichier(s)`;
+    if (compteur) compteur.textContent = `Corbeille — ${corbeille.length} ${window.pluriel(corbeille.length, 'fichier', 'fichiers')}`;
 
     // Masquer la moyenne et les productions
     const elemMoyenne = document.getElementById('moyenne-evaluations');
@@ -2765,9 +2743,7 @@ function viderTouteCorbeille() {
 
 // Rendre les fonctions accessibles globalement
 window.initialiserListeEvaluations = initialiserListeEvaluations;
-window.ouvrirCartouche = ouvrirCartouche;
 window.consulterEvaluationDepuisListe = consulterEvaluationDepuisListe;
-window.dupliquerEvaluation = dupliquerEvaluation;
 window.supprimerEvaluation = supprimerEvaluation;
 window.toggleVerrouillerEvaluation = toggleVerrouillerEvaluation;
 window.modifierEvaluationRemplacee = modifierEvaluationRemplacee;
