@@ -423,7 +423,7 @@ function genererExplicationCalculIndices() {
     html += '<strong>P</strong> mesure la <strong>qualité de l\'apprentissage</strong> selon la pratique pédagogique choisie (Sommative, PAN-Standards, ou autre).';
 
     html += '<br><br>';
-    html += '<em class="etud-texte-gris-moyen">💡 La pratique de notation et ses paramètres peuvent être modifiés dans <strong>Réglages › Pratique de notation</strong></em>';
+    html += '<em class="etud-texte-gris-moyen">💡 La pratique de notation et ses paramètres peuvent être modifiés dans <strong>Conception › Pratiques de notation</strong></em>';
 
     return html;
 }
@@ -638,7 +638,7 @@ function toggleFiltreMinimum(actif) {
     if (moyP) {
         moyP.textContent = fmtMoy(moy.P);
         if (actif && window._moyennesQualifies) {
-            moyP.title = 'Moyenne P sur ' + window._moyennesQualifies.nb + ' étudiant·e·s qualifié·e·s (≥ minimum). ' + window._moyennesQualifies.nbInsuffisants + ' exclu·e·s.';
+            moyP.title = 'Moyenne P sur ' + window._moyennesQualifies.nb + ' étudiant·es qualifié·es (≥ minimum). ' + window._moyennesQualifies.nbInsuffisants + ' exclu·es.';
         }
     }
 }
