@@ -219,10 +219,10 @@ function afficherAccueilContenu(conteneur) {
             </div>
 
             <label for="checkbox-accompagnement-accueil" class="accueil-aide-demi">
-                <div class="accueil-aide-icone"><img src="icons/icons8-info.svg" alt=""></div>
+                <div class="accueil-aide-icone"><img src="icons/icons8-info-popup.svg" alt=""></div>
                 <div>
                     <div class="accueil-aide-titre">Assistance</div>
-                    <div class="accueil-aide-desc">Tour guid\u00e9, info-bulles, aide contextuelle.</div>
+                    <div class="accueil-aide-desc">Info-bulles, aide contextuelle.</div>
                 </div>
                 <input type="checkbox" id="checkbox-accompagnement-accueil"
                     class="accueil-aide-checkbox" ${accChecked ? 'checked' : ''}
@@ -232,7 +232,7 @@ function afficherAccueilContenu(conteneur) {
             <label for="checkbox-demo-accueil" class="accueil-aide-demi">
                 <div class="accueil-aide-icone"><img src="icons/icons8-binary-code.svg" alt=""></div>
                 <div>
-                    <div class="accueil-aide-titre">Donn\u00e9es d\u00e9mo</div>
+                    <div class="accueil-aide-titre">Donn\u00e9es d\u00e9mo <button class="btn-aide-contextuelle" data-aide="accueil-donnees-demo" aria-label="Aide : mode d\u00e9monstration"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></div>
                     <div class="accueil-aide-desc">Explore l\u2019app avec un cours fictif d\u00e9j\u00e0 configur\u00e9.</div>
                 </div>
                 <input type="checkbox" id="checkbox-demo-accueil"
@@ -311,6 +311,11 @@ function toggleDemoHandler(el) {
 function toggleAccompagnementHandler(el) {
     if (window.accompagnement && typeof window.accompagnement.definirActif === 'function') {
         window.accompagnement.definirActif(!!el.checked);
+    }
+    // La case de l'accueil et le bouton de l'en-tête sont le même interrupteur :
+    // refléter le nouvel état sur le bouton d'en-tête (title/aria-pressed).
+    if (typeof window.synchroniserControlesAssistance === 'function') {
+        window.synchroniserControlesAssistance();
     }
 }
 
