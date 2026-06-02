@@ -140,15 +140,15 @@ const AIDE_CONTEXTUELLE = {
     // =========================================================================
 
     'evaluations-proceder': {
-        titre: '\u00c9valuer une production',
+        titre: 'Évaluer une production',
         sections: [
             {
                 type: 'texte',
-                contenu: 'Pour \u00e9valuer une production, s\u00e9lectionne d\u2019abord la grille, l\u2019\u00e9chelle et la cartouche associ\u00e9es \u2014 elles sont normalement d\u00e9j\u00e0 configur\u00e9es dans Structure. Attribue ensuite un niveau \u00e0 chaque crit\u00e8re\u00a0: la note et la r\u00e9troaction se construisent au fur et \u00e0 mesure. Tu peux pr\u00e9visualiser le commentaire complet avant de le copier dans le presse-papier.'
+                contenu: 'Pour évaluer une production, sélectionne d’abord la grille, l’échelle et la cartouche associées — elles sont normalement déjà configurées dans Structure. Attribue ensuite un niveau à chaque critère\u00a0: la note et la rétroaction se construisent au fur et à mesure. Tu peux prévisualiser le commentaire complet avant de le copier dans le presse-papier.'
             },
             {
                 type: 'conseil',
-                contenu: 'Si tu utilises des jetons, rappelle-toi qu\u2019ils offrent \u00e0 l\u2019\u00e9tudiant\u00b7e une nouvelle occasion de d\u00e9montrer sa comp\u00e9tence \u2014 pas simplement d\u2019am\u00e9liorer une note.'
+                contenu: 'Si tu utilises des jetons, rappelle-toi qu’ils offrent à l’étudiant·e une nouvelle occasion de démontrer sa compétence — pas simplement d’améliorer une note.'
             },
         ],
         voirAussi: ['evaluations-annoter', 'construction-grilles', 'construction-echelles', 'construction-cartouches']
@@ -159,31 +159,31 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: 'Assure-toi que la somme des pond\u00e9rations de tes productions totalise 100\u00a0%. Pour les portfolios, d\u00e9finis d\u2019abord le nombre d\u2019artefacts \u00e0 retenir (ex.\u00a0: les 3 meilleurs sur 9) \u2014 ce sont les N meilleures d\u00e9monstrations de comp\u00e9tence qui comptent. Les artefacts individuels n\u2019ont pas de pond\u00e9ration propre\u00a0: c\u2019est le portfolio conteneur qui porte le poids dans la note finale.'
+                contenu: 'Assure-toi que la somme des pondérations de tes productions totalise 100\u00a0%. Pour les portfolios, définis d’abord le nombre d’artefacts à retenir (ex.\u00a0: les 3 meilleurs sur 9) — ce sont les N meilleures démonstrations de compétence qui comptent. Les artefacts individuels n’ont pas de pondération propre\u00a0: c’est le portfolio conteneur qui porte le poids dans la note finale.'
             },
             {
                 type: 'conseil',
-                contenu: 'Pense \u00e0 verrouiller les productions une fois finalis\u00e9es pour \u00e9viter les modifications accidentelles.'
+                contenu: 'Pense à verrouiller les productions une fois finalisées pour éviter les modifications accidentelles.'
             },
         ],
         voirAussi: ['construction-grilles', 'construction-pratiques']
     },
 
     'construction-grilles': {
-        titre: 'Grilles de crit\u00e8res',
+        titre: 'Grilles de critères',
         sections: [
             {
                 type: 'texte',
-                contenu: 'Pour certains crit\u00e8res (ex.\u00a0: fran\u00e7ais \u00e9crit), quand une notation n\u00e9gative est appliqu\u00e9e, tu peux utiliser le type algorithmique avec la formule (nb_erreurs\u00a0/\u00a0nb_mots)\u00a0\u00d7\u00a0100. Les grilles peuvent \u00eatre dupliqu\u00e9es et modifi\u00e9es pour cr\u00e9er des variantes adapt\u00e9es \u00e0 diff\u00e9rents types de productions.'
+                contenu: 'Pour certains critères (ex.\u00a0: français écrit), quand une notation négative est appliquée, tu peux utiliser le type algorithmique avec la formule (nb_erreurs\u00a0/\u00a0nb_mots)\u00a0×\u00a0100. Les grilles peuvent être dupliquées et modifiées pour créer des variantes adaptées à différents types de productions.'
             },
             {
                 type: 'conseil',
-                contenu: 'Nomme tes grilles de fa\u00e7on descriptive (ex.\u00a0: \u00ab\u00a0Grille analyse litt\u00e9raire\u00a0\u00bb, \u00ab\u00a0Grille laboratoire\u00a0\u00bb) \u2014 tu les retrouveras plus facilement.'
+                contenu: 'Nomme tes grilles de façon descriptive (ex.\u00a0: «\u00a0Grille analyse littéraire\u00a0», «\u00a0Grille laboratoire\u00a0») — tu les retrouveras plus facilement.'
             },
             {
                 type: 'alerte',
                 niveau: 'attention',
-                contenu: 'La somme des pond\u00e9rations des crit\u00e8res doit totaliser 100\u00a0%.'
+                contenu: 'La somme des pondérations des critères doit totaliser 100\u00a0%.'
             },
         ],
         voirAussi: ['construction-echelles', 'construction-cartouches', 'evaluations-proceder']
@@ -224,19 +224,19 @@ const AIDE_CONTEXTUELLE = {
     },
 
     'construction-cartouches': {
-        titre: 'Cartouches de r\u00e9troaction',
+        titre: 'Cartouches de rétroaction',
         sections: [
             {
                 type: 'texte',
-                contenu: 'Pour \u00eatre efficaces, les commentaires de r\u00e9troaction doivent \u00eatre lus et\u2026 compris\u00a0! Id\u00e9alement ils peuvent avoir entre 50 et 75 mots environ. R\u00e9dige-les de fa\u00e7on personnelle et constructive \u2014 c\u2019est ce que tes \u00e9tudiant\u00b7es liront.'
+                contenu: 'Pour être efficaces, les commentaires de rétroaction doivent être lus et… compris\u00a0! Idéalement ils peuvent avoir entre 50 et 75 mots environ. Rédige-les de façon personnelle et constructive — c’est ce que tes étudiant·es liront.'
             },
             {
                 type: 'texte',
-                contenu: 'Chaque cellule de la matrice correspond \u00e0 un commentaire pour un niveau de performance donn\u00e9 sur un crit\u00e8re sp\u00e9cifique. Tu peux utiliser les codes de ta grille (ex.\u00a0: I, D, M, E) et le format propos\u00e9 pour structurer tes commentaires.'
+                contenu: 'Chaque cellule de la matrice correspond à un commentaire pour un niveau de performance donné sur un critère spécifique. Tu peux utiliser les codes de ta grille (ex.\u00a0: I, D, M, E) et le format proposé pour structurer tes commentaires.'
             },
             {
                 type: 'conseil',
-                contenu: 'Les cartouches peuvent \u00eatre verrouill\u00e9es une fois finalis\u00e9es pour \u00e9viter les modifications accidentelles.'
+                contenu: 'Les cartouches peuvent être verrouillées une fois finalisées pour éviter les modifications accidentelles.'
             },
         ],
         voirAussi: ['construction-grilles', 'construction-echelles', 'evaluations-proceder']
@@ -247,21 +247,21 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: 'Quatre pratiques sont disponibles. Choisis celle qui correspond \u00e0 ta philosophie d\u2019enseignement \u2014 tu peux toujours la changer.'
+                contenu: 'Quatre pratiques sont disponibles. Choisis celle qui correspond à ta philosophie d’enseignement — tu peux toujours la changer.'
             },
             {
                 type: 'liste',
                 titre: 'Les quatre pratiques',
                 items: [
-                    '<strong>Sommative (SOM)</strong> \u2014 calcule une moyenne pond\u00e9r\u00e9e traditionnelle.',
-                    '<strong>PAN par standards (STD)</strong> \u2014 retient les meilleures d\u00e9monstrations de comp\u00e9tence\u00a0; l\u2019\u00e9tudiant\u00b7e progresse en montrant sa ma\u00eetrise, pas en accumulant des points.',
-                    '<strong>PAN par sp\u00e9cifications (SPE)</strong> \u2014 fonctionne par contrat\u00a0: chaque production est r\u00e9ussie ou non selon des crit\u00e8res pr\u00e9d\u00e9finis\u00a0; c\u2019est l\u2019ensemble des cibles atteintes qui d\u00e9termine la note.',
-                    '<strong>D\u00e9notation (DEN)</strong> \u2014 r\u00e9duit ou \u00e9limine la notation chiffr\u00e9e au profit de la r\u00e9troaction qualitative.',
+                    '<strong>Sommative (SOM)</strong> — calcule une moyenne pondérée traditionnelle.',
+                    '<strong>PAN par standards (STD)</strong> — retient les meilleures démonstrations de compétence\u00a0; l’étudiant·e progresse en montrant sa maîtrise, pas en accumulant des points.',
+                    '<strong>PAN par spécifications (SPE)</strong> — fonctionne par contrat\u00a0: chaque production est réussie ou non selon des critères prédéfinis\u00a0; c’est l’ensemble des cibles atteintes qui détermine la note.',
+                    '<strong>Dénotation (DEN)</strong> — réduit ou élimine la notation chiffrée au profit de la rétroaction qualitative.',
                 ]
             },
             {
                 type: 'conseil',
-                contenu: 'En cas de doute, commence par SOM (la plus famili\u00e8re) et fais \u00e9voluer ta pratique au fil des sessions.'
+                contenu: 'En cas de doute, commence par SOM (la plus familière) et fais évoluer ta pratique au fil des sessions.'
             },
         ],
         voirAussi: ['conception-productions', 'construction-echelles']
@@ -272,24 +272,24 @@ const AIDE_CONTEXTUELLE = {
     // =========================================================================
 
     'tableau-bord-rai': {
-        titre: "Le mod\u00e8le R\u00e0I (R\u00e9ponse \u00e0 l'Intervention)",
+        titre: "Le modèle RàI (Réponse à l'Intervention)",
         sections: [
             {
                 type: 'texte',
-                contenu: "Le mod\u00e8le R\u00e0I structure les interventions p\u00e9dagogiques en trois niveaux d'intensit\u00e9. L'application s'en inspire pour cat\u00e9goriser les besoins observ\u00e9s, sans prescrire une pratique particuli\u00e8re."
+                contenu: "Le modèle RàI structure les interventions pédagogiques en trois niveaux d'intensité. L'application s'en inspire pour catégoriser les besoins observés, sans prescrire une pratique particulière."
             },
             {
                 type: 'liste',
                 titre: "Les trois niveaux",
                 items: [
-                    "<strong>Niveau 1 \u2014 Universel</strong>\u00a0: enseignement de qualit\u00e9 pour tout le groupe.",
-                    "<strong>Niveau 2 \u2014 Cibl\u00e9</strong>\u00a0: interventions pr\u00e9ventives pour les \u00e9tudiant\u00b7es en difficult\u00e9 \u00e9mergente.",
-                    "<strong>Niveau 3 \u2014 Intensif</strong>\u00a0: soutien individualis\u00e9 pour les difficult\u00e9s persistantes."
+                    "<strong>Niveau 1 — Universel</strong>\u00a0: enseignement de qualité pour tout le groupe.",
+                    "<strong>Niveau 2 — Ciblé</strong>\u00a0: interventions préventives pour les étudiant·es en difficulté émergente.",
+                    "<strong>Niveau 3 — Intensif</strong>\u00a0: soutien individualisé pour les difficultés persistantes."
                 ]
             },
             {
                 type: 'conseil',
-                contenu: "Les proportions d\u2019\u00e9l\u00e8ves par niveau varient selon le contexte et ta propre pratique professionnelle. L\u2019application te laisse d\u00e9finir les seuils dans R\u00e9glages \u203a D\u00e9pistage."
+                contenu: "Les proportions d’étudiant·es par niveau varient selon le contexte et ta propre pratique professionnelle. L’application te laisse définir les seuils dans Labo › Outils d’observation."
             }
         ],
         voirAussi: ['interventions-planification', 'depistage-interpretation', 'suivi-liste']
@@ -314,7 +314,7 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'conseil',
-                contenu: "Prends les présences au début du cours plutôt qu'à la fin. Utilise le bouton « Tous présents » puis ajuste les exceptions."
+                contenu: "Prends les présences au début du cours plutôt qu'à la fin. Utilise le bouton qui marque d’emblée tout le monde présent, puis ajuste les exceptions."
             },
             {
                 type: 'alerte',
@@ -360,11 +360,11 @@ const AIDE_CONTEXTUELLE = {
     // =========================================================================
 
     'suivi-liste': {
-        titre: 'Liste des \u00e9tudiant\u00b7es',
+        titre: 'Liste des étudiant·es',
         sections: [
             {
                 type: 'texte',
-                contenu: 'Pour ajouter, modifier ou supprimer des \u00e9tudiant\u00b7es, va dans R\u00e9glages\u00a0>\u00a0Groupe. La liste ici refl\u00e8te automatiquement les changements que tu fais l\u00e0-bas.'
+                contenu: 'Pour ajouter, modifier ou supprimer des étudiant·es, va dans l’onglet Cadre. La liste ici reflète automatiquement les changements que tu fais là-bas.'
             },
         ],
         voirAussi: ['contexte-groupe-etudiants', 'tableau-bord-apercu', 'tableau-bord-rai']
@@ -557,15 +557,15 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: "Le profil individuel affiche trois indices qui te permettent de cerner rapidement la situation d'un \u00e9tudiant."
+                contenu: "Le profil individuel affiche trois indices qui te permettent de cerner rapidement la situation d'un étudiant."
             },
             {
                 type: 'liste',
                 titre: "Les 3 indices A-C-P",
                 items: [
-                    "A (Assiduit\u00e9) \u2014 Mesure l\u2019exposition de l\u2019\u00e9tudiant\u00b7e aux situations d\u2019apprentissage\u00a0: sa pr\u00e9sence en classe. Ce n\u2019est pas un jugement sur la qualit\u00e9 de sa participation.",
-                    "C (Compl\u00e9tion) \u2014 Mesure la r\u00e9gularit\u00e9 de la mise en pratique\u00a0: les artefacts remis par rapport aux artefacts attendus. C\u2019est le constat d\u2019un effort, pas de sa qualit\u00e9.",
-                    "P (Performance) \u2014 Mesure la comp\u00e9tence d\u00e9montr\u00e9e au moment T, selon la pratique de notation configur\u00e9e. C\u2019est une photographie, pas un pronostic."
+                    "A (Assiduité) — Mesure l’exposition de l’étudiant·e aux situations d’apprentissage\u00a0: sa présence en classe. Ce n’est pas un jugement sur la qualité de sa participation.",
+                    "C (Complétion) — Mesure la régularité de la mise en pratique\u00a0: les artefacts remis par rapport aux artefacts attendus. C’est le constat d’un effort, pas de sa qualité.",
+                    "P (Performance) — Mesure la compétence démontrée au moment T, selon la pratique de notation configurée. C’est une photographie, pas un pronostic."
                 ]
             },
             {
@@ -594,7 +594,7 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'conseil',
-                contenu: "Ces indices sont des rep\u00e8res, pas des verdicts. Un A faible peut s\u2019expliquer par un contexte personnel d\u00e9favorable sur lequel tu n\u2019as pas de contr\u00f4le. Un P plus faible en d\u00e9but de trimestre est \u00e9galement normal. C\u2019est la trajectoire qui compte, pas l\u2019\u00e9valuation isol\u00e9e."
+                contenu: "Ces indices sont des repères, pas des verdicts. Un A faible peut s’expliquer par un contexte personnel défavorable sur lequel tu n’as pas de contrôle. Un P plus faible en début de trimestre est également normal. C’est la trajectoire qui compte, pas l’évaluation isolée."
             }
         ],
         voirAussi: ['profil-etudiant-accompagnement']
@@ -673,13 +673,13 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'exemple',
-                titre: "Enseigner, \u00e9valuer, ajuster",
-                contenu: "Tu interviens sur les crit\u00e8res cibl\u00e9s (niveau 2). Au fil des productions suivantes, tu observes la trajectoire. Quand tu marques l\u2019intervention comme compl\u00e9t\u00e9e, le bilan compare les scores avant et apr\u00e8s sur les crit\u00e8res cibl\u00e9s. Selon le r\u00e9sultat, tu choisis\u00a0: reconduire l\u2019intervention, ajuster la cible, ou r\u00e9f\u00e9rer vers un soutien plus intensif."
+                titre: "Enseigner, évaluer, ajuster",
+                contenu: "Tu interviens sur les critères ciblés (niveau 2). Au fil des productions suivantes, tu observes la trajectoire. Quand tu marques l’intervention comme complétée, le bilan compare les scores avant et après sur les critères ciblés. Selon le résultat, tu choisis\u00a0: reconduire l’intervention, ajuster la cible, ou référer vers un soutien plus intensif."
             },
             {
                 type: 'alerte',
                 niveau: 'attention',
-                contenu: "Les interventions de niveau 3 d\u00e9passent parfois ce que l\u2019enseignant\u00b7e peut faire seul. Les services adapt\u00e9s, l\u2019aide p\u00e9dagogique individuelle (API) ou les centres d\u2019aide sont des ressources \u00e0 mobiliser."
+                contenu: "Les interventions de niveau 3 dépassent parfois ce que l’enseignant·e peut faire seul. Les services adaptés, l’aide pédagogique individuelle (API) ou les centres d’aide sont des ressources à mobiliser."
             }
         ],
         voirAussi: ['profil-etudiant-indicateurs', 'profil-etudiant-accompagnement', 'suivi-apprentissage-fondamentaux']
@@ -711,36 +711,36 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'texte',
-                contenu: "Configure les critères surveillés dans Conception → Grille de critères (tag SOLO). Ajuste le seuil et la fenêtre d'analyse dans Calendrier → Dépistage."
+                contenu: "Configure les critères surveillés dans Conception → Grille de critères (tag SOLO). Ajuste le seuil et la fenêtre d'analyse dans Labo → Outils d’observation."
             }
         ],
         voirAussi: ['profil-etudiant-indicateurs']
     },
 
     'tableau-bord-apercu': {
-        titre: 'Aper\u00e7u du groupe (indices A-C-P)',
+        titre: 'Aperçu du groupe (indices A-C-P)',
         sections: [
             {
                 type: 'texte',
-                contenu: 'Les trois indices A-C-P r\u00e9sument le contexte d\u2019apprentissage observ\u00e9 de chaque \u00e9tudiant\u00b7e.'
+                contenu: 'Les trois indices A-C-P résument le contexte d’apprentissage observé de chaque étudiant·e.'
             },
             {
                 type: 'liste',
                 titre: 'Les trois indices',
                 items: [
-                    '<strong>A \u2014 Assiduit\u00e9</strong>\u00a0: pr\u00e9sence en classe.',
-                    '<strong>C \u2014 Compl\u00e9tion</strong>\u00a0: remise des productions.',
-                    '<strong>P \u2014 Performance</strong>\u00a0: r\u00e9sultats aux \u00e9valuations.',
+                    '<strong>A — Assiduité</strong>\u00a0: présence en classe.',
+                    '<strong>C — Complétion</strong>\u00a0: remise des productions.',
+                    '<strong>P — Performance</strong>\u00a0: résultats aux évaluations.',
                 ]
             },
             {
                 type: 'texte',
-                contenu: 'Les zones de couleur \u2014 Fragile, Mod\u00e9r\u00e9, Favorable, Tr\u00e8s favorable \u2014 t\u2019aident \u00e0 rep\u00e9rer rapidement qui a besoin d\u2019attention.'
+                contenu: 'Les zones de couleur — Fragile, Modéré, Favorable, Très favorable — t’aident à repérer rapidement qui a besoin d’attention.'
             },
             {
                 type: 'exemple',
-                titre: 'Lire les \u00e9carts',
-                contenu: 'Un\u00b7e \u00e9tudiant\u00b7e avec un C \u00e9lev\u00e9 mais un P faible fournit l\u2019effort sans obtenir les r\u00e9sultats\u00a0: c\u2019est un signal pour intervenir. Tu peux ensuite regarder plus pr\u00e9cis\u00e9ment sur quel crit\u00e8re ou habilet\u00e9 se situe la difficult\u00e9.'
+                titre: 'Lire les écarts',
+                contenu: 'Un·e étudiant·e avec un C élevé mais un P faible fournit l’effort sans obtenir les résultats\u00a0: c’est un signal pour intervenir. Tu peux ensuite regarder plus précisément sur quel critère ou habileté se situe la difficulté.'
             },
         ],
         voirAussi: ['tableau-bord-rai', 'profil-etudiant-indicateurs', 'suivi-liste']
@@ -751,11 +751,11 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: 'Un seul cours peut \u00eatre actif \u00e0 la fois \u2014 c\u2019est celui qui sert de r\u00e9f\u00e9rence dans toute l\u2019application. Le code de cours suit le format habituel 000-000-XX (discipline-cours-lettres).'
+                contenu: 'Un seul cours peut être actif à la fois — c’est celui qui sert de référence dans toute l’application. Le code de cours suit le format habituel 000-000-XX (discipline-cours-lettres).'
             },
             {
                 type: 'conseil',
-                contenu: 'Tu peux dupliquer un cours pour cr\u00e9er rapidement une nouvelle session en modifiant seulement l\u2019ann\u00e9e, et verrouiller un cours termin\u00e9 pour \u00e9viter les modifications accidentelles.'
+                contenu: 'Tu peux dupliquer un cours pour créer rapidement une nouvelle session en modifiant seulement l’année, et verrouiller un cours terminé pour éviter les modifications accidentelles.'
             },
         ],
         voirAussi: ['calendrier-trimestre', 'construction-pratiques']
@@ -766,97 +766,116 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: 'Choisis le format qui correspond \u00e0 ton horaire r\u00e9el\u00a0: 2\u00d72h (deux p\u00e9riodes s\u00e9par\u00e9es dans la semaine, ex.\u00a0: lundi et jeudi), 1\u00d74h (cours intensif en une seule p\u00e9riode continue) ou 1\u00d73h (une seule p\u00e9riode continue).'
+                contenu: 'Choisis le format qui correspond à ton horaire réel\u00a0: 2×2h (deux périodes séparées dans la semaine, ex.\u00a0: lundi et jeudi), 1×4h (cours intensif en une seule période continue) ou 1×3h (une seule période continue).'
             },
             {
                 type: 'exemple',
                 titre: 'Format des heures',
-                contenu: 'Les heures utilisent le format 24h (ex.\u00a0: 13:00, pas 1:00\u00a0PM). Les s\u00e9ances de reprise sont ajout\u00e9es automatiquement quand tu configures les cong\u00e9s dans la section Trimestre.'
+                contenu: 'Les heures utilisent le format 24h (ex.\u00a0: 13:00, pas 1:00\u00a0PM). Les séances de reprise sont ajoutées automatiquement quand tu configures les congés dans la section Trimestre.'
             },
             {
                 type: 'alerte',
                 niveau: 'attention',
-                contenu: 'Si tu modifies le format horaire, les s\u00e9ances existantes seront recr\u00e9\u00e9es.'
+                contenu: 'Si tu modifies le format horaire, les séances existantes seront recréées.'
             },
         ],
         voirAussi: ['calendrier-trimestre', 'calendrier-vue', 'suivi-saisie']
     },
 
     'contexte-groupe-etudiants': {
-        titre: 'Groupe d\u2019\u00e9tudiant\u00b7es',
+        titre: 'Groupe d’étudiant·es',
         sections: [
             {
                 type: 'texte',
-                contenu: 'Le champ Groupe permet d\u2019organiser tes \u00e9tudiant\u00b7es si tu as plusieurs groupes (ex.\u00a0: Groupe 1, Groupe 2) \u2014 utilise le filtre en haut pour afficher un groupe sp\u00e9cifique.'
+                contenu: 'Le champ Groupe permet d’organiser tes étudiant·es si tu as plusieurs groupes (ex.\u00a0: Groupe 1, Groupe 2) — utilise le filtre en haut pour afficher un groupe spécifique.'
             },
             {
                 type: 'liste',
-                titre: 'Format d\u2019import en lot (7 colonnes)',
+                titre: 'Format d’import en lot (7 colonnes)',
                 items: [
                     'DA',
                     'Groupe',
                     'Nom',
-                    'Pr\u00e9nom',
+                    'Prénom',
                     'Programme',
                     'Nom du programme',
-                    'SA (Services adapt\u00e9s)',
+                    'SA (Services adaptés)',
                 ]
             },
             {
                 type: 'conseil',
-                contenu: 'Tu peux coller directement depuis un tableur ou le syst\u00e8me de gestion institutionnel \u2014 la pr\u00e9visualisation te permet de v\u00e9rifier avant d\u2019importer. La liste configur\u00e9e ici est automatiquement disponible dans le tableau de bord.'
+                contenu: 'Tu peux coller directement depuis un tableur ou le système de gestion institutionnel — la prévisualisation te permet de vérifier avant d’importer. La liste configurée ici est automatiquement disponible dans le tableau de bord.'
             },
             {
                 type: 'alerte',
                 niveau: 'important',
-                contenu: 'Le bouton \u00ab\u00a0R\u00e9initialiser\u00a0\u00bb supprime tous les \u00e9tudiant\u00b7es de fa\u00e7on irr\u00e9versible.'
+                contenu: 'Le bouton «\u00a0Réinitialiser\u00a0» supprime tous les étudiant·es de façon irréversible.'
             },
         ],
         voirAussi: ['suivi-liste', 'suivi-saisie']
     },
 
     'depistage-interpretation': {
-        titre: 'Seuils d\u2019interpr\u00e9tation du d\u00e9pistage',
+        titre: 'Seuils d’interprétation du dépistage',
         sections: [
             {
                 type: 'texte',
-                contenu: 'Les seuils d\u2019interpr\u00e9tation d\u00e9terminent les couleurs et les alertes dans tout le tableau de bord. Toute modification s\u2019applique imm\u00e9diatement \u00e0 tous les calculs \u2014 diagnostics R\u00e0I, patterns et recommandations.'
+                contenu: 'Les seuils d’interprétation déterminent les couleurs et les alertes dans tout le tableau de bord. Toute modification s’applique immédiatement à tous les calculs — diagnostics RàI, patterns et recommandations.'
             },
             {
                 type: 'exemple',
-                titre: 'Valeurs par d\u00e9faut',
-                contenu: 'Progression\u00a0: 5 points (%). Direction du risque\u00a0: 5 points (%). D\u00e9fi\u00a0: \u2264\u00a070\u00a0%.'
+                titre: 'Valeurs par défaut',
+                contenu: 'Progression\u00a0: 5 points (%). Direction du risque\u00a0: 5 points (%). Défi\u00a0: ≤\u00a070\u00a0%.'
             },
             {
                 type: 'conseil',
-                contenu: 'En cas de doute, le bouton \u00ab\u00a0Restaurer\u00a0\u00bb remet les valeurs par d\u00e9faut.'
+                contenu: 'En cas de doute, le bouton «\u00a0Restaurer les valeurs par défaut\u00a0» rétablit la configuration initiale.'
             },
         ],
         voirAussi: ['tableau-bord-rai', 'interventions-planification']
     },
 
     'planification-alignement': {
-        titre: 'Alignement p\u00e9dagogique (carte mentale)',
+        titre: 'Alignement pédagogique (carte mentale)',
         sections: [
             {
                 type: 'texte',
-                contenu: 'La carte mentale rend visible l\u2019alignement p\u00e9dagogique de ton cours\u00a0: les liens entre ce que tu vises (comp\u00e9tence, connaissances), comment tu l\u2019enseignes (activit\u00e9s, soutien) et comment tu le v\u00e9rifies (\u00e9valuations).'
+                contenu: 'La carte mentale rend visible l’alignement pédagogique de ton cours\u00a0: les liens entre ce que tu vises (compétence, connaissances), comment tu l’enseignes (activités, soutien) et comment tu le vérifies (évaluations).'
             },
             {
                 type: 'conseil',
-                contenu: 'Tu n\u2019es pas oblig\u00e9\u00b7e de suivre un ordre lin\u00e9aire \u2014 commence par ce qui te semble naturel.'
+                contenu: 'Tu n’es pas obligé·e de suivre un ordre linéaire — commence par ce qui te semble naturel.'
             },
             {
                 type: 'exemple',
-                titre: 'Signalements d\u2019incoh\u00e9rence',
-                contenu: 'L\u2019application signale les incoh\u00e9rences\u00a0: un objectif sans production li\u00e9e, une connaissance sans \u00e9valuation pr\u00e9vue. Utilise ces alertes comme des pistes de r\u00e9flexion, pas comme des erreurs \u00e0 corriger.'
+                titre: 'Signalements d’incohérence',
+                contenu: 'L’application signale les incohérences\u00a0: un objectif sans production liée, une connaissance sans évaluation prévue. Utilise ces alertes comme des pistes de réflexion, pas comme des erreurs à corriger.'
             },
             {
                 type: 'texte',
-                contenu: 'Les \u00e9valuations servent \u00e0 livrer une r\u00e9troaction et peuvent prendre plusieurs formes (orale, \u00e9crite, etc.).'
+                contenu: 'Les évaluations servent à livrer une rétroaction et peuvent prendre plusieurs formes (orale, écrite, etc.).'
             },
         ],
         voirAussi: ['conception-productions', 'construction-grilles']
+    },
+
+    // =========================================================================
+    // LABO — ÉTUDES (explorations de recherche expérimentales)
+    // =========================================================================
+
+    'labo-etudes': {
+        titre: 'Études',
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Cette section rassemble des explorations de recherche : des outils expérimentaux qui cherchent à observer l’effet de certaines actions ou interventions sur les apprentissages. Ils sont en développement — ce qu’ils mesurent exactement, et comment l’interpréter, n’est pas encore établi ; certains évolueront, d’autres seront peut-être abandonnés."
+            },
+            {
+                type: 'alerte',
+                niveau: 'attention',
+                contenu: "Ce sont des pistes de réflexion, pas des preuves : une corrélation n’est pas une cause, et les tendances sont d’autant plus fragiles que ton groupe est petit. Prends-les comme des invitations à observer, pas comme des verdicts."
+            }
+        ]
     },
 
     // =========================================================================
@@ -864,25 +883,25 @@ const AIDE_CONTEXTUELLE = {
     // =========================================================================
 
     'apc-activite': {
-        titre: 'Activit\u00e9 d\u2019apprentissage dans une APC',
+        titre: 'Activité d’apprentissage dans une APC',
         sections: [
             {
                 type: 'texte',
-                contenu: 'Dans une approche par comp\u00e9tences (APC), une activit\u00e9 d\u2019\u00e9valuation est g\u00e9n\u00e9ralement centr\u00e9e sur l\u2019apprentissage plut\u00f4t que sur un comportement (ex.\u00a0: participation, pr\u00e9sence). Elle repose sur des objectifs explicites li\u00e9s \u00e0 la comp\u00e9tence du cours.'
+                contenu: 'Dans une approche par compétences (APC), une activité d’évaluation est généralement centrée sur l’apprentissage plutôt que sur un comportement (ex.\u00a0: participation, présence). Elle repose sur des objectifs explicites liés à la compétence du cours.'
             },
         ],
         voirAussi: ['conception-productions', 'planification-alignement']
     },
     'apc-grille-individuel': {
-        titre: '\u00c9valuation individuelle en APC',
+        titre: 'Évaluation individuelle en APC',
         sections: [
             {
                 type: 'texte',
-                contenu: 'Dans une approche par comp\u00e9tences, l\u2019\u00e9valuation est g\u00e9n\u00e9ralement individuelle afin de rendre compte du degr\u00e9 d\u2019acquisition de chaque apprenant\u00b7e.'
+                contenu: 'Dans une approche par compétences, l’évaluation est généralement individuelle afin de rendre compte du degré d’acquisition de chaque apprenant·e.'
             },
             {
                 type: 'conseil',
-                contenu: 'Les travaux d\u2019\u00e9quipe peuvent \u00eatre \u00e9valu\u00e9s, mais la contribution individuelle devrait id\u00e9alement \u00eatre distingu\u00e9e.'
+                contenu: 'Les travaux d’équipe peuvent être évalués, mais la contribution individuelle devrait idéalement être distinguée.'
             },
         ],
         voirAussi: ['construction-grilles', 'conception-productions']
@@ -892,71 +911,71 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: 'Formule tes objectifs avec des verbes actifs et observables selon la taxonomie r\u00e9vis\u00e9e d\u2019Anderson et Krathwohl.'
+                contenu: 'Formule tes objectifs avec des verbes actifs et observables selon la taxonomie révisée d’Anderson et Krathwohl.'
             },
             {
                 type: 'exemple',
                 titre: 'Verbes actionnables',
-                contenu: 'nommer, d\u00e9crire, analyser, cr\u00e9er, r\u00e9soudre, comparer, justifier, concevoir\u2026'
+                contenu: 'nommer, décrire, analyser, créer, résoudre, comparer, justifier, concevoir…'
             },
             {
                 type: 'conseil',
-                contenu: '\u00c9vite les verbes vagues comme <strong>savoir</strong>, <strong>comprendre</strong> ou <strong>conna\u00eetre</strong>. La carte d\u2019alignement (Structure \u2192 Alignement p\u00e9dagogique) propose une banque de verbes class\u00e9s par niveau cognitif.'
+                contenu: 'Évite les verbes vagues comme <strong>savoir</strong>, <strong>comprendre</strong> ou <strong>connaître</strong>. La carte d’alignement (Conception → Alignement pédagogique) propose une banque de verbes classés par niveau cognitif.'
             },
         ],
         voirAussi: ['planification-alignement', 'conception-productions']
     },
     'echeance-indices': {
-        titre: 'Date d\u2019\u00e9ch\u00e9ance et indices',
+        titre: 'Date d’échéance et indices',
         sections: [
             {
                 type: 'texte',
-                contenu: 'Cette date fixe les indices C (Compl\u00e9tion) et P (Performance) pour les suivis longitudinaux. Une production non remise \u00e0 cette date sera compt\u00e9e comme manquante dans le calcul de C.'
+                contenu: 'Cette date fixe les indices C (Complétion) et P (Performance) pour les suivis longitudinaux. Une production non remise à cette date sera comptée comme manquante dans le calcul de C.'
             },
         ],
         voirAussi: ['tableau-bord-apercu', 'conception-productions']
     },
     'echeances-multigroupes': {
-        titre: '\u00c9ch\u00e9ances multi-groupes',
+        titre: 'Échéances multi-groupes',
         sections: [
             {
                 type: 'texte',
-                contenu: 'Chaque groupe-cours peut avoir sa propre date d\u2019\u00e9ch\u00e9ance. D\u00e9coche un groupe pour indiquer que la production ne lui est pas encore assign\u00e9e.'
+                contenu: 'Chaque groupe-cours peut avoir sa propre date d’échéance. Décoche un groupe pour indiquer que la production ne lui est pas encore assignée.'
             },
         ],
         voirAussi: ['conception-productions']
     },
     'retroaction-grille-descriptive': {
-        titre: 'R\u00e9troaction et grille descriptive',
+        titre: 'Rétroaction et grille descriptive',
         sections: [
             {
                 type: 'texte',
-                contenu: 'La r\u00e9troaction fournie \u00e0 l\u2019apprenant\u00b7e repose sur le croisement de deux \u00e9l\u00e9ments\u00a0: les <strong>crit\u00e8res</strong> d\u2019\u00e9valuation et les <strong>niveaux</strong> de performance. Ce croisement forme une <em>grille descriptive</em>.'
+                contenu: 'La rétroaction fournie à l’apprenant·e repose sur le croisement de deux éléments\u00a0: les <strong>critères</strong> d’évaluation et les <strong>niveaux</strong> de performance. Ce croisement forme une <em>grille descriptive</em>.'
             },
             {
                 type: 'liste',
-                titre: 'Ce qu\u2019une grille descriptive pr\u00e9cise',
+                titre: 'Ce qu’une grille descriptive précise',
                 items: [
                     'Le niveau atteint',
-                    'Ce qui est ma\u00eetris\u00e9',
-                    'Ce qui reste \u00e0 travailler',
+                    'Ce qui est maîtrisé',
+                    'Ce qui reste à travailler',
                     'Comment progresser',
                 ]
             },
             {
                 type: 'conseil',
-                contenu: 'Une r\u00e9troaction efficace est <strong>sp\u00e9cifique</strong>, <strong>actionnable</strong>, <strong>utile</strong> et <strong>bienveillante</strong>.'
+                contenu: 'Une rétroaction efficace est <strong>spécifique</strong>, <strong>actionnable</strong>, <strong>utile</strong> et <strong>bienveillante</strong>.'
             },
             {
                 type: 'alerte',
                 niveau: 'attention',
-                contenu: '\u00c9vite le \u00ab\u00a0sandwich\u00a0\u00bb (positif\u2013n\u00e9gatif\u2013positif)\u00a0: il dilue le message et n\u2019atteint pas les objectifs d\u2019une r\u00e9troaction efficace.'
+                contenu: 'Évite le «\u00a0sandwich\u00a0» (positif–négatif–positif)\u00a0: il dilue le message et n’atteint pas les objectifs d’une rétroaction efficace.'
             },
         ],
         voirAussi: ['construction-cartouches', 'construction-grilles']
     },
     'categories-selection-obligatoires': {
-        titre: 'Cat\u00e9gories S\u00e9lection / Obligatoires',
+        titre: 'Catégories Sélection / Obligatoires',
         sections: [
             {
                 type: 'texte',
@@ -964,10 +983,10 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'liste',
-                titre: 'Les deux cat\u00e9gories',
+                titre: 'Les deux catégories',
                 items: [
-                    '<strong>S\u00e9lection</strong> \u2014 les N meilleures sont retenues pour la note.',
-                    '<strong>Obligatoires</strong> \u2014 toujours compt\u00e9es, par exemple un examen final ou une mise en situation r\u00e9capitulative.',
+                    '<strong>Sélection</strong> — les N meilleures sont retenues pour la note.',
+                    '<strong>Obligatoires</strong> — toujours comptées, par exemple un examen final ou une mise en situation récapitulative.',
                 ]
             },
         ],
@@ -978,7 +997,7 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: 'Plage de pourcentages d\u00e9finissant le degr\u00e9 de ma\u00eetrise. Permet d\u2019\u00e9tablir les stades ou niveaux auxquels se situe l\u2019apprenant\u00b7e (ex.\u00a0: Insuffisant, en D\u00e9veloppement, Ma\u00eetris\u00e9, \u00c9tendu).'
+                contenu: 'Plage de pourcentages définissant le degré de maîtrise. Permet d’établir les stades ou niveaux auxquels se situe l’apprenant·e (ex.\u00a0: Insuffisant, en Développement, Maîtrisé, Étendu).'
             },
         ],
         voirAussi: ['construction-echelles']
@@ -988,21 +1007,21 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: 'Valeur num\u00e9rique fixe attribu\u00e9e \u00e0 un niveau. Utilis\u00e9e pour\u00a0: le calcul des notes, la conversion d\u2019une note lettr\u00e9e en note chiffr\u00e9e, la pratique sommative traditionnelle et le d\u00e9pistage.'
+                contenu: 'Valeur numérique fixe attribuée à un niveau. Utilisée pour\u00a0: le calcul des notes, la conversion d’une note lettrée en note chiffrée, la pratique sommative traditionnelle et le dépistage.'
             },
         ],
         voirAussi: ['construction-echelles', 'construction-pratiques']
     },
     'grille-type-critere-detail': {
-        titre: 'Type de crit\u00e8re d\u2019\u00e9valuation',
+        titre: 'Type de critère d’évaluation',
         sections: [
             {
                 type: 'liste',
                 titre: 'Trois types disponibles',
                 items: [
-                    '<strong>Holistique</strong> \u2014 \u00e9value l\u2019ensemble en consid\u00e9rant les interrelations entre les \u00e9l\u00e9ments.',
-                    '<strong>Analytique</strong> \u2014 d\u00e9compose et \u00e9value chaque \u00e9l\u00e9ment s\u00e9par\u00e9ment.',
-                    '<strong>Algorithmique</strong> \u2014 calcul automatique bas\u00e9 sur une formule (ex.\u00a0: nombre d\u2019erreurs en fran\u00e7ais \u00e9crit).',
+                    '<strong>Holistique</strong> — évalue l’ensemble en considérant les interrelations entre les éléments.',
+                    '<strong>Analytique</strong> — décompose et évalue chaque élément séparément.',
+                    '<strong>Algorithmique</strong> — calcul automatique basé sur une formule (ex.\u00a0: nombre d’erreurs en français écrit).',
                 ]
             },
         ],
@@ -1013,11 +1032,11 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: 'Niveau cognitif du crit\u00e8re selon la taxonomie SOLO (Structure of Observed Learning Outcomes) de Biggs et Collis. D\u00e9crit la complexit\u00e9 structurelle attendue dans la r\u00e9ponse de l\u2019\u00e9tudiant\u00b7e.'
+                contenu: 'Niveau cognitif du critère selon la taxonomie SOLO (Structure of Observed Learning Outcomes) de Biggs et Collis. Décrit la complexité structurelle attendue dans la réponse de l’étudiant·e.'
             },
             {
                 type: 'conseil',
-                contenu: 'Les crit\u00e8res <strong>multistructurels</strong> (fondations) sont surveill\u00e9s par le d\u00e9pistage pour d\u00e9tecter les difficult\u00e9s persistantes. Identifie-les pour alimenter le suivi des fondamentaux.'
+                contenu: 'Les critères <strong>multistructurels</strong> (fondations) sont surveillés par le dépistage pour détecter les difficultés persistantes. Identifie-les pour alimenter le suivi des fondamentaux.'
             },
         ],
         voirAussi: ['depistage-interpretation', 'suivi-apprentissage-fondamentaux']
@@ -1026,6 +1045,21 @@ const AIDE_CONTEXTUELLE = {
     // =========================================================================
     // ACCUEIL — MODE DÉMONSTRATION & DUPLICATION CC
     // =========================================================================
+
+    'tour-guide': {
+        titre: 'Visite guidée',
+        sections: [
+            {
+                type: 'texte',
+                contenu: "La visite guidée te présente, en quelques étapes, les grandes sections de l’application — Cadre, Conception, Évaluation, Suivi. Tu peux la quitter à tout moment, et la relancer depuis ce bouton quand tu veux."
+            },
+            {
+                type: 'action',
+                libelle: 'Démarrer la visite',
+                action: 'demarrerTourDepuisAide'
+            }
+        ]
+    },
 
     'accueil-donnees-demo': {
         titre: "Mode démonstration & duplication CC",
@@ -1044,12 +1078,12 @@ const AIDE_CONTEXTUELLE = {
                 items: [
                     "<strong>Modélisation</strong> — Active la démo et explore l'aperçu peuplé. Tu vois directement ce que l'outil produit avec des données réalistes.",
                     "<strong>Pratique guidée</strong> — Ouvre une grille ou une échelle démo pour comprendre sa structure. Le formulaire est en lecture seule (aucun risque de modifier accidentellement le matériel).",
-                    "<strong>Autonomie</strong> — Clique sur « Dupliquer pour créer ma grille » (ou ta propre échelle, cartouche, production, pratique, groupe-cours) et renomme. Tu pars du modèle mais tu deviens l'auteur."
+                    "<strong>Autonomie</strong> — Clique sur « Dupliquer » (ou ta propre échelle, cartouche, production, pratique, groupe-cours) et renomme. Tu pars du modèle mais tu deviens l'auteur."
                 ]
             },
             {
                 type: 'exemple',
-                contenu: "Tu ouvres la grille démo « Analyse littéraire ». Tu cliques sur « Dupliquer pour créer ma grille ». Une copie apparaît dans ta bibliothèque, prête à être renommée. Dans les métadonnées de ta copie, une ligne « Inspiré de : Analyse littéraire par Labo Codex » reste visible — c'est la reconnaissance d'origine exigée par la licence CC."
+                contenu: "Tu ouvres la grille démo « Analyse littéraire ». Tu cliques sur « Dupliquer ». Une copie apparaît dans ta bibliothèque, prête à être renommée. Dans les métadonnées de ta copie, une ligne « Inspiré de : Analyse littéraire par Labo Codex » reste visible — c'est la reconnaissance d'origine exigée par la licence CC."
             },
             {
                 type: 'conseil',
@@ -1185,23 +1219,9 @@ const AIDE_CONTEXTUELLE = {
                 contenu: "Si une référence est absente de l’archive et de tes bibliothèques actives, l'item est marqué « référence manquante » en orange. Tu peux quand même le réimporter, mais sa référence sera cassée."
             }
         ],
-        voirAussi: ['reserve-deja-present', 'reserve-copie-double', 'reserve-ref-manquante']
+        voirAussi: ['reserve-copie-double', 'reserve-ref-manquante']
     },
 
-    'reserve-deja-present': {
-        titre: "Item déjà présent",
-        sections: [
-            {
-                type: 'texte',
-                contenu: "Cet item porte le même identifiant qu'un item déjà dans ta bibliothèque active. Par défaut, il est grisé pour éviter d'écraser ta version actuelle."
-            },
-            {
-                type: 'texte',
-                contenu: "Si tu veux quand même le récupérer : coche « Recopier en double » en bas de la modale. L'item sera réimporté avec un nouvel identifiant et le suffixe « — copie » dans le nom. Tu auras alors les deux versions côte à côte dans ta bibliothèque, libre de les comparer ou de supprimer l'une des deux."
-            }
-        ],
-        voirAussi: ['reserve-copie-double', 'reserve-types-ressources']
-    },
 
     'reserve-copie-double': {
         titre: "Recopier en double",
@@ -1224,7 +1244,7 @@ const AIDE_CONTEXTUELLE = {
                 contenu: "Utile quand tu veux comparer une grille passée et sa version actuelle, ou récupérer une cartouche de rétroaction d'un trimestre antérieur sans toucher à celle que tu utilises maintenant."
             }
         ],
-        voirAussi: ['reserve-deja-present']
+        voirAussi: ['reserve-types-ressources']
     },
 
     'reserve-ref-manquante': {

@@ -775,6 +775,8 @@ function rendreSectionAide(section) {
             const iconeA = section.niveau === 'important' ? '⚠️' : '⚡';
             const classeA = section.niveau === 'important' ? 'aide-alerte-important' : 'aide-alerte-attention';
             return `<div class="aide-alerte ${classeA}"><span class="aide-icone">${iconeA}</span><div class="aide-alerte-contenu">${section.contenu}</div></div>`;
+        case 'action':
+            return `<div class="aide-action"><button class="btn btn-primaire" data-action="${section.action}">${section.libelle}</button></div>`;
         default:
             return `<p>${section.contenu || ''}</p>`;
     }
@@ -1675,6 +1677,41 @@ window.masquerFlecheDidactique = fermerEtMarquerAutoReveal;
 window.fermerPopupPrimo = fermerPopupPrimo;
 window.fermerAideContextuelle = fermerAideContextuelle;
 window.demarrerTourGuide = demarrerTourGuide;
+// Lancé depuis le popup d'introduction (bouton « Démarrer la visite ») : ferme
+// d'abord la popup d'aide, puis démarre le tour.
+window.demarrerTourDepuisAide = function() {
+    fermerAideContextuelle();
+    demarrerTourGuide();
+};
+
+// Bascule globale de l'assistance depuis l'en-tête (équivalent de la case
+// « Assistance » de l'accueil). Pref unique → pilote les 4 sous-systèmes.
+// Le bouton d'en-tête et la case de l'accueil sont le MÊME interrupteur :
+// cette fonction reflète l'état courant sur les deux contrôles.
+function synchroniserControlesAssistance() {
+    var actif = estAccompagnementActif();
+    var btn = document.getElementById('btn-assistance-nav');
+    if (btn) {
+        btn.setAttribute('aria-pressed', actif ? 'true' : 'false');
+        btn.setAttribute('title', actif ? 'Assistance activée' : 'Assistance désactivée');
+    }
+    var cb = document.getElementById('checkbox-accompagnement-accueil');
+    if (cb) cb.checked = actif;
+}
+window.synchroniserControlesAssistance = synchroniserControlesAssistance;
+window.basculerAssistance = function() {
+    var actif = !estAccompagnementActif();
+    definirAccompagnementActif(actif);
+    synchroniserControlesAssistance();
+    if (window.notifications && typeof window.notifications.info === 'function') {
+        window.notifications.info(actif ? 'Assistance activée' : 'Assistance désactivée');
+    }
+};
+if (document.readyState !== 'loading') {
+    synchroniserControlesAssistance();
+} else {
+    document.addEventListener('DOMContentLoaded', synchroniserControlesAssistance);
+}
 
 // ---- API sémantique conservée -----------------------------------------------
 // afficherAideContextuelle : API publique pour ouvrir une popup par clé.

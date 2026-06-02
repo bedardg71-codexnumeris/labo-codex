@@ -3870,7 +3870,7 @@
                                 <button id="codex-menu-ouvrir-versement" class="codex-menu-item" data-action="ReserveOuvrir.actionOuvrir">
                                     <span class="codex-menu-icone"><img src="icons/icon-import.svg" alt=""></span> Ouvrir une archive...
                                 </button>
-                                <button id="codex-menu-charger-codex-data" class="codex-menu-item" data-action="LaboCodexData.actionOuvrirChargement" data-tooltip="labo-charger-codex-data">
+                                <button id="codex-menu-charger-codex-data" class="codex-menu-item" data-action="LaboCodexData.actionOuvrirChargement">
                                     <span class="codex-menu-icone"><img src="icons/icon-import.svg" alt=""></span> Charger un codex data...
                                 </button>
                                 <input type="file" id="labo-codex-data-input" accept=".json" class="u-hide" data-on-change="LaboCodexData.onFichierSelectionne">
@@ -3901,7 +3901,9 @@
                         </div>
                         <div class="utilitaires-separateur" aria-hidden="true"></div>
                         <div class="utilitaires-groupe">
-                            <button data-action="afficherSection" data-param="aide" class="btn-action-header btn-icon-header" data-tooltip="nav-aide" title="Aide"><span class="header-icon ico-wordbook" aria-hidden="true"></span></button>
+                            <button data-action="afficherAideContextuelle" data-param="tour-guide" class="btn-action-header btn-icon-header" data-tooltip="entete-tour-guide" title="Visite guid&eacute;e"><span class="header-icon ico-travel-signpost" aria-hidden="true"></span></button>
+                            <button id="btn-assistance-nav" class="btn-action-header btn-icon-header" data-action="basculerAssistance" title="Assistance" aria-pressed="true"><span class="header-icon ico-assistance" aria-hidden="true"></span></button>
+                            <button data-action="afficherSection" data-param="aide" class="btn-action-header btn-icon-header" data-tooltip="nav-aide" title="Aide"><span class="header-icon ico-questions" aria-hidden="true"></span></button>
                             <button data-action="afficherSection" data-param="reglages" class="btn-action-header btn-icon-header" data-tooltip="entete-reglages" title="R&eacute;glages"><span class="header-icon ico-tune" aria-hidden="true"></span></button>
                         </div>
                     </div>
@@ -3943,8 +3945,16 @@
                     <span>Thème clair/sombre</span>
                 </button>
                 <div class="popover-separateur" aria-hidden="true"></div>
+                <button class="popover-item" data-action="afficherAideContextuelle" data-param="tour-guide" role="menuitem">
+                    <img src="icons/icons8-travel-signpost.svg" alt="" class="popover-icon">
+                    <span>Visite guidée</span>
+                </button>
+                <button class="popover-item" data-action="basculerAssistance" role="menuitem">
+                    <img src="icons/icons8-info-popup.svg" alt="" class="popover-icon">
+                    <span>Assistance</span>
+                </button>
                 <button class="popover-item" data-action="afficherSection" data-param="aide" role="menuitem">
-                    <img src="icons/icon-wordbook.svg" alt="" class="popover-icon">
+                    <img src="icons/icons8-questions.svg" alt="" class="popover-icon">
                     <span>Aide</span>
                 </button>
                 <button class="popover-item" data-action="afficherSection" data-param="reglages" role="menuitem">
@@ -7323,7 +7333,7 @@
                     <div class="carte accordeon ferme" id="accordeon-horaire">
                         <div class="accordeon-header" data-tooltip="reglages-horaire">
                             <h3 class="carte-titre-bleu" style="margin: 0;">
-                                <span class="accordeon-chevron">▶</span> Horaire
+                                <span class="accordeon-chevron">▶</span> Horaire <button class="btn-aide-contextuelle" data-aide="contexte-horaire" aria-label="Aide : format horaire"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
@@ -7792,7 +7802,7 @@
                     <div class="carte" id="carte-trajectoires-production" style="margin-top: 2rem;">
                         <h3 class="carte-titre-bleu u-flex-col" style="display: flex; gap: 0.5rem">
                             <div class="u-flex-between u-w-100 u-flex-wrap" style="gap: 0.5rem">
-                                <div class="u-align-center" style="display: flex; gap: 0.5rem" data-tooltip="tdb-trajectoires">
+                                <div class="u-align-center" style="display: flex; gap: 0.5rem">
                                     <span>Trajectoires par <span id="trajectoires-titre-terme">production</span></span>
                                     <span class="emoji-container">
                                         <span class="primo-aide" data-target="note-trajectoires"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
@@ -7856,7 +7866,7 @@
                             </div>
                         </div>
 
-                        <div class="u-w-100" style="position: relative; height: 550px" data-tooltip="tdb-graphique-trajectoires">
+                        <div class="u-w-100" style="position: relative; height: 550px">
                             <canvas id="graphique-trajectoires-production"></canvas>
                         </div>
 
@@ -9203,7 +9213,7 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Études</span>
                         <span class="titre-emoji-container">
-                            <button class="btn-aide-contextuelle" data-aide="labo-etudes" aria-label="Aide : analyser les résultats"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>
+                            <button class="btn-aide-contextuelle" data-aide="labo-etudes" aria-label="Aide : explorations de recherche"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>
                         </span>
                     </h2>
                     <p class="text-muted">Analyse des résultats de la démarche pédagogique en cours</p>
@@ -9870,17 +9880,11 @@
 
                     <!-- Identité -->
                     <div class="carte">
-                        <p><strong>Monitorage p&eacute;dagogique</strong> &mdash; Version <span id="apropos-version-beta"></span> (build <span id="apropos-version-build"></span>)</p>
-                        <p class="text-muted mt-10">Syst&egrave;me de suivi des apprentissages pour enseignant&middot;e&middot;s du coll&eacute;gial. Con&ccedil;u par un enseignant, pour des enseignants.</p>
-                        <p class="text-muted mt-10">D&eacute;velopp&eacute; par Gr&eacute;goire B&eacute;dard (C&eacute;gep de Drummondville) avec l&rsquo;assistance de Claude&nbsp;Code (Anthropic).</p>
-                        <p class="text-muted mt-10"><a href="https://codexnumeris.org" target="_blank" rel="noopener noreferrer">Labo Codex Numeris</a></p>
-                    </div>
-
-                    <!-- Commun éducatif -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">Un commun &eacute;ducatif</h3>
-                        <p class="mt-10">Cette application est gratuite, fonctionne enti&egrave;rement hors-ligne et son code source est ouvert.</p>
-                        <p class="mt-10">Tu peux l&rsquo;utiliser librement dans ton &eacute;tablissement, la partager avec tes coll&egrave;gues, l&rsquo;adapter &agrave; tes besoins. Aucune donn&eacute;e ne quitte ton appareil &mdash; tes donn&eacute;es d&rsquo;&eacute;tudiants t&rsquo;appartiennent et ne sont couvertes par aucune licence.</p>
+                        <p><strong>Labo Codex</strong> &mdash; Version <span id="apropos-version-beta"></span> (build <span id="apropos-version-build"></span>)</p>
+                        <p class="text-muted mt-10">D&eacute;velopp&eacute; par Gr&eacute;goire B&eacute;dard (<a href="https://codexnumeris.org" target="_blank" rel="noopener noreferrer">Codex Numeris</a>) avec l&rsquo;assistance de Claude&nbsp;Code (Anthropic).</p>
+                        <p class="text-muted mt-10">Cette application est gratuite, fonctionne enti&egrave;rement hors-ligne et son code source est ouvert.</p>
+                        <p class="text-muted mt-10">Tu peux l&rsquo;utiliser librement dans ton &eacute;tablissement, la partager avec tes coll&egrave;gues, l&rsquo;adapter &agrave; tes besoins. Aucune donn&eacute;e ne quitte ton appareil &mdash; tes donn&eacute;es d&rsquo;&eacute;tudiants t&rsquo;appartiennent et ne sont couvertes par aucune licence.</p>
+                        <p class="text-muted mt-10">Labo Codex est d&eacute;velopp&eacute; en solo et autofinanc&eacute;. <a href="https://codexnumeris.org/#/portal/support" target="_blank" rel="noopener noreferrer">Soutenir le projet</a>.</p>
                     </div>
 
                     <!-- Licences -->
@@ -9900,7 +9904,7 @@
                                 <td class="td-bold-bleu">Contenu p&eacute;dagogique</td>
                                 <td class="ligne-separee-bleu">
                                     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a> (Creative Commons)<br>
-                                    <span class="text-muted u-texte-09">Documentation, mod&egrave;les p&eacute;dagogiques (SOLO, Ra&Igrave;, A-C-P, ELLAC, IDME), guides, aide int&eacute;gr&eacute;e. Tu peux copier, adapter et partager &agrave; des fins &eacute;ducatives non commerciales, avec attribution.</span>
+                                    <span class="text-muted u-texte-09">Documentation, mod&egrave;les p&eacute;dagogiques (SOLO, R&agrave;I, A-C-P, ELLAC, IDME), guides, aide int&eacute;gr&eacute;e. Tu peux copier, adapter et partager &agrave; des fins &eacute;ducatives non commerciales, avec attribution.</span>
                                 </td>
                             </tr>
                         </table>
@@ -9984,9 +9988,6 @@
                         </table>
                     </div>
 
-                    <p class="carte-bleu-mt20-center-italic">
-                        <strong>&laquo;&nbsp;L&rsquo;observation des micro donn&eacute;es permet de faire des interventions proactives qui supportent mieux l&rsquo;apprenant&middot;e dans son parcours.&nbsp;&raquo;</strong>
-                    </p>
                 </div>
 
             </section><!-- fin section-reglages -->
