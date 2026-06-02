@@ -30,7 +30,7 @@
                 'S\u00e9curit\u00e9 \u2014 nouveau r\u00e9glage \u00ab\u00a0M\u00e9moriser le dossier Travaux et la R\u00e9serve entre les sessions\u00a0\u00bb (R\u00e9glages > Pr\u00e9f\u00e9rences > S\u00e9curit\u00e9, d\u00e9sactiv\u00e9 par d\u00e9faut). Quand d\u00e9sactiv\u00e9, l\u2019app demande \u00e0 chaque d\u00e9marrage l\u2019acc\u00e8s au dossier \u2014 plus s\u00fbr face \u00e0 un script malveillant qui s\u2019ex\u00e9cuterait pendant une session.',
                 'Confirmation avant chaque export\u00a0: une nouvelle fen\u00eatre liste les fichiers du Codex / archive / configuration / tampons avant le t\u00e9l\u00e9chargement. Tu peux v\u00e9rifier qu\u2019aucun fichier inattendu ne s\u2019est gliss\u00e9 dans l\u2019envoi avant de confirmer.',
                 'V\u00e9rification d\u2019int\u00e9grit\u00e9 \u2014 chaque ressource partag\u00e9e (grille, \u00e9chelle, cartouche, pratique, production, tampon) est scell\u00e9e \u00e0 l\u2019export avec une empreinte SHA-256. \u00c0 l\u2019import, l\u2019app v\u00e9rifie la signature et alerte si une ressource a \u00e9t\u00e9 modifi\u00e9e en transit.',
-                'Page d\u2019accueil \u2014 message d\u2019acc\u00e8s cadr\u00e9 pour la fen\u00eatre publique 3\u201330 juin 2026. Le paragraphe s\u2019affiche tant qu\u2019on est avant le 1er juillet 2026 (heure de Toronto) puis dispara\u00eet automatiquement.'
+                'Page d\u2019accueil \u2014 invitation \u00e0 rejoindre la Communaut\u00e9 de pratique Labo Codex h\u00e9berg\u00e9e par l\u2019AQPC. L\u2019application reste publiquement accessible, sans date de fermeture.'
             ]
         },
         {
