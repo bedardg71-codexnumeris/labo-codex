@@ -42,8 +42,8 @@ const configurationsOnglets = {
         { id: 'productions', label: 'Productions étudiantes' },
         { id: 'grille-criteres', label: 'Grilles de critères' },
         { id: 'echelle-performance', label: 'Échelles de performance' },
-        { id: 'pratiques-notation', label: 'Pratiques de notation' },
-        { id: 'retroactions', label: 'Cartouches de rétroaction' }
+        { id: 'retroactions', label: 'Cartouches de rétroaction' },
+        { id: 'pratiques-notation', label: 'Pratiques de notation' }
     ],
     'calendrier': [
         { id: 'trimestre', label: 'Trimestre' },
