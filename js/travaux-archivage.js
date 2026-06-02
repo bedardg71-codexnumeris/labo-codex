@@ -466,7 +466,7 @@
         const _hasProg = typeof window.afficherProgression === 'function';
         if (_hasProg) {
             window.afficherProgression('Export des travaux');
-            window.majProgression(20, 'Compression de l\'archive...');
+            window.majProgression(20, 'Compression de l\'archive…');
         }
         try {
             const zip = await exporterParEtudiant(da, options);
@@ -480,7 +480,7 @@
             fichiers.forEach(f => travauxStockage.marquerExporte(f.id));
         } catch (e) {
             console.error('[Travaux-Archivage] Erreur export etudiant:', e);
-            alert('Erreur lors de l\'export: ' + e.message);
+            alert('L\'export a échoué : ' + e.message);
         } finally {
             if (_hasProg) window.masquerProgression();
         }
@@ -495,7 +495,7 @@
         const _hasProg = typeof window.afficherProgression === 'function';
         if (_hasProg) {
             window.afficherProgression('Export des travaux');
-            window.majProgression(20, 'Compression de l\'archive...');
+            window.majProgression(20, 'Compression de l\'archive…');
         }
         try {
             const zip = await exporterParProduction(productionId, options);
@@ -506,7 +506,7 @@
             fichiers.forEach(f => travauxStockage.marquerExporte(f.id));
         } catch (e) {
             console.error('[Travaux-Archivage] Erreur export production:', e);
-            alert('Erreur lors de l\'export: ' + e.message);
+            alert('L\'export a échoué : ' + e.message);
         } finally {
             if (_hasProg) window.masquerProgression();
         }
@@ -521,7 +521,7 @@
         const _hasProg = typeof window.afficherProgression === 'function';
         if (_hasProg) {
             window.afficherProgression('Export des travaux');
-            window.majProgression(20, 'Compression de l\'archive...');
+            window.majProgression(20, 'Compression de l\'archive…');
         }
         try {
             const zip = await exporterTravaux(da, productionId);
@@ -548,7 +548,7 @@
             fichiers.forEach(f => travauxStockage.marquerExporte(f.id));
         } catch (e) {
             console.error('[Travaux-Archivage] Erreur export:', e);
-            alert('Erreur lors de l\'export: ' + e.message);
+            alert('L\'export a échoué : ' + e.message);
         } finally {
             if (_hasProg) window.masquerProgression();
         }
@@ -568,13 +568,13 @@
                 const barre = document.getElementById('travaux-barre-progression');
                 if (barre) barre.style.width = pourcent + '%';
                 const texte = document.getElementById('travaux-texte-progression');
-                if (texte) texte.textContent = `${traites}/${total} fichiers traites...`;
+                if (texte) texte.textContent = `${traites}/${total} fichiers traités…`;
             });
 
             telechargerBlob(zip, `archive_travaux_${nom}_${new Date().toISOString().split('T')[0]}.zip`);
         } catch (e) {
             console.error('[Travaux-Archivage] Erreur export semestre:', e);
-            alert('Erreur lors de l\'export: ' + e.message);
+            alert('L\'export a échoué : ' + e.message);
         }
     }
 
@@ -586,7 +586,7 @@
      */
     async function lancerExportLea(productionId, da, reprisesSeulement) {
         if (!productionId) {
-            alert('Veuillez sélectionner une production.');
+            alert('Sélectionne une production.');
             return;
         }
 
@@ -598,7 +598,7 @@
                 const barre = document.getElementById('travaux-barre-progression-lea');
                 if (barre) barre.style.width = pourcent + '%';
                 const texte = document.getElementById('travaux-texte-progression-lea');
-                if (texte) texte.textContent = `${traites}/${total} fichiers traités...`;
+                if (texte) texte.textContent = `${traites}/${total} fichiers traités…`;
             });
 
             if (blobs.length === 1) {
@@ -616,7 +616,7 @@
             }
         } catch (e) {
             console.error('[Travaux-Archivage] Erreur export Lea:', e);
-            alert('Erreur lors de l\'export Lea: ' + e.message);
+            alert('L\'export Léa a échoué : ' + e.message);
         }
     }
 
@@ -654,7 +654,7 @@
         const exportes = fichiers.filter(f => f.blobStatut === 'exporte');
 
         if (exportes.length === 0) {
-            alert('Aucun fichier exporte a alleger.');
+            alert('Aucun fichier exporté à alléger.');
             return;
         }
 

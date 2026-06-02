@@ -62,12 +62,12 @@
         const _hasProg = typeof window.afficherProgression === 'function';
         if (_hasProg) {
             window.afficherProgression('Export PDF');
-            window.majProgression(20, 'Rendu des pages annotées...');
+            window.majProgression(20, 'Rendu des pages annotées…');
         }
 
         try {
             const { doc, nomSortie } = await genererDocPDF(fichierId);
-            if (_hasProg) window.majProgression(90, 'Téléchargement...');
+            if (_hasProg) window.majProgression(90, 'Téléchargement…');
             doc.save(nomSortie);
             travauxStockage.marquerExporte(fichierId);
         } catch (e) {
@@ -792,7 +792,7 @@
         const _hasProg = typeof window.afficherProgression === 'function';
         if (_hasProg) {
             window.afficherProgression('Export dossier complet');
-            window.majProgression(15, 'Rendu des pages annotées...');
+            window.majProgression(15, 'Rendu des pages annotées…');
         }
 
         try {
@@ -803,12 +803,12 @@
                 doc = await exporterDepuisImage(blob, annotation);
             }
 
-            if (_hasProg) window.majProgression(70, 'Ajout de la page de synthèse...');
+            if (_hasProg) window.majProgression(70, 'Ajout de la page de synthèse…');
 
             // Ajouter la page de synthese (grille + retroaction)
             await ajouterPageSynthese(doc, fichier, productionId);
 
-            if (_hasProg) window.majProgression(90, 'Téléchargement...');
+            if (_hasProg) window.majProgression(90, 'Téléchargement…');
 
             // Telecharger
             // ✅ ANONYMISATION (Tier 0.1) : clé de base — prenom/nom sont anonymisés par obtenirDonneesSelonMode
@@ -882,7 +882,7 @@
                     const retroTexte = typeof anonymiserTexteRetroaction === 'function'
                         ? anonymiserTexteRetroaction(c.retroaction || '', evaluation.etudiantDA)
                         : (c.retroaction || '');
-                    const extrait = retroTexte ? retroTexte.substring(0, 80) + (retroTexte.length > 80 ? '...' : '') : '—';
+                    const extrait = retroTexte ? retroTexte.substring(0, 80) + (retroTexte.length > 80 ? '…' : '') : '—';
                     html += `<li><strong>${echapperHtml(c.critereNom)}</strong> — ${echapperHtml(c.niveauSelectionne || '—')}<br><span class="texte-muted">${echapperHtml(extrait)}</span></li>`;
                 }
                 html += '</ul>';
@@ -1082,7 +1082,7 @@
         overlay = document.createElement('div');
         overlay.id = overlayId;
         overlay.className = 'preview-quicklook-overlay';
-        overlay.innerHTML = '<div class="preview-pdf-chargement">Génération du PDF...</div>';
+        overlay.innerHTML = '<div class="preview-pdf-chargement">Génération du PDF…</div>';
         document.body.appendChild(overlay);
 
         try {

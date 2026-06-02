@@ -1159,17 +1159,12 @@
 
         conteneur.innerHTML = `
             <h3>Archivage des travaux <button class="btn-aide-contextuelle" data-aide="archiver-travaux" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h3>
-            <p class="texte-muted">${fichiersTravaux.length} fichier(s) en stock (${tailleFormatee})</p>
+            <p class="texte-muted">${fichiersTravaux.length} ${pluriel(fichiersTravaux.length, 'fichier', 'fichiers')} en stock (${tailleFormatee})</p>
 
             ${genererGrilleFichiers(fichiersTravaux, 'ouvrirPreviewInline')}
 
             <div class="travaux-archivage-options">
-                <!-- Allégement -->
-                <div class="travaux-archivage-carte">
-                    <h4 data-tooltip="travaux-archivage-alleger">All\u00e9ger les travaux export\u00e9s</h4>
-                    <p class="texte-muted">Convertit les originaux export\u00e9s en fac-simil\u00e9s. Fonctionnalit\u00e9 en cours de refonte.</p>
-                    <button class="btn btn-secondaire" disabled style="opacity:0.5;cursor:not-allowed">All\u00e9ger les travaux export\u00e9s</button>
-                </div>
+                <!-- Allégement : carte retirée tant que la fonctionnalité n'est pas prête (refonte textes, décision Grégoire 2 juin) -->
 
                 <!-- Exporter des travaux -->
                 <div class="travaux-archivage-carte">
@@ -1223,8 +1218,8 @@
 
                 <!-- Export Lea -->
                 <div class="travaux-archivage-carte">
-                    <h4>Export Lea</h4>
-                    <p class="texte-muted">Production annotée + évaluation (note et rétroaction) en PDF pour téléversement dans Lea</p>
+                    <h4>Export Léa</h4>
+                    <p class="texte-muted">Production annotée + évaluation (note et rétroaction) en PDF pour téléversement dans Léa</p>
                     <div class="travaux-archivage-filtres">
                         <div class="groupe-form">
                             <label>Production</label>
@@ -1250,7 +1245,7 @@
                     <div class="travaux-barre-progression-container">
                         <div id="travaux-barre-progression-lea" class="travaux-barre-progression"></div>
                     </div>
-                    <button class="btn btn-confirmer" data-action="travauxUI.lancerExportLea">Exporter pour Lea</button>
+                    <button class="btn btn-confirmer" data-action="travauxUI.lancerExportLea">Exporter pour Léa</button>
                 </div>
             </div>
 
@@ -1258,7 +1253,7 @@
             <!-- Quota stockage -->
             <div class="travaux-quota-section">
                 <h4>Espace de stockage</h4>
-                <div id="travaux-quota-info">Chargement...</div>
+                <div id="travaux-quota-info">Chargement…</div>
             </div>
         `;
 
