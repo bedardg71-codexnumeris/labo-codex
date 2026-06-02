@@ -53,24 +53,49 @@ function afficherAccueil() {
  * (validé 19 avril 2026).
  */
 function genererBanniereBienvenue() {
+    const replie = (typeof obtenirPreference === 'function') && obtenirPreference('banniereAccueilRepliee') === true;
+
     const paragrapheCommunaute = `
             <div class="banniere-bienvenue-acces">
-                <p><strong>Rejoindre la communauté.</strong> Une Communauté de pratique Labo Codex est hébergée par l’AQPC. Elle rassemble des enseignantes et des enseignants qui utilisent l’application pour observer les trajectoires de leurs élèves, expérimenter des pratiques alternatives de notation et co-construire des ressources sous licence libre. <a href="https://www.aqpc.qc.ca/fr/cop-labocodex" target="_blank" rel="noopener noreferrer">Inscription via l’AQPC</a>.</p>
+                <p><strong>Rejoindre la communauté.</strong> L’AQPC héberge une Communauté de pratique (CoP) Labo Codex : le lieu pour obtenir du soutien et échanger entre pairs. Des enseignant·es comme toi y explorent d’autres pratiques pédagogiques et co-construisent des ressources libres. Une occasion de développement professionnel.</p>
             </div>`;
 
     return `
-        <div class="banniere-bienvenue carte" id="banniere-bienvenue">
-            <h2 class="banniere-bienvenue-titre">Bienvenue dans Labo Codex</h2>
-            <p>Labo Codex num\u00e9rise le travail que tu fais d\u00e9j\u00e0\u00a0: planifier ton cours, concevoir tes activit\u00e9s d\u2019apprentissage, \u00e9valuer les travaux, suivre la progression de tes \u00e9tudiant\u00b7es. Tu y poses les m\u00eames gestes que sur papier avec calculette ou tableur, mais dans un seul outil portable.</p>
-            <p><strong>Par o\u00f9 commencer\u00a0?</strong> Tu peux cocher les options d\u2019assistance et d\u2019exploration des donn\u00e9es de d\u00e9monstration. Puis configure ton trimestre, ton cours et ton groupe dans l\u2019onglet Cadre. Tu saisis l\u2019information une fois et l\u2019application s\u2019en sert partout. Ensuite, tu peux cr\u00e9er et partager tout le mat\u00e9riel que tu veux\u00a0!</p>
+        <div class="banniere-bienvenue carte ${replie ? 'est-replie' : ''}" id="banniere-bienvenue">
+            <button type="button" class="banniere-bienvenue-toggle" data-action="basculerBanniereBienvenue" aria-expanded="${replie ? 'false' : 'true'}" aria-controls="banniere-bienvenue-corps">
+                <span class="banniere-bienvenue-titre">Bienvenue dans Labo Codex !</span>
+                <span class="banniere-chevron" aria-hidden="true"></span>
+            </button>
+            <div id="banniere-bienvenue-corps" class="banniere-bienvenue-corps">
+            <p>Labo Codex te propose de numériser ton travail habituel : planifier, concevoir, évaluer, suivre la progression de tes étudiant·es. Les mêmes gestes que sur papier, réunis dans un seul outil portable.</p>
+            <p><strong>Par où commencer ?</strong> Configure ton trimestre, ton cours et ton groupe dans l’onglet Cadre : tu saisis tout une fois, l’app s’en sert partout. Ensuite, crée et partage le matériel que tu veux.</p>
             ${paragrapheCommunaute}
             <div class="banniere-bienvenue-actions">
                 <button class="btn btn-primaire" data-action="demarrerTourGuide">
                     Commencer la visite guid\u00e9e
                 </button>
             </div>
+            </div>
         </div>
     `;
+}
+
+/**
+ * Replie ou déplie la bannière de bienvenue. L'état (préférence UI globale,
+ * non namespacée par trimestre) est mémorisé via le système de préférences.
+ * Le <button> natif gère Entrée/Espace et le focus ; seul le corps se masque,
+ * la barre de titre — et donc l'affordance de réouverture — reste visible.
+ */
+function basculerBanniereBienvenue() {
+    const banniere = document.getElementById('banniere-bienvenue');
+    if (!banniere) return;
+    const replie = !banniere.classList.contains('est-replie');
+    banniere.classList.toggle('est-replie', replie);
+    const toggle = banniere.querySelector('.banniere-bienvenue-toggle');
+    if (toggle) toggle.setAttribute('aria-expanded', replie ? 'false' : 'true');
+    if (typeof definirPreference === 'function') {
+        definirPreference('banniereAccueilRepliee', replie);
+    }
 }
 
 /**
@@ -100,55 +125,55 @@ function afficherAccueilContenu(conteneur) {
     conteneur.innerHTML = `
         ${banniereBienvenueHTML}
 
-        <div class="accueil-section-label">Raccourcis</div>
+        <div class="accueil-section-label">Tâches</div>
         <div class="accueil-grille-actions">
 
-            <div class="accueil-action" data-section="conception" data-action="ouvrirWizardPratique">
+            <div class="accueil-action" role="button" tabindex="0" data-section="conception" data-action="ouvrirWizardPratique">
                 <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-data-sheet"></span></div>
                 <div class="accueil-action-titre">Adopter ta pratique</div>
-                <div class="accueil-action-desc">L\u2019app s\u2019adapte \u00e0 ta notation : sommative, standards, sp\u00e9cifications, jetons.</div>
+                <div class="accueil-action-desc">Notation sommative, par standards, par sp\u00e9cifications.</div>
             </div>
 
-            <div class="accueil-action" data-section="conception" data-action="naviguerAccueilCarte" data-param="conception|conception-carte">
+            <div class="accueil-action" role="button" tabindex="0" data-section="conception" data-action="naviguerAccueilCarte" data-param="conception|conception-carte">
                 <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-puzzle"></span></div>
                 <div class="accueil-action-titre">Planifier ton cours</div>
-                <div class="accueil-action-desc">Carte mentale, s\u00e9quences et le\u00e7ons align\u00e9es avec tes \u00e9valuations.</div>
+                <div class="accueil-action-desc">Carte mentale alignant s\u00e9quences, le\u00e7ons et \u00e9valuations.</div>
             </div>
 
-            <div class="accueil-action" data-section="suivi" data-action="naviguerAccueilCarte" data-param="suivi|suivi-saisie">
+            <div class="accueil-action" role="button" tabindex="0" data-section="suivi" data-action="naviguerAccueilCarte" data-param="suivi|suivi-saisie">
                 <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-people"></span></div>
                 <div class="accueil-action-titre">Saisir les pr\u00e9sences</div>
-                <div class="accueil-action-desc">Pr\u00e9sences et observations \u2014 premiers signaux des difficult\u00e9s.</div>
+                <div class="accueil-action-desc">Pr\u00e9sences, retards et observations de s\u00e9ance.</div>
             </div>
 
-            <div class="accueil-action" data-section="evaluations" data-action="naviguerAccueilCarte" data-param="evaluations|evaluations-importer">
+            <div class="accueil-action" role="button" tabindex="0" data-section="evaluations" data-action="naviguerAccueilCarte" data-param="evaluations|evaluations-importer">
                 <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-downloading"></span></div>
-                <div class="accueil-action-titre">Importer des productions \u00e9tudiantes</div>
-                <div class="accueil-action-desc">PDF et images, prêts à être annotés au stylet ou à la souris.</div>
+                <div class="accueil-action-titre">Importer des productions</div>
+                <div class="accueil-action-desc">PDF, images et numérisations, prêts à annoter.</div>
             </div>
 
-            <div class="accueil-action" data-section="evaluations" data-action="naviguerAccueilCarte" data-param="evaluations|evaluations-annoter">
+            <div class="accueil-action" role="button" tabindex="0" data-section="evaluations" data-action="naviguerAccueilCarte" data-param="evaluations|evaluations-annoter">
                 <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-edit"></span></div>
                 <div class="accueil-action-titre">Annoter et \u00e9valuer</div>
-                <div class="accueil-action-desc">Annote au stylet, \u00e9value selon ta grille \u2014 le bilan s\u2019\u00e9crit tout seul.</div>
+                <div class="accueil-action-desc">Annotation au stylet, grille d\u2019\u00e9valuation, bilan automatique.</div>
             </div>
 
-            <div class="accueil-action" data-section="suivi" data-action="naviguerAccueilCarte" data-param="suivi|suivi-groupe">
+            <div class="accueil-action" role="button" tabindex="0" data-section="suivi" data-action="naviguerAccueilCarte" data-param="suivi|suivi-groupe">
                 <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-line-chart"></span></div>
-                <div class="accueil-action-titre">Avoir un aper\u00e7u du groupe</div>
-                <div class="accueil-action-desc">Engagement, structure des r\u00e9sultats d\u2019apprentissage, signaux \u00e0 surveiller.</div>
+                <div class="accueil-action-titre">Observer le groupe</div>
+                <div class="accueil-action-desc">Engagement, structure des r\u00e9sultats, signaux \u00e0 surveiller.</div>
             </div>
 
-            <div class="accueil-action" data-section="suivi" data-action="naviguerAccueilCarte" data-param="suivi|suivi-profil">
+            <div class="accueil-action" role="button" tabindex="0" data-section="suivi" data-action="naviguerAccueilCarte" data-param="suivi|suivi-profil">
                 <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-profile"></span></div>
-                <div class="accueil-action-titre">Consulter le profil d\u2019un\u00B7e \u00e9tudiant\u00B7e</div>
-                <div class="accueil-action-desc">Productions, progression et difficultés récurrentes pour ajuster ton soutien.</div>
+                <div class="accueil-action-titre">Consulter un profil</div>
+                <div class="accueil-action-desc">Productions, progression et difficultés récurrentes.</div>
             </div>
 
-            <div class="accueil-action" data-section="suivi" data-action="naviguerAccueilCarte" data-param="suivi|suivi-interventions">
+            <div class="accueil-action" role="button" tabindex="0" data-section="suivi" data-action="naviguerAccueilCarte" data-param="suivi|suivi-interventions">
                 <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-pause-button"></span></div>
-                <div class="accueil-action-titre">Interventions</div>
-                <div class="accueil-action-desc">Mod\u00e8le R\u00e9ponse \u00e0 l\u2019intervention (R\u00e0I) : interventions diff\u00e9renci\u00e9es selon le besoin.</div>
+                <div class="accueil-action-titre">Diff\u00e9rencier les interventions</div>
+                <div class="accueil-action-desc">Mod\u00e8le R\u00e0I, niveaux 2 et 3, interventions selon le besoin.</div>
             </div>
 
         </div>
@@ -160,15 +185,15 @@ function afficherAccueilContenu(conteneur) {
 
         <div class="accueil-grille-bas">
 
-            <div class="accueil-utilitaire-demi" data-action="ouvrirModalBackup">
+            <div class="accueil-utilitaire-demi" role="button" tabindex="0" data-action="ouvrirModalBackup">
                 <div class="accueil-utilitaire-icone"><span class="accueil-icone-mask ico-acc-usb-memory"></span></div>
                 <div>
                     <div class="accueil-utilitaire-titre">Sauvegarder</div>
-                    <div class="accueil-utilitaire-desc">Exporte ou restaure tes donn\u00e9es. Tout reste local.</div>
+                    <div class="accueil-utilitaire-desc">Export, restauration, stockage 100 % local.</div>
                 </div>
             </div>
 
-            <div class="accueil-utilitaire-demi" data-action="afficherModalNouveautes">
+            <div class="accueil-utilitaire-demi" role="button" tabindex="0" data-action="afficherModalNouveautes">
                 <div class="accueil-utilitaire-icone"><span class="accueil-icone-mask ico-acc-megaphone"></span><span class="pastille-nouveautes"></span></div>
                 <div>
                     <div class="accueil-utilitaire-titre">Nouveaut\u00e9s</div>
@@ -180,7 +205,7 @@ function afficherAccueilContenu(conteneur) {
                 <div class="accueil-aide-icone"><img src="icons/icons8-info-popup.svg" alt=""></div>
                 <div>
                     <div class="accueil-aide-titre">Assistance</div>
-                    <div class="accueil-aide-desc">Info-bulles, aide contextuelle.</div>
+                    <div class="accueil-aide-desc">Info-bulles et aide contextuelle.</div>
                 </div>
                 <input type="checkbox" id="checkbox-accompagnement-accueil"
                     class="accueil-aide-checkbox" ${accChecked ? 'checked' : ''}
@@ -191,7 +216,7 @@ function afficherAccueilContenu(conteneur) {
                 <div class="accueil-aide-icone"><img src="icons/icons8-binary-code.svg" alt=""></div>
                 <div>
                     <div class="accueil-aide-titre">Donn\u00e9es d\u00e9mo <button class="btn-aide-contextuelle" data-aide="accueil-donnees-demo" aria-label="Aide : mode d\u00e9monstration"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></div>
-                    <div class="accueil-aide-desc">Explore l\u2019app avec un cours fictif d\u00e9j\u00e0 configur\u00e9.</div>
+                    <div class="accueil-aide-desc">Cours fictif d\u00e9j\u00e0 configur\u00e9, \u00e0 explorer librement.</div>
                 </div>
                 <input type="checkbox" id="checkbox-demo-accueil"
                     class="accueil-aide-checkbox" ${demoChecked ? 'checked' : ''}
@@ -294,6 +319,21 @@ function naviguerAccueilCarte(sectionEtSousSection) {
     if (sousSection) {
         setTimeout(function() { afficherSousSection(sousSection); }, 100);
     }
+    // Règle SPA (CLAUDE.md) : après le changement de vue, déplacer le focus vers
+    // le conteneur de la nouvelle section (utile aux utilisateurs clavier).
+    setTimeout(function() { deplacerFocusVersSection(section); }, sousSection ? 150 : 60);
+}
+
+/**
+ * Déplace le focus clavier vers le conteneur de la section affichée (règle SPA).
+ * Échec gracieux si la section est absente. tabindex=-1 rend le conteneur
+ * focusable par script sans l'ajouter à l'ordre de tabulation.
+ */
+function deplacerFocusVersSection(section) {
+    var cible = document.getElementById('section-' + section);
+    if (!cible) return;
+    if (!cible.hasAttribute('tabindex')) cible.setAttribute('tabindex', '-1');
+    cible.focus();
 }
 
 /** Ouvre le wizard de pratique de notation par-dessus l'accueil (modale, pas de navigation). */
@@ -313,6 +353,7 @@ window.definirModeExpert = definirModeExpert;
 window.toggleDemoHandler = toggleDemoHandler;
 window.toggleAccompagnementHandler = toggleAccompagnementHandler;
 window.naviguerAccueilCarte = naviguerAccueilCarte;
+window.basculerBanniereBienvenue = basculerBanniereBienvenue;
 window.ouvrirWizardPratique = ouvrirWizardPratique;
 window.ouvrirModalBackup = ouvrirModalBackup;
 

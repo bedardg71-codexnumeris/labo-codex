@@ -23248,6 +23248,46 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     color: var(--accent-primaire);
 }
 
+/* Bannière repliable : la barre de titre est un <button> qui masque/affiche
+   le corps. La barre reste toujours visible (affordance de réouverture).
+   État mémorisé en préférence UI globale (banniereAccueilRepliee). */
+.banniere-bienvenue-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    margin: 0 0 14px 0;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    color: var(--accent-primaire);
+}
+.banniere-bienvenue-toggle .banniere-bienvenue-titre {
+    margin: 0;
+}
+/* Chevron CSS (triangle) : pointe vers le bas déplié, vers la droite replié. */
+.banniere-chevron {
+    width: 0;
+    height: 0;
+    flex-shrink: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 7px solid currentColor;
+    transition: transform 0.2s ease;
+}
+.banniere-bienvenue.est-replie .banniere-chevron {
+    transform: rotate(-90deg);
+}
+.banniere-bienvenue.est-replie .banniere-bienvenue-toggle {
+    margin-bottom: 0;
+}
+.banniere-bienvenue.est-replie .banniere-bienvenue-corps {
+    display: none;
+}
+
 .banniere-bienvenue p {
     margin: 0 0 12px 0;
     line-height: 1.6;

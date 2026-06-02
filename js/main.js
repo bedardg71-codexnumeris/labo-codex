@@ -838,6 +838,23 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Activation clavier des [data-action] rendus focusables artificiellement
+    // (ex. <div role="button" tabindex="0"> : cartes d'accueil, demi-cartes).
+    // Le dispatcher click ci-dessus n'écoute que la souris ; on simule le clic
+    // sur Entrée/Espace via el.click() (réutilise toute la logique de routage).
+    // Les éléments nativement activables (button, a, input, textarea, select)
+    // gèrent Entrée/Espace eux-mêmes : on ne les double pas.
+    document.addEventListener('keydown', function(e) {
+        if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+        var el = e.target.closest('[data-action]');
+        if (!el) return;
+        var tag = el.tagName;
+        if (tag === 'BUTTON' || tag === 'A' || tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+        if (el.getAttribute('role') !== 'button' && !el.hasAttribute('tabindex')) return;
+        e.preventDefault(); // évite le défilement sur Espace
+        el.click();
+    });
+
     // Délégation change / input / keyup / mousedown (Phase 5 — remplace on* inline)
     ['change', 'input', 'keyup', 'mousedown', 'focusin'].forEach(function(eventType) {
         document.addEventListener(eventType, function(e) {
