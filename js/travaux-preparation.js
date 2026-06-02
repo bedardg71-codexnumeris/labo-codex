@@ -2493,7 +2493,7 @@
                     </div>
                     <button class="prep-btn-canvas" id="prep-btn-appliquer-crop"
                             data-action="travauxPreparation.appliquerCrop"
-                            style="display:none;">Confirmer rognage</button>
+                            style="display:none;">Confirmer le recadrage</button>
                     <button class="prep-btn-canvas" id="prep-btn-appliquer-persp"
                             data-action="travauxPreparation.appliquerPerspective"
                             style="display:none;">Confirmer perspective</button>
@@ -2576,7 +2576,7 @@
                                 <div class="prep-section-sous-titre">ajustements visuels</div>
                                 <div class="prep-section-body">
                                     <div class="prep-slider-groupe">
-                                        <label>Luminosite</label>
+                                        <label>Luminosité</label>
                                         <input type="range" id="prep-luminosite" min="${LUMINOSITE_MIN}" max="${LUMINOSITE_MAX}" value="0"
                                                data-on-input="travauxPreparation.changerLuminositeHandler">
                                     </div>
@@ -2606,7 +2606,7 @@
                                         <label class="prep-option-label">
                                             <input type="checkbox" id="prep-opt-balance"
                                                    data-on-change="travauxPreparation.changerOptBalanceHandler">
-                                            Ne pas faire de Balance des blancs pour ce document
+                                            Ne pas appliquer la balance des blancs à ce document
                                         </label>
                                     </div>
                                     <div class="prep-option-row">
@@ -2622,7 +2622,7 @@
                         </div>
                         <div class="prep-palette-footer">
                             <button class="prep-btn" data-action="travauxPreparation.annulerDerniere">Annuler</button>
-                            <button class="prep-btn" data-action="travauxPreparation.reinitialiser">Reinit.</button>
+                            <button class="prep-btn" data-action="travauxPreparation.reinitialiser">Réinit.</button>
                         </div>
                     </div>
                 </div>

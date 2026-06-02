@@ -442,6 +442,42 @@ const AIDE_CONTEXTUELLE = {
         voirAussi: ['construction-grilles', 'construction-echelles', 'construction-cartouches', 'construction-pratiques']
     },
 
+    'evaluations-importer': {
+        titre: 'Préparer et importer des copies',
+        sections: [
+            {
+                type: 'texte',
+                contenu: 'Cette page rassemble les copies numérisées de tes étudiant·es (PDF ou images), les optimise et les associe à une production, prêtes à être annotées et évaluées ensuite.'
+            },
+            {
+                type: 'liste',
+                titre: 'Étapes',
+                items: [
+                    'Dépose tes fichiers (PDF, JPEG, PNG, HEIC) par glisser-déposer ou en cliquant pour parcourir',
+                    'Le processus optimise les images, regroupe les pages d\'une même copie et propose une association automatique à partir du nom de fichier',
+                    'Vérifie ou ajuste l\'étudiant·e et la production de chaque fichier dans l\'inspecteur central',
+                    'Clique sur « Importer » : les copies sont stockées et prêtes pour « Annoter et évaluer »'
+                ]
+            },
+            {
+                type: 'conseil',
+                contenu: 'Le DA de l\'étudiant·e (7 chiffres) doit minimalement apparaître dans le nom du fichier pour que l\'association et le regroupement multi-pages soient automatiques. Le format Léa complet (NOM_DA_Production_Remis_le_AAAA-MM-JJ_HHhMMmSSs) est reconnu directement.'
+            },
+            {
+                type: 'liste',
+                titre: 'Traitements automatiques à l\'import',
+                items: [
+                    'Balance des blancs : correction colorimétrique des photos prises en classe',
+                    'Uniformisation DPI : 250 dpi par défaut, ajustable (200, 250 ou 300)',
+                    'Compression des images pour limiter le stockage',
+                    'Assemblage multi-pages : les fichiers d\'un même étudiant·e pour une même production sont regroupés',
+                    'Les PDF sont importés tels quels, sans modification'
+                ]
+            }
+        ],
+        voirAussi: ['evaluations-annoter', 'evaluations-liste']
+    },
+
     'evaluations-annoter': {
         titre: 'Annoter des travaux',
         sections: [
