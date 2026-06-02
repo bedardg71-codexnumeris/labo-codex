@@ -68,7 +68,7 @@ const TYPES = {
     'sequence':       { label: 'Séquence',          couleur: 'var(--planif-couleur-sequence)',  conteneur: true },
     'lecon':          { label: 'Leçon',             couleur: 'var(--planif-couleur-lecon)',     conteneur: true },
     // Activités
-    'activite':       { label: 'Apprentissage',     couleur: 'var(--planif-couleur-activite)' },
+    'activite':       { label: 'Activité',          couleur: 'var(--planif-couleur-activite)' },
     'soutien':        { label: 'Soutien',           couleur: 'var(--planif-couleur-soutien)' },
     'revision':       { label: 'Révision',          couleur: 'var(--planif-couleur-revision)' },
     // Évaluation
