@@ -27,6 +27,13 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 ### Bugs UX et cohérence interface
 
+- [ ] 🟡 ⚠️ **#308** Mode comparatif SOM/PAN — résidu fantôme dans l'UI Suivi (P « alternatif » à 0 %)
+  - **PRIORITÉ** actée par Grégoire 2 juin 2026 — à investiguer **après** les refontes de textes en cours.
+  - Le mode comparatif a été **retiré récemment**, mais il **persiste dans l'interface** : la page Suivi (« Observation globale des indices d'engagement ») affiche encore « A — sommatif / C — sommatif / **P — alternatif** » et **P = 0 % pour tout le groupe**, alors que la case « comparatif » est **décochée**. Constaté terrain sur 601-101-MQ gr. 00008 (H2026, 23 personnes).
+  - Diagnostic 2 juin (aucune modif faite) : la branche `modeComparatif` / `e.alternatif.performance` se déclenche encore (`tableau-bord-apercu.js` ~771, 817, 1356, 1572, 1637). A et C (sommatif) calculent correctement (86 %, 83 %) → le moteur tourne ; seul le P alternatif (PAN) est à 0.
+  - **Piste forte** : `etudiants.js:864-865` lit `affichage.afficherSommatif !== false` / `afficherAlternatif !== false` → **défaut à `true` quand la valeur est `undefined`** (au lieu de `=== true` utilisé ailleurs, ex. `tableau-bord-apercu.js:810-811`). Après retrait du mode, les clés `afficherSommatif`/`afficherAlternatif` de `config.affichageTableauBord` ne sont probablement plus posées → `undefined` → `!== false` = `true` → comportement comparatif fantôme. Harmoniser sur `=== true` et/ou nettoyer le résidu de `modalitesEvaluation.affichageTableauBord` (posé par `preferences-v2.js:91/224-233`).
+  - **Non causé par la session refonte du 2 juin** : diff `d2da44e..HEAD` ne touche aucun fichier de calcul/préférences/modes. Cf. mémoire `project-mode-comparatif-som-pan-a-retirer`.
+
 - [ ] 🟡 ⚠️ **#282** Migrer `js/cours.js` de la clé legacy `listeCours` vers la clé V2 `cours`
   - **PRIORITÉ HAUTE** actée par Grégoire 23 mai 2026 PM (« il faudra y revenir absolument »).
   - Modal Bibliothèque cours vide en V2 — 10 sites dans cours.js lisent encore `listeCours`.
