@@ -36,76 +36,34 @@ function afficherAccueil() {
 }
 
 /**
- * Génère la bannière de bienvenue.
+ * Génère la bannière de bienvenue « Bienvenue dans Labo Codex ».
  *
- * Comportement initial : affichée uniquement pour les nouveaux utilisateurs
- * (aucun groupe-cours configuré ET mode démo inactif).
- * Source texte : docs/refonte-textes/textes-manquants-bloc4.md (validé 19 avril 2026)
+ * Affichée à TOUS les utilisateurs, en permanence (accueil public par
+ * défaut). Elle présente l'application, oriente vers l'onglet Cadre et
+ * invite à rejoindre la Communauté de pratique Labo Codex hébergée par
+ * l'AQPC.
  *
- * Fenêtre d'accès public 3-30 juin 2026 (consigne Cowork 28 mai PM) :
- * pendant cette fenêtre, la bannière est affichée à TOUS les utilisateurs
- * (y compris ceux ayant un groupe-cours configuré ou étant en mode démo)
- * et contient en plus un encadré « Accès libre jusqu'au 30 juin 2026 »
- * inséré entre « Par où commencer ? » et la rangée de boutons. À partir
- * du 23 juin 2026 00h00 EDT (J-7 avant le refermage), l'encadré bascule
- * sur une formulation d'urgence (« Plus que quelques jours »). Au
- * refermage le 1er juillet 2026 00h00 EDT, la bannière revient à son
- * comportement d'origine et l'encadré disparaît, sans intervention
- * manuelle requise — aligné avec le principe « stabilité zero-dette »
- * du CLAUDE.md. Cf. DEPLOY.md v1.3 §3 + §3.6 et ADR-008 révisé du
- * 28 mai 2026.
+ * Historique : un encadré d'accès cadré 3-30 juin 2026 (refermage prévu
+ * au 1er juillet) y avait été ajouté le 1er juin 2026. Le refermage a été
+ * abandonné le 2 juin 2026 (Cloudflare Access désactivé sans date de
+ * réactivation) ; l'encadré temporaire — avec sa logique de dates et sa
+ * variante d'urgence J-7 — est remplacé par l'invitation permanente à la
+ * CoP. Cf. DEPLOY.md v1.4 §3, ADR-008 (révision 2 juin 2026), BACKLOG.md #298.
+ * Source texte d'origine : docs/refonte-textes/textes-manquants-bloc4.md
+ * (validé 19 avril 2026).
  */
 function genererBanniereBienvenue() {
-    // Fenêtre d'accès public 3-30 juin 2026 : refermage 1er juillet 00:00 EDT
-    // (heure de Toronto, EDT UTC-4). Transition J-7 : à partir du 23 juin
-    // 00:00 EDT, le paragraphe bascule sur une formulation d'urgence.
-    const LIMITE_FENETRE_PUBLIC = new Date('2026-07-01T00:00:00-04:00').getTime();
-    const DEBUT_TRANSITION_URGENCE = new Date('2026-06-23T00:00:00-04:00').getTime();
-    const maintenant = Date.now();
-    const dansFenetrePublic = maintenant < LIMITE_FENETRE_PUBLIC;
-    const enTransitionUrgence = dansFenetrePublic && maintenant >= DEBUT_TRANSITION_URGENCE;
-
-    const enDemo = typeof estEnModeDemo === 'function' && estEnModeDemo();
-    if (!dansFenetrePublic && enDemo) return '';
-
-    // Détection : au moins un groupe-cours configuré.
-    // `groupeCoursActif` est une clé GLOBALE (pas préfixée par trimestre) qui
-    // stocke l'ID du GC actif. `cle('groupesCours')` contient le tableau des GC
-    // du trimestre actuel.
-    let aGroupeCours = false;
-    try {
-        if (typeof db !== 'undefined') {
-            const gcActif = db.getSync('groupeCoursActif', null);
-            if (gcActif) {
-                aGroupeCours = true;
-            } else if (typeof window.cle === 'function') {
-                const gcList = db.getSync(window.cle('groupesCours'), []);
-                aGroupeCours = Array.isArray(gcList) && gcList.length > 0;
-            }
-        }
-    } catch (e) { /* ignore */ }
-
-    if (!dansFenetrePublic && aGroupeCours) return '';
-
-    let paragrapheAccesCadre = '';
-    if (enTransitionUrgence) {
-        paragrapheAccesCadre = `
-            <div class="banniere-bienvenue-acces banniere-bienvenue-acces--urgent">
-                <p><strong>Plus que quelques jours.</strong> L’accès libre se termine le 30 juin 2026. Écris à <a href="mailto:labo@codexnumeris.org"><code>labo@codexnumeris.org</code></a> avant cette date pour conserver l’accès web.</p>
-            </div>`;
-    } else if (dansFenetrePublic) {
-        paragrapheAccesCadre = `
+    const paragrapheCommunaute = `
             <div class="banniere-bienvenue-acces">
-                <p><strong>Accès libre jusqu’au 30 juin 2026.</strong> L’application est librement accessible jusqu’au 30 juin 2026, en marge du lancement de la Communauté de pratique Labo Codex au colloque AQPC. Pour conserver l’accès web après cette date, écris à <a href="mailto:labo@codexnumeris.org"><code>labo@codexnumeris.org</code></a> avant le 30 juin.</p>
+                <p><strong>Rejoindre la communauté.</strong> Une Communauté de pratique Labo Codex est hébergée par l’AQPC. Elle rassemble des enseignantes et des enseignants qui utilisent l’application pour observer les trajectoires de leurs élèves, expérimenter des pratiques alternatives de notation et co-construire des ressources sous licence libre. <a href="https://www.aqpc.qc.ca/fr/cop-labocodex" target="_blank" rel="noopener noreferrer">Inscription via l’AQPC</a>.</p>
             </div>`;
-    }
 
     return `
         <div class="banniere-bienvenue carte" id="banniere-bienvenue">
             <h2 class="banniere-bienvenue-titre">Bienvenue dans Labo Codex</h2>
             <p>Labo Codex num\u00e9rise le travail que tu fais d\u00e9j\u00e0\u00a0: planifier ton cours, concevoir tes activit\u00e9s d\u2019apprentissage, \u00e9valuer les travaux, suivre la progression de tes \u00e9tudiant\u00b7es. Tu y poses les m\u00eames gestes que sur papier avec calculette ou tableur, mais dans un seul outil portable.</p>
             <p><strong>Par o\u00f9 commencer\u00a0?</strong> Tu peux cocher les options d\u2019assistance et d\u2019exploration des donn\u00e9es de d\u00e9monstration. Puis configure ton trimestre, ton cours et ton groupe dans l\u2019onglet Cadre. Tu saisis l\u2019information une fois et l\u2019application s\u2019en sert partout. Ensuite, tu peux cr\u00e9er et partager tout le mat\u00e9riel que tu veux\u00a0!</p>
-            ${paragrapheAccesCadre}
+            ${paragrapheCommunaute}
             <div class="banniere-bienvenue-actions">
                 <button class="btn btn-primaire" data-action="demarrerTourGuide">
                     Commencer la visite guid\u00e9e

@@ -23146,11 +23146,10 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     margin-bottom: 18px;
 }
 
-/* Encadré d'accès cadré 3-30 juin 2026 (consigne Cowork 28 mai PM) :
-   bord gauche orange-accent + fond ambre subtil pour signaler une
-   communication temporaire sans agresser. Strong d'amorce en couleur
-   d'accent pour le punch. La variante --urgent (J-7) intensifie en
-   rouge pour signaler la fin imminente. Cf. js/accueil.js. */
+/* Encadré d'invitation à la Communauté de pratique (permanent) :
+   bord gauche orange-accent + fond ambre subtil, strong d'amorce en
+   couleur d'accent. Remplace l'encadré d'accès cadré 3-30 juin 2026
+   (refermage abandonné le 2 juin 2026). Cf. js/accueil.js. */
 .banniere-bienvenue-acces {
     margin: 12px 0 18px 0;
     padding: 12px 16px;
@@ -23168,21 +23167,9 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 .banniere-bienvenue-acces strong {
     color: var(--alerte-texte-attention, #d4b878);
 }
-.banniere-bienvenue-acces code {
-    background: rgba(200, 160, 96, 0.18);
-    padding: 1px 6px;
-    border-radius: 4px;
-    font-size: 0.92em;
-}
-.banniere-bienvenue-acces--urgent {
-    border-left-color: var(--rouge-erreur);
-    background: var(--alerte-fond-erreur, rgba(232, 64, 87, 0.10));
-}
-.banniere-bienvenue-acces--urgent strong {
-    color: var(--alerte-texte-erreur, #f06878);
-}
-.banniere-bienvenue-acces--urgent code {
-    background: rgba(232, 64, 87, 0.15);
+.banniere-bienvenue-acces a {
+    color: var(--alerte-texte-attention, #d4b878);
+    text-decoration: underline;
 }
 
 .banniere-bienvenue-actions {

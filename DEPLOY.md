@@ -1,6 +1,6 @@
 # Guide de déploiement — Labo Codex
 
-> **Version** : 1.3 (28 mai 2026 — fenêtre d'ouverture cadrée 3 juin - 30 juin 2026 et plan de refermage planifié ; voir §3 et §3.6)
+> **Version** : 1.4 (2 juin 2026 — Cloudflare Access désactivé par défaut, pas de refermage planifié ; voir §3, §3.6 et historique)
 > **Public** : Grégoire Bédard (mainteneur principal) + co-mainteneur éventuel
 > **Document apparenté** : [`PRIVACY.md`](PRIVACY.md), [`INCIDENTS.md`](INCIDENTS.md)
 
@@ -167,39 +167,68 @@ sur `main` — pas de configuration ad hoc dans le dashboard Netlify.
 
 ---
 
-## 3. Configuration Cloudflare Access (SUSPENDU du 3 juin au 30 juin 2026)
+## 3. Configuration Cloudflare Access (désactivé par défaut — référence technique pour un usage futur)
 
-> **⚠️ Section transitoire** : les procédures de gestion d'accès
-> ci-dessous sont **suspendues** pendant la fenêtre d'ouverture publique
-> du 3 juin au 30 juin 2026. Elles redeviennent applicables au refermage
-> planifié du 1er juillet 2026 (cf. §3.6 ci-après).
+> **Statut au 2 juin 2026** : Cloudflare Access est **désactivé sur
+> `app.codexnumeris.org` sans date de réactivation planifiée**.
+> L'application est publiquement accessible sans authentification.
+> Les procédures de gestion d'accès documentées dans cette section et
+> dans §4 ne s'appliquent à aucune opération actuelle ; elles sont
+> conservées comme référence technique pour une éventuelle
+> réactivation future (cf. §3.6 et ADR-008).
 >
-> **Décision du 28 mai 2026** : ouverture publique de
-> `app.codexnumeris.org` du **3 juin au 30 juin 2026 inclus** en
-> préparation de la présentation AQPC du 3 juin 2026 (J−6 au moment de
-> la décision) et du lancement parallèle de la Communauté de pratique
-> Labo Codex. La liste blanche de 50 places (dont 47 disponibles au
-> moment de la décision) est libérée pendant cette fenêtre ;
-> l'application est publiquement accessible sans authentification. Le
-> contrôle d'accès est rétabli au 1er juillet 2026 avec une liste
-> reconstituée (cf. §3.6).
+> **Chronologie de la décision** :
 >
-> **Motivations** :
-> - Permettre aux visiteurs de la conférence AQPC de tester l'application
->   sans procédure d'inscription préalable.
-> - Éliminer le risque que le challenge bot Cloudflare bloque des visiteurs
->   sur des appareils anciens ou réseaux institutionnels stricts.
-> - Sortir de la contrainte du quota gratuit (50 utilisateurs).
+> - **28 mai 2026** : décision initiale d'une fenêtre d'ouverture
+>   publique cadrée du 3 juin au 30 juin 2026, suivie d'un refermage
+>   planifié au 1er juillet avec liste blanche reconstituée (cf.
+>   DEPLOY.md v1.3 et ADR-008 révision du 28 mai 2026 PM).
+> - **2 juin 2026** : décision révisée après examen des justifications
+>   restantes du refermage. Le scénario «refermage 1er juillet» est
+>   abandonné au profit d'une ouverture publique par défaut. Motifs
+>   détaillés ci-dessous.
 >
-> **Conséquences acceptées** :
-> - Plus de logs d'accès individuels par identité courriel. C'est un
->   inconfort de gestion (support, communication des mises à jour), pas
->   un manquement légal – voir §1.4 sur le cadrage de confidentialité.
-> - L'app reste 100 % hors-ligne par conception (ADR-003) : aucune donnée
->   pédagogique ne transite par les serveurs Netlify / Cloudflare.
-> - Surface d'attaque résiduelle limitée à : scraping des assets statiques
->   publics (faible enjeu), DoS absorbable par le CDN Cloudflare, et
->   exposition d'image (captures d'écran publiables par n'importe qui).
+> **Motifs du retrait du refermage** (décision du 2 juin 2026) :
+> Une fois retirées les justifications qui ne tiennent plus l'examen,
+> il ne reste pratiquement rien pour fonder un refermage actif :
+>
+> - **Loi 25** : ne s'applique vraisemblablement pas à la configuration
+>   actuelle (cf. §1.4 et ADR-008 PM). Plus pertinente comme contrainte.
+> - **Anti-scraping / anti-DDoS** : la protection de base de Cloudflare
+>   fonctionne indépendamment d'Access. Les assets statiques de l'app
+>   n'ont rien de sensible à voler (code public sur GitHub).
+> - **Traçabilité des accès** : la phase alpha janvier-mai 2026 a
+>   démontré que les logs Cloudflare ne produisent rien d'actionnable
+>   (purgés à 24 h sur plan gratuit ; aucun retour utilisateur n'est
+>   passé par cette voie). Les vrais canaux d'engagement passent par
+>   la CoP et `labo@codexnumeris.org`.
+> - **Voûte future** : aura son propre contrôle d'accès applicatif
+>   quand elle existera. Maintenir Access actif sur l'app principale
+>   ne sert pas la Voûte.
+> - **Quota 50 sièges gratuits** : c'est une conséquence opérationnelle
+>   du choix de maintenir Access, pas une raison de le maintenir.
+>
+> **Pression du calendrier académique** : refermer le 1er juillet
+> couperait l'accès précisément pendant la fenêtre d'appropriation et
+> de préparation des cours d'automne (mi-juillet à mi-août). Or l'ADR-008
+> situe l'AQPC du 3 juin comme «la première vraie amorce d'une vague
+> significative d'expérimentateurs accompagnés, en vue d'une phase
+> structurée à l'automne 2026». Un refermage à J+27 contredit cette
+> finalité.
+>
+> **Conséquences acceptées de l'ouverture publique par défaut** :
+>
+> - Pas de logs d'accès individuels par identité courriel — sans impact
+>   matériel jusqu'ici, et sans portée Loi 25 (cf. §1.4).
+> - L'app reste 100 % hors-ligne par conception (ADR-003) : aucune
+>   donnée pédagogique ne transite par les serveurs Netlify / Cloudflare.
+> - Surface d'attaque résiduelle limitée à : scraping des assets
+>   statiques publics (faible enjeu), DoS absorbable par le CDN
+>   Cloudflare, et exposition d'image (captures d'écran publiables
+>   par n'importe qui).
+> - La CoP devient le seul vecteur d'engagement et de recrutement —
+>   ce qui correspond à son rôle conçu, plutôt que de partager cette
+>   fonction avec une liste blanche Cloudflare.
 >
 > **Note sur le cadre Loi 25** : la v1.1 de ce document (et l'ADR-008 du
 > 28 mai) inscrivaient parmi les conséquences la perte d'une «base de
@@ -210,29 +239,27 @@ sur `main` — pas de configuration ad hoc dans le dashboard Netlify.
 >
 > **Note sur l'usage hors-ligne** : l'application reste téléchargeable
 > depuis GitHub et utilisable en local (`file://`) en tout temps,
-> indépendamment du statut de l'accès web hébergé. La fenêtre d'ouverture
-> publique 3 juin - 30 juin vise donc surtout le premier contact ; les
-> utilisateurs réellement engagés (notamment la Cohorte 1 pilote
-> 2026-2027 de la CoP) migreront vraisemblablement vers l'usage local.
-> Le refermage du 1er juillet ne coupe l'accès web qu'aux personnes
-> hors de la liste blanche reconstituée – il ne coupe l'accès à
-> l'application à personne.
+> indépendamment du statut de l'accès web hébergé. C'est une propriété
+> structurelle de l'app, pas un mécanisme conditionnel.
 >
-> **Précédent à noter** : une première phase d'invitations alpha en
-> janvier 2026 (Beta 95) reposait sur une logique comparable de liste
-> blanche élargie. Elle n'a pas généré d'engagement, mais deux
-> paramètres clés étaient défavorables : application en phase alpha
-> plutôt que beta (pas assez stable pour un usage soutenu) et début de
-> trimestre (bande passante mentale des enseignants saturée). Le
-> contexte de juin 2026 est différent (beta stable, fin de session,
-> dispositif CoP en place pour absorber l'engagement) – le précédent
-> ne disqualifie donc pas le modèle.
+> **Précédent alpha de janvier 2026** : une première phase d'invitations
+> alpha (Beta 95) reposait sur une logique de liste blanche élargie.
+> Elle n'a pas généré d'engagement, mais deux paramètres clés étaient
+> défavorables : application en phase alpha plutôt que beta (pas assez
+> stable pour un usage soutenu) et début de trimestre (bande passante
+> mentale des enseignants saturée). Le contexte de juin 2026 est
+> différent (beta publique stable, fin de session, dispositif CoP en
+> place) – le précédent n'invalide donc pas le modèle, et n'invalide
+> pas non plus l'ouverture publique sans contrôle.
 >
-> **Décision réversible** : la procédure ci-dessous reste valide pour
-> remettre Cloudflare Access en place à tout moment (quelques minutes
-> dans le dashboard Zero Trust).
+> **Réversibilité** : la procédure technique documentée ci-dessous
+> (§3.1 à §3.5) et la procédure de gestion (§4) restent valides pour
+> remettre Cloudflare Access en place en quelques minutes si une
+> raison concrète apparaît un jour (cf. §3.6 pour les conditions qui
+> pourraient déclencher cette décision). Pas d'anticipation, pas de
+> calendrier prévu.
 >
-> Cf. ADR-008 (révisé le 28 mai 2026, à re-réviser pour alignement avec §1.4 et §3.6).
+> Cf. ADR-008 (révisé le 2 juin 2026).
 
 ### 3.1 Tableau de bord
 
@@ -288,55 +315,50 @@ contourné et l'app est accessible sans authentification.
 Test rapide depuis un terminal :
 ```bash
 curl -I https://app.codexnumeris.org
-# Attendu pendant la fenêtre 3-30 juin : HTTP/2 200 (accès direct).
-# Attendu hors fenêtre : HTTP/2 302 (redirection vers Cloudflare Access login).
+# Attendu en posture actuelle (Access désactivé) : HTTP/2 200 (accès direct).
+# Attendu si Access est un jour réactivé : HTTP/2 302 (redirection vers Cloudflare Access login).
 ```
 
-### 3.6 Refermage planifié — 1er juillet 2026
+### 3.6 Conditions de réactivation éventuelle
 
-Au 1er juillet 2026, le Cloudflare Access est remis en place sur
-`app.codexnumeris.org` avec une liste blanche reconstituée à partir des
-sources suivantes :
+Aucun refermage n'est planifié au calendrier (décision du 2 juin 2026).
+Cloudflare Access reste néanmoins configuré côté DNS / proxy orange ;
+seule la policy est désactivée. La réactivation est une opération de
+quelques minutes dans le dashboard Zero Trust.
 
-1. **Membres de la Cohorte 1 pilote 2026-2027** de la Communauté Labo
-   Codex (priorité — c'est le noyau d'expérimentateurs accompagnés ;
-   référence : `communauté/OneDrive_1_2026-04-30/Lancement CoP -
-   Documentation essentielle à fournir 2/Nécessaire pour un lancement
-   réussi/Lancer une communauté de pratique-6 questions (3).docx`,
-   section «Projet d'avenir»).
-2. **Membres de la CoP** qui ont demandé explicitement l'accès web
-   entre le 3 et le 30 juin 2026 en écrivant à
-   `labo@codexnumeris.org`. Une note dans la communication CoP de
-   l'AQPC devra signaler cette modalité avant la fin juin.
-3. **Mainteneur** et co-mainteneur éventuel.
+Conditions qui pourraient justifier une réactivation future :
 
-*Inférence* : la somme de ces sources restera vraisemblablement sous le
-quota gratuit Cloudflare de 50 sièges (Cohorte 1 dimensionnée pour des
-ateliers mensuels de 90 minutes, donc probablement 15-25 personnes par
-contrainte pédagogique ; demandeurs CoP additionnels difficile à
-estimer mais probablement modeste à court terme). Si dépassement,
-l'arbitrage upgrade Cloudflare payant vs sélection sera posé à ce
-moment-là – pas d'anticipation.
+1. **Émergence d'un risque opérationnel concret** : abus mesurable
+   (DoS persistant non absorbé par Cloudflare, scraping intensif
+   identifié, dérive d'usage). Aucun de ces signaux n'est anticipé,
+   mais ils restent les seuls motifs matériels.
+2. **Création de la Voûte** (cf. §Contexte de ADR-008) : la Voûte
+   imposera son propre contrôle d'accès applicatif ; selon
+   l'architecture retenue, il pourrait être commode de réactiver
+   Access sur l'app principale comme première barrière. Décision
+   à prendre au moment d'implémenter la Voûte, pas avant.
+3. **Bascule institutionnelle** : si Labo Codex est porté un jour par
+   une organisation (cégep, OBNL, entreprise), la posture devra être
+   reprise à zéro, et un contrôle d'accès formel deviendra
+   vraisemblablement requis (cf. §1.4).
+4. **Croissance qualitative inattendue** qui rendrait utile une
+   traçabilité dont l'absence ne pose actuellement aucun problème.
 
-**Procédure technique de remise en place** : suivre les sections §3.1 à
-§3.5 et §4. La configuration DNS / proxy orange reste en place pendant
-toute la fenêtre d'ouverture ; seule la policy Access est désactivée
-(pour la fenêtre) puis réactivée (au refermage) avec la nouvelle liste
-blanche. Quelques minutes dans le dashboard Zero Trust.
-
-**À documenter au moment du refermage** : date effective de la remise
-en place, taille de la liste blanche reconstituée, et le cas échéant
-les arbitrages faits si le quota gratuit est dépassé. Mettre à jour
-cette section avec les chiffres réels.
+Procédure de réactivation, le cas échéant : suivre §3.1 à §3.5 (config
+Access) et §4 (gestion de la liste blanche). À documenter au moment
+de la réactivation : date effective, raison déclenchante, taille de
+la liste blanche reconstituée, et arbitrage upgrade Cloudflare payant
+si le quota gratuit de 50 sièges est dépassé.
 
 ---
 
-## 4. Gestion des utilisateurs autorisés (SUSPENDU du 3 juin au 30 juin 2026)
+## 4. Gestion des utilisateurs autorisés (référence technique pour un usage futur)
 
-> **Section suspendue pendant la fenêtre d'ouverture publique**
-> (cf. §3). Redevient applicable au refermage planifié du 1er juillet
-> 2026 (cf. §3.6), avec la liste blanche reconstituée à partir des
-> sources énumérées en §3.6.
+> **Section sans usage actuel** : Cloudflare Access étant désactivé
+> sans date de réactivation planifiée (cf. §3), les procédures
+> ci-dessous ne s'appliquent à aucune opération en cours. Elles sont
+> conservées comme référence technique pour une éventuelle
+> réactivation future (conditions listées en §3.6).
 
 ### 4.1 Ajouter une personne à la liste blanche
 
@@ -351,11 +373,12 @@ cette section avec les chiffres réels.
    - Le fait que ses données pédagogiques restent locales sur sa machine
    - Le lien vers `PRIVACY.md` (politique de confidentialité)
 
-⚠️ **Quota plan gratuit** : 50 utilisateurs maximum. État au 22 mai 2026 :
-saturée. État au 28 mai 2026 : libérée en vue de la fenêtre d'ouverture
-publique (cf. §3). État au 1er juillet 2026 : à reconstituer selon §3.6.
-Si la liste reconstituée dépasse 50 personnes, évaluer les options
-(upgrade payant, politique de domaine, sélection).
+⚠️ **Quota plan gratuit** : 50 utilisateurs maximum. États historiques :
+saturée au 22 mai 2026, libérée le 28 mai 2026 en vue de l'ouverture
+publique. État au 2 juin 2026 : aucune liste active (policy
+désactivée). En cas de réactivation future, si la liste reconstituée
+dépasse 50 personnes, évaluer les options (upgrade payant, politique
+de domaine, sélection).
 
 ### 4.2 Retirer une personne de la liste blanche
 
@@ -566,6 +589,7 @@ Statut : **non activé au 22 mai 2026**. À activer post-AQPC.
 | 2026-05-28 | 1.1 | (a) Substitution `labo.codexnumeris.org` → `app.codexnumeris.org` partout. L'ancien sous-domaine n'a plus d'enregistrement DNS. (b) Retrait du Cloudflare Access acté en préparation de l'AQPC du 3 juin. Sections 3 et 4 marquées historiques. PRIVACY.md à réviser séparément (BACKLOG #298). Cf. ADR-008 révisé. |
 | 2026-05-28 | 1.2 | Recadrage du référentiel Loi 25 après consultation Cowork. §1.4 ajoutée : Labo Codex, en configuration actuelle (mainteneur individuel, pas d'activité économique organisée, app 100 % hors-ligne), n'engage vraisemblablement pas la *Loi sur la protection des renseignements personnels dans le secteur privé*. §3 «Conséquences acceptées» et §4.3 réécrites en conséquence. ADR-008 (révision du 28 mai 2026) et PRIVACY.md à aligner ; BACKLOG `#298` à reformuler – pas «mettre à jour la posture Loi 25», mais «clarifier que le cadre a été surinvoqué et préciser le régime réel». |
 | 2026-05-28 | 1.3 | Cadrage de la levée Access comme **fenêtre d'ouverture publique du 3 juin au 30 juin 2026**, pas comme retrait indéfini. §3 retitrée «SUSPENDU», intro réécrite pour acter la date de refermage, ajout d'une note sur l'usage hors-ligne (l'app reste téléchargeable en tout temps – le refermage ne coupe l'accès web qu'aux personnes hors liste blanche reconstituée) et d'une note sur le précédent alpha de janvier 2026 (paramètres défavorables aujourd'hui levés : beta stable, fin de session, dispositif CoP). Nouvelle §3.6 «Refermage planifié — 1er juillet 2026» : sources de reconstitution de la liste blanche (Cohorte 1 pilote 2026-2027 + demandeurs CoP + mainteneur), procédure technique, points à documenter au moment du refermage. §4 retitrée «SUSPENDU». §3.5 et §4.1 actualisées pour refléter les états successifs du quota. ADR-008 à aligner. |
+| 2026-06-02 | 1.4 | **Retrait du refermage planifié au 1er juillet** après examen à froid des justifications restantes. Une fois retirées les invocations qui ne tiennent plus l'examen (Loi 25 absente par §1.4, anti-scraping géré indépendamment d'Access par le CDN Cloudflare, traçabilité Cloudflare n'ayant rien produit d'actionnable en phase alpha, Voûte ayant son propre contrôle d'accès applicatif futur), il ne reste comme justification matérielle du refermage que la contrainte du quota gratuit 50 sièges — qui est une conséquence opérationnelle du choix de maintenir Access, pas une raison de le maintenir. Argument additionnel : refermer le 1er juillet couperait l'accès pendant la fenêtre d'appropriation et de préparation des cours d'automne (mi-juillet à mi-août), en contradiction avec la finalité de l'AQPC du 3 juin telle que documentée par l'ADR-008. Décision : ouverture publique par défaut sans date de réactivation planifiée. §3 retitrée «désactivé par défaut — référence technique pour un usage futur», intro et motivations réécrites. §3.6 retitrée «Conditions de réactivation éventuelle» : liste des conditions qui pourraient justifier une réactivation future (abus mesurable, création de la Voûte, bascule institutionnelle, croissance inattendue). §4 retitrée «référence technique pour un usage futur». §3.5 et §4.1 actualisées. ADR-008 à aligner, BACKLOG `#298` à refondre une seconde fois, note CoP et message d'accueil dans l'app à amender. |
 
 ---
 
