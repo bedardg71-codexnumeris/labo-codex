@@ -324,7 +324,7 @@ function viderAffichageCoursV2() {
 
     // Vider les statistiques du groupe
     const nbEtudiants = document.getElementById('v2-nbEtudiantsTotal');
-    if (nbEtudiants) nbEtudiants.textContent = '0';
+    if (nbEtudiants) nbEtudiants.textContent = window.formaterNbEtudiants ? window.formaterNbEtudiants(0) : '0';
 
     const groupeCoursElem = document.getElementById('v2-groupeCours');
     if (groupeCoursElem) groupeCoursElem.textContent = '—';
@@ -780,11 +780,13 @@ function afficherSyntheseGroupeEtudiants() {
 
     // Mettre à jour l'affichage
     if (elemTotal) elemTotal.textContent = total;
-    if (elemNbTotal) elemNbTotal.textContent = total;
+    const elemLabelEtud = document.getElementById('v2-resumeLabelEtudiants');
+    if (elemLabelEtud && window.pluriel) elemLabelEtud.textContent = window.pluriel(total, 'étudiant·e', 'étudiant·es');
+    if (elemNbTotal) elemNbTotal.textContent = window.formaterNbEtudiants ? window.formaterNbEtudiants(total) : total;
 
     if (conteneurSA) {
         toggleDisplay(conteneurSA, nbSA > 0);
-        if (elemSA) elemSA.textContent = nbSA;
+        if (elemSA) elemSA.textContent = window.formaterNbEtudiants ? window.formaterNbEtudiants(nbSA) : nbSA;
     }
 
     if (elemProgrammes) {

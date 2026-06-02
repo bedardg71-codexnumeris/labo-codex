@@ -6380,7 +6380,7 @@
                     </h2>
 
                     <p class="text-muted">
-                        Configuration du cadre temporel et organisationnel du trimestre actif.
+                        Pose ici le squelette de ton trimestre : dates, cours, groupe, horaire. Tu le configures une fois, l’app s’en sert partout.
                     </p>
 
                     <!-- Barre de convergence : statut des 6 composantes → Groupe-cours -->
@@ -6399,13 +6399,13 @@
                         <span class="bc-liaison" aria-hidden="true"></span>
                         <button class="bc-etape" data-etape="enseignant" data-accordeon="accordeon-enseignant">
                             <span class="bc-noeud"><span class="bc-check">&#10003;</span></span>
-                            <span class="bc-label">Enseignant</span>
+                            <span class="bc-label">Enseignant·e</span>
                             <span class="bc-info" id="bc-info-enseignant"></span>
                         </button>
                         <span class="bc-liaison" aria-hidden="true"></span>
                         <button class="bc-etape" data-etape="etudiants" data-accordeon="accordeon-groupe-etudiants">
                             <span class="bc-noeud"><span class="bc-check">&#10003;</span></span>
-                            <span class="bc-label">Étudiants</span>
+                            <span class="bc-label">Étudiant·es</span>
                             <span class="bc-info" id="bc-info-etudiants"></span>
                         </button>
                         <span class="bc-liaison" aria-hidden="true"></span>
@@ -6426,7 +6426,7 @@
                     <div class="carte accordeon" id="accordeon-gestion-trimestres">
                         <div class="accordeon-header" data-tooltip="reglages-gestion-trimestres">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▶</span> Gestion des trimestres
+                                <span class="accordeon-chevron">▶</span> Trimestre
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
@@ -6473,7 +6473,7 @@
                                             <div class="groupe-form">
                                                 <label>Session <span class="text-danger u-texte-medium">*</span></label>
                                                 <select class="controle-form" id="v2-sessionTrimestre" data-on-change="sauvegarderIdentificationTrimestreV2">
-                                                    <option value="">— Choisir —</option>
+                                                    <option value="">— Sélectionner —</option>
                                                     <option value="automne">Automne</option>
                                                     <option value="hiver">Hiver</option>
                                                     <option value="ete">Été</option>
@@ -6485,7 +6485,7 @@
                                             </div>
                                         </div>
                                         <p class="texte-aide u-mt-10" style="margin-bottom: 0">
-                                            Ces informations identifient ton trimestre de travail et préfixent tes données.
+                                            Ces informations nomment ton trimestre et gardent ses données séparées des autres trimestres.
                                         </p>
                                     </div>
 
@@ -6590,7 +6590,7 @@
                                                     <label class="u-texte-medium">Type d'événement</label>
                                                     <select id="v2-categorieEvenementPrevu" class="controle-form controle-form-compact" data-on-change="majAffichageRepriseV2Prevu">
                                                         <option value="institutionnel">Institutionnel (collège)</option>
-                                                        <option value="personnel">Personnel (vous seulement)</option>
+                                                        <option value="personnel">Personnel (toi seulement)</option>
                                                     </select>
                                                 </div>
                                                 <div class="u-mb-8" id="v2-blocReprisePrevu" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
@@ -6645,7 +6645,7 @@
                                                     <label class="u-texte-medium">Type d'événement</label>
                                                     <select id="v2-categorieEvenementImprevu" class="controle-form controle-form-compact" data-on-change="majAffichageRepriseV2Imprevu">
                                                         <option value="institutionnel">Institutionnel (collège)</option>
-                                                        <option value="personnel">Personnel (vous seulement)</option>
+                                                        <option value="personnel">Personnel (toi seulement)</option>
                                                     </select>
                                                 </div>
                                                 <div class="u-mb-8" id="v2-blocRepriseImprevu" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
@@ -6679,7 +6679,7 @@
 
                                     <!-- Statistiques calculées -->
                                     <div class="info-box u-mt-15 u-text-right">
-                                        <button class="btn btn-confirmer btn-tres-compact" data-action="sauvegarderCadreCalendrierV2">Sauvegarder le trimestre</button>
+                                        <button class="btn btn-confirmer btn-tres-compact" data-action="sauvegarderCadreCalendrierV2">Enregistrer</button>
                                     </div>
                                     <!-- Anciens spans masqués pour compatibilité -->
                                     <span id="v2-nombreSemaines" class="u-hide">0</span>
@@ -6712,7 +6712,7 @@
                                     <div class="groupe-form u-mt-15">
                                         <label class="libelle-selection">Cours :</label>
                                         <select id="v2-selectCours" class="controle-form" data-on-change="changerCoursSelectionneV2">
-                                            <option value="">-- Sélectionner --</option>
+                                            <option value="">— Sélectionner —</option>
                                         </select>
                                     </div>
 
@@ -6992,7 +6992,7 @@
                                         <p class="profil-detail" id="enseignant-resume-institution"></p>
                                     </div>
                                     <p class="texte-aide u-mt-15">
-                                        Ces informations servent de métadonnées pour tes ressources partagées.
+                                        Ces informations accompagnent les ressources que tu partages : nom, établissement, discipline.
                                     </p>
                                 </div>
 
@@ -7203,10 +7203,10 @@
                     <div class="carte accordeon ferme" id="accordeon-groupe-etudiants">
                         <div class="accordeon-header" data-tooltip="reglages-groupe-etudiants">
                             <h3 class="carte-titre-bleu" style="margin: 0;">
-                                <span class="accordeon-chevron">▶</span> Groupe d'étudiants
+                                <span class="accordeon-chevron">▶</span> Groupe d'étudiant·es
                             </h3>
                             <div class="badge-compteur u-mr-10" style="margin-left: auto">
-                                <span id="v2-nbEtudiantsTotal">0</span> étudiant(s)
+                                <span id="v2-nbEtudiantsTotal">0 étudiant·e</span>
                             </div>
                         </div>
                         <div class="accordeon-contenu">
@@ -7229,13 +7229,13 @@
                                     <div class="carte-resume-etudiants">
                                         <div class="resume-stat-principal">
                                             <span class="resume-nombre" id="v2-resumeNbTotal">0</span>
-                                            <span class="resume-label">étudiants</span>
+                                            <span class="resume-label" id="v2-resumeLabelEtudiants">étudiant·e</span>
                                         </div>
                                         <div class="resume-details" id="v2-resumeGroupes">
                                             <!-- Rempli dynamiquement -->
                                         </div>
                                         <div class="resume-sa u-hide" id="v2-resumeSA">
-                                            <span class="badge-sa">SA</span> <span id="v2-resumeNbSA">0</span> étudiant(s)
+                                            <span class="badge-sa">SA</span> <span id="v2-resumeNbSA">0 étudiant·e</span>
                                         </div>
                                         <!-- Top programmes (Beta 95.3) -->
                                         <div class="top-programmes u-hide" id="v2-topProgrammes">
@@ -7263,12 +7263,12 @@
 
                                     <!-- Liste des étudiants (tableau scrollable) -->
                                     <div class="conteneur-liste-etudiants" id="v2-listeEtudiants">
-                                        <p class="etat-vide-liste">Aucun étudiant. Utilise le formulaire ci-dessous ou l'import plus bas.</p>
+                                        <p class="etat-vide-liste">Aucun·e étudiant·e pour l'instant. Utilise le formulaire ci-dessous ou l'import plus bas.</p>
                                     </div>
 
                                     <!-- Formulaire d'ajout/édition (toujours visible) -->
                                     <div class="formulaire-ajout-etudiant" id="v2-formEtudiant">
-                                        <h5 class="sous-titre-section u-mb-10" id="v2-formEtudiantTitre">Ajouter un étudiant</h5>
+                                        <h5 class="sous-titre-section u-mb-10" id="v2-formEtudiantTitre">Ajouter un·e étudiant·e</h5>
                                         <div class="grille-ajout-etudiant">
                                             <div class="groupe-form">
                                                 <label>DA</label>
@@ -7300,7 +7300,7 @@
                                         </div>
                                         <div class="u-flex-gap-10 u-mt-10">
                                             <button class="btn btn-confirmer btn-sm" id="v2-btnSoumettreEtudiant" data-action="soumettreEtudiantV2">
-                                                Ajouter l'étudiant
+                                                Ajouter l'étudiant·e
                                             </button>
                                             <button class="btn btn-annuler btn-sm u-hide" id="v2-btnAnnulerEdition" data-action="annulerEditionEtudiantV2">
                                                 Annuler
@@ -7310,7 +7310,7 @@
 
                                     <!-- Section Import (Beta 95.3 : déplacée à droite) -->
                                     <div class="section-import-droite">
-                                        <h5 class="sous-titre-section u-mb-10" data-tooltip="reglages-etudiants-import">Importer des étudiants</h5>
+                                        <h5 class="sous-titre-section u-mb-10" data-tooltip="reglages-etudiants-import">Importer des étudiant·es</h5>
 
                                         <div class="grille-import-2col">
                                             <!-- Colonne 1 : Coller -->
@@ -7370,7 +7370,7 @@
                                     <div class="groupe-form u-mb-15">
                                         <label class="label-compact">Horaire :</label>
                                         <select id="v2-selectHoraire" class="controle-form" data-on-change="changerHoraireSelectionneV2">
-                                            <option value="">Sélectionner...</option>
+                                            <option value="">— Sélectionner —</option>
                                         </select>
                                     </div>
 
@@ -7492,7 +7492,7 @@
 
                             <!-- Consigne groupe-cours -->
                             <p class="texte-aide">
-                                <strong>Pour constituer un groupe-cours</strong>, associe : un cours + un enseignant·e + un numéro de groupe + un horaire + une pratique de notation.
+                                <strong>Pour constituer un groupe-cours</strong>, renseigne les 5 éléments obligatoires : trimestre, cours, numéro de groupe, horaire et enseignant·e. La pratique de notation est facultative.
                             </p>
 
                             <div class="disposition-bibliotheque-formulaire">
@@ -7537,10 +7537,11 @@
                                     <div id="v2-groupeCoursEtatVide" class="etat-vide-formulaire">
                                         <div class="u-text-center u-p-20">
                                             <p class="u-mb-10 u-texte-11"><strong>Assemble un groupe-cours</strong></p>
-                                            <p class="u-mb-15" style="color: var(--gris-moyen)">Clique sur « + Nouveau groupe-cours » pour sélectionner les 4 éléments à assembler.</p>
+                                            <p class="u-mb-15" style="color: var(--gris-moyen)">Clique sur « + Nouveau groupe-cours » pour renseigner les 5 éléments obligatoires.</p>
                                             <ol class="u-texte-09 u-text-left" style="display: inline-block; color: var(--gris-moyen); margin: 0; padding-left: 20px">
+                                                <li>Le <strong>trimestre</strong></li>
                                                 <li>Le <strong>cours</strong> à enseigner</li>
-                                                <li>Le <strong>numéro de groupe</strong> d'étudiants</li>
+                                                <li>Le <strong>numéro de groupe</strong> d'étudiant·es</li>
                                                 <li>L'<strong>horaire</strong> des séances</li>
                                                 <li>L'<strong>enseignant·e</strong> responsable</li>
                                             </ol>
@@ -7553,7 +7554,7 @@
 
                                         <!-- Message d'aide affiché en mode démo (A.12) -->
                                         <div id="v2-messageAideDemoGC" class="u-hide alerte alerte-info u-mb-15">
-                                            💡 Tu peux utiliser les valeurs marquées <strong>« démo »</strong> dans chaque menu pour te familiariser avec le flux de création.
+                                            💡 Tu peux utiliser les valeurs marquées <strong>« démo »</strong> dans chaque menu pour te familiariser avec la création d'un groupe-cours.
                                         </div>
 
                                         <!-- Nom généré dynamiquement -->
@@ -7563,7 +7564,7 @@
                                         </div>
 
                                         <!-- Assemblage des 5 éléments (Beta 95.2) -->
-                                        <p class="u-mb-10 u-texte-petit" style="color: var(--gris-moyen)">Assemble les 5 éléments pour créer un groupe-cours</p>
+                                        <p class="u-mb-10 u-texte-petit" style="color: var(--gris-moyen)">Renseigne les 5 éléments obligatoires (la pratique de notation est facultative).</p>
 
                                         <!-- Ligne 1: Trimestre + Cours -->
                                         <div class="grille-form-2col u-mb-15">
@@ -7606,7 +7607,7 @@
                                                 </select>
                                             </div>
                                             <div class="groupe-form" data-tooltip="reglages-gc-pratique">
-                                                <label>6. Pratique de notation</label>
+                                                <label>6. Pratique de notation (facultatif)</label>
                                                 <select id="v2-gc-pratique" class="controle-form">
                                                     <option value="">— À compléter quand configurée —</option>
                                                 </select>
@@ -7628,7 +7629,7 @@
                                                     Annuler
                                                 </button>
                                                 <button class="btn btn-confirmer" id="v2-btnSauvegarderGroupeCours" data-action="sauvegarderGroupeCoursV2">
-                                                    <span id="v2-btnTexteGroupeCours">Créer</span>
+                                                    <span id="v2-btnTexteGroupeCours">Enregistrer</span>
                                                 </button>
                                             </div>
                                         </div>
@@ -7653,7 +7654,7 @@
                     <div class="carte">
                         <h3 class="carte-titre-bleu">Vue calendaire</h3>
                         <div id="conteneur-calendrier">
-                            [Le calendrier sera généré ici]
+                            Aucune présence à afficher pour l'instant.
                         </div>
                     </div>
                 </div>
