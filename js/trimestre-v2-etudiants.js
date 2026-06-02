@@ -26,6 +26,21 @@
 'use strict';
 
 /* ===============================
+   ACCORD SINGULIER / PLURIEL (helpers partagés)
+   =============================== */
+
+// 0 ou 1 → singulier ; ≥ 2 → pluriel. Réutilisé par trimestre-v2-cours.js.
+function pluriel(n, singulier, plur) {
+    return Math.abs(Number(n)) >= 2 ? plur : singulier;
+}
+// « N étudiant·e » / « N étudiant·es » selon l'accord.
+function formaterNbEtudiants(n) {
+    return n + ' ' + pluriel(n, 'étudiant·e', 'étudiant·es');
+}
+window.pluriel = pluriel;
+window.formaterNbEtudiants = formaterNbEtudiants;
+
+/* ===============================
    ACCORDÉON GROUPES / ÉTUDIANTS
    =============================== */
 
@@ -61,7 +76,7 @@ async function chargerListeEtudiantsV2() {
         : tousLesEtudiants;
 
     // Mettre à jour le compteur dans l'en-tête (total, pas filtré)
-    if (nbTotal) nbTotal.textContent = tousLesEtudiants.length;
+    if (nbTotal) nbTotal.textContent = formaterNbEtudiants(tousLesEtudiants.length);
 
     // Mettre à jour la carte résumé (avec les étudiants filtrés)
     mettreAJourResumeEtudiantsV2(etudiants);
@@ -152,8 +167,10 @@ function mettreAJourResumeEtudiantsV2(etudiants) {
     const elemSA = document.getElementById('v2-resumeSA');
     const elemNbSA = document.getElementById('v2-resumeNbSA');
 
-    // Nombre total
+    // Nombre total (le grand nombre reste seul ; le mot accordé va dans le label)
     if (elemNbTotal) elemNbTotal.textContent = etudiants.length;
+    const elemLabelEtud = document.getElementById('v2-resumeLabelEtudiants');
+    if (elemLabelEtud) elemLabelEtud.textContent = pluriel(etudiants.length, 'étudiant·e', 'étudiant·es');
 
     // Répartition par groupe
     if (elemGroupes) {
@@ -182,7 +199,7 @@ function mettreAJourResumeEtudiantsV2(etudiants) {
     const nbSA = etudiants.filter(e => e.sa === 'Oui' || e.sa === true).length;
     toggleDisplay(elemSA, nbSA > 0);
     if (elemNbSA) {
-        elemNbSA.textContent = nbSA;
+        elemNbSA.textContent = formaterNbEtudiants(nbSA);
     }
 
     // Beta 95.3 : Top programmes (2-3 plus fréquents)
@@ -372,7 +389,7 @@ function editerEtudiantV2(da) {
     const btnAnnuler = document.getElementById('v2-btnAnnulerEdition');
     const formContainer = document.getElementById('v2-formEtudiant');
 
-    if (titre) titre.textContent = 'Modifier l\'étudiant';
+    if (titre) titre.textContent = 'Modifier l\'étudiant·e';
     if (btnSoumettre) btnSoumettre.textContent = 'Enregistrer les modifications';
     if (btnAnnuler) btnAnnuler.classList.remove('u-hide');
     if (formContainer) formContainer.classList.add('mode-edition');
@@ -408,8 +425,8 @@ function reinitialiserFormEtudiantV2() {
     const btnAnnuler = document.getElementById('v2-btnAnnulerEdition');
     const formContainer = document.getElementById('v2-formEtudiant');
 
-    if (titre) titre.textContent = 'Ajouter un étudiant';
-    if (btnSoumettre) btnSoumettre.textContent = 'Ajouter l\'étudiant';
+    if (titre) titre.textContent = 'Ajouter un·e étudiant·e';
+    if (btnSoumettre) btnSoumettre.textContent = 'Ajouter l\'étudiant·e';
     if (btnAnnuler) btnAnnuler.classList.add('u-hide');
     if (formContainer) formContainer.classList.remove('mode-edition');
 }
