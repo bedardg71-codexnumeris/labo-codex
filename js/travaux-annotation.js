@@ -1168,7 +1168,7 @@
             z-index: 1000;
             overflow: hidden;
         `;
-        textarea.placeholder = 'Texte...';
+        textarea.placeholder = 'Texte…';
 
         conteneur.appendChild(textarea);
 

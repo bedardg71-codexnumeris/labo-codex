@@ -338,7 +338,7 @@ function mettreAJourCompteurMots() {
     if (!textarea || !compteur) return;
     const texte = textarea.value.trim();
     const nbMots = texte.length === 0 ? 0 : texte.split(/\s+/).length;
-    compteur.textContent = nbMots + ' mot' + (nbMots > 1 ? 's' : '');
+    compteur.textContent = nbMots + ' ' + pluriel(nbMots, 'mot', 'mots');
 }
 
 // Écouter la saisie manuelle dans le textarea

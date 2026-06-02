@@ -81,7 +81,7 @@ function chargerListeEtudiantsEval() {
         return nomA.localeCompare(nomB);
     });
 
-    select.innerHTML = '<option value="">-- Choisir un·e étudiant·e --</option>';
+    select.innerHTML = '<option value="">— Choisir un·e étudiant·e —</option>';
     etudiants.forEach((etudiant, index) => {
         const option = document.createElement('option');
         // Toujours utiliser le DA réel pour la valeur (nécessaire pour les calculs)
@@ -160,7 +160,7 @@ function filtrerEtudiantsParGroupe() {
     const select = document.getElementById('selectEtudiantEval');
     if (!select) return;
 
-    select.innerHTML = '<option value="">-- Choisir un·e étudiant·e --</option>';
+    select.innerHTML = '<option value="">— Choisir un·e étudiant·e —</option>';
     etudiantsFiltres.forEach((etudiant, index) => {
         const option = document.createElement('option');
         // Toujours utiliser le DA réel pour la valeur (nécessaire pour les calculs)
@@ -196,7 +196,7 @@ function chargerProductionsDansSelect() {
 
     if (!select) return;
 
-    select.innerHTML = '<option value="">-- Choisir une production --</option>';
+    select.innerHTML = '<option value="">— Choisir une production —</option>';
     productions.forEach(prod => {
         const nomEchappe = echapperHtml(prod.titre || prod.nom);
         const option = document.createElement('option');
@@ -218,7 +218,7 @@ function chargerGrillesDansSelect() {
 
     if (!select) return;
 
-    select.innerHTML = '<option value="">-- Choisir une grille --</option>';
+    select.innerHTML = '<option value="">— Choisir une grille —</option>';
     grilles.forEach(grille => {
         const nomEchappe = echapperHtml(grille.nom);
         const option = document.createElement('option');
@@ -283,7 +283,7 @@ function _resoudreEchellePratique() {
 }
 
 function _renderOptionsEchelles(select, echelles, echellePratique) {
-    let html = '<option value="">-- Choisir une échelle --</option>';
+    let html = '<option value="">— Choisir une échelle —</option>';
     if (echellePratique) {
         const nbNiveaux = echellePratique.niveaux?.length || 0;
         const nomEchappe = echapperHtml(echellePratique.nom);
@@ -686,7 +686,7 @@ function chargerGrilleSelectionnee() {
     const selectCartouche = document.getElementById('selectCartoucheEval');
 
     if (selectCartouche) {
-        selectCartouche.innerHTML = '<option value="">-- Choisir une cartouche --</option>';
+        selectCartouche.innerHTML = '<option value="">— Choisir une cartouche —</option>';
         cartouches.forEach(cartouche => {
             const nomEchappe = echapperHtml(cartouche.nom);
             const option = document.createElement('option');
@@ -873,7 +873,7 @@ function cartoucheSelectionnee() {
             <label data-tooltip="eval-niveau-idme" class="eval-label">Niveau IDME (modifiable manuellement) :</label>
             <select id="eval_${critere.id}" class="controle-form eval-select-niveau"
                     data-on-change="niveauSelectionne" data-param="${critere.id}">
-                <option value="">-- Utiliser le niveau calculé --</option>
+                <option value="">— Utiliser le niveau calculé —</option>
                 ${niveauxDisponibles.map(n => `<option value="${echapperHtml(n.code)}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
             </select>
             <small class="eval-aide">Par défaut: utilise le niveau calculé automatiquement. Modifiez uniquement si nécessaire (ex: jeton de reprise ciblée).</small>
@@ -906,7 +906,7 @@ function cartoucheSelectionnee() {
             <label data-tooltip="eval-niveau-idme" class="eval-label">Niveau IDME (modifiable manuellement) :</label>
             <select id="eval_${critere.id}" class="controle-form eval-select-niveau"
                     data-on-change="niveauSelectionne" data-param="${critere.id}">
-                <option value="">-- Utiliser le niveau calculé --</option>
+                <option value="">— Utiliser le niveau calculé —</option>
                 ${niveauxDisponibles.map(n => `<option value="${echapperHtml(n.code)}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
             </select>
             <small class="eval-aide">Par défaut: utilise le niveau calculé automatiquement. Modifiez uniquement si nécessaire (ex: jeton de reprise ciblée).</small>

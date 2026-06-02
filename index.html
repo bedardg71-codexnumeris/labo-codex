@@ -8557,7 +8557,7 @@
                                 <div class="groupe-boutons-ligne">
                                     <button class="btn btn-principal btn-tres-compact u-flex-1" data-action="sauvegarderEvaluation"
                                         data-tooltip="eval-btn-sauvegarder">
-                                        Sauvegarder
+                                        Enregistrer
                                     </button>
 
                                     <button class="btn btn-annuler btn-tres-compact btn-icon-compact" data-action="reinitialiserFormulaire"
@@ -8570,8 +8570,8 @@
 
                             <!-- Labels d'identité (affichage compact, sans clés) -->
                             <div id="travaux-eval-identite" class="travaux-eval-identite">
-                                <div style="display:flex; align-items:center; gap:6px;"><span class="travaux-eval-label-val" id="travaux-eval-label-etudiant">--</span><button class="btn-profil-rapide" id="travaux-eval-btn-profil" data-action="ouvrirProfilDepuisAnnotation" data-tooltip="eval-profil-rapide"><img src="icons/icon-profile.svg" alt="" class="btn-inline-icon"></button></div>
-                                <span class="travaux-eval-label-val travaux-eval-label-production" id="travaux-eval-label-production">--</span>
+                                <div style="display:flex; align-items:center; gap:6px;"><span class="travaux-eval-label-val" id="travaux-eval-label-etudiant">—</span><button class="btn-profil-rapide" id="travaux-eval-btn-profil" data-action="ouvrirProfilDepuisAnnotation" data-tooltip="eval-profil-rapide"><img src="icons/icon-profile.svg" alt="" class="btn-inline-icon"></button></div>
+                                <span class="travaux-eval-label-val travaux-eval-label-production" id="travaux-eval-label-production">—</span>
                             </div>
 
                             <!-- Selects cachés — utilisés par sauvegarderEvaluation() et le pré-remplissage -->
@@ -8582,10 +8582,10 @@
                                 </select>
                                 <select id="selectEtudiantEval" class="controle-form"
                                     data-on-change="chargerEvaluationsEtudiant">
-                                    <option value="">-- Choisir un·e étudiant·e --</option>
+                                    <option value="">— Choisir un·e étudiant·e —</option>
                                 </select>
                                 <select id="selectProduction1" class="controle-form" data-on-change="chargerProduction" data-param="1">
-                                    <option value="">-- Choisir une production --</option>
+                                    <option value="">— Choisir une production —</option>
                                 </select>
                             </div>
 
@@ -8594,7 +8594,7 @@
                                 <div class="groupe-form">
                                     <label class="label-formulaire" data-tooltip="eval-grille">Grille d'évaluation :</label>
                                     <select id="selectGrille1" class="controle-form" data-on-change="chargerGrilleSelectionnee">
-                                        <option value="">-- Choisir une grille --</option>
+                                        <option value="">— Choisir une grille —</option>
                                     </select>
                                 </div>
 
@@ -8602,7 +8602,7 @@
                                     <label class="label-formulaire" data-tooltip="eval-echelle">Échelle de performance :</label>
                                     <select id="selectEchelle1" class="controle-form"
                                         data-on-change="changerEchelleEvaluation" data-param="1">
-                                        <option value="">-- Choisir une échelle --</option>
+                                        <option value="">— Choisir une échelle —</option>
                                     </select>
                                 </div>
 
@@ -8610,7 +8610,7 @@
                                     <label class="label-formulaire" data-tooltip="eval-cartouche">Cartouche de rétroaction :</label>
                                     <select id="selectCartoucheEval" class="controle-form"
                                         data-on-change="cartoucheSelectionnee">
-                                        <option value="">-- Choisir une cartouche --</option>
+                                        <option value="">— Choisir une cartouche —</option>
                                     </select>
                                 </div>
 
@@ -8630,14 +8630,14 @@
                                     <select id="statutIntegrite" class="controle-form" data-on-change="changerStatutIntegrite">
                                         <option value="recevable">Recevable</option>
                                         <option value="soupcon">Soupçon à vérifier</option>
-                                        <option value="plagiat">Non recevable - Plagiat</option>
-                                        <option value="ia">Non recevable - IA non autorisée</option>
+                                        <option value="plagiat">Non recevable (Plagiat)</option>
+                                        <option value="ia">Non recevable (IA non autorisée)</option>
                                     </select>
                                 </div>
 
                                 <div id="divNotesIntegrite" class="groupe-form u-hide">
                                     <label class="label-formulaire">Notes (optionnel) :</label>
-                                    <textarea id="notesIntegrite" class="controle-form" rows="3" placeholder="Détails du cas, preuves, références..."></textarea>
+                                    <textarea id="notesIntegrite" class="controle-form" rows="3" placeholder="Détails du cas, preuves, références…"></textarea>
                                 </div>
 
                             <!-- Application de jetons -->
@@ -8677,7 +8677,7 @@
                                     <div class="u-text-right">
                                         <div class="label u-texte-gris u-mb-5">Niveau</div>
                                         <div class="valeur u-texte-bold u-texte-bleu">
-                                            <span id="niveauProduction1">--</span>
+                                            <span id="niveauProduction1">—</span>
                                         </div>
                                     </div>
                                 </div>

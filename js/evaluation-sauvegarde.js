@@ -363,7 +363,7 @@ function sauvegarderEvaluation() {
 
     const { etudiantDA, productionId, grilleId } = _lireEntreesFormulaireSauv();
     if (!etudiantDA || !productionId || !grilleId) {
-        alert('Veuillez sélectionner un étudiant, une production et une grille avant de sauvegarder.');
+        alert('Sélectionne un·e étudiant·e, une production et une grille avant d\'enregistrer.');
         return;
     }
 
@@ -852,7 +852,7 @@ function gererChangementCheckboxJetonReprise() {
     if (!evaluationId) {
         console.warn('⚠️ Jeton de reprise : Impossible d\'appliquer sur une nouvelle évaluation (pas encore sauvegardée)');
         checkbox.checked = false;
-        notifications.erreur('Erreur', 'Veuillez d\'abord sauvegarder l\'évaluation avant d\'appliquer un jeton');
+        notifications.erreur('Erreur', 'Enregistre d\'abord l\'évaluation avant d\'appliquer un jeton');
         return;
     }
 
@@ -897,7 +897,7 @@ function gererChangementCheckboxJetonRepriseCiblee() {
     if (!evaluationId) {
         console.warn('⚠️ Jeton de reprise ciblée : Impossible d\'appliquer sur une nouvelle évaluation (pas encore sauvegardée)');
         checkbox.checked = false;
-        notifications.erreur('Erreur', 'Veuillez d\'abord sauvegarder l\'évaluation avant d\'appliquer un jeton');
+        notifications.erreur('Erreur', 'Enregistre d\'abord l\'évaluation avant d\'appliquer un jeton');
         return;
     }
 
