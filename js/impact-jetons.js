@@ -309,7 +309,7 @@ function creerGraphiqueImpactJetons(canvasId) {
         var donnees = calculerImpactJetons();
         if (!donnees || donnees.labels.length < 2) {
             if (typeof afficherMessageAttente === 'function') {
-                afficherMessageAttente(canvas, 'Données insuffisantes', 'Au moins 2 semaines de snapshots nécessaires');
+                afficherMessageAttente(canvas, 'Données insuffisantes', 'Au moins 2 semaines de relevés nécessaires');
             }
             return;
         }
