@@ -4,7 +4,7 @@
    
    ⚠️ AVERTISSEMENT ⚠️
    Ce module gère l'affichage du calendrier scolaire dans
-   la section Présences › Vue calendaire.
+   la section Calendrier › Calendrier scolaire.
    
    Contenu de ce module:
    - Génération des semaines scolaires
@@ -500,7 +500,7 @@ function afficherCalendrierScolaire() {
 
     // Ajouter la légende comme dernier élément de la grille (6ème position)
     htmlCalendrier += '<div class="calendrier-legende">';
-    htmlCalendrier += '<h3 class="calendrier-titre-mois">- LÉGENDE -</h3>';
+    htmlCalendrier += '<h3 class="calendrier-titre-mois">Légende</h3>';
     htmlCalendrier += '<div class="calendrier-legende-grille">';
 
     htmlCalendrier += '<div class="calendrier-legende-item">';
@@ -520,7 +520,7 @@ function afficherCalendrierScolaire() {
 
     htmlCalendrier += '<div class="calendrier-legende-item">';
     htmlCalendrier += '<div class="calendrier-legende-badge" style="background: var(--conge-bg); border: 2px solid #ef5350;"></div>';
-    htmlCalendrier += '<span class="calendrier-legende-label">Congé prévu au calendrier</span>';
+    htmlCalendrier += '<span class="calendrier-legende-label">Congé prévu</span>';
     htmlCalendrier += '</div>';
 
     htmlCalendrier += '<div class="calendrier-legende-item">';
@@ -546,7 +546,7 @@ function afficherCalendrierScolaire() {
 
     htmlCalendrier += '</div>';
     htmlCalendrier += '<p class="calendrier-legende-astuce">';
-    htmlCalendrier += '<strong>Astuce :</strong> Survole un jour pour illuminer toute sa semaine.';
+    htmlCalendrier += '<strong>Astuce :</strong> Sur ordinateur, survole un jour pour mettre sa semaine en évidence.';
     htmlCalendrier += '</p>';
     htmlCalendrier += '</div>';
 
@@ -581,7 +581,7 @@ function afficherCalendrierScolaire() {
     // Carte 3 : Congés institutionnels et fériés
     htmlStats += '<div class="cal-carte-importante">';
     htmlStats += '<div class="u-flex-between">';
-    htmlStats += '<span class="cal-texte-gris">Congés institutionnels et fériés</span>';
+    htmlStats += '<span class="cal-texte-gris">Congés avec reprise</span>';
     htmlStats += '<strong class="cal-valeur-grande-bleu">' + congesAvecReprise + '</strong>';
     htmlStats += '</div>';
     htmlStats += '</div>';
