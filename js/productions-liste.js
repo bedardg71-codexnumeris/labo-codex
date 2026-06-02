@@ -239,6 +239,7 @@ function creerNouvelleProduction() {
     document.getElementById('productionGrille').value = '';
     document.getElementById('productionObjectif').value = '';
     document.getElementById('productionTache').value = '';
+    document.getElementById('productionDetailTache').value = '';
 
     // ✅ AJOUT (6 jan 2026) : Vider le panneau métadonnées (mode création)
     const panneauMeta = document.getElementById('panneauMetadonneesProduction');
@@ -267,7 +268,7 @@ function creerNouvelleProduction() {
     }
 
     // Changer le titre et le bouton
-    document.getElementById('btnTexteEvaluation').textContent = 'Ajouter';
+    document.getElementById('btnTexteEvaluation').textContent = 'Enregistrer';
 
     // Réinitialiser productionEnEdition
     productionEnEdition = null;
