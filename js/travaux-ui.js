@@ -1770,7 +1770,7 @@
                 <div class="pipeline-autocomplete-liste u-hide" id="pipeline-autocomplete-${idx}"></div>
             </div>`;
             colCentre += `<div class="pipeline-champ">
-                <label>Production</label>
+                <label>Modifier</label>
                 <select class="form-select pipeline-select-petit" data-on-change="travauxUI.changerProductionPipeline" data-param="${idx}">
                     <option value="">—</option>
                     ${productions.map(p => `<option value="${echapperHtml(p.id)}" ${f.productionId === p.id && !f.estReprise ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
