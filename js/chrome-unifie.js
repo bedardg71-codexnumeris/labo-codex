@@ -102,7 +102,16 @@
        ============================================================ */
 
     function changerSectionDepuisSelectMobile(select) {
-        if (!select || typeof window.afficherSection !== 'function') return;
+        if (!select) return;
+        // Entrée spéciale « CoP » : lien externe AQPC (pas une section). Ouvrir
+        // dans un nouvel onglet, puis remettre le select sur la section courante
+        // (sinon il resterait bloqué sur « CoP »).
+        if (select.value === '__cop__') {
+            window.open('https://www.aqpc.qc.ca/fr/cop-labocodex', '_blank', 'noopener,noreferrer');
+            synchroniserSelectNavMobile();
+            return;
+        }
+        if (typeof window.afficherSection !== 'function') return;
         window.afficherSection(select.value);
     }
 
