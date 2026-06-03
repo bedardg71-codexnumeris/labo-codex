@@ -744,9 +744,11 @@ async function afficherFormProduction(id) {
     // 🆕 Peupler le select Échelle de performance
     await peuplerEchellesProduction();
 
-    // Listener : repeupler cartouches quand la grille change
+    // Listener : repeupler cartouches quand la grille change. onchange
+    // (propriété) plutôt qu'addEventListener → idempotent, pas d'empilement
+    // de handlers si afficherFormProduction est rappelée.
     if (selectGrille) {
-        selectGrille.addEventListener('change', () => peuplerCartouchesProduction(selectGrille.value));
+        selectGrille.onchange = () => peuplerCartouchesProduction(selectGrille.value);
     }
 
     // Peupler cartouches avec la grille initiale (si déjà sélectionnée)
@@ -2142,6 +2144,16 @@ async function chargerGrillesDisponiblesPourProduction() {
     // production » (creerNouvelleProduction) n'appelait que les grilles, d'où
     // un select Échelle resté vide (seulement « Aucune »).
     await peuplerEchellesProduction();
+
+    // Cartouches : dépendantes de la grille sélectionnée. Le chemin « Nouvelle
+    // production » n'attachait pas le repeuplement au changement de grille (il
+    // ne vivait que dans afficherFormProduction) → cartouches inertes. On
+    // (ré)attache via onchange (idempotent, productionGrille n'a pas d'autre
+    // handler de changement) + peuplement initial selon la grille courante.
+    if (selectStandard) {
+        selectStandard.onchange = function() { peuplerCartouchesProduction(selectStandard.value); };
+        await peuplerCartouchesProduction(selectStandard.value);
+    }
 }
 
 /**
