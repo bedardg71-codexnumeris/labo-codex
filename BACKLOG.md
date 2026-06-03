@@ -84,6 +84,16 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - **Contexte** : la même pratique est nommée de **trois façons** dans l'UI : « PAN-Standards » (`profil-etudiant-actions.js:187, 192` ; `etudiants.js` note), « PAN (Portfolio à nombre limité) » et « SOM (Sommative provisoire) » (`profil-etudiant-sections-affichage.js:4217`).
   - **À trancher** : choisir **une** forme d'affichage et l'appliquer partout. Lié à la décision déjà prise de **retirer « PAN-Standards »** des notes *explicatives* (la décrire « par portfolio ») — mais les libellés *fonctionnels* qui nomment la pratique active restaient en suspens. Voir §A3 du brief `refonte-textes-profils-individuels.md`.
 
+- [ ] 🔒 🟠 **#312** `innerHTML` non échappé dans le récapitulatif de l'assistant de pratique
+  - **Contexte** : `wizard-pratique-v2.js:1702-1704` injecte `r.auteur`, `r.etablissement`, `r.discipline` (saisis par l'utilisateur·trice) dans `innerHTML` **sans `echapperHtml()`** — violation de la règle de sécurité non négociable (« tout `innerHTML` de données utilisateur DOIT passer par `echapperHtml()` »). Le champ `nom` (l. 1688) est, lui, échappé.
+  - **À faire** : envelopper ces trois valeurs dans `echapperHtml()`. Risque réel faible (données du profil enseignant), mais la règle est absolue. Repéré le 2 juin lors de la révision des textes de l'assistant (voir `refonte-textes-assistant-pratique.md` §3).
+
+- [ ] 📐 🟡 **#313** Deux sélecteurs « Production » dans le pipeline d'import — clarifier / dédupliquer
+  - **Contexte** : le pipeline d'import (étape Optimisation) expose **deux** selects « Production ». Le **global** (`travaux-ui.js:1683`, `associerProductionGlobale`) écrit `productionId` sur **tous** les fichiers de la file (boucle `forEach`, `~l.2259`). Le **par fichier** (`l.1774`, `changerProductionPipeline(idx)`) n'agit que sur le fichier sélectionné — raccourci né de l'usage pour **corriger une attribution** (équivalent rapide d'« Éditer »). Même donnée (`f.productionId`), portées différentes.
+  - **Risque** : le global **écrase silencieusement** les choix par-fichier, et les deux selects peuvent afficher des valeurs **divergentes** → confusion.
+  - **Fait le 3 juin (lancement)** : le select par-fichier renommé « Production » → **« Modifier »** (commit `59358856`) pour signaler son rôle de correction, **sans toucher à la logique**.
+  - **À trancher post-AQPC** : (1) ajouter une **information dans l'interface** précisant la distinction global ↔ par-fichier ; (2) décider de fusionner, supprimer l'un, ou neutraliser le piège d'écrasement. Modèle cohérent pressenti : **production = globale (1 par lot)**, **étudiant·e = par fichier**. Options analysées le 3 juin (cf. échange de session).
+
 ### Fonctionnalités à compléter
 
 - [ ] 📐 🟡 **#279** Ajouter 3 champs au formulaire de production : DESCRIPTION DÉTAILLÉE des consignes, FORMAT ET MISE EN PAGE, REMISE
