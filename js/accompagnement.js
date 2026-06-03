@@ -1054,33 +1054,19 @@ const ETAPES_TOUR = [
         id: 0,
         titre: 'Bienvenue',
         texte: "Labo Codex num\u00e9rise le travail que tu fais d\u00e9j\u00e0. Ce parcours te guide \u00e0 travers les \u00e9tapes essentielles. Tu peux le quitter \u00e0 tout moment et y revenir depuis les Pr\u00e9f\u00e9rences. Commence par configurer ton espace de travail dans l'onglet Cadre.",
-        actions: [
-            { label: 'Aller \u00e0 Cadre', type: 'primaire', action: 'naviguerVers', param: 'calendrier' },
-            { label: 'Explorer seul\u00b7e',     type: 'secondaire', action: 'passerEtape' }
-        ],
         correspond: function(idSousSection) { return !idSousSection || idSousSection === 'accueil'; }
     },
     {
         id: 1,
         titre: 'Cadre',
-        texte: "C'est ici que tu poses les fondations\u00a0: ton trimestre (dates, cong\u00e9s), ton cours (comp\u00e9tence, \u00e9l\u00e9ments), ton groupe d'\u00e9tudiant\u00b7es et ton horaire. Ce sont les m\u00eames informations que dans ton plan de cours. Tu les saisis une fois et l'application g\u00e9n\u00e8re automatiquement le calendrier de tes s\u00e9ances.\n\nLes ic\u00f4nes d'info t'en disent plus sur chaque section. Quand ton groupe-cours est assembl\u00e9, tu es pr\u00eat\u00b7e pour la suite.",
-        actions: [
-            { label: "J'ai compris",      type: 'primaire', action: 'avancerEtape' },
-            { label: 'Passer cette \u00e9tape', type: 'secondaire', action: 'passerEtape' }
-        ],
-        correspond: function(idSousSection) {
+        texte: "C'est ici que tu poses les fondations\u00a0: ton trimestre (dates, cong\u00e9s), ton cours (comp\u00e9tence, \u00e9l\u00e9ments), ton groupe d'\u00e9tudiant\u00b7es et ton horaire. Ce sont les m\u00eames informations que dans ton plan de cours. Tu les saisis une fois et l'application g\u00e9n\u00e8re automatiquement le calendrier de tes s\u00e9ances.\n\nLes ic\u00f4nes d'info t'en disent plus sur chaque section. Quand ton groupe-cours est assembl\u00e9, tu es pr\u00eat\u00b7e pour la suite.",        correspond: function(idSousSection) {
             return typeof idSousSection === 'string' && idSousSection.indexOf('calendrier-') === 0;
         }
     },
     {
         id: 2,
         titre: 'Conception',
-        texte: "Tu construis ici tes outils d'\u00e9valuation \u2014 les m\u00eames que sur papier, mais r\u00e9utilisables. Les productions d\u00e9finissent les occasions d'apprentissage de tes \u00e9tudiant\u00b7es. Les grilles fixent tes crit\u00e8res. Les \u00e9chelles \u00e9tablissent les niveaux de performance. Les cartouches pr\u00e9parent la r\u00e9troaction. La pratique assemble le tout.\n\nL'ordre n'est pas impos\u00e9, mais les productions et les grilles sont un bon point de d\u00e9part.",
-        actions: [
-            { label: "J'ai compris",      type: 'primaire', action: 'avancerEtape' },
-            { label: 'Passer cette \u00e9tape', type: 'secondaire', action: 'passerEtape' }
-        ],
-        correspond: function(idSousSection) {
+        texte: "Tu construis ici tes outils d'\u00e9valuation \u2014 les m\u00eames que sur papier, mais r\u00e9utilisables. Les productions d\u00e9finissent les occasions d'apprentissage de tes \u00e9tudiant\u00b7es. Les grilles fixent tes crit\u00e8res. Les \u00e9chelles \u00e9tablissent les niveaux de performance. Les cartouches pr\u00e9parent la r\u00e9troaction. La pratique assemble le tout.\n\nL'ordre n'est pas impos\u00e9, mais les productions et les grilles sont un bon point de d\u00e9part.",        correspond: function(idSousSection) {
             if (typeof idSousSection !== 'string') return false;
             const structureConception = ['conception-productions', 'conception-grille-criteres', 'conception-echelle-performance', 'conception-retroactions'];
             return structureConception.indexOf(idSousSection) !== -1;
@@ -1089,24 +1075,14 @@ const ETAPES_TOUR = [
     {
         id: 3,
         titre: '\u00c9valuations',
-        texte: "C'est le geste quotidien\u00a0: tu s\u00e9lectionnes une production, tu attribues un niveau \u00e0 chaque crit\u00e8re et la r\u00e9troaction se construit au fur et \u00e0 mesure. Tu peux importer les copies de tes \u00e9tudiant\u00b7es (PDF ou images), les annoter avec des tampons / estampes ou des codes, puis les \u00e9valuer \u2014 tout sur le m\u00eame document.\n\nLes jetons (D\u00e9lai, Reprise, Reprise cibl\u00e9e) offrent \u00e0 l'\u00e9tudiant\u00b7e une nouvelle occasion de d\u00e9montrer sa comp\u00e9tence.",
-        actions: [
-            { label: "J'ai compris",      type: 'primaire', action: 'avancerEtape' },
-            { label: 'Passer cette \u00e9tape', type: 'secondaire', action: 'passerEtape' }
-        ],
-        correspond: function(idSousSection) {
+        texte: "C'est le geste quotidien\u00a0: tu s\u00e9lectionnes une production, tu attribues un niveau \u00e0 chaque crit\u00e8re et la r\u00e9troaction se construit au fur et \u00e0 mesure. Tu peux importer les copies de tes \u00e9tudiant\u00b7es (PDF ou images), les annoter avec des tampons / estampes ou des codes, puis les \u00e9valuer \u2014 tout sur le m\u00eame document.\n\nLes jetons (D\u00e9lai, Reprise, Reprise cibl\u00e9e) offrent \u00e0 l'\u00e9tudiant\u00b7e une nouvelle occasion de d\u00e9montrer sa comp\u00e9tence.",        correspond: function(idSousSection) {
             return typeof idSousSection === 'string' && idSousSection.indexOf('evaluations-') === 0;
         }
     },
     {
         id: 4,
         titre: 'Suivi',
-        texte: "L'aper\u00e7u (Suivi du groupe) te montre ce que tu ne verrais pas facilement sur papier\u00a0: le portrait de ton groupe en un coup d'\u0153il. Les indices Assiduit\u00e9 (A), Compl\u00e9tion (C) et Performance (P) r\u00e9sument le contexte d'apprentissage observ\u00e9 de chaque \u00e9tudiant\u00b7e. Les zones de couleur t'aident \u00e0 rep\u00e9rer qui a besoin d'attention.\n\nExplore les vues du Suivi\u00a0: Suivi du groupe, liste, profils individuels et interventions R\u00e0I.",
-        actions: [
-            { label: "J'ai compris",      type: 'primaire', action: 'avancerEtape' },
-            { label: 'Passer cette \u00e9tape', type: 'secondaire', action: 'passerEtape' }
-        ],
-        correspond: function(idSousSection) {
+        texte: "L'aper\u00e7u (Suivi du groupe) te montre ce que tu ne verrais pas facilement sur papier\u00a0: le portrait de ton groupe en un coup d'\u0153il. Les indices Assiduit\u00e9 (A), Compl\u00e9tion (C) et Performance (P) r\u00e9sument le contexte d'apprentissage observ\u00e9 de chaque \u00e9tudiant\u00b7e. Les zones de couleur t'aident \u00e0 rep\u00e9rer qui a besoin d'attention.\n\nExplore les vues du Suivi\u00a0: Suivi du groupe, liste, profils individuels et interventions R\u00e0I.",        correspond: function(idSousSection) {
             // 'suivi-groupe' couvre l'ancien id 'apercu' depuis la migration du 27 mai 2026.
             return typeof idSousSection === 'string' && idSousSection.indexOf('suivi-') === 0;
         }
@@ -1115,15 +1091,26 @@ const ETAPES_TOUR = [
         id: 5,
         titre: 'Alignement et plan de le\u00e7on (optionnel)',
         texte: "La carte d'alignement rend visible l'alignement p\u00e9dagogique de ton cours\u00a0: ce que tu vises, comment tu l'enseignes et comment tu le v\u00e9rifies. Le plan de la le\u00e7on structure tes le\u00e7ons sur les semaines de ton trimestre. Ce module est compl\u00e9mentaire. Tu peux l'explorer quand tu te sens \u00e0 l'aise avec les autres sections.",
-        actions: [
-            { label: 'Terminer le parcours', type: 'primaire',   action: 'terminerTour' },
-            { label: 'Relancer plus tard',   type: 'secondaire', action: 'terminerTour' }
-        ],
         correspond: function(idSousSection) {
             return idSousSection === 'conception-carte' || idSousSection === 'conception-organisateur';
         }
     }
 ];
+
+// Modèle « panneau qui suit » : pour chaque étape, la section où le panneau
+// emmène l'utilisateur quand il clique « Suivant ». L'étape 0 (Bienvenue) n'a
+// pas de cible — c'est le point de départ. Les étapes Conception/Alignement
+// ciblent une sous-section précise (sinon afficherSection ouvrirait la 1re).
+const TOUR_NAV = {
+    1: { section: 'calendrier' },
+    2: { section: 'conception', sousSection: 'productions' },
+    3: { section: 'evaluations' },
+    4: { section: 'suivi' },
+    5: { section: 'conception', sousSection: 'carte' }
+};
+
+// Libellés courts pour le bouton « Suivant : <section> » (indexés par id d'étape).
+const TOUR_TITRE_COURT = ['Bienvenue', 'Cadre', 'Conception', 'Évaluations', 'Suivi', 'Alignement'];
 
 // Phase 4 : publier les 6 étapes dans le catalogue unifié sous mode `tour`.
 // La clé est `tour-etape-<id>`. L'orchestration continue d'utiliser le tableau
@@ -1212,42 +1199,37 @@ function afficherPanneauEtape(etape) {
 
     const actions = document.createElement('div');
     actions.className = 'tour-actions';
-    etape.actions.forEach(function(a) {
+    const dernier = ETAPES_TOUR.length - 1;
+
+    function ajouterBouton(label, type, handler) {
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'tour-btn btn ' + (a.type === 'primaire' ? 'btn-primaire' : 'btn-secondaire');
-        btn.textContent = a.label;
-        btn.addEventListener('click', function() { executerActionTour(a); });
+        btn.className = 'tour-btn btn ' + (type === 'primaire' ? 'btn-primaire' : 'btn-secondaire');
+        btn.textContent = label;
+        btn.addEventListener('click', handler);
         actions.appendChild(btn);
-    });
+    }
+
+    // Bouton de gauche : « Précédent » (étapes > 0) ou porte de sortie (étape 0).
+    if (etape.id > 0) {
+        ajouterBouton('‹ Précédent', 'secondaire', tourReculerEtape);
+    } else {
+        ajouterBouton('Explorer seul·e', 'secondaire', quitterTourGuide);
+    }
+
+    // Bouton de droite (primaire) : avancer vers la section suivante, ou terminer.
+    if (etape.id >= dernier) {
+        ajouterBouton('Terminer le parcours', 'primaire', terminerTour);
+    } else {
+        const prefixe = etape.id === 0 ? 'Commencer' : 'Suivant';
+        ajouterBouton(prefixe + ' : ' + TOUR_TITRE_COURT[etape.id + 1] + ' ›', 'primaire', tourAvancerEtape);
+    }
+
     panneau.appendChild(actions);
 
     document.body.appendChild(panneau);
 
     requestAnimationFrame(function() { panneau.classList.add('visible'); });
-}
-
-function executerActionTour(a) {
-    const etape = tourEtapeCourante();
-    switch (a.action) {
-        case 'naviguerVers':
-            if (etape) tourMarquerEtapeVue(etape.id);
-            if (typeof afficherSection === 'function' && a.param) afficherSection(a.param);
-            fermerPanneauTour();
-            if (etape) tourDefinirEtape(etape.id + 1);
-            break;
-        case 'avancerEtape':
-            avancerEtape();
-            break;
-        case 'passerEtape':
-            passerEtape();
-            break;
-        case 'terminerTour':
-            terminerTour();
-            break;
-        default:
-            console.warn('[Accompagnement/tour] Action inconnue :', a.action);
-    }
 }
 
 function tourEtapeCourante() {
@@ -1256,24 +1238,38 @@ function tourEtapeCourante() {
     return ETAPES_TOUR[i];
 }
 
-function avancerEtape() {
-    const courante = tourEtapeCourante();
-    if (!courante) return;
-    tourMarquerEtapeVue(courante.id);
-    fermerPanneauTour();
-    const prochaine = courante.id + 1;
-    if (prochaine >= ETAPES_TOUR.length) { terminerTour(); return; }
-    tourDefinirEtape(prochaine);
+// Cœur du modèle « panneau qui suit » : on fixe l'étape, on emmène
+// l'utilisateur dans la section correspondante, puis on réaffiche le panneau
+// pour cette étape (position fixed → il reste visible à l'écran).
+function tourNaviguerVersEtape(idx) {
+    if (idx < 0 || idx >= ETAPES_TOUR.length) return;
+    tourDefinirEtape(idx);
+    tourMarquerEtapeVue(idx);
+
+    const nav = TOUR_NAV[idx];
+    if (nav) {
+        if (nav.sousSection && typeof naviguerVers === 'function') {
+            naviguerVers(nav.section, nav.sousSection);
+        } else if (typeof afficherSection === 'function') {
+            afficherSection(nav.section);
+        }
+    }
+
+    afficherPanneauEtape(ETAPES_TOUR[idx]);
 }
 
-function passerEtape() {
+function tourAvancerEtape() {
     const courante = tourEtapeCourante();
     if (!courante) return;
-    tourMarquerEtapeVue(courante.id);
-    fermerPanneauTour();
     const prochaine = courante.id + 1;
-    if (prochaine >= ETAPES_TOUR.length) terminerTour();
-    else tourDefinirEtape(prochaine);
+    if (prochaine >= ETAPES_TOUR.length) { terminerTour(); return; }
+    tourNaviguerVersEtape(prochaine);
+}
+
+function tourReculerEtape() {
+    const courante = tourEtapeCourante();
+    if (!courante || courante.id <= 0) return;
+    tourNaviguerVersEtape(courante.id - 1);
 }
 
 function terminerTour() {
@@ -1323,6 +1319,15 @@ function initialiserTour() {
         const id = e && e.detail && e.detail.idSousSection;
         setTimeout(function() { verifierDeclenchementAuto(id); }, 300);
     });
+
+    // Tour en cours au chargement (rechargement de page) : réafficher le
+    // panneau de l'étape courante pour qu'il « suive » l'utilisateur.
+    if (!tourEstComplete()) {
+        const i = tourObtenirEtape();
+        if (typeof i === 'number' && i >= 0 && i < ETAPES_TOUR.length) {
+            afficherPanneauEtape(ETAPES_TOUR[i]);
+        }
+    }
 }
 
 // ============================================================================
