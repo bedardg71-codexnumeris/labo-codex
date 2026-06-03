@@ -742,12 +742,7 @@ async function afficherFormProduction(id) {
     }
 
     // 🆕 Peupler le select Échelle de performance
-    const selectEchelle = document.getElementById('productionEchelle');
-    if (selectEchelle) {
-        const echelles = await db.get('echellesTemplates') || [];
-        selectEchelle.innerHTML = '<option value="">Aucune</option>' +
-            echelles.map(e => `<option value="${echapperHtml(e.id)}">${echapperHtml(e.nom)}</option>`).join('');
-    }
+    await peuplerEchellesProduction();
 
     // Listener : repeupler cartouches quand la grille change
     if (selectGrille) {
@@ -2142,6 +2137,24 @@ async function chargerGrillesDisponiblesPourProduction() {
     if (selectInline) {
         selectInline.innerHTML = optionsHtml;
     }
+
+    // Peupler aussi le select Échelle de performance. Le chemin « Nouvelle
+    // production » (creerNouvelleProduction) n'appelait que les grilles, d'où
+    // un select Échelle resté vide (seulement « Aucune »).
+    await peuplerEchellesProduction();
+}
+
+/**
+ * Peuple le select « Échelle de performance » du formulaire de production.
+ * Les échelles sont stockées globalement (`echellesTemplates`), comme dans la
+ * biblio Échelles — pas de namespace de trimestre (contrairement aux grilles).
+ */
+async function peuplerEchellesProduction() {
+    const selectEchelle = document.getElementById('productionEchelle');
+    if (!selectEchelle) return;
+    const echelles = await db.get('echellesTemplates') || [];
+    selectEchelle.innerHTML = '<option value="">Aucune</option>' +
+        echelles.map(e => `<option value="${echapperHtml(e.id)}">${echapperHtml(e.nom)}</option>`).join('');
 }
 
 
