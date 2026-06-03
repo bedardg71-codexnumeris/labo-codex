@@ -1703,7 +1703,7 @@
         colCentre += '<p class="texte-muted u-texte-petit" style="margin:8px 0 4px 0;">R\u00e9glages par d\u00e9faut\u00a0:</p>';
 
         colCentre += '<ul class="pipeline-checklist">';
-        colCentre += `<li><label>Uniformisation <select id="pipeline-opt-dpi" data-on-change="travauxUI.mettreAJourPreviewsPipeline" class="controle-form-compact" style="width:auto;display:inline-block;font-size:inherit;padding:2px 4px;"><option value="0">désactivée</option><option value="200">200 dpi</option><option value="250" selected>250 dpi</option><option value="300">300 dpi</option></select></label></li>`;
+        colCentre += `<li><label>Rés. max. <select id="pipeline-opt-dpi" data-on-change="travauxUI.mettreAJourPreviewsPipeline" class="controle-form-compact" style="width:auto;display:inline-block;font-size:inherit;padding:2px 4px;"><option value="0">désactivée</option><option value="200">200 dpi</option><option value="250" selected>250 dpi</option><option value="300">300 dpi</option></select></label></li>`;
         colCentre += '</ul>';
 
         // Alerte globale : blobs manquants après restauration session
@@ -1717,7 +1717,7 @@
 
         const fSel = queue[fichierSelectionneIndex];
         const btnReglagesDisabled = fichierSelectionneIndex < 0 || !fSel?.estImage || !fSel?.fichier;
-        colCentre += `<button class="btn btn-secondaire" style="margin-top:8px;" ${btnReglagesDisabled ? 'disabled' : ''} data-action="travauxUI.ouvrirPreparationFichier" data-param="${fichierSelectionneIndex}">R\u00e9glages sp\u00e9cifiques</button>`;
+        colCentre += `<button class="btn btn-secondaire" style="margin-top:8px;" ${btnReglagesDisabled ? 'disabled' : ''} data-action="travauxUI.ouvrirPreparationFichier" data-param="${fichierSelectionneIndex}" title="R\u00e9glages sp\u00e9cifiques" aria-label="R\u00e9glages sp\u00e9cifiques"><img src="icons/icons8-photo-editor.svg" alt="" class="btn-inline-icon"></button>`;
 
         colCentre += '</div>'; // fin pipeline-centre-global
 
