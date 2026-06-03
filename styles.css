@@ -948,10 +948,10 @@ h1, h2, h3, h4 {
     width: auto;
 }
 
-/* « Codex » dans l'orange de marque (palette assistance, --acc-fond).
-   « Labo_ » hérite du blanc du titre via currentColor. */
+/* Mot-symbole monochrome : « Codex » comme « Labo_ » hérite du blanc du
+   titre via currentColor (identique dans les deux thèmes). */
 .titre-section h1 .logo-codex {
-    fill: var(--acc-fond);
+    fill: currentColor;
 }
 
 .titre-section .meta {
