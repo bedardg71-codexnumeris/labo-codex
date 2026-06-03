@@ -466,12 +466,17 @@ function afficherEtatVideHoraireV2() {
 /**
  * Peuple le dropdown des groupes associés dans le formulaire horaire
  */
-function populerDropdownGroupesHoraireV2() {
+function populerDropdownGroupesHoraireV2(etudiantsOpt) {
     const select = document.getElementById('v2-hor-groupeAssocie');
     if (!select) return;
 
-    const cleEtud = cle('groupeEtudiants');
-    const etudiants = db.getSync(cleEtud, []);
+    // Utiliser les données fraîches si fournies (par chargerListeEtudiantsV2,
+    // lues en async fiable), sinon relire en getSync.
+    const etudiants = Array.isArray(etudiantsOpt) ? etudiantsOpt : db.getSync(cle('groupeEtudiants'), []);
+
+    // Préserver la sélection en cours pour ne pas la perdre lors d'un
+    // rafraîchissement (ex. import d'étudiants pendant l'édition d'un horaire).
+    const valeurCourante = select.value;
 
     // Extraire les groupes uniques
     const groupesSet = new Set();
@@ -488,6 +493,10 @@ function populerDropdownGroupesHoraireV2() {
         html += `<option value="${grp}">${grp} (${nbEtudiants} étud.)</option>`;
     });
     select.innerHTML = html;
+
+    if (valeurCourante && groupesTries.indexOf(valeurCourante) !== -1) {
+        select.value = valeurCourante;
+    }
 }
 
 /**

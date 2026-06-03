@@ -20822,6 +20822,23 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     color: white;
 }
 
+/* En-tête des tableaux blancs (ex. prévisualisation d'import) : garder le
+   texte blanc sur le bandeau bleu en thème clair. Sans ça, .mode-clair th
+   (texte foncé) l'emporte → en-tête foncé sur fond foncé, peu lisible. */
+.mode-clair .tableau-blanc thead th {
+    color: white;
+}
+
+/* En-tête de la liste de groupe (Cadre › Groupe d'étudiants) : bandeau bleu
+   foncé + texte blanc en thème clair. Sans ça, le fond pâlit et le texte
+   blanc devient illisible (blanc sur pâle). */
+.mode-clair #v2-listeEtudiants thead {
+    background: var(--bleu-principal);
+}
+.mode-clair #v2-listeEtudiants th {
+    color: white;
+}
+
 .mode-clair .tableau tbody tr {
     border-bottom-color: rgba(3, 46, 92, 0.08);
 }
