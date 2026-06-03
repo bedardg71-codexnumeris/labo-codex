@@ -1727,7 +1727,7 @@
             const tailleEst = estimerTailleFichier(dims.w, dims.h, f);
             const resCible = f.estPDF ? 'PDF (aucun traitement)' : `${dims.w} x ${dims.h}`;
 
-            colCentre += '<div class="pipeline-col-titre">Aper\u00e7u</div>';
+            colCentre += '<div class="pipeline-col-titre">Aper\u00e7u page par page</div>';
 
             // Grande preview
             colCentre += `<div class="pipeline-preview-centre" id="pipeline-preview-centre">
