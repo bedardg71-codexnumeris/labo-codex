@@ -380,13 +380,13 @@
             right: 10px;
             background: none;
             border: none;
-            color: var(--acc-texte);
+            color: var(--acc-accent);
             font-size: 1.2rem;
             font-weight: 700;
             cursor: pointer;
             line-height: 1;
             padding: 2px 6px;
-            opacity: 0.7;
+            opacity: 0.85;
             transition: opacity 0.2s ease;
             z-index: 1;
         }
@@ -4033,7 +4033,7 @@
 
         <!-- NOTIFICATION VERSION / MISE À JOUR (toast chantier routier) -->
         <div id="bandeau-mise-a-jour" class="bandeau-mise-a-jour">
-            <button data-action="fermerBandeauMiseAJour" class="bandeau-mise-a-jour-close" title="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
+            <button data-action="fermerBandeauMiseAJour" class="bandeau-mise-a-jour-close" title="Fermer" aria-label="Fermer">×</button>
             <div class="bandeau-mise-a-jour-header">
                 <span id="bandeau-mise-a-jour-build" class="bandeau-mise-a-jour-build"></span>
             </div>
