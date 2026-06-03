@@ -2491,13 +2491,22 @@ function _postSauvegardeMod(evalModifiee) {
     window.majBadgesApresEvaluation(evalModifiee);
     _ajouterCadenasBadgesMod();
 
-    // Réinitialiser le mode modification
-    delete window.evaluationEnCours.idModification;
+    // L'évaluation est enregistrée ET verrouillée (verrouillee:true). On CONSERVE
+    // idModification : le cadenas de la palette en a besoin pour (dé)verrouiller
+    // (basculerVerrouillageEvaluationCourante), et un nouvel « Enregistrer »
+    // repasse correctement par le chemin modification.
+    if (window.evaluationEnCours) window.evaluationEnCours.verrouillee = true;
 
     const indicateurModif = document.getElementById('indicateurModeModification');
     if (indicateurModif) indicateurModif.classList.add('u-hide');
 
-    afficherOuMasquerBoutonVerrouillage(false);
+    // Refléter l'état verrouillé : cadenas FERMÉ + formulaire en lecture seule.
+    // Avant, on masquait le cadenas (afficher=false), si bien qu'après une
+    // sauvegarde le cadenas ouvert disparaissait sans cadenas fermé pour rouvrir.
+    afficherOuMasquerBoutonVerrouillage(true, true);
+    if (typeof desactiverFormulaireEvaluation === 'function') {
+        desactiverFormulaireEvaluation(true);
+    }
 
     if (typeof calculerEtStockerIndicesCP === 'function') {
         calculerEtStockerIndicesCP();
@@ -3883,5 +3892,8 @@ window.memoriserSelectionsEvaluation = memoriserSelectionsEvaluation;
 window.obtenirNomCartouche = obtenirNomCartouche;
 window.sauvegarderSelectionsEvaluation = sauvegarderSelectionsEvaluation;
 window.trierListeEvaluations = trierListeEvaluations;
+// Exposé pour révéler le cadenas de (dé)verrouillage depuis le module de
+// sauvegarde (evaluation-sauvegarde.js) après une première sauvegarde.
+window.afficherOuMasquerBoutonVerrouillage = afficherOuMasquerBoutonVerrouillage;
 
 })();
