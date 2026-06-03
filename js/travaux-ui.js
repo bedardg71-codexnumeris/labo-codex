@@ -1700,11 +1700,12 @@
             </div>`;
         }
 
-        colCentre += '<p class="texte-muted u-texte-petit" style="margin:8px 0 4px 0;">R\u00e9glages par d\u00e9faut\u00a0:</p>';
 
-        colCentre += '<ul class="pipeline-checklist">';
-        colCentre += `<li><label>Rés. max. <select id="pipeline-opt-dpi" data-on-change="travauxUI.mettreAJourPreviewsPipeline" class="controle-form-compact" style="width:auto;display:inline-block;font-size:inherit;padding:2px 4px;"><option value="0">désactivée</option><option value="200">200 dpi</option><option value="250" selected>250 dpi</option><option value="300">300 dpi</option></select></label></li>`;
-        colCentre += '</ul>';
+        // « Rés. max. » + bouton réglages spécifiques sur une seule ligne
+        // (gain d'espace vertical ; le titre « Réglages par défaut : » est retiré).
+        const fSel = queue[fichierSelectionneIndex];
+        const btnReglagesDisabled = fichierSelectionneIndex < 0 || !fSel?.estImage || !fSel?.fichier;
+        colCentre += `<div class="pipeline-reglages-ligne" style="display:flex; align-items:center; gap:10px; margin:8px 0 4px 0;"><label style="white-space:nowrap;">Rés. max. <select id="pipeline-opt-dpi" data-on-change="travauxUI.mettreAJourPreviewsPipeline" class="controle-form-compact" style="width:auto;display:inline-block;font-size:inherit;padding:2px 4px;"><option value="0">désactivée</option><option value="200">200 dpi</option><option value="250" selected>250 dpi</option><option value="300">300 dpi</option></select></label><button class="btn btn-secondaire" ${btnReglagesDisabled ? 'disabled' : ''} data-action="travauxUI.ouvrirPreparationFichier" data-param="${fichierSelectionneIndex}" title="Réglages spécifiques" aria-label="Réglages spécifiques"><img src="icons/icons8-photo-editor.svg" alt="" class="btn-inline-icon"></button></div>`;
 
         // Alerte globale : blobs manquants après restauration session
         const nbBlobsManquants = queue.filter(f => !f.fichier).length;
@@ -1714,10 +1715,6 @@
                 <button class="btn btn-secondaire btn-sm" data-action="travauxUI.redeposerFichiers">Re-d\u00e9poser les fichiers</button>
             </div>`;
         }
-
-        const fSel = queue[fichierSelectionneIndex];
-        const btnReglagesDisabled = fichierSelectionneIndex < 0 || !fSel?.estImage || !fSel?.fichier;
-        colCentre += `<button class="btn btn-secondaire" style="margin-top:8px;" ${btnReglagesDisabled ? 'disabled' : ''} data-action="travauxUI.ouvrirPreparationFichier" data-param="${fichierSelectionneIndex}" title="R\u00e9glages sp\u00e9cifiques" aria-label="R\u00e9glages sp\u00e9cifiques"><img src="icons/icons8-photo-editor.svg" alt="" class="btn-inline-icon"></button>`;
 
         colCentre += '</div>'; // fin pipeline-centre-global
 
