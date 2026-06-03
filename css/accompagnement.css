@@ -370,7 +370,7 @@ nav [data-tooltip],
 .primo-popup-close {
     background: none;
     border: none;
-    color: var(--acc-btn-prim-txt);
+    color: var(--acc-accent);
     font-size: 1.5rem;
     cursor: pointer;
     padding: 0;
@@ -381,6 +381,32 @@ nav [data-tooltip],
 
 .primo-popup-close:hover {
     opacity: 1;
+}
+
+/* Bouton X de l'aide contextuelle (visite guidée). Caractère « × » foncé
+   (--acc-accent) plutôt qu'une <img>, pour un X net et visible, uniforme
+   avec le bouton du tour guidé (.tour-fermer) et du bandeau de version. */
+.primo-popup-fermer {
+    background: none;
+    border: none;
+    color: var(--acc-accent);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+    opacity: 0.85;
+    transition: opacity 0.2s;
+}
+
+.primo-popup-fermer:hover {
+    opacity: 1;
+}
+
+/* Icône « i » de l'en-tête du popup d'aide : foncée (--acc-accent) pour
+   être lisible sur l'orange de l'en-tête, au lieu du jaune doré (--acc-fond)
+   peu contrasté qui sert ailleurs sur des fonds clairs. */
+.primo-popup-header .icone-info-aide {
+    background-color: var(--acc-accent);
 }
 
 .primo-popup-body {
@@ -794,7 +820,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     padding: 0;
     background: transparent;
     border: none;
-    color: var(--acc-btn-prim-txt);
+    color: var(--acc-accent);
     opacity: 0.85;
     font-size: 1rem;
     cursor: pointer;
