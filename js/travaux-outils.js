@@ -2146,8 +2146,12 @@
         }
 
         // Propager le total dans le champ « Nombre d'erreurs » du critère algorithmique
+        // UNIQUEMENT s'il y a des tampons d'erreurs (total > 0). Sinon on ne touche
+        // pas au champ : sans cette garde, une saisie MANUELLE du nombre d'erreurs
+        // (sans tampons) était écrasée par 0 à chaque appel — notamment via
+        // `_forcerRecalculAlgorithmiqueAvantSauvegarde` avant la sauvegarde.
         const inputErreurs = document.querySelector('input[id^="eval_erreurs_"]');
-        if (inputErreurs) {
+        if (inputErreurs && total > 0) {
             inputErreurs.value = total;
             inputErreurs.dispatchEvent(new Event('input', { bubbles: true }));
         }
