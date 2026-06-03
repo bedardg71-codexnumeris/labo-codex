@@ -5404,22 +5404,15 @@ body:not(.mode-clair) .badge-source--demo {
         gap: 0;
     }
 
-    /* Mobile : le select remplace les boutons de SECTION, mais le lien CoP
-       (lien externe AQPC, pas une section du select) reste visible à côté du
-       select — sinon il disparaissait totalement sur iPhone/iPad. */
-    .navigation-boutons > button,
-    .navigation-boutons > .nav-separateur-vertical {
-        display: none;
-    }
+    /* Mobile : le select remplace toute la barre de boutons. Le CoP n'est PAS
+       à côté (lien externe) — il est ajouté comme dernière option du select
+       (#select-nav-mobile, gérée par changerSectionDepuisSelectMobile). */
     .navigation-boutons {
-        flex: 0 0 auto;
+        display: none;
     }
 
     .select-nav-mobile {
         display: block;
-        flex: 1 1 auto;
-        width: auto;
-        min-width: 0;
     }
 
     /* Sous-nav mobile : cache les boutons, montre le select sticky
