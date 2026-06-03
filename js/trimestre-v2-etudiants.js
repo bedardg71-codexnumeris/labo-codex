@@ -69,6 +69,13 @@ async function chargerListeEtudiantsV2() {
     // Mettre à jour le dropdown des groupes (avec tous les étudiants)
     populerDropdownGroupesV2(tousLesEtudiants);
 
+    // Rafraîchir aussi le dropdown « Groupe associé » de l'éditeur d'horaire :
+    // sinon un groupe créé/importé n'y apparaît qu'après réouverture du
+    // formulaire (le select rendu n'était jamais repeuplé). Non destructif.
+    if (typeof populerDropdownGroupesHoraireV2 === 'function') {
+        populerDropdownGroupesHoraireV2(tousLesEtudiants);
+    }
+
     // Filtrer par groupe si sélectionné
     const groupeFiltre = getGroupeSelectionneV2();
     const etudiants = groupeFiltre
@@ -594,13 +601,24 @@ function importerFichierEtudiantsV2(event) {
     const fichier = event.target.files[0];
     if (!fichier) return;
 
+    // Lire d'abord en UTF-8 (cas standard : Excel, exports .csv UTF-8), puis
+    // rebasculer en Windows-1252 (Omnivox, Excel français — FIX #49) seulement
+    // si on détecte des caractères corrompus. Forcer Windows-1252 cassait les
+    // fichiers UTF-8 (« Ã© » au lieu de « é »). Même logique que groupe.js.
     const reader = new FileReader();
     reader.onload = function(e) {
         const contenu = e.target.result;
-        traiterDonneesImportV2(contenu);
+        const aCaractereRemplacement = contenu.indexOf('�') !== -1;
+        const aMojibake = /Ã©|Ã¨|Ã |Ãª|Ã®|Ã´|Ã¹|Ã§|Ã‰|Ãˆ|Ã€|Ãœ|Ã"|Ã¢|Ã¯/.test(contenu);
+        if (aCaractereRemplacement || aMojibake) {
+            const readerLatin = new FileReader();
+            readerLatin.onload = function(e2) { traiterDonneesImportV2(e2.target.result); };
+            readerLatin.readAsText(fichier, 'windows-1252');
+        } else {
+            traiterDonneesImportV2(contenu);
+        }
     };
-    // FIX #49 (1er fév 2026) : Omnivox exporte en Windows-1252, pas UTF-8
-    reader.readAsText(fichier, 'windows-1252');
+    reader.readAsText(fichier, 'UTF-8');
 }
 
 /**
