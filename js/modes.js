@@ -485,6 +485,40 @@ window.anonymiserNomFichier = anonymiserNomFichier;
  * @param {string} cle - Clé du localStorage (ex: 'groupeEtudiants', 'evaluationsSauvegardees')
  * @returns {Array|Object} - Données selon le mode actif
  */
+/**
+ * Résout le contexte de cours actif de façon FIABLE (#130).
+ *
+ * `infoCours` est un cache qui peut se désynchroniser : un write de cours
+ * "legacy" (sélection/activation/sauvegarde de cours) réécrit `infoCours` à
+ * partir d'un objet cours qui traîne un ancien champ `groupe`, écrasant le
+ * groupe dérivé du groupe-cours actif. Résultat : le Suivi se vide alors que
+ * le groupe-cours est bien assemblé et actif.
+ *
+ * La SSOT du groupe actif est l'entrée `actif===true` de `cle('groupesCours')`.
+ * Si un groupe-cours actif vise LE MÊME cours que `infoCours`, on corrige
+ * uniquement le `groupe` (et le mode), sans changer le cours ni perturber le
+ * mode démo (dont le `infoCours.id` ne correspond à aucun groupe-cours réel).
+ * Non destructif : retourne une copie, n'écrit rien.
+ */
+function obtenirContexteCoursActif() {
+    const infoCours = db.getSync('infoCours', null);
+    if (!infoCours || !infoCours.id) return infoCours;
+    if (typeof window.cle !== 'function') return infoCours;
+
+    const listeGC = db.getSync(window.cle('groupesCours'), []);
+    if (!Array.isArray(listeGC)) return infoCours;
+
+    const gc = listeGC.find(function(g) { return g && g.actif && g.coursId === infoCours.id; });
+    if (!gc) return infoCours;
+
+    // Mêmes priorités que l'orchestration (orchestre.js) : groupe || groupeNum.
+    const groupeGC = gc.modeCours ? null : (gc.groupe || gc.groupeNum || null);
+    return Object.assign({}, infoCours, {
+        groupe: groupeGC,
+        _modeCours: !!gc.modeCours || groupeGC === null
+    });
+}
+
 function obtenirDonneesSelonMode(cle) {
     const mode = modeActuel;
     // ===================================
@@ -517,7 +551,7 @@ function obtenirDonneesSelonMode(cle) {
     // 🆕 BETA 95.3 (10 jan 2026) : Supporte le mode "cours" (tous groupes fusionnés)
     const clesAvecCoursId = ['groupeEtudiants', 'productions', 'presences', 'evaluationsSauvegardees'];
     if (clesAvecCoursId.includes(cleBase) && Array.isArray(donnees)) {
-        const coursActif = db.getSync('infoCours', null);
+        const coursActif = obtenirContexteCoursActif();
         if (coursActif && coursActif.id) {
             const totalAvant = donnees.length;
             // 🆕 BETA 95.3 : Mode cours = tous les groupes fusionnés
@@ -939,8 +973,8 @@ window.filtrerEtudiantsParMode = filtrerEtudiantsParMode;
  * @returns {Array} - Liste des étudiants du cours actif (vide si aucun cours)
  */
 function obtenirEtudiantsCoursActif() {
-    // Obtenir le cours actif
-    const coursActif = db.getSync('infoCours', null);
+    // Obtenir le cours actif (résolu de façon fiable, cf. #130)
+    const coursActif = obtenirContexteCoursActif();
 
     // Si aucun cours actif, retourner tableau vide
     if (!coursActif || !coursActif.id) {
