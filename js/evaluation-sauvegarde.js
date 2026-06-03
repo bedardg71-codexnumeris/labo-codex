@@ -338,6 +338,18 @@ function _postSauvegardeSauv(evaluation, groupeCoursActif) {
         window.evaluationEnCours.idModification = evaluation.id;
     }
 
+    // L'évaluation est enregistrée ET verrouillée (verrouillee:true). Refléter
+    // l'état verrouillé comme le chemin modification : cadenas FERMÉ visible +
+    // formulaire en lecture seule. Sans ça, après une PREMIÈRE sauvegarde le
+    // cadenas restait masqué (display:none) — impossible de (dé)verrouiller.
+    if (window.evaluationEnCours) window.evaluationEnCours.verrouillee = !!evaluation.verrouillee;
+    if (typeof window.afficherOuMasquerBoutonVerrouillage === 'function') {
+        window.afficherOuMasquerBoutonVerrouillage(true, !!evaluation.verrouillee);
+    }
+    if (evaluation.verrouillee && typeof window.desactiverFormulaireEvaluation === 'function') {
+        window.desactiverFormulaireEvaluation(true);
+    }
+
     _synchroniserGroupeCoursFichierSauv(groupeCoursActif);
     majBadgesApresEvaluation(evaluation);
 
