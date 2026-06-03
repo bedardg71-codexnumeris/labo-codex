@@ -1095,7 +1095,9 @@ function genererLigneHTML(ligne) {
             <td class="td-left">${ligne.associationManquante
                 ? `${echapperHtml(ligne.productionNom)} ${ligne.estDoublon
                     ? `<span style="color: var(--rouge-danger); font-size: 0.85em;" title="Doublon : ce fichier est déjà associé à ${echapperHtml(ligne.diagnosticDoublon || '')}. Suppression sécuritaire."><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Doublon</span>`
-                    : `<span style="color: var(--attention); font-size: 0.85em;"><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Non associé</span>`}`
+                    : (ligne.fichierId
+                        ? `<button type="button" data-stop data-action="ouvrirProprieteFichier" data-param="${ligne.fichierId}" title="${ligne.etudiantManquant ? 'Étudiant·e introuvable : le DA du fichier ne correspond à aucun·e étudiant·e inscrit·e. Clique pour associer l’étudiant·e et la production.' : 'Aucune production liée à ce travail. Clique pour l’associer à une production.'}" style="color: var(--attention); font-size: 0.85em; background: none; border: none; padding: 0; cursor: pointer; text-decoration: underline;"><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Non associé ›</button>`
+                        : `<span style="color: var(--attention); font-size: 0.85em;"><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Non associé</span>`)}`
                 : ligne.fichierAutreProduction
                     ? `${echapperHtml(ligne.productionNom)} <span style="color: var(--attention); font-size: 0.85em;"><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Fichier sous ${ligne.fichierAutreProductionNom ? echapperHtml(ligne.fichierAutreProductionNom) : 'autre production'}</span>`
                     : echapperHtml(ligne.productionNom)}</td>
