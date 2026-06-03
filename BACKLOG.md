@@ -94,6 +94,12 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - **Fait le 3 juin (lancement)** : le select par-fichier renommé « Production » → **« Modifier »** (commit `59358856`) pour signaler son rôle de correction, **sans toucher à la logique**.
   - **À trancher post-AQPC** : (1) ajouter une **information dans l'interface** précisant la distinction global ↔ par-fichier ; (2) décider de fusionner, supprimer l'un, ou neutraliser le piège d'écrasement. Modèle cohérent pressenti : **production = globale (1 par lot)**, **étudiant·e = par fichier**. Options analysées le 3 juin (cf. échange de session).
 
+- [ ] 🟡 **#314** Import : la production choisie n'est pas toujours persistée (`productionId` vide → « Non associé » silencieux)
+  - **Contexte** : un travail importé en données réelles arrive avec `productionId` **vide** alors qu'il aurait dû être associé à une production → il s'affiche « Non associé » dans la Liste des évaluations. Diagnostic console confirmé le 3 juin (terrain, pas démo) : `Primavera_1234567_…pdf | DA: 2570113 | productionId: (vide)`. L'étudiant·e est bien rattaché·e (DA valide) ; **seule la production manque**. **Échec silencieux** : aucune erreur console.
+  - **Piste** : le `productionId` posé par le pipeline (`associerProductionGlobale` / `changerProductionPipeline`, cf. #313) ne survit pas jusqu'au fichier stocké au moment de **confirmer l'import**. À vérifier : la chaîne import → `travauxStockage` persiste-t-elle `productionId` ? Cas particulier des fichiers nommés avec un DA placeholder (1234567) rattachés par **nom** (le rattachement étudiant marche, la production non). Reproduire : importer un fichier, choisir une production dans le pipeline, confirmer, vérifier `productionId` du fichier stocké.
+  - **Atténuation déjà livrée (3 juin, commit `f05cbad4`)** : le badge « Non associé » est devenu **cliquable** (ouvre « Propriétés du fichier » pour associer la production) avec tooltip diagnostique. Guide l'utilisateur, mais **ne corrige pas la cause**.
+  - **Priorité** : important pour expérimentateurs (flux import → évaluation de base). À investiguer à froid post-AQPC.
+
 ### Fonctionnalités à compléter
 
 - [ ] 📐 🟡 **#279** Ajouter 3 champs au formulaire de production : DESCRIPTION DÉTAILLÉE des consignes, FORMAT ET MISE EN PAGE, REMISE
