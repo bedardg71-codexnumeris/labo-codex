@@ -203,10 +203,10 @@ class PratiqueConfigurable {
             return 0;
         }
 
-        // Déterminer quelle branche utiliser (SOM ou PAN)
-        const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-        const pratique = modalites.pratique;
-
+        // Session C : retrait de code mort — `modalites`/`pratique` étaient lus depuis
+        // le SSOT global puis JAMAIS utilisés (le switch ci-dessous branche sur
+        // this.config.calcul_note.methode, la config propre à l'instance). Le calcul
+        // par famille s'appuie sur this.config, pas sur l'état global actif.
         let P_pct = 0;
 
         // Pour les pratiques configurables, utiliser la méthode définie dans la config

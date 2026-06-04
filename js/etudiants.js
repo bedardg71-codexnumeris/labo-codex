@@ -764,8 +764,6 @@ function afficherListeEtudiantsConsultation() {
 
     // Vérifier si le modèle RàI est activé (préférence utilisateur)
     const activerRai = obtenirPreference('activerRai') !== false;
-    // Config de pratique (utilisée plus bas pour affichageTableauBord)
-    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
 
     // Afficher/masquer les colonnes Pattern et RàI dans les headers
     masquerColonnesRaiSiDesactive(activerRai);
@@ -848,29 +846,14 @@ function afficherListeEtudiantsConsultation() {
     // Corrélations A-P et C-P calculées sur la population pédagogiquement pertinente :
     // les étudiants ACTIFS uniquement. Inclure les abandons/inactifs introduit un cluster
     // faible-A / faible-P qui gonfle artificiellement r sans signification pédagogique.
-    // IMPORTANT: Utiliser la même pratique que le tableau de bord (SOM ou PAN selon config)
-    // Réutiliser la variable config déjà chargée à la ligne 847
-    const affichage = config.affichageTableauBord || {};
-    // #308 : aligner sur `=== true` (cf. tableau-bord-apercu.js). Clés absentes →
-    // aucun mode → pratiqueAffichee null → calculerTousLesIndices déduit la
-    // pratique active. `!== false` rallumait un mode comparatif fantôme (PAN forcé).
-    const afficherSommatif = affichage.afficherSommatif === true;
-    const afficherAlternatif = affichage.afficherAlternatif === true;
-
-    // Déterminer quelle pratique afficher (cohérence avec apercu-contenu.js)
-    let pratiqueAffichee = null;
-    if (afficherSommatif && !afficherAlternatif) {
-        pratiqueAffichee = 'SOM';
-    } else if (!afficherSommatif && afficherAlternatif) {
-        pratiqueAffichee = 'PAN';
-    } else if (afficherSommatif && afficherAlternatif) {
-        // Mode comparatif : utiliser PAN comme dans le tableau de bord
-        pratiqueAffichee = 'PAN';
-    }
+    // IMPORTANT: Utiliser la même pratique que le tableau de bord (déduite par calculerTousLesIndices).
+    // Session C (#303) : mode comparatif retiré ; le jeton SOM|PAN est inerte
+    // depuis Beta 95.5 (obtenirIndicesCP l'ignore). calculerTousLesIndices(da)
+    // déduit la pratique active → un seul jeu d'indices A-C-P.
 
     // Vérifier que calculerTousLesIndices existe (chargé depuis profil-etudiant.js)
     const tousIndices = typeof window.calculerTousLesIndices === 'function'
-        ? etudiants.map(e => calculerTousLesIndices(e.da, pratiqueAffichee))
+        ? etudiants.map(e => calculerTousLesIndices(e.da))
         : etudiants.map(e => calculerIndicesEtudiant(e.da)); // Fallback vers ancienne fonction
 
     const valeursA_tous = tousIndices.map(indices => indices.A);
@@ -891,7 +874,7 @@ function afficherListeEtudiantsConsultation() {
     // NOUVEAU: Enrichir les données pour le tri (sans assigner les numéros encore)
     etudiantsFiltres = etudiantsFiltres.map((e) => {
         const indices = typeof window.calculerTousLesIndices === 'function'
-            ? calculerTousLesIndices(e.da, pratiqueAffichee)
+            ? calculerTousLesIndices(e.da)
             : calculerIndicesEtudiant(e.da); // Fallback
         // 🆕 BETA 90+ : Utiliser determinerNiveauRaiPedagogique (Single Source of Truth)
         const niveauInfo = determinerNiveauRaiPedagogique(e.da);

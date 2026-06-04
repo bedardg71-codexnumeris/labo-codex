@@ -35,8 +35,6 @@
    - #typePAN : Select pour choisir le type de PAN
    - #infoPAN : Zone d'information sur le PAN choisi
    - #optionsAffichageIndices : Conteneur des options d'affichage
-   - #afficherSommatif : Checkbox pour afficher indices sommatifs
-   - #afficherAlternatif : Checkbox pour afficher indices alternatifs
    - #statutModalites : Zone d'affichage du statut
    - #btnSauvegarderPratiqueNotation : Bouton de sauvegarde
    
@@ -85,14 +83,6 @@ function migrerConfigurationsSpecifiques() {
     pratiques.forEach(p => {
         if (!p.config) {
             p.config = {};
-        }
-
-        // Ajouter affichage si manquant
-        if (!p.config.affichage) {
-            p.config.affichage = {
-                modeComparatif: false
-            };
-            nbMigrees++;
         }
 
         // Ajouter portfolio si manquant
@@ -491,12 +481,6 @@ function attacherEvenementsPratiques() {
         selectTypePAN.addEventListener('change', afficherInfoPAN);
     }
 
-    // Checkbox mode comparatif
-    const checkComparatif = document.getElementById('modeComparatif');
-    if (checkComparatif) {
-        checkComparatif.addEventListener('change', sauvegarderOptionsAffichage);
-    }
-
     // Checkbox activation jetons
     const checkJetonsActif = document.getElementById('jetonsActif');
     if (checkJetonsActif) {
@@ -636,7 +620,6 @@ function afficherInfoPAN() {
 function afficherOptionsAffichage() {
     const pratique = document.getElementById('pratiqueNotation').value;
     const sectionAffichageTableauBord = document.getElementById('sectionAffichageTableauBord');
-    const checkComparatif = document.getElementById('modeComparatif');
     const activationsExtras = document.getElementById('activationsExtras');
 
     const pratiqueCanon = _normPratique(pratique);
@@ -657,64 +640,6 @@ function afficherOptionsAffichage() {
         toggleDisplay(sectionAffichageTableauBord, false);
         toggleDisplay(activationsExtras, false);
     }
-
-    sauvegarderOptionsAffichage();
-}
-
-/**
- * Sauvegarde les options d'affichage des indices
- * Appelée par l'événement change de la checkbox mode comparatif
- *
- * FONCTIONNEMENT:
- * 1. Récupère l'état du mode comparatif
- * 2. Si mode comparatif actif → affiche SOM + PAN
- * 3. Sinon → affiche uniquement la pratique principale choisie
- * 4. Sauvegarde dans localStorage
- */
-function sauvegarderOptionsAffichage() {
-    const checkComparatif = document.getElementById('modeComparatif');
-
-    if (!checkComparatif) return;
-
-    const modeComparatif = checkComparatif.checked;
-
-    // Récupérer la config existante
-    let modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-
-    // Récupérer la pratique active depuis modalites (nouvelle architecture Beta 91)
-    const pratique = modalites.pratique || 'sommative';
-
-    // Définir l'affichage selon le mode comparatif
-    if (modeComparatif) {
-        // Mode comparatif : afficher les deux
-        modalites.affichageTableauBord = {
-            afficherSommatif: true,
-            afficherAlternatif: true
-        };
-    } else {
-        // Mode normal : afficher uniquement la pratique principale
-        // Comparaison normalisée ; on conserve le startsWith pour les variantes
-        // (pan-standards-json…) qui ne sont pas dans la table de normalisation.
-        const pratiqueCanon = _normPratique(pratique);
-        if (pratiqueCanon === 'sommative') {
-            modalites.affichageTableauBord = {
-                afficherSommatif: true,
-                afficherAlternatif: false
-            };
-        } else if (pratiqueCanon === 'standards' || (pratique && pratique.startsWith('pan-standards'))) {
-            // ✅ CORRECTION (9 déc 2025) : Support des variantes pan-standards-json, pan-standards-*
-            modalites.affichageTableauBord = {
-                afficherSommatif: false,
-                afficherAlternatif: true
-            };
-        }
-    }
-
-    db.setSync(cle('modalitesEvaluation'), modalites);
-
-    // ✅ NOUVEAU (9 décembre 2025) : Sauvegarder aussi dans la pratique active
-    sauvegarderDansConfiguration('affichage', { modeComparatif });
-
 }
 
 /* ===============================
@@ -1187,32 +1112,6 @@ function sauvegarderPratiqueNotation() {
         definirPreference('grilleReferenceDepistage', selectGrilleRef.value || '');
     }
 
-    // ✅ CORRECTION (9 décembre 2025) : Toujours lire l'état de la checkbox modeComparatif
-    const checkComparatif = document.getElementById('modeComparatif');
-    const modeComparatif = checkComparatif ? checkComparatif.checked : false;
-
-    if (modeComparatif) {
-        // Mode comparatif : afficher les deux pratiques
-        modalites.affichageTableauBord = {
-            afficherSommatif: true,
-            afficherAlternatif: true
-        };
-    } else {
-        // Mode normal : afficher uniquement la pratique principale
-        if (pratique === 'sommative') {
-            modalites.affichageTableauBord = {
-                afficherSommatif: true,
-                afficherAlternatif: false
-            };
-        } else if (_normPratique(pratique) === 'standards' || (pratique && pratique.startsWith('pan-standards'))) {
-            // ✅ CORRECTION (9 déc 2025) : Support des variantes pan-standards-json, pan-standards-*
-            modalites.affichageTableauBord = {
-                afficherSommatif: false,
-                afficherAlternatif: true
-            };
-        }
-    }
-
     // Sauvegarder l'option d'affichage des descriptions SOLO (préférence utilisateur)
     const checkSOLO = document.getElementById('afficherDescriptionsSOLO');
     definirPreference('afficherDescriptionsSOLO', checkSOLO ? checkSOLO.checked : true);
@@ -1268,10 +1167,6 @@ function chargerModalites() {
     // Si pas de données sauvegardées, initialiser avec pratique par défaut
     if (!modalites.pratique) {
         modalites.pratique = 'sommative';
-        modalites.affichageTableauBord = {
-            afficherSommatif: true,
-            afficherAlternatif: false
-        };
         db.setSync(cle('modalitesEvaluation'), modalites);
 
         selectPratique.value = '';
@@ -1301,38 +1196,6 @@ function chargerModalites() {
     } else {
         colonnePAN.classList.add('u-hide');
         selectPAN.value = '';
-    }
-
-    // Charger les options d'affichage
-    // Si affichageTableauBord n'existe pas, l'initialiser selon la pratique choisie
-    if (!modalites.affichageTableauBord) {
-        if (pratiqueCanon === 'sommative') {
-            modalites.affichageTableauBord = {
-                afficherSommatif: true,
-                afficherAlternatif: false
-            };
-        } else if (pratiqueCanon === 'standards') {
-            modalites.affichageTableauBord = {
-                afficherSommatif: false,
-                afficherAlternatif: true
-            };
-        } else {
-            // Par défaut : aucun affichage
-            modalites.affichageTableauBord = {
-                afficherSommatif: false,
-                afficherAlternatif: false
-            };
-        }
-        db.setSync(cle('modalitesEvaluation'), modalites);
-    }
-
-    // Initialiser la checkbox mode comparatif
-    const checkComparatif = document.getElementById('modeComparatif');
-    if (checkComparatif) {
-        // Mode comparatif activé si les deux sont affichés
-        const modeComparatif = modalites.affichageTableauBord.afficherSommatif &&
-                               modalites.affichageTableauBord.afficherAlternatif;
-        checkComparatif.checked = modeComparatif;
     }
 
     // Charger l'option d'affichage des descriptions SOLO (préférence utilisateur)
@@ -1664,10 +1527,6 @@ function obtenirConfigurationNotation() {
  * {
  *   pratique: "sommative" | "alternative",
  *   typePAN: "maitrise" | "specifications" | "denotation" | null,
- *   affichageTableauBord: {
- *     afficherSommatif: boolean,
- *     afficherAlternatif: boolean
- *   },
  *   dateConfiguration: "2025-10-20T..."
  * }
  * 
@@ -2052,39 +1911,7 @@ function chargerConfigurationPratique(id) {
     // ✅ NOUVEAU (9 décembre 2025) : Rafraîchir la sidebar pour mettre à jour le style de sélection
     afficherListePratiquesSidebar();
 
-    // ✅ 1. Appliquer la configuration d'affichage
-    if (config.affichage) {
-        const modeComparatif = config.affichage.modeComparatif || false;
-
-        if (modeComparatif) {
-            // Mode comparatif : afficher les deux
-            modalites.affichageTableauBord = {
-                afficherSommatif: true,
-                afficherAlternatif: true
-            };
-        } else {
-            // Mode normal : afficher uniquement la pratique principale
-            if (_normPratique(modalites.pratique) === 'sommative') {
-                modalites.affichageTableauBord = {
-                    afficherSommatif: true,
-                    afficherAlternatif: false
-                };
-            } else if (_normPratique(modalites.pratique) === 'standards') {
-                modalites.affichageTableauBord = {
-                    afficherSommatif: false,
-                    afficherAlternatif: true
-                };
-            }
-        }
-
-        // Mettre à jour la checkbox dans l'interface
-        const checkComparatif = document.getElementById('modeComparatif');
-        if (checkComparatif) {
-            checkComparatif.checked = modeComparatif;
-        }
-    }
-
-    // ✅ 2. Appliquer la configuration du portfolio
+    // ✅ Appliquer la configuration du portfolio
     if (config.portfolio) {
         if (!modalites.configPAN) {
             modalites.configPAN = {};

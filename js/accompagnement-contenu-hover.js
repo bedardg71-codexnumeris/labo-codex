@@ -123,8 +123,6 @@ const TOOLTIPS = {
         'Active trois tampons ou estampes (Repérage, Liaison, Ouverture) que tu poses sur les copies pour observer les gestes cognitifs de tes étudiant·es. Les résultats alimentent le profil ACO et l\'export de recherche anonymisé.',
     'pref-affichage-assiduite':
         'Choisis l\'unité d\'affichage des totaux de présence et d\'assiduité (ex. : en périodes).',
-    'pref-affichage-comparatif':
-        'Mode expérimental. Affiche la notation sommative traditionnelle et la notation alternative côte à côte dans les aperçus et le profil individuel.',
     'pref-affichage-developpement':
         'Affiche le tableau de progression des critères et les graphiques 0-100 % dans la section «Développement des habiletés» du profil individuel.',
     'pref-affichage-graphiques':

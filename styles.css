@@ -7328,15 +7328,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     color: var(--accent-primaire);
 }
 
-.profil-valeur-grande-orange {
-    font-size: 1.8rem;
-    color: var(--som-orange);
-}
-
-.profil-valeur-grande-bleu-std {
-    font-size: 1.8rem;
-    color: var(--std-bleu);
-}
 
 .profil-valeur-moyenne {
     font-size: 1.5rem;
@@ -9913,15 +9904,6 @@ body.mode-clair .bloc-rlo-separateur {
     height: 16px;
     z-index: 20;
     box-shadow: var(--shadow-prononce);
-}
-
-/* Points colorés pour mode comparatif SOM/PAN */
-.critere-point-som {
-    background: var(--som-orange);
-}
-
-.critere-point-std {
-    background: var(--std-bleu);
 }
 
 /* Légende IDME alignée avec zones */
