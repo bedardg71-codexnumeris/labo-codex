@@ -28,7 +28,7 @@
  * Version actuelle de l'application (lue dynamiquement)
  */
 function getVersionApp() {
-    return 'Beta ' + (window.VERSION_MAJEURE || '??');
+    return 'Bêta publique ' + (window.VERSION_MAJEURE || '??');
 }
 
 // ===============================

@@ -18,7 +18,7 @@ Ce document te guidera vers :
 
 ## Etat actuel
 
-- **Version** : Beta 99.64 (Build 0525-0623)
+- **Version** : Bêta publique 1.0.0 (versionnage sémantique depuis le lancement public du 3 juin 2026)
 - **Objectif** : Suivi de l'apprentissage (dépistage SOLO) — Phase 6 nettoyage complet
 - **Session en cours** : Voir `SESSION.md`
 - **Backlog** : Voir `BACKLOG.md` (taches a faire)
@@ -227,24 +227,24 @@ Gregoire a la memoire contextuelle reelle du projet.
 
 ## Avant chaque commit
 
-1. **Demander le numero de beta** a Gregoire. Ne jamais renumeroter automatiquement.
-2. **Mettre a jour `version.json`** a la racine du projet — c'est la **source unique de verite** :
-```json
-{"build":"MMJJ-HHMM","beta":"XX.X"}
-```
-Format BUILD : mois-jour-heure-minute (Toronto). Exemple : `"0201-0840"` = 1er fevrier, 08h40.
-L'en-tete de l'app charge `version.json` au demarrage et synchronise `VERSION_MAJEURE` et `BUILD_ID` automatiquement. Les valeurs dans `index.html` ne sont que des fallback hors-ligne.
-3. **Mettre a jour les fallback** dans `js/init-inline.js` (lignes 103-104) :
-```javascript
-let VERSION_MAJEURE = 'XX.X';
-let BUILD_ID = 'MMJJ-HHMM';
-```
-Ces valeurs servent de fallback quand `version.json` n'est pas accessible (hors-ligne). Doivent etre identiques a `version.json`.
-4. **Mettre a jour le snapshot dans `js/main.js`** (ligne ~19) :
-```javascript
-window._SCRIPT_BUILD_main = 'MMJJ-HHMM';
-```
-Ce snapshot est compare au `BUILD_ID` lu de `version.json` au boot. Si different, Safari file:// a probablement un `main.js` perime en cache et le mecanisme « Scripts perimes » declenche reload+bandeau (cf. BACKLOG #285 livre le 25 mai 2026). MEME valeur que `version.json` et que les fallback de l'etape 3.
+1. **Décider l'intention de version** (ton jugement) : correction de bug → `patch`,
+   nouveauté sans rupture → `minor`, rupture ou changement de format de données → `major`.
+   **Confirmer avec Grégoire avant un `major`** (acte visible publiquement) ; `patch`/`minor`
+   relèvent du jugement courant.
+2. **Lancer le script de release** (source unique, écriture atomique des 4 points de vérité) :
+   ```
+   node scripts/release.mjs patch|minor|major
+   # ou : node scripts/release.mjs --set X.Y.Z      (fixer une version précise)
+   # ou : node scripts/release.mjs --build-only      (commit doc/UI sans changer le numéro)
+   # ajouter --dry-run pour prévisualiser sans écrire
+   ```
+   Le script calcule le numéro SemVer, horodate le build (Toronto, `MMJJ-HHMM`) et synchronise
+   `version.json`, les deux fallbacks de `js/init-inline.js` et le snapshot de `js/main.js`.
+   Plus de recopie manuelle, plus de désync « scripts périmés ».
+3. **Vérifier** `git diff` (les 4 points cohérents), puis `cd tests && npm test`.
+
+> `version.json` reste la **source unique de vérité**. « Bêta publique » est un libellé
+> d'affichage (`init-inline.js`, `rapport-bug.js`), pas le numéro.
 
 ---
 
