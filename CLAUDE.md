@@ -74,7 +74,7 @@ Ce document te guidera vers :
 
 **Document fondateur** : `docs/architecture/ECOSYSTEME-DONNEES.md` (26 avril 2026)
 
-Quatre concepts : **Codex** (espace de travail actif), **Reserve** (archive locale),
+Quatre concepts : **Codex** (espace de travail actif), **Archives** (depot local),
 **Codex data** (format recherche), **Voute** (bibliotheque partagee).
 Lire ce document AVANT de toucher a `codex.js`, `import-export.js`, `db.js`
 ou `travaux-stockage.js`.
