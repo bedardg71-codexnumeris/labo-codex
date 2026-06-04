@@ -100,7 +100,7 @@ const ETAPES_WIZARD = {
                     },
                     {
                         value: 'pas-certain',
-                        label: 'Je ne suis pas certain(e)',
+                        label: 'Je ne suis pas certain·e',
                         description: 'Des questions supplémentaires t\'aideront à identifier ta méthode.'
                     }
                 ]
@@ -228,7 +228,7 @@ const ETAPES_WIZARD = {
     'seuils-personnels': {
         id: 'seuils-personnels',
         titre: 'Tes seuils personnels',
-        description: 'Ces seuils servent au dépistage automatique des étudiants en difficulté.',
+        description: 'Ces seuils servent au dépistage automatique des étudiant·es en difficulté.',
         branche: 'commune',
         ordre: 5,
         champs: [
@@ -422,7 +422,7 @@ const ETAPES_WIZARD = {
             {
                 id: 'infoObjectifsConfig',
                 type: 'info',
-                texte: 'La définition détaillée de chaque objectif (nom, poids, type) sera configurable dans Réglages → Ensembles d\'objectifs après la création de la pratique.'
+                texte: 'La définition détaillée de chaque objectif (nom, poids, type) sera configurable dans Conception → Pratiques de notation après la création de la pratique.'
             }
         ],
         suivant: () => 'mode-calcul-objectifs',
@@ -499,7 +499,7 @@ const ETAPES_WIZARD = {
                     {
                         value: 'exploration',
                         label: 'Mode Exploration',
-                        description: 'Guidez-moi étape par étape pour découvrir les options disponibles.'
+                        description: 'Guide-moi étape par étape pour découvrir les options disponibles.'
                     }
                 ]
             }
@@ -519,7 +519,7 @@ const ETAPES_WIZARD = {
     'config-sommative': {
         id: 'config-sommative',
         titre: 'Configuration sommative',
-        description: 'Paramétrez l\'affichage des résultats',
+        description: 'Paramètre l\'affichage des résultats',
         branche: 'sommative',
         ordre: 4,
         champs: [
@@ -559,7 +559,7 @@ const ETAPES_WIZARD = {
                     {
                         value: 'par-artefacts',
                         label: 'Par artefacts (portfolio)',
-                        description: 'Les étudiants soumettent des artefacts. La note finale est calculée à partir des N meilleurs artefacts.'
+                        description: 'Les étudiant·es soumettent des artefacts. La note finale est calculée à partir des N meilleurs artefacts.'
                     },
                     {
                         value: 'par-objectifs',
@@ -578,7 +578,7 @@ const ETAPES_WIZARD = {
     'config-portfolio': {
         id: 'config-portfolio',
         titre: 'Configuration du portfolio',
-        description: 'Paramétrez la gestion des artefacts',
+        description: 'Paramètre la gestion des artefacts',
         branche: 'pan-standards-artefacts',
         ordre: 5,
         champs: [
@@ -689,7 +689,7 @@ const ETAPES_WIZARD = {
     'config-mode-calcul': {
         id: 'config-mode-calcul',
         titre: 'Configuration du mode de calcul',
-        description: 'Paramétrez les détails du calcul',
+        description: 'Paramètre les détails du calcul',
         branche: 'pan-standards-objectifs',
         ordre: 6,
         champs: [], // Champs dynamiques selon modeCalcul
@@ -720,7 +720,7 @@ const ETAPES_WIZARD = {
                     {
                         id: 'infoPonderation',
                         type: 'info',
-                        texte: 'Les pondérations par objectif seront configurables dans Réglages → Ensembles d\'objectifs après la création de la pratique.'
+                        texte: 'Les pondérations par objectif seront configurables dans Conception → Pratiques de notation après la création de la pratique.'
                     }
                 ];
             }
@@ -733,7 +733,7 @@ const ETAPES_WIZARD = {
                         type: 'select',
                         options: [
                             { value: 'D', label: 'Développement (D)' },
-                            { value: 'M', label: 'Maîtrise (M)' }
+                            { value: 'M', label: 'Maîtrisé (M)' }
                         ],
                         default: 'M',
                         required: true
@@ -790,7 +790,7 @@ const ETAPES_WIZARD = {
     'config-specifications': {
         id: 'config-specifications',
         titre: 'Configuration de base',
-        description: 'Paramétrez le seuil d\'acceptabilité et les jetons',
+        description: 'Paramètre le seuil d\'acceptabilité et les jetons',
         branche: 'pan-specifications',
         ordre: 4,
         champs: [
@@ -821,7 +821,7 @@ const ETAPES_WIZARD = {
     'config-jetons': {
         id: 'config-jetons',
         titre: 'Configuration des jetons',
-        description: 'Paramétrez le système de jetons',
+        description: 'Paramètre le système de jetons',
         branche: 'pan-specifications',
         ordre: 5,
         condition: (reponses) => reponses.utiliserJetons === true,
@@ -868,7 +868,7 @@ const ETAPES_WIZARD = {
                     {
                         id: 'infoExpert',
                         type: 'info',
-                        texte: 'Les forfaits (bundles) de spécifications seront configurables dans Réglages → Pratique de notation après la création de la pratique.'
+                        texte: 'Les forfaits de spécifications seront configurables dans Conception → Pratiques de notation après la création de la pratique.'
                     }
                 ];
             }
@@ -956,7 +956,7 @@ const ETAPES_WIZARD = {
             {
                 id: 'infoGrille',
                 type: 'info',
-                texte: 'La grille peut également être configurée plus tard dans Réglages → Critères d\'évaluation.'
+                texte: 'La grille peut également être configurée plus tard dans Conception → Grilles de critères.'
             }
         ],
         suivant: () => 'recapitulatif',
@@ -1501,7 +1501,7 @@ function genererSelectEchelle(champ) {
                 <label>${champ.label}</label>
                 <div class="wizard-v2-alerte">
                     Aucune échelle de performance n'a été créée.
-                    Tu pourras en créer une dans Matériel → Échelles de performance.
+                    Tu pourras en créer une dans Conception → Échelles de performance.
                 </div>
             </div>
         `;
@@ -1546,7 +1546,7 @@ function genererSelectGrille(champ) {
                         font-size: 0.9rem;
                         align-self: flex-start;
                     ">Créer une grille de base (4\u00a0critères)</button>
-                    <p style="margin: 8px 0 0 0; font-size: 0.8rem; color: var(--gris-moyen, #888);">Tu pourras la modifier plus tard dans Matériel → Critères d'évaluation.</p>
+                    <p style="margin: 8px 0 0 0; font-size: 0.8rem; color: var(--gris-moyen, #888);">Tu pourras la modifier plus tard dans Conception → Grilles de critères.</p>
                 </div>
             </div>
         `;
@@ -1575,7 +1575,7 @@ function wizardV2CreerGrilleDemo() {
     const grilleDemo = {
         id: genererIdUnique('GRILLE_'),
         nom: 'Grille de base',
-        description: 'Grille générique créée par l\'assistant. Modifiable dans Matériel → Critères.',
+        description: 'Grille générique créée par l\'assistant. Modifiable dans Conception → Grilles de critères.',
         criteres: [
             { id: 'c1', nom: 'Compréhension du sujet', description: 'Démontrer une compréhension juste du sujet traité.', poids: 25 },
             { id: 'c2', nom: 'Qualité de la démarche', description: 'Appliquer une démarche méthodique et rigoureuse.', poids: 25 },
@@ -1699,9 +1699,9 @@ function genererRecapitulatif() {
     // ─── Section 3 : Informations de base ───
     html += '<div class="wizard-v2-recap-section">';
     html += '<h4>Informations de base</h4>';
-    if (r.auteur) html += `<p><strong>Auteur\u00a0:</strong> ${r.auteur}</p>`;
-    if (r.etablissement) html += `<p><strong>Établissement\u00a0:</strong> ${r.etablissement}</p>`;
-    if (r.discipline) html += `<p><strong>Discipline\u00a0:</strong> ${r.discipline}</p>`;
+    if (r.auteur) html += `<p><strong>Auteur\u00a0:</strong> ${echapperHtml(r.auteur)}</p>`;
+    if (r.etablissement) html += `<p><strong>Établissement\u00a0:</strong> ${echapperHtml(r.etablissement)}</p>`;
+    if (r.discipline) html += `<p><strong>Discipline\u00a0:</strong> ${echapperHtml(r.discipline)}</p>`;
     html += '</div>';
 
     // Section : Paramètres généraux
@@ -1939,8 +1939,8 @@ function validerEtape(etapeId) {
 
     if (!valide) {
         const message = champsInvalides.length > 0
-            ? `Veuillez remplir: ${champsInvalides.join(', ')}`
-            : 'Veuillez remplir tous les champs obligatoires.';
+            ? `Remplis\u00a0: ${champsInvalides.join(', ')}`
+            : 'Remplis tous les champs obligatoires.';
         notifications.erreur(message);
     }
 
@@ -2369,7 +2369,7 @@ async function creerPratiqueV2() {
     fermerWizardV2();
 
     // Notification de succès
-    notifications.succes(`Pratique "${pratique.nom}" créée avec succès !`);
+    notifications.succes(`Pratique «\u00a0${pratique.nom}\u00a0» créée.`);
 
     // Rafraîchir l'interface si nécessaire
     if (typeof chargerPratiques === 'function') {

@@ -18,6 +18,13 @@
 
 ## Items livrés après la bascule du 25 mai 2026
 
+### Session du 4 juin 2026 — refonte des textes de l'assistant de pratique + sécurité (version 1.0.0, build 0604-0652)
+
+- [x] 🔒 **#312** `innerHTML` non échappé dans le récapitulatif de l'assistant de pratique ✅ LIVRÉ (build 0604-0652, non poussé)
+  - **Fix** : `r.auteur`, `r.etablissement`, `r.discipline` du récap (`wizard-pratique-v2.js`) passent désormais par `echapperHtml()` — règle de sécurité non négociable respectée. Le champ `nom` était déjà échappé.
+  - **Sentinelle** : `tests/unit/sentinelle-recap-echappement-2026-06-04.test.js` (4 tests) verrouille les 3 échappements et interdit la réintroduction d'une injection brute (protection contre la perte du fix au refactoring).
+  - Livré dans la même passe que la refonte des textes de l'assistant (brief `refonte-textes-assistant-pratique.md`) : renvois périmés → Conception, vouvoiement → tutoiement, écriture inclusive, « Maîtrise » → « Maîtrisé », notification « créée. », `aria-label`/desc du modal « wizard » → « assistant ». 175 tests verts.
+
 ### Session du 26 mai 2026 — bugs des testeurs + petits items backlog (Beta 99.66, builds 0526-0345 → 0526-0503)
 
 - [x] **Bug 25 mai 07:19 — modale migration legacy au démarrage** ✅ LIVRÉ (commit `aabc0d3`, build 0526-0345)
