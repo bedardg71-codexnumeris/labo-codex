@@ -100,8 +100,8 @@ function definirModeExpertFromEl(el) {
 // === CONFIGURATION ===
 // VERSION_MAJEURE et BUILD_ID sont lus depuis version.json au chargement (source unique)
 // Les valeurs ici servent de fallback si version.json n'est pas disponible
-let VERSION_MAJEURE = '99.87';
-let BUILD_ID = '0603-1053';
+let VERSION_MAJEURE = '1.0.0';
+let BUILD_ID = '0603-1438';
 // Snapshot du build contenu dans CE fichier script (pour détecter les scripts périmés)
 const _SCRIPT_BUILD = BUILD_ID;
 
@@ -198,7 +198,7 @@ function fermerModalNouveautes() {
 function afficherBuildNumero() {
     const spanVersion = document.getElementById('version-entete');
     if (spanVersion) {
-        spanVersion.textContent = `Beta ${VERSION_MAJEURE} - Consolidation`;
+        spanVersion.textContent = `Bêta publique ${VERSION_MAJEURE}`;
     }
     const span = document.getElementById('build-numero');
     if (span) {
@@ -284,11 +284,11 @@ async function chargerVersionJSON() {
         afficherBuildNumero();
         var spanBeta = document.getElementById('apropos-version-beta');
         var spanBuild = document.getElementById('apropos-version-build');
-        if (spanBeta) spanBeta.textContent = 'Beta ' + VERSION_MAJEURE;
+        if (spanBeta) spanBeta.textContent = 'Bêta publique ' + VERSION_MAJEURE;
         if (spanBuild) spanBuild.textContent = BUILD_ID;
         var spanBetaAide = document.getElementById('aide-apropos-version-beta');
         var spanBuildAide = document.getElementById('aide-apropos-version-build');
-        if (spanBetaAide) spanBetaAide.textContent = 'Beta ' + VERSION_MAJEURE;
+        if (spanBetaAide) spanBetaAide.textContent = 'Bêta publique ' + VERSION_MAJEURE;
         if (spanBuildAide) spanBuildAide.textContent = BUILD_ID;
         return;
     }
@@ -305,21 +305,21 @@ async function chargerVersionJSON() {
         afficherBuildNumero();
         var spanBeta = document.getElementById('apropos-version-beta');
         var spanBuild = document.getElementById('apropos-version-build');
-        if (spanBeta) spanBeta.textContent = 'Beta ' + VERSION_MAJEURE;
+        if (spanBeta) spanBeta.textContent = 'Bêta publique ' + VERSION_MAJEURE;
         if (spanBuild) spanBuild.textContent = BUILD_ID;
         var spanBetaAide = document.getElementById('aide-apropos-version-beta');
         var spanBuildAide = document.getElementById('aide-apropos-version-build');
-        if (spanBetaAide) spanBetaAide.textContent = 'Beta ' + VERSION_MAJEURE;
+        if (spanBetaAide) spanBetaAide.textContent = 'Bêta publique ' + VERSION_MAJEURE;
         if (spanBuildAide) spanBuildAide.textContent = BUILD_ID;
     } catch (e) {
         // Hors-ligne : on garde les valeurs fallback
         var spanBeta = document.getElementById('apropos-version-beta');
         var spanBuild = document.getElementById('apropos-version-build');
-        if (spanBeta) spanBeta.textContent = 'Beta ' + VERSION_MAJEURE;
+        if (spanBeta) spanBeta.textContent = 'Bêta publique ' + VERSION_MAJEURE;
         if (spanBuild) spanBuild.textContent = BUILD_ID;
         var spanBetaAide = document.getElementById('aide-apropos-version-beta');
         var spanBuildAide = document.getElementById('aide-apropos-version-build');
-        if (spanBetaAide) spanBetaAide.textContent = 'Beta ' + VERSION_MAJEURE;
+        if (spanBetaAide) spanBetaAide.textContent = 'Bêta publique ' + VERSION_MAJEURE;
         if (spanBuildAide) spanBuildAide.textContent = BUILD_ID;
     }
 }
@@ -371,7 +371,7 @@ function afficherBandeauVersion(beta, build, distant) {
     const dateStr = maintenant.toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' });
     const heureStr = maintenant.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
 
-    elBuild.textContent = `BETA ${beta} (BUILD ${build})`;
+    elBuild.textContent = `BÊTA PUBLIQUE ${beta} (BUILD ${build})`;
     elTexte.textContent = `Une mise à jour a été déployée en arrière-plan pendant que tu travailles. Rafraîchis la page pour l\u2019activer. Tes données persistent.`;
     elDate.textContent = `${dateStr} à ${heureStr}`;
 

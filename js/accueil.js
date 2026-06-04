@@ -197,7 +197,7 @@ function afficherAccueilContenu(conteneur) {
                 <div class="accueil-utilitaire-icone"><span class="accueil-icone-mask ico-acc-megaphone"></span><span class="pastille-nouveautes"></span></div>
                 <div>
                     <div class="accueil-utilitaire-titre">Nouveaut\u00e9s</div>
-                    <div class="accueil-utilitaire-desc">Beta ${window.VERSION_MAJEURE || ''} (Build ${window.BUILD_ID || ''})</div>
+                    <div class="accueil-utilitaire-desc">Bêta publique ${window.VERSION_MAJEURE || ''} (Build ${window.BUILD_ID || ''})</div>
                 </div>
             </div>
 

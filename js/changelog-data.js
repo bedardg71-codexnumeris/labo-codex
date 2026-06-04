@@ -1,7 +1,9 @@
 /**
  * changelog-data.js — Données structurées du changelog + rendu HTML
  *
- * Convention : 1 entrée par version majeure (Beta 95, 96, 97, 98).
+ * Convention : 1 entrée par version majeure. Depuis 1.0.0 (3 juin 2026),
+ * versionnage sémantique (SemVer MAJEUR.MINEUR.CORRECTIF) ; avant, schéma
+ * « Beta XX » (95, 96, 97, 98, 99).
  * Pas de dates. Max 6-8 items orientés utilisateur.
  * Couleurs : vert (features), bleu (améliorations).
  */
@@ -9,6 +11,21 @@
     'use strict';
 
     var CHANGELOG = [
+        {
+            version: '1.0',
+            couleur: 'vert',
+            titre: 'Lancement public',
+            items: [
+                'Planification\u00a0: carte mentale d\u2019objectifs, alignement p\u00e9dagogique et organisateur de le\u00e7on.',
+                '\u00c9valuation\u00a0: grilles de crit\u00e8res, \u00e9chelles de performance et grilles descriptives, calcul automatique.',
+                'Annotation des copies au stylet, avec r\u00e9troactions visuelles et cartouches de commentaires.',
+                'Suivi du groupe\u00a0: pr\u00e9sences et remises semaine apr\u00e8s semaine, signaux pr\u00e9coces avant la note.',
+                'D\u00e9veloppement des habilet\u00e9s\u00a0: trajectoires A-C-P, d\u00e9pistage SOLO et interventions R\u00e0I.',
+                'Pratique de notation \u00e0 ta main\u00a0: sommative, par standards ou par sp\u00e9cifications, configur\u00e9e pas \u00e0 pas par un assistant.',
+                'Partage entre coll\u00e8gues sous licence Creative Commons \u2014 100\u00a0% hors ligne, donn\u00e9es locales, sans compte.',
+                'Version b\u00eata publique, en \u00e9volution\u00a0: un pli\u00a0? Le bouton \u00ab\u00a0Signaler un bug\u00a0\u00bb va droit au d\u00e9veloppeur.'
+            ]
+        },
         {
             version: 'Beta 99',
             couleur: 'vert',
