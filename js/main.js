@@ -139,30 +139,17 @@ window.genererBadgePratique = function(type, compact = false) {
     const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const typePAN = config.typePAN || 'maitrise';
 
-    let texte = '';
     let classe = compact ? 'badge-pratique-compact' : 'badge-pratique';
 
-    if (type === 'SOM') {
-        texte = 'SOM';
-        classe += ' som';
-    } else {
-        // PAN : Identifier la pratique spécifique avec classe correspondante
-        if (typePAN === 'maitrise' || typePAN === 'standards') {
-            texte = 'STD';
-            classe += ' std';
-        } else if (typePAN === 'specifications') {
-            texte = 'SPE';
-            classe += ' spe';
-        } else if (typePAN === 'denotation') {
-            texte = 'DEN';
-            classe += ' den';
-        } else {
-            texte = 'STD';
-            classe += ' std';
-        }
-    }
+    // Session B : code dérivé du registre (source unique). SOM direct ; sinon le
+    // typePAN (maitrise/standards/specifications/denotation) → code via le registre
+    // (maitrise et inconnu retombent sur STD, comportement historique préservé).
+    const code = (type === 'SOM')
+        ? 'SOM'
+        : (typeof obtenirCodePratique === 'function' ? obtenirCodePratique(typePAN) : 'STD');
+    classe += ' ' + code.toLowerCase();
 
-    return `<span class="${classe}">${texte}</span>`;
+    return `<span class="${classe}">${code}</span>`;
 };
 
 // ✅ Fonction reactiverGroupeDemo() supprimée (Beta 93.5)

@@ -155,4 +155,40 @@ Chaque pratique gagne, en délégant au registre via son id canonique :
 
 ## 7. Ordre d'exécution
 Lot 1 → valider/commit → Lot 2 → valider/commit → Lot 3 → valider/commit → Lot 4 → push.
-Bump version via `node scripts/release.mjs minor` (nouveauté sans rupture de données).
+
+---
+
+## 8. Journal d'exécution (4 juin 2026)
+
+- **Lot 1 LIVRÉ** (`c36f959`) : registre = source unique {code, couleur, famille} +
+  méthodes IPratique sur les 6 classes + `PratiqueConfigurable` via type + helper strict.
+  Test `representation-pratiques` (11 cas). Additif, non destructif.
+- **Lot 2 LIVRÉ** (`69afe58`) : badges routés (`donnees-v2`, `pratique-notation-v2`,
+  `pratiques-gestion`) ; 3 tables locales retirées ; sentinelle anti-réapparition.
+- **Lot 3 LIVRÉ** : `main.js` + `etudiants.js` dérivent le code du registre (escaliers
+  if/else famille retirés ; descriptions microcopy conservées, indexées par code).
+  `gabarits-utils.js` : **`COULEURS_PRATIQUES` supprimé** (table morte + export).
+
+### Corrections de findings à l'exécution
+- **`gabarits-utils.js COULEURS_PRATIQUES` était DU CODE MORT** : défini + exporté mais
+  **jamais consommé** (grep repo entier). La « dérive de couleur » du §4 ne rendait donc
+  **rien à l'écran** → suppression = nettoyage zéro-dette, **pas** un changement visuel.
+  (Correction de l'alerte initiale qui annonçait un changement visible des pastilles.)
+- **`gabarits-utils.js genererBadgePratique`** : fonction **paramétrique** (lowercase du
+  code + gère MULTI), pas une table de famille → **conservée** (consommée par cartouches/
+  grilles/productions via `GabaritsUtils`).
+- **`pratiques-bibliotheque.js` / `PRATIQUES_DISPONIBLES`** : catalogues UI (codes + noms +
+  microcopy de filtre), pas une duplication du triplet → **conservés**.
+
+### Exceptions assumées (hors scope, documentées)
+- **`couleurs.js`** : mappe les indices A-C-P, pas les pratiques (faux positif).
+- **`echelles.js` (`<option>` du filtre)** : 5 options statiques code→nom complet +
+  `all`→Multi. Microcopy de filtre comparée par code ; générer dynamiquement ajouterait
+  un risque (instances `test`/`pan-objectifs` parasites) sans bénéfice SSOT réel. **Laissé
+  statique.** Le badge **rendu** (le vrai porteur de représentation) passe, lui, par le registre.
+
+### Reste
+- **Validation terrain** (Mac + iPad, 2 modes) des badges routés avant de considérer clos.
+- Bump : **`patch`** (1.1.1 → 1.1.2) — corrige 2 bugs latents (clé `denominateur`, table
+  couleur morte divergente) + durcissement interne, **invisible** aux utilisateurs (pas
+  de feature → pas d'entrée changelog, conforme aux règles `changelog-data.js`).
