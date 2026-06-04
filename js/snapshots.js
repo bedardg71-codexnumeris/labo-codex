@@ -954,7 +954,7 @@ async function reconstruireSnapshotsHistoriques() {
         return {
             succes: true,
             nbSnapshots: nbSnapshots,
-            message: `${nbSnapshots} captures par séance reconstruites avec succès${nbEchecs > 0 ? ` (${nbEchecs} échecs)` : ''}`
+            message: `${nbSnapshots} captures par séance reconstruites${nbEchecs > 0 ? ` (${nbEchecs} échecs)` : ''}`
         };
 
     } catch (error) {
@@ -1157,7 +1157,7 @@ async function lancerReconstructionRetroactive() {
 
         if (resultats.succes) {
             alert(`Reconstruction terminée!\n\n` +
-                  `${resultats.nbSnapshots} captures reconstruites avec succès\n\n` +
+                  `${resultats.nbSnapshots} captures reconstruites\n\n` +
                   `${resultats.message}`);
         } else {
             alert(`Erreur lors de la reconstruction:\n\n${resultats.message}`);

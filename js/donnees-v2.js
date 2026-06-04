@@ -195,7 +195,7 @@
         }
 
         // Afficher le chargement
-        container.innerHTML = '<p class="text-muted text-center" style="padding: 30px;">Chargement...</p>';
+        container.innerHTML = '<p class="text-muted text-center" style="padding: 30px;">Chargement…</p>';
 
         // Appeler la fonction appropriée avec un léger délai
         setTimeout(() => {
