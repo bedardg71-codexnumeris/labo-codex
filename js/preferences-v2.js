@@ -257,9 +257,10 @@
         definirPreference('chronoEvaluation', document.getElementById('v2-pref-chrono-eval')?.checked === true);
         definirPreference('sisDefaut', document.getElementById('v2-pref-sis')?.value || 'lea');
 
-        // Le toggle `activerActionsRLO` régit l'affichage de la catégorie `action`
-        // dans la palette de tampons. Rafraîchir la palette si elle est ouverte
-        // (no-op si la palette n'est pas rendue — DOM-safe).
+        // Les toggles `activerActionsRLO` (catégorie `action`) et
+        // `afficherDescriptionsSOLO` (catégorie `comprehension`) régissent
+        // l'affichage de catégories dans la palette de tampons. Rafraîchir la
+        // palette si elle est ouverte (no-op si la palette n'est pas rendue — DOM-safe).
         if (typeof travauxOutils !== 'undefined' && travauxOutils.rafraichirPalettesApresPersonnalisation) {
             travauxOutils.rafraichirPalettesApresPersonnalisation();
         }
