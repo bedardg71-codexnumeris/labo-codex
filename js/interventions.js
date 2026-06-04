@@ -355,12 +355,19 @@ function afficherListeInterventions() {
         return dateB - dateA;
     });
 
-    // Bouton pour planifier une nouvelle intervention
+    // Bouton pour planifier une nouvelle intervention.
+    // Le bouton « Guide RàI » (module guides-pedagogiques.js) suit la préférence activerRai,
+    // par cohérence avec les autres zones RàI de l'app.
+    const raiActif = (typeof obtenirPreference === 'function')
+        && obtenirPreference('activerRai') !== false;
     let html = `
         <div class="actions-principales">
             <button data-action="afficherFormulaireIntervention" class="btn btn-principal" data-tooltip="interv-btn-planifier">
                 Planifier une intervention
             </button>
+            ${raiActif ? `<button data-action="ouvrirGuidePedagogique" data-param="rai" class="btn btn-secondaire" title="Guide RàI">
+                <img src="icons/icon-book.svg" alt="" class="btn-inline-icon"> Guide RàI
+            </button>` : ''}
         </div>
     `;
 
