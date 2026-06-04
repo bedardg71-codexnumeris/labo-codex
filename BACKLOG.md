@@ -96,6 +96,11 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - **Atténuation déjà livrée (3 juin, commit `f05cbad4`)** : le badge « Non associé » est devenu **cliquable** (ouvre « Propriétés du fichier » pour associer la production) avec tooltip diagnostique. Guide l'utilisateur, mais **ne corrige pas la cause**.
   - **Priorité** : important pour expérimentateurs (flux import → évaluation de base). À investiguer à froid post-AQPC.
 
+- [ ] 🟢 **#315** Bibliothèques — migrer les `alert()`/`confirm()` natifs vers `notifications` + une modale de confirmation réutilisable
+  - **Contexte** : audit du 4 juin (refonte des textes des bibliothèques, brief `refonte-textes-bibliotheques.md` §2). ~40 `alert()`/`confirm()` natifs subsistent : `productions-bibliotheque-ui.js` (~26), `planification-bibliotheque.js` (11), `pratiques-bibliotheque.js` (3). `bibliotheque-ui.js` est déjà propre. Les **textes** ont été corrigés en place cette session (pur-texte) ; la migration UX a été volontairement séparée.
+  - **Difficulté** : 8 `confirm()` bloquants (suppressions irréversibles : planification 409/438/440 ; productions 276/436/479/517/548) ne peuvent pas devenir des `notifications` non-bloquantes — il faut d'abord une **modale de confirmation async réutilisable** (`Promise<boolean>`). `notifications` est aussi **absent** de `planification-bibliotheque.js` et `productions-bibliotheque-ui.js` (à câbler).
+  - **À faire** : (1) concevoir/réutiliser une modale de confirmation async ; (2) migrer les `alert()` informatifs → `notifications.{info,erreur,succes}` ; (3) migrer les `confirm()` → la modale ; (4) retirer les natifs (zéro-dette).
+
 ### Fonctionnalités à compléter
 
 - [ ] 📐 🟡 **#279** Ajouter 3 champs au formulaire de production : DESCRIPTION DÉTAILLÉE des consignes, FORMAT ET MISE EN PAGE, REMISE
