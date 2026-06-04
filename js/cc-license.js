@@ -230,7 +230,6 @@ function genererBadgeCC(metadata) {
                 <ul>
                     <li>Partager ce matériel</li>
                     <li>Le modifier et le remixer</li>
-                    <li>L'utiliser commercialement</li>
                 </ul>
 
                 <h4>À condition de :</h4>
