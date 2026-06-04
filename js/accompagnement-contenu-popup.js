@@ -290,6 +290,9 @@ const AIDE_CONTEXTUELLE = {
             {
                 type: 'conseil',
                 contenu: "Les proportions d’étudiant·es par niveau varient selon le contexte et ta propre pratique professionnelle. L’application te laisse définir les seuils dans Labo › Outils d’observation."
+            },
+            {
+                type: 'action', action: 'ouvrirGuidePedagogique', param: 'rai', libelle: 'Ouvrir le guide RàI'
             }
         ],
         voirAussi: ['interventions-planification', 'depistage-interpretation', 'suivi-liste']
@@ -716,6 +719,9 @@ const AIDE_CONTEXTUELLE = {
                 type: 'alerte',
                 niveau: 'attention',
                 contenu: "Les interventions de niveau 3 dépassent parfois ce que l’enseignant·e peut faire seul. Les services adaptés, l’aide pédagogique individuelle (API) ou les centres d’aide sont des ressources à mobiliser."
+            },
+            {
+                type: 'action', action: 'ouvrirGuidePedagogique', param: 'rai', libelle: 'Ouvrir le guide RàI'
             }
         ],
         voirAussi: ['profil-etudiant-indicateurs', 'profil-etudiant-accompagnement', 'suivi-apprentissage-fondamentaux']
@@ -748,6 +754,9 @@ const AIDE_CONTEXTUELLE = {
             {
                 type: 'texte',
                 contenu: "Configure les critères surveillés dans Conception → Grille de critères (tag SOLO). Ajuste le seuil et la fenêtre d'analyse dans Labo → Outils d’observation."
+            },
+            {
+                type: 'action', action: 'ouvrirGuidePedagogique', param: 'solo', libelle: 'Ouvrir le guide SOLO'
             }
         ],
         voirAussi: ['profil-etudiant-indicateurs']
@@ -778,6 +787,9 @@ const AIDE_CONTEXTUELLE = {
                 titre: 'Lire les écarts',
                 contenu: 'Un·e étudiant·e avec un C élevé mais un P faible fournit l’effort sans obtenir les résultats\u00a0: c’est un signal pour intervenir. Tu peux ensuite regarder plus précisément sur quel critère ou habileté se situe la difficulté.'
             },
+            {
+                type: 'action', action: 'ouvrirGuidePedagogique', param: 'acp', libelle: 'Ouvrir le guide ACP'
+            }
         ],
         voirAussi: ['tableau-bord-rai', 'profil-etudiant-indicateurs', 'suivi-liste']
     },
@@ -1074,6 +1086,9 @@ const AIDE_CONTEXTUELLE = {
                 type: 'conseil',
                 contenu: 'Les critères <strong>multistructurels</strong> (fondations) sont surveillés par le dépistage pour détecter les difficultés persistantes. Identifie-les pour alimenter le suivi des fondamentaux.'
             },
+            {
+                type: 'action', action: 'ouvrirGuidePedagogique', param: 'solo', libelle: 'Ouvrir le guide SOLO'
+            }
         ],
         voirAussi: ['depistage-interpretation', 'suivi-apprentissage-fondamentaux']
     },

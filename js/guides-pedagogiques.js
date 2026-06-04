@@ -254,6 +254,16 @@
         // Si un guide est déjà ouvert, le fermer proprement d'abord
         if (_guideActuel) fermerGuidePedagogique();
 
+        // Découvrabilité (juin 2026) : un guide peut être déclenché depuis une
+        // popup d'aide ou une fiche de glossaire, dont l'overlay est au-dessus
+        // du panneau (z-index). Fermer ces surfaces d'aide d'abord pour que le
+        // guide reste visible.
+        if (window.accompagnement) {
+            if (typeof window.accompagnement.fermerAide === 'function') window.accompagnement.fermerAide();
+            if (typeof window.accompagnement.fermerPopupPrimo === 'function') window.accompagnement.fermerPopupPrimo();
+            if (typeof window.accompagnement.fermerMicroPopup === 'function') window.accompagnement.fermerMicroPopup();
+        }
+
         _guideActuel = idGuide;
         _pageCourante = 0;
         _focusAvantOuverture = document.activeElement;

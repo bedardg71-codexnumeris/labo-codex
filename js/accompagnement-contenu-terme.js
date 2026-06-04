@@ -179,6 +179,7 @@ const GLOSSAIRE = {
 
     'indice-a-assiduite': {
         cle: 'indice-a-assiduite',
+        guide: 'acp',
         terme: 'Indice A — Assiduité',
         categorie: 'Tableau de bord',
         etape: 'observation',
@@ -188,6 +189,7 @@ const GLOSSAIRE = {
 
     'indice-c-completion': {
         cle: 'indice-c-completion',
+        guide: 'acp',
         terme: 'Indice C — Complétion',
         categorie: 'Tableau de bord',
         etape: 'observation',
@@ -197,6 +199,7 @@ const GLOSSAIRE = {
 
     'indice-p-performance': {
         cle: 'indice-p-performance',
+        guide: 'acp',
         terme: 'Indice P — Performance',
         categorie: 'Tableau de bord',
         etape: 'observation',
@@ -215,6 +218,7 @@ const GLOSSAIRE = {
 
     'pattern-d-apprentissage': {
         cle: 'pattern-d-apprentissage',
+        guide: 'rai',
         terme: 'Pattern d\'apprentissage',
         categorie: 'Tableau de bord',
         etape: 'observation',
@@ -233,6 +237,7 @@ const GLOSSAIRE = {
 
     'rai-reponse-a-l-intervention': {
         cle: 'rai-reponse-a-l-intervention',
+        guide: 'rai',
         terme: 'RàI — Réponse à l\'Intervention',
         categorie: 'Tableau de bord',
         etape: 'observation',
@@ -242,6 +247,7 @@ const GLOSSAIRE = {
 
     'niveau-rai': {
         cle: 'niveau-rai',
+        guide: 'rai',
         terme: 'Niveau RàI',
         categorie: 'Tableau de bord',
         etape: 'observation',
@@ -260,6 +266,7 @@ const GLOSSAIRE = {
 
     'idme': {
         cle: 'idme',
+        guide: 'solo',
         terme: 'IDME',
         categorie: 'Structure / Tableau de bord',
         etape: 'observation',
@@ -269,6 +276,7 @@ const GLOSSAIRE = {
 
     'solo': {
         cle: 'solo',
+        guide: 'solo',
         terme: 'SOLO',
         categorie: 'Cadre théorique',
         etape: 'observation',
