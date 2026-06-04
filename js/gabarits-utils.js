@@ -27,16 +27,10 @@
         { code: 'DEN', nom: 'PAN-Dénotation', description: 'Ungrading (autoévaluation guidée)' }
     ];
 
-    /**
-     * Couleurs par pratique
-     */
-    const COULEURS_PRATIQUES = {
-        'SOM': '#6c757d',  // Gris
-        'STD': '#17a2b8',  // Bleu info
-        'SPE': '#28a745',  // Vert
-        'DEN': '#ffc107',  // Jaune
-        'all': '#6f42c1'   // Violet pour multi-pratiques
-    };
+    // Session B (#303) : COULEURS_PRATIQUES retiré (zéro-dette). C'était une table
+    // de couleurs en dur (jamais consommée) qui DIVERGEAIT du design system. La
+    // couleur canonique d'une pratique vient désormais du registre
+    // (obtenirCouleurPratique → var(--som-orange|--std-bleu|--spe-vert|--den-violet)).
 
     // =========================================================================
     // FONCTIONS DE DÉTECTION
@@ -529,7 +523,6 @@
     window.GabaritsUtils = {
         // Constantes
         PRATIQUES_DISPONIBLES,
-        COULEURS_PRATIQUES,
 
         // Gabarits par défaut
         GABARITS_ECHELLES_DEFAUT,

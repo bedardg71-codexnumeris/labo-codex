@@ -370,23 +370,17 @@
         const badge = document.getElementById('v2-badge-pratique');
         if (!badge) return;
 
-        // Mapping type → classe CSS et texte
-        const badgeConfig = {
-            'sommative': { classe: 'som', texte: 'SOM' },
-            'pan-standards': { classe: 'std', texte: 'STD' },
-            'pan-maitrise': { classe: 'std', texte: 'STD' },
-            'pan-specifications': { classe: 'spe', texte: 'SPE' },
-            'pan-denotation': { classe: 'den', texte: 'DEN' }
-        };
+        // Session B : représentation routée vers le registre (source unique).
+        // Strict → null si pas une famille connue : on masque alors le badge.
+        const rep = (typeof obtenirRepresentationPratiqueStricte === 'function')
+            ? obtenirRepresentationPratiqueStricte(typePratique) : null;
 
-        const config = badgeConfig[typePratique];
-
-        if (config) {
+        if (rep) {
             // Supprimer les anciennes classes de couleur
             badge.classList.remove('som', 'std', 'spe', 'den');
-            // Ajouter la nouvelle classe
-            badge.classList.add(config.classe);
-            badge.textContent = config.texte;
+            // Ajouter la nouvelle classe (= code en minuscules)
+            badge.classList.add(rep.code.toLowerCase());
+            badge.textContent = rep.code;
             badge.classList.remove('u-hide');
         } else {
             badge.classList.add('u-hide');

@@ -53,6 +53,95 @@ function normaliserIdPratique(id) {
 }
 
 // ============================================================================
+// REPRÉSENTATIONS CANONIQUES (Session B — source unique, juin 2026)
+// ============================================================================
+// Le registre est la SOURCE UNIQUE du triplet {code, couleur, famille} d'une
+// pratique. Avant la Session B, ce triplet était dupliqué dans ~7 tables locales
+// (main.js, etudiants.js, gabarits-utils.js, donnees-v2.js, pratiques-gestion.js,
+// pratique-notation-v2.js, echelles.js). Toute représentation passe désormais ici.
+//
+// - couleurVar : variable CSS canonique du design system (styles.css). Les classes
+//   .badge-type-* lisent la même couleur ; obtenirCouleurPratique renvoie var(--…)
+//   pour les usages hors badge (style inline, Chart.js).
+// - famille : « Sommative » (SOM) ou « PAN » (STD/SPE/DEN) — « PAN » est un libellé
+//   de famille, plus un préfixe technique (décision 29 mai 2026).
+const REPRESENTATIONS_PRATIQUES = {
+    sommative:      { code: 'SOM', couleurVar: '--som-orange', famille: 'Sommative' },
+    standards:      { code: 'STD', couleurVar: '--std-bleu',   famille: 'PAN' },
+    specifications: { code: 'SPE', couleurVar: '--spe-vert',   famille: 'PAN' },
+    denotation:     { code: 'DEN', couleurVar: '--den-violet', famille: 'PAN' }
+};
+
+// Représentation par défaut = celle de la pratique par défaut (Standards).
+const REPRESENTATION_DEFAUT = REPRESENTATIONS_PRATIQUES[PRATIQUE_DEFAUT];
+
+// Remappage de représentation pour les variantes non normalisées par la Session A.
+// 'pan-objectifs' (décision D1) est une granularité fine de Standards : il s'affiche
+// en STD d'ici son fold en Session C.
+const TABLE_REPRESENTATION_VARIANTE = {
+    'pan-objectifs': 'standards'
+};
+
+/**
+ * Obtient la représentation canonique {code, couleurVar, famille, classe} d'une pratique.
+ * Normalise l'id, applique le remappage de variante, retombe sur le défaut si inconnu.
+ * @param {string} id - identifiant de pratique (legacy, canonique, ou variante)
+ * @returns {{code:string, couleurVar:string, famille:string, classe:string}}
+ */
+function obtenirRepresentationPratique(id) {
+    const idNorm = normaliserIdPratique(id);
+    const idRep = TABLE_REPRESENTATION_VARIANTE[idNorm] || idNorm;
+    const rep = REPRESENTATIONS_PRATIQUES[idRep] || REPRESENTATION_DEFAUT;
+    return {
+        code: rep.code,
+        couleurVar: rep.couleurVar,
+        famille: rep.famille,
+        classe: 'badge-type-' + rep.code.toLowerCase()
+    };
+}
+
+/**
+ * Variante STRICTE : retourne null si l'id n'est pas une famille connue (après
+ * normalisation + remappage de variante). Pour les consommateurs qui ont un état
+ * « inconnu / multi / masqué » distinct (badge configurable CFG, badge caché…) et
+ * ne doivent PAS retomber sur le défaut STD.
+ * @param {string} id @returns {?{code,couleurVar,famille,classe}}
+ */
+function obtenirRepresentationPratiqueStricte(id) {
+    const idNorm = normaliserIdPratique(id);
+    const idRep = TABLE_REPRESENTATION_VARIANTE[idNorm] || idNorm;
+    if (!REPRESENTATIONS_PRATIQUES[idRep]) return null;
+    return obtenirRepresentationPratique(id);
+}
+
+/** Code court (SOM/STD/SPE/DEN). @param {string} id @returns {string} */
+function obtenirCodePratique(id) {
+    return obtenirRepresentationPratique(id).code;
+}
+
+/** Couleur sous forme var(--…) (style inline / Chart.js). @param {string} id @returns {string} */
+function obtenirCouleurPratique(id) {
+    return 'var(' + obtenirRepresentationPratique(id).couleurVar + ')';
+}
+
+/** Libellé de famille (« Sommative » / « PAN »). @param {string} id @returns {string} */
+function obtenirLabelFamillePratique(id) {
+    return obtenirRepresentationPratique(id).famille;
+}
+
+/**
+ * Génère le badge HTML court d'une pratique — GÉNÉRATEUR UNIQUE.
+ * Sortie 100 % contrôlée (codes du registre, jamais de donnée utilisateur) → pas
+ * d'échappement requis, zéro handler inline (conforme CSP script-src 'self').
+ * @param {string} id - identifiant de pratique
+ * @returns {string} `<span class="badge-type-pratique badge-type-std">STD</span>`
+ */
+function genererBadgePratiqueHTML(id) {
+    const rep = obtenirRepresentationPratique(id);
+    return '<span class="badge-type-pratique ' + rep.classe + '">' + rep.code + '</span>';
+}
+
+// ============================================================================
 // ÉTAT DU REGISTRE
 // ============================================================================
 
@@ -189,6 +278,8 @@ function construireConfigComplete(pratiqueData) {
         // Champs obligatoires - prendre de config si présent, sinon de racine
         id: config.id || pratiqueData.id,
         nom: config.nom || pratiqueData.nom,
+        // Type canonique (famille) — requis par les représentations Session B
+        type: config.type || pratiqueData.type || pratiqueData.configuration?.type,
         echelle: echelle,
         calcul_note: config.calcul_note || pratiqueData.calcul_note || { methode: 'conversion_niveaux' },
 
@@ -537,6 +628,14 @@ window.obtenirPratiqueActive = obtenirPratiqueActive;
 window.obtenirIdPratiqueActive = obtenirIdPratiqueActive;
 window.normaliserIdPratique = normaliserIdPratique;
 window.PRATIQUE_DEFAUT = PRATIQUE_DEFAUT;
+
+// Représentations canoniques (Session B) — source unique code/couleur/famille/badge
+window.obtenirRepresentationPratique = obtenirRepresentationPratique;
+window.obtenirRepresentationPratiqueStricte = obtenirRepresentationPratiqueStricte;
+window.obtenirCodePratique = obtenirCodePratique;
+window.obtenirCouleurPratique = obtenirCouleurPratique;
+window.obtenirLabelFamillePratique = obtenirLabelFamillePratique;
+window.genererBadgePratiqueHTML = genererBadgePratiqueHTML;
 window.listerPratiquesDisponibles = listerPratiquesDisponibles;
 window.pratiqueEstDisponible = pratiqueEstDisponible;
 window.obtenirPratiqueParId = obtenirPratiqueParId;
