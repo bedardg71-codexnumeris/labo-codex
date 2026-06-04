@@ -501,7 +501,7 @@ async function _collecterDonnees(trimestre, gc, onProg) {
     var donnees = {};
     var clesInconnues = [];
 
-    onProg(5, 'Inventaire des clés...', '');
+    onProg(5, 'Inventaire des clés…', '');
     var toutesCles = await db.keys();
 
     // PASSE 1 — préfixe trimestre
@@ -558,7 +558,7 @@ async function _collecterDonnees(trimestre, gc, onProg) {
         // l'utilisateur voyait la barre figee. (M4)
         if (i % 5 === 0) {
             onProg(15 + Math.round((i / clesTrimestre.length) * 15),
-                'Lecture des données...',
+                'Lecture des données…',
                 (i + 1) + ' / ' + clesTrimestre.length + ' clés');
             await _yield();
         }
@@ -669,7 +669,7 @@ async function _collecterDonnees(trimestre, gc, onProg) {
     }
 
     // 3) Clés globales (non namespacées)
-    onProg(32, 'Clés globales...', '');
+    onProg(32, 'Clés globales…', '');
     for (var g = 0; g < CLES_GLOBALES_INCLUSES.length; g++) {
         var cg = CLES_GLOBALES_INCLUSES[g];
         var v = await db.get(cg, null);
@@ -748,7 +748,7 @@ async function _collecterBlobs(donnees, trimestre, onProg) {
 
         if (j % 5 === 0) {
             onProg(40 + Math.round((j / fichiers.length) * 30),
-                'Collecte des fichiers travaux...',
+                'Collecte des fichiers travaux…',
                 blobs.length + ' / ' + fichiers.length + ' (' + _formaterTaille(tailleTotale) + ')');
             await _yield();
         }
@@ -900,7 +900,7 @@ async function _ecrireVersementDirect(handleRacine, dossier, donnees, meta, patc
     var dossierVersement = await dossierTrim.getDirectoryHandle(dossier, { create: true });
     var dossierTravaux = await dossierVersement.getDirectoryHandle('travaux', { create: true });
 
-    onProg(73, 'Ecriture donnees.json...', dossier);
+    onProg(73, 'Écriture des données…', dossier);
     await _ecrireFichierTexte(dossierVersement, 'donnees.json', JSON.stringify(donnees, null, 0));
 
     for (var i = 0; i < blobs.length; i++) {
@@ -908,16 +908,16 @@ async function _ecrireVersementDirect(handleRacine, dossier, donnees, meta, patc
         await _ecrireFichierBlob(dossierTravaux, entree.id + '.' + entree.ext, entree.blob);
         if (i % 5 === 0 || i === blobs.length - 1) {
             var p = 75 + Math.round((i / Math.max(blobs.length, 1)) * 18);
-            onProg(p, 'Ecriture des travaux...', (i + 1) + ' / ' + blobs.length);
+            onProg(p, 'Écriture des travaux…', (i + 1) + ' / ' + blobs.length);
             await _yield();
         }
     }
 
-    onProg(94, 'Ecriture du patch manifeste...', '');
+    onProg(94, 'Écriture des fichiers…', '');
     await _ecrireFichierTexte(dossierVersement, 'manifeste-archives-patch.json', JSON.stringify(patch, null, 2));
 
     // Sentinelle de completude : meta.json en dernier
-    onProg(96, 'Ecriture meta.json (sentinelle)...', '');
+    onProg(96, 'Finalisation…', '');
     await _ecrireFichierTexte(dossierVersement, 'meta.json', JSON.stringify(meta, null, 2));
 
     return { cheminDossier: 'trimestres/' + dossier + '/' };
@@ -1110,7 +1110,7 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
     }
 
     _progShow('Création de l’archive');
-    _prog(0, modeFSAPI ? 'Mode automatique...' : 'Préparation...', dossier);
+    _prog(0, modeFSAPI ? 'Mode automatique…' : 'Préparation…', dossier);
     await _yield();
 
     try {
@@ -1139,7 +1139,7 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
         var donneesSha256 = donneesJsonStr ? await _calculerSHA256(donneesJsonStr) : null;
 
         // 2. Collecte des blobs
-        _prog(40, 'Collecte des fichiers travaux...', '');
+        _prog(40, 'Collecte des fichiers travaux…', '');
         await _yield();
         var collecteBlobs = await _collecterBlobs(donnees, trimestre, _prog);
 
@@ -1199,7 +1199,7 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
         // 4. Branche selon le mode
         if (modeFSAPI) {
             // === MODE FSAPI : écriture directe ===
-            _prog(72, 'Écriture sur disque...', dossier);
+            _prog(72, 'Écriture sur disque…', dossier);
             await _yield();
 
             var ecriture = await _ecrireVersementDirect(
@@ -1207,7 +1207,7 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
                 collecteBlobs.blobs, _prog
             );
 
-            _prog(98, 'Mise à jour du manifeste global...', '');
+            _prog(98, 'Mise à jour du manifeste global…', '');
             await _yield();
             try {
                 await _fusionnerManifesteGlobal(handleReserve, dossier, patch.patch);
@@ -1248,7 +1248,7 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
         }
 
         // === MODE ZIP : flux v1 (téléchargement manuel) ===
-        _prog(72, 'Construction du ZIP...', dossier);
+        _prog(72, 'Construction du ZIP…', dossier);
         await _yield();
 
         // Manifeste local : upsert AVANT la construction du ZIP pour
@@ -1298,13 +1298,13 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
             _progShow('Génération de l\'archive');
         }
 
-        _prog(80, 'Compression du ZIP...', '');
+        _prog(80, 'Compression du ZIP…', '');
         await _yield();
         var zipBlob = await zip.generateAsync(
             { type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } },
             function(metaCompr) {
                 _prog(80 + Math.round(metaCompr.percent * 0.18),
-                    'Compression du ZIP...',
+                    'Compression du ZIP…',
                     Math.round(metaCompr.percent) + '% compressé');
             }
         );
@@ -1312,7 +1312,7 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
         // Convention #262 : préfixe `archive-` + dossier + date + extension simple.
         // CONFIDENTIEL- retiré (l'archive est implicitement personnelle).
         var nomFichier = 'archive-' + dossier + '-' + _dateAujourdhui() + EXTENSION_ARCHIVE;
-        _prog(99, 'Téléchargement...', nomFichier);
+        _prog(99, 'Téléchargement…', nomFichier);
 
         var url = URL.createObjectURL(zipBlob);
         var a = document.createElement('a');

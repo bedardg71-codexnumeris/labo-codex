@@ -263,7 +263,7 @@ async function genererCodex(options = {}) {
     var _progMasquer = silencieux ? function() {} : _masquerProgression;
 
     if (!silencieux) _afficherProgression('Génération du codex');
-    _prog(0, 'Lecture des données...');
+    _prog(0, 'Lecture des données…');
     await _yield(); // laisser le navigateur peindre l'overlay
 
     try {
@@ -280,7 +280,7 @@ async function genererCodex(options = {}) {
         if (i % 10 === 0) {
             _prog(
                 Math.round((i / clesFiltrees.length) * 20),
-                'Lecture des données...',
+                'Lecture des données…',
                 (i + 1) + '/' + clesFiltrees.length + ' clés'
             );
             await _yield();
@@ -288,7 +288,7 @@ async function genererCodex(options = {}) {
     }
 
     // 2. Construire le ZIP
-    _prog(20, 'Préparation du ZIP...');
+    _prog(20, 'Préparation du ZIP…');
     const zip = new JSZip();
 
     // 2a. Données JSON
@@ -333,7 +333,7 @@ async function genererCodex(options = {}) {
             if (j % 5 === 0) {
                 _prog(
                     20 + Math.round((j / fichiers.length) * 50),
-                    'Ajout des fichiers travaux...',
+                    'Ajout des fichiers travaux…',
                     nbBlobs + '/' + fichiers.length + ' fichiers (' + _formaterTaille(tailleTotale) + ')'
                 );
                 await _yield();
@@ -395,24 +395,24 @@ async function genererCodex(options = {}) {
         }
         // Recréer l'overlay pour la phase compression (peut être longue).
         _afficherProgression('Génération du codex');
-        _prog(70, 'Compression du ZIP...', nbBlobs + ' fichier(s), ' + _formaterTaille(tailleTotale));
+        _prog(70, 'Compression du ZIP…', nbBlobs + ' fichier(s), ' + _formaterTaille(tailleTotale));
     }
 
     // 5. Générer le blob ZIP
-    _prog(70, 'Compression du ZIP...', nbBlobs + ' fichier(s), ' + _formaterTaille(tailleTotale));
+    _prog(70, 'Compression du ZIP…', nbBlobs + ' fichier(s), ' + _formaterTaille(tailleTotale));
     const zipBlob = await zip.generateAsync(
         { type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } },
         function(meta) {
             _prog(
                 70 + Math.round(meta.percent * 0.28),
-                'Compression du ZIP...',
+                'Compression du ZIP…',
                 Math.round(meta.percent) + '% compressé'
             );
         }
     );
 
     // 6. Mettre à jour l'état
-    _prog(98, 'Finalisation...');
+    _prog(98, 'Finalisation…');
     _etat.actif = true;
     _etat.nom = manifeste.nom;
     _etat.derniereSauvegarde = maintenant;
@@ -485,7 +485,7 @@ async function chargerCodex(fichierZip) {
 
     const debut = performance.now();
     _afficherProgression('Ouverture du codex');
-    _majProgression(0, 'Validation du fichier...', _formaterTaille(fichierZip.size));
+    _majProgression(0, 'Validation du fichier…', _formaterTaille(fichierZip.size));
     await _yield(); // laisser le navigateur peindre l'overlay
 
     try {
@@ -517,7 +517,7 @@ async function chargerCodex(fichierZip) {
     }
 
     // 2. Extraire et charger les données JSON
-    _majProgression(15, 'Extraction des données...');
+    _majProgression(15, 'Extraction des données…');
     const jsonStr = await zip.file(NOM_DONNEES).async('string');
     const donnees = JSON.parse(jsonStr);
 
@@ -540,7 +540,7 @@ async function chargerCodex(fichierZip) {
         if (i % 10 === 0) {
             _majProgression(
                 15 + Math.round((i / entreesData.length) * 20),
-                'Restauration des données...',
+                'Restauration des données…',
                 (i + 1) + '/' + entreesData.length + ' clés'
             );
             await _yield();
@@ -548,7 +548,7 @@ async function chargerCodex(fichierZip) {
     }
 
     // 3. Synchroniser le cache localStorage
-    _majProgression(35, 'Synchronisation du cache...');
+    _majProgression(35, 'Synchronisation du cache…');
     await db.syncToLocalStorageCache();
 
     // 4. Restaurer les blobs
@@ -590,7 +590,7 @@ async function chargerCodex(fichierZip) {
             if (j % 5 === 0) {
                 _majProgression(
                     35 + Math.round((j / fichiers.length) * 60),
-                    'Restauration des fichiers travaux...',
+                    'Restauration des fichiers travaux…',
                     nbBlobs + '/' + fichiers.length + ' fichiers'
                 );
                 await _yield();
@@ -603,7 +603,7 @@ async function chargerCodex(fichierZip) {
     await db.set(CLE_SNAPSHOT_AVANT, donnees);
 
     // 6. Mettre à jour l'état
-    _majProgression(98, 'Finalisation...');
+    _majProgression(98, 'Finalisation…');
     const maintenant = new Date().toISOString();
     _etat.actif = true;
     _etat.nom = manifeste.nom;
@@ -1353,7 +1353,7 @@ function _resoudreConflits(analyse, donneesLocales, donneesExternes, analyseTrav
             return { resolutions: resolutions, importerTravaux: importerTravaux, annule: true };
         }
 
-        if (!confirm(resume + '\n\nAucun conflit ! Procéder à la fusion automatique ?')) {
+        if (!confirm(resume + '\n\nAucun conflit. Procéder à la fusion automatique ?')) {
             return { resolutions: resolutions, importerTravaux: importerTravaux, annule: true };
         }
 
@@ -1864,7 +1864,7 @@ async function _executerAutoSave() {
         _derniereAutoSave = new Date().toISOString();
 
         notifications.succes(
-            'Auto-save',
+            'Enregistrement auto',
             _formaterTaille(resultat.blob.size) + ' — ' + _formaterHeureLocale(_derniereAutoSave)
         );
     } catch (e) {
@@ -2132,7 +2132,7 @@ async function actionOuvrir() {
             resultat.stats.nbCles + ' clés, ' + resultat.stats.nbBlobs + ' fichiers'
         );
         // Proposer de recharger pour appliquer les données
-        if (confirm('Codex chargé avec succès !\n\nRecharger la page pour appliquer les données ?')) {
+        if (confirm('Codex chargé. Recharger la page pour appliquer les données ?')) {
             window.location.reload();
         }
     } catch (e) {
@@ -2160,7 +2160,7 @@ async function actionEnregistrer() {
                            sauvegarde.methode === 'share' ? 'Fichiers' : 'Téléchargements';
         notifications.succes(
             'Codex enregistré',
-            _formaterTaille(resultat.blob.size) + ' — ' + methodeLabel
+            _formaterTaille(resultat.blob.size) + ' – ' + methodeLabel
         );
     } catch (e) {
         console.error('📂 Erreur enregistrement codex:', e);
@@ -2184,7 +2184,7 @@ async function actionEnregistrerSous() {
                            sauvegarde.methode === 'share' ? 'Fichiers' : 'Téléchargements';
         notifications.succes(
             'Codex enregistré',
-            _formaterTaille(resultat.blob.size) + ' — ' + methodeLabel
+            _formaterTaille(resultat.blob.size) + ' – ' + methodeLabel
         );
     } catch (e) {
         console.error('📂 Erreur enregistrement codex:', e);
@@ -2291,7 +2291,7 @@ async function actionFusionner() {
     if (!fichier) return;
 
     _afficherProgression('Fusion de codex');
-    _majProgression(0, 'Lecture du codex externe...');
+    _majProgression(0, 'Lecture du codex externe…');
     await _yield();
 
     try {
@@ -2300,7 +2300,7 @@ async function actionFusionner() {
     var externe = await lireCodexExterne(fichier);
 
     // 3. Collecter les données locales depuis IndexedDB
-    _majProgression(15, 'Lecture des données locales...');
+    _majProgression(15, 'Lecture des données locales…');
     await _yield();
 
     var toutesLesCles = await db.keys();
@@ -2313,18 +2313,18 @@ async function actionFusionner() {
         if (val !== null) donneesLocales[clesFiltrees[i]] = val;
         if (i % 20 === 0) {
             _majProgression(15 + Math.round((i / clesFiltrees.length) * 15),
-                'Lecture des données locales...', (i + 1) + '/' + clesFiltrees.length);
+                'Lecture des données locales…', (i + 1) + '/' + clesFiltrees.length);
             await _yield();
         }
     }
 
     // 4. Chercher un ancêtre commun (dernier snapshot partagé)
-    _majProgression(30, 'Recherche d\'un ancêtre commun...');
+    _majProgression(30, 'Recherche d\'un ancêtre commun…');
     await _yield();
     var ancetre = await db.get(CLE_SNAPSHOT_AVANT, null);
 
     // 5. Analyser les différences (données)
-    _majProgression(35, 'Analyse des différences...');
+    _majProgression(35, 'Analyse des différences…');
     await _yield();
 
     var analyse = _analyserFusion(donneesLocales, externe.donnees, ancetre);
@@ -2374,13 +2374,13 @@ async function actionFusionner() {
 
         if (j % 10 === 0) {
             _majProgression(Math.round((j / clesResolution.length) * 60),
-                'Écriture des données...', (j + 1) + '/' + clesResolution.length);
+                'Écriture des données…', (j + 1) + '/' + clesResolution.length);
             await _yield();
         }
     }
 
     // 9. Synchroniser le cache localStorage
-    _majProgression(60, 'Synchronisation du cache...');
+    _majProgression(60, 'Synchronisation du cache…');
     await db.syncToLocalStorageCache();
 
     // 10. Importer les blobs travaux externes
@@ -2389,7 +2389,7 @@ async function actionFusionner() {
         statsTravaux = await _fusionnerTravaux(
             externe._zip, externe.donnees, plan.importerTravaux,
             function(pct, msg) {
-                _majProgression(60 + Math.round(pct * 0.35), 'Import des fichiers travaux...', msg);
+                _majProgression(60 + Math.round(pct * 0.35), 'Import des fichiers travaux…', msg);
             }
         );
     }
@@ -2461,13 +2461,13 @@ async function actionComparer() {
     if (!fichier) return;
 
     _afficherProgression('Comparaison de codex');
-    _majProgression(0, 'Lecture du codex externe...');
+    _majProgression(0, 'Lecture du codex externe…');
     await _yield();
 
     try {
         var externe = await lireCodexExterne(fichier);
 
-        _majProgression(20, 'Lecture des données locales...');
+        _majProgression(20, 'Lecture des données locales…');
         await _yield();
 
         var toutesLesCles = await db.keys();
@@ -2480,11 +2480,11 @@ async function actionComparer() {
             if (val !== null) donneesLocales[clesFiltrees[i]] = val;
         }
 
-        _majProgression(50, 'Recherche d\'un ancêtre commun...');
+        _majProgression(50, 'Recherche d\'un ancêtre commun…');
         await _yield();
         var ancetre = await db.get(CLE_SNAPSHOT_AVANT, null);
 
-        _majProgression(65, 'Analyse des différences...');
+        _majProgression(65, 'Analyse des différences…');
         await _yield();
         var analyse = _analyserFusion(donneesLocales, externe.donnees, ancetre);
 
@@ -2498,7 +2498,7 @@ async function actionComparer() {
         }
         var analyseTravaux = _analyserFusionTravaux(travauxLocaux, externe.travauxListe);
 
-        _majProgression(90, 'Construction du rapport...');
+        _majProgression(90, 'Construction du rapport…');
         await _yield();
 
         var rapport = _construireRapportComparaison(externe, analyse, analyseTravaux);
@@ -2652,7 +2652,7 @@ async function actionExporterSelection() {
     _fermerMenu();
 
     _afficherProgression('Export sélectif');
-    _majProgression(0, 'Lecture des données...');
+    _majProgression(0, 'Lecture des données…');
     await _yield();
 
     try {
@@ -2668,7 +2668,7 @@ async function actionExporterSelection() {
         if (val !== null) donnees[clesFiltrees[i]] = val;
         if (i % 20 === 0) {
             _majProgression(Math.round((i / clesFiltrees.length) * 20),
-                'Lecture des données...', (i + 1) + '/' + clesFiltrees.length);
+                'Lecture des données…', (i + 1) + '/' + clesFiltrees.length);
             await _yield();
         }
     }
@@ -2741,7 +2741,7 @@ async function actionExporterSelection() {
 
     // 7. Construire le ZIP partiel
     _afficherProgression('Export sélectif');
-    _majProgression(25, 'Préparation du ZIP...');
+    _majProgression(25, 'Préparation du ZIP…');
     await _yield();
 
     if (typeof JSZip === 'undefined') {
@@ -2789,7 +2789,7 @@ async function actionExporterSelection() {
             }
             if (j % 5 === 0) {
                 _majProgression(25 + Math.round((j / tousLesFichiers.length) * 35),
-                    'Ajout des fichiers travaux...', nbBlobs + '/' + tousLesFichiers.length);
+                    'Ajout des fichiers travaux…', nbBlobs + '/' + tousLesFichiers.length);
                 await _yield();
             }
         }
@@ -2821,16 +2821,16 @@ async function actionExporterSelection() {
     zip.file(NOM_MANIFESTE, JSON.stringify(manifeste, null, 2));
 
     // 8. Générer le blob
-    _majProgression(65, 'Compression du ZIP...');
+    _majProgression(65, 'Compression du ZIP…');
     var zipBlob = await zip.generateAsync(
         { type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } },
         function(meta) {
             _majProgression(65 + Math.round(meta.percent * 0.30),
-                'Compression du ZIP...', Math.round(meta.percent) + '%');
+                'Compression du ZIP…', Math.round(meta.percent) + '%');
         }
     );
 
-    _majProgression(98, 'Enregistrement...');
+    _majProgression(98, 'Enregistrement…');
     await _yield();
 
     // 9. Sauvegarder
