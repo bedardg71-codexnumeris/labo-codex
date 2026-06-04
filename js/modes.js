@@ -50,7 +50,7 @@ function initialiserSystemeModes() {
     // Gérer l'affichage des boutons selon le mode
     gererAffichageBoutonPrimo(modeActuel);
 
-    // Appliquer la classe tour-guide-actif si le tour guide est actif
+    // Appliquer la classe tour-guide-actif si la visite guidée est active
     if (estTourGuideActif()) {
         document.body.classList.add('tour-guide-actif');
     }
@@ -810,7 +810,7 @@ function gererAffichageBoutonPrimo(mode) {
 // ============================================
 
 /**
- * Les 4 sous-systèmes d'accompagnement (tour guidé, aide contextuelle,
+ * Les 4 sous-systèmes d'accompagnement (visite guidée, aide contextuelle,
  * tooltips hover, flèches didactiques) sont pilotés par la pref unique
  * `accompagnementActif` depuis le 20 avril 2026. Les fonctions ci-dessous
  * redirigent vers window.accompagnement pour préserver la rétrocompat des
