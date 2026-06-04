@@ -81,8 +81,8 @@
         }
         notifications.succes(
             actif
-                ? 'Persistance FSAPI activée — les dossiers Travaux et Réserve seront retenus entre sessions.'
-                : 'Persistance FSAPI désactivée — tu redemanderas le dossier à chaque démarrage.'
+                ? 'Mémorisation du dossier activée – les dossiers Travaux et Archives seront retenus entre les sessions.'
+                : 'Mémorisation désactivée – tu redemanderas le dossier à chaque démarrage.'
         );
     }
 
