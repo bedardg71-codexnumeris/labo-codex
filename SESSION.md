@@ -1,20 +1,28 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 2 juin 2026, build 0602-1401.
-     Session du 2 juin (J−1 AQPC), après-midi/soir : marathon de REFONTE DES
-     TEXTES page par page (briefs refonte-textes-*.md) — 13 pages (Calendrier
-     scolaire, alignement, Plan de la leçon, Productions, Grilles, Échelles,
-     Cartouches, Pratiques, Préparer/importer, Liste évaluations, Suivi, Liste
-     étudiant·es, Saisie présences) + Profils (mécaniques). Conventions :
-     « étudiant·es » (point médian unique), « — Sélectionner — », verbe
-     « Enregistrer », tutoiement, « Profils » (ex-« Pattern »). Bug terrain P=0
-     = résidu du mode comparatif retiré (#308). Chantier terme/genre différé
-     (#309-#311). Beta 99.87 (bumps build-only), build 0602-1401.
-     Le matin du 2 juin (UI/CoP/logos, 99.86→99.87) et les sessions précédentes
-     restent documentées dans les §§ suivants.
+     IDENTIFICATION DE CE FICHIER  (mis à jour 3 juin 2026, build 0603-1438).
+     JOUR AQPC — LANCEMENT PUBLIC 1.0.0. Exécution délibérée du plan
+     « plans de travail/PLAN-passage-1.0-AQPC.md » : bascule du schéma
+     « beta 99.x » au versionnage sémantique (SemVer) via scripts/release.mjs,
+     libellé « Bêta publique » (10 sites / 3 fichiers), entrée de changelog
+     « Lancement public », sentinelle tests/unit/version-format.test.js,
+     CLAUDE.md mis à jour. Commit unique 47ab5b65, version 1.0.0 /
+     build 0603-1438, poussé sur origin/main. 171 tests verts.
+     Validation terrain navigateur (6 surfaces, Mac + iPad, sombre/clair)
+     reste à faire par Grégoire ; curl bloqué par le défi anti-bot Cloudflare
+     (≠ Cloudflare Access, toujours désactivé). Les sessions du 2 juin (refonte
+     des textes) et antérieures restent documentées dans les §§ suivants.
      ===================================================================== -->
 
 > **📌 Identification**
 > - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
+> - **🚀 RELAIS — 3 juin 2026 (JOUR AQPC), LANCEMENT PUBLIC 1.0.0, HEAD `47ab5b65`, version 1.0.0 / build 0603-1438, PUSHÉ sur origin/main** : exécution délibérée du `plans de travail/PLAN-passage-1.0-AQPC.md` (étapes 1 à 7). Bascule du schéma « beta 99.x » au **versionnage sémantique (SemVer)** via `node scripts/release.mjs --set 1.0.0`. **171 tests verts** (143 Vitest + 28 Playwright), zéro régression.
+>   - **Commit unique `47ab5b65`** « release: lancement public 1.0.0 (bêta publique) — AQPC », 8 fichiers : les **4 points de vérité** posés atomiquement par le script (`version.json` + 2 fallbacks `init-inline.js` + snapshot `main.js`) ; libellé **« Bêta publique »** sur les **10 sites / 3 fichiers** (init-inline.js 201/287/291/308/312/318/322/374, accueil.js 200, rapport-bug.js 31) avec retrait du suffixe « - Consolidation » ; entrée de changelog **« Lancement public »** (champ `version: '1.0'`, 8 items orientés fonctionnalités, échappée `\uXXXX` + espaces insécables conformes au fichier) ; `CLAUDE.md` (section « Avant chaque commit » réécrite autour de `release.mjs` + ligne « État actuel ») ; nouvelle sentinelle `tests/unit/version-format.test.js` (verrouille `beta` en `^\d+\.\d+\.\d+$` et `build` en `^\d{4}-\d{4}$`).
+>   - **Titre changelog « Lancement public »** tranché par Grégoire (vs « Première version publique » de l'Annexe A) pour éviter que « 1.0 », affiché au-dessus de « Beta 99 », ne se lise comme une régression.
+>   - **HEAD de départ `c5ae63a0`** : correctifs du matin (nav mobile « CoP » + évaluation, beta 99.87 / build 0603-1053) — non relayés individuellement dans SESSION.md, mais inclus dans l'historique poussé.
+>   - **⚠️ VÉRIFICATION DÉPLOIEMENT (à connaître)** : `curl https://app.codexnumeris.org` renvoie le **défi managé Cloudflare** (« Just a moment… », HTTP 403) qui bloque les clients non-navigateurs. C'est l'**anti-bot de base de Cloudflare** (proxy orange), **indépendant de Cloudflare Access** (toujours désactivé, DEPLOY.md §3) — pas une erreur de déploiement. La vérification réelle passe donc par le navigateur ; **l'agent n'a pas pu confirmer la version en ligne**.
+>   - **⚠️ À VALIDER EN TERRAIN** (`Cmd+Option+R`, navigation privée, **Mac Safari + iPad**, modes **sombre ET clair**) : les **6 surfaces** affichent « Bêta publique 1.0.0 » — (1) en-tête, (2) Réglages › À propos, (3) bulle d'aide À propos, (4) panneau de notification orange (MAJUSCULES « BÊTA PUBLIQUE 1.0.0 (BUILD 0603-1438) »), (5) carte « Nouveautés » de l'accueil, (6) rapport « Signaler un bug ». Vérifier aussi le **non-débordement** du libellé (plus long qu'avant) sur iPad/iPhone (en-tête + carte « Nouveautés »).
+>   - **ROLLBACK** dispo si la vérif révèle un pli : `git revert 47ab5b65` + push, ou rollback Netlify instantané (DEPLOY.md §5). **Aucune donnée utilisateur touchée** par ce chantier (identité de version + doc + changelog).
+>   - **PROCÉDURE DE VERSION DÉSORMAIS** : `node scripts/release.mjs patch|minor|major` (ou `--set X.Y.Z`, ou `--build-only`). Confirmer avec Grégoire avant un `major`. `version.json` reste la **source unique de vérité** ; « Bêta publique » est un **libellé d'affichage**, pas le numéro. Le jour où Grégoire voudra retirer le mot « Bêta » = chantier distinct (mêmes 10 sites / 3 fichiers).
 > - **🟢 RELAIS — 2 juin 2026 (SOIR, J−1 AQPC), beta 99.87 / builds 0602-1620 → 0602-1907, PUSHÉ sur origin/main (synchro 0/0)** : suite directe du marathon. **13 commits poussés** + **2 corrections terrain en données (console, sur backup, pas de code)**. 165 tests verts (141 Vitest + 24 Playwright) à chaque étape. Bumps **build-only** (beta reste 99.87 jusqu'au lancement 1.0 du 3 juin).
 >   - **2 BUGS TERRAIN diagnostiqués + corrigés (données, pas de code)** :
 >     - **#308 — P à 0 % sur l'Aperçu (601-101 gr.00008)** : cause = **pratique de test « Testb-SOM-31mai » mal assemblée au groupe-cours** (héritée des tests du trimestre Été 2026), PAS le mode comparatif (le diagnostic du backlog était faux). Le moteur est sain (gr.00002 calculait bien). Corrigé en réassignant la vraie pratique « PAN-SDT-Litt H26 » via « Appliquer au cours actif ». **Piège noté** (mémoire `feedback-diagnostic-perf-zero-assemblage-pratique`) : tester `pratique.calculerPerformance(da)` sur une pratique NON active est biaisé (lit `modalitesEvaluation` global). Un **fix d'affichage** est commité en bonus (`d93055d`, `tableau-bord-apercu.js`) : `determinerModeAffichageTableauBord` suit la pratique active au lieu de forcer PAN + libellés honnêtes + 7 tests.
