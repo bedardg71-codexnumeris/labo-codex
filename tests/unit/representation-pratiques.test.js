@@ -80,4 +80,19 @@ describe('Session B · représentations canoniques', () => {
         const rep = win.obtenirRepresentationPratique('standards');
         expect(rep).toEqual({ code: 'STD', couleurVar: '--std-bleu', famille: 'PAN', classe: 'badge-type-std' });
     });
+
+    describe('variante stricte (états non-famille préservés par les consommateurs)', () => {
+        it('rend la représentation pour les familles connues (legacy incluses)', () => {
+            expect(win.obtenirRepresentationPratiqueStricte('standards').code).toBe('STD');
+            expect(win.obtenirRepresentationPratiqueStricte('pan-standards').code).toBe('STD');
+            expect(win.obtenirRepresentationPratiqueStricte('sommative').code).toBe('SOM');
+            expect(win.obtenirRepresentationPratiqueStricte('pan-objectifs').code).toBe('STD');
+        });
+
+        it('retourne null pour un id inconnu / multi / vide (PAS de défaut STD)', () => {
+            for (const id of [null, undefined, '', 'configurable', 'multi', 'id-inconnu', 'test']) {
+                expect(win.obtenirRepresentationPratiqueStricte(id)).toBeNull();
+            }
+        });
+    });
 });
