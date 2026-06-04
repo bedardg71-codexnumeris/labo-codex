@@ -19190,6 +19190,242 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     padding: 2px 0 6px;
 }
 
+/* ============================================================
+   GUIDES PÉDAGOGIQUES — panneau unifié (SOLO, ACP, RàI)
+   js/guides-pedagogiques.js — un seul jeu de classes pour tous
+   les guides (PLAN_guides_pedagogiques.md §2.4)
+   ============================================================ */
+#guide-pedagogique-panel {
+    position: fixed;
+    z-index: 600;
+    right: 24px;
+    top: 80px;
+    width: 420px;
+    max-width: calc(100vw - 32px);
+    max-height: 82vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface-carte, #1a3040);
+    border: 1px solid var(--bordure-moyenne, rgba(106, 172, 184, 0.35));
+    border-radius: 12px;
+    box-shadow: var(--shadow-prononce);
+    color: var(--texte-principal, #d0e0e4);
+    padding: 16px 20px 10px;
+}
+.guide-pedagogique-contenu {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+.guide-pedagogique-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+.guide-pedagogique-surtitre {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--texte-muted, #80a0b0);
+    margin-bottom: 2px;
+}
+.guide-pedagogique-titre {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--bleu-meta, #9fc5e8);
+    line-height: 1.3;
+    outline: none;
+}
+.guide-pedagogique-fermer {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    margin: -8px -10px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.guide-pedagogique-fermer:hover { background: rgba(106, 172, 184, 0.1); }
+.guide-pedagogique-corps {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--texte-secondaire, #8aa4b0);
+    padding-right: 4px;
+}
+.guide-pedagogique-corps p { margin: 0 0 12px; }
+.guide-pedagogique-corps ul, .guide-pedagogique-corps ol { margin: 0 0 12px; padding-left: 20px; }
+.guide-pedagogique-corps li { margin-bottom: 6px; }
+.guide-pedagogique-corps strong { color: var(--texte-principal, #d0e0e4); }
+.guide-pedagogique-corps h4 {
+    margin: 16px 0 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--texte-principal, #d0e0e4);
+}
+.guide-pedagogique-corps code {
+    font-size: 0.82rem;
+    background: rgba(106, 172, 184, 0.1);
+    padding: 1px 5px;
+    border-radius: 4px;
+}
+.guide-pedagogique-pictogramme {
+    height: 26px;
+    width: auto;
+    vertical-align: middle;
+    margin-left: 6px;
+    flex-shrink: 0;
+}
+.guide-pedagogique-tampons-liste,
+.guide-pedagogique-patterns-liste {
+    list-style: none;
+    padding-left: 0;
+    margin: 12px 0;
+}
+.guide-pedagogique-tampons-liste li,
+.guide-pedagogique-patterns-liste li {
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--bordure-claire, rgba(106, 172, 184, 0.25));
+}
+.guide-pedagogique-tampons-liste li:last-child,
+.guide-pedagogique-patterns-liste li:last-child { border-bottom: none; }
+.guide-pedagogique-tampons-liste .guide-pedagogique-pictogramme { margin: 0 6px 0 0; }
+.guide-pedagogique-patterns-liste [class^="badge-pattern-"] { white-space: nowrap; }
+.guide-pedagogique-astuce {
+    background: rgba(249, 115, 22, 0.06);
+    border: 1px solid rgba(249, 115, 22, 0.15);
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin: 12px 0;
+    font-size: 0.85rem;
+    line-height: 1.55;
+}
+.guide-pedagogique-astuce::before { content: '\1F4A1 '; }
+.guide-pedagogique-ref {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--bordure-claire, rgba(106, 172, 184, 0.25));
+    font-size: 0.78rem;
+    color: var(--texte-muted, #80a0b0);
+    font-style: italic;
+    line-height: 1.5;
+}
+.guide-pedagogique-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--bordure-claire, rgba(106, 172, 184, 0.25));
+}
+.guide-pedagogique-prec,
+.guide-pedagogique-suiv {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 4px 12px;
+    border: 1px solid var(--bordure-moyenne, rgba(106, 172, 184, 0.35));
+    background: transparent;
+    color: var(--texte-secondaire, #8aa4b0);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+.guide-pedagogique-prec:hover,
+.guide-pedagogique-suiv:hover {
+    background: rgba(106, 172, 184, 0.1);
+    color: var(--texte-principal, #d0e0e4);
+}
+.guide-pedagogique-prec:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+.guide-pedagogique-dots {
+    display: flex;
+    gap: 4px;
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.guide-pedagogique-dot {
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    border-radius: 50%;
+    cursor: pointer;
+    position: relative;
+}
+.guide-pedagogique-dot::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 1px solid var(--bordure-moyenne, rgba(106, 172, 184, 0.35));
+    background: transparent;
+    transition: background 0.15s;
+}
+.guide-pedagogique-dot:hover::after { background: var(--bordure-moyenne, rgba(106, 172, 184, 0.35)); }
+.guide-pedagogique-dot.actif::after {
+    background: var(--bleu-meta, #9fc5e8);
+    border-color: var(--bleu-meta, #9fc5e8);
+}
+.guide-pedagogique-page-num {
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--texte-muted, #80a0b0);
+    padding: 4px 0 2px;
+}
+/* Bouton « ? » d'accès au guide depuis un label de catégorie (palette tampons) */
+.travaux-categorie-guide-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    margin-left: 6px;
+    padding: 0;
+    border: 1px solid var(--bordure-moyenne, rgba(106, 172, 184, 0.35));
+    border-radius: 50%;
+    background: transparent;
+    color: var(--texte-secondaire, #8aa4b0);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    vertical-align: middle;
+}
+.travaux-categorie-guide-btn:hover {
+    background: rgba(106, 172, 184, 0.15);
+    color: var(--texte-principal, #d0e0e4);
+}
+/* Adaptations tablette / mobile : panneau pleine largeur en bas */
+@media (max-width: 768px) {
+    #guide-pedagogique-panel {
+        right: 8px;
+        left: 8px;
+        width: auto;
+        top: auto;
+        bottom: 8px;
+        max-height: 70vh;
+    }
+}
+
 .planif-noeud-titre {
     padding: 2px 10px 8px;
     font-size: 13px;

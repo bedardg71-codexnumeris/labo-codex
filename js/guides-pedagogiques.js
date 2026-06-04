@@ -1,0 +1,423 @@
+/* ============================================================
+   GUIDES PÉDAGOGIQUES — Module unifié
+   ------------------------------------------------------------
+   Un seul moteur de rendu pour tous les guides pédagogiques de
+   Labo Codex. Guides actuels : SOLO, ACP, RàI. Extensible :
+   ajouter une entrée dans GUIDES_PEDAGOGIQUES suffit (guides
+   PAN et Enseignement explicite prévus dans un chantier futur).
+
+   Specs : Plan Accompagnement/PLAN_guides_pedagogiques.md (23 mai 2026)
+   Contenu : Plan Accompagnement/REVISION_contenu_guides_SOLO-ACP-RAI.md
+             (validé par Grégoire le 4 juin 2026)
+
+   API publique (dispatcher data-action de main.js) :
+   - ouvrirGuidePedagogique(idGuide)   data-param="solo" | "acp" | "rai"
+   - fermerGuidePedagogique()
+
+   Panneau : #guide-pedagogique-panel (index.html), construit
+   dynamiquement à l'ouverture, vidé à la fermeture.
+
+   Sécurité : contenu 100 % statique défini dans ce fichier —
+   aucune donnée utilisateur injectée, donc innerHTML est sûr
+   ici (même statut que GUIDE_PAGES de planification-carte.js).
+   ============================================================ */
+
+(function() {
+
+    var GUIDES_PEDAGOGIQUES = {
+
+        /* ────────────────────────────────────────────────────
+           Guide SOLO — 5 pages
+           Référence : Biggs & Collis (1982)
+           ──────────────────────────────────────────────────── */
+        solo: {
+            titre: 'Guide SOLO',
+            cssPrefix: 'guide-solo',
+            pages: [
+                {
+                    titre: 'Qu’est-ce que SOLO ?',
+                    contenu: `
+<p>La <strong>taxonomie SOLO</strong> (Structure of Observed Learning Outcomes) est un cadre développé par Biggs et Collis en 1982 pour décrire la qualité de l'apprentissage observable dans les productions étudiantes.</p>
+<p>Plutôt que de mesurer la quantité d'informations restituées, SOLO décrit la <strong>structure cognitive</strong> d'une réponse : à quel point l'étudiant·e relie les éléments entre eux et les intègre dans une compréhension cohérente.</p>
+<p>Cinq niveaux progressifs sont distingués :</p>
+<ul>
+    <li><strong>Préstructurel</strong> — aucune information pertinente</li>
+    <li><strong>Unistructurel</strong> — un seul élément identifié</li>
+    <li><strong>Multistructurel</strong> — plusieurs éléments juxtaposés mais non reliés</li>
+    <li><strong>Relationnel</strong> — éléments intégrés en une structure cohérente</li>
+    <li><strong>Abstrait étendu</strong> — la structure est transférée à d'autres contextes</li>
+</ul>
+<p>Dans Labo Codex, SOLO sert de fondement à l'échelle de performance IDME (Insuffisant, Développement, Maîtrisé, Étendu) et à l'observation des productions étudiantes via les tampons de la catégorie Compréhension.</p>
+<p class="guide-pedagogique-ref">Biggs, J. B., &amp; Collis, K. F. (1982). <em>Evaluating the Quality of Learning: The SOLO Taxonomy (Structure of the Observed Learning Outcome)</em>. Academic Press.</p>`
+                },
+                {
+                    titre: 'Préstructurel et Unistructurel',
+                    contenu: `
+<p>Les deux niveaux les plus bas correspondent à un apprentissage fragmentaire ou absent.</p>
+<h4>Préstructurel</h4>
+<p>L'étudiant·e ne fournit aucune information pertinente, ou des informations sans lien avec la question posée. Code IDME : <strong>0</strong> (Non recevable).</p>
+<h4>Unistructurel <img src="autocollants/solo/comprehension-uni.svg" alt="" class="guide-pedagogique-pictogramme"></h4>
+<p>L'étudiant·e identifie un seul élément pertinent, sans le mettre en relation avec d'autres. La réponse est correcte mais incomplète ou superficielle. Code IDME : <strong>I</strong> (Insuffisant).</p>
+<p><em>Exemple : à la question « Quelles sont les causes de la Révolution française ? », l'étudiant·e mentionne seulement « la pauvreté » sans détailler ni relier à d'autres facteurs.</em></p>
+<div class="guide-pedagogique-astuce">Pédagogiquement, ce niveau signale une compréhension de surface — un point de départ, pas une fin. L'intervention vise à enrichir les éléments identifiés et à inviter l'étudiant·e à en chercher d'autres.</div>`
+                },
+                {
+                    titre: 'Multistructurel',
+                    contenu: `
+<h4>Multistructurel <img src="autocollants/solo/comprehension-multi.svg" alt="" class="guide-pedagogique-pictogramme"></h4>
+<p>L'étudiant·e identifie plusieurs éléments pertinents, mais ils restent juxtaposés sans relation explicite entre eux. La réponse est riche mais fragmentée. Code IDME : <strong>D</strong> (En Développement).</p>
+<p><em>Exemple : pour la même question, l'étudiant·e énumère « la pauvreté, les inégalités sociales, les idées des Lumières et la crise financière » sans expliquer comment ces facteurs interagissent.</em></p>
+<div class="guide-pedagogique-astuce">C'est la <strong>zone critique de consolidation</strong>. L'étudiant·e a les éléments mais pas encore la structure. L'intervention pédagogique vise à amener à <em>relier</em> : « Comment ces facteurs s'influencent-ils les uns les autres ? »</div>
+<p>Dans l'évaluation IDME, ce niveau correspond à un seuil situé entre 64 % et 74 % : la performance est en développement, pas encore aboutie.</p>`
+                },
+                {
+                    titre: 'Relationnel et Abstrait étendu',
+                    contenu: `
+<h4>Relationnel <img src="autocollants/solo/comprehension-relationnel.svg" alt="" class="guide-pedagogique-pictogramme"></h4>
+<p>L'étudiant·e intègre les éléments en une structure cohérente. Il ou elle établit explicitement des relations entre les composantes. La réponse a une logique interne identifiable. Code IDME : <strong>M</strong> (Maîtrisé).</p>
+<p><em>Exemple : « Les idées des Lumières ont alimenté la conscience des inégalités, que la crise financière a rendues insupportables aux yeux d'une population déjà appauvrie. »</em></p>
+<h4>Abstrait étendu <img src="autocollants/solo/comprehension-etendu.svg" alt="" class="guide-pedagogique-pictogramme"></h4>
+<p>L'étudiant·e non seulement intègre la structure, mais l'extrapole : comparaisons avec d'autres contextes, formulation de principes généraux, application de la structure à des situations nouvelles. Code IDME : <strong>E</strong> (Étendu).</p>
+<p><em>Exemple : « Les conditions qui ont conduit à la Révolution française se retrouvent partiellement dans d'autres révolutions, comme le Printemps arabe — une crise économique combinée à une conscience des inégalités amplifiée par la circulation des idées. »</em></p>
+<div class="guide-pedagogique-astuce">L'écart entre Relationnel et Abstrait étendu marque un saut qualitatif : passer de comprendre <em>ce cas-ci</em> à comprendre <em>cette classe de cas</em>.</div>`
+                },
+                {
+                    titre: 'SOLO en pratique',
+                    contenu: `
+<h4>Avec les tampons de la palette d'annotation</h4>
+<p>Quatre tampons SOLO sont disponibles dans la catégorie « Compréhension » de la palette d'annotation (visible seulement quand la taxonomie SOLO est activée dans Labo → Outils d'observation) :</p>
+<ul class="guide-pedagogique-tampons-liste">
+    <li><img src="autocollants/solo/comprehension-uni.svg" alt="" class="guide-pedagogique-pictogramme"> <strong>Unistructurel</strong> — pour les passages où l'étudiant·e identifie un seul élément</li>
+    <li><img src="autocollants/solo/comprehension-multi.svg" alt="" class="guide-pedagogique-pictogramme"> <strong>Multistructurel</strong> — pour les passages où plusieurs éléments sont juxtaposés</li>
+    <li><img src="autocollants/solo/comprehension-relationnel.svg" alt="" class="guide-pedagogique-pictogramme"> <strong>Relationnel</strong> — pour les passages qui établissent des relations</li>
+    <li><img src="autocollants/solo/comprehension-etendu.svg" alt="" class="guide-pedagogique-pictogramme"> <strong>Étendu</strong> — pour les passages qui transfèrent à d'autres contextes</li>
+</ul>
+<h4>Avec l'échelle de performance IDME</h4>
+<p>L'échelle IDME de Labo Codex est construite sur SOLO : chaque code correspond à un niveau cognitif. <strong>0</strong> (Non recevable) ↔ Préstructurel, <strong>I</strong> ↔ Unistructurel, <strong>D</strong> ↔ Multistructurel, <strong>M</strong> ↔ Relationnel, <strong>E</strong> ↔ Abstrait étendu. Quand tu situes une production sur l'échelle, tu poses en fait un jugement sur la structure cognitive observable de la réponse.</p>
+<h4>Pour la rétroaction étudiante</h4>
+<p>Identifier le niveau SOLO d'une production aide à formuler une rétroaction <em>structurelle</em> plutôt que purement quantitative. Au lieu de « il manque des éléments », tu peux dire « tes éléments sont identifiés (Multistructurel), maintenant cherche à les relier (Relationnel) ». L'étudiant·e comprend ce qu'il faut faire pour progresser, pas seulement que ce n'est pas assez.</p>
+<div class="guide-pedagogique-astuce">Conseil pratique : commence par identifier le niveau dominant de la production, puis cherche les passages qui s'écartent (en mieux ou en moins bien). Les tampons servent à signaler ces passages dans le texte étudiant.</div>`
+                }
+            ]
+        },
+
+        /* ────────────────────────────────────────────────────
+           Guide ACP — 3 pages
+           Cadre interne, sans référence académique externe
+           ──────────────────────────────────────────────────── */
+        acp: {
+            titre: 'Guide ACP',
+            cssPrefix: 'guide-acp',
+            pages: [
+                {
+                    titre: 'Qu’est-ce qu’ACP ?',
+                    contenu: `
+<p><strong>ACP</strong> est l'acronyme de trois indices descriptifs qui mesurent l'engagement et la performance d'un·e étudiant·e dans le cours :</p>
+<ul>
+    <li><strong>A</strong> — <strong>Assiduité</strong> : la proportion des périodes du trimestre auxquelles l'étudiant·e a été présent·e.</li>
+    <li><strong>C</strong> — <strong>Complétion</strong> : la proportion des productions attendues qui ont été remises.</li>
+    <li><strong>P</strong> — <strong>Performance</strong> : la note pondérée obtenue selon la pratique de notation choisie.</li>
+</ul>
+<p>Ces trois indices, pris ensemble, fournissent un portrait rapide de la situation de chaque étudiant·e. Ils sont calculés automatiquement à partir des présences saisies et des productions évaluées – aucune saisie supplémentaire requise.</p>
+<p>Dans Labo Codex, ACP est utilisé dans plusieurs zones :</p>
+<ul>
+    <li>Section « Engagement ACP » du profil individuel</li>
+    <li>Section « Progression temporelle ACP » du profil (si Graphiques d'évolution activé)</li>
+    <li>Vue d'ensemble du tableau de bord (Aperçu)</li>
+</ul>
+<div class="guide-pedagogique-astuce">ACP est un cadre de lecture interne à Labo Codex, sans référence académique externe. C'est un outil de bord pour l'enseignant·e, pas un instrument de mesure standardisé.</div>`
+                },
+                {
+                    titre: 'Les trois indices en détail',
+                    contenu: `
+<h4>A — Assiduité</h4>
+<p>L'indice A se calcule à partir des présences enregistrées dans le module Suivi → Saisie des présences. Une présence enregistrée pour une période compte ; une absence (justifiée ou non) ne compte pas.</p>
+<p>L'unité d'affichage peut être configurée dans Labo → Outils d'observation : périodes (par défaut), heures, ou les deux.</p>
+<h4>C — Complétion</h4>
+<p>L'indice C se calcule à partir des productions attendues dans le trimestre. Une production est « complétée » dès qu'elle est remise, indépendamment de la note obtenue. Les productions à venir ne pénalisent pas C tant que leur date d'échéance n'est pas passée.</p>
+<p>Calcul : <code>C = productions remises / productions attendues échues</code></p>
+<h4>P — Performance</h4>
+<p>L'indice P est la note pondérée de l'étudiant·e selon la pratique de notation active (PAN – Standards, Sommative, ou une pratique personnalisée). Il ne représente <em>pas</em> la note finale du trimestre, mais une projection courante basée sur les productions déjà évaluées.</p>
+<div class="guide-pedagogique-astuce">Les trois indices sont indépendants. Un·e étudiant·e peut avoir A élevé (toujours présent·e) mais C faible (ne remet pas ses travaux), ou C élevé (remet tout) mais P faible (résultats faibles). Lire les trois ensemble donne un portrait riche que la seule note ne donne pas.</div>`
+                },
+                {
+                    titre: 'Utiliser ACP en classe',
+                    contenu: `
+<p>ACP éclaire trois types de situations courantes :</p>
+<h4>Repérer les étudiant·es qui décrochent</h4>
+<p>Quand A et C baissent ensemble sur quelques semaines, c'est un signal de désengagement précoce, souvent avant que P ne se dégrade. Intervention recommandée : prise de contact, conversation sur les obstacles.</p>
+<h4>Distinguer effort et résultat</h4>
+<p>Un·e étudiant·e avec C élevé et P faible fait l'effort mais ne maîtrise pas. L'intervention vise les compétences (revoir la grille de dépistage, identifier les critères en défi).</p>
+<p>Un·e étudiant·e avec C faible et P moyen ou élevé sur ce qui est remis a peut-être un problème de planification ou de motivation, pas de compréhension. L'intervention vise l'organisation et l'engagement.</p>
+<h4>Identifier les patterns de classe</h4>
+<p>Si A de la classe baisse sur une période, c'est probablement un signal contextuel (semaine de partiels ailleurs, météo, etc.) – pas un problème individuel à intensifier. Si C baisse sur une production particulière, c'est peut-être que sa consigne ou son échéance est mal calibrée.</p>
+<div class="guide-pedagogique-astuce">ACP est un cadre simple, pas un diagnostic. Croisé avec les patterns RàI (si activés) et les niveaux SOLO (si activés), il devient un outil de jugement professionnel riche – à manier avec discernement.</div>`
+                }
+            ]
+        },
+
+        /* ────────────────────────────────────────────────────
+           Guide RàI — 4 pages
+           Référence : Desrochers (dir.) (2021)
+           ──────────────────────────────────────────────────── */
+        rai: {
+            titre: 'Guide RàI',
+            cssPrefix: 'guide-rai',
+            pages: [
+                {
+                    titre: 'Qu’est-ce que la RàI ?',
+                    contenu: `
+<p>La <strong>Réponse à l'Intervention (RàI)</strong> est un modèle d'organisation pédagogique qui combine dépistage continu, interventions ajustées et données pour soutenir l'apprentissage de l'ensemble des étudiant·es.</p>
+<p>Dans Labo Codex, la RàI est <strong>une inspiration, pas un cadre normatif</strong>. Le modèle original (Fuchs, Fuchs &amp; Malone, 2017 ; Desrochers 2021) a été développé pour le primaire et le secondaire, dans des contextes où des équipes d'intervenants travaillent ensemble. L'app adapte ce modèle au cégep, où l'enseignant·e est souvent seul·e intervenant·e et où les compétences visées sont d'un autre ordre (analyse, argumentation, transfert, plutôt que décodage ou fluence).</p>
+<p>Quatre principes directeurs guident l'implémentation :</p>
+<ul>
+    <li><strong>Le dépistage est un portrait</strong>, pas un diagnostic. Il sert à mieux intervenir, non à catégoriser.</li>
+    <li><strong>L'intensification est un continuum</strong> ajustable, pas une suite de cases.</li>
+    <li><strong>Les données servent les décisions</strong>, pas l'inverse.</li>
+    <li><strong>L'individualisation se fonde sur les données</strong> – le cycle <em>enseigner, évaluer, ajuster, réévaluer</em>.</li>
+</ul>
+<p>L'app fournit les données et les éclairages. Tu prends les décisions. Labo Codex ne prescrit jamais une intervention — il éclaire ton jugement professionnel.</p>
+<p class="guide-pedagogique-ref">Desrochers, A. (dir.) (2021). <em>L'approche de la réponse à l'intervention et l'enseignement de la lecture-écriture</em>. Presses de l'Université du Québec. ISBN 978-2-7605-5404-7.</p>`
+                },
+                {
+                    titre: 'Dépistage et patterns d’apprentissage',
+                    contenu: `
+<p>Le dépistage de Labo Codex se construit automatiquement à partir des productions étudiantes que tu évalues. À chaque artefact, l'app calcule des indices et détecte des patterns.</p>
+<h4>Quatre fonctions du dépistage</h4>
+<ul>
+    <li><strong>Suivre les progrès</strong> de chaque étudiant·e dans le temps.</li>
+    <li><strong>Repérer les étudiant·es à risque</strong> qui ne réalisent pas les apprentissages attendus.</li>
+    <li><strong>Guider le choix de l'intervention</strong> : quel palier, quels critères cibler.</li>
+    <li><strong>Évaluer l'efficacité de ton enseignement</strong>. Si plus de 20 % des étudiant·es sont en difficulté, c'est peut-être ton palier universel qu'il faut renforcer, pas nécessairement l'étudiant·e qui est en cause.</li>
+</ul>
+<h4>Quatre patterns observables</h4>
+<p>L'app classe automatiquement chaque étudiant·e dans des «patterns» multifactoriels. Ces patterns sont en réalité une combinaison d'observations faites à partir de ses productions récentes. Les plages de pourcentages sont basées sur des données empiriques recueillies avec Labo Codex par Grégoire Bédard à l'automne 2025. Étant donné les limites de l'échantillon, ce sont des hypothèses qui restent encore à valider empiriquement. Ces plages reposent sur SOLO et ACP :</p>
+<ul class="guide-pedagogique-patterns-liste">
+    <li><span class="badge-pattern-stable">Progression stable</span> — pas de défi identifié, performance suffisante.</li>
+    <li><span class="badge-pattern-defi-specifique">Défi spécifique</span> — performance générale ≥ 75 %, mais un défi récurrent identifié sur un ou plusieurs critères.</li>
+    <li><span class="badge-pattern-difficulte-emergente">Difficulté émergente</span> — performance entre 64 % et 74 % avec présence d'un défi. Zone de surveillance.</li>
+    <li><span class="badge-pattern-difficulte-persistante">Difficulté persistante</span> — performance inférieure à 64 % sur les artefacts récents. Zone d'intervention prioritaire.</li>
+</ul>
+<div class="guide-pedagogique-astuce">L'app surveille particulièrement les critères de <strong>niveau SOLO Multistructurel</strong> — ce sont les fondamentaux. Si les fondamentaux ne sont pas acquis, les compétences supérieures (Relationnel, Abstrait étendu) ne peuvent pas se développer.</div>`
+                },
+                {
+                    titre: 'Les trois niveaux d’intervention',
+                    contenu: `
+<p>La RàI propose un <strong>continuum d'intensification</strong> de l'intervention pédagogique, organisé en trois paliers. Ces paliers ne sont pas des catégories où l'on enferme un·e étudiant·e — c'est un curseur que tu ajustes selon sa réponse.</p>
+<h4>Palier 1 — Universel</h4>
+<p>L'enseignement régulier offert à l'ensemble du groupe. C'est le palier le plus large et le plus important. Quand il fonctionne bien, 80 % ou plus des étudiant·es progressent correctement sans intervention supplémentaire.</p>
+<h4>Palier 2 — Préventif</h4>
+<p>Intervention ciblée pour les étudiant·es qui montrent des signes de difficulté émergente. Travail en sous-groupe sur des composantes précises (par exemple un critère récurrent en défi). Durée limitée, objectif clair, mesure de la réponse.</p>
+<h4>Palier 3 — Intensif</h4>
+<p>Intervention individualisée pour les étudiant·es dont la difficulté persiste malgré le palier 2. Plus de temps, plus de fréquence, plus de personnalisation. C'est rare et coûteux en ressources — à utiliser pour les cas où c'est nécessaire – et à répartir dans une équipe intégrée.</p>
+<div class="guide-pedagogique-astuce"><strong>Principe contre-intuitif</strong> : si plus de 20 % de tes étudiant·es sont en difficulté, c'est ton <em>palier 1</em> qu'il faut renforcer en premier, pas multiplier les interventions de palier 2 ou 3. Quand l'enseignement universel échoue à grande échelle, intensifier individuellement masque le vrai problème.</div>
+<p>Dans Labo Codex, l'app suggère un niveau d'intervention basé sur le diagnostic croisé (IPB × direction), mais c'est <strong>toi qui décides</strong>. L'app éclaire, tu juges.</p>`
+                },
+                {
+                    titre: 'La RàI en pratique dans Labo Codex',
+                    contenu: `
+<p>Voici comment utiliser concrètement la RàI dans l'app :</p>
+<h4>1. Configure ta grille de dépistage</h4>
+<p>Va dans <strong>Conception → Grilles de critères</strong>. Ta grille contient les critères que tu utilises pour évaluer les productions. Chaque critère porte un attribut <strong>niveau SOLO</strong> (Multistructurel, Relationnel, ou Abstrait étendu). Le dépistage surveille particulièrement les critères Multistructurels.</p>
+<h4>2. Évalue les productions normalement</h4>
+<p>À chaque production évaluée (annotée et notée), l'app met à jour automatiquement les indices et patterns pour chaque étudiant·e. Aucune saisie supplémentaire requise.</p>
+<h4>3. Consulte les patterns dans le profil étudiant</h4>
+<p>Va dans <strong>Suivi → Profils individuels</strong>. Le profil affiche le pattern actuel de l'étudiant·e avec son badge, les critères en défi classés par niveau SOLO, et la trajectoire récente.</p>
+<h4>4. Documente tes interventions</h4>
+<p>Le module <strong>Suivi → Interventions</strong> te permet de planifier une intervention, de documenter ce que tu as fait, et de revenir mesurer la réponse de l'étudiant·e à travers les artefacts suivants. C'est le cycle <em>teach-test-revise-test</em> de Fuchs.</p>
+<h4>5. Suis les sous-groupes</h4>
+<p>Quand plusieurs étudiant·es partagent un défi commun, l'app peut suggérer des sous-groupes pour des interventions ciblées de palier 2. Le formulaire d'intervention propose les critères en défi communs — tu n'as qu'à valider ou ajuster.</p>
+<div class="guide-pedagogique-astuce">La RàI n'est pas un système qui te dit quoi faire. C'est un système qui t'aide à voir ce qui se passe pour mieux décider. Si l'app te suggère un palier 3 pour un·e étudiant·e mais que ton jugement professionnel te dit autre chose, fais confiance à ton jugement — et utilise les données pour expliquer ta décision à toi-même et aux autres intervenants.</div>`
+                }
+            ]
+        }
+    };
+
+    /* ── État interne ─────────────────────────────────────── */
+    var _guideActuel = null;
+    var _pageCourante = 0;
+    var _focusAvantOuverture = null;
+
+    /* ── Ouverture ────────────────────────────────────────── */
+    function ouvrirGuidePedagogique(idGuide) {
+        var guide = GUIDES_PEDAGOGIQUES[idGuide];
+        if (!guide) {
+            console.warn('[guides-pedagogiques] Guide inconnu : ' + idGuide);
+            return;
+        }
+        var panel = document.getElementById('guide-pedagogique-panel');
+        if (!panel) {
+            console.error('[guides-pedagogiques] Panneau #guide-pedagogique-panel introuvable');
+            return;
+        }
+
+        // Si un guide est déjà ouvert, le fermer proprement d'abord
+        if (_guideActuel) fermerGuidePedagogique();
+
+        _guideActuel = idGuide;
+        _pageCourante = 0;
+        _focusAvantOuverture = document.activeElement;
+
+        // Classe d'accent optionnelle par guide (guide-solo, guide-acp, guide-rai)
+        panel.className = guide.cssPrefix;
+
+        construirePanneau(panel, guide);
+        panel.style.display = '';
+        rendrePage(panel, guide);
+
+        // Accessibilité SPA : déplacer le focus vers le titre
+        var titre = panel.querySelector('.guide-pedagogique-titre');
+        if (titre) titre.focus();
+
+        document.addEventListener('keydown', _surClavier);
+        // Différer pour ne pas capter le clic d'ouverture lui-même
+        setTimeout(function() {
+            document.addEventListener('mousedown', _surClicExterieur);
+        }, 0);
+    }
+
+    /* ── Construction du panneau (une fois par ouverture) ─── */
+    function construirePanneau(panel, guide) {
+        panel.innerHTML =
+            '<div class="guide-pedagogique-contenu" role="dialog" aria-labelledby="guide-pedagogique-titre-texte">' +
+                '<div class="guide-pedagogique-header">' +
+                    '<div>' +
+                        '<div class="guide-pedagogique-surtitre"></div>' +
+                        '<h3 class="guide-pedagogique-titre" id="guide-pedagogique-titre-texte" tabindex="-1" aria-live="polite"></h3>' +
+                    '</div>' +
+                    '<button class="guide-pedagogique-fermer" title="Fermer le guide" aria-label="Fermer le guide">' +
+                        '<img src="icons/icon-close-window.svg" alt="" class="modal-close-icon">' +
+                    '</button>' +
+                '</div>' +
+                '<div class="guide-pedagogique-corps"></div>' +
+                '<div class="guide-pedagogique-nav">' +
+                    '<button class="guide-pedagogique-prec" aria-label="Page précédente">&larr;</button>' +
+                    '<div class="guide-pedagogique-dots" role="group" aria-label="Pages du guide"></div>' +
+                    '<button class="guide-pedagogique-suiv" aria-label="Page suivante">&rarr;</button>' +
+                '</div>' +
+                '<div class="guide-pedagogique-page-num"></div>' +
+            '</div>';
+
+        panel.querySelector('.guide-pedagogique-surtitre').textContent = guide.titre;
+
+        panel.querySelector('.guide-pedagogique-fermer').addEventListener('click', fermerGuidePedagogique);
+
+        panel.querySelector('.guide-pedagogique-prec').addEventListener('click', function() {
+            if (_pageCourante > 0) {
+                _pageCourante--;
+                rendrePage(panel, guide);
+            }
+        });
+
+        panel.querySelector('.guide-pedagogique-suiv').addEventListener('click', function() {
+            if (_pageCourante < guide.pages.length - 1) {
+                _pageCourante++;
+                rendrePage(panel, guide);
+            } else {
+                fermerGuidePedagogique();
+            }
+        });
+
+        var dots = panel.querySelector('.guide-pedagogique-dots');
+        for (var i = 0; i < guide.pages.length; i++) {
+            var dot = document.createElement('button');
+            dot.className = 'guide-pedagogique-dot';
+            dot.dataset.page = i;
+            dot.title = 'Page ' + (i + 1);
+            dot.setAttribute('aria-label', 'Page ' + (i + 1) + ' : ' + guide.pages[i].titre);
+            dot.addEventListener('click', function() {
+                _pageCourante = parseInt(this.dataset.page, 10);
+                rendrePage(panel, guide);
+            });
+            dots.appendChild(dot);
+        }
+    }
+
+    /* ── Rendu d'une page ─────────────────────────────────── */
+    function rendrePage(panel, guide) {
+        var page = guide.pages[_pageCourante];
+        if (!page) return;
+
+        panel.querySelector('.guide-pedagogique-titre').textContent = page.titre;
+        // Contenu statique défini dans ce fichier — innerHTML sûr (aucune donnée utilisateur)
+        panel.querySelector('.guide-pedagogique-corps').innerHTML = page.contenu;
+        panel.querySelector('.guide-pedagogique-corps').scrollTop = 0;
+        panel.querySelector('.guide-pedagogique-page-num').textContent =
+            'Page ' + (_pageCourante + 1) + ' / ' + guide.pages.length;
+
+        var btnPrec = panel.querySelector('.guide-pedagogique-prec');
+        var btnSuiv = panel.querySelector('.guide-pedagogique-suiv');
+        btnPrec.disabled = _pageCourante === 0;
+        if (_pageCourante === guide.pages.length - 1) {
+            btnSuiv.textContent = 'Terminer';
+            btnSuiv.setAttribute('aria-label', 'Terminer et fermer le guide');
+        } else {
+            btnSuiv.innerHTML = '&rarr;';
+            btnSuiv.setAttribute('aria-label', 'Page suivante');
+        }
+
+        var dots = panel.querySelectorAll('.guide-pedagogique-dot');
+        for (var i = 0; i < dots.length; i++) {
+            dots[i].classList.toggle('actif', i === _pageCourante);
+        }
+    }
+
+    /* ── Fermeture ────────────────────────────────────────── */
+    function fermerGuidePedagogique() {
+        var panel = document.getElementById('guide-pedagogique-panel');
+        if (!panel) return;
+
+        document.removeEventListener('keydown', _surClavier);
+        document.removeEventListener('mousedown', _surClicExterieur);
+
+        panel.innerHTML = '';
+        panel.style.display = 'none';
+        panel.className = '';
+        _guideActuel = null;
+        _pageCourante = 0;
+
+        // Restaurer le focus sur l'élément déclencheur
+        if (_focusAvantOuverture && typeof _focusAvantOuverture.focus === 'function'
+            && document.contains(_focusAvantOuverture)) {
+            _focusAvantOuverture.focus();
+        }
+        _focusAvantOuverture = null;
+    }
+
+    /* ── Écouteurs globaux (actifs seulement guide ouvert) ── */
+    function _surClavier(e) {
+        if (!_guideActuel) return;
+        if (e.key === 'Escape') {
+            fermerGuidePedagogique();
+            return;
+        }
+        // Ne pas détourner les flèches dans les champs de saisie
+        var t = e.target;
+        if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
+
+        var panel = document.getElementById('guide-pedagogique-panel');
+        var guide = GUIDES_PEDAGOGIQUES[_guideActuel];
+        if (!panel || !guide) return;
+
+        if (e.key === 'ArrowLeft' && _pageCourante > 0) {
+            _pageCourante--;
+            rendrePage(panel, guide);
+        } else if (e.key === 'ArrowRight' && _pageCourante < guide.pages.length - 1) {
+            _pageCourante++;
+            rendrePage(panel, guide);
+        }
+    }
+
+    function _surClicExterieur(e) {
+        var panel = document.getElementById('guide-pedagogique-panel');
+        if (!panel || panel.contains(e.target)) return;
+        // Laisser le dispatcher gérer un clic sur un autre bouton d'ouverture
+        if (e.target.closest && e.target.closest('[data-action="ouvrirGuidePedagogique"]')) return;
+        fermerGuidePedagogique();
+    }
+
+    /* ── API publique (dispatcher data-action de main.js) ─── */
+    window.ouvrirGuidePedagogique = ouvrirGuidePedagogique;
+    window.fermerGuidePedagogique = fermerGuidePedagogique;
+
+})();

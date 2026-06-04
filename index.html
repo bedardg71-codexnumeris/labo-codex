@@ -3846,7 +3846,7 @@
                             <div id="codex-menu" class="codex-menu u-hide">
                                 <div id="codex-menu-statut-haut" class="codex-menu-statut-haut u-hide"></div>
                                 <button class="codex-menu-item" data-action="Codex.actionOuvrir">
-                                    <span class="codex-menu-icone"><img src="icons/icon-final-state.svg" alt=""></span> Ouvrir un codex...
+                                    <span class="codex-menu-icone"><img src="icons/icon-final-state.svg" alt=""></span> Ouvrir un codex…
                                 </button>
                                 <button class="codex-menu-item" data-action="Codex.actionEnregistrer">
                                     <span class="codex-menu-icone"><img src="icons/icon-usb-memory.svg" alt=""></span>
@@ -3856,13 +3856,13 @@
                                     </span>
                                 </button>
                                 <button class="codex-menu-item" data-action="Codex.actionEnregistrerSous">
-                                    <span class="codex-menu-icone"><img src="icons/icon-downloading.svg" alt=""></span> Enregistrer sous...
+                                    <span class="codex-menu-icone"><img src="icons/icon-downloading.svg" alt=""></span> Enregistrer sous…
                                 </button>
                                 <div id="codex-menu-autosave-sep" class="codex-menu-sep u-hide"></div>
                                 <div id="codex-menu-autosave" class="codex-menu-statut u-hide">
                                     <span class="codex-menu-icone"><img src="icons/icon-flash-on.svg" alt=""></span>
                                     <span class="codex-menu-contenu">
-                                        <span id="codex-menu-autosave-texte">Auto-save actif</span>
+                                        <span id="codex-menu-autosave-texte">Enregistrement auto actif</span>
                                         <span id="codex-menu-autosave-detail" class="codex-menu-sous-texte"></span>
                                     </span>
                                 </div>
@@ -3875,22 +3875,22 @@
                                 </button>
                                 <div class="codex-menu-sep"></div>
                                 <button id="codex-menu-fusionner" class="codex-menu-item u-hide" data-action="Codex.actionFusionner">
-                                    <span class="codex-menu-icone"><img src="icons/icon-query-inner-join.svg" alt=""></span> Fusionner avec un codex...
+                                    <span class="codex-menu-icone"><img src="icons/icon-query-inner-join.svg" alt=""></span> Fusionner avec un codex…
                                 </button>
                                 <button id="codex-menu-comparer" class="codex-menu-item u-hide" data-action="Codex.actionComparer">
-                                    <span class="codex-menu-icone"><img src="icons/icon-compare.svg" alt=""></span> Comparer avec un codex...
+                                    <span class="codex-menu-icone"><img src="icons/icon-compare.svg" alt=""></span> Comparer avec un codex…
                                 </button>
                                 <button id="codex-menu-exporter" class="codex-menu-item" data-action="Codex.actionExporterSelection">
-                                    <span class="codex-menu-icone"><img src="icons/icon-export.svg" alt=""></span> Exporter une s&eacute;lection...
+                                    <span class="codex-menu-icone"><img src="icons/icon-export.svg" alt=""></span> Exporter une s&eacute;lection…
                                 </button>
                                 <button id="codex-menu-verser-reserve" class="codex-menu-item" data-action="Reserve.actionVerser">
-                                    <span class="codex-menu-icone"><img src="icons/icon-filing-cabinet.svg" alt=""></span> Archiver...
+                                    <span class="codex-menu-icone"><img src="icons/icon-filing-cabinet.svg" alt=""></span> Archiver…
                                 </button>
                                 <button id="codex-menu-ouvrir-versement" class="codex-menu-item" data-action="ReserveOuvrir.actionOuvrir">
-                                    <span class="codex-menu-icone"><img src="icons/icon-import.svg" alt=""></span> Ouvrir une archive...
+                                    <span class="codex-menu-icone"><img src="icons/icon-import.svg" alt=""></span> Ouvrir une archive…
                                 </button>
                                 <button id="codex-menu-charger-codex-data" class="codex-menu-item" data-action="LaboCodexData.actionOuvrirChargement">
-                                    <span class="codex-menu-icone"><img src="icons/icon-import.svg" alt=""></span> Charger un codex data...
+                                    <span class="codex-menu-icone"><img src="icons/icon-import.svg" alt=""></span> Charger un codex data…
                                 </button>
                                 <input type="file" id="labo-codex-data-input" accept=".json" class="u-hide" data-on-change="LaboCodexData.onFichierSelectionne">
                                 <div class="codex-menu-sep"></div>
@@ -8791,7 +8791,7 @@
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Taxonomie SOLO
                             </h3>
-                            <button class="option-accompagnement-guide-btn" data-action="ouvrirGuideSolo" title="Guide SOLO">
+                            <button class="option-accompagnement-guide-btn" data-action="ouvrirGuidePedagogique" data-param="solo" title="Guide SOLO">
                                 <img src="icons/icon-book.svg" alt="" class="btn-inline-icon"> Guide
                             </button>
                         </div>
@@ -8804,7 +8804,7 @@
                                     <strong style="margin-left: 8px;">Activer l'observation de la structure des résultats d'apprentissage</strong>
                                 </label>
                                 <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
-                                    Affiche les descriptions détaillées des niveaux SOLO (unistructurel, multistructurel, relationnel, abstrait étendu) dans l'Accompagnement.
+                                    Affiche les descriptions détaillées des niveaux SOLO (unistructurel, multistructurel, relationnel, abstrait étendu) et active la catégorie « Compréhension » (tampons SOLO) dans la palette d'annotation.
                                 </small>
                             </div>
 
@@ -8960,7 +8960,7 @@
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Micro-données ACP
                             </h3>
-                            <button class="option-accompagnement-guide-btn" data-action="ouvrirGuideAcp" title="Guide ACP">
+                            <button class="option-accompagnement-guide-btn" data-action="ouvrirGuidePedagogique" data-param="acp" title="Guide ACP">
                                 <img src="icons/icon-book.svg" alt="" class="btn-inline-icon"> Guide
                             </button>
                         </div>
@@ -9074,7 +9074,7 @@
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Intervention (RàI)
                             </h3>
-                            <button class="option-accompagnement-guide-btn" data-action="ouvrirGuideRai" title="Guide RàI">
+                            <button class="option-accompagnement-guide-btn" data-action="ouvrirGuidePedagogique" data-param="rai" title="Guide RàI">
                                 <img src="icons/icon-book.svg" alt="" class="btn-inline-icon"> Guide
                             </button>
                         </div>
@@ -14484,6 +14484,10 @@
 
         </main>
 
+        <!-- Panneau unique des guides pédagogiques (SOLO, ACP, RàI).
+             Construit dynamiquement par js/guides-pedagogiques.js à l'ouverture. -->
+        <div id="guide-pedagogique-panel" style="display: none;"></div>
+
     </div>
 
 
@@ -14722,6 +14726,7 @@
     <script src="js/accompagnement-contenu-hover.js?v=20260512d"></script> <!-- Beta 99.42 b0512-0840 : #18 +4 clés Évaluations, -7 clés ea-* mortes -->
     <script src="js/accompagnement-contenu-popup.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
     <script src="js/accompagnement-contenu-terme.js?v=2026050528"></script>
+    <script src="js/guides-pedagogiques.js?v=2026060401"></script> <!-- Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
     <script src="js/main.js?v=2026050543"></script> <!-- Refonte nav SP5 : naviguerVers calendrier-trimestre -->

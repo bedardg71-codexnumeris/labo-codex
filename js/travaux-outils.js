@@ -1205,6 +1205,11 @@
         // polluent l'espace de travail de l'enseignant).
         var actionsRloActif = (typeof obtenirPreference === 'function')
             && obtenirPreference('activerActionsRLO') === true;
+        // Toggle SOLO : la catégorie `comprehension` (tampons Unistructurel /
+        // Multistructurel / Relationnel / Étendu) suit la préférence Taxonomie
+        // SOLO (défaut : activée), sur le même patron que la catégorie `action`.
+        var soloActif = (typeof obtenirPreference === 'function')
+            && obtenirPreference('afficherDescriptionsSOLO') !== false;
 
         // Helper: generer une grille de tampons image
         function _htmlTamponsImage(categorie, coulCat) {
@@ -1232,10 +1237,17 @@
         obtenirOrdreCategories().forEach(function(catId) {
             if (catsMasquees.indexOf(catId) !== -1) return;
             if (catId === 'action' && !actionsRloActif) return;
+            if (catId === 'comprehension' && !soloActif) return;
             var nomCat = nomsCat[catId] || catId;
             var coulCat = couleursCat[catId];
             var styleCat = coulCat ? ' style="border-left:3px solid ' + coulCat + '; padding-left:6px;"' : '';
-            html += '<div class="travaux-autocollants-label"' + styleCat + '>' + nomCat + '</div>';
+            // echapperHtml : les noms de catégories sont personnalisables (nomsCategoriesTampons)
+            html += '<div class="travaux-autocollants-label"' + styleCat + '>' + echapperHtml(nomCat);
+            // Accès au guide SOLO depuis la catégorie Compréhension (module guides-pedagogiques.js)
+            if (catId === 'comprehension') {
+                html += '<button class="travaux-categorie-guide-btn" data-action="ouvrirGuidePedagogique" data-param="solo" data-stop title="Guide SOLO" aria-label="Ouvrir le guide SOLO">?</button>';
+            }
+            html += '</div>';
 
             if (catId === 'symboles') {
                 html += '<div class="travaux-autocollants-grille travaux-autocollants-grille--symboles">';
