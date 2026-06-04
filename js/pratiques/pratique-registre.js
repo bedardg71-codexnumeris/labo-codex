@@ -100,6 +100,20 @@ function obtenirRepresentationPratique(id) {
     };
 }
 
+/**
+ * Variante STRICTE : retourne null si l'id n'est pas une famille connue (après
+ * normalisation + remappage de variante). Pour les consommateurs qui ont un état
+ * « inconnu / multi / masqué » distinct (badge configurable CFG, badge caché…) et
+ * ne doivent PAS retomber sur le défaut STD.
+ * @param {string} id @returns {?{code,couleurVar,famille,classe}}
+ */
+function obtenirRepresentationPratiqueStricte(id) {
+    const idNorm = normaliserIdPratique(id);
+    const idRep = TABLE_REPRESENTATION_VARIANTE[idNorm] || idNorm;
+    if (!REPRESENTATIONS_PRATIQUES[idRep]) return null;
+    return obtenirRepresentationPratique(id);
+}
+
 /** Code court (SOM/STD/SPE/DEN). @param {string} id @returns {string} */
 function obtenirCodePratique(id) {
     return obtenirRepresentationPratique(id).code;
@@ -617,6 +631,7 @@ window.PRATIQUE_DEFAUT = PRATIQUE_DEFAUT;
 
 // Représentations canoniques (Session B) — source unique code/couleur/famille/badge
 window.obtenirRepresentationPratique = obtenirRepresentationPratique;
+window.obtenirRepresentationPratiqueStricte = obtenirRepresentationPratiqueStricte;
 window.obtenirCodePratique = obtenirCodePratique;
 window.obtenirCouleurPratique = obtenirCouleurPratique;
 window.obtenirLabelFamillePratique = obtenirLabelFamillePratique;

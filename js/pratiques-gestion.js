@@ -288,16 +288,12 @@ function genererBadgeTypePratique(pratique) {
     }
     // Source 2 : pratique.type (format alternatif)
     else if (pratique.type) {
-        // Convertir le type en code badge. Table indexée en canonique ;
-        // normalisation à la lecture (A-2 4c) car pratique.type peut être legacy.
-        const typeMapping = {
-            'sommative': 'SOM',
-            'standards': 'STD',
-            'specifications': 'SPE',
-            'denombrement': 'DEN'
-        };
-        const typeCanon = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(pratique.type.toLowerCase()) : pratique.type.toLowerCase());
-        type = typeMapping[typeCanon] || pratique.type.toUpperCase().substring(0, 3);
+        // Session B : code des 4 familles routé vers le registre (source unique).
+        // pratique.type peut être legacy ; le registre normalise. Inconnu → repli
+        // 3 lettres majuscules (comportement historique préservé).
+        const rep = (typeof obtenirRepresentationPratiqueStricte === 'function')
+            ? obtenirRepresentationPratiqueStricte(pratique.type) : null;
+        type = rep ? rep.code : pratique.type.toUpperCase().substring(0, 3);
     }
 
     if (!type) return '';
