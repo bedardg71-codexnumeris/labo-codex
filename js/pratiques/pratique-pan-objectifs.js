@@ -50,6 +50,12 @@ class PratiquePANObjectifs {
                "atteindre niveau 3+ pour réussir. Discipline : Informatique (Interfaces et BD).";
     }
 
+    // Représentations (Session B) — déléguées au registre. 'pan-objectifs' s'affiche
+    // en STD (variante de granularité de Standards, décision D1, fold en Session C).
+    obtenirCode() { return window.obtenirCodePratique(this.obtenirId()); }
+    obtenirCouleur() { return window.obtenirCouleurPratique(this.obtenirId()); }
+    obtenirLabelFamille() { return window.obtenirLabelFamillePratique(this.obtenirId()); }
+
     // ========================================================================
     // MÉTHODES DE CALCUL (Interface IPratique)
     // ========================================================================

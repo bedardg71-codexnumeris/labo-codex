@@ -95,6 +95,11 @@ class PratiquePanSpecifications {
                "Approche qui clarifie les attentes, responsabilise les étudiants, et valorise la persévérance.";
     }
 
+    // Représentations (Session B) — déléguées au registre (source unique)
+    obtenirCode() { return window.obtenirCodePratique(this.obtenirId()); }
+    obtenirCouleur() { return window.obtenirCouleurPratique(this.obtenirId()); }
+    obtenirLabelFamille() { return window.obtenirLabelFamillePratique(this.obtenirId()); }
+
     // ========================================================================
     // CONFIGURATION (Spécifique à PAN-Spécifications)
     // ========================================================================
