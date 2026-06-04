@@ -36,3 +36,26 @@ describe('Session B Lot 2 · routage des représentations', () => {
         expect(gestion).not.toMatch(/const typeMapping = \{\s*\n\s*'sommative':\s*'SOM'/);
     });
 });
+
+describe('Session B Lot 3 · routage code + nettoyage couleurs', () => {
+    const mainJs = lire('js/main.js');
+    const etudiants = lire('js/etudiants.js');
+    const gabarits = lire('js/gabarits-utils.js');
+
+    it('main.js · genererBadgePratique dérive le code du registre (if/else famille retiré)', () => {
+        expect(mainJs).toMatch(/obtenirCodePratique\(typePAN\)/);
+        // L'ancien escalier if/else (typePAN === 'specifications' …) a disparu.
+        expect(mainJs).not.toMatch(/typePAN === 'specifications'/);
+    });
+
+    it('etudiants.js · badge liste dérive le code du registre (if/else famille retiré)', () => {
+        expect(etudiants).toMatch(/obtenirCodePratique\(typePAN\)/);
+        expect(etudiants).not.toMatch(/classePratique = 'spe'/);
+    });
+
+    it('gabarits-utils.js · table de couleurs en dur (divergente) retirée — zéro-dette', () => {
+        // Plus de définition ni d'export de COULEURS_PRATIQUES (seul le commentaire subsiste).
+        expect(gabarits).not.toMatch(/const COULEURS_PRATIQUES = \{/);
+        expect(gabarits).not.toMatch(/'STD': '#17a2b8'/);
+    });
+});
