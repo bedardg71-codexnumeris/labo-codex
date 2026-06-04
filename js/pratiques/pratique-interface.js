@@ -49,6 +49,33 @@
  */
 
 /**
+ * obtenirCode() - Code court de la pratique (Session B)
+ *
+ * @returns {string} 'SOM' | 'STD' | 'SPE' | 'DEN'
+ *
+ * Délégué au registre (source unique) : obtenirCodePratique(id). Ne jamais
+ * coder le code en dur ailleurs — le registre est la seule table de vérité.
+ */
+
+/**
+ * obtenirCouleur() - Couleur canonique de la pratique (Session B)
+ *
+ * @returns {string} Référence de variable CSS, ex: 'var(--std-bleu)'
+ *
+ * Délégué au registre : obtenirCouleurPratique(id). La même couleur alimente
+ * les classes .badge-type-* (styles.css). Utiliser pour style inline / Chart.js.
+ */
+
+/**
+ * obtenirLabelFamille() - Libellé de famille de la pratique (Session B)
+ *
+ * @returns {string} 'Sommative' (SOM) | 'PAN' (STD/SPE/DEN)
+ *
+ * Délégué au registre : obtenirLabelFamillePratique(id). « PAN » est un libellé
+ * de famille, plus un préfixe technique (décision 29 mai 2026).
+ */
+
+/**
  * obtenirDescription() - Retourne une description complète de la pratique
  *
  * @returns {string} Description détaillée (1-3 phrases)

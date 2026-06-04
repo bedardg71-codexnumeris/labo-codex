@@ -29,6 +29,11 @@ class PratiqueTest {
         return "Pratique factice pour valider l'infrastructure. Ne pas utiliser en production.";
     }
 
+    // Représentations (Session B) — déléguées au registre (source unique)
+    obtenirCode() { return window.obtenirCodePratique(this.obtenirId()); }
+    obtenirCouleur() { return window.obtenirCouleurPratique(this.obtenirId()); }
+    obtenirLabelFamille() { return window.obtenirLabelFamillePratique(this.obtenirId()); }
+
     // ========================================================================
     // MÉTHODES DE CALCUL
     // ========================================================================

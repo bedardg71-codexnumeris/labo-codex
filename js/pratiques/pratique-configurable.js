@@ -77,6 +77,14 @@ class PratiqueConfigurable {
         return this.config.description || '';
     }
 
+    // Représentations (Session B) — dérivées du TYPE canonique (famille), pas de l'id
+    // (les ids configurables sont libres : pan-standards-bedard, pratique-1768…). Le
+    // registre normalise le type et retombe sur le défaut (STD) si absent.
+    _typeFamille() { return this.config.type || this.config.configuration?.type; }
+    obtenirCode() { return window.obtenirCodePratique(this._typeFamille()); }
+    obtenirCouleur() { return window.obtenirCouleurPratique(this._typeFamille()); }
+    obtenirLabelFamille() { return window.obtenirLabelFamillePratique(this._typeFamille()); }
+
     // ========================================================================
     // GESTION DES NIVEAUX
     // ========================================================================
