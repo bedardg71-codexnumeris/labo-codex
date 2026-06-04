@@ -5,7 +5,7 @@
  * Regroupe ce qui était dispersé dans deux emplacements :
  *   - 5 champs de modalitesEvaluation (RàI, SOLO, grille, découpler P/R, fenêtre patterns)
  *   - tout preferencesAffichage (patterns on/off, snapshots, graphiques, chrono, animations,
- *     tour guidé, aide contextuelle, mode clair, tooltips, mode expert, etc.)
+ *     visite guidée, aide contextuelle, mode clair, tooltips, mode expert, etc.)
  *
  * IMPORTANT : deux objets historiques NE SONT PAS absorbés.
  *
@@ -86,7 +86,7 @@
         transition_obs_comp_vue: false,
         transition_obs_comp_vue_demo: false,
 
-        // État du tour guidé 6 étapes (js/accompagnement.js)
+        // État de la visite guidée 6 étapes (js/accompagnement.js)
         tourGuide_etape: null,
         tourGuide_complete: false,
         tourGuide_etapes_vues: []

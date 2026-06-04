@@ -11,7 +11,7 @@
      - pied de page
 
    La case « Accompagnement » pilote en bloc les 4 sous-systèmes d'aide
-   (tour guidé, info-bulles, aide contextuelle, flèches didactiques).
+   (visite guidée, info-bulles, aide contextuelle, flèches didactiques).
 
    Exports: afficherAccueil, initialiserAccueil, definirModeExpert
    =============================== */
@@ -288,7 +288,7 @@ function toggleDemoHandler(el) {
 
 /**
  * Toggle « Accompagnement » : pilote en bloc les 4 sous-systèmes d'aide
- * (tour guidé, info-bulles, aide contextuelle, flèches didactiques).
+ * (visite guidée, info-bulles, aide contextuelle, flèches didactiques).
  * Un seul état visible côté utilisateur — case cochée = les 4 actifs.
  */
 function toggleAccompagnementHandler(el) {

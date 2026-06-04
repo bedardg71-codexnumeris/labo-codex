@@ -182,7 +182,7 @@ function ecrirePref(cle, valeur) {
 }
 
 // Préférence unique depuis le 20 avril 2026. Les 4 sous-systèmes (tooltips
-// hover, aide popup, flèches autoReveal, tour guidé) partagent cette pref.
+// hover, aide popup, flèches autoReveal, visite guidée) partagent cette pref.
 function estAccompagnementActif() {
     return lirePref('accompagnementActif', true) !== false;
 }
