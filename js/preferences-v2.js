@@ -84,12 +84,7 @@
             rai.checked = obtenirPreference('activerRai') !== false;
         }
 
-        // Mode comparatif : dérive de modalitesEvaluation (paramètre de pratique)
-        const comparatif = document.getElementById('v2-pref-comparatif');
-        if (comparatif) {
-            const modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
-            comparatif.checked = !!(modalites.afficherSommatif && modalites.afficherAlternatif);
-        }
+        // Session C (#303) : mode comparatif SOM/PAN retiré (plus de checkbox).
 
         // Affichage des ressources
         const solo = document.getElementById('v2-pref-solo');
@@ -217,21 +212,15 @@
      * Le mode comparatif reste traité sur modalitesEvaluation (paramètre de pratique).
      */
     function sauvegarderPreferencesV2() {
-        // Mode comparatif : paramètre de pratique, pas une préférence utilisateur
+        // Session C (#303) : mode comparatif retiré. L'affichage suit la pratique
+        // active (jamais les deux à la fois). Mêmes champs de stockage qu'avant.
         const modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
-        const comparatif = document.getElementById('v2-pref-comparatif')?.checked || false;
-        if (comparatif) {
+        if (modalites.pratique === 'sommative') {
             modalites.afficherSommatif = true;
-            modalites.afficherAlternatif = true;
+            modalites.afficherAlternatif = false;
         } else {
-            // Mode normal selon la pratique
-            if (modalites.pratique === 'sommative') {
-                modalites.afficherSommatif = true;
-                modalites.afficherAlternatif = false;
-            } else {
-                modalites.afficherSommatif = false;
-                modalites.afficherAlternatif = true;
-            }
+            modalites.afficherSommatif = false;
+            modalites.afficherAlternatif = true;
         }
         db.setSync(cle('modalitesEvaluation'), modalites);
 

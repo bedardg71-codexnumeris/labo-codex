@@ -52,6 +52,17 @@ class PratiquePANStandards {
     obtenirCouleur() { return window.obtenirCouleurPratique(this.obtenirId()); }
     obtenirLabelFamille() { return window.obtenirLabelFamillePratique(this.obtenirId()); }
 
+    // Session C — source unique des modalités de calcul.
+    // Pour la pratique ACTIVE : repli sur le SSOT global `modalitesEvaluation`
+    // (décision b, comportement strictement identique à avant). Une instance
+    // SIMULÉE (#307) peut porter `this.config.modalites` pour calculer une pratique
+    // NON active sur les mêmes données. Ce singleton n'a pas de `this.config` →
+    // retourne donc toujours le global : aucun changement de comportement.
+    _modalites() {
+        if (this.config && this.config.modalites) return this.config.modalites;
+        return db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    }
+
     // ========================================================================
     // MÉTHODES DE CALCUL (Interface IPratique)
     // ========================================================================
@@ -71,7 +82,7 @@ class PratiquePANStandards {
         }
 
         // ✅ NOUVEAU (Beta 95) : Vérifier si la variante est "par-objectifs"
-        const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+        const modalites = this._modalites();
         if (modalites.varianteCalcul === 'par-objectifs') {
             return this._calculerPerformanceParObjectifs(da);
         }
@@ -698,7 +709,7 @@ class PratiquePANStandards {
      * @private
      */
     _lireConfiguration() {
-        const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+        const config = this._modalites();
         const configPAN = config.configPAN || {};
 
         // ✅ PHASE 3: SINGLE SOURCE OF TRUTH centralisé dans modalitesEvaluation.configPAN.portfolio
@@ -1350,7 +1361,7 @@ class PratiquePANStandards {
      * @private
      */
     _calculerPerformanceParObjectifs(da) {
-        const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+        const modalites = this._modalites();
         const config = modalites.parObjectifs || {};
         const mode = config.modeCalcul || 'comptage';
 

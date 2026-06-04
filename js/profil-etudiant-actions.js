@@ -390,9 +390,15 @@ function _calculerNoteFinaleAggregee(moyennePortfolio, noteTerminale, pondP, pon
  * Retourne les informations nécessaires pour afficher la construction de la note
  *
  * @param {string} da - Numéro DA de l'étudiant
+ * @param {string|null} pratiqueIdDemande - Session C : si fourni, identifie explicitement
+ *   la pratique à représenter (brique simulation #307). Si null (cas par défaut, tous les
+ *   appelants actuels), on résout la pratique ACTIVE du groupe-cours → comportement
+ *   strictement identique à avant. NB : le basculement complet de la CONFIG de calcul vers
+ *   la pratique demandée (lecture de sa config au lieu du SSOT global) arrive au Lot 5 ;
+ *   ici on plombe la signature + la résolution d'identité, sans changer le calcul actif.
  * @returns {Object|null} - Détails de la note finale ou null si pas de données
  */
-function calculerDetailsNoteFinale(da) {
+function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     // Session A-2 : id canonique normalisé à la lecture, défaut = PRATIQUE_DEFAUT ('standards').
     const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(modalites.pratique) : modalites.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
@@ -404,7 +410,10 @@ function calculerDetailsNoteFinale(da) {
     // #127 (31 mai) : identifier la pratique active DÈS MAINTENANT, pour la nommer
     // même dans le cas « non calculable » (retour Grégoire 05:26 : « celles qui ne
     // sont pas calculables ne sont pas identifiées »). Lu depuis la bibliothèque.
-    const pratiqueId = (typeof obtenirPratiqueActiveGroupeCours === 'function') ? obtenirPratiqueActiveGroupeCours() : null;
+    // Session C (Lot 2) : si une pratique est explicitement demandée (#307), on la
+    // privilégie ; sinon repli sur la pratique active du groupe-cours (identique à avant).
+    const pratiqueId = pratiqueIdDemande
+        || ((typeof obtenirPratiqueActiveGroupeCours === 'function') ? obtenirPratiqueActiveGroupeCours() : null);
     const _pratiquesCfg = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
     const pratiqueNom = (_pratiquesCfg.find(p => p.id === pratiqueId)?.nom) || null;
 

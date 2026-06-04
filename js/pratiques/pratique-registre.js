@@ -297,7 +297,6 @@ function construireConfigComplete(pratiqueData) {
         gestion_criteres: config.gestion_criteres || pratiqueData.gestion_criteres,
         seuils: config.seuils || pratiqueData.seuils || pratiqueData.configuration?.seuils,
         interface: config.interface || pratiqueData.interface,
-        affichage: config.affichage || pratiqueData.affichage,
         portfolio: config.portfolio || pratiqueData.portfolio || pratiqueData.configuration?.portfolio,
         jetons: config.jetons || pratiqueData.jetons,
         objectifs: config.objectifs || pratiqueData.objectifs || pratiqueData.configuration?.objectifs,

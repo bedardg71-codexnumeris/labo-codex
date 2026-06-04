@@ -34,6 +34,10 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - **Travail de code livré quand même (amélioration, build 0602-1513)** : `afficherMetriquesGlobales` suit désormais la **pratique active** au lieu de forcer PAN (`determinerModeAffichageTableauBord`, testée) ; libellés de barres « Performance (P) » nus hors mode comparatif (plus de « — alternatif » trompeur) ; 2 sites `!== false`→`=== true` harmonisés (`etudiants.js:864-865`, `profil-etudiant-sections-affichage.js:3805-3806`). 7 tests sentinelle (`tests/unit/sentinelle-mode-affichage-tableau-bord-2026-06-02.test.js`).
   - **Observation laissée (non bloquante)** : depuis #224, le chemin `indicesCP` (`portfolio.js:646`) n'a plus de fallback générique `calculerPerformancePAN` quand `pratique.calculerPerformance` rend null/0 → une pratique PAN **mal configurée** affiche 0 sans repli (masque la mauvaise config plutôt que de la signaler). Le vrai chantier de calcul par famille reste **#303 Session C (post-AQPC)**. Retrait complet du mode comparatif = chantier distinct (`project-mode-comparatif-som-pan-a-retirer`).
 
+- [x] **#303 Session C — RETRAIT DU MODE COMPARATIF (3b+3c+3d) — LIVRÉ 4 juin 2026** (branche `claude/eager-wozniak-KpaAC`, PR #25, build `0604-1326`, 175 Vitest verts). Mode comparatif **entièrement retiré** : neutralisation à la source (3b), code mort affichages/import-export/CSS (3c), write-side `pratiques.js`/`pratique-registre.js` (3d). Affichages **validés terrain par Grégoire** ; feu vert donné pour 3d.
+  - **Reste à valider avant clôture** : flux Réglages → Pratique de notation (sauvegarde/chargement d'une pratique, modifié en 3d) sur Mac+iPad. Données `affichageTableauBord` persistées laissées inertes (pas de migration destructive).
+  - ⚠️ **NE PAS confondre** avec le vrai chantier **#303 Session C = calcul par famille** (voir #307), qui reste à faire.
+
 - [ ] 🟡 ⚠️ **#282** Migrer `js/cours.js` de la clé legacy `listeCours` vers la clé V2 `cours`
   - **PRIORITÉ HAUTE** actée par Grégoire 23 mai 2026 PM (« il faudra y revenir absolument »).
   - Modal Bibliothèque cours vide en V2 — 10 sites dans cours.js lisent encore `listeCours`.

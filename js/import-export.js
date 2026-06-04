@@ -2204,8 +2204,8 @@ async function executerImportConfigComplete() {
                 systemeJetons: contenu.parametres.systeme_jetons,
                 reprisesAutorisees: contenu.parametres.reprises_autorisees,
                 nombreArtefacts: contenu.parametres.nombre_artefacts,
-                pratiqueActive: contenu.parametres.pratique_active,
-                modeComparatif: contenu.parametres.mode_comparatif
+                pratiqueActive: contenu.parametres.pratique_active
+                // Session C (#303) : modeComparatif retiré (mode comparatif supprimé).
             };
             db.setSync(cle('modalitesEvaluation'), modalitesFusionnees);
         }
@@ -3141,8 +3141,8 @@ async function exporterConfigurationComplete() {
         systeme_jetons: modalitesEvaluation.systemeJetons || false,
         reprises_autorisees: modalitesEvaluation.reprisesAutorisees || false,
         nombre_artefacts: modalitesEvaluation.nombreArtefacts || 0,
-        pratique_active: modalitesEvaluation.pratiqueActive || 'sommative',
-        mode_comparatif: modalitesEvaluation.modeComparatif || false
+        pratique_active: modalitesEvaluation.pratiqueActive || 'sommative'
+        // Session C (#303) : mode_comparatif retiré (mode comparatif supprimé).
     };
 
     // Vérifier qu'il y a du contenu à exporter

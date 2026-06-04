@@ -341,17 +341,11 @@ function initialiserModuleProfilEtudiant() {
 /**
  * Génère un badge compact indiquant la pratique de notation pour le profil
  * DÉPRÉCIÉ: Utiliser genererBadgePratique() global à la place
+ * Session C (#303) : paramètre modeComparatif retiré (mode comparatif supprimé).
  * @param {string} pratiqueUtilisee - 'SOM' ou 'PAN' (fourni par calculerTousLesIndices)
- * @param {boolean} modeComparatif - true pour afficher les deux badges
  * @returns {string} - HTML du badge
  */
-function genererBadgePratiqueProfil(pratiqueUtilisee, modeComparatif = false) {
-    // Mode comparatif: afficher les deux badges
-    if (modeComparatif) {
-        return genererBadgePratique('SOM', true) + genererBadgePratique('PAN', true);
-    }
-
-    // Mode normal: un seul badge (utiliser la fonction globale)
+function genererBadgePratiqueProfil(pratiqueUtilisee) {
     return genererBadgePratique(pratiqueUtilisee, true);
 }
 

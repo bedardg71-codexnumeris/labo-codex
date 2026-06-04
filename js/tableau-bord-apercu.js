@@ -762,18 +762,13 @@ function genererBadgePratique() {
     // Session A-2 : id canonique normalisé à la lecture, défaut = PRATIQUE_DEFAUT ('standards').
     const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
     const typePAN = config.typePAN || 'maitrise';
-    const affichage = config.affichageTableauBord || {};
+    // Session C (#303) : mode comparatif retiré — couche unique (pratique active).
 
     let texte = '';
     let couleur = '';
     let description = '';
 
-    if (affichage.afficherSommatif && affichage.afficherAlternatif) {
-        // Mode hybride
-        texte = 'Mode Hybride (SOM + PAN)';
-        couleur = '#9c27b0'; // Violet
-        description = 'Comparaison expérimentale des deux pratiques';
-    } else if (pratique === 'sommative') {
+    if (pratique === 'sommative') {
         texte = 'Sommative traditionnelle (SOM)';
         couleur = '#ff6f00'; // Orange
         description = 'Moyenne pondérée provisoire';
@@ -800,26 +795,20 @@ function genererBadgePratique() {
 }
 
 /**
- * Génère un badge compact indiquant la source des données (SOM, PAN, ou Hybride)
+ * Génère un badge compact indiquant la source des données (SOM ou PAN)
  * Pour les sections du tableau de bord
  * @returns {string} - HTML du badge
  */
 function genererBadgeSourceDonnees() {
     const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-    const affichage = config.affichageTableauBord || {};
-    const afficherSommatif = affichage.afficherSommatif === true;
-    const afficherAlternatif = affichage.afficherAlternatif === true;
+    // Session C (#303) : mode comparatif retiré — couche unique (pratique active).
+    const { afficherSom: afficherSommatif } = determinerModeAffichageTableauBord(config);
 
     let texte = '';
     let couleur = '';
     let titre = '';
 
-    if (afficherSommatif && afficherAlternatif) {
-        // Mode hybride - les cartes montrent déjà (SOM) et (PAN)
-        texte = 'Hybride';
-        couleur = '#9c27b0';
-        titre = 'Affichage des deux pratiques';
-    } else if (afficherSommatif) {
+    if (afficherSommatif) {
         texte = 'Source : SOM';
         couleur = '#ff6f00';
         titre = 'Données calculées selon pratique sommative';
@@ -1099,15 +1088,7 @@ function chargerTableauBordApercu() {
         // Ajouter l'indicateur de pratique ou les checkboxes selon le mode
         const titre = document.querySelector('#apercu-contenu h2');
         if (titre) {
-            const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-            const affichage = config.affichageTableauBord || {};
-
-            // NOUVEAU Beta 90 : Détection automatique du mode comparatif
-            // Si les deux pratiques sont affichées (OU si le flag explicite est true), c'est comparatif
-            const afficherSom = affichage.afficherSommatif === true;
-            const afficherPan = affichage.afficherAlternatif === true;
-            const modeComparatif = (afficherSom && afficherPan) || affichage.modeComparatif === true;
-
+            // Session C (#303) : mode comparatif retiré — plus de calcul de mode ici.
             titre.innerHTML = '';
             const conteneurTitre = document.createElement('div');
 
@@ -1346,27 +1327,8 @@ function initialiserEvenementsToggle() {
  * @returns {string} HTML du badge ou des checkboxes
  */
 function genererIndicateurPratiqueOuCheckboxes() {
-    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-    const affichage = config.affichageTableauBord || {};
-    const afficherSom = affichage.afficherSommatif === true;
-    const afficherPan = affichage.afficherAlternatif === true;
-
-    // NOUVEAU Beta 90 : Détection automatique du mode comparatif
-    // Si les deux pratiques sont affichées, c'est le mode comparatif
-    const modeComparatif = afficherSom && afficherPan;
-
-    // MODE COMPARATIF: Afficher deux badges informatifs côte à côte
-    // (similaires aux badges utilisés dans le profil étudiant)
-    if (modeComparatif) {
-        return `
-            <div style="display: flex; gap: 10px; align-items: center;">
-                ${genererBadgePratique('SOM', true)}
-                ${genererBadgePratique('PAN', true)}
-            </div>
-        `;
-    }
-
-    // MODE NORMAL: Pas de badge (info déjà dans l'en-tête)
+    // Session C (#303) : mode comparatif retiré — plus de double badge SOM/PAN.
+    // En mode simple, aucun badge ici : la pratique active est déjà dans l'en-tête.
     return '';
 }
 
@@ -1378,37 +1340,26 @@ function genererIndicateurPratiqueOuCheckboxes() {
    =============================== */
 
 /**
- * Détermine quelles pratiques afficher dans la section « Observation globale »
- * du tableau de bord, à partir de la configuration d'évaluation.
+ * Détermine la couche à afficher dans la section « Observation globale » du
+ * tableau de bord. Point unique de vérité : on suit TOUJOURS la pratique de
+ * notation ACTIVE du groupe (sommative → SOM, sinon → PAN). Le mode comparatif
+ * (deux couches) a été retiré (Session C, #303) ; ce helper ne renvoie donc
+ * jamais les deux à true.
  *
- * Les clés afficherSommatif/afficherAlternatif ne sont posées QUE par l'ancien
- * mode comparatif (en voie de retrait — cf. #308). Hors de ce mode elles sont
- * absentes : on suit alors la pratique de notation ACTIVE du groupe (sommative
- * → SOM, sinon → PAN), au lieu de forcer PAN. Forcer PAN était un résidu du
- * mode comparatif qui faisait afficher « Performance (P) — alternatif » à 0 %
- * sur un groupe sommatif (la performance PAN n'y est pas calculable).
- *
- * @param {object} config - objet modalitesEvaluation (pratique active + affichageTableauBord)
+ * @param {object} config - objet modalitesEvaluation (pratique active)
  * @returns {{afficherSom: boolean, afficherPan: boolean}}
  */
 function determinerModeAffichageTableauBord(config) {
-    const affichage = (config && config.affichageTableauBord) || {};
-    let afficherSom = affichage.afficherSommatif === true;
-    let afficherPan = affichage.afficherAlternatif === true;
-
-    // Aucun mode comparatif posé (cas normal) : suivre la pratique active.
-    if (!afficherSom && !afficherPan) {
-        const pratiqueActive = (typeof normaliserIdPratique === 'function'
-            ? normaliserIdPratique(config && config.pratique)
-            : (config && config.pratique)) || (window.PRATIQUE_DEFAUT || 'standards');
-        if (pratiqueActive === 'sommative') {
-            afficherSom = true;
-        } else {
-            afficherPan = true;
-        }
-    }
-
-    return { afficherSom, afficherPan };
+    // Session C (#303) : mode comparatif RETIRÉ. Point unique de neutralisation —
+    // on renvoie TOUJOURS une seule couche, celle de la pratique ACTIVE du groupe
+    // (sommative → SOM, sinon → PAN). Les clés afficherSommatif/afficherAlternatif
+    // (qui pouvaient être les deux à true = comparatif, ou poser un override) ne sont
+    // plus honorées : ce seul point garantit qu'aucun rendu n'affiche deux couches.
+    const pratiqueActive = (typeof normaliserIdPratique === 'function'
+        ? normaliserIdPratique(config && config.pratique)
+        : (config && config.pratique)) || (window.PRATIQUE_DEFAUT || 'standards');
+    const estSommative = pratiqueActive === 'sommative';
+    return { afficherSom: estSommative, afficherPan: !estSommative };
 }
 
 /**
@@ -1419,10 +1370,7 @@ function determinerModeAffichageTableauBord(config) {
  */
 function afficherMetriquesGlobales(etudiants) {
     const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-    const affichage = config.affichageTableauBord || {};
-
-    // #308 (2 juin 2026) : hors mode comparatif, suivre la pratique active du
-    // groupe plutôt que de forcer PAN (logique extraite et testée ci-dessus).
+    // Session C (#303) : mode comparatif retiré — couche unique (pratique active).
     let { afficherSom, afficherPan } = determinerModeAffichageTableauBord(config);
 
     // 🆕 BETA 95.7 (22 jan) : Calculer "en attente" au niveau du GROUPE
@@ -1656,13 +1604,11 @@ function afficherMetriquesGlobales(etudiants) {
     // 🆕 BETA 95.7 (22 jan) : Passer le texte explicite "en attente" à chaque barre
     const nbTotal = etudiants.length;
 
-    // #308 : les suffixes « — sommatif » / « — alternatif » n'ont de sens qu'en
-    // mode comparatif (deux pratiques côte à côte). En mode simple, libellés nus —
-    // la pratique active est déjà signalée par le badge d'en-tête.
-    const modeComparatif = afficherSom && afficherPan;
-    const labelA = modeComparatif ? 'Assiduité (A) — sommatif' : 'Assiduité (A)';
-    const labelC = modeComparatif ? 'Complétion (C) — sommatif' : 'Complétion (C)';
-    const labelP = modeComparatif ? 'Performance (P) — alternatif' : 'Performance (P)';
+    // Session C (#303) : mode comparatif retiré — libellés simples (la pratique
+    // active est signalée par le badge d'en-tête).
+    const labelA = 'Assiduité (A)';
+    const labelC = 'Complétion (C)';
+    const labelP = 'Performance (P)';
 
     // Générer les 4 barres de distribution avec interprétations
     const html = `
@@ -2283,12 +2229,8 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
     let labelEmergent = 'Difficulté<br>émergente';
     let labelCritique = 'Difficulté<br>persistante';
 
-    if (afficherSom && afficherPan) {
-        labelStable += `<br><span class="tb-texte-mini-orange">${stableSOM} (${stablePctSOM}%)</span> <span class="tb-texte-mini-bleu-std">${stablePAN} (${stablePctPAN}%)</span>`;
-        labelDefi += `<br><span class="tb-texte-mini-orange">${defiSOM} (${defiPctSOM}%)</span> <span class="tb-texte-mini-bleu-std">${defiPAN} (${defiPctPAN}%)</span>`;
-        labelEmergent += `<br><span class="tb-texte-mini-orange">${emergentSOM} (${emergentPctSOM}%)</span> <span class="tb-texte-mini-bleu-std">${emergentPAN} (${emergentPctPAN}%)</span>`;
-        labelCritique += `<br><span class="tb-texte-mini-orange">${critiqueSOM} (${critiquePctSOM}%)</span> <span class="tb-texte-mini-bleu-std">${critiquePAN} (${critiquePctPAN}%)</span>`;
-    } else if (afficherSom) {
+    // Session C (#303) : mode comparatif retiré — une seule couche affichée.
+    if (afficherSom) {
         labelStable += `<br><span class="tb-texte-mini-orange">${stableSOM} (${stablePctSOM}%)</span>`;
         labelDefi += `<br><span class="tb-texte-mini-orange">${defiSOM} (${defiPctSOM}%)</span>`;
         labelEmergent += `<br><span class="tb-texte-mini-orange">${emergentSOM} (${emergentPctSOM}%)</span>`;
@@ -2501,11 +2443,8 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
     let labelNiveau2 = 'Niveau 2<br>Préventif';
     let labelNiveau3 = 'Niveau 3<br>Intensif';
 
-    if (afficherSom && afficherPan) {
-        labelNiveau1 += `<br><span class="tb-texte-mini-orange">${niveau1SOM} (${niveau1PctSOM}%)</span> <span class="tb-texte-mini-bleu-std">${niveau1PAN} (${niveau1PctPAN}%)</span>`;
-        labelNiveau2 += `<br><span class="tb-texte-mini-orange">${niveau2SOM} (${niveau2PctSOM}%)</span> <span class="tb-texte-mini-bleu-std">${niveau2PAN} (${niveau2PctPAN}%)</span>`;
-        labelNiveau3 += `<br><span class="tb-texte-mini-orange">${niveau3SOM} (${niveau3PctSOM}%)</span> <span class="tb-texte-mini-bleu-std">${niveau3PAN} (${niveau3PctPAN}%)</span>`;
-    } else if (afficherSom) {
+    // Session C (#303) : mode comparatif retiré — une seule couche affichée.
+    if (afficherSom) {
         labelNiveau1 += `<br><span class="tb-texte-mini-orange">${niveau1SOM} (${niveau1PctSOM}%)</span>`;
         labelNiveau2 += `<br><span class="tb-texte-mini-orange">${niveau2SOM} (${niveau2PctSOM}%)</span>`;
         labelNiveau3 += `<br><span class="tb-texte-mini-orange">${niveau3SOM} (${niveau3PctSOM}%)</span>`;
@@ -2519,16 +2458,8 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
     let interpretation = '';
     const etudiants = afficherSom ? etudiantsSOM : etudiantsPAN;
     if (etudiants && etudiants.length > 0) {
-        // Si mode comparatif, utiliser les données de la pratique affichée
-        if (afficherSom && afficherPan) {
-            // Mode comparatif : utiliser les données combinées
-            const raiDistribution = [
-                { niveau: 1, count: niveau1SOM + niveau1PAN },
-                { niveau: 2, count: niveau2SOM + niveau2PAN },
-                { niveau: 3, count: niveau3SOM + niveau3PAN }
-            ];
-            interpretation = genererInterpretationRai(raiDistribution, etudiantsSOM.length);
-        } else if (afficherSom) {
+        // Session C (#303) : mode comparatif retiré — une seule couche affichée.
+        if (afficherSom) {
             const raiDistributionSOM = [
                 { niveau: 1, count: niveau1SOM },
                 { niveau: 2, count: niveau2SOM },
@@ -2605,8 +2536,7 @@ function genererCartePattern(label, valeurSom, valeurPan, total, afficherSom, af
 }
 
 /**
- * Affiche les patterns d'apprentissage
- * En mode hybride, affiche SOM et PAN côte à côte
+ * Affiche les patterns d'apprentissage (couche unique = pratique active du groupe)
  *
  * NOUVEAU Beta 90 : Utilise l'interface de pratiques au lieu du calcul hardcodé
  *
@@ -2675,9 +2605,8 @@ function afficherAlerteNonParticipation(etudiants) {
 
 function afficherPatternsApprentissage(etudiants) {
     const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-    const affichage = config.affichageTableauBord || {};
-    const afficherSom = affichage.afficherSommatif === true;
-    const afficherPan = affichage.afficherAlternatif === true;
+    // Session C (#303) : mode comparatif retiré — couche unique (pratique active).
+    const { afficherSom, afficherPan } = determinerModeAffichageTableauBord(config);
 
     // 🆕 BETA 98.9: Inclure TOUS les étudiants — les non-participants sont classés
     // 'Non-participation' par determinerCibleIntervention() et apparaissent dans la zone critique
@@ -2794,9 +2723,8 @@ function genererCarteRaI(label, description, valeurSomPct, valeurPanPct, valeurS
 
     // Générer le texte du nombre d'étudiants
     let texteEtudiants = '';
-    if (afficherSom && afficherPan) {
-        texteEtudiants = `${valeurSomCount} / ${valeurPanCount} étudiants – ${description}`;
-    } else if (afficherSom) {
+    // Session C (#303) : mode comparatif retiré — une seule couche affichée.
+    if (afficherSom) {
         texteEtudiants = `${valeurSomCount} étudiants – ${description}`;
     } else if (afficherPan) {
         texteEtudiants = `${valeurPanCount} étudiants – ${description}`;
@@ -2825,9 +2753,8 @@ function genererCarteRaI(label, description, valeurSomPct, valeurPanPct, valeurS
  */
 function afficherNiveauxRaI(etudiants) {
     const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-    const affichage = config.affichageTableauBord || {};
-    const afficherSom = affichage.afficherSommatif === true;
-    const afficherPan = affichage.afficherAlternatif === true;
+    // Session C (#303) : mode comparatif retiré — couche unique (pratique active).
+    const { afficherSom, afficherPan } = determinerModeAffichageTableauBord(config);
 
     // 🆕 BETA 98.9: Inclure TOUS les étudiants — les non-participants sont classés
     // Niveau 3 par determinerNiveauRaiPedagogique()

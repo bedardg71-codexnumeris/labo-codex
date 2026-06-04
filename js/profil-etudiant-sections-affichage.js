@@ -67,31 +67,13 @@
  * @param {string} da - Numéro de DA
  * @returns {string} - HTML de la section
  */
-function _calculerIndicesEtDirectionsMobilisation(da, modeComparatif, pratiqueConfig) {
-    if (modeComparatif) {
-        return {
-            indicesSOM: calculerTousLesIndices(da, 'SOM'),
-            indicesPAN: calculerTousLesIndices(da, 'PAN'),
-            directionSOM: calculerDirectionEngagement(da, 'SOM'),
-            directionPAN: calculerDirectionEngagement(da, 'PAN')
-        };
-    }
+function _calculerIndicesMobilisation(da, pratiqueConfig) {
+    // Session C (#303) : mode comparatif retiré — couche unique (pratique active).
     const indicesActifs = calculerTousLesIndices(da);
-    const directionActive = calculerDirectionEngagement(da);
     if (pratiqueConfig === 'sommative') {
-        return {
-            indicesSOM: indicesActifs,
-            indicesPAN: { A: indicesActifs.A, C: 0, P: 0, M: 0 },
-            directionSOM: directionActive,
-            directionPAN: { direction: 'stable', emoji: '→' }
-        };
+        return { indicesSOM: indicesActifs, indicesPAN: { A: indicesActifs.A, C: 0, P: 0, M: 0 } };
     }
-    return {
-        indicesPAN: indicesActifs,
-        indicesSOM: { A: indicesActifs.A, C: 0, P: 0, M: 0 },
-        directionPAN: directionActive,
-        directionSOM: { direction: 'stable', emoji: '→' }
-    };
+    return { indicesPAN: indicesActifs, indicesSOM: { A: indicesActifs.A, C: 0, P: 0, M: 0 } };
 }
 
 function _trouverEvaluationActiveMobilisation(evaluationsProduction) {
@@ -376,12 +358,8 @@ function genererSectionMobilisationEngagement(da) {
     // Calcul dual pour mode comparatif (Beta 90 + correctif 7 déc 2025 :
     // vérifier === true pour éviter le mode comparatif par défaut)
     const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-    const affichage = config.affichageTableauBord || {};
-    const afficherSom = affichage.afficherSommatif === true;
-    const afficherPan = affichage.afficherAlternatif === true;
-    const modeComparatif = afficherSom && afficherPan;
-
-    const { indicesSOM, indicesPAN, directionSOM, directionPAN } = _calculerIndicesEtDirectionsMobilisation(da, modeComparatif, config.pratique);
+    // Session C (#303) : mode comparatif retiré — couche unique (pratique active).
+    const { indicesSOM, indicesPAN } = _calculerIndicesMobilisation(da, config.pratique);
 
     // Récupérer les données pour les trois sections
     const detailsA = obtenirDetailsAssiduite(da);
@@ -545,7 +523,7 @@ function genererSectionMobilisationEngagement(da) {
             <div class="profil-carte">
                 <div class="u-flex-between-mb15">
                     <h3 class="profil-section-titre-seul">Assiduité</h3>
-                    ${genererValeursComparatives(indicesSOM.A, indicesPAN.A, modeComparatif, aucuneDonneeAssiduite)}
+                    ${genererValeursComparatives(indicesSOM.A, indicesPAN.A, aucuneDonneeAssiduite)}
                 </div>
 
                 <!-- Statistiques -->
@@ -598,7 +576,7 @@ function genererSectionMobilisationEngagement(da) {
             <div class="profil-carte">
                 <div class="u-flex-between-mb15">
                     <h3 class="profil-section-titre-seul">Complétion</h3>
-                    ${genererValeursComparatives(indicesSOM.C, indicesPAN.C, modeComparatif, aucuneDonneeCompletion)}
+                    ${genererValeursComparatives(indicesSOM.C, indicesPAN.C, aucuneDonneeCompletion)}
                 </div>
 
                 <!-- Statistiques -->
@@ -678,7 +656,7 @@ function genererSectionMobilisationEngagement(da) {
                     <h3 class="profil-section-titre-seul">Performance</h3>
                     ${performanceInsuffisante
                         ? '<span class="profil-valeur-grande" style="color: var(--gris-moyen);">—</span>'
-                        : genererValeursComparatives(indicesSOM.P, indicesPAN.P, modeComparatif, aucuneDonneePerformance)}
+                        : genererValeursComparatives(indicesSOM.P, indicesPAN.P, aucuneDonneePerformance)}
                 </div>
 
                 <!-- Statistiques -->
@@ -2129,33 +2107,23 @@ function genererHistoriqueInterventionsProfil(da) {
 }
 
 /**
- * Génère l'affichage des valeurs SOM/PAN pour le mode comparatif
- * @param {number} valeurSOM - Valeur pour la pratique sommative
- * @param {number} valeurPAN - Valeur pour la pratique PAN
- * @param {boolean} modeComparatif - Mode comparatif actif
- * @returns {string} HTML des valeurs colorées
+ * Affiche la valeur de la pratique active (SOM ou PAN selon la config).
+ * @param {number} valeurSOM - Valeur si pratique sommative
+ * @param {number} valeurPAN - Valeur si pratique PAN
+ * @param {boolean} afficherTiret - Afficher « — » si aucune donnée
+ * @returns {string} HTML de la valeur colorée
  */
-function genererValeursComparatives(valeurSOM, valeurPAN, modeComparatif, afficherTiret = false) {
+function genererValeursComparatives(valeurSOM, valeurPAN, afficherTiret = false) {
     // 🆕 BETA 95.6 : Afficher tiret si aucune donnée
     if (afficherTiret) {
         return `<span style="color: var(--gris-clair); font-weight: 600;">—</span>`;
     }
 
-    if (!modeComparatif) {
-        // Mode normal: afficher seulement la valeur de la pratique active
-        const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-        const pratique = config.pratique || 'sommative';
-        const valeur = pratique === 'sommative' ? valeurSOM : valeurPAN;
-        return `<strong class="profil-valeur-grande-bleu">${valeur}%</strong>`;
-    }
-
-    // Mode comparatif: afficher les deux valeurs côte à côte
-    return `
-        <div class="profil-flex-gap15-baseline">
-            <strong class="profil-valeur-grande-orange">${valeurSOM}%</strong>
-            <strong class="profil-valeur-grande-bleu-std">${valeurPAN}%</strong>
-        </div>
-    `;
+    // Session C (#303) : mode comparatif retiré — toujours la valeur de la pratique active.
+    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const pratique = config.pratique || 'sommative';
+    const valeur = pratique === 'sommative' ? valeurSOM : valeurPAN;
+    return `<strong class="profil-valeur-grande-bleu">${valeur}%</strong>`;
 }
 
 // === HELPERS PRIVÉS pour afficherProfilComplet (étape 4 éclatement cyc 58 → < 30) ===
@@ -2194,33 +2162,6 @@ function _recalculerIndicesACPSiPossible() {
     if (typeof genererSeancesCompletes === 'function') genererSeancesCompletes(null);
     if (typeof calculerEtSauvegarderIndicesAssiduite === 'function') calculerEtSauvegarderIndicesAssiduite();
     if (typeof calculerEtStockerIndicesCP === 'function') calculerEtStockerIndicesCP();
-}
-
-/**
- * HELPER : calcul indices dual SOM/PAN selon mode comparatif (optimisation 7 déc 2025).
- * Retourne { indicesSOM, indicesPAN, modeComparatif }.
- */
-function _calculerIndicesDualPourProfil(da, config) {
-    const affichage = config.affichageTableauBord || {};
-    const afficherSom = affichage.afficherSommatif === true;
-    const afficherPan = affichage.afficherAlternatif === true;
-    const modeComparatif = afficherSom && afficherPan;
-
-    let indicesSOM, indicesPAN;
-    if (modeComparatif) {
-        indicesSOM = calculerTousLesIndices(da, 'SOM');
-        indicesPAN = calculerTousLesIndices(da, 'PAN');
-    } else {
-        const indicesActifs = calculerTousLesIndices(da);
-        if (config.pratique === 'sommative') {
-            indicesSOM = indicesActifs;
-            indicesPAN = { A: indicesActifs.A, C: 0, P: 0, M: 0, E: 0 };
-        } else {
-            indicesPAN = indicesActifs;
-            indicesSOM = { A: indicesActifs.A, C: 0, P: 0, M: 0, E: 0 };
-        }
-    }
-    return { indicesSOM, indicesPAN, modeComparatif };
 }
 
 function _resoudreSectionContenu(sectionAffichee, da, prefs) {
@@ -2301,9 +2242,7 @@ function afficherProfilComplet(daOuEl) {
     const C = indices.C / 100;
     const interpM = interpreterMobilisation(A, C);
 
-    // 3. Calcul dual SOM/PAN
-    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-    const { indicesSOM, indicesPAN, modeComparatif } = _calculerIndicesDualPourProfil(da, config);
+    // Session C (#303) : mode comparatif retiré — le calcul dual SOM/PAN (mort) a été retiré.
 
     // 4. Préférences UI (pour résolution section + sidebar)
     const prefs = {
@@ -3703,62 +3642,17 @@ function _obtenirNiveauxEtGradientSRPNF() {
     return { niveaux, gradientCSS: `linear-gradient(to right, ${gradientStops.join(', ')})` };
 }
 
-function _calculerMoyennesComparativesSRPNF(da, modeComparatif) {
-    let moyennesSOM = null, moyennesPAN = null, directionsSOM = null, directionsPAN = null;
-    if (modeComparatif) {
-        moyennesSOM = calculerMoyennesCriteres(da);
-        directionsSOM = calculerDirectionsCriteres(da);
-        const pratiquePAN = obtenirPratiqueParId('standards');
-        if (pratiquePAN && typeof pratiquePAN._calculerMoyennesCriteresRecents === 'function') {
-            moyennesPAN = pratiquePAN._calculerMoyennesCriteresRecents(da);
-        } else {
-            console.warn('  ⚠️ Pratique PAN-Standards non disponible ou méthode _calculerMoyennesCriteresRecents absente');
-            moyennesPAN = null;
-        }
-        directionsPAN = calculerDirectionsCriteres(da);
-    } else {
-        moyennesPAN = calculerMoyennesCriteres(da);
-        directionsPAN = calculerDirectionsCriteres(da);
-    }
+function _calculerMoyennesComparativesSRPNF(da) {
+    // Session C (#303) : mode comparatif retiré — couche unique (pratique active).
     return {
-        moyennes: modeComparatif ? moyennesSOM : moyennesPAN,
-        moyennesSOM, moyennesPAN, directionsSOM, directionsPAN
+        moyennes: calculerMoyennesCriteres(da),
+        directionsPAN: calculerDirectionsCriteres(da)
     };
 }
 
 function _nomCritereSRPNF(cle) {
     const noms = { structure: 'Structure', rigueur: 'Rigueur', plausibilite: 'Plausibilité', nuance: 'Nuance', francais: 'Français' };
     return noms[cle] || cle;
-}
-
-function _genererPointsBarreSRPNFComparatif(cle, moyennesSOM, moyennesPAN, directionsSOM, directionsPAN) {
-    const scoreSOM = moyennesSOM?.[cle];
-    const scorePAN = moyennesPAN?.[cle];
-    const pourcentageSOM = (typeof scoreSOM === 'number' && !isNaN(scoreSOM)) ? Math.round(scoreSOM * 100) : null;
-    const pourcentagePAN = (typeof scorePAN === 'number' && !isNaN(scorePAN)) ? Math.round(scorePAN * 100) : null;
-    if (pourcentageSOM === null && pourcentagePAN === null) return null;
-
-    const directionSOM = directionsSOM ? directionsSOM[cle] : null;
-    const directionPAN = directionsPAN ? directionsPAN[cle] : null;
-    const symboleSOM = directionSOM && directionSOM.symbole ? directionSOM.symbole : '';
-    const symbolePAN = directionPAN && directionPAN.symbole ? directionPAN.symbole : '';
-
-    const pointsHTML = `
-        ${pourcentageSOM !== null ? `<div class="critere-point critere-point-som" style="left: ${Math.min(pourcentageSOM, 100)}%;"></div>` : ''}
-        ${pourcentagePAN !== null ? `<div class="critere-point critere-point-std" style="left: ${Math.min(pourcentagePAN, 100)}%;"></div>` : ''}
-    `;
-    const symbolesHTML = `
-        ${symboleSOM && pourcentageSOM !== null ? `<div style="position: absolute; left: ${Math.min(pourcentageSOM, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--som-orange);" title="SOM: ${directionSOM.interpretation}">${symboleSOM}</div>` : ''}
-        ${symbolePAN && pourcentagePAN !== null ? `<div style="position: absolute; left: ${Math.min(pourcentagePAN, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--std-bleu);" title="PAN: ${directionPAN.interpretation}">${symbolePAN}</div>` : ''}
-    `;
-    const valeursHTML = `
-        <span style="display: flex; gap: 8px; align-items: center;">
-            ${pourcentageSOM !== null ? `<span style="color: var(--som-orange); font-weight: 600;">${pourcentageSOM}%</span>` : ''}
-            ${pourcentageSOM !== null && pourcentagePAN !== null ? `<span style="color: var(--gris-clair);">|</span>` : ''}
-            ${pourcentagePAN !== null ? `<span style="color: var(--std-bleu); font-weight: 600;">${pourcentagePAN}%</span>` : ''}
-        </span>
-    `;
-    return { pointsHTML, symbolesHTML, valeursHTML };
 }
 
 function _genererPointsBarreSRPNFNormal(cle, score, directionsPAN) {
@@ -3773,13 +3667,12 @@ function _genererPointsBarreSRPNFNormal(cle, score, directionsPAN) {
 }
 
 function _genererBarreCritereSRPNF(cle, contexte) {
-    const { modeComparatif, moyennes, moyennesSOM, moyennesPAN, directionsSOM, directionsPAN, gradientCSS } = contexte;
+    const { moyennes, directionsPAN, gradientCSS } = contexte;
     const score = moyennes?.[cle];
     if (typeof score !== 'number' || isNaN(score)) return '';
 
-    const parties = modeComparatif
-        ? _genererPointsBarreSRPNFComparatif(cle, moyennesSOM, moyennesPAN, directionsSOM, directionsPAN)
-        : _genererPointsBarreSRPNFNormal(cle, score, directionsPAN);
+    // Session C (#303) : mode comparatif retiré — couche unique (pratique active).
+    const parties = _genererPointsBarreSRPNFNormal(cle, score, directionsPAN);
     if (!parties) return '';
     const { pointsHTML, valeursHTML, symbolesHTML } = parties;
     return `
@@ -3800,16 +3693,9 @@ function _genererBarreCritereSRPNF(cle, contexte) {
 
 function _genererBlocForcesDefisSRPNF(da) {
     const { niveaux, gradientCSS } = _obtenirNiveauxEtGradientSRPNF();
-    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-    const affichage = config.affichageTableauBord || {};
-    // #308 : `=== true` (cf. tableau-bord-apercu.js) — clés absentes ne rallument
-    // plus le mode comparatif fantôme du bloc Forces/Défis SRPNF.
-    const afficherSom = affichage.afficherSommatif === true;
-    const afficherPan = affichage.afficherAlternatif === true;
-    const modeComparatif = afficherSom && afficherPan;
-
-    const moyennesCtx = _calculerMoyennesComparativesSRPNF(da, modeComparatif);
-    const contexte = { modeComparatif, ...moyennesCtx, gradientCSS };
+    // Session C (#303) : mode comparatif retiré — couche unique (pratique active).
+    const moyennesCtx = _calculerMoyennesComparativesSRPNF(da);
+    const contexte = { ...moyennesCtx, gradientCSS };
 
     const barresHTML = ['structure', 'rigueur', 'plausibilite', 'nuance', 'francais']
         .map(cle => _genererBarreCritereSRPNF(cle, contexte))
@@ -4001,27 +3887,9 @@ function _appliquerSelectionAutoArtefacts(da, portfolio, artefacts, selectionEle
     });
 }
 
-function _calculerIndicesPerformance(da, modeComparatif, pratiqueConfig) {
-    if (modeComparatif) {
-        // Mode comparatif : calculer les deux pratiques
-        const indicesSOM = calculerTousLesIndices(da, 'SOM');
-        const indicesPAN = calculerTousLesIndices(da, 'PAN');
-        return { indices: indicesSOM, indicesSOM, indicesPAN };
-    }
-    // Mode normal : calculer seulement la pratique active
-    const indices = calculerTousLesIndices(da);
-    if (pratiqueConfig === 'sommative') {
-        return {
-            indices,
-            indicesSOM: indices,
-            indicesPAN: { A: indices.A, C: 0, P: 0, M: 0, E: 0 }
-        };
-    }
-    return {
-        indices,
-        indicesPAN: indices,
-        indicesSOM: { A: indices.A, C: 0, P: 0, M: 0, E: 0 }
-    };
+function _calculerIndicesPerformance(da) {
+    // Session C (#303) : mode comparatif retiré — indices de la pratique active.
+    return { indices: calculerTousLesIndices(da) };
 }
 
 function _lireDetailsRapportPerformance(da, pratiqueActive, nombreARetenir, artefacts) {
@@ -4166,12 +4034,8 @@ function genererSectionPerformance(da) {
     // Calcul dual pour mode comparatif (Beta 90 + correctif 7 déc 2025 :
     // vérifier === true pour éviter le mode comparatif par défaut)
     const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-    const affichage = config.affichageTableauBord || {};
-    const afficherSom = affichage.afficherSommatif === true;
-    const afficherPan = affichage.afficherAlternatif === true;
-    const modeComparatif = afficherSom && afficherPan;
-
-    const { indices, indicesSOM, indicesPAN } = _calculerIndicesPerformance(da, modeComparatif, config.pratique);
+    // Session C (#303) : mode comparatif retiré — indices de la pratique active.
+    const { indices } = _calculerIndicesPerformance(da);
 
     // Détails du rapport portfolio (méthode sélection, artefacts retenus, etc.)
     const detailsRapport = _lireDetailsRapportPerformance(da, indices.pratique, nombreARetenir, artefacts);
@@ -4193,11 +4057,8 @@ function genererSectionPerformance(da) {
         return 'I';
     };
 
-    const lettreIDME_SOM = determinerLettreIDME(indicesSOM.P);
-    const lettreIDME_PAN = determinerLettreIDME(indicesPAN.P);
-
-    // Pour compatibilité avec le code existant
-    const lettreIDME = modeComparatif ? lettreIDME_SOM : determinerLettreIDME(indices.P);
+    // Session C (#303) : mode comparatif retiré — lettre IDME de la pratique active.
+    const lettreIDME = determinerLettreIDME(indices.P);
 
     // Calculer moyennes des critères pour badges
     const moyennes = calculerMoyennesCriteres(da);
@@ -4236,14 +4097,8 @@ function genererSectionPerformance(da) {
 
             <!-- En-tête avec indice P -->
             <div class="u-flex-between-mb15">
-                ${modeComparatif ? `
-                    <div class="profil-flex-gap15-baseline" style="margin-left: auto;">
-                        <strong class="profil-valeur-grande-orange">${lettreIDME_SOM} ${indicesSOM.P}%</strong>
-                        <strong class="profil-valeur-grande-bleu-std">${lettreIDME_PAN} ${indicesPAN.P}%</strong>
-                    </div>
-                ` : `
-                    <strong class="profil-valeur-grande-bleu" style="margin-left: auto;">${lettreIDME} ${indices.P}%</strong>
-                `}
+                <!-- Session C (#303) : mode comparatif retiré — indice P unique (pratique active). -->
+                <strong class="profil-valeur-grande-bleu" style="margin-left: auto;">${lettreIDME} ${indices.P}%</strong>
             </div>
 
             <!-- 🆕 MÉTHODE DE CALCUL EXPLICITE -->

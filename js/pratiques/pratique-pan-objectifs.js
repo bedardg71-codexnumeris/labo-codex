@@ -56,6 +56,13 @@ class PratiquePANObjectifs {
     obtenirCouleur() { return window.obtenirCouleurPratique(this.obtenirId()); }
     obtenirLabelFamille() { return window.obtenirLabelFamillePratique(this.obtenirId()); }
 
+    // Session C — source unique des modalités (repli global pour l'active, décision b).
+    // Singleton sans this.config → retourne le global : comportement identique.
+    _modalites() {
+        if (this.config && this.config.modalites) return this.config.modalites;
+        return db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    }
+
     // ========================================================================
     // MÉTHODES DE CALCUL (Interface IPratique)
     // ========================================================================
@@ -374,7 +381,7 @@ class PratiquePANObjectifs {
      * @returns {Object} Configuration avec objectifs
      */
     _lireConfiguration() {
-        const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+        const modalites = this._modalites();
 
         // Configuration par défaut PAN-Objectifs
         const configDefaut = {

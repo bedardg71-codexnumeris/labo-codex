@@ -44,20 +44,21 @@ describe('#308 · determinerModeAffichageTableauBord suit la pratique active', (
         expect(r).toEqual({ afficherSom: false, afficherPan: true });
     });
 
-    it('mode comparatif explicite (deux clés true) → les deux, indépendamment de la pratique', () => {
+    it('Session C : deux clés true (ancien comparatif) → suit quand même la pratique active', () => {
+        // Le mode comparatif est retiré : determinerMode ne renvoie JAMAIS deux couches.
         const r = win.determinerModeAffichageTableauBord({
             pratique: 'sommative',
             affichageTableauBord: { afficherSommatif: true, afficherAlternatif: true }
         });
-        expect(r).toEqual({ afficherSom: true, afficherPan: true });
+        expect(r).toEqual({ afficherSom: true, afficherPan: false });
     });
 
-    it('un seul mode explicite est respecté (PAN seul même si pratique sommative)', () => {
+    it('Session C : un override explicite n\'est plus honoré (suit la pratique active)', () => {
         const r = win.determinerModeAffichageTableauBord({
             pratique: 'sommative',
             affichageTableauBord: { afficherAlternatif: true }
         });
-        expect(r).toEqual({ afficherSom: false, afficherPan: true });
+        expect(r).toEqual({ afficherSom: true, afficherPan: false });
     });
 
     it('régression : ne force PLUS PAN sur un groupe sommatif (cause du P à 0 %)', () => {
