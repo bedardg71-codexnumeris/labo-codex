@@ -69,10 +69,14 @@ function genererBanniereBienvenue() {
             <div id="banniere-bienvenue-corps" class="banniere-bienvenue-corps">
             <p>Labo Codex te propose de numériser ton travail habituel : planifier, concevoir, évaluer, suivre la progression de tes étudiant·es. Les mêmes gestes que sur papier, réunis dans un seul outil portable.</p>
             <p><strong>Par où commencer ?</strong> Configure ton trimestre, ton cours et ton groupe dans l’onglet Cadre : tu saisis tout une fois, l’app s’en sert partout. Ensuite, crée et partage le matériel que tu veux.</p>
+            <p><strong>Comprendre les cadres de l’app.</strong> Trois guides pédagogiques expliquent en quelques pages la taxonomie SOLO, les micro-données ACP et le modèle RàI — accessibles en tout temps par les boutons « Guide » des Outils d’observation.</p>
             ${paragrapheCommunaute}
             <div class="banniere-bienvenue-actions">
                 <button class="btn btn-primaire" data-action="demarrerTourGuide">
                     Commencer la visite guid\u00e9e
+                </button>
+                <button class="btn btn-secondaire" data-action="naviguerAccueilCarte" data-param="labo|labo-accompagnement">
+                    Voir les guides p\u00e9dagogiques
                 </button>
             </div>
             </div>

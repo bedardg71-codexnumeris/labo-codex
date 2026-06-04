@@ -776,7 +776,7 @@ function rendreSectionAide(section) {
             const classeA = section.niveau === 'important' ? 'aide-alerte-important' : 'aide-alerte-attention';
             return `<div class="aide-alerte ${classeA}"><span class="aide-icone">${iconeA}</span><div class="aide-alerte-contenu">${section.contenu}</div></div>`;
         case 'action':
-            return `<div class="aide-action"><button class="btn btn-primaire" data-action="${section.action}">${section.libelle}</button></div>`;
+            return `<div class="aide-action"><button class="btn btn-primaire" data-action="${section.action}"${section.param ? ` data-param="${section.param}"` : ''}>${section.libelle}</button></div>`;
         default:
             return `<p>${section.contenu || ''}</p>`;
     }
@@ -1094,6 +1094,14 @@ const ETAPES_TOUR = [
         correspond: function(idSousSection) {
             return idSousSection === 'conception-carte' || idSousSection === 'conception-organisateur';
         }
+    },
+    {
+        id: 6,
+        titre: 'Labo (optionnel)',
+        texte: "Le Labo regroupe les outils d'observation et d'analyse : c'est là que tu actives la taxonomie SOLO, les micro-données ACP et le dépistage RàI, et que tu règles leurs seuils.\n\nChaque cadre est expliqué par un guide pédagogique de quelques pages — bouton « Guide » sur les cartes des Outils d'observation. Tu y trouveras aussi la modélisation, le rythme de travail, les études et le bilan réflexif.",
+        correspond: function(idSousSection) {
+            return typeof idSousSection === 'string' && idSousSection.indexOf('labo-') === 0;
+        }
     }
 ];
 
@@ -1402,6 +1410,19 @@ function afficherMicroPopupGlossaire(terme, cible) {
     });
     actions.appendChild(lien);
 
+    // Renvoi optionnel vers le guide pédagogique associé (découvrabilité, juin
+    // 2026). data-action → dispatcher de main.js ; ouvrirGuidePedagogique ferme
+    // le micro-popup avant d'ouvrir le panneau.
+    if (terme.guide) {
+        const btnGuide = document.createElement('button');
+        btnGuide.type = 'button';
+        btnGuide.className = 'glossaire-lien-ensavoirplus glossaire-lien-guide';
+        btnGuide.setAttribute('data-action', 'ouvrirGuidePedagogique');
+        btnGuide.setAttribute('data-param', terme.guide);
+        btnGuide.textContent = 'Ouvrir le guide';
+        actions.appendChild(btnGuide);
+    }
+
     const btnFermer = document.createElement('button');
     btnFermer.type = 'button';
     btnFermer.className = 'glossaire-micropopup-fermer';
@@ -1530,6 +1551,20 @@ function creerFicheGlossaire(t) {
         voir.className = 'glossaire-fiche-voir';
         voir.innerHTML = '<strong>Voir\u00a0:</strong> ' + echapper(t.voir);
         fiche.appendChild(voir);
+    }
+    // D\u00e9couvrabilit\u00e9 des guides (juin 2026) : renvoi vers le guide p\u00e9dagogique
+    // associ\u00e9 au terme, le cas \u00e9ch\u00e9ant. Catalogue statique \u2192 pas d'\u00e9chappement.
+    if (t.guide) {
+        const guideWrap = document.createElement('div');
+        guideWrap.className = 'glossaire-fiche-guide';
+        const btnGuide = document.createElement('button');
+        btnGuide.type = 'button';
+        btnGuide.className = 'btn btn-secondaire';
+        btnGuide.setAttribute('data-action', 'ouvrirGuidePedagogique');
+        btnGuide.setAttribute('data-param', t.guide);
+        btnGuide.textContent = 'Ouvrir le guide';
+        guideWrap.appendChild(btnGuide);
+        fiche.appendChild(guideWrap);
     }
     return fiche;
 }

@@ -18,6 +18,7 @@
             items: [
                 'Trois guides pédagogiques consultables directement dans l’app : taxonomie SOLO (5 pages), Micro-données ACP (3 pages) et modèle RàI (4 pages).',
                 'Accessibles depuis Labo → Outils d’observation (bouton « Guide » de chaque carte), depuis la palette d’annotation (catégorie Compréhension, bouton « ? ») et depuis le module Interventions.',
+                'Signalés aussi là où le concept apparaît : bannière d’accueil, étape « Labo » de la visite guidée, popups d’aide et fiches du glossaire.',
                 'Navigation au clavier (flèches gauche/droite, Échap pour fermer) et points de page cliquables.',
                 'La catégorie « Compréhension » (tampons SOLO) de la palette d’annotation suit désormais la préférence « Taxonomie SOLO » des Outils d’observation, comme la catégorie « Action » suit l’observation des actions.',
                 'Références académiques citées : Biggs et Collis (1982) pour SOLO, Desrochers (2021) pour la RàI.'
