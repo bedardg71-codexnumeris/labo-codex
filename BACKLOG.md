@@ -101,6 +101,10 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - **Difficulté** : 8 `confirm()` bloquants (suppressions irréversibles : planification 409/438/440 ; productions 276/436/479/517/548) ne peuvent pas devenir des `notifications` non-bloquantes — il faut d'abord une **modale de confirmation async réutilisable** (`Promise<boolean>`). `notifications` est aussi **absent** de `planification-bibliotheque.js` et `productions-bibliotheque-ui.js` (à câbler).
   - **À faire** : (1) concevoir/réutiliser une modale de confirmation async ; (2) migrer les `alert()` informatifs → `notifications.{info,erreur,succes}` ; (3) migrer les `confirm()` → la modale ; (4) retirer les natifs (zéro-dette).
 
+- [ ] 🟢 **#316** Codex — migrer les `alert()`/`prompt()` natifs vers `notifications` + modales maison
+  - **Contexte** : audit du 4 juin (refonte des textes Codex, brief `refonte-textes-codex.md` §2). `codex.js` utilise encore des `alert()` (erreurs) et des `prompt()` (saisies) natifs : ~`:1426, 2140, 2167, 2191, 2201`. Les **textes** de progression/notifications ont été corrigés cette session (commit `e501b93`) ; la migration UX est séparée. Même nature que [[#315]] (bibliothèques) — un `prompt()` (saisie) exige en plus une **modale de saisie** maison.
+  - **À faire** : migrer `alert()` → `notifications.{erreur,info}` ; `prompt()` → modale de saisie ; retirer les natifs (zéro-dette). Mutualiser la modale de confirmation/saisie avec #315.
+
 ### Fonctionnalités à compléter
 
 - [ ] 📐 🟡 **#279** Ajouter 3 champs au formulaire de production : DESCRIPTION DÉTAILLÉE des consignes, FORMAT ET MISE EN PAGE, REMISE
