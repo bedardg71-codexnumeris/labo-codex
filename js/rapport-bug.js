@@ -164,7 +164,7 @@ function ouvrirModalRapportsArchives() {
                         padding: 0;" title="Supprimer"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>
                 </div>
                 <p style="margin: 0 0 8px 0; font-size: 0.9rem; color: var(--gris-fonce);">
-                    ${(r.description || 'Aucune description').substring(0, 100)}${r.description?.length > 100 ? '...' : ''}
+                    ${(r.description || 'Aucune description').substring(0, 100)}${r.description?.length > 100 ? '…' : ''}
                 </p>
                 <button data-action="afficherRapportComplet" data-param="${r.id}" class="btn btn-secondaire" style="font-size: 0.8rem; padding: 4px 10px;">
                     Voir le rapport complet
@@ -342,7 +342,7 @@ document.addEventListener('click', (event) => {
     // Ajouter le texte si disponible
     const texte = target.textContent?.substring(0, 30).trim();
     if (texte && texte.length > 0) {
-        description += ` "${texte}${texte.length >= 30 ? '...' : ''}"`;
+        description += ` "${texte}${texte.length >= 30 ? '…' : ''}"`;
     }
 
     enregistrerAction('clic', description);
@@ -554,7 +554,7 @@ function obtenirEtatStockage() {
             if (valeur !== null) {
                 // Tronquer si trop long
                 const valeurStr = typeof valeur === 'string' ? valeur : JSON.stringify(valeur);
-                etat[cle] = valeurStr.length > 50 ? valeurStr.substring(0, 50) + '...' : valeurStr;
+                etat[cle] = valeurStr.length > 50 ? valeurStr.substring(0, 50) + '…' : valeurStr;
             }
         } catch (e) {
             etat[cle] = 'erreur lecture';
@@ -764,7 +764,7 @@ function mettreAJourModeRapport() {
     if (textarea && !textarea.value) {
         textarea.placeholder = modeRapport === 'commentaire'
             ? "Dis-nous ce que tu penses de l'app.\n- Ce qui fonctionne bien\n- Ce qui pourrait être amélioré\n- Tes suggestions"
-            : "Exemple :\n- J'étais dans la section Réglages > Cours\n- J'ai cliqué sur le bouton «Ajouter un cours»\n- Rien ne s'est passé (ou message d'erreur...)\n- Je m'attendais à voir le formulaire de création";
+            : "Exemple :\n- J'étais dans la section Cadre > Trimestre\n- J'ai cliqué sur le bouton «Ajouter un cours»\n- Rien ne s'est passé (ou message d'erreur...)\n- Je m'attendais à voir le formulaire de création";
     }
 
     // Masquer/afficher le sélecteur de gravité selon le mode
@@ -894,7 +894,7 @@ function ouvrirModalRapportBug() {
                             Décris le problème rencontré :
                         </label>
                         <textarea id="descriptionBug" placeholder="Exemple :
-- J'étais dans la section Réglages > Cours
+- J'étais dans la section Cadre > Trimestre
 - J'ai cliqué sur le bouton «Ajouter un cours»
 - Rien ne s'est passé (ou message d'erreur...)
 - Je m'attendais à voir le formulaire de création
@@ -905,7 +905,7 @@ function ouvrirModalRapportBug() {
                             font-family: inherit; font-size: 0.95rem; resize: vertical; box-sizing: border-box;
                         " data-on-input="mettreAJourRapport"></textarea>
                         <small style="display: block; margin-top: 6px; color: var(--gris-moyen); font-size: 0.85rem; line-height: 1.4;">
-                            🔒 Pour la confidentialité étudiante (Loi 25) : évite de nommer des étudiant·e·s nominalement dans la description. Utilise plutôt « l'étudiant·e A » ou « un·e étudiant·e du groupe X ». Les rapports sont conservés localement (max 20, rotation automatique).
+                            🔒 Pour la confidentialité étudiante (Loi 25) : évite de nommer des étudiant·es nominalement dans la description. Utilise plutôt « l'étudiant·e A » ou « un·e étudiant·e du groupe X ». Les rapports sont conservés localement (max 20, rotation automatique).
                         </small>
                     </div>
 
@@ -1151,7 +1151,7 @@ function envoyerRapportParCourriel(btn) {
         // Construire le mailto
         var typeLabel = modeRapport === 'commentaire' ? 'Feedback' : 'Bug';
         var graviteLabel = graviteRapport === 'bloquant' ? ' BLOQUANT' : (graviteRapport === 'mineur' ? ' mineur' : '');
-        var sujet = encodeURIComponent('[' + typeLabel + graviteLabel + ' Monitorage ' + getVersionApp() + '] ' + (description.substring(0, 50) || 'Rapport de bug') + '...');
+        var sujet = encodeURIComponent('[' + typeLabel + graviteLabel + ' Monitorage ' + getVersionApp() + '] ' + (description.substring(0, 50) || 'Rapport de bug') + '…');
         var corpsNettoye = nettoyerUTF16(rapport + '\n\n--- JOINS TES CAPTURES D\'ÉCRAN À CE COURRIEL ---');
         var corps = encodeURIComponent(corpsNettoye);
         var mailtoUrl = 'mailto:labo@codexnumeris.org?subject=' + sujet + '&body=' + corps;
