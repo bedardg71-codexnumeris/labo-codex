@@ -455,33 +455,23 @@ function genererBadgePratiqueListeEtudiants() {
     const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
     const typePAN = config.typePAN || 'maitrise';
 
-    let texte = '';
-    let classePratique = '';
-    let description = '';
+    // Session B : code dérivé du registre (source unique). SOM si pratique sommative ;
+    // sinon le typePAN → code via le registre (specifications→SPE, denotation→DEN,
+    // standards/maitrise/inconnu→STD). Les descriptions (microcopy) restent locales,
+    // indexées par code canonique.
+    const code = (pratique === 'sommative')
+        ? 'SOM'
+        : (typeof obtenirCodePratique === 'function' ? obtenirCodePratique(typePAN) : 'STD');
 
-    if (pratique === 'sommative') {
-        texte = 'SOM';
-        classePratique = 'som';
-        description = 'Pratique sommative : moyenne pondérée provisoire';
-    } else {
-        // Pratiques PAN avec codes 3 lettres
-        if (typePAN === 'specifications') {
-            texte = 'SPE';
-            classePratique = 'spe';
-            description = 'PAN-Spécifications : pass/fail sur objectifs';
-        } else if (typePAN === 'denotation') {
-            texte = 'DEN';
-            classePratique = 'den';
-            description = 'Dénotation : sans notes chiffrées';
-        } else {
-            // Standards (maitrise) par défaut
-            texte = 'STD';
-            classePratique = 'std';
-            description = 'PAN-Standards : N meilleurs artefacts selon IDME';
-        }
-    }
+    const descriptions = {
+        SOM: 'Pratique sommative : moyenne pondérée provisoire',
+        SPE: 'PAN-Spécifications : pass/fail sur objectifs',
+        DEN: 'Dénotation : sans notes chiffrées',
+        STD: 'PAN-Standards : N meilleurs artefacts selon IDME'
+    };
+    const description = descriptions[code] || descriptions.STD;
 
-    return `<span class="badge-pratique-compact ${classePratique}" title="${description}">${texte}</span>`;
+    return `<span class="badge-pratique-compact ${code.toLowerCase()}" title="${description}">${code}</span>`;
 }
 
 /**

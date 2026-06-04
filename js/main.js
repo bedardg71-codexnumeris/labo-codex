@@ -20,7 +20,7 @@
 // init-inline.js compare cette valeur au BUILD_ID lu depuis version.json :
 // si différent, Safari file:// a probablement un main.js périmé en cache,
 // et la séquence reload+bandeau s'enclenche. SYNCHRONISER À CHAQUE BUMP.
-window._SCRIPT_BUILD_main = '0604-0826';
+window._SCRIPT_BUILD_main = '0604-0904';
 
 /* ===============================
    FONCTION GLOBALE: Génération d'ID uniques
@@ -139,30 +139,17 @@ window.genererBadgePratique = function(type, compact = false) {
     const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
     const typePAN = config.typePAN || 'maitrise';
 
-    let texte = '';
     let classe = compact ? 'badge-pratique-compact' : 'badge-pratique';
 
-    if (type === 'SOM') {
-        texte = 'SOM';
-        classe += ' som';
-    } else {
-        // PAN : Identifier la pratique spécifique avec classe correspondante
-        if (typePAN === 'maitrise' || typePAN === 'standards') {
-            texte = 'STD';
-            classe += ' std';
-        } else if (typePAN === 'specifications') {
-            texte = 'SPE';
-            classe += ' spe';
-        } else if (typePAN === 'denotation') {
-            texte = 'DEN';
-            classe += ' den';
-        } else {
-            texte = 'STD';
-            classe += ' std';
-        }
-    }
+    // Session B : code dérivé du registre (source unique). SOM direct ; sinon le
+    // typePAN (maitrise/standards/specifications/denotation) → code via le registre
+    // (maitrise et inconnu retombent sur STD, comportement historique préservé).
+    const code = (type === 'SOM')
+        ? 'SOM'
+        : (typeof obtenirCodePratique === 'function' ? obtenirCodePratique(typePAN) : 'STD');
+    classe += ' ' + code.toLowerCase();
 
-    return `<span class="${classe}">${texte}</span>`;
+    return `<span class="${classe}">${code}</span>`;
 };
 
 // ✅ Fonction reactiverGroupeDemo() supprimée (Beta 93.5)

@@ -1255,14 +1255,13 @@
      * Génère le badge HTML abrégé pour un type de pratique (SOM, STD, SPE, DEN)
      */
     function obtenirBadgeTypePratique(type) {
-        const badges = {
-            'pan-standards': '<span class="badge-type-pratique badge-type-std">STD</span>',
-            'pan-specifications': '<span class="badge-type-pratique badge-type-spe">SPE</span>',
-            'sommative': '<span class="badge-type-pratique badge-type-som">SOM</span>',
-            'denominateur': '<span class="badge-type-pratique badge-type-den">DEN</span>',
-            'configurable': '<span class="badge-type-pratique badge-type-multi">CFG</span>'
-        };
-        return badges[type] || '<span class="badge-type-pratique badge-type-multi">—</span>';
+        // Session B : badge des 4 familles routé vers le registre (source unique).
+        const rep = (typeof obtenirRepresentationPratiqueStricte === 'function')
+            ? obtenirRepresentationPratiqueStricte(type) : null;
+        if (rep) return genererBadgePratiqueHTML(type);
+        // États distincts (non famille) : pratique configurable multi / inconnu.
+        if (type === 'configurable') return '<span class="badge-type-pratique badge-type-multi">CFG</span>';
+        return '<span class="badge-type-pratique badge-type-multi">—</span>';
     }
 
     /**
