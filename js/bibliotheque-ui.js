@@ -98,7 +98,7 @@
                     'data-on-change="BibliothequeUI.basculerMasquerDejaPresent" ' +
                     'data-refresh-fn="' + refreshFnName + '" ' +
                     (actif ? 'checked' : '') + '>' +
-                'Masquer les items déjà dans la barre latérale' +
+                'Masquer les éléments déjà dans la barre latérale' +
             '</label>' +
         '</div>';
     };
@@ -166,7 +166,7 @@
     BibliothequeUI.ajouterOptgroupDemo = function (selectElement, demoItems, extraireTexte, titreOptgroup) {
         if (!selectElement || !demoItems || demoItems.length === 0) return;
         var optgroup = document.createElement('optgroup');
-        optgroup.label = titreOptgroup || 'Démo (par Labo Codex — à dupliquer pour utiliser)';
+        optgroup.label = titreOptgroup || 'Démo (par Labo Codex – à dupliquer pour utiliser)';
         demoItems.forEach(function(item) {
             var option = document.createElement('option');
             option.value = 'demo-' + (item.id || '');
@@ -315,7 +315,7 @@
         };
         var auteurActif = (typeof obtenirIdentiteCCUtilisateur === 'function')
             ? obtenirIdentiteCCUtilisateur()
-            : 'Utilisateur de Labo Codex';
+            : 'Utilisateur·trice de Labo Codex';
         // Clone profond pour éviter tout partage de références (ex. tableaux
         // `criteres`, `niveaux`, `commentaires`) entre la source démo et la copie.
         var copie = JSON.parse(JSON.stringify(source));

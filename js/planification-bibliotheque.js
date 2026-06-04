@@ -175,7 +175,7 @@ async function afficherBibliothequeAlignements() {
     var contenuSection1 = '';
 
     if (cartesActives.length === 0) {
-        contenuSection1 = '<p class="text-muted" style="padding: 10px;">Aucun alignement dans le trimestre actif.</p>';
+        contenuSection1 = '<p class="text-muted" style="padding: 10px;">Aucune carte d\'alignement dans le trimestre actif.</p>';
     } else {
         cartesActives.forEach(function (carte) {
             var donnees = window.planificationDonnees.chargerCarte(carte.id);
@@ -198,7 +198,7 @@ async function afficherBibliothequeAlignements() {
     // Section 2 : Bibliothèque partagée
     var contenuSection2 = '';
     if (biblioItems.length === 0) {
-        contenuSection2 = '<p class="text-muted" style="padding: 10px;">La bibliothèque est vide. Partagez un alignement depuis la section ci-dessus.</p>';
+        contenuSection2 = '<p class="text-muted" style="padding: 10px;">La bibliothèque est vide. Partage une carte d\'alignement depuis la section ci-dessus.</p>';
     } else {
         biblioItems.forEach(function (item) {
             var nbNoeuds = item.donnees ? (item.donnees.noeuds || []).length : 0;
@@ -250,11 +250,11 @@ async function afficherBibliothequeAlignements() {
 
     BibliothequeUI.creerModal({
         modalId: MODAL_ID,
-        titre: "Bibliothèque d'alignements pédagogiques",
-        sousTitre: 'Partagez et réutilisez vos cartes d\'alignement entre les trimestres.',
+        titre: "Bibliothèque de cartes d'alignement",
+        sousTitre: 'Partage et réutilise tes cartes d\'alignement entre les trimestres.',
         onFermer: 'fermerModalBibliothequeAlignements',
         doublonsHTML: '',
-        titreSection1: 'Mes alignements (trimestre actif)',
+        titreSection1: 'Mes cartes d\'alignement (trimestre actif)',
         contenuIdListe1: 'listeAlignementsTrimestre',
         contenuSection1: contenuSection1,
         boutonsApresSection1: boutonsApresSection1,
@@ -437,7 +437,7 @@ async function supprimerAlignementDeBibliotheque(id) {
     if (id === ID_DEMO) {
         if (!confirm('Supprimer la carte démo de la bibliothèque ? Elle sera recréée au prochain chargement.')) return;
     } else {
-        if (!confirm('Supprimer cet alignement de la bibliothèque partagée ? Cette action est irréversible.')) return;
+        if (!confirm('Supprimer cette carte d\'alignement de la bibliothèque partagée ? Cette action est irréversible.')) return;
     }
 
     await retirerAlignementDeLaBibliotheque(id);

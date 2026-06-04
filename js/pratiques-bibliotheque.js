@@ -52,7 +52,7 @@ const MODELES_PRATIQUES_PREDEFINIS = {
     'SPE-simple': {
         id: 'SPE-simple',
         nom: 'Modèle simple',
-        description: 'Pour débuter avec PAN-Spécifications',
+        description: 'Pour débuter avec PAN – Spécifications',
         type: 'specifications',
         auteur: 'Demo Labo Codex',
         discipline: 'Général',
@@ -404,7 +404,7 @@ const MODELES_PRATIQUES_PREDEFINIS = {
     'STD-anatomie': {
         id: 'STD-anatomie',
         nom: 'STD Anatomie',
-        description: 'PAN-Standards avec jugement global. 11 évaluations. Progression qualitative sans calcul strict.',
+        description: 'PAN – Standards avec jugement global. 11 évaluations. Progression qualitative sans calcul strict.',
         type: 'standards',
         auteur: 'Gabarit Labo Codex',
         discipline: 'Biologie',
@@ -1041,7 +1041,7 @@ async function chargerDropdownModelesPratiques() {
 async function appliquerModeleSelectionne() {
     const dropdown = document.getElementById('v2-spec-dropdown-modeles');
     if (!dropdown || !dropdown.value) {
-        alert('Veuillez sélectionner une configuration.');
+        alert('Sélectionne une configuration.');
         return;
     }
 
@@ -1050,7 +1050,7 @@ async function appliquerModeleSelectionne() {
 
     if (succes) {
         // Afficher confirmation
-        notifications.succes('Configuration appliquée avec succès');
+        notifications.succes('Configuration appliquée.');
     } else {
         alert('Erreur lors de l\'application de la configuration.');
     }

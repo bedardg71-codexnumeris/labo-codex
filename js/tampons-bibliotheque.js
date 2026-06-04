@@ -131,7 +131,7 @@ async function partagerTampon(tamponId) {
 
     var ok = await ajouterALaBibliotheque(entry);
     if (ok) {
-        notifications.succes('Tampon "' + tampon.nom + '" ajouté à la bibliothèque');
+        notifications.succes('Tampon « ' + tampon.nom + ' » ajouté à la bibliothèque');
     }
     rafraichirModal();
 }
@@ -167,7 +167,7 @@ async function ajouterDepuisBibliotheque(tamponId) {
         db.setSync('tamponsImages', imagesCustom);
     }
 
-    notifications.succes('Tampon "' + tampon.nom + '" ajouté à ta palette');
+    notifications.succes('Tampon « ' + tampon.nom + ' » ajouté à ta palette');
     rafraichirModal();
 }
 
@@ -358,7 +358,7 @@ function afficherBibliothequeTampons() {
         '<input type="file" id="biblio-tampons-fichier-import" accept=".json" style="display:none" data-on-change="tamponsBiblioImporterFichier">' +
         '<button class="btn btn-secondaire btn-tres-compact" data-action="tamponsBibliotheque.exporterBibliotheque">Exporter la bibliothèque</button>' +
         '</div>' +
-        '<p style="font-size:0.8em; color:var(--texte-secondaire); margin-top:8px;">Assurez-vous d\'avoir les droits sur les images importées.</p>';
+        '<p style="font-size:0.8em; color:var(--texte-secondaire); margin-top:8px;">Assure-toi d\'avoir les droits sur les images importées.</p>';
 
     // Section 2 : Bibliothèque partagée
     var biblioItems = obtenirTousSync();
@@ -369,7 +369,7 @@ function afficherBibliothequeTampons() {
 
     var htmlBiblio = '';
     if (biblioItems.length === 0) {
-        htmlBiblio = '<p style="color:var(--texte-secondaire);">Aucun tampon dans la bibliothèque partagée.<br>Utilise "Partager" pour y ajouter des tampons.</p>';
+        htmlBiblio = '<p style="color:var(--texte-secondaire);">Aucun tampon dans la bibliothèque partagée.<br>Utilise « Partager » pour y ajouter des tampons.</p>';
     } else {
         biblioItems.forEach(function(item) {
             var dejaPresent = idsActuels.has(item.id);

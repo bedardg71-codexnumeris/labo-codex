@@ -251,7 +251,7 @@ async function ajouterProductionIndividuelle(id) {
         await afficherListeProductions();
         await afficherBibliothequeProductions();
 
-        alert(`✅ "${prod.titre}" ajoutée à ton cours !`);
+        alert(`"${prod.titre}" ajoutée à ton cours !`);
     } catch (error) {
         console.error('Erreur lors de l\'ajout:', error);
         alert('Erreur lors de l\'ajout de la production');
@@ -291,7 +291,7 @@ async function ajouterMesProductionsALaBibliotheque() {
 
         // Message de confirmation
         if (resultat.ajoutees > 0) {
-            alert(`✅ ${resultat.ajoutees} production(s) ajoutée(s) à la bibliothèque !\n\n` +
+            alert(`${resultat.ajoutees} ${window.pluriel(resultat.ajoutees, 'production ajoutée', 'productions ajoutées')} à la bibliothèque.\n\n` +
                   (resultat.existantes > 0 ? `${resultat.existantes} étai(en)t déjà présente(s).` : ''));
         } else {
             alert(`Toutes tes productions étaient déjà dans la bibliothèque.`);
@@ -411,7 +411,7 @@ async function importerToutTrimestreModal() {
     const selectCours = document.getElementById('selectCoursImportProductions');
 
     if (!select || !select.value) {
-        alert('Veuillez d\'abord sélectionner un trimestre.');
+        alert('Sélectionne d\'abord un trimestre.');
         return;
     }
 
@@ -445,7 +445,7 @@ async function importerToutTrimestreModal() {
     fermerModalBibliothequeProductions();
     await afficherBibliothequeProductions();
 
-    alert(`✅ Import terminé !\n\n${resultat.ajoutees} production(s) ajoutée(s).\n${resultat.existantes} déjà présente(s).`);
+    alert(`Import terminé.\n\n${resultat.ajoutees} ${window.pluriel(resultat.ajoutees, 'production ajoutée', 'productions ajoutées')}.\n${resultat.existantes} ${window.pluriel(resultat.existantes, 'déjà présente', 'déjà présentes')}.`);
 }
 
 /**
@@ -466,7 +466,7 @@ async function importerUneProductionTrimestre(cleTrimestre, productionId) {
         // Rafraîchir l'affichage
         fermerModalBibliothequeProductions();
         await afficherBibliothequeProductions();
-        alert(`✅ "${prod.titre}" ajoutée à la bibliothèque !`);
+        alert(`"${prod.titre}" ajoutée à la bibliothèque !`);
     } else {
         alert('Cette production est déjà dans la bibliothèque.');
     }
@@ -499,7 +499,7 @@ async function retirerProductionDeBibliotheque(id) {
 
     } catch (error) {
         console.error('Erreur lors du retrait:', error);
-        alert(`❌ Erreur : ${error.message}`);
+        alert(`Erreur : ${error.message}`);
     }
 }
 
@@ -607,7 +607,7 @@ async function ajouterProductionsABibliotheque() {
     const checkboxes = document.querySelectorAll('#listeProductionsDisponibles input[type="checkbox"]:checked');
 
     if (checkboxes.length === 0) {
-        alert('Veuillez sélectionner au moins une production à ajouter.');
+        alert('Sélectionne au moins une production à ajouter.');
         return;
     }
 
@@ -647,11 +647,11 @@ async function ajouterProductionsABibliotheque() {
         await mettreAJourPonderationTotale();
 
         if (ajoutees > 0) {
-            alert(`${ajoutees} production(s) ajoutée(s) avec succès !`);
+            alert(`${ajoutees} ${window.pluriel(ajoutees, 'production ajoutée', 'productions ajoutées')}.`);
         }
     } catch (error) {
         console.error('Erreur lors de l\'ajout:', error);
-        alert(`❌ Erreur : ${error.message}`);
+        alert(`Erreur : ${error.message}`);
     }
 }
 
