@@ -1033,13 +1033,17 @@ function calculerNoteAvecCategories(da, configCategories) {
  *
  * @returns {object|null} - Objet configuration { portfolio, categories, ... } ou null
  */
-function obtenirConfigPratiqueActive() {
+function obtenirConfigPratiqueActive(pratiqueIdDemande = null) {
     const pratiquesConfig = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
 
-    // Utiliser obtenirPratiqueActiveGroupeCours() qui gère tous les fallbacks
-    // (groupeCoursActif → infoCours → groupesCours → modalitesEvaluation)
-    const pratiqueId = typeof obtenirPratiqueActiveGroupeCours === 'function'
-        ? obtenirPratiqueActiveGroupeCours() : null;
+    // #307 (simulation) : si une pratique est explicitement demandée, on résout SA
+    // config sans changer l'état global. Sinon, repli sur la pratique active du
+    // groupe-cours via obtenirPratiqueActiveGroupeCours() qui gère tous les fallbacks
+    // (groupeCoursActif → infoCours → groupesCours → modalitesEvaluation).
+    // Param absent ⇒ comportement historique strictement inchangé.
+    const pratiqueId = pratiqueIdDemande
+        || (typeof obtenirPratiqueActiveGroupeCours === 'function'
+            ? obtenirPratiqueActiveGroupeCours() : null);
 
     if (!pratiqueId) {
         return null;
@@ -1050,12 +1054,14 @@ function obtenirConfigPratiqueActive() {
 }
 
 /**
- * Vérifie si une configuration de catégories est active pour la pratique courante
+ * Vérifie si une configuration de catégories est active pour une pratique.
  *
+ * @param {string|null} pratiqueIdDemande - Pratique à inspecter (#307 simulation) ;
+ *        absent ⇒ pratique active du groupe-cours (comportement historique).
  * @returns {object|null} - Configuration des catégories ou null si non active
  */
-function obtenirConfigCategories() {
-    const config = obtenirConfigPratiqueActive();
+function obtenirConfigCategories(pratiqueIdDemande = null) {
+    const config = obtenirConfigPratiqueActive(pratiqueIdDemande);
     if (!config?.categories?.actif) return null;
     return config.categories;
 }

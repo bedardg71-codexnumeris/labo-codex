@@ -192,12 +192,14 @@ function _diagnostiquerNoteNonCalculable() {
     return 'Pratique PAN-Standards, mais sa configuration de portfolio (nombre d\'artefacts à retenir, minimum requis) est absente ou incomplète. Ouvre « Réglages de la pratique » pour la compléter.';
 }
 
-function _obtenirConfigPortfolioCalcul(modalites) {
+function _obtenirConfigPortfolioCalcul(modalites, pratiqueIdDemande = null) {
     // Phase G2-a (24 mai 2026) : la pratique active est lue UNIQUEMENT depuis
     // la bibliothèque (pratiquesConfigurables, via obtenirConfigPratiqueActive).
     // Plus de fallback sur le snapshot modalitesEvaluation.configPAN.portfolio,
     // qui drift quand l'utilisateur édite la pratique dans le wizard.
-    const configPratiqueActive = typeof obtenirConfigPratiqueActive === 'function' ? obtenirConfigPratiqueActive() : null;
+    // #307 : pratiqueIdDemande permet de lire la config d'une pratique simulée
+    // (absent ⇒ pratique active, comportement inchangé).
+    const configPratiqueActive = typeof obtenirConfigPratiqueActive === 'function' ? obtenirConfigPratiqueActive(pratiqueIdDemande) : null;
     if (!configPratiqueActive || !configPratiqueActive.portfolio) {
         // Message précis selon la cause réelle (#128) au lieu d'un générique.
         return { erreur: _diagnostiquerNoteNonCalculable() };
@@ -206,7 +208,7 @@ function _obtenirConfigPortfolioCalcul(modalites) {
     let methodeSelection = configPortfolio.methodeSelection || 'meilleurs';
     if (methodeSelection === 'derniers') methodeSelection = 'recents';
     const configCategories = configPratiqueActive.categories
-        || (typeof obtenirConfigCategories === 'function' ? obtenirConfigCategories() : null);
+        || (typeof obtenirConfigCategories === 'function' ? obtenirConfigCategories(pratiqueIdDemande) : null);
     return {
         nombreARetenir: configPortfolio.nombreARetenir || 4,
         minimumRequis: configPortfolio.minimumCompletion || 7,
@@ -405,7 +407,17 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
 
     // On gère seulement Standards (portfolio à note construite). Les autres pratiques
     // (sommative, specifications, denotation) n'ont pas de détail de note finale portfolio.
-    if (pratique !== 'standards') return null;
+    // #307 (simulation) : la garde porte sur la famille de la pratique DEMANDÉE (via son
+    // code court 'STD'), pas l'active — sinon simuler une sommative pendant qu'une
+    // standards est active calculerait un portfolio à tort. Sans demande, garde inchangée.
+    let estFamilleStandards;
+    if (pratiqueIdDemande) {
+        const _instDemande = (typeof obtenirPratiqueParId === 'function') ? obtenirPratiqueParId(pratiqueIdDemande) : null;
+        estFamilleStandards = !!(_instDemande && typeof _instDemande.obtenirCode === 'function' && _instDemande.obtenirCode() === 'STD');
+    } else {
+        estFamilleStandards = (pratique === 'standards');
+    }
+    if (!estFamilleStandards) return null;
 
     // #127 (31 mai) : identifier la pratique active DÈS MAINTENANT, pour la nommer
     // même dans le cas « non calculable » (retour Grégoire 05:26 : « celles qui ne
@@ -420,7 +432,7 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     // Lecture config portfolio (source canonique : pratiquesConfigurables, via
     // obtenirConfigPratiqueActive). Plus de fallback sur configPAN.portfolio
     // (Phase G2-a, 24 mai 2026).
-    const cfg = _obtenirConfigPortfolioCalcul(modalites);
+    const cfg = _obtenirConfigPortfolioCalcul(modalites, pratiqueIdDemande);
     if (cfg.erreur) {
         return {
             pratique: 'PAN-Standards',
@@ -449,7 +461,7 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     // Statut Provisoire/Finale lu tôt — pilote la règle « obligatoires non
     // remises = 0 » : appliquée uniquement en mode finale. En provisoire,
     // les non-remises restent simplement ignorées.
-    const cfgPratiqueActive = (typeof obtenirConfigPratiqueActive === 'function') ? obtenirConfigPratiqueActive() : null;
+    const cfgPratiqueActive = (typeof obtenirConfigPratiqueActive === 'function') ? obtenirConfigPratiqueActive(pratiqueIdDemande) : null;
     const estFinale = !!(cfgPratiqueActive && cfgPratiqueActive.notesFinales);
     // pratiqueId / pratiqueNom : déjà résolus en tête de fonction (#127, pour couvrir
     // aussi le cas « non calculable »).
