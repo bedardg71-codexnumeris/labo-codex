@@ -694,6 +694,57 @@ function calculerEtStockerIndicesCP() {
 }
 
 /**
+ * #307 (Session C Lot 5) — Simule les indices C et P d'un·e étudiant·e pour UNE
+ * pratique donnée, en LECTURE SEULE.
+ *
+ * Miroir, pour un seul étudiant et une seule pratique, de la boucle de
+ * calculerEtStockerIndicesCP() — MAIS sans aucun effet de bord : ne lit ni n'écrit
+ * le store `indicesCP`, ne change pas la pratique active du groupe-cours. Permet
+ * d'afficher côte à côte « voici ce que donnerait la pratique X sur les mêmes
+ * artefacts » sans toucher aux données du trimestre (spec #307 §2 : éphémère).
+ *
+ * Parité : appelée avec la pratique active, rend exactement les mêmes C et P que
+ * calculerEtStockerIndicesCP() pour cet étudiant (même chaîne de calcul).
+ *
+ * @param {string} da - Numéro DA de l'étudiant·e
+ * @param {string} pratiqueId - Pratique à simuler (id bibliothèque ou canonique)
+ * @returns {{pratique:string, C:number, P:number, noteFinale:?number, details:?object}|null}
+ *          null si da/pratiqueId manquant ou pratique introuvable dans le registre.
+ */
+function simulerIndices(da, pratiqueId) {
+    if (!da || !pratiqueId) return null;
+
+    const pratique = (typeof obtenirPratiqueParId === 'function') ? obtenirPratiqueParId(pratiqueId) : null;
+    if (!pratique) return null;
+
+    // C = complétion selon la config propre de la pratique simulée.
+    const C_decimal = (typeof pratique.calculerCompletion === 'function') ? pratique.calculerCompletion(da) : null;
+
+    // P = note finale de session de la pratique simulée (chemin portfolio paramétré,
+    // Lot 2). Fallback sur calculerPerformance pour les familles sans note portfolio.
+    let P_decimal = null;
+    let noteFinale = null;
+    let details = null;
+    if (typeof calculerDetailsNoteFinale === 'function') {
+        const d = calculerDetailsNoteFinale(da, pratiqueId);
+        if (d && d.noteFinale !== null && d.noteFinale !== undefined) {
+            noteFinale = d.noteFinale;
+            P_decimal = d.noteFinale / 100;
+            details = d;
+        }
+    }
+    if (P_decimal === null && typeof pratique.calculerPerformance === 'function') {
+        P_decimal = pratique.calculerPerformance(da);
+    }
+
+    // Mêmes arrondis que calculerEtStockerIndicesCP (0-1 → 0-100).
+    const C = C_decimal !== null && C_decimal !== undefined ? Math.round(C_decimal * 100) : 0;
+    const P = P_decimal !== null && P_decimal !== undefined ? Math.round(P_decimal * 100) : 0;
+
+    return { pratique: pratiqueId, C, P, noteFinale, details };
+}
+
+/**
  * 🆕 BETA 95.5 : Récupère les indices C et P depuis IndexedDB (async)
  *
  * @param {string} da - Numéro DA de l'étudiant
@@ -1097,6 +1148,7 @@ window.obtenirConfigPratiqueActive = obtenirConfigPratiqueActive;
 // 🆕 Beta 95.5 : Exporter les fonctions d'indices C/P
 window.calculerEtStockerIndicesCP = calculerEtStockerIndicesCP;
 window.obtenirIndicesCPAsync = obtenirIndicesCPAsync;
+window.simulerIndices = simulerIndices; // #307 Lot 5 — indices C/P en lecture seule pour une pratique simulée
 // window.obtenirIndicesCP → indices.js (#206)
 
 
