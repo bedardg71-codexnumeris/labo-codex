@@ -3,7 +3,7 @@
 **Date** : 4 juin 2026
 **Auteur** : Claude (Cowork) en discussion avec Grégoire
 **Destinataire** : Claude Code
-**Statut** : ✅ Décisions de design actées par Grégoire (§2). **Mise à jour 5 juin 2026** : le verrou technique est levé — #307 (Lot 5) est désormais exécutable (voir l'encadré du §3.1).
+**Statut** : ✅ Décisions de design actées par Grégoire (§2). **Mise à jour 5 juin 2026** : verrou technique *en partie* levé (signature paramétrable posée au Lot 2) ; reste à câbler le paramètre jusqu'au calcul de config — c'est le premier travail de #307 (voir l'encadré du §3.1).
 **Références** : `BACKLOG.md` #307 et #303 ; `Refactorisations/PLAN_architecture_pratiques_SSOT.md` (§5 et §7 corrigé le 4 juin) ; rapports testeurs #126-128 (31 mai)
 
 ---
@@ -29,11 +29,12 @@ Ordre impératif : **Session B (représentations) → Session C (calcul) → #30
 
 ### 3.1 Contrat exigé de la Session C (CONDITION DE FAISABILITÉ de #307)
 
-> **✅ MISE À JOUR 5 juin 2026 — verrou levé.** Le contrat ci-dessous est **livré sur `origin/main`** par les Lots 0-2 de la Session C (PR #25) :
-> - **Lot 2** a posé `calculerDetailsNoteFinale(da, pratiqueIdDemande = null)` (`js/profil-etudiant-actions.js:401`) — la fonction est **paramétrable par pratique**. C'est la condition de faisabilité de #307, désormais remplie.
+> **⚠️ MISE À JOUR 5 juin 2026 — verrou EN PARTIE levé (état vérifié dans le code).** Les Lots 0-2 de la Session C sont sur `origin/main` (PR #25), mais le câblage n'est pas complet :
+> - **Lot 2** a posé la *signature* `calculerDetailsNoteFinale(da, pratiqueIdDemande = null)` (`js/profil-etudiant-actions.js:401`). **Mais** `pratiqueIdDemande` ne pilote pour l'instant que la résolution du **nom** de la pratique (l. 415-418) ; le **calcul de la note** appelle toujours `_obtenirConfigPortfolioCalcul(modalites)` (l. 423) → `obtenirConfigPratiqueActive()` (l. 200), c.-à-d. la pratique **active**. Passer une autre pratique donne donc son nom mais la note de l'active.
+> - **Premier travail de #307** : propager `pratiqueId` jusqu'à la config — `_obtenirConfigPortfolioCalcul(modalites, pratiqueId)` → `obtenirConfigPratiqueActive(pratiqueId)` (résout la config de la pratique demandée, défaut = active). Verrouiller par un test : simuler une pratique ≠ active produit une note distincte sur les mêmes artefacts.
 > - **Lot 1** a posé le *seam* `_modalites()` (lit `this.config.modalites` en priorité) dans les instances.
-> - **Nuance sur le diagnostic du 4 juin** : la lecture de `modalitesEvaluation` dans `pratique-configurable.js` était en réalité du **code mort** (lue puis jamais utilisée — le `switch` branchait déjà sur `this.config`), retirée par le Lot 1. La cause réelle du comportement émergent était le **chemin procédural** (`calculerDetailsNoteFinale` → `obtenirPratiqueActiveGroupeCours`, sans paramètre), levé par le Lot 2.
-> - **Restent en Session C** (non bloquants pour #307) : Lot 3 (retrait du jeton `SOM|PAN`) et Lot 4 (fold `pan-objectifs ⊂ standards`), prêts sur branches. **Lot 5 = la brique `simulerIndices` = le point de départ de #307**, pas encore écrit.
+> - **Nuance sur le diagnostic du 4 juin** : la lecture de `modalitesEvaluation` dans `pratique-configurable.js` était du **code mort** (lue puis jamais utilisée — le `switch` branchait déjà sur `this.config`), retirée au Lot 1. La cause réelle du comportement émergent est le **chemin procédural** (`calculerDetailsNoteFinale` → `obtenirConfigPratiqueActive` → pratique active, sans paramètre).
+> - **Restent en Session C** (non bloquants pour #307) : Lot 3 (retrait du jeton `SOM|PAN`) et Lot 4 (fold `pan-objectifs ⊂ standards`), prêts sur branches. **Lot 5 = la brique `simulerIndices` = le cœur de #307**, pas encore écrit.
 >
 > Le texte original ci-dessous est conservé comme trace de l'intention initiale.
 
