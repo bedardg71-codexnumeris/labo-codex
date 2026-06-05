@@ -307,10 +307,9 @@ function calculerTauxCompletion(da) {
     // Le recalcul de secours a été supprimé pour éviter deux algorithmes divergents.
     // Si indicesCP n'est pas encore calculé, retourner null (les appelants gèrent ce cas).
     if (typeof obtenirIndicesCP === 'function') {
-        const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-        const pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
-
-        const indicesCP = obtenirIndicesCP(da, pratique);
+        // Session C (Lot 3) : jeton SOM|PAN retiré — obtenirIndicesCP rend la
+        // couche unique de la pratique active.
+        const indicesCP = obtenirIndicesCP(da);
 
         if (indicesCP && indicesCP.C !== undefined) {
             return Math.round(indicesCP.C);
@@ -338,11 +337,8 @@ function obtenirCouleurCompletion(taux) {
 function calculerPerformance(da) {
     // LIRE depuis la source unique de vérité (portfolio.js)
     if (typeof obtenirIndicesCP === 'function') {
-        // Détecter la pratique active
-        const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-        const pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
-
-        const indicesCP = obtenirIndicesCP(da, pratique);
+        // Session C (Lot 3) : jeton SOM|PAN retiré — couche unique active.
+        const indicesCP = obtenirIndicesCP(da);
 
         if (indicesCP && indicesCP.P !== undefined) {
             return Math.round(indicesCP.P);

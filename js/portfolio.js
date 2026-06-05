@@ -705,7 +705,7 @@ async function obtenirIndicesCPAsync(da) {
     return indicesCP[da]?.actuel || null;
 }
 
-// obtenirIndicesCP, obtenirHistoriqueIndicesCP → déplacés dans indices.js (#206)
+// obtenirIndicesCP → déplacé dans indices.js (#206)
 
 /* ===============================
    🎯 CALCULS MULTI-OBJECTIFS
@@ -1091,7 +1091,7 @@ window.obtenirConfigPratiqueActive = obtenirConfigPratiqueActive;
 // 🆕 Beta 95.5 : Exporter les fonctions d'indices C/P
 window.calculerEtStockerIndicesCP = calculerEtStockerIndicesCP;
 window.obtenirIndicesCPAsync = obtenirIndicesCPAsync;
-// window.obtenirIndicesCP, window.obtenirHistoriqueIndicesCP → indices.js (#206)
+// window.obtenirIndicesCP → indices.js (#206)
 
 
 })();

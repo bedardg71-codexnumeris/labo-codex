@@ -460,9 +460,7 @@ function chargerListeEvaluationsRefonte() {
  */
 function genererBadgeCompletion(etudiant) {
     // 🎯 Lire depuis la source unique : portfolio.js génère indicesCP
-    // Détecter la pratique active pour lire le bon indice C
-    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-    const pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
+    // Session C (Lot 3) : jeton SOM|PAN retiré — couche unique de la pratique active.
 
     // Compter uniquement les artefacts distincts (exclure les évaluations remplacées)
     const evaluationsActives = etudiant.evaluations.filter(e => !e.remplaceeParId);
@@ -474,22 +472,13 @@ function genererBadgeCompletion(etudiant) {
 
     // PRIORITÉ 1 : Utiliser obtenirIndicesCP si disponible (Single Source of Truth)
     if (typeof obtenirIndicesCP === 'function') {
-        const indicesCPEtudiant = obtenirIndicesCP(etudiant.da, pratique);
+        const indicesCPEtudiant = obtenirIndicesCP(etudiant.da);
         if (indicesCPEtudiant && typeof indicesCPEtudiant.C === 'number' && !isNaN(indicesCPEtudiant.C)) {
             completion = indicesCPEtudiant.C / 100;
         }
     }
 
-    // PRIORITÉ 2 : Fallback - Lire directement depuis localStorage
-    if (completion === 0) {
-        const indicesCP = db.getSync(cle('indicesCP'), {});
-        const actuel = indicesCP[etudiant.da]?.actuel;
-        if (actuel && actuel[pratique] && typeof actuel[pratique].C === 'number') {
-            completion = actuel[pratique].C / 100;
-        }
-    }
-
-    // PRIORITÉ 3 : Fallback final - Calculer depuis le nombre d'artefacts
+    // PRIORITÉ 2 : Fallback final - Calculer depuis le nombre d'artefacts
     if (completion === 0 && nbArtefacts > 0) {
         const productions = obtenirDonneesSelonMode('productions');
         const productionsAttendues = productions.filter(p => p.type !== 'portfolio').length;

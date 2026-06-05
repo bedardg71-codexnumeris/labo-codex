@@ -732,71 +732,6 @@ function genererSectionMobilisationEngagement(da) {
 }
 
 /**
- * Calcule la direction de l'engagement (tendance récente)
- * Basé sur l'historique des indices C et P (mobilisation)
- * @param {string} da - Numéro de DA
- * @param {string} pratique - 'SOM' ou 'PAN'
- * @returns {Object} - { symbole: '→'|'←'|'—', interpretation: string }
- */
-function calculerDirectionEngagement(da, pratique) {
-    const historiqueCP = obtenirHistoriqueIndicesCP(da, pratique);
-
-    // Résultat par défaut
-    const resultatParDefaut = {
-        symbole: '',
-        interpretation: 'Données insuffisantes'
-    };
-
-    // Besoin d'au moins 4 entrées pour calculer une tendance (2 récentes vs 2 précédentes)
-    if (!historiqueCP || historiqueCP.length < 4) {
-        return resultatParDefaut;
-    }
-
-    // Prendre les N dernières entrées (N=2 pour simplifier)
-    const N = 2;
-    const entrees = historiqueCP.slice(-N * 2); // 4 dernières entrées
-
-    // Calculer la moyenne de mobilisation (C × P) pour chaque groupe
-    const calculerMobilisation = (entries) => {
-        let somme = 0;
-        let count = 0;
-        entries.forEach(e => {
-            const C = e.C / 100; // Convertir en décimal
-            const P = e.P / 100;
-            somme += C * P;
-            count++;
-        });
-        return count > 0 ? somme / count : 0;
-    };
-
-    const groupe1 = entrees.slice(0, N); // 2 anciennes
-    const groupe2 = entrees.slice(N); // 2 récentes
-
-    const mobilisation1 = calculerMobilisation(groupe1);
-    const mobilisation2 = calculerMobilisation(groupe2);
-
-    const difference = mobilisation2 - mobilisation1;
-    const seuilStabilite = 0.05; // 5% de différence = stabilité
-
-    if (Math.abs(difference) < seuilStabilite) {
-        return {
-            symbole: '—',
-            interpretation: 'Mobilisation stable'
-        };
-    } else if (difference > 0) {
-        return {
-            symbole: '→',
-            interpretation: 'Mobilisation en hausse'
-        };
-    } else {
-        return {
-            symbole: '←',
-            interpretation: 'Mobilisation en baisse'
-        };
-    }
-}
-
-/**
  * Génère le HTML de la section Accompagnement (interventions RàI)
  * Inclut: badge RàI, risque, pattern, progression, services, échelle, historique
  * @param {string} da - Numéro de DA
@@ -3892,7 +3827,7 @@ function _calculerIndicesPerformance(da) {
     return { indices: calculerTousLesIndices(da) };
 }
 
-function _lireDetailsRapportPerformance(da, pratiqueActive, nombreARetenir, artefacts) {
+function _lireDetailsRapportPerformance(da, nombreARetenir, artefacts) {
     let methodeSelectionRapport = 'meilleurs';
     let portfolioActifRapport = true;
     let nombreARetenirConfig = nombreARetenir;
@@ -3917,7 +3852,7 @@ function _lireDetailsRapportPerformance(da, pratiqueActive, nombreARetenir, arte
     let noteTop3 = null;
 
     if (typeof obtenirIndicesCP === 'function') {
-        const indicesCP = obtenirIndicesCP(da, pratiqueActive);
+        const indicesCP = obtenirIndicesCP(da);
         if (indicesCP && indicesCP.details) {
             const idsRetenus = indicesCP.details.artefactsRetenus || [];
             notesRetenues = indicesCP.details.notes || [];
@@ -4038,7 +3973,7 @@ function genererSectionPerformance(da) {
     const { indices } = _calculerIndicesPerformance(da);
 
     // Détails du rapport portfolio (méthode sélection, artefacts retenus, etc.)
-    const detailsRapport = _lireDetailsRapportPerformance(da, indices.pratique, nombreARetenir, artefacts);
+    const detailsRapport = _lireDetailsRapportPerformance(da, nombreARetenir, artefacts);
     const {
         methodeSelectionRapport, portfolioActifRapport, nombreARetenirConfig,
         configCategoriesRapport, artefactsRetenus, notesRetenues
