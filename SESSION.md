@@ -1,19 +1,26 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 4 juin 2026, build 0604-0826).
-     Session du 4 juin : après le lancement public 1.0.0 (3 juin), REFONTE
-     COMPLÈTE DE LA PAGE AIDE + refonte des textes des DERNIERS MODULES +
-     MODULE GUIDES PÉDAGOGIQUES (#302) → VERSION 1.1.0, puis DÉCOUVRABILITÉ
-     DES GUIDES (accueil, visite guidée, popups, glossaire) → VERSION 1.1.1.
-     ✅ TOUT EST POUSSÉ sur origin/main (HEAD `7eeffe07`, validé terrain par
-     Grégoire). 178 tests verts (150 Vitest + 28 Playwright).
-     SUITE PLANIFIÉE PAR COWORK (prête) : #307 simulation de pratiques (spec
-     validée) → voir le relais ci-dessous + BACKLOG #307/#303.
-     Les sessions du 3 juin (lancement) et antérieures restent documentées
-     dans les §§ suivants.
+     IDENTIFICATION DE CE FICHIER  (mis à jour 5 juin 2026).
+     Session du 5 juin : #303 SESSION C (calcul par famille) CONSOLIDÉE sur main
+     + #307 DÉBLOQUÉ. Consolidation des Lots 3 (retrait jeton SOM|PAN, PR #26) et
+     4 (fold pan-objectifs ⊂ standards, PR #27) ; CÂBLAGE Lot 2 (config paramétrable
+     par pratique, PR #28) ; brique Lot 5 simulerIndices lecture seule (PR #29).
+     MOTEUR DE SIMULATION #307 COMPLET sur origin/main (HEAD `a8345986`). 224 tests
+     verts (196 Vitest + 28 Playwright). version 1.1.2 inchangée (lots internes ;
+     bump `minor` prévu au Lot 6 / livraison #307).
+     SUITE : phase UI #307 (panneau comparatif + export CSV, spec §4-5) À PLANIFIER
+     avec Grégoire, puis Lot 6 (golden master final + bump + relais + validation).
+     Les sessions du 4 juin et antérieures restent documentées dans les §§ suivants.
      ===================================================================== -->
 
 > **📌 Identification**
 > - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
+> - **✅ RELAIS — 5 juin 2026 (Claude Code), #303 SESSION C (CALCUL PAR FAMILLE) CONSOLIDÉE + #307 DÉBLOQUÉ — moteur complet sur `main`, HEAD `a8345986`, 4 PR mergées, 224 tests verts (196 Vitest + 28 Playwright)** : journée centrée sur le déverrouillage technique de #307 (simuler/comparer des pratiques sur les mêmes artefacts). ⚠️ **Fil dédoublé resynchronisé** : début de session, ce SESSION.md (4 juin) disait #303 Sessions B+C « post-AQPC » alors qu'un autre agent les avait relancées et avancées le jour même (branches `claude/session-c-*`, PR #24/#25 déjà mergées). Audit git effectué → bascule sur l'état réel d'`origin/main` avant tout travail.
+>   - **Spec #307 versionnée + amendée** (`plans de travail/SPEC_simulation_pratiques_307.md`, jusque-là untracked) : chemins §3.1 préfixés `js/pratiques/`, encadré d'état du verrou. Brouillon local antérieur préservé sous `...BROUILLON-LOCAL-presync-20260605.md` (ne pas confondre avec la version versionnée).
+>   - **Consolidation Lots 3-4** : **PR #26** (retrait du jeton `SOM|PAN`, vestigial) et **PR #27** (fold `pan-objectifs ⊂ standards` — instance orpheline `js/pratiques/pratique-pan-objectifs.js` (645 l.) supprimée ; variante `par-objectifs` de Standards **préservée** ; filet de normalisation `pan-objectifs → standards`) fusionnées en squash dans l'ordre du plan. Audit pan-objectifs (aucune donnée prod active) corroboré côté code.
+>   - **Câblage Lot 2** (**PR #28**) : `pratiqueIdDemande` se propage jusqu'au calcul de config — `obtenirConfigPratiqueActive(pratiqueIdDemande)` / `obtenirConfigCategories(pratiqueIdDemande)` (`portfolio.js`) ; `_obtenirConfigPortfolioCalcul(modalites, pratiqueIdDemande)` + `calculerDetailsNoteFinale` (config **et** statut finale) (`profil-etudiant-actions.js`). **Garde de famille portée sur la pratique DEMANDÉE** (code `STD`) ; pratique inconnue → `null` (pas de repli silencieux). Invariant : param absent ⇒ comportement identique (golden master inchangé). Sentinelle 6 cas.
+>   - **Lot 5** (**PR #29**) : `window.simulerIndices(da, pratiqueId)` dans `portfolio.js` — miroir **lecture seule** de `calculerEtStockerIndicesCP` pour un étudiant + une pratique (C via `calculerCompletion`, P via `calculerDetailsNoteFinale(da, pratiqueId)`, fallback `calculerPerformance`). N'écrit **jamais** `indicesCP`. Sentinelle : PARITÉ (= calcul stocké pour l'active) + LECTURE SEULE + paramétrage + fallback.
+>   - **Diagnostic corrigé en route** : la lecture de `modalitesEvaluation` dans `pratique-configurable.js` était du **code mort** (retirée au Lot 1), pas une cause active. Cause réelle du comportement émergent = chemin procédural `calculerDetailsNoteFinale → obtenirConfigPratiqueActive → pratique active`, levé par le câblage Lot 2.
+>   - **SUITE — phase UI #307 (À PLANIFIER ENSEMBLE, prochaine session)** : panneau comparatif dans le profil (« Comparer des pratiques », sélection inline 1-2 pratiques, colonnes avec décomposition par famille, écart en points) + export CSV horodaté. **Base = SPEC #307 §4-5**. Briques d'appel prêtes : `simulerIndices(da, pratiqueId)` + `calculerDetailsNoteFinale(da, pratiqueId)`. Puis **Lot 6** : golden master final, **bump `minor`** (capacité de simulation = nouveauté), relais, **validation terrain Mac + iPad (sombre/clair)**. Pas d'UI codée tant que le design n'est pas validé avec Grégoire.
 > - **✅ RELAIS — 4 juin 2026 (Claude Code), #303 SESSION C — RETRAIT COMPLET DU MODE COMPARATIF (3b+3c+3d) LIVRÉ — branche `claude/eager-wozniak-KpaAC`, PUSHÉ, NON mergé sur main, build `0604-1326`** : le mode comparatif (affichage SOM+PAN côte à côte) est **entièrement retiré** — affichages, import/export, CSS **et** write-side. L'app affiche TOUJOURS une seule couche = la pratique active du groupe. **175 Vitest verts** à chaque commit (Playwright WebKit non exécutable sur ce conteneur — binaire absent ; échecs d'environnement seulement). **Affichages validés terrain par Grégoire (3b/3c).** **PR #25 ouverte** sur ce travail.
 >   - **Lot 3b (neutralisation à la source)** : `determinerModeAffichageTableauBord(config)` (`tableau-bord-apercu.js`) = **point unique de vérité** ; renvoie toujours une seule couche (sommative→SOM, sinon→PAN), jamais les deux. Toutes les fonctions de rendu (tableau de bord + profil) en dérivent leur couche. Le chemin « pratique active » est byte-identique à avant ; seules les branches « deux couches » (déjà inertes) sont coupées.
 >   - **Lot 3c-1/2/3 (retrait du code mort affichage)** : branches/échafaudages comparatif supprimés dans `profil-etudiant-sections-affichage.js` et `tableau-bord-apercu.js` ; champ `mode_comparatif` retiré de `import-export.js` (export + mapping import) ; 4 classes CSS mortes retirées de `styles.css` (`.profil-valeur-grande-orange/-bleu-std`, `.critere-point-som/-std`) ; paramètres/locals/retours vestigiaux `modeComparatif` retirés (sorties identiques — les corps ignoraient déjà le drapeau).
