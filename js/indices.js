@@ -7,7 +7,7 @@
    - profil-etudiant.js (calculerTousLesIndices, calculerPerformancePAN)
    - apercu-contenu.js (calculerIndicesEtudiant, calculerCorrelationPearson)
    - etudiants.js (calculerCorrelationPearson - doublon)
-   - portfolio.js (obtenirIndicesCP, obtenirHistoriqueIndicesCP)
+   - portfolio.js (obtenirIndicesCP)
 
    PRODUCTEURS :
    - calculerEtSauvegarderIndicesAssiduite() → ici (déplacé depuis saisie-presences.js)
@@ -355,59 +355,23 @@ function calculerAssiduitePourAffichage(da, dateStr, periodesSeanceActuelle) {
 /**
  * Récupère les indices C et P actuels pour un étudiant (synchrone)
  *
- * NOUVELLE STRUCTURE (Beta 95.5) :
+ * STRUCTURE (Beta 95.5, structure unifiée plate) :
  * { date, pratique, C, P, details }
  *
- * RÉTROCOMPATIBILITÉ : Si paramètre 'pratique' fourni (ancienne API),
- * retourne { C, P, details } directement.
+ * Session C (Lot 3) : le jeton déprécié `pratique` (SOM|PAN) a été retiré —
+ * il était ignoré au calcul (indices identiques quelle que soit la valeur).
  *
  * @param {string} da - Numéro DA de l'étudiant
- * @param {string} pratique - (Déprécié) Ignoré en Beta 95.5
- * @returns {Object} - Structure actuelle ou null
+ * @returns {Object} - Structure actuelle { date, pratique, C, P, details } ou null
  */
-function obtenirIndicesCP(da, pratique = null) {
+function obtenirIndicesCP(da) {
     // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
     const indicesCP = obtenirDonneesSelonMode('indicesCP') || {};
     const actuel = indicesCP[da]?.actuel;
 
     if (!actuel) return null;
 
-    // Rétrocompatibilité : si pratique demandée, retourner le format attendu
-    if (pratique === 'SOM' || pratique === 'PAN') {
-        return {
-            C: actuel.C || 0,
-            P: actuel.P || 0,
-            details: actuel.details || {}
-        };
-    }
-
-    // Sinon retourner la structure complète
     return actuel;
-}
-
-/**
- * Récupère l'historique des indices C et P pour un étudiant
- *
- * @param {string} da - Numéro DA de l'étudiant
- * @param {string} pratique - (Déprécié) Ignoré en Beta 95.5
- * @returns {Array} - [{ date, pratique, C, P, details }, ...]
- */
-function obtenirHistoriqueIndicesCP(da, pratique = null) {
-    // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
-    const indicesCP = obtenirDonneesSelonMode('indicesCP') || {};
-    const historique = indicesCP[da]?.historique || [];
-
-    // Rétrocompatibilité : si pratique demandée, adapter le format
-    if (pratique === 'SOM' || pratique === 'PAN') {
-        return historique.map(entree => ({
-            date: entree.date,
-            C: entree.C || 0,
-            P: entree.P || 0,
-            details: entree.details || {}
-        }));
-    }
-
-    return historique;
 }
 
 /* ===============================
@@ -468,8 +432,6 @@ function calculerPerformancePAN(da) {
  * Calcule tous les indices pour un étudiant
  *
  * @param {string} da - Numéro de DA
- * @param {string} pratique - (Optionnel) 'SOM' ou 'PAN' pour forcer une pratique
- *                            Si non spécifié, détecte depuis modalitesEvaluation
  * @returns {Object} - Objet avec tous les indices
  *
  * STRUCTURE DE RETOUR :
@@ -481,7 +443,7 @@ function calculerPerformancePAN(da) {
  *   pratique: 'SOM'     // Pratique utilisée pour le calcul
  * }
  */
-function calculerTousLesIndices(da, pratique = null) {
+function calculerTousLesIndices(da) {
     // ========================================
     // INDICE A : SINGLE SOURCE OF TRUTH
     // Lire depuis db.getSync('indicesAssiduite') (calculé par calculerEtSauvegarderIndicesAssiduite ci-dessus)
@@ -497,21 +459,20 @@ function calculerTousLesIndices(da, pratique = null) {
         A = assiduiteSommatif;
     }
 
-    // DÉTERMINER LA PRATIQUE À UTILISER
-    if (!pratique) {
-        const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-        pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
-    }
+    // Étiquette de la pratique active (Session C, Lot 3 : jeton SOM|PAN retiré de
+    // la signature ; dérivé en interne pour le champ `.pratique` du retour).
+    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
 
     // INDICES C, P : Lire depuis indicesCP (Single Source of Truth)
     let C = 0;
     let P = 0;
 
     if (typeof obtenirIndicesCP === 'function') {
-        const indicesCP = obtenirIndicesCP(da, pratique);
+        const indicesCP = obtenirIndicesCP(da);
         if (indicesCP) {
-            C = indicesCP.C / 100;
-            P = indicesCP.P / 100;
+            C = (indicesCP.C || 0) / 100;
+            P = (indicesCP.P || 0) / 100;
         } else {
             // Fallback : calculer à la volée si pas encore généré
             console.warn(`⚠️ indicesCP non trouvé pour ${da} (${pratique}) - Calcul à la volée`);
@@ -591,7 +552,6 @@ function calculerIndicesEtudiant(da, _cacheIndicesA, _cacheIndicesCP) {
    =============================== */
 window.calculerCorrelationPearson = calculerCorrelationPearson;
 window.obtenirIndicesCP = obtenirIndicesCP;
-window.obtenirHistoriqueIndicesCP = obtenirHistoriqueIndicesCP;
 window.calculerPerformancePAN = calculerPerformancePAN;
 window.calculerTousLesIndices = calculerTousLesIndices;
 window.calculerIndicesEtudiant = calculerIndicesEtudiant;
