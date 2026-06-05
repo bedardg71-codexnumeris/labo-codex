@@ -16,29 +16,24 @@ const db = {
 };
 const cle = (k) => k;
 
-let standards, objectifs;
+let standards;
 
 beforeAll(() => {
     const win = chargerScript('js/pratiques/pratique-registre.js', { db, cle });
     chargerScript('js/pratiques/pratique-pan-standards.js', { db, cle }, win);
-    chargerScript('js/pratiques/pratique-pan-objectifs.js', { db, cle }, win);
     standards = win.obtenirPratiqueParId('standards');
-    objectifs = win.obtenirPratiqueParId('pan-objectifs');
 });
 
 describe('Session C Lot 1 · seam _modalites()', () => {
-    it('résout les instances codées en dur', () => {
+    it('résout l\'instance codée en dur', () => {
         expect(standards?.obtenirId()).toBe('standards');
-        expect(objectifs?.obtenirId()).toBe('pan-objectifs');
         expect(typeof standards._modalites).toBe('function');
-        expect(typeof objectifs._modalites).toBe('function');
     });
 
     it('sans this.config → repli sur le SSOT global (no-op, invariant)', () => {
         // L'instance active (singleton) n'a pas de this.config → global identique à avant.
         expect(standards.config).toBeUndefined();
         expect(standards._modalites()).toBe(MODALITES_GLOBAL);
-        expect(objectifs._modalites()).toBe(MODALITES_GLOBAL);
     });
 
     it('avec this.config.modalites → utilise la config propre (simulation #307)', () => {

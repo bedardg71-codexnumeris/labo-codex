@@ -4,8 +4,8 @@ import { chargerScript } from './_helpers/charger-script.js';
 // Session A (assainissement des identifiants de pratiques, mai 2026).
 // normaliserIdPratique est le point unique de canonicalisation legacy → canonique.
 // Décision 29 mai : identifiants neutres (sommative/standards/specifications/denotation),
-// codes courts (SOM/STD/SPE/DEN) inchangés. pan-objectifs N'EST PAS remappé en Session A
-// (variante de granularité de standards, consolidée en session calcul).
+// codes courts (SOM/STD/SPE/DEN) inchangés. Session C Lot 4 : pan-objectifs est
+// foldé dans standards (instance séparée retirée, décision D1).
 
 let win;
 
@@ -30,6 +30,7 @@ describe('Session A · normaliserIdPratique', () => {
         expect(N('pan-maitrise')).toBe('standards');
         expect(N('pan-maitrise-json')).toBe('standards');
         expect(N('pan-standards')).toBe('standards');
+        expect(N('pan-objectifs')).toBe('standards');
         expect(N('pan-specifications')).toBe('specifications');
         expect(N('pan-denotation')).toBe('denotation');
     });
@@ -41,8 +42,8 @@ describe('Session A · normaliserIdPratique', () => {
         }
     });
 
-    it('ne remappe PAS pan-objectifs en Session A (variante de standards, décision D1)', () => {
-        expect(win.normaliserIdPratique('pan-objectifs')).toBe('pan-objectifs');
+    it('folde pan-objectifs dans standards (Session C Lot 4, décision D1)', () => {
+        expect(win.normaliserIdPratique('pan-objectifs')).toBe('standards');
     });
 
     it('est idempotent : normaliser(normaliser(x)) === normaliser(x)', () => {
