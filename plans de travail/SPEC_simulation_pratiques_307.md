@@ -1,5 +1,7 @@
 # SPEC #307 — Simuler et comparer des pratiques de notation (profil étudiant)
 
+> ⚠️ **ORIENTATION DÉPASSÉE — 5 juin 2026.** La forme « panneau dans le profil individuel » décrite ici (en particulier §2 et §4) est **close**. Une session de conception du 5 juin a fait émerger un chantier plus vaste : une **vue dédiée « Comparateur de pratiques »** (échantillon de profils-types du groupe démo, disposition réversible, aide au choix d'une pratique). Le **moteur** construit pour #307 reste valide et sert de base ; seule l'orientation UI change. La réflexion conceptuelle du chantier successeur est menée avec Cowork : voir `plans de travail/NOTE-COWORK-comparateur-pratiques.md`. **Ne pas reprendre l'implémentation du panneau de profil décrite ci-dessous.**
+
 **Date** : 4 juin 2026
 **Auteur** : Claude (Cowork) en discussion avec Grégoire
 **Destinataire** : Claude Code
