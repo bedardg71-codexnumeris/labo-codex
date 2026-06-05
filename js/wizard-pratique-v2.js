@@ -1086,33 +1086,20 @@ function etapePrecedenteV2() {
  * @returns {number} - Nombre total d'étapes
  */
 function calculerNbEtapes() {
-    const reponses = wizardState.reponses;
-    // Base: infos-base, calcul-note-finale, nb-evaluations, seuils-personnels, recapitulatif
-    let count = 5;
-
-    if (reponses.calcNoteFinale === 'pas-certain') {
-        count++; // sous-questions-guidees
+    // #134 : dériver le total du graphe réel (obtenirEtapeSuivante) au lieu d'un compteur
+    // manuel qui divergeait — il oubliait des étapes conditionnelles (config-sommative-regles,
+    // config-objectifs-definition…) → « étape 8 sur 7 » et dots désynchronisés. Le parcours
+    // suit exactement les mêmes transitions et conditions que la navigation, donc le total
+    // reste synchrone par construction selon les réponses actuelles.
+    let count = 1; // infos-base (point d'entrée)
+    let etape = 'infos-base';
+    let garde = 0;
+    while (etape && garde++ < 50) {
+        const suivante = obtenirEtapeSuivante(etape, wizardState.reponses);
+        if (!suivante) break;
+        count++;
+        etape = suivante;
     }
-
-    if (reponses.typePratique === 'sommative') {
-        count++; // regles-sommative
-        count++; // config-sommative
-        return count;
-    }
-
-    if (reponses.typePratique === 'pan-standards') {
-        count++; // approche-evaluation
-        if (reponses.approcheEvaluation === 'par-artefacts') {
-            count += 3; // config-portfolio, echelle-performance, grille-criteres
-        } else {
-            count += 4; // mode-calcul-objectifs, config-mode-calcul, echelle-performance, grille-criteres
-        }
-    } else if (reponses.typePratique === 'pan-specifications') {
-        count++; // config-specifications
-        if (reponses.utiliserJetons) count++; // config-jetons
-        count++; // choix-modele-bundles
-    }
-
     return count;
 }
 
@@ -1536,17 +1523,8 @@ function genererSelectGrille(champ) {
                 <label>${champ.label}</label>
                 <div class="wizard-v2-info-block" style="flex-direction: column; align-items: stretch;">
                     <p style="margin: 0 0 10px 0;">Aucune grille de critères n'a été créée. Tu peux en générer une de base pour commencer.</p>
-                    <button type="button" class="wizard-v2-btn-demo-grille" data-action="wizardV2CreerGrilleDemo" style="
-                        background: var(--bleu-principal, #4A90D9);
-                        color: white;
-                        border: none;
-                        padding: 8px 16px;
-                        border-radius: 6px;
-                        cursor: pointer;
-                        font-size: 0.9rem;
-                        align-self: flex-start;
-                    ">Créer une grille de base (4\u00a0critères)</button>
-                    <p style="margin: 8px 0 0 0; font-size: 0.8rem; color: var(--gris-moyen, #888);">Tu pourras la modifier plus tard dans Conception → Grilles de critères.</p>
+                    <button type="button" class="wizard-v2-btn-demo-grille" data-action="wizardV2CreerGrilleDemo">Créer une grille de base (4\u00a0critères)</button>
+                    <p class="wizard-v2-demo-grille-aide">Tu pourras la modifier plus tard dans Conception → Grilles de critères.</p>
                 </div>
             </div>
         `;
@@ -1592,8 +1570,9 @@ function wizardV2CreerGrilleDemo() {
     // Stocker l'ID pour pré-sélection
     wizardState.reponses.grilleId = grilleDemo.id;
 
-    // Rafraîchir l'affichage de l'étape
-    afficherEtapeV2(wizardState.etapeActuelle);
+    // Rafraîchir l'affichage de l'étape (#131 : la fonction s'appelle afficherEtapeWizardV2,
+    // afficherEtapeV2 n'existe pas → ReferenceError, l'écran ne se rafraîchissait pas)
+    afficherEtapeWizardV2(wizardState.etapeActuelle);
 }
 
 /**
@@ -1620,35 +1599,20 @@ function genererRecapitulatif() {
 
     // ─── Section 1 : Diagnostic du type de notation (proéminent) ───
     const typeBadges = {
-        'sommative': { code: 'SOM', couleur: '#4A90D9', label: 'Sommative', description: 'Ta note finale est calculée par une moyenne pondérée des évaluations. C\'est la méthode traditionnelle, largement utilisée.' },
-        'pan-standards': { code: 'STD', couleur: '#E67E22', label: 'PAN \u2013 Standards', description: 'Tu évalues par niveaux de maîtrise (ex.\u00a0: I-D-M-E). La note est construite à partir de la démonstration de compétences, pas d\'une simple moyenne.' },
-        'pan-specifications': { code: 'SPE', couleur: '#27AE60', label: 'PAN \u2013 Spécifications', description: 'Chaque travail est jugé acceptable ou non. La note finale dépend du nombre de spécifications réussies (forfaits).' }
+        'sommative': { code: 'SOM', classe: 'som', label: 'Sommative', description: 'Ta note finale est calculée par une moyenne pondérée des évaluations. C\'est la méthode traditionnelle, largement utilisée.' },
+        'pan-standards': { code: 'STD', classe: 'std', label: 'PAN \u2013 Standards', description: 'Tu évalues par niveaux de maîtrise (ex.\u00a0: I-D-M-E). La note est construite à partir de la démonstration de compétences, pas d\'une simple moyenne.' },
+        'pan-specifications': { code: 'SPE', classe: 'spe', label: 'PAN \u2013 Spécifications', description: 'Chaque travail est jugé acceptable ou non. La note finale dépend du nombre de spécifications réussies (forfaits).' }
     };
-    const badge = typeBadges[classification.type] || { code: '?', couleur: '#888', label: 'Indéterminé', description: '' };
+    const badge = typeBadges[classification.type] || { code: '?', classe: 'indetermine', label: 'Indéterminé', description: '' };
 
     html += `
-        <div class="wizard-v2-recap-diagnostic" style="
-            background: ${badge.couleur}12;
-            border: 2px solid ${badge.couleur};
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            text-align: center;
-        ">
-            <div style="font-size: 0.85rem; color: var(--gris-moyen, #888); margin-bottom: 8px;">Ta pratique de notation a été identifiée comme</div>
-            <div style="display: inline-flex; align-items: center; gap: 12px; margin-bottom: 10px;">
-                <span style="
-                    background: ${badge.couleur};
-                    color: white;
-                    padding: 6px 16px;
-                    border-radius: 20px;
-                    font-weight: 700;
-                    font-size: 1.1rem;
-                    letter-spacing: 1px;
-                ">${badge.code}</span>
-                <span style="font-size: 1.2rem; font-weight: 600; color: ${badge.couleur};">${badge.label}</span>
+        <div class="wizard-v2-recap-diagnostic wizard-v2-recap-diagnostic--${badge.classe}">
+            <div class="wizard-v2-recap-diagnostic-intro">Ta pratique de notation a été identifiée comme</div>
+            <div class="wizard-v2-recap-diagnostic-titre">
+                <span class="wizard-v2-recap-badge">${badge.code}</span>
+                <span class="wizard-v2-recap-badge-label">${badge.label}</span>
             </div>
-            <p style="font-size: 0.9rem; color: var(--texte-secondaire, #555); margin: 8px 0 0 0; max-width: 500px; margin-left: auto; margin-right: auto;">${badge.description}</p>
+            <p class="wizard-v2-recap-diagnostic-desc">${badge.description}</p>
     `;
     if (classification.variante) {
         const varianteLabels = {
@@ -1665,7 +1629,7 @@ function genererRecapitulatif() {
             'holistique': 'Holistique',
             'bundles': 'Forfaits de spécifications'
         };
-        html += `<p style="font-size: 0.85rem; margin: 6px 0 0 0; color: var(--gris-moyen, #888);">Variante\u00a0: <strong>${varianteLabels[classification.variante] || classification.variante}</strong></p>`;
+        html += `<p class="wizard-v2-recap-diagnostic-meta">Variante\u00a0: <strong>${varianteLabels[classification.variante] || classification.variante}</strong></p>`;
     }
     if (classification.regles && classification.regles.length > 0 && !classification.regles.includes('aucune')) {
         const reglesLabels = {
@@ -1675,24 +1639,17 @@ function genererRecapitulatif() {
             'plafonnement': 'Plafonnement conditionnel'
         };
         const reglesTexte = classification.regles.map(rl => reglesLabels[rl] || rl).join(', ');
-        html += `<p style="font-size: 0.85rem; margin: 4px 0 0 0; color: var(--gris-moyen, #888);">Règles\u00a0: ${reglesTexte}</p>`;
+        html += `<p class="wizard-v2-recap-diagnostic-meta">Règles\u00a0: ${reglesTexte}</p>`;
     }
     html += '</div>';
 
     // ─── Section 2 : Nom de la pratique (modifiable) ───
     const nomActuel = r.nom || 'Ma pratique de notation';
     html += `
-        <div class="wizard-v2-recap-section" style="margin-bottom: 16px;">
+        <div class="wizard-v2-recap-section">
             <h4>Nom de la pratique</h4>
-            <p style="font-size: 0.85rem; color: var(--gris-moyen, #888); margin: 0 0 8px 0;">Maintenant que tu connais ton type de notation, tu peux ajuster le nom si tu le souhaites.</p>
-            <input type="text" id="wizard-v2-recap-nom" value="${nomActuel.replace(/"/g, '&quot;')}" style="
-                width: 100%;
-                padding: 10px 12px;
-                border: 1px solid var(--bordure, #ddd);
-                border-radius: 6px;
-                font-size: 1rem;
-                box-sizing: border-box;
-            " placeholder="Ex\u00a0: ${badge.label} \u2013 Littérature H2026">
+            <p class="wizard-v2-recap-aide">Maintenant que tu connais ton type de notation, tu peux ajuster le nom si tu le souhaites.</p>
+            <input type="text" id="wizard-v2-recap-nom" class="wizard-v2-recap-nom-input" value="${echapperHtml(nomActuel)}" placeholder="Ex\u00a0: ${badge.label} \u2013 Littérature H2026">
         </div>
     `;
 
@@ -1736,9 +1693,10 @@ function genererRecapitulatif() {
         html += `<p><strong>Approche\u00a0:</strong> ${approcheLabels[r.approcheEvaluation] || r.approcheEvaluation}</p>`;
 
         if (r.approcheEvaluation === 'par-artefacts') {
-            const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-            const nbSoumis = modalites.nArtefactsPAN || r.nbArtefactsSoumis || '?';
-            const nbRetenus = modalites.nArtefactsRetenus || r.nbArtefactsRetenus || '?';
+            // #133 : le wizard prime — on affiche les réponses saisies, défauts
+            // alignés sur l'écriture (plus de lecture prioritaire de Primo).
+            const nbSoumis = r.nbArtefactsSoumis || 12;
+            const nbRetenus = r.nbArtefactsRetenus || 7;
             html += `<p><strong>Artefacts à soumettre\u00a0:</strong> ${nbSoumis}</p>`;
             html += `<p><strong>Artefacts retenus\u00a0:</strong> ${nbRetenus}</p>`;
             const modeSelectionLabels = {
@@ -2136,7 +2094,7 @@ async function creerPratiqueV2() {
     // pratique invalide (qui échouerait ensuite à l'instanciation : « echelle manquante »).
     // SOM (moyenne pondérée) et SPE (seuils) n'utilisent pas d'échelle IDME → non bloqués.
     if (typeFinal === 'pan-standards' && !r.echelleId) {
-        alert('Choisis une échelle de performance (IDME) avant de créer cette pratique PAN-Standards. Reviens à l\'étape « Échelle de performance ».');
+        notifications.erreur('Choisis une échelle de performance (IDME) avant de créer cette pratique PAN-Standards. Reviens à l\'étape « Échelle de performance ».');
         return;
     }
 
@@ -2278,14 +2236,14 @@ async function creerPratiqueV2() {
         };
 
         if (r.approcheEvaluation === 'par-artefacts') {
-            // 🆕 Beta 95.7 : Lire depuis modalitesEvaluation (Primo) OU wizardState (#4)
+            // #133 : le wizard prime — nbSoumis/retenus/min viennent des réponses
+            // saisies, plus du SSOT global modalitesEvaluation (Primo n'écrase plus
+            // ce que l'utilisateur tape). modalites reste lu ci-dessous pour les
+            // catégories hybrides détaillées (Mode Expert), non collectées ici.
             const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-
-            // Priorité : valeur Primo > valeur wizard > défaut
-            // 🆕 Beta 95.7 : Utiliser noms Primo corrects (#4)
-            const nbSoumis = parseInt(modalites.nArtefactsPAN) || parseInt(r.nbArtefactsSoumis) || 12;
-            const nbRetenus = parseInt(modalites.nArtefactsRetenus) || parseInt(r.nbArtefactsRetenus) || 7;
-            const minFormatif = parseInt(modalites.minimumAvantCalcul) || parseInt(r.minAvantCalculFormatif) || 3;
+            const nbSoumis = parseInt(r.nbArtefactsSoumis) || 12;
+            const nbRetenus = parseInt(r.nbArtefactsRetenus) || 7;
+            const minFormatif = parseInt(r.minAvantCalculFormatif) || 3;
 
             pratique.configuration.portfolio = {
                 utiliser: r.utiliserPortfolio !== false,
@@ -2568,16 +2526,38 @@ function chargerPratiqueExistante(pratiqueId) {
             wizardState.reponses.grilleId = config.grilleId;
 
             if (config.portfolio) {
+                // #132 : la création écrit les noms standardisés (nombreTotal /
+                // nombreARetenir / methodeSelection / minimumCompletion). Relire les
+                // anciens noms (nbArtefactsSoumis…) rendait undefined → la config réelle
+                // était écrasée par les défauts à la re-sauvegarde. On relit les bons noms.
                 wizardState.reponses.utiliserPortfolio = config.portfolio.utiliser;
-                wizardState.reponses.nbArtefactsSoumis = config.portfolio.nbArtefactsSoumis;
-                wizardState.reponses.nbArtefactsRetenus = config.portfolio.nbArtefactsRetenus;
+                wizardState.reponses.nbArtefactsSoumis = config.portfolio.nombreTotal;
+                wizardState.reponses.nbArtefactsRetenus = config.portfolio.nombreARetenir;
                 wizardState.reponses.reprisesPermises = config.portfolio.reprisesPermises;
-                wizardState.reponses.minAvantCalculFormatif = config.portfolio.minAvantCalculFormatif;
+                wizardState.reponses.minAvantCalculFormatif = config.portfolio.minimumCompletion;
+                // Restaurer la méthode de sélection (sinon le round-trip repart sur 'n_meilleurs').
+                // L'écriture stocke 'meilleurs' pour le mode 'n_meilleurs' → mapping inverse.
+                const methodeVersMode = { 'meilleurs': 'n_meilleurs', 'tous': 'tous', 'derniers': 'derniers' };
+                wizardState.reponses.modeSelectionPortfolio = config.portfolio.hybride
+                    ? 'hybride'
+                    : (methodeVersMode[config.portfolio.methodeSelection] || 'n_meilleurs');
             }
 
             if (config.objectifs) {
+                // #132 : restaurer le mode ET ses paramètres (TODO jadis inachevé).
+                // Symétrique de l'écriture (creerPratiqueV2, branche par-objectifs).
                 wizardState.reponses.modeCalcul = config.objectifs.modeCalcul;
-                // Ajouter les paramètres spécifiques selon le mode
+                wizardState.reponses.nbObjectifs = config.objectifs.nbObjectifs;
+                if (config.objectifs.comptage) {
+                    wizardState.reponses.seuilMaitrise = config.objectifs.comptage.seuilMaitrise;
+                    wizardState.reponses.plafondSiEssentielNonMaitrise = config.objectifs.comptage.plafondSiEssentielNonMaitrise;
+                } else if (config.objectifs.seuilsCritiques) {
+                    wizardState.reponses.seuilReussite = config.objectifs.seuilsCritiques.seuilReussite;
+                    wizardState.reponses.noteBaseReussite = config.objectifs.seuilsCritiques.noteBaseReussite;
+                    wizardState.reponses.bonusParNiveau = config.objectifs.seuilsCritiques.bonusParNiveau;
+                } else if (config.objectifs.holistique) {
+                    wizardState.reponses.methodeSuggestion = config.objectifs.holistique.methodeSuggestion;
+                }
             }
         }
     }
@@ -2597,6 +2577,12 @@ window.deduireTypePratique = deduireTypePratique;
 window.wizardV2GererExclusionCheckbox = wizardV2GererExclusionCheckbox;
 window.wizardV2CreerGrilleDemo = wizardV2CreerGrilleDemo;
 
-
+// Exposés pour la testabilité (#317) : la relecture d'édition (#132) et le
+// calcul du nombre d'étapes (#134) sont verrouillés par sentinelles. wizardState
+// est exposé pour permettre aux tests de poser les réponses et de lire le résultat.
+window.chargerPratiqueExistante = chargerPratiqueExistante;
+window.calculerNbEtapes = calculerNbEtapes;
+window.obtenirEtapeSuivante = obtenirEtapeSuivante;
+window.wizardState = wizardState;
 
 })();
