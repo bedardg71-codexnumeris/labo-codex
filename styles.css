@@ -11986,6 +11986,92 @@ label:has(+ textarea:disabled) {
     font-weight: 500;
 }
 
+/* Récapitulatif — diagnostic de type (#135b : styles sortis des inline,
+   couleurs alignées sur le design system via --recap-couleur). Couleurs de
+   famille canoniques : SOM=orange, STD=bleu, SPE=vert (cf. :root --som/--std/--spe). */
+.wizard-v2-recap-diagnostic {
+    --recap-couleur: var(--gris-moyen, #888);
+    border: 2px solid var(--recap-couleur);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+    background: var(--surface-carte, transparent);
+    background: color-mix(in srgb, var(--recap-couleur) 8%, var(--surface-carte, transparent));
+}
+.wizard-v2-recap-diagnostic--som { --recap-couleur: var(--som-orange); }
+.wizard-v2-recap-diagnostic--std { --recap-couleur: var(--std-bleu); }
+.wizard-v2-recap-diagnostic--spe { --recap-couleur: var(--spe-vert); }
+.wizard-v2-recap-diagnostic--indetermine { --recap-couleur: var(--gris-moyen, #888); }
+
+.wizard-v2-recap-diagnostic-intro {
+    font-size: 0.85rem;
+    color: var(--texte-secondaire, var(--gris-moyen));
+    margin-bottom: 8px;
+}
+.wizard-v2-recap-diagnostic-titre {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+.wizard-v2-recap-badge {
+    background: var(--recap-couleur);
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+}
+.wizard-v2-recap-badge-label {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--recap-couleur);
+}
+.wizard-v2-recap-diagnostic-desc {
+    font-size: 0.9rem;
+    color: var(--texte-secondaire, var(--gris-fonce));
+    margin: 8px auto 0;
+    max-width: 500px;
+}
+.wizard-v2-recap-diagnostic-meta {
+    font-size: 0.85rem;
+    margin: 6px 0 0 0;
+    color: var(--texte-secondaire, var(--gris-moyen));
+}
+.wizard-v2-recap-aide {
+    font-size: 0.85rem;
+    color: var(--texte-secondaire, var(--gris-moyen));
+    margin: 0 0 8px 0;
+}
+.wizard-v2-recap-nom-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--bordure, var(--bleu-clair));
+    border-radius: 6px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+/* Bouton « Créer une grille de base » (état vide grille-critères) */
+.wizard-v2-btn-demo-grille {
+    background: var(--accent-primaire);
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    align-self: flex-start;
+}
+.wizard-v2-btn-demo-grille:hover { filter: brightness(1.05); }
+.wizard-v2-demo-grille-aide {
+    margin: 8px 0 0 0;
+    font-size: 0.8rem;
+    color: var(--gris-moyen);
+}
+
 /* Boutons d'actions */
 .wizard-v2-actions {
     display: flex;
