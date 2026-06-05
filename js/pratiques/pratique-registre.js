@@ -29,14 +29,15 @@
 const PRATIQUE_DEFAUT = 'standards';
 
 // Table de normalisation legacy → canonique.
-// NB : 'pan-objectifs' n'est PAS remappé en Session A — c'est une variante de
-// granularité de 'standards' (décision D1), consolidée en session calcul ; on le
-// laisse résoudre vers son instance actuelle d'ici là.
+// 'pan-objectifs' (décision D1) : granularité fine de 'standards', foldée en
+// Session C (Lot 4) — l'instance séparée a été retirée ; tout id legacy résiduel
+// résout désormais vers 'standards' (la variante par-objectifs vit dans Standards).
 const TABLE_NORMALISATION_PRATIQUE = {
     'alternative': 'standards',
     'pan-maitrise': 'standards',
     'pan-maitrise-json': 'standards',
     'pan-standards': 'standards',
+    'pan-objectifs': 'standards',
     'pan-specifications': 'specifications',
     'pan-denotation': 'denotation'
 };
@@ -75,23 +76,16 @@ const REPRESENTATIONS_PRATIQUES = {
 // Représentation par défaut = celle de la pratique par défaut (Standards).
 const REPRESENTATION_DEFAUT = REPRESENTATIONS_PRATIQUES[PRATIQUE_DEFAUT];
 
-// Remappage de représentation pour les variantes non normalisées par la Session A.
-// 'pan-objectifs' (décision D1) est une granularité fine de Standards : il s'affiche
-// en STD d'ici son fold en Session C.
-const TABLE_REPRESENTATION_VARIANTE = {
-    'pan-objectifs': 'standards'
-};
-
 /**
  * Obtient la représentation canonique {code, couleurVar, famille, classe} d'une pratique.
- * Normalise l'id, applique le remappage de variante, retombe sur le défaut si inconnu.
- * @param {string} id - identifiant de pratique (legacy, canonique, ou variante)
+ * Normalise l'id (les variantes legacy comme pan-objectifs y sont foldées, Lot 4),
+ * retombe sur le défaut si inconnu.
+ * @param {string} id - identifiant de pratique (legacy ou canonique)
  * @returns {{code:string, couleurVar:string, famille:string, classe:string}}
  */
 function obtenirRepresentationPratique(id) {
     const idNorm = normaliserIdPratique(id);
-    const idRep = TABLE_REPRESENTATION_VARIANTE[idNorm] || idNorm;
-    const rep = REPRESENTATIONS_PRATIQUES[idRep] || REPRESENTATION_DEFAUT;
+    const rep = REPRESENTATIONS_PRATIQUES[idNorm] || REPRESENTATION_DEFAUT;
     return {
         code: rep.code,
         couleurVar: rep.couleurVar,
@@ -102,15 +96,14 @@ function obtenirRepresentationPratique(id) {
 
 /**
  * Variante STRICTE : retourne null si l'id n'est pas une famille connue (après
- * normalisation + remappage de variante). Pour les consommateurs qui ont un état
+ * normalisation). Pour les consommateurs qui ont un état
  * « inconnu / multi / masqué » distinct (badge configurable CFG, badge caché…) et
  * ne doivent PAS retomber sur le défaut STD.
  * @param {string} id @returns {?{code,couleurVar,famille,classe}}
  */
 function obtenirRepresentationPratiqueStricte(id) {
     const idNorm = normaliserIdPratique(id);
-    const idRep = TABLE_REPRESENTATION_VARIANTE[idNorm] || idNorm;
-    if (!REPRESENTATIONS_PRATIQUES[idRep]) return null;
+    if (!REPRESENTATIONS_PRATIQUES[idNorm]) return null;
     return obtenirRepresentationPratique(id);
 }
 
