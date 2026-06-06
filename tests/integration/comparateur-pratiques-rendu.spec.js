@@ -229,3 +229,66 @@ test('C1-b · matrice — parité moteur (réf = panneau profil) + divergence de
 
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });
+
+test('C1-d · sélection inline des candidates — recalcul + invariant non-destructif (données démo)', async ({ page }) => {
+    const erreurs = [];
+    brancherErreurs(page, erreurs);
+
+    await page.goto(indexHtml);
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
+
+    const resultat = await page.evaluate(async () => {
+        if (typeof window.activerModeDemo !== 'function') return { erreur: 'activerModeDemo absent' };
+        await window.activerModeDemo();
+
+        // Snapshot intégral du localStorage APRÈS seed démo (référence non-destructif).
+        const snapshot = () => {
+            const o = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                o[k] = localStorage.getItem(k);
+            }
+            return JSON.stringify(o, Object.keys(o).sort());
+        };
+        const avant = snapshot();
+
+        window.ouvrirComparateurPratiques();
+        const panel = document.getElementById('comparateur-pratiques-panel');
+
+        // Sélecteurs inline présents (zone dans le corps, pas de modale).
+        const zone = panel.querySelector('#comparateur-selecteurs');
+        const selects = panel.querySelectorAll('.comparateur-select');
+
+        // Recalcul : changer une candidate doit re-rendre la matrice.
+        let recalculOk = false;
+        const sel = panel.querySelector('.comparateur-select[data-slot="0"]');
+        const matrice = document.getElementById('comparateur-matrice');
+        if (sel && matrice) {
+            const avantTable = matrice.textContent;
+            const autre = Array.from(sel.options).find(o => o.value !== sel.value);
+            if (autre) {
+                sel.value = autre.value;
+                sel.dispatchEvent(new Event('change', { bubbles: true }));
+                recalculOk = document.getElementById('comparateur-matrice').textContent !== avantTable;
+            }
+        }
+
+        const apres = snapshot();
+
+        return {
+            aZone: !!zone,
+            nbSelects: selects.length,
+            recalculOk,
+            nonDestructif: avant === apres
+        };
+    });
+
+    expect(resultat.erreur, `Erreur eval : ${resultat.erreur}`).toBeUndefined();
+    expect(resultat.aZone).toBe(true);                 // sélection inline (pas de modale)
+    expect(resultat.nbSelects).toBeGreaterThanOrEqual(1);
+    expect(resultat.recalculOk).toBe(true);            // changer une candidate recalcule
+    expect(resultat.nonDestructif).toBe(true);         // aucune écriture (lecture seule)
+
+    expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
+});
