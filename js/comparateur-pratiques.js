@@ -44,6 +44,21 @@
         { da: 'DEMO011', label: 'Irrégulier' }
     ];
 
+    // E1 — « ce que cette note mesure » : une ligne fixe par FAMILLE (indexée par
+    // le code du registre, pas par l'id de pratique), sous le nom + badge (§5).
+    // Formulations de départ (SPEC §3.1) — à valider en terrain avec Grégoire.
+    // DEN à ajouter quand la famille sera créable (#318).
+    var MICROCOPY_E1 = {
+        SOM: 'La moyenne pondérée des performances, chacune comptée une fois, au moment où elle a eu lieu.',
+        STD: 'Le niveau de maîtrise démontré — les reprises remplacent les premiers essais.',
+        SPE: 'Les exigences satisfaites parmi celles annoncées.'
+    };
+
+    // Ligne de garde sous la matrice (§2.1) : recentre le novice issu de SOM —
+    // ni le chiffre le plus élevé ni l'écart ne sont l'enjeu (pluralisme, pas de
+    // palmarès). Formulation à valider en terrain.
+    var LIGNE_GARDE = 'Il ne s’agit pas d’un palmarès des pratiques de notation.';
+
     function estEnDemo() {
         return typeof estEnModeDemo === 'function' && estEnModeDemo();
     }
@@ -211,9 +226,12 @@
         h += '<th scope="col" class="comparateur-col-profil">Profil</th>';
         h += '<th scope="col" class="comparateur-col-niveau">Niveau atteint</th>';
         cols.forEach(function(c) {
+            var code = _codePratique(c.id);
+            var e1 = (code && MICROCOPY_E1[code]) ? MICROCOPY_E1[code] : '';
             h += '<th scope="col" class="comparateur-col-pratique' + (c.ref ? ' comparateur-col-pratique--ref' : '') + '">'
                 + _badge(c.id) + ' <span class="comparateur-col-nom">' + _esc(_nomPratique(c.id)) + '</span>'
                 + '<span class="comparateur-col-tag">' + (c.ref ? 'Ta pratique' : 'simulation') + '</span>'
+                + (e1 ? '<span class="comparateur-col-e1">' + _esc(e1) + '</span>' : '')
                 + '</th>';
         });
         h += '</tr></thead><tbody>';
@@ -329,11 +347,12 @@
                 entete('Comparateur de pratiques') +
                 '<div class="comparateur-corps">' +
                     '<p class="comparateur-finalite">Des pratiques différentes mesurent des choses ' +
-                    'différentes — un écart n’est ni un bonus ni une erreur. Le comparateur ' +
-                    'montre la <strong>maîtrise atteinte en regard de chaque note</strong>.</p>' +
+                    'différentes. Un écart entre des points n’est ni un bonus ni une erreur. Le ' +
+                    'comparateur montre la <strong>maîtrise atteinte en regard de chaque note</strong>.</p>' +
                     '<div class="comparateur-matrice" id="comparateur-matrice" data-etat="matrice">' +
                         _rendreMatrice() +
                     '</div>' +
+                    '<p class="comparateur-garde">' + _esc(LIGNE_GARDE) + '</p>' +
                 '</div>' +
             '</div>';
         attacherFermeture(panel);

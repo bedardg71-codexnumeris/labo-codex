@@ -19377,6 +19377,26 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
+/* E1 — « ce que cette note mesure » (une ligne descriptive par famille). */
+.comparateur-col-e1 {
+    display: block;
+    margin-top: 6px;
+    max-width: 240px;
+    font-size: 0.76rem;
+    font-weight: 400;
+    line-height: 1.35;
+    white-space: normal;
+    color: var(--texte-secondaire, #8aa4b0);
+}
+/* Ligne de garde sous la matrice (recentrage finalité). */
+.comparateur-garde {
+    margin: 14px 0 4px;
+    padding-top: 12px;
+    border-top: 1px solid var(--bordure-claire, rgba(106, 172, 184, 0.18));
+    font-size: 0.84rem;
+    font-style: italic;
+    color: var(--texte-muted, #80a0b0);
+}
 /* Référence « Ta pratique » : accent léger ; simulations = bordure pointillée
    (variables design system, aucune couleur nouvelle). */
 .comparateur-col-pratique--ref,

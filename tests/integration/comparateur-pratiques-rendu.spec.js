@@ -104,6 +104,11 @@ test('C1-a · garde démo — en démo, le comparateur affiche la matrice (struc
         const table = matrice ? matrice.querySelector('table.comparateur-matrice-table') : null;
         const lignes = table ? table.querySelectorAll('tbody tr').length : 0;
         const aColNiveau = table ? table.textContent.includes('Niveau atteint') : false;
+        // C1-c (structure) : au moins une ligne E1 dans les en-têtes + ligne de
+        // garde. Le texte E1 PAR FAMILLE est vérifié dans le test seedé (réf = STD).
+        const corps = panel ? panel.querySelector('.comparateur-corps') : null;
+        const aE1 = !!(corps && corps.querySelector('.comparateur-col-e1'));
+        const aGarde = !!(corps && corps.querySelector('.comparateur-garde'));
 
         // Fermeture (Échap déconnecté, panneau vidé, display none).
         let fermeOk = false;
@@ -118,6 +123,7 @@ test('C1-a · garde démo — en démo, le comparateur affiche la matrice (struc
             aTable: !!table,
             nbLignes: lignes,
             aColNiveau,
+            aE1, aGarde,
             aBoutonActiver: !!(panel && panel.querySelector('.comparateur-activer-demo')),
             fermeOk
         };
@@ -129,6 +135,8 @@ test('C1-a · garde démo — en démo, le comparateur affiche la matrice (struc
     expect(resultat.aTable).toBe(true);
     expect(resultat.nbLignes).toBe(4);            // 4 profils-types en dur
     expect(resultat.aColNiveau).toBe(true);       // colonne « Niveau atteint »
+    expect(resultat.aE1).toBe(true);              // C1-c : au moins une ligne E1
+    expect(resultat.aGarde).toBe(true);           // C1-c : ligne de garde
     expect(resultat.aBoutonActiver).toBe(false);  // plus l'invitation
     expect(resultat.fermeOk).toBe(true);
 
@@ -177,6 +185,8 @@ test('C1-b · matrice — parité moteur (réf = panneau profil) + divergence de
         window.ouvrirComparateurPratiques();
         const matrice = document.getElementById('comparateur-matrice');
         const texte = matrice ? matrice.textContent : '';
+        const corps = document.querySelector('#comparateur-pratiques-panel .comparateur-corps');
+        const texteCorps = corps ? corps.textContent : '';
 
         return {
             pariteOk,
@@ -184,7 +194,12 @@ test('C1-b · matrice — parité moteur (réf = panneau profil) + divergence de
             speTrouvee: !!speId,
             pStd, pSom, pSpe,
             domNiveauMaitrise: texte.includes('Maîtrisé'), // terminale DEMO011 = M
-            domNoteStd: texte.includes(String(pStd))
+            domNoteStd: texte.includes(String(pStd)),
+            // C1-c : E1 par famille (réf STD + simulations SOM/SPE) + ligne de garde.
+            e1Std: texteCorps.includes('les reprises remplacent'),
+            e1Som: texteCorps.includes('moyenne pondérée'),
+            e1Spe: texteCorps.includes('exigences satisfaites'),
+            garde: texteCorps.includes('palmarès des pratiques de notation')
         };
     });
 
@@ -205,6 +220,12 @@ test('C1-b · matrice — parité moteur (réf = panneau profil) + divergence de
     // La maîtrise (niveau atteint) est montrée en regard, et la note réf est rendue.
     expect(resultat.domNiveauMaitrise).toBe(true);
     expect(resultat.domNoteStd).toBe(true);
+
+    // C1-c : microcopy E1 par famille (réf STD + simulations SOM/SPE) + ligne de garde.
+    expect(resultat.e1Std).toBe(true);
+    expect(resultat.e1Som).toBe(true);
+    expect(resultat.e1Spe).toBe(true);
+    expect(resultat.garde).toBe(true);
 
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });
