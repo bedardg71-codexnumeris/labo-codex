@@ -173,6 +173,10 @@ Utiliser `window.cle('nomCle')` pour obtenir la cle namespacee.
 1. Lire `docs/00-START-HERE.md`
 2. **Charger les skills du projet** dans `Skills pour Claude Code/` :
    - `SKILL_labo_codex.md` — architecture, indices A-C-P, pratiques de notation, workflow
+   - `SKILL_pratiques_notation.md` — moteur de calcul des pratiques : resolution, deux
+     systemes de calcul, simulerIndices, configs executables, pieges (volet TECHNIQUE de
+     la notation ; complement de labo_codex §5). Charger pour tout chantier touchant
+     `js/pratiques/`, le calcul de la note ou la simulation/comparaison de pratiques.
    - `SKILL_Ecosysteme_classe.md` — cadre pedagogique (ELLAC, SOLO, PAN, SRPNF, IDME, cartouches)
    - `SKILL_Alignement.md` — module Alignement (carte mentale, lecons, sequences, design curriculaire)
    - `SKILL_RaI.md` — depistage SOLO, IPB, diagnostic croise, patterns, interventions RaI
@@ -187,7 +191,7 @@ Utiliser `window.cle('nomCle')` pour obtenir la cle namespacee.
      filtrer par identite). Skill parent de `SKILL_integrite_globaux.md`, applicable
      a tout projet. **Charger pour tout nouveau projet ou module manipulant des
      donnees de sources heterogenes.**
-   Ces sept skills sont complementaires et constituent la reference metier du projet.
+   Ces huit skills sont complementaires et constituent la reference metier du projet.
    **Si travail sur les donnees** (codex, reserve, import/export, anonymisation) :
    charger `SKILL_Securite_donnees.md` EN PRIORITE — les regles de la section 9
    sont obligatoires pour tout code touchant aux donnees.
