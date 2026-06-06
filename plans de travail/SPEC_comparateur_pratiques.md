@@ -17,6 +17,19 @@ Une vue d'aide à la **transition SOM → PAN** : l'utilisateur sommatif voit ce
 
 **Anti-pattern nommé** : laisser la vue se lire comme un palmarès de générosité (« +14 en PAN ! »). Tout l'agencement (E1-E3, §3) existe pour l'empêcher.
 
+### 1 bis. Finalité — sortir du paradigme du cumul (acté 6 juin 2026, Grégoire)
+
+L'objet du Comparateur n'est **ni l'écart de notes** entre pratiques, **ni le seuil de réussite (60 %)**. C'est de rendre tangible **ce que la note REPRÉSENTE : un reflet le plus fidèle possible de la maîtrise de la compétence en fin de parcours**. La bonne question n'est pas « combien de points séparent les pratiques ? » mais **« laquelle de ces notes dit le vrai sur ce que l'élève maîtrise maintenant ? »**.
+
+Le novice issu de SOM a le réflexe de comparer les chiffres — réflexe normal après des années de moyenne. Mais l'enjeu n'est **pas** « quitter SOM » : c'est sortir du **paradigme du cumul** (la note comme score additionné), et ce recentrage vaut **peu importe la famille** (pluralisme ; *Gateways* de Clark — viser l'idée du cumul, jamais la pratique de l'enseignant·e). Conséquences sur la vue :
+
+- Le Comparateur **rappelle activement** ce recentrage (cadrage explicite, pas un simple affichage neutre — cf. ligne de garde §3.1 et engagements E1-E3).
+- Il **montre, en regard de chaque note, où en est la maîtrise en fin de parcours** (trajectoire IDME, dernières démonstrations, terminale) — il ne se contente pas d'aligner des chiffres comparables.
+- L'**écart en points** (que `SPEC_simulation_pratiques_307.md` §4 plaçait en colonne) reste **rétrogradé** : delta discret, gris, jamais en vedette (E3). Ne pas le réintroduire comme métrique première au lot C1.
+- L'outil **ne tranche pas** : l'enseignant applique le critère « est-ce que cette note dit le vrai ? ». La conviction reste la sienne, pas une règle codée.
+
+> Principe directeur durable — voir mémoire `project-comparateur-finalite-sortie-paradigme-som`. À garder en tête pour C1 (matrice), C2 (fiche) et toute la microcopy.
+
 ## 2. Décisions actées (réflexion du 5 juin)
 
 | Question | Décision |
@@ -50,6 +63,7 @@ Une vue d'aide à la **transition SOM → PAN** : l'utilisateur sommatif voit ce
 
 - **Phrase de contexte écrite à la main** pour chacun des 4 profils démo (livrable de contenu, pas de génération) — ex. : « A raté l'examen de mi-session (poids 30 %) ; maîtrise démontrée sur les productions suivantes. »
 - **(E2) Récit de calcul par pratique** : pour chaque pratique, le **sort de chaque résultat** du profil — « compté 30 % » / « remplacé par la reprise » / « écarté (7 meilleurs retenus) » / « non exigé pour le forfait B » / « obligatoire ». Source : la décomposition par famille déjà spécifiée (spec #307 §4.2), re-présentée comme trajectoire résultat par résultat, pas comme tableau de paramètres.
+- **(E2 bis — maîtrise en fin de parcours, acté 6 juin 2026)** : à côté du récit de calcul, montrer **où en est la maîtrise** — la trajectoire des niveaux IDME dans le temps et la démonstration finale (terminale). C'est l'élément qui permet de juger si chaque note *reflète* la compétence atteinte (cf. §1 bis). Pour le profil « irrégulier », c'est là que se voit l'écart de sens : la moyenne garde la trace des débuts ratés, la trajectoire monte vers la maîtrise.
 - Retour à la matrice = un clic ; aucun état persisté entre deux ouvertures (éphémère).
 
 ### 3.3 Non calculable
