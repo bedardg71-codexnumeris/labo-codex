@@ -35,8 +35,224 @@
     var _focusAvantOuverture = null;
     var _ouvert = false;
 
+    // Profils-types étiquetés en dur (§8 de la note de conception) : stables et
+    // racontables, pas de détection dynamique. DA du namespace démo (DEMO0xx).
+    var PROFILS = [
+        { da: 'DEMO010', label: 'Fort' },
+        { da: 'DEMO013', label: 'Moyen' },
+        { da: 'DEMO004', label: 'En difficulté' },
+        { da: 'DEMO011', label: 'Irrégulier' }
+    ];
+
     function estEnDemo() {
         return typeof estEnModeDemo === 'function' && estEnModeDemo();
+    }
+
+    /* ════════════════════════════════════════════════════════
+       MOTEUR (consommation seule — aucune écriture)
+       ════════════════════════════════════════════════════════ */
+
+    // Productions / évaluations selon le mode (démo ou réel) + échelles globales.
+    function _donnees() {
+        var lire = (typeof obtenirDonneesSelonMode === 'function')
+            ? obtenirDonneesSelonMode
+            : function() { return []; };
+        return {
+            productions: lire('productions') || [],
+            evaluations: lire('evaluationsSauvegardees') || [],
+            echelles: (typeof db !== 'undefined') ? (db.getSync('echellesTemplates', []) || []) : []
+        };
+    }
+
+    function _echelle(echelleId, echelles) {
+        if (!echelleId) return null;
+        for (var i = 0; i < echelles.length; i++) {
+            if (echelles[i].id === echelleId) return echelles[i];
+        }
+        return null;
+    }
+
+    // Rang d'un niveau = son index dans l'échelle triée (jamais une valeur IDME
+    // codée en dur — l'outil est pluraliste, §3 de la note).
+    function _rang(echelle, code) {
+        if (!echelle || !echelle.niveaux) return -1;
+        for (var i = 0; i < echelle.niveaux.length; i++) {
+            if (echelle.niveaux[i].code === code) return i;
+        }
+        return -1;
+    }
+
+    // Évaluations recevables d'un profil portant un niveau, triées par date.
+    function _evalsProfil(da, evaluations) {
+        return evaluations.filter(function(e) {
+            if (e.etudiantDA !== da) return false;
+            if (e.remplaceeParId) return false;
+            if (e.niveauFinal === null || e.niveauFinal === undefined || e.niveauFinal === '') return false;
+            var st = e.statutIntegrite || 'recevable';
+            if (st === 'plagiat' || st === 'ia') return false;
+            return true;
+        }).sort(function(a, b) {
+            return new Date(a.dateEvaluation) - new Date(b.dateEvaluation);
+        });
+    }
+
+    // Seuils de tendance (proposition §12.3, à valider en terrain).
+    function _tendance(delta) {
+        if (delta >= 2)  return { fleche: '↗↗', mot: 'forte progression' };
+        if (delta === 1) return { fleche: '↗',  mot: 'progression' };
+        if (delta <= -1) return { fleche: '↘',  mot: 'recul' };
+        return { fleche: '→', mot: 'stable' };
+    }
+
+    // Colonne « Niveau atteint » : niveau de fin de parcours (production
+    // terminale, sinon dernière éval datée — §4 + repli §12.2), traduit via
+    // l'ÉCHELLE de la grille (libellé + description SOLO au survol), + tendance.
+    function _niveauAtteint(da, d) {
+        var evals = _evalsProfil(da, d.evaluations);
+        if (!evals.length) return null;
+
+        var terminale = null;
+        for (var i = 0; i < d.productions.length; i++) {
+            if (d.productions[i].type === 'terminale') { terminale = d.productions[i]; break; }
+        }
+        var evalFin = null;
+        if (terminale) {
+            var fins = evals.filter(function(e) { return e.productionId === terminale.id; });
+            evalFin = fins.length ? fins[fins.length - 1] : null;
+        }
+        if (!evalFin) evalFin = evals[evals.length - 1];   // repli : dernière éval datée
+
+        var echelle = _echelle(evalFin.echelleId, d.echelles);
+        var niveau = null;
+        if (echelle && echelle.niveaux) {
+            for (var j = 0; j < echelle.niveaux.length; j++) {
+                if (echelle.niveaux[j].code === evalFin.niveauFinal) { niveau = echelle.niveaux[j]; break; }
+            }
+        }
+        var delta = _rang(echelle, evalFin.niveauFinal) - _rang(echelle, evals[0].niveauFinal);
+        return {
+            label: niveau ? niveau.nom : evalFin.niveauFinal,
+            description: (niveau && niveau.description) ? niveau.description : '',
+            tendance: _tendance(delta)
+        };
+    }
+
+    // Code court de famille (SOM/STD/SPE) — strict d'abord (familles codées),
+    // sinon via l'instance (pratiques configurables : dérive de configuration.type).
+    function _codePratique(id) {
+        if (typeof obtenirRepresentationPratiqueStricte === 'function') {
+            var r = obtenirRepresentationPratiqueStricte(id);
+            if (r && r.code) return r.code;
+        }
+        var inst = (typeof obtenirPratiqueParId === 'function') ? obtenirPratiqueParId(id) : null;
+        return (inst && typeof inst.obtenirCode === 'function') ? inst.obtenirCode() : null;
+    }
+
+    // Badge construit depuis le CODE réel (genererBadgePratiqueHTML retombe sur STD
+    // par défaut pour un id configurable non mappé — à ne pas réutiliser ici).
+    function _badge(id) {
+        var code = _codePratique(id);
+        if (!code) return '';
+        var c = code.toLowerCase();
+        return '<span class="badge-type-pratique badge-type-' + c + '">' + code + '</span>';
+    }
+
+    function _configsPratiques() {
+        var ns = (typeof cle === 'function') ? db.getSync(cle('pratiquesConfigurables'), null) : null;
+        return ns || db.getSync('pratiquesConfigurables', []) || [];
+    }
+
+    function _nomPratique(id) {
+        var cfg = _configsPratiques().filter(function(p) { return p.id === id; })[0];
+        if (cfg && cfg.nom) return cfg.nom;
+        var inst = (typeof obtenirPratiqueParId === 'function') ? obtenirPratiqueParId(id) : null;
+        if (inst && inst.nom) return inst.nom;
+        if (typeof obtenirRepresentationPratique === 'function') {
+            var r = obtenirRepresentationPratique(id);
+            if (r && r.famille) return r.famille;
+        }
+        return id;
+    }
+
+    // Colonnes : référence = pratique active (« Ta pratique ») + simulations
+    // SOM (famille codée) et SPE (1ʳᵉ configurable de famille SPE ≠ réf).
+    // La sélection inline des candidates arrive en C1-d.
+    function _colonnes() {
+        var refId = (typeof obtenirPratiqueActiveGroupeCours === 'function' && obtenirPratiqueActiveGroupeCours())
+            || (window.PRATIQUE_DEFAUT || 'standards');
+        var cols = [{ id: refId, ref: true }];
+        cols.push({ id: 'sommative', ref: false });
+        var spe = _configsPratiques().filter(function(p) {
+            return p.id !== refId && _codePratique(p.id) === 'SPE';
+        })[0];
+        if (spe) cols.push({ id: spe.id, ref: false });
+        return cols;
+    }
+
+    // Note finale simulée (0-100), lecture seule. null si non calculable.
+    function _note(da, pratiqueId) {
+        if (typeof simulerIndices !== 'function') return null;
+        var r = simulerIndices(da, pratiqueId);
+        return r ? r.P : null;
+    }
+
+    function _esc(s) {
+        return (typeof echapperHtml === 'function') ? echapperHtml(String(s)) : String(s);
+    }
+
+    /* ── Rendu de la matrice (§3 du layout) ────────────────── */
+    function _rendreMatrice() {
+        var d = _donnees();
+        var cols = _colonnes();
+        var refId = cols[0].id;
+
+        var h = '<table class="comparateur-matrice-table">';
+        h += '<thead><tr>';
+        h += '<th scope="col" class="comparateur-col-profil">Profil</th>';
+        h += '<th scope="col" class="comparateur-col-niveau">Niveau atteint</th>';
+        cols.forEach(function(c) {
+            h += '<th scope="col" class="comparateur-col-pratique' + (c.ref ? ' comparateur-col-pratique--ref' : '') + '">'
+                + _badge(c.id) + ' <span class="comparateur-col-nom">' + _esc(_nomPratique(c.id)) + '</span>'
+                + '<span class="comparateur-col-tag">' + (c.ref ? 'Ta pratique' : 'simulation') + '</span>'
+                + '</th>';
+        });
+        h += '</tr></thead><tbody>';
+
+        PROFILS.forEach(function(prof) {
+            var na = _niveauAtteint(prof.da, d);
+            var pRef = _note(prof.da, refId);
+            h += '<tr>';
+            h += '<th scope="row" class="comparateur-col-profil">' + _esc(prof.label) + '</th>';
+
+            if (na) {
+                var titre = na.description ? _esc(na.label + ' · ' + na.description) : _esc(na.label);
+                h += '<td class="comparateur-col-niveau" title="' + titre + '">'
+                    + _esc(na.label)
+                    + ' <span class="comparateur-tendance" aria-label="' + _esc(na.tendance.mot) + '">' + na.tendance.fleche + '</span>'
+                    + '</td>';
+            } else {
+                h += '<td class="comparateur-col-niveau comparateur-vide">—</td>';
+            }
+
+            cols.forEach(function(c) {
+                var p = _note(prof.da, c.id);
+                if (p === null) {
+                    h += '<td class="comparateur-cellule comparateur-vide" title="Note non calculable pour cette pratique">—</td>';
+                    return;
+                }
+                var delta = '';
+                if (!c.ref && pRef !== null) {
+                    var dd = p - pRef;
+                    delta = ' <span class="comparateur-delta">(' + (dd > 0 ? '+' : '') + dd + ')</span>';
+                }
+                h += '<td class="comparateur-cellule' + (c.ref ? ' comparateur-cellule--ref' : '') + '">'
+                    + '<span class="comparateur-note">' + p + '</span>' + delta + '</td>';
+            });
+            h += '</tr>';
+        });
+
+        h += '</tbody></table>';
+        return h;
     }
 
     /* ── Ouverture ────────────────────────────────────────── */
@@ -106,7 +322,7 @@
         if (btn) btn.addEventListener('click', activerDemoEtOuvrir);
     }
 
-    /* ── Vue comparateur (squelette C1-a ; matrice en C1-b) ── */
+    /* ── Vue comparateur (matrice — lot C1-b) ───────────────── */
     function construireVue(panel) {
         panel.innerHTML =
             '<div class="comparateur-contenu" role="dialog" aria-labelledby="comparateur-titre-texte">' +
@@ -115,9 +331,8 @@
                     '<p class="comparateur-finalite">Des pratiques différentes mesurent des choses ' +
                     'différentes — un écart n’est ni un bonus ni une erreur. Le comparateur ' +
                     'montre la <strong>maîtrise atteinte en regard de chaque note</strong>.</p>' +
-                    '<div class="comparateur-matrice" id="comparateur-matrice" data-etat="squelette">' +
-                        '<p class="comparateur-placeholder">La matrice de comparaison (profils-types, ' +
-                        'colonne « Niveau atteint », pratiques en regard) sera affichée ici — lot C1-b.</p>' +
+                    '<div class="comparateur-matrice" id="comparateur-matrice" data-etat="matrice">' +
+                        _rendreMatrice() +
                     '</div>' +
                 '</div>' +
             '</div>';
