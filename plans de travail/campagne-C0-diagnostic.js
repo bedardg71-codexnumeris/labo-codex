@@ -3,12 +3,19 @@
  * Diagnostic : simule les 3 pratiques de référence sur les 20 étudiant·es démo
  * et fait émerger les profils-types contrastés.
  *
+ * MÀJ 6 juin 2026 (post-seed démo 20.4) : on simule désormais les pratiques
+ * CONFIGURÉES `demo-std-litt` / `demo-spe-litt` (créées au seed), PAS les ids
+ * codés en dur `standards` / `specifications` (qui tombaient en fallback faute
+ * de config — c'était le diagnostic du premier passage C0). `sommative` reste
+ * l'id codé en dur (il calcule sans config).
+ *
  * USAGE (Safari, file://) :
- *   1. Active le mode démo (bandeau vert) — la vue doit afficher le groupe démo.
- *   2. Ouvre la console (Cmd+Option+C).
- *   3. Colle TOUT ce fichier d'un coup. Lecture seule : aucune écriture, la
- *      pratique active du groupe-cours n'est pas touchée (simulerIndices, #307).
- *   4. Lis la table imprimée, puis renvoie-moi `window.__C0` (objet complet)
+ *   1. Recharge l'app (Cmd+Option+R) pour déclencher le re-seed démo (v20.4).
+ *   2. Active le mode démo (bandeau vert) — la vue doit afficher le groupe démo.
+ *   3. Ouvre la console (Cmd+Option+C).
+ *   4. Colle TOUT ce fichier d'un coup. Lecture seule : aucune écriture, la
+ *      pratique active du groupe-cours n'est pas touchee (simulerIndices, lot 307).
+ *   5. Lis la table imprimée, puis renvoie-moi `window.__C0` (objet complet)
  *      OU une capture de la table.
  * ==========================================================================*/
 (function comparateurC0() {
@@ -21,13 +28,18 @@
         return;
     }
 
-    var pratiquesRef = ['sommative', 'standards', 'specifications'];
+    // pid = identifiant à simuler ; label = colonne affichée
+    var pratiquesRef = [
+        { pid: 'sommative',     label: 'SOM' },
+        { pid: 'demo-std-litt', label: 'STD' },
+        { pid: 'demo-spe-litt', label: 'SPE' }
+    ];
 
     // Résolution + famille de chaque pratique de référence
     var dispo = {};
-    pratiquesRef.forEach(function (pid) {
-        var inst = obtenirPratiqueParId(pid);
-        dispo[pid] = inst
+    pratiquesRef.forEach(function (p) {
+        var inst = obtenirPratiqueParId(p.pid);
+        dispo[p.pid] = inst
             ? (typeof inst.obtenirCode === 'function' ? inst.obtenirCode() : '(pas de code)')
             : 'INTROUVABLE';
     });
@@ -48,21 +60,21 @@
     etudiants.forEach(function (e) {
         var da = e.da || e.DA || e.numeroDA;
         var row = { da: da, nom: ((e.nom || '') + ', ' + (e.prenom || '')).trim() };
-        pratiquesRef.forEach(function (pid) {
+        pratiquesRef.forEach(function (p) {
             var r = null, erreur = null;
-            try { r = simulerIndices(da, pid); } catch (err) { erreur = String(err); }
-            if (erreur) { row[pid] = null; row[pid + '_note'] = 'ERR'; row[pid + '_C'] = null; }
-            else if (!r) { row[pid] = null; row[pid + '_note'] = 'null'; row[pid + '_C'] = null; }
+            try { r = simulerIndices(da, p.pid); } catch (err) { erreur = String(err); }
+            if (erreur) { row[p.label] = null; row[p.label + '_note'] = 'ERR'; row[p.label + '_C'] = null; }
+            else if (!r) { row[p.label] = null; row[p.label + '_note'] = 'null'; row[p.label + '_C'] = null; }
             else {
-                row[pid] = r.P; // métrique commune 0-100 (note finale/100 pour STD, performance sinon)
-                row[pid + '_C'] = r.C;
-                row[pid + '_note'] = (r.noteFinale === null || r.noteFinale === undefined)
+                row[p.label] = r.P; // métrique commune 0-100 (note finale/100 pour STD, performance sinon)
+                row[p.label + '_C'] = r.C;
+                row[p.label + '_note'] = (r.noteFinale === null || r.noteFinale === undefined)
                     ? 'fallback' : r.noteFinale; // 'fallback' = calculerDetailsNoteFinale n'a pas produit de note finale
             }
         });
-        var som = typeof row.sommative === 'number' ? row.sommative : null;
-        var std = typeof row.standards === 'number' ? row.standards : null;
-        var spe = typeof row.specifications === 'number' ? row.specifications : null;
+        var som = typeof row.SOM === 'number' ? row.SOM : null;
+        var std = typeof row.STD === 'number' ? row.STD : null;
+        var spe = typeof row.SPE === 'number' ? row.SPE : null;
         var panMax = null;
         if (std !== null) panMax = std;
         if (spe !== null) panMax = (panMax === null) ? spe : Math.max(panMax, spe);
@@ -81,8 +93,8 @@
     console.table(lignes.map(function (r) {
         return {
             DA: r.da, Nom: r.nom,
-            SOM: r.sommative, STD: r.standards, SPE: r.specifications,
-            'STD note?': r.standards_note,
+            SOM: r.SOM, STD: r.STD, SPE: r.SPE,
+            'STD note?': r.STD_note,
             'écart SOM−PAN': r.ecartSOMvsPAN
         };
     }));
