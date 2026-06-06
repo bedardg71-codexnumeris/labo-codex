@@ -145,7 +145,8 @@ function peuplerNamespace(pack) {
         'evaluationsSauvegardees',
         'grillesTemplates',
         'echellesTemplates',
-        'modalitesEvaluation'
+        'modalitesEvaluation',
+        'pratiquesConfigurables'
     ];
 
     for (let i = 0; i < collectionsDuPack.length; i++) {
@@ -219,7 +220,7 @@ function peuplerNamespace(pack) {
             groupeNum: '0demo',
             horaireId: 'HOR_DEMO',
             enseignantId: 'ENS_DEMO',
-            pratiqueId: null,
+            pratiqueId: 'demo-std-litt',
             actif: true,
             isDemo: true,
             auteur: 'Labo Codex',
