@@ -222,8 +222,13 @@ S/R/F = fondations multistructurelles ; P = relationnel ; N = abstrait étendu.
 
 ## 5. PRATIQUES DE NOTATION SUPPORTÉES
 
-L'application supporte 4 familles. Les identifiants techniques sont stables.
-12 modules dans `js/pratiques/` (~7 200 lignes au total).
+> **Moteur de calcul, résolution, simulation et pièges** : voir
+> `SKILL_pratiques_notation.md` (volet technique). Cette section n'est qu'un aperçu.
+> Les identifiants ci-dessous sont les libellés legacy ; les **id canoniques neutres**
+> (`sommative`/`standards`/`specifications`/`denotation`, sans préfixe `pan-`) datent de
+> la canonicalisation Session A — détail dans le skill dédié.
+
+L'application supporte 4 familles. 11 modules dans `js/pratiques/`.
 
 ### 5.1 Sommative (traditionnelle)
 - **Identifiant** : `sommative`
@@ -239,10 +244,11 @@ L'application supporte 4 familles. Les identifiants techniques sont stables.
   - **Moyenne pondérée** (Michel B.) : moyenne des niveaux × pondération
   - **Seuils critiques** (Xavier C.-T.) : tous objectifs ≥ niveau 3
   - **Holistique** (Isabelle M.) : suggestion statistique + jugement professionnel
-- **Variante par-objectifs** : standards évalués individuellement, meilleur résultat retenu
+- **Variante par-objectifs** : standards évalués individuellement, meilleur résultat retenu.
+  **Foldée dans Standards** (Session C Lot 4, 5 juin 2026) — `pratique-pan-objectifs.js` supprimé.
 - **Portfolio** : configurable (nombre à retenir, mode de sélection, artefacts obligatoires)
 - **Reprises** : Multiples, niveau non-rétrogradable
-- **Fichiers** : `js/pratiques/pratique-pan-standards.js`, `js/pratiques/pratique-pan-objectifs.js`
+- **Fichier** : `js/pratiques/pratique-pan-standards.js`
 
 ### 5.3 PAN-Spécifications
 - **Identifiant** : `pan-specifications`
@@ -371,6 +377,7 @@ en dur, vérifier la conformité dans les deux modes. Voir CLAUDE.md pour les d�
 
 | Skill | Rôle | Quand le consulter |
 |-------|------|--------------------|
+| `SKILL_pratiques_notation.md` | Moteur de calcul des pratiques : résolution, deux systèmes de calcul, `simulerIndices`, configs exécutables, pièges | Tout chantier touchant `js/pratiques/`, le calcul de la note ou la simulation/comparaison de pratiques |
 | `SKILL_Ecosysteme_classe.md` | Cadre pédagogique : ELLAC, SOLO, PAN, cartouches SRPNF×IDME, manuel élève | Rédaction de cartouches, validation pédagogique, conception d'artefacts |
 | `SKILL_Alignement.md` | Module Alignement : carte mentale, leçons, séquences, design curriculaire | Travail sur le module Planification, cohérence objectifs-activités-évaluations |
 | `SKILL_RaI.md` | Dépistage SOLO, IPB, diagnostic croisé, patterns, interventions RàI | Travail sur les indices, les portraits dynamiques, les interventions |
