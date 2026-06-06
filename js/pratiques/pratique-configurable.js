@@ -227,9 +227,16 @@ class PratiqueConfigurable {
                 break;
 
             case 'specifications':
+                // Délègue à la vraie logique tout-ou-rien (bundles) de
+                // PratiquePanSpecifications, configurée avec la config de CETTE
+                // instance. Sans cette délégation, une SPE configurable retombait
+                // sur la valeur PAN stockée dans indicesCP (faux : ce n'était pas
+                // un calcul par paliers). Lecture seule, instance jetable.
+                P_pct = this._calculerPerformanceSpecifications(da, donneesEtudiant);
+                break;
+
             case 'jugement_global':
-                // Pour ces méthodes, utiliser le calcul custom si défini
-                // Sinon, fallback sur PAN
+                // DEN (#318) non implémenté : repli sur PAN en attendant.
                 P_pct = donneesEtudiant.actuel.PAN?.P || 0;
                 break;
 
@@ -240,6 +247,36 @@ class PratiqueConfigurable {
 
         // Convertir en décimal 0-1
         return P_pct / 100;
+    }
+
+    /**
+     * Délègue le calcul de performance SPE à PratiquePanSpecifications.
+     *
+     * La logique des paliers (bundles, tout-ou-rien) vit UNIQUEMENT dans la classe
+     * codée en dur. Une pratique configurable de type 'specifications' la réutilise
+     * en configurant une instance jetable avec sa propre config. Aucune écriture.
+     *
+     * @param {string} da - DA de l'étudiant
+     * @param {object} donneesEtudiant - entrée indicesCP[da] (pour le repli)
+     * @returns {number} P en pourcentage (0-100)
+     */
+    _calculerPerformanceSpecifications(da, donneesEtudiant) {
+        const cfg = this.config.configuration || this.config;
+        if (typeof window.PratiquePanSpecifications !== 'function' ||
+            !cfg || !Array.isArray(cfg.typesTravaux) || !Array.isArray(cfg.tableBundles)) {
+            // Classe absente ou config incomplète → repli sur la valeur PAN connue.
+            return donneesEtudiant?.actuel?.PAN?.P || 0;
+        }
+        const inst = new window.PratiquePanSpecifications();
+        inst.configurerPratique({
+            typesTravaux: cfg.typesTravaux,
+            tableBundles: cfg.tableBundles,
+            jetons: cfg.jetons,
+            seuilReussite: cfg.seuilReussite,
+            seuilExcellence: cfg.seuilExcellence
+        });
+        const perf = inst.calculerPerformance(da); // 0-1, ou null si pas de données
+        return (perf === null || perf === undefined) ? 0 : perf * 100;
     }
 
     // ========================================================================
