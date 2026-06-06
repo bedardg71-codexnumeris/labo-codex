@@ -19397,6 +19397,36 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     font-style: italic;
     color: var(--texte-muted, #80a0b0);
 }
+/* Sélecteurs inline des candidates simulées (C1-d). */
+.comparateur-selecteurs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin: 4px 0 14px;
+}
+.comparateur-selecteurs-titre {
+    font-size: 0.82rem;
+    color: var(--texte-muted, #80a0b0);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.comparateur-selecteur {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.78rem;
+    color: var(--texte-muted, #80a0b0);
+}
+.comparateur-select {
+    min-height: 36px;
+    padding: 6px 10px;
+    border: 1px solid var(--bordure-moyenne, rgba(106, 172, 184, 0.35));
+    border-radius: 8px;
+    background: var(--surface-input, var(--surface-carte, #1a3040));
+    color: var(--texte-principal, #d0e0e4);
+    font-size: 0.85rem;
+}
 /* Référence « Ta pratique » : accent léger ; simulations = bordure pointillée
    (variables design system, aucune couleur nouvelle). */
 .comparateur-col-pratique--ref,

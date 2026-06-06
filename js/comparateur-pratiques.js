@@ -34,6 +34,9 @@
     /* ── État interne ─────────────────────────────────────── */
     var _focusAvantOuverture = null;
     var _ouvert = false;
+    // Candidates simulées sélectionnées (1-2 ids), réinitialisées à la fermeture.
+    // null = pas encore initialisé → défauts calculés à l'ouverture (C1-d).
+    var _candidatsSel = null;
 
     // Profils-types étiquetés en dur (§8 de la note de conception) : stables et
     // racontables, pas de détection dynamique. DA du namespace démo (DEMO0xx).
@@ -192,15 +195,56 @@
     // Colonnes : référence = pratique active (« Ta pratique ») + simulations
     // SOM (famille codée) et SPE (1ʳᵉ configurable de famille SPE ≠ réf).
     // La sélection inline des candidates arrive en C1-d.
-    function _colonnes() {
-        var refId = (typeof obtenirPratiqueActiveGroupeCours === 'function' && obtenirPratiqueActiveGroupeCours())
+    // Référence = pratique active du groupe-cours (« Ta pratique »).
+    function _refId() {
+        return (typeof obtenirPratiqueActiveGroupeCours === 'function' && obtenirPratiqueActiveGroupeCours())
             || (window.PRATIQUE_DEFAUT || 'standards');
-        var cols = [{ id: refId, ref: true }];
-        cols.push({ id: 'sommative', ref: false });
+    }
+
+    // Pratiques SIMULABLES disponibles pour les sélecteurs (C1-d) : familles
+    // codées (SOM/STD/SPE actives) + pratiques configurables de la bibliothèque,
+    // hors référence. Les gabarits prédéfinis sont EXCLUS : non exécutables tels
+    // quels (skill §3/§10) — ils donneraient « — ». À revoir si on synthétise
+    // une config à la volée (hors C1).
+    function _pratiquesDisponibles(refId) {
+        var vues = {};
+        var liste = [];
+        function ajouter(id) {
+            if (!id || id === refId || vues[id]) return;
+            var code = _codePratique(id);
+            if (!code) return;                 // non résoluble → on n'offre pas
+            vues[id] = true;
+            liste.push({ id: id, nom: _nomPratique(id), code: code });
+        }
+        ['sommative', 'standards', 'specifications'].forEach(ajouter);
+        _configsPratiques().forEach(function(p) { ajouter(p.id); });
+        return liste;
+    }
+
+    // Défauts des candidates : SOM (famille codée) + 1ʳᵉ SPE configurable ≠ réf.
+    function _initCandidats(refId) {
+        if (_candidatsSel) return;
+        var sel = [];
+        if (refId !== 'sommative') sel.push('sommative');
         var spe = _configsPratiques().filter(function(p) {
             return p.id !== refId && _codePratique(p.id) === 'SPE';
         })[0];
-        if (spe) cols.push({ id: spe.id, ref: false });
+        if (spe) sel.push(spe.id);
+        // Repli : au moins une simulation si rien trouvé.
+        if (!sel.length) {
+            var dispo = _pratiquesDisponibles(refId);
+            if (dispo.length) sel.push(dispo[0].id);
+        }
+        _candidatsSel = sel;
+    }
+
+    function _colonnes() {
+        var refId = _refId();
+        _initCandidats(refId);
+        var cols = [{ id: refId, ref: true }];
+        _candidatsSel.forEach(function(id) {
+            if (id) cols.push({ id: id, ref: false });
+        });
         return cols;
     }
 
@@ -244,9 +288,12 @@
 
             if (na) {
                 var titre = na.description ? _esc(na.label + ' · ' + na.description) : _esc(na.label);
-                h += '<td class="comparateur-col-niveau" title="' + titre + '">'
+                // aria-label : la description du niveau (SOLO au survol) est aussi
+                // restituée au lecteur d'écran, pas seulement à la souris (§9).
+                var aria = na.label + (na.description ? ', ' + na.description : '') + ', ' + na.tendance.mot;
+                h += '<td class="comparateur-col-niveau" title="' + titre + '" aria-label="' + _esc(aria) + '">'
                     + _esc(na.label)
-                    + ' <span class="comparateur-tendance" aria-label="' + _esc(na.tendance.mot) + '">' + na.tendance.fleche + '</span>'
+                    + ' <span class="comparateur-tendance" aria-hidden="true">' + na.tendance.fleche + '</span>'
                     + '</td>';
             } else {
                 h += '<td class="comparateur-col-niveau comparateur-vide">—</td>';
@@ -340,7 +387,51 @@
         if (btn) btn.addEventListener('click', activerDemoEtOuvrir);
     }
 
-    /* ── Vue comparateur (matrice — lot C1-b) ───────────────── */
+    /* ── Sélecteurs inline des candidates simulées (C1-d) ───── */
+    // Zone inline (jamais de modale — anti-pattern projet). Un <select> par
+    // colonne de simulation ; changer une candidate recalcule la matrice.
+    function _rendreSelecteurs() {
+        var refId = _refId();
+        _initCandidats(refId);
+        var dispo = _pratiquesDisponibles(refId);
+
+        var blocs = _candidatsSel.map(function(selId, slot) {
+            var opts = dispo.map(function(p) {
+                var sel = (p.id === selId) ? ' selected' : '';
+                return '<option value="' + _esc(p.id) + '"' + sel + '>'
+                    + _esc(p.code + ' · ' + p.nom) + '</option>';
+            }).join('');
+            return '<label class="comparateur-selecteur">'
+                + '<span class="comparateur-selecteur-libelle">Simulation ' + (slot + 1) + '</span>'
+                + '<select class="comparateur-select" data-slot="' + slot + '">' + opts + '</select>'
+                + '</label>';
+        }).join('');
+
+        return '<div class="comparateur-selecteurs" id="comparateur-selecteurs">'
+            + '<span class="comparateur-selecteurs-titre">Comparer avec</span>'
+            + blocs + '</div>';
+    }
+
+    // Re-rend uniquement le tableau (préserve les sélecteurs et le focus).
+    function _rerendreMatrice(panel) {
+        var hote = panel.querySelector('#comparateur-matrice');
+        if (hote) hote.innerHTML = _rendreMatrice();
+    }
+
+    function _attacherSelecteurs(panel) {
+        var selects = panel.querySelectorAll('.comparateur-select');
+        for (var i = 0; i < selects.length; i++) {
+            selects[i].addEventListener('change', function(e) {
+                var slot = parseInt(e.target.getAttribute('data-slot'), 10);
+                if (!isNaN(slot)) {
+                    _candidatsSel[slot] = e.target.value;   // état UI seulement, aucune écriture en base
+                    _rerendreMatrice(panel);
+                }
+            });
+        }
+    }
+
+    /* ── Vue comparateur (matrice + sélecteurs) ─────────────── */
     function construireVue(panel) {
         panel.innerHTML =
             '<div class="comparateur-contenu" role="dialog" aria-labelledby="comparateur-titre-texte">' +
@@ -349,6 +440,7 @@
                     '<p class="comparateur-finalite">Des pratiques différentes mesurent des choses ' +
                     'différentes. Un écart entre des points n’est ni un bonus ni une erreur. Le ' +
                     'comparateur montre la <strong>maîtrise atteinte en regard de chaque note</strong>.</p>' +
+                    _rendreSelecteurs() +
                     '<div class="comparateur-matrice" id="comparateur-matrice" data-etat="matrice">' +
                         _rendreMatrice() +
                     '</div>' +
@@ -356,6 +448,7 @@
                 '</div>' +
             '</div>';
         attacherFermeture(panel);
+        _attacherSelecteurs(panel);
     }
 
     function attacherFermeture(panel) {
@@ -389,6 +482,7 @@
         panel.innerHTML = '';
         panel.style.display = 'none';
         _ouvert = false;
+        _candidatsSel = null;   // rouvrir = défauts recalculés
 
         // Restaurer le focus sur l'élément déclencheur.
         if (_focusAvantOuverture && typeof _focusAvantOuverture.focus === 'function'
