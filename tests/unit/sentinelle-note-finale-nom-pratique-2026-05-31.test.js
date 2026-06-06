@@ -19,8 +19,9 @@ describe('#127 · nom de la pratique active dans le panneau de note finale', () 
 
     it('la couche données expose pratiqueNom dans detailsNoteFinale', () => {
         const occ = actions.match(/pratiqueNom:\s*pratiqueNom/g) || [];
-        // exposé dans le retour succès ET dans le retour « non calculable »
-        expect(occ.length).toBe(2);
+        // exposé dans le retour succès ET dans le retour « non calculable »,
+        // + dans le récit de calcul C2-a (traçabilité de la fiche du comparateur).
+        expect(occ.length).toBe(3);
         // résolu depuis la bibliothèque par id
         expect(actions).toMatch(/_pratiquesCfg\.find\(p => p\.id === pratiqueId\)\?\.nom/);
     });

@@ -442,7 +442,8 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
             portfolio: null,
             terminal: null,
             noteFinale: null,
-            estProvisoire: false
+            estProvisoire: false,
+            recit: null
         };
     }
     const { nombreARetenir, minimumRequis, reglesConformite, modeHybride: modeHybrideNote, configCategories: configCategoriesNote } = cfg;
@@ -521,6 +522,73 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     // au calculateur hybride, car le flag pilote le traitement des obligatoires
     // non remises).
 
+    // ── C2-a (Comparateur, fiche de profil) : récit de calcul STD — traçabilité
+    // ADDITIVE. Contrat NOTE-CONCEPTION-C2 §4 : on ne lit QUE des valeurs déjà
+    // établies ci-dessus pour décrire le « sort » de chaque résultat. Aucun calcul
+    // n'est modifié → la note finale est strictement inchangée (sentinelle de parité).
+    const _titreProd = (pid) => {
+        const p = productions.find(pr => pr.id === pid);
+        return p?.titre || p?.activiteApprentissage || p?.description || pid;
+    };
+    const _estObligatoireHybride = (pid) => {
+        if (!modeHybrideNote) return false;
+        const p = productions.find(pr => pr.id === pid);
+        return !!(p && p.categorie === 'obligatoire');
+    };
+    const _resArtefact = (e, sort, detail) => ({
+        label: _titreProd(e.productionId),
+        date: e.dateEvaluation || null,
+        niveau: e.niveauFinal || null,   // code BRUT — traduit par l'échelle à la vue (neutralité)
+        note: (e.noteFinale ?? null),
+        sort: sort,
+        detail: detail
+    });
+    // Écartées = évaluées et valides mais hors sélection (mêmes références d'objets
+    // que artefactsRetenus, donc comparaison par identité fiable).
+    const _artefactsEcartes = evaluationsArtefacts.filter(e => !artefactsRetenus.includes(e));
+    // Remplacées par reprise : exclues dès le filtrage des valides (remplaceeParId),
+    // relues ici dans les évaluations brutes pour les nommer dans le récit.
+    const _remplacees = evaluations.filter(e =>
+        e.etudiantDA === da &&
+        artefactsIds.includes(e.productionId) &&
+        e.productionId !== terminalId &&
+        e.remplaceeParId
+    );
+    const _resultatsRecit = [];
+    artefactsRetenus.forEach(e => {
+        const obl = _estObligatoireHybride(e.productionId);
+        _resultatsRecit.push(_resArtefact(e, obl ? 'obligatoire' : 'compte',
+            obl ? 'obligatoire · comptée' : 'retenue dans la sélection'));
+    });
+    _artefactsEcartes.forEach(e => {
+        _resultatsRecit.push(_resArtefact(e, 'ecarte',
+            'écartée · hors des ' + artefactsRetenus.length + ' retenues'));
+    });
+    _remplacees.forEach(e => {
+        _resultatsRecit.push(_resArtefact(e, 'remplace', 'remplacée par une reprise'));
+    });
+    if (productionTerminale && noteTerminale !== null) {
+        _resultatsRecit.push({
+            label: productionTerminale.titre || productionTerminale.activiteApprentissage || 'Évaluation terminale',
+            date: evaluationTerminale?.dateEvaluation || null,
+            niveau: evaluationTerminale?.niveauFinal || null,
+            note: noteTerminale,
+            sort: 'compte',
+            detail: 'comptée · poids ' + normaliser(ponderationTerminale) + ' %'
+        });
+    }
+    const recit = {
+        famille: 'STD',
+        pratiqueNom: pratiqueNom,
+        resultats: _resultatsRecit,
+        synthese: {
+            formuleTexte: erreurConfiguration ? null
+                : ('portfolio × ' + normaliser(ponderationPortfolio) + ' % + terminale × ' + normaliser(ponderationTerminale) + ' %'),
+            noteFinale: noteFinale,
+            plafonnement: plafonnement
+        }
+    };
+
     return {
         pratique: 'PAN-Standards',
         erreur: erreurConfiguration,
@@ -552,7 +620,8 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
             present: productionTerminale !== null
         },
         noteFinale: noteFinale,
-        estProvisoire: noteTerminale === null
+        estProvisoire: noteTerminale === null,
+        recit: recit
     };
 }
 
