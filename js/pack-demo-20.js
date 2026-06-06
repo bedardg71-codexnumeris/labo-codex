@@ -13,7 +13,7 @@
 const PACK_DEMARRAGE = {
   "_metadata": {
     "nom": "Pack démo A2025",
-    "version": "20.7",
+    "version": "20.8",
     "date": "2026-04-22",
     "description": "20 étudiants anonymisés • 11 productions • 200 évaluations • 627 présences",
     "source": "Données réelles A2025 anonymisées",
@@ -1526,42 +1526,42 @@ const PACK_DEMARRAGE = {
         {
           "critereId": "CR1759243306842",
           "critereNom": "Structure",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "D",
           "retroaction": "",
           "ponderation": 15
         },
         {
           "critereId": "CR1759243331050",
           "critereNom": "Rigueur",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "I",
           "retroaction": "",
           "ponderation": 20
         },
         {
           "critereId": "CR1759243365467",
           "critereNom": "Plausibilité",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "I",
           "retroaction": "",
           "ponderation": 10
         },
         {
           "critereId": "CR1759243379949",
           "critereNom": "Nuance",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "I",
           "retroaction": "",
           "ponderation": 25
         },
         {
           "critereId": "CR1759243428715",
           "critereNom": "Français écrit",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "D",
           "retroaction": "",
           "ponderation": 30
         }
       ],
       "noteFinale": 54,
       "niveauFinal": "I",
-      "retroactionFinale": "Production : Description d'un personnage\nObjectif : Développer ta capacité d'observation détaillée des personnages tout en renforçant ta maîtrise de la grammaire française.\nTâche : Décrire un personnage en observant systématiquement toutes ses dimensions et faire une analyse grammaticale complète de ton texte.\n\nBonjour Mamadou ! Cet exercice nous offre la possibilité de voir comment tu adoptes les postures descriptive et analytique devant un texte littéraire. Voici quelques observations.\n\nSTRUCTURE (M) : Ta description montre une bonne organisation logique. Tu as clairement structuré ton texte autour de différents aspects du personnage, créant une progression fluide dans ta présentation. Les transitions entre les idées sont généralement efficaces. Pour aller plus loin, tu pourrais renforcer les liens entre les caractéristiques physiques et psychologiques du personnage, montrant comment elles s'influencent mutuellement dans la construction du personnage.\n\nRIGUEUR (M) : Ta description démontre une bonne rigueur dans l'observation du personnage. Tu as couvert la plupart des aspects importants : physique, psychologique, social et moral. Tes observations sont généralement précises et bien étayées. Réfléchis aussi aux liens entre ces différents aspects pour enrichir ton analyse.\n\nPLAUSIBILITÉ (M) : Ta description utilise efficacement des preuves explicites du texte, y compris des citations entre guillemets. Tu as su sélectionner des passages pertinents pour appuyer tes observations sur le personnage. C'est un bon niveau de plausibilité. Travaille sur l'intégration fluide de ces citations dans tes explications, en veillant à bien les contextualiser.\n\nNUANCE (D) : Ta description commence à montrer quelques nuances, ce qui est un bon début. Tu as identifié certaines complexités dans le personnage, allant au-delà d'une simple caractérisation en noir et blanc. Cependant, tu pourrais approfondir davantage. Essaie d'explorer comment différents traits de caractère peuvent coexister chez le personnage, même s'ils semblent contradictoires. Réfléchis aussi à comment le contexte influence le comportement du personnage.\n\nFRANÇAIS ÉCRIT (M) : Il y a quelques erreurs de français. Assure-toi de toujours réviser ton texte adéquatement.\n\nLe niveau global de cette production est : D",
+      "retroactionFinale": "Production : Description d'un personnage\nObjectif : Développer ta capacité d'observation détaillée des personnages tout en renforçant ta maîtrise de la grammaire française.\nTâche : Décrire un personnage en observant systématiquement toutes ses dimensions et faire une analyse grammaticale complète de ton texte.\n\nBonjour Mamadou ! Cet exercice nous offre la possibilité de voir comment tu adoptes les postures descriptive et analytique devant un texte littéraire. Voici quelques observations.\n\nSTRUCTURE (D) : Ta description s'organise autour de quelques aspects du personnage, mais l'ensemble ressemble encore à une liste plus qu'à un portrait construit. Les transitions entre les idées sont rares et la progression n'est pas toujours claire. Pour t'améliorer, regroupe tes observations par dimension (physique, psychologique, sociale, morale) et montre comment tu passes de l'une à l'autre.\n\nRIGUEUR (I) : Tes observations restent en surface : tu touches à quelques aspects du personnage, mais plusieurs dimensions importantes sont survolées ou absentes. Les détails relevés sont peu précis. Pour progresser, prends le temps d'observer systématiquement chaque dimension et appuie chaque observation sur un élément concret du texte.\n\nPLAUSIBILITÉ (I) : Tes observations sont rarement appuyées sur le texte. Les citations sont peu nombreuses, et quand elles sont présentes, le lien avec ce que tu avances n'est pas clair. Pour t'améliorer, choisis pour chaque trait du personnage une preuve explicite et explique en quoi elle le démontre.\n\nNUANCE (I) : Ta caractérisation reste binaire : le personnage est décrit d'un seul bloc, sans tension ni complexité. Pour progresser, cherche les contradictions ou les zones d'ombre du personnage, et demande-toi comment le contexte influence son comportement. C'est là que la description devient analyse.\n\nFRANÇAIS ÉCRIT (D) : Ta rédaction contient plusieurs erreurs de français qui nuisent par moments à la clarté de tes idées. Une relecture attentive de la syntaxe et de la ponctuation t'aiderait à mieux faire ressortir tes observations.\n\nLe niveau global de cette production est : I",
       "optionsAffichage": {
         "description": true,
         "objectif": true,
@@ -3612,35 +3612,35 @@ const PACK_DEMARRAGE = {
         {
           "critereId": "CR17592642064900.618466646516426",
           "critereNom": "Structure",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "D",
           "retroaction": "",
           "ponderation": 20
         },
         {
           "critereId": "CR17592642064900.9140629252044018",
           "critereNom": "Rigueur",
-          "niveauSelectionne": "E",
+          "niveauSelectionne": "I",
           "retroaction": "",
           "ponderation": 30
         },
         {
           "critereId": "CR17592642064900.06875447039747506",
           "critereNom": "Plausibilité",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "D",
           "retroaction": "",
           "ponderation": 15
         },
         {
           "critereId": "CR17592642064900.21301963126012036",
           "critereNom": "Nuance",
-          "niveauSelectionne": "E",
+          "niveauSelectionne": "I",
           "retroaction": "",
           "ponderation": 35
         }
       ],
       "noteFinale": 60,
       "niveauFinal": "I",
-      "retroactionFinale": "Production : Carte mentale\nObjectif : Développer sa capacité à analyser collaborativement un texte et à représenter les relations entre objectif, mécanismes et procédés.\nTâche : En binôme, construire une carte mentale qui organise visuellement l'analyse du texte, en délibérant sur chaque élément pour arriver à une interprétation commune.\n\nBonjour Mamadou ! Cet exercice nous permet de pratiquer la posture analytique en organisant des idées dans une carte mentale. La carte présente une hypothèse d’objectif de communication. Celle-ci est soutenue par des mécanismes que tu observes dans le texte et dont tu expliques le fonctionnement avec des procédés littéraires. Toutes tes explications doivent être appuyées sur des preuves. Voici quelques observations.\n\nSTRUCTURE (M) : La structure est claire et la schématisation est méthodique et efficace. L'hypothèse d'objectif de communication est bien placée au centre, avec les mécanismes littéraires formant les branches principales et les procédés littéraires les branches secondaires. L'alignement logique entre l'objectif de communication, les mécanismes et les procédés est clair et logique. Cette organisation efficace facilitera la création du plan détaillé.\n\nRIGUEUR (E) : Les mécanismes sont complémentaires et les procédés littéraires sont pertinents et bien développés. Les preuves textuelles sont nombreuses, précises et judicieusement sélectionnées. Les interprétations sont claires et pertinentes. Les procédés sont bien identifiés. Cette approche exhaustive offre une bonne base pour une analyse riche et nuancée, permettant un plan de qualité.\n\nPLAUSIBILITÉ (M) : L'hypothèse d'objectif de communication est claire et pertinente, tandis que les mécanismes et procédés littéraires identifiés viennent bien la soutenir. Les preuves textuelles sont bien choisies et correctement interprétées. Les liens entre l'objectif, les mécanismes et les procédés sont logiques et cohérents. Cette carte mentale offre une interprétation crédible du texte, fournissant une base solide pour l'analyse littéraire à venir.\n\nNUANCE (E) : Ce schéma révèle une compréhension fine et nuancée du texte. Les mécanismes et procédés littéraires sont analysés en profondeur, avec une appréciation de leurs effets. Les subtilités et les complexités du texte sont reconnues et enrichissent l'interprétation. Les liens entre les éléments révèlent des interactions complexes et fines. Cette approche capture la richesse et la profondeur du texte, permettant une analyse littéraire de qualité.\n\nLe niveau global de cette production est : E",
+      "retroactionFinale": "Production : Carte mentale\nObjectif : Développer sa capacité à analyser collaborativement un texte et à représenter les relations entre objectif, mécanismes et procédés.\nTâche : En binôme, construire une carte mentale qui organise visuellement l'analyse du texte, en délibérant sur chaque élément pour arriver à une interprétation commune.\n\nBonjour Mamadou ! Cet exercice nous permet de pratiquer la posture analytique en organisant des idées dans une carte mentale. La carte présente une hypothèse d’objectif de communication. Celle-ci est soutenue par des mécanismes que tu observes dans le texte et dont tu expliques le fonctionnement avec des procédés littéraires. Toutes tes explications doivent être appuyées sur des preuves. Voici quelques observations.\n\nSTRUCTURE (D) : Ta carte commence à s'organiser, mais la hiérarchie entre l'hypothèse d'objectif de communication, les mécanismes et les procédés n'est pas encore claire. Plusieurs branches restent incomplètes et certains éléments sont placés au mauvais niveau. Pour t'améliorer, distingue bien les trois niveaux : le message implicite au centre (HOC), les stratégies qui le portent (mécanismes), puis les moyens précis (procédés). Une organisation visuelle plus nette facilitera ton plan détaillé.\n\nRIGUEUR (I) : Les éléments d'analyse sont encore peu nombreux et souvent imprécis. Quelques mécanismes sont nommés, mais ils sont parfois confondus avec des procédés, et les preuves textuelles manquent ou ne sont pas reliées à ce que tu avances. Pour progresser, appuie chaque branche sur au moins une citation et vérifie que tu nommes les mécanismes et les procédés avec le vocabulaire du cours.\n\nPLAUSIBILITÉ (D) : Ton hypothèse d'objectif de communication est présente, mais elle reste floue et peu ancrée dans tes observations. Certains éléments la soutiennent, d'autres s'en éloignent ou restent isolés. Pour t'améliorer, demande-toi pour chaque branche : est-ce que cet élément aide vraiment à démontrer mon HOC ? Resserre la carte autour de cette question.\n\nNUANCE (I) : Ton analyse reste descriptive : tu identifies des éléments sans expliquer ce qu'ils révèlent ni comment ils se répondent. Les liens entre les branches sont absents. Pour progresser, ne te contente pas de nommer un mécanisme ou un procédé : explique son effet et relie-le aux autres observations. C'est ce croisement qui fait passer la carte du repérage à l'interprétation.\n\nLe niveau global de cette production est : I",
       "optionsAffichage": {
         "description": true,
         "objectif": true,
@@ -7671,14 +7671,14 @@ const PACK_DEMARRAGE = {
         {
           "critereId": "CR1759529438502",
           "critereNom": "Structure",
-          "niveauSelectionne": "I",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 15
         },
         {
           "critereId": "CR1759529458633",
           "critereNom": "Rigueur",
-          "niveauSelectionne": "I",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 20
         },
@@ -7692,7 +7692,7 @@ const PACK_DEMARRAGE = {
         {
           "critereId": "CR1759529494819",
           "critereNom": "Nuance",
-          "niveauSelectionne": "I",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 25
         },
@@ -7706,7 +7706,7 @@ const PACK_DEMARRAGE = {
       ],
       "noteFinale": 80,
       "niveauFinal": "M",
-      "retroactionFinale": "Production : Rédaction d'un texte suivi\nObjectif : Démontrer ta capacité à développer une analyse littéraire structurée, argumentée et bien écrite.\nTâche : Rédiger une analyse littéraire à partir de ton plan détaillé.\n\nBonjour Mamadou !\n\nLa rédaction est une étape terminale où il faut développer des paragraphes structurés, intégrer des preuves avec fluidité et assurer la progression logique des idées. Il s'agit ici de transformer ton plan détaillé en analyse littéraire complète. Ce moment est l'aboutissement de tout ton travail préparatoire.\n\nVoici quelques observations :\n\nStructure (I) : L'analyse manque d'organisation dans ses différentes parties. Notamment, l'hypothèse d'objectif de communication, les mécanismes qui démontrent son application dans l'écriture ou l'explication des procédés sont absents ou incomplets. Les paragraphes ne suivent pas une progression logique claire. Enfin, les transitions et les organisateurs textuels sont rares ou peu efficaces pour guider la lecture.\n\nRigueur (I) : L'analyse contient peu d'éléments à observer. Notamment, les procédés littéraires identifiés sont rares ou imprécis, tandis que l'explication de leurs effets est absente ou superficielle. Les mécanismes littéraires ne sont pas clairement reliés à l'objectif de communication. Enfin, le vocabulaire spécifique à l'analyse littéraire est limité ou utilisé de façon imprécise.\n\nPlausibilité (D) : Quelques citations pertinentes appuient l'analyse, mais elles pourraient être plus nombreuses ou plus ciblées. Leur contextualisation dans l'œuvre reste partielle. L'intégration des citations dans les phrases manque parfois de fluidité. Les liens entre ces preuves et l'argumentation pourraient être plus explicites.\n\nNuance (I) : L'analyse des éléments observés demeure au niveau descriptif. Ainsi, les observations se limitent à décrire le contenu apparent du texte, sans proposer d'interprétations. Les déductions sont absentes ou restent superficielles. Le texte est abordé de manière plutôt littérale, sans chercher à en comprendre les significations plus profondes.\n\nFrançais écrit (M) : Ta rédaction contient 4 erreurs de français pour 300 mots. Tu fais en moyenne 1 erreur à chaque 75 mots. En prévision de l'EUF, ce ratio est très bien. La plupart des erreurs concernent l'utilisation de la ponctuation. Elle peut être relative au coordonnant, au complément de phrase, au complément du nom, à l'organisateur textuel, à une énumération (dont la juxtaposition de phrases) ou encore à une citation. La ponctuation fautive vient embrouiller la structure et la clarté des idées. Vérifie les règles de ponctuation pour les différents types de phrases et de propositions. Certaines conjonctions rendent obligatoire l'usage de la virgule. Utilise des guides de ponctuation pour vérifier cet usage.\n\nLe niveau global de cette production est : I.",
+      "retroactionFinale": "Production : Rédaction d'un texte suivi\nObjectif : Démontrer ta capacité à développer une analyse littéraire structurée, argumentée et bien écrite.\nTâche : Rédiger une analyse littéraire à partir de ton plan détaillé.\n\nBonjour Mamadou !\n\nLa rédaction est une étape terminale où il faut développer des paragraphes structurés, intégrer des preuves avec fluidité et assurer la progression logique des idées. Il s'agit ici de transformer ton plan détaillé en analyse littéraire complète. Ce moment est l'aboutissement de tout ton travail préparatoire.\n\nVoici quelques observations :\n\nStructure (M) : Ton analyse est bien organisée : l'hypothèse d'objectif de communication est claire, chaque paragraphe développe un mécanisme et la progression logique est facile à suivre. Les transitions et les organisateurs textuels guident efficacement la lecture. Pour viser l'excellence, soigne encore ton introduction et ta conclusion pour qu'elles mettent davantage ton interprétation en valeur.\n\nRigueur (M) : Tu identifies des procédés littéraires pertinents et tu expliques leurs effets de façon généralement juste. Les mécanismes sont reliés à l'objectif de communication et le vocabulaire analytique est employé correctement. Pour aller plus loin, approfondis l'explication de quelques procédés dont l'effet reste encore survolé.\n\nPlausibilité (D) : Quelques citations pertinentes appuient l'analyse, mais elles pourraient être plus nombreuses ou plus ciblées. Leur contextualisation dans l'œuvre reste partielle et leur intégration dans tes phrases manque parfois de fluidité. Pour t'améliorer, vérifie que chaque preuve démontre vraiment ce que tu avances et relie-la explicitement à ton argumentation.\n\nNuance (M) : Ton analyse dépasse le constat : tu interprètes le texte et tu proposes des significations qui vont au-delà du sens littéral. Quelques liens entre tes observations gagneraient encore à être explicités. Pour viser l'excellence, montre comment les procédés se répondent et enrichissent l'interprétation d'ensemble.\n\nFrançais écrit (M) : Ta rédaction contient 4 erreurs de français pour 300 mots. Tu fais en moyenne 1 erreur à chaque 75 mots. En prévision de l'EUF, ce ratio est très bien. La plupart des erreurs concernent l'utilisation de la ponctuation. Elle peut être relative au coordonnant, au complément de phrase, au complément du nom, à l'organisateur textuel, à une énumération (dont la juxtaposition de phrases) ou encore à une citation. La ponctuation fautive vient embrouiller la structure et la clarté des idées. Vérifie les règles de ponctuation pour les différents types de phrases et de propositions. Certaines conjonctions rendent obligatoire l'usage de la virgule. Utilise des guides de ponctuation pour vérifier cet usage.\n\nLe niveau global de cette production est : M.",
       "optionsAffichage": {
         "description": true,
         "objectif": true,
@@ -9504,28 +9504,28 @@ const PACK_DEMARRAGE = {
         {
           "critereId": "CR1759243306842",
           "critereNom": "Structure",
-          "niveauSelectionne": "I",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 15
         },
         {
           "critereId": "CR1759243331050",
           "critereNom": "Rigueur",
-          "niveauSelectionne": "I",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 20
         },
         {
           "critereId": "CR1759243365467",
           "critereNom": "Plausibilité",
-          "niveauSelectionne": "I",
+          "niveauSelectionne": "D",
           "retroaction": "",
           "ponderation": 10
         },
         {
           "critereId": "CR1759243379949",
           "critereNom": "Nuance",
-          "niveauSelectionne": "I",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 25
         },
@@ -9539,7 +9539,7 @@ const PACK_DEMARRAGE = {
       ],
       "noteFinale": 83,
       "niveauFinal": "M",
-      "retroactionFinale": "Production : Formuler 5 HOC\nObjectif : Développer ta capacité à reconnaître les intentions d'un auteur, ses stratégies d'écriture et les liens qui unissent différents récits d'une même œuvre.\nTâche : Analyser dix récits du recueil pour identifier leurs objectifs de communication, mécanismes littéraires et preuves textuelles, puis synthétiser les patterns observés.\n\nBonjour Mamadou !\n\nVoici quelques observations :\n\nStructure (I) : Ton tableau présente des difficultés d'organisation entre les hypothèses d'objectif de communication, les mécanismes et les procédés. Plusieurs éléments sont confondus ou manquants, ce qui rend difficile la compréhension de ton analyse. Pour progresser, assure-toi d'abord de bien distinguer ces trois niveaux hiérarchiques : le message implicite (HOC), la stratégie utilisée (mécanisme), et le moyen technique précis (procédé). Travaille à établir des liens clairs entre eux pour chaque récit.\n\nRigueur (I) : Ton travail montre des difficultés à identifier avec précision les éléments demandés. Plusieurs hypothèses d'objectif de communication restent descriptives plutôt qu'analytiques, et certains procédés ou mécanismes sont mal nommés ou absents. Assure-toi d'inclure tous les récits obligatoires et le nombre requis d'autres récits. Concentre-toi sur la distinction entre décrire ce qui se passe et analyser le message implicite que l'autrice cherche à transmettre. Cette précision est essentielle.\n\nPlausibilité (I) : Tes preuves textuelles ont du mal à soutenir efficacement tes analyses. Les citations choisies ne sont pas toujours pertinentes, et les explications n'établissent pas clairement le lien avec les mécanismes ou les hypothèses formulées. Ton paragraphe de synthèse peine à identifier des récurrences significatives dans l'œuvre. Pour progresser, sélectionne des preuves qui illustrent précisément ce que tu avances, et explique concrètement comment elles appuient ton interprétation.\n\nNuance (I) : Ton analyse reste au niveau descriptif ou personnel plutôt qu'analytique. Tes interprétations s'en tiennent souvent aux significations évidentes sans explorer les subtilités des récits de Natasha Kanapé Fontaine. Ton raisonnement demeure binaire, sans percevoir les complexités ou les ambiguïtés. Pour progresser, cherche à aller au-delà de ta première impression : interroge les doubles sens, les tensions, les non-dits. Développe une posture analytique qui explore plutôt que de simplement constater.\n\nFrançais écrit (E) : Excellent travail sur la qualité de la langue ! Ton expression écrite est claire, précise et soignée tout au long de ton travail. Tes HOC sont formulées avec justesse, tes explications sont limpides et ton paragraphe de synthèse est particulièrement bien rédigé. Cette maîtrise linguistique te permet de communiquer tes idées analytiques avec efficacité et nuance. Tu es bien préparé pour rédiger une analyse littéraire de qualité où la clarté de l'expression sera essentielle.\n\nLe niveau global de cette production est : I.",
+      "retroactionFinale": "Production : Formuler 5 HOC\nObjectif : Développer ta capacité à reconnaître les intentions d'un auteur, ses stratégies d'écriture et les liens qui unissent différents récits d'une même œuvre.\nTâche : Analyser dix récits du recueil pour identifier leurs objectifs de communication, mécanismes littéraires et preuves textuelles, puis synthétiser les patterns observés.\n\nBonjour Mamadou !\n\nVoici quelques observations :\n\nStructure (M) : Ton tableau distingue maintenant clairement les trois niveaux hiérarchiques : l'hypothèse d'objectif de communication, les mécanismes et les procédés. L'organisation est cohérente d'un récit à l'autre et rend ton analyse facile à suivre. Pour viser l'excellence, resserre encore les liens entre les récits pour que les patterns ressortent dès la lecture du tableau.\n\nRigueur (M) : Tu identifies les éléments demandés avec justesse : tes hypothèses d'objectif de communication sont analytiques, et la plupart des mécanismes et des procédés sont bien nommés. Tu couvres les récits obligatoires et le nombre requis d'autres récits. Pour aller plus loin, précise quelques procédés dont l'identification reste approximative et pousse un cran plus loin la distinction entre décrire et analyser.\n\nPlausibilité (D) : Tes preuves textuelles soutiennent l'analyse, mais elles pourraient être mieux choisies et plus systématiquement reliées à tes hypothèses. Ton paragraphe de synthèse amorce le repérage de récurrences sans encore les nommer précisément. Pour t'améliorer, sélectionne des citations qui illustrent exactement ce que tu avances et explicite le lien avec chaque mécanisme.\n\nNuance (M) : Ton analyse dépasse la description : tu interprètes les récits de Natasha Kanapé Fontaine et tu commences à percevoir leurs tensions et leurs doubles sens. Pour viser l'excellence, prolonge cette posture en reliant les ambiguïtés d'un récit à l'autre, de façon à dégager une lecture d'ensemble nuancée de l'œuvre.\n\nFrançais écrit (E) : Excellent travail sur la qualité de la langue ! Ton expression écrite est claire, précise et soignée tout au long de ton travail. Tes HOC sont formulées avec justesse, tes explications sont limpides et ton paragraphe de synthèse est particulièrement bien rédigé. Cette maîtrise linguistique te permet de communiquer tes idées analytiques avec efficacité et nuance. Tu es bien préparé pour rédiger une analyse littéraire de qualité où la clarté de l'expression sera essentielle.\n\nLe niveau global de cette production est : M.",
       "optionsAffichage": {
         "description": true,
         "objectif": true,
@@ -10672,35 +10672,35 @@ const PACK_DEMARRAGE = {
         {
           "critereId": "CR17592642064900.618466646516426",
           "critereNom": "Structure",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 20
         },
         {
           "critereId": "CR17592642064900.9140629252044018",
           "critereNom": "Rigueur",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "E",
           "retroaction": "",
           "ponderation": 30
         },
         {
           "critereId": "CR17592642064900.06875447039747506",
           "critereNom": "Plausibilité",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 15
         },
         {
           "critereId": "CR17592642064900.21301963126012036",
           "critereNom": "Nuance",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "E",
           "retroaction": "",
           "ponderation": 35
         }
       ],
       "noteFinale": 86,
       "niveauFinal": "E",
-      "retroactionFinale": "Production : Stratégies de lecture (2)\nObjectif : Développer sa capacité à utiliser efficacement différentes stratégies de lecture et à documenter de manière claire et méthodique son processus d'analyse.\nTâche : Appliquer au moins trois stratégies de lecture différentes sur un texte littéraire et laisser des traces visibles et organisées de cette analyse.\n\nBonjour Mamadou !\n\nCet exercice nous permet d’observer comment tu adoptes la posture analytique en appliquant tes stratégies de lecture, en adoptant une méthode de travail efficace et en interprétant et en reliant les informations. Voici quelques observations.\n\nVoici quelques observations :\n\nStructure (D) : Tes stratégies de lecture sont partiellement identifiées et ton système d'annotation commence à se développer, mais manque encore de constance d'une page à l'autre. Les traces présentes faciliteront la création de ta carte mentale, mais celle-ci risque d'être incomplète. Pour t'améliorer, applique plus systématiquement ton code visuel (mêmes couleurs pour mêmes éléments, symboles constants) afin de mieux préparer l'étape suivante.\n\nRigueur (D) : Tes stratégies de lecture sont appliquées, mais certains aspects importants du texte restent peu explorés. Bien que certaines annotations soient pertinentes, tu passes à côté d'occasions d'analyse que le texte offrait pourtant. Pour t'améliorer, exploite plus à fond les possibilités de chaque stratégie choisie. Quand tu repères un élément intéressant, prends le temps de vraiment l'analyser plutôt que de simplement le souligner.\n\nPlausibilité (D) : Plusieurs de tes annotations sont pertinentes et commencent à révéler une compréhension du texte. Une piste se dessine dans ton hypothèse d'objectif de communication, mais elle reste encore floue ou pas tout à fait ancrée dans tes observations. Pour t'améliorer, vérifie que tes annotations les plus importantes t'aident à mieux cerner cette direction. Demande-toi : qu'est-ce que ces éléments me disent vraiment sur le message de l'autrice ?\n\nNuance (D) : Ton approche commence à dépasser le simple repérage. Tu établis quelques liens entre les observations issues de différentes stratégies, mais plusieurs connexions potentielles restent inexploitées. Pour t'améliorer, cherche davantage à croiser tes stratégies. Par exemple, si tu observes un symbole et un thème, comment travaillent-ils ensemble ? Cette lecture croisée révélera des nuances que tu ne vois pas encore.\n\nLe niveau global de cette production est : D.",
+      "retroactionFinale": "Production : Stratégies de lecture (2)\nObjectif : Développer sa capacité à utiliser efficacement différentes stratégies de lecture et à documenter de manière claire et méthodique son processus d'analyse.\nTâche : Appliquer au moins trois stratégies de lecture différentes sur un texte littéraire et laisser des traces visibles et organisées de cette analyse.\n\nBonjour Mamadou !\n\nCet exercice nous permet d’observer comment tu adoptes la posture analytique en appliquant tes stratégies de lecture, en adoptant une méthode de travail efficace et en interprétant et en reliant les informations. Voici quelques observations.\n\nVoici quelques observations :\n\nStructure (M) : Tes stratégies de lecture sont clairement identifiées et ton système d'annotation est cohérent d'une page à l'autre. Tes traces sont organisées et prépareront efficacement ta carte mentale. Pour atteindre l'excellence sur ce critère, uniformise les derniers éléments de ton code visuel (mêmes couleurs pour les mêmes éléments, symboles constants partout).\n\nRigueur (E) : Tu exploites tes stratégies en profondeur : tes annotations couvrent les aspects importants du texte et chacune est vraiment analysée, pas seulement soulignée. Tu repères des éléments que beaucoup laisseraient passer et tu en tires des observations précises. Cette rigueur te donne une matière riche pour l'analyse à venir.\n\nPlausibilité (M) : Tes annotations sont pertinentes et soutiennent une hypothèse d'objectif de communication déjà bien dessinée. La plupart de tes observations convergent vers le message de l'autrice. Pour viser l'excellence, vérifie que tes toutes dernières annotations renforcent encore cette direction plutôt que de la disperser.\n\nNuance (E) : Tu croises tes stratégies avec finesse : tu mets en relation des observations issues de différentes lectures et tu en tires des significations que le simple repérage ne donnerait pas. Cette lecture croisée révèle les subtilités du texte. Continue d'expliciter ces liens, c'est ce qui fait la profondeur de ton analyse.\n\nLe niveau global de cette production est : E.",
       "optionsAffichage": {
         "description": true,
         "objectif": true,
@@ -12023,35 +12023,35 @@ const PACK_DEMARRAGE = {
         {
           "critereId": "CR17592642064900.618466646516426",
           "critereNom": "Structure",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "E",
           "retroaction": "",
           "ponderation": 20
         },
         {
           "critereId": "CR17592642064900.9140629252044018",
           "critereNom": "Rigueur",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "E",
           "retroaction": "",
           "ponderation": 30
         },
         {
           "critereId": "CR17592642064900.06875447039747506",
           "critereNom": "Plausibilité",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 15
         },
         {
           "critereId": "CR17592642064900.21301963126012036",
           "critereNom": "Nuance",
-          "niveauSelectionne": "I",
+          "niveauSelectionne": "E",
           "retroaction": "",
           "ponderation": 35
         }
       ],
       "noteFinale": 88,
       "niveauFinal": "E",
-      "retroactionFinale": "Production : Carte mentale (2)\nObjectif : Développer sa capacité à analyser collaborativement un texte et à représenter les relations entre objectif, mécanismes et procédés.\nTâche : En binôme, construire une carte mentale qui organise visuellement l'analyse du texte, en délibérant sur chaque élément pour arriver à une interprétation commune.\n\nBonjour Mamadou !\n\nCet exercice nous permet de pratiquer la posture analytique en organisant des idées dans une carte mentale. La carte présente une hypothèse d’objectif de communication. Celle-ci est soutenue par des mécanismes que tu observes dans le texte et dont tu expliques le fonctionnement avec des procédés littéraires. Toutes tes explications doivent être appuyées sur des preuves. Voici quelques observations.\n\nVoici quelques observations :\n\nStructure (M) : Ta carte mentale est bien organisée avec une hiérarchie claire entre HOC, mécanismes et procédés. L'organisation visuelle (couleurs, symboles) facilite la lecture et montre efficacement les relations logiques entre les éléments. Cette structure cohérente démontre ta capacité à organiser une analyse complexe et te prépare bien pour le plan de rédaction. Ta méthode visuelle révèle une bonne compréhension de l'architecture de l'analyse littéraire.\n\nRigueur (D) : Ta carte mentale contient plusieurs éléments d'analyse, mais la précision manque dans certaines identifications. Quelques mécanismes sont bien nommés tandis que d'autres restent vagues ou confondus avec des procédés. Pour t'améliorer, utilise le vocabulaire analytique précis du cours pour identifier mécanismes et procédés. Vérifie que chaque branche contient des citations pertinentes avec leurs références. Cette précision renforcera la qualité de ton analyse.\n\nPlausibilité (D) : Ton hypothèse d'objectif de communication est présente mais gagnerait à être plus précise. Certains éléments de ta carte soutiennent bien cette HOC tandis que d'autres s'en éloignent ou restent peu reliés. Pour t'améliorer, vérifie que chaque mécanisme littéraire identifié contribue directement à démontrer ton HOC centrale. Demande-toi : mes citations et procédés prouvent-ils vraiment ce que j'avance ? Cette cohérence renforcera la crédibilité de ton analyse.\n\nNuance (I) : Ton analyse reste au niveau descriptif sans véritablement interpréter le texte. Ta carte mentale se limite à identifier des éléments sans expliquer leur signification ou leurs relations. Tu n'établis pas de liens entre les différentes branches. Pour progresser, ne te contente pas de nommer des mécanismes et procédés : explique ce qu'ils révèlent sur le message de l'auteur. Utilise des flèches pour montrer comment différentes observations se complètent ou se répondent.\n\nLe niveau global de cette production est : I.",
+      "retroactionFinale": "Production : Carte mentale (2)\nObjectif : Développer sa capacité à analyser collaborativement un texte et à représenter les relations entre objectif, mécanismes et procédés.\nTâche : En binôme, construire une carte mentale qui organise visuellement l'analyse du texte, en délibérant sur chaque élément pour arriver à une interprétation commune.\n\nBonjour Mamadou !\n\nCet exercice nous permet de pratiquer la posture analytique en organisant des idées dans une carte mentale. La carte présente une hypothèse d’objectif de communication. Celle-ci est soutenue par des mécanismes que tu observes dans le texte et dont tu expliques le fonctionnement avec des procédés littéraires. Toutes tes explications doivent être appuyées sur des preuves. Voici quelques observations.\n\nVoici quelques observations :\n\nStructure (E) : Ta carte mentale est remarquablement organisée : la hiérarchie entre l'hypothèse d'objectif de communication, les mécanismes et les procédés est limpide, et ton code visuel (couleurs, symboles) rend les relations logiques immédiatement lisibles. Cette architecture claire montre que tu maîtrises la structure d'une analyse littéraire et te prépare idéalement au plan de rédaction.\n\nRigueur (E) : Tes mécanismes et tes procédés sont identifiés avec précision et nommés avec le vocabulaire juste du cours. Chaque branche est appuyée sur des citations pertinentes et bien référencées. Cette exactitude donne à ta carte une réelle valeur analytique et solidifie l'ensemble de ta démarche.\n\nPlausibilité (M) : Ton hypothèse d'objectif de communication est claire et la plupart des éléments de ta carte la soutiennent efficacement. Pour atteindre l'excellence, vérifie que chaque dernière branche contribue directement à démontrer ta HOC centrale, sans détour ni élément qui s'en éloigne.\n\nNuance (E) : Tu ne te contentes plus de nommer : tu expliques ce que les mécanismes et les procédés révèlent du message de l'autrice, et tu relies les branches entre elles pour faire ressortir des significations d'ensemble. Cette lecture interprétative et croisée capture la richesse et la profondeur du texte.\n\nLe niveau global de cette production est : E.",
       "optionsAffichage": {
         "description": true,
         "objectif": true,
@@ -13379,14 +13379,14 @@ const PACK_DEMARRAGE = {
         {
           "critereId": "CR1759529438502",
           "critereNom": "Structure",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 15
         },
         {
           "critereId": "CR1759529458633",
           "critereNom": "Rigueur",
-          "niveauSelectionne": "I",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 20
         },
@@ -13400,7 +13400,7 @@ const PACK_DEMARRAGE = {
         {
           "critereId": "CR1759529494819",
           "critereNom": "Nuance",
-          "niveauSelectionne": "I",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 25
         },
@@ -13414,7 +13414,7 @@ const PACK_DEMARRAGE = {
       ],
       "noteFinale": 84,
       "niveauFinal": "M",
-      "retroactionFinale": "Production : Rédaction finale\nObjectif : Démontrer ta capacité à développer une analyse littéraire structurée, argumentée et bien écrite.\nTâche : Rédiger une analyse littéraire à partir de ton plan détaillé.\n\nBonjour Mamadou !\n\nLa rédaction est une étape terminale où il faut développer des paragraphes structurés, intégrer des preuves avec fluidité et assurer la progression logique des idées. Il s'agit ici de transformer ton plan détaillé en analyse littéraire complète. Ce moment est l'aboutissement de tout ton travail préparatoire.\n\nVoici quelques observations :\n\nStructure (D) : L'analyse présente une structure de base, cependant certains éléments restent à développer. L'hypothèse d'objectif et les mécanismes littéraires utilisés pour l'atteindre sont identifiés mais traités de façon isolée. Ainsi, les parties du texte sont présentes mais peu reliées entre elles. De même, la transition logique entre les paragraphes manque de clarté.\n\nRigueur (I) : L'analyse contient peu d'éléments à observer. Notamment, les procédés littéraires identifiés sont rares ou imprécis, tandis que l'explication de leurs effets est absente ou superficielle. Les mécanismes littéraires ne sont pas clairement reliés à l'objectif de communication. Enfin, le vocabulaire spécifique à l'analyse littéraire est limité ou utilisé de façon imprécise.\n\nPlausibilité (D) : Quelques citations pertinentes appuient l'analyse, mais elles pourraient être plus nombreuses ou plus ciblées. Leur contextualisation dans l'œuvre reste partielle. L'intégration des citations dans les phrases manque parfois de fluidité. Les liens entre ces preuves et l'argumentation pourraient être plus explicites.\n\nNuance (I) : L'analyse des éléments observés demeure au niveau descriptif. Ainsi, les observations se limitent à décrire le contenu apparent du texte, sans proposer d'interprétations. Les déductions sont absentes ou restent superficielles. Le texte est abordé de manière plutôt littérale, sans chercher à en comprendre les significations plus profondes.\n\nFrançais écrit (E) : Ta rédaction contient 1 erreur de français pour 608 mots. Tu fais en moyenne 1 erreur à chaque 608 mots. En prévision de l'EUF, ce ratio est excellent. La plupart des erreurs concernent les mots invariables, plus précisément l'usage de la préposition, de l'adverbe ou de la conjonction. L'orthographe de ces mots ne change jamais. Consulte les listes de mots invariables et l'usage qu'on en fait. Vérifie surtout le sens de ces mots, car ils sont parfois confondus les uns avec les autres.\n\nLe niveau global de cette production est : I.",
+      "retroactionFinale": "Production : Rédaction finale\nObjectif : Démontrer ta capacité à développer une analyse littéraire structurée, argumentée et bien écrite.\nTâche : Rédiger une analyse littéraire à partir de ton plan détaillé.\n\nBonjour Mamadou !\n\nLa rédaction est une étape terminale où il faut développer des paragraphes structurés, intégrer des preuves avec fluidité et assurer la progression logique des idées. Il s'agit ici de transformer ton plan détaillé en analyse littéraire complète. Ce moment est l'aboutissement de tout ton travail préparatoire.\n\nVoici quelques observations :\n\nStructure (M) : Ton analyse finale est bien construite : l'hypothèse d'objectif de communication est clairement posée, chaque paragraphe développe un mécanisme et la progression d'ensemble se suit sans peine. Les transitions et les organisateurs textuels relient correctement tes idées. Sous la contrainte de l'épreuve, tu as su transformer ton plan en texte cohérent — c'est la maîtrise attendue à cette étape.\n\nRigueur (M) : Tu identifies des procédés littéraires pertinents et tu expliques leurs effets de façon juste, en les reliant à ton objectif de communication. Le vocabulaire analytique est employé correctement. Pour aller encore plus loin, approfondis l'explication de deux ou trois procédés dont l'effet reste annoncé plus qu'analysé.\n\nPlausibilité (D) : Tes citations appuient l'analyse, mais elles pourraient être plus nombreuses et mieux intégrées à tes phrases. Quelques liens entre tes preuves et ton argumentation restent implicites. Pour consolider, contextualise brièvement chaque citation et montre explicitement ce qu'elle démontre.\n\nNuance (M) : Ton analyse interprète le texte et propose des significations qui dépassent le sens littéral. Tu perçois des tensions et tu commences à les exploiter. Pour viser l'excellence, relie davantage ces interprétations entre elles afin de dégager une lecture d'ensemble pleinement nuancée.\n\nFrançais écrit (E) : Ta rédaction contient 1 erreur de français pour 608 mots. Tu fais en moyenne 1 erreur à chaque 608 mots. En prévision de l'EUF, ce ratio est excellent. La plupart des erreurs concernent les mots invariables, plus précisément l'usage de la préposition, de l'adverbe ou de la conjonction. L'orthographe de ces mots ne change jamais. Consulte les listes de mots invariables et l'usage qu'on en fait. Vérifie surtout le sens de ces mots, car ils sont parfois confondus les uns avec les autres.\n\nLe niveau global de cette production est : M.",
       "optionsAffichage": {
         "description": true,
         "objectif": true,
