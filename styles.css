@@ -19443,6 +19443,19 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 .comparateur-delta { color: var(--texte-muted, #80a0b0); font-size: 0.8rem; font-weight: 400; }
 .comparateur-tendance { color: var(--texte-muted, #80a0b0); }
 .comparateur-vide { color: var(--texte-muted, #80a0b0); }
+/* Mode clair : sur fond blanc, --surface-element (#f0f8ff) est presque
+   imperceptible. On épingle la colonne référence « Ta pratique » par un fond
+   bleu pâle plus contrasté + une bordure-gauche d'accent, et on accentue son
+   tag (variables design system, aucune couleur nouvelle). */
+.mode-clair .comparateur-col-pratique--ref,
+.mode-clair .comparateur-cellule--ref {
+    background: var(--bleu-pale, #e8f2fd);
+    border-left: 3px solid var(--accent-primaire, #065dbb);
+}
+.mode-clair .comparateur-col-pratique--ref .comparateur-col-tag {
+    color: var(--accent-primaire, #065dbb);
+    font-weight: 600;
+}
 
 @media (max-width: 768px) {
     #comparateur-pratiques-panel {
