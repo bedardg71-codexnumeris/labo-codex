@@ -128,7 +128,8 @@ describe('#134 · calculerNbEtapes dérive du graphe réel', () => {
     });
 
     it('coïncide avec le déroulé réel — parcours PAN-Standards par objectifs', () => {
-        const reponses = { typePratique: 'pan-standards', approcheEvaluation: 'par-objectifs', calcNoteFinale: 'niveaux' };
+        // #319 Lot 1 : vocabulaire interne canonique ('standards', plus 'pan-standards').
+        const reponses = { typePratique: 'standards', approcheEvaluation: 'par-objectifs', calcNoteFinale: 'niveaux' };
         win.wizardState.reponses = reponses;
         expect(win.calculerNbEtapes()).toBe(compterParGraphe(reponses));
     });

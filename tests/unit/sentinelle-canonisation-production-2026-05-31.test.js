@@ -40,9 +40,13 @@ describe('Volet B étape 2 · canonisation de la production', () => {
         expect(gestion).toMatch(/setValeurChamp\('mat-pratique-type',.*normaliserIdPratique\(pratique\.type\)/);
     });
 
-    it('le flux interne du wizard reste legacy (canonVersInterne conservé — architecture 4e)', () => {
-        // On ne churn PAS les 16 comparaisons internes : canonVersInterne fait le pont.
-        expect(wizard).toMatch(/canonVersInterne/);
-        expect(wizard).toMatch(/return \{ type: 'pan-standards'/); // deduireTypePratique reste legacy en interne
+    it('#319 Lot 1 · le flux interne du wizard est canonique de bout en bout (canonVersInterne retiré)', () => {
+        // L'architecture 4e (« interne legacy + canonique à la frontière ») est supprimée :
+        // deduireTypePratique et les comparaisons internes travaillent en canonique, la
+        // frontière canonVersInterne a disparu. La normalisation défensive à l'écriture/
+        // lecture (normaliserIdPratique) reste — voir Unité 3 + Unité 2.
+        expect(wizard).not.toMatch(/canonVersInterne/);
+        expect(wizard).toMatch(/return \{ type: 'standards'/);          // canonique
+        expect(wizard).not.toMatch(/return \{ type: 'pan-standards'/);  // plus de legacy interne
     });
 });
