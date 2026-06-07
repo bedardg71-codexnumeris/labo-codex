@@ -330,6 +330,11 @@ const INITIALISATEURS_SOUS_SECTION = {
             setTimeout(initialiserModelisation, 100);
         }
     },
+    'labo-comparateur': function () {
+        if (typeof initialiserComparateurPratiques === 'function') {
+            setTimeout(initialiserComparateurPratiques, 100);
+        }
+    },
     'labo-etudes': function () {
         // Graphiques déplacés depuis l'Aperçu (ancien suivi-labo)
         if (typeof creerGraphiqueCorrelationsLongitudinales === 'function') {

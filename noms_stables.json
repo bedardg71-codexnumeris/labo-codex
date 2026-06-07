@@ -1,24 +1,24 @@
 {
   "_commentaire": "Registre des identifiants protégés référencés par des marqueurs '⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json' dans le code. Source de vérité pour les noms de fonctions et variables globales dont le renommage casserait la navigation, le rendu des productions, ou la gestion des grilles. Mis à jour le 13 mai 2026 (Beta 99.42).",
   "_regle": "Avant de renommer un de ces identifiants : (1) vérifier qu'aucun appelant n'utilise le nom historique, (2) mettre à jour ce fichier ET le marqueur dans le code, (3) tester le module concerné en Safari.",
-  "_derniere_maj": "2026-05-13",
-  "_version_codebase": "Beta 99.42 b0512-0708",
+  "_derniere_maj": "2026-06-07",
+  "_version_codebase": "1.1.3 b0605-1323",
   "identifiants": {
     "js/config.js": {
       "description": "Configuration globale de la navigation + données partagées",
       "noms": [
         { "nom": "configurationsOnglets", "type": "const", "ligne": 32, "role": "Définition des sections et sous-sections de l'app (carte de la navigation)" },
-        { "nom": "sectionActive", "type": "let", "ligne": 104, "role": "Variable globale : section principale actuellement affichée" },
-        { "nom": "sousSectionActive", "type": "let", "ligne": 117, "role": "Variable globale : sous-section actuellement affichée" },
-        { "nom": "listeEtudiants", "type": "const", "ligne": 218, "role": "Liste partagée des étudiants (lue par plusieurs modules)" }
+        { "nom": "sectionActive", "type": "let", "ligne": 105, "role": "Variable globale : section principale actuellement affichée" },
+        { "nom": "sousSectionActive", "type": "let", "ligne": 118, "role": "Variable globale : sous-section actuellement affichée" },
+        { "nom": "listeEtudiants", "type": "const", "ligne": 216, "role": "Liste partagée des étudiants (lue par plusieurs modules)" }
       ]
     },
     "js/navigation.js": {
       "description": "Logique de navigation principale et sous-navigation",
       "noms": [
         { "nom": "afficherSection", "type": "function", "ligne": 68, "role": "Change la section principale active et déclenche le rendu de sa sous-navigation" },
-        { "nom": "afficherSousNavigation", "type": "function", "ligne": 357, "role": "Génère et affiche les boutons de sous-navigation pour une section" },
-        { "nom": "afficherSousSection", "type": "function", "ligne": 442, "role": "Affiche une sous-section spécifique et met à jour les boutons actifs" }
+        { "nom": "afficherSousNavigation", "type": "function", "ligne": 370, "role": "Génère et affiche les boutons de sous-navigation pour une section" },
+        { "nom": "afficherSousSection", "type": "function", "ligne": 455, "role": "Affiche une sous-section spécifique et met à jour les boutons actifs" }
       ]
     },
     "js/productions.js": {

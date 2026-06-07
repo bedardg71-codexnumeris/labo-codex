@@ -6,13 +6,19 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
 const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 
-// Lot C1-a — Comparateur de pratiques : squelette + GARDE DÉMO.
-// Vérifie les deux états de la garde (NOTE-CONCEPTION-C1-comparateur.md §11) :
-//   (1) hors démo → invitation à activer la démonstration (pas de matrice) ;
-//   (2) démo active (flag posé) → vue comparateur (placeholder de matrice).
-// On pose le flag `demo-actif` directement plutôt que d'exécuter le seed
-// complet activerModeDemo() : C1-a ne dépend d'aucune donnée démo, seulement
-// de estEnModeDemo(). Attrape aussi les ReferenceError silencieux au chargement.
+// Comparateur de pratiques : GARDE DÉMO + rendu (matrice, fiche, export).
+// Depuis C4, le comparateur est une SOUS-SECTION pérenne du Labo
+// (Labo › « Comparateur de pratiques »), plus un overlay. Les tests exercent
+// donc le vrai câblage de navigation : afficherSection('labo') +
+// afficherSousSection('labo-comparateur') déclenche l'initialiseur
+// 'labo-comparateur' (setTimeout 100 ms) qui rend le contenu dans
+// #labo-comparateur. Attrape aussi les ReferenceError silencieux au chargement.
+//
+// Ouverture commune (inlinée dans chaque page.evaluate async) :
+//   window.afficherSection('labo');
+//   window.afficherSousSection('labo-comparateur');
+//   await new Promise((r) => setTimeout(r, 250));   // initialiseur en setTimeout 100 ms
+//   const panel = document.getElementById('labo-comparateur');
 
 const patternsAttendus = [
     /version\.json.*access control/i,
@@ -34,7 +40,7 @@ function brancherErreurs(page, erreurs) {
     });
 }
 
-test('C1-a · garde démo — hors démo, le comparateur invite à activer la démonstration', async ({ page }) => {
+test('C4 · garde démo — hors démo, la sous-section invite à activer la démonstration', async ({ page }) => {
     const erreurs = [];
     brancherErreurs(page, erreurs);
 
@@ -42,9 +48,9 @@ test('C1-a · garde démo — hors démo, le comparateur invite à activer la d�
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
 
-    const resultat = await page.evaluate(() => {
-        if (typeof window.ouvrirComparateurPratiques !== 'function') {
-            return { erreur: 'window.ouvrirComparateurPratiques absent' };
+    const resultat = await page.evaluate(async () => {
+        if (typeof window.initialiserComparateurPratiques !== 'function') {
+            return { erreur: 'window.initialiserComparateurPratiques absent' };
         }
         if (typeof window.db === 'undefined' || typeof window.estEnModeDemo !== 'function') {
             return { erreur: 'db ou estEnModeDemo absent' };
@@ -53,13 +59,16 @@ test('C1-a · garde démo — hors démo, le comparateur invite à activer la d�
         // S'assurer qu'on n'est PAS en démo
         window.db.setSync('demo-actif', null);
 
-        window.ouvrirComparateurPratiques();
+        // C4 : ouverture par la vraie navigation (sous-section pérenne du Labo).
+        window.afficherSection('labo');
+        window.afficherSousSection('labo-comparateur');
+        await new Promise((r) => setTimeout(r, 250));
 
-        const panel = document.getElementById('comparateur-pratiques-panel');
+        const panel = document.getElementById('labo-comparateur');
         const html = panel ? panel.innerHTML : '';
         return {
             aPanneau: !!panel,
-            visible: panel ? panel.style.display !== 'none' : false,
+            visible: panel ? panel.classList.contains('active') : false,
             aBoutonActiver: !!(panel && panel.querySelector('.comparateur-activer-demo')),
             aMatrice: !!(panel && panel.querySelector('#comparateur-matrice')),
             aTitre: html.includes('Comparateur de pratiques'),
@@ -80,7 +89,7 @@ test('C1-a · garde démo — hors démo, le comparateur invite à activer la d�
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });
 
-test('C1-a · garde démo — en démo, le comparateur affiche la matrice (structure + fermeture)', async ({ page }) => {
+test('C4 · garde démo — en démo, la sous-section affiche la matrice (structure + navigation sortante)', async ({ page }) => {
     const erreurs = [];
     brancherErreurs(page, erreurs);
 
@@ -88,18 +97,20 @@ test('C1-a · garde démo — en démo, le comparateur affiche la matrice (struc
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
 
-    const resultat = await page.evaluate(() => {
-        if (typeof window.ouvrirComparateurPratiques !== 'function') {
-            return { erreur: 'window.ouvrirComparateurPratiques absent' };
+    const resultat = await page.evaluate(async () => {
+        if (typeof window.initialiserComparateurPratiques !== 'function') {
+            return { erreur: 'window.initialiserComparateurPratiques absent' };
         }
 
         // Simuler le mode démo actif (estEnModeDemo lit ce flag en premier).
         // Sans seed : la structure de la matrice se rend, les notes valent « — ».
         window.db.setSync('demo-actif', 'true');
 
-        window.ouvrirComparateurPratiques();
+        window.afficherSection('labo');
+        window.afficherSousSection('labo-comparateur');
+        await new Promise((r) => setTimeout(r, 250));
 
-        const panel = document.getElementById('comparateur-pratiques-panel');
+        const panel = document.getElementById('labo-comparateur');
         const matrice = panel ? panel.querySelector('#comparateur-matrice') : null;
         const table = matrice ? matrice.querySelector('table.comparateur-matrice-table') : null;
         const lignes = table ? table.querySelectorAll('tbody tr').length : 0;
@@ -110,12 +121,10 @@ test('C1-a · garde démo — en démo, le comparateur affiche la matrice (struc
         const aE1 = !!(corps && corps.querySelector('.comparateur-col-e1'));
         const aGarde = !!(corps && corps.querySelector('.comparateur-garde'));
 
-        // Fermeture (Échap déconnecté, panneau vidé, display none).
-        let fermeOk = false;
-        if (typeof window.fermerComparateurPratiques === 'function') {
-            window.fermerComparateurPratiques();
-            fermeOk = panel.style.display === 'none' && panel.innerHTML === '';
-        }
+        // « Fermeture » = quitter la sous-section : on navigue ailleurs dans le Labo,
+        // #labo-comparateur perd .active (la navigation gère la visibilité).
+        window.afficherSousSection('labo-rythme');
+        const fermeOk = !panel.classList.contains('active');
 
         return {
             aMatrice: !!matrice,
@@ -182,10 +191,12 @@ test('C1-b · matrice — parité moteur (réf = panneau profil) + divergence de
         const pSpe = speId ? window.simulerIndices(DA, speId).P : null;
 
         // Rendu DOM : la matrice affiche le niveau atteint (libellé d'échelle) + la note réf.
-        window.ouvrirComparateurPratiques();
+        window.afficherSection('labo');
+        window.afficherSousSection('labo-comparateur');
+        await new Promise((r) => setTimeout(r, 250));
         const matrice = document.getElementById('comparateur-matrice');
         const texte = matrice ? matrice.textContent : '';
-        const corps = document.querySelector('#comparateur-pratiques-panel .comparateur-corps');
+        const corps = document.querySelector('#labo-comparateur .comparateur-corps');
         const texteCorps = corps ? corps.textContent : '';
 
         return {
@@ -250,10 +261,14 @@ test('C2-d.1 · navigation matrice → fiche (en-tête + phrase de contexte + ma
             }
             return JSON.stringify(o, Object.keys(o).sort());
         };
-        const avant = snapshot();
+        window.afficherSection('labo');
+        window.afficherSousSection('labo-comparateur');
+        await new Promise((r) => setTimeout(r, 250));
+        const panel = document.getElementById('labo-comparateur');
 
-        window.ouvrirComparateurPratiques();
-        const panel = document.getElementById('comparateur-pratiques-panel');
+        // Snapshot APRÈS rendu (la navigation persiste l'état de nav, hors périmètre) :
+        // on isole l'invariant du comparateur — ses interactions sont en lecture seule.
+        const avant = snapshot();
 
         // Ligne DEMO011 (« Irrégulier ») activable : role=button + tabindex.
         const tr = panel.querySelector('[data-profil-da="DEMO011"]');
@@ -336,10 +351,14 @@ test('C2-d.3 · fiche — bloc récit E2 (cartes par pratique via simulerIndices
             }
             return JSON.stringify(o, Object.keys(o).sort());
         };
+        window.afficherSection('labo');
+        window.afficherSousSection('labo-comparateur');
+        await new Promise((r) => setTimeout(r, 250));
+        const panel = document.getElementById('labo-comparateur');
+
+        // Snapshot APRÈS rendu (la navigation persiste l'état de nav, hors périmètre).
         const avant = snapshot();
 
-        window.ouvrirComparateurPratiques();
-        const panel = document.getElementById('comparateur-pratiques-panel');
         const tr = panel.querySelector('[data-profil-da="DEMO011"]');
         if (tr) tr.click();
 
@@ -394,8 +413,10 @@ test('C3 · export CSV — bouton présent + contenu conforme (BOM, en-têtes, u
         if (typeof window.activerModeDemo !== 'function') return { erreur: 'activerModeDemo absent' };
         await window.activerModeDemo();
 
-        window.ouvrirComparateurPratiques();
-        const panel = document.getElementById('comparateur-pratiques-panel');
+        window.afficherSection('labo');
+        window.afficherSousSection('labo-comparateur');
+        await new Promise((r) => setTimeout(r, 250));
+        const panel = document.getElementById('labo-comparateur');
         const aBouton = !!panel.querySelector('.comparateur-exporter');
 
         if (typeof window._comparateurGenererCSV !== 'function') {
@@ -458,10 +479,13 @@ test('C1-d · sélection inline des candidates — recalcul + invariant non-dest
             }
             return JSON.stringify(o, Object.keys(o).sort());
         };
-        const avant = snapshot();
+        window.afficherSection('labo');
+        window.afficherSousSection('labo-comparateur');
+        await new Promise((r) => setTimeout(r, 250));
+        const panel = document.getElementById('labo-comparateur');
 
-        window.ouvrirComparateurPratiques();
-        const panel = document.getElementById('comparateur-pratiques-panel');
+        // Snapshot APRÈS rendu (la navigation persiste l'état de nav, hors périmètre).
+        const avant = snapshot();
 
         // Sélecteurs inline présents (zone dans le corps, pas de modale).
         const zone = panel.querySelector('#comparateur-selecteurs');
