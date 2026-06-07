@@ -382,6 +382,61 @@ test('C2-d.3 · fiche — bloc récit E2 (cartes par pratique via simulerIndices
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });
 
+test('C3 · export CSV — bouton présent + contenu conforme (BOM, en-têtes, une colonne par pratique)', async ({ page }) => {
+    const erreurs = [];
+    brancherErreurs(page, erreurs);
+
+    await page.goto(indexHtml);
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
+
+    const resultat = await page.evaluate(async () => {
+        if (typeof window.activerModeDemo !== 'function') return { erreur: 'activerModeDemo absent' };
+        await window.activerModeDemo();
+
+        window.ouvrirComparateurPratiques();
+        const panel = document.getElementById('comparateur-pratiques-panel');
+        const aBouton = !!panel.querySelector('.comparateur-exporter');
+
+        if (typeof window._comparateurGenererCSV !== 'function') {
+            return { erreur: '_comparateurGenererCSV absent' };
+        }
+        const csv = window._comparateurGenererCSV();
+        const aBOM = csv.charCodeAt(0) === 0xFEFF;
+        const lignes = csv.replace(/^﻿/, '').replace(/\r\n$/, '').split('\r\n');
+        const entete = lignes[0] || '';
+        const nbColonnes = entete.split(',').length;
+
+        return {
+            aBouton,
+            aBOM,
+            nbLignes: lignes.length,
+            entete,
+            aColProfil: entete.includes('Profil'),
+            aColDA: entete.includes('DA'),
+            aColNiveau: entete.includes('Niveau atteint'),
+            aColTendance: entete.includes('Tendance'),
+            aColTaPratique: entete.includes('Ta pratique'),
+            nbColonnes,
+            ligneIrregulier: lignes.find(l => l.includes('DEMO011')) || ''
+        };
+    });
+
+    expect(resultat.erreur, `Erreur eval : ${resultat.erreur}`).toBeUndefined();
+    expect(resultat.aBouton).toBe(true);
+    expect(resultat.aBOM).toBe(true);                     // BOM UTF-8 (Excel/accents)
+    expect(resultat.nbLignes).toBe(5);                    // en-tête + 4 profils-types
+    expect(resultat.aColProfil).toBe(true);
+    expect(resultat.aColDA).toBe(true);
+    expect(resultat.aColNiveau).toBe(true);
+    expect(resultat.aColTendance).toBe(true);
+    expect(resultat.aColTaPratique).toBe(true);           // au moins la pratique de référence
+    expect(resultat.nbColonnes).toBeGreaterThanOrEqual(5);
+    expect(resultat.ligneIrregulier).toContain('Irrégulier');
+
+    expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
+});
+
 test('C1-d · sélection inline des candidates — recalcul + invariant non-destructif (données démo)', async ({ page }) => {
     const erreurs = [];
     brancherErreurs(page, erreurs);
