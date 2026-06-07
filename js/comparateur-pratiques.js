@@ -1,5 +1,5 @@
 /* ============================================================
-   COMPARATEUR DE PRATIQUES — lot C1-a (squelette + garde démo)
+   COMPARATEUR DE PRATIQUES — sous-section pérenne du Labo (lot C4)
    ------------------------------------------------------------
    Vue d'aide au choix d'une pratique de notation. Montre, sur des
    profils-types contrastés, la maîtrise en regard de chaque note —
@@ -7,21 +7,23 @@
    en fin de parcours, pas un score additionné).
 
    Spec : plans de travail/SPEC_comparateur_pratiques.md (§3.1 matrice,
-          §1 bis finalité, §3.4 garde démo)
-   Conception C1 : plans de travail/NOTE-CONCEPTION-C1-comparateur.md
-                   (design validé avec Grégoire le 6 juin 2026)
+          §1 bis finalité, §3.4 garde démo, §7 séquencement C4)
+   Conception : NOTE-CONCEPTION-C1/C2-comparateur.md (design validé
+                avec Grégoire les 6-7 juin 2026)
 
-   PÉRIMÈTRE DE CE LOT (C1-a) : squelette du module, conteneur,
-   ouverture/fermeture (focus SPA, Échap, clic extérieur) et la
-   GARDE DÉMO. La matrice elle-même (4 profils, colonnes, colonne
-   « Niveau atteint », deltas, en-têtes E1) arrive en C1-b.
+   FORME (lot C4) : vraie SOUS-SECTION du Labo (Labo › « Comparateur de
+   pratiques »), pas un overlay. La visibilité est gérée par la
+   navigation (afficherSousSection ajoute/retire .active) ; ce module
+   construit le contenu via l'initialiseur 'labo-comparateur' du
+   dispatcher INITIALISATEURS_SOUS_SECTION de navigation.js. Aucun
+   bouton Fermer / Échap / clic-extérieur : on quitte par la sous-nav.
 
-   API publique (dispatcher data-action de main.js) :
-   - ouvrirComparateurPratiques()
-   - fermerComparateurPratiques()
+   API publique :
+   - initialiserComparateurPratiques()  ← appelée par navigation.js
+   - _comparateurGenererCSV()           ← exposée pour les tests (C3)
 
-   Panneau : #comparateur-pratiques-panel (index.html), construit
-   dynamiquement à l'ouverture, vidé à la fermeture.
+   Conteneur : #labo-comparateur (index.html), rempli dynamiquement à
+   chaque affichage de la sous-section (entrée fraîche = retour matrice).
 
    Sécurité : contenu 100 % statique défini dans ce fichier — aucune
    donnée utilisateur injectée (même statut que guides-pedagogiques.js).
@@ -32,10 +34,9 @@
 (function() {
 
     /* ── État interne ─────────────────────────────────────── */
-    var _focusAvantOuverture = null;
-    var _ouvert = false;
-    // Candidates simulées sélectionnées (1-2 ids), réinitialisées à la fermeture.
-    // null = pas encore initialisé → défauts calculés à l'ouverture (C1-d).
+    // Candidates simulées sélectionnées (1-2 ids), réinitialisées à chaque
+    // entrée dans la sous-section. null = pas encore initialisé → défauts
+    // calculés au rendu (C1-d).
     var _candidatsSel = null;
 
     // Vue courante du panneau : 'matrice' (comparaison) ou 'fiche' (profil) — C2-d.
@@ -337,39 +338,37 @@
     }
 
     /* ── Ouverture ────────────────────────────────────────── */
-    function ouvrirComparateurPratiques() {
-        var panel = document.getElementById('comparateur-pratiques-panel');
-        if (!panel) {
-            console.error('[comparateur-pratiques] Panneau #comparateur-pratiques-panel introuvable');
+    // Conteneur de la sous-section (toggle .active géré par la navigation).
+    function _conteneur() {
+        return document.getElementById('labo-comparateur');
+    }
+
+    // Rend (ou re-rend) le contenu de la sous-section. Appelée par la
+    // navigation à chaque affichage de Labo › Comparateur, et après
+    // activation de la démo. Entrée fraîche = on repart de la matrice.
+    function rendreComparateur() {
+        var hote = _conteneur();
+        if (!hote) {
+            console.error('[comparateur-pratiques] Conteneur #labo-comparateur introuvable');
             return;
         }
 
-        // Si déjà ouvert, refermer proprement d'abord (réentrance : la garde
-        // démo réutilise ce chemin pour basculer invitation → vue).
-        if (_ouvert) fermerComparateurPratiques();
-
-        _focusAvantOuverture = document.activeElement;
-        _ouvert = true;
+        _vue = 'matrice';
+        _daFiche = null;
+        _candidatsSel = null;   // défauts recalculés à chaque entrée
 
         // GARDE DÉMO : le comparateur s'appuie sur les profils-types de la
         // démonstration. Hors démo, on invite à l'activer plutôt que d'afficher
         // une vue vide (§3.4 de la spec).
         if (estEnDemo()) {
-            construireVue(panel);
+            construireVue(hote);
         } else {
-            construireInvitation(panel);
+            construireInvitation(hote);
         }
-        panel.style.display = '';
 
-        // Accessibilité SPA : déplacer le focus vers le titre du panneau.
-        var titre = panel.querySelector('.comparateur-titre');
+        // Accessibilité SPA : déplacer le focus vers le titre de la vue.
+        var titre = hote.querySelector('.comparateur-titre');
         if (titre) titre.focus();
-
-        document.addEventListener('keydown', _surClavier);
-        // Différer pour ne pas capter le clic d'ouverture lui-même.
-        setTimeout(function() {
-            document.addEventListener('mousedown', _surClicExterieur);
-        }, 0);
     }
 
     /* ── En-tête commun (titre + bouton fermer) ───────────── */
@@ -379,16 +378,13 @@
                         '<div class="comparateur-surtitre">Aide au choix d’une pratique</div>' +
                         '<h3 class="comparateur-titre" id="comparateur-titre-texte" tabindex="-1">' + titre + '</h3>' +
                     '</div>' +
-                    '<button class="comparateur-fermer" title="Fermer le comparateur" aria-label="Fermer le comparateur">' +
-                        '<img src="icons/icon-close-window.svg" alt="" class="modal-close-icon">' +
-                    '</button>' +
                 '</div>';
     }
 
     /* ── Garde démo : invitation à activer la démonstration ── */
     function construireInvitation(panel) {
         panel.innerHTML =
-            '<div class="comparateur-contenu" role="dialog" aria-labelledby="comparateur-titre-texte">' +
+            '<div class="comparateur-contenu" role="region" aria-labelledby="comparateur-titre-texte">' +
                 entete('Comparateur de pratiques') +
                 '<div class="comparateur-corps">' +
                     '<p>Le comparateur s’appuie sur des <strong>profils-types contrastés</strong> ' +
@@ -398,7 +394,6 @@
                     '<button class="btn btn-principal comparateur-activer-demo" type="button">Activer le mode démonstration</button>' +
                 '</div>' +
             '</div>';
-        attacherFermeture(panel);
         var btn = panel.querySelector('.comparateur-activer-demo');
         if (btn) btn.addEventListener('click', activerDemoEtOuvrir);
     }
@@ -621,7 +616,7 @@
         var phrase = PHRASES_CONTEXTE[da] || '';
 
         panel.innerHTML =
-            '<div class="comparateur-contenu" role="dialog" aria-labelledby="comparateur-titre-texte">' +
+            '<div class="comparateur-contenu" role="region" aria-labelledby="comparateur-titre-texte">' +
                 '<div class="comparateur-header">' +
                     '<div>' +
                         '<button class="comparateur-retour" type="button">‹ Retour à la comparaison</button>' +
@@ -630,9 +625,6 @@
                         '</h3>' +
                         (phrase ? '<p class="comparateur-fiche-contexte">' + _esc(phrase) + '</p>' : '') +
                     '</div>' +
-                    '<button class="comparateur-fermer" title="Fermer le comparateur" aria-label="Fermer le comparateur">' +
-                        '<img src="icons/icon-close-window.svg" alt="" class="modal-close-icon">' +
-                    '</button>' +
                 '</div>' +
                 '<div class="comparateur-corps">' +
                     _blocMaitrise(da, d) +
@@ -640,7 +632,6 @@
                 '</div>' +
             '</div>';
 
-        attacherFermeture(panel);
         var r = panel.querySelector('.comparateur-retour');
         if (r) r.addEventListener('click', function() { _retourMatrice(panel); });
     }
@@ -648,7 +639,7 @@
     /* ── Vue comparateur (matrice + sélecteurs) ─────────────── */
     function construireVue(panel) {
         panel.innerHTML =
-            '<div class="comparateur-contenu" role="dialog" aria-labelledby="comparateur-titre-texte">' +
+            '<div class="comparateur-contenu" role="region" aria-labelledby="comparateur-titre-texte">' +
                 entete('Comparateur de pratiques') +
                 '<div class="comparateur-corps">' +
                     '<p class="comparateur-finalite">Des pratiques différentes mesurent des choses ' +
@@ -664,76 +655,24 @@
                     '</div>' +
                 '</div>' +
             '</div>';
-        attacherFermeture(panel);
         _attacherSelecteurs(panel);
         _attacherNavigationLignes(panel);
         _attacherExport(panel);
     }
 
-    function attacherFermeture(panel) {
-        var f = panel.querySelector('.comparateur-fermer');
-        if (f) f.addEventListener('click', fermerComparateurPratiques);
-    }
-
-    /* ── Garde démo : activer puis basculer sur la vue ──────── */
+    /* ── Garde démo : activer puis rendre la vue ────────────── */
     function activerDemoEtOuvrir() {
         if (typeof activerModeDemo !== 'function') {
             console.warn('[comparateur-pratiques] activerModeDemo absent — impossible d’activer la démo');
             return;
         }
-        // activerModeDemo est asynchrone (seed démo). On ré-ouvre ensuite pour
+        // activerModeDemo est asynchrone (seed démo). On re-rend ensuite pour
         // que la garde rebascule sur la vue (estEnDemo() devient vrai).
         Promise.resolve(activerModeDemo()).then(function() {
-            ouvrirComparateurPratiques();
+            rendreComparateur();
         }).catch(function(e) {
             console.error('[comparateur-pratiques] échec activation démo', e);
         });
-    }
-
-    /* ── Fermeture ────────────────────────────────────────── */
-    function fermerComparateurPratiques() {
-        var panel = document.getElementById('comparateur-pratiques-panel');
-        if (!panel) return;
-
-        document.removeEventListener('keydown', _surClavier);
-        document.removeEventListener('mousedown', _surClicExterieur);
-
-        panel.innerHTML = '';
-        panel.style.display = 'none';
-        _ouvert = false;
-        _candidatsSel = null;   // rouvrir = défauts recalculés
-        _vue = 'matrice';       // rouvrir = toujours sur la matrice
-        _daFiche = null;
-
-        // Restaurer le focus sur l'élément déclencheur.
-        if (_focusAvantOuverture && typeof _focusAvantOuverture.focus === 'function'
-            && document.contains(_focusAvantOuverture)) {
-            _focusAvantOuverture.focus();
-        }
-        _focusAvantOuverture = null;
-    }
-
-    /* ── Écouteurs globaux (actifs seulement panneau ouvert) ─ */
-    function _surClavier(e) {
-        // Auto-désattachement défensif si l'overlay est fermé (cf. pattern
-        // listeners globaux du projet) — ne pas compter sur le couple ouvrir/fermer.
-        if (!_ouvert) {
-            document.removeEventListener('keydown', _surClavier);
-            return;
-        }
-        if (e.key === 'Escape') fermerComparateurPratiques();
-    }
-
-    function _surClicExterieur(e) {
-        var panel = document.getElementById('comparateur-pratiques-panel');
-        if (!panel || !_ouvert) {
-            document.removeEventListener('mousedown', _surClicExterieur);
-            return;
-        }
-        if (panel.contains(e.target)) return;
-        // Laisser le dispatcher gérer un clic sur un autre bouton d'ouverture.
-        if (e.target.closest && e.target.closest('[data-action="ouvrirComparateurPratiques"]')) return;
-        fermerComparateurPratiques();
     }
 
     /* ── Export CSV (C3) — trace de la comparaison ──────────── */
@@ -794,9 +733,10 @@
         if (b) b.addEventListener('click', exporterCSV);
     }
 
-    /* ── API publique (dispatcher data-action de main.js) ─── */
-    window.ouvrirComparateurPratiques = ouvrirComparateurPratiques;
-    window.fermerComparateurPratiques = fermerComparateurPratiques;
+    /* ── API publique ─────────────────────────────────────── */
+    // Appelée par le dispatcher INITIALISATEURS_SOUS_SECTION de navigation.js
+    // ('labo-comparateur') à chaque affichage de la sous-section.
+    window.initialiserComparateurPratiques = rendreComparateur;
     // Exposée pour les tests de régression (contenu CSV déterministe).
     window._comparateurGenererCSV = _genererCSV;
 

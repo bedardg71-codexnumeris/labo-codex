@@ -5616,10 +5616,7 @@
 
                             <!-- Boutons d'action en haut à droite -->
                             <div class="u-mb-20 u-text-right">
-                                <!-- Point d'accès provisoire au comparateur (lot C1 ; nav pérenne = C4) -->
-                                <button data-action="ouvrirComparateurPratiques" class="btn btn-secondaire" style="margin-right: 8px;">
-                                    Comparer les pratiques
-                                </button>
+                                <!-- Comparateur : désormais sous-section pérenne (Labo › Comparateur de pratiques), C4. -->
                                 <button data-action="creerNouvellePratique" class="btn btn-principal">
                                     + Nouvelle pratique
                                 </button>
@@ -9113,6 +9110,11 @@
                         <!-- Rempli dynamiquement par modelisation.js -->
                     </div>
                 </div><!-- fin sous-section modelisation -->
+
+                <!-- Sous-section: Comparateur de pratiques (C4 — nav pérenne).
+                     Rempli dynamiquement par js/comparateur-pratiques.js via
+                     l'initialiseur 'labo-comparateur' de navigation.js. -->
+                <div id="labo-comparateur" class="sous-section"></div>
 
                 <!-- Sous-section: Rythme de travail -->
                 <div id="labo-rythme" class="sous-section">
@@ -14475,10 +14477,6 @@
         <!-- Panneau unique des guides pédagogiques (SOLO, ACP, RàI).
              Construit dynamiquement par js/guides-pedagogiques.js à l'ouverture. -->
         <div id="guide-pedagogique-panel" style="display: none;"></div>
-
-        <!-- Panneau du comparateur de pratiques (lot C1).
-             Construit dynamiquement par js/comparateur-pratiques.js à l'ouverture. -->
-        <div id="comparateur-pratiques-panel" style="display: none;"></div>
 
     </div>
 

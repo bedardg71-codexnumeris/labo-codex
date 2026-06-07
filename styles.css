@@ -19269,16 +19269,14 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
    (la matrice C1-b est un tableau). Variables design system
    uniquement, aucune couleur en dur (modes sombre + clair).
    ============================================================ */
-#comparateur-pratiques-panel {
-    position: fixed;
-    z-index: 600;
-    left: 50%;
-    top: 80px;
-    transform: translateX(-50%);
-    width: min(880px, calc(100vw - 32px));
-    max-height: 82vh;
+/* C4 : le comparateur est une SOUS-SECTION du Labo (plus un overlay). Le contenu
+   s'affiche en flux normal dans #labo-comparateur ; .comparateur-contenu reprend
+   l'identité de carte (fond, bordure, rayon) sans positionnement fixe. */
+.comparateur-contenu {
     display: flex;
     flex-direction: column;
+    min-height: 0;
+    max-width: 880px;
     background: var(--surface-carte, #1a3040);
     border: 1px solid var(--bordure-moyenne, rgba(106, 172, 184, 0.35));
     border-radius: 12px;
@@ -19286,7 +19284,6 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     color: var(--texte-principal, #d0e0e4);
     padding: 16px 20px 14px;
 }
-.comparateur-contenu { display: flex; flex-direction: column; min-height: 0; }
 .comparateur-header {
     display: flex;
     align-items: flex-start;
@@ -19309,20 +19306,6 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     line-height: 1.3;
     outline: none;
 }
-.comparateur-fermer {
-    flex-shrink: 0;
-    width: 44px;
-    height: 44px;
-    margin: -8px -10px 0 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    background: transparent;
-    border-radius: 8px;
-    cursor: pointer;
-}
-.comparateur-fermer:hover { background: rgba(106, 172, 184, 0.1); }
 .comparateur-corps {
     flex: 1;
     min-height: 0;
@@ -19571,15 +19554,6 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     min-height: 36px;
 }
 .comparateur-exporter:hover { background: var(--surface-element, rgba(106, 172, 184, 0.08)); }
-
-@media (max-width: 768px) {
-    #comparateur-pratiques-panel {
-        left: 16px;
-        right: 16px;
-        transform: none;
-        width: auto;
-    }
-}
 
 #guide-pedagogique-panel {
     position: fixed;
