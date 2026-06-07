@@ -269,12 +269,12 @@ const ETAPES_WIZARD = {
                 return 'config-sommative-regles';
             }
             if (type === 'sommative') return 'config-sommative';
-            if (type === 'pan-standards') {
+            if (type === 'standards') {
                 if (reponses.approcheEvaluation === 'par-objectifs') return 'config-objectifs-definition';
                 if (reponses.approcheEvaluation === 'par-artefacts') return 'config-portfolio';
                 return 'mode-calcul-objectifs';
             }
-            if (type === 'pan-specifications') return 'config-specifications';
+            if (type === 'specifications') return 'config-specifications';
             return 'recapitulatif';
         },
         precedent: () => 'nb-evaluations'
@@ -402,7 +402,7 @@ const ETAPES_WIZARD = {
         id: 'config-objectifs-definition',
         titre: 'Définition des objectifs d\'apprentissage',
         description: 'Ajoute tes objectifs d\'apprentissage avec leurs pondérations. Les poids doivent totaliser 100%.',
-        branche: 'pan-standards-objectifs',
+        branche: 'standards-objectifs',
         ordre: 6,
         champs: [
             {
@@ -463,53 +463,19 @@ const ETAPES_WIZARD = {
             }
         ],
         suivant: (reponses) => {
-            if (reponses.typePratique === 'pan-standards' || reponses.typePratique === 'pan-specifications') {
+            if (reponses.typePratique === 'standards' || reponses.typePratique === 'specifications') {
                 return 'echelle-performance';
             }
             return 'recapitulatif';
         },
         precedent: (reponses) => {
             if (reponses.typePratique === 'sommative') return 'config-sommative';
-            if (reponses.typePratique === 'pan-standards') {
+            if (reponses.typePratique === 'standards') {
                 if (reponses.approcheEvaluation === 'par-artefacts') return 'config-portfolio';
                 return 'config-mode-calcul';
             }
             return 'choix-modele-bundles';
         }
-    },
-
-    'mode-configuration': {
-        id: 'mode-configuration',
-        titre: 'Mode de configuration',
-        description: 'Comment souhaites-tu configurer ta pratique ?',
-        branche: 'commune',
-        ordre: 3,
-        condition: (reponses) => reponses.typePratique !== 'sommative',
-        champs: [
-            {
-                id: 'modeConfig',
-                type: 'radio-cards',
-                required: true,
-                options: [
-                    {
-                        value: 'expert',
-                        label: 'Mode Expert',
-                        description: 'J\'ai une idée claire de ce que je veux. Configuration directe des paramètres.'
-                    },
-                    {
-                        value: 'exploration',
-                        label: 'Mode Exploration',
-                        description: 'Guide-moi étape par étape pour découvrir les options disponibles.'
-                    }
-                ]
-            }
-        ],
-        suivant: (reponses) => {
-            if (reponses.typePratique === 'pan-standards') return 'approche-evaluation';
-            if (reponses.typePratique === 'pan-specifications') return 'config-specifications';
-            return null;
-        },
-        precedent: () => 'type-pratique'
     },
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -548,7 +514,7 @@ const ETAPES_WIZARD = {
         id: 'approche-evaluation',
         titre: 'Approche d\'évaluation',
         description: 'Comment souhaites-tu structurer tes évaluations ?',
-        branche: 'pan-standards',
+        branche: 'standards',
         ordre: 4,
         champs: [
             {
@@ -579,7 +545,7 @@ const ETAPES_WIZARD = {
         id: 'config-portfolio',
         titre: 'Configuration du portfolio',
         description: 'Paramètre la gestion des artefacts',
-        branche: 'pan-standards-artefacts',
+        branche: 'standards-artefacts',
         ordre: 5,
         champs: [
             {
@@ -651,7 +617,7 @@ const ETAPES_WIZARD = {
         id: 'mode-calcul-objectifs',
         titre: 'Mode de calcul',
         description: 'Comment la note finale sera-t-elle calculée à partir des objectifs ?',
-        branche: 'pan-standards-objectifs',
+        branche: 'standards-objectifs',
         ordre: 5,
         champs: [
             {
@@ -690,7 +656,7 @@ const ETAPES_WIZARD = {
         id: 'config-mode-calcul',
         titre: 'Configuration du mode de calcul',
         description: 'Paramètre les détails du calcul',
-        branche: 'pan-standards-objectifs',
+        branche: 'standards-objectifs',
         ordre: 6,
         champs: [], // Champs dynamiques selon modeCalcul
         getChampsDynamiques: (reponses) => {
@@ -791,7 +757,7 @@ const ETAPES_WIZARD = {
         id: 'config-specifications',
         titre: 'Configuration de base',
         description: 'Paramètre le seuil d\'acceptabilité et les jetons',
-        branche: 'pan-specifications',
+        branche: 'specifications',
         ordre: 4,
         champs: [
             {
@@ -822,7 +788,7 @@ const ETAPES_WIZARD = {
         id: 'config-jetons',
         titre: 'Configuration des jetons',
         description: 'Paramètre le système de jetons',
-        branche: 'pan-specifications',
+        branche: 'specifications',
         ordre: 5,
         condition: (reponses) => reponses.utiliserJetons === true,
         champs: [
@@ -859,20 +825,10 @@ const ETAPES_WIZARD = {
         id: 'choix-modele-bundles',
         titre: 'Forfaits de spécifications',
         description: 'Choisis un modèle prédéfini ou personnalise',
-        branche: 'pan-specifications',
+        branche: 'specifications',
         ordre: 6,
-        champs: [], // Champs dynamiques selon modeConfig
-        getChampsDynamiques: (reponses) => {
-            if (reponses.modeConfig === 'expert') {
-                return [
-                    {
-                        id: 'infoExpert',
-                        type: 'info',
-                        texte: 'Les forfaits de spécifications seront configurables dans Conception → Pratiques de notation après la création de la pratique.'
-                    }
-                ];
-            }
-            // Mode exploration
+        champs: [], // Champs dynamiques (modèles de forfaits prédéfinis)
+        getChampsDynamiques: () => {
             return [
                 {
                     id: 'modeleBundle',
@@ -931,7 +887,7 @@ const ETAPES_WIZARD = {
         ],
         suivant: () => 'grille-criteres',
         precedent: (reponses) => {
-            if (reponses.typePratique === 'pan-standards') {
+            if (reponses.typePratique === 'standards') {
                 if (reponses.approcheEvaluation === 'par-artefacts') return 'config-portfolio';
                 return 'config-mode-calcul';
             }
@@ -973,7 +929,7 @@ const ETAPES_WIZARD = {
         suivant: () => null, // Fin du wizard
         precedent: (reponses) => {
             if (reponses.typePratique === 'sommative') return 'config-sommative';
-            if (reponses.typePratique === 'pan-specifications') return 'choix-modele-bundles';
+            if (reponses.typePratique === 'specifications') return 'choix-modele-bundles';
             // PAN-Standards
             if (reponses.approcheEvaluation === 'par-artefacts') return 'grille-criteres';
             return 'grille-criteres';
@@ -1051,9 +1007,6 @@ function etapeSuivanteV2() {
         const classification = deduireTypePratique(wizardState.reponses);
         wizardState.reponses.typePratique = classification.type;
         wizardState.reponses.typeVariante = classification.variante;
-        if (!wizardState.reponses.modeConfig) {
-            wizardState.reponses.modeConfig = 'exploration';
-        }
     }
 
     // Obtenir l'étape suivante
@@ -1600,8 +1553,8 @@ function genererRecapitulatif() {
     // ─── Section 1 : Diagnostic du type de notation (proéminent) ───
     const typeBadges = {
         'sommative': { code: 'SOM', classe: 'som', label: 'Sommative', description: 'Ta note finale est calculée par une moyenne pondérée des évaluations. C\'est la méthode traditionnelle, largement utilisée.' },
-        'pan-standards': { code: 'STD', classe: 'std', label: 'PAN \u2013 Standards', description: 'Tu évalues par niveaux de maîtrise (ex.\u00a0: I-D-M-E). La note est construite à partir de la démonstration de compétences, pas d\'une simple moyenne.' },
-        'pan-specifications': { code: 'SPE', classe: 'spe', label: 'PAN \u2013 Spécifications', description: 'Chaque travail est jugé acceptable ou non. La note finale dépend du nombre de spécifications réussies (forfaits).' }
+        'standards': { code: 'STD', classe: 'std', label: 'PAN \u2013 Standards', description: 'Tu évalues par niveaux de maîtrise (ex.\u00a0: I-D-M-E). La note est construite à partir de la démonstration de compétences, pas d\'une simple moyenne.' },
+        'specifications': { code: 'SPE', classe: 'spe', label: 'PAN \u2013 Spécifications', description: 'Chaque travail est jugé acceptable ou non. La note finale dépend du nombre de spécifications réussies (forfaits).' }
     };
     const badge = typeBadges[classification.type] || { code: '?', classe: 'indetermine', label: 'Indéterminé', description: '' };
 
@@ -1683,7 +1636,7 @@ function genererRecapitulatif() {
         html += '</div>';
     }
 
-    if (r.typePratique === 'pan-standards') {
+    if (r.typePratique === 'standards') {
         html += '<div class="wizard-v2-recap-section">';
         html += '<h4>Configuration PAN-Standards</h4>';
         const approcheLabels = {
@@ -1719,7 +1672,7 @@ function genererRecapitulatif() {
         html += '</div>';
     }
 
-    if (r.typePratique === 'pan-specifications') {
+    if (r.typePratique === 'specifications') {
         html += '<div class="wizard-v2-recap-section">';
         html += '<h4>Configuration PAN-Spécifications</h4>';
         html += `<p><strong>Seuil d'acceptabilité\u00a0:</strong> ${r.seuilAcceptabilite}%</p>`;
@@ -2030,11 +1983,11 @@ function deduireTypePratique(reponses) {
             variante = reponses.modeCalcul || 'objectifs-ponderes';
         }
 
-        return { type: 'pan-standards', variante, regles: [], confiance: 1.0 };
+        return { type: 'standards', variante, regles: [], confiance: 1.0 };
     }
 
     if (q1 === 'acceptable') {
-        return { type: 'pan-specifications', variante: 'bundles', regles: [], confiance: 1.0 };
+        return { type: 'specifications', variante: 'bundles', regles: [], confiance: 1.0 };
     }
 
     return { type: null, variante: null, regles: [], confiance: 0 };
@@ -2081,8 +2034,8 @@ async function creerPratiqueV2() {
     // retirée (A-2 4e, zéro-dette).
     const typeMapping = {
         'sommative': 'SOM',
-        'pan-standards': 'STD',
-        'pan-specifications': 'SPE'
+        'standards': 'STD',
+        'specifications': 'SPE'
     };
 
     // Utiliser la classification comportementale déduite
@@ -2093,7 +2046,7 @@ async function creerPratiqueV2() {
     // → elle DOIT avoir une échelle. On bloque la création plutôt que de produire une
     // pratique invalide (qui échouerait ensuite à l'instanciation : « echelle manquante »).
     // SOM (moyenne pondérée) et SPE (seuils) n'utilisent pas d'échelle IDME → non bloqués.
-    if (typeFinal === 'pan-standards' && !r.echelleId) {
+    if (typeFinal === 'standards' && !r.echelleId) {
         notifications.erreur('Choisis une échelle de performance (IDME) avant de créer cette pratique PAN-Standards. Reviens à l\'étape « Échelle de performance ».');
         return;
     }
@@ -2105,11 +2058,10 @@ async function creerPratiqueV2() {
         etablissement: r.etablissement || '',
         description: r.description || '',
         discipline: r.discipline || '',
-        // Volet B étape 2 : la PRODUCTION naît canonique. On normalise le type STOCKÉ
-        // (pan-standards → standards) au seul point d'écriture. Le flux INTERNE du wizard
-        // reste en legacy (deduireTypePratique, les comparaisons, canonVersInterne) — c'est
-        // l'architecture 4e « interne legacy + canonique à la frontière ». La reconstruction
-        // à l'édition normalise déjà (typeCanon), donc le round-trip tient.
+        // La pratique naît canonique. Depuis #319 Lot 1, deduireTypePratique et tout
+        // le flux interne produisent déjà le vocabulaire canonique ('standards'…) ;
+        // normaliserIdPratique reste appelé ici par sécurité défensive (idempotent sur
+        // un type déjà canonique, et ramène un éventuel legacy résiduel au canonique).
         type: (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(typeFinal) : typeFinal),
         variante: classification.variante || null,
         pratiques: [typeMapping[typeFinal] || 'STD'],  // Pour le badge (typeMapping indexé legacy, OK)
@@ -2124,7 +2076,7 @@ async function creerPratiqueV2() {
     // une échelle. Le switch de PratiqueConfigurable.calculerPerformance attend ces codes.
     if (typeFinal === 'sommative') {
         pratique.calcul_note = { methode: 'moyenne_ponderee' };
-    } else if (typeFinal === 'pan-specifications') {
+    } else if (typeFinal === 'specifications') {
         pratique.calcul_note = { methode: 'specifications' };
     } else {
         // pan-standards : par objectifs → pan_par_objectif, sinon conversion de niveaux
@@ -2211,7 +2163,7 @@ async function creerPratiqueV2() {
                 max: parseInt(r.nbMaxReprises) || 3
             };
         }
-    } else if (typeFinal === 'pan-standards') {
+    } else if (typeFinal === 'standards') {
         // 🆕 #24 : Récupérer le mode de sélection pour déterminer varianteCalcul
         const modeSelection = r.modeSelectionPortfolio || 'n_meilleurs';
         const estHybride = modeSelection === 'hybride';
@@ -2293,7 +2245,7 @@ async function creerPratiqueV2() {
                 };
             }
         }
-    } else if (typeFinal === 'pan-specifications') {
+    } else if (typeFinal === 'specifications') {
         pratique.configuration = {
             seuilAcceptabilite: parseInt(r.seuilAcceptabilite) || 100,
             jetons: {
@@ -2482,15 +2434,12 @@ function chargerPratiqueExistante(pratiqueId) {
     }
 
     // Mapper les données vers les réponses du wizard.
-    // Normalisation à la lecture (A-2 4e) : pratique.type peut être canonique
-    // ('standards', 'specifications'…) si la donnée vient d'un seed canonisé
-    // (lot 4b) ou d'une migration future. Le wizard travaille en vocabulaire
-    // INTERNE legacy ('pan-standards'…) jusqu'à l'étape 6 ; on convertit donc à
-    // l'entrée, sinon une pratique Standards/Spécifications serait reconstruite
-    // en Sommative (bug latent réel). Tables indexées canonique ; la conversion
-    // canon→interne est transitoire (retirée à l'étape 6).
+    // Normalisation défensive à la lecture : pratique.type peut être stocké en
+    // legacy ('standards'…) dans d'anciennes données ; normaliserIdPratique
+    // (registre) le ramène au canonique ('standards'/'specifications'/'sommative').
+    // Depuis #319 Lot 1, le flux INTERNE du wizard est canonique de bout en bout :
+    // plus de pont de conversion canon→legacy (l'ancienne table interne est retirée).
     const typeCanon = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(pratique.type) : pratique.type);
-    const canonVersInterne = { 'standards': 'pan-standards', 'specifications': 'pan-specifications', 'sommative': 'sommative' };
     const calcNoteFinaleMap = {
         'sommative': 'moyenne',
         'standards': 'niveaux',
@@ -2503,7 +2452,7 @@ function chargerPratiqueExistante(pratiqueId) {
         etablissement: pratique.etablissement,
         description: pratique.description,
         discipline: pratique.discipline,
-        typePratique: canonVersInterne[typeCanon] || pratique.type,
+        typePratique: typeCanon,
         calcNoteFinale: calcNoteFinaleMap[typeCanon] || 'moyenne',
         typeVariante: pratique.variante || null,
         reglesSommatives: pratique.reglesSpeciales || pratique.configuration?.reglesSommatives || [],

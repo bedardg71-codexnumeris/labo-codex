@@ -73,7 +73,8 @@ describe('Bug #126 · le wizard pose une méthode de calcul par famille + bloque
     });
 
     it('bloque la création d\'une PAN-Standards sans echelleId', () => {
-        expect(wizard).toMatch(/typeFinal === 'pan-standards' && !r\.echelleId/);
+        // #319 Lot 1 : vocabulaire interne canonique ('standards', plus 'pan-standards').
+        expect(wizard).toMatch(/typeFinal === 'standards' && !r\.echelleId/);
     });
 
     it('rafraîchit le select d\'assemblage après création (régression select)', () => {
