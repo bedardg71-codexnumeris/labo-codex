@@ -11971,6 +11971,16 @@ label:has(+ textarea:disabled) {
     line-height: 1.5;
 }
 
+/* #319 Lot 3 (a4) : variante « attention » — ambre, distincte des infos neutres
+   bleues, pour que le garde-fou se remarque parmi les blocs d'info. */
+.wizard-v2-info-block--attention {
+    background: rgba(200, 160, 96, 0.15);
+    border-left-color: var(--btn-annuler);
+}
+.wizard-v2-info-block--attention .wizard-v2-info-icon {
+    color: var(--btn-annuler);
+}
+
 /* Alerte */
 .wizard-v2-alerte {
     padding: 12px 15px;

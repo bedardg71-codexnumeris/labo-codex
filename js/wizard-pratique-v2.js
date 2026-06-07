@@ -47,6 +47,36 @@ const TYPE_BADGES = {
 // ============================================================================
 
 /**
+ * Champs « reprises » réutilisables (#319 Lot 3 a3). Un seul endroit pour le select
+ * et la ligne de repère pédagogique, injecté dans les 3 branches de configuration
+ * (portfolio, sommative, objectifs). Déclaration de fonction → hoistée, donc
+ * appelable dans le littéral ETAPES_WIZARD ci-dessous.
+ * NB : la valeur est persistée (configuration.reprises / portfolio.reprisesPermises)
+ * mais n'est pas encore consommée par le moteur de calcul — écart tracé au backlog.
+ * @param {string} defaut - 'illimite' | 'limite' | 'non'
+ */
+function champsReprises(defaut) {
+    return [
+        {
+            id: 'reprisesPermises',
+            label: 'Reprises permises',
+            type: 'select',
+            options: [
+                { value: 'illimite', label: 'Illimitées' },
+                { value: 'limite', label: 'Limitées (configurer après)' },
+                { value: 'non', label: 'Non permises' }
+            ],
+            default: defaut
+        },
+        {
+            id: 'infoReprisesPedago',
+            type: 'info',
+            texte: 'Des reprises limitées favorisent des soumissions mieux préparées — tu pourras assouplir ensuite.'
+        }
+    ];
+}
+
+/**
  * Configuration de toutes les étapes du wizard
  * Chaque étape définit son contenu, sa validation et sa navigation
  */
@@ -278,7 +308,7 @@ const ETAPES_WIZARD = {
                     {
                         value: 'remplacement',
                         label: 'Remplacement automatique',
-                        description: 'L\'évaluation finale remplace la mi-session si la note est supérieure.'
+                        description: 'L\'évaluation finale remplace la mi-session si elle est meilleure — une forme de reprise sans pénalité, un pilier que tu pratiques peut-être déjà.'
                     },
                     {
                         value: 'double_verrou',
@@ -407,7 +437,7 @@ const ETAPES_WIZARD = {
                 champs.push({
                     id: 'infoRemplacement',
                     type: 'info',
-                    texte: 'Remplacement automatique : l\'évaluation finale remplace l\'initiale si la note est supérieure.'
+                    texte: 'Remplacement automatique : l\'évaluation finale remplace la mi-session si elle est meilleure — une forme de reprise sans pénalité.'
                 });
                 champs.push({
                     id: 'nbPairesRemplacement',
@@ -512,78 +542,46 @@ const ETAPES_WIZARD = {
         description: 'Ajoute tes objectifs d\'apprentissage avec leurs pondérations. Les poids doivent totaliser 100%.',
         branche: 'standards-objectifs',
         ordre: 6,
-        champs: [
-            {
-                id: 'infoObjectifs',
-                type: 'info',
-                texte: 'Chaque objectif a un nom, un poids (%) et un type (fondamental, intégrateur ou transversal). Les objectifs intégrateurs sont les plus complexes et les plus importants.'
-            },
-            {
-                id: 'nbObjectifs',
-                label: 'Nombre d\'objectifs d\'apprentissage',
-                type: 'number',
-                min: 1,
-                max: 30,
-                default: 6,
-                required: true
-            },
-            {
-                id: 'infoObjectifsConfig',
-                type: 'info',
-                texte: 'La définition détaillée de chaque objectif (nom, poids, type) sera configurable dans Conception → Pratiques de notation après la création de la pratique.'
+        champs: [], // Dynamiques : garde-fou a4 (>15) + reprises a3
+        getChampsDynamiques: (reponses) => {
+            const champs = [
+                {
+                    id: 'infoObjectifs',
+                    type: 'info',
+                    texte: 'Chaque objectif a un nom, un poids (%) et un type (fondamental, intégrateur ou transversal). Les objectifs intégrateurs sont les plus complexes et les plus importants.'
+                },
+                {
+                    id: 'nbObjectifs',
+                    label: 'Nombre d\'objectifs d\'apprentissage',
+                    type: 'number',
+                    min: 1,
+                    max: 30,
+                    default: 6,
+                    required: true,
+                    // a4 : re-rendre l'étape à la saisie pour afficher/masquer le garde-fou.
+                    onChange: 'wizardV2RafraichirEtapeCourante'
+                },
+                {
+                    id: 'infoObjectifsConfig',
+                    type: 'info',
+                    texte: 'La définition détaillée de chaque objectif (nom, poids, type) sera configurable dans Conception → Pratiques de notation après la création de la pratique.'
+                }
+            ];
+            // #319 Lot 3 (a4) : garde-fou doux au-delà de ~15 objectifs (non bloquant).
+            if (parseInt(reponses.nbObjectifs) > 15) {
+                champs.push({
+                    id: 'infoTropObjectifs',
+                    type: 'info',
+                    variante: 'attention',
+                    texte: 'Au-delà d\'environ 15 objectifs, l\'évaluation devient difficile à soutenir sur une session — c\'est toi qui décides.'
+                });
             }
-        ],
+            // #319 Lot 3 (a3) : reprises configurables pour les objectifs.
+            champs.push(...champsReprises('limite'));
+            return champs;
+        },
         suivant: () => 'mode-calcul-objectifs',
         precedent: () => 'seuils-personnels'
-    },
-
-    'config-reprises': {
-        id: 'config-reprises',
-        titre: 'Reprises',
-        description: 'Configure les reprises pour tes évaluations.',
-        branche: 'commune',
-        ordre: 7,
-        champs: [
-            {
-                id: 'reprisesPermisesGlobal',
-                label: 'Reprises permises ?',
-                type: 'toggle',
-                default: false
-            },
-            {
-                id: 'modeReprises',
-                label: 'Mode de reprises',
-                type: 'select',
-                options: [
-                    { value: 'illimite', label: 'Illimitées' },
-                    { value: 'limite', label: 'Limitées' },
-                    { value: 'non', label: 'Non permises' }
-                ],
-                default: 'non'
-            },
-            {
-                id: 'nbMaxReprises',
-                label: 'Nombre maximum de tentatives (si limitées)',
-                type: 'number',
-                min: 1,
-                max: 10,
-                default: 3
-            }
-        ],
-        suivant: (reponses) => {
-            if (reponses.typePratique === 'standards' || reponses.typePratique === 'specifications') {
-                return 'echelle-performance';
-            }
-            return 'infos-base';
-        },
-        precedent: (reponses) => {
-            if (reponses.typePratique === 'sommative') return 'config-sommative';
-            if (reponses.typePratique === 'standards') {
-                if (reponses.approcheEvaluation === 'par-artefacts') return 'config-portfolio';
-                return 'config-mode-calcul';
-            }
-            return 'choix-modele-bundles';
-        }
     },
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -608,7 +606,9 @@ const ETAPES_WIZARD = {
                 label: 'Afficher la moyenne du groupe ?',
                 type: 'toggle',
                 default: true
-            }
+            },
+            // #319 Lot 3 (a3) : reprises configurables aussi en Sommative.
+            ...champsReprises('limite')
         ],
         suivant: () => 'infos-base',
         precedent: () => 'seuils-personnels'
@@ -695,17 +695,8 @@ const ETAPES_WIZARD = {
                 default: 7,
                 required: true
             },
-            {
-                id: 'reprisesPermises',
-                label: 'Reprises permises',
-                type: 'select',
-                options: [
-                    { value: 'illimite', label: 'Illimitées' },
-                    { value: 'limite', label: 'Limitées (configurer après)' },
-                    { value: 'non', label: 'Non permises' }
-                ],
-                default: 'illimite'
-            },
+            // #319 Lot 3 (a3) : reprises mutualisées, défaut « Limitées » pour les artefacts.
+            ...champsReprises('limite'),
             {
                 id: 'minAvantCalculFormatif',
                 label: 'Minimum d\'artefacts avant calcul formatif',
@@ -1250,6 +1241,17 @@ function wizardV2VoieRapide() {
 }
 
 /**
+ * Re-rend l'étape courante après avoir sauvegardé ses champs (#319 Lot 3 a4).
+ * Permet aux champs dynamiques dépendant d'une valeur saisie (garde-fou « >15
+ * objectifs ») d'apparaître/disparaître en direct. Déclenché sur 'change' (après
+ * blur) → aucun risque de perte de focus en cours de frappe.
+ */
+function wizardV2RafraichirEtapeCourante() {
+    sauvegarderReponsesEtape(wizardState.etapeActuelle);
+    afficherEtapeWizardV2(wizardState.etapeActuelle);
+}
+
+/**
  * Calcule le nombre total d'étapes pour le parcours actuel
  * @returns {number} - Nombre total d'étapes
  */
@@ -1481,6 +1483,8 @@ function genererChampTextarea(champ) {
  */
 function genererChampNumber(champ) {
     const step = champ.step || 1;
+    // onChange optionnel : re-render live de l'étape (ex. garde-fou a4 sur nbObjectifs).
+    const onChange = champ.onChange ? `data-on-change="${champ.onChange}"` : '';
     return `
         <div class="wizard-v2-champ">
             <label for="${WIZARD_V2_ID_PREFIX}${champ.id}">${champ.label}${champ.required ? ' *' : ''}</label>
@@ -1490,7 +1494,8 @@ function genererChampNumber(champ) {
                    min="${champ.min || 0}"
                    max="${champ.max || 100}"
                    step="${step}"
-                   value="${champ.default || ''}">
+                   value="${champ.default || ''}"
+                   ${onChange}>
             ${champ.help ? `<small class="wizard-v2-help">${champ.help}</small>` : ''}
         </div>
     `;
@@ -1774,9 +1779,11 @@ function wizardV2CreerGrilleDemo() {
  * Génère un bloc d'information
  */
 function genererInfo(champ) {
+    // variante 'attention' (a4) : bloc ambre distinct des infos neutres (bleues).
+    const modif = champ.variante === 'attention' ? ' wizard-v2-info-block--attention' : '';
     return `
         <div class="wizard-v2-champ">
-            <div class="wizard-v2-info-block">
+            <div class="wizard-v2-info-block${modif}">
                 <span class="wizard-v2-info-icon icone-inline icone-inline--info" aria-hidden="true"></span>
                 <span>${champ.texte}</span>
             </div>
@@ -2417,12 +2424,12 @@ async function creerPratiqueV2() {
             });
         }
 
-        // Reprises
-        if (r.reprisesPermisesGlobal) {
+        // Reprises (#319 Lot 3 a3) : champ mutualisé reprisesPermises (select).
+        // Remplace feu config-reprises (reprisesPermisesGlobal/modeReprises/nbMaxReprises).
+        if (r.reprisesPermises) {
             pratique.configuration.reprises = {
-                permises: true,
-                mode: r.modeReprises || 'non',
-                max: parseInt(r.nbMaxReprises) || 3
+                permises: r.reprisesPermises !== 'non',
+                mode: r.reprisesPermises
             };
         }
     } else if (typeFinal === 'standards') {
@@ -2504,6 +2511,14 @@ async function creerPratiqueV2() {
             } else if (r.modeCalcul === 'holistique') {
                 pratique.configuration.objectifs.holistique = {
                     methodeSuggestion: r.methodeSuggestion || 'mode'
+                };
+            }
+
+            // #319 Lot 3 (a3) : reprises configurables aussi pour les objectifs.
+            if (r.reprisesPermises) {
+                pratique.configuration.reprises = {
+                    permises: r.reprisesPermises !== 'non',
+                    mode: r.reprisesPermises
                 };
             }
         }
@@ -2751,6 +2766,8 @@ function chargerPratiqueExistante(pratiqueId) {
         if (typeCanon === 'sommative') {
             wizardState.reponses.afficherRang = config.afficherRang;
             wizardState.reponses.afficherMoyenneGroupe = config.afficherMoyenneGroupe;
+            // #319 Lot 3 (a3) : restaurer les reprises (round-trip d'édition #132).
+            if (config.reprises) wizardState.reponses.reprisesPermises = config.reprises.mode;
         } else if (typeCanon === 'standards') {
             wizardState.reponses.approcheEvaluation = config.approcheEvaluation;
             wizardState.reponses.echelleId = config.echelleId;
@@ -2789,6 +2806,8 @@ function chargerPratiqueExistante(pratiqueId) {
                 } else if (config.objectifs.holistique) {
                     wizardState.reponses.methodeSuggestion = config.objectifs.holistique.methodeSuggestion;
                 }
+                // #319 Lot 3 (a3) : restaurer les reprises des objectifs (round-trip).
+                if (config.reprises) wizardState.reponses.reprisesPermises = config.reprises.mode;
             }
         }
     }
@@ -2808,6 +2827,7 @@ window.deduireTypePratique = deduireTypePratique;
 window.wizardV2GererExclusionCheckbox = wizardV2GererExclusionCheckbox;
 window.wizardV2CreerGrilleDemo = wizardV2CreerGrilleDemo;
 window.wizardV2VoieRapide = wizardV2VoieRapide;
+window.wizardV2RafraichirEtapeCourante = wizardV2RafraichirEtapeCourante;
 
 // Exposés pour la testabilité (#317) : la relecture d'édition (#132) et le
 // calcul du nombre d'étapes (#134) sont verrouillés par sentinelles. wizardState
@@ -2816,5 +2836,8 @@ window.chargerPratiqueExistante = chargerPratiqueExistante;
 window.calculerNbEtapes = calculerNbEtapes;
 window.obtenirEtapeSuivante = obtenirEtapeSuivante;
 window.wizardState = wizardState;
+// #319 Lot 3 : testabilité des configs de champs (défaut reprises a3, garde-fou a4).
+window.ETAPES_WIZARD = ETAPES_WIZARD;
+window.champsReprises = champsReprises;
 
 })();
