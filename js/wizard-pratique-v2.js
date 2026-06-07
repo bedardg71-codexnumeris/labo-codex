@@ -62,8 +62,15 @@ const ETAPES_WIZARD = {
             { id: 'description', label: 'Description', type: 'textarea', required: false, placeholder: 'Décris brièvement ta pratique (optionnel)' },
             { id: 'infoCC', type: 'info', texte: 'Le partage n\'est pas obligatoire, mais ces informations permettent de protéger ton travail sous licence Creative Commons (CC BY-NC-SA 4.0) et d\'en attribuer la création si tu choisis de le partager.' }
         ],
-        suivant: () => 'calcul-note-finale',
-        precedent: () => null
+        // #319 Lot 2 (a6) : infos-base est désormais juste AVANT le récapitulatif —
+        // on nomme/attribue la pratique une fois qu'on sait ce qu'elle est.
+        suivant: () => 'recapitulatif',
+        precedent: (reponses) => {
+            // Précédent = la dernière étape de configuration (ex-précédent du récap).
+            if (reponses.typePratique === 'sommative') return 'config-sommative';
+            if (reponses.typePratique === 'specifications') return 'choix-modele-bundles';
+            return 'grille-criteres'; // PAN-Standards (par-artefacts ou par-objectifs)
+        }
     },
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -275,7 +282,7 @@ const ETAPES_WIZARD = {
                 return 'mode-calcul-objectifs';
             }
             if (type === 'specifications') return 'config-specifications';
-            return 'recapitulatif';
+            return 'infos-base';
         },
         precedent: () => 'nb-evaluations'
     },
@@ -466,7 +473,7 @@ const ETAPES_WIZARD = {
             if (reponses.typePratique === 'standards' || reponses.typePratique === 'specifications') {
                 return 'echelle-performance';
             }
-            return 'recapitulatif';
+            return 'infos-base';
         },
         precedent: (reponses) => {
             if (reponses.typePratique === 'sommative') return 'config-sommative';
@@ -502,7 +509,7 @@ const ETAPES_WIZARD = {
                 default: true
             }
         ],
-        suivant: () => 'recapitulatif',
+        suivant: () => 'infos-base',
         precedent: () => 'seuils-personnels'
     },
 
@@ -859,7 +866,7 @@ const ETAPES_WIZARD = {
                 }
             ];
         },
-        suivant: () => 'recapitulatif',
+        suivant: () => 'infos-base',
         precedent: (reponses) => {
             if (reponses.utiliserJetons) return 'config-jetons';
             return 'config-specifications';
@@ -915,7 +922,7 @@ const ETAPES_WIZARD = {
                 texte: 'La grille peut également être configurée plus tard dans Conception → Grilles de critères.'
             }
         ],
-        suivant: () => 'recapitulatif',
+        suivant: () => 'infos-base',
         precedent: () => 'echelle-performance'
     },
 
@@ -927,13 +934,9 @@ const ETAPES_WIZARD = {
         ordre: 9,
         champs: [], // Généré dynamiquement
         suivant: () => null, // Fin du wizard
-        precedent: (reponses) => {
-            if (reponses.typePratique === 'sommative') return 'config-sommative';
-            if (reponses.typePratique === 'specifications') return 'choix-modele-bundles';
-            // PAN-Standards
-            if (reponses.approcheEvaluation === 'par-artefacts') return 'grille-criteres';
-            return 'grille-criteres';
-        }
+        // #319 Lot 2 (a6) : infos-base précède désormais le récap. Cas modèle (a7) :
+        // l'adoption d'un gabarit saute à la fin → le retour ramène au choix du modèle.
+        precedent: (reponses) => reponses._modeleAdopte ? 'choix-modele' : 'infos-base'
     }
 };
 
@@ -1044,8 +1047,8 @@ function calculerNbEtapes() {
     // config-objectifs-definition…) → « étape 8 sur 7 » et dots désynchronisés. Le parcours
     // suit exactement les mêmes transitions et conditions que la navigation, donc le total
     // reste synchrone par construction selon les réponses actuelles.
-    let count = 1; // infos-base (point d'entrée)
-    let etape = 'infos-base';
+    let count = 1; // point d'entrée du parcours (#319 Lot 2 : plus 'infos-base')
+    let etape = wizardState.etapeInitiale || 'calcul-note-finale';
     let garde = 0;
     while (etape && garde++ < 50) {
         const suivante = obtenirEtapeSuivante(etape, wizardState.reponses);
@@ -2341,8 +2344,14 @@ async function sauvegarderPratique(pratique) {
  */
 function ouvrirWizardV2(modeEdition = false, pratiqueId = null) {
 
+    // #319 Lot 2 (a6) : infos-base n'est plus l'entrée. Le parcours démarre à la
+    // classification (calcul-note-finale). etapeInitiale sert au compteur de
+    // progression (calculerNbEtapes) — voir aussi a7 (écran d'entrée à venir).
+    const etapeInitiale = 'calcul-note-finale';
+
     // Réinitialiser l'état
-    wizardState.etapeActuelle = 'infos-base';
+    wizardState.etapeActuelle = etapeInitiale;
+    wizardState.etapeInitiale = etapeInitiale;
     wizardState.historique = [];
     wizardState.reponses = {};
     wizardState.modeEdition = modeEdition;
@@ -2368,7 +2377,7 @@ function ouvrirWizardV2(modeEdition = false, pratiqueId = null) {
     const modal = document.getElementById('modalWizardPratiqueV2');
     if (modal) {
         modal.classList.add('actif');
-        afficherEtapeWizardV2('infos-base');
+        afficherEtapeWizardV2(wizardState.etapeActuelle);
     } else {
         console.error('[WizardV2] Modal #modalWizardPratiqueV2 non trouvé');
     }
@@ -2413,7 +2422,7 @@ function fermerWizardV2() {
     }
 
     // Réinitialiser l'état
-    wizardState.etapeActuelle = 'infos-base';
+    wizardState.etapeActuelle = 'calcul-note-finale';
     wizardState.historique = [];
     wizardState.reponses = {};
     wizardState.modeEdition = false;

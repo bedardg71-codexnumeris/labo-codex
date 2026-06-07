@@ -110,8 +110,11 @@ describe('#134 · calculerNbEtapes dérive du graphe réel', () => {
     // Déroule la navigation réelle (obtenirEtapeSuivante) depuis infos-base et
     // compte : calculerNbEtapes DOIT coïncider. Un futur compteur manuel divergent
     // (cause du « 8 sur 7 ») ferait casser ce test.
+    // #319 Lot 2 (a6) : le parcours démarre à 'calcul-note-finale' (infos-base
+    // a été déplacé juste avant le récap). Le compteur dérive de etapeInitiale.
+    const ENTREE = 'calcul-note-finale';
     function compterParGraphe(reponses) {
-        let count = 1, etape = 'infos-base', garde = 0;
+        let count = 1, etape = ENTREE, garde = 0;
         while (etape && garde++ < 50) {
             const suivante = win.obtenirEtapeSuivante(etape, reponses);
             if (!suivante) break;
@@ -123,6 +126,7 @@ describe('#134 · calculerNbEtapes dérive du graphe réel', () => {
     it('coïncide avec le déroulé réel — parcours sommative', () => {
         const reponses = { typePratique: 'sommative', calcNoteFinale: 'moyenne' };
         win.wizardState.reponses = reponses;
+        win.wizardState.etapeInitiale = ENTREE;
         expect(win.calculerNbEtapes()).toBe(compterParGraphe(reponses));
         expect(win.calculerNbEtapes()).toBeGreaterThan(1);
     });
@@ -131,6 +135,7 @@ describe('#134 · calculerNbEtapes dérive du graphe réel', () => {
         // #319 Lot 1 : vocabulaire interne canonique ('standards', plus 'pan-standards').
         const reponses = { typePratique: 'standards', approcheEvaluation: 'par-objectifs', calcNoteFinale: 'niveaux' };
         win.wizardState.reponses = reponses;
+        win.wizardState.etapeInitiale = ENTREE;
         expect(win.calculerNbEtapes()).toBe(compterParGraphe(reponses));
     });
 });
