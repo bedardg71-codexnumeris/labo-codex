@@ -19512,6 +19512,52 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 .comparateur-fiche-finale-niveau { color: var(--texte-principal, #d0e0e4); font-weight: 600; }
 .mode-clair .comparateur-traj-etape { background: var(--bleu-pale, #e8f2fd); }
 
+/* Récit E2 (C2-d.3) : une carte par pratique (réf « Ta pratique » d'abord). */
+.comparateur-recit-cartes { display: flex; flex-direction: column; gap: 12px; }
+.comparateur-recit-carte {
+    border: 1px solid var(--bordure-claire, rgba(106, 172, 184, 0.18));
+    border-radius: 8px;
+    padding: 10px 12px;
+}
+.comparateur-recit-carte--ref { background: var(--surface-element, rgba(106, 172, 184, 0.08)); }
+.mode-clair .comparateur-recit-carte--ref {
+    background: var(--bleu-pale, #e8f2fd);
+    border-left: 3px solid var(--accent-primaire, #065dbb);
+}
+.comparateur-recit-entete {
+    display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;
+}
+.comparateur-recit-entete .comparateur-col-tag { display: inline; margin: 0; }
+.comparateur-recit-liste {
+    list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px;
+}
+.comparateur-recit-ligne {
+    display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+    font-size: 0.84rem; padding: 3px 0;
+    border-bottom: 1px solid var(--bordure-claire, rgba(106, 172, 184, 0.1));
+}
+.comparateur-recit-ligne:last-child { border-bottom: none; }
+.comparateur-recit-label { color: var(--texte-principal, #d0e0e4); font-weight: 600; }
+.comparateur-recit-niveau { color: var(--texte-secondaire, #8aa4b0); }
+.comparateur-recit-note { color: var(--texte-principal, #d0e0e4); font-variant-numeric: tabular-nums; }
+.comparateur-recit-detail { color: var(--texte-muted, #80a0b0); margin-left: auto; font-size: 0.8rem; }
+/* Résultats écartés / remplacés : atténués (ne comptent pas dans la note). */
+.comparateur-recit--ecarte .comparateur-recit-label,
+.comparateur-recit--remplace .comparateur-recit-label {
+    color: var(--texte-muted, #80a0b0); font-weight: 400;
+}
+.comparateur-recit-synthese {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+    margin-top: 8px; padding-top: 8px;
+    border-top: 1px solid var(--bordure-claire, rgba(106, 172, 184, 0.18));
+}
+.comparateur-recit-formule { font-size: 0.8rem; font-style: italic; color: var(--texte-muted, #80a0b0); }
+.comparateur-recit-notefinale {
+    font-size: 1rem; font-weight: 700; color: var(--texte-principal, #d0e0e4);
+    font-variant-numeric: tabular-nums;
+}
+.comparateur-recit-plafond { margin: 6px 0 0; font-size: 0.78rem; color: var(--texte-muted, #80a0b0); }
+
 @media (max-width: 768px) {
     #comparateur-pratiques-panel {
         left: 16px;

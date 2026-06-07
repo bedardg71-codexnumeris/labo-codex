@@ -316,6 +316,72 @@ test('C2-d.1 · navigation matrice → fiche (en-tête + phrase de contexte + ma
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });
 
+test('C2-d.3 · fiche — bloc récit E2 (cartes par pratique via simulerIndices().recit) non-destructif', async ({ page }) => {
+    const erreurs = [];
+    brancherErreurs(page, erreurs);
+
+    await page.goto(indexHtml);
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
+
+    const resultat = await page.evaluate(async () => {
+        if (typeof window.activerModeDemo !== 'function') return { erreur: 'activerModeDemo absent' };
+        await window.activerModeDemo();
+
+        const snapshot = () => {
+            const o = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                o[k] = localStorage.getItem(k);
+            }
+            return JSON.stringify(o, Object.keys(o).sort());
+        };
+        const avant = snapshot();
+
+        window.ouvrirComparateurPratiques();
+        const panel = document.getElementById('comparateur-pratiques-panel');
+        const tr = panel.querySelector('[data-profil-da="DEMO011"]');
+        if (tr) tr.click();
+
+        const corps = panel.querySelector('.comparateur-corps');
+        const texte = corps ? corps.textContent : '';
+        const cartes = panel.querySelectorAll('.comparateur-recit-carte');
+        const carteRef = panel.querySelector('.comparateur-recit-carte--ref');
+        const lignes = panel.querySelectorAll('.comparateur-recit-ligne');
+        const noteFinale = panel.querySelector('.comparateur-recit-notefinale');
+        // La carte de référence est la première (« Ta pratique » d'abord).
+        const refEstPremiere = cartes.length
+            ? cartes[0].classList.contains('comparateur-recit-carte--ref') : false;
+
+        const apres = snapshot();
+
+        return {
+            aTitreRecit: texte.includes('Ce que chaque pratique retient'),
+            nbCartes: cartes.length,
+            aCarteRef: !!carteRef,
+            tagRef: carteRef ? carteRef.querySelector('.comparateur-col-tag')?.textContent : '',
+            refEstPremiere,
+            nbLignes: lignes.length,
+            aNoteFinale: !!noteFinale,
+            aGarde: !!panel.querySelector('.comparateur-fiche-bloc .comparateur-garde'),
+            nonDestructif: avant === apres
+        };
+    });
+
+    expect(resultat.erreur, `Erreur eval : ${resultat.erreur}`).toBeUndefined();
+    expect(resultat.aTitreRecit).toBe(true);
+    expect(resultat.nbCartes).toBeGreaterThanOrEqual(1);   // au moins la référence
+    expect(resultat.aCarteRef).toBe(true);
+    expect(resultat.tagRef).toContain('Ta pratique');
+    expect(resultat.refEstPremiere).toBe(true);            // réf d'abord
+    expect(resultat.nbLignes).toBeGreaterThanOrEqual(1);   // résultats du contrat §4
+    expect(resultat.aNoteFinale).toBe(true);               // synthèse discrète
+    expect(resultat.aGarde).toBe(true);                    // ligne de garde sous le récit
+    expect(resultat.nonDestructif).toBe(true);             // lecture seule
+
+    expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
+});
+
 test('C1-d · sélection inline des candidates — recalcul + invariant non-destructif (données démo)', async ({ page }) => {
     const erreurs = [];
     brancherErreurs(page, erreurs);
