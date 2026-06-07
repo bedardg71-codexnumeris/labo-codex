@@ -186,6 +186,113 @@ class PratiquePanSpecifications {
     }
 
     /**
+     * C2-c (Comparateur, fiche de profil) — RÉCIT DE CALCUL SPE, traçabilité ADDITIVE.
+     *
+     * Produit l'objet normalisé `RecitCalcul` (contrat NOTE-CONCEPTION-C2 §4). En
+     * spécifications, la note est un PALIER : chaque type de travail est décrit par
+     * son sort vis-à-vis du palier atteint —
+     *   - `satisfait`  : exigé par le palier atteint, et atteint (par construction du bundle) ;
+     *   - `manquant`   : non exigé au palier atteint mais requis (et déficitaire) au palier suivant ;
+     *   - `non-exige`  : ni exigé au palier atteint, ni bloquant pour le suivant.
+     *
+     * Orientation A (SSOT, additif) : la note finale vient DIRECTEMENT de
+     * calculerPerformance (palier ÷ 100) ; on ne décrit ici que la composition.
+     * calculerPerformance reste inchangée → la note ne bouge pas (sentinelle de parité).
+     *
+     * Repli (NOTE §5) : sans config exploitable (types/bundles), renvoie null
+     * (« récit indisponible »), JAMAIS d'échec global hors STD.
+     *
+     * @param {string} da - Numéro de dossier d'admission
+     * @returns {Object|null} RecitCalcul §4, ou null si non calculable
+     */
+    decrireCalcul(da) {
+        if (!da || da.length !== 7) {
+            return null;
+        }
+
+        // Config exploitable requise (sinon repli « récit indisponible »).
+        const types = (this.config && this.config.typesTravaux) || [];
+        const bundles = (this.config && this.config.tableBundles) || [];
+        if (types.length === 0 || bundles.length === 0) {
+            return null;
+        }
+
+        const evaluations = this._lireEvaluations();
+        // MÊMES critères de validité que calculerPerformance (garantit la parité).
+        const valides = (evaluations || []).filter(e =>
+            e.etudiantDA === da &&
+            !e.remplaceeParId &&
+            e.noteFinale !== null &&
+            e.noteFinale !== undefined
+        );
+
+        if (valides.length === 0) {
+            return null;
+        }
+
+        const comptes = this._compterTravauxAcceptables(da, valides);
+        const noteAtteinte = this._determinerPalierBundle(comptes);
+        const palierAtteint = bundles.find(p => p.noteFixe === noteAtteinte) || null;
+
+        // Palier immédiatement supérieur (pour qualifier le « manquant »).
+        const prochain = bundles
+            .filter(p => p.requis && p.noteFixe > noteAtteinte)
+            .sort((a, b) => a.noteFixe - b.noteFixe)[0] || null;
+
+        const labelPalier = (p) => p ? (p.label || p.description || (p.noteFixe + ' %')) : null;
+
+        const resultats = types.map(t => {
+            const nbAcc = comptes[t.id] || 0;
+            const reqAtteint = (palierAtteint && palierAtteint.requis && palierAtteint.requis[t.id]) || 0;
+            const reqProchain = (prochain && prochain.requis && prochain.requis[t.id]) || 0;
+
+            let sort, detail;
+            if (reqAtteint > 0) {
+                sort = 'satisfait';
+                detail = nbAcc + ' acceptable' + (nbAcc > 1 ? 's' : '') +
+                         ' · ' + reqAtteint + ' exigé' + (reqAtteint > 1 ? 's' : '') +
+                         ' (palier ' + labelPalier(palierAtteint) + ')';
+            } else if (reqProchain > nbAcc) {
+                const manque = reqProchain - nbAcc;
+                sort = 'manquant';
+                detail = 'il manque ' + manque + ' acceptable' + (manque > 1 ? 's' : '') +
+                         ' pour le palier ' + labelPalier(prochain);
+            } else {
+                sort = 'non-exige';
+                detail = nbAcc > 0
+                    ? (nbAcc + ' acceptable' + (nbAcc > 1 ? 's' : '') + ' · au-delà des exigences du palier atteint')
+                    : 'non exigé pour le palier atteint';
+            }
+
+            return {
+                label: t.nom || t.id,
+                date: null,           // un type agrège plusieurs travaux : pas de date unique
+                niveau: null,         // SPE binaire : pas de niveau d'échelle
+                note: null,           // la note est le palier, pas un score par type
+                sort: sort,
+                detail: detail
+            };
+        });
+
+        const indiceP = this.calculerPerformance(da);   // SSOT — la note ne bouge pas
+        const noteFinale = (indiceP === null || indiceP === undefined) ? null : indiceP * 100;
+
+        return {
+            famille: this.obtenirCode(),     // 'SPE' (registre, source unique)
+            pratiqueNom: this.obtenirNom(),
+            resultats: resultats,
+            synthese: {
+                formuleTexte: palierAtteint
+                    ? ('palier ' + labelPalier(palierAtteint) + ' atteint'
+                       + (palierAtteint.description ? ' — ' + palierAtteint.description : ''))
+                    : 'aucun palier atteint',
+                noteFinale: noteFinale,
+                plafonnement: null               // les spécifications ne plafonnent pas
+            }
+        };
+    }
+
+    /**
      * Calcule l'indice C (Complétion) selon pratique PAN-Spécifications V2.0
      *
      * LOGIQUE (universel, codé en dur) :
