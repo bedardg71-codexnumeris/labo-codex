@@ -25,11 +25,21 @@
  * État global du wizard
  */
 const wizardState = {
-    etapeActuelle: 'infos-base',
+    etapeActuelle: 'entree-pratique',
     historique: [],          // Pile des étapes visitées pour navigation arrière
     reponses: {},            // Réponses collectées à chaque étape
     modeEdition: false,      // true si modification d'une pratique existante
     pratiqueId: null         // ID de la pratique en édition (null si création)
+};
+
+// Familles canoniques → badge (code court + libellé + description du diagnostic).
+// SSOT du vocabulaire de famille dans l'assistant : consommé par le récapitulatif
+// (genererRecapitulatif) ET par l'écran « Partir d'un modèle » (#319 Lot 2 a7,
+// badge famille). Un seul endroit à éditer, pas de microcopy dupliqué.
+const TYPE_BADGES = {
+    'sommative': { code: 'SOM', classe: 'som', label: 'Sommative', description: 'Ta note finale est calculée par une moyenne pondérée des évaluations. C\'est la méthode traditionnelle, largement utilisée.' },
+    'standards': { code: 'STD', classe: 'std', label: 'PAN – Standards', description: 'Tu évalues par niveaux de maîtrise (ex. : I-D-M-E). La note est construite à partir de la démonstration de compétences, pas d\'une simple moyenne.' },
+    'specifications': { code: 'SPE', classe: 'spe', label: 'PAN – Spécifications', description: 'Chaque travail est jugé acceptable ou non. La note finale dépend du nombre de spécifications réussies (forfaits).' }
 };
 
 // ============================================================================
@@ -41,6 +51,62 @@ const wizardState = {
  * Chaque étape définit son contenu, sa validation et sa navigation
  */
 const ETAPES_WIZARD = {
+    // ─────────────────────────────────────────────────────────────────────────
+    // ENTRÉE — Deux portes (#319 Lot 2 a7)
+    // Le novice rencontre du sens d'abord ; l'expert part d'un modèle et va vite.
+    // Étape de tête en CRÉATION uniquement (l'édition entre à 'calcul-note-finale').
+    // ─────────────────────────────────────────────────────────────────────────
+
+    'entree-pratique': {
+        id: 'entree-pratique',
+        titre: 'Comment veux-tu créer ta pratique ?',
+        description: 'Pars d\'un modèle existant pour aller vite, ou décris ta pratique étape par étape.',
+        branche: 'commune',
+        ordre: 1,
+        champs: [
+            {
+                id: 'porteEntree',
+                type: 'radio-cards',
+                required: true,
+                options: [
+                    {
+                        value: 'modele',
+                        label: 'Partir d\'un modèle',
+                        description: 'Choisis un gabarit prêt à l\'emploi ou une de tes pratiques. Tu l\'adoptes telle quelle ; tu pourras la renommer et l\'ajuster ensuite.'
+                    },
+                    {
+                        value: 'decrire',
+                        label: 'Décrire ma pratique',
+                        description: 'Réponds à quelques questions sur ta façon de noter. L\'assistant identifie le type qui te correspond.'
+                    }
+                ]
+            }
+        ],
+        suivant: (reponses) => reponses.porteEntree === 'modele' ? 'choix-modele' : 'calcul-note-finale',
+        precedent: () => null
+    },
+
+    'choix-modele': {
+        id: 'choix-modele',
+        titre: 'Choisis un modèle',
+        description: 'Adopter un modèle copie sa configuration dans une nouvelle pratique. L\'original n\'est pas modifié — tu pourras renommer et ajuster ta copie ensuite.',
+        branche: 'commune',
+        ordre: 2,
+        // Liste construite dynamiquement : gabarits prédéfinis + pratiques de la
+        // bibliothèque de l'enseignant. L'adoption saute au récapitulatif ; le clonage
+        // réel est fait par etapeSuivanteV2 (préparation) puis creerPratiqueV2 (écriture).
+        getChampsDynamiques: () => [
+            {
+                id: 'modeleChoisi',
+                type: 'radio-cards',
+                required: true,
+                options: obtenirOptionsModeles()
+            }
+        ],
+        suivant: () => 'recapitulatif',
+        precedent: () => 'entree-pratique'
+    },
+
     // ─────────────────────────────────────────────────────────────────────────
     // ÉTAPES COMMUNES
     // ─────────────────────────────────────────────────────────────────────────
@@ -941,6 +1007,96 @@ const ETAPES_WIZARD = {
 };
 
 // ============================================================================
+// MODÈLES ADOPTABLES (#319 Lot 2 a7)
+// ============================================================================
+
+/**
+ * Libellé court de la famille d'un modèle (badge de l'écran « Partir d'un modèle »).
+ * Dérivé du type canonique via le SSOT TYPE_BADGES. Retourne '' si famille inconnue.
+ * @param {Object} p - Modèle (gabarit prédéfini ou pratique de la bibliothèque)
+ * @returns {string} - Code court ('SOM' / 'STD' / 'SPE') ou ''
+ */
+function libelleFamilleModele(p) {
+    const type = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(p.type) : p.type);
+    return (TYPE_BADGES[type] && TYPE_BADGES[type].code) || '';
+}
+
+/**
+ * Construit la liste d'options radio-cards de l'étape 'choix-modele' :
+ * gabarits prédéfinis + pratiques de la bibliothèque (helper canonique
+ * obtenirToutesLesPratiquesBibliothequeSync, déjà dédoublonné par id).
+ *
+ * Sécurité : genererRadioCards n'échappe que la `value`. Les noms/descriptions
+ * peuvent venir de données utilisateur (pratiques de la bibliothèque) → on les
+ * échappe ICI avant injection. Le badge famille provient d'un mapping contrôlé.
+ * @returns {Array<{value, label, description}>}
+ */
+function obtenirOptionsModeles() {
+    let modeles = [];
+    if (typeof obtenirToutesLesPratiquesBibliothequeSync === 'function') {
+        try { modeles = obtenirToutesLesPratiquesBibliothequeSync(true) || []; }
+        catch (e) { modeles = []; }
+    }
+    return modeles
+        .filter(m => m && m.id)
+        .map(m => {
+            const titre = echapperHtml(m.nom || 'Sans nom');
+            const badge = libelleFamilleModele(m);
+            const meta = [badge, m.discipline ? echapperHtml(m.discipline) : '']
+                .filter(Boolean).join(' · ');
+            return {
+                value: m.id,
+                // Le titre est échappé ; le badge famille est ajouté en HTML contrôlé.
+                label: meta ? `${titre} <span class="wizard-v2-modele-famille">${meta}</span>` : titre,
+                description: echapperHtml(m.description || '')
+            };
+        });
+}
+
+/**
+ * Prépare l'adoption d'un modèle au départ de l'étape 'choix-modele'.
+ * Pose une COPIE PROFONDE figée du gabarit (_gabaritSource) que creerPratiqueV2
+ * clonera tel quel — on court-circuite la reconstruction depuis les réponses, qui
+ * est cassée pour les modèles (SPE : forfaits/typesTravaux perdus ; STD : echelleId
+ * absente → création bloquée). Renseigne aussi les champs lus par le récapitulatif.
+ * @param {Object} r - wizardState.reponses (muté)
+ */
+function preparerAdoptionModele(r) {
+    let modeles = [];
+    if (typeof obtenirToutesLesPratiquesBibliothequeSync === 'function') {
+        try { modeles = obtenirToutesLesPratiquesBibliothequeSync(true) || []; }
+        catch (e) { modeles = []; }
+    }
+    const gabarit = modeles.find(m => m && m.id === r.modeleChoisi);
+    if (!gabarit) {
+        // Id introuvable : retomber sur le parcours « décrire » plutôt que cloner du vide.
+        reinitialiserAdoptionModele(r);
+        return;
+    }
+    // Copie profonde : le clone final ne doit jamais aliaser le gabarit source.
+    r._modeleAdopte = true;
+    r._gabaritSource = JSON.parse(JSON.stringify(gabarit));
+    // Champs d'affichage du récapitulatif (le diagnostic lit calcNoteFinale).
+    const typeCanon = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(gabarit.type) : gabarit.type);
+    const calcNoteFinaleMap = { 'sommative': 'moyenne', 'standards': 'niveaux', 'specifications': 'acceptable' };
+    r.typePratique = typeCanon;
+    r.calcNoteFinale = calcNoteFinaleMap[typeCanon] || 'moyenne';
+    if (!r.nom) r.nom = gabarit.nom || '';
+}
+
+/**
+ * Nettoie tout état d'adoption (retour arrière vers la porte « décrire », ou id de
+ * modèle introuvable). Sans ça, recapitulatif.precedent ramènerait à tort vers
+ * 'choix-modele' et creerPratiqueV2 clonerait un gabarit fantôme.
+ * @param {Object} r - wizardState.reponses (muté)
+ */
+function reinitialiserAdoptionModele(r) {
+    delete r._modeleAdopte;
+    delete r._gabaritSource;
+    delete r.modeleChoisi;
+}
+
+// ============================================================================
 // NAVIGATION
 // ============================================================================
 
@@ -1010,6 +1166,15 @@ function etapeSuivanteV2() {
         const classification = deduireTypePratique(wizardState.reponses);
         wizardState.reponses.typePratique = classification.type;
         wizardState.reponses.typeVariante = classification.variante;
+    }
+
+    // #319 Lot 2 (a7) — Adoption d'un modèle : au départ de 'choix-modele', préparer le
+    // clonage (creerPratiqueV2 écrira le clone). La porte « décrire » nettoie tout état
+    // d'adoption résiduel — l'utilisateur a pu revenir en arrière puis changer d'avis.
+    if (wizardState.etapeActuelle === 'choix-modele') {
+        preparerAdoptionModele(wizardState.reponses);
+    } else if (wizardState.etapeActuelle === 'entree-pratique' && wizardState.reponses.porteEntree === 'decrire') {
+        reinitialiserAdoptionModele(wizardState.reponses);
     }
 
     // Obtenir l'étape suivante
@@ -1554,12 +1719,8 @@ function genererRecapitulatif() {
     let html = '<div class="wizard-v2-recapitulatif">';
 
     // ─── Section 1 : Diagnostic du type de notation (proéminent) ───
-    const typeBadges = {
-        'sommative': { code: 'SOM', classe: 'som', label: 'Sommative', description: 'Ta note finale est calculée par une moyenne pondérée des évaluations. C\'est la méthode traditionnelle, largement utilisée.' },
-        'standards': { code: 'STD', classe: 'std', label: 'PAN \u2013 Standards', description: 'Tu évalues par niveaux de maîtrise (ex.\u00a0: I-D-M-E). La note est construite à partir de la démonstration de compétences, pas d\'une simple moyenne.' },
-        'specifications': { code: 'SPE', classe: 'spe', label: 'PAN \u2013 Spécifications', description: 'Chaque travail est jugé acceptable ou non. La note finale dépend du nombre de spécifications réussies (forfaits).' }
-    };
-    const badge = typeBadges[classification.type] || { code: '?', classe: 'indetermine', label: 'Indéterminé', description: '' };
+    // Familles : SSOT module TYPE_BADGES (partagé avec l'écran « Partir d'un modèle »).
+    const badge = TYPE_BADGES[classification.type] || { code: '?', classe: 'indetermine', label: 'Indéterminé', description: '' };
 
     html += `
         <div class="wizard-v2-recap-diagnostic wizard-v2-recap-diagnostic--${badge.classe}">
@@ -2032,6 +2193,30 @@ async function creerPratiqueV2() {
         r.nom = champNomRecap.value.trim();
     }
 
+    // #319 Lot 2 (a7) — Adoption d'un modèle = CLONE FIDÈLE du gabarit. On copie sa
+    // configuration intégrale et on court-circuite toute la reconstruction ci-dessous :
+    // celle-ci, pilotée par les réponses, perd la config des gabarits (SPE : forfaits/
+    // typesTravaux ; STD : echelleId absente → création bloquée). Le clone reçoit un
+    // nouvel id, le nom/auteur du récap, et entre dans la bibliothèque.
+    if (r._modeleAdopte && r._gabaritSource) {
+        const src = r._gabaritSource;
+        const clone = JSON.parse(JSON.stringify(src));
+        clone.id = wizardState.pratiqueId || genererIdUnique('pratique_');
+        clone.nom = r.nom || src.nom || 'Pratique adoptée';
+        const auteurRecap = `${r.prenom || ''} ${r.nomAuteur || ''}`.trim();
+        if (auteurRecap) clone.auteur = auteurRecap;
+        if (r.etablissement) clone.etablissement = r.etablissement;
+        if (r.discipline) clone.discipline = r.discipline;
+        if (r.description) clone.description = r.description;
+        clone.dansBibliotheque = true;
+        clone.dateCreation = new Date().toISOString();
+        // Le clone est une pratique à part entière, pas un gabarit/seed prédéfini.
+        delete clone.estGabarit;
+        delete clone.dateAjoutBiblio;
+        await finaliserCreationPratique(clone);
+        return;
+    }
+
     // Construire l'objet pratique. typeFinal vient de deduireTypePratique
     // (jamais 'pan-maitrise') → l'entrée 'pan-maitrise':'PAN' était du code mort,
     // retirée (A-2 4e, zéro-dette).
@@ -2275,6 +2460,17 @@ async function creerPratiqueV2() {
     }
 
 
+    // Finaliser (sauvegarde + fermeture + notification + rafraîchissements).
+    await finaliserCreationPratique(pratique);
+}
+
+/**
+ * Finalise la création d'une pratique : sauvegarde puis fermeture, notification et
+ * rafraîchissement des vues. Partagée par le parcours « décrire » (reconstruction
+ * depuis les réponses) et l'adoption d'un modèle (#319 Lot 2 a7, clone du gabarit).
+ * @param {Object} pratique - Objet pratique prêt à être persisté
+ */
+async function finaliserCreationPratique(pratique) {
     // Sauvegarder la pratique (attendre pour s'assurer que c'est fait)
     await sauvegarderPratique(pratique);
 
@@ -2344,10 +2540,12 @@ async function sauvegarderPratique(pratique) {
  */
 function ouvrirWizardV2(modeEdition = false, pratiqueId = null) {
 
-    // #319 Lot 2 (a6) : infos-base n'est plus l'entrée. Le parcours démarre à la
-    // classification (calcul-note-finale). etapeInitiale sert au compteur de
-    // progression (calculerNbEtapes) — voir aussi a7 (écran d'entrée à venir).
-    const etapeInitiale = 'calcul-note-finale';
+    // #319 Lot 2 (a6/a7) : infos-base n'est plus l'entrée. En CRÉATION, le parcours
+    // démarre à l'écran d'entrée à deux portes (entree-pratique). En ÉDITION, on entre
+    // directement à la classification (calcul-note-finale) — pas de choix de modèle au
+    // ré-ouvert d'une pratique existante. etapeInitiale sert aussi de point de départ
+    // au compteur de progression (calculerNbEtapes).
+    const etapeInitiale = modeEdition ? 'calcul-note-finale' : 'entree-pratique';
 
     // Réinitialiser l'état
     wizardState.etapeActuelle = etapeInitiale;
@@ -2421,8 +2619,9 @@ function fermerWizardV2() {
         modal.classList.remove('actif');
     }
 
-    // Réinitialiser l'état
-    wizardState.etapeActuelle = 'calcul-note-finale';
+    // Réinitialiser l'état (ouvrirWizardV2 réécrit etapeActuelle/etapeInitiale selon
+    // le mode ; on réaligne sur l'entrée de création par cohérence).
+    wizardState.etapeActuelle = 'entree-pratique';
     wizardState.historique = [];
     wizardState.reponses = {};
     wizardState.modeEdition = false;

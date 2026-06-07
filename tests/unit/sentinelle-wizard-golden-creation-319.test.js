@@ -141,3 +141,83 @@ describe('#319 Lot 1 — canonicalisation du vocabulaire interne', () => {
         expect(src).not.toMatch(/modeConfig/);
     });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// #319 Lot 2 (a7) — Écran d'entrée à deux portes + adoption d'un modèle par CLONE.
+// La reconstruction depuis les réponses PERDRAIT la config des gabarits (SPE :
+// forfaits/typesTravaux). L'adoption clone donc le gabarit intégral.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const GABARIT_SPE = {
+    id: 'SPE-chimie-contrats', nom: 'Modèle Chimie', description: 'Notation par contrats',
+    type: 'specifications', auteur: 'Gabarit Labo Codex', discipline: 'Chimie', estGabarit: true,
+    pratiques: ['SPE'],
+    configuration: {
+        seuilAcceptable: 75,
+        typesTravaux: [ { id: 1, nom: 'Prise de position' }, { id: 2, nom: 'Test' } ],
+        forfaits: [ { id: 1, lettre: 'A', note: 90, travaux: { 1: 3, 2: 2 } } ]
+    }
+};
+
+function adopter(pratiqueId, extra = {}) {
+    return produire(pratiqueId, {
+        _modeleAdopte: true,
+        _gabaritSource: JSON.parse(JSON.stringify(GABARIT_SPE)),
+        nom: 'Ma copie chimie', prenom: 'Greg', nomAuteur: 'L',
+        ...extra
+    });
+}
+
+describe('#319 Lot 2 (a7) — adoption d\'un modèle = clone fidèle', () => {
+    it('préserve la configuration intégrale du gabarit (forfaits/typesTravaux)', async () => {
+        const obj = await adopter('fixe-clone');
+        expect(obj.configuration).toEqual(GABARIT_SPE.configuration);
+        expect(obj.type).toBe('specifications');
+        expect(obj.pratiques).toEqual(['SPE']);
+    });
+
+    it('attribue un nouvel id, le nom/auteur du récap, et entre en bibliothèque', async () => {
+        const obj = await adopter('fixe-clone-2');
+        expect(obj.id).toBe('fixe-clone-2'); // pratiqueId fixé par produire (sinon genererIdUnique)
+        expect(obj.nom).toBe('Ma copie chimie');
+        expect(obj.auteur).toBe('Greg L');
+        expect(obj.dansBibliotheque).toBe(true);
+    });
+
+    it('le clone n\'est plus marqué comme gabarit/seed', async () => {
+        const obj = await adopter('fixe-clone-3');
+        expect(obj.estGabarit).toBeUndefined();
+        expect(obj.dateAjoutBiblio).toBeUndefined();
+    });
+
+    it('conserve la discipline du gabarit si le récap ne la fournit pas', async () => {
+        const obj = await adopter('fixe-clone-4');
+        expect(obj.discipline).toBe('Chimie');
+    });
+
+    it('le clone n\'aliase pas le gabarit source (copie profonde)', async () => {
+        const source = JSON.parse(JSON.stringify(GABARIT_SPE));
+        const obj = await produire('fixe-clone-5', {
+            _modeleAdopte: true, _gabaritSource: source, nom: 'X', prenom: 'A', nomAuteur: 'B'
+        });
+        obj.configuration.forfaits[0].note = 0; // mutation du clone
+        expect(source.configuration.forfaits[0].note).toBe(90); // source intacte
+    });
+});
+
+describe('#319 Lot 2 (a7) — navigation des deux portes', () => {
+    it('porte « modèle » → choix-modele → récapitulatif', () => {
+        expect(win.obtenirEtapeSuivante('entree-pratique', { porteEntree: 'modele' })).toBe('choix-modele');
+        expect(win.obtenirEtapeSuivante('choix-modele', {})).toBe('recapitulatif');
+    });
+
+    it('porte « décrire » → calcul-note-finale', () => {
+        expect(win.obtenirEtapeSuivante('entree-pratique', { porteEntree: 'decrire' })).toBe('calcul-note-finale');
+    });
+
+    it('compteur d\'étapes de la porte « modèle » = 3 (entrée → choix → récap)', () => {
+        win.wizardState.reponses = { porteEntree: 'modele' };
+        win.wizardState.etapeInitiale = 'entree-pratique';
+        expect(win.calculerNbEtapes()).toBe(3);
+    });
+});
