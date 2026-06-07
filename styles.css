@@ -19558,6 +19558,20 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 }
 .comparateur-recit-plafond { margin: 6px 0 0; font-size: 0.78rem; color: var(--texte-muted, #80a0b0); }
 
+/* Export CSV (C3) : barre d'action sous la matrice. */
+.comparateur-actions { margin-top: 12px; text-align: right; }
+.comparateur-exporter {
+    border: 1px solid var(--bordure-moyenne, rgba(106, 172, 184, 0.35));
+    background: transparent;
+    color: var(--texte-principal, #d0e0e4);
+    border-radius: 8px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    min-height: 36px;
+}
+.comparateur-exporter:hover { background: var(--surface-element, rgba(106, 172, 184, 0.08)); }
+
 @media (max-width: 768px) {
     #comparateur-pratiques-panel {
         left: 16px;

@@ -659,11 +659,15 @@
                         _rendreMatrice() +
                     '</div>' +
                     '<p class="comparateur-garde">' + _esc(LIGNE_GARDE) + '</p>' +
+                    '<div class="comparateur-actions">' +
+                        '<button type="button" class="comparateur-exporter">Exporter en CSV</button>' +
+                    '</div>' +
                 '</div>' +
             '</div>';
         attacherFermeture(panel);
         _attacherSelecteurs(panel);
         _attacherNavigationLignes(panel);
+        _attacherExport(panel);
     }
 
     function attacherFermeture(panel) {
@@ -732,8 +736,68 @@
         fermerComparateurPratiques();
     }
 
+    /* ── Export CSV (C3) — trace de la comparaison ──────────── */
+    // Échappement RFC 4180 + neutralisation d'injection de formule (Excel/Sheets) :
+    // une cellule qui commence par = + - @ est préfixée d'une apostrophe.
+    function _csvCell(v) {
+        var s = (v === null || v === undefined) ? '' : String(v);
+        if (/^[=+\-@]/.test(s)) s = "'" + s;
+        if (/[",\n\r]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+        return s;
+    }
+
+    // Génère le CSV de la comparaison : une ligne par profil-type, une colonne de
+    // note par pratique comparée (réf d'abord). Lecture seule. BOM UTF-8 pour Excel.
+    function _genererCSV() {
+        var d = _donnees();
+        var cols = _colonnes();
+        var entetes = ['Profil', 'DA', 'Niveau atteint', 'Tendance'];
+        cols.forEach(function(c) {
+            entetes.push(_nomPratique(c.id) + (c.ref ? ' (Ta pratique)' : ' (simulation)'));
+        });
+        var lignes = [entetes.map(_csvCell).join(',')];
+        PROFILS.forEach(function(prof) {
+            var na = _niveauAtteint(prof.da, d);
+            var row = [prof.label, prof.da, na ? na.label : '', na ? na.tendance.mot : ''];
+            cols.forEach(function(c) {
+                var p = _note(prof.da, c.id);
+                row.push(p === null ? '' : p);
+            });
+            lignes.push(row.map(_csvCell).join(','));
+        });
+        var BOM = String.fromCharCode(0xFEFF);   // BOM UTF-8 explicite (ouverture Excel/accents)
+        return BOM + lignes.join('\r\n') + '\r\n';
+    }
+
+    function exporterCSV() {
+        var csv = _genererCSV();
+        var nom = (typeof genererNomFichierExport === 'function')
+            ? genererNomFichierExport('comparateur-pratiques', { extension: '.csv', precisionDate: 'minute' })
+            : 'comparateur-pratiques.csv';
+        var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        var url = URL.createObjectURL(blob);
+        var link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', nom);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        if (typeof notifications !== 'undefined' && notifications.succes) {
+            notifications.succes('Export réussi', 'Comparaison exportée en CSV');
+        }
+    }
+
+    function _attacherExport(panel) {
+        var b = panel.querySelector('.comparateur-exporter');
+        if (b) b.addEventListener('click', exporterCSV);
+    }
+
     /* ── API publique (dispatcher data-action de main.js) ─── */
     window.ouvrirComparateurPratiques = ouvrirComparateurPratiques;
     window.fermerComparateurPratiques = fermerComparateurPratiques;
+    // Exposée pour les tests de régression (contenu CSV déterministe).
+    window._comparateurGenererCSV = _genererCSV;
 
 })();
