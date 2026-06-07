@@ -11921,6 +11921,16 @@ label:has(+ textarea:disabled) {
     vertical-align: middle;
 }
 
+/* #319 Lot 2 (a2) — carte « voie rapide », même poids visuel que les options de Q1.
+   Réutilise .wizard-v2-radio-card ; le bouton radio est décoratif (neutralisé). */
+.wizard-v2-radio-card--action input[type="radio"] {
+    pointer-events: none;
+}
+.wizard-v2-radio-card--action:focus-visible {
+    outline: 2px solid var(--accent-primaire);
+    outline-offset: 2px;
+}
+
 /* Carte désactivée */
 .wizard-v2-card-disabled {
     opacity: 0.5;

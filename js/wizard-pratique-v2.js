@@ -107,6 +107,39 @@ const ETAPES_WIZARD = {
         precedent: () => 'entree-pratique'
     },
 
+    // Voie rapide (#319 Lot 2 a2) — atteinte par le lien « Je sais déjà ce que je
+    // veux » sous Q1. Choix DIRECT de famille (réutilise l'id 'calcNoteFinale' comme
+    // sous-questions-guidees) → saut à la branche de configuration. DEN désactivée.
+    // Atteinte hors-graphe : wizardV2VoieRapide n'empile pas Q1 → voie-rapide occupe
+    // la position de calcul-note-finale (compteur #134 cohérent).
+    'voie-rapide': {
+        id: 'voie-rapide',
+        titre: 'Choisis directement ta famille',
+        description: 'Tu sais déjà comment tu notes ? Choisis ta famille de pratique et passe directement à sa configuration.',
+        branche: 'commune',
+        ordre: 2,
+        champs: [
+            {
+                id: 'calcNoteFinale',
+                type: 'radio-cards',
+                required: true,
+                options: [
+                    { value: 'moyenne', label: 'Sommative (SOM)', description: 'Note finale par moyenne pondérée des évaluations.' },
+                    { value: 'niveaux', label: 'PAN – Standards (STD)', description: 'Niveaux de maîtrise (ex. I-D-M-E) convertis en note.' },
+                    { value: 'acceptable', label: 'PAN – Spécifications (SPE)', description: 'Travaux acceptables ou non ; note selon les forfaits réussis.' },
+                    { value: 'denotation', label: 'Dénotation (DEN) — à venir', description: 'Rétroaction qualitative et jugement global. Famille en construction dans Labo Codex.', disabled: true }
+                ]
+            }
+        ],
+        suivant: (reponses) => {
+            if (reponses.calcNoteFinale === 'moyenne') return 'regles-sommative';
+            if (reponses.calcNoteFinale === 'niveaux') return 'approche-evaluation';
+            if (reponses.calcNoteFinale === 'acceptable') return 'nb-evaluations';
+            return null;
+        },
+        precedent: () => 'calcul-note-finale'
+    },
+
     // ─────────────────────────────────────────────────────────────────────────
     // ÉTAPES COMMUNES
     // ─────────────────────────────────────────────────────────────────────────
@@ -177,7 +210,9 @@ const ETAPES_WIZARD = {
                         description: 'Des questions supplémentaires t\'aideront à identifier ta méthode.'
                     }
                 ]
-            }
+            },
+            // Voie rapide (a2) : sortie expert, carte de même poids que les autres options.
+            { id: 'voie-rapide-lien', type: 'lien-action', texte: 'Je sais déjà ce que je veux', description: 'Choisis directement ta famille de pratique (SOM, STD ou SPE) et passe à sa configuration.', action: 'wizardV2VoieRapide' }
         ],
         suivant: (reponses) => {
             if (reponses.calcNoteFinale === 'moyenne') return 'regles-sommative';
@@ -186,7 +221,7 @@ const ETAPES_WIZARD = {
             if (reponses.calcNoteFinale === 'pas-certain') return 'sous-questions-guidees';
             return null;
         },
-        precedent: () => 'infos-base'
+        precedent: () => 'entree-pratique'
     },
 
     'sous-questions-guidees': {
@@ -910,7 +945,7 @@ const ETAPES_WIZARD = {
                     options: [
                         {
                             value: 'sciences',
-                            label: 'Modèle Sciences (recommandé)',
+                            label: 'Modèle Sciences',
                             description: 'Forfaits progressifs avec reprises limitées. Idéal pour les disciplines scientifiques.'
                         },
                         {
@@ -1161,7 +1196,8 @@ function etapeSuivanteV2() {
     sauvegarderReponsesEtape(wizardState.etapeActuelle);
 
     // Auto-déduire le type de pratique après les étapes de classification
-    const etapesClassification = ['calcul-note-finale', 'sous-questions-guidees', 'regles-sommative', 'approche-evaluation'];
+    // ('voie-rapide' a2 : pose calcNoteFinale en direct → même déduction).
+    const etapesClassification = ['calcul-note-finale', 'sous-questions-guidees', 'voie-rapide', 'regles-sommative', 'approche-evaluation'];
     if (etapesClassification.includes(wizardState.etapeActuelle)) {
         const classification = deduireTypePratique(wizardState.reponses);
         wizardState.reponses.typePratique = classification.type;
@@ -1200,6 +1236,17 @@ function etapePrecedenteV2() {
         wizardState.etapeActuelle = precedente;
         afficherEtapeWizardV2(precedente);
     }
+}
+
+/**
+ * Voie rapide (#319 Lot 2 a2) — saut expert depuis le lien sous Q1 vers le choix
+ * direct de famille. On N'EMPILE PAS Q1 (calcul-note-finale) : voie-rapide prend sa
+ * position dans le parcours, donc le retour arrière ramène à l'écran d'entrée et le
+ * compteur d'étapes (#134) reste cohérent. Le novice n'a aucun écran imposé.
+ */
+function wizardV2VoieRapide() {
+    wizardState.etapeActuelle = 'voie-rapide';
+    afficherEtapeWizardV2('voie-rapide');
 }
 
 /**
@@ -1336,10 +1383,37 @@ function genererChamp(champ) {
             return genererChampRow(champ);
         case 'info':
             return genererInfo(champ);
+        case 'lien-action':
+            return genererLienAction(champ);
         default:
             console.warn('[WizardV2] Type de champ inconnu:', champ.type);
             return '';
     }
+}
+
+/**
+ * Génère une carte-action (voie rapide a2), de même poids visuel que les cartes
+ * d'options (demande Grégoire 7 juin). Carte CSP-safe (data-action, pas de handler
+ * inline) ; clic + clavier gérés par le dispatcher de main.js (role="button"/tabindex).
+ * Le bouton radio est DÉCORATIF : hors du groupe 'calcNoteFinale', `aria-hidden` et
+ * neutralisé (`pointer-events:none`) — il aligne la carte sur les autres options sans
+ * la rendre sélectionnable (l'action reste la navigation).
+ */
+function genererLienAction(champ) {
+    const desc = champ.description
+        ? `<div class="wizard-v2-card-description">${echapperHtml(champ.description)}</div>`
+        : '';
+    return `
+        <div class="wizard-v2-champ">
+            <div class="wizard-v2-radio-card wizard-v2-radio-card--action" role="button" tabindex="0" data-action="${champ.action}">
+                <input type="radio" tabindex="-1" aria-hidden="true">
+                <div class="wizard-v2-card-content">
+                    <div class="wizard-v2-card-title">${echapperHtml(champ.texte)}</div>
+                    ${desc}
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 // Préfixe unique pour éviter conflits avec ancien wizard
@@ -2733,6 +2807,7 @@ window.creerPratiqueV2 = creerPratiqueV2;
 window.deduireTypePratique = deduireTypePratique;
 window.wizardV2GererExclusionCheckbox = wizardV2GererExclusionCheckbox;
 window.wizardV2CreerGrilleDemo = wizardV2CreerGrilleDemo;
+window.wizardV2VoieRapide = wizardV2VoieRapide;
 
 // Exposés pour la testabilité (#317) : la relecture d'édition (#132) et le
 // calcul du nombre d'étapes (#134) sont verrouillés par sentinelles. wizardState
