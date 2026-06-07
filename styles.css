@@ -12039,6 +12039,7 @@ label:has(+ textarea:disabled) {
 .wizard-v2-recap-diagnostic--som { --recap-couleur: var(--som-orange); }
 .wizard-v2-recap-diagnostic--std { --recap-couleur: var(--std-bleu); }
 .wizard-v2-recap-diagnostic--spe { --recap-couleur: var(--spe-vert); }
+.wizard-v2-recap-diagnostic--den { --recap-couleur: var(--den-violet); }
 .wizard-v2-recap-diagnostic--indetermine { --recap-couleur: var(--gris-moyen, #888); }
 
 .wizard-v2-recap-diagnostic-intro {
