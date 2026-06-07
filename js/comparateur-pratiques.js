@@ -375,8 +375,7 @@
     function entete(titre) {
         return '<div class="comparateur-header">' +
                     '<div>' +
-                        '<div class="comparateur-surtitre">Aide au choix d’une pratique</div>' +
-                        '<h3 class="comparateur-titre" id="comparateur-titre-texte" tabindex="-1">' + titre + '</h3>' +
+                        '<h2 class="comparateur-titre" id="comparateur-titre-texte" tabindex="-1">' + titre + '</h2>' +
                     '</div>' +
                 '</div>';
     }
@@ -384,7 +383,7 @@
     /* ── Garde démo : invitation à activer la démonstration ── */
     function construireInvitation(panel) {
         panel.innerHTML =
-            '<div class="comparateur-contenu" role="region" aria-labelledby="comparateur-titre-texte">' +
+            '<div class="comparateur-contenu carte" role="region" aria-labelledby="comparateur-titre-texte">' +
                 entete('Comparateur de pratiques') +
                 '<div class="comparateur-corps">' +
                     '<p>Le comparateur s’appuie sur des <strong>profils-types contrastés</strong> ' +
@@ -616,13 +615,13 @@
         var phrase = PHRASES_CONTEXTE[da] || '';
 
         panel.innerHTML =
-            '<div class="comparateur-contenu" role="region" aria-labelledby="comparateur-titre-texte">' +
+            '<div class="comparateur-contenu carte" role="region" aria-labelledby="comparateur-titre-texte">' +
                 '<div class="comparateur-header">' +
                     '<div>' +
                         '<button class="comparateur-retour" type="button">‹ Retour à la comparaison</button>' +
-                        '<h3 class="comparateur-titre" id="comparateur-titre-texte" tabindex="-1">' +
+                        '<h2 class="comparateur-titre" id="comparateur-titre-texte" tabindex="-1">' +
                             _esc(label) + ' <span class="comparateur-fiche-da">· ' + _esc(da) + '</span>' +
-                        '</h3>' +
+                        '</h2>' +
                         (phrase ? '<p class="comparateur-fiche-contexte">' + _esc(phrase) + '</p>' : '') +
                     '</div>' +
                 '</div>' +
@@ -639,7 +638,7 @@
     /* ── Vue comparateur (matrice + sélecteurs) ─────────────── */
     function construireVue(panel) {
         panel.innerHTML =
-            '<div class="comparateur-contenu" role="region" aria-labelledby="comparateur-titre-texte">' +
+            '<div class="comparateur-contenu carte" role="region" aria-labelledby="comparateur-titre-texte">' +
                 entete('Comparateur de pratiques') +
                 '<div class="comparateur-corps">' +
                     '<p class="comparateur-finalite">Des pratiques différentes mesurent des choses ' +
