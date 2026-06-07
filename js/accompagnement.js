@@ -845,7 +845,7 @@ function afficherAideContextuelle(cleAide) {
 
     modal.innerHTML = `
         <div class="primo-popup-header">
-            <span id="aide-ctx-titre" class="primo-popup-titre"><span class="icone-info-aide taille-inline" aria-hidden="true"></span> </span>
+            <span id="aide-ctx-titre" class="primo-popup-titre"><span class="icone-info-aide taille-inline" aria-hidden="true"></span> ${typeof echapperHtml === 'function' ? echapperHtml(aide.titre || '') : (aide.titre || '')}</span>
             <button class="primo-popup-fermer" data-action="fermerAideContextuelle" aria-label="Fermer">×</button>
         </div>
         <div class="primo-popup-body aide-contextuelle-body">
