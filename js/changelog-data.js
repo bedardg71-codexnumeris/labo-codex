@@ -12,6 +12,19 @@
 
     var CHANGELOG = [
         {
+            version: '1.2',
+            couleur: 'vert',
+            titre: 'Comparateur de pratiques et assistant repensé',
+            items: [
+                'Comparateur de pratiques : une nouvelle section du Labo met plusieurs pratiques de notation en regard sur des profils-types — pour voir la maîtrise atteinte derrière chaque note, sans en faire un palmarès. Export CSV.',
+                'Assistant de pratique repensé : partir d’un modèle existant (copié fidèlement) ou décrire sa pratique ; voie rapide pour les familles connues (sommative, standards, spécifications).',
+                'Reprises configurables et garde-fous pédagogiques dans l’assistant : limiter les reprises, alerte au-delà de 15 objectifs.',
+                'Récapitulatif enrichi : un exemple chiffré d’ordre de grandeur, et le rappel que ta pratique active n’est pas modifiée.',
+                'La famille Dénotation est reconnue à l’édition (création à venir).',
+                'Corrections : le titre des fenêtres d’aide est annoncé aux lecteurs d’écran ; icônes de suppression plus lisibles.'
+            ]
+        },
+        {
             version: '1.1',
             couleur: 'vert',
             titre: 'Guides pédagogiques intégrés',
