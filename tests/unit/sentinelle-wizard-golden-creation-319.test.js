@@ -249,3 +249,70 @@ describe('#319 Lot 2 (a2) — voie rapide', () => {
         expect(src).toMatch(/action: 'wizardV2VoieRapide'/);
     });
 });
+
+describe('#319 Lot 3 (a3) — reprises configurables', () => {
+    it('helper champsReprises : select + ligne pédagogique, défaut paramétrable', () => {
+        const champs = win.champsReprises('limite');
+        const select = champs.find(c => c.id === 'reprisesPermises');
+        expect(select.type).toBe('select');
+        expect(select.default).toBe('limite');
+        expect(select.options.map(o => o.value)).toEqual(['illimite', 'limite', 'non']);
+        expect(champs.some(c => c.id === 'infoReprisesPedago')).toBe(true);
+    });
+
+    it('défaut artefacts (portfolio) = Limitées', () => {
+        const champ = win.ETAPES_WIZARD['config-portfolio'].champs.find(c => c.id === 'reprisesPermises');
+        expect(champ.default).toBe('limite');
+    });
+
+    it('Sommative persiste configuration.reprises depuis reprisesPermises', async () => {
+        const obj = await produire('fixe-rep-som', { ...REPONSES.SOM, reprisesPermises: 'limite' });
+        expect(obj.configuration.reprises).toEqual({ permises: true, mode: 'limite' });
+    });
+
+    it('Objectifs persiste configuration.reprises (mode « non » → permises false)', async () => {
+        const obj = await produire('fixe-rep-obj', { ...REPONSES.STD_obj, reprisesPermises: 'non' });
+        expect(obj.configuration.reprises).toEqual({ permises: false, mode: 'non' });
+    });
+
+    it('sans champ reprises, aucune configuration.reprises (golden inchangé)', async () => {
+        const obj = await produire('fixe-rep-vide', REPONSES.SOM);
+        expect(obj.configuration.reprises).toBeUndefined();
+    });
+
+    it('round-trip d\'édition : reprises restaurées depuis configuration.reprises', () => {
+        store = [{ id: 'r1', nom: 'X', type: 'sommative', configuration: { reprises: { permises: true, mode: 'limite' } } }];
+        win.wizardState.reponses = {};
+        win.chargerPratiqueExistante('r1');
+        expect(win.wizardState.reponses.reprisesPermises).toBe('limite');
+    });
+});
+
+describe('#319 Lot 3 (a4) — garde-fou nombre d\'objectifs', () => {
+    const champsObj = (rep) => win.ETAPES_WIZARD['config-objectifs-definition'].getChampsDynamiques(rep);
+
+    it('affiche l\'info non bloquante au-delà de 15 objectifs (variante attention)', () => {
+        const guard = champsObj({ nbObjectifs: 20 }).find(c => c.id === 'infoTropObjectifs');
+        expect(guard).toBeTruthy();
+        expect(guard.variante).toBe('attention');
+    });
+    it('ne l\'affiche pas à 15 ou moins', () => {
+        expect(champsObj({ nbObjectifs: 6 }).some(c => c.id === 'infoTropObjectifs')).toBe(false);
+        expect(champsObj({ nbObjectifs: 15 }).some(c => c.id === 'infoTropObjectifs')).toBe(false);
+    });
+    it('le champ nbObjectifs déclenche un re-rendu live (garde-fou réactif à la saisie)', () => {
+        const champ = champsObj({}).find(c => c.id === 'nbObjectifs');
+        expect(champ.onChange).toBe('wizardV2RafraichirEtapeCourante');
+        expect(typeof win.wizardV2RafraichirEtapeCourante).toBe('function');
+    });
+});
+
+describe('#319 Lot 3 — a11 + purge config-reprises', () => {
+    it('la carte Remplacement nomme la reprise sans pénalité (a11)', () => {
+        const src = readFileSync(path.join(racineProjet, 'js/wizard-pratique-v2.js'), 'utf8');
+        expect(src).toMatch(/reprise sans pénalité/);
+    });
+    it('l\'étape morte config-reprises est purgée', () => {
+        expect(win.ETAPES_WIZARD['config-reprises']).toBeUndefined();
+    });
+});
