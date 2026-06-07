@@ -38,6 +38,10 @@
     // null = pas encore initialisé → défauts calculés à l'ouverture (C1-d).
     var _candidatsSel = null;
 
+    // Vue courante du panneau : 'matrice' (comparaison) ou 'fiche' (profil) — C2-d.
+    var _vue = 'matrice';
+    var _daFiche = null;
+
     // Profils-types étiquetés en dur (§8 de la note de conception) : stables et
     // racontables, pas de détection dynamique. DA du namespace démo (DEMO0xx).
     var PROFILS = [
@@ -61,6 +65,16 @@
     // ni le chiffre le plus élevé ni l'écart ne sont l'enjeu (pluralisme, pas de
     // palmarès). Formulation à valider en terrain.
     var LIGNE_GARDE = 'Il ne s’agit pas d’un palmarès des pratiques de notation.';
+
+    // Phrases de contexte par profil (§9 — contenu VALIDÉ Grégoire 7 juin 2026,
+    // variante A). En dur, stables, racontables ; indexées par DA ; echapperHtml()
+    // à l'affichage. S'affichent dans l'en-tête de la fiche, sous « {profil} · {DA} ».
+    var PHRASES_CONTEXTE = {
+        DEMO010: 'Parcours régulier et soutenu : la maîtrise s’installe tôt et se confirme jusqu’à la fin.',
+        DEMO013: 'Progression régulière, sans accroc marquant : la maîtrise se construit graduellement.',
+        DEMO004: 'Plusieurs remises restent sous les attentes ; la maîtrise demeure fragile en fin de parcours.',
+        DEMO011: 'A raté deux des premières remises, puis a démontré la maîtrise sur les productions suivantes.'
+    };
 
     function estEnDemo() {
         return typeof estEnModeDemo === 'function' && estEnModeDemo();
@@ -283,7 +297,9 @@
         PROFILS.forEach(function(prof) {
             var na = _niveauAtteint(prof.da, d);
             var pRef = _note(prof.da, refId);
-            h += '<tr>';
+            // Ligne activable (clic + clavier) → ouvre la fiche du profil (C2-d.1).
+            h += '<tr class="comparateur-ligne-profil" data-profil-da="' + _esc(prof.da) + '"'
+                + ' role="button" tabindex="0" aria-label="' + _esc('Ouvrir la fiche : ' + prof.label) + '">';
             h += '<th scope="row" class="comparateur-col-profil">' + _esc(prof.label) + '</th>';
 
             if (na) {
@@ -431,6 +447,122 @@
         }
     }
 
+    /* ── Navigation matrice → fiche (C2-d.1) ───────────────── */
+    // Délégation sur l'hôte #comparateur-matrice : il PERSISTE à travers les
+    // re-rendus du tableau (_rerendreMatrice ne change que son innerHTML), donc
+    // un seul attachement suffit (pas de fuite d'écouteurs).
+    function _attacherNavigationLignes(panel) {
+        var hote = panel.querySelector('#comparateur-matrice');
+        if (!hote) return;
+        hote.addEventListener('click', function(e) {
+            var tr = e.target.closest ? e.target.closest('[data-profil-da]') : null;
+            if (tr) _ouvrirFiche(panel, tr.getAttribute('data-profil-da'));
+        });
+        hote.addEventListener('keydown', function(e) {
+            if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+            var tr = e.target.closest ? e.target.closest('[data-profil-da]') : null;
+            if (tr) { e.preventDefault(); _ouvrirFiche(panel, tr.getAttribute('data-profil-da')); }
+        });
+    }
+
+    function _ouvrirFiche(panel, da) {
+        if (!da) return;
+        _vue = 'fiche';
+        _daFiche = da;
+        construireFiche(panel, da);
+        // Accessibilité SPA : focus au titre de la nouvelle vue.
+        var titre = panel.querySelector('.comparateur-titre');
+        if (titre) titre.focus();
+    }
+
+    function _retourMatrice(panel) {
+        _vue = 'matrice';
+        _daFiche = null;
+        construireVue(panel);   // _candidatsSel préservé → état des sélecteurs conservé
+        var titre = panel.querySelector('.comparateur-titre');
+        if (titre) titre.focus();
+    }
+
+    /* ── Bloc « Maîtrise en fin de parcours » (E2bis, C2-d.2) ─ */
+    // Niveau d'échelle correspondant à un code (jamais I/D/M/E en dur — pluralisme).
+    function _libelleNiveau(echelle, code) {
+        if (echelle && echelle.niveaux) {
+            for (var i = 0; i < echelle.niveaux.length; i++) {
+                if (echelle.niveaux[i].code === code) return echelle.niveaux[i];
+            }
+        }
+        return null;
+    }
+
+    // Trajectoire des niveaux datés (libellés d'échelle) + démonstration finale.
+    function _blocMaitrise(da, d) {
+        var titre = '<h4 class="comparateur-fiche-titre">Maîtrise en fin de parcours</h4>';
+        var evals = _evalsProfil(da, d.evaluations);
+        if (!evals.length) {
+            return '<section class="comparateur-fiche-bloc">' + titre
+                + '<p class="comparateur-vide">Aucune évaluation datée pour ce profil.</p></section>';
+        }
+
+        var etapes = evals.map(function(e) {
+            var ech = _echelle(e.echelleId, d.echelles);
+            var niv = _libelleNiveau(ech, e.niveauFinal);
+            var lib = niv ? niv.nom : e.niveauFinal;
+            var desc = (niv && niv.description) ? niv.description : '';
+            var t = desc ? _esc(lib + ' · ' + desc) : _esc(lib);
+            return '<span class="comparateur-traj-etape" title="' + t + '">' + _esc(lib) + '</span>';
+        }).join('<span class="comparateur-traj-fleche" aria-hidden="true">→</span>');
+
+        var finale = '';
+        var na = _niveauAtteint(da, d);
+        if (na) {
+            var aria = na.label + (na.description ? ', ' + na.description : '') + ', ' + na.tendance.mot;
+            var t2 = na.description ? _esc(na.label + ' · ' + na.description) : _esc(na.label);
+            finale = '<p class="comparateur-fiche-finale">'
+                + '<span class="comparateur-fiche-finale-libelle">Démonstration finale :</span> '
+                + '<span class="comparateur-fiche-finale-niveau" title="' + t2 + '" aria-label="' + _esc(aria) + '">'
+                + _esc(na.label)
+                + ' <span class="comparateur-tendance" aria-hidden="true">' + na.tendance.fleche + '</span>'
+                + '</span></p>';
+        }
+
+        return '<section class="comparateur-fiche-bloc">' + titre
+            + '<div class="comparateur-traj">' + etapes + '</div>' + finale + '</section>';
+    }
+
+    /* ── Fiche de profil (en-tête + maîtrise ; récit E2 = C2-d.3) ─ */
+    function construireFiche(panel, da) {
+        var d = _donnees();
+        var prof = null;
+        for (var i = 0; i < PROFILS.length; i++) {
+            if (PROFILS[i].da === da) { prof = PROFILS[i]; break; }
+        }
+        var label = prof ? prof.label : da;
+        var phrase = PHRASES_CONTEXTE[da] || '';
+
+        panel.innerHTML =
+            '<div class="comparateur-contenu" role="dialog" aria-labelledby="comparateur-titre-texte">' +
+                '<div class="comparateur-header">' +
+                    '<div>' +
+                        '<button class="comparateur-retour" type="button">‹ Retour à la comparaison</button>' +
+                        '<h3 class="comparateur-titre" id="comparateur-titre-texte" tabindex="-1">' +
+                            _esc(label) + ' <span class="comparateur-fiche-da">· ' + _esc(da) + '</span>' +
+                        '</h3>' +
+                        (phrase ? '<p class="comparateur-fiche-contexte">' + _esc(phrase) + '</p>' : '') +
+                    '</div>' +
+                    '<button class="comparateur-fermer" title="Fermer le comparateur" aria-label="Fermer le comparateur">' +
+                        '<img src="icons/icon-close-window.svg" alt="" class="modal-close-icon">' +
+                    '</button>' +
+                '</div>' +
+                '<div class="comparateur-corps">' +
+                    _blocMaitrise(da, d) +
+                '</div>' +
+            '</div>';
+
+        attacherFermeture(panel);
+        var r = panel.querySelector('.comparateur-retour');
+        if (r) r.addEventListener('click', function() { _retourMatrice(panel); });
+    }
+
     /* ── Vue comparateur (matrice + sélecteurs) ─────────────── */
     function construireVue(panel) {
         panel.innerHTML =
@@ -449,6 +581,7 @@
             '</div>';
         attacherFermeture(panel);
         _attacherSelecteurs(panel);
+        _attacherNavigationLignes(panel);
     }
 
     function attacherFermeture(panel) {
@@ -483,6 +616,8 @@
         panel.style.display = 'none';
         _ouvert = false;
         _candidatsSel = null;   // rouvrir = défauts recalculés
+        _vue = 'matrice';       // rouvrir = toujours sur la matrice
+        _daFiche = null;
 
         // Restaurer le focus sur l'élément déclencheur.
         if (_focusAvantOuverture && typeof _focusAvantOuverture.focus === 'function'

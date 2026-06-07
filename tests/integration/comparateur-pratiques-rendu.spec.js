@@ -230,6 +230,92 @@ test('C1-b · matrice — parité moteur (réf = panneau profil) + divergence de
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });
 
+test('C2-d.1 · navigation matrice → fiche (en-tête + phrase de contexte + maîtrise) + retour non-destructif', async ({ page }) => {
+    const erreurs = [];
+    brancherErreurs(page, erreurs);
+
+    await page.goto(indexHtml);
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
+
+    const resultat = await page.evaluate(async () => {
+        if (typeof window.activerModeDemo !== 'function') return { erreur: 'activerModeDemo absent' };
+        await window.activerModeDemo();
+
+        const snapshot = () => {
+            const o = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                o[k] = localStorage.getItem(k);
+            }
+            return JSON.stringify(o, Object.keys(o).sort());
+        };
+        const avant = snapshot();
+
+        window.ouvrirComparateurPratiques();
+        const panel = document.getElementById('comparateur-pratiques-panel');
+
+        // Ligne DEMO011 (« Irrégulier ») activable : role=button + tabindex.
+        const tr = panel.querySelector('[data-profil-da="DEMO011"]');
+        const ligneActivable = !!(tr && tr.getAttribute('role') === 'button' && tr.getAttribute('tabindex') === '0');
+
+        // Clic → ouverture de la fiche (délégation sur #comparateur-matrice).
+        if (tr) tr.click();
+
+        const titreEl = panel.querySelector('.comparateur-titre');
+        const titre = titreEl ? titreEl.textContent : '';
+        const phraseEl = panel.querySelector('.comparateur-fiche-contexte');
+        const blocMaitrise = panel.querySelector('.comparateur-fiche-bloc');
+        const nbEtapes = panel.querySelectorAll('.comparateur-traj-etape').length;
+        const finaleEl = panel.querySelector('.comparateur-fiche-finale-niveau');
+        const focusTitre = !!(document.activeElement
+            && document.activeElement.classList
+            && document.activeElement.classList.contains('comparateur-titre'));
+        const aRetour = !!panel.querySelector('.comparateur-retour');
+        // La fiche n'affiche plus la matrice.
+        const ficheSansMatrice = !panel.querySelector('#comparateur-matrice');
+
+        // Retour → la matrice réapparaît (état des sélecteurs préservé).
+        const r = panel.querySelector('.comparateur-retour');
+        if (r) r.click();
+        const retourMatrice = !!panel.querySelector('#comparateur-matrice table.comparateur-matrice-table');
+
+        const apres = snapshot();
+
+        return {
+            ligneActivable,
+            titre,
+            aPhrase: !!phraseEl,
+            phraseTexte: phraseEl ? phraseEl.textContent : '',
+            aBlocMaitrise: !!blocMaitrise,
+            nbEtapes,
+            finaleTexte: finaleEl ? finaleEl.textContent : '',
+            focusTitre,
+            aRetour,
+            ficheSansMatrice,
+            retourMatrice,
+            nonDestructif: avant === apres
+        };
+    });
+
+    expect(resultat.erreur, `Erreur eval : ${resultat.erreur}`).toBeUndefined();
+    expect(resultat.ligneActivable).toBe(true);
+    expect(resultat.titre).toContain('Irrégulier');
+    expect(resultat.titre).toContain('DEMO011');
+    expect(resultat.aPhrase).toBe(true);
+    expect(resultat.phraseTexte).toContain('A raté deux des premières remises'); // §9 variante A
+    expect(resultat.aBlocMaitrise).toBe(true);
+    expect(resultat.nbEtapes).toBeGreaterThanOrEqual(1);          // trajectoire (libellés d'échelle)
+    expect(resultat.finaleTexte).toContain('Maîtrisé');           // terminale DEMO011 = M
+    expect(resultat.focusTitre).toBe(true);                       // focus SPA au titre de la fiche
+    expect(resultat.aRetour).toBe(true);
+    expect(resultat.ficheSansMatrice).toBe(true);
+    expect(resultat.retourMatrice).toBe(true);                    // retour reconstruit la matrice
+    expect(resultat.nonDestructif).toBe(true);                    // aucune écriture (lecture seule)
+
+    expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
+});
+
 test('C1-d · sélection inline des candidates — recalcul + invariant non-destructif (données démo)', async ({ page }) => {
     const erreurs = [];
     brancherErreurs(page, erreurs);
