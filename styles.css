@@ -4431,6 +4431,18 @@ body:not(.mode-clair) .badge-source--demo {
     filter: brightness(0) saturate(100%) invert(39%) sepia(90%) saturate(1700%) hue-rotate(336deg) brightness(95%);
 }
 
+/* #323 — Sur bouton « Supprimer » (fond rouge --btn-supprimer, texte blanc), la
+   corbeille s'aligne sur la couleur du texte : blanc, états normal + survol, deux
+   modes. Sans ça le gris hérité (invert 0.45) — correct sur fond clair — manque de
+   contraste sur le rouge foncé (vise WCAG AA ≥ 3:1 pour éléments graphiques). Le
+   survol par défaut vire au rouge vif, illisible sur le rouge du bouton : neutralisé. */
+.btn-supprimer .btn-delete-icon,
+.btn-supprimer:hover > .btn-delete-icon,
+.mode-clair .btn-supprimer .btn-delete-icon,
+.mode-clair .btn-supprimer:hover > .btn-delete-icon {
+    filter: brightness(0) invert(1);
+}
+
 .modal-titre {
     margin: 0 0 20px 0;
     color: var(--accent-primaire);
