@@ -11904,6 +11904,23 @@ label:has(+ textarea:disabled) {
     line-height: 1.4;
 }
 
+/* #319 Lot 2 (a7) — badge famille (code court + discipline) dans la liste
+   « Partir d'un modèle ». Chip neutre : la sémantique chromatique des familles
+   (SOM/STD/SPE) est décorative et hors périmètre ici. Variables des deux modes. */
+.wizard-v2-modele-famille {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    color: var(--gris-moyen);
+    background: var(--gris-tres-clair);
+    border: 1px solid var(--bordure-moyenne);
+    vertical-align: middle;
+}
+
 /* Carte désactivée */
 .wizard-v2-card-disabled {
     opacity: 0.5;
