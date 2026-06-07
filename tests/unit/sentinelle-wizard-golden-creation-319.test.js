@@ -40,7 +40,9 @@ const globaux = {
     db, cle: (k) => k,
     notifications: { erreur: () => {}, succes: () => {} },
     normaliserIdPratique: (t) => normMap[t] || t,
-    genererIdUnique: () => 'id-genere'
+    genererIdUnique: () => 'id-genere',
+    // Rendu (a2) : wizardV2VoieRapide déclenche afficherEtapeWizardV2 → genererRadioCards.
+    echapperHtml: (s) => String(s == null ? '' : s)
 };
 const win = chargerScript('js/wizard-pratique-v2.js', globaux);
 
@@ -219,5 +221,31 @@ describe('#319 Lot 2 (a7) — navigation des deux portes', () => {
         win.wizardState.reponses = { porteEntree: 'modele' };
         win.wizardState.etapeInitiale = 'entree-pratique';
         expect(win.calculerNbEtapes()).toBe(3);
+    });
+});
+
+describe('#319 Lot 2 (a2) — voie rapide', () => {
+    it('route directement vers la branche de configuration selon la famille', () => {
+        expect(win.obtenirEtapeSuivante('voie-rapide', { calcNoteFinale: 'moyenne' })).toBe('regles-sommative');
+        expect(win.obtenirEtapeSuivante('voie-rapide', { calcNoteFinale: 'niveaux' })).toBe('approche-evaluation');
+        expect(win.obtenirEtapeSuivante('voie-rapide', { calcNoteFinale: 'acceptable' })).toBe('nb-evaluations');
+    });
+
+    it('DEN n\'est pas un parcours créable (pas de route)', () => {
+        expect(win.obtenirEtapeSuivante('voie-rapide', { calcNoteFinale: 'denotation' })).toBeNull();
+    });
+
+    it('wizardV2VoieRapide n\'empile pas Q1 — voie-rapide prend sa position (compteur cohérent)', () => {
+        win.wizardState.historique = ['entree-pratique'];
+        win.wizardState.etapeActuelle = 'calcul-note-finale';
+        win.wizardV2VoieRapide();
+        expect(win.wizardState.etapeActuelle).toBe('voie-rapide');
+        expect(win.wizardState.historique).toEqual(['entree-pratique']);
+    });
+
+    it('le lien-action de voie rapide est câblé sous Q1 (CSP-safe, data-action)', () => {
+        const src = readFileSync(path.join(racineProjet, 'js/wizard-pratique-v2.js'), 'utf8');
+        expect(src).toMatch(/data-action="\$\{champ\.action\}"/);
+        expect(src).toMatch(/action: 'wizardV2VoieRapide'/);
     });
 });
