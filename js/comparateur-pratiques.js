@@ -529,7 +529,88 @@
             + '<div class="comparateur-traj">' + etapes + '</div>' + finale + '</section>';
     }
 
-    /* ── Fiche de profil (en-tête + maîtrise ; récit E2 = C2-d.3) ─ */
+    /* ── Bloc « Ce que chaque pratique retient » (récit E2, C2-d.3) ─ */
+    // Échelle de référence du profil pour traduire les niveaux (codes bruts) du
+    // récit en libellés. Même logique que _niveauAtteint (terminale, sinon dernière
+    // éval datée). Les profils démo ont une échelle homogène ; repli = code brut.
+    function _echelleProfil(da, d) {
+        var evals = _evalsProfil(da, d.evaluations);
+        if (!evals.length) return null;
+        var terminale = null;
+        for (var i = 0; i < d.productions.length; i++) {
+            if (d.productions[i].type === 'terminale') { terminale = d.productions[i]; break; }
+        }
+        var evalFin = null;
+        if (terminale) {
+            var fins = evals.filter(function(e) { return e.productionId === terminale.id; });
+            evalFin = fins.length ? fins[fins.length - 1] : null;
+        }
+        if (!evalFin) evalFin = evals[evals.length - 1];
+        return _echelle(evalFin.echelleId, d.echelles);
+    }
+
+    // Une carte par pratique (référence d'abord) consommant le contrat §4 via
+    // simulerIndices().recit (aiguillage unifié C2-d.0 — pas de ré-aiguillage ici).
+    function _carteRecit(da, c, ech) {
+        var recit = null;
+        if (typeof simulerIndices === 'function') {
+            var r = simulerIndices(da, c.id);
+            recit = r ? r.recit : null;
+        }
+        var enTete = '<div class="comparateur-recit-entete">'
+            + _badge(c.id) + ' <span class="comparateur-col-nom">' + _esc(_nomPratique(c.id)) + '</span>'
+            + '<span class="comparateur-col-tag">' + (c.ref ? 'Ta pratique' : 'simulation') + '</span>'
+            + '</div>';
+        var classe = 'comparateur-recit-carte' + (c.ref ? ' comparateur-recit-carte--ref' : '');
+
+        if (!recit || !recit.resultats || !recit.resultats.length) {
+            return '<div class="' + classe + '">' + enTete
+                + '<p class="comparateur-vide">Récit indisponible pour cette pratique.</p></div>';
+        }
+
+        var lignes = recit.resultats.map(function(res) {
+            var niveauHtml = '';
+            if (res.niveau) {
+                var niv = _libelleNiveau(ech, res.niveau);
+                var lib = niv ? niv.nom : res.niveau;
+                var t = (niv && niv.description) ? _esc(lib + ' · ' + niv.description) : _esc(lib);
+                niveauHtml = '<span class="comparateur-recit-niveau" title="' + t + '">' + _esc(lib) + '</span>';
+            }
+            var noteHtml = (res.note !== null && res.note !== undefined)
+                ? '<span class="comparateur-recit-note">' + _esc(res.note) + '</span>' : '';
+            return '<li class="comparateur-recit-ligne comparateur-recit--' + _esc(res.sort) + '">'
+                + '<span class="comparateur-recit-label">' + _esc(res.label) + '</span>'
+                + niveauHtml + noteHtml
+                + '<span class="comparateur-recit-detail">' + _esc(res.detail) + '</span>'
+                + '</li>';
+        }).join('');
+
+        var synth = recit.synthese || {};
+        var noteFin = (synth.noteFinale !== null && synth.noteFinale !== undefined)
+            ? Math.round(synth.noteFinale) : null;
+        var synthHtml = '<div class="comparateur-recit-synthese">'
+            + (synth.formuleTexte ? '<span class="comparateur-recit-formule">' + _esc(synth.formuleTexte) + '</span>' : '')
+            + (noteFin !== null ? '<span class="comparateur-recit-notefinale">' + noteFin + '</span>' : '')
+            + '</div>';
+        var plaf = synth.plafonnement
+            ? '<p class="comparateur-recit-plafond">Note plafonnée (conformité).</p>' : '';
+
+        return '<div class="' + classe + '">' + enTete
+            + '<ul class="comparateur-recit-liste">' + lignes + '</ul>'
+            + synthHtml + plaf + '</div>';
+    }
+
+    function _blocRecit(da, d) {
+        var titre = '<h4 class="comparateur-fiche-titre">Ce que chaque pratique retient</h4>';
+        var ech = _echelleProfil(da, d);
+        var cartes = _colonnes().map(function(c) { return _carteRecit(da, c, ech); }).join('');
+        return '<section class="comparateur-fiche-bloc">' + titre
+            + '<div class="comparateur-recit-cartes">' + cartes + '</div>'
+            + '<p class="comparateur-garde">' + _esc(LIGNE_GARDE) + '</p>'
+            + '</section>';
+    }
+
+    /* ── Fiche de profil (en-tête + maîtrise + récit E2) ────── */
     function construireFiche(panel, da) {
         var d = _donnees();
         var prof = null;
@@ -555,6 +636,7 @@
                 '</div>' +
                 '<div class="comparateur-corps">' +
                     _blocMaitrise(da, d) +
+                    _blocRecit(da, d) +
                 '</div>' +
             '</div>';
 
