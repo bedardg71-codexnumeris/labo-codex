@@ -105,6 +105,107 @@ class PratiqueSommative {
     }
 
     /**
+     * C2-b (Comparateur, fiche de profil) — RÉCIT DE CALCUL SOM, traçabilité ADDITIVE.
+     *
+     * Produit l'objet normalisé `RecitCalcul` (contrat NOTE-CONCEPTION-C2 §4) qui
+     * décrit le « sort » de chaque résultat : en sommative, chaque évaluation valide
+     * est COMPTÉE UNE FOIS, à son poids ; les remplacées par reprise sont exclues de
+     * la moyenne (nommées tout de même, pour l'honnêteté du récit).
+     *
+     * Orientation A (SSOT, additif) : la note finale du récit vient DIRECTEMENT de
+     * `calculerPerformance` (aucun recalcul parallèle) ; on ne reproduit la boucle
+     * de pondération que pour exprimer le poids effectif PAR résultat. `calculerPerformance`
+     * reste inchangée → la note ne bouge pas (sentinelle de parité C2-b).
+     *
+     * Neutralité (continuité C1) : `niveau` reste un CODE BRUT, traduit par l'échelle
+     * à la vue. Aucun littéral I/D/M/E ici.
+     *
+     * @param {string} da - Numéro de dossier d'admission
+     * @returns {Object|null} RecitCalcul §4, ou null si non calculable
+     */
+    decrireCalcul(da) {
+        if (!da || da.length !== 7) {
+            return null;
+        }
+
+        const evaluations = this._lireEvaluations();
+        const productions = this._lireProductions();
+
+        const titreProd = (pid) => {
+            const p = productions.find(pr => pr.id === pid);
+            return p?.titre || p?.activiteApprentissage || p?.description || pid;
+        };
+        // MÊME règle que calculerPerformance : pondération de la production, défaut 1.
+        const pondProd = (pid) => {
+            const p = productions.find(pr => pr.id === pid);
+            return p?.ponderation || 1;
+        };
+
+        // MÊMES critères de validité que calculerPerformance (garantit la parité).
+        const valides = evaluations.filter(e =>
+            e.etudiantDA === da &&
+            !e.remplaceeParId &&
+            e.noteFinale !== null &&
+            e.noteFinale !== undefined
+        );
+
+        if (valides.length === 0) {
+            return null;
+        }
+
+        // Poids effectif normalisé, pour l'affichage PAR résultat. La note finale,
+        // elle, vient de calculerPerformance (SSOT) — pas d'un recalcul parallèle.
+        const pondTotal = valides.reduce((somme, e) => somme + pondProd(e.productionId), 0);
+        const poidsPct = (pid) => pondTotal > 0 ? (pondProd(pid) / pondTotal * 100) : 0;
+
+        const parDate = (a, b) =>
+            new Date(a.dateEvaluation || a.dateCreation || 0) - new Date(b.dateEvaluation || b.dateCreation || 0);
+
+        const resultats = [];
+
+        // Comptées : chaque évaluation valide, une fois, à son poids.
+        valides.slice().sort(parDate).forEach(e => {
+            resultats.push({
+                label: titreProd(e.productionId),
+                date: e.dateEvaluation || null,
+                niveau: e.niveauFinal || null,   // code BRUT — traduit par l'échelle à la vue
+                note: (e.noteFinale ?? null),
+                sort: 'compte',
+                detail: 'comptée une fois · poids ' + poidsPct(e.productionId).toFixed(0) + ' %'
+            });
+        });
+
+        // Remplacées par reprise : exclues de la moyenne (parité), nommées pour l'honnêteté.
+        evaluations
+            .filter(e => e.etudiantDA === da && e.remplaceeParId)
+            .slice().sort(parDate)
+            .forEach(e => {
+                resultats.push({
+                    label: titreProd(e.productionId),
+                    date: e.dateEvaluation || null,
+                    niveau: e.niveauFinal || null,
+                    note: (e.noteFinale ?? null),
+                    sort: 'remplace',
+                    detail: 'remplacée par une reprise · exclue de la moyenne'
+                });
+            });
+
+        const indiceP = this.calculerPerformance(da);   // SSOT — la note ne bouge pas
+        const noteFinale = (indiceP === null || indiceP === undefined) ? null : indiceP * 100;
+
+        return {
+            famille: this.obtenirCode(),     // 'SOM' (registre, source unique)
+            pratiqueNom: this.obtenirNom(),
+            resultats: resultats,
+            synthese: {
+                formuleTexte: 'moyenne pondérée de ' + valides.length + ' évaluation' + (valides.length > 1 ? 's' : ''),
+                noteFinale: noteFinale,
+                plafonnement: null               // la sommative ne plafonne pas
+            }
+        };
+    }
+
+    /**
      * Calcule la performance HISTORIQUE jusqu'à une date spécifique (pour snapshots)
      * Applique la logique Sommative avec filtrage temporel
      *
