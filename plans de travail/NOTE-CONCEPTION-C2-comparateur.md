@@ -1,7 +1,11 @@
 # Note de conception — Comparateur de pratiques, lot C2 (fiche de profil)
 
-> **Statut** : conception en cours, **orientation validée avec Grégoire le 6 juin 2026** (option A — étendre le moteur, additif + découpage par famille). **Aucun code applicatif écrit.**
-> Préalable : C0 livré (seed démo v20.8) + C1 livré et poussé (`origin/main` = `cdd61ecb`).
+> **Statut** : **moteur de traçabilité COMPLET (C2-a/b/c livrés et poussés)** ; design C2-d acté le 7 juin 2026, **code C2-d à venir**. Orientation A validée le 6 juin (étendre le moteur, additif + découpage par famille).
+> - **C2-a** (STD, `recit` dans `calculerDetailsNoteFinale`) — livré, `278b95f7`.
+> - **C2-b** (SOM, `PratiqueSommative.decrireCalcul`) — livré, `1e5778a1` (7 juin).
+> - **C2-c** (SPE, `PratiquePanSpecifications.decrireCalcul`) — livré, `71b7119a` (7 juin).
+> Les 3 familles produisent le contrat §4. 230 Vitest + 32 Playwright verts. Pas de bump.
+> Préalable : C0 livré (seed démo v20.8) + C1 livré et poussé.
 > Cadre : `SPEC_comparateur_pratiques.md` §3.2 ; finalité §1 bis ; skill `pratiques_notation`.
 > Les emplacements `fichier:ligne` datent du 6 juin — **revérifier au moment de coder**.
 
@@ -202,4 +206,33 @@ Chaque sous-lot : `node --check`, `cd tests && npm test`, validation terrain Mac
 3. **SPE sur la démo** : la pratique SPE configurable calcule des paliers depuis C0 (délégation `PanSpecifications`, commit `47ce3a5f`) — confirmer que `decrireCalcul` lit bien la config configurable, pas un défaut.
 4. **Navigation** : sous-vue dans le même panneau vs panneau pair — trancher au code selon la simplicité de gestion du focus (préférence : même panneau, re-rendu).
 5. **Phrases de contexte** : à fournir par Grégoire (§9).
-6. **Ordre des blocs** dans la fiche (maîtrise avant récit) — à confirmer en terrain : c'est un choix de finalité, susceptible d'ajustement.
+6. **Ordre des blocs** dans la fiche — **TRANCHÉ (7 juin 2026) : maîtrise d'abord, puis récit.** Motif de finalité : la maîtrise est l'enjeu, les notes sont mises *en regard* ensuite (sortir du paradigme du cumul). Cf. §14.
+
+---
+
+## 14. Plan d'exécution C2-d (acté 7 juin 2026)
+
+Préalable établi (lecture du code, 7 juin) : `simulerIndices(da, pratiqueId)` (`portfolio.js:714`)
+est **déjà l'unique point d'aiguillage** (STD → `calculerDetailsNoteFinale`, sinon
+`calculerPerformance`) et conserve `details = d`. Pour STD, `details.recit` (C2-a) y est
+donc déjà disponible. La fiche ne doit PAS ré-aiguiller elle-même (sinon 3ᵉ chemin de
+résolution = anti-pattern « deux systèmes de calcul »).
+
+**Décision d'architecture (reco actée)** : étendre `simulerIndices` d'un champ `recit`
+unifié — STD `recit = details.recit` ; SOM/SPE `recit = instance.decrireCalcul(da)`. La
+fiche lit alors `simulerIndices(da, id).recit` quelle que soit la famille. Additif,
+lecture seule, verrouillé par sentinelle.
+
+| Sous-lot | Contenu | Nature | Test |
+|---|---|---|---|
+| **C2-d.0** | Champ `recit` unifié dans `simulerIndices` (aiguillage STD/SOM/SPE) | moteur (additif) | sentinelle : `recit` présent pour les 3 familles, parité `noteFinale` |
+| **C2-d.1** | Navigation matrice↔fiche : `<tr>` activable (clic + clavier Entrée/Espace, ≥44 px), ouverture = re-rendu dans `#comparateur-pratiques-panel`, focus au titre, retour 1 clic (état sélecteurs préservé) | UI | rendu DOM + invariant non-destructif |
+| **C2-d.2** | Bloc **MAÎTRISE EN FIN DE PARCOURS** (en premier) : trajectoire via `_evalsProfil` + niveau de fin via `_niveauAtteint` (libellés d'échelle, SOLO au survol/focus, jamais I/D/M/E) | UI | rendu DOM |
+| **C2-d.3** | Bloc **CE QUE CHAQUE PRATIQUE RETIENT** : une carte par pratique (réf « Ta pratique » d'abord), consommant le contrat §4 via `simulerIndices().recit` ; sort + detail en clair, `niveau` traduit par l'échelle (null pour SPE → pas de pastille), synthèse discrète en pied + ligne de garde | UI | rendu DOM (3 familles) |
+| **C2-d.4** | Phrases de contexte (§9, **contenu Grégoire**) en en-tête + intégration finale | contenu + UI | rendu DOM |
+
+Ordre fiche acté : **en-tête (profil + phrase) → MAÎTRISE → RÉCIT → ligne de garde**.
+Chaque sous-lot : `node --check`, `cd tests && npm test`, validation terrain Mac + iPad /
+sombre + clair. Pas de bump (le `minor` reste réservé à C5). `echapperHtml()` sur tout label.
+
+**En attente de Grégoire avant C2-d.4** : les 4 phrases de contexte (§9).

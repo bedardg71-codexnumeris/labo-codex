@@ -741,7 +741,19 @@ function simulerIndices(da, pratiqueId) {
     const C = C_decimal !== null && C_decimal !== undefined ? Math.round(C_decimal * 100) : 0;
     const P = P_decimal !== null && P_decimal !== undefined ? Math.round(P_decimal * 100) : 0;
 
-    return { pratique: pratiqueId, C, P, noteFinale, details };
+    // C2-d.0 — récit de calcul UNIFIÉ (contrat NOTE-CONCEPTION-C2 §4). Même
+    // aiguillage que la note ci-dessus : STD via calculerDetailsNoteFinale.recit
+    // (C2-a) ; SOM/SPE via instance.decrireCalcul (C2-b/C2-c). Additif, lecture
+    // seule — la fiche de profil (C2-d) lit simulerIndices(da, id).recit sans
+    // ré-aiguiller (SSOT, évite un 3ᵉ chemin de résolution). null si indisponible.
+    let recit = null;
+    if (details && details.recit) {
+        recit = details.recit;
+    } else if (typeof pratique.decrireCalcul === 'function') {
+        recit = pratique.decrireCalcul(da);
+    }
+
+    return { pratique: pratiqueId, C, P, noteFinale, details, recit };
 }
 
 /**
