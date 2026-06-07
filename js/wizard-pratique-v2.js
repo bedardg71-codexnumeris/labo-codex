@@ -1791,6 +1791,64 @@ function genererInfo(champ) {
     `;
 }
 
+// ─── #319 Lot 4 (a8) — exemple de conséquence « ordre de grandeur » ───
+// Décision Grégoire 7 juin 2026 : le chiffre reflète le TYPE de notation, PAS les
+// réglages fins (artefacts retenus, seuils…). On simule la FAMILLE générique (id de
+// pratique enregistré par défaut, résoluble par obtenirPratiqueParId SANS toucher
+// aux données) sur deux profils démo contrastés. Lecture seule absolue : simulerIndices
+// (#307) ne fait que lire (aucun write indicesCP). Hors démo : repli qualitatif, jamais
+// de chiffre fabriqué. La pratique simulée ≠ la pratique active de l'utilisateur.
+const ID_SIMULATION_PAR_FAMILLE = {
+    'sommative': 'sommative',
+    'standards': 'standards',
+    'specifications': 'specifications'
+};
+
+const REPLI_EXEMPLE_PAR_FAMILLE = {
+    'sommative': 'La note finale serait une moyenne pondérée : chaque évaluation compte une fois, selon son poids.',
+    'standards': 'La note refléterait le niveau de maîtrise démontré ; une reprise réussie remplace un premier essai.',
+    'specifications': 'La note dépendrait du nombre de spécifications réussies — un forfait atteint, un palier de note.'
+};
+
+/**
+ * Calcule l'exemple « ordre de grandeur » (a8). Disponible en mode démo seulement
+ * (les profils-types DEMO0xx vivent dans le namespace démo). Lecture seule.
+ * @param {string} famille - classification.type (sommative|standards|specifications|denotation)
+ * @returns {{disponible:boolean, idSimulation?:string, fortP?:number, difficulteP?:number}}
+ */
+function calculerExempleConsequence(famille) {
+    const idSim = ID_SIMULATION_PAR_FAMILLE[famille];
+    if (!idSim) return { disponible: false };
+    if (typeof estEnModeDemo !== 'function' || !estEnModeDemo()) return { disponible: false };
+    if (typeof simulerIndices !== 'function') return { disponible: false };
+    const fort = simulerIndices('DEMO010', idSim);      // profil Fort (§8 note conception)
+    const diff = simulerIndices('DEMO004', idSim);      // profil En difficulté
+    if (!fort || !diff) return { disponible: false };
+    return { disponible: true, idSimulation: idSim, fortP: fort.P, difficulteP: diff.P };
+}
+
+/**
+ * Section « Ce que ça donnerait » (a8) : exemple chiffré en démo, repli qualitatif
+ * hors démo. Chaîne vide si la famille n'est pas simulable (DEN/indéterminé).
+ */
+function genererSectionExemple(famille) {
+    const ex = calculerExempleConsequence(famille);
+    let html = '<div class="wizard-v2-recap-section">';
+    html += '<h4>Ce que ça donnerait</h4>';
+    if (ex.disponible) {
+        html += '<p class="wizard-v2-recap-aide">Avec une pratique de ce type, sur les profils-types de la démonstration :</p>';
+        html += `<p>Un profil <strong>fort</strong> : <strong>~${ex.fortP} %</strong></p>`;
+        html += `<p>Un profil <strong>en difficulté</strong> : <strong>~${ex.difficulteP} %</strong></p>`;
+        html += '<p class="wizard-v2-recap-aide">Ordre de grandeur lié au <em>type</em> de notation, pas à tes réglages fins.</p>';
+    } else {
+        const repli = REPLI_EXEMPLE_PAR_FAMILLE[famille];
+        if (!repli) return '';   // famille non simulable (DEN/indéterminé) : pas de section
+        html += `<p class="wizard-v2-recap-aide">${repli}</p>`;
+    }
+    html += '</div>';
+    return html;
+}
+
 /**
  * Génère le récapitulatif
  */
@@ -1946,6 +2004,16 @@ function genererRecapitulatif() {
             html += `<p><strong>Grille\u00a0:</strong> <em>À configurer plus tard</em></p>`;
         }
         html += '</div>';
+    }
+
+    // ─── #319 Lot 4 — exemple de conséquence (a8) + réassurance non-destructive (a9) ───
+    html += genererSectionExemple(classification.type);
+    if (!wizardState.modeEdition) {
+        // a9 — création seulement : la garantie existe dans sauvegarderPratique,
+        // on la rend visible (encadré info bleu réutilisé, design system).
+        html += '<div class="wizard-v2-info-block">'
+              + '<span>Ta pratique active n\'est pas modifiée : celle-ci s\'ajoute à ta bibliothèque.</span>'
+              + '</div>';
     }
 
     html += '</div>';
@@ -2839,5 +2907,7 @@ window.wizardState = wizardState;
 // #319 Lot 3 : testabilité des configs de champs (défaut reprises a3, garde-fou a4).
 window.ETAPES_WIZARD = ETAPES_WIZARD;
 window.champsReprises = champsReprises;
+window.calculerExempleConsequence = calculerExempleConsequence; // #319 Lot 4 a8 (testabilité)
+window.genererRecapitulatif = genererRecapitulatif;             // #319 Lot 4 a8/a9 (testabilité du rendu)
 
 })();
