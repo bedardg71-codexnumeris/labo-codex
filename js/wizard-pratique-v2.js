@@ -39,7 +39,10 @@ const wizardState = {
 const TYPE_BADGES = {
     'sommative': { code: 'SOM', classe: 'som', label: 'Sommative', description: 'Ta note finale est calculée par une moyenne pondérée des évaluations. C\'est la méthode traditionnelle, largement utilisée.' },
     'standards': { code: 'STD', classe: 'std', label: 'PAN – Standards', description: 'Tu évalues par niveaux de maîtrise (ex. : I-D-M-E). La note est construite à partir de la démonstration de compétences, pas d\'une simple moyenne.' },
-    'specifications': { code: 'SPE', classe: 'spe', label: 'PAN – Spécifications', description: 'Chaque travail est jugé acceptable ou non. La note finale dépend du nombre de spécifications réussies (forfaits).' }
+    'specifications': { code: 'SPE', classe: 'spe', label: 'PAN – Spécifications', description: 'Chaque travail est jugé acceptable ou non. La note finale dépend du nombre de spécifications réussies (forfaits).' },
+    // #319 Lot 5 (#318) : DEN reconnue à l'édition (code/couleur du registre canonique,
+    // --den-violet). Parcours de CRÉATION reporté #318 — pas de carte Q1 pour DEN.
+    'denotation': { code: 'DEN', classe: 'den', label: 'PAN – Dénotation', description: 'Rétroaction qualitative et jugement global — famille en construction dans Labo Codex.' }
 };
 
 // ============================================================================
@@ -2303,6 +2306,13 @@ function deduireTypePratique(reponses) {
         return { type: 'specifications', variante: 'bundles', regles: [], confiance: 1.0 };
     }
 
+    // #319 Lot 5 (#318) : DEN reconnue à l'édition seulement (calcNoteFinale posé par
+    // chargerPratiqueExistante). Aucune carte Q1 ne produit 'jugement' — la création
+    // DEN est reportée (#318). Variante null : famille en construction, pas de modèle.
+    if (q1 === 'jugement') {
+        return { type: 'denotation', variante: null, regles: [], confiance: 1.0 };
+    }
+
     return { type: null, variante: null, regles: [], confiance: 0 };
 }
 
@@ -2808,7 +2818,8 @@ function chargerPratiqueExistante(pratiqueId) {
     const calcNoteFinaleMap = {
         'sommative': 'moyenne',
         'standards': 'niveaux',
-        'specifications': 'acceptable'
+        'specifications': 'acceptable',
+        'denotation': 'jugement'   // #319 Lot 5 : sans ça, une DEN retombait sur 'moyenne' → badge SOM
     };
 
     wizardState.reponses = {
