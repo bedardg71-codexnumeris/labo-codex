@@ -21,27 +21,31 @@
     const CLE_NE_PLUS_RAPPELER = 'backupNePlusRappeler';
 
     /**
-     * Vérifie si l'utilisateur possède des données réelles.
-     * Un utilisateur vierge (fraîche install, aucun groupe-cours) n'a rien à
-     * sauvegarder — pas de raison de lui proposer un export.
+     * Vérifie si l'utilisateur possède de VRAIES données à protéger.
+     *
+     * Retour terrain (8 juin 2026) : un simple groupe-cours configuré ne justifie
+     * pas le rappel — « avoir monté un contexte » ≠ « avoir des données à sauvegarder ».
+     * Le rappel se déclenche désormais sur du travail d'évaluation RÉEL : des
+     * évaluations enregistrées, ou des travaux d'élèves importés. Jamais en mode démo
+     * (rien de réel à perdre).
      * @returns {boolean}
      */
     function utilisateurADesDonnees() {
         try {
             if (typeof db === 'undefined') return false;
-            // Groupe-cours actif = utilisateur a configuré son contexte
-            const gcActif = db.getSync('groupeCoursActif', null);
-            if (gcActif) return true;
-            // Liste de groupes-cours non vide dans le trimestre actif
-            if (typeof window.cle === 'function') {
-                const gcList = db.getSync(window.cle('groupesCours'), []);
-                if (Array.isArray(gcList) && gcList.length > 0) return true;
-            }
-            // Liste globale de trimestres non vide (autres que le trimestre démo)
-            const trimestres = db.getSync('trimestres', []);
-            if (Array.isArray(trimestres) && trimestres.some(t => t && t.id !== 'demo')) {
-                return true;
-            }
+
+            // Pas de rappel en démonstration : aucune donnée réelle en jeu.
+            if (db.getSync('demo-actif', null) === 'true') return false;
+
+            if (typeof window.cle !== 'function') return false;
+
+            // Travail d'évaluation saisi par l'enseignant = données réellement à protéger.
+            const evals = db.getSync(window.cle('evaluationsSauvegardees'), []);
+            if (Array.isArray(evals) && evals.length > 0) return true;
+
+            // Travaux d'élèves importés (fichiers) — aussi des données réelles.
+            const travaux = db.getSync(window.cle('fichiersTravaux'), []);
+            if (Array.isArray(travaux) && travaux.length > 0) return true;
         } catch (e) { /* storage inaccessible */ }
         return false;
     }
@@ -260,7 +264,9 @@
         desactiverRappels: desactiverRappels,
         allerVersExport: allerVersExport,
         gererChoixRappel: gererChoixRappel,
-        fermerModal: fermerModal
+        fermerModal: fermerModal,
+        // Exposé pour la sentinelle du seuil « vraies données » (retour terrain 8 juin).
+        utilisateurADesDonnees: utilisateurADesDonnees
     };
 
     // Initialiser automatiquement
