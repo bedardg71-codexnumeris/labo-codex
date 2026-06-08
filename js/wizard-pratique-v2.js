@@ -119,11 +119,17 @@ function _infererFamilleComportementale(reponses) {
  * départage si les signaux divergent encore (jamais d'impasse, jamais « nomme ta méthode »).
  */
 function _etapeApresInference(reponses) {
+    // Tant que les DEUX gestes ne sont pas répondus, fin de traversée (renvoie null,
+    // comme les autres étapes sur réponse absente). Sans ce garde, le compteur d'étapes
+    // (calculerNbEtapes, traversée du graphe) bouclait : signaux absents → famille nulle
+    // → 'departage-pratique', dont le suivant rebouclait sur lui-même jusqu'au plafond
+    // (≈ 40 points parasites en tête de carte). Bug d'affichage 1.3.0.
+    if (!reponses.uniteCorrection || !reponses.sortReprise) return null;
     const cls = deduireTypePratique(reponses);
     if (cls.type === 'sommative') return 'regles-sommative';
     if (cls.type === 'standards') return 'approche-evaluation';
     if (cls.type === 'specifications') return 'nb-evaluations';
-    return 'departage-pratique';
+    return 'departage-pratique'; // les deux signaux divergent → 3e question
 }
 
 /**
@@ -411,7 +417,9 @@ const ETAPES_WIZARD = {
                 ]
             }
         ],
-        suivant: (reponses) => _etapeApresInference(reponses),
+        // Garde anti-auto-boucle : ne route qu'une fois le départage répondu (sinon
+        // null = fin de traversée, jamais un retour sur soi qui sature le compteur).
+        suivant: (reponses) => reponses.departagePratique ? _etapeApresInference(reponses) : null,
         precedent: () => 'sous-questions-guidees'
     },
 
