@@ -160,7 +160,7 @@ const ETAPES_WIZARD = {
                     { value: 'moyenne', label: 'Sommative (SOM)', description: 'Note finale par moyenne pondérée des évaluations.' },
                     { value: 'niveaux', label: 'PAN – Standards (STD)', description: 'Niveaux de maîtrise (ex. I-D-M-E) convertis en note.' },
                     { value: 'acceptable', label: 'PAN – Spécifications (SPE)', description: 'Travaux acceptables ou non ; note selon les forfaits réussis.' },
-                    { value: 'denotation', label: 'Dénotation (DEN) — à venir', description: 'Rétroaction qualitative et jugement global. Famille en construction dans Labo Codex.', disabled: true }
+                    { value: 'jugement', label: 'PAN – Dénotation (DEN)', description: 'La note finale est un jugement certificatif, gardé par l\'atteinte des cibles. Famille exigeante, à accompagner.' }
                 ]
             }
         ],
@@ -168,9 +168,54 @@ const ETAPES_WIZARD = {
             if (reponses.calcNoteFinale === 'moyenne') return 'regles-sommative';
             if (reponses.calcNoteFinale === 'niveaux') return 'approche-evaluation';
             if (reponses.calcNoteFinale === 'acceptable') return 'nb-evaluations';
+            if (reponses.calcNoteFinale === 'jugement') return 'config-denotation';
             return null;
         },
         precedent: () => 'calcul-note-finale'
+    },
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // BRANCHE DÉNOTATION (DEN couche 2, #318)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    'config-denotation': {
+        id: 'config-denotation',
+        titre: 'Configuration de la dénotation',
+        description: 'La note finale sera un jugement que tu poses, gardé par la confirmation que chaque cible d\'apprentissage est atteinte.',
+        branche: 'denotation',
+        ordre: 3,
+        champs: [
+            {
+                id: 'infoDenotation',
+                type: 'info',
+                variante: 'attention',
+                texte: 'Famille exigeante, à accompagner pédagogiquement : certain·es étudiant·es sont déstabilisé·es par l\'absence de repères (échafaudage nécessaire — voir le guide PAN). La dénotation abandonne la fonction de tri, mais produit toujours une note certificative (RREC : 60 réussite / 59 échec).'
+            },
+            {
+                id: 'ciblesDenotation',
+                label: 'Cibles d\'apprentissage (une par ligne)',
+                type: 'textarea',
+                required: true,
+                placeholder: 'Ex. :\nAnalyser une source\nArgumenter de façon structurée\nMaîtriser la langue écrite'
+            },
+            {
+                id: 'infoMethodeSuggestion',
+                type: 'info',
+                texte: 'Suggestion statistique : un ancrage facultatif calculé à partir des niveaux atteints par cible. « L\'algorithme propose, le jugement tranche » — tu peux toujours t\'en écarter.'
+            },
+            {
+                id: 'methodeSuggestionDen',
+                type: 'radio-cards',
+                required: true,
+                options: [
+                    { value: 'mode', label: 'Mode', description: 'La note la plus fréquente parmi les niveaux atteints par cible.' },
+                    { value: 'mediane', label: 'Médiane', description: 'La valeur centrale des niveaux atteints par cible.' },
+                    { value: 'moyenne', label: 'Moyenne', description: 'La moyenne des niveaux atteints par cible.' }
+                ]
+            }
+        ],
+        suivant: () => 'infos-base',
+        precedent: () => 'voie-rapide'
     },
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -201,6 +246,7 @@ const ETAPES_WIZARD = {
             // Précédent = la dernière étape de configuration (ex-précédent du récap).
             if (reponses.typePratique === 'sommative') return 'config-sommative';
             if (reponses.typePratique === 'specifications') return 'choix-modele-bundles';
+            if (reponses.typePratique === 'denotation') return 'config-denotation';
             return 'grille-criteres'; // PAN-Standards (par-artefacts ou par-objectifs)
         }
     },
@@ -1107,7 +1153,7 @@ function preparerAdoptionModele(r) {
     r._gabaritSource = JSON.parse(JSON.stringify(gabarit));
     // Champs d'affichage du récapitulatif (le diagnostic lit calcNoteFinale).
     const typeCanon = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(gabarit.type) : gabarit.type);
-    const calcNoteFinaleMap = { 'sommative': 'moyenne', 'standards': 'niveaux', 'specifications': 'acceptable' };
+    const calcNoteFinaleMap = { 'sommative': 'moyenne', 'standards': 'niveaux', 'specifications': 'acceptable', 'denotation': 'jugement' };
     r.typePratique = typeCanon;
     r.calcNoteFinale = calcNoteFinaleMap[typeCanon] || 'moyenne';
     if (!r.nom) r.nom = gabarit.nom || '';
@@ -1990,8 +2036,19 @@ function genererRecapitulatif() {
         html += '</div>';
     }
 
-    // Échelle et grille (si applicable)
-    if (r.typePratique !== 'sommative') {
+    if (r.typePratique === 'denotation') {
+        const cibles = String(r.ciblesDenotation || '').split('\n').map(s => s.trim()).filter(Boolean);
+        const methodeLabels = { 'mode': 'Mode', 'mediane': 'Médiane', 'moyenne': 'Moyenne' };
+        html += '<div class="wizard-v2-recap-section">';
+        html += '<h4>Configuration PAN-Dénotation</h4>';
+        html += `<p><strong>Mode :</strong> Éliminée (jugement narratif → note)</p>`;
+        html += `<p><strong>Cibles d'apprentissage :</strong> ${cibles.length}</p>`;
+        html += `<p><strong>Suggestion statistique :</strong> ${methodeLabels[r.methodeSuggestionDen] || r.methodeSuggestionDen || 'Mode'}</p>`;
+        html += '</div>';
+    }
+
+    // Échelle et grille (si applicable) — pas pour la dénotation (jugement, sans grille IDME).
+    if (r.typePratique !== 'sommative' && r.typePratique !== 'denotation') {
         html += '<div class="wizard-v2-recap-section">';
         html += '<h4>Matériel pédagogique</h4>';
         if (r.echelleId) {
@@ -2306,11 +2363,11 @@ function deduireTypePratique(reponses) {
         return { type: 'specifications', variante: 'bundles', regles: [], confiance: 1.0 };
     }
 
-    // #319 Lot 5 (#318) : DEN reconnue à l'édition seulement (calcNoteFinale posé par
-    // chargerPratiqueExistante). Aucune carte Q1 ne produit 'jugement' — la création
-    // DEN est reportée (#318). Variante null : famille en construction, pas de modèle.
+    // DEN couche 2 (#318, DEN-3) : 'jugement' est produit par la carte de la voie
+    // rapide (création) ET par chargerPratiqueExistante (édition). Variante = le mode
+    // de dénotation ; seul 'eliminee' est offert au premier lot (mode « réduite » plus tard).
     if (q1 === 'jugement') {
-        return { type: 'denotation', variante: null, regles: [], confiance: 1.0 };
+        return { type: 'denotation', variante: 'eliminee', regles: [], confiance: 1.0 };
     }
 
     return { type: null, variante: null, regles: [], confiance: 0 };
@@ -2382,7 +2439,8 @@ async function creerPratiqueV2() {
     const typeMapping = {
         'sommative': 'SOM',
         'standards': 'STD',
-        'specifications': 'SPE'
+        'specifications': 'SPE',
+        'denotation': 'DEN'
     };
 
     // Utiliser la classification comportementale déduite
@@ -2425,6 +2483,9 @@ async function creerPratiqueV2() {
         pratique.calcul_note = { methode: 'moyenne_ponderee' };
     } else if (typeFinal === 'specifications') {
         pratique.calcul_note = { methode: 'specifications' };
+    } else if (typeFinal === 'denotation') {
+        // DEN couche 2 (#318) : la note est un jugement saisi (moteur DEN-1).
+        pratique.calcul_note = { methode: 'jugement_global' };
     } else {
         // pan-standards : par objectifs → pan_par_objectif, sinon conversion de niveaux
         pratique.calcul_note = {
@@ -2624,6 +2685,22 @@ async function creerPratiqueV2() {
         if (r.modeleBundle) {
             pratique.configuration.modeleBundle = r.modeleBundle;
         }
+    } else if (typeFinal === 'denotation') {
+        // DEN couche 2 (#318, DEN-3). Les cibles sont saisies réellement (une par
+        // ligne) pour que la garde « cibles atteintes » soit opérante dès la création
+        // (chaque cible a un id stable). Mode « éliminée » seul pour l'instant.
+        const cibles = String(r.ciblesDenotation || '')
+            .split('\n')
+            .map(s => s.trim())
+            .filter(Boolean)
+            .map((nom, i) => ({ id: 'cible-' + (i + 1), nom: nom }));
+
+        pratique.configuration = {
+            type: 'denotation',
+            modeDEN: 'eliminee',
+            objectifs: cibles,
+            suggestion: { methode: r.methodeSuggestionDen || 'mode' }
+        };
     }
 
 
