@@ -1,5 +1,28 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 8 juin 2026 — Claude Code, DEN couche 2 #318 lots 0→4).
+     IDENTIFICATION DE CE FICHIER  (mis à jour 8 juin 2026 — Claude Code, RELEASE 1.3.0 livrée et poussée).
+     Session du 8 juin (Claude Code — RELEASE 1.3.0, DÉNOTATION + correctif assistant) :
+     DEN couche 2 (#318, lots DEN-0→4) ET bug testeur #137 (assistant « pas-certain »)
+     VALIDÉS TERRAIN (Mac + iPad, sombre + clair) par Grégoire, puis RELEASE GROUPÉE.
+       • Bump minor 1.2.3 → 1.3.0 (build 0608-1046) via release.mjs ; changelog 1.3.
+       • #137 (PRIORITAIRE, interrompait DEN/D) : l'écran « Je ne suis pas certain·e »
+         reposait la même question (calcNoteFinale) → CHANGEMENT D'AXE : deux questions
+         comportementales (`uniteCorrection`, `sortReprise`) + inférence par le moteur
+         UNIQUE `deduireTypePratique` (cas pas-certain → valeur canonique) + 3e question
+         de départage `departage-pratique` si divergence (jamais d'impasse). Renderer
+         radio-cards doté d'un énoncé optionnel (`question`) + role=radiogroup. Sentinelle
+         `tests/unit/sentinelle-wizard-inference-comportementale.test.js` (16 cas). SUIVI-BUGS #137.
+       • DEN : famille créable (assistant) → jugement saisi (profil, section « Jugement »,
+         garde « cibles atteintes » → 59/certif) → note certificative. Détails des lots
+         DEN-0→4 dans l'entrée ci-dessous.
+     ÉTAT : HEAD `a2318c54`, origin/main SYNCHRO (0/0). 344 Vitest + 39 Playwright verts.
+     SUITE possible : axe D (#326, « Exploration des pratiques ») dont DEN était le
+     préalable ; reste #320 (répertoires de classement) aussi préalable de D. Mode DEN
+     « réduite » + couche 1 « note différée » (#321) hors périmètre livré.
+     Réserve technique connue (notée DEN-4) : la note DEN transite par l'instance
+     `calculerPerformance`, pas par le chemin procédural `calculerDetailsNoteFinale` —
+     le widget « note finale » du profil montre le diagnostic DEN, pas le chiffre saisi.
+     À évaluer si un retour terrain le demande (hors couche 2).
+     ---
      Session du 8 juin (Claude Code — DEN couche 2 #318, lots DEN-0 à DEN-4) :
      IMPLÉMENTATION de la Dénotation (famille DEN « éliminée ») selon
      `plans de travail/SPEC_DEN_couche2.md`. 6 commits sur `main`, EN AVANCE DE 6
