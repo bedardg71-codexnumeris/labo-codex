@@ -1701,6 +1701,13 @@ function changerSectionProfil(section) {
             titre = 'Productions et évaluations';
             contenu = genererSectionProductions(da);
             break;
+        case 'jugement':
+            // DEN couche 2 (#318) : panneau de saisie du jugement.
+            titre = 'Jugement (dénotation)';
+            contenu = (window.denotationSaisie && typeof window.denotationSaisie.panneau === 'function')
+                ? window.denotationSaisie.panneau(da)
+                : '<div class="alerte alerte-information">Module de dénotation indisponible.</div>';
+            break;
         case 'cible':
             titre = 'Suivi de l\'apprentissage';
             contenu = genererContenuCibleIntervention(da);
@@ -2103,6 +2110,11 @@ function _resoudreSectionContenu(sectionAffichee, da, prefs) {
     const fallback = { titreSection: 'Productions et évaluations', contenuSection: genererSectionProductions(da) };
 
     if (sectionAffichee === 'productions') return fallback;
+    if (sectionAffichee === 'jugement') {
+        return (prefs.jugementDenActif && window.denotationSaisie)
+            ? { titreSection: 'Jugement (dénotation)', contenuSection: window.denotationSaisie.panneau(da) }
+            : fallback;
+    }
     if (sectionAffichee === 'performance') {
         return prefs.developpementVisible
             ? { titreSection: 'Développement des habiletés', contenuSection: genererSectionPerformance(da) }
@@ -2184,7 +2196,12 @@ function afficherProfilComplet(daOuEl) {
         activerRai:           obtenirPreference('activerRai') !== false,
         engagementVisible:    obtenirPreference('depistageAcp') !== false,
         progressionVisible:   obtenirPreference('afficherGraphiques') !== false,
-        developpementVisible: obtenirPreference('afficherDeveloppementHabiletes') !== false
+        developpementVisible: obtenirPreference('afficherDeveloppementHabiletes') !== false,
+        // DEN couche 2 (#318) : section « Jugement » visible seulement quand la
+        // pratique active du groupe-cours est une dénotation (note saisie).
+        jugementDenActif:     !!(window.denotationSaisie
+                                  && typeof window.denotationSaisie.estActive === 'function'
+                                  && window.denotationSaisie.estActive())
     };
 
     // 5. Navigation Précédent/Suivant
@@ -2195,7 +2212,7 @@ function afficherProfilComplet(daOuEl) {
     // 6. Section + contenu (Beta 90 : section mémorisée ou 'productions' par défaut)
     const sectionAffichee = sectionProfilActive || 'productions';
     const { titreSection, contenuSection } = _resoudreSectionContenu(sectionAffichee, da, prefs);
-    const { activerRai, engagementVisible, progressionVisible, developpementVisible } = prefs;
+    const { activerRai, engagementVisible, progressionVisible, developpementVisible, jugementDenActif } = prefs;
 
     // Générer le HTML avec layout sidebar matériel
     container.innerHTML = `
@@ -2256,6 +2273,13 @@ function afficherProfilComplet(daOuEl) {
                     <div class="sidebar-item ${sectionAffichee === 'productions' ? 'active' : ''}" data-action="changerSectionProfil" data-param="productions">
                         <div class="sidebar-item-titre">Productions</div>
                     </div>
+
+                    <!-- 1b. Jugement (Dénotation #318) — visible seulement si la pratique active est une DEN -->
+                    ${jugementDenActif ? `
+                    <div class="sidebar-item ${sectionAffichee === 'jugement' ? 'active' : ''}" data-action="changerSectionProfil" data-param="jugement">
+                        <div class="sidebar-item-titre">Jugement</div>
+                    </div>
+                    ` : ''}
 
                     <!-- 2. Engagement ACP (affiché uniquement si Micro données ACP activé) -->
                     ${engagementVisible ? `
