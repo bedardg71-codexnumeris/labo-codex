@@ -12,6 +12,17 @@
 
     var CHANGELOG = [
         {
+            version: '1.4',
+            couleur: 'vert',
+            titre: 'Soutenir le projet + correctifs',
+            items: [
+                'Nouveau bouton « Soutenir Labo Codex » dans l’en-tête (le cœur, à côté du bouton bug) : une fenêtre réunit les façons de contribuer — communauté de pratique, blogue, abonnement de soutien, offrir un abonnement, don.',
+                'Le rappel de sauvegarde n’apparaît plus que lorsque tu as de vraies données à protéger (évaluations enregistrées ou travaux importés) — jamais sur une page vide ni en mode démonstration.',
+                'Le bandeau de mise à jour ne réapparaît plus en boucle après un rechargement : il ne s’affiche désormais que lors d’une vraie mise à jour déployée pendant que tu travailles.',
+                'Assistant de pratique : l’indicateur d’étapes ne s’emballe plus dans le parcours « Je ne suis pas certain·e ».'
+            ]
+        },
+        {
             version: '1.3',
             couleur: 'vert',
             titre: 'Dénotation : une famille de pratique complète',
