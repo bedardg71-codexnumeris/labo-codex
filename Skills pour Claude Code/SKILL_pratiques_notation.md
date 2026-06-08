@@ -385,6 +385,17 @@ discret, pas l'info vedette.**
   familles calculent. **Reste** : D4 — construire le profil « irrégulier » (DEMO011) comme
   une **progression réelle** (maîtrise tardive démontrée), pas pour maximiser un écart.
 
+**Axe suivant — « Exploration des pratiques » (D, conçu et validé 8 juin 2026, NON codé).**
+Le §12 ci-dessus décrit la **phase 1 livrée** (C0-C4). L'axe D élargit le Comparateur en
+**« Exploration des pratiques »** (sous-section du Labo) : décliner une **souche** en
+**variantes d'essai**, parenté via `inspireDe.sourceId`, **diff de config** (statique →
+**survit au « non calculable »**), flag `estEssai` (transitoire). **DEN y est diffable mais
+NON simulable** (jugement saisi → pas de colonne note). Le Comparateur reste **consommateur
+lecture seule** ; aucun nouveau chemin de calcul. Spéc canonique :
+`plans de travail/SPEC_D_exploration_pratiques.md` (découpage 6 lots, préalables **#320** +
+**#318**) ; backlog **#326**. ⚠️ **Ne rien documenter ici comme existant tant que le code
+n'est pas livré** : les §3/§5/§8/§12 seront mises à jour **au fil des lots D**, avec le code.
+
 ---
 
 ## 13. Coordination
@@ -412,4 +423,5 @@ vraiment*.
 |------|------------|
 | 2026-06-05 | Création. Établi par lecture de code lors du démarrage du Comparateur (#307 / C0) : moteur de calcul, résolution, deux systèmes de calcul, `simulerIndices`, schéma exécutable des configs, représentations canoniques (Session B), pièges vérifiés. Acte le fold `pan-objectifs → standards` (Session C Lot 4) et la garde STD de `calculerDetailsNoteFinale`. |
 | 2026-06-05 (Cowork) | Ajout du **§2 bis** (ancrage recherche/pratique des 4 familles + écarts code ; corpus GfG/CoP/Blum/Dyer/CSÉ inliné) suite au constat que le skill ne faisait que miroiter le code. Retouches : nature « pas un simple miroir », posture pluraliste explicite ; ligne DEN de la table requalifiée (plus « jugement global qualitatif ») ; caveat sur `P` « commodité ≠ équivalence » (§7) ; renvoi §8 DEN → §2 bis ; entrée Sources + recadrage prévu d'Ecosysteme (§13). |
+| 2026-06-08 (Cowork) | Ajout au **§12** d'un **pointeur vers l'axe D** (« Exploration des pratiques » : variantes/souche, `inspireDe.sourceId`, diff de config, `estEssai`, DEN diffable-non-simulable ; SPEC `SPEC_D_exploration_pratiques.md`, backlog #326). **Référence seulement** — aucune description de code inexistant ; §3/§5/§8/§12 à mettre à jour au fil des lots D, avec le code. |
 | 2026-06-06 (Cowork) | §12 finalité réancrée : « sortir du **paradigme du cumul** » (la note n'est pas un score additionné), **pas** « quitter SOM » — alignement sur SPEC_comparateur §1 bis et sur *Gateways* (viser l'idée, pas la pratique de l'enseignant), pour lever la tension avec le pluralisme affiché. Réserve forward notée pour DEN/#318 : « quelle note dit le vrai » est le cadre SBG ; Blum/ungrading reframe (la vérité vit dans le portfolio, pas dans un chiffre unique) — déjà porté par le §2 bis. |
