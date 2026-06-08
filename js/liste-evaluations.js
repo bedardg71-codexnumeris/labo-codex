@@ -1641,6 +1641,24 @@ function confirmerSuppressionFichier(fichierId, da) {
     const etudiant = etudiants.find(e => e.da === da);
     const nomEtudiant = etudiant ? `${etudiant.prenom} ${etudiant.nom}` : da;
 
+    // Garde-fou reprise : si une reprise (ou un original « remplacé ») existe pour
+    // ce travail, supprimer le fichier ne défait PAS la reprise → on oriente vers
+    // le bon geste. Bug Grégoire 8 juin 2026.
+    let avertissementReprise = '';
+    try {
+        const evalsTrim = db.getSync(cle('evaluationsSauvegardees'), []) || [];
+        const prodId = fichier ? fichier.productionId : null;
+        const contexteReprise = prodId && evalsTrim.some(e =>
+            e.etudiantDA === da && e.productionId === prodId && (e.repriseDeId || e.remplaceeParId)
+        );
+        if (contexteReprise) {
+            avertissementReprise = `
+            <p style="margin: 0 0 16px 0; padding: 10px 12px; font-size: 0.85em; background: var(--alerte-fond-attention); color: var(--alerte-texte-attention); border-left: 3px solid var(--alerte-bordure-attention); border-radius: 6px;">
+                Ce travail est lié à une reprise. Déplacer le fichier à la corbeille ne retire ni la reprise ni le statut « remplacée » de l'évaluation d'origine. Pour annuler la reprise, supprime plutôt l'évaluation de reprise (ou décoche le jeton de reprise dans la page d'évaluation).
+            </p>`;
+        }
+    } catch (e) { /* défensif : un échec de détection ne doit pas bloquer la suppression */ }
+
     // Retirer une modale existante
     const existante = document.getElementById('supprimer-fichier-modal-overlay');
     if (existante) existante.remove();
@@ -1659,6 +1677,7 @@ function confirmerSuppressionFichier(fichierId, da) {
             <p style="margin: 0 0 16px 0; font-size: 0.85em; color: var(--texte-secondaire);">
                 Le fichier pourra être restauré pendant 30 jours.
             </p>
+            ${avertissementReprise}
             <div class="modal-actions">
                 <button class="btn btn-danger" id="supprimer-fichier-btn-confirmer">Déplacer à la corbeille</button>
                 <button class="btn btn-secondaire" data-action="fermerOverlayParent">Annuler</button>
@@ -1913,6 +1932,29 @@ function evaluerProduction(da, productionId) {
 /**
  * Supprime une évaluation
  */
+/**
+ * Restaure l'évaluation originale quand on supprime/retire une reprise :
+ * défait le statut « remplacée » (remplaceeParId & co) posé par
+ * appliquerJetonReprise. Mutation in-place du tableau fourni.
+ * @param {Array} evaluations - toutes les évaluations (contient la reprise)
+ * @param {string} evaluationId - id de la reprise supprimée
+ * @returns {boolean} true si une originale a été restaurée.
+ */
+function restaurerOriginaleSiReprise(evaluations, evaluationId) {
+    if (!Array.isArray(evaluations)) return false;
+    const reprise = evaluations.find(e => e.id === evaluationId);
+    if (!reprise || !reprise.repriseDeId) return false;
+    const originale = evaluations.find(e =>
+        e.id === reprise.repriseDeId && e.remplaceeParId === evaluationId
+    );
+    if (!originale) return false;
+    delete originale.remplaceeParId;
+    delete originale.dateRemplacement;
+    delete originale.archivee;
+    delete originale.dateArchivage;
+    return true;
+}
+
 function supprimerEvaluation(evaluationId) {
     // CORRECTION: Lire TOUTES les évaluations (pas seulement celles du cours actif)
     const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
@@ -1942,6 +1984,11 @@ function supprimerEvaluation(evaluationId) {
         return;
     }
 
+    // COHÉRENCE REPRISE : supprimer une reprise restaure son évaluation originale
+    // (retire le statut « remplacée »). Mutation in-place reflétée dans le tableau
+    // filtré (objets partagés). Bug Grégoire 8 juin 2026.
+    const originaleRestauree = restaurerOriginaleSiReprise(evaluations, evaluationId);
+
     const evaluationsFiltered = evaluations.filter(ev => ev.id !== evaluationId);
 
     if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluationsFiltered)) {
@@ -1959,7 +2006,7 @@ function supprimerEvaluation(evaluationId) {
     initialiserListeEvaluations();
 
     // Notification de succès
-    notifications.succes('Évaluation supprimée');
+    notifications.succes(originaleRestauree ? 'Reprise supprimée, originale restaurée' : 'Évaluation supprimée');
 }
 
 /**
@@ -2747,6 +2794,7 @@ function viderTouteCorbeille() {
 window.initialiserListeEvaluations = initialiserListeEvaluations;
 window.consulterEvaluationDepuisListe = consulterEvaluationDepuisListe;
 window.supprimerEvaluation = supprimerEvaluation;
+window._restaurerOriginaleSiReprise = restaurerOriginaleSiReprise;
 window.toggleVerrouillerEvaluation = toggleVerrouillerEvaluation;
 window.modifierEvaluationRemplacee = modifierEvaluationRemplacee;
 window.calculerEtSauvegarderIndiceCompletion = calculerEtSauvegarderIndiceCompletion;
