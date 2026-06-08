@@ -14,6 +14,19 @@ description: >
 
 # SKILL : Cadre pédagogique — Enseignement de la littérature au collégial
 
+> **Dernière mise à jour** : 5 juin 2026 (Cowork — encadré de statut ajouté ; recadrage
+> complet planifié, **non exécuté**).
+> **Statut / usage** : ce skill documente **UNE instanciation** — la pratique STD (PAN par
+> standards) de Grégoire Bédard dans le cours 601-101. Ce n'est **pas** la doctrine de Labo
+> Codex, qui est **pluraliste** (SOM/STD/SPE/DEN, sans hiérarchie). ⚠️ **Ne pas en tirer de
+> microcopy ni de choix de conception qui valorisent une famille au détriment d'une autre.**
+> Deux tensions connues, à corriger au recadrage : (1) « PAN » y désigne souvent la variante
+> STD de Grégoire, alors que PAN = libellé de **famille** (Session A) ; (2) le §1.2 oppose
+> « sommative problématique / PAN supérieure » — c'est la **conviction du concepteur**, légitime
+> et motrice, pas une doctrine imposée par l'outil (cf. *Gateways* : viser les idées, pas les
+> personnes qui les pratiquent). Panorama neutre des familles : `SKILL_pratiques_notation`
+> §2 bis. Plan de recadrage : `plans de travail/PLAN_recadrage_skill_ecosysteme.md`.
+
 ## Vue d'ensemble
 
 Ce skill documente le cadre pédagogique du cours **601-101-MQ Écriture et littérature** (premier cours de français au collégial québécois). Il couvre deux composantes :
@@ -727,5 +740,5 @@ L'alignement pédagogique et le monitorage dans l'application sont documentés d
 ---
 
 **Document créé** : 8 janvier 2026
-**Dernière révision** : 26 avril 2026
-**Statut** : Documentation vivante — recentrée sur le cadre pédagogique pur
+**Dernière révision** : 5 juin 2026 (Cowork — encadré de statut en tête ; recadrage complet à venir, voir `plans de travail/PLAN_recadrage_skill_ecosysteme.md`). Révision précédente : 26 avril 2026.
+**Statut** : Documentation vivante — **une instanciation de référence** (pratique STD de Grégoire), pas la doctrine de l'outil. Recadrage planifié pour distinguer explicitement instanciation / doctrine / recherche.

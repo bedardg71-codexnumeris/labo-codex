@@ -1,5 +1,37 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 7 juin 2026 — suite 8).
+     IDENTIFICATION DE CE FICHIER  (mis à jour 8 juin 2026 — Cowork, conception axe D).
+     Session du 8 juin (Cowork — conception, AUCUN code) : axe D « EXPLORATION DES
+     PRATIQUES » conçu de bout en bout et SPEC VALIDÉE par Grégoire (découpage 6 lots).
+     Décliner une pratique « souche » en variantes d'essai, les comparer par un diff de
+     config (« ce que chaque réglage change »), promouvoir la retenue. Lieu : élargir
+     `Labo › Comparateur de pratiques` en « Exploration des pratiques » (arbre + diff +
+     matrice) ; création via assistant condensé invocable du Labo ; biblio/sidebar ne
+     montrent que les pratiques abouties. Modèle : filiation `inspireDe` (CC BY, permanente)
+     + `sourceId` pour l'arbre ; flag `estEssai` (transitoire). Docs : SPEC canonique
+     `plans de travail/SPEC_D_exploration_pratiques.md` + note `NOTE-CONCEPTION-D-comparateur-variantes-parente.md` ;
+     backlog #326 créé. PRÉALABLES au code de D : #320 (répertoires) + #318 (DEN couche 2) ;
+     D-0/D-1 (moteur pur) parallélisables avec DEN. Contact `config.js`/`navigation.js`
+     (renommage label, id `comparateur` conservé) = aval Grégoire au moment du code.
+     Audit non-régression de la modif comparateur (sélecteurs déplacés dans l'en-tête des
+     colonnes, working tree non commité) : 284 Vitest verts, invariant lecture seule
+     préservé ; test intégration WebKit NON rejouable en sandbox → à valider sur Mac.
+     NB : `tests/node_modules` perturbé en sandbox → faire `rm -rf node_modules && npm install`
+     dans `tests/` sur Mac avant de relancer. Pas de commit, pas de bump (conception seule).
+     ---
+     Session du 8 juin (Claude Code — CODE) : 3 RAFFINEMENTS + 1 BUG TESTEUR livrés
+     et POUSSÉS (1.2.0 → 1.2.3). (1) Comparateur : le <select> de simulation passe
+     DANS l'en-tête de sa colonne (bandeau « Comparer avec » retiré — il répétait le
+     nom de colonne) + ligne sous matrice/récit = avertissement « outil expérimental
+     + Signaler un bug » (1.2.1, `5624655f`). NB : ceci COMMITE et POUSSE la « modif
+     comparateur working tree » mentionnée dans l'entrée Cowork ci-dessus. (2)
+     Transitions : bandeaux de jalon CIBLÉS PAR SECTION (champ `sections`) — fin du
+     débordement sur l'accueil ; « signaux/interventions » → Suivi, « espace prêt »
+     → Évaluation (1.2.2, `695a4440`). (3) Bug #136 (rapport 07-14-38) : supprimer
+     une reprise RESTAURE l'original (fin du « remplacée » orphelin) + garde-fou sur
+     la suppression d'un fichier lié à une reprise (1.2.3, `107655e6`). Backlog : #322
+     RETIRÉ. HEAD origin/main = `107655e6`, SYNCHRO (0/0). 287 Vitest (+3 skip lint =
+     artefact env, OK en isolé) + 7 PW comparateur + 1 PW transitions.
+     ---
      Session du 7 juin (suite 8, Claude Code) : RELEASE 1.2.0 PUBLIÉE ET POUSSÉE.
      #319 Lots 4-5 (assistant : récap enrichi a8/a9 + reconnaissance DEN), #305
      (a11y titre modale d'aide), #323 (contraste corbeille), #322 PARTIEL (titre
@@ -123,6 +155,14 @@
 
 > **📌 Identification**
 > - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
+> - **✅ RELAIS — 8 juin 2026 (Claude Code, CODE) — 3 RAFFINEMENTS + 1 BUG TESTEUR livrés et poussés (1.2.0 → 1.2.3). HEAD `origin/main` = `107655e6`, SYNCHRONISÉ (0/0). 287 Vitest verts (+3 skip du lint sécurité = artefact d'environnement, 3/3 en isolé) + 7 Playwright comparateur + 1 Playwright transitions.** Raffinements UX du Comparateur + un correctif de cohérence sur les jetons de reprise (retour testeur). Distinct de la session Cowork « conception axe D Exploration des pratiques » du même jour (en-tête ci-dessus) — celle-ci est le PROCHAIN chantier.
+>   - **Backlog** : **#322 RETIRÉ** (décision Grégoire — le double encadrement carte/section n'est pas un problème, d'autres pages l'ont). Modif dans `BACKLOG.md` (non commité, tenu par Cowork).
+>   - **Comparateur — `5624655f` (1.2.1, build 0608-0640)** : le `<select>` de chaque colonne de simulation vit désormais DANS l'en-tête de sa colonne, à la place du titre statique ; **bandeau « Comparer avec » SUPPRIMÉ** (il répétait le nom déjà porté par la colonne). Choix « Select seul » (code de famille lisible dans le texte du select, pas de badge coloré séparé). Écouteur **délégué** sur `#comparateur-matrice` (survit aux re-rendus), `aria-label` par select, CSS du bandeau retiré (zéro-dette). La ligne sous la matrice ET le récit (`LIGNE_GARDE`) passe d'anti-palmarès à **avertissement « outil expérimental + Signaler un bug (icône en-tête) »** (l'anti-palmarès survit dans le paragraphe de finalité). Tests adaptés : C1-d (selects dans l'en-tête, plus de bandeau), C1-b (nouveau texte). C'est la modif « working tree » que l'entrée Cowork voyait non commitée → désormais COMMITÉE + POUSSÉE.
+>   - **Transitions — `695a4440` (1.2.2, build 0608-0707)** : les 3 bandeaux de jalon (`transitions.js`) s'affichaient sur N'IMPORTE QUELLE section (d'où « signaux qui méritent attention » sur l'accueil). Ajout d'un champ `sections` par transition + filtre `cibleSectionCourante` (lit `sectionActive`). Mapping : « tableau de bord / signaux / interventions » → **suivi** ; « espace prêt, saisir présences et évaluer » → **evaluations**. Plus rien sur l'accueil. Test `tests/integration/transitions-ciblage-section.spec.js`.
+>   - **Bug #136 — `107655e6` (1.2.3, build 0608-0733 ; rapport `BUG_grégoire_2026-06-08_07-14-38`)** : supprimer un doublon de reprise laissait l'original étiqueté « remplacée ». Aucun geste de la liste ne défaisait proprement une reprise (« Déplacer le fichier à la corbeille » ne touche qu'au fichier ; « Supprimer l'évaluation » laissait `remplaceeParId` orphelin ; seul `retirerJetonReprise`, page d'évaluation, le faisait). **Cohérence** : helper pur `restaurerOriginaleSiReprise` + `supprimerEvaluation` l'appelle → supprimer une reprise restaure l'original. **Garde-fou** : `confirmerSuppressionFichier` avertit (variables `--alerte-*-attention`) quand le travail est lié à une reprise. Test `tests/unit/sentinelle-suppression-reprise-2026-06-08.test.js` (6 cas). Entrée `SUIVI-BUGS.md` #136.
+>   - **▶️ À REPRENDRE — PROCHAIN CHANTIER = axe D « Exploration des pratiques »** (conception Cowork du 8 juin, SPEC `plans de travail/SPEC_D_exploration_pratiques.md`, backlog #326). Préalables au code : #320 (répertoires) + #318 (DEN couche 2) ; D-0/D-1 (moteur pur) parallélisables. Contact `config.js`/`navigation.js` (renommage label, id `comparateur` conservé) = aval Grégoire requis.
+>   - **AUTRES SUITES** : (a) **Réparer l'artefact 10 de Justin** en prod (geste utilisateur : supprimer l'évaluation de reprise depuis la liste, ou décocher le jeton de reprise). (b) **Environnement de test instable** ce jour : binaire WebKit Playwright disparu (réinstallé via `npx playwright install webkit`), Vitest v2.1.9 → v4.1.8 en cours de session (skip intermittent du lint en suite, OK en isolé) — cf. NB Cowork « `tests/node_modules` perturbé → `rm -rf node_modules && npm install` dans `tests/` sur Mac ».
+>   - **⚠️ Non commités** (travaux Cowork, NON touchés par Claude Code) : `BACKLOG.md` (inclut le retrait #322 + #326), `Skills pour Claude Code/SKILL_Ecosysteme_classe.md`, plus de nombreux fichiers de plans/audits non suivis.
 > - **✅ RELAIS — 7 juin 2026 (suite 8, Claude Code) — RELEASE 1.2.0 PUBLIÉE ET POUSSÉE. HEAD `origin/main` = `2ed0cc4b`, SYNCHRONISÉ (0/0). 284 Vitest + 35 Playwright verts.** Session de finition de #319, deux correctifs ciblés et une amorce de #322, close par la release minor (comparateur + assistant refondu). Tout sur `origin/main`.
 >   - **#319 Lot 4 — récap enrichi** (`7f3ab1ae`) : **a8** = exemple « ordre de grandeur » au récap — décision Grégoire : reflète le **TYPE** de notation, pas les réglages fins ; en démo, simule la famille générique (`sommative`/`standards`/`specifications`) sur DEMO010 (Fort) + DEMO004 (En difficulté) via `simulerIndices` (lecture seule absolue) ; repli qualitatif hors démo, jamais de chiffre fabriqué. **a9** = réassurance « ta pratique active n'est pas modifiée » (création seulement). Sentinelle `sentinelle-wizard-exemple-recap-319` (10 cas).
 >   - **#319 Lot 5 — reconnaissance DEN** (`18841d22`, #318) : `chargerPratiqueExistante` mappe le type canonique `denotation` → `calcNoteFinale 'jugement'` (avant : fallback `'moyenne'` → badge SOM par erreur) ; `deduireTypePratique` reconnaît `'jugement'` → `denotation` ; entrée `denotation` dans `TYPE_BADGES` (DEN, « PAN – Dénotation ») + `.wizard-v2-recap-diagnostic--den` (`--den-violet`). **Création DEN toujours reportée (#318)** : aucune carte Q1 ne produit `'jugement'` → zéro code mort. Sentinelle `sentinelle-wizard-denotation-319` (5 cas). NB : aucune pratique DEN atteignable par l'UI actuelle (pas de gabarit DEN) → fondation non visible en terrain tant que #318 n'est pas fait.
