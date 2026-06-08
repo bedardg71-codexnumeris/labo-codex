@@ -3915,6 +3915,7 @@
                     <div class="entete-utilitaires">
                         <div class="utilitaires-groupe">
                             <button data-action="ouvrirModalRapportBug" class="btn-action-header btn-icon-header" data-tooltip="entete-signaler-bug" title="Signaler un bug"><span class="header-icon ico-bug" aria-hidden="true"></span></button>
+                            <button data-action="ouvrirModalSoutien" class="btn-action-header btn-icon-header" data-tooltip="entete-soutien" title="Soutenir Labo Codex"><span class="header-icon ico-coeur" aria-hidden="true"></span></button>
                             <button id="btn-toggle-anonymisation-nav" class="btn-action-header btn-icon-header" data-tooltip="entete-mode-affichage" title="Mode normal / anonymisé" data-action="basculerModeAnonymisation"><span class="header-icon ico-mask-anon" aria-hidden="true"></span></button>
                             <button id="btn-toggle-theme-nav" class="btn-action-header btn-icon-header" title="Mode clair / sombre" data-action="basculerTheme"><img src="icons/icon-black-and-white.svg" alt="" class="header-icon"></button>
                         </div>
@@ -3954,6 +3955,10 @@
                 <button class="popover-item" data-action="ouvrirModalRapportBug" role="menuitem">
                     <img src="icons/icon-bug.svg" alt="" class="popover-icon">
                     <span>Signaler un bug</span>
+                </button>
+                <button class="popover-item" data-action="ouvrirModalSoutien" role="menuitem">
+                    <img src="icons/icons8-heart.svg" alt="" class="popover-icon">
+                    <span>Soutenir Labo Codex</span>
                 </button>
                 <button class="popover-item" data-action="basculerModeAnonymisation" role="menuitem">
                     <img src="icons/icons8-anonymous.svg" alt="" class="popover-icon">
@@ -14495,6 +14500,7 @@
 
     <!-- Rapport de bug pour testeurs (Beta 94) - Chargé tôt pour capturer les erreurs -->
     <script src="js/rapport-bug.js?v=2026050547"></script> <!-- Refonte nav SP5 : case 'calendrier' -->
+    <script src="js/modal-soutien.js?v=2026060801"></script> <!-- Bouton « Soutenir Labo Codex » (entête) -->
 
     <!-- Bibliothèque externe: Chart.js pour graphiques progression (Beta 93) -->
     <script src="libs/chart.min.js"></script>
