@@ -12,6 +12,17 @@
 
     var CHANGELOG = [
         {
+            version: '1.3',
+            couleur: 'vert',
+            titre: 'Dénotation : une famille de pratique complète',
+            items: [
+                'Nouvelle famille « Dénotation » : la note finale est un jugement que tu poses, gardé par la confirmation que chaque cible d’apprentissage est atteinte — sortir de la logique du cumul tout en restant certificatif.',
+                'Création dans l’assistant (voie rapide → Dénotation) : tu définis tes cibles d’apprentissage et une suggestion statistique d’ancrage (mode, médiane ou moyenne).',
+                'Saisie dans le profil étudiant (section « Jugement ») : coche les cibles atteintes, lis la suggestion comme repère, saisis la note et une justification ; une garde t’indique quand la note ne peut pas encore certifier la réussite.',
+                'Assistant de pratique : « Je ne suis pas certain·e » ne repose plus la même question — deux questions sur ce que tu fais concrètement (comment tu corriges, ce qu’il advient d’une reprise) suffisent à déduire ta famille.'
+            ]
+        },
+        {
             version: '1.2',
             couleur: 'vert',
             titre: 'Comparateur de pratiques et assistant repensé',
