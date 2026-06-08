@@ -196,6 +196,18 @@ class PratiqueConfigurable {
      * @returns {number} Indice P (0-1, décimal)
      */
     calculerPerformance(da) {
+        // DEN couche 2 (#318) : la note finale est un JUGEMENT saisi par
+        // l'enseignant, pas un calcul sur les artefacts. Elle ne dépend donc pas
+        // d'indicesCP — un étudiant peut être jugé sans aucune évaluation
+        // enregistrée — d'où le court-circuit AVANT le garde indicesCP ci-dessous.
+        // Retourne null quand aucune saisie n'existe (« non calculable » : le
+        // diagnostic par cellule viendra à DEN-4), pas un zéro. portfolio.js mappe
+        // déjà ce null → 0 pour l'indice stocké (P_decimal !== null ? … : 0).
+        if (this.config.calcul_note && this.config.calcul_note.methode === 'jugement_global') {
+            const pDen = this._calculerPerformanceDenotation(da);
+            return pDen === null ? null : pDen / 100;
+        }
+
         const indicesCP = db.getSync(cle('indicesCP'), {});
         const donneesEtudiant = indicesCP[da];
 
@@ -235,10 +247,9 @@ class PratiqueConfigurable {
                 P_pct = this._calculerPerformanceSpecifications(da, donneesEtudiant);
                 break;
 
-            case 'jugement_global':
-                // DEN (#318) non implémenté : repli sur PAN en attendant.
-                P_pct = donneesEtudiant.actuel.PAN?.P || 0;
-                break;
+            // 'jugement_global' (DEN) est traité par court-circuit en tête de
+            // calculerPerformance (la note est saisie, indépendante d'indicesCP),
+            // donc jamais atteint ici.
 
             default:
                 console.warn(`Méthode de calcul inconnue : ${this.config.calcul_note.methode}`);
@@ -247,6 +258,55 @@ class PratiqueConfigurable {
 
         // Convertir en décimal 0-1
         return P_pct / 100;
+    }
+
+    /**
+     * Performance DEN (Dénotation couche 2, #318) — la note est un JUGEMENT saisi.
+     *
+     * LECTURE SEULE : lit la collection jugementsDenotation via le module SSOT
+     * (denotation-jugements.js) ; ne l'écrit JAMAIS (l'écriture est le geste de
+     * l'UI de saisie du profil, DEN-2).
+     *
+     * Contrat (SPEC §5.1) :
+     *  - aucune saisie → null (« non calculable » : pas encore jugé, pas un zéro) ;
+     *  - garde « cibles atteintes » (DEN-B) : si une cible n'est pas confirmée
+     *    atteinte, la certification est plafonnée à 59 (RREC échec), jamais ≥ 60 —
+     *    la garde CONDITIONNE la certification, elle ne fabrique pas la note ;
+     *  - toutes cibles confirmées → la note saisie telle quelle (≥ 60 attendue).
+     *
+     * RREC : dès qu'une saisie existe, produit TOUJOURS un chiffre (59 ou la note),
+     * jamais « pas de note ». DEN abandonne le TRI, garde la CERTIFICATION.
+     *
+     * @param {string} da - DA de l'étudiant
+     * @returns {number|null} P en pourcentage (0-100), ou null si aucune saisie
+     */
+    _calculerPerformanceDenotation(da) {
+        if (!window.denotationJugements) {
+            console.warn('[DEN] Module denotation-jugements absent — note non calculable.');
+            return null;
+        }
+
+        const pratiqueId = this.config.id;
+        const saisie = window.denotationJugements.lireJugementDenotation(pratiqueId, da);
+        if (!saisie) {
+            return null; // pas encore jugé → non calculable (diagnostic DEN-4)
+        }
+
+        // Cibles de la config (réutilise les objectifs existants — zéro ontologie neuve).
+        const cibles = this.config.objectifs
+            || (this.config.configuration && this.config.configuration.objectifs)
+            || [];
+        const confirmations = saisie.ciblesAtteintes || {};
+        const toutesAtteintes = cibles.length > 0
+            && cibles.every(cible => confirmations[cible.id] === true);
+
+        const note = (typeof saisie.noteFinale === 'number') ? saisie.noteFinale : 0;
+
+        if (!toutesAtteintes) {
+            // Non certifié : plafonné à 59 (RREC échec), jamais ≥ 60.
+            return Math.min(note, 59);
+        }
+        return note;
     }
 
     /**

@@ -24,6 +24,54 @@
 (function() {
 'use strict';
 
+/**
+ * Suggestion holistique partagée (mode / médiane / moyenne des notes par objectif).
+ *
+ * Helper PUR extrait de _calculerModeHolistique (#318, DEN-1) pour être réutilisé
+ * SANS instancier une PratiquePANStandards entière :
+ *  - STD (mode holistique) l'appelle ci-dessous — comportement strictement identique
+ *    à l'avant-extraction (sentinelle de parité, golden master) ;
+ *  - l'UI de saisie DEN (couche 2, DEN-2) l'appellera comme ANCRAGE de la note
+ *    (« l'algorithme propose, le jugement tranche » — Voisard), jamais comme valeur
+ *    finale du calcul.
+ *
+ * @param {Array<{note:number}|null>} niveauxParObjectif - niveaux atteints par objectif
+ *   (sortie de _calculerNiveauxParObjectif : un élément par objectif, ou null)
+ * @param {'mode'|'mediane'|'moyenne'} methode
+ * @returns {number|null} note suggérée en décimal 0-1, ou null si aucune note exploitable
+ */
+function suggererNoteHolistique(niveauxParObjectif, methode) {
+    if (!Array.isArray(niveauxParObjectif)) return null;
+
+    const notes = niveauxParObjectif
+        .map(niveau => (niveau ? niveau.note : undefined))
+        .filter(n => n !== undefined && n !== null);
+
+    if (notes.length === 0) return null;
+
+    switch (methode) {
+        case 'mode': {
+            // Mode : note la plus fréquente
+            const frequences = {};
+            notes.forEach(n => {
+                const key = Math.round(n * 100);
+                frequences[key] = (frequences[key] || 0) + 1;
+            });
+            const modeKey = Object.entries(frequences).reduce((a, b) => b[1] > a[1] ? b : a)[0];
+            return parseInt(modeKey) / 100;
+        }
+        case 'mediane': {
+            const sorted = [...notes].sort((a, b) => a - b);
+            const mid = Math.floor(sorted.length / 2);
+            return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+        }
+        case 'moyenne':
+        default: {
+            return notes.reduce((a, b) => a + b, 0) / notes.length;
+        }
+    }
+}
+
 class PratiquePANStandards {
 
     constructor() {
@@ -1511,33 +1559,10 @@ class PratiquePANStandards {
         const niveauxParObjectif = this._calculerNiveauxParObjectif(da, objectifs);
         if (!niveauxParObjectif) return null;
 
-        const notes = objectifs
-            .map((obj, index) => niveauxParObjectif[index]?.note)
-            .filter(n => n !== undefined && n !== null);
-
-        if (notes.length === 0) return null;
-
-        switch (methode) {
-            case 'mode': {
-                // Mode : note la plus fréquente
-                const frequences = {};
-                notes.forEach(n => {
-                    const key = Math.round(n * 100);
-                    frequences[key] = (frequences[key] || 0) + 1;
-                });
-                const modeKey = Object.entries(frequences).reduce((a, b) => b[1] > a[1] ? b : a)[0];
-                return parseInt(modeKey) / 100;
-            }
-            case 'mediane': {
-                const sorted = [...notes].sort((a, b) => a - b);
-                const mid = Math.floor(sorted.length / 2);
-                return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
-            }
-            case 'moyenne':
-            default: {
-                return notes.reduce((a, b) => a + b, 0) / notes.length;
-            }
-        }
+        // Logique mode/médiane/moyenne extraite dans le helper partagé (DEN-1).
+        // niveauxParObjectif est aligné index-pour-index sur objectifs (il en est
+        // le map), donc itérer dessus produit la même liste de notes qu'avant.
+        return suggererNoteHolistique(niveauxParObjectif, methode);
     }
 
     /**
@@ -1623,6 +1648,9 @@ class PratiquePANStandards {
 
 // Export pour utilisation directe
 window.PratiquePANStandards = PratiquePANStandards;
+
+// Helper de suggestion holistique partagé (STD + UI de saisie DEN, #318)
+window.suggererNoteHolistique = suggererNoteHolistique;
 
 // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
 
