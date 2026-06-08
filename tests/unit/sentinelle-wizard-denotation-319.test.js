@@ -1,14 +1,15 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
 
-// SENTINELLE — #319 Lot 5 (#318) — reconnaissance minimale de la Dénotation (DEN).
+// SENTINELLE — #319 Lot 5 + #318 DEN-3 — reconnaissance ET création de la Dénotation.
 //
-// Contrat : une pratique DEN EXISTANTE (gabarit adopté, import…) est reconnue à
-// l'édition — son badge récap est « DEN » (couleur du registre, --den-violet), pas
-// « Sommative » ni « Indéterminé ». Avant le Lot 5, chargerPratiqueExistante mappait
-// le type canonique 'denotation' vers calcNoteFinale 'moyenne' (fallback) → deduire
-// la classait en sommative. Le parcours de CRÉATION DEN reste reporté (#318) : aucune
-// carte Q1 ne produit 'jugement'. Aucune régression des familles SOM/STD/SPE.
+// Contrat : une pratique DEN (existante OU fraîchement créée) est reconnue — son
+// badge récap est « DEN » (--den-violet), pas « Sommative » ni « Indéterminé ».
+// Avant le Lot 5, chargerPratiqueExistante mappait 'denotation' → calcNoteFinale
+// 'moyenne' (fallback) → deduire la classait en sommative. Depuis DEN-3 (#318), la
+// DEN est CRÉABLE : la carte « jugement » de la voie rapide produit une classification
+// denotation AVEC variante ('eliminee', seul mode du premier lot). Aucune régression
+// des familles SOM/STD/SPE.
 
 let store = [];
 const db = {
@@ -39,10 +40,10 @@ const win = chargerScript('js/wizard-pratique-v2.js', globaux);
 describe('#319 Lot 5 — reconnaissance DEN (a)', () => {
     beforeEach(() => { store = []; });
 
-    it('deduireTypePratique : jugement → denotation (variante null)', () => {
+    it('deduireTypePratique : jugement → denotation (variante eliminee, créable depuis DEN-3)', () => {
         const c = win.deduireTypePratique({ calcNoteFinale: 'jugement' });
         expect(c.type).toBe('denotation');
-        expect(c.variante).toBeNull();
+        expect(c.variante).toBe('eliminee');
         expect(c.confiance).toBe(1.0);
     });
 
@@ -72,7 +73,7 @@ describe('#319 Lot 5 — reconnaissance DEN (a)', () => {
 describe('#319 Lot 5 — badge récap DEN (b)', () => {
     it('le récap d\'une DEN affiche le badge DEN, jamais SOM ni Indéterminé', () => {
         win.wizardState.reponses = { calcNoteFinale: 'jugement', typePratique: 'denotation' };
-        win.wizardState.modeEdition = true;   // DEN ne se crée pas : on édite
+        win.wizardState.modeEdition = true;   // recap en mode édition
         const html = win.genererRecapitulatif();
         expect(html).toContain('wizard-v2-recap-diagnostic--den');
         expect(html).toContain('DEN');
