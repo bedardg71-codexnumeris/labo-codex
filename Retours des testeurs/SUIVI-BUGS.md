@@ -1,7 +1,7 @@
 # Suivi des bugs testeurs
 
 > **Objectif** : Tracker les bugs rapportés par les testeurs pour éviter le travail en double.
-> **Dernière mise à jour** : 5 juin 2026 — ajout #131-#135 : 5 bugs du wizard de pratique relevés par l'audit de l'assistant de configuration (session Cowork, lecture de code intégrale de `wizard-pratique-v2.js`). Lot de correctifs purs → BACKLOG #317. Avant : 3 juin #130 corrigé en code (Suivi vide malgré groupe-cours actif). Fonction émergente « simuler/comparer des pratiques » → BACKLOG #307. Calcul par famille du profil = Session C (#303). Ouverts : #114-116, #118, #121, #131-#135.
+> **Dernière mise à jour** : 8 juin 2026 — #137 corrigé en code (assistant : « Je ne suis pas certain·e » reposait la même question → inférence comportementale ; working tree, release groupée avec DEN #318 après validation terrain). Avant : 5 juin #131-#135 (5 bugs du wizard relevés par l'audit de l'assistant, lot #317). 3 juin #130 (Suivi vide malgré groupe-cours actif). Fonction émergente « simuler/comparer des pratiques » → BACKLOG #307. Calcul par famille du profil = Session C (#303). Ouverts : #114-116, #118, #121, #131-#135.
 
 ---
 
@@ -23,6 +23,14 @@
 ---
 
 ---
+
+## Corrigés (8 juin 2026 — doublon de question dans l'assistant de pratique)
+
+> Corrigé en **code** (working tree, NON poussé — release groupée avec DEN couche 2 #318 après validation terrain). Sentinelle ajoutée.
+
+| # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
+|---|---------|--------------|---------|-------|-------------|------------|
+| 137 | Grégoire (terrain, captures — 8 juin 2026) | 8 juin 2026 | 8 juin 2026 (code) | à renseigner au bump (release groupée DEN-5 + ce fix) | **Assistant de pratique : « Je ne suis pas certain·e » repose la même question.** À l'étape `calcul-note-finale` (`wizard-pratique-v2.js`), choisir « Je ne suis pas certain·e » menait à `sous-questions-guidees`, qui reposait STRICTEMENT la même question (même champ `calcNoteFinale`, mêmes valeurs moyenne/niveaux/acceptable, même routage), juste reformulée à la 1re personne. Ça ne lève pas l'incertitude : qui ne s'est pas reconnu dans les familles nommées à l'écran 2 ne s'y reconnaît pas davantage à l'écran 3. `deduireTypePratique` lisait `calcNoteFinale` en clair — aucune inférence malgré le nom de la section. | **Changement d'AXE** : `sous-questions-guidees` pose désormais deux questions sur des GESTES observables — `uniteCorrection` (« sur une copie, tu inscris… » : pourcentage→SOM / niveau→STD / mention→SPE) et `sortReprise` (« la 1re note d'un travail repris et réussi… » : compte→SOM / remplacée→STD / exigence→SPE). La famille est **inférée** par le moteur UNIQUE `deduireTypePratique` (cas `pas-certain` → normalise vers la valeur canonique, branches existantes inchangées ; zéro duplication). Signaux divergents → 3e question comportementale de départage (`departage-pratique`), jamais d'impasse ni de retour à « nomme ta méthode ». Routage et chemins certains (#319 golden master) inchangés. Renderer `radio-cards` doté d'un énoncé optionnel (`question`) + `role="radiogroup"`/`aria-labelledby`. **Test** : `tests/unit/sentinelle-wizard-inference-comportementale.test.js` (16 cas : 3 concordants, 6 divergents→départage, départage tranche, cas partiel, non-régression certains). |
 
 ## Corrigés (8 juin 2026 — suppression d'une reprise laissait l'original « remplacé »)
 
