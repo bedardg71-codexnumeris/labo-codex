@@ -324,6 +324,7 @@
     --section-evaluations: #6ec1e7;   /* bleu fluo sky — stabilité/observation
                                          (data-onglet "evaluations" au pluriel). */
     --section-labo:        #d1aff4;   /* violet pastel — expérimental/funky */
+    --accent-coeur:        #ff6f91;   /* rose/rouge — bouton « Soutenir » (cœur), distinct de l'orange des voisines */
 
     /* Couleur médiane du bandeau nav, utilisée pour background-blend-mode:
        multiply. Mode sombre = milieu du gradient sarcelle. Redéfinie en
@@ -1289,6 +1290,16 @@ span.header-icon {
     -webkit-mask-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgMzAgMzAiIHdpZHRoPSIzMHB4IiBoZWlnaHQ9IjMwcHgiPiAgICA8cGF0aCBkPSJNIDcgMy4wMDE5NTMxIEMgNS44OTUgMy4wMDE5NTMxIDUgMy44OTY5NTMxIDUgNS4wMDE5NTMxIEwgNSAyNS4wMDM5MDYgQyA1IDI2LjEwODkwNiA1Ljg5MTA5MzggMjYuOTk4MDQ3IDYuOTk2MDkzOCAyNi45OTgwNDcgQyA4LjY1Mzc2MTEgMjYuOTk3NjkzIDEwLjEzNDA4IDI2Ljk5OTY2MyAxMi42NTYyNSAyNyBMIDEyLjY1NjI1IDI3LjAwMTk1MyBMIDE0LjQxNDA2MiAyOC43NTc4MTIgQyAxNC43MzgwNjIgMjkuMDgwODEzIDE1LjI2MTkzOCAyOS4wODA4MTMgMTUuNTg1OTM4IDI4Ljc1NzgxMiBMIDE3LjM0Mzc1IDI3LjAwMTk1MyBMIDE3LjM0Mzc1IDI3IEMgMTkuMzc4NTM1IDI3LjAwMDQ0IDIzIDI3LjAwMTk1MyAyMyAyNy4wMDE5NTMgQyAyNC4xMDUgMjcuMDAxOTUzIDI1IDI2LjEwNjk1MyAyNSAyNS4wMDE5NTMgTCAyNSA1LjAwMTk1MzEgQyAyNSAzLjg5Njk1MzEgMjQuMTA1IDMuMDAxOTUzMSAyMyAzLjAwMTk1MzEgTCA3IDMuMDAxOTUzMSB6IE0gMTUgOC41IEMgMTUuODI4IDguNSAxNi41IDkuMTcyIDE2LjUgMTAgQyAxNi41IDEwLjgyOCAxNS44MjggMTEuNSAxNSAxMS41IEMgMTQuMTcyIDExLjUgMTMuNSAxMC44MjggMTMuNSAxMCBDIDEzLjUgOS4xNzIgMTQuMTcyIDguNSAxNSA4LjUgeiBNIDE0IDE0IEwgMTYgMTQgTCAxNiAyMSBMIDE0IDIxIEwgMTQgMTQgeiIvPjwvc3ZnPg==");
             mask-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgMzAgMzAiIHdpZHRoPSIzMHB4IiBoZWlnaHQ9IjMwcHgiPiAgICA8cGF0aCBkPSJNIDcgMy4wMDE5NTMxIEMgNS44OTUgMy4wMDE5NTMxIDUgMy44OTY5NTMxIDUgNS4wMDE5NTMxIEwgNSAyNS4wMDM5MDYgQyA1IDI2LjEwODkwNiA1Ljg5MTA5MzggMjYuOTk4MDQ3IDYuOTk2MDkzOCAyNi45OTgwNDcgQyA4LjY1Mzc2MTEgMjYuOTk3NjkzIDEwLjEzNDA4IDI2Ljk5OTY2MyAxMi42NTYyNSAyNyBMIDEyLjY1NjI1IDI3LjAwMTk1MyBMIDE0LjQxNDA2MiAyOC43NTc4MTIgQyAxNC43MzgwNjIgMjkuMDgwODEzIDE1LjI2MTkzOCAyOS4wODA4MTMgMTUuNTg1OTM4IDI4Ljc1NzgxMiBMIDE3LjM0Mzc1IDI3LjAwMTk1MyBMIDE3LjM0Mzc1IDI3IEMgMTkuMzc4NTM1IDI3LjAwMDQ0IDIzIDI3LjAwMTk1MyAyMyAyNy4wMDE5NTMgQyAyNC4xMDUgMjcuMDAxOTUzIDI1IDI2LjEwNjk1MyAyNSAyNS4wMDE5NTMgTCAyNSA1LjAwMTk1MzEgQyAyNSAzLjg5Njk1MzEgMjQuMTA1IDMuMDAxOTUzMSAyMyAzLjAwMTk1MzEgTCA3IDMuMDAxOTUzMSB6IE0gMTUgOC41IEMgMTUuODI4IDguNSAxNi41IDkuMTcyIDE2LjUgMTAgQyAxNi41IDEwLjgyOCAxNS44MjggMTEuNSAxNSAxMS41IEMgMTQuMTcyIDExLjUgMTMuNSAxMC44MjggMTMuNSAxMCBDIDEzLjUgOS4xNzIgMTQuMTcyIDguNSAxNSA4LjUgeiBNIDE0IDE0IEwgMTYgMTQgTCAxNiAyMSBMIDE0IDIxIEwgMTQgMTQgeiIvPjwvc3ZnPg==");
 }
+
+/* Soutenir (cœur plein) : masque base64 (contournement CORS file://) teinté rose/rouge,
+   distinct de l'orange des voisines. Source : icons/icons8-heart.svg. */
+.ico-coeur { background-color: var(--accent-coeur); }
+.ico-coeur {
+    -webkit-mask-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgMzAgMzAiIHdpZHRoPSIzMHB4IiBoZWlnaHQ9IjMwcHgiPiAgICA8cGF0aCBkPSJNIDkuNTQ0OTIxOSA0IEMgNS45Mjk5MjE5IDQgMyA2LjkyOTkyMTkgMyAxMC41NDQ5MjIgQyAzIDE2LjgzNzMyMSAxMC4yOTg5NzUgMjIuODQ5Nzk5IDEzLjcwODk4NCAyNS41MjczNDQgQSAyIDIgMCAwIDAgMTMuNzE4NzUgMjUuNTM1MTU2IEMgMTMuNzQyMTE1IDI1LjU1MzUgMTMuNzczODgxIDI1LjU3OTYyOSAxMy43OTY4NzUgMjUuNTk3NjU2IEwgMTMuNzk4ODI4IDI1LjU5NTcwMyBBIDIgMiAwIDAgMCAxNSAyNiBBIDIgMiAwIDAgMCAxNi4yMDMxMjUgMjUuNTk1NzAzIEwgMTYuMjAzMTI1IDI1LjU5NzY1NiBDIDE2LjIwOTg1NSAyNS41OTIzOCAxNi4yMTk4MDEgMjUuNTg1MzgxIDE2LjIyNjU2MiAyNS41ODAwNzggQyAxNi4yMzE3MDQgMjUuNTc2MDQ1IDE2LjIzODk4IDI1LjU3MDQ1NSAxNi4yNDQxNDEgMjUuNTY2NDA2IEEgMiAyIDAgMCAwIDE2LjI2MzY3MiAyNS41NDg4MjggQyAxOS42NjMxMDkgMjIuODgwOTA0IDI3IDE2Ljg1MjMzNiAyNyAxMC41NDQ5MjIgQyAyNyA2LjkyOTkyMTkgMjQuMDcwMDc4IDQgMjAuNDU1MDc4IDQgQyAxNy4wMDAwNzggNCAxNSA3IDE1IDcgQyAxNSA3IDEyLjk5OTkyMiA0IDkuNTQ0OTIxOSA0IHoiLz48L3N2Zz4=");
+            mask-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgMzAgMzAiIHdpZHRoPSIzMHB4IiBoZWlnaHQ9IjMwcHgiPiAgICA8cGF0aCBkPSJNIDkuNTQ0OTIxOSA0IEMgNS45Mjk5MjE5IDQgMyA2LjkyOTkyMTkgMyAxMC41NDQ5MjIgQyAzIDE2LjgzNzMyMSAxMC4yOTg5NzUgMjIuODQ5Nzk5IDEzLjcwODk4NCAyNS41MjczNDQgQSAyIDIgMCAwIDAgMTMuNzE4NzUgMjUuNTM1MTU2IEMgMTMuNzQyMTE1IDI1LjU1MzUgMTMuNzczODgxIDI1LjU3OTYyOSAxMy43OTY4NzUgMjUuNTk3NjU2IEwgMTMuNzk4ODI4IDI1LjU5NTcwMyBBIDIgMiAwIDAgMCAxNSAyNiBBIDIgMiAwIDAgMCAxNi4yMDMxMjUgMjUuNTk1NzAzIEwgMTYuMjAzMTI1IDI1LjU5NzY1NiBDIDE2LjIwOTg1NSAyNS41OTIzOCAxNi4yMTk4MDEgMjUuNTg1MzgxIDE2LjIyNjU2MiAyNS41ODAwNzggQyAxNi4yMzE3MDQgMjUuNTc2MDQ1IDE2LjIzODk4IDI1LjU3MDQ1NSAxNi4yNDQxNDEgMjUuNTY2NDA2IEEgMiAyIDAgMCAwIDE2LjI2MzY3MiAyNS41NDg4MjggQyAxOS42NjMxMDkgMjIuODgwOTA0IDI3IDE2Ljg1MjMzNiAyNyAxMC41NDQ5MjIgQyAyNyA2LjkyOTkyMTkgMjQuMDcwMDc4IDQgMjAuNDU1MDc4IDQgQyAxNy4wMDAwNzggNCAxNSA3IDE1IDcgQyAxNSA3IDEyLjk5OTkyMiA0IDkuNTQ0OTIxOSA0IHoiLz48L3N2Zz4=");
+}
+/* Cœur plein = glyphe plus « lourd » que les icônes au trait voisines → légèrement réduit. */
+.btn-icon-header .ico-coeur { width: 16px; height: 16px; }
 
 /* Boutons icône-seule dans l'en-tête (bug, thème) */
 .btn-icon-header {
@@ -4542,6 +4553,55 @@ body:not(.mode-clair) .badge-source--demo {
 .modal-section p {
     line-height: 1.6;
     margin: 0;
+}
+
+/* Modale « Soutenir Labo Codex » (bouton cœur de l'entête) */
+.modal-contenu.modal-soutien {
+    max-width: 640px;
+}
+.soutien-intro {
+    line-height: 1.6;
+    margin: 0 0 18px 0;
+    color: var(--gris-texte);
+}
+.soutien-groupe-titre {
+    color: var(--accent-primaire);
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 18px 0 8px 0;
+}
+.soutien-liste {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.soutien-liste li {
+    position: relative;
+    padding: 8px 0 8px 18px;
+    line-height: 1.55;
+    border-bottom: 1px solid var(--bordure-claire);
+}
+.soutien-liste li:last-child {
+    border-bottom: none;
+}
+.soutien-liste li::before {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 16px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent-primaire);
+}
+.soutien-lien {
+    color: var(--accent-primaire);
+    font-weight: 600;
+    text-decoration: underline;
+}
+.soutien-lien:hover,
+.soutien-lien:focus {
+    text-decoration: none;
 }
 
 .modal-liste {

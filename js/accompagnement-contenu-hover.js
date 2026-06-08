@@ -44,6 +44,11 @@ const TOOLTIPS = {
     'entete-reglages':
         'Configure ici ton trimestre, ton cours, tes groupes et ton horaire — les mêmes informations que dans ton plan de cours.',
 
+    // --- Soutien ---
+
+    'entete-soutien':
+        'Plusieurs façons de soutenir Labo Codex : rejoindre la communauté de pratique, en parler à tes collègues, suivre le blogue ou contribuer financièrement.',
+
     // =================================================================
     // T2 — RÉGLAGES — Configuration de base
     // =================================================================
