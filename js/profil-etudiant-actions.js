@@ -189,8 +189,16 @@ function _diagnostiquerNoteNonCalculable() {
     if (famille === 'specifications' || methode === 'specifications') {
         return 'Cette pratique est de type Spécifications (exigences/seuils). Son calcul dans le profil n\'est pas encore branché. Tes données sont cohérentes – c\'est l\'affichage qui ne couvre pas encore cette famille (à venir).';
     }
+    if (famille === 'denotation' || methode === 'jugement_global') {
+        // DEN couche 2 (#318, DEN-4) : la note finale est un JUGEMENT saisi, pas un
+        // calcul sur les artefacts — elle ne « manque » pas, elle se pose. On oriente
+        // donc l'enseignant vers la saisie plutôt que vers une config à corriger.
+        return 'Cette pratique est de type Dénotation : la note finale est un jugement que tu poses, pas un calcul sur les artefacts. Ouvre la section « Jugement » du profil pour confirmer les cibles atteintes et saisir la note (la garde « cibles atteintes » conditionne la certification ≥ 60).';
+    }
     return 'Pratique PAN-Standards, mais sa configuration de portfolio (nombre d\'artefacts à retenir, minimum requis) est absente ou incomplète. Ouvre « Réglages de la pratique » pour la compléter.';
 }
+// #318 DEN-4 : exposé pour la sentinelle du diagnostic DEN (diagnostic-denotation-DEN4).
+window._diagnostiquerNoteNonCalculable = _diagnostiquerNoteNonCalculable;
 
 function _obtenirConfigPortfolioCalcul(modalites, pratiqueIdDemande = null) {
     // Phase G2-a (24 mai 2026) : la pratique active est lue UNIQUEMENT depuis

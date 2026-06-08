@@ -66,11 +66,15 @@ function normaliserIdPratique(id) {
 //   pour les usages hors badge (style inline, Chart.js).
 // - famille : « Sommative » (SOM) ou « PAN » (STD/SPE/DEN) — « PAN » est un libellé
 //   de famille, plus un préfixe technique (décision 29 mai 2026).
+// Taxonomie (#318, DEN-F) : le badge « PAN » est conservé pour l'UI (cohérence avec
+// le billet CoP vulgarisé), MAIS la dénotation est académiquement une PRÉN (pratique
+// de réduction/élimination de la notation), pas une PAN (Girouard-Gagné et al. 2024).
+// Distinction documentée ici, dans SKILL_pratiques_notation §2 bis, et dans le guide PAN.
 const REPRESENTATIONS_PRATIQUES = {
     sommative:      { code: 'SOM', couleurVar: '--som-orange', famille: 'Sommative' },
     standards:      { code: 'STD', couleurVar: '--std-bleu',   famille: 'PAN' },
     specifications: { code: 'SPE', couleurVar: '--spe-vert',   famille: 'PAN' },
-    denotation:     { code: 'DEN', couleurVar: '--den-violet', famille: 'PAN' }
+    denotation:     { code: 'DEN', couleurVar: '--den-violet', famille: 'PAN' } // PRÉN académiquement (voir note ci-dessus)
 };
 
 // Représentation par défaut = celle de la pratique par défaut (Standards).
