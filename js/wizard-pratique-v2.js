@@ -79,6 +79,53 @@ function champsReprises(defaut) {
     ];
 }
 
+// ───────────────────────────────────────────────────────────────────────────
+// INFÉRENCE COMPORTEMENTALE (bug testeur 8 juin : « pas-certain »)
+// Le novice qui ne s'est pas reconnu dans les familles nommées ne se reconnaîtra
+// pas davantage en les reformulant. On l'interroge donc sur ce qu'il FAIT (gestes
+// observables) et on INFÈRE la famille. Un seul moteur de déduction (deduireTypePratique
+// consomme ces signaux) ; ces helpers ne font que cartographier signal → famille.
+// Déclarations de fonction → hoistées, donc appelables dans le littéral ETAPES_WIZARD.
+
+// Cartographie d'un signal vers la valeur canonique calcNoteFinale (pas la famille
+// directement : on réutilise ensuite les branches existantes de deduireTypePratique
+// ET le routage existant — zéro duplication du mapping famille→config).
+const _SIGNAUX_FAMILLE = {
+    uniteCorrection:   { pourcentage: 'moyenne', niveau: 'niveaux', mention: 'acceptable' },
+    sortReprise:       { compte: 'moyenne', remplacee: 'niveaux', exigence: 'acceptable' },
+    departagePratique: { somme: 'moyenne', maitrise: 'niveaux', exigences: 'acceptable' }
+};
+
+/**
+ * Infère la valeur canonique `calcNoteFinale` à partir des gestes observables.
+ * - départage répondu → tranche directement ;
+ * - deux signaux concordants → la famille commune ;
+ * - signaux divergents → null (l'étape route vers le départage comportemental) ;
+ * - un seul signal présent → ce signal.
+ * @returns {'moyenne'|'niveaux'|'acceptable'|null}
+ */
+function _infererFamilleComportementale(reponses) {
+    const dep = _SIGNAUX_FAMILLE.departagePratique[reponses.departagePratique];
+    if (dep) return dep;
+    const u = _SIGNAUX_FAMILLE.uniteCorrection[reponses.uniteCorrection];
+    const r = _SIGNAUX_FAMILLE.sortReprise[reponses.sortReprise];
+    if (u && r) return (u === r) ? u : null;   // divergence → départage
+    return u || r || null;
+}
+
+/**
+ * Routage après une étape d'inférence comportementale. Réutilise le moteur unique
+ * (deduireTypePratique) puis les étapes de config existantes. Renvoie l'étape de
+ * départage si les signaux divergent encore (jamais d'impasse, jamais « nomme ta méthode »).
+ */
+function _etapeApresInference(reponses) {
+    const cls = deduireTypePratique(reponses);
+    if (cls.type === 'sommative') return 'regles-sommative';
+    if (cls.type === 'standards') return 'approche-evaluation';
+    if (cls.type === 'specifications') return 'nb-evaluations';
+    return 'departage-pratique';
+}
+
 /**
  * Configuration de toutes les étapes du wizard
  * Chaque étape définit son contenu, sa validation et sa navigation
@@ -303,43 +350,69 @@ const ETAPES_WIZARD = {
         precedent: () => 'entree-pratique'
     },
 
+    // Bug testeur 8 juin : cet écran reposait STRICTEMENT la même question que
+    // 'calcul-note-finale' (même champ calcNoteFinale, mêmes valeurs, juste reformulé).
+    // Reformuler ne lève pas l'incertitude. On change d'AXE : deux questions sur ce
+    // que l'enseignant FAIT (gestes observables), jamais sur le nom de sa méthode, et
+    // on INFÈRE la famille (deduireTypePratique consomme uniteCorrection/sortReprise).
     'sous-questions-guidees': {
         id: 'sous-questions-guidees',
         titre: 'Identifions ta méthode',
-        description: 'Choisis l\'énoncé qui décrit le mieux ta pratique de notation.',
+        description: 'Deux questions sur ce que tu fais concrètement — pas besoin de nommer ta méthode, on la déduit.',
         branche: 'commune',
         ordre: 2,
         champs: [
             {
-                id: 'calcNoteFinale',
+                id: 'uniteCorrection',
                 type: 'radio-cards',
                 required: true,
+                question: 'Sur une copie corrigée, tu inscris le plus souvent…',
                 options: [
-                    {
-                        value: 'moyenne',
-                        label: 'Je calcule une moyenne de pourcentages',
-                        description: 'Chaque évaluation vaut un certain pourcentage de la note finale (ex: examen 30%, travail 20%). Je fais la somme pondérée.'
-                    },
-                    {
-                        value: 'niveaux',
-                        label: 'J\'attribue des niveaux de maîtrise',
-                        description: 'J\'utilise des échelons comme A-B-C-D, 1-2-3-4 ou I-D-M-E pour évaluer chaque apprentissage, puis je convertis en note.'
-                    },
-                    {
-                        value: 'acceptable',
-                        label: 'Je vérifie si des critères sont réussis ou non',
-                        description: 'Chaque travail est acceptable ou non. La note dépend du nombre de critères/spécifications satisfaits.'
-                    }
+                    { value: 'pourcentage', label: 'Un pourcentage ou une note chiffrée', description: 'Ex. 78 %, 17 sur 20.' },
+                    { value: 'niveau', label: 'Un niveau ou une cote', description: 'Ex. A, I-D-M-E, 3 sur 4.' },
+                    { value: 'mention', label: 'Une mention atteint / non atteint', description: 'Ex. réussi, à reprendre.' }
+                ]
+            },
+            {
+                id: 'sortReprise',
+                type: 'radio-cards',
+                required: true,
+                question: 'Un élève rate un travail, le reprend et réussit. La première note…',
+                options: [
+                    { value: 'compte', label: 'Compte encore dans la moyenne', description: 'Les deux résultats pèsent dans la note finale.' },
+                    { value: 'remplacee', label: 'Est remplacée — seul le meilleur niveau compte', description: 'On retient le meilleur résultat, pas l\'historique.' },
+                    { value: 'exigence', label: 'N\'a pas vraiment de sens en soi', description: 'Ce qui compte, c\'est que l\'exigence finisse par être satisfaite.' }
                 ]
             }
         ],
-        suivant: (reponses) => {
-            if (reponses.calcNoteFinale === 'moyenne') return 'regles-sommative';
-            if (reponses.calcNoteFinale === 'niveaux') return 'approche-evaluation';
-            if (reponses.calcNoteFinale === 'acceptable') return 'nb-evaluations';
-            return null;
-        },
+        suivant: (reponses) => _etapeApresInference(reponses),
         precedent: () => 'calcul-note-finale'
+    },
+
+    // Départage comportemental — atteint UNIQUEMENT quand les deux signaux ci-dessus
+    // pointent des familles différentes (pratique hybride/floue). Jamais d'impasse,
+    // jamais de retour à « nomme ta méthode » : une 3e question sur le geste.
+    'departage-pratique': {
+        id: 'departage-pratique',
+        titre: 'Une dernière précision',
+        description: 'Tes deux réponses pointent vers des approches différentes — une question pour trancher.',
+        branche: 'commune',
+        ordre: 2,
+        champs: [
+            {
+                id: 'departagePratique',
+                type: 'radio-cards',
+                required: true,
+                question: 'À la fin de la session, la note d\'un élève reflète surtout…',
+                options: [
+                    { value: 'somme', label: 'La somme de ses résultats accumulés', description: 'La note additionne ou moyenne ce qui a été obtenu au fil de la session.' },
+                    { value: 'maitrise', label: 'Son niveau de maîtrise le plus avancé', description: 'Ce qui compte est le meilleur niveau atteint, pas l\'historique des essais.' },
+                    { value: 'exigences', label: 'Le nombre d\'exigences qu\'il a fini par satisfaire', description: 'La note dépend des exigences satisfaites, peu importe quand.' }
+                ]
+            }
+        ],
+        suivant: (reponses) => _etapeApresInference(reponses),
+        precedent: () => 'sous-questions-guidees'
     },
 
     'regles-sommative': {
@@ -1685,9 +1758,18 @@ function genererRadioCards(champ) {
         `;
     }).join('');
 
+    // Énoncé optionnel (champ.question) : un radio-cards comportemental porte sa
+    // propre question (l'étape peut en empiler plusieurs). Absent → markup inchangé.
+    const idQ = WIZARD_V2_ID_PREFIX + champ.id + '-q';
+    const enonce = champ.question
+        ? `<p class="wizard-v2-question" id="${idQ}">${echapperHtml(champ.question)}</p>`
+        : '';
+    const a11y = champ.question ? ` role="radiogroup" aria-labelledby="${idQ}"` : '';
+
     return `
         <div class="wizard-v2-champ">
-            <div class="wizard-v2-radio-cards">
+            ${enonce}
+            <div class="wizard-v2-radio-cards"${a11y}>
                 ${cards}
             </div>
         </div>
@@ -2334,7 +2416,17 @@ function restaurerValeursEtape(etapeId) {
  * @returns {{ type: string, variante: string, regles: string[], confiance: number }}
  */
 function deduireTypePratique(reponses) {
-    const q1 = reponses.calcNoteFinale;
+    let q1 = reponses.calcNoteFinale;
+
+    // Cas « pas-certain » (bug testeur 8 juin) : ne PAS reposer la question nommée.
+    // On infère la famille à partir des gestes observables (unité de correction, sort
+    // de la reprise, départage éventuel) et on NORMALISE vers la valeur canonique —
+    // les branches ci-dessous produisent ensuite type + variante (moteur unique).
+    if (q1 === 'pas-certain') {
+        const inf = _infererFamilleComportementale(reponses);
+        if (!inf) return { type: null, variante: null, regles: [], confiance: 0 }; // divergent → départage
+        q1 = inf;
+    }
 
     if (q1 === 'moyenne') {
         const regles = reponses.reglesSommatives || [];
@@ -2980,6 +3072,9 @@ window.etapeSuivanteV2 = etapeSuivanteV2;
 window.etapePrecedenteV2 = etapePrecedenteV2;
 window.creerPratiqueV2 = creerPratiqueV2;
 window.deduireTypePratique = deduireTypePratique;
+// Bug testeur 8 juin : exposé pour la sentinelle d'inférence comportementale.
+window._etapeApresInference = _etapeApresInference;
+window._infererFamilleComportementale = _infererFamilleComportementale;
 window.wizardV2GererExclusionCheckbox = wizardV2GererExclusionCheckbox;
 window.wizardV2CreerGrilleDemo = wizardV2CreerGrilleDemo;
 window.wizardV2VoieRapide = wizardV2VoieRapide;

@@ -11927,6 +11927,22 @@ label:has(+ textarea:disabled) {
 }
 
 /* Radio cards */
+/* Énoncé d'un radio-cards comportemental (#318 voisin — bug « pas-certain » 8 juin) :
+   un radio-cards peut porter sa propre question (l'étape en empile plusieurs). */
+.wizard-v2-question {
+    margin: 0 0 10px 0;
+    font-weight: 600;
+    color: var(--gris-texte);
+    line-height: 1.5;
+}
+.wizard-v2-question + .wizard-v2-radio-cards {
+    margin-bottom: 4px;
+}
+/* Espace entre deux groupes de questions empilés dans une même étape. */
+.wizard-v2-champ + .wizard-v2-champ .wizard-v2-question {
+    margin-top: 4px;
+}
+
 .wizard-v2-radio-cards {
     display: flex;
     flex-direction: column;
