@@ -71,13 +71,35 @@ describe('inférence comportementale · le départage tranche', () => {
     });
 });
 
-describe('inférence comportementale · cas partiel (un seul signal)', () => {
-    it('uniteCorrection seul → famille de ce signal', () => {
-        expect(deduire({ calcNoteFinale: 'pas-certain', uniteCorrection: 'niveau' }).type).toBe('standards');
+describe('inférence comportementale · routage incomplet → fin de traversée (anti-auto-boucle)', () => {
+    // Bug d'affichage 1.3.0 : tant qu'un geste manque, le routage doit rendre null
+    // (fin de parcours), JAMAIS 'departage-pratique' — sinon le compteur d'étapes
+    // bouclait sur lui-même (≈ 40 points parasites en tête de carte).
+    it('aucun signal → routage null', () => {
+        expect(router({ calcNoteFinale: 'pas-certain' })).toBeNull();
     });
-    it('aucun signal → null (l\'étape reste à répondre, pas d\'impasse silencieuse)', () => {
-        expect(deduire({ calcNoteFinale: 'pas-certain' }).type).toBeNull();
-        expect(router({ calcNoteFinale: 'pas-certain' })).toBe('departage-pratique');
+    it('un seul geste répondu → routage null (les deux sont requis)', () => {
+        expect(router({ calcNoteFinale: 'pas-certain', uniteCorrection: 'niveau' })).toBeNull();
+        expect(router({ calcNoteFinale: 'pas-certain', sortReprise: 'compte' })).toBeNull();
+    });
+    it('deux gestes répondus → route vraiment (jamais bloqué à null)', () => {
+        expect(router({ calcNoteFinale: 'pas-certain', uniteCorrection: 'niveau', sortReprise: 'remplacee' })).toBe('approche-evaluation');
+        expect(router({ calcNoteFinale: 'pas-certain', uniteCorrection: 'pourcentage', sortReprise: 'remplacee' })).toBe('departage-pratique');
+    });
+});
+
+describe('inférence comportementale · compteur d\'étapes borné (régression 1.3.0)', () => {
+    it('calculerNbEtapes ne s\'emballe pas sur le parcours pas-certain', () => {
+        win.wizardState.etapeInitiale = 'calcul-note-finale';
+        win.wizardState.reponses = { calcNoteFinale: 'pas-certain' }; // gestes pas encore répondus
+        const n = win.calculerNbEtapes();
+        expect(n).toBeGreaterThan(0);
+        expect(n).toBeLessThan(10);   // l'auto-boucle saturait à ~50
+    });
+    it('reste borné même quand les gestes divergent (départage atteint, pas de boucle)', () => {
+        win.wizardState.etapeInitiale = 'calcul-note-finale';
+        win.wizardState.reponses = { calcNoteFinale: 'pas-certain', uniteCorrection: 'pourcentage', sortReprise: 'remplacee' };
+        expect(win.calculerNbEtapes()).toBeLessThan(12);
     });
 });
 
