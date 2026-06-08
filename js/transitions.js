@@ -6,8 +6,10 @@
  * Source : docs/refonte-textes/textes-manquants-bloc4.md (validé 19 avril 2026)
  *
  * Architecture :
- * - 3 transitions avec condition() + message + clé de mémorisation
+ * - 3 transitions avec condition() + message + clé de mémorisation + sections cibles
  * - Déclenchement : écoute l'événement `sectionAffichee` + re-évaluation
+ * - Ciblage : chaque bandeau ne s'affiche que dans sa/ses section(s) pertinente(s)
+ *   (champ `sections`) — sinon il déborde hors contexte (ex. sur l'accueil)
  * - Mémorisation : préférences globales (non préfixées par trimestre)
  * - Affichage : bandeau fixe en bas de l'écran, fermeture explicite
  */
@@ -47,6 +49,9 @@ var TRANSITIONS = [
     {
         id: 'numerisation-croisement',
         dejaVuePref: 'transition_num_crois_vue',
+        // Section où le bandeau a du sens (l'appel à l'action « saisir présences
+        // et évaluer » relève de l'Évaluation). Vide/absent = aucune restriction.
+        sections: ['evaluations'],
         condition: function() {
             // groupeCoursActif est une clé GLOBALE (stocke l'ID du GC actif)
             return !!lireCleGlobale('groupeCoursActif', null);
@@ -57,6 +62,8 @@ var TRANSITIONS = [
     {
         id: 'croisement-observation',
         dejaVuePref: 'transition_crois_obs_vue',
+        // Parle du tableau de bord et de l'observation du groupe → Suivi.
+        sections: ['suivi'],
         condition: function() {
             return nbTrim('evaluationsSauvegardees') > 0;
         },
@@ -65,6 +72,9 @@ var TRANSITIONS = [
     {
         id: 'observation-competence',
         dejaVuePref: 'transition_obs_comp_vue',
+        // Signaux du tableau de bord, interventions, alignement → Suivi (et non
+        // l'accueil, où il s'affichait hors contexte).
+        sections: ['suivi'],
         condition: function() {
             // Proxy : suffisamment de données pour détecter des signaux RàI.
             return nbTrim('evaluationsSauvegardees') >= 5;
@@ -158,14 +168,29 @@ function afficherBandeau(transition) {
 // Évaluation
 // =========================================================================
 
+// Section principale courante (variable globale de config.js/navigation.js).
+// typeof reste sûr en mode strict même si le script n'est pas encore chargé.
+function sectionPrincipaleCourante() {
+    return (typeof sectionActive !== 'undefined') ? sectionActive : null;
+}
+
+// Le bandeau ne s'affiche que dans sa/ses section(s) pertinente(s). Sans champ
+// `sections`, aucune restriction (rétro-compatible).
+function cibleSectionCourante(transition) {
+    if (!transition.sections || !transition.sections.length) return true;
+    return transition.sections.indexOf(sectionPrincipaleCourante()) !== -1;
+}
+
 function evaluerTransitions() {
     // Ne pas afficher si un bandeau est déjà visible
     if (document.getElementById(ID_BANDEAU)) return;
 
-    // Parcourir dans l'ordre : afficher la première non vue + déclenchée
+    // Parcourir dans l'ordre : afficher la première non vue + déclenchée + dans
+    // sa section pertinente (évite les messages hors contexte, ex. sur l'accueil).
     for (var i = 0; i < TRANSITIONS.length; i++) {
         var t = TRANSITIONS[i];
         if (estDejaVue(prefPourMode(t))) continue;
+        if (!cibleSectionCourante(t)) continue;
         try {
             if (t.condition()) {
                 afficherBandeau(t);
