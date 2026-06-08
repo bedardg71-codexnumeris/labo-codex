@@ -81,6 +81,12 @@ test('bouton Soutenir : ouvre la modale avec le bon contenu + liens', async ({ p
         await expect(lien).toHaveAttribute('target', '_blank');
     }
 
+    // Contact : section « Nous écrire » avec un lien mailto.
+    await expect(modal).toContainText('demande de présentation');
+    const mailto = modal.locator('a[href="mailto:labo@codexnumeris.org"]');
+    await expect(mailto).toHaveCount(1);
+    await expect(mailto).toHaveText('labo@codexnumeris.org');
+
     // Focus déplacé dans la modale (bouton de fermeture).
     const focusDansModale = await page.evaluate(() => {
         const m = document.getElementById('modalSoutien');

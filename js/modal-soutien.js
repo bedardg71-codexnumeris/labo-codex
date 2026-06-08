@@ -63,6 +63,11 @@
                         <li><a class="soutien-lien" href="https://codexnumeris.org/#/portal/gift" target="_blank" rel="noopener noreferrer">Offrir un abonnement de soutien</a> à un·e collègue.</li>
                         <li><a class="soutien-lien" href="https://codexnumeris.org/#/portal/support" target="_blank" rel="noopener noreferrer">Faire un don à Codex Numeris.</a></li>
                     </ul>
+
+                    <h4 class="soutien-groupe-titre">Nous écrire</h4>
+                    <ul class="soutien-liste">
+                        <li>Un commentaire, une question, ou une demande de présentation de l'application ? Écris-nous à <a class="soutien-lien" href="mailto:labo@codexnumeris.org">labo@codexnumeris.org</a>.</li>
+                    </ul>
                 </div>
             </div>
         </div>`;
