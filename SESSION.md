@@ -1,5 +1,47 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 8 juin 2026 — Cowork, conception axe D).
+     IDENTIFICATION DE CE FICHIER  (mis à jour 8 juin 2026 — Claude Code, DEN couche 2 #318 lots 0→4).
+     Session du 8 juin (Claude Code — DEN couche 2 #318, lots DEN-0 à DEN-4) :
+     IMPLÉMENTATION de la Dénotation (famille DEN « éliminée ») selon
+     `plans de travail/SPEC_DEN_couche2.md`. 6 commits sur `main`, EN AVANCE DE 6
+     sur origin, AUCUN PUSH (validation terrain Grégoire requise avant DEN-5/release).
+       • `af079404` docs(cowork) : commit séparé des docs de conception du 8 juin
+         (SPEC DEN couche 2 + SPEC axe D + notes modèle/parenté ; BACKLOG/SESSION/2 skills).
+         NB : la « modif comparateur non commitée » de la prémisse était PÉRIMÉE
+         (déjà livrée à 1.2.1 `5624655f`) — seuls les docs Cowork restaient à trier.
+       • `73ad3d71` DEN-0 (modèle) : module SSOT `js/pratiques/denotation-jugements.js`
+         (collection `jugementsDenotation` namespacée ; reconnaissance + validation config
+         « éliminée » + lecture). Entrée DATA-OWNERSHIP.md. 17 tests Vitest.
+       • `0c2560c0` DEN-1 (moteur) : helper pur partagé `window.suggererNoteHolistique`
+         (extrait de `_calculerModeHolistique`, PARITÉ STD golden master) +
+         `_calculerPerformanceDenotation` (garde « cibles atteintes » par cible →
+         plafond 59 RREC ; toutes → note saisie ; pas de saisie → null). Branché par
+         COURT-CIRCUIT en tête de `calculerPerformance` (PAS dans le switch : la note DEN
+         est indépendante d'`indicesCP`). 16 tests.
+       • `0aff853d` DEN-2 (UI) : `js/pratiques/denotation-saisie-ui.js` +
+         section « Jugement » conditionnelle dans le profil étudiant (cibles à cocher,
+         suggestion en ancrage, note + justification, garde live, écriture namespacée).
+         CSS `.den-*` (variables). 2 tests Playwright. + écriture `ecrireJugementDenotation`.
+       • `c9d710dc` DEN-3 (création) : carte DEN activée dans la voie rapide de l'assistant
+         (valeur 'jugement'), étape `config-denotation` (cibles une par ligne → ids stables,
+         méthode suggestion, mode eliminee, framing Dyer), assemblage complet
+         (calcul_note jugement_global, configuration, badge DEN, récap). Sentinelle #319
+         Lot 5 mise à jour (variante null → eliminee). 1 Vitest + 1 Playwright (création réelle
+         → calculable).
+       • `f1b655b9` DEN-4 (diagnostic + doc) : cas DEN dans `_diagnostiquerNoteNonCalculable`
+         (#128, oriente vers la saisie, pas la config portfolio) ; note PRÉN≠PAN au registre ;
+         SKILL_pratiques_notation.md §8 réécrit + §9 + HISTORIQUE (avec le code) ; DEN
+         non-simulable confirmé (simulerIndices → noteFinale null → « — »). 3 tests.
+     ÉTAT TESTS : 328 Vitest + 39 Playwright VERTS. Pas de bump (réservé DEN-5).
+     RESTE — DEN-5 : (1) VALIDATION TERRAIN Grégoire (Mac + iPad, sombre + clair) :
+     créer une DEN → assigner → section Jugement → garde 59/succès → saisie persistée ;
+     (2) sur go : `node scripts/release.mjs minor` + 1 entrée changelog (texte proposé :
+     « Dénotation (DEN) — nouvelle famille : note finale = jugement gardé par l'atteinte
+     des cibles ; création dans l'assistant, saisie dans le profil ») + PUSH.
+     Réserve connue : la note DEN transite par l'instance `calculerPerformance` (fallback
+     portfolio.js), PAS par le chemin procédural `calculerDetailsNoteFinale` — le widget
+     « note finale » du profil affichera donc le diagnostic DEN tant que ce câblage
+     procédural n'est pas fait (hors périmètre couche 2 ; à évaluer si besoin terrain).
+     ---
      Session du 8 juin (Cowork — conception, AUCUN code) : axe D « EXPLORATION DES
      PRATIQUES » conçu de bout en bout et SPEC VALIDÉE par Grégoire (découpage 6 lots).
      Décliner une pratique « souche » en variantes d'essai, les comparer par un diff de
