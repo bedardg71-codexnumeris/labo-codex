@@ -353,11 +353,13 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /**
- * BANDEAU VERSION — Affiché à chaque nouveau build (local + distant)
- * Persistant jusqu'à ce que l'utilisateur clique sur X.
- * Mémorise le build "vu" dans localStorage pour ne pas réafficher.
+ * BANDEAU VERSION — Affiché UNIQUEMENT quand le polling détecte un build distant
+ * plus récent que le build chargé (vraie mise à jour déployée en cours de session).
+ * Plus d'affichage au chargement : le build chargé EST déjà le build actif, donc
+ * « recharge pour l'activer » n'aurait aucun sens et le bandeau revenait en boucle
+ * après chaque Recharger (retour terrain 8 juin). Fermé par X ; Recharger charge le
+ * nouveau build (et le bandeau ne réapparaît pas — plus de déclencheur au chargement).
  */
-const CLE_BANDEAU_VU = 'monitorage-bandeau-vu';
 let miseAJourDejaSignalee = false;
 
 function afficherBandeauVersion(beta, build, distant) {
@@ -383,7 +385,6 @@ function fermerBandeauMiseAJour() {
     if (bandeau) {
         bandeau.classList.remove('visible');
     }
-    localStorage.setItem(CLE_BANDEAU_VU, BUILD_ID);
 }
 
 /**
@@ -405,13 +406,9 @@ async function verifierMiseAJourDistante() {
     }
 }
 
-// Au chargement : afficher le bandeau si ce build n'a pas été vu
+// Au chargement : pas de bandeau (le build chargé est déjà actif). Seul le polling
+// distant peut le déclencher, pour une vraie mise à jour déployée pendant la session.
 document.addEventListener('DOMContentLoaded', function() {
-    const bandeauVu = localStorage.getItem(CLE_BANDEAU_VU);
-    if (bandeauVu !== BUILD_ID) {
-        afficherBandeauVersion(VERSION_MAJEURE, BUILD_ID, false);
-    }
-
     // Polling distant : première vérif après 30s, puis toutes les 5 min
     setTimeout(verifierMiseAJourDistante, 30000);
     setInterval(verifierMiseAJourDistante, 5 * 60 * 1000);
