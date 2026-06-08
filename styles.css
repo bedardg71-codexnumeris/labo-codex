@@ -3369,6 +3369,70 @@ input[type="number"].controle-form {
     color: var(--alerte-texte-erreur);
 }
 
+/* ============================================================
+   Dénotation (DEN couche 2, #318) — panneau de saisie du jugement
+   ============================================================ */
+.den-saisie {
+    max-width: 720px;
+}
+.den-saisie-intro {
+    margin: 0 0 16px 0;
+    line-height: 1.6;
+}
+.den-cibles {
+    border: 1px solid var(--bordure-legere);
+    border-radius: var(--radius-moyen);
+    padding: 12px 16px 16px;
+    margin: 0 0 16px 0;
+    background: var(--surface-element);
+}
+.den-cibles legend {
+    padding: 0 6px;
+    font-weight: 600;
+    color: var(--gris-texte);
+}
+.den-cible {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    cursor: pointer;
+    border-bottom: 1px solid var(--bordure-claire);
+}
+.den-cible:last-child {
+    border-bottom: none;
+}
+.den-cible input[type="checkbox"] {
+    margin-top: 3px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+.den-cible-nom {
+    line-height: 1.5;
+}
+.den-suggestion {
+    margin-bottom: 16px;
+}
+.den-suggestion-note {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.85rem;
+    opacity: 0.85;
+}
+.den-champ {
+    margin-bottom: 16px;
+}
+.den-champ label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: var(--gris-texte);
+}
+.den-champ .den-note {
+    max-width: 140px;
+}
+
 .alerte h4 {
     margin: 0 0 8px 0;
     font-size: 1rem;

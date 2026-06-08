@@ -7,11 +7,12 @@
  * par la confirmation que chaque cible d'apprentissage est atteinte (garde-fou
  * d'équité Dyer, natif), et ANCRÉE par une suggestion holistique optionnelle.
  *
- * Périmètre de CE lot (DEN-0, données) :
- *  - reconnaissance d'une pratique DEN + validation du schéma de config « éliminée » ;
- *  - lecture namespacée (window.cle) de la saisie d'un jugement.
- * L'ÉCRITURE de la saisie est le geste de l'UI de profil (lot DEN-2) ; le CALCUL
- * (lot DEN-1) ne fait que LIRE cette collection.
+ * Responsabilités :
+ *  - reconnaissance d'une pratique DEN + validation du schéma de config « éliminée » (DEN-0) ;
+ *  - lecture namespacée (window.cle) de la saisie d'un jugement (DEN-0) ;
+ *  - écriture de la saisie (DEN-2) — SEUL point d'écriture de la collection.
+ * Le CALCUL (lot DEN-1, pratique-configurable.js) ne fait que LIRE cette collection ;
+ * l'écriture n'est déclenchée que par le geste de saisie de l'UI de profil (DEN-2).
  *
  * Garde-fous (cf. NOTE-COWORK-modele-DEN.md / SPEC_DEN_couche2.md) :
  *  - RREC : DEN abandonne la fonction de TRI mais garde la CERTIFICATION — le
@@ -94,6 +95,37 @@
         return parPratique[da] || null;
     }
 
+    /**
+     * Date du jour au format YYYY-MM-DD (horodatage de la saisie).
+     */
+    function _aujourdhui() {
+        return new Date().toISOString().slice(0, 10);
+    }
+
+    /**
+     * Écrit le jugement saisi pour un couple (pratique, étudiant), namespacé
+     * par trimestre. C'est le SEUL point d'écriture de la collection (le calcul
+     * DEN-1 ne fait que lire). Appelé par l'UI de saisie du profil (DEN-2).
+     *
+     * @param {string} pratiqueId
+     * @param {string} da
+     * @param {object} saisie - `{ ciblesAtteintes, noteFinale, justification }`
+     * @returns {boolean} vrai si écrit
+     */
+    function ecrireJugementDenotation(pratiqueId, da, saisie) {
+        if (!pratiqueId || !da) return false;
+        const tout = lireTousLesJugements();
+        if (!tout[pratiqueId]) tout[pratiqueId] = {};
+        tout[pratiqueId][da] = {
+            ciblesAtteintes: (saisie && saisie.ciblesAtteintes) || {},
+            noteFinale: (saisie && typeof saisie.noteFinale === 'number') ? saisie.noteFinale : null,
+            justification: (saisie && typeof saisie.justification === 'string') ? saisie.justification : '',
+            date: (saisie && saisie.date) || _aujourdhui()
+        };
+        db.setSync(cle(CLE_JUGEMENTS), tout);
+        return true;
+    }
+
     // Export public (SSOT de jugementsDenotation).
     window.denotationJugements = {
         CLE: CLE_JUGEMENTS,
@@ -101,6 +133,7 @@
         estPratiqueDenotation: estPratiqueDenotation,
         estConfigDenotationValide: estConfigDenotationValide,
         lireTousLesJugements: lireTousLesJugements,
-        lireJugementDenotation: lireJugementDenotation
+        lireJugementDenotation: lireJugementDenotation,
+        ecrireJugementDenotation: ecrireJugementDenotation
     };
 })();
