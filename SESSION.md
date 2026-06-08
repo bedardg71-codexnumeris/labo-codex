@@ -1,5 +1,24 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 8 juin 2026 — Claude Code, RELEASE 1.3.0 livrée et poussée).
+     IDENTIFICATION DE CE FICHIER  (mis à jour 8 juin 2026 — Claude Code, RELEASE 1.4.0 livrée et poussée).
+     Session du 8 juin (Claude Code — RELEASE 1.4.0, BOUTON SOUTIEN + correctifs terrain) :
+     suite directe de la 1.3.0. Bump minor 1.3.0 → 1.4.0 (build 0608-1335), poussé.
+     HEAD origin/main = `076b5881`, SYNCHRO (0/0). 353 Vitest + 42 Playwright verts.
+       • feat : bouton « Soutenir Labo Codex » dans l'entête (cœur masqué teinté rose
+         `--accent-coeur`, à côté du bouton bug) + modale (communauté, blogue, abonnement
+         de soutien, offrir, don ; liens portail Codex Numeris ; a11y focus/Échap/piège ;
+         CoP = lien AQPC externe, §4 « section CoP interne » clos sans réciprocité — aucune
+         section CoP n'existe, décision Grégoire). Module `js/modal-soutien.js`.
+       • fix terrain : (1) rappel « Protège tes données » seulement sur de vraies données
+         (évaluations/travaux, hors démo) ; (2) bandeau de MAJ ne s'affiche plus au
+         chargement (retiré le déclencheur, gardé le polling) ; (3) compteur d'étapes de
+         l'assistant ne s'emballe plus sur le parcours « pas-certain » (auto-boucle du
+         graphe `departage-pratique` corrigée).
+       • Consigne appliquée : `consigne-bouton-soutien.md` (version révisée) — encore en
+         racine, peut être retirée. À VÉRIFIER au prochain coup d'œil : teinte du cœur
+         (#ff6f91) en mode CLAIR (contraste ≥ 3:1) — ajuster `--accent-coeur` si besoin.
+     Reste possible : axe D (#326, Exploration des pratiques), préalables DEN (fait) + #320.
+     ---
+     Session du 8 juin (Claude Code — RELEASE 1.3.0, DÉNOTATION + correctif assistant) :
      Session du 8 juin (Claude Code — RELEASE 1.3.0, DÉNOTATION + correctif assistant) :
      DEN couche 2 (#318, lots DEN-0→4) ET bug testeur #137 (assistant « pas-certain »)
      VALIDÉS TERRAIN (Mac + iPad, sombre + clair) par Grégoire, puis RELEASE GROUPÉE.
