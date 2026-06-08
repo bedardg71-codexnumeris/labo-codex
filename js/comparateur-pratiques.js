@@ -62,10 +62,11 @@
         SPE: 'Les exigences satisfaites parmi celles annoncées.'
     };
 
-    // Ligne de garde sous la matrice (§2.1) : recentre le novice issu de SOM —
-    // ni le chiffre le plus élevé ni l'écart ne sont l'enjeu (pluralisme, pas de
-    // palmarès). Formulation à valider en terrain.
-    var LIGNE_GARDE = 'Il ne s’agit pas d’un palmarès des pratiques de notation.';
+    // Avertissement sous la matrice ET sous le récit de la fiche : le comparateur
+    // est expérimental ; invite à signaler les anomalies pour contribuer à son
+    // amélioration. (Le recentrage anti-palmarès reste porté par le paragraphe de
+    // finalité en tête : « un écart entre des points n’est ni un bonus ni une erreur ».)
+    var LIGNE_GARDE = 'Le comparateur est un outil expérimental et peut présenter des erreurs. Partage tes observations et participe à son amélioration en utilisant l’icône « Signaler un bug », en haut à droite de l’en-tête.';
 
     // Phrases de contexte par profil (§9 — contenu VALIDÉ Grégoire 7 juin 2026,
     // variante A). En dur, stables, racontables ; indexées par DA ; echapperHtml()
@@ -280,6 +281,10 @@
         var cols = _colonnes();
         var refId = cols[0].id;
 
+        // Pratiques offertes aux sélecteurs des colonnes de simulation (hors réf).
+        var dispo = _pratiquesDisponibles(refId);
+        var slot = 0;   // index dans _candidatsSel = ordre des colonnes non-réf
+
         var h = '<table class="comparateur-matrice-table">';
         h += '<thead><tr>';
         h += '<th scope="col" class="comparateur-col-profil">Profil</th>';
@@ -287,9 +292,20 @@
         cols.forEach(function(c) {
             var code = _codePratique(c.id);
             var e1 = (code && MICROCOPY_E1[code]) ? MICROCOPY_E1[code] : '';
+            // Réf (« Ta pratique ») = titre statique non modifiable ; colonnes de
+            // simulation = un <select> à la place du titre (le bandeau « Comparer
+            // avec » est supprimé — il répétait le nom déjà porté par la colonne).
+            var titre;
+            if (c.ref) {
+                titre = _badge(c.id) + ' <span class="comparateur-col-nom">' + _esc(_nomPratique(c.id)) + '</span>'
+                    + '<span class="comparateur-col-tag">Ta pratique</span>';
+            } else {
+                titre = _selectColonne(slot, c.id, dispo)
+                    + '<span class="comparateur-col-tag">Simulation</span>';
+                slot++;
+            }
             h += '<th scope="col" class="comparateur-col-pratique' + (c.ref ? ' comparateur-col-pratique--ref' : '') + '">'
-                + _badge(c.id) + ' <span class="comparateur-col-nom">' + _esc(_nomPratique(c.id)) + '</span>'
-                + '<span class="comparateur-col-tag">' + (c.ref ? 'Ta pratique' : 'simulation') + '</span>'
+                + titre
                 + (e1 ? '<span class="comparateur-col-e1">' + _esc(e1) + '</span>' : '')
                 + '</th>';
         });
@@ -397,48 +413,47 @@
         if (btn) btn.addEventListener('click', activerDemoEtOuvrir);
     }
 
-    /* ── Sélecteurs inline des candidates simulées (C1-d) ───── */
-    // Zone inline (jamais de modale — anti-pattern projet). Un <select> par
-    // colonne de simulation ; changer une candidate recalcule la matrice.
-    function _rendreSelecteurs() {
-        var refId = _refId();
-        _initCandidats(refId);
-        var dispo = _pratiquesDisponibles(refId);
-
-        var blocs = _candidatsSel.map(function(selId, slot) {
-            var opts = dispo.map(function(p) {
-                var sel = (p.id === selId) ? ' selected' : '';
-                return '<option value="' + _esc(p.id) + '"' + sel + '>'
-                    + _esc(p.code + ' · ' + p.nom) + '</option>';
-            }).join('');
-            return '<label class="comparateur-selecteur">'
-                + '<span class="comparateur-selecteur-libelle">Simulation ' + (slot + 1) + '</span>'
-                + '<select class="comparateur-select" data-slot="' + slot + '">' + opts + '</select>'
-                + '</label>';
+    /* ── Sélecteurs des candidates simulées (C1-d) ─────────── */
+    // Le <select> vit DANS l'en-tête de sa colonne de simulation (jamais de
+    // modale — anti-pattern projet). Il remplace le titre statique : le bandeau
+    // « Comparer avec » répétait le nom déjà porté par la colonne. Changer une
+    // candidate recalcule la matrice.
+    function _optionsSelect(selId, dispo) {
+        return dispo.map(function(p) {
+            var sel = (p.id === selId) ? ' selected' : '';
+            return '<option value="' + _esc(p.id) + '"' + sel + '>'
+                + _esc(p.code + ' · ' + p.nom) + '</option>';
         }).join('');
-
-        return '<div class="comparateur-selecteurs" id="comparateur-selecteurs">'
-            + '<span class="comparateur-selecteurs-titre">Comparer avec</span>'
-            + blocs + '</div>';
     }
 
-    // Re-rend uniquement le tableau (préserve les sélecteurs et le focus).
+    function _selectColonne(slot, selId, dispo) {
+        return '<select class="comparateur-select" data-slot="' + slot + '"'
+            + ' aria-label="Pratique à simuler dans cette colonne">'
+            + _optionsSelect(selId, dispo) + '</select>';
+    }
+
+    // Re-rend uniquement le tableau (les sélecteurs y vivent désormais ; l'hôte
+    // #comparateur-matrice persiste, donc l'écouteur délégué survit au re-rendu).
     function _rerendreMatrice(panel) {
         var hote = panel.querySelector('#comparateur-matrice');
         if (hote) hote.innerHTML = _rendreMatrice();
     }
 
+    // Délégation sur l'hôte persistant #comparateur-matrice : un seul attachement
+    // suffit, les <select> recréés à chaque re-rendu restent câblés (même pattern
+    // que _attacherNavigationLignes). Le change d'un <select> remonte par bulle.
     function _attacherSelecteurs(panel) {
-        var selects = panel.querySelectorAll('.comparateur-select');
-        for (var i = 0; i < selects.length; i++) {
-            selects[i].addEventListener('change', function(e) {
-                var slot = parseInt(e.target.getAttribute('data-slot'), 10);
-                if (!isNaN(slot)) {
-                    _candidatsSel[slot] = e.target.value;   // état UI seulement, aucune écriture en base
-                    _rerendreMatrice(panel);
-                }
-            });
-        }
+        var hote = panel.querySelector('#comparateur-matrice');
+        if (!hote) return;
+        hote.addEventListener('change', function(e) {
+            var t = e.target;
+            if (!t || !t.classList || !t.classList.contains('comparateur-select')) return;
+            var slot = parseInt(t.getAttribute('data-slot'), 10);
+            if (!isNaN(slot)) {
+                _candidatsSel[slot] = t.value;   // état UI seulement, aucune écriture en base
+                _rerendreMatrice(panel);
+            }
+        });
     }
 
     /* ── Navigation matrice → fiche (C2-d.1) ───────────────── */
@@ -644,7 +659,6 @@
                     '<p class="comparateur-finalite">Des pratiques différentes mesurent des choses ' +
                     'différentes. Un écart entre des points n’est ni un bonus ni une erreur. Le ' +
                     'comparateur montre la <strong>maîtrise atteinte en regard de chaque note</strong>.</p>' +
-                    _rendreSelecteurs() +
                     '<div class="comparateur-matrice" id="comparateur-matrice" data-etat="matrice">' +
                         _rendreMatrice() +
                     '</div>' +

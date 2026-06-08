@@ -210,7 +210,7 @@ test('C1-b · matrice — parité moteur (réf = panneau profil) + divergence de
             e1Std: texteCorps.includes('les reprises remplacent'),
             e1Som: texteCorps.includes('moyenne pondérée'),
             e1Spe: texteCorps.includes('exigences satisfaites'),
-            garde: texteCorps.includes('palmarès des pratiques de notation')
+            garde: texteCorps.includes('outil expérimental')
         };
     });
 
@@ -487,9 +487,14 @@ test('C1-d · sélection inline des candidates — recalcul + invariant non-dest
         // Snapshot APRÈS rendu (la navigation persiste l'état de nav, hors périmètre).
         const avant = snapshot();
 
-        // Sélecteurs inline présents (zone dans le corps, pas de modale).
-        const zone = panel.querySelector('#comparateur-selecteurs');
+        // Sélecteurs intégrés dans l'en-tête des colonnes de simulation (le bandeau
+        // « Comparer avec » a été retiré — plus de doublon avec le nom de colonne,
+        // toujours pas de modale).
+        const banniere = panel.querySelector('#comparateur-selecteurs');
         const selects = panel.querySelectorAll('.comparateur-select');
+        const selectsDansEntete = panel.querySelectorAll(
+            '#comparateur-matrice thead .comparateur-select'
+        ).length;
 
         // Recalcul : changer une candidate doit re-rendre la matrice.
         let recalculOk = false;
@@ -508,16 +513,18 @@ test('C1-d · sélection inline des candidates — recalcul + invariant non-dest
         const apres = snapshot();
 
         return {
-            aZone: !!zone,
+            aBanniere: !!banniere,
             nbSelects: selects.length,
+            selectsDansEntete,
             recalculOk,
             nonDestructif: avant === apres
         };
     });
 
     expect(resultat.erreur, `Erreur eval : ${resultat.erreur}`).toBeUndefined();
-    expect(resultat.aZone).toBe(true);                 // sélection inline (pas de modale)
+    expect(resultat.aBanniere).toBe(false);            // bandeau « Comparer avec » retiré
     expect(resultat.nbSelects).toBeGreaterThanOrEqual(1);
+    expect(resultat.selectsDansEntete).toBe(resultat.nbSelects);  // tous dans l'en-tête de colonne
     expect(resultat.recalculOk).toBe(true);            // changer une candidate recalcule
     expect(resultat.nonDestructif).toBe(true);         // aucune écriture (lecture seule)
 
