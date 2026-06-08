@@ -24,6 +24,14 @@
 
 ---
 
+## Corrigés (8 juin 2026 — suppression d'une reprise laissait l'original « remplacé »)
+
+> Corrigé en **code** (build 0608-0733, 1.2.3). Sentinelle ajoutée. Réparation des données existantes : décocher le jeton de reprise (page d'évaluation) OU, avec ce correctif, supprimer l'évaluation de reprise depuis la liste → l'original est restauré.
+
+| # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
+|---|---------|--------------|---------|-------|-------------|------------|
+| 136 | Grégoire (rapport `BUG_grégoire_2026-06-08_07-14-38`) | 8 juin 2026 | 8 juin 2026 | 0608-0733 (1.2.3) | Suppression d'un doublon de reprise (artefact 10 de Justin) : « Déplacer le fichier à la corbeille » (`#supprimer-fichier-btn-confirmer`) ne retirait ni la reprise ni le statut « remplacée » de l'original ; et même « Supprimer l'évaluation » laissait `remplaceeParId` orphelin. Aucun geste de la liste ne défaisait proprement une reprise (seul `retirerJetonReprise`, accessible depuis la page d'évaluation, le faisait). Cause : pas de synchronisation entre la suppression (fichier/évaluation) et le lien de reprise (`evaluation-jetons.js:357` pose `remplaceeParId` ; `supprimerEvaluation`/`confirmerSuppressionFichier` ne le nettoyaient pas). | **(1) Cohérence** : helper pur `restaurerOriginaleSiReprise(evaluations, id)` (`liste-evaluations.js`) défait `remplaceeParId`/`dateRemplacement`/`archivee`/`dateArchivage` de l'original ; `supprimerEvaluation` l'appelle → supprimer une reprise restaure l'original (message « Reprise supprimée, originale restaurée »). Garde-fou : ne restaure que si le lien pointe sur cette reprise. **(2) Garde-fou** : `confirmerSuppressionFichier` détecte un contexte de reprise (reprise/original pour ce DA+production) et affiche un avertissement ambre (`--alerte-*-attention`) orientant vers le bon geste. **Test** : `tests/unit/sentinelle-suppression-reprise-2026-06-08.test.js` (6 cas). |
+
 ## Corrigés (3 juin 2026 — Suivi vide malgré groupe-cours actif)
 
 > Corrigé en **code** (working tree, à committer). Test de non-régression ajouté.
