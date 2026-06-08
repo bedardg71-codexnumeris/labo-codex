@@ -37,11 +37,13 @@ ci-dessous.
 | `corbeilleFichiers` | NS | `travaux-stockage.js` | travaux-ui | `migration-diagnostic.js` (rétention) | < 200 Ko |
 | `portfoliosEleves` | NS | `portfolio.js` | indices, profil-etudiant-sections-affichage (réflecteur lecture seule) | `profil-etudiant-sections-affichage.js` (écrit aussi — à investiguer, voir §Violations) | < 200 Ko |
 | `interventions` | NS | `interventions.js` | evaluation, trimestres | — | < 200 Ko |
+| `jugementsDenotation` | NS | `pratiques/denotation-jugements.js` (#318, DEN couche 2) | moteur DEN `pratique-configurable.js` (lecture seule au calcul) ; UI de saisie profil (écriture, DEN-2) | — (collection neuve, aucune migration) | < 200 Ko |
 
 ### Notes de schéma
 
 - `evaluationsSauvegardees[i].actionsRLO` : `{reperage, liaison, ouverture, incertain, incomplet, inexact, total} | null` — peuplé par `actions-rlo.js` au moment de `sauvegarderEvaluation()` si la préférence `activerActionsRLO` est active. Absent si la préférence est désactivée. `null` explicite si aucune annotation n'est résolue pour l'évaluation.
 - `evaluationsSauvegardees` est écrit littéralement dans **8 modules** (audit 22 mai). 5 contourneurs hérités du god module `evaluation.js` pré-refactor (split en `evaluation-chargement` / `evaluation-sauvegarde` / `evaluation-jetons` lors du refactor du 21 mai). Plan Tier 6.6 documenté en violation #2.
+- `jugementsDenotation` : `{ [pratiqueId]: { [da]: { ciblesAtteintes: {[objectifId]: boolean}, noteFinale: number, justification: string, date: 'YYYY-MM-DD' } } }`. La note DEN est un **jugement saisi** par l'enseignant, pas un calcul. Le moteur la **lit** seulement (`denotationJugements.lireJugementDenotation`) ; l'écriture est le geste de l'UI de saisie (profil étudiant, DEN-2). Une cible non confirmée plafonne la certification à 59 (RREC), jamais ≥ 60 (garde « cibles atteintes », DEN-B).
 
 ---
 
