@@ -1,5 +1,10 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 8 juin 2026 — Claude Code, RELEASE 1.4.0 livrée et poussée).
+     IDENTIFICATION DE CE FICHIER  (mis à jour 8 juin 2026 — Claude Code, RELEASE 1.4.1 livrée et poussée).
+     Patch 1.4.1 (build 0608-1400, `609491a0`) : section « Nous écrire » dans la modale
+     Soutien (lien mailto labo@codexnumeris.org) ; + correctif `icons/icons8-heart.svg`
+     n'était PAS suivi par git alors que le popover mobile le référence (image cassée au
+     déploiement) → ajouté. `consigne-bouton-soutien.md` retirée (appliquée). SYNCHRO (0/0).
+     ---
      Session du 8 juin (Claude Code — RELEASE 1.4.0, BOUTON SOUTIEN + correctifs terrain) :
      suite directe de la 1.3.0. Bump minor 1.3.0 → 1.4.0 (build 0608-1335), poussé.
      HEAD origin/main = `076b5881`, SYNCHRO (0/0). 353 Vitest + 42 Playwright verts.
