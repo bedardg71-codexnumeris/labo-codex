@@ -309,18 +309,23 @@ function genererBadgeTypePratique(pratique) {
    MODAL BIBLIOTHÈQUE
    =============================== */
 
+// #320 — état (mémoire de session) du dépliage de la zone « Mes dossiers ».
+// Repliée par défaut quand des dossiers existent (gain d'espace) ; toujours
+// dépliée s'il n'y en a aucun (pour inviter à en créer).
+let _depliageDossiers = false;
+
 /**
- * #320 L1 — Zone « Mes dossiers » : gestion des répertoires de classement
+ * #320 — Zone « Mes dossiers » REPLIABLE : gestion des répertoires de classement
  * (créer / renommer / supprimer). Rendu en tête de la Section 2 (le pool que
- * l'on range). L'affichage groupé et l'assignation viennent au Lot L2.
- * Le module js/repertoires-bibliotheque.js range PAR IDENTITÉ, sans toucher
- * aux pratiques elles-mêmes.
+ * l'on range). Le module js/repertoires-bibliotheque.js range PAR IDENTITÉ, sans
+ * toucher aux pratiques elles-mêmes.
  * @returns {string} HTML de la zone
  */
 function genererZoneRepertoiresPratiques() {
     var reps = (window.repertoiresBibliotheque && typeof window.repertoiresBibliotheque.obtenir === 'function')
         ? window.repertoiresBibliotheque.obtenir('pratiques')
         : [];
+    var deplie = _depliageDossiers || reps.length === 0;
 
     var lignes = reps.map(function(r) {
         var id = echapperHtml(r.id);
@@ -336,13 +341,29 @@ function genererZoneRepertoiresPratiques() {
     }
 
     return '<div style="border:1px solid var(--bordure, #ddd); border-radius:8px; padding:12px; margin-bottom:15px; background:var(--surface-carte, #fff);">' +
-        '<div style="font-weight:600; margin-bottom:8px; color:var(--texte-principal, #222);">Mes dossiers</div>' +
-        '<div id="rep-liste-pratiques">' + lignes + '</div>' +
-        '<div style="display:flex; gap:6px; margin-top:8px;">' +
-            '<input type="text" id="rep-nouveau-nom" class="controle-form" placeholder="Nom d\'un nouveau dossier" style="flex:1;" aria-label="Nom du nouveau dossier" />' +
-            '<button data-action="creerRepertoirePratiques" class="btn btn-principal btn-mini">Créer le dossier</button>' +
+        '<button type="button" data-action="basculerZoneRepertoires" aria-expanded="' + deplie + '" style="background:none; border:none; padding:0; cursor:pointer; font:inherit; font-weight:600; color:var(--texte-principal, #222); display:flex; align-items:center; gap:6px;">' +
+            '<span id="rep-zone-icone" aria-hidden="true">' + (deplie ? '▾' : '▸') + '</span> Mes dossiers' + (reps.length ? ' (' + reps.length + ')' : '') +
+        '</button>' +
+        '<div id="rep-zone-contenu" style="' + (deplie ? 'margin-top:8px;' : 'display:none;') + '">' +
+            '<div id="rep-liste-pratiques">' + lignes + '</div>' +
+            '<div style="display:flex; gap:6px; margin-top:8px;">' +
+                '<input type="text" id="rep-nouveau-nom" class="controle-form" placeholder="Nom d\'un nouveau dossier" style="flex:1;" aria-label="Nom du nouveau dossier" />' +
+                '<button data-action="creerRepertoirePratiques" class="btn btn-principal btn-mini">Créer le dossier</button>' +
+            '</div>' +
         '</div>' +
     '</div>';
+}
+
+/** #320 — replie/déplie « Mes dossiers » sans re-rendu (préserve le scroll). */
+function basculerZoneRepertoires() {
+    _depliageDossiers = !_depliageDossiers;
+    var contenu = document.getElementById('rep-zone-contenu');
+    var icone = document.getElementById('rep-zone-icone');
+    if (contenu) {
+        contenu.style.display = _depliageDossiers ? '' : 'none';
+        if (_depliageDossiers) contenu.style.marginTop = '8px';
+    }
+    if (icone) icone.textContent = _depliageDossiers ? '▾' : '▸';
 }
 
 /** #320 L1 — crée un répertoire depuis le champ de la modale, puis rafraîchit. */
@@ -354,6 +375,7 @@ async function creerRepertoirePratiques() {
         return;
     }
     window.repertoiresBibliotheque.creer(input.value, 'pratiques');
+    _depliageDossiers = true; // rester déplié pendant la gestion
     await afficherBibliothequePratiques();
 }
 
@@ -362,12 +384,14 @@ async function renommerRepertoirePratiques(repId) {
     var input = document.querySelector('input[data-rep-id="' + repId + '"]');
     if (!input || !input.value || !input.value.trim()) return;
     window.repertoiresBibliotheque.renommer(repId, input.value);
+    _depliageDossiers = true;
     await afficherBibliothequePratiques();
 }
 
 /** #320 L1 — supprime un répertoire (les pratiques restent, repassent non classées). */
 async function supprimerRepertoirePratiques(repId) {
     window.repertoiresBibliotheque.supprimer(repId);
+    _depliageDossiers = true;
     await afficherBibliothequePratiques();
 }
 
@@ -418,21 +442,6 @@ async function supprimerPratiqueSelectionnee(selectId) {
 }
 
 /**
- * #320 L3 — filtre « par dossier » : masque/affiche les groupes du pool selon
- * la valeur du select. '' = tous ; '__nonclasse__' = groupe non classées ;
- * sinon l'id du dossier. Masquage DOM (pas de re-rendu) — coexiste avec les
- * filtres type/discipline. Lit le select par id (comme filtrerPratiquesBibliotheque).
- */
-function filtrerParRepertoirePratiques() {
-    const select = document.getElementById('filtreRepertoirePratiques');
-    const val = select ? select.value : '';
-    const groupes = document.querySelectorAll('#listePratiquesDisponibles .biblio-groupe-repertoire');
-    groupes.forEach(div => {
-        div.style.display = (!val || div.getAttribute('data-repertoire-id') === val) ? '' : 'none';
-    });
-}
-
-/**
  * Affiche le modal de gestion de la bibliothèque de pratiques
  * Section 1: Pratiques dans la sélection (avec boutons Partager/Retirer)
  * Section 2: Pratiques disponibles avec filtres
@@ -453,11 +462,6 @@ async function afficherBibliothequePratiques() {
     pratiquesDisponibles = BibliothequeUI.filtrerParModeDemo(pratiquesDisponibles);
 
     const doublonsDetectes = detecterDoublonsPratiques(pratiquesDansBibliotheque, pratiquesDisponibles);
-
-    let disciplines = [];
-    if (typeof obtenirDisciplinesDisponiblesPratiques === 'function') {
-        disciplines = await obtenirDisciplinesDisponiblesPratiques();
-    }
 
     // Section 1 : pratiques dans la sélection
     let contenuSection1 = '';
@@ -511,45 +515,11 @@ async function afficherBibliothequePratiques() {
     const repParPratique = {};
     repsPratiques.forEach(r => (r.itemIds || []).forEach(id => { repParPratique[id] = r.id; }));
 
-    // #320 L3 — filtre « par dossier » (n'apparaît que s'il existe des dossiers)
-    const filtreDossierHTML = repsPratiques.length === 0 ? '' : `
-            <div style="flex: 1; min-width: 200px;">
-                <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">
-                    Filtrer par dossier :
-                </label>
-                <select id="filtreRepertoirePratiques" class="controle-form" data-on-change="filtrerParRepertoirePratiques" style="max-width: 300px;">
-                    <option value="">Tous les dossiers</option>
-                    ${repsPratiques.map(r => `<option value="${echapperHtml(r.id)}">${echapperHtml(r.nom)}</option>`).join('')}
-                    <option value="__nonclasse__">Non classées</option>
-                </select>
-            </div>`;
-
-    // Filtres Section 2 : zone « Mes dossiers » (#320 L1) + filtres type/discipline/dossier
-    const filtresHTML = genererZoneRepertoiresPratiques() + `
-        <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 15px;">
-            <div style="flex: 1; min-width: 200px;">
-                <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">
-                    Filtrer par type :
-                </label>
-                <select id="filtreTypePratiques" class="controle-form" data-on-change="filtrerPratiquesBibliotheque" style="max-width: 300px;">
-                    <option value="">Tous les types</option>
-                    <option value="pan-standards">PAN-Standards (STD)</option>
-                    <option value="pan-specifications">PAN-Spécifications (SPE)</option>
-                    <option value="sommative">Sommative (SOM)</option>
-                    <option value="denombrement">Dénombrement (DEN)</option>
-                </select>
-            </div>
-            <div style="flex: 1; min-width: 200px;">
-                <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">
-                    Filtrer par discipline :
-                </label>
-                <select id="filtreDisciplinePratiques" class="controle-form" data-on-change="filtrerPratiquesBibliotheque" style="max-width: 300px;">
-                    <option value="">Toutes les disciplines</option>
-                    ${disciplines.map(d => `<option value="${d}">${d}</option>`).join('')}
-                </select>
-            </div>${filtreDossierHTML}
-        </div>
-    `;
+    // #320 (9 juin) — filtres type/discipline/dossier RETIRÉS : avec l'organisation
+    // par dossiers (selects), ils étaient incohérents (n'agissaient plus que sur les
+    // cartes « Non classées »). La zone « Mes dossiers » (repliable) tient lieu de
+    // section de tête de la Section 2.
+    const filtresHTML = genererZoneRepertoiresPratiques();
 
     // Section 2 : pool (pratiques disponibles à ajouter)
     const idsDejaPresents = new Set(pratiquesDansBibliotheque.map(p => p.id));
@@ -661,26 +631,6 @@ async function afficherBibliothequePratiques() {
  */
 function fermerModalBibliothequePratiques() {
     BibliothequeUI.fermerModal('modalBibliothequePratiques');
-}
-
-/**
- * Filtre les pratiques disponibles selon les critères sélectionnés
- */
-function filtrerPratiquesBibliotheque() {
-    const typeFiltre = document.getElementById('filtreTypePratiques')?.value || '';
-    const disciplineFiltre = document.getElementById('filtreDisciplinePratiques')?.value || '';
-
-    const items = document.querySelectorAll('.pratique-dispo-item');
-
-    items.forEach(item => {
-        const itemType = item.dataset.type || '';
-        const itemDiscipline = item.dataset.discipline || '';
-
-        const matchType = !typeFiltre || itemType === typeFiltre;
-        const matchDiscipline = !disciplineFiltre || itemDiscipline.toLowerCase() === disciplineFiltre.toLowerCase();
-
-        toggleDisplay(item, matchType && matchDiscipline);
-    });
 }
 
 /* ===============================
@@ -2912,14 +2862,13 @@ window.initialiserModulePratiquesMateriel = initialiserModulePratiquesMateriel;
 window.afficherListePratiquesMateriel = afficherListePratiquesMateriel;
 window.afficherBibliothequePratiques = afficherBibliothequePratiques;
 window.fermerModalBibliothequePratiques = fermerModalBibliothequePratiques;
-window.filtrerPratiquesBibliotheque = filtrerPratiquesBibliotheque;
-// #320 L1 — gestion des répertoires de classement (zone « Mes dossiers »)
+// #320 — gestion des répertoires de classement (zone « Mes dossiers » repliable)
+window.basculerZoneRepertoires = basculerZoneRepertoires;
 window.creerRepertoirePratiques = creerRepertoirePratiques;
 window.renommerRepertoirePratiques = renommerRepertoirePratiques;
 window.supprimerRepertoirePratiques = supprimerRepertoirePratiques;
 window.classerPratiqueDansRepertoire = classerPratiqueDansRepertoire;
 window.retirerPratiqueDeRepertoire = retirerPratiqueDeRepertoire;
-window.filtrerParRepertoirePratiques = filtrerParRepertoirePratiques;
 // #320 — actions sur la pratique sélectionnée dans le select d'un dossier
 window.ajouterPratiqueSelectionnee = ajouterPratiqueSelectionnee;
 window.classerPratiqueSelectionnee = classerPratiqueSelectionnee;
