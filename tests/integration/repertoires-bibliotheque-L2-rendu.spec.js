@@ -9,6 +9,8 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // #320 Lot L2 — affichage groupé du pool par dossier + assignation « Classer dans… ».
 // Vérifie l'intégration UI ↔ module : en-têtes de groupe, menu d'assignation,
 // et les handlers classer/retirer qui déplacent une pratique entre groupes.
+// #327 — câblage générique BibliothequeUI.repertoires.* (biblio en param, ids
+// rep-pratiques-select-*). Mêmes comportements, sélecteurs mis à jour.
 
 const patternsAttendus = [
     /version\.json.*access control/i,
@@ -55,34 +57,35 @@ test('L2 · pool groupé par dossier + assignation « Classer dans… »', async
         await window.afficherBibliothequePratiques();
         const html1 = lireModal();
         const aGroupeNonClassees = html1.includes('Non classées');
-        const aActionClasser = !!document.querySelector('[data-action="classerPratiqueDansRepertoire"][data-param2="' + dossier.id + '"]');
+        // #327 — classer(biblio, itemId, repId) : repId = param3.
+        const aActionClasser = !!document.querySelector('[data-action="BibliothequeUI.repertoires.classer"][data-param3="' + dossier.id + '"]');
 
         // Récupérer une pratique réelle du pool (bouton « Ajouter »)
         const boutonAjouter = document.querySelector('[data-action="ajouterPratiqueALaSelection"]');
         const pratiqueId = boutonAjouter ? boutonAjouter.getAttribute('data-param') : null;
         if (!pratiqueId) return { erreur: 'aucune pratique dans le pool' };
 
-        // Classer cette pratique via le handler (comme le ferait le menu ⋮)
-        await window.classerPratiqueDansRepertoire(pratiqueId, dossier.id);
+        // Classer cette pratique via le handler générique (comme le ferait le menu ⋮)
+        await window.BibliothequeUI.repertoires.classer('pratiques', pratiqueId, dossier.id);
         const html2 = lireModal();
         const aEnteteDossier = html2.includes('Expérimentations');
         // La pratique classée est désormais une OPTION du select compact du dossier
-        const aOptionSelect = !!document.querySelector('#rep-select-' + dossier.id + ' option[value="' + pratiqueId + '"]');
-        // Ligne compacte : bouton « Ajouter » câblé sur le select du dossier
-        const aBoutonAjouterSelect = !!document.querySelector('[data-action="ajouterPratiqueSelectionnee"][data-param="rep-select-' + dossier.id + '"]');
+        const aOptionSelect = !!document.querySelector('#rep-pratiques-select-' + dossier.id + ' option[value="' + pratiqueId + '"]');
+        // Ligne compacte : bouton « Ajouter » câblé sur le select du dossier (param2 = selectId)
+        const aBoutonAjouterSelect = !!document.querySelector('[data-action="BibliothequeUI.repertoires.ajouterSel"][data-param2="rep-pratiques-select-' + dossier.id + '"]');
         // Le menu ⋮ du dossier propose « Retirer du dossier » (agit sur la sélection)
-        const aActionRetirer = !!document.querySelector('[data-action="retirerPratiqueSelectionnee"][data-param="rep-select-' + dossier.id + '"]');
+        const aActionRetirer = !!document.querySelector('[data-action="BibliothequeUI.repertoires.retirerSel"][data-param2="rep-pratiques-select-' + dossier.id + '"]');
         // Persistance : le module connaît l'appartenance
         const reps = window.repertoiresBibliotheque.obtenir('pratiques');
         const estClassee = reps[0].itemIds.includes(pratiqueId);
 
         // Retirer → repasse non classée
-        await window.retirerPratiqueDeRepertoire(pratiqueId);
+        await window.BibliothequeUI.repertoires.retirer('pratiques', pratiqueId);
         const repsApres = window.repertoiresBibliotheque.obtenir('pratiques');
         const retiree = !repsApres[0].itemIds.includes(pratiqueId);
 
-        const aHandlers = typeof window.classerPratiqueDansRepertoire === 'function'
-            && typeof window.retirerPratiqueDeRepertoire === 'function';
+        const aHandlers = typeof window.BibliothequeUI.repertoires.classer === 'function'
+            && typeof window.BibliothequeUI.repertoires.retirer === 'function';
 
         return { aGroupeNonClassees, aActionClasser, aEnteteDossier, aOptionSelect, aBoutonAjouterSelect, aActionRetirer, estClassee, retiree, aHandlers };
     });

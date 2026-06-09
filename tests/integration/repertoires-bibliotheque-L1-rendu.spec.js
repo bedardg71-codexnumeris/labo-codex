@@ -10,6 +10,9 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // Vérifie le rendu de la zone de gestion (création/renommage/suppression) et
 // que l'intégration module ↔ UI fonctionne (un répertoire créé apparaît au
 // ré-affichage). L'affichage groupé du pool et l'assignation = Lot L2.
+// #327 — le câblage est passé au helper générique BibliothequeUI.repertoires.*
+// (handlers paramétrés par `biblio`, ids préfixés rep-pratiques-*). Mêmes
+// comportements vérifiés, sélecteurs mis à jour.
 
 const patternsAttendus = [
     /version\.json.*access control/i,
@@ -55,7 +58,7 @@ test('L1 · zone « Mes dossiers » se rend et un répertoire créé apparaît',
         const modal = document.getElementById('modalBibliothequePratiques');
         const html1 = modal ? modal.innerHTML : '';
         const aZone = html1.includes('Mes dossiers');
-        const aChampCreation = !!document.getElementById('rep-nouveau-nom');
+        const aChampCreation = !!document.getElementById('rep-pratiques-nouveau-nom');
         const aMessageVide = html1.includes('Aucun dossier');
 
         // Création via le module + ré-affichage (simule le handler)
@@ -65,21 +68,22 @@ test('L1 · zone « Mes dossiers » se rend et un répertoire créé apparaît',
         const champRenomme = modal2
             ? modal2.querySelector('input[data-rep-id="' + cree.id + '"]')
             : null;
-        const aBoutonSupprimer = !!(modal2 && modal2.querySelector('[data-action="supprimerRepertoirePratiques"][data-param="' + cree.id + '"]'));
+        // #327 — supprimer(biblio, repId) : biblio=param, repId=param2.
+        const aBoutonSupprimer = !!(modal2 && modal2.querySelector('[data-action="BibliothequeUI.repertoires.supprimer"][data-param2="' + cree.id + '"]'));
 
         // #320 — zone repliable. Ici le dossier a été créé via le module (pas le
         // handler), donc l'état de dépliage reste à son défaut : avec 1 dossier,
         // la zone est REPLIÉE. Le toggle doit la déplier.
-        const aBoutonBascule = !!document.querySelector('[data-action="basculerZoneRepertoires"]');
-        const contenu = document.getElementById('rep-zone-contenu');
+        const aBoutonBascule = !!document.querySelector('[data-action="BibliothequeUI.repertoires.basculer"]');
+        const contenu = document.getElementById('rep-pratiques-zone-contenu');
         const replieParDefaut = contenu ? getComputedStyle(contenu).display === 'none' : null;
-        window.basculerZoneRepertoires();
+        window.BibliothequeUI.repertoires.basculer('pratiques');
         const deplieApresToggle = contenu ? getComputedStyle(contenu).display !== 'none' : null;
 
-        // Le handler de suppression existe et est branché
-        const aHandlers = typeof window.creerRepertoirePratiques === 'function'
-            && typeof window.renommerRepertoirePratiques === 'function'
-            && typeof window.supprimerRepertoirePratiques === 'function';
+        // Les handlers génériques existent et sont branchés
+        const aHandlers = typeof window.BibliothequeUI.repertoires.creer === 'function'
+            && typeof window.BibliothequeUI.repertoires.renommer === 'function'
+            && typeof window.BibliothequeUI.repertoires.supprimer === 'function';
 
         return {
             aZone,

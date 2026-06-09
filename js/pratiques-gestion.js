@@ -309,137 +309,12 @@ function genererBadgeTypePratique(pratique) {
    MODAL BIBLIOTHÈQUE
    =============================== */
 
-// #320 — état (mémoire de session) du dépliage de la zone « Mes dossiers ».
-// Repliée par défaut quand des dossiers existent (gain d'espace) ; toujours
-// dépliée s'il n'y en a aucun (pour inviter à en créer).
-let _depliageDossiers = false;
-
-/**
- * #320 — Zone « Mes dossiers » REPLIABLE : gestion des répertoires de classement
- * (créer / renommer / supprimer). Rendu en tête de la Section 2 (le pool que
- * l'on range). Le module js/repertoires-bibliotheque.js range PAR IDENTITÉ, sans
- * toucher aux pratiques elles-mêmes.
- * @returns {string} HTML de la zone
- */
-function genererZoneRepertoiresPratiques() {
-    var reps = (window.repertoiresBibliotheque && typeof window.repertoiresBibliotheque.obtenir === 'function')
-        ? window.repertoiresBibliotheque.obtenir('pratiques')
-        : [];
-    var deplie = _depliageDossiers || reps.length === 0;
-
-    var lignes = reps.map(function(r) {
-        var id = echapperHtml(r.id);
-        return '<div style="display:flex; gap:6px; align-items:center; margin-bottom:6px;">' +
-            '<input type="text" data-rep-id="' + id + '" value="' + echapperHtml(r.nom || '') + '" class="controle-form" style="flex:1;" aria-label="Nom du dossier" />' +
-            '<button data-action="renommerRepertoirePratiques" data-param="' + id + '" class="btn btn-secondaire btn-mini">Renommer</button>' +
-            '<button data-action="supprimerRepertoirePratiques" data-param="' + id + '" data-confirm="Supprimer ce dossier ? Les pratiques qu\'il contient ne sont pas supprimées : elles repassent en « non classées »." class="btn btn-supprimer btn-mini" title="Supprimer le dossier" aria-label="Supprimer le dossier">✕</button>' +
-            '</div>';
-    }).join('');
-
-    if (!lignes) {
-        lignes = '<p style="color: var(--gris-clair); font-style: italic; margin:0 0 6px;">Aucun dossier pour l\'instant. Crée-en un pour ranger tes pratiques.</p>';
-    }
-
-    return '<div style="border:1px solid var(--bordure, #ddd); border-radius:8px; padding:12px; margin-bottom:15px; background:var(--surface-carte, #fff);">' +
-        '<button type="button" data-action="basculerZoneRepertoires" aria-expanded="' + deplie + '" style="background:none; border:none; padding:0; cursor:pointer; font:inherit; font-weight:600; color:var(--texte-principal, #222); display:flex; align-items:center; gap:6px;">' +
-            '<span id="rep-zone-icone" aria-hidden="true">' + (deplie ? '▾' : '▸') + '</span> Mes dossiers' + (reps.length ? ' (' + reps.length + ')' : '') +
-        '</button>' +
-        '<div id="rep-zone-contenu" style="' + (deplie ? 'margin-top:8px;' : 'display:none;') + '">' +
-            '<div id="rep-liste-pratiques">' + lignes + '</div>' +
-            '<div style="display:flex; gap:6px; margin-top:8px;">' +
-                '<input type="text" id="rep-nouveau-nom" class="controle-form" placeholder="Nom d\'un nouveau dossier" style="flex:1;" aria-label="Nom du nouveau dossier" />' +
-                '<button data-action="creerRepertoirePratiques" class="btn btn-principal btn-mini">Créer le dossier</button>' +
-            '</div>' +
-        '</div>' +
-    '</div>';
-}
-
-/** #320 — replie/déplie « Mes dossiers » sans re-rendu (préserve le scroll). */
-function basculerZoneRepertoires() {
-    _depliageDossiers = !_depliageDossiers;
-    var contenu = document.getElementById('rep-zone-contenu');
-    var icone = document.getElementById('rep-zone-icone');
-    if (contenu) {
-        contenu.style.display = _depliageDossiers ? '' : 'none';
-        if (_depliageDossiers) contenu.style.marginTop = '8px';
-    }
-    if (icone) icone.textContent = _depliageDossiers ? '▾' : '▸';
-}
-
-/** #320 L1 — crée un répertoire depuis le champ de la modale, puis rafraîchit. */
-async function creerRepertoirePratiques() {
-    var input = document.getElementById('rep-nouveau-nom');
-    if (!input) return;
-    if (!input.value || !input.value.trim()) {
-        if (window.notifications && typeof notifications.info === 'function') notifications.info('Donne un nom au dossier.');
-        return;
-    }
-    window.repertoiresBibliotheque.creer(input.value, 'pratiques');
-    _depliageDossiers = true; // rester déplié pendant la gestion
-    await afficherBibliothequePratiques();
-}
-
-/** #320 L1 — renomme un répertoire à partir de la valeur de son champ. */
-async function renommerRepertoirePratiques(repId) {
-    var input = document.querySelector('input[data-rep-id="' + repId + '"]');
-    if (!input || !input.value || !input.value.trim()) return;
-    window.repertoiresBibliotheque.renommer(repId, input.value);
-    _depliageDossiers = true;
-    await afficherBibliothequePratiques();
-}
-
-/** #320 L1 — supprime un répertoire (les pratiques restent, repassent non classées). */
-async function supprimerRepertoirePratiques(repId) {
-    window.repertoiresBibliotheque.supprimer(repId);
-    _depliageDossiers = true;
-    await afficherBibliothequePratiques();
-}
-
-/** #320 L2 — range une pratique dans un dossier (exclusif), puis rafraîchit. */
-async function classerPratiqueDansRepertoire(pratiqueId, repId) {
-    window.repertoiresBibliotheque.assigner(pratiqueId, repId, 'pratiques');
-    await afficherBibliothequePratiques();
-}
-
-/** #320 L2 — sort une pratique de son dossier (repasse en non classées). */
-async function retirerPratiqueDeRepertoire(pratiqueId) {
-    window.repertoiresBibliotheque.retirerItem(pratiqueId, 'pratiques');
-    await afficherBibliothequePratiques();
-}
-
-// #320 — actions agissant sur la pratique SÉLECTIONNÉE dans le select d'un dossier.
-function _idPratiqueSelectionnee(selectId) {
-    const s = document.getElementById(selectId);
-    return s && s.value ? s.value : null;
-}
-
-/** Ajoute à la barre latérale la pratique choisie dans le select du dossier. */
-async function ajouterPratiqueSelectionnee(selectId) {
-    const id = _idPratiqueSelectionnee(selectId);
-    if (id && typeof ajouterPratiqueALaSelection === 'function') await ajouterPratiqueALaSelection(id);
-}
-
-/** Déplace la pratique choisie vers un autre dossier (exclusif). */
-async function classerPratiqueSelectionnee(selectId, repId) {
-    const id = _idPratiqueSelectionnee(selectId);
-    if (!id) return;
-    window.repertoiresBibliotheque.assigner(id, repId, 'pratiques');
-    await afficherBibliothequePratiques();
-}
-
-/** Sort la pratique choisie de son dossier (repasse en non classées). */
-async function retirerPratiqueSelectionnee(selectId) {
-    const id = _idPratiqueSelectionnee(selectId);
-    if (!id) return;
-    window.repertoiresBibliotheque.retirerItem(id, 'pratiques');
-    await afficherBibliothequePratiques();
-}
-
-/** Supprime de la bibliothèque la pratique choisie dans le select. */
-async function supprimerPratiqueSelectionnee(selectId) {
-    const id = _idPratiqueSelectionnee(selectId);
-    if (id && typeof supprimerPratiqueDeBibliothequePartagee === 'function') await supprimerPratiqueDeBibliothequePartagee(id);
-}
+// #327 — Les répertoires de classement (zone « Mes dossiers », ligne-select,
+// handlers créer/renommer/supprimer/classer/retirer) sont désormais GÉNÉRIQUES
+// dans BibliothequeUI.repertoires (js/bibliotheque-ui.js), paramétrés par `biblio`.
+// La bibliothèque pratiques s'y enregistre dans afficherBibliothequePratiques()
+// avec ses callbacks spécifiques. Le moteur (repertoires-bibliotheque.js, range
+// PAR IDENTITÉ) est inchangé.
 
 /**
  * Affiche le modal de gestion de la bibliothèque de pratiques
@@ -447,6 +322,17 @@ async function supprimerPratiqueSelectionnee(selectId) {
  * Section 2: Pratiques disponibles avec filtres
  */
 async function afficherBibliothequePratiques() {
+    // #327 — enregistre la biblio « pratiques » auprès du helper générique de
+    // répertoires (idempotent). Callbacks spécifiques : rafraîchir la modale,
+    // ajouter à la sélection, supprimer de la biblio, libeller un item.
+    BibliothequeUI.repertoires.enregistrer('pratiques', {
+        rafraichir: afficherBibliothequePratiques,
+        ajouterItem: (id) => ajouterPratiqueALaSelection(id),
+        supprimerItem: (id) => supprimerPratiqueDeBibliothequePartagee(id),
+        labelItem: (p) => BibliothequeUI.formaterTitre((p && p.nom) || 'Sans titre'),
+        labelPluriel: 'pratiques'
+    });
+
     // Beta 99.39 Phase B : migration vers BibliothequeUI (sortir de l'outlier).
     const configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
 
@@ -518,8 +404,8 @@ async function afficherBibliothequePratiques() {
     // #320 (9 juin) — filtres type/discipline/dossier RETIRÉS : avec l'organisation
     // par dossiers (selects), ils étaient incohérents (n'agissaient plus que sur les
     // cartes « Non classées »). La zone « Mes dossiers » (repliable) tient lieu de
-    // section de tête de la Section 2.
-    const filtresHTML = genererZoneRepertoiresPratiques();
+    // section de tête de la Section 2. #327 — rendue par le helper générique.
+    const filtresHTML = BibliothequeUI.repertoires.genererZone('pratiques');
 
     // Section 2 : pool (pratiques disponibles à ajouter)
     const idsDejaPresents = new Set(pratiquesDansBibliotheque.map(p => p.id));
@@ -532,11 +418,11 @@ async function afficherBibliothequePratiques() {
         const actionsMenu = [];
         repsPratiques.forEach(r => {
             if (r.id !== repCourant) {
-                actionsMenu.push({ label: 'Classer dans : ' + r.nom, action: 'classerPratiqueDansRepertoire', param: pratique.id, param2: r.id, classe: 'btn-secondaire', title: 'Ranger dans ce dossier' });
+                actionsMenu.push({ label: 'Classer dans : ' + r.nom, action: 'BibliothequeUI.repertoires.classer', param: 'pratiques', param2: pratique.id, param3: r.id, classe: 'btn-secondaire', title: 'Ranger dans ce dossier' });
             }
         });
         if (repCourant) {
-            actionsMenu.push({ label: 'Retirer du dossier', action: 'retirerPratiqueDeRepertoire', param: pratique.id, classe: 'btn-secondaire', title: 'Sortir du dossier (repasse en non classées)' });
+            actionsMenu.push({ label: 'Retirer du dossier', action: 'BibliothequeUI.repertoires.retirer', param: 'pratiques', param2: pratique.id, classe: 'btn-secondaire', title: 'Sortir du dossier (repasse en non classées)' });
         }
         actionsMenu.push({ label: 'Supprimer', action: 'supprimerPratiqueDeBibliothequePartagee', param: pratique.id, classe: 'btn-supprimer', title: 'Supprimer de la bibliothèque', showAlways: true });
 
@@ -558,29 +444,10 @@ async function afficherBibliothequePratiques() {
 
     const enteteGroupe = (titre) => `<h4 style="margin:18px 0 8px; padding-bottom:4px; border-bottom:1px solid var(--bordure, #ddd); color:var(--texte-secondaire, #555); font-size:0.95rem;">${echapperHtml(titre)}</h4>`;
 
-    // #320 — ligne compacte d'un dossier : select des pratiques classées +
-    // bouton Ajouter + menu ⋮ (actions sur la pratique SÉLECTIONNÉE du select).
-    // Gagne de l'espace vertical vs une carte par pratique.
-    const renderLigneDossierSelect = (g) => {
-        const selectId = 'rep-select-' + g.id;
-        const options = g.items.map(p =>
-            `<option value="${echapperHtml(p.id)}">${echapperHtml(BibliothequeUI.formaterTitre(p.nom || 'Sans titre'))}</option>`
-        ).join('');
-        const actions = [];
-        repsPratiques.forEach(r => {
-            if (r.id !== g.id) {
-                actions.push({ label: 'Classer dans : ' + r.nom, action: 'classerPratiqueSelectionnee', param: selectId, param2: r.id, classe: 'btn-secondaire', title: 'Déplacer vers ce dossier' });
-            }
-        });
-        actions.push({ label: 'Retirer du dossier', action: 'retirerPratiqueSelectionnee', param: selectId, classe: 'btn-secondaire', title: 'Sortir du dossier (repasse en non classées)' });
-        actions.push({ label: 'Supprimer de la bibliothèque', action: 'supprimerPratiqueSelectionnee', param: selectId, classe: 'btn-supprimer', title: 'Supprimer définitivement', showAlways: true });
-
-        return '<div style="display:flex; gap:6px; align-items:center; margin-bottom:10px;">' +
-            '<select id="' + selectId + '" class="controle-form" style="flex:1;" aria-label="Pratiques du dossier ' + echapperHtml(g.titre) + '">' + options + '</select>' +
-            '<button data-action="ajouterPratiqueSelectionnee" data-param="' + selectId + '" class="btn btn-principal btn-mini">Ajouter</button>' +
-            BibliothequeUI.renderMenuActions(actions, selectId) +
-        '</div>';
-    };
+    // #327 — ligne compacte d'un dossier (select + Ajouter + menu ⋮) rendue par le
+    // helper générique, paramétré par `biblio`. Les callbacks d'ajout/suppression
+    // proviennent de l'enregistrement en tête de fonction.
+    const renderLigneDossierSelect = (g) => BibliothequeUI.repertoires.renderLigneDossierSelect('pratiques', g);
 
     let contenuSection2 = '';
     if (pratiquesAAfficher.length === 0) {
@@ -2862,18 +2729,8 @@ window.initialiserModulePratiquesMateriel = initialiserModulePratiquesMateriel;
 window.afficherListePratiquesMateriel = afficherListePratiquesMateriel;
 window.afficherBibliothequePratiques = afficherBibliothequePratiques;
 window.fermerModalBibliothequePratiques = fermerModalBibliothequePratiques;
-// #320 — gestion des répertoires de classement (zone « Mes dossiers » repliable)
-window.basculerZoneRepertoires = basculerZoneRepertoires;
-window.creerRepertoirePratiques = creerRepertoirePratiques;
-window.renommerRepertoirePratiques = renommerRepertoirePratiques;
-window.supprimerRepertoirePratiques = supprimerRepertoirePratiques;
-window.classerPratiqueDansRepertoire = classerPratiqueDansRepertoire;
-window.retirerPratiqueDeRepertoire = retirerPratiqueDeRepertoire;
-// #320 — actions sur la pratique sélectionnée dans le select d'un dossier
-window.ajouterPratiqueSelectionnee = ajouterPratiqueSelectionnee;
-window.classerPratiqueSelectionnee = classerPratiqueSelectionnee;
-window.retirerPratiqueSelectionnee = retirerPratiqueSelectionnee;
-window.supprimerPratiqueSelectionnee = supprimerPratiqueSelectionnee;
+// #327 — la gestion des répertoires de classement est passée au helper générique
+// BibliothequeUI.repertoires (js/bibliotheque-ui.js). Plus d'exports spécifiques ici.
 window.ajouterPratiqueALaSelection = ajouterPratiqueALaSelection;
 window.retirerPratiqueDeLaSelection = retirerPratiqueDeLaSelection;
 window.retirerPratiqueDeBibliothequeMateriel = retirerPratiqueDeBibliothequeMateriel;
