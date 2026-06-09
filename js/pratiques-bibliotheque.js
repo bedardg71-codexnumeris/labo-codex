@@ -704,6 +704,14 @@ async function retirerPratiqueDeLaBibliotheque(configId) {
     }
 
     await db.set(CLE_BIBLIOTHEQUE_PRATIQUES, bibliotheque);
+
+    // #320 — cohérence des répertoires : une pratique retirée quitte tout
+    // répertoire qui la classait (sinon itemId orphelin). Appel défensif :
+    // le module de classement peut ne pas être chargé.
+    if (window.repertoiresBibliotheque && typeof window.repertoiresBibliotheque.retirerItem === 'function') {
+        window.repertoiresBibliotheque.retirerItem(configId, 'pratiques');
+    }
+
     return true;
 }
 
