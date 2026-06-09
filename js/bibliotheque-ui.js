@@ -455,6 +455,7 @@
             var attrs = 'data-action="' + btn.action + '"';
             if (btn.param != null) attrs += ' data-param="' + btn.param + '"';
             if (btn.param2 != null) attrs += ' data-param2="' + btn.param2 + '"';
+            if (btn.param3 != null) attrs += ' data-param3="' + btn.param3 + '"';
             return attrs;
         }
         // Legacy onclick string → convertir en data-action via parsing
@@ -776,6 +777,238 @@
 
         document.body.insertAdjacentHTML('beforeend', html);
     };
+
+    /* =====================================================================
+       #327 — RÉPERTOIRES DE CLASSEMENT : couche UI GÉNÉRIQUE (transversale).
+       Généralise l'UI livrée pour les pratiques en #320 (zone « Mes dossiers »
+       repliable, pool groupé en selects compacts, assignation) à TOUTES les
+       bibliothèques. Le moteur (js/repertoires-bibliotheque.js) est déjà
+       paramétré par `biblio` ; ici on mutualise le rendu et les handlers.
+
+       Chaque bibliothèque s'enregistre une fois via `enregistrer(biblio, cfg)`
+       en fournissant ses callbacks spécifiques (rafraîchir la modale, ajouter /
+       supprimer un item, libeller un item). Les handlers génériques reçoivent
+       la `biblio` en premier data-param, sans jamais utiliser `this`
+       (le dispatcher data-action appelle fn(param, param2, param3)).
+
+       Garde-fous : aucune mutation des items (couche par-dessus, par identité) ;
+       noms échappés (echapperHtml) ; data-action (CSP). Cf. SKILL_integrite_globaux.
+       ===================================================================== */
+    (function () {
+        // Registre des bibliothèques (callbacks spécifiques par `biblio`).
+        var _config = {};
+        // État (mémoire de session) du dépliage de la zone, PAR bibliothèque :
+        // repliée par défaut s'il existe des dossiers, dépliée s'il n'y en a aucun.
+        var _deplie = {};
+
+        function _cfg(biblio) {
+            return _config[biblio] || {};
+        }
+
+        function _moteur() {
+            return window.repertoiresBibliotheque;
+        }
+
+        function _reps(biblio) {
+            var m = _moteur();
+            return (m && typeof m.obtenir === 'function') ? m.obtenir(biblio) : [];
+        }
+
+        function _labelPluriel(biblio) {
+            return _cfg(biblio).labelPluriel || 'éléments';
+        }
+
+        // Libellé d'affichage d'un item dans un select (callback ou défaut).
+        function _labelItem(biblio, item) {
+            var fn = _cfg(biblio).labelItem;
+            if (typeof fn === 'function') return fn(item);
+            return BibliothequeUI.formaterTitre((item && item.nom) || 'Sans titre');
+        }
+
+        async function _rafraichir(biblio) {
+            var fn = _cfg(biblio).rafraichir;
+            if (typeof fn === 'function') await fn();
+        }
+
+        /**
+         * Enregistre une bibliothèque et ses callbacks spécifiques.
+         * @param {string} biblio  clé de bibliothèque ('pratiques', 'grilles'…)
+         * @param {Object} cfg
+         *   - rafraichir   {Function}  ré-affiche la modale après mutation (async ok)
+         *   - ajouterItem  {Function}  (id) => ajoute l'item à la sélection (optionnel)
+         *   - supprimerItem{Function}  (id) => supprime l'item de la biblio (optionnel)
+         *   - labelItem    {Function}  (item) => texte d'option de select (optionnel)
+         *   - labelPluriel {string}    pour les textes d'aide/confirmation ('pratiques'…)
+         */
+        BibliothequeUI.repertoires = {};
+
+        BibliothequeUI.repertoires.enregistrer = function (biblio, cfg) {
+            _config[biblio] = cfg || {};
+        };
+
+        // --- Zone « Mes dossiers » (repliable) -------------------------------
+
+        /** HTML de la zone « Mes dossiers » (créer / renommer / supprimer). */
+        BibliothequeUI.repertoires.genererZone = function (biblio) {
+            var reps = _reps(biblio);
+            var deplie = _deplie[biblio] || reps.length === 0;
+            var pluriel = _labelPluriel(biblio);
+
+            var lignes = reps.map(function (r) {
+                var id = echapperHtml(r.id);
+                var b = echapperHtml(biblio);
+                return '<div style="display:flex; gap:6px; align-items:center; margin-bottom:6px;">' +
+                    '<input type="text" data-rep-biblio="' + b + '" data-rep-id="' + id + '" value="' + echapperHtml(r.nom || '') + '" class="controle-form" style="flex:1;" aria-label="Nom du dossier" />' +
+                    '<button data-action="BibliothequeUI.repertoires.renommer" data-param="' + b + '" data-param2="' + id + '" class="btn btn-secondaire btn-mini">Renommer</button>' +
+                    '<button data-action="BibliothequeUI.repertoires.supprimer" data-param="' + b + '" data-param2="' + id + '" data-confirm="Supprimer ce dossier ? Son contenu n\'est pas supprimé : les ' + pluriel + ' repassent en « non classées »." class="btn btn-supprimer btn-mini" title="Supprimer le dossier" aria-label="Supprimer le dossier">✕</button>' +
+                    '</div>';
+            }).join('');
+
+            if (!lignes) {
+                lignes = '<p style="color: var(--gris-clair); font-style: italic; margin:0 0 6px;">Aucun dossier pour l\'instant. Crée-en un pour ranger tes ' + pluriel + '.</p>';
+            }
+
+            var b = echapperHtml(biblio);
+            return '<div style="border:1px solid var(--bordure, #ddd); border-radius:8px; padding:12px; margin-bottom:15px; background:var(--surface-carte, #fff);">' +
+                '<button type="button" data-action="BibliothequeUI.repertoires.basculer" data-param="' + b + '" aria-expanded="' + deplie + '" style="background:none; border:none; padding:0; cursor:pointer; font:inherit; font-weight:600; color:var(--texte-principal, #222); display:flex; align-items:center; gap:6px;">' +
+                    '<span id="rep-' + b + '-zone-icone" aria-hidden="true">' + (deplie ? '▾' : '▸') + '</span> Mes dossiers' + (reps.length ? ' (' + reps.length + ')' : '') +
+                '</button>' +
+                '<div id="rep-' + b + '-zone-contenu" style="' + (deplie ? 'margin-top:8px;' : 'display:none;') + '">' +
+                    '<div id="rep-' + b + '-liste">' + lignes + '</div>' +
+                    '<div style="display:flex; gap:6px; margin-top:8px;">' +
+                        '<input type="text" id="rep-' + b + '-nouveau-nom" class="controle-form" placeholder="Nom d\'un nouveau dossier" style="flex:1;" aria-label="Nom du nouveau dossier" />' +
+                        '<button data-action="BibliothequeUI.repertoires.creer" data-param="' + b + '" class="btn btn-principal btn-mini">Créer le dossier</button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        };
+
+        /** Replie/déplie « Mes dossiers » sans re-rendu (préserve le scroll). */
+        BibliothequeUI.repertoires.basculer = function (biblio) {
+            _deplie[biblio] = !_deplie[biblio];
+            var contenu = document.getElementById('rep-' + biblio + '-zone-contenu');
+            var icone = document.getElementById('rep-' + biblio + '-zone-icone');
+            if (contenu) {
+                contenu.style.display = _deplie[biblio] ? '' : 'none';
+                if (_deplie[biblio]) contenu.style.marginTop = '8px';
+            }
+            if (icone) icone.textContent = _deplie[biblio] ? '▾' : '▸';
+        };
+
+        // --- Mutations sur les dossiers --------------------------------------
+
+        BibliothequeUI.repertoires.creer = async function (biblio) {
+            var input = document.getElementById('rep-' + biblio + '-nouveau-nom');
+            if (!input) return;
+            if (!input.value || !input.value.trim()) {
+                if (window.notifications && typeof notifications.info === 'function') notifications.info('Donne un nom au dossier.');
+                return;
+            }
+            _moteur().creer(input.value, biblio);
+            _deplie[biblio] = true; // rester déplié pendant la gestion
+            await _rafraichir(biblio);
+        };
+
+        BibliothequeUI.repertoires.renommer = async function (biblio, repId) {
+            var input = document.querySelector('input[data-rep-biblio="' + biblio + '"][data-rep-id="' + repId + '"]');
+            if (!input || !input.value || !input.value.trim()) return;
+            _moteur().renommer(repId, input.value);
+            _deplie[biblio] = true;
+            await _rafraichir(biblio);
+        };
+
+        BibliothequeUI.repertoires.supprimer = async function (biblio, repId) {
+            _moteur().supprimer(repId);
+            _deplie[biblio] = true;
+            await _rafraichir(biblio);
+        };
+
+        /** Range un item dans un dossier (exclusif), puis rafraîchit. */
+        BibliothequeUI.repertoires.classer = async function (biblio, itemId, repId) {
+            _moteur().assigner(itemId, repId, biblio);
+            await _rafraichir(biblio);
+        };
+
+        /** Sort un item de son dossier (repasse en non classées), puis rafraîchit. */
+        BibliothequeUI.repertoires.retirer = async function (biblio, itemId) {
+            _moteur().retirerItem(itemId, biblio);
+            await _rafraichir(biblio);
+        };
+
+        // --- Ligne compacte d'un dossier : select + Ajouter + menu ⋮ ----------
+        // Actions agissant sur l'item SÉLECTIONNÉ dans le select du dossier.
+
+        function _idSelectionne(selectId) {
+            var s = document.getElementById(selectId);
+            return s && s.value ? s.value : null;
+        }
+
+        /**
+         * Rend la ligne compacte d'un groupe-dossier : un select de ses items +
+         * bouton « Ajouter » + menu ⋮ (déplacer vers un autre dossier / retirer /
+         * supprimer). `groupe` = { id, titre, items } issu de repertoiresBibliotheque.grouper.
+         * Gagne de l'espace vertical vs une carte par item.
+         */
+        BibliothequeUI.repertoires.renderLigneDossierSelect = function (biblio, groupe) {
+            var selectId = 'rep-' + biblio + '-select-' + groupe.id;
+            var b = echapperHtml(biblio);
+            var sid = echapperHtml(selectId);
+            var options = groupe.items.map(function (item) {
+                return '<option value="' + echapperHtml(item.id) + '">' + echapperHtml(_labelItem(biblio, item)) + '</option>';
+            }).join('');
+
+            var actions = [];
+            _reps(biblio).forEach(function (r) {
+                if (r.id !== groupe.id) {
+                    actions.push({ label: 'Classer dans : ' + r.nom, action: 'BibliothequeUI.repertoires.classerSel', param: biblio, param2: selectId, param3: r.id, classe: 'btn-secondaire', title: 'Déplacer vers ce dossier' });
+                }
+            });
+            actions.push({ label: 'Retirer du dossier', action: 'BibliothequeUI.repertoires.retirerSel', param: biblio, param2: selectId, classe: 'btn-secondaire', title: 'Sortir du dossier (repasse en non classées)' });
+            if (typeof _cfg(biblio).supprimerItem === 'function') {
+                actions.push({ label: 'Supprimer de la bibliothèque', action: 'BibliothequeUI.repertoires.supprimerSel', param: biblio, param2: selectId, classe: 'btn-supprimer', title: 'Supprimer définitivement', showAlways: true });
+            }
+
+            var boutonAjouter = (typeof _cfg(biblio).ajouterItem === 'function')
+                ? '<button data-action="BibliothequeUI.repertoires.ajouterSel" data-param="' + b + '" data-param2="' + sid + '" class="btn btn-principal btn-mini">Ajouter</button>'
+                : '';
+
+            return '<div style="display:flex; gap:6px; align-items:center; margin-bottom:10px;">' +
+                '<select id="' + sid + '" class="controle-form" style="flex:1;" aria-label="' + echapperHtml(_labelPluriel(biblio)) + ' du dossier ' + echapperHtml(groupe.titre) + '">' + options + '</select>' +
+                boutonAjouter +
+                BibliothequeUI.renderMenuActions(actions, selectId) +
+            '</div>';
+        };
+
+        /** Ajoute à la sélection l'item choisi dans le select du dossier. */
+        BibliothequeUI.repertoires.ajouterSel = async function (biblio, selectId) {
+            var id = _idSelectionne(selectId);
+            var fn = _cfg(biblio).ajouterItem;
+            if (id && typeof fn === 'function') await fn(id);
+        };
+
+        /** Déplace l'item choisi vers un autre dossier (exclusif). */
+        BibliothequeUI.repertoires.classerSel = async function (biblio, selectId, repId) {
+            var id = _idSelectionne(selectId);
+            if (!id) return;
+            _moteur().assigner(id, repId, biblio);
+            await _rafraichir(biblio);
+        };
+
+        /** Sort l'item choisi de son dossier (repasse en non classées). */
+        BibliothequeUI.repertoires.retirerSel = async function (biblio, selectId) {
+            var id = _idSelectionne(selectId);
+            if (!id) return;
+            _moteur().retirerItem(id, biblio);
+            await _rafraichir(biblio);
+        };
+
+        /** Supprime de la bibliothèque l'item choisi dans le select. */
+        BibliothequeUI.repertoires.supprimerSel = async function (biblio, selectId) {
+            var id = _idSelectionne(selectId);
+            var fn = _cfg(biblio).supprimerItem;
+            if (id && typeof fn === 'function') await fn(id);
+        };
+    })();
 
     // Exposer globalement
     window.BibliothequeUI = BibliothequeUI;
