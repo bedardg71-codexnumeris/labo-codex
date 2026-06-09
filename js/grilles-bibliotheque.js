@@ -52,22 +52,9 @@ function obtenirGrillesParDiscipline(discipline) {
     );
 }
 
-/**
- * Obtenir la liste des disciplines disponibles dans la bibliothèque
- * @returns {Array} Tableau des noms de disciplines uniques
- */
-function obtenirDisciplinesDisponiblesGrilles() {
-    const bibliotheque = db.getSync(CLE_BIBLIOTHEQUE_GRILLES) || [];
-    const disciplines = new Set();
-
-    bibliotheque.forEach(grille => {
-        if (grille.discipline) {
-            disciplines.add(grille.discipline);
-        }
-    });
-
-    return Array.from(disciplines).sort();
-}
+// #327 — obtenirDisciplinesDisponiblesGrilles retiré (code mort) : le seul
+// appelant était le filtre par discipline de la modale, supprimé au profit du
+// classement par dossiers.
 
 /**
  * Ajouter une grille à la bibliothèque partagée
@@ -128,6 +115,12 @@ async function retirerGrilleDeLaBibliotheque(grilleId) {
     }
 
     await db.set(CLE_BIBLIOTHEQUE_GRILLES, bibliotheque);
+
+    // #327 — hook de cohérence : la grille retirée sort de tout dossier de
+    // classement (le moteur range par identité, sans toucher la grille).
+    if (window.repertoiresBibliotheque && typeof window.repertoiresBibliotheque.retirerItem === 'function') {
+        window.repertoiresBibliotheque.retirerItem(grilleId, 'grilles');
+    }
     return true;
 }
 
@@ -268,7 +261,6 @@ function getNombreGrillesBibliotheque() {
 window.obtenirToutesLesGrillesBibliotheque = obtenirToutesLesGrillesBibliotheque;
 window.obtenirToutesLesGrillesBibliothequeSync = obtenirToutesLesGrillesBibliothequeSync;
 window.obtenirGrillesParDiscipline = obtenirGrillesParDiscipline;
-window.obtenirDisciplinesDisponiblesGrilles = obtenirDisciplinesDisponiblesGrilles;
 window.ajouterGrilleALaBibliotheque = ajouterGrilleALaBibliotheque;
 window.retirerGrilleDeLaBibliotheque = retirerGrilleDeLaBibliotheque;
 window.importerGrillesDansBibliotheque = importerGrillesDansBibliotheque;
