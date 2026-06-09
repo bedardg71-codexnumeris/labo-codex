@@ -130,6 +130,42 @@ describe('L0 · immuabilité', () => {
     });
 });
 
+describe('L3 · grouperPur (helper transversal de groupage)', () => {
+    const items = [{ id: 'p1' }, { id: 'p2' }, { id: 'p3' }, { id: 'p4' }];
+
+    it('un groupe par dossier non vide (ordonné) + « Non classées » en dernier', () => {
+        // A: p1,p2 ; B: p3 ; non classé: p4
+        const g = R.grouperPur(items, [repA, repB], 'pratiques');
+        expect(g.map(x => x.titre)).toEqual(['A', 'B', 'Non classées']);
+        expect(g[0].items.map(i => i.id)).toEqual(['p1', 'p2']);
+        expect(g[2].id).toBeNull();
+        expect(g[2].items.map(i => i.id)).toEqual(['p4']);
+    });
+
+    it('omet un dossier vide (aucun item du lot dedans)', () => {
+        const repVide = { id: 'v', nom: 'Vide', biblio: 'pratiques', itemIds: ['absent'], ordre: 2 };
+        const g = R.grouperPur(items, [repA, repVide], 'pratiques');
+        expect(g.map(x => x.titre)).not.toContain('Vide');
+    });
+
+    it('pas de groupe « Non classées » si tout est classé', () => {
+        const g = R.grouperPur([{ id: 'p1' }, { id: 'p3' }], [repA, repB], 'pratiques');
+        expect(g.map(x => x.titre)).toEqual(['A', 'B']);
+    });
+
+    it('ignore les répertoires d\'une autre biblio', () => {
+        const g = R.grouperPur([{ id: 'p1' }], [repAutre], 'pratiques'); // repAutre = grilles
+        expect(g.map(x => x.titre)).toEqual(['Non classées']);
+    });
+
+    it('getId personnalisé (grouper des cartes/vues, pas des items bruts)', () => {
+        const cartes = [{ ref: 'p1' }, { ref: 'p4' }];
+        const g = R.grouperPur(cartes, [repA], 'pratiques', c => c.ref);
+        expect(g.find(x => x.titre === 'A').items).toEqual([{ ref: 'p1' }]);
+        expect(g.find(x => x.titre === 'Non classées').items).toEqual([{ ref: 'p4' }]);
+    });
+});
+
 describe('L0 · publiques (I/O via db) — round-trip', () => {
     it('creer puis obtenir relit le répertoire persisté', () => {
         const cree = R.creer('Essais SOM', 'pratiques');

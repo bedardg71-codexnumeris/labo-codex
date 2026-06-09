@@ -384,6 +384,21 @@ async function retirerPratiqueDeRepertoire(pratiqueId) {
 }
 
 /**
+ * #320 L3 — filtre « par dossier » : masque/affiche les groupes du pool selon
+ * la valeur du select. '' = tous ; '__nonclasse__' = groupe non classées ;
+ * sinon l'id du dossier. Masquage DOM (pas de re-rendu) — coexiste avec les
+ * filtres type/discipline. Lit le select par id (comme filtrerPratiquesBibliotheque).
+ */
+function filtrerParRepertoirePratiques() {
+    const select = document.getElementById('filtreRepertoirePratiques');
+    const val = select ? select.value : '';
+    const groupes = document.querySelectorAll('#listePratiquesDisponibles .biblio-groupe-repertoire');
+    groupes.forEach(div => {
+        div.style.display = (!val || div.getAttribute('data-repertoire-id') === val) ? '' : 'none';
+    });
+}
+
+/**
  * Affiche le modal de gestion de la bibliothèque de pratiques
  * Section 1: Pratiques dans la sélection (avec boutons Partager/Retirer)
  * Section 2: Pratiques disponibles avec filtres
@@ -455,7 +470,27 @@ async function afficherBibliothequePratiques() {
         </div>
     `;
 
-    // Filtres Section 2 : zone « Mes dossiers » (#320 L1) + filtres type/discipline
+    // #320 — répertoires de classement (lus une fois : filtre L3 + groupage L2)
+    const repsPratiques = (window.repertoiresBibliotheque && typeof window.repertoiresBibliotheque.obtenir === 'function')
+        ? window.repertoiresBibliotheque.obtenir('pratiques')
+        : [];
+    const repParPratique = {};
+    repsPratiques.forEach(r => (r.itemIds || []).forEach(id => { repParPratique[id] = r.id; }));
+
+    // #320 L3 — filtre « par dossier » (n'apparaît que s'il existe des dossiers)
+    const filtreDossierHTML = repsPratiques.length === 0 ? '' : `
+            <div style="flex: 1; min-width: 200px;">
+                <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">
+                    Filtrer par dossier :
+                </label>
+                <select id="filtreRepertoirePratiques" class="controle-form" data-on-change="filtrerParRepertoirePratiques" style="max-width: 300px;">
+                    <option value="">Tous les dossiers</option>
+                    ${repsPratiques.map(r => `<option value="${echapperHtml(r.id)}">${echapperHtml(r.nom)}</option>`).join('')}
+                    <option value="__nonclasse__">Non classées</option>
+                </select>
+            </div>`;
+
+    // Filtres Section 2 : zone « Mes dossiers » (#320 L1) + filtres type/discipline/dossier
     const filtresHTML = genererZoneRepertoiresPratiques() + `
         <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 15px;">
             <div style="flex: 1; min-width: 200px;">
@@ -478,21 +513,13 @@ async function afficherBibliothequePratiques() {
                     <option value="">Toutes les disciplines</option>
                     ${disciplines.map(d => `<option value="${d}">${d}</option>`).join('')}
                 </select>
-            </div>
+            </div>${filtreDossierHTML}
         </div>
     `;
 
     // Section 2 : pool (pratiques disponibles à ajouter)
     const idsDejaPresents = new Set(pratiquesDansBibliotheque.map(p => p.id));
     const pratiquesAAfficher = pratiquesDisponibles.filter(p => !idsDejaPresents.has(p.id));
-
-    // #320 L2 — répertoires de classement du pool (dossiers exclusifs).
-    const repsPratiques = (window.repertoiresBibliotheque && typeof window.repertoiresBibliotheque.obtenir === 'function')
-        ? window.repertoiresBibliotheque.obtenir('pratiques')
-        : [];
-    // id de pratique → id du répertoire qui la contient (au plus un)
-    const repParPratique = {};
-    repsPratiques.forEach(r => (r.itemIds || []).forEach(id => { repParPratique[id] = r.id; }));
 
     // Rendu d'une carte du pool, menu d'actions enrichi de l'assignation.
     const renderCartePool = (pratique) => {
@@ -534,21 +561,18 @@ async function afficherBibliothequePratiques() {
         // Aucun dossier → liste à plat (comportement d'origine, zéro régression)
         pratiquesAAfficher.forEach(p => { contenuSection2 += renderCartePool(p); });
     } else {
-        // Groupé : un bloc par dossier (montré s'il contient des pratiques du
-        // pool) puis « Non classées ». L'assignation au menu ⋮ couvre TOUS les
-        // dossiers, y compris ceux vides ici.
-        repsPratiques.forEach(r => {
-            const dansCe = pratiquesAAfficher.filter(p => (r.itemIds || []).includes(p.id));
-            if (dansCe.length) {
-                contenuSection2 += enteteGroupe(r.nom);
-                dansCe.forEach(p => { contenuSection2 += renderCartePool(p); });
-            }
+        // #320 L3 — groupage via le helper transversal repertoiresBibliotheque.
+        // Chaque groupe est ENVELOPPÉ (data-repertoire-id) pour que le filtre
+        // « par dossier » puisse masquer/afficher un groupe entier (en-tête + cartes).
+        // L'assignation au menu ⋮ couvre TOUS les dossiers, même vides ici.
+        const groupes = window.repertoiresBibliotheque.grouper(pratiquesAAfficher, 'pratiques');
+        groupes.forEach(g => {
+            const cleGroupe = g.id || '__nonclasse__';
+            contenuSection2 += `<div class="biblio-groupe-repertoire" data-repertoire-id="${echapperHtml(cleGroupe)}">`;
+            contenuSection2 += enteteGroupe(g.titre);
+            g.items.forEach(p => { contenuSection2 += renderCartePool(p); });
+            contenuSection2 += `</div>`;
         });
-        const nonClassees = pratiquesAAfficher.filter(p => !repParPratique[p.id]);
-        if (nonClassees.length) {
-            contenuSection2 += enteteGroupe('Non classées');
-            nonClassees.forEach(p => { contenuSection2 += renderCartePool(p); });
-        }
     }
 
     BibliothequeUI.creerModal({
@@ -2831,6 +2855,7 @@ window.renommerRepertoirePratiques = renommerRepertoirePratiques;
 window.supprimerRepertoirePratiques = supprimerRepertoirePratiques;
 window.classerPratiqueDansRepertoire = classerPratiqueDansRepertoire;
 window.retirerPratiqueDeRepertoire = retirerPratiqueDeRepertoire;
+window.filtrerParRepertoirePratiques = filtrerParRepertoirePratiques;
 window.ajouterPratiqueALaSelection = ajouterPratiqueALaSelection;
 window.retirerPratiqueDeLaSelection = retirerPratiqueDeLaSelection;
 window.retirerPratiqueDeBibliothequeMateriel = retirerPratiqueDeBibliothequeMateriel;
