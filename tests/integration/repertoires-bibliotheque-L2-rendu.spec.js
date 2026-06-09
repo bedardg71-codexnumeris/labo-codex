@@ -66,8 +66,12 @@ test('L2 · pool groupé par dossier + assignation « Classer dans… »', async
         await window.classerPratiqueDansRepertoire(pratiqueId, dossier.id);
         const html2 = lireModal();
         const aEnteteDossier = html2.includes('Expérimentations');
-        // La pratique classée propose désormais « Retirer du dossier »
-        const aActionRetirer = !!document.querySelector('[data-action="retirerPratiqueDeRepertoire"][data-param="' + pratiqueId + '"]');
+        // La pratique classée est désormais une OPTION du select compact du dossier
+        const aOptionSelect = !!document.querySelector('#rep-select-' + dossier.id + ' option[value="' + pratiqueId + '"]');
+        // Ligne compacte : bouton « Ajouter » câblé sur le select du dossier
+        const aBoutonAjouterSelect = !!document.querySelector('[data-action="ajouterPratiqueSelectionnee"][data-param="rep-select-' + dossier.id + '"]');
+        // Le menu ⋮ du dossier propose « Retirer du dossier » (agit sur la sélection)
+        const aActionRetirer = !!document.querySelector('[data-action="retirerPratiqueSelectionnee"][data-param="rep-select-' + dossier.id + '"]');
         // Persistance : le module connaît l'appartenance
         const reps = window.repertoiresBibliotheque.obtenir('pratiques');
         const estClassee = reps[0].itemIds.includes(pratiqueId);
@@ -80,13 +84,15 @@ test('L2 · pool groupé par dossier + assignation « Classer dans… »', async
         const aHandlers = typeof window.classerPratiqueDansRepertoire === 'function'
             && typeof window.retirerPratiqueDeRepertoire === 'function';
 
-        return { aGroupeNonClassees, aActionClasser, aEnteteDossier, aActionRetirer, estClassee, retiree, aHandlers };
+        return { aGroupeNonClassees, aActionClasser, aEnteteDossier, aOptionSelect, aBoutonAjouterSelect, aActionRetirer, estClassee, retiree, aHandlers };
     });
 
     expect(resultat.erreur).toBeUndefined();
     expect(resultat.aGroupeNonClassees).toBe(true);
     expect(resultat.aActionClasser).toBe(true);
     expect(resultat.aEnteteDossier).toBe(true);
+    expect(resultat.aOptionSelect).toBe(true);
+    expect(resultat.aBoutonAjouterSelect).toBe(true);
     expect(resultat.aActionRetirer).toBe(true);
     expect(resultat.estClassee).toBe(true);
     expect(resultat.retiree).toBe(true);

@@ -383,6 +383,40 @@ async function retirerPratiqueDeRepertoire(pratiqueId) {
     await afficherBibliothequePratiques();
 }
 
+// #320 — actions agissant sur la pratique SÉLECTIONNÉE dans le select d'un dossier.
+function _idPratiqueSelectionnee(selectId) {
+    const s = document.getElementById(selectId);
+    return s && s.value ? s.value : null;
+}
+
+/** Ajoute à la barre latérale la pratique choisie dans le select du dossier. */
+async function ajouterPratiqueSelectionnee(selectId) {
+    const id = _idPratiqueSelectionnee(selectId);
+    if (id && typeof ajouterPratiqueALaSelection === 'function') await ajouterPratiqueALaSelection(id);
+}
+
+/** Déplace la pratique choisie vers un autre dossier (exclusif). */
+async function classerPratiqueSelectionnee(selectId, repId) {
+    const id = _idPratiqueSelectionnee(selectId);
+    if (!id) return;
+    window.repertoiresBibliotheque.assigner(id, repId, 'pratiques');
+    await afficherBibliothequePratiques();
+}
+
+/** Sort la pratique choisie de son dossier (repasse en non classées). */
+async function retirerPratiqueSelectionnee(selectId) {
+    const id = _idPratiqueSelectionnee(selectId);
+    if (!id) return;
+    window.repertoiresBibliotheque.retirerItem(id, 'pratiques');
+    await afficherBibliothequePratiques();
+}
+
+/** Supprime de la bibliothèque la pratique choisie dans le select. */
+async function supprimerPratiqueSelectionnee(selectId) {
+    const id = _idPratiqueSelectionnee(selectId);
+    if (id && typeof supprimerPratiqueDeBibliothequePartagee === 'function') await supprimerPratiqueDeBibliothequePartagee(id);
+}
+
 /**
  * #320 L3 — filtre « par dossier » : masque/affiche les groupes du pool selon
  * la valeur du select. '' = tous ; '__nonclasse__' = groupe non classées ;
@@ -554,6 +588,30 @@ async function afficherBibliothequePratiques() {
 
     const enteteGroupe = (titre) => `<h4 style="margin:18px 0 8px; padding-bottom:4px; border-bottom:1px solid var(--bordure, #ddd); color:var(--texte-secondaire, #555); font-size:0.95rem;">${echapperHtml(titre)}</h4>`;
 
+    // #320 — ligne compacte d'un dossier : select des pratiques classées +
+    // bouton Ajouter + menu ⋮ (actions sur la pratique SÉLECTIONNÉE du select).
+    // Gagne de l'espace vertical vs une carte par pratique.
+    const renderLigneDossierSelect = (g) => {
+        const selectId = 'rep-select-' + g.id;
+        const options = g.items.map(p =>
+            `<option value="${echapperHtml(p.id)}">${echapperHtml(BibliothequeUI.formaterTitre(p.nom || 'Sans titre'))}</option>`
+        ).join('');
+        const actions = [];
+        repsPratiques.forEach(r => {
+            if (r.id !== g.id) {
+                actions.push({ label: 'Classer dans : ' + r.nom, action: 'classerPratiqueSelectionnee', param: selectId, param2: r.id, classe: 'btn-secondaire', title: 'Déplacer vers ce dossier' });
+            }
+        });
+        actions.push({ label: 'Retirer du dossier', action: 'retirerPratiqueSelectionnee', param: selectId, classe: 'btn-secondaire', title: 'Sortir du dossier (repasse en non classées)' });
+        actions.push({ label: 'Supprimer de la bibliothèque', action: 'supprimerPratiqueSelectionnee', param: selectId, classe: 'btn-supprimer', title: 'Supprimer définitivement', showAlways: true });
+
+        return '<div style="display:flex; gap:6px; align-items:center; margin-bottom:10px;">' +
+            '<select id="' + selectId + '" class="controle-form" style="flex:1;" aria-label="Pratiques du dossier ' + echapperHtml(g.titre) + '">' + options + '</select>' +
+            '<button data-action="ajouterPratiqueSelectionnee" data-param="' + selectId + '" class="btn btn-principal btn-mini">Ajouter</button>' +
+            BibliothequeUI.renderMenuActions(actions, selectId) +
+        '</div>';
+    };
+
     let contenuSection2 = '';
     if (pratiquesAAfficher.length === 0) {
         contenuSection2 = '<p style="color: var(--gris-clair); font-style: italic;">Toutes les pratiques sont déjà dans ta sélection</p>';
@@ -570,7 +628,13 @@ async function afficherBibliothequePratiques() {
             const cleGroupe = g.id || '__nonclasse__';
             contenuSection2 += `<div class="biblio-groupe-repertoire" data-repertoire-id="${echapperHtml(cleGroupe)}">`;
             contenuSection2 += enteteGroupe(g.titre);
-            g.items.forEach(p => { contenuSection2 += renderCartePool(p); });
+            if (g.id) {
+                // Dossier → select compact (gain d'espace vertical)
+                contenuSection2 += renderLigneDossierSelect(g);
+            } else {
+                // « Non classées » → cartes (on y voit ce qui reste à ranger)
+                g.items.forEach(p => { contenuSection2 += renderCartePool(p); });
+            }
             contenuSection2 += `</div>`;
         });
     }
@@ -2856,6 +2920,11 @@ window.supprimerRepertoirePratiques = supprimerRepertoirePratiques;
 window.classerPratiqueDansRepertoire = classerPratiqueDansRepertoire;
 window.retirerPratiqueDeRepertoire = retirerPratiqueDeRepertoire;
 window.filtrerParRepertoirePratiques = filtrerParRepertoirePratiques;
+// #320 — actions sur la pratique sélectionnée dans le select d'un dossier
+window.ajouterPratiqueSelectionnee = ajouterPratiqueSelectionnee;
+window.classerPratiqueSelectionnee = classerPratiqueSelectionnee;
+window.retirerPratiqueSelectionnee = retirerPratiqueSelectionnee;
+window.supprimerPratiqueSelectionnee = supprimerPratiqueSelectionnee;
 window.ajouterPratiqueALaSelection = ajouterPratiqueALaSelection;
 window.retirerPratiqueDeLaSelection = retirerPratiqueDeLaSelection;
 window.retirerPratiqueDeBibliothequeMateriel = retirerPratiqueDeBibliothequeMateriel;
