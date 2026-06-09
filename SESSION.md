@@ -1,8 +1,8 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 9 juin 2026 — Claude Code, session HYGIÈNE + cadrage/L0 #320).
+     IDENTIFICATION DE CE FICHIER  (mis à jour 9 juin 2026 — Claude Code, session HYGIÈNE + #320 L0→L3).
      Session du 9 juin (Claude Code) — pas de release ; tri, réconciliation du tracking, puis
-     ouverture du chantier #320 (répertoires de classement). 6 commits poussés sur main, HEAD
-     `bc34f58b`, origin SYNCHRO. 375 Vitest + 42 Playwright verts.
+     chantier #320 (répertoires de classement) lots L0→L3. 10 commits sur main, HEAD `b190014d`
+     (+ relais SESSION). 380 Vitest + 45 Playwright verts.
        • `604d0554` tri du working tree : .gitignore durci (node_modules/, *.timestamp-*.mjs,
          .fuse_hidden*, audit/reports/ 21 Mo) ; ~37 docs + 6 icônes versionnés ; suppression
          de docs/MESSAGES_ENSEIGNANTS_H2026.md confirmée ; 2 fichiers vides accidentels retirés.
@@ -21,11 +21,21 @@
        • `bc34f58b` #320 L0 : module `js/repertoires-bibliotheque.js` (couche par-dessus les biblios,
          range PAR IDENTITÉ via itemIds, fonctions pures immuables + I/O sync). Hook de cohérence
          dans `retirerPratiqueDeLaBibliotheque`. Chargé dans index.html. Sentinelle
-         `tests/unit/repertoires-bibliotheque-L0.test.js` (20 cas). AUCUNE UI.
-     RESTE #320 : L1 (UI créer/renommer/supprimer un répertoire) ← EN COURS d'enchaînement ;
-     L2 (affichage groupé + « Classer dans… » au menu ⋮) ; L3 option (filtre + helper transversal
-     `bibliotheque-ui.js`) ; L4 (validation terrain Mac+iPad + release `minor`). Point démo (1
-     répertoire d'exemple dans le pack démo) acté par défaut, à faire en lot UI.
+         `tests/unit/repertoires-bibliotheque-L0.test.js`. AUCUNE UI.
+       • `8af32b65` #320 L1 : zone « Mes dossiers » (créer/renommer/supprimer) en tête de la
+         Section 2 de la modale biblio pratiques (`pratiques-gestion.js`). data-action,
+         data-confirm pour la suppression, noms échappés. Test rendu Playwright. VALIDÉ TERRAIN
+         (capture Grégoire 9 juin : 2 dossiers créés, mode sombre).
+       • `b20a3bd5` #320 L2 : pool groupé par dossier (en-tête + « Non classées ») + assignation
+         « Classer dans : <dossier> » / « Retirer du dossier » au menu ⋮ (param+param2). Repli à
+         plat si aucun dossier. Test rendu.
+       • `b190014d` #320 L3 : helper transversal `grouperPur`/`grouper` (réutilisable grilles/échelles)
+         + filtre « par dossier » (select, masquage DOM des groupes enveloppés). +5 Vitest, test rendu.
+     ÉTAT #320 : L0→L3 livrés et testés (380 Vitest + 45 Playwright verts). Système fonctionnel pour
+     les pratiques. RESTE L4 : VALIDATION TERRAIN (Mac+iPad, sombre+clair — créer/ranger/voir groupé/
+     filtrer) puis release `minor` (changelog + bump). Point démo (1 répertoire d'exemple dans le pack
+     démo) acté par défaut, à faire avec L4. Limite connue mineure : le filtre type/discipline (DOM)
+     ne masque pas les en-têtes de groupe devenus vides (cosmétique).
      ---
      RELEASE 1.4.2 (8 juin 2026, build 0608-1640, `84536350`) — toujours la dernière version publiée.
      Patch 1.4.2 (build 0608-1640, `84536350`) : bug terrain iPhone #138 — Visite guidée /
