@@ -1,0 +1,169 @@
+# Scan structurel : js/profil-etudiant.js
+# Lignes totales : 8818
+
+## Fonctions de premier niveau (avec leurs lignes)
+70:function obtenirTermeProduction(context = 'singulier', majuscule = false) {
+115:function obtenirCouleurNiveauIDME(codeNiveau) {
+143:function obtenirNiveauIDMEDepuisPourcentage(pourcentage) {
+163:function obtenirNombreProductionsPourPatterns() {
+175:function obtenirIdsProductionsEvaluables(productions) {
+189:function obtenirPratiqueActuelle() {
+222:function obtenirGrilleReferenceDepistage() {
+258:function obtenirCriteresAvecValeurs(da) {
+304:function initialiserModuleProfilEtudiant() {
+325:function genererBadgePratiqueProfil(pratiqueUtilisee, modeComparatif = false) {
+340:function genererBadgeRisqueProfil(risque) {
+372:function genererBadgePatternProfil(pattern) {
+408:function interpreterMobilisation(A, C, statutDecrochage = false) {
+494:function interpreterPerformance(valeur) {
+541:function interpreterCompletion(valeur) {
+592:function interpreterAssiduite(valeur) {
+644:function genererSectionMobilisationEngagement(da) {
+1390:function calculerDirectionEngagement(da, pratique) {
+1454:function genererSectionAccompagnement(da) {
+1920:function genererSectionMobilisation(da) {
+2044:function obtenirCouleurIndice(taux) {
+2055:function obtenirEmojiIndice(taux) {
+2073:function obtenirDetailsAssiduite(da) {
+2214:function genererCarteCibleIntervention(da) {
+2302:function genererSectionCollapsible(id, titre, contenu, ouvert = false) {
+2329:function toggleSectionCollapsible(sectionId) {
+2349:function toggleDetailsTechniques(detailsId) {
+2374:function changerSectionProfil(section) {
+2517:function calculerDirectionRisque(da) {
+2591:function calculerDirectionsCriteres(da) {
+2725:function genererHistoriqueInterventionsProfil(da) {
+2773:function genererValeursComparatives(valeurSOM, valeurPAN, modeComparatif, afficherTiret = false) {
+2800:function afficherProfilComplet(daOuEl) {
+3120:function genererSectionAssiduite(da) {
+3202:function genererSectionProductions(da) {
+3530:function genererTableauObjectifs(da, ensembleId, noteFinaleMultiObjectifs) {
+3713:function genererBandeauContexteProfil() {
+3757:function genererSectionProgression(da) {
+3895:function toggleDetailIndice(indice, da) {
+3987:function fermerDetailIndice() {
+4012:function genererSectionCompletion(da) {
+4190:function obtenirTableConversionIDME(echelleId = null) {
+4244:function convertirNiveauIDMEEnScore(niveau, tableConversion) {
+4261:function calculerMoyennesCriteres(da) {
+4381:function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
+4525:function calculerIPB(da) {
+4685:function diagnostiquerSuiviApprentissage(da) {
+4754:function diagnostiquerForcesChallenges(moyennes, seuil = null) {
+4833:function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
+4933:function calculerProgressionEleve(da) {
+5019:function identifierDefiSpecifique(da) {
+5139:function identifierPatternActuel(performancePAN3, aUnDefi) {
+5176:function determinerNiveauRaiPedagogique(da) {
+5305:function determinerAlerteContextuelle(da) {
+5399:function determinerCibleIntervention(da) {
+5693:function genererDiagnosticCriteres(da) {
+5724:function genererDiagnosticSRPNF(da, defisInfo) {
+5909:function genererDiagnosticGenerique(da, defisInfo) {
+6063:function _genererBarresSRPNF(da) {
+6187:function genererBlocProfilRLO(da) {
+6286:function genererBlocConsolidation(da) {
+6315:function genererConteneurGestesCognitifs(da) {
+6340:function genererNoteRLO(da) {
+6357:function genererOngletsDeveloppement(da, contenus) {
+6407:function changerOngletDeveloppement(idOnglet, da) {
+6451:function genererBlocEvolutionRLO(da) {
+6520:function genererSectionPerformance(da) {
+7148:function genererSectionAssiduiteLegacy(da) {
+7231:function naviguerVersPresenceAvecDate(dateStr) {
+7268:function formaterDateCompacte(dateISO) {
+7284:function reattacherEvenementsToggles() {
+7318:function toggleSection(sectionId) {
+7339:function naviguerVersNouvelleIntervention(daPreselectionne) {
+7361:function naviguerVersIntervention(interventionId) {
+7462:function genererRapportAPI(da, options = {}) {
+7606:function genererSectionRapport(da) {
+7684:function genererEtAfficherRapport(da) {
+7723:function copierRapport(da) {
+7793:function viderRapport(da) {
+7810:function sauvegarderPreferencesRapport(da) {
+7827:function restaurerPreferencesRapport(da) {
+7851:function consulterEvaluation(da, productionId) {
+7937:function evaluerProduction(da, productionId) {
+7968:function supprimerEvaluationDepuisProfil(evaluationId) {
+7991:function calculerDetailsNoteFinale(da) {
+8289:function attribuerJetonPersonnaliseAvecPrompt(da, jetonId, nomJeton) {
+8316:function retirerJetonPersonnaliseAvecConfirmation(da, jetonId, nomJeton) {
+8354:function calculerEtStockerPatternsGroupe() {
+8402:function obtenirPatternEtudiant(da) {
+8461:function ouvrirModalConfidentiel(da) {
+8517:function chargerNotesPresencesConfidentiel(da) {
+8576:function sauvegarderNotesPresencesConfidentiel() {
+8599:function fermerModalConfidentiel() {
+8607:function sauvegarderConfidentiel() {
+8656:function toggleServicesAdaptes(afficher) {
+8666:function mettreAJourSousCategories() {
+8685:function aDesInfosConfidentielles(da) {
+8717:function genererSectionTravaux(da) {
+8777:function togglePSansReprisesIndivHandler(el) {
+8782:function toggleIndiceIndivHandler(el) {
+8787:function toggleCritereIndivHandler(el) {
+8792:function lancerExportEtudiantAnnotes(da) {
+
+## Fonctions imbriquées (indentées)
+928:    function _rangProduction(production) {
+4568:    function scorePourArtefact(ev) {
+7762:    function afficherNotificationCopiee() {
+
+## Exports globaux
+2362:window.profilActuelDA = null;
+2808:    window.profilActuelDA = da;
+2823:    window.etudiantsListeCache = etudiants;
+4277:            window._avertiGrilleMoyennes = true;
+6440:window.changerOngletDeveloppement = changerOngletDeveloppement;
+7385:window.naviguerVersNouvelleIntervention = naviguerVersNouvelleIntervention;
+7386:window.naviguerVersIntervention = naviguerVersIntervention;
+7856:        window._consulterEvalTimerId = null;
+7858:    window._apresOuvertureFichier = null;
+7893:        window._apresOuvertureFichier = function() {
+7909:        window._consulterEvalTimerId = setTimeout(function() {
+7910:            window._consulterEvalTimerId = null;
+8335:window.attribuerJetonPersonnaliseAvecPrompt = attribuerJetonPersonnaliseAvecPrompt;
+8336:window.retirerJetonPersonnaliseAvecConfirmation = retirerJetonPersonnaliseAvecConfirmation;
+8339:window.determinerNiveauRaiPedagogique = determinerNiveauRaiPedagogique;
+8340:window.determinerAlerteContextuelle = determinerAlerteContextuelle;
+8341:window.determinerCibleIntervention = determinerCibleIntervention; // 🔧 FIX Beta 97.4 : Nécessaire pour afficherPatternsApprentissage
+8342:window.calculerMoyennesCriteres = calculerMoyennesCriteres;
+8343:window.calculerIPB = calculerIPB;
+8344:window.obtenirGrilleReferenceDepistage = obtenirGrilleReferenceDepistage;
+8345:window.calculerDirectionsCriteres = calculerDirectionsCriteres;
+8408:window.calculerEtStockerPatternsGroupe = calculerEtStockerPatternsGroupe;
+8409:window.obtenirPatternEtudiant = obtenirPatternEtudiant;
+8703:window.ouvrirModalConfidentiel = ouvrirModalConfidentiel;
+8704:window.fermerModalConfidentiel = fermerModalConfidentiel;
+8705:window.sauvegarderConfidentiel = sauvegarderConfidentiel;
+8706:window.toggleServicesAdaptes = toggleServicesAdaptes;
+8707:window.mettreAJourSousCategories = mettreAJourSousCategories;
+8708:window.aDesInfosConfidentielles = aDesInfosConfidentielles;
+8797:window.afficherProfilComplet = afficherProfilComplet;
+8799:window.obtenirPratiqueActuelle = obtenirPratiqueActuelle; // ✅ BETA 93.5 (10 déc): Utilisé par snapshots.js pour calcul historique P
+8800:window.calculerDetailsNoteFinale = calculerDetailsNoteFinale; // 🆕 BETA 96 (FIX #37): Utilisé par portfolio.js pour cohérence P = Note finale
+8803:window.changerSectionProfil = changerSectionProfil;
+8804:window.toggleSectionCollapsible = toggleSectionCollapsible;
+8805:window.naviguerVersPresenceAvecDate = naviguerVersPresenceAvecDate;
+8806:window.genererEtAfficherRapport = genererEtAfficherRapport;
+8807:window.copierRapport = copierRapport;
+8808:window.consulterEvaluation = consulterEvaluation;
+8809:window.evaluerProduction = evaluerProduction;
+8812:window.togglePSansReprisesIndivHandler = togglePSansReprisesIndivHandler;
+8813:window.toggleIndiceIndivHandler = toggleIndiceIndivHandler;
+8814:window.toggleCritereIndivHandler = toggleCritereIndivHandler;
+8815:window.lancerExportEtudiantAnnotes = lancerExportEtudiantAnnotes;
+8816:window.obtenirTermeProduction = obtenirTermeProduction;
+
+## Clés SSOT mentionnées (premières occurrences)
+41:   - 'evaluationsSauvegardees' : Array des évaluations
+42:   - 'portfoliosEleves' : Object avec sélections d'artefacts
+71:    const config = db.getSync('modalitesEvaluation', {});
+176:    var config = db.getSync('modalitesEvaluation', {});
+190:    const modalites = db.getSync('modalitesEvaluation', {});
+233:    const grilles = db.getSync('grillesTemplates', []);
+653:    const config = db.getSync('modalitesEvaluation', {});
+707:    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+773:    // Source de vérité : pratiquesConfigurables (Material Settings), fallback sur modalitesEvaluation
+775:    const modalites = db.getSync('modalitesEvaluation', {});

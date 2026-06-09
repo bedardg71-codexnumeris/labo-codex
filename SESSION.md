@@ -1,5 +1,16 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 8 juin 2026 — Claude Code, RELEASE 1.4.1 livrée et poussée).
+     IDENTIFICATION DE CE FICHIER  (mis à jour 8 juin 2026 — Claude Code, RELEASE 1.4.2 livrée et poussée).
+     Patch 1.4.2 (build 0608-1640, `84536350`) : bug terrain iPhone #138 — Visite guidée /
+     Assistance / Aide en carré noir dans le menu mobile. Le popover charge ces icônes en
+     <img src> (le desktop utilise des masques base64 inlinés, d'où l'absence du bug côté
+     bureau), mais les SVG étaient présents en local SANS être suivis par git → absents du
+     déploiement. Ajoutés : icons8-travel-signpost.svg, icons8-info-popup.svg,
+     icons8-questions.svg. #115 corrigé au passage (404 icon-files.svg dans la modale
+     « Plusieurs fichiers » → icon-filing-cabinet.svg, existant + suivi). NOUVELLE SENTINELLE
+     `tests/unit/sentinelle-icones-suivies-git.test.js` : échoue si une icône référencée en
+     <img src> (index.html + js/) n'est pas suivie par git — c'est elle qui a révélé #115.
+     355 Vitest + 42 Playwright verts. SYNCHRO (0/0). SUIVI-BUGS #138 + #115.
+     ---
      Patch 1.4.1 (build 0608-1400, `609491a0`) : section « Nous écrire » dans la modale
      Soutien (lien mailto labo@codexnumeris.org) ; + correctif `icons/icons8-heart.svg`
      n'était PAS suivi par git alors que le popover mobile le référence (image cassée au

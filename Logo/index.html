@@ -1,0 +1,56 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Labo_Codex — Mot-symbole</title>
+<link rel="stylesheet" href="../../colors_and_type.css">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg-subtle);color:var(--fg);font-family:var(--font-body);}
+  .wrap{max-width:1080px;margin:0 auto;padding:56px 32px 80px;}
+  header{margin-bottom:40px;}
+  .eyebrow{font-family:var(--font-body);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);}
+  h1{font-family:var(--font-display);font-weight:900;font-size:40px;letter-spacing:-.02em;margin:8px 0 6px;}
+  p.lead{color:var(--fg-muted);font-size:16px;max-width:62ch;margin:0;}
+  h2{font-family:var(--font-display);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--fg-subtle);margin:44px 0 14px;border-bottom:1px solid var(--border);padding-bottom:10px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
+  .tile{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#fff;}
+  .frame{height:150px;display:flex;align-items:center;justify-content:center;padding:24px;}
+  .frame.dark{background:var(--sarcelle-900);}
+  .frame img{max-height:84px;max-width:84%;}
+  .meta{border-top:1px solid var(--border);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--surface);}
+  .meta b{font-weight:600;font-size:12.5px;}
+  .meta code{font-family:var(--font-mono);font-size:10.5px;color:var(--fg-subtle);}
+  .two{grid-template-columns:repeat(auto-fill,minmax(420px,1fr));}
+  .two .frame img{max-height:54px;}
+</style></head><body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Mot-symbole</div>
+    <h1>Labo_Codex</h1>
+    <p class="lead">Onze SVG vectorisés (tracés, sans dépendance de police). Deux mises en page — empilé &amp; ligne — en cinq colorways, plus une version <code style="font-family:var(--font-mono)">currentColor</code> monochrome pour usage inline.</p>
+  </header>
+
+  <h2>Empilé — lockup principal</h2>
+  <div class="grid">
+    <div class="tile"><div class="frame"><img src="labo-codex-empile-clair.svg"></div><div class="meta"><b>Clair</b><code>empile-clair.svg</code></div></div>
+    <div class="tile"><div class="frame dark"><img src="labo-codex-empile-sombre.svg"></div><div class="meta"><b>Sombre</b><code>empile-sombre.svg</code></div></div>
+    <div class="tile"><div class="frame"><img src="labo-codex-empile-sarcelle.svg"></div><div class="meta"><b>Sarcelle</b><code>empile-sarcelle.svg</code></div></div>
+    <div class="tile"><div class="frame"><img src="labo-codex-empile-noir.svg"></div><div class="meta"><b>Noir</b><code>empile-noir.svg</code></div></div>
+    <div class="tile"><div class="frame dark"><img src="labo-codex-empile-blanc.svg"></div><div class="meta"><b>Blanc</b><code>empile-blanc.svg</code></div></div>
+  </div>
+
+  <h2>Ligne — en-têtes larges</h2>
+  <div class="grid two">
+    <div class="tile"><div class="frame"><img src="labo-codex-ligne-clair.svg"></div><div class="meta"><b>Clair</b><code>ligne-clair.svg</code></div></div>
+    <div class="tile"><div class="frame dark"><img src="labo-codex-ligne-sombre.svg"></div><div class="meta"><b>Sombre</b><code>ligne-sombre.svg</code></div></div>
+    <div class="tile"><div class="frame"><img src="labo-codex-ligne-sarcelle.svg"></div><div class="meta"><b>Sarcelle</b><code>ligne-sarcelle.svg</code></div></div>
+    <div class="tile"><div class="frame"><img src="labo-codex-ligne-noir.svg"></div><div class="meta"><b>Noir</b><code>ligne-noir.svg</code></div></div>
+    <div class="tile"><div class="frame dark"><img src="labo-codex-ligne-blanc.svg"></div><div class="meta"><b>Blanc</b><code>ligne-blanc.svg</code></div></div>
+  </div>
+
+  <h2>Monochrome currentColor</h2>
+  <div class="grid two">
+    <div class="tile"><div class="frame" style="color:var(--bleu-500)"><img src="labo-codex-mono-currentcolor.svg"></div><div class="meta"><b>Hérite de <code style="font-family:var(--font-mono)">color</code></b><code>mono-currentcolor.svg</code></div></div>
+    <div class="tile"><div class="frame dark" style="color:#fff"><img src="labo-codex-mono-currentcolor.svg"></div><div class="meta"><b>Sur fond foncé</b><code>color:#fff</code></div></div>
+  </div>
+</div>
+</body></html>
