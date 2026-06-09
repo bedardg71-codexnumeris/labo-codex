@@ -371,6 +371,18 @@ async function supprimerRepertoirePratiques(repId) {
     await afficherBibliothequePratiques();
 }
 
+/** #320 L2 — range une pratique dans un dossier (exclusif), puis rafraîchit. */
+async function classerPratiqueDansRepertoire(pratiqueId, repId) {
+    window.repertoiresBibliotheque.assigner(pratiqueId, repId, 'pratiques');
+    await afficherBibliothequePratiques();
+}
+
+/** #320 L2 — sort une pratique de son dossier (repasse en non classées). */
+async function retirerPratiqueDeRepertoire(pratiqueId) {
+    window.repertoiresBibliotheque.retirerItem(pratiqueId, 'pratiques');
+    await afficherBibliothequePratiques();
+}
+
 /**
  * Affiche le modal de gestion de la bibliothèque de pratiques
  * Section 1: Pratiques dans la sélection (avec boutons Partager/Retirer)
@@ -474,29 +486,69 @@ async function afficherBibliothequePratiques() {
     const idsDejaPresents = new Set(pratiquesDansBibliotheque.map(p => p.id));
     const pratiquesAAfficher = pratiquesDisponibles.filter(p => !idsDejaPresents.has(p.id));
 
+    // #320 L2 — répertoires de classement du pool (dossiers exclusifs).
+    const repsPratiques = (window.repertoiresBibliotheque && typeof window.repertoiresBibliotheque.obtenir === 'function')
+        ? window.repertoiresBibliotheque.obtenir('pratiques')
+        : [];
+    // id de pratique → id du répertoire qui la contient (au plus un)
+    const repParPratique = {};
+    repsPratiques.forEach(r => (r.itemIds || []).forEach(id => { repParPratique[id] = r.id; }));
+
+    // Rendu d'une carte du pool, menu d'actions enrichi de l'assignation.
+    const renderCartePool = (pratique) => {
+        const estGabarit = pratique.estGabarit;
+        const repCourant = repParPratique[pratique.id] || null;
+        const actionsMenu = [];
+        repsPratiques.forEach(r => {
+            if (r.id !== repCourant) {
+                actionsMenu.push({ label: 'Classer dans : ' + r.nom, action: 'classerPratiqueDansRepertoire', param: pratique.id, param2: r.id, classe: 'btn-secondaire', title: 'Ranger dans ce dossier' });
+            }
+        });
+        if (repCourant) {
+            actionsMenu.push({ label: 'Retirer du dossier', action: 'retirerPratiqueDeRepertoire', param: pratique.id, classe: 'btn-secondaire', title: 'Sortir du dossier (repasse en non classées)' });
+        }
+        actionsMenu.push({ label: 'Supprimer', action: 'supprimerPratiqueDeBibliothequePartagee', param: pratique.id, classe: 'btn-supprimer', title: 'Supprimer de la bibliothèque', showAlways: true });
+
+        return BibliothequeUI.renderCarteDisponible({
+            nom: BibliothequeUI.formaterTitre(pratique.nom || 'Sans titre'),
+            id: pratique.id,
+            badgesPratiques: genererBadgeTypePratique(pratique),
+            badgeSource: genererBadgeSourcePratique(pratique, pratiquesDansBibliotheque),
+            metadonnees: BibliothequeUI.formaterMetadonnees(pratique, { discipline: true }),
+            description: pratique.description || '',
+            inspireDe: BibliothequeUI.formaterInspireDe(pratique),
+            classeItem: 'pratique-dispo-item',
+            dataAttrs: `data-type="${pratique.type || ''}" data-discipline="${pratique.discipline || ''}"`,
+            styleExtra: estGabarit ? 'background: var(--gris-tres-pale);' : '',
+            boutonPrincipal: { label: 'Ajouter', action: 'ajouterPratiqueALaSelection', param: pratique.id, classe: 'btn-principal', title: 'Ajouter à ta sélection' },
+            actionsMenu: actionsMenu
+        });
+    };
+
+    const enteteGroupe = (titre) => `<h4 style="margin:18px 0 8px; padding-bottom:4px; border-bottom:1px solid var(--bordure, #ddd); color:var(--texte-secondaire, #555); font-size:0.95rem;">${echapperHtml(titre)}</h4>`;
+
     let contenuSection2 = '';
     if (pratiquesAAfficher.length === 0) {
         contenuSection2 = '<p style="color: var(--gris-clair); font-style: italic;">Toutes les pratiques sont déjà dans ta sélection</p>';
+    } else if (repsPratiques.length === 0) {
+        // Aucun dossier → liste à plat (comportement d'origine, zéro régression)
+        pratiquesAAfficher.forEach(p => { contenuSection2 += renderCartePool(p); });
     } else {
-        pratiquesAAfficher.forEach(pratique => {
-            const estGabarit = pratique.estGabarit;
-            contenuSection2 += BibliothequeUI.renderCarteDisponible({
-                nom: BibliothequeUI.formaterTitre(pratique.nom || 'Sans titre'),
-                id: pratique.id,
-                badgesPratiques: genererBadgeTypePratique(pratique),
-                badgeSource: genererBadgeSourcePratique(pratique, pratiquesDansBibliotheque),
-                metadonnees: BibliothequeUI.formaterMetadonnees(pratique, { discipline: true }),
-                description: pratique.description || '',
-                inspireDe: BibliothequeUI.formaterInspireDe(pratique),
-                classeItem: 'pratique-dispo-item',
-                dataAttrs: `data-type="${pratique.type || ''}" data-discipline="${pratique.discipline || ''}"`,
-                styleExtra: estGabarit ? 'background: var(--gris-tres-pale);' : '',
-                boutonPrincipal: { label: 'Ajouter', action: 'ajouterPratiqueALaSelection', param: pratique.id, classe: 'btn-principal', title: 'Ajouter à ta sélection' },
-                actionsMenu: [
-                    { label: 'Supprimer', action: 'supprimerPratiqueDeBibliothequePartagee', param: pratique.id, classe: 'btn-supprimer', title: 'Supprimer de la bibliothèque', showAlways: true }
-                ]
-            });
+        // Groupé : un bloc par dossier (montré s'il contient des pratiques du
+        // pool) puis « Non classées ». L'assignation au menu ⋮ couvre TOUS les
+        // dossiers, y compris ceux vides ici.
+        repsPratiques.forEach(r => {
+            const dansCe = pratiquesAAfficher.filter(p => (r.itemIds || []).includes(p.id));
+            if (dansCe.length) {
+                contenuSection2 += enteteGroupe(r.nom);
+                dansCe.forEach(p => { contenuSection2 += renderCartePool(p); });
+            }
         });
+        const nonClassees = pratiquesAAfficher.filter(p => !repParPratique[p.id]);
+        if (nonClassees.length) {
+            contenuSection2 += enteteGroupe('Non classées');
+            nonClassees.forEach(p => { contenuSection2 += renderCartePool(p); });
+        }
     }
 
     BibliothequeUI.creerModal({
@@ -2777,6 +2829,8 @@ window.filtrerPratiquesBibliotheque = filtrerPratiquesBibliotheque;
 window.creerRepertoirePratiques = creerRepertoirePratiques;
 window.renommerRepertoirePratiques = renommerRepertoirePratiques;
 window.supprimerRepertoirePratiques = supprimerRepertoirePratiques;
+window.classerPratiqueDansRepertoire = classerPratiqueDansRepertoire;
+window.retirerPratiqueDeRepertoire = retirerPratiqueDeRepertoire;
 window.ajouterPratiqueALaSelection = ajouterPratiqueALaSelection;
 window.retirerPratiqueDeLaSelection = retirerPratiqueDeLaSelection;
 window.retirerPratiqueDeBibliothequeMateriel = retirerPratiqueDeBibliothequeMateriel;
