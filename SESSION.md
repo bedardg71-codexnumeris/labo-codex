@@ -1,5 +1,33 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 8 juin 2026 — Claude Code, RELEASE 1.4.2 livrée et poussée).
+     IDENTIFICATION DE CE FICHIER  (mis à jour 9 juin 2026 — Claude Code, session HYGIÈNE + cadrage/L0 #320).
+     Session du 9 juin (Claude Code) — pas de release ; tri, réconciliation du tracking, puis
+     ouverture du chantier #320 (répertoires de classement). 6 commits poussés sur main, HEAD
+     `bc34f58b`, origin SYNCHRO. 375 Vitest + 42 Playwright verts.
+       • `604d0554` tri du working tree : .gitignore durci (node_modules/, *.timestamp-*.mjs,
+         .fuse_hidden*, audit/reports/ 21 Mo) ; ~37 docs + 6 icônes versionnés ; suppression
+         de docs/MESSAGES_ENSEIGNANTS_H2026.md confirmée ; 2 fichiers vides accidentels retirés.
+       • `5b70c8e0` réconciliation : 5 items livrés mais marqués ouverts cochés [x] (#305 1.2.0,
+         #317 1.1.3, #318 1.3.0, #319 1.2.0, #323) ; SUIVI-BUGS — #131-#135 sortis de « Ouverts »
+         vers une section « Corrigés » (lot #317, 1.1.3). Audit factuel git, pas la prémisse.
+       • `2ece1b22` archivage des 5 items vers BACKLOG-ARCHIVE.md (section 9 juin). Backlog actif
+         = 52 ouverts réels.
+       • `b25f2fd3` nettoyage : 3 sous-puces orphelines (reconnaissance DEN, livrée par #319 Lot 5)
+         mal rattachées à #320, retirées.
+       • `099d8a48` CADRAGE #320 : `plans de travail/CADRAGE-320-repertoires-bibliotheques.md`.
+         Système de rangement par DOSSIERS EXCLUSIFS, créé librement par chaque utilisateur (page
+         blanche, AUCUNE catégorie codée en dur — outil pluraliste). Périmètre pratiques d'abord,
+         archi transversale. COLLECTION SÉPARÉE `repertoiresBibliotheques` (jamais un champ sur
+         l'item — conformité SKILL_integrite_globaux). Découpage 5 lots (L0→L4 release minor).
+       • `bc34f58b` #320 L0 : module `js/repertoires-bibliotheque.js` (couche par-dessus les biblios,
+         range PAR IDENTITÉ via itemIds, fonctions pures immuables + I/O sync). Hook de cohérence
+         dans `retirerPratiqueDeLaBibliotheque`. Chargé dans index.html. Sentinelle
+         `tests/unit/repertoires-bibliotheque-L0.test.js` (20 cas). AUCUNE UI.
+     RESTE #320 : L1 (UI créer/renommer/supprimer un répertoire) ← EN COURS d'enchaînement ;
+     L2 (affichage groupé + « Classer dans… » au menu ⋮) ; L3 option (filtre + helper transversal
+     `bibliotheque-ui.js`) ; L4 (validation terrain Mac+iPad + release `minor`). Point démo (1
+     répertoire d'exemple dans le pack démo) acté par défaut, à faire en lot UI.
+     ---
+     RELEASE 1.4.2 (8 juin 2026, build 0608-1640, `84536350`) — toujours la dernière version publiée.
      Patch 1.4.2 (build 0608-1640, `84536350`) : bug terrain iPhone #138 — Visite guidée /
      Assistance / Aide en carré noir dans le menu mobile. Le popover charge ces icônes en
      <img src> (le desktop utilise des masques base64 inlinés, d'où l'absence du bug côté
