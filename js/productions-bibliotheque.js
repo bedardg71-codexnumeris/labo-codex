@@ -127,6 +127,12 @@ async function retirerDeLaBibliotheque(productionId) {
     }
 
     await db.set(CLE_BIBLIOTHEQUE_PRODUCTIONS, bibliotheque);
+
+    // #327 — hook de cohérence : la production retirée sort de tout dossier de
+    // classement (le moteur range par identité, sans toucher la production).
+    if (window.repertoiresBibliotheque && typeof window.repertoiresBibliotheque.retirerItem === 'function') {
+        window.repertoiresBibliotheque.retirerItem(productionId, 'productions');
+    }
     return true;
 }
 
