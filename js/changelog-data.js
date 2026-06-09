@@ -12,6 +12,18 @@
 
     var CHANGELOG = [
         {
+            version: '1.5',
+            couleur: 'vert',
+            titre: 'Ranger tes pratiques dans des dossiers',
+            items: [
+                'Crée tes propres dossiers (« Mes dossiers ») pour classer tes pratiques de notation dans la bibliothèque — tes essais, tes hypothèses, les pratiques reçues de collègues — et t’y retrouver.',
+                'Chaque dossier regroupe ses pratiques dans un menu compact : choisis-en une et ajoute-la à ta barre latérale. Ce qui n’est pas rangé reste sous « Non classées ».',
+                'Classe, déplace d’un dossier à l’autre ou sors une pratique en un geste. Une pratique est rangée à un seul endroit.',
+                'La zone « Mes dossiers » se replie pour gagner de l’espace.',
+                'Le classement n’organise que l’affichage : il ne modifie jamais tes pratiques.'
+            ]
+        },
+        {
             version: '1.4',
             couleur: 'vert',
             titre: 'Soutenir le projet + correctifs',
