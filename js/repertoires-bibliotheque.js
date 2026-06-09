@@ -134,6 +134,29 @@ function itemsNonClassesPur(repertoires, idsPool, biblio) {
     return (idsPool || []).filter(id => !classes.has(id));
 }
 
+/**
+ * Groupe une liste d'items par répertoire (dossiers exclusifs), pour l'affichage.
+ * Retourne `[{ id, titre, items }]` : un groupe par répertoire NON VIDE (dans
+ * l'ordre), suivi d'un groupe « Non classées » (id null) s'il reste des items.
+ * `getId` extrait l'identité d'un item (défaut : it.id) — permet de grouper des
+ * cartes/vues, pas seulement des items bruts. Tolère les ids orphelins.
+ */
+function grouperPur(items, repertoires, biblio, getId) {
+    var idDe = getId || function (it) { return it.id; };
+    var reps = repertoiresPourBibliothequePur(repertoires, biblio);
+    var assigne = {};
+    reps.forEach(function (r) { (r.itemIds || []).forEach(function (id) { assigne[id] = true; }); });
+
+    var groupes = [];
+    reps.forEach(function (r) {
+        var dans = (items || []).filter(function (it) { return (r.itemIds || []).indexOf(idDe(it)) !== -1; });
+        if (dans.length) groupes.push({ id: r.id, titre: r.nom, items: dans });
+    });
+    var nonClasses = (items || []).filter(function (it) { return !assigne[idDe(it)]; });
+    if (nonClasses.length) groupes.push({ id: null, titre: 'Non classées', items: nonClasses });
+    return groupes;
+}
+
 // --- Fonctions PUBLIQUES (I/O = lire → transformer pur → écrire) ----------
 
 function obtenir(biblio = 'pratiques') {
@@ -167,6 +190,10 @@ function itemsNonClasses(idsPool, biblio = 'pratiques') {
     return itemsNonClassesPur(_lire(), idsPool, biblio);
 }
 
+function grouper(items, biblio = 'pratiques', getId) {
+    return grouperPur(items, _lire(), biblio, getId);
+}
+
 // --- Export ---------------------------------------------------------------
 
 window.repertoiresBibliotheque = {
@@ -179,6 +206,7 @@ window.repertoiresBibliotheque = {
     assignerPur,
     retirerItemPur,
     itemsNonClassesPur,
+    grouperPur,
     // publiques (I/O)
     obtenir,
     creer,
@@ -186,7 +214,8 @@ window.repertoiresBibliotheque = {
     supprimer,
     assigner,
     retirerItem,
-    itemsNonClasses
+    itemsNonClasses,
+    grouper
 };
 
 })();
