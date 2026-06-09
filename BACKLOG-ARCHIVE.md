@@ -18,6 +18,33 @@
 
 ## Items livrés après la bascule du 25 mai 2026
 
+### Réconciliation du 9 juin 2026 — items livrés (1.1.3 → 1.3.0) qui étaient restés marqués ouverts dans le backlog actif
+
+> Déplacés ici par Claude (audit factuel git, début de session du 9 juin) : ces 5 items avaient été livrés et poussés mais n'avaient pas été cochés ni archivés. Voir commit `5b70c8e0`.
+
+- [x] 🟡 ⚠️ **#317** Lot correctifs wizard de pratique (bugs #131-#135 de l'audit assistant) — ✅ LIVRÉ 1.1.3 (commits `6fa6bbd7` + clôture `a80bbdf5`)
+  - **Origine** : audit de l'assistant de configuration (session Cowork du 5 juin, lecture intégrale de `wizard-pratique-v2.js`). Détail technique de chaque bug : **SUIVI-BUGS #131-#135** (section « Corrigés (5 juin 2026 — lot #317) »).
+  - **Périmètre du lot** : #131 (`afficherEtapeV2` inexistant → `afficherEtapeWizardV2`), #132 (round-trip édition perdait la config portfolio + params objectifs — **le plus important**, sentinelle round-trip), #133 (récap affichait les valeurs Primo au lieu des réponses saisies → décision A : le wizard prime), #134 (`calculerNbEtapes` désync → dérive du graphe), #135 (alert()→`notifications.erreur`, couleurs alignées au design system, échappement nom).
+  - **LOT COMPLET (5/5)**, sentinelle `tests/unit/sentinelle-wizard-roundtrip-317.test.js`. DEN sorti du lot → #318.
+
+- [x] 🟡 ⚠️ **#319** Refonte ciblée de l'assistant de pratique (post-audit) — ✅ LIVRÉ 1.2.0 (6 lots, commits `58ed760e`→`18841d22`)
+  - **Plan** : `plans de travail/PLAN_refonte_assistant_pratique_post-audit.md` (6 lots, golden master, bump `minor` au Lot 6). Audit source : `Rapports/AUDIT-assistant-configuration-2026-06-05.md`.
+  - **Décisions actées (5 juin)** : refonte DANS l'architecture déclarative (pas de réécriture) ; voie rapide « Je sais ce que je veux » sur Q1 ; inversion classification↔infos-base ; écran d'entrée à deux portes (modèle bibliothèque vs décrire) ; Dénotation = minimal+fondations (lots a/b/c absorbés ; parcours créable DEN → #318).
+  - Lot 1 = canonicalisation vocabulaire interne + purge `mode-configuration`/`config-reprises`. Lot 4 (exemple réel au récap) utilise `simulerIndices`.
+
+- [x] 🟢 **#323** Icônes sur boutons foncés — contraste insuffisant — ✅ LIVRÉ (commit `b066ccc2`, corbeille `.btn-supprimer` ; steppers OK via `color-scheme`, rien à corriger)
+  - **Origine** : terrain (7 juin, assistant SPE « Table des forfaits / Types de productions »). Corbeille des boutons Supprimer rouge foncé peu lisible (icône grise héritée du fond clair) ; flèches des steppers `input[type=number]`.
+  - **Correctif** : icône `.btn-delete-icon` alignée sur la couleur du texte (blanc) au repos et au survol, scopée à `.btn-supprimer` (les corbeilles sur fonds clairs gardent le gris) ; vérifié 2 modes. Steppers : aucun fond custom dans le wizard, déjà gérés par `color-scheme` → rien à corriger.
+
+- [x] 🟢 **#318** Famille « Dénotation » (DEN) — ✅ LIVRÉ 1.3.0 (couche 2, DEN-0→4, commits `73ad3d71`→`f1b655b9`). Réserve documentée : note DEN via `calculerPerformance`, pas le chemin procédural `calculerDetailsNoteFinale` (non bloquant)
+  - **SPEC couche 2** : `plans de travail/SPEC_DEN_couche2.md` (mode « éliminée » d'abord, garde « cibles atteintes » par cible ; note saisie ancrée sur la suggestion holistique). 6 lots (DEN-0 modèle/`jugementsDenotation` namespacée → DEN-1 moteur `_calculerPerformanceDenotation` + helper suggestion partagé → DEN-2 UI saisie profil → DEN-3 parcours création assistant → DEN-4 diagnostic non-simulable + doc → DEN-5 release `minor`). Modèle conceptuel : `NOTE-COWORK-modele-DEN.md`.
+  - Mécanisme : garde « cibles atteintes » (réutilise les objectifs STD) → débloque une note finale saisie + suggestion holistique optionnelle (mode/médiane/moyenne IDME, ancrage anti-biais Dyer). DEN abandonne le **tri**, garde la **certification** (RREC 60/59) — jamais « pas de chiffre ». **Non simulable** (jugement saisi) → hors Comparateur phase 1, créable dans l'assistant.
+  - **Taxonomie** : badge « PAN » gardé pour l'UI mais DEN = PRÉN académiquement. **Garde-fou** : ne pas vendre DEN comme un bien universel (Girouard-Gagné). **Préalable au code de l'axe D (#326)** ; indépendant de #320.
+
+- [x] 🟢 **#305** A11y : la modale d'aide contextuelle annonce un dialogue sans nom — ✅ LIVRÉ (commit `677af656`, intégré 1.2.0)
+  - `afficherAideContextuelle()` (`js/accompagnement.js:846`) posait `aria-labelledby="aide-ctx-titre"` mais ce `<span>` ne recevait jamais le `titre` de l'entrée → lecteurs d'écran annonçaient un dialogue sans nom (~40 entrées popup).
+  - Correctif d'une ligne (injecter `aide.titre` dans `#aide-ctx-titre` au rendu). Découvert 29 mai 2026 en livrant le mini-guide « balises du cours ».
+
 ### Session du 4 juin 2026 — refonte des textes de l'assistant de pratique + sécurité (version 1.0.0, build 0604-0652)
 
 - [x] 🔒 **#312** `innerHTML` non échappé dans le récapitulatif de l'assistant de pratique ✅ LIVRÉ (build 0604-0652, non poussé)
