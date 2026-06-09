@@ -67,6 +67,15 @@ test('L1 · zone « Mes dossiers » se rend et un répertoire créé apparaît',
             : null;
         const aBoutonSupprimer = !!(modal2 && modal2.querySelector('[data-action="supprimerRepertoirePratiques"][data-param="' + cree.id + '"]'));
 
+        // #320 — zone repliable. Ici le dossier a été créé via le module (pas le
+        // handler), donc l'état de dépliage reste à son défaut : avec 1 dossier,
+        // la zone est REPLIÉE. Le toggle doit la déplier.
+        const aBoutonBascule = !!document.querySelector('[data-action="basculerZoneRepertoires"]');
+        const contenu = document.getElementById('rep-zone-contenu');
+        const replieParDefaut = contenu ? getComputedStyle(contenu).display === 'none' : null;
+        window.basculerZoneRepertoires();
+        const deplieApresToggle = contenu ? getComputedStyle(contenu).display !== 'none' : null;
+
         // Le handler de suppression existe et est branché
         const aHandlers = typeof window.creerRepertoirePratiques === 'function'
             && typeof window.renommerRepertoirePratiques === 'function'
@@ -78,6 +87,9 @@ test('L1 · zone « Mes dossiers » se rend et un répertoire créé apparaît',
             aMessageVide,
             valeurChamp: champRenomme ? champRenomme.value : null,
             aBoutonSupprimer,
+            aBoutonBascule,
+            replieParDefaut,
+            deplieApresToggle,
             aHandlers
         };
     });
@@ -88,6 +100,9 @@ test('L1 · zone « Mes dossiers » se rend et un répertoire créé apparaît',
     expect(resultat.aMessageVide).toBe(true);
     expect(resultat.valeurChamp).toBe('Essais L1');
     expect(resultat.aBoutonSupprimer).toBe(true);
+    expect(resultat.aBoutonBascule).toBe(true);
+    expect(resultat.replieParDefaut).toBe(true);
+    expect(resultat.deplieApresToggle).toBe(true);
     expect(resultat.aHandlers).toBe(true);
     expect(erreurs).toEqual([]);
 });
