@@ -2100,7 +2100,6 @@ window.initialiserModuleGrilles = initialiserModuleGrilles;
 window.afficherBibliothequeGrilles = afficherBibliothequeGrilles;
 window.retirerGrilleDeBibliotheque = retirerGrilleDeBibliotheque;
 window.ajouterGrillesABibliotheque = ajouterGrillesABibliotheque;
-window.filtrerGrillesParDiscipline = filtrerGrillesParDiscipline;
 window.fermerModalBibliothequeGrilles = fermerModalBibliothequeGrilles;
 window.ajouterGrilleIndividuelle = ajouterGrilleIndividuelle;
 window.dupliquerGrilleBibliotheque = dupliquerGrilleBibliotheque;
@@ -2188,7 +2187,13 @@ async function preparerDonneesBibliothequeGrilles() {
         await obtenirToutesLesGrillesBibliotheque()
     );
     const doublonsDetectes = detecterDoublonsGrilles(grillesDansBibliotheque, grillesDisponibles);
-    const disciplines = obtenirDisciplinesDisponiblesGrilles();
+
+    // #327 — dossiers de classement (couche par-dessus, range par identité).
+    const repsGrilles = (window.repertoiresBibliotheque && typeof window.repertoiresBibliotheque.obtenir === 'function')
+        ? window.repertoiresBibliotheque.obtenir('grilles')
+        : [];
+    const repParGrille = {};
+    repsGrilles.forEach(r => (r.itemIds || []).forEach(id => { repParGrille[id] = r.id; }));
 
     // Section 1 : cartes pour les grilles dans la sélection
     const cartesSection1 = grillesDansBibliotheque.map(grille => ({
@@ -2209,45 +2214,56 @@ async function preparerDonneesBibliothequeGrilles() {
         ]
     }));
 
-    // Section 2 : cartes groupées par discipline
-    const cartesSection2 = [];
-    const grillesParDiscipline = {};
-    grillesDisponibles.forEach(grille => {
-        const disc = grille.discipline || 'Autre';
-        if (!grillesParDiscipline[disc]) grillesParDiscipline[disc] = [];
-        grillesParDiscipline[disc].push(grille);
-    });
-
-    Object.keys(grillesParDiscipline).sort().forEach(discipline => {
-        grillesParDiscipline[discipline].forEach(grille => {
-            const dejaPresent = grilles.some(g => (g.id === grille.id || g.idOriginal === grille.id) && g.dansBibliotheque !== false);
-            cartesSection2.push({
-                nom: BibliothequeUI.formaterTitreDemo(grille.nom || 'Sans titre', BibliothequeUI.estItemDemo(grille)),
-                id: grille.id,
-                badgeSource: BibliothequeUI.genererBadgeSource(grille, grillesDansBibliotheque),
-                badgesPratiques: (typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(grille) : '') + genererBadgeGrilleDepistage(grille),
-                metadonnees: BibliothequeUI.formaterMetadonnees(grille, {
-                    quantite: `${grille.criteres?.length || 0} critère(s)`,
-                    discipline: true
-                }),
-                inspireDe: BibliothequeUI.formaterInspireDe(grille),
-                description: grille.description || '',
-                dejaPresent: dejaPresent,
-                classeItem: 'grille-disponible-item',
-                dataAttrs: `data-discipline="${discipline}"`,
-                boutonPrincipal: { label: 'Ajouter à ma sélection', action: 'ajouterGrilleIndividuelle', param: grille.id, classe: 'btn-confirmer', title: 'Ajouter cette grille à ta sélection' },
-                actionsMenu: [
-                    { label: 'Supprimer', action: 'supprimerGrilleDeBibliothequePartagee', param: grille.id, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true }
-                ],
-                groupe: discipline
-            });
+    // Section 2 : #327 — cartes à plat (le groupage par dossier se fait au rendu
+    // via repertoiresBibliotheque.grouper). Chaque carte porte au menu ⋮ les
+    // actions « Classer dans … » / « Retirer du dossier » selon son dossier courant.
+    const cartesSection2 = grillesDisponibles.map(grille => {
+        const dejaPresent = grilles.some(g => (g.id === grille.id || g.idOriginal === grille.id) && g.dansBibliotheque !== false);
+        const repCourant = repParGrille[grille.id] || null;
+        const actionsMenu = [];
+        repsGrilles.forEach(r => {
+            if (r.id !== repCourant) {
+                actionsMenu.push({ label: 'Classer dans : ' + r.nom, action: 'BibliothequeUI.repertoires.classer', param: 'grilles', param2: grille.id, param3: r.id, classe: 'btn-secondaire', title: 'Ranger dans ce dossier' });
+            }
         });
+        if (repCourant) {
+            actionsMenu.push({ label: 'Retirer du dossier', action: 'BibliothequeUI.repertoires.retirer', param: 'grilles', param2: grille.id, classe: 'btn-secondaire', title: 'Sortir du dossier (repasse en non classées)' });
+        }
+        actionsMenu.push({ label: 'Supprimer', action: 'supprimerGrilleDeBibliothequePartagee', param: grille.id, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true });
+
+        return {
+            nom: BibliothequeUI.formaterTitreDemo(grille.nom || 'Sans titre', BibliothequeUI.estItemDemo(grille)),
+            id: grille.id,
+            badgeSource: BibliothequeUI.genererBadgeSource(grille, grillesDansBibliotheque),
+            badgesPratiques: (typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(grille) : '') + genererBadgeGrilleDepistage(grille),
+            metadonnees: BibliothequeUI.formaterMetadonnees(grille, {
+                quantite: `${grille.criteres?.length || 0} critère(s)`,
+                discipline: true
+            }),
+            inspireDe: BibliothequeUI.formaterInspireDe(grille),
+            description: grille.description || '',
+            dejaPresent: dejaPresent,
+            classeItem: 'grille-disponible-item',
+            boutonPrincipal: { label: 'Ajouter à ma sélection', action: 'ajouterGrilleIndividuelle', param: grille.id, classe: 'btn-confirmer', title: 'Ajouter cette grille à ta sélection' },
+            actionsMenu: actionsMenu
+        };
     });
 
-    return { cartesSection1, cartesSection2, doublonsDetectes, disciplines };
+    return { cartesSection1, cartesSection2, doublonsDetectes, repsGrilles };
 }
 
 async function afficherBibliothequeGrilles() {
+    // #327 — enregistre la biblio « grilles » auprès du helper générique de
+    // répertoires (idempotent). Les items de Section 2 sont des cartes-config
+    // déjà libellées : labelItem lit leur .nom tel quel.
+    BibliothequeUI.repertoires.enregistrer('grilles', {
+        rafraichir: afficherBibliothequeGrilles,
+        ajouterItem: (id) => ajouterGrilleIndividuelle(id),
+        supprimerItem: (id) => supprimerGrilleDeBibliothequePartagee(id),
+        labelItem: (c) => c.nom,
+        labelPluriel: 'grilles'
+    });
+
     const data = await preparerDonneesBibliothequeGrilles();
 
     // Section 1
@@ -2269,28 +2285,37 @@ async function afficherBibliothequeGrilles() {
             <input type="file" id="fichier-import-grilles-modal" accept=".json" style="display: none;" data-on-change="importerGrilles">
         </div>`;
 
-    // Filtres Section 2
-    const filtresHTML = `
-        <div class="u-mb-15">
-            <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">Filtrer par discipline :</label>
-            <select id="filtreDisciplineGrilles" class="controle-form" data-on-change="filtrerGrillesParDiscipline" style="max-width: 300px;">
-                <option value="">Toutes les disciplines</option>
-                ${data.disciplines.map(d => `<option value="${d}">${d}</option>`).join('')}
-            </select>
-        </div>
-        ${BibliothequeUI.renderToggleMasquerDejaPresent('afficherBibliothequeGrilles')}`;
+    // Filtres Section 2 : #327 — le filtre discipline est retiré (incohérent avec
+    // l'organisation par dossiers). La zone « Mes dossiers » (repliable) tient lieu
+    // de tête de section ; le toggle « masquer déjà présents » (#293) est conservé.
+    const filtresHTML = BibliothequeUI.repertoires.genererZone('grilles') +
+        BibliothequeUI.renderToggleMasquerDejaPresent('afficherBibliothequeGrilles');
 
-    // Section 2 — filtrage #293 (Masquer les items déjà dans la sidebar)
+    // Section 2 — #293 (masquer déjà présents) puis #327 (groupage par dossier).
     const cartesAffichables = BibliothequeUI.filtrerParDejaPresent(data.cartesSection2);
+    const enteteGroupe = (titre) => `<h4 style="margin:18px 0 8px; padding-bottom:4px; border-bottom:1px solid var(--bordure, #ddd); color:var(--texte-secondaire, #555); font-size:0.95rem;">${echapperHtml(titre)}</h4>`;
+
     let contenuSection2 = '';
-    let groupeCourant = null;
-    cartesAffichables.forEach(carte => {
-        if (carte.groupe && carte.groupe !== groupeCourant) {
-            groupeCourant = carte.groupe;
-            contenuSection2 += `<h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--gris-moyen);">${groupeCourant}</h4>`;
-        }
-        contenuSection2 += BibliothequeUI.renderCarteDisponible(carte);
-    });
+    if (cartesAffichables.length === 0) {
+        contenuSection2 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune grille disponible à ajouter</p>';
+    } else if (data.repsGrilles && data.repsGrilles.length === 0) {
+        // Aucun dossier → liste à plat (comportement d'origine)
+        cartesAffichables.forEach(carte => { contenuSection2 += BibliothequeUI.renderCarteDisponible(carte); });
+    } else {
+        // Dossier → select compact ; « Non classées » → cartes (ce qui reste à ranger).
+        const groupes = window.repertoiresBibliotheque.grouper(cartesAffichables, 'grilles');
+        groupes.forEach(g => {
+            const cleGroupe = g.id || '__nonclasse__';
+            contenuSection2 += `<div class="biblio-groupe-repertoire" data-repertoire-id="${echapperHtml(cleGroupe)}">`;
+            contenuSection2 += enteteGroupe(g.titre);
+            if (g.id) {
+                contenuSection2 += BibliothequeUI.repertoires.renderLigneDossierSelect('grilles', g);
+            } else {
+                g.items.forEach(carte => { contenuSection2 += BibliothequeUI.renderCarteDisponible(carte); });
+            }
+            contenuSection2 += `</div>`;
+        });
+    }
 
     BibliothequeUI.creerModal({
         modalId: 'modalBibliothequeGrilles',
@@ -2582,33 +2607,9 @@ async function ajouterGrillesABibliotheque() {
     }
 }
 
-/**
- * ✅ AJOUT (8 décembre 2025) : Filtrer les grilles disponibles par discipline
- */
-function filtrerGrillesParDiscipline() {
-    const select = document.getElementById('filtreDisciplineGrilles');
-    const disciplineSelectionnee = select ? select.value : '';
-
-    const items = document.querySelectorAll('.grille-disponible-item');
-    const titresDisciplines = document.querySelectorAll('#listeGrillesDisponibles h4');
-
-    if (!disciplineSelectionnee) {
-        // Afficher tout
-        items.forEach(item => toggleDisplay(item, true));
-        titresDisciplines.forEach(titre => toggleDisplay(titre, true));
-    } else {
-        // Filtrer par discipline
-        items.forEach(item => {
-            const discipline = item.dataset.discipline;
-            toggleDisplay(item, discipline === disciplineSelectionnee);
-        });
-
-        titresDisciplines.forEach(titre => {
-            const disciplineTitre = titre.textContent.trim();
-            toggleDisplay(titre, disciplineTitre === disciplineSelectionnee);
-        });
-    }
-}
+// #327 — filtrerGrillesParDiscipline retiré : le filtre par discipline n'existe
+// plus (incohérent avec l'organisation par dossiers). Remplacé par la zone
+// « Mes dossiers » + le groupage par dossier dans afficherBibliothequeGrilles.
 
 /**
  * ✅ AJOUT (8 décembre 2025) : Fermer le modal de bibliothèque
