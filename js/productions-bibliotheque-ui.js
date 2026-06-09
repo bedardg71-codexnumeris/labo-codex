@@ -67,42 +67,46 @@ async function preparerDonneesBibliothequeProductions() {
         ]
     }));
 
-    // Section 2 : fusionner retirées + bibliothèque, exclure celles déjà en sélection
+    // Section 2 : fusionner retirées + bibliothèque, exclure celles déjà en sélection.
+    // #327 — cartes à plat (groupage par dossier au rendu via repertoiresBibliotheque).
     const toutesProductionsDisponibles = [...toutesProductionsBiblio, ...productionsRetirees];
-    const disciplinesSet = new Set();
-    const cartesSection2 = [];
-    const parDiscipline = {};
 
+    // Dossiers de classement (couche par-dessus, range par identité).
+    const repsProductions = (window.repertoiresBibliotheque && typeof window.repertoiresBibliotheque.obtenir === 'function')
+        ? window.repertoiresBibliotheque.obtenir('productions')
+        : [];
+    const repParProduction = {};
+    repsProductions.forEach(r => (r.itemIds || []).forEach(id => { repParProduction[id] = r.id; }));
+
+    const cartesSection2 = [];
     toutesProductionsDisponibles.forEach(prod => {
         if (productionsDansSelection.find(p => p.id === prod.id)) return;
-        const discipline = prod.discipline || 'Autres';
-        disciplinesSet.add(discipline);
-        if (!parDiscipline[discipline]) parDiscipline[discipline] = [];
-        parDiscipline[discipline].push(prod);
-    });
 
-    const disciplines = Array.from(disciplinesSet).sort();
+        const repCourant = repParProduction[prod.id] || null;
+        const actionsMenu = [];
+        repsProductions.forEach(r => {
+            if (r.id !== repCourant) {
+                actionsMenu.push({ label: 'Classer dans : ' + r.nom, action: 'BibliothequeUI.repertoires.classer', param: 'productions', param2: prod.id, param3: r.id, classe: 'btn-secondaire', title: 'Ranger dans ce dossier' });
+            }
+        });
+        if (repCourant) {
+            actionsMenu.push({ label: 'Retirer du dossier', action: 'BibliothequeUI.repertoires.retirer', param: 'productions', param2: prod.id, classe: 'btn-secondaire', title: 'Sortir du dossier (repasse en non classées)' });
+        }
+        actionsMenu.push({ label: 'Supprimer', action: 'supprimerProductionDeBibliothequePartagee', param: prod.id, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true });
 
-    Object.keys(parDiscipline).sort().forEach(discipline => {
-        parDiscipline[discipline].forEach(prod => {
-            cartesSection2.push({
-                nom: `${BibliothequeUI.formaterTitreDemo(prod.titre, BibliothequeUI.estItemDemo(prod))}${(prod.activiteApprentissage || prod.description) ? ' - ' + (prod.activiteApprentissage || prod.description) : ''}`,
-                id: prod.id,
-                badgeSource: BibliothequeUI.genererBadgeSource(prod, productionsUtilisateur),
-                metadonnees: BibliothequeUI.formaterMetadonnees(prod, {
-                    quantite: `Type: ${getTypeLabel(prod.type)} • Pondération: ${prod.ponderation}%`
-                }),
-                inspireDe: BibliothequeUI.formaterInspireDe(prod),
-                description: prod.objectif ? 'Objectif: ' + prod.objectif : '',
-                dejaPresent: false,
-                classeItem: 'production-disponible-item',
-                dataAttrs: `data-discipline="${prod.discipline || 'Autres'}"`,
-                boutonPrincipal: { label: 'Ajouter à ma sélection', action: 'ajouterProductionIndividuelle', param: prod.id, classe: 'btn-confirmer', title: 'Ajouter cette production à ta sélection' },
-                actionsMenu: [
-                    { label: 'Supprimer', action: 'supprimerProductionDeBibliothequePartagee', param: prod.id, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true }
-                ],
-                groupe: discipline
-            });
+        cartesSection2.push({
+            nom: `${BibliothequeUI.formaterTitreDemo(prod.titre, BibliothequeUI.estItemDemo(prod))}${(prod.activiteApprentissage || prod.description) ? ' - ' + (prod.activiteApprentissage || prod.description) : ''}`,
+            id: prod.id,
+            badgeSource: BibliothequeUI.genererBadgeSource(prod, productionsUtilisateur),
+            metadonnees: BibliothequeUI.formaterMetadonnees(prod, {
+                quantite: `Type: ${getTypeLabel(prod.type)} • Pondération: ${prod.ponderation}%`
+            }),
+            inspireDe: BibliothequeUI.formaterInspireDe(prod),
+            description: prod.objectif ? 'Objectif: ' + prod.objectif : '',
+            dejaPresent: false,
+            classeItem: 'production-disponible-item',
+            boutonPrincipal: { label: 'Ajouter à ma sélection', action: 'ajouterProductionIndividuelle', param: prod.id, classe: 'btn-confirmer', title: 'Ajouter cette production à ta sélection' },
+            actionsMenu: actionsMenu
         });
     });
 
@@ -114,8 +118,8 @@ async function preparerDonneesBibliothequeProductions() {
         cartesSection1,
         cartesSection2,
         doublonsDetectes,
-        disciplines,
         sectionImportTrimestre,
+        repsProductions,
         nombreSelection: productionsDansSelection.length
     };
 }
@@ -125,6 +129,17 @@ async function afficherBibliothequeProductions() {
         alert('Le module bibliothèque n\'est pas chargé.\n\nVérifiez que le fichier productions-bibliotheque.js est bien chargé.');
         return;
     }
+
+    // #327 — enregistre la biblio « productions » auprès du helper générique de
+    // répertoires (idempotent). Les items de Section 2 sont des cartes-config
+    // déjà libellées : labelItem lit leur .nom tel quel.
+    BibliothequeUI.repertoires.enregistrer('productions', {
+        rafraichir: afficherBibliothequeProductions,
+        ajouterItem: (id) => ajouterProductionIndividuelle(id),
+        supprimerItem: (id) => supprimerProductionDeBibliothequePartagee(id),
+        labelItem: (c) => c.nom,
+        labelPluriel: 'productions'
+    });
 
     const data = await preparerDonneesBibliothequeProductions();
     if (!data) return;
@@ -169,26 +184,35 @@ async function afficherBibliothequeProductions() {
             </div>`;
     }
 
-    // Filtres Section 2
-    const filtresHTML = `
-        <div style="margin-bottom: 15px;">
-            <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">Filtrer par discipline :</label>
-            <select id="filtreDisciplineProductions" data-on-change="filtrerProductionsParDiscipline" class="controle-form" style="max-width: 300px;">
-                <option value="">Toutes les disciplines</option>
-                ${data.disciplines.map(d => `<option value="${d}">${d}</option>`).join('')}
-            </select>
-        </div>`;
+    // Filtres Section 2 : #327 — le filtre par discipline est retiré (incohérent avec
+    // l'organisation par dossiers). La zone « Mes dossiers » (repliable) tient lieu de
+    // tête de section.
+    const filtresHTML = BibliothequeUI.repertoires.genererZone('productions');
 
-    // Section 2
+    // Section 2 — #327 (groupage par dossier).
+    const enteteGroupe = (titre) => `<h4 style="margin:18px 0 8px; padding-bottom:4px; border-bottom:1px solid var(--bordure, #ddd); color:var(--texte-secondaire, #555); font-size:0.95rem;">${echapperHtml(titre)}</h4>`;
+
     let contenuSection2 = '';
-    let groupeCourant = null;
-    data.cartesSection2.forEach(carte => {
-        if (carte.groupe && carte.groupe !== groupeCourant) {
-            groupeCourant = carte.groupe;
-            contenuSection2 += `<h4 style="color: var(--gris-moyen); font-size: 0.95rem; margin-top: 15px; margin-bottom: 10px; border-bottom: 1px solid var(--bordure-claire); padding-bottom: 5px;">${groupeCourant}</h4>`;
-        }
-        contenuSection2 += BibliothequeUI.renderCarteDisponible(carte);
-    });
+    if (data.cartesSection2.length === 0) {
+        contenuSection2 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune production disponible à ajouter</p>';
+    } else if (data.repsProductions && data.repsProductions.length === 0) {
+        // Aucun dossier → liste à plat (comportement d'origine)
+        data.cartesSection2.forEach(carte => { contenuSection2 += BibliothequeUI.renderCarteDisponible(carte); });
+    } else {
+        // Dossier → select compact ; « Non classées » → cartes (ce qui reste à ranger).
+        const groupes = window.repertoiresBibliotheque.grouper(data.cartesSection2, 'productions');
+        groupes.forEach(g => {
+            const cleGroupe = g.id || '__nonclasse__';
+            contenuSection2 += `<div class="biblio-groupe-repertoire" data-repertoire-id="${echapperHtml(cleGroupe)}">`;
+            contenuSection2 += enteteGroupe(g.titre);
+            if (g.id) {
+                contenuSection2 += BibliothequeUI.repertoires.renderLigneDossierSelect('productions', g);
+            } else {
+                g.items.forEach(carte => { contenuSection2 += BibliothequeUI.renderCarteDisponible(carte); });
+            }
+            contenuSection2 += `</div>`;
+        });
+    }
 
     BibliothequeUI.creerModal({
         modalId: 'modalBibliothequeProductions',
@@ -655,35 +679,9 @@ async function ajouterProductionsABibliotheque() {
     }
 }
 
-/**
- * Filtre les productions disponibles par discipline
- * ✅ AJOUT (8 décembre 2025)
- */
-function filtrerProductionsParDiscipline() {
-    const select = document.getElementById('filtreDisciplineProductions');
-    const disciplineSelectionnee = select ? select.value : '';
-
-    const items = document.querySelectorAll('.production-disponible-item');
-    const titresDisciplines = document.querySelectorAll('#listeProductionsDisponibles h4');
-
-    if (!disciplineSelectionnee) {
-        // Afficher tout
-        items.forEach(item => toggleDisplay(item, true));
-        titresDisciplines.forEach(titre => toggleDisplay(titre, true));
-    } else {
-        // Filtrer par discipline
-        items.forEach(item => {
-            const discipline = item.dataset.discipline;
-            toggleDisplay(item, discipline === disciplineSelectionnee);
-        });
-
-        // Afficher/cacher les titres de discipline selon le filtre
-        titresDisciplines.forEach(titre => {
-            const disciplineTitre = titre.textContent.trim();
-            toggleDisplay(titre, disciplineTitre === disciplineSelectionnee);
-        });
-    }
-}
+// #327 — filtrerProductionsParDiscipline retiré (code mort) : le filtre par
+// discipline n'existe plus (incohérent avec l'organisation par dossiers).
+// Remplacé par la zone « Mes dossiers » + le groupage par dossier.
 
 /**
  * Ferme le modal bibliothèque
@@ -699,7 +697,6 @@ function fermerModalBibliothequeProductions() {
 window.afficherBibliothequeProductions = afficherBibliothequeProductions;
 window.retirerProductionDeBibliotheque = retirerProductionDeBibliotheque;
 window.ajouterProductionsABibliotheque = ajouterProductionsABibliotheque;
-window.filtrerProductionsParDiscipline = filtrerProductionsParDiscipline;
 window.fermerModalBibliothequeProductions = fermerModalBibliothequeProductions;
 window.ajouterProductionIndividuelle = ajouterProductionIndividuelle;
 window.ajouterMesProductionsALaBibliotheque = ajouterMesProductionsALaBibliotheque;
