@@ -1,0 +1,210 @@
+# Scan structurel : js/evaluation.js
+# Lignes totales : 7348
+
+## Fonctions de premier niveau (avec leurs lignes)
+77:function initialiserModuleEvaluation() {
+118:function chargerListeEtudiantsEval() {
+166:function chargerGroupesEval() {
+194:function filtrerEtudiantsParGroupe() {
+247:function chargerProductionsDansSelect() {
+272:function chargerGrillesDansSelect() {
+297:function chargerEchellePerformance() {
+414:function chargerEvaluationsEtudiant() {
+547:function chargerProduction(productionNum) {
+602:function _selectionnerCartoucheProduction(cartoucheId) {
+624:function chargerGrilleSelectionnee() {
+711:function cartoucheSelectionnee() {
+920:function afficherCriteresDepuisGrille(grilleId, echelleId) {
+1043:function niveauSelectionne(critereId) {
+1120:function _debouncerAutoSave() {
+1139:function _flusherAutoSave() {
+1150:function _autoSauvegarderCriteres(snapshot) {
+1257:function calculerNoteAlgorithmique(critereId, ponderation, facteur) {
+1333:function genererRetroactionEUF(erreurs, mots) {
+1370:function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur, critereGrilleId) {
+1599:function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
+1715:function calculerNote() {
+1893:function obtenirCouleurNiveau(codeNiveau) {
+1929:function genererRetroaction(num) {
+2089:function regenererRetroactionAvecFeedback() {
+2118:function afficherNotifRetro(message) {
+2136:function mettreAJourCompteurMots() {
+2177:function sauvegarderEvaluation() {
+2437:function majBadgesApresEvaluation(evaluation) {
+2467:function mettreAJourPillStatut(valeur) {
+2485:function changerStatutRemise(num) {
+2506:function changerStatutIntegrite() {
+2585:function afficherBadgesJetons() {
+2646:function afficherGestionJetons(afficher) {
+2671:function peuplementOptJetons() {
+2828:function gererChangementCheckboxJetonDelai() {
+2858:function gererChangementCheckboxJetonReprise() {
+2903:function gererChangementCheckboxJetonRepriseCiblee() {
+2956:function retirerJetonDepuisSidebar(evaluationId, typeJeton) {
+2985:function changerEchelleEvaluation(num) {
+2999:function cocherOptionsParDefaut() {
+3033:function nouvelleEvaluation() {
+3095:function reinitialiserFormulaire() {
+3118:function naviguerVersListeEvaluations() {
+3133:function evaluerProduction(da, productionId) {
+3182:function copierRetroaction(num) {
+3218:function basculerVueRetroaction(vue) {
+3232:function genererRetroactionSpecifique() {
+3316:function genererRetroactionBilan() {
+3537:function copierToutRetroaction() {
+3575:function sauvegarderRetroactionFinale(productionNum) {
+3583:function afficherNotificationSucces(message, details = '') {
+3616:function convertirNoteEnValeur(note) {
+3634:function calculerRisqueEchec(assiduite, completion, performance) {
+3644:function obtenirClasseRisque(risque) {
+3656:function obtenirNomCartouche(cartoucheId, grilleId) {
+3681:function obtenirClasseNote(note, echelleId) {
+3737:function chargerListeEvaluationsRefonte() {
+3819:function genererBadgeCompletion(etudiant) {
+3880:function afficherListeEvaluations(donneesEtudiants) {
+3936:function genererDetailsEtudiant(etudiant) {
+4120:function toggleEtudiantEval(da) {
+4142:function chargerFiltresEvaluations() {
+4166:function rechargerFiltreProduction() {
+4178:function filtrerListeEvaluations() {
+4229:function trierListeEvaluations() {
+4295:function restaurerPreferenceTri() {
+4309:function restaurerPreferenceTri() {
+4327:function mettreAJourStatistiquesEvaluations() {
+4390:function obtenirClasseNote(note) {
+4405:function formaterDateISO(dateISO) {
+4414:function obtenirTendance(evaluations) {
+4465:function memoriserSelectionsEvaluation() {
+4492:function sauvegarderSelectionsEvaluation() {
+4520:function restaurerSelectionsEvaluation() {
+4611:function verifierEtChargerEvaluationExistante() {
+4878:function naviguerEtudiantPrecedent() {
+4899:function naviguerEtudiantSuivant() {
+4920:function mettreAJourIndicateurProgression() {
+4965:function attacherEvenementsMemorisation() {
+5012:function insererNavigationEvaluationSerie() {
+5071:function initialiserModeEvaluationSerie() {
+5110:function extraireNiveauxDepuisRetroaction(retroaction, grille) {
+5143:function _afficherCriteresDepuisEvaluation(evaluation) {
+5207:function modifierEvaluation(evaluationId) {
+5719:function sauvegarderEvaluationModifiee() {
+5976:function verrouillerEvaluationIndividuelle(evaluationId) {
+6006:function deverrouillerEvaluationIndividuelle(evaluationId) {
+6035:function afficherIndicateurModeModification(evaluation) {
+6085:function supprimerEvaluation(evaluationId) {
+6137:function ouvrirBanqueEvaluations() {
+6153:function fermerBanqueEvaluations() {
+6161:function chargerFiltresBanqueEvaluations() {
+6219:function filtrerBanqueEvaluations() {
+6287:function afficherListeBanqueEvaluations(evaluations) {
+6368:function chargerEvaluationDepuisBanque(evaluationId) {
+6380:function appliquerJetonRepriseDepuisBanque(evaluationId) {
+6415:function appliquerJetonDelaiDepuisSidebar() {
+6439:function appliquerJetonRepriseDepuisSidebar() {
+6471:function basculerVerrouillageEvaluation(evaluationId) {
+6517:function retirerJeton(evaluationId, typeJeton) {
+6569:function supprimerEvaluationBanque(evaluationId) {
+6611:function verrouillerToutesEvaluations(verrouiller) {
+6655:function basculerVerrouillageEvaluationCourante() {
+6729:function mettreAJourBoutonVerrouillage(estVerrouillee) {
+6766:function afficherOuMasquerBoutonVerrouillage(afficher, estVerrouillee = false) {
+6781:function desactiverFormulaireEvaluation(desactiver) {
+6851:function filtrerListeEvaluations() {
+6872:function ouvrirBanqueAvecRecherche() {
+6897:function ouvrirProfilDepuisEvaluation() {
+6947:function ouvrirTravailDepuisEvaluation() {
+6993:function mettreAJourBoutonVoirTravail() {
+7037:function afficherJetonsPersonnalisesEvaluation() {
+7076:function appliquerJetonPersonnalise(jetonId) {
+7139:function confirmerSuppressionEvaluationSidebar() {
+7175:async function copierEnFormatTSV(texte) {
+7192:async function copierCriteresSRPN() {
+7216:async function copierCriteresSRPNF() {
+7240:function calculerNoteAlgoSimpleHandler(el) {
+7249:function calculerNoteAlgoCatHandler(el) {
+7318:function editerFichierDepuisEvaluation() {
+
+## Fonctions imbriquées (indentées)
+
+## Exports globaux
+2130:window.regenererRetroactionAvecFeedback = regenererRetroactionAvecFeedback;
+2382:    window._moyennesQualifies = null;
+2383:    window._moyennesToutes = null;
+3062:    window.evaluationEnCours = {
+5222:    window._modifierEvaluationEnCours = true;
+5332:                window._forceStandaloneEval = false;
+5339:                window._modifierEvaluationEnCours = false;
+5433:            window.evaluationEnCours = {
+5710:            window._modifierEvaluationEnCours = false;
+5922:        window._snapshotAvantModifRemplacee = null;
+7020:window.filtrerBanqueEvaluations = filtrerBanqueEvaluations;
+7021:window.ouvrirBanqueAvecRecherche = ouvrirBanqueAvecRecherche;
+7022:window.modifierEvaluationParId = modifierEvaluation; // Export sous un nom différent pour éviter conflit avec liste-evaluations.js
+7023:window.ouvrirProfilDepuisEvaluation = ouvrirProfilDepuisEvaluation;
+7024:window.ouvrirTravailDepuisEvaluation = ouvrirTravailDepuisEvaluation;
+7025:window.mettreAJourBoutonVoirTravail = mettreAJourBoutonVoirTravail;
+7026:window.chargerProductionsDansSelect = chargerProductionsDansSelect; // Pour mise à jour après duplication/modification de productions
+7027:window.rechargerFiltreProduction = rechargerFiltreProduction; // Pour mise à jour du filtre après ajout/modification de productions
+7028:window.afficherNotificationSucces = afficherNotificationSucces; // Utilisé par trimestre-v2.js et autres modules
+7126:    window._moyennesQualifies = null;
+7127:    window._moyennesToutes = null;
+7259:window.afficherJetonsPersonnalisesEvaluation = afficherJetonsPersonnalisesEvaluation;
+7260:window.peuplementOptJetons = peuplementOptJetons;
+7261:window.appliquerJetonPersonnalise = appliquerJetonPersonnalise;
+7262:window.confirmerSuppressionEvaluationSidebar = confirmerSuppressionEvaluationSidebar;
+7263:window.reinitialiserFormulaire = reinitialiserFormulaire;
+7264:window.calculerNoteAlgorithmiqueAvecCategories = calculerNoteAlgorithmiqueAvecCategories;
+7265:window.calculerNoteAlgorithmiqueSimple = calculerNoteAlgorithmiqueSimple;
+7266:window.copierCriteresSRPN = copierCriteresSRPN;
+7267:window.copierCriteresSRPNF = copierCriteresSRPNF;
+7268:window.gererChangementCheckboxJetonRepriseCiblee = gererChangementCheckboxJetonRepriseCiblee;
+7271:window.chargerListeEtudiantsEval = chargerListeEtudiantsEval;
+7272:window.chargerGroupesEval = chargerGroupesEval;
+7273:window.chargerGrillesDansSelect = chargerGrillesDansSelect;
+7274:window.chargerEchellePerformance = chargerEchellePerformance;
+7275:window.chargerEvaluationsEtudiant = chargerEvaluationsEtudiant;
+7276:window.chargerGrilleSelectionnee = chargerGrilleSelectionnee;
+7277:window.cartoucheSelectionnee = cartoucheSelectionnee;
+7278:window.sauvegarderEvaluation = sauvegarderEvaluation;
+7279:window.chargerProduction = chargerProduction;
+7280:window.filtrerEtudiantsParGroupe = filtrerEtudiantsParGroupe;
+7281:window.changerStatutRemise = changerStatutRemise;
+7282:window.mettreAJourPillStatut = mettreAJourPillStatut;
+7283:window.changerEchelleEvaluation = changerEchelleEvaluation;
+7284:window.changerStatutIntegrite = changerStatutIntegrite;
+7285:window.genererRetroaction = genererRetroaction;
+7286:window.copierRetroaction = copierRetroaction;
+7287:window.basculerVueRetroaction = basculerVueRetroaction;
+7288:window.copierToutRetroaction = copierToutRetroaction;
+7289:window.basculerVerrouillageEvaluationCourante = basculerVerrouillageEvaluationCourante;
+7290:window.nouvelleEvaluation = nouvelleEvaluation;
+7291:window.gererChangementCheckboxJetonDelai = gererChangementCheckboxJetonDelai;
+7292:window.gererChangementCheckboxJetonReprise = gererChangementCheckboxJetonReprise;
+7293:window.niveauSelectionne = niveauSelectionne;
+7296:window.calculerNoteAlgoSimpleHandler = calculerNoteAlgoSimpleHandler;
+7297:window.calculerNoteAlgoCatHandler = calculerNoteAlgoCatHandler;
+7300:window.toggleEtudiantEval = toggleEtudiantEval;
+7301:window.modifierEvaluation = modifierEvaluation;
+7302:window.supprimerEvaluation = supprimerEvaluation;
+7303:window.basculerVerrouillageEvaluation = basculerVerrouillageEvaluation;
+7304:window.chargerEvaluationDepuisBanque = chargerEvaluationDepuisBanque;
+7305:window.appliquerJetonRepriseDepuisBanque = appliquerJetonRepriseDepuisBanque;
+7306:window.supprimerEvaluationBanque = supprimerEvaluationBanque;
+7307:window.retirerJetonDepuisSidebar = retirerJetonDepuisSidebar;
+7308:window.evaluerProduction = evaluerProduction;
+7309:window.naviguerEtudiantPrecedent = naviguerEtudiantPrecedent;
+7310:window.naviguerEtudiantSuivant = naviguerEtudiantSuivant;
+7311:window.retirerJeton = retirerJeton;
+7312:window.editerFichierDepuisEvaluation = editerFichierDepuisEvaluation;
+
+## Clés SSOT mentionnées (premières occurrences)
+55:   - 'grillesTemplates' : Array des grilles de critères
+58:   - 'evaluationsSauvegardees' : Array des évaluations complètes
+270: * - 'grillesTemplates' : Array des grilles de critères
+273:    const grilles = db.getSync('grillesTemplates', []);
+314:            const modalites = db.getSync('modalitesEvaluation', {});
+320:            const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
+321:            const pratiqueData = pratiquesConfigurables.find(p => p.id === pratiqueId);
+333:            // Synchroniser les jetons de la pratique vers modalitesEvaluation.configPAN.jetons
+336:                const modalites = db.getSync('modalitesEvaluation', {});
+354:                db.setSync('modalitesEvaluation', modalites);

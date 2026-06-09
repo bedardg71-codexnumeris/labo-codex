@@ -1,0 +1,38 @@
+Checklist dashboard — Levée du Cloudflare Access
+  
+  1. Cloudflare Zero Trust (one.dash.cloudflare.com)
+  
+  1. Va sur https://one.dash.cloudflare.com (tableau Zero Trust, pas le dash classique).
+  2. Navigue à Access → Applications.
+  3. Trouve l'application qui protège app.codexnumeris.org.
+  4. Deux choix :
+    - Désactiver (recommandé pour conserver la config pour réactivation future) : clique ... → Disable application.
+    - Supprimer (zéro-dette) : clique ... → Delete. La liste blanche d'emails est perdue (à reconstruire si tu remets Access plus tard).
+  
+  2. Cloudflare classique (dash.cloudflare.com) — vérifications
+  
+  1. DNS : codexnumeris.org → DNS → Records. Vérifie que le CNAME app → labocodex.netlify.app est en proxy orange (icône orange, pas grise). Si gris → l'origin Netlify est
+  directement exposé, Cache-Control du netlify.toml arrive intact mais tu perds le CDN Cloudflare.
+  2. WAF / Bots : Security → Bots. Sans Access devant, le challenge bot peut toujours filtrer. Choisis selon ton goût :
+    - Bot Fight Mode : OFF (recommandé pré-AQPC) → tout le monde passe sans challenge.
+    - Bot Fight Mode : ON → garde la protection mais teste depuis un iPad / navigateur ancien avant l'AQPC.
+  3. SSL/TLS : SSL/TLS → Overview. Vérifie que le mode est Full (strict). Si c'est Flexible → traffic non chiffré entre Cloudflare et Netlify, à corriger.
+  4. Cache Rules : Caching → Cache Rules. Vérifie qu'aucune règle « Cache Everything » ne couvre app.codexnumeris.org/* (sinon le Cache-Control: must-revalidate de netlify.toml
+   est écrasé et les utilisateurs reçoivent du HTML/JS périmé pendant des heures). Si une règle existe → la désactiver ou la limiter aux assets statiques (/icons/*, /img/*).
+  5. Purge Cache : Caching → Configuration → Purge Cache → noter le bouton « Purge Everything » pour usage post-démo si tu pushes un fix le 3 juin.
+  
+  3. Netlify (app.netlify.com)
+  
+  1. Va sur https://app.netlify.com, ouvre le site Labo Codex.
+  2. Onglet Deploys → confirme que le dernier deploy correspond au commit local 40643a6 (ou le HEAD courant après le git push). Cherche le build 0528-XXXX.
+  3. Onglet Site configuration → Domain management → confirme que app.codexnumeris.org est le domaine principal et que Netlify a un certificat SSL valide.
+  4. Onglet Analytics (si activé) → snapshot du trafic actuel pour comparaison post-AQPC.
+  
+  4. Re-test après levée (je le fais)
+  
+  Une fois ta levée Access effective, dis-le moi — je relance les requêtes curl depuis ici :
+  - curl -I https://app.codexnumeris.org/ → attendu HTTP 200, sans cf-mitigated: challenge.
+  - curl https://app.codexnumeris.org/version.json → attendu {"build":"0528-1158","beta":"99.72"} (cohérent avec le local).
+  - Vérification des headers Cache-Control réels en sortie de Cloudflare.
+  
+  5. Push des commits docs

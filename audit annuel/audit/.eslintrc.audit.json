@@ -1,0 +1,37 @@
+{
+  "_comment": "Configuration ESLint dédiée à l'audit de Labo Codex. NE PAS UTILISER comme config de développement. Sert uniquement à mesurer les fonctions hors seuils. Seuils basés sur CodeScene, SonarSource S3776, McConnell.",
+
+  "root": true,
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module"
+  },
+  "env": {
+    "browser": true,
+    "es2022": true
+  },
+  "plugins": ["security"],
+  "rules": {
+    "complexity": ["error", { "max": 10 }],
+    "max-depth": ["error", { "max": 3 }],
+    "max-lines": ["error", { "max": 500, "skipBlankLines": true, "skipComments": true }],
+    "max-lines-per-function": ["error", { "max": 60, "skipBlankLines": true, "skipComments": true, "IIFEs": true }],
+    "max-params": ["error", 4],
+    "max-statements": ["error", 20],
+    "max-nested-callbacks": ["error", 3],
+
+    "security/detect-eval-with-expression": "error",
+    "security/detect-non-literal-regexp": "warn",
+    "security/detect-non-literal-fs-filename": "warn",
+    "security/detect-object-injection": "warn",
+    "security/detect-unsafe-regex": "warn",
+    "security/detect-buffer-noassert": "warn",
+    "security/detect-child-process": "error",
+    "security/detect-disable-mustache-escape": "warn",
+    "security/detect-no-csrf-before-method-override": "warn",
+    "security/detect-possible-timing-attacks": "warn",
+    "security/detect-pseudoRandomBytes": "warn",
+    "security/detect-new-buffer": "warn",
+    "security/detect-bidi-characters": "error"
+  }
+}

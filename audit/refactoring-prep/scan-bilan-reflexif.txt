@@ -1,0 +1,167 @@
+# Scan structurel : js/bilan-reflexif.js
+# Lignes totales : 4716
+
+## Fonctions de premier niveau (avec leurs lignes)
+15:function injecterStyles() {
+262:function genId() {
+272:function initialiserBilanReflexif() {
+319:function rendreInterface() {
+342:function afficherVue(nomVue) {
+380:function afficherToast(message) {
+388:function libelleTypeQuestion(type, q) {
+407:function rendreEditeur() {
+503:function rendreDetailsQuestion(q, blocId) {
+614:function rendreBlocHTML(bloc, indexBloc) {
+697:function modifierPreambule() {
+707:function modifierDescriptionBloc(blocId, elem) {
+718:function modifierTitre() {
+727:function toggleBloc(blocId) {
+736:function toggleOuverture(blocId) {
+741:function editerQuestion(blocId, questionId) {
+751:function confirmerEdition(blocId, questionId) {
+771:function annulerEdition() {
+776:function validerEditionKeyup(el) {
+784:function supprimerQuestion(blocId, questionId) {
+808:function deplacerQuestion(blocId, questionId, direction) {
+828:function ajouterQuestionBloc(blocId) {
+869:function ajouterPerso() {
+913:function trouverQuestionUniverselle(blocId, questionId) {
+920:function trouverOption(question, optionId) {
+928:function indexOption(question, optionId) {
+936:function trouverEnonce(question, enonceId) {
+944:function indexEnonce(question, enonceId) {
+952:function _toucher() {
+956:function ajouterOption(elem) {
+977:function supprimerOption(elem) {
+997:function deplacerOption(elem) {
+1018:function modifierOption(elem) {
+1032:function toggleAutreChamp(elem) {
+1046:function modifierLimite(elem) {
+1061:function ajouterEnonce(elem) {
+1073:function supprimerEnonce(elem) {
+1089:function deplacerEnonce(elem) {
+1107:function modifierEnonce(elem) {
+1120:function toggleNA(elem) {
+1130:function modifierConsigneConditionnelle(elem) {
+1141:function reinitialiserDemo() {
+1150:function formaterQuestionnaireEnTexte(q) {
+1269:function exporterTexte() {
+1297:function parserQuestionnaireTexte(texte) {
+1594:function genererModeleTexte() {
+1676:function telechargerModele() {
+1787:function copierPromptIA() {
+1804:function injecterModaleImport() {
+1888:function ouvrirModaleImport() {
+1902:function fermerModaleImport() {
+1907:function appliquerImport() {
+1954:function rendreAideHTML(cle, titre, contenu) {
+1970:function toggleAide(cle) {
+1981:function trouverBloc(blocId) {
+1988:function trouverQuestion(blocId, questionId) {
+1997:function trouverQuestionPerso(questionId) {
+2006:function sauvegarderQuestionnaire() {
+2014:function rendreParcours() {
+2109:function rendreActiviteHTML(activite, index) {
+2151:function rendreQuestionParActiviteHTML(question, index, parcours) {
+2238:function toggleQuestionParActivite(qpaId) {
+2250:function editerQuestionQPA(qpaId) {
+2259:function confirmerEditionQPA(qpaId) {
+2274:function ajouterQuestionParActivite() {
+2292:function supprimerQuestionParActivite(qpaId) {
+2306:function ajouterActivite() {
+2322:function modifierActivite(actId) {
+2331:function confirmerModifActivite(actId) {
+2347:function annulerModifActivite() {
+2352:function supprimerActivite(actId) {
+2365:function deplacerActivite(actId, direction) {
+2384:function importerProductions() {
+2433:function ajouterEmotion() {
+2452:function supprimerEmotion(index) {
+2459:function toggleTransversale(cleQuestion) {
+2466:function exporterTexteParcours() {
+2563:function trouverActivite(actId) {
+2570:function recalculerOrdreActivites() {
+2576:function sauvegarderParcours() {
+2584:function rendreReflexion() {
+2690:function rendreQuestionMiroirLikertHTML(question, modeApres) {
+2732:function rendreActiviteReflexionHTML(activite, blocB, modeApres) {
+2776:function rendreQuestionSyntheseHTML(question, modeApres) {
+2805:function changerEtatReflexion(nouvelEtat) {
+2812:function toggleBlocReflexion(nomBloc) {
+2820:function toggleQuestionReflexion(nomBloc, questionId) {
+2833:function repondreReflexionLikert(questionId, valeur) {
+2848:function repondreReflexionOuiNon(activiteId, questionId, valOui) {
+2862:function ajouterQuestionReflexion(nomBloc) {
+2892:function supprimerQuestionReflexion(nomBloc, questionId) {
+2905:function sauvegarderReflexionExplicite() {
+2911:function collecterReponsesReflexion() {
+2964:function attacherListenersReflexion() {
+2974:function sauvegarderReflexion() {
+2982:function rendreImport() {
+3035:function declencherImport() {
+3040:function chargerResultatsDemo() {
+3050:function traiterFichierCSV(fichier) {
+3073:function traiterContenuCSV(texte, nomFichier) {
+3102:function detecterSeparateur(texte) {
+3113:function parserCSV(texte, sep) {
+3172:function normaliserTexte(texte) {
+3186:function similitudeTexte(a, b) {
+3215:function estColonneIgnoree(entete) {
+3223:function obtenirCiblesMapping(questions) {
+3266:function _tenterMappingAutres(entete, questions) {
+3292:function _tenterMappingMatrice(entete, questions) {
+3318:function mapperColonnes(entetes, questions) {
+3386:function obtenirToutesLesQuestions() {
+3405:function afficherMapping(entetes, mapping, questions, nbLignes) {
+3453:function modifierMapping(el) {
+3475:function annulerImport() {
+3481:function confirmerImport() {
+3530:function _agregerQuestion(question, cols, donnees) {
+3657:function _estNA(valeur) {
+3662:function _splitMultiChoix(valeur) {
+3674:function _trouverOptionParTexte(options, valeur) {
+3688:function _collecterAutres(colsAutres, donnees) {
+3699:function convertirLikert(valeur) {
+3716:function rendreRapport() {
+3810:function _rendreBarreLikert(distribution, totalRep) {
+3835:function _rendreBarrePct(label, pct, dominante) {
+3843:function _rendreReponsesAutres(rep) {
+3854:function rendreReponseLikert(question, rep) {
+3872:function rendreReponseChoixUnique(question, rep) {
+3906:function rendreReponseChoixMultiple(question, rep) {
+3941:function rendreReponseMatrix(question, rep) {
+3977:function rendreReponseOuvert(question, rep) {
+3994:function calculerVueEnsemble(res, q) {
+4042:function calculerScoreBloc(questionsBloc, res) {
+4066:function calculerSignaux(questionsBloc, res) {
+4104:function labelVersValeur(label) {
+4112:function rendreSynthese(q, res) {
+4174:function creerGraphiques(q, res) {
+4180:function creerGraphiqueGlobal(res) {
+4245:function creerGraphiqueBloc(canvasId, questionsLikert, res) {
+4307:function obtenirCouleursLikert() {
+4317:function obtenirCouleurCSS(variable, fallback) {
+4322:function couleurGrille() {
+4328:function detruireGraphiques() {
+4337:function supprimerResultats() {
+4350:function exporterPDF() {
+4593:function tronquer(texte, max) {
+
+## Fonctions imbriquées (indentées)
+1163:    function lettrePour(opt, idx) {
+1168:    function texteOption(opt) {
+1177:    function ajouterQuestion(question) {
+1332:    function ouvrirBlocSansTitre() {
+1337:    function pousserQuestion(q) {
+1346:    function fermerPreambule() {
+1354:    function fermerQuestion() {
+4000:    function _ajouterDistrib(distrib) {
+4069:    function _addDistrib(distrib) {
+
+## Exports globaux
+4617:    window.afficherSousSection = function(idSousSection) {
+4629:    window.afficherSection = function(nomSection) {
+4638:window.BilanReflexif = {
+4714:window.initialiserBilanReflexif = initialiserBilanReflexif;
+
+## Clés SSOT mentionnées (premières occurrences)

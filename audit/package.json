@@ -1,0 +1,12 @@
+{
+  "name": "audit",
+  "version": "1.0.0",
+  "description": "Protocole d'audit conjoint enseignant / Claude Code. Périmètre : application web Labo Codex (HTML/CSS/JS pur, IndexedDB + localStorage, ~130 modules JS, vibe coding avec Claude Code). Mainteneur unique : Grégoire Bédard, enseignant de littérature, Cégep de Drummondville. Licences du projet audité : AGPL v3 (code) + CC BY-NC-SA 4.0 (ressources pédagogiques).",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "AGPL-3.0-only"
+}

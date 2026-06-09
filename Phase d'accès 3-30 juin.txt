@@ -1,0 +1,6 @@
+  (function(){var C="COURS1766455789356";var S=["presences","productions","groupeEtudiants","groupesCours","evaluationsSauvegardees"];var T=db.getSync("trimestres",[]);var R={};var
+  p=Promise.resolve();T.forEach(function(t){S.forEach(function(s){p=p.then(function(){return db.get(t.id+"_"+s);}).then(function(a){if(Array.isArray(a)){var
+  n=0;a.forEach(function(it){if(it&&it.coursId===C)n++;});if(n)R[t.id+"_"+s]=n;}});});});p.then(function(){return db.keys();}).then(function(ks){var
+  all=Object.keys(localStorage).concat(ks);T.forEach(function(t){var pre=t.id+"_snapshots_";var n=0;all.forEach(function(k){if(typeof
+  k==="string"&&k.indexOf(pre)===0&&k.slice(pre.length)===C)n++;});if(n)R[t.id+"_snapshots"]=n;});var tot=0;Object.keys(R).forEach(function(k){tot+=R[k];});console.log("VENTILATION "+C+"
+  (total "+tot+"):\n"+JSON.stringify(R,null,2));});})();

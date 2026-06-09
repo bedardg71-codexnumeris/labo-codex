@@ -1,0 +1,218 @@
+# Scan structurel : js/trimestre-v2.js
+# Lignes totales : 6584
+
+## Fonctions de premier niveau (avec leurs lignes)
+19:function afficherNotificationSucces(message, details) {
+26:function afficherNotificationErreur(message, details) {
+42:function initialiserTrimestreV2() {
+98:function chargerIdentificationTrimestreV2() {
+125:function sauvegarderIdentificationTrimestreV2() {
+204:function chargerCadreCalendrierV2() {
+259:function sauvegarderCadreCalendrierV2() {
+313:function reinitialiserBornesTrimestreV2() {
+357:function reinitialiserSemainesSpecialesV2() {
+392:function afficherStatistiquesTrimestreV2() {
+483:function chargerEvenementsPrevusV2() {
+509:function chargerEvenementsImprevusV2() {
+535:function genererCarteEvenementV2(evt, type) {
+572:function afficherFormEvenementV2(type) {
+618:function majAffichageRepriseV2Prevu() {
+631:function majAffichageRepriseV2Imprevu() {
+647:function ajouterBoutonRetourV2(sectionLegacy) {
+666:function retournerVueV2() {
+691:function modifierEvenementV2(id, type) {
+747:function confirmerEvenementPrevuV2() {
+820:function annulerFormEvenementPrevuV2() {
+829:function confirmerEvenementImprevuV2() {
+902:function annulerFormEvenementImprevuV2() {
+911:function supprimerEvenementV2(id, type) {
+947:function populerDropdownTrimestreV2() {
+994:function afficherListeTrimestreGestion() {
+1083:function confirmerArchivage(id) {
+1113:function confirmerDesarchivage(id) {
+1149:function afficherFormulaireTrimestreActif() {
+1164:function ouvrirBibliothequeTrimestreV2() {
+1241:function fermerModalBibliothequeTrimestres() {
+1249:function archiverTrimestreActif() {
+1264:function supprimerTrimestreActif() {
+1272:function changerTrimestreActifV2(valeur) {
+1319:function ouvrirModalNouveauTrimestre() {
+1397:function chargerDropdownCoursV2() {
+1550:function changerCoursSelectionneV2(coursId) {
+1596:function supprimerCoursV2() {
+1655:function viderAffichageCoursV2() {
+1694:function afficherDetailsCoursV2(cours) {
+1749:async function afficherFormCoursV2() {
+1757:async function nouveauCoursV2() {
+1787:async function modifierCoursSelectionneV2() {
+1836:function dupliquerCoursSelectionneV2() {
+1886:function remplirFormCoursV2(cours) {
+1926:function afficherSyntheseCours(cours) {
+1953:function afficherSyntheseEnseignant(enseignant) {
+1982:function afficherSyntheseGroupeEtudiants() {
+2029:function afficherSyntheseHoraire(horaire) {
+2073:function afficherSyntheseGroupeCours(gc) {
+2123:function reinitialiserFormCoursV2() {
+2164:async function chargerDropdownPratiquesCours() {
+2211:function setValue(id, value) {
+2219:function annulerFormCoursV2() {
+2239:function sauvegarderCoursV2() {
+2349:function ouvrirModalNouveauCours() {
+2364:async function chargerListeEtudiantsV2() {
+2474:function mettreAJourResumeEtudiantsV2(etudiants) {
+2546:function populerDropdownGroupesV2(etudiants) {
+2594:async function filtrerParGroupeV2() {
+2606:function getGroupeSelectionneV2() {
+2613:async function chargerGroupesCoursV2(coursId) {
+2623:async function soumettreEtudiantV2() {
+2675:function editerEtudiantV2(da) {
+2712:function annulerEditionEtudiantV2() {
+2719:function reinitialiserFormEtudiantV2() {
+2745:function ajouterEtudiantV2() {
+2752:function creerNouveauGroupeV2() {
+2815:async function supprimerEtudiantV2(da) {
+2839:function actionEtudiantV2(selectElement, da) {
+2858:async function remarqueEtudiantV2(selectElement, da) {
+2870:async function changerStatutEtudiantV2(da, nouveauStatut) {
+2905:function importerFichierEtudiantsV2(event) {
+2921:function previsualiserDonneesV2() {
+2933:function traiterDonneesImportV2(contenu) {
+3005:async function confirmerImportV2() {
+3055:function annulerImportV2() {
+3063:function exporterEtudiantsV2() {
+3088:async function reinitialiserEtudiantsV2() {
+3111:function viderListeEtudiantsV2() {
+3119:async function supprimerGroupeSelectionneV2() {
+3170:async function sauvegarderGroupeEtudiantsV2() {
+3228:function activerGroupeV2(numeroGroupe) {
+3238:function gererEtudiantsGroupeV2(numeroGroupe) {
+3245:function ouvrirModalNouveauGroupe() {
+3258:function chargerSeancesV2() {
+3355:function afficherFormSeanceV2() {
+3381:function modifierSeanceV2(index) {
+3419:function annulerFormSeanceV2() {
+3429:function confirmerSeanceV2() {
+3517:function supprimerSeanceV2(index) {
+3546:function chargerHoraireGroupeActifV2(numeroGroupe) {
+3561:function chargerHorairesV2() {
+3587:function populerDropdownHorairesV2() {
+3620:function changerHoraireSelectionneV2(horaireId) {
+3646:function mettreAJourCarteResumeHoraireV2(horaire) {
+3685:function afficherEtatVideHoraireV2() {
+3700:function populerDropdownGroupesHoraireV2() {
+3727:function nouveauHoraireV2() {
+3775:function editerHoraireV2(horaire) {
+3832:function annulerFormHoraireV2() {
+3845:function sauvegarderHoraireV2() {
+3948:function supprimerHoraireV2() {
+4016:function mettreAJourSeancesHoraireV2() {
+4055:function calculerHeureFin(heureDebut, nbPeriodes) {
+4088:function chargerGroupeCoursV2() {
+4124:function ouvrirAideGroupeCours() {
+4144:function populerDropdownGroupeCoursV2() {
+4182:function populerDropdownsAssemblageV2() {
+4319:function afficherEnseignantGroupeCoursV2() {
+4335:function genererNomGroupeCoursV2() {
+4391:function abrevierJour(jour) {
+4402:function obtenirPeriodeJournee(heure) {
+4411:function mettreAJourNomGroupeCoursV2() {
+4451:function changerGroupeCoursSelectionneV2(gcId) {
+4477:function mettreAJourCarteResumeGroupeCoursV2(gc) {
+4540:function afficherEtatVideGroupeCoursV2() {
+4552:function afficherTrimestreGroupeCoursV2() {
+4574:function nouveauGroupeCoursV2() {
+4636:function editerGroupeCoursV2(gc) {
+4683:function annulerFormGroupeCoursV2() {
+4694:function sauvegarderGroupeCoursV2() {
+4803:function supprimerGroupeCoursV2() {
+4860:function ouvrirModalBibliothequeGroupeCours() {
+4967:function fermerModalBibliothequeGroupeCoursEscape(e) {
+4973:function fermerModalBibliothequeGroupeCours() {
+4978:function activerGroupeCoursDepuisBibliotheque(gcId) {
+5007:function supprimerGroupeCoursDepuisBibliotheque(gcId, nomGC) {
+5046:function masquerGroupeCoursDepuisBibliotheque(gcId) {
+5081:function afficherGroupeCoursDepuisBibliotheque(gcId) {
+5110:function mettreAJourOptionsFormatHoraire() {
+5178:function mettreAJourFormatHoraire() {
+5221:function mettreAJourInfoDuree() {
+5251:function actionEtudiantV2Handler(el) {
+5255:function remarqueEtudiantV2Handler(el) {
+5356:function mettreAJourGuideGroupeCours() {
+5403:function allerVersAide(idAccordeon) {
+5438:function chargerProfilEnseignantV2() {
+5481:function mettreAJourCarteEnseignant() {
+5499:function populerDropdownEnseignantsV2() {
+5531:function chargerEnseignantSelectionneV2() {
+5577:function nouveauProfilEnseignantV2() {
+5598:function viderFormulaireEnseignantV2() {
+5610:async function sauvegarderEnseignantV2() {
+5678:function annulerFormEnseignantV2() {
+5690:async function supprimerProfilEnseignantV2() {
+5753:async function peuplerDropdownGroupeCoursActif() {
+5855:async function changerGroupeCoursDepuisHeader(groupeCoursId) {
+5864:async function changerGroupeCoursActifV2(valeur) {
+6150:async function peuplerDropdownEnseignants() {
+6177:function changerEnseignantSelectionneV2(enseignantId) {
+6209:function afficherFormEnseignantV2() {
+6232:async function modifierEnseignantSelectionneV2() {
+6269:function afficherFormHoraireV2() {
+6296:async function modifierHoraireSelectionneV2() {
+6333:function mettreAJourResumeFormatHoraireV2() {
+6347:function afficherFormGroupeCoursV2() {
+6366:async function activerGroupeCoursV2(groupeCoursId) {
+6393:async function _supprimerGroupeCoursV2_legacy(groupeCoursId) {
+6401:async function mettreAJourApercuGroupeCours() {
+6439:function accederCalendrierRapide() {
+6477:function mettreAJourBarreContexte() {
+
+## Fonctions imbriquées (indentées)
+1176:    function genererCarteTrim(t, estArchive) {
+4876:    function genererCarteGC(gc, estMasque) {
+
+## Exports globaux
+158:        window.trimestreActif = id;
+181:        window.trimestreActif = id;
+4139:window.ouvrirAideGroupeCours = ouvrirAideGroupeCours;
+5150:window.mettreAJourOptionsFormatHoraire = mettreAJourOptionsFormatHoraire;
+5160:window.ouvrirModalBibliothequeGroupeCours = ouvrirModalBibliothequeGroupeCours; // 🆕 Beta 95.3
+5161:window.fermerModalBibliothequeGroupeCours = fermerModalBibliothequeGroupeCours; // 🆕 Beta 95.3
+5162:window.activerGroupeCoursDepuisBibliotheque = activerGroupeCoursDepuisBibliotheque; // 🆕 Beta 95.3
+5163:window.supprimerGroupeCoursDepuisBibliotheque = supprimerGroupeCoursDepuisBibliotheque; // 🆕 Beta 95.3
+5164:window.masquerGroupeCoursDepuisBibliotheque = masquerGroupeCoursDepuisBibliotheque; // 🆕 (10 jan 2026)
+5165:window.afficherGroupeCoursDepuisBibliotheque = afficherGroupeCoursDepuisBibliotheque; // 🆕 (10 jan 2026)
+5264:window.mettreAJourFormatHoraire = mettreAJourFormatHoraire;
+5265:window.mettreAJourInfoDuree = mettreAJourInfoDuree;
+5286:window.ouvrirModalNouveauTrimestre = ouvrirModalNouveauTrimestre;
+5287:window.afficherListeTrimestreGestion = afficherListeTrimestreGestion;
+5288:window.confirmerArchivage = confirmerArchivage;
+5289:window.confirmerDesarchivage = confirmerDesarchivage;
+5290:window.afficherFormulaireTrimestreActif = afficherFormulaireTrimestreActif;
+5292:window.fermerModalBibliothequeTrimestres = fermerModalBibliothequeTrimestres;
+5293:window.archiverTrimestreActif = archiverTrimestreActif;
+5294:window.supprimerTrimestreActif = supprimerTrimestreActif;
+5306:window.chargerDropdownPratiquesCours = chargerDropdownPratiquesCours; // ✅ AJOUT (2 jan 2026)
+5307:window.afficherSyntheseCours = afficherSyntheseCours; // 🆕 Beta 95.3
+5308:window.afficherSyntheseEnseignant = afficherSyntheseEnseignant; // 🆕 Beta 95.3
+5309:window.afficherSyntheseGroupeEtudiants = afficherSyntheseGroupeEtudiants; // 🆕 Beta 95.3
+5310:window.afficherSyntheseHoraire = afficherSyntheseHoraire; // 🆕 Beta 95.3
+5311:window.afficherSyntheseGroupeCours = afficherSyntheseGroupeCours; // 🆕 Beta 95.3
+5312:window.ouvrirModalNouveauCours = ouvrirModalNouveauCours;
+5316:window.ouvrirModalNouveauGroupe = ouvrirModalNouveauGroupe;
+5346:window.mettreAJourGuideGroupeCours = mettreAJourGuideGroupeCours;
+5732:window.mettreAJourCarteEnseignant = mettreAJourCarteEnseignant;
+6453:window.accederCalendrierRapide = accederCalendrierRapide;
+6454:window.peuplerDropdownGroupeCoursActif = peuplerDropdownGroupeCoursActif;
+6455:window.changerGroupeCoursDepuisHeader = changerGroupeCoursDepuisHeader;
+6457:window.peuplerDropdownEnseignants = peuplerDropdownEnseignants;
+6467:window.mettreAJourApercuGroupeCours = mettreAJourApercuGroupeCours;
+6562:window.mettreAJourBarreContexte = mettreAJourBarreContexte;
+
+## Clés SSOT mentionnées (premières occurrences)
+2088:    const pratiques = db.getSync('pratiquesConfigurables', []);
+2162: * Affiche les pratiques de pratiquesConfigurables (celles dans la sidebar)
+2174:    // Charger les pratiques depuis pratiquesConfigurables (même source que la sidebar)
+2177:        pratiques = db.getSync('pratiquesConfigurables', []);
+4295:        // Les pratiques sont stockées dans 'pratiquesConfigurables' (module pratiques-gestion.js)
+4296:        const toutesPratiques = db.getSync('pratiquesConfigurables', []);
+4310:            const pratiquesDemo = db.getSync(cleDemo('pratiquesConfigurables'), []) || [];
+4730:            { id: pratiqueId, collection: 'pratiquesConfigurables', labelType: 'pratique' }

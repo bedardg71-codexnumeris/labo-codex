@@ -1,0 +1,150 @@
+# Scan structurel : js/productions.js
+# Lignes totales : 3994
+
+## Fonctions de premier niveau (avec leurs lignes)
+56:function getCleProductions() {
+63:function getCleGrilles() {
+75:function obtenirEcheanceEffective(production, groupeCoursId) {
+91:function obtenirEcheancePlusTot(production) {
+109:function trierListeProductions() {
+120:function detecterDoublonsProductions(productionsLocales, productionsBibliotheque) {
+145:function genererBadgeSourceProduction(prod, productionsLocales) {
+149:function genererIdCourtProduction(id) {
+177:async function afficherTableauProductions() {
+268:function peuplerEcheancesParGroupe(production) {
+421:function verifierDateHorsTrimestre(inputDate, dateMin, dateMax, labelDebut, labelFin) {
+450:function afficherInfoSeanceEcheance(spanInfo, dateStr, coursId, groupeNum) {
+558:function lireEcheancesParGroupeDepuisFormulaire() {
+600:async function afficherFormProduction(id) {
+805:async function sauvegarderProduction() {
+1075:function annulerFormProduction() {
+1108:async function modifierProduction(id) {
+1134:async function supprimerProduction(id) {
+1172:async function verrouillerEvaluation(id) {
+1229:async function monterEvaluation(id) {
+1262:async function descendreEvaluation(id) {
+1298:function gererChangementTypeProduction() {
+1456:function synchroniserGrilles() {
+1488:async function chargerArtefactsDisponibles() {
+1534:async function mettreAJourPonderationTotale() {
+1576:function mettreAJourResumeTypes(evaluations) {
+1614:function getTypeLabel(type) {
+1641:function gererPortfolio(id) {
+1667:async function afficherToutesLesProductionsParType() {
+1848:async function ajouterProductionAuType(type) {
+1898:async function migrerProductionsVersBibliotheque() {
+1914:function initialiserModuleProductions() {
+1952:async function preparerDonneesBibliothequeProductions() {
+2037:async function afficherBibliothequeProductions() {
+2127:async function ajouterProductionIndividuelle(id) {
+2179:async function ajouterMesProductionsALaBibliotheque() {
+2222:function mettreAJourFiltreCoursTrimestreProductions() {
+2270:function afficherProductionsTrimestreModal() {
+2323:async function importerToutTrimestreModal() {
+2368:async function importerUneProductionTrimestre(cleTrimestre, productionId) {
+2392:async function retirerProductionDeBibliotheque(id) {
+2424:async function supprimerProductionDefinitivement(id) {
+2455:async function supprimerProductionDeBibliothequePartagee(id) {
+2474:async function dupliquerProductionBibliotheque(id) {
+2520:async function ajouterProductionsABibliotheque() {
+2576:function filtrerProductionsParDiscipline() {
+2605:function fermerModalBibliothequeProductions() {
+2630:async function exporterProductions() {
+2694:async function exporterProductionActive() {
+2785:async function importerDansProductionActive(event) {
+2916:function importerProductions(eventOuEl) {
+3090:async function verifierMigrationCategories() {
+3111:async function afficherAssistantMigrationCategories() {
+3194:function assignerToutesMigration(categorie) {
+3204:function fermerModalMigration() {
+3214:async function sauvegarderMigrationCategories() {
+3257:function fermerModalImportProductions() {
+3267:function confirmerEtFermerImportProductions() {
+3273:function ouvrirFilePickerImportProductions() {
+3314:async function dupliquerEtEditerProduction(id) {
+3442:async function afficherListeProductions(filtreType = '') {
+3540:function filtrerListeProductions() {
+3553:async function chargerProductionPourModif(id) {
+3607:function creerNouvelleProduction() {
+3688:function definirProductionActive(id) {
+3708:function mettreAJourMetriquesProduction(production) {
+3738:async function chargerGrillesDisponiblesPourProduction() {
+3768:async function dupliquerProduction(id) {
+3815:async function dupliquerProductionActive() {
+3827:async function supprimerProductionActive() {
+
+## Fonctions imbriquées (indentées)
+1697:    function genererHtmlProduction(prod, index, total) {
+
+## Exports globaux
+2949:            window._productionsImportEnAttente = donnees;
+2980:window.confirmerImportProductions = async function(donnees) {
+3282:window.afficherTableauProductions = afficherTableauProductions;
+3283:window.afficherToutesLesProductionsParType = afficherToutesLesProductionsParType;
+3284:window.ajouterProductionAuType = ajouterProductionAuType;
+3285:window.afficherFormProduction = afficherFormProduction;
+3286:window.sauvegarderProduction = sauvegarderProduction;
+3287:window.annulerFormProduction = annulerFormProduction;
+3288:window.modifierProduction = modifierProduction;
+3289:window.supprimerProduction = supprimerProduction;
+3290:window.verrouillerEvaluation = verrouillerEvaluation;
+3291:window.monterEvaluation = monterEvaluation;
+3292:window.descendreEvaluation = descendreEvaluation;
+3293:window.gererChangementTypeProduction = gererChangementTypeProduction;
+3294:window.chargerArtefactsDisponibles = chargerArtefactsDisponibles;
+3295:window.mettreAJourPonderationTotale = mettreAJourPonderationTotale;
+3296:window.getTypeLabel = getTypeLabel;
+3297:window.gererPortfolio = gererPortfolio;
+3298:window.initialiserModuleProductions = initialiserModuleProductions;
+3301:window.exporterProductions = exporterProductions;
+3302:window.exporterProductionActive = exporterProductionActive;
+3303:window.importerDansProductionActive = importerDansProductionActive;
+3304:window.importerProductions = importerProductions;
+3307:window.afficherListeProductions = afficherListeProductions;
+3309:window.chargerProductionPourModif = chargerProductionPourModif;
+3337:window.dupliquerEtEditerProduction = dupliquerEtEditerProduction;
+3338:window.creerNouvelleProduction = creerNouvelleProduction;
+3339:window.dupliquerProduction = dupliquerProduction;
+3340:window.dupliquerProductionActive = dupliquerProductionActive;
+3341:window.supprimerProductionActive = supprimerProductionActive;
+3342:window.chargerGrillesDisponiblesPourProduction = chargerGrillesDisponiblesPourProduction;
+3345:window.afficherBibliothequeProductions = afficherBibliothequeProductions;
+3346:window.retirerProductionDeBibliotheque = retirerProductionDeBibliotheque;
+3347:window.ajouterProductionsABibliotheque = ajouterProductionsABibliotheque;
+3348:window.filtrerProductionsParDiscipline = filtrerProductionsParDiscipline;
+3349:window.fermerModalBibliothequeProductions = fermerModalBibliothequeProductions;
+3350:window.ajouterProductionIndividuelle = ajouterProductionIndividuelle;
+3351:window.ajouterMesProductionsALaBibliotheque = ajouterMesProductionsALaBibliotheque;
+3352:window.afficherProductionsTrimestreModal = afficherProductionsTrimestreModal;
+3353:window.importerToutTrimestreModal = importerToutTrimestreModal;
+3354:window.importerUneProductionTrimestre = importerUneProductionTrimestre;
+3355:window.mettreAJourFiltreCoursTrimestreProductions = mettreAJourFiltreCoursTrimestreProductions; // 🆕 Beta 95.3
+3356:window.supprimerProductionDefinitivement = supprimerProductionDefinitivement;
+3357:window.supprimerProductionDeBibliothequePartagee = supprimerProductionDeBibliothequePartagee;
+3358:window.dupliquerProductionBibliotheque = dupliquerProductionBibliotheque;
+3361:window.verifierMigrationCategories = verifierMigrationCategories;
+3364:window.obtenirEcheanceEffective = obtenirEcheanceEffective;
+3365:window.afficherAssistantMigrationCategories = afficherAssistantMigrationCategories;
+3366:window.assignerToutesMigration = assignerToutesMigration;
+3367:window.fermerModalMigration = fermerModalMigration;
+3368:window.sauvegarderMigrationCategories = sauvegarderMigrationCategories;
+3371:window.fermerModalImportProductions = fermerModalImportProductions;
+3372:window.confirmerEtFermerImportProductions = confirmerEtFermerImportProductions;
+3373:window.ouvrirFilePickerImportProductions = ouvrirFilePickerImportProductions;
+3873:window.sauvegarderProduction = async function() {
+3898:window.annulerFormProduction = function() {
+3916:    window.productionEnCoursEdition = null;
+3923:window.supprimerProduction = async function(id) {
+3955:window.importerProductionsExternes = function(nouvellesProductions, options) {
+
+## Clés SSOT mentionnées (premières occurrences)
+49:   - 'grillesTemplates' : Array des grilles de critères (pour association)
+64:    return cle('grillesTemplates');
+171: * 2. Charge les grilles depuis localStorage ('grillesTemplates')
+179:    const grilles = await db.get('grillesTemplates') || [];
+618:        const cleGrilles = cle('grillesTemplates');
+1672:    const grilles = await db.get('grillesTemplates') || [];
+3007:        const grillesExistantes = await db.get('grillesTemplates') || [];
+3396: * - 'grillesTemplates' : Array des grilles de critères (pour association)
+3445:    const cleGrilles = cle('grillesTemplates');
+3709:    const grilles = db.getSync('grillesTemplates', []);
