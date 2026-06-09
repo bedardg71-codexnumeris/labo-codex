@@ -310,6 +310,68 @@ function genererBadgeTypePratique(pratique) {
    =============================== */
 
 /**
+ * #320 L1 — Zone « Mes dossiers » : gestion des répertoires de classement
+ * (créer / renommer / supprimer). Rendu en tête de la Section 2 (le pool que
+ * l'on range). L'affichage groupé et l'assignation viennent au Lot L2.
+ * Le module js/repertoires-bibliotheque.js range PAR IDENTITÉ, sans toucher
+ * aux pratiques elles-mêmes.
+ * @returns {string} HTML de la zone
+ */
+function genererZoneRepertoiresPratiques() {
+    var reps = (window.repertoiresBibliotheque && typeof window.repertoiresBibliotheque.obtenir === 'function')
+        ? window.repertoiresBibliotheque.obtenir('pratiques')
+        : [];
+
+    var lignes = reps.map(function(r) {
+        var id = echapperHtml(r.id);
+        return '<div style="display:flex; gap:6px; align-items:center; margin-bottom:6px;">' +
+            '<input type="text" data-rep-id="' + id + '" value="' + echapperHtml(r.nom || '') + '" class="controle-form" style="flex:1;" aria-label="Nom du dossier" />' +
+            '<button data-action="renommerRepertoirePratiques" data-param="' + id + '" class="btn btn-secondaire btn-mini">Renommer</button>' +
+            '<button data-action="supprimerRepertoirePratiques" data-param="' + id + '" data-confirm="Supprimer ce dossier ? Les pratiques qu\'il contient ne sont pas supprimées : elles repassent en « non classées »." class="btn btn-supprimer btn-mini" title="Supprimer le dossier" aria-label="Supprimer le dossier">✕</button>' +
+            '</div>';
+    }).join('');
+
+    if (!lignes) {
+        lignes = '<p style="color: var(--gris-clair); font-style: italic; margin:0 0 6px;">Aucun dossier pour l\'instant. Crée-en un pour ranger tes pratiques.</p>';
+    }
+
+    return '<div style="border:1px solid var(--bordure, #ddd); border-radius:8px; padding:12px; margin-bottom:15px; background:var(--surface-carte, #fff);">' +
+        '<div style="font-weight:600; margin-bottom:8px; color:var(--texte-principal, #222);">Mes dossiers</div>' +
+        '<div id="rep-liste-pratiques">' + lignes + '</div>' +
+        '<div style="display:flex; gap:6px; margin-top:8px;">' +
+            '<input type="text" id="rep-nouveau-nom" class="controle-form" placeholder="Nom d\'un nouveau dossier" style="flex:1;" aria-label="Nom du nouveau dossier" />' +
+            '<button data-action="creerRepertoirePratiques" class="btn btn-principal btn-mini">Créer le dossier</button>' +
+        '</div>' +
+    '</div>';
+}
+
+/** #320 L1 — crée un répertoire depuis le champ de la modale, puis rafraîchit. */
+async function creerRepertoirePratiques() {
+    var input = document.getElementById('rep-nouveau-nom');
+    if (!input) return;
+    if (!input.value || !input.value.trim()) {
+        if (window.notifications && typeof notifications.info === 'function') notifications.info('Donne un nom au dossier.');
+        return;
+    }
+    window.repertoiresBibliotheque.creer(input.value, 'pratiques');
+    await afficherBibliothequePratiques();
+}
+
+/** #320 L1 — renomme un répertoire à partir de la valeur de son champ. */
+async function renommerRepertoirePratiques(repId) {
+    var input = document.querySelector('input[data-rep-id="' + repId + '"]');
+    if (!input || !input.value || !input.value.trim()) return;
+    window.repertoiresBibliotheque.renommer(repId, input.value);
+    await afficherBibliothequePratiques();
+}
+
+/** #320 L1 — supprime un répertoire (les pratiques restent, repassent non classées). */
+async function supprimerRepertoirePratiques(repId) {
+    window.repertoiresBibliotheque.supprimer(repId);
+    await afficherBibliothequePratiques();
+}
+
+/**
  * Affiche le modal de gestion de la bibliothèque de pratiques
  * Section 1: Pratiques dans la sélection (avec boutons Partager/Retirer)
  * Section 2: Pratiques disponibles avec filtres
@@ -381,8 +443,8 @@ async function afficherBibliothequePratiques() {
         </div>
     `;
 
-    // Filtres Section 2 : type + discipline (spécifique pratiques)
-    const filtresHTML = `
+    // Filtres Section 2 : zone « Mes dossiers » (#320 L1) + filtres type/discipline
+    const filtresHTML = genererZoneRepertoiresPratiques() + `
         <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 15px;">
             <div style="flex: 1; min-width: 200px;">
                 <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">
@@ -2711,6 +2773,10 @@ window.afficherListePratiquesMateriel = afficherListePratiquesMateriel;
 window.afficherBibliothequePratiques = afficherBibliothequePratiques;
 window.fermerModalBibliothequePratiques = fermerModalBibliothequePratiques;
 window.filtrerPratiquesBibliotheque = filtrerPratiquesBibliotheque;
+// #320 L1 — gestion des répertoires de classement (zone « Mes dossiers »)
+window.creerRepertoirePratiques = creerRepertoirePratiques;
+window.renommerRepertoirePratiques = renommerRepertoirePratiques;
+window.supprimerRepertoirePratiques = supprimerRepertoirePratiques;
 window.ajouterPratiqueALaSelection = ajouterPratiqueALaSelection;
 window.retirerPratiqueDeLaSelection = retirerPratiqueDeLaSelection;
 window.retirerPratiqueDeBibliothequeMateriel = retirerPratiqueDeBibliothequeMateriel;
