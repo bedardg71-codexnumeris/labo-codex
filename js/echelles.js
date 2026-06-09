@@ -2342,7 +2342,13 @@ async function preparerDonneesBibliothequeEchelles() {
         await obtenirToutesLesEchellesBibliotheque()
     );
     const doublonsDetectes = detecterDoublonsEchelles(echellesDansBibliotheque, echellesDisponibles);
-    const disciplines = obtenirDisciplinesDisponiblesEchelles();
+
+    // #327 — dossiers de classement (couche par-dessus, range par identité).
+    const repsEchelles = (window.repertoiresBibliotheque && typeof window.repertoiresBibliotheque.obtenir === 'function')
+        ? window.repertoiresBibliotheque.obtenir('echelles')
+        : [];
+    const repParEchelle = {};
+    repsEchelles.forEach(r => (r.itemIds || []).forEach(id => { repParEchelle[id] = r.id; }));
 
     // Section 1
     const cartesSection1 = echellesDansBibliotheque.map(echelle => ({
@@ -2363,66 +2369,77 @@ async function preparerDonneesBibliothequeEchelles() {
         ]
     }));
 
-    // Section 2 : groupée par discipline
-    const cartesSection2 = [];
-    const echellesParDiscipline = {};
-    echellesDisponibles.forEach(echelle => {
-        const disc = echelle.discipline || 'Autre';
-        if (!echellesParDiscipline[disc]) echellesParDiscipline[disc] = [];
-        echellesParDiscipline[disc].push(echelle);
-    });
-
-    Object.keys(echellesParDiscipline).sort().forEach(discipline => {
-        echellesParDiscipline[discipline].forEach(echelle => {
-            const pratiques = echelle.pratiques || (echelle.gabaritType ? [echelle.gabaritType] : ['all']);
-            let badgesPratiques = '';
-            if (window.GabaritsUtils) {
-                badgesPratiques = window.GabaritsUtils.genererBadgesPratiques(echelle);
-            } else {
-                pratiques.forEach(p => {
-                    const label = p === 'all' ? 'Multi' : p;
-                    const classeCSS = p === 'all' ? '' : p.toLowerCase();
-                    badgesPratiques += `<span class="badge-pratique-compact ${classeCSS}">${label}</span>`;
-                });
-            }
-
-            const dejaPresent = echelles.some(e => (e.id === echelle.id || e.idOriginal === echelle.id) && e.dansBibliotheque !== false);
-            const estGabarit = echelle.estGabarit === true;
-            const styleGabarit = estGabarit ? 'border-left: 4px solid var(--gabarit-couleur); background: var(--gabarit-fond);' : '';
-            const gabaritBadge = estGabarit ? '<span style="font-size: 0.7rem; color: var(--gabarit-couleur); font-weight: 500;">(gabarit)</span>' : '';
-
-            cartesSection2.push({
-                nom: BibliothequeUI.formaterTitreDemo(echelle.nom || 'Sans titre', BibliothequeUI.estItemDemo(echelle)) + ' ' + gabaritBadge,
-                id: echelle.id,
-                badgeSource: BibliothequeUI.genererBadgeSource(echelle, echellesDansBibliotheque),
-                badgesPratiques: badgesPratiques,
-                metadonnees: BibliothequeUI.formaterMetadonnees(echelle, {
-                    quantite: `${echelle.niveaux?.length || 0} niveau(x)`,
-                    discipline: true
-                }),
-                inspireDe: BibliothequeUI.formaterInspireDe(echelle),
-                description: echelle.description || '',
-                dejaPresent: dejaPresent,
-                classeItem: 'echelle-disponible-item',
-                dataAttrs: `data-discipline="${discipline}" data-pratiques="${pratiques.join(',')}"`,
-                styleExtra: styleGabarit,
-                boutonPrincipal: { label: 'Ajouter à ma sélection', action: 'ajouterEchelleIndividuelle', param: echelle.id, classe: 'btn-confirmer', title: 'Ajouter cette échelle à ta sélection' },
-                actionsMenu: [
-                    { label: 'Supprimer', action: 'supprimerEchelleDeBibliothequePartagee', param: echelle.id, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true }
-                ],
-                groupe: discipline
+    // Section 2 : #327 — cartes à plat (le groupage par dossier se fait au rendu
+    // via repertoiresBibliotheque.grouper). Chaque carte porte au menu ⋮ les
+    // actions « Classer dans … » / « Retirer du dossier » selon son dossier courant.
+    const cartesSection2 = echellesDisponibles.map(echelle => {
+        const pratiques = echelle.pratiques || (echelle.gabaritType ? [echelle.gabaritType] : ['all']);
+        let badgesPratiques = '';
+        if (window.GabaritsUtils) {
+            badgesPratiques = window.GabaritsUtils.genererBadgesPratiques(echelle);
+        } else {
+            pratiques.forEach(p => {
+                const label = p === 'all' ? 'Multi' : p;
+                const classeCSS = p === 'all' ? '' : p.toLowerCase();
+                badgesPratiques += `<span class="badge-pratique-compact ${classeCSS}">${label}</span>`;
             });
+        }
+
+        const dejaPresent = echelles.some(e => (e.id === echelle.id || e.idOriginal === echelle.id) && e.dansBibliotheque !== false);
+        const estGabarit = echelle.estGabarit === true;
+        const styleGabarit = estGabarit ? 'border-left: 4px solid var(--gabarit-couleur); background: var(--gabarit-fond);' : '';
+        const gabaritBadge = estGabarit ? '<span style="font-size: 0.7rem; color: var(--gabarit-couleur); font-weight: 500;">(gabarit)</span>' : '';
+
+        const repCourant = repParEchelle[echelle.id] || null;
+        const actionsMenu = [];
+        repsEchelles.forEach(r => {
+            if (r.id !== repCourant) {
+                actionsMenu.push({ label: 'Classer dans : ' + r.nom, action: 'BibliothequeUI.repertoires.classer', param: 'echelles', param2: echelle.id, param3: r.id, classe: 'btn-secondaire', title: 'Ranger dans ce dossier' });
+            }
         });
+        if (repCourant) {
+            actionsMenu.push({ label: 'Retirer du dossier', action: 'BibliothequeUI.repertoires.retirer', param: 'echelles', param2: echelle.id, classe: 'btn-secondaire', title: 'Sortir du dossier (repasse en non classées)' });
+        }
+        actionsMenu.push({ label: 'Supprimer', action: 'supprimerEchelleDeBibliothequePartagee', param: echelle.id, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true });
+
+        return {
+            nom: BibliothequeUI.formaterTitreDemo(echelle.nom || 'Sans titre', BibliothequeUI.estItemDemo(echelle)) + ' ' + gabaritBadge,
+            id: echelle.id,
+            badgeSource: BibliothequeUI.genererBadgeSource(echelle, echellesDansBibliotheque),
+            badgesPratiques: badgesPratiques,
+            metadonnees: BibliothequeUI.formaterMetadonnees(echelle, {
+                quantite: `${echelle.niveaux?.length || 0} niveau(x)`,
+                discipline: true
+            }),
+            inspireDe: BibliothequeUI.formaterInspireDe(echelle),
+            description: echelle.description || '',
+            dejaPresent: dejaPresent,
+            classeItem: 'echelle-disponible-item',
+            styleExtra: styleGabarit,
+            boutonPrincipal: { label: 'Ajouter à ma sélection', action: 'ajouterEchelleIndividuelle', param: echelle.id, classe: 'btn-confirmer', title: 'Ajouter cette échelle à ta sélection' },
+            actionsMenu: actionsMenu
+        };
     });
 
     // Import trimestre
     const trimestresDisponibles = typeof listerTrimestresAvecEchelles === 'function' ? listerTrimestresAvecEchelles() : [];
     const sectionImportTrimestre = trimestresDisponibles.length > 0 ? { trimestres: trimestresDisponibles } : null;
 
-    return { cartesSection1, cartesSection2, doublonsDetectes, disciplines, sectionImportTrimestre };
+    return { cartesSection1, cartesSection2, doublonsDetectes, sectionImportTrimestre, repsEchelles };
 }
 
 async function afficherBibliothequeEchelles() {
+    // #327 — enregistre la biblio « echelles » auprès du helper générique de
+    // répertoires (idempotent). Les items de Section 2 sont des cartes-config
+    // déjà libellées : labelItem lit leur .nom tel quel.
+    BibliothequeUI.repertoires.enregistrer('echelles', {
+        rafraichir: afficherBibliothequeEchelles,
+        ajouterItem: (id) => ajouterEchelleIndividuelle(id),
+        supprimerItem: (id) => supprimerEchelleDeBibliothequePartagee(id),
+        labelItem: (c) => c.nom,
+        labelPluriel: 'échelles'
+    });
+
     const data = await preparerDonneesBibliothequeEchelles();
 
     // Section 1
@@ -2462,41 +2479,37 @@ async function afficherBibliothequeEchelles() {
             </div>`;
     }
 
-    // Filtres Section 2
-    const filtresHTML = `
-        <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 15px;">
-            <div style="flex: 1; min-width: 200px;">
-                <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">Filtrer par discipline :</label>
-                <select id="filtreDisciplineEchelles" class="controle-form" data-on-change="filtrerEchellesBibliotheque" style="max-width: 300px;">
-                    <option value="">Toutes les disciplines</option>
-                    ${data.disciplines.map(d => `<option value="${d}">${d}</option>`).join('')}
-                </select>
-            </div>
-            <div style="flex: 1; min-width: 200px;">
-                <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">Filtrer par pratique :</label>
-                <select id="filtrePratiqueEchelles" class="controle-form" data-on-change="filtrerEchellesBibliotheque" style="max-width: 300px;">
-                    <option value="">Toutes les pratiques</option>
-                    <option value="SOM">Sommative</option>
-                    <option value="STD">PAN-Standards</option>
-                    <option value="SPE">PAN-Spécifications</option>
-                    <option value="DEN">PAN-Dénotation</option>
-                    <option value="all">Multi-pratiques</option>
-                </select>
-            </div>
-        </div>
-        ${BibliothequeUI.renderToggleMasquerDejaPresent('afficherBibliothequeEchelles')}`;
+    // Filtres Section 2 : #327 — filtres discipline ET pratique retirés (incohérents
+    // avec l'organisation par dossiers). La zone « Mes dossiers » (repliable) tient
+    // lieu de tête de section ; le toggle « masquer déjà présents » (#293) est conservé.
+    const filtresHTML = BibliothequeUI.repertoires.genererZone('echelles') +
+        BibliothequeUI.renderToggleMasquerDejaPresent('afficherBibliothequeEchelles');
 
-    // Section 2 — filtrage #293 (Masquer les items déjà dans la sidebar)
+    // Section 2 — #293 (masquer déjà présents) puis #327 (groupage par dossier).
     const cartesAffichables = BibliothequeUI.filtrerParDejaPresent(data.cartesSection2);
+    const enteteGroupe = (titre) => `<h4 style="margin:18px 0 8px; padding-bottom:4px; border-bottom:1px solid var(--bordure, #ddd); color:var(--texte-secondaire, #555); font-size:0.95rem;">${echapperHtml(titre)}</h4>`;
+
     let contenuSection2 = '';
-    let groupeCourant = null;
-    cartesAffichables.forEach(carte => {
-        if (carte.groupe && carte.groupe !== groupeCourant) {
-            groupeCourant = carte.groupe;
-            contenuSection2 += `<h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--gris-moyen);">${groupeCourant}</h4>`;
-        }
-        contenuSection2 += BibliothequeUI.renderCarteDisponible(carte);
-    });
+    if (cartesAffichables.length === 0) {
+        contenuSection2 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune échelle disponible à ajouter</p>';
+    } else if (data.repsEchelles && data.repsEchelles.length === 0) {
+        // Aucun dossier → liste à plat (comportement d'origine)
+        cartesAffichables.forEach(carte => { contenuSection2 += BibliothequeUI.renderCarteDisponible(carte); });
+    } else {
+        // Dossier → select compact ; « Non classées » → cartes (ce qui reste à ranger).
+        const groupes = window.repertoiresBibliotheque.grouper(cartesAffichables, 'echelles');
+        groupes.forEach(g => {
+            const cleGroupe = g.id || '__nonclasse__';
+            contenuSection2 += `<div class="biblio-groupe-repertoire" data-repertoire-id="${echapperHtml(cleGroupe)}">`;
+            contenuSection2 += enteteGroupe(g.titre);
+            if (g.id) {
+                contenuSection2 += BibliothequeUI.repertoires.renderLigneDossierSelect('echelles', g);
+            } else {
+                g.items.forEach(carte => { contenuSection2 += BibliothequeUI.renderCarteDisponible(carte); });
+            }
+            contenuSection2 += `</div>`;
+        });
+    }
 
     BibliothequeUI.creerModal({
         modalId: 'modalBibliothequeEchelles',
@@ -2765,68 +2778,10 @@ async function ajouterEchellesABibliotheque() {
     }
 }
 
-/**
- * ✅ AJOUT (8 décembre 2025) : Filtrer les échelles disponibles par discipline
- */
-function filtrerEchellesParDiscipline() {
-    // Rétrocompatibilité - appeler la nouvelle fonction
-    filtrerEchellesBibliotheque();
-}
-
-/**
- * Filtre les échelles par discipline ET par pratique
- * Utilise le module GabaritsUtils pour le filtrage par pratique
- */
-function filtrerEchellesBibliotheque() {
-    const selectDiscipline = document.getElementById('filtreDisciplineEchelles');
-    const selectPratique = document.getElementById('filtrePratiqueEchelles');
-
-    const disciplineSelectionnee = selectDiscipline ? selectDiscipline.value : '';
-    const pratiqueSelectionnee = selectPratique ? selectPratique.value : '';
-
-    const items = document.querySelectorAll('.echelle-disponible-item');
-    const titresDisciplines = document.querySelectorAll('#listeEchellesDisponibles h4');
-
-    // Filtrer chaque item
-    items.forEach(item => {
-        const discipline = item.dataset.discipline || '';
-        const pratiques = (item.dataset.pratiques || 'all').split(',');
-
-        // Vérifier filtre discipline
-        const matchDiscipline = !disciplineSelectionnee || discipline === disciplineSelectionnee;
-
-        // Vérifier filtre pratique (utiliser GabaritsUtils si disponible)
-        let matchPratique = true;
-        if (pratiqueSelectionnee) {
-            if (pratiqueSelectionnee === 'all') {
-                // Chercher les multi-pratiques
-                matchPratique = pratiques.includes('all');
-            } else {
-                matchPratique = pratiques.includes('all') || pratiques.includes(pratiqueSelectionnee);
-            }
-        }
-
-        toggleDisplay(item, matchDiscipline && matchPratique);
-    });
-
-    // Masquer les titres de discipline si aucun item visible
-    titresDisciplines.forEach(titre => {
-        const disciplineTitre = titre.textContent.trim();
-
-        if (!disciplineSelectionnee) {
-            // Vérifier si au moins un item de cette discipline est visible
-            let hasVisibleItem = false;
-            items.forEach(item => {
-                if (item.dataset.discipline === disciplineTitre && !item.classList.contains('u-hide')) {
-                    hasVisibleItem = true;
-                }
-            });
-            toggleDisplay(titre, hasVisibleItem);
-        } else {
-            toggleDisplay(titre, disciplineTitre === disciplineSelectionnee);
-        }
-    });
-}
+// #327 — filtrerEchellesParDiscipline + filtrerEchellesBibliotheque retirés :
+// les filtres discipline/pratique n'existent plus (incohérents avec l'organisation
+// par dossiers). Remplacés par la zone « Mes dossiers » + le groupage par dossier
+// dans afficherBibliothequeEchelles.
 
 /**
  * ✅ AJOUT (8 décembre 2025) : Fermer le modal de bibliothèque
@@ -4049,8 +4004,6 @@ window.migrerEvaluationsVersNouvelleEchelle = migrerEvaluationsVersNouvelleEchel
 window.afficherBibliothequeEchelles = afficherBibliothequeEchelles;
 window.retirerEchelleDeBibliotheque = retirerEchelleDeBibliotheque;
 window.ajouterEchellesABibliotheque = ajouterEchellesABibliotheque;
-window.filtrerEchellesParDiscipline = filtrerEchellesParDiscipline;
-window.filtrerEchellesBibliotheque = filtrerEchellesBibliotheque;
 window.fermerModalBibliothequeEchelles = fermerModalBibliothequeEchelles;
 window.ajouterEchelleIndividuelle = ajouterEchelleIndividuelle;
 window.dupliquerEchelleBibliotheque = dupliquerEchelleBibliotheque;

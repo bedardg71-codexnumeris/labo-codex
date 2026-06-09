@@ -52,22 +52,9 @@ function obtenirEchellesParDiscipline(discipline) {
     );
 }
 
-/**
- * Obtenir la liste des disciplines disponibles dans la bibliothèque
- * @returns {Array} Tableau des noms de disciplines uniques
- */
-function obtenirDisciplinesDisponiblesEchelles() {
-    const bibliotheque = db.getSync(CLE_BIBLIOTHEQUE_ECHELLES) || [];
-    const disciplines = new Set();
-
-    bibliotheque.forEach(echelle => {
-        if (echelle.discipline) {
-            disciplines.add(echelle.discipline);
-        }
-    });
-
-    return Array.from(disciplines).sort();
-}
+// #327 — obtenirDisciplinesDisponiblesEchelles retiré (code mort) : le seul
+// appelant était le filtre par discipline de la modale, supprimé au profit du
+// classement par dossiers.
 
 /**
  * Ajouter une échelle à la bibliothèque partagée
@@ -119,6 +106,12 @@ async function retirerEchelleDeLaBibliotheque(echelleId) {
     }
 
     await db.set(CLE_BIBLIOTHEQUE_ECHELLES, bibliotheque);
+
+    // #327 — hook de cohérence : l'échelle retirée sort de tout dossier de
+    // classement (le moteur range par identité, sans toucher l'échelle).
+    if (window.repertoiresBibliotheque && typeof window.repertoiresBibliotheque.retirerItem === 'function') {
+        window.repertoiresBibliotheque.retirerItem(echelleId, 'echelles');
+    }
     return true;
 }
 
@@ -259,7 +252,6 @@ function getNombreEchellesBibliotheque() {
 window.obtenirToutesLesEchellesBibliotheque = obtenirToutesLesEchellesBibliotheque;
 window.obtenirToutesLesEchellesBibliothequeSync = obtenirToutesLesEchellesBibliothequeSync;
 window.obtenirEchellesParDiscipline = obtenirEchellesParDiscipline;
-window.obtenirDisciplinesDisponiblesEchelles = obtenirDisciplinesDisponiblesEchelles;
 window.ajouterEchelleALaBibliotheque = ajouterEchelleALaBibliotheque;
 window.retirerEchelleDeLaBibliotheque = retirerEchelleDeLaBibliotheque;
 window.importerEchellesDansBibliotheque = importerEchellesDansBibliotheque;
