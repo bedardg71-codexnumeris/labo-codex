@@ -1,8 +1,23 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 9 juin 2026 — Claude Code, session HYGIÈNE + #320 L0→L3).
-     Session du 9 juin (Claude Code) — pas de release ; tri, réconciliation du tracking, puis
-     chantier #320 (répertoires de classement) lots L0→L3. 10 commits sur main, HEAD `b190014d`
-     (+ relais SESSION). 380 Vitest + 45 Playwright verts.
+     IDENTIFICATION DE CE FICHIER  (mis à jour 9 juin 2026 — Claude Code, RELEASE 1.5.0 #320 répertoires).
+     RELEASE 1.5.0 (build 0609-1023) — répertoires de classement des pratiques. Session du 9 juin :
+     tri + réconciliation du tracking, puis chantier #320 (répertoires) lots L0→L3 + 2 raffinements
+     terrain, validés par Grégoire, puis release `minor`. 380 Vitest + 44 Playwright verts.
+       • #320 L0→L3 : module `js/repertoires-bibliotheque.js` (couche par-dessus les biblios, range
+         PAR IDENTITÉ via itemIds, dossiers EXCLUSIFS, helper `grouper`) + UI dans la modale biblio
+         pratiques (`pratiques-gestion.js`) : zone « Mes dossiers », pool groupé, assignation.
+       • Raffinements terrain (9 juin, captures Grégoire) : (1) pratiques classées en SELECT compact
+         par dossier (`[select][Ajouter][⋮]`) au lieu d'une carte chacune — gain d'espace vertical ;
+         (2) filtres type/discipline/dossier RETIRÉS (incohérents avec l'organisation par dossiers,
+         code mort nettoyé, −119 lignes nettes) ; zone « Mes dossiers » REPLIABLE.
+       • Sentinelles : `repertoires-bibliotheque-L0.test.js` (modèle + helper, 25 cas Vitest) +
+         `repertoires-bibliotheque-L1-rendu.spec.js` + `-L2-rendu.spec.js` (Playwright).
+       • RESTE possible (NON fait, optionnel) : un répertoire d'exemple dans le PACK DÉMO pour
+         illustrer la fonctionnalité aux expérimentateurs (touche `demo-activation.js` — à traiter
+         à part, par identité, cf. SKILL_integrite_globaux). Extension transversale aux autres
+         biblios (grilles/échelles…) = chantiers distincts (helper `grouper` déjà réutilisable).
+     ---
+     Session du 9 juin (Claude Code) — détail des commits #320 L0→L3 (avant raffinements/release).
        • `604d0554` tri du working tree : .gitignore durci (node_modules/, *.timestamp-*.mjs,
          .fuse_hidden*, audit/reports/ 21 Mo) ; ~37 docs + 6 icônes versionnés ; suppression
          de docs/MESSAGES_ENSEIGNANTS_H2026.md confirmée ; 2 fichiers vides accidentels retirés.
