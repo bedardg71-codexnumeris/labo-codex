@@ -71,11 +71,12 @@
     // ------------------------------------------------------------------
     // Limites globales
     // ------------------------------------------------------------------
-    // tailleMaxPackageOctets : défaut issu de SKILL_Securite_donnees §9.4
-    // (règle 16, « suggestion : 50 Mo ») — à confirmer avec Grégoire avant P2
-    // (question §9 de la spec, restée ouverte au plan du 10 juin).
+    // tailleMaxPackageOctets : 10 Mo, CONFIRMÉ par Grégoire le 10 juin 2026
+    // (revue du format pré-P2). Couvre largement un package JSON v1 sans
+    // médias ; relever cette limite plus tard est gratuit (aucune migration),
+    // l'abaisser rejetterait des .lcz en circulation — d'où le départ bas.
     partageSchemas.LIMITES = {
-        tailleMaxPackageOctets: 50 * 1024 * 1024,
+        tailleMaxPackageOctets: 10 * 1024 * 1024,
         maxItemsParType: 50,
         maxReferences: 200,
         maxNiveauxChaineAttribution: 20,
