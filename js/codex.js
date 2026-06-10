@@ -554,7 +554,21 @@ async function chargerCodex(fichierZip) {
         if (_estBiblioPartagee(cleEntree) && Array.isArray(valeurEntree) && typeof window.verifierUniciteIds === 'function') {
             valeurEntree = window.verifierUniciteIds(valeurEntree, cleEntree);
         }
-        await db.set(cleEntree, valeurEntree);
+        try {
+            await db.set(cleEntree, valeurEntree);
+        } catch (errSet) {
+            // Échec dur en phase données : le noyau JSON doit être cohérent
+            // (D7 du plan #334 — pas de rollback, mais pas de demi-noyau
+            // silencieux non plus). Sur quota, dire où on en était et quoi faire.
+            if (errSet && errSet.name === 'QuotaExceededError') {
+                throw new Error(
+                    'L\'espace s\'est rempli pendant l\'import (' + nbCles + '/' +
+                    entreesData.length + ' clés écrites). Les données sont partielles : ' +
+                    'libère de l\'espace puis rouvre ton codex (le ZIP est toujours dans Fichiers).'
+                );
+            }
+            throw errSet;
+        }
         nbCles++;
         if (i % 10 === 0) {
             _majProgression(
@@ -570,8 +584,15 @@ async function chargerCodex(fichierZip) {
     _majProgression(35, 'Synchronisation du cache…');
     await db.syncToLocalStorageCache();
 
-    // 4. Restaurer les blobs
+    // 4. Restaurer les blobs — journalisé (#334 session B) : chaque échec est
+    //    compté avec sa raison, plus aucun n'est silencieux. stockerBlob est
+    //    appelé avec notifier:false (une notification par blob refusé = avalanche
+    //    de bandeaux en import massif) ; le bilan est rendu en fin d'import.
     let nbBlobs = 0;
+    var blobsEchecs = [];        // [{id, raison}] — raison : 'quota' | 'trop_volumineux' | 'erreur'
+    var blobsRefusesMagic = [];  // [id] — magic bytes invalides
+    var blobsAbsentsDuZip = [];  // [id] — attendus (statut avec blob) mais absents du ZIP
+    var nbBlobsAttendus = 0;
     // Memes raisons que cote export (genererCodex) : un codex peut contenir
     // plusieurs trimestres, on doit toutes les capturer. (H5)
     const clesFTImport = Object.keys(donnees).filter(function(c) { return c.includes('fichiersTravaux'); });
@@ -584,6 +605,10 @@ async function chargerCodex(fichierZip) {
         });
         for (var j = 0; j < fichiers.length; j++) {
             var f = fichiers[j];
+            // Un statut 'exporte' n'a légitimement pas de blob dans le ZIP
+            // (le blob avait déjà quitté l'app au moment de l'export).
+            var blobAttendu = f.blobStatut !== 'exporte';
+            if (blobAttendu) nbBlobsAttendus++;
             try {
                 var pattern = new RegExp('^' + DOSSIER_TRAVAUX + '/' + _echapperRegex(f.id) + '\\.');
                 var entries = zip.file(pattern);
@@ -597,14 +622,22 @@ async function chargerCodex(fichierZip) {
                         var magicOk = await window.travauxImport.validerMagicBytes(blobData);
                         if (!magicOk) {
                             console.warn('📂 Codex : blob refuse (magic bytes invalides) pour ' + f.id);
+                            blobsRefusesMagic.push(f.id);
                             continue;
                         }
                     }
-                    await travauxStockage.stockerBlob(f.id, blobData, f.etudiantDA, f.productionId);
+                    await travauxStockage.stockerBlob(f.id, blobData, f.etudiantDA, f.productionId, { notifier: false });
                     nbBlobs++;
+                } else if (blobAttendu) {
+                    console.warn('📂 Codex : blob attendu mais absent du ZIP pour ' + f.id);
+                    blobsAbsentsDuZip.push(f.id);
                 }
             } catch (e) {
-                console.warn('📂 Codex : blob ignoré pour ' + f.id, e.message);
+                var raison = 'erreur';
+                if (e && e.name === 'QuotaExceededError') raison = 'quota';
+                else if (e && e.code === 'BLOB_TROP_VOLUMINEUX') raison = 'trop_volumineux';
+                blobsEchecs.push({ id: f.id, raison: raison });
+                console.warn('📂 Codex : blob ignoré pour ' + f.id + ' (' + raison + ')', e.message);
             }
             if (j % 5 === 0) {
                 _majProgression(
@@ -613,6 +646,23 @@ async function chargerCodex(fichierZip) {
                     nbBlobs + '/' + fichiers.length + ' fichiers'
                 );
                 await _yield();
+            }
+        }
+
+        // Marquer les fichiers sans blob pour que la visionneuse affiche l'état
+        // manquant au lieu d'un visualiseur vide. Les entrées de `fichiers` sont
+        // des références dans donnees[cle] : réécrire les clés après marquage
+        // (le snapshot 3-way de l'étape 5 reflète alors l'état réellement stocké).
+        var idsManquants = {};
+        blobsRefusesMagic.forEach(function(id) { idsManquants[id] = true; });
+        blobsAbsentsDuZip.forEach(function(id) { idsManquants[id] = true; });
+        blobsEchecs.forEach(function(e) { idsManquants[e.id] = true; });
+        if (Object.keys(idsManquants).length > 0) {
+            fichiers.forEach(function(fic) {
+                if (idsManquants[fic.id]) fic.blobStatut = 'manquant';
+            });
+            for (var k = 0; k < clesFTImport.length; k++) {
+                await db.set(clesFTImport[k], donnees[clesFTImport[k]]);
             }
         }
     }
@@ -633,9 +683,22 @@ async function chargerCodex(fichierZip) {
     _mettreAJourIndicateur();
 
     const duree = Math.round(performance.now() - debut);
-    const stats = { nbCles: nbCles, nbBlobs: nbBlobs, dureeMs: duree };
+    const stats = {
+        nbCles: nbCles,
+        nbBlobs: nbBlobs,
+        nbBlobsAttendus: nbBlobsAttendus,
+        blobsEchecs: blobsEchecs,
+        blobsRefusesMagic: blobsRefusesMagic,
+        blobsAbsentsDuZip: blobsAbsentsDuZip,
+        incomplet: (blobsEchecs.length + blobsRefusesMagic.length + blobsAbsentsDuZip.length) > 0,
+        dureeMs: duree
+    };
 
-    _majProgression(100, 'Codex chargé !', nbCles + ' clés, ' + nbBlobs + ' fichiers');
+    _majProgression(
+        100,
+        stats.incomplet ? 'Import terminé — incomplet' : 'Codex chargé !',
+        nbCles + ' clés, ' + nbBlobs + (stats.incomplet ? '/' + nbBlobsAttendus : '') + ' fichiers'
+    );
     await new Promise(function(r) { setTimeout(r, 800); });
     _masquerProgression();
 
@@ -645,6 +708,42 @@ async function chargerCodex(fichierZip) {
         _masquerProgression();
         throw erreur;
     }
+}
+
+/**
+ * Construit le bilan d'un import incomplet (#334 session B).
+ * Fonction pure : ne lit ni le DOM ni le stockage — testable en Vitest.
+ * @param {{nbCles: number, nbBlobs: number, nbBlobsAttendus: number,
+ *          blobsEchecs: Array<{id: string, raison: string}>,
+ *          blobsRefusesMagic: string[], blobsAbsentsDuZip: string[]}} stats
+ * @returns {{titre: string, details: string}}
+ */
+function construireBilanImport(stats) {
+    var echecs = stats.blobsEchecs || [];
+    var magic = stats.blobsRefusesMagic || [];
+    var absents = stats.blobsAbsentsDuZip || [];
+    var nbQuota = echecs.filter(function(e) { return e.raison === 'quota'; }).length;
+    var nbTropGros = echecs.filter(function(e) { return e.raison === 'trop_volumineux'; }).length;
+    var nbErreurs = echecs.length - nbQuota - nbTropGros;
+    var nbManquants = echecs.length + magic.length + absents.length;
+
+    var titre = 'Import incomplet : ' + nbManquants + ' fichier' + (nbManquants > 1 ? 's' : '') +
+        ' sur ' + stats.nbBlobsAttendus + ' n\'' + (nbManquants > 1 ? 'ont' : 'a') + ' pas été restauré' +
+        (nbManquants > 1 ? 's' : '') + '.';
+
+    var causes = [];
+    if (nbQuota > 0) causes.push(nbQuota + ' refusé' + (nbQuota > 1 ? 's' : '') + ' faute d\'espace de stockage');
+    if (nbTropGros > 0) causes.push(nbTropGros + ' au-dessus de la taille maximale par fichier');
+    if (magic.length > 0) causes.push(magic.length + ' au format non reconnu');
+    if (absents.length > 0) causes.push(absents.length + ' absent' + (absents.length > 1 ? 's' : '') + ' du ZIP');
+    if (nbErreurs > 0) causes.push(nbErreurs + ' en erreur technique');
+
+    var details = 'Les données du codex, elles, sont complètes (' + stats.nbCles + ' clés). ' +
+        'Fichiers manquants : ' + causes.join(', ') + '.';
+    if (nbQuota > 0 || nbErreurs > 0) {
+        details += ' Libère de l\'espace puis rouvre le même ZIP : l\'import réécrit tout et complétera les fichiers manquants.';
+    }
+    return { titre: titre, details: details };
 }
 
 /* ===============================
@@ -2146,10 +2245,17 @@ async function actionOuvrir() {
 
     try {
         var resultat = await chargerCodex(fichier);
-        notifications.succes(
-            'Codex ouvert : ' + resultat.manifeste.nom,
-            resultat.stats.nbCles + ' clés, ' + resultat.stats.nbBlobs + ' fichiers'
-        );
+        if (resultat.stats.incomplet) {
+            // Bilan honnête (#334 session B) : ne pas déclarer « ouvert » un
+            // codex dont des fichiers travaux manquent.
+            var bilan = construireBilanImport(resultat.stats);
+            notifications.warning(bilan.titre, bilan.details);
+        } else {
+            notifications.succes(
+                'Codex ouvert : ' + resultat.manifeste.nom,
+                resultat.stats.nbCles + ' clés, ' + resultat.stats.nbBlobs + ' fichiers'
+            );
+        }
         // Attendre la fin des écritures IDB pendantes AVANT de proposer le
         // rechargement : avec un localStorage saturé, les clés passées par
         // setSync (dont le marqueur de codex actif) ne vivent qu'en
@@ -2948,6 +3054,7 @@ window.Codex = {
     valider: validerCodex,
     lireManifeste: lireManifeste,
     lireExterne: lireCodexExterne,
+    construireBilanImport: construireBilanImport,
 
     // Sauvegarde multi-plateforme
     sauvegarder: sauvegarderVersDestination,

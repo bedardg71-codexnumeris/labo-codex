@@ -148,3 +148,62 @@ describe('codex.js — sanity load', () => {
 // describe('codex.js — FSAPI (#239)', () => {
 //     it.todo('_peutPartagerFichier détecte correctement le support navigator.share');
 // });
+
+describe('codex.js — bilan d\'import incomplet (#334 session B)', () => {
+
+    it('expose construireBilanImport (fonction pure)', () => {
+        expect(typeof win.Codex.construireBilanImport).toBe('function');
+    });
+
+    it('compose titre et causes pour un mélange quota + trop volumineux', () => {
+        const bilan = win.Codex.construireBilanImport({
+            nbCles: 120,
+            nbBlobs: 7,
+            nbBlobsAttendus: 12,
+            blobsEchecs: [
+                { id: 'FT_a', raison: 'quota' },
+                { id: 'FT_b', raison: 'quota' },
+                { id: 'FT_c', raison: 'trop_volumineux' }
+            ],
+            blobsRefusesMagic: ['FT_d'],
+            blobsAbsentsDuZip: ['FT_e']
+        });
+        expect(bilan.titre).toContain('5 fichiers sur 12');
+        expect(bilan.details).toContain('120 clés');
+        expect(bilan.details).toContain('2 refusés faute d\'espace');
+        expect(bilan.details).toContain('1 au-dessus de la taille maximale');
+        expect(bilan.details).toContain('1 au format non reconnu');
+        expect(bilan.details).toContain('1 absent du ZIP');
+        // Du quota est en cause → le conseil de ré-import doit apparaître.
+        expect(bilan.details).toContain('rouvre le même ZIP');
+    });
+
+    it('singulier correct et pas de conseil de ré-import si seul un fichier dépasse la limite', () => {
+        const bilan = win.Codex.construireBilanImport({
+            nbCles: 50,
+            nbBlobs: 9,
+            nbBlobsAttendus: 10,
+            blobsEchecs: [{ id: 'FT_x', raison: 'trop_volumineux' }],
+            blobsRefusesMagic: [],
+            blobsAbsentsDuZip: []
+        });
+        expect(bilan.titre).toContain('1 fichier sur 10');
+        expect(bilan.titre).toContain('n\'a pas été restauré');
+        // Ré-importer le même ZIP ne corrige pas un dépassement de limite :
+        // promettre le contraire serait un message menteur.
+        expect(bilan.details).not.toContain('rouvre le même ZIP');
+    });
+
+    it('erreur technique seule → conseil de ré-import présent', () => {
+        const bilan = win.Codex.construireBilanImport({
+            nbCles: 10,
+            nbBlobs: 1,
+            nbBlobsAttendus: 2,
+            blobsEchecs: [{ id: 'FT_y', raison: 'erreur' }],
+            blobsRefusesMagic: [],
+            blobsAbsentsDuZip: []
+        });
+        expect(bilan.details).toContain('1 en erreur technique');
+        expect(bilan.details).toContain('rouvre le même ZIP');
+    });
+});

@@ -185,20 +185,28 @@
      * @param {Blob} blob - Le contenu du fichier
      * @param {string} etudiantDA - DA de l'etudiant
      * @param {string} productionId - ID de la production
+     * @param {{notifier?: boolean}} [options] - notifier:false = le caller
+     *        journalise lui-meme les echecs (import massif : une notification
+     *        par blob refuse devient une avalanche de bandeaux, cf. #334 B).
      * @returns {Promise<void>}
      */
-    async function stockerBlob(id, blob, etudiantDA, productionId) {
+    async function stockerBlob(id, blob, etudiantDA, productionId, options) {
+        const notifier = !options || options.notifier !== false;
         // Limite de sécurité : 20 MB par blob (IndexedDB ~50 MB par origin)
         const LIMITE_BLOB_MB = 20;
         if (blob.size > LIMITE_BLOB_MB * 1024 * 1024) {
             const tailleMB = (blob.size / 1024 / 1024).toFixed(1);
             const msg = `Blob trop volumineux: ${tailleMB} MB (limite: ${LIMITE_BLOB_MB} MB)`;
             console.error(`[Travaux-Stockage] ${msg}`);
-            notifications.erreur('Fichier trop volumineux', `Le fichier dépasse la limite de ${LIMITE_BLOB_MB} MB.`);
+            if (notifier) {
+                notifications.erreur('Fichier trop volumineux', `Le fichier dépasse la limite de ${LIMITE_BLOB_MB} MB.`);
+            }
             // Throw plutot que return silencieux : sinon le caller croit que le
             // blob est stocke alors qu'il ne l'est pas, et la metadata associee
             // (entree dans fichiersTravaux) devient orpheline.
-            throw new Error(msg);
+            const erreurTaille = new Error(msg);
+            erreurTaille.code = 'BLOB_TROP_VOLUMINEUX';
+            throw erreurTaille;
         }
 
         // FSAPI: fichier sur disque
@@ -217,7 +225,7 @@
                 dateStored: new Date().toISOString()
             });
         } catch (err) {
-            if (err?.name === 'QuotaExceededError') {
+            if (notifier && err?.name === 'QuotaExceededError') {
                 notifications.erreur('Stockage plein', 'L\'espace de stockage est insuffisant. Supprimez des fichiers.');
             }
             console.error(`[Travaux-Stockage] Erreur stockage blob: ${id}`, err);
