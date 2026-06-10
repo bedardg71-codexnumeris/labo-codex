@@ -41,7 +41,7 @@ contradiction, le plus récent prime :
 
 | Réf | Décision | Recommandation | Bloque |
 |---|---|---|---|
-| **D-V1** | Extension du package : `.lcz` vs `.codex-share.zip` | **TRANCHÉE (Grégoire, 10 juin) : `.lcz`** — conteneur ZIP à extension dédiée, patron `.docx`/`.epub` ; évite la décompression au double-clic sur macOS/iPadOS qui casserait le flux d'import ; la validation lit les magic bytes, pas le nom. Coût : extension inconnue, à expliquer au guide (Phase 7). | Rien (tranchée) |
+| **D-V1** | Extension du package : `.lcz` vs `.codex-share.zip` | **TRANCHÉE (Grégoire, 10 juin) : `.lcz` = « Labo Codex Zip »** (expansion officielle actée le 10 juin, à reprendre au guide P7) — conteneur ZIP à extension dédiée, patron `.docx`/`.epub` ; évite la décompression au double-clic sur macOS/iPadOS qui casserait le flux d'import ; la validation lit les magic bytes, pas le nom. Coût : extension inconnue, à expliquer au guide (Phase 7) — confirmé terrain 10 juin (dialogue Finder « aucune application configurée », comportement attendu). | Rien (tranchée) |
 | **D-V2** | Nom d'affichage UI : « Voûte », « Partage », ou les deux | À trancher avec les textes de la Phase 2 (cohérence vocabulaire : la Voûte est le concept, le partage par fichier en est la Phase 1) | Phase 2 |
 | **D-V3** | `MODELE-CONFIANCE.md` (action E8 de l'audit sécurité) : rédigé par Cowork ou Claude Code | Cowork (document de gouvernance, pas de code) | Jalon pilote |
 
@@ -235,9 +235,12 @@ restreint fin août » (calendrier) tombe après la Phase 3.
       dont aller-retour .lcz avec le VRAI JSZip de libs/) +
       `window._testPartageExportP2()` (terrain : chaîne complète package →
       .lcz → relecture → validation + signature + TOFU, sans téléchargement).
-- [ ] Validation terrain Grégoire (Safari Mac) : `await _testPartageExportP2()`
-      → 8/8, puis export réel d'une grille via le menu ⋮ (modale + .lcz
-      téléchargé), puis release minor.
+- [x] Validation terrain Grégoire (Safari Mac, 10 juin 2026) :
+      `_testPartageExportP2()` → **8/8 verts** sur grille réelle (.lcz 13,7 Ko,
+      signature et TOFU vérifiés après aller-retour) ; export réel via menu ⋮
+      validé (bug #139 modale derrière la bibliothèque corrigé en cours de
+      route, cf. SUIVI-BUGS) ; `.lcz` téléchargé, nommage #262 conforme,
+      comportement Finder conforme à D-V1. **Release 1.10.0 exécutée.**
 
 #### Lot P3 — Import
 - [ ] P3 : section dans Réglages › Données, drag-and-drop + file picker, pipeline
