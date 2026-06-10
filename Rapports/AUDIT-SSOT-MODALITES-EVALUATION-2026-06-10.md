@@ -48,7 +48,7 @@ procédural continue de lire comme s'il était la vérité.
 | Fichier:ligne | Fonction | Constat |
 |---|---|---|
 | `horaire.js:298` | `definirDureePeriode` | Stocke `dureePeriodeMinutes` (donnée d'HORAIRE) dans la config d'évaluation |
-| `preferences-v2.js:225` | `chargerPreferencesDepuisStorage` | Écrit `afficherSommatif`/`afficherAlternatif` — résidu du mode comparatif SOM/PAN dont le retrait est déjà acté (30 mai) ; un CHARGEUR de préférences qui écrit dans une autre clé |
+| `preferences-v2.js:225` | `sauvegarderPreferencesV2` *(erratum : attribué à tort à `chargerPreferencesDepuisStorage` en première version)* | Écrit `afficherSommatif`/`afficherAlternatif` à chaque sauvegarde des préférences — résidu du mode comparatif SOM/PAN ; vérification faite : `determinerModeAffichageTableauBord` ne les honore plus depuis Session C → champs en écriture seule (morts) |
 
 ### C. Migrations one-shot — 3 sites, 3 fichiers (à borner, pas à migrer)
 

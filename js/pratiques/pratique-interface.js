@@ -277,8 +277,6 @@
  *
  * {
  *   pratique: "pan-maitrise" | "sommative" | "pan-specifications" | "denotation",
- *   afficherSommatif: boolean,    // Afficher calculs sommatifs
- *   afficherAlternatif: boolean,  // Afficher calculs alternatifs
  *
  *   // Configuration PAN-Standards
  *   configPAN: {

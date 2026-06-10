@@ -146,6 +146,7 @@ function peuplerNamespace(pack) {
         'grillesTemplates',
         'echellesTemplates',
         'modalitesEvaluation',
+        'dureePeriode',
         'pratiquesConfigurables'
     ];
 

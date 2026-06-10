@@ -56,7 +56,7 @@ ci-dessous.
 | `echellesTemplates` | G | `echelles.js` | evaluation-*, echelles-bibliotheque | **3 contourneurs : demo-activation, donnees-v2, import-export** (violation #4) | < 200 Ko |
 | `cartouches_[grilleId]` | G | `cartouches.js` | evaluation-*, cartouches-bibliotheque | import-export, primo-modal (au cas par cas) | < 100 Ko |
 | `pratiquesConfigurables` | G | `pratiques.js` | evaluation-*, wizard-pratique-v2, pratique-* | **4 contourneurs : donnees-v2, import-export, pratique-manager, wizard-pratique-v2** (violation #5) | < 200 Ko |
-| `modalitesEvaluation` | NS | `evaluation.js` (cible — actuellement aucun owner unique) | horaire, evaluation-*, pratique-notation-v2, pratiques (41 lecteurs) | **15 écrivains, ~48 call-sites** — violation #1 CRITIQUE, **Tier 6.5 reporté Sprint C (été 2026)** | < 50 Ko |
+| `modalitesEvaluation` | NS | domaine pratiques (cible à trancher au Lot 1 : `pratique-manager.js` ou module dédié — l'ancienne cible `evaluation.js` n'écrit plus la clé) | evaluation-*, pratique-notation-v2, pratiques, profil-etudiant-*, tableau-bord (39 fichiers lecteurs) | **12 écrivains, 42 call-sites** (14 avant Lot 0) — violation #1 CRITIQUE, chantier en cours : audit 10 juin (`Rapports/AUDIT-SSOT-MODALITES-EVALUATION-2026-06-10.md`), **Lot 0 livré** (intrus extraits : horaire, preferences-v2), sentinelle `tests/unit/sentinelle-ssot-modalites-ecrivains-L0.test.js` | < 50 Ko |
 
 ---
 
@@ -79,6 +79,7 @@ ci-dessous.
 | `cadreCalendrier` | NS | `trimestre.js` | horaire, productions, snapshots (multi-lecteurs) | `trimestre-v2-init.js` co-écrit pendant l'initialisation (cas particulier init, violation mineure #6) |
 | `horaireHebdo` | NS | `trimestre-v2-orchestre.js` (cible — était `horaire.js` mais celui-ci est lecteur seul) | calendrier-vue, saisie-presences, organisateur (5 lecteurs) | **3 contourneurs : entites/groupe-cours, trimestre.js (legacy), trimestre-v2-orchestre** (violation mineure #7 — owner cible à confirmer Sprint C) |
 | `seancesHoraire` | NS | `horaire.js` (cible) | horaire, trimestre-v2 | **3 écrivains : entites/groupe-cours, horaire, trimestre-v2-orchestre** (violation mineure #8) |
+| `dureePeriode` | NS | `horaire.js` (`obtenirDureePeriode`/`definirDureePeriode`, seul écrivain) | indices, saisie-presences, etudiants, profil-etudiant-*, trimestre-v2 (tous via `obtenirDureePeriode()`) | Créée au Lot 0 SSOT (10 juin 2026) — extraite de `modalitesEvaluation.dureePeriodeMinutes` (migration paresseuse en lecture ; champ legacy purgé au Lot 3). Seed démo : clé `dureePeriode` du pack |
 | `evenementsPrevus`, `evenementsImprevus` | NS | `trimestre.js` | calendrier-vue, productions | `trimestre-v2-init.js` co-écrit pendant init (violation mineure héritée) |
 | `planification_mindmap` | NS | `planification-donnees.js` | planification-carte, planification | Pattern exemplaire (1 écrivain) |
 | `snapshots` | NS | `snapshots.js` (via variable composite `cleSnap`) | trimestres, trimestre | Clé composite : `h2026_snapshots_[coursId]` |

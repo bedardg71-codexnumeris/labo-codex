@@ -9,8 +9,7 @@
  * - Seuils d'interprétation (fragile, acceptable, bon)
  *
  * Source de vérité : API preferences.js (obtenirPreference / definirPreference).
- * Le mode comparatif SOM/PAN est une exception : il touche modalitesEvaluation
- * (afficherSommatif / afficherAlternatif) car c'est un paramètre de pratique.
+ * Ce module n'écrit JAMAIS dans modalitesEvaluation (SSOT Lot 0).
  */
 
 (function() {
@@ -209,20 +208,11 @@
 
     /**
      * Sauvegarde les préférences via l'API.
-     * Le mode comparatif reste traité sur modalitesEvaluation (paramètre de pratique).
      */
     function sauvegarderPreferencesV2() {
-        // Session C (#303) : mode comparatif retiré. L'affichage suit la pratique
-        // active (jamais les deux à la fois). Mêmes champs de stockage qu'avant.
-        const modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
-        if (modalites.pratique === 'sommative') {
-            modalites.afficherSommatif = true;
-            modalites.afficherAlternatif = false;
-        } else {
-            modalites.afficherSommatif = false;
-            modalites.afficherAlternatif = true;
-        }
-        db.setSync(cle('modalitesEvaluation'), modalites);
+        // SSOT Lot 0 : l'écriture des toggles afficherSommatif/afficherAlternatif
+        // est retirée — plus aucun lecteur ne les honorait depuis Session C (#303),
+        // l'affichage dérive de la pratique active (determinerModeAffichageTableauBord).
 
         // Préférences utilisateur : via l'API centralisée
         definirPreference('activerRai', document.getElementById('v2-pref-rai')?.checked !== false);

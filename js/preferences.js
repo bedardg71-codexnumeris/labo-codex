@@ -212,10 +212,11 @@
      */
     const MIGRATION_MAP = [
         // Depuis modalitesEvaluation — UNIQUEMENT les 5 champs qui sont des préférences
-        // utilisateur. Le reste (pratique, specifications, parObjectifs, categories,
-        // dureePeriodeMinutes, afficherSommatif, afficherAlternatif) reste dans
-        // modalitesEvaluation car ce sont des paramètres de la pratique active,
-        // pas des préférences utilisateur.
+        // utilisateur. Le reste (pratique, specifications, parObjectifs, categories)
+        // reste dans modalitesEvaluation car ce sont des paramètres de la pratique
+        // active, pas des préférences utilisateur. NB SSOT Lot 0 (10 juin 2026) :
+        // dureePeriodeMinutes a déménagé dans la clé `dureePeriode` (domaine horaire)
+        // et les toggles afficherSommatif/afficherAlternatif ne sont plus écrits.
         { source: 'modalitesEvaluation', champ: 'afficherDescriptionsSOLO', cible: 'afficherDescriptionsSOLO' },
         { source: 'modalitesEvaluation', champ: 'activerRai',               cible: 'activerRai' },
         { source: 'modalitesEvaluation', champ: 'grilleReferenceDepistage', cible: 'grilleReferenceDepistage' },

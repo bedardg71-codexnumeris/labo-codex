@@ -14312,16 +14312,10 @@ const PACK_DEMARRAGE = {
       "_migrationDate": "2026-01-22T12:18:43.928Z"
     },
     "pratique": "standards",
-    "affichageTableauBord": {
-      "afficherSommatif": false,
-      "afficherAlternatif": true
-    },
     "pratiqueId": "demo-std-litt",
-    "approcheEvaluation": "par-artefacts",
-    "afficherSommatif": false,
-    "afficherAlternatif": true,
-    "dureePeriodeMinutes": 50
+    "approcheEvaluation": "par-artefacts"
   },
+  "dureePeriode": 50,
   "pratiquesConfigurables": [
     {
       "id": "demo-std-litt",
