@@ -95,9 +95,32 @@
          « Voûte » réservé aux docs d'architecture. Dernière occurrence UI
          corrigée (intro Réglages › Données : « Partage (ressources
          signées entre collègues) »).
+     SUITE (16h) — BUG TERRAIN iPad #140 CORRIGÉ + RELEASE 1.11.1 (build
+     0610-1616) : import codex sur iPad restauré (app.codexnumeris.org,
+     1.11.0 vérifié) → 1er essai « Codex chargé » puis « Aucun codex
+     actif » au rechargement ; 2e essai OK. QUOTA INNOCENTÉ PAR MESURE
+     (estimate() : 36 Go accordés / 419 Mo utilisés) — la prémisse
+     « disque plein » de #334 ne couvrait pas ce cas. CAUSE : reload sans
+     attendre les écritures IDB pendantes (localStorage saturé → clés
+     setSync en memoryCache + IDB async, coupées par le reload). FIX :
+     await db.flush() avant les 6 confirm+reload (codex.js + 5 sites
+     import-export.js) + sentinelle statique anti-refactoring. 513 Vitest
+     + 53 Playwright = 566 VERTS. SUIVI-BUGS #140 consigné.
+     CONSTATS #334 À REPRENDRE (volet non corrigé) :
+       • Travaux > 20 Mo REFUSÉS un à un (bandeau « Fichier trop
+         volumineux » en rafale), import déclaré réussi quand même →
+         session B du plan #334 (bilan honnête + anti-spam). Vérifier
+         avec Grégoire s'il MANQUE des travaux sur l'iPad (comparer le
+         compte de fichiers iPad vs Mac).
+       • LIMITE 20 Mo/blob (travaux-stockage.js) fondée sur un commentaire
+         périmé (« IDB ≈ 50 Mo/origine » vs 36 Go mesurés) = seuil métier
+         arbitraire → à trancher avec Grégoire (ne PAS choisir seul, cf.
+         feedback-zero-fallback-arbitraire).
+       • Bruit CSP Cloudflare sur prod = bug #114 déjà ouvert (désactiver
+         l'injection Browser Insights au dashboard).
      REPRISE — AVANT LE JALON PILOTE :
-       1. Re-passe iPad du flux import/duplication (iPad en cours de
-          restauration le 10 juin — espace saturé réglé, cf. #334).
+       1. Re-passe iPad du flux import .lcz/duplication (le codex, lui,
+          est maintenant chargé sur l'iPad — Netlify déploie 1.11.1).
        2. ETAT-PROJET.md + en-tête BACKLOG.md à rafraîchir (écrivain
           unique, quand la session #334 a posé ses commits).
        3. P5-P8 : ne PAS détailler avant le bilan du pilote (sauf décision

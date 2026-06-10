@@ -22,7 +22,8 @@
                 'Les items importés restent à part, en lecture seule, dans la section « Partagés par des collègues » de chaque bibliothèque — rien n’est mélangé à tes documents.',
                 '« Dupliquer vers mes documents » crée ta copie modifiable : une grille vient avec ses cartouches, une production avec sa grille. L’attribution d’origine est conservée.',
                 '« Retirer » (Réglages › Données) supprime un package importé sans toucher tes propres documents.',
-                'Pour éviter la confusion, les anciens boutons d’export/import par fichier sont renommés « … (JSON) ».'
+                'Pour éviter la confusion, les anciens boutons d’export/import par fichier sont renommés « … (JSON) ».',
+                'Correction (iPad surtout) : après « Codex chargé », le rechargement pouvait repartir « sans codex actif » — l’app attend maintenant la fin des écritures avant de proposer le rechargement.'
             ]
         },
         {
