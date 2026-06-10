@@ -1,4 +1,67 @@
 <!-- =====================================================================
+     SESSION 10 juin 2026 SOIR (Claude Code) — #334 SESSION B LIVRÉE :
+     IMPORT CODEX JOURNALISÉ. RELEASE 1.12.0 (build 0610-1916), terrain Mac
+     validé, POUSSÉE sur origin (Netlify déploie). HEAD main `2f25dfc9`.
+     533 Vitest + 53 Playwright = 586 VERTS.
+       • AUDIT D'ENTRÉE : session A du plan #334 (pré-vol stockage) NON
+         livrée — B est shippable seule (plan §B) et c'est cohérent avec le
+         terrain : quota innocenté sur l'iPad réel (36 Go accordés). A reste
+         à faire ; le cas qu'elle traite (disque plein) n'était pas celui-ci.
+       • B.2 ANTI-SPAM (travaux-stockage.js) : stockerBlob accepte
+         options {notifier:false} — chargerCodex journalise lui-même, plus
+         d'avalanche de bandeaux « Fichier trop volumineux » en import
+         massif. L'erreur de taille porte erreurTaille.code =
+         'BLOB_TROP_VOLUMINEUX' (classement par le caller). Les 7 autres
+         callers n'envoient pas d'options → comportement INCHANGÉ.
+       • B.1 JOURNAL (codex.js, chargerCodex) : boucle blobs — compteurs
+         par raison (quota / trop_volumineux / magic bytes / absent du ZIP /
+         erreur) ; un statut 'exporte' légitimement absent du ZIP n'est PAS
+         compté (l'export n'inclut que les blobs que recupererBlob trouve).
+         Boucle données — quota → throw actionnable « L'espace s'est rempli
+         pendant l'import (i/n clés écrites)… » au lieu d'un état partiel
+         muet (D7 : échec dur en phase données, tolérance journalisée en
+         phase blobs). Fichiers sans blob marqués blobStatut 'manquant' +
+         clés fichiersTravaux RÉÉCRITES (le snapshot 3-way de l'étape 5
+         reflète l'état réellement stocké). Fin : « Import terminé —
+         incomplet » + stats.incomplet ; actionOuvrir route vers
+         notifications.warning avec bilan.
+       • construireBilanImport(stats) : fonction PURE exposée sur
+         window.Codex. HONNÊTETÉ DU MESSAGE : le conseil « rouvre le même
+         ZIP » n'apparaît que si la cause est corrigeable ainsi (quota,
+         erreur technique) — pas pour un dépassement de limite. Le chiffre
+         « 20 Mo » N'EST PAS codé en dur dans le bilan (seuil métier à
+         trancher avec Grégoire, cf. feedback-zero-fallback-arbitraire).
+       • UI : badge rouge MNQ dans les 2 rendus de miniatures + message
+         explicite dans la visionneuse (travaux-ui.js, 3 sites) ;
+         .travaux-badge-manquant dans styles.css (var --rouge-danger).
+         Alléger/Re-importer naturellement désactivés sur 'manquant'.
+       • TESTS (+13) : 4 fonctionnels sur construireBilanImport dans
+         codex.test.js (loader custom existant) + 9 sentinelles statiques
+         sentinelle-import-journalise-334B.test.js (notifier:false câblé,
+         compteurs, message quota, marquage manquant, badge ×3 — cf.
+         feedback-fix-perdu-refactoring-extraction). Piège rencontré : la
+         sentinelle doit chercher les apostrophes ÉCHAPPÉES (L\'espace)
+         telles qu'écrites dans la source.
+       • COMMITS : cfca07b7 (code+tests, sans release, sur go Grégoire) puis
+         2f25dfc9 (release 1.12.0 après terrain Mac validé). Poussés
+         ensemble 0c173dd3..2f25dfc9. Rappel donné : hard refresh
+         Cmd+Option+R sur la session Safari file:// ouverte pendant le bump.
+     REPRISE — DOSSIER #334 :
+       1. Re-passe iPad sur 1.12.0 (une fois Netlify déployé) + COMPARER le
+          compte de fichiers iPad vs Mac — c'est elle qui dit si des travaux
+          manquent réellement (constat du 10 juin : refus 20 Mo en rafale).
+       2. Seuil 20 Mo/blob (travaux-stockage.js) : fondé sur un commentaire
+          périmé (« IDB ≈ 50 Mo » vs 36 Go mesurés) — à trancher AVEC
+          Grégoire, jamais seul. Le bilan le rend maintenant VISIBLE.
+       3. Session A (pré-vol, plan §A) toujours à livrer ; sessions C
+          (snapshot 3-way haché) et D (memoryCache + doc) ensuite. La
+          maladie de fond localStorage saturé reste à prioriser (plan
+          Désaturation + #334 D).
+       4. En-têtes BACKLOG.md (dit 1.11.0) et ETAT-PROJET.md (dit 1.6.2)
+          toujours périmés — rafraîchis à la prochaine occasion d'écrivain
+          unique. Changelog : entrée consolidée prévue en session D (plan
+          §D.2), pas faite exprès ici.
+     =====================================================================
      SESSION 10 juin 2026 AM-3 (Claude Code) — #329 VOÛTE : LOT P3 (IMPORT)
      CODE COMPLET, terrain en attente. HEAD main `d09100e5`. 499 Vitest +
      51 Playwright = 550 VERTS. AUCUNE release (minor 1.11.0 APRÈS terrain).
