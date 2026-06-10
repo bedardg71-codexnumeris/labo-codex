@@ -12,6 +12,19 @@
 
     var CHANGELOG = [
         {
+            version: '1.6',
+            couleur: 'vert',
+            titre: 'Des dossiers dans toutes tes bibliothèques',
+            items: [
+                'Les « Mes dossiers » arrivent aussi dans les bibliothèques de grilles, d’échelles et de productions : crée tes propres dossiers pour ranger ce que tu veux, comme pour les pratiques.',
+                'Chaque dossier regroupe ses éléments dans un menu compact ; choisis-en un et ajoute-le à ta barre latérale. Ce qui n’est pas rangé reste sous « Non classées ».',
+                'Classe, déplace d’un dossier à l’autre ou sors un élément en un geste — il est toujours rangé à un seul endroit.',
+                'Les anciens filtres par discipline (et par pratique pour les échelles) laissent la place à tes dossiers, plus souples.',
+                'Les cartouches restent organisées par grille : c’est leur classement naturel, on n’y touche pas.',
+                'Comme pour les pratiques, le classement n’organise que l’affichage — il ne modifie jamais tes contenus.'
+            ]
+        },
+        {
             version: '1.5',
             couleur: 'vert',
             titre: 'Ranger tes pratiques dans des dossiers',
