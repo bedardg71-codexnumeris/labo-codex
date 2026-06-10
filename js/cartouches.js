@@ -3379,8 +3379,8 @@ async function afficherBibliothequeCartouches() {
 
     const boutonsApresSection1 = `
         <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
-            <button data-action="exporterCartouches" class="btn btn-secondaire btn-mini">Exporter toutes mes cartouches</button>
-            <button data-action="ouvrirFilePickerImportCartouches" class="btn btn-secondaire btn-mini">Importer des cartouches</button>
+            <button data-action="exporterCartouches" class="btn btn-secondaire btn-mini">Exporter toutes mes cartouches (JSON)</button>
+            <button data-action="ouvrirFilePickerImportCartouches" class="btn btn-secondaire btn-mini">Importer des cartouches (JSON)</button>
             <button data-action="partageImport.ouvrirSelecteurFichier" class="btn btn-secondaire btn-mini">Importer un partage (.lcz)</button>
             <input type="file" id="fichier-import-cartouches-modal" accept=".json" style="display: none;" data-on-change="importerCartouches">
         </div>`;

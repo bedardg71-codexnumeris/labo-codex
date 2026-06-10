@@ -387,10 +387,10 @@ async function afficherBibliothequePratiques() {
     const boutonsApresSection1 = `
         <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
             <button data-action="exporterPratiquesUtilisateur" class="btn btn-secondaire btn-mini">
-                Exporter toutes mes pratiques
+                Exporter toutes mes pratiques (JSON)
             </button>
             <button data-action="ouvrirFilePickerImportPratiques" class="btn btn-secondaire btn-mini">
-                Importer des pratiques
+                Importer des pratiques (JSON)
             </button>
             <button data-action="partageImport.ouvrirSelecteurFichier" class="btn btn-secondaire btn-mini">
                 Importer un partage (.lcz)

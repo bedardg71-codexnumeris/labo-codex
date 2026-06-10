@@ -2281,8 +2281,8 @@ async function afficherBibliothequeGrilles() {
     const boutonsApresSection1 = `
         <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
             <button data-action="ajouterMesGrillesALaBibliotheque" class="btn btn-principal btn-mini">Ajouter mes grilles à la bibliothèque</button>
-            <button data-action="exporterGrilles" class="btn btn-secondaire btn-mini">Exporter toutes mes grilles</button>
-            <button data-action="ouvrirFilePickerImportGrilles" class="btn btn-secondaire btn-mini">Importer des grilles</button>
+            <button data-action="exporterGrilles" class="btn btn-secondaire btn-mini">Exporter toutes mes grilles (JSON)</button>
+            <button data-action="ouvrirFilePickerImportGrilles" class="btn btn-secondaire btn-mini">Importer des grilles (JSON)</button>
             <button data-action="partageImport.ouvrirSelecteurFichier" class="btn btn-secondaire btn-mini">Importer un partage (.lcz)</button>
             <input type="file" id="fichier-import-grilles-modal" accept=".json" style="display: none;" data-on-change="importerGrilles">
         </div>`;
