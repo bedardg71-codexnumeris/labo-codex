@@ -1,7 +1,7 @@
 # Suivi des bugs testeurs
 
 > **Objectif** : Tracker les bugs rapportés par les testeurs pour éviter le travail en double.
-> **Dernière mise à jour** : 10 juin 2026 — #139 (modale « Exporter pour partager » cachée derrière la modale de bibliothèque, corrigé même session, classe `.modal-overlay--partage` z-index 10005). Avant : 8 juin #138 (icônes du popover mobile en carré noir : SVG non suivis par git) + #115 (404 `icon-files.svg`) corrigés en 1.4.2, avec sentinelle anti-récurrence. Avant : #137 (assistant « pas-certain » → inférence comportementale, 1.3.0) ; 5 juin #131-#135 (wizard, lot #317) ; 3 juin #130. Fonction « simuler/comparer des pratiques » → BACKLOG #307. Calcul par famille du profil = Session C (#303). Ouverts : #114, #116, #118, #121.
+> **Dernière mise à jour** : 10 juin 2026 PM — #140 (import codex iPad : « Codex chargé » puis « Aucun codex actif » après rechargement — reload sans attendre les écritures IDB pendantes ; corrigé même session, `await db.flush()` aux 6 sites confirm+reload, sentinelle statique). Le volet « travaux > 20 Mo refusés sans bilan » reste OUVERT → #334 session B. Avant : #139 (modale « Exporter pour partager » cachée derrière la modale de bibliothèque, corrigé même session, classe `.modal-overlay--partage` z-index 10005). Avant : 8 juin #138 (icônes du popover mobile en carré noir : SVG non suivis par git) + #115 (404 `icon-files.svg`) corrigés en 1.4.2, avec sentinelle anti-récurrence. Avant : #137 (assistant « pas-certain » → inférence comportementale, 1.3.0) ; 5 juin #131-#135 (wizard, lot #317) ; 3 juin #130. Fonction « simuler/comparer des pratiques » → BACKLOG #307. Calcul par famille du profil = Session C (#303). Ouverts : #114, #116, #118, #121.
 
 ---
 
@@ -17,6 +17,14 @@
 ---
 
 ---
+
+## Corrigés (10 juin 2026 PM — import codex perdu au rechargement)
+
+> Corrigé en **code** même session (terrain iPad restauré, app.codexnumeris.org 1.11.0). Quota innocenté par mesure : `estimate()` = 36 Go accordés / 419 Mo utilisés — la prémisse « disque plein » de #334 ne couvrait pas ce cas.
+
+| # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
+|---|---------|--------------|---------|-------|-------------|------------|
+| 140 | Grégoire (terrain iPad — 10 juin 2026) | 10 juin 2026 | 10 juin 2026 (même session) | 0610-1242 | **1ᵉʳ import d'un codex : « Codex chargé. Recharger ? » → OK → « Aucun codex actif »** ; le 2ᵉ essai réussit. Cause : `actionOuvrir` (codex.js) rechargeait la page SANS attendre les écritures IndexedDB pendantes ; avec un localStorage saturé (thumbnails — warning console observé), les clés passées par `setSync` (dont le marqueur de codex actif) ne vivent qu'en memoryCache + écriture IDB asynchrone, que le reload coupe. Même patron latent sur 5 sites d'import-export.js. **Volet distinct constaté au passage, NON corrigé ici** : travaux > 20 Mo refusés un à un (bandeau « Fichier trop volumineux » en rafale) avec import déclaré réussi → #334 session B (bilan honnête) ; la limite 20 Mo elle-même repose sur une hypothèse périmée (« IDB ≈ 50 Mo/origine » vs 36 Go mesurés) — seuil à retrancher avec Grégoire. | `await db.flush()` AVANT chaque `confirm(...)` suivi de `location.reload()` (1 site codex.js + 5 sites import-export.js ; les reload de réinitialisation post-`db.clear()` sont hors patron). Sentinelle statique `tests/unit/sentinelle-flush-avant-reload.test.js` (verrouillage anti-refactoring). |
 
 ## Corrigés (10 juin 2026 — modale d'export de partage cachée derrière la bibliothèque)
 
