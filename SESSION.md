@@ -1,4 +1,37 @@
 <!-- =====================================================================
+     SESSION 9 juin 2026 (Claude Code) — #327 T0→T4 LIVRÉS, reste T5 release.
+     Étend le classement par dossiers (#320, livré en 1.5.0 pour les pratiques) à
+     TOUTES les bibliothèques. HEAD main `19480962`, AUCUN bump (release = T5).
+     Cadrage + journal des décisions : `plans de travail/CADRAGE-327-...md` §7.
+       • T0 (`6ea5abc3`) — helper générique `BibliothequeUI.repertoires` dans
+         js/bibliotheque-ui.js : zone « Mes dossiers » repliable, ligne compacte
+         select+Ajouter+menu, 9 handlers paramétrés par `biblio`, registre
+         `enregistrer(biblio, callbacks)`, état de dépliage par biblio. + support
+         `data-param3` dans `renderMenuActions` (sinon « Classer dans » perd le repId).
+         Pratiques refactorées dessus, ~15 fonctions spécifiques RETIRÉES (zéro
+         wrapper). DÉCISION Grégoire : sentinelles #320 L1/L2 ADAPTÉES aux nouveaux
+         noms d'action/ids (mêmes assertions de comportement), pas d'alias de compat.
+       • T1 grilles (`d1e3b7df`), T2 échelles (`1e0a322e`), T3 productions (`4d857ba2`)
+         — même patron : enregistrement biblio + zone dossiers en tête de Section 2 +
+         groupage du pool par dossier (selects compacts ; « Non classées » en cartes) +
+         hook de cohérence `retirerItem(id, biblio)` dans chaque remover canonique.
+         Filtres de commodité RETIRÉS (discipline T1/T2/T3 + pratique T2) ; selects +
+         fonctions de filtrage + utils `obtenirDisciplinesDisponibles*` devenus morts →
+         SUPPRIMÉS (zéro-dette). Toggle « masquer déjà présents » (#293) + import
+         trimestre CONSERVÉS. 1 sentinelle de rendu par lot (repertoires-{grilles,
+         echelles,productions}-T*-rendu.spec.js).
+       • T4 cartouches = EXCEPTION (`19480962`, décision Grégoire) — dossiers NON
+         appliqués. « Par grille » est la STRUCTURE réelle (stockage `cartouches_{grilleId}`,
+         une cartouche n'a de sens qu'avec sa grille, les 2 sections déjà groupées par
+         grille). Groupage + filtre par grille conservés tels quels. Aucune modif de
+         cartouches.js. NB : le « ordre perso » productions du cadrage §4 = inexistant.
+       • ÉTAT TESTS : 380 Vitest + 47 Playwright verts à chaque lot (zéro régression).
+       • RESTE T5 (release `minor` → 1.6.0) : entrée changelog `1.6` DÉJÀ RÉDIGÉE
+         (js/changelog-data.js), BACKLOG #327 à jour. APRÈS validation terrain par
+         Grégoire (Mac+iPad, sombre+clair : grilles/échelles/productions — créer un
+         dossier, classer/retirer, voir groupé) → `node scripts/release.mjs minor`.
+         Option démo (1 répertoire d'exemple) reportée comme pour #320.
+     =====================================================================
      IDENTIFICATION DE CE FICHIER  (mis à jour 9 juin 2026 — Claude Code, RELEASE 1.5.0 #320 répertoires).
      RELEASE 1.5.0 (build 0609-1023) — répertoires de classement des pratiques. Session du 9 juin :
      tri + réconciliation du tracking, puis chantier #320 (répertoires) lots L0→L3 + 2 raffinements
