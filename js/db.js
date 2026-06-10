@@ -588,6 +588,22 @@
 
                 var SEUIL_IDB_FIRST = 200 * 1024; // 200 Ko
 
+                // #300 — Invalidation préventive du cache AVANT réhydratation.
+                // localStorage est un cache de la session précédente, qui peut
+                // être périmé vis-à-vis d'IndexedDB (source de vérité). Tant
+                // qu'une clé n'est pas réhydratée par la boucle ci-dessous,
+                // getSync doit rendre le DÉFAUT (sûr) plutôt qu'une valeur
+                // périmée — ex. `trimestres` aux id vides → `",,,"` lu avant
+                // `db-ready`. On ne vide QUE les clés présentes en IDB : elles
+                // sont restaurées juste après, donc aucune perte. Les clés
+                // localStorage-seules (jamais passées par IDB) restent intactes.
+                // On ne touche pas memoryCache : vide au boot, et porteur des
+                // données courantes lors des syncs post-import (pas périmé).
+                for (const key of indexedDBKeys) {
+                    if (key === 'travaux_fsapi_handle') continue;
+                    try { localStorage.removeItem(key); } catch (ex) {}
+                }
+
                 for (const key of indexedDBKeys) {
                     // Skip : FileSystemDirectoryHandle non sérialisable en JSON
                     if (key === 'travaux_fsapi_handle') continue;
