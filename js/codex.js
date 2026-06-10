@@ -2131,6 +2131,14 @@ async function actionOuvrir() {
             'Codex ouvert : ' + resultat.manifeste.nom,
             resultat.stats.nbCles + ' clés, ' + resultat.stats.nbBlobs + ' fichiers'
         );
+        // Attendre la fin des écritures IDB pendantes AVANT de proposer le
+        // rechargement : avec un localStorage saturé, les clés passées par
+        // setSync (dont le marqueur de codex actif) ne vivent qu'en
+        // memoryCache + écriture IDB asynchrone — un reload immédiat les
+        // coupe et l'app redémarre « sans codex actif » alors que les
+        // données, elles, sont écrites. Bug terrain iPad 10 juin 2026.
+        // (confirm bloque la boucle d'événements : flush AVANT le dialogue.)
+        await db.flush();
         // Proposer de recharger pour appliquer les données
         if (confirm('Codex chargé. Recharger la page pour appliquer les données ?')) {
             window.location.reload();

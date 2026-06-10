@@ -1036,6 +1036,9 @@ async function executerImport() {
         const msgBlobs = nbRestores > 0 ? ` + ${nbRestores} fichier(s) travaux` : '';
         notifications.succes(`Import réussi : ${nbCles} clé(s) importée(s)${msgBlobs}`);
 
+        // Écritures IDB pendantes terminées AVANT le reload (bug terrain
+        // iPad 10 juin 2026 — cf. codex.js actionOuvrir, même patron).
+        await db.flush();
         if (confirm('Import terminé ! Recharger la page pour appliquer les changements ?')) {
             location.reload();
         }
@@ -2245,6 +2248,9 @@ async function executerImportConfigComplete() {
         notifications.succes(messageSucces);
 
         // Proposer de recharger la page
+        // Écritures IDB pendantes terminées AVANT le reload (bug terrain
+        // iPad 10 juin 2026 — cf. codex.js actionOuvrir, même patron).
+        await db.flush();
         if (confirm('Import terminé!\n\nRecharger la page pour appliquer les changements?')) {
             location.reload();
         }
@@ -2305,6 +2311,9 @@ async function executerImportLocalStorageBrut(config) {
         // Notification et rechargement
         alert(`Import réussi !\n\n${nbCles} clé(s) de données importée(s)${msgBlobs}.`);
 
+        // Écritures IDB pendantes terminées AVANT le reload (bug terrain
+        // iPad 10 juin 2026 — cf. codex.js actionOuvrir, même patron).
+        await db.flush();
         if (confirm('Recharger la page pour appliquer les changements ?')) {
             location.reload();
         }
@@ -2598,6 +2607,9 @@ async function executerImportVersBibliotheques() {
             notifications.succes(message);
             alert(message);
 
+            // Écritures IDB pendantes terminées AVANT le reload (bug terrain
+            // iPad 10 juin 2026 — cf. codex.js actionOuvrir, même patron).
+            await db.flush();
             if (confirm('Recharger la page pour voir les nouvelles ressources ?')) {
                 location.reload();
             }
@@ -3074,6 +3086,9 @@ async function executerImportSelectif() {
             notifications.succes(message);
             alert(message);
 
+            // Écritures IDB pendantes terminées AVANT le reload (bug terrain
+            // iPad 10 juin 2026 — cf. codex.js actionOuvrir, même patron).
+            await db.flush();
             if (confirm('Recharger la page pour voir les changements ?')) {
                 location.reload();
             }
