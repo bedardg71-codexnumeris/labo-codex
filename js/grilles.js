@@ -2209,6 +2209,7 @@ async function preparerDonneesBibliothequeGrilles() {
         inspireDe: BibliothequeUI.formaterInspireDe(grille),
         boutonPrincipal: { label: 'Dupliquer', action: 'dupliquerGrilleBibliotheque', param: grille.id, classe: 'btn-confirmer', title: 'Créer une copie' },
         actionsMenu: [
+            { label: 'Exporter pour partager', action: 'partageExport.exporterPourPartager', param: 'grille', param2: grille.id, classe: 'btn-secondaire', title: 'Générer un fichier .lcz signé à transmettre (#329)' },
             { label: 'Retirer', action: 'retirerGrilleDeBibliotheque', param: grille.id, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
             { label: 'Supprimer', action: 'supprimerGrilleDefinitivement', param: grille.id, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
         ]

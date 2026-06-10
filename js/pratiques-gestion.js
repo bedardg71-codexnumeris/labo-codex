@@ -365,7 +365,9 @@ async function afficherBibliothequePratiques() {
                 inspireDe: BibliothequeUI.formaterInspireDe(pratique),
                 boutonPrincipal: { label: 'Dupliquer', action: 'dupliquerPratiqueBibliotheque', param: pratique.id, classe: 'btn-confirmer', title: 'Créer une copie' },
                 actionsMenu: [
-                    { label: 'Exporter', action: 'partagerPratiqueMateriel', param: pratique.id, classe: 'btn-secondaire', title: 'Exporter en JSON' },
+                    { label: 'Exporter pour partager', action: 'partageExport.exporterPourPartager', param: 'pratique', param2: pratique.id, classe: 'btn-secondaire', title: 'Générer un fichier .lcz signé à transmettre (#329)' },
+                    // Legacy JSON — retrait prévu à la convergence des formats (P8 #329)
+                    { label: 'Exporter (JSON)', action: 'partagerPratiqueMateriel', param: pratique.id, classe: 'btn-secondaire', title: 'Exporter en JSON (ancien format)' },
                     { label: 'Retirer', action: 'retirerPratiqueDeBibliothequeMateriel', param: pratique.id, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
                     { label: 'Supprimer', action: 'supprimerPratiqueDefinitivement', param: pratique.id, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
                 ]
