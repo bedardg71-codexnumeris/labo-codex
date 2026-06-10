@@ -292,5 +292,24 @@
         };
     };
 
+    /**
+     * Variante signée : construit le package puis le signe avec l'identité
+     * locale (signature.js, lot F — décision D2). Chemin que P2 utilisera ;
+     * les mises à jour d'un package déjà publié repassent ici (R3), il n'y
+     * a qu'un seul chemin de signature. Retourne une Promise<package signé>.
+     */
+    partageFormat.construirePackageSigne = function (itemPrincipal, options) {
+        var pkg;
+        try {
+            pkg = partageFormat.construirePackage(itemPrincipal, options);
+        } catch (e) {
+            return Promise.reject(e);
+        }
+        if (!window.signaturePartage) {
+            return Promise.reject(new Error('[partage-format] signature.js non chargé — package signé impossible'));
+        }
+        return window.signaturePartage.signerPackage(pkg);
+    };
+
     window.partageFormat = partageFormat;
 })();

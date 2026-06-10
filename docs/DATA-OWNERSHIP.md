@@ -240,6 +240,18 @@ Namespacing par trimestre :
 
 ---
 
+## Bases IndexedDB annexes (hors db.js)
+
+Stockage qui ne passe PAS par `db.js` ni par sa base `keyvalue` — donc invisible
+aux exports/restaurations Codex et au cache localStorage. À n'utiliser que pour
+du matériel qui NE DOIT PAS entrer dans ces flux.
+
+| Base | Store | Propriétaire | Contenu | Justification |
+|------|-------|-------------|---------|---------------|
+| `labo-codex-identite` | `cles` | `js/signature.js` (#329 lot F) | Paire ECDSA P-256 de signature des packages de partage. Clé privée **non extractible** (`CryptoKey`), clé publique + export base64(JWK), date de création. Enregistrement unique `identite-v1`. | Un `CryptoKey` se dégrade silencieusement en `{}` au `JSON.stringify` de la copie localStorage de `db.js` ; et le matériel d'identité ne doit jamais transiter par un export/restauration Codex (écrasement, fausse restauration d'une clé non extractible). Décision Grégoire 10 juin 2026. Perte de la base = nouvelle identité (re-TOFU chez les pairs ; sauvegarde chiffrée = #47, hors lot). |
+
+---
+
 ## Méthodologie — comment ce registre est mis à jour
 
 1. Lancer `python3 scripts/audit-ssot.py` à la racine du repo.
