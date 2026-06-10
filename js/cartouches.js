@@ -3421,7 +3421,8 @@ async function afficherBibliothequeCartouches() {
         titreSection2: 'Cartouches disponibles à ajouter à la barre latérale',
         filtresSection2: filtresHTML,
         contenuIdListe2: 'listeCartouchesDisponibles',
-        contenuSection2: contenuSection2
+        contenuSection2: contenuSection2,
+        sectionPartages: window.partageSection ? partageSection.genererSectionHTML('cartouche') : ''
     });
 }
 

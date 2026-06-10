@@ -494,7 +494,8 @@ async function afficherBibliothequePratiques() {
         titreSection2: 'Pratiques disponibles à ajouter à la barre latérale',
         filtresSection2: filtresHTML,
         contenuIdListe2: 'listePratiquesDisponibles',
-        contenuSection2: contenuSection2
+        contenuSection2: contenuSection2,
+        sectionPartages: window.partageSection ? partageSection.genererSectionHTML('pratique') : ''
     });
 }
 

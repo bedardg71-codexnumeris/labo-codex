@@ -228,6 +228,78 @@ test('P3 · bouton « Importer un partage (.lcz) » présent dans les 5 modales 
     expect(erreurs).toEqual([]);
 });
 
+test('P4 · section « Partagés » dans la modale grilles + duplication vers mes documents', async ({ page }) => {
+    const erreurs = [];
+    brancherErreurs(page, erreurs);
+    await preparerPage(page);
+
+    const resultat = await page.evaluate(async (auteur) => {
+        // Import réel d'un package signé (chaîne P2 → P3 complète).
+        const grille = window.db.getSync('grillesTemplates')[0];
+        const pkg = await window.partageFormat.construirePackageSigne(grille, { type: 'grille', identiteAuteur: auteur });
+        const blob = await window.partageExport.genererLcz(pkg);
+        const promesse = window.partageImport.importerFichier(new File([blob], 'p4.lcz'));
+        await new Promise(r => setTimeout(r, 400));
+        document.querySelector('#modalPartagePreviz [data-decision="importer"]').click();
+        await promesse;
+
+        const partagee = window.db.getSync('partage_grilles', [])[0];
+        const nbGrillesAvant = window.db.getSync('grillesTemplates', []).length;
+        const partagesAvant = JSON.stringify([
+            window.db.getSync('partage_grilles', []), window.db.getSync('partage_cartouches', [])
+        ]);
+
+        // La modale grilles rend la section « Partagés » avec le bouton.
+        await window.afficherBibliothequeGrilles();
+        const modal = document.getElementById('modalBibliothequeGrilles');
+        const texteModal = modal ? modal.textContent : '';
+        const bouton = modal ? modal.querySelector(
+            '[data-action="partageSection.dupliquer"][data-param2="' + partagee.id + '"]') : null;
+        if (modal) modal.remove();
+
+        // Duplication vers les documents de l'utilisateur.
+        const dup = window.partageSection.dupliquerVersMesDocuments('grille', partagee.id);
+        const grilles = window.db.getSync('grillesTemplates', []);
+        const copie = grilles.filter(g => g.id === dup.idNouveau)[0];
+        const cartouchesCopiees = window.db.getSync('cartouches_' + dup.idNouveau, []);
+        const partagesApres = JSON.stringify([
+            window.db.getSync('partage_grilles', []), window.db.getSync('partage_cartouches', [])
+        ]);
+
+        window.trustTofu.oublierAuteur(auteur);
+        return {
+            texteModal, boutonPresent: !!bouton,
+            nbGrillesAvant, nbGrillesApres: grilles.length,
+            copie: copie ? {
+                prefixeUtilisateur: copie.id.indexOf('GRILLE_') === 0,
+                inspireAuteur: copie.inspireDe && copie.inspireDe.auteur,
+                metadataCcRetire: !('metadata_cc' in copie),
+                dansBibliotheque: copie.dansBibliotheque
+            } : null,
+            nbCartouchesCopiees: cartouchesCopiees.length,
+            grilleIdRemappe: cartouchesCopiees.length ? cartouchesCopiees[0].grilleId === dup.idNouveau : false,
+            partagesIntacts: partagesAvant === partagesApres
+        };
+    }, AUTEUR);
+
+    expect(resultat.texteModal).toContain('Partagés par des collègues');
+    expect(resultat.texteModal).toContain('Dupliquer vers mes documents');
+    expect(resultat.boutonPresent).toBe(true);
+
+    expect(resultat.nbGrillesApres).toBe(resultat.nbGrillesAvant + 1);
+    expect(resultat.copie).toEqual({
+        prefixeUtilisateur: true,
+        inspireAuteur: AUTEUR,
+        metadataCcRetire: true,
+        dansBibliotheque: true
+    });
+    expect(resultat.nbCartouchesCopiees).toBe(1);
+    expect(resultat.grilleIdRemappe).toBe(true);
+    // Lecture seule : la duplication ne touche jamais les clés partage_*.
+    expect(resultat.partagesIntacts).toBe(true);
+    expect(erreurs).toEqual([]);
+});
+
 test('P3 · clé changée → alerte bloquante, Refuser n\'intègre rien (critère 19)', async ({ page }) => {
     const erreurs = [];
     brancherErreurs(page, erreurs);

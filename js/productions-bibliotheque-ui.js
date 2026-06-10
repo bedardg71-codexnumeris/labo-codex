@@ -229,7 +229,8 @@ async function afficherBibliothequeProductions() {
         titreSection2: 'Productions disponibles à ajouter à la barre latérale',
         filtresSection2: filtresHTML,
         contenuIdListe2: 'listeProductionsDisponibles',
-        contenuSection2: contenuSection2
+        contenuSection2: contenuSection2,
+        sectionPartages: window.partageSection ? partageSection.genererSectionHTML('production') : ''
     });
 }
 

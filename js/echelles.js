@@ -2527,7 +2527,8 @@ async function afficherBibliothequeEchelles() {
         titreSection2: 'Échelles disponibles à ajouter à la barre latérale',
         filtresSection2: filtresHTML,
         contenuIdListe2: 'listeEchellesDisponibles',
-        contenuSection2: contenuSection2
+        contenuSection2: contenuSection2,
+        sectionPartages: window.partageSection ? partageSection.genererSectionHTML('echelle') : ''
     });
 }
 
