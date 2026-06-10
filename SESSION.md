@@ -60,13 +60,38 @@
          rafraîchie), BACKLOG #328 créé + en-tête rafraîchi (dernier ID réel).
          392 Vitest + 47 Playwright = 439 VERTS. Incident mineur : index.lock
          orphelin (0 octet, aucun process git) retiré après vérification.
-       • RESTE : (1) VALIDATION TERRAIN Lot 0 (Mac+iPad : Réglages → Trimestre,
-         select durée de période 50/55/60 — changer, recharger, vérifier
-         persistance + calculs d'assiduité ; mode démo : durée 50 attendue) ;
-         (2) sur go : release patch + push (2 commits locaux non poussés) ;
-         (3) cadrage L1 — DÉCISION : propriétaire = pratique-manager.js OU
-         module dédié type denotation-jugements.js ; (4) trancher les 2
-         untracked `Rapports/entrevue-*` (pas créés par Claude Code).
+       • SUITE 2 (même session) : Lot 0 VALIDÉ TERRAIN par Grégoire → RELEASE
+         1.6.2 (`50ea613f`, build 0610-0545) POUSSÉE. Puis DÉCISION Grégoire
+         (choix fermé, reco suivie) : L1 = module DÉDIÉ. LOT 1 LIVRÉ
+         (`abf5814f`, SANS bump, NON poussé) :
+         (a) js/pratiques/modalites-evaluation.js = PROPRIÉTAIRE unique
+         (patron denotation-jugements.js), chargé juste après db.js (un
+         propriétaire de stockage vit avec la couche stockage). API lire()
+         (fallback clé nue gardé jusqu'au L3) / modifier(mutateur) (RMW
+         centralisé) / remplacer(objet) (refuse non-objet).
+         (b) 12 écrivains routés, 42 sites → ZÉRO db.set direct de la clé NS
+         hors module. Motifs 100 % uniformes dans pratiques.js et
+         pratique-notation-v2.js → remplacement mécanique vérifié par grep.
+         Restent VOLONTAIREMENT hors module : 2 migrations bornées clé NUE
+         (main.js decouplerPR ; pratiques/migration-pratiques.js).
+         (c) sentinelle ratchet RETAILLÉE à 3 fichiers + garde « anciens
+         écrivains restent routés » ; le module écrit la clé en LITTÉRAL
+         exprès (visible du grep de la sentinelle). Contrat du module :
+         modalites-evaluation-proprietaire-L1.test.js (9 cas).
+         (d) harnais golden master #319 enchaîné (module chargé dans le même
+         sandbox AVANT le wizard — pattern fauxWindowExistant) ; c'était la
+         seule casse (13 tests), corrigée.
+         402 Vitest + 47 Playwright = 449 VERTS. DATA-OWNERSHIP : violation
+         n°1 résorbée CÔTÉ ÉCRITURE.
+       • RESTE : (1) VALIDATION TERRAIN Lot 1 (Mac+iPad : Réglages → Pratique
+         de notation — changer de pratique, sauvegarder une config
+         PAN/SPE/objectifs, créer une pratique via l'assistant, toggle démo
+         ON/OFF avec retour à l'état antérieur) ; (2) sur go : release patch
+         + push (1 commit local + le relais) ; (3) cadrage LOT 2 (dériver les
+         champs miroirs pratique/pratiqueId/approcheEvaluation/configPAN.jetons
+         de la pratique active — RISQUE ÉLEVÉ, touche le calcul, golden master
+         #303 en garde-fou, session dédiée) ; (4) trancher les 2 untracked
+         `Rapports/entrevue-*` (pas créés par Claude Code).
      =====================================================================
      SESSION 9 juin 2026 (Claude Code) — #327 T0→T4 LIVRÉS, reste T5 release.
      Étend le classement par dossiers (#320, livré en 1.5.0 pour les pratiques) à
