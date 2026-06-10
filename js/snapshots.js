@@ -926,9 +926,10 @@ async function reconstruireSnapshotsHistoriques() {
         // ✅ CORRECTIF CRITIQUE (2 mars 2026): Forcer la synchro du cache pour les snapshots
         // Problème : après reconstruction, les snapshots sont dans IndexedDB (11 captures)
         // mais le cache localStorage peut contenir une version périmée (4 captures).
-        // db.getSync() lit localStorage EN PREMIER → retourne les anciennes données.
-        // syncToLocalStorageCache() skip les clés déjà existantes dans localStorage.
-        // Solution : supprimer la clé périmée et forcer le memoryCache.
+        // db.getSync() lit memoryCache puis localStorage → peut rendre les anciennes
+        // données tant qu'on ne rafraîchit pas le cache ici (cette reconstruction
+        // ne passe pas par syncToLocalStorageCache, qui ne tourne qu'au boot/import).
+        // Solution : supprimer la clé périmée de localStorage et forcer le memoryCache.
         const cleSnap = cleSnapshots();
         if (cleSnap) {
             try {
