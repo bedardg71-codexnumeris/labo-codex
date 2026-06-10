@@ -188,6 +188,46 @@ test('P3 · package altéré après signature → rejet signature (critère 16)'
     expect(erreurs).toEqual([]);
 });
 
+test('P3 · bouton « Importer un partage (.lcz) » présent dans les 5 modales de bibliothèque', async ({ page }) => {
+    const erreurs = [];
+    brancherErreurs(page, erreurs);
+    await preparerPage(page);
+
+    const resultat = await page.evaluate(async () => {
+        const modales = [
+            ['grilles', 'afficherBibliothequeGrilles', 'modalBibliothequeGrilles'],
+            ['echelles', 'afficherBibliothequeEchelles', 'modalBibliothequeEchelles'],
+            ['cartouches', 'afficherBibliothequeCartouches', 'modalBibliothequeCartouches'],
+            ['productions', 'afficherBibliothequeProductions', 'modalBibliothequeProductions'],
+            ['pratiques', 'afficherBibliothequePratiques', 'modalBibliothequePratiques']
+        ];
+        const presence = {};
+        for (const [nom, fnNom, modalId] of modales) {
+            if (typeof window[fnNom] !== 'function') {
+                presence[nom] = 'fonction absente : ' + fnNom;
+                continue;
+            }
+            await window[fnNom]();
+            const modal = document.getElementById(modalId);
+            const bouton = modal
+                ? modal.querySelector('[data-action="partageImport.ouvrirSelecteurFichier"]')
+                : null;
+            presence[nom] = bouton ? 'ok' : 'bouton absent (modale ' + (modal ? 'trouvée' : 'introuvable') + ')';
+            if (modal) modal.remove();
+        }
+        // L'input caché que le bouton déclenche vit dans Réglages › Données,
+        // présent dans le DOM en permanence.
+        const inputGlobal = !!document.getElementById('partage-fichier-import');
+        return { presence, inputGlobal };
+    });
+
+    expect(resultat.presence).toEqual({
+        grilles: 'ok', echelles: 'ok', cartouches: 'ok', productions: 'ok', pratiques: 'ok'
+    });
+    expect(resultat.inputGlobal).toBe(true);
+    expect(erreurs).toEqual([]);
+});
+
 test('P3 · clé changée → alerte bloquante, Refuser n\'intègre rien (critère 19)', async ({ page }) => {
     const erreurs = [];
     brancherErreurs(page, erreurs);

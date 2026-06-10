@@ -160,6 +160,7 @@ async function afficherBibliothequeProductions() {
             <button data-action="ajouterMesProductionsALaBibliotheque" class="btn btn-principal btn-mini">Ajouter mes productions à la bibliothèque</button>
             <button data-action="exporterProductions" class="btn btn-secondaire btn-mini">Exporter toutes mes productions</button>
             <button data-action="ouvrirFilePickerImportProductions" class="btn btn-secondaire btn-mini">Importer des productions</button>
+            <button data-action="partageImport.ouvrirSelecteurFichier" class="btn btn-secondaire btn-mini">Importer un partage (.lcz)</button>
             <input type="file" id="fichier-import-productions-modal" accept=".json" style="display: none;" data-on-change="importerProductions">
         </div>`;
 

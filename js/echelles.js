@@ -2458,6 +2458,7 @@ async function afficherBibliothequeEchelles() {
             <button data-action="ajouterMesEchellesALaBibliotheque" class="btn btn-principal btn-mini">Ajouter mes échelles à la bibliothèque</button>
             <button data-action="exporterEchelles" class="btn btn-secondaire btn-mini">Exporter toutes mes échelles</button>
             <button data-action="ouvrirFilePickerImportEchelles" class="btn btn-secondaire btn-mini">Importer des échelles</button>
+            <button data-action="partageImport.ouvrirSelecteurFichier" class="btn btn-secondaire btn-mini">Importer un partage (.lcz)</button>
             <input type="file" id="fichier-import-echelles-modal" accept=".json" style="display: none;" data-on-change="importerEchelles">
         </div>`;
 
