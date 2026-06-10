@@ -84,3 +84,29 @@ Aujourd'hui les handlers de classement sont **spécifiques aux pratiques**
 - `config.js` / `navigation.js` non touchés.
 - `echapperHtml()` sur les noms, `data-action` (CSP), ≥ 1 test par lot.
 - Refacto pratiques = **non-régression obligatoire** (sentinelles L0/L1/L2 vertes).
+
+## 7. Décisions prises et journal d'implémentation (9 juin 2026)
+
+- **T0 livré** (`6ea5abc3`) — helper générique `BibliothequeUI.repertoires` (zone repliable,
+  ligne-select, 9 handlers paramétrés par `biblio`, registre `enregistrer`, état de dépliage
+  par biblio) + support `data-param3` dans `renderMenuActions`. Pratiques refactorées dessus,
+  **sans wrapper** (zéro-dette) ; ~15 fonctions spécifiques retirées. Décision tranchée avec
+  Grégoire : **adapter les sentinelles #320 L1/L2 aux nouveaux noms d'action/ids** (mêmes
+  assertions de comportement) plutôt que de garder des alias de compat. L0 (moteur) intacte.
+- **Filtres de commodité retirés partout** (décision Grégoire) : discipline (T1, T2, T3) et
+  pratique (T2). Selects + fonctions de filtrage + utils `obtenirDisciplinesDisponibles*`
+  devenus morts → **supprimés** (zéro-dette). Toggle « masquer déjà présents » (#293) et
+  import depuis un trimestre **conservés** (orthogonaux aux dossiers).
+- **T1 grilles** (`d1e3b7df`), **T2 échelles** (`1e0a322e`), **T3 productions** (`4d857ba2`) —
+  câblés, hook de cohérence dans chaque remover, 1 sentinelle de rendu par lot.
+- **Productions « ordre perso »** (mentionné en §4) : **inexistant** dans la modale — aucune
+  logique d'ordre/drag à faire cohabiter. Mention du cadrage périmée.
+- **T4 cartouches — EXCEPTION (décision Grégoire 9 juin)** : les dossiers ne sont **pas**
+  appliqués aux cartouches. La relation « par grille » est la **structure réelle des données**
+  (stockage `cartouches_{grilleId}` ; une cartouche n'a de sens qu'avec sa grille ; les deux
+  sections sont déjà groupées par grille). Le groupage + le filtre par grille sont **conservés
+  tels quels**. Aucune modification de `cartouches.js`. C'est le cas « à repenser, pas un simple
+  filtre » anticipé en §5.1.
+- **Reste : T5** — hygiène + changelog + release `minor` (couvre grilles/échelles/productions ;
+  cartouches noté comme exception). Validation terrain (Mac+iPad, sombre+clair) avant release,
+  selon la pratique du projet.
