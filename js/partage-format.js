@@ -1,0 +1,228 @@
+/**
+ * partage-format.js — Construction d'un package `labo-codex-partage-v1`
+ *
+ * Chantier #329 Voûte Phase 1, lot P1.
+ * Spec : `docs/architecture/PLAN2-PHASE1-SPEC.md` §5.
+ * Schémas : `js/partage-schemas.js` (chargé AVANT ce module).
+ *
+ * API : window.partageFormat.construirePackage(itemPrincipal, options)
+ *   - `itemPrincipal` : objet entité interne (ex. une grille de
+ *     `grillesTemplates`). L'objet n'est PAS modifié.
+ *   - `options` :
+ *       type               (REQUIS) — 'grille'|'echelle'|'cartouche'|
+ *                          'production'|'pratique'. Les entités internes ne
+ *                          portent pas leur type : il doit être explicite
+ *                          (écart assumé avec la spec d'avril, qui ne disait
+ *                          pas d'où le type venait).
+ *       inclureDependances (défaut true) — embarque les entités liées
+ *                          (voir « Modèle de dépendances » ci-dessous).
+ *       identiteAuteur     (défaut obtenirIdentiteCCUtilisateur()) — chaîne
+ *                          (nom) ou objet { nom, courriel, institution,
+ *                          discipline }.
+ *   - Retourne l'objet package complet (PAS un ZIP — la sérialisation `.lcz`
+ *     est le lot P2). Aucune écriture storage.
+ *
+ * Modèle de dépendances RÉEL (≠ exemple « grille → échelle » de la spec
+ * d'avril : les grilles ne référencent pas d'échelle dans le modèle de
+ * données — écart documenté dans SESSION.md) :
+ *   - grille      → ses cartouches (`cartouches_{grilleId}`, clé globale)
+ *   - cartouche   → sa grille (grilleId)
+ *   - production  → sa grille (si grilleId non vide) + cartouches de celle-ci
+ *   - echelle, pratique → aucune (l'échelle d'une pratique est EMBARQUÉE
+ *     dans l'entité, pas référencée)
+ *
+ * La projection sur les schémas fermés retire par construction tout champ
+ * non déclaré : `auteur`, flags démo, champs locaux (coursId, dateEcheance),
+ * champs `_*` — seuls les champs du schéma sont copiés.
+ *
+ * Le bloc signature du manifeste est présent dès la v1 (D2, anti-dette de
+ * format) mais vaut null tant que le lot F (js/signature.js) n'est pas livré.
+ */
+(function () {
+    'use strict';
+
+    var partageFormat = {};
+
+    function clonerProfond(v) {
+        return JSON.parse(JSON.stringify(v));
+    }
+
+    /**
+     * Projette une entité interne sur son schéma fermé : seuls les champs
+     * déclarés dans SCHEMA_ENTITE[type].champs sont copiés (clone profond).
+     */
+    function projeterEntite(item, type) {
+        var schema = window.partageSchemas.SCHEMA_ENTITE[type];
+        if (!schema) {
+            throw new Error('[partage-format] Type d\'entité inconnu : ' + type);
+        }
+        var projection = {};
+        Object.keys(schema.champs).forEach(function (champ) {
+            if (item[champ] !== undefined) {
+                projection[champ] = item[champ] === null ? null : clonerProfond(item[champ]);
+            }
+        });
+        return projection;
+    }
+    partageFormat.projeterEntite = projeterEntite;
+
+    /**
+     * Lecture défensive d'une collection du storage. Retourne [] si db
+     * n'est pas disponible (contexte de test sans stub) ou si la clé est vide.
+     */
+    function lireCollection(cle) {
+        if (typeof db === 'undefined' || !db.getSync) return [];
+        var valeur = db.getSync(cle, []);
+        return Array.isArray(valeur) ? valeur : [];
+    }
+
+    /**
+     * Rassemble les dépendances d'un item selon le modèle réel. Retourne
+     * { entites: { <clePluriel>: [...] }, references: [...] } — entités déjà
+     * projetées sur leur schéma.
+     */
+    function rassemblerDependances(item, type) {
+        var resultat = { entites: {}, references: [] };
+
+        function ajouterCartouchesDeGrille(grilleId) {
+            var cartouches = lireCollection('cartouches_' + grilleId);
+            if (!cartouches.length) return;
+            resultat.entites.cartouches = (resultat.entites.cartouches || []);
+            cartouches.forEach(function (c) {
+                resultat.entites.cartouches.push(projeterEntite(c, 'cartouche'));
+                resultat.references.push({
+                    depuis: { type: 'cartouche', id: c.id },
+                    vers: { type: 'grille', id: grilleId },
+                    nature: 'utilise'
+                });
+            });
+        }
+
+        function ajouterGrille(grilleId, depuisType, depuisId) {
+            var grille = null;
+            lireCollection('grillesTemplates').forEach(function (g) {
+                if (g.id === grilleId) grille = g;
+            });
+            if (!grille) return;
+            resultat.entites.grilles = (resultat.entites.grilles || []);
+            resultat.entites.grilles.push(projeterEntite(grille, 'grille'));
+            resultat.references.push({
+                depuis: { type: depuisType, id: depuisId },
+                vers: { type: 'grille', id: grilleId },
+                nature: 'utilise'
+            });
+            ajouterCartouchesDeGrille(grilleId);
+        }
+
+        if (type === 'grille') {
+            ajouterCartouchesDeGrille(item.id);
+        } else if (type === 'cartouche' && item.grilleId) {
+            ajouterGrille(item.grilleId, 'cartouche', item.id);
+        } else if (type === 'production' && item.grilleId) {
+            ajouterGrille(item.grilleId, 'production', item.id);
+        }
+        // echelle, pratique : aucune dépendance référencée.
+
+        return resultat;
+    }
+    partageFormat.rassemblerDependances = rassemblerDependances;
+
+    /**
+     * Normalise `identiteAuteur` (chaîne ou objet) vers le schéma
+     * manifest.auteur. Fallback : obtenirIdentiteCCUtilisateur() (cc-license.js).
+     */
+    function normaliserAuteur(identiteAuteur) {
+        if (typeof identiteAuteur === 'string' && identiteAuteur) {
+            return { nom: identiteAuteur };
+        }
+        if (identiteAuteur && typeof identiteAuteur === 'object' && identiteAuteur.nom) {
+            var auteur = { nom: String(identiteAuteur.nom) };
+            ['courriel', 'institution', 'discipline'].forEach(function (k) {
+                if (identiteAuteur[k]) auteur[k] = String(identiteAuteur[k]);
+            });
+            return auteur;
+        }
+        if (typeof obtenirIdentiteCCUtilisateur === 'function') {
+            return { nom: obtenirIdentiteCCUtilisateur() };
+        }
+        return { nom: 'Utilisateur de Labo Codex' };
+    }
+
+    /**
+     * Chaîne d'attribution minimale v1 : un seul maillon, l'auteur original
+     * tracé par metadata_cc s'il existe. La chaîne multi-niveaux complète
+     * (préservation au fork, condensation) est le lot P5.
+     */
+    function construireChaineAttribution(item) {
+        var meta = item.metadata_cc;
+        if (!meta || !meta.auteur_original) return [];
+        return [{
+            niveau: 0,
+            auteur: String(meta.auteur_original),
+            nomItem: String(item.nom || item.titre || '')
+        }];
+    }
+
+    /**
+     * Construit un package `labo-codex-partage-v1` complet. Voir l'en-tête
+     * du fichier pour le contrat. Lance une Error si `options.type` est
+     * absent ou inconnu, ou si l'item n'a pas d'id.
+     */
+    partageFormat.construirePackage = function (itemPrincipal, options) {
+        var schemas = window.partageSchemas;
+        options = options || {};
+
+        if (!itemPrincipal || typeof itemPrincipal !== 'object') {
+            throw new Error('[partage-format] itemPrincipal absent ou non-objet');
+        }
+        if (!options.type || schemas.TYPES_ENTITES.indexOf(options.type) === -1) {
+            throw new Error('[partage-format] options.type requis, parmi : ' + schemas.TYPES_ENTITES.join(', '));
+        }
+        if (!itemPrincipal.id) {
+            throw new Error('[partage-format] itemPrincipal.id requis');
+        }
+
+        var type = options.type;
+        var inclureDependances = options.inclureDependances !== false;
+
+        var entites = {};
+        schemas.TYPES_ENTITES.forEach(function (t) {
+            entites[schemas.CLES_ENTITES[t]] = [];
+        });
+        entites[schemas.CLES_ENTITES[type]].push(projeterEntite(itemPrincipal, type));
+
+        var references = [];
+        if (inclureDependances) {
+            var deps = rassemblerDependances(itemPrincipal, type);
+            Object.keys(deps.entites).forEach(function (clePluriel) {
+                deps.entites[clePluriel].forEach(function (entite) {
+                    // Pas de doublon si la dépendance est déjà présente
+                    // (ex. item principal lui-même).
+                    var dejaLa = entites[clePluriel].some(function (e) { return e.id === entite.id; });
+                    if (!dejaLa) entites[clePluriel].push(entite);
+                });
+            });
+            references = deps.references;
+        }
+
+        return {
+            format: schemas.FORMAT,
+            manifest: {
+                licence: schemas.LICENCE,
+                licence_url: schemas.LICENCE_URL,
+                dateExport: new Date().toISOString(),
+                auteur: normaliserAuteur(options.identiteAuteur),
+                item_principal: { type: type, id: String(itemPrincipal.id) },
+                chaineAttribution: construireChaineAttribution(itemPrincipal),
+                signature: null,
+                clePublique: null,
+                algorithme: null
+            },
+            entites: entites,
+            references: references,
+            medias: []
+        };
+    };
+
+    window.partageFormat = partageFormat;
+})();
