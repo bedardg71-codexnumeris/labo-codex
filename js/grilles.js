@@ -2332,7 +2332,8 @@ async function afficherBibliothequeGrilles() {
         titreSection2: 'Grilles disponibles à ajouter à la barre latérale',
         filtresSection2: filtresHTML,
         contenuIdListe2: 'listeGrillesDisponibles',
-        contenuSection2: contenuSection2
+        contenuSection2: contenuSection2,
+        sectionPartages: window.partageSection ? partageSection.genererSectionHTML('grille') : ''
     });
 }
 

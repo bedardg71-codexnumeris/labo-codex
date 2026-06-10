@@ -1,0 +1,326 @@
+/**
+ * partage-section.js — Lot P4 : section « Partagés » dans les bibliothèques
+ *
+ * Chantier #329 Voûte Phase 1, lot P4 (avancé avant le jalon pilote,
+ * décision Grégoire 10 juin 2026 — sans elle, un .lcz importé n'est
+ * utilisable nulle part dans l'app).
+ * Plan canonique : `plans de travail/PLAN-VOUTE-PHASES-1-8.md`.
+ *
+ * Rôle : chaque modale de bibliothèque affiche une 3e section « Partagés
+ * par des collègues » listant les items des clés `partage_*` (importés par
+ * js/partage-import.js). Ces items sont en LECTURE SEULE : la seule action
+ * est « Dupliquer vers mes documents », qui crée une copie MODIFIABLE dans
+ * les collections de l'utilisateur. L'interdiction de référencer un item
+ * partagé dans un assemblage est garantie PAR CONSTRUCTION : les items
+ * partagés n'entrent jamais dans les collections que lisent les sélecteurs.
+ *
+ * DUPLICATION AVEC DÉPENDANCES (cohérent avec le modèle d'export) :
+ *  - grille      → copie + SES cartouches partagées (grilleId remappé,
+ *                  écrites dans `cartouches_{nouvelId}`)
+ *  - cartouche   → duplique SA grille parente entière (une cartouche sans
+ *                  sa grille est inutilisable — ancrage cartouches_{grilleId})
+ *  - production  → copie + sa grille partagée (et les cartouches de
+ *                  celle-ci) si grilleId pointe un item partagé
+ *  - echelle, pratique → copie directe
+ *
+ * CONVENTIONS DE COPIE (mêmes que les `dupliquer*Bibliotheque` existants) :
+ * id neuf via genererIdUnique, auteur = window.BibliothequeUI.obtenirAuteurActif(),
+ * dansBibliotheque: true, metadata_cc retiré ; `inspireDe` posé à l'import
+ * (auteur d'origine + idOriginal, D7) est CONSERVÉ — c'est la trace CC.
+ * Les collections `partage_*` ne sont JAMAIS modifiées par la duplication.
+ *
+ * SÉCURITÉ : les noms viennent de packages importés (déjà sanitisés par
+ * validerPackage niveau 5) — ré-échappés ici par défense en profondeur
+ * avant insertion dans le HTML des cartes.
+ *
+ * Tests : tests/unit/partage-section-P4.test.js (duplication par type,
+ * dépendances, invariant lecture seule) + flux Playwright dans
+ * tests/integration/partage-import-rendu.spec.js.
+ */
+(function () {
+    'use strict';
+
+    var partageSection = {};
+
+    var CLES_STOCKAGE = {
+        grille: 'partage_grilles',
+        echelle: 'partage_echelles',
+        cartouche: 'partage_cartouches',
+        production: 'partage_productions',
+        pratique: 'partage_pratiques'
+    };
+
+    var PREFIXES_ID = {
+        grille: 'GRILLE_',
+        echelle: 'ECH_',
+        cartouche: 'CART_',
+        production: 'PROD_',
+        pratique: 'pratique_'
+    };
+
+    // Modale à rafraîchir après duplication, par type.
+    var FONCTIONS_MODALE = {
+        grille: 'afficherBibliothequeGrilles',
+        echelle: 'afficherBibliothequeEchelles',
+        cartouche: 'afficherBibliothequeCartouches',
+        production: 'afficherBibliothequeProductions',
+        pratique: 'afficherBibliothequePratiques'
+    };
+
+    var IDS_MODALE = {
+        grille: 'modalBibliothequeGrilles',
+        echelle: 'modalBibliothequeEchelles',
+        cartouche: 'modalBibliothequeCartouches',
+        production: 'modalBibliothequeProductions',
+        pratique: 'modalBibliothequePratiques'
+    };
+
+    // ------------------------------------------------------------------
+    // Helpers
+    // ------------------------------------------------------------------
+
+    function lire(cle) {
+        if (typeof db === 'undefined' || !db.getSync) return [];
+        var v = db.getSync(cle, []);
+        return Array.isArray(v) ? v : [];
+    }
+
+    function ecrire(cle, valeur) {
+        db.setSync(cle, valeur);
+    }
+
+    function echapper(s) {
+        if (typeof echapperHtml === 'function') return echapperHtml(s);
+        return String(s)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    function nomDe(item) {
+        return String(item.nom || item.titre || '(sans nom)');
+    }
+
+    function auteurDe(item) {
+        return (item.inspireDe && item.inspireDe.auteur) ? String(item.inspireDe.auteur) : 'auteur inconnu';
+    }
+
+    /**
+     * Copie « propre » d'un item partagé vers les documents de l'utilisateur :
+     * id neuf, auteur actif, visible en sidebar, metadata_cc retiré,
+     * inspireDe (trace de provenance posée à l'import, D7) conservé.
+     */
+    function copiePropre(item, type) {
+        var copie = JSON.parse(JSON.stringify(item));
+        copie.id = genererIdUnique(PREFIXES_ID[type]);
+        copie.auteur = (window.BibliothequeUI && window.BibliothequeUI.obtenirAuteurActif)
+            ? window.BibliothequeUI.obtenirAuteurActif() : 'Inconnu';
+        copie.dansBibliotheque = true;
+        copie.isDemo = false;
+        copie.dateCreation = new Date().toISOString();
+        copie.dateModification = copie.dateCreation;
+        delete copie.metadata_cc;
+        delete copie.dateAjoutBiblio;
+        return copie;
+    }
+
+    function cleProductions() {
+        if (typeof getCleProductions === 'function') return getCleProductions();
+        return window.cle('productions');
+    }
+
+    function ajouterACollection(cle, item) {
+        var collection = lire(cle);
+        collection.push(item);
+        ecrire(cle, collection);
+    }
+
+    // ------------------------------------------------------------------
+    // Duplication (storage pur — testé en Vitest)
+    // ------------------------------------------------------------------
+
+    /**
+     * Duplique une grille partagée + ses cartouches partagées. Retourne
+     * { grille, nbCartouches }. Ne touche jamais aux clés partage_*.
+     */
+    function dupliquerGrillePartagee(grillePartagee) {
+        var copie = copiePropre(grillePartagee, 'grille');
+        ajouterACollection('grillesTemplates', copie);
+
+        var cartouchesLiees = lire(CLES_STOCKAGE.cartouche).filter(function (c) {
+            return c.grilleId === grillePartagee.id;
+        });
+        if (cartouchesLiees.length) {
+            var copies = cartouchesLiees.map(function (c) {
+                var cc = copiePropre(c, 'cartouche');
+                cc.grilleId = copie.id;
+                return cc;
+            });
+            // Clé neuve (ancrage de la grille copiée) — rien d'existant à préserver.
+            ecrire('cartouches_' + copie.id, copies);
+        }
+        return { grille: copie, nbCartouches: cartouchesLiees.length };
+    }
+
+    /**
+     * Duplique un item partagé vers les documents de l'utilisateur, avec
+     * ses dépendances. Retourne { libelle, idNouveau } ou null si impossible
+     * (item introuvable, cartouche orpheline).
+     */
+    partageSection.dupliquerVersMesDocuments = function (type, id) {
+        var item = null;
+        lire(CLES_STOCKAGE[type] || '').forEach(function (i) {
+            if (i.id === id) item = i;
+        });
+        if (!item) {
+            console.error('[partage-section] Item partagé introuvable :', type, id);
+            return null;
+        }
+
+        if (type === 'grille') {
+            var resG = dupliquerGrillePartagee(item);
+            return {
+                idNouveau: resG.grille.id,
+                libelle: 'Grille « ' + nomDe(item) + ' » copiée dans tes documents'
+                    + (resG.nbCartouches ? ' (avec ' + resG.nbCartouches + ' cartouche' + (resG.nbCartouches > 1 ? 's' : '') + ')' : '')
+            };
+        }
+
+        if (type === 'cartouche') {
+            // Une cartouche est inutilisable sans sa grille (ancrage
+            // cartouches_{grilleId}) : on duplique la grille parente entière.
+            var parent = null;
+            lire(CLES_STOCKAGE.grille).forEach(function (g) {
+                if (g.id === item.grilleId) parent = g;
+            });
+            if (!parent) {
+                alert('Cette cartouche est liée à une grille qui n\'est plus dans tes partagés — impossible de la dupliquer seule.');
+                return null;
+            }
+            var resC = dupliquerGrillePartagee(parent);
+            return {
+                idNouveau: resC.grille.id,
+                libelle: 'Grille « ' + nomDe(parent) + ' » copiée avec ses ' + resC.nbCartouches
+                    + ' cartouche' + (resC.nbCartouches > 1 ? 's' : '')
+            };
+        }
+
+        if (type === 'production') {
+            var copieP = copiePropre(item, 'production');
+            var complement = '';
+            if (copieP.grilleId) {
+                var grilleLiee = null;
+                lire(CLES_STOCKAGE.grille).forEach(function (g) {
+                    if (g.id === copieP.grilleId) grilleLiee = g;
+                });
+                if (grilleLiee) {
+                    var resPG = dupliquerGrillePartagee(grilleLiee);
+                    copieP.grilleId = resPG.grille.id;
+                    complement = ' (avec sa grille' + (resPG.nbCartouches ? ' et ' + resPG.nbCartouches + ' cartouche' + (resPG.nbCartouches > 1 ? 's' : '') : '') + ')';
+                } else if (copieP.grilleId.indexOf('PARTAGE_') === 0) {
+                    // Référence partagée introuvable : ne JAMAIS laisser une
+                    // copie utilisateur pointer vers le namespace partage_*.
+                    console.warn('[partage-section] Grille partagée introuvable pour la production', id, '— référence vidée');
+                    copieP.grilleId = '';
+                    complement = ' (sa grille n\'était plus disponible : à réassocier)';
+                }
+            }
+            ajouterACollection(cleProductions(), copieP);
+            return {
+                idNouveau: copieP.id,
+                libelle: 'Production « ' + nomDe(item) + ' » copiée dans tes documents' + complement
+            };
+        }
+
+        if (type === 'echelle') {
+            var copieE = copiePropre(item, 'echelle');
+            ajouterACollection('echellesTemplates', copieE);
+            return { idNouveau: copieE.id, libelle: 'Échelle « ' + nomDe(item) + ' » copiée dans tes documents' };
+        }
+
+        if (type === 'pratique') {
+            var copiePr = copiePropre(item, 'pratique');
+            ajouterACollection(window.cle('pratiquesConfigurables'), copiePr);
+            return { idNouveau: copiePr.id, libelle: 'Pratique « ' + nomDe(item) + ' » copiée dans tes documents' };
+        }
+
+        console.error('[partage-section] Type inconnu :', type);
+        return null;
+    };
+
+    // ------------------------------------------------------------------
+    // Handler data-action (bouton « Dupliquer » des cartes)
+    // ------------------------------------------------------------------
+
+    /** data-action="partageSection.dupliquer" param=type param2=id */
+    partageSection.dupliquer = function (type, id) {
+        var resultat = partageSection.dupliquerVersMesDocuments(type, id);
+        if (!resultat) return;
+        if (typeof notifications !== 'undefined' && notifications.succes) {
+            notifications.succes(resultat.libelle);
+        }
+        // Rafraîchir la modale d'où l'action vient (la copie apparaît en
+        // Section 1 — elle est dansBibliotheque: true).
+        var fn = window[FONCTIONS_MODALE[type]];
+        if (typeof fn === 'function' && document.getElementById(IDS_MODALE[type])) {
+            fn();
+        }
+    };
+
+    // ------------------------------------------------------------------
+    // Rendu de la section « Partagés » (HTML pour creerModal)
+    // ------------------------------------------------------------------
+
+    function descriptionPour(type, item) {
+        if (type === 'grille') {
+            var nb = lire(CLES_STOCKAGE.cartouche).filter(function (c) {
+                return c.grilleId === item.id;
+            }).length;
+            var nbCrit = (item.criteres || []).length;
+            return nbCrit + ' critère' + (nbCrit > 1 ? 's' : '')
+                + (nb ? ' · ' + nb + ' cartouche' + (nb > 1 ? 's' : '') + ' incluse' + (nb > 1 ? 's' : '') : '');
+        }
+        if (type === 'echelle') {
+            var nbNiv = (item.niveaux || []).length;
+            return nbNiv + ' niveau' + (nbNiv > 1 ? 'x' : '');
+        }
+        return String(item.description || item.contexte || item.objectif || '');
+    }
+
+    /**
+     * HTML de la section « Partagés par des collègues » pour un type, à
+     * passer à window.BibliothequeUI.creerModal via `sectionPartages`. Chaîne vide
+     * s'il n'y a aucun item partagé de ce type (la section n'apparaît pas).
+     */
+    partageSection.genererSectionHTML = function (type) {
+        var items = lire(CLES_STOCKAGE[type] || '');
+        if (!items.length) return '';
+
+        var cartes = items.map(function (item) {
+            return window.BibliothequeUI.renderCarteDisponible({
+                nom: echapper(window.BibliothequeUI.formaterTitre(nomDe(item))),
+                id: item.id,
+                badgeSource: '<span class="badge-source badge-source--partage">Partagé</span>',
+                metadonnees: echapper('par ' + auteurDe(item)),
+                description: descriptionPour(type, item),
+                boutonPrincipal: {
+                    label: type === 'cartouche' ? 'Dupliquer avec sa grille' : 'Dupliquer vers mes documents',
+                    action: 'partageSection.dupliquer',
+                    param: type,
+                    param2: item.id,
+                    classe: 'btn-confirmer',
+                    title: 'Créer une copie modifiable dans tes documents (l\'original partagé reste intact)'
+                }
+            });
+        }).join('');
+
+        return '<h3 class="biblio-section-titre">Partagés par des collègues</h3>' +
+            '<p style="color: var(--gris-clair); font-size: 0.9em; margin-bottom: 12px;">' +
+                'Importés par fichier .lcz, en lecture seule. « Dupliquer » crée une copie ' +
+                'modifiable dans tes documents — l\'attribution d\'origine est conservée. ' +
+                'Gestion des packages : Réglages › Données.' +
+            '</p>' +
+            cartes;
+    };
+
+    window.partageSection = partageSection;
+})();

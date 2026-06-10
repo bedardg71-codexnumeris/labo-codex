@@ -3638,6 +3638,18 @@ body:not(.mode-clair) .badge-source--demo {
     background: rgba(156, 39, 176, 0.18);
     border-color: #9c27b0;
 }
+/* Badge Partagé (#329 P4) — sarcelle pour les items importés par .lcz */
+.badge-source--partage {
+    color: #00796b;
+    background: #e0f2f1;
+    border-color: #00897b;
+}
+.mode-sombre .badge-source--partage,
+body:not(.mode-clair) .badge-source--partage {
+    color: #80cbc4;
+    background: rgba(0, 137, 123, 0.18);
+    border-color: #00897b;
+}
 .badge-source--id {
     background: var(--surface-carte, #1a3a48);
     color: var(--texte-secondaire, #8aa4b0);

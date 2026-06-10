@@ -734,6 +734,8 @@
      * @param {string} config.filtresSection2 - HTML des filtres avant Section 2
      * @param {string} config.contenuSection2 - HTML du contenu de la Section 2
      * @param {string} [config.contenuIdListe2] - ID du conteneur Section 2
+     * @param {string} [config.sectionPartages] - HTML optionnel de la section
+     *        « Partagés par des collègues » (#329 P4, partageSection.genererSectionHTML)
      */
     BibliothequeUI.creerModal = function (config) {
         // Idempotence : si une instance avec ce modalId existe déjà (cas typique
@@ -771,6 +773,8 @@
                 '<div id="' + (config.contenuIdListe2 || '') + '">' +
                     config.contenuSection2 +
                 '</div>' +
+
+                (config.sectionPartages || '') +
 
             '</div>' +
         '</div>';
