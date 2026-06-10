@@ -1,4 +1,56 @@
 <!-- =====================================================================
+     SESSION 10 juin 2026 (Claude Code) — #329 VOÛTE PHASE 1, LOT P1 LIVRÉ
+     (code complet, SANS bump, NON poussé). HEAD main `58772cea`.
+     434 Vitest + 47 Playwright = 481 VERTS (dont 27 nouvelles sentinelles P1).
+       • OUVERTURE : rituel conforme — relais attendait `15e570ec`+2 avance ;
+         constaté `0d150e95` synchro origin, 1.6.3 (0610-0653) : la release
+         Lot 1 #328 et la consolidation #329 avaient été poussées entre-temps.
+         Prémisse « entamer #329 » cohérente. Skills chargés : Securite_donnees
+         (PRIORITÉ), integrite_globaux, hygiene (résumé), plan + spec relus.
+       • LOT P1 LIVRÉ en 3 commits (découpage spec §7) :
+         `661d671c` js/partage-schemas.js — constantes + schémas fermés des
+           5 entités + manifeste AVEC bloc signature (D2) + LIMITES.
+         `c94e9fbe` js/partage-validation.js — validerPackage 6 niveaux
+           (→ {valide, erreurs, preview, packageNettoye}) + _testPartagePhase1
+           (14 scénarios console, pour le terrain Safari).
+         `58772cea` js/partage-format.js (construirePackage, projection +
+           dépendances) + index.html (3 scripts avant import-export.js) +
+           tests/unit/partage-phase1-P1.test.js (27 tests).
+       • ÉCARTS SPEC D'AVRIL ACTÉS (formes réelles relevées dans le code) :
+         (a) cartouche = {id, grilleId, nom, criteres, niveaux, commentaires,
+             contexte…} — le « niveau/descripteurs[] » de la spec n'existe
+             pas ; schémas bâtis sur pack-demo v20.3+/grilles.js/wizard-v2.
+         (b) modèle de dépendances réel : grille → cartouches ; production →
+             grille + cartouches ; AUCUN lien grille → échelle dans les
+             données (l'exemple de la spec était fictif).
+         (c) construirePackage exige options.type (les entités internes ne
+             portent pas leur type — la spec ne disait pas d'où il venait).
+         (d) pratique.configuration/calcul_note/echelle/seuils = 'objet-libre'
+             (validation STRUCTURELLE : profondeur ≤10, types JSON purs,
+             chaînes ≤5000, zéro clé `_`) — inénumérables par famille (#319).
+         (e) niveau 5 réconcilié avec SKILL_Securite §9.4 règle 14 : pattern
+             dangereux → REJET CONTENU_DANGEREUX ; HTML bénin → ré-échappé
+             sans rejet. Le résultat expose packageNettoye (clone sanitisé,
+             flags démo retirés) — c'est LUI que P3 intégrera.
+         (f) DÉFAUT POSÉ À CONFIRMER avant P2 : taille max package 50 Mo
+             (partage-schemas.LIMITES, suggestion du skill §9.4 r.16) ;
+             maxItemsParType 50, profondeur 10, chaîne libre 5000 = défensifs.
+       • COEXISTENCE DÉTECTÉE EN COURS DE SESSION : js/indices.js modifié
+         (44+/21-) + tests/unit/sentinelle-assiduite-bigroupes-330.test.js
+         apparus dans le working tree PENDANT cette session = une session
+         parallèle traite #330. RIEN embarqué dans mes commits (diffs
+         vérifiés fichier par fichier). import-export.js NON touché par #329
+         cette session (point de contact §6 du plan, RAS).
+       • RESTE (prochaine session #329 ou GO terrain) :
+         1. VALIDATION TERRAIN Grégoire : console Safari (Mac puis iPad) →
+            `_testPartagePhase1()` → attendu « 14/14 tests réussis » + zéro
+            régression visuelle au boot. Sur GO : release minor + push
+            (coordonner avec la session #330 — UNE release à la fois, §6).
+         2. REVUE DU FORMAT avec Grégoire avant P2 (risque « gel prématuré »,
+            plan §7) : confirmer 50 Mo, le bloc signature, les champs exclus
+            (auteur/coursId/dateEcheance/etablissement au niveau entité).
+         3. Puis lot F (js/signature.js, ECDSA P-256) — session dédiée.
+     ---------------------------------------------------------------------
      SESSION 10 juin 2026 (Claude Code) — ÉTAT DES LIEUX + AUDIT SSOT
      `modalitesEvaluation` (lecture seule, AUCUN code applicatif).
      HEAD main `80cb7f65` (1.6.1, build 0610-0512), SYNCHRO origin.
