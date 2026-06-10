@@ -165,7 +165,9 @@
      */
     function confirmerExport(type, entite, dependances) {
         return new Promise(function (resolve) {
-            var overlay = el('div', 'modal-overlay');
+            // --partage : au-dessus des modales de bibliothèque (z-index 10000)
+            // d'où l'action est déclenchée (bug terrain 10 juin 2026).
+            var overlay = el('div', 'modal-overlay modal-overlay--partage');
             overlay.id = 'modalPartageExport';
 
             var carte = el('div', 'modal-contenu modal-compact');

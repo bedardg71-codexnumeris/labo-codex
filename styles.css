@@ -4428,6 +4428,15 @@ body:not(.mode-clair) .badge-source--demo {
     display: block;
 }
 
+/* #329 lots P2/T — modales de partage construites dynamiquement
+   (partage-export confirmation CC, trust-tofu alerte clé changée) :
+   déclenchées DEPUIS les modales de bibliothèque (z-index 10000), elles
+   doivent passer au-dessus. Précédent : aide accompagnement à 10002
+   (css/accompagnement.css). Bug terrain Grégoire 10 juin 2026. */
+.modal-overlay--partage {
+    z-index: 10005;
+}
+
 .modal-contenu {
     max-width: 800px;
     margin: 50px auto;

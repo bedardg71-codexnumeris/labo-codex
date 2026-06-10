@@ -1,7 +1,7 @@
 # Suivi des bugs testeurs
 
 > **Objectif** : Tracker les bugs rapportés par les testeurs pour éviter le travail en double.
-> **Dernière mise à jour** : 8 juin 2026 — #138 (icônes du popover mobile en carré noir : SVG non suivis par git) + #115 (404 `icon-files.svg`) corrigés en 1.4.2, avec sentinelle anti-récurrence. Avant : #137 (assistant « pas-certain » → inférence comportementale, 1.3.0) ; 5 juin #131-#135 (wizard, lot #317) ; 3 juin #130. Fonction « simuler/comparer des pratiques » → BACKLOG #307. Calcul par famille du profil = Session C (#303). Ouverts : #114, #116, #118, #121.
+> **Dernière mise à jour** : 10 juin 2026 — #139 (modale « Exporter pour partager » cachée derrière la modale de bibliothèque, corrigé même session, classe `.modal-overlay--partage` z-index 10005). Avant : 8 juin #138 (icônes du popover mobile en carré noir : SVG non suivis par git) + #115 (404 `icon-files.svg`) corrigés en 1.4.2, avec sentinelle anti-récurrence. Avant : #137 (assistant « pas-certain » → inférence comportementale, 1.3.0) ; 5 juin #131-#135 (wizard, lot #317) ; 3 juin #130. Fonction « simuler/comparer des pratiques » → BACKLOG #307. Calcul par famille du profil = Session C (#303). Ouverts : #114, #116, #118, #121.
 
 ---
 
@@ -17,6 +17,14 @@
 ---
 
 ---
+
+## Corrigés (10 juin 2026 — modale d'export de partage cachée derrière la bibliothèque)
+
+> Corrigé en **code** même session (#329 lot P2, avant release). Rapport `BUG_grégoire_2026-06-10_10-54-41.txt`.
+
+| # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
+|---|---------|--------------|---------|-------|-------------|------------|
+| 139 | Grégoire (terrain Mac — 10 juin 2026) | 10 juin 2026 | 10 juin 2026 (même session, pré-release P2) | 0610-* | **Modale « Exporter pour partager » invisible** quand l'action est déclenchée depuis le menu ⋮ d'une bibliothèque : elle se rendait DERRIÈRE la modale de bibliothèque. Cause : `.modal-overlay` générique = z-index 9999, modales de bibliothèque = 10000. La modale apparaissait seulement après fermeture manuelle de la bibliothèque. | Classe `.modal-overlay--partage` (z-index 10005, précédent : aide accompagnement à 10002) appliquée aux DEUX modales dynamiques du chantier #329 : confirmation d'export (partage-export.js) ET alerte clé changée (trust-tofu.js — même piège latent pour P3). |
 
 ## Corrigés (8 juin 2026 — icônes manquantes : SVG non suivis par git)
 
