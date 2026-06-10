@@ -132,6 +132,18 @@
      9 cas dont verrou anti-réintroduction. 516 Vitest + 53 Playwright =
      569 VERTS. SUIVI-BUGS #141. RÉPARATION des données de Justin :
      Liste → ligne sans badge → Actions → Supprimer l'évaluation.
+     SUITE (18h) — BUG TERRAIN #142 CORRIGÉ + RELEASE 1.11.3 (build
+     0610-1802) : « Aucun codex actif » au boot malgré données chargées.
+     CAUSE : localStorage saturé (~8,9 Mo Mac) → _codex_etat refoulé en
+     IDB seulement → lu trop tôt (DOMContentLoaded, avant db-ready) par
+     initialiserCodex, jamais relu. FIX : relecture à db-ready (garde
+     window.dbReady + garde anti-écrasement), sentinelle statique 4 cas.
+     520 Vitest + 53 Playwright = 573 VERTS. SUIVI-BUGS #142.
+     ⚠ MALADIE DE FOND CONFIRMÉE 2× AUJOURD'HUI (Mac ET iPad) :
+     localStorage saturé — toute petite clé critique écrite à quota plein
+     devient IDB-seulement et vulnérable aux courses/reloads. Traitement =
+     plan « Désaturation localStorage » (mars 2026, vignettes ≈ 80 %) +
+     #334 session D. À PRIORISER au prochain créneau avec la session B.
      REPRISE — AVANT LE JALON PILOTE :
        1. Re-passe iPad du flux import .lcz/duplication (le codex, lui,
           est maintenant chargé sur l'iPad — Netlify déploie 1.11.2).
