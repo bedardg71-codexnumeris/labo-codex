@@ -94,8 +94,47 @@ function calculerCorrelationPearson(x, y) {
    =============================== */
 
 /**
+ * Construit l'ensemble des dates de séances saisies pour le GROUPE de l'étudiant·e.
+ * FIX #220 : depuis le groupe (pas juste l'étudiant·e), pour que les absences comptent.
+ * FIX #330 : restreint aux étudiant·es du MÊME groupe — depuis la consolidation
+ * multi-groupes (chantier D), groupeEtudiants peut contenir le roster du cours
+ * ENTIER ; sans ce filtre, chaque séance saisie de l'autre groupe compte comme
+ * une absence complète pour tout le groupe affiché. Si le groupe de l'étudiant·e
+ * est introuvable (fiche absente ou champ groupe vide), on retombe sur le roster
+ * complet (comportement antérieur, correct pour un roster mono-groupe).
+ *
+ * @param {string} da - Numéro DA de l'étudiant·e dont on calcule l'assiduité
+ * @param {Array} presences - Tableau des fiches de présence
+ * @returns {Set} Dates (YYYY-MM-DD) ayant une saisie pour le groupe
+ */
+function construireDatesSaisiesGroupe(da, presences) {
+    var etudiantsGroupe = obtenirDonneesSelonMode('groupeEtudiants') || [];
+    if (!Array.isArray(etudiantsGroupe)) etudiantsGroupe = [];
+
+    var fiche = null;
+    for (var i = 0; i < etudiantsGroupe.length; i++) {
+        if (String(etudiantsGroupe[i].da) === String(da)) { fiche = etudiantsGroupe[i]; break; }
+    }
+    var groupeEleve = fiche ? (fiche.groupeReel || fiche.groupe || null) : null;
+
+    var dasGroupe = new Set();
+    etudiantsGroupe.forEach(function(e) {
+        if (!e.da) return;
+        if (groupeEleve !== null && (e.groupeReel || e.groupe || null) !== groupeEleve) return;
+        dasGroupe.add(String(e.da));
+    });
+
+    var datesSaisies = new Set();
+    presences.forEach(function(p) {
+        if (p.date && dasGroupe.has(String(p.da))) datesSaisies.add(p.date);
+    });
+    return datesSaisies;
+}
+
+/**
  * Calcule l'assiduité sommative d'un étudiant.
- * Source de vérité : seancesCompletes du groupe-cours × datesSaisies du groupe.
+ * Source de vérité : seancesCompletes du groupe-cours × datesSaisies du groupe
+ * de l'étudiant·e (FIX #330 : jamais celles de l'autre groupe du même cours).
  *
  * Formule : A = Σ periodesPresentes / Σ periodesOffertes
  * - Séances facultatives (RàI) : présent → compte aux deux ; absent → ni l'un ni l'autre
@@ -116,16 +155,8 @@ function calculerAssiduite(da, dateLimite) {
 
     var aujourdhui = dateLimite || new Date().toISOString().split('T')[0];
 
-    // Construire datesSaisies depuis le GROUPE (pas juste l'étudiant) — FIX #220
-    var etudiantsGroupe = obtenirDonneesSelonMode('groupeEtudiants') || [];
-    var dasGroupe = new Set();
-    if (Array.isArray(etudiantsGroupe)) {
-        etudiantsGroupe.forEach(function(e) { if (e.da) dasGroupe.add(String(e.da)); });
-    }
-    var datesSaisies = new Set();
-    presences.forEach(function(p) {
-        if (p.date && dasGroupe.has(String(p.da))) datesSaisies.add(p.date);
-    });
+    // FIX #220 + #330 : dates saisies du groupe de l'étudiant·e (helper partagé)
+    var datesSaisies = construireDatesSaisiesGroupe(da, presences);
 
     var dates = Object.keys(seancesCompletes).filter(function(d) {
         if (d > aujourdhui) return false;
@@ -263,16 +294,8 @@ function calculerAssiduitePourAffichage(da, dateStr, periodesSeanceActuelle) {
 
     var dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
 
-    // Construire datesSaisies depuis le GROUPE — FIX #220
-    var etudiantsGroupe = obtenirDonneesSelonMode('groupeEtudiants') || [];
-    var dasGroupe = new Set();
-    if (Array.isArray(etudiantsGroupe)) {
-        etudiantsGroupe.forEach(function(e) { if (e.da) dasGroupe.add(String(e.da)); });
-    }
-    var datesSaisies = new Set();
-    presences.forEach(function(p) {
-        if (p.date && dasGroupe.has(String(p.da))) datesSaisies.add(p.date);
-    });
+    // FIX #220 + #330 : dates saisies du groupe de l'étudiant·e (helper partagé)
+    var datesSaisies = construireDatesSaisiesGroupe(da, presences);
 
     var presencesEtudiant = presences.filter(function(p) { return p.da === da; });
 
