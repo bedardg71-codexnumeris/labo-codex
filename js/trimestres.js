@@ -164,6 +164,31 @@
     }
 
     /**
+     * Énumère les trimestres EXPLOITABLES pour bâtir des clés namespacées.
+     *
+     * Invariant (#300) : un trimestre sans `id` ne peut porter aucune donnée
+     * namespacée — la clé `${id}_suffixe` deviendrait `_suffixe` (mauvais
+     * namespace → lectures/écritures muettes hors cible, agrégations amputées).
+     * On écarte donc tout trimestre à `id` falsy.
+     *
+     * LECTURE SEULE, JAMAIS DE RÉÉCRITURE : au démarrage, avant l'évènement
+     * `db-ready`, `getSync` peut rendre un localStorage périmé (ids vides) le
+     * temps que `syncToLocalStorageCache` réhydrate depuis IndexedDB. Persister
+     * la liste filtrée effacerait alors des trimestres réels du stockage. On
+     * filtre uniquement la valeur retournée, on ne touche pas au stockage.
+     *
+     * Tout code qui construit une clé `${trimestre.id}_…` DOIT énumérer via
+     * cette fonction plutôt que `db.getSync('trimestres')` directement.
+     *
+     * @returns {Array} Trimestres dont l'`id` est non vide.
+     */
+    function enumererTrimestres() {
+        const trimestres = db.getSync('trimestres', []);
+        if (!Array.isArray(trimestres)) return [];
+        return trimestres.filter(t => t && t.id);
+    }
+
+    /**
      * Obtient le trimestre actuellement actif
      * @returns {Object|null} Le trimestre actif ou null
      */
@@ -1875,6 +1900,7 @@
 
     // Fonctions publiques
     window.obtenirTrimestres = obtenirTrimestres;
+    window.enumererTrimestres = enumererTrimestres;
     window.obtenirTrimestreActif = obtenirTrimestreActif;
     window.obtenirTrimestreId = obtenirTrimestreId;
     window.cle = cle;

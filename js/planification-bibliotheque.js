@@ -120,7 +120,7 @@ function seederDemoSiNecessaire() {
 function listerTrimestresAvecAlignements() {
     var trimestres = [];
     try {
-        var allTrim = db.getSync('trimestres') || [];
+        var allTrim = enumererTrimestres();
         for (var i = 0; i < allTrim.length; i++) {
             var code = allTrim[i].id;
             var donnees = db.getSync(code + '_planification_mindmap', null);

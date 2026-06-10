@@ -894,7 +894,7 @@
 
         // Parcourir tous les trimestres pour trouver les groupe-cours
         try {
-            const trimestres = db.getSync('trimestres') || [];
+            const trimestres = enumererTrimestres();
             trimestres.forEach(trim => {
                 const groupesCours = db.getSync(`${trim.id}_groupesCours`) || [];
                 groupesCours.forEach(gc => {
@@ -938,7 +938,7 @@
 
         // Parcourir les évaluations de tous les trimestres
         try {
-            const trimestres = db.getSync('trimestres') || [];
+            const trimestres = enumererTrimestres();
             trimestres.forEach(trim => {
                 const evaluations = db.getSync(`${trim.id}_evaluationsSauvegardees`) || [];
                 evaluations.forEach(ev => {
@@ -965,7 +965,7 @@
 
         // Parcourir les évaluations de tous les trimestres
         try {
-            const trimestres = db.getSync('trimestres') || [];
+            const trimestres = enumererTrimestres();
             trimestres.forEach(trim => {
                 const evaluations = db.getSync(`${trim.id}_evaluationsSauvegardees`) || [];
                 evaluations.forEach(ev => {
@@ -1016,7 +1016,7 @@
 
         // Parcourir les évaluations de tous les trimestres
         try {
-            const trimestres = db.getSync('trimestres') || [];
+            const trimestres = enumererTrimestres();
             trimestres.forEach(trim => {
                 const evaluations = db.getSync(`${trim.id}_evaluationsSauvegardees`) || [];
                 evaluations.forEach(ev => {
@@ -1047,7 +1047,7 @@
 
         // Vérifier les cours qui l'utilisent
         try {
-            const trimestres = db.getSync('trimestres') || [];
+            const trimestres = enumererTrimestres();
             trimestres.forEach(trim => {
                 const groupesCours = db.getSync(`${trim.id}_groupesCours`) || [];
                 groupesCours.forEach(gc => {
@@ -1083,7 +1083,7 @@
 
         // Vérifier les évaluations
         try {
-            const trimestres = db.getSync('trimestres') || [];
+            const trimestres = enumererTrimestres();
             let evalCount = 0;
             trimestres.forEach(trim => {
                 const evaluations = db.getSync(`${trim.id}_evaluationsSauvegardees`) || [];
@@ -1114,7 +1114,7 @@
 
         // Vérifier les évaluations (avertissement seulement)
         try {
-            const trimestres = db.getSync('trimestres') || [];
+            const trimestres = enumererTrimestres();
             let evalCount = 0;
             trimestres.forEach(trim => {
                 const evaluations = db.getSync(`${trim.id}_evaluationsSauvegardees`) || [];
@@ -1160,7 +1160,7 @@
 
         // Vérifier les évaluations qui utilisent cette production
         try {
-            const trimestres = db.getSync('trimestres') || [];
+            const trimestres = enumererTrimestres();
             let evalCount = 0;
             trimestres.forEach(trim => {
                 const evaluations = db.getSync(`${trim.id}_evaluationsSauvegardees`) || [];
