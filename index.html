@@ -9690,17 +9690,34 @@
                     </div>
 
                     <!-- ========================================
-                         CARTE 4 : VOÛTE (placeholder « à venir »)
+                         CARTE 4 : PARTAGE ENTRE COLLÈGUES (#329 P3 — import .lcz)
                          ======================================== -->
-                    <div class="carte" style="opacity: 0.65;">
-                        <h3 class="carte-titre-bleu" style="display: flex; align-items: center; justify-content: space-between;" data-tooltip="donnees-voute">
-                            <span>Voûte <em style="font-weight: 400; font-size: 0.85em; color: var(--gris-moyen)">(bibliothèque partagée)</em></span>
-                            <span class="badge-archive" style="font-weight: 400;">À venir</span>
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu" data-tooltip="donnees-voute">
+                            Partage entre collègues <em style="font-weight: 400; font-size: 0.85em; color: var(--gris-moyen)">(fichiers .lcz signés)</em>
                         </h3>
-                        <p class="text-muted u-mb-0">
-                            Bibliothèque partagée entre enseignant·es pour mutualiser grilles, échelles, productions et cartouches. Tu pourras y déposer ta config et y emprunter celle de collègues (CC BY-NC-SA).
-                            <br><em class="u-texte-gris u-texte-09">Disponible dans une prochaine version (cf. ECOSYSTEME-DONNEES.md, priorité 6).</em>
+                        <p class="text-muted u-mb-20">
+                            Importe une ressource partagée par un·e collègue : grille, échelle, cartouche, production ou pratique de notation.
+                            Chaque fichier est vérifié avant intégration — structure, signature de la personne qui l'a créé, continuité de sa clé.
+                            <br><em class="u-texte-gris u-texte-09">Pour partager tes propres documents : menu ⋮ d'une bibliothèque › « Exporter pour partager ».</em>
                         </p>
+
+                        <div id="partage-zone-depot" class="carte-bleu-pale-p15" style="text-align: center; border: 2px dashed var(--gris-moyen); cursor: pointer;"
+                             data-action="partageImport.ouvrirSelecteurFichier" role="button" tabindex="0"
+                             aria-label="Importer un fichier .lcz (glisser-déposer ou sélection)">
+                            <p class="u-mb-10"><strong>Dépose un fichier .lcz ici</strong></p>
+                            <p class="u-mb-15 u-texte-09" style="color: var(--gris-moyen)">ou</p>
+                            <button class="btn btn-principal" type="button" data-action="partageImport.ouvrirSelecteurFichier">
+                                Choisir un fichier…
+                            </button>
+                        </div>
+                        <input type="file" id="partage-fichier-import" accept=".lcz" style="display: none"
+                               data-on-change="partageImport.surSelectionFichier">
+
+                        <div class="u-mt-20">
+                            <h4 class="u-mb-10 u-texte-bleu">Packages importés</h4>
+                            <div id="partage-imports-liste"></div>
+                        </div>
                     </div>
 
                     <!-- ========================================
@@ -14688,6 +14705,7 @@
     <script src="js/trust-tofu.js?v=2026061003"></script>
     <script src="js/partage-format.js?v=2026061002"></script>
     <script src="js/partage-export.js?v=2026061004"></script>
+    <script src="js/partage-import.js?v=2026061005"></script>
     <script src="js/import-export.js?v=20260511c"></script> <!-- Beta 99.41 : #264 progression sur exporterConfigurationComplete + executerExport -->
     <script src="js/codex.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #239 menu adapté navigateur + #243 actionComparer rapport exportable -->
     <script src="js/statistiques.js?v=20260529a"></script> <!-- Beta 99.76 b0529-1139 : refonte chantier B — libellé trimestre via trimestre actif -->

@@ -71,6 +71,12 @@
 
         // Rafraîchir les statistiques des snapshots
         chargerStatistiquesSnapshots();
+
+        // Carte « Partage entre collègues » (#329 P3) : liste des packages
+        // importés + câblage de la zone de dépôt
+        if (window.partageImport && typeof partageImport.rafraichirSection === 'function') {
+            partageImport.rafraichirSection();
+        }
     }
 
     // =========================================================================
