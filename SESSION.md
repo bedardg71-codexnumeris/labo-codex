@@ -81,14 +81,26 @@
      (« tout fonctionne bien ») ; entrée changelog 1.11 ajoutée, puce
      « l'import arrive » retirée de 1.10 (jamais partie dans un build).
      564 tests verts. L'AVANT-PILOTE EST CODE-COMPLET (P1+F+T+P2+P3+P4).
+     SUITE (13h) — PRÉALABLES HORS-CODE DU PILOTE LIVRÉS :
+       • docs/securite/MODELE-CONFIANCE.md (E8/D-V3, rédigé ici sur
+         décision Grégoire — pas Cowork) : cercles de confiance, garanties
+         ET limites de chaque mécanisme (validation/signature/TOFU),
+         couverture M1-M8, gouvernance D4 (critères d'acceptation 4 volets,
+         appel, révocation, délégation, succession). Source des textes P7.
+       • docs/securite/CHECKLIST-MODERATION.md (D4 opérationnel, version
+         phase fichiers SANS serveur) : audit avant rediffusion,
+         signalement, révocation (oublierAuteur + avis aux pilotes),
+         journal de modération (gabarit), garde-fous personnels.
+       • D-V2 TRANCHÉE (Grégoire) : « partage » partout dans l'UI ;
+         « Voûte » réservé aux docs d'architecture. Dernière occurrence UI
+         corrigée (intro Réglages › Données : « Partage (ressources
+         signées entre collègues) »).
      REPRISE — AVANT LE JALON PILOTE :
-       1. Hors code : MODELE-CONFIANCE.md (Cowork, D-V3) ; trancher D-V2
-          (nom UI) avec les textes du guide P7 ; checklist de modération
-          manuelle (D4).
-       2. Re-passe iPad du flux import/duplication, à l'occasion.
-       3. ETAT-PROJET.md + en-tête BACKLOG.md à rafraîchir (écrivain
+       1. Re-passe iPad du flux import/duplication (iPad en cours de
+          restauration le 10 juin — espace saturé réglé, cf. #334).
+       2. ETAT-PROJET.md + en-tête BACKLOG.md à rafraîchir (écrivain
           unique, quand la session #334 a posé ses commits).
-       4. P5-P8 : ne PAS détailler avant le bilan du pilote (sauf décision
+       3. P5-P8 : ne PAS détailler avant le bilan du pilote (sauf décision
           contraire — P8, retrait des paires JSON, dépend du terrain).
      =====================================================================
      SESSION 10 juin 2026 AM-2 (Claude Code) — #329 VOÛTE : REVUE DU FORMAT
