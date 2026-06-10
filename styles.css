@@ -4437,6 +4437,13 @@ body:not(.mode-clair) .badge-source--demo {
     z-index: 10005;
 }
 
+/* #329 lot P3 — zone de dépôt .lcz (Réglages › Données) : retour visuel
+   pendant le survol d'un glisser-déposer. */
+#partage-zone-depot.partage-zone-depot--survol {
+    border-color: var(--bleu-principal);
+    background: var(--surface-element);
+}
+
 .modal-contenu {
     max-width: 800px;
     margin: 50px auto;

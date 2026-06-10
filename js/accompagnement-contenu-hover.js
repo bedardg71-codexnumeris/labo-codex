@@ -191,7 +191,7 @@ const TOOLTIPS = {
     'donnees-codex-data':
         'Format léger sans blobs (5–30 Mo), multi-trimestres, pour la recherche longitudinale au Labo. À venir : extraction depuis tes Archives.',
     'donnees-voute':
-        'Bibliothèque partagée entre enseignants pour mutualiser grilles, échelles, productions et cartouches. À venir.',
+        'Importe les ressources partagées par tes collègues (fichiers .lcz signés). Chaque fichier est vérifié : structure, signature, continuité de la clé de la personne.',
     'donnees-config-export':
         'ZIP léger sans données étudiants : grilles, échelles, productions, cartouches. Pour partager avec un·e collègue (CC BY-NC-SA).',
     'donnees-export-recherche':
