@@ -15840,7 +15840,8 @@ tr.etudiant-inactif td {
 
 /* --- Badges cycle de vie des blobs --- */
 .travaux-badge-facsimile,
-.travaux-badge-exporte {
+.travaux-badge-exporte,
+.travaux-badge-manquant {
     position: absolute;
     bottom: 2px;
     right: 2px;
@@ -15856,6 +15857,10 @@ tr.etudiant-inactif td {
 }
 .travaux-badge-exporte {
     background: var(--bleu-clair, #3498db);
+    color: #fff;
+}
+.travaux-badge-manquant {
+    background: var(--rouge-danger, #dc3545);
     color: #fff;
 }
 .travaux-miniature-thumb,

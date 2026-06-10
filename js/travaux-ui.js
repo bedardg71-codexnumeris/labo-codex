@@ -2898,6 +2898,8 @@
                 badge = '<span class="travaux-badge-facsimile" title="Version allegee">FAC</span>';
             } else if (f.blobStatut === 'exporte') {
                 badge = '<span class="travaux-badge-exporte" title="Exporte">EXP</span>';
+            } else if (f.blobStatut === 'manquant') {
+                badge = '<span class="travaux-badge-manquant" title="Fichier manquant (import incomplet)">MNQ</span>';
             }
 
             html += `
@@ -2962,6 +2964,8 @@
                 badge = '<span class="travaux-badge-facsimile" title="Version allegee">FAC</span>';
             } else if (f.blobStatut === 'exporte') {
                 badge = '<span class="travaux-badge-exporte" title="Exporte">EXP</span>';
+            } else if (f.blobStatut === 'manquant') {
+                badge = '<span class="travaux-badge-manquant" title="Fichier manquant (import incomplet)">MNQ</span>';
             }
 
             html += `
@@ -3217,6 +3221,10 @@
                     } else if (statut === 'exporte') {
                         badgeStatut.textContent = 'Exporte';
                         badgeStatut.className = 'travaux-badge-exporte';
+                        badgeStatut.classList.remove('u-hide');
+                    } else if (statut === 'manquant') {
+                        badgeStatut.textContent = 'Fichier manquant — rouvre le codex après avoir libéré de l\'espace';
+                        badgeStatut.className = 'travaux-badge-manquant';
                         badgeStatut.classList.remove('u-hide');
                     } else {
                         badgeStatut.classList.add('u-hide');
