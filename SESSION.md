@@ -76,21 +76,20 @@
          CONSERVÉ. Invariant testé : duplication ne modifie jamais
          partage_*. 12 sentinelles Vitest + flux Playwright (section rendue
          + duplication). 511 Vitest + 53 Playwright = 564 VERTS.
-     REPRISE — VALIDATION TERRAIN P3+P4 puis JALON PILOTE :
-       1. Terrain Grégoire Mac + iPad : hard refresh, _testPartageImportP3()
-          (7 vérifications) + parcours réel : exporter une grille en .lcz
-          (menu ⋮) puis l'importer via la carte (statut « premier contact »
-          attendu — l'auto-import présente ta propre clé, déjà connue après
-          le 1er passage → « vérifiée » ensuite), Retirer, réimporter.
-          FAIT sur Mac (PM, via la carte) ; reste re-passe avec les boutons
-          biblios + iPad à l'occasion.
-       2. Après terrain : node scripts/release.mjs minor (1.11.0) + entrée
-          changelog « import » (l'entrée 1.10 dit encore « l'import arrive
-          dans une prochaine version »).
-       3. Avant jalon pilote (hors code) : MODELE-CONFIANCE.md (Cowork,
-          D-V3) ; trancher D-V2 avec les textes P7.
-       4. ETAT-PROJET.md + en-tête BACKLOG.md à rafraîchir (écrivain
+     CLÔTURE (même session, 12h45) — P3+P4 LIVRÉS, RELEASE 1.11.0 (build
+     0610-1242) : terrain Mac validé par Grégoire sur le parcours complet
+     (« tout fonctionne bien ») ; entrée changelog 1.11 ajoutée, puce
+     « l'import arrive » retirée de 1.10 (jamais partie dans un build).
+     564 tests verts. L'AVANT-PILOTE EST CODE-COMPLET (P1+F+T+P2+P3+P4).
+     REPRISE — AVANT LE JALON PILOTE :
+       1. Hors code : MODELE-CONFIANCE.md (Cowork, D-V3) ; trancher D-V2
+          (nom UI) avec les textes du guide P7 ; checklist de modération
+          manuelle (D4).
+       2. Re-passe iPad du flux import/duplication, à l'occasion.
+       3. ETAT-PROJET.md + en-tête BACKLOG.md à rafraîchir (écrivain
           unique, quand la session #334 a posé ses commits).
+       4. P5-P8 : ne PAS détailler avant le bilan du pilote (sauf décision
+          contraire — P8, retrait des paires JSON, dépend du terrain).
      =====================================================================
      SESSION 10 juin 2026 AM-2 (Claude Code) — #329 VOÛTE : REVUE DU FORMAT
      + LOTS F, T, P2 LIVRÉS ET VALIDÉS TERRAIN. 4 releases (1.7.1 → 1.10.0).
