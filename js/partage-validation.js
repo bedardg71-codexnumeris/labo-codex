@@ -334,7 +334,7 @@
         });
         if (erreurs.length) return rejet();
 
-        // Limite de taille globale (défaut 50 Mo — cf. partage-schemas.LIMITES).
+        // Limite de taille globale (10 Mo — cf. partage-schemas.LIMITES).
         var tailleSerialise;
         try {
             tailleSerialise = JSON.stringify(pkgObj).length;
