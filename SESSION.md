@@ -41,12 +41,32 @@
        • RITUEL FIN DE SESSION : périmètre = docs uniquement (audit sécurité
          sans objet) ; tests 436/436 verts ; version SYNCHRONE (version.json =
          init-inline.js = snapshot main.js : 1.6.1 / 0610-0512).
-       • RESTE : (1) validation Grégoire → commit des 2 docs (release.mjs
-         --build-only, docs purs) ; (2) go/no-go Lot 0 (petit, sans dépendance
-         de design) ; (3) trancher les 2 untracked `Rapports/entrevue-*` (pas
-         créés par Claude Code — versionner ou non) ; (4) en-tête BACKLOG.md
-         dit encore « dernier ID #326 » (réalité : #327) — à rafraîchir au
-         prochain commit de tracking.
+       • SUITE (même session) : GO Grégoire → docs committés (`dcdb2108`) puis
+         LOT 0 LIVRÉ (`79583caa`, refactor(328), SANS bump) :
+         (a) `dureePeriodeMinutes` → nouvelle clé NS `dureePeriode`, owner
+         horaire.js seul écrivain, MIGRATION PARESSEUSE en lecture (recopie
+         sans toucher modalitesEvaluation ; champ legacy purgé au Lot 3) ;
+         le namespacing par trimestre isole la démo tout seul
+         (demo_dureePeriode) — AUCUNE modif de demo-activation.js ; seed pack
+         adapté (clé top-level `dureePeriode: 50` + versement demo-namespace).
+         (b) toggles afficherSommatif/afficherAlternatif : VÉRIFIÉ écriture
+         seule (determinerModeAffichageTableauBord les ignore depuis Session
+         C) → retirés de sauvegarderPreferencesV2 + du seed (bloc
+         affichageTableauBord inerte aussi).
+         (c) sentinelle RATCHET sentinelle-ssot-modalites-ecrivains-L0.test.js
+         (liste fermée des 12 écrivains ; horaire/preferences-v2 exclus ; la
+         liste ne peut que RÉTRÉCIR — Lot 1 la retaille).
+         (d) DATA-OWNERSHIP (entrée dureePeriode, ligne modalitesEvaluation
+         rafraîchie), BACKLOG #328 créé + en-tête rafraîchi (dernier ID réel).
+         392 Vitest + 47 Playwright = 439 VERTS. Incident mineur : index.lock
+         orphelin (0 octet, aucun process git) retiré après vérification.
+       • RESTE : (1) VALIDATION TERRAIN Lot 0 (Mac+iPad : Réglages → Trimestre,
+         select durée de période 50/55/60 — changer, recharger, vérifier
+         persistance + calculs d'assiduité ; mode démo : durée 50 attendue) ;
+         (2) sur go : release patch + push (2 commits locaux non poussés) ;
+         (3) cadrage L1 — DÉCISION : propriétaire = pratique-manager.js OU
+         module dédié type denotation-jugements.js ; (4) trancher les 2
+         untracked `Rapports/entrevue-*` (pas créés par Claude Code).
      =====================================================================
      SESSION 9 juin 2026 (Claude Code) — #327 T0→T4 LIVRÉS, reste T5 release.
      Étend le classement par dossiers (#320, livré en 1.5.0 pour les pratiques) à
