@@ -130,22 +130,28 @@ restreint fin août » (calendrier) tombe après la Phase 3.
    deviennent des modules sensibles** → tests obligatoires avant tout commit qui
    les touche).
 
-### Lot P1 — Format et validation (1re session : ~½ lot)
+### Lot P1 — Format et validation — ✅ LIVRÉ 10 juin 2026 (release 1.7.0)
 
-- [ ] Relire `PLAN2-PHASE1-SPEC.md` en entier ; noter les écarts éventuels avec l'état
-      du code (la spec date du 24 avril ; `bibliotheque-ui.js` a été refactoré le 9 juin — #327).
-- [ ] `js/partage-schemas.js` : schémas fermés des 5 entités + manifeste **avec bloc
-      signature** (champs présents, validation `null` acceptée tant que F non livré).
-- [ ] `js/partage-format.js` : `construirePackage(itemsRacine, options)`.
-- [ ] `js/partage-validation.js` : `validerPackage(pkgObj)` — 6 niveaux, rejet des
-      champs inconnus, limites de taille, anti-usurpation « Demo Labo Codex ».
-- [ ] Inscription des 3 scripts dans `index.html` (ordre : après `cc-license.js` et
+- [x] Relire `PLAN2-PHASE1-SPEC.md` en entier ; noter les écarts éventuels avec l'état
+      du code → **écarts actés, détail dans SESSION.md** : shapes réelles (cartouche ≠
+      `descripteurs[]` ; criteres[].niveauSOLO ; metadata_cc complète de cc-license.js) ;
+      modèle de dépendances réel = grille → cartouches (pas grille → échelle) ;
+      `construirePackage` exige `options.type`.
+- [x] `js/partage-schemas.js` : schémas fermés des 5 entités + manifeste **avec bloc
+      signature** (`signature`/`clePublique`/`algorithme`, null acceptés tant que F non livré).
+      Défaut posé À CONFIRMER avant P2 : taille max package 50 Mo (LIMITES).
+- [x] `js/partage-format.js` : `construirePackage(itemPrincipal, options)` — projection
+      RÉCURSIVE sur les schémas (l'export ÉLAGUE l'inconnu, l'import le REJETTE).
+- [x] `js/partage-validation.js` : `validerPackage(pkgObj)` — 6 niveaux, rejet des
+      champs inconnus, limites de taille, anti-usurpation « Demo Labo Codex » ;
+      retourne aussi `packageNettoye` (clone sanitisé que P3 intégrera) ; patterns
+      dangereux = REJET (règle 14 SKILL_Securite_donnees, prime sur le niveau 5 spec).
+- [x] Inscription des 3 scripts dans `index.html` (après `cc-license.js` et
       `bibliotheque-ui.js`, avant `import-export.js`).
-- [ ] Tests : sentinelles Vitest couvrant les 14 critères de la spec (remplacent les
-      tests console prévus en avril) + `window._testPartagePhase1()` conservé pour
-      la validation manuelle iPad.
-- [ ] Validation fonctionnelle Mac + iPad, modes clair/sombre (rien de visuel à ce
-      lot, mais vérifier zéro régression console).
+- [x] Tests : 28 sentinelles Vitest (`tests/unit/partage-phase1-P1.test.js`) +
+      `window._testPartagePhase1()` conservé pour la validation manuelle.
+- [x] Validation fonctionnelle : Mac 14/14 sur données réelles (10 juin, après fix
+      `702fa7e9`). Re-passe iPad : optionnelle, à faire à l'occasion (JS pur, sans UI).
 
 ### Lot F — Signature ECDSA (Défense F)
 
@@ -255,3 +261,4 @@ Décision Grégoire (10 juin) : les deux chantiers avancent **en parallèle**.
 | 2026-06-10 | Plan créé. Périmètre « programme complet Phases 1-8 » validé par Grégoire. Coexistence parallèle avec chantier SSOT (#328) actée. Recommandation `.lcz` formulée (D-V1, à confirmer). Bloc signature intégré au manifeste v1 (anti-dette de format). |
 | 2026-06-10 (PM) | **Plan validé par Grégoire.** Passation à Claude Code décidée : démarrage du lot P1 après clôture de la session SSOT en cours. **D-V1 TRANCHÉE : `.lcz`.** D-V2/D-V3 restent à confirmer (non bloquantes avant P2 et le jalon pilote respectivement). |
 | 2026-06-10 (PM) | **Exécution séquentielle décidée** (Grégoire) : pas d'instances Claude Code simultanées — la capacité de validation terrain est le facteur limitant, pas l'outillage. Les chantiers #328 et #329 alternent par sessions complètes ; les règles du §6 (release unique, écrivain unique des fichiers de suivi, merges séquentiels) restent en vigueur pour l'alternance. |
+| 2026-06-10 (PM) | **Lot P1 LIVRÉ** (release 1.7.0). 3 modules + 28 sentinelles Vitest + `_testPartagePhase1()` validé terrain 14/14 sur données réelles (Mac), après un correctif : schémas alignés sur les formes RÉELLES (criteres[].niveauSOLO, metadata_cc complète) et projection récursive (asymétrie actée : export élague, import rejette). Écarts avec la spec d'avril documentés dans SESSION.md. En pratique les instances ont tourné EN PARALLÈLE dans le même dépôt (#329 ∥ #330) — règles §6 appliquées : commits par chemins explicites, release prise par la session bugs, aucun croisement. **À l'ordre du jour avant P2** : revue du format avec Grégoire (50 Mo, champs exclus auteur/coursId/dateEcheance/etablissement, bloc signature). Prochain lot : F (`js/signature.js`). |
