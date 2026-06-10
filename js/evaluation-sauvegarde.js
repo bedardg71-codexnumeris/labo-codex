@@ -893,8 +893,12 @@ function gererChangementCheckboxJetonReprise() {
             checkbox.checked = false;
         }
     } else {
-        // Retirer le jeton
-        retirerJetonReprise(evaluationId);
+        // Retirer le jeton — si l'utilisateur annule le confirm, rien n'a
+        // changé : la checkbox doit refléter l'état réel (jeton en place).
+        const retire = retirerJetonReprise(evaluationId);
+        if (!retire) {
+            checkbox.checked = true;
+        }
     }
 }
 

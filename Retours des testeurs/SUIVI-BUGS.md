@@ -1,7 +1,7 @@
 # Suivi des bugs testeurs
 
 > **Objectif** : Tracker les bugs rapportés par les testeurs pour éviter le travail en double.
-> **Dernière mise à jour** : 10 juin 2026 PM — #140 (import codex iPad : « Codex chargé » puis « Aucun codex actif » après rechargement — reload sans attendre les écritures IDB pendantes ; corrigé même session, `await db.flush()` aux 6 sites confirm+reload, sentinelle statique). Le volet « travaux > 20 Mo refusés sans bilan » reste OUVERT → #334 session B. Avant : #139 (modale « Exporter pour partager » cachée derrière la modale de bibliothèque, corrigé même session, classe `.modal-overlay--partage` z-index 10005). Avant : 8 juin #138 (icônes du popover mobile en carré noir : SVG non suivis par git) + #115 (404 `icon-files.svg`) corrigés en 1.4.2, avec sentinelle anti-récurrence. Avant : #137 (assistant « pas-certain » → inférence comportementale, 1.3.0) ; 5 juin #131-#135 (wizard, lot #317) ; 3 juin #130. Fonction « simuler/comparer des pratiques » → BACKLOG #307. Calcul par famille du profil = Session C (#303). Ouverts : #114, #116, #118, #121.
+> **Dernière mise à jour** : 10 juin 2026 PM — #141 (jeton de reprise : confirm piège OK/Annuler dans retirerJetonReprise → état orphelin irréparable ; branche « entériner » RETIRÉE, restauration par lien unilatéral, corrigé même session 1.11.2). Avant : #140 (import codex iPad : « Codex chargé » puis « Aucun codex actif » après rechargement — reload sans attendre les écritures IDB pendantes ; corrigé même session, `await db.flush()` aux 6 sites confirm+reload, sentinelle statique). Le volet « travaux > 20 Mo refusés sans bilan » reste OUVERT → #334 session B. Avant : #139 (modale « Exporter pour partager » cachée derrière la modale de bibliothèque, corrigé même session, classe `.modal-overlay--partage` z-index 10005). Avant : 8 juin #138 (icônes du popover mobile en carré noir : SVG non suivis par git) + #115 (404 `icon-files.svg`) corrigés en 1.4.2, avec sentinelle anti-récurrence. Avant : #137 (assistant « pas-certain » → inférence comportementale, 1.3.0) ; 5 juin #131-#135 (wizard, lot #317) ; 3 juin #130. Fonction « simuler/comparer des pratiques » → BACKLOG #307. Calcul par famille du profil = Session C (#303). Ouverts : #114, #116, #118, #121.
 
 ---
 
@@ -17,6 +17,14 @@
 ---
 
 ---
+
+## Corrigés (10 juin 2026 PM — jeton de reprise : confirm piège et état orphelin)
+
+> Corrigé en **code** même session (rapport `BUG_grégoire_2026-06-10_16-30-48.txt`). Réparation des données coincées : Liste des évaluations → ligne de l'ancienne copie (sans badge) → Actions → « Supprimer l'évaluation » → l'originale est restaurée (fonctionne désormais même sur un lien unilatéral).
+
+| # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
+|---|---------|--------------|---------|-------|-------------|------------|
+| 141 | Grégoire (terrain Mac — 10 juin 2026) | 10 juin 2026 | 10 juin 2026 (même session) | 0610-1616 | **Impossible de défaire une reprise de test** : décocher le jeton (`#checkboxJetonReprise`) posait un confirm piège — « OK = entériner la reprise / **Annuler** = supprimer la reprise et restaurer l'originale ». OK (le choix naturel) effaçait `repriseDeId` de la copie SANS toucher l'originale → lien unilatéral (`remplaceeParId` orphelin) ; `restaurerOriginaleSiReprise` exigeait le lien des DEUX côtés → plus AUCUN geste de l'interface ne pouvait restaurer l'originale, figée « Remplacée ». Défaut adjacent : retirer le jeton depuis l'ORIGINALE = no-op au message menteur (« Jeton de reprise retiré »). | **(1)** Branche « entériner » RETIRÉE (zéro-dette) : décocher le jeton = défaire la reprise, un seul confirm au défaut sûr (Annuler = aucun changement, la checkbox se recoche — caller corrigé). Une reprise assumée se garde en laissant le jeton en place. **(2)** `restaurerOriginaleSiReprise` accepte le lien UNILATÉRAL (l'originale fait foi) → supprimer l'évaluation copie répare les états orphelins existants. **(3)** Cas « appelée sur l'originale » : propose la restauration au lieu du no-op. Sentinelle étendue (9 cas, dont verrou anti-réintroduction du confirm piège). |
 
 ## Corrigés (10 juin 2026 PM — import codex perdu au rechargement)
 

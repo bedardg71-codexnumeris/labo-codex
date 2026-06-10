@@ -1942,11 +1942,13 @@ function evaluerProduction(da, productionId) {
  */
 function restaurerOriginaleSiReprise(evaluations, evaluationId) {
     if (!Array.isArray(evaluations)) return false;
-    const reprise = evaluations.find(e => e.id === evaluationId);
-    if (!reprise || !reprise.repriseDeId) return false;
-    const originale = evaluations.find(e =>
-        e.id === reprise.repriseDeId && e.remplaceeParId === evaluationId
-    );
+    // Le lien fait foi du côté de l'ORIGINALE (remplaceeParId === id supprimé).
+    // Ne PAS exiger le lien réciproque (repriseDeId) : une reprise peut l'avoir
+    // perdu (état orphelin du bug #141 — l'ancienne branche « entériner » de
+    // retirerJetonReprise effaçait les props de la reprise sans toucher
+    // l'originale). Le garde-fou du 8 juin (#136) reste : on ne restaure que
+    // l'originale qui pointe précisément l'évaluation supprimée.
+    const originale = evaluations.find(e => e && e.remplaceeParId === evaluationId);
     if (!originale) return false;
     delete originale.remplaceeParId;
     delete originale.dateRemplacement;
