@@ -24,7 +24,8 @@
                 '« Retirer » (Réglages › Données) supprime un package importé sans toucher tes propres documents.',
                 'Pour éviter la confusion, les anciens boutons d’export/import par fichier sont renommés « … (JSON) ».',
                 'Correction (iPad surtout) : après « Codex chargé », le rechargement pouvait repartir « sans codex actif » — l’app attend maintenant la fin des écritures avant de proposer le rechargement.',
-                'Correction : défaire un jeton de reprise est maintenant un geste clair (décocher = supprimer la reprise et restaurer l’originale, avec confirmation) ; supprimer une évaluation de reprise restaure l’originale même si le lien était abîmé.'
+                'Correction : défaire un jeton de reprise est maintenant un geste clair (décocher = supprimer la reprise et restaurer l’originale, avec confirmation) ; supprimer une évaluation de reprise restaure l’originale même si le lien était abîmé.',
+                'Correction : le menu Codex pouvait afficher « Aucun codex actif » au démarrage alors que tes données étaient bien chargées — l’indicateur attend maintenant que le stockage soit prêt.'
             ]
         },
         {
