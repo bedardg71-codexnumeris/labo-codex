@@ -124,6 +124,7 @@ ci-dessous.
 | `bibliothequeAlignements` | G | `planification-bibliotheque.js` (via variable) | |
 | `bibliothequePratiques` | G | `main.js` (init pratiques) | Lecteur unique : `tableau-bord-apercu.js` |
 | `tamponsPersonnalises` | G | `tampons-bibliotheque.js` (cible) | **3 écrivains : reserve-ouvrir, tampons-bibliotheque, travaux-outils** (violation mineure #17) |
+| `clesConnues` | G | `js/trust-tofu.js` (#329 lot T) | Registre TOFU auteur → clé publique (D3). JAMAIS namespacée (la confiance en une personne ne dépend pas du trimestre). Index par nom normalisé (NFC, casse, espaces). Champ `signaturesWoT` réservé au WoT progressif post-pilote. |
 
 ---
 

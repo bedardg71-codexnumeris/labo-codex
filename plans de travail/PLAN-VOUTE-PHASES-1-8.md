@@ -179,15 +179,34 @@ restreint fin août » (calendrier) tombe après la Phase 3.
       → **8/8 verts**, identité locale créée et persistée. Release minor exécutée
       dans la foulée.
 
-### Lot T — Confiance TOFU
+### Lot T — Confiance TOFU — ✅ CODE COMPLET 10 juin 2026 (terrain en attente)
 
-- [ ] `js/trust-tofu.js` : registre `clesConnues` (global), `verifierConfianceTOFU()`.
-- [ ] UX des 3 états (vérifiée / nouvel auteur / **clé changée = alerte bloquante**,
-      formulation en français clair — consulter `design-system.html` pour l'alerte ;
-      ne PAS réutiliser le style des alertes RaI).
-- [ ] Menace documentée à afficher honnêtement : le premier contact piégé reste
-      possible (TOFU) — le guide (P7) l'expliquera.
-- [ ] Tests : les 3 états + persistance du registre.
+- [x] `js/trust-tofu.js` : registre `clesConnues` (global, db.js, jamais namespacé),
+      `verifierConfianceTOFU()` LECTURE SEULE → nouveau/verifiee/cle_changee/
+      indeterminable ; `memoriserContact()` séparé (posé à l'ACCEPTATION de
+      l'import, P3) — remplacement de clé refusé sans `remplacerCle: true`
+      explicite (critère 19), ancienne clé tracée (`anciennesCles`). Nom
+      d'auteur indexé NORMALISÉ (NFC — macOS produit du NFD —, casse, espaces) :
+      un nom connu n'est pas contournable par variation typographique.
+      `listerAuteursConnus()`/`oublierAuteur()` posés pour le futur panneau
+      Confiances et la modération (D4). `signaturesWoT: []` réservé (D3, T2).
+- [x] UX des 3 états : `TEXTES_CONFIANCE` (français clair, tutoiement) +
+      `demanderDecisionCleChangee()` = modale BLOQUANTE construite à l'appel
+      (.modal-overlay du design system, PAS le style RaI), défaut sûr partout
+      (ESC, clic hors carte et bouton principal = refuser ; « Faire confiance »
+      en btn-danger), construite en API DOM + textContent (AUCUN innerHTML —
+      les noms viennent de packages importés), zéro handler inline,
+      écouteur clavier défensif, focus a11y sur l'action par défaut.
+- [x] Menace TOFU documentée honnêtement dans TEXTES_CONFIANCE.nouveau (« Labo
+      Codex ne peut pas garantir une identité au premier contact ») — repris
+      au guide P7.
+- [x] Tests : 17 sentinelles Vitest (`tests/unit/trust-tofu-T.test.js`) — 3 états,
+      normalisation, persistance, remplacement, registre corrompu + console
+      `_testTrustTofu()` (8 scénarios, registre nettoyé) et
+      `_demoAlerteCleChangee()` (vérif visuelle modes sombre/clair).
+- [x] `docs/DATA-OWNERSHIP.md` : ligne `clesConnues` (section Bibliothèques).
+- [ ] Validation terrain Grégoire (Safari Mac) : `await _testTrustTofu()` → 8/8,
+      puis `_demoAlerteCleChangee()` dans les DEUX modes, puis release minor.
 
 ### Lots P2-P3 — Export / Import UI
 
