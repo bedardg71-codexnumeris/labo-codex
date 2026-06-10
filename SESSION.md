@@ -56,7 +56,27 @@
          Données (toujours dans le DOM). Friction consignée USAGE-FORMATS
          (« l'import se cherche là où vit l'export ») ; renforce P4.
          Sentinelle Playwright 5 modales. 499 Vitest + 52 Playwright = 551.
-     REPRISE — VALIDATION TERRAIN P3 puis JALON PILOTE :
+     SUITE PM (même session) — RENOMMAGE (JSON) + LOT P4 CODE COMPLET :
+       • Libellés legacy des 5 biblios → « Exporter toutes mes X (JSON) » /
+         « Importer des X (JSON) » (décision Grégoire : 2 imports côte à
+         côte sans distinction = confusion). RETRAIT de la paire JSON = P8,
+         PAS avant P4 actif (l'import JSON est le seul flux qui rendait une
+         ressource reçue utilisable).
+       • LOT P4 AVANCÉ AVANT-PILOTE (décision Grégoire) : js/partage-section
+         .js — section « Partagés par des collègues » dans les 5 modales
+         (creerModal accepte sectionPartages, ligne unique ajoutée à
+         bibliotheque-ui.js), badge sarcelle .badge-source--partage (2
+         modes). LECTURE SEULE ; « Dupliquer vers mes documents » AVEC
+         dépendances : grille→ses cartouches (cartouches_{nouvelId},
+         grilleId remappé) ; cartouche→sa grille ENTIÈRE (ancrage oblige) ;
+         production→sa grille+cartouches, JAMAIS de copie utilisateur
+         pointant vers partage_* (référence vidée si introuvable).
+         Conventions des dupliquer* existants : id genererIdUnique, auteur
+         actif, dansBibliotheque true, metadata_cc retiré, inspireDe (D7)
+         CONSERVÉ. Invariant testé : duplication ne modifie jamais
+         partage_*. 12 sentinelles Vitest + flux Playwright (section rendue
+         + duplication). 511 Vitest + 53 Playwright = 564 VERTS.
+     REPRISE — VALIDATION TERRAIN P3+P4 puis JALON PILOTE :
        1. Terrain Grégoire Mac + iPad : hard refresh, _testPartageImportP3()
           (7 vérifications) + parcours réel : exporter une grille en .lcz
           (menu ⋮) puis l'importer via la carte (statut « premier contact »
