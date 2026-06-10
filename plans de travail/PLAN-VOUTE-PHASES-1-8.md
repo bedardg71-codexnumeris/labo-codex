@@ -212,9 +212,34 @@ restreint fin août » (calendrier) tombe après la Phase 3.
 
 ### Lots P2-P3 — Export / Import UI
 
-- [ ] P2 : boutons export 5 entités (patron `data-action`), modale CC (réutiliser
-      `formaterAttribution`), génération `.lcz` (D-V1 confirmée), nommage de fichier
-      lisible (`grille-{nom}-{date}.lcz`).
+#### Lot P2 — ✅ CODE COMPLET 10 juin 2026 (terrain en attente)
+
+- [x] `js/partage-export.js` : `exporterPourPartager(type, id, contexteId)` —
+      résolution par type dans les collections RÉELLES (grillesTemplates/
+      echellesTemplates/`cle('productions')`/`cle('pratiquesConfigurables')` +
+      replis pools ; cartouches par ancrage `cartouches_{grilleId}`), modale de
+      confirmation CC (API DOM + textContent, identité CC, dépendances
+      embarquées, licence), **AUTO-CONTRÔLE** : le package signé repasse par
+      `validerPackage` avant émission — on n'émet jamais un package que notre
+      propre import rejetterait. Garde-fou : items démo non exportables.
+- [x] **Canon du conteneur `.lcz` posé** (la spec d'avril s'arrêtait au JSON) :
+      ZIP avec `package.json` (UTF-8) à la racine, `medias/` réservé.
+- [x] Boutons « Exporter pour partager » au menu ⋮ section « Mes documents »
+      des 5 biblios (grilles.js, echelles.js, cartouches.js,
+      productions-bibliotheque-ui.js, pratiques-gestion.js). Legacy pratiques
+      renommé « Exporter (JSON) » en attendant la convergence P8.
+- [x] Nommage via `genererNomFichierExport` (#262) : `.lcz`, licence, minute.
+- [x] Vocabulaire UI : « partage » uniquement (D-V2 non tranchée — « Voûte »
+      n'apparaît nulle part dans l'interface).
+- [x] Tests : 10 sentinelles Vitest (`tests/unit/partage-export-P2.test.js`,
+      dont aller-retour .lcz avec le VRAI JSZip de libs/) +
+      `window._testPartageExportP2()` (terrain : chaîne complète package →
+      .lcz → relecture → validation + signature + TOFU, sans téléchargement).
+- [ ] Validation terrain Grégoire (Safari Mac) : `await _testPartageExportP2()`
+      → 8/8, puis export réel d'une grille via le menu ⋮ (modale + .lcz
+      téléchargé), puis release minor.
+
+#### Lot P3 — Import
 - [ ] P3 : section dans Réglages › Données, drag-and-drop + file picker, pipeline
       complet (ZIP → schéma → signature → TOFU → préviz → intégration `partage_*`),
       liste « Packages importés » + Retirer (n'affecte que `partage_*`).

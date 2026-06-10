@@ -62,6 +62,7 @@ async function preparerDonneesBibliothequeProductions() {
         inspireDe: BibliothequeUI.formaterInspireDe(prod),
         boutonPrincipal: { label: 'Dupliquer', action: 'dupliquerProductionBibliotheque', param: prod.id, classe: 'btn-confirmer', title: 'Créer une copie' },
         actionsMenu: [
+            { label: 'Exporter pour partager', action: 'partageExport.exporterPourPartager', param: 'production', param2: prod.id, classe: 'btn-secondaire', title: 'Générer un fichier .lcz signé à transmettre (#329)' },
             { label: 'Retirer', action: 'retirerProductionDeBibliotheque', param: prod.id, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
             { label: 'Supprimer', action: 'supprimerProductionDefinitivement', param: prod.id, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
         ]

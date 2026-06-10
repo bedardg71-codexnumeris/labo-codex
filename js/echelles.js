@@ -2364,6 +2364,7 @@ async function preparerDonneesBibliothequeEchelles() {
         inspireDe: BibliothequeUI.formaterInspireDe(echelle),
         boutonPrincipal: { label: 'Dupliquer', action: 'dupliquerEchelleBibliotheque', param: echelle.id, classe: 'btn-confirmer', title: 'Créer une copie' },
         actionsMenu: [
+            { label: 'Exporter pour partager', action: 'partageExport.exporterPourPartager', param: 'echelle', param2: echelle.id, classe: 'btn-secondaire', title: 'Générer un fichier .lcz signé à transmettre (#329)' },
             { label: 'Retirer', action: 'retirerEchelleDeBibliotheque', param: echelle.id, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
             { label: 'Supprimer', action: 'supprimerEchelleDefinitivement', param: echelle.id, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
         ]

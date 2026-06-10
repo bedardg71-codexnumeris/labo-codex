@@ -3314,6 +3314,7 @@ async function preparerDonneesBibliothequeCartouches() {
                 inspireDe: BibliothequeUI.formaterInspireDe(cartouche),
                 boutonPrincipal: { label: 'Dupliquer', action: 'dupliquerCartoucheBibliotheque', param: cartouche.id, param2: cartouche.grilleId, classe: 'btn-confirmer', title: 'Créer une copie' },
                 actionsMenu: [
+                    { label: 'Exporter pour partager', action: 'partageExport.exporterPourPartager', param: 'cartouche', param2: cartouche.id, param3: cartouche.grilleId, classe: 'btn-secondaire', title: 'Générer un fichier .lcz signé à transmettre (#329)' },
                     { label: 'Retirer', action: 'retirerCartoucheDeBibliotheque', param: cartouche.id, param2: cartouche.grilleId, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
                     { label: 'Supprimer', action: 'supprimerCartoucheDefinitivement', param: cartouche.id, param2: cartouche.grilleId, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
                 ],
