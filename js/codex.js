@@ -214,6 +214,25 @@ function initialiserCodex() {
     if (etatSauve && etatSauve.actif) {
         _etat = Object.assign({}, _etat, etatSauve);
     } else {
+        // #142 — quand localStorage est saturé, _codex_etat est refoulé en
+        // IndexedDB seulement : à DOMContentLoaded la lecture synchrone tombe
+        // sur du vide (la sync IDB → cache n'a pas fini) et le menu affiche
+        // « Aucun codex actif » alors que les données sont là. Relire après
+        // db-ready (même patron que la migration ci-dessus). Bug terrain
+        // Grégoire 10 juin 2026.
+        var relireEtatTardif = function() {
+            if (_etat.actif) return; // un geste utilisateur a déjà activé
+            var etatTardif = db.getSync(CLE_ETAT_CODEX, null) || db.getSync(CLE_ETAT_ANCIEN, null);
+            if (etatTardif && etatTardif.actif) {
+                _etat = Object.assign({}, _etat, etatTardif);
+                _mettreAJourIndicateur();
+            }
+        };
+        if (window.dbReady) {
+            relireEtatTardif();
+        } else {
+            window.addEventListener('db-ready', relireEtatTardif, { once: true });
+        }
     }
     _mettreAJourIndicateur();
 
