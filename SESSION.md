@@ -1,4 +1,47 @@
 <!-- =====================================================================
+     SESSION 10 juin 2026 (Claude Code) — CYCLE #328 CLOS + BUG ASSIDUITÉ
+     #330/#331 RÉGLÉ SUR DONNÉES RÉELLES + #332 OUVERT. Releases 1.6.3 et
+     1.6.4 poussées. 435 Vitest + 47 Playwright = 482 VERTS.
+       • CYCLE #328 CLOS : Lot 1 validé terrain (aucun bug du routage) →
+         release 1.6.3 (`0d8e3328`). Consolidation #329 de la session
+         parallèle committée à part (`0d150e95` : entrée backlog + plan).
+       • #330 BUG ASSIDUITÉ BI-GROUPES (signalement Grégoire en cours de
+         validation terrain ; P = cas isolé corrigé par lui à la main) :
+         A ~50 % dès la 2e semaine pour tout le groupe. CAUSE : roster du
+         cours ENTIER depuis chantier D → `calculerAssiduite` comptait
+         chaque séance saisie de l'AUTRE groupe comme absence complète.
+         FIX (`d9fb6076`, release 1.6.4 `6d129765`) : helper
+         `construireDatesSaisiesGroupe` (indices.js, filtre par identité
+         DA du même groupe), partagé avec calculerAssiduitePourAffichage ;
+         sentinelle 5 cas (cache contaminé, symétrie, FIX #220 préservé).
+       • VOLET DONNÉES (réparé par sondes console guidées, AUCUN bump) :
+         les 2 GC pointaient le MÊME horaire « Lun-Jeu » ; réassemblage UI
+         par Grégoire = NO-OP SILENCIEUX COMPLET (ni SSOT ni pointeur) →
+         écriture console des 2 champs (groupesCours[00008].horaireId +
+         gcActif.horaireId → HOR_1768050643606 Mar-Jeu), régénération
+         seancesCompletes + indices. #331 CLOS : 104 fiches orphelines
+         (4 lundis sans cours × 26) purgées après backup Codex.
+       • #332 CRÉÉ : (a) no-op UI du réassemblage (écran à préciser) ;
+         (b) `obtenirSeancesHoraire` lit la COPIE gcActif.horaireId AVANT
+         la SSOT groupesCours — même patron à corriger que #328 L2.
+       • MÉTHODE QUI A MARCHÉ (à réutiliser) : sondes console lecture
+         seule progressives ; l'HISTORIQUE horodaté de indicesCP (avec
+         `pratique` par entrée) est un journal d'audit intégré précieux.
+       • COORDINATION : fix terrain Voûte `702fa7e9` + relais `f50f04d5`
+         poussés par la session parallèle PENDANT ce travail (intégrés,
+         zéro conflit). Sa release MINOR attendait la fin de mes bugs
+         (règle « une release à la fois ») → exécutée ci-dessous.
+       • SUITE (cette session, sur demande Grégoire) : audit docs avant
+         release → relais consigné, #333 créé (plan export résultats
+         finaux CSV/PDF, cadrage Cowork versionné), ligne assiduité
+         ajoutée au changelog 1.6, RELEASE MINOR 1.7.0 (Voûte P1).
+     REPRISE — ORDRE PROPOSÉ : 1. revue du format partage avec Grégoire
+       (AVANT P2 — risque gel prématuré ; 50 Mo, bloc signature, champs
+       exclus). 2. #328 Lot 3 (petit) puis Lot 2 (risque élevé, golden
+       master). 3. #332 (cadrage : reproduire le no-op UI). 4. ETAT-PROJET
+       à rafraîchir (1.6.2→1.7.0). Untracked restants : 2 Rapports/
+       entrevue-* (à trancher, pas créés par Claude Code).
+     =====================================================================
      SESSION 10 juin 2026 (Claude Code) — #329 VOÛTE PHASE 1, LOT P1 LIVRÉ
      (code complet, SANS bump, NON poussé). HEAD main `58772cea`.
      434 Vitest + 47 Playwright = 481 VERTS (dont 27 nouvelles sentinelles P1).
