@@ -1,4 +1,53 @@
 <!-- =====================================================================
+     SESSION 10 juin 2026 (Claude Code) — ÉTAT DES LIEUX + AUDIT SSOT
+     `modalitesEvaluation` (lecture seule, AUCUN code applicatif).
+     HEAD main `80cb7f65` (1.6.1, build 0610-0512), SYNCHRO origin.
+     389 Vitest + 47 Playwright = 436 VERTS (exécution locale en fin de session).
+       • CONTEXTE : reprise de l'implémentation de l'audit annuel. DÉCISION
+         Grégoire (choix fermé) : prochaine cible = SSOT `modalitesEvaluation`
+         (Tier 6.5, violation n°1 CRITIQUE de docs/DATA-OWNERSHIP.md), en
+         commençant par l'audit dédié — aucune écriture de code avant.
+       • ETAT-PROJET.md MIS À JOUR (NON COMMITTÉ, validation Grégoire requise) :
+         rattrapage 31 mai → 10 juin vérifié sur git (124 commits, releases
+         1.0.0 → 1.6.1). Faits actés : lancement public 3 juin ; #303 CLOS ;
+         #307/#317/#318/#319/#320/#327 livrés ; #305 corrigé ; #300 CLOS (voir
+         plus bas) ; #298 à requalifier (fenêtre « avant ouverture » échue) ;
+         branche audit/2026-mai toujours à merger (68 avance / 526 retard,
+         fenêtre post-AQPC ouverte).
+       • AUDIT SSOT LIVRÉ : `Rapports/AUDIT-SSOT-MODALITES-EVALUATION-2026-06-10.md`
+         (NON COMMITTÉ). Constats : 14 fichiers écrivains (44 sites db.set),
+         39 lecteurs (~125 sites) dont tout le chemin procédural du calcul.
+         La clé est un MIROIR NON DÉCLARÉ de la SSOT pratiques (#303 : config
+         canonique = `pratiquesConfigurables`, pointeur actif =
+         `groupesCours[].pratiqueId`) maintenu à la main → chaque désync fausse
+         le calcul (cas réel : P à 0 %, #308). 2 INTRUS : `dureePeriodeMinutes`
+         (horaire.js:298) et toggles `afficherSommatif/Alternatif`
+         (preferences-v2.js:225, liés au retrait du mode comparatif déjà acté).
+         2 écritures non namespacées BORNÉES (migrations : main.js:287,
+         pratiques/migration-pratiques.js:74). DATA-OWNERSHIP.md PÉRIMÉ sur
+         cette ligne : la cible « evaluation.js » n'écrit plus la clé.
+       • PLAN 4 LOTS proposé (§6 du rapport) : L0 extraire les 2 intrus (faible
+         risque) → L1 module propriétaire + API d'écriture PAR SECTION +
+         sentinelle « zéro db.set direct » (modèle notifications 21 mai) →
+         L2 dégonfler le miroir (pratiqueId/pratique/approcheEvaluation/
+         configPAN.jetons deviennent DÉRIVÉS de la pratique active ; golden
+         master #303 en garde-fou) → L3 purge des fallbacks non namespacés.
+         À TRANCHER au cadrage L1 : propriétaire = pratique-manager.js OU
+         module dédié type denotation-jugements.js.
+       • EN PARALLÈLE (autre session, même matinée) : #300 CLOS — Lot 2
+         `f224d1c0` (cause racine : clear-then-hydrate au boot dans db.js) +
+         release 1.6.1 `80cb7f65`, poussés. ETAT-PROJET.md et la mémoire
+         Claude reflètent la clôture.
+       • RITUEL FIN DE SESSION : périmètre = docs uniquement (audit sécurité
+         sans objet) ; tests 436/436 verts ; version SYNCHRONE (version.json =
+         init-inline.js = snapshot main.js : 1.6.1 / 0610-0512).
+       • RESTE : (1) validation Grégoire → commit des 2 docs (release.mjs
+         --build-only, docs purs) ; (2) go/no-go Lot 0 (petit, sans dépendance
+         de design) ; (3) trancher les 2 untracked `Rapports/entrevue-*` (pas
+         créés par Claude Code — versionner ou non) ; (4) en-tête BACKLOG.md
+         dit encore « dernier ID #326 » (réalité : #327) — à rafraîchir au
+         prochain commit de tracking.
+     =====================================================================
      SESSION 9 juin 2026 (Claude Code) — #327 T0→T4 LIVRÉS, reste T5 release.
      Étend le classement par dossiers (#320, livré en 1.5.0 pour les pratiques) à
      TOUTES les bibliothèques. HEAD main `19480962`, AUCUN bump (release = T5).
