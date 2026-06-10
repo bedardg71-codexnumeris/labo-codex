@@ -83,15 +83,42 @@
          seule casse (13 tests), corrigée.
          402 Vitest + 47 Playwright = 449 VERTS. DATA-OWNERSHIP : violation
          n°1 résorbée CÔTÉ ÉCRITURE.
-       • RESTE : (1) VALIDATION TERRAIN Lot 1 (Mac+iPad : Réglages → Pratique
-         de notation — changer de pratique, sauvegarder une config
-         PAN/SPE/objectifs, créer une pratique via l'assistant, toggle démo
-         ON/OFF avec retour à l'état antérieur) ; (2) sur go : release patch
-         + push (1 commit local + le relais) ; (3) cadrage LOT 2 (dériver les
-         champs miroirs pratique/pratiqueId/approcheEvaluation/configPAN.jetons
-         de la pratique active — RISQUE ÉLEVÉ, touche le calcul, golden master
-         #303 en garde-fou, session dédiée) ; (4) trancher les 2 untracked
-         `Rapports/entrevue-*` (pas créés par Claude Code).
+       • COEXISTENCE DÉTECTÉE EN FIN DE SESSION : une session PARALLÈLE a créé
+         #329 (Voûte Phase 1, plan `plans de travail/PLAN-VOUTE-PHASES-1-8.md`)
+         dans BACKLOG.md — modification NON COMMITÉE par elle au moment du
+         relais (l'audit d'ouverture de la prochaine session dira si elle a
+         été commitée depuis ; ne pas l'embarquer dans un commit #328).
+         Sa note désigne `import-export.js` comme POINT DE CONTACT unique
+         entre #329 et #328 — or le Lot 1 vient d'y router une écriture
+         (executerImportConfigComplete → modifier()). Toute session Voûte qui
+         touche ce fichier doit repartir de l'état post-Lot-1.
+     ---------------------------------------------------------------------
+     REPRISE — ORDRE PROPOSÉ POUR LA PROCHAINE SESSION (à froid) :
+       0. Rituel d'ouverture (SKILL_Debut_de_session) : git log/status, tests,
+          version. État attendu si rien n'a bougé : HEAD `15e570ec`, 2 commits
+          d'avance sur origin, version 1.6.2 (build 0610-0545), 449 verts,
+          BACKLOG.md modifié (#329, session parallèle), 2 untracked
+          `Rapports/entrevue-*`.
+       1. VALIDATION TERRAIN Lot 1 si pas déjà faite (Mac+iPad : Réglages →
+          Pratique de notation — changer de pratique, sauvegarder une config
+          PAN/SPE/objectifs, créer une pratique via l'assistant, toggle démo
+          ON/OFF avec retour à l'état antérieur). Sur go : release patch +
+          PUSH des 2 commits locaux.
+       2. CHANTIER SUIVANT au choix de Grégoire :
+          (a) #328 LOT 2 — dériver les champs miroirs (pratique, pratiqueId,
+              approcheEvaluation, configPAN.jetons) de la pratique active.
+              RISQUE ÉLEVÉ (touche le calcul). Garde-fous : golden master
+              #303, sentinelle ratchet, SKILL_pratiques_notation à charger.
+              Point de départ : §6 du rapport d'audit + grep des LECTEURS de
+              ces 4 champs avant de toucher quoi que ce soit.
+          (b) #328 LOT 3 (petit) — purge des fallbacks clé nue (lire() du
+              module, pratique-manager/wizard déjà routés) + champ legacy
+              dureePeriodeMinutes + 2 migrations bornées à retirer de la
+              sentinelle. Moins risqué que L2, peut passer avant.
+          (c) #329 Voûte Phase 1 — session dédiée, charger
+              SKILL_Securite_donnees EN PRIORITÉ (+ hygiene/integrite).
+       3. Trancher les 2 untracked `Rapports/entrevue-*` (pas créés par
+          Claude Code — versionner ou retirer).
      =====================================================================
      SESSION 9 juin 2026 (Claude Code) — #327 T0→T4 LIVRÉS, reste T5 release.
      Étend le classement par dossiers (#320, livré en 1.5.0 pour les pratiques) à
