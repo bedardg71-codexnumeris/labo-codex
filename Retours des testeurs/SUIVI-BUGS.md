@@ -1,7 +1,7 @@
 # Suivi des bugs testeurs
 
 > **Objectif** : Tracker les bugs rapportés par les testeurs pour éviter le travail en double.
-> **Dernière mise à jour** : 10 juin 2026 PM — #142 (« Aucun codex actif » au boot malgré données chargées : localStorage saturé refoule `_codex_etat` en IDB seulement, lu trop tôt à DOMContentLoaded ; relecture à db-ready, corrigé même session 1.11.3 — la MALADIE DE FOND reste le localStorage saturé ≈ 8,9 Mo → plan Désaturation + #334 D). Avant : #141 (jeton de reprise : confirm piège OK/Annuler dans retirerJetonReprise → état orphelin irréparable ; branche « entériner » RETIRÉE, restauration par lien unilatéral, corrigé même session 1.11.2). Avant : #140 (import codex iPad : « Codex chargé » puis « Aucun codex actif » après rechargement — reload sans attendre les écritures IDB pendantes ; corrigé même session, `await db.flush()` aux 6 sites confirm+reload, sentinelle statique). Le volet « travaux > 20 Mo refusés sans bilan » reste OUVERT → #334 session B. Avant : #139 (modale « Exporter pour partager » cachée derrière la modale de bibliothèque, corrigé même session, classe `.modal-overlay--partage` z-index 10005). Avant : 8 juin #138 (icônes du popover mobile en carré noir : SVG non suivis par git) + #115 (404 `icon-files.svg`) corrigés en 1.4.2, avec sentinelle anti-récurrence. Avant : #137 (assistant « pas-certain » → inférence comportementale, 1.3.0) ; 5 juin #131-#135 (wizard, lot #317) ; 3 juin #130. Fonction « simuler/comparer des pratiques » → BACKLOG #307. Calcul par famille du profil = Session C (#303). Ouverts : #114, #116, #118, #121.
+> **Dernière mise à jour** : 10 juin 2026 PM — #143 (modale « Signaler un problème » : le bloc d'instructions restait « Comment signaler un bug » sous l'onglet Commentaire ; titre + 1re étape suivent maintenant le mode, corrigé même session, sans bump). Avant : #142 (« Aucun codex actif » au boot malgré données chargées : localStorage saturé refoule `_codex_etat` en IDB seulement, lu trop tôt à DOMContentLoaded ; relecture à db-ready, corrigé même session 1.11.3 — la MALADIE DE FOND reste le localStorage saturé ≈ 8,9 Mo → plan Désaturation + #334 D). Avant : #141 (jeton de reprise : confirm piège OK/Annuler dans retirerJetonReprise → état orphelin irréparable ; branche « entériner » RETIRÉE, restauration par lien unilatéral, corrigé même session 1.11.2). Avant : #140 (import codex iPad : « Codex chargé » puis « Aucun codex actif » après rechargement — reload sans attendre les écritures IDB pendantes ; corrigé même session, `await db.flush()` aux 6 sites confirm+reload, sentinelle statique). Le volet « travaux > 20 Mo refusés sans bilan » reste OUVERT → #334 session B. Avant : #139 (modale « Exporter pour partager » cachée derrière la modale de bibliothèque, corrigé même session, classe `.modal-overlay--partage` z-index 10005). Avant : 8 juin #138 (icônes du popover mobile en carré noir : SVG non suivis par git) + #115 (404 `icon-files.svg`) corrigés en 1.4.2, avec sentinelle anti-récurrence. Avant : #137 (assistant « pas-certain » → inférence comportementale, 1.3.0) ; 5 juin #131-#135 (wizard, lot #317) ; 3 juin #130. Fonction « simuler/comparer des pratiques » → BACKLOG #307. Calcul par famille du profil = Session C (#303). Ouverts : #114, #116, #118, #121.
 
 ---
 
@@ -17,6 +17,12 @@
 ---
 
 ---
+
+## Corrigés (10 juin 2026 PM — instructions du rapport de bug figées en mode commentaire)
+
+| # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
+|---|---------|--------------|---------|-------|-------------|------------|
+| 143 | Grégoire (terrain Mac — 10 juin 2026, capture) | 10 juin 2026 | 10 juin 2026 (même session, sans bump) | 0610-1802+ | Modale « Signaler un problème », onglet « Partager un commentaire » : le bloc d'instructions affichait toujours « Comment signaler un bug : 1. Décris le problème… ». `mettreAJourModeRapport` adaptait le libellé, le placeholder et la gravité, mais pas ce bloc. | Ids `instructionsRapportTitre` / `instructionsRapportEtape1` + bascule textContent dans `mettreAJourModeRapport` (« Comment partager un commentaire : / Écris ton commentaire ou ta suggestion ci-dessous »). |
 
 ## Corrigés (10 juin 2026 PM — « Aucun codex actif » au boot, localStorage saturé)
 
