@@ -1,7 +1,7 @@
 # Suivi des bugs testeurs
 
 > **Objectif** : Tracker les bugs rapportés par les testeurs pour éviter le travail en double.
-> **Dernière mise à jour** : 10 juin 2026 PM — #141 (jeton de reprise : confirm piège OK/Annuler dans retirerJetonReprise → état orphelin irréparable ; branche « entériner » RETIRÉE, restauration par lien unilatéral, corrigé même session 1.11.2). Avant : #140 (import codex iPad : « Codex chargé » puis « Aucun codex actif » après rechargement — reload sans attendre les écritures IDB pendantes ; corrigé même session, `await db.flush()` aux 6 sites confirm+reload, sentinelle statique). Le volet « travaux > 20 Mo refusés sans bilan » reste OUVERT → #334 session B. Avant : #139 (modale « Exporter pour partager » cachée derrière la modale de bibliothèque, corrigé même session, classe `.modal-overlay--partage` z-index 10005). Avant : 8 juin #138 (icônes du popover mobile en carré noir : SVG non suivis par git) + #115 (404 `icon-files.svg`) corrigés en 1.4.2, avec sentinelle anti-récurrence. Avant : #137 (assistant « pas-certain » → inférence comportementale, 1.3.0) ; 5 juin #131-#135 (wizard, lot #317) ; 3 juin #130. Fonction « simuler/comparer des pratiques » → BACKLOG #307. Calcul par famille du profil = Session C (#303). Ouverts : #114, #116, #118, #121.
+> **Dernière mise à jour** : 10 juin 2026 PM — #142 (« Aucun codex actif » au boot malgré données chargées : localStorage saturé refoule `_codex_etat` en IDB seulement, lu trop tôt à DOMContentLoaded ; relecture à db-ready, corrigé même session 1.11.3 — la MALADIE DE FOND reste le localStorage saturé ≈ 8,9 Mo → plan Désaturation + #334 D). Avant : #141 (jeton de reprise : confirm piège OK/Annuler dans retirerJetonReprise → état orphelin irréparable ; branche « entériner » RETIRÉE, restauration par lien unilatéral, corrigé même session 1.11.2). Avant : #140 (import codex iPad : « Codex chargé » puis « Aucun codex actif » après rechargement — reload sans attendre les écritures IDB pendantes ; corrigé même session, `await db.flush()` aux 6 sites confirm+reload, sentinelle statique). Le volet « travaux > 20 Mo refusés sans bilan » reste OUVERT → #334 session B. Avant : #139 (modale « Exporter pour partager » cachée derrière la modale de bibliothèque, corrigé même session, classe `.modal-overlay--partage` z-index 10005). Avant : 8 juin #138 (icônes du popover mobile en carré noir : SVG non suivis par git) + #115 (404 `icon-files.svg`) corrigés en 1.4.2, avec sentinelle anti-récurrence. Avant : #137 (assistant « pas-certain » → inférence comportementale, 1.3.0) ; 5 juin #131-#135 (wizard, lot #317) ; 3 juin #130. Fonction « simuler/comparer des pratiques » → BACKLOG #307. Calcul par famille du profil = Session C (#303). Ouverts : #114, #116, #118, #121.
 
 ---
 
@@ -17,6 +17,14 @@
 ---
 
 ---
+
+## Corrigés (10 juin 2026 PM — « Aucun codex actif » au boot, localStorage saturé)
+
+> Corrigé en **code** même session (rapport `BUG_grégoire_2026-06-10_17-54-51.txt`). Symptôme cosmétique et auto-réparable (générer/télécharger le codex repose l'état actif), mais signal d'une maladie de fond : **localStorage saturé (~8,9 Mo)** — toute petite clé critique écrite à quota plein devient IDB-seulement et vulnérable à ce genre de course. Traitement de fond = plan « Désaturation localStorage » (mars 2026, vignettes ≈ 80 % du poids) + #334 session D.
+
+| # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
+|---|---------|--------------|---------|-------|-------------|------------|
+| 142 | Grégoire (terrain Mac — 10 juin 2026) | 10 juin 2026 | 10 juin 2026 (même session) | 0610-1643 | **Menu Codex : « Aucun codex actif »** alors que toutes les données sont chargées (trimestre, 409 évaluations) et que « Télécharger le codex » fonctionne. Cause : `_codex_etat` refoulé en IndexedDB seulement (localStorage plein au moment d'une écriture), puis lu de façon synchrone à `DOMContentLoaded` par `initialiserCodex` — AVANT la fin de la sync IDB → cache (`db-ready`). Lecture vide → indicateur jamais relu. Intermittent par nature. | Relecture de `CLE_ETAT_CODEX` à `db-ready` quand la lecture initiale est vide (même patron que la migration classeur→codex trois lignes plus haut), garde `window.dbReady` si l'événement est déjà passé, et garde « un geste utilisateur a déjà activé » pour ne rien écraser. Sentinelle statique `tests/unit/sentinelle-codex-etat-db-ready.test.js` (4 cas). |
 
 ## Corrigés (10 juin 2026 PM — jeton de reprise : confirm piège et état orphelin)
 
