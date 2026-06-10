@@ -12,6 +12,20 @@
 
     var CHANGELOG = [
         {
+            version: '1.11',
+            couleur: 'vert',
+            titre: 'Importe les ressources partagées par tes collègues',
+            items: [
+                'Tu reçois un fichier .lcz ? Importe-le par le bouton « Importer un partage (.lcz) » de tes bibliothèques, ou par Réglages › Données › « Partage entre collègues » (glisser-déposer accepté).',
+                'Avant d’accepter, Labo Codex vérifie tout : structure du fichier, signature de la personne qui l’a créé, continuité de sa clé — puis te présente une prévisualisation (contenu, auteur·e, licence).',
+                'Au premier import d’une personne, sa clé de signature est mémorisée. Si un fichier ultérieur se présente sous son nom avec une autre clé, une alerte bloquante te demande de confirmer par un autre canal avant de continuer.',
+                'Les items importés restent à part, en lecture seule, dans la section « Partagés par des collègues » de chaque bibliothèque — rien n’est mélangé à tes documents.',
+                '« Dupliquer vers mes documents » crée ta copie modifiable : une grille vient avec ses cartouches, une production avec sa grille. L’attribution d’origine est conservée.',
+                '« Retirer » (Réglages › Données) supprime un package importé sans toucher tes propres documents.',
+                'Pour éviter la confusion, les anciens boutons d’export/import par fichier sont renommés « … (JSON) ».'
+            ]
+        },
+        {
             version: '1.10',
             couleur: 'vert',
             titre: 'Partage tes ressources avec des collègues (.lcz)',
@@ -20,8 +34,7 @@
                 'Le fichier embarque ce qu’il faut pour fonctionner chez l’autre personne : une grille part avec ses cartouches, une production avec sa grille.',
                 'Chaque fichier est signé avec ta clé personnelle (créée automatiquement, elle ne quitte jamais ta machine) : la personne qui l’importera pourra vérifier qu’il vient bien de toi et qu’il n’a pas été modifié en chemin.',
                 'Le contenu est publié sous licence CC BY-NC-SA 4.0, avec ton attribution — une fenêtre de confirmation te récapitule tout avant l’export.',
-                'Le fichier .lcz ne s’ouvre pas au double-clic, c’est normal : il est destiné à être importé dans Labo Codex.',
-                'L’import arrive dans une prochaine version — garde tes fichiers .lcz, ils seront importables tels quels.'
+                'Le fichier .lcz ne s’ouvre pas au double-clic, c’est normal : il est destiné à être importé dans Labo Codex.'
             ]
         },
         {
