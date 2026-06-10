@@ -1,0 +1,361 @@
+/**
+ * partage-schemas.js — Schémas fermés du format `labo-codex-partage-v1`
+ *
+ * Chantier #329 Voûte Phase 1, lot P1.
+ * Plan canonique : `plans de travail/PLAN-VOUTE-PHASES-1-8.md`.
+ * Spec source : `docs/architecture/PLAN2-PHASE1-SPEC.md` (24 avril 2026),
+ * amendée par les décisions D2/D3/D7 du 11 mai 2026 :
+ *   - le manifeste porte le bloc signature DÈS la v1 (champs `signature`,
+ *     `clePublique`, `algorithme`, à `null` tant que le lot F n'est pas livré) ;
+ *   - les IDs du package sont conservés tels quels ; le préfixage `PARTAGE_*`
+ *     se fait à l'import (D7), pas ici.
+ *
+ * Module de DONNÉES PURES : aucune dépendance, aucun accès au storage, aucun
+ * effet. Consommé par `partage-validation.js` (interprète les descripteurs)
+ * et `partage-format.js` (projette les entités internes sur ces schémas).
+ *
+ * Mini-langage des descripteurs de champ :
+ *   { type, requis, nullable, max, maxValeur, minValeur, element,
+ *     maxLongueurElement, schema, valeurs, valeurExacte }
+ *   - type : 'chaine' | 'nombre' | 'booleen' | 'tableau' | 'objet'
+ *            | 'objet-libre' | 'dictionnaire-chaines'
+ *   - 'objet'        : sous-schéma fermé (clé `schema`) — champ inconnu = rejet
+ *   - 'objet-libre'  : structure JSON imbriquée non énumérable (configurations
+ *                      de pratiques) — validée structurellement par
+ *                      partage-validation (profondeur max, types JSON purs,
+ *                      chaînes bornées, aucune clé préfixée `_`)
+ *   - 'dictionnaire-chaines' : objet plat { cléLibre: chaîne } (commentaires
+ *                      de cartouche, indexés `<critereId>_<niveau>`)
+ *   - 'tableau'      : `max` = nombre d'items ; `schema` = schéma fermé des
+ *                      items objets, OU `element: 'chaine'` pour un tableau de
+ *                      chaînes (bornées par `maxLongueurElement`)
+ */
+(function () {
+    'use strict';
+
+    var partageSchemas = {};
+
+    // ------------------------------------------------------------------
+    // Constantes du format
+    // ------------------------------------------------------------------
+
+    partageSchemas.FORMAT = 'labo-codex-partage-v1';
+    partageSchemas.LICENCE = 'CC BY-NC-SA 4.0';
+    partageSchemas.LICENCE_URL = 'https://creativecommons.org/licenses/by-nc-sa/4.0/';
+
+    // Chaîne technique réservée au matériel d'exemple embarqué : toute
+    // occurrence dans un champ auteur d'un package entrant = USURPATION_DEMO.
+    partageSchemas.AUTEUR_RESERVE = 'Demo Labo Codex';
+    // Tout item dont l'ID commence par ce préfixe = item du pack démo, rejet.
+    partageSchemas.PREFIXE_ID_DEMO = 'demo-';
+
+    // Bloc signature (D2) — câblé au lot F ; la valeur est tolérée à null d'ici là.
+    partageSchemas.ALGORITHME_SIGNATURE = 'ECDSA-P256-SHA-256';
+
+    // Clés racine d'un package. Toute clé hors liste = rejet (niveau 1).
+    partageSchemas.CLES_RACINE = ['format', 'manifest', 'entites', 'references', 'medias'];
+
+    // Types d'entités partageables (singulier = item_principal.type / references)
+    // et clés correspondantes du dictionnaire `entites` (pluriel).
+    partageSchemas.TYPES_ENTITES = ['grille', 'echelle', 'cartouche', 'production', 'pratique'];
+    partageSchemas.CLES_ENTITES = {
+        grille: 'grilles',
+        echelle: 'echelles',
+        cartouche: 'cartouches',
+        production: 'productions',
+        pratique: 'pratiques'
+    };
+
+    partageSchemas.NATURES_REFERENCE = ['utilise', 'reprend', 'derive_de'];
+
+    // ------------------------------------------------------------------
+    // Limites globales
+    // ------------------------------------------------------------------
+    // tailleMaxPackageOctets : défaut issu de SKILL_Securite_donnees §9.4
+    // (règle 16, « suggestion : 50 Mo ») — à confirmer avec Grégoire avant P2
+    // (question §9 de la spec, restée ouverte au plan du 10 juin).
+    partageSchemas.LIMITES = {
+        tailleMaxPackageOctets: 50 * 1024 * 1024,
+        maxItemsParType: 50,
+        maxReferences: 200,
+        maxNiveauxChaineAttribution: 20,
+        profondeurMaxObjetLibre: 10,
+        longueurMaxChaineLibre: 5000
+    };
+
+    // ------------------------------------------------------------------
+    // Champs au traitement transversal (tous types d'entités)
+    // ------------------------------------------------------------------
+    // Flags démo : retirés SILENCIEUSEMENT (pas de rejet) — spec §4 niveau 6,
+    // test 10. Cohérent avec le pattern « filtrer plutôt que nettoyer ».
+    partageSchemas.CHAMPS_RETIRES_SILENCIEUSEMENT = ['isDemo', 'estDemo'];
+    // `auteur` au niveau d'une entité : interdit — l'attribution appartient au
+    // manifeste (auteur + chaineAttribution) et aux metadata_cc. À l'export,
+    // construirePackage le retire ; à l'import, sa présence = rejet (niveau 3).
+    partageSchemas.CHAMPS_INTERDITS_COMMUNS = ['auteur'];
+    // Tout champ préfixé `_` est interdit (état interne de l'application).
+    partageSchemas.PREFIXE_CHAMP_INTERDIT = '_';
+
+    // ------------------------------------------------------------------
+    // Sous-schémas réutilisés
+    // ------------------------------------------------------------------
+
+    // Attribution CC portée par les entités (posée par cc-license.js).
+    var SCHEMA_METADATA_CC = {
+        auteur_original: { type: 'chaine', max: 200 },
+        date_creation: { type: 'chaine', max: 40 },
+        licence: { type: 'chaine', max: 100 },
+        contributeurs: {
+            type: 'tableau', max: 50,
+            schema: {
+                auteur: { type: 'chaine', max: 200 },
+                date: { type: 'chaine', max: 40 },
+                modifications: { type: 'chaine', max: 2000 }
+            }
+        }
+    };
+
+    // Trace de fork (forgée par BibliothequeUI.forgerInspireDe). `idOriginal`
+    // est posé à l'import par le pipeline P3 (D7) — accepté dès la v1.
+    var SCHEMA_INSPIRE_DE = {
+        nom: { type: 'chaine', max: 200 },
+        auteur: { type: 'chaine', max: 200 },
+        date: { type: 'chaine', max: 40 },
+        idOriginal: { type: 'chaine', max: 200 }
+    };
+
+    // ------------------------------------------------------------------
+    // Schéma du manifeste (spec §3.2 + bloc signature D2)
+    // ------------------------------------------------------------------
+
+    partageSchemas.SCHEMA_MANIFESTE = {
+        champs: {
+            licence: { type: 'chaine', requis: true, valeurExacte: partageSchemas.LICENCE },
+            licence_url: { type: 'chaine', max: 300 },
+            dateExport: { type: 'chaine', requis: true, max: 40 }, // ISO 8601, parsabilité vérifiée au niveau 2
+            auteur: {
+                type: 'objet', requis: true,
+                schema: {
+                    nom: { type: 'chaine', requis: true, max: 200 },
+                    courriel: { type: 'chaine', max: 200 },
+                    institution: { type: 'chaine', max: 200 },
+                    discipline: { type: 'chaine', max: 200 }
+                }
+            },
+            item_principal: {
+                type: 'objet', requis: true,
+                schema: {
+                    type: { type: 'chaine', requis: true, valeurs: partageSchemas.TYPES_ENTITES },
+                    id: { type: 'chaine', requis: true, max: 200 }
+                }
+            },
+            chaineAttribution: {
+                type: 'tableau', max: partageSchemas.LIMITES.maxNiveauxChaineAttribution,
+                schema: {
+                    niveau: { type: 'nombre', requis: true, minValeur: 0, maxValeur: 1000 },
+                    auteur: { type: 'chaine', requis: true, max: 200 },
+                    nomItem: { type: 'chaine', max: 200 },
+                    date: { type: 'chaine', max: 40 }
+                }
+            },
+            // Bloc signature (D2) — présent dès la v1 pour éviter un format v2
+            // au lot F (zéro-dette appliqué au format). null accepté tant que
+            // la signature n'est pas câblée.
+            signature: { type: 'chaine', nullable: true, max: 1000 },
+            clePublique: { type: 'chaine', nullable: true, max: 2000 },
+            algorithme: { type: 'chaine', nullable: true, valeurExacte: partageSchemas.ALGORITHME_SIGNATURE }
+        }
+    };
+
+    // ------------------------------------------------------------------
+    // Schémas fermés par type d'entité
+    // ------------------------------------------------------------------
+    // Inventaires relevés sur les formes RÉELLES (pack-demo-20.js v20.3+,
+    // grilles.js, echelles.js, wizard-pratique-v2.js, 10 juin 2026). La spec
+    // d'avril résumait des shapes périmées (ex. cartouche « descripteurs ») —
+    // ces schémas-ci font foi, l'écart est documenté dans SESSION.md.
+
+    partageSchemas.SCHEMA_ENTITE = {
+
+        grille: {
+            champs: {
+                id: { type: 'chaine', requis: true, max: 200 },
+                nom: { type: 'chaine', requis: true, max: 200 },
+                criteres: {
+                    type: 'tableau', requis: true, max: 50,
+                    schema: {
+                        id: { type: 'chaine', requis: true, max: 200 },
+                        nom: { type: 'chaine', requis: true, max: 200 },
+                        description: { type: 'chaine', max: 2000 },
+                        ponderation: { type: 'nombre', minValeur: 0, maxValeur: 100 },
+                        type: { type: 'chaine', max: 50 },
+                        formule: { type: 'chaine', max: 500 },
+                        verrouille: { type: 'booleen' }
+                    }
+                },
+                dateCreation: { type: 'chaine', max: 40 },
+                dateModification: { type: 'chaine', max: 40 },
+                dansBibliotheque: { type: 'booleen' },
+                pratiquesCompatibles: { type: 'tableau', max: 20, element: 'chaine', maxLongueurElement: 20 },
+                baseSur: { type: 'chaine', max: 200 },
+                metadata_cc: { type: 'objet', schema: SCHEMA_METADATA_CC },
+                inspireDe: { type: 'objet', schema: SCHEMA_INSPIRE_DE }
+            },
+            champsInterdits: []
+        },
+
+        echelle: {
+            champs: {
+                id: { type: 'chaine', requis: true, max: 200 },
+                nom: { type: 'chaine', requis: true, max: 200 },
+                niveaux: {
+                    type: 'tableau', requis: true, max: 10,
+                    schema: {
+                        code: { type: 'chaine', requis: true, max: 20 },
+                        nom: { type: 'chaine', requis: true, max: 200 },
+                        min: { type: 'nombre', minValeur: 0, maxValeur: 100 },
+                        max: { type: 'nombre', minValeur: 0, maxValeur: 100 },
+                        valeurCalcul: { type: 'nombre', minValeur: 0, maxValeur: 100 },
+                        couleur: { type: 'chaine', max: 30 }
+                    }
+                },
+                config: {
+                    type: 'objet',
+                    schema: {
+                        typeEchelle: { type: 'chaine', max: 50 },
+                        seuilReussite: { type: 'nombre', minValeur: 0, maxValeur: 100 },
+                        notePassage: { type: 'chaine', max: 20 },
+                        codesPersonnalises: { type: 'chaine', max: 2000 }
+                    }
+                },
+                dateCreation: { type: 'chaine', max: 40 },
+                dateModification: { type: 'chaine', max: 40 },
+                dansBibliotheque: { type: 'booleen' },
+                pratiquesCompatibles: { type: 'tableau', max: 20, element: 'chaine', maxLongueurElement: 20 },
+                baseSur: { type: 'chaine', max: 200 },
+                metadata_cc: { type: 'objet', schema: SCHEMA_METADATA_CC },
+                inspireDe: { type: 'objet', schema: SCHEMA_INSPIRE_DE }
+            },
+            champsInterdits: []
+        },
+
+        cartouche: {
+            champs: {
+                id: { type: 'chaine', requis: true, max: 200 },
+                grilleId: { type: 'chaine', requis: true, max: 200 },
+                nom: { type: 'chaine', max: 200 },
+                criteres: {
+                    type: 'tableau', max: 50,
+                    schema: {
+                        id: { type: 'chaine', requis: true, max: 200 },
+                        nom: { type: 'chaine', max: 200 }
+                    }
+                },
+                niveaux: {
+                    type: 'tableau', max: 10,
+                    schema: {
+                        code: { type: 'chaine', requis: true, max: 20 },
+                        nom: { type: 'chaine', max: 200 }
+                    }
+                },
+                // Dictionnaire plat { '<critereId>_<code>': commentaire }.
+                commentaires: { type: 'dictionnaire-chaines', maxLongueurElement: 5000 },
+                contexte: { type: 'chaine', max: 2000 },
+                verrouille: { type: 'booleen' },
+                dansBibliotheque: { type: 'booleen' },
+                pratiquesCompatibles: { type: 'tableau', max: 20, element: 'chaine', maxLongueurElement: 20 },
+                metadata_cc: { type: 'objet', schema: SCHEMA_METADATA_CC },
+                inspireDe: { type: 'objet', schema: SCHEMA_INSPIRE_DE }
+            },
+            champsInterdits: []
+        },
+
+        production: {
+            champs: {
+                id: { type: 'chaine', requis: true, max: 200 },
+                titre: { type: 'chaine', requis: true, max: 200 },
+                // Peut être vide ('' = production sans grille, ex. portfolio).
+                grilleId: { type: 'chaine', requis: true, max: 200 },
+                description: { type: 'chaine', max: 2000 },
+                type: { type: 'chaine', max: 50 },
+                ponderation: { type: 'nombre', minValeur: 0, maxValeur: 100 },
+                objectif: { type: 'chaine', max: 2000 },
+                tache: { type: 'chaine', max: 5000 },
+                verrouille: { type: 'booleen' },
+                regles: {
+                    type: 'objet',
+                    schema: {
+                        nombreARetenir: { type: 'nombre', minValeur: 0, maxValeur: 1000 },
+                        minimumCompletion: { type: 'nombre', minValeur: 0, maxValeur: 1000 },
+                        nombreTotal: { type: 'nombre', minValeur: 0, maxValeur: 1000 }
+                    }
+                },
+                modeCalcul: { type: 'chaine', max: 50 },
+                code: { type: 'chaine', max: 50 },
+                dansBibliotheque: { type: 'booleen' },
+                metadata_cc: { type: 'objet', schema: SCHEMA_METADATA_CC },
+                inspireDe: { type: 'objet', schema: SCHEMA_INSPIRE_DE }
+            },
+            // Champs LOCAUX au trimestre/cours de l'auteur : non portables,
+            // retirés à l'export par construirePackage ; présents dans un
+            // package entrant = champ inconnu = rejet (schéma fermé).
+            champsInterdits: ['coursId', 'dateEcheance']
+        },
+
+        pratique: {
+            champs: {
+                id: { type: 'chaine', requis: true, max: 200 },
+                nom: { type: 'chaine', requis: true, max: 200 },
+                // Structures internes propres à chaque famille de pratique
+                // (#319) : non énumérables champ par champ — validation
+                // structurelle 'objet-libre' (profondeur, types JSON purs,
+                // chaînes bornées, aucune clé `_`).
+                configuration: { type: 'objet-libre', requis: true },
+                calcul_note: { type: 'objet-libre' },
+                echelle: { type: 'objet-libre' },
+                seuils: { type: 'objet-libre' },
+                type: { type: 'chaine', max: 50 },
+                variante: { type: 'chaine', nullable: true, max: 50 },
+                pratiques: { type: 'tableau', max: 20, element: 'chaine', maxLongueurElement: 20 },
+                description: { type: 'chaine', max: 2000 },
+                discipline: { type: 'chaine', max: 200 },
+                nbEvaluationsPrevues: { type: 'nombre', minValeur: 0, maxValeur: 1000 },
+                reglesSpeciales: { type: 'tableau', max: 20, element: 'chaine', maxLongueurElement: 50 },
+                dateCreation: { type: 'chaine', max: 40 },
+                dateModification: { type: 'chaine', max: 40 },
+                dansBibliotheque: { type: 'booleen' },
+                metadata_cc: { type: 'objet', schema: SCHEMA_METADATA_CC },
+                inspireDe: { type: 'objet', schema: SCHEMA_INSPIRE_DE }
+            },
+            // `etablissement` est une donnée d'auteur (comme `auteur`) : portée
+            // par manifest.auteur.institution, pas par l'entité.
+            champsInterdits: ['etablissement']
+        }
+    };
+
+    // ------------------------------------------------------------------
+    // Schéma des références inter-entités (spec §3.4)
+    // ------------------------------------------------------------------
+
+    partageSchemas.SCHEMA_REFERENCE = {
+        champs: {
+            depuis: {
+                type: 'objet', requis: true,
+                schema: {
+                    type: { type: 'chaine', requis: true, valeurs: partageSchemas.TYPES_ENTITES },
+                    id: { type: 'chaine', requis: true, max: 200 }
+                }
+            },
+            vers: {
+                type: 'objet', requis: true,
+                schema: {
+                    type: { type: 'chaine', requis: true, valeurs: partageSchemas.TYPES_ENTITES },
+                    id: { type: 'chaine', requis: true, max: 200 }
+                }
+            },
+            nature: { type: 'chaine', requis: true, valeurs: partageSchemas.NATURES_REFERENCE }
+        }
+    };
+
+    window.partageSchemas = partageSchemas;
+})();
