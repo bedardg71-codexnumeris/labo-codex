@@ -54,7 +54,7 @@
         cle_changee_titre: 'La clé de signature a changé',
         cle_changee: 'Ce package se présente comme venant de {nom}, mais sa signature '
             + 'ne correspond pas à la clé mémorisée depuis ton premier import '
-            + 'du {premierContact} ({nbImports} import(s) accepté(s)).',
+            + 'du {premierContact} ({imports}).',
         cle_changee_causes: 'Deux explications possibles : {nom} a changé d\'appareil ou '
             + 'perdu sa clé… ou quelqu\'un tente de se faire passer pour cette personne.',
         cle_changee_consigne: 'Ne fais confiance à la nouvelle clé que si tu as confirmé '
@@ -207,18 +207,26 @@
     // ------------------------------------------------------------------
 
     /**
-     * Substitution TEXTE PUR des gabarits {nom}/{nbImports}/{premierContact}.
-     * Aucun échappement requis : le résultat n'entre dans le DOM que par
+     * Substitution TEXTE PUR des gabarits {nom}/{imports}/{premierContact}.
+     * L'accord en nombre est calculé ici ({imports} → « 1 import accepté » /
+     * « 3 imports acceptés ») : pas de « (s) » de gabarit dans l'UI. Aucun
+     * échappement requis : le résultat n'entre dans le DOM que par
      * textContent (jamais innerHTML).
      */
     function substituer(gabarit, resultat) {
         var fiche = resultat.fiche || {};
-        var premierContact = fiche.premierContact
-            ? String(fiche.premierContact).slice(0, 10)
-            : 'date inconnue';
+        var premierContact = 'date inconnue';
+        if (fiche.premierContact) {
+            var date = new Date(fiche.premierContact);
+            premierContact = isNaN(date.getTime())
+                ? String(fiche.premierContact).slice(0, 10)
+                : date.toLocaleDateString('fr-CA', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+        var nb = fiche.nbImports || 0;
+        var imports = nb === 1 ? '1 import accepté' : nb + ' imports acceptés';
         return gabarit
             .replace(/\{nom\}/g, String(resultat.auteur || ''))
-            .replace(/\{nbImports\}/g, String(fiche.nbImports || 0))
+            .replace(/\{imports\}/g, imports)
             .replace(/\{premierContact\}/g, premierContact);
     }
 
