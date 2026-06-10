@@ -403,6 +403,29 @@ function retirerJetonReprise(evaluationId) {
 
     const evaluationReprise = evaluations[indexReprise];
 
+    // #141 — appelée sur une ORIGINALE remplacée (et non sur la reprise) :
+    // proposer la restauration au lieu de l'ancien no-op au message menteur
+    // (« Jeton de reprise retiré » sans rien faire).
+    if (evaluationReprise.remplaceeParId) {
+        const indexRepriseLiee = evaluations.findIndex(e => e.id === evaluationReprise.remplaceeParId);
+        const noteRepriseLiee = indexRepriseLiee !== -1 ? (evaluations[indexRepriseLiee].noteFinale || 0) : null;
+        const confirmer = confirm(
+            'Cette évaluation est l\'ORIGINALE, remplacée par une reprise'
+            + (noteRepriseLiee !== null ? ` (${noteRepriseLiee}%)` : '') + '.\n\n'
+            + 'La restaurer supprimera la reprise. Continuer ?'
+        );
+        if (!confirmer) return false;
+
+        delete evaluationReprise.remplaceeParId;
+        delete evaluationReprise.dateRemplacement;
+        delete evaluationReprise.archivee;
+        delete evaluationReprise.dateArchivage;
+        if (indexRepriseLiee !== -1) {
+            evaluations.splice(indexRepriseLiee, 1);
+        }
+        notifications.succes('Originale restaurée' + (indexRepriseLiee !== -1 ? ', reprise supprimée' : ''));
+    } else {
+
     // Trouver l'évaluation originale si elle existe
     const evaluationOriginale = evaluations.find(e =>
         e.etudiantDA === evaluationReprise.etudiantDA &&
@@ -411,49 +434,42 @@ function retirerJetonReprise(evaluationId) {
     );
 
     if (evaluationOriginale) {
-        // Demander à l'utilisateur ce qu'il veut faire
+        // #141 — décocher le jeton = DÉFAIRE la reprise, un seul confirm,
+        // défaut sûr (Annuler = aucun changement). L'ancienne branche
+        // « OK = entériner la reprise » est RETIRÉE : une reprise assumée se
+        // garde en laissant le jeton en place (l'originale archivée est la
+        // trace) ; l'entérinement effaçait repriseDeId et fabriquait un état
+        // orphelin irréparable depuis l'interface (bug terrain 10 juin).
         const noteOriginale = evaluationOriginale.noteFinale || 0;
         const noteReprise = evaluationReprise.noteFinale || 0;
 
-        const garderReprise = confirm(
-            `Veux-tu conserver la reprise et archiver l'originale ?\n\n` +
-            `• OK : La reprise (${noteReprise}%) devient l'évaluation principale, l'originale (${noteOriginale}%) est archivée\n` +
-            `• Annuler : La reprise est supprimée, l'originale (${noteOriginale}%) est restaurée`
+        const confirmer = confirm(
+            `Retirer le jeton de reprise ?\n\n` +
+            `La reprise (${noteReprise}%) sera supprimée et l'originale (${noteOriginale}%) sera restaurée.\n\n` +
+            `(Pour conserver la reprise, garde simplement le jeton en place.)`
         );
+        if (!confirmer) {
+            return false; // aucun changement — le caller remet la checkbox
+        }
 
-        if (garderReprise) {
-            // Garder la reprise, archiver l'originale
+        // Retirer les flags de l'originale
+        delete evaluationOriginale.remplaceeParId;
+        delete evaluationOriginale.dateRemplacement;
+        delete evaluationOriginale.archivee;
+        delete evaluationOriginale.dateArchivage;
 
-            // Nettoyer les propriétés de jeton de la reprise
-            delete evaluationReprise.repriseDeId;
-            delete evaluationReprise.jetonRepriseApplique;
-            delete evaluationReprise.dateApplicationJetonReprise;
+        // Supprimer la reprise
+        evaluations.splice(indexReprise, 1);
 
-            // L'originale reste archivée (ne rien changer)
+        notifications.succes('Reprise supprimée, originale restaurée');
 
-            notifications.succes('Reprise conservée, originale archivée');
-        } else {
-            // Supprimer la reprise, restaurer l'originale
-
-            // Retirer les flags de l'originale
-            delete evaluationOriginale.remplaceeParId;
-            delete evaluationOriginale.dateRemplacement;
-            delete evaluationOriginale.archivee;
-            delete evaluationOriginale.dateArchivage;
-
-            // Supprimer la reprise
-            evaluations.splice(indexReprise, 1);
-
-            notifications.succes('Reprise supprimée, originale restaurée');
-
-            // Recharger l'originale
-            if (window.evaluationEnCours?.idModification === evaluationId) {
-                setTimeout(() => {
-                    if (typeof modifierEvaluation === 'function') {
-                        modifierEvaluation(evaluationOriginale.id);
-                    }
-                }, 500);
-            }
+        // Recharger l'originale
+        if (window.evaluationEnCours?.idModification === evaluationId) {
+            setTimeout(() => {
+                if (typeof modifierEvaluation === 'function') {
+                    modifierEvaluation(evaluationOriginale.id);
+                }
+            }, 500);
         }
     } else {
         // Pas d'originale trouvée, juste nettoyer les propriétés
@@ -462,6 +478,7 @@ function retirerJetonReprise(evaluationId) {
         delete evaluationReprise.dateApplicationJetonReprise;
 
         notifications.succes('Jeton de reprise retiré');
+    }
     }
 
     // Sauvegarder via sauvegarderDonneesSelonMode (bloque en mode anonymisation)
