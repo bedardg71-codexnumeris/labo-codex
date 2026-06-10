@@ -215,10 +215,11 @@ function fusionnerDemoVersGlobaux() {
     }
     db.setSync('echellesTemplates', echelles);
 
-    // 6. modalitesEvaluation : écrasement (mêmes contraintes que legacy)
+    // 6. modalitesEvaluation : écrasement (mêmes contraintes que legacy),
+    // via le module propriétaire (SSOT #328 Lot 1)
     var modDemo = db.getSync('demo_modalitesEvaluation', null);
     if (modDemo) {
-        db.setSync(cle('modalitesEvaluation'), modDemo);
+        window.modalitesEvaluation.remplacer(modDemo);
     }
 
     // 7. cartouches_* : lire depuis PACK_DEMARRAGE (Phase 1 ne les peuple pas
@@ -516,7 +517,8 @@ async function desactiverModeDemo() {
             else db.removeSync('groupeCoursActif');
 
             if (etat.modalitesEvaluation) {
-                db.setSync(cle('modalitesEvaluation'), etat.modalitesEvaluation);
+                // Restauration via le module propriétaire (SSOT #328 Lot 1)
+                window.modalitesEvaluation.remplacer(etat.modalitesEvaluation);
             }
 
             // Force normal si valeur legacy 'simulation'

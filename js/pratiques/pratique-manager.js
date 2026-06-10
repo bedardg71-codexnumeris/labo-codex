@@ -69,11 +69,11 @@ const PratiqueManager = {
      * @param {string} pratiqueId - ID de la pratique à activer
      */
     async changerPratiqueActive(pratiqueId) {
-        const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-        modalites.pratique = pratiqueId;
-        modalites.dateConfiguration = new Date().toISOString();
-
-        db.setSync(cle('modalitesEvaluation'), modalites);
+        // Écriture via le module propriétaire (SSOT #328 Lot 1)
+        window.modalitesEvaluation.modifier(function (m) {
+            m.pratique = pratiqueId;
+            m.dateConfiguration = new Date().toISOString();
+        });
 
         // Invalider le cache de pratique-registre.js
         if (window.invaliderCachePratique) {

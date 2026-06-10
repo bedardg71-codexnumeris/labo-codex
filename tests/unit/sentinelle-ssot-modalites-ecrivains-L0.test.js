@@ -7,31 +7,22 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
 const dossierJs = path.join(racineProjet, 'js');
 
-// Sentinelle SSOT `modalitesEvaluation` — Lot 0 (10 juin 2026).
+// Sentinelle SSOT `modalitesEvaluation` — Lots 0 et 1 (10 juin 2026).
 //
 // Contexte : audit `Rapports/AUDIT-SSOT-MODALITES-EVALUATION-2026-06-10.md`.
-// La clé est écrite par read-modify-write depuis trop d'endroits (violation
-// SSOT n°1 de l'audit annuel). Le Lot 0 a extrait les deux écrivains HORS
-// DOMAINE (horaire.js → clé `dureePeriode` ; preferences-v2.js → toggles
-// comparatifs morts retirés). Cette sentinelle verrouille le résultat :
-// tout NOUVEL écrivain hors de la liste ci-dessous fait échouer la suite.
+// La clé était écrite par read-modify-write depuis 14 fichiers (violation
+// SSOT n°1 de l'audit annuel). Lot 0 : extraction des écrivains hors domaine
+// (horaire.js → clé `dureePeriode` ; preferences-v2.js → toggles morts).
+// Lot 1 : module PROPRIÉTAIRE `js/pratiques/modalites-evaluation.js`
+// (lire/modifier/remplacer) — les 12 écrivains du domaine routés dessus.
 //
-// RATCHET : cette liste ne doit que RÉTRÉCIR. Au Lot 1 (module propriétaire
-// + API d'écriture par section), la retailler vers le seul propriétaire.
-// Ne JAMAIS y rajouter un fichier sans décision explicite de Grégoire.
+// RATCHET : cette liste ne doit que RÉTRÉCIR (Lot 3 retirera les deux
+// migrations bornées avec la purge legacy). Ne JAMAIS y rajouter un fichier
+// sans décision explicite de Grégoire.
 const ECRIVAINS_AUTORISES = new Set([
-    'js/pratique-notation-v2.js',          // éditeur de configuration (22 sites)
-    'js/pratiques.js',                     // activation/sauvegarde de pratique
-    'js/objectifs.js',                     // bascule multi-objectifs
-    'js/wizard-pratique-v2.js',            // création (sync si pratique active)
-    'js/pratiques/pratique-manager.js',    // changerPratiqueActive
-    'js/pratiques/migration-pratiques.js', // migration one-shot (clé non namespacée, bornée)
-    'js/pratiques-bibliotheque.js',        // appliquerConfigurationPratique
-    'js/main.js',                          // migration decouplerPR (bornée, documentée)
-    'js/preferences.js',                   // nettoyerLegacy (one-shot)
-    'js/import-export.js',                 // executerImportConfigComplete
-    'js/demo-activation.js',               // bascule démo (écrasement + restauration)
-    'js/evaluation-chargement.js'          // _synchroniserJetonsPratique (miroir, cible Lot 2)
+    'js/pratiques/modalites-evaluation.js', // module PROPRIÉTAIRE (seul écrivain de la clé NS)
+    'js/main.js',                           // migration decouplerPR — clé NON namespacée, bornée, documentée
+    'js/pratiques/migration-pratiques.js'   // migration one-shot — clé NON namespacée, bornée
 ]);
 
 const MOTIF_ECRITURE = /db\.set(?:Sync)?\s*\([^)]*modalitesEvaluation/;
@@ -84,7 +75,19 @@ describe('Sentinelle SSOT · écrivains de modalitesEvaluation (Lot 0)', () => {
     it('le périmètre scanné est plausible (la sentinelle voit bien les écrivains connus)', () => {
         // Garde anti-régression de la sentinelle elle-même : si le motif ou le
         // parcours casse silencieusement, ce test échoue au lieu de tout laisser passer.
-        expect(ecrivainsTrouves.has('js/pratique-notation-v2.js')).toBe(true);
-        expect(ecrivainsTrouves.size).toBeGreaterThanOrEqual(10);
+        // Le module propriétaire écrit la clé en LITTÉRAL exprès pour rester visible ici.
+        expect(ecrivainsTrouves.has('js/pratiques/modalites-evaluation.js')).toBe(true);
+        expect(ecrivainsTrouves.size).toBeGreaterThanOrEqual(3);
+    });
+
+    it('les anciens écrivains du domaine sont bien routés (acquis Lot 1)', () => {
+        for (const ancien of [
+            'js/pratique-notation-v2.js', 'js/pratiques.js', 'js/objectifs.js',
+            'js/wizard-pratique-v2.js', 'js/pratiques/pratique-manager.js',
+            'js/pratiques-bibliotheque.js', 'js/preferences.js',
+            'js/import-export.js', 'js/demo-activation.js', 'js/evaluation-chargement.js'
+        ]) {
+            expect(ecrivainsTrouves.has(ancien), `${ancien} écrit encore la clé en direct`).toBe(false);
+        }
     });
 });

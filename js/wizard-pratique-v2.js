@@ -2864,12 +2864,14 @@ async function sauvegarderPratique(pratique) {
     db.setSync(cle('pratiquesConfigurables'), pratiques);
 
     // Mettre à jour les modalités d'évaluation si c'est la pratique active
-    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    // (écriture via le module propriétaire — SSOT #328 Lot 1)
+    const modalites = window.modalitesEvaluation.lire();
     if (!modalites.pratiqueId || modalites.pratiqueId === pratique.id) {
-        modalites.pratiqueId = pratique.id;
-        modalites.pratique = pratique.type;
-        modalites.approcheEvaluation = pratique.configuration?.approcheEvaluation || null;
-        db.setSync(cle('modalitesEvaluation'), modalites);
+        window.modalitesEvaluation.modifier(function (m) {
+            m.pratiqueId = pratique.id;
+            m.pratique = pratique.type;
+            m.approcheEvaluation = pratique.configuration?.approcheEvaluation || null;
+        });
     }
 }
 

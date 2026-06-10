@@ -1022,20 +1022,14 @@ function activerPratiqueMultiObjectifs(ensembleId) {
         return false;
     }
 
-    // Lire la configuration actuelle
-    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-
-    // Créer configPAN si nécessaire
-    if (!modalites.configPAN) {
-        modalites.configPAN = {};
-    }
-
-    // Activer la pratique multi-objectifs
-    modalites.configPAN.ensembleObjectifsId = ensembleId;
-
-    // Sauvegarder
-    db.setSync(cle('modalitesEvaluation'), modalites);
-
+    // Écriture via le module propriétaire (SSOT #328 Lot 1)
+    window.modalitesEvaluation.modifier(function (modalites) {
+        if (!modalites.configPAN) {
+            modalites.configPAN = {};
+        }
+        // Activer la pratique multi-objectifs
+        modalites.configPAN.ensembleObjectifsId = ensembleId;
+    });
 
     return true;
 }
@@ -1046,11 +1040,13 @@ function activerPratiqueMultiObjectifs(ensembleId) {
  * @returns {boolean} - true si désactivation réussie
  */
 function desactiverPratiqueMultiObjectifs() {
-    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const modalites = window.modalitesEvaluation.lire();
 
     if (modalites.configPAN) {
-        delete modalites.configPAN.ensembleObjectifsId;
-        db.setSync(cle('modalitesEvaluation'), modalites);
+        // Écriture via le module propriétaire (SSOT #328 Lot 1)
+        window.modalitesEvaluation.modifier(function (m) {
+            if (m.configPAN) delete m.configPAN.ensembleObjectifsId;
+        });
         return true;
     }
 
