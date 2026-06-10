@@ -175,8 +175,9 @@ restreint fin août » (calendrier) tombe après la Phase 3.
       structurés, **vecteurs fixes committés** (clé privée jetée) +
       `window._testSignatureF()` (8 scénarios console, terrain Safari).
 - [x] `docs/DATA-OWNERSHIP.md` : nouvelle section « Bases IndexedDB annexes ».
-- [ ] Validation terrain Grégoire (Safari Mac) : `await _testSignatureF()`
-      → 8/8 attendus, puis release minor.
+- [x] Validation terrain Grégoire (Safari Mac, 10 juin 2026) : `_testSignatureF()`
+      → **8/8 verts**, identité locale créée et persistée. Release minor exécutée
+      dans la foulée.
 
 ### Lot T — Confiance TOFU
 
