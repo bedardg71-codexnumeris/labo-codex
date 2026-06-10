@@ -251,7 +251,9 @@
                 return noeud;
             }
 
-            var overlay = el('div', 'modal-overlay');
+            // --partage : au-dessus des modales de bibliothèque (z-index 10000),
+            // même correctif que la modale d'export (bug terrain 10 juin 2026).
+            var overlay = el('div', 'modal-overlay modal-overlay--partage');
             overlay.id = 'modalConfianceCleChangee';
 
             var carte = el('div', 'modal-contenu modal-compact');
