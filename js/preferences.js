@@ -317,17 +317,18 @@
         ];
 
         try {
-            const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', null);
+            const modalites = window.modalitesEvaluation.lire();
             if (modalites && typeof modalites === 'object') {
-                let modifie = false;
-                for (const champ of CHAMPS_LEGACY_MODALITES) {
-                    if (champ in modalites) {
-                        delete modalites[champ];
-                        modifie = true;
-                    }
-                }
-                if (modifie) {
-                    db.setSync(cle('modalitesEvaluation'), modalites);
+                const aNettoyer = CHAMPS_LEGACY_MODALITES.some(function (champ) {
+                    return champ in modalites;
+                });
+                if (aNettoyer) {
+                    // Écriture via le module propriétaire (SSOT #328 Lot 1)
+                    window.modalitesEvaluation.modifier(function (m) {
+                        for (const champ of CHAMPS_LEGACY_MODALITES) {
+                            delete m[champ];
+                        }
+                    });
                 }
             }
 

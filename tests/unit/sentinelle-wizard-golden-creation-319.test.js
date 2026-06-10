@@ -44,7 +44,10 @@ const globaux = {
     // Rendu (a2) : wizardV2VoieRapide déclenche afficherEtapeWizardV2 → genererRadioCards.
     echapperHtml: (s) => String(s == null ? '' : s)
 };
-const win = chargerScript('js/wizard-pratique-v2.js', globaux);
+// SSOT #328 Lot 1 : le wizard écrit modalitesEvaluation via le module
+// propriétaire — chargé d'abord dans le même sandbox (même db/cle mockés).
+const win = chargerScript('js/pratiques/modalites-evaluation.js', globaux);
+chargerScript('js/wizard-pratique-v2.js', globaux, win);
 
 async function produire(pratiqueId, reponses) {
     store = [];

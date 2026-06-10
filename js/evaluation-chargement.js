@@ -245,22 +245,24 @@ function _obtenirPratiqueIdActive() {
 }
 
 function _synchroniserJetonsPratique(jetons) {
-    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-    modalites.configPAN = modalites.configPAN || {};
-    modalites.configPAN.jetons = {
-        actif: jetons.actif !== false,
-        delai: { nombre: jetons.nombre || 2, dureeJours: jetons.delaiDuree || 2 },
-        reprise: {
-            nombre: jetons.nombre || 2,
-            maxParProduction: 1,
-            archiverOriginale: jetons.repriseOriginale === 'archiver'
-        },
-        repriseCiblee: {
-            actif: jetons.cibleeActif || false,
-            plafondNote: jetons.cibleePlafond || null
-        }
-    };
-    db.setSync(cle('modalitesEvaluation'), modalites);
+    // Écriture via le module propriétaire (SSOT #328 Lot 1). NB : ce miroir
+    // configPAN.jetons est une cible du Lot 2 (dérivation depuis la pratique).
+    window.modalitesEvaluation.modifier(function (modalites) {
+        modalites.configPAN = modalites.configPAN || {};
+        modalites.configPAN.jetons = {
+            actif: jetons.actif !== false,
+            delai: { nombre: jetons.nombre || 2, dureeJours: jetons.delaiDuree || 2 },
+            reprise: {
+                nombre: jetons.nombre || 2,
+                maxParProduction: 1,
+                archiverOriginale: jetons.repriseOriginale === 'archiver'
+            },
+            repriseCiblee: {
+                actif: jetons.cibleeActif || false,
+                plafondNote: jetons.cibleePlafond || null
+            }
+        };
+    });
 }
 
 function _resoudreEchellePratique() {

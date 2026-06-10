@@ -2198,16 +2198,14 @@ async function executerImportConfigComplete() {
 
         // 5. Importer les paramètres du cours (fusion avec paramètres existants)
         if (contenu.parametres) {
-            const modalitesActuelles = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
-            const modalitesFusionnees = {
-                ...modalitesActuelles,
-                systemeJetons: contenu.parametres.systeme_jetons,
-                reprisesAutorisees: contenu.parametres.reprises_autorisees,
-                nombreArtefacts: contenu.parametres.nombre_artefacts,
-                pratiqueActive: contenu.parametres.pratique_active
+            // Écriture via le module propriétaire (SSOT #328 Lot 1)
+            window.modalitesEvaluation.modifier(function (m) {
+                m.systemeJetons = contenu.parametres.systeme_jetons;
+                m.reprisesAutorisees = contenu.parametres.reprises_autorisees;
+                m.nombreArtefacts = contenu.parametres.nombre_artefacts;
+                m.pratiqueActive = contenu.parametres.pratique_active;
                 // Session C (#303) : modeComparatif retiré (mode comparatif supprimé).
-            };
-            db.setSync(cle('modalitesEvaluation'), modalitesFusionnees);
+            });
         }
 
         // Afficher résumé des remappages si nécessaire
