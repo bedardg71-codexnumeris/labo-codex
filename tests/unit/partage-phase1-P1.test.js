@@ -134,6 +134,42 @@ describe('#329 P1 · construirePackage (spec §6 tests 1-2)', () => {
     it('options.type est requis (les entités internes ne portent pas leur type)', () => {
         expect(() => win.partageFormat.construirePackage(grilleFixture(), {})).toThrow(/type/);
     });
+
+    it('régression terrain 10 juin — grille réelle : la projection élague RÉCURSIVEMENT les résidus', () => {
+        // Reproduit l'échec _testPartagePhase1 #1 sur les grilles réelles
+        // H2026 : champs legacy DANS les critères + metadata_cc enrichie.
+        const grilleReelle = {
+            id: 'grille_1770742838756_23q82vbsk', nom: 'Grille réelle',
+            criteres: [{
+                id: 'C1', nom: 'Structure', ponderation: 20,
+                niveauSOLO: 'multistructurel',          // champ réel (grilles.js:339)
+                residuLegacy: 'cycle ancien',            // résidu → élagué
+                _etatInterne: true                       // interne → élagué
+            }],
+            metadata_cc: {
+                licence: 'CC BY-NC-SA 4.0',
+                licence_resume: 'Attribution - Pas d\'utilisation commerciale…',
+                auteur_original: 'Grégoire B.', email_auteur: 'x@y.org',
+                site_auteur: 'https://codexnumeris.org', type: 'grille',
+                nom: 'Grille réelle', version: '1.2',
+                attribution: 'Créé par Grégoire B.',
+                discipline: ['Littérature'], niveau: 'Collégial',
+                institution: 'Cégep', description_courte: 'desc',
+                contributeurs: [{ nom: 'Collègue', date: '2026-06-01', modifications: 'ajustements' }],
+                champFutur: 'inconnu'                    // résidu → élagué
+            }
+        };
+        const pkg = win.partageFormat.construirePackage(grilleReelle, { type: 'grille', identiteAuteur: 'T' });
+        const r = win.partageValidation.validerPackage(pkg);
+        expect(r.erreurs).toEqual([]);
+        expect(r.valide).toBe(true);
+        const critere = pkg.entites.grilles[0].criteres[0];
+        expect(critere.niveauSOLO).toBe('multistructurel');
+        expect(critere.residuLegacy).toBeUndefined();
+        expect(critere._etatInterne).toBeUndefined();
+        expect(pkg.entites.grilles[0].metadata_cc.champFutur).toBeUndefined();
+        expect(pkg.entites.grilles[0].metadata_cc.contributeurs[0].nom).toBe('Collègue');
+    });
 });
 
 describe('#329 P1 · validerPackage — 6 niveaux (spec §6 tests 3-14)', () => {
