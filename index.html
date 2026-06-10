@@ -9711,7 +9711,11 @@
                                 Choisir un fichier…
                             </button>
                         </div>
-                        <input type="file" id="partage-fichier-import" accept=".lcz" style="display: none"
+                        <!-- PAS d'attribut accept : Safari macOS mappe accept sur les UTI
+                             système et grise toute extension non enregistrée (.lcz, D-V1,
+                             constat terrain 10 juin). La validation se fait par magic
+                             bytes + validerPackage, pas par le nom. -->
+                        <input type="file" id="partage-fichier-import" style="display: none"
                                data-on-change="partageImport.surSelectionFichier">
 
                         <div class="u-mt-20">
