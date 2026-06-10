@@ -12,6 +12,19 @@
 
     var CHANGELOG = [
         {
+            version: '1.10',
+            couleur: 'vert',
+            titre: 'Partage tes ressources avec des collègues (.lcz)',
+            items: [
+                'Nouveau dans le menu ⋮ de tes bibliothèques (grilles, échelles, cartouches, productions, pratiques) : « Exporter pour partager » génère un fichier .lcz (Labo Codex Zip) à transmettre par courriel ou USB.',
+                'Le fichier embarque ce qu’il faut pour fonctionner chez l’autre personne : une grille part avec ses cartouches, une production avec sa grille.',
+                'Chaque fichier est signé avec ta clé personnelle (créée automatiquement, elle ne quitte jamais ta machine) : la personne qui l’importera pourra vérifier qu’il vient bien de toi et qu’il n’a pas été modifié en chemin.',
+                'Le contenu est publié sous licence CC BY-NC-SA 4.0, avec ton attribution — une fenêtre de confirmation te récapitule tout avant l’export.',
+                'Le fichier .lcz ne s’ouvre pas au double-clic, c’est normal : il est destiné à être importé dans Labo Codex.',
+                'L’import arrive dans une prochaine version — garde tes fichiers .lcz, ils seront importables tels quels.'
+            ]
+        },
+        {
             version: '1.6',
             couleur: 'vert',
             titre: 'Des dossiers dans toutes tes bibliothèques',
