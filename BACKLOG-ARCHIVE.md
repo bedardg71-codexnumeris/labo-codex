@@ -18,6 +18,165 @@
 
 ## Items livrés après la bascule du 25 mai 2026
 
+### Bascule du 10 juin 2026 — passe de triage (Cowork)
+
+> Déplacés ici par Claude (passe de triage du 10 juin 2026, à la demande de Grégoire) : 16 items cochés [x] restés dans le backlog actif, dont #303 (clos d'après SESSION.md mais resté ouvert dans BACKLOG.md — réconciliation) et #295 (absorbé par #334).
+
+- [x] 🔴 **#330** Bug assiduité bi-groupes — dénominateur contaminé par les séances de l'autre groupe — créé 10 juin 2026, **LIVRÉ 10 juin 2026 (1.6.4), validé terrain**
+  - **Symptôme** (données réelles H2026, groupes 00008/00002) : A chute vers ~50 % dès la 2e semaine pour tout le groupe affiché, même étudiant·es présent·es. Faussait en cascade M = (A+C)/2, profils, corrélations et alertes RàI.
+  - **Cause** : depuis la consolidation chantier D (29 mai), `groupeEtudiants` = roster du cours ENTIER (51 = 26+25). `calculerAssiduite` construisait `datesSaisies` depuis ce roster — la garde du FIX #220 supposait un roster mono-groupe. Chaque séance saisie du groupe B = absence complète pour chaque étudiant·e du groupe A.
+  - **Livré (code)** : helper `construireDatesSaisiesGroupe(da, presences)` dans `indices.js`, partagé par `calculerAssiduite` + `calculerAssiduitePourAffichage` (bloc dupliqué retiré). Sentinelle `tests/unit/sentinelle-assiduite-bigroupes-330.test.js` (5 cas : cache contaminé, symétrie, FIX #220 préservé, roster legacy sans groupe).
+  - **Réparé (données)** : les 2 GC pointaient le MÊME horaire « Lun-Jeu » ; GC 00008 réassemblé sur « Mar-Jeu » (HOR_1768050643606), caches `seancesCompletes` + indices régénérés pour les 2 groupes.
+  - **Reliquat ouvert → #331** : fiches de présence orphelines du 00008 saisies sous des dates de LUNDI pendant le mauvais assemblage (vu : lundi 23 fév, sem. 6) — invisibles en saisie, exclues du calcul, partiellement doublonnées par re-saisie manuelle. Auditer puis re-dater ou purger.
+
+
+- [x] 🟡 **#331** Fiches de présence orphelines (séquelle #330) — audit puis purge — créé et **CLOS 10 juin 2026** (purge console one-shot)
+  - **Inventaire (sonde 10 juin)** : 4 lundis (9 et 23 fév, 2 et 23 mars) × 26 fiches = 104 fiches non-facultatives d'étudiant·es 00008 sous des dates sans cours (confirmé Grégoire : pas de cours 00008 ces lundis ; les mardis des mêmes semaines étaient déjà saisis).
+  - **Purge** : backup Codex puis script console (filtre identité DA × date × non-facultatif), recalcul indices enchaîné. Pas de bump (opération données, patron chantier D).
+
+
+- [x] 🟢 **#327** Étendre le classement par dossiers aux autres bibliothèques (grilles, échelles, productions) — ✅ **LIVRÉ 1.6.0 (9 juin 2026, `a27f7e42`)**, validé terrain par Grégoire
+  - **✅ CADRAGE** : `plans de travail/CADRAGE-327-classement-transversal-biblios.md` (§7 = journal des décisions). Prolonge #320 (1.5.0 pour les pratiques).
+  - **T0–T3** : helper générique `BibliothequeUI.repertoires` (`6ea5abc3`) + refacto pratiques sans wrapper (sentinelles #320 adaptées). Câblage **grilles** (`d1e3b7df`), **échelles** (`1e0a322e`), **productions** (`4d857ba2`). Filtres de commodité (discipline, pratique) retirés ; code mort supprimé ; hook de cohérence dans chaque remover ; 1 sentinelle de rendu par lot. 380 Vitest + 47 Playwright verts.
+  - **T4 cartouches = EXCEPTION (décision Grégoire, `19480962`)** : dossiers NON appliqués — la relation « par grille » est la structure réelle (`cartouches_{grilleId}`), conservée telle quelle. Aucune modif de `cartouches.js`.
+  - **T5** : changelog `1.6` + release `minor` (`a27f7e42`, build 0609-2040). Option démo (1 répertoire d'exemple) reportée comme pour #320. Archivage à la prochaine bascule.
+  - **Origine** : demande Grégoire (9 juin 2026, captures des 4 modales). Reprend « même chose dans toutes les bibliothèques » de l'idée initiale #320.
+
+
+- [x] 🟢 **#320** Répertoires de classement dans les bibliothèques (pratiques, échelles, grilles…) — ✅ LIVRÉ 1.5.0 (9 juin 2026, `1321faac`). Pratiques d'abord (L0→L3 + select compact + repliable). Reste optionnel : répertoire d'exemple démo + extension aux autres biblios (helper `grouper` réutilisable). Archivage à la prochaine bascule.
+  - **✅ CADRAGE PRÊT (9 juin 2026)** : `plans de travail/CADRAGE-320-repertoires-bibliotheques.md`. Décisions par défaut : **dossiers exclusifs**, **pratiques d'abord** (archi transversale), **collection séparée** `repertoiresBibliotheques` (jamais un champ sur l'item — conformité `SKILL_integrite_globaux`). Découpage en 5 lots (L0 modèle+CRUD → L4 release `minor`). 3 points à confirmer avant L0 (gabarits non classables / clé globale / sémantique).
+  - **Origine** : idée Grégoire (5 juin 2026, réflexion Comparateur — `plans de travail/NOTE-COWORK-comparateur-pratiques.md` q.7). L'utilisateur stocke ses essais de pratiques dans la bibliothèque ; il devrait pouvoir **créer des répertoires** pour classer ce qu'il veut — ses propres hypothèses, les pratiques reçues de collègues, etc. « Même chose dans toutes les bibliothèques d'ailleurs. »
+  - **Périmètre à cadrer** : transversal aux bibliothèques (pratiques de notation d'abord ; échelles, grilles, cartouches ensuite ?). Attention aux collections globales partagées — charger `SKILL_integrite_globaux.md` au cadrage (le classement ne doit jamais filtrer par flag, toujours par identité de la source).
+  - **Lien** : le sélecteur de candidates du Comparateur bénéficiera du classement sans en dépendre (aucune dépendance dure).
+
+
+- [x] 🟡 **#308** RÉSOLU (2 juin 2026, terrain) — P à 0 % sur Suivi gr. 00008 = **assemblage pratique↔groupe-cours erroné**, PAS le mode comparatif
+  - **Cause réelle** : le groupe-cours 00008 (601-101 H2026) avait pour pratique active « Testb-SOM-31mai » (pratique de **test** SOM liée à Été 2026, héritée des tests du volet B le 31 mai — cf. réserve #126), au lieu de sa vraie pratique **PAN-SDT-Litt H26** (`pratique-1768910384608`, celle de gr. 00002 qui calculait correctement). Le calcul de performance lit `modalitesEvaluation` global (= config de la pratique active) → `PratiquePANStandards.calculerPerformance` sortait 0. **Le moteur de calcul est sain** : gr. 00002 affichait P=60 %.
+  - **Correction** : réassignation de PAN-SDT-Litt H26 au groupe-cours via « Appliquer au cours actif » (data, **sans code**). P recalculé correctement. Méthode de diagnostic décisive : comparer un groupe qui marche (00002) vs cassé (00008).
+  - **Le diagnostic initial (mode comparatif) était erroné** : ni le mode comparatif ni les libellés codés en dur ne causaient le 0 %. Le calcul générique `calculerPerformancePAN` donnait 0.76 sur les mêmes données — confirmant que les données étaient bonnes et le contexte de pratique mauvais.
+  - **Travail de code livré quand même (amélioration, build 0602-1513)** : `afficherMetriquesGlobales` suit désormais la **pratique active** au lieu de forcer PAN (`determinerModeAffichageTableauBord`, testée) ; libellés de barres « Performance (P) » nus hors mode comparatif (plus de « — alternatif » trompeur) ; 2 sites `!== false`→`=== true` harmonisés (`etudiants.js:864-865`, `profil-etudiant-sections-affichage.js:3805-3806`). 7 tests sentinelle (`tests/unit/sentinelle-mode-affichage-tableau-bord-2026-06-02.test.js`).
+  - **Observation laissée (non bloquante)** : depuis #224, le chemin `indicesCP` (`portfolio.js:646`) n'a plus de fallback générique `calculerPerformancePAN` quand `pratique.calculerPerformance` rend null/0 → une pratique PAN **mal configurée** affiche 0 sans repli (masque la mauvaise config plutôt que de la signaler). Le vrai chantier de calcul par famille reste **#303 Session C (post-AQPC)**. Retrait complet du mode comparatif = chantier distinct (`project-mode-comparatif-som-pan-a-retirer`).
+
+
+- [x] **#303 Session C — RETRAIT DU MODE COMPARATIF (3b+3c+3d) — LIVRÉ 4 juin 2026** (branche `claude/eager-wozniak-KpaAC`, PR #25, build `0604-1326`, 175 Vitest verts). Mode comparatif **entièrement retiré** : neutralisation à la source (3b), code mort affichages/import-export/CSS (3c), write-side `pratiques.js`/`pratique-registre.js` (3d). Affichages **validés terrain par Grégoire** ; feu vert donné pour 3d.
+  - **Reste à valider avant clôture** : flux Réglages → Pratique de notation (sauvegarde/chargement d'une pratique, modifié en 3d) sur Mac+iPad. Données `affichageTableauBord` persistées laissées inertes (pas de migration destructive).
+  - ⚠️ **NE PAS confondre** avec le vrai chantier **#303 Session C = calcul par famille** (voir #307), qui reste à faire.
+
+
+- [x] 🟢 **#300** Bug `getSync("trimestres")` — désync localStorage↔IDB — ✅ **LIVRÉ 10 juin 2026** (Lot 1 robustesse + Lot 2 cause racine)
+  - Découvert 29 mai 2026 (chantier D). `db.getSync("trimestres")` rend par moments 4 objets aux `.id` **vides** (`map(t=>t.id).join(",")` → `",,,"`), alors que `db.get("trimestres")` (async/IDB) rend la bonne structure.
+  - **Risque** : tout code qui énumère les trimestres via `getSync` (ou `t.id` issu de getSync) pour bâtir des clés `{t.id}_{suffixe}` travaille sur des ids vides → données introuvables / écritures mal placées.
+  - Piste : pourquoi `trimestres` part en localStorage amputé (cf. `db.js` `_prechargerDepuisIDB`/`syncToLocalStorageCache`, quota Safari file://) ; forcer lecture async ou re-sync au boot. Distinct du pattern autosave race-condition (ici = lecture). Cf. mémoire `project-bug-getsync-trimestres-desync`.
+  - **Diagnostic (10 juin 2026)** : mécanisme = **fenêtre de boot**. `syncToLocalStorageCache` (IDB→localStorage) ne tourne qu'après `db.init()`, et `db-ready` n'est émis qu'après ; toute lecture `getSync('trimestres')` **avant `db-ready`** voit le localStorage de la session précédente (ids vides), tandis que `db.get` (IDB) rend la bonne structure — d'où l'intermittence. Audit des ~30 lecteurs : la plupart se gardent déjà ; **9 énumérateurs nus** bâtissaient `${id}_…` sans garde (8 dans `donnees-v2.js`, 1 dans `planification-bibliotheque.js`) → agrégations silencieusement amputées.
+  - **✅ Lot 1 LIVRÉ (10 juin 2026, robustesse ciblée)** : helper global `enumererTrimestres()` (`js/trimestres.js`) qui écarte les trimestres à `id` falsy **en lecture seule** (jamais de réécriture, sinon une lecture périmée au boot effacerait des trimestres réels) ; les 9 énumérateurs nus routés dessus. Sentinelle `tests/unit/sentinelle-trimestres-id-vide-300.test.js` (6 cas). 386 Vitest + 47 Playwright verts. Neutralise la **conséquence** (corruption silencieuse) quelle que soit la cause.
+  - **✅ Lot 2 LIVRÉ (10 juin 2026, cause racine — clear-then-hydrate)** : `syncToLocalStorageCache` (`js/db.js`) invalide désormais le cache localStorage des clés présentes en IDB **avant** de les réhydrater. Pendant la fenêtre de boot, `getSync` rend le défaut (sûr) au lieu d'une valeur périmée ; les clés localStorage-seules restent intactes (aucune perte). Sentinelle `tests/unit/sentinelle-boot-clear-then-hydrate-300.test.js` (3 cas : ordre clear-avant-hydratation, état final = IDB, préservation des clés locales). Commentaire périmé de `snapshots.js` corrigé au passage. 389 Vitest + 47 Playwright verts.
+  - **Lien #116 / SUIVI-BUGS #129** : le « fallback global silencieux » horaire↔groupe-cours reste un chantier distinct (#116) ; #300 ne traitait que la désync de lecture trimestres.
+
+
+- [x] 🟢 **#303** Refactor des pratiques de notation → registre `IPratique` comme source unique (SSOT) — **CLOS (triage 10 juin 2026)** : « #303 CLOS » acté dans SESSION.md ; Session A livrée 29-30 mai, Session B (représentations) 4 juin, Session C (calcul par famille) consolidée sur main le 5 juin (HEAD `a8345986`, 224 tests verts)
+  - **Vérification triage (grep 10 juin)** : la production naît désormais canonique — select `mat-pratique-type` (index.html ~5673) et radios pratique par défaut (`pratiques.js` ~1655-1680) émettent `sommative`/`standards`/`specifications` ; `calculerDetailsNoteFinale(da, pratiqueIdDemande = null)` paramétrable (`profil-etudiant-actions.js:411`). **Non vérifié** : le volet (A) migration console one-shot des données personnelles de Grégoire — à confirmer par Grégoire (hygiène data, pas du code).
+  - Réf. maître : `Refactorisations/PLAN_architecture_pratiques_SSOT.md`. Ordre impératif **A → B → C**.
+  - **✅ Session A-1 LIVRÉE (29 mai soir, beta 99.80, commit `8de006a`)** — non destructif : `normaliserIdPratique` + `PRATIQUE_DEFAUT='standards'`, **bug latent corrigé** (plus de réécriture `specifications`→`pan-specifications` ; normalisation à la lecture **sans write-back**), instance Standards → `'standards'`, 3 sites `liste-evaluations.js` normalisés, test Vitest `pratique-normalisation`. **Décision : code Standards = `STD`** (`SDT` = libellé). Cf. mémoire `project-pratiques-ssot-decisions`.
+  - **✅ Session A-2 « tolérance à la lecture » LIVRÉE (30 mai, beta 99.84, poussée)** — lots 4b/4c/4d/4e, non destructifs. Tous les consommateurs majeurs (`pratiques-bibliotheque`, `pratiques-gestion`, `pratiques`, `wizard-pratique-v2`, profils, stats…) lisent désormais legacy ET canonique. **Conséquence : l'app fonctionne quelles que soient les données → la migration destructive n'est plus un prérequis, juste du nettoyage.** `code:'PAN'`→`'STD'` fait dans 4c/4e.
+  - **🔑 DÉCISION 30 mai (Grégoire) — SCINDER l'ex-« étape 6 » en deux opérations DISTINCTES** (ne plus jamais les fusionner) :
+    - **(A) Migration destructive des données EXISTANTES** — réservée aux SEULES données de Grégoire, en **console one-shot** (modèle chantier D), sur backup, observable, réversible. **JAMAIS embarquée dans la version distribuée** aux ~80 expérimentateurs (migration-boot aveugle, sans filet, population non technique = risque décuplé). Fenêtre : post-AQPC / pré-ouverture.
+    - **(B) Canonisation de la PRODUCTION** — faire naître les NOUVELLES données en canonique. **Non destructif** (ne touche aucune donnée existante). **C'est CE volet — pas (A) — qui rend les données des 80 pérennes et leur évite toute migration future.** À faire AVANT l'ouverture publique (fenêtre 3-30 juin, cf. #298). *Constat 30 mai : aujourd'hui un nouvel utilisateur crée des données LEGACY (wizard/selects/radios) → il hériterait du problème de Grégoire. (B) est donc nécessaire avant l'ouverture.*
+  - **ORDRE IMPÉRATIF pour (B)** (vérifié par grep 30 mai — sinon régression) :
+    1. **Rendre tolérants les ~7 lecteurs bruts restants** du SSOT `modalites.pratique` : `pratique-notation-v2.js` (lit ET écrit le SSOT, ~143-149/355/550/572, écriture l.544 — c'est le « nœud 4a », **LE verrou**), `spe-specifications.js:205`, `preferences-v2.js:228` (déjà `sommative`, à confirmer) ; vérifier `pratiques.js:1938/2335/2889` + `pratique-manager.js:204` (comparaisons `=== id` dynamiques, a priori OK). Méthode = normalisation à la lecture (pattern `_normPratique` / guard `typeof normaliserIdPratique`), comme 4c/4d/4e. Non destructif.
+    2. **Canoniser la production** : `<option>` du select pratique (`index.html:5625-5627`), `data-param` radios défaut (`pratiques.js:1806/1815`), `deduireTypePratique` (`wizard-pratique-v2.js:2064/2075/2079`), écritures SSOT (`wizard-pratique-v2.js:2380`, `pratiques.js:1270` déjà OK), Temps 2 de 4c reporté (`<select> mat-pratique-type` + écriture `configurations[].type` dans `pratiques-gestion.js`).
+    3. **(A)** pour Grégoire seul, puis **retrait des helpers transitoires** (`canonVersInterne`…) = ex-étape 7, **OPTIONNELLE** : la normalisation à la lecture peut RESTER comme filet d'interopérabilité (imports codex entre versions). La garder = choix défendable, pas dette.
+  - **⚠️ Timing** : (B) étapes 1-2 non destructives mais sur fichiers sensibles (`pratique-notation-v2.js`) → **PAS à J−4 de l'AQPC**. Fenêtre = après le 3 juin, AVANT l'ouverture aux 80.
+  - Détail complet : `Refactorisations/SPEC_sessionA_identifiants.md` (ADDENDUM 30 mai — ⚠️ dossier `Refactorisations/` NON versionné).
+  - ⚠️ Incohérence corpus à corriger avant B/C : `PLAN_architecture_pratiques_SSOT.md` §7 (découpage sessions) est obsolète vs §5 réordonné (Session A = identifiants, pas représentations) ; le guide PAN Modalités affiche « code SDT » incompatible avec la décision `STD`.
+  - **Session B (représentations)** : étendre le contrat (`obtenirCode`/`obtenirCouleur`/`obtenirLabelFamille`), tout lire du registre, supprimer les tables de codes éparpillées.
+  - **Session C (calcul)** : déléguer à `calculerPerformance(da)`, supprimer le jeton binaire `'SOM'|'PAN'`, et y rattacher le fold `objectifs ⊂ standards`.
+    - **⚠️ Constat terrain 31 mai (rapport #127)** : la note finale du **profil élève** (`profil-etudiant-actions.js` → `_obtenirConfigPortfolioCalcul`) se calcule **uniquement par le chemin portfolio** (PAN-Standards). Une pratique **Sommative** (moyenne pondérée) ou **Spécifications** (seuils) → « Note finale non calculable / config portfolio absente ». Session C doit router la note finale du profil vers `PratiqueConfigurable.calculerPerformance` selon la famille (`calcul_note.methode`), pas présumer le portfolio. (L'affichage du **nom** de la pratique active est, lui, déjà livré le 31 mai — voir SUIVI-BUGS #127.)
+  - Décisions actées : nommage neutre (`sommative`/`standards`/`specifications`/`denotation` ; codes SOM/STD/SPE/DEN ; « PAN » = nom de famille). Audit des call-sites : `Refactorisations/PLAN_unification_codes_pratiques.md`. Post-AQPC.
+
+
+- [x] 🟢 **#287** Picker couleur custom (modale Personnaliser tampons + Codes erreurs FR) — **livré 28 mai 2026 PM**
+  - **Implémentation** : `<details>` HTML5 + popover absolute avec grille des 12 couleurs prédéfinies (constante `COULEURS`) + bouton « Personnalisé » qui rouvre le picker natif macOS pour les couleurs hors-palette. La couleur active dans la grille est marquée via `.actif`.
+  - **5 sites couverts** : pastille catégorie tampon (l. 2104 + l. 2746), pastille item tampon (l. 2149 + l. 2687), couleur outil de dessin avec numéro (l. 3135).
+  - **Architecture** : helper `_renderPickerCouleur(idAttr, idVal, couleur, opts)` paramétré (supporte un summary avec contenu — numéro pour le site 3135). Handlers `travauxOutils.choisirCouleurPalette(el)` et `travauxOutils.ouvrirCouleurPerso(el)` exposés via `data-action`. L'`<input type="color">` original est conservé en hidden (CSS `.travaux-retro-couleur-input`) — il reste la source de vérité pour la sauvegarde (`input[data-color-cat-id]` l. 2510, 2531, 3241, 3328) et reçoit un event `input` dispatché manuellement quand on clique une couleur de la grille. Le picker natif est appelé via `input.click()` depuis « Personnalisé ».
+  - **Auto-fermeture** : event `toggle` capture phase qui ferme tous les autres `<details.travaux-retro-couleur-picker>` quand l'un s'ouvre. Évite plusieurs popovers superposés.
+  - **Zéro-dette** : ancienne classe CSS `.travaux-retro-couleur-wrap` retirée (remplacée par le picker).
+  - **Capture déclencheuse** : Grégoire 27 mai 2026 matin (modale Personnaliser tampons, picker macOS ouvert sans indication de la couleur active).
+
+
+- [x] ⚠️ 🟡 **#294** Configurer Netlify + Cloudflare pour accueillir la visite AQPC du 3 juin
+  - **Acté par Grégoire 28 mai 2026 matin** : à faire en PM, avant AQPC.
+  - **Décision majeure 28 mai 2026 PM** : retrait complet du Cloudflare Access pour ouvrir l'app publiquement (élimine le challenge bot bloquant, élimine la friction OTP pour les expérimentateurs AQPC, libère la liste blanche). Cf. ADR-008 révisé + DEPLOY.md v1.1.
+  - **Audit local livré** : `netlify.toml` ✅ propre (Cache-Control corrects). `labo.codexnumeris.org` n'a plus de DNS → URL réelle `app.codexnumeris.org` (substitution dans DEPLOY.md).
+  - **Action restante côté dashboard Grégoire** : levée effective du Cloudflare Access dans le tableau Zero Trust + re-test public. Procédure dans la note de session.
+  - **Post-AQPC** : `#298` créé pour révision PRIVACY.md (posture Loi 25 sans liste blanche).
+
+
+- [x] 🟢 **#293** Toggle « Masquer les items déjà dans la barre latérale » en section 2 des modales bibliothèque — **livré 28 mai 2026 PM**
+  - **Constat 28 mai 2026** (Bibliothèque de grilles de Grégoire) : la Section 2 montre toutes les entrées de la biblio partagée, y compris celles « Déjà dans la barre latérale ». Quand le ratio biblio/sidebar est lourd (ex. 5 entrées biblio pour 3 grilles sidebar = anciennes variantes accumulées), l'affichage devient encombrant et donne une fausse impression de doublons.
+  - **Périmètre réel livré** : 3 modales (grilles, échelles, cartouches) au lieu des 5 initialement prévues. Audit pendant l'implémentation : `productions-bibliotheque-ui.js` et `pratiques-gestion.js` filtrent NATIVEMENT les items « déjà dans la sélection » avant Section 2 (ligne 76-82 productions, ligne 411-412 pratiques). Le toggle y serait sans objet — items « déjà présents » jamais affichés.
+  - **Helpers ajoutés à `BibliothequeUI`** : `estMasquerDejaPresentActif()`, `filtrerParDejaPresent(cartes)`, `renderToggleMasquerDejaPresent(refreshFnName)`, `basculerMasquerDejaPresent(elementOuNom)`. Persistance dans `db` via la clé `biblio-masquer-deja-present` (préférence globale partagée par les 3 modales).
+
+
+- [x] 🟡 **#292** Déduplication défensive au chargement de codex — filet de sécurité contre la propagation de doublons d'ID — **livré 28 mai 2026 PM, commit `ed83d74`**
+  - **Constat 28 mai 2026** : `chargerCodex` (`js/codex.js:500`) fait un overwrite complet par clé (`db.set(cle, valeur)`). Si le codex source contient déjà des doublons d'ID dans `grillesTemplates`, `echellesTemplates`, `cartouches_*`, `bibliothequeProductions`, `bibliothequePratiques`, ils sont restaurés à l'identique à chaque ouverture. Les codex de Grégoire en sont infectés (3 doublons confirmés dans `grillesTemplates` au 28 mai).
+  - **Origine probable** : un ou plusieurs imports historiques contournaient `verifierUniciteIds` (`js/import-export.js:66`) ou ne déduplicaient pas avant `push`. Audit à faire : grep tous les sites qui font `grilles.push(...)` / `echelles.push(...)` / etc. sans passer par `verifierUniciteIds` ou `importerGrillesExternes` (dont la version actuelle déduplique correctement, ligne 3940).
+  - **Fix proposé** : dans `chargerCodex`, après `db.set(cle, valeur)`, si la clé correspond à une biblio partagée (liste connue), appliquer `verifierUniciteIds` sur la valeur AVANT le `set`. Idem pour les clés `cartouches_*` (pattern à matcher).
+  - **Hygiène data** : nettoyer le codex de Grégoire (snippet console fourni le 28 mai 2026 — déduplique en gardant le premier item de chaque ID, puis ré-export du codex pour avoir une version propre comme base de démo AQPC).
+  - **Effort estimé** : 1-2 h (fix `chargerCodex` + audit des chemins d'import historiques + un test).
+
+
+- [x] ⚠️ 🟡 **#290** Intégrer 4 pratiques personnelles anonymisées au seed `MODELES_PRATIQUES_PREDEFINIS` — **livré 28 mai 2026 PM en 2 phases, commits `1fcad27` (phase 1 — anonymisation seed + zéro-dette IDs) et `c791f1b` (phase 2 — convention 'Demo Labo Codex' pour 3 modèles génériques + filtre transitoire OR)**
+  - **Priorité actée par Grégoire le 28 mai 2026 matin** : les premiers expérimentateurs accéderont à l'application dès le 3 juin et iront probablement voir la bibliothèque de pratiques en premier (« existe-t-il une configuration de base pour ma discipline ? »). Le seed doit être enrichi avant cette date.
+  - **Calendrier** : à exécuter APRÈS le plan de vérification visuelle en cours (28 mai matin), avant le 3 juin. Probablement 28-29 mai.
+  - **Origine des données** : 4 pratiques actuellement dans le `bibliothequePratiques` IndexedDB local du Codex de Grégoire (importées de collègues du Cégep de Drummondville) — pas dans le code source. Grégoire conserve ces fichiers personnels **inchangés** en stockage, prêts à être récupérés pour le portage.
+    - Modèle Chimie (FAH) — François A.-H. — Chimie — Notation par contrats
+    - Par objectifs (Pondéré) — Michel B. — Mathématiques — Moyenne pondérée des objectifs
+    - Par objectifs (Comptage) — Bruno V. — Chimie — Comptage d'objectifs essentiels et complémentaires
+    - STD Chimie organique (BV) — Bruno V. — Chimie — Standards avec critères par standard
+    - STD Interfaces et BD (Xavier C.-T.) — Xavier C.-T. — Informatique — 6 objectifs niveau 3+, base 80% + bonus
+  - **Méthode suggérée** :
+    1. Grégoire dump son `bibliothequePratiques` IDB (script console à fournir) pour récupérer les configurations exactes (typesTravaux, forfaits, parObjectifs, seuilsCritiques, etc.).
+    2. Pour chaque pratique : extraire la configuration, **strip les initiales** en fin de `nom` (« STD Chimie organique (BV) » → « STD Chimie organique »), **anonymiser** `auteur: 'Gabarit Labo Codex'`, **nettoyer** tout `metadata_cc.auteur_original` et `metadata_cc.contributeurs`.
+    3. Ajouter au seed `js/pratiques-bibliotheque.js` `MODELES_PRATIQUES_PREDEFINIS` avec `estGabarit: true`, IDs **sans prénom** (ex. `SPE-chimie-contrats`, `STD-chimie-organique`, `STD-info-interfaces-bd` au lieu de `STD-Bruno-Chimie` / `STD-Xavier-Info`).
+    4. **Vérifier les IDs existants** dans le seed : `SPE-francois` (Modèle Chimie générique), `STD-par-objectifs-comptage`, `STD-par-objectifs-pondere`, `STD-Bruno-Chimie`, `STD-Xavier-Info` existent déjà avec `auteur: 'Labo Codex'`. Décider si on **remplace** la config existante par la version enrichie du collègue, ou si on **ajoute** une nouvelle entrée à côté. Recommandation : remplacer (le nom du seed actuel est générique, la config enrichie du collègue apporte plus de valeur pour les expérimentateurs).
+    5. Renommer `STD-Bruno-Chimie` → `STD-chimie-organique` et `STD-Xavier-Info` → `STD-info-interfaces-bd` dans la même passe (zéro-dette : les IDs contiennent des prénoms).
+  - **Convention auteur** : `auteur: 'Gabarit Labo Codex'` (et non « Anonyme » ni « Labo Codex » seul, pour distinguer les gabarits dérivés de pratiques de collègues anonymisées des modèles génériques originaux).
+  - **Effort estimé** : 1-2 h (dump + lecture des configs + ajout au seed + renommage IDs + test visuel modale).
+
+
+- [x] 🟢 **#289** Audit visuel des palettes de création — pattern « icônes 100 % + hover sur le bouton » **livré 28 mai 2026 PM**
+  - **Pattern de référence** (livré 28 mai 2026 sur la palette Nœuds d'Alignement pédagogique, build 0528-0448) : l'icône est pleinement visible en permanence (blanc 100 % en sombre, noir 100 % en clair), et l'effet hover porte sur le bouton qui entoure l'icône (fond + bordure plus saturés), pas sur l'icône elle-même qui reste à 100 %.
+  - **Classes auditées et migrées** :
+    - `.outil-svg-icon` (palette annotation Travaux + ses variantes `.palette-toggle-icon`, `.palette-bas-icon`) — repos `invert(0.6/0.35)` → `invert(1)/brightness(0)`.
+    - `.planif-icon` (boutons vue/zoom carte mentale) — idem.
+    - `.nav-seq-icon` (chevrons navigation séquence/leçon, partagé entre planif et toolbars Travaux) — idem. État `:disabled` préservé à `invert(0.25/0.7)` pour signaler la désactivation.
+    - `.editeur-page-icon` (boutons éditeur de pages + pipeline) — idem.
+    - `.popover-icon` (mode clair uniquement) — passé de `invert(0.25)` à `brightness(0)` (100 % noir).
+    - Tous les `:hover .X-icon { filter: ... }` retirés.
+  - **Hors scope** (icônes sciemment pâles, design délibéré) : `.btn-inline-icon` (inline avec texte), `.modal-close-icon` (X de fermeture subtil), `.btn-delete-icon` (corbeille, action destructrice signalée par pâleur), `.drop-zone-icon` (zone drag&drop), `.codex-menu-icone img`, `.pipeline-icone-placeholder-img`. `.prep-btn` également hors scope (bouton purement textuel sans icône SVG).
+
+
+- [x] 🟡 **#288** Terminologie collégiale : remplacer « élève(s) » par « étudiant·e(s) » dans l'UI — **balayage UI visible livré 28 mai 2026 PM**
+  - **Convention** : au collégial le terme « élève » est réservé au primaire/secondaire. L'UI Labo Codex (Cégep de Drummondville) doit utiliser « étudiant·e(s) ».
+  - **Bilan migration livrée** : 56 sites visibles migrés (169 occurrences brutes → 113 restantes). Les 113 restantes sont volontairement préservées : commentaires `//` et JSDoc, format de donnée d'anonymisation `'Élève X'` (modes.js, evaluation-chargement.js, reserve-ouvrir.js — convention stockée), patterns de matching CSV import (groupe.js l. 209-210 — détectent les colonnes externes avec ces mots), banniers ASCII de section, commentaire CSS, et la citation bibliographique (index.html:14459, titre d'ouvrage de Gauthier-Bissonnette-Richard 2013).
+  - **Couverture** : index.html (24 libellés UI), 14 modules JS — descriptions SOLO (profil-etudiant-sections-affichage), objectifs pédagogiques d'organisateur et planification-carte, tooltips moyennes (etudiants, tableau-bord-apercu), bulles d'aide (accompagnement-contenu-popup), placeholders bilan réflexif (bilan-reflexif-editeur), alertes (liste-evaluations, profil-etudiant-sections-affichage), libellés tooltips d'action (travaux-outils, travaux-ui), descriptions RaI (profil-etudiant-calculs), dropdowns (graphiques-progression).
+  - **Convention de remplacement appliquée** : « élève » → « étudiant·e », « élèves » → « étudiant·e·s », « Élève » → « Étudiant·e », adjectifs adjacents migrés vers la forme épicène (« sélectionné » → « sélectionné·e ») quand le mot suit immédiatement, accord par défaut conservé sinon. Pour « un élève » → « un·e étudiant·e ».
+  - **Reste à faire post-AQPC** (si pertinent) : documentation `docs/` (rapports, plans, skills) — non inclus dans ce balayage UI.
+
+
+- [x] 🟡 **#295** Diagnostic mémoire/quota avant la tentative d'ouverture d'un Codex (Mac + iPad + iPhone) — **ABSORBÉ PAR #334** (10 juin 2026) : la session A du plan `Rapports/plan-chantier-import-codex-ipad-2026-06-10.md` livre ce besoin (pré-vol + message actionnable) et fermera cet item
+  - **Constat 28 mai 2026 PM** : Grégoire est actuellement incapable d'ouvrir un Codex sur son iPad parce que l'espace mémoire est saturé. La tentative échoue après coup, sans signal préalable. Conséquence directe : **ses tests sur iPad et iPhone sont limités** depuis plusieurs sessions — facteur d'incertitude pour le projet (le poste iPad reste un cas d'usage majeur).
+  - **Comportement actuel** : `chargerCodex` (`js/codex.js`) déclenche les écritures `db.set(cle, valeur)` sans vérification préalable de l'espace disponible côté navigateur. Sur iPad Safari avec quota saturé, l'opération avorte en cours ou laisse l'état partiellement écrit.
+  - **Comportement souhaité** :
+    1. AVANT toute écriture, appeler `navigator.storage.estimate()` (retourne `{quota, usage}` en octets, supporté Safari iOS 17+) et calculer le ratio + l'espace restant.
+    2. Calculer le poids du ZIP du codex à charger (somme des `JSON.stringify(valeur).length` à venir).
+    3. Si `usage + poidsCodex > quota * 0.9` → bloquer le chargement et afficher une modale d'avertissement : « Votre espace de stockage navigateur est presque plein (X Mo / Y Mo). Le codex que vous tentez d'ouvrir pèse Z Mo. Libérez de l'espace avant de continuer. » + bouton « Voir comment libérer de l'espace » (renvoie vers une mini-doc avec Réglages Safari iOS).
+    4. Si ratio > 0.95 → bouton « Forcer le chargement » désactivé. Sinon proposer le forçage avec avertissement explicite (état partiel possible).
+  - **Affichage permanent suggéré** : badge discret quelque part dans les Réglages ou l'En-tête « Stockage : X% utilisé » (mêmes calculs) pour donner à l'utilisateur une visibilité en continu sur son quota.
+  - **Effort estimé** : 1-2 h pour le diagnostic préventif + modale. +1 h pour l'affichage permanent du quota.
+  - **Tests iPad/iPhone** : Grégoire devra vider partiellement son cache avant de pouvoir tester sur ses propres devices. Alternative : tester sur iPad/iPhone d'un tiers, ou en simulation desktop (DevTools Safari → quota artificiel).
+
+
 ### Réconciliation du 9 juin 2026 — items livrés (1.1.3 → 1.3.0) qui étaient restés marqués ouverts dans le backlog actif
 
 > Déplacés ici par Claude (audit factuel git, début de session du 9 juin) : ces 5 items avaient été livrés et poussés mais n'avaient pas été cochés ni archivés. Voir commit `5b70c8e0`.
