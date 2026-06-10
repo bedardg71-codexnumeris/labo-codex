@@ -1,4 +1,64 @@
 <!-- =====================================================================
+     SESSION 10 juin 2026 AM-3 (Claude Code) — #329 VOÛTE : LOT P3 (IMPORT)
+     CODE COMPLET, terrain en attente. HEAD main `d09100e5`. 499 Vitest +
+     51 Playwright = 550 VERTS. AUCUNE release (minor 1.11.0 APRÈS terrain).
+       • LOT P3 — IMPORT .lcz (js/partage-import.js, ~870 l.) : chaîne
+         complète magic bytes PK → validerZipSecurite → package.json →
+         JSON.parse strict → validerPackage → verifierSignaturePackage →
+         verifierConfianceTOFU (alerte bloquante lot T si clé changée) →
+         PRÉVISUALISATION obligatoire → intégration partage_* +
+         memoriserContact à l'ACCEPTATION seulement.
+       • RÈGLE POSÉE (absente du plan) : signature vérifiée sur l'objet
+         BRUT (le payload signé est le package tel qu'émis — le nettoyage
+         niveau 5 l'altérerait) ; TOUT LE RESTE (TOFU, préviz, intégration)
+         travaille sur le packageNettoye. À retenir pour P4+.
+       • INTÉGRATION (D7) : IDs préfixés PARTAGE_{suffixe d'import}_ à la
+         conception (zéro collision, même package importé 2×) ; id source
+         dans inspireDe.idOriginal (inspireDe existant COMPLÉTÉ, pas
+         écrasé) ; grilleId cartouches/productions remappé si la cible est
+         dans le package. Collections partage_* PLATES (cartouches NE
+         reprennent PAS l'ancrage cartouches_{grilleId} — réservé à
+         l'utilisateur). Retrait par IDENTITÉ via registre
+         partage_packagesImportes.idsIntegres — jamais par flag.
+         DATA-OWNERSHIP à jour. L'import n'écrit JAMAIS dans les
+         collections utilisateur (lecture par sélecteurs = P4).
+       • RÉIMPORT = MISE À JOUR (R3, critère 20) : détection auteur
+         normalisé + item principal d'origine → préviz annonce le
+         remplacement ; acceptation = intégration neuve puis retrait de
+         l'ancienne copie.
+       • UI : carte « Partage entre collègues » dans Réglages › Données
+         (remplace le placeholder « Voûte à venir » ; config.js/
+         navigation.js INTOUCHÉS — hook dans chargerVueDonnees de
+         donnees-v2.js). Zone de dépôt drag-and-drop + file picker
+         (data-action/data-on-change, délégation main.js existante),
+         liste « Packages importés » + Retirer. API DOM + textContent
+         partout (données importées), zéro innerHTML. D-V2 toujours
+         ouverte (« Voûte » n'apparaît nulle part).
+       • TESTS : 14 sentinelles Vitest (préfixage, remappage, registre,
+         retrait par identité) + 4 flux Playwright avec la VRAIE chaîne
+         P2 (ECDSA + TOFU réels dans WebKit) : valide, corrompu, signature
+         invalide (critère 16), clé changée + refus (critère 19).
+         _testPartageImportP3() pour le terrain (cliquer « Importer » à la
+         préviz ; auteur jetable nettoyé).
+       • COORDINATION : BACKLOG.md (modif session parallèle #334) NON
+         touché ni commité — règle écrivain unique. Son en-tête reste
+         périmé (1.6.1 ; réel 1.10.0). ETAT-PROJET.md toujours à 1.6.2.
+         Commit 8d6f3747 (changelog 1.10) apparu en cours de session —
+         aucun conflit (fichier disjoint).
+     REPRISE — VALIDATION TERRAIN P3 puis JALON PILOTE :
+       1. Terrain Grégoire Mac + iPad : hard refresh, _testPartageImportP3()
+          (7 vérifications) + parcours réel : exporter une grille en .lcz
+          (menu ⋮) puis l'importer via la carte (statut « premier contact »
+          attendu — l'auto-import présente ta propre clé, déjà connue après
+          le 1er passage → « vérifiée » ensuite), Retirer, réimporter.
+       2. Après terrain : node scripts/release.mjs minor (1.11.0) + entrée
+          changelog « import » (l'entrée 1.10 dit encore « l'import arrive
+          dans une prochaine version »).
+       3. Avant jalon pilote (hors code) : MODELE-CONFIANCE.md (Cowork,
+          D-V3) ; trancher D-V2 avec les textes P7.
+       4. ETAT-PROJET.md + en-tête BACKLOG.md à rafraîchir (écrivain
+          unique, quand la session #334 a posé ses commits).
+     =====================================================================
      SESSION 10 juin 2026 AM-2 (Claude Code) — #329 VOÛTE : REVUE DU FORMAT
      + LOTS F, T, P2 LIVRÉS ET VALIDÉS TERRAIN. 4 releases (1.7.1 → 1.10.0).
      HEAD main `0d4206d6`. 485 Vitest + 47 Playwright = 532 VERTS.

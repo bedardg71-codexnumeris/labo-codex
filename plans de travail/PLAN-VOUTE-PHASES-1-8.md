@@ -242,13 +242,41 @@ restreint fin août » (calendrier) tombe après la Phase 3.
       route, cf. SUIVI-BUGS) ; `.lcz` téléchargé, nommage #262 conforme,
       comportement Finder conforme à D-V1. **Release 1.10.0 exécutée.**
 
-#### Lot P3 — Import
-- [ ] P3 : section dans Réglages › Données, drag-and-drop + file picker, pipeline
-      complet (ZIP → schéma → signature → TOFU → préviz → intégration `partage_*`),
-      liste « Packages importés » + Retirer (n'affecte que `partage_*`).
-- [ ] Tests : Playwright sur le flux import (package valide, corrompu, signature
-      invalide, clé changée) ; sentinelle préfixage `PARTAGE_*` + `inspireDe.idOriginal`.
-- [ ] Validation terrain Grégoire Mac + iPad avant le jalon pilote.
+#### Lot P3 — Import — ✅ CODE COMPLET 10 juin 2026 (terrain en attente)
+- [x] `js/partage-import.js` : pipeline complet — magic bytes ZIP →
+      `validerZipSecurite` → `package.json` → JSON.parse strict →
+      `validerPackage` → `verifierSignaturePackage` sur l'objet BRUT
+      (le payload signé est le package tel qu'émis ; règle posée :
+      signature = brut, tout le reste = packageNettoye) →
+      `verifierConfianceTOFU` → alerte bloquante si clé changée →
+      PRÉVISUALISATION obligatoire → intégration `partage_*` +
+      `memoriserContact` à l'ACCEPTATION seulement.
+- [x] Carte « Partage entre collègues » dans Réglages › Données (remplace le
+      placeholder « Voûte à venir » ; `config.js`/`navigation.js` INTOUCHÉS,
+      hook dans `chargerVueDonnees` de donnees-v2.js) : zone de dépôt
+      drag-and-drop + file picker, liste « Packages importés » + Retirer.
+      Vocabulaire « partage » (D-V2 toujours ouverte).
+- [x] Intégration (D7) : IDs préfixés `PARTAGE_{suffixe d'import}_` à la
+      conception (zéro collision, y compris entre deux imports), id source
+      dans `inspireDe.idOriginal` (un inspireDe existant est complété, pas
+      écrasé), `grilleId` des cartouches/productions remappé quand la cible
+      est dans le package. Retrait par IDENTITÉ (registre
+      `partage_packagesImportes.idsIntegres`), jamais par flag. L'import
+      n'écrit JAMAIS dans les collections utilisateur.
+- [x] Mise à jour d'un package déjà importé (R3, critère 20) : détection par
+      auteur normalisé + item principal d'origine → la préviz annonce le
+      remplacement, l'acceptation remplace la copie précédente.
+- [x] Garde d'entrée : fichier ≤ 12 Mo, magic bytes PK, anti-bombe ciblée sur
+      package.json (10 Mo décompressé), JSON strict.
+- [x] Tests : 14 sentinelles Vitest (`tests/unit/partage-import-P3.test.js` —
+      préfixage, remappage, registre, retrait par identité) + 4 flux
+      Playwright (`tests/integration/partage-import-rendu.spec.js` : valide
+      avec vraie chaîne P2 + ECDSA + TOFU, corrompu, signature invalide,
+      clé changée avec refus) + `window._testPartageImportP3()` (terrain).
+- [x] `docs/DATA-OWNERSHIP.md` : clés `partage_packagesImportes` + `partage_*`.
+- [ ] Validation terrain Grégoire Mac + iPad avant le jalon pilote
+      (`_testPartageImportP3()` + import réel d'un .lcz exporté en P2),
+      puis release minor (1.11.0) et entrée changelog « import » .
 
 ### Phases P4-P8 — à détailler post-pilote
 
@@ -325,4 +353,5 @@ Décision Grégoire (10 juin) : les deux chantiers avancent **en parallèle**.
 | 2026-06-10 (PM) | **Plan validé par Grégoire.** Passation à Claude Code décidée : démarrage du lot P1 après clôture de la session SSOT en cours. **D-V1 TRANCHÉE : `.lcz`.** D-V2/D-V3 restent à confirmer (non bloquantes avant P2 et le jalon pilote respectivement). |
 | 2026-06-10 (PM) | **Exécution séquentielle décidée** (Grégoire) : pas d'instances Claude Code simultanées — la capacité de validation terrain est le facteur limitant, pas l'outillage. Les chantiers #328 et #329 alternent par sessions complètes ; les règles du §6 (release unique, écrivain unique des fichiers de suivi, merges séquentiels) restent en vigueur pour l'alternance. |
 | 2026-06-10 (PM) | **Revue du format pré-P2 TENUE (Grégoire + Claude Code).** Trois décisions : (1) **taille max package abaissée à 10 Mo** (relever plus tard = gratuit, abaisser = migration des `.lcz` en circulation — départ bas prudent ; le 50 Mo de la skill §9.4 visait un codex data, pas un package JSON sans médias) ; (2) **champs exclus confirmés tels quels** (`auteur` sur entité, `coursId`/`dateEcheance`, `etablissement`, flags démo, `_*`) et **courriel d'auteur optionnel conservé** dans `manifest.auteur.courriel` + `metadata_cc.email_auteur` (attribution CC standard, présent seulement si l'identité CC est remplie) ; (3) **mono-licence gelée** : `licence === 'CC BY-NC-SA 4.0'` en valeur exacte dans le format v1, élargissement éventuel = format v2 assumé. Le format est GELÉ — P2 peut démarrer après le lot F. |
+| 2026-06-10 (PM) | **Lot P3 CODE COMPLET** (session Claude Code AM-3). Pipeline d'import .lcz entier, carte « Partage entre collègues » dans Réglages › Données, 14 sentinelles Vitest + 4 flux Playwright (550 tests verts au total). Décisions d'implémentation : signature vérifiée sur l'objet BRUT / tout le reste sur le packageNettoye ; mise à jour d'un package = remplacement par identité (R3) ; collections `partage_*` plates, possédées par le module. Reste : terrain Mac + iPad, puis release minor + changelog. |
 | 2026-06-10 (PM) | **Lot P1 LIVRÉ** (release 1.7.0). 3 modules + 28 sentinelles Vitest + `_testPartagePhase1()` validé terrain 14/14 sur données réelles (Mac), après un correctif : schémas alignés sur les formes RÉELLES (criteres[].niveauSOLO, metadata_cc complète) et projection récursive (asymétrie actée : export élague, import rejette). Écarts avec la spec d'avril documentés dans SESSION.md. En pratique les instances ont tourné EN PARALLÈLE dans le même dépôt (#329 ∥ #330) — règles §6 appliquées : commits par chemins explicites, release prise par la session bugs, aucun croisement. **À l'ordre du jour avant P2** : revue du format avec Grégoire (50 Mo, champs exclus auteur/coursId/dateEcheance/etablissement, bloc signature). Prochain lot : F (`js/signature.js`). |
