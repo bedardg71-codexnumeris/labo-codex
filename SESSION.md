@@ -1,4 +1,65 @@
 <!-- =====================================================================
+     SESSION 10 juin 2026 AM-2 (Claude Code) — #329 VOÛTE : REVUE DU FORMAT
+     + LOTS F, T, P2 LIVRÉS ET VALIDÉS TERRAIN. 4 releases (1.7.1 → 1.10.0).
+     HEAD main `0d4206d6`. 485 Vitest + 47 Playwright = 532 VERTS.
+       • REVUE DU FORMAT pré-P2 (release 1.7.1) — 3 décisions Grégoire :
+         taille max 50→10 Mo (relever = gratuit, abaisser = migration des
+         .lcz en circulation) ; champs exclus confirmés + courriel d'auteur
+         optionnel conservé ; mono-licence CC BY-NC-SA 4.0 gelée (valeur
+         exacte, autre licence = format v2). LE FORMAT v1 EST GELÉ.
+       • LOT F — SIGNATURE ECDSA (1.8.0, terrain 8/8) : js/signature.js,
+         P-256 + SHA-256, crypto.subtle seulement. Périmètre signé SPÉCIFIÉ
+         (absent de la spec d'avril) : canonicalisation (clés triées) du
+         package ENTIER, bloc signature à null. Identité en base IndexedDB
+         DÉDIÉE `labo-codex-identite` — ÉCART AU PLAN acté par Grégoire :
+         pas db.js (sa copie localStorage dégrade un CryptoKey en {} ; flux
+         export/restauration Codex à exclure). Clé privée non extractible.
+         23 sentinelles + VECTEURS FIXES committés (clé privée jetée).
+         construirePackageSigne câblé dans partage-format.js (R3).
+       • LOT T — CONFIANCE TOFU (1.9.0, terrain 8/8 + modale 2 modes) :
+         js/trust-tofu.js, registre `clesConnues` (GLOBAL, jamais namespacé,
+         DATA-OWNERSHIP à jour). verifierConfianceTOFU = LECTURE SEULE ;
+         memoriserContact séparé (à poser à l'ACCEPTATION d'import, P3),
+         remplacement de clé refusé sans remplacerCle:true explicite. Nom
+         d'auteur indexé normalisé NFC/casse/espaces (anti-contournement).
+         Alerte bloquante « clé changée » : API DOM + textContent (ZÉRO
+         innerHTML — 1er essai recalé par notre lint F.15, reconstruit en
+         DOM pur plutôt que bumper la baseline). 17 sentinelles.
+       • LOT P2 — EXPORT .lcz (1.10.0, terrain 8/8 + export réel validé) :
+         js/partage-export.js — résolution par type (collections réelles,
+         cartouches par ancrage cartouches_{grilleId}), modale CC,
+         AUTO-CONTRÔLE validerPackage avant émission, canon du conteneur
+         posé : .lcz = ZIP avec package.json à la racine, medias/ réservé.
+         « .lcz = Labo Codex Zip » acté (D-V1, plan §1). Boutons aux menus
+         ⋮ des 5 biblios ; legacy pratiques renommé « Exporter (JSON) »
+         (retrait à P8). Items démo non exportables. 10 sentinelles dont
+         aller-retour avec le VRAI JSZip. D-V2 : « Voûte » n'apparaît
+         nulle part dans l'UI (non tranchée).
+       • BUG #139 corrigé même session (SUIVI-BUGS à jour) : modales de
+         partage DERRIÈRE les modales de bibliothèque (9999 < 10000) →
+         classe .modal-overlay--partage (10005) sur les modales export ET
+         TOFU (piège latent P3 désamorcé).
+       • COORDINATION : session parallèle active (chantier import codex
+         iPad) — BACKLOG.md modifié par ELLE (non committé), 4 untracked
+         Rapports/ (entrevue-* + import-codex-ipad-*) à elle. Règle
+         écrivain unique respectée : aucune écriture BACKLOG/ETAT-PROJET
+         ici. En-tête BACKLOG.md périmé (annonce 1.6.1, réel 1.10.0) — à
+         rafraîchir par son écrivain.
+     REPRISE — P3 (IMPORT, dernier lot avant le jalon pilote) :
+       1. Chaîne : .lcz → validerZipSecurite → validerPackage (intégrer le
+          packageNettoye, PAS l'objet brut) → verifierSignaturePackage →
+          verifierConfianceTOFU (alerte si cle_changee) → PRÉVISUALISATION
+          obligatoire → intégration namespace partage_* + préfixage
+          PARTAGE_* (D7) + inspireDe.idOriginal → memoriserContact à
+          l'ACCEPTATION. Tous les maillons existent, P3 les relie.
+       2. Entry point : Réglages › Données (section existante — PAS de
+          nouvel onglet, config.js/navigation.js INTOUCHÉS).
+       3. Point de contact import-export.js : vérifier qu'aucune session
+          SSOT (#328 Lot 3) n'y travaille avant d'ouvrir.
+       4. Hors code, avant jalon pilote : MODELE-CONFIANCE.md (Cowork,
+          D-V3) ; D-V2 (nom UI) à trancher avec les textes P3/P7.
+       5. ETAT-PROJET.md à rafraîchir (toujours à 1.6.2 ; réel 1.10.0).
+     =====================================================================
      SESSION 10 juin 2026 (Claude Code) — CYCLE #328 CLOS + BUG ASSIDUITÉ
      #330/#331 RÉGLÉ SUR DONNÉES RÉELLES + #332 OUVERT. Releases 1.6.3 et
      1.6.4 poussées. 435 Vitest + 47 Playwright = 482 VERTS.
