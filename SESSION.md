@@ -118,9 +118,23 @@
          feedback-zero-fallback-arbitraire).
        • Bruit CSP Cloudflare sur prod = bug #114 déjà ouvert (désactiver
          l'injection Browser Insights au dashboard).
+     SUITE (16h45) — BUG TERRAIN #141 CORRIGÉ + RELEASE 1.11.2 (build
+     0610-1643) : jeton de reprise impossible à défaire. Confirm PIÈGE
+     dans retirerJetonReprise (OK = entériner / Annuler = défaire) →
+     « OK » effaçait repriseDeId de la copie sans toucher l'originale =
+     lien UNILATÉRAL irréparable depuis l'UI (restaurerOriginaleSiReprise
+     exigeait le lien réciproque). FIX 3 volets : (1) branche « entériner »
+     RETIRÉE — décocher = défaire, un confirm, défaut sûr, checkbox
+     recochée si annulation ; (2) restauration par lien unilatéral
+     (l'originale fait foi) → la suppression de l'éval copie répare les
+     états orphelins ; (3) appel sur l'ORIGINALE = proposition de
+     restauration (fin du no-op menteur). Sentinelle du 8 juin étendue à
+     9 cas dont verrou anti-réintroduction. 516 Vitest + 53 Playwright =
+     569 VERTS. SUIVI-BUGS #141. RÉPARATION des données de Justin :
+     Liste → ligne sans badge → Actions → Supprimer l'évaluation.
      REPRISE — AVANT LE JALON PILOTE :
        1. Re-passe iPad du flux import .lcz/duplication (le codex, lui,
-          est maintenant chargé sur l'iPad — Netlify déploie 1.11.1).
+          est maintenant chargé sur l'iPad — Netlify déploie 1.11.2).
        2. ETAT-PROJET.md + en-tête BACKLOG.md à rafraîchir (écrivain
           unique, quand la session #334 a posé ses commits).
        3. P5-P8 : ne PAS détailler avant le bilan du pilote (sauf décision
