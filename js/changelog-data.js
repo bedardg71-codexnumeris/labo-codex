@@ -21,7 +21,8 @@
                 'Classe, déplace d’un dossier à l’autre ou sors un élément en un geste — il est toujours rangé à un seul endroit.',
                 'Les anciens filtres par discipline (et par pratique pour les échelles) laissent la place à tes dossiers, plus souples.',
                 'Les cartouches restent organisées par grille : c’est leur classement naturel, on n’y touche pas.',
-                'Comme pour les pratiques, le classement n’organise que l’affichage — il ne modifie jamais tes contenus.'
+                'Comme pour les pratiques, le classement n’organise que l’affichage — il ne modifie jamais tes contenus.',
+                'Correction : dans un cours à deux groupes, le taux d’assiduité comptait à tort les séances de l’autre groupe — il reflète maintenant uniquement les séances du groupe de chaque étudiant·e.'
             ]
         },
         {
