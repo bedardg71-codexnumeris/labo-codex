@@ -761,6 +761,21 @@ function mettreAJourModeRapport() {
             : 'Décris le problème rencontré :';
     }
 
+    // #143 — le bloc d'instructions suit aussi le mode (il restait « Comment
+    // signaler un bug » sous l'onglet Commentaire).
+    const titreInstructions = document.getElementById('instructionsRapportTitre');
+    if (titreInstructions) {
+        titreInstructions.textContent = modeRapport === 'commentaire'
+            ? 'Comment partager un commentaire :'
+            : 'Comment signaler un bug :';
+    }
+    const etape1Instructions = document.getElementById('instructionsRapportEtape1');
+    if (etape1Instructions) {
+        etape1Instructions.textContent = modeRapport === 'commentaire'
+            ? 'Écris ton commentaire ou ta suggestion ci-dessous'
+            : 'Décris le problème ci-dessous';
+    }
+
     if (textarea && !textarea.value) {
         textarea.placeholder = modeRapport === 'commentaire'
             ? "Dis-nous ce que tu penses de l'app.\n- Ce qui fonctionne bien\n- Ce qui pourrait être amélioré\n- Tes suggestions"
@@ -866,11 +881,11 @@ function ouvrirModalRapportBug() {
                         </button>
                     </div>
 
-                    <!-- Instructions -->
+                    <!-- Instructions (titre + 1re étape adaptés au mode — #143) -->
                     <div class="alerte alerte-attention">
-                        <strong>Comment signaler un bug :</strong>
+                        <strong id="instructionsRapportTitre">Comment signaler un bug :</strong>
                         <ol style="margin: 10px 0 0 0; padding-left: 20px;">
-                            <li>Décris le problème ci-dessous</li>
+                            <li id="instructionsRapportEtape1">Décris le problème ci-dessous</li>
                             <li>Clique sur « Copier le rapport »</li>
                             <li>Envoie-le par courriel avec tes captures d'écran</li>
                         </ol>
