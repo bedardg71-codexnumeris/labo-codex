@@ -281,9 +281,12 @@ restreint fin août » (calendrier) tombe après la Phase 3.
       reste le tableau de gestion (liste + Retirer). Friction d'origine
       consignée dans USAGE-FORMATS (l'import était cherché là où vit
       l'export). Sentinelle Playwright : bouton présent dans les 5 modales.
-- [ ] Validation terrain Grégoire Mac + iPad avant le jalon pilote
-      (`_testPartageImportP3()` + import réel d'un .lcz exporté en P2),
-      puis release minor (1.11.0) et entrée changelog « import » .
+- [x] Validation terrain Grégoire (Safari Mac, 10 juin 2026) : import réel
+      validé via la carte ET via le bouton biblio, section « Partagés » +
+      duplication conformes (« tout fonctionne bien »). **Release 1.11.0
+      exécutée** (build 0610-1242) + entrée changelog « Importe les
+      ressources partagées par tes collègues ». Re-passe iPad : à
+      l'occasion, avant le jalon pilote.
 
 ### Phases P4-P8 — à détailler post-pilote
 
@@ -360,6 +363,7 @@ Décision Grégoire (10 juin) : les deux chantiers avancent **en parallèle**.
 | 2026-06-10 (PM) | **Plan validé par Grégoire.** Passation à Claude Code décidée : démarrage du lot P1 après clôture de la session SSOT en cours. **D-V1 TRANCHÉE : `.lcz`.** D-V2/D-V3 restent à confirmer (non bloquantes avant P2 et le jalon pilote respectivement). |
 | 2026-06-10 (PM) | **Exécution séquentielle décidée** (Grégoire) : pas d'instances Claude Code simultanées — la capacité de validation terrain est le facteur limitant, pas l'outillage. Les chantiers #328 et #329 alternent par sessions complètes ; les règles du §6 (release unique, écrivain unique des fichiers de suivi, merges séquentiels) restent en vigueur pour l'alternance. |
 | 2026-06-10 (PM) | **Revue du format pré-P2 TENUE (Grégoire + Claude Code).** Trois décisions : (1) **taille max package abaissée à 10 Mo** (relever plus tard = gratuit, abaisser = migration des `.lcz` en circulation — départ bas prudent ; le 50 Mo de la skill §9.4 visait un codex data, pas un package JSON sans médias) ; (2) **champs exclus confirmés tels quels** (`auteur` sur entité, `coursId`/`dateEcheance`, `etablissement`, flags démo, `_*`) et **courriel d'auteur optionnel conservé** dans `manifest.auteur.courriel` + `metadata_cc.email_auteur` (attribution CC standard, présent seulement si l'identité CC est remplie) ; (3) **mono-licence gelée** : `licence === 'CC BY-NC-SA 4.0'` en valeur exacte dans le format v1, élargissement éventuel = format v2 assumé. Le format est GELÉ — P2 peut démarrer après le lot F. |
+| 2026-06-10 (PM) | **P3 + P4 LIVRÉS — release 1.11.0** (build 0610-1242). Terrain Mac validé par Grégoire sur le parcours complet (import par la carte et par le bouton biblio, section « Partagés », duplication avec cartouches). Entrée changelog 1.11 ; la puce « l'import arrive » retirée de l'entrée 1.10 (jamais partie dans un build). L'avant-pilote est CODE-COMPLET : restent hors code MODELE-CONFIANCE.md (D-V3, Cowork), D-V2 (nom UI, avec les textes P7) et la re-passe iPad. |
 | 2026-06-10 (PM) | **Libellés legacy « … (JSON) » + LOT P4 AVANCÉ ET CODE COMPLET** (décisions Grégoire au fil du terrain). (1) Les paires export/import JSON des 5 biblios sont renommées « … (JSON) » — le RETRAIT reste à P8. (2) P4 sorti du post-pilote : section « Partagés » dans les 5 biblios + « Dupliquer vers mes documents » avec dépendances (`js/partage-section.js`). 564 tests verts (511 Vitest + 53 Playwright). Reste : terrain P3+P4 puis release minor unique. |
 | 2026-06-10 (PM) | **Terrain P3 (Mac) : flux d'import VALIDÉ par Grégoire** (préviz premier contact, intégration, liste, notification). Deux correctifs terrain : (1) `accept=".lcz"` retiré — Safari grise toute extension sans UTI ; (2) **double porte d'entrée actée** : bouton « Importer un partage (.lcz) » ajouté aux 5 modales de bibliothèque (la friction « l'import se cherche là où vit l'export » est consignée dans USAGE-FORMATS). Reste avant release : re-passe Mac complète (+ iPad à l'occasion) avec les boutons biblios. |
 | 2026-06-10 (PM) | **Lot P3 CODE COMPLET** (session Claude Code AM-3). Pipeline d'import .lcz entier, carte « Partage entre collègues » dans Réglages › Données, 14 sentinelles Vitest + 4 flux Playwright (550 tests verts au total). Décisions d'implémentation : signature vérifiée sur l'objet BRUT / tout le reste sur le packageNettoye ; mise à jour d'un package = remplacement par identité (R3) ; collections `partage_*` plates, possédées par le module. Reste : terrain Mac + iPad, puis release minor + changelog. |
