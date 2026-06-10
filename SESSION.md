@@ -53,11 +53,16 @@
          FIX : schémas élargis aux formes réelles + projection RÉCURSIVE
          (asymétrie actée : l'export ÉLAGUE l'inconnu, l'import le REJETTE).
          Sentinelle de régression ajoutée (28 tests P1). 435+47 = 482 VERTS.
-       • RESTE (prochaine session #329 ou GO terrain) :
-         1. VALIDATION TERRAIN Grégoire : console Safari (Mac puis iPad) →
-            `_testPartagePhase1()` → attendu « 14/14 tests réussis » + zéro
-            régression visuelle au boot. Sur GO : release minor + push
-            (coordonner avec la session #330 — UNE release à la fois, §6).
+       • VALIDATION TERRAIN OBTENUE (même session, après correctif) :
+         `_testPartagePhase1()` → 14/14 sur les données réelles (Mac).
+         RELEASE MINOR EN ATTENTE — décision Grégoire : une autre instance
+         travaille sur des bugs, on attend (règle §6 du plan : UNE release
+         à la fois). Le correctif `702fa7e9` est POUSSÉ sans bump.
+       • RESTE (prochaine session #329 ou créneau de release libre) :
+         1. RELEASE `minor` + (optionnel) re-passe iPad de
+            `_testPartagePhase1()` — P1 est du JS pur sans UI, risque iPad
+            quasi nul. Après le bump : hard refresh Cmd+Option+R dans toute
+            session Safari ouverte (cf. mémoire bump-build-session-ouverte).
          2. REVUE DU FORMAT avec Grégoire avant P2 (risque « gel prématuré »,
             plan §7) : confirmer 50 Mo, le bloc signature, les champs exclus
             (auteur/coursId/dateEcheance/etablissement au niveau entité).
