@@ -205,8 +205,10 @@ restreint fin août » (calendrier) tombe après la Phase 3.
       `_testTrustTofu()` (8 scénarios, registre nettoyé) et
       `_demoAlerteCleChangee()` (vérif visuelle modes sombre/clair).
 - [x] `docs/DATA-OWNERSHIP.md` : ligne `clesConnues` (section Bibliothèques).
-- [ ] Validation terrain Grégoire (Safari Mac) : `await _testTrustTofu()` → 8/8,
-      puis `_demoAlerteCleChangee()` dans les DEUX modes, puis release minor.
+- [x] Validation terrain Grégoire (Safari Mac, 10 juin 2026) : `_testTrustTofu()`
+      → **8/8 verts**, alerte « clé changée » conforme dans les DEUX modes
+      (captures), formulation retouchée sur constat terrain (accord en nombre
+      calculé, date longue fr-CA). **Release 1.9.0 exécutée.**
 
 ### Lots P2-P3 — Export / Import UI
 
