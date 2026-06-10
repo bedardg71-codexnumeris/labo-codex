@@ -392,6 +392,9 @@ async function afficherBibliothequePratiques() {
             <button data-action="ouvrirFilePickerImportPratiques" class="btn btn-secondaire btn-mini">
                 Importer des pratiques
             </button>
+            <button data-action="partageImport.ouvrirSelecteurFichier" class="btn btn-secondaire btn-mini">
+                Importer un partage (.lcz)
+            </button>
             <input type="file" id="fichier-import-pratiques-modal" accept=".json" style="display: none;" data-on-change="importerPratiquesUtilisateur">
         </div>
     `;
