@@ -45,12 +45,25 @@
          périmé (1.6.1 ; réel 1.10.0). ETAT-PROJET.md toujours à 1.6.2.
          Commit 8d6f3747 (changelog 1.10) apparu en cours de session —
          aucun conflit (fichier disjoint).
+     TERRAIN MAC (même session, PM) : FLUX VALIDÉ par Grégoire (préviz,
+     intégration, liste, notification). 2 correctifs terrain :
+       • accept=".lcz" RETIRÉ (`ef2926e4`) : Safari mappe accept sur les
+         UTI système → extension inconnue = TOUS les fichiers grisés.
+         Piège à retenir pour tout futur input file à extension dédiée.
+       • DOUBLE PORTE D'ENTRÉE actée (Grégoire) : bouton « Importer un
+         partage (.lcz) » dans les 5 modales de biblio, à côté de l'import
+         JSON legacy — déclenche l'input global de la carte Réglages ›
+         Données (toujours dans le DOM). Friction consignée USAGE-FORMATS
+         (« l'import se cherche là où vit l'export ») ; renforce P4.
+         Sentinelle Playwright 5 modales. 499 Vitest + 52 Playwright = 551.
      REPRISE — VALIDATION TERRAIN P3 puis JALON PILOTE :
        1. Terrain Grégoire Mac + iPad : hard refresh, _testPartageImportP3()
           (7 vérifications) + parcours réel : exporter une grille en .lcz
           (menu ⋮) puis l'importer via la carte (statut « premier contact »
           attendu — l'auto-import présente ta propre clé, déjà connue après
           le 1er passage → « vérifiée » ensuite), Retirer, réimporter.
+          FAIT sur Mac (PM, via la carte) ; reste re-passe avec les boutons
+          biblios + iPad à l'occasion.
        2. Après terrain : node scripts/release.mjs minor (1.11.0) + entrée
           changelog « import » (l'entrée 1.10 dit encore « l'import arrive
           dans une prochaine version »).
