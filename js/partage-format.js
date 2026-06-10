@@ -47,22 +47,90 @@
         return JSON.parse(JSON.stringify(v));
     }
 
+    function estObjetPlat(v) {
+        return v !== null && typeof v === 'object' && !Array.isArray(v);
+    }
+
     /**
-     * Projette une entité interne sur son schéma fermé : seuls les champs
-     * déclarés dans SCHEMA_ENTITE[type].champs sont copiés (clone profond).
+     * Clone un objet libre en retirant les clés préfixées `_` (état interne)
+     * à tous les niveaux. Les autres valeurs sont clonées telles quelles.
+     */
+    function clonerObjetLibre(noeud) {
+        if (Array.isArray(noeud)) return noeud.map(clonerObjetLibre);
+        if (estObjetPlat(noeud)) {
+            var copie = {};
+            Object.keys(noeud).forEach(function (k) {
+                if (k.charAt(0) === window.partageSchemas.PREFIXE_CHAMP_INTERDIT) return;
+                copie[k] = clonerObjetLibre(noeud[k]);
+            });
+            return copie;
+        }
+        return noeud;
+    }
+
+    /**
+     * Projette une valeur selon son descripteur de schéma. Asymétrie voulue
+     * export/import : l'export ÉLAGUE tout ce qui n'est pas déclaré (les
+     * données réelles portent des résidus de cycles legacy), l'import
+     * (partage-validation) REJETTE tout champ inconnu.
+     */
+    function projeterValeur(valeur, desc) {
+        if (valeur === null) return null;
+        switch (desc.type) {
+            case 'objet':
+                if (!estObjetPlat(valeur)) return undefined;
+                return projeterChamps(valeur, desc.schema);
+            case 'objet-libre':
+                if (!estObjetPlat(valeur)) return undefined;
+                return clonerObjetLibre(valeur);
+            case 'tableau':
+                if (!Array.isArray(valeur)) return undefined;
+                if (desc.schema) {
+                    return valeur
+                        .filter(estObjetPlat)
+                        .map(function (item) { return projeterChamps(item, desc.schema); });
+                }
+                if (desc.element === 'chaine') {
+                    return valeur.filter(function (item) { return typeof item === 'string'; });
+                }
+                return clonerProfond(valeur);
+            case 'dictionnaire-chaines':
+                if (!estObjetPlat(valeur)) return undefined;
+                var dict = {};
+                Object.keys(valeur).forEach(function (k) {
+                    if (k.charAt(0) === window.partageSchemas.PREFIXE_CHAMP_INTERDIT) return;
+                    if (typeof valeur[k] === 'string') dict[k] = valeur[k];
+                });
+                return dict;
+            default:
+                // chaine / nombre / booleen : copie par valeur.
+                return valeur;
+        }
+    }
+
+    /** Projette un objet sur un schéma fermé { champ: descripteur }. */
+    function projeterChamps(objet, schemaChamps) {
+        var projection = {};
+        Object.keys(schemaChamps).forEach(function (champ) {
+            if (objet[champ] === undefined) return;
+            var valeur = projeterValeur(objet[champ], schemaChamps[champ]);
+            if (valeur !== undefined) projection[champ] = valeur;
+        });
+        return projection;
+    }
+
+    /**
+     * Projette une entité interne sur son schéma fermé, RÉCURSIVEMENT :
+     * seuls les champs déclarés sont copiés, à tous les niveaux (les données
+     * réelles portent des champs hérités de cycles legacy que la validation
+     * fermée rejetterait — bug terrain du 10 juin, grilles réelles H2026).
      */
     function projeterEntite(item, type) {
         var schema = window.partageSchemas.SCHEMA_ENTITE[type];
         if (!schema) {
             throw new Error('[partage-format] Type d\'entité inconnu : ' + type);
         }
-        var projection = {};
-        Object.keys(schema.champs).forEach(function (champ) {
-            if (item[champ] !== undefined) {
-                projection[champ] = item[champ] === null ? null : clonerProfond(item[champ]);
-            }
-        });
-        return projection;
+        return projeterChamps(item, schema.champs);
     }
     partageFormat.projeterEntite = projeterEntite;
 

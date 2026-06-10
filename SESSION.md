@@ -41,6 +41,18 @@
          parallèle traite #330. RIEN embarqué dans mes commits (diffs
          vérifiés fichier par fichier). import-export.js NON touché par #329
          cette session (point de contact §6 du plan, RAS).
+       • CORRECTIF TERRAIN (même session, retour Grégoire 13/14 sur Mac) :
+         _testPartagePhase1 #1 échouait sur les grilles RÉELLES H2026 —
+         (a) champs réels absents des schémas : criteres[].niveauSOLO
+         (grilles.js:339) + metadata_cc COMPLÈTE de ajouterMetadonnéesCC
+         (licence_resume, email/site_auteur, type, nom, version, attribution,
+         discipline EN TABLEAU, niveau, institution, description_courte ;
+         contributeurs = {nom, date, modifications}, PAS {auteur,…}) ;
+         (b) projeterEntite ne descendait pas dans les sous-objets → résidus
+         legacy des critères passaient à l'export puis rejetés à l'import.
+         FIX : schémas élargis aux formes réelles + projection RÉCURSIVE
+         (asymétrie actée : l'export ÉLAGUE l'inconnu, l'import le REJETTE).
+         Sentinelle de régression ajoutée (28 tests P1). 435+47 = 482 VERTS.
        • RESTE (prochaine session #329 ou GO terrain) :
          1. VALIDATION TERRAIN Grégoire : console Safari (Mac puis iPad) →
             `_testPartagePhase1()` → attendu « 14/14 tests réussis » + zéro

@@ -100,15 +100,31 @@
     // Sous-schémas réutilisés
     // ------------------------------------------------------------------
 
-    // Attribution CC portée par les entités (posée par cc-license.js).
+    // Attribution CC portée par les entités. Forme réelle complète de
+    // ajouterMetadonnéesCC / ajouterContributeurSiNecessaire (cc-license.js) :
+    // CC_LICENSE_DEFAULTS + champs enrichis Beta 95.2. email/site = données
+    // d'attribution publiques voulues par la licence CC BY, pas une fuite.
     var SCHEMA_METADATA_CC = {
-        auteur_original: { type: 'chaine', max: 200 },
-        date_creation: { type: 'chaine', max: 40 },
         licence: { type: 'chaine', max: 100 },
+        licence_url: { type: 'chaine', max: 300 },
+        licence_resume: { type: 'chaine', max: 300 },
+        auteur_original: { type: 'chaine', max: 200 },
+        email_auteur: { type: 'chaine', max: 200 },
+        site_auteur: { type: 'chaine', max: 300 },
+        type: { type: 'chaine', max: 50 },
+        nom: { type: 'chaine', max: 200 },
+        date_creation: { type: 'chaine', max: 40 },
+        date_modification: { type: 'chaine', max: 40 },
+        version: { type: 'chaine', max: 20 },
+        attribution: { type: 'chaine', max: 500 },
+        discipline: { type: 'tableau', max: 20, element: 'chaine', maxLongueurElement: 100 },
+        niveau: { type: 'chaine', max: 100 },
+        institution: { type: 'chaine', max: 200 },
+        description_courte: { type: 'chaine', max: 500 },
         contributeurs: {
             type: 'tableau', max: 50,
             schema: {
-                auteur: { type: 'chaine', max: 200 },
+                nom: { type: 'chaine', max: 200 },
                 date: { type: 'chaine', max: 40 },
                 modifications: { type: 'chaine', max: 2000 }
             }
@@ -190,6 +206,7 @@
                         ponderation: { type: 'nombre', minValeur: 0, maxValeur: 100 },
                         type: { type: 'chaine', max: 50 },
                         formule: { type: 'chaine', max: 500 },
+                        niveauSOLO: { type: 'chaine', max: 50 },
                         verrouille: { type: 'booleen' }
                     }
                 },
