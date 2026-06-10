@@ -153,17 +153,30 @@ restreint fin août » (calendrier) tombe après la Phase 3.
 - [x] Validation fonctionnelle : Mac 14/14 sur données réelles (10 juin, après fix
       `702fa7e9`). Re-passe iPad : optionnelle, à faire à l'occasion (JS pur, sans UI).
 
-### Lot F — Signature ECDSA (Défense F)
+### Lot F — Signature ECDSA (Défense F) — ✅ CODE COMPLET 10 juin 2026 (terrain en attente)
 
-- [ ] `js/signature.js` : `genererPaireCles()`, `signerManifeste(manifeste)`,
-      `verifierSignature(manifeste, clePublique)` — ECDSA P-256, Web Crypto natif.
-- [ ] Clé privée **non extractible** (IndexedDB via `db.js`, clé globale non
-      namespacée) ; documenter la conséquence (perte de clé = nouvelle identité,
-      acceptée pour le pilote ; sauvegarde chiffrée = #47, hors lot).
-- [ ] Câbler la signature dans `construirePackage` ; signature des mises à jour (R3).
-- [ ] Tests : signature valide acceptée, manifeste altéré rejeté, clé étrangère
-      rejetée (vecteurs de test fixes committés).
-- [ ] Mettre à jour `docs/DATA-OWNERSHIP.md` (nouvelles clés : paire de clés, registre).
+- [x] `js/signature.js` : `obtenirOuCreerIdentite()`, `signerPackage(pkg)`,
+      `verifierSignaturePackage(pkg)` + crypto pur testable (`canonicaliser`,
+      `construirePayloadSignature`, `signerChaine`, `verifierChaine`) — ECDSA
+      P-256 + SHA-256, Web Crypto natif. **Périmètre signé spécifié** (la spec
+      d'avril ne le disait pas) : sérialisation CANONIQUE (clés triées) du
+      package ENTIER, bloc signature à null — signer le manifeste seul
+      laisserait altérer les entités sans invalider la signature.
+- [x] Clé privée **non extractible**, base IndexedDB DÉDIÉE `labo-codex-identite`
+      (ÉCART AU PLAN acté par Grégoire 10 juin : pas db.js, dont la copie
+      localStorage dégrade un CryptoKey en `{}` et dont les clés entrent dans
+      les exports/restaurations Codex). Perte de clé = nouvelle identité
+      (pilote) ; sauvegarde chiffrée = #47, hors lot.
+- [x] Câblage : `construirePackageSigne(item, options)` dans partage-format.js
+      (`construirePackage` reste pur/synchrone) ; chemin de signature UNIQUE,
+      les mises à jour repassent par lui (R3).
+- [x] Tests : 23 sentinelles Vitest (`tests/unit/signature-F.test.js`) —
+      aller-retour, altération entité/manifeste, clé étrangère, refus
+      structurés, **vecteurs fixes committés** (clé privée jetée) +
+      `window._testSignatureF()` (8 scénarios console, terrain Safari).
+- [x] `docs/DATA-OWNERSHIP.md` : nouvelle section « Bases IndexedDB annexes ».
+- [ ] Validation terrain Grégoire (Safari Mac) : `await _testSignatureF()`
+      → 8/8 attendus, puis release minor.
 
 ### Lot T — Confiance TOFU
 
