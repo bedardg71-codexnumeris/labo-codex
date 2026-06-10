@@ -280,12 +280,22 @@ function calculerHeureFin(debut, duree) {
 
 /**
  * Obtient la durée d'une période en minutes
- * Source unique : modalitesEvaluation.dureePeriodeMinutes
+ * Source unique : clé namespacée `dureePeriode` (domaine horaire — SSOT Lot 0).
+ * Migration paresseuse : si la clé est absente, récupère l'ancien emplacement
+ * `modalitesEvaluation.dureePeriodeMinutes` et le recopie dans la nouvelle clé
+ * (sans toucher à modalitesEvaluation — le champ legacy sera purgé au Lot 3).
  * @returns {number} Durée en minutes (défaut: 55)
  */
 function obtenirDureePeriode() {
-    const modalites = db.getSync(cle('modalitesEvaluation'), {});
-    return modalites.dureePeriodeMinutes || 55; // Défaut: 55 minutes
+    let duree = db.getSync(cle('dureePeriode'), null);
+    if (duree === null) {
+        const modalites = db.getSync(cle('modalitesEvaluation'), {});
+        if (modalites.dureePeriodeMinutes) {
+            duree = parseInt(modalites.dureePeriodeMinutes) || null;
+            if (duree) db.setSync(cle('dureePeriode'), duree);
+        }
+    }
+    return duree || 55; // Défaut: 55 minutes
 }
 
 /**
@@ -293,9 +303,7 @@ function obtenirDureePeriode() {
  * @param {number} minutes - Durée en minutes (50, 55, 60...)
  */
 function definirDureePeriode(minutes) {
-    const modalites = db.getSync(cle('modalitesEvaluation'), {});
-    modalites.dureePeriodeMinutes = parseInt(minutes) || 55;
-    db.setSync(cle('modalitesEvaluation'), modalites);
+    db.setSync(cle('dureePeriode'), parseInt(minutes) || 55);
 }
 
 /**
