@@ -730,19 +730,22 @@ async function sauvegarderConfigurationActuelle(nom, description = '') {
         modalites = {};
     }
 
+    // #328 L2-b2 : type dérivé de la SSOT groupesCours[].pratiqueId (helper D2) —
+    // le miroir modalites.pratique n'existe plus.
+    const pratiqueCanon = (typeof obtenirTypePratiqueActive === 'function')
+        ? obtenirTypePratiqueActive()
+        : null;
+
     const nouvelleConfig = {
         id: genererIdUnique('config_'),
         nom: nom,
         description: description,
-        type: (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(modalites.pratique) : modalites.pratique) || 'specifications',
+        type: pratiqueCanon || 'specifications',
         auteur: 'Utilisateur',
         discipline: modalites.discipline || 'Général',
         dateCreation: new Date().toISOString(),
         configuration: {}
     };
-
-    // Session A-2 : id canonique normalisé à la lecture.
-    const pratiqueCanon = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(modalites.pratique) : modalites.pratique);
 
     // Selon le type de pratique, extraire la configuration pertinente
     if (pratiqueCanon === 'specifications') {
@@ -802,10 +805,10 @@ async function appliquerConfigurationPratique(configId) {
     // Session A-2 : id canonique normalisé à la lecture (config.type peut être legacy).
     const typeConfig = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.type) : config.type);
 
-    // Appliquer selon le type
+    // Appliquer selon le type (#328 L2-b2 : le miroir modalites.pratique n'est
+    // plus écrit — appliquer une config ne change pas la pratique active du
+    // groupe-cours, seule l'activation par la SSOT le fait)
     if (typeConfig === 'specifications') {
-        modalites.pratique = 'specifications';
-
         if (!modalites.specifications) {
             modalites.specifications = {};
         }
@@ -817,8 +820,6 @@ async function appliquerConfigurationPratique(configId) {
         modalites.specifications.modeleNom = config.nom;
 
     } else if (typeConfig === 'standards') {
-        modalites.pratique = 'standards';
-
         // Variante de calcul (n-meilleurs, n-recents, par-objectifs, etc.)
         if (config.configuration?.varianteCalcul) {
             modalites.varianteCalcul = config.configuration.varianteCalcul;

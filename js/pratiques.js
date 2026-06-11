@@ -48,15 +48,14 @@
    =============================== */
 
 /**
- * A-2 4d : normalisation à la lecture de l'identifiant de pratique active.
- * Les comparaisons sur `modalites.pratique` doivent rester correctes que la
- * donnée soit legacy ('pan-standards', 'alternative'…) OU déjà canonisée
- * ('standards'…). Le SSOT peut déjà contenir du canonique selon le chemin
- * d'activation (cf. pratiques-bibliotheque.js lot 4b). Guard `typeof` car
- * pratique-registre.js peut être chargé après ce fichier ; au runtime
- * (handlers) il est présent.
- * NB : la canonisation des <select> et des écritures de modalites.pratique est
- * reportée à l'étape 6 (post-AQPC, sur backup) — ici, lecture seule.
+ * A-2 4d : normalisation à la lecture d'un identifiant de pratique.
+ * Les comparaisons d'ids doivent rester correctes que la donnée soit legacy
+ * ('pan-standards', 'alternative'…) OU déjà canonisée ('standards'…).
+ * Guard `typeof` car pratique-registre.js peut être chargé après ce fichier ;
+ * au runtime (handlers) il est présent.
+ * NB #328 L2-b2 : le miroir modalites.pratique n'existe plus — la pratique
+ * active se dérive de la SSOT via obtenirPratiqueActiveGroupeCours (id) et
+ * obtenirTypePratiqueActive (type canonique).
  * @param {string} p - identifiant éventuellement legacy
  * @returns {string} forme canonique (ou l'entrée telle quelle)
  */
@@ -289,8 +288,10 @@ function getCoursActifId() {
  */
 function getCoursUtilisantPratique(pratiqueId) {
     const cours = db.getSync('cours', []);
-    const modalites = window.modalitesEvaluation.lire();
-    const pratiqueActive = modalites.pratique || 'sommative';
+    // #328 L2-b2 : id dérivé de la SSOT groupesCours[].pratiqueId.
+    const pratiqueActive = ((typeof obtenirPratiqueActiveGroupeCours === 'function')
+        ? obtenirPratiqueActiveGroupeCours()
+        : null) || 'sommative';
 
     // Si cette pratique est la pratique active, tous les cours l'utilisent
     // (comparaison normalisée : tolère legacy ↔ canonique des deux côtés).
@@ -551,9 +552,10 @@ function changerPratiqueNotation() {
         infoPAN.classList.add('u-hide');
     }
 
-    // Sauvegarder via le module propriétaire (SSOT #328 Lot 1)
+    // #328 L2-b2 : le miroir modalites.pratique n'est plus écrit — l'activation
+    // passe par la SSOT groupesCours[].pratiqueId (PratiqueManager). Seul le
+    // champ propre typePAN reste géré ici.
     window.modalitesEvaluation.modifier(function (modalites) {
-        modalites.pratique = pratique;
         modalites.typePAN = pratiqueCanon === 'standards' ? modalites.typePAN : null;
     });
 
@@ -1080,9 +1082,11 @@ function sauvegarderConfigurationPAN() {
  * 6. Met à jour le statut
  */
 function sauvegarderPratiqueNotation() {
-    // Lire la pratique active depuis localStorage (nouveau système de cartes)
+    // #328 L2-b2 : type dérivé de la SSOT (le miroir modalites.pratique n'existe plus)
     let modalites = window.modalitesEvaluation.lire();
-    const pratique = modalites.pratique;
+    const pratique = (typeof obtenirTypePratiqueActive === 'function')
+        ? obtenirTypePratiqueActive()
+        : null;
 
     // Les sélecteurs suivants n'existent que dans l'ancien système
     const selectTypePAN = document.getElementById('typePAN');
@@ -1102,8 +1106,7 @@ function sauvegarderPratiqueNotation() {
         return;
     }
 
-    // Construire la configuration complète (écriture conservée telle quelle ; canonisation en étape 6)
-    modalites.pratique = pratique;
+    // #328 L2-b2 : plus d'écriture du miroir modalites.pratique — champs propres seulement.
     modalites.typePAN = pratiqueCanon === 'standards' ? typePAN : null;
     modalites.dateConfiguration = new Date().toISOString();
 
@@ -1165,11 +1168,12 @@ function chargerModalites() {
         return;
     }
 
-    // Si pas de données sauvegardées, initialiser avec pratique par défaut
-    if (!modalites.pratique) {
-        modalites.pratique = 'sommative';
-        window.modalitesEvaluation.remplacer(modalites);
-
+    // #328 L2-b2 : type dérivé de la SSOT — plus de bootstrap du miroir
+    // (une pratique non configurée ne s'écrit plus dans les modalités).
+    const typeActif = (typeof obtenirTypePratiqueActive === 'function')
+        ? obtenirTypePratiqueActive()
+        : null;
+    if (!typeActif) {
         selectPratique.value = '';
         colonnePAN.classList.add('u-hide');
         selectPAN.value = '';
@@ -1178,10 +1182,9 @@ function chargerModalites() {
         return;
     }
 
-    // Charger la pratique de notation (valeur brute ; le <select> garde ses
-    // options legacy tant que l'étape 6 ne les a pas canonisées).
-    selectPratique.value = modalites.pratique;
-    const pratiqueCanon = _normPratique(modalites.pratique);
+    // Charger la pratique de notation (type canonique dérivé de la SSOT)
+    selectPratique.value = typeActif;
+    const pratiqueCanon = typeActif;
 
     // Gérer l'affichage du menu PAN
     if (pratiqueCanon === 'standards') {
@@ -1399,9 +1402,11 @@ function mettreAJourStatutModalites() {
         return;
     }
 
-    // Vérifier le statut selon la pratique choisie (comparaison normalisée)
-    const pratiqueCanon = _normPratique(modalites.pratique);
-    if (!modalites.pratique) {
+    // Vérifier le statut selon la pratique active (#328 L2-b2 : type dérivé de la SSOT)
+    const pratiqueCanon = (typeof obtenirTypePratiqueActive === 'function')
+        ? obtenirTypePratiqueActive()
+        : null;
+    if (!pratiqueCanon) {
         statutDiv.innerHTML = '<span style="color: var(--niveau-attention-critique);"><span class="icone-inline icone-inline--cancel" aria-hidden="true"></span>À configurer</span>';
     } else if (pratiqueCanon === 'sommative') {
         statutDiv.innerHTML = '<span style="color: var(--vert-moyen);"><span class="icone-inline icone-inline--check" aria-hidden="true"></span>Sommative traditionnelle (en %)</span>';
@@ -1793,9 +1798,11 @@ function togglePratique(pratiqueId) {
  * @param {string} id - ID de la pratique à activer
  */
 async function activerPratique(id, confirmer = true) {
-    // Vérifier si la pratique est déjà active
-    const modalites = window.modalitesEvaluation.lire();
-    if (modalites.pratique === id) {
+    // Vérifier si la pratique est déjà active (#328 L2-b2 : SSOT, plus le miroir)
+    const pratiqueActiveId = (typeof obtenirPratiqueActiveGroupeCours === 'function')
+        ? obtenirPratiqueActiveGroupeCours()
+        : null;
+    if (pratiqueActiveId === id) {
         // ✅ NOUVEAU (9 décembre 2025) : Même si déjà active, recharger sa config
         // pour afficher ses options spécifiques à droite
         chargerConfigurationPratique(id);
@@ -1836,8 +1843,10 @@ async function activerPratique(id, confirmer = true) {
  * @param {object} valeur - Valeur à sauvegarder
  */
 function sauvegarderDansConfiguration(cle, valeur) {
-    const modalites = window.modalitesEvaluation.lire();
-    const pratiqueActiveId = modalites.pratique;
+    // #328 L2-b2 : id dérivé de la SSOT groupesCours[].pratiqueId.
+    const pratiqueActiveId = (typeof obtenirPratiqueActiveGroupeCours === 'function')
+        ? obtenirPratiqueActiveGroupeCours()
+        : null;
 
     if (!pratiqueActiveId) {
         console.warn('[sauvegarderDansConfiguration] Aucune pratique active');
@@ -2039,8 +2048,10 @@ async function desactiverPratique(id) {
  * Ouvre le wizard pour éditer la pratique actuellement active
  */
 async function editerPratiqueActive() {
-    const modalites = window.modalitesEvaluation.lire();
-    const pratiqueActiveId = modalites.pratique;
+    // #328 L2-b2 : id dérivé de la SSOT groupesCours[].pratiqueId.
+    const pratiqueActiveId = (typeof obtenirPratiqueActiveGroupeCours === 'function')
+        ? obtenirPratiqueActiveGroupeCours()
+        : null;
 
     if (!pratiqueActiveId) {
         alert('❌ Aucune pratique active\n\nVeuillez d\'abord activer une pratique dans la sidebar.');
@@ -2158,9 +2169,11 @@ async function supprimerPratique(id) {
     const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
     const pratique = pratiques.find(p => p.id === id);
 
-    // Vérifier que la pratique n'est pas active
-    const modalites = window.modalitesEvaluation.lire();
-    if (modalites.pratique === id) {
+    // Vérifier que la pratique n'est pas active (#328 L2-b2 : SSOT, plus le miroir)
+    const pratiqueActiveId = (typeof obtenirPratiqueActiveGroupeCours === 'function')
+        ? obtenirPratiqueActiveGroupeCours()
+        : null;
+    if (pratiqueActiveId === id) {
         alert(`❌ Impossible de supprimer cette pratique\n\nElle est actuellement active.\n\nVous devez d'abord activer une autre pratique.`);
         return;
     }
@@ -2409,8 +2422,10 @@ async function afficherListePratiquesSidebar() {
 
     if (!container) return;
 
-    const modalites = window.modalitesEvaluation.lire();
-    const pratiqueActiveId = modalites.pratique;
+    // #328 L2-b2 : id dérivé de la SSOT groupesCours[].pratiqueId.
+    const pratiqueActiveId = (typeof obtenirPratiqueActiveGroupeCours === 'function')
+        ? obtenirPratiqueActiveGroupeCours()
+        : null;
 
     // ✅ NOUVEAU (9 décembre 2025) : Récupérer la pratique sélectionnée pour l'affichage
     const pratiqueSelectionneeId = sessionStorage.getItem('pratiqueSelectionnee');
@@ -2712,9 +2727,11 @@ async function supprimerPratiqueHorsBibliotheque(pratiqueId) {
         return;
     }
 
-    // Vérifier que la pratique n'est pas active
-    const modalites = window.modalitesEvaluation.lire();
-    if (modalites.pratique === pratiqueId) {
+    // Vérifier que la pratique n'est pas active (#328 L2-b2 : SSOT, plus le miroir)
+    const pratiqueActiveId = (typeof obtenirPratiqueActiveGroupeCours === 'function')
+        ? obtenirPratiqueActiveGroupeCours()
+        : null;
+    if (pratiqueActiveId === pratiqueId) {
         alert(`❌ Impossible de supprimer cette pratique\n\nElle est actuellement active.\n\nVous devez d'abord activer une autre pratique.`);
         return;
     }

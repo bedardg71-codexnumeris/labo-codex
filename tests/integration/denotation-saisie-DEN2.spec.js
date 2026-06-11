@@ -57,8 +57,10 @@ test('DEN-2 · le panneau se rend quand une DEN est active (cibles + garde + cha
         if (!window.denotationSaisie) return { erreur: 'denotationSaisie absent' };
         window.db.setSync('pratiquesConfigurables', [pratiqueData]);
         window.db.setSync(window.cle('pratiquesConfigurables'), [pratiqueData]);
-        window.db.setSync('modalitesEvaluation', { pratique: pratiqueData.id });
-        window.db.setSync(window.cle('modalitesEvaluation'), { pratique: pratiqueData.id });
+        // #328 L2-b2 : activation par la SSOT groupesCours[].pratiqueId
+        // (le miroir modalitesEvaluation.pratique n'existe plus).
+        window.db.setSync('groupeCoursActif', { id: 'GC_DEN', trimestreId: window.obtenirTrimestreId() });
+        window.db.setSync(window.cle('groupesCours'), [{ id: 'GC_DEN', pratiqueId: pratiqueData.id }]);
 
         const active = window.denotationSaisie.estActive();
         const html = window.denotationSaisie.panneau(da);
@@ -96,8 +98,9 @@ test('DEN-2 · enregistrer persiste la saisie (namespacée) sans écraser une au
     const r = await page.evaluate(async ({ da, pratiqueId, pratiqueData }) => {
         window.db.setSync('pratiquesConfigurables', [pratiqueData]);
         window.db.setSync(window.cle('pratiquesConfigurables'), [pratiqueData]);
-        window.db.setSync('modalitesEvaluation', { pratique: pratiqueId });
-        window.db.setSync(window.cle('modalitesEvaluation'), { pratique: pratiqueId });
+        // #328 L2-b2 : activation par la SSOT groupesCours[].pratiqueId.
+        window.db.setSync('groupeCoursActif', { id: 'GC_DEN', trimestreId: window.obtenirTrimestreId() });
+        window.db.setSync(window.cle('groupesCours'), [{ id: 'GC_DEN', pratiqueId: pratiqueId }]);
 
         // Saisie préexistante d'une AUTRE pratique : ne doit pas être touchée.
         window.db.setSync(window.cle('jugementsDenotation'), {

@@ -3,8 +3,11 @@ import { chargerScript } from './_helpers/charger-script.js';
 
 // Session A volet B (canonisation de la production des pratiques, 31 mai 2026).
 //
-// Verrou réel de l'étape 1 : `PratiqueManager.chargerPratiqueActive` lit le SSOT
-// `modalites.pratique` puis route les pratiques codées en dur vers le registre.
+// Verrou réel de l'étape 1 : `PratiqueManager.chargerPratiqueActive` résout la
+// pratique active puis route les pratiques codées en dur vers le registre.
+// #328 L2-b2 (11 juin 2026) : la résolution passe par la SSOT
+// `groupesCours[].pratiqueId` via obtenirPratiqueActiveGroupeCours — le miroir
+// `modalites.pratique` n'existe plus ; le stub du helper remplace la fixture.
 // Avant ce volet, le test était fait sur les ids LEGACY en dur
 // (`pan-standards`/`pan-specifications`) ; au moment où la production écrit du
 // canonique (`standards`/`specifications`), une valeur canonique « tombait »
@@ -19,7 +22,6 @@ const MARQUEUR_REGISTRE = { __source: 'registre' };
 function chargerManager(pratiqueSSOT, { normaliser } = {}) {
     const db = {
         getSync(c, d) {
-            if (c === 'modalitesEvaluation') return { pratique: pratiqueSSOT };
             if (c === 'pratiquesConfigurables') return []; // aucune pratique configurable
             return d !== undefined ? d : null;
         },
@@ -35,8 +37,9 @@ function chargerManager(pratiqueSSOT, { normaliser } = {}) {
         // emprunté la branche « pratique codée en dur ».
         obtenirPratiqueActive: () => MARQUEUR_REGISTRE
     });
-    // obtenirPratiqueActive est lu via window.obtenirPratiqueActive dans le code.
+    // Lus via window.* dans le code.
     win.obtenirPratiqueActive = () => MARQUEUR_REGISTRE;
+    win.obtenirPratiqueActiveGroupeCours = () => pratiqueSSOT;
     return win;
 }
 

@@ -428,8 +428,10 @@ function obtenirEtatApplication() {
         const pratiqueDefaut = db.getSync('pratiqueParDefaut', 'non définie');
         etat.pratiqueParDefaut = pratiqueDefaut;
 
-        const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
-        etat.pratiqueActive = modalites.pratique || 'non définie';
+        // #328 L2-b2 : id dérivé de la SSOT groupesCours[].pratiqueId.
+        etat.pratiqueActive = ((typeof obtenirPratiqueActiveGroupeCours === 'function')
+            ? obtenirPratiqueActiveGroupeCours()
+            : null) || 'non définie';
     } catch (e) {
         etat.pratiqueParDefaut = 'erreur lecture';
     }

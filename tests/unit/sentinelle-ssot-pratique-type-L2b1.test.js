@@ -7,55 +7,77 @@ import { chargerScript } from './_helpers/charger-script.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
 
-// #328 L2-b1 — le chemin de CALCUL dérive le type de pratique de la SSOT
-// (11 juin 2026).
+// #328 L2-b1/L2-b2 — calcul (11 juin 2026) PUIS affichage et domaine pratiques
+// (11 juin 2026, L2-b2) dérivent le type de pratique de la SSOT.
 //
 // Verrouille :
 //  1. `obtenirTypePratiqueActive(contexte)` (pratique-registre.js) : la chaîne
 //     groupesCours[].pratiqueId → configuration.type, résolue dans la
 //     bibliothèque DU TRIMESTRE DU GROUPE-COURS (absorption #301), copies en
 //     dernier recours seulement et JAMAIS sous contexte explicite.
-//  2. RATCHET : les fichiers du chemin de calcul migrés ne relisent plus
-//     `modalites/config.pratique` (le miroir). Cette liste ne peut que
-//     S'ALLONGER (L2-b2 y ajoutera l'affichage) — jamais rétrécir.
+//  2. RATCHET : depuis L2-b2, PLUS AUCUN fichier de js/ ne lit le miroir
+//     `modalites/config.pratique` — le balayage couvre tout js/ (plus de
+//     liste : le ratchet est au maximum, il ne peut plus que le rester).
+//  3. Depuis L2-b2, plus AUCUNE écriture `*.pratique = …` non plus : le champ
+//     est purgé des données par purgerLegacy() à chaque boot.
 
-const FICHIERS_CALCUL_SANS_MIROIR = [
-    'js/indices.js',
-    'js/evaluation.js',
-    'js/evaluation-chargement.js',
-    'js/statistiques.js',
-    'js/profil-etudiant-calculs.js',
-    'js/profil-etudiant-actions.js',
-    'js/profil-etudiant-helpers.js',
-    'js/etudiants.js'
-];
+const MOTIF_LECTURE_MIROIR = /\b(modalites|config|mods|modalitesTab|configBeta|m)\.pratique\b/;
+const MOTIF_ECRITURE_MIROIR = /\b(modalites|config|mods|modalitesTab|configBeta|m)\.pratique\s*=[^=]/;
 
-const MOTIF_LECTURE_MIROIR = /\b(modalites|config|mods|modalitesTab|configBeta)\.pratique\b/;
+function listerFichiersJs(dossier) {
+    const resultats = [];
+    for (const entree of fs.readdirSync(dossier, { withFileTypes: true })) {
+        const chemin = path.join(dossier, entree.name);
+        if (entree.isDirectory()) resultats.push(...listerFichiersJs(chemin));
+        else if (entree.name.endsWith('.js')) resultats.push(chemin);
+    }
+    return resultats;
+}
 
-describe('Sentinelle SSOT · ratchet lecteurs du miroir `pratique` (L2-b1, statique)', () => {
+describe('Sentinelle SSOT · ratchet lecteurs/écrivains du miroir `pratique` (L2-b2, statique)', () => {
 
-    it('les fichiers du chemin de calcul ne lisent plus le miroir', () => {
+    const fichiersJs = listerFichiersJs(path.join(racineProjet, 'js'));
+
+    it('PLUS AUCUN fichier de js/ ne lit le miroir modalites.pratique', () => {
         const fautifs = [];
-        for (const fichier of FICHIERS_CALCUL_SANS_MIROIR) {
-            const lignes = fs.readFileSync(path.join(racineProjet, fichier), 'utf8').split('\n');
+        for (const fichier of fichiersJs) {
+            const lignes = fs.readFileSync(fichier, 'utf8').split('\n');
             lignes.forEach((ligne, i) => {
-                if (MOTIF_LECTURE_MIROIR.test(ligne)) fautifs.push(`${fichier}:${i + 1}`);
+                const sansCommentaire = ligne.replace(/\/\/.*$/, '').replace(/^\s*\*.*$/, '');
+                if (MOTIF_LECTURE_MIROIR.test(sansCommentaire)) {
+                    fautifs.push(`${path.relative(racineProjet, fichier)}:${i + 1}`);
+                }
             });
         }
         expect(
             fautifs,
-            'Lecture du miroir modalites.pratique réintroduite dans le chemin de calcul — ' +
-            'dériver via obtenirTypePratiqueActive() (SSOT, plan PLAN-328-L2)'
+            'Lecture du miroir modalites.pratique réintroduite — dériver via ' +
+            'obtenirTypePratiqueActive() (type) ou obtenirPratiqueActiveGroupeCours() (id) ' +
+            '(SSOT, plan PLAN-328-L2 §4 bis D1)'
         ).toEqual([]);
     });
 
-    it('le helper est bien câblé dans chaque fichier migré', () => {
-        for (const fichier of FICHIERS_CALCUL_SANS_MIROIR) {
-            const src = fs.readFileSync(path.join(racineProjet, fichier), 'utf8');
-            const utiliseHelper = src.includes('obtenirTypePratiqueActive')
-                || src.includes('obtenirPratiqueActiveGroupeCours');   // sites qui veulent l'ID
-            expect(utiliseHelper, `${fichier} : aucun appel au helper SSOT`).toBe(true);
+    it('PLUS AUCUNE écriture du miroir modalites.pratique', () => {
+        const fautifs = [];
+        for (const fichier of fichiersJs) {
+            const lignes = fs.readFileSync(fichier, 'utf8').split('\n');
+            lignes.forEach((ligne, i) => {
+                const sansCommentaire = ligne.replace(/\/\/.*$/, '').replace(/^\s*\*.*$/, '');
+                if (MOTIF_ECRITURE_MIROIR.test(sansCommentaire)) {
+                    fautifs.push(`${path.relative(racineProjet, fichier)}:${i + 1}`);
+                }
+            });
         }
+        expect(
+            fautifs,
+            'Écriture du miroir modalites.pratique réintroduite — l\'activation passe par ' +
+            'la SSOT groupesCours[].pratiqueId (PratiqueManager.changerPratiqueActive)'
+        ).toEqual([]);
+    });
+
+    it('le champ `pratique` figure dans CHAMPS_MIROIRS_MORTS du module propriétaire', () => {
+        const src = fs.readFileSync(path.join(racineProjet, 'js/pratiques/modalites-evaluation.js'), 'utf8');
+        expect(src).toMatch(/CHAMPS_MIROIRS_MORTS\s*=\s*\[[^\]]*'pratique'[^\]]*\]/);
     });
 
 });

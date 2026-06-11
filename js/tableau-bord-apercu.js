@@ -759,8 +759,9 @@ function calculerDistributionPerformance(etudiants) {
  */
 function genererBadgePratique() {
     const config = db.getSync(cle('modalitesEvaluation'), null) || {};
-    // Session A-2 : id canonique normalisé à la lecture, défaut = PRATIQUE_DEFAUT ('standards').
-    const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
+    // #328 L2-b2 : type dérivé de la SSOT groupesCours[].pratiqueId (helper D2),
+    // défaut historique conservé = PRATIQUE_DEFAUT ('standards').
+    const pratique = (typeof obtenirTypePratiqueActive === 'function' ? obtenirTypePratiqueActive() : null) || (window.PRATIQUE_DEFAUT || 'standards');
     const typePAN = config.typePAN || 'maitrise';
     // Session C (#303) : mode comparatif retiré — couche unique (pratique active).
 
@@ -1355,9 +1356,11 @@ function determinerModeAffichageTableauBord(config) {
     // (sommative → SOM, sinon → PAN). Les clés afficherSommatif/afficherAlternatif
     // (qui pouvaient être les deux à true = comparatif, ou poser un override) ne sont
     // plus honorées : ce seul point garantit qu'aucun rendu n'affiche deux couches.
-    const pratiqueActive = (typeof normaliserIdPratique === 'function'
-        ? normaliserIdPratique(config && config.pratique)
-        : (config && config.pratique)) || (window.PRATIQUE_DEFAUT || 'standards');
+    // #328 L2-b2 : type dérivé de la SSOT (le paramètre config reste pour les
+    // autres champs des appelants, plus pour la pratique).
+    const pratiqueActive = (typeof obtenirTypePratiqueActive === 'function'
+        ? obtenirTypePratiqueActive()
+        : null) || (window.PRATIQUE_DEFAUT || 'standards');
     const estSommative = pratiqueActive === 'sommative';
     return { afficherSom: estSommative, afficherPan: !estSommative };
 }

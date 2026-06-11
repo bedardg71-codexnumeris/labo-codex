@@ -9,9 +9,10 @@
  * (et des migrations bornées documentées) fait échouer la suite.
  *
  * Périmètre Lot 1 : CENTRALISER les écritures sans en changer la sémantique.
- * Les champs miroirs (`pratique`, `pratiqueId`, `approcheEvaluation`,
- * `configPAN.jetons`) restent écrits à la main par les appelants — leur
- * dérivation depuis la pratique active est le Lot 2.
+ * Lot 2 (a/b1/b2) : les champs miroirs `pratique`, `pratiqueId` et
+ * `approcheEvaluation` sont MORTS — dérivés de la SSOT
+ * `groupesCours[].pratiqueId` via obtenirTypePratiqueActive /
+ * obtenirPratiqueActiveGroupeCours. Reste `configPAN.jetons` (Lot 2-c).
  *
  * Lot 3 (11 juin 2026) : le fallback de lecture sur la clé NON namespacée est
  * retiré (la migration namespacing de main.js, bornée, reste le seul lecteur
@@ -75,18 +76,20 @@
         return true;
     }
 
-    // Champs miroirs SANS rapatriement, purgés tels quels (#328 L2-a) :
-    // `pratiqueId` (SSOT = groupesCours[].pratiqueId) et `approcheEvaluation`
-    // (vit dans pratique.configuration) n'ont plus AUCUN lecteur.
-    const CHAMPS_MIROIRS_MORTS = ['pratiqueId', 'approcheEvaluation'];
+    // Champs miroirs SANS rapatriement, purgés tels quels (#328 L2-a/L2-b2) :
+    // `pratiqueId` (SSOT = groupesCours[].pratiqueId), `approcheEvaluation`
+    // (vit dans pratique.configuration) et `pratique` (type — dérivé via
+    // obtenirTypePratiqueActive depuis L2-b2) n'ont plus AUCUN lecteur.
+    const CHAMPS_MIROIRS_MORTS = ['pratiqueId', 'approcheEvaluation', 'pratique'];
 
     /**
      * Purge les champs legacy des modalités de CHAQUE trimestre :
      *  - `dureePeriodeMinutes` (Lot 3) — valeur rapatriée dans la clé
      *    `dureePeriode` (domaine horaire, SSOT Lot 0) si elle n'y est pas
      *    déjà ; la clé existante a toujours priorité, jamais d'écrasement ;
-     *  - `pratiqueId` / `approcheEvaluation` (Lot 2-a) — miroirs morts,
-     *    supprimés sans rapatriement (leur SSOT vit ailleurs).
+     *  - `pratiqueId` / `approcheEvaluation` (Lot 2-a) et `pratique`
+     *    (Lot 2-b2) — miroirs morts, supprimés sans rapatriement (leur SSOT
+     *    vit ailleurs).
      *
      * Appelée à chaque démarrage (main.js, séquence db-ready) : idempotente
      * et robuste face aux réintroductions par import de données anciennes

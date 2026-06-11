@@ -96,3 +96,4 @@ audit/reports/
 CODEX problématiques juin/
 *.codex.zip
 codex-*/
+test-results/

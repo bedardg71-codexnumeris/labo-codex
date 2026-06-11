@@ -322,30 +322,21 @@ function construireConfigComplete(pratiqueData) {
  */
 function obtenirIdPratiqueActive() {
     try {
-        const config = db.getSync(cle('modalitesEvaluation'), null);
-
-        if (!config) {
-            // Fraîche installation — modalitesEvaluation pas encore initialisé. Silent.
-            return null;
-        }
-
-        let idPratique = config.pratique;
+        // #328 L2-b2 : id dérivé de la SSOT groupesCours[].pratiqueId (le miroir
+        // modalitesEvaluation.pratique n'existe plus). La résolution passe par
+        // obtenirPratiqueActiveGroupeCours (modes.js) — SSOT d'abord, copies en
+        // dernier recours, défaut 'sommative'.
+        const idPratique = (typeof window.obtenirPratiqueActiveGroupeCours === 'function')
+            ? window.obtenirPratiqueActiveGroupeCours()
+            : null;
 
         if (!idPratique) {
-            console.warn('Aucune pratique configurée dans modalitesEvaluation.pratique');
             return null;
         }
 
         // Normalisation vers l'identifiant canonique (point unique : normaliserIdPratique).
-        // Remplace les anciennes « migrations » dispersées — dont celle qui poussait
-        // specifications → pan-specifications alors que l'instance s'enregistre sous
-        // specifications (le .get échouait).
-        //
-        // Session A-1 : on normalise À LA LECTURE, SANS write-back. Réécrire
-        // modalitesEvaluation.pratique en base désynchroniserait les ~60 comparaisons
-        // qui lisent encore `config.pratique`/`modalites.pratique` brut (legacy). La
-        // migration des données stockées + le collapse de ces comparaisons sont traités
-        // ensemble en Session A-2 (étape 6), sur backup.
+        // On normalise À LA LECTURE, SANS write-back (Session A-1) — la SSOT peut
+        // contenir un id configurable (laissé tel quel) ou un type legacy.
         return normaliserIdPratique(idPratique);
     } catch (error) {
         console.error('Erreur lors de la lecture de la pratique active:', error);
