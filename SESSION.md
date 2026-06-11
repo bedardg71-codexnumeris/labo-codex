@@ -25,9 +25,12 @@
          Au passage, FIX livré pendant le terrain (32cfddc6) : le plan de
          purge est persisté (_codex_planPurge336) et réaffiché au boot — le
          reload post-import effaçait la console ET le plan (constat 15h27).
+         Vérif visuelle post-purge OK (page travaux Artefact 10 intacte,
+         statuts/notes normaux ; les badges « Fichier sous Artefact 1 » de
+         2 étudiants = classement de remise antérieur, fiches référencées,
+         hors purge par construction). TERRAIN COMPLET.
          Reste (décision Grégoire, prochaine session) : activer l'exécution
          automatique à l'import, et sous quelle forme (silencieuse vs confirm).
-         Vérif visuelle d'une page travaux encore à faire par Grégoire.
        • #328 L2-b2 LIVRÉ (e3179c41) : miroir `pratique` MORT. ~46 lecteurs
          migrés (type → obtenirTypePratiqueActive ; id →
          obtenirPratiqueActiveGroupeCours) dans 14 fichiers ; toutes les
