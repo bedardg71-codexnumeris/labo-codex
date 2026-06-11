@@ -1,4 +1,65 @@
 <!-- =====================================================================
+     SESSION 11 juin 2026 (matinée, suite — Claude Code, SOLO, Grégoire au
+     repos) — PASSE SSOT : #328 L3 LIVRÉ + #328 L2 CADRÉ + #332 CONSTAT 2
+     LIVRÉ. Skills rechargés depuis la branche qualité. HEAD main
+     `5d1caaf7`, POUSSÉ. 593 Vitest + 54 Playwright = 647 VERTS. ARBRE
+     PROPRE. PAS DE RELEASE (terrain requis — voir REPRISE).
+       • SKILLS INTÉGRÉS (commit 2e21152e) : audit Fable 5 de la branche
+         claude/fable5-labo-codex-quality-z12y1e mergé sur main (11
+         fichiers, dégraissage + dérives factuelles). ⚠ L'item backlog de
+         la branche (« protection de branche main », n° #335 là-bas) est
+         intégré sous #337 — #335/#336 attribués sur main entre-temps.
+         Action UI GitHub ~2 min, procédure .github/BRANCH-PROTECTION.md.
+       • #328 L3 LIVRÉ (commit f5730e6c) : fallbacks clé nue purgés
+         PARTOUT (~57 sites, ~30 fichiers — l'audit ne nommait que 3
+         sites, l'idiome || db.getSync('modalitesEvaluation', {}) était
+         généralisé chez les lecteurs). Seul lecteur clé nue restant =
+         migration namespacing bornée de main.js. migration-pratiques.js
+         SUPPRIMÉ (ids legacy résolus par normaliserIdPratique) ; volet
+         clé nue de decouplerPR retiré de main.js ; champ legacy
+         dureePeriodeMinutes purgé des données au boot par
+         modalitesEvaluation.purgerLegacy() (tous trimestres via
+         enumererTrimestres, rapatriement vers dureePeriode sans
+         écrasement, sans flag — patron nettoyerLegacy) ;
+         obtenirDureePeriode() simplifié. Bug de précédence corrigé au
+         passage (rapport-bug.js : pratiqueActive recevait l'objet entier).
+         Ratchet écrivains rétréci au module seul ; sentinelle
+         sentinelle-ssot-modalites-purge-L3.test.js (5 cas) + 5 cas
+         purgerLegacy au contrat L1 ; 35 cache-busters bumpés.
+       • #328 L2 CADRÉ, PAS CODÉ (plans de travail/
+         PLAN-328-L2-degonfler-miroir.md) : découverte structurante — le
+         miroir est de granularité TRIMESTRE, la SSOT par GROUPE-COURS
+         (perte d'information par conception, pas un simple drift). ~111
+         sites lecteurs (pratique ~59, configPAN.jetons ~31,
+         approcheEvaluation ~18, pratiqueId 3) ; AUCUNE tranche détachable
+         (écritures inretirable avant migration des lecteurs). Golden
+         master actuel INSUFFISANT (ne couvre que Sommative.calculer-
+         Performance). DÉCISIONS GRÉGOIRE REQUISES : D1 suppression vs
+         cache dérivé, D2 absorber #301 (contexte consultation), D3
+         sémantique jetons (suivre la config ou snapshot), D4 découpage
+         L2-0→L2-c. L2-0 (golden master Playwright du chemin procédural)
+         = préalable faisable solo, sans risque.
+       • #332 CONSTAT 2 LIVRÉ (commit 5d1caaf7) : obtenirSeancesHoraire
+         dérive horaireId de la SSOT groupesCours ; la copie
+         groupeCoursActif.horaireId ne sert que si le GC est introuvable
+         dans la SSOT, jamais pour la contredire. Test fonctionnel 5 cas
+         (repro exacte désync 00008 + fallback intact). RESTE constat 1
+         (no-op UI du réassemblage — repro Grégoire requise au cadrage).
+       • Code mort observé (non traité, hors périmètre) : migrations.js
+         executerMigrationsBeta951 + migrerSeances/PresencesVersPeriodes
+         exposés window mais AUCUN appelant — utilitaire console ?
+         À trancher avec Grégoire avant retrait.
+     REPRISE (dans l'ordre) :
+       1. TERRAIN Mac (L3 + #332, ~5 min) : boot sans erreur console ;
+          Réglages → Trimestre → durée de période (50/55/60) lit/écrit
+          bien ; assiduité du 00008 toujours Mar-Jeu ; console :
+          (await db.get(...)) non requis — vérifier plutôt
+          db.getSync(cle('modalitesEvaluation')).dureePeriodeMinutes
+          === undefined. Puis RELEASE PATCH (L3+#332 = interne/fix).
+       2. Décisions L2 (D1-D4 du plan) — session Cowork ou ici.
+       3. #332 constat 1 : repro du no-op UI ensemble.
+       4. #337 : activer la protection de branche main (UI GitHub, 2 min).
+     =====================================================================
      SESSION 11 juin 2026 (suite matin, Claude Code) — #334 SESSION C
      LIVRÉE : SNAPSHOT DE FUSION 3-WAY EN INDEX HACHÉ. RELEASE 1.15.0
      (build 0611-0600), terrain Mac validé (fusion + comparaison #243),
