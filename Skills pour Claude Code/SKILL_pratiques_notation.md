@@ -23,8 +23,9 @@ description: >
 > nomme les **écarts** entre le code et ce que la recherche propose. La doctrine de l'outil
 > est **pluraliste** (SOM/STD/SPE/DEN, sans hiérarchie) ; `SKILL_Ecosysteme_classe` décrit
 > UNE instanciation (la pratique STD de Grégoire), pas la doctrine.
-> **Avertissement** : les emplacements `fichier:ligne` datent du 5 juin 2026 — les
-> revérifier contre le code au moment de coder (le code bouge plus vite que ce skill).
+> **Avertissement** : ce skill repère les fonctions par **nom** (retrouvable par grep),
+> pas par numéro de ligne (les `fichier:NNN` dérivaient à chaque édition du code). Toujours
+> `grep` le nom dans le fichier indiqué au moment de coder.
 
 ---
 
@@ -55,8 +56,8 @@ A et C (cf. `indices.js`, `portfolio.js`).
 préfixe `pan-`. « PAN » est un **libellé de famille**, plus un préfixe technique ni un
 jeton de calcul (décision 29 mai 2026). `PRATIQUE_DEFAUT = 'standards'`.
 
-**Normalisation legacy → canonique** (`normaliserIdPratique`, `pratique-registre.js:51`,
-idempotente). Table (`:35`) :
+**Normalisation legacy → canonique** (`normaliserIdPratique`, `pratique-registre.js`,
+idempotente). Table `TABLE_NORMALISATION_PRATIQUE` (même fichier) :
 
 ```
 alternative, pan-maitrise, pan-maitrise-json, pan-standards, pan-objectifs → standards
@@ -128,18 +129,18 @@ périmée (c'est le cas de SKILL_labo_codex §5.2 au 5 juin).
   comme 3e famille PAN) — **mais c'est une approximation assumée**. Ne pas la prendre pour la
   réalité conceptuelle. (À documenter aussi : commentaire registre près de `denotation` ;
   guide PAN utilisateur.)
-- *Code Labo Codex* : **non implémenté**. Le registre connaît le badge `DEN` et la
-  normalisation `pan-denotation → denotation`, mais `deduireTypePratique` ne le produit pas.
-- *Modèle DEN (conception actée 6 juin — `plans de travail/NOTE-COWORK-modele-DEN.md`)* : **un
-  seul mécanisme** (note **entrée/suggérée** + **garde « cibles atteintes »**) exposé en
-  **trois modes ancrés sur la gradation** Girouard-Gagné — (1) note **différée/masquée**
-  (entrée prudente : la rétroaction avant le chiffre), (2) note **réduite** (réussi-échoué sur
-  des épreuves + différenciation), (3) note **éliminée** (jugement narratif → note
-  certificative). Principe : DEN abandonne la fonction de **tri** de la note, garde la
-  **certification** (RREC). **Jamais « pas de chiffre ».** Garde-fou Dyer + santé mentale
-  (Girouard-Gagné : certains étudiants déstabilisés par l'absence de repères) : traces +
-  critères explicites obligatoires ; ne pas vendre DEN comme un bien universel. Sources :
-  Girouard-Gagné et al. (2024), billet CoP dénotation (Poulin-Lamarre & Langlois), Blum (2020), Dyer.
+- *Code Labo Codex* : **implémenté** (couche 2, #318, juin 2026). La note finale est un
+  **jugement saisi** par l'enseignant, gardé par l'atteinte des cibles. **Détail technique
+  complet au §8** (collection `jugementsDenotation` SSOT, moteur `_calculerPerformanceDenotation`,
+  garde par cible → 59, helper `suggererNoteHolistique`, création assistant). Conception :
+  `plans de travail/NOTE-COWORK-modele-DEN.md`.
+- *Principe pédagogique* : DEN abandonne la fonction de **tri** de la note, garde la
+  **certification** (RREC). **Jamais « pas de chiffre ».** Trois modes ancrés sur la gradation
+  Girouard-Gagné (différée, réduite, éliminée) ; seul **éliminée** est livré (modes différée/réduite
+  à venir, voir §8). Garde-fou Dyer + santé mentale (Girouard-Gagné : certains étudiants
+  déstabilisés par l'absence de repères) : traces + critères explicites obligatoires ; ne pas
+  vendre DEN comme un bien universel. Sources : Girouard-Gagné et al. (2024), billet CoP
+  dénotation (Poulin-Lamarre & Langlois), Blum (2020), Dyer.
 
 **Transversal — les familles ne sont pas étanches**
 - *Recherche* : standards et spécifications se **combinent** dans une même classe (Clark) ;
@@ -175,7 +176,7 @@ objet `pratiquesConfigurables` au schéma (b) — pas copier le gabarit.
 
 ## 4. Résolution : `obtenirPratiqueParId(id)`
 
-`pratique-registre.js:487` (exposé `window.obtenirPratiqueParId`). Ordre :
+`obtenirPratiqueParId` (`pratique-registre.js`, exposé `window.obtenirPratiqueParId`). Ordre :
 
 1. **Normalise** l'id (`normaliserIdPratique`) — un id legacy non migré résout quand même.
 2. Cherche dans le **registre** (codées en dur).
@@ -193,10 +194,10 @@ La **famille** d'une pratique configurable dérive du champ **`configuration.typ
 pratiquesConfigurables = [ { id, nom, configuration: { … } } ]
 ```
 
-`obtenirConfigPratiqueActive(pratiqueId)` (`portfolio.js:1087`) renvoie `configuration`.
-Sans `pratiqueId`, repli sur la pratique active du groupe-cours.
+`obtenirConfigPratiqueActive(pratiqueId)` (fn `obtenirConfigPratiqueActive`, `portfolio.js`)
+renvoie `configuration`. Sans `pratiqueId`, repli sur la pratique active du groupe-cours.
 
-**STD** (lu par `_obtenirConfigPortfolioCalcul`, `profil-etudiant-actions.js:195`) :
+**STD** (lu par `_obtenirConfigPortfolioCalcul`, `profil-etudiant-actions.js`) :
 ```js
 configuration: {
   type: 'standards',
@@ -229,8 +230,8 @@ Deux chemins coexistent — c'est la source de la plupart des surprises.
 | | Chemin procédural | Instances IPratique |
 |---|---|---|
 | **Fonction** | `calculerDetailsNoteFinale(da, pratiqueId)` | `pratique.calculerPerformance(da)` |
-| **Lieu** | `profil-etudiant-actions.js:403` | chaque `js/pratiques/pratique-*.js` |
-| **Familles** | **STD uniquement** (`return null` si non-STD, `:420`) | toutes (chacune la sienne) |
+| **Lieu** | fn `calculerDetailsNoteFinale`, `profil-etudiant-actions.js` | chaque `js/pratiques/pratique-*.js` |
+| **Familles** | **STD uniquement** (garde `if (!estFamilleStandards) return null`) | toutes (chacune la sienne) |
 | **Sortie** | décomposition `{ portfolio, terminal, noteFinale, … }` 0-100 | indice 0-1 |
 | **Usage** | note « riche » du profil (portfolio à note construite) | indice P, snapshots, simulation |
 
@@ -246,7 +247,7 @@ les rejette et le code retombe sur leur `calculerPerformance`.
 
 ## 7. `simulerIndices(da, pratiqueId)` — la porte lecture seule (#307)
 
-`portfolio.js:714` (exposé `window.simulerIndices`, Lot 5). Miroir **sans effet de bord**
+fn `simulerIndices` (`portfolio.js`, exposé `window.simulerIndices`, Lot 5). Miroir **sans effet de bord**
 de `calculerEtStockerIndicesCP` pour un étudiant et **une pratique demandée**.
 
 ```
@@ -270,13 +271,13 @@ plusieurs pratiques sur les mêmes artefacts sans toucher aux données du trimes
 
 ## 8. Calcul par famille (résumé technique)
 
-- **SOM** (`pratique-sommative.js:63`) : moyenne pondérée de **toutes** les évaluations
+- **SOM** (fn `calculerPerformance`, `pratique-sommative.js`) : moyenne pondérée de **toutes** les évaluations
   actives de l'étudiant (`!remplaceeParId`, note non nulle), pondérée par
   `production.ponderation || 1`. Indice = moyenne / 100.
 - **STD** (`calculerDetailsNoteFinale`) : sélectionne `nombreARetenir` artefacts (méthode
   configurée) parmi les `type === 'artefact-portfolio'`, moyenne le portfolio, agrège avec
   la terminale selon pondérations. Reprises = le dernier essai non remplacé est retenu.
-- **SPE** (`pratique-pan-specifications.js:158`) : compte les travaux **acceptables** par type
+- **SPE** (fn `calculerPerformance`, `pratique-pan-specifications.js`) : compte les travaux **acceptables** par type
   (`_estTravailAcceptable` = `noteFinale >= seuilAcceptable`, défaut 60), puis trouve le
   palier le plus élevé dont **tous** les `requis` sont satisfaits (logique tout-ou-rien).
 - **DEN** (couche 2, #318, juin 2026) : la note finale est un **jugement SAISI** par
@@ -298,7 +299,8 @@ plusieurs pratiques sur les mêmes artefacts sans toucher aux données du trimes
   - **Non simulable** (DEN-E) : la note étant un jugement, `simulerIndices` ne produit pas de
     nombre comparable (P=0/noteFinale=null) → **diffable** dans l'Exploration des pratiques
     (axe D), pas une colonne note. Pas de note DEN dans le pack démo.
-  - **Taxonomie** (DEN-F) : badge UI « PAN », mais DEN = **PRÉN** académiquement (cf. §2 bis).
+  - **Taxonomie / principe pédagogique** : badge UI « PAN » mais DEN = **PRÉN** ; certification
+    sans tri, jamais « pas de chiffre », garde-fous Dyer + santé mentale → **voir §2 bis** (pas de redite).
   - Reste hors premier jet : mode **réduite** (réussi/échoué + différenciation) ; couche 1
     « note différée » (#321) ; câblage DEN dans le chemin **procédural** `calculerDetailsNoteFinale`
     (la note de jugement transite par l'instance `calculerPerformance`, pas par le portfolio).
@@ -307,7 +309,7 @@ plusieurs pratiques sur les mêmes artefacts sans toucher aux données du trimes
 
 ## 9. Note « non calculable » : diagnostic
 
-`_diagnostiquerNoteNonCalculable()` (`profil-etudiant-actions.js:174`, #128) rend un message
+`_diagnostiquerNoteNonCalculable()` (fn `_diagnostiquerNoteNonCalculable`, `profil-etudiant-actions.js`, #128) rend un message
 **précis** selon la cause réelle, jamais un générique :
 1. aucune pratique assignée au groupe-cours ;
 2. pratique assignée introuvable en bibliothèque (id obsolète, supprimée) ;
@@ -326,7 +328,7 @@ pratique non calculable n'empêche pas les autres de calculer).
   servir comme calcul universel.
 - **SOM pondère `production.ponderation || 1`** : une production à pondération **0** reçoit
   donc le poids **1** (et non 0). Vérifier les pondérations avant d'interpréter un écart.
-- **`_identifierProductionTerminale` cherche `type === 'terminale'`** (`:222`) — une
+- **`_identifierProductionTerminale` cherche `type === 'terminale'`** (fn `_identifierProductionTerminale`, `profil-etudiant-actions.js`) — une
   production `type: 'travail'` n'est **pas** vue comme terminale par STD (elle serait ignorée).
 - **Config portfolio = `pratiquesConfigurables` seulement** (Phase G2-a) ; ne pas relire
   `configPAN.portfolio`.
@@ -351,19 +353,19 @@ pratique non calculable n'empêche pas les autres de calculer).
 
 ---
 
-## 11. Carte des fonctions (au 5 juin 2026 — revérifier)
+## 11. Carte des fonctions (repérer par **nom** via grep — pas de numéro de ligne)
 
-| Fonction | Lieu | Exposée | Rôle |
+| Fonction | Fichier | Exposée | Rôle |
 |---|---|---|---|
-| `normaliserIdPratique` | `pratique-registre.js:51` | window | legacy → canonique |
-| `obtenirPratiqueParId` | `pratique-registre.js:487` | window | id → instance |
-| `obtenirRepresentationPratique[Stricte]` | `pratique-registre.js:86`/`:104` | window | {code, couleur, famille} |
-| `genererBadgePratiqueHTML` | `pratique-registre.js:132` | window | badge SOM/STD/SPE/DEN |
-| `obtenirConfigPratiqueActive` | `portfolio.js:1087` | window | config d'une pratique |
-| `simulerIndices` | `portfolio.js:714` | window | C/P/note, lecture seule |
-| `calculerDetailsNoteFinale` | `profil-etudiant-actions.js:403` | window | détail note STD |
-| `_obtenirConfigPortfolioCalcul` | `profil-etudiant-actions.js:195` | non | lit la config portfolio |
-| `_diagnostiquerNoteNonCalculable` | `profil-etudiant-actions.js:174` | non | message d'erreur précis |
+| `normaliserIdPratique` | `pratique-registre.js` | window | legacy → canonique |
+| `obtenirPratiqueParId` | `pratique-registre.js` | window | id → instance |
+| `obtenirRepresentationPratique[Stricte]` | `pratique-registre.js` | window | {code, couleur, famille} |
+| `genererBadgePratiqueHTML` | `pratique-registre.js` | window | badge SOM/STD/SPE/DEN |
+| `obtenirConfigPratiqueActive` | `portfolio.js` | window | config d'une pratique |
+| `simulerIndices` | `portfolio.js` | window | C/P/note, lecture seule |
+| `calculerDetailsNoteFinale` | `profil-etudiant-actions.js` | window | détail note STD |
+| `_obtenirConfigPortfolioCalcul` | `profil-etudiant-actions.js` | non | lit la config portfolio |
+| `_diagnostiquerNoteNonCalculable` | `profil-etudiant-actions.js` | non | message d'erreur précis |
 
 Infrastructure : `pratique-interface.js` (contrat `IPratique`), `pratique-configurable.js`,
 `pratique-registre.js`, `pratique-manager.js`, `pratiques-predefines.js`.
@@ -440,8 +442,8 @@ vraiment*.
 
 | Date | Changement |
 |------|------------|
-| 2026-06-08 (DEN-4, avec le code) | **DEN couche 2 implémentée (#318).** §8 réécrit (DEN passe de « non implémenté » à actif : jugement saisi, collection `jugementsDenotation` SSOT, moteur `_calculerPerformanceDenotation` par court-circuit, garde cibles → 59, helper partagé `suggererNoteHolistique`, création assistant, non-simulable/diffable, PRÉN). Table §8 et §9 (5ᵉ cas de diagnostic : DEN = jugement à saisir) mises à jour. Lots DEN-0 (modèle) → DEN-3 (création) livrés ; DEN-4 = ce doc + diagnostic ; DEN-5 = release. |
-| 2026-06-05 | Création. Établi par lecture de code lors du démarrage du Comparateur (#307 / C0) : moteur de calcul, résolution, deux systèmes de calcul, `simulerIndices`, schéma exécutable des configs, représentations canoniques (Session B), pièges vérifiés. Acte le fold `pan-objectifs → standards` (Session C Lot 4) et la garde STD de `calculerDetailsNoteFinale`. |
-| 2026-06-05 (Cowork) | Ajout du **§2 bis** (ancrage recherche/pratique des 4 familles + écarts code ; corpus GfG/CoP/Blum/Dyer/CSÉ inliné) suite au constat que le skill ne faisait que miroiter le code. Retouches : nature « pas un simple miroir », posture pluraliste explicite ; ligne DEN de la table requalifiée (plus « jugement global qualitatif ») ; caveat sur `P` « commodité ≠ équivalence » (§7) ; renvoi §8 DEN → §2 bis ; entrée Sources + recadrage prévu d'Ecosysteme (§13). |
-| 2026-06-08 (Cowork) | Ajout au **§12** d'un **pointeur vers l'axe D** (« Exploration des pratiques » : variantes/souche, `inspireDe.sourceId`, diff de config, `estEssai`, DEN diffable-non-simulable ; SPEC `SPEC_D_exploration_pratiques.md`, backlog #326). **Référence seulement** — aucune description de code inexistant ; §3/§5/§8/§12 à mettre à jour au fil des lots D, avec le code. |
-| 2026-06-06 (Cowork) | §12 finalité réancrée : « sortir du **paradigme du cumul** » (la note n'est pas un score additionné), **pas** « quitter SOM » — alignement sur SPEC_comparateur §1 bis et sur *Gateways* (viser l'idée, pas la pratique de l'enseignant), pour lever la tension avec le pluralisme affiché. Réserve forward notée pour DEN/#318 : « quelle note dit le vrai » est le cadre SBG ; Blum/ungrading reframe (la vérité vit dans le portfolio, pas dans un chiffre unique) — déjà porté par le §2 bis. |
+| 2026-06-08 (DEN-4) | **DEN couche 2 implémentée (#318).** §8 réécrit (jugement saisi, collection `jugementsDenotation` SSOT, moteur `_calculerPerformanceDenotation`, garde cibles → 59, helper `suggererNoteHolistique`, non-simulable/diffable, PRÉN) ; §9 5ᵉ cas de diagnostic. Lots DEN-0→DEN-3 livrés ; DEN-4 = doc + diagnostic ; DEN-5 = release. |
+| 2026-06-08 (Cowork) | §12 : pointeur vers l'axe D (« Exploration des pratiques » : variantes/souche, diff de config, `estEssai`, DEN diffable-non-simulable ; SPEC_D, #326). Référence seulement — §3/§5/§8/§12 à mettre à jour au fil des lots D. |
+| 2026-06-06 (Cowork) | §12 finalité réancrée : « sortir du **paradigme du cumul** », **pas** « quitter SOM » (align. SPEC_comparateur §1 bis + *Gateways*), pour lever la tension avec le pluralisme. |
+| 2026-06-05 (Cowork) | Ajout du **§2 bis** (ancrage recherche/pratique + écarts code ; corpus GfG/CoP/Blum/Dyer/CSÉ) ; posture pluraliste explicite ; caveat `P` « commodité ≠ équivalence » (§7) ; entrée Sources + recadrage Ecosysteme (§13). |
+| 2026-06-05 | Création (lecture de code, Comparateur #307/C0) : moteur, résolution, deux systèmes de calcul, `simulerIndices`, schéma des configs, pièges. Acte le fold `pan-objectifs → standards` et la garde STD de `calculerDetailsNoteFinale`. |

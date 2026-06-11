@@ -1,4 +1,41 @@
 <!-- =====================================================================
+     SESSION 11 juin 2026 (suite matin, Claude Code) — #334 SESSION C
+     LIVRÉE : SNAPSHOT DE FUSION 3-WAY EN INDEX HACHÉ. RELEASE 1.15.0
+     (build 0611-0600), terrain Mac validé (fusion + comparaison #243),
+     POUSSÉE sur origin. HEAD main `8760fac6`. 577 Vitest + 54 Playwright
+     = 631 VERTS. ARBRE PROPRE.
+       • Reprise exacte du relais : le code C était déjà écrit (non
+         commité) ; cette session a livré l'étape 1 (tests) puis release.
+       • TESTS (+25) : tests/unit/analyser-fusion-hash.test.js —
+         toutes les branches 3 parties (ajouts 1/2 côtés, modif/modif
+         divergente ET convergente, suppr propre ×2, suppr+modif ×2,
+         suppr 2 côtés, identiques, égalité JSON stricte ordre des clés
+         inclus) ; diff 2 parties (ancetre null) ; ÉQUIVALENCE STRICTE
+         exigée par le plan §C : l'ancien algorithme (HEAD e80722c9)
+         est embarqué verbatim dans le test comme référence, toEqual
+         complet ancien vs nouveau (ancêtre intégral vs index par
+         _indexerSnapshot), avec/sans ancêtre + datasets vides ;
+         _indexerSnapshot (format codex-snapshot-hash-v1, sha256 vérifié
+         contre une implémentation indépendante, _codex_* exclues, null
+         si entrée invalide) ; 6 sentinelles de câblage statiques
+         (aucun db.set(CLE_SNAPSHOT_AVANT, donnees) — l'ancien format
+         n'est plus jamais écrit ; 2 écritures « , index) » exactement ;
+         2 _ecrireSnapshotAvant(donnees) ; 2 lectures brutes dans les
+         helpers seulement ; 2 _lireSnapshotAvant() ; migration one-shot
+         câblée au boot).
+       • COMMITS : 619f40d4 (feat 334 : code C + tests) puis 8760fac6
+         (release 1.15.0). Poussés e80722c9..8760fac6.
+     RESTE — DOSSIER #334 :
+       1. VÉRIF iPad (Grégoire, après déploiement) : memoryCache.nbCles
+          diminue au boot ; (await db.get('_codex_snapshot_avant')).__format
+          = 'codex-snapshot-hash-v1' ; rouvrir le même ZIP (fichier 1/372).
+       2. Session D (memoryCache + harmonisation db.set + doc
+          DATA-OWNERSHIP + changelog consolidé + entrée #295) puis #336.
+     SUITE DE LA JOURNÉE (acté Grégoire 10-11 juin) : #328 L3 puis L2,
+     #332 candidat de la même passe. Grégoire absent (repos) — travail
+     solo : code+tests+commit+push ; release seulement si aucun besoin
+     de terrain.
+     =====================================================================
      SESSION 11 juin 2026 MATIN (Claude Code) — JOURNÉE MULTI-CHANTIERS :
      #144 palettes iPad (1.12.1), incident modèle de données (restauration),
      #334 session A (1.13.0), seuil 20 Mo retiré (1.14.0), #334 SESSION C

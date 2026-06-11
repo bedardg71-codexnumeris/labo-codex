@@ -55,14 +55,14 @@ Le processus teach-test-revise-test de Fuchs : enseigner, évaluer la réponse, 
 
 ### La taxonomie SOLO comme fondement universel
 
-Le dépistage repose sur les niveaux taxonomiques SOLO, qui sont indépendants de la discipline :
+Le dépistage repose sur les niveaux taxonomiques SOLO, qui sont indépendants de la discipline. La correspondance complète SOLO ↔ IDME (seuils et valeurs normalisées) est définie dans `SKILL_Ecosysteme_classe.md` (propriétaire désigné par `CLAUDE.md`). Interprétation propre au dépistage :
 
 | Niveau SOLO | Seuil IDME | Interprétation dans le dépistage |
 |-------------|-----------|----------------------------------|
-| Préstructurel / Unistructurel | < 64 % (I — Insuffisant) | Compréhension fragmentaire, difficulté majeure |
-| Multistructurel | 64-74 % (D — Développement) | Éléments identifiés mais pas intégrés, fondations fragiles |
-| Relationnel | 75-84 % (M — Maîtrisé) | Éléments intégrés en un tout cohérent |
-| Abstrait étendu | ≥ 85 % (E — Étendu) | Généralisation et transfert au-delà du contexte immédiat |
+| Préstructurel / Unistructurel | I (Insuffisant) | Compréhension fragmentaire, difficulté majeure |
+| Multistructurel | D (Développement) | Éléments identifiés mais pas intégrés, fondations fragiles |
+| Relationnel | M (Maîtrisé) | Éléments intégrés en un tout cohérent |
+| Abstrait étendu | E (Étendu) | Généralisation et transfert au-delà du contexte immédiat |
 
 Chaque critère de la grille de dépistage de l'enseignant porte un attribut `niveauSOLO` (multistructurel, relationnel ou abstrait_étendu). **Le dépistage surveille les critères multistructurels** — ce sont les fondations. Si les fondations ne sont pas acquises, les compétences de niveau supérieur (relationnel, abstrait) ne peuvent pas se développer.
 
@@ -82,7 +82,7 @@ Ce flux garantit que l'intervention est alignée sur le dépistage (Alignment de
 
 L'IPB mesure le nombre d'artefacts consécutifs récents dont le score pondéré des **critères multistructurels** est sous le seuil de défi configurable.
 
-**Fonctionnement** (`calculerIPB()` dans profil-etudiant.js) :
+**Fonctionnement** (`calculerIPB()` dans `js/profil-etudiant-calculs.js`) :
 1. Filtrer les critères dont le `niveauSOLO === 'multistructurel'`
 2. Pour chaque artefact récent, calculer la moyenne pondérée de ces critères
 3. Compter les artefacts consécutifs sous le seuil (en partant du plus récent)
@@ -92,7 +92,7 @@ L'IPB mesure le nombre d'artefacts consécutifs récents dont le score pondéré
 
 ### Le diagnostic croisé IPB × direction
 
-La fonction `diagnostiquerSuiviApprentissage()` croise l'IPB avec la direction pour produire un diagnostic :
+La fonction `diagnostiquerSuiviApprentissage()` (`js/profil-etudiant-calculs.js`) croise l'IPB avec la direction pour produire un diagnostic :
 
 | IPB | Direction | Diagnostic | Niveau RàI |
 |-----|-----------|------------|-----------|
@@ -107,7 +107,7 @@ La fonction `diagnostiquerSuiviApprentissage()` croise l'IPB avec la direction p
 
 ### Les patterns d'apprentissage
 
-La fonction `identifierPatternActuel()` détermine un pattern basé sur la performance (P) et la présence de défis :
+La fonction `identifierPatternActuel()` (`js/profil-etudiant-calculs.js`) détermine un pattern basé sur la performance (P) et la présence de défis :
 
 | Pattern | Condition | Badge |
 |---------|-----------|-------|
@@ -119,7 +119,7 @@ La fonction `identifierPatternActuel()` détermine un pattern basé sur la perfo
 
 ### Le niveau RàI pédagogique
 
-La fonction `determinerNiveauRaiPedagogique()` dérive les niveaux à partir des patterns et de P :
+La fonction `determinerNiveauRaiPedagogique()` (`js/profil-etudiant-calculs.js`) dérive les niveaux à partir des patterns et de P :
 
 - **Niveau 3 — Intensif** : Pattern «Difficulté persistante» OU P < seuil insuffisant
 - **Niveau 2 — Préventif** : P < seuil développement OU «Difficulté émergente» OU «Défi spécifique»
@@ -248,7 +248,7 @@ Logique de données :
 
 ## Le module interventions — État actuel et vision
 
-### Architecture actuelle (interventions.js, ~1581 lignes — refonte 11 avril 2026)
+### Architecture actuelle (`js/interventions.js` — refonte 11 avril 2026)
 
 **Structure de données d'une intervention** :
 ```javascript
@@ -288,7 +288,7 @@ Logique de données :
 - `sauvegarderNouvelleIntervention`, `afficherFormulaireModification`, `sauvegarderModificationIntervention` (Phase 2)
 - `terminerIntervention`, `rouvrirIntervention` (Phase 5)
 
-**Source unique pour le niveau RàI** : `determinerNiveauRaiPedagogique()` (profil-etudiant.js) — utilisée partout, y compris dans `analyserSousGroupe()` et la liste des étudiants
+**Source unique pour le niveau RàI** : `determinerNiveauRaiPedagogique()` (`js/profil-etudiant-calculs.js`) — utilisée partout, y compris dans `analyserSousGroupe()` et la liste des étudiants
 - Pas de suivi de la trajectoire au fil des interventions successives
 
 ### Formulaire unifié (implémenté 11 avril 2026)
@@ -348,31 +348,9 @@ Sept dimensions pour évaluer et renforcer l'intensité. Elles servent de cadre 
 
 ## Vision future — Labo Codex multi-intervenants
 
-L'architecture actuelle sert un enseignant seul. Mais le modèle RàI prend tout son sens dans un système de soutien à paliers multiples avec plusieurs intervenants coordonnés.
+L'architecture actuelle sert un enseignant seul. Le modèle RàI prend toutefois tout son sens dans un système de soutien à paliers multiples avec plusieurs intervenants coordonnés (enseignant, API, services adaptés, tuteur pair, orthopédagogue, travailleur social), structurés au besoin en centre de soutien (type CALFÉ — Centre d'Aide en Littératie et en Français Écrit — ou équivalent disciplinaire).
 
-### Intervenants potentiels
-
-| Rôle | Paliers | Ce que Labo Codex pourrait offrir |
-|------|---------|----------------------------------|
-| **Enseignant** (actuel) | 1, 2, 3 | Portrait de classe, dépistage, planification, suivi |
-| **Aide pédagogique individuel (API)** | 2, 3 | Vue transversale de l'élève à travers les cours, coordination |
-| **Services adaptés** | 3 | Plans d'intervention avec accommodements, suivi des mesures |
-| **Tuteur pair** | 2 | Vue simplifiée du profil de l'élève aidé, activités suggérées |
-| **Orthopédagogue** | 3 | Profil détaillé, historique complet, plan d'intervention structuré |
-| **Travailleur social** | 3 | Indicateurs d'engagement, patterns de désengagement |
-
-### Structures possibles
-
-Le concept de CALFÉ (Centre d'Aide en Littératie et en Français Écrit) est un exemple de ce que pourrait devenir un centre de soutien coordonné. D'autres formes pourraient exister dans d'autres contextes : centres d'aide disciplinaires, cliniques de soutien intégrées, équipes multidisciplinaires. La structure varierait selon les établissements et les ressources disponibles.
-
-### Implications architecturales (à préserver dès maintenant)
-
-- **Rôles et permissions** : Différents intervenants auront des vues différentes sur les mêmes données
-- **Multi-intervenant par élève** : Les interventions doivent être traçables par intervenant
-- **Confidentialité** : Certaines notes ne doivent pas être visibles par tous
-- **Plans d'intervention partageables** : Inspirés du Student Intervention Plan du NCII, avec les 7 dimensions de la taxonomie comme structure possible
-- **Historique inter-trimestres** : Le suivi d'un élève en difficulté persistante doit pouvoir traverser les trimestres
-- **Indépendance disciplinaire** : Le modèle de données ne doit présumer d'aucun critère spécifique ni d'aucune discipline
+**Contraintes à préserver dès maintenant** pour ne pas fermer cette porte : rôles et permissions (vues différenciées sur les mêmes données), traçabilité des interventions par intervenant, confidentialité sélective de certaines notes, plans d'intervention partageables (inspirés du Student Intervention Plan du NCII), historique inter-trimestres, et indépendance disciplinaire du modèle de données (aucun critère ni discipline codé en dur).
 
 ---
 
@@ -386,14 +364,13 @@ Le concept de CALFÉ (Centre d'Aide en Littératie et en Français Écrit) est u
 
 ### Corpus documentaire dans le projet
 
-| Catégorie | Emplacement |
-|-----------|-------------|
-| Notes Desrochers (2021) | `références-pédagogiques/Modèle RàI/` |
-| Taxonomie NCII (traductions) | `références-pédagogiques/Modèle RàI/` |
-| Articles Fuchs (ED571640, EJ1160167) | `références-pédagogiques/Modèle RàI/` |
-| Student Intervention Plan | `références-pédagogiques/Modèle RàI/` |
-| Fiches Institut TA (niveaux 1-2-3) | `références-pédagogiques/Modèle RàI/RàI CUA et Référentiels/Institut TA/` |
-| Explorations CALFÉ (v1-v8) | `références-pédagogiques/Modèle RàI/RàI CUA et Référentiels/Exploration Modèle RàI en 101/` |
-| Brouillons RàI (v1-v6) | `références-pédagogiques/Modèle RàI/RàI CUA et Référentiels/Exploration Modèle RàI en 101/` |
-| Référentiels (Lecture, Écriture, Portrait, Paliers) | `références-pédagogiques/Modèle RàI/RàI CUA et Référentiels/` |
-| Guide d'intervention et Blocages (historique) | `références tableur/` (⚠️ formule IB obsolète) |
+Le corpus de recherche complet (notes Desrochers 2021, traductions de la taxonomie
+NCII, articles Fuchs, Student Intervention Plan, fiches Institut TA, explorations
+CALFÉ et brouillons RàI) **n'est pas versionné dans le dépôt** — il vit dans les
+archives de travail de Grégoire. Les seuls documents présents dans le repo :
+
+| Document | Emplacement |
+|----------|-------------|
+| Guide d'intervention basé sur le monitorage (historique) | `références tableur/` |
+| Section sur les blocages d'apprentissage (historique) | `références tableur/` (⚠️ mentionne la formule IB obsolète) |
+| Guide de monitorage vA2025 (PDF) | `références tableur/` |

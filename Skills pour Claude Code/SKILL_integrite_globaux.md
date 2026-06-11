@@ -14,293 +14,183 @@ description: >
 # SKILL : Intégrité des collections globales (Labo Codex)
 
 > **Instanciation concrète** de `SKILL_hygiene_donnees_partagees.md` pour
-> le projet Labo Codex. Le skill parent définit les 5 principes abstraits
-> et les 5 anti-patterns génériques. Ce skill-ci les applique aux
-> collections globales spécifiques de l'application, avec les incidents
-> réels, les modules concernés et les commits de référence.
+> le projet Labo Codex. Le skill parent porte les principes abstraits,
+> les anti-patterns génériques et le « pourquoi ». Ce skill-ci ne garde
+> que le contextuel projet : noms de clés réels, modules et fonctions
+> actuelles, incidents datés, regex testées. **Pour la justification d'un
+> principe, renvoyer au parent — ne pas la dupliquer ici.**
 >
 > **Document fondateur** — 26 avril 2026, après l'incident du 24 avril où
 > 3 grilles d'évaluation ont disparu silencieusement du trimestre H2026.
-> La cause racine n'était pas un bug ponctuel mais un **pattern d'erreur
-> récurrent** dont 5 manifestations distinctes ont été observées au fil
-> des chantiers Phase 5 Autonomisation.
-> Ce skill documente le pattern, les signaux d'alerte, et les antidotes.
+> La cause racine n'était pas un bug ponctuel mais un pattern d'erreur
+> récurrent dont plusieurs manifestations ont été observées au fil des
+> chantiers Phase 5 Autonomisation.
 
 ---
 
-## 1. POURQUOI CE SKILL
+## 1. LES CLÉS CONCERNÉES (état réel du code)
 
-Dans Labo Codex, certaines clés du storage sont **globales** (au sens de
-`CLES_GLOBALES` dans `js/trimestres.js`) — c'est-à-dire qu'elles ne sont
-pas namespacées par trimestre. Elles cohabitent entre toutes les sessions
-de l'utilisateur :
+Deux mécanismes rendent une clé « globale » (non namespacée par trimestre)
+dans Labo Codex. Ne pas les confondre.
+
+### 1.1 `CLES_GLOBALES` — la liste canonique
+
+Dans `js/trimestres.js`, la constante `CLES_GLOBALES` énumère les clés
+JAMAIS préfixées par trimestre (sauf copie d'archivage). **Composition
+réelle vérifiée (7 clés)** :
 
 ```
-trimestres, grillesTemplates, echellesTemplates, pratiquesConfigurables,
-modalitesEvaluation, modeApplication, etatsAccordeonsV2, cours, listeCours,
-enseignants, cartouches_*
+trimestres, grillesTemplates, echellesTemplates, modeApplication,
+etatsAccordeonsV2, cours, listeCours
 ```
 
-Ces clés sont **fragiles** parce qu'elles reçoivent des items provenant
-de **plusieurs sources distinctes** :
+(`cours` est la clé canonique ; `listeCours` est legacy, migrée vers
+`cours` au chargement et conservée pour rétrocompatibilité.)
 
-- Items créés par l'utilisateur (Grégoire) — propriété personnelle
-- Items injectés par le pack démo (`pack-demo-20.js`) — système
-- Items importés depuis un export Beta 91 ou un partage CC futur — externes
-- Items copiés lors d'un archivage de trimestre — copies isolées
+### 1.2 Clés globales par d'AUTRES mécanismes
 
-**Aucun invariant n'est garanti** sur la coexistence de ces sources :
-les IDs peuvent se chevaucher (le pack démo dérivait du matériel réel
-de Grégoire jusqu'au 24 avril 2026), les flags `estDemo`/`isDemo` peuvent
-être présents par accident sur des items utilisateur (héritage de cycles
-legacy), les types peuvent diverger entre source et lecteurs.
+Plusieurs clés sensibles sont partagées entre trimestres sans figurer
+dans `CLES_GLOBALES` :
 
-**Toute manipulation programmatique de ces clés** doit donc partir de
-ce qui existe, pas de ce qu'on imagine.
+- **`pratiquesConfigurables`, `modalitesEvaluation`** : au contraire,
+  elles sont **namespacées** par trimestre (présentes dans `CLES_NAMESPACE`
+  de `trimestres.js`, migration au boot dans `main.js`). Elles ne sont
+  PAS dans `CLES_GLOBALES`. Mais `grillesTemplates`, `echellesTemplates`
+  et `pratiquesConfigurables` figurent dans `CLES_TEMPLATES_ARCHIVES`
+  (copiées vers `<trimestre>_grillesTemplates` etc. à l'archivage) — c'est
+  ce mécanisme d'archivage, pas la globalité, qui les rend sensibles.
+- **`enseignants`, `cartouches_*`** : globales de fait (manipulées comme
+  globales par `demo-activation.js`, le pack démo, etc.) sans être listées
+  dans `CLES_GLOBALES`. Toujours vérifier le mécanisme réel d'une clé
+  avant de la traiter.
+
+> **Conséquence pratique** : « globale » ≠ « dans `CLES_GLOBALES` ».
+> Avant de coder, grep la clé visée dans `trimestres.js` pour savoir
+> sous quel régime elle tombe (`CLES_GLOBALES`, `CLES_NAMESPACE`,
+> `CLES_TEMPLATES_ARCHIVES`).
+
+Ces clés reçoivent des items de **plusieurs sources** : items utilisateur
+(Grégoire), items du pack démo (`pack-demo-20.js` → `PACK_DEMARRAGE`),
+items importés (export Beta 91, futur partage CC Plan 2), copies d'archivage.
+Aucun invariant n'est garanti sur la coexistence de ces sources : IDs qui
+se chevauchent, flags `estDemo`/`isDemo` parfois présents par héritage
+legacy sur des items utilisateur, types qui divergent entre source et
+lecteurs.
 
 ---
 
 ## 2. AVANT DE CODER — CHECKLIST 4 POINTS
 
-À écrire en tête du plan AVANT toute fusion, filtre, écrasement ou
-suppression dans une clé globale. Trois lignes en console suffisent
-souvent à valider chaque point.
+> Détail, justification et barème de réversibilité : **parent §4 et §2 (P5)**.
+> Ici, seulement la version courte projet.
 
-### 2.1 IDs — collision possible ?
-
-> Les IDs que je vais écrire/manipuler peuvent-ils correspondre à ceux
-> d'items déjà présents dans la collection cible ?
-
-**Si oui** : préfixer les IDs source (`*_DEMO_*`, `*_PARTAGE_*`) **à la
-conception**. Pas en runtime. Si la décision est tardive, refondre la
-source plutôt que d'ajouter des protections au manipulateur.
-
-**Si non, certain à 100 %** : documenter cette certitude dans le code
-(commentaire avec le raisonnement) pour que la prochaine session le
-relise sans avoir à re-vérifier.
-
-### 2.2 Flags — légitimement présents sur items utilisateur ?
-
-> Le flag que je vais filtrer (`estDemo`, `isDemo`, `isShared`, etc.)
-> peut-il être posé légitimement sur un item utilisateur ?
-
-**Test à faire** : grep dans tout le code pour `\.estDemo\s*=` (ou
-équivalent). Lister les call-sites qui posent le flag. S'assurer
-qu'aucun ne touche un item utilisateur en dehors d'un cycle système
-explicite.
-
-**Si doute** : ne JAMAIS filtrer par flag seul. Filtrer par identité
-de la source (set des IDs du pack/import).
-
-### 2.3 Type — forme attendue par les lecteurs ?
-
-> Les données que je vais écrire correspondent-elles au type que les
-> lecteurs aval attendent ?
-
-**Test à faire** : ouvrir 2-3 lecteurs (grep `db.getSync.*<cle>`) et
-vérifier ce qu'ils font des données. Tableau ? Objet ? Avec quelle
-shape ?
-
-**Si la source diverge** : transformer EXPLICITEMENT à l'écriture
-(comme `peuplerNamespace` convertit `pack.presences` objet → tableau).
-Ne pas écrire la donnée brute en supposant qu'elle correspondra.
-
-### 2.4 Réversibilité — snapshot ou restauration possible ?
-
-> Si mon code corrompt ou supprime des données par erreur, l'utilisateur
-> peut-il revenir en arrière ?
-
-**Test à faire** : avant toute opération destructive, capturer un
-snapshot dans une clé temporaire (`<operation>-etat-precedent`). En cas
-d'échec dans le `try`, restaurer dans le `catch`. Documenter la
-durée de vie de ce snapshot.
-
-**Pour les données utilisateur réelles** : un export Codex/Réserve
-récent doit être recommandé à l'utilisateur avant toute migration de
-masse, dans la procédure de test.
+1. **IDs — collision possible ?** Préfixer les IDs source à la conception
+   (`*_DEMO_*`, `*_PARTAGE_*`), pas en runtime. Si certitude d'absence de
+   collision, la documenter dans le code.
+2. **Flags — légitimes sur items utilisateur ?** `estDemo`/`isDemo` peuvent
+   être hérités par accident. Ne jamais filtrer par flag SEUL sur un global.
+   Grep `\.estDemo\s*=` pour lister les call-sites qui posent le flag.
+3. **Type — forme attendue par les lecteurs ?** Grep `db.getSync.*<cle>`,
+   inspecter 2-3 lecteurs, transformer explicitement à l'écriture si la
+   source diverge (cf. `peuplerNamespace` qui convertit `pack.presences`
+   objet → tableau).
+4. **Réversibilité — snapshot/restauration ?** `activerModeDemo` capture
+   `demo-etat-precedent` avant de muter les globaux et restaure au toggle
+   OFF. Pour les données utilisateur réelles, recommander un export
+   Codex/Réserve récent avant toute migration de masse.
 
 ---
 
-## 3. 5 ANTI-PATTERNS — INCIDENTS RÉELS LABO CODEX
+## 3. INCIDENTS RÉELS LABO CODEX
 
-Chaque entrée ci-dessous décrit un anti-pattern observé dans le code
-Phase 5 Autonomisation, l'incident qu'il a causé, le signal d'alerte
-à grep, et l'antidote correct.
+> Les anti-patterns abstraits (AP-1 à AP-5) et leur antidote générique
+> sont dans le **parent §3**. Ci-dessous : seulement les incidents datés
+> du projet et les fonctions qui portent aujourd'hui la protection.
 
-### 3.1 Source qui dérive de données utilisateur
+### 3.1 Source dérivée de données utilisateur (collision d'IDs)
 
 **Incident** : le 24 avril 2026, 3 grilles d'évaluation H2026 de Grégoire
-(`grille_1770742838756_23q82vbsk`, `grille_1772187755149_uq1oiiafa`,
-`GRILLE1759529438501`) ont disparu silencieusement. Restauration nécessaire
-depuis Codex USB du 18 avril.
+ont disparu silencieusement (restauration nécessaire depuis Codex USB du
+18 avril). Cause racine : le pack `js/pack-demo-20.js` était initialement
+construit à partir du matériel pédagogique réel de Grégoire ; les IDs des
+grilles, échelles et cartouches du pack étaient **identiques** aux
+ressources personnelles encore présentes dans le storage.
 
-**Cause racine** : le pack `js/pack-demo-20.js` était initialement
-construit à partir du matériel pédagogique réel de Grégoire (auteur
-original). Les IDs des grilles, échelles et cartouches du pack étaient
-**identiques** aux ressources personnelles que l'utilisateur avait
-encore dans son storage.
+**État actuel du pack** : `pack-demo-20.js` (version interne `20.8`) a
+refondu ses IDs avec un préfixe `GRILLE_DEMO_*`, `ECH_DEMO_*`,
+`cartouches_GRILLE_DEMO_*`. Le préfixage est en place côté pack.
 
-**Signal d'alerte** :
-- Tu manipules un pack système (`PACK_DEMARRAGE`, `bibliotheque-pratiques`,
-  un export à réimporter, etc.) dont les items partagent le même schéma
-  d'IDs que les items utilisateur.
-- Le pack a été constitué « à partir du matériel de Grégoire », « à partir
-  d'un trimestre réel anonymisé », ou « comme exemple ».
+**Mais le préfixage seul n'est PAS le filet de sécurité.** Le commentaire
+dans `fusionnerDemoVersGlobaux` (`js/demo-activation.js`) signale que le
+cas de collision reste possible — exemple documenté : la grille utilisateur
+`GRILLE1759529438501` (alias « Global-5 (FR-ALGO) H26 » de Grégoire)
+partage le suffixe numérique avec la grille démo `GRILLE_DEMO_1759529438501`.
+Le vrai garde-fou est le **push sans replace** (§3.2), pas le préfixage.
+Considérer le préfixage comme une réduction du risque, jamais comme une
+garantie d'absence de collision.
 
-**Antidote** : préfixer les IDs du pack à la conception, pas en runtime.
+### 3.2 Push sans replace — la protection réelle des fusions
 
-```js
-// AVANT — pack contient les IDs originaux de l'utilisateur
-{
-    "grillesTemplates": [{ "id": "GRILLE1759243306842", ... }],
-    "cartouches_GRILLE1759243306842": [...]
-}
+`fusionnerDemoVersGlobaux` (`js/demo-activation.js`) injecte les items
+démo dans `listeCours`, `cours`, `enseignants`, `grillesTemplates`,
+`echellesTemplates` et `cartouches_*` avec, pour chaque collection, un
+test `some(x => x.id === idDemo)` **avant** le `push`. Si l'ID existe
+déjà côté utilisateur, l'item démo n'est PAS ajouté — la version
+utilisateur est préservée. Aucun upsert/replace par ID.
 
-// APRÈS (commit 40393ad du 24 avril 2026) — IDs préfixés
-{
-    "grillesTemplates": [{ "id": "GRILLE_DEMO_1759243306842", ... }],
-    "cartouches_GRILLE_DEMO_1759243306842": [...]
-}
-```
+(Exception assumée : `modalitesEvaluation` est écrasé via
+`window.modalitesEvaluation.remplacer(...)`, son module propriétaire SSOT.)
 
-### 3.2 Filtre aveugle par flag sur un global partagé
+C'est l'antidote concret à l'AP-3 (upsert silencieux) du parent.
 
-**Incident** : `retirerItemsDemoDesGlobaux` (commit du 24 avril, `abecd65`)
-filtrait `estDemo:true` sur `grillesTemplates`. Une grille utilisateur
-qui aurait hérité du flag par un cycle legacy ancien était supprimée.
+### 3.3 Cleanup par identité ET flag — légitime, pas une violation
 
-**Signal d'alerte** :
-```
-\.filter\(.*\.estDemo\)
-\.filter\(.*\.isDemo\)
-```
-Sur une clé globale partagée. Tu retires « les items démo », tu signales
-le flag avec confiance, mais le flag est un signal **non-trusted**.
-
-**Antidote** : filtrer par identité de la source (set des IDs
-appartenant au pack), pas par flag.
+`retirerItemsDemoDesGlobaux` (`js/demo-activation.js`) retire les items
+démo au toggle OFF. Le filtre n'est PAS « identité seule » mais
+**identité ET flag** :
 
 ```js
-// AVANT — filtre aveugle, supprime tout ce qui porte estDemo
-db.setSync('grillesTemplates', grilles.filter(g => !g.estDemo));
-
-// APRÈS — filtre par appartenance au pack
-const pack = window.PACK_DEMARRAGE;
-const idsDuPack = new Set((pack.grillesTemplates || []).map(g => g.id));
-db.setSync('grillesTemplates', grilles.filter(g => !idsDuPack.has(g.id)));
-```
-
-### 3.3 Upsert (replace par ID) dans une fusion vers global
-
-**Incident** : `fusionnerDemoVersGlobaux` (commit du 24 avril, `abecd65`)
-faisait un `findIndex` puis `arr[idx] = nouvelleVersion`. Quand un ID
-existait déjà côté utilisateur, sa version était écrasée par la version
-système (avec `estDemo:true`). Combiné au pattern 3.2 ci-dessus, cela
-provoquait la perte définitive de la grille utilisateur.
-
-**Signal d'alerte** :
-```
-\.findIndex.*=\s*nouvelleVersion
-new\s+Map\(.*\.map\(.*\[.*id.*\]\)\)\.set\(
-```
-Sur un global partagé.
-
-**Antidote** : push sans replace. La version existante (utilisateur) a
-priorité. Une collision d'ID est un cas qui doit être tracé, pas un
-upsert silencieux.
-
-```js
-// AVANT — écrase la version utilisateur si même ID
-const idx = grilles.findIndex(g => g.id === grilleDemo.id);
-if (idx >= 0) grilles[idx] = grilleDemo;
-else grilles.push(grilleDemo);
-
-// APRÈS — préserve la version utilisateur
-const existe = grilles.some(g => g.id === grilleDemo.id);
-if (!existe) grilles.push(grilleDemo);
-// Si existe : on ne touche pas, l'utilisateur garde sa version
-```
-
-### 3.4 Suppositions sur le type des données externes
-
-**Incident** : `peuplerNamespace` (commit Phase 5.B fixup du 24 avril,
-`e21310a`) copiait `pack.presences` tel quel. Le pack stockait un objet
-`{date: {da: data}}` mais tous les lecteurs (`indices.js`,
-`tableau-bord-apercu.js`) attendaient un tableau `[{date, da, ...}]`.
-La barre Assiduité (A) restait vide sans erreur visible.
-
-**Signal d'alerte** :
-- Tu copies des données depuis une source externe (pack, import, fetch)
-  vers le storage **sans** `Array.isArray()` / `typeof` / vérification
-  de schéma.
-- Les lecteurs aval ont des fallbacks silencieux du type
-  `if (!Array.isArray(x)) x = [];` — ce qui masque l'erreur de type sans
-  la signaler.
-
-**Antidote** : transformer EXPLICITEMENT à l'écriture vers le format
-attendu, en testant le type d'entrée.
-
-```js
-// AVANT — copie brute, suppose que pack.presences est un tableau
-db.setSync(cleDemo('presences'), pack.presences);
-
-// APRÈS — vérifie le type, convertit explicitement
-let presencesArr = [];
-if (Array.isArray(pack.presences)) {
-    presencesArr = pack.presences;
-} else if (pack.presences && typeof pack.presences === 'object') {
-    Object.keys(pack.presences).forEach(date => {
-        const parDA = pack.presences[date] || {};
-        Object.keys(parDA).forEach(da => {
-            presencesArr.push(Object.assign({ date, da }, parDA[da]));
-        });
-    });
+function estItemDemo(item) {
+    return !!(item && (item.isDemo === true || item.estDemo === true));
 }
-db.setSync(cleDemo('presences'), presencesArr);
+// grillesTemplates :
+var idsGrilles = idsDuPack('grillesTemplates'); // IDs présents dans PACK_DEMARRAGE
+db.setSync('grillesTemplates', grilles.filter(g =>
+    !(idsGrilles.has(g.id) && estItemDemo(g))    // retire SEULEMENT si ID du pack ET flag démo
+));
 ```
 
-### 3.5 Migration de masse sans audit pré
+**Pourquoi c'est correct et non une violation du principe « filtrer par
+identité »** : ajouter le flag ici n'est pas un filtre aveugle par flag
+(l'AP-2 du parent), c'est un **resserrement protecteur**. Le filtre par
+identité seul retirerait un item utilisateur légitime qui aurait créé un
+ID en collision avec le pack (cas documenté dans le code :
+`listeCours.id='demo-cours'` qu'un utilisateur peut créer spontanément).
+Exiger AUSSI le flag garantit qu'on ne supprime qu'un item effectivement
+injecté par la démo. La règle parent reste : ne jamais filtrer par flag
+SEUL. Ici on filtre par identité d'abord, puis on resserre.
 
-**Incident** : `migrerResidusPhase5` (commit du 24 avril, `0f927b3`)
-détectait des résidus `estDemo:true` puis appelait
-`retirerItemsDemoDesGlobaux` qui supprimait aveuglément tous les items
-porteurs du flag. Combiné au pattern 3.2, cela a provoqué la perte des
-grilles utilisateur dès le boot post-Phase 5.E.
+(`enseignants` est retiré par ID système fixe `ENS_DEMO`, sans risque de
+collision spontanée.)
 
-**Signal d'alerte** :
-```
-db\.keys\(\).*\.filter.*startsWith.*forEach\(.*remove
-```
-Ou toute boucle qui itère une famille de clés et applique un
-remove/setSync sans vérification cas par cas.
+### 3.4 Type des données externes (presences objet → tableau)
 
-**Antidote** : avant d'écrire une migration, lister 3 cas réels
-divergents (storage de l'utilisateur, profil neuf, profil avec résidus
-legacy) et tracer le résultat attendu pour chacun. Implémenter un
-**dry-run** qui logge les actions sans les exécuter, demander une
-validation manuelle, puis exécuter la vraie passe.
+`peuplerNamespace` (`js/demo-namespace.js`) écrit les données démo dans
+les clés `demo_*`. Pour `pack.presences`, le pack stocke un objet
+`{date: {da: data}}` alors que les lecteurs (`indices.js`,
+`tableau-bord-apercu.js`) attendent un tableau `[{date, da, ...}]`. La
+fonction teste `Array.isArray(pack.presences)` puis convertit
+explicitement (objet → tableau) avant d'écrire. Antidote concret à l'AP-4
+du parent.
 
-```js
-// AVANT — migration en aveugle
-function migrer() {
-    if (db.getSync('migration-done')) return;
-    if (countResidus() > 0) retirerToutLesResidus();
-    db.setSync('migration-done', '1');
-}
+### 3.5 Migration de masse sans audit
 
-// APRÈS — dry-run + validation + filtrage par identité de la source
-function migrer({ dryRun = false } = {}) {
-    if (db.getSync('migration-done')) return { skipped: true };
-    const aSupprimer = identifierResidusParIdentiteSource();
-    if (dryRun) {
-        console.warn('[Migration] Cibles:', aSupprimer);
-        return { dryRun: true, cibles: aSupprimer };
-    }
-    aSupprimer.forEach(item => supprimerSurement(item));
-    db.setSync('migration-done', '1');
-    return { ok: true, supprimes: aSupprimer.length };
-}
-```
+Toute boucle qui itère une famille de clés (`db.keys().filter(...).forEach(...)`)
+et applique un `remove`/`setSync` sans vérification cas par cas est à
+risque (AP-5 du parent). Antidote projet : lister 3 cas réels divergents
+(storage utilisateur, profil neuf, profil avec résidus legacy), tracer le
+résultat attendu, implémenter un dry-run loggant les cibles avant
+exécution.
 
 ---
 
@@ -308,15 +198,14 @@ function migrer({ dryRun = false } = {}) {
 
 ### 4.1 Pack démo
 
-- Le pack `pack-demo-20.js` v20.3+ utilise des IDs préfixés
-  (`GRILLE_DEMO_*`, `ECH_DEMO_*`, `cartouches_GRILLE_DEMO_*`). Les
-  versions antérieures (≤ v20.2) avaient les IDs originaux de Grégoire.
-- `js/demo-activation.js` (modules `fusionnerDemoVersGlobaux` et
-  `retirerItemsDemoDesGlobaux`) applique les patterns 3.2 et 3.3
-  (push sans replace + filter par identité du pack). Double sécurité
-  même si la collision se reproduit.
-- `js/demo-namespace.js` (`peuplerNamespace`) applique le pattern 3.4
-  pour `pack.presences` (conversion objet → tableau).
+- `pack-demo-20.js` (version interne `20.8`) utilise des IDs préfixés
+  (`GRILLE_DEMO_*`, `ECH_DEMO_*`, `cartouches_GRILLE_DEMO_*`). Réduction
+  du risque de collision, pas garantie.
+- `js/demo-activation.js` : `fusionnerDemoVersGlobaux` (push sans replace)
+  et `retirerItemsDemoDesGlobaux` (filtre identité+flag) portent la double
+  protection même si une collision se reproduit.
+- `js/demo-namespace.js` : `peuplerNamespace` applique la conversion de
+  type pour `pack.presences` (objet → tableau).
 
 ### 4.2 Réserve (`js/reserve.js`)
 
@@ -324,88 +213,81 @@ function migrer({ dryRun = false } = {}) {
 - Lit les copies archivées des bibliothèques (`a2025_grillesTemplates`,
   etc.) sans les modifier — pas de risque de corruption des globaux.
 - À auditer si on étend reserve.js pour faire l'opération inverse
-  (réimport sélectif, cf. backlog #254) — ce sera une nouvelle source
-  qui doit appliquer §2 avant d'écrire dans `grillesTemplates`.
+  (réimport sélectif, cf. backlog #254) : ce sera une nouvelle source qui
+  doit appliquer §2 avant d'écrire dans `grillesTemplates`.
 
 ### 4.3 Plan 2 — partage CC entre utilisateurs (à venir)
 
 Plan 2 introduit une **3e source** dans les globaux : items partagés.
 Avant de coder le pipeline d'import, appliquer §2 :
 
-- IDs : possibles collisions avec les items utilisateur ou démo →
-  préfixe `PARTAGE_*` à l'import.
-- Flag : `isShared` ou `inspireDe.source === 'partage'` → ne pas filtrer
-  par flag, filtrer par appartenance au package importé.
-- Type : validation de schéma fermée à l'import (déjà dans la spec
-  `docs/PLAN2-PHASE1-SPEC.md` §4).
-- Réversibilité : « Désinstaller un package partagé » prévue en spec,
-  garde-fou nécessaire.
+- IDs : collisions possibles avec items utilisateur ou démo → préfixe
+  `PARTAGE_*` à l'import.
+- Flag : `isShared` / `inspireDe.source === 'partage'` → ne pas filtrer
+  par flag seul, filtrer par appartenance au package importé.
+- Type : validation de schéma fermée à l'import (spec
+  `docs/architecture/PLAN2-PHASE1-SPEC.md` §4).
+- Réversibilité : « Désinstaller un package partagé » prévue en spec.
 
 ### 4.4 Trimestre archivé (`js/trimestres.js`)
 
 - L'archivage copie `grillesTemplates`, `echellesTemplates`,
   `pratiquesConfigurables` vers `<trimestre>_grillesTemplates`, etc.
-- Risque potentiel : si un trimestre est archivé puis désarchivé et
-  qu'entre temps les globaux ont changé, comment fusionner ?
-- À auditer si une refonte du désarchivage est prévue.
+  (`CLES_TEMPLATES_ARCHIVES`).
+- Risque potentiel : si un trimestre est archivé puis désarchivé alors
+  que les globaux ont changé entre temps, comment fusionner ? À auditer
+  si une refonte du désarchivage est prévue.
 
 ---
 
-## 5. WORKFLOW RECOMMANDÉ
+## 5. WORKFLOW ET REGEX TESTÉES
 
-### Avant un chantier touchant un global
+> Le workflow générique (observer / checklist / post-mortem / audit
+> périodique) est dans le **parent §5**. Ici : les commandes `grep`
+> exactes pour le code JS du projet, validées.
 
-1. Identifier les clés globales touchées (grep `CLES_GLOBALES` dans
-   `js/trimestres.js`).
-2. Appliquer §2 (4 points) en tête du plan, dans une section dédiée.
-3. Pour chaque point, écrire la commande console qui valide
-   l'hypothèse.
+```bash
+# Filtre aveugle par flag sur un global
+grep -rn "\.filter(.*estDemo\|\.filter(.*isDemo" js/
 
-### Pendant le chantier
+# Upsert par index après findIndex
+grep -rn "findIndex.*=\s*[a-z]" js/
 
-4. Avant chaque `db.setSync` sur un global, relire la checklist.
-5. Grep les signaux d'alerte §3 sur le code en cours :
-   ```bash
-   grep -rn "\.filter\(.*estDemo\|\.filter\(.*isDemo" js/
-   grep -rn "findIndex.*=\s*[a-z]" js/
-   ```
+# Migration de masse sur une famille de clés
+grep -rn "keys().*filter.*forEach" js/
 
-### Après un incident touchant un global
+# Call-sites qui posent un flag démo (point 2 de la checklist)
+grep -rn "\.estDemo\s*=\|\.isDemo\s*=" js/
+```
 
-6. Post-mortem court (5-10 min) en 3 points : symptôme, cause racine,
-   hook évitant.
-7. Si la cause révèle un nouveau pattern, l'ajouter à §3 de ce skill.
-8. Mémoire feedback Claude correspondante (si transversale aux projets).
-
-### Audit léger périodique
-
-9. Une fois par session de travail (ou par jour), grep des signaux §3
-   sur tout le code pour détecter les régressions ou les nouveaux call-sites
-   à risque.
+Audit léger : une fois par session de travail, passer ces greps sur tout
+le code pour détecter les régressions ou nouveaux call-sites à risque.
 
 ---
 
 ## 6. RÉFÉRENCES
 
-- `docs/AUDIT-PHASE5-PRE-TENTATIVE-2.md` — Audit Phase 5 où la collision
-  d'IDs a été identifiée comme P2 (point d'attention) mais pas suffisamment
-  protégée à l'implémentation.
-- `docs/POST-MORTEM-PHASE5-22-AVRIL.md` — Post-mortem 1re tentative
-  Phase 5 (révèle déjà le pattern « valider lectures namespace de bout
-  en bout »).
-- `docs/modules/demo-et-autonomisation.md` — Architecture finale du mode
+- `docs/AUDIT-PHASE5-PRE-TENTATIVE-2.md` — collision d'IDs identifiée
+  comme P2 mais pas suffisamment protégée à l'implémentation.
+- `docs/POST-MORTEM-PHASE5-22-AVRIL.md` — post-mortem 1re tentative
+  Phase 5 (pattern « valider lectures namespace de bout en bout »).
+- `docs/modules/demo-et-autonomisation.md` — architecture finale du mode
   démo (post-correctifs du 24 avril).
-- Commits de référence :
-  - `abecd65` — Patchs de protection (`fusionnerDemoVersGlobaux` +
-    `retirerItemsDemoDesGlobaux`).
-  - `40393ad` — Pack démo refondu avec IDs préfixés.
-  - `e21310a` — Conversion presences objet → tableau dans Phase 1.
+- `docs/architecture/PLAN2-PHASE1-SPEC.md` — spec du partage CC (3e source).
+- Fonctions de référence (code actuel, retrouvables par grep) :
+  - `fusionnerDemoVersGlobaux` — push sans replace (`js/demo-activation.js`).
+  - `retirerItemsDemoDesGlobaux` — cleanup par identité + flag
+    (`js/demo-activation.js`).
+  - `peuplerNamespace` — conversion presences objet → tableau
+    (`js/demo-namespace.js`).
+  - `CLES_GLOBALES`, `CLES_TEMPLATES_ARCHIVES` (`js/trimestres.js`).
 - Mémoire Claude : `feedback_collision_ids_pack_demo.md` (point de vue
   IA, complémentaire à ce skill projet).
 
 ---
 
-**Skill parent** : `SKILL_hygiene_donnees_partagees.md` (principes abstraits, agnostique au projet)
+**Skill parent** : `SKILL_hygiene_donnees_partagees.md` (principes
+abstraits, agnostique au projet).
 
 **Date de création** : 26 avril 2026, suite à l'incident du 24 avril.
 **Révision attendue** : à chaque ajout d'une nouvelle source dans les

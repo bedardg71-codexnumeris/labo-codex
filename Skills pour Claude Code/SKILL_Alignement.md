@@ -1,27 +1,36 @@
 ---
 name: alignement
 description: >
-  Module Alignement de l'application Labo Codex. Ce skill guide la conception
-  et le développement du 7e module : un outil de carte mentale interactive qui
-  aide les enseignants du collégial à planifier leur enseignement en rendant
-  visible l'alignement pédagogique (objectifs → activités → évaluations).
-  Couvre le macro (organisation des séquences sur le trimestre de 15 semaines)
-  et le micro (structure des leçons et activités dans les séances). Utiliser
-  ce skill pour tout travail touchant à la planification des leçons, à la
-  conception pédagogique, au design curriculaire, à l'organisation des
-  séquences d'enseignement, ou au module Alignement de Labo Codex. Pour le
-  cadre théorique (ELLAC, SOLO, PAN, cartouches), voir
+  Module Alignement de l'application Labo Codex (affiché « Alignement
+  pédagogique », fichiers et clés `planification*`). Outil de carte mentale
+  interactive qui aide les enseignants du collégial à planifier leur
+  enseignement en rendant visible l'alignement pédagogique (objectifs →
+  activités → évaluations). Couvre le macro (organisation des séquences sur le
+  trimestre de 15 semaines) et le micro (structure des leçons et activités).
+  Utiliser ce skill pour tout travail touchant à la carte mentale, à la
+  planification des leçons, à la conception pédagogique, au design curriculaire,
+  à l'organisation des séquences d'enseignement, ou au module Alignement.
+  Pour le cadre théorique (ELLAC, SOLO, PAN, cartouches), voir
   SKILL_Ecosysteme_classe.md. Pour l'architecture technique et les autres
   modules, voir SKILL_labo_codex.md.
 ---
 
 # Module Alignement — Labo Codex
 
+> **Nommage.** Le module est **affiché « Alignement pédagogique »**
+> (`js/config.js`, section `{ id: 'carte', label: 'Alignement pédagogique' }`).
+> Son code historique porte le préfixe `planification*` : `js/planification.js`
+> (orchestration), `js/planification-carte.js` (éditeur de carte mentale, le
+> gros du module), `js/planification-donnees.js` (couche stockage),
+> `js/planification-bibliotheque.js` (bibliothèque partagée). Le présent skill
+> dit « module Alignement » pour l'expérience utilisateur et « code
+> `planification*` » pour les fichiers. Les deux désignent la même chose.
+
 ## 1. Vision et principes
 
 ### Ce que ce module fait
 
-Le module Planification est un **outil de conception**, pas un formulaire à
+Le module Alignement est un **outil de conception**, pas un formulaire à
 remplir. Il offre à l'enseignant une carte mentale interactive où il organise
 ses idées, relie ses objectifs à ses activités et à ses évaluations, et construit
 progressivement la structure de son cours sur 15 semaines.
@@ -48,10 +57,10 @@ temps qu'il aide à planifier.
    - **Macro** : organisation des séquences dans le trimestre de 15 semaines
    - **Micro** : structure des leçons et activités dans les séances
 
-5. **Module autonome, données partagées.** Le module Planification est le 7e
-   module de l'application, souverain dans son domaine. Il *lit* les données
-   des autres modules (calendrier, horaire, productions, critères) mais ne
-   les modifie pas (principe Single Source of Truth).
+5. **Module autonome, données partagées.** Le module Alignement est souverain
+   dans son domaine. Il *lit* les données des autres modules (calendrier,
+   horaire, productions, critères) mais ne les modifie pas (principe Single
+   Source of Truth).
 
 6. **Public cible : enseignants novices et intermédiaires.** L'outil guide
    sans imposer, explique le jargon, propose des exemples concrets.
@@ -65,8 +74,6 @@ Le cadre s'inspire des stratégies de design curriculaire du Direct Instruction
 Ce cadre n'est pas un dogme — il fournit des catégories utiles et une logique
 de planification validée par la recherche, tout en laissant place à d'autres
 approches pédagogiques.
-
-> Pour le détail du cadre théorique, lire `references/cadre-theorique.md`.
 
 ### Les catégories de la carte mentale
 
@@ -121,9 +128,6 @@ une connaissance sans activité de révision signale un risque d'oubli.
 
 ## 3. Architecture du module
 
-> Pour le détail de l'intégration avec l'application existante,
-> lire `references/architecture-integration.md`.
-
 ### Position dans la hiérarchie
 
 ```
@@ -134,15 +138,15 @@ TRIMESTRE (Réglages)
     │   │   ├─ PRODUCTIONS (Construction)
     │   │   └─ ÉVALUATIONS (Évaluations)
     │   │
-    │   └─ PLANIFICATION (nouveau module)  ← ICI
-    │       ├─ Carte mentale du cours
-    │       ├─ Séquences
-    │       ├─ Leçons
-    │       └─ Activités
+    │   └─ ALIGNEMENT
+    │       ├─ Carte mentale du cours (nœuds + liens)
+    │       ├─ Séquences (types de nœuds)
+    │       ├─ Leçons (types de nœuds)
+    │       └─ Activités (types de nœuds)
 ```
 
-Le module est rattaché au **cours**, pas au groupe. Un même plan de cours
-s'applique potentiellement à plusieurs groupes.
+Conceptuellement, le plan de cours est rattaché au **cours**, pas au groupe :
+un même plan s'applique potentiellement à plusieurs groupes.
 
 ### Données lues (lecture seule)
 
@@ -156,28 +160,44 @@ s'applique potentiellement à plusieurs groupes.
 
 ### Données propres (écriture)
 
+Le module stocke **une seule clé** par trimestre, via `db.getSync/setSync` et la
+fonction `cle()` (voir `js/planification-donnees.js`, constante `CLE_DONNEES`) :
+
 | Donnée | Clé de stockage | Namespace |
 |--------|-----------------|-----------|
-| Carte mentale (nœuds + liens) | `{trimestreId}_planification_mindmap` | Par trimestre |
-| Séquences | `{trimestreId}_planification_sequences` | Par trimestre |
-| Leçons | `{trimestreId}_planification_lecons` | Par trimestre |
+| Toutes les cartes du trimestre | `{trimestreId}_planification_mindmap` | Par trimestre |
+
+> **Important.** Il n'existe PAS de clés séparées pour les séquences ou les
+> leçons. Séquences, leçons et activités sont des **types de nœuds à l'intérieur
+> de la carte mentale**, donc stockés dans la même clé. Structure du document :
+> ```
+> {
+>   index: { active: 'carte_1', compteurCartes: 1, cartes: [ { id, nom, dateCreation } ] },
+>   cartes: { carte_1: { compteur, compteurLiens, noeuds: [...], liens: [...] }, ... }
+> }
+> ```
+> Un trimestre peut contenir plusieurs cartes ; `index.active` désigne la carte
+> affichée. Une migration one-shot (`migrerDonneesProto`) convertit l'ancien
+> format prototype `proto_cm_*` du localStorage vers ce format namespacé.
 
 ### Patron de conception
 
 Le module suit le patron **Bibliothèque + Assemblage** de l'application :
 
-- **Bibliothèque** : gabarits de leçons, séquences-types, structures d'activités
-  réutilisables (potentiellement partagées entre cours/trimestres)
+- **Bibliothèque** : `js/planification-bibliotheque.js`. Cartes/alignements
+  réutilisables, partagés entre cours/trimestres. `importerDepuisBibliotheque`
+  deep-clone une carte de la bibliothèque vers le trimestre actif ;
+  `exporterCartePourBibliotheque` fait l'inverse.
 - **Assemblage** : la carte mentale du cours est un assemblage spécifique pour
-  un cours donné dans un trimestre donné
+  un cours donné dans un trimestre donné.
 
 ---
 
 ## 4. Structure d'une leçon
 
-La structure interne d'une leçon s'inspire de l'enseignement explicite, mais
-reste adaptable. Les phases ne sont pas obligatoires — l'enseignant peut en
-ajouter, en retirer, ou en modifier l'ordre.
+La structure interne d'une leçon (nœud de type leçon dans la carte) s'inspire de
+l'enseignement explicite, mais reste adaptable. Les phases ne sont pas
+obligatoires — l'enseignant peut en ajouter, en retirer, ou en modifier l'ordre.
 
 ### Phases suggérées
 
@@ -189,37 +209,13 @@ ajouter, en retirer, ou en modifier l'ordre.
 | **Pratique autonome** | Consolider | 15 min | Superviser, vérifier la fluidité (« vous faites ») | Pratiquer seul |
 | **Objectivation** | Clore | 5 min | Synthétiser (Quoi ? Quand ? Comment ?), annoncer la suite | Consolider |
 
-### Modèle de données
-
-```javascript
-{
-  id: "LECON_xxx",
-  titre: "",
-  objectif: "",                    // Comportement + contenu + conditions
-  ideesMaitresses: [],             // Liens vers nœuds idée maîtresse
-  connaissancesPrealables: [],     // Liens vers nœuds connaissance préalable
-  connaissances: {
-    declaratives: [],
-    procedurales: [],
-    conditionnelles: []
-  },
-  phases: [                        // Tableau flexible (pas structure fixe)
-    { type: "ouverture", duree: 5, notes: "", activites: [] },
-    { type: "modelage", duree: 10, notes: "", activites: [] },
-    { type: "pratiqueGuidee", duree: 15, notes: "", activites: [] },
-    { type: "pratiqueAutonome", duree: 15, notes: "", activites: [] },
-    { type: "objectivation", duree: 5, notes: "", activites: [] }
-  ],
-  strategiesCognitives: [],        // Liens vers nœuds stratégie
-  dispositifsSoutien: [],          // Outils structurants, référentiels
-  revisionPrevue: "",              // Notes sur la révision planifiée
-  materiel: [],
-  evaluationPrevue: null,          // Lien vers une production existante
-  sequenceParente: "",             // Lien vers la séquence
-  seancesAssociees: [],            // Liens vers séances du calendrier
-  dureeEstimee: 50                 // minutes
-}
-```
+> **Note sur le modèle de données.** Le stockage réel d'une leçon est celui d'un
+> **nœud de la carte** (`noeuds[]` : id, type, position, contenu, liens vers
+> d'autres nœuds), pas une structure dédiée `LECON_xxx` avec un tableau `phases`
+> figé. La grille de phases ci-dessus est un **guide pédagogique** pour ce qu'un
+> nœud-leçon peut contenir, pas un schéma imposé par le code. Avant d'ajouter des
+> champs au modèle, lire la forme effective des nœuds dans
+> `js/planification-carte.js` et `js/planification-donnees.js`.
 
 ---
 
@@ -268,10 +264,10 @@ L'application peut signaler :
 
 ## 6. Intégration avec le monitoring
 
-Le module Planification crée un pont entre la conception (en amont) et le
+Le module Alignement crée un pont entre la conception (en amont) et le
 suivi (en cours de trimestre) :
 
-| Planification (amont) | Monitoring (en cours) | Lien |
+| Alignement (amont) | Monitoring (en cours) | Lien |
 |-----------------------|----------------------|------|
 | Séquence planifiée sem. 3-5 | Indices A-C-P à la sem. 4 | Savoir *quoi* observer et *pourquoi* |
 | Objectif : marqueurs de relation | Critère SRPNF « Structure » | Le critère évalue ce qui a été enseigné |
@@ -282,47 +278,24 @@ suivi (en cours de trimestre) :
 
 ## 7. Contraintes techniques
 
-- **Vanilla JavaScript ES6+**, zéro dépendance (sauf Chart.js)
-- **Stockage** : IndexedDB (persistant) + localStorage (cache)
-- **Client-side uniquement** : aucun serveur, données 100% locales
-- **Namespace par trimestre** : `{semesterId}_{clé}`
-- **Patron Bibliothèque + Assemblage** pour toutes les entités configurables
-- **Single Source of Truth** : chaque donnée a une source unique
-- **Modules protégés** : config.js, navigation.js, noms_stables.json
-
-Pour la carte mentale, l'éditeur devra être implémenté en vanilla JS (pas de
-bibliothèque externe). Options à explorer : Canvas HTML5, SVG, ou un système
-hybride DOM + positionnement CSS.
+Voir `CLAUDE.md` (vanilla JS ES6+, stockage hybride localStorage/IndexedDB,
+hors-ligne, CSP, Single Source of Truth, namespacing par trimestre, modules
+protégés). Spécificité du module : l'éditeur de carte mentale est implémenté en
+vanilla JS, sans bibliothèque externe (voir `js/planification-carte.js`).
 
 ---
 
-## 8. Échelle IDME et critères SRPNF (résumé)
+## 8. Échelle IDME et critères SRPNF
 
-**IDME** : I (0.01–0.64), D (0.65–0.74), M (0.75–0.84), E (0.85–1.00) — alignés SOLO.
-
-**SRPNF** : Structure, Rigueur, Plausibilité, Nuance, Français.
-
-> **Définitions complètes, validation empirique et cartouches** :
-> voir `SKILL_Ecosysteme_classe.md`.
+I/D/M/E et S/R/P/N/F sont définis dans `SKILL_Ecosysteme_classe.md`
+(propriétaire désigné par `CLAUDE.md`). S'y reporter pour les seuils, la
+validation empirique et les cartouches.
 
 ---
 
-## 9. Documents de référence
-
-| Document | Contenu | Quand le lire |
-|----------|---------|---------------|
-| `references/cadre-theorique.md` | Cadre théorique complet adapté au collégial | Conception des catégories et logique de validation |
-| `references/architecture-integration.md` | Intégration avec l'architecture existante | Développement du modèle de données et interfaces |
-| `references/exemple-601-101.md` | Exemple concret avec le cours 601-101-MQ | Tester la conception avec un cas réel |
-
----
-
-## 10. Coordination avec les autres skills
+## 9. Coordination avec les autres skills
 
 | Skill | Rôle | Quand le consulter |
 |-------|------|--------------------|
 | `SKILL_Ecosysteme_classe.md` | Cadre pédagogique : ELLAC, SOLO, PAN, cartouches, manuel élève | Cohérence des catégories avec le cadre théorique |
-| `SKILL_labo_codex.md` | Architecture technique, modules, indices A-C-P-E, pratiques de notation | Intégration technique du module, clés IndexedDB, principes SSOT |
-
-**Plugin Productivité** : Les tâches de développement liées au module Alignement
-portent l'étiquette `[PLN]` dans `TASKS.md` (voir skill `task-management`).
+| `SKILL_labo_codex.md` | Architecture technique, modules, indices A-C-P-E, pratiques de notation | Intégration technique du module, clés de stockage, principes SSOT |
