@@ -728,6 +728,33 @@ async function chargerCodex(fichierZip) {
     //    pour la fusion 3-way — #334 C (le TimeMachine a été retiré le 28 avril 2026 — #250)
     await _ecrireSnapshotAvant(donnees);
 
+    // 5 bis. Vérification d'écriture (#335 Lot C, 11 juin 2026) : relire en
+    // IndexedDB les clés témoins du modèle et comparer à ce qui vient d'être
+    // écrit. Leçon de l'incident bis du 11 juin : une écriture qui ne persiste
+    // pas (ou une copie périmée qui survit en IDB) ressuscite un ancien état
+    // au prochain rechargement — ça ne doit JAMAIS passer sous silence.
+    _majProgression(96, 'Vérification de la persistance…');
+    await db.flush();
+    var ecartsPersistance = await _verifierEcritureTemoins(donnees);
+    if (ecartsPersistance.length > 0) {
+        // Une seule retentative ciblée, puis alerte honnête.
+        console.warn('[Codex] Persistance non confirmée pour : ' + ecartsPersistance.join(', ') + ' — retentative.');
+        for (var ep = 0; ep < ecartsPersistance.length; ep++) {
+            await db.set(ecartsPersistance[ep], donnees[ecartsPersistance[ep]]);
+        }
+        await db.flush();
+        ecartsPersistance = await _verifierEcritureTemoins(donnees, ecartsPersistance);
+    }
+    if (ecartsPersistance.length > 0) {
+        console.error('[Codex] Échec de persistance après retentative : ' + ecartsPersistance.join(', '));
+        alert('Vérification de persistance échouée pour ' + ecartsPersistance.length
+            + ' clé(s) : ' + ecartsPersistance.join(', ')
+            + '\n\nTes données sont chargées pour cette session, mais le stockage du navigateur '
+            + 'n\'a pas confirmé l\'écriture — au prochain rechargement, une ANCIENNE version '
+            + 'pourrait réapparaître.\n\nQuoi faire : réessaie « Ouvrir un codex » avec le même '
+            + 'fichier ; si le problème persiste, libère de l\'espace disque puis réessaie.');
+    }
+
     // 6. Mettre à jour l'état
     _majProgression(98, 'Finalisation…');
     const maintenant = new Date().toISOString();
@@ -1356,6 +1383,53 @@ async function _migrerSnapshotVersIndexHash() {
         console.warn('[Codex] Conversion du snapshot de fusion échouée :', e.message || e);
         return false;
     }
+}
+
+/**
+ * Vérifie que les clés TÉMOINS du modèle relues depuis le stockage persistant
+ * correspondent à ce qui vient d'être écrit (#335 Lot C, 11 juin 2026).
+ *
+ * Témoins = le cœur du modèle de données — les clés dont la résurrection d'une
+ * version périmée a causé les incidents des 10-11 juin : productions,
+ * évaluations, groupes-cours, étudiant·es (toutes namespacées) + `trimestres`.
+ * Comparaison par JSON.stringify strict (pas de hachage : exactitude, zéro
+ * dépendance). db.get lit IndexedDB en priorité — c'est précisément la couche
+ * dont une copie périmée peut survivre à un import.
+ *
+ * @param {Object} donnees - dataset qui vient d'être écrit (état attendu)
+ * @param {string[]} [cibles] - restreindre la vérification à ces clés
+ * @returns {Promise<string[]>} clés dont la relecture ne correspond pas
+ */
+async function _verifierEcritureTemoins(donnees, cibles) {
+    var SUFFIXES_TEMOINS = ['productions', 'evaluationsSauvegardees', 'groupesCours', 'groupeEtudiants'];
+    var temoins;
+    if (Array.isArray(cibles)) {
+        temoins = cibles;
+    } else {
+        temoins = [];
+        if ('trimestres' in donnees) temoins.push('trimestres');
+        Object.keys(donnees).forEach(function(k) {
+            for (var i = 0; i < SUFFIXES_TEMOINS.length; i++) {
+                if (k.endsWith('_' + SUFFIXES_TEMOINS[i])) { temoins.push(k); break; }
+            }
+        });
+    }
+    var ecarts = [];
+    for (var j = 0; j < temoins.length; j++) {
+        var cleTemoin = temoins[j];
+        if (!(cleTemoin in donnees)) continue;
+        try {
+            var relu = await db.get(cleTemoin, null);
+            if (JSON.stringify(relu) !== JSON.stringify(donnees[cleTemoin])) {
+                ecarts.push(cleTemoin);
+            }
+        } catch (e) {
+            // Une lecture qui ÉCHOUE est un écart : on ne peut pas confirmer.
+            console.warn('[Codex] Relecture impossible pour ' + cleTemoin + ' :', e.message || e);
+            ecarts.push(cleTemoin);
+        }
+    }
+    return ecarts;
 }
 
 /* ===============================
@@ -3279,9 +3353,11 @@ window.Codex = {
     lireExterne: lireCodexExterne,
     construireBilanImport: construireBilanImport,
     evaluerPrevolStockage: evaluerPrevolStockage,
-    // Internes exposés pour les tests Vitest (#334 C — fusion 3-way sensible)
+    // Internes exposés pour les tests Vitest (#334 C — fusion 3-way sensible ;
+    // #335 C — vérification de persistance post-import)
     _analyserFusion: _analyserFusion,
     _indexerSnapshot: _indexerSnapshot,
+    _verifierEcritureTemoins: _verifierEcritureTemoins,
 
     // Sauvegarde multi-plateforme
     sauvegarder: sauvegarderVersDestination,

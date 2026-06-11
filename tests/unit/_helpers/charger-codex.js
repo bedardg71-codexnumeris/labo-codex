@@ -13,7 +13,7 @@ const racineProjet = path.resolve(__dirname, '..', '..', '..');
 // `db` avec les méthodes minimales.
 // Extrait de codex.test.js le 11 juin 2026 (#334 session A) pour être
 // partagé avec sentinelle-prevol-stockage-2026-06.test.js.
-export function chargerCodex() {
+export function chargerCodex(dbOverride = null) {
     const code = readFileSync(path.join(racineProjet, 'js/codex.js'), 'utf8');
 
     const fauxWindow = {
@@ -37,7 +37,7 @@ export function chargerCodex() {
         body: { addEventListener: () => {}, appendChild: () => {} },
         documentElement: { addEventListener: () => {} }
     };
-    const db = {
+    const db = dbOverride || {
         ready: true,
         init: async () => {},
         get: async () => null,
