@@ -18,8 +18,11 @@ var _overlay = null;
 /**
  * Affiche un overlay de progression plein ecran.
  * @param {string} titre - Ex: "Generation du codex", "Export backup"
+ * @param {string} [sousTitre] - Source de l'operation (ex: nom du fichier
+ *        ouvert/fusionne) — donnee utilisateur, echappee. Demande Gregoire
+ *        11 juin 2026 : identifier le document source dans la modale.
  */
-window.afficherProgression = function(titre) {
+window.afficherProgression = function(titre, sousTitre) {
     window.masquerProgression();
 
     var overlay = document.createElement('div');
@@ -29,8 +32,14 @@ window.afficherProgression = function(titre) {
     var boite = document.createElement('div');
     boite.className = 'progression-boite';
 
+    var esc = (typeof echapperHtml === 'function')
+        ? echapperHtml
+        : function(x) { return String(x).replace(/[&<>"']/g, function(c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+
     boite.innerHTML =
         '<div class="progression-titre" id="progression-titre">' + titre + '</div>' +
+        (sousTitre ? '<div class="progression-source" id="progression-source">' + esc(sousTitre) + '</div>' : '') +
         '<div class="progression-detail" id="progression-detail">Preparation...</div>' +
         '<div class="progression-piste">' +
             '<div class="progression-barre" id="progression-barre"></div>' +

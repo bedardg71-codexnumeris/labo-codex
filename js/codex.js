@@ -512,7 +512,7 @@ async function chargerCodex(fichierZip) {
     }
 
     const debut = performance.now();
-    _afficherProgression('Ouverture du codex');
+    _afficherProgression('Ouverture du codex', fichierZip && fichierZip.name);
     _majProgression(0, 'Validation du fichier…', _formaterTaille(fichierZip.size));
     await _yield(); // laisser le navigateur peindre l'overlay
 
@@ -2817,7 +2817,7 @@ async function actionFusionner() {
     var fichier = await ouvrirDialogueFichier();
     if (!fichier) return;
 
-    _afficherProgression('Fusion de codex');
+    _afficherProgression('Fusion de codex', fichier && fichier.name);
     _majProgression(0, 'Lecture du codex externe…');
     await _yield();
 
@@ -3000,7 +3000,7 @@ async function actionComparer() {
     var fichier = await ouvrirDialogueFichier();
     if (!fichier) return;
 
-    _afficherProgression('Comparaison de codex');
+    _afficherProgression('Comparaison de codex', fichier && fichier.name);
     _majProgression(0, 'Lecture du codex externe…');
     await _yield();
 
