@@ -98,31 +98,27 @@ function cleSeancesCompletes(coursId) {
  * @returns {Array} - Séances horaire du cours
  */
 function obtenirSeancesHoraire(coursId) {
-    // 1. 🆕 BETA 95.6 : PRIORITÉ à l'entité Horaire du groupe-cours actif
-    // Chaque groupe-cours peut avoir son propre horaire (Lun-Jeu vs Mar-Ven)
+    // 1. PRIORITÉ à l'entité Horaire du groupe-cours actif
+    // Chaque groupe-cours peut avoir son propre horaire (Lun-Jeu vs Mar-Ven).
+    // 🔧 FIX #332 (11 juin 2026) : la SSOT `groupesCours[].horaireId` fait foi.
+    // L'ancien ordre lisait d'abord la COPIE `groupeCoursActif.horaireId`
+    // (pointeur dénormalisé) — toute désync copie/SSOT servait silencieusement
+    // le mauvais horaire (cas réel GC 00008, cache régénéré Lun-Jeu malgré
+    // l'intention Mar-Jeu). La copie ne sert plus que si le groupe-cours est
+    // INTROUVABLE dans la SSOT (état transitoire) — jamais pour la contredire.
     try {
         const groupeCoursActif = db.getSync('groupeCoursActif', null);
 
         if (groupeCoursActif) {
-            // 1a. Utiliser horaireId direct
-            if (groupeCoursActif.horaireId) {
-                const cleHoraires = cle('horaires');
-                const horaires = db.getSync(cleHoraires, []);
-                const horaire = horaires.find(h => h.id === groupeCoursActif.horaireId);
-                if (horaire && horaire.seances && horaire.seances.length > 0) {
-                    return horaire.seances;
-                }
-            }
-
-            // 1b. 🆕 FIX #220 (3 mars 2026) : Si pas de horaireId direct, chercher
-            // dans la liste des groupes-cours pour récupérer le horaireId
-            const cleGC = cle('groupesCours');
-            const groupesCours = db.getSync(cleGC, []);
-            const gc = groupesCours.find(g => g.id === groupeCoursActif.id);
-            if (gc && gc.horaireId) {
-                const cleHoraires = cle('horaires');
-                const horaires = db.getSync(cleHoraires, []);
-                const horaire = horaires.find(h => h.id === gc.horaireId);
+            const groupesCours = db.getSync(cle('groupesCours'), []);
+            const gc = Array.isArray(groupesCours)
+                ? groupesCours.find(g => g && g.id === groupeCoursActif.id)
+                : null;
+            // SSOT si le GC y figure ; copie en dernier recours sinon
+            const horaireId = gc ? gc.horaireId : groupeCoursActif.horaireId;
+            if (horaireId) {
+                const horaires = db.getSync(cle('horaires'), []);
+                const horaire = horaires.find(h => h.id === horaireId);
                 if (horaire && horaire.seances && horaire.seances.length > 0) {
                     return horaire.seances;
                 }
