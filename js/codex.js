@@ -36,6 +36,10 @@ const CLE_ETAT_CODEX = '_codex_etat';
 // Snapshot de référence : utilisé par actionFusionner comme ancêtre 3-way.
 // Le TimeMachine (#250) a été retiré le 28 avril 2026, mais ce snapshot reste utile.
 const CLE_SNAPSHOT_AVANT = '_codex_snapshot_avant';
+// #334 session C : la clé ne contient plus le dataset intégral mais un index
+// de hachés {__format, cles: {clé: sha256hex(JSON)}} — quelques Ko au lieu de
+// plusieurs Mo dupliqués en IDB + memoryCache à chaque boot.
+const FORMAT_SNAPSHOT_HASH = 'codex-snapshot-hash-v1';
 // Flag de purge unique des clés _codex_hist_* / _classeur_hist_* (ex-TimeMachine, #250)
 const CLE_PURGE_TIMEMACHINE_FAITE = '_codex_purge_timemachine_done';
 
@@ -208,6 +212,11 @@ function initialiserCodex() {
         console.error('[Codex] Erreur purge TimeMachine :', e);
     });
 
+    // Conversion unique du snapshot de fusion legacy en index haché (#334 C)
+    // — sinon un utilisateur qui n'enregistre jamais son codex garde la
+    // duplication IDB + memoryCache du dataset intégral.
+    _migrerSnapshotVersIndexHash();
+
     // CLE_ETAT_CODEX pointe maintenant vers _codex_etat
     // Fallback sur l'ancienne clé pour le premier chargement avant que la migration async ne termine
     var etatSauve = db.getSync(CLE_ETAT_CODEX, null) || db.getSync(CLE_ETAT_ANCIEN, null);
@@ -360,9 +369,9 @@ async function genererCodex(options = {}) {
         }
     }
 
-    // 3. Mettre à jour le snapshot de référence pour la fusion 3-way
-    //    (le TimeMachine a été retiré le 28 avril 2026 — #250)
-    await db.set(CLE_SNAPSHOT_AVANT, donnees);
+    // 3. Mettre à jour le snapshot de référence pour la fusion 3-way —
+    //    index haché depuis #334 C (le TimeMachine a été retiré le 28 avril 2026 — #250)
+    await _ecrireSnapshotAvant(donnees);
 
     // 4. Manifeste
     const maintenant = new Date().toISOString();
@@ -715,9 +724,9 @@ async function chargerCodex(fichierZip) {
         }
     }
 
-    // 5. Stocker les données chargées comme snapshot de référence pour la fusion 3-way
-    //    (le TimeMachine a été retiré le 28 avril 2026 — #250)
-    await db.set(CLE_SNAPSHOT_AVANT, donnees);
+    // 5. Stocker l'index haché des données chargées comme snapshot de référence
+    //    pour la fusion 3-way — #334 C (le TimeMachine a été retiré le 28 avril 2026 — #250)
+    await _ecrireSnapshotAvant(donnees);
 
     // 6. Mettre à jour l'état
     _majProgression(98, 'Finalisation…');
@@ -1252,6 +1261,104 @@ function _grouperParPrefixe(cles) {
 }
 
 /* ===============================
+   SNAPSHOT DE FUSION — INDEX HACHÉ (#334 session C)
+   =============================== */
+
+/**
+ * SHA-256 hexadécimal d'une chaîne. Helper local (même patron que
+ * reserve.js) plutôt qu'une dépendance inter-modules : codex.js ne doit pas
+ * exiger que reserve.js soit chargé.
+ * @param {string} str
+ * @returns {Promise<string|null>} hex, ou null si crypto.subtle indisponible
+ */
+async function _sha256Hex(str) {
+    if (typeof crypto === 'undefined' || !crypto.subtle) return null;
+    try {
+        var data = new TextEncoder().encode(str);
+        var buffer = await crypto.subtle.digest('SHA-256', data);
+        return Array.from(new Uint8Array(buffer))
+            .map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+    } catch (e) {
+        console.warn('[Codex] Calcul SHA-256 échoué :', e.message || e);
+        return null;
+    }
+}
+
+/**
+ * Construit l'index de hachés d'un dataset pour la fusion 3-way.
+ * _analyserFusion n'utilise jamais les VALEURS de l'ancêtre — uniquement la
+ * présence de clé et l'égalité JSON (audit D4 du plan #334) : un index
+ * {clé: hash} est donc sémantiquement identique au dataset intégral.
+ * Ignore les clés `_codex_*`, exactement comme _analyserFusion.
+ * @param {Object} donnees - Dataset complet (format data.json du codex)
+ * @returns {Promise<{__format: string, cles: Object}|null>} null si crypto indisponible
+ */
+async function _indexerSnapshot(donnees) {
+    if (!donnees || typeof donnees !== 'object') return null;
+    if (typeof crypto === 'undefined' || !crypto.subtle) {
+        console.warn('[Codex] crypto.subtle indisponible — snapshot de fusion non indexé (prochaines fusions en diff 2 parties).');
+        return null;
+    }
+    var index = { __format: FORMAT_SNAPSHOT_HASH, cles: {} };
+    var cles = Object.keys(donnees);
+    for (var i = 0; i < cles.length; i++) {
+        if (cles[i].startsWith('_codex_')) continue;
+        index.cles[cles[i]] = await _sha256Hex(JSON.stringify(donnees[cles[i]]));
+    }
+    return index;
+}
+
+/**
+ * Écrit le snapshot de référence sous forme d'index haché.
+ * Si l'indexation est impossible, retire la clé : un vieux dataset intégral
+ * qui traîne vaut moins qu'un diff 2 parties assumé.
+ */
+async function _ecrireSnapshotAvant(donnees) {
+    var index = await _indexerSnapshot(donnees);
+    if (index) {
+        await db.set(CLE_SNAPSHOT_AVANT, index);
+    } else {
+        await db.remove(CLE_SNAPSHOT_AVANT);
+    }
+}
+
+/**
+ * Lit le snapshot de référence. Un snapshot legacy (dataset intégral écrit
+ * avant la session C) est converti à la volée — l'ancien format n'est plus
+ * jamais écrit (migration de données, pas un alias de compat).
+ * @returns {Promise<Object|null>} index haché ou null
+ */
+async function _lireSnapshotAvant() {
+    var brut = await db.get(CLE_SNAPSHOT_AVANT, null);
+    if (!brut) return null;
+    if (brut.__format === FORMAT_SNAPSHOT_HASH) return brut;
+    return await _indexerSnapshot(brut);
+}
+
+/**
+ * Migration one-shot au boot : convertit un gros snapshot legacy en index
+ * haché — sinon un utilisateur qui n'enregistre jamais son codex garderait
+ * la duplication IDB + memoryCache indéfiniment.
+ */
+async function _migrerSnapshotVersIndexHash() {
+    try {
+        var brut = await db.get(CLE_SNAPSHOT_AVANT, null);
+        if (!brut || brut.__format === FORMAT_SNAPSHOT_HASH) return false;
+        var index = await _indexerSnapshot(brut);
+        if (index) {
+            await db.set(CLE_SNAPSHOT_AVANT, index);
+        } else {
+            await db.remove(CLE_SNAPSHOT_AVANT);
+        }
+        console.warn('[Codex] Snapshot de fusion legacy converti en index haché (' + FORMAT_SNAPSHOT_HASH + ').');
+        return true;
+    } catch (e) {
+        console.warn('[Codex] Conversion du snapshot de fusion échouée :', e.message || e);
+        return false;
+    }
+}
+
+/* ===============================
    ANALYSE DE FUSION (Phase 3)
    =============================== */
 
@@ -1264,8 +1371,9 @@ function _grouperParPrefixe(cles) {
  *
  * @param {Object} local - Données du codex local (actuellement dans IDB)
  * @param {Object} externe - Données du codex externe (lu en mémoire)
- * @param {Object|null} [ancetre=null] - Dernier état commun connu (snapshot partagé)
- * @returns {{
+ * @param {Object|null} [ancetre=null] - Index haché du dernier état commun
+ *        ({__format, cles} via _indexerSnapshot / _lireSnapshotAvant), ou null
+ * @returns {Promise<{
  *   ajouteesLocal: string[],    - Clés nouvelles seulement dans local
  *   ajouteesExterne: string[],  - Clés nouvelles seulement dans externe
  *   modifieesLocal: string[],   - Clés modifiées seulement dans local (auto-merge: garder local)
@@ -1274,14 +1382,18 @@ function _grouperParPrefixe(cles) {
  *   supprimeesExterne: string[],- Clés supprimées seulement dans externe
  *   conflits: string[],         - Clés modifiées/supprimées des DEUX côtés (choix utilisateur requis)
  *   identiques: number          - Nombre de clés identiques (pas de stats, juste le compte)
- * }}
+ * }>}
  */
-function _analyserFusion(local, externe, ancetre) {
+async function _analyserFusion(local, externe, ancetre) {
+    // L'ancêtre est un index de hachés (#334 C) : présence de clé dans
+    // ancetre.cles, égalité par sha256(JSON) — image fidèle de l'ancien
+    // JSON.stringify(ancetre[cle]), qui n'était jamais utilisé autrement.
+    var clesAncetre = (ancetre && ancetre.cles) ? ancetre.cles : null;
     var toutesLesCles = new Set(
         Object.keys(local).concat(Object.keys(externe))
     );
-    if (ancetre) {
-        Object.keys(ancetre).forEach(function(c) { toutesLesCles.add(c); });
+    if (clesAncetre) {
+        Object.keys(clesAncetre).forEach(function(c) { toutesLesCles.add(c); });
     }
 
     var resultat = {
@@ -1295,28 +1407,33 @@ function _analyserFusion(local, externe, ancetre) {
         identiques: 0
     };
 
-    toutesLesCles.forEach(function(cle) {
+    for (var cle of toutesLesCles) {
         // Ignorer les clés internes du codex
-        if (cle.startsWith('_codex_')) return;
+        if (cle.startsWith('_codex_')) continue;
 
         var dansLocal = cle in local;
         var dansExterne = cle in externe;
-        var dansAncetre = ancetre ? (cle in ancetre) : false;
+        var dansAncetre = clesAncetre ? (cle in clesAncetre) : false;
 
         var jsonLocal = dansLocal ? JSON.stringify(local[cle]) : undefined;
         var jsonExterne = dansExterne ? JSON.stringify(externe[cle]) : undefined;
-        var jsonAncetre = (ancetre && dansAncetre) ? JSON.stringify(ancetre[cle]) : undefined;
 
         // Cas trivial : valeurs identiques
         if (dansLocal && dansExterne && jsonLocal === jsonExterne) {
             resultat.identiques++;
-            return;
+            continue;
         }
 
-        if (ancetre) {
+        if (clesAncetre) {
             // ── Diff 3 parties (avec ancêtre) ──
-            var localChange = jsonLocal !== jsonAncetre;
-            var externeChange = jsonExterne !== jsonAncetre;
+            // Mêmes sémantiques qu'avant : un côté absent garde un hash
+            // undefined, donc « change » vrai face à un ancêtre présent —
+            // exactement comme jsonLocal !== jsonAncetre avec undefined.
+            var hashAncetre = dansAncetre ? clesAncetre[cle] : undefined;
+            var hashLocal = dansLocal ? await _sha256Hex(jsonLocal) : undefined;
+            var hashExterne = dansExterne ? await _sha256Hex(jsonExterne) : undefined;
+            var localChange = hashLocal !== hashAncetre;
+            var externeChange = hashExterne !== hashAncetre;
 
             if (!dansAncetre && dansLocal && !dansExterne) {
                 // Ajoutée dans local seulement
@@ -1365,7 +1482,7 @@ function _analyserFusion(local, externe, ancetre) {
                 resultat.conflits.push(cle);
             }
         }
-    });
+    }
 
     return resultat;
 }
@@ -2556,16 +2673,16 @@ async function actionFusionner() {
         }
     }
 
-    // 4. Chercher un ancêtre commun (dernier snapshot partagé)
+    // 4. Chercher un ancêtre commun (dernier snapshot partagé, index haché)
     _majProgression(30, 'Recherche d\'un ancêtre commun…');
     await _yield();
-    var ancetre = await db.get(CLE_SNAPSHOT_AVANT, null);
+    var ancetre = await _lireSnapshotAvant();
 
     // 5. Analyser les différences (données)
     _majProgression(35, 'Analyse des différences…');
     await _yield();
 
-    var analyse = _analyserFusion(donneesLocales, externe.donnees, ancetre);
+    var analyse = await _analyserFusion(donneesLocales, externe.donnees, ancetre);
 
     // 6. Analyser les différences (travaux/blobs)
     // Construire la liste des chemins locaux
@@ -2720,11 +2837,11 @@ async function actionComparer() {
 
         _majProgression(50, 'Recherche d\'un ancêtre commun…');
         await _yield();
-        var ancetre = await db.get(CLE_SNAPSHOT_AVANT, null);
+        var ancetre = await _lireSnapshotAvant();
 
         _majProgression(65, 'Analyse des différences…');
         await _yield();
-        var analyse = _analyserFusion(donneesLocales, externe.donnees, ancetre);
+        var analyse = await _analyserFusion(donneesLocales, externe.donnees, ancetre);
 
         var travauxLocaux = [];
         var cleFTLocale = toutesLesCles.find(function(c) { return c.includes('fichiersTravaux'); });
@@ -3161,6 +3278,9 @@ window.Codex = {
     lireExterne: lireCodexExterne,
     construireBilanImport: construireBilanImport,
     evaluerPrevolStockage: evaluerPrevolStockage,
+    // Internes exposés pour les tests Vitest (#334 C — fusion 3-way sensible)
+    _analyserFusion: _analyserFusion,
+    _indexerSnapshot: _indexerSnapshot,
 
     // Sauvegarde multi-plateforme
     sauvegarder: sauvegarderVersDestination,
