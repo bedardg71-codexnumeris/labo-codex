@@ -618,10 +618,78 @@ function initialiserRegistrePratiques() {
 // EXPORTS
 // ============================================================================
 
+/**
+ * Résout le TYPE canonique de la pratique active depuis la SSOT — #328 L2-b1.
+ *
+ * Chaîne : `groupesCours[].pratiqueId` (SSOT actée #303) → type de la pratique
+ * (id canonique du registre, ou `configuration.type` d'une configurable lue
+ * dans la bibliothèque DU TRIMESTRE DU GROUPE-COURS — pas du trimestre actif,
+ * c'est l'absorption de #301). Remplace les lectures du miroir
+ * `modalitesEvaluation.pratique`, dont le contenu était ambigu (tantôt un
+ * type, tantôt un id de configurable selon l'écrivain).
+ *
+ * @param {{gcId?: string, trimestreId?: string}} [contexte] - contexte
+ *        EXPLICITE de consultation. Sans contexte : groupe-cours actif et
+ *        SON trimestre.
+ * @returns {string|null} type canonique ('sommative'|'standards'|
+ *        'specifications'|'denotation'), ou null si rien d'actif /
+ *        introuvable — chaque appelant applique son défaut historique.
+ */
+function obtenirTypePratiqueActive(contexte) {
+    contexte = contexte || {};
+    try {
+        const gcActif = db.getSync('groupeCoursActif', null);
+
+        // Trimestre de résolution : explicite > celui du GC actif > l'actif.
+        const trimestreId = contexte.trimestreId
+            || (!contexte.gcId && gcActif && gcActif.trimestreId)
+            || (typeof window.obtenirTrimestreId === 'function' ? window.obtenirTrimestreId() : null);
+        const gcId = contexte.gcId || (gcActif && gcActif.id) || null;
+        if (!gcId || !trimestreId) return null;
+
+        // 1. SSOT : pratiqueId du groupe-cours dans la liste du trimestre.
+        let pratiqueId = null;
+        const groupesCours = db.getSync(trimestreId + '_groupesCours', null);
+        const gc = Array.isArray(groupesCours)
+            ? groupesCours.find(g => g && g.id === gcId)
+            : null;
+        if (gc) {
+            pratiqueId = gc.pratiqueId || null;
+        } else if (!contexte.gcId) {
+            // GC actif introuvable dans la SSOT (état transitoire) : copies en
+            // dernier recours — jamais quand un contexte explicite est demandé.
+            pratiqueId = (gcActif && gcActif.pratiqueId)
+                || ((db.getSync('infoCours', null) || {}).pratiqueId)
+                || null;
+        }
+        if (!pratiqueId) return null;
+
+        // 2. id → type. Un id canonique du registre EST un type.
+        const canonique = normaliserIdPratique(pratiqueId);
+        if (pratiquesEnregistrees.has(canonique)) return canonique;
+
+        // 3. Configurable : type déclaré par sa configuration, dans la
+        //    bibliothèque du trimestre demandé.
+        const configurables = db.getSync(trimestreId + '_pratiquesConfigurables', null);
+        const p = Array.isArray(configurables)
+            ? configurables.find(x => x && x.id === pratiqueId)
+            : null;
+        if (p) {
+            const type = (p.configuration && p.configuration.type) || p.type || null;
+            return type ? normaliserIdPratique(type) : null;
+        }
+        return null;
+    } catch (e) {
+        console.warn('[Registre] Résolution du type de pratique active échouée :', e.message || e);
+        return null;
+    }
+}
+
 // Fonctions principales
 window.enregistrerPratique = enregistrerPratique;
 window.obtenirPratiqueActive = obtenirPratiqueActive;
 window.obtenirIdPratiqueActive = obtenirIdPratiqueActive;
+window.obtenirTypePratiqueActive = obtenirTypePratiqueActive;
 window.normaliserIdPratique = normaliserIdPratique;
 window.PRATIQUE_DEFAUT = PRATIQUE_DEFAUT;
 

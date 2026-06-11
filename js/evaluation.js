@@ -390,9 +390,9 @@ function chargerListeEvaluationsRefonte() {
     // 🎯 LECTURE DEPUIS LA SOURCE UNIQUE : portfolio.js génère indicesCP
     const indicesCP = db.getSync(cle('indicesCP'), {});
 
-    // Détecter la pratique active
-    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
-    const pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
+    // Détecter la pratique active — #328 L2-b1 : type dérivé de la SSOT.
+    const typeActif = (typeof obtenirTypePratiqueActive === 'function') ? obtenirTypePratiqueActive() : null;
+    const pratique = typeActif === 'sommative' ? 'SOM' : 'PAN';
 
     // Grouper les évaluations par étudiant
     const evaluationsParEtudiant = {};

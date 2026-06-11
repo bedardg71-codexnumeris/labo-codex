@@ -41,9 +41,9 @@
  * @returns {string} - Le terme approprié ("artefact", "production", "travail", etc.)
  */
 function obtenirTermeProduction(context = 'singulier', majuscule = false) {
-    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
-    // Session A-2 : normalisation à la lecture (id canonique), défaut = PRATIQUE_DEFAUT ('standards').
-    const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
+    // #328 L2-b1 : type dérivé de la SSOT (groupesCours), plus du miroir.
+    const pratique = ((typeof obtenirTypePratiqueActive === 'function')
+        ? obtenirTypePratiqueActive() : null) || (window.PRATIQUE_DEFAUT || 'standards');
 
     // Définir les termes selon la pratique
     let termes = {
@@ -54,7 +54,9 @@ function obtenirTermeProduction(context = 'singulier', majuscule = false) {
 
     // Standards : terme "artefact" (portfolio d'apprentissage)
     if (pratique === 'standards') {
-        // Configuration personnalisée possible dans le futur
+        // Terme personnalisé configurable — champ PROPRE des modalités
+        // (pas un miroir ; seule la dérivation du type a migré en L2-b1)
+        const config = db.getSync(cle('modalitesEvaluation'), null) || {};
         const termePerso = config.termeProduction || 'artefact';
         termes = {
             singulier: termePerso,
@@ -108,8 +110,9 @@ const _ACCORDS_TERME_PRODUCTION = {
  * @returns {'m'|'f'}
  */
 function genreTermeProduction() {
-    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
-    const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
+    // #328 L2-b1 : type dérivé de la SSOT (groupesCours), plus du miroir.
+    const pratique = ((typeof obtenirTypePratiqueActive === 'function')
+        ? obtenirTypePratiqueActive() : null) || (window.PRATIQUE_DEFAUT || 'standards');
     return pratique === 'standards' ? 'm' : 'f';
 }
 
@@ -198,9 +201,9 @@ function obtenirNombreProductionsPourPatterns() {
  * @returns {Array<string>} - IDs des productions évaluables
  */
 function obtenirIdsProductionsEvaluables(productions) {
-    var config = db.getSync(cle('modalitesEvaluation'), null) || {};
-    // Session A-2 : normalisation à la lecture — tous les alias Standards résolvent vers 'standards'.
-    var estPAN = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) === 'standards';
+    // #328 L2-b1 : type dérivé de la SSOT (groupesCours), plus du miroir.
+    var estPAN = ((typeof obtenirTypePratiqueActive === 'function')
+        ? obtenirTypePratiqueActive() : null) === 'standards';
     if (estPAN) {
         return productions.filter(function(p) { return p.type === 'artefact-portfolio'; }).map(function(p) { return p.id; });
     }
@@ -213,9 +216,10 @@ function obtenirIdsProductionsEvaluables(productions) {
  * @returns {Object} - Instance de la pratique (PratiquePANMaitrise ou PratiqueSommative)
  */
 function obtenirPratiqueActuelle() {
-    const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
-    // Session A-2 : id canonique normalisé à la lecture, défaut = PRATIQUE_DEFAUT ('standards').
-    const pratiqueId = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(modalites.pratique) : modalites.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
+    // #328 L2-b1 : type dérivé de la SSOT (groupesCours), plus du miroir.
+    // (On passe le TYPE au registre, comme avant — même classe d'instance.)
+    const pratiqueId = ((typeof obtenirTypePratiqueActive === 'function')
+        ? obtenirTypePratiqueActive() : null) || (window.PRATIQUE_DEFAUT || 'standards');
 
     // Obtenir l'instance depuis le registre
     if (typeof obtenirPratiqueParId === 'function') {

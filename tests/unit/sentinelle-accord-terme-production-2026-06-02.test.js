@@ -15,9 +15,7 @@ describe('#309 · genre et accord du terme production/artefact', () => {
     beforeEach(() => {
         pratiqueActive = 'standards';
         const db = {
-            getSync: (k, d) => (k === 'modalitesEvaluation'
-                ? { pratique: pratiqueActive }
-                : (d !== undefined ? d : null)),
+            getSync: (k, d) => (d !== undefined ? d : null),
             get: async () => null,
             set: async () => {},
             setSync: () => {}
@@ -25,7 +23,10 @@ describe('#309 · genre et accord du terme production/artefact', () => {
         win = chargerScript('js/profil-etudiant-helpers.js', {
             db,
             cle: (k) => k,
-            normaliserIdPratique: (id) => id
+            normaliserIdPratique: (id) => id,
+            // #328 L2-b1 : la pratique active se dérive de la SSOT via le
+            // helper du registre — plus du miroir modalitesEvaluation.
+            obtenirTypePratiqueActive: () => pratiqueActive
         });
         win.PRATIQUE_DEFAUT = 'standards';
     });

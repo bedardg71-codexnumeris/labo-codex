@@ -240,8 +240,9 @@ function chargerGrillesDansSelect() {
 function _obtenirPratiqueIdActive() {
     const coursActifId = getCoursActifId();
     if (coursActifId) return getPratiqueCours(coursActifId);
-    const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
-    return modalites.pratique || 'sommative';
+    // #328 L2-b1 : id dérivé de la SSOT (groupesCours), plus du miroir.
+    return ((typeof obtenirPratiqueActiveGroupeCours === 'function')
+        ? obtenirPratiqueActiveGroupeCours() : null) || 'sommative';
 }
 
 function _synchroniserJetonsPratique(jetons) {
