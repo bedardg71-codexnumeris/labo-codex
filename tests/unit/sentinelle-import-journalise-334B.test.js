@@ -10,8 +10,8 @@ import { fileURLToPath } from 'node:url';
 // feedback-fix-perdu-refactoring-extraction :
 //   1. chargerCodex journalise les échecs de blobs (compteurs par raison)
 //      et appelle stockerBlob avec notifier:false (anti-spam) ;
-//   2. stockerBlob accepte options.notifier et marque l'erreur de taille
-//      d'un code lisible par le caller ;
+//   2. stockerBlob accepte options.notifier — et depuis le 11 juin 2026,
+//      n'impose PLUS de limite de taille par fichier (hypothèse périmée) ;
 //   3. les fichiers sans blob sont marqués blobStatut 'manquant' et la
 //      visionneuse affiche cet état.
 
@@ -37,7 +37,6 @@ describe('sentinelle · import codex journalisé (#334 B)', () => {
         expect(corps).toContain('blobsAbsentsDuZip.push');
         expect(corps).toContain('blobsEchecs.push');
         expect(corps).toContain("raison = 'quota'");
-        expect(corps).toContain("raison = 'trop_volumineux'");
     });
 
     it('chargerCodex appelle stockerBlob avec notifier:false (anti-avalanche)', () => {
@@ -66,10 +65,13 @@ describe('sentinelle · import codex journalisé (#334 B)', () => {
         expect(apres).toContain('notifications.warning');
     });
 
-    it('stockerBlob accepte options.notifier et code l\'erreur de taille', () => {
+    it('stockerBlob accepte options.notifier et n\'a PAS de limite de taille par fichier', () => {
         expect(stockage).toMatch(/async function stockerBlob\(id, blob, etudiantDA, productionId, options\)/);
         expect(stockage).toContain("options.notifier !== false");
-        expect(stockage).toContain("erreurTaille.code = 'BLOB_TROP_VOLUMINEUX'");
+        // Limite 20 Mo retirée le 11 juin 2026 (hypothèse « IDB ≈ 50 Mo »
+        // périmée ; décision Grégoire). Verrou anti-réintroduction :
+        expect(stockage).not.toContain('LIMITE_BLOB_MB');
+        expect(stockage).not.toContain('BLOB_TROP_VOLUMINEUX');
     });
 
     it('la visionneuse affiche l\'état manquant (badge dans les 3 rendus)', () => {

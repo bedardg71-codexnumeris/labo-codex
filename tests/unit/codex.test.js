@@ -93,7 +93,7 @@ describe('codex.js — bilan d\'import incomplet (#334 session B)', () => {
         expect(typeof win.Codex.construireBilanImport).toBe('function');
     });
 
-    it('compose titre et causes pour un mélange quota + trop volumineux', () => {
+    it('compose titre et causes pour un mélange quota + erreur technique', () => {
         const bilan = win.Codex.construireBilanImport({
             nbCles: 120,
             nbBlobs: 7,
@@ -101,7 +101,7 @@ describe('codex.js — bilan d\'import incomplet (#334 session B)', () => {
             blobsEchecs: [
                 { id: 'FT_a', raison: 'quota' },
                 { id: 'FT_b', raison: 'quota' },
-                { id: 'FT_c', raison: 'trop_volumineux' }
+                { id: 'FT_c', raison: 'erreur' }
             ],
             blobsRefusesMagic: ['FT_d'],
             blobsAbsentsDuZip: ['FT_e']
@@ -109,26 +109,26 @@ describe('codex.js — bilan d\'import incomplet (#334 session B)', () => {
         expect(bilan.titre).toContain('5 fichiers sur 12');
         expect(bilan.details).toContain('120 clés');
         expect(bilan.details).toContain('2 refusés faute d\'espace');
-        expect(bilan.details).toContain('1 au-dessus de la taille maximale');
+        expect(bilan.details).toContain('1 en erreur technique');
         expect(bilan.details).toContain('1 au format non reconnu');
         expect(bilan.details).toContain('1 absent du ZIP');
         // Du quota est en cause → le conseil de ré-import doit apparaître.
         expect(bilan.details).toContain('rouvre le même ZIP');
     });
 
-    it('singulier correct et pas de conseil de ré-import si seul un fichier dépasse la limite', () => {
+    it('singulier correct et pas de conseil de ré-import si la cause n\'est pas corrigeable ainsi', () => {
+        // Un blob refusé aux magic bytes ne sera pas plus accepté au 2e essai :
+        // promettre « rouvre le même ZIP » serait un message menteur.
         const bilan = win.Codex.construireBilanImport({
             nbCles: 50,
             nbBlobs: 9,
             nbBlobsAttendus: 10,
-            blobsEchecs: [{ id: 'FT_x', raison: 'trop_volumineux' }],
-            blobsRefusesMagic: [],
+            blobsEchecs: [],
+            blobsRefusesMagic: ['FT_x'],
             blobsAbsentsDuZip: []
         });
         expect(bilan.titre).toContain('1 fichier sur 10');
         expect(bilan.titre).toContain('n\'a pas été restauré');
-        // Ré-importer le même ZIP ne corrige pas un dépassement de limite :
-        // promettre le contraire serait un message menteur.
         expect(bilan.details).not.toContain('rouvre le même ZIP');
     });
 
