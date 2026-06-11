@@ -213,30 +213,25 @@
      * 🆕 FIX (9 jan 2026)
      */
     function corrigerTrimestresMultiplesActifs(trimestres) {
-        const maintenant = new Date();
-        const moisActuel = maintenant.getMonth() + 1; // 1-12
-        const anneeActuelle = maintenant.getFullYear();
+        // 🔧 FIX #335 Lot B (11 juin 2026) : l'INTENTION prime sur le calendrier.
+        // L'ancienne version choisissait le trimestre suggéré par la DATE DU JOUR
+        // même s'il n'était pas marqué actif — en important un codex H2026 en
+        // juin, l'app basculait sur Été 2026 et PERSISTAIT ce choix (incident I2
+        // du 10 juin). On choisit désormais PARMI les trimestres réellement
+        // marqués actifs (l'intention déclarée — celle du codex importé, ou de
+        // l'utilisateur) : le plus récent par le tri existant (année décroissante,
+        // H > E > A). La date du jour ne décide plus rien ici ; elle ne servirait
+        // qu'en l'absence totale d'actif (cas où cette fonction n'est pas appelée).
+        const rangSession = s => (s === 'H' ? 2 : s === 'E' ? 1 : 0);
+        const plusRecent = (liste) => liste.sort((a, b) => {
+            if (b.annee !== a.annee) return b.annee - a.annee;
+            return rangSession(b.session) - rangSession(a.session);
+        })[0];
 
-        // Déterminer quel trimestre devrait être actif (3 sessions : H/E/A)
-        const sessionAttendue = sessionDepuisMois(moisActuel);
-        const idAttendu = `${sessionAttendue.toLowerCase()}${anneeActuelle}`;
-
-        // Chercher ce trimestre
-        let trimestreAGarder = trimestres.find(t => t.id === idAttendu);
-
-        // Si pas trouvé, prendre le plus récent (par année puis session H > A)
-        if (!trimestreAGarder) {
-            const tries = trimestres
-                .filter(t => t.id !== 'demo')
-                .sort((a, b) => {
-                    // Trier par année décroissante, puis par session (H > E > A,
-                    // préserve l'ordre H avant A legacy, insère Été au milieu)
-                    if (b.annee !== a.annee) return b.annee - a.annee;
-                    const rangSession = s => (s === 'H' ? 2 : s === 'E' ? 1 : 0);
-                    return rangSession(b.session) - rangSession(a.session);
-                });
-            trimestreAGarder = tries[0];
-        }
+        const actifs = trimestres.filter(t => t && t.actif === true && t.id !== 'demo');
+        const trimestreAGarder = actifs.length > 0
+            ? plusRecent(actifs)
+            : plusRecent(trimestres.filter(t => t && t.id !== 'demo'));
 
         if (trimestreAGarder) {
             // Désactiver tous, activer le bon

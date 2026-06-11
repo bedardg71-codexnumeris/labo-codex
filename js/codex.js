@@ -598,6 +598,16 @@ async function chargerCodex(fichierZip) {
     const jsonStr = await zip.file(NOM_DONNEES).async('string');
     const donnees = JSON.parse(jsonStr);
 
+    // 2 bis. Garde de modèle antérieur (#335 Lot A) : AVANT toute écriture.
+    var detectionModele = _detecterModeleAnterieur(donnees, manifeste);
+    if (detectionModele) {
+        _masquerProgression();
+        if (!confirm(_messageModeleAnterieur(detectionModele, 'remplacer'))) {
+            throw new Error('Import annulé : ton espace de travail n\'a pas été modifié.');
+        }
+        _majProgression(15, 'Extraction des données…');
+    }
+
     var entreesData = Object.entries(donnees).filter(function(e) { return !e[0].startsWith('_'); });
     let nbCles = 0;
     for (var i = 0; i < entreesData.length; i++) {
@@ -1383,6 +1393,86 @@ async function _migrerSnapshotVersIndexHash() {
         console.warn('[Codex] Conversion du snapshot de fusion échouée :', e.message || e);
         return false;
     }
+}
+
+/**
+ * Cours référencés par les données d'un trimestre (productions, évaluations,
+ * groupes-cours). Sert de signature du MODÈLE de données (#335 Lot A).
+ * @returns {string[]} coursId uniques
+ */
+function _coursReferences(productions, evaluations, groupesCours) {
+    var set = {};
+    (Array.isArray(productions) ? productions : []).forEach(function(x) { if (x && x.coursId) set[x.coursId] = true; });
+    (Array.isArray(evaluations) ? evaluations : []).forEach(function(x) { if (x && x.coursId) set[x.coursId] = true; });
+    (Array.isArray(groupesCours) ? groupesCours : []).forEach(function(x) { if (x && x.coursId) set[x.coursId] = true; });
+    return Object.keys(set);
+}
+
+/**
+ * Détecte un codex externe porteur d'un modèle de données DIVERGENT
+ * (probablement antérieur) de l'espace courant — #335 Lot A, décisions
+ * Grégoire 11 juin 2026 (D2 : marqueur = coursId référencés ; D3 : garde
+ * bloquante avec choix, posée par l'appelant).
+ *
+ * Marqueur : pour chaque trimestre présent des DEUX côtés avec des données,
+ * si l'ensemble des coursId référencés par l'externe est totalement DISJOINT
+ * de celui de l'espace courant, les deux états ne parlent pas du même modèle
+ * (cas réels I1/I3 : codex pré-chantier-D sur COURS1766455789356 vs espace
+ * consolidé sur h2026-…). Un chevauchement même partiel = même lignée → pas
+ * d'alerte (un backup plus ancien du MÊME modèle reste importable sans bruit).
+ *
+ * @param {Object} donneesExternes - dataset du codex externe
+ * @param {Object|null} manifesteExterne - pour dater l'alerte (appoint)
+ * @returns {null|{suspects: Array, dateExterne: string|null}}
+ */
+function _detecterModeleAnterieur(donneesExternes, manifesteExterne) {
+    var tids = {};
+    Object.keys(donneesExternes).forEach(function(k) {
+        var m = k.match(/^(.+)_(productions|evaluationsSauvegardees|groupesCours)$/);
+        if (m && !m[1].startsWith('_')) tids[m[1]] = true;
+    });
+    var suspects = [];
+    Object.keys(tids).forEach(function(tid) {
+        var locaux = _coursReferences(
+            db.getSync(tid + '_productions', null),
+            db.getSync(tid + '_evaluationsSauvegardees', null),
+            db.getSync(tid + '_groupesCours', null)
+        );
+        if (locaux.length === 0) return;   // rien à protéger localement
+        var externes = _coursReferences(
+            donneesExternes[tid + '_productions'],
+            donneesExternes[tid + '_evaluationsSauvegardees'],
+            donneesExternes[tid + '_groupesCours']
+        );
+        if (externes.length === 0) return;
+        var commun = externes.some(function(c) { return locaux.indexOf(c) !== -1; });
+        if (!commun) suspects.push({ trimestre: tid, locaux: locaux, externes: externes });
+    });
+    if (suspects.length === 0) return null;
+    return {
+        suspects: suspects,
+        dateExterne: (manifesteExterne && manifesteExterne.dateDerniereModification) || null
+    };
+}
+
+/**
+ * Message de la garde bloquante (#335 Lot A) — quoi / pourquoi / quoi faire.
+ * @param {{suspects: Array, dateExterne: string|null}} detection
+ * @param {string} verbe - 'remplacer' (import) ou 'fusionner avec' (fusion)
+ */
+function _messageModeleAnterieur(detection, verbe) {
+    var lignes = detection.suspects.map(function(sus) {
+        var ext = sus.externes.slice(0, 2).join(', ') + (sus.externes.length > 2 ? '…' : '');
+        var loc = sus.locaux.slice(0, 2).join(', ') + (sus.locaux.length > 2 ? '…' : '');
+        return '• ' + sus.trimestre + ' : le codex référence « ' + ext +
+            ' » alors que ton espace actuel référence « ' + loc + ' »';
+    }).join('\n');
+    return '⚠️ ATTENTION : ce codex semble porter un MODÈLE DE DONNÉES différent ' +
+        '(probablement antérieur) de ton espace de travail actuel.\n\n' + lignes +
+        (detection.dateExterne ? '\n\nDernière modification du codex : ' + detection.dateExterne : '') +
+        '\n\nContinuer va ' + verbe + ' ton espace avec cet ancien état — c\'est ' +
+        'exactement le scénario des incidents des 10-11 juin (productions « Non associé », ' +
+        'indices à zéro).\n\nContinuer quand même ?\n(Annuler = ne rien toucher)';
 }
 
 /**
@@ -2753,6 +2843,19 @@ async function actionFusionner() {
     await _yield();
     var ancetre = await _lireSnapshotAvant();
 
+    // 4 bis. Garde de modèle antérieur (#335 Lot A) : un externe d'un modèle
+    // divergent régresserait silencieusement toute clé non modifiée localement
+    // (mécanique 3-way correcte, résultat désastreux).
+    var detectionModeleFusion = _detecterModeleAnterieur(externe.donnees, externe.manifeste || null);
+    if (detectionModeleFusion) {
+        _masquerProgression();
+        if (!confirm(_messageModeleAnterieur(detectionModeleFusion, 'fusionner avec'))) {
+            notifications.warning('Fusion annulée', 'Ton espace de travail n\'a pas été modifié.');
+            return;
+        }
+        _majProgression(35, 'Analyse des différences…');
+    }
+
     // 5. Analyser les différences (données)
     _majProgression(35, 'Analyse des différences…');
     await _yield();
@@ -3358,6 +3461,7 @@ window.Codex = {
     _analyserFusion: _analyserFusion,
     _indexerSnapshot: _indexerSnapshot,
     _verifierEcritureTemoins: _verifierEcritureTemoins,
+    _detecterModeleAnterieur: _detecterModeleAnterieur,
 
     // Sauvegarde multi-plateforme
     sauvegarder: sauvegarderVersDestination,
