@@ -68,4 +68,29 @@ describe('Défense I · C · validerZipSecurite', () => {
         expect(result.erreur).toBeNull();
     });
 
+    // #334 session A — le pré-vol stockage consomme la taille décompressée.
+
+    it('#334 A · expose tailleDecompressee avec la somme correcte', () => {
+        const fauxZip = {
+            files: {
+                'donnees.json': { dir: false, _data: { uncompressedSize: 300 } },
+                'travaux/a.jpg': { dir: false, _data: { uncompressedSize: 700 } },
+                'travaux/': { dir: true, _data: { uncompressedSize: 999 } } // dossier : ignoré
+            }
+        };
+        const result = win.validerZipSecurite(fauxZip);
+        expect(result.valide).toBe(true);
+        expect(result.tailleDecompressee).toBe(1000);
+    });
+
+    it('#334 A · D6 · tailleDecompressee vaut 0 quand _data.uncompressedSize est absent', () => {
+        // JSZip ne garantit pas _data avant génération (MODELE-MENACES.md) —
+        // 0 = « inconnu » pour le pré-vol, qui bascule sur taille ZIP × 3.
+        const zip = new JSZip();
+        zip.file('codex-manifeste.json', JSON.stringify({ version: 1 }));
+        const result = win.validerZipSecurite(zip);
+        expect(result.valide).toBe(true);
+        expect(result.tailleDecompressee).toBe(0);
+    });
+
 });

@@ -535,6 +535,55 @@ async function chargerCodex(fichierZip) {
         console.warn('[Codex] ZIP legacy : le dossier historique/ et les snapshots TimeMachine sont ignorés (#250).');
     }
 
+    // 1b. Pré-vol stockage (#334 session A) : refuser AVANT toute écriture si
+    // le quota WebKit ne suffira pas (quota proportionnel à l'espace libre de
+    // l'appareil — cas réel iPad saturé du 10 juin 2026).
+    _majProgression(10, 'Vérification de l\'espace disponible…');
+
+    // Stockage persistant : revérifier ICI, sur geste utilisateur frais —
+    // meilleures chances d'octroi, et c'est le moment où ça compte (l'appel
+    // du boot dans travaux-stockage.js ignore son résultat ; D1).
+    if (navigator.storage && navigator.storage.persisted && navigator.storage.persist) {
+        try {
+            if (!(await navigator.storage.persisted())) {
+                var persistAccorde = await navigator.storage.persist();
+                if (!persistAccorde) {
+                    console.warn('[Codex] persist() refusé — le stockage reste susceptible d\'éviction.');
+                }
+            }
+        } catch (ePersist) {
+            console.warn('[Codex] persisted()/persist() indisponible :', ePersist.message);
+        }
+    }
+
+    var estimationStockage = null;
+    if (navigator.storage && navigator.storage.estimate) {
+        try {
+            var brutEstimation = await navigator.storage.estimate();
+            estimationStockage = { usage: brutEstimation.usage || 0, quota: brutEstimation.quota || 0 };
+        } catch (eEstimate) {
+            console.warn('[Codex] estimate() indisponible :', eEstimate.message);
+        }
+    }
+
+    var prevol = evaluerPrevolStockage(validation._tailleDecompressee || 0, fichierZip.size, estimationStockage);
+    if (prevol.verdict === 'refus') {
+        _masquerProgression();
+        var msgPrevol = 'Espace insuffisant pour ouvrir ce codex. Il a besoin d\'environ ' +
+            _formaterTaille(prevol.besoin) + ', mais Safari n\'accorde que ' +
+            _formaterTaille(prevol.disponible) + ' à l\'application parce que l\'appareil est presque plein. ' +
+            'Libère environ ' + _formaterTaille(prevol.manque * 2) +
+            ' (Réglages → Général → Stockage iPad), puis réessaie. ' +
+            'Astuce : les anciens ZIP de codex dans Fichiers prennent beaucoup de place.';
+        if (prevol.quotaFaible) {
+            msgPrevol += ' Si tu navigues en privé, rouvre l\'app dans une fenêtre normale.';
+        }
+        throw new Error(msgPrevol);
+    }
+    if (prevol.verdict === 'inconnu') {
+        console.warn('[Codex] Pré-vol stockage sans verdict (estimate() indisponible) — l\'import journalisé sert de filet.');
+    }
+
     // 2. Extraire et charger les données JSON
     _majProgression(15, 'Extraction des données…');
     const jsonStr = await zip.file(NOM_DONNEES).async('string');
@@ -747,6 +796,54 @@ function construireBilanImport(stats) {
 }
 
 /* ===============================
+   PRÉ-VOL STOCKAGE (#334 session A)
+   =============================== */
+
+// Marges du pré-vol (plan #334 §A.3) — marges TECHNIQUES documentées, pas des
+// valeurs métier : double écriture JSON tant que la session C (snapshot haché)
+// n'est pas livrée, enrobage structured-clone/SQLite WebKit (~10-20 %),
+// estimate() arrondi volontairement par WebKit. Conserver 1,5 même après C
+// (fragmentation).
+var PREVOL_FACTEUR_MARGE = 1.5;
+var PREVOL_PLANCHER_LIBRE = 100 * 1024 * 1024;  // coussin de fonctionnement post-import
+var PREVOL_FACTEUR_ZIP = 3;       // D6 : taille décompressée inconnue → borne conservatrice
+                                  // (blobs quasi incompressibles, JSON ~×5)
+var PREVOL_QUOTA_PRIVE = 500 * 1024 * 1024;     // heuristique navigation privée WebKit
+
+/**
+ * Évalue si l'espace accordé par le navigateur suffit pour ouvrir un codex.
+ * Fonction PURE (ne lit ni navigator ni le DOM) — testable en Vitest.
+ *
+ * @param {number} tailleDecompressee - Somme des entrées du ZIP (0 = inconnue, cf. D6)
+ * @param {number} tailleZip - Taille du fichier ZIP (fallback quand tailleDecompressee = 0)
+ * @param {{usage: number, quota: number}|null} estimation - storage.estimate(), ou null si indisponible
+ * @returns {{verdict: 'ok'|'refus'|'inconnu', besoin: number, disponible: number,
+ *            manque: number, approximatif: boolean, quotaFaible: boolean}}
+ */
+function evaluerPrevolStockage(tailleDecompressee, tailleZip, estimation) {
+    var approximatif = !(tailleDecompressee > 0);
+    var besoin = (approximatif
+        ? (tailleZip || 0) * PREVOL_FACTEUR_ZIP
+        : tailleDecompressee * PREVOL_FACTEUR_MARGE) + PREVOL_PLANCHER_LIBRE;
+
+    if (!estimation || !(estimation.quota > 0)) {
+        return { verdict: 'inconnu', besoin: besoin, disponible: 0, manque: 0,
+                 approximatif: approximatif, quotaFaible: false };
+    }
+
+    var disponible = Math.max(0, estimation.quota - (estimation.usage || 0));
+    var manque = Math.max(0, besoin - disponible);
+    return {
+        verdict: manque > 0 ? 'refus' : 'ok',
+        besoin: besoin,
+        disponible: disponible,
+        manque: manque,
+        approximatif: approximatif,
+        quotaFaible: estimation.quota < PREVOL_QUOTA_PRIVE
+    };
+}
+
+/* ===============================
    VALIDATION
    =============================== */
 
@@ -773,11 +870,13 @@ async function validerCodex(fichierZip) {
     }
 
     // 2b. Validation sécurité ZIP (taille décompressée + path traversal)
+    var tailleDecompressee = 0;
     if (typeof validerZipSecurite === 'function') {
         var securite = validerZipSecurite(zip);
         if (!securite.valide) {
             return { valide: false, erreurs: [securite.erreur] };
         }
+        tailleDecompressee = securite.tailleDecompressee || 0;
     }
 
     // 3. Vérifier la présence du manifeste (accepte aussi l'ancien nom)
@@ -831,7 +930,8 @@ async function validerCodex(fichierZip) {
         valide: erreurs.length === 0,
         erreurs,
         _zip: zip,
-        _manifeste: manifeste
+        _manifeste: manifeste,
+        _tailleDecompressee: tailleDecompressee
     };
 }
 
@@ -2264,8 +2364,16 @@ async function actionOuvrir() {
         // données, elles, sont écrites. Bug terrain iPad 10 juin 2026.
         // (confirm bloque la boucle d'événements : flush AVANT le dialogue.)
         await db.flush();
-        // Proposer de recharger pour appliquer les données
-        if (confirm('Codex chargé. Recharger la page pour appliquer les données ?')) {
+        // Proposer de recharger pour appliquer les données. Le rappel « tu
+        // peux supprimer le ZIP » (piste 5 du plan #334) ne vaut que pour un
+        // import COMPLET : en cas d'import incomplet, le bilan conseille au
+        // contraire de rouvrir le même ZIP — ne pas suggérer de le supprimer.
+        var msgReload = resultat.stats.incomplet
+            ? 'Recharger la page pour appliquer les données ?'
+            : 'Codex chargé. Le fichier ZIP d\'origine (' + _formaterTaille(fichier.size) +
+              ') reste dans Fichiers — tu peux le supprimer pour récupérer de l\'espace. ' +
+              'Recharger la page pour appliquer les données ?';
+        if (confirm(msgReload)) {
             window.location.reload();
         }
     } catch (e) {
@@ -3055,6 +3163,7 @@ window.Codex = {
     lireManifeste: lireManifeste,
     lireExterne: lireCodexExterne,
     construireBilanImport: construireBilanImport,
+    evaluerPrevolStockage: evaluerPrevolStockage,
 
     // Sauvegarde multi-plateforme
     sauvegarder: sauvegarderVersDestination,
