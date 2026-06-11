@@ -267,7 +267,7 @@ async function activerModeDemo() {
             infoCours: db.getSync('infoCours', null),
             groupeCoursActif: db.getSync('groupeCoursActif', null),
             modeApplication: db.getSync('modeApplication', 'normal'),
-            modalitesEvaluation: db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', null),
+            modalitesEvaluation: db.getSync(cle('modalitesEvaluation'), null),
             trimestres: trimestresAvant,
             listeCours: db.getSync('listeCours', []),
             cours: db.getSync('cours', []),

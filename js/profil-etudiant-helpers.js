@@ -41,7 +41,7 @@
  * @returns {string} - Le terme approprié ("artefact", "production", "travail", etc.)
  */
 function obtenirTermeProduction(context = 'singulier', majuscule = false) {
-    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
     // Session A-2 : normalisation à la lecture (id canonique), défaut = PRATIQUE_DEFAUT ('standards').
     const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
 
@@ -108,7 +108,7 @@ const _ACCORDS_TERME_PRODUCTION = {
  * @returns {'m'|'f'}
  */
 function genreTermeProduction() {
-    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
     const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
     return pratique === 'standards' ? 'm' : 'f';
 }
@@ -198,7 +198,7 @@ function obtenirNombreProductionsPourPatterns() {
  * @returns {Array<string>} - IDs des productions évaluables
  */
 function obtenirIdsProductionsEvaluables(productions) {
-    var config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    var config = db.getSync(cle('modalitesEvaluation'), null) || {};
     // Session A-2 : normalisation à la lecture — tous les alias Standards résolvent vers 'standards'.
     var estPAN = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) === 'standards';
     if (estPAN) {
@@ -213,7 +213,7 @@ function obtenirIdsProductionsEvaluables(productions) {
  * @returns {Object} - Instance de la pratique (PratiquePANMaitrise ou PratiqueSommative)
  */
 function obtenirPratiqueActuelle() {
-    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
     // Session A-2 : id canonique normalisé à la lecture, défaut = PRATIQUE_DEFAUT ('standards').
     const pratiqueId = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(modalites.pratique) : modalites.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
 

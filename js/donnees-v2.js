@@ -259,7 +259,7 @@
      */
     function obtenirPratiqueActiveId() {
         try {
-            const modalites = db.getSync(cle('modalitesEvaluation')) || db.getSync('modalitesEvaluation') || {};
+            const modalites = db.getSync(cle('modalitesEvaluation')) || {};
             return modalites.pratique || modalites.pratiqueActiveId || modalites.configurationSTDAppliquee?.id || null;
         } catch (e) {
             return null;

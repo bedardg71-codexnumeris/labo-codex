@@ -409,7 +409,7 @@ function _calculerNoteFinaleAggregee(moyennePortfolio, noteTerminale, pondP, pon
  * @returns {Object|null} - Détails de la note finale ou null si pas de données
  */
 function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
-    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
     // Session A-2 : id canonique normalisé à la lecture, défaut = PRATIQUE_DEFAUT ('standards').
     const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(modalites.pratique) : modalites.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
 

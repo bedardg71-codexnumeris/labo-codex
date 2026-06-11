@@ -1,14 +1,17 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
 
-// #328 Lot 1 — module propriétaire de `modalitesEvaluation`.
+// #328 Lots 1 et 3 — module propriétaire de `modalitesEvaluation`.
 // Verrouille le contrat de js/pratiques/modalites-evaluation.js :
-//  - lire() : clé namespacée d'abord, fallback clé nue (legacy pré-24 mai,
+//  - lire() : clé NAMESPACÉE uniquement (le fallback clé nue du Lot 1 a été
 //    retiré au Lot 3), jamais null ;
 //  - modifier() : read-modify-write centralisé, mutations en place
 //    (affectations, delete, sections imbriquées), écrit la clé NAMESPACÉE ;
 //  - remplacer() : écrasement complet, refuse null/non-objet (ne stocke
-//    jamais autre chose qu'un objet à la place de la config).
+//    jamais autre chose qu'un objet à la place de la config) ;
+//  - purgerLegacy() (Lot 3) : retire dureePeriodeMinutes des modalités de
+//    chaque trimestre, rapatrie la valeur dans `${id}_dureePeriode` sans
+//    jamais écraser une valeur existante.
 // La sentinelle sentinelle-ssot-modalites-ecrivains-L0.test.js verrouille en
 // parallèle que ce module est le SEUL écrivain de la clé dans js/.
 
@@ -32,9 +35,9 @@ describe('L1 · lire()', () => {
         expect(M.lire().pratique).toBe('standards');
     });
 
-    it('retombe sur la clé nue legacy si la namespacée est absente', () => {
+    it('ignore la clé nue legacy (fallback retiré au Lot 3)', () => {
         store['modalitesEvaluation'] = { pratique: 'sommative' };
-        expect(M.lire().pratique).toBe('sommative');
+        expect(M.lire()).toEqual({});
     });
 
     it('rend un objet vide (jamais null) si rien en stockage', () => {
@@ -59,12 +62,13 @@ describe('L1 · modifier()', () => {
         expect(store['t1_modalitesEvaluation']).toEqual({ configPAN: { jetons: { actif: true } } });
     });
 
-    it('rapatrie une config legacy (clé nue) vers la clé namespacée au passage', () => {
+    it('ne rapatrie plus la clé nue : modifier() part d\'un objet vide (Lot 3)', () => {
         store['modalitesEvaluation'] = { pratique: 'sommative' };
         M.modifier((m) => { m.typePAN = null; });
-        expect(store['t1_modalitesEvaluation']).toEqual({ pratique: 'sommative', typePAN: null });
-        // La clé nue n'est jamais supprimée par le module (purge = Lot 3).
-        expect('modalitesEvaluation' in store).toBe(true);
+        // La clé nue est ignorée et jamais touchée — seule la migration
+        // namespacing bornée de main.js a encore le droit de la lire.
+        expect(store['t1_modalitesEvaluation']).toEqual({ typePAN: null });
+        expect(store['modalitesEvaluation']).toEqual({ pratique: 'sommative' });
     });
 
     it('rend l\'objet écrit', () => {
@@ -86,5 +90,51 @@ describe('L1 · remplacer()', () => {
         expect(M.remplacer(undefined)).toBe(false);
         expect(M.remplacer('oops')).toBe(false);
         expect(store['t1_modalitesEvaluation']).toEqual({ pratique: 'standards' });
+    });
+});
+
+describe('L3 · purgerLegacy()', () => {
+    beforeEach(() => {
+        // Deux trimestres réels + une entrée invalide (filtrée par le helper
+        // réel enumererTrimestres — le stub reproduit son contrat : ids non vides).
+        win.enumererTrimestres = () => [{ id: 't1' }, { id: 't2' }];
+    });
+
+    it('rapatrie la valeur dans dureePeriode et retire le champ legacy', () => {
+        store['t1_modalitesEvaluation'] = { pratique: 'standards', dureePeriodeMinutes: 50 };
+        expect(M.purgerLegacy()).toBe(1);
+        expect(store['t1_dureePeriode']).toBe(50);
+        expect(store['t1_modalitesEvaluation']).toEqual({ pratique: 'standards' });
+    });
+
+    it('n\'écrase JAMAIS une clé dureePeriode déjà présente', () => {
+        store['t1_modalitesEvaluation'] = { dureePeriodeMinutes: 50 };
+        store['t1_dureePeriode'] = 60;
+        M.purgerLegacy();
+        expect(store['t1_dureePeriode']).toBe(60);
+        expect('dureePeriodeMinutes' in store['t1_modalitesEvaluation']).toBe(false);
+    });
+
+    it('traite chaque trimestre indépendamment et reste idempotente', () => {
+        store['t1_modalitesEvaluation'] = { dureePeriodeMinutes: 50 };
+        store['t2_modalitesEvaluation'] = { pratique: 'sommative' };
+        expect(M.purgerLegacy()).toBe(1);   // seul t1 portait le champ
+        expect(M.purgerLegacy()).toBe(0);   // 2e passe : plus rien à faire
+        expect(store['t2_modalitesEvaluation']).toEqual({ pratique: 'sommative' });
+        expect('t2_dureePeriode' in store).toBe(false);
+    });
+
+    it('ignore une valeur legacy invalide sans créer dureePeriode, mais purge le champ', () => {
+        store['t1_modalitesEvaluation'] = { dureePeriodeMinutes: 'abc' };
+        expect(M.purgerLegacy()).toBe(1);
+        expect('t1_dureePeriode' in store).toBe(false);
+        expect(store['t1_modalitesEvaluation']).toEqual({});
+    });
+
+    it('no-op sans helper enumererTrimestres (boot très précoce)', () => {
+        delete win.enumererTrimestres;
+        store['t1_modalitesEvaluation'] = { dureePeriodeMinutes: 50 };
+        expect(M.purgerLegacy()).toBe(0);
+        expect(store['t1_modalitesEvaluation']).toEqual({ dureePeriodeMinutes: 50 });
     });
 });

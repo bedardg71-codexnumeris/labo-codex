@@ -39,7 +39,8 @@
    - #btnSauvegarderPratiqueNotation : Bouton de sauvegarde
    
    LocalStorage utilisé:
-   - 'modalitesEvaluation' : Object contenant la configuration complète
+   - 'modalitesEvaluation' (clé namespacée, via le module propriétaire
+     js/pratiques/modalites-evaluation.js) : configuration complète
    =============================== */
 
 /* ===============================

@@ -10,9 +10,10 @@
  * IMPORTANT : deux objets historiques NE SONT PAS absorbés.
  *
  * 1. `modalitesEvaluation` contient aussi la configuration de la pratique de
- *    notation active (pratique, specifications, parObjectifs, categories, etc.)
- *    et des paramètres d'horaire (dureePeriodeMinutes). Ces champs restent
- *    dans modalitesEvaluation — ce ne sont pas des préférences utilisateur.
+ *    notation active (pratique, specifications, parObjectifs, categories, etc.).
+ *    Ces champs restent dans modalitesEvaluation — ce ne sont pas des
+ *    préférences utilisateur. (La durée de période, ex-champ legacy, vit dans
+ *    la clé `dureePeriode` du domaine horaire depuis le Lot 0 #328.)
  *
  * 2. `seuilsInterpretation` contient une structure mixte : quelques seuils
  *    ajustables par l'utilisateur (fragile, acceptable, bon, progression,

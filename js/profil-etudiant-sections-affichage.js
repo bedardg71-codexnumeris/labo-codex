@@ -287,7 +287,7 @@ function _genererBadgesJetonsHTML(evaluations, productions, da) {
 function _genererBlocGestionJetons(statutJetons, evaluations, productions, da) {
     if (typeof obtenirStatutJetonsEtudiant !== 'function') return '';
     const totalJetonsUtilisesTousTypes = Object.values(statutJetons).reduce((sum, info) => sum + info.utilises, 0);
-    const configBeta = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const configBeta = db.getSync(cle('modalitesEvaluation'), null) || {};
     const quotaGlobal = configBeta.configPAN?.jetons?.nombreParEleve || 2;  // Beta 95.7 : défaut 2
     return `
         <!-- Encadré pour le titre et la barre de progression globale -->
@@ -357,7 +357,7 @@ function genererSectionMobilisationEngagement(da) {
 
     // Calcul dual pour mode comparatif (Beta 90 + correctif 7 déc 2025 :
     // vérifier === true pour éviter le mode comparatif par défaut)
-    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
     // Session C (#303) : mode comparatif retiré — couche unique (pratique active).
     const { indicesSOM, indicesPAN } = _calculerIndicesMobilisation(da, config.pratique);
 
@@ -387,7 +387,7 @@ function genererSectionMobilisationEngagement(da) {
     // 🆕 LIRE LA CONFIGURATION DE LA PRATIQUE DE NOTATION
     // Source de vérité : pratiquesConfigurables (Material Settings), fallback sur modalitesEvaluation
     const configPratiqueActive = typeof obtenirConfigPratiqueActive === 'function' ? obtenirConfigPratiqueActive() : null;
-    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
     const configPortfolio = configPratiqueActive?.portfolio || modalites.configPAN?.portfolio || {};
     const portfolioActif = configPortfolio.actif !== false;
     let nombreARetenir = configPortfolio.nombreARetenir || portfolio?.regles?.nombreARetenir || 3;
@@ -895,7 +895,7 @@ function genererSectionAccompagnement(da) {
                         const niveau = pct >= 85 ? 'E' : pct >= 75 ? 'M' : pct >= 65 ? 'D' : 'I';
 
                         // Obtenir la configuration pour afficher le nombre d'artefacts retenus
-                        const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+                        const config = db.getSync(cle('modalitesEvaluation'), null) || {};
                         // Session A-2 : id canonique normalisé à la lecture, défaut = PRATIQUE_DEFAUT ('standards').
                         const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
 
@@ -2062,7 +2062,7 @@ function genererValeursComparatives(valeurSOM, valeurPAN, afficherTiret = false)
     }
 
     // Session C (#303) : mode comparatif retiré — toujours la valeur de la pratique active.
-    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
     const pratique = config.pratique || 'sommative';
     const valeur = pratique === 'sommative' ? valeurSOM : valeurPAN;
     return `<strong class="profil-valeur-grande-bleu">${valeur}%</strong>`;
@@ -3992,7 +3992,7 @@ function genererSectionPerformance(da) {
 
     // Calcul dual pour mode comparatif (Beta 90 + correctif 7 déc 2025 :
     // vérifier === true pour éviter le mode comparatif par défaut)
-    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
     // Session C (#303) : mode comparatif retiré — indices de la pratique active.
     const { indices } = _calculerIndicesPerformance(da);
 

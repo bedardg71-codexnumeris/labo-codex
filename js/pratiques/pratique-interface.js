@@ -45,7 +45,8 @@
  * // Sommative
  * obtenirId() => "sommative"
  *
- * NOTE : Cet ID doit correspondre à la valeur dans db.getSync('modalitesEvaluation').pratique
+ * NOTE : Cet ID doit correspondre à la valeur dans modalitesEvaluation.lire().pratique
+ *        (module propriétaire js/pratiques/modalites-evaluation.js, #328 Lot 1)
  */
 
 /**
@@ -273,7 +274,8 @@
 // ============================================================================
 
 /**
- * STRUCTURE : Modalités d'évaluation (db.getSync('modalitesEvaluation'))
+ * STRUCTURE : Modalités d'évaluation (modalitesEvaluation.lire() — module
+ * propriétaire js/pratiques/modalites-evaluation.js, clé namespacée)
  *
  * {
  *   pratique: "pan-maitrise" | "sommative" | "pan-specifications" | "denotation",

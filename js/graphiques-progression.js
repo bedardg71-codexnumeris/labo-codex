@@ -4562,7 +4562,7 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
  */
 function obtenirLabelNoteFinale() {
     try {
-        const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+        const config = db.getSync(cle('modalitesEvaluation'), null) || {};
         // Session A-2 : id canonique normalisé à la lecture, défaut = PRATIQUE_DEFAUT ('standards').
         const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
         return (pratique === 'standards') ? 'Note chiffrée' : 'Note finale';

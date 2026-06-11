@@ -699,7 +699,7 @@ function _collecterJetonsUtilisesParType(da) {
         if (e.jetonRepriseCibleeApplique) jetonsParType.repriseCiblee.push(echapperHtml(nomProd));
     });
     var totalUtilises = jetonsParType.delai.length + jetonsParType.reprise.length + jetonsParType.repriseCiblee.length;
-    var modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    var modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
     var totalMax = (modalites.configPAN && modalites.configPAN.jetons && modalites.configPAN.jetons.nombreParEleve)
         || (modalites.configurationJetons && modalites.configurationJetons.nombreParEleve)
         || 2;

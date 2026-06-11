@@ -2700,7 +2700,7 @@ async function creerPratiqueV2() {
             // saisies, plus du SSOT global modalitesEvaluation (Primo n'écrase plus
             // ce que l'utilisateur tape). modalites reste lu ci-dessous pour les
             // catégories hybrides détaillées (Mode Expert), non collectées ici.
-            const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+            const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
             const nbSoumis = parseInt(r.nbArtefactsSoumis) || 12;
             const nbRetenus = parseInt(r.nbArtefactsRetenus) || 7;
             const minFormatif = parseInt(r.minAvantCalculFormatif) || 3;

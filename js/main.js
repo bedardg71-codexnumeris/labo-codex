@@ -136,7 +136,7 @@ window.formaterDateComplete = function(dateISO) {
  * @returns {string} - HTML du badge avec classes CSS
  */
 window.genererBadgePratique = function(type, compact = false) {
-    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
     const typePAN = config.typePAN || 'maitrise';
 
     let classe = compact ? 'badge-pratique-compact' : 'badge-pratique';
@@ -277,23 +277,19 @@ document.addEventListener('DOMContentLoaded', function () {
                     return false;
                 };
 
-                // 1. modalitesEvaluation.portfolio.decouplerPR
-                // ⚠️ Migration historique : opère sur la clé globale (l'ancienne
-                // source de vérité, avant le namespacing du 24 mai 2026). La
-                // migration namespacing ci-dessous copiera le résultat dans les
-                // clés par trimestre. Ne pas utiliser cle() ici.
-                const modalites = db.getSync('modalitesEvaluation', {});
-                if (modalites && modalites.portfolio && renommerDansObjet(modalites.portfolio)) {
-                    db.setSync('modalitesEvaluation', modalites);
-                }
+                // NB Lot 3 #328 (11 juin 2026) : le volet « modalitesEvaluation
+                // .portfolio.decouplerPR » (clé globale pré-namespacing) a été
+                // retiré — la clé nue est morte et le module propriétaire est
+                // le seul écrivain de la clé namespacée. La config portfolio
+                // canonique vit dans pratiquesConfigurables (Phase G2-a).
 
-                // 2. preferencesUtilisateur.decouplerPR (préférence v2)
+                // 1. preferencesUtilisateur.decouplerPR (préférence v2)
                 const prefs = db.getSync('preferencesUtilisateur', {});
                 if (prefs && renommerDansObjet(prefs)) {
                     db.setSync('preferencesUtilisateur', prefs);
                 }
 
-                // 3. bibliothequePratiques[*].config.portfolio.decouplerPR
+                // 2. bibliothequePratiques[*].config.portfolio.decouplerPR
                 const biblioPratiques = db.getSync('bibliothequePratiques', []);
                 let biblioModifiee = false;
                 if (Array.isArray(biblioPratiques)) {
@@ -305,7 +301,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (biblioModifiee) db.setSync('bibliothequePratiques', biblioPratiques);
                 }
 
-                // 4. pratiquesPersonnalisees[*].config.portfolio.decouplerPR
+                // 3. pratiquesPersonnalisees[*].config.portfolio.decouplerPR
                 const pratiquesPerso = db.getSync('pratiquesPersonnalisees', []);
                 let persoModifiee = false;
                 if (Array.isArray(pratiquesPerso)) {
@@ -326,10 +322,11 @@ document.addEventListener('DOMContentLoaded', function () {
         // la pratique de notation devient namespacée par trimestre pour que
         // chaque session conserve sa propre pratique (modèle qui évolue d'un
         // semestre à l'autre). On copie le global existant dans la clé
-        // namespacée de chaque trimestre encore dépourvu. Le global est
-        // conservé en lecture seule pendant la transition des callers ;
-        // sa lecture deviendra inutile une fois tous les sites migrés.
-        // Idempotent.
+        // namespacée de chaque trimestre encore dépourvu. Idempotent.
+        // ⚠️ BORNÉE (Lot 3 #328, 11 juin 2026) : SEUL lecteur autorisé de la
+        // clé nue 'modalitesEvaluation' dans js/ — pont pour les données
+        // pré-24 mai 2026. La sentinelle L3 verrouille ce périmètre ; ne pas
+        // ajouter d'autre lecture de la clé nue.
         if (!db.getSync('migration_modalites_namespacees_done', false)) {
             try {
                 const modalitesGlobales = db.getSync('modalitesEvaluation', null);
@@ -349,6 +346,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.warn('[migration_modalites_namespacees] erreur ignorée:', e);
             }
             db.setSync('migration_modalites_namespacees_done', true);
+        }
+
+        // Purge du champ legacy dureePeriodeMinutes dans les modalités de
+        // chaque trimestre (Lot 3 #328, 11 juin 2026). Sans flag : idempotente
+        // et robuste face aux réintroductions par import de données anciennes
+        // (même patron que nettoyerLegacy de preferences.js). La valeur est
+        // rapatriée dans la clé `dureePeriode` (domaine horaire) au passage.
+        try {
+            if (window.modalitesEvaluation && typeof window.modalitesEvaluation.purgerLegacy === 'function') {
+                window.modalitesEvaluation.purgerLegacy();
+            }
+        } catch(e) {
+            console.warn('[purge dureePeriodeMinutes] erreur ignorée:', e);
         }
 
         // Migration namespacing de pratiquesConfigurables (24 mai 2026) :

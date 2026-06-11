@@ -322,7 +322,7 @@ function construireConfigComplete(pratiqueData) {
  */
 function obtenirIdPratiqueActive() {
     try {
-        const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', null);
+        const config = db.getSync(cle('modalitesEvaluation'), null);
 
         if (!config) {
             // Fraîche installation — modalitesEvaluation pas encore initialisé. Silent.
