@@ -17,8 +17,17 @@
          APRÈS validation terrain de la preview par Grégoire (critère du plan
          335/336). 14 tests sentinelle-purge-espace-336D (dont : fusion ne
          purge JAMAIS, pas d'exécution auto).
-         TERRAIN À FAIRE : ouvrir un codex réel, lire la preview console,
-         vérifier la liste, puis purger et re-vérifier l'espace.
+         ✅ TERRAIN VALIDÉ (Grégoire, 11 juin ~15h45, Mac, codex réel 1 Go) :
+         preview affichée (1 clé orpheline = e2026_horaireSelectionne, résidu
+         du trimestre test supprimé au chantier D ; 7 blobs FT_* mars-mai non
+         référencés), contre-vérification console vs espace vivant = [],
+         purge exécutée {clesSupprimees:1, blobsSupprimes:7, echecs:[]}.
+         Au passage, FIX livré pendant le terrain (32cfddc6) : le plan de
+         purge est persisté (_codex_planPurge336) et réaffiché au boot — le
+         reload post-import effaçait la console ET le plan (constat 15h27).
+         Reste (décision Grégoire, prochaine session) : activer l'exécution
+         automatique à l'import, et sous quelle forme (silencieuse vs confirm).
+         Vérif visuelle d'une page travaux encore à faire par Grégoire.
        • #328 L2-b2 LIVRÉ (e3179c41) : miroir `pratique` MORT. ~46 lecteurs
          migrés (type → obtenirTypePratiqueActive ; id →
          obtenirPratiqueActiveGroupeCours) dans 14 fichiers ; toutes les
