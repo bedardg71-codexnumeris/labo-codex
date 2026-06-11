@@ -1,4 +1,87 @@
 <!-- =====================================================================
+     SESSION 11 juin 2026 MATIN (Claude Code) — JOURNÉE MULTI-CHANTIERS :
+     #144 palettes iPad (1.12.1), incident modèle de données (restauration),
+     #334 session A (1.13.0), seuil 20 Mo retiré (1.14.0), #334 SESSION C
+     EN COURS NON COMMITÉE. HEAD main `a1b65e75`, poussé. 552 Vitest +
+     54 Playwright = 606 VERTS sur l'état courant (codex.js modifié inclus).
+     ⚠ ARBRE DE TRAVAIL NON PROPRE : js/codex.js modifié (session C), seul
+     fichier dirty — sessions parallèles : ne pas stager à l'aveugle.
+       • #144 (1.12.1, commits 1da88f5e+d2a02610) : palettes immobiles au
+         toucher iPad. TROIS causes : (a) drag souris-seulement → réécrit en
+         Pointer Events + setPointerCapture + touch-action:none (couvre
+         doigt/Pencil/souris ; aussi palette Nœuds carte mentale) ; (b) palette
+         Annotation en mode normal JAMAIS câblée au drag (creerLayoutAnnotation
+         n'appelait pas configurerDragPalette — immobile même à la souris) ;
+         (c) restaurerPositionPalette sans bornage → palette « disparue » hors
+         zone (vu sur Codes). Poignées ⠿ ajoutées (6 barres). Sentinelle 9 cas
+         + Playwright palettes-drag-rendu.spec.js (drag réel + bornage).
+         SUIVI-BUGS #144. Limite connue : resize CSS inopérant au toucher.
+       • INCIDENT DONNÉES (04:44, sans changement de code) : l'import du codex
+         iPad (test #334 B du 10 juin soir) avait ÉCRASÉ le modèle consolidé
+         chantier D du Mac (la migration console one-shot du 29 mai n'avait
+         jamais touché l'iPad). Symptôme : 11 productions coursId orphelin
+         `COURS1766455789356`, liste évaluations toute « Non associé »,
+         sélecteur Production vide (obtenirDonneesSelonMode filtre par
+         coursId). Diagnostic : _diagnostiquerModeleCours() (outil chantier D).
+         RÉSOLU par restauration du codex Mac de la veille. Effet de bord :
+         corrigerTrimestresMultiplesActifs a basculé sur Été 2026 (juin → É,
+         heuristique de date qui écrase l'intention) — H2026 réactivé à la
+         main. #335 créé (garde-fous : détection modèle antérieur à l'import +
+         trimestre actif du codex prioritaire sur la date). L'iPad a ensuite
+         importé le codex Mac → DEUX APPAREILS ALIGNÉS sur le modèle consolidé.
+       • #334 SESSION A (1.13.0, commits 9d5eca78+abe6a43d) : pré-vol stockage.
+         evaluerPrevolStockage PURE (besoin = décompressé×1,5 + plancher
+         100 Mo ; fallback D6 ZIP×3 ; verdict inconnu non bloquant ;
+         quotaFaible <500 Mo → indice navigation privée) ; persisted()/persist()
+         sur geste frais ; refus = message quoi/pourquoi/quoi-faire (manque ×2).
+         validerZipSecurite expose tailleDecompressee → _tailleDecompressee.
+         DIVERGENCE ASSUMÉE §A.4 : rappel « ZIP supprimable » sur import
+         COMPLET seulement (incomplet → on conseille de ROUVRIR le même ZIP).
+         Loader codex.test.js extrait en _helpers/charger-codex.js (partagé).
+         Ferme #295. Terrain Mac stub estimate non fait (release sur go
+         Grégoire) — à faire à l'occasion.
+       • SEUIL 20 Mo/BLOB RETIRÉ (1.14.0, commits 5ed65cc1+a1b65e75) —
+         DÉCISION GRÉGOIRE 11 juin. Terrain iPad B : bilan honnête validé
+         (371/372, UN SEUL fichier > 20 Mo, quota innocenté). Hypothèse
+         « IDB ≈ 50 Mo » périmée (36 Go réels). Zéro-dette : branche
+         trop_volumineux retirée (classement + bilan), sentinelle B INVERSÉE
+         (not.toContain LIMITE_BLOB_MB / BLOB_TROP_VOLUMINEUX).
+       • #336 CRÉÉ : ouvrir un codex ne purge pas l'espace précédent —
+         2,5 Go Safari observés iPad. 3 contributions : blobs orphelins,
+         clés orphelines, snapshot intégral (réglé par session C). Purge =
+         suppression de données → session dédiée, preview console d'abord,
+         périmètre strictement chargerCodex (PAS la fusion).
+       • #334 SESSION C EN COURS — code écrit dans js/codex.js, NON COMMITÉ,
+         TESTS DÉDIÉS PAS ENCORE ÉCRITS. Fait : _sha256Hex (local, patron
+         reserve.js, null si crypto.subtle absent) ; _indexerSnapshot
+         ({__format:'codex-snapshot-hash-v1', cles:{clé:sha256(JSON)}},
+         ignore _codex_* comme l'analyseur) ; _ecrireSnapshotAvant (remove si
+         index impossible) ; _lireSnapshotAvant (conversion legacy À LA VOLÉE,
+         l'ancien format n'est plus jamais écrit) ; _migrerSnapshotVersIndexHash
+         one-shot au boot (initialiserCodex) ; _analyserFusion ASYNC par hachés
+         — BRANCHES STRICTEMENT INCHANGÉES, hash undefined côté absent =
+         sémantique exacte de l'ancien jsonX !== jsonAncetre ; 2 callers
+         awaités (comparer 2685 + fusionner 2844) ; écritures genererCodex +
+         chargerCodex via _ecrireSnapshotAvant ; exports tests _analyserFusion
+         + _indexerSnapshot sur window.Codex. Audit sécurité du diff : propre.
+     REPRISE — SESSION C À FINIR (dans l'ordre) :
+       1. ÉCRIRE tests/unit/analyser-fusion-hash.test.js : toutes les branches
+          du 3 parties (ajouts 1/2 côtés, modif/modif, suppr propre ×2,
+          suppr+modif ×2, suppr 2 côtés, identiques), 2 parties (ancetre null),
+          ancêtre legacy converti par _indexerSnapshot, clés _codex_ ignorées,
+          + sentinelles câblage (écritures via _ecrireSnapshotAvant, lecteurs
+          via _lireSnapshotAvant, pas de db.set(CLE_SNAPSHOT_AVANT, donnees)
+          brut hors helpers). crypto.subtle dispo dans Node/Vitest. Plan §C :
+          résultats IDENTIQUES à l'ancien algorithme exigés.
+       2. cd tests && npm test (suite complète), puis terrain Mac : scénario
+          fusion complet avant/après + comparaison (#243). file:// = contexte
+          sécurisé pour crypto.subtle (signature.js Voûte déjà validé terrain).
+       3. Release minor APRÈS terrain. Vérif iPad : memoryCache.nbCles diminue
+          au boot ; (await db.get('_codex_snapshot_avant')).__format présent.
+       4. iPad 1.14.0 : ROUVRIR le même ZIP → le fichier 1/372 doit se
+          compléter. Les 2,5 Go ne redescendront qu'avec #336 + C déployées.
+       5. Ensuite : session D (memoryCache + doc DATA-OWNERSHIP) puis #336.
+     =====================================================================
      SESSION 10 juin 2026 SOIR (Claude Code) — #334 SESSION B LIVRÉE :
      IMPORT CODEX JOURNALISÉ. RELEASE 1.12.0 (build 0610-1916), terrain Mac
      validé, POUSSÉE sur origin (Netlify déploie). HEAD main `2f25dfc9`.
