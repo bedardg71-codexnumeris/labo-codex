@@ -2369,12 +2369,14 @@ function _actualiserMenu() {
         else comparerItem.classList.add('u-hide');
     }
 
-    // Adaptation selon le support FSAPI (Chrome/Edge vs Safari/iPad)
-    // Sans FSAPI, « Enregistrer le codex » télécharge toujours un nouveau fichier — on renomme.
+    // Libellé canonique « Enregistrer le codex » partout (décision Grégoire,
+    // 11 juin 2026 — ECOSYSTEME-DONNEES.md : verbes ouvrir/enregistrer ; l'ancien
+    // « Télécharger » Safari ne disait pas la direction). La mécanique Safari
+    // (téléchargement d'un nouveau fichier) reste dite par le sous-texte ci-dessous.
     var fsapiOk = (typeof window.showSaveFilePicker === 'function');
     var enregLabel = document.getElementById('codex-menu-enreg-label');
     if (enregLabel) {
-        enregLabel.textContent = fsapiOk ? 'Enregistrer le codex' : 'Télécharger le codex';
+        enregLabel.textContent = 'Enregistrer le codex';
     }
 
     // Sous-texte "Enregistrer" : montre le bon mode selon le contexte
@@ -2579,8 +2581,7 @@ function actionDetails() {
         : '\n\nMode : téléchargement d\'un nouveau fichier à chaque enregistrement (Safari/iPad). Pense à remplacer manuellement le fichier précédent sur ta clé USB.';
 
     if (!_etat.manifeste) {
-        var libelleEnreg = fsapiOk ? 'Enregistrer le codex' : 'Télécharger le codex';
-        alert('Aucun codex actif.\n\nPour commencer :\n• « Ouvrir un codex » pour charger un fichier existant\n• « Nouveau codex » pour en créer un\n• « ' + libelleEnreg + ' » pour sauvegarder tes données actuelles' + noteFsapi);
+        alert('Aucun codex actif.\n\nPour commencer :\n• « Ouvrir un codex » pour charger un fichier existant\n• « Nouveau codex » pour en créer un\n• « Enregistrer le codex » pour sauvegarder tes données actuelles' + noteFsapi);
         return;
     }
 
