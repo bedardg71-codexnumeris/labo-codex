@@ -8,6 +8,15 @@
 > alerte explicite), câblé en étape 5 bis de `chargerCodex` après `db.flush()`. Tests :
 > `sentinelle-persistance-import-335C.test.js` (9 cas, dont la repro exacte de
 > l'incident bis — copie périmée en IDB → signalée).
+> ✅ **Lot A LIVRÉ** (11 juin) : `_detecterModeleAnterieur` (coursId référencés
+> disjoints par trimestre = modèles divergents ; chevauchement partiel = même lignée,
+> pas d'alerte) + garde BLOQUANTE avec choix dans `chargerCodex` (avant toute écriture,
+> Annuler → throw, espace intact) ET `actionFusionner` (avant l'analyse). Tests :
+> `sentinelle-modele-anterieur-335A.test.js` (10 cas, dont la repro I1/I3).
+> ✅ **Lot B LIVRÉ** (11 juin) : `corrigerTrimestresMultiplesActifs` choisit PARMI les
+> trimestres marqués actifs (année desc, H>E>A) — la date du jour ne peut plus élire un
+> trimestre non marqué (incident I2). Tests : `sentinelle-trimestre-intention-335B.test.js`
+> (4 cas, repro I2). **Reste : Lot D (#336, purge à l'ouverture — session dédiée).**
 > **Pourquoi maintenant** : trois incidents de la même famille en 28 heures, tous sur
 > données réelles H2026 — (I1) import du codex iPad pré-chantier-D qui écrase le modèle
 > consolidé Mac (10-11 juin) ; (I2) trimestre actif basculé sur Été par l'heuristique de
