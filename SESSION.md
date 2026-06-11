@@ -1,4 +1,53 @@
 <!-- =====================================================================
+     SESSION 11 juin 2026 (après-midi, Claude Code AUTONOME, mandat Grégoire :
+     « en-tête BACKLOG + #336 D + #328 L2-b2 + #332 c1 ») — 3 CHANTIERS LIVRÉS,
+     PAS DE RELEASE (terrain requis sur les 3 ; session Safari de Grégoire
+     possiblement ouverte). 649→651 Vitest + 55 Playwright = 706 VERTS.
+     ARBRE PROPRE, POUSSÉ (même précédent que la session solo du matin :
+     commits poussés, release différée au terrain).
+       • EN-TÊTE BACKLOG rafraîchi (03352b09) : 1.16.0, enchaînement du 11 juin,
+         #335 clos, AQPC au passé.
+       • #336 LOT D LIVRÉ EN PHASE PREVIEW (d09a2bb9) : chargerCodex planifie
+         la purge de l'espace précédent (clés trimestre orphelines via
+         _planifierPurgeEspace — identité = préfixe `^[a-z]\d{4}_`, jamais les
+         clés globales/démo ; blobs non référencés via db.listBlobIds ajouté à
+         db.js) et AFFICHE en console SANS rien supprimer.
+         Codex.purgerEspacePrecedent() exécute sur décision humaine (purge des
+         2 couches via db.remove + deleteBlob). Activation auto = prochain pas,
+         APRÈS validation terrain de la preview par Grégoire (critère du plan
+         335/336). 14 tests sentinelle-purge-espace-336D (dont : fusion ne
+         purge JAMAIS, pas d'exécution auto).
+         TERRAIN À FAIRE : ouvrir un codex réel, lire la preview console,
+         vérifier la liste, puis purger et re-vérifier l'espace.
+       • #328 L2-b2 LIVRÉ (e3179c41) : miroir `pratique` MORT. ~46 lecteurs
+         migrés (type → obtenirTypePratiqueActive ; id →
+         obtenirPratiqueActiveGroupeCours) dans 14 fichiers ; toutes les
+         écritures retirées ; PratiqueManager.changerPratiqueActive écrit la
+         SSOT groupesCours[].pratiqueId du GC actif (+ sync de la copie) et
+         lève une erreur claire sans GC actif ; purgerLegacy strippe
+         `pratique` au boot ; ratchet étendu à TOUT js/ (lecture ET écriture) ;
+         golden master L2-0 INCHANGÉ ; fixtures DEN basculées SSOT.
+         TERRAIN À FAIRE (critère du plan) : H2026, 2 groupes — notes finales
+         identiques avant/après + activer/désactiver une pratique au Labo.
+         RESTE : L2-c (configPAN.jetons, ~31 sites, D3 actée) = session dédiée.
+         DÉCOUVERTE → #338 créé : vieil éditeur pratiques 100 % mort
+         (10 ids DOM inexistants) + bug dormant sauvegarderDansConfiguration
+         (param `cle` masque window.cle) — ablation à valider avec Grégoire.
+       • #332 CONSTAT 1 — ENQUÊTE LIVRÉE, RIEN APPLIQUÉ (repro Grégoire
+         requise) : Rapports/ENQUETE-332-CONSTAT1-2026-06-11.md. Deux
+         mécanismes CONFIRMÉS : (A) le select horaire du formulaire GC est
+         écrasé par l'auto-association groupeAssocie dans son PROPRE handler
+         (mettreAJourNomGroupeCoursV2) → changer d'horaire est impossible,
+         retour silencieux à l'ancien ; (B) sauvegarderGroupeCoursV2 :
+         findIndex raté (groupeCoursEnEditionId périmé après changement de
+         trimestre, jamais réinitialisé) → AUCUN else, toast « modifié » quand
+         même. Protocoles console 2-3 min chacun dans le rapport.
+     PROCHAINE SESSION (avec Grégoire) :
+       1. Terrain #336 preview + #328 L2-b2 (puis release minor groupée).
+       2. Repro #332 A/B avec le rapport → fix (options proposées dedans).
+       3. #328 L2-c (jetons) en session dédiée ; #337 (2 min, UI GitHub) ;
+          #338 à trancher (périmètre d'ablation).
+     =====================================================================
      SESSION 11 juin 2026 (fin de matinée, Claude Code AVEC Grégoire) —
      INCIDENT RÉSOLU + #335 LOTS C/A/B LIVRÉS + RELEASE 1.16.0. HEAD main
      `d26d21fe`, POUSSÉ. 635 Vitest + 55 Playwright = 690 VERTS.
