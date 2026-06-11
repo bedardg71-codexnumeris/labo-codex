@@ -91,3 +91,8 @@ node_modules/
 
 # Rapports d'outillage d'audit (lourds, régénérables — 21 Mo)
 audit/reports/
+
+# Données réelles de classe — ne JAMAIS committer (PII étudiant·es)
+CODEX problématiques juin/
+*.codex.zip
+codex-*/
