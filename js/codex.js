@@ -765,6 +765,41 @@ async function chargerCodex(fichierZip) {
             + 'fichier ; si le problème persiste, libère de l\'espace disque puis réessaie.');
     }
 
+    // 5 ter. Purge de l'espace précédent (#336 Lot D — phase PREVIEW, 11 juin
+    // 2026). Ouvrir un codex = REMPLACEMENT : ce qui n'est pas dans le codex
+    // importé est un résidu de l'espace précédent (doublement Safari, constat
+    // iPad du 11 juin). AUCUNE suppression automatique tant que la preview
+    // n'est pas validée sur le terrain (critère de fin du plan #335/#336) —
+    // on planifie, on affiche, et Codex.purgerEspacePrecedent() exécute sur
+    // décision humaine. Périmètre strictement import complet : la fusion et
+    // la comparaison ne passent jamais ici.
+    try {
+        var clesStockage = await db.keys();
+        var blobIdsStockage = (typeof db.listBlobIds === 'function') ? await db.listBlobIds() : [];
+        var planPurge = _planifierPurgeEspace(donnees, clesStockage, blobIdsStockage);
+        _dernierPlanPurge = planPurge;
+        if (planPurge.clesOrphelines.length === 0 && planPurge.blobsOrphelins.length === 0) {
+            console.warn('[Codex] #336 purge (preview) : aucun orphelin — espace déjà propre.');
+            _dernierPlanPurge = null;
+        } else {
+            console.warn('[Codex] #336 purge (PREVIEW — rien n\'est supprimé) : ' +
+                planPurge.clesOrphelines.length + ' clé(s) orpheline(s), ' +
+                planPurge.blobsOrphelins.length + ' blob(s) orphelin(s) détecté(s).');
+            if (planPurge.clesOrphelines.length > 0) {
+                console.warn('[Codex] #336 clés orphelines : ' + planPurge.clesOrphelines.join(', '));
+            }
+            if (planPurge.blobsOrphelins.length > 0) {
+                console.warn('[Codex] #336 blobs orphelins (' + planPurge.blobsOrphelins.length + ') : ' +
+                    planPurge.blobsOrphelins.slice(0, 20).join(', ') +
+                    (planPurge.blobsOrphelins.length > 20 ? ', …' : ''));
+            }
+            console.warn('[Codex] #336 pour purger après vérification : Codex.purgerEspacePrecedent()');
+        }
+    } catch (ePurge) {
+        // La preview ne doit jamais faire échouer un import réussi.
+        console.warn('[Codex] #336 preview de purge impossible :', ePurge.message || ePurge);
+    }
+
     // 6. Mettre à jour l'état
     _majProgression(98, 'Finalisation…');
     const maintenant = new Date().toISOString();
@@ -1521,6 +1556,112 @@ async function _verifierEcritureTemoins(donnees, cibles) {
         }
     }
     return ecarts;
+}
+
+/* ===============================
+   PURGE DE L'ESPACE PRÉCÉDENT (#336 Lot D)
+   =============================== */
+
+// Dernier plan de purge calculé par chargerCodex (phase PREVIEW).
+// Consommé par Codex.purgerEspacePrecedent() après vérification en console.
+var _dernierPlanPurge = null;
+
+/**
+ * Planifie la purge de l'espace précédent après un import COMPLET (#336 Lot D).
+ * Fonction PURE (ne lit ni le stockage ni le DOM) — testable en Vitest.
+ *
+ * Ouvrir un codex = REMPLACEMENT (ECOSYSTEME-DONNEES.md) : ce qui reste en
+ * stockage sans figurer dans le codex importé est un résidu de l'espace
+ * précédent. Périmètre volontairement restreint par IDENTITÉ (jamais par
+ * flag — SKILL_integrite_globaux) :
+ * - clés : seules les clés namespacées par trimestre (`h2026_…`) sont
+ *   candidates. Les clés globales (trimestres, bibliothèques, préférences,
+ *   `_codex_*`, espace démo `demo_…`) ne sont JAMAIS touchées.
+ * - blobs : seuls les blobs du store fichiers non référencés par les
+ *   `fichiersTravaux` importés (tous trimestres du codex confondus).
+ *
+ * @param {Object} donnees - dataset du codex qui vient d'être écrit
+ * @param {string[]} clesStockage - toutes les clés présentes en stockage (db.keys())
+ * @param {string[]} blobIdsStockage - tous les ids du store fichiers (db.listBlobIds())
+ * @returns {{clesOrphelines: string[], blobsOrphelins: string[]}}
+ */
+function _planifierPurgeEspace(donnees, clesStockage, blobIdsStockage) {
+    // Clés du nouvel espace — même filtre que la phase d'écriture (les
+    // entrées `_…` du dataset ne sont pas écrites, elles ne comptent pas).
+    var clesNouvelEspace = {};
+    Object.keys(donnees || {}).forEach(function(c) {
+        if (c.charAt(0) !== '_') clesNouvelEspace[c] = true;
+    });
+
+    var clesOrphelines = (clesStockage || []).filter(function(c) {
+        return typeof c === 'string' &&
+            /^[a-z]\d{4}_/.test(c) &&      // identité : clé d'espace trimestre
+            !clesNouvelEspace[c];
+    });
+
+    var idsReferences = {};
+    Object.keys(donnees || {}).forEach(function(c) {
+        if (c.indexOf('fichiersTravaux') === -1) return;
+        var liste = donnees[c];
+        if (!Array.isArray(liste)) return;
+        liste.forEach(function(f) { if (f && f.id) idsReferences[f.id] = true; });
+    });
+    var blobsOrphelins = (blobIdsStockage || []).filter(function(id) {
+        return !idsReferences[id];
+    });
+
+    return { clesOrphelines: clesOrphelines, blobsOrphelins: blobsOrphelins };
+}
+
+/**
+ * Exécute un plan de purge (#336 Lot D) : supprime clés (localStorage + IDB
+ * + memoryCache via db.remove) et blobs orphelins. Zéro-silence : chaque clé
+ * supprimée est loggée, décompte final retourné.
+ * @param {{clesOrphelines: string[], blobsOrphelins: string[]}} plan
+ * @returns {Promise<{clesSupprimees: number, blobsSupprimes: number, echecs: string[]}>}
+ */
+async function _executerPurgeEspace(plan) {
+    var bilan = { clesSupprimees: 0, blobsSupprimes: 0, echecs: [] };
+    for (var i = 0; i < plan.clesOrphelines.length; i++) {
+        var clePurge = plan.clesOrphelines[i];
+        try {
+            await db.remove(clePurge);
+            bilan.clesSupprimees++;
+            console.warn('[Codex] #336 purge : clé supprimée — ' + clePurge);
+        } catch (e) {
+            bilan.echecs.push(clePurge);
+            console.error('[Codex] #336 purge : échec sur la clé ' + clePurge, e);
+        }
+    }
+    for (var j = 0; j < plan.blobsOrphelins.length; j++) {
+        var idBlob = plan.blobsOrphelins[j];
+        try {
+            await db.deleteBlob(idBlob);
+            bilan.blobsSupprimes++;
+        } catch (e2) {
+            bilan.echecs.push(idBlob);
+            console.error('[Codex] #336 purge : échec sur le blob ' + idBlob, e2);
+        }
+    }
+    console.warn('[Codex] #336 purge terminée : ' + bilan.clesSupprimees + ' clé(s), ' +
+        bilan.blobsSupprimes + ' blob(s) supprimé(s)' +
+        (bilan.echecs.length ? ', ' + bilan.echecs.length + ' échec(s)' : '') + '.');
+    return bilan;
+}
+
+/**
+ * One-shot console (#336 Lot D, phase PREVIEW) : exécute le dernier plan de
+ * purge affiché par chargerCodex, après vérification humaine de la liste.
+ * Usage : Codex.purgerEspacePrecedent()
+ */
+async function purgerEspacePrecedent() {
+    if (!_dernierPlanPurge) {
+        console.warn('[Codex] #336 : aucun plan de purge en attente — ouvre d\'abord un codex.');
+        return null;
+    }
+    var plan = _dernierPlanPurge;
+    _dernierPlanPurge = null;   // consommé : pas de double exécution
+    return _executerPurgeEspace(plan);
 }
 
 /* ===============================
@@ -3464,11 +3605,16 @@ window.Codex = {
     construireBilanImport: construireBilanImport,
     evaluerPrevolStockage: evaluerPrevolStockage,
     // Internes exposés pour les tests Vitest (#334 C — fusion 3-way sensible ;
-    // #335 C — vérification de persistance post-import)
+    // #335 C — vérification de persistance post-import ; #336 D — purge)
     _analyserFusion: _analyserFusion,
     _indexerSnapshot: _indexerSnapshot,
     _verifierEcritureTemoins: _verifierEcritureTemoins,
     _detecterModeleAnterieur: _detecterModeleAnterieur,
+    _planifierPurgeEspace: _planifierPurgeEspace,
+    _executerPurgeEspace: _executerPurgeEspace,
+
+    // #336 Lot D (phase preview) : exécution manuelle du dernier plan de purge
+    purgerEspacePrecedent: purgerEspacePrecedent,
 
     // Sauvegarde multi-plateforme
     sauvegarder: sauvegarderVersDestination,
