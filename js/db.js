@@ -754,6 +754,25 @@
         }
 
         /**
+         * Liste les ids de TOUS les blobs du store fichiers (#336 Lot D).
+         * @returns {Promise<string[]>}
+         */
+        async listBlobIds() {
+            if (!this.ready) await this.init();
+            if (!this.useIndexedDB || !this.db) return [];
+            return new Promise((resolve, reject) => {
+                const tx = this.db.transaction(['fichiers'], 'readonly');
+                const store = tx.objectStore('fichiers');
+                const request = store.getAllKeys();
+                request.onsuccess = () => resolve(request.result || []);
+                request.onerror = () => {
+                    console.error('[DB] Erreur listBlobIds:', request.error);
+                    reject(request.error);
+                };
+            });
+        }
+
+        /**
          * Liste les blobs d'un étudiant via l'index etudiantDA
          * @param {string} etudiantDA
          * @returns {Promise<Array>}
