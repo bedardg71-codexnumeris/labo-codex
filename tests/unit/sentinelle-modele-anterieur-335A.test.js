@@ -133,4 +133,12 @@ describe('#335 A · câblage des gardes (sentinelle statique)', () => {
         expect(src).toMatch(/Continuer quand même \?/);
     });
 
+    it('les modales nomment le fichier source (demande Grégoire, 11 juin)', () => {
+        // Garde import : nom passé depuis fichierZip ; garde fusion : depuis fichier.
+        expect(src).toMatch(/_messageModeleAnterieur\(detectionModele, 'remplacer', fichierZip && fichierZip\.name\)/);
+        expect(src).toMatch(/_messageModeleAnterieur\(detectionModeleFusion, 'fusionner avec', fichier && fichier\.name\)/);
+        // Confirm final d'ouverture : « Codex chargé depuis "…" »
+        expect(src).toMatch(/Codex chargé depuis/);
+    });
+
 });
