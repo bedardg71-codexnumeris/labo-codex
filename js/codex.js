@@ -217,6 +217,15 @@ function initialiserCodex() {
     // duplication IDB + memoryCache du dataset intégral.
     _migrerSnapshotVersIndexHash();
 
+    // #336 : réafficher le plan de purge persisté par le dernier import (le
+    // reload post-import efface la console — constat terrain 11 juin). Après
+    // db-ready : la clé peut n'être qu'en IDB au premier rendu.
+    if (window.dbReady) {
+        _restaurerPlanPurge();
+    } else {
+        window.addEventListener('db-ready', _restaurerPlanPurge, { once: true });
+    }
+
     // CLE_ETAT_CODEX pointe maintenant vers _codex_etat
     // Fallback sur l'ancienne clé pour le premier chargement avant que la migration async ne termine
     var etatSauve = db.getSync(CLE_ETAT_CODEX, null) || db.getSync(CLE_ETAT_ANCIEN, null);
@@ -781,19 +790,17 @@ async function chargerCodex(fichierZip) {
         if (planPurge.clesOrphelines.length === 0 && planPurge.blobsOrphelins.length === 0) {
             console.warn('[Codex] #336 purge (preview) : aucun orphelin — espace déjà propre.');
             _dernierPlanPurge = null;
+            await db.remove(CLE_PLAN_PURGE);
         } else {
-            console.warn('[Codex] #336 purge (PREVIEW — rien n\'est supprimé) : ' +
-                planPurge.clesOrphelines.length + ' clé(s) orpheline(s), ' +
-                planPurge.blobsOrphelins.length + ' blob(s) orphelin(s) détecté(s).');
-            if (planPurge.clesOrphelines.length > 0) {
-                console.warn('[Codex] #336 clés orphelines : ' + planPurge.clesOrphelines.join(', '));
-            }
-            if (planPurge.blobsOrphelins.length > 0) {
-                console.warn('[Codex] #336 blobs orphelins (' + planPurge.blobsOrphelins.length + ') : ' +
-                    planPurge.blobsOrphelins.slice(0, 20).join(', ') +
-                    (planPurge.blobsOrphelins.length > 20 ? ', …' : ''));
-            }
-            console.warn('[Codex] #336 pour purger après vérification : Codex.purgerEspacePrecedent()');
+            // Persister AVANT le reload proposé par actionOuvrir : la console
+            // est effacée et la mémoire du module perdue — le plan est
+            // réaffiché au boot par _restaurerPlanPurge().
+            db.setSync(CLE_PLAN_PURGE, {
+                plan: planPurge,
+                date: new Date().toISOString(),
+                fichier: (fichierZip && fichierZip.name) || null
+            });
+            _afficherPlanPurge(planPurge, 'survivra au rechargement');
         }
     } catch (ePurge) {
         // La preview ne doit jamais faire échouer un import réussi.
@@ -1564,7 +1571,49 @@ async function _verifierEcritureTemoins(donnees, cibles) {
 
 // Dernier plan de purge calculé par chargerCodex (phase PREVIEW).
 // Consommé par Codex.purgerEspacePrecedent() après vérification en console.
+// PERSISTÉ sous CLE_PLAN_PURGE : l'import propose un location.reload() qui
+// efface la console ET la mémoire du module (constat terrain Grégoire,
+// 11 juin 15h27) — le plan est donc réaffiché au boot suivant.
 var _dernierPlanPurge = null;
+var CLE_PLAN_PURGE = '_codex_planPurge336';
+
+/**
+ * Affiche le plan de purge en console (preview #336) — même format à l'import
+ * et au boot suivant le rechargement.
+ * @param {{clesOrphelines: string[], blobsOrphelins: string[]}} plan
+ * @param {string} [contexte] - ex. nom du fichier importé, date du calcul
+ */
+function _afficherPlanPurge(plan, contexte) {
+    console.warn('[Codex] #336 purge (PREVIEW — rien n\'est supprimé' +
+        (contexte ? ' ; ' + contexte : '') + ') : ' +
+        plan.clesOrphelines.length + ' clé(s) orpheline(s), ' +
+        plan.blobsOrphelins.length + ' blob(s) orphelin(s) détecté(s).');
+    if (plan.clesOrphelines.length > 0) {
+        console.warn('[Codex] #336 clés orphelines : ' + plan.clesOrphelines.join(', '));
+    }
+    if (plan.blobsOrphelins.length > 0) {
+        console.warn('[Codex] #336 blobs orphelins (' + plan.blobsOrphelins.length + ') : ' +
+            plan.blobsOrphelins.slice(0, 20).join(', ') +
+            (plan.blobsOrphelins.length > 20 ? ', …' : ''));
+    }
+    console.warn('[Codex] #336 pour purger après vérification : Codex.purgerEspacePrecedent()');
+}
+
+/**
+ * Recharge au boot le plan de purge persisté par le dernier import (#336) :
+ * le réaffiche et réarme Codex.purgerEspacePrecedent(). Sans ça, le reload
+ * post-import efface la preview avant qu'elle soit lisible.
+ */
+function _restaurerPlanPurge() {
+    var stocke = db.getSync(CLE_PLAN_PURGE, null);
+    if (!stocke || !stocke.plan) return;
+    var plan = stocke.plan;
+    if (!Array.isArray(plan.clesOrphelines) || !Array.isArray(plan.blobsOrphelins)) return;
+    if (plan.clesOrphelines.length + plan.blobsOrphelins.length === 0) return;
+    _dernierPlanPurge = plan;
+    _afficherPlanPurge(plan, 'plan de l\'import du ' + (stocke.date || '?') +
+        (stocke.fichier ? ' — « ' + stocke.fichier + ' »' : ''));
+}
 
 /**
  * Planifie la purge de l'espace précédent après un import COMPLET (#336 Lot D).
@@ -1660,7 +1709,8 @@ async function purgerEspacePrecedent() {
         return null;
     }
     var plan = _dernierPlanPurge;
-    _dernierPlanPurge = null;   // consommé : pas de double exécution
+    _dernierPlanPurge = null;            // consommé : pas de double exécution
+    await db.remove(CLE_PLAN_PURGE);     // y compris après un rechargement
     return _executerPurgeEspace(plan);
 }
 
@@ -3612,6 +3662,7 @@ window.Codex = {
     _detecterModeleAnterieur: _detecterModeleAnterieur,
     _planifierPurgeEspace: _planifierPurgeEspace,
     _executerPurgeEspace: _executerPurgeEspace,
+    _restaurerPlanPurge: _restaurerPlanPurge,
 
     // #336 Lot D (phase preview) : exécution manuelle du dernier plan de purge
     purgerEspacePrecedent: purgerEspacePrecedent,
