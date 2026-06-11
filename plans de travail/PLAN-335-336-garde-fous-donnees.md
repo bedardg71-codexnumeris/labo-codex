@@ -1,7 +1,13 @@
 # Plan #335 + #336 — Garde-fous données : import, fusion, ouverture
 
 > **Date du cadrage** : 11 juin 2026 (Claude Code, après l'incident bis du matin).
-> **Statut** : ⏸ décisions D1-D3 à trancher avec Grégoire avant de coder.
+> **Statut** : décisions D1-D3 ACTÉES (Grégoire, 11 juin : recommandations telles
+> quelles — ordre C→A→B puis D ; marqueur = coursId référencés + manifeste en appoint ;
+> garde BLOQUANTE avec choix). ✅ **Lot C LIVRÉ** (11 juin) : `_verifierEcritureTemoins`
+> (clés témoins relues depuis IDB, comparaison JSON stricte, retentative ciblée unique,
+> alerte explicite), câblé en étape 5 bis de `chargerCodex` après `db.flush()`. Tests :
+> `sentinelle-persistance-import-335C.test.js` (9 cas, dont la repro exacte de
+> l'incident bis — copie périmée en IDB → signalée).
 > **Pourquoi maintenant** : trois incidents de la même famille en 28 heures, tous sur
 > données réelles H2026 — (I1) import du codex iPad pré-chantier-D qui écrase le modèle
 > consolidé Mac (10-11 juin) ; (I2) trimestre actif basculé sur Été par l'heuristique de
