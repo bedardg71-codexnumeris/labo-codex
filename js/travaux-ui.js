@@ -582,6 +582,7 @@
         paletteEl.style.top = '12px';
         paletteEl.style.left = '12px';
         zoneCanvas.appendChild(paletteEl);
+        travauxOutils.configurerDragPalette(paletteEl, zoneCanvas);
 
         // Bouton réglages annotation (click direct — le dispatcher ne traverse pas le canvas overlay)
         const btnReglagesAnnot = document.getElementById('travaux-btn-reglages-annotation');
@@ -4705,7 +4706,7 @@
         const barre = document.createElement('div');
         barre.className = 'palette-flottante-barre';
         barre.innerHTML = `
-            <span class="palette-flottante-titre">${echapperHtml(titre)}</span>
+            <span class="palette-flottante-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>${echapperHtml(titre)}</span>
             <div style="display:flex; gap:2px;">
                 <button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteH" data-param="${id}" title="Disposition horizontale">\u2194</button>
                 <button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteV" data-param="${id}" title="Disposition verticale">\u2195</button>

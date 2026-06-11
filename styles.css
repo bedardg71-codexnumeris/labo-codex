@@ -17640,6 +17640,7 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     justify-content: space-between;
     padding: 6px 10px;
     cursor: grab;
+    touch-action: none; /* drag au doigt (iPad) : ne pas céder le geste au défilement natif */
     border-bottom: 1px solid rgba(106, 172, 184, 0.2);
     border-radius: 10px 10px 0 0;
     position: sticky;
@@ -17655,6 +17656,14 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--texte-secondaire, #8aa4b0);
+}
+
+/* Poignée de déplacement (affordance tactile — pas de cursor:grab sur iPad) */
+.palette-grip {
+    margin-right: 6px;
+    opacity: 0.55;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .palette-flottante-toggle {
@@ -18829,6 +18838,7 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     justify-content: space-between;
     padding: 6px 10px;
     cursor: grab;
+    touch-action: none; /* drag au doigt (iPad) : ne pas céder le geste au défilement natif */
     border-bottom: 1px solid var(--planif-couleur-bordure);
     border-radius: 10px 10px 0 0;
     background: var(--surface-carte, #1a3040);
