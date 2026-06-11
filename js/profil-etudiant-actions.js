@@ -410,8 +410,9 @@ function _calculerNoteFinaleAggregee(moyennePortfolio, noteTerminale, pondP, pon
  */
 function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
-    // Session A-2 : id canonique normalisé à la lecture, défaut = PRATIQUE_DEFAUT ('standards').
-    const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(modalites.pratique) : modalites.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
+    // #328 L2-b1 : type dérivé de la SSOT (groupesCours), plus du miroir.
+    const pratique = ((typeof obtenirTypePratiqueActive === 'function')
+        ? obtenirTypePratiqueActive() : null) || (window.PRATIQUE_DEFAUT || 'standards');
 
     // On gère seulement Standards (portfolio à note construite). Les autres pratiques
     // (sommative, specifications, denotation) n'ont pas de détail de note finale portfolio.

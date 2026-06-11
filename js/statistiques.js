@@ -117,8 +117,8 @@ function chargerMaterielConfigure() {
     const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
     let pratique = 'Non configurée';
     
-    // Session A-2 : id canonique normalisé à la lecture (Standards = ex-'alternative'/'pan-maitrise').
-    const pratiqueId = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(modalites.pratique) : modalites.pratique);
+    // #328 L2-b1 : type dérivé de la SSOT (groupesCours), plus du miroir.
+    const pratiqueId = (typeof obtenirTypePratiqueActive === 'function') ? obtenirTypePratiqueActive() : null;
     if (pratiqueId === 'sommative') {
         pratique = 'Sommative (%)';
     } else if (pratiqueId === 'standards' && modalites.typePAN) {

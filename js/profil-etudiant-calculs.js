@@ -1023,9 +1023,9 @@ function determinerNiveauRaiPedagogique(da) {
     const P = indices.P / 100; // Convertir en décimal 0-1
 
     // Déterminer quelle fonction utiliser selon la pratique
-    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
-    // Session A-2 : id canonique normalisé à la lecture, défaut = PRATIQUE_DEFAUT ('standards').
-    const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
+    // #328 L2-b1 : type dérivé de la SSOT (groupesCours), plus du miroir.
+    const pratique = ((typeof obtenirTypePratiqueActive === 'function')
+        ? obtenirTypePratiqueActive() : null) || (window.PRATIQUE_DEFAUT || 'standards');
 
     // Calculer moyennes SRPNF
     const moyennes = (pratique === 'standards')
@@ -1308,9 +1308,9 @@ function _resoudreCibleStable(M, N, I) {
 
 function determinerCibleIntervention(da) {
     const indices = calculerTousLesIndices(da);
-    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
-    // Session A-2 : id canonique normalisé à la lecture, défaut = PRATIQUE_DEFAUT ('standards').
-    const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
+    // #328 L2-b1 : type dérivé de la SSOT (groupesCours), plus du miroir.
+    const pratique = ((typeof obtenirTypePratiqueActive === 'function')
+        ? obtenirTypePratiqueActive() : null) || (window.PRATIQUE_DEFAUT || 'standards');
 
     const moyennes = (pratique === 'standards')
         ? calculerMoyennesCriteresRecents(da)

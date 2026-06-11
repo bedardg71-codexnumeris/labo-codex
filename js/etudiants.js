@@ -370,8 +370,9 @@ function obtenirCouleurPerformance(performance) {
 function genererExplicationCalculIndices() {
     // Récupérer la configuration de la pratique active
     const config = db.getSync(cle('modalitesEvaluation'), null) || {};
-    // Session A-2 : id canonique normalisé à la lecture, défaut = PRATIQUE_DEFAUT ('standards').
-    const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
+    // #328 L2-b1 : type dérivé de la SSOT (groupesCours), plus du miroir.
+    const pratique = ((typeof obtenirTypePratiqueActive === 'function')
+        ? obtenirTypePratiqueActive() : null) || (window.PRATIQUE_DEFAUT || 'standards');
     const isPAN = pratique === 'standards';
 
     // Récupérer les paramètres de configuration
@@ -447,8 +448,9 @@ function mettreAJourExplicationCalculIndices() {
  */
 function genererBadgePratiqueListeEtudiants() {
     const config = db.getSync(cle('modalitesEvaluation'), null) || {};
-    // Session A-2 : id canonique normalisé à la lecture, défaut = PRATIQUE_DEFAUT ('standards').
-    const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
+    // #328 L2-b1 : type dérivé de la SSOT (groupesCours), plus du miroir.
+    const pratique = ((typeof obtenirTypePratiqueActive === 'function')
+        ? obtenirTypePratiqueActive() : null) || (window.PRATIQUE_DEFAUT || 'standards');
     const typePAN = config.typePAN || 'maitrise';
 
     // Session B : code dérivé du registre (source unique). SOM si pratique sommative ;

@@ -50,8 +50,29 @@
   - Tests : sentinelle `sentinelle-ssot-modalites-miroir-L2a.test.js` (8 cas, dont
     fonctionnels SSOT-first sur modes.js chargé en sandbox) + 2 cas purgerLegacy au
     contrat L1. Golden master L2-0 inchangé au centième.
-- **Prochain sous-lot : L2-b1** (lecteurs de `pratique` dans le chemin de CALCUL, helper
-  D2 avec contexte explicite {gcId, trimestreId}).
+- **✅ L2-b1 LIVRÉ (11 juin 2026)** : le chemin de CALCUL dérive le type de la SSOT.
+  - **Helper D2 livré** : `obtenirTypePratiqueActive(contexte)` (`pratique-registre.js`,
+    exposé window). Chaîne : `groupesCours[].pratiqueId` → type (id canonique du registre,
+    ou `configuration.type` d'une configurable lue dans la bibliothèque DU TRIMESTRE DU
+    GROUPE-COURS — absorption #301 côté résolution de pratique). Contexte explicite
+    `{gcId, trimestreId}` ; copies en dernier recours, JAMAIS sous contexte explicite ;
+    `null` si introuvable — chaque appelant garde son défaut historique.
+  - **13 sites migrés** (8 fichiers calcul) : indices, evaluation, evaluation-chargement
+    (id via `obtenirPratiqueActiveGroupeCours`), statistiques, profil-etudiant-calculs ×2,
+    profil-etudiant-actions (garde de `calculerDetailsNoteFinale`), profil-etudiant-helpers
+    ×4 (terme/genre/évaluables/instance — résolution du type seulement, classe d'instance
+    inchangée), etudiants ×2. `termeProduction` (champ PROPRE, pas un miroir) reste lu
+    dans les modalités.
+  - **Tests** : `sentinelle-ssot-pratique-type-L2b1.test.js` (8 cas — fonctionnels du
+    helper dont le cas #301 bi-trimestre, + RATCHET statique : les 8 fichiers calcul ne
+    relisent plus `.pratique` du miroir ; liste qui ne peut que S'ALLONGER en L2-b2).
+    Sentinelle #309 adaptée (stub du helper au lieu du miroir). Golden master inchangé.
+  - **Note sémantique** : le miroir contenait tantôt un TYPE tantôt un ID de configurable
+    selon l'écrivain (`changerPratiqueActive` écrivait l'ID) — la dérivation SSOT élimine
+    cette ambiguïté pour le calcul.
+- **Prochain sous-lot : L2-b2** (lecteurs AFFICHAGE de `pratique` : tableau-bord ×3,
+  graphiques ×1, sections-affichage ×3, travaux-export-pdf, rapport-bug, donnees-v2 +
+  domaine pratiques ~36 sites, puis RETRAIT des écritures `m.pratique`).
 
 ---
 
