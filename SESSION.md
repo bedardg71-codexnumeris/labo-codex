@@ -1,4 +1,55 @@
 <!-- =====================================================================
+     SESSION 11 juin 2026 (fin de matinée, Claude Code AVEC Grégoire) —
+     INCIDENT RÉSOLU + #335 LOTS C/A/B LIVRÉS + RELEASE 1.16.0. HEAD main
+     `d26d21fe`, POUSSÉ. 635 Vitest + 55 Playwright = 690 VERTS.
+       • INCIDENT BIS (~09h30) : résurrection de la version pré-chantier-D
+         de h2026_productions (11 orphelines COURS1766455789356) après le
+         reload « scripts périmés », alors que l'espace était SAIN à 09h10
+         (codex généré propre = preuve, autopsié sur disque). AUCUN
+         import/fusion entre les deux. Hypothèse la plus cohérente (non
+         confirmée — réparé avant de pouvoir la prouver) : copie IDB restée
+         périmée depuis la restauration de la VEILLE (écriture IDB async
+         64 Mo échouée en silence), réhydratée au boot. Diagnostic par
+         sondes localStorage vs db.get (les 2 couches corrompues après le
+         reload). RÉPARÉ : réimport du codex sain 09h10 + flush ;
+         persistance vérifiée par sondes AVANT et APRÈS reload. Trimestre
+         actif vérifié (H2026). Codex de référence régénéré. Mes pushes du
+         matin = déclencheur du reload, PAS la cause. Mémoire :
+         project-incident-resurrection-idb. ⚠ Au passage : dossier « CODEX
+         problématiques juin » (données réelles) ajouté au .gitignore —
+         il était à un git add . de partir sur GitHub.
+       • #335 LOTS C+A+B LIVRÉS (décisions D1-D3 actées telles que
+         recommandées ; plan PLAN-335-336-garde-fous-donnees.md) :
+         - C (adc0be41) : _verifierEcritureTemoins — après chargerCodex,
+           relecture IDB des clés témoins (productions, évals, GC,
+           étudiants NS + trimestres), comparaison JSON stricte,
+           retentative ciblée unique, alerte explicite. 9 tests.
+         - A (857fb49d) : _detecterModeleAnterieur — coursId référencés
+           DISJOINTS par trimestre = modèles divergents → garde BLOQUANTE
+           avec choix, dans chargerCodex (avant toute écriture) ET
+           actionFusionner (avant analyse). Chevauchement partiel = même
+           lignée, silencieux. 10 tests. TERRAIN VALIDÉ avec la fixture
+           codex-TEST-GARDE-modele-divergent.zip (dossier ignoré) : garde
+           affichée, Annuler intact.
+         - B (857fb49d) : corrigerTrimestresMultiplesActifs choisit PARMI
+           les actifs déclarés (année desc, H>E>A) — la date du jour ne
+           peut plus élire un trimestre non marqué (incident I2). 4 tests.
+       • RELEASE 1.16.0 (bcfd78fc, build 0611-1141) après terrain complet.
+       • UX (demandes Grégoire du jour) : « Enregistrer le codex » partout
+         (fin du « Télécharger » Safari — canon ECOSYSTEME-DONNEES, 90d030c9) ;
+         nom du fichier source dans la garde + le confirm final (3805a6bd)
+         ET dans la modale de progression ouverture/fusion/comparaison
+         (d26d21fe, post-1.16.0 — sous-titre échappé, .progression-source
+         2 modes ; sera absorbé par la prochaine release) ; annulation de
+         la garde sans préfixe « Erreur ».
+     RESTE (prochaines sessions) :
+       1. #336 Lot D — purge de l'espace précédent à l'ouverture
+          (suppression de données : session dédiée, preview console).
+       2. #328 L2-b2 (affichage + domaine pratiques, ~46 sites) puis L2-c
+          (jetons, D3 actée : config vivante, solde négatif toléré).
+       3. #332 constat 1 (no-op UI réassemblage — repro avec Grégoire).
+       4. #337 protection de branche main (UI GitHub, 2 min, Grégoire).
+     =====================================================================
      SESSION 11 juin 2026 (matinée, suite — Claude Code, SOLO, Grégoire au
      repos) — PASSE SSOT : #328 L3 LIVRÉ + #328 L2 CADRÉ + #332 CONSTAT 2
      LIVRÉ. Skills rechargés depuis la branche qualité. HEAD main
