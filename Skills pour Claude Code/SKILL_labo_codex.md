@@ -15,7 +15,9 @@ description: >
 
 # SKILL : Labo Codex — Application et développement
 
-> **Dernière mise à jour** : 26 avril 2026 (Beta 99.25)
+> **Dernière mise à jour** : 11 juin 2026.
+> **Version** : SemVer, **source unique = `version.json`** (« Bêta publique » est un libellé
+> d'affichage, pas le numéro). Ne pas figer un numéro ici — toujours lire `version.json`.
 
 ## 1. CONTEXTE DU PROJET
 
@@ -24,8 +26,9 @@ de suivi des apprentissages développée par Grégoire Bédard, enseignant de
 littérature au Cégep de Drummondville. Elle soutient sa pratique et, à terme,
 celle d'enseignants du réseau collégial québécois dans plusieurs disciplines.
 
-**État actuel** : Beta 99.25 (build 0425-1916) — phase de nettoyage complet (Phase 6)
-**Objectif** : Version 1.0 open-source (AGPL v3), présentation AQPC juin 2026
+**État actuel** : Bêta publique en SemVer (numéro courant dans `version.json`) — lancement
+public le 3 juin 2026, phase de nettoyage complet (Phase 6)
+**Objectif** : version open-source (AGPL v3), présentation AQPC juin 2026
 **Dépôt** : GitHub (commits fréquents, peu de branches)
 **Fonctionnement** : 100 % hors-ligne, pas de serveur requis
 
@@ -43,7 +46,8 @@ celle d'enseignants du réseau collégial québécois dans plusieurs disciplines
   - pdf.js + pdf.worker (lecture de PDF dans le navigateur)
 - 100 % hors-ligne : IndexedDB (persistant, plusieurs GB) + localStorage (cache synchrone)
 - Orchestration stockage : `db.js` (abstraction hybride localStorage / IndexedDB / memoryCache)
-- SPA monolithique : `index.html` (~16 500 l.), `styles.css` (~22 000 l.), 102 modules JS (~176 000 l.)
+- SPA monolithique : `index.html` (~16 500 l.), `styles.css` (~22 000 l.), ~170 modules JS
+  (~200 000 l. ; chiffre indicatif — compter par `find js -name '*.js' | wc -l` au besoin)
 
 ### Principes architecturaux — INVIOLABLES
 
@@ -90,7 +94,7 @@ Les modules ne s'importent pas entre eux — ils communiquent via `window.*` et 
 | Données | `codex.js`, `import-export.js`, `reserve.js` | Codex (ZIP portable), import/export, réserve (archivage) |
 | Trimestre / Cours | `trimestre-v2.js`, `trimestres.js`, `cours.js`, `horaire.js`, `groupe.js` | Gestion de la session, des cours et des groupes |
 | Planification | `planification-carte.js`, `planification.js`, `planification-donnees.js`, `organisateur.js` | Carte mentale, séquences, organisateur de leçons |
-| Pratiques de notation | `pratiques.js`, `pratique-notation-v2.js`, 12 modules dans `js/pratiques/` | Configuration et calcul selon la pratique choisie |
+| Pratiques de notation | `pratiques.js`, `pratique-notation-v2.js`, 14 modules dans `js/pratiques/` | Configuration et calcul selon la pratique choisie |
 | Dépistage / RàI | `snapshots.js`, `interventions.js`, `correlations-longitudinales.js` | Snapshots de progression, interventions RàI, analyse longitudinale |
 | Bibliothèques | `grilles-bibliotheque.js`, `echelles-bibliotheque.js`, `productions-bibliotheque.js`, `cartouches-bibliotheque.js`, `tampons-bibliotheque.js`, `pratiques-bibliotheque.js`, `planification-bibliotheque.js` | Gestion des entités réutilisables |
 
@@ -152,60 +156,25 @@ La fonction `calculerCorrelationPearson` reste disponible dans `indices.js` comm
 utilitaire, mais ne produit plus d'indice affiché.
 
 **Calcul de P** :
-P dépend de la pratique de notation configurée. Pour la pratique de Grégoire
-(PAN-Standards avec portfolio) :
-- Portfolio configurable : nombre d'artefacts à retenir, mode de sélection
-  (`meilleurs`, `recents`, `recents-meilleurs`, `tous`)
-- Artefacts obligatoires (terminaux) configurables
-- La configuration se fait via `modalitesEvaluation.configPAN.portfolio`
+P dépend de la pratique de notation configurée. Pour la pratique STD (par standards,
+portfolio) : nombre d'artefacts à retenir, mode de sélection (`meilleurs`, `recents`,
+`recents-meilleurs`, `tous`), artefacts terminaux configurables. La config portfolio est
+lue **uniquement** depuis `pratiquesConfigurables` (depuis la Phase G2-a, 24 mai 2026 —
+plus de `modalitesEvaluation.configPAN.portfolio`). Détail technique (résolution, deux
+systèmes de calcul, `simulerIndices`, pièges) : **`SKILL_pratiques_notation.md` §5/§10.**
 
-### Suivi des apprentissages sur les fondamentaux (S, R, F)
+### Suivi des fondamentaux, IPB et portraits dynamiques
 
-Le suivi porte sur les **fondamentaux multistructurels** : Structure (S), Rigueur (R)
-et Français (F). Plausibilité et Nuance sont exclues (nécessitent d'abord la maîtrise
-des fondations).
+Le suivi porte sur les **fondamentaux multistructurels** S-R-F (score par artefact
+`0.35×S + 0.35×F + 0.30×R`), **par artefact et non en moyenne** : c'est la **trajectoire**
+qui révèle le portrait. L'**indice de persistance (IPB)**, les seuils, le tableau des
+portraits dynamiques (IPB × direction) et le vocabulaire descriptif appartiennent au
+**dépistage RàI** → **voir `SKILL_RaI.md`** (ne pas dupliquer ici).
 
-**Principe** : le diagnostic est **par artefact**, pas en moyenne. Chaque production
-génère un score SRF pondéré (0.35×S + 0.35×F + 0.30×R). C'est la **trajectoire**
-de ces scores qui révèle le portrait d'apprentissage, pas leur moyenne.
-
-**Seuils par artefact** (ancrés sur l'échelle IDME) :
-- ≥ 0.75 : Fondamentaux maîtrisés (niveau M+)
-- 0.65–0.74 : Zone de développement (niveau D)
-- < 0.65 : Fondamentaux insuffisants (niveau I)
-
-**Indice de persistance (IPB)** : nombre d'artefacts consécutifs récents où les
-fondamentaux sont sous le seuil de maîtrise (< 0.75). C'est la différence entre un
-mauvais jour et une difficulté réelle.
-- IPB = 1 : Signal à surveiller
-- IPB = 2 : Intervention ciblée recommandée
-- IPB ≥ 3 : Intervention intensive
-
-**Portrait dynamique** (croisement IPB × direction) :
-
-| IPB | Direction | Diagnostic | Vocabulaire |
-|-----|-----------|------------|-------------|
-| 0 | — | Fondamentaux solides | **Maîtrise acquise** |
-| 1 | ↗ depuis < 0.65 | Amélioration récente | **Difficulté résolue** |
-| 1 | → ou ↘ | Premier signal | **Difficulté émergente** |
-| 2 | ↗ | Scores en hausse | **Progression** |
-| 2 | → | Stabilité sous le seuil | **Plateau** (consolidation ou stagnation — jugement pro.) |
-| 2 | ↘ | Détérioration | **Difficulté constante** |
-| ≥ 3 | → ou ↘ | Persistance confirmée | **Difficulté persistante** |
-
-**Philosophie** : Le vocabulaire est descriptif, pas alarmiste. « Plateau » n'est pas un
-verdict négatif — un D stable peut être une consolidation avant un bond vers M.
-L'enseignant interprète le portrait avec son jugement professionnel.
-
-### Échelle IDME et critères SRPNF (résumé)
-
-**IDME** : I (0.01–0.64), D (0.65–0.74), M (0.75–0.84), E (0.85–1.00) — alignés SOLO.
-Seuil critique : 0.75 garantit ≥60 % au cours suivant.
-
-**SRPNF** : Structure, Rigueur, Plausibilité, Nuance, Français.
-S/R/F = fondations multistructurelles ; P = relationnel ; N = abstrait étendu.
-
-> **Définitions complètes et validation empirique** : voir `SKILL_Ecosysteme_classe.md`.
+**Échelle IDME / critères SRPNF** (rappel minimal) : I (0.01–0.64), D (0.65–0.74),
+M (0.75–0.84), E (0.85–1.00), alignés SOLO ; 0.75 = seuil garantissant ≥60 % au cours
+suivant. SRPNF = Structure, Rigueur, Plausibilité, Nuance, Français. **Définitions
+complètes et validation empirique** : `SKILL_Ecosysteme_classe.md`.
 
 ### Workflow enseignant dans l'application
 
@@ -228,7 +197,8 @@ S/R/F = fondations multistructurelles ; P = relationnel ; N = abstrait étendu.
 > (`sommative`/`standards`/`specifications`/`denotation`, sans préfixe `pan-`) datent de
 > la canonicalisation Session A — détail dans le skill dédié.
 
-L'application supporte 4 familles. 11 modules dans `js/pratiques/`.
+L'application supporte 4 familles. 14 modules dans `js/pratiques/` (compter par
+`ls js/pratiques/` ; ne pas figer le nombre).
 
 ### 5.1 Sommative (traditionnelle)
 - **Identifiant** : `sommative`
@@ -259,11 +229,15 @@ L'application supporte 4 familles. 11 modules dans `js/pratiques/`.
 - **Référence terrain** : François A.-H., Chimie, Cégep André-Laurendeau
 - **Fichier** : `js/pratiques/pratique-pan-specifications.js`
 
-### 5.4 PAN-Dénotation
-- **Identifiant** : `pan-denotation`
-- **État** : **Non implémenté** (aucun fichier créé)
-- **Principe** : Rétroaction qualitative uniquement ; jugement global en fin de cours
-- **Références** : Blum (2020), Stommel (2023)
+### 5.4 PAN-Dénotation (DEN)
+- **Identifiant** : `denotation` (badge famille « PAN » ; académiquement = **PRÉN**)
+- **État** : **implémenté** (couche 2, #318, 8 juin 2026)
+- **Calcul** : la note finale est un **jugement SAISI** par l'enseignant, gardé par
+  l'atteinte des cibles (une cible non confirmée plafonne à 59 ; toutes confirmées → la
+  note saisie). Pas de saisie → non calculable, jamais un zéro.
+- **Fichiers** : `js/pratiques/denotation-jugements.js`, `js/pratiques/denotation-saisie-ui.js` ;
+  moteur `_calculerPerformanceDenotation` dans `js/pratiques/pratique-configurable.js`
+- **Références** : Blum (2020), Stommel (2023) ; détail technique : `SKILL_pratiques_notation.md` §8
 
 ### Fichiers pratiques (infrastructure)
 ```
@@ -325,9 +299,7 @@ sélectionnable — acceptable car usage cible = consultation sur cellulaire.
 2. **Lisibilité** — code navigable par un non-développeur accompagné
 3. **Maintenabilité** — modules cohérents, sans duplication
 4. **SSOT strict** — aucun doublon de fonctions ni de données
-5. **Stabilité zéro-dette** — tout nouveau chantier retire ce qu'il remplace.
-   Pas d'alias « au cas où », pas de code mort « pour plus tard ».
-   Refactoring permis si ça rend le code plus propre.
+5. **Stabilité zéro-dette** — tout nouveau chantier retire ce qu'il remplace (détails : CLAUDE.md)
 
 ---
 
@@ -363,13 +335,9 @@ ne pas extrapoler sans le signaler.
 
 ## 9. RÉFÉRENCE VISUELLE
 
-**`design-system.html`** (racine du projet) est la source de vérité pour :
-- Palette de couleurs (modes sombre et clair)
-- Surfaces, ombres, border-radius
-- Boutons, formulaires, cartes, en-têtes, tableaux, alertes, badges
-
-**Règles** : utiliser les variables CSS de `styles.css`, ne jamais inventer de couleurs
-en dur, vérifier la conformité dans les deux modes. Voir CLAUDE.md pour les détails.
+**`design-system.html`** (racine) = source de vérité visuelle (palette sombre/clair,
+surfaces, composants). Règles complètes (variables CSS de `styles.css`, pas de couleur
+en dur, conformité dans les deux modes, accessibilité) : **voir CLAUDE.md**.
 
 ---
 
@@ -401,4 +369,5 @@ correspondent aux modules décrits dans ce skill (section 2).
 | Date       | Changement |
 |------------|------------|
 | 2026-02-28 | Création (Beta 98.3) |
-| 2026-04-26 | Refonte complète. Retrait indice E, mise à jour version (99.25), ajout écosystème de données (Codex/Réserve/Codex data/Voûte), PAN-Spécifications marqué complet, portfolio configurable, ajout synthèse de rétroaction, principe zéro-dette, 8 libs documentées, 102 modules / ~176 000 lignes, références croisées aux 5 skills, section design system. |
+| 2026-04-26 | Refonte complète. Retrait indice E, écosystème de données (Codex/Réserve/Codex data/Voûte), PAN-Spécifications complet, portfolio configurable, synthèse de rétroaction, principe zéro-dette, 8 libs, références croisées aux 5 skills, section design system. |
+| 2026-06-11 | Corrections factuelles. Version → renvoi `version.json` (SemVer ; fin du figé « Beta 99.25 »). §4 : config portfolio lue depuis `pratiquesConfigurables` (plus `configPAN.portfolio`) ; IPB/portraits → renvoi `SKILL_RaI`. §5 : DEN passé « non implémenté » → **implémenté** (#318) ; compte `js/pratiques/` corrigé (14) ; comptes modules/lignes rendus indicatifs. §7/§9 zéro-dette + design system → renvois CLAUDE.md. |

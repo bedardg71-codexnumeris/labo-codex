@@ -6,9 +6,9 @@ description: >
   commit», «j'ai fini pour aujourd'hui», «vérifie avant de pousser», ou toute
   formulation signalant la clôture d'une session de travail. Audit du code
   modifié contre les règles non négociables de CLAUDE.md (section sécurité)
-  et SKILL_Securite_donnees.md §9, exécution de la suite de tests, vérification
-  de la cohérence de version. Rapport sans modification automatique — toute
-  correction reste à la décision de Grégoire.
+  et SKILL_Securite_donnees.md §9, exécution de la suite de tests, bump de
+  version par `scripts/release.mjs` si nécessaire. Rapport sans modification
+  automatique — toute correction reste à la décision de Grégoire.
   Prérequis : SKILL_Securite_donnees.md pour le contexte des règles vérifiées.
 ---
 
@@ -53,7 +53,7 @@ Catégoriser par dossier pour situer le périmètre :
 - `tests/` — suite de tests (signalement, pas d'audit §2)
 - `docs/`, `Retours des testeurs/` — documentation
 - `index.html`, `styles.css` — interface (audit §2 sur index.html, vérification CSP §2.6)
-- racine — fichiers de config (`version.json` à surveiller §4)
+- racine — fichiers de config (version : bump via `release.mjs` au §4)
 
 ⏸ Rapporter à Grégoire le périmètre détecté. S'il dit «ce n'est pas ce que je
 veux vérifier», ajuster avant de passer à l'étape 2.
@@ -63,49 +63,29 @@ veux vérifier», ajuster avant de passer à l'étape 2.
 ## 2. AUDIT SÉCURITÉ STATIQUE
 
 **Objectif** : sur chaque fichier JS et HTML modifié, chercher les motifs
-interdits par CLAUDE.md et SKILL_Securite_donnees.md §9. Signaler sans corriger.
+interdits par CLAUDE.md (section « Regles de securite ») et
+SKILL_Securite_donnees.md §9. Signaler sans corriger.
+
+> Les règles vérifiées ci-dessous sont définies dans CLAUDE.md — s'y référer
+> pour l'énoncé canonique et les exemples conformes. Ce qui suit est la
+> traduction en motifs à grepper, pas une redéfinition.
 
 ### 2.1 innerHTML non échappé
 
-Motif : `innerHTML\s*[+]?=` sans appel à `echapperHtml()` dans la même expression
-ou les ~5 lignes au-dessus dans la même fonction.
-
-Exemple à signaler :
-```javascript
-container.innerHTML = '<div>' + etudiant.nom + '</div>';  // ⚠ nom non échappé
-```
-
-Pattern correct :
-```javascript
-container.innerHTML = '<div>' + echapperHtml(etudiant.nom) + '</div>';
-```
-
-Exceptions légitimes (ne pas signaler) :
-- `innerHTML = ''` (vidage)
-- Injection de chaînes 100% statiques sans interpolation de variable
-- Contenu issu d'une source déjà échappée explicitement plus haut (rare)
+Motif : `innerHTML\s*[+]?=` injectant des données utilisateur sans
+`echapperHtml()`. Exceptions (ne pas signaler) : `innerHTML = ''`, chaînes
+100 % statiques, contenu déjà échappé plus haut dans la fonction.
 
 ### 2.2 Handlers inline
 
-Motif : `on\w+=` (onclick, onchange, onload, onerror, onfocus, etc.) dans
-une chaîne de caractères injectée via innerHTML, template literal destiné
-à innerHTML, ou attribut HTML statique.
-
-Exemple à signaler :
-```javascript
-html += '<button onclick="faireQuelqueChose()">Cliquer</button>';
-```
-
-Pattern correct : utiliser `data-action`, `data-on-change`, etc., et le
-dispatcher de `main.js` (lignes 700-780).
+Motif : `on\w+=` dans une chaîne injectée via innerHTML ou un attribut HTML.
+Pattern correct : `data-action` / `data-on-change` routés par le dispatcher
+de `main.js` (handler `[data-action]`, ≈ lignes 781-836).
 
 ### 2.3 Évaluations dynamiques
 
-Motifs : `eval(`, `new Function(`, `setTimeout('` (chaîne au lieu de fonction),
-`setInterval('` (idem).
-
-Tolérance zéro. Si présent, signaler comme **bloquant** — la CSP `script-src 'self'`
-les bloque déjà, mais le code doit être sûr indépendamment du CSP.
+Motifs : `eval(`, `new Function(`, `setTimeout('` / `setInterval('` (chaîne
+au lieu de fonction). Tolérance zéro — signaler comme **bloquant**.
 
 ### 2.4 console.log
 
@@ -183,35 +163,51 @@ complet d'abord.
 
 ---
 
-## 4. COHÉRENCE DE LA VERSION
+## 4. VERSION : BUMP VIA LE SCRIPT DE RELEASE
 
-**Objectif** : vérifier que les trois sources de la version sont synchrones.
+**Objectif** : si ce commit doit changer le numéro de version, le faire par
+le script officiel — jamais à la main. La version vit dans **4 points de
+vérité** (`version.json`, deux fallbacks `VERSION_MAJEURE`/`BUILD_ID` dans
+`js/init-inline.js`, le snapshot `window._SCRIPT_BUILD_main` dans `js/main.js`).
+Les recopier manuellement les désynchronise — c'est précisément ce que le
+script empêche (cf. BACKLOG #285).
 
-### 4.1 Source unique de vérité
+### 4.1 Décider l'intention (jugement de Grégoire)
 
-Lire `version.json` à la racine :
-```json
-{"build":"MMJJ-HHMM","beta":"XX.X"}
+- **patch** (`1.0.0 → 1.0.1`) — correction de bug, rien de neuf à l'usage
+- **minor** (`1.0.1 → 1.1.0`) — nouveauté sans rupture
+- **major** (`1.1.0 → 2.0.0`) — rupture ou changement de format de données.
+  **Confirmer explicitement avec Grégoire avant un `major`** (acte public).
+
+`patch`/`minor` relèvent du jugement courant ; ne jamais décider d'un `major` seul.
+
+### 4.2 Lancer le script (écriture atomique des 4 points)
+
+```bash
+node scripts/release.mjs patch|minor|major
+# ou : node scripts/release.mjs --set X.Y.Z      (fixer une version précise)
+# ou : node scripts/release.mjs --build-only      (commit doc/UI sans changer le numéro)
+node scripts/release.mjs minor --dry-run          # prévisualiser sans rien écrire
 ```
 
-### 4.2 Fallbacks hors-ligne
+Toujours prévisualiser avec `--dry-run` d'abord, puis relancer sans l'option.
+Le script calcule le numéro SemVer, horodate le build (Toronto, `MMJJ-HHMM`)
+et synchronise les 4 points d'un seul geste — soit tout, soit rien.
 
-Chercher dans `index.html` (autour de la ligne 17166, ou via grep `VERSION_MAJEURE`) :
-```javascript
-let VERSION_MAJEURE = '...';
-let BUILD_ID = '...';
-```
+`version.json` reste la **source unique de vérité** ; « Bêta publique » n'est
+qu'un libellé d'affichage, pas le numéro.
 
-### 4.3 Vérification
+### 4.3 Vérifier la cohérence après coup
 
-Les trois valeurs doivent être identiques :
-- `version.json:beta` == `VERSION_MAJEURE` dans `index.html`
-- `version.json:build` == `BUILD_ID` dans `index.html`
+Le contrôle n'est plus une comparaison manuelle de sources : c'est `git diff`
+après release.mjs. Confirmer que les 4 points portent le même numéro/build :
+- `version.json` (`beta` + `build`)
+- `js/init-inline.js` (`VERSION_MAJEURE` + `BUILD_ID`)
+- `js/main.js` (`window._SCRIPT_BUILD_main`)
 
-Si désynchronisation, signaler les valeurs trouvées dans chaque source.
-**NE PAS modifier sans validation explicite** — Grégoire décide du numéro
-de beta pour ce commit (CLAUDE.md le précise : ne jamais renuméroter
-automatiquement).
+Si le diff montre une désynchronisation, c'est que le script a échoué ou
+n'a pas tourné — ne pas committer, le relancer. Ne jamais éditer ces valeurs
+à la main.
 
 ---
 
@@ -246,16 +242,17 @@ Tests automatisés :
     ...
 
 Version :
-  ✅ version.json et fallbacks synchrones (Beta XX.X / MMJJ-HHMM)
+  ✅ 4 points de vérité synchrones (X.Y.Z / MMJJ-HHMM)
   ou
-  ⚠ Désynchronisation :
-    - version.json : Beta XX.X / MMJJ-HHMM
-    - index.html   : Beta YY.Y / MMJJ-HHMM
+  ⚠ Désynchronisation (relancer release.mjs, ne pas éditer à la main) :
+    - version.json      : X.Y.Z / MMJJ-HHMM
+    - js/init-inline.js : A.B.C / MMJJ-HHMM
+    - js/main.js        : MMJJ-HHMM
 
 Prochaines étapes possibles (à choisir par Grégoire) :
   1. Corriger les éléments signalés
-  2. Décider du numéro de beta pour ce commit
-  3. Mettre à jour version.json et les fallbacks
+  2. Décider l'intention de version (patch/minor/major — major = confirmer)
+  3. node scripts/release.mjs <intention> (--dry-run d'abord)
   4. Committer
 ```
 
@@ -266,9 +263,9 @@ Prochaines étapes possibles (à choisir par Grégoire) :
 ## 6. CE QUE CETTE SKILL NE FAIT PAS
 
 - Ne corrige pas automatiquement les motifs détectés
-- Ne modifie pas `version.json` ni les fallbacks
+- N'édite pas les 4 points de vérité à la main — le bump passe par `release.mjs`
 - N'exécute pas `git add`, `git commit`, `git push`
-- Ne décide pas du numéro de beta — prérogative de Grégoire (CLAUDE.md)
+- Ne décide pas seul de l'intention de version — `major` se confirme avec Grégoire
 - Ne se substitue pas à SKILL_Debug.md si un bug réel est découvert
 - Ne remplace pas la lecture humaine du diff avant commit — c'est un filet,
   pas une garantie
@@ -282,8 +279,10 @@ Prochaines étapes possibles (à choisir par Grégoire) :
   pas toutes les règles)
 - ❌ Sauter les tests §3 parce que «l'audit ne détecte rien» (l'audit est
   statique, il rate la logique runtime)
-- ❌ Committer sans demander le numéro de beta à Grégoire
-- ❌ Prétendre que la version est synchrone sans avoir vérifié les trois sources
+- ❌ Éditer `version.json`, les fallbacks de `init-inline.js` ou le snapshot de
+  `main.js` à la main au lieu de lancer `release.mjs`
+- ❌ Prétendre que la version est synchrone sans avoir vérifié le `git diff` des 4 points
+- ❌ Décider seul d'un bump `major` (changement public) sans confirmation de Grégoire
 - ❌ Confondre un avertissement avec un bloquant : seuls §2.3 (eval), §2.6
   (zones protégées) et les échecs de tests sont bloquants ; le reste est
   à arbitrer par Grégoire
@@ -298,3 +297,4 @@ Prochaines étapes possibles (à choisir par Grégoire) :
 | Date       | Changement                                                |
 |------------|-----------------------------------------------------------|
 | 2026-05-11 | Création. Audit statique, tests, cohérence version, rapport sans modification automatique. |
+| 2026-06-11 | §4 réécrite : bump de version par `scripts/release.mjs` (4 points de vérité, `--dry-run`) au lieu de l'édition manuelle de `index.html` (fallbacks déplacés dans `init-inline.js`). Renvoi CLAUDE.md pour §2.1-2.3, dispatcher recité (`[data-action]` ≈ 780-836). |

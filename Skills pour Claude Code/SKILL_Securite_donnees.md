@@ -460,44 +460,45 @@ protection des renseignements personnels dans le contexte collégial québécois
 
 ### 9.1 Règles ABSOLUES (tout code touchant aux données)
 
-1. **echapperHtml()** sur TOUTE donnée affichée dans innerHTML — pas
-   seulement les noms d'étudiants, mais aussi les champs importés
-   (grilles, commentaires, descriptions).
-2. **Validation de schéma** sur TOUT JSON importé (codex, codex data,
-   configuration, dépôt Voûte). Ne jamais faire confiance au contenu
-   d'un fichier externe.
-3. **validerZipSecurite()** sur tout ZIP importé (déjà en place).
-4. **validerMagicBytes()** sur tout fichier blob importé (déjà en place).
-5. **Pas de `eval()`**, pas de `new Function()`, pas de `innerHTML`
-   avec du contenu non échappé. CSP `script-src 'self'` est le filet
-   de sécurité, mais le code doit être sûr indépendamment du CSP.
+Les règles de base — `echapperHtml()` sur tout innerHTML, `validerZipSecurite()`
+sur tout ZIP, `validerMagicBytes()` sur tout blob, zéro `eval()`/`new Function()`,
+zéro handler inline, CSP `script-src 'self'` — sont normatives et détaillées
+dans **CLAUDE.md §Règles de sécurité** (source unique). Ne pas les redupliquer ;
+les appliquer.
+
+Spécifique à la sécurité des DONNÉES (au-delà des règles génériques) :
+
+1. **Validation de schéma** sur TOUT JSON importé (codex, codex data,
+   configuration, dépôt Voûte). Ne jamais faire confiance au contenu d'un
+   fichier externe — c'est le complément des défenses CLAUDE.md, qui couvrent
+   ZIP/blobs/HTML mais pas la structure d'un JSON de données.
 
 ### 9.2 Règles pour la Réserve
 
-6. Chaque versement porte un UUID v4 (`crypto.randomUUID()`).
-7. Chaque `meta.json` inclut un hash SHA-256 de `donnees.json`.
-8. Les données démo (groupe 9999) sont EXCLUES des versements.
-9. Les blobs portent un `groupeCoursId` — les fichiers sans ce tag
+2. Chaque versement porte un UUID v4 (`crypto.randomUUID()`).
+3. Chaque `meta.json` inclut un hash SHA-256 de `donnees.json`.
+4. Les données démo (groupe 9999) sont EXCLUES des versements.
+5. Les blobs portent un `groupeCoursId` — les fichiers sans ce tag
    (pré-Beta 98) sont exclus avec un warning.
 
 ### 9.3 Règles pour l'anonymisation
 
-10. Le DA n'est JAMAIS hashé — il est supprimé. (Un DA est trop court,
-    un hash serait réversible par force brute en secondes.)
-11. Les noms sont remplacés par des identifiants séquentiels stables
-    dans le contexte du codex data (même étudiant = même identifiant
-    dans tout le fichier).
-12. Les blobs sont exclus par défaut du codex data.
-13. L'anonymisation se fait TOUJOURS sur une copie, JAMAIS sur l'original.
+6. Le DA n'est JAMAIS hashé — il est supprimé. (Un DA est trop court,
+   un hash serait réversible par force brute en secondes.)
+7. Les noms sont remplacés par des identifiants séquentiels stables
+   dans le contexte du codex data (même étudiant = même identifiant
+   dans tout le fichier).
+8. Les blobs sont exclus par défaut du codex data.
+9. L'anonymisation se fait TOUJOURS sur une copie, JAMAIS sur l'original.
 
 ### 9.4 Règles pour les imports (anti-injection)
 
-14. Tout champ texte importé est scanné pour les patterns dangereux
+10. Tout champ texte importé est scanné pour les patterns dangereux
     (`<script`, `javascript:`, `onerror=`, `onload=`, `data:text/html`).
     Si détecté → rejet de l'import entier avec message explicite.
-15. Les fichiers JSON importés sont validés par `JSON.parse()` strict
+11. Les fichiers JSON importés sont validés par `JSON.parse()` strict
     (pas d'extensions, pas de commentaires, pas de trailing commas).
-16. Taille maximale d'un import JSON : à définir (suggestion : 50 Mo
+12. Taille maximale d'un import JSON : à définir (suggestion : 50 Mo
     pour un codex data, 500 Mo pour un codex complet).
 
 ---

@@ -144,17 +144,20 @@ Des mécanismes de repli masquent l'erreur :
 
 **Objectif** : Expliquer *pourquoi* le code produit ce comportement.
 
-### Taxonomie des bugs Labo Codex
+### Taxonomie des bugs Labo Codex (symptôme → fix → modules)
 
-| # | Catégorie | Description | Fréquence | Modules les plus touchés |
-|---|-----------|-------------|-----------|--------------------------|
-| 2.1 | **Filtrage / périmètre** | `obtenirDonneesSelonMode` ou équivalent retourne un sous-ensemble → écrasement à la sauvegarde, compteur erroné, mauvais groupe affiché | ≈30% | evaluation.js, liste-evaluations.js, travaux-ui.js, trimestre-v2.js |
-| 2.2 | **Métadonnées manquantes** | `productionId` / `etudiantDA` / `groupeCoursId` vide → matching cassé entre fichiers et évaluations | ≈20% | travaux-ui.js, evaluation.js, export-pdf.js |
-| 2.3 | **Namespace / clé** | Oubli de `window.cle()`, clé en dur, mélange namespacé/non-namespacé | ≈15% | Tout module lisant localStorage |
-| 2.4 | **Export `window` manquant** | Fonction non exposée globalement → `ReferenceError` dans un autre module | ≈10% | trimestre-v2.js, evaluation.js, groupe.js |
-| 2.5 | **État résiduel** | Variable d'état non réinitialisée après navigation | ≈10% | travaux-ui.js, navigation.js |
-| 2.6 | **Concurrence asynchrone** | Chaînes parallèles qui se marchent dessus | ≈10% | travaux-ui.js, profil-etudiant.js |
-| 2.7 | **Fallback silencieux** | Mécanisme de repli qui masque le vrai problème | ≈5% | travaux-ui.js |
+Tableau de référence unique : la catégorie localisée au §2 donne directement
+le pattern de fix éprouvé et les modules à surveiller.
+
+| # | Catégorie | Symptôme | Fréq. | Pattern de fix éprouvé | Modules les plus touchés |
+|---|-----------|----------|-------|------------------------|--------------------------|
+| 2.1 | **Filtrage / périmètre** | `obtenirDonneesSelonMode` retourne un sous-ensemble → écrasement à la sauvegarde, compteur erroné, mauvais groupe | ≈30% | Remplacer `obtenirDonneesSelonMode()` par `db.getSync(cle(...))` pour lire toutes les données avant écriture | evaluation.js, liste-evaluations.js, travaux-ui.js, trimestre-v2.js |
+| 2.2 | **Métadonnées manquantes** | `productionId` / `etudiantDA` / `groupeCoursId` vide → matching cassé fichiers ↔ évaluations | ≈20% | Matching souple (accepter `productionId` vide) + rétro-propagation des métadonnées depuis les évaluations | travaux-ui.js, evaluation.js, export-pdf.js |
+| 2.3 | **Namespace / clé** | Oubli de `window.cle()`, clé en dur, mélange namespacé/non | ≈15% | Remplacer la clé en dur par `cle('...')` + auditer toutes les occurrences du fichier | Tout module lisant localStorage |
+| 2.4 | **Export `window` manquant** | Fonction non exposée → `ReferenceError` dans un autre module | ≈10% | Ajouter `window.nomFonction = nomFonction` dans le bloc d'init | trimestre-v2.js, evaluation.js, groupe.js |
+| 2.5 | **État résiduel** | Variable d'état non réinitialisée après navigation | ≈10% | Reset dans `initialiserModule*()` ou le handler de navigation sortante | travaux-ui.js, navigation.js |
+| 2.6 | **Concurrence asynchrone** | Chaînes parallèles qui se marchent dessus | ≈10% | Séquencer (callback unique, suppression des `setTimeout` redondants) | travaux-ui.js, profil-etudiant.js |
+| 2.7 | **Fallback silencieux** | Mécanisme de repli qui masque le vrai problème | ≈5% | Corriger la source plutôt que le repli ; si le fallback reste, `console.warn` | travaux-ui.js |
 
 ### Expliquer
 
@@ -194,17 +197,9 @@ du code ont le même problème. Signaler les occurrences similaires comme bugs p
 
 ### Patterns de correction éprouvés
 
-Ces patterns ont fait leurs preuves dans l'historique du projet :
-
-| Cause | Pattern de fix éprouvé |
-|-------|------------------------|
-| 2.1 Filtrage avant sauvegarde | Remplacer `obtenirDonneesSelonMode()` par `db.getSync(cle(...))` pour lire toutes les données avant écriture |
-| 2.2 Métadonnées manquantes | Matching souple (accepter `productionId` vide) + rétro-propagation des métadonnées depuis les évaluations vers les fichiers |
-| 2.3 Namespace manquant | Remplacer la clé en dur par `cle('...')` + auditer toutes les occurrences dans le fichier |
-| 2.4 Export manquant | Ajouter `window.nomFonction = nomFonction` dans le bloc d'init du module |
-| 2.5 État résiduel | Reset dans `initialiserModule*()` ou dans le handler de navigation sortante |
-| 2.6 Concurrence | Séquencer les opérations (callback unique, suppression des `setTimeout` redondants) |
-| 2.7 Fallback | Corriger la source plutôt que le repli ; si le fallback reste, ajouter un `console.warn` |
+Le pattern de fix éprouvé pour chaque catégorie 2.x est dans la colonne
+« Pattern de fix éprouvé » du tableau de taxonomie (§3). S'y reporter
+plutôt que de réinventer la correction.
 
 ### Format de la proposition
 
@@ -262,23 +257,24 @@ Un résumé lisible :
 **Objectif** : Consigner la résolution pour maintenir l'historique du projet.
 
 Cette étape est **obligatoire** après chaque fix validé. Le fichier
-`SUIVI-BUGS.md` (à la racine du répertoire `résolution de bugs/`) est la source
-de vérité unique — il alimente `resolutions.json` via le script de build.
+`Retours des testeurs/SUIVI-BUGS.md` (cf. CLAUDE.md §« Priorité absolue :
+Retours testeurs ») est la source de vérité unique pour le suivi des bugs.
+Le consulter AVANT de corriger un bug (évite le travail en double).
 
 ### Procédure
 
 1. **Lire `SUIVI-BUGS.md`** pour déterminer :
-   - Le **prochain numéro séquentiel** (indiqué dans la section Notes :
-     «prochain : #XX»). Si absent, lire le dernier # dans les tableaux corrigés
-     et incrémenter.
+   - Le **prochain numéro séquentiel** : lire le dernier # dans les tableaux
+     « Corrigés » (et « Ouverts ») et incrémenter.
    - La **section «Corrigés» la plus récente** (en haut, juste après «Ouverts»).
-     Si le build actuel n'y figure pas encore, créer une nouvelle section
-     `## Corrigés (Beta XX.X)` au-dessus des précédentes.
+     Si le contexte actuel n'y figure pas encore, créer une nouvelle section
+     `## Corrigés (date — résumé court)` au-dessus des précédentes.
 
-2. **Ajouter une ligne** dans la section Corrigés appropriée :
+2. **Ajouter une ligne** dans la section Corrigés appropriée (colonnes :
+   #, Testeur, Date rapport, Corrigé, Build, Description, Correction) :
 
 ```
-| [#] | [Testeur] | [date rapport] | [date correction] | [description courte] | [catégorie 2.x] : [explication technique concise du fix] |
+| [#] | [Testeur] | [date rapport] | [date correction] | [build MMJJ-HHMM] | [description courte] | [catégorie 2.x] : [explication technique concise du fix] |
 ```
 
    Règles de rédaction :
@@ -295,27 +291,13 @@ de vérité unique — il alimente `resolutions.json` via le script de build.
 
 ### Exemple concret
 
-Avant :
+Ligne ajoutée en tête de la section « Corrigés » la plus récente
+(ou nouvelle section `## Corrigés (date — résumé)` si le contexte a changé) :
+
 ```markdown
-## Corrigés (24 février 2026)
-
-| # | Testeur | Date rapport | Corrigé | Description | Correction |
-|---|---------|--------------|---------|-------------|------------|
-| 84 | Grégoire | 24 fév | 24 fév | Déverrouiller une évaluation déverrouille TOUTES | 2.1 filtrage : `basculerVerrouillageEvaluationCourante()` utilisait `obtenirDonneesSelonMode` → `db.getSync(cle(...))` + rafraîchissement badges |
-```
-
-Après ajout :
-```markdown
-## Corrigés (Beta 98.4)
-
-| # | Testeur | Date rapport | Corrigé | Description | Correction |
-|---|---------|--------------|---------|-------------|------------|
-| 85 | Grégoire | 16 mar | 16 mar | [description] | [catégorie] : [fix] |
-
----
-
-## Corrigés (24 février 2026)
-(inchangé)
+| # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
+|---|---------|--------------|---------|-------|-------------|------------|
+| 144 | Grégoire | 11 juin | 11 juin | 0611-1030 | Déverrouiller une évaluation déverrouille TOUTES | 2.1 filtrage : `basculerVerrouillageEvaluationCourante()` lisait via `obtenirDonneesSelonMode` → `db.getSync(cle(...))` + rafraîchissement badges |
 ```
 
 ---
@@ -336,13 +318,14 @@ Ces modules concentrent la majorité des bugs historiques :
 
 ## ANTI-PATTERNS À ÉVITER
 
+Les pièges propres à chaque catégorie (setTimeout masquant un timing 2.6,
+`obtenirDonneesSelonMode` avant sauvegarde 2.1, matching strict sur
+`productionId` 2.2, clé sans `window.cle()` 2.3…) sont déjà dans le tableau
+§3. Au-delà, les pièges de **démarche** :
+
 - ❌ Sauter directement à une solution sans avoir localisé la cause racine.
-- ❌ Ajouter un `setTimeout` pour «résoudre» un problème de timing (ça le masque).
-- ❌ Utiliser `obtenirDonneesSelonMode()` avant une sauvegarde (ça écrase les autres cours/groupes).
-- ❌ Faire un matching strict sur `productionId` sans gérer le cas vide/undefined.
-- ❌ Dupliquer un calcul d'indice hors de `indices.js`.
-- ❌ Faire communiquer deux modules directement (import/appel de fonction croisé).
-- ❌ Modifier une clé localStorage sans passer par `window.cle()`.
 - ❌ Corriger un symptôme dans un module quand la cause est dans un autre.
+- ❌ Dupliquer un calcul d'indice hors de `indices.js`, ou faire communiquer
+  deux modules directement (import/appel croisé) — violations d'architecture.
 - ❌ Faire du refactoring «tant qu'on y est» dans le même commit que le fix.
 - ❌ Oublier la rétrocompatibilité avec les fichiers/données importés avant le fix.

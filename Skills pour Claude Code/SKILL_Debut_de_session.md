@@ -39,7 +39,7 @@ description: >
   « relai », « audit », « fais le point »
 - Quand Grégoire envoie une prémisse de relance contenant des assertions
   vérifiables (« HEAD attendu », « N tests verts », « ~N occurrences »,
-  « beta X.Y attendue »)
+  « version X.Y.Z attendue »)
 - Quand plus de quelques heures se sont écoulées depuis le dernier
   échange et que le contexte de session précédent est perdu
 
@@ -54,7 +54,7 @@ explicitement une demande sur un travail déjà en cours.
 **Objectif** : connaître le HEAD réel et l'état du dépôt.
 
 ```bash
-cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
+# depuis la racine du dépôt
 git status
 git log --oneline main -10
 git fetch origin
@@ -94,14 +94,14 @@ prétendre que les tests passent.
 
 ## 3. ÉTAT DE LA VERSION
 
-**Objectif** : lire `version.json` pour connaître la beta/build courante.
+**Objectif** : lire `version.json` pour connaître la version/build courante.
 
 ```bash
 cat version.json
 ```
 
 Reporter :
-- Beta et build du fichier
+- Version SemVer (`X.Y.Z`) et build (`MMJJ-HHMM`) du fichier
 - Comparaison avec ce que la prémisse annonce (s'il y a une assertion)
 - Cohérence avec le dernier commit (le message du dernier commit
   contient souvent le build pour confirmation croisée)
@@ -159,7 +159,7 @@ Si la prémisse contient des éléments comme :
 - « HEAD attendu : ... »
 - « N tests verts attendus »
 - « ~N occurrences attendues »
-- « beta X.Y attendue »
+- « version X.Y.Z attendue »
 - « branche X attendue propre »
 
 Construire un tableau de comparaison ≤ 5 lignes :
@@ -197,7 +197,7 @@ Tests :
   ❌ K/N échecs
 
 Version :
-  Beta X.Y / build MMJJ-HHMM
+  X.Y.Z / build MMJJ-HHMM
   (cohérent avec le dernier commit)
 
 Écart prémisse vs réel :
@@ -223,9 +223,11 @@ d'ouvrir un chantier.
 
 ## 8. CE QUE CETTE SKILL NE FAIT PAS
 
-- Ne modifie aucun fichier (ni SESSION.md, ni BACKLOG.md, ni autre)
-- Ne committe pas, ne push pas
-- Ne corrige pas la documentation périmée — seulement signaler
+Lecture seule (cf. Justification en tête) : aucune modification de fichier,
+aucun commit, aucun push. En particulier :
+
+- Ne corrige pas la documentation périmée (SESSION.md, BACKLOG.md…) —
+  seulement la signaler, et proposer une note de relance que Grégoire validera
 - Ne décide pas du chantier à attaquer — prérogative de Grégoire
 - Ne se substitue pas à SKILL_Fin_de_session.md (qui audite le code
   modifié contre les règles de sécurité)
@@ -236,20 +238,13 @@ d'ouvrir un chantier.
 
 ## ANTI-PATTERNS À ÉVITER
 
-- ❌ Prendre la prémisse de relance pour argent comptant sans audit
+- ❌ Prendre la prémisse de relance pour argent comptant sans audit —
+  c'est la raison d'être du rituel
 - ❌ Sauter le `git fetch origin` (peut masquer une divergence avec le remote)
 - ❌ Confondre « SESSION.md à jour » et « prémisse de relance à jour » —
-  ce sont deux choses différentes, l'une peut être correcte et l'autre
-  périmée
+  l'une peut être correcte et l'autre périmée
 - ❌ Ignorer les fichiers untracked sans les énumérer rapidement (un
-  chantier en cours non commité peut représenter du travail à
-  préserver)
-- ❌ Lire tout SESSION.md (le fichier accumule l'historique des
-  sessions — seuls le bloc d'identification et le §0 le plus récent
-  sont pertinents pour démarrer)
-- ❌ Modifier SESSION.md ou BACKLOG.md pendant ce rituel — la mise à
-  jour de la documentation périmée doit être proposée à Grégoire,
-  pas exécutée silencieusement
+  chantier en cours non commité peut représenter du travail à préserver)
 - ❌ Enchaîner directement sur un chantier sans avoir produit le §7
   rapport final — l'objectif du skill est de poser le décor, pas de
   faire le travail
@@ -261,3 +256,4 @@ d'ouvrir un chantier.
 | Date       | Changement                                                |
 |------------|-----------------------------------------------------------|
 | 2026-05-28 | Création. Pendant inverse de SKILL_Fin_de_session.md. Acté après écart de 24 h sur le Lot A ✴ : prémisse demandait un travail déjà livré au commit `11f87a1`. |
+| 2026-06-11 | Format de version aligné sur SemVer (`X.Y.Z`). Déduplication : §8 et ANTI-PATTERNS resserrés (la consigne « lecture seule / ne pas prendre la prémisse pour argent comptant » n'est plus répétée 3×, elle renvoie à la Justification). |

@@ -14,18 +14,20 @@ description: >
 
 # SKILL : Cadre pédagogique — Enseignement de la littérature au collégial
 
-> **Dernière mise à jour** : 5 juin 2026 (Cowork — encadré de statut ajouté ; recadrage
-> complet planifié, **non exécuté**).
+> **Dernière mise à jour** : 11 juin 2026 (Cowork — §1.2 ré-ancré : la critique de la note
+> sommative traditionnelle est rattachée au rapport du CSE 2018 ; précisé que le rapport ne
+> nomme pas les PAN et que l'outil sert toutes les pratiques).
 > **Statut / usage** : ce skill documente **UNE instanciation** — la pratique STD (PAN par
 > standards) de Grégoire Bédard dans le cours 601-101. Ce n'est **pas** la doctrine de Labo
 > Codex, qui est **pluraliste** (SOM/STD/SPE/DEN, sans hiérarchie). ⚠️ **Ne pas en tirer de
 > microcopy ni de choix de conception qui valorisent une famille au détriment d'une autre.**
-> Deux tensions connues, à corriger au recadrage : (1) « PAN » y désigne souvent la variante
-> STD de Grégoire, alors que PAN = libellé de **famille** (Session A) ; (2) le §1.2 oppose
-> « sommative problématique / PAN supérieure » — c'est la **conviction du concepteur**, légitime
-> et motrice, pas une doctrine imposée par l'outil (cf. *Gateways* : viser les idées, pas les
-> personnes qui les pratiquent). Panorama neutre des familles : `SKILL_pratiques_notation`
-> §2 bis. Plan de recadrage : `plans de travail/PLAN_recadrage_skill_ecosysteme.md`.
+> Rappel : « PAN » = libellé de **famille** (Session A) ; ce que ce skill décrit est la variante
+> **STD-portfolio** de Grégoire. Le §1.2 s'appuie sur le rapport du CSE *Évaluer pour que ça
+> compte vraiment* (2018), qui questionne la notation sommative **traditionnelle** (somme de
+> points + note chiffrée sans rétroaction explicite) — **sans nommer les PAN** ni hiérarchiser
+> les familles. Comme Labo Codex sert à **simuler et comparer** les pratiques, la sommative
+> reste une option de premier rang. Panorama neutre : `SKILL_pratiques_notation` §2 bis.
+> Recadrage complet planifié (moves A-F) : `plans de travail/PLAN_recadrage_skill_ecosysteme.md`.
 
 ## Vue d'ensemble
 
@@ -107,30 +109,43 @@ Ce skill documente le cadre pédagogique du cours **601-101-MQ Écriture et litt
 - Plausibilité : Compétence relationnelle (transition)
 - Nuance : Compétence d'abstraction étendue (complexité)
 
-#### Pratique Alternative de Notation (PAN)
+#### Pratique alternative de notation — position fondée (CSE 2018), pas doctrine d'outil
 
-**Philosophie** : Évaluer l'apprentissage atteint, pas le parcours d'erreurs
+> ⚠️ **Position fondée sur la recherche, pas doctrine d'outil.** Ce qui suit est la position
+> pédagogique de Grégoire — **non une préférence personnelle**. Elle s'appuie sur le rapport du
+> Conseil supérieur de l'éducation *Évaluer pour que ça compte vraiment* (2018) et sur la
+> littérature sur l'*ungrading* (Blum, Talbert, Girouard-Gagné, Clark). **Important** : le
+> rapport du CSE **ne nomme pas les PAN** ; il questionne la notation sommative **traditionnelle**
+> — la somme de points et la **note chiffrée sans rétroaction explicite**. La STD-portfolio de
+> Grégoire est **une** réponse possible à cette critique, dans son contexte (601-101) ; d'autres
+> réponses existent. Et comme Labo Codex sert à **simuler et comparer** les pratiques, la
+> sommative traditionnelle reste une **option pleinement servie** : toutes les options sont
+> ouvertes à l'utilisateur. Panorama neutre des familles : `SKILL_pratiques_notation` §2 bis
+> (« aucune famille n'est la bonne »). Rappel : « PAN » = libellé de **famille** (Session A) ;
+> la pratique décrite ici est la variante **STD-portfolio**, pas « la » PAN.
 
-**Distinction critique** :
+**Pourquoi Grégoire a choisi une STD-portfolio dans son contexte** : évaluer l'apprentissage
+atteint plutôt que le parcours d'erreurs.
 
-*Notation sommative traditionnelle* (problématique) :
-- Logique : SOMME de toutes les notes depuis le début
-- Inclut toutes les erreurs d'apprentissage initial
-- Crée une inertie négative qui pénalise l'élève
-- **Validité certificative faible**
+*Ce que le CSE (2018) et la littérature questionnent* : la notation sommative traditionnelle —
+une note chiffrée issue de la **somme** des points, qui cumule les erreurs d'apprentissage
+initial et qui, **non accompagnée de rétroaction explicite**, ne dit pas à l'élève quoi améliorer.
 
-*Pratique Alternative de Notation* (adoptée) :
-- Logique : SÉLECTION des meilleures preuves de compétence
-- Neutralise l'inertie des erreurs initiales
-- Mesure la compétence réellement maîtrisée maintenant
-- **Validité certificative supérieure**
+*Ce que la STD-portfolio apporte à Grégoire, dans son contexte* : une logique de **sélection**
+des meilleures preuves de compétence, assortie d'une rétroaction explicite (cartouches), qui
+vise à mesurer la compétence maîtrisée maintenant.
+
+(Ces jugements valent **pour sa pratique et ses objectifs**. Le CSE critique une *pratique*
+courante, pas une *famille* ; l'outil ne hiérarchise pas les familles et n'universalise pas ces
+jugements dans son microcopy.)
 
 **Système de jetons** :
 - Permet l'amélioration des artefacts (droit à l'erreur)
 - Fonction motivationnelle : favorise motivation de maîtrise
 - Encourage persévérance et engagement continu
 
-**Structure certificative** :
+**Structure certificative** (paramètres **propres à cette instanciation**, pas « le système » —
+d'autres pratiques STD choisiraient d'autres réglages) :
 - Portfolio (65%) : 4 meilleurs artefacts sélectionnés (16,25% chacun)
 - Artefacts terminaux obligatoires (35%) : 2 artefacts (17,5% chacun)
 
@@ -512,6 +527,10 @@ l'application qui rend cette cohérence visible et vérifiable.
 
 ### 6.1 Données empiriques
 
+> Les chiffres ci-dessous sont la **validation initiale (A2024)**. Des trimestres
+> ultérieurs existent (A2025, H2026) et peuvent affiner ce portrait — ne pas présenter
+> A2024 comme la seule donnée disponible.
+
 **Session A2024** (validation système) :
 
 **Engagement** :
@@ -582,7 +601,7 @@ l'application qui rend cette cohérence visible et vérifiable.
 - Affiner le dépistage SOLO et les portraits dynamiques (voir `SKILL_RaI.md`)
 
 **À moyen terme** :
-- Développer version web Labo Codex (Beta 99 → 1.0)
+- Version web Labo Codex publiée (bêta publique en SemVer depuis le 3 juin 2026 ; voir `version.json`)
 - Mettre en place l'écosystème de données (Réserve, Codex data, Voûte)
 - Publication open-source pour autres enseignants
 - Documentation complète pour transfert
@@ -636,31 +655,10 @@ l'application qui rend cette cohérence visible et vérifiable.
 □ J'ai identifié les critères évalués (SRPNF ou SRPN)
 □ J'ai consulté les principes validés
 
-**PROCESSUS DE RÉDACTION** :
-
-Pour chaque critère × niveau :
-
-1. **Identifier le gap** (sauf pour M et E)
-   - Qu'est-ce qui manque ou pose problème ?
-   - Quelle est la conséquence ?
-
-2. **Donner direction précise** (I et D)
-   - Action concrète à poser
-   - "Pour progresser..." / "Pour améliorer..."
-
-3. **Valoriser maîtrise** (M et E)
-   - Ce qui fonctionne bien
-   - Encouragement à maintenir/approfondir
-
-4. **Adapter au contexte**
-   - Artefact formatif ou certificatif ?
-   - Étape dans le processus ?
-   - HOC exploratoire ou affirmatif ?
-
-5. **Vérifier le ton**
-   - Commentaire sur le TRAVAIL ?
-   - Pas de superlatifs ?
-   - 65-75 mots ?
+**PROCESSUS DE RÉDACTION** : pour chaque critère × niveau, suivre la structure et le ton
+détaillés au **§3.4** (gap + direction en I/D, valorisation en M/E ; adapter au contexte
+formatif/certificatif et au statut exploratoire du HOC ; commentaire sur le TRAVAIL,
+sans superlatif, 65-75 mots). Ne pas redupliquer ici.
 
 **VALIDATION FINALE** :
 
@@ -684,7 +682,9 @@ Pour chaque critère × niveau :
 
 **Approche ELLAC** :
 - Bélec, C. & Doré, R. (2023). "Recherche collaborative PAREA 2023"
-- Conseil supérieur de l'éducation du Québec : Recommandations sur évaluation
+- Conseil supérieur de l'éducation du Québec (2018). *Évaluer pour que ça compte vraiment*
+  (questionne la notation sommative traditionnelle — note chiffrée sans rétroaction explicite ;
+  ne nomme pas les PAN)
 
 **Taxonomie SOLO** :
 - Biggs, J. & Collis, K. (1982). "Evaluating the Quality of Learning: The SOLO Taxonomy"
@@ -740,5 +740,5 @@ L'alignement pédagogique et le monitorage dans l'application sont documentés d
 ---
 
 **Document créé** : 8 janvier 2026
-**Dernière révision** : 5 juin 2026 (Cowork — encadré de statut en tête ; recadrage complet à venir, voir `plans de travail/PLAN_recadrage_skill_ecosysteme.md`). Révision précédente : 26 avril 2026.
+**Dernière révision** : 11 juin 2026 (Cowork — §1.2 ré-ancré sur le rapport du CSE *Évaluer pour que ça compte vraiment* (2018) : la critique vise la notation sommative **traditionnelle** (note chiffrée sans rétroaction explicite), le rapport ne nomme pas les PAN, et l'outil sert toutes les pratiques (simulation/comparaison) ; référence §8.1 complétée du titre exact ; paramètres 65/35 marqués « propres à cette instanciation » ; §6 données A2024 situées comme validation initiale ; §7.2 dédupliqué vers §3.4 ; version → `version.json`). Recadrage complet (moves A-F) toujours planifié, voir `plans de travail/PLAN_recadrage_skill_ecosysteme.md`. Révisions précédentes : 5 juin 2026, 26 avril 2026.
 **Statut** : Documentation vivante — **une instanciation de référence** (pratique STD de Grégoire), pas la doctrine de l'outil. Recadrage planifié pour distinguer explicitement instanciation / doctrine / recherche.
