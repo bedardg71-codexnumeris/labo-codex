@@ -2863,19 +2863,10 @@ async function sauvegarderPratique(pratique) {
     // Sauvegarde localStorage + IndexedDB (setSync écrit dans les deux stores)
     db.setSync(cle('pratiquesConfigurables'), pratiques);
 
-    // Rafraîchir le type dans les modalités si la pratique sauvegardée est
-    // l'ACTIVE — « active » dérivé de la SSOT groupesCours[].pratiqueId
-    // (#328 L2-a), plus du miroir. Les champs miroirs `pratiqueId` et
-    // `approcheEvaluation` (zéro lecteur) ne sont plus écrits ; `m.pratique`
-    // (type) reste synchronisé tant que ses lecteurs ne sont pas migrés (L2-b).
-    const pratiqueActiveId = (typeof obtenirPratiqueActiveGroupeCours === 'function')
-        ? obtenirPratiqueActiveGroupeCours()
-        : null;
-    if (pratiqueActiveId === pratique.id) {
-        window.modalitesEvaluation.modifier(function (m) {
-            m.pratique = pratique.type;
-        });
-    }
+    // #328 L2-b2 : plus AUCUNE synchronisation miroir — le type de la pratique
+    // active se dérive partout de la SSOT groupesCours[].pratiqueId via
+    // obtenirTypePratiqueActive (helper D2). Sauvegarder une pratique ne touche
+    // plus modalitesEvaluation.
 }
 
 // ============================================================================

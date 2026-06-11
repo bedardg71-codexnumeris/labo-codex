@@ -4562,9 +4562,8 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
  */
 function obtenirLabelNoteFinale() {
     try {
-        const config = db.getSync(cle('modalitesEvaluation'), null) || {};
-        // Session A-2 : id canonique normalisé à la lecture, défaut = PRATIQUE_DEFAUT ('standards').
-        const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
+        // #328 L2-b2 : type dérivé de la SSOT groupesCours[].pratiqueId (helper D2).
+        const pratique = (typeof obtenirTypePratiqueActive === 'function' ? obtenirTypePratiqueActive() : null) || (window.PRATIQUE_DEFAUT || 'standards');
         return (pratique === 'standards') ? 'Note chiffrée' : 'Note finale';
     } catch (e) {
         return 'Note chiffrée';

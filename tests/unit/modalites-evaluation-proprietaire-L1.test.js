@@ -101,10 +101,10 @@ describe('L3 · purgerLegacy()', () => {
     });
 
     it('rapatrie la valeur dans dureePeriode et retire le champ legacy', () => {
-        store['t1_modalitesEvaluation'] = { pratique: 'standards', dureePeriodeMinutes: 50 };
+        store['t1_modalitesEvaluation'] = { discipline: 'Philosophie', dureePeriodeMinutes: 50 };
         expect(M.purgerLegacy()).toBe(1);
         expect(store['t1_dureePeriode']).toBe(50);
-        expect(store['t1_modalitesEvaluation']).toEqual({ pratique: 'standards' });
+        expect(store['t1_modalitesEvaluation']).toEqual({ discipline: 'Philosophie' });
     });
 
     it('n\'écrase JAMAIS une clé dureePeriode déjà présente', () => {
@@ -117,10 +117,10 @@ describe('L3 · purgerLegacy()', () => {
 
     it('traite chaque trimestre indépendamment et reste idempotente', () => {
         store['t1_modalitesEvaluation'] = { dureePeriodeMinutes: 50 };
-        store['t2_modalitesEvaluation'] = { pratique: 'sommative' };
-        expect(M.purgerLegacy()).toBe(1);   // seul t1 portait le champ
+        store['t2_modalitesEvaluation'] = { discipline: 'Littérature' };
+        expect(M.purgerLegacy()).toBe(1);   // seul t1 portait un champ legacy
         expect(M.purgerLegacy()).toBe(0);   // 2e passe : plus rien à faire
-        expect(store['t2_modalitesEvaluation']).toEqual({ pratique: 'sommative' });
+        expect(store['t2_modalitesEvaluation']).toEqual({ discipline: 'Littérature' });
         expect('t2_dureePeriode' in store).toBe(false);
     });
 
@@ -138,24 +138,25 @@ describe('L3 · purgerLegacy()', () => {
         expect(store['t1_modalitesEvaluation']).toEqual({ dureePeriodeMinutes: 50 });
     });
 
-    it('L2-a · purge les miroirs morts pratiqueId/approcheEvaluation SANS rapatriement', () => {
+    it('L2-a/b2 · purge les trois miroirs morts SANS rapatriement (champs propres conservés)', () => {
         store['t1_modalitesEvaluation'] = {
-            pratique: 'standards',                 // L2-b : encore lu, CONSERVÉ
+            typePAN: 'maitrise',                   // champ PROPRE : conservé
+            pratique: 'standards',                 // L2-b2 : miroir mort, purgé
             pratiqueId: 'p1',
             approcheEvaluation: 'par-artefacts'
         };
         expect(M.purgerLegacy()).toBe(1);
-        expect(store['t1_modalitesEvaluation']).toEqual({ pratique: 'standards' });
+        expect(store['t1_modalitesEvaluation']).toEqual({ typePAN: 'maitrise' });
         // Aucune clé créée : ces champs n'ont pas de destination, leur SSOT existe déjà.
         expect(Object.keys(store)).toEqual(['t1_modalitesEvaluation']);
     });
 
-    it('L2-a · purge combinée durée + miroirs en une passe', () => {
+    it('L2-a/b2 · purge combinée durée + miroirs en une passe', () => {
         store['t1_modalitesEvaluation'] = {
-            pratique: 'standards', dureePeriodeMinutes: 50, pratiqueId: 'p1'
+            typePAN: 'maitrise', pratique: 'standards', dureePeriodeMinutes: 50, pratiqueId: 'p1'
         };
         expect(M.purgerLegacy()).toBe(1);
         expect(store['t1_dureePeriode']).toBe(50);
-        expect(store['t1_modalitesEvaluation']).toEqual({ pratique: 'standards' });
+        expect(store['t1_modalitesEvaluation']).toEqual({ typePAN: 'maitrise' });
     });
 });

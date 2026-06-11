@@ -140,13 +140,18 @@
 
         const typePratique = document.getElementById('v2-pratique-type');
         if (typePratique) {
-            typePratique.value = modalites.pratique || '';
+            // #328 L2-b2 : type dérivé de la SSOT (le miroir modalites.pratique
+            // n'existe plus).
+            const typeActif = ((typeof obtenirTypePratiqueActive === 'function')
+                ? obtenirTypePratiqueActive()
+                : null) || '';
+            typePratique.value = typeActif;
             // Afficher la description taxonomique, variante et configuration correspondante
-            afficherDescriptionTaxonomique(modalites.pratique || '');
-            afficherVariantePANStandards(modalites.pratique || '');
-            afficherBibliothequeConfigurations(modalites.pratique || '');
-            afficherConfigurationType(modalites.pratique || '');
-            mettreAJourBadgePratiqueV2(modalites.pratique || '');
+            afficherDescriptionTaxonomique(typeActif);
+            afficherVariantePANStandards(typeActif);
+            afficherBibliothequeConfigurations(typeActif);
+            afficherConfigurationType(typeActif);
+            mettreAJourBadgePratiqueV2(typeActif);
         }
 
         // Variante PAN-Standards (si applicable)
@@ -535,13 +540,15 @@
         }
 
         modalites.nomPratique = document.getElementById('v2-pratique-nom')?.value || '';
-        modalites.pratique = document.getElementById('v2-pratique-type')?.value || 'sommative';
+        // #328 L2-b2 : le miroir modalites.pratique n'est plus écrit — le type
+        // sélectionné ne sert plus qu'à la condition de variante ci-dessous.
+        const typeSelectionne = document.getElementById('v2-pratique-type')?.value || 'sommative';
         modalites.description = document.getElementById('v2-pratique-description')?.value || '';
         modalites.echelleId = document.getElementById('v2-echelle-id')?.value || '';
 
         // Variante PAN-Standards (si applicable)
         const varianteSelect = document.getElementById('v2-variante-calcul');
-        if (varianteSelect && modalites.pratique === 'pan-standards') {
+        if (varianteSelect && typeSelectionne === 'pan-standards') {
             modalites.varianteCalcul = varianteSelect.value || '';
         }
 
@@ -563,7 +570,9 @@
             modalites = {};
         }
 
-        const type = modalites.pratique || '';
+        // #328 L2-b2 : le miroir modalites.pratique n'existe plus — le type
+        // vient du sélecteur de l'éditeur (même source que la sauvegarde de base).
+        const type = document.getElementById('v2-pratique-type')?.value || '';
 
         // Portfolio (PAN-Standards et PAN-Standards utilisent le portfolio)
         // ✅ CORRECTIF (30 déc 2025): Inclure 'pan-standards' en plus de 'pan-maitrise'

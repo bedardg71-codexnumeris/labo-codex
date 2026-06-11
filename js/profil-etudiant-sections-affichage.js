@@ -357,9 +357,12 @@ function genererSectionMobilisationEngagement(da) {
 
     // Calcul dual pour mode comparatif (Beta 90 + correctif 7 déc 2025 :
     // vérifier === true pour éviter le mode comparatif par défaut)
-    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
     // Session C (#303) : mode comparatif retiré — couche unique (pratique active).
-    const { indicesSOM, indicesPAN } = _calculerIndicesMobilisation(da, config.pratique);
+    // #328 L2-b2 : type dérivé de la SSOT groupesCours[].pratiqueId (helper D2).
+    const { indicesSOM, indicesPAN } = _calculerIndicesMobilisation(
+        da,
+        (typeof obtenirTypePratiqueActive === 'function' ? obtenirTypePratiqueActive() : null)
+    );
 
     // Récupérer les données pour les trois sections
     const detailsA = obtenirDetailsAssiduite(da);
@@ -896,8 +899,8 @@ function genererSectionAccompagnement(da) {
 
                         // Obtenir la configuration pour afficher le nombre d'artefacts retenus
                         const config = db.getSync(cle('modalitesEvaluation'), null) || {};
-                        // Session A-2 : id canonique normalisé à la lecture, défaut = PRATIQUE_DEFAUT ('standards').
-                        const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
+                        // #328 L2-b2 : type dérivé de la SSOT (helper D2), défaut historique conservé.
+                        const pratique = (typeof obtenirTypePratiqueActive === 'function' ? obtenirTypePratiqueActive() : null) || (window.PRATIQUE_DEFAUT || 'standards');
 
                         let noteExplicative = '';
                         if (pratique === 'standards') {
@@ -2062,8 +2065,8 @@ function genererValeursComparatives(valeurSOM, valeurPAN, afficherTiret = false)
     }
 
     // Session C (#303) : mode comparatif retiré — toujours la valeur de la pratique active.
-    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
-    const pratique = config.pratique || 'sommative';
+    // #328 L2-b2 : type dérivé de la SSOT (helper D2), défaut historique conservé.
+    const pratique = (typeof obtenirTypePratiqueActive === 'function' ? obtenirTypePratiqueActive() : null) || 'sommative';
     const valeur = pratique === 'sommative' ? valeurSOM : valeurPAN;
     return `<strong class="profil-valeur-grande-bleu">${valeur}%</strong>`;
 }

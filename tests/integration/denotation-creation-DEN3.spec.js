@@ -67,8 +67,11 @@ test('DEN-3 · créer une DEN via l\'assistant → pratique calculable', async (
         if (!creee) return { erreur: 'pratique créée introuvable' };
 
         // Calculabilité par le chemin RÉEL : rendre la pratique active puis résoudre.
-        window.db.setSync('modalitesEvaluation', { pratique: creee.id });
-        window.db.setSync(window.cle('modalitesEvaluation'), { pratique: creee.id });
+        // #328 L2-b2 : activation par la SSOT groupesCours[].pratiqueId
+        // (le miroir modalitesEvaluation.pratique n'existe plus).
+        window.db.setSync('groupeCoursActif', { id: 'GC_DEN3', trimestreId: window.obtenirTrimestreId() });
+        window.db.setSync(window.cle('groupesCours'), [{ id: 'GC_DEN3', pratiqueId: creee.id }]);
+        if (typeof window.invaliderCachePratique === 'function') window.invaliderCachePratique();
         const inst = window.obtenirPratiqueActive();
         if (!inst) return { erreur: 'obtenirPratiqueActive a rendu null' };
 

@@ -896,8 +896,8 @@
             } else {
                 try {
                     const cfgs = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
-                    const mods = db.getSync(cle('modalitesEvaluation'), null) || {};
-                    const pId = mods.pratique;
+                    // #328 L2-b2 : id dérivé de la SSOT groupesCours[].pratiqueId.
+                    const pId = (typeof obtenirPratiqueActiveGroupeCours === 'function') ? obtenirPratiqueActiveGroupeCours() : null;
                     const pActive = pId ? (cfgs.find(p => p.id === pId) || cfgs.find(p => p.type === pId)) : null;
                     if (pActive?.affichageNote === 'lettre') modeNotePreview = 'lettre';
                 } catch(e) { console.warn('[PDF-Export] pratique affichageNote preview fallback:', e.message || e); }

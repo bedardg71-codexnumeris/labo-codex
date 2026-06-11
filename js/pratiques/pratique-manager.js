@@ -30,8 +30,11 @@ const PratiqueManager = {
      * Compatible avec l'architecture existante
      */
     async chargerPratiqueActive() {
-        const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
-        const pratiqueId = modalites.pratique; // Ex: 'pan-standards-bruno'
+        // #328 L2-b2 : id dérivé de la SSOT groupesCours[].pratiqueId — le
+        // miroir modalitesEvaluation.pratique n'existe plus.
+        const pratiqueId = (typeof window.obtenirPratiqueActiveGroupeCours === 'function')
+            ? window.obtenirPratiqueActiveGroupeCours()
+            : null; // Ex: 'pan-standards-bruno'
 
         if (!pratiqueId) {
             console.warn('[PratiqueManager] Aucune pratique configurée');
@@ -65,15 +68,33 @@ const PratiqueManager = {
     },
 
     /**
-     * Change la pratique active (met à jour modalitesEvaluation.pratique)
+     * Change la pratique active du groupe-cours actif.
+     * #328 L2-b2 : écrit la SSOT `groupesCours[].pratiqueId` (décision #303 —
+     * la pratique active est par GROUPE-COURS) ; le miroir
+     * modalitesEvaluation.pratique n'est plus écrit.
      * @param {string} pratiqueId - ID de la pratique à activer
      */
     async changerPratiqueActive(pratiqueId) {
-        // Écriture via le module propriétaire (SSOT #328 Lot 1)
-        window.modalitesEvaluation.modifier(function (m) {
-            m.pratique = pratiqueId;
-            m.dateConfiguration = new Date().toISOString();
-        });
+        const gcActif = db.getSync('groupeCoursActif', null);
+        if (!gcActif || !gcActif.id) {
+            throw new Error('Aucun groupe-cours actif : assemble d\'abord un groupe-cours (Cadre → Groupes-cours) avant d\'activer une pratique.');
+        }
+
+        const groupesCours = db.getSync(cle('groupesCours'), []);
+        const index = Array.isArray(groupesCours)
+            ? groupesCours.findIndex(g => g && g.id === gcActif.id)
+            : -1;
+        if (index === -1) {
+            throw new Error('Groupe-cours actif introuvable dans la liste des groupes-cours du trimestre.');
+        }
+
+        groupesCours[index].pratiqueId = pratiqueId;
+        db.setSync(cle('groupesCours'), groupesCours);
+
+        // Synchroniser la copie du pointeur (jamais prioritaire sur la SSOT,
+        // mais on ne la laisse pas contredire ce qui vient d'être activé).
+        gcActif.pratiqueId = pratiqueId;
+        db.setSync('groupeCoursActif', gcActif);
 
         // Invalider le cache de pratique-registre.js
         if (window.invaliderCachePratique) {
@@ -206,9 +227,11 @@ const PratiqueManager = {
             throw new Error(`Pratique introuvable : ${pratiqueId}`);
         }
 
-        // Vérifier que ce n'est pas la pratique active
-        const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
-        if (modalites.pratique === pratiqueId) {
+        // Vérifier que ce n'est pas la pratique active (#328 L2-b2 : SSOT)
+        const pratiqueActiveId = (typeof window.obtenirPratiqueActiveGroupeCours === 'function')
+            ? window.obtenirPratiqueActiveGroupeCours()
+            : null;
+        if (pratiqueActiveId === pratiqueId) {
             throw new Error('Impossible de supprimer la pratique active');
         }
 
