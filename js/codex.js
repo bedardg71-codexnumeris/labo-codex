@@ -602,7 +602,7 @@ async function chargerCodex(fichierZip) {
     var detectionModele = _detecterModeleAnterieur(donnees, manifeste);
     if (detectionModele) {
         _masquerProgression();
-        if (!confirm(_messageModeleAnterieur(detectionModele, 'remplacer'))) {
+        if (!confirm(_messageModeleAnterieur(detectionModele, 'remplacer', fichierZip && fichierZip.name))) {
             throw new Error('Import annulé : ton espace de travail n\'a pas été modifié.');
         }
         _majProgression(15, 'Extraction des données…');
@@ -1460,14 +1460,15 @@ function _detecterModeleAnterieur(donneesExternes, manifesteExterne) {
  * @param {{suspects: Array, dateExterne: string|null}} detection
  * @param {string} verbe - 'remplacer' (import) ou 'fusionner avec' (fusion)
  */
-function _messageModeleAnterieur(detection, verbe) {
+function _messageModeleAnterieur(detection, verbe, nomFichier) {
     var lignes = detection.suspects.map(function(sus) {
         var ext = sus.externes.slice(0, 2).join(', ') + (sus.externes.length > 2 ? '…' : '');
         var loc = sus.locaux.slice(0, 2).join(', ') + (sus.locaux.length > 2 ? '…' : '');
         return '• ' + sus.trimestre + ' : le codex référence « ' + ext +
             ' » alors que ton espace actuel référence « ' + loc + ' »';
     }).join('\n');
-    return '⚠️ ATTENTION : ce codex semble porter un MODÈLE DE DONNÉES différent ' +
+    return (nomFichier ? 'Fichier : « ' + nomFichier + ' »\n\n' : '') +
+        '⚠️ ATTENTION : ce codex semble porter un MODÈLE DE DONNÉES différent ' +
         '(probablement antérieur) de ton espace de travail actuel.\n\n' + lignes +
         (detection.dateExterne ? '\n\nDernière modification du codex : ' + detection.dateExterne : '') +
         '\n\nContinuer va ' + verbe + ' ton espace avec cet ancien état — c\'est ' +
@@ -2650,9 +2651,9 @@ async function actionOuvrir() {
         // contraire de rouvrir le même ZIP — ne pas suggérer de le supprimer.
         var msgReload = resultat.stats.incomplet
             ? 'Recharger la page pour appliquer les données ?'
-            : 'Codex chargé. Le fichier ZIP d\'origine (' + _formaterTaille(fichier.size) +
-              ') reste dans Fichiers — tu peux le supprimer pour récupérer de l\'espace. ' +
-              'Recharger la page pour appliquer les données ?';
+            : 'Codex chargé depuis « ' + fichier.name + ' » (' + _formaterTaille(fichier.size) +
+              ').\n\nLe fichier ZIP d\'origine reste dans Fichiers — tu peux le supprimer ' +
+              'pour récupérer de l\'espace. Recharger la page pour appliquer les données ?';
         if (confirm(msgReload)) {
             window.location.reload();
         }
@@ -2849,7 +2850,7 @@ async function actionFusionner() {
     var detectionModeleFusion = _detecterModeleAnterieur(externe.donnees, externe.manifeste || null);
     if (detectionModeleFusion) {
         _masquerProgression();
-        if (!confirm(_messageModeleAnterieur(detectionModeleFusion, 'fusionner avec'))) {
+        if (!confirm(_messageModeleAnterieur(detectionModeleFusion, 'fusionner avec', fichier && fichier.name))) {
             notifications.warning('Fusion annulée', 'Ton espace de travail n\'a pas été modifié.');
             return;
         }
