@@ -638,7 +638,7 @@ async function chargerCodex(fichierZip) {
     //    appelé avec notifier:false (une notification par blob refusé = avalanche
     //    de bandeaux en import massif) ; le bilan est rendu en fin d'import.
     let nbBlobs = 0;
-    var blobsEchecs = [];        // [{id, raison}] — raison : 'quota' | 'trop_volumineux' | 'erreur'
+    var blobsEchecs = [];        // [{id, raison}] — raison : 'quota' | 'erreur'
     var blobsRefusesMagic = [];  // [id] — magic bytes invalides
     var blobsAbsentsDuZip = [];  // [id] — attendus (statut avec blob) mais absents du ZIP
     var nbBlobsAttendus = 0;
@@ -684,7 +684,6 @@ async function chargerCodex(fichierZip) {
             } catch (e) {
                 var raison = 'erreur';
                 if (e && e.name === 'QuotaExceededError') raison = 'quota';
-                else if (e && e.code === 'BLOB_TROP_VOLUMINEUX') raison = 'trop_volumineux';
                 blobsEchecs.push({ id: f.id, raison: raison });
                 console.warn('📂 Codex : blob ignoré pour ' + f.id + ' (' + raison + ')', e.message);
             }
@@ -772,8 +771,7 @@ function construireBilanImport(stats) {
     var magic = stats.blobsRefusesMagic || [];
     var absents = stats.blobsAbsentsDuZip || [];
     var nbQuota = echecs.filter(function(e) { return e.raison === 'quota'; }).length;
-    var nbTropGros = echecs.filter(function(e) { return e.raison === 'trop_volumineux'; }).length;
-    var nbErreurs = echecs.length - nbQuota - nbTropGros;
+    var nbErreurs = echecs.length - nbQuota;
     var nbManquants = echecs.length + magic.length + absents.length;
 
     var titre = 'Import incomplet : ' + nbManquants + ' fichier' + (nbManquants > 1 ? 's' : '') +
@@ -782,7 +780,6 @@ function construireBilanImport(stats) {
 
     var causes = [];
     if (nbQuota > 0) causes.push(nbQuota + ' refusé' + (nbQuota > 1 ? 's' : '') + ' faute d\'espace de stockage');
-    if (nbTropGros > 0) causes.push(nbTropGros + ' au-dessus de la taille maximale par fichier');
     if (magic.length > 0) causes.push(magic.length + ' au format non reconnu');
     if (absents.length > 0) causes.push(absents.length + ' absent' + (absents.length > 1 ? 's' : '') + ' du ZIP');
     if (nbErreurs > 0) causes.push(nbErreurs + ' en erreur technique');

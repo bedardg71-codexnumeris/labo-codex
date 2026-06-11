@@ -192,22 +192,11 @@
      */
     async function stockerBlob(id, blob, etudiantDA, productionId, options) {
         const notifier = !options || options.notifier !== false;
-        // Limite de sécurité : 20 MB par blob (IndexedDB ~50 MB par origin)
-        const LIMITE_BLOB_MB = 20;
-        if (blob.size > LIMITE_BLOB_MB * 1024 * 1024) {
-            const tailleMB = (blob.size / 1024 / 1024).toFixed(1);
-            const msg = `Blob trop volumineux: ${tailleMB} MB (limite: ${LIMITE_BLOB_MB} MB)`;
-            console.error(`[Travaux-Stockage] ${msg}`);
-            if (notifier) {
-                notifications.erreur('Fichier trop volumineux', `Le fichier dépasse la limite de ${LIMITE_BLOB_MB} MB.`);
-            }
-            // Throw plutot que return silencieux : sinon le caller croit que le
-            // blob est stocke alors qu'il ne l'est pas, et la metadata associee
-            // (entree dans fichiersTravaux) devient orpheline.
-            const erreurTaille = new Error(msg);
-            erreurTaille.code = 'BLOB_TROP_VOLUMINEUX';
-            throw erreurTaille;
-        }
+        // Pas de limite de taille par fichier : l'ancienne limite de 20 Mo
+        // reposait sur une hypothèse périmée (« IndexedDB ~50 Mo par origin » —
+        // 36 Go mesurés sur l'iPad réel). Le quota global est gardé par le
+        // pré-vol d'import (#334 A) et un vrai QuotaExceededError est journalisé
+        // par l'import (#334 B). Retirée le 11 juin 2026, décision Grégoire.
 
         // FSAPI: fichier sur disque
         if (fsapiActif) {
