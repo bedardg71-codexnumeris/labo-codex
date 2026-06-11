@@ -2658,6 +2658,12 @@ async function actionOuvrir() {
             window.location.reload();
         }
     } catch (e) {
+        // Une annulation volontaire (garde de modèle antérieur, #335 A) n'est
+        // pas une erreur — message neutre, sans préfixe alarmant.
+        if (e && e.message && e.message.indexOf('Import annulé') === 0) {
+            alert(e.message);
+            return;
+        }
         console.error('📂 Erreur ouverture codex:', e);
         alert('Erreur : ' + e.message);
     }
