@@ -32,11 +32,26 @@
   figée sciemment** : sans entrée `indicesCP[da].actuel`, une pratique CONFIGURABLE rend
   P=0 (garde de `PratiqueConfigurable.calculerPerformance` court-circuite la délégation
   SPE) — si L2 change cette garde, le test le rend visible.
-- **Trouvaille à intégrer au helper D2** : `obtenirPratiqueActiveGroupeCours()` (modes.js)
-  lit la COPIE `gcActif.pratiqueId` (étape 1) AVANT la SSOT `groupesCours` (étape 3) —
-  même patron copie-prioritaire que #332 (corrigé pour `horaireId` le 11 juin). Le helper
-  de dérivation L2 doit consulter la SSOT d'abord ; étape 4 (fallback
-  `modalites.pratiqueNotation`) à purger avec le miroir.
+- **✅ L2-a LIVRÉ (11 juin 2026)** : champs miroirs `pratiqueId` et `approcheEvaluation`
+  dégonflés. Constat d'inventaire : `approcheEvaluation` n'avait AUCUN lecteur (les ~18
+  sites du grep étaient l'état d'édition du wizard, `reponses.*`) ; `pratiqueId` en avait
+  2 réels. Livré :
+  - `obtenirPratiqueActiveGroupeCours()` (modes.js) résout par la SSOT `groupesCours`
+    AVANT les copies (gcActif/infoCours) — patron #332 ; fallback mort « pratiqueNotation »
+    retiré. C'est l'embryon du helper D2 (le paramètre de contexte explicite vient en L2-b).
+  - wizard `sauvegarderPratique` : garde « est-ce l'active ? » dérivée de la SSOT ;
+    n'écrit plus que `m.pratique` (type — encore lu, L2-b). La clause bootstrap « miroir
+    vide → le réclamer » est supprimée : une pratique créée sans être assignée ne bascule
+    plus le type du trimestre (sémantique SSOT).
+  - `trimestres.js` snapshot : pratiques utilisées dérivées de `${id}_groupesCours`
+    (TOUTES les pratiques actives du trimestre — le miroir n'en stockait qu'une).
+  - `purgerLegacy()` étendue : strip `pratiqueId`/`approcheEvaluation` des données de
+    chaque trimestre (sans rapatriement) ; seed démo nettoyé (SSOT démo = `GC_DEMO`).
+  - Tests : sentinelle `sentinelle-ssot-modalites-miroir-L2a.test.js` (8 cas, dont
+    fonctionnels SSOT-first sur modes.js chargé en sandbox) + 2 cas purgerLegacy au
+    contrat L1. Golden master L2-0 inchangé au centième.
+- **Prochain sous-lot : L2-b1** (lecteurs de `pratique` dans le chemin de CALCUL, helper
+  D2 avec contexte explicite {gcId, trimestreId}).
 
 ---
 

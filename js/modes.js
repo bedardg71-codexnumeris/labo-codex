@@ -1069,35 +1069,36 @@ function etudiantDansCoursActif(etudiant) {
  * @returns {string|null} - ID de la pratique active ou null si non définie
  */
 function obtenirPratiqueActiveGroupeCours() {
-    // 1. Essayer depuis groupeCoursActif (source principale)
+    // 🔧 FIX #328 L2-a (11 juin 2026) : la SSOT `groupesCours[].pratiqueId`
+    // fait foi. L'ancien ordre lisait d'abord les COPIES (gcActif.pratiqueId,
+    // infoCours.pratiqueId) — même patron copie-prioritaire que #332
+    // (horaireId, corrigé le même jour). Les copies ne servent plus que si le
+    // groupe-cours est INTROUVABLE dans la SSOT, jamais pour la contredire.
+    // Le fallback sur le champ « pratiqueNotation » des modalités (que plus
+    // rien n'écrivait) a été retiré.
     const gcActif = db.getSync('groupeCoursActif', null);
+
+    // 1. SSOT : le groupe-cours actif dans la liste groupesCours
+    if (gcActif && gcActif.id) {
+        const groupesCours = db.getSync(cle('groupesCours'), []);
+        const gc = Array.isArray(groupesCours)
+            ? groupesCours.find(g => g && g.id === gcActif.id)
+            : null;
+        if (gc) {
+            return gc.pratiqueId || 'sommative';
+        }
+    }
+
+    // 2. GC introuvable dans la SSOT (état transitoire) : copies en dernier recours
     if (gcActif && gcActif.pratiqueId) {
         return gcActif.pratiqueId;
     }
-
-    // 2. Essayer depuis infoCours (rétrocompatibilité)
     const infoCours = db.getSync('infoCours', null);
     if (infoCours && infoCours.pratiqueId) {
         return infoCours.pratiqueId;
     }
 
-    // 3. Essayer depuis le groupe-cours complet dans groupesCours
-    if (gcActif && gcActif.id) {
-        const cleGC = cle('groupesCours');
-        const groupesCours = db.getSync(cleGC, []);
-        const gc = groupesCours.find(g => g.id === gcActif.id);
-        if (gc && gc.pratiqueId) {
-            return gc.pratiqueId;
-        }
-    }
-
-    // 4. Fallback : lire depuis modalitesEvaluation (ancienne méthode)
-    const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
-    if (modalites.pratiqueNotation) {
-        return modalites.pratiqueNotation;
-    }
-
-    // 5. Défaut : sommative (fallback silencieux — pratique par défaut attendue
+    // 3. Défaut : sommative (fallback silencieux — pratique par défaut attendue
     // pour un utilisateur qui n'a pas encore configuré sa pratique de notation)
     return 'sommative';
 }

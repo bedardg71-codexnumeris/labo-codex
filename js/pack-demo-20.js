@@ -14311,9 +14311,7 @@ const PACK_DEMARRAGE = {
       "_migrationV1Complete": true,
       "_migrationDate": "2026-01-22T12:18:43.928Z"
     },
-    "pratique": "standards",
-    "pratiqueId": "demo-std-litt",
-    "approcheEvaluation": "par-artefacts"
+    "pratique": "standards"
   },
   "dureePeriode": 50,
   "pratiquesConfigurables": [

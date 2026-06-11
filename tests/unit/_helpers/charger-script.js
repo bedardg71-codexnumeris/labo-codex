@@ -39,9 +39,15 @@ export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExist
             appendChild: () => {},
             addEventListener: () => {},
             style: {},
-            classList: { add: () => {}, remove: () => {}, contains: () => false }
+            classList: { add: () => {}, remove: () => {}, contains: () => false, toggle: () => false }
         }),
-        body: { addEventListener: () => {}, appendChild: () => {} },
+        body: {
+            addEventListener: () => {}, appendChild: () => {},
+            // modes.js pose un attribut data-mode sur <body> au chargement
+            setAttribute: () => {}, getAttribute: () => null,
+            classList: { add: () => {}, remove: () => {}, contains: () => false, toggle: () => false },
+            style: {}
+        },
         documentElement: { addEventListener: () => {} }
     };
 

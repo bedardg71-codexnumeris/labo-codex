@@ -567,11 +567,15 @@
             if (p.pratiqueId) pratiqueIds.add(p.pratiqueId);
         });
 
-        // Récupérer aussi les modalités d'évaluation du trimestre
-        // (clé namespacée uniquement — fallback clé nue retiré, SSOT Lot 3)
-        const modalites = db.getSync(`${trimestreId}_modalitesEvaluation`, null);
-        if (modalites && modalites.pratiqueId) {
-            pratiqueIds.add(modalites.pratiqueId);
+        // Récupérer aussi les pratiques ACTIVES des groupes-cours du trimestre
+        // (#328 L2-a : SSOT `groupesCours[].pratiqueId` — l'ancien miroir
+        // `modalitesEvaluation.pratiqueId` ne stockait qu'UNE pratique pour le
+        // trimestre alors que chaque groupe-cours a la sienne)
+        const groupesCoursTrimestre = db.getSync(`${trimestreId}_groupesCours`, null);
+        if (Array.isArray(groupesCoursTrimestre)) {
+            groupesCoursTrimestre.forEach(gc => {
+                if (gc && gc.pratiqueId) pratiqueIds.add(gc.pratiqueId);
+            });
         }
 
         return { grilleIds, echelleIds, pratiqueIds };

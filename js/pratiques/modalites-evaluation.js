@@ -75,11 +75,18 @@
         return true;
     }
 
+    // Champs miroirs SANS rapatriement, purgés tels quels (#328 L2-a) :
+    // `pratiqueId` (SSOT = groupesCours[].pratiqueId) et `approcheEvaluation`
+    // (vit dans pratique.configuration) n'ont plus AUCUN lecteur.
+    const CHAMPS_MIROIRS_MORTS = ['pratiqueId', 'approcheEvaluation'];
+
     /**
-     * Purge le champ legacy `dureePeriodeMinutes` des modalités de CHAQUE
-     * trimestre (Lot 3). La valeur est rapatriée dans la clé `dureePeriode`
-     * (domaine horaire, SSOT depuis le Lot 0) si elle n'y est pas déjà — la
-     * clé existante a toujours priorité, jamais d'écrasement.
+     * Purge les champs legacy des modalités de CHAQUE trimestre :
+     *  - `dureePeriodeMinutes` (Lot 3) — valeur rapatriée dans la clé
+     *    `dureePeriode` (domaine horaire, SSOT Lot 0) si elle n'y est pas
+     *    déjà ; la clé existante a toujours priorité, jamais d'écrasement ;
+     *  - `pratiqueId` / `approcheEvaluation` (Lot 2-a) — miroirs morts,
+     *    supprimés sans rapatriement (leur SSOT vit ailleurs).
      *
      * Appelée à chaque démarrage (main.js, séquence db-ready) : idempotente
      * et robuste face aux réintroductions par import de données anciennes
@@ -92,15 +99,29 @@
         for (const t of window.enumererTrimestres()) {
             const cleTrimestre = t.id + '_modalitesEvaluation';
             const m = db.getSync(cleTrimestre, null);
-            if (!m || typeof m !== 'object' || !('dureePeriodeMinutes' in m)) continue;
-            const cleDuree = t.id + '_dureePeriode';
-            if (db.getSync(cleDuree, null) === null) {
-                const duree = parseInt(m.dureePeriodeMinutes);
-                if (duree) db.setSync(cleDuree, duree);
+            if (!m || typeof m !== 'object') continue;
+
+            let modifie = false;
+            if ('dureePeriodeMinutes' in m) {
+                const cleDuree = t.id + '_dureePeriode';
+                if (db.getSync(cleDuree, null) === null) {
+                    const duree = parseInt(m.dureePeriodeMinutes);
+                    if (duree) db.setSync(cleDuree, duree);
+                }
+                delete m.dureePeriodeMinutes;
+                modifie = true;
             }
-            delete m.dureePeriodeMinutes;
-            db.setSync(cleTrimestre, m);
-            nettoyes++;
+            for (const champ of CHAMPS_MIROIRS_MORTS) {
+                if (champ in m) {
+                    delete m[champ];
+                    modifie = true;
+                }
+            }
+
+            if (modifie) {
+                db.setSync(cleTrimestre, m);
+                nettoyes++;
+            }
         }
         return nettoyes;
     }
