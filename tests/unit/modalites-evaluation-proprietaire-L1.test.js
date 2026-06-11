@@ -137,4 +137,25 @@ describe('L3 · purgerLegacy()', () => {
         expect(M.purgerLegacy()).toBe(0);
         expect(store['t1_modalitesEvaluation']).toEqual({ dureePeriodeMinutes: 50 });
     });
+
+    it('L2-a · purge les miroirs morts pratiqueId/approcheEvaluation SANS rapatriement', () => {
+        store['t1_modalitesEvaluation'] = {
+            pratique: 'standards',                 // L2-b : encore lu, CONSERVÉ
+            pratiqueId: 'p1',
+            approcheEvaluation: 'par-artefacts'
+        };
+        expect(M.purgerLegacy()).toBe(1);
+        expect(store['t1_modalitesEvaluation']).toEqual({ pratique: 'standards' });
+        // Aucune clé créée : ces champs n'ont pas de destination, leur SSOT existe déjà.
+        expect(Object.keys(store)).toEqual(['t1_modalitesEvaluation']);
+    });
+
+    it('L2-a · purge combinée durée + miroirs en une passe', () => {
+        store['t1_modalitesEvaluation'] = {
+            pratique: 'standards', dureePeriodeMinutes: 50, pratiqueId: 'p1'
+        };
+        expect(M.purgerLegacy()).toBe(1);
+        expect(store['t1_dureePeriode']).toBe(50);
+        expect(store['t1_modalitesEvaluation']).toEqual({ pratique: 'standards' });
+    });
 });
