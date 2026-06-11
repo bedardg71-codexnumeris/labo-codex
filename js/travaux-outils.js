@@ -460,7 +460,7 @@
         // Barre de titre
         let html = '<div class="palette-flottante-barre">';
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroObservations" title="Personnaliser"><img src="' + ICONS_DIR + 'icon-gear.svg" alt="" class="outil-svg-icon palette-toggle-icon"></button>';
-        html += '<span class="palette-flottante-titre">Tampons</span>';
+        html += '<span class="palette-flottante-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>Tampons</span>';
         html += '<div style="display:flex; gap:2px;">';
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteH" data-param="travaux-palette-tampons" title="Disposition horizontale">\u2194</button>';
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteV" data-param="travaux-palette-tampons" title="Disposition verticale">\u2195</button>';
@@ -1302,7 +1302,7 @@
         // Barre de titre
         let html = '<div class="palette-flottante-barre">';
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroErreursFr" title="Personnaliser"><img src="' + ICONS_DIR + 'icon-gear.svg" alt="" class="outil-svg-icon palette-toggle-icon"></button>';
-        html += '<span class="palette-flottante-titre">Codes <span id="travaux-errfr-total-header" style="font-weight:400; font-size:0.75rem; color:var(--texte-secondaire);"></span></span>';
+        html += '<span class="palette-flottante-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>Codes <span id="travaux-errfr-total-header" style="font-weight:400; font-size:0.75rem; color:var(--texte-secondaire);"></span></span>';
         html += '<div style="display:flex; gap:2px;">';
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteH" data-param="travaux-palette-erreurs-fr" title="Disposition horizontale">\u2194</button>';
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteV" data-param="travaux-palette-erreurs-fr" title="Disposition verticale">\u2195</button>';
@@ -1657,7 +1657,7 @@
 
         // Barre de titre (draggable + toggle)
         html += '<div class="palette-flottante-barre">';
-        html += '<span class="palette-flottante-titre">Annotation</span>';
+        html += '<span class="palette-flottante-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>Annotation</span>';
         html += '<button class="palette-flottante-toggle" id="travaux-btn-reglages-annotation" title="Personnaliser"><img src="' + ICONS_DIR + 'icon-gear.svg" alt="" class="outil-svg-icon palette-toggle-icon"></button>';
         html += '<button class="palette-flottante-toggle" id="travaux-palette-toggle" data-action="travauxOutils.togglePaletteReplie" title="Réduire la palette">&#x2212;</button>';
         html += '</div>';
@@ -1935,6 +1935,24 @@
             if (pos.top) palette.style.top = pos.top;
             if (pos.width) palette.style.width = pos.width;
             if (pos.height) palette.style.height = pos.height;
+            // Borner au conteneur : une position sauvegardée dans un autre
+            // layout (plein écran, fenêtre plus étroite) peut placer la
+            // palette hors zone → palette invisible alors qu'elle existe.
+            const cont = palette.offsetParent || palette.parentElement;
+            if (cont && cont.clientWidth > 100) {
+                const maxLeft = cont.clientWidth - 60;
+                const maxTop = cont.clientHeight - 40;
+                if (palette.offsetLeft > maxLeft) {
+                    palette.style.left = Math.max(0, maxLeft) + 'px';
+                    palette.style.right = 'auto';
+                }
+                if (palette.offsetLeft < 0) {
+                    palette.style.left = '0px';
+                    palette.style.right = 'auto';
+                }
+                if (palette.offsetTop > maxTop) palette.style.top = Math.max(0, maxTop) + 'px';
+                if (palette.offsetTop < 0) palette.style.top = '0px';
+            }
         } catch(e) { /* JSON parse error */ }
     }
 
@@ -1948,12 +1966,17 @@
         // Restaurer la position persistée
         restaurerPositionPalette(palette);
 
-        // Focus (z-index) au mousedown sur la palette entière
-        palette.addEventListener('mousedown', function() { focusPalette(palette); });
+        // Focus (z-index) au pointerdown sur la palette entière (souris, doigt, stylet)
+        palette.addEventListener('pointerdown', function() { focusPalette(palette); });
 
-        barre.addEventListener('mousedown', function(e) {
+        // Pointer Events : couvre souris, doigt (iPad) et Apple Pencil avec une
+        // seule mécanique. Nécessite touch-action:none sur la barre (styles.css)
+        // pour que le geste ne soit pas happé par le défilement natif.
+        barre.addEventListener('pointerdown', function(e) {
             if (e.target.closest('.palette-flottante-toggle') || e.target.closest('.travaux-palette-toggle')) return;
+            if (!e.isPrimary) return;
             e.preventDefault();
+            const pointerId = e.pointerId;
             const startX = e.clientX, startY = e.clientY;
             const rect = palette.getBoundingClientRect();
             const cont = conteneur || document.getElementById('travaux-conteneur-document');
@@ -1964,16 +1987,23 @@
             palette.style.right = 'auto';
             palette.style.left = startLeft + 'px';
             function onMove(e2) {
+                if (e2.pointerId !== pointerId) return;
                 palette.style.left = Math.max(0, startLeft + e2.clientX - startX) + 'px';
                 palette.style.top = Math.max(0, startTop + e2.clientY - startY) + 'px';
             }
-            function onUp() {
-                document.removeEventListener('mousemove', onMove);
-                document.removeEventListener('mouseup', onUp);
+            function onUp(e2) {
+                if (e2.pointerId !== pointerId) return;
+                barre.removeEventListener('pointermove', onMove);
+                barre.removeEventListener('pointerup', onUp);
+                barre.removeEventListener('pointercancel', onUp);
                 sauvegarderPositionPalette(palette);
             }
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup', onUp);
+            // La capture redirige les pointermove/up vers la barre même quand
+            // le pointeur sort de la palette — pas d'écouteurs sur document.
+            barre.setPointerCapture(pointerId);
+            barre.addEventListener('pointermove', onMove);
+            barre.addEventListener('pointerup', onUp);
+            barre.addEventListener('pointercancel', onUp);
         });
 
         // Double-clic sur la barre : reset taille et position sauvegardée
@@ -2073,7 +2103,7 @@
         palette.className = 'palette-flottante palette-chrono';
 
         let html = '<div class="palette-flottante-barre">';
-        html += '<span class="palette-flottante-titre">Chronométrer</span>';
+        html += '<span class="palette-flottante-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>Chronométrer</span>';
         html += '<button class="palette-flottante-toggle" title="Démarre à la 1re annotation et s\'arrête à la sauvegarde. Indique ensuite une durée moyenne.">?</button>';
         html += '</div>';
         html += '<div class="palette-flottante-contenu palette-chrono-contenu">';

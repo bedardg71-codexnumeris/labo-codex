@@ -4282,9 +4282,13 @@ function initialiser() {
     var palette = document.getElementById('planif-palette');
     var paletteBarre = palette ? palette.querySelector('.planif-palette-barre') : null;
     if (paletteBarre) {
-        paletteBarre.addEventListener('mousedown', function(e) {
+        // Pointer Events : couvre souris, doigt (iPad) et Apple Pencil.
+        // Nécessite touch-action:none sur .planif-palette-barre (styles.css).
+        paletteBarre.addEventListener('pointerdown', function(e) {
             if (e.target.closest('.planif-palette-toggle')) return;
+            if (!e.isPrimary) return;
             e.preventDefault();
+            var pointerId = e.pointerId;
             var startX = e.clientX;
             var startY = e.clientY;
             var rect = palette.getBoundingClientRect();
@@ -4293,15 +4297,20 @@ function initialiser() {
             var startTop = rect.top - wrapperRect.top;
 
             function onMove(e2) {
+                if (e2.pointerId !== pointerId) return;
                 palette.style.left = (startLeft + e2.clientX - startX) + 'px';
                 palette.style.top = (startTop + e2.clientY - startY) + 'px';
             }
-            function onUp() {
-                document.removeEventListener('mousemove', onMove);
-                document.removeEventListener('mouseup', onUp);
+            function onUp(e2) {
+                if (e2.pointerId !== pointerId) return;
+                paletteBarre.removeEventListener('pointermove', onMove);
+                paletteBarre.removeEventListener('pointerup', onUp);
+                paletteBarre.removeEventListener('pointercancel', onUp);
             }
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup', onUp);
+            paletteBarre.setPointerCapture(pointerId);
+            paletteBarre.addEventListener('pointermove', onMove);
+            paletteBarre.addEventListener('pointerup', onUp);
+            paletteBarre.addEventListener('pointercancel', onUp);
         });
     }
 
