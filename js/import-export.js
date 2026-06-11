@@ -46,11 +46,14 @@ function validerZipSecurite(zip) {
         return {
             valide: false,
             erreur: 'ZIP trop volumineux une fois décompressé (' +
-                (tailleDecompressee / 1024 / 1024 / 1024).toFixed(1) + ' Go). Limite : 2 Go.'
+                (tailleDecompressee / 1024 / 1024 / 1024).toFixed(1) + ' Go). Limite : 2 Go.',
+            tailleDecompressee: tailleDecompressee
         };
     }
 
-    return { valide: true, erreur: null };
+    // tailleDecompressee vaut 0 si JSZip n'expose pas _data.uncompressedSize
+    // (D6 du plan #334) — les consommateurs doivent traiter 0 comme « inconnu ».
+    return { valide: true, erreur: null, tailleDecompressee: tailleDecompressee };
 }
 
 // Export global pour que codex.js puisse l'utiliser
