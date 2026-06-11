@@ -1059,7 +1059,7 @@ function desactiverPratiqueMultiObjectifs() {
  * @returns {Object|null} - { actif: boolean, ensembleId: string, ensemble: Object } ou null
  */
 function verifierPratiqueMultiObjectifs() {
-    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
     const ensembleId = modalites.configPAN?.ensembleObjectifsId;
 
     if (!ensembleId) {

@@ -21,7 +21,7 @@
  * @returns {object} Configuration des jetons avec valeurs par défaut
  */
 function obtenirConfigJetons() {
-    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
     const configPAN = modalites.configPAN || {};
 
     // Valeurs par défaut si config PAN n'existe pas
@@ -709,7 +709,7 @@ function appliquerJetonRepriseCiblee(evaluationOriginaleId, critereId = null, ar
     // Vérifier la disponibilité des jetons de reprise ciblée pour cet étudiant
     // Pour l'instant, on utilise le même compteur que les reprises standard
     // TODO: Créer un compteur séparé si besoin
-    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
     const configPAN = modalites.configPAN || {};
     const configRepriseCiblee = configPAN.jetons?.repriseCiblee || {};
 

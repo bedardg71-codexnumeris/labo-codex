@@ -108,7 +108,7 @@ class PratiquePANStandards {
     // retourne donc toujours le global : aucun changement de comportement.
     _modalites() {
         if (this.config && this.config.modalites) return this.config.modalites;
-        return db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+        return db.getSync(cle('modalitesEvaluation'), null) || {};
     }
 
     // ========================================================================

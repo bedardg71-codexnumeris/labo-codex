@@ -568,8 +568,8 @@
         });
 
         // Récupérer aussi les modalités d'évaluation du trimestre
-        const modalites = db.getSync(`${trimestreId}_modalitesEvaluation`, null)
-            || db.getSync('modalitesEvaluation', null);
+        // (clé namespacée uniquement — fallback clé nue retiré, SSOT Lot 3)
+        const modalites = db.getSync(`${trimestreId}_modalitesEvaluation`, null);
         if (modalites && modalites.pratiqueId) {
             pratiqueIds.add(modalites.pratiqueId);
         }
@@ -1210,7 +1210,7 @@
             const snapshots = snapshotsRaw.hebdomadaires || [];
             const grilles = db.getSync('grillesTemplates', []);
             const echelles = db.getSync('echellesTemplates', []);
-            const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+            const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
             const indicesCP = db.getSync(cle('indicesCP'), {});
             const cours = db.getSync('cours', []);
             const coursActif = cours.find(c => c.actif);

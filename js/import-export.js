@@ -3152,7 +3152,7 @@ async function exporterConfigurationComplete() {
     }
 
     // Paramètres du cours
-    const modalitesEvaluation = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const modalitesEvaluation = db.getSync(cle('modalitesEvaluation'), null) || {};
     const parametres = {
         systeme_jetons: modalitesEvaluation.systemeJetons || false,
         reprises_autorisees: modalitesEvaluation.reprisesAutorisees || false,

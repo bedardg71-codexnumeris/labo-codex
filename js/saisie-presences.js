@@ -40,7 +40,7 @@
  * @returns {Object} Configuration complète de notation
  */
 function obtenirConfigurationNotation() {
-    return db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    return db.getSync(cle('modalitesEvaluation'), null) || {};
 }
 
 function initialiserModuleSaisiePresences() {

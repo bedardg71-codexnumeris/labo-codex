@@ -758,7 +758,7 @@ function calculerDistributionPerformance(etudiants) {
  * @returns {string} - HTML du badge avec icône et texte
  */
 function genererBadgePratique() {
-    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
     // Session A-2 : id canonique normalisé à la lecture, défaut = PRATIQUE_DEFAUT ('standards').
     const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
     const typePAN = config.typePAN || 'maitrise';
@@ -800,7 +800,7 @@ function genererBadgePratique() {
  * @returns {string} - HTML du badge
  */
 function genererBadgeSourceDonnees() {
-    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
     // Session C (#303) : mode comparatif retiré — couche unique (pratique active).
     const { afficherSom: afficherSommatif } = determinerModeAffichageTableauBord(config);
 
@@ -1369,7 +1369,7 @@ function determinerModeAffichageTableauBord(config) {
  * @param {Array} etudiants - Étudiants avec indices calculés
  */
 function afficherMetriquesGlobales(etudiants) {
-    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
     // Session C (#303) : mode comparatif retiré — couche unique (pratique active).
     let { afficherSom, afficherPan } = determinerModeAffichageTableauBord(config);
 
@@ -2604,7 +2604,7 @@ function afficherAlerteNonParticipation(etudiants) {
 }
 
 function afficherPatternsApprentissage(etudiants) {
-    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
     // Session C (#303) : mode comparatif retiré — couche unique (pratique active).
     const { afficherSom, afficherPan } = determinerModeAffichageTableauBord(config);
 
@@ -2752,7 +2752,7 @@ function genererCarteRaI(label, description, valeurSomPct, valeurPanPct, valeurS
  * @param {Array} etudiants - Étudiants avec indices calculés
  */
 function afficherNiveauxRaI(etudiants) {
-    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
     // Session C (#303) : mode comparatif retiré — couche unique (pratique active).
     const { afficherSom, afficherPan } = determinerModeAffichageTableauBord(config);
 

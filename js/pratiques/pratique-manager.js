@@ -30,7 +30,7 @@ const PratiqueManager = {
      * Compatible avec l'architecture existante
      */
     async chargerPratiqueActive() {
-        const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+        const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
         const pratiqueId = modalites.pratique; // Ex: 'pan-standards-bruno'
 
         if (!pratiqueId) {
@@ -207,7 +207,7 @@ const PratiqueManager = {
         }
 
         // Vérifier que ce n'est pas la pratique active
-        const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+        const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
         if (modalites.pratique === pratiqueId) {
             throw new Error('Impossible de supprimer la pratique active');
         }

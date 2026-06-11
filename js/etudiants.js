@@ -369,7 +369,7 @@ function obtenirCouleurPerformance(performance) {
  */
 function genererExplicationCalculIndices() {
     // Récupérer la configuration de la pratique active
-    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
     // Session A-2 : id canonique normalisé à la lecture, défaut = PRATIQUE_DEFAUT ('standards').
     const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
     const isPAN = pratique === 'standards';
@@ -446,7 +446,7 @@ function mettreAJourExplicationCalculIndices() {
  * @returns {string} - HTML du badge
  */
 function genererBadgePratiqueListeEtudiants() {
-    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
     // Session A-2 : id canonique normalisé à la lecture, défaut = PRATIQUE_DEFAUT ('standards').
     const pratique = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(config.pratique) : config.pratique) || (window.PRATIQUE_DEFAUT || 'standards');
     const typePAN = config.typePAN || 'maitrise';
@@ -883,7 +883,7 @@ function afficherListeEtudiantsConsultation() {
 
     // Déterminer le seuil minimum d'évaluations pour P
     const configPratiqueActiveTab = typeof obtenirConfigPratiqueActive === 'function' ? obtenirConfigPratiqueActive() : null;
-    const modalitesTab = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const modalitesTab = db.getSync(cle('modalitesEvaluation'), null) || {};
     const configPortfolioTab = configPratiqueActiveTab?.portfolio || modalitesTab.configPAN?.portfolio || {};
     const minimumCompletionTab = configPortfolioTab.minimumCompletion || modalitesTab.configPAN?.portfolio?.minimumCompletion || 3;
 

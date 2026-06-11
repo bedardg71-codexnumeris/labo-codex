@@ -11,8 +11,13 @@
  * Périmètre Lot 1 : CENTRALISER les écritures sans en changer la sémantique.
  * Les champs miroirs (`pratique`, `pratiqueId`, `approcheEvaluation`,
  * `configPAN.jetons`) restent écrits à la main par les appelants — leur
- * dérivation depuis la pratique active est le Lot 2. La purge du fallback
- * non namespacé et des champs legacy est le Lot 3.
+ * dérivation depuis la pratique active est le Lot 2.
+ *
+ * Lot 3 (11 juin 2026) : le fallback de lecture sur la clé NON namespacée est
+ * retiré (la migration namespacing de main.js, bornée, reste le seul lecteur
+ * de la clé nue) ; `purgerLegacy()` retire le champ `dureePeriodeMinutes` des
+ * données de chaque trimestre (valeur rapatriée dans la clé `dureePeriode`,
+ * domaine horaire, si elle n'y est pas déjà).
  *
  * @module modalites-evaluation
  */
@@ -23,13 +28,13 @@
     const CLE = 'modalitesEvaluation';
 
     /**
-     * Lit l'objet modalités courant.
-     * Conserve le fallback de lecture sur la clé NON namespacée (données
-     * antérieures au namespacing du 24 mai 2026) — retrait prévu au Lot 3.
+     * Lit l'objet modalités courant (clé namespacée uniquement — le fallback
+     * clé nue a été retiré au Lot 3, la migration namespacing de main.js
+     * ayant peuplé les clés par trimestre depuis le 24 mai 2026).
      * @returns {object} l'objet modalités (jamais null)
      */
     function lire() {
-        return db.getSync(cle(CLE), null) || db.getSync(CLE, null) || {};
+        return db.getSync(cle(CLE), null) || {};
     }
 
     /**
@@ -70,11 +75,42 @@
         return true;
     }
 
+    /**
+     * Purge le champ legacy `dureePeriodeMinutes` des modalités de CHAQUE
+     * trimestre (Lot 3). La valeur est rapatriée dans la clé `dureePeriode`
+     * (domaine horaire, SSOT depuis le Lot 0) si elle n'y est pas déjà — la
+     * clé existante a toujours priorité, jamais d'écrasement.
+     *
+     * Appelée à chaque démarrage (main.js, séquence db-ready) : idempotente
+     * et robuste face aux réintroductions par import de données anciennes
+     * (même patron que nettoyerLegacy de preferences.js).
+     * @returns {number} nombre de trimestres nettoyés
+     */
+    function purgerLegacy() {
+        if (typeof window.enumererTrimestres !== 'function') return 0;
+        let nettoyes = 0;
+        for (const t of window.enumererTrimestres()) {
+            const cleTrimestre = t.id + '_modalitesEvaluation';
+            const m = db.getSync(cleTrimestre, null);
+            if (!m || typeof m !== 'object' || !('dureePeriodeMinutes' in m)) continue;
+            const cleDuree = t.id + '_dureePeriode';
+            if (db.getSync(cleDuree, null) === null) {
+                const duree = parseInt(m.dureePeriodeMinutes);
+                if (duree) db.setSync(cleDuree, duree);
+            }
+            delete m.dureePeriodeMinutes;
+            db.setSync(cleTrimestre, m);
+            nettoyes++;
+        }
+        return nettoyes;
+    }
+
     // Export public (SSOT de modalitesEvaluation).
     window.modalitesEvaluation = {
         CLE: CLE,
         lire: lire,
         modifier: modifier,
-        remplacer: remplacer
+        remplacer: remplacer,
+        purgerLegacy: purgerLegacy
     };
 })();

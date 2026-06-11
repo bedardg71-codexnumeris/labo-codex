@@ -204,7 +204,7 @@ function calculerCompletionSommative(da) {
  */
 function calculerCompletionAlternative(da) {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
-    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
     
     // Obtenir le nombre d'artefacts depuis les réglages
     const nombreArtefacts = config.configPAN?.nombreArtefacts || 3;

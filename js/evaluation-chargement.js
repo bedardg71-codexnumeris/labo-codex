@@ -240,7 +240,7 @@ function chargerGrillesDansSelect() {
 function _obtenirPratiqueIdActive() {
     const coursActifId = getCoursActifId();
     if (coursActifId) return getPratiqueCours(coursActifId);
-    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
     return modalites.pratique || 'sommative';
 }
 
@@ -825,7 +825,7 @@ function cartoucheSelectionnee() {
         const facteur = critereGrille?.facteurNormalisation || 500;
 
         // Vérifier si la catégorisation des erreurs est activée
-        const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+        const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
         let categorisationActive = modalites.activerCategorisationErreurs === true;
 
         // DÉTECTION AUTOMATIQUE : Si l'évaluation a des codes sauvegardés, forcer le mode catégorisation

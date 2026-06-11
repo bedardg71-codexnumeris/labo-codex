@@ -114,7 +114,7 @@ function chargerInfosCours() {
  */
 function chargerMaterielConfigure() {
     // Pratique de notation
-    const modalites = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
     let pratique = 'Non configurée';
     
     // Session A-2 : id canonique normalisé à la lecture (Standards = ex-'alternative'/'pan-maitrise').

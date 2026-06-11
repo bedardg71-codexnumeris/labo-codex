@@ -484,7 +484,7 @@ function calculerTousLesIndices(da) {
 
     // Étiquette de la pratique active (Session C, Lot 3 : jeton SOM|PAN retiré de
     // la signature ; dérivé en interne pour le champ `.pratique` du retour).
-    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
     const pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
 
     // INDICES C, P : Lire depuis indicesCP (Single Source of Truth)

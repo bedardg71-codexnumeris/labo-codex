@@ -391,7 +391,7 @@ function chargerListeEvaluationsRefonte() {
     const indicesCP = db.getSync(cle('indicesCP'), {});
 
     // Détecter la pratique active
-    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
     const pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
 
     // Grouper les évaluations par étudiant
@@ -3641,7 +3641,7 @@ function afficherJetonsPersonnalisesEvaluation() {
     }
 
     // Récupérer les jetons personnalisés depuis la configuration
-    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
     const jetonsPersonnalises = config.jetons?.typesPersonnalises || [];
 
     if (jetonsPersonnalises.length === 0) {
@@ -3680,7 +3680,7 @@ function appliquerJetonPersonnalise(jetonId) {
     }
 
     // Récupérer les informations du jeton
-    const config = db.getSync(cle('modalitesEvaluation'), null) || db.getSync('modalitesEvaluation', {});
+    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
     const jeton = config.jetons?.typesPersonnalises?.find(j => j.id === jetonId);
 
     if (!jeton) {

@@ -7,7 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
 const dossierJs = path.join(racineProjet, 'js');
 
-// Sentinelle SSOT `modalitesEvaluation` — Lots 0 et 1 (10 juin 2026).
+// Sentinelle SSOT `modalitesEvaluation` — Lots 0, 1 et 3 (10-11 juin 2026).
 //
 // Contexte : audit `Rapports/AUDIT-SSOT-MODALITES-EVALUATION-2026-06-10.md`.
 // La clé était écrite par read-modify-write depuis 14 fichiers (violation
@@ -15,14 +15,15 @@ const dossierJs = path.join(racineProjet, 'js');
 // (horaire.js → clé `dureePeriode` ; preferences-v2.js → toggles morts).
 // Lot 1 : module PROPRIÉTAIRE `js/pratiques/modalites-evaluation.js`
 // (lire/modifier/remplacer) — les 12 écrivains du domaine routés dessus.
+// Lot 3 : purge legacy — la migration decouplerPR de main.js n'écrit plus la
+// clé nue (volet retiré) et migration-pratiques.js est SUPPRIMÉ (les ids
+// legacy résolvent à la volée par normaliserIdPratique). Le module est
+// désormais le SEUL écrivain, point.
 //
-// RATCHET : cette liste ne doit que RÉTRÉCIR (Lot 3 retirera les deux
-// migrations bornées avec la purge legacy). Ne JAMAIS y rajouter un fichier
-// sans décision explicite de Grégoire.
+// RATCHET : cette liste ne doit que RÉTRÉCIR. Ne JAMAIS y rajouter un
+// fichier sans décision explicite de Grégoire.
 const ECRIVAINS_AUTORISES = new Set([
-    'js/pratiques/modalites-evaluation.js', // module PROPRIÉTAIRE (seul écrivain de la clé NS)
-    'js/main.js',                           // migration decouplerPR — clé NON namespacée, bornée, documentée
-    'js/pratiques/migration-pratiques.js'   // migration one-shot — clé NON namespacée, bornée
+    'js/pratiques/modalites-evaluation.js'  // module PROPRIÉTAIRE — écritures NS + purge legacy (purgerLegacy)
 ]);
 
 const MOTIF_ECRITURE = /db\.set(?:Sync)?\s*\([^)]*modalitesEvaluation/;
@@ -77,7 +78,7 @@ describe('Sentinelle SSOT · écrivains de modalitesEvaluation (Lot 0)', () => {
         // parcours casse silencieusement, ce test échoue au lieu de tout laisser passer.
         // Le module propriétaire écrit la clé en LITTÉRAL exprès pour rester visible ici.
         expect(ecrivainsTrouves.has('js/pratiques/modalites-evaluation.js')).toBe(true);
-        expect(ecrivainsTrouves.size).toBeGreaterThanOrEqual(3);
+        expect(ecrivainsTrouves.size).toBeGreaterThanOrEqual(1);
     });
 
     it('les anciens écrivains du domaine sont bien routés (acquis Lot 1)', () => {
@@ -89,5 +90,15 @@ describe('Sentinelle SSOT · écrivains de modalitesEvaluation (Lot 0)', () => {
         ]) {
             expect(ecrivainsTrouves.has(ancien), `${ancien} écrit encore la clé en direct`).toBe(false);
         }
+    });
+
+    it('les migrations bornées du Lot 1 ont disparu (acquis Lot 3)', () => {
+        // main.js n'écrit plus la clé nue (volet decouplerPR retiré) et
+        // migration-pratiques.js est supprimé du dépôt.
+        expect(ecrivainsTrouves.has('js/main.js')).toBe(false);
+        expect(
+            fs.existsSync(path.join(dossierJs, 'pratiques', 'migration-pratiques.js')),
+            'js/pratiques/migration-pratiques.js devait être supprimé au Lot 3'
+        ).toBe(false);
     });
 });
