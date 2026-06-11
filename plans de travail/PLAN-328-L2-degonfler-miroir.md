@@ -22,6 +22,22 @@
   (`pratiqueId` + `approcheEvaluation`) → L2-b1 calcul / L2-b2 affichage (`pratique`) →
   L2-c (`configPAN.jetons`). Terrain H2026 après chaque sous-lot ; release minor à la fin.
 
+## 4 ter. Avancement
+
+- **✅ L2-0 LIVRÉ (11 juin 2026)** : `tests/integration/golden-master-procedural-L2-0.spec.js`.
+  Fixture synthétique posant SSOT ET miroir de façon cohérente ; chiffres figés sur
+  1.15.1 : STD noteFinale **81,5** (meilleurs 2 = 82,5 ; terminale 80 ; pondérations
+  60/40 ; exclusion `remplaceeParId` vérifiée ; P=82, C=100) ; parité explicite/active ;
+  SOM P=**78** ; SPE P=**80** (palier 2 artefacts + terminale, seuil 70). **Caractéristique
+  figée sciemment** : sans entrée `indicesCP[da].actuel`, une pratique CONFIGURABLE rend
+  P=0 (garde de `PratiqueConfigurable.calculerPerformance` court-circuite la délégation
+  SPE) — si L2 change cette garde, le test le rend visible.
+- **Trouvaille à intégrer au helper D2** : `obtenirPratiqueActiveGroupeCours()` (modes.js)
+  lit la COPIE `gcActif.pratiqueId` (étape 1) AVANT la SSOT `groupesCours` (étape 3) —
+  même patron copie-prioritaire que #332 (corrigé pour `horaireId` le 11 juin). Le helper
+  de dérivation L2 doit consulter la SSOT d'abord ; étape 4 (fallback
+  `modalites.pratiqueNotation`) à purger avec le miroir.
+
 ---
 
 ## 1. Le problème, précisément
