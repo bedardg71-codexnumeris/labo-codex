@@ -2,8 +2,25 @@
 
 > **Date du cadrage** : 11 juin 2026 (Claude Code, session solo — analyse préparatoire,
 > AUCUN code L2 écrit). **Référence** : audit `Rapports/AUDIT-SSOT-MODALITES-EVALUATION-2026-06-10.md`
-> §6 Lot 2 ; lots 0/1/3 livrés (L3 le 11 juin, commit `f5730e6c`).
-> **Statut** : ⏸ EN ATTENTE DE DÉCISIONS GRÉGOIRE (§4) — ne pas coder avant.
+> §6 Lot 2 ; lots 0/1/3 livrés (L3 le 11 juin, commit `f5730e6c`, release 1.15.1).
+> **Statut** : ✅ DÉCISIONS ACTÉES (Grégoire, 11 juin 2026 — voir §4 bis). Prêt à coder,
+> dans l'ordre du §4 bis (L2-0 d'abord).
+
+## 4 bis. DÉCISIONS ACTÉES (Grégoire, 11 juin 2026)
+
+- **D1 = (a) PARTOUT, en deux temps** : suppression pure des champs miroirs, chaque
+  lecteur dérive via helper unique. Chemin de calcul d'abord (L2-b1), affichage ensuite
+  (L2-b2) ; les écritures miroirs ne tombent qu'à la toute fin.
+- **D2 = #301 ABSORBÉ** : le helper de dérivation prend un contexte EXPLICITE
+  (groupe-cours + trimestre consultés), jamais de globaux implicites. La signature du
+  helper est la pièce maîtresse du lot.
+- **D3 = les jetons suivent la config VIVANTE** (dérivation à la lecture, pas de
+  snapshot) — `_synchroniserJetonsPratique` disparaît. Défaut acté pour le cas limite :
+  les consommations passées restent valides (jamais de rétro-annulation d'évaluation),
+  le solde peut devenir négatif et l'UI le montre tel quel. À verrouiller par test en L2-c.
+- **D4 = séquence confirmée** : L2-0 (golden masters chemin procédural) → L2-a
+  (`pratiqueId` + `approcheEvaluation`) → L2-b1 calcul / L2-b2 affichage (`pratique`) →
+  L2-c (`configPAN.jetons`). Terrain H2026 après chaque sous-lot ; release minor à la fin.
 
 ---
 
@@ -52,7 +69,7 @@ Même `pratiqueId` (3 lecteurs) est entrelacé : son écrivain wizard met à jou
   chantier I), appeler `simulerIndices(da)` + `calculerDetailsNoteFinale(da)` pour
   STD/SOM/SPE, figer les chiffres exacts AVANT de toucher aux lecteurs.
 
-## 4. Décisions à trancher AVANT de coder (Grégoire)
+## 4. Décisions à trancher AVANT de coder (Grégoire) — TRANCHÉES, voir §4 bis
 
 **D1 — Sort du champ `pratique` (type) au niveau trimestre.** Options :
 - (a) **Suppression pure** : chaque lecteur dérive du groupe-cours pertinent via un
