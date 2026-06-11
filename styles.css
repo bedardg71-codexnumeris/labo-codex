@@ -6394,6 +6394,14 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     margin-bottom: 20px;
 }
 
+/* Source de l'opération (nom du fichier ouvert/fusionné) — #335, 11 juin 2026 */
+.progression-source {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.45);
+    margin-bottom: 6px;
+    overflow-wrap: anywhere;
+}
+
 .progression-piste {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 6px;
@@ -6425,6 +6433,10 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 .mode-clair .progression-detail {
     color: var(--texte-secondaire);
+}
+.mode-clair .progression-source {
+    color: var(--texte-secondaire);
+    opacity: 0.8;
 }
 .mode-clair .progression-piste {
     background: rgba(3, 46, 92, 0.1);
