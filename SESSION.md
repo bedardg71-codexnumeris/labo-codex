@@ -1,4 +1,34 @@
 <!-- =====================================================================
+     NOTE DE RELANCE — 12 juin 2026 (midi, ~11h30-12h, avec Grégoire)
+     Session close sur épuisement Grégoire. ⚠ L'APP EST LAISSÉE DANS UN
+     ÉTAT CONTAMINÉ — LIRE CECI AVANT TOUT TRAVAIL H2026.
+     • TERRAIN #328 L2-b2 (commencé) : S1 ✅ (SSOT=copie=helper sur les
+       2 groupes, pratique-1768910384608, type standards), S2 ✅ (miroir
+       `pratique` et `approcheEvaluation` absents). S3 INTERROMPU : notes
+       toutes null — PAS une régression L2-b2, cause = #340 ci-dessous.
+       Reste du terrain : S3 sur les 2 groupes + activer/désactiver une
+       pratique au Labo, APRÈS réparation. Release minor groupée toujours
+       en attente.
+     • #340 DÉCOUVERT (bug majeur, item au BACKLOG) : la séquence
+       « A25 en Permission d'écriture (4h-6h) → retour H2026 + hard
+       refresh » a écrasé `h2026_productions` (2 couches localStorage+IDB)
+       avec les 11 productions d'A25 (COURS1766455789356). Dépistage :
+       contamination limitée à cette clé (fichiersTravaux = résidu
+       légitime, vérifié contre les codex témoins). Ré-éclaire l'incident
+       du 11 juin (même clé, même contenu) → la mémoire
+       project-incident-resurrection-idb est mise à jour.
+     • ⚠ RÉPARATION EN ATTENTE (5 étapes au #340) : le tableau sain
+       (10 artefacts) est dans `CODEX problématiques juin/
+       h2026_productions_SAIN-a-restaurer-2026-06-12.json`. Le recharger
+       dans le presse-papiers : `cat "CODEX problématiques juin/
+       h2026_productions_SAIN-a-restaurer-2026-06-12.json" | pbcopy`.
+       D'ICI LÀ : ne rien sauvegarder qui dépende des productions H2026,
+       NE PAS écraser le codex de référence du 11 juin.
+     • Constats A25 du matin (saisie FR-ALGO bloquée, grilles à
+       reconstruire à 30 %) : déjà notés sous #339 (commit 3fc978ca).
+     PROCHAINE SESSION : 1) réparer #340 (5 étapes) ; 2) finir le terrain
+     L2-b2 → release ; 3) enquête de fond #340 (trouver l'écrivain).
+     =====================================================================
      NOTE DE RELANCE — 12 juin 2026 (matin, ~04h-06h, avec Grégoire)
      Session courte close sur signal de fatigue (fin de cycle) — Grégoire
      retourné se coucher ~06h05. AUCUN code modifié, docs seulement :
