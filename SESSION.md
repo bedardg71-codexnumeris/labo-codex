@@ -1,4 +1,25 @@
 <!-- =====================================================================
+     MISE À JOUR — 12 juin 2026 (~13h, pause Grégoire) : TERRAIN L2-b2 AUX
+     TROIS QUARTS + #341 DÉCOUVERT.
+     • Terrain L2-b2 acquis : S1 ✅ ×2 groupes, S2 ✅, S3 ✅ ×2 groupes
+       POST-réparation #340 (notes revenues : gr.00002 25 lignes, gr.00008
+       26 lignes, 1 seul pf:null = DA 9000135, cas à confirmer abandon).
+       RESTE la dernière étape : aller-retour de pratique via
+       PratiqueManager.changerPratiqueActive en console (copie jetable
+       « PAN-SDT-Litt H26 (copie) », id pratique_1781283452752_1_9e7c433ece40,
+       déjà créée et EN PLACE dans la barre latérale — à supprimer après le
+       test) → S1 ×2 → S3 final → release minor groupée.
+     • #341 DÉCOUVERT (item au BACKLOG, code lu) :
+       obtenirConfigurationPratiqueParId lit db.get('pratiquesConfigurables')
+       GLOBALE (pratiques-bibliotheque.js:622) au lieu de la clé namespacée
+       → « Appliquer au cours actif » ne retrouve AUCUNE config (ni la
+       pratique A25 de Grégoire — id pan-standards-bruno — ni une copie
+       fraîche). Fix 1 ligne + sentinelle. Versant code probable du blocage
+       de reconstitution A25 (#339). Garde-fou aval OK (SSOT intacte).
+     • Constat UX à trancher : carte A25 affichée « par Bruno V.
+       +1 contrib. » (lignée de duplication) — Grégoire le perçoit comme
+       une erreur d'attribution.
+     =====================================================================
      MISE À JOUR — 12 juin 2026 (~12h40) : #340 RÉPARÉ (terrain Grégoire,
      persistance vérifiée post-reload : 2 couches + getSync à 10 items
      sains, artefacts et notes revenus à l'écran). L'avertissement « ne
