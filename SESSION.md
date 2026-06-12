@@ -1,4 +1,24 @@
 <!-- =====================================================================
+     NOTE DE RELANCE — 12 juin 2026 (matin, ~04h-06h, avec Grégoire)
+     Session courte close sur signal de fatigue (fin de cycle) — Grégoire
+     retourné se coucher ~06h05. AUCUN code modifié, docs seulement :
+       • Rituel de début de session : main propre, 654 Vitest + 55 Playwright
+         = 709 verts, 1.16.0 b0611-1141.
+       • Diagnostic A25 RAPATRIÉ sur main (merge eb405e55) depuis la branche
+         claude/a25-grading-practice-rebuild-fo9efd :
+         Rapports/DIAGNOSTIC-A25-reconstitution-pratique-hybride-2026-06-12.md
+       • #339 CRÉÉ (30ee69a8) : config portfolio STD explicite — séquencé
+         APRÈS #328, coordonné #319. + Constats terrain A25 de Grégoire (06h)
+         ajoutés sous #339 : saisie FR-ALGO bloquée malgré Permission
+         d'écriture (conversion « -- », pas de note IDME), grille H26 +
+         échelle VIDE sur éval A25 (subtilité §8 probable), grilles A25 à
+         reconstruire (Français 30 %) et réassocier.
+     TERRAIN #328 L2-b2 : PAS FAIT (protocole console prêt dans la
+     conversation du 12 juin matin, réutilisable tel quel). Release minor
+     groupée toujours en attente de ce terrain.
+     Priorités inchangées pour la suite : terrain L2-b2 → release ;
+     enquête A25 §6 (~30 min) quand Grégoire voudra ; repro #332 A/B.
+     =====================================================================
      SESSION 11 juin 2026 (après-midi, Claude Code AUTONOME, mandat Grégoire :
      « en-tête BACKLOG + #336 D + #328 L2-b2 + #332 c1 ») — 3 CHANTIERS LIVRÉS,
      PAS DE RELEASE (terrain requis sur les 3 ; session Safari de Grégoire
