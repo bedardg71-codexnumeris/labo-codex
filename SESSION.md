@@ -1,4 +1,13 @@
 <!-- =====================================================================
+     MISE À JOUR — 12 juin 2026 (~12h40) : #340 RÉPARÉ (terrain Grégoire,
+     persistance vérifiée post-reload : 2 couches + getSync à 10 items
+     sains, artefacts et notes revenus à l'écran). L'avertissement « ne
+     rien sauvegarder » de la note ci-dessous est LEVÉ. Découverte au
+     passage : localStorage du Mac SATURÉ (écriture 12 Ko refusée par
+     quota) — versé au dossier #340, lien #334. Reste : fin du terrain
+     L2-b2 (S3 ×2 groupes + bascule de pratique au Labo) → release minor ;
+     enquête de fond #340.
+     =====================================================================
      NOTE DE RELANCE — 12 juin 2026 (midi, ~11h30-12h, avec Grégoire)
      Session close sur épuisement Grégoire. ⚠ L'APP EST LAISSÉE DANS UN
      ÉTAT CONTAMINÉ — LIRE CECI AVANT TOUT TRAVAIL H2026.
