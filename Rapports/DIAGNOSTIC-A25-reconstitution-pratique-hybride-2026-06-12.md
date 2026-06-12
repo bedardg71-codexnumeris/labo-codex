@@ -281,7 +281,53 @@ une pratique STD ») devrait, en cohérence avec le principe zéro-dette et
 - ~46 lecteurs de `production.categorie` et des pondérations à auditer (mêmes réflexes
   que #328 L2-b2).
 
-## 8. Ce que ce rapport ne fait pas
+## 8. Trimestre archivé : nature réelle du verrou et déblocage (ajout 12 juin)
+
+A25 est archivé (`trimestre.archive === true`) → bandeau LECTURE SEULE + classe
+`mode-archive` sur le body. Constats de lecture :
+
+- **Le verrou est purement UI** : des règles CSS (`index.html`, bloc
+  `body.mode-archive:not(.mode-ecriture-temp)`) désactivent boutons et champs. **Aucune
+  garde `estTrimestreArchive()` dans le moteur** : `calculerEtStockerIndicesCP`,
+  `calculerDetailsNoteFinale` et les recalculs tournent déjà sur un trimestre archivé.
+  Les notes affichées aujourd'hui pour A25 sont donc **déjà** des recalculs du moteur
+  de juin sur les données A25 — pas les chiffres de décembre. Les seuls témoins
+  réellement figés de décembre sont : l'export JSON généré à l'archivage
+  (`trimestre-a2025-archive-AAAA-MM-JJ.json`, fichier téléchargé), les
+  `statistiquesFinales` du registre, et les snapshots hebdomadaires.
+- **Deux déblocages intégrés existent déjà** :
+  1. Bandeau LECTURE SEULE → case **« Permission d'écriture »** (mode écriture
+     temporaire, prévu pour corrections ponctuelles ; se réinitialise au changement de
+     trimestre).
+  2. Réglages → Trimestres → **« Désarchiver »** (réversible — le bouton « Archiver »
+     re-verrouille ; `statistiquesFinales` est conservé comme référence historique).
+- **Subtilité templates archivés** : en mode archivé, `cle()` redirige
+  `pratiquesConfigurables`/`grillesTemplates`/`echellesTemplates`/`cartouches_*` vers les
+  copies `a2025_…` si elles existent (créées à l'archivage seulement depuis la version du
+  28 jan 2026). A25 ayant été monté puis archivé dans une version antérieure, vérifier où
+  vit réellement sa pratique (le script du §6 affiche `pratiqueId` + config résolus).
+
+**Doublon de trimestre : n'existe pas dans l'app.** Faisable mais c'est un chantier réel,
+pas un correctif : id hors schéma session-année (`a2025` est pris ; un id `[a-z]\d{4}`
+libre fonctionnerait avec le namespacing), copie des ~30 clés `CLES_NAMESPACEES`,
+réécriture des références internes (`groupesCours[].trimestreId`, liens cours),
+enregistrement au registre, et interaction avec la purge #336 (toute clé `^[a-z]\d{4}_`
+absente du prochain codex ouvert est signalée orpheline → le bac à sable serait proposé à
+la purge). À inscrire au BACKLOG si désiré (prochain ID libre).
+
+**Chemin recommandé pour expérimenter sans risque** (sans doublon) :
+1. Backup codex (réflexe existant) ; si l'export d'archive de décembre est introuvable,
+   générer MAINTENANT un export du trimestre (bouton « Exporter », actif même archivé)
+   pour figer l'état courant avant toute manipulation.
+2. Désarchiver A25 (réversible).
+3. Expérimenter par **duplication de la PRATIQUE** (bouton « Dupliquer » de la
+   bibliothèque) + **simulation lecture seule** (`simulerIndices`, Comparateur #307) :
+   c'est le mécanisme conçu exactement pour « essayer une variante sur les mêmes données
+   sans toucher aux résultats ». Basculer la pratique active du groupe-cours seulement
+   quand la variante concorde avec l'officiel de décembre.
+4. Réarchiver.
+
+## 9. Ce que ce rapport ne fait pas
 
 Aucun code modifié, aucune donnée touchée. La reconstitution A25 elle-même (ajuster la
 config jusqu'à concorder avec l'officiel) requiert le terrain du §6 avec les données
