@@ -21,7 +21,7 @@ const GLOSSAIRE = {
         categorie: 'Réglages',
         etape: 'numerisation',
         definition: 'Période de 15 semaines qui structure le calendrier de ton cours. Tu définis les dates de début et de fin, les congés et les journées de reprise. L\'application génère automatiquement les séances à partir de ces informations et de ton horaire.',
-        voir: 'Réglages > Trimestre'
+        voir: 'Cadre > Trimestre'
     },
 
     'cours': {
@@ -30,7 +30,7 @@ const GLOSSAIRE = {
         categorie: 'Réglages',
         etape: 'numerisation',
         definition: 'Le cours tel qu\'il apparaît dans ton plan de cours. Le code suit le format 000-000-XX (discipline-cours-lettres). Un seul cours peut être actif à la fois dans l\'application. Tu peux dupliquer un cours pour créer rapidement une nouvelle session.',
-        voir: 'Réglages > Cours'
+        voir: 'Cadre > Trimestre > Cours'
     },
 
     'groupe-d-etudiant-es': {
@@ -129,7 +129,7 @@ const GLOSSAIRE = {
         categorie: 'Structure',
         etape: 'numerisation',
         definition: 'Ta recette complète pour construire la note. Quatre pratiques sont disponibles : sommative (SOM), PAN par standards (STD), PAN par spécifications (SPE) et dénotation (DEN). La pratique détermine comment les résultats de tes évaluations se transforment en note finale. Tu peux toujours la changer.',
-        voir: 'Conception > Pratiques / Réglages > Pratiques'
+        voir: 'Conception > Pratiques de notation'
     },
 
     'evaluation': {
@@ -442,8 +442,8 @@ const GLOSSAIRE = {
         terme: 'Bilan réflexif',
         categorie: 'Réglages',
         etape: 'interface',
-        definition: 'Un espace dans les Réglages pour consigner tes observations sur ta démarche pédagogique : forces, défis et pistes d\'amélioration. C\'est un outil de pratique réflexive, pas un formulaire obligatoire.',
-        voir: 'Réglages > Bilan'
+        definition: 'Un espace dans le Labo pour consigner tes observations sur ta démarche pédagogique : forces, défis et pistes d\'amélioration. C\'est un outil de pratique réflexive, pas un formulaire obligatoire.',
+        voir: 'Labo > Bilan réflexif'
     },
 
     'namespacing-prefixe-trimestre': {

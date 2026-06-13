@@ -1447,7 +1447,7 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                     <p style="margin: 0; font-size: 0.85rem; color: var(--gris-fonce);">
                         <strong>Auteur non identifié</strong><br>
                         ${!utilisateurActuel
-                            ? 'Configure ton nom dans Réglages > Trimestre > Cours pour identifier tes fichiers.'
+                            ? 'Configure ton nom dans Cadre > Trimestre > Cours pour identifier tes fichiers.'
                             : 'Le fichier importé ne contient pas d\'information sur son auteur.'}
                     </p>
                 </div>

@@ -1196,7 +1196,7 @@ async function afficherToutesLesGrillesEtCartouches() {
         container.innerHTML = `
             <div class="cartouche-zone-bleu-pale">
                 <p class="u-texte-bleu-leger">Aucune grille de critères disponible</p>
-                <small>Crée d'abord une grille dans <strong>Réglages → Grilles de critères</strong></small>
+                <small>Crée d'abord une grille dans <strong>Conception → Grilles de critères</strong></small>
             </div>
         `;
         return;
