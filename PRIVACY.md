@@ -1,9 +1,16 @@
 # Politique de confidentialité — Labo Codex
 
-> **Version** : 1.0 (DRAFT du 22 mai 2026, soumis à validation)
+> **Version** : 1.1 (13 juin 2026 — alignement sur le cadrage DEPLOY.md §1.4 et ADR-008 : régime réel précisé, Cloudflare Access désactivé)
 > **Responsable** : Grégoire Bédard, Cégep de Drummondville
-> **Cadre légal** : Loi modernisant des dispositions législatives en matière
-> de protection des renseignements personnels (Loi 25, Québec, 2021)
+> **Régime applicable** : projet d'expérimentation pédagogique conduit à titre
+> personnel, application 100 % hors-ligne. La *Loi sur la protection des
+> renseignements personnels dans le secteur privé* (modifiée par la Loi 25) ne
+> s'applique vraisemblablement pas à cette configuration (cf. §1 et DEPLOY.md
+> §1.4 — *inférence à confirmer par un juriste*). Ce document décrit néanmoins
+> la posture de protection des renseignements personnels, par hygiène
+> professionnelle et par souci de transparence envers les testeurs et les
+> étudiants. Les articles de la Loi 25 cités le sont à titre de repère, comme
+> esprit suivi volontairement, non comme cadre formel d'application.
 > **Document apparenté** : [`INCIDENTS.md`](INCIDENTS.md) (registre des incidents)
 
 ---
@@ -19,12 +26,59 @@ Cette politique décrit :
 - quelles données sont conservées,
 - où elles sont conservées,
 - combien de temps,
-- quels droits vous avez sur vos données (Loi 25),
+- quels droits vous avez sur vos données (dans l'esprit de la Loi 25),
 - à qui vous adresser pour les exercer.
 
-Elle vise un double public : les **collègues enseignants** à qui un accès
-individuel à l'application a été accordé, et les **étudiants** dont les
-données pédagogiques transitent par l'outil.
+Elle vise un double public : les **collègues enseignants** qui accèdent à
+l'application en ligne, et les **étudiants** dont les données pédagogiques
+transitent par l'outil.
+
+### 1.1 Régime de protection des renseignements personnels
+
+Labo Codex est un projet d'expérimentation pédagogique conduit par son auteur
+**à titre personnel**, sans activité économique organisée au sens de l'article
+1525 du Code civil du Québec. *Inférence à confirmer par un juriste en cas de
+doute* : dans cette configuration, la *Loi sur la protection des renseignements
+personnels dans le secteur privé* (modifiée par la Loi 25) **ne s'applique
+vraisemblablement pas** — son article premier, deuxième alinéa, exclut les
+renseignements collectés « à des fins exclusivement personnelles, domestiques
+ou artistiques ».
+
+Les versions antérieures de ce document, comme d'anciennes rédactions de
+DEPLOY.md et de l'ADR-008, présentaient le contrôle d'accès à l'application
+comme une « base de consentement explicite Loi 25 ». Cette qualification était
+disproportionnée et a été retirée (cf. DEPLOY.md §1.4). La discipline maintenue
+— tenue rigoureuse de la liste d'accès quand un contrôle d'accès est en place,
+retrait sur demande, non-diffusion des courriels — relève du **contrôle d'accès
+opérationnel** et de l'**hygiène professionnelle** envers les testeurs, non
+d'une obligation légale.
+
+**Renseignements personnels effectivement traités par l'infrastructure** :
+
+- **Niveau application** : aucun. L'application est 100 % hors-ligne. Les données
+  pédagogiques (noms d'étudiants, évaluations, productions) restent sur la
+  machine de chaque utilisateur. Aucun flux serveur (voir §4).
+- **Niveau infrastructure** : depuis la désactivation de Cloudflare Access (2 juin
+  2026), aucune métadonnée d'accès individuelle n'est traitée côté serveur.
+  L'application `app.codexnumeris.org` est **publiquement accessible par défaut**
+  depuis le 3 juin 2026, derrière le proxy Cloudflare (DNS/CDN), sans
+  authentification ni journal d'accès individuel.
+
+### 1.2 Quand cette posture devra être revue
+
+La posture décrite ici suppose un mainteneur individuel et une application
+hors-ligne. Elle devra être **reprise à zéro** — et un dispositif de conformité
+Loi 25 complet (registre, ÉFVP, politique formelle, désignation d'un
+responsable) probablement enclenché — si l'une de ces conditions se réalise :
+
+- Labo Codex est porté par une **organisation** (cégep, OBNL, entreprise) ;
+- l'application acquiert une **base d'utilisateurs hors du cercle
+  personnel/collégial** ;
+- l'**architecture évolue pour traiter des données pédagogiques côté serveur**
+  (par exemple une Voûte hébergeant des contenus identifiants).
+
+Les conditions opérationnelles d'une éventuelle réactivation du contrôle d'accès
+sont documentées dans DEPLOY.md §3.6 et l'ADR-008 (« À réviser si »).
 
 ---
 
@@ -34,19 +88,21 @@ données pédagogiques transitent par l'outil.
 |---|---|---|
 | Responsable du traitement | Grégoire Bédard, enseignant en littérature, Cégep de Drummondville | [labo@codexnumeris.org](mailto:labo@codexnumeris.org) |
 | Responsable institutionnel (PRP) | Cégep de Drummondville — responsable de la protection des renseignements personnels | *À confirmer (demande envoyée [À COMPLÉTER — date], réponse attendue 2-6 semaines)* |
-| Hébergement public | Netlify (frontal statique) + Cloudflare Access (contrôle d'accès) | Conditions Netlify et Cloudflare applicables |
+| Hébergement public | Netlify (frontal statique) derrière le proxy Cloudflare (DNS/CDN) | Conditions Netlify et Cloudflare applicables. **Cloudflare Access (contrôle d'accès) désactivé depuis le 2 juin 2026** (voir §6) |
 | Code source | GitHub (dépôt public) | [github.com/bedardg71-codexnumeris/Monitorage_v6](https://github.com/bedardg71-codexnumeris/Monitorage_v6) |
 
 **Statut actuel** : Labo Codex est utilisé en **pratique pédagogique individuelle**
-par son auteur. Un accès individuel à l'application en ligne a été accordé
-à une cinquantaine de collègues entre janvier et mai 2026 (voir §6). Sur
-ces ~50 personnes, la quasi-totalité a brièvement consulté l'application
-puis n'y est pas revenue. **Aucun retour de bug, aucune demande de
-feedback structuré, aucune cohorte active d'usage n'a émergé de cette
-voie**. L'usage effectif est donc resté individuel (l'auteur seul). L'adoption
-institutionnelle formelle (Cégep, autres établissements) est subordonnée à
-l'avis du responsable PRP du Cégep et à la signature d'ÉFVP (évaluation des
-facteurs relatifs à la vie privée) le cas échéant.
+par son auteur. Entre janvier et mai 2026, un accès individuel à l'application
+en ligne a été accordé à une cinquantaine de collègues via Cloudflare Access
+(voir §6) ; la quasi-totalité a brièvement consulté l'application puis n'y est
+pas revenue, **sans retour de bug ni cohorte active d'usage**. Depuis le 2 juin
+2026, Cloudflare Access est **désactivé** et l'application est **publiquement
+accessible par défaut** (depuis le 3 juin 2026), sans authentification ; il n'y
+a donc plus de liste d'accès individuelle ni de journal d'accès nominatif.
+L'adoption institutionnelle formelle (Cégep, autres établissements) — qui
+changerait le régime applicable (cf. §1.2) — reste subordonnée à l'avis du
+responsable PRP du Cégep et à la signature d'une ÉFVP (évaluation des facteurs
+relatifs à la vie privée) le cas échéant.
 
 ---
 
@@ -87,27 +143,30 @@ L'enseignant est l'auteur et la donnée le concernant est traitée comme
 n'est pas anonymisée par défaut puisqu'elle sert l'attribution Creative
 Commons.
 
-### 3.3 Données d'accès au site (Cloudflare Access)
+### 3.3 Données d'accès au site (Cloudflare)
 
-Pour la cinquantaine de collègues à qui un accès individuel à l'application
-en ligne a été accordé entre janvier et mai 2026, **Cloudflare Access**
-(service Zero Trust) agit comme portail d'authentification par courriel à
-usage unique (OTP).
+**État actuel (depuis le 2 juin 2026)** : Cloudflare Access est **désactivé**.
+L'application est publiquement accessible sans authentification, derrière le
+proxy Cloudflare (DNS/CDN). Aucune métadonnée d'accès **individuelle** (courriel,
+identité) n'est donc collectée ni journalisée. Cloudflare peut conserver des
+journaux techniques agrégés propres à son CDN/proxy (anti-abus, mise en cache),
+sans corrélation à une identité fournie par le projet.
 
-**Données collectées par Cloudflare** :
-- Adresse courriel de l'invité (pour envoi du code OTP — One-Time PIN)
-- Date et heure des accès
-- Adresse IP de la session
-- Identifiant de session (cookie, validité une semaine)
+**Historique (janvier – mai 2026)** : pendant cette période, **Cloudflare Access**
+(service Zero Trust) servait de portail d'authentification par courriel à usage
+unique (OTP) pour la cinquantaine de collègues invités. Cloudflare traitait alors :
+- l'adresse courriel de l'invité (envoi du code OTP — One-Time PIN) ;
+- la date et l'heure des accès ;
+- l'adresse IP de la session ;
+- un identifiant de session (cookie, validité une semaine).
 
-**Au 22 mai 2026** : la liste blanche compte 51 personnes (l'auteur +
-~50 collègues invités). Aucune session active sur les 24 dernières heures
-(rétention des logs sur le plan gratuit Cloudflare Zero Trust = 24 h
-seulement).
+Ces journaux d'accès étaient purgés automatiquement après **24 heures**
+(rétention du plan gratuit Cloudflare Zero Trust) ; l'historique des accès de
+cette période n'est donc **plus reconstituable**.
 
-Cloudflare est une entreprise états-unienne. **Les logs Cloudflare ne sont
-pas hébergés au Canada**. Aucun fichier d'élève ne transite par Cloudflare —
-seul l'accès à l'application elle-même est filtré.
+Cloudflare est une entreprise états-unienne. **Les journaux Cloudflare ne sont
+pas hébergés au Canada**. Dans tous les cas, aucun fichier d'élève ne transite
+par Cloudflare — seul l'accès à l'application elle-même était filtré (voir §4).
 
 ### 3.4 Rapports de bug archivés
 
@@ -174,11 +233,11 @@ Labo Codex respecte un principe d'**autonomie complète** :
 - Aucun service tiers n'est appelé pendant l'usage normal (pas de polices
   Google, pas de CDN externe — sauf Chart.js, vendored localement).
 
-**Conséquence Loi 25** : il n'y a **pas de communication transfrontalière**
-de renseignements personnels d'élèves dans l'usage normal. Le seul trafic
-réseau lors de l'utilisation locale est :
+**Conséquence pour la protection des renseignements personnels** : il n'y a
+**pas de communication transfrontalière** de renseignements personnels d'élèves
+dans l'usage normal. Le seul trafic réseau lors de l'utilisation locale est :
 - Le chargement initial du site (HTML, CSS, JS, images) depuis Netlify (Canada/USA)
-  via Cloudflare Access (États-Unis) — sans données étudiantes.
+  via le proxy Cloudflare (DNS/CDN, États-Unis) — sans données étudiantes.
 - Aucun envoi automatique de données après le chargement.
 
 **Politique de sécurité du contenu (CSP)** : `script-src 'self'` —
@@ -237,65 +296,66 @@ l'apprentissage de l'outil et n'est pas concerné par la Loi 25.
 
 ---
 
-## 6. Cloudflare Access (contrôle d'accès au site)
+## 6. Contrôle d'accès au site (Cloudflare Access — désactivé)
 
-### 6.1 Contexte
+### 6.1 État actuel : accès public par défaut
 
-Pour limiter l'accès à l'application en ligne pendant la phase d'invitations
-individuelles, le site est protégé par **Cloudflare Access** (service
-Zero Trust). Les personnes invitées reçoivent un courriel d'invitation,
-puis s'authentifient par OTP (mot de passe à usage unique envoyé par courriel)
-lors de chaque session.
+Depuis le **2 juin 2026**, **Cloudflare Access est désactivé** et l'application
+`app.codexnumeris.org` est **publiquement accessible** (depuis le 3 juin 2026),
+sans authentification. Cette décision est documentée dans l'ADR-008 (révision du
+2 juin 2026) et DEPLOY.md §3 : aucune date de réactivation n'est planifiée. Seule
+la *policy* Access est désactivée ; la configuration DNS / proxy Cloudflare
+(orange) reste en place, et la réactivation resterait une opération de quelques
+minutes si une raison concrète l'imposait (cf. §6.4 et DEPLOY.md §3.6).
 
-### 6.2 Liste des invités
+Conséquence : il n'existe actuellement **ni liste d'accès individuelle, ni
+authentification, ni journal d'accès nominatif** côté infrastructure. Le risque
+résiduel se limite au scraping d'assets statiques publics (code déjà public sur
+GitHub) et à un déni de service absorbé par le CDN Cloudflare.
 
-La liste blanche Cloudflare contient **51 personnes** au 22 mai 2026 :
-l'auteur et une cinquantaine de collègues à qui un accès individuel a été
-accordé entre janvier et mai 2026. Le quota gratuit Cloudflare Zero Trust
-(50 utilisateurs) est essentiellement saturé. **Aucune liste nominative
-n'est publiée** dans ce document afin de protéger la confidentialité des
-personnes concernées.
+### 6.2 Historique : phase d'accès individuel (janvier – mai 2026)
 
-**Usage effectif observé** : la quasi-totalité des personnes invitées a
-brièvement consulté l'application puis n'y est pas revenue. Aucune
-n'a soumis de feedback structuré ni signalé de bug par cette voie.
-La liste est conservée par défaut, mais un retrait sera proposé aux
-personnes inactives lors d'un futur audit (voir [`DEPLOY.md`](DEPLOY.md) §4.4).
+Pendant la phase d'invitations alpha, le site était protégé par **Cloudflare
+Access** (service Zero Trust) : les personnes invitées s'authentifiaient par OTP
+(mot de passe à usage unique envoyé par courriel) à chaque session. La liste
+d'accès a compté jusqu'à une cinquantaine de collègues (en plus de l'auteur),
+saturant le quota gratuit Cloudflare Zero Trust (50 utilisateurs). **Aucune
+liste nominative n'a été publiée.** La quasi-totalité des personnes invitées a
+brièvement consulté l'application puis n'y est pas revenue, sans feedback
+structuré ni rapport de bug par cette voie.
 
-Les personnes invitées peuvent demander **à tout moment** leur retrait de
-la liste blanche en écrivant à
-[labo@codexnumeris.org](mailto:labo@codexnumeris.org).
-
-### 6.3 Données conservées par Cloudflare
-
-Selon la politique standard de Cloudflare Zero Trust (plan gratuit, état
-au 22 mai 2026) :
+Pendant cette phase, Cloudflare traitait, selon la politique standard du plan
+gratuit Zero Trust :
 
 | Donnée | Conservation |
 |---|---|
-| Courriel de l'invité | Tant que l'invité figure dans la liste blanche |
-| Logs d'accès (date, heure, IP des sessions) | **24 heures** sur le plan gratuit, puis purgés automatiquement par Cloudflare |
+| Courriel de l'invité | Tant que l'invité figurait dans la liste d'accès |
+| Journaux d'accès (date, heure, IP des sessions) | **24 heures** sur le plan gratuit, puis purgés automatiquement par Cloudflare |
 | Codes OTP utilisés | Stockés temporairement le temps de la validation, puis purgés |
 | Cookies de session | **Validité d'une semaine** par configuration de l'application Access |
 
-**Observation au 22 mai 2026** : la console Cloudflare montre 0 session
-active sur les 24 dernières heures. L'usage actif reste limité à l'auteur,
-qui travaille essentiellement en local via `file://` sans passer par
-Cloudflare. Les logs anciens (janvier à mai 2026) ne sont **plus disponibles**
-dans le dashboard en raison de la rétention courte du plan gratuit.
+À la désactivation d'Access, la liste d'accès n'est plus opérante ; les journaux
+de cette période avaient déjà été purgés (rétention 24 h) et ne sont **plus
+reconstituables**. Cette communication transfrontalière n'a concerné que les
+**métadonnées d'accès au site** (courriels, IP, horaires), jamais les données
+étudiantes (strictement locales — voir §4).
 
-**Hébergement** : Cloudflare est une entreprise américaine. **Les logs ne
-sont pas hébergés au Canada**. Cette communication transfrontalière a
-concerné les **métadonnées d'accès au site** (courriels des personnes
-invitées, IP, horaires) au moment où elles se sont connectées, et non les
-données étudiantes (qui restent strictement locales — voir §4).
+### 6.3 Aucun fichier étudiant ne transite par Cloudflare
 
-### 6.4 Aucun fichier étudiant ne transite par Cloudflare
+Que Cloudflare Access soit actif ou non, le proxy Cloudflare n'intercepte que la
+**requête initiale** au site. Une fois la page chargée, l'application fonctionne
+**hors ligne sur la machine de l'utilisateur**. Aucun fichier étudiant, aucune
+note, aucune photo ne transite par les serveurs Cloudflare.
 
-Cloudflare Access intercepte uniquement la **requête initiale** au site
-(authentification). Une fois la session établie, l'application fonctionne
-**hors ligne sur la machine de l'utilisateur**. Aucun fichier étudiant,
-aucune note, aucune photo ne transite par les serveurs Cloudflare.
+### 6.4 Conditions d'une éventuelle réactivation
+
+Le contrôle d'accès pourrait être réactivé si une raison concrète apparaissait :
+émergence d'un risque opérationnel mesurable (abus, DoS persistant, scraping
+intensif), création de la Voûte imposant un contrôle d'accès applicatif, bascule
+institutionnelle, ou croissance qualitative inattendue rendant utile une
+traçabilité. Le détail figure dans DEPLOY.md §3.6 et l'ADR-008 (« À réviser si »).
+Une telle réactivation rétablirait le traitement des métadonnées d'accès décrit
+en §6.2.
 
 ---
 
@@ -314,7 +374,7 @@ aucune note, aucune photo ne transite par les serveurs Cloudflare.
 | Trajet | Chiffrement |
 |---|---|
 | Navigateur ↔ Netlify | HTTPS / TLS 1.3 obligatoire |
-| Navigateur ↔ Cloudflare Access | HTTPS / TLS 1.3 obligatoire |
+| Navigateur ↔ Cloudflare (DNS / proxy) | HTTPS / TLS 1.3 obligatoire (Cloudflare Access désactivé — voir §6) |
 | Échanges locaux (file://) | Aucun trafic réseau |
 
 ### 7.3 Voûte (à venir)
@@ -346,12 +406,18 @@ attendu avant fin juin 2026 ; il pourra imposer une durée précise.
 
 ### 8.2 Données d'accès Cloudflare
 
-- **Logs d'accès** (date, heure, IP) : **24 heures** sur le plan gratuit
+**État actuel** : Cloudflare Access étant désactivé (voir §6), aucune métadonnée
+d'accès individuelle (courriel, IP, horaire) n'est collectée ni conservée côté
+projet. Les valeurs ci-dessous décrivent la **phase historique** (janvier – mai
+2026), et s'appliqueraient de nouveau en cas de réactivation :
+
+- **Journaux d'accès** (date, heure, IP) : **24 heures** sur le plan gratuit
   Cloudflare Zero Trust, purgés automatiquement par Cloudflare.
 - **Cookies de session** : validité d'une semaine, renouvelés à chaque
   nouvelle authentification OTP.
-- **Courriels en liste blanche** : conservés tant que la personne reste
-  invitée. Retrait sur demande (§9).
+- **Courriels en liste d'accès** : conservés tant que la personne restait
+  invitée ; retrait sur demande. La liste n'est plus opérante depuis la
+  désactivation d'Access.
 
 ### 8.3 Rapports de bug archivés
 
@@ -375,10 +441,13 @@ consentement) peut demander le retrait de cette mention par courriel
 
 ---
 
-## 9. Droits Loi 25
+## 9. Vos droits sur vos renseignements personnels
 
-Conformément à la Loi 25, vous disposez sur les renseignements personnels
-qui vous concernent des droits suivants :
+Même si le régime formel de la Loi 25 ne s'applique vraisemblablement pas à la
+configuration actuelle (cf. §1.1), l'auteur s'engage à honorer, **dans leur
+esprit et à titre volontaire**, les droits que la Loi 25 reconnaît sur les
+renseignements personnels. Vous pouvez ainsi exercer les droits suivants (les
+articles cités servent de repère) :
 
 | Droit | Article Loi 25 | Comment l'exercer |
 |---|---|---|
@@ -386,7 +455,7 @@ qui vous concernent des droits suivants :
 | **Droit de rectification** — corriger des renseignements inexacts ou incomplets | art. 28 | Idem. |
 | **Droit à l'effacement** — demander la suppression de vos renseignements (sous conditions Loi 25) | art. 28.1 (en vigueur depuis sept. 2023) | Idem. |
 | **Droit à la portabilité** — recevoir vos renseignements dans un format technologique structuré et couramment utilisé | art. 27 (depuis sept. 2024) | Idem. Labo Codex peut produire un export JSON UTF-8 conforme. |
-| **Droit de retrait du consentement** — pour les personnes ayant reçu un accès Cloudflare Access | art. 14 | Demander le retrait de la liste blanche Cloudflare. |
+| **Droit de retrait du consentement** | art. 14 | Cloudflare Access étant désactivé (voir §6), il n'y a plus de liste d'accès individuelle. En cas de réactivation, demander le retrait de la liste d'accès. |
 | **Droit de plainte** auprès de la Commission d'accès à l'information (CAI) | art. 81 | [cai.gouv.qc.ca](https://www.cai.gouv.qc.ca) |
 
 ### 9.1 Étudiants — comment exercer vos droits
@@ -419,7 +488,8 @@ responsable du traitement (Grégoire Bédard) couvre :
 - Les rapports de bug archivés mentionnant la personne.
 - Les mentions nominatives dans `INCIDENTS.md`, `README.md`,
   `docs/MESSAGES_ENSEIGNANTS_H2026.md` (si applicable).
-- La radiation de la liste blanche Cloudflare Access.
+- La radiation de la liste d'accès Cloudflare, en cas de réactivation du
+  contrôle d'accès (désactivé actuellement — voir §6).
 
 Elle **ne couvre pas** :
 - Les données sur la machine d'un autre enseignant utilisateur (chaque
@@ -428,7 +498,12 @@ Elle **ne couvre pas** :
 
 ---
 
-## 10. Loi 25 — mentions formelles
+## 10. Mentions formelles (dans l'esprit de la Loi 25)
+
+> Le régime formel de la Loi 25 ne s'applique vraisemblablement pas à la
+> configuration actuelle (cf. §1.1). Les mentions ci-dessous sont maintenues
+> **volontairement**, comme bonnes pratiques et points de repère ; elles
+> deviendraient des obligations formelles si la posture changeait (cf. §1.2).
 
 ### 10.1 Registre des incidents
 
@@ -458,11 +533,13 @@ Labo Codex utilise actuellement deux services hébergés à l'étranger :
 | Service | Localisation | Données concernées | Mesures de protection |
 |---|---|---|---|
 | Netlify (frontal statique) | États-Unis / Canada (CDN distribué) | Code de l'application uniquement — **aucune donnée étudiante** | HTTPS / TLS 1.3 |
-| Cloudflare Access (contrôle d'accès) | États-Unis (logs aux États-Unis) | Métadonnées d'accès des **personnes ayant reçu un accès individuel** (courriels, IP, horaires) — **aucune donnée étudiante** | Authentification OTP, TLS 1.3 |
+| Cloudflare (DNS / proxy / CDN) | États-Unis | Requêtes HTTP du site — **aucune donnée étudiante**. Cloudflare Access (métadonnées d'accès individuelles) **désactivé** depuis le 2 juin 2026 ; historiquement, courriels/IP/horaires des collègues invités (janvier – mai 2026) | TLS 1.3 ; Access (OTP) le cas échéant |
 
 Aucun fichier d'élève ne transite par ces services dans l'usage normal.
-Le seul transfert transfrontalier concerne les **métadonnées d'accès au
-site** des collègues invités, qui en ont été informés à l'invitation.
+Le seul transfert transfrontalier de renseignements personnels a concerné les
+**métadonnées d'accès au site** des collègues invités pendant la phase Cloudflare
+Access (janvier – mai 2026), dont ils avaient été informés à l'invitation ;
+depuis la désactivation d'Access, il n'y a plus de transfert de ce type.
 
 ---
 
@@ -483,20 +560,24 @@ Par souci de transparence :
 
 1. **L'avis du responsable PRP du Cégep n'est pas encore reçu** (demande
    envoyée en mai 2026, délai de réponse 2-6 semaines). Plusieurs points
-   sont marqués « à confirmer » et seront précisés dans la version 1.1.
+   sont marqués « à confirmer » et seront précisés dans une version ultérieure.
 2. **L'inventaire technique de `rapportsBugArchives` a été conduit le
    22 mai 2026** (audit Phase 6.2 PLAN-AQPC). La structure stockée est
    désormais documentée (§3.4). Une revue manuelle du contenu réel des
    rapports actuels par l'auteur reste recommandée si un doute persiste
    sur des descriptions ayant nommé des étudiants.
 3. **L'ÉFVP formelle est en préparation** — pas encore disponible.
-4. **Les logs Cloudflare ne sont conservés que 24 h** sur le plan gratuit.
-   L'historique précis des accès depuis janvier 2026 n'est donc pas
-   reconstituable a posteriori.
+4. **Cloudflare Access est désactivé depuis le 2 juin 2026** : il n'y a plus de
+   journal d'accès individuel. Les journaux de la phase historique (janvier – mai
+   2026) n'étaient conservés que 24 h sur le plan gratuit et ne sont donc pas
+   reconstituables a posteriori.
 5. Labo Codex est un **projet de mainteneur unique** (`CAF = 1`).
    La pérennité de la politique de protection des données dépend de
    l'engagement personnel de l'auteur. Un plan de transition / passage de
    relais sera documenté en cas d'évolution institutionnelle.
+6. **Le régime applicable repose sur une inférence juridique** (Loi 25 secteur
+   privé vraisemblablement inapplicable, cf. §1.1) qui reste *à confirmer par un
+   juriste* et qui devra être reprise si la posture du projet change (cf. §1.2).
 
 Ces limites sont **assumées** et inscrites dans ce document plutôt que
 masquées — pour permettre à un lectorat informé (juriste, responsable
@@ -509,9 +590,12 @@ PRP, collègue, étudiant, parent) de juger sur pièces.
 | Date | Version | Modification |
 |---|---|---|
 | 2026-05-22 | 1.0 DRAFT | Rédaction initiale, soumis à validation de Grégoire et du responsable PRP du Cégep |
+| 2026-06-13 | 1.1 | Alignement sur DEPLOY.md §1.4 et ADR-008 (rév. 2 juin 2026) : régime réel précisé (Loi 25 secteur privé vraisemblablement inapplicable, §1.1) ; conditions de révision de la posture ajoutées (§1.2) ; Cloudflare Access désactivé et accès public par défaut reflétés (§2, §3.3, §4, §6, §7.2, §8.2, §10.4) ; vocabulaire « base de consentement Loi 25 » retiré ; références à la fenêtre 3-30 juin et au refermage du 1er juillet supprimées. |
 
 ---
 
-**Document à mettre à jour** en version 1.1 lorsque :
+**Document à mettre à jour** en version 1.2 lorsque :
 - L'avis du responsable PRP du Cégep est reçu (coordonnées §11, mentions formelles §10).
 - L'ÉFVP est produite.
+- La posture du projet change au sens du §1.2 (port institutionnel, base
+  d'utilisateurs élargie, traitement de données pédagogiques côté serveur).
