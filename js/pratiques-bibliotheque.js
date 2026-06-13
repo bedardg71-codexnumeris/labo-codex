@@ -617,8 +617,11 @@ async function obtenirConfigurationPratiqueParId(configId) {
     const dansBibliotheque = bibliotheque.find(p => p.id === configId);
     if (dansBibliotheque) return dansBibliotheque;
 
-    // 3. Vérifier les pratiques configurables de l'utilisateur (Beta 95.2 - Bug chimie)
-    const configurables = await db.get('pratiquesConfigurables') || [];
+    // 3. Vérifier les pratiques configurables de l'utilisateur. Les configs vivent
+    //    dans la clé namespacée par trimestre depuis 99.64 ; on lit donc
+    //    cle('pratiquesConfigurables') d'abord, avec repli sur la clé nue legacy
+    //    (même idiome que pratiques-gestion.js / evaluation-calcul.js).
+    const configurables = await db.get(cle('pratiquesConfigurables')) || await db.get('pratiquesConfigurables') || [];
     return configurables.find(p => p.id === configId) || null;
 }
 
