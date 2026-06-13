@@ -3964,7 +3964,7 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
                 ? obtenirTermeProduction('singulier')
                 : 'production';
             afficherMessageAttente(canvas, 'Aucun ' + termeSing + ' défini',
-                'Crée des productions dans Réglages › Productions.');
+                'Crée des productions dans Conception › Productions.');
             return null;
         }
 

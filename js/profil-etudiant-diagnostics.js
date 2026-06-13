@@ -481,7 +481,7 @@ function _genererBarresSRPNF(da) {
             contenuBarres = `<div class="info-box info-box--attention" style="margin: 15px 0;">
                 <strong style="color: var(--alerte-texte-attention);">Configuration requise</strong>
                 <p style="margin: 5px 0 0; color: var(--alerte-texte-attention); font-size: 0.9rem;">
-                    Configure une grille de référence dans Réglages → Pratique de notation → Grille de référence pour le dépistage.
+                    Configure une grille de référence dans Conception → Pratiques de notation → Grille de référence pour le dépistage.
                 </p>
             </div>`;
         } else {

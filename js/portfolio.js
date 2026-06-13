@@ -116,7 +116,7 @@ function chargerPortfolioEleveDetail(da) {
 
         if (!portfolio) {
             document.getElementById('portfolioEleveDetail').innerHTML =
-                '<p class="text-muted">Aucun portfolio configuré dans Réglages › Productions.</p>';
+                '<p class="text-muted">Aucun portfolio configuré dans Conception › Productions.</p>';
             return;
         }
 
@@ -299,7 +299,7 @@ function chargerPortfolioEleveDetail(da) {
                                     ${echapperHtml(art.description || art.titre)}
                                 </div>
                                 <div class="portfolio-artefact-avenir-info">
-                                    Artefact à venir (non encore créé dans Réglages › Productions)
+                                    Artefact à venir (non encore créé dans Conception › Productions)
                                 </div>
                             </div>
                         </div>

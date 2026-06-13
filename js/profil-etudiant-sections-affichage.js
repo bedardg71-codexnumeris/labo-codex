@@ -3685,7 +3685,7 @@ function _genererBlocForcesDefisSRPNF(da) {
                             <strong style="color: var(--alerte-texte-attention); display: block; margin-bottom: 5px;">Configuration requise</strong>
                             <p style="margin: 0; color: var(--alerte-texte-attention); font-size: 0.9rem; line-height: 1.5;">
                                 Pour afficher les forces et défis par critère, tu dois configurer une grille de référence dans
-                                <strong>Réglages → Pratique de notation → Grille de référence pour le dépistage</strong>.
+                                <strong>Conception → Pratiques de notation → Grille de référence pour le dépistage</strong>.
                             </p>
                         </div>
                     </div>

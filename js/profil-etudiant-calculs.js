@@ -610,7 +610,7 @@ function diagnostiquerForcesChallenges(moyennes, seuil = null) {
     if (!grille || !grille.criteres || grille.criteres.length === 0) {
         console.warn('⚠️ Pas de grille de référence - diagnostic forces/défis impossible');
         console.warn('   → Grille:', grille);
-        console.warn('   → Allez dans Réglages → Pratique de notation pour configurer une grille de référence');
+        console.warn('   → Allez dans Conception → Pratiques de notation pour configurer une grille de référence');
         return { forces: [], defis: [], principaleForce: null, principalDefi: null };
     }
 

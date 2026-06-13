@@ -174,12 +174,12 @@ function supprimerEvaluationDepuisProfil(evaluationId) {
 function _diagnostiquerNoteNonCalculable() {
     const pratiqueId = (typeof obtenirPratiqueActiveGroupeCours === 'function') ? obtenirPratiqueActiveGroupeCours() : null;
     if (!pratiqueId) {
-        return 'Aucune pratique de notation n\'est assignée à ce groupe-cours. Choisis-en une dans Réglages → Pratiques de notation.';
+        return 'Aucune pratique de notation n\'est assignée à ce groupe-cours. Choisis-en une dans Conception → Pratiques de notation.';
     }
     const pratiquesCfg = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
     const pratiqueData = pratiquesCfg.find(p => p.id === pratiqueId) || null;
     if (!pratiqueData) {
-        return 'La pratique assignée à ce groupe-cours est introuvable dans la bibliothèque (supprimée, ou assignation vers un identifiant obsolète). Réassigne une pratique dans Réglages → Pratiques de notation.';
+        return 'La pratique assignée à ce groupe-cours est introuvable dans la bibliothèque (supprimée, ou assignation vers un identifiant obsolète). Réassigne une pratique dans Conception → Pratiques de notation.';
     }
     const famille = (typeof normaliserIdPratique === 'function') ? normaliserIdPratique(pratiqueData.type || '') : (pratiqueData.type || '');
     const methode = pratiqueData.calcul_note && pratiqueData.calcul_note.methode;
