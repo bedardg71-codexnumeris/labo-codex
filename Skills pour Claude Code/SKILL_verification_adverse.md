@@ -147,6 +147,14 @@ absente au chemin voisin qui mute les mêmes données).
 « connexions » — lister les invariants partagés et vérifier que TOUS les chemins
 qui les touchent sont couverts, pas seulement celui qui vient d'être modifié.
 
+> **Maillon mécanique (le plus oublié)** : quand un chantier ajoute un garde-fou
+> de vérification, **les données/clés que ce garde-fou contrôle SONT l'invariant
+> partagé**. Énumérer alors *tous* les écrivains de ces clés (grep) ; chaque
+> écrivain qui ne passe PAS par le garde-fou est un trou candidat. C'est ce qui
+> fait surgir le défaut transversal sans connaître la réponse d'avance : un
+> garde-fou posé sur un chemin (l'import) laisse les autres écrivains des mêmes
+> clés (l'autosave, un changement d'état) non protégés.
+
 ### Principe 5 — Lecture seule sur la cible ; le doute s'exerce en jetable
 
 > **La vérification ne modifie jamais ce qu'elle juge. Les manipulations
