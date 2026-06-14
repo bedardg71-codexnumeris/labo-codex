@@ -70,14 +70,42 @@ const SYMBOLES_VIVANTS = [
     'onEchelleConformiteChange'
 ];
 
+// Branche pratique-notation-v2.js : l'éditeur AUTONOME mort (bootstrap +
+// chargement/sauvegarde/type-selection sur le DOM `v2-pratique-type` disparu)
+// est retiré ; le moteur de config consommé par la bibliothèque reste.
+const V2_RETIRES = [
+    'initialiserPratiqueNotationV2',
+    'chargerDropdownEchellesV2',
+    'afficherPreviewEchelleV2',
+    'chargerValeursDepuisStorage',
+    'changerTypePratiqueV2',
+    'afficherConfigurationType',
+    'sauvegarderStructureV2',
+    'sauvegarderJetonsV2',
+    'sauvegarderToutePratiqueV2',
+    'sauvegarderConfigSpecifications',
+    'appliquerModeleSpecifications',
+    'initialiserComptageObjectifsV2'
+];
+const V2_VIVANTS = [
+    'chargerConfigParObjectifs',
+    'chargerConfigSpecifications',
+    'afficherTypesTravauxSpec',
+    'afficherForfaitsSpec',
+    'changerVariantePANStandards',
+    'sauvegarderPratiqueBaseV2'   // atteint par changerVariantePANStandards (vivant)
+];
+
 let source;
 let productions;
 let productionsListe;
+let v2;
 
 beforeAll(() => {
     source = readFileSync(path.join(racine, 'js/pratiques.js'), 'utf8');
     productions = readFileSync(path.join(racine, 'js/productions.js'), 'utf8');
     productionsListe = readFileSync(path.join(racine, 'js/productions-liste.js'), 'utf8');
+    v2 = readFileSync(path.join(racine, 'js/pratique-notation-v2.js'), 'utf8');
 });
 
 describe('#338 · ablation du vieil éditeur de pratique mort (pratiques.js, 2 passages)', () => {
@@ -105,5 +133,23 @@ describe('#338 · ablation du vieil éditeur de pratique mort (pratiques.js, 2 p
     it('plus aucun appel résiduel à mettreAJourStatutModalites dans les modules productions', () => {
         expect(productions.includes('mettreAJourStatutModalites')).toBe(false);
         expect(productionsListe.includes('mettreAJourStatutModalites')).toBe(false);
+    });
+});
+
+describe('#338 · branche pratique-notation-v2.js (éditeur autonome mort retiré, moteur vivant conservé)', () => {
+
+    it('le bootstrap autonome et la chaîne morte sont retirés', () => {
+        // Plus de bootstrap DOMContentLoaded/db-ready de l'éditeur autonome.
+        expect(v2.includes("document.readyState === 'loading'")).toBe(false);
+        for (const sym of V2_RETIRES) {
+            expect(v2.includes(`function ${sym}(`), `${sym} ne doit plus être défini`).toBe(false);
+            expect(v2.includes(`window.${sym} =`), `window.${sym} ne doit plus être exporté`).toBe(false);
+        }
+    });
+
+    it('le moteur de configuration consommé par la bibliothèque reste défini', () => {
+        for (const sym of V2_VIVANTS) {
+            expect(v2.includes(`function ${sym}(`), `${sym} doit rester défini`).toBe(true);
+        }
     });
 });
