@@ -250,6 +250,28 @@ correctif de **données, sécurité, invariant, garde-fou**. Pas le microcopy.
 itérer vite. Un seul break-test échantillon par chantier suffit souvent à
 qualifier la discipline de test de l'auteur.
 
+### Cas particulier — sentinelle d'ablation / « ratchet » (mutation INVERSE)
+
+La procédure ci-dessus est écrite pour un correctif **additif** : on RETIRE le
+correctif et on attend le rouge. Pour un chantier d'**ablation** (suppression de
+code mort, retrait d'un alias, nettoyage zéro-dette), la sentinelle est un
+**cliquet** (« ratchet ») : elle affirme une **absence** (`expect(source).not.toMatch(...)`
+ou `includes(...).toBe(false)`). Le break-test prend alors la forme **inverse** :
+
+```
+3'. RÉINTRODUIRE ce qui a été retiré (re-coller la fonction/le symbole/l'alias
+    supprimé) — la plus petite résurrection du code mort.
+4'. Re-rouler la sentinelle.
+    → Attendu : ROUGE sur l'assertion d'absence.
+    → Si VERT : la sentinelle est tautologique (regex trop stricte, mauvais
+      fichier lu, motif jamais présent) → réserve, l'ablation n'est PAS verrouillée.
+5'. Restaurer (retirer la résurrection) ; vérifier git status propre.
+```
+
+Sans cette étape, une sentinelle d'absence peut passer **vacuously** (p. ex. une
+regex qui ne matche jamais, même si le symbole revenait sous une autre forme) :
+verte mais décorative. C'est exactement le piège AP-2 transposé à l'ablation.
+
 ---
 
 ## 5. PROPORTIONNALITÉ — LE TRIAGE DE LA PROFONDEUR
@@ -368,6 +390,7 @@ Avant de prononcer un verdict (« vérifié » / « confirmé ») :
 | « Aucun problème détecté » → conclu « ça marche » | AP-6 | P6 |
 | Un chantier validé isolément, voisins non regardés | AP-4 | P4 |
 | Statut « réparé » en un endroit, « en attente » ailleurs | AP-1 : couture récit↔code | P1, P4 |
+| Sentinelle d'**absence** (ablation/ratchet) verte mais jamais faite rougir | AP-2 : peut passer vacuously (regex jamais matchée) | P2, §4 cas ratchet |
 
 ---
 
@@ -399,6 +422,51 @@ Quand un audit découvre un nouveau type de défaut « aux coutures » ou un nou
 motif de test trompeur, l'ajouter à §3/§9. Quand un rituel projet change sa façon
 de lancer les tests ou de borner un diff, vérifier que la procédure §4 reste
 valide.
+
+---
+
+## 11. RETOURS TERRAIN
+
+### Premier essai — #338 « ablation du vieil éditeur de pratique mort » (14 juin 2026)
+
+Premier banc d'essai réel (mode A, auto-vérification), cadré d'avance dans
+`plans de travail/CADRAGE-premier-essai-verification-adverse-338.md`. Chantier
+données/SSOT borné et à faible risque (suppression de code mort), idéal pour
+roder le skill. Résultat : ~1987 lignes mortes retirées sur 3 passages
+(`pratiques.js` ~1244 + `pratique-notation-v2.js` 743), PR mergée, CI verte.
+
+**Ce que le skill a bien servi (appliqué même sans chargement explicite)** :
+- **P1** a payé directement : le BACKLOG affirmait que le « trio v2 » était mort ;
+  re-dérivé → `sauvegarderPratiqueBaseV2` est en fait **vivant** (atteint par
+  `changerVariantePANStandards`, consommé par la bibliothèque). Croire le récit
+  aurait cassé le moteur de config.
+- **P4** (passe connexions) a été l'outil central : analyse d'atteignabilité
+  scriptée (graphe d'appels) + **résolution des alias d'export** — qui a évité de
+  retirer une fonction vivante exportée sous un nom différent (`supprimerTypeTravailSpec`
+  → `window.supprimerTypeTravailSpecV2`, câblée en `data-action`). Le maillon
+  « invariant partagé » s'est instancié en « qui écrit encore `pratiquesConfigurables` ? ».
+- **P6** : Playwright non exécutable en cloud, nommé comme angle mort, puis levé
+  par la CI sur la PR.
+
+**Friction observée → corrigée dans ce skill** :
+1. **P2 (break-test) oublié pendant la session.** Les sentinelles d'ablation ont
+   été déclarées « vertes » sans jamais être faites **rougir** — exactement AP-2/AP-7.
+   Rattrapé en fin de session (réintroduction d'un symbole retiré → rouge sur la
+   bonne assertion, puis restauration, arbre propre). Le motif d'absence-jamais-rougie
+   est désormais documenté au **§4 (cas « ratchet »)** et ci-dessous au §9.
+2. **Déclenchement non automatique.** Le skill a été appliqué « d'instinct » + via
+   le cadrage, mais il n'était ni dans la liste de skills de `CLAUDE.md`, ni câblé
+   dans `SKILL_Fin_de_session.md` §4 de façon contraignante. C'est probablement la
+   cause racine de la friction nº 1 : sans déclencheur ferme, l'étape la plus
+   importante (P2) est celle que le biais d'auteur saute. **Action de suivi** : une
+   fois ce skill mergé sur `main`, l'ajouter à la liste « Charger les skills » de
+   `CLAUDE.md` et faire de la checklist de sortie (§8) un passage **obligatoire**
+   du rituel de fin de session.
+
+**Verdict** : le skill fait ce qu'il promet. Son apport le plus net n'a pas été un
+meilleur jugement mais le **rappel mécanique de l'étape que l'auteur allait
+oublier** — ce qui valide P7 (« mécaniser la défiance envers soi ») comme étant
+le cœur du skill, pas un principe parmi d'autres.
 
 ---
 
