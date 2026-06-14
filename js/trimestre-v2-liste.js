@@ -379,6 +379,15 @@ function changerTrimestreActifV2(valeur) {
                 window.chargerHorairesV2();
             }
 
+            // #332 constat 1 — mécanisme B (B2) : réinitialiser AUSSI le formulaire
+            // groupe-cours. Sans ça, `groupeCoursEnEditionId` pointait un GC de
+            // l'ancien trimestre (absent du nouveau namespace) → la sauvegarde
+            // suivante ratait son findIndex en silence (no-op + faux succès).
+            // Même geste que la réinitialisation de l'éditeur d'horaire ci-dessus.
+            if (typeof afficherEtatVideGroupeCoursV2 === 'function') {
+                afficherEtatVideGroupeCoursV2();
+            }
+
             // 🆕 BETA 95.2 : Rafraîchir le dropdown groupe-cours actif
             if (typeof peuplerDropdownGroupeCoursActif === 'function') {
                 window.peuplerDropdownGroupeCoursActif();

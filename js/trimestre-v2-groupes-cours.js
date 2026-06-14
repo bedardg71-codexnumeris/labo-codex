@@ -257,19 +257,32 @@ function obtenirPeriodeJournee(heure) {
 }
 
 /**
- * Met à jour l'aperçu du nom généré et l'horaire associé
+ * Met à jour l'aperçu du nom généré et l'horaire associé.
+ * @param {HTMLElement} [triggerEl] - L'élément qui a déclenché le handler
+ *   (fourni par le dispatcher data-on-change). Sert à distinguer un changement
+ *   du select HORAIRE (choix manuel à respecter) d'un changement de GROUPE
+ *   (qui auto-associe l'horaire).
  */
-function mettreAJourNomGroupeCoursV2() {
-    // Chercher l'horaire associé au groupe sélectionné
+function mettreAJourNomGroupeCoursV2(triggerEl) {
     const groupeNum = document.getElementById('v2-gc-groupe')?.value;
     const horaireHidden = document.getElementById('v2-gc-horaire');
     const horaireNomSpan = document.getElementById('v2-gc-horaireNom');
     const horaireContainer = document.getElementById('v2-gc-horaireInfo');
+    const horaires = db.getSync(cle('horaires'), []);
 
-    if (groupeNum) {
-        const cleHoraires = cle('horaires');
-        const horaires = db.getSync(cleHoraires, []);
-        const horaireAssocie = horaires.find(h => h.groupeAssocie === groupeNum);
+    // #332 constat 1 — mécanisme A : le select horaire porte le même handler que
+    // les autres champs. Sans ce garde, choisir un horaire manuellement
+    // déclenchait la ré-association depuis le groupe, qui ÉCRASAIT le choix
+    // (no-op silencieux). Quand c'est le select horaire lui-même qui déclenche,
+    // on respecte sa valeur et on ne met à jour que l'affichage.
+    if (triggerEl && triggerEl.id === 'v2-gc-horaire') {
+        const choisi = horaires.find(h => h.id === horaireHidden?.value);
+        if (horaireNomSpan) horaireNomSpan.textContent = choisi ? (choisi.nom || 'Sans nom') : 'Aucun horaire pour ce groupe';
+        if (horaireContainer) horaireContainer.classList.toggle('sans-horaire', !choisi);
+    } else if (groupeNum) {
+        // #332 piste secondaire : comparer en chaîne — `groupeAssocie` peut être
+        // stocké en nombre (saisies anciennes), `groupeNum` est toujours une string.
+        const horaireAssocie = horaires.find(h => String(h.groupeAssocie) === String(groupeNum));
 
         if (horaireAssocie) {
             // Horaire trouvé
@@ -607,19 +620,25 @@ function sauvegarderGroupeCoursV2() {
     if (groupeCoursEnEditionId) {
         // Modification
         const index = groupesCours.findIndex(g => g.id === groupeCoursEnEditionId);
-        if (index >= 0) {
-            groupesCours[index] = {
-                ...groupesCours[index],
-                nom,
-                trimestreId,  // Beta 95.2
-                coursId,
-                groupeNum,
-                horaireId,
-                enseignantId,
-                pratiqueId,   // Beta 95.3
-                dateModification: new Date().toISOString()
-            };
+        // #332 constat 1 — mécanisme B : sans cet `else`, un findIndex raté
+        // (id d'édition périmé, p. ex. après un changement de trimestre)
+        // affichait quand même « Groupe-cours modifié » et réécrivait l'array
+        // inchangé → no-op silencieux avec succès trompeur, modif perdue.
+        if (index < 0) {
+            notifications.erreur('Groupe-cours introuvable', 'Resélectionne-le dans la liste avant d\'enregistrer.');
+            return;
         }
+        groupesCours[index] = {
+            ...groupesCours[index],
+            nom,
+            trimestreId,  // Beta 95.2
+            coursId,
+            groupeNum,
+            horaireId,
+            enseignantId,
+            pratiqueId,   // Beta 95.3
+            dateModification: new Date().toISOString()
+        };
         notifications.succes('Groupe-cours modifié');
     } else {
         // Ajout : actif = true SEULEMENT si premier groupe-cours créé.
