@@ -1,4 +1,38 @@
 <!-- =====================================================================
+     CLÔTURE DE SESSION — 14 juin 2026 (soir). Build 1.17.6 (0614-1653).
+     HEAD main attendu : 21f9f409 (#332 constat 1). Arc complet de la session :
+     ─────────────────────────────────────────────────────────────────────
+     LIVRÉ ET MERGÉ DANS main (5 PR) :
+       • #338 « vieil éditeur de pratique mort » CLOS — 3 passages, ~1987 lignes
+         mortes retirées (pratiques.js ~1244 + pratique-notation-v2.js 743),
+         PR #30. Méthode : graphe d'appels + analyse d'atteignabilité scriptée
+         (alias d'export résolus). 1.17.3 → 1.17.5.
+       • Relai #338 dans SESSION.md (PR #31).
+       • SKILL_verification_adverse : premier essai consigné dans le skill (§4
+         cas « ratchet », §9 signal, §11 retours terrain) + ajout à CLAUDE.md
+         (liste des skills) (PR #32, depuis claude/ai-work-audit-plan-ndp4nj).
+       • #332 constat 1 « no-op silencieux horaire ↔ groupe-cours » CORRIGÉ
+         (PR #33, 1.17.6) : mécanisme A (select horaire plus écrasé par
+         l'auto-association du groupe + comparaison groupeAssocie en chaîne),
+         B1 (findIndex raté → erreur+return, plus de faux succès), B2
+         (changerTrimestreActifV2 réinitialise le formulaire GC). Sentinelle
+         ratchet 4 cas, TOUTES break-testées. 674 Vitest verts.
+     ─────────────────────────────────────────────────────────────────────
+     RESTE / RISQUES :
+       • #332 : confirmation TERRAIN en attente (protocoles repro 2-3 min dans
+         Rapports/ENQUETE-332-CONSTAT1-2026-06-11.md). Mergé sur décision de
+         Grégoire (fixes B sûrs ; A change un comportement UI assumé).
+       • Playwright/WebKit NON exécutable en cloud tout au long de la session →
+         couvert par la CI sur les PR (job « Vitest + Playwright (WebKit) »).
+         Vérifier que le run du merge #33 est bien vert (lancé 20:56).
+       • Leçon de process (P5 du skill) : un `git checkout` de restauration de
+         break-test a effacé des correctifs NON commités (#332) ; rattrapé, puis
+         règle appliquée = committer AVANT tout break-test, ou backup `cp`.
+     PROCHAINE SESSION — candidats backlog (priorité) : #340 (cause racine de
+     l'écrasement des productions au changement de trimestre — gros, incertain),
+     #282 (migrer cours.js listeCours→cours), #336/#334 (stockage/codex iPad),
+     #337 (activer la protection de branche main — action UI Grégoire).
+     =====================================================================
      SESSION 14 juin 2026 (après-midi/soir, Claude Code, reprise à froid) :
      #338 CLOS ET MERGÉ DANS main + premier essai de SKILL_verification_adverse.
      ─────────────────────────────────────────────────────────────────────
