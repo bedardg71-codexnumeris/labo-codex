@@ -1,4 +1,51 @@
 <!-- =====================================================================
+     SESSION 14 juin 2026 (après-midi/soir, Claude Code, reprise à froid) :
+     #338 CLOS ET MERGÉ DANS main + premier essai de SKILL_verification_adverse.
+     ─────────────────────────────────────────────────────────────────────
+     CHANTIER #338 — retrait du vieil éditeur de pratique mort, en 3 passages :
+       • 1er passage (1.17.3, commit 245fae2e) : pratiques.js — cœur sûr, 524
+         lignes (feuilles 100 % mortes) + bug dormant sauvegarderDansConfiguration
+         (paramètre `cle` masquant window.cle). Découverte : chargerConfigurationPAN
+         défini 2× (sans arg / à param), la 2e ombrant la 1re par hoisting.
+       • 2e passage (1.17.4, commit 2829f7df) : pratiques.js — zone grise +
+         helpers orphelins, ~720 lignes. PREUVE : aucun id DOM du vieil éditeur
+         n'existe (ni index.html ni généré), y compris #statutModalites → TOUTE
+         la chaîne était morte. Nettoyage des sites d'appel vivants (init,
+         chargerConfigurationPratique, productions.js ×2, productions-liste.js ×1).
+       • 3e passage (1.17.5, commit 536f9b6e) : pratique-notation-v2.js (moteur
+         de config VIVANT consommé par la bibliothèque) — 743 lignes, 28 fonctions
+         injoignables. Périmètre établi par ANALYSE D'ATTEIGNABILITÉ SCRIPTÉE avec
+         résolution des alias d'export (window.ALIAS=fn) — ce qui a évité de retirer
+         des fonctions vivantes exportées en …V2 (ex. supprimerTypeTravailSpec).
+         31 fonctions conservées (l'estimation BACKLOG « 13 vivants » était basse).
+       TOTAL ~1987 lignes mortes retirées. 670 Vitest verts. PR #30 → CI verte
+       (Vitest + Playwright WebKit, le maillon que le cloud ne pouvait pas lancer)
+       → MERGÉE dans main (merge fe0660ee). #338 marqué [x] au BACKLOG.
+     SENTINELLE : tests/unit/sentinelle-ablation-vieil-editeur-pratique-338.test.js
+       (pratiques.js + bloc v2). Ancienne sentinelle #303 « badge v2 » adaptée.
+     ─────────────────────────────────────────────────────────────────────
+     PREMIER ESSAI DE SKILL_verification_adverse (créé 13-14 juin, sur branche
+     claude/ai-work-audit-plan-ndp4nj, PAS encore sur main ; cadrage
+     `plans de travail/CADRAGE-premier-essai-verification-adverse-338.md`) :
+       • Fortement appliqué SANS l'avoir chargé : P1 (défiance des claims — le
+         BACKLOG disait le trio v2 mort, re-dérivé → sauvegarderPratiqueBaseV2 est
+         VIVANT ; agent de cartographie corrigé), P3 (balayage scripté), P4 (passe
+         connexions = l'analyse d'atteignabilité + alias + écrivains de
+         pratiquesConfigurables), P6 (Playwright non exécutable en cloud nommé
+         comme limite, levé par la CI), P7 (artefacts plutôt qu'introspection).
+       • GAP rattrapé : P2 (break-test) sauté pendant la session (j'avais déclaré
+         les sentinelles vertes sans les faire rougir). Rattrapé en fin de session :
+         réintroduction de chargerModalites (pratiques.js) et
+         chargerValeursDepuisStorage (v2) → sentinelle ROUGE sur la bonne assertion,
+         puis restauration, arbre propre. Sentinelles confirmées non tautologiques.
+       • VERDICT skill : excellent et bien ajusté à ce chantier données/SSOT. Le
+         seul reproche est qu'il s'est révélé utile SURTOUT en rappelant P2, que
+         j'aurais oublié sans le cadrage — ce qui valide sa raison d'être.
+     ENVIRONNEMENT : Playwright/WebKit non exécutable en cloud (binaire absent) —
+     couvert par la CI sur la PR. À garder en tête pour les sessions cloud.
+     SUITE SUGGÉRÉE : rafraîchir ETAT-PROJET.md ; merger la branche du skill sur
+     main si Grégoire valide ; supprimer la branche claude/session-338-* (fusionnée).
+     =====================================================================
      MISE À JOUR — 12 juin 2026 (~13h, pause Grégoire) : TERRAIN L2-b2 AUX
      TROIS QUARTS + #341 DÉCOUVERT.
      • Terrain L2-b2 acquis : S1 ✅ ×2 groupes, S2 ✅, S3 ✅ ×2 groupes
