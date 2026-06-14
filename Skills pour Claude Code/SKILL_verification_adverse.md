@@ -32,7 +32,7 @@ description: >
 
 - **Avant de déclarer un chantier fini** (auto-vérification, mode A).
 - **Avant un commit/push qui clôt un travail** (en complément du rituel de fin
-  de session — voir §9).
+  de session — voir §10).
 - **Quand on demande de vérifier/auditer/valider** le travail d'une autre
   session ou d'une autre IA (audit tiers, mode B).
 - **Après un « c'est testé, ça marche »** — surtout si c'est toi qui le dis.
@@ -286,7 +286,56 @@ limites d'environnement (P6).
 
 ---
 
-## 7. CHECKLIST DE SORTIE — gate explicite
+## 7. ORCHESTRATION — qui applique ce skill (principale ou sous-agents)
+
+**Le facteur décisif n'est pas le volume de travail, c'est que le break-test (§4)
+MUTE l'arbre de travail.** C'est lui qui dicte l'architecture.
+
+### Contrainte d'isolation (le P5 opérationnalisé)
+
+Deux vérificateurs qui break-testent **en parallèle sur le MÊME arbre** se corrompent
+mutuellement : sauvegardes qui s'écrasent, source lue en plein milieu d'une casse,
+`git status` qui n'est plus un témoin fiable de propreté. Donc : break-tests parallèles
+→ **chaque agent dans son propre worktree isolé** (`isolation: "worktree"`), un chantier
+par agent. **Jamais** de break-tests parallèles sur un arbre partagé.
+
+### Mode A — auto-vérification
+
+Par défaut : **instance principale**. Le diff à vérifier est *non commité*, dans ton
+arbre ; tu portes le contexte (ce que tu viens de faire, les affirmations que tu
+t'apprêtes à écrire) ; un sous-agent en worktree séparé ne verrait même pas tes
+changements non commités. **Exception à forte valeur** : sur un chantier
+données/sécurité, déléguer à **un** sous-agent frais réduit le biais de confirmation
+(il n'a pas écrit le code → quasi-mode B, P7). Si tu le fais : committe ou `stash`
+d'abord (pour qu'il voie le travail), et exige des **artefacts**, pas un verdict.
+
+### Mode B — audit tiers
+
+- **Paralléliser la vérification profonde PAR CHANTIER** : un sous-agent par chantier,
+  chacun en worktree isolé, renvoyant verdict **et artefacts bruts**.
+- **NE PAS paralléliser la passe « connexions » (P4) ni la synthèse** : le défaut
+  transversal vit ENTRE les chantiers, invisible à tout agent qui n'en regarde qu'un.
+  Verdict final, risques résiduels et section « limites » = **propriétaire unique** qui
+  voit tous les retours.
+
+### Les deux non-négociables (quel que soit le découpage)
+
+1. **Le rapport d'un sous-agent est une attestation (P1)** : l'orchestrateur ne tamponne
+   pas son « ✅ » — il réclame l'artefact factuel (sortie de test rouge, lignes de grep)
+   et en rejoue un par échantillon. Sinon le rubber-stamp est juste déplacé d'un cran.
+2. **La passe « connexions » + le verdict = un seul cerveau.** Le transversal ne se
+   découpe pas.
+
+### Règle simple
+
+| Situation | Orchestration |
+|---|---|
+| 2-3 chantiers | **Principale, en série** — le surcoût d'orchestration dépasse le gain, la vue transversale est déjà dans une tête |
+| Beaucoup de chantiers indépendants | **Fan-out par chantier en worktrees isolés**, puis synthèse + passe connexions par la principale |
+
+---
+
+## 8. CHECKLIST DE SORTIE — gate explicite
 
 Avant de prononcer un verdict (« vérifié » / « confirmé ») :
 
@@ -307,7 +356,7 @@ Avant de prononcer un verdict (« vérifié » / « confirmé ») :
 
 ---
 
-## 8. SIGNAUX D'ALERTE — formulations à ne pas croire sur parole
+## 9. SIGNAUX D'ALERTE — formulations à ne pas croire sur parole
 
 | Signal | Risque | Principe |
 |---|---|---|
@@ -322,7 +371,7 @@ Avant de prononcer un verdict (« vérifié » / « confirmé ») :
 
 ---
 
-## 9. RELATION AVEC LES SKILLS PROJET
+## 10. RELATION AVEC LES SKILLS PROJET
 
 Ce skill est **agnostique au projet** : il porte les principes et le break-test.
 Chaque projet l'instancie via ses rituels et ses cas concrets.
@@ -347,7 +396,7 @@ Chaque projet l'instancie via ses rituels et ses cas concrets.
 ### Co-évolution
 
 Quand un audit découvre un nouveau type de défaut « aux coutures » ou un nouveau
-motif de test trompeur, l'ajouter à §3/§8. Quand un rituel projet change sa façon
+motif de test trompeur, l'ajouter à §3/§9. Quand un rituel projet change sa façon
 de lancer les tests ou de borner un diff, vérifier que la procédure §4 reste
 valide.
 
