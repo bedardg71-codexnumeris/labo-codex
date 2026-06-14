@@ -24,9 +24,11 @@ describe('Session B Lot 2 · routage des représentations', () => {
         expect(donneesV2).not.toMatch(/'denominateur':/); // clé boguée retirée
     });
 
-    it('pratique-notation-v2 · badge piloté par obtenirRepresentationPratiqueStricte', () => {
-        expect(notationV2).toMatch(/obtenirRepresentationPratiqueStricte/);
-        // L'ancien badgeConfig {sommative:{classe:'som'…}} a disparu.
+    it('pratique-notation-v2 · aucune table de badge locale (badge de l’éditeur autonome retiré #338)', () => {
+        // #338 (juin 2026) : mettreAJourBadgePratiqueV2 — qui rendait le badge via
+        // obtenirRepresentationPratiqueStricte dans l'éditeur autonome mort — a été
+        // retiré avec la chaîne morte. Le guard zéro-dette demeure : pas de
+        // réintroduction d'une table de badge locale {pan-standards:{classe:'std'…}}.
         expect(notationV2).not.toMatch(/'pan-standards':\s*\{\s*classe:\s*'std'/);
     });
 
