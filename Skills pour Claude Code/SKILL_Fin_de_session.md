@@ -6,10 +6,13 @@ description: >
   commit», «j'ai fini pour aujourd'hui», «vérifie avant de pousser», ou toute
   formulation signalant la clôture d'une session de travail. Audit du code
   modifié contre les règles non négociables de CLAUDE.md (section sécurité)
-  et SKILL_Securite_donnees.md §9, exécution de la suite de tests, bump de
-  version par `scripts/release.mjs` si nécessaire. Rapport sans modification
-  automatique — toute correction reste à la décision de Grégoire.
-  Prérequis : SKILL_Securite_donnees.md pour le contexte des règles vérifiées.
+  et SKILL_Securite_donnees.md §9, exécution de la suite de tests, vérification
+  adverse des tests neufs/modifiés (break-test : le test doit pouvoir échouer) et
+  confrontation des affirmations de session au diff réel, bump de version par
+  `scripts/release.mjs` si nécessaire. Rapport sans modification automatique —
+  toute correction reste à la décision de Grégoire.
+  Prérequis : SKILL_Securite_donnees.md pour le contexte des règles vérifiées ;
+  SKILL_verification_adverse.md pour le « pourquoi » et la procédure du break-test (§4).
 ---
 
 # SKILL : Rituel de fin de session — Labo Codex
@@ -53,7 +56,7 @@ Catégoriser par dossier pour situer le périmètre :
 - `tests/` — suite de tests (signalement, pas d'audit §2)
 - `docs/`, `Retours des testeurs/` — documentation
 - `index.html`, `styles.css` — interface (audit §2 sur index.html, vérification CSP §2.6)
-- racine — fichiers de config (version : bump via `release.mjs` au §4)
+- racine — fichiers de config (version : bump via `release.mjs` au §5)
 
 ⏸ Rapporter à Grégoire le périmètre détecté. S'il dit «ce n'est pas ce que je
 veux vérifier», ajuster avant de passer à l'étape 2.
@@ -163,7 +166,61 @@ complet d'abord.
 
 ---
 
-## 4. VERSION : BUMP VIA LE SCRIPT DE RELEASE
+## 4. VÉRIFICATION ADVERSE
+
+**Objectif** : prouver que les tests neufs/modifiés protègent vraiment, et que ce
+que la session s'apprête à écrire dans SESSION.md correspond au diff réel. Applique
+`SKILL_verification_adverse.md` (mode A — auto-vérification) : ce parent porte le
+« pourquoi » et la procédure complète du break-test (§4 du parent). Ici, la version
+courte projet.
+
+> Le balayage mécanique (parent P3) est déjà couvert par le §2 ci-dessus. Cette
+> étape ajoute le break-test (P2) et la confrontation récit↔diff (P1/P4) — ce qu'une
+> suite verte ne donne PAS.
+
+### 4.1 Break-test des tests neufs ou modifiés
+
+Pour chaque test ajouté/modifié dans le diff qui couvre un correctif de **données,
+sécurité, SSOT, ou garde-fou** (pas le microcopy) :
+
+1. `cp <fichier-source-du-correctif> /tmp/bak`
+2. Retirer le correctif (revert du hunk, ou inverser/neutraliser la ligne porteuse).
+3. `cd tests && npx vitest run <fichier-test-ciblé>` → **attendu : ROUGE** sur
+   l'assertion qui décrit le comportement.
+4. `cp /tmp/bak <fichier-source>` ; vérifier `git status` propre (lecture seule, P5).
+
+→ Si le test reste **VERT** sans le correctif : il est tautologique. Le signaler
+comme **réserve** — le comportement n'est PAS prouvé, le correctif n'est pas couvert.
+
+Proportionnalité (barème parent §5) : un break-test échantillon par chantier suffit
+souvent ; les correctifs données/sécurité/SSOT l'exigent, l'UI/microcopy non.
+
+### 4.2 Confrontation des affirmations au diff
+
+Avant de rédiger le bilan de session (SESSION.md, message de commit) : pour chaque
+affirmation chiffrée ou de complétude (« N lecteurs migrés », « X retiré partout »,
+« tests verts », « bug réparé »), vérifier qu'elle correspond au diff/grep réel. Une
+affirmation non re-dérivable se reformule en « non vérifié », jamais en fait acquis.
+
+**Passe « connexions »** (parent P4) : si le chantier ajoute un garde-fou sur un
+invariant partagé (une clé, une donnée), vérifier que les **chemins voisins** qui
+touchent le même invariant sont couverts — pas seulement celui qu'on vient de
+modifier.
+
+> **Concrètement** : repérer les clés/données que le garde-fou contrôle (ses
+> clés-témoins, sa cible), puis grep **tous** les écrivains de ces clés
+> (`db.set`/`setSync`/`localStorage.setItem` sur la clé). Chaque écrivain qui ne
+> passe pas par le garde-fou est un trou candidat. Exemple vérifié : le garde-fou
+> de persistance #335-C contrôle `productions`/`evaluationsSauvegardees`/… à
+> l'import, mais 7 autres sites écrivent `productions` sans lui (autosave,
+> changement de trimestre) — c'est le territoire de #340.
+
+⏸ Rapporter à Grégoire les réserves (tests tautologiques) et les écarts récit↔code.
+Pas de correction automatique.
+
+---
+
+## 5. VERSION : BUMP VIA LE SCRIPT DE RELEASE
 
 **Objectif** : si ce commit doit changer le numéro de version, le faire par
 le script officiel — jamais à la main. La version vit dans **4 points de
@@ -172,7 +229,7 @@ vérité** (`version.json`, deux fallbacks `VERSION_MAJEURE`/`BUILD_ID` dans
 Les recopier manuellement les désynchronise — c'est précisément ce que le
 script empêche (cf. BACKLOG #285).
 
-### 4.1 Décider l'intention (jugement de Grégoire)
+### 5.1 Décider l'intention (jugement de Grégoire)
 
 - **patch** (`1.0.0 → 1.0.1`) — correction de bug, rien de neuf à l'usage
 - **minor** (`1.0.1 → 1.1.0`) — nouveauté sans rupture
@@ -181,7 +238,7 @@ script empêche (cf. BACKLOG #285).
 
 `patch`/`minor` relèvent du jugement courant ; ne jamais décider d'un `major` seul.
 
-### 4.2 Lancer le script (écriture atomique des 4 points)
+### 5.2 Lancer le script (écriture atomique des 4 points)
 
 ```bash
 node scripts/release.mjs patch|minor|major
@@ -197,7 +254,7 @@ et synchronise les 4 points d'un seul geste — soit tout, soit rien.
 `version.json` reste la **source unique de vérité** ; « Bêta publique » n'est
 qu'un libellé d'affichage, pas le numéro.
 
-### 4.3 Vérifier la cohérence après coup
+### 5.3 Vérifier la cohérence après coup
 
 Le contrôle n'est plus une comparaison manuelle de sources : c'est `git diff`
 après release.mjs. Confirmer que les 4 points portent le même numéro/build :
@@ -211,7 +268,7 @@ n'a pas tourné — ne pas committer, le relancer. Ne jamais éditer ces valeurs
 
 ---
 
-## 5. RAPPORT FINAL
+## 6. RAPPORT FINAL
 
 **Objectif** : produire une synthèse en une seule sortie lisible.
 
@@ -241,6 +298,14 @@ Tests automatisés :
     - [test] : [message condensé]
     ...
 
+Vérification adverse :
+  ✅ N break-tests sur correctifs risqués → N rouges attendus obtenus
+  ou
+  ⚠ Réserves :
+    - [test tautologique] : reste vert sans le correctif → comportement non prouvé
+    - [écart récit↔diff] : affirmation « … » non re-dérivée → reformuler en « non vérifié »
+  — (aucun correctif données/sécurité/SSOT dans le diff → étape sans objet)
+
 Version :
   ✅ 4 points de vérité synchrones (X.Y.Z / MMJJ-HHMM)
   ou
@@ -260,7 +325,7 @@ Prochaines étapes possibles (à choisir par Grégoire) :
 
 ---
 
-## 6. CE QUE CETTE SKILL NE FAIT PAS
+## 7. CE QUE CETTE SKILL NE FAIT PAS
 
 - Ne corrige pas automatiquement les motifs détectés
 - N'édite pas les 4 points de vérité à la main — le bump passe par `release.mjs`
@@ -279,6 +344,10 @@ Prochaines étapes possibles (à choisir par Grégoire) :
   pas toutes les règles)
 - ❌ Sauter les tests §3 parce que «l'audit ne détecte rien» (l'audit est
   statique, il rate la logique runtime)
+- ❌ Déclarer un correctif (données/sécurité/SSOT) «couvert» sans avoir fait
+  rougir son test (§4.1) — un test vert peut être tautologique
+- ❌ Recopier une affirmation de session («N migrés», «retiré partout») dans le
+  bilan sans l'avoir re-dérivée au diff/grep (§4.2)
 - ❌ Éditer `version.json`, les fallbacks de `init-inline.js` ou le snapshot de
   `main.js` à la main au lieu de lancer `release.mjs`
 - ❌ Prétendre que la version est synchrone sans avoir vérifié le `git diff` des 4 points
@@ -298,3 +367,4 @@ Prochaines étapes possibles (à choisir par Grégoire) :
 |------------|-----------------------------------------------------------|
 | 2026-05-11 | Création. Audit statique, tests, cohérence version, rapport sans modification automatique. |
 | 2026-06-11 | §4 réécrite : bump de version par `scripts/release.mjs` (4 points de vérité, `--dry-run`) au lieu de l'édition manuelle de `index.html` (fallbacks déplacés dans `init-inline.js`). Renvoi CLAUDE.md pour §2.1-2.3, dispatcher recité (`[data-action]` ≈ 780-836). |
+| 2026-06-14 | Nouveau §4 « Vérification adverse » (break-test des tests neufs/modifiés + confrontation récit↔diff + passe « connexions »), instanciant `SKILL_verification_adverse.md` (mode A). Renumérotation §4-6 → §5-7. Né des audits du 13-14 juin (7 break-tests, défaut transversal #340). |

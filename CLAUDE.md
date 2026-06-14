@@ -191,7 +191,14 @@ Utiliser `window.cle('nomCle')` pour obtenir la cle namespacee.
      filtrer par identite). Skill parent de `SKILL_integrite_globaux.md`, applicable
      a tout projet. **Charger pour tout nouveau projet ou module manipulant des
      donnees de sources heterogenes.**
-   Ces huit skills sont complementaires et constituent la reference metier du projet.
+   - `SKILL_verification_adverse.md` — principes abstraits pour verifier la qualite
+     d'un travail (le sien en auto-verification, ou celui d'une autre session en audit
+     tiers). Coeur : l'attestation n'est pas la preuve, et un test doit pouvoir echouer
+     (break-test) avant qu'on lui fasse confiance. Skill parent ; instancie en mode A
+     par `SKILL_Fin_de_session.md` §4. **Charger AVANT de declarer un chantier fini ou
+     quand on demande de verifier/auditer un travail.** Analyse fondatrice :
+     `Skills pour Claude Code/ANALYSE-verification-adverse.md`.
+   Ces neuf skills sont complementaires et constituent la reference metier du projet.
    **Si travail sur les donnees** (codex, reserve, import/export, anonymisation) :
    charger `SKILL_Securite_donnees.md` EN PRIORITE — les regles de la section 9
    sont obligatoires pour tout code touchant aux donnees.
