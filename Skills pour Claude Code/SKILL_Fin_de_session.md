@@ -205,8 +205,15 @@ affirmation non re-dérivable se reformule en « non vérifié », jamais en fai
 **Passe « connexions »** (parent P4) : si le chantier ajoute un garde-fou sur un
 invariant partagé (une clé, une donnée), vérifier que les **chemins voisins** qui
 touchent le même invariant sont couverts — pas seulement celui qu'on vient de
-modifier. (C'est cette passe qui a révélé, à l'audit du 13-14 juin, qu'une protection
-posée à l'import laissait le changement de trimestre non gardé.)
+modifier.
+
+> **Concrètement** : repérer les clés/données que le garde-fou contrôle (ses
+> clés-témoins, sa cible), puis grep **tous** les écrivains de ces clés
+> (`db.set`/`setSync`/`localStorage.setItem` sur la clé). Chaque écrivain qui ne
+> passe pas par le garde-fou est un trou candidat. Exemple vérifié : le garde-fou
+> de persistance #335-C contrôle `productions`/`evaluationsSauvegardees`/… à
+> l'import, mais 7 autres sites écrivent `productions` sans lui (autosave,
+> changement de trimestre) — c'est le territoire de #340.
 
 ⏸ Rapporter à Grégoire les réserves (tests tautologiques) et les écarts récit↔code.
 Pas de correction automatique.
