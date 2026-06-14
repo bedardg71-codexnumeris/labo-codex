@@ -153,9 +153,6 @@ function initialiserModulePratiques() {
     // BETA 92: Afficher la liste des pratiques configurables
     afficherListePratiques();
 
-    // Attacher les événements (pour les anciennes configurations)
-    attacherEvenementsPratiques();
-
     // Charger les modalités sauvegardées
     chargerModalites();
 
@@ -466,108 +463,6 @@ function migrerConfigurationPortfolio() {
     return true;
 }
 
-/**
- * Attache les événements aux éléments HTML
- * Appelée par initialiserModulePratiques()
- */
-function attacherEvenementsPratiques() {
-    // Sélecteur pratique de notation
-    const selectPratique = document.getElementById('pratiqueNotation');
-    if (selectPratique) {
-        selectPratique.addEventListener('change', changerPratiqueNotation);
-    }
-
-    // Sélecteur type PAN
-    const selectTypePAN = document.getElementById('typePAN');
-    if (selectTypePAN) {
-        selectTypePAN.addEventListener('change', afficherInfoPAN);
-    }
-
-    // Checkbox activation jetons
-    const checkJetonsActif = document.getElementById('jetonsActif');
-    if (checkJetonsActif) {
-        checkJetonsActif.addEventListener('change', toggleConfigJetons);
-    }
-
-    // Checkbox activation portfolio
-    const checkPortfolioActif = document.getElementById('portfolioActif');
-    if (checkPortfolioActif) {
-        checkPortfolioActif.addEventListener('change', toggleConfigPortfolio);
-    }
-
-    // Dropdown modalité de sélection
-    const selectModalite = document.getElementById('configMethodeSelection');
-    if (selectModalite) {
-        selectModalite.addEventListener('change', updateDescriptionModalite);
-    }
-
-    // Bouton sauvegarder
-    const btnSauvegarder = document.getElementById('btnSauvegarderPratiqueNotation');
-    if (btnSauvegarder) {
-        btnSauvegarder.addEventListener('click', sauvegarderPratiqueNotation);
-    }
-
-    // NOUVEAU: Bouton pour ajouter un type de jeton personnalisé
-    const btnAjouterTypeJeton = document.getElementById('btnAjouterTypeJeton');
-    if (btnAjouterTypeJeton) {
-        btnAjouterTypeJeton.addEventListener('click', ajouterTypeJetonPersonnalise);
-    }
-}
-
-/* ===============================
-   📝 GESTION DE LA PRATIQUE DE NOTATION
-   =============================== */
-
-/**
- * Gère le changement de pratique de notation
- * Appelée lors du changement dans #pratiqueNotation
- * 
- * FONCTIONNEMENT:
- * 1. Récupère la pratique sélectionnée
- * 2. Affiche/masque la colonne PAN selon la pratique
- * 3. Réinitialise le type PAN si nécessaire
- * 4. Affiche les options d'affichage
- * 5. Sauvegarde dans localStorage
- * 6. Met à jour le statut
- */
-function changerPratiqueNotation() {
-    const elPratique = document.getElementById('pratiqueNotation');
-    if (!elPratique) return;
-    const pratique = elPratique.value;
-    const colonnePAN = document.getElementById('colonnePAN');
-    const selectPAN = document.getElementById('typePAN');
-    const infoPAN = document.getElementById('infoPAN');
-
-    // Comparaison normalisée (tolère legacy ↔ canonique). NB : la valeur écrite
-    // dans modalites.pratique reste celle du select (legacy tant que le <select>
-    // n'est pas canonisé en étape 6) — ici on ne touche pas l'écriture.
-    const pratiqueCanon = _normPratique(pratique);
-    if (pratiqueCanon === 'standards') {
-        // Afficher le menu PAN
-        colonnePAN.classList.remove('u-hide');
-    } else {
-        // Masquer le menu PAN
-        colonnePAN.classList.add('u-hide');
-        selectPAN.value = '';
-        infoPAN.classList.add('u-hide');
-    }
-
-    // #328 L2-b2 : le miroir modalites.pratique n'est plus écrit — l'activation
-    // passe par la SSOT groupesCours[].pratiqueId (PratiqueManager). Seul le
-    // champ propre typePAN reste géré ici.
-    window.modalitesEvaluation.modifier(function (modalites) {
-        modalites.typePAN = pratiqueCanon === 'standards' ? modalites.typePAN : null;
-    });
-
-    // Gérer l'affichage des options d'affichage
-    afficherOptionsAffichage();
-
-    // Afficher/masquer la configuration PAN
-    afficherConfigurationPAN();
-
-    mettreAJourStatutModalites();
-}
-
 /* ===============================
    📚 GESTION DU TYPE DE PAN
    =============================== */
@@ -650,23 +545,6 @@ function afficherOptionsAffichage() {
    =============================== */
 
 /**
- * Affiche/masque la configuration PAN selon la pratique sélectionnée
- */
-function afficherConfigurationPAN() {
-    const pratique = document.getElementById('pratiqueNotation').value;
-    const configPAN = document.getElementById('configurationPAN');
-
-    if (!configPAN) return;
-
-    if (_normPratique(pratique) === 'standards') {
-        configPAN.classList.remove('u-hide');
-        chargerConfigurationPAN();
-    } else {
-        configPAN.classList.add('u-hide');
-    }
-}
-
-/**
  * Affiche les paramètres de configuration PAN
  * Appelée par le bouton "Modifier les paramètres"
  */
@@ -679,120 +557,6 @@ function afficherParametresPAN() {
 
     // Scroller vers la section
     configPAN.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-
-/**
- * Charge la configuration PAN depuis localStorage
- */
-function chargerConfigurationPAN() {
-    const modalites = window.modalitesEvaluation.lire();
-    const configPAN = modalites.configPAN || {};
-
-    // Période d'évaluation
-    const nombreCours = configPAN.nombreCours || 7;
-    const radioPeriode = document.querySelector(`input[name="periodePAN"][value="${nombreCours}"]`);
-    if (radioPeriode) {
-        radioPeriode.checked = true;
-    }
-
-    // ✅ CORRECTION Phase 3: Configuration du portfolio depuis modalitesEvaluation
-    const configPortfolio = configPAN.portfolio || {
-        actif: true,
-        nombreARetenir: 5,
-        minimumCompletion: 7,
-        nombreTotal: 10,
-        methodeSelection: 'meilleurs'
-    };
-
-    const checkPortfolioActif = document.getElementById('portfolioActif');
-    if (checkPortfolioActif) {
-        checkPortfolioActif.checked = configPortfolio.actif !== false; // Par défaut true
-    }
-
-    const selectMethodeSelection = document.getElementById('configMethodeSelection');
-    if (selectMethodeSelection) {
-        selectMethodeSelection.value = configPortfolio.methodeSelection || 'meilleurs';
-    }
-
-    const selectNombreARetenir = document.getElementById('configNombreARetenir');
-    if (selectNombreARetenir) {
-        selectNombreARetenir.value = configPortfolio.nombreARetenir || 5;
-    }
-
-    const inputMinimumCompletion = document.getElementById('configMinimumCompletion');
-    if (inputMinimumCompletion) {
-        inputMinimumCompletion.value = configPortfolio.minimumCompletion || 7;
-    }
-
-    const inputNombreTotal = document.getElementById('configNombreTotal');
-    if (inputNombreTotal) {
-        inputNombreTotal.value = configPortfolio.nombreTotal || 10;
-    }
-
-    const checkDecouplerPR = document.getElementById('decouplerPN');
-    if (checkDecouplerPR) {
-        checkDecouplerPR.checked = configPortfolio.decouplerPN || false; // Par défaut false (couplé)
-    }
-
-    // Jetons - valeurs par défaut
-    const jetons = configPAN.jetons || {
-        actif: true,
-        delai: { nombre: 2, dureeJours: 2 },  // 🆕 Beta 95.7 : défaut 2 jours
-        reprise: { nombre: 2, maxParProduction: 1, archiverOriginale: true }
-    };
-
-    const checkJetonsActif = document.getElementById('jetonsActif');
-    if (checkJetonsActif) {
-        checkJetonsActif.checked = jetons.actif;
-    }
-
-    const selectNombreJetonsDelai = document.getElementById('nombreJetonsDelai');
-    if (selectNombreJetonsDelai) {
-        selectNombreJetonsDelai.value = jetons.delai.nombre;
-    }
-
-    const selectDureeDelai = document.getElementById('dureeDelai');
-    if (selectDureeDelai) {
-        selectDureeDelai.value = jetons.delai.dureeJours;
-    }
-
-    const selectNombreJetonsReprise = document.getElementById('nombreJetonsReprise');
-    if (selectNombreJetonsReprise) {
-        selectNombreJetonsReprise.value = jetons.reprise.nombre;
-    }
-
-    const selectMaxRepriseParProduction = document.getElementById('maxRepriseParProduction');
-    if (selectMaxRepriseParProduction) {
-        selectMaxRepriseParProduction.value = jetons.reprise.maxParProduction;
-    }
-
-    const gestionOriginale = jetons.reprise.archiverOriginale ? 'archiver' : 'supprimer';
-    const radioGestion = document.querySelector(`input[name="gestionOriginale"][value="${gestionOriginale}"]`);
-    if (radioGestion) {
-        radioGestion.checked = true;
-    }
-
-    // Nombre de jetons par élève (NOUVEAU)
-    const inputNombreJetonsParEleve = document.getElementById('nombreJetonsParEleve');
-    if (inputNombreJetonsParEleve) {
-        inputNombreJetonsParEleve.value = jetons.nombreParEleve || 2;  // 🆕 Beta 95.7 : défaut 2
-    }
-
-    // Charger les types de jetons personnalisés (NOUVEAU)
-    const jetonsPersonnalises = jetons.typesPersonnalises || [];
-    afficherJetonsPersonnalises(jetonsPersonnalises);
-
-    // 🆕 Beta 95.7 : Peupler le dropdown note maximale (reprise ciblée)
-    peuplerDropdownPlafondNoteCiblee();
-
-    // Activer/désactiver sections jetons
-    toggleConfigJetons();
-
-    // Mettre à jour description modalité
-    updateDescriptionModalite();
-
-    // Activer/désactiver configuration portfolio
-    toggleConfigPortfolio();
 }
 
 /**
@@ -816,59 +580,6 @@ function toggleConfigPortfolio() {
 
     // Afficher/masquer la carte portfolio dans la colonne droite
     afficherCartesExtras();
-}
-
-/**
- * Met à jour dynamiquement la description et les labels selon la modalité sélectionnée
- */
-function updateDescriptionModalite() {
-    const selectModalite = document.getElementById('configMethodeSelection');
-    if (!selectModalite) return;
-
-    const modalite = selectModalite.value;
-    const descriptionElem = document.getElementById('descriptionModalite');
-    const labelNombreElem = document.getElementById('labelNombreARetenir');
-    const groupeNombreElem = document.getElementById('groupeNombreARetenir');
-
-    // Définir les textes selon la modalité (format HTML avec puces)
-    const textes = {
-        'meilleurs': {
-            description: "Dans ma pratique de notation basée sur la maîtrise de standards, le portfolio contient <strong>les N meilleures productions</strong> de l'apprenant·e.",
-            label: 'N meilleurs',
-            afficherNombre: true
-        },
-        'recents': {
-            description: "Dans ma pratique de notation basée sur la maîtrise de standards, le portfolio contient <strong>les N plus récentes productions</strong> de l'apprenant·e.",
-            label: 'N récents',
-            afficherNombre: true
-        },
-        'recents-meilleurs': {
-            description: "Dans ma pratique de notation basée sur la maîtrise de standards, le portfolio contient <strong>les N plus récentes productions parmi les 50% meilleures</strong> de l'apprenant·e (approche hybride).",
-            label: 'N récents (top 50%)',
-            afficherNombre: true
-        },
-        'tous': {
-            description: "Dans ma pratique de notation, le portfolio contient <strong>toutes les productions</strong> de l'apprenant·e (calcul de type sommative, utile pour comparaison).",
-            label: 'Tous',
-            afficherNombre: false
-        }
-    };
-
-    const config = textes[modalite] || textes['meilleurs'];
-
-    // Mettre à jour les éléments
-    if (descriptionElem) {
-        descriptionElem.innerHTML = config.description;
-    }
-
-    if (labelNombreElem) {
-        labelNombreElem.textContent = config.label;
-    }
-
-    // Afficher/cacher le champ "Artefacts à retenir" selon la modalité
-    if (groupeNombreElem) {
-        toggleDisplay(groupeNombreElem, config.afficherNombre);
-    }
 }
 
 /**
@@ -944,204 +655,9 @@ function afficherCartesExtras() {
     }
 }
 
-/**
- * Sauvegarde la configuration PAN
- */
-function sauvegarderConfigurationPAN() {
-    const modalites = window.modalitesEvaluation.lire();
-
-    // Période d'évaluation
-    const radioPeriode = document.querySelector('input[name="periodePAN"]:checked');
-    const nombreCours = radioPeriode ? parseInt(radioPeriode.value) : 7;
-
-    // ✅ CORRECTION Phase 3: Configuration du portfolio
-    const checkPortfolioActif = document.getElementById('portfolioActif');
-    const portfolioActif = checkPortfolioActif ? checkPortfolioActif.checked : true;
-
-    const selectMethodeSelection = document.getElementById('configMethodeSelection');
-    const methodeSelection = selectMethodeSelection ? selectMethodeSelection.value : 'meilleurs';
-
-    const selectNombreARetenir = document.getElementById('configNombreARetenir');
-    const nombreARetenir = selectNombreARetenir ? parseInt(selectNombreARetenir.value) : 5;
-
-    const inputMinimumCompletion = document.getElementById('configMinimumCompletion');
-    const minimumCompletion = inputMinimumCompletion ? parseInt(inputMinimumCompletion.value) : 7;
-
-    const inputNombreTotal = document.getElementById('configNombreTotal');
-    const nombreTotal = inputNombreTotal ? parseInt(inputNombreTotal.value) : 10;
-
-    const checkDecouplerPR = document.getElementById('decouplerPN');
-    const decouplerPN = checkDecouplerPR ? checkDecouplerPR.checked : false;
-
-    // Jetons
-    const checkJetonsActif = document.getElementById('jetonsActif');
-    const jetonsActif = checkJetonsActif ? checkJetonsActif.checked : true;
-
-    const checkJetonDelaiActif = document.getElementById('jetonDelaiActif');
-    const jetonDelaiActif = checkJetonDelaiActif ? checkJetonDelaiActif.checked : true;
-
-    const checkJetonRepriseActif = document.getElementById('jetonRepriseActif');
-    const jetonRepriseActif = checkJetonRepriseActif ? checkJetonRepriseActif.checked : true;
-
-    const selectNombreJetonsDelai = document.getElementById('nombreJetonsDelai');
-    const nombreJetonsDelai = selectNombreJetonsDelai ? parseInt(selectNombreJetonsDelai.value) : 2;
-
-    const selectDureeDelai = document.getElementById('dureeDelai');
-    const dureeDelai = selectDureeDelai ? parseInt(selectDureeDelai.value) : 2;  // 🆕 Beta 95.7
-
-    const selectNombreJetonsReprise = document.getElementById('nombreJetonsReprise');
-    const nombreJetonsReprise = selectNombreJetonsReprise ? parseInt(selectNombreJetonsReprise.value) : 2;
-
-    const selectMaxRepriseParProduction = document.getElementById('maxRepriseParProduction');
-    const maxRepriseParProduction = selectMaxRepriseParProduction ? parseInt(selectMaxRepriseParProduction.value) : 1;
-
-    const radioGestion = document.querySelector('input[name="gestionOriginale"]:checked');
-    const gestionOriginale = radioGestion ? radioGestion.value : 'archiver';
-
-    // NOUVEAU: Reprise ciblée
-    const checkJetonRepriseCibleeActif = document.getElementById('jetonRepriseCibleeActif');
-    const jetonRepriseCibleeActif = checkJetonRepriseCibleeActif ? checkJetonRepriseCibleeActif.checked : true;
-
-    const selectPlafondNoteCiblee = document.getElementById('plafondNoteCiblee');
-    const plafondNoteCiblee = selectPlafondNoteCiblee ? selectPlafondNoteCiblee.value : 'M';
-
-    const radioGestionCiblee = document.querySelector('input[name="gestionOriginaleCiblee"]:checked');
-    const gestionOriginaleCiblee = radioGestionCiblee ? radioGestionCiblee.value : 'archiver';
-
-    // NOUVEAU: Nombre de jetons par élève
-    const inputNombreJetonsParEleve = document.getElementById('nombreJetonsParEleve');
-    const nombreParEleve = inputNombreJetonsParEleve ? parseInt(inputNombreJetonsParEleve.value) : 2;  // 🆕 Beta 95.7
-
-    // NOUVEAU: Récupérer les types personnalisés depuis localStorage temporaire
-    const typesPersonnalises = window.jetonsPersonnalisesTemporaire || [];
-
-    // Construire l'objet config
-    // ✅ CORRECTION Phase 3: Inclure la configuration du portfolio
-    modalites.configPAN = {
-        nombreCours: nombreCours,
-
-        portfolio: {
-            actif: portfolioActif,
-            nombreARetenir: nombreARetenir,
-            minimumCompletion: minimumCompletion,
-            nombreTotal: nombreTotal,
-            methodeSelection: methodeSelection,
-            decouplerPN: decouplerPN,
-            reglesConformite: getReglesConformiteConfig()
-        },
-
-        jetons: {
-            actif: jetonsActif,
-            nombreParEleve: nombreParEleve,
-
-            delai: {
-                actif: jetonDelaiActif,
-                nombre: nombreJetonsDelai,
-                dureeJours: dureeDelai
-            },
-
-            reprise: {
-                actif: jetonRepriseActif,
-                nombre: nombreJetonsReprise,
-                maxParProduction: maxRepriseParProduction,
-                archiverOriginale: gestionOriginale === 'archiver'
-            },
-
-            repriseCiblee: {
-                actif: jetonRepriseCibleeActif,
-                plafondNote: plafondNoteCiblee,
-                archiverOriginale: gestionOriginaleCiblee === 'archiver'
-            },
-
-            typesPersonnalises: typesPersonnalises
-        }
-    };
-
-    window.modalitesEvaluation.remplacer(modalites);
-
-    // ✅ NOUVEAU (9 décembre 2025) : Sauvegarder aussi dans la pratique active
-    sauvegarderDansConfiguration('portfolio', modalites.configPAN.portfolio);
-    sauvegarderDansConfiguration('jetons', modalites.configPAN.jetons);
-
-}
-
 /* ===============================
    SAUVEGARDE ET CHARGEMENT
    =============================== */
-
-/**
- * Sauvegarde la configuration complète de la pratique de notation
- * Appelée par le bouton «Sauvegarder la configuration»
- *
- * FONCTIONNEMENT:
- * 1. Récupère les valeurs des champs
- * 2. Valide les champs obligatoires
- * 3. Sauvegarde dans localStorage avec timestamp
- * 4. Sauvegarde la configuration PAN si pratique alternative
- * 5. Affiche notification de succès
- * 6. Met à jour le statut
- */
-function sauvegarderPratiqueNotation() {
-    // #328 L2-b2 : type dérivé de la SSOT (le miroir modalites.pratique n'existe plus)
-    let modalites = window.modalitesEvaluation.lire();
-    const pratique = (typeof obtenirTypePratiqueActive === 'function')
-        ? obtenirTypePratiqueActive()
-        : null;
-
-    // Les sélecteurs suivants n'existent que dans l'ancien système
-    const selectTypePAN = document.getElementById('typePAN');
-    const colonnePAN = document.getElementById('colonnePAN');
-    const typePAN = selectTypePAN ? selectTypePAN.value : modalites.typePAN;
-
-    if (!pratique) {
-        alert('Veuillez choisir une pratique de notation');
-        return;
-    }
-
-    // Valider typePAN uniquement si le sélecteur est VISIBLE (ancien système)
-    const selecteurVisible = colonnePAN && !colonnePAN.classList.contains('u-hide');
-    const pratiqueCanon = _normPratique(pratique);
-    if (pratiqueCanon === 'standards' && selecteurVisible && !typePAN) {
-        alert('Veuillez choisir un type de pratique alternative');
-        return;
-    }
-
-    // #328 L2-b2 : plus d'écriture du miroir modalites.pratique — champs propres seulement.
-    modalites.typePAN = pratiqueCanon === 'standards' ? typePAN : null;
-    modalites.dateConfiguration = new Date().toISOString();
-
-    // Sauvegarder la grille de référence pour le dépistage (préférence utilisateur)
-    const selectGrilleRef = document.getElementById('grilleReferenceDepistage');
-    if (selectGrilleRef) {
-        definirPreference('grilleReferenceDepistage', selectGrilleRef.value || '');
-    }
-
-    // Sauvegarder l'option d'affichage des descriptions SOLO (préférence utilisateur)
-    const checkSOLO = document.getElementById('afficherDescriptionsSOLO');
-    definirPreference('afficherDescriptionsSOLO', checkSOLO ? checkSOLO.checked : true);
-
-    // Sauvegarder l'option d'activation du modèle RàI (préférence utilisateur)
-    const checkRai = document.getElementById('activerRai');
-    definirPreference('activerRai', checkRai ? checkRai.checked : true);
-
-    // Sauvegarder l'option d'activation de la catégorisation des erreurs de français
-    const checkCategorisation = document.getElementById('activerCategorisationErreurs');
-    if (checkCategorisation) {
-        modalites.activerCategorisationErreurs = checkCategorisation.checked;
-    } else {
-        // Par défaut désactivé si l'élément n'existe pas (mode simple par défaut)
-        modalites.activerCategorisationErreurs = false;
-    }
-
-    window.modalitesEvaluation.remplacer(modalites);
-
-    // Sauvegarder toutes les configurations (portfolio et jetons)
-    sauvegarderConfigurationPAN();
-
-    notifications.succes('Toutes les configurations ont été sauvegardées !');
-    mettreAJourStatutModalites();
-
-}
 
 /**
  * Charge les modalités sauvegardées depuis localStorage
@@ -1837,45 +1353,6 @@ async function activerPratique(id, confirmer = true) {
 }
 
 /**
- * Sauvegarde une partie de la configuration dans la pratique active
- * ✅ NOUVEAU (9 décembre 2025)
- * @param {string} cle - Nom de la clé à sauvegarder ('affichage', 'portfolio', 'jetons')
- * @param {object} valeur - Valeur à sauvegarder
- */
-function sauvegarderDansConfiguration(cle, valeur) {
-    // #328 L2-b2 : id dérivé de la SSOT groupesCours[].pratiqueId.
-    const pratiqueActiveId = (typeof obtenirPratiqueActiveGroupeCours === 'function')
-        ? obtenirPratiqueActiveGroupeCours()
-        : null;
-
-    if (!pratiqueActiveId) {
-        console.warn('[sauvegarderDansConfiguration] Aucune pratique active');
-        return;
-    }
-
-    // Charger la pratique depuis pratiquesConfigurables
-    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
-    const index = pratiques.findIndex(p => p.id === pratiqueActiveId);
-
-    if (index === -1) {
-        console.warn('[sauvegarderDansConfiguration] Pratique introuvable:', pratiqueActiveId);
-        return;
-    }
-
-    // Initialiser config si nécessaire
-    if (!pratiques[index].config) {
-        pratiques[index].config = {};
-    }
-
-    // Sauvegarder la valeur dans la config de la pratique
-    pratiques[index].config[cle] = valeur;
-
-    // Sauvegarder les pratiques
-    db.setSync(cle('pratiquesConfigurables'), pratiques);
-
-}
-
-/**
  * Charge la configuration spécifique d'une pratique et l'applique à l'interface
  * ✅ NOUVEAU (9 décembre 2025)
  * @param {string} id - ID de la pratique dont on veut charger la config
@@ -2358,7 +1835,6 @@ function peuplerDropdownPlafondNoteCiblee() {
 // ============================================
 
 window.initialiserModulePratiques = initialiserModulePratiques;
-window.sauvegarderPratiqueNotation = sauvegarderPratiqueNotation;
 window.obtenirConfigurationNotation = obtenirConfigurationNotation;
 window.peuplerDropdownPlafondNoteCiblee = peuplerDropdownPlafondNoteCiblee; // 🆕 Beta 95.7
 
