@@ -29,6 +29,11 @@ description: >
 > une urgence ajoutée depuis. Acté 28 mai 2026 PM après écart de 24 h
 > détecté sur le Lot A ✴ (livré au commit `11f87a1` mais demandé à
 > nouveau dans la prémisse du lendemain).
+>
+> **Lien** : quand la demande est d'**auditer** le travail d'une session
+> antérieure (et pas seulement d'ouvrir la journée), ce baseline factuel est
+> l'étape 0 du mode B (audit tiers) de `SKILL_verification_adverse.md` —
+> enchaîner ensuite sur le break-test et la relecture des coutures.
 
 ---
 
