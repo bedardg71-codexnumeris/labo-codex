@@ -992,10 +992,6 @@ async function rafraichirInterfaceApresSauvegarde(idSauvegarde, estModification)
         'Production modifiée avec succès !' :
         'Production ajoutée avec succès !');
 
-    if (typeof mettreAJourStatutModalites === 'function') {
-        mettreAJourStatutModalites();
-    }
-
     if (typeof window.chargerProductionsDansSelect === 'function') {
         window.chargerProductionsDansSelect();
     }
@@ -1156,11 +1152,6 @@ async function supprimerProduction(id) {
         await afficherTableauProductions();
         await afficherToutesLesProductionsParType();
         await mettreAJourPonderationTotale();
-
-        // Mettre à jour le statut des modalités si la fonction existe
-        if (typeof mettreAJourStatutModalites === 'function') {
-            mettreAJourStatutModalites();
-        }
     }
 }
 

@@ -374,11 +374,6 @@ async function supprimerProductionActive() {
     await afficherToutesLesProductionsParType();
     await mettreAJourPonderationTotale();
 
-    // Mettre à jour le statut des modalités si la fonction existe
-    if (typeof mettreAJourStatutModalites === 'function') {
-        mettreAJourStatutModalites();
-    }
-
     // Mettre à jour le select des productions dans le module Évaluation
     if (typeof window.chargerProductionsDansSelect === 'function') {
         window.chargerProductionsDansSelect();
