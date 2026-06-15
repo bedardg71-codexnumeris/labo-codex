@@ -438,11 +438,10 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 ### Sécurité / Modes alternatifs
 
-- [ ] ⚠️ **#337** Activer la protection de branche `main` dans les réglages GitHub — créé 11 juin 2026 (n° #335 sur la branche skills, renuméroté à l'intégration)
-  - **Action manuelle (UI GitHub, ~2 min)** : `Settings → Branches → Add branch protection rule`, pattern `main`. La CI existe et tourne déjà (workflows `tests.yml` + `codeql.yml`, 248+ runs verts), **mais rien n'empêche actuellement un commit rouge d'atterrir sur `main`** : `main` est `protected: false`.
-  - **À cocher** : *Require status checks to pass before merging* → ajouter `Vitest + Playwright (WebKit)` et `Analyse CodeQL` ; décocher *Allow force pushes* et *Allow deletions*. Laisser *Require a pull request before merging* **décoché** (workflow solo dev).
-  - **Procédure détaillée déjà rédigée** : `.github/BRANCH-PROTECTION.md` (à suivre tel quel).
-  - **Pourquoi pas Claude** : réglage d'administration du dépôt, pas du code — seul Grégoire peut l'activer. À faire sur Mac.
+- [x] ⚠️ **#337 LIVRÉ 15 juin 2026** Activer la protection de branche `main` dans les réglages GitHub — créé 11 juin 2026 (n° #335 sur la branche skills, renuméroté à l'intégration)
+  - **✅ Activé par Grégoire (UI GitHub, 15 juin)** : `main` est désormais `protected: true`. Première PR gatée = #38 (merge 1.17.9). Force-push et suppression bloqués ; *Require status checks to pass before merging* avec `Vitest + Playwright (WebKit)` + `Analyse CodeQL` ; *Require a pull request* décoché (solo dev).
+  - **Action manuelle (UI GitHub, ~2 min)** : `Settings → Branches → Add branch protection rule`, pattern `main`. La CI existe et tourne déjà (workflows `tests.yml` + `codeql.yml`, 248+ runs verts).
+  - **Procédure détaillée** : `.github/BRANCH-PROTECTION.md`.
 
 - [ ] 🟢 **#47** Mot de passe optionnel pour sauvegarde/restauration
   - AES-256 via Web Crypto API. Couvre la protection au repos (fichier exporté en local), distincte de la signature ECDSA prévue pour la Voûte (Défense F, juillet 2026).
