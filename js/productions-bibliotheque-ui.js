@@ -239,7 +239,13 @@ async function afficherBibliothequeProductions() {
  */
 async function ajouterProductionIndividuelle(id) {
     try {
-        let productions = await db.get(getCleProductions()) || [];
+        // #340 — Capturer la clé namespacée UNE fois : le `await` ci-dessous
+        // (obtenirToutesLesProductionsBibliotheque) ouvre une fenêtre pendant
+        // laquelle le trimestre actif pourrait basculer. Sans capture, le
+        // `db.set(getCleProductions(), ...)` final se résoudrait sous le NOUVEAU
+        // namespace et écrirait le tableau lu sous l'ANCIEN → contamination.
+        const cleProductions = getCleProductions();
+        let productions = await db.get(cleProductions) || [];
         let prod = productions.find(p => p.id === id);
 
         // Si pas trouvée dans le cours actuel, chercher dans la bibliothèque partagée
@@ -265,12 +271,12 @@ async function ajouterProductionIndividuelle(id) {
 
             // Ajouter aux productions du cours
             productions.push(prod);
-            await db.set(getCleProductions(), productions);
+            await db.set(cleProductions, productions);
 
         } else {
             // Production déjà dans le cours, juste la marquer comme visible
             prod.dansBibliotheque = true;
-            await db.set(getCleProductions(), productions);
+            await db.set(cleProductions, productions);
         }
 
         // Rafraîchir modal et sidebar

@@ -57,6 +57,53 @@
             this.memoryCache = new Map();
             // Écritures IDB en cours (pour flush dans beforeunload)
             this._pendingWrites = new Set();
+            // #340 — Gardes d'écriture par clé de base. Une garde reçoit
+            // (cleEffective, valeur) et retourne { coherent:false, raison } pour
+            // BLOQUER une écriture incohérente (ex. productions d'un trimestre
+            // écrites sous le namespace d'un autre). Domaine-agnostique : la
+            // logique métier est injectée par un module dédié (cf.
+            // js/productions-namespace-garde.js).
+            this._gardesEcriture = new Map();
+        }
+
+        /**
+         * #340 — Enregistre une garde d'écriture pour une clé de base donnée.
+         * @param {string} cleBase - clé sans namespace (ex. 'productions')
+         * @param {function} garde - (cleEffective, valeur) => { coherent, raison }
+         */
+        enregistrerGardeEcriture(cleBase, garde) {
+            if (typeof garde === 'function') this._gardesEcriture.set(cleBase, garde);
+        }
+
+        /**
+         * #340 — Vérifie la garde d'écriture applicable à `key`.
+         * @returns {boolean} true si l'écriture est autorisée (ou aucune garde),
+         *   false si une garde la bloque (la corruption est alors évitée).
+         */
+        _ecritureAutorisee(key, value) {
+            if (!this._gardesEcriture || this._gardesEcriture.size === 0) return true;
+            var cleBase = key;
+            var m = typeof key === 'string' ? key.match(/^[aeh]\d{4}_(.+)$/) : null;
+            if (m) cleBase = m[1];
+            var garde = this._gardesEcriture.get(cleBase);
+            if (!garde) return true;
+            try {
+                var res = garde(key, value);
+                if (res && res.coherent === false) {
+                    var stack = (new Error().stack || '').split('\n').slice(2, 8).join('\n');
+                    console.error(
+                        '[DB][GARDE #340] Écriture BLOQUÉE sur "' + key + '" — ' +
+                        (res.raison || 'incohérence de namespace') +
+                        '\n   Donnée saine préservée. Pile d\'appel de l\'écrivain fautif :\n' + stack
+                    );
+                    return false;
+                }
+            } catch (e) {
+                // Une garde ne doit jamais casser une écriture : en cas d'erreur
+                // interne, on autorise par défaut (fail-open) et on journalise.
+                console.warn('[DB][GARDE #340] garde "' + cleBase + '" a levé une exception (écriture autorisée) :', e && e.message);
+            }
+            return true;
         }
 
         /**
@@ -247,6 +294,10 @@
             if (!this.ready) {
                 await this.init();
             }
+
+            // #340 — Garde d'écriture : bloque une écriture incohérente avant
+            // qu'elle n'atteigne IDB et localStorage (les deux couches).
+            if (!this._ecritureAutorisee(key, value)) return;
 
             if (this.useIndexedDB) {
                 // Écrire dans IndexedDB (stockage persistant)
@@ -975,6 +1026,10 @@
                     }
                 }
             }
+            // #340 — Garde d'écriture : bloque une écriture incohérente avant
+            // toute persistance (localStorage, memoryCache ou IDB).
+            if (!this._ecritureAutorisee(key, value)) return;
+
             // Seuil IDB-first : les grosses valeurs vont directement dans
             // memoryCache + IDB, sans tenter localStorage (évite QuotaExceeded)
             var SEUIL_IDB_FIRST = 200 * 1024; // 200 Ko
