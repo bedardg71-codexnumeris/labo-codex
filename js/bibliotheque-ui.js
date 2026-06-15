@@ -128,15 +128,24 @@
     /**
      * Construit la métadonnée `inspireDe` à poser sur toute copie forkée
      * d'un item existant (respect CC BY — on trace l'origine quelle que
-     * soit la source). Retourne { nom, auteur, date } avec date au
+     * soit la source). Retourne { nom, auteur, date, sourceId } avec date au
      * format YYYY-MM-DD.
+     *
+     * `sourceId` (axe D / #326, SPEC §3.1) = id de la source. Sert à la fois
+     * l'attribution CC (permanente, jamais effacée) ET la navigation de l'arbre
+     * de filiation (souche → variantes). Optionnel : omis si la source n'a pas
+     * d'id (les filiations antérieures sans id restent valides, l'arbre les
+     * ignore proprement). Sous-schéma transversal (grilles, échelles,
+     * cartouches, pratiques) — cohérent avec import-export.js (SCHEMA_INSPIRE_DE).
      */
     BibliothequeUI.forgerInspireDe = function (itemSource) {
-        return {
+        var meta = {
             nom: (itemSource && itemSource.nom) || 'Inconnu',
             auteur: (itemSource && itemSource.auteur) || 'Inconnu',
             date: new Date().toISOString().slice(0, 10)
         };
+        if (itemSource && itemSource.id) meta.sourceId = itemSource.id;
+        return meta;
     };
 
     /**

@@ -856,7 +856,7 @@ async function reconstruireSnapshotsHistoriques() {
             return {
                 succes: false,
                 nbSnapshots: 0,
-                message: 'Aucune séance configurée. Configure d\'abord l\'horaire du groupe dans Réglages → Horaire.'
+                message: 'Aucune séance configurée. Configure d\'abord l\'horaire du groupe dans Cadre → Trimestre → Horaire.'
             };
         }
 

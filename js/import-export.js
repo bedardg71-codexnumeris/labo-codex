@@ -326,13 +326,16 @@ const SCHEMA_METADATA_CC = {
     }
 };
 
-/** Sous-schéma `inspireDe` (filiation Plan §4.3) réutilisé sur tous les types. */
+/** Sous-schéma `inspireDe` (filiation Plan §4.3) réutilisé sur tous les types.
+ *  `sourceId` (axe D / #326) : id de la source pour l'arbre de filiation —
+ *  optionnel, jamais effacé (invariant CC, SPEC §3.1). */
 const SCHEMA_INSPIRE_DE = {
     type: 'object',
     schema: {
         nom: { type: 'string', maxLen: 200 },
         auteur: { type: 'string', maxLen: 100 },
-        date: { type: 'string', maxLen: 50 }
+        date: { type: 'string', maxLen: 50 },
+        sourceId: { type: 'string', maxLen: 100 }
     }
 };
 

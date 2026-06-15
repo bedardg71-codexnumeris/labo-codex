@@ -197,7 +197,7 @@
                 ? obtenirIdentiteCCUtilisateur() : '';
             carte.appendChild(el('p', null,
                 'Le contenu sera publié sous licence ' + window.partageSchemas.LICENCE
-                + ', attribué à : ' + (identite || 'identité CC non renseignée (Réglages › Identité)') + '.'));
+                + ', attribué à : ' + (identite || 'identité CC non renseignée (Cadre › Trimestre, enseignant)') + '.'));
 
             carte.appendChild(el('p', null,
                 'Le fichier est signé avec ta clé : la personne qui l\'importe '
