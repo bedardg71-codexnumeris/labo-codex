@@ -43,6 +43,12 @@
 (function() {
     'use strict';
 
+    // Seuil IDB-first (#334 D, zéro-dette) : au-delà, une valeur va directement
+    // dans memoryCache + IndexedDB, sans tenter localStorage (évite un
+    // QuotaExceededError systématique sur les grosses clés). Source unique —
+    // consommé par set(), setSync() et syncToLocalStorageCache().
+    const SEUIL_IDB_FIRST = 200 * 1024; // 200 Ko
+
     /**
      * Classe Database - API unifiée pour stockage
      */
@@ -303,18 +309,28 @@
                 // Écrire dans IndexedDB (stockage persistant)
                 await this._setIndexedDB(key, value);
 
-                // AUSSI écrire dans localStorage (cache synchrone) si la donnée n'est pas trop grande
-                // Pour que les lectures getSync() voient immédiatement les nouvelles données
+                // Seuil IDB-first (#334 D) : harmonisé avec setSync — au-delà du
+                // seuil, on NE tente PAS localStorage (évite un QuotaExceededError
+                // systématique sur les grosses clés) et on sert getSync via
+                // memoryCache. Comportement observable identique, chemin plus propre.
+                if (this._estimateSize(value) > SEUIL_IDB_FIRST) {
+                    this.memoryCache.set(key, value);
+                    try { localStorage.removeItem(key); } catch (ex) { console.warn('[DB] localStorage.removeItem skipped:', key, ex.message || ex); }
+                    return;
+                }
+
+                // Valeur raisonnable → AUSSI écrire dans localStorage (cache
+                // synchrone) pour que getSync() voie immédiatement la donnée.
                 try {
                     this._setLocalStorage(key, value);
+                    // Plus à jour que memoryCache : retirer une éventuelle copie périmée.
+                    this.memoryCache.delete(key);
                 } catch (e) {
-                    // Si QuotaExceededError (données trop grandes pour localStorage),
-                    // utiliser memoryCache pour que getSync() puisse y accéder
+                    // Filet : QuotaExceededError résiduel (estimation sous le seuil
+                    // mais localStorage saturé par ailleurs) → memoryCache.
                     if (e.name === 'QuotaExceededError' || e.code === 22) {
-                        console.warn(`[DB] ⚠️ Clé "${key}" trop grande pour localStorage, utilisation memoryCache`);
-                        // 🆕 Beta 95.5 : Stocker dans memoryCache pour accès synchrone
+                        console.warn(`[DB] ⚠️ Clé "${key}" rejetée par localStorage (quota), utilisation memoryCache`);
                         this.memoryCache.set(key, value);
-                        // Supprimer du cache localStorage si elle y était
                         try { localStorage.removeItem(key); } catch (ex) { console.warn('[DB] localStorage.removeItem skipped:', key, ex.message || ex); }
                     } else {
                         // Autre erreur, la remonter
@@ -636,8 +652,6 @@
                 const indexedDBKeys = await this.keys();
                 let synced = 0;
                 let inMemory = 0;
-
-                var SEUIL_IDB_FIRST = 200 * 1024; // 200 Ko
 
                 // #300 — Invalidation préventive du cache AVANT réhydratation.
                 // localStorage est un cache de la session précédente, qui peut
@@ -1030,10 +1044,8 @@
             // toute persistance (localStorage, memoryCache ou IDB).
             if (!this._ecritureAutorisee(key, value)) return;
 
-            // Seuil IDB-first : les grosses valeurs vont directement dans
-            // memoryCache + IDB, sans tenter localStorage (évite QuotaExceeded)
-            var SEUIL_IDB_FIRST = 200 * 1024; // 200 Ko
-
+            // Seuil IDB-first (constante unique module, #334 D) : les grosses
+            // valeurs vont directement dans memoryCache + IDB (évite QuotaExceeded).
             var taille = this._estimateSize(value);
             var idbDispo = this.ready && this.useIndexedDB;
 

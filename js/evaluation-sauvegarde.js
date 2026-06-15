@@ -290,7 +290,7 @@ function _gererErreurPersistanceSauv(resultatSauvegarde) {
     if (resultatSauvegarde === 'quota') {
         notifications.erreur(
             'Espace de stockage insuffisant',
-            'Le quota de stockage du navigateur est dépassé. Exporte tes données (Réglages → Gestion des données) puis supprime des évaluations anciennes.'
+            'Le quota de stockage du navigateur est dépassé. Exporte tes données (Réglages → Données) puis supprime des évaluations anciennes.'
         );
     } else if (resultatSauvegarde === false) {
         notifications.erreur(

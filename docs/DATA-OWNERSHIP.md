@@ -241,6 +241,31 @@ Namespacing par trimestre :
   Liste des clés namespacées : trimestres.js lignes 40-80
 ```
 
+### Seuil IDB-first (`SEUIL_IDB_FIRST`, #334 D)
+
+Constante **unique** (`js/db.js`, top de l'IIFE, 200 Ko), consommée par `set()`,
+`setSync()` et `syncToLocalStorageCache()`. Au-delà du seuil, une valeur va
+directement dans `memoryCache` + IndexedDB **sans tenter localStorage** — évite
+un `QuotaExceededError` systématique sur les grosses clés. `set()` et `setSync()`
+sont harmonisés sur ce chemin (15 juin 2026) ; `set()` conserve un filet
+`QuotaExceededError` résiduel (estimation sous le seuil mais localStorage saturé
+par ailleurs).
+
+### Règle d'éviction `memoryCache` (décision #334 D, 15 juin 2026)
+
+**Pas d'éviction LRU / purge généralisée du `memoryCache` possible.** `getSync()`
+ne peut pas réhydrater une clé depuis IndexedDB (lecture IDB asynchrone) : 608
+call-sites `getSync` dans ~60 fichiers lisent les grosses clés de façon
+synchrone. `memoryCache` est, par conception, le **tiers synchrone** des grosses
+clés (`fichiersTravaux`, `evaluationsSauvegardees`…).
+
+> **Invariant** : toute purge de `memoryCache` doit PROUVER qu'aucun `getSync`
+> ne lit la clé visée. Seule clé purgée sans risque à ce jour :
+> `_codex_snapshot_avant` (lectures exclusivement asynchrones), remplacée depuis
+> #334 C par un index de hachés (`codex-snapshot-hash-v1`, format interne de
+> `js/codex.js` : `{__format, cles: {clé: sha256(JSON)}}`) — quelques Ko au lieu
+> du dataset intégral, donc repassée sous le seuil et sortie du `memoryCache`.
+
 ---
 
 ## Bases IndexedDB annexes (hors db.js)

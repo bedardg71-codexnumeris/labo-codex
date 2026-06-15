@@ -1,4 +1,234 @@
 <!-- =====================================================================
+     CLÔTURE DE SESSION — 15 juin 2026 (après-midi, Claude Code cloud).
+     Rituel de fin appliqué. Branche claude/merge-claude-session-md-i4qgf1.
+     ─────────────────────────────────────────────────────────────────────
+     ÉTAT : bêta publique 1.17.9 (build 0615-0742). 709 Vitest verts.
+     Branche poussée, NON mergée dans main (pas de PR demandée). Commits de la
+     session, dans l'ordre :
+       1. Merge (fast-forward) de claude/issue-341-jms7fg → 1.17.8 (#341 clos,
+          #342 créé, #339 L0, #284 titre Alignement, #299 lot #2, relais #297).
+       2. feat(326) D-0/D-1 — moteur pur d'exploration des pratiques.
+       3. feat(326) — affinage du mapping d'effets (registre pédagogique).
+       4. docs(backlog) — réconciliation #334/#336 (désync attrapée).
+       5. feat(334) Session D → 1.17.9 + docs(backlog) D livrée.
+     ─────────────────────────────────────────────────────────────────────
+     CE QUI A ÉTÉ FAIT
+
+     • MERGE + PATCH 1.17.8 : branche issue-341 fusionnée dans la branche de
+       travail (fast-forward), release patch (microcopy #299 + titre #284).
+
+     • #326 axe D — EXPLORATION DES PRATIQUES, lots D-0/D-1 LIVRÉS (moteur pur,
+       AUCUNE UI). Module js/pratiques/pratiques-exploration.js (lecture seule) :
+       - D-0 : construireArbrePratiques() (forêt par inspireDe.sourceId,
+         anti-cycle, legacy sans id ignoré) ; forgerInspireDe pose sourceId
+         (transversal) ; SCHEMA_INSPIRE_DE l'accepte ; dupliquerPratique(id,
+         {estEssai}) opt-in (pas de régression latente avant le filtre D-2).
+       - D-1 : diffConfigsPratiques() (pur, symétrique, statique → survit au
+         « non calculable ») ; diffPratiques()/phraseEffetPourDiff() avec mapping
+         d'effets AFFINÉ (registre « ce que ça change dans la mesure », anti
+         palmarès — un test le verrouille), repli neutre, lookup robuste au
+         nesting configuration.*. Couverture : reprises, pondération, conditions
+         spéciales, méthode, portfolio (selection/nombre/notesFinales),
+         échelle/seuils, SPE (bundles/types), DEN (type/modeDEN/suggestion).
+       - 16 tests (arbre 5 + diff 11), break-testés. Skill pratiques_notation
+         §5/§12 + HISTORIQUE à jour.
+       - PAS de bump (groundwork sans capacité visible ; minor à D-6, par la SPEC).
+       - RESTE : D-2→D-6 (UI/nav). Préalable #320 (répertoires) + aval Grégoire
+         pour le renommage label config.js. #318 (DEN) déjà livré. Phrases
+         d'effet = libellé final à ajuster par Grégoire au fil de l'usage.
+
+     • #334 IMPORT CODEX iPAD — A/B/C/D LIVRÉS.
+       - DÉCOUVERTE : A/B/C étaient DÉJÀ dans main (BACKLOG désync — même leçon
+         transversale que le relais précédent). Réconcilié, pas recodé. Tests
+         verts : sentinelle-prevol-stockage (A), sentinelle-import-journalise-334B
+         (B), analyser-fusion-hash (C). #295 déjà archivé (absorbé).
+       - D LIVRÉ aujourd'hui (1.17.9) : SEUIL_IDB_FIRST extrait en constante
+         unique de module (db.js, zéro-dette) ; set() harmonisé sur setSync
+         (IDB-first, plus de QuotaExceeded systématique sur grosses clés, filet
+         résiduel conservé, comportement observable identique) ; règle d'éviction
+         memoryCache + format codex-snapshot-hash-v1 consignés dans
+         docs/DATA-OWNERSHIP.md ; entrée changelog 1.14. Test
+         sentinelle-db-set-idb-first-334D (3 cas, break-testé).
+
+     • #336 PURGE ESPACE PRÉCÉDENT — preview DÉJÀ livré (réconcilié) :
+       _planifierPurgeEspace (lecture seule, plan persisté survit au reload) +
+       purge manuelle Codex.purgerEspacePrecedent() ; test 336D vert. Aucune
+       purge automatique (prudence). RESTE : validation terrain Mac.
+
+     ─────────────────────────────────────────────────────────────────────
+     CE QUI RESTE — ACTIONS TERRAIN GRÉGOIRE (hors cloud)
+
+     • #337 PROTECTION DE BRANCHE main — NON FAISABLE par Claude (aucun outil
+       API de branch protection). main confirmé protected:false. Action UI
+       GitHub (~2 min) : Settings → Branches → Add rule, pattern `main`,
+       Require status checks → « Vitest + Playwright (WebKit) » + « Analyse
+       CodeQL », décocher force-push/deletions, laisser PR-required décoché.
+       Procédure : .github/BRANCH-PROTECTION.md.
+     • #342 ATTRIBUTION CC — prévention REPORTÉE (décision Grégoire). Réparation
+       des données = one-shot console READ-ONLY puis ré-écriture auteur_original,
+       à exécuter SUR MAC (préparé en session #341).
+     • #334 — validation terrain iPad (refus réel sur appareil saturé, petit
+       codex qui passe) → ensuite clôturable.
+     • #336 — validation terrain Mac (chiffrer l'ampleur via le preview console,
+       décider si/quand exécuter Codex.purgerEspacePrecedent()).
+     • #326 phrases d'effet — ratifier/ajuster le libellé au fil de l'usage.
+
+     ─────────────────────────────────────────────────────────────────────
+     PROCHAINE SESSION — PISTES CLOUD-DOABLES
+       • #320 (répertoires de classement) = préalable qui DÉBLOQUE la suite de
+         #326 (D-2 UI). Bon prochain enchaînement.
+       • Sinon chantiers autonomes : #333 (export résultats CSV+PDF, non démarré),
+         #315/#316 (alert/confirm → notifications), #283 (responsive sidebar).
+       • NB : la plupart des bugs prioritaires restants (#340 suite, #332, #282,
+         #339 L2+) sont bloqués sur terrain Mac/iPad ou décisions Grégoire.
+
+     RITUEL DÉBUT DE SESSION : audit git+tests+version (SKILL_Debut_de_session).
+     `cd tests && npm install` avant le premier `npx vitest run` (deps absentes
+     au clone). Playwright/WebKit NON lançable en cloud → couvrir par la CI.
+     ⚠️ VÉRIFIER L'ÉTAT RÉEL DANS main avant de (re)coder un item « ouvert » : le
+     BACKLOG a encore dérivé cette session (#334 A/B/C, #336 déjà livrés).
+     =====================================================================
+<!-- =====================================================================
+     CLÔTURE DE SESSION — 15 juin 2026 (iPad, Claude Code). Rituel de fin
+     appliqué (relais rafraîchi en fin de session). Branche
+     claude/issue-341-jms7fg, 8 commits AU-DESSUS de main (NON mergés) :
+     3747253, 787b766, 856c426, 485f0b4, 3970fea, df2c93e, e6d0dfd (+ ce relais).
+     Version inchangée (1.17.7 / 0614-2036). 690 Vitest verts, lint sécurité OK.
+     Seuls codes de prod touchés = microcopy/UI (3 messages #299 + titre #284) +
+     1 test (#339 L0) → release `patch` à décider AU MERGE de la branche.
+     ─────────────────────────────────────────────────────────────────────
+     LEÇON TRANSVERSALE DE LA SESSION : le BACKLOG était DÉSYNC de main. Le lot
+     du 13 juin (commits 5d5dfe5, a2478f9, 0d7e412, 481d93e, f0ef98f) avait
+     livré #341, #325, #302, #298 et un lot partiel de #299 SANS cocher le
+     BACKLOG. Le rituel de début + les vérifs à froid l'ont attrapé → on a
+     RÉCONCILIÉ au lieu de refaire. Réflexe à garder : vérifier l'état réel dans
+     main avant de (re)coder un item « ouvert ».
+     ─────────────────────────────────────────────────────────────────────
+     ➡️ PROCHAINE REPRISE — état des dossiers touchés :
+
+     • #341 CLOS (était déjà livré). Le rituel de début a attrapé que le fix
+       était mergé dans main depuis le 13 juin (commit 5d5dfe5). Vérifié à
+       froid : pratiques-bibliotheque.js:624 lit cle() d'abord ; sentinelle
+       4/4 + break-test ; audit call-sites (seule clé nue restante = migration
+       main.js:373). Repli legacy GARDÉ. Marqué [x] au BACKLOG.
+
+     • #342 CRÉÉ (extrait de #341) — attribution CC erronée. La carte
+       « PAN-Littérature A25 » s'affiche « par Bruno V. » alors que Bruno
+       enseigne la chimie et Grégoire la littérature. CAUSE RACINE (code lu) :
+       auteur_original dérivé de l'enseignant actif du registre `enseignants`
+       (cc-license.js:44 → dropdown/actif/enseignantsReels[0]) puis FIGÉ à la
+       création (cc-license.js:154). Le seed pan-standards-bruno (chimie,
+       auteur 'Labo Codex') n'est PAS en cause → données live.
+       ⛔ NON terminable en cloud : c'est une réparation de DONNÉES LIVE (Mac).
+       Un one-shot console (audit READ-ONLY puis ré-écriture de auteur_original)
+       a été fourni en chat — À EXÉCUTER PAR GRÉGOIRE SUR MAC (il n'a que l'iPad
+       cette session). Prévention à trancher : assainir `enseignants` et/ou
+       défaut CC = Grégoire quand aucun enseignant `actif`. Item BACKLOG complet.
+
+     • #339 — PRÉPARATION LIVRÉE (plan + audit + premier lot non destructif).
+       - Plan : plans de travail/PLAN-339-config-portfolio-explicite.md
+         (modèle cible « liens par identité », découpage L0-L7, migration
+         idempotente A25/H2026, 5 décisions bloquantes D1-D5).
+       - Audit statique : ~79 accès directs dans js/ (categorie 2 écr.+22 lect. ;
+         pondérations portfolio/terminale 9 ; facultatif 10 ; type 36).
+         L'estimation « ~46 » du diagnostic était basse.
+       - ✅ L0 LIVRÉ : tests/unit/golden-master-hybride-indiceP-339.test.js
+         (Vitest 5 cas, break-testé). Fige le moteur « indice P »
+         calculerNoteAvecCategories (celui que L4 retire), pièges L5/L6/L9.
+       - ⚠️ L1 RECLASSÉ : un helper isolé serait du code mort (zéro-dette) →
+         fondu dans L2/L3, à faire AVEC son premier consommateur.
+
+     CE QUI BLOQUE LA SUITE DE #339 (tout hors session cloud) :
+       1. L0 bis = golden master du moteur PROFIL (calculerDetailsNoteFinale)
+          sur les vraies données A25 — Playwright/CI, MAC.
+       2. Décisions Grégoire D1-D5 (surtout D1 version MAJEURE = changement de
+          format, et D5 écrivain canonique des liens vs #319).
+       3. Séquencement : #328 L2-c (jetons) reste le prérequis acté avant la
+          partie destructive (L2+).
+       4. Enquête terrain §6 du diagnostic (protocole console A25, Mac).
+
+     • RÉCONCILIATION BACKLOG (dérive du 13 juin) — marqués [x] LIVRÉ après
+       vérif à froid : #325 (carte Sources, index.html:10050, a2478f9),
+       #302 (guides som/pan, guides-pedagogiques.js, 0d7e412), #298 (PRIVACY.md
+       aligné, 481d93e). Annotés : #299 (lots partiels) et #282 (voir ci-dessous).
+
+     • #299 BALAYAGE ONGLETS PÉRIMÉS — partiel. Lot #1 (13 juin, f0ef98f) avait
+       corrigé l'essentiel des cibles de l'audit. Lot #2 (15 juin, 3970fea) :
+       3 messages user-facing, destinations VÉRIFIÉES dans config.js+index.html :
+       snapshots.js « Réglages→Horaire » → « Cadre→Trimestre→Horaire » ;
+       partage-export.js « Réglages›Identité » → « Cadre›Trimestre (enseignant) »
+       (v2-selectEnseignant vit dans calendrier-trimestre, index.html:7006) ;
+       evaluation-sauvegarde.js « Gestion des données » → « Réglages→Données ».
+       PIÈGE ÉVITÉ : codex.js:594 « Réglages→Général→Stockage iPad » = Réglages
+       iOS, pas Labo Codex → laissé. RESTE = surtout des COMMENTAIRES à
+       destination incertaine (Interprétation/Portfolio/Aperçu/Snapshots/
+       Enseignant) → confirmer leur foyer nav actuel avec Grégoire avant de finir.
+
+     • #284 TITRES DE PAGES — LIVRÉ (df2c93e). Décision Grégoire : ajouter
+       titre+sous-titre. Vue Alignement pédagogique (conception-carte,
+       index.html:4150), seule sous-section de Conception sans en-tête → h2
+       « Alignement pédagogique » + p.text-muted descriptif (patron standard).
+       Tirage au sort = carte du Labo déjà titrée, non concerné.
+       ⚠️ RÉSERVE : rendu non vérifié visuellement (clair/sombre + iPad) en cloud
+       → coup d'œil à donner au prochain passage Mac (classes existantes, sûr a priori).
+
+     • #282 listeCours→cours — NON touché. Constat statique : cours.js n'a plus
+       qu'1 fallback (vs « 10 sites ») → symptôme « modal Bibliothèque cours
+       vide en V2 » probablement déjà résolu. ⛔ CONFIRMER SUR MAC que le modal
+       s'affiche bien en V2 → si oui, CLORE. Ne PAS relancer la migration de
+       masse revertée. Le reste de listeCours dans js/ est légitime (migrations,
+       backup, seeds).
+
+     • #297 DETTE CSS — relais de cadrage prêt (e6d0dfd) :
+       plans de travail/RELAIS-297-dette-css.md. Chantier dédié post-AQPC, MAC
+       (aucun test auto ne couvre le CSS). ÉTAPE 0 : bloc <style> a dérivé (fin
+       l. 3825 vs 3806 dans le script) → corriger INLINE_FIN_LIGNE + re-générer
+       l'audit avant décision. Découpage Lot A/B/C dans le relais.
+
+     RITUEL DÉBUT DE SESSION : audit git+tests+version. `cd tests && npm install`
+     avant le premier `npx vitest run` (deps non présentes au clone). La branche
+     claude/issue-341-jms7fg n'est PAS mergée (10 commits) — décider PR ou merge
+     selon Grégoire ; un `patch` accompagnera le merge (microcopy #299 + titre #284).
+     =====================================================================
+     SESSION 15 juin 2026 (reprise à froid, #341) — #341 DÉJÀ LIVRÉ, ÉCART
+     ATTRAPÉ PAR LE RITUEL + EXTRACTION DE #342 (attribution CC).
+     ─────────────────────────────────────────────────────────────────────
+     CONSTAT D'ENTRÉE : le rituel de début de session (audit git + tests) a
+     révélé que le fix #341 était DÉJÀ implémenté, testé et mergé dans main
+     depuis le 13 juin (commit 5d5dfe5), avec sa sentinelle 4 cas. Le relais
+     ci-dessous (écrit le 15 juin) le décrivait à tort comme « PRESSENTI / non
+     appliqué » — exactement le type d'écart qui a motivé SKILL_Debut_de_session.
+     VÉRIFICATIONS (à froid) :
+       • js/pratiques-bibliotheque.js:624 lit bien db.get(cle('pratiquesConfigurables'))
+         d'abord, repli legacy sur la clé nue conservé.
+       • Sentinelle tests/unit/sentinelle-pratique-config-namespacee-341.test.js
+         = 4/4 verts. BREAK-TESTÉE : réinjection du bug → 2 cas rougissent
+         (lecture namespacée + ratchet statique), puis restauré. La sentinelle
+         peut donc échouer (verification_adverse : l'attestation ≠ la preuve).
+       • Audit des autres lecteurs de la clé nue : seule lecture restante =
+         migration intentionnelle main.js:373 (copie global→namespacé). RAS.
+     DÉCISIONS :
+       • Repli legacy GARDÉ (idiome cohérent pratiques.js/portfolio.js/…, testé
+         cas 2). Pas de retrait partiel incohérent (zéro-dette respecté : un
+         retrait propre serait un chantier transversal sur tous les sites + la
+         migration, non justifié — contrainte de préservation des données).
+       • #341 marqué [x] LIVRÉ au BACKLOG.
+     EXTRACTION #342 (attribution CC) : le « constat UX connexe » du relais
+     (carte « PAN-Littérature A25 » affichée « par Bruno V. +1 contrib. »)
+     N'EST PAS une préférence d'affichage. Correction terrain de Grégoire :
+     Bruno enseigne la CHIMIE, Grégoire la LITTÉRATURE — Bruno n'est pas
+     l'auteur. CAUSE RACINE (code lu) : auteur_original dérivé de l'enseignant
+     actif du registre `enseignants` (obtenirProfilAuteurActifSync, cc-license.js:44
+     → dropdown / actif / enseignantsReels[0]) puis FIGÉ à la création
+     (cc-license.js:154). Une entrée « Bruno V. » (lignée test chimie
+     « Bug Bruno » Beta 95.2) était l'identité résolue au stamp. Le seed
+     pan-standards-bruno (chimie, auteur 'Labo Codex') n'est PAS en cause.
+     → données live, non corrigeable depuis le cloud. Item #342 créé avec
+     plan de réparation (one-shot console audit puis ré-écriture, patron #331)
+     + question de prévention (assainir `enseignants` / défaut CC = Grégoire).
+     RESTE : exécuter le one-shot de réparation en local (Grégoire) ; trancher
+     la prévention #342 ; choisir le prochain item de backlog.
+     =====================================================================
      RELAIS DE SESSION — 15 juin 2026 (fin). #340 CLOS ET MERGÉ ; PROCHAIN : #341.
      ─────────────────────────────────────────────────────────────────────
      ÉTAT MAIN : HEAD = 2b365b5 (squash PR #35), bêta publique 1.17.7

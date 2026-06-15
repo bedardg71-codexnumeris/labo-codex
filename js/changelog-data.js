@@ -12,6 +12,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.14',
+            couleur: 'bleu',
+            titre: 'Ouverture de codex plus sûre (surtout iPad)',
+            items: [
+                'Avant d’ouvrir un codex, Labo Codex vérifie qu’il reste assez d’espace : si l’appareil est presque plein, l’ouverture est refusée avec un message clair (combien il faut libérer, où, comment) plutôt que d’échouer à mi-chemin.',
+                'En cas d’import incomplet (espace qui se remplit en cours de route, fichier abîmé), tu obtiens un bilan honnête « Import terminé — incomplet » qui dit ce qui manque et quoi faire, au lieu d’un « Codex chargé ! » trompeur.',
+                'Rappel utile après l’ouverture : le fichier ZIP d’origine reste dans Fichiers — tu peux le supprimer pour récupérer de l’espace.'
+            ]
+        },
+        {
             version: '1.11',
             couleur: 'vert',
             titre: 'Importe les ressources partagées par tes collègues',

@@ -221,6 +221,18 @@ configuration: {
 **uniquement** depuis `pratiquesConfigurables`. Plus de fallback sur
 `modalitesEvaluation.configPAN.portfolio` (qui driftait à l'édition wizard).
 
+**Champs d'enveloppe pour l'Exploration (axe D / #326, D-0 livré)** : l'enveloppe
+`{id, nom, auteur, description, config}` porte désormais deux champs pour l'axe D :
+- `inspireDe.sourceId` (dans le sous-schéma `inspireDe`) — id de la pratique source,
+  posé par `BibliothequeUI.forgerInspireDe` (donc sur **toute** copie forkée, transversal
+  grilles/échelles/cartouches/pratiques). Sert l'arbre de filiation **et** l'attribution CC.
+  **Jamais effacé** (invariant CC, SPEC §3.1) ; optionnel (filiations legacy sans id ignorées).
+  Validé à l'import par `SCHEMA_INSPIRE_DE` (`import-export.js`).
+- `estEssai` (booléen, transitoire) — variante d'essai vs pratique aboutie (SPEC §3.2).
+  Posé **opt-in** par `dupliquerPratique(id, {estEssai:true})` ; la duplication ordinaire
+  (bouton « Dupliquer ») ne le pose **pas** (pas de régression : le filtre `estEssai ≠ true`
+  sur sidebar/bibliothèque arrive en D-2, pas encore livré). Basculé à `false` à la promotion.
+
 ---
 
 ## 6. Les DEUX systèmes de calcul de la note (crucial)
@@ -406,7 +418,7 @@ discret, pas l'info vedette.**
   familles calculent. **Reste** : D4 — construire le profil « irrégulier » (DEMO011) comme
   une **progression réelle** (maîtrise tardive démontrée), pas pour maximiser un écart.
 
-**Axe suivant — « Exploration des pratiques » (D, conçu et validé 8 juin 2026, NON codé).**
+**Axe suivant — « Exploration des pratiques » (D, conçu et validé 8 juin 2026).**
 Le §12 ci-dessus décrit la **phase 1 livrée** (C0-C4). L'axe D élargit le Comparateur en
 **« Exploration des pratiques »** (sous-section du Labo) : décliner une **souche** en
 **variantes d'essai**, parenté via `inspireDe.sourceId`, **diff de config** (statique →
@@ -414,8 +426,36 @@ Le §12 ci-dessus décrit la **phase 1 livrée** (C0-C4). L'axe D élargit le Co
 NON simulable** (jugement saisi → pas de colonne note). Le Comparateur reste **consommateur
 lecture seule** ; aucun nouveau chemin de calcul. Spéc canonique :
 `plans de travail/SPEC_D_exploration_pratiques.md` (découpage 6 lots, préalables **#320** +
-**#318**) ; backlog **#326**. ⚠️ **Ne rien documenter ici comme existant tant que le code
-n'est pas livré** : les §3/§5/§8/§12 seront mises à jour **au fil des lots D**, avec le code.
+**#318**) ; backlog **#326**.
+
+**État (15 juin 2026) — D-0/D-1 LIVRÉS (moteur pur, aucune UI encore).**
+- **Module** `js/pratiques/pratiques-exploration.js` (IIFE, `window.ExplorationPratiques`),
+  **lecture seule**, pur, testable sans DOM. Fonctions :
+  - `construireArbrePratiques(pratiques)` (D-0) — forêt de filiation par `inspireDe.sourceId` ;
+    souche = sans sourceId / source absente / legacy sans id ; profondeur libre ; anti-cycle
+    (jamais de boucle ni de perte de pratique).
+  - `diffConfigsPratiques(configA, configB)` (D-1) — diff profond pur des objets `config`
+    (tableaux comparés **en bloc**), sortie triée par chemin, **symétrique**, **statique**
+    (se calcule même quand la note est « non calculable » : aucun appel au moteur).
+  - `phraseEffetPourDiff(entry)` / `diffPratiques(pA, pB)` (D-1) — mapping paramètre→phrase
+    d'effet (**affiné le 15 juin 2026 à la demande de Grégoire** ; libellé final = son ressort,
+    à ajuster au fil de l'usage) avec **repli neutre garanti** (« Réglage modifié. ») — ne lève
+    jamais. **Posture** : la phrase dit ce que le réglage change *dans la mesure*, jamais en
+    « plus/moins sévère » (anti palmarès de générosité, §2 bis/§12) — un test le verrouille.
+    Couverture : reprises (type, rétrogradation), pondération, conditions spéciales, méthode
+    de calcul, **portfolio** (methodeSelection, nombreARetenir, minimumCompletion, notesFinales),
+    échelle/seuils, **SPE** (tableBundles, typesTravaux), **DEN** (type, modeDEN, suggestion).
+    Lookup robuste au nesting `configuration.*` (normalisé vers la forme à plat).
+- **Modèle** (D-0) : `forgerInspireDe` pose `sourceId` ; `SCHEMA_INSPIRE_DE` l'accepte ;
+  `dupliquerPratique(id, {estEssai})` pose `estEssai` **opt-in** (voir §5).
+- Tests : `tests/unit/exploration-pratiques-arbre-326.test.js` (5) +
+  `…-diff-326.test.js` (6), break-testés.
+- **RESTE (non livré)** : D-2 (UI Labo « Exploration », renommage `config.js` label —
+  **aval Grégoire**, zone protégée — + filtre `estEssai ≠ true` sidebar/biblio), D-3
+  (dérivation assistant condensé), D-4 (matrice + diff avant matrice + DEN non-simulable),
+  D-5 (hygiène, consomme #320), D-6 (release `minor`). Préalables UI : **#320** + **#318**
+  (DEN couche 2 livrée ; #320 répertoires requis avant D-2). ⚠️ **Ne pas documenter D-2+ comme
+  existant** : §8/§12 seront mises à jour au fil des lots, avec le code.
 
 ---
 
@@ -442,6 +482,7 @@ vraiment*.
 
 | Date | Changement |
 |------|------------|
+| 2026-06-15 (axe D, D-0/D-1) | **Exploration des pratiques — moteur pur livré (#326).** §5 : champs d'enveloppe `inspireDe.sourceId` (transversal, posé par `forgerInspireDe`, validé par `SCHEMA_INSPIRE_DE`) + `estEssai` (opt-in via `dupliquerPratique`). §12 : module `js/pratiques/pratiques-exploration.js` (`construireArbrePratiques`, `diffConfigsPratiques`, `phraseEffetPourDiff`, `diffPratiques`), lecture seule, pur ; mapping d'effets PROVISOIRE (à valider Grégoire) + repli neutre. D-2→D-6 restent à livrer (UI/nav, préalable #320). |
 | 2026-06-08 (DEN-4) | **DEN couche 2 implémentée (#318).** §8 réécrit (jugement saisi, collection `jugementsDenotation` SSOT, moteur `_calculerPerformanceDenotation`, garde cibles → 59, helper `suggererNoteHolistique`, non-simulable/diffable, PRÉN) ; §9 5ᵉ cas de diagnostic. Lots DEN-0→DEN-3 livrés ; DEN-4 = doc + diagnostic ; DEN-5 = release. |
 | 2026-06-08 (Cowork) | §12 : pointeur vers l'axe D (« Exploration des pratiques » : variantes/souche, diff de config, `estEssai`, DEN diffable-non-simulable ; SPEC_D, #326). Référence seulement — §3/§5/§8/§12 à mettre à jour au fil des lots D. |
 | 2026-06-06 (Cowork) | §12 finalité réancrée : « sortir du **paradigme du cumul** », **pas** « quitter SOM » (align. SPEC_comparateur §1 bis + *Gateways*), pour lever la tension avec le pluralisme. |

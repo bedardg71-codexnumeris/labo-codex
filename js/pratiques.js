@@ -1015,8 +1015,9 @@ async function editerPratique(id) {
  * Dupliquer une pratique
  * @param {string} id - ID de la pratique à dupliquer
  */
-async function dupliquerPratique(id) {
-    const nouveauNom = prompt('Nom de la copie:', 'Copie de pratique');
+async function dupliquerPratique(id, options = {}) {
+    const nomPropose = options.nom || 'Copie de pratique';
+    const nouveauNom = options.nom || prompt('Nom de la copie:', nomPropose);
     if (!nouveauNom) return;
 
     try {
@@ -1028,8 +1029,9 @@ async function dupliquerPratique(id) {
         }
 
         // Créer une copie avec un nouvel ID. La copie devient un nouvel original
-        // de l'utilisateur ; trace d'origine `inspireDe` (respect CC BY). Si la
-        // source était une démo, la copie perd le flag isDemo.
+        // de l'utilisateur ; trace d'origine `inspireDe` (respect CC BY, incl.
+        // `sourceId` pour l'arbre de filiation, axe D / #326). Si la source était
+        // une démo, la copie perd le flag isDemo.
         const copie = {
             id: genererIdUnique('pratique_'),
             nom: nouveauNom,
@@ -1039,6 +1041,14 @@ async function dupliquerPratique(id) {
             description: original.description,
             config: JSON.parse(JSON.stringify(original.config)) // Deep copy
         };
+
+        // `estEssai` (axe D / #326, SPEC §3.2) : variante d'essai vivant dans
+        // l'Exploration des pratiques, masquée de la sidebar/bibliothèque propre
+        // (filtre posé en D-2). OPT-IN : la duplication ordinaire (bouton
+        // « Dupliquer ») produit une pratique ABOUTIE (flag omis) — pas de
+        // régression latente ; seule la dérivation (assistant condensé, D-3)
+        // passera { estEssai: true }.
+        if (options.estEssai === true) copie.estEssai = true;
 
         // Mettre à jour l'ID et le nom dans la config
         copie.config.id = copie.id;
