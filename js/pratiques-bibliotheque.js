@@ -1053,7 +1053,7 @@ async function chargerDropdownModelesPratiques() {
 async function appliquerModeleSelectionne() {
     const dropdown = document.getElementById('v2-spec-dropdown-modeles');
     if (!dropdown || !dropdown.value) {
-        alert('Sélectionne une configuration.');
+        notifications.info('Sélectionne une configuration.');
         return;
     }
 
@@ -1064,7 +1064,7 @@ async function appliquerModeleSelectionne() {
         // Afficher confirmation
         notifications.succes('Configuration appliquée.');
     } else {
-        alert('Erreur lors de l\'application de la configuration.');
+        notifications.erreur('Erreur lors de l\'application de la configuration.');
     }
 }
 
@@ -1072,10 +1072,18 @@ async function appliquerModeleSelectionne() {
  * Ouvrir la modale de sauvegarde de configuration
  */
 async function ouvrirModaleSauvegardeConfig() {
-    const nom = prompt('Nom de la configuration de pratique :', 'Ma configuration');
+    const nom = await uiDialogues.demanderSaisie({
+        titre: 'Sauvegarder la configuration',
+        message: 'Nom de la configuration de pratique :',
+        valeurInitiale: 'Ma configuration'
+    });
     if (!nom) return;
 
-    const description = prompt('Description (optionnel) :', '');
+    const description = await uiDialogues.demanderSaisie({
+        titre: 'Description',
+        message: 'Description (optionnel) :',
+        valeurInitiale: ''
+    });
 
     try {
         const config = await sauvegarderConfigurationActuelle(nom, description);
@@ -1086,7 +1094,7 @@ async function ouvrirModaleSauvegardeConfig() {
         notifications.succes(`Configuration "${config.nom}" sauvegardée`);
     } catch (err) {
         console.error('[Bibliothèque Pratiques] Erreur sauvegarde:', err);
-        alert('Erreur lors de la sauvegarde.');
+        notifications.erreur('Erreur lors de la sauvegarde.');
     }
 }
 

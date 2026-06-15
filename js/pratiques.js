@@ -1061,11 +1061,45 @@ async function dupliquerPratique(id, options = {}) {
         // Recharger
         await afficherListePratiques();
 
-        alert(`✅ Pratique dupliquée avec succès !\n\n"${nouveauNom}" a été ajoutée à tes pratiques.`);
+        // `silencieux` (#326 D-3) : la dérivation d'une variante d'essai enchaîne
+        // sur l'assistant et rafraîchit l'arbre elle-même → pas d'alerte ici.
+        if (!options.silencieux) {
+            alert(`✅ Pratique dupliquée avec succès !\n\n"${nouveauNom}" a été ajoutée à tes pratiques.`);
+        }
+        return copie.id;
     } catch (error) {
         console.error('Erreur lors de la duplication:', error);
-        alert(`❌ Erreur : ${error.message}`);
+        if (!options.silencieux) alert(`❌ Erreur : ${error.message}`);
+        return null;
     }
+}
+
+/**
+ * Dérive une variante d'ESSAI depuis une pratique source (#326 axe D, D-3, SPEC §8).
+ * Geste raccourci : nom auto « <souche> · essai N », duplication AVEC `estEssai:true`
+ * (dupliquerPratique pose déjà `auteur` + `inspireDe.sourceId` via forgerInspireDe),
+ * puis ouverture directe de l'assistant sur les paramètres (editerPratique). L'essai
+ * vit dans le Labo › Exploration (filtré de la sidebar/bibliothèque, D-2).
+ *
+ * @param {string} sourceId - id de la pratique souche
+ * @returns {Promise<string|null>} id de la variante créée, ou null.
+ */
+async function deriverVarianteEssai(sourceId) {
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+    const source = pratiques.find(p => p.id === sourceId);
+    if (!source) {
+        if (typeof notifications !== 'undefined' && notifications.erreur) notifications.erreur('Pratique source introuvable.');
+        return null;
+    }
+    // N = nombre de variantes d'essai déjà dérivées de cette souche + 1.
+    const nEssais = pratiques.filter(p => p.estEssai === true && p.inspireDe && p.inspireDe.sourceId === sourceId).length;
+    const nom = (source.nom || 'Pratique') + ' · essai ' + (nEssais + 1);
+
+    const nouvelId = await dupliquerPratique(sourceId, { estEssai: true, nom: nom, silencieux: true });
+    if (nouvelId && typeof editerPratique === 'function') {
+        await editerPratique(nouvelId);   // ouvre l'assistant sur les paramètres (D-3)
+    }
+    return nouvelId || null;
 }
 
 /**
@@ -1108,6 +1142,34 @@ async function supprimerPratique(id) {
         console.error('Erreur lors de la suppression:', error);
         alert(`❌ Erreur : ${error.message}`);
     }
+}
+
+/**
+ * Promotion d'une variante d'essai (#326 axe D, SPEC §3.3) : l'essai devient une
+ * pratique ABOUTIE et rejoint la bibliothèque propre + la sidebar (le filtre
+ * `estEssai !== true` la laisse alors passer). SEUL le flag `estEssai` bascule à
+ * false ; `inspireDe`/`sourceId` restent INTACTS — couper l'attribution d'un
+ * dérivé violerait CC BY (invariant CC, SPEC §3.1/§5). Bascule en place + persiste
+ * le store SSOT `pratiquesConfigurables` (pas de chemin de persistance parallèle).
+ *
+ * @param {string} id
+ * @returns {Promise<boolean>} true si promue ; false si introuvable ou déjà aboutie.
+ */
+async function promouvoirPratiqueEssai(id) {
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+    const pratique = pratiques.find(p => p.id === id);
+    if (!pratique || pratique.estEssai !== true) return false;
+
+    // SEUL estEssai change ; tout le reste (inspireDe/sourceId inclus) est préservé.
+    pratique.estEssai = false;
+    db.setSync(cle('pratiquesConfigurables'), pratiques);
+    if (db.set) await db.set(cle('pratiquesConfigurables'), pratiques);
+
+    if (typeof afficherListePratiques === 'function') await afficherListePratiques();
+    if (typeof notifications !== 'undefined' && notifications.succes) {
+        notifications.succes('Variante promue', `« ${pratique.nom || 'Sans titre'} » rejoint tes pratiques.`);
+    }
+    return true;
 }
 
 /**
@@ -1242,6 +1304,8 @@ window.editerPratique = editerPratique;
 window.editerPratiqueActive = editerPratiqueActive;
 window.dupliquerPratique = dupliquerPratique;
 window.supprimerPratique = supprimerPratique;
+window.promouvoirPratiqueEssai = promouvoirPratiqueEssai;
+window.deriverVarianteEssai = deriverVarianteEssai;
 window.exporterPratiqueVersJSON = exporterPratiqueVersJSON;
 window.creerNouvellePratique = creerNouvellePratique;
 window.importerPratiqueJSON = importerPratiqueJSON;
@@ -1269,9 +1333,12 @@ async function afficherListePratiquesSidebar() {
     // On normalise p.id à la comparaison → tolère legacy ET migré (A-2 4d).
     const idsCanevasCanon = ['standards', 'specifications', 'sommative'];
 
-    // Filtrer les pratiques : dans bibliothèque ET pas un canevas de base
+    // Filtrer les pratiques : dans bibliothèque ET pas un canevas de base ET pas
+    // une variante d'essai (#326 axe D : les essais vivent dans le Labo ›
+    // Exploration, jamais dans la sélection de la pratique active).
     const pratiquesDansBibliotheque = pratiquesConfigurables.filter(p =>
         p.dansBibliotheque !== false && !idsCanevasCanon.includes(_normPratique(p.id))
+        && p.estEssai !== true
     );
 
 

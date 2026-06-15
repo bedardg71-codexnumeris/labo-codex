@@ -280,7 +280,7 @@ function fermerModalBibliothequeAlignements() {
 async function partagerAlignement(carteId) {
     var exportData = window.planificationDonnees.exporterCartePourBibliotheque(carteId);
     if (!exportData) {
-        alert('Impossible d\'exporter cette carte.');
+        notifications.erreur('Impossible d\'exporter cette carte.');
         return;
     }
 
@@ -324,7 +324,7 @@ async function ajouterAlignementDepuisBibliotheque(biblioId) {
         if (items[i].id === biblioId) { item = items[i]; break; }
     }
     if (!item || !item.donnees) {
-        alert('Alignement introuvable dans la bibliothèque.');
+        notifications.erreur('Alignement introuvable dans la bibliothèque.');
         return;
     }
 
@@ -334,7 +334,7 @@ async function ajouterAlignementDepuisBibliotheque(biblioId) {
     });
 
     if (!nouvelId) {
-        alert('Erreur lors de l\'import.');
+        notifications.erreur('Erreur lors de l\'import.');
         return;
     }
 
@@ -355,7 +355,7 @@ async function ajouterAlignementDepuisBibliotheque(biblioId) {
 async function exporterAlignementJSON(carteId) {
     var exportData = window.planificationDonnees.exporterCartePourBibliotheque(carteId);
     if (!exportData) {
-        alert('Impossible d\'exporter cette carte.');
+        notifications.erreur('Impossible d\'exporter cette carte.');
         return;
     }
 
@@ -403,10 +403,16 @@ async function supprimerAlignementDuTrimestre(carteId) {
     var carte = index.cartes.find(function (c) { return c.id === carteId; });
     if (!carte) return;
     if (index.cartes.length <= 1) {
-        alert('Impossible de supprimer la dernière carte du trimestre actif.');
+        notifications.warning('Impossible de supprimer la dernière carte du trimestre actif.');
         return;
     }
-    if (!confirm('Supprimer définitivement la carte « ' + carte.nom + ' » du trimestre actif ?')) return;
+    const okSuppr = await uiDialogues.confirmerAction({
+        titre: 'Supprimer la carte',
+        message: 'Supprimer définitivement la carte « ' + carte.nom + ' » du trimestre actif ?',
+        texteConfirmer: 'Supprimer',
+        variante: 'danger'
+    });
+    if (!okSuppr) return;
 
     window.planificationDonnees.supprimerCarte(carteId);
     index.cartes = index.cartes.filter(function (c) { return c.id !== carteId; });
@@ -434,11 +440,16 @@ async function supprimerAlignementDuTrimestre(carteId) {
  * Supprime un alignement de la bibliothèque partagée
  */
 async function supprimerAlignementDeBibliotheque(id) {
-    if (id === ID_DEMO) {
-        if (!confirm('Supprimer la carte démo de la bibliothèque ? Elle sera recréée au prochain chargement.')) return;
-    } else {
-        if (!confirm('Supprimer cette carte d\'alignement de la bibliothèque partagée ? Cette action est irréversible.')) return;
-    }
+    const messageSuppr = (id === ID_DEMO)
+        ? 'Supprimer la carte démo de la bibliothèque ? Elle sera recréée au prochain chargement.'
+        : 'Supprimer cette carte d\'alignement de la bibliothèque partagée ? Cette action est irréversible.';
+    const okSuppr = await uiDialogues.confirmerAction({
+        titre: 'Supprimer de la bibliothèque',
+        message: messageSuppr,
+        texteConfirmer: 'Supprimer',
+        variante: 'danger'
+    });
+    if (!okSuppr) return;
 
     await retirerAlignementDeLaBibliotheque(id);
 
@@ -501,7 +512,7 @@ function importerAlignementFichier(event) {
             await afficherBibliothequeAlignements();
 
         } catch (err) {
-            alert('Erreur lors de la lecture du fichier JSON : ' + err.message);
+            notifications.erreur('Erreur lors de la lecture du fichier JSON', err.message);
         }
     };
     reader.readAsText(fichier);
@@ -545,7 +556,7 @@ async function importerCarteDepuisTrimestre(codeTrimestre, carteId) {
     try {
         var donnees = db.getSync(codeTrimestre + '_planification_mindmap', null);
         if (!donnees || !donnees.cartes || !donnees.cartes[carteId]) {
-            alert('Carte introuvable.');
+            notifications.erreur('Carte introuvable.');
             return;
         }
 
@@ -584,7 +595,7 @@ async function importerCarteDepuisTrimestre(codeTrimestre, carteId) {
         await afficherBibliothequeAlignements();
 
     } catch (e) {
-        alert('Erreur lors de l\'import : ' + e.message);
+        notifications.erreur('Erreur lors de l\'import', e.message);
     }
 }
 

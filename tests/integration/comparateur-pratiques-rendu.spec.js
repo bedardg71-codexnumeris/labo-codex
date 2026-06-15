@@ -72,9 +72,12 @@ test('C4 · garde démo — hors démo, la sous-section invite à activer la dé
             aBoutonActiver: !!(panel && panel.querySelector('.comparateur-activer-demo')),
             aMatrice: !!(panel && panel.querySelector('#comparateur-matrice')),
             aTitre: html.includes('Comparateur de pratiques'),
+            aArbre: !!(panel && panel.querySelector('#exploration-arbre-hote .exploration-arbre')),
+            // #326 D-2 : l'Exploration a deux régions ; le focus SPA va au titre de
+            // l'arbre (sommet de la vue), plus à celui de la matrice/invitation.
             focusSurTitre: !!(document.activeElement
                 && document.activeElement.classList
-                && document.activeElement.classList.contains('comparateur-titre'))
+                && document.activeElement.classList.contains('exploration-arbre-titre'))
         };
     });
 
@@ -84,7 +87,8 @@ test('C4 · garde démo — hors démo, la sous-section invite à activer la dé
     expect(resultat.aTitre).toBe(true);
     expect(resultat.aBoutonActiver).toBe(true);   // invitation présente
     expect(resultat.aMatrice).toBe(false);        // pas de vue matrice hors démo
-    expect(resultat.focusSurTitre).toBe(true);    // focus SPA déplacé au titre
+    expect(resultat.aArbre).toBe(true);           // #326 D-2 : l'arbre d'exploration est rendu
+    expect(resultat.focusSurTitre).toBe(true);    // focus SPA déplacé au titre de l'arbre
 
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });

@@ -127,7 +127,7 @@ async function preparerDonneesBibliothequeProductions() {
 
 async function afficherBibliothequeProductions() {
     if (typeof obtenirToutesLesProductionsBibliotheque !== 'function') {
-        alert('Le module bibliothèque n\'est pas chargé.\n\nVérifiez que le fichier productions-bibliotheque.js est bien chargé.');
+        notifications.erreur('Le module bibliothèque n\'est pas chargé.', 'Vérifiez que le fichier productions-bibliotheque.js est bien chargé.');
         return;
     }
 
@@ -254,7 +254,7 @@ async function ajouterProductionIndividuelle(id) {
             const prodBiblio = bibliotheque.find(p => p.id === id);
 
             if (!prodBiblio) {
-                alert('Production introuvable dans le cours actuel ni dans la bibliothèque.');
+                notifications.erreur('Production introuvable dans le cours actuel ni dans la bibliothèque.');
                 return;
             }
 
@@ -284,10 +284,10 @@ async function ajouterProductionIndividuelle(id) {
         await afficherListeProductions();
         await afficherBibliothequeProductions();
 
-        alert(`"${prod.titre}" ajoutée à ton cours !`);
+        notifications.succes(`"${prod.titre}" ajoutée à ton cours !`);
     } catch (error) {
         console.error('Erreur lors de l\'ajout:', error);
-        alert('Erreur lors de l\'ajout de la production');
+        notifications.erreur('Erreur lors de l\'ajout de la production');
     }
 }
 
@@ -301,15 +301,16 @@ async function ajouterMesProductionsALaBibliotheque() {
         const productions = await db.get(getCleProductions()) || [];
 
         if (productions.length === 0) {
-            alert('Aucune production à ajouter.\n\nCrée d\'abord des productions dans ton cours actuel.');
+            notifications.info('Aucune production à ajouter.', 'Crée d\'abord des productions dans ton cours actuel.');
             return;
         }
 
         // Confirmer avec l'utilisateur
-        const confirmation = confirm(
-            `Veux-tu ajouter tes ${productions.length} production(s) à la bibliothèque partagée ?\n\n` +
-            `Elles seront disponibles dans tous tes trimestres et pourront être partagées avec des collègues.`
-        );
+        const confirmation = await uiDialogues.confirmerAction({
+            titre: 'Ajouter à la bibliothèque partagée',
+            message: `Veux-tu ajouter tes ${productions.length} production(s) à la bibliothèque partagée ? Elles seront disponibles dans tous tes trimestres et pourront être partagées avec des collègues.`,
+            texteConfirmer: 'Ajouter'
+        });
 
         if (!confirmation) {
             return;
@@ -324,14 +325,15 @@ async function ajouterMesProductionsALaBibliotheque() {
 
         // Message de confirmation
         if (resultat.ajoutees > 0) {
-            alert(`${resultat.ajoutees} ${window.pluriel(resultat.ajoutees, 'production ajoutée', 'productions ajoutées')} à la bibliothèque.\n\n` +
-                  (resultat.existantes > 0 ? `${resultat.existantes} étai(en)t déjà présente(s).` : ''));
+            notifications.succes(
+                `${resultat.ajoutees} ${window.pluriel(resultat.ajoutees, 'production ajoutée', 'productions ajoutées')} à la bibliothèque.`,
+                (resultat.existantes > 0 ? `${resultat.existantes} étai(en)t déjà présente(s).` : ''));
         } else {
-            alert(`Toutes tes productions étaient déjà dans la bibliothèque.`);
+            notifications.info(`Toutes tes productions étaient déjà dans la bibliothèque.`);
         }
     } catch (error) {
         console.error('Erreur lors de l\'ajout à la bibliothèque:', error);
-        alert('Erreur lors de l\'ajout des productions à la bibliothèque.');
+        notifications.erreur('Erreur lors de l\'ajout des productions à la bibliothèque.');
     }
 }
 
@@ -444,7 +446,7 @@ async function importerToutTrimestreModal() {
     const selectCours = document.getElementById('selectCoursImportProductions');
 
     if (!select || !select.value) {
-        alert('Sélectionne d\'abord un trimestre.');
+        notifications.info('Sélectionne d\'abord un trimestre.');
         return;
     }
 
@@ -461,14 +463,16 @@ async function importerToutTrimestreModal() {
     }
 
     if (productions.length === 0) {
-        alert('Aucune production à importer' + (coursFiltre ? ' pour ce cours.' : ' dans ce trimestre.'));
+        notifications.info('Aucune production à importer' + (coursFiltre ? ' pour ce cours.' : ' dans ce trimestre.'));
         return;
     }
 
     const coursLabel = coursFiltre ? ` du cours sélectionné` : '';
-    const confirmation = confirm(
-        `Veux-tu importer les ${productions.length} production(s)${coursLabel} de ${nomTrimestre} dans la bibliothèque partagée ?`
-    );
+    const confirmation = await uiDialogues.confirmerAction({
+        titre: 'Importer dans la bibliothèque partagée',
+        message: `Veux-tu importer les ${productions.length} production(s)${coursLabel} de ${nomTrimestre} dans la bibliothèque partagée ?`,
+        texteConfirmer: 'Importer'
+    });
 
     if (!confirmation) return;
 
@@ -478,7 +482,9 @@ async function importerToutTrimestreModal() {
     fermerModalBibliothequeProductions();
     await afficherBibliothequeProductions();
 
-    alert(`Import terminé.\n\n${resultat.ajoutees} ${window.pluriel(resultat.ajoutees, 'production ajoutée', 'productions ajoutées')}.\n${resultat.existantes} ${window.pluriel(resultat.existantes, 'déjà présente', 'déjà présentes')}.`);
+    notifications.succes('Import terminé.',
+        `${resultat.ajoutees} ${window.pluriel(resultat.ajoutees, 'production ajoutée', 'productions ajoutées')}. ` +
+        `${resultat.existantes} ${window.pluriel(resultat.existantes, 'déjà présente', 'déjà présentes')}.`);
 }
 
 /**
@@ -489,7 +495,7 @@ async function importerUneProductionTrimestre(cleTrimestre, productionId) {
     const prod = productions.find(p => p.id === productionId);
 
     if (!prod) {
-        alert('Production introuvable.');
+        notifications.erreur('Production introuvable.');
         return;
     }
 
@@ -499,9 +505,9 @@ async function importerUneProductionTrimestre(cleTrimestre, productionId) {
         // Rafraîchir l'affichage
         fermerModalBibliothequeProductions();
         await afficherBibliothequeProductions();
-        alert(`"${prod.titre}" ajoutée à la bibliothèque !`);
+        notifications.succes(`"${prod.titre}" ajoutée à la bibliothèque !`);
     } else {
-        alert('Cette production est déjà dans la bibliothèque.');
+        notifications.info('Cette production est déjà dans la bibliothèque.');
     }
 }
 
@@ -509,7 +515,12 @@ async function importerUneProductionTrimestre(cleTrimestre, productionId) {
  * Retire une production de la bibliothèque (soft delete)
  */
 async function retirerProductionDeBibliotheque(id) {
-    if (!confirm('Retirer cette production de ta sélection ?\n\nElle ne sera plus affichée dans la barre latérale mais restera disponible dans le gestionnaire.')) {
+    const okRetrait = await uiDialogues.confirmerAction({
+        titre: 'Retirer de la sélection',
+        message: 'Retirer cette production de ta sélection ? Elle ne sera plus affichée dans la barre latérale mais restera disponible dans le gestionnaire.',
+        texteConfirmer: 'Retirer'
+    });
+    if (!okRetrait) {
         return;
     }
 
@@ -532,7 +543,7 @@ async function retirerProductionDeBibliotheque(id) {
 
     } catch (error) {
         console.error('Erreur lors du retrait:', error);
-        alert(`Erreur : ${error.message}`);
+        notifications.erreur('Erreur', error.message);
     }
 }
 
@@ -547,7 +558,13 @@ async function supprimerProductionDefinitivement(id) {
     if (!production) return;
 
     // Confirmation
-    if (!confirm(`Supprimer définitivement la production «${production.titre}» ?\n\nCette action est irréversible.`)) {
+    const okSuppr = await uiDialogues.confirmerAction({
+        titre: 'Supprimer définitivement',
+        message: `Supprimer définitivement la production «${production.titre}» ? Cette action est irréversible.`,
+        texteConfirmer: 'Supprimer',
+        variante: 'danger'
+    });
+    if (!okSuppr) {
         return;
     }
 
@@ -578,7 +595,13 @@ async function supprimerProductionDeBibliothequePartagee(id) {
     const prod = biblio.find(p => p.id === id);
     if (!prod) return;
 
-    if (!confirm(`Supprimer définitivement «${prod.titre || 'Sans titre'}» de la bibliothèque partagée ?\n\nCette action est irréversible.`)) return;
+    const okSuppr = await uiDialogues.confirmerAction({
+        titre: 'Supprimer de la bibliothèque partagée',
+        message: `Supprimer définitivement «${prod.titre || 'Sans titre'}» de la bibliothèque partagée ? Cette action est irréversible.`,
+        texteConfirmer: 'Supprimer',
+        variante: 'danger'
+    });
+    if (!okSuppr) return;
 
     await retirerDeLaBibliotheque(id);
 
@@ -595,7 +618,7 @@ async function dupliquerProductionBibliotheque(id) {
     const production = productions.find(p => p.id === id);
 
     if (!production) {
-        alert('Production introuvable');
+        notifications.erreur('Production introuvable');
         return;
     }
 
@@ -640,7 +663,7 @@ async function ajouterProductionsABibliotheque() {
     const checkboxes = document.querySelectorAll('#listeProductionsDisponibles input[type="checkbox"]:checked');
 
     if (checkboxes.length === 0) {
-        alert('Sélectionne au moins une production à ajouter.');
+        notifications.info('Sélectionne au moins une production à ajouter.');
         return;
     }
 
@@ -680,11 +703,11 @@ async function ajouterProductionsABibliotheque() {
         await mettreAJourPonderationTotale();
 
         if (ajoutees > 0) {
-            alert(`${ajoutees} ${window.pluriel(ajoutees, 'production ajoutée', 'productions ajoutées')}.`);
+            notifications.succes(`${ajoutees} ${window.pluriel(ajoutees, 'production ajoutée', 'productions ajoutées')}.`);
         }
     } catch (error) {
         console.error('Erreur lors de l\'ajout:', error);
-        alert(`Erreur : ${error.message}`);
+        notifications.erreur('Erreur', error.message);
     }
 }
 

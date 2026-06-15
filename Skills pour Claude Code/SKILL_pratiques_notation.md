@@ -311,6 +311,15 @@ plusieurs pratiques sur les mêmes artefacts sans toucher aux données du trimes
   - **Non simulable** (DEN-E) : la note étant un jugement, `simulerIndices` ne produit pas de
     nombre comparable (P=0/noteFinale=null) → **diffable** dans l'Exploration des pratiques
     (axe D), pas une colonne note. Pas de note DEN dans le pack démo.
+  - **Récit de calcul** (#333 Lot 1, 15 juin 2026) : `PratiqueConfigurable.decrireCalcul(da)`
+    (gardé `jugement_global`, sinon `null`) produit le `RecitCalcul` `{famille, pratiqueNom,
+    resultats, synthese}` décrivant le **jugement** (note gardée, sort de chaque cible
+    confirmée/non confirmée, `synthese.justification`), **parité** via
+    `_calculerPerformanceDenotation`, lecture seule. Comble le seul trou du **récit unifié** de
+    `simulerIndices` (SOM/SPE l'avaient via leur `decrireCalcul`, STD via
+    `calculerDetailsNoteFinale.recit` ; DEN rendait `recit=null`). Aucune saisie → `null`
+    (« note non encore arrêtée », jamais un zéro). Test :
+    `tests/unit/decrire-calcul-denotation-333.test.js`.
   - **Taxonomie / principe pédagogique** : badge UI « PAN » mais DEN = **PRÉN** ; certification
     sans tri, jamais « pas de chiffre », garde-fous Dyer + santé mentale → **voir §2 bis** (pas de redite).
   - Reste hors premier jet : mode **réduite** (réussi/échoué + différenciation) ; couche 1
@@ -450,12 +459,27 @@ lecture seule** ; aucun nouveau chemin de calcul. Spéc canonique :
   `dupliquerPratique(id, {estEssai})` pose `estEssai` **opt-in** (voir §5).
 - Tests : `tests/unit/exploration-pratiques-arbre-326.test.js` (5) +
   `…-diff-326.test.js` (6), break-testés.
-- **RESTE (non livré)** : D-2 (UI Labo « Exploration », renommage `config.js` label —
-  **aval Grégoire**, zone protégée — + filtre `estEssai ≠ true` sidebar/biblio), D-3
-  (dérivation assistant condensé), D-4 (matrice + diff avant matrice + DEN non-simulable),
-  D-5 (hygiène, consomme #320), D-6 (release `minor`). Préalables UI : **#320** + **#318**
-  (DEN couche 2 livrée ; #320 répertoires requis avant D-2). ⚠️ **Ne pas documenter D-2+ comme
-  existant** : §8/§12 seront mises à jour au fil des lots, avec le code.
+- **D-2 + D-3 LIVRÉS (15 juin 2026)** — UI Labo « Exploration » + dérivation :
+  - **Filtre `estEssai`** : `BibliothequeUI.estEssai` / `filtrerParEssai` (miroir de
+    `estItemDemo`/`filtrerParModeDemo`), appliqués aux sites de présentation
+    (`afficherListePratiquesSidebar`, `afficherListePratiquesMateriel`,
+    `afficheBibliothequePratiques`). Le helper source `obtenirToutesLesPratiquesBibliotheque`
+    reste INTACT (l'Exploration/le wizard/la duplication voient les essais).
+  - **Label** : `config.js` `'comparateur'` → « Exploration des pratiques » (id conservé).
+  - **Promotion** : `promouvoirPratiqueEssai(id)` (`pratiques.js`) — `estEssai`→false en place,
+    `inspireDe`/`sourceId` INTACTS (invariant CC). **Dérivation** : `deriverVarianteEssai(sourceId)`
+    — nom auto « <souche> · essai N », `dupliquerPratique(sourceId,{estEssai:true,silencieux})`
+    (pose `inspireDe.sourceId` via `forgerInspireDe`) puis `editerPratique` (assistant). `dupliquerPratique`
+    retourne désormais l'id + accepte `silencieux`.
+  - **Arbre** (`comparateur-pratiques.js`, sous-section devenue « Exploration ») : `rendreComparateur`
+    rend deux régions — `#exploration-arbre-hote` (filiation des essais via `construireArbrePratiques`,
+    actions dériver/promouvoir/jeter, noms `_esc`) + `#exploration-comparaison` (matrice démo inchangée).
+  - Tests : `exploration-pratiques-essai-filtre-326`, `promotion-essai-326`, `derivation-essai-326`,
+    `exploration-arbre-securite-326` (break-testés).
+- **RESTE (non livré)** : D-4 (matrice + diff avant matrice + DEN non-simulable + bouton « Comparer »
+  depuis l'arbre), D-5 (hygiène : tri/filtre, péremption douce, consomme #320), D-6 (validation
+  terrain Mac+iPad sombre/clair + release `minor` + changelog). ⚠️ **Validation terrain Grégoire
+  en attente pour l'UI de l'arbre** (deux modes, iPad).
 
 ---
 
@@ -482,6 +506,8 @@ vraiment*.
 
 | Date | Changement |
 |------|------------|
+| 2026-06-15 (#326 D-2/D-3) | **Exploration des pratiques — UI arbre + dérivation livrées.** §12 État : filtre `estEssai` (helpers `BibliothequeUI.estEssai`/`filtrerParEssai` + sites de présentation) ; label `config.js` → « Exploration des pratiques » ; `promouvoirPratiqueEssai` (estEssai→false, inspireDe intact) ; `deriverVarianteEssai` (nom auto, dupliquerPratique{estEssai,silencieux} + assistant) ; arbre dans `comparateur-pratiques.js` (deux régions : arbre des essais + matrice). Reste D-4 (matrice/diff + Comparer), D-5 (hygiène/#320), D-6 (terrain + release). |
+| 2026-06-15 (#333 Lot 1) | **Export des résultats finaux — récit de calcul DEN.** §8 : `PratiqueConfigurable.decrireCalcul` (jugement_global) comble le dernier trou du récit unifié de `simulerIndices` (DEN avait `recit=null`). Re-scoping acté : l'« API unifiée de décomposition » du plan #333 (10 juin) **existe déjà** (`simulerIndices(da,id)` → `{noteFinale, recit, details}` + `decrireCalcul` par famille) ; pas de nouvelle méthode IPratique (zéro-dette). Le module d'export (Lot 2/3) consommera `simulerIndices` + `obtenirPratiqueParId`. |
 | 2026-06-15 (axe D, D-0/D-1) | **Exploration des pratiques — moteur pur livré (#326).** §5 : champs d'enveloppe `inspireDe.sourceId` (transversal, posé par `forgerInspireDe`, validé par `SCHEMA_INSPIRE_DE`) + `estEssai` (opt-in via `dupliquerPratique`). §12 : module `js/pratiques/pratiques-exploration.js` (`construireArbrePratiques`, `diffConfigsPratiques`, `phraseEffetPourDiff`, `diffPratiques`), lecture seule, pur ; mapping d'effets PROVISOIRE (à valider Grégoire) + repli neutre. D-2→D-6 restent à livrer (UI/nav, préalable #320). |
 | 2026-06-08 (DEN-4) | **DEN couche 2 implémentée (#318).** §8 réécrit (jugement saisi, collection `jugementsDenotation` SSOT, moteur `_calculerPerformanceDenotation`, garde cibles → 59, helper `suggererNoteHolistique`, non-simulable/diffable, PRÉN) ; §9 5ᵉ cas de diagnostic. Lots DEN-0→DEN-3 livrés ; DEN-4 = doc + diagnostic ; DEN-5 = release. |
 | 2026-06-08 (Cowork) | §12 : pointeur vers l'axe D (« Exploration des pratiques » : variantes/souche, diff de config, `estEssai`, DEN diffable-non-simulable ; SPEC_D, #326). Référence seulement — §3/§5/§8/§12 à mettre à jour au fil des lots D. |

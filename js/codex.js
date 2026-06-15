@@ -611,7 +611,13 @@ async function chargerCodex(fichierZip) {
     var detectionModele = _detecterModeleAnterieur(donnees, manifeste);
     if (detectionModele) {
         _masquerProgression();
-        if (!confirm(_messageModeleAnterieur(detectionModele, 'remplacer', fichierZip && fichierZip.name))) {
+        if (!(await uiDialogues.confirmerAction({
+            titre: 'Modèle antérieur détecté',
+            message: _messageModeleAnterieur(detectionModele, 'remplacer', fichierZip && fichierZip.name),
+            texteConfirmer: 'Remplacer',
+            variante: 'danger',
+            preformate: true
+        }))) {
             throw new Error('Import annulé : ton espace de travail n\'a pas été modifié.');
         }
         _majProgression(15, 'Extraction des données…');
@@ -766,12 +772,16 @@ async function chargerCodex(fichierZip) {
     }
     if (ecartsPersistance.length > 0) {
         console.error('[Codex] Échec de persistance après retentative : ' + ecartsPersistance.join(', '));
-        alert('Vérification de persistance échouée pour ' + ecartsPersistance.length
-            + ' clé(s) : ' + ecartsPersistance.join(', ')
-            + '\n\nTes données sont chargées pour cette session, mais le stockage du navigateur '
-            + 'n\'a pas confirmé l\'écriture — au prochain rechargement, une ANCIENNE version '
-            + 'pourrait réapparaître.\n\nQuoi faire : réessaie « Ouvrir un codex » avec le même '
-            + 'fichier ; si le problème persiste, libère de l\'espace disque puis réessaie.');
+        await uiDialogues.informer({
+            titre: 'Vérification de persistance échouée',
+            message: 'Vérification de persistance échouée pour ' + ecartsPersistance.length
+                + ' clé(s) : ' + ecartsPersistance.join(', ')
+                + '\n\nTes données sont chargées pour cette session, mais le stockage du navigateur '
+                + 'n\'a pas confirmé l\'écriture — au prochain rechargement, une ANCIENNE version '
+                + 'pourrait réapparaître.\n\nQuoi faire : réessaie « Ouvrir un codex » avec le même '
+                + 'fichier ; si le problème persiste, libère de l\'espace disque puis réessaie.',
+            preformate: true
+        });
     }
 
     // 5 ter. Purge de l'espace précédent (#336 Lot D — phase PREVIEW, 11 juin
@@ -1993,7 +2003,7 @@ function _resumerValeur(val) {
  *   annule: boolean
  * }}
  */
-function _resoudreConflits(analyse, donneesLocales, donneesExternes, analyseTravaux) {
+async function _resoudreConflits(analyse, donneesLocales, donneesExternes, analyseTravaux) {
     // 1. Construire les résolutions automatiques
     var resolutions = {};
 
@@ -2037,11 +2047,17 @@ function _resoudreConflits(analyse, donneesLocales, donneesExternes, analyseTrav
         // Pas de conflit — confirmer l'auto-merge
         var totalActions = Object.keys(resolutions).length + importerTravaux.length;
         if (totalActions === 0) {
-            alert('Les deux codex sont identiques. Rien à fusionner.');
+            notifications.info('Les deux codex sont identiques. Rien à fusionner.');
             return { resolutions: resolutions, importerTravaux: importerTravaux, annule: true };
         }
 
-        if (!confirm(resume + '\n\nAucun conflit. Procéder à la fusion automatique ?')) {
+        const okAuto = await uiDialogues.confirmerAction({
+            titre: 'Fusion automatique',
+            message: resume + '\n\nAucun conflit. Procéder à la fusion automatique ?',
+            texteConfirmer: 'Fusionner',
+            preformate: true
+        });
+        if (!okAuto) {
             return { resolutions: resolutions, importerTravaux: importerTravaux, annule: true };
         }
 
@@ -2058,7 +2074,11 @@ function _resoudreConflits(analyse, donneesLocales, donneesExternes, analyseTrav
         '4. Annuler la fusion\n\n' +
         'Entrer 1, 2, 3 ou 4 :';
 
-    var choixStrategie = prompt(strategieTexte);
+    var choixStrategie = await uiDialogues.demanderSaisie({
+        titre: 'Résoudre les conflits',
+        message: strategieTexte,
+        preformate: true
+    });
     if (!choixStrategie || choixStrategie.trim() === '4') {
         return { resolutions: resolutions, importerTravaux: importerTravaux, annule: true };
     }
@@ -2090,10 +2110,19 @@ function _resoudreConflits(analyse, donneesLocales, donneesExternes, analyseTrav
                 '3. Ignorer (ne pas toucher)\n\n' +
                 'Entrer 1, 2 ou 3 :';
 
-            var choixConflit = prompt(texteConflit);
+            var choixConflit = await uiDialogues.demanderSaisie({
+                titre: 'Conflit ' + (r + 1) + '/' + nbConflits,
+                message: texteConflit,
+                preformate: true
+            });
             if (!choixConflit) {
                 // Annulation en cours de résolution — demander confirmation
-                if (confirm('Annuler toute la fusion ?\n\n(Les conflits déjà résolus seront perdus.)')) {
+                if (await uiDialogues.confirmerAction({
+                    titre: 'Annuler la fusion',
+                    message: 'Annuler toute la fusion ? (Les conflits déjà résolus seront perdus.)',
+                    texteConfirmer: 'Annuler la fusion',
+                    variante: 'danger'
+                })) {
                     return { resolutions: {}, importerTravaux: [], annule: true };
                 }
                 // Re-poser la question pour ce conflit
@@ -2111,7 +2140,7 @@ function _resoudreConflits(analyse, donneesLocales, donneesExternes, analyseTrav
         }
     } else {
         // Choix invalide → annuler
-        alert('Choix invalide. Fusion annulée.');
+        notifications.warning('Choix invalide. Fusion annulée.');
         return { resolutions: resolutions, importerTravaux: importerTravaux, annule: true };
     }
 
@@ -2845,18 +2874,23 @@ async function actionOuvrir() {
             : 'Codex chargé depuis « ' + fichier.name + ' » (' + _formaterTaille(fichier.size) +
               ').\n\nLe fichier ZIP d\'origine reste dans Fichiers — tu peux le supprimer ' +
               'pour récupérer de l\'espace. Recharger la page pour appliquer les données ?';
-        if (confirm(msgReload)) {
+        if (await uiDialogues.confirmerAction({
+            titre: 'Recharger la page',
+            message: msgReload,
+            texteConfirmer: 'Recharger',
+            preformate: true
+        })) {
             window.location.reload();
         }
     } catch (e) {
         // Une annulation volontaire (garde de modèle antérieur, #335 A) n'est
         // pas une erreur — message neutre, sans préfixe alarmant.
         if (e && e.message && e.message.indexOf('Import annulé') === 0) {
-            alert(e.message);
+            notifications.info(e.message);
             return;
         }
         console.error('📂 Erreur ouverture codex:', e);
-        alert('Erreur : ' + e.message);
+        notifications.erreur('Erreur', e.message);
     }
 }
 
@@ -2883,7 +2917,7 @@ async function actionEnregistrer() {
         );
     } catch (e) {
         console.error('📂 Erreur enregistrement codex:', e);
-        alert('Erreur : ' + e.message);
+        notifications.erreur('Erreur', e.message);
     }
 }
 
@@ -2907,17 +2941,21 @@ async function actionEnregistrerSous() {
         );
     } catch (e) {
         console.error('📂 Erreur enregistrement codex:', e);
-        alert('Erreur : ' + e.message);
+        notifications.erreur('Erreur', e.message);
     }
 }
 
 /**
  * Créer un nouveau codex (marque l'état actif sans exporter)
  */
-function actionNouveau() {
+async function actionNouveau() {
     _fermerMenu();
 
-    var nom = prompt('Nom du codex :', _genererNomCodex());
+    var nom = await uiDialogues.demanderSaisie({
+        titre: 'Nouveau codex',
+        message: 'Nom du codex :',
+        valeurInitiale: _genererNomCodex()
+    });
     if (!nom) return;
 
     _etat.actif = true;
@@ -2943,7 +2981,11 @@ function actionDetails() {
         : '\n\nMode : téléchargement d\'un nouveau fichier à chaque enregistrement (Safari/iPad). Pense à remplacer manuellement le fichier précédent sur ta clé USB.';
 
     if (!_etat.manifeste) {
-        alert('Aucun codex actif.\n\nPour commencer :\n• « Ouvrir un codex » pour charger un fichier existant\n• « Nouveau codex » pour en créer un\n• « Enregistrer le codex » pour sauvegarder tes données actuelles' + noteFsapi);
+        uiDialogues.informer({
+            titre: 'Aucun codex actif',
+            message: 'Pour commencer :\n• « Ouvrir un codex » pour charger un fichier existant\n• « Nouveau codex » pour en créer un\n• « Enregistrer le codex » pour sauvegarder tes données actuelles' + noteFsapi,
+            preformate: true
+        });
         return;
     }
 
@@ -2961,16 +3003,20 @@ function actionDetails() {
         '  ' + _formaterTaille(m.contenu.tailleTotaleOctets || 0) +
         noteFsapi;
 
-    alert(details);
+    uiDialogues.informer({ titre: 'Détails du codex', message: details, preformate: true });
 }
 
 /**
- * Renomme le codex actif via prompt().
+ * Renomme le codex actif via une modale de saisie (uiDialogues.demanderSaisie).
  */
 async function actionRenommer() {
     if (!_etat.actif) return;
 
-    var nouveauNom = prompt('Nouveau nom du codex :', _etat.nom || '');
+    var nouveauNom = await uiDialogues.demanderSaisie({
+        titre: 'Renommer le codex',
+        message: 'Nouveau nom du codex :',
+        valeurInitiale: _etat.nom || ''
+    });
     if (nouveauNom === null) return; // annulé
     nouveauNom = nouveauNom.trim();
     if (!nouveauNom) return;
@@ -3000,7 +3046,7 @@ async function actionFusionner() {
     _fermerMenu();
 
     if (!_etat.actif) {
-        alert('Aucun codex actif.\n\nOuvre d\'abord un codex (ou enregistre tes données), puis utilise « Fusionner » pour combiner avec un autre codex.');
+        notifications.info('Aucun codex actif', 'Ouvre d\'abord un codex (ou enregistre tes données), puis utilise « Fusionner » pour combiner avec un autre codex.');
         return;
     }
 
@@ -3047,7 +3093,13 @@ async function actionFusionner() {
     var detectionModeleFusion = _detecterModeleAnterieur(externe.donnees, externe.manifeste || null);
     if (detectionModeleFusion) {
         _masquerProgression();
-        if (!confirm(_messageModeleAnterieur(detectionModeleFusion, 'fusionner avec', fichier && fichier.name))) {
+        if (!(await uiDialogues.confirmerAction({
+            titre: 'Modèle antérieur détecté',
+            message: _messageModeleAnterieur(detectionModeleFusion, 'fusionner avec', fichier && fichier.name),
+            texteConfirmer: 'Fusionner quand même',
+            variante: 'danger',
+            preformate: true
+        }))) {
             notifications.warning('Fusion annulée', 'Ton espace de travail n\'a pas été modifié.');
             return;
         }
@@ -3076,7 +3128,7 @@ async function actionFusionner() {
     _masquerProgression();
 
     // 7. Résolution des conflits (interaction utilisateur)
-    var plan = _resoudreConflits(analyse, donneesLocales, externe.donnees, analyseTravaux);
+    var plan = await _resoudreConflits(analyse, donneesLocales, externe.donnees, analyseTravaux);
 
     if (plan.annule) {
         return;
@@ -3156,12 +3208,12 @@ async function actionFusionner() {
 
     resume += '\nPense à enregistrer le codex pour sauvegarder la fusion.';
 
-    alert(resume);
+    await uiDialogues.informer({ titre: 'Fusion terminée', message: resume, preformate: true });
 
 
     } catch (erreur) {
         _masquerProgression();
-        alert('Erreur lors de la fusion :\n\n' + erreur.message);
+        notifications.erreur('Erreur lors de la fusion', erreur.message);
         console.error('📂 Fusion : erreur', erreur);
     }
 }
@@ -3184,7 +3236,7 @@ async function actionComparer() {
     _fermerMenu();
 
     if (!_etat.actif) {
-        alert('Aucun codex actif.\n\nOuvre d\'abord un codex (ou enregistre tes données), puis utilise « Comparer » pour analyser les différences avec un autre codex.');
+        notifications.info('Aucun codex actif', 'Ouvre d\'abord un codex (ou enregistre tes données), puis utilise « Comparer » pour analyser les différences avec un autre codex.');
         return;
     }
 
@@ -3239,7 +3291,7 @@ async function actionComparer() {
 
     } catch (erreur) {
         _masquerProgression();
-        alert('Erreur lors de la comparaison :\n\n' + erreur.message);
+        notifications.erreur('Erreur lors de la comparaison', erreur.message);
         console.error('📂 Comparaison : erreur', erreur);
     }
 }
@@ -3358,7 +3410,7 @@ async function copierRapportComparaison() {
         // Fallback : sélectionne le textarea pour copie manuelle
         var ta = document.getElementById('codex-comparer-rapport');
         if (ta) { ta.focus(); ta.select(); }
-        alert('Copie automatique refusée par le navigateur. Le texte est sélectionné — fais Cmd+C / Ctrl+C.');
+        notifications.warning('Copie automatique refusée', 'Le texte est sélectionné — fais Cmd+C / Ctrl+C.');
     }
 }
 
@@ -3410,12 +3462,12 @@ async function actionExporterSelection() {
     var trimestres = _detecterTrimestresDisponibles(donnees);
 
     if (trimestres.length === 0) {
-        alert('Aucun trimestre détecté dans les données.\n\nIl n\'y a rien à exporter.');
+        notifications.info('Aucun trimestre détecté dans les données.', 'Il n\'y a rien à exporter.');
         return;
     }
 
     if (trimestres.length === 1) {
-        alert('Un seul trimestre détecté (' + trimestres[0] + ').\n\nUtilise « Enregistrer le codex » pour un export complet.');
+        notifications.info('Un seul trimestre détecté (' + trimestres[0] + ').', 'Utilise « Enregistrer le codex » pour un export complet.');
         return;
     }
 
@@ -3429,7 +3481,11 @@ async function actionExporterSelection() {
     }
     listeChoix += '\nEntrer les numéros séparés par des virgules (ex: 1,3)\nou "tous" pour tout exporter :';
 
-    var choix = prompt(listeChoix);
+    var choix = await uiDialogues.demanderSaisie({
+        titre: 'Export sélectif',
+        message: listeChoix,
+        preformate: true
+    });
     if (!choix) return;
 
     // 4. Parser la sélection
@@ -3452,7 +3508,7 @@ async function actionExporterSelection() {
     }
 
     if (trimestresChoisis.length === 0) {
-        alert('Aucun trimestre sélectionné. Export annulé.');
+        notifications.warning('Aucun trimestre sélectionné. Export annulé.');
         return;
     }
 
@@ -3468,7 +3524,12 @@ async function actionExporterSelection() {
         '(Les données globales sont toujours incluses)\n\n' +
         'Continuer ?';
 
-    if (!confirm(resume)) return;
+    if (!(await uiDialogues.confirmerAction({
+        titre: 'Export sélectif',
+        message: resume,
+        texteConfirmer: 'Continuer',
+        preformate: true
+    }))) return;
 
     // 7. Construire le ZIP partiel
     _afficherProgression('Export sélectif');
@@ -3582,7 +3643,7 @@ async function actionExporterSelection() {
 
     } catch (erreur) {
         _masquerProgression();
-        alert('Erreur lors de l\'export sélectif :\n\n' + erreur.message);
+        notifications.erreur('Erreur lors de l\'export sélectif', erreur.message);
         console.error('📂 Export sélectif : erreur', erreur);
     }
 }
@@ -3605,11 +3666,15 @@ function _formaterNomTrimestre(prefixe) {
 /**
  * Fermer le codex actif
  */
-function actionFermer() {
+async function actionFermer() {
     _fermerMenu();
 
     if (_etat.modificationsDepuis) {
-        if (!confirm('Des modifications ne sont pas enregistrées.\n\nFermer quand même ?')) {
+        if (!(await uiDialogues.confirmerAction({
+            titre: 'Modifications non enregistrées',
+            message: 'Des modifications ne sont pas enregistrées. Fermer quand même ?',
+            texteConfirmer: 'Fermer'
+        }))) {
             return;
         }
     }

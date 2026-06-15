@@ -63,6 +63,28 @@
     };
 
     /**
+     * #326 axe D (SPEC §3.2/§4) — Variante d'ESSAI. Une pratique marquée
+     * `estEssai === true` vit dans le Labo › Exploration des pratiques ; elle est
+     * MASQUÉE de la sidebar (sélection) et de la bibliothèque propre (Conception ›
+     * Pratiques), pour ne pas polluer les pratiques abouties. Flag transitoire,
+     * basculé à la promotion (jamais une donnée détruite — juste masquée).
+     */
+    BibliothequeUI.estEssai = function (item) {
+        return !!(item && item.estEssai === true);
+    };
+
+    /**
+     * #326 axe D — Filtre une collection : retire les variantes d'essai. À
+     * appeler avant tout rendu de la sidebar de pratiques ou de la bibliothèque
+     * propre (PAS dans le Labo › Exploration, qui montre justement les essais).
+     * Préserve l'ordre. Les essais ne sont PAS supprimés du stockage.
+     */
+    BibliothequeUI.filtrerParEssai = function (items) {
+        if (!Array.isArray(items)) return items;
+        return items.filter(function (item) { return !BibliothequeUI.estEssai(item); });
+    };
+
+    /**
      * BACKLOG #293 (28 mai 2026) — Toggle « Masquer les items déjà dans la
      * barre latérale » en Section 2 des modales biblio. Préférence globale
      * partagée par les 5 modales (grilles, échelles, cartouches, productions,
