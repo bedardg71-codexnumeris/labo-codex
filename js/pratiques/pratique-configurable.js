@@ -310,6 +310,81 @@ class PratiqueConfigurable {
     }
 
     /**
+     * Récit de calcul DEN (Dénotation, #318 / #333 Lot 1) — RecitCalcul ADDITIF,
+     * lecture seule. Comble le seul trou du chemin de récit unifié de
+     * `simulerIndices` (SOM/SPE l'ont via leur `decrireCalcul`, STD via
+     * `calculerDetailsNoteFinale.recit` ; DEN n'en avait aucun → `recit=null`).
+     *
+     * En Dénotation, il n'y a RIEN à décomposer arithmétiquement (SPEC §2/§8) : la
+     * note est un JUGEMENT saisi, gardé par l'atteinte des cibles. Le récit décrit
+     * donc l'état du jugement (note attribuée, sort de chaque cible, justification),
+     * pas un calcul sur des artefacts.
+     *
+     * Parité (SSOT) : la `noteFinale` du récit vient DIRECTEMENT de
+     * `_calculerPerformanceDenotation` (même garde « cibles → 59 ») — aucun recalcul
+     * parallèle. Gardé à `jugement_global` : pour une pratique configurable d'une
+     * autre famille (STD/SOM/SPE), retourne `null` (comportement antérieur inchangé).
+     *
+     * @param {string} da - DA de l'étudiant
+     * @returns {Object|null} RecitCalcul `{famille, pratiqueNom, resultats, synthese}`,
+     *   ou `null` si la pratique n'est pas DEN ou si aucun jugement n'a été saisi
+     *   (« note non encore arrêtée » — jamais un zéro).
+     */
+    decrireCalcul(da) {
+        if (!da) return null;
+        if (!(this.config.calcul_note && this.config.calcul_note.methode === 'jugement_global')) {
+            return null; // pas une DEN : aucun récit de jugement à produire
+        }
+        if (!window.denotationJugements) return null;
+
+        const saisie = window.denotationJugements.lireJugementDenotation(this.config.id, da);
+        if (!saisie) {
+            return null; // pas encore jugé → non calculable (l'export affichera « note non arrêtée »)
+        }
+
+        const cibles = this.config.objectifs
+            || (this.config.configuration && this.config.configuration.objectifs)
+            || [];
+        const confirmations = saisie.ciblesAtteintes || {};
+        const labelCible = (c) => c.nom || c.titre || c.description || c.id;
+
+        // Une ligne par cible : son SORT est « confirmée » ou « non confirmée ».
+        // niveau/note restent null (DEN ne note pas la cible — elle la confirme).
+        const resultats = cibles.map(c => {
+            const atteinte = confirmations[c.id] === true;
+            return {
+                label: labelCible(c),
+                date: saisie.date || null,
+                niveau: null,
+                note: null,
+                sort: atteinte ? 'compte' : 'ecarte',
+                detail: atteinte ? 'cible confirmée atteinte' : 'cible non confirmée'
+            };
+        });
+
+        // Note finale = note GARDÉE (parité avec le moteur), 0-100 ou null.
+        const noteFinale = this._calculerPerformanceDenotation(da);
+
+        // Plafonnement = la garde s'est-elle déclenchée ? (note saisie ≥ 60 ramenée à 59).
+        const noteSaisie = (typeof saisie.noteFinale === 'number') ? saisie.noteFinale : null;
+        const plafonne = noteSaisie !== null && noteFinale !== null && noteFinale < noteSaisie;
+
+        return {
+            famille: this.obtenirCode(),   // 'DEN' (registre, source unique)
+            pratiqueNom: this.obtenirNom(),
+            resultats: resultats,
+            synthese: {
+                formuleTexte: 'note attribuée par jugement (dénotation)',
+                noteFinale: noteFinale,
+                plafonnement: plafonne
+                    ? { type: 'cibles-non-atteintes', noteGardee: noteFinale }
+                    : null,
+                justification: saisie.justification || ''
+            }
+        };
+    }
+
+    /**
      * Délègue le calcul de performance SPE à PratiquePanSpecifications.
      *
      * La logique des paliers (bundles, tout-ou-rien) vit UNIQUEMENT dans la classe

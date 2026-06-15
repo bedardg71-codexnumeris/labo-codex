@@ -145,9 +145,10 @@ async function afficherListePratiquesMateriel() {
 
     // Filtrer les pratiques dans la bibliothèque (affichées dans la sidebar)
     // Beta 99.39 (A.0) : masque les items démo en mode normal
-    const pratiquesDansBibliotheque = BibliothequeUI.filtrerParModeDemo(
+    // #326 axe D : masque aussi les variantes d'essai (réservées au Labo › Exploration).
+    const pratiquesDansBibliotheque = BibliothequeUI.filtrerParEssai(BibliothequeUI.filtrerParModeDemo(
         configurations.filter(p => p.dansBibliotheque !== false)
-    );
+    ));
 
 
     // Si aucune pratique, afficher message
@@ -337,15 +338,16 @@ async function afficherBibliothequePratiques() {
     const configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
 
     // Beta 99.39 (A.0) : masque les items démo en mode normal
-    const pratiquesDansBibliotheque = BibliothequeUI.filtrerParModeDemo(
+    // #326 axe D : masque aussi les variantes d'essai (réservées au Labo › Exploration).
+    const pratiquesDansBibliotheque = BibliothequeUI.filtrerParEssai(BibliothequeUI.filtrerParModeDemo(
         configurations.filter(p => p.dansBibliotheque !== false)
-    );
+    ));
 
     let pratiquesDisponibles = [];
     if (typeof obtenirToutesLesPratiquesBibliotheque === 'function') {
         pratiquesDisponibles = await obtenirToutesLesPratiquesBibliotheque();
     }
-    pratiquesDisponibles = BibliothequeUI.filtrerParModeDemo(pratiquesDisponibles);
+    pratiquesDisponibles = BibliothequeUI.filtrerParEssai(BibliothequeUI.filtrerParModeDemo(pratiquesDisponibles));
 
     const doublonsDetectes = detecterDoublonsPratiques(pratiquesDansBibliotheque, pratiquesDisponibles);
 

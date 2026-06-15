@@ -12,6 +12,15 @@
 
     var CHANGELOG = [
         {
+            version: '1.18',
+            couleur: 'bleu',
+            titre: 'Des fenêtres claires à la place des popups du navigateur',
+            items: [
+                'Les confirmations, les saisies (nom de codex, de configuration…) et les messages d’information des bibliothèques (productions, planification, pratiques) et du menu Codex s’affichent maintenant dans des fenêtres intégrées à Labo Codex — au style de l’app, en mode clair comme sombre — au lieu des popups gris du navigateur.',
+                'Les suppressions définitives sont signalées par un bouton rouge distinct ; Échap annule, Entrée confirme.'
+            ]
+        },
+        {
             version: '1.14',
             couleur: 'bleu',
             titre: 'Ouverture de codex plus sûre (surtout iPad)',

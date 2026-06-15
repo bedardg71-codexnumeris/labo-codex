@@ -25,10 +25,12 @@
    Conteneur : #labo-comparateur (index.html), rempli dynamiquement à
    chaque affichage de la sous-section (entrée fraîche = retour matrice).
 
-   Sécurité : contenu 100 % statique défini dans ce fichier — aucune
-   donnée utilisateur injectée (même statut que guides-pedagogiques.js).
-   Lecture seule absolue côté moteur : ce module n'écrit jamais de
-   données (ni clés réelles, ni demo_*).
+   Sécurité : la matrice/fiche sont 100 % statiques (profils-types démo) ;
+   l'arbre d'exploration (#326 D-2) injecte les NOMS de pratiques de
+   l'utilisateur → TOUJOURS échappés par _esc (echapperHtml). Le moteur du
+   comparateur reste lecture seule (ni clés réelles, ni demo_*) ; les actions
+   de l'arbre (dériver/promouvoir/jeter) délèguent aux fonctions d'écriture de
+   la couche pratiques — aucun chemin de persistance parallèle ici.
    ============================================================ */
 
 (function() {
@@ -359,6 +361,147 @@
         return document.getElementById('labo-comparateur');
     }
 
+    /* ════════════════════════════════════════════════════════
+       ARBRE D'EXPLORATION (#326 D-2) — variantes d'essai
+       ------------------------------------------------------------
+       Affiche la filiation (souche → variantes d'essai) des pratiques
+       configurables RÉELLES de l'utilisateur, avec les actions dériver /
+       promouvoir / jeter. LECTURE pour l'affichage ; les actions délèguent
+       aux fonctions d'écriture de la couche pratiques (pas de chemin
+       parallèle). Noms utilisateur → TOUJOURS échappés par _esc.
+       ════════════════════════════════════════════════════════ */
+
+    var _BASE_CANEVAS = ['standards', 'specifications', 'sommative'];
+
+    function _lirePratiquesConfigurablesReelles() {
+        if (typeof db === 'undefined') return [];
+        var k = (typeof cle === 'function') ? cle('pratiquesConfigurables') : 'pratiquesConfigurables';
+        return (db.getSync(k, null) || db.getSync('pratiquesConfigurables', []) || []);
+    }
+
+    function _sousArbreContientEssai(noeud) {
+        if (noeud.pratique && noeud.pratique.estEssai === true) return true;
+        return (noeud.enfants || []).some(_sousArbreContientEssai);
+    }
+
+    function _badgeFamille(p) {
+        if (typeof genererBadgePratiqueHTML === 'function') {
+            try { return genererBadgePratiqueHTML(p.id) || ''; } catch (e) { return ''; }
+        }
+        return '';
+    }
+
+    // Boutons d'un nœud. Toute pratique est dérivable ; seules les variantes
+    // d'essai offrent promouvoir / jeter (la comparaison arrive en D-4).
+    function _actionsNoeud(p) {
+        var id = _esc(p.id);
+        var b = '<div class="exploration-noeud-actions">';
+        b += '<button type="button" class="btn btn-tres-compact btn-secondaire" data-expl-action="deriver" data-id="' + id + '">Dériver une variante</button>';
+        if (p.estEssai === true) {
+            b += '<button type="button" class="btn btn-tres-compact btn-principal" data-expl-action="promouvoir" data-id="' + id + '">Promouvoir</button>';
+            b += '<button type="button" class="btn btn-tres-compact btn-supprimer" data-expl-action="jeter" data-id="' + id + '">Jeter</button>';
+        }
+        b += '</div>';
+        return b;
+    }
+
+    function _rendreNoeud(noeud) {
+        var p = noeud.pratique;
+        var estEssai = (p.estEssai === true);
+        var h = '<li class="exploration-noeud' + (estEssai ? ' exploration-noeud--essai' : ' exploration-noeud--souche') + '">';
+        h += '<div class="exploration-noeud-tete">';
+        h += '<span class="exploration-noeud-nom">' + _esc(p.nom || 'Sans titre') + '</span> ';
+        h += _badgeFamille(p);
+        if (estEssai) h += ' <span class="exploration-tag-essai">essai</span>';
+        h += _actionsNoeud(p);
+        h += '</div>';
+        if (noeud.enfants && noeud.enfants.length) {
+            h += '<ul class="exploration-arbre-liste">' + noeud.enfants.map(_rendreNoeud).join('') + '</ul>';
+        }
+        h += '</li>';
+        return h;
+    }
+
+    // Quand aucun essai n'existe encore : proposer de dériver depuis une pratique aboutie.
+    function _listeDerivables(configurables) {
+        var abouties = configurables.filter(function (p) { return p.estEssai !== true; });
+        if (abouties.length === 0) return '';
+        var h = '<p class="exploration-derivables-titre">Dériver depuis une de tes pratiques :</p>';
+        h += '<ul class="exploration-arbre-liste">';
+        h += abouties.map(function (p) {
+            return '<li class="exploration-noeud exploration-noeud--souche"><div class="exploration-noeud-tete">'
+                + '<span class="exploration-noeud-nom">' + _esc(p.nom || 'Sans titre') + '</span> ' + _badgeFamille(p)
+                + '<div class="exploration-noeud-actions"><button type="button" class="btn btn-tres-compact btn-secondaire" data-expl-action="deriver" data-id="' + _esc(p.id) + '">Dériver une variante</button></div>'
+                + '</div></li>';
+        }).join('');
+        h += '</ul>';
+        return h;
+    }
+
+    function _construireArbre(host) {
+        var pratiques = _lirePratiquesConfigurablesReelles();
+        var configurables = pratiques.filter(function (p) { return p && p.id && _BASE_CANEVAS.indexOf(p.id) === -1; });
+        var foret = (typeof construireArbrePratiques === 'function') ? construireArbrePratiques(configurables) : [];
+        var arbres = foret.filter(_sousArbreContientEssai);
+
+        var h = '<section class="exploration-arbre carte" role="region" aria-labelledby="exploration-arbre-titre">'
+            + '<h3 id="exploration-arbre-titre" class="exploration-arbre-titre" tabindex="-1">Variantes d’essai</h3>'
+            + '<p class="exploration-arbre-intro">Décline une pratique en variantes pour comparer ce que chaque réglage change. '
+            + 'Les essais vivent ici : ils n’apparaissent ni dans la sélection de la pratique active ni dans tes pratiques abouties tant que tu ne les as pas promus.</p>';
+
+        if (arbres.length === 0) {
+            h += '<p class="exploration-arbre-vide">Aucune variante d’essai pour l’instant.</p>';
+            h += _listeDerivables(configurables);
+        } else {
+            h += '<ul class="exploration-arbre-liste exploration-arbre-racine">' + arbres.map(_rendreNoeud).join('') + '</ul>';
+        }
+        h += '</section>';
+        host.innerHTML = h;
+        _attacherActionsArbre(host);
+    }
+
+    function _rafraichirArbre() {
+        var host = document.getElementById('exploration-arbre-hote');
+        if (host) _construireArbre(host);
+    }
+
+    function _attacherActionsArbre(host) {
+        host.addEventListener('click', function (e) {
+            var btn = e.target.closest ? e.target.closest('[data-expl-action]') : null;
+            if (!btn) return;
+            var action = btn.getAttribute('data-expl-action');
+            var id = btn.getAttribute('data-id');
+            if (!id) return;
+            if (action === 'deriver' && typeof deriverVarianteEssai === 'function') {
+                Promise.resolve(deriverVarianteEssai(id)).then(_rafraichirArbre);
+            } else if (action === 'promouvoir' && typeof promouvoirPratiqueEssai === 'function') {
+                Promise.resolve(promouvoirPratiqueEssai(id)).then(_rafraichirArbre);
+            } else if (action === 'jeter') {
+                _jeterEssai(id);
+            }
+        });
+    }
+
+    async function _jeterEssai(id) {
+        var ok = (typeof uiDialogues !== 'undefined' && uiDialogues.confirmerAction)
+            ? await uiDialogues.confirmerAction({
+                titre: 'Jeter la variante',
+                message: 'Supprimer définitivement cette variante d’essai ? Cette action est irréversible.',
+                texteConfirmer: 'Jeter', variante: 'danger'
+            })
+            : true;
+        if (!ok) return;
+        try {
+            if (typeof PratiqueManager !== 'undefined' && PratiqueManager.supprimerPratique) {
+                await PratiqueManager.supprimerPratique(id);
+            }
+            if (typeof notifications !== 'undefined' && notifications.succes) notifications.succes('Variante supprimée');
+        } catch (e) {
+            if (typeof notifications !== 'undefined' && notifications.erreur) notifications.erreur('Erreur', e.message);
+        }
+        _rafraichirArbre();
+    }
+
     // Rend (ou re-rend) le contenu de la sous-section. Appelée par la
     // navigation à chaque affichage de Labo › Comparateur, et après
     // activation de la démo. Entrée fraîche = on repart de la matrice.
@@ -373,17 +516,23 @@
         _daFiche = null;
         _candidatsSel = null;   // défauts recalculés à chaque entrée
 
-        // GARDE DÉMO : le comparateur s'appuie sur les profils-types de la
+        // #326 D-2 : l'Exploration a deux régions — l'ARBRE des variantes d'essai
+        // (pratiques réelles, toujours visible) puis la COMPARAISON (matrice démo).
+        hote.innerHTML = '<div id="exploration-arbre-hote"></div><div id="exploration-comparaison"></div>';
+        _construireArbre(document.getElementById('exploration-arbre-hote'));
+        var comp = document.getElementById('exploration-comparaison');
+
+        // GARDE DÉMO : la matrice s'appuie sur les profils-types de la
         // démonstration. Hors démo, on invite à l'activer plutôt que d'afficher
         // une vue vide (§3.4 de la spec).
         if (estEnDemo()) {
-            construireVue(hote);
+            construireVue(comp);
         } else {
-            construireInvitation(hote);
+            construireInvitation(comp);
         }
 
-        // Accessibilité SPA : déplacer le focus vers le titre de la vue.
-        var titre = hote.querySelector('.comparateur-titre');
+        // Accessibilité SPA : déplacer le focus vers le titre de l'Exploration.
+        var titre = hote.querySelector('.exploration-arbre-titre');
         if (titre) titre.focus();
     }
 

@@ -19525,6 +19525,75 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     min-height: 0;
     color: var(--texte-principal, #d0e0e4);
 }
+
+/* #326 D-2 — Arbre d'exploration des variantes d'essai. Variables uniquement
+   (deux modes), au-dessus de la matrice de comparaison. */
+.exploration-arbre {
+    margin-bottom: 16px;
+}
+.exploration-arbre-titre {
+    margin: 0 0 6px;
+    outline: none;
+}
+.exploration-arbre-intro,
+.exploration-derivables-titre {
+    color: var(--texte-secondaire);
+    font-size: 0.9rem;
+    margin: 0 0 12px;
+}
+.exploration-arbre-vide {
+    color: var(--texte-secondaire);
+    font-style: italic;
+    margin: 0 0 12px;
+}
+.exploration-arbre-liste {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+/* Indentation des déclinaisons (variantes dérivées). */
+.exploration-noeud .exploration-arbre-liste {
+    margin-left: 18px;
+    padding-left: 12px;
+    border-left: 2px solid var(--bordure-legere);
+}
+.exploration-noeud {
+    margin: 6px 0;
+}
+.exploration-noeud-tete {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: var(--surface-element, var(--surface-carte));
+    border: 1px solid var(--bordure-legere);
+    border-radius: var(--radius-moyen, 8px);
+}
+/* Variante d'essai : accent gauche pour la distinguer d'une souche aboutie. */
+.exploration-noeud--essai > .exploration-noeud-tete {
+    border-left: 3px solid var(--accent-primaire);
+}
+.exploration-noeud-nom {
+    font-weight: 600;
+    color: var(--texte-principal);
+}
+.exploration-tag-essai {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--accent-primaire);
+    border: 1px solid var(--accent-primaire);
+    border-radius: 4px;
+    padding: 1px 6px;
+}
+/* Les boutons d'action se collent à droite de la tête du nœud. */
+.exploration-noeud-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-left: auto;
+}
 .comparateur-header {
     display: flex;
     align-items: flex-start;

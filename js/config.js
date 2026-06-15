@@ -66,7 +66,7 @@ const configurationsOnglets = {
     'labo': [
         { id: 'accompagnement', label: "Outils d'observation" },
         { id: 'modelisation', label: 'Modélisation' },
-        { id: 'comparateur', label: 'Comparateur de pratiques' },
+        { id: 'comparateur', label: 'Exploration des pratiques' },
         { id: 'rythme', label: 'Rythme de travail' },
         { id: 'etudes', label: 'Études' },
         { id: 'bilan', label: 'Bilan réflexif' }
