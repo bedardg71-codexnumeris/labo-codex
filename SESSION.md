@@ -1,4 +1,51 @@
 <!-- =====================================================================
+     RELAIS DE SESSION — 15 juin 2026 (fin). #340 CLOS ET MERGÉ ; PROCHAIN : #341.
+     ─────────────────────────────────────────────────────────────────────
+     ÉTAT MAIN : HEAD = 2b365b5 (squash PR #35), bêta publique 1.17.7
+     (build 0614-2036). 685 Vitest verts + CI verte (Tests/Playwright WebKit +
+     CodeQL). PR #35 mergée et désabonnée. Branche claude/backlog-task-340-t3qx6w
+     fusionnée (supprimable).
+
+     #340 LIVRÉ (voir bloc ci-dessous pour le détail) : enquête de fond +
+     garde-fou ACTIF au point de persistance (db.js _ecritureAutorisee +
+     js/productions-namespace-garde.js) + capture-once + sentinelle 11 cas.
+       • RESTE #340 (suite, NON bloquant) : confirmation terrain (reproduire
+         A25→H26 ; si la garde se déclenche, relever la PILE journalisée
+         « [DB][GARDE #340] Écriture BLOQUÉE » → elle prouvera enfin l'écrivain
+         fautif, sans perte de données) ; quota localStorage Mac → #334.
+
+     ─────────────────────────────────────────────────────────────────────
+     ➡️ PROCHAINE SESSION — #341 (décision Grégoire 15 juin : enchaîner #341
+        dans une NOUVELLE session). Tout est déjà documenté :
+       • BACKLOG.md item #341 (section « Bugs UX », 🔴) — diagnostic complet.
+       • SESSION.md bloc « MISE À JOUR 12 juin ~13h » (découverte terrain).
+       RÉSUMÉ DU BUG : `obtenirConfigurationPratiqueParId`
+       (js/pratiques-bibliotheque.js:622) résout par la clé GLOBALE
+       `db.get('pratiquesConfigurables')` (vestige du fix « Beta 95.2 - Bug
+       chimie ») au lieu de la clé NAMESPACÉE par trimestre
+       (`h2026_pratiquesConfigurables`, en place depuis 99.64 le 24 mai).
+       → « Appliquer au cours actif » ne retrouve AUCUNE config (ni
+       pan-standards-bruno = pratique A25 de Grégoire, ni une copie fraîche).
+       Versant code probable du blocage de reconstitution A25 (#339).
+       FIX PRESSENTI (1 ligne + sentinelle) : lire `cle('pratiquesConfigurables')`
+       (utiliser window.cle, patron #300/#340) ; trancher le fallback global
+       legacy (zéro-dette : probablement le retirer) ; AUDITER au passage les
+       autres `db.get('pratiquesConfigurables')` SANS `cle()` dans le fichier.
+       Sentinelle « config namespacée retrouvée par id » — un modèle EXISTE
+       DÉJÀ : tests/unit/sentinelle-pratique-config-namespacee-341.test.js
+       (créé en amont ; vérifier qu'il rougit AVANT le fix = break-test, puis
+       qu'il passe APRÈS). Charger SKILL_pratiques_notation.md +
+       SKILL_verification_adverse.md. Release : patch.
+       CONSTAT UX CONNEXE (à trancher, pas un bug) : la carte « PAN-Littérature
+       A25 » affiche « par Bruno V. +1 contrib. » (lignée de duplication
+       CC) — Grégoire le perçoit comme une erreur d'attribution ; décider si
+       l'affichage doit prioriser le contributeur local.
+
+     RITUEL DÉBUT DE SESSION #341 : audit git+tests+version (Skills pour Claude
+     Code/SKILL_Debut_de_session.md) ; Playwright/WebKit NON lançable en cloud
+     (couvrir par la CI de la PR). `cd tests && npm install` requis avant le
+     premier `npx vitest run` (deps non présentes au clone).
+     =====================================================================
      SESSION 15 juin 2026 — #340 ENQUÊTE DE FOND + GARDE-FOU ACTIF (1.17.7).
      ─────────────────────────────────────────────────────────────────────
      CONTEXTE : reprise à froid (rituel git+tests OK, branche
