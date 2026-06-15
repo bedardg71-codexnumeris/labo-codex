@@ -1,4 +1,47 @@
 <!-- =====================================================================
+     SESSION 15 juin 2026 — #340 ENQUÊTE DE FOND + GARDE-FOU ACTIF (1.17.7).
+     ─────────────────────────────────────────────────────────────────────
+     CONTEXTE : reprise à froid (rituel git+tests OK, branche
+     claude/backlog-task-340-t3qx6w, 674 Vitest verts au départ). Cible : la
+     cause racine de l'écrasement #340 (productions A25 sous h2026_productions).
+
+     ENQUÊTE (Rapports/ENQUETE-340-contamination-productions-2026-06-15.md) :
+       • Mécanisme STRUCTUREL confirmé : RMW async + cle('productions')
+         dynamique + changerTrimestreActif qui bascule le namespace sans flush.
+       • Audit des 17 écrivains de `productions` (correction du contre-sens :
+         la fenêtre de course n'existe qu'ENTRE le get et le set). UNE seule
+         vraie vulnérabilité intra-fonction : ajouterProductionIndividuelle
+         (await obtenirToutesLesProductionsBibliotheque entre get et set).
+       • Aucun cache mémoire de productions. Le chemin de sauvegarde d'éval
+         n'écrit JAMAIS productions (_autoSauvegarderCriteres → evaluations
+         seulement). → l'écrivain fautif EXACT n'est pas prouvable en statique.
+
+     DÉCISION GRÉGOIRE (AskUserQuestion) : garde-fou ACTIF + détecteur.
+     LIVRÉ (1.17.7) :
+       • js/db.js : registre générique de gardes d'écriture
+         (enregistrerGardeEcriture / _ecritureAutorisee), consulté par set ET
+         setSync AVANT toute persistance (localStorage + memoryCache + IDB) ;
+         abandon silencieux + journalisation de la pile du fautif si refus.
+       • js/productions-namespace-garde.js (nouveau) : garde métier productions.
+         Bloque l'écriture de <T>_productions dont le contenu appartient à un
+         autre trimestre (coursId→trimestreId via la globale `cours`).
+         Anti-faux-positifs : ne bloque que la signature de corruption (0 natif
+         + étrangers, ≥2 ou en remplacement de natif) ; ajout biblio d'1 item OK.
+       • Capture-once dans ajouterProductionIndividuelle (la vraie fenêtre).
+       • index.html : chargement du module après trimestres.js.
+       • Sentinelle tests/unit/sentinelle-namespace-productions-340.test.js
+         (11 cas, BREAK-TESTÉE : neutraliser la garde → 2 rouges sur les bonnes
+         assertions, puis restauré). 685 Vitest verts.
+
+     EFFET : la corruption #340 ne peut PLUS se persister, quel que soit
+     l'écrivain ; au prochain déclenchement la pile d'appel sera journalisée
+     → preuve terrain de l'écrivain fautif, sans perte de données.
+
+     RESTE / RISQUES : confirmation terrain (reproduire A25→H26) ; Playwright
+     non lançable en cloud (couvert par CI) ; quota localStorage saturé du Mac
+     à verser à #334 ; patron de garde extensible à evaluationsSauvegardees /
+     groupeEtudiants si l'instrumentation révèle le même mécanisme.
+     =====================================================================
      CLÔTURE DE SESSION — 14 juin 2026 (soir). Build 1.17.6 (0614-1653).
      HEAD main attendu : 21f9f409 (#332 constat 1). Arc complet de la session :
      ─────────────────────────────────────────────────────────────────────
