@@ -17324,6 +17324,10 @@ body.travaux-plein-ecran-actif .sous-nav {
     z-index: 9999;
     background: var(--surface-page, #0c1a22);
 }
+/* FIX terrain #carte-mentale (16 juin) : l'en-tête réel est <header class="entete">,
+   pas #header (aucun élément n'a cet id) → la règle ne masquait jamais l'en-tête,
+   qui restait visible et chevauchait la carte en plein écran. On cible la classe réelle. */
+body.planif-plein-ecran-actif header.entete,
 body.planif-plein-ecran-actif #header,
 body.planif-plein-ecran-actif .navigation-sous-sections,
 body.planif-plein-ecran-actif .sous-nav,

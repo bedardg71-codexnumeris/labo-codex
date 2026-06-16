@@ -17,7 +17,9 @@
             titre: 'Des fenêtres claires à la place des popups du navigateur',
             items: [
                 'Les confirmations, les saisies (nom de codex, de configuration…) et les messages d’information des bibliothèques (productions, planification, pratiques) et du menu Codex s’affichent maintenant dans des fenêtres intégrées à Labo Codex — au style de l’app, en mode clair comme sombre — au lieu des popups gris du navigateur.',
-                'Les suppressions définitives sont signalées par un bouton rouge distinct ; Échap annule, Entrée confirme.'
+                'Les suppressions définitives sont signalées par un bouton rouge distinct ; Échap annule, Entrée confirme.',
+                'Correction : « Dupliquer » et « Dériver une variante » d’une pratique sont de nouveau opérationnels (ils restaient sans effet sur les pratiques créées par l’assistant).',
+                'Correction : en plein écran de la carte mentale d’alignement, l’en-tête de l’app ne chevauche plus la carte.'
             ]
         },
         {

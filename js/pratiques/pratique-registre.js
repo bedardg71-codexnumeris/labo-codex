@@ -695,6 +695,10 @@ window.listerPratiquesDisponibles = listerPratiquesDisponibles;
 window.pratiqueEstDisponible = pratiqueEstDisponible;
 window.obtenirPratiqueParId = obtenirPratiqueParId;
 window.initialiserRegistrePratiques = initialiserRegistrePratiques;
+// #326 terrain : exposé pour que dupliquerPratique résolve la config exécutable
+// d'une pratique quelle que soit sa forme stockée (.config legacy OU .configuration
+// + racine du wizard) — la SSOT de résolution, pas une relecture à l'aveugle.
+window.construireConfigComplete = construireConfigComplete;
 
 // Gestion du cache
 window.invaliderCachePratique = invaliderCachePratique;
