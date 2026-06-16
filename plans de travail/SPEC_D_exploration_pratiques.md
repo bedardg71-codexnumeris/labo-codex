@@ -1,5 +1,14 @@
 # SPEC — Exploration des pratiques (Labo) : variantes, parenté et diff (axe D)
 
+> ⚠️ **RECADRAGE 16 juin 2026 — lire `RELAIS-326-refonte-banc-decision.md` AVANT cette spéc.**
+> La passe terrain de Grégoire sur l'UI livrée (D-2…D-5) a montré que le *mécanisme* est là
+> mais que le *workflow* rate sa cible. Recadrage VALIDÉ : (1) comparer des pratiques = mission
+> première (la dérivation devient un support) ; (2) profils fictifs par défaut, dérivés de
+> l'échelle de l'utilisateur ; (3) tableau **lecture seule** (résumé construction + résultat),
+> **lien** par colonne vers le formulaire ; vocabulaire « Comparateur » / « maquette ». Découpage
+> refondu en lots **R1→R6** (relais §5.3), préalable **#343 (DEN)**. Les §1, §13, §14 ci-dessous
+> sont **amendés** par le relais. **Release 1.19.0 suspendue jusqu'à R6.**
+
 **Date** : 8 juin 2026
 **Auteur** : Claude (Cowork) en réflexion avec Grégoire — conception **close** (voir `NOTE-CONCEPTION-D-comparateur-variantes-parente.md`, source des justifications)
 **Destinataire** : Claude Code
