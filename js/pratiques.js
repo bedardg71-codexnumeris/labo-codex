@@ -1032,6 +1032,16 @@ async function dupliquerPratique(id, options = {}) {
         // de l'utilisateur ; trace d'origine `inspireDe` (respect CC BY, incl.
         // `sourceId` pour l'arbre de filiation, axe D / #326). Si la source était
         // une démo, la copie perd le flag isDemo.
+        //
+        // FIX #326 (terrain 16 juin) : la config exécutable est RÉSOLUE par la SSOT
+        // (construireConfigComplete) — les pratiques du wizard la rangent sous
+        // `.configuration` (+ racine), PAS `.config`. Lire `original.config` à
+        // l'aveugle valait `undefined` → `JSON.parse(undefined)` LEVAIT, ce qui
+        // rendait « Dupliquer » et « Dériver une variante » silencieusement sans
+        // effet. Le résolveur gère les deux formes (legacy `.config` ET wizard).
+        const configResolue = (typeof construireConfigComplete === 'function')
+            ? construireConfigComplete(original)
+            : (original.config || original.configuration || {});
         const copie = {
             id: genererIdUnique('pratique_'),
             nom: nouveauNom,
@@ -1039,7 +1049,7 @@ async function dupliquerPratique(id, options = {}) {
             isDemo: false,
             inspireDe: BibliothequeUI.forgerInspireDe(original),
             description: original.description,
-            config: JSON.parse(JSON.stringify(original.config)) // Deep copy
+            config: JSON.parse(JSON.stringify(configResolue)) // Deep copy de la config résolue
         };
 
         // `estEssai` (axe D / #326, SPEC §3.2) : variante d'essai vivant dans
@@ -1096,10 +1106,18 @@ async function deriverVarianteEssai(sourceId) {
     const nom = (source.nom || 'Pratique') + ' · essai ' + (nEssais + 1);
 
     const nouvelId = await dupliquerPratique(sourceId, { estEssai: true, nom: nom, silencieux: true });
-    if (nouvelId && typeof editerPratique === 'function') {
+    if (!nouvelId) {
+        // Défense (terrain 16 juin) : ne JAMAIS échouer en silence — `silencieux`
+        // supprime l'alerte de dupliquerPratique, donc on rend l'échec visible ici.
+        if (typeof notifications !== 'undefined' && notifications.erreur) {
+            notifications.erreur('La dérivation a échoué', 'La variante d\'essai n\'a pas pu être créée.');
+        }
+        return null;
+    }
+    if (typeof editerPratique === 'function') {
         await editerPratique(nouvelId);   // ouvre l'assistant sur les paramètres (D-3)
     }
-    return nouvelId || null;
+    return nouvelId;
 }
 
 /**
