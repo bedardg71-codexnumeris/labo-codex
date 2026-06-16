@@ -8307,16 +8307,11 @@ body.mode-clair .bloc-rlo-separateur {
     align-items: start;
 }
 
-/* 🆕 FIX (1er fév 2026) : Responsive pour iPad/tablettes */
-/* Corrige le contenu tronqué à droite sur iPad */
+/* #283 (16 juin 2026, option B) : empiler la sidebar dès < 1024 px — aligné sur
+   les breakpoints du chrome (1024/768). Avant : sidebar étroite 220 px serrée
+   entre 850 et 1024 px puis empilée à 850. Maintenant : 2 colonnes pleines au-delà
+   de 1024 px, sinon empilé. Fusionne les anciennes media queries 1024 + 850. */
 @media (max-width: 1024px) {
-    .layout-sidebar-2col {
-        grid-template-columns: 220px 1fr;
-        gap: 15px;
-    }
-}
-
-@media (max-width: 850px) {
     .layout-sidebar-2col {
         grid-template-columns: 1fr;
         gap: 15px;
