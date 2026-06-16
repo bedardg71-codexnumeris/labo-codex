@@ -1,4 +1,56 @@
 <!-- =====================================================================
+     CLÔTURE DE SESSION — 16 juin 2026 (Claude Code cloud).
+     Rituel de fin appliqué. Session de CADRAGE PUR (aucun code).
+     ─────────────────────────────────────────────────────────────────────
+     ÉTAT : main inclut #283 (PR #45). 755 Vitest verts ; Playwright = CI.
+     ─────────────────────────────────────────────────────────────────────
+     CE QUI A ÉTÉ FAIT
+
+     • #283 responsive sidebar — option B livrée, VALIDÉE TERRAIN, MERGÉE (PR #45).
+
+     • #326 — RECADRAGE COMPLET du comparateur (passe terrain Grégoire sur l'UI
+       D-2…D-5 : mécanisme livré, WORKFLOW raté). TOUT consigné dans
+       plans de travail/RELAIS-326-refonte-banc-decision.md (SOURCE UNIQUE).
+       Décisions VALIDÉES par Grégoire :
+       - COMPARATEUR = banc de décision (comparer 2-3 pratiques pour choisir
+         AVANT d'appliquer) ; la dérivation = support.
+       - Données : profils FICTIFS par défaut ; vrais groupes en raffinement.
+       - UI : tableau LECTURE SEULE (résumé construction de la note + résultat sur
+         N profils), LIEN par colonne vers le formulaire (pas d'éditeur embarqué) ;
+         multi-lignes (construction, pas que la note).
+       - Vocabulaire : « Comparateur » / « maquette » / dériver / ADOPTER ;
+         estEssai→estMaquette ; MAX 1 dérivé.
+       - Profils-types DÉRIVÉS de l'échelle (N niveaux → N profils, trajectoires
+         ancrées + 1 irrégulier ; v1 fixes, réels plus tard).
+       - Inventaire des 4 familles (socle commun vs family-specific) — §4.6.
+       - #319 (assistant) DÉJÀ LIVRÉ → lien vers le formulaire existant, PAS de
+         co-chantier.
+       - DÉCOUPAGE VALIDÉ (§5.3) : #343 → (R1 ∥ R2 ∥ R3) → R4 → R5 → R6.
+
+     • #343 CRÉÉ — chantier DEN distinct, PRÉALABLE à #326. Malentendu « DEN =
+       sans critères/grille/échelle » VÉRIFIÉ à 3 niveaux. Principe Grégoire :
+       critères TOUJOURS EXPLICITES. DEN = seul cas (SOM/SPE sans grille = par
+       design ; STD exige l'échelle).
+     ─────────────────────────────────────────────────────────────────────
+     POINT DE REPRISE POUR L'INSTANCE SUIVANTE (fresh, sans mémoire)
+
+     1. LIRE EN PREMIER : plans de travail/RELAIS-326-refonte-banc-decision.md
+        (cadrage validé + §5.3 découpage + §4.6 inventaire + §4.7 malentendu DEN).
+        Puis backlog #326 et #343.
+     2. COMMENCER PAR #343 (préalable DEN) ; volet « descriptions » séparable.
+     3. PUIS R1→R6 (§5.3). R1 inclut le fix du bug « Pratique introuvable ».
+     4. POSTURE ADVERSE : références fichier:ligne DATÉES → re-vérifier par grep ;
+        DISCORDANCE non résolue (§4.5) jetons formulaire STD vs relevé code côté
+        SPE ; inventaire 4 familles + malentendu DEN = subagent-sourcés (file:line
+        cités) NON re-vérifiés ligne à ligne → re-confirmer au codage.
+     5. Skills : SKILL_pratiques_notation, SKILL_integrite_globaux,
+        SKILL_Securite_donnees, SKILL_verification_adverse ; design-system.html (R4).
+     6. NB : ces docs montés sur main via PR (séparée de la branche de cadrage
+        divergente claude/backlog-status-review-l0ltlx, NON mergée).
+     ─────────────────────────────────────────────────────────────────────
+-->
+
+<!-- =====================================================================
      CLÔTURE DE SESSION — 15 juin 2026 (après-midi, Claude Code cloud).
      Rituel de fin appliqué. Branche claude/merge-claude-session-md-i4qgf1.
      ─────────────────────────────────────────────────────────────────────
