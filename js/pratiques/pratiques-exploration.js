@@ -296,13 +296,133 @@
     }
 
     // =========================================================================
+    // D-4 — Diff « avant matrice » : helpers PURS pour la vue comparaison
+    // =========================================================================
+
+    /**
+     * Deux pratiques partagent-elles une SOUCHE ? (l'une dérive de l'autre, ou
+     * toutes deux d'une même source). Sert à n'afficher le diff « ce que ça change »
+     * que quand les colonnes comparées sont des variantes d'une même base (SPEC §7).
+     * Pur ; lit `inspireDe.sourceId`.
+     */
+    function partagentSouche(a, b) {
+        if (!a || !b || a.id == null || b.id == null || a.id === b.id) return false;
+        var sa = _sourceIdDe(a), sb = _sourceIdDe(b);
+        return !!((sa && sa === b.id) || (sb && sb === a.id) || (sa && sb && sa === sb));
+    }
+
+    /**
+     * Phrases d'effet entre deux objets `config` RÉSOLUS (forme à plat). Pur.
+     * = diff profond + mapping « ce que ça change dans la mesure ». L'appelant
+     * résout d'abord chaque config (construireConfigComplete) — les vraies
+     * pratiques rangent sous `.configuration`, pas `.config` (cf. fix 16 juin).
+     * @returns {Array<{chemin, type, effet}>}
+     */
+    function phrasesEffetEntreConfigs(configA, configB) {
+        return diffConfigsPratiques(configA, configB).map(function (d) {
+            return { chemin: d.chemin, type: d.type, effet: phraseEffetPourDiff(d) };
+        });
+    }
+
+    // =========================================================================
+    // D-5 — Hygiène de l'exploration (tri / filtre / péremption douce) — PUR
+    //
+    // SPEC §9 : éviter l'accumulation de variantes semblables. Leviers purs,
+    // sans DOM ni stockage : tri par nom/famille/date, filtre par texte/famille,
+    // et « péremption douce » = SIGNALER (jamais détruire) les essais dormants.
+    // La famille est dérivée de la forme stockée (configuration.type | type),
+    // sans dépendre du registre → reste pur et testable.
+    // =========================================================================
+
+    function _familleEssai(p) {
+        return (p && (p.type || (p.configuration && p.configuration.type) || (p.config && p.config.type))) || '';
+    }
+
+    // Date de référence d'un essai pour la péremption : sa date de filiation
+    // (forgerInspireDe) ou une date de création si présente. null si aucune.
+    function _dateEssai(p) {
+        var d = (p && ((p.inspireDe && p.inspireDe.date) || p.dateCreation || p.dateModification)) || null;
+        return d || null;
+    }
+
+    /**
+     * Trie une liste d'essais (copie, sans muter l'entrée). Tri stable, pur.
+     * @param {Array} essais
+     * @param {'nom'|'famille'|'date'} critere
+     * @returns {Array} nouvelle liste triée
+     */
+    function trierEssais(essais, critere) {
+        var liste = Array.isArray(essais) ? essais.slice() : [];
+        var cmp;
+        if (critere === 'famille') {
+            cmp = function (a, b) { return _familleEssai(a).localeCompare(_familleEssai(b)); };
+        } else if (critere === 'date') {
+            // Plus récent d'abord ; les essais sans date finissent en dernier.
+            cmp = function (a, b) {
+                var da = _dateEssai(a), dbb = _dateEssai(b);
+                if (!da && !dbb) return 0;
+                if (!da) return 1;
+                if (!dbb) return -1;
+                return new Date(dbb) - new Date(da);
+            };
+        } else { // 'nom' (défaut)
+            cmp = function (a, b) { return String((a && a.nom) || '').localeCompare(String((b && b.nom) || '')); };
+        }
+        return liste.sort(cmp);
+    }
+
+    /**
+     * Filtre une liste d'essais par texte (sur le nom, insensible casse/accents
+     * approximée) et/ou par famille (code de type stocké). Pur.
+     * @param {Array} essais
+     * @param {{texte?:string, famille?:string}} criteres
+     * @returns {Array}
+     */
+    function filtrerEssais(essais, criteres) {
+        var liste = Array.isArray(essais) ? essais : [];
+        var c = criteres || {};
+        var texte = (c.texte || '').trim().toLowerCase();
+        var famille = (c.famille || '').trim();
+        return liste.filter(function (p) {
+            if (famille && _familleEssai(p) !== famille) return false;
+            if (texte && String((p && p.nom) || '').toLowerCase().indexOf(texte) === -1) return false;
+            return true;
+        });
+    }
+
+    /**
+     * Péremption douce (SPEC §9) : un essai est « dormant » si sa date de
+     * référence est antérieure de plus de `seuilJours` à `maintenant`. PUR —
+     * ne supprime RIEN, ne fait que signaler (l'UI pose un badge discret).
+     * @param {object} essai
+     * @param {{maintenant?:number|Date, seuilJours?:number}} [opts]
+     * @returns {boolean} vrai si dormant (à signaler), faux sinon ou si date absente.
+     */
+    function essaiDormant(essai, opts) {
+        var o = opts || {};
+        var seuil = (typeof o.seuilJours === 'number') ? o.seuilJours : 30;
+        var d = _dateEssai(essai);
+        if (!d) return false; // pas de date → on ne signale pas (jamais de faux positif destructeur)
+        var t = new Date(d).getTime();
+        if (isNaN(t)) return false;
+        var maintenant = (o.maintenant instanceof Date) ? o.maintenant.getTime()
+            : (typeof o.maintenant === 'number') ? o.maintenant : Date.now();
+        return (maintenant - t) / 86400000 > seuil;
+    }
+
+    // =========================================================================
     // Exposition (IIFE → window), cohérente avec les autres modules pratiques.
     // =========================================================================
     var api = {
         construireArbrePratiques: construireArbrePratiques,
         diffConfigsPratiques: diffConfigsPratiques,
         diffPratiques: diffPratiques,
-        phraseEffetPourDiff: phraseEffetPourDiff
+        phraseEffetPourDiff: phraseEffetPourDiff,
+        partagentSouche: partagentSouche,
+        phrasesEffetEntreConfigs: phrasesEffetEntreConfigs,
+        trierEssais: trierEssais,
+        filtrerEssais: filtrerEssais,
+        essaiDormant: essaiDormant
     };
 
     if (typeof window !== 'undefined') {
