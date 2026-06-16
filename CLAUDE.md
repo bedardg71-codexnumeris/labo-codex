@@ -238,6 +238,13 @@ Gregoire a la memoire contextuelle reelle du projet.
 
 ## Avant chaque commit
 
+0. **Rituel de fin de session** — lancer **`/fin-de-session`** (commande qui déroule
+   `SKILL_Fin_de_session.md` §1-§6, dont le **§4 break-test** : faire ROUGIR chaque
+   sentinelle de correctif données/sécurité/SSOT avant de lui faire confiance). Le
+   filet **mécanique** (Défense I/J : contrôle innerHTML au commit, Vitest au push)
+   s'active tout seul via le hook SessionStart (`.claude/hooks/session-start.sh` →
+   `scripts/install-hooks.sh`) ; le **§4 adverse** (jugement) reste à ta charge —
+   c'est l'étape que le biais d'auteur saute, donc la non négociable.
 1. **Décider l'intention de version** (ton jugement) : correction de bug → `patch`,
    nouveauté sans rupture → `minor`, rupture ou changement de format de données → `major`.
    **Confirmer avec Grégoire avant un `major`** (acte visible publiquement) ; `patch`/`minor`
