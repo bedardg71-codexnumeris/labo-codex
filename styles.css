@@ -19591,6 +19591,17 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     border-radius: 4px;
     padding: 1px 6px;
 }
+/* D-5 péremption douce : badge discret « dormant » (signal, pas alarme) —
+   ton secondaire/atténué pour ne pas voler l'attention. */
+.exploration-tag-dormant {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--texte-secondaire);
+    border: 1px solid var(--bordure-legere);
+    border-radius: 4px;
+    padding: 1px 6px;
+}
 /* Les boutons d'action se collent à droite de la tête du nœud. */
 .exploration-noeud-actions {
     display: flex;
@@ -19718,6 +19729,22 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 .comparateur-delta { color: var(--texte-muted, #80a0b0); font-size: 0.8rem; font-weight: 400; }
 .comparateur-tendance { color: var(--texte-muted, #80a0b0); }
 .comparateur-vide { color: var(--texte-muted, #80a0b0); }
+/* D-4 : cellule d'une colonne DEN — pas un nombre comparable, un rappel que la
+   note est un jugement (non simulable). Texte atténué + italique. */
+.comparateur-cellule--den { color: var(--texte-secondaire, #80a0b0); font-style: italic; font-size: 0.85rem; }
+
+/* D-4 : bloc « ce que ces réglages changent » — affiché AVANT la matrice quand
+   les colonnes comparées sont des variantes d'une même souche. « Ce qui change »
+   d'abord, l'écart de note discret ensuite. Variables uniquement (deux modes). */
+.comparateur-diff { margin: 0 0 16px; }
+.comparateur-diff:empty { display: none; }
+.comparateur-diff-hote:empty { display: none; }
+.comparateur-diff-titre { margin: 0 0 4px; font-size: 1rem; }
+.comparateur-diff-intro { margin: 0 0 12px; color: var(--texte-secondaire); font-size: 0.9rem; }
+.comparateur-diff-paire { margin: 0 0 10px; }
+.comparateur-diff-paire-titre { font-weight: 600; color: var(--texte-principal); margin-bottom: 4px; }
+.comparateur-diff-liste { margin: 0; padding-left: 18px; color: var(--texte-secondaire); }
+.comparateur-diff-liste li { margin: 2px 0; }
 /* Mode clair : sur fond blanc, --surface-element (#f0f8ff) est presque
    imperceptible. On épingle la colonne référence « Ta pratique » par un fond
    bleu pâle plus contrasté + une bordure-gauche d'accent, et on accentue son

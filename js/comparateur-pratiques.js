@@ -184,6 +184,10 @@
         return (inst && typeof inst.obtenirCode === 'function') ? inst.obtenirCode() : null;
     }
 
+    // D-4 : une pratique de dénotation (DEN) n'est PAS simulable — sa note finale
+    // est un jugement posé, pas un calcul sur les données (SPEC §7, SKILL §8 DEN-E).
+    function _estDEN(id) { return _codePratique(id) === 'DEN'; }
+
     // Badge construit depuis le CODE réel (genererBadgePratiqueHTML retombe sur STD
     // par défaut pour un id configurable non mappé — à ne pas réutiliser ici).
     function _badge(id) {
@@ -335,6 +339,12 @@
             }
 
             cols.forEach(function(c) {
+                // DEN non simulable (D-4) : pas un 4ᵉ nombre comparable, mais le
+                // rappel que la note est un jugement (mécanisme #128 paramétré DEN).
+                if (_estDEN(c.id)) {
+                    h += '<td class="comparateur-cellule comparateur-cellule--den" title="En dénotation, la note finale est un jugement posé par l’enseignant, gardé par l’atteinte des cibles — pas un calcul sur les données. Elle n’est donc pas simulable ici.">jugement</td>';
+                    return;
+                }
                 var p = _note(prof.da, c.id);
                 if (p === null) {
                     h += '<td class="comparateur-cellule comparateur-vide" title="Note non calculable pour cette pratique">—</td>';
@@ -391,13 +401,14 @@
         return '';
     }
 
-    // Boutons d'un nœud. Toute pratique est dérivable ; seules les variantes
-    // d'essai offrent promouvoir / jeter (la comparaison arrive en D-4).
+    // Boutons d'un nœud. Toute pratique est dérivable ; les variantes d'essai
+    // offrent en plus comparer (D-4) / promouvoir / jeter.
     function _actionsNoeud(p) {
         var id = _esc(p.id);
         var b = '<div class="exploration-noeud-actions">';
         b += '<button type="button" class="btn btn-tres-compact btn-secondaire" data-expl-action="deriver" data-id="' + id + '">Dériver une variante</button>';
         if (p.estEssai === true) {
+            b += '<button type="button" class="btn btn-tres-compact btn-secondaire" data-expl-action="comparer" data-id="' + id + '">Comparer</button>';
             b += '<button type="button" class="btn btn-tres-compact btn-principal" data-expl-action="promouvoir" data-id="' + id + '">Promouvoir</button>';
             b += '<button type="button" class="btn btn-tres-compact btn-supprimer" data-expl-action="jeter" data-id="' + id + '">Jeter</button>';
         }
@@ -413,6 +424,12 @@
         h += '<span class="exploration-noeud-nom">' + _esc(p.nom || 'Sans titre') + '</span> ';
         h += _badgeFamille(p);
         if (estEssai) h += ' <span class="exploration-tag-essai">essai</span>';
+        // D-5 péremption douce : badge discret si l'essai dort depuis longtemps.
+        // SIGNAL seulement (jamais de suppression) — SPEC §9. Date = filiation.
+        if (estEssai && typeof ExplorationPratiques !== 'undefined'
+            && ExplorationPratiques.essaiDormant && ExplorationPratiques.essaiDormant(p)) {
+            h += ' <span class="exploration-tag-dormant" title="Variante d’essai inactive depuis plus de 30 jours — à promouvoir ou jeter ?">dormant</span>';
+        }
         h += _actionsNoeud(p);
         h += '</div>';
         if (noeud.enfants && noeud.enfants.length) {
@@ -478,8 +495,30 @@
                 Promise.resolve(promouvoirPratiqueEssai(id)).then(_rafraichirArbre);
             } else if (action === 'jeter') {
                 _jeterEssai(id);
+            } else if (action === 'comparer') {
+                _comparerDepuisArbre(id);
             }
         });
+    }
+
+    // D-4 : « Comparer » depuis l'arbre → injecte la variante dans la 1ʳᵉ colonne de
+    // simulation de la matrice (sur les profils-types démo). La matrice étant
+    // démo-gated, hors démo on invite à l'activer. Lecture seule, aucune écriture.
+    // ⚠️ Pont réel↔démo : la variante doit être résoluble dans le contexte courant ;
+    // sinon la cellule affiche « — » (graceful). À confirmer au terrain.
+    function _comparerDepuisArbre(id) {
+        if (!estEnDemo()) {
+            if (typeof notifications !== 'undefined' && notifications.info) {
+                notifications.info('Comparer une variante', 'Active le mode démonstration (ci-dessous) pour comparer une variante sur les profils-types.');
+            }
+            return;
+        }
+        var refId = _refId();
+        if (!Array.isArray(_candidatsSel)) _initCandidats(refId);
+        if (!_candidatsSel.length) _candidatsSel = [id]; else _candidatsSel[0] = id;
+        var panel = _conteneur();
+        var comp = panel && panel.querySelector('#exploration-comparaison');
+        if (comp) _rerendreMatrice(comp);
     }
 
     async function _jeterEssai(id) {
@@ -583,9 +622,66 @@
 
     // Re-rend uniquement le tableau (les sélecteurs y vivent désormais ; l'hôte
     // #comparateur-matrice persiste, donc l'écouteur délégué survit au re-rendu).
+    /* ── Diff « avant matrice » (D-4) ─────────────────────── */
+    // Enveloppe stockée d'une pratique configurable (pour lire inspireDe).
+    function _enveloppe(id) {
+        var liste = _configsPratiques();
+        for (var i = 0; i < liste.length; i++) { if (liste[i] && liste[i].id === id) return liste[i]; }
+        return null;
+    }
+    // Config exécutable RÉSOLUE (les vraies pratiques rangent sous `.configuration`,
+    // pas `.config` — cf. fix 16 juin) ; null si non configurable (famille codée).
+    function _resoudreConfig(id) {
+        var env = _enveloppe(id);
+        if (!env) return null;
+        return (typeof construireConfigComplete === 'function')
+            ? construireConfigComplete(env)
+            : (env.config || env.configuration || env);
+    }
+    // Pour chaque colonne de simulation partageant une SOUCHE avec la référence :
+    // les phrases « ce que ce réglage change ». Lecture seule, pur côté moteur.
+    function _diffColonnes(cols) {
+        if (!cols || cols.length < 2 || typeof ExplorationPratiques === 'undefined'
+            || !ExplorationPratiques.partagentSouche) return [];
+        var refEnv = _enveloppe(cols[0].id);
+        if (!refEnv) return [];
+        var out = [];
+        for (var i = 1; i < cols.length; i++) {
+            var cEnv = _enveloppe(cols[i].id);
+            if (!cEnv || !ExplorationPratiques.partagentSouche(refEnv, cEnv)) continue;
+            var ca = _resoudreConfig(cols[0].id), cb = _resoudreConfig(cols[i].id);
+            if (!ca || !cb) continue;
+            var phrases = ExplorationPratiques.phrasesEffetEntreConfigs(ca, cb)
+                .filter(function (e) { return e.chemin !== 'id' && e.chemin !== 'nom'; });
+            if (phrases.length) out.push({ refId: cols[0].id, colId: cols[i].id, phrases: phrases });
+        }
+        return out;
+    }
+    // Le diff s'affiche AVANT la matrice (« ce qui change » d'abord, l'écart de
+    // note discret ensuite — continuité E1-E3, anti palmarès de générosité).
+    function _rendreDiff(cols) {
+        var diffs = _diffColonnes(cols);
+        if (!diffs.length) return '';
+        var h = '<div class="comparateur-diff carte" role="region" aria-label="Ce que ces réglages changent">';
+        h += '<h3 class="comparateur-diff-titre">Ce que ces réglages changent</h3>';
+        h += '<p class="comparateur-diff-intro">Avant de regarder l’écart de notes : voici ce que chaque réglage modifie dans ce que la note mesure.</p>';
+        diffs.forEach(function (d) {
+            h += '<div class="comparateur-diff-paire">'
+                + '<div class="comparateur-diff-paire-titre">' + _esc(_nomPratique(d.refId)) + ' → ' + _esc(_nomPratique(d.colId)) + '</div>'
+                + '<ul class="comparateur-diff-liste">';
+            d.phrases.forEach(function (e) { h += '<li>' + _esc(e.effet) + '</li>'; });
+            h += '</ul></div>';
+        });
+        h += '</div>';
+        return h;
+    }
+
     function _rerendreMatrice(panel) {
         var hote = panel.querySelector('#comparateur-matrice');
         if (hote) hote.innerHTML = _rendreMatrice();
+        // Le diff suit l'état des colonnes (D-4) : re-rendu au même moment.
+        var diffHote = panel.querySelector('#comparateur-diff');
+        if (diffHote) diffHote.innerHTML = _rendreDiff(_colonnes());
     }
 
     // Délégation sur l'hôte persistant #comparateur-matrice : un seul attachement
@@ -808,6 +904,9 @@
                     '<p class="comparateur-finalite">Des pratiques différentes mesurent des choses ' +
                     'différentes. Un écart entre des points n’est ni un bonus ni une erreur. Le ' +
                     'comparateur montre la <strong>maîtrise atteinte en regard de chaque note</strong>.</p>' +
+                    '<div class="comparateur-diff-hote" id="comparateur-diff">' +
+                        _rendreDiff(_colonnes()) +
+                    '</div>' +
                     '<div class="comparateur-matrice" id="comparateur-matrice" data-etat="matrice">' +
                         _rendreMatrice() +
                     '</div>' +

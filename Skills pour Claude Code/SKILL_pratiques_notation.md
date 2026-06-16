@@ -476,10 +476,19 @@ lecture seule** ; aucun nouveau chemin de calcul. Spéc canonique :
     actions dériver/promouvoir/jeter, noms `_esc`) + `#exploration-comparaison` (matrice démo inchangée).
   - Tests : `exploration-pratiques-essai-filtre-326`, `promotion-essai-326`, `derivation-essai-326`,
     `exploration-arbre-securite-326` (break-testés).
-- **RESTE (non livré)** : D-4 (matrice + diff avant matrice + DEN non-simulable + bouton « Comparer »
-  depuis l'arbre), D-5 (hygiène : tri/filtre, péremption douce, consomme #320), D-6 (validation
-  terrain Mac+iPad sombre/clair + release `minor` + changelog). ⚠️ **Validation terrain Grégoire
-  en attente pour l'UI de l'arbre** (deux modes, iPad).
+- **D-4 + D-5 (cœurs) LIVRÉS (16 juin 2026)** :
+  - **D-4** : `comparateur-pratiques.js` — **DEN non-simulable** (colonne DEN = « jugement », pas un
+    nombre) ; **diff avant matrice** (`#comparateur-diff`, re-rendu avec la matrice) via les helpers
+    PURS `ExplorationPratiques.partagentSouche` + `phrasesEffetEntreConfigs` (diff de configs
+    **résolues** par `construireConfigComplete` — pas `.config` à l'aveugle) ; bouton **« Comparer »**
+    sur les nœuds d'essai → `_comparerDepuisArbre` injecte la variante dans la matrice démo.
+  - **D-5** : moteur PUR `trierEssais`/`filtrerEssais`/`essaiDormant` (péremption douce = signale,
+    jamais détruit) + badge « dormant » sur les nœuds d'essai.
+  - Tests : `exploration-hygiene-326` (13), `exploration-diff-souche-326` (7), break-testés.
+- **RESTE** : **D-4** pont réel↔démo de « Comparer » (la variante doit être résoluble en démo) +
+  barre tri/filtre (liste plate) + rangement #320 — **décisions/validation terrain** ; **D-6**
+  (validation terrain Mac+iPad sombre/clair + release `minor` + changelog). ⚠️ **Validation terrain
+  Grégoire en attente** pour tout le visuel Exploration (arbre, diff, matrice, badges).
 
 ---
 
