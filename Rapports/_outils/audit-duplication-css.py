@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Audit de la duplication CSS entre le <style> inline d'index.html et styles.css.
 
-Sortie : Rapports/audit-duplication-css-2026-05-28.md (rapport classifié).
+Sortie : Rapports/audit-duplication-css-2026-06-16.md (rapport classifié).
 
 Parser naïf adapté à un CSS plat sans nesting (vanilla), supportant @media et
 @supports comme conteneurs (le sélecteur garde son préfixe @media-context).
@@ -31,11 +31,11 @@ from typing import Iterable
 RACINE = Path(__file__).resolve().parents[2]
 INDEX = RACINE / "index.html"
 STYLES = RACINE / "styles.css"
-SORTIE = RACINE / "Rapports" / "audit-duplication-css-2026-05-28.md"
+SORTIE = RACINE / "Rapports" / "audit-duplication-css-2026-06-16.md"
 
 # Bornes du <style> inline d'index.html
 INLINE_DEBUT_LIGNE = 16
-INLINE_FIN_LIGNE = 3806
+INLINE_FIN_LIGNE = 3825
 
 
 @dataclass
@@ -229,7 +229,7 @@ def main() -> int:
 
     p("# Audit duplication CSS — index.html ↔ styles.css")
     p("")
-    p("**Date** : 2026-05-28 PM")
+    p("**Date** : 2026-06-16 (re-génération ÉTAPE 0 — plage inline corrigée 16-3825)")
     p(f"**Ticket** : BACKLOG #297")
     p("**Mode** : Audit lecture seule. Aucune modification de code.")
     p("**Script** : `Rapports/_outils/audit-duplication-css.py`")

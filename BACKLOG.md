@@ -284,7 +284,8 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 ### Cohérence visuelle UI
 
 - [ ] 🟢 **#297** Dette technique : duplication des règles CSS entre `<style>` inline d'index.html et styles.css
-  - **📋 Relais de cadrage prêt (15 juin 2026)** : `plans de travail/RELAIS-297-dette-css.md` — découpage Lot A (15 identiques, retrait des profondes seulement) / Lot B (33 divergentes cas par cas) / Lot C (convention + sentinelle statique), grille de décision, profil de risque (FOUC Safari `file://`, `:root` en retard de variables), vérif visuelle deux modes (session Mac). **ÉTAPE 0** : le bloc inline a dérivé (fin l. **3825** vs 3806 codé dans le script) → corriger `INLINE_FIN_LIGNE` et re-générer l'audit avant toute décision (chiffres ci-dessous périmés).
+  - **📋 Relais de cadrage prêt (15 juin 2026)** : `plans de travail/RELAIS-297-dette-css.md` — découpage Lot A (15 identiques, retrait des profondes seulement) / Lot B (33 divergentes cas par cas) / Lot C (convention + sentinelle statique), grille de décision, profil de risque (FOUC Safari `file://`, `:root` en retard de variables), vérif visuelle deux modes (session Mac).
+  - **✅ ÉTAPE 0 FAITE (16 juin 2026)** : `INLINE_FIN_LIGNE` corrigée (3806 → **3825**) + date d'en-tête dans `Rapports/_outils/audit-duplication-css.py` ; audit re-généré → `Rapports/audit-duplication-css-2026-06-16.md`. **Chiffres actualisés** : bloc inline = **629 règles** (vs 625), styles.css 4176 ; **48 sélecteurs communs** dont **15 identiques** (retrait sûr) + **33 divergentes** (cas par cas). Les phases 2-3 (décision par sélecteur + retrait + convention) restent **post-AQPC / session Mac** (risque FOUC `file://`, vérif visuelle deux modes — non faisable en cloud).
   - **Phase 1 livrée 28 mai 2026 PM — audit lecture seule**.
   - **Rapport** : `Rapports/audit-duplication-css-2026-05-28.md` (script reproductible dans `Rapports/_outils/audit-duplication-css.py`).
   - **Constats clés** :
