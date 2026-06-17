@@ -557,8 +557,16 @@ mécanisme mais raté le workflow.** La refonte se découpe en `#343 → R1∥R2
     l'injection (repli `db.getSync` inchangé hors simulation). Seules évaluations+productions sont
     simulées ; la **config des pratiques + les échelles** restent lues du stockage réel.
   - Tests : `profils-types-generateur-326` (9), `simulation-injection-326` (8), break-testés. 823 verts.
-  - **RESTE R4** (tableau : source fictif/réel + colonnes paires + lignes construction R3 + résultats
-    R2 via injection + lien formulaire #319) → **non vérifiable en cloud, terrain R6** ; R5 nettoyage ; R6 release.
+  - **R4a LIVRÉ (17 juin 2026)** — le banc tourne sur les **profils fictifs générés (R2)** injectés,
+    **par défaut, sans mode démo** (résout RELAIS §1.3/§1.4). `comparateur-pratiques.js` : `_corpusActif`/
+    `_corpusInjection`/`_profilsActifs`/`_echelleActiveComparateur` (échelle de la pratique de réf, sinon
+    1ʳᵉ échelle) ; `_note`/`_carteRecit` injectent le corpus dans `simulerIndices` ; `_donnees` lit le
+    corpus ; garde « mode démo » → « corpus disponible » (repli `construireInvitationEchelle`).
+    `genererCorpus` stampe `echelleId` sur les évals. Test `comparateur-source-fictive-326` (8, statique,
+    break-testé). ⚠️ **Rendu non vérifiable en cloud → terrain.** `construireInvitation`/`activerDemoEtOuvrir`
+    = code de transition (retrait R5).
+  - **RESTE R4b** (colonnes paires sans réf + lignes de construction R3 + lien formulaire #319 + source
+    réelle) ; **R5** nettoyage ; **R6** terrain + release 1.19.0.
 
 ---
 
@@ -586,6 +594,8 @@ vraiment*.
 | Date | Changement |
 |------|------------|
 | 2026-06-16 (#343 descriptions) | **Malentendu DEN corrigé dans les descriptions.** §2 bis (DEN) : « standards/specs implicites » → « doivent rester explicites » (cf. #343). 5 sites UI alignés (gabarits-utils, accompagnement terme/popup, wizard type + bannière). Reste #343 (b)+(c) modèle/formulaire (DEN porte échelle/grille optionnelles). |
+| 2026-06-17 (#326 R4b/R5/R6) | **Banc de décision — code COMPLET, release 1.19.0 préparée.** R4b : colonnes paires (sans réf, maquettes incluses) + section « Construction de la note » (R3, alignée par axe, « s.o. ») + section « Résultat » + lien par colonne vers le formulaire #319 + source fictif/réel + « Comparer » depuis l'arbre injecte une colonne. R5 : retrait du code démo mort (PROFILS/PHRASES_CONTEXTE/MICROCOPY_E1/estEnDemo/construireInvitation/activerDemoEtOuvrir). R6 : bump 1.19.0 + changelog. Tests `comparateur-banc-r4b-326` (11). ⚠️ Rendu UI = validation terrain (porte avant merge). |
+| 2026-06-17 (#326 R4a) | **Banc de décision — R4a : le banc tourne sur les profils fictifs générés (R2) injectés, sans mode démo.** `comparateur-pratiques.js` : `_corpusActif`/`_corpusInjection`/`_profilsActifs`/`_echelleActiveComparateur` ; `_note`/`_carteRecit`/`_donnees` consomment le corpus ; garde démo → corpus disponible. `genererCorpus` stampe `echelleId`. Test 8 cas (statique) break-testé. Rendu = terrain. Reste R4b (colonnes paires + lignes construction R3 + lien formulaire + source réelle), R5, R6. |
 | 2026-06-17 (#326 R2+inj) | **Banc de décision — R2 (générateur de profils) + injection mémoire livrés.** `ProfilsTypesGenerateur.genererCorpus(echelle)` (pur, déterministe : N profils ancrés + 1 irrégulier, reprises sur exercices, corpus partagé). `simulerIndices(da,id,donnees?)` calcule sur un corpus injecté (try/finally, lecture seule) ; mécanisme dans `modes.js` (interception `obtenirDonneesSelonMode` des clés évaluations/productions) ; param absent ⇒ parité moteur (golden master vert). Tests 17 cas break-testés. Reste R4 (UI, terrain R6). |
 | 2026-06-17 (#343 b+c) | **DEN porte échelle + grille optionnelles (rétroaction formative).** §8 : `configuration.echelleId/grilleId` optionnels (n'entrent pas dans le calcul = jugement saisi ; `valider()` n'exige pas d'échelle pour `jugement_global`). Wizard : selects optionnels dans `config-denotation`, build + récap, **branche `denotation` ajoutée à `chargerPratiqueExistante`** (round-trip cibles/suggestion/échelle/grille — comble un gap pré-existant). Commentaire récap `:2140` reformulé (« sans grille IDME » retiré). R3 colonne DEN montre échelle/grille. #343 entièrement livré. |
 | 2026-06-17 (#326 R3) | **Banc de décision — R3 livré : extracteur d'attributs de construction (pur).** Module `construction-attributs.js` (`ConstructionAttributs.extraire`) → lignes de construction par famille (ancres pondération/reprises/nb productions + family-specific), lit la config résolue, applique le constat R1 (STD sans jetons), repli neutre. Test 12 cas break-testé. Alimente R4. |

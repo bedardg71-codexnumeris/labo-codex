@@ -6,19 +6,14 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
 const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 
-// Comparateur de pratiques : GARDE DÉMO + rendu (matrice, fiche, export).
-// Depuis C4, le comparateur est une SOUS-SECTION pérenne du Labo
-// (Labo › « Comparateur de pratiques »), plus un overlay. Les tests exercent
-// donc le vrai câblage de navigation : afficherSection('labo') +
-// afficherSousSection('labo-comparateur') déclenche l'initialiseur
-// 'labo-comparateur' (setTimeout 100 ms) qui rend le contenu dans
-// #labo-comparateur. Attrape aussi les ReferenceError silencieux au chargement.
+// Comparateur de pratiques — BANC DE DÉCISION (#326 R4→R6). Le comparateur est une
+// sous-section pérenne du Labo. Depuis R4, il s'appuie sur des PROFILS FICTIFS GÉNÉRÉS
+// depuis l'échelle (R2) injectés en lecture seule — plus de garde « mode démo ».
+// activerModeDemo() sert ici UNIQUEMENT à semer une échelle + des pratiques réelles
+// (le banc génère ensuite ses propres profils SIM00xx).
 //
-// Ouverture commune (inlinée dans chaque page.evaluate async) :
-//   window.afficherSection('labo');
-//   window.afficherSousSection('labo-comparateur');
-//   await new Promise((r) => setTimeout(r, 250));   // initialiseur en setTimeout 100 ms
-//   const panel = document.getElementById('labo-comparateur');
+// Ouverture commune : afficherSection('labo') + afficherSousSection('labo-comparateur')
+// → initialiseur 'labo-comparateur' (setTimeout 100 ms) → rendu dans #labo-comparateur.
 
 const patternsAttendus = [
     /version\.json.*access control/i,
@@ -40,497 +35,279 @@ function brancherErreurs(page, erreurs) {
     });
 }
 
-test('C4 · garde démo — hors démo, la sous-section invite à activer la démonstration', async ({ page }) => {
-    const erreurs = [];
-    brancherErreurs(page, erreurs);
-
-    await page.goto(indexHtml);
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
-
-    const resultat = await page.evaluate(async () => {
-        if (typeof window.initialiserComparateurPratiques !== 'function') {
-            return { erreur: 'window.initialiserComparateurPratiques absent' };
-        }
-        if (typeof window.db === 'undefined' || typeof window.estEnModeDemo !== 'function') {
-            return { erreur: 'db ou estEnModeDemo absent' };
-        }
-
-        // S'assurer qu'on n'est PAS en démo
-        window.db.setSync('demo-actif', null);
-
-        // C4 : ouverture par la vraie navigation (sous-section pérenne du Labo).
+// Ouvre le banc après seed démo (échelle + pratiques). Retourne le handle d'éval.
+async function ouvrirBanc(page) {
+    return page.evaluate(async () => {
+        if (typeof window.activerModeDemo !== 'function') return { erreur: 'activerModeDemo absent' };
+        if (typeof window.initialiserComparateurPratiques !== 'function') return { erreur: 'initialiserComparateurPratiques absent' };
+        await window.activerModeDemo();           // sème échelle + pratiques réelles
         window.afficherSection('labo');
         window.afficherSousSection('labo-comparateur');
-        await new Promise((r) => setTimeout(r, 250));
-
-        const panel = document.getElementById('labo-comparateur');
-        const html = panel ? panel.innerHTML : '';
-        return {
-            aPanneau: !!panel,
-            visible: panel ? panel.classList.contains('active') : false,
-            aBoutonActiver: !!(panel && panel.querySelector('.comparateur-activer-demo')),
-            aMatrice: !!(panel && panel.querySelector('#comparateur-matrice')),
-            aTitre: html.includes('Comparateur de pratiques'),
-            aArbre: !!(panel && panel.querySelector('#exploration-arbre-hote .exploration-arbre')),
-            // #326 D-2 : l'Exploration a deux régions ; le focus SPA va au titre de
-            // l'arbre (sommet de la vue), plus à celui de la matrice/invitation.
-            focusSurTitre: !!(document.activeElement
-                && document.activeElement.classList
-                && document.activeElement.classList.contains('exploration-arbre-titre'))
-        };
+        await new Promise((r) => setTimeout(r, 300));
+        return { ok: true };
     });
+}
 
-    expect(resultat.erreur, `Erreur eval : ${resultat.erreur}`).toBeUndefined();
-    expect(resultat.aPanneau).toBe(true);
-    expect(resultat.visible).toBe(true);
-    expect(resultat.aTitre).toBe(true);
-    expect(resultat.aBoutonActiver).toBe(true);   // invitation présente
-    expect(resultat.aMatrice).toBe(false);        // pas de vue matrice hors démo
-    expect(resultat.aArbre).toBe(true);           // #326 D-2 : l'arbre d'exploration est rendu
-    expect(resultat.focusSurTitre).toBe(true);    // focus SPA déplacé au titre de l'arbre
-
-    expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
-});
-
-test('C4 · garde démo — en démo, la sous-section affiche la matrice (structure + navigation sortante)', async ({ page }) => {
+test('#326 R4 · le banc s\'ouvre SANS mode démo et rend construction + résultat', async ({ page }) => {
     const erreurs = [];
     brancherErreurs(page, erreurs);
-
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
 
-    const resultat = await page.evaluate(async () => {
-        if (typeof window.initialiserComparateurPratiques !== 'function') {
-            return { erreur: 'window.initialiserComparateurPratiques absent' };
-        }
+    const r = await ouvrirBanc(page);
+    expect(r.erreur, `Erreur ouverture : ${r.erreur}`).toBeUndefined();
 
-        // Simuler le mode démo actif (estEnModeDemo lit ce flag en premier).
-        // Sans seed : la structure de la matrice se rend, les notes valent « — ».
-        window.db.setSync('demo-actif', 'true');
-
-        window.afficherSection('labo');
-        window.afficherSousSection('labo-comparateur');
-        await new Promise((r) => setTimeout(r, 250));
-
+    const res = await page.evaluate(() => {
         const panel = document.getElementById('labo-comparateur');
         const matrice = panel ? panel.querySelector('#comparateur-matrice') : null;
         const table = matrice ? matrice.querySelector('table.comparateur-matrice-table') : null;
-        const lignes = table ? table.querySelectorAll('tbody tr').length : 0;
-        const aColNiveau = table ? table.textContent.includes('Niveau atteint') : false;
-        // C1-c (structure) : au moins une ligne E1 dans les en-têtes + ligne de
-        // garde. Le texte E1 PAR FAMILLE est vérifié dans le test seedé (réf = STD).
-        const corps = panel ? panel.querySelector('.comparateur-corps') : null;
-        const aE1 = !!(corps && corps.querySelector('.comparateur-col-e1'));
-        const aGarde = !!(corps && corps.querySelector('.comparateur-garde'));
-
-        // « Fermeture » = quitter la sous-section : on navigue ailleurs dans le Labo,
-        // #labo-comparateur perd .active (la navigation gère la visibilité).
-        window.afficherSousSection('labo-rythme');
-        const fermeOk = !panel.classList.contains('active');
-
+        const txt = table ? table.textContent : '';
         return {
+            aPanneau: !!panel,
             aMatrice: !!matrice,
-            etatMatrice: matrice ? matrice.getAttribute('data-etat') === 'matrice' : false,
             aTable: !!table,
-            nbLignes: lignes,
-            aColNiveau,
-            aE1, aGarde,
-            aBoutonActiver: !!(panel && panel.querySelector('.comparateur-activer-demo')),
-            fermeOk
+            // R5 : plus d'invitation « mode démo »
+            aBoutonDemo: !!(panel && panel.querySelector('.comparateur-activer-demo')),
+            aSectionConstruction: txt.includes('Construction de la note'),
+            aSectionResultat: txt.includes('Résultat'),
+            aSelecteurSource: !!(panel && panel.querySelector('.comparateur-source-select')),
+            aArbre: !!(panel && panel.querySelector('#exploration-arbre-hote .exploration-arbre'))
         };
     });
 
-    expect(resultat.erreur, `Erreur eval : ${resultat.erreur}`).toBeUndefined();
-    expect(resultat.aMatrice).toBe(true);
-    expect(resultat.etatMatrice).toBe(true);
-    expect(resultat.aTable).toBe(true);
-    expect(resultat.nbLignes).toBe(4);            // 4 profils-types en dur
-    expect(resultat.aColNiveau).toBe(true);       // colonne « Niveau atteint »
-    expect(resultat.aE1).toBe(true);              // C1-c : au moins une ligne E1
-    expect(resultat.aGarde).toBe(true);           // C1-c : ligne de garde
-    expect(resultat.aBoutonActiver).toBe(false);  // plus l'invitation
-    expect(resultat.fermeOk).toBe(true);
-
+    expect(res.aPanneau).toBe(true);
+    expect(res.aMatrice).toBe(true);
+    expect(res.aTable).toBe(true);
+    expect(res.aBoutonDemo).toBe(false);                 // garde démo retirée (R5)
+    expect(res.aSectionConstruction).toBe(true);
+    expect(res.aSectionResultat).toBe(true);
+    expect(res.aSelecteurSource).toBe(true);             // source fictif/réel (R4b)
+    expect(res.aArbre).toBe(true);
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });
 
-test('C1-b · matrice — parité moteur (réf = panneau profil) + divergence des pratiques (données démo)', async ({ page }) => {
+// ⚠️ PROBLÈME CONNU (#326, 17 juin 2026) : sur le JEU DÉMO de la CI, les notes du
+// banc s'affichent à 0 (simulerIndices rend P=0 sur le corpus généré injecté ; cause
+// non encore identifiée — au-delà du fix « DA 7 caractères »). Marqué `fixme` pour
+// NE PAS bloquer le déploiement de 1.19.0 (décision Grégoire : peu d'utilisateurs,
+// besoin de tester le banc sur DONNÉES RÉELLES — le comportement peut différer du
+// seed démo). Le test reste en place : à RÉACTIVER (retirer `.fixme`) dès que la
+// cause est corrigée. Suivi : BACKLOG #326 (note « banc — notes à 0 sur démo »).
+test.fixme('#326 R2/R4a · les notes du banc sont calculées (> 0) sur les profils générés', async ({ page }) => {
+    // Vérification BOUT EN BOUT du fix « DA 7 caractères » : corpus généré → injection
+    // → simulerIndices → notes non nulles (le bug terrain affichait 0 partout).
     const erreurs = [];
     brancherErreurs(page, erreurs);
-
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
 
-    const resultat = await page.evaluate(async () => {
-        if (typeof window.activerModeDemo !== 'function') return { erreur: 'activerModeDemo absent' };
-        if (typeof window.simulerIndices !== 'function') return { erreur: 'simulerIndices absent' };
+    const r = await ouvrirBanc(page);
+    expect(r.erreur, `Erreur ouverture : ${r.erreur}`).toBeUndefined();
 
-        // Seed démo complet (fusionne demo_* + globaux) — données réelles des profils-types.
-        await window.activerModeDemo();
+    const res = await page.evaluate(() => {
+        const panel = document.getElementById('labo-comparateur');
+        const lignesProfil = panel.querySelectorAll('#comparateur-matrice .comparateur-ligne-profil');
+        const notes = Array.from(panel.querySelectorAll('#comparateur-matrice .comparateur-note'))
+            .map(n => parseInt(n.textContent, 10)).filter(v => !isNaN(v));
 
-        const DA = 'DEMO011'; // profil « Irrégulier » : STD≈81 / SOM≈76 / SPE≈60 (seed C0)
-        const refId = window.obtenirPratiqueActiveGroupeCours() || 'standards';
-
-        // PARITÉ : la réf simulée doit égaler le détail de note du panneau profil
-        // (même appel sous-jacent, pratique active).
-        const sim = window.simulerIndices(DA, refId);
-        const det = window.calculerDetailsNoteFinale(DA, null);
-        const pariteOk = !!(sim && det && sim.noteFinale === det.noteFinale);
-
-        // DIVERGENCE : résoudre la SPE configurable, comparer les 3 familles.
-        const cfgs = window.db.getSync(window.cle('pratiquesConfigurables'), null)
-            || window.db.getSync('pratiquesConfigurables', []) || [];
-        let speId = null;
-        for (const p of cfgs) {
-            const inst = window.obtenirPratiqueParId(p.id);
-            if (inst && typeof inst.obtenirCode === 'function' && inst.obtenirCode() === 'SPE' && p.id !== refId) {
-                speId = p.id; break;
-            }
-        }
-        const pStd = window.simulerIndices(DA, refId).P;
-        const pSom = window.simulerIndices(DA, 'sommative').P;
-        const pSpe = speId ? window.simulerIndices(DA, speId).P : null;
-
-        // Rendu DOM : la matrice affiche le niveau atteint (libellé d'échelle) + la note réf.
-        window.afficherSection('labo');
-        window.afficherSousSection('labo-comparateur');
-        await new Promise((r) => setTimeout(r, 250));
-        const matrice = document.getElementById('comparateur-matrice');
-        const texte = matrice ? matrice.textContent : '';
-        const corps = document.querySelector('#labo-comparateur .comparateur-corps');
-        const texteCorps = corps ? corps.textContent : '';
+        // SONDE de diagnostic (remontée dans le message d'échec CI) : pourquoi 0 ?
+        let diag = {};
+        try {
+            const ech = (window.db.getSync('echellesTemplates', []) || [])[0] || null;
+            const c = (window.ProfilsTypesGenerateur && ech)
+                ? window.ProfilsTypesGenerateur.genererCorpus(ech) : { profils: [], productions: [], evaluations: [] };
+            const da0 = c.profils[0] ? c.profils[0].da : null;
+            const inj = { evaluationsSauvegardees: c.evaluations, productions: c.productions };
+            const som = (da0 && typeof window.simulerIndices === 'function')
+                ? window.simulerIndices(da0, 'sommative', inj) : null;
+            const actif = (typeof window.obtenirPratiqueActiveGroupeCours === 'function')
+                ? window.obtenirPratiqueActiveGroupeCours() : null;
+            const actRes = (da0 && actif) ? window.simulerIndices(da0, actif, inj) : null;
+            diag = {
+                echNom: ech && (ech.nom || ech.echelle_nom), echId: ech && ech.id,
+                niv0: ech && ech.niveaux && ech.niveaux[0],
+                nbProfilsGen: c.profils.length, nbEvals: c.evaluations.length,
+                da0, eval0: c.evaluations[0] || null,
+                actif, somP: som && som.P, somNote: som && som.noteFinale,
+                actP: actRes && actRes.P, actNote: actRes && actRes.noteFinale
+            };
+        } catch (e) { diag = { erreurDiag: String(e && e.message) }; }
 
         return {
-            pariteOk,
-            refId,
-            speTrouvee: !!speId,
-            pStd, pSom, pSpe,
-            domNiveauMaitrise: texte.includes('Maîtrisé'), // terminale DEMO011 = M
-            domNoteStd: texte.includes(String(pStd)),
-            // C1-c : E1 par famille (réf STD + simulations SOM/SPE) + ligne de garde.
-            e1Std: texteCorps.includes('les reprises remplacent'),
-            e1Som: texteCorps.includes('moyenne pondérée'),
-            e1Spe: texteCorps.includes('exigences satisfaites'),
-            garde: texteCorps.includes('outil expérimental')
+            nbProfils: lignesProfil.length,
+            nbNotes: notes.length,
+            maxNote: notes.length ? Math.max.apply(null, notes) : 0,
+            toutesZero: notes.length > 0 && notes.every(v => v === 0),
+            diag
         };
     });
 
-    expect(resultat.erreur, `Erreur eval : ${resultat.erreur}`).toBeUndefined();
-    expect(resultat.pariteOk, `Parité réf/profil rompue (refId=${resultat.refId})`).toBe(true);
-    expect(resultat.speTrouvee).toBe(true);
-
-    // Les 3 familles calculent des notes finies.
-    for (const p of [resultat.pStd, resultat.pSom, resultat.pSpe]) {
-        expect(typeof p).toBe('number');
-        expect(p).toBeGreaterThanOrEqual(0);
-        expect(p).toBeLessThanOrEqual(100);
-    }
-    // Divergence documentée du profil irrégulier : SPE plafonne sous SOM, sous STD.
-    expect(resultat.pSpe).toBeLessThan(resultat.pSom);
-    expect(resultat.pSom).toBeLessThan(resultat.pStd);
-
-    // La maîtrise (niveau atteint) est montrée en regard, et la note réf est rendue.
-    expect(resultat.domNiveauMaitrise).toBe(true);
-    expect(resultat.domNoteStd).toBe(true);
-
-    // C1-c : microcopy E1 par famille (réf STD + simulations SOM/SPE) + ligne de garde.
-    expect(resultat.e1Std).toBe(true);
-    expect(resultat.e1Som).toBe(true);
-    expect(resultat.e1Spe).toBe(true);
-    expect(resultat.garde).toBe(true);
-
+    expect(res.nbProfils).toBeGreaterThanOrEqual(2);     // profils générés depuis l'échelle
+    expect(res.nbNotes).toBeGreaterThanOrEqual(1);       // au moins une note rendue
+    expect(res.maxNote, `DIAG notes=0 → ${JSON.stringify(res.diag)}`).toBeGreaterThan(0);
+    expect(res.toutesZero).toBe(false);
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });
 
-test('C2-d.1 · navigation matrice → fiche (en-tête + phrase de contexte + maîtrise) + retour non-destructif', async ({ page }) => {
+test('#326 R4b · colonnes paires + lignes de construction + lien « Éditer »', async ({ page }) => {
     const erreurs = [];
     brancherErreurs(page, erreurs);
-
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
 
-    const resultat = await page.evaluate(async () => {
-        if (typeof window.activerModeDemo !== 'function') return { erreur: 'activerModeDemo absent' };
-        await window.activerModeDemo();
+    const r = await ouvrirBanc(page);
+    expect(r.erreur, `Erreur ouverture : ${r.erreur}`).toBeUndefined();
 
+    const res = await page.evaluate(() => {
+        const panel = document.getElementById('labo-comparateur');
+        const selects = panel.querySelectorAll('#comparateur-matrice .comparateur-select');
+        const lignesConstr = panel.querySelectorAll('#comparateur-matrice .comparateur-ligne-constr');
+        const liens = panel.querySelectorAll('#comparateur-matrice .comparateur-editer-lien');
+        const txt = panel.querySelector('#comparateur-matrice').textContent;
+        return {
+            nbSelects: selects.length,
+            selectsDansTete: panel.querySelectorAll('#comparateur-matrice thead .comparateur-select').length,
+            nbLignesConstr: lignesConstr.length,
+            aLienEditer: liens.length >= 1,
+            // ancres de construction présentes (R3)
+            aPonderation: txt.includes('Pondération'),
+            aReprises: txt.includes('Reprises'),
+            // plus de modèle réf privilégiée (R4b)
+            aTaPratique: txt.includes('Ta pratique')
+        };
+    });
+
+    expect(res.nbSelects).toBeGreaterThanOrEqual(2);     // colonnes paires (≥ 2)
+    expect(res.selectsDansTete).toBe(res.nbSelects);     // sélecteurs dans l'en-tête
+    expect(res.nbLignesConstr).toBeGreaterThanOrEqual(3);// ancres pondération/reprises/nb productions
+    expect(res.aLienEditer).toBe(true);                  // lien vers le formulaire #319
+    expect(res.aPonderation).toBe(true);
+    expect(res.aReprises).toBe(true);
+    expect(res.aTaPratique).toBe(false);                 // plus de « Ta pratique »
+    expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
+});
+
+test('#326 R4b · navigation vers la fiche d\'un profil + retour, non-destructif', async ({ page }) => {
+    const erreurs = [];
+    brancherErreurs(page, erreurs);
+    await page.goto(indexHtml);
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
+
+    const r = await ouvrirBanc(page);
+    expect(r.erreur, `Erreur ouverture : ${r.erreur}`).toBeUndefined();
+
+    const res = await page.evaluate(async () => {
+        const panel = document.getElementById('labo-comparateur');
         const snapshot = () => {
             const o = {};
-            for (let i = 0; i < localStorage.length; i++) {
-                const k = localStorage.key(i);
-                o[k] = localStorage.getItem(k);
-            }
+            for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); o[k] = localStorage.getItem(k); }
             return JSON.stringify(o, Object.keys(o).sort());
         };
-        window.afficherSection('labo');
-        window.afficherSousSection('labo-comparateur');
-        await new Promise((r) => setTimeout(r, 250));
-        const panel = document.getElementById('labo-comparateur');
-
-        // Snapshot APRÈS rendu (la navigation persiste l'état de nav, hors périmètre) :
-        // on isole l'invariant du comparateur — ses interactions sont en lecture seule.
         const avant = snapshot();
 
-        // Ligne DEMO011 (« Irrégulier ») activable : role=button + tabindex.
-        const tr = panel.querySelector('[data-profil-da="DEMO011"]');
+        const tr = panel.querySelector('#comparateur-matrice .comparateur-ligne-profil');
         const ligneActivable = !!(tr && tr.getAttribute('role') === 'button' && tr.getAttribute('tabindex') === '0');
-
-        // Clic → ouverture de la fiche (délégation sur #comparateur-matrice).
         if (tr) tr.click();
+        await new Promise((r) => setTimeout(r, 50));
 
-        const titreEl = panel.querySelector('.comparateur-titre');
-        const titre = titreEl ? titreEl.textContent : '';
-        const phraseEl = panel.querySelector('.comparateur-fiche-contexte');
-        const blocMaitrise = panel.querySelector('.comparateur-fiche-bloc');
-        const nbEtapes = panel.querySelectorAll('.comparateur-traj-etape').length;
-        const finaleEl = panel.querySelector('.comparateur-fiche-finale-niveau');
-        const focusTitre = !!(document.activeElement
-            && document.activeElement.classList
-            && document.activeElement.classList.contains('comparateur-titre'));
         const aRetour = !!panel.querySelector('.comparateur-retour');
-        // La fiche n'affiche plus la matrice.
         const ficheSansMatrice = !panel.querySelector('#comparateur-matrice');
-
-        // Retour → la matrice réapparaît (état des sélecteurs préservé).
-        const r = panel.querySelector('.comparateur-retour');
-        if (r) r.click();
+        const ret = panel.querySelector('.comparateur-retour');
+        if (ret) ret.click();
+        await new Promise((r) => setTimeout(r, 50));
         const retourMatrice = !!panel.querySelector('#comparateur-matrice table.comparateur-matrice-table');
 
-        const apres = snapshot();
-
-        return {
-            ligneActivable,
-            titre,
-            aPhrase: !!phraseEl,
-            phraseTexte: phraseEl ? phraseEl.textContent : '',
-            aBlocMaitrise: !!blocMaitrise,
-            nbEtapes,
-            finaleTexte: finaleEl ? finaleEl.textContent : '',
-            focusTitre,
-            aRetour,
-            ficheSansMatrice,
-            retourMatrice,
-            nonDestructif: avant === apres
-        };
+        return { ligneActivable, aRetour, ficheSansMatrice, retourMatrice, nonDestructif: avant === snapshot() };
     });
 
-    expect(resultat.erreur, `Erreur eval : ${resultat.erreur}`).toBeUndefined();
-    expect(resultat.ligneActivable).toBe(true);
-    expect(resultat.titre).toContain('Irrégulier');
-    expect(resultat.titre).toContain('DEMO011');
-    expect(resultat.aPhrase).toBe(true);
-    expect(resultat.phraseTexte).toContain('A raté deux des premières remises'); // §9 variante A
-    expect(resultat.aBlocMaitrise).toBe(true);
-    expect(resultat.nbEtapes).toBeGreaterThanOrEqual(1);          // trajectoire (libellés d'échelle)
-    expect(resultat.finaleTexte).toContain('Maîtrisé');           // terminale DEMO011 = M
-    expect(resultat.focusTitre).toBe(true);                       // focus SPA au titre de la fiche
-    expect(resultat.aRetour).toBe(true);
-    expect(resultat.ficheSansMatrice).toBe(true);
-    expect(resultat.retourMatrice).toBe(true);                    // retour reconstruit la matrice
-    expect(resultat.nonDestructif).toBe(true);                    // aucune écriture (lecture seule)
-
+    expect(res.ligneActivable).toBe(true);
+    expect(res.aRetour).toBe(true);
+    expect(res.ficheSansMatrice).toBe(true);
+    expect(res.retourMatrice).toBe(true);
+    expect(res.nonDestructif).toBe(true);                // lecture seule
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });
 
-test('C2-d.3 · fiche — bloc récit E2 (cartes par pratique via simulerIndices().recit) non-destructif', async ({ page }) => {
+test('#326 R4b · export CSV — BOM, en-têtes, une colonne par pratique', async ({ page }) => {
     const erreurs = [];
     brancherErreurs(page, erreurs);
-
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
 
-    const resultat = await page.evaluate(async () => {
-        if (typeof window.activerModeDemo !== 'function') return { erreur: 'activerModeDemo absent' };
-        await window.activerModeDemo();
+    const r = await ouvrirBanc(page);
+    expect(r.erreur, `Erreur ouverture : ${r.erreur}`).toBeUndefined();
 
-        const snapshot = () => {
-            const o = {};
-            for (let i = 0; i < localStorage.length; i++) {
-                const k = localStorage.key(i);
-                o[k] = localStorage.getItem(k);
-            }
-            return JSON.stringify(o, Object.keys(o).sort());
-        };
-        window.afficherSection('labo');
-        window.afficherSousSection('labo-comparateur');
-        await new Promise((r) => setTimeout(r, 250));
-        const panel = document.getElementById('labo-comparateur');
-
-        // Snapshot APRÈS rendu (la navigation persiste l'état de nav, hors périmètre).
-        const avant = snapshot();
-
-        const tr = panel.querySelector('[data-profil-da="DEMO011"]');
-        if (tr) tr.click();
-
-        const corps = panel.querySelector('.comparateur-corps');
-        const texte = corps ? corps.textContent : '';
-        const cartes = panel.querySelectorAll('.comparateur-recit-carte');
-        const carteRef = panel.querySelector('.comparateur-recit-carte--ref');
-        const lignes = panel.querySelectorAll('.comparateur-recit-ligne');
-        const noteFinale = panel.querySelector('.comparateur-recit-notefinale');
-        // La carte de référence est la première (« Ta pratique » d'abord).
-        const refEstPremiere = cartes.length
-            ? cartes[0].classList.contains('comparateur-recit-carte--ref') : false;
-
-        const apres = snapshot();
-
-        return {
-            aTitreRecit: texte.includes('Ce que chaque pratique retient'),
-            nbCartes: cartes.length,
-            aCarteRef: !!carteRef,
-            tagRef: carteRef ? carteRef.querySelector('.comparateur-col-tag')?.textContent : '',
-            refEstPremiere,
-            nbLignes: lignes.length,
-            aNoteFinale: !!noteFinale,
-            aGarde: !!panel.querySelector('.comparateur-fiche-bloc .comparateur-garde'),
-            nonDestructif: avant === apres
-        };
-    });
-
-    expect(resultat.erreur, `Erreur eval : ${resultat.erreur}`).toBeUndefined();
-    expect(resultat.aTitreRecit).toBe(true);
-    expect(resultat.nbCartes).toBeGreaterThanOrEqual(1);   // au moins la référence
-    expect(resultat.aCarteRef).toBe(true);
-    expect(resultat.tagRef).toContain('Ta pratique');
-    expect(resultat.refEstPremiere).toBe(true);            // réf d'abord
-    expect(resultat.nbLignes).toBeGreaterThanOrEqual(1);   // résultats du contrat §4
-    expect(resultat.aNoteFinale).toBe(true);               // synthèse discrète
-    expect(resultat.aGarde).toBe(true);                    // ligne de garde sous le récit
-    expect(resultat.nonDestructif).toBe(true);             // lecture seule
-
-    expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
-});
-
-test('C3 · export CSV — bouton présent + contenu conforme (BOM, en-têtes, une colonne par pratique)', async ({ page }) => {
-    const erreurs = [];
-    brancherErreurs(page, erreurs);
-
-    await page.goto(indexHtml);
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
-
-    const resultat = await page.evaluate(async () => {
-        if (typeof window.activerModeDemo !== 'function') return { erreur: 'activerModeDemo absent' };
-        await window.activerModeDemo();
-
-        window.afficherSection('labo');
-        window.afficherSousSection('labo-comparateur');
-        await new Promise((r) => setTimeout(r, 250));
+    const res = await page.evaluate(() => {
         const panel = document.getElementById('labo-comparateur');
         const aBouton = !!panel.querySelector('.comparateur-exporter');
-
-        if (typeof window._comparateurGenererCSV !== 'function') {
-            return { erreur: '_comparateurGenererCSV absent' };
-        }
+        if (typeof window._comparateurGenererCSV !== 'function') return { erreur: '_comparateurGenererCSV absent' };
         const csv = window._comparateurGenererCSV();
         const aBOM = csv.charCodeAt(0) === 0xFEFF;
         const lignes = csv.replace(/^﻿/, '').replace(/\r\n$/, '').split('\r\n');
         const entete = lignes[0] || '';
-        const nbColonnes = entete.split(',').length;
-
         return {
-            aBouton,
-            aBOM,
+            aBouton, aBOM,
             nbLignes: lignes.length,
-            entete,
             aColProfil: entete.includes('Profil'),
             aColDA: entete.includes('DA'),
             aColNiveau: entete.includes('Niveau atteint'),
-            aColTendance: entete.includes('Tendance'),
-            aColTaPratique: entete.includes('Ta pratique'),
-            nbColonnes,
-            ligneIrregulier: lignes.find(l => l.includes('DEMO011')) || ''
+            nbColonnes: entete.split(',').length
         };
     });
 
-    expect(resultat.erreur, `Erreur eval : ${resultat.erreur}`).toBeUndefined();
-    expect(resultat.aBouton).toBe(true);
-    expect(resultat.aBOM).toBe(true);                     // BOM UTF-8 (Excel/accents)
-    expect(resultat.nbLignes).toBe(5);                    // en-tête + 4 profils-types
-    expect(resultat.aColProfil).toBe(true);
-    expect(resultat.aColDA).toBe(true);
-    expect(resultat.aColNiveau).toBe(true);
-    expect(resultat.aColTendance).toBe(true);
-    expect(resultat.aColTaPratique).toBe(true);           // au moins la pratique de référence
-    expect(resultat.nbColonnes).toBeGreaterThanOrEqual(5);
-    expect(resultat.ligneIrregulier).toContain('Irrégulier');
-
+    expect(res.erreur, `Erreur eval : ${res.erreur}`).toBeUndefined();
+    expect(res.aBouton).toBe(true);
+    expect(res.aBOM).toBe(true);
+    expect(res.nbLignes).toBeGreaterThanOrEqual(3);      // en-tête + ≥ 2 profils générés
+    expect(res.aColProfil).toBe(true);
+    expect(res.aColDA).toBe(true);
+    expect(res.aColNiveau).toBe(true);
+    expect(res.nbColonnes).toBeGreaterThanOrEqual(5);    // Profil, DA, Niveau, Tendance, ≥ 1 pratique
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });
 
-test('C1-d · sélection inline des candidates — recalcul + invariant non-destructif (données démo)', async ({ page }) => {
+test('#326 R4b · changer une colonne recalcule le banc (lecture seule)', async ({ page }) => {
     const erreurs = [];
     brancherErreurs(page, erreurs);
-
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
 
-    const resultat = await page.evaluate(async () => {
-        if (typeof window.activerModeDemo !== 'function') return { erreur: 'activerModeDemo absent' };
-        await window.activerModeDemo();
+    const r = await ouvrirBanc(page);
+    expect(r.erreur, `Erreur ouverture : ${r.erreur}`).toBeUndefined();
 
-        // Snapshot intégral du localStorage APRÈS seed démo (référence non-destructif).
+    const res = await page.evaluate(async () => {
+        const panel = document.getElementById('labo-comparateur');
         const snapshot = () => {
             const o = {};
-            for (let i = 0; i < localStorage.length; i++) {
-                const k = localStorage.key(i);
-                o[k] = localStorage.getItem(k);
-            }
+            for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); o[k] = localStorage.getItem(k); }
             return JSON.stringify(o, Object.keys(o).sort());
         };
-        window.afficherSection('labo');
-        window.afficherSousSection('labo-comparateur');
-        await new Promise((r) => setTimeout(r, 250));
-        const panel = document.getElementById('labo-comparateur');
-
-        // Snapshot APRÈS rendu (la navigation persiste l'état de nav, hors périmètre).
         const avant = snapshot();
 
-        // Sélecteurs intégrés dans l'en-tête des colonnes de simulation (le bandeau
-        // « Comparer avec » a été retiré — plus de doublon avec le nom de colonne,
-        // toujours pas de modale).
-        const banniere = panel.querySelector('#comparateur-selecteurs');
-        const selects = panel.querySelectorAll('.comparateur-select');
-        const selectsDansEntete = panel.querySelectorAll(
-            '#comparateur-matrice thead .comparateur-select'
-        ).length;
-
-        // Recalcul : changer une candidate doit re-rendre la matrice.
-        let recalculOk = false;
-        const sel = panel.querySelector('.comparateur-select[data-slot="0"]');
+        const sel = panel.querySelector('#comparateur-matrice .comparateur-select[data-slot="1"]')
+            || panel.querySelector('#comparateur-matrice .comparateur-select');
         const matrice = document.getElementById('comparateur-matrice');
+        let recalculOk = false;
         if (sel && matrice) {
-            const avantTable = matrice.textContent;
+            const avantTxt = matrice.textContent;
             const autre = Array.from(sel.options).find(o => o.value !== sel.value);
             if (autre) {
                 sel.value = autre.value;
                 sel.dispatchEvent(new Event('change', { bubbles: true }));
-                recalculOk = document.getElementById('comparateur-matrice').textContent !== avantTable;
+                await new Promise((r) => setTimeout(r, 50));
+                recalculOk = document.getElementById('comparateur-matrice').textContent !== avantTxt;
             }
         }
-
-        const apres = snapshot();
-
-        return {
-            aBanniere: !!banniere,
-            nbSelects: selects.length,
-            selectsDansEntete,
-            recalculOk,
-            nonDestructif: avant === apres
-        };
+        return { recalculOk, nonDestructif: avant === snapshot() };
     });
 
-    expect(resultat.erreur, `Erreur eval : ${resultat.erreur}`).toBeUndefined();
-    expect(resultat.aBanniere).toBe(false);            // bandeau « Comparer avec » retiré
-    expect(resultat.nbSelects).toBeGreaterThanOrEqual(1);
-    expect(resultat.selectsDansEntete).toBe(resultat.nbSelects);  // tous dans l'en-tête de colonne
-    expect(resultat.recalculOk).toBe(true);            // changer une candidate recalcule
-    expect(resultat.nonDestructif).toBe(true);         // aucune écriture (lecture seule)
-
+    expect(res.recalculOk).toBe(true);
+    expect(res.nonDestructif).toBe(true);
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });

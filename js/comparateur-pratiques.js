@@ -25,12 +25,12 @@
    Conteneur : #labo-comparateur (index.html), rempli dynamiquement à
    chaque affichage de la sous-section (entrée fraîche = retour matrice).
 
-   Sécurité : la matrice/fiche sont 100 % statiques (profils-types démo) ;
-   l'arbre d'exploration (#326 D-2) injecte les NOMS de pratiques de
-   l'utilisateur → TOUJOURS échappés par _esc (echapperHtml). Le moteur du
-   comparateur reste lecture seule (ni clés réelles, ni demo_*) ; les actions
-   de l'arbre (dériver/promouvoir/jeter) délèguent aux fonctions d'écriture de
-   la couche pratiques — aucun chemin de persistance parallèle ici.
+   Sécurité : le banc est LECTURE SEULE. Source 'fictif' (#326 R4) = profils-types
+   GÉNÉRÉS depuis l'échelle (R2) injectés en mémoire dans simulerIndices (aucune
+   écriture, aucune bascule de contexte) ; source 'reel' = lecture du groupe actif.
+   Les NOMS de pratiques de l'utilisateur (arbre, colonnes) → TOUJOURS échappés par
+   _esc (echapperHtml). Les actions de l'arbre (dériver/adopter/jeter) délèguent aux
+   fonctions d'écriture de la couche pratiques — aucun chemin de persistance parallèle.
    ============================================================ */
 
 (function() {
@@ -39,30 +39,18 @@
     // Candidates simulées sélectionnées (1-2 ids), réinitialisées à chaque
     // entrée dans la sous-section. null = pas encore initialisé → défauts
     // calculés au rendu (C1-d).
-    var _candidatsSel = null;
+    // #326 R4b : colonnes PAIRES — 2-3 pratiques/maquettes au choix, sans colonne
+    // « référence » privilégiée (le banc compare des pratiques entre elles).
+    var _colonnesSel = null;
 
     // Vue courante du panneau : 'matrice' (comparaison) ou 'fiche' (profil) — C2-d.
     var _vue = 'matrice';
     var _daFiche = null;
 
-    // Profils-types étiquetés en dur (§8 de la note de conception) : stables et
-    // racontables, pas de détection dynamique. DA du namespace démo (DEMO0xx).
-    var PROFILS = [
-        { da: 'DEMO010', label: 'Fort' },
-        { da: 'DEMO013', label: 'Moyen' },
-        { da: 'DEMO004', label: 'En difficulté' },
-        { da: 'DEMO011', label: 'Irrégulier' }
-    ];
-
-    // E1 — « ce que cette note mesure » : une ligne fixe par FAMILLE (indexée par
-    // le code du registre, pas par l'id de pratique), sous le nom + badge (§5).
-    // Formulations de départ (SPEC §3.1) — à valider en terrain avec Grégoire.
-    // DEN à ajouter quand la famille sera créable (#318).
-    var MICROCOPY_E1 = {
-        SOM: 'La moyenne pondérée des performances, chacune comptée une fois, au moment où elle a eu lieu.',
-        STD: 'Le niveau de maîtrise démontré — les reprises remplacent les premiers essais.',
-        SPE: 'Les exigences satisfaites parmi celles annoncées.'
-    };
+    // #326 R5 : profils-types DEMO figés, MICROCOPY_E1, PHRASES_CONTEXTE et la garde
+    // « mode démo » (PROFILS, estEnDemo, construireInvitation, activerDemoEtOuvrir)
+    // RETIRÉS — le banc s'appuie désormais sur les profils fictifs GÉNÉRÉS (R2/R4a)
+    // et la source réelle (R4b). Le contexte de chaque profil vient du générateur.
 
     // Avertissement sous la matrice ET sous le récit de la fiche : le comparateur
     // est expérimental ; invite à signaler les anomalies pour contribuer à son
@@ -70,18 +58,56 @@
     // finalité en tête : « un écart entre des points n’est ni un bonus ni une erreur ».)
     var LIGNE_GARDE = 'Le comparateur est un outil expérimental et peut présenter des erreurs. Partage tes observations et participe à son amélioration en utilisant l’icône « Signaler un bug », en haut à droite de l’en-tête.';
 
-    // Phrases de contexte par profil (§9 — contenu VALIDÉ Grégoire 7 juin 2026,
-    // variante A). En dur, stables, racontables ; indexées par DA ; echapperHtml()
-    // à l'affichage. S'affichent dans l'en-tête de la fiche, sous « {profil} · {DA} ».
-    var PHRASES_CONTEXTE = {
-        DEMO010: 'Parcours régulier et soutenu : la maîtrise s’installe tôt et se confirme jusqu’à la fin.',
-        DEMO013: 'Progression régulière, sans accroc marquant : la maîtrise se construit graduellement.',
-        DEMO004: 'Plusieurs remises restent sous les attentes ; la maîtrise demeure fragile en fin de parcours.',
-        DEMO011: 'A raté deux des premières remises, puis a démontré la maîtrise sur les productions suivantes.'
-    };
+    /* ── Source de données du banc (#326 R4) ───────────────────
+       'fictif' (défaut) = profils-types GÉNÉRÉS depuis l'échelle de l'utilisateur
+       (R2) + injectés dans le moteur en lecture seule (Étape 2). Plus besoin du
+       mode démo : la décision « quelle pratique adopter ? » se prend AVANT que les
+       élèves produisent. ('reel' = un vrai groupe → R4b, à venir.) Corpus mis en
+       cache par entrée dans la sous-section (réinitialisé par rendreComparateur). */
+    var _sourceDonnees = 'fictif';
+    var _corpusCache = null;
 
-    function estEnDemo() {
-        return typeof estEnModeDemo === 'function' && estEnModeDemo();
+    // Échelle qui pilote les profils fictifs : celle de la pratique de référence si
+    // elle en a une, sinon la 1ʳᵉ échelle disponible. null si aucune échelle.
+    function _echelleActiveComparateur() {
+        var echelles = (typeof db !== 'undefined') ? (db.getSync('echellesTemplates', []) || []) : [];
+        if (!echelles.length) return null;
+        var cfg = _resoudreConfig(_refId());
+        var echId = cfg && cfg.echelle && (cfg.echelle.echelle_id || cfg.echelle.id);
+        if (echId) {
+            for (var i = 0; i < echelles.length; i++) { if (echelles[i].id === echId) return echelles[i]; }
+        }
+        return echelles[0];
+    }
+
+    // Corpus fictif courant (généré une fois, mis en cache). null hors mode fictif
+    // ou si le générateur/l'échelle manquent.
+    function _corpusActif() {
+        if (_sourceDonnees !== 'fictif') return null;
+        if (_corpusCache) return _corpusCache;
+        if (typeof ProfilsTypesGenerateur === 'undefined' || !ProfilsTypesGenerateur.genererCorpus) return null;
+        var ech = _echelleActiveComparateur();
+        if (!ech) return null;
+        var c = ProfilsTypesGenerateur.genererCorpus(ech);
+        if (!c || !c.profils.length) return null;
+        _corpusCache = { evaluations: c.evaluations, productions: c.productions, profils: c.profils, echelle: ech };
+        return _corpusCache;
+    }
+
+    // Jeu à injecter dans simulerIndices (clés du moteur), ou null (→ stockage réel).
+    function _corpusInjection() {
+        var c = _corpusActif();
+        return c ? { evaluationsSauvegardees: c.evaluations, productions: c.productions } : null;
+    }
+
+    // Profils affichés : réels (source 'reel'), sinon générés (fictif), sinon démo (repli).
+    function _profilsActifs() {
+        if (_sourceDonnees === 'reel') return _profilsReels();
+        var c = _corpusActif();
+        if (c && c.profils.length) {
+            return c.profils.map(function(p) { return { da: p.da, label: p.label, contexte: p.contexte }; });
+        }
+        return [];
     }
 
     /* ════════════════════════════════════════════════════════
@@ -90,13 +116,21 @@
 
     // Productions / évaluations selon le mode (démo ou réel) + échelles globales.
     function _donnees() {
+        var echelles = (typeof db !== 'undefined') ? (db.getSync('echellesTemplates', []) || []) : [];
+        // #326 R4 : en source fictive, le banc lit le corpus généré (R2), pas le
+        // stockage. (Les notes passent par simulerIndices+injection ; ici c'est la
+        // colonne « Niveau atteint » et la fiche qui lisent productions/évaluations.)
+        var corpus = _corpusActif();
+        if (corpus) {
+            return { productions: corpus.productions, evaluations: corpus.evaluations, echelles: echelles };
+        }
         var lire = (typeof obtenirDonneesSelonMode === 'function')
             ? obtenirDonneesSelonMode
             : function() { return []; };
         return {
             productions: lire('productions') || [],
             evaluations: lire('evaluationsSauvegardees') || [],
-            echelles: (typeof db !== 'undefined') ? (db.getSync('echellesTemplates', []) || []) : []
+            echelles: echelles
         };
     }
 
@@ -214,27 +248,24 @@
         return id;
     }
 
-    // Colonnes : référence = pratique active (« Ta pratique ») + simulations
-    // SOM (famille codée) et SPE (1ʳᵉ configurable de famille SPE ≠ réf).
-    // La sélection inline des candidates arrive en C1-d.
-    // Référence = pratique active du groupe-cours (« Ta pratique »).
+    // Pratique active du groupe-cours — sert de 1ʳᵉ colonne par défaut (#326 R4b :
+    // colonnes paires, plus de notion de « référence privilégiée »).
     function _refId() {
         return (typeof obtenirPratiqueActiveGroupeCours === 'function' && obtenirPratiqueActiveGroupeCours())
             || (window.PRATIQUE_DEFAUT || 'standards');
     }
 
-    // Pratiques SIMULABLES disponibles pour les sélecteurs (C1-d) : familles
-    // codées (SOM/STD/SPE actives) + pratiques configurables de la bibliothèque,
-    // hors référence. Les gabarits prédéfinis sont EXCLUS : non exécutables tels
-    // quels (skill §3/§10) — ils donneraient « — ». À revoir si on synthétise
-    // une config à la volée (hors C1).
-    function _pratiquesDisponibles(refId) {
+    // Pratiques COMPARABLES offertes aux sélecteurs (#326 R4b) : familles codées
+    // (SOM/STD/SPE) + pratiques configurables de la bibliothèque, MAQUETTES INCLUSES
+    // (on compare aussi des essais). Gabarits prédéfinis EXCLUS (non exécutables,
+    // skill §3/§10). Plus d'exclusion d'une « référence » : modèle paires.
+    function _pratiquesComparables() {
         var vues = {};
         var liste = [];
         function ajouter(id) {
-            if (!id || id === refId || vues[id]) return;
+            if (!id || vues[id]) return;
             var code = _codePratique(id);
-            if (!code) return;                 // non résoluble → on n'offre pas
+            if (!code) return;
             vues[id] = true;
             liste.push({ id: id, nom: _nomPratique(id), code: code });
         }
@@ -243,37 +274,51 @@
         return liste;
     }
 
-    // Défauts des candidates : SOM (famille codée) + 1ʳᵉ SPE configurable ≠ réf.
-    function _initCandidats(refId) {
-        if (_candidatsSel) return;
+    // Défauts des colonnes : la pratique active + une 2ᵉ distincte (SOM si l'active
+    // n'est pas SOM, sinon la 1ʳᵉ autre comparable). 2 colonnes par défaut (max 3).
+    function _initColonnes() {
+        if (_colonnesSel) return;
         var sel = [];
-        if (refId !== 'sommative') sel.push('sommative');
-        var spe = _configsPratiques().filter(function(p) {
-            return p.id !== refId && _codePratique(p.id) === 'SPE';
-        })[0];
-        if (spe) sel.push(spe.id);
-        // Repli : au moins une simulation si rien trouvé.
-        if (!sel.length) {
-            var dispo = _pratiquesDisponibles(refId);
-            if (dispo.length) sel.push(dispo[0].id);
+        var actif = _refId();
+        if (actif && _codePratique(actif)) sel.push(actif);
+        var dispo = _pratiquesComparables();
+        var deux = (actif !== 'sommative') ? 'sommative'
+            : (dispo.filter(function(p) { return p.id !== actif; })[0] || {}).id;
+        if (deux && deux !== actif && _codePratique(deux)) sel.push(deux);
+        // Repli : au moins 2 colonnes si possible.
+        if (sel.length < 2) {
+            dispo.forEach(function(p) { if (sel.length < 2 && sel.indexOf(p.id) === -1) sel.push(p.id); });
         }
-        _candidatsSel = sel;
+        _colonnesSel = sel.slice(0, 3);
     }
 
     function _colonnes() {
-        var refId = _refId();
-        _initCandidats(refId);
-        var cols = [{ id: refId, ref: true }];
-        _candidatsSel.forEach(function(id) {
-            if (id) cols.push({ id: id, ref: false });
-        });
-        return cols;
+        _initColonnes();
+        return _colonnesSel.filter(Boolean).map(function(id) { return { id: id }; });
+    }
+
+    // Type canonique (pour ConstructionAttributs) à partir du code de famille — sert
+    // aux familles codées (SOM/STD/SPE) qui n'ont pas d'enveloppe configurable.
+    var _CODE_VERS_TYPE = { SOM: 'sommative', STD: 'standards', SPE: 'specifications', DEN: 'denotation' };
+    function _configPourExtraction(id) {
+        var cfg = _resoudreConfig(id);
+        if (cfg) return cfg;
+        return { type: _CODE_VERS_TYPE[_codePratique(id)] || null };
+    }
+
+    // Profils réels (source 'reel') : étudiant·es du groupe actif, lecture seule.
+    function _profilsReels() {
+        var etu = (typeof obtenirDonneesSelonMode === 'function')
+            ? (obtenirDonneesSelonMode('groupeEtudiants') || []) : [];
+        return etu.filter(function(e) { return e && e.da; }).slice(0, 12)
+            .map(function(e) { return { da: e.da, label: e.nom || e.da, contexte: '' }; });
     }
 
     // Note finale simulée (0-100), lecture seule. null si non calculable.
+    // #326 R4 : en source fictive, on injecte le corpus généré (sinon stockage réel).
     function _note(da, pratiqueId) {
         if (typeof simulerIndices !== 'function') return null;
-        var r = simulerIndices(da, pratiqueId);
+        var r = simulerIndices(da, pratiqueId, _corpusInjection());
         return r ? r.P : null;
     }
 
@@ -281,66 +326,80 @@
         return (typeof echapperHtml === 'function') ? echapperHtml(String(s)) : String(s);
     }
 
-    /* ── Rendu de la matrice (§3 du layout) ────────────────── */
+    /* ── Extraction des attributs de construction par colonne (R3 → R4b) ─ */
+    // Pour chaque colonne : { axe → {libelle, valeur} } via ConstructionAttributs.
+    function _extraitsColonnes(cols) {
+        return cols.map(function(c) {
+            var parAxe = {};
+            if (typeof ConstructionAttributs !== 'undefined' && ConstructionAttributs.extraire) {
+                ConstructionAttributs.extraire(_configPourExtraction(c.id)).attributs
+                    .forEach(function(a) { parAxe[a.axe] = a; });
+            }
+            return parAxe;
+        });
+    }
+    // Union ORDONNÉE des axes : ancres d'abord (R3 AXES_ANCRES), puis les autres dans
+    // l'ordre de première apparition. libellé pris de la 1ʳᵉ colonne qui le porte.
+    function _axesConstruction(extraits) {
+        var ordre = (typeof ConstructionAttributs !== 'undefined' && ConstructionAttributs.AXES_ANCRES)
+            ? ConstructionAttributs.AXES_ANCRES.slice() : [];
+        var seen = {}; ordre.forEach(function(a) { seen[a] = true; });
+        var libelles = {};
+        extraits.forEach(function(parAxe) {
+            Object.keys(parAxe).forEach(function(axe) {
+                if (!seen[axe]) { seen[axe] = true; ordre.push(axe); }
+                if (!libelles[axe]) libelles[axe] = parAxe[axe].libelle;
+            });
+        });
+        return ordre.filter(function(a) { return libelles[a]; })
+            .map(function(a) { return { axe: a, libelle: libelles[a] }; });
+    }
+
+    /* ── Rendu du banc : construction (R3) + résultats (R2/réel) ─────── */
     function _rendreMatrice() {
         var d = _donnees();
         var cols = _colonnes();
-        var refId = cols[0].id;
-
-        // Pratiques offertes aux sélecteurs des colonnes de simulation (hors réf).
-        var dispo = _pratiquesDisponibles(refId);
-        var slot = 0;   // index dans _candidatsSel = ordre des colonnes non-réf
+        var dispo = _pratiquesComparables();
+        var extraits = _extraitsColonnes(cols);
+        var axes = _axesConstruction(extraits);
+        var nbCol = cols.length;
 
         var h = '<table class="comparateur-matrice-table">';
-        h += '<thead><tr>';
-        h += '<th scope="col" class="comparateur-col-profil">Profil</th>';
-        h += '<th scope="col" class="comparateur-col-niveau">Niveau atteint</th>';
-        cols.forEach(function(c) {
-            var code = _codePratique(c.id);
-            var e1 = (code && MICROCOPY_E1[code]) ? MICROCOPY_E1[code] : '';
-            // Réf (« Ta pratique ») = titre statique non modifiable ; colonnes de
-            // simulation = un <select> à la place du titre (le bandeau « Comparer
-            // avec » est supprimé — il répétait le nom déjà porté par la colonne).
-            var titre;
-            if (c.ref) {
-                titre = _badge(c.id) + ' <span class="comparateur-col-nom">' + _esc(_nomPratique(c.id)) + '</span>'
-                    + '<span class="comparateur-col-tag">Ta pratique</span>';
-            } else {
-                titre = _selectColonne(slot, c.id, dispo)
-                    + '<span class="comparateur-col-tag">Simulation</span>';
-                slot++;
-            }
-            h += '<th scope="col" class="comparateur-col-pratique' + (c.ref ? ' comparateur-col-pratique--ref' : '') + '">'
-                + titre
-                + (e1 ? '<span class="comparateur-col-e1">' + _esc(e1) + '</span>' : '')
-                + '</th>';
+        // En-tête : un sélecteur de pratique par colonne + lien « Éditer » (#319).
+        h += '<thead><tr><th scope="col" class="comparateur-col-profil"></th>';
+        cols.forEach(function(c, slot) {
+            h += '<th scope="col" class="comparateur-col-pratique">' + _enteteColonne(slot, c.id, dispo) + '</th>';
         });
         h += '</tr></thead><tbody>';
 
-        PROFILS.forEach(function(prof) {
+        // SECTION 1 — Construction de la note (lignes R3, alignées par axe).
+        h += '<tr class="comparateur-section-tete"><th colspan="' + (nbCol + 1) + '" scope="colgroup">Construction de la note</th></tr>';
+        axes.forEach(function(ax) {
+            h += '<tr class="comparateur-ligne-constr"><th scope="row" class="comparateur-col-profil">' + _esc(ax.libelle) + '</th>';
+            extraits.forEach(function(parAxe) {
+                var a = parAxe[ax.axe];
+                var v = a ? a.valeur : 's.o.';
+                h += '<td class="comparateur-cellule-constr' + (a ? '' : ' comparateur-vide') + '">' + _esc(v) + '</td>';
+            });
+            h += '</tr>';
+        });
+
+        // SECTION 2 — Résultat sur les profils-types (note par colonne). Le niveau
+        // atteint est porté par le libellé du profil (colonnes uniformes).
+        h += '<tr class="comparateur-section-tete"><th colspan="' + (nbCol + 1) + '" scope="colgroup">Résultat — profils-types</th></tr>';
+        _profilsActifs().forEach(function(prof) {
             var na = _niveauAtteint(prof.da, d);
-            var pRef = _note(prof.da, refId);
-            // Ligne activable (clic + clavier) → ouvre la fiche du profil (C2-d.1).
+            var niveauHtml = '';
+            if (na) {
+                var aria = na.label + (na.description ? ', ' + na.description : '') + ', ' + na.tendance.mot;
+                var titre = na.description ? _esc(na.label + ' · ' + na.description) : _esc(na.label);
+                niveauHtml = ' <span class="comparateur-profil-niveau" title="' + titre + '" aria-label="' + _esc(aria) + '">'
+                    + _esc(na.label) + ' <span class="comparateur-tendance" aria-hidden="true">' + na.tendance.fleche + '</span></span>';
+            }
             h += '<tr class="comparateur-ligne-profil" data-profil-da="' + _esc(prof.da) + '"'
                 + ' role="button" tabindex="0" aria-label="' + _esc('Ouvrir la fiche : ' + prof.label) + '">';
-            h += '<th scope="row" class="comparateur-col-profil">' + _esc(prof.label) + '</th>';
-
-            if (na) {
-                var titre = na.description ? _esc(na.label + ' · ' + na.description) : _esc(na.label);
-                // aria-label : la description du niveau (SOLO au survol) est aussi
-                // restituée au lecteur d'écran, pas seulement à la souris (§9).
-                var aria = na.label + (na.description ? ', ' + na.description : '') + ', ' + na.tendance.mot;
-                h += '<td class="comparateur-col-niveau" title="' + titre + '" aria-label="' + _esc(aria) + '">'
-                    + _esc(na.label)
-                    + ' <span class="comparateur-tendance" aria-hidden="true">' + na.tendance.fleche + '</span>'
-                    + '</td>';
-            } else {
-                h += '<td class="comparateur-col-niveau comparateur-vide">—</td>';
-            }
-
+            h += '<th scope="row" class="comparateur-col-profil">' + _esc(prof.label) + niveauHtml + '</th>';
             cols.forEach(function(c) {
-                // DEN non simulable (D-4) : pas un 4ᵉ nombre comparable, mais le
-                // rappel que la note est un jugement (mécanisme #128 paramétré DEN).
                 if (_estDEN(c.id)) {
                     h += '<td class="comparateur-cellule comparateur-cellule--den" title="En dénotation, la note finale est un jugement posé par l’enseignant, gardé par l’atteinte des cibles — pas un calcul sur les données. Elle n’est donc pas simulable ici.">jugement</td>';
                     return;
@@ -350,13 +409,7 @@
                     h += '<td class="comparateur-cellule comparateur-vide" title="Note non calculable pour cette pratique">—</td>';
                     return;
                 }
-                var delta = '';
-                if (!c.ref && pRef !== null) {
-                    var dd = p - pRef;
-                    delta = ' <span class="comparateur-delta">(' + (dd > 0 ? '+' : '') + dd + ')</span>';
-                }
-                h += '<td class="comparateur-cellule' + (c.ref ? ' comparateur-cellule--ref' : '') + '">'
-                    + '<span class="comparateur-note">' + p + '</span>' + delta + '</td>';
+                h += '<td class="comparateur-cellule"><span class="comparateur-note">' + p + '</span></td>';
             });
             h += '</tr>';
         });
@@ -518,19 +571,19 @@
     // démo-gated, hors démo on invite à l'activer. Lecture seule, aucune écriture.
     // ⚠️ Pont réel↔démo : la variante doit être résoluble dans le contexte courant ;
     // sinon la cellule affiche « — » (graceful). À confirmer au terrain.
+    // #326 R4b : « Comparer » depuis l'arbre injecte la maquette comme COLONNE du banc
+    // (profils fictifs générés + injection — plus de garde mode démo). La maquette est
+    // une pratique configurable → résoluble par simulerIndices sur le corpus.
     function _comparerDepuisArbre(id) {
-        if (!estEnDemo()) {
-            if (typeof notifications !== 'undefined' && notifications.info) {
-                notifications.info('Comparer une variante', 'Active le mode démonstration (ci-dessous) pour comparer une variante sur les profils-types.');
-            }
-            return;
-        }
-        var refId = _refId();
-        if (!Array.isArray(_candidatsSel)) _initCandidats(refId);
-        if (!_candidatsSel.length) _candidatsSel = [id]; else _candidatsSel[0] = id;
+        _initColonnes();
+        if (!_colonnesSel.length) _colonnesSel = [id];
+        else if (_colonnesSel.length === 1) _colonnesSel.push(id);
+        else _colonnesSel[1] = id;
         var panel = _conteneur();
         var comp = panel && panel.querySelector('#exploration-comparaison');
-        if (comp) _rerendreMatrice(comp);
+        if (!comp) return;
+        if (comp.querySelector('#comparateur-matrice')) _rerendreMatrice(comp);
+        else construireVue(comp);   // si l'invitation était affichée, bascule sur le banc
     }
 
     async function _jeterMaquette(id) {
@@ -565,7 +618,9 @@
 
         _vue = 'matrice';
         _daFiche = null;
-        _candidatsSel = null;   // défauts recalculés à chaque entrée
+        _colonnesSel = null;    // défauts recalculés à chaque entrée
+        _sourceDonnees = 'fictif';
+        _corpusCache = null;    // corpus régénéré (échelle active courante)
 
         // #326 D-2 : l'Exploration a deux régions — l'ARBRE des variantes d'essai
         // (pratiques réelles, toujours visible) puis la COMPARAISON (matrice démo).
@@ -573,13 +628,14 @@
         _construireArbre(document.getElementById('exploration-arbre-hote'));
         var comp = document.getElementById('exploration-comparaison');
 
-        // GARDE DÉMO : la matrice s'appuie sur les profils-types de la
-        // démonstration. Hors démo, on invite à l'activer plutôt que d'afficher
-        // une vue vide (§3.4 de la spec).
-        if (estEnDemo()) {
+        // #326 R4 : la matrice s'appuie sur des PROFILS FICTIFS GÉNÉRÉS depuis
+        // l'échelle (R2) + injection lecture seule — plus de garde « mode démo »
+        // (retirée en R5). Repli : sans échelle, pas de profils-types → on invite à
+        // en créer une.
+        if (_corpusActif()) {
             construireVue(comp);
         } else {
-            construireInvitation(comp);
+            construireInvitationEchelle(comp);
         }
 
         // Accessibilité SPA : déplacer le focus vers le titre de l'Exploration.
@@ -596,21 +652,18 @@
                 '</div>';
     }
 
-    /* ── Garde démo : invitation à activer la démonstration ── */
-    function construireInvitation(panel) {
+    /* ── État vide (#326 R4) : aucune échelle → pas de profils-types ── */
+    function construireInvitationEchelle(panel) {
         panel.innerHTML =
             '<div class="comparateur-contenu carte" role="region" aria-labelledby="comparateur-titre-texte">' +
                 entete('Comparateur de pratiques') +
                 '<div class="comparateur-corps">' +
-                    '<p>Le comparateur s’appuie sur des <strong>profils-types contrastés</strong> ' +
-                    'pour montrer comment une même trajectoire d’apprentissage se traduit en notes ' +
-                    'selon la pratique choisie. Ces profils vivent dans le <strong>mode démonstration</strong>.</p>' +
-                    '<p>Active la démonstration pour explorer le comparateur sans toucher à tes données réelles.</p>' +
-                    '<button class="btn btn-principal comparateur-activer-demo" type="button">Activer le mode démonstration</button>' +
+                    '<p>Le comparateur s’appuie sur des <strong>profils-types fictifs</strong> générés ' +
+                    'depuis ton <strong>échelle de performance</strong> — pour comparer ce que chaque ' +
+                    'pratique ferait de la même trajectoire d’apprentissage, avant d’en adopter une.</p>' +
+                    '<p>Crée d’abord une échelle dans <strong>Conception › Échelles</strong>, puis reviens ici.</p>' +
                 '</div>' +
             '</div>';
-        var btn = panel.querySelector('.comparateur-activer-demo');
-        if (btn) btn.addEventListener('click', activerDemoEtOuvrir);
     }
 
     /* ── Sélecteurs des candidates simulées (C1-d) ─────────── */
@@ -628,8 +681,19 @@
 
     function _selectColonne(slot, selId, dispo) {
         return '<select class="comparateur-select" data-slot="' + slot + '"'
-            + ' aria-label="Pratique à simuler dans cette colonne">'
+            + ' aria-label="Pratique de cette colonne">'
             + _optionsSelect(selId, dispo) + '</select>';
+    }
+
+    // En-tête d'une colonne (#326 R4b) : badge + sélecteur de pratique + lien
+    // « Éditer » vers le formulaire existant (#319, editerPratique) — seulement pour
+    // les pratiques configurables (les familles codées de base ne s'éditent pas ici).
+    function _enteteColonne(slot, id, dispo) {
+        var h = '<div class="comparateur-col-tete">' + _badge(id) + _selectColonne(slot, id, dispo) + '</div>';
+        if (_enveloppe(id)) {
+            h += '<button type="button" class="comparateur-editer-lien" data-editer-id="' + _esc(id) + '">Éditer la pratique</button>';
+        }
+        return h;
     }
 
     // Re-rend uniquement le tableau (les sélecteurs y vivent désormais ; l'hôte
@@ -707,9 +771,17 @@
             if (!t || !t.classList || !t.classList.contains('comparateur-select')) return;
             var slot = parseInt(t.getAttribute('data-slot'), 10);
             if (!isNaN(slot)) {
-                _candidatsSel[slot] = t.value;   // état UI seulement, aucune écriture en base
+                _colonnesSel[slot] = t.value;   // état UI seulement, aucune écriture en base
                 _rerendreMatrice(panel);
             }
+        });
+        // Lien « Éditer la pratique » (#326 R4b → formulaire #319). Délégué sur l'hôte.
+        hote.addEventListener('click', function(e) {
+            var b = e.target.closest ? e.target.closest('[data-editer-id]') : null;
+            if (!b) return;
+            e.stopPropagation();   // ne pas déclencher l'ouverture de la fiche (ligne profil)
+            var id = b.getAttribute('data-editer-id');
+            if (id && typeof editerPratique === 'function') editerPratique(id);
         });
     }
 
@@ -820,14 +892,13 @@
     function _carteRecit(da, c, ech) {
         var recit = null;
         if (typeof simulerIndices === 'function') {
-            var r = simulerIndices(da, c.id);
+            var r = simulerIndices(da, c.id, _corpusInjection());
             recit = r ? r.recit : null;
         }
         var enTete = '<div class="comparateur-recit-entete">'
             + _badge(c.id) + ' <span class="comparateur-col-nom">' + _esc(_nomPratique(c.id)) + '</span>'
-            + '<span class="comparateur-col-tag">' + (c.ref ? 'Ta pratique' : 'simulation') + '</span>'
             + '</div>';
-        var classe = 'comparateur-recit-carte' + (c.ref ? ' comparateur-recit-carte--ref' : '');
+        var classe = 'comparateur-recit-carte';
 
         if (!recit || !recit.resultats || !recit.resultats.length) {
             return '<div class="' + classe + '">' + enTete
@@ -880,11 +951,13 @@
     function construireFiche(panel, da) {
         var d = _donnees();
         var prof = null;
-        for (var i = 0; i < PROFILS.length; i++) {
-            if (PROFILS[i].da === da) { prof = PROFILS[i]; break; }
+        var profils = _profilsActifs();
+        for (var i = 0; i < profils.length; i++) {
+            if (profils[i].da === da) { prof = profils[i]; break; }
         }
         var label = prof ? prof.label : da;
-        var phrase = PHRASES_CONTEXTE[da] || '';
+        // Contexte du profil (généré R2, ou vide en source réelle).
+        var phrase = (prof && prof.contexte) || '';
 
         panel.innerHTML =
             '<div class="comparateur-contenu carte" role="region" aria-labelledby="comparateur-titre-texte">' +
@@ -916,6 +989,7 @@
                     '<p class="comparateur-finalite">Des pratiques différentes mesurent des choses ' +
                     'différentes. Un écart entre des points n’est ni un bonus ni une erreur. Le ' +
                     'comparateur montre la <strong>maîtrise atteinte en regard de chaque note</strong>.</p>' +
+                    _rendreSource() +
                     '<div class="comparateur-diff-hote" id="comparateur-diff">' +
                         _rendreDiff(_colonnes()) +
                     '</div>' +
@@ -931,20 +1005,33 @@
         _attacherSelecteurs(panel);
         _attacherNavigationLignes(panel);
         _attacherExport(panel);
+        _attacherSource(panel);
     }
 
-    /* ── Garde démo : activer puis rendre la vue ────────────── */
-    function activerDemoEtOuvrir() {
-        if (typeof activerModeDemo !== 'function') {
-            console.warn('[comparateur-pratiques] activerModeDemo absent — impossible d’activer la démo');
-            return;
-        }
-        // activerModeDemo est asynchrone (seed démo). On re-rend ensuite pour
-        // que la garde rebascule sur la vue (estEnDemo() devient vrai).
-        Promise.resolve(activerModeDemo()).then(function() {
-            rendreComparateur();
-        }).catch(function(e) {
-            console.error('[comparateur-pratiques] échec activation démo', e);
+    // Sélecteur de source (#326 R4b) : profils fictifs générés (défaut) OU groupe réel.
+    function _rendreSource() {
+        var c = _corpusActif();
+        var nomEch = (c && c.echelle && (c.echelle.nom || c.echelle.echelle_nom)) || '—';
+        var optF = '<option value="fictif"' + (_sourceDonnees === 'fictif' ? ' selected' : '') + '>Profils fictifs (depuis ton échelle)</option>';
+        var optR = '<option value="reel"' + (_sourceDonnees === 'reel' ? ' selected' : '') + '>Mon groupe actif (données réelles)</option>';
+        var desc = (_sourceDonnees === 'reel')
+            ? 'Données réelles du groupe actif — mêmes étudiant·es pour toutes les colonnes, seules les règles de la pratique changent.'
+            : 'Profils fictifs générés depuis ton échelle « ' + _esc(nomEch) + ' » — mêmes parcours pour toutes les colonnes, seules les règles changent.';
+        return '<div class="comparateur-source-ctrl">'
+            + '<label class="comparateur-source-label">Source des données : '
+            + '<select class="comparateur-source-select" aria-label="Source des données du banc">' + optF + optR + '</select></label>'
+            + '<p class="comparateur-source text-muted">' + desc + '</p></div>';
+    }
+
+    function _attacherSource(panel) {
+        var sel = panel.querySelector('.comparateur-source-select');
+        if (!sel) return;
+        sel.addEventListener('change', function(e) {
+            _sourceDonnees = (e.target.value === 'reel') ? 'reel' : 'fictif';
+            _corpusCache = null;            // régénéré au besoin (fictif)
+            construireVue(panel);           // re-rend toute la vue (source + matrice)
+            var titre = panel.querySelector('.comparateur-titre');
+            if (titre) titre.focus();
         });
     }
 
@@ -965,10 +1052,10 @@
         var cols = _colonnes();
         var entetes = ['Profil', 'DA', 'Niveau atteint', 'Tendance'];
         cols.forEach(function(c) {
-            entetes.push(_nomPratique(c.id) + (c.ref ? ' (Ta pratique)' : ' (simulation)'));
+            entetes.push(_nomPratique(c.id) + ' (' + (_codePratique(c.id) || '') + ')');
         });
         var lignes = [entetes.map(_csvCell).join(',')];
-        PROFILS.forEach(function(prof) {
+        _profilsActifs().forEach(function(prof) {
             var na = _niveauAtteint(prof.da, d);
             var row = [prof.label, prof.da, na ? na.label : '', na ? na.tendance.mot : ''];
             cols.forEach(function(c) {

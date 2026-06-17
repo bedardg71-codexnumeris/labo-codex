@@ -12,6 +12,19 @@
 
     var CHANGELOG = [
         {
+            version: '1.19',
+            couleur: 'vert',
+            titre: 'Comparateur de pratiques refondu en « banc de décision »',
+            items: [
+                'Le comparateur génère des profils-types fictifs à partir de TON échelle de performance (autant de profils que de niveaux, plus un parcours irrégulier) — plus besoin du mode démonstration pour l’utiliser.',
+                'Compare 2 ou 3 pratiques (ou maquettes) côte à côte sur les mêmes parcours : seules les règles de chaque pratique changent.',
+                'Le tableau montre d’abord COMMENT chaque pratique construit la note (pondération, reprises, nombre de productions comptées, méthode de sélection…), puis le résultat sur chaque profil.',
+                'Un lien par colonne ouvre le formulaire de la pratique pour l’ajuster ; tu peux aussi comparer sur les données réelles de ton groupe actif.',
+                'En dénotation, la colonne rappelle que la note finale est un jugement — pas un calcul — et la pratique peut désormais s’appuyer sur une grille et une échelle pour la rétroaction.',
+                'Le menu « Exploration des pratiques » parle maintenant de « maquettes » : crée une maquette, dérive-la une fois, puis adopte-la quand elle te convient (correction au passage de l’erreur « Pratique introuvable » au moment de jeter une maquette).'
+            ]
+        },
+        {
             version: '1.18',
             couleur: 'bleu',
             titre: 'Des fenêtres claires à la place des popups du navigateur',
