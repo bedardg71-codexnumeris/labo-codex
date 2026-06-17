@@ -1,4 +1,95 @@
 <!-- =====================================================================
+     CLÔTURE DE SESSION — 17 juin 2026 (Claude Code cloud).
+     Rituel de fin appliqué (§1→§6 + break-test §4).
+     ─────────────────────────────────────────────────────────────────────
+     ÉTAT : bêta publique 1.19.2 (build 0617-1822). 847 Vitest verts ;
+     Playwright = CI (WebKit non téléchargeable en cloud → politique réseau).
+     Branche claude/notation-comparison-tool-uql2dm.
+       • #326 R1→R6 + #343 + injection mémoire : MERGÉS dans main (PR #48
+         1.19.x base, #49 R4→R6 1.19.0, #50 fix notes fictif 1.19.1).
+       • Travail du jour (PR #51, OUVERTE, auto-merge SQUASH) : découvrabilité
+         + suppression des maquettes, lien comparateur, note « en développement ».
+     ─────────────────────────────────────────────────────────────────────
+     CE QUI A ÉTÉ FAIT (17 juin)
+
+     • #326 BANC DE DÉCISION — implémentation R1→R6 livrée et déployée
+       (1.19.0), puis correctif notes=0 en mode fictif (1.19.1, champ de
+       pourcentage d'échelle : valeurCalcul/valeur/valeur_pourcentage → _pct
+       robuste). Détail dans le backlog #326 et RELAIS-326 (source unique).
+
+     • RETOURS TERRAIN sur 1.19.1 (PR #51 → 1.19.2) :
+       1. « Je ne peux pas supprimer mes maquettes (essais). » DIAGNOSTIC
+          ADVERSE : les maquettes ÉTAIENT déjà toutes listées + jetables dans
+          le Labo › Comparateur (vérifié empiriquement : construireArbrePratiques
+          place toujours chaque maquette dans un arbre rendu — un « filet de
+          complétude » d'abord codé puis RETIRÉ comme code mort, zéro-dette).
+          Vrai problème = DÉCOUVRABILITÉ : masquées de la bibliothèque par
+          design D-2, l'utilisateur les y cherche. → Bannière « Gérer mes
+          maquettes » dans la modale Bibliothèque (pratiques-gestion.js :
+          compte les maquettes masquées + bouton → naviguerVers('labo',
+          'comparateur')).
+       2. « Lien vers le comparateur depuis le formulaire. » → Section
+          « Comparer ce type de notation » dans le récap du wizard
+          (wizard-pratique-v2.js) + handler ouvrirComparateurDepuisWizard.
+       3. STD à 0 sur le banc (fictif ET réel, captures IMG_6289..6291).
+          RECADRAGE GRÉGOIRE : ce n'est pas forcément un bug — c'est
+          possiblement une IMPOSSIBILITÉ de construire la note selon les
+          paramètres de la pratique et leur compatibilité avec les résultats
+          réels qui alimentent la simulation. L'outil est en développement ;
+          la prod est de facto « en mode dev » sur cet aspect (Grégoire sans
+          accès Mac). → NOTE « Outil en développement » en tête du comparateur
+          (comparateur-pratiques.js NOTE_DEV + .comparateur-note-dev). On NE
+          poursuit PAS le STD=0 maintenant (décision Grégoire).
+
+     • Tests : nouvelle sentinelle Playwright maquettes-decouvrabilite-326.spec.js
+       (bannière + masquage carte D-2 ; arbre Labo liste la maquette avec
+       « Jeter ») + assertion .comparateur-note-dev dans
+       comparateur-pratiques-rendu.spec.js. Break-test (node, hors WebKit) :
+       sans le flag estMaquette, la maquette sort de tout arbre rendu (rouge
+       attendu obtenu) → la claim de suppressibilité dépend du comportement réel.
+
+     • Liens CSP-safe (data-action → naviguerVers, aucun handler inline) ;
+       audit sécurité du diff propre (0 innerHTML brut, 0 handler inline,
+       0 eval, 0 console.log).
+     ─────────────────────────────────────────────────────────────────────
+     POINT DE REPRISE POUR L'INSTANCE SUIVANTE (fresh, sans mémoire)
+
+     0. RITUEL DE DÉBUT (obligatoire) : audit git + tests + version, lecture
+        SESSION.md/BACKLOG.md, comparaison avec la prémisse reçue.
+     1. VÉRIFIER d'abord que PR #51 est MERGÉE et la 1.19.2 déployée (si encore
+        ouverte : CI verte ? auto-merge SQUASH armé). Resync la branche sur
+        origin/main (reset --hard + force-with-lease pour repartir propre).
+     2. TÂCHES VALIDÉES PAR GRÉGOIRE POUR CETTE SESSION (dans cet ordre libre) :
+        a. #305 — a11y modale d'aide sans nom accessible (petit, testable
+           Playwright sans Mac). Win propre.
+        b. #342 — PRÉVENTION attribution CC : quand aucun enseignant n'est
+           « actif », l'identité CC retombe en silence sur enseignantsReels[0]
+           (cc-license.js:44/154) → d'où « par Bruno V. » sur la pratique
+           de littérature de Grégoire. Rendre le défaut explicite/sûr (défaut
+           = Grégoire / pas de stamp silencieux). La RÉPARATION des données
+           live reste un one-shot console à exécuter par Grégoire sur Mac.
+        c. #321 — « note différée » (couche 1 PRÉN) : cacher la note par
+           travail pendant le trimestre (rétroaction d'abord), transversale
+           au-dessus de n'importe quelle famille, NE change pas la valeur
+           finale. Plus gros ; passe terrain à terme.
+        d. #326 NOUVEL ÉLÉMENT (amélioration du banc) : distinguer un « 0 »
+           LÉGITIME d'une note « non constructible ». Afficher « — / non
+           constructible » au lieu d'un 0 trompeur quand le moteur ne peut pas
+           bâtir la note (lié au STD=0 ci-dessus). Codable + testable sans Mac.
+     3. CONTRAINTE TRANSVERSE : Grégoire SANS accès Mac → privilégier le code
+        + tests COMPLETS sans porte de validation terrain ; éviter de livrer
+        du code « en attente de terrain ». Écartés tant que sans Mac :
+        #340/#332 (repro), #342-réparation (one-shot local), #323 (visuel).
+     4. POSTURE ADVERSE : l'attestation n'est pas la preuve ; tout correctif
+        données/sécurité/SSOT → break-test (faire ROUGIR la sentinelle) avant
+        de lui faire confiance. RELAIS-326 reste la source unique du banc.
+     5. Skills : SKILL_pratiques_notation (#321/#326), SKILL_Securite_donnees
+        + SKILL_integrite_globaux (#342), SKILL_verification_adverse,
+        design-system.html (tout visuel : #305, banc).
+     ─────────────────────────────────────────────────────────────────────
+-->
+
+<!-- =====================================================================
      CLÔTURE DE SESSION — 16 juin 2026 (Claude Code cloud).
      Rituel de fin appliqué. Session de CADRAGE PUR (aucun code).
      ─────────────────────────────────────────────────────────────────────

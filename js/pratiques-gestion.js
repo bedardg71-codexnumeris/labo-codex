@@ -385,6 +385,27 @@ async function afficherBibliothequePratiques() {
     '</div>';
     contenuSection1 = messageAide + contenuSection1;
 
+    // #326 (demande terrain 17 juin) — Découvrabilité des maquettes. Les maquettes
+    // d'exploration sont VOLONTAIREMENT masquées de cette bibliothèque (D-2 : elles
+    // vivent dans le Labo › Comparateur). Résultat terrain : l'utilisateur les cherche
+    // ici pour les supprimer et ne les trouve pas. On signale donc leur existence et
+    // on pointe vers le seul endroit où on peut les comparer, les adopter ou les jeter.
+    const nbMaquettes = BibliothequeUI.filtrerParModeDemo(
+        configurations.filter(p => p.dansBibliotheque !== false)
+    ).filter(p => BibliothequeUI.estMaquette(p)).length;
+    if (nbMaquettes > 0) {
+        const motMaquette = nbMaquettes > 1 ? 'maquettes' : 'maquette';
+        const banniereMaquettes = '<div style="background: var(--bleu-tres-pale, #e8f4f8); border-left: 3px solid var(--bleu-clair, #5dade2); padding: 10px 15px; margin-bottom: 20px; border-radius: 0 6px 6px 0;">' +
+            '<p style="margin: 0 0 8px; font-size: 0.9rem; color: var(--texte-secondaire, #555);">' +
+                'Tu as <strong>' + nbMaquettes + ' ' + motMaquette + '</strong> d\'exploration. ' +
+                'Les maquettes ne s\'affichent pas ici : elles vivent dans le <strong>Labo › Comparateur</strong>, ' +
+                'où tu peux les comparer, les adopter ou les jeter.' +
+            '</p>' +
+            '<button type="button" class="btn btn-secondaire btn-mini" data-action="ouvrirExplorationMaquettes">Gérer mes maquettes</button>' +
+        '</div>';
+        contenuSection1 = banniereMaquettes + contenuSection1;
+    }
+
     // Boutons import/export après Section 1
     const boutonsApresSection1 = `
         <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
@@ -506,6 +527,18 @@ async function afficherBibliothequePratiques() {
  */
 function fermerModalBibliothequePratiques() {
     BibliothequeUI.fermerModal('modalBibliothequePratiques');
+}
+
+/**
+ * Ferme la bibliothèque puis ouvre le Labo › Comparateur, où vivent les maquettes
+ * d'exploration (comparer / adopter / jeter). Routé par le dispatcher data-action
+ * depuis la bannière de découvrabilité (#326). CSP-safe, aucun handler inline.
+ */
+function ouvrirExplorationMaquettes() {
+    fermerModalBibliothequePratiques();
+    if (typeof naviguerVers === 'function') {
+        naviguerVers('labo', 'comparateur');
+    }
 }
 
 /* ===============================
@@ -2737,6 +2770,7 @@ window.initialiserModulePratiquesMateriel = initialiserModulePratiquesMateriel;
 window.afficherListePratiquesMateriel = afficherListePratiquesMateriel;
 window.afficherBibliothequePratiques = afficherBibliothequePratiques;
 window.fermerModalBibliothequePratiques = fermerModalBibliothequePratiques;
+window.ouvrirExplorationMaquettes = ouvrirExplorationMaquettes;
 // #327 — la gestion des répertoires de classement est passée au helper générique
 // BibliothequeUI.repertoires (js/bibliotheque-ui.js). Plus d'exports spécifiques ici.
 window.ajouterPratiqueALaSelection = ajouterPratiqueALaSelection;
