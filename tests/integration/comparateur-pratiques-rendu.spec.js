@@ -87,14 +87,11 @@ test('#326 R4 · le banc s\'ouvre SANS mode démo et rend construction + résult
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });
 
-// ⚠️ PROBLÈME CONNU (#326, 17 juin 2026) : sur le JEU DÉMO de la CI, les notes du
-// banc s'affichent à 0 (simulerIndices rend P=0 sur le corpus généré injecté ; cause
-// non encore identifiée — au-delà du fix « DA 7 caractères »). Marqué `fixme` pour
-// NE PAS bloquer le déploiement de 1.19.0 (décision Grégoire : peu d'utilisateurs,
-// besoin de tester le banc sur DONNÉES RÉELLES — le comportement peut différer du
-// seed démo). Le test reste en place : à RÉACTIVER (retirer `.fixme`) dès que la
-// cause est corrigée. Suivi : BACKLOG #326 (note « banc — notes à 0 sur démo »).
-test.fixme('#326 R2/R4a · les notes du banc sont calculées (> 0) sur les profils générés', async ({ page }) => {
+// #326 (fix 17 juin) : le pourcentage d'un niveau d'échelle a 3 noms (valeurCalcul /
+// valeur / valeur_pourcentage). Le générateur ne lisait que `valeur_pourcentage` →
+// noteFinale null → toutes les notes du banc à 0 (constaté terrain + CI). Corrigé
+// (`_pct` robuste). Ce test re-vérifie de bout en bout que les notes calculent (> 0).
+test('#326 R2/R4a · les notes du banc sont calculées (> 0) sur les profils générés', async ({ page }) => {
     // Vérification BOUT EN BOUT du fix « DA 7 caractères » : corpus généré → injection
     // → simulerIndices → notes non nulles (le bug terrain affichait 0 partout).
     const erreurs = [];

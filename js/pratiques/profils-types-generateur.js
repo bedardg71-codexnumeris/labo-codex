@@ -40,11 +40,24 @@
 
     function _clamp(x, min, max) { return x < min ? min : (x > max ? max : x); }
 
+    // Pourcentage d'un niveau — ROBUSTE aux variantes de champ selon l'origine de
+    // l'échelle (#326, fix 17 juin) : `valeurCalcul` (echellesTemplates démo/réel),
+    // `valeur` (echelles.js), `valeur_pourcentage` (pratiques embarquées). Repli :
+    // milieu de [min,max]. null si rien d'exploitable. (Sans ça, noteFinale=null →
+    // SOM/STD filtrent les évals → toutes les notes du banc tombent à 0.)
+    function _pct(niv) {
+        if (!niv || typeof niv !== 'object') return null;
+        var cands = [niv.valeurCalcul, niv.valeur, niv.valeur_pourcentage, niv.pourcentage, niv.valeurMax];
+        for (var i = 0; i < cands.length; i++) { if (typeof cands[i] === 'number') return cands[i]; }
+        if (typeof niv.min === 'number' && typeof niv.max === 'number') return Math.round((niv.min + niv.max) / 2);
+        return null;
+    }
+
     function _niveauxTries(echelle) {
         if (!echelle || !Array.isArray(echelle.niveaux) || echelle.niveaux.length < 2) return null;
         return echelle.niveaux.slice().sort(function (a, b) {
-            var oa = (a && a.ordre != null) ? a.ordre : (a && a.valeur_pourcentage != null ? a.valeur_pourcentage : 0);
-            var ob = (b && b.ordre != null) ? b.ordre : (b && b.valeur_pourcentage != null ? b.valeur_pourcentage : 0);
+            var oa = (a && a.ordre != null) ? a.ordre : (_pct(a) != null ? _pct(a) : 0);
+            var ob = (b && b.ordre != null) ? b.ordre : (_pct(b) != null ? _pct(b) : 0);
             return oa - ob;
         });
     }
@@ -83,7 +96,7 @@
                 productionNom: productions[k].nom,
                 echelleId: echelleId,
                 niveauFinal: niv.code,
-                noteFinale: (niv.valeur_pourcentage != null) ? niv.valeur_pourcentage : null,
+                noteFinale: _pct(niv),
                 dateEvaluation: _dateISO(baseDate, k, cadence),
                 statutRemise: 'evalue',
                 statutIntegrite: 'recevable',
@@ -110,7 +123,7 @@
                     productionNom: productions[kReprise].nom,
                     echelleId: echelleId,
                     niveauFinal: niv.code,
-                    noteFinale: (niv.valeur_pourcentage != null) ? niv.valeur_pourcentage : null,
+                    noteFinale: _pct(niv),
                     // Reprise datée après la dernière production (fin de parcours).
                     dateEvaluation: _dateISO(baseDate, productions.length + 1, cadence),
                     statutRemise: 'evalue',

@@ -107,3 +107,40 @@ describe('#326 R2 · notes cohérentes avec l’échelle + déterminisme', () =>
         expect(c.evaluations.every(e => e.echelleId === 'ECH_X')).toBe(true);
     });
 });
+
+describe('#326 R2 · noteFinale dérivée — ROBUSTE aux champs de pourcentage (fix bug notes=0)', () => {
+    // Le pourcentage d'un niveau a 3 noms selon l'origine de l'échelle :
+    // valeurCalcul (echellesTemplates), valeur (echelles.js), valeur_pourcentage
+    // (pratiques embarquées). Sans robustesse → noteFinale null → toutes les notes à 0.
+    const niveauxValeur = [
+        { code: 'I', nom: 'Incomplet', min: 0, max: 59, valeur: 45 },
+        { code: 'D', nom: 'Développement', min: 60, max: 74, valeur: 67 },
+        { code: 'M', nom: 'Maîtrisé', min: 75, max: 89, valeur: 82 },
+        { code: 'E', nom: 'Étendu', min: 90, max: 100, valeur: 95 }
+    ];
+    const niveauxValeurCalcul = [
+        { code: '0', nom: 'Aucun', min: 0, max: 0, valeurCalcul: 0 },
+        { code: 'I', nom: 'Incomplet', min: 0, max: 64, valeurCalcul: 50 },
+        { code: 'M', nom: 'Maîtrisé', min: 65, max: 84, valeurCalcul: 78 },
+        { code: 'E', nom: 'Étendu', min: 85, max: 100, valeurCalcul: 92 }
+    ];
+    it('champ `valeur` (echelles.js) → noteFinale dérivée (pas null)', () => {
+        const c = genererCorpus({ id: 'E1', niveaux: niveauxValeur });
+        const e = c.evaluations.find(x => x.niveauFinal === 'M');
+        expect(e.noteFinale).toBe(82);
+        expect(c.evaluations.every(x => x.noteFinale !== null)).toBe(true);
+    });
+    it('champ `valeurCalcul` (echellesTemplates) → noteFinale dérivée (pas null)', () => {
+        const c = genererCorpus({ id: 'E2', niveaux: niveauxValeurCalcul });
+        const e = c.evaluations.find(x => x.niveauFinal === 'M');
+        expect(e.noteFinale).toBe(78);
+        // au moins une note > 0 (le « 0/Aucun » peut légitimement valoir 0)
+        expect(Math.max.apply(null, c.evaluations.map(x => x.noteFinale))).toBeGreaterThan(0);
+    });
+    it('repli milieu [min,max] si aucun champ de valeur', () => {
+        const c = genererCorpus({ id: 'E3', niveaux: [
+            { code: 'A', min: 0, max: 50 }, { code: 'B', min: 51, max: 100 }
+        ] });
+        expect(c.evaluations.every(x => typeof x.noteFinale === 'number')).toBe(true);
+    });
+});
