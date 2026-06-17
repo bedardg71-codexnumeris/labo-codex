@@ -42,7 +42,28 @@ describe('#326 D-2b · arbre — échappement des noms utilisateur', () => {
 
     it('les actions délèguent aux fonctions d\'écriture de la couche pratiques', () => {
         const bloc = blocExploration();
-        expect(bloc).toMatch(/deriverVarianteEssai/);
-        expect(bloc).toMatch(/promouvoirPratiqueEssai/);
+        expect(bloc).toMatch(/deriverMaquette/);
+        expect(bloc).toMatch(/adopterMaquette/);
+    });
+
+    // R1 — fix bug « Pratique introuvable » : le listener délégué de l'arbre doit
+    // être attaché UNE SEULE fois par host (garde idempotente), sinon il s'accumule
+    // à chaque _rafraichirArbre et un clic « Jeter » se déclenche N+1 fois.
+    it('le listener d\'actions est idempotent (garde anti-accumulation)', () => {
+        const bloc = blocExploration();
+        expect(bloc).toMatch(/_explActionsAttachees/);
+        // La garde précède l'ajout du listener (return tôt avant addEventListener).
+        const iGarde = bloc.indexOf('_explActionsAttachees');
+        const iListener = bloc.indexOf('addEventListener');
+        expect(iGarde).toBeGreaterThan(-1);
+        expect(iListener).toBeGreaterThan(iGarde);
+    });
+
+    // R1 — garde-fou « max 1 dérivé » : « Dériver » n'est offert que sur une souche
+    // (pas de dérivé-de-dérivé). Le bouton dériver vit dans la branche !estMaquette.
+    it('le bouton « Dériver » est conditionné à une pratique aboutie (!estMaquette)', () => {
+        const bloc = blocExploration();
+        expect(bloc).toMatch(/if\s*\(\s*!estMaquette\s*\)/);
+        expect(bloc).toMatch(/data-expl-action="deriver"/);
     });
 });

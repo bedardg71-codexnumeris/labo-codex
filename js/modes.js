@@ -519,8 +519,50 @@ function obtenirContexteCoursActif() {
     });
 }
 
+// ============================================================================
+// CONTEXTE DE SIMULATION (#326 R2/Étape 2 — banc de décision, injection mémoire)
+// ----------------------------------------------------------------------------
+// Permet à simulerIndices() de faire calculer le moteur sur un CORPUS fictif en
+// mémoire (profils-types générés) SANS écrire en stockage ni basculer le contexte
+// (trimestre/cours). Transitoire, synchrone, posé puis effacé par simulerIndices
+// en try/finally — jamais persisté. Seules les clés du corpus (évaluations,
+// productions) sont interceptées ; la config des pratiques + les échelles restent
+// lues du stockage réel (on ne simule que les artefacts d'élèves, pas les règles).
+// ============================================================================
+let _contexteSimulation = null;
+const _CLES_SIMULABLES = ['evaluationsSauvegardees', 'productions'];
+
+function definirContexteSimulation(donnees) {
+    _contexteSimulation = donnees || null;
+}
+function effacerContexteSimulation() {
+    _contexteSimulation = null;
+}
+// Retourne le jeu injecté pour une clé simulable, ou null si pas de simulation en
+// cours. Sert à router les lectures directes du chemin de calcul (db.getSync(cle('…')))
+// SANS changer leur comportement hors simulation (repli sur l'appel direct existant).
+function obtenirDonneesSimulationOuNull(cleBase) {
+    if (_contexteSimulation && _CLES_SIMULABLES.includes(cleBase)
+        && _contexteSimulation[cleBase] !== undefined) {
+        return _contexteSimulation[cleBase];
+    }
+    return null;
+}
+
 function obtenirDonneesSelonMode(cle) {
     const mode = modeActuel;
+
+    // Injection mémoire (#326 R2) : si un corpus de simulation est posé, le moteur
+    // lit DIRECTEMENT ce jeu pour les clés simulables (déjà scopé : pas de filtre
+    // coursId, pas d'anonymisation). Toute autre clé suit le chemin normal ci-dessous.
+    if (_contexteSimulation) {
+        let cleBaseSim = cle;
+        const trIdSim = typeof window.obtenirTrimestreId === 'function' ? window.obtenirTrimestreId() : null;
+        if (trIdSim && cle.startsWith(trIdSim + '_')) cleBaseSim = cle.substring(trIdSim.length + 1);
+        if (_CLES_SIMULABLES.includes(cleBaseSim) && _contexteSimulation[cleBaseSim] !== undefined) {
+            return _contexteSimulation[cleBaseSim];
+        }
+    }
     // ===================================
     // MODE NORMAL : Données réelles
     // ===================================
@@ -916,6 +958,9 @@ window.estAideContextuelleActive = estAideContextuelleActive;
 window.definirAideContextuelle = definirAideContextuelle;
 window.estEnModeDemo = estEnModeDemo;
 window.obtenirDonneesSelonMode = obtenirDonneesSelonMode;
+window.definirContexteSimulation = definirContexteSimulation;
+window.effacerContexteSimulation = effacerContexteSimulation;
+window.obtenirDonneesSimulationOuNull = obtenirDonneesSimulationOuNull;
 window.sauvegarderDonneesSelonMode = sauvegarderDonneesSelonMode;
 window.anonymiserNom = anonymiserNom;
 window.anonymiserGroupe = anonymiserGroupe;

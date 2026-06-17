@@ -42,7 +42,7 @@ const TYPE_BADGES = {
     'specifications': { code: 'SPE', classe: 'spe', label: 'PAN – Spécifications', description: 'Chaque travail est jugé acceptable ou non. La note finale dépend du nombre de spécifications réussies (forfaits).' },
     // #319 Lot 5 (#318) : DEN reconnue à l'édition (code/couleur du registre canonique,
     // --den-violet). Parcours de CRÉATION reporté #318 — pas de carte Q1 pour DEN.
-    'denotation': { code: 'DEN', classe: 'den', label: 'PAN – Dénotation', description: 'Rétroaction qualitative et jugement global — famille en construction dans Labo Codex.' }
+    'denotation': { code: 'DEN', classe: 'den', label: 'PAN – Dénotation', description: 'Rétroaction qualitative sur des cibles et des critères explicites ; la note certificative est posée par jugement à la fin.' }
 };
 
 // ============================================================================
@@ -242,7 +242,7 @@ const ETAPES_WIZARD = {
                 id: 'infoDenotation',
                 type: 'info',
                 variante: 'attention',
-                texte: 'Famille exigeante, à accompagner pédagogiquement : certain·es étudiant·es sont déstabilisé·es par l\'absence de repères (échafaudage nécessaire — voir le guide PAN). La dénotation abandonne la fonction de tri, mais produit toujours une note certificative (RREC : 60 réussite / 59 échec).'
+                texte: 'Famille exigeante, à accompagner pédagogiquement : certain·es étudiant·es sont déstabilisé·es par l\'absence de notes chiffrées en cours de route (échafaudage nécessaire — voir le guide PAN). La dénotation s\'appuie sur des cibles et des critères explicites (grille, échelle) pour la rétroaction ; elle abandonne la fonction de tri, mais produit toujours une note certificative (RREC : 60 réussite / 59 échec).'
             },
             {
                 id: 'ciblesDenotation',
@@ -265,6 +265,28 @@ const ETAPES_WIZARD = {
                     { value: 'mediane', label: 'Médiane', description: 'La valeur centrale des niveaux atteints par cible.' },
                     { value: 'moyenne', label: 'Moyenne', description: 'La moyenne des niveaux atteints par cible.' }
                 ]
+            },
+            {
+                // #343 (b) : DEN s'appuie sur des critères EXPLICITES pour la
+                // rétroaction formative (échelle + grille), comme toute pratique.
+                // Ces outils NE servent PAS à calculer la note (qui reste un jugement
+                // saisi, gardé par les cibles) — ils explicitent les critères tout au
+                // long de la session. Les deux sont optionnels.
+                id: 'infoMaterielDen',
+                type: 'info',
+                texte: 'Tu peux rattacher une échelle de performance et une grille de critères pour ta rétroaction tout au long de la session. Elles rendent tes critères explicites, mais ne calculent pas la note finale — celle-ci reste le jugement que tu poses à la fin.'
+            },
+            {
+                id: 'echelleId',
+                type: 'select-echelle',
+                required: false,
+                label: 'Échelle de performance (optionnelle, pour la rétroaction)'
+            },
+            {
+                id: 'grilleId',
+                type: 'select-grille',
+                required: false,
+                label: 'Grille de critères (optionnelle, pour la rétroaction)'
             }
         ],
         suivant: () => 'infos-base',
@@ -2134,10 +2156,23 @@ function genererRecapitulatif() {
         html += `<p><strong>Mode :</strong> Éliminée (jugement narratif → note)</p>`;
         html += `<p><strong>Cibles d'apprentissage :</strong> ${cibles.length}</p>`;
         html += `<p><strong>Suggestion statistique :</strong> ${methodeLabels[r.methodeSuggestionDen] || r.methodeSuggestionDen || 'Mode'}</p>`;
+        // #343 (b) : échelle/grille de rétroaction formative (n'entrent pas dans la note).
+        if (r.echelleId) {
+            const echelles = db.getSync('echellesTemplates', []);
+            const echelle = echelles.find(e => e.id === r.echelleId);
+            html += `<p><strong>Échelle (rétroaction) :</strong> ${echelle?.nom || r.echelleId}</p>`;
+        }
+        if (r.grilleId) {
+            const grilles = db.getSync('grillesTemplates', []);
+            const grille = grilles.find(g => g.id === r.grilleId);
+            html += `<p><strong>Grille (rétroaction) :</strong> ${grille?.nom || r.grilleId}</p>`;
+        }
         html += '</div>';
     }
 
-    // Échelle et grille (si applicable) — pas pour la dénotation (jugement, sans grille IDME).
+    // Échelle et grille — section « Matériel pédagogique » pour STD/SPE (l'échelle y sert
+    // au calcul/conversion de niveaux). DEN les affiche dans SON bloc ci-dessus, en
+    // rétroaction formative : la note DEN est un jugement, PAS une conversion de niveaux.
     if (r.typePratique !== 'sommative' && r.typePratique !== 'denotation') {
         html += '<div class="wizard-v2-recap-section">';
         html += '<h4>Matériel pédagogique</h4>';
@@ -2799,7 +2834,12 @@ async function creerPratiqueV2() {
             type: 'denotation',
             modeDEN: 'eliminee',
             objectifs: cibles,
-            suggestion: { methode: r.methodeSuggestionDen || 'mode' }
+            suggestion: { methode: r.methodeSuggestionDen || 'mode' },
+            // #343 (b) : échelle + grille OPTIONNELLES pour la rétroaction formative.
+            // Elles n'entrent PAS dans le calcul (note = jugement saisi, jugement_global) ;
+            // la validation n'exige pas d'échelle pour jugement_global. null si non choisies.
+            echelleId: r.echelleId || null,
+            grilleId: r.grilleId || null
         };
     }
 
@@ -3061,6 +3101,18 @@ function chargerPratiqueExistante(pratiqueId) {
                 // #319 Lot 3 (a3) : restaurer les reprises des objectifs (round-trip).
                 if (config.reprises) wizardState.reponses.reprisesPermises = config.reprises.mode;
             }
+        } else if (typeCanon === 'denotation') {
+            // #343 (b) round-trip d'édition DEN (gap pré-existant comblé) : restaurer
+            // les cibles (textarea), la suggestion, et l'échelle/grille de rétroaction.
+            if (Array.isArray(config.objectifs)) {
+                wizardState.reponses.ciblesDenotation = config.objectifs
+                    .map(o => (o && o.nom) ? o.nom : o).filter(Boolean).join('\n');
+            }
+            if (config.suggestion && config.suggestion.methode) {
+                wizardState.reponses.methodeSuggestionDen = config.suggestion.methode;
+            }
+            wizardState.reponses.echelleId = config.echelleId;
+            wizardState.reponses.grilleId = config.grilleId;
         }
     }
 }

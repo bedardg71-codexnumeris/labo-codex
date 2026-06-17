@@ -11,7 +11,7 @@
  *
  * Hors périmètre de ces lots (UI/nav) : l'affichage de l'arbre/diff/matrice
  * (D-2/D-4), la dérivation via assistant condensé (D-3), le filtre
- * `estEssai ≠ true` sur la sidebar/bibliothèque (D-2). Ici : le moteur seul.
+ * `estMaquette ≠ true` sur la sidebar/bibliothèque (D-2). Ici : le moteur seul.
  */
 (function () {
     'use strict';
@@ -327,39 +327,39 @@
     // =========================================================================
     // D-5 — Hygiène de l'exploration (tri / filtre / péremption douce) — PUR
     //
-    // SPEC §9 : éviter l'accumulation de variantes semblables. Leviers purs,
+    // SPEC §9 : éviter l'accumulation de maquettes semblables. Leviers purs,
     // sans DOM ni stockage : tri par nom/famille/date, filtre par texte/famille,
-    // et « péremption douce » = SIGNALER (jamais détruire) les essais dormants.
+    // et « péremption douce » = SIGNALER (jamais détruire) les maquettes dormantes.
     // La famille est dérivée de la forme stockée (configuration.type | type),
     // sans dépendre du registre → reste pur et testable.
     // =========================================================================
 
-    function _familleEssai(p) {
+    function _familleMaquette(p) {
         return (p && (p.type || (p.configuration && p.configuration.type) || (p.config && p.config.type))) || '';
     }
 
-    // Date de référence d'un essai pour la péremption : sa date de filiation
+    // Date de référence d'une maquette pour la péremption : sa date de filiation
     // (forgerInspireDe) ou une date de création si présente. null si aucune.
-    function _dateEssai(p) {
+    function _dateMaquette(p) {
         var d = (p && ((p.inspireDe && p.inspireDe.date) || p.dateCreation || p.dateModification)) || null;
         return d || null;
     }
 
     /**
-     * Trie une liste d'essais (copie, sans muter l'entrée). Tri stable, pur.
-     * @param {Array} essais
+     * Trie une liste de maquettes (copie, sans muter l'entrée). Tri stable, pur.
+     * @param {Array} maquettes
      * @param {'nom'|'famille'|'date'} critere
      * @returns {Array} nouvelle liste triée
      */
-    function trierEssais(essais, critere) {
-        var liste = Array.isArray(essais) ? essais.slice() : [];
+    function trierMaquettes(maquettes, critere) {
+        var liste = Array.isArray(maquettes) ? maquettes.slice() : [];
         var cmp;
         if (critere === 'famille') {
-            cmp = function (a, b) { return _familleEssai(a).localeCompare(_familleEssai(b)); };
+            cmp = function (a, b) { return _familleMaquette(a).localeCompare(_familleMaquette(b)); };
         } else if (critere === 'date') {
-            // Plus récent d'abord ; les essais sans date finissent en dernier.
+            // Plus récent d'abord ; les maquettes sans date finissent en dernier.
             cmp = function (a, b) {
-                var da = _dateEssai(a), dbb = _dateEssai(b);
+                var da = _dateMaquette(a), dbb = _dateMaquette(b);
                 if (!da && !dbb) return 0;
                 if (!da) return 1;
                 if (!dbb) return -1;
@@ -372,36 +372,36 @@
     }
 
     /**
-     * Filtre une liste d'essais par texte (sur le nom, insensible casse/accents
+     * Filtre une liste de maquettes par texte (sur le nom, insensible casse/accents
      * approximée) et/ou par famille (code de type stocké). Pur.
-     * @param {Array} essais
+     * @param {Array} maquettes
      * @param {{texte?:string, famille?:string}} criteres
      * @returns {Array}
      */
-    function filtrerEssais(essais, criteres) {
-        var liste = Array.isArray(essais) ? essais : [];
+    function filtrerMaquettes(maquettes, criteres) {
+        var liste = Array.isArray(maquettes) ? maquettes : [];
         var c = criteres || {};
         var texte = (c.texte || '').trim().toLowerCase();
         var famille = (c.famille || '').trim();
         return liste.filter(function (p) {
-            if (famille && _familleEssai(p) !== famille) return false;
+            if (famille && _familleMaquette(p) !== famille) return false;
             if (texte && String((p && p.nom) || '').toLowerCase().indexOf(texte) === -1) return false;
             return true;
         });
     }
 
     /**
-     * Péremption douce (SPEC §9) : un essai est « dormant » si sa date de
+     * Péremption douce (SPEC §9) : une maquette est « dormante » si sa date de
      * référence est antérieure de plus de `seuilJours` à `maintenant`. PUR —
      * ne supprime RIEN, ne fait que signaler (l'UI pose un badge discret).
-     * @param {object} essai
+     * @param {object} maquette
      * @param {{maintenant?:number|Date, seuilJours?:number}} [opts]
-     * @returns {boolean} vrai si dormant (à signaler), faux sinon ou si date absente.
+     * @returns {boolean} vrai si dormante (à signaler), faux sinon ou si date absente.
      */
-    function essaiDormant(essai, opts) {
+    function maquetteDormante(maquette, opts) {
         var o = opts || {};
         var seuil = (typeof o.seuilJours === 'number') ? o.seuilJours : 30;
-        var d = _dateEssai(essai);
+        var d = _dateMaquette(maquette);
         if (!d) return false; // pas de date → on ne signale pas (jamais de faux positif destructeur)
         var t = new Date(d).getTime();
         if (isNaN(t)) return false;
@@ -420,9 +420,9 @@
         phraseEffetPourDiff: phraseEffetPourDiff,
         partagentSouche: partagentSouche,
         phrasesEffetEntreConfigs: phrasesEffetEntreConfigs,
-        trierEssais: trierEssais,
-        filtrerEssais: filtrerEssais,
-        essaiDormant: essaiDormant
+        trierMaquettes: trierMaquettes,
+        filtrerMaquettes: filtrerMaquettes,
+        maquetteDormante: maquetteDormante
     };
 
     if (typeof window !== 'undefined') {

@@ -220,7 +220,8 @@ class PratiquePANStandards {
         const moyennePortfolio = somme / artefactsRetenus.length;
 
         // ✅ NOUVEAU (Beta 94 - 10 déc 2025): Intégrer évaluation terminale avec pondération
-        const productions = db.getSync(cle('productions'), []);
+        // #326 R2 : injection mémoire prioritaire (banc de décision) ; repli inchangé.
+        const productions = (typeof obtenirDonneesSimulationOuNull === 'function' && obtenirDonneesSimulationOuNull('productions')) || db.getSync(cle('productions'), []);
 
         // Trouver la production portfolio (conteneur)
         const productionPortfolio = productions.find(p => p.type === 'portfolio');
@@ -777,7 +778,8 @@ class PratiquePANStandards {
             methodeSelection = configPAN.portfolio.methodeSelection || 'meilleurs';
         } else {
             // Ancien format (fallback pour rétrocompatibilité)
-            const productions = db.getSync(cle('productions'), []);
+            // #326 R2 : injection mémoire prioritaire ; repli inchangé.
+            const productions = (typeof obtenirDonneesSimulationOuNull === 'function' && obtenirDonneesSimulationOuNull('productions')) || db.getSync(cle('productions'), []);
             const portfolio = productions.find(p => p.type === 'portfolio');
 
             if (portfolio && portfolio.regles) {
@@ -1571,7 +1573,8 @@ class PratiquePANStandards {
      */
     _calculerNiveauxParObjectif(da, objectifs) {
         const evaluations = this._lireEvaluations();
-        const productions = db.getSync(cle('productions'), []);
+        // #326 R2 : injection mémoire prioritaire ; repli inchangé.
+        const productions = (typeof obtenirDonneesSimulationOuNull === 'function' && obtenirDonneesSimulationOuNull('productions')) || db.getSync(cle('productions'), []);
 
         const evaluationsEleve = evaluations.filter(e =>
             e.etudiantDA === da &&

@@ -20,7 +20,7 @@
 // init-inline.js compare cette valeur au BUILD_ID lu depuis version.json :
 // si différent, Safari file:// a probablement un main.js périmé en cache,
 // et la séquence reload+bandeau s'enclenche. SYNCHRONISER À CHAQUE BUMP.
-window._SCRIPT_BUILD_main = '0616-0319';
+window._SCRIPT_BUILD_main = '0617-0501';
 
 /* ===============================
    FONCTION GLOBALE: Génération d'ID uniques
@@ -387,6 +387,40 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.warn('[migration_pratiques_namespacees] erreur ignorée:', e);
             }
             db.setSync('migration_pratiques_namespacees_done', true);
+        }
+
+        // Migration #326 R1 (16 juin 2026) : le flag transitoire de maquette
+        // d'exploration passe de `estEssai` à `estMaquette` (renommage zéro-dette).
+        // Préserve les maquettes créées en terrain (iPad) en réécrivant le champ
+        // dans `pratiquesConfigurables` (global + chaque trimestre). Aucun chemin
+        // de lecture ne lit plus `estEssai` → on rebaptise une fois et on supprime
+        // l'ancien champ (pas d'alias dormant). Idempotent.
+        if (!db.getSync('migration_estEssai_to_estMaquette_done', false)) {
+            try {
+                const _rebaptiserMaquettes = (cleStore) => {
+                    const liste = db.getSync(cleStore, null);
+                    if (!Array.isArray(liste) || liste.length === 0) return;
+                    let modifie = false;
+                    liste.forEach(p => {
+                        if (p && Object.prototype.hasOwnProperty.call(p, 'estEssai')) {
+                            if (p.estEssai === true) p.estMaquette = true;
+                            delete p.estEssai;
+                            modifie = true;
+                        }
+                    });
+                    if (modifie) db.setSync(cleStore, liste);
+                };
+                _rebaptiserMaquettes('pratiquesConfigurables');
+                const trimestres = db.getSync('trimestres', []);
+                if (Array.isArray(trimestres)) {
+                    trimestres.forEach(t => {
+                        if (t && t.id) _rebaptiserMaquettes(`${t.id}_pratiquesConfigurables`);
+                    });
+                }
+            } catch(e) {
+                console.warn('[migration_estEssai_to_estMaquette] erreur ignorée:', e);
+            }
+            db.setSync('migration_estEssai_to_estMaquette_done', true);
         }
 
         // Migration Phase G1 (24 mai 2026) : groupesCours[].pratiqueId qui
