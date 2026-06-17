@@ -28,7 +28,7 @@ describe('#326 R2 · nombre de profils = nombre de niveaux + 1 irrégulier', () 
     it('échelle 4 niveaux → 5 profils (4 ancrés + irrégulier)', () => {
         const c = genererCorpus(echelle4);
         expect(c.profils).toHaveLength(5);
-        expect(c.profils[4].da).toBe('SIMP_IRR');
+        expect(c.profils[4].da).toBe('SIM0099');
         expect(c.profils.slice(0, 4).map(p => p.niveauAncrage)).toEqual(['I', 'D', 'M', 'E']);
     });
     it('échelle 3 niveaux → 4 profils (parle l’échelle de l’utilisateur)', () => {
@@ -39,6 +39,12 @@ describe('#326 R2 · nombre de profils = nombre de niveaux + 1 irrégulier', () 
     it('échelle invalide → corpus vide (repli neutre, jamais d’exception)', () => {
         expect(genererCorpus(null)).toEqual({ profils: [], productions: [], evaluations: [] });
         expect(genererCorpus({ niveaux: [{ code: 'X' }] })).toEqual({ profils: [], productions: [], evaluations: [] });
+    });
+    it('TOUS les DA font 7 caractères (le moteur garde da.length !== 7 → sinon note 0)', () => {
+        // Bug terrain 17 juin : 'SIMP_0'/'SIMP_IRR' (6/8 car.) → toutes les notes à 0.
+        const c = genererCorpus(echelle4);
+        expect(c.profils.every(p => p.da.length === 7)).toBe(true);
+        expect(c.evaluations.every(e => e.etudiantDA.length === 7)).toBe(true);
     });
 });
 
@@ -56,14 +62,14 @@ describe('#326 R2 · trajectoires ancrées NON plates', () => {
     it('chaque profil ancré a de la variance (pas une note constante)', () => {
         const c = genererCorpus(echelle4);
         // pour le profil ancré index 1 (D) : les niveauFinal ne sont pas tous identiques
-        const niveauxProfil = c.evaluations.filter(e => e.etudiantDA === 'SIMP_1' && !e.remplaceeParId).map(e => e.niveauFinal);
+        const niveauxProfil = c.evaluations.filter(e => e.etudiantDA === 'SIM0001' && !e.remplaceeParId).map(e => e.niveauFinal);
         const uniques = new Set(niveauxProfil);
         expect(uniques.size).toBeGreaterThan(1);
     });
     it('profil irrégulier : commence bas, finit haut (maîtrise tardive)', () => {
         const c = genererCorpus(echelle4);
         const evs = c.evaluations
-            .filter(e => e.etudiantDA === 'SIMP_IRR' && !e.estReprise)
+            .filter(e => e.etudiantDA === 'SIM0099' && !e.estReprise)
             .sort((a, b) => new Date(a.dateEvaluation) - new Date(b.dateEvaluation));
         const ordreNiveau = { I: 0, D: 1, M: 2, E: 3 };
         expect(ordreNiveau[evs[0].niveauFinal]).toBeLessThanOrEqual(1);
@@ -93,5 +99,11 @@ describe('#326 R2 · notes cohérentes avec l’échelle + déterminisme', () =>
     });
     it('déterministe : deux générations identiques (profils fixes v1)', () => {
         expect(JSON.stringify(genererCorpus(echelle4))).toBe(JSON.stringify(genererCorpus(echelle4)));
+    });
+    it('echelleId stampé sur les évaluations (résolution du niveau côté comparateur)', () => {
+        const ech = { id: 'ECH_X', niveaux: echelle4.niveaux };
+        const c = genererCorpus(ech);
+        expect(c.evaluations.length).toBeGreaterThan(0);
+        expect(c.evaluations.every(e => e.echelleId === 'ECH_X')).toBe(true);
     });
 });

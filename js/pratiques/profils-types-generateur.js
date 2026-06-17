@@ -72,7 +72,7 @@
         return t;
     }
 
-    function _evalsPourProfil(da, trajectoire, productions, niveaux, baseDate, cadence, coursId) {
+    function _evalsPourProfil(da, trajectoire, productions, niveaux, baseDate, cadence, coursId, echelleId) {
         var evals = [];
         for (var k = 0; k < productions.length; k++) {
             var niv = niveaux[trajectoire[k]];
@@ -81,6 +81,7 @@
                 etudiantDA: da,
                 productionId: productions[k].id,
                 productionNom: productions[k].nom,
+                echelleId: echelleId,
                 niveauFinal: niv.code,
                 noteFinale: (niv.valeur_pourcentage != null) ? niv.valeur_pourcentage : null,
                 dateEvaluation: _dateISO(baseDate, k, cadence),
@@ -107,6 +108,7 @@
                     etudiantDA: da,
                     productionId: productions[kReprise].id,
                     productionNom: productions[kReprise].nom,
+                    echelleId: echelleId,
                     niveauFinal: niv.code,
                     noteFinale: (niv.valeur_pourcentage != null) ? niv.valeur_pourcentage : null,
                     // Reprise datée après la dernière production (fin de parcours).
@@ -142,6 +144,9 @@
         var cadence = parseInt(o.cadenceJours, 10) || 7;
         var coursId = o.coursId || 'comparateur-sim';
         var baseDate = o.dateDebut ? new Date(o.dateDebut).getTime() : new Date('2025-09-08T15:00:00.000Z').getTime();
+        // echelleId stampé sur les évaluations → la résolution du niveau (colonne
+        // « Niveau atteint », récit) retrouve l'échelle dans echellesTemplates.
+        var echelleId = echelle.id || echelle.echelle_id || o.echelleId || null;
 
         // Corpus de productions PARTAGÉ : (nbArtefacts-1) exercices + 1 terminale.
         var productions = [];
@@ -159,8 +164,11 @@
         var evaluations = [];
 
         // N profils ancrés, un par niveau (du plus bas au plus haut).
+        // ⚠️ Le DA DOIT faire 7 caractères : tout le moteur garde `da.length !== 7`
+        // (cf. pratique-*.js) → un DA non conforme rend une note nulle. Format
+        // 'SIM' + 4 chiffres (comme 'DEMO0xx' = 7 car.).
         for (var a = 0; a < N; a++) {
-            var da = 'SIMP_' + a;
+            var da = 'SIM' + String(a).padStart(4, '0');
             var nom = (niveaux[a] && niveaux[a].label) ? niveaux[a].label : (niveaux[a] && niveaux[a].code) || ('Niveau ' + (a + 1));
             profils.push({
                 da: da,
@@ -169,12 +177,12 @@
                 niveauAncrage: niveaux[a] ? niveaux[a].code : null
             });
             evaluations = evaluations.concat(
-                _evalsPourProfil(da, _trajectoireAncree(a, nbArtefacts, N), productions, niveaux, baseDate, cadence, coursId)
+                _evalsPourProfil(da, _trajectoireAncree(a, nbArtefacts, N), productions, niveaux, baseDate, cadence, coursId, echelleId)
             );
         }
 
-        // + 1 profil irrégulier (maîtrise tardive) — transversal.
-        var daIrr = 'SIMP_IRR';
+        // + 1 profil irrégulier (maîtrise tardive) — transversal. DA 7 car. également.
+        var daIrr = 'SIM0099';
         profils.push({
             da: daIrr,
             label: 'Parcours irrégulier',
@@ -182,7 +190,7 @@
             niveauAncrage: null
         });
         evaluations = evaluations.concat(
-            _evalsPourProfil(daIrr, _trajectoireIrreguliere(nbArtefacts, N), productions, niveaux, baseDate, cadence, coursId)
+            _evalsPourProfil(daIrr, _trajectoireIrreguliere(nbArtefacts, N), productions, niveaux, baseDate, cadence, coursId, echelleId)
         );
 
         return { profils: profils, productions: productions, evaluations: evaluations };
