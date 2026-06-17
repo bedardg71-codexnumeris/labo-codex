@@ -1,12 +1,14 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
 
-// #326 D-3 — dérivation d'une variante d'essai (SPEC §8).
-// deriverVarianteEssai(sourceId) : nom auto « <souche> · essai N », duplication
-// AVEC estEssai:true + inspireDe.sourceId (via forgerInspireDe), puis ouverture
-// de l'assistant (editerPratique → ouvrirWizardV2(true, newId)).
+// #326 R1 — dérivation d'une maquette (SPEC §8 ; renommage « variante d'essai » →
+// « maquette »). deriverMaquette(sourceId) : nom auto « <souche> · maquette N »,
+// duplication AVEC estMaquette:true + inspireDe.sourceId (via forgerInspireDe),
+// puis ouverture de l'assistant (editerPratique → ouvrirWizardV2(true, newId)).
 //
-// FIX terrain 16 juin : dupliquerPratique lisait `original.config`, mais les
+// GARDE-FOU R1 « max 1 dérivé » : on ne dérive JAMAIS une maquette (profondeur 1).
+//
+// Régression terrain 16 juin : dupliquerPratique lisait `original.config`, mais les
 // pratiques du wizard rangent leur config sous `.configuration` (+ racine).
 // → `JSON.parse(JSON.stringify(undefined))` levait, et `silencieux:true` avalait
 // l'erreur → « Dériver » sans effet. Le fix résout la config via construireConfigComplete.
@@ -58,7 +60,7 @@ const win = chargerScript('js/pratiques.js', {
     genererIdUnique: (p) => p + (++compteurId),
     ouvrirWizardV2: (mode, id) => { wizardOuvert = { mode, id }; }
 });
-const deriver = win.deriverVarianteEssai;
+const deriver = win.deriverMaquette;
 
 // Souche AU FORMAT WIZARD : config sous `.configuration` (+ racine), PAS `.config`.
 // C'est exactement la forme qui faisait planter dupliquerPratique sur le terrain.
@@ -77,37 +79,47 @@ beforeEach(() => {
     compteurId = 0;
 });
 
-describe('#326 D-3 · deriverVarianteEssai (source au format wizard — régression terrain)', () => {
-    it('dérive sans planter et crée une variante à la config VALIDE', async () => {
+describe('#326 R1 · deriverMaquette (source au format wizard — régression terrain)', () => {
+    it('dérive sans planter et crée une maquette à la config VALIDE', async () => {
         const id = await deriver('p_souche');
         expect(id).toBeTruthy();
-        const variante = store['h2026_pratiquesConfigurables'].find(p => p.id === id);
-        expect(variante).toBeTruthy();
+        const maquette = store['h2026_pratiquesConfigurables'].find(p => p.id === id);
+        expect(maquette).toBeTruthy();
         // La config résolue est présente et valide (le bug rendait copie.config undefined).
-        expect(variante.config).toBeTruthy();
-        expect(variante.config.id).toBe(id);
-        expect(variante.config.calcul_note).toBeTruthy();
+        expect(maquette.config).toBeTruthy();
+        expect(maquette.config.id).toBe(id);
+        expect(maquette.config.calcul_note).toBeTruthy();
     });
 
-    it('crée une variante estEssai:true avec inspireDe.sourceId = souche', async () => {
+    it('crée une maquette estMaquette:true avec inspireDe.sourceId = souche', async () => {
         const id = await deriver('p_souche');
-        const variante = store['h2026_pratiquesConfigurables'].find(p => p.id === id);
-        expect(variante.estEssai).toBe(true);
-        expect(variante.inspireDe.sourceId).toBe('p_souche');
+        const maquette = store['h2026_pratiquesConfigurables'].find(p => p.id === id);
+        expect(maquette.estMaquette).toBe(true);
+        expect(maquette.inspireDe.sourceId).toBe('p_souche');
     });
 
-    it('nom auto « <souche> · essai N » incrémental', async () => {
+    it('nom auto « <souche> · maquette N » incrémental', async () => {
         const id1 = await deriver('p_souche');
         const id2 = await deriver('p_souche');
         const v1 = store['h2026_pratiquesConfigurables'].find(p => p.id === id1);
         const v2 = store['h2026_pratiquesConfigurables'].find(p => p.id === id2);
-        expect(v1.nom).toBe('Standards Bédard · essai 1');
-        expect(v2.nom).toBe('Standards Bédard · essai 2');
+        expect(v1.nom).toBe('Standards Bédard · maquette 1');
+        expect(v2.nom).toBe('Standards Bédard · maquette 2');
     });
 
-    it('ouvre l\'assistant sur la nouvelle variante (editerPratique → wizard édition)', async () => {
+    it('ouvre l\'assistant sur la nouvelle maquette (editerPratique → wizard édition)', async () => {
         const id = await deriver('p_souche');
         expect(wizardOuvert).toEqual({ mode: true, id });
+    });
+
+    it('GARDE-FOU « max 1 dérivé » : dériver une maquette → null, aucune création', async () => {
+        const idMaquette = await deriver('p_souche');           // souche → maquette (OK)
+        const nAvant = store['h2026_pratiquesConfigurables'].length;
+        wizardOuvert = null;
+        const refus = await deriver(idMaquette);                 // maquette → refus
+        expect(refus).toBeNull();
+        expect(store['h2026_pratiquesConfigurables']).toHaveLength(nAvant);
+        expect(wizardOuvert).toBeNull(); // n'ouvre pas l'assistant
     });
 
     it('source introuvable → null, aucune création', async () => {

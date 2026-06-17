@@ -711,9 +711,26 @@ function calculerEtStockerIndicesCP() {
  * @returns {{pratique:string, C:number, P:number, noteFinale:?number, details:?object}|null}
  *          null si da/pratiqueId manquant ou pratique introuvable dans le registre.
  */
-function simulerIndices(da, pratiqueId) {
+function simulerIndices(da, pratiqueId, donnees = null) {
     if (!da || !pratiqueId) return null;
 
+    // #326 R2/Étape 2 — injection mémoire (banc de décision) : si un corpus fictif
+    // { evaluationsSauvegardees, productions } est fourni, le moteur calcule SUR CE
+    // corpus (profils-types générés) sans toucher au stockage ni au contexte. Posé
+    // puis effacé en try/finally → lecture seule absolue, aucun effet de bord global.
+    // Param absent ⇒ comportement historique strictement inchangé (parité moteur).
+    if (donnees && typeof definirContexteSimulation === 'function') {
+        try {
+            definirContexteSimulation(donnees);
+            return _simulerIndicesInterne(da, pratiqueId);
+        } finally {
+            if (typeof effacerContexteSimulation === 'function') effacerContexteSimulation();
+        }
+    }
+    return _simulerIndicesInterne(da, pratiqueId);
+}
+
+function _simulerIndicesInterne(da, pratiqueId) {
     const pratique = (typeof obtenirPratiqueParId === 'function') ? obtenirPratiqueParId(pratiqueId) : null;
     if (!pratique) return null;
 

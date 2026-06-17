@@ -389,9 +389,9 @@
         return (db.getSync(k, null) || db.getSync('pratiquesConfigurables', []) || []);
     }
 
-    function _sousArbreContientEssai(noeud) {
-        if (noeud.pratique && noeud.pratique.estEssai === true) return true;
-        return (noeud.enfants || []).some(_sousArbreContientEssai);
+    function _sousArbreContientMaquette(noeud) {
+        if (noeud.pratique && noeud.pratique.estMaquette === true) return true;
+        return (noeud.enfants || []).some(_sousArbreContientMaquette);
     }
 
     function _badgeFamille(p) {
@@ -401,15 +401,19 @@
         return '';
     }
 
-    // Boutons d'un nœud. Toute pratique est dérivable ; les variantes d'essai
-    // offrent en plus comparer (D-4) / promouvoir / jeter.
+    // Boutons d'un nœud. GARDE-FOU « max 1 dérivé » (R1) : seule une pratique
+    // ABOUTIE (souche) est dérivable ; une maquette ne se dérive pas (profondeur
+    // d'arbre = 1, évite les « doublons de doublons » #326 §1.2). La maquette offre
+    // en retour comparer (D-4) / adopter / jeter.
     function _actionsNoeud(p) {
         var id = _esc(p.id);
+        var estMaquette = (p.estMaquette === true);
         var b = '<div class="exploration-noeud-actions">';
-        b += '<button type="button" class="btn btn-tres-compact btn-secondaire" data-expl-action="deriver" data-id="' + id + '">Dériver une variante</button>';
-        if (p.estEssai === true) {
+        if (!estMaquette) {
+            b += '<button type="button" class="btn btn-tres-compact btn-secondaire" data-expl-action="deriver" data-id="' + id + '">Dériver une maquette</button>';
+        } else {
             b += '<button type="button" class="btn btn-tres-compact btn-secondaire" data-expl-action="comparer" data-id="' + id + '">Comparer</button>';
-            b += '<button type="button" class="btn btn-tres-compact btn-principal" data-expl-action="promouvoir" data-id="' + id + '">Promouvoir</button>';
+            b += '<button type="button" class="btn btn-tres-compact btn-principal" data-expl-action="adopter" data-id="' + id + '">Adopter</button>';
             b += '<button type="button" class="btn btn-tres-compact btn-supprimer" data-expl-action="jeter" data-id="' + id + '">Jeter</button>';
         }
         b += '</div>';
@@ -418,17 +422,17 @@
 
     function _rendreNoeud(noeud) {
         var p = noeud.pratique;
-        var estEssai = (p.estEssai === true);
-        var h = '<li class="exploration-noeud' + (estEssai ? ' exploration-noeud--essai' : ' exploration-noeud--souche') + '">';
+        var estMaquette = (p.estMaquette === true);
+        var h = '<li class="exploration-noeud' + (estMaquette ? ' exploration-noeud--essai' : ' exploration-noeud--souche') + '">';
         h += '<div class="exploration-noeud-tete">';
         h += '<span class="exploration-noeud-nom">' + _esc(p.nom || 'Sans titre') + '</span> ';
         h += _badgeFamille(p);
-        if (estEssai) h += ' <span class="exploration-tag-essai">essai</span>';
-        // D-5 péremption douce : badge discret si l'essai dort depuis longtemps.
+        if (estMaquette) h += ' <span class="exploration-tag-essai">maquette</span>';
+        // D-5 péremption douce : badge discret si la maquette dort depuis longtemps.
         // SIGNAL seulement (jamais de suppression) — SPEC §9. Date = filiation.
-        if (estEssai && typeof ExplorationPratiques !== 'undefined'
-            && ExplorationPratiques.essaiDormant && ExplorationPratiques.essaiDormant(p)) {
-            h += ' <span class="exploration-tag-dormant" title="Variante d’essai inactive depuis plus de 30 jours — à promouvoir ou jeter ?">dormant</span>';
+        if (estMaquette && typeof ExplorationPratiques !== 'undefined'
+            && ExplorationPratiques.maquetteDormante && ExplorationPratiques.maquetteDormante(p)) {
+            h += ' <span class="exploration-tag-dormant" title="Maquette inactive depuis plus de 30 jours — à adopter ou jeter ?">dormant</span>';
         }
         h += _actionsNoeud(p);
         h += '</div>';
@@ -439,16 +443,16 @@
         return h;
     }
 
-    // Quand aucun essai n'existe encore : proposer de dériver depuis une pratique aboutie.
+    // Quand aucune maquette n'existe encore : proposer de dériver depuis une pratique aboutie.
     function _listeDerivables(configurables) {
-        var abouties = configurables.filter(function (p) { return p.estEssai !== true; });
+        var abouties = configurables.filter(function (p) { return p.estMaquette !== true; });
         if (abouties.length === 0) return '';
         var h = '<p class="exploration-derivables-titre">Dériver depuis une de tes pratiques :</p>';
         h += '<ul class="exploration-arbre-liste">';
         h += abouties.map(function (p) {
             return '<li class="exploration-noeud exploration-noeud--souche"><div class="exploration-noeud-tete">'
                 + '<span class="exploration-noeud-nom">' + _esc(p.nom || 'Sans titre') + '</span> ' + _badgeFamille(p)
-                + '<div class="exploration-noeud-actions"><button type="button" class="btn btn-tres-compact btn-secondaire" data-expl-action="deriver" data-id="' + _esc(p.id) + '">Dériver une variante</button></div>'
+                + '<div class="exploration-noeud-actions"><button type="button" class="btn btn-tres-compact btn-secondaire" data-expl-action="deriver" data-id="' + _esc(p.id) + '">Dériver une maquette</button></div>'
                 + '</div></li>';
         }).join('');
         h += '</ul>';
@@ -459,15 +463,15 @@
         var pratiques = _lirePratiquesConfigurablesReelles();
         var configurables = pratiques.filter(function (p) { return p && p.id && _BASE_CANEVAS.indexOf(p.id) === -1; });
         var foret = (typeof construireArbrePratiques === 'function') ? construireArbrePratiques(configurables) : [];
-        var arbres = foret.filter(_sousArbreContientEssai);
+        var arbres = foret.filter(_sousArbreContientMaquette);
 
         var h = '<section class="exploration-arbre carte" role="region" aria-labelledby="exploration-arbre-titre">'
-            + '<h3 id="exploration-arbre-titre" class="exploration-arbre-titre" tabindex="-1">Variantes d’essai</h3>'
-            + '<p class="exploration-arbre-intro">Décline une pratique en variantes pour comparer ce que chaque réglage change. '
-            + 'Les essais vivent ici : ils n’apparaissent ni dans la sélection de la pratique active ni dans tes pratiques abouties tant que tu ne les as pas promus.</p>';
+            + '<h3 id="exploration-arbre-titre" class="exploration-arbre-titre" tabindex="-1">Maquettes</h3>'
+            + '<p class="exploration-arbre-intro">Décline une pratique en maquettes pour comparer ce que chaque réglage change. '
+            + 'Les maquettes vivent ici : elles n’apparaissent ni dans la sélection de la pratique active ni dans tes pratiques abouties tant que tu ne les as pas adoptées.</p>';
 
         if (arbres.length === 0) {
-            h += '<p class="exploration-arbre-vide">Aucune variante d’essai pour l’instant.</p>';
+            h += '<p class="exploration-arbre-vide">Aucune maquette pour l’instant.</p>';
             h += _listeDerivables(configurables);
         } else {
             h += '<ul class="exploration-arbre-liste exploration-arbre-racine">' + arbres.map(_rendreNoeud).join('') + '</ul>';
@@ -483,18 +487,26 @@
     }
 
     function _attacherActionsArbre(host) {
+        // FIX bug « Pratique introuvable » (#326 R1) : le listener est DÉLÉGUÉ sur le
+        // host (qui survit aux `innerHTML` de `_rafraichirArbre`). Sans garde, chaque
+        // rafraîchissement (après dérivation/adoption) RÉ-AJOUTAIT un listener sur le
+        // même élément → un seul clic « Jeter » exécutait le handler N+1 fois ; la 1ʳᵉ
+        // suppression réussissait, les suivantes levaient « Pratique introuvable : <id> »
+        // (id déjà supprimé). Garde idempotente : un seul listener par host.
+        if (host._explActionsAttachees) return;
+        host._explActionsAttachees = true;
         host.addEventListener('click', function (e) {
             var btn = e.target.closest ? e.target.closest('[data-expl-action]') : null;
             if (!btn) return;
             var action = btn.getAttribute('data-expl-action');
             var id = btn.getAttribute('data-id');
             if (!id) return;
-            if (action === 'deriver' && typeof deriverVarianteEssai === 'function') {
-                Promise.resolve(deriverVarianteEssai(id)).then(_rafraichirArbre);
-            } else if (action === 'promouvoir' && typeof promouvoirPratiqueEssai === 'function') {
-                Promise.resolve(promouvoirPratiqueEssai(id)).then(_rafraichirArbre);
+            if (action === 'deriver' && typeof deriverMaquette === 'function') {
+                Promise.resolve(deriverMaquette(id)).then(_rafraichirArbre);
+            } else if (action === 'adopter' && typeof adopterMaquette === 'function') {
+                Promise.resolve(adopterMaquette(id)).then(_rafraichirArbre);
             } else if (action === 'jeter') {
-                _jeterEssai(id);
+                _jeterMaquette(id);
             } else if (action === 'comparer') {
                 _comparerDepuisArbre(id);
             }
@@ -521,11 +533,11 @@
         if (comp) _rerendreMatrice(comp);
     }
 
-    async function _jeterEssai(id) {
+    async function _jeterMaquette(id) {
         var ok = (typeof uiDialogues !== 'undefined' && uiDialogues.confirmerAction)
             ? await uiDialogues.confirmerAction({
-                titre: 'Jeter la variante',
-                message: 'Supprimer définitivement cette variante d’essai ? Cette action est irréversible.',
+                titre: 'Jeter la maquette',
+                message: 'Supprimer définitivement cette maquette ? Cette action est irréversible.',
                 texteConfirmer: 'Jeter', variante: 'danger'
             })
             : true;
@@ -534,7 +546,7 @@
             if (typeof PratiqueManager !== 'undefined' && PratiqueManager.supprimerPratique) {
                 await PratiqueManager.supprimerPratique(id);
             }
-            if (typeof notifications !== 'undefined' && notifications.succes) notifications.succes('Variante supprimée');
+            if (typeof notifications !== 'undefined' && notifications.succes) notifications.succes('Maquette supprimée');
         } catch (e) {
             if (typeof notifications !== 'undefined' && notifications.erreur) notifications.erreur('Erreur', e.message);
         }

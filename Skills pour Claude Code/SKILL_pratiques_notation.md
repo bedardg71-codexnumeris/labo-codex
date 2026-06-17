@@ -119,9 +119,11 @@ périmée (c'est le cas de SKILL_labo_codex §5.2 au 5 juin).
   reprise/resoumission, **note finale toujours attribuée**, de façon collaborative. La CoP
   (Poulin-Lamarre & Langlois, Cégep de Sherbrooke) décrit **trois scénarios** de composition
   de la note finale, tous certificatifs et conformes au **RREC (60+/59-)**, fondés sur la
-  *qualité* des productions liées à des **cibles d'apprentissage** — donc reposant sur des
-  standards/specs implicites (Clark). Talon d'Achille documenté (Dyer) : biais implicite sur
-  l'attribution **holistique** de la note finale.
+  *qualité* des productions liées à des **cibles d'apprentissage** — donc sur des standards/specs
+  sous-jacents qui **doivent rester explicites** (Clark ; cf. #343 : les critères d'évaluation
+  sont toujours explicités — grille/échelle de rétroaction —, jamais implicites, même si la note
+  finale reste un jugement et non une conversion de niveaux). Talon d'Achille documenté (Dyer) :
+  biais implicite sur l'attribution **holistique** de la note finale.
 - *⚠️ Taxonomie (acté 6 juin)* : académiquement, DEN = **PRÉN** (pratique de réduction ou
   d'élimination de la notation — Girouard-Gagné et al., 2024), que la recherche **distingue**
   des **PAN** (qui renouvellent la notation : STD/SPE/maîtrise/contrat). Labo Codex **garde le
@@ -228,10 +230,13 @@ configuration: {
   grilles/échelles/cartouches/pratiques). Sert l'arbre de filiation **et** l'attribution CC.
   **Jamais effacé** (invariant CC, SPEC §3.1) ; optionnel (filiations legacy sans id ignorées).
   Validé à l'import par `SCHEMA_INSPIRE_DE` (`import-export.js`).
-- `estEssai` (booléen, transitoire) — variante d'essai vs pratique aboutie (SPEC §3.2).
-  Posé **opt-in** par `dupliquerPratique(id, {estEssai:true})` ; la duplication ordinaire
-  (bouton « Dupliquer ») ne le pose **pas** (pas de régression : le filtre `estEssai ≠ true`
-  sur sidebar/bibliothèque arrive en D-2, pas encore livré). Basculé à `false` à la promotion.
+- `estMaquette` (booléen, transitoire ; **R1 : renommé depuis `estEssai`**) — maquette vs
+  pratique aboutie (SPEC §3.2). Posé **opt-in** par `dupliquerPratique(id, {estMaquette:true})` ;
+  la duplication ordinaire (bouton « Dupliquer ») ne le pose **pas**. Le filtre `estMaquette ≠ true`
+  masque les maquettes de la sidebar/bibliothèque (helpers `BibliothequeUI.estMaquette`/
+  `filtrerParMaquette`). Basculé à `false` à l'**adoption** (`adopterMaquette`). Migration boot
+  one-shot `estEssai`→`estMaquette` (`main.js`, flag `migration_estEssai_to_estMaquette_done`,
+  supprime l'ancien champ — pas d'alias).
 
 ---
 
@@ -308,6 +313,12 @@ plusieurs pratiques sur les mêmes artefacts sans toucher aux données du trimes
     affiché à la saisie (« l'algorithme propose, le jugement tranche »), jamais la valeur finale.
   - **Création** : assistant, voie rapide → carte « Dénotation » → étape `config-denotation`
     (cibles une par ligne → ids stables ; méthode de suggestion ; mode `eliminee` seul offert).
+  - **Échelle + grille OPTIONNELLES (#343 (b), 17 juin 2026)** : DEN peut porter `configuration.echelleId`/
+    `grilleId` pour la **rétroaction formative** — les critères doivent rester **explicites** (cf. §2 bis).
+    Elles **n'entrent PAS dans le calcul** (note = jugement saisi ; `valider()` n'exige pas d'échelle pour
+    `jugement_global`). Le wizard (`config-denotation`) les expose en selects `required:false` ; round-trip
+    d'édition restauré (branche `denotation` de `chargerPratiqueExistante`). R3 (`construction-attributs.js`)
+    affiche l'échelle/grille DEN au lieu de « s.o. ».
   - **Non simulable** (DEN-E) : la note étant un jugement, `simulerIndices` ne produit pas de
     nombre comparable (P=0/noteFinale=null) → **diffable** dans l'Exploration des pratiques
     (axe D), pas une colonne note. Pas de note DEN dans le pack démo.
@@ -490,6 +501,65 @@ lecture seule** ; aucun nouveau chemin de calcul. Spéc canonique :
   (validation terrain Mac+iPad sombre/clair + release `minor` + changelog). ⚠️ **Validation terrain
   Grégoire en attente** pour tout le visuel Exploration (arbre, diff, matrice, badges).
 
+**RECADRAGE « banc de décision » (RELAIS-326, 16 juin 2026) — les lots D-2…D-5 ont livré le
+mécanisme mais raté le workflow.** La refonte se découpe en `#343 → R1∥R2∥R3 → R4 → R5 → R6`
+(SPEC_D bandeau + `plans de travail/RELAIS-326-refonte-banc-decision.md`, source unique). Le
+**moteur pur survit tel quel** ; ne pas releaser 1.19.0 avant R6.
+
+- **R1 LIVRÉ (16 juin 2026) — maquette (modèle + cycle de vie) + fix bug.** Vocabulaire
+  **« essai » → « maquette »**, **« promouvoir » → « adopter »** (décisions Grégoire, RELAIS §4.5) :
+  - **Champ** `estEssai` → `estMaquette` (migration boot one-shot dans `main.js`, supprime
+    l'ancien champ — pas d'alias). **Fonctions** : `promouvoirPratiqueEssai`→**`adopterMaquette`**,
+    `deriverVarianteEssai`→**`deriverMaquette`**, `BibliothequeUI.estEssai`→**`estMaquette`**,
+    `filtrerParEssai`→**`filtrerParMaquette`** ; moteur pur `trierEssais`/`filtrerEssais`/
+    `essaiDormant`→**`trierMaquettes`/`filtrerMaquettes`/`maquetteDormante`**.
+  - **Garde-fou « max 1 dérivé »** : `deriverMaquette` refuse une source déjà maquette
+    (profondeur d'arbre = 1) ; l'arbre n'offre « Dériver » que sur une souche → corrige
+    « doublons de doublons » (#326 §1.2).
+  - **Fix bug « Pratique introuvable »** (RELAIS §1.5) : `_attacherActionsArbre` rendait le
+    listener délégué accumulé à chaque `_rafraichirArbre` → un clic « Jeter » se déclenchait N+1
+    fois (la 1ʳᵉ supprimait, les suivantes levaient « Pratique introuvable : <id> »). Garde
+    idempotente `host._explActionsAttachees`.
+  - Tests : `adoption-maquette-326`, `derivation-maquette-326` (dont garde-fou), `exploration-maquette-filtre-326`,
+    `exploration-hygiene-326`, `exploration-arbre-securite-326` (idempotence + garde-fou),
+    `sentinelle-migration-maquette-326`. Break-testés. **CSS internes** `exploration-noeud--essai`/
+    `exploration-tag-essai` conservées (tokens de style, non user-facing).
+  - **RESTE R2, R4…R6** : R2 générateur de profils depuis l'échelle ; R4 tableau lecture seule
+    (source + construction + résultat + lien formulaire #319) — **préalable #343 (b)+(c)** pour la
+    colonne DEN ; R5 nettoyage UI D-2…D-5 ; R6 terrain + release 1.19.0.
+
+- **R3 LIVRÉ (17 juin 2026) — extracteur « config résolue → attributs de construction par famille » (pur).**
+  Module `js/pratiques/construction-attributs.js` (`window.ConstructionAttributs.extraire(config)`),
+  lecture seule, testable sans DOM. Produit les **lignes de construction** du tableau R4
+  (RELAIS §4.3.4) : **ancres toujours présentes** (`AXES_ANCRES` = pondération / reprises /
+  nb de productions) puis attributs **family-specific** (STD : méthode de sélection, composantes,
+  mode note finale, échelle ; SPE : seuil d'acceptabilité, forfaits, échelle, reprises=jetons ;
+  SOM : règles spéciales, reprises=select ; DEN : note=jugement, suggestion, cibles, échelle/grille
+  « à venir #343 »). Lit la config **résolue** (plat + `configuration.*`). **Applique le constat R1**
+  (§4.5) : STD ne liste **pas** de jetons. R4 alignera les colonnes par `axe` (« s.o. » si absent).
+  Repli neutre (config vide → ancres « — », jamais d'exception). Test `construction-attributs-326`
+  (12 cas, break-testé). **RESTE R4…R6.**
+
+- **R2 + INJECTION MÉMOIRE LIVRÉS (17 juin 2026).**
+  - **R2** : `js/pratiques/profils-types-generateur.js` (`ProfilsTypesGenerateur.genererCorpus(echelle, options)`),
+    pur + **déterministe** (profils FIXES, §4.8). `N niveaux → N profils ancrés` (trajectoires NON
+    plates, libellés tirés de l'échelle) **+ 1 « irrégulier »** (maîtrise tardive). Corpus de
+    productions partagé (exercices + 1 terminale) ; **scénarios de reprise sur exercices seulement**
+    (pas la terminale). Notes dérivées de `valeur_pourcentage`. Forme calée sur les enregistrements
+    réels → consommable par le moteur. Sortie `{ profils, productions, evaluations }`.
+  - **Injection (approche A)** : `simulerIndices(da, pratiqueId, donnees?)` — si un corpus
+    `{evaluationsSauvegardees, productions}` est fourni, le moteur calcule **dessus** (lecture seule,
+    try/finally, aucune écriture, aucune bascule de contexte). Mécanisme dans `modes.js` :
+    `definirContexteSimulation`/`effacerContexteSimulation`/`obtenirDonneesSimulationOuNull` ;
+    `obtenirDonneesSelonMode` intercepte les clés simulables (évaluations/productions) **avant** la voie
+    normale. **Param absent ⇒ parité historique stricte** (golden master inchangé). Les 3 lectures
+    directes de productions du chemin de calcul de `pratique-pan-standards.js` sont routées par
+    l'injection (repli `db.getSync` inchangé hors simulation). Seules évaluations+productions sont
+    simulées ; la **config des pratiques + les échelles** restent lues du stockage réel.
+  - Tests : `profils-types-generateur-326` (9), `simulation-injection-326` (8), break-testés. 823 verts.
+  - **RESTE R4** (tableau : source fictif/réel + colonnes paires + lignes construction R3 + résultats
+    R2 via injection + lien formulaire #319) → **non vérifiable en cloud, terrain R6** ; R5 nettoyage ; R6 release.
+
 ---
 
 ## 13. Coordination
@@ -515,6 +585,11 @@ vraiment*.
 
 | Date | Changement |
 |------|------------|
+| 2026-06-16 (#343 descriptions) | **Malentendu DEN corrigé dans les descriptions.** §2 bis (DEN) : « standards/specs implicites » → « doivent rester explicites » (cf. #343). 5 sites UI alignés (gabarits-utils, accompagnement terme/popup, wizard type + bannière). Reste #343 (b)+(c) modèle/formulaire (DEN porte échelle/grille optionnelles). |
+| 2026-06-17 (#326 R2+inj) | **Banc de décision — R2 (générateur de profils) + injection mémoire livrés.** `ProfilsTypesGenerateur.genererCorpus(echelle)` (pur, déterministe : N profils ancrés + 1 irrégulier, reprises sur exercices, corpus partagé). `simulerIndices(da,id,donnees?)` calcule sur un corpus injecté (try/finally, lecture seule) ; mécanisme dans `modes.js` (interception `obtenirDonneesSelonMode` des clés évaluations/productions) ; param absent ⇒ parité moteur (golden master vert). Tests 17 cas break-testés. Reste R4 (UI, terrain R6). |
+| 2026-06-17 (#343 b+c) | **DEN porte échelle + grille optionnelles (rétroaction formative).** §8 : `configuration.echelleId/grilleId` optionnels (n'entrent pas dans le calcul = jugement saisi ; `valider()` n'exige pas d'échelle pour `jugement_global`). Wizard : selects optionnels dans `config-denotation`, build + récap, **branche `denotation` ajoutée à `chargerPratiqueExistante`** (round-trip cibles/suggestion/échelle/grille — comble un gap pré-existant). Commentaire récap `:2140` reformulé (« sans grille IDME » retiré). R3 colonne DEN montre échelle/grille. #343 entièrement livré. |
+| 2026-06-17 (#326 R3) | **Banc de décision — R3 livré : extracteur d'attributs de construction (pur).** Module `construction-attributs.js` (`ConstructionAttributs.extraire`) → lignes de construction par famille (ancres pondération/reprises/nb productions + family-specific), lit la config résolue, applique le constat R1 (STD sans jetons), repli neutre. Test 12 cas break-testé. Alimente R4. |
+| 2026-06-16 (#326 R1) | **Banc de décision — R1 livré : maquette (modèle + cycle de vie) + fix bug.** Renommage zéro-dette « essai »→« maquette », « promouvoir »→« adopter » : champ `estEssai`→`estMaquette` (migration boot), `adopterMaquette`/`deriverMaquette`/`filtrerParMaquette`/`estMaquette`, moteur pur `trierMaquettes`/`filtrerMaquettes`/`maquetteDormante`. Garde-fou « max 1 dérivé » (pas de dérivé-de-dérivé). Fix bug « Pratique introuvable » (listener d'arbre accumulé → garde idempotente `host._explActionsAttachees`). §5 + §12 à jour. Reste R2…R6 (préalable #343 (b)+(c) pour la colonne DEN de R4). Source unique : RELAIS-326. |
 | 2026-06-15 (#326 D-2/D-3) | **Exploration des pratiques — UI arbre + dérivation livrées.** §12 État : filtre `estEssai` (helpers `BibliothequeUI.estEssai`/`filtrerParEssai` + sites de présentation) ; label `config.js` → « Exploration des pratiques » ; `promouvoirPratiqueEssai` (estEssai→false, inspireDe intact) ; `deriverVarianteEssai` (nom auto, dupliquerPratique{estEssai,silencieux} + assistant) ; arbre dans `comparateur-pratiques.js` (deux régions : arbre des essais + matrice). Reste D-4 (matrice/diff + Comparer), D-5 (hygiène/#320), D-6 (terrain + release). |
 | 2026-06-15 (#333 Lot 1) | **Export des résultats finaux — récit de calcul DEN.** §8 : `PratiqueConfigurable.decrireCalcul` (jugement_global) comble le dernier trou du récit unifié de `simulerIndices` (DEN avait `recit=null`). Re-scoping acté : l'« API unifiée de décomposition » du plan #333 (10 juin) **existe déjà** (`simulerIndices(da,id)` → `{noteFinale, recit, details}` + `decrireCalcul` par famille) ; pas de nouvelle méthode IPratique (zéro-dette). Le module d'export (Lot 2/3) consommera `simulerIndices` + `obtenirPratiqueParId`. |
 | 2026-06-15 (axe D, D-0/D-1) | **Exploration des pratiques — moteur pur livré (#326).** §5 : champs d'enveloppe `inspireDe.sourceId` (transversal, posé par `forgerInspireDe`, validé par `SCHEMA_INSPIRE_DE`) + `estEssai` (opt-in via `dupliquerPratique`). §12 : module `js/pratiques/pratiques-exploration.js` (`construireArbrePratiques`, `diffConfigsPratiques`, `phraseEffetPourDiff`, `diffPratiques`), lecture seule, pur ; mapping d'effets PROVISOIRE (à valider Grégoire) + repli neutre. D-2→D-6 restent à livrer (UI/nav, préalable #320). |

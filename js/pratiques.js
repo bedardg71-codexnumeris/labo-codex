@@ -1052,13 +1052,13 @@ async function dupliquerPratique(id, options = {}) {
             config: JSON.parse(JSON.stringify(configResolue)) // Deep copy de la config résolue
         };
 
-        // `estEssai` (axe D / #326, SPEC §3.2) : variante d'essai vivant dans
-        // l'Exploration des pratiques, masquée de la sidebar/bibliothèque propre
-        // (filtre posé en D-2). OPT-IN : la duplication ordinaire (bouton
-        // « Dupliquer ») produit une pratique ABOUTIE (flag omis) — pas de
-        // régression latente ; seule la dérivation (assistant condensé, D-3)
-        // passera { estEssai: true }.
-        if (options.estEssai === true) copie.estEssai = true;
+        // `estMaquette` (axe D / #326, SPEC §3.2 ; R1 : « essai » → « maquette ») :
+        // maquette vivant dans l'Exploration des pratiques, masquée de la
+        // sidebar/bibliothèque propre (filtre posé en D-2). OPT-IN : la duplication
+        // ordinaire (bouton « Dupliquer ») produit une pratique ABOUTIE (flag omis)
+        // — pas de régression latente ; seule la dérivation (assistant condensé, D-3)
+        // passera { estMaquette: true }.
+        if (options.estMaquette === true) copie.estMaquette = true;
 
         // Mettre à jour l'ID et le nom dans la config
         copie.config.id = copie.id;
@@ -1085,32 +1085,44 @@ async function dupliquerPratique(id, options = {}) {
 }
 
 /**
- * Dérive une variante d'ESSAI depuis une pratique source (#326 axe D, D-3, SPEC §8).
- * Geste raccourci : nom auto « <souche> · essai N », duplication AVEC `estEssai:true`
- * (dupliquerPratique pose déjà `auteur` + `inspireDe.sourceId` via forgerInspireDe),
- * puis ouverture directe de l'assistant sur les paramètres (editerPratique). L'essai
- * vit dans le Labo › Exploration (filtré de la sidebar/bibliothèque, D-2).
+ * Dérive une MAQUETTE depuis une pratique source (#326 axe D, D-3, SPEC §8 ; R1).
+ * Geste raccourci : nom auto « <souche> · maquette N », duplication AVEC
+ * `estMaquette:true` (dupliquerPratique pose déjà `auteur` + `inspireDe.sourceId`
+ * via forgerInspireDe), puis ouverture directe de l'assistant sur les paramètres
+ * (editerPratique). La maquette vit dans le Labo › Exploration (filtrée de la
+ * sidebar/bibliothèque, D-2).
  *
- * @param {string} sourceId - id de la pratique souche
- * @returns {Promise<string|null>} id de la variante créée, ou null.
+ * GARDE-FOU « max 1 dérivé » (R1, décision Grégoire 16 juin) : on ne dérive JAMAIS
+ * une maquette (profondeur d'arbre = 1). Une maquette se dérive d'un original abouti,
+ * pas d'une autre maquette — sinon « doublons de doublons » (#326 §1.2).
+ *
+ * @param {string} sourceId - id de la pratique souche (aboutie)
+ * @returns {Promise<string|null>} id de la maquette créée, ou null.
  */
-async function deriverVarianteEssai(sourceId) {
+async function deriverMaquette(sourceId) {
     const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
     const source = pratiques.find(p => p.id === sourceId);
     if (!source) {
         if (typeof notifications !== 'undefined' && notifications.erreur) notifications.erreur('Pratique source introuvable.');
         return null;
     }
-    // N = nombre de variantes d'essai déjà dérivées de cette souche + 1.
-    const nEssais = pratiques.filter(p => p.estEssai === true && p.inspireDe && p.inspireDe.sourceId === sourceId).length;
-    const nom = (source.nom || 'Pratique') + ' · essai ' + (nEssais + 1);
+    // Garde-fou « max 1 dérivé » : refuser de dériver une maquette.
+    if (source.estMaquette === true) {
+        if (typeof notifications !== 'undefined' && notifications.info) {
+            notifications.info('Dérivation impossible', 'Une maquette se dérive d\'une pratique aboutie, pas d\'une autre maquette.');
+        }
+        return null;
+    }
+    // N = nombre de maquettes déjà dérivées de cette souche + 1.
+    const nMaquettes = pratiques.filter(p => p.estMaquette === true && p.inspireDe && p.inspireDe.sourceId === sourceId).length;
+    const nom = (source.nom || 'Pratique') + ' · maquette ' + (nMaquettes + 1);
 
-    const nouvelId = await dupliquerPratique(sourceId, { estEssai: true, nom: nom, silencieux: true });
+    const nouvelId = await dupliquerPratique(sourceId, { estMaquette: true, nom: nom, silencieux: true });
     if (!nouvelId) {
         // Défense (terrain 16 juin) : ne JAMAIS échouer en silence — `silencieux`
         // supprime l'alerte de dupliquerPratique, donc on rend l'échec visible ici.
         if (typeof notifications !== 'undefined' && notifications.erreur) {
-            notifications.erreur('La dérivation a échoué', 'La variante d\'essai n\'a pas pu être créée.');
+            notifications.erreur('La dérivation a échoué', 'La maquette n\'a pas pu être créée.');
         }
         return null;
     }
@@ -1163,29 +1175,30 @@ async function supprimerPratique(id) {
 }
 
 /**
- * Promotion d'une variante d'essai (#326 axe D, SPEC §3.3) : l'essai devient une
- * pratique ABOUTIE et rejoint la bibliothèque propre + la sidebar (le filtre
- * `estEssai !== true` la laisse alors passer). SEUL le flag `estEssai` bascule à
- * false ; `inspireDe`/`sourceId` restent INTACTS — couper l'attribution d'un
- * dérivé violerait CC BY (invariant CC, SPEC §3.1/§5). Bascule en place + persiste
- * le store SSOT `pratiquesConfigurables` (pas de chemin de persistance parallèle).
+ * Adoption d'une maquette (#326 axe D, SPEC §3.3 ; R1 : « promouvoir » → « adopter »,
+ * « essai » → « maquette ») : la maquette devient une pratique ABOUTIE et rejoint la
+ * bibliothèque propre + la sidebar (le filtre `estMaquette !== true` la laisse alors
+ * passer). SEUL le flag `estMaquette` bascule à false ; `inspireDe`/`sourceId` restent
+ * INTACTS — couper l'attribution d'un dérivé violerait CC BY (invariant CC, SPEC
+ * §3.1/§5). Bascule en place + persiste le store SSOT `pratiquesConfigurables` (pas
+ * de chemin de persistance parallèle).
  *
  * @param {string} id
- * @returns {Promise<boolean>} true si promue ; false si introuvable ou déjà aboutie.
+ * @returns {Promise<boolean>} true si adoptée ; false si introuvable ou déjà aboutie.
  */
-async function promouvoirPratiqueEssai(id) {
+async function adopterMaquette(id) {
     const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
     const pratique = pratiques.find(p => p.id === id);
-    if (!pratique || pratique.estEssai !== true) return false;
+    if (!pratique || pratique.estMaquette !== true) return false;
 
-    // SEUL estEssai change ; tout le reste (inspireDe/sourceId inclus) est préservé.
-    pratique.estEssai = false;
+    // SEUL estMaquette change ; tout le reste (inspireDe/sourceId inclus) est préservé.
+    pratique.estMaquette = false;
     db.setSync(cle('pratiquesConfigurables'), pratiques);
     if (db.set) await db.set(cle('pratiquesConfigurables'), pratiques);
 
     if (typeof afficherListePratiques === 'function') await afficherListePratiques();
     if (typeof notifications !== 'undefined' && notifications.succes) {
-        notifications.succes('Variante promue', `« ${pratique.nom || 'Sans titre'} » rejoint tes pratiques.`);
+        notifications.succes('Maquette adoptée', `« ${pratique.nom || 'Sans titre'} » rejoint tes pratiques.`);
     }
     return true;
 }
@@ -1322,8 +1335,8 @@ window.editerPratique = editerPratique;
 window.editerPratiqueActive = editerPratiqueActive;
 window.dupliquerPratique = dupliquerPratique;
 window.supprimerPratique = supprimerPratique;
-window.promouvoirPratiqueEssai = promouvoirPratiqueEssai;
-window.deriverVarianteEssai = deriverVarianteEssai;
+window.adopterMaquette = adopterMaquette;
+window.deriverMaquette = deriverMaquette;
 window.exporterPratiqueVersJSON = exporterPratiqueVersJSON;
 window.creerNouvellePratique = creerNouvellePratique;
 window.importerPratiqueJSON = importerPratiqueJSON;
@@ -1352,11 +1365,11 @@ async function afficherListePratiquesSidebar() {
     const idsCanevasCanon = ['standards', 'specifications', 'sommative'];
 
     // Filtrer les pratiques : dans bibliothèque ET pas un canevas de base ET pas
-    // une variante d'essai (#326 axe D : les essais vivent dans le Labo ›
-    // Exploration, jamais dans la sélection de la pratique active).
+    // une maquette (#326 axe D : les maquettes vivent dans le Labo › Exploration,
+    // jamais dans la sélection de la pratique active tant qu'elles ne sont pas adoptées).
     const pratiquesDansBibliotheque = pratiquesConfigurables.filter(p =>
         p.dansBibliotheque !== false && !idsCanevasCanon.includes(_normPratique(p.id))
-        && p.estEssai !== true
+        && p.estMaquette !== true
     );
 
 

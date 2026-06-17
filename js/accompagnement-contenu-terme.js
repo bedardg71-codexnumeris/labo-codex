@@ -406,7 +406,7 @@ const GLOSSAIRE = {
         terme: 'DEN — Dénotation',
         categorie: 'Pratiques de notation',
         etape: 'transversal',
-        definition: 'Pratique qui réduit ou élimine la notation chiffrée au profit de la rétroaction qualitative. L\'accent est mis sur le commentaire et l\'accompagnement plutôt que sur le score.',
+        definition: 'Pratique (PRÉN) qui retire la note chiffrée des travaux en cours de route au profit d\'une rétroaction qualitative appuyée sur des cibles et des critères explicites (grille, échelle). La note certificative (RREC : 60 réussite / 59 échec) est posée par jugement à la fin — jamais « pas de note ».',
         voir: 'Conception > Pratiques'
     },
 

@@ -24,7 +24,7 @@
         { code: 'SOM', nom: 'Sommative', description: 'Pratique traditionnelle avec moyenne pondérée' },
         { code: 'STD', nom: 'PAN-Standards', description: 'Standards-Based Grading (objectifs à maîtriser)' },
         { code: 'SPE', nom: 'PAN-Spécifications', description: 'Specifications Grading (forfaits/bundles)' },
-        { code: 'DEN', nom: 'PAN-Dénotation', description: 'Ungrading (autoévaluation guidée)' }
+        { code: 'DEN', nom: 'PAN-Dénotation', description: 'Ungrading (cibles et critères explicites, note certificative à la fin)' }
     ];
 
     // Session B (#303) : COULEURS_PRATIQUES retiré (zéro-dette). C'était une table
