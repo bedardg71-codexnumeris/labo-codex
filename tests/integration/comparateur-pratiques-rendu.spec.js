@@ -72,7 +72,9 @@ test('#326 R4 · le banc s\'ouvre SANS mode démo et rend construction + résult
             aSectionConstruction: txt.includes('Construction de la note'),
             aSectionResultat: txt.includes('Résultat'),
             aSelecteurSource: !!(panel && panel.querySelector('.comparateur-source-select')),
-            aArbre: !!(panel && panel.querySelector('#exploration-arbre-hote .exploration-arbre'))
+            aArbre: !!(panel && panel.querySelector('#exploration-arbre-hote .exploration-arbre')),
+            // Note « outil en développement » (#326) : cadre la lecture d'un 0.
+            aNoteDev: !!(panel && panel.querySelector('.comparateur-note-dev'))
         };
     });
 
@@ -84,6 +86,7 @@ test('#326 R4 · le banc s\'ouvre SANS mode démo et rend construction + résult
     expect(res.aSectionResultat).toBe(true);
     expect(res.aSelecteurSource).toBe(true);             // source fictif/réel (R4b)
     expect(res.aArbre).toBe(true);
+    expect(res.aNoteDev).toBe(true);                     // note « outil en développement »
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });
 

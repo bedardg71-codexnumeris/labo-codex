@@ -58,6 +58,16 @@
     // finalité en tête : « un écart entre des points n’est ni un bonus ni une erreur ».)
     var LIGNE_GARDE = 'Le comparateur est un outil expérimental et peut présenter des erreurs. Partage tes observations et participe à son amélioration en utilisant l’icône « Signaler un bug », en haut à droite de l’en-tête.';
 
+    // Note « outil en développement » (demande Grégoire, 17 juin) — placée EN TÊTE du
+    // banc, distincte de la garde « expérimental » de bas de page. Cadre la lecture
+    // d'un 0 : selon les paramètres d'une pratique (surtout PAN-Standards : structure
+    // portfolio/pondération/artefacts) et leur compatibilité avec les résultats réels
+    // qui alimentent la simulation, la note peut ne PAS être constructible — le banc
+    // affiche alors 0. Ce n'est pas nécessairement une erreur : c'est un état attendu
+    // d'un outil encore en construction.
+    var NOTE_DEV_TITRE = 'Outil en développement';
+    var NOTE_DEV_TEXTE = 'Le comparateur est en construction. Pour certaines pratiques — surtout PAN-Standards — une note peut s’afficher à 0 : le plus souvent, cela veut dire que la note ne peut pas être construite à partir des paramètres choisis et des résultats réels disponibles, pas qu’il y a forcément une erreur. Lis les résultats avec prudence.';
+
     /* ── Source de données du banc (#326 R4) ───────────────────
        'fictif' (défaut) = profils-types GÉNÉRÉS depuis l'échelle de l'utilisateur
        (R2) + injectés dans le moteur en lecture seule (Étape 2). Plus besoin du
@@ -989,6 +999,9 @@
                     '<p class="comparateur-finalite">Des pratiques différentes mesurent des choses ' +
                     'différentes. Un écart entre des points n’est ni un bonus ni une erreur. Le ' +
                     'comparateur montre la <strong>maîtrise atteinte en regard de chaque note</strong>.</p>' +
+                    '<div class="comparateur-note-dev" role="note">' +
+                        '<strong>' + _esc(NOTE_DEV_TITRE) + '</strong> ' + _esc(NOTE_DEV_TEXTE) +
+                    '</div>' +
                     _rendreSource() +
                     '<div class="comparateur-diff-hote" id="comparateur-diff">' +
                         _rendreDiff(_colonnes()) +

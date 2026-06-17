@@ -19630,6 +19630,20 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 .comparateur-corps p { margin: 0 0 12px; }
 .comparateur-corps strong { color: var(--texte-principal, #d0e0e4); }
 .comparateur-finalite { color: var(--texte-principal, #d0e0e4); }
+/* Note « outil en développement » (#326) : encadré d'information en tête du banc,
+   accent gauche (variables design system, aucune couleur en dur). Cadre la lecture
+   d'un 0 = note non constructible selon paramètres + données, pas forcément erreur. */
+.comparateur-note-dev {
+    margin: 10px 0 16px;
+    padding: 10px 14px;
+    border-left: 3px solid var(--bleu-clair, #5dade2);
+    border-radius: 0 6px 6px 0;
+    background: var(--surface-element, rgba(106, 172, 184, 0.08));
+    font-size: 0.86rem;
+    line-height: 1.45;
+    color: var(--texte-secondaire, #aac3cf);
+}
+.comparateur-note-dev strong { color: var(--texte-principal, #d0e0e4); }
 .comparateur-placeholder {
     padding: 24px;
     text-align: center;

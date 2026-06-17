@@ -2201,8 +2201,29 @@ function genererRecapitulatif() {
               + '</div>';
     }
 
+    // ─── Lien vers le banc de décision (#326, demande terrain 17 juin) ───
+    // Depuis le formulaire d'une pratique, accès direct au comparateur du Labo
+    // pour mettre cette pratique en regard d'autres sur des profils-types.
+    html += '<div class="wizard-v2-recap-section">';
+    html += '<h4>Comparer ce type de notation</h4>';
+    html += '<p class="wizard-v2-recap-aide">Le banc de décision du Labo met plusieurs pratiques en regard, sur des profils-types, pour voir ce que chaque réglage change sur les notes.</p>';
+    html += '<button type="button" class="btn btn-secondaire" data-action="ouvrirComparateurDepuisWizard">Ouvrir le comparateur du Labo</button>';
+    html += '</div>';
+
     html += '</div>';
     return html;
+}
+
+/**
+ * Ferme le wizard puis ouvre le banc de décision (Labo › Comparateur). Lien
+ * proposé dans le récapitulatif du formulaire de pratique (#326). Routé par le
+ * dispatcher data-action (CSP-safe, aucun handler inline).
+ */
+function ouvrirComparateurDepuisWizard() {
+    fermerWizardV2();
+    if (typeof naviguerVers === 'function') {
+        naviguerVers('labo', 'comparateur');
+    }
 }
 
 /**
@@ -3135,6 +3156,7 @@ window.wizardV2GererExclusionCheckbox = wizardV2GererExclusionCheckbox;
 window.wizardV2CreerGrilleDemo = wizardV2CreerGrilleDemo;
 window.wizardV2VoieRapide = wizardV2VoieRapide;
 window.wizardV2RafraichirEtapeCourante = wizardV2RafraichirEtapeCourante;
+window.ouvrirComparateurDepuisWizard = ouvrirComparateurDepuisWizard;
 
 // Exposés pour la testabilité (#317) : la relecture d'édition (#132) et le
 // calcul du nombre d'étapes (#134) sont verrouillés par sentinelles. wizardState
