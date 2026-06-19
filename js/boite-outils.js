@@ -754,10 +754,10 @@ function ouvrirModalParamsQuestions() {
     });
 
     const modalHTML = `
-        <div id="modal-params-questions" class="modal-overlay actif" role="dialog" aria-modal="true">
+        <div id="modal-params-questions" class="modal-overlay actif" role="dialog" aria-modal="true" aria-labelledby="titre-modal-questions">
             <div class="modal-contenu modal-large">
                 <div class="modal-entete">
-                    <h2>Gestion des Questions Flash</h2>
+                    <h2 id="titre-modal-questions">Gestion des Questions Flash</h2>
                     <button class="modal-fermer" data-action="fermerModalParamsQuestions" aria-label="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
                 </div>
                 <div class="modal-corps">

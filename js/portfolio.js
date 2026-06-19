@@ -758,6 +758,14 @@ function _simulerIndicesInterne(da, pratiqueId) {
     const C = C_decimal !== null && C_decimal !== undefined ? Math.round(C_decimal * 100) : 0;
     const P = P_decimal !== null && P_decimal !== undefined ? Math.round(P_decimal * 100) : 0;
 
+    // #326 (sous-item) — distinguer un « 0 » LÉGITIME (le moteur a calculé 0)
+    // d'une note NON CONSTRUCTIBLE (P_decimal est resté null : ni portfolio
+    // paramétré ni calculerPerformance n'ont pu produire de valeur → P forcé à 0
+    // ci-dessus, trompeur). Champ ADDITIF, lecture seule : les consommateurs
+    // historiques (golden masters, fiche profil) lisent C/P/noteFinale/details/
+    // recit inchangés ; le banc s'en sert pour afficher « — non constructible ».
+    const noteConstructible = (typeof P_decimal === 'number' && isFinite(P_decimal));
+
     // C2-d.0 — récit de calcul UNIFIÉ (contrat NOTE-CONCEPTION-C2 §4). Même
     // aiguillage que la note ci-dessus : STD via calculerDetailsNoteFinale.recit
     // (C2-a) ; SOM/SPE via instance.decrireCalcul (C2-b/C2-c). Additif, lecture
@@ -770,7 +778,7 @@ function _simulerIndicesInterne(da, pratiqueId) {
         recit = pratique.decrireCalcul(da);
     }
 
-    return { pratique: pratiqueId, C, P, noteFinale, details, recit };
+    return { pratique: pratiqueId, C, P, noteFinale, details, recit, noteConstructible };
 }
 
 /**

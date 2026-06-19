@@ -19738,6 +19738,9 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 .comparateur-delta { color: var(--texte-muted, #80a0b0); font-size: 0.8rem; font-weight: 400; }
 .comparateur-tendance { color: var(--texte-muted, #80a0b0); }
 .comparateur-vide { color: var(--texte-muted, #80a0b0); }
+/* #326 (sous-item) : mention « non constructible » — distingue visiblement une
+   note que le moteur n'a pas pu bâtir d'un vrai 0. Atténué + italique + petit. */
+.comparateur-nonconstr-mot { color: var(--texte-muted, #80a0b0); font-style: italic; font-size: 0.78rem; }
 /* D-4 : cellule d'une colonne DEN — pas un nombre comparable, un rappel que la
    note est un jugement (non simulable). Texte atténué + italique. */
 .comparateur-cellule--den { color: var(--texte-secondaire, #80a0b0); font-style: italic; font-size: 0.85rem; }
