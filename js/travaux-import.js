@@ -762,6 +762,12 @@
                 groupeDocumentId: f.groupeDocumentId,
                 // thumbnailDataUrl omis : regeneree depuis le blob au reattachement
                 productionId: f.productionId,
+                // #314 : ces deux drapeaux d'intention DOIVENT survivre au round-trip
+                // sessionStorage. Sans eux, productionIdParLea redevient undefined au
+                // restore → associerProductionGlobale('') efface une production détectée
+                // par le parse Léa (perte silencieuse : « Non associé »).
+                productionIdParLea: !!f.productionIdParLea,
+                estReprise: !!f.estReprise,
                 largeurOriginale: f.largeurOriginale || 0,
                 hauteurOriginale: f.hauteurOriginale || 0
             }));
@@ -801,6 +807,9 @@
                 groupeDocumentId: d.groupeDocumentId || '',
                 thumbnailDataUrl: null, // regeneree au reattachement des blobs
                 productionId: d.productionId || '',
+                // #314 : restaurer les drapeaux d'intention (cf. persisterFileDAttente).
+                productionIdParLea: !!d.productionIdParLea,
+                estReprise: !!d.estReprise,
                 largeurOriginale: d.largeurOriginale || 0,
                 hauteurOriginale: d.hauteurOriginale || 0
             }));
