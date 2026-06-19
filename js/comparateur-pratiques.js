@@ -326,10 +326,13 @@
 
     // Note finale simulée (0-100), lecture seule. null si non calculable.
     // #326 R4 : en source fictive, on injecte le corpus généré (sinon stockage réel).
+    // Retourne le résultat de simulation complet { P, noteConstructible, ... }
+    // ou null si la pratique est introuvable / invalide. #326 (sous-item) :
+    // les consommateurs distinguent un « 0 » légitime (noteConstructible) d'une
+    // note non constructible (P forcé à 0 faute de calcul possible).
     function _note(da, pratiqueId) {
         if (typeof simulerIndices !== 'function') return null;
-        var r = simulerIndices(da, pratiqueId, _corpusInjection());
-        return r ? r.P : null;
+        return simulerIndices(da, pratiqueId, _corpusInjection()) || null;
     }
 
     function _esc(s) {
@@ -414,12 +417,19 @@
                     h += '<td class="comparateur-cellule comparateur-cellule--den" title="En dénotation, la note finale est un jugement posé par l’enseignant, gardé par l’atteinte des cibles — pas un calcul sur les données. Elle n’est donc pas simulable ici.">jugement</td>';
                     return;
                 }
-                var p = _note(prof.da, c.id);
-                if (p === null) {
-                    h += '<td class="comparateur-cellule comparateur-vide" title="Note non calculable pour cette pratique">—</td>';
+                var r = _note(prof.da, c.id);
+                if (r === null) {
+                    h += '<td class="comparateur-cellule comparateur-vide" title="Note non calculable pour cette pratique" aria-label="Note non calculable pour cette pratique">—</td>';
                     return;
                 }
-                h += '<td class="comparateur-cellule"><span class="comparateur-note">' + p + '</span></td>';
+                if (!r.noteConstructible) {
+                    // #326 (sous-item) : pas un « 0 » trompeur — le moteur n'a pas pu
+                    // bâtir la note avec ces paramètres et ces résultats.
+                    var titreNC = 'Note non constructible avec ces paramètres — ce n’est pas un zéro.';
+                    h += '<td class="comparateur-cellule comparateur-vide comparateur-nonconstr" title="' + titreNC + '" aria-label="' + titreNC + '">— <span class="comparateur-nonconstr-mot">non constructible</span></td>';
+                    return;
+                }
+                h += '<td class="comparateur-cellule"><span class="comparateur-note">' + r.P + '</span></td>';
             });
             h += '</tr>';
         });
@@ -1072,8 +1082,10 @@
             var na = _niveauAtteint(prof.da, d);
             var row = [prof.label, prof.da, na ? na.label : '', na ? na.tendance.mot : ''];
             cols.forEach(function(c) {
-                var p = _note(prof.da, c.id);
-                row.push(p === null ? '' : p);
+                var r = _note(prof.da, c.id);
+                // #326 (sous-item) : « non constructible » explicite dans le CSV,
+                // distinct d'une cellule vide (pratique introuvable) et d'un vrai 0.
+                row.push(r === null ? '' : (r.noteConstructible ? r.P : 'non constructible'));
             });
             lignes.push(row.map(_csvCell).join(','));
         });

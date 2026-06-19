@@ -17,9 +17,15 @@ const CC_LICENSE_DEFAULTS = {
     licence: "CC BY-NC-SA 4.0",
     licence_url: "https://creativecommons.org/licenses/by-nc-sa/4.0/",
     licence_resume: "Attribution - Pas d'utilisation commerciale - Partage dans les mêmes conditions 4.0 International",
-    auteur_original: "Grégoire Bédard",
-    email_auteur: "labo@codexnumeris.org",
-    site_auteur: "https://codexnumeris.org"
+    // #342 : aucune coordonnée personnelle par défaut. Sans identité résolue
+    // (Réglages › Enseignant ou enseignant marqué actif), l'auteur est « Inconnu »
+    // et NI courriel NI site ne sont gravés — plutôt qu'un nom ou des coordonnées
+    // posés silencieusement (cf. « par Bruno V. » sur une pratique de
+    // littérature de Grégoire). Quand un enseignant réel est résolu, ses propres
+    // courriel/site sont utilisés.
+    auteur_original: "Inconnu",
+    email_auteur: "",
+    site_auteur: ""
 };
 
 // ============================================
@@ -35,8 +41,10 @@ const CC_LICENSE_DEFAULTS = {
 /**
  * Retourne le profil CC de l'utilisateur : l'enseignant sélectionné dans
  * Réglages › Enseignant (le dropdown `v2-selectEnseignant`), avec fallback
- * sur l'enseignant marqué `actif` puis le premier enseignant réel de la
- * liste. Les entrées `isDemo: true` sont toujours exclues.
+ * sur l'enseignant marqué `actif`. #342 : plus de repli silencieux sur le
+ * premier enseignant de la liste — sans désignation explicite, on retourne
+ * `null` (l'auteur deviendra « Inconnu » en aval). Les entrées `isDemo: true`
+ * sont toujours exclues.
  *
  * @returns {Object|null} Profil (auteur_original, email_auteur, institution,
  *          site_auteur, niveau, attribution) ou null si aucun profil réel.
@@ -66,12 +74,12 @@ function obtenirProfilAuteurActifSync() {
             enseignant = enseignantsReels.find(e => e.actif);
         }
 
-        // 3. Premier enseignant réel de la liste
+        // 3. (#342) Aucune désignation explicite : ON N'ATTRIBUE À PERSONNE.
+        // L'ancien repli `enseignantsReels[0]` gravait un enseignant arbitraire
+        // (premier de la liste) sur le matériel — c'est lui qui a stampé
+        // « Bruno V. » sur une pratique de littérature de Grégoire.
         if (!enseignant) {
-            enseignant = enseignantsReels[0];
-        }
-
-        if (!enseignant) {
+            console.warn('[CC License] #342 : aucun enseignant désigné (ni sélection Réglages › Enseignant, ni marqué actif) — attribution « Inconnu ».');
             return null;
         }
 
@@ -92,16 +100,17 @@ function obtenirProfilAuteurActifSync() {
 }
 
 /**
- * Retourne le nom de l'identité CC de l'utilisateur (chaîne). Fallback
- * `"Utilisateur de Labo Codex"` si aucun profil enseignant n'est configuré
- * dans Réglages. À utiliser partout où on veut tracer « qui est l'utilisateur »
- * pour CC BY (auteur_original, contributeurs).
+ * Retourne le nom de l'identité CC de l'utilisateur (chaîne). #342 : fallback
+ * `"Inconnu"` si aucun enseignant n'est désigné (ni sélectionné dans Réglages ›
+ * Enseignant, ni marqué actif) — on n'invente jamais un auteur. À utiliser
+ * partout où on veut tracer « qui est l'utilisateur » pour CC BY
+ * (auteur_original, contributeurs).
  *
- * @returns {string} Nom complet ou fallback.
+ * @returns {string} Nom complet ou « Inconnu ».
  */
 function obtenirIdentiteCCUtilisateur() {
     const profil = obtenirProfilAuteurActifSync();
-    return (profil && profil.auteur_original) || 'Utilisateur de Labo Codex';
+    return (profil && profil.auteur_original) || 'Inconnu';
 }
 
 // ============================================
