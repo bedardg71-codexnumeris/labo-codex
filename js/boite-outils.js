@@ -343,7 +343,7 @@ function ouvrirModalParamsTirage() {
 
                     <!-- Nombre à tirer -->
                     <div class="form-groupe">
-                        <label for="param-nombre">Nombre d'étudiant·es à tirer</label>
+                        <label for="param-nombre" data-tooltip="outil-tirage-nombre">Nombre d'étudiant·es à tirer</label>
                         <select id="param-nombre" class="form-select">
                             <option value="1" ${etatTirage.nombreATirer === 1 ? 'selected' : ''}>1 étudiant·e</option>
                             <option value="2" ${etatTirage.nombreATirer === 2 ? 'selected' : ''}>2 étudiant·es</option>
@@ -355,7 +355,7 @@ function ouvrirModalParamsTirage() {
 
                     <!-- Mode avec/sans remise -->
                     <div class="form-groupe">
-                        <label class="form-checkbox-label">
+                        <label class="form-checkbox-label" data-tooltip="outil-tirage-remise">
                             <input type="checkbox" id="param-remise" ${etatTirage.avecRemise ? 'checked' : ''}>
                             <span>Avec remise (un même étudiant peut être tiré plusieurs fois)</span>
                         </label>
@@ -365,7 +365,7 @@ function ouvrirModalParamsTirage() {
 
                     <!-- Liste des étudiants -->
                     <div class="form-groupe">
-                        <label>Étudiants du groupe (${disponibles.length}/${total} disponibles)</label>
+                        <label data-tooltip="outil-tirage-exclusion">Étudiants du groupe (${disponibles.length}/${total} disponibles)</label>
                         <div class="tirage-liste-etudiants">
                             ${etatTirage.pool.map(e => {
                                 const estExclu = etatTirage.exclus.includes(e.da);

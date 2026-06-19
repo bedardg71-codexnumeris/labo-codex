@@ -8175,7 +8175,7 @@
                     <!-- Contrôles de saisie -->
                     <div class="carte">
                         <h3 class="carte-titre-bleu u-flex-between">
-                            <span>Enregistrement</span>
+                            <span data-tooltip="presences-saisie">Enregistrement</span>
                             <span id="nbEtudiantsPresences" class="badge-compteur-header">
                                 (0 étudiant·e)
                             </span>
@@ -8185,7 +8185,7 @@
                         <div class="carte-grise-mb20">
                             <div class="grid-auto-180">
                                 <div class="groupe-form" style="grid-column: span 2;">
-                                    <label for="date-cours" class="label-formulaire">Date du cours</label>
+                                    <label for="date-cours" class="label-formulaire" data-tooltip="presences-date">Date du cours</label>
                                     <div class="d-flex-gap8-center">
                                         <button id="btn-cours-precedent" data-action="allerCoursPrecedent"
                                             class="btn btn-principal btn-compact" style="flex-shrink: 0;">
@@ -8208,7 +8208,7 @@
                                     </select>
                                 </div>
                                 <div class="groupe-form">
-                                    <label for="selectTriPresences" class="label-formulaire">Trier par</label>
+                                    <label for="selectTriPresences" class="label-formulaire" data-tooltip="presences-tri">Trier par</label>
                                     <select id="selectTriPresences" class="controle-form"
                                         data-on-change="initialiserSaisiePresences">
                                         <option value="nom">Ordre alphabétique (nom)</option>
@@ -8247,7 +8247,7 @@
                                     <th>Prénom</th>
                                     <th>Nom</th>
                                     <th id="colonneHeuresTitre" class="w-100-center">
-                                        Présence
+                                        <span data-tooltip="presences-presence-col">Présence</span>
                                         <div class="mt-8-flex-col-gap4">
                                             <button class="btn btn-principal btn-tres-compact"
                                                     data-action="tousPresents"
@@ -8262,8 +8262,8 @@
                                         </div>
                                     </th>
                                     <th class="w-200">Notes</th>
-                                    <th class="w-80px">Total pér.</th>
-                                    <th class="w-100px">Assiduité</th>
+                                    <th class="w-80px"><span data-tooltip="presences-total-periodes">Total pér.</span></th>
+                                    <th class="w-100px"><span data-tooltip="presences-assiduite-col">Assiduité</span></th>
                                 </tr>
                             </thead>
                             <tbody id="tbody-saisie-presences">
@@ -8317,7 +8317,7 @@
                         <!-- CARTE 1: Questions Flash -->
                         <div id="questions-container" class="outil-carte">
                             <div class="outil-carte-header">
-                                <h3 class="outil-carte-titre">Questions Flash</h3>
+                                <h3 class="outil-carte-titre" data-tooltip="outil-questions-flash">Questions Flash</h3>
                                 <button id="btn-params-questions"
                                         class="btn-params-outil"
                                         data-action="ouvrirModalParamsQuestions"
@@ -8360,7 +8360,7 @@
                         <!-- CARTE 2: Tirage au sort -->
                         <div id="tirage-container" class="outil-carte">
                             <div class="outil-carte-header">
-                                <h3 class="outil-carte-titre">Tirage au sort</h3>
+                                <h3 class="outil-carte-titre" data-tooltip="outil-tirage">Tirage au sort</h3>
                                 <button id="btn-params-tirage"
                                         class="btn-params-outil"
                                         data-action="ouvrirModalParamsTirage"
