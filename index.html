@@ -7929,6 +7929,18 @@
 
                     <!-- Graphiques "Dynamique des corrélations" et "Impact des jetons" déplacés vers Suivi > Labo -->
 
+                    <!-- #333 Lot 2 : Résultats finaux — export CSV (archives) -->
+                    <div class="carte" id="carte-resultats-finaux">
+                        <h3 class="carte-titre-bleu">Résultats finaux</h3>
+                        <p class="text-muted u-texte-petit">
+                            Exporte les résultats finaux du groupe-cours actif (1 ligne par étudiant·e :
+                            note finale et pratique en vigueur), pour tes archives. Lecture seule ; aucun calcul n'est modifié.
+                        </p>
+                        <button class="btn btn-secondaire" data-action="exporterSyntheseResultatsCSV">
+                            Exporter la synthèse (CSV)
+                        </button>
+                    </div>
+
                     <p id="tdb-horodatage" class="text-muted u-text-right" style="font-size: 0.72rem; opacity: 0.6; margin-top: 1.5rem"></p>
 
             </div><!-- FIN sous-section suivi-groupe -->
@@ -14821,6 +14833,7 @@
     <script src="js/accompagnement-contenu-terme.js?v=2026050528"></script>
     <script src="js/guides-pedagogiques.js?v=2026060401"></script> <!-- Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->
     <script src="js/comparateur-pratiques.js?v=2026061704"></script> <!-- Comparateur de pratiques (lot C1-a : squelette + garde démo, 6 juin 2026) -->
+    <script src="js/export-resultats-finaux.js?v=2026061901"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
     <script src="js/main.js?v=2026061101"></script> <!-- Refonte nav SP5 : naviguerVers calendrier-trimestre -->
