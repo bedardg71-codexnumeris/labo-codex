@@ -816,7 +816,44 @@ const TOOLTIPS = {
     'reserve-ouvrir-toggle-copie':
         'Active la recopie des items déjà présents dans ta bibliothèque active : ils recevront un nouvel identifiant et le suffixe «\u00a0— copie\u00a0».',
     'reserve-ouvrir-bouton-reimporter':
-        'Recopie les items cochés dans tes bibliothèques actives. L’archive d\'origine reste figé.'
+        'Recopie les items cochés dans tes bibliothèques actives. L’archive d\'origine reste figé.',
+
+    // =================================================================
+    // T12 — BOÎTE À OUTILS / ANIMATION (#18)
+    // =================================================================
+
+    // --- Cartes d'outils ---
+
+    'outil-questions-flash':
+        'Affiche une question au hasard pour relancer la discussion ou vérifier la compréhension en classe. L’engrenage te permet de gérer tes questions et leurs catégories.',
+    'outil-tirage':
+        'Désigne un·e étudiant·e au hasard pour distribuer la parole équitablement. L’engrenage règle le nombre à tirer, la remise et les exclusions.',
+
+    // --- Paramètres du tirage ---
+
+    'outil-tirage-nombre':
+        'Combien d’étudiant·es tirer d’un seul coup (de 1 à 5).',
+    'outil-tirage-remise':
+        'Avec remise : une même personne peut ressortir à plusieurs tirages. Sans remise : chacun·e n’est tiré·e qu’une fois, jusqu’à ce que le groupe soit épuisé, puis réinitialisé.',
+    'outil-tirage-exclusion':
+        'Décoche un·e étudiant·e pour l’exclure du tirage (absent·e, déjà passé·e…). Les exclusions sont conservées jusqu’à la réinitialisation.',
+
+    // =================================================================
+    // T13 — PRÉSENCES (#18)
+    // =================================================================
+
+    'presences-saisie':
+        'Marque qui est présent·e à cette séance. Les présences alimentent le taux d’assiduité de chaque étudiant·e et le suivi du groupe.',
+    'presences-date':
+        'La séance dont tu saisis les présences. Les flèches « Précédent » / « Suivant » passent d’une séance de cours à l’autre.',
+    'presences-tri':
+        'Ordonne la liste — par nom, ou par assiduité pour repérer d’un coup d’œil qui s’absente le plus.',
+    'presences-presence-col':
+        'Marque la présence de chaque étudiant·e à cette séance. « Tous » met tout le groupe présent d’un coup ; tu ajustes ensuite les absences.',
+    'presences-total-periodes':
+        'Nombre de périodes (ou d’heures) de présence comptées pour l’étudiant·e à cette séance.',
+    'presences-assiduite-col':
+        'Taux de présence cumulé de l’étudiant·e depuis le début du trimestre.'
 
 };
 
