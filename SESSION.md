@@ -1,4 +1,54 @@
 <!-- =====================================================================
+     CLÔTURE DE SESSION — 19 juin 2026 (Claude Code cloud).
+     Rituel de fin appliqué (break-test §4 sur chaque sentinelle).
+     ─────────────────────────────────────────────────────────────────────
+     ÉTAT : bêta publique 1.20.0 (build 0619-1829). ~865 Vitest verts à chaque
+     étape ; Playwright = CI (WebKit non lançable en cloud).
+
+     LIVRÉ CETTE SESSION (8 chantiers, 7 PR mergées #52→#58, release 1.20.0)
+
+     • #305 (reliquat a11y) — nom accessible sur la modale « Questions Flash »
+       (le cœur de #305 était déjà livré). PR #53.
+     • #342 (PRÉVENTION) — l'auteur CC n'est plus deviné : défaut « Inconnu »,
+       plus de coordonnées personnelles par défaut, retrait du repli silencieux
+       enseignantsReels[0]. La RÉPARATION des données live reste un one-shot
+       console sur Mac (checklist §H). PR #53.
+     • #326 (sous-item) — le banc affiche « — non constructible » au lieu d'un 0
+       trompeur (champ additif noteConstructible dans simulerIndices, parité
+       moteur préservée). PR #53.
+     • #321 — « note différée » (couche 1 PRÉN) : bascule globale Réglages ›
+       Préférences qui masque la note PAR TRAVAIL (7 sites) derrière un badge,
+       sans toucher aucun calcul ni la note finale. PR #54.
+     • #314 — import : productionId conservé (round-trip des drapeaux
+       productionIdParLea/estReprise dans persister/restaurer file d'attente).
+       PR #55.
+     • #333 Lot 2 — export CSV de synthèse des résultats finaux (module dédié
+       export-resultats-finaux.js + bouton Suivi). Le « Détail » structuré reste
+       à faire (décompo par famille manquante). PR #56.
+     • #18 — info-bulles des zones Labo (tirage/questions flash) et Présences
+       (chantier continu ; restent Construction de la note + Aide). PR #57.
+     • #296 — fin du masquage du contenu « Labo Codex » : estItemDemo ne matche
+       plus que 'Demo Labo Codex' → gabarits/défauts/exemples redeviennent
+       visibles ; 4 items d'infra démo re-tagués ; 1 résidu supprimé. Audit
+       Rapports/AUDIT-296-seeds-labo-codex-2026-06-19.md. PR #58.
+     • Checklist tests Mac consolidée (Retours des testeurs/
+       TESTS-MANUELS-PENDING-2026-06-19.md). PR #52.
+
+     RESTE / VALIDATION TERRAIN MAC (non bloquant pour la logique, déjà testée)
+     • Rendus visuels 2 modes : badge « note différée » (#321), « — non
+       constructible » (#326), bouton+CSV résultats (#333), info-bulles (#18),
+       réapparition des gabarits/exemples (#296).
+     • Repro terrain : #314 (production conservée après reload), #342 réparation
+       données live (one-shot console préparé).
+     • Tout est consigné dans la checklist tests Mac (PR #52).
+
+     PROCHAINES PISTES CLOUD : #18 zones restantes (Construction de la note,
+     Aide), #333 Lot 2 « Détail » (si une décompo par famille est créée),
+     #333 Lot 3 (PDF). Bugs bloqués terrain : #332, #340, #282, #336, #334.
+     ─────────────────────────────────────────────────────────────────────
+-->
+
+<!-- =====================================================================
      CLÔTURE DE SESSION — 17 juin 2026 (Claude Code cloud).
      Rituel de fin appliqué (§1→§6 + break-test §4).
      ─────────────────────────────────────────────────────────────────────
