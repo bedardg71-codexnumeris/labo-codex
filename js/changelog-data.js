@@ -12,6 +12,20 @@
 
     var CHANGELOG = [
         {
+            version: '1.20',
+            couleur: 'vert',
+            titre: 'Note différée, export des résultats et bibliothèques complètes',
+            items: [
+                'Nouvelle option « Masquer les notes par travail » (Réglages › Préférences) : la note chiffrée de chaque travail est remplacée par un repère « note différée » dans la liste, le profil et le portfolio, pour que ta rétroaction passe d’abord. Les niveaux et la note finale de session restent visibles ; aucun calcul n’est modifié.',
+                'Export CSV des résultats finaux du groupe (Suivi › Suivi du groupe) : une ligne par étudiant·e avec la note finale et la pratique en vigueur, pour tes archives.',
+                'Tes gabarits, modèles par défaut et exemples par discipline (échelles, grilles, pratiques) réapparaissent dans les bibliothèques — ils étaient masqués à tort.',
+                'Au comparateur, une note qui ne peut pas être construite affiche « — non constructible » au lieu d’un 0 trompeur.',
+                'Correction : à l’import des travaux, la production choisie (ou détectée d’après le nom du fichier) n’est plus perdue après un rechargement.',
+                'Des info-bulles d’aide ont été ajoutées aux outils du Labo (tirage au sort, questions flash) et à la saisie des présences.',
+                'Attribution Creative Commons : sans enseignant·e identifié·e, le matériel n’est plus signé d’un nom ni de coordonnées par défaut (mention « Inconnu »).'
+            ]
+        },
+        {
             version: '1.19',
             couleur: 'vert',
             titre: 'Comparateur de pratiques refondu en « banc de décision »',
