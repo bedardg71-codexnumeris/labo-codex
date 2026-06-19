@@ -101,6 +101,12 @@
             graphiques.checked = obtenirPreference('afficherGraphiques') !== false;
         }
 
+        // #321 note différée (défaut false = case décochée)
+        const noteDifferee = document.getElementById('v2-pref-note-differee');
+        if (noteDifferee) {
+            noteDifferee.checked = obtenirPreference('noteDifferee') === true;
+        }
+
         const seuilsVisuels = document.getElementById('v2-pref-seuils-visuels');
         if (seuilsVisuels) {
             seuilsVisuels.checked = obtenirPreference('afficherSeuilsVisuels') !== false;
@@ -224,6 +230,8 @@
 
         definirPreference('depistageAcp', document.getElementById('v2-pref-depistage-acp')?.checked !== false);
         definirPreference('afficherGraphiques', document.getElementById('v2-pref-graphiques')?.checked !== false);
+        // #321 note différée : true seulement si la case est cochée (défaut false)
+        definirPreference('noteDifferee', document.getElementById('v2-pref-note-differee')?.checked === true);
         definirPreference('afficherSeuilsVisuels', document.getElementById('v2-pref-seuils-visuels')?.checked !== false);
         definirPreference('afficherDeveloppementHabiletes', document.getElementById('v2-pref-developpement-habiletes')?.checked !== false);
         definirPreference('uniteAffichageAssiduite', document.getElementById('v2-pref-unite-affichage')?.value || 'periodes');

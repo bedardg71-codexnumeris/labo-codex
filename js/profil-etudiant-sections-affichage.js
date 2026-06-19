@@ -717,7 +717,7 @@ function genererSectionMobilisationEngagement(da) {
                                         ${art.niveau || '—'}
                                     </span>
                                     <span class="u-texte-petit u-texte-gris" style="font-weight: 500;">
-                                        (${art.note})
+                                        ${(typeof noteDiffereeActive === 'function' && noteDiffereeActive()) ? badgeNoteDifferee() : `(${art.note})`}
                                     </span>
                                 </div>
                             `;
@@ -2497,7 +2497,9 @@ function _construireLigneProductionEvaluee(production, evaluation, indexArtefact
     return {
         production: production.titre,
         description: production.activiteApprentissage || production.description || production.titre,
-        note: `${evaluation.niveauFinal} ${evaluation.noteFinale}%`,
+        note: (typeof noteDiffereeActive === 'function' && noteDiffereeActive())
+            ? `${evaluation.niveauFinal} ${badgeNoteDifferee()}`   // #321 : niveau IDME gardé, % masqué
+            : `${evaluation.niveauFinal} ${evaluation.noteFinale}%`,
         date: _calculerEcheanceFormateeProduction(production),
         statut: estNonRemis ? 'non-remis' : 'evalue',
         statutRemise: statutRemise,
@@ -2621,14 +2623,17 @@ function genererSectionProductions(da) {
             .map(decrireRetenu)
             .sort((a, b) => (b.note || 0) - (a.note || 0));
 
+        const differee = (typeof noteDiffereeActive === 'function' && noteDiffereeActive());  // #321
         const renderLigneRetenu = (r) => {
-            const noteTxt = (typeof r.note === 'number') ? `${r.note.toFixed(1)}%` : '—';
+            const noteTxt = differee ? badgeNoteDifferee()
+                : ((typeof r.note === 'number') ? `${r.note.toFixed(1)}%` : '—');
             const marqueur = `${echapperHtml(r.niveau || '?')} ${noteTxt}`;
             const activite = r.activite ? ` : ${echapperHtml(r.activite)}` : '';
             return `<li>${echapperHtml(r.titreProd)} <strong>(${marqueur})</strong>${activite}</li>`;
         };
         const renderLigneObligatoire = (o) => {
-            const noteTxt = (typeof o.note === 'number') ? `${o.note.toFixed(1)}%` : null;
+            const aNote = (typeof o.note === 'number');
+            const noteTxt = aNote ? (differee ? badgeNoteDifferee() : `${o.note.toFixed(1)}%`) : null;
             const marqueur = (o.niveau && noteTxt) ? `${echapperHtml(o.niveau)} ${noteTxt}` : 'non remis';
             const activite = o.activite ? ` : ${echapperHtml(o.activite)}` : '';
             return `<li>${echapperHtml(o.titreProd)} <strong>(${marqueur})</strong>${activite}</li>`;
@@ -3524,7 +3529,7 @@ function genererSectionCompletion(da) {
                                 ${art.jetonDelai ? '<span style="color: #ff6f00; margin-left: 6px;" title="Jeton de délai appliqué">★</span>' : ''}
                             </div>
                             <div class="profil-texte-detail">
-                                <strong>${art.note}</strong>${art.niveau ? ` · ${art.niveau}` : ''}
+                                ${(typeof noteDiffereeActive === 'function' && noteDiffereeActive()) ? badgeNoteDifferee() : `<strong>${art.note}</strong>`}${art.niveau ? ` · ${art.niveau}` : ''}
                             </div>
                         </div>
                     `).join('')}
