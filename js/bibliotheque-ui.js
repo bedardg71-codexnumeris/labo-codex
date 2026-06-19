@@ -26,19 +26,20 @@
 
     /**
      * Détermine si un item est un exemple démo.
-     * Détection par flag isDemo ou par auteur démo. Deux chaînes acceptées
-     * pendant la transition (cf. BACKLOG #296) :
-     *   - 'Labo Codex' (legacy, encore présent dans echelles.js,
-     *     spe-specifications.js, gabarits-utils.js, demo-namespace.js, etc.)
-     *   - 'Demo Labo Codex' (nouvelle convention, voir #290 du 28 mai 2026)
-     * Le tri catégoriel (vraies démos vs canevas génériques vs résidus de
-     * tests) sera tranché par #296 post-AQPC, puis cette fonction sera
-     * réduite à la nouvelle chaîne uniquement.
+     * Détection par flag isDemo ou par auteur démo `'Demo Labo Codex'`.
+     *
+     * #296 (19 juin 2026) — tri catégoriel tranché : seuls les items d'infra
+     * démo portent désormais `'Demo Labo Codex'`. Le marqueur legacy
+     * `'Labo Codex'` n'est PLUS traité comme « démo » : les gabarits, défauts
+     * génériques et exemples par discipline (echelles.js, gabarits-utils.js,
+     * spe-specifications.js, pratiques-predefines.js) qui le portaient étaient
+     * du contenu de bibliothèque FONCTIONNEL, masqué à tort — ils redeviennent
+     * visibles en mode normal. Audit : `Rapports/AUDIT-296-seeds-labo-codex-2026-06-19.md`.
      */
     BibliothequeUI.estItemDemo = function (item) {
         if (!item) return false;
         if (item.isDemo === true) return true;
-        return item.auteur === 'Labo Codex' || item.auteur === 'Demo Labo Codex';
+        return item.auteur === 'Demo Labo Codex';
     };
 
     /**

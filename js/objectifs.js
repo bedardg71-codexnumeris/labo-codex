@@ -865,142 +865,6 @@ Tu peux utiliser, modifier et partager ce matériel selon les conditions de la l
 }
 
 // ============================================================================
-// DONNÉES DE DÉMONSTRATION
-// ============================================================================
-
-/**
- * Crée l'ensemble d'objectifs pour le calcul différentiel
- * Exemple réaliste avec 13 objectifs pondérés
- */
-function creerEnsembleCalculDiff() {
-    const ensemble = {
-        id: 'objectifs-michel-calcul-diff',
-        nom: 'Calcul différentiel (201-NYA)',
-        auteur: 'Labo Codex',
-        etablissement: 'Cégep de Sainte-Foy',
-        discipline: 'Mathématiques',
-        description: 'Objectifs d\'apprentissage pour le cours de calcul différentiel 201-NYA-05. ' +
-                     'Cette structure permet d\'évaluer chaque objectif séparément avec des artefacts spécifiques, ' +
-                     'tout en maintenant une pondération cohérente reflétant l\'importance de chaque concept.',
-        version: '1.0',
-        date_creation: '2025-11-26',
-        objectifs: [
-            {
-                id: 'obj1',
-                nom: 'Limites et continuité',
-                poids: 6,
-                type: 'fondamental',
-                description: 'Comprendre et calculer les limites de fonctions, identifier la continuité'
-            },
-            {
-                id: 'obj2',
-                nom: 'Dérivées - Définition et interprétation',
-                poids: 8,
-                type: 'fondamental',
-                description: 'Maîtriser la définition de la dérivée comme taux de variation instantané'
-            },
-            {
-                id: 'obj3',
-                nom: 'Règles de dérivation de base',
-                poids: 8,
-                type: 'fondamental',
-                description: 'Appliquer les règles de dérivation (puissance, somme, produit, quotient)'
-            },
-            {
-                id: 'obj4',
-                nom: 'Dérivées de fonctions composées',
-                poids: 7,
-                type: 'fondamental',
-                description: 'Utiliser la règle de dérivation en chaîne pour des fonctions composées'
-            },
-            {
-                id: 'obj5',
-                nom: 'Dérivées de fonctions trigonométriques',
-                poids: 6,
-                type: 'fondamental',
-                description: 'Calculer les dérivées des fonctions sin, cos, tan et leurs inverses'
-            },
-            {
-                id: 'obj6',
-                nom: 'Dérivées de fonctions exponentielles et logarithmiques',
-                poids: 5,
-                type: 'fondamental',
-                description: 'Maîtriser les dérivées de e^x, ln(x) et leurs compositions'
-            },
-            {
-                id: 'obj7',
-                nom: 'Taux de variation liés',
-                poids: 5,
-                type: 'fondamental',
-                description: 'Résoudre des problèmes impliquant des taux de variation reliés'
-            },
-            {
-                id: 'obj8',
-                nom: 'Analyse de fonctions',
-                poids: 12,
-                type: 'integrateur',
-                description: 'Étudier le comportement d\'une fonction (croissance, décroissance, concavité)'
-            },
-            {
-                id: 'obj9',
-                nom: 'Extremums et points d\'inflexion',
-                poids: 10,
-                type: 'integrateur',
-                description: 'Identifier et classifier les extremums locaux et absolus, points d\'inflexion'
-            },
-            {
-                id: 'obj10',
-                nom: 'Optimisation',
-                poids: 15,
-                type: 'integrateur',
-                description: 'Résoudre des problèmes d\'optimisation appliqués (géométrie, économie, physique)'
-            },
-            {
-                id: 'obj11',
-                nom: 'Approximations linéaires et différentielles',
-                poids: 8,
-                type: 'integrateur',
-                description: 'Utiliser les approximations linéaires et calculer des différentielles'
-            },
-            {
-                id: 'obj12',
-                nom: 'Règle de L\'Hospital',
-                poids: 6,
-                type: 'integrateur',
-                description: 'Appliquer la règle de L\'Hospital pour lever les indéterminations'
-            },
-            {
-                id: 'obj13',
-                nom: 'Théorème de la valeur intermédiaire',
-                poids: 4,
-                type: 'fondamental',
-                description: 'Comprendre et appliquer le théorème de la valeur intermédiaire'
-            }
-        ]
-    };
-
-    // Vérifier que le total = 100%
-    const total = ensemble.objectifs.reduce((sum, obj) => sum + obj.poids, 0);
-    if (total !== 100) {
-        console.warn(`⚠️ Total des pondérations: ${total}% (devrait être 100%)`);
-    }
-
-    // Sauvegarder
-    const ensembles = chargerEnsemblesObjectifs();
-
-    // Vérifier si l'ensemble existe déjà
-    const existant = ensembles.find(e => e.id === ensemble.id);
-    if (existant) {
-        return ensemble.id;
-    }
-
-    ensembles.push(ensemble);
-    sauvegarderEnsemblesObjectifs(ensembles);
-
-    return ensemble.id;
-}
-
-// ============================================================================
 // CONFIGURATION PRATIQUE MULTI-OBJECTIFS
 // ============================================================================
 
@@ -1011,7 +875,7 @@ function creerEnsembleCalculDiff() {
  * @returns {boolean} - true si activation réussie
  *
  * EXEMPLE:
- * activerPratiqueMultiObjectifs('objectifs-michel-calcul-diff');
+ * activerPratiqueMultiObjectifs('<ensembleObjectifsId>');
  */
 function activerPratiqueMultiObjectifs(ensembleId) {
     const ensembles = chargerEnsemblesObjectifs();
@@ -1108,7 +972,6 @@ window.exporterEnsembleObjectifs = exporterEnsembleObjectifs;
 window.exporterTousObjectifs = exporterTousObjectifs;
 window.importerObjectifs = importerObjectifs;
 window.traiterImportObjectifs = traiterImportObjectifs;
-window.creerEnsembleCalculDiff = creerEnsembleCalculDiff;
 window.chargerEnsemblesObjectifs = chargerEnsemblesObjectifs;
 
 // Nouvelles fonctions pour pratique multi-objectifs
