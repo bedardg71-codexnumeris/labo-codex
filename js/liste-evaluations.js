@@ -1077,7 +1077,11 @@ function genererLigneHTML(ligne) {
         // Non recevable : afficher -- au lieu d'une note
         affichageNoteChiffree = '<strong style="color: var(--gris-clair);">--</strong>';
     } else if ((ligne.statut === 'evalue' || ligne.statut === 'remplacee') && ligne.noteChiffree !== null) {
-        affichageNoteChiffree = `<strong>${ligne.noteChiffree}%</strong>`;
+        // #321 note différée : masquer le % par travail (le niveau IDME, colonne
+        // distincte, reste visible). N'altère pas la valeur stockée.
+        affichageNoteChiffree = (typeof noteDiffereeActive === 'function' && noteDiffereeActive())
+            ? badgeNoteDifferee()
+            : `<strong>${ligne.noteChiffree}%</strong>`;
     } else {
         affichageNoteChiffree = '-';
     }

@@ -68,6 +68,10 @@
         uniteAffichageAssiduite: 'periodes',
         animationPoints: true,
         chronoEvaluation: false,
+        // #321 — « note différée » (couche 1 PRÉN) : masque les notes PAR TRAVAIL
+        // pour que la rétroaction passe d'abord. N'altère aucun calcul ni la note
+        // finale de session. Défaut false = notes visibles (comportement actuel).
+        noteDifferee: false,
         sisDefaut: 'lea',
         modeExpert: false,
         modeClair: true,
@@ -372,6 +376,18 @@
     window.migrerPreferencesV3 = migrerPreferencesV3;
     window.obtenirDefautsPreferences = obtenirDefauts;
     window.listerClesPreferencesConnues = listerClesConnues;
+
+    // #321 — helpers « note différée » (couche 1 PRÉN). noteDiffereeActive() est
+    // consulté par les écrans qui affichent une note PAR TRAVAIL ; badgeNoteDifferee()
+    // fournit le repère HTML statique (CSP-safe) qui remplace la note masquée.
+    function noteDiffereeActive() {
+        return obtenirPreference('noteDifferee') === true;
+    }
+    function badgeNoteDifferee() {
+        return '<span class="badge-note-differee" title="Note différée : la rétroaction passe d\'abord. Réglage dans Réglages › Préférences.">note différée</span>';
+    }
+    window.noteDiffereeActive = noteDiffereeActive;
+    window.badgeNoteDifferee = badgeNoteDifferee;
 
     // =========================================================================
     // AUTO-INITIALISATION : migration au démarrage

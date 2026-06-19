@@ -285,7 +285,7 @@ function chargerPortfolioEleveDetail(da) {
                                 <div class="portfolio-artefact-meta">
                                     ${art.remis
                                         ? `<span class="u-texte-succes"><span class="icone-inline icone-inline--check" aria-hidden="true"></span>Remis</span>
-                                           <span><strong>Note :</strong> ${art.note}/100</span>
+                                           <span>${(typeof noteDiffereeActive === 'function' && noteDiffereeActive()) ? badgeNoteDifferee() : `<strong>Note :</strong> ${art.note}/100`}</span>
                                            <span><strong>Niveau :</strong> ${echapperHtml(art.niveau)}</span>`
                                         : '<span class="portfolio-texte-gris-fade">— Non remis</span>'}
                                 </div>

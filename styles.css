@@ -9785,6 +9785,21 @@ body.mode-clair .bloc-rlo-separateur {
     color: white;
 }
 
+/* #321 « note différée » (couche 1 PRÉN) : repère atténué qui remplace la note
+   chiffrée d'un travail quand le masquage est actif. Distinct d'une note absente
+   (qui reste « -- » / « non remis »). Deux modes via variables. */
+.badge-note-differee {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: var(--radius-moyen, 8px);
+    font-size: 0.78rem;
+    font-style: italic;
+    font-weight: 500;
+    color: var(--texte-muted, #80a0b0);
+    background: var(--surface-survol, rgba(128, 160, 176, 0.12));
+    border: 1px solid var(--bordure-subtile, rgba(128, 160, 176, 0.30));
+}
+
 /* Badge artefact non remis (gris) */
 .badge-artefact-non-remis {
     display: inline-flex;
