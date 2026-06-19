@@ -815,7 +815,7 @@ async function obtenirIndicesCPAsync(da) {
  * @returns {Object} - { obj1: {P: 85, nbArtefacts: 5, artefacts: [...]}, obj2: {...}, ... }
  *
  * EXEMPLES :
- * calculerPerformanceParObjectif('1234567', 'objectifs-michel-calcul-diff')
+ * calculerPerformanceParObjectif('1234567', '<ensembleObjectifsId>')
  * → {
  *     obj1: { P: 85, nbArtefacts: 5, artefacts: [{id, note}, ...] },
  *     obj2: { P: 72, nbArtefacts: 3, artefacts: [{id, note}, ...] },
@@ -905,7 +905,7 @@ function calculerPerformanceParObjectif(da, ensembleId) {
  * @returns {Object} - { noteFinale: 78.5, details: {...} }
  *
  * EXEMPLES :
- * calculerNoteFinaleMultiObjectifs('1234567', 'objectifs-michel-calcul-diff')
+ * calculerNoteFinaleMultiObjectifs('1234567', '<ensembleObjectifsId>')
  * → {
  *     noteFinale: 78.5,
  *     nbObjectifsEvalues: 13,
