@@ -28,6 +28,16 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 ### Bugs UX et cohérence interface
 
+- [ ] 🔴 **#345** Masquer le comparateur de pratiques (#326) de l'interface déployée — réversible, conditionné
+  - **Décision Grégoire (21 juin 2026)** : retirer le comparateur (« Outil en développement ») de la surface exposée à la **CoP de l'AQPC**, le temps que les écarts terrain **#326-T1 à T5** (cf. `Retours des testeurs/SUIVI-BUGS.md`) soient corrigés. **Candidat n°1 du paquet « bloqueurs CoP »** (objectif app stable à expérimenter d'ici la mi-août 2026).
+  - **Périmètre — traiter ensemble (zéro-dette, pas de lien mort)** :
+    - Masquer l'entrée nav **Labo › Exploration des pratiques** (l'entrée principale du banc).
+    - Masquer le lien **« Ouvrir le comparateur du Labo »** au récapitulatif du wizard de pratique (vu en A.12).
+    - (La bannière « Gérer mes maquettes » est déjà absente — A.11 — donc rien à faire de ce côté.)
+  - **Réversible + conditionné (CLAUDE.md zéro-dette)** : **masquage**, pas retrait de code ; règle de réactivation **explicite** = « réaffiché quand #326-T1 à T5 sont traités » (pas un masquage flou « au cas où »).
+  - **⚠️ Zones protégées** : si l'entrée nav passe par `js/config.js` / `js/navigation.js`, masquer via un **flag/condition d'affichage** plutôt qu'en supprimant l'entrée (ces fichiers sont protégés — autorisation acquise pour ce masquage précis seulement).
+  - **Vérif** : la sous-nav Labo reste cohérente (pas de trou), aucun lien entrant ne pointe vers une page masquée, rendu OK dans les deux modes.
+
 - [ ] 🟠 **#342** Erreur d'attribution CC : `auteur_original` figé à un mauvais enseignant — créé 15 juin 2026 (extrait de #341). **PRÉVENTION LIVRÉE 19 juin (1.20.0, PR #53)** : retrait du repli silencieux `enseignantsReels[0]` ; défaut applicatif « Inconnu » (plus de nom NI coordonnées personnelles par défaut) ; helper `obtenirIdentiteCCUtilisateur` → « Inconnu ». **RESTE : réparation des données live déjà stampées** (one-shot console READ-ONLY puis ré-écriture `auteur_original`, à exécuter sur Mac — checklist §H).
   - **Symptôme (Grégoire, 15 juin)** : la carte « PAN-Littérature A25 » (pratique de **littérature**, créée par Grégoire) s'affiche « par Bruno V. +1 contrib. ». Bruno enseigne la **chimie** ; il n'est pas l'auteur de cette pratique.
   - **Cause racine (code lu)** : `auteur_original` est dérivé de l'enseignant actif du registre `enseignants` via `obtenirProfilAuteurActifSync` (`cc-license.js:44`) — résolution : dropdown Réglages › Enseignant, sinon `actif`, sinon **`enseignantsReels[0]`** (premier de la liste). Il est ensuite **figé** sur la pratique à la création (`cc-license.js:154`) et y persiste. Une entrée « Bruno V. » (lignée des données de test chimie « Bug Bruno » Beta 95.2) a été l'identité résolue au moment du stamp → gravée sur la pratique de littérature de Grégoire, qui devient « contributeur » de sa propre pratique via `ajouterContributeurSiNecessaire` (`cc-license.js:333`).
