@@ -235,6 +235,13 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 ### Cohérence visuelle UI
 
+- [ ] 🟢 **#344** Calendrier scolaire — fusionner les 3 cartes métriques dans la carte « Légende »
+  - **Idée (Grégoire, 21 juin 2026, captures fournies)** : retirer les **3 cartes métriques** du haut de la page Calendrier scolaire (« Semaines scolaires », « Jours de cours », « Congés avec reprise ») et reporter ces 3 chiffres **à l'intérieur de la carte « Légende »**, en **disposition deux colonnes** : la légende des codes-couleur d'un côté, les 3 indicateurs chiffrés de l'autre. Une seule carte au lieu de quatre.
+  - **Bénéfice attendu** : page plus compacte, moins d'éléments, la synthèse chiffrée cohabite avec la grille de lecture — cohérent avec le principe « densité maîtrisée, pas d'ornementation » du design system.
+  - **Point de conception à trancher** : aujourd'hui les 3 chiffres sont en tête de page (visibles d'un coup d'œil) ; la carte Légende est plus bas. S'ils descendent dans la Légende, ils perdent cette position de tête → décider si la carte fusionnée **remonte en haut** de la page ou si la Légende reste à sa place. Confirmer la disposition exacte des deux colonnes avec Grégoire.
+  - **Vérif terrain** : rendu dans les deux modes (clair/sombre) + responsive (les deux colonnes doivent s'empiler proprement en étroit — cf. #283-T1 qui touche aussi cette page).
+  - Fichier(s) : vue Calendrier scolaire (`index.html` section calendrier + rendu JS), `styles.css` (cartes métriques + carte légende).
+
 - [ ] 🟢 **#297** Dette technique : duplication des règles CSS entre `<style>` inline d'index.html et styles.css
   - **📋 Relais de cadrage prêt (15 juin 2026)** : `plans de travail/RELAIS-297-dette-css.md` — découpage Lot A (15 identiques, retrait des profondes seulement) / Lot B (33 divergentes cas par cas) / Lot C (convention + sentinelle statique), grille de décision, profil de risque (FOUC Safari `file://`, `:root` en retard de variables), vérif visuelle deux modes (session Mac).
   - **✅ ÉTAPE 0 FAITE (16 juin 2026)** : `INLINE_FIN_LIGNE` corrigée (3806 → **3825**) + date d'en-tête dans `Rapports/_outils/audit-duplication-css.py` ; audit re-généré → `Rapports/audit-duplication-css-2026-06-16.md`. **Chiffres actualisés** : bloc inline = **629 règles** (vs 625), styles.css 4176 ; **48 sélecteurs communs** dont **15 identiques** (retrait sûr) + **33 divergentes** (cas par cas). Les phases 2-3 (décision par sélecteur + retrait + convention) restent **post-AQPC / session Mac** (risque FOUC `file://`, vérif visuelle deux modes — non faisable en cloud).
