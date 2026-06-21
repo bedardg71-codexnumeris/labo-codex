@@ -4,10 +4,21 @@
      sur la version 1.20.0 (build 0619-1829), branche
      claude/backlog-bascule-2026-06-19. Base : 899 Vitest verts.
 
-     COUVERT (~2h50) : Sections A (banc #326), B (DEN #343), C (responsive
-     #283), D (durée période #328), E (biblio cours #282). RESTE : F-G-H-I
-     (données réelles : #340 contamination, #332 horaire, #342 réparation
-     auteur CC, #336 purge) — pour une prochaine fois, Safari + données live.
+     COUVERT (~2h50, matin) : Sections A (banc #326), B (DEN #343), C (responsive
+     #283), D (durée période #328), E (biblio cours #282).
+     COUVERT (2e tranche, ~midi) : F (#340) et G (#332). RESTE : H (#342 réparation
+     auteur CC) + I (#336 purge) — données live, pour une prochaine matinée + backup.
+
+     F + G — faits saillants (détail : SUIVI-BUGS.md « Constats terrain F + G ») :
+     • #340 contamination NON reproduite (baseline propre 10/0 + garde-fou « lecture
+       seule » sur trimestre archivé). localStorage à ~88 % du plafond Safari → #334.
+       Erreurs « Aucune échelle de performance sélectionnée » à l'ouverture d'une éval
+       A2025 (résolution échelle/cartouche en consultation d'un trimestre archivé).
+     • #332 RACINE identifiée : le select Horaire se pré-remplit par `groupeAssocie`
+       (= n° de groupe), PAS par le `horaireId` réel du GC → quand les deux divergent,
+       le select ment et la sauvegarde réaligne. Mécanismes A/B du rapport non
+       reproduits. `cle('horaires')` non namespacé. Données live RÉPARÉES en séance
+       (00002→Lun-Jeu, 00008→Mar-Jeu, alignées, plus d'orphelin).
 
      VERDICT : les cœurs fonctionnels marchent (le banc compare ; DEN se crée
      et s'affiche correctement AU BANC ; durée de période persiste ; biblio

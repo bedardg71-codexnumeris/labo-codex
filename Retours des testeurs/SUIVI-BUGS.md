@@ -80,6 +80,22 @@
 
 ---
 
+## Constats terrain — Sections F + G données réelles (tests Mac 21 juin 2026, 2e tranche)
+
+> Suite du bloc données réelles, sur le tab `file://` (vraies données H2026 + A2025).
+> **F (#340) = pas de contamination** ; **G (#332) = racine identifiée + données réparées**.
+> Restent H (#342) et I (#336) pour une prochaine matinée (écriture/purge live).
+
+| Réf | Test | Date | Description | Priorité | Fichier(s) — à identifier |
+|---|---|---|---|---|---|
+| #340-T1 | F.1 | 21 juin 2026 | **Contamination NON reproduite.** Baseline : 10 productions H2026, toutes `h2026-601-101-MQ-00001`, **0** trace de `COURS1766455789356` (A2025). Après repro (passage A2025 → retour H2026 → hard refresh) : toujours 10, 0 étrangère. De plus, **garde-fou « lecture seule » sur trimestre archivé** : pour saisir en A2025 il faut cocher « Permission d'écriture » → protège contre l'écriture accidentelle. #340 considéré **neutralisé**. | Basse (surveiller) | garde #340 (1.17.7), lecture seule trimestre archivé |
+| #340-T2 | F.3 | 21 juin 2026 | **localStorage ~4,4 Mo = ~88 % du plafond Safari (~5 Mo).** Risque latent réel (toute écriture proche du plafond peut refouler une clé en IDB-only, cf. #142). À verser à **#334** (désaturation). | Moyenne | plan désaturation localStorage, #334 |
+| #340-T3 | F | 21 juin 2026 | **Erreurs rouges à l'ouverture d'une éval A2025** : `❌ Aucune échelle de performance sélectionnée` (×6, via `calculerNote` ← `changerEchelleEvaluation`/`niveauSelectionne`/`cartoucheSelectionnee`) + `⚠️ Cartouche CART1763652289229 non trouvée`. En consultant un trimestre **archivé**, l'échelle/cartouche ne se résout pas → recalcul en cascade qui échoue. = finding #2 du chantier D (29 mai) : « la résolution de pratique/échelle en consultation lit le namespace du trimestre actif, pas du consulté ». | Moyenne | résolution échelle/cartouche en consultation (evaluation-calcul.js:546, evaluation.js:71/2120), namespace trimestre consulté |
+| #332-T1 | G.1 | 21 juin 2026 | **RACINE de #332 — le select Horaire se pré-remplit par `groupeAssocie`, pas par le `horaireId` du GC.** Confirmé terrain : à l'ouverture du GC 00002 (base `horaireId` = Mar-Jeu), le select Horaire affichait « **Lun-Jeu** » **tout seul** (= l'horaire dont `groupeAssocie` = 00002). Quand la liaison directe (`horaireId` du GC) et la liaison inverse (`groupeAssocie` de l'horaire) divergent, le select **ment** et la sauvegarde réaligne sur `groupeAssocie` → impression « je change mais rien ne bouge ». Les Mécanismes A (select figé) et B (no-op à l'écriture) du rapport ENQUETE-332-CONSTAT1 **ne se reproduisent pas** : le select reflète le GC et les écritures prennent. Aussi : `cle('horaires')` **n'est pas namespacé** (même liste en H2026 et A2025). | Moyenne-Haute | pré-remplissage du select Horaire (Cadre › Groupes-cours), résolution `horaireId` vs `groupeAssocie`, namespacing des horaires |
+| #332-T2 | G.1 | 21 juin 2026 | **Données live réparées en séance** : le test a corrigé l'incohérence croisée → GC 00002 → Lun-Jeu, GC 00008 → Mar-Jeu, `groupeAssocie` alignés, **plus d'horaire orphelin**. Note annexe : **doublon de GC A2025** (deux GC au même nom « A2025-601-101-MQ-00001 », même `horaireId`). | Basse | dédup GC (A2025) |
+
+---
+
 ## Corrigés (11 juin 2026 — palettes déplaçables au doigt sur iPad)
 
 | # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
