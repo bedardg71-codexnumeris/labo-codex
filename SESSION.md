@@ -1,4 +1,49 @@
 <!-- =====================================================================
+     SESSION TESTS MAC — 21 juin 2026 (Claude Code local, Safari terrain).
+     Validation terrain de la checklist TESTS-MANUELS-PENDING-2026-06-19.md
+     sur la version 1.20.0 (build 0619-1829), branche
+     claude/backlog-bascule-2026-06-19. Base : 899 Vitest verts.
+
+     COUVERT (~2h50) : Sections A (banc #326), B (DEN #343), C (responsive
+     #283), D (durée période #328), E (biblio cours #282). RESTE : F-G-H-I
+     (données réelles : #340 contamination, #332 horaire, #342 réparation
+     auteur CC, #336 purge) — pour une prochaine fois, Safari + données live.
+
+     VERDICT : les cœurs fonctionnels marchent (le banc compare ; DEN se crée
+     et s'affiche correctement AU BANC ; durée de période persiste ; biblio
+     cours non vide). Mais NI #326 NI #343 ne sont closables en l'état. Les
+     écarts sont tous du rendu / parcours / édition / contenu — jamais du
+     calcul (cohérent : 899 tests verts sur la logique ; le terrain attrape
+     ce que le cloud ne voit pas). 14 constats tracés dans
+     Retours des testeurs/SUIVI-BUGS.md (sections « Constats terrain »).
+
+     ÉCARTS PRINCIPAUX :
+     • #326-T1 (A.14) — « — non constructible » NON rendu pour PAN-Standards
+       (cellule=0, aucun tooltip, CSV=0 ; vue détail dit « Récit indisponible
+       pour cette pratique »). C'était la livraison-clé PR #53. PRIORITÉ HAUTE.
+     • #343-T1 (B.5) — édition standard de DEN incomplète : type « (bientôt) »
+       + pas de select Grille, alors que le banc (B.7) la rend bien.
+     • #343-T2 (B.6) — DÉCISION CONTENU (Grégoire) : retirer le jugement
+       « Famille exigeante / à accompagner » des descriptions DEN.
+     • #326-T2 (A.11) bannière « Gérer mes maquettes » absente ; #326-T3 (A.8)
+       « Éditer la pratique » du banc ouvre un assistant NON prérempli — MAIS
+       isolé au banc : le vrai mode édition (sidebar) restaure bien (B.5) ;
+       #326-T4 dérivation qui passe par l'assistant de façon parasite.
+     • #328-T1 (D.2) changer la durée vide l'assemblage d'un GC existant.
+     • #283-T1 (C.2) le Calendrier ne s'empile pas < 1024 px (scroll horizontal).
+     • Annexes : doublons cours (#282-T1), libellés DEN (#343-T4), suggestion
+       UX portes wizard (#343-T5), retouche bandeau orange (#326-T5).
+
+     CLÔTURE : #282 FERMÉ (E.1 OK — modal biblio cours non vide ; le symptôme
+     « modal vide en V2 » est résolu ; ne PAS relancer la migration revertée).
+
+     PROCHAIN PAS POSSIBLE : chantier de CORRECTION à froid (registre code) des
+     écarts #326/#343, en commençant par #326-T1 (non-constructible) + les
+     libellés/contenu DEN ; OU finir le terrain (sections F-I, données réelles).
+     ─────────────────────────────────────────────────────────────────────
+-->
+
+<!-- =====================================================================
      CLÔTURE DE SESSION — 19 juin 2026 (Claude Code cloud).
      Rituel de fin appliqué (break-test §4 sur chaque sentinelle).
      ─────────────────────────────────────────────────────────────────────

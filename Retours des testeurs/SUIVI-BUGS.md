@@ -16,6 +16,68 @@
 
 ---
 
+## Constats terrain — banc de décision #326 (Section A, tests Mac 21 juin 2026)
+
+> Validation terrain de la checklist `TESTS-MANUELS-PENDING-2026-06-19.md` sur Mac/Safari
+> (version 1.20.0, build 0619-1829, branche `claude/backlog-bascule-2026-06-19`). A.1→A.7,
+> A.9, A.10, A.12 = OK. Trois écarts confirmés + un flux douteux + une retouche. La porte
+> terrain #326 **ne peut donc PAS être levée en l'état** (cf. « Décision release » de la checklist).
+
+| Réf | Test | Date | Description | Priorité | Fichier(s) — à identifier |
+|---|---|---|---|---|---|
+| #326-T1 | A.14 | 21 juin 2026 | **« — non constructible » non rendu pour PAN-Standards (STD).** La cellule du banc affiche **« 0 »** (pas « — non constructible »), **aucun tooltip / aria-label** « ce n'est pas un zéro » au survol, et le **CSV exporté porte « 0 »** (colonne `PAN-SDT-Litt H26 (STD)` = 0 pour les 6 profils). La vue détail d'un profil affiche pourtant **« Récit indisponible pour cette pratique »** côté STD → le cas est bien un non-constructible, mais non signalé comme tel. Or PR #53 annonçait le champ `noteConstructible` dans `simulerIndices`. **À diagnostiquer** : le rendu du banc ET l'export CSV lisent-ils `noteConstructible` ? C'était la livraison-clé à valider. | Haute | `simulerIndices` (js/pratiques/…), module de rendu du comparateur (Labo › Exploration), export CSV du banc |
+| #326-T2 | A.11 | 21 juin 2026 | **Bannière « Gérer mes maquettes » absente.** Avec une maquette **vivante** (« PAN-SDT-Litt H26 · maquette 1 [MAQUETTE] »), l'ouverture de la modale Bibliothèque (Conception › Pratiques) n'affiche **aucune** bannière « Tu as X maquette(s)… » + bouton « Gérer mes maquettes » censée renvoyer vers Labo › Exploration. | Moyenne | modale Bibliothèque (`pratiques-bibliotheque.js` ?), module maquettes |
+| #326-T3 | A.8 | 21 juin 2026 | **« Éditer la pratique » (lien d'une colonne du banc) ouvre l'assistant NON prérempli.** Radios par défaut cochés mais champs obligatoires **vides** (ex. « Nombre d'évaluations prévues » vide à l'étape 3/9), alors que la pratique existe avec ses valeurs. Le vrai mode édition passe par la sidebar (« Ajouter » puis clic), d'après la modale Bibliothèque. **À trancher** : bug de préremplissage en édition, OU libellé « Éditer la pratique » trompeur (route vers création). | Moyenne | lien `editerPratique` du banc, wizard-pratique-v2.js |
+| #326-T4 | A.9/A.10 | 21 juin 2026 | **« Dériver une maquette » ouvre l'assistant complet (9 étapes) de façon parasite.** Il faut **Annuler** pour revenir à l'arbre — et la maquette est créée **quand même**. Une dérivation devrait copier la pratique en maquette sans dérouler tout le wizard de création. Flux jugé « lourd » et probablement erroné. | Moyenne | chemin de dérivation des maquettes (module Exploration/maquettes) |
+| #326-T5 | A.2 | 21 juin 2026 | **Retouche (pas un bug)** : bandeau « Outil en développement » sur **fond bleu** → se confond avec la surface ; le passer en **orange** (cohérence avec l'aide dans l'app, cf. design-system). | Basse | rendu du bandeau d'avertissement du banc, styles.css |
+
+---
+
+## Constats terrain — famille DEN #343 (Section B, tests Mac 21 juin 2026)
+
+> Suite de la checklist `TESTS-MANUELS-PENDING-2026-06-19.md`. B.1→B.4, B.7 = OK ;
+> DEN est créable (via « Je sais déjà ce que je veux → Choisis ta famille → DEN ») et
+> **bien rendu au banc** (échelle + grille + « jugement » par profil). Mais l'**édition
+> standard** de DEN est incomplète, et une décision de contenu est actée.
+
+| Réf | Test | Date | Description | Priorité | Fichier(s) — à identifier |
+|---|---|---|---|---|---|
+| #343-T1 | B.5 | 21 juin 2026 | **Édition standard de DEN incomplète (« bientôt »).** Une pratique DEN créée au wizard se rouvre bien en édition via la sidebar (préremplie), MAIS le formulaire affiche **« Type de pratique : PAN-Dénotation (bientôt) »** (faux — DEN est livré), il **n'offre pas de select Grille de critères** (seulement Échelle), et n'expose pas les champs DEN (cibles / mode d'ancrage / suggestion). **Contraste** : au banc (B.7), la même pratique affiche correctement échelle **et** grille. → Brancher l'UI DEN dans le formulaire d'édition standard (ou router l'édition DEN vers le wizard) + retirer le libellé « (bientôt) ». Dette « un chemin livré, l'autre bientôt ». | Moyenne-Haute | formulaire d'édition pratiques (pratiques-gestion.js ?), select « Type de pratique » |
+| #343-T2 | B.6 | 21 juin 2026 | **Décision de contenu (Grégoire)** : retirer le jugement **« Famille exigeante, à accompagner »** des descriptions DEN — présent à l'étape « Choisis ta famille » (option DEN) ET dans l'encadré orange « Configuration de la dénotation » (« à accompagner pédagogiquement : certain·es étudiant·es sont déstabilisé·es… échafaudage nécessaire »). Motif : ça peut décourager, et ce jugement n'est pas celui de Grégoire. **Garder** le fond factuel (cibles + critères explicites, note certificative RREC 60/59, abandon de la fonction de tri) **sans** le qualificatif « exigeante » ni l'injonction d'accompagnement. | Moyenne | textes DEN du wizard (wizard-pratique-v2.js), encadré config-denotation |
+| #343-T3 | B.6 | 21 juin 2026 | **Hover du tag DEN absent dans la bibliothèque** : aucun tooltip au survol du tag « DEN » d'une pratique (les bons textes existent ailleurs, dans le wizard). À confirmer si un hover était attendu. | Basse | rendu des tags de famille dans la modale Bibliothèque |
+| #343-T4 | B.1/B.4/B.7 | 21 juin 2026 | **Libellés à uniformiser** : (a) « **eliminee** » (sans accent, brut technique) exposé en « Variante » au récap ; (b) compteur d'étapes « **3/2** » sur le chemin DEN (le total ne s'ajuste pas) ; (c) la description de « Je sais déjà ce que je veux » dit « **SOM, STD ou SPE** » et **oublie DEN** ; (d) « Suggestion **statistique** » (wizard) vs « Suggestion **holistique** » (banc) — choisir un seul terme. | Basse | wizard-pratique-v2.js, rendu du banc |
+| #343-T5 | B.1 | 21 juin 2026 | **Suggestion UX (Grégoire)** : remonter « Je sais déjà ce que je veux » et « Je ne suis pas certain » comme **portes d'entrée de la 1ʳᵉ modale** du wizard, à côté de « Partir d'un modèle » / « Décrire ma pratique » (aujourd'hui enfouies dans l'étape 2). | Basse | 1ʳᵉ étape du wizard de création de pratique |
+
+---
+
+## Constats terrain — Sections D + E (tests Mac 21 juin 2026)
+
+> Checklist `TESTS-MANUELS-PENDING-2026-06-19.md`. **D.1 OK** (durée de période persiste
+> après reload). **E.1 + E.2 OK** → la modale Bibliothèque cours n'est plus vide et
+> « Reprendre dans ce trimestre » fonctionne sans erreur → **#282 peut être clos**
+> (ne PAS relancer la migration de masse revertée). Deux constats annexes :
+
+| Réf | Test | Date | Description | Priorité | Fichier(s) — à identifier |
+|---|---|---|---|---|---|
+| #328-T1 | D.2 | 21 juin 2026 | **Changer la durée de période vide l'assemblage d'un groupe-cours existant.** Après modification de « Durée d'une période », le formulaire « Modifier le groupe-cours » (GC pourtant « Complet » dans la sidebar) affiche **tous ses selects vides** (Cours / Groupe / Horaire / Enseignant·e / Pratique) alors que le **nom généré reste correct**. De plus, le nom généré montre « **Lun-AM / Jeu-PM** » tandis que la sidebar indique l'horaire « **Mar-Jeu** » (désync à confirmer). Cause probable : le changement de durée recrée les horaires du trimestre (modèle « horaire propre au trimestre ») → le `horaireId` référencé par le GC n'existe plus → assemblage à refaire. **Risque** : perte silencieuse de la configuration des GC existants. À confirmer la causalité et décider si la durée doit préserver/migrer les horaires. | Moyenne | logique durée de période #328, recréation horaires (trimestre), pré-remplissage « Modifier le groupe-cours » |
+| #282-T1 | E.1 | 21 juin 2026 | **Doublons de cours dans la Bibliothèque** : « 601-101-MQ Écriture et littérature » apparaît **2×** et « 601-102-MQ Littérature et imaginaire » **3×** (sélection de 5 + Démo). Pollution de données (dédup par tuple naturel non appliquée), **distincte** de #282 (« modal vide », résolu). N'empêche pas la clôture de #282 mais mérite un nettoyage. | Basse-Moyenne | dédup cours (cours.js, tuple naturel), Bibliothèque de cours |
+
+> **Note console (D.2)** : warnings jaunes non bloquants observés — `indicesCP non trouvé … Calcul à la volée` (indices.js:502), `calculerTauxCompletion … retourne null` (etudiants.js:319), `Canvas … non visible — graphique différé`. Bruit, pas d'erreur rouge.
+
+---
+
+## Constats terrain — Section C responsive #283 (tests Mac 21 juin 2026)
+
+> **C.3 OK** (iPad réel : Productions étudiantes répond bien, portrait + paysage, info-bulles
+> #18 visibles). **C.1 imprécis** : « Évaluation › Liste » **n'a pas de sidebar** (c'est une liste
+> avec filtres) → la consigne ne colle pas à cette page ; la page s'adapte correctement en
+> étroit (filtres empilés + bandeau « Le tableau dépasse l'écran — décoche des colonnes »,
+> géré au lieu d'un scroll brut). Un écart confirmé :
+
+| Réf | Test | Date | Description | Priorité | Fichier(s) — à identifier |
+|---|---|---|---|---|---|
+| #283-T1 | C.2 | 21 juin 2026 | **Le Calendrier scolaire ne s'empile pas sous 1024 px.** Les mois restent **côte à côte** (2 colonnes) et le 2ᵉ mois **déborde à droite** → **scroll horizontal**. C'est la page « divergente » qui restait à traiter en #283 (l'empilement < 1024 px était validé pour les 5 pages bibliothèque). Décision suggérée par la checklist : passer ces pages sur `.layout-sidebar-2col` (option A) ou forcer la grille de mois en 1 colonne sous le seuil. | Moyenne | grille de mois du Calendrier scolaire (styles.css responsive, vue calendrier) |
+
 ---
 
 ## Corrigés (11 juin 2026 — palettes déplaçables au doigt sur iPad)
