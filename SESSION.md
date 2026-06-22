@@ -1,4 +1,73 @@
 <!-- =====================================================================
+     SESSION DEN — 22 juin 2026 (Claude Code local, Safari terrain), suite du
+     matin après #345. Release 1.21.0 (build 0622-1322). 906 Vitest verts.
+     Rituel de fin appliqué (audit §1→§6 + break-test §4) avant clôture.
+
+     LIVRÉ (3 chantiers DEN, tous validés terrain par Grégoire)
+     • #343-T1 — ÉDITION DEN. D'abord routée vers l'assistant (b), PUIS, à la
+       demande de Grégoire, ÉDITEUR INLINE complet dans le formulaire `mat-` :
+       section `mat-config-denotation` (cibles + suggestion + grille optionnelle),
+       pré-remplissage + sauvegarde (`objectifs`/`suggestion`/`grilleId` +
+       `calcul_note: jugement_global` + `pratiques: ['DEN']`), échelle réutilisée
+       (carte commune), `chargerDropdownGrillesMat`, option de type activée,
+       routage retiré. DEN s'édite désormais comme les autres familles.
+     • #318 — CRÉATION DEN (parcours créable). Carte DEN de 1er rang sur l'écran
+       « Comment calcules-tu la note finale ? » (libellé « Note finale posée, pas
+       calculée » — PAS « jugement professionnel », commun à toutes les PAN) +
+       gabarit « Modèle de base » (générique, 3 cibles larges, grille/échelle
+       optionnelles ; en FIN de liste via l'inversion `unshift`) + voie rapide.
+     • #343-T2 — retrait du jugement « famille exigeante / à accompagner » des
+       3 sites DEN (cartes, encadré config, UI de saisie). Grep = 0. Fond factuel
+       conservé (cibles/critères explicites, RREC 60/59, abandon du tri).
+
+     ANCRAGE : SKILL_pratiques_notation lu (§2 bis/§8). Corrige le malentendu
+     « DEN = jugement » : le jugement caractérise TOUTES les PAN ; le distinctif
+     DEN = note finale POSÉE (non calculée), abandon du tri, certification gardée,
+     critères toujours explicites. DEN n'est PAS la pratique de Grégoire (gabarit
+     théorique). Moteur DEN déclenché par `calcul_note.methode==='jugement_global'`
+     (pratique-configurable.js:206) — vérifié récit↔code ; 2 écrivains DEN
+     (assistant `creerPratiqueV2:2657` + inline) symétriques.
+
+     CACHE : `?v=2026062201` sur pratiques-bibliotheque.js + denotation-saisie-ui.js
+     (config/navigation/gestion/wizard déjà bumpés au #345). noms_stables.json à jour.
+
+     RESTE (DEN, non bloquant) : #343-T3 (hover tag DEN), #343-T4 (libellés :
+     « eliminee » brut, compteur « 3/2 », « statistique » vs « holistique »),
+     #343-T5 (portes du wizard) — tous BASSE (SUIVI-BUGS) ; modes DEN « différée »
+     et « réduite » + câblage `calculerDetailsNoteFinale` = DEN couche 2+ (futur).
+     NON committé/poussé (décision Grégoire).
+     ─────────────────────────────────────────────────────────────────────
+-->
+
+<!-- =====================================================================
+     SESSION #345 — 22 juin 2026 (Claude Code local, Safari terrain).
+     Suite directe des tests Mac du 21 juin : #345 = masquer le comparateur
+     de pratiques de la surface exposée à la CoP AQPC, le temps de corriger
+     les écarts terrain #326-T1 à T5. Réversible + conditionné (zéro-dette).
+     Base : 1.20.0 (0619-1829), 899 Vitest verts (avant ET après).
+
+     LIVRÉ (#345 CLOS, voir BACKLOG.md pour le détail) — flag unique
+     `COMPARATEUR_VISIBLE = false` (config.js, après configurationsOnglets ;
+     fail-open : masque seulement si explicitement false). 3 points d'entrée
+     gatés : sous-nav Labo (navigation.js, filtre d'une COPIE — objet protégé
+     non muté), lien récap wizard (wizard-pratique-v2.js, section entière),
+     bannière « Gérer mes maquettes » (pratiques-gestion.js). Page + code
+     conservés (réversibilité). 4 `?v=` bumpés → 2026062201 ; noms_stables.json
+     réajusté (4 lignes). Terrain Mac validé par Grégoire (Lots 1-2).
+
+     DÉCOUVERTE : la bannière maquettes n'était pas « absente » (présupposé
+     #345 venu de A.11) mais CONDITIONNELLE (≥1 maquette). Gatée aussi.
+     COMPROMIS ACTÉ : comparateur + bannière masqués ⇒ maquettes existantes
+     temporairement non gérables (réversible ; nul pour un membre CoP frais).
+
+     RÉACTIVATION : repasser le flag à true quand #326-T1 à T5 sont traités.
+     RESTE (non fait ce jour) : version.json/changelog si release dédiée ;
+     commit + PR (sur décision Grégoire). PROCHAIN : tâches suivantes du
+     paquet « bloqueurs CoP » (écarts #326-T1→T5 / #343 — voir SUIVI-BUGS.md).
+     ─────────────────────────────────────────────────────────────────────
+-->
+
+<!-- =====================================================================
      SESSION TESTS MAC — 21 juin 2026 (Claude Code local, Safari terrain).
      Validation terrain de la checklist TESTS-MANUELS-PENDING-2026-06-19.md
      sur la version 1.20.0 (build 0619-1829), branche

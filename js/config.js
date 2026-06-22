@@ -87,6 +87,25 @@ const configurationsOnglets = {
 };
 
 /* ===============================
+   🚧 FLAG D'AFFICHAGE — COMPARATEUR DE PRATIQUES (#345)
+   Décision Grégoire (21 juin 2026) : retirer le comparateur
+   (« Outil en développement ») de la surface exposée à la CoP de l'AQPC
+   le temps que les écarts terrain #326-T1 à T5 (Retours des testeurs/
+   SUIVI-BUGS.md) soient corrigés.
+
+   MASQUAGE réversible — le code et la page restent en place ; seules les
+   ENTRÉES VISIBLES sont masquées. RÉACTIVATION : repasser ce flag à `true`
+   QUAND #326-T1 à T5 sont traités (pas un masquage flou « au cas où »).
+
+   Points masqués quand false :
+   - entrée nav « Labo › Exploration des pratiques » (navigation.js,
+     afficherSousNavigation) ;
+   - lien « Ouvrir le comparateur du Labo » au récap du wizard
+     (wizard-pratique-v2.js).
+   =============================== */
+const COMPARATEUR_VISIBLE = false;
+
+/* ===============================
    🔄 VARIABLES GLOBALES D'ÉTAT
    Suivent l'état actuel de la navigation et de l'interface
    PROTÉGÉ - Ne pas modifier

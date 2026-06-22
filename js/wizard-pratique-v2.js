@@ -195,7 +195,7 @@ const ETAPES_WIZARD = {
 
     // Voie rapide (#319 Lot 2 a2) — atteinte par le lien « Je sais déjà ce que je
     // veux » sous Q1. Choix DIRECT de famille (réutilise l'id 'calcNoteFinale' comme
-    // sous-questions-guidees) → saut à la branche de configuration. DEN désactivée.
+    // sous-questions-guidees) → saut à la branche de configuration. DEN incluse (#318).
     // Atteinte hors-graphe : wizardV2VoieRapide n'empile pas Q1 → voie-rapide occupe
     // la position de calcul-note-finale (compteur #134 cohérent).
     'voie-rapide': {
@@ -213,7 +213,7 @@ const ETAPES_WIZARD = {
                     { value: 'moyenne', label: 'Sommative (SOM)', description: 'Note finale par moyenne pondérée des évaluations.' },
                     { value: 'niveaux', label: 'PAN – Standards (STD)', description: 'Niveaux de maîtrise (ex. I-D-M-E) convertis en note.' },
                     { value: 'acceptable', label: 'PAN – Spécifications (SPE)', description: 'Travaux acceptables ou non ; note selon les forfaits réussis.' },
-                    { value: 'jugement', label: 'PAN – Dénotation (DEN)', description: 'La note finale est un jugement certificatif, gardé par l\'atteinte des cibles. Famille exigeante, à accompagner.' }
+                    { value: 'jugement', label: 'PAN – Dénotation (DEN)', description: 'Note finale certificative posée (non calculée) selon l\'atteinte de cibles d\'apprentissage explicites ; abandonne la fonction de tri.' }
                 ]
             }
         ],
@@ -242,7 +242,7 @@ const ETAPES_WIZARD = {
                 id: 'infoDenotation',
                 type: 'info',
                 variante: 'attention',
-                texte: 'Famille exigeante, à accompagner pédagogiquement : certain·es étudiant·es sont déstabilisé·es par l\'absence de notes chiffrées en cours de route (échafaudage nécessaire — voir le guide PAN). La dénotation s\'appuie sur des cibles et des critères explicites (grille, échelle) pour la rétroaction ; elle abandonne la fonction de tri, mais produit toujours une note certificative (RREC : 60 réussite / 59 échec).'
+                texte: 'La dénotation s\'appuie sur des cibles et des critères explicites (grille, échelle) pour la rétroaction ; elle abandonne la fonction de tri, mais produit toujours une note certificative (RREC : 60 réussite / 59 échec).'
             },
             {
                 id: 'ciblesDenotation',
@@ -359,6 +359,14 @@ const ETAPES_WIZARD = {
                         description: 'Chaque travail est jugé acceptable ou non. La note finale dépend du nombre de spécifications réussies.'
                     },
                     {
+                        // #318 — DEN devient une famille de 1er rang. Distinctif : PAS « le jugement
+                        // professionnel » (commun à toutes les PAN — SKILL_pratiques_notation §2 bis),
+                        // mais une note finale POSÉE et non calculée ; abandon du tri, certification conservée.
+                        value: 'jugement',
+                        label: 'Note finale posée, pas calculée (PAN – Dénotation)',
+                        description: 'Tu poses la note finale certificative (RREC) selon l\'atteinte de cibles d\'apprentissage explicites, plutôt que de la calculer. La rétroaction en cours de route reste qualitative.'
+                    },
+                    {
                         value: 'pas-certain',
                         label: 'Je ne suis pas certain·e',
                         description: 'Des questions supplémentaires t\'aideront à identifier ta méthode.'
@@ -366,12 +374,13 @@ const ETAPES_WIZARD = {
                 ]
             },
             // Voie rapide (a2) : sortie expert, carte de même poids que les autres options.
-            { id: 'voie-rapide-lien', type: 'lien-action', texte: 'Je sais déjà ce que je veux', description: 'Choisis directement ta famille de pratique (SOM, STD ou SPE) et passe à sa configuration.', action: 'wizardV2VoieRapide' }
+            { id: 'voie-rapide-lien', type: 'lien-action', texte: 'Je sais déjà ce que je veux', description: 'Choisis directement ta famille de pratique (SOM, STD, SPE ou DEN) et passe à sa configuration.', action: 'wizardV2VoieRapide' }
         ],
         suivant: (reponses) => {
             if (reponses.calcNoteFinale === 'moyenne') return 'regles-sommative';
             if (reponses.calcNoteFinale === 'niveaux') return 'approche-evaluation';
             if (reponses.calcNoteFinale === 'acceptable') return 'nb-evaluations';
+            if (reponses.calcNoteFinale === 'jugement') return 'config-denotation'; // #318
             if (reponses.calcNoteFinale === 'pas-certain') return 'sous-questions-guidees';
             return null;
         },
@@ -2204,11 +2213,15 @@ function genererRecapitulatif() {
     // ─── Lien vers le banc de décision (#326, demande terrain 17 juin) ───
     // Depuis le formulaire d'une pratique, accès direct au comparateur du Labo
     // pour mettre cette pratique en regard d'autres sur des profils-types.
-    html += '<div class="wizard-v2-recap-section">';
-    html += '<h4>Comparer ce type de notation</h4>';
-    html += '<p class="wizard-v2-recap-aide">Le banc de décision du Labo met plusieurs pratiques en regard, sur des profils-types, pour voir ce que chaque réglage change sur les notes.</p>';
-    html += '<button type="button" class="btn btn-secondaire" data-action="ouvrirComparateurDepuisWizard">Ouvrir le comparateur du Labo</button>';
-    html += '</div>';
+    // #345 — masquage réversible : toute la section (titre + aide + bouton) est
+    // gated par COMPARATEUR_VISIBLE (config.js). Ne PAS laisser le titre orphelin.
+    if (typeof COMPARATEUR_VISIBLE === 'undefined' || COMPARATEUR_VISIBLE) {
+        html += '<div class="wizard-v2-recap-section">';
+        html += '<h4>Comparer ce type de notation</h4>';
+        html += '<p class="wizard-v2-recap-aide">Le banc de décision du Labo met plusieurs pratiques en regard, sur des profils-types, pour voir ce que chaque réglage change sur les notes.</p>';
+        html += '<button type="button" class="btn btn-secondaire" data-action="ouvrirComparateurDepuisWizard">Ouvrir le comparateur du Labo</button>';
+        html += '</div>';
+    }
 
     html += '</div>';
     return html;

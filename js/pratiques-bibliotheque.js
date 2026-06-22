@@ -24,6 +24,39 @@ const CLE_BIBLIOTHEQUE_PRATIQUES = 'bibliothequePratiques';
  * Ces modèles sont toujours disponibles même si la bibliothèque est vide
  */
 const MODELES_PRATIQUES_PREDEFINIS = {
+    // === PAN-DÉNOTATION (#318) ===
+    // ⚠️ Placé EN TÊTE À DESSEIN : obtenirToutesLesPratiquesBibliothequeSync fait `unshift`
+    // sur chaque gabarit → l'ordre d'affichage est INVERSÉ, donc une entrée en tête ici
+    // s'affiche EN DERNIER dans « Partir d'un modèle » (demande Grégoire : DEN en fin de liste).
+    // Gabarit « de base », volontairement GÉNÉRIQUE et LARGE (pas une discipline précise) :
+    // DEN n'est pas la pratique de Grégoire — description et paramètres s'appuient sur la
+    // théorie (Girouard-Gagné, Talbert, CoP Sherbrooke ; cf. SKILL_pratiques_notation §2 bis/§8).
+    // Mode `eliminee` (seul livré, #318). Échelle/grille OPTIONNELLES (la rétroaction peut aussi
+    // être orale/hors-app ; l'app garde au moins une trace) ; les CIBLES tiennent le rôle des
+    // critères explicites. DEN reste un chantier en soi (modes différée/réduite à venir).
+    'DEN-base': {
+        id: 'DEN-base',
+        nom: 'Modèle de base',
+        description: 'Rétroaction qualitative sur des cibles d\'apprentissage explicites ; la note finale certificative (RREC) est posée à la fin selon l\'atteinte des cibles, sans note chiffrée en cours de route.',
+        type: 'denotation',
+        auteur: 'Gabarit Labo Codex',
+        discipline: 'Général',
+        estGabarit: true,
+        pratiques: ['DEN'],
+        configuration: {
+            type: 'denotation',
+            modeDEN: 'eliminee',
+            objectifs: [
+                { id: 'cible-1', nom: 'Maîtriser les savoirs et concepts essentiels du cours' },
+                { id: 'cible-2', nom: 'Appliquer les méthodes propres à la discipline' },
+                { id: 'cible-3', nom: 'Communiquer clairement sa démarche et ses résultats' }
+            ],
+            suggestion: { methode: 'mode' },
+            echelleId: null,
+            grilleId: null
+        }
+    },
+
     // === PAN-SPÉCIFICATIONS ===
     'SPE-chimie-contrats': {
         id: 'SPE-chimie-contrats',

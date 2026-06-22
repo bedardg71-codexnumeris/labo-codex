@@ -153,7 +153,7 @@
             <div class="den-saisie" data-da="${echapper(da)}">
                 <p class="den-saisie-intro u-texte-gris">
                     Dénotation : la note finale est un <strong>jugement</strong> que tu poses, gardé par la confirmation
-                    que chaque cible est atteinte. Famille exigeante, à accompagner pédagogiquement (voir le guide PAN).
+                    que chaque cible est atteinte (voir le guide PAN).
                 </p>
 
                 ${_gardeBanniere(da, toutesAtteintes)}

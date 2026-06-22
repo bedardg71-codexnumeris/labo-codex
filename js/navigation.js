@@ -369,7 +369,14 @@ const INITIALISATEURS_SOUS_SECTION = {
 
 function afficherSousNavigation(nomOnglet) {
     const conteneurSousNav = document.getElementById('sous-navigation');
-    const configuration = configurationsOnglets[nomOnglet];
+    let configuration = configurationsOnglets[nomOnglet];
+
+    // #345 — masquage réversible du comparateur (flag COMPARATEUR_VISIBLE, config.js).
+    // On filtre une COPIE : configurationsOnglets (protégé) n'est jamais muté.
+    if (configuration && nomOnglet === 'labo'
+        && typeof COMPARATEUR_VISIBLE !== 'undefined' && !COMPARATEUR_VISIBLE) {
+        configuration = configuration.filter(item => item.id !== 'comparateur');
+    }
 
     if (!configuration || configuration.length === 0) {
         // Pas de sous-navigation pour cette section — masquer le conteneur
