@@ -393,7 +393,10 @@ async function afficherBibliothequePratiques() {
     const nbMaquettes = BibliothequeUI.filtrerParModeDemo(
         configurations.filter(p => p.dansBibliotheque !== false)
     ).filter(p => BibliothequeUI.estMaquette(p)).length;
-    if (nbMaquettes > 0) {
+    // #345 — la bannière pointe vers le comparateur (Labo) ; masquée tant que
+    // COMPARATEUR_VISIBLE est false (sinon = lien entrant vers une page masquée).
+    const comparateurVisible = (typeof COMPARATEUR_VISIBLE === 'undefined' || COMPARATEUR_VISIBLE);
+    if (nbMaquettes > 0 && comparateurVisible) {
         const motMaquette = nbMaquettes > 1 ? 'maquettes' : 'maquette';
         const banniereMaquettes = '<div style="background: var(--bleu-tres-pale, #e8f4f8); border-left: 3px solid var(--bleu-clair, #5dade2); padding: 10px 15px; margin-bottom: 20px; border-radius: 0 6px 6px 0;">' +
             '<p style="margin: 0 0 8px; font-size: 0.9rem; color: var(--texte-secondaire, #555);">' +
@@ -782,6 +785,8 @@ async function chargerPratiquePourModif(pratiqueId) {
     // ✅ FIX (10 jan 2026) : Charger le dropdown des échelles AVANT de remplir le formulaire
     // Sinon la valeur de l'échelle ne peut pas être appliquée car le dropdown est vide
     await chargerDropdownEchellesMat();
+    // #343-T1 — idem pour la grille de rétroaction DEN (section mat-config-denotation).
+    await chargerDropdownGrillesMat();
 
     // Remplir les champs du formulaire (incluant l'échelle)
     remplirFormulairePratique(pratique);
@@ -940,6 +945,18 @@ function remplirFormulairePratique(pratique) {
         afficherForfaitsMat(config.forfaits || [], config.typesTravaux || []);
     }
 
+    // #343-T1 — DEN éditable inline. Cibles (une par ligne), méthode de suggestion,
+    // grille de rétroaction. L'échelle utilise la carte commune (mat-echelle-id) plus bas.
+    if (typeCanon === 'denotation') {
+        const config = pratique.configuration || {};
+        const cibles = Array.isArray(config.objectifs)
+            ? config.objectifs.map(o => (o && o.nom) ? o.nom : o).filter(Boolean).join('\n')
+            : '';
+        setValeurChamp('mat-den-cibles', cibles);
+        setValeurChamp('mat-den-suggestion', config.suggestion?.methode || 'mode');
+        setValeurChamp('mat-den-grille', config.grilleId || '');
+    }
+
     // Échelle de performance
     if (pratique.configuration?.echelleId) {
         setValeurChamp('mat-echelle-id', pratique.configuration.echelleId);
@@ -1021,7 +1038,7 @@ function afficherConfigurationTypeMat(type) {
     const typeCanon = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(type) : type);
 
     // Cacher toutes les sections (style.display pour surcharger le style inline du HTML)
-    const sections = ['mat-config-pan-standards', 'mat-config-sommative', 'mat-config-pan-specifications', 'mat-config-defaut'];
+    const sections = ['mat-config-pan-standards', 'mat-config-sommative', 'mat-config-pan-specifications', 'mat-config-denotation', 'mat-config-defaut'];
     sections.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
@@ -1039,6 +1056,8 @@ function afficherConfigurationTypeMat(type) {
         configId = 'mat-config-sommative';
     } else if (typeCanon === 'specifications') {
         configId = 'mat-config-pan-specifications';
+    } else if (typeCanon === 'denotation') {
+        configId = 'mat-config-denotation';
     }
 
     const config = document.getElementById(configId);
@@ -1064,7 +1083,8 @@ function changerTypePratiqueMat() {
         const typeCanon = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(type) : type);
         const pratiques = typeCanon === 'standards' ? ['STD'] :
                          typeCanon === 'specifications' ? ['SPE'] :
-                         typeCanon === 'sommative' ? ['SOM'] : [];
+                         typeCanon === 'sommative' ? ['SOM'] :
+                         typeCanon === 'denotation' ? ['DEN'] : [];
         badge.innerHTML = genererBadgeTypePratique({ pratiques });
     }
 
@@ -1228,7 +1248,8 @@ async function sauvegarderConfigPratiqueMat() {
     // Mettre à jour pratiques[]
     configurations[index].pratiques = typeCanon === 'standards' ? ['STD'] :
                                       typeCanon === 'specifications' ? ['SPE'] :
-                                      typeCanon === 'sommative' ? ['SOM'] : [];
+                                      typeCanon === 'sommative' ? ['SOM'] :
+                                      typeCanon === 'denotation' ? ['DEN'] : [];
 
     // Initialiser la configuration si absente
     if (!configurations[index].configuration) {
@@ -1302,6 +1323,21 @@ async function sauvegarderConfigPratiqueMat() {
     } else if (typeCanon === 'specifications') {
         configurations[index].configuration.seuilAcceptable = parseInt(getValeurChamp('mat-spec-seuil')) || 75;
         // typesTravaux et forfaits sont gérés par leurs propres fonctions
+    } else if (typeCanon === 'denotation') {
+        // #343-T1 — DEN éditée inline. MÊME forme de config que la création assistant
+        // (creerPratiqueV2) : la note finale reste un jugement saisi ; cibles = critères
+        // explicites ; échelle/grille = rétroaction (n'entrent pas dans le calcul).
+        const cibles = String(getValeurChamp('mat-den-cibles') || '')
+            .split('\n').map(s => s.trim()).filter(Boolean)
+            .map((nom, i) => ({ id: 'cible-' + (i + 1), nom: nom }));
+        configurations[index].configuration.type = 'denotation';
+        configurations[index].configuration.modeDEN = 'eliminee';
+        configurations[index].configuration.objectifs = cibles;
+        configurations[index].configuration.suggestion = { methode: getValeurChamp('mat-den-suggestion') || 'mode' };
+        configurations[index].configuration.grilleId = getValeurChamp('mat-den-grille') || null;
+        // Le moteur DEN se déclenche sur calcul_note.methode='jugement_global' (racine,
+        // skill §8/§10) ; on le pose pour rester valide à l'édition ET à une conversion vers DEN.
+        configurations[index].calcul_note = { methode: 'jugement_global' };
     }
 
     // Échelle
@@ -1383,6 +1419,30 @@ async function chargerDropdownEchellesMat() {
     let html = '<option value="">-- Sélectionner une échelle --</option>';
     echelles.forEach(e => {
         html += `<option value="${echapperHtml(e.id)}">${echapperHtml(e.nom || 'Sans nom')}</option>`;
+    });
+
+    select.innerHTML = html;
+}
+
+/**
+ * #343-T1 — Peuple le sélecteur de grille de la section DEN (rétroaction optionnelle).
+ * Modelé sur chargerDropdownEchellesMat. Grilles depuis `grillesTemplates`.
+ */
+async function chargerDropdownGrillesMat() {
+    const select = document.getElementById('mat-den-grille');
+    if (!select) return;
+
+    let grilles = [];
+    try {
+        const toutes = await db.get('grillesTemplates') || [];
+        grilles = toutes.filter(g => g.dansBibliotheque !== false);
+    } catch (e) {
+        grilles = [];
+    }
+
+    let html = '<option value="">— Aucune —</option>';
+    grilles.forEach(g => {
+        html += `<option value="${echapperHtml(g.id)}">${echapperHtml(g.nom || 'Sans nom')}</option>`;
     });
 
     select.innerHTML = html;
@@ -2827,6 +2887,7 @@ window.validerPonderationsCategoriesMat = validerPonderationsCategoriesMat;  // 
 
 // Échelles
 window.chargerDropdownEchellesMat = chargerDropdownEchellesMat;
+window.chargerDropdownGrillesMat = chargerDropdownGrillesMat;
 window.afficherPreviewEchelleMat = afficherPreviewEchelleMat;
 window.peuplerDropdownNoteMaximaleMat = peuplerDropdownNoteMaximaleMat;
 

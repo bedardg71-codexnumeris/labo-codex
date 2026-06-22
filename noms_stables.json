@@ -8,9 +8,9 @@
       "description": "Configuration globale de la navigation + données partagées",
       "noms": [
         { "nom": "configurationsOnglets", "type": "const", "ligne": 32, "role": "Définition des sections et sous-sections de l'app (carte de la navigation)" },
-        { "nom": "sectionActive", "type": "let", "ligne": 105, "role": "Variable globale : section principale actuellement affichée" },
-        { "nom": "sousSectionActive", "type": "let", "ligne": 118, "role": "Variable globale : sous-section actuellement affichée" },
-        { "nom": "listeEtudiants", "type": "const", "ligne": 216, "role": "Liste partagée des étudiants (lue par plusieurs modules)" }
+        { "nom": "sectionActive", "type": "let", "ligne": 124, "role": "Variable globale : section principale actuellement affichée" },
+        { "nom": "sousSectionActive", "type": "let", "ligne": 137, "role": "Variable globale : sous-section actuellement affichée" },
+        { "nom": "listeEtudiants", "type": "const", "ligne": 235, "role": "Liste partagée des étudiants (lue par plusieurs modules)" }
       ]
     },
     "js/navigation.js": {
@@ -18,7 +18,7 @@
       "noms": [
         { "nom": "afficherSection", "type": "function", "ligne": 68, "role": "Change la section principale active et déclenche le rendu de sa sous-navigation" },
         { "nom": "afficherSousNavigation", "type": "function", "ligne": 370, "role": "Génère et affiche les boutons de sous-navigation pour une section" },
-        { "nom": "afficherSousSection", "type": "function", "ligne": 455, "role": "Affiche une sous-section spécifique et met à jour les boutons actifs" }
+        { "nom": "afficherSousSection", "type": "function", "ligne": 462, "role": "Affiche une sous-section spécifique et met à jour les boutons actifs" }
       ]
     },
     "js/productions.js": {

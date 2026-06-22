@@ -5687,7 +5687,8 @@
                                                 <option value="sommative">Sommative</option>
                                                 <option value="standards">PAN-Standards</option>
                                                 <option value="specifications">PAN-Spécifications</option>
-                                                <option value="denotation" disabled>PAN-Dénotation (bientôt)</option>
+                                                <!-- #343-T1 : DEN éditable inline (section mat-config-denotation) ; création via l'assistant. -->
+                                                <option value="denotation">PAN-Dénotation</option>
                                             </select>
                                         </div>
                                     </div>
@@ -6253,6 +6254,35 @@
                                             <button type="button" class="btn btn-secondaire" data-action="ajouterForfaitMat">
                                                 + Ajouter un forfait
                                             </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Configuration PAN-Dénotation (#343-T1 / #318 : édition inline) -->
+                                    <div id="mat-config-denotation" style="display: none;">
+                                        <div class="u-mb-15 u-p-12" style="background: var(--bleu-tres-pale); border-radius: 6px">
+                                            <p class="text-muted u-texte-petit" style="margin: 0; line-height: 1.5">
+                                                <strong>PAN-Dénotation</strong> : la note finale certificative est posée selon l'atteinte de cibles d'apprentissage explicites. La rétroaction (échelle/grille ci-dessus, ou orale/hors-app) reste qualitative et n'entre pas dans le calcul.
+                                            </p>
+                                        </div>
+                                        <div class="groupe-form u-mb-15">
+                                            <label for="mat-den-cibles" class="u-texte-gras" style="display: block; margin-bottom: 6px">Cibles d'apprentissage (une par ligne)</label>
+                                            <textarea id="mat-den-cibles" class="controle-form" rows="4" data-on-change="sauvegarderConfigPratiqueMat" placeholder="Une cible d'apprentissage par ligne"></textarea>
+                                        </div>
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: start;">
+                                            <div class="groupe-form">
+                                                <label for="mat-den-suggestion" class="u-texte-gras" style="display: block; margin-bottom: 6px">Méthode de suggestion</label>
+                                                <select id="mat-den-suggestion" class="controle-form" data-on-change="sauvegarderConfigPratiqueMat">
+                                                    <option value="mode">Mode</option>
+                                                    <option value="mediane">Médiane</option>
+                                                    <option value="moyenne">Moyenne</option>
+                                                </select>
+                                            </div>
+                                            <div class="groupe-form">
+                                                <label for="mat-den-grille" class="u-texte-gras" style="display: block; margin-bottom: 6px">Grille de critères (optionnelle)</label>
+                                                <select id="mat-den-grille" class="controle-form" data-on-change="sauvegarderConfigPratiqueMat">
+                                                    <option value="">— Aucune —</option>
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -14592,8 +14622,8 @@
     <script src="libs/jspdf-autotable.min.js"></script>
 
     <!-- PRIORITÉ 1: Fondations -->
-    <script src="js/config.js?v=20260512b"></script> <!-- Refonte nav SP5-fix : sous-onglet id court 'vue' (au lieu de 'calendrier') pour éviter la redondance calendrier-calendrier -->
-    <script src="js/navigation.js?v=2026050536"></script> <!-- Refonte nav SP5 : tables migrées calendrier-* + nav-calendrier-* -->
+    <script src="js/config.js?v=2026062201"></script> <!-- #345 (22 juin) : flag COMPARATEUR_VISIBLE ; Refonte nav SP5-fix : sous-onglet id court 'vue' (au lieu de 'calendrier') pour éviter la redondance calendrier-calendrier -->
+    <script src="js/navigation.js?v=2026062201"></script> <!-- #345 (22 juin) : filtre comparateur sous-nav Labo ; Refonte nav SP5 : tables migrées calendrier-* + nav-calendrier-* -->
     <script src="js/preferences.js?v=2026061101"></script> <!-- Beta 99.16 : API centralisée préférences + migration V3 (doit précéder modes.js) -->
     <script src="js/modes.js?v=2026061102"></script> <!-- Refonte nav SP5 : commentaire et clé calendrier-trimestre -->
     <script src="js/utils-notifications.js?v=20260521a"></script> <!-- Cat-B Track 4 chantier E (21 mai 2026) : source unique notifications toast — window.notifications.{succes,erreur,info} -->
@@ -14634,8 +14664,8 @@
     <script src="js/bibliotheque-ui.js?v=2026051020"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 (menu ⋮ kebab + refactor renderCarte) -->
     <script src="js/spe-specifications.js?v=2026061101"></script> <!-- Beta 95 : Module PAN-Spécifications + gabarits François -->
     <script src="js/repertoires-bibliotheque.js"></script> <!-- #320 L0 : répertoires de classement (couche par-dessus les biblios) -->
-    <script src="js/pratiques-bibliotheque.js?v=2026061113b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/pratiques-gestion.js?v=20260512b"></script> <!-- Beta 99.42 b0512-0641 : fix Safari #266 — sidebar pratiques rafraîchie après suppression/duplication -->
+    <script src="js/pratiques-bibliotheque.js?v=2026062201"></script> <!-- #318 (22 juin) : gabarit DEN « Modèle de base » ; Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
+    <script src="js/pratiques-gestion.js?v=2026062201"></script> <!-- #345 (22 juin) : bannière « Gérer mes maquettes » gatée ; Beta 99.42 b0512-0641 : fix Safari #266 — sidebar pratiques rafraîchie après suppression/duplication -->
     <script src="js/preferences-v2.js?v=2026050104"></script> <!-- Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
     <script src="js/donnees-v2.js?v=2026061113"></script> <!-- Refonte nav SP5 : afficherSection calendrier -->
     <script src="js/etudiants.js?v=2026061103"></script>
@@ -14676,7 +14706,7 @@
     <script src="js/pratiques/pratiques-predefines.js?v=2025112602"></script>
     <script src="js/pratiques/pratique-manager.js?v=2026061113"></script>
     <!-- DEN couche 2 (#318, DEN-2) : UI de saisie du jugement (profil étudiant) -->
-    <script src="js/pratiques/denotation-saisie-ui.js?v=2026060801"></script>
+    <script src="js/pratiques/denotation-saisie-ui.js?v=2026062201"></script> <!-- #343-T2 (22 juin) : retrait du jugement « famille exigeante » -->
     <!-- Exploration des pratiques (axe D, #326) — moteur pur D-0/D-1 : arbre de filiation (inspireDe.sourceId) + diff de config + mapping d'effets. Lecture seule. -->
     <script src="js/pratiques/pratiques-exploration.js?v=2026061501"></script>
 
@@ -14694,7 +14724,7 @@
 
     <!-- Interface de gestion des pratiques configurables -->
     <script src="js/pratiques.js?v=2026061113"></script> <!-- Beta 99.38 b0508-1425 : nettoyage wizard V1 fantôme (-1772 l.) -->
-    <script src="js/wizard-pratique-v2.js?v=2026061113"></script>
+    <script src="js/wizard-pratique-v2.js?v=2026062201"></script> <!-- #345 (22 juin) : lien « Ouvrir le comparateur » du récap gaté -->
     <script src="js/objectifs.js?v=2026061101"></script> <!-- Beta 99.39 b0509-0719 : #262 Phase 2 + precisionDate:minute -->
 
     <script src="js/portfolio.js?v=2026061101"></script>
