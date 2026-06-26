@@ -59,7 +59,7 @@ Justification : <1-3 phrases>
 ### 7. SAST (Static Application Security Testing)
 **Question** : le projet utilise-t-il un outil d'analyse statique de sécurité ?
 **Vérification** : présence d'une intégration ESLint security, CodeQL, ou similaire dans la CI/CD.
-**Score Labo Codex** : __/10 (peut être amélioré avec GitHub CodeQL Action)
+**Score Labo Codex** : __/10 (CodeQL retiré le 26 juin 2026 — GitHub Advanced Security indisponible sur dépôt privé gratuit ; reste l'ESLint baseline tenue par sentinelles)
 
 ### 8. Vulnerabilities
 **Question** : le projet a-t-il des vulnérabilités connues non corrigées ?
@@ -89,7 +89,7 @@ Justification : <1-3 phrases>
 ### 13. Branch-Protection
 **Question** : la branche principale est-elle protégée (pas de force-push, revue obligatoire) ?
 **Vérification** : configuration GitHub branch protection rules.
-**Score Labo Codex** : __/10 (peut être configuré sur main)
+**Score Labo Codex** : __/10 (inactive depuis la privatisation du 23 juin 2026 — exige GitHub Pro sur dépôt privé ; voir `.github/BRANCH-PROTECTION.md`)
 
 ### 14. Packaging
 **Question** : le projet a-t-il un système de packaging reconnu (npm, PyPI, etc.) ?
@@ -135,7 +135,7 @@ Justification : <1-3 phrases>
 À rédiger par Grégoire / Claude Code :
 
 - Les 0 structurels (Code-Review, Contributors, Fuzzing, Signed-Releases) reflètent la nature solo et pédagogique du projet, **pas un défaut à corriger artificiellement**.
-- Les améliorations réalistes : Security-Policy (SECURITY.md), Dependency-Update-Tool (Dependabot), CI-Tests (au moins des tests de fidélité automatisés), Branch-Protection (sur main).
+- Les améliorations réalistes : Security-Policy (SECURITY.md), Dependency-Update-Tool (Dependabot), CI-Tests (au moins des tests de fidélité automatisés). Branch-Protection et SAST/CodeQL ne sont plus réalistes gratuitement depuis la privatisation du 23 juin 2026 (exigent GitHub Pro / Advanced Security).
 - Les améliorations hors périmètre : Fuzzing, Signed-Releases, multi-contributeurs.
 
 ---

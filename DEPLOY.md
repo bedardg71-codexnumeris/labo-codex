@@ -547,21 +547,27 @@ Si le volume des accès individuels dépasse les quotas gratuits :
 | Compromission compte Netlify | Activer 2FA — *[À COMPLÉTER : statut]* |
 | Compromission compte Cloudflare | Activer 2FA — *[À COMPLÉTER : statut]* |
 | Token d'API Netlify exposé | Aucun token n'est stocké dans le repo (deploy déclenché par webhook GitHub uniquement) |
-| Push malveillant sur `main` | Pas de Branch Protection actuellement — voir Phase moyen terme [PLAN-MOYEN-TERME `audit/PLAN-MOYEN-TERME.md` §5.3](audit/PLAN-MOYEN-TERME.md) |
+| Push malveillant sur `main` | Pas de Branch Protection : inactive depuis la privatisation du 23 juin 2026 (exige GitHub Pro sur dépôt privé). Voir §8.3 et [`.github/BRANCH-PROTECTION.md`](.github/BRANCH-PROTECTION.md) |
 
 ### 8.2 Tests de sécurité automatiques
 
 Le hook pré-push lance Vitest + Playwright (97/97 verts requis). Voir
 [`docs/securite/TESTS-AUTOMATISES.md`](docs/securite/TESTS-AUTOMATISES.md).
 
-### 8.3 Branch Protection (à activer — Phase moyen terme)
+### 8.3 Branch Protection (inactive — exige GitHub Pro)
 
-Recommandation [`audit/PLAN-MOYEN-TERME.md` §5.3](audit/PLAN-MOYEN-TERME.md) :
+Configuration de référence ([`.github/BRANCH-PROTECTION.md`](.github/BRANCH-PROTECTION.md),
+[`audit/PLAN-MOYEN-TERME.md` §5.3](audit/PLAN-MOYEN-TERME.md)) :
 - Force-push interdit sur `main`
 - Historique linéaire requis
 - Status checks (CI Vitest + Playwright) requis avant merge
 
-Statut : **non activé au 22 mai 2026**. À activer post-AQPC.
+Statut : **inactive depuis la privatisation du 23 juin 2026**. Brièvement activée
+le 15 juin (#337), elle est retombée au passage en dépôt privé : l'API GitHub renvoie
+`403 — Upgrade to GitHub Pro` (la feature exige Pro sur un dépôt privé). À réappliquer
+si le dépôt redevient public ou passe à Pro — voir `.github/BRANCH-PROTECTION.md`
+(statut « suspendu »). Le check `Analyse CodeQL` a par ailleurs été retiré (`codeql.yml`
+supprimé le 26 juin).
 
 ---
 
