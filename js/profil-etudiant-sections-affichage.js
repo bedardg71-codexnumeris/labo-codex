@@ -683,7 +683,7 @@ function genererSectionMobilisationEngagement(da) {
                             const indexOriginal = _rangProduction(artefactsPortfolio.find(p => p.id === art.id));
 
                             // Récupérer les couleurs depuis l'échelle configurée
-                            const echelles = db.getSync('echellesTemplates', []);
+                            const echelles = db.getSync(cle('echellesTemplates'), []);
                             const echelleActive = echelles.find(e => e.active) || echelles[0];
 
                             // Déterminer la couleur selon la note
@@ -3188,7 +3188,7 @@ function genererSectionProgression(da) {
     const canvasId = `graphique-progression-${da}`;
 
     // ✨ AMÉLIORATION (8 déc 2025) : Lire dynamiquement l'échelle de performance configurée
-    const echelles = db.getSync('echellesTemplates', []);
+    const echelles = db.getSync(cle('echellesTemplates'), []);
     const echelleActive = echelles.find(e => e.active) || echelles[0];
 
     let texteZones = 'Zones colorées basées sur l\'échelle IDME par défaut';
@@ -3576,7 +3576,7 @@ function genererSectionCompletion(da) {
 
 
 function _obtenirNiveauxEtGradientSRPNF() {
-    const echelles = db.getSync('echellesTemplates', []);
+    const echelles = db.getSync(cle('echellesTemplates'), []);
     const echelleActive = echelles.find(e => e.active) || echelles[0];
     let niveaux = [
         { code: 'I', nom: 'Incomplet', min: 0, max: 64, couleur: 'var(--orange-accent)' },
@@ -3797,7 +3797,7 @@ function _genererTexteRegleSelectionPortfolio(portfolioActifRapport, methodeSele
 }
 
 function _genererTextePonderationCriteresActifs() {
-    const grilles = db.getSync('grillesTemplates', []);
+    const grilles = db.getSync(cle('grillesTemplates'), []);
     const grilleActive = grilles.find(g => g.active) || grilles[0];
     if (grilleActive && grilleActive.criteres) {
         const ponderations = grilleActive.criteres

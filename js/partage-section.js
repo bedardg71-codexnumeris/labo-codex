@@ -139,16 +139,42 @@
     // ------------------------------------------------------------------
 
     /**
-     * Duplique une grille partagée + ses cartouches partagées. Retourne
-     * { grille, nbCartouches }. Ne touche jamais aux clés partage_*.
+     * Lecteur des cartouches SOURCE pour la Voûte : collection PLATE
+     * partage_cartouches filtrée par grilleId. Lecteur par défaut de
+     * dupliquerGrillePartagee.
      */
-    function dupliquerGrillePartagee(grillePartagee) {
-        var copie = copiePropre(grillePartagee, 'grille');
+    function lireCartouchesPartageDe(grille) {
+        return lire(CLES_STOCKAGE.cartouche).filter(function (c) {
+            return c.grilleId === grille.id;
+        });
+    }
+
+    /**
+     * Duplique une grille (d'une SOURCE quelconque) + ses cartouches liées vers
+     * les documents de l'utilisateur. Retourne { grille, nbCartouches }.
+     *
+     * Brique C (namespacing) : la lecture des cartouches liées est INJECTÉE via
+     * lireCartouchesDe(grille), pour que la même mécanique serve deux sources aux
+     * stockages différents — la Voûte (collection plate partage_cartouches, lecteur
+     * par défaut) et un import inter-trimestre (cartouches par CLÉ cartouches_{grilleId},
+     * lues via cleSource au pas 4). La source n'est JAMAIS mutée (copiePropre fait une
+     * copie profonde). La destination reste les collections du trimestre actif (clés
+     * grillesTemplates / cartouches_{nouvelId}) — la migration des writers vers cle()
+     * relève de la Brique D, pas d'ici.
+     *
+     * Report ASSUMÉ au pas 4 (D-C4) : une cartouche copiée conserve son echelleId
+     * source (pas de remappage d'échelle ici) — verrouillé par un test-témoin.
+     *
+     * @param {Object} grilleSource - grille à copier (objet déjà résolu par le caller)
+     * @param {Function} [lireCartouchesDe] - (grille) => Array des cartouches liées ;
+     *                   défaut = lecteur Voûte (collection plate)
+     */
+    function dupliquerGrillePartagee(grilleSource, lireCartouchesDe) {
+        var copie = copiePropre(grilleSource, 'grille');
         ajouterACollection('grillesTemplates', copie);
 
-        var cartouchesLiees = lire(CLES_STOCKAGE.cartouche).filter(function (c) {
-            return c.grilleId === grillePartagee.id;
-        });
+        var lecteur = (typeof lireCartouchesDe === 'function') ? lireCartouchesDe : lireCartouchesPartageDe;
+        var cartouchesLiees = lecteur(grilleSource) || [];
         if (cartouchesLiees.length) {
             var copies = cartouchesLiees.map(function (c) {
                 var cc = copiePropre(c, 'cartouche');
@@ -177,7 +203,7 @@
         }
 
         if (type === 'grille') {
-            var resG = dupliquerGrillePartagee(item);
+            var resG = dupliquerGrillePartagee(item, lireCartouchesPartageDe);
             return {
                 idNouveau: resG.grille.id,
                 libelle: 'Grille « ' + nomDe(item) + ' » copiée dans tes documents'
@@ -196,7 +222,7 @@
                 alert('Cette cartouche est liée à une grille qui n\'est plus dans tes partagés — impossible de la dupliquer seule.');
                 return null;
             }
-            var resC = dupliquerGrillePartagee(parent);
+            var resC = dupliquerGrillePartagee(parent, lireCartouchesPartageDe);
             return {
                 idNouveau: resC.grille.id,
                 libelle: 'Grille « ' + nomDe(parent) + ' » copiée avec ses ' + resC.nbCartouches
@@ -213,7 +239,7 @@
                     if (g.id === copieP.grilleId) grilleLiee = g;
                 });
                 if (grilleLiee) {
-                    var resPG = dupliquerGrillePartagee(grilleLiee);
+                    var resPG = dupliquerGrillePartagee(grilleLiee, lireCartouchesPartageDe);
                     copieP.grilleId = resPG.grille.id;
                     complement = ' (avec sa grille' + (resPG.nbCartouches ? ' et ' + resPG.nbCartouches + ' cartouche' + (resPG.nbCartouches > 1 ? 's' : '') : '') + ')';
                 } else if (copieP.grilleId.indexOf('PARTAGE_') === 0) {
@@ -321,6 +347,11 @@
             '</p>' +
             cartes;
     };
+
+    // Exposé pour réutilisation (Brique C : l'import inter-trimestre du pas 4
+    // l'appellera avec un lecteur de cartouches par CLÉ via cleSource) et pour
+    // la sentinelle storage-pur. copiePropre reste interne tant qu'aucun caller externe.
+    partageSection.dupliquerGrillePartagee = dupliquerGrillePartagee;
 
     window.partageSection = partageSection;
 })();

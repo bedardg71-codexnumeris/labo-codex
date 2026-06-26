@@ -213,7 +213,7 @@ function chargerProductionsDansSelect() {
  * - 'grillesTemplates' : Array des grilles de critères
  */
 function chargerGrillesDansSelect() {
-    const grilles = db.getSync('grillesTemplates', []);
+    const grilles = db.getSync(cle('grillesTemplates'), []);
     const select = document.getElementById('selectGrille1');
 
     if (!select) return;
@@ -303,7 +303,7 @@ function _renderOptionsEchelles(select, echelles, echellePratique) {
 }
 
 function chargerEchellePerformance() {
-    const echelles = db.getSync('echellesTemplates', []);
+    const echelles = db.getSync(cle('echellesTemplates'), []);
     const select = document.getElementById('selectEchelle1');
     if (!select) return;
 
@@ -685,7 +685,7 @@ function chargerGrilleSelectionnee() {
     evaluationEnCours.grilleId = grilleId;
 
     // Charger les cartouches pour cette grille
-    const cartouches = db.getSync(`cartouches_${grilleId}`, []);
+    const cartouches = db.getSync(cle(`cartouches_${grilleId}`), []);
     const selectCartouche = document.getElementById('selectCartoucheEval');
 
     if (selectCartouche) {
@@ -703,7 +703,7 @@ function chargerGrilleSelectionnee() {
     const echelleId = evaluationEnCours.echelleId || document.getElementById('selectEchelle1')?.value;
     if (echelleId) {
         // Construire un map nom→niveau depuis l'ancienne grille pour matcher par nom
-        const grilles = db.getSync('grillesTemplates', []);
+        const grilles = db.getSync(cle('grillesTemplates'), []);
         const ancienneGrilleId = evaluationEnCours._ancienneGrilleId || '';
         const ancienneGrille = ancienneGrilleId ? grilles.find(g => g.id === ancienneGrilleId) : null;
         const mapNomNiveau = {};
@@ -778,12 +778,12 @@ function cartoucheSelectionnee() {
     }
 
     const grilleId = evaluationEnCours.grilleId;
-    const cartouches = db.getSync(`cartouches_${grilleId}`, []);
+    const cartouches = db.getSync(cle(`cartouches_${grilleId}`), []);
     const cartouche = cartouches.find(c => c.id === cartoucheId);
 
     if (!cartouche) return;
 
-    const grilles = db.getSync('grillesTemplates', []);
+    const grilles = db.getSync(cle('grillesTemplates'), []);
     const grille = grilles.find(g => g.id === grilleId);
 
     if (!grille) return;
@@ -809,7 +809,7 @@ function cartoucheSelectionnee() {
         }
     } else {
         // Échelle personnalisée classique
-        const echelles = db.getSync('echellesTemplates', []);
+        const echelles = db.getSync(cle('echellesTemplates'), []);
         echelleSelectionnee = echelles.find(e => e.id === echelleId);
     }
 
@@ -970,12 +970,23 @@ function cartoucheSelectionnee() {
  */
 function afficherCriteresDepuisGrille(grilleId, echelleId) {
 
-    const grilles = db.getSync('grillesTemplates', []);
+    // Le panneau « Critères » (#listeCriteresGrille1) est déplacé par JS dans la
+    // visionneuse de travaux ; il peut être absent du DOM (ex. consultation d'une
+    // éval terminale sans visionneuse déployée). Garde alignée sur le jumeau gardé
+    // _afficherCriteresDepuisEvaluation : on dégrade au lieu de planter — le fallback
+    // _appliquerFallbackGrilleManquanteModif rend alors les critères depuis l'éval. (#348)
+    const conteneur = document.getElementById('listeCriteresGrille1');
+    if (!conteneur) {
+        console.warn('⚠️ Conteneur listeCriteresGrille1 absent du DOM — critères non rendus depuis la grille (le fallback données sauvegardées prend le relais)');
+        return;
+    }
+
+    const grilles = db.getSync(cle('grillesTemplates'), []);
     const grille = grilles.find(g => g.id === grilleId);
 
     if (!grille || !grille.criteres) {
         console.error('❌ Grille introuvable ou sans critères');
-        document.getElementById('listeCriteresGrille1').innerHTML =
+        conteneur.innerHTML =
             '<p class="eval-texte-italic-gris">Grille introuvable</p>';
         return;
     }
@@ -991,7 +1002,7 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
             niveauxDisponibles = pratiqueData.config.echelle.niveaux;
         }
     } else {
-        const echelles = db.getSync('echellesTemplates', []);
+        const echelles = db.getSync(cle('echellesTemplates'), []);
         const echelle = echelles.find(e => e.id === echelleId);
         if (echelle?.niveaux) {
             niveauxDisponibles = echelle.niveaux;
@@ -1071,7 +1082,7 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
 `;
     }).join('');
 
-    document.getElementById('listeCriteresGrille1').innerHTML = html;
+    conteneur.innerHTML = html;
 }
 
 /* ===============================
@@ -1120,7 +1131,7 @@ function niveauSelectionne(critereId) {
     // Afficher le commentaire correspondant
     if (niveau && evaluationEnCours.cartoucheId) {
         const grilleId = evaluationEnCours.grilleId;
-        const cartouches = db.getSync(`cartouches_${grilleId}`, []);
+        const cartouches = db.getSync(cle(`cartouches_${grilleId}`), []);
         const cartouche = cartouches.find(c => c.id === evaluationEnCours.cartoucheId);
 
         if (cartouche) {
@@ -1319,7 +1330,7 @@ function _autoSauvegarderCriteres(snapshot) {
     if (!Object.values(ec.criteres || {}).some(function(v) { return v; })) return;
 
     // Collecter les criteres
-    const grilles = db.getSync('grillesTemplates', []);
+    const grilles = db.getSync(cle('grillesTemplates'), []);
     const grille = grilles.find(function(g) { return g.id === ec.grilleId; });
     if (!grille || !grille.criteres) return;
 
@@ -1335,6 +1346,12 @@ function _autoSauvegarderCriteres(snapshot) {
     });
 
     if (idx !== -1) {
+        // GARDE (Phase 0 A25, juin 2026) : ne JAMAIS réécrire une évaluation
+        // VERROUILLÉE par auto-save silencieux. Le verrouillage = lecture seule ;
+        // toute modification passe par un déverrouillage explicite. Protège les
+        // notes archivées d'un recalcul accidentel déclenché par une interaction
+        // sur un formulaire mal désactivé (angle mort terminale #348 ; risque #350).
+        if (evaluations[idx].verrouillee === true) return;
         _majEvaluationExistanteAutoSave(evaluations[idx], ec, criteres);
     } else {
         // Creer une nouvelle evaluation (brouillon non verrouille)
@@ -1372,5 +1389,9 @@ window.afficherCriteresDepuisGrille = afficherCriteresDepuisGrille;
 // Chantier F Cat-B (21 mai 2026) — API découplage travaux-ui ↔ evaluationEnCours.
 // Seul appelant cross-module autorisé à écrire le pivot. Sentinelle Vitest associée.
 window.demarrerEvaluationDepuisFichier = demarrerEvaluationDepuisFichier;
+
+// Exposé pour la sentinelle auto-save ↔ verrouillage (Phase 0 A25, juin 2026) :
+// vérifie que l'auto-save ne réécrit JAMAIS une évaluation verrouillée.
+window._autoSauvegarderCriteres = _autoSauvegarderCriteres;
 
 })();

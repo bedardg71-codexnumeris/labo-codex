@@ -241,7 +241,7 @@ function genererRetroaction(num) {
     }
 
     const grilleId = evaluationEnCours.grilleId;
-    const cartouches = db.getSync(`cartouches_${grilleId}`, []);
+    const cartouches = db.getSync(cle(`cartouches_${grilleId}`), []);
     const cartouche = cartouches.find(c => c.id === evaluationEnCours.cartoucheId);
 
     if (!cartouche) return;
@@ -260,7 +260,7 @@ function genererRetroaction(num) {
 
     // Commentaires des critères
     texte += 'Voici quelques observations :\n\n';
-    const grilles = db.getSync('grillesTemplates', []);
+    const grilles = db.getSync(cle('grillesTemplates'), []);
     const grille = grilles.find(g => g.id === grilleId);
     const critereActifId = evaluationEnCours._dernierCritereModifie || null;
     const { texte: texteCriteres, positionCritereActif } = _rendreCommentairesCriteres(grille, cartouche, critereActifId, texte);
@@ -503,7 +503,7 @@ function _chargerHistoriqueBilan(da) {
 
 function _chargerGrilleDefBilan(grilleId) {
     try {
-        var grilles = db.getSync('grillesTemplates', []);
+        var grilles = db.getSync(cle('grillesTemplates'), []);
         return grilles.find(function(g) { return g.id === grilleId; }) || null;
     } catch(e) {
         console.warn('[Evaluation] grille lookup skipped:', e.message || e);

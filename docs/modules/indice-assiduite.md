@@ -54,7 +54,7 @@ Orchestrateur. Calcule A pour chaque etudiant actif et sauvegarde :
 // Cle : cle('indicesAssiduite')
 {
   sommatif: {
-    "9000145": { indice, periodesPresentes, periodesOffertes, nombreSeances }
+    "[DA-retiré]": { indice, periodesPresentes, periodesOffertes, nombreSeances }
   },
   dateCalcul: "2026-03-03T..."
 }

@@ -25,7 +25,7 @@ En analysant les vraies données de l'utilisateur, formats identifiés :
 **Présences** (clé: `presences`) :
 ```json
 [
-  {"date": "2025-08-25", "da": "9000260", "heures": 2, "notes": ""}
+  {"date": "2025-08-25", "da": "[DA-retiré]", "heures": 2, "notes": ""}
 ]
 ```
 
@@ -34,7 +34,7 @@ En analysant les vraies données de l'utilisateur, formats identifiés :
 [
   {
     "id": "EVAL_xxx",
-    "etudiantDA": "9000155",
+    "etudiantDA": "[DA-retiré]",
     "etudiantNom": "Nom Prénom",
     "groupe": "01",
     "productionId": "A1",
@@ -62,11 +62,11 @@ En analysant les vraies données de l'utilisateur, formats identifiés :
 ```
 
 ### 4. Profils étudiants créés
-- **Excellentes** : Léa (93%), Juliette (88%)
-- **Bonnes** : Émilie, Camille, Rosalie (80-82%, progression)
-- **Solides** : Gabriel (77%), Samuel (75%)
-- **Amélioration** : Alexandre (70%), Thomas (60%)
-- **Fragile** : Antoine (68%, A3 non remis, absences)
+- **Excellentes** : Élève-041 (93%), Élève-034 (88%)
+- **Bonnes** : Élève-039, Élève-035, Élève-036 (80-82%, progression)
+- **Solides** : Élève-037 (77%), Élève-025 (75%)
+- **Amélioration** : Élève-033 (70%), Élève-040 (60%)
+- **Fragile** : Élève-038 (68%, A3 non remis, absences)
 
 ## ⚠️ Problèmes identifiés
 

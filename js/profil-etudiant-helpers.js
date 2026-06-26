@@ -144,7 +144,7 @@ function obtenirCouleurNiveauIDME(codeNiveau) {
     if (!codeNiveau) return '#999999';
 
     // Lire l'échelle IDME par défaut (première échelle trouvée)
-    const echelles = db.getSync('echellesTemplates', []);
+    const echelles = db.getSync(cle('echellesTemplates'), []);
     const echelleIDME = echelles.find(e => e.nom && e.nom.toLowerCase().includes('idme')) || echelles[0];
 
     if (!echelleIDME || !echelleIDME.niveaux) {
@@ -257,7 +257,7 @@ function obtenirGrilleReferenceDepistage() {
     }
 
     // Lire toutes les grilles
-    const grilles = db.getSync('grillesTemplates', []);
+    const grilles = db.getSync(cle('grillesTemplates'), []);
     const grille = grilles.find(g => g.id === grilleId);
 
     if (!grille) {

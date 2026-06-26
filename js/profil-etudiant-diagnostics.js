@@ -393,7 +393,7 @@ function genererDiagnosticGenerique(da, defisInfo) {
 function _genererBarresSRPNF(da) {
 
     // Récupérer les couleurs depuis l'échelle configurée
-    const echelles = db.getSync('echellesTemplates', []);
+    const echelles = db.getSync(cle('echellesTemplates'), []);
     const echelleActive = echelles.find(e => e.active) || echelles[0];
 
     let niveaux = [

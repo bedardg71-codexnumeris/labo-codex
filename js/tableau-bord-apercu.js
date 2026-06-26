@@ -689,7 +689,7 @@ function calculerDistributionPerformance(etudiants) {
 
     // Lire l'échelle de performance active depuis localStorage
     // Essayer d'abord echellesTemplates (utilisé par echelles.js), puis echellesPerformance (fallback)
-    let echelles = db.getSync('echellesTemplates', []);
+    let echelles = db.getSync(cle('echellesTemplates'), []);
     let echelleId = db.getSync('echellePerformanceActive', 'idme-5niv');
 
 
@@ -1727,7 +1727,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
 
             if (raiActive) {
                 // Interprétation pédagogique avancée avec patterns
-                const echelles = db.getSync('echellesTemplates', []);
+                const echelles = db.getSync(cle('echellesTemplates'), []);
                 const echelleId = db.getSync('echellePerformanceActive', 'idme-5niv');
                 let echelle = echelles.find(e => e.id === echelleId);
                 if (!echelle) {
