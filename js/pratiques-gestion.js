@@ -425,6 +425,29 @@ async function afficherBibliothequePratiques() {
         </div>
     `;
 
+    // Section import inter-trimestre (Brique C namespacing — pas 5, modèle COPIE).
+    // DIVERGENCE vs grilles : pratiquesConfigurables est NAMESPACÉE par trimestre, donc
+    // listerTrimestresAvecPratiques() liste TOUS les trimestres ≠ actif ayant des pratiques
+    // (pas seulement les archivés à copie propre comme les grilles). Destination = trimestre
+    // ACTIF. Garde D-C7 (cible jamais archivée) incluse dans le listing.
+    let sectionImportTrimestre = '';
+    const trimestresAvecPratiques = (typeof listerTrimestresAvecPratiques === 'function') ? listerTrimestresAvecPratiques() : [];
+    if (trimestresAvecPratiques.length > 0) {
+        sectionImportTrimestre = `
+            <div style="margin-top: 20px; padding: 15px; background: var(--gris-tres-pale); border-radius: 6px; border: 1px solid var(--bordure-claire);">
+                <h4 style="color: var(--accent-primaire); font-size: 1rem; margin: 0 0 10px 0;">Importer depuis un autre trimestre</h4>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <select id="selectTrimestreImportPratiques" class="controle-form" style="flex: 1; min-width: 200px;">
+                        <option value="">-- Choisir un trimestre --</option>
+                        ${trimestresAvecPratiques.map(t => `<option value="${echapperHtml(t.id)}">${echapperHtml(t.nom)} (${t.nombre} pratique${t.nombre > 1 ? 's' : ''})</option>`).join('')}
+                    </select>
+                    <button data-action="afficherPratiquesTrimestreModal" class="btn btn-secondaire btn-compact">Voir les pratiques</button>
+                    <button data-action="importerToutPratiquesTrimestreModal" class="btn btn-principal btn-compact">Tout importer</button>
+                </div>
+                <div id="previewPratiquesTrimestre" class="u-hide" style="margin-top: 10px;"></div>
+            </div>`;
+    }
+
     // #320 — répertoires de classement (lus une fois : filtre L3 + groupage L2)
     const repsPratiques = (window.repertoiresBibliotheque && typeof window.repertoiresBibliotheque.obtenir === 'function')
         ? window.repertoiresBibliotheque.obtenir('pratiques')
@@ -517,6 +540,7 @@ async function afficherBibliothequePratiques() {
         contenuIdListe1: 'listePratiquesDansBibliotheque',
         contenuSection1: contenuSection1,
         boutonsApresSection1: boutonsApresSection1,
+        sectionImportTrimestre: sectionImportTrimestre,
         titreSection2: 'Pratiques disponibles à ajouter à la barre latérale',
         filtresSection2: filtresHTML,
         contenuIdListe2: 'listePratiquesDisponibles',
@@ -530,6 +554,224 @@ async function afficherBibliothequePratiques() {
  */
 function fermerModalBibliothequePratiques() {
     BibliothequeUI.fermerModal('modalBibliothequePratiques');
+}
+
+/* ===================================================================
+   IMPORT INTER-TRIMESTRE DE PRATIQUES (Brique C namespacing — pas 5)
+   Modèle COPIE : une pratique d'un trimestre source est DUPLIQUÉE dans le
+   trimestre actif (id neuf + trace inspireDe), la source n'est JAMAIS mutée.
+   DIVERGENCE vs grilles (pas 4) : pratiquesConfigurables ∈ CLES_NAMESPACEES →
+   cleSource('pratiquesConfigurables', srcId) rend TOUJOURS <srcId>_pratiquesConfigurables
+   (jamais la clé globale nue), donc TOUS les trimestres ≠ actif sont des sources
+   (pas seulement les archivés). Cadrage C/D §2.5.
+   Dépendances (option A, décision Grégoire 26 juin) : echelleId/grilleId de la
+   pratique importée NE sont PAS remappés ; s'ils ne résolvent pas dans le
+   trimestre actif, on AVERTIT (re-sélection manuelle), pas de copie transitive.
+   =================================================================== */
+
+/**
+ * Liste les trimestres ≠ actif qui possèdent des pratiques configurées.
+ * pratiquesConfigurables étant namespacée, cleSource rend toujours la clé propre du
+ * trimestre source — il n'y a donc PAS de filtre « copie propre » comme pour les grilles.
+ * Garde D-C7 : la cible d'un import n'est jamais un trimestre archivé (consultation =
+ * lecture seule, cohérence avec la garde anti-écriture en archive de la Brique B).
+ * @returns {Array<{id:string, nom:string, nombre:number}>}
+ */
+function listerTrimestresAvecPratiques() {
+    if (typeof obtenirTrimestres !== 'function' || typeof cleSource !== 'function') return [];
+    if (window.estTrimestreArchive && window.estTrimestreArchive()) return [];
+    const actif = (typeof obtenirTrimestreId === 'function') ? obtenirTrimestreId() : (window.trimestreActif || '');
+    const resultat = [];
+    (obtenirTrimestres() || []).forEach(t => {
+        if (!t || !t.id || t.id === actif) return;
+        const pratiques = (db.getSync(cleSource('pratiquesConfigurables', t.id), []) || [])
+            .filter(p => p && p.dansBibliotheque !== false);
+        if (pratiques.length > 0) {
+            resultat.push({ id: t.id, nom: t.nom || t.id, nombre: pratiques.length });
+        }
+    });
+    resultat.sort((a, b) => String(b.id).localeCompare(String(a.id)));
+    return resultat;
+}
+
+/**
+ * Vérifie si les dépendances (échelle, grille de rétroaction DEN) d'une pratique
+ * EXISTENT dans le trimestre actif. Lecture du catalogue actif par la clé GLOBALE NUE
+ * ('echellesTemplates'/'grillesTemplates'), comme les dropdowns de l'éditeur de pratique
+ * (chargerDropdownEchellesMat / chargerDropdownGrillesMat) — PAS cle(), qui ne préfixe
+ * ces collections globales que hors de notre cas (actif archivé).
+ * @param {Object} pratique
+ * @returns {Array<string>} libellés des dépendances absentes (vide si tout résout)
+ */
+function verifierDependancesPratique(pratique) {
+    const manquantes = [];
+    const conf = (pratique && pratique.configuration) ? pratique.configuration : {};
+    // « Existe » doit signifier « RE-SÉLECTIONNABLE » : les dropdowns de l'éditeur
+    // (chargerDropdownEchellesMat / chargerDropdownGrillesMat) n'offrent que les
+    // items dansBibliotheque !== false. On filtre pareil pour que l'avertissement
+    // (option A) ne rate pas le cas « présente mais retirée de la barre latérale ».
+    if (conf.echelleId) {
+        const echelles = (db.getSync('echellesTemplates', []) || []).filter(e => e && e.dansBibliotheque !== false);
+        if (!echelles.some(e => e.id === conf.echelleId)) manquantes.push('échelle');
+    }
+    if (conf.grilleId) {
+        const grilles = (db.getSync('grillesTemplates', []) || []).filter(g => g && g.dansBibliotheque !== false);
+        if (!grilles.some(g => g.id === conf.grilleId)) manquantes.push('grille de rétroaction');
+    }
+    return manquantes;
+}
+
+/**
+ * Copie une pratique d'un trimestre source vers le trimestre ACTIF.
+ * La trace de provenance (inspireDe / inspireDeTrimestre) est posée sur une COPIE —
+ * la pratique source en mémoire et en stockage n'est jamais mutée. Id neuf, métadonnées
+ * de partage retirées (comme dupliquerPratiqueBibliotheque). echelleId/grilleId NON
+ * remappés (option A) ; les dépendances manquantes sont retournées pour avertissement.
+ * @param {Object} pratiqueSource - pratique telle que lue dans le trimestre source
+ * @param {string} srcId - id du trimestre source (ex. 'a2025')
+ * @returns {{pratique:Object, depsManquantes:Array<string>}}
+ */
+function copierPratiqueDepuisTrimestre(pratiqueSource, srcId) {
+    // Copie PROFONDE : aucune référence partagée avec la source (sous-objets
+    // configuration / jetons / objectifs). Garantit STRUCTURELLEMENT l'invariant
+    // §5.5 « source immuable » — pas seulement par la sérialisation de la
+    // persistance. Une pratique est full-JSON (issue de localStorage) → round-trip
+    // sans perte. Verrouillé par un break-test d'indépendance dans la sentinelle.
+    const nouvellePratique = JSON.parse(JSON.stringify(pratiqueSource));
+    nouvellePratique.id = genererIdUnique('pratique_');
+    nouvellePratique.nom = `${pratiqueSource.nom || 'Pratique'} (importée)`;
+    nouvellePratique.auteur = BibliothequeUI.obtenirAuteurActif();
+    nouvellePratique.isDemo = false;
+    // Trace de provenance : objet inspireDe structuré (schéma CC transversal lu par
+    // formaterInspireDe / cc-license) + trimestre source (ajout Brique C). NB : une
+    // STRING brute afficherait « Inspiré de Inconnu par Inconnu » sur la carte.
+    nouvellePratique.inspireDe = BibliothequeUI.forgerInspireDe(pratiqueSource);
+    nouvellePratique.inspireDeTrimestre = srcId;
+    nouvellePratique.dansBibliotheque = true;
+    nouvellePratique.dateCreation = new Date().toISOString();
+    delete nouvellePratique.metadata_cc;
+    delete nouvellePratique.auteurOriginal;
+    delete nouvellePratique.estGabarit;
+
+    const configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    configurations.push(nouvellePratique);
+    db.setSync(cle('pratiquesConfigurables'), configurations);
+
+    return { pratique: nouvellePratique, depsManquantes: verifierDependancesPratique(nouvellePratique) };
+}
+
+/**
+ * Bouton « Voir les pratiques » : affiche, sous le sélecteur, la liste des pratiques du
+ * trimestre choisi avec un bouton « Importer » par ligne.
+ */
+function afficherPratiquesTrimestreModal() {
+    const select = document.getElementById('selectTrimestreImportPratiques');
+    const preview = document.getElementById('previewPratiquesTrimestre');
+    if (!select || !preview) return;
+
+    const srcId = select.value;
+    if (!srcId) { preview.classList.add('u-hide'); return; }
+
+    const pratiques = (db.getSync(cleSource('pratiquesConfigurables', srcId), []) || [])
+        .filter(p => p && p.dansBibliotheque !== false);
+    if (pratiques.length === 0) {
+        preview.innerHTML = '<p style="color: var(--gris-clair); font-style: italic;">Aucune pratique trouvée.</p>';
+        preview.classList.remove('u-hide');
+        return;
+    }
+
+    let html = '<div style="max-height: 200px; overflow-y: auto; border: 1px solid var(--bordure-claire); border-radius: 4px; padding: 10px;">';
+    pratiques.forEach(pratique => {
+        const desc = pratique.description ? `<br><small style="color: var(--gris-moyen);">${echapperHtml(pratique.description)}</small>` : '';
+        html += `
+            <div style="padding: 8px; border-bottom: 1px solid var(--bordure-claire); display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong>${echapperHtml(pratique.nom || 'Sans titre')}</strong>${desc}
+                </div>
+                <button data-action="importerUnePratiqueTrimestre" data-param="${echapperHtml(srcId)}" data-param2="${echapperHtml(pratique.id)}" class="btn btn-confirmer btn-tres-compact">
+                    Importer
+                </button>
+            </div>
+        `;
+    });
+    html += '</div>';
+
+    preview.innerHTML = html;
+    preview.classList.remove('u-hide');
+}
+
+/**
+ * Bouton « Importer » d'une ligne d'aperçu : copie une seule pratique du trimestre source.
+ * @param {string} srcId - id du trimestre source
+ * @param {string} pratiqueId - id de la pratique dans le trimestre source
+ */
+async function importerUnePratiqueTrimestre(srcId, pratiqueId) {
+    if (window.estTrimestreArchive && window.estTrimestreArchive()) {
+        alert('Import impossible : le trimestre actif est archivé (consultation). Active un trimestre courant pour importer des pratiques.');
+        return;
+    }
+    const pratiques = (db.getSync(cleSource('pratiquesConfigurables', srcId), []) || [])
+        .filter(p => p && p.dansBibliotheque !== false);
+    const pratique = pratiques.find(p => p.id === pratiqueId);
+    if (!pratique) { alert('Pratique introuvable.'); return; }
+
+    const res = copierPratiqueDepuisTrimestre(pratique, srcId);
+
+    fermerModalBibliothequePratiques();
+    await afficherListePratiquesMateriel();
+    await afficherBibliothequePratiques();
+
+    let msg = `« ${pratique.nom || 'Pratique'} » importée dans ce trimestre.`;
+    if (res.depsManquantes.length > 0) {
+        msg += `\n\nÀ re-sélectionner à l'édition (absent de ce trimestre) : ${res.depsManquantes.join(', ')}.`;
+    }
+    alert(msg);
+}
+
+/**
+ * Bouton « Tout importer » : copie toutes les pratiques du trimestre sélectionné dans
+ * le trimestre actif.
+ */
+async function importerToutPratiquesTrimestreModal() {
+    if (window.estTrimestreArchive && window.estTrimestreArchive()) {
+        alert('Import impossible : le trimestre actif est archivé (consultation). Active un trimestre courant pour importer des pratiques.');
+        return;
+    }
+    const select = document.getElementById('selectTrimestreImportPratiques');
+    if (!select || !select.value) { alert('Sélectionne d\'abord un trimestre.'); return; }
+
+    const srcId = select.value;
+    const trimestres = (typeof obtenirTrimestres === 'function') ? (obtenirTrimestres() || []) : [];
+    const trimSrc = trimestres.find(t => t && t.id === srcId);
+    const nomTrim = (trimSrc && trimSrc.nom) ? trimSrc.nom : srcId;
+
+    const pratiques = (db.getSync(cleSource('pratiquesConfigurables', srcId), []) || [])
+        .filter(p => p && p.dansBibliotheque !== false);
+    if (pratiques.length === 0) { alert('Aucune pratique à importer dans ce trimestre.'); return; }
+
+    const confirmation = confirm(
+        `Veux-tu importer les ${pratiques.length} pratique(s) de ${nomTrim} dans ce trimestre ?\n\n` +
+        'Chaque pratique est COPIÉE (l\'original du trimestre source reste intact).'
+    );
+    if (!confirmation) return;
+
+    let nb = 0;
+    const depsGlobales = new Set();
+    for (const pratique of pratiques) {
+        const res = copierPratiqueDepuisTrimestre(pratique, srcId);
+        nb++;
+        res.depsManquantes.forEach(d => depsGlobales.add(d));
+    }
+
+    fermerModalBibliothequePratiques();
+    await afficherListePratiquesMateriel();
+    await afficherBibliothequePratiques();
+
+    let msg = `Import terminé.\n\n${nb} pratique(s) copiée(s).`;
+    if (depsGlobales.size > 0) {
+        msg += `\n\nCertaines pratiques référencent des éléments absents de ce trimestre (${[...depsGlobales].join(', ')}) — à re-sélectionner à l'édition.`;
+    }
+    alert(msg);
 }
 
 /**
@@ -2923,6 +3165,12 @@ window.mettreAJourDisciplinePratique = mettreAJourDisciplinePratique;
 
 // Fonctions bibliothèque (manquantes avant Phase 5)
 window.dupliquerPratiqueBibliotheque = dupliquerPratiqueBibliotheque;
+// Brique C namespacing pas 5 — import inter-trimestre de pratiques (modèle COPIE).
+window.listerTrimestresAvecPratiques = listerTrimestresAvecPratiques;
+window.afficherPratiquesTrimestreModal = afficherPratiquesTrimestreModal;
+window.importerUnePratiqueTrimestre = importerUnePratiqueTrimestre;
+window.importerToutPratiquesTrimestreModal = importerToutPratiquesTrimestreModal;
+window.copierPratiqueDepuisTrimestre = copierPratiqueDepuisTrimestre;
 window.supprimerPratiqueDefinitivement = supprimerPratiqueDefinitivement;
 window.supprimerPratiqueDeBibliothequePartagee = supprimerPratiqueDeBibliothequePartagee;
 
