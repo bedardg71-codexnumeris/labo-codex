@@ -94,11 +94,64 @@ trimestre actif : duplicata avec id neuf + trace `inspireDe`, source jamais mut�
 
 ### 2.4 Ordre + filet
 1. ✓ Trancher D-C1 ⇄ D-D1 (hybride, 26 juin). 2. ✓ `cleSource` + test de routage (commit `b6ea9443`, 5 cas, break-testée).
-3. ✓ Généraliser `dupliquerGrillePartagee` — lecteur de cartouches injecté ; `copiePropre` laissée intacte (déjà source-agnostique) (commit `db16227f`, sentinelle 11 cas, break-testée). **4. ← PROCHAIN : Import grilles dans la modale** (UI + Playwright ; patron `productions-bibliotheque-ui.js` / `echelles-bibliotheque.js` ; câbler sur `window.partageSection.dupliquerGrillePartagee(grilleSource, lecteurParCle)` + `cleSource`). 5. Import pratiques (modale à créer).
+3. ✓ Généraliser `dupliquerGrillePartagee` — lecteur de cartouches injecté ; `copiePropre` laissée intacte (déjà source-agnostique) (commit `db16227f`, sentinelle 11 cas, break-testée). **4. ✓ Import grilles dans la modale** (commit `82fd4e9f` : `listerTrimestresAvecGrilles`/`copierGrilleDepuisTrimestre`/`afficherGrillesTrimestreModal`/`importerToutGrillesTrimestreModal` + garde D-C7 + fix preview ; sentinelle `import-grilles-inter-trimestre-briqueC`, 4 cas ; validé terrain A25→H26). **5. ✓ Import pratiques (LIVRÉ sur branche `claude/brique-C-pas5-import-pratiques`)** — voir §2.5.
 - **Filet** : test « source intacte byte-à-byte après copie » (break-test : forcer une réécriture de la source doit ROUGIR) — ✓ livré dans `sentinelle-duplication-source-briqueC` ; L2 VERT (id neuf) ; L0 VERT (aucune note touchée).
 - **Report assumé D-C4** (pas 4) : `echelleId` d'une copie n'est pas remappé au pas 3, verrouillé par un test-témoin qui RUGIRA au pas 4 (= signal attendu, mettre à jour le témoin). NB vérifié au code : `grille.echelleId` n'est PAS un champ racine général (1 seule occurrence, la grille générique `grilles.js:1538` ; `dupliquerGrille` ne le construit pas) — le lien grille↔échelle passe par la **production** (grilleId + echelleId séparés) et par `cartouche.echelleId` (optionnel). D-C4 plus léger que craint pour le chemin grille+cartouches ; à statuer au pas 4.
 
 **Effort M / risque MOYEN** (patron existant ; danger = remappage incomplet des dépendances).
+
+### 2.5 Pas 5 — Import pratiques (✓ LIVRÉ 26 juin 2026 sur branche `claude/brique-C-pas5-import-pratiques`)
+
+> **Statut : LIVRÉ** (commit `2e2aaf95`). `js/pratiques-gestion.js` : `listerTrimestresAvecPratiques`,
+> `verifierDependancesPratique`, `copierPratiqueDepuisTrimestre`, `afficherPratiquesTrimestreModal`,
+> `importerUnePratiqueTrimestre`, `importerToutPratiquesTrimestreModal` + section UI. Sentinelle
+> `import-pratiques-inter-trimestre-briqueC.spec.js` (6 cas, 9 break-tests rouges→verts). Revue
+> adverse (3 angles) passée. **Corrections issues de la revue** : `inspireDe` = objet `forgerInspireDe`
+> (et non chaîne brute, sinon carte « Inspiré de Inconnu ») ; copie PROFONDE (JSON round-trip) pour
+> garantir §5.5 ; `verifierDependancesPratique` filtre `dansBibliotheque` (aligné sur les dropdowns).
+> 973 Vitest + 67 Playwright verts. **Pas de bump** (patch au merge sur main, après validation terrain).
+> Dette flaguée hors périmètre : même défaut `inspireDe` au pas 4 (grilles) ; `dupliquerPratiqueBibliotheque`
+> à durcir (deep-clone) ; `workers: 1` manquant dans `playwright.config`.
+
+Cadrage initial (conservé pour référence) :
+
+**Divergence-clé avec le pas 4 (le piège du relai)** : `pratiquesConfigurables` ∈ `CLES_NAMESPACEES`
+(trimestres.js:95) — chaque trimestre (actif **ou** archivé) a sa copie `<id>_pratiquesConfigurables`.
+Donc `cleSource('pratiquesConfigurables', srcId)` rend **toujours** `<srcId>_pratiquesConfigurables`
+(jamais la clé nue). La logique « source = trimestre archivé » du pas 4 (filtre « copie propre »)
+**ne s'applique pas** : toute pratique d'un trimestre ≠ actif est une source valide.
+
+**Décisions (déduites du régime des clés — pas de choix à reposer)** :
+- **Source** = `cleSource('pratiquesConfigurables', srcId)`. **PAS** `bibliothequePratiques` (clé
+  globale partagée = catalogue commun, déjà accessible → rien à importer d'elle).
+- **Destination** = `cle('pratiquesConfigurables')` du trimestre actif (D-C1/D-D1 hybride).
+- **Mécanique** = paramétrer `dupliquerPratiqueBibliotheque` (pratiques-gestion.js:710) par la source :
+  lire `cleSource(...)` au lieu de `cle(...)`, id neuf via `genererIdUnique('pratique_')`,
+  `inspireDe` + `inspireDeTrimestre`, source jamais mutée. Patron identique aux pas 3/4.
+- **`listerTrimestresAvecPratiques`** = tous les trimestres ≠ actif ayant `length>0` (PAS le filtre
+  « copie propre » du pas 4).
+- **Garde D-C7 conservée mais RE-JUSTIFIÉE** : ici la destination `cle('pratiquesConfigurables')`
+  route correctement même quand l'actif est archivé (sa copie d'archive existe) — la garde ne tient
+  donc PAS par un risque de mauvais routage (contrairement aux grilles) mais par l'invariant
+  **« consultation = lecture seule »** (cohérence avec la garde anti-écriture en archive de la Brique B).
+- **Productions hors périmètre** : une pratique ne porte aucun `productionId` (✓ vérifié) — le lien
+  production↔pratique est porté par la production. Cohérent D-C5.
+
+**Décision Grégoire (26 juin) — dépendances `echelleId`/`grilleId` de la pratique importée** :
+une pratique référence une échelle (`configuration.echelleId`) et, en mode DEN, une grille
+(`configuration.grilleId`). Cas réel A25(archivé)→H26 : ces ids vivent dans `a2025_echellesTemplates`/
+`a2025_grillesTemplates`, absents du catalogue global de H26 → refs non résolues.
+→ **Option A retenue : « pratique seule + avertir »**. Copier la mécanique de la pratique en gardant
+`echelleId`/`grilleId` tels quels ; si non résolus dans le trimestre actif, **avertir** l'enseignant
+(« échelle/grille à re-sélectionner »). Pas de copie transitive ni de remappage en v1 (zéro-dette ;
+une pratique = mécanique réutilisable, l'échelle est rattachée localement). Copie transitive (option B)
+reportée tant que le terrain ne la réclame pas.
+
+**Filet (à livrer avec le pas 5)** : sentinelle `import-pratiques-inter-trimestre-briqueC` —
+(1) listing rend tous les trimestres ≠ actif avec pratiques ; (2) garde D-C7 (actif archivé → []
++ refus dans les importeurs) ; (3) copie = id neuf + `inspireDe`/`inspireDeTrimestre`, **source intacte
+byte-à-byte** (break-test : réécrire la source doit ROUGIR) ; (4) avertissement si `echelleId`/`grilleId`
+non résolu dans l'actif. Patron de test = `import-grilles-inter-trimestre-briqueC.spec.js`.
 
 ---
 

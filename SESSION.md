@@ -1,5 +1,70 @@
 <!-- =====================================================================
-     ⮕ ACTION DEMANDÉE PAR GRÉGOIRE — PUBLIER SUR MAIN (déléguée à Claude Code, 26 juin 2026, via Cowork).
+     SESSION PHASE 2 — BRIQUE C PAS 5 LIVRÉ (import pratiques) — 26 juin 2026 PM (Claude Code local).
+     ⮕ RELAI VERS LA VALIDATION TERRAIN + PUBLICATION — lire ce bloc en premier à la reprise.
+
+     LIVRÉ (commit 2e2aaf95 sur branche claude/brique-C-pas5-import-pratiques, à POUSSER) :
+       js/pratiques-gestion.js — import inter-trimestre de pratiques (modèle COPIE, option A) :
+       • Section « Importer depuis un autre trimestre » dans afficherBibliothequePratiques
+         (slot sectionImportTrimestre déjà câblé dans BibliothequeUI.creerModal — juste passé).
+       • listerTrimestresAvecPratiques : DIVERGENCE vs pas 4 confirmée au code — pratiquesConfigurables
+         ∈ CLES_NAMESPACEES → cleSource rend toujours <id>_pratiquesConfigurables → TOUS les trimestres
+         ≠ actif sont sources (vivants inclus), PAS le filtre « copie propre » des grilles. Garde D-C7.
+       • copierPratiqueDepuisTrimestre : copie PROFONDE (JSON round-trip, invariant §5.5), id neuf,
+         inspireDe = forgerInspireDe (OBJET CC) + inspireDeTrimestre, destination = cle('pratiquesConfigurables').
+       • Option A : echelleId/grilleId NON remappés ; verifierDependancesPratique avertit si absents
+         (lecture clé globale nue + filtre dansBibliotheque, aligné sur les dropdowns de re-sélection).
+       • Sentinelle import-pratiques-inter-trimestre-briqueC.spec.js (6 cas, 9 break-tests rouges→verts).
+
+     QUALITÉ : workflow de cartographie (3 lecteurs) + workflow de revue adverse (3 angles : sécu/CSP,
+       correctness, patron/UI). Verdict : livrable. 3 CORRECTIONS appliquées suite à la revue
+       (inspireDe objet ; deep-clone ; filtre deps dansBibliotheque). FILETS : 973 Vitest + 67 Playwright
+       verts ; #326 rouge PRÉEXISTANT (dette #345 COMPARATEUR_VISIBLE=false, hors périmètre).
+     VERSION : INCHANGÉE (pas de bump, comme pas 1-4 ; patch au merge sur main).
+
+     PROCHAINS CAPS :
+       1) VALIDATION TERRAIN (Grégoire, Mac) : importer une pratique A25→H26 (modèle COPIE, source intacte,
+          avertissement si échelle/grille absente). Vérifier les 2 modes (sombre/clair).
+       2) PUBLIER SUR MAIN : même flux que le pas 4 (PR depuis claude/brique-C-pas5-import-pratiques →
+          release.mjs patch → npm test → squash merge). La branche part de main à jour (post-PR #62).
+     DETTE FLAGUÉE (pastilles spawn_task, hors périmètre) : (a) même défaut inspireDe au pas 4 grilles
+       (carte « Inspiré de Inconnu ») + durcir dupliquerPratiqueBibliotheque (deep-clone) ; (b) workers:1
+       manquant dans playwright.config (rouges fantômes en parallèle) ; (c) CodeQL CI rouge (repo privé).
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION PHASE 2 — PUBLICATION SUR MAIN (✓ FAITE) + BRIQUE C PAS 5 CADRÉ — 26 juin 2026 PM (Claude Code local).
+     ⮕ RELAI VERS L'IMPLÉMENTATION DU PAS 5 — lire ce bloc en premier à la reprise.
+
+     1) PUBLIER SUR MAIN — ✓ FAIT. PR #62 squash-mergée sur main le 26 juin 21:05 UTC (commit a1e42328
+        « Namespacing par trimestre (Briques A/B/C) + restauration A25 (L0/L2) — 1.21.1 (#62) »).
+        Bump release.mjs patch → version 1.21.1 / build 0626-1702 (commit 3212ea50, poussé). 4 points
+        de vérité synchronisés. Tests au merge : 973 Vitest + 61 Playwright verts ; #326 rouge préexistant.
+        ⚠ DETTE CI RÉVÉLÉE : le check CodeQL est rouge à chaque PR depuis le passage du repo en privé
+        (23 juin) — « Code scanning is not enabled » : un repo privé exige GitHub Advanced Security.
+        FAUX ÉCHEC (aucune alerte de code), mais brouille le signal CI. Pastille spawn_task posée
+        (retirer le workflow CodeQL [reco zéro-dette] OU activer le scanning). NON traité ce cap.
+
+     2) BRIQUE C PAS 5 — IMPORT PRATIQUES — CADRÉ (pas codé). Détail : CADRAGE-briques-C-D-namespacing.md §2.5.
+        • SOURCE = cleSource('pratiquesConfigurables', srcId) (per-trimestre, namespacée) — PAS
+          bibliothequePratiques (globale partagée). DESTINATION = cle('pratiquesConfigurables') actif.
+        • DIVERGENCE vs pas 4 (le piège du relai, résolu) : pratiquesConfigurables ∈ CLES_NAMESPACEES →
+          cleSource rend TOUJOURS <id>_pratiquesConfigurables → listerTrimestresAvecPratiques liste TOUS
+          les trimestres ≠ actif (actifs ET archivés), PAS le filtre « copie propre » du pas 4.
+        • Garde D-C7 conservée mais RE-JUSTIFIÉE (consultation = lecture seule, pas mauvais routage).
+        • Mécanique = paramétrer dupliquerPratiqueBibliotheque (pratiques-gestion.js:710) par la source
+          (id neuf + inspireDe/inspireDeTrimestre, source intacte). Patron pas 3/4.
+        • DÉCISION GRÉGOIRE (dépendances echelleId/grilleId DEN) = OPTION A « pratique seule + avertir » :
+          garder les ids tels quels, avertir si non résolus dans l'actif (re-sélection manuelle). PAS de
+          copie transitive ni remappage en v1. Productions hors périmètre (la pratique n'en porte pas).
+        • FILET à livrer : sentinelle import-pratiques-inter-trimestre-briqueC (listing, garde D-C7,
+          copie+source intacte byte-à-byte [break-test], avertissement deps). Patron =
+          import-grilles-inter-trimestre-briqueC.spec.js.
+        ⮕ À l'implémentation : repartir d'une branche FRAÎCHE depuis main (la branche L0-golden-master-A25
+          est désormais mergée). UI = section dans modale (patron echelles.js sectionImportTrimestre + grilles pas 4).
+     ===================================================================== -->
+
+<!-- =====================================================================
+     ⮕ ACTION DEMANDÉE PAR GRÉGOIRE — PUBLIER SUR MAIN (déléguée à Claude Code, 26 juin 2026, via Cowork). ✓ FAITE (voir bloc ci-dessus).
      Grégoire ne fait pas la manip git lui-même ; il délègue la publication. À FAIRE dans l'ordre
      (flux PR habituel + protection de main) :
        1) `git push origin claude/L0-golden-master-A25` — publier la branche
