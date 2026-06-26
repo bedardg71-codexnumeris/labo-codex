@@ -383,7 +383,7 @@ function sauvegarderEvaluation() {
     const etudiant = etudiants.find(e => e.da === etudiantDA);
     const productions = obtenirDonneesSelonMode('productions');
     const production = productions.find(p => p.id === productionId);
-    const grilles = db.getSync('grillesTemplates', []);
+    const grilles = db.getSync(cle('grillesTemplates'), []);
     const grille = grilles.find(g => g.id === grilleId);
 
     if (!_validerReferencesSauv(etudiant, production, grille, etudiantDA, productionId, grilleId)) return;

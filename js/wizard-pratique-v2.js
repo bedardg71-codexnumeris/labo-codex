@@ -1850,7 +1850,7 @@ function genererCheckboxCards(champ) {
  */
 function genererSelectEchelle(champ) {
     // Récupérer les échelles existantes
-    const echelles = db.getSync('echellesTemplates', []);
+    const echelles = db.getSync(cle('echellesTemplates'), []);
 
     if (echelles.length === 0) {
         return `
@@ -1885,7 +1885,7 @@ function genererSelectEchelle(champ) {
  */
 function genererSelectGrille(champ) {
     // Récupérer les grilles existantes
-    const grilles = db.getSync('grillesTemplates', []);
+    const grilles = db.getSync(cle('grillesTemplates'), []);
 
     if (grilles.length === 0) {
         return `
@@ -1933,9 +1933,9 @@ function wizardV2CreerGrilleDemo() {
         dateCreation: new Date().toISOString()
     };
 
-    const grilles = db.getSync('grillesTemplates', []);
+    const grilles = db.getSync(cle('grillesTemplates'), []);
     grilles.push(grilleDemo);
-    db.setSync('grillesTemplates', grilles);
+    db.setSync(cle('grillesTemplates'), grilles);
 
     // Stocker l'ID pour pré-sélection
     wizardState.reponses.grilleId = grilleDemo.id;
@@ -2167,12 +2167,12 @@ function genererRecapitulatif() {
         html += `<p><strong>Suggestion statistique :</strong> ${methodeLabels[r.methodeSuggestionDen] || r.methodeSuggestionDen || 'Mode'}</p>`;
         // #343 (b) : échelle/grille de rétroaction formative (n'entrent pas dans la note).
         if (r.echelleId) {
-            const echelles = db.getSync('echellesTemplates', []);
+            const echelles = db.getSync(cle('echellesTemplates'), []);
             const echelle = echelles.find(e => e.id === r.echelleId);
             html += `<p><strong>Échelle (rétroaction) :</strong> ${echelle?.nom || r.echelleId}</p>`;
         }
         if (r.grilleId) {
-            const grilles = db.getSync('grillesTemplates', []);
+            const grilles = db.getSync(cle('grillesTemplates'), []);
             const grille = grilles.find(g => g.id === r.grilleId);
             html += `<p><strong>Grille (rétroaction) :</strong> ${grille?.nom || r.grilleId}</p>`;
         }
@@ -2186,12 +2186,12 @@ function genererRecapitulatif() {
         html += '<div class="wizard-v2-recap-section">';
         html += '<h4>Matériel pédagogique</h4>';
         if (r.echelleId) {
-            const echelles = db.getSync('echellesTemplates', []);
+            const echelles = db.getSync(cle('echellesTemplates'), []);
             const echelle = echelles.find(e => e.id === r.echelleId);
             html += `<p><strong>Échelle\u00a0:</strong> ${echelle?.nom || r.echelleId}</p>`;
         }
         if (r.grilleId) {
-            const grilles = db.getSync('grillesTemplates', []);
+            const grilles = db.getSync(cle('grillesTemplates'), []);
             const grille = grilles.find(g => g.id === r.grilleId);
             html += `<p><strong>Grille\u00a0:</strong> ${grille?.nom || r.grilleId}</p>`;
         } else {

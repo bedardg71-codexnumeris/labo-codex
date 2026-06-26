@@ -309,6 +309,58 @@
         return nomCle;
     }
 
+    /**
+     * Retourne la clé de stockage où vivent les données d'un trimestre NOMMÉ,
+     * SANS changer le trimestre actif. Helper de LECTURE inter-trimestre (Brique C
+     * du namespacing — cadrage C/D §2.2). Miroir de cle() paramétré par une source :
+     * répond à « où est la version de nomCle propre au trimestre trimestreSourceId ? »,
+     * que ce trimestre soit actif, archivé, ou ni l'un ni l'autre.
+     *
+     * Le swap du trimestre actif pour lire une autre source est un anti-pattern
+     * fragile : ce helper l'évite. Import inter-trimestre = COPIE, source jamais mutée.
+     *
+     * Routage (calqué sur cle()) :
+     *   1. copie namespacée du trimestre source (templates archivés / cartouches) si elle existe ;
+     *   2. clé globale partagée (catalogue commun, ex. grilles/échelles non archivées, cours) ;
+     *   3. clé namespacée pure (pratiques, modalités, données étudiants) → préfixée par la source ;
+     *   4. clé non reconnue → telle quelle.
+     *
+     * @param {string} nomCle - Nom de la clé (ex: 'grillesTemplates', 'pratiquesConfigurables')
+     * @param {string} trimestreSourceId - ID du trimestre source (ex: 'a2025')
+     * @returns {string} Clé de stockage du trimestre source pour nomCle
+     */
+    function cleSource(nomCle, trimestreSourceId) {
+        // Garde : sans source explicite, retomber sur le routage du trimestre actif.
+        if (!trimestreSourceId) {
+            console.warn('[Trimestres] cleSource appelée sans trimestreSourceId — repli sur cle()');
+            return cle(nomCle);
+        }
+
+        // 1. Copie namespacée du trimestre source (templates archivés ou cartouches) :
+        //    si elle existe, c'est la version propre à ce trimestre (cas archivé, ou
+        //    futur régime hybride D-D1). Prioritaire sur la clé globale partagée.
+        if (CLES_TEMPLATES_ARCHIVES.includes(nomCle) || nomCle.startsWith('cartouches_')) {
+            const cleCopie = `${trimestreSourceId}_${nomCle}`;
+            if (db.getSync(cleCopie, null) !== null) {
+                return cleCopie;
+            }
+            // Pas de copie → poursuivre le routage (globale partagée ou namespacée pure).
+        }
+
+        // 2. Clé globale partagée (jamais préfixée hors copie d'archivage).
+        if (CLES_GLOBALES.includes(nomCle) || nomCle.startsWith('cartouches_')) {
+            return nomCle;
+        }
+
+        // 3. Clé namespacée : emplacement canonique = préfixe du trimestre source.
+        if (CLES_NAMESPACEES.includes(nomCle)) {
+            return `${trimestreSourceId}_${nomCle}`;
+        }
+
+        // 4. Clé non reconnue, retourner telle quelle.
+        return nomCle;
+    }
+
     /* ===============================
        GESTION DES TRIMESTRES
        =============================== */
@@ -1903,6 +1955,7 @@
     window.obtenirTrimestreActif = obtenirTrimestreActif;
     window.obtenirTrimestreId = obtenirTrimestreId;
     window.cle = cle;
+    window.cleSource = cleSource;
     window.sessionDepuisMois = sessionDepuisMois;
     window.nomSession = nomSession;
     window.creerTrimestre = creerTrimestre;

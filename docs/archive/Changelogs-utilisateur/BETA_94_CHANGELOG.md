@@ -50,8 +50,8 @@ Implémenter un système de **captures hebdomadaires automatiques** (snapshots) 
        numSemaine: 1,
        etudiants: [
            {
-               da: "9000116",
-               nom: "Eve B.",
+               da: "[DA-retiré]",
+               nom: "Élève-004",
                A: 100,              // Ponctuel (séance actuelle)
                A_cumulatif: 100,    // Cumulatif (depuis début)
                C: 67,               // Cumulatif
@@ -182,7 +182,7 @@ window.calculerEtSauvegarderIndicesAssiduite = calculerEtSauvegarderIndicesAssid
 
 ### Problème identifié
 
-**Symptôme** : Étudiante Eve B. affiche 92.3% d'assiduité au lieu de 100%
+**Symptôme** : Étudiante Élève-004 affiche 92.3% d'assiduité au lieu de 100%
 
 **Investigation graphique** :
 - Graphique individuel montre chute A_cumulatif à semaine 6
@@ -224,7 +224,7 @@ window.calculerEtSauvegarderIndicesAssiduite = calculerEtSauvegarderIndicesAssid
 
 #### 3. `test_eve_presences.js` (95 lignes)
 
-**Objectif** : Analyse détaillée présences Eve
+**Objectif** : Analyse détaillée présences Élève-004
 
 **Tests effectués** :
 - Liste toutes dates avec heures
@@ -237,7 +237,7 @@ window.calculerEtSauvegarderIndicesAssiduite = calculerEtSauvegarderIndicesAssid
 **Objectif** : Investigation spécifique 30 septembre
 
 **Tests effectués** :
-- Vérification présence Eve ce jour
+- Vérification présence Élève-004 ce jour
 - Recherche interventions RàI associées
 - Validation jour type='cours' dans calendrier
 - Proposition solution avec code correctif
@@ -251,11 +251,11 @@ window.calculerEtSauvegarderIndicesAssiduite = calculerEtSauvegarderIndicesAssid
 2. Suppression 30 entrées (911 → 881 présences)
 3. Recalcul indices assiduité global
 4. Reconstruction snapshots historiques
-5. Vérification assiduité Eve après correction
+5. Vérification assiduité Élève-004 après correction
 
 **Résultat final** :
 ```
-Assiduité Eve : 100.0% (24h/24h sur 12 séances)
+Assiduité Élève-004 : 100.0% (24h/24h sur 12 séances)
 ```
 
 ---

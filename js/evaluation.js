@@ -311,7 +311,7 @@ function obtenirNomCartouche(cartoucheId, grilleId) {
 
     // Chercher dans la grille spécifique
     const cartouchesKey = `cartouches_${grilleId}`;
-    const cartouches = db.getSync(cartouchesKey, []);
+    const cartouches = db.getSync(cle(cartouchesKey), []);
     const cartouche = cartouches.find(c => c.id === cartoucheId);
 
     return cartouche ? cartouche.nom : cartoucheId;
@@ -334,7 +334,7 @@ function obtenirClasseNote(note, echelleId) {
     }
 
     // Chercher l'échelle dans localStorage
-    const echelles = db.getSync('echellesTemplates', []);
+    const echelles = db.getSync(cle('echellesTemplates'), []);
     const echelle = echelles.find(e => e.id === echelleId);
 
     if (!echelle) {
@@ -1729,7 +1729,7 @@ function _afficherCriteresDepuisEvaluation(evaluation) {
             p.config.echelle.niveaux.forEach(n => { niveauxMap[n.code] = n.nom || n.code; });
         }
     } else {
-        const echelles = db.getSync('echellesTemplates', []);
+        const echelles = db.getSync(cle('echellesTemplates'), []);
         const echelle = echelles.find(e => e.id === echelleId);
         if (echelle?.niveaux) {
             echelle.niveaux.forEach(n => { niveauxMap[n.code] = n.nom || n.code; });
@@ -2074,7 +2074,7 @@ function _initEvaluationEnCoursPourModif(evaluation, evaluationId) {
 
     // FALLBACK : Extraire depuis rétroaction si criteres[] vide
     console.warn('⚠️ Extraction niveaux depuis rétroaction...');
-    const grilles = db.getSync('grillesTemplates', []);
+    const grilles = db.getSync(cle('grillesTemplates'), []);
     const grille = grilles.find(g => g.id === evaluation.grilleId);
     if (!grille || !evaluation.retroactionFinale) return;
     const niveauxExtrait = extraireNiveauxDepuisRetroaction(evaluation.retroactionFinale, grille);
@@ -2100,7 +2100,7 @@ function _chargerCartoucheDropdownModif(evaluation) {
     if (!selectCartouche || !evaluation.grilleId) return false;
 
     // ✅ CORRIGÉ (31 déc 2025) : Peupler explicitement le dropdown avant de sélectionner
-    const cartouches = db.getSync(`cartouches_${evaluation.grilleId}`, []);
+    const cartouches = db.getSync(cle(`cartouches_${evaluation.grilleId}`), []);
     selectCartouche.innerHTML = '<option value="">— Choisir une cartouche —</option>';
     cartouches.forEach(cartouche => {
         const option = document.createElement('option');
@@ -2122,7 +2122,7 @@ function _chargerCartoucheDropdownModif(evaluation) {
 }
 
 function _appliquerFallbackGrilleManquanteModif(evaluation) {
-    const grilles = db.getSync('grillesTemplates', []);
+    const grilles = db.getSync(cle('grillesTemplates'), []);
     const grilleExiste = grilles.some(g => g.id === evaluation.grilleId);
     if (grilleExiste) return;
 
@@ -2537,7 +2537,7 @@ function sauvegarderEvaluationModifiee() {
     const etudiant = etudiants.find(e => e.da === etudiantDA);
     const productions = obtenirDonneesSelonMode('productions');
     const production = productions.find(p => p.id === productionId);
-    const grilles = db.getSync('grillesTemplates', []);
+    const grilles = db.getSync(cle('grillesTemplates'), []);
     const grille = grilles.find(g => g.id === grilleId);
 
     if (!_validerReferencesMod(etudiant, production, grille, etudiantDA, productionId, grilleId)) return;

@@ -1,0 +1,19 @@
+{
+  "name": "labo-codex",
+  "owner": {
+    "name": "Grégoire Bédard",
+    "email": "labo@codexnumeris.org"
+  },
+  "description": "Marketplace locale du projet Labo Codex (dépôt Monitorage_v6). Source unique du plugin de productivité, chargée par Claude Code depuis ce dépôt.",
+  "plugins": [
+    {
+      "name": "productivite-labo-codex",
+      "source": "./plugins/productivite-labo-codex",
+      "description": "Couche légère (Cowork + Code) au-dessus des vrais fichiers du projet : pilotage des tâches via BACKLOG.md et index de la mémoire (CLAUDE.md, ETAT-PROJET.md, SESSION.md, dossier « Skills pour Claude Code/ »). Commandes /start et /update ; skills memory-management et task-management.",
+      "version": "3.0.0",
+      "author": {
+        "name": "Grégoire Bédard"
+      }
+    }
+  ]
+}

@@ -375,7 +375,7 @@ function calculerBornesYDynamiques100(datasets) {
  */
 function obtenirEchelleUtilisateur() {
     try {
-        const echelles = db.getSync('echellesTemplates', []);
+        const echelles = db.getSync(cle('echellesTemplates'), []);
         if (echelles && echelles.length > 0) {
             // Prendre la première échelle (ou celle par défaut si définie)
             return echelles.find(e => e.parDefaut) || echelles[0];
@@ -3820,7 +3820,7 @@ function listerCriteresHabiletes() {
         const evaluations = (typeof obtenirDonneesSelonMode === 'function')
             ? (obtenirDonneesSelonMode('evaluationsSauvegardees') || [])
             : [];
-        const grilles = db.getSync('grillesTemplates', []) || [];
+        const grilles = db.getSync(cle('grillesTemplates'), []) || [];
 
         const nomsUtilises = new Set();
         for (let i = 0; i < evaluations.length; i++) {

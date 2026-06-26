@@ -182,7 +182,7 @@ async function afficherBibliothequeProductions() {
                     <button data-action="afficherProductionsTrimestreModal" class="btn btn-secondaire btn-compact">Voir les productions</button>
                     <button data-action="importerToutTrimestreModal" class="btn btn-principal btn-compact">Tout importer</button>
                 </div>
-                <div id="previewProductionsTrimestre" style="margin-top: 10px; display: none;"></div>
+                <div id="previewProductionsTrimestre" class="u-hide" style="margin-top: 10px;"></div>
             </div>`;
     }
 

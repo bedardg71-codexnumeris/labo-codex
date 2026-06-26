@@ -55,7 +55,7 @@ Favorise les clusters proches des directions cardinales (0/90/180) et penalise l
 ## Diagnostic des echecs restants (37/53)
 
 ### Categorie 1 : 0 candidats (4 images)
-- Kengne x2, Marcoux, Vincent
+- Kengne x2, Élève-024, Élève-021
 - Cause : images tres sombres ou contraste extreme → trop peu de lignes Hough (25-95 lignes, 2-3 clusters)
 - **Solution potentielle** : abaisser le seuil Hough pour ces cas, ou fallback plus agressif
 
@@ -63,22 +63,22 @@ Favorise les clusters proches des directions cardinales (0/90/180) et penalise l
 C'est le probleme DOMINANT. Le bon couple de clusters (pres de cardinal) gagne grace au bonus angulaire, mais les lignes specifiques selectionnees dans ces clusters ne correspondent pas aux vrais bords de la feuille.
 
 Exemples :
-- Brouillard θ91°×θ0° ang=0.99 → e=0.0622 (imprecis, presque OK)
-- Guillot θ90°×θ1° ang=0.99 → e=0.1681 (bon cluster, mauvaises lignes)
+- Élève-009 θ91°×θ0° ang=0.99 → e=0.0622 (imprecis, presque OK)
+- Élève-022 θ90°×θ1° ang=0.99 → e=0.1681 (bon cluster, mauvaises lignes)
 - Rheaume θ93°×θ176° ang=0.92 → e=0.0880 (presque imprecis)
-- Dubois θ89°×θ173° ang=0.91 → e=0.1086 (presque imprecis)
+- Élève-027 θ89°×θ173° ang=0.91 → e=0.1086 (presque imprecis)
 
 **Cause racine** : `trouverBordsOpposes()` classe les paires par `score = distance × log(votes)`. Ce score favorise les paires les plus ecartees (grande surface) meme si elles ne correspondent pas aux vrais bords du document.
 
 ### Categorie 3 : Cluster semi-diagonal persiste (~5 images)
-- Doyon θ20°×θ112° ang=0.53
-- Dubois θ29°×θ113° ang=0.42
-- Boudreau θ89°×θ154° ang=0.70
+- Élève-031 θ20°×θ112° ang=0.53
+- Élève-027 θ29°×θ113° ang=0.42
+- Élève-015 θ89°×θ154° ang=0.70
 
 Le bonus angulaire les a penalises mais pas assez pour qu'un meilleur candidat cardinal les depasse (souvent car le candidat cardinal a une surface trop petite).
 
 ### Categorie 4 : Imprecis (4 images, e=0.032-0.065)
-- Brouillard, Boudreau, Martin, Michaud-Lebel
+- Élève-009, Élève-015, Élève-028, Élève-008
 - Bon cluster, bonnes lignes, mais legerement decalees
 - Presque OK — pourraient basculer avec un meilleur tri des paires
 
@@ -153,7 +153,7 @@ Quand le taux sera satisfaisant (~60-70%+), il faudra porter les ameliorations d
 2. **Journal d'apprentissage** — IndexedDB store 'journal', auto-save des runs avec params/scores/notes
 3. **Fallback corners (0,0)** — quand coins indetectables, defaut aux coins de l'image (eleves remplissent le cadre)
 4. **detectSize 600** — +3 OK sur le corpus original (lignes Hough plus precises a haute resolution)
-5. **Fallback 600→400** — si support < 0.6 ou detection null, reessai a 400px (recupere Houle, Laberge)
+5. **Fallback 600→400** — si support < 0.6 ou detection null, reessai a 400px (recupere Élève-029, Élève-023)
 6. **Surface dans le log compact** — `A=` pour diagnostiquer les candidats
 
 ### Tentatives echouees (revertees)
@@ -166,18 +166,18 @@ Quand le taux sera satisfaisant (~60-70%+), il faudra porter les ameliorations d
 
 ### Diagnostic des deux modes d'echec (corpus 113 images)
 
-**Mode 1 — Contenu interne trop contraste (type Lafleur)**
+**Mode 1 — Contenu interne trop contraste (type Élève-019)**
 - Surlignages colores, bandes, dessins survivent au heavy blur
 - Creent des pixels boundary INTERNES → trop de clusters (5-7)
 - Le scoring a trop de candidats et se trompe
-- 5/5 images Lafleur en echec (e=0.080-0.105)
+- 5/5 images Élève-019 en echec (e=0.080-0.105)
 - **Piste** : variance locale (idee Cowork) pour rejeter les frontieres internes heterogenes
 
-**Mode 2 — Fond trop clair, pas de contraste papier/fond (type Hurtubise)**
+**Mode 2 — Fond trop clair, pas de contraste papier/fond (type Élève-010)**
 - Fond gris clair ≈ luminosite papier (pic papier 201, moy fond 171 → delta 30 seulement)
 - Seuil adaptatif (201×0.55=110) inclut tout le fond comme "papier"
 - Segmentation echoue → boundary errone → quad deborde
-- 3/4 images Hurtubise en echec (e=0.088-0.097)
+- 3/4 images Élève-010 en echec (e=0.088-0.097)
 - **Piste** : segmentation par couleur/teinte (le papier est blanc, le fond est gris — la saturation differe)
 
 ### Statistiques corpus 113 images
@@ -194,13 +194,13 @@ Taux d'utilite (OK + imprecis) : 98/113 = **86.7%**
 
 | Eleve | Images | Echecs | Cause probable |
 |---|---|---|---|
-| Lafleur | 5 | 5 | Surlignages colores, bande en bas de page |
-| Hurtubise | 4 | 3 | Fond gris clair ≈ papier |
+| Élève-019 | 5 | 5 | Surlignages colores, bande en bas de page |
+| Élève-010 | 4 | 3 | Fond gris clair ≈ papier |
 | Kengne_Elage | 2 | 2 | Image tres sombre |
-| Richard | 4 | 2 | A investiguer |
+| Élève-018 | 4 | 2 | A investiguer |
 | Frechette | 3 | 1 | Cas catastrophique (A=0.076) |
-| Plouffe | 3 | 1 | Detection null (e=1.000) |
-| Boisvert | 3 | 1 | A investiguer |
+| Élève-020 | 3 | 1 | Detection null (e=1.000) |
+| Élève-012 | 3 | 1 | A investiguer |
 
 ### Plan global module Travaux
 
@@ -218,7 +218,7 @@ Objectif : flux complet pour AQPC 3-5 juin 2026.
 - La surface n'est PAS un discriminant utile (OK et imprecis ont des surfaces similaires ~0.90)
 - Le support < 0.6 est un bon indicateur de detection douteuse (seuil de fallback)
 - Le heavy blur (6 passes) est le bon equilibre — 8 passes detruit la frontiere
-- Les images "faciles" (Desfosses, Dionne, Funk) ont 2 clusters et e≈0.000 — fond sombre, papier clair
+- Les images "faciles" (Desfosses, Élève-025, Élève-006) ont 2 clusters et e≈0.000 — fond sombre, papier clair
 - Les images "difficiles" ont 5-8 clusters — fond clair ou contenu interne contraste
 - Le MC (moindres carres sur boundary) marche pour les images complexes mais nuit aux images simples
 
@@ -275,11 +275,11 @@ Quand le taux sera satisfaisant (~60-70%+), il faudra porter les ameliorations d
 ### Tentatives echouees (a ne pas repeter)
 
 1. **Multi-resolution 600→900px** — Regression. Plus de resolution = plus de blur necessaire = gain net zero.
-2. **N=50 echantillons** — Regressions Audet, Bathalon. N=30 est le sweet spot.
+2. **N=50 echantillons** — Regressions Élève-030, Élève-014. N=30 est le sweet spot.
 3. **raffinerLignesHough()** — Regression catastrophique (38%→5.7%). Modifier rho/theta avant pairing cascade.
-4. **Centre-poids sur P1** — Regression Audet (0.029→0.041). P1 a besoin des extremites.
-5. **P3 avec gardes laches** — Regression Richard (0.079→0.084). P3 doit etre ultra-strict.
-6. **Support aretes dans trouverBordsOpposes (Phase 1)** — Regression 69→67 OK avec catastrophes (Rheaume 0.013→0.527, Lavoie 0.010→0.204, Laberge 0.053→1.000). Meme un plancher 0.3 ne suffit pas — **aucune modification au scoring des paires n'est sure**.
+4. **Centre-poids sur P1** — Regression Élève-030 (0.029→0.041). P1 a besoin des extremites.
+5. **P3 avec gardes laches** — Regression Élève-018 (0.079→0.084). P3 doit etre ultra-strict.
+6. **Support aretes dans trouverBordsOpposes (Phase 1)** — Regression 69→67 OK avec catastrophes (Rheaume 0.013→0.527, Élève-026 0.010→0.204, Élève-023 0.053→1.000). Meme un plancher 0.3 ne suffit pas — **aucune modification au scoring des paires n'est sure**.
 
 ### Lecons cles (NOUVELLES)
 
@@ -302,18 +302,18 @@ Quand le taux sera satisfaisant (~60-70%+), il faudra porter les ameliorations d
 
 | Eleve | Images | Echecs | Erreurs | Cause |
 |---|---|---|---|---|
-| Lafleur | 7 | 7 | 0.077-0.116 | Surlignages, bandes internes |
-| Hurtubise | 5 | 4 | 0.062-0.092 | Fond gris clair ≈ papier |
-| Richard | 5 | 3 | 0.060-0.098 | A investiguer |
+| Élève-019 | 7 | 7 | 0.077-0.116 | Surlignages, bandes internes |
+| Élève-010 | 5 | 4 | 0.062-0.092 | Fond gris clair ≈ papier |
+| Élève-018 | 5 | 3 | 0.060-0.098 | A investiguer |
 | Kengne_Elage | 2 | 2 | 0.183-0.249 | Image tres sombre |
-| Gallant | 2 | 2 | 0.101-0.140 | A investiguer |
+| Élève-005 | 2 | 2 | 0.101-0.140 | A investiguer |
 | Frechette | 3 | 1 | 0.442 | Cas pathologique |
-| Plouffe | 4 | 1 | 1.000 | Detection null |
-| Lampron | 4 | 1 | 0.138 | A investiguer |
-| Jeanneau | 1 | 1 | 0.094 | A investiguer |
-| Boisvert | 3 | 1 | 0.112 | A investiguer |
-| Bienvenue | 6 | 1 | 0.082 | A investiguer |
-| Sainjuste | 2 | 1 | 0.107 | A investiguer |
+| Élève-020 | 4 | 1 | 1.000 | Detection null |
+| Élève-017 | 4 | 1 | 0.138 | A investiguer |
+| Élève-013 | 1 | 1 | 0.094 | A investiguer |
+| Élève-012 | 3 | 1 | 0.112 | A investiguer |
+| Élève-004 | 6 | 1 | 0.082 | A investiguer |
+| Élève-011 | 2 | 1 | 0.107 | A investiguer |
 | Giguere | 9 | 1 | 0.088 | A investiguer |
 
 ### Fichier de reference technique
@@ -322,7 +322,7 @@ Voir `docs/modules/auto-perspective.md` pour la documentation complete du pipeli
 
 ---
 
-## Session du 19 fevrier 2026 (suite) — Diagnostic Lafleur + pipeline par profils
+## Session du 19 fevrier 2026 (suite) — Diagnostic Élève-019 + pipeline par profils
 
 ### Progression
 
@@ -334,7 +334,7 @@ Voir `docs/modules/auto-perspective.md` pour la documentation complete du pipeli
 | + Filtre boundary par variance | 146 | 8 | 5.5% | CATASTROPHE, revert immediat |
 | **Pipeline par profils (Theil-Sen)** | **146** | **67** | **45.9%** | Err moy 0.0430, echec 20 |
 
-### Diagnostic des images Lafleur — HYPOTHESE INVALIDEE
+### Diagnostic des images Élève-019 — HYPOTHESE INVALIDEE
 
 L'hypothese du plan Phase 2 etait : "les surlignages creent des pixels boundary INTERNES".
 
@@ -342,19 +342,19 @@ L'hypothese du plan Phase 2 etait : "les surlignages creent des pixels boundary 
 
 | Image | Boundary total | Centre | Bord | Ratio centre |
 |-------|---------------|--------|------|-------------|
-| Lafleur 11h41m12s | 4274 | 177 | 4097 | 4.1% |
+| Élève-019 11h41m12s | 4274 | 177 | 4097 | 4.1% |
 | Desfosses 11h32m15s | 2122 | 0 | 2122 | 0.0% |
 
-**96% des boundary pixels Lafleur sont au bord, pas au centre.** Le probleme n'est PAS des boundary internes. C'est une **frontiere epaisse/bruitee au bord** qui produit 7.6x plus de lignes Hough (344 vs 45) avec des votes faibles.
+**96% des boundary pixels Élève-019 sont au bord, pas au centre.** Le probleme n'est PAS des boundary internes. C'est une **frontiere epaisse/bruitee au bord** qui produit 7.6x plus de lignes Hough (344 vs 45) avec des votes faibles.
 
-Comparaison Lafleur vs Desfosses :
+Comparaison Élève-019 vs Desfosses :
 - Boundary pixels : 4274 vs 2122 (2x)
 - Lignes Hough : 344 vs 45 (7.6x)
 - Votes max : 223 vs 581 (0.4x)
 - Clusters : 7 vs 2
 - Candidats : 54 vs 3
 
-**Le vrai probleme Lafleur** : trop de lignes dans les bons clusters (99H + 152V), le scoring `dist × log(votes)` selectionne des paires legerement decalees.
+**Le vrai probleme Élève-019** : trop de lignes dans les bons clusters (99H + 152V), le scoring `dist × log(votes)` selectionne des paires legerement decalees.
 
 ### Tentatives echouees (NOUVELLES — a ne pas repeter)
 
@@ -386,13 +386,13 @@ Au lieu de boundary → Hough → clusters → paires → quad, on fait :
 **Resultats** : 67 OK (45.9%), 59 imprecis, 20 echec, err moy 0.0430
 
 **Les deux pipelines sont complementaires** :
-- Profils mieux : Hurtubise (4 echec→0), Frechette (0.442→0.043), Plouffe (1.0→0.008)
-- Hough mieux : Rheaume (0.013→0.168), Tshamala (0.039→0.140)
+- Profils mieux : Élève-010 (4 echec→0), Frechette (0.442→0.043), Élève-020 (1.0→0.008)
+- Hough mieux : Rheaume (0.013→0.168), Élève-016 (0.039→0.140)
 - **Piste prometteuse : courir les deux et choisir le meilleur**
 
 ### Lecons cles (NOUVELLES)
 
-- **L'hypothese "boundary internes" pour Lafleur est FAUSSE** — 96% des boundary sont au bord. Diagnostiquer AVANT de coder.
+- **L'hypothese "boundary internes" pour Élève-019 est FAUSSE** — 96% des boundary sont au bord. Diagnostiquer AVANT de coder.
 - **Le pipeline Hough est fragile face au nombre de lignes** — 344 lignes → 54 candidats → mauvais choix. Le probleme est structurel.
 - **Les profils de masque sont une alternative viable** — Deterministe, rapide, complementaire a Hough.
 - **Theil-Sen est excellent pour la regression robuste** — Mediane des pentes resiste a ~30% d'outliers.
@@ -410,7 +410,7 @@ Au lieu de boundary → Hough → clusters → paires → quad, on fait :
 ### Prochaines pistes
 
 1. **Combiner Hough + Profils** — Courir les deux, choisir avec un critere fiable (surface × support? vote majoritaire sur les coins? erreur predite?)
-2. **Phase 3 du plan (saturation pour Hurtubise)** — Toujours valide, les profils ameliorent Hurtubise mais ne resolvent pas tout
+2. **Phase 3 du plan (saturation pour Élève-010)** — Toujours valide, les profils ameliorent Élève-010 mais ne resolvent pas tout
 3. **Analyser les quasi-OK (e=0.031-0.040)** — 14+ images dans cette zone, chaque amelioration marginale compte
 
 ---

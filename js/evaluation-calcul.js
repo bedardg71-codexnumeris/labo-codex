@@ -119,7 +119,7 @@ function calculerNoteAlgorithmique(critereId, ponderation, facteur) {
 
     // Déterminer le niveau IDME selon l'échelle
     const echelleId = evaluationEnCours?.echelleId || document.getElementById('selectEchelle1')?.value;
-    const echelles = db.getSync('echellesTemplates', []);
+    const echelles = db.getSync(cle('echellesTemplates'), []);
     const echelleSelectionnee = echelles.find(e => e.id === echelleId);
 
     let niveauIDME = '--';
@@ -230,7 +230,7 @@ function _resetAffichageAlgoCategories(critereId) {
 }
 
 function _obtenirSousCriteresGrille(critereId) {
-    const grilles = db.getSync('grillesTemplates', []);
+    const grilles = db.getSync(cle('grillesTemplates'), []);
     const grilleId = evaluationEnCours?.grilleId;
     const grille = grilles.find(g => g.id === grilleId);
     if (grille && grille.criteres) {
@@ -255,7 +255,7 @@ function _calculerScoreAlgoCategories(codesSousCriteres, sousCriteres, ponderati
 
 function _determinerNiveauIDMEAlgo(pctFinal) {
     const echelleId = evaluationEnCours?.echelleId || document.getElementById('selectEchelle1')?.value;
-    const echelles = db.getSync('echellesTemplates', []);
+    const echelles = db.getSync(cle('echellesTemplates'), []);
     const echelleSelectionnee = echelles.find(e => e.id === echelleId);
     if (!echelleSelectionnee || !echelleSelectionnee.niveaux) return '--';
     const niveau = echelleSelectionnee.niveaux.find(n => {
@@ -428,7 +428,7 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
 
     // Déterminer le niveau IDME selon l'échelle
     const echelleId = evaluationEnCours?.echelleId || document.getElementById('selectEchelle1')?.value;
-    const echelles = db.getSync('echellesTemplates', []);
+    const echelles = db.getSync(cle('echellesTemplates'), []);
     const echelleSelectionnee = echelles.find(e => e.id === echelleId);
 
     let niveauIDME = '--';
@@ -512,7 +512,7 @@ function calculerNote() {
     if (!evaluationEnCours) return;
 
     const grilleId = evaluationEnCours.grilleId;
-    const grilles = db.getSync('grillesTemplates', []);
+    const grilles = db.getSync(cle('grillesTemplates'), []);
     const grille = grilles.find(g => g.id === grilleId);
 
     if (!grille) return;
@@ -537,15 +537,21 @@ function calculerNote() {
         }
     } else {
         // Échelle personnalisée classique
-        const echelles = db.getSync('echellesTemplates', []);
+        const echelles = db.getSync(cle('echellesTemplates'), []);
         echelleSelectionnee = echelles.find(e => e.id === echelleId);
     }
 
-    // SÉCURITÉ: Vérifier que l'échelle existe
+    // SÉCURITÉ: Vérifier que l'échelle existe. Si non résolue (consultation d'un
+    // trimestre archivé sans copie d'échelle = pilote A25 pas posé, ou échelle pas
+    // encore sélectionnée), on dégrade SILENCIEUSEMENT (note « -- ») — comme le cas
+    // « grille manquante » plus haut. Le problème de fond est déjà signalé une fois par
+    // l'avertissement « Grille introuvable » ; crier ❌ à chaque recalcul en cascade au
+    // chargement ne fait que polluer la console (4× à l'ouverture d'une éval A25). (#348-résiduel)
     if (!echelleSelectionnee || !echelleSelectionnee.niveaux || echelleSelectionnee.niveaux.length === 0) {
-        console.error('❌ Aucune échelle de performance sélectionnée');
-        document.getElementById('noteProduction1').textContent = '--';
-        document.getElementById('niveauProduction1').textContent = '--';
+        const elNote = document.getElementById('noteProduction1');
+        const elNiveau = document.getElementById('niveauProduction1');
+        if (elNote) elNote.textContent = '--';
+        if (elNiveau) elNiveau.textContent = '--';
         return;
     }
 
@@ -691,7 +697,7 @@ function obtenirCouleurNiveau(codeNiveau) {
 
     // LECTURE DE L'ÉCHELLE SÉLECTIONNÉE (pas l'ancienne niveauxEchelle)
     const echelleId = evaluationEnCours?.echelleId || document.getElementById('selectEchelle1')?.value;
-    const echelles = db.getSync('echellesTemplates', []);
+    const echelles = db.getSync(cle('echellesTemplates'), []);
     const echelleSelectionnee = echelles.find(e => e.id === echelleId);
 
     if (!echelleSelectionnee || !echelleSelectionnee.niveaux) {

@@ -71,7 +71,7 @@ effacer toute texture interne (texte, grain) et ne garder que les grandes zones
 papier/fond. Les pixels frontiere de ce masque sont les bords du document.
 
 **Avantage** : insensible au texte, aux surlignages, aux annotations.
-**Limitation** : echoue quand le fond a une luminosite proche du papier (ex: Hurtubise, fond gris clair).
+**Limitation** : echoue quand le fond a une luminosite proche du papier (ex: Élève-010, fond gris clair).
 
 ### 8. Selection de paires
 
@@ -116,7 +116,7 @@ Pour chaque cote du quad :
 **Centre-poids** (P2/P3 seulement) : les points proches du centre du cote recoivent
 un poids plus eleve (`0.5 + 0.5 * sin(pi * tNorm)`). Aide pour les cotes bruites aux
 extremites. **NE PAS activer pour P1** — cause des regressions sur les images simples
-(ex: Audet 0.029 → 0.041 quand P1 utilise le centre-poids).
+(ex: Élève-030 0.029 → 0.041 quand P1 utilise le centre-poids).
 
 ---
 
@@ -161,7 +161,7 @@ Un autre candidat gagne. L'erreur peut passer de 0.01 a 0.50.
 
 **Tentative Phase 1 (19 fev 2026)** : support d'aretes multiplicatif avec plancher 0.3
 dans `trouverBordsOpposes`. Resultat : **regression 69/146 → 67/146** avec des echecs
-catastrophiques (Rheaume 0.013→0.527, Lavoie 0.010→0.204, Laberge 0.053→1.000).
+catastrophiques (Rheaume 0.013→0.527, Élève-026 0.010→0.204, Élève-023 0.053→1.000).
 Meme un facteur multiplicatif avec plancher change suffisamment le ranking des paires
 pour declencher des cascades. **CONFIRME : aucune modification au scoring des paires
 n'est sure.** Le code de support reste dans le fichier mais n'est PAS appele.
@@ -185,15 +185,15 @@ Le gain de resolution est annule par le besoin de plus de flou. Abandonner.
 
 ### 4. N=30 echantillons est le sweet spot
 
-- N=50 : regressions sur Audet, Bathalon (surechantillonnage capture du bruit)
+- N=50 : regressions sur Élève-030, Élève-014 (surechantillonnage capture du bruit)
 - N=30 : stable
 - N<20 : pas teste, probablement insuffisant
 
 ### 5. Le centre-poids aide P2 mais nuit a P1
 
 - P1 sans centre-poids : correction stable sur les cas faciles
-- P2 avec centre-poids : aide les images complexes (Guillot 0.042 → 0.003)
-- P1 avec centre-poids : regression Audet (0.029 → 0.041)
+- P2 avec centre-poids : aide les images complexes (Élève-022 0.042 → 0.003)
+- P1 avec centre-poids : regression Élève-030 (0.029 → 0.041)
 
 Le P1 a besoin de TOUS les points le long du cote (y compris les extremites)
 pour estimer correctement la direction globale. Le P2, operant sur un quad deja
@@ -231,15 +231,15 @@ pour choisir entre candidats.**
 ### 10. Le pipeline par profils est complementaire a Hough
 
 Les profils de masque (Theil-Sen) et Hough ont des forces differentes :
-- Profils : mieux pour les images bruitees (Lafleur, Hurtubise, cas pathologiques)
-- Hough : mieux pour les images avec contours nets (Rheaume, Tshamala)
+- Profils : mieux pour les images bruitees (Élève-019, Élève-010, cas pathologiques)
+- Hough : mieux pour les images avec contours nets (Rheaume, Élève-016)
 - **La combinaison des deux est la voie a explorer.**
 
 ---
 
 ## Modes d'echec identifies
 
-### Mode 1 — Frontiere epaisse/bruitee (Lafleur, ~7 images)
+### Mode 1 — Frontiere epaisse/bruitee (Élève-019, ~7 images)
 
 **DIAGNOSTIC CORRIGE (19 fev 2026)** : L'hypothese initiale ("boundary internes
 depuis les surlignages") est **FAUSSE**. Mesure : 96% des boundary pixels sont au
@@ -252,9 +252,9 @@ sélectionne des paires legerement decalees parmi 54 candidats.
 (69→8 OK) car le heavy blur cree des transitions graduelles meme aux vrais bords.
 
 **Piste actuelle** : le pipeline par profils (Theil-Sen) contourne le probleme en
-n'utilisant pas Hough du tout. Mais ne resout pas completement les Lafleur (e=0.073-0.113).
+n'utilisant pas Hough du tout. Mais ne resout pas completement les Élève-019 (e=0.073-0.113).
 
-### Mode 2 — Faible contraste fond/papier (Hurtubise, ~5 images)
+### Mode 2 — Faible contraste fond/papier (Élève-010, ~5 images)
 
 Fond gris clair ≈ luminosite du papier (delta ~30). Le seuil `picPapier × 0.55`
 inclut tout le fond → pas de bords detectes correctement. Erreurs 0.088-0.092.
@@ -274,11 +274,11 @@ scoring des paires n'est sure.
 
 **Piste actuelle** : le pipeline par profils contourne le scoring de paires entierement.
 
-### Mode 4 — Cas pathologiques (Frechette 0.442, Plouffe 1.000)
+### Mode 4 — Cas pathologiques (Frechette 0.442, Élève-020 1.000)
 
 Image tres sombre, cadrage extreme, ou quasi-absence de contraste.
 Le pipeline par profils recupere certains de ces cas (Frechette 0.442→0.043,
-Plouffe 1.000→0.008) car il ne depend pas du nombre de lignes Hough.
+Élève-020 1.000→0.008) car il ne depend pas du nombre de lignes Hough.
 
 ---
 

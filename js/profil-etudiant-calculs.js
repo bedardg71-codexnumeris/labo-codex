@@ -49,7 +49,7 @@ function obtenirTableConversionIDME(echelleId = null) {
     }
 
     // PRIORITÉ 2 : Charger depuis echellesTemplates si niveauxEchelle est vide
-    let echelles = db.getSync('echellesTemplates', []);
+    let echelles = db.getSync(cle('echellesTemplates'), []);
     let echelle;
 
     if (echelleId) {

@@ -31,7 +31,7 @@ Chaque snapshot = **photo prise au moment d'une séance spécifique**
 - P instantané (performance actuelle à ce moment)
 - E calculé (engagement)
 
-**Exemple pour étudiant DA 9000260**:
+**Exemple pour étudiant DA [DA-retiré]**:
 ```
 Séance 1 (15 jan):  A=100%, C=null, P=null, E=null
 Séance 2 (17 jan):  A=100%, C=null, P=null, E=null
@@ -260,9 +260,9 @@ Sem. 15:   E = ∛(1.00 × 0.85 × 0.82) = ∛(0.70) = 0.89 (89%)
   // DONNÉES INDIVIDUELLES (30 étudiants)
   etudiants: [
     {
-      da: "9000260",
-      nom: "B.-A.",
-      prenom: "Patricio",
+      da: "[DA-retiré]",
+      nom: "Élève-003",
+      prenom: "Élève-003",
 
       // Indices ponctuels/instantanés
       A: 1.00,   // Présent à cette séance

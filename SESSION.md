@@ -1,4 +1,563 @@
 <!-- =====================================================================
+     ⮕ ACTION DEMANDÉE PAR GRÉGOIRE — PUBLIER SUR MAIN (déléguée à Claude Code, 26 juin 2026, via Cowork).
+     Grégoire ne fait pas la manip git lui-même ; il délègue la publication. À FAIRE dans l'ordre
+     (flux PR habituel + protection de main) :
+       1) `git push origin claude/L0-golden-master-A25` — publier la branche
+          (≈27 commits d'avance sur origin/main au 26 juin ; revérifier).
+       2) Ouvrir une PR vers main ; relire le diff.
+       3) Intention de version puis `node scripts/release.mjs patch` (relai Brique B : « patch au merge »).
+          ⚠ NE PAS éditer les 4 points de vérité à la main — passer par release.mjs.
+       4) `cd tests && npm test` → vert (baseline annoncée : 957 Vitest ; Playwright 55/1 = #326 préexistant).
+       5) Merger la PR.
+     RELIQUATS PLUGIN — ✓ FAITS (Claude Code, 26 juin PM, commit 7460b024) : enabledPlugins activé dans
+       .claude/settings.json, zip untracked retiré, note de relai SESSION.md commitée. (Les sous-commandes
+       `claude plugin marketplace add/install` côté app restent du ressort de Grégoire si la marketplace
+       n'est pas encore enregistrée ; les skills productivite-labo-codex:* étaient déjà disponibles en session.)
+     NB : l'action PUBLIER SUR MAIN ci-dessus reste À FAIRE ; ~31 commits d'avance au 26 juin PM (revérifier).
+     ===================================================================== -->
+
+<!-- =====================================================================
+     NOTE COWORK — MARKETPLACE LOCALE DU PLUGIN PRODUCTIVITÉ — 26 juin 2026 (Cowork).
+     Le plugin « productivite-labo-codex » (v3.0.0) est désormais distribué via une
+     MARKETPLACE LOCALE dans ce dépôt, pour que Claude Code le charge proprement :
+       • .claude-plugin/marketplace.json (marketplace « labo-codex ») + source DÉCOMPRESSÉE
+         dans plugins/productivite-labo-codex/ ; l'ancien .plugin (zip) a été RETIRÉ du suivi
+         git (zéro-dette). Commits : b8781dca (mise à jour du zip) puis 03276d68 (marketplace).
+       ⮕ CORRIGE l'« ÉTAT GIT » du bloc Brique B ci-dessous (« .plugin non commité » = PÉRIMÉ).
+     POUR QUE CODE LE CHARGE — à faire UNE FOIS (un commit ne suffit pas, pas d'auto-découverte) :
+       1) cd dépôt ; `claude plugin marketplace add . --scope project`
+       2) `claude plugin install productivite-labo-codex@labo-codex`
+       3) activer dans .claude/settings.json (fichier protégé → édition MANUELLE) :
+          "enabledPlugins": { "productivite-labo-codex@labo-codex": true }
+     RELIQUAT : le zip retiré du suivi reste untracked sur le disque →
+       `rm "Skills pour Claude Code/productivite-labo-codex.plugin"` côté Mac (sinon un futur
+       git add -A le re-suivrait).
+     COWORK : rien à faire — le plugin reste actif (installé dans l'app, indépendant du dépôt).
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION PHASE 2 — BRIQUE C PAS 4 LIVRÉ (import grilles inter-trimestre) + fix preview des 3 biblios — 26 juin 2026 PM (Claude Code local).
+     ⮕ RELAI VERS LE PAS 5 — lire ce bloc en premier à la reprise.
+
+     LIVRÉ (2 commits sur claude/L0-golden-master-A25, POUSSÉS sur origin) :
+       1. PAS 4 — import grilles inter-trimestre (82fd4e9f). js/grilles.js :
+          • Section « Importer depuis un autre trimestre » dans afficherBibliothequeGrilles (slot
+            sectionImportTrimestre de creerModal, patron echelles/productions).
+          • listerTrimestresAvecGrilles() : sources = trimestres avec une COPIE PROPRE de grilles
+            (cleSource rend <id>_grillesTemplates seulement si elle existe = trimestres ARCHIVÉS ;
+            les vivants partagent le catalogue global → rien à importer d'eux). Voie canonique cleSource,
+            PAS de scan localStorage.
+          • copierGrilleDepuisTrimestre(grilleSource, srcId) : inspireDe + inspireDeTrimestre posés sur
+            une COPIE (source jamais mutée) ; cartouches lues par cleSource('cartouches_'+g.id, srcId)
+            et copiées via partageSection.dupliquerGrillePartagee (outil pas 3, INCHANGÉ).
+          • Import « à la carte » (afficherGrillesTrimestreModal → bouton Importer/ligne) + « Tout importer ».
+          • GARDE D-C7 (cible jamais archivée) : listerTrimestresAvecGrilles rend [] si estTrimestreArchive()
+            → section masquée ; + défense en profondeur (refus dans importerUne/Tout). Raison : la destination
+            est la clé globale NUE 'grillesTemplates' (Brique D migrera les writers vers cle()) ; un actif
+            archivé lit cle()=<id>_grillesTemplates → sans garde, la copie irait au mauvais endroit.
+          • Fix preview « Voir les grilles » : le div previewGrillesTrimestre portait display:none INLINE,
+            non retiré par classList.remove('u-hide') → bouton mort. Corrigé en cachant via class="u-hide".
+          • Filet tests/integration/import-grilles-inter-trimestre-briqueC.spec.js (4 cas : listing, garde
+            D-C7, preview visible sur le VRAI HTML, copie+source intacte). 3 break-tests rouges obtenus.
+       2. FIX preview prod/échelles (032d983f). MÊME bug latent (display:none inline) sur les boutons
+          « Voir les productions/échelles » → js/productions-bibliotheque-ui.js + js/echelles.js : class="u-hide".
+          Produit en session parallèle (worktree ecstatic-lalande, depuis la pastille spawn_task), RAPATRIÉ
+          ici puis worktree+branche NETTOYÉS. Filet import-preview-inter-trimestre-prod-echelles.spec.js
+          (2 cas), les deux break-testés (chaque preview rougit avec display:none réintroduit).
+
+     DÉCISIONS (cadrage §2.3) : D-C2 = grilles+cartouches (Grégoire) ; D-C4 REPORTÉ (echelleId d'une cartouche
+       copiée non remappé — témoin de la sentinelle pas 3 reste vert) ; D-C7 = garde IMPLÉMENTÉE ce cap ;
+       D-C8 = section par modale.
+     VALIDÉ TERRAIN (Grégoire, Mac) : import A25→H26 OK (3 grilles • 13 cartouches), source A25 intacte,
+       2 modes OK, « Voir les grilles » OK après fix. Console : copie id neuf + inspireDe + cartouches.
+
+     PROCHAIN CAP = BRIQUE C PAS 5 — IMPORT PRATIQUES (modale à créer ; cadrage §2.4 pas 5).
+       ⚠ NE PAS calquer aveuglément le pas 4 : les pratiques (pratiquesConfigurables) sont PLEINEMENT
+       NAMESPACÉES (CLES_NAMESPACEES), pas hybrides comme les grilles. Donc cleSource('pratiquesConfigurables',
+       srcId) rend TOUJOURS <id>_pratiquesConfigurables (existe pour tout trimestre, pas seulement archivé) →
+       listerTrimestresAvecPratiques listerait TOUS les trimestres avec des pratiques, pas seulement les
+       archivés. Distinguer aussi bibliothequePratiques (clé GLOBALE partagée = catalogue) de
+       pratiquesConfigurables (per-trimestre). À cadrer : quelle clé est la SOURCE d'un import de pratiques,
+       et la mécanique de copie (dupliquerPratiqueBibliotheque, pratiques-gestion.js:710, à paramétrer par source).
+
+     FILETS verts : 973 Vitest + 61 Playwright (6 neufs ce cap). #326 (maquettes-decouvrabilite) ROUGE
+       PRÉEXISTANT depuis le flag COMPARATEUR_VISIBLE=false (#345) — indépendant, hors périmètre.
+     VERSION : version.json INCHANGÉ 1.21.0 / 0622-1322 (pas de bump ce cap, comme pas 1-3 ; patch au merge sur main).
+     ÉTAT GIT : branche claude/L0-golden-master-A25, HEAD = ce commit doc ; POUSSÉE sur origin (l'action
+       « PUBLIER SUR MAIN » du bloc en tête a son étape 1 [push] FAITE ; restent PR + release + merge).
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION PHASE 2 — D-D1 TRANCHÉE + BRIQUE C PAS 1-3 (import inter-trimestre = COPIE) — 26 juin 2026 PM (Claude Code local).
+     ⮕ RELAI VERS LE PAS 4 — lire ce bloc en premier à la reprise.
+
+     LIVRÉ (4 commits sur claude/L0-golden-master-A25, NON poussée) :
+       1. INTENDANCE (7460b024) — plugin productivite-labo-codex activé (enabledPlugins .claude/settings.json),
+          zip untracked retiré, note de relai Cowork commitée.
+       2. D-D1 TRANCHÉE (b59714d0) — Grégoire : HYBRIDE « globale-partagée + copie-locale ». Grilles/échelles
+          suivent le patron bibliothequePratiques (catalogue global partagé) + copie locale namespacée par
+          trimestre dès édition/usage. Résout le L2 ROUGE. D-C1 en découle : une copie inter-trimestre écrit
+          la clé NAMESPACÉE du trimestre actif ; la biblio globale reste catalogue/lecture. Acté au cadrage
+          (§3.3 D-D1, §2.3 D-C1).
+       3. BRIQUE C PAS 2 — cleSource (b6ea9443). window.cleSource(nomCle, trimestreSourceId) dans trimestres.js :
+          lit la clé d'un trimestre NOMMÉ sans swap du trimestre actif (miroir de cle() paramétré par une source).
+          Sentinelle sentinelle-clesource-trimestre-briqueC (5 cas), break-testée.
+       4. BRIQUE C PAS 3 — dupliquerGrillePartagee généralisée (db16227f). js/partage-section.js : la lecture des
+          cartouches liées est INJECTÉE (2e arg) → même mécanique de copie pour la Voûte (collection plate
+          partage_cartouches, lecteur par défaut) ET un import inter-trimestre (cartouches par CLÉ
+          cartouches_{grilleId}, via cleSource). copiePropre intacte. Destination = clé GLOBALE nue (migration
+          des writers vers cle() = Brique D, PAS ici ; verrou par test DESTINATION). Fonction exposée sur
+          window.partageSection. Sentinelle sentinelle-duplication-source-briqueC (11 cas), break-testée
+          (2 modes de mutation source). Non-régression Voûte (partage-section-P4) verte.
+
+     OUTILS RÉUTILISABLES DISPONIBLES POUR LE PAS 4 :
+       • window.cleSource('grillesTemplates', srcTrim) / cleSource('cartouches_'+grilleId, srcTrim)
+         → lire les modèles d'un trimestre source SANS swap.
+       • window.partageSection.dupliquerGrillePartagee(grilleSource, lireCartouchesDe) → copier une grille
+         + ses cartouches dans le trimestre actif, source jamais mutée. Au pas 4, fournir
+         lireCartouchesDe = (g) => db.getSync(cleSource('cartouches_'+g.id, srcTrim), []).
+
+     PROCHAIN CAP = BRIQUE C PAS 4 — « Import grilles dans la modale » (UI + Playwright) :
+       - Ajouter une section « importer d'un autre trimestre » dans afficherBibliothequeGrilles() (grilles.js
+         ~2261). PATRON À IMITER : productions-bibliotheque-ui.js (importerToutTrimestreModal) et
+         echelles-bibliotheque.js (modale échelles inter-trimestre DÉJÀ branchée).
+       - Câbler le bouton d'import sur dupliquerGrillePartagee(grilleSource, lecteurParCle) (ci-dessus).
+       - DÉCISIONS À CONFIRMER au démarrage (cadrage §2.3) : D-C2 (types v1 : A grilles+échelles ou B +pratiques),
+         D-C8 (entrée = section par modale, reco), D-C7 (source archivée permise en lecture seule), D-C4 (ré-examiner).
+       - DÉCOUVERTE (vérif adverse du diff pas 3) : grille.echelleId N'EST PAS un champ racine général des grilles
+         (1 seule occurrence, grille générique grilles.js:1538 ; dupliquerGrille ne le construit pas). Le lien
+         grille↔échelle passe par la PRODUCTION (grilleId + echelleId séparés) et par cartouche.echelleId (optionnel).
+         Donc D-C4 « remapper l'échelle d'une grille importée » est plus léger que craint pour le chemin grille+cartouches.
+         Le test-témoin D-C4 (sentinelle-duplication-source-briqueC) VERROUILLE le report : il RUGIRA quand le pas 4
+         ajoutera le remappage — signal attendu, mettre à jour le témoin à ce moment.
+
+     FILETS À GARDER VERTS AU PAS 4 : partage-section-P4 (Voûte), sentinelle-duplication-source-briqueC,
+       sentinelle-clesource-trimestre-briqueC. Import = copie (id neuf) → L0/L2 non touchés.
+     ARTEFACT : cartographie multi-agents du graphe de références entre modèles (grille/échelle/cartouche/
+       production/pratique) produite cette session (workflow cartographie-duplication-modeles) ; résumé en
+       commit db16227f — relancer le workflow si besoin du détail.
+     TESTS : 973 Vitest verts (123 fichiers ; +5 cleSource +11 duplication-source). Playwright inchangé
+       (Vitest-only ce cap). Hook Défense J : avertissements fixtures de test = norme acceptée du dépôt
+       (aucun test du repo n'utilise security-ok — vérifié).
+     VERSION : version.json INCHANGÉ 1.21.0 / 0622-1322. Intention = patch au merge sur main.
+     ÉTAT GIT : branche claude/L0-golden-master-A25, HEAD db16227f. Plugin reliquats FAITS (7460b024).
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION PHASE 1 — BRIQUE B NAMESPACING (ÉDITEURS DE CONCEPTION) + CADRAGE C/D — 26 juin 2026 PM (Claude Code local).
+     LIVRÉ (3 commits 8dc51d32→6d3b47f2, branche claude/L0-golden-master-A25, NON poussée) :
+       1. BRIQUE B — section Conception entièrement namespacée (get+set → cle()). Constat d'audit : la zone
+          Conception n'est PAS de la lecture — grilles.js et echelles.js SONT les éditeurs complets (cycles
+          read-modify-write). Décision Grégoire = « pleinement éditable » (A25 = vrai trimestre, pas seulement
+          consultable). Invariant H26 = no-op prouvé (cle() rend la clé globale tant que le trimestre actif
+          n'est pas archivé).
+          - Lot B1 (8dc51d32) — grilles.js : 70 accès grillesTemplates → cle() + GARDE archive dans
+            initialiserModuleGrilles (pas d'auto-migration ni de grille générique en archive = pas de pollution
+            de la copie golden master a2025_).
+          - Lot B2 (5c4c9778) — echelles.js : 68 accès echellesTemplates → cle() + garde archive jumelle
+            (migrerEchellesVersBibliotheque / assurerEchelleGenerique / assurerEchellesPersonnalisees).
+          - Lot B3 (6d3b47f2) — wizard-pratique-v2.js : 8 accès (sélecteurs grille/échelle + récap) → cle().
+            Pas de garde (aucune écriture auto au chargement).
+       2. SENTINELLE sentinelle-cle-conception-namespacee-briqueB (25 tests) : branchement COMPORTEMENTAL
+          (importerGrilles/EchellesExternes écrit le global en H26, a2025_ en archive) + ratchet statique
+          (3 fichiers) + garde. Break-testée par lot (B1 3×, B2, B3) — tous rouges attendus obtenus. LEÇON
+          MÉTHODE : 1er break-test wizard = FAUX-VERT (sed `0,/…/` = extension GNU non supportée par le sed
+          BSD de macOS → break non appliqué) ; corrigé puis re-vérifié (grep-confirmer l'application d'un break
+          AVANT de conclure du résultat du test).
+       3. VALIDÉ TERRAIN (Grégoire) : « Ça fonctionne » — A25 affiche ses propres modèles dans Conception.
+       4. CADRAGE BRIQUES C/D rédigé : plans de travail/CADRAGE-briques-C-D-namespacing.md (workflow multi-agents :
+          5 cartographies + synthèse + critique adverse). Critique adverse VÉRIFIÉE au code — 4 trous
+          CRITIQUES/IMPORTANTS confirmés : (a) bibliothequePratiques = clé GLOBALE partagée intentionnelle oubliée
+          (pratiques-bibliotheque.js) → patron « biblio globale + copie locale » déjà existant pour les pratiques,
+          reformule la décision-pivot D-D1 ; (b) clés globales de modèles non inventoriées (objectifsTemplates,
+          bibliothequeProductions, echellesPerformance/niveauxEchelle) ; (c) le L2 sentinelle ne scanne QUE
+          grillesTemplates → « L2 VERT » est un FAUX POSITIF pour échelles/pratiques/cartouches, à ÉTENDRE AVANT
+          toute migration ; (d) desarchiverTrimestre ne purge PAS les copies namespacées = bug latent (orphelins
+          morts non relus hors-archive) — c'est un FIX, pas une décision ouverte.
+          DÉCISION-PIVOT D-D1 à trancher AVEC Grégoire avant toute implémentation : grilles/échelles
+          globales-partagées + copie-locale (patron bibliothequePratiques) OU pleinement namespacées.
+     TESTS : 957 Vitest verts (121 fichiers ; +25 sentinelle Brique B). Playwright 55/1 (#326 maquettes
+       préexistant, sans rapport avec grilles/échelles/wizard). Audit §2 propre sur les 3 diffs (0 innerHTML/
+       handler/eval/console.log ajouté ; hook Défense J = avertissements PRÉEXISTANTS « écriture clé sensible »,
+       sanitisation au rendu via echapperHtml, pas au stockage ; commits autorisés).
+     VERSION : version.json INCHANGÉ 1.21.0 / 0622-1322 (4 points de vérité synchrones, non touchés).
+       Intention = patch au merge sur main.
+     ÉTAT GIT : branche claude/L0-golden-master-A25, HEAD 6d3b47f2, +24 vs origin/main. .plugin productivité
+       (session Cowork parallèle) toujours non commité, à committer à part par Grégoire/Cowork.
+     PROCHAIN CAP : Briques C (import inter-trimestre = COPIE) et D (migration des globaux), SESSIONS SÉPARÉES
+       (D = risque maximal, touche les collections globales partagées). OUVRIR par la décision-pivot D-D1, puis
+       étendre L2 + ratchet AVANT toute migration. Réf : plans de travail/CADRAGE-briques-C-D-namespacing.md.
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION PHASE 0 — DIAGNOSTIC REPRODUCTIBILITÉ A25 + CONTOURNEMENT + RÉPARATION DONNÉES — 26 juin 2026 AM (Claude Code local).
+     LIVRÉ :
+       1. PHASE 0 (a) — REPRODUCTIBILITÉ MOTEUR PROUVÉE. Le moteur ACTUEL re-dérive les notes A25 au
+          centième : 65/65 critères français algo reproduits (MAE 0, écart max 0) avec pondération=30 +
+          facteur 500, formule mode catégories `note = pond − sommePondérée/mots×500`. Réponse Phase 0 :
+          OUI, sans réserve. Tension du dossier TRANCHÉE par les données : 62/65 critères algo en MODE
+          CATÉGORIES (codes stockés), 3 en mode simple, 0 « note posée vide » → le §8.2 « champs vides »
+          (PLAN-restauration-longitudinale-A25) était PÉRIMÉ ; le diagnostic #350 est exact. Script diag
+          (scratchpad, hors repo) : simuler-critere-algo-a25.mjs.
+       2. B1 — GARDE AUTO-SAVE (commit 7a124420). _autoSauvegarderCriteres (evaluation-chargement.js) ne
+          réécrit PLUS une éval VERROUILLÉE (risque #350 : recalcul déclenché par interaction sur formulaire
+          mal désactivé — angle mort terminale #348 — écrasait la note archivée). Garde dans le chemin commun
+          aux deux écrivains (debounce + flush). Sentinelle break-testée (2 rouges à l'ablation, 4 verts).
+       3. B2 — CORRECTION PROFIL GRILLES A25 (données terrain). Les grilles posées portaient le profil H26
+          (Fr 20 %) ; corrigées au profil A25 RÉEL dérivé des évals = S15·R20·P10·N25·Fr30 (FR-HOLIS + FR-ALGO ;
+          Grille-4 sans français déjà juste, INTOUCHÉE). Libellés « -20 H26 » → « -30 A25 ». NOTE-NEUTRE :
+          golden master L0 reste VERT (MAE Omnivox 0,148, 30/30).
+       4. B3 — MODE CATÉGORIES ACTIVÉ (a2025_modalitesEvaluation.activerCategorisationErreurs=true). Effet de
+          bord ASSUMÉ : 1 éval active saisie en mode simple (Artefact 6, 25 err) affiche « 0 erreur » sur le
+          critère algo → résorbé à la reconstruction native (Phase 2).
+       5. RE-POINTAGE PRODUCTIONS A25 (données). production.grilleId pointait l'ANCIEN id FR-ALGO
+          (GRILLE1759529438501, introuvable depuis le renommage) sur Artefact 6 + Terminale ; vide sur Artefact
+          2 + 9. Re-pointé vers la grille dominante des évals (Art6/Term → GRILLE_A2025_FR_ALGO, Art2 → FR-HOLIS,
+          Art9 → Grille-4). L0 VERT. Le re-pointage du 23 juin avait corrigé les évals mais OUBLIÉ les productions.
+       6. RÉPARATION a2025_productions ÉCRASÉ. Au hard refresh terrain, a2025_productions a été écrasé par
+          h2026_productions (ids prod_1768073…, « Artefact 1-10 ») → 305 évals ORPHELINES (NON REÇU partout).
+          Réparé en données via script console : reposé les 11 vraies productions A25 (ids EV2 / PROD1759… /
+          PROD1765415976749 = Terminale), 0 éval orpheline. Réparation TIENT après recharge (écrasement
+          PONCTUEL, pas systématique). CAUSE PROBABLE : quota localStorage SATURÉ + cohabitation H26/A25 dans
+          le même espace (codex « H2026-A25 »). B1 protège désormais les évals verrouillées d'un effet similaire.
+     SCRIPTS TERRAIN (dossier Grégoire « Suivi 101-102-103 », HORS repo, db.setSync) :
+       corriger-profil-activer-categories-a25-console.js (IDEMPOTENT : profil grilles + re-pointage productions
+       + flag mode catégories ; backups internes *__bak_phase0 ; rollback documenté) ;
+       reparer-productions-a25-console.js (repose les 11 vraies productions ; backup *__avant_reparation).
+     VALIDÉ TERRAIN (Grégoire, Mac) : codes d'erreurs affichés (17 err/671 mots → 17,33/30 = 57,8 %, catégorie
+       dominante) ; profil A25 visible (S15·P10·Fr30) ; grilles renommées « -30 A25 » ; éval-pilote 76,6 % ;
+       holistiques OK ; réparation productions TIENT après Cmd+R (notes A25 présentes).
+     TESTS : 932 Vitest verts (120 fichiers ; +4 sentinelle-autosave-verrou-eval, break-testée). Playwright = CI.
+       Audit §2 propre (garde + exposition ; 0 innerHTML/handler/eval/console.log ajouté). §4 break-test : 2
+       rouges à l'ablation de la garde → restauré → 4 verts, arbre propre.
+     VERSION : version.json INCHANGÉ 1.21.0 / 0622-1322 (branche de travail). Intention = patch (#350) au merge main.
+     ÉTAT GIT : branche claude/L0-golden-master-A25, HEAD 7a124420 (B1, 2 fichiers : evaluation-chargement.js +
+       sentinelle). BACKLOG.md (#351) + CONSIGNE-renommage-eleves-demo.md = SESSION COWORK PARALLÈLE (renommage
+       20 élèves démo, 26 juin) — NON commités, à committer par Grégoire/Cowork à part. .plugin productivité préexistant.
+     PROCHAIN CAP : PHASE 1 — SOCLE NAMESPACING (Briques B/C/D), à OUVRIR par la BRIQUE B (création/affichage
+       namespacé dans CONCEPTION : grilles/échelles/cartouches/PRODUCTIONS A25 lisent ENCORE le global H26 —
+       constat terrain Grégoire, 4 captures). La cohabitation H26/A25 dans un localStorage saturé cause des
+       écrasements (item #352) → renforce l'urgence du socle. Réf : plans de travail/PLAN-namespacing-par-trimestre.md
+       (Briques B/C/D) + PLAN-reconstruction-trimestres.md (Phase 1).
+     BACKLOG (ajouts non commités) : #352 écrasement a2025_productions ← h2026 ; #353 quota localStorage saturé ;
+       #354 grille de référence dépistage introuvable (×30) ; #355 navigation élève en consultation ; #356
+       anonymiser le golden master ; a2025_interventions orpheline (#336). #350 MàJ : contourné A25 (flag + profil
+       corrigé), reproductibilité moteur PROUVÉE (MAE 0), reste reconstruction native (Phase 2) + vérif H26.
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION PILOTE A25 « VOIE COURTE » + BASCULE VERS RECONSTRUCTION NATIVE — 25 juin 2026 PM (Claude Code local).
+     LIVRÉ :
+       1. Pilote A25 « voie courte » (pose des modèles namespacés) — scripts/poser-modeles-a25.mjs
+          (dry-run + écriture sur COPIE, original intouché). Pose a2025_grillesTemplates (3 grilles :
+          FR-HOLIS, Grille-4/SRPN, FR-ALGO renommée GRILLE_A2025_FR_ALGO — source backup 4 fév 2026,
+          critereId identiques aux évals) + a2025_echellesTemplates (2 échelles IDME — source
+          pratique-A2025-reconstituee.json). VALIDÉ : golden master L0 VERT (30/30, MAE Omnivox 0,148) ;
+          résolution grille+échelle 0/305 → 305/305 (vérif adverse). Posé en terrain via script console
+          (db.setSync ; poser-modeles-a25-console.js, hors repo). Terrain Grégoire : échelle + critères +
+          grille s'affichent (fin du symptôme #348 / #349 composante 2).
+       2. CSV L0 oracle régénéré (maintenance) — 2 valeurs « conforme » réalignées sur le moteur
+          (Houle 77,9→77,6 ; Marquis 69,4→71,1). MAE conforme 0,087→0,024, 30/30 dans la tolérance,
+          diagnostic « valeurs à régénérer » résorbé. Backup *.avant-regen-L0 (dossier Grégoire, hors repo).
+       3. DIAGNOSTIC TERRAIN (Grégoire) → BACKLOG #350 : à l'ouverture d'une éval rédaction A25, la note se
+          RECALCULE faux (éval-pilote terminale 76,6 → 88 %). Le critère français algo affiche 0 erreur au
+          lieu du nombre stocké. Cause = (fait) données en MODE CATÉGORIES (codes) mais mode non activé dans
+          a2025_modalitesEvaluation → rendu en mode simple (evaluation-chargement.js:828-836) → codes non
+          restaurés (evaluation.js:1346-1391) ; + (contexte Grégoire) A25 évalué par un MOTEUR ANTÉRIEUR
+          (codes saisis à la main, calcul différent, module annotation inexistant) → le moteur actuel ne
+          reproduit pas. Données STOCKÉES INTACTES (donneesAlgorithmiques.totalErreurs présent, notes =
+          Omnivox, L0 vert). Bug d'AFFICHAGE/recalcul, PAS une corruption.
+       4. BASCULE DE STRATÉGIE (Grégoire) : abandon du raccourci (pose par script, notes finales seules) au
+          profit de la RECONSTRUCTION NATIVE des trimestres. Objectif REQUALIFIÉ : développer la capacité
+          multi-trimestres de l'app (namespacing socle, comparateur de pratiques, longitudinal, archives,
+          récupération inter-trimestre, Voûte), prête pour la CoP (fin Automne 2026). L'article = sous-produit.
+          A25 = pilote ; A24/H24 = ingestion externe (#347). Chaque trimestre porte ses propres documents
+          pédagogiques. Voir mémoire objectif-reconstruction-multi-trimestres.
+       5. PLAN rédigé — plans de travail/PLAN-reconstruction-trimestres.md (3 axes Socle/Données/Outils ;
+          6 phases ; dépendances ; garde-fous H26 + golden master par trimestre). 4 décisions tranchées (§6) :
+          comparateur AVANT A24/H24 ; Phase 0 = simulation Node + activation du mode catégories ; A24/H24 =
+          reconstruction COMPLÈTE ; Cat. 6 (compteurs/tour) = GLOBAUX.
+     PROCHAIN CAP : Phase 0 (simulation reproductibilité du moteur sur A25 + activer
+       a2025_modalitesEvaluation.activerCategorisationErreurs + vérif terrain), puis Phase 1 (socle
+       namespacing — Briques B/C/D).
+     TESTS : 928 Vitest verts (119 fichiers, inchangés — aucun code/test de prod touché ; pas de sentinelle
+       ajoutée, session = données + plan). Playwright 55/1 (#326 maquettes préexistant). Audit fin de session :
+       §2 propre (poser-modeles-a25.mjs : 0 innerHTML/handler/eval ; console.log = usage CLI normal) ;
+       §4 break-test du garde-fou « refus d'écrasement » du script → rouge attendu obtenu ; anonymisation
+       d'un prénom dans le plan.
+     VERSION : version.json INCHANGÉ 1.21.0 / 0622-1322 (aucun code de prod modifié → pas de bump).
+     ÉTAT GIT : branche claude/L0-golden-master-A25. Commit de ce relais = scripts/poser-modeles-a25.mjs +
+       plans de travail/PLAN-reconstruction-trimestres.md + SESSION.md + BACKLOG.md. .plugin productivité
+       (préexistant) NON inclus. Données A25 (codex enrichi, CSV régénéré, script console) restent dans le
+       dossier de Grégoire, HORS repo.
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION BRIQUE A ÉCRANS D'ANALYSE + CORRECTIFS TERRAIN A25 — 25 juin 2026 (Claude Code local).
+     LIVRÉ (10 commits ad00a4b7→e657cee2, branche claude/L0-golden-master-A25, NON poussée) :
+       1. Brique A « écrans d'analyse » du namespacing — 8 fichiers / 16 lectures de modèles
+          (grilles/échelles/cartouches) branchées sur cle() : liste-evaluations(1),
+          tableau-bord-apercu(2), graphiques-progression(2), synthese-retroaction-data(3),
+          GRAPPE PROFIL calculs(1)/diagnostics(1)/helpers(2)/sections-affichage(4). 1 commit/fichier,
+          diff symétrique (16 substitutions pures). Le plan disait « 9 fichiers » = COQUILLE (8 réels ;
+          corrigée dans le plan). Invariant H26 = no-op (cle()=global tant que trimestre actif non archivé).
+       2. fix #348 (commit 4b0095ee) — crash « Impossible de charger l'évaluation » à la consultation
+          d'une éval A25 dont la grille manque des templates : afficherCriteresDepuisGrille
+          (evaluation-chargement.js:978) écrivait dans #listeCriteresGrille1 (null en éval terminale —
+          panneau déplacé dans la visionneuse) SANS garde → garde DOM (variable conteneur + early return),
+          aligné sur le jumeau gardé _afficherCriteresDepuisEvaluation. PAS une régression du namespacing
+          (diff a93395aa ne touche que la lecture) — bug de robustesse préexistant, révélé le 23 juin par
+          l'isolation des grilles A25.
+       3. fix #348-résiduel (commit e657cee2) — calculerNote (evaluation-calcul.js:546) criait 4×
+          « ❌ Aucune échelle de performance sélectionnée » en cascade au chargement A25 (échelle non
+          résolue avant le pilote) → dégradation SILENCIEUSE (note « -- » + gardes DOM), alignée sur le
+          cas jumeau « grille manquante ». Demande terrain Grégoire.
+     TESTS : 928 Vitest verts (119 fichiers ; +13 depuis 915 : ratchet sentinelle-cle-modeles-trimestre-briqueA
+       étendu aux 8 fichiers analyse + assertion représentative ; sentinelle-crash-criteres-grille-absente-348 ;
+       sentinelle-calculerNote-echelle-non-resolue-348). Passe adverse §4 fin de session : 4 rouges puis
+       restaurées, arbre propre. Playwright = CI (non lançable local).
+     VALIDÉ TERRAIN (Grégoire, Mac) : Section A H26 (non-régression écrans d'analyse) ; L0 golden master
+       a2025 VERT (30/30, MAE Omnivox 0.148 = identique au 23 juin → namespacing NOTE-NEUTRE) ; #348 crash
+       résolu (éval terminale Patricio se charge) ; #348-résiduel bruit échelle tu.
+     ORACLE L0 — 2 divergences NON bloquantes (le moteur colle MIEUX à Omnivox que le CSV de reconstruction) :
+       Houle CSV 77.9 / moteur+Omnivox 77.6 ; Marquis CSV 69.4 / moteur 71.1 / Omnivox 70.8. → 2 VALEURS DU
+       CSV « conforme » À RÉGÉNÉRER (maintenance d'oracle, pas un défaut moteur). Non urgent.
+     PROCHAIN CAP : PILOTE A25 — poser les copies a2025_grillesTemplates/echellesTemplates (JSON de Grégoire,
+       échelle marquée `active`). Rend l'effet du namespacing visible sur A25 ET résorbe les résiduels A25
+       (échelle vide ; #349 composante 2). Puis Briques B (création) / C (import-copie) / D (migration) +
+       décision Cat. 6 (compteurs statistiques.js / tour accompagnement.js : namespacé vs global).
+     BACKLOG (non commité, voir ce relais) : #347 rétroaction recalculée « live » ≠ version historique
+       (conception) ; #348 RÉSOLU ; #349 flicker double rendu éval A25 (cosmétique, DIAGNOSTIQUÉ non corrigé —
+       modifierEvaluation = séquence async 17 étapes, peuplement éditable puis verrouillage tardif étape 13-14
+       _gererIndicateurEtVerrouillageModif → flash ; composante échelle = pilote ; correctif A « voiler le
+       formulaire au chargement » ou B « anticiper desactiverFormulaireEvaluation » à froid après le pilote).
+     ⚠ DIVERGENCE BRANCHES (via BACKLOG-ARCHIVE) : travail cloud #343-T3/T4 (release 1.21.1, commit 6d901fa5)
+       sur claude/project-access-zyxt6n NON mergé dans claude/L0-golden-master-A25 (1.21.0). À réconcilier
+       (PR non confirmée, GitHub indispo en Cowork).
+     VERSION : version.json INCHANGÉ 1.21.0 / 0622-1322 (pas de bump sur branche de travail). Intention =
+       patch (#348) à appliquer au merge sur main.
+     ÉTAT GIT : branche claude/L0-golden-master-A25, HEAD e657cee2, 10 commits devant origin/main, NON poussée.
+       Docs de ce relais committées à part (SESSION.md + BACKLOG.md #347/#348/#349 + plan corrigé +
+       BACKLOG-ARCHIVE.md). .plugin productivité (préexistant) NON inclus.
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION COWORK — RELAI VERS CLAUDE CODE : cadrage Brique A « écrans d'analyse »
+       du namespacing par trimestre — 24 juin 2026 (Cowork, AUCUN code).
+     CONTEXTE / CAP : priorité de Grégoire = namespacing à FROID par trimestre, au
+       service d'une ANALYSE LONGITUDINALE des résultats (A25 ⇄ A24 ⇄ H24 ; cours
+       101/102/103) → article avec Steve Bissonnette ~mi-août 2026. La restauration
+       A25 (§8.4) sert de patron pour A24 puis H24.
+     LIVRÉ (DOCUMENT seulement) : plans de travail/PLAN-briqueA-ecrans-analyse-namespacing.md
+       — plan d'exécution de la SUITE de la Brique A : brancher sur cle() les LECTURES
+       de modèles des ÉCRANS D'ANALYSE. La Brique A du 24 juin n'a couvert que le
+       sous-système ÉVALUATION ; les écrans d'analyse (profil, graphiques, tableau de
+       bord, synthèse) lisent ENCORE le global → consulter un trimestre archivé y montre
+       les modèles du mauvais trimestre. Périmètre VÉRIFIÉ sur le code courant (pas
+       seulement l'audit) : 9 fichiers / 16 lectures globales nues.
+     CORRECTION DE L'AUDIT (à acter) : accompagnement.js (505/519/535/537 — conditions du
+       TOUR GUIDÉ « crée ta première grille ? ») et statistiques.js (142/146 + boucle
+       cartouches_ — COMPTEURS de l'écran Matériel) étaient classés Brique A dans
+       Rapports/AUDIT-call-sites-namespacing-2026-06-24.md → en réalité CATÉGORIE 6
+       (bibliothèque/onboarding, décision UX). NE PAS les substituer en Brique A.
+     DÉCISIONS GRÉGOIRE (24 juin) : (a) unité d'analyse de l'article = LES DEUX (résultats
+       de cohorte ET détail par artefact dans l'app → le PILOTE A25 COMPLET, import des
+       travaux PDF inclus, reste sur le chemin) ; (b) notes externes 102/103 (Direction
+       des études) = à IMPORTER dans Labo Codex, mais REPORTÉ APRÈS le pilote A25 —
+       fonctionnalité NOUVELLE hors des 4 briques (ingestion de résultats externes sans
+       artefacts/grilles), futur item de backlog (pressenti #347) ; (c) Brique A écrans
+       d'analyse = PLAN D'ABORD (ce doc), code délégué à Claude Code.
+     PROCHAIN CAP (Claude Code, demain) : EXÉCUTER plans de travail/PLAN-briqueA-ecrans-analyse-namespacing.md.
+       UN commit par fichier, ordre du §3 : liste-evaluations.js → tableau-bord-apercu.js
+       → graphiques-progression.js → synthese-retroaction-data.js → GRAPPE PROFIL
+       (calculs → diagnostics → helpers → sections-affichage, la plus sensible : dépistage
+       SOLO/RaI + conversion IDME = les chiffres de l'article). Idiome EXACT
+       db.getSync(cle('…'), []) (copié de la Brique A éval). INVARIANT H26 (cle()=global si
+       trimestre actif NON archivé → substitution = NO-OP pour H26) à REPROUVER par test.
+       ÉTENDRE le ratchet de tests/unit/sentinelle-cle-modeles-trimestre-briqueA.test.js
+       aux 9 fichiers (PAS accompagnement.js / statistiques.js) + 1 Playwright A25/H26
+       + break-test (faire ROUGIR) + oracle L0 scripts/valider-golden-master-trimestre.mjs
+       VERT à chaque fichier (aucune note ne bouge).
+     DÉPENDANCE : effet visible sur A25 SEULEMENT une fois les copies a2025_* posées
+       (pilote A25 — attend les JSON de Grégoire, échelle marquée `active`). Le code est
+       livrable AVANT (H26 = no-op) → code et donnée découplés.
+     DÉCISIONS OUVERTES (§7 du plan, pour Grégoire) : Cat. 6 namespacé vs global
+       (compteurs/tour) ; ordre A24 puis H24 ; confirmer 1 commit/fichier.
+     ÉTAT GIT : branche claude/L0-golden-master-A25, HEAD 2c196a51. Cette session Cowork
+       n'a modifié AUCUN fichier js/tests/index ; ajouts = ce bloc SESSION.md + le nouveau
+       plan .md, NON committés (rituel fin de session §7 : pas de commit sans demande).
+       version.json INCHANGÉ 1.21.0 / 0622-1322. Vitest 915 inchangés (rien exécuté ici).
+     HYGIÈNE BACKLOG repérée via /update (HORS chantier, à traiter à part) : en-tête
+       BACKLOG « État courant 1.20.0 » périmé (réel 1.21.0) ; #345 et #282 [x] encore dans
+       « À faire » → à archiver ; ETAT-PROJET.md figé à 1.6.1 (10 juin) ; retours testeurs
+       ouverts sans item de backlog : #116, #328-T1, #343-T3/T4/T5.
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION BRIQUE A NAMESPACING (flux d'évaluation) + DIAGNOSTICS TERRAIN — 24 juin 2026 (Claude Code local).
+     LIVRÉ — Étape 1 (audit) + Brique A (lecture) du PLAN-namespacing-par-trimestre :
+       29 lectures de modèles (grilles/échelles/cartouches) du sous-système ÉVALUATION
+       branchées sur cle() — evaluation.js, -calcul, -chargement, -retroaction, -sauvegarde.
+       Périmètre élargi du seul AFFICHAGE au CALCUL (calculerNote) pour éviter une désync de
+       la note A25 (sinon grille « trouvée » à l'affichage mais « introuvable » au recalcul).
+       Diff symétrique : 29 ajouts cle() = 29 retraits de lectures nues (remplacements purs).
+     INVARIANT H26 : trimestre actif NON archivé → cle() rend la clé globale INCHANGÉE
+       (trimestres.js:294, fichier NON touché). Comportement H26 identique. Résout le symptôme
+       A25 « grille introuvable » + échelle vide UNE FOIS les copies a2025_grillesTemplates/
+       echellesTemplates posées (pilote §4 — attend les JSON A25 de Grégoire).
+     TESTS : sentinelle tests/unit/sentinelle-cle-modeles-trimestre-briqueA.test.js (9 cas) —
+       BREAK-TESTÉE 2 axes (cassé cle() → RÉSOLUTION ARCHIVE rouge ; lecture nue réintroduite →
+       ratchet rouge ; restaurés, arbre propre). 915 Vitest verts (+9). Playwright 55/1 (le 1 =
+       #326 maquettes-decouvrabilite, comparateur masqué #345, PRÉEXISTANT sur main, sans lien).
+       Audit complet : Rapports/AUDIT-call-sites-namespacing-2026-06-24.md.
+     RESTE namespacing (HORS périmètre de cette session) : Catégorie 1 non-éval
+       (profil-etudiant-*, graphiques-progression, tableau-bord-apercu, accompagnement,
+       liste-evaluations, synthese-retroaction-data, statistiques) lit ENCORE le global ;
+       Brique B (création) + décision UX « bibliothèque globale vs par trimestre » (audit Cat. 6) ;
+       Brique C (import-copie) ; Brique D (migration). L'écran d'éval A25 est couvert, PAS les
+       écrans profils/graphiques/tableau de bord.
+     VALIDATION TERRAIN éval H26 : NON faite (interrompue par les diagnostics ci-dessous).
+       En H26 le comportement est identique (cle()=global) donc sans risque ; reste à confirmer
+       visuellement à l'ouverture d'une éval.
+     DIAGNOSTICS TERRAIN (données INTACTES, AUCUN lien avec le chantier de code) :
+       1. Groupes-cours « disparus » = la bascule de trimestre ne re-peuple pas la liste affichée
+          (changerTrimestreActif:362 ne rafraîchit pas l'accordéon GC) ; un rechargement contourne.
+          Les 2 groupes H26 (00002/00008) sont intacts. → item plan « swap à la bascule ».
+       2. Travaux « Non associé » sur les 2 groupes H26 = les 11 productions H26 portaient
+          l'ANCIEN coursId du cours (COURS1766455789356, créé 23 déc 2025, absent de la fiche
+          `cours`) alors qu'évals (409)/présences (1617)/élèves (51)/fiche cours utilisent le
+          canonique h2026-601-101-MQ-00001 → le filtre coursId (modes.js:624) écartait TOUTES les
+          productions (liste-evaluations.js:798) → fichiers orphelins. VÉRIFIÉ via le backup du
+          22 juin : ce sont les VRAIES productions H26 (productionId/titres/fichiers concordent),
+          PAS la contamination #340 ; désalignement = migration d'id de cours qui a oublié les
+          productions (préexistant au 22 juin). RÉPARÉ EN DONNÉES (console one-shot : 11 productions
+          réalignées → canonique ; backup pris ; productionId INCHANGÉS ; validé terrain). Cause de
+          fond + doublons cours + warning « Fichier sous X » → BACKLOG #346. NB honnête : mes
+          lectures successives « transitoire » puis « contamination A25 » étaient ERRONÉES — la
+          vérification du backup a tranché (le fix initial était correct).
+     COMMIT : branche claude/L0-golden-master-A25, en local, SANS bump de version (chantier en
+       cours). Filets break-test §4 OK. .plugin productivité (préexistant) NON inclus.
+     PROCHAIN CAP : valider éval H26 (visuel) ; puis pilote A25 (JSON A25 dans a2025_* + import
+       travaux PDF) OU étendre Brique A au reste de la Cat. 1 ; chantier coursId séparé.
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION RESTAURATION A25 §8.4 + CADRAGE NAMESPACING — 23 juin 2026 PM (Claude Code local).
+     LIVRÉ : scripts/restaurer-isoler-cartouches-A25.mjs — restaure les cartouches A25
+       RÉELLES depuis le backup du 4 février (dump localStorage double-encodé : cartouche
+       FR-ALGO CART1763652289229 + 4 cartouches Global-4 ; descripteurs/niveaux/commentaires
+       intacts, critereId concordants) et ISOLE la grille FR-ALGO partagée (66 évals A25
+       re-pointées GRILLE1759529438501 → GRILLE_A2025_FR_ALGO). Pondération A25
+       S15·R20·P10·N25·Fr30 (grilles 5 critères) / S20·R30·P15·N35 (Global-4) confirmée par
+       les évals + Grégoire. Notes d'artefact JAMAIS touchées.
+     ORACLES sur le codex PROMU : L0 ✅ VERT (MAE Omnivox 0,148, 30/30 ; rougissement prouvé),
+       L2 ✅ VERT (aucune grille partagée), 0 cartouche orpheline, H26 intact (89 évals + 2
+       cartouches), 0 clé perdue, 305 évals A25 préservées.
+     PROMOTION : donnees.json du codex export remplacé (sur copie validée) ; 2 filets
+       (donnees.json.bak + donnees.json.avant-recreation-A25-<ts>) ; manifeste aligné.
+       Grégoire a re-zippé (manifeste+donnees+travaux) et réimporté ; basculé sur A25.
+     VALIDÉ TERRAIN : consultation A25 OK (Évaluation terminale : 30 évalués, moyenne 72,1 %,
+       niveaux + notes affichés). RÉSIDUEL cosmétique : encadré « Grille d'origine introuvable »
+       + échelle vide à l'ouverture d'une éval (namespacing incomplet ; les Artefacts 1-9
+       l'avaient déjà avant). Critères + cartouche affichés via fallback (données sauvegardées).
+     DÉCISION ARCHITECTURE (Grégoire) : NAMESPACING PAR TRIMESTRE — chaque trimestre porte SES
+       modèles (grilles/échelles/cartouches/productions), import inter-trimestre = COPIE,
+       originaux intouchés. Racine de la contamination. Mécanisme natif PARTIEL/DORMANT
+       (archivage copie vers a2025_*, cle() route en mode archive, MAIS écrans lisent le global
+       EN DIRECT, pas de swap à la bascule changerTrimestreActif). Cadré dans
+       plans de travail/PLAN-namespacing-par-trimestre.md (4 briques + pilote A25 complet avec
+       import travaux PDF + réplication A24/H24) + mémoire namespacing-par-trimestre.
+     PROCHAIN CAP : exécuter le plan namespacing À FROID (audit call-sites → Brique Lecture →
+       pilote A25 modèles + travaux PDF → validation « trimestre actif » → A24/H24).
+     RELIQUATS documentés (non bloquants) : échelles A25 orphelines (édition seulement) ;
+       4 cartouches H26 doublons inertes dans cartouches_GRILLE1759243306842 ; 5 évals A25 à
+       pondération déviante (1 contaminée Fr20 + 4 anomalies ; notes correctes, non modifiées).
+     ⚠ Vitest 906 verts INCHANGÉS (aucun module app touché ; livrables = scripts + .md).
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION PÉRIMÈTRE 2 — HYGIÈNE/CONFIDENTIALITÉ (23 juin 2026, Claude Code local).
+     Anonymisation des données d'élèves résiduelles dans les .md — COMMITTÉ 1e5cc3c4.
+     PÉRIMÈTRE RÉEL : 11 fichiers .md (≈9 DA réels, 41 élèves → Élève-NNN ;
+     DA → [DA-retiré]). Le « 21 DA » du handoff sur-comptait des SHA de commits et
+     des exemples fictifs.
+     MÉTHODE DÉCISIVE : recoupement avec le codex A25 (« Suivi 101-102-103/
+     codex-…A25-…12h29/donnees.json » = liste des vrais élèves). Seul moyen fiable
+     de trier réel/fictif ET d'attraper les noms de famille SEULS dans les analyses
+     auto-perspective* (vecteur invisible au grep de motifs). Vérif adverse
+     indépendante : grep codex = 0 DA / 0 paire résiduelle ; elle a attrapé 1 raté
+     (prénom sur ligne JSON séparée du nom → re-scan de densité).
+     PRÉSERVÉS (faux positifs / non-élèves) : exemples (Marie-Hélène/2024567), groupe
+     démo, SHA, plateforme Léa, mot « bienvenue », collègues-auteurs de pratiques
+     (Bruno V., Xavier C.-T.) + testeurs (Olivier/Jordan/Elise).
+     HISTORIQUE GIT : CONSERVÉ (décision Grégoire — repo privé + mono-utilisateur ;
+     réécriture écartée pour ne pas casser la PR #62). HEAD propre ; le diff du commit
+     garde les noms en lignes « − » (sans conséquence tant que privé) ; purgeable
+     plus tard si le statut change.
+     DIVERS : artefact untracked error-context.md (données réelles) supprimé ; reste
+     un trace.zip Playwright gitignoré (purgeable). /tmp nettoyé. Mémoire
+     repo-prive-donnees-eleves mise à jour. Vitest 906 inchangés (aucun module touché).
+     RESTE : anonymisation des TIERS (collègues/testeurs) — seulement sur demande.
+     PROCHAIN CHANTIER : Restauration A25 (§8.4 recréation des cartouches depuis les
+     critères + re-pointage, validée L0/L2 ; pondération S15·R20·P10·N25·Fr30).
+     =====================================================================
+-->
+
+<!-- =====================================================================
+     SESSION RESTAURATION A25 — L0 + L2 (audit+sentinelle) LIVRÉS (23 juin 2026, Claude Code local).
+     Pilote longitudinal A25 (plan « plans de travail/PLAN-restauration-
+     longitudinale-A25.md », §8 restauré le matin du 23). Base : 1.21.0 après
+     fast-forward de main (le clone local était 56 commits en retard, gelé au
+     12 juin — fast-forward sans risque, working tree propre).
+
+     LIVRÉ — L0 « golden master Omnivox par trimestre » :
+       scripts/valider-golden-master-trimestre.mjs (générique, réutilisable
+       L1-L7 + A24/H24). Charge le vrai moteur calculerDetailsNoteFinale via
+       chargerScript (hors navigateur). Oracle = Omnivox (plan §2) ;
+       reconstruction « conforme » = diagnostic non bloquant. Vérif adverse
+       intégrée (--prouver-rougit).
+     RÉSULTAT A25 (✅ VERT) : le recalcul moteur SUR LE CODEX reproduit Omnivox
+       à MAE 0,148 (30/30, max 0,32). Confirme et améliore le break-test §8.1
+       (0,148 < 0,203). Rougissement prouvé.
+     DIAGNOSTIC — 2 valeurs « Note finale conforme » du CSV resultats-conformes-
+       A25.csv à REGÉNÉRER côté reconstruction (le codex fait foi, colle à
+       Omnivox) : élève A (69,4→71,1) et élève B (77,9→77,6). À regénérer (nous, pas Cowork).
+       Détail : §8.6 du plan.
+
+     L2 (audit + sentinelle) : affine §8.2 — UNE SEULE grille partagée A25/H26
+       (GRILLE1759529438501 FR-ALGO, 66 évals A25 + 89 H26) ; les 2 autres grilles
+       A25 isolées de fait. Livré scripts/sentinelle-isolation-grilles-trimestre.mjs
+       (invariant structurel, ❌ ROUGE aujourd'hui, ✅ VERT après --simuler-isolation).
+       Détail : §8.7 du plan.
+     PROCHAIN : recréation propre (§8.4) = GRÉGOIRE + CLAUDE CODE. ⚠ L'isolation par
+       simple copie est IMPOSSIBLE — la cartouche A25 FR-ALGO est PERDUE (orpheline
+       CART1763652289229, écrasée par les cartouches H26 ; cf §8.8, notes intactes/L0
+       vert). À la place : RECONSTRUIRE les cartouches A25 depuis les criteres des
+       évals (déf. connue) + ids distincts + re-pointer. §8.3 TRANCHÉ par les données :
+       pondération A25 = S15·R20·P10·N25·Fr30 (= handoff, PAS H26). À exécuter à froid,
+       sur copie + backup, validé L0+L2.
+     POUR REPRENDRE — vérifier l'état en 2 commandes (<DOSSIER> = dossier Cowork
+     « Suivi 101-102-103 » sur le Mac de Grégoire ; <CODEX> = codex-…A25-…12h29/donnees.json) :
+       node scripts/valider-golden-master-trimestre.mjs --codex "<DOSSIER>/<CODEX>" \
+         --reference "<DOSSIER>/resultats-conformes-A25.csv" \
+         --omnivox "<DOSSIER>/601-101-MQ A2025 groupe 00001.xls" --trimestre a2025 --prouver-rougit
+       node scripts/sentinelle-isolation-grilles-trimestre.mjs --codex "<DOSSIER>/<CODEX>" \
+         --trimestre-cible a2025 --simuler-isolation
+       (L0 doit être VERT ; L2 ROUGE aujourd'hui puis VERT après --simuler-isolation.)
+     CE TRAVAIL est sur la branche claude/L0-golden-master-A25 (PR #62). À MERGER pour que
+     ce relais + les scripts soient visibles depuis main — sinon une nouvelle instance
+     démarrant le rituel sur main repart de l'état du 22 juin.
+     ⚠ CONFIDENTIALITÉ (23 juin) : le repo est passé en PRIVÉ — il contenait des données
+     d'élèves réelles (noms + DA) dans SESSION.md, plans et rapports (~21 fichiers .md sur
+     un dépôt alors public). Décision Grégoire : ne PAS le repasser public. Ma branche L0/L2
+     a été anonymisée (identifiants retirés, squash + force-push, PR #62 éditée). RESTE
+     (hygiène, à froid) : anonymiser les ~21 fichiers + les 21 DA de SESSION.md ; trancher
+     le sort de l'historique git (le contenu courant nettoyé ne purge pas les commits passés).
+     ⚠ Vitest 906 verts inchangés (aucun module app touché ; L0+L2 = scripts).
+     =====================================================================
+-->
+
+<!-- =====================================================================
      SESSION DEN — 22 juin 2026 (Claude Code local, Safari terrain), suite du
      matin après #345. Release 1.21.0 (build 0622-1322). 906 Vitest verts.
      Rituel de fin appliqué (audit §1→§6 + break-test §4) avant clôture.
@@ -722,7 +1281,7 @@
      TROIS QUARTS + #341 DÉCOUVERT.
      • Terrain L2-b2 acquis : S1 ✅ ×2 groupes, S2 ✅, S3 ✅ ×2 groupes
        POST-réparation #340 (notes revenues : gr.00002 25 lignes, gr.00008
-       26 lignes, 1 seul pf:null = DA 9000135, cas à confirmer abandon).
+       26 lignes, 1 seul pf:null = DA [DA-retiré], cas à confirmer abandon).
        RESTE la dernière étape : aller-retour de pratique via
        PratiqueManager.changerPratiqueActive en console (copie jetable
        « PAN-SDT-Litt H26 (copie) », id pratique_1781283452752_1_9e7c433ece40,
@@ -1285,7 +1844,7 @@
      états orphelins ; (3) appel sur l'ORIGINALE = proposition de
      restauration (fin du no-op menteur). Sentinelle du 8 juin étendue à
      9 cas dont verrou anti-réintroduction. 516 Vitest + 53 Playwright =
-     569 VERTS. SUIVI-BUGS #141. RÉPARATION des données de Justin :
+     569 VERTS. SUIVI-BUGS #141. RÉPARATION des données de Élève-002 :
      Liste → ligne sans badge → Actions → Supprimer l'évaluation.
      SUITE (18h) — BUG TERRAIN #142 CORRIGÉ + RELEASE 1.11.3 (build
      0610-1802) : « Aucun codex actif » au boot malgré données chargées.
@@ -1949,7 +2508,7 @@
 >   - **Transitions — `695a4440` (1.2.2, build 0608-0707)** : les 3 bandeaux de jalon (`transitions.js`) s'affichaient sur N'IMPORTE QUELLE section (d'où « signaux qui méritent attention » sur l'accueil). Ajout d'un champ `sections` par transition + filtre `cibleSectionCourante` (lit `sectionActive`). Mapping : « tableau de bord / signaux / interventions » → **suivi** ; « espace prêt, saisir présences et évaluer » → **evaluations**. Plus rien sur l'accueil. Test `tests/integration/transitions-ciblage-section.spec.js`.
 >   - **Bug #136 — `107655e6` (1.2.3, build 0608-0733 ; rapport `BUG_grégoire_2026-06-08_07-14-38`)** : supprimer un doublon de reprise laissait l'original étiqueté « remplacée ». Aucun geste de la liste ne défaisait proprement une reprise (« Déplacer le fichier à la corbeille » ne touche qu'au fichier ; « Supprimer l'évaluation » laissait `remplaceeParId` orphelin ; seul `retirerJetonReprise`, page d'évaluation, le faisait). **Cohérence** : helper pur `restaurerOriginaleSiReprise` + `supprimerEvaluation` l'appelle → supprimer une reprise restaure l'original. **Garde-fou** : `confirmerSuppressionFichier` avertit (variables `--alerte-*-attention`) quand le travail est lié à une reprise. Test `tests/unit/sentinelle-suppression-reprise-2026-06-08.test.js` (6 cas). Entrée `SUIVI-BUGS.md` #136.
 >   - **▶️ À REPRENDRE — PROCHAIN CHANTIER = axe D « Exploration des pratiques »** (conception Cowork du 8 juin, SPEC `plans de travail/SPEC_D_exploration_pratiques.md`, backlog #326). Préalables au code : #320 (répertoires) + #318 (DEN couche 2) ; D-0/D-1 (moteur pur) parallélisables. Contact `config.js`/`navigation.js` (renommage label, id `comparateur` conservé) = aval Grégoire requis.
->   - **AUTRES SUITES** : (a) **Réparer l'artefact 10 de Justin** en prod (geste utilisateur : supprimer l'évaluation de reprise depuis la liste, ou décocher le jeton de reprise). (b) **Environnement de test instable** ce jour : binaire WebKit Playwright disparu (réinstallé via `npx playwright install webkit`), Vitest v2.1.9 → v4.1.8 en cours de session (skip intermittent du lint en suite, OK en isolé) — cf. NB Cowork « `tests/node_modules` perturbé → `rm -rf node_modules && npm install` dans `tests/` sur Mac ».
+>   - **AUTRES SUITES** : (a) **Réparer l'artefact 10 de Élève-002** en prod (geste utilisateur : supprimer l'évaluation de reprise depuis la liste, ou décocher le jeton de reprise). (b) **Environnement de test instable** ce jour : binaire WebKit Playwright disparu (réinstallé via `npx playwright install webkit`), Vitest v2.1.9 → v4.1.8 en cours de session (skip intermittent du lint en suite, OK en isolé) — cf. NB Cowork « `tests/node_modules` perturbé → `rm -rf node_modules && npm install` dans `tests/` sur Mac ».
 >   - **⚠️ Non commités** (travaux Cowork, NON touchés par Claude Code) : `BACKLOG.md` (inclut le retrait #322 + #326), `Skills pour Claude Code/SKILL_Ecosysteme_classe.md`, plus de nombreux fichiers de plans/audits non suivis.
 > - **✅ RELAIS — 7 juin 2026 (suite 8, Claude Code) — RELEASE 1.2.0 PUBLIÉE ET POUSSÉE. HEAD `origin/main` = `2ed0cc4b`, SYNCHRONISÉ (0/0). 284 Vitest + 35 Playwright verts.** Session de finition de #319, deux correctifs ciblés et une amorce de #322, close par la release minor (comparateur + assistant refondu). Tout sur `origin/main`.
 >   - **#319 Lot 4 — récap enrichi** (`7f3ab1ae`) : **a8** = exemple « ordre de grandeur » au récap — décision Grégoire : reflète le **TYPE** de notation, pas les réglages fins ; en démo, simule la famille générique (`sommative`/`standards`/`specifications`) sur DEMO010 (Fort) + DEMO004 (En difficulté) via `simulerIndices` (lecture seule absolue) ; repli qualitatif hors démo, jamais de chiffre fabriqué. **a9** = réassurance « ta pratique active n'est pas modifiée » (création seulement). Sentinelle `sentinelle-wizard-exemple-recap-319` (10 cas).
@@ -3116,7 +3675,7 @@ Grégoire a explicitement décidé de ne pas faire ce chantier dans cette sessio
 
 **5 commits push d'amélioration de code** (du premier au dernier) :
 1. `aabc0d3` **fix(migrations)** — retrait code mort modale migration legacy (zéro-dette) + bump 99.66 (build 0526-0345). −380 LOC. Résout BUG_grégoire_2026-05-25_07-19-19 (modale « Mise à jour de tes données » apparaissait sur iPad).
-2. `7574c75` **fix(profil)** — filtrer les originaux remplacés dans la grille « Travaux soumis » + bump 0526-0441. Résout BUG_grégoire_2026-05-21_13-15-45 et suivants (doublons original/reprise dans Travaux soumis du profil). Bilan : audit 17 paires (DA, productionId) sur h2026 → 16 saines + 1 orpheline (Houle/Artefact 5 fichier reprise orphelin supprimé séparément côté données).
+2. `7574c75` **fix(profil)** — filtrer les originaux remplacés dans la grille « Travaux soumis » + bump 0526-0441. Résout BUG_grégoire_2026-05-21_13-15-45 et suivants (doublons original/reprise dans Travaux soumis du profil). Bilan : audit 17 paires (DA, productionId) sur h2026 → 16 saines + 1 orpheline (Élève-029/Artefact 5 fichier reprise orphelin supprimé séparément côté données).
 3. `71286d5` **fix(eval)** — exposer 10 fonctions manquées sur window après extraction des sous-modules + bump 0526-0455. Audit complet d'evaluation.js : 86 fonctions, 29 exportées, **10 manquantes** appelées cross-module (6 ReferenceErrors potentiels dont 1 confirmé : `verifierEtChargerEvaluationExistante` qui crashait à chaque changement d'étudiant/production). Cause directe du bug du 21 mai « rien ne s'affiche au clic ». Confirme [[feedback-fix-perdu-refactoring-extraction]] sur l'extraction des sous-modules evaluation-*.js du 18-21 mai.
 4. `c1c8abd` **fix(backlog) #281 + #278 + #280** — petits items backlog groupés + bump 0526-0503. −66 LOC net.
    - #281 : 1 toast custom migré vers `notifications.succes` (saisie-presences.js)
@@ -3140,7 +3699,7 @@ Grégoire a explicitement décidé de ne pas faire ce chantier dans cette sessio
 **Warnings console résiduels observés mais non traités cette session** (à inscrire SUIVI-BUGS si besoin) :
 - ⚠ `[DB] Quota localStorage dépassé pour h2026_indicesCP (29669 bytes)` × 2
 - ⚠ `Format de séance non reconnu — SEANCE-2026-05-14-B` × 2 (saisie-presences.js:338)
-- ⚠ `calculerTauxCompletion(DA) : indicesCP non disponible — retourne null` pour DA 9000176 et 9000040
+- ⚠ `calculerTauxCompletion(DA) : indicesCP non disponible — retourne null` pour DA [DA-retiré] et [DA-retiré]
 
 ---
 
@@ -3649,9 +4208,9 @@ La pratique « PAN-Littérature A25 » avait l'auteur Bruno V. / Cégep Laurende
 
 ### Validation arithmétique
 
-- a2025 Bermudez Ambriz, mode « N meilleurs avec N=4 » : **73,5%** (Léa transmis 73,2% en décembre, écart 0,3% = bruit d'arrondi).
-- a2025 Bermudez Ambriz, mode « tous, 4 retenus » : 65,9% (vérifié).
-- a2025 Bermudez Ambriz, mode « tous, 8 retenus » : 64,2% (vérifié — Formuler 5 HOC compté à 0%).
+- a2025 Élève-003, mode « N meilleurs avec N=4 » : **73,5%** (Léa transmis 73,2% en décembre, écart 0,3% = bruit d'arrondi).
+- a2025 Élève-003, mode « tous, 4 retenus » : 65,9% (vérifié).
+- a2025 Élève-003, mode « tous, 8 retenus » : 64,2% (vérifié — Formuler 5 HOC compté à 0%).
 - Wizard édite → bibliothèque namespacée → calcul → rendu : **chaîne validée bout en bout**.
 
 ### Plan détaillé
@@ -3965,7 +4524,7 @@ Si Grégoire préfère un autre item parmi les 27 ouverts :
 
 - Quota localStorage `h2026_indicesCP` dépassé (29 Ko/clé) — défensif db.js bascule IDB+memoryCache.
 - Format de séance non reconnu — `SEANCE-2026-05-14-B` × 2 (saisie-presences.js:338).
-- `indicesCP non disponible` pour DA 9000176 et 9000040 — fallback recalcul à la volée.
+- `indicesCP non disponible` pour DA [DA-retiré] et [DA-retiré] — fallback recalcul à la volée.
 
 ### Étapes de démarrage immédiat
 

@@ -24,7 +24,7 @@
    - Problème : 30 évaluations Artefact 1 avaient `note: null` dans `evaluationsEtudiants`
    - Cause : Import historique créa placeholders, migration ignora enregistrements existants
    - Solution : Script de correction mis à jour 28 évaluations avec vraies notes
-   - Résultat : Notes restaurées (ex: Maïka G. 68.5%)
+   - Résultat : Notes restaurées (ex: Élève-005 68.5%)
 
 4. **Nettoyage snapshots**
    - Problème : 120 snapshots au lieu de 15 (8 duplicatas par semaine)
@@ -54,7 +54,7 @@
      * `index 93.html` (cache buster mis à jour)
    - **Test validé** :
      * AVANT : P=100 (cache localStorage incomplet)
-     * APRÈS : P=69 pour Maïka (données correctes depuis IndexedDB)
+     * APRÈS : P=69 pour Élève-007 (données correctes depuis IndexedDB)
      * Console : `✓ 194 évaluations chargées depuis IndexedDB`
    - **Impact** : Graphiques progression temporelle maintenant fonctionnels avec données réelles
 
@@ -72,7 +72,7 @@
 
 3. **Correction CRITIQUE : P=null avant première évaluation (Beta 93)**
    - **Problème** : Graphiques affichaient P=100% avant la première évaluation
-   - **Impact visuel** : Fausse "chute brutale" (ex: Émile F. 100%→76%)
+   - **Impact visuel** : Fausse "chute brutale" (ex: Élève-006 100%→76%)
    - **Réalité** : Première évaluation était à 76%, aucune chute
    - **Cause racine** : `calculerIndicesHistoriques()` retournait 100 par défaut
    - **Solution appliquée** :

@@ -73,7 +73,7 @@ Le code de `calculerSupportLigne` et le support dans `trouverBordsOpposes` reste
 
 ---
 
-## Phase 2 — Filtrage par variance locale des pixels boundary (Mode 1 : Lafleur)
+## Phase 2 — Filtrage par variance locale des pixels boundary (Mode 1 : Élève-019)
 
 **Impact attendu : +3-6% (52% -> 55-58%)**
 
@@ -96,12 +96,12 @@ Probleme : les surlignages colores et bandes survivent au heavy blur → pixels 
 4. **Tuner** : tester valeurs 50 a 300, pas de 50
 
 ### Validation
-- Cible : 3-4 images Lafleur passent de echec a imprecis/OK
-- Les images "faciles" (Desfosses, Dionne, Funk) ne doivent pas regresser
+- Cible : 3-4 images Élève-019 passent de echec a imprecis/OK
+- Les images "faciles" (Desfosses, Élève-025, Élève-006) ne doivent pas regresser
 
 ---
 
-## Phase 3 — Segmentation assistee par saturation (Mode 2 : Hurtubise)
+## Phase 3 — Segmentation assistee par saturation (Mode 2 : Élève-010)
 
 **Impact attendu : +2-4% (58% -> 60-62%)**
 
@@ -120,7 +120,7 @@ Probleme : fond gris clair ≈ luminosite papier (delta ~30). Le seuil `picPapie
 3. **Ajouter parametre** : `seuilSaturation` (defaut : 25)
 
 ### Validation
-- Cible : 2-3 images Hurtubise passent de echec a imprecis/OK
+- Cible : 2-3 images Élève-010 passent de echec a imprecis/OK
 - Activation conditionnelle = zero risque de regression sur les images normales
 
 ---

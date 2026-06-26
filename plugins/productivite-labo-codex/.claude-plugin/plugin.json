@@ -1,0 +1,9 @@
+{
+  "name": "productivite-labo-codex",
+  "version": "3.0.0",
+  "description": "Plugin de productivité pour le projet Labo Codex (bêta publique, SemVer). Couche Cowork légère au-dessus des vrais fichiers du projet, pas un système parallèle : pilotage des tâches via BACKLOG.md et index de la mémoire (CLAUDE.md, ETAT-PROJET.md, SESSION.md, dossier « Skills pour Claude Code/ »). Connaît deux dossiers à rôles distincts : le dépôt de code (Monitorage_v6) et le dossier Cowork (pédagogie, communauté, ressources).",
+  "author": {
+    "name": "Grégoire Bédard"
+  },
+  "keywords": ["labo-codex", "pedagogie", "monitorage", "backlog", "memoire", "communaute-de-pratique"]
+}

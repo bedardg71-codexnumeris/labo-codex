@@ -239,7 +239,7 @@
        ===================================================================== */
 
     function lireEchelle(echelleId) {
-        const echelles = db.getSync('echellesTemplates', []) || [];
+        const echelles = db.getSync(cle('echellesTemplates'), []) || [];
         const echelle = echelles.find(x => x.id === echelleId);
         if (!echelle || !Array.isArray(echelle.niveaux) || !echelle.niveaux.length) {
             return SCALE_FALLBACK.slice();
@@ -927,13 +927,13 @@
 
     function lireGrille(grilleId) {
         if (!grilleId) return null;
-        const grilles = db.getSync('grillesTemplates', []) || [];
+        const grilles = db.getSync(cle('grillesTemplates'), []) || [];
         return grilles.find(g => g.id === grilleId) || null;
     }
 
     function lireCartouche(grilleId, cartoucheId) {
         if (!grilleId || !cartoucheId) return null;
-        let cartouches = db.getSync(`cartouches_${grilleId}`, []);
+        let cartouches = db.getSync(cle(`cartouches_${grilleId}`), []);
         if (cartouches && !Array.isArray(cartouches)) cartouches = [cartouches];
         return (cartouches || []).find(c => c.id === cartoucheId) || null;
     }

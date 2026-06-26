@@ -219,7 +219,7 @@ async function afficherToutesLesEchellesNiveaux() {
     const container = document.getElementById('vueEchellesNiveaux');
     if (!container) return;
 
-    const echelles = await db.get('echellesTemplates') ||  [];
+    const echelles = await db.get(cle('echellesTemplates')) ||  [];
 
     if (echelles.length === 0) {
         container.innerHTML = `
@@ -381,7 +381,7 @@ async function ajouterNiveauAEchelle(echelleId) {
  * 4. Rafraîchit l'affichage
  */
 async function dupliquerEchelle(echelleId) {
-    const echelles = await db.get('echellesTemplates') ||  [];
+    const echelles = await db.get(cle('echellesTemplates')) ||  [];
     const echelle = echelles.find(e => e.id === echelleId);
 
     if (!echelle) {
@@ -406,7 +406,7 @@ async function dupliquerEchelle(echelleId) {
     };
 
     echelles.push(nouvelleEchelle);
-    await db.set('echellesTemplates',  echelles);
+    await db.set(cle('echellesTemplates'),  echelles);
 
     // Mettre à jour l'interface
     await chargerEchellesTemplates();
@@ -440,7 +440,7 @@ async function dupliquerEchelle(echelleId) {
  * Ajoute le flag dansBibliotheque=true à toutes les échelles existantes qui n'ont pas ce flag
  */
 async function migrerEchellesVersBibliotheque() {
-    const echelles = await db.get('echellesTemplates') || [];
+    const echelles = await db.get(cle('echellesTemplates')) || [];
 
     let nbMigrees = 0;
     echelles.forEach(echelle => {
@@ -451,7 +451,7 @@ async function migrerEchellesVersBibliotheque() {
     });
 
     if (nbMigrees > 0) {
-        await db.set('echellesTemplates', echelles);
+        await db.set(cle('echellesTemplates'), echelles);
     }
 }
 
@@ -460,7 +460,7 @@ async function migrerEchellesVersBibliotheque() {
  * Facilite la compréhension du système pour les nouveaux utilisateurs
  */
 async function assurerEchelleGenerique() {
-    const echelles = await db.get('echellesTemplates') || [];
+    const echelles = await db.get(cle('echellesTemplates')) || [];
 
     // Vérifier si l'échelle générique existe déjà ou a été supprimée volontairement
     const existe = echelles.some(e => e.id === 'ECHELLE_GENERIQUE');
@@ -482,7 +482,7 @@ async function assurerEchelleGenerique() {
     };
 
     echelles.push(echelleGenerique);
-    await db.set('echellesTemplates', echelles);
+    await db.set(cle('echellesTemplates'), echelles);
 }
 
 /**
@@ -491,7 +491,7 @@ async function assurerEchelleGenerique() {
  * ✅ AJOUT (3 janvier 2026)
  */
 async function assurerEchellesPersonnalisees() {
-    const echelles = await db.get('echellesTemplates') || [];
+    const echelles = await db.get(cle('echellesTemplates')) || [];
     const supprimees = await db.get('ressourcesSupprimees') || [];
     let nbAjoutees = 0;
 
@@ -689,20 +689,26 @@ async function assurerEchellesPersonnalisees() {
     }
 
     if (nbAjoutees > 0) {
-        await db.set('echellesTemplates', echelles);
+        await db.set(cle('echellesTemplates'), echelles);
     }
 }
 
 async function initialiserModuleEchelles() {
 
-    // ✅ AJOUT (8 décembre 2025) : Migration vers système de bibliothèque
-    await migrerEchellesVersBibliotheque();
+    // En trimestre ARCHIVÉ (lecture seule), ne pas auto-migrer ni réinjecter les
+    // échelles génériques/personnalisées : une simple consultation ne doit pas
+    // modifier la copie d'archive (a2025_echellesTemplates = golden master).
+    // Lot B2 namespacing — 26 juin 2026 (jumeau de la garde grilles.js).
+    if (!(window.estTrimestreArchive && window.estTrimestreArchive())) {
+        // ✅ AJOUT (8 décembre 2025) : Migration vers système de bibliothèque
+        await migrerEchellesVersBibliotheque();
 
-    // ✅ AJOUT (3 janvier 2026) : Assurer présence de l'échelle générique
-    await assurerEchelleGenerique();
+        // ✅ AJOUT (3 janvier 2026) : Assurer présence de l'échelle générique
+        await assurerEchelleGenerique();
 
-    // ✅ AJOUT (3 janvier 2026) : Assurer présence des échelles personnalisées (Bruno, Xavier)
-    await assurerEchellesPersonnalisees();
+        // ✅ AJOUT (3 janvier 2026) : Assurer présence des échelles personnalisées (Bruno, Xavier)
+        await assurerEchellesPersonnalisees();
+    }
 
     // Afficher la sidebar avec la liste des échelles (Beta 80.5+)
     if (typeof afficherListeEchelles === 'function') {
@@ -746,7 +752,7 @@ async function chargerEchellesTemplates() {
     const select = document.getElementById('selectEchelleTemplate');
     if (!select) return;
 
-    const echelles = await db.get('echellesTemplates') ||  [];
+    const echelles = await db.get(cle('echellesTemplates')) ||  [];
 
     let options = '<option value="">-- Nouvelle échelle --</option>';
     options += '<option value="new">+ Créer une nouvelle échelle</option>';
@@ -797,7 +803,7 @@ async function chargerEchelleTemplate(echelleId) {
 
     } else {
         // Charger une échelle existante
-        const echelles = await db.get('echellesTemplates') ||  [];
+        const echelles = await db.get(cle('echellesTemplates')) ||  [];
         const echelle = echelles.find(e => e.id === selectValue);
 
         if (echelle) {
@@ -864,7 +870,7 @@ async function sauvegarderNomEchelle() {
     const nom = document.getElementById('nomEchelleTemplate')?.value?.trim();
     if (echelleTemplateActuelle && echelleTemplateActuelle.id && nom) {
         // CRITIQUE: Vérifier la synchronisation avec localStorage pour éviter perte de données
-        const echellesActuelles = await db.get('echellesTemplates') ||  [];
+        const echellesActuelles = await db.get(cle('echellesTemplates')) ||  [];
         const echelleActuelleEnStorage = echellesActuelles.find(e => e.id === echelleTemplateActuelle.id);
 
         // Protection: Si désynchronisation détectée, resynchroniser depuis localStorage
@@ -891,11 +897,11 @@ async function sauvegarderNomEchelle() {
         }
 
         // Mettre à jour dans localStorage - SAUVEGARDER TOUTE L'ÉCHELLE (y compris les niveaux)
-        let echelles = await db.get('echellesTemplates') ||  [];
+        let echelles = await db.get(cle('echellesTemplates')) ||  [];
         const index = echelles.findIndex(e => e.id === echelleTemplateActuelle.id);
         if (index !== -1) {
             echelles[index] = { ...echelleTemplateActuelle };
-            await db.set('echellesTemplates',  echelles);
+            await db.set(cle('echellesTemplates'),  echelles);
 
             // Recharger la sidebar ET le select pour afficher le nouveau nom
             await afficherListeEchelles();
@@ -932,7 +938,7 @@ async function enregistrerCommeEchelle() {
         return;
     }
 
-    let echelles = await db.get('echellesTemplates') ||  [];
+    let echelles = await db.get(cle('echellesTemplates')) ||  [];
 
     // Vérifier si on modifie une échelle existante
     if (echelleTemplateActuelle && echelleTemplateActuelle.id) {
@@ -968,7 +974,7 @@ async function enregistrerCommeEchelle() {
     }
 
     // Sauvegarder
-    await db.set('echellesTemplates',  echelles);
+    await db.set(cle('echellesTemplates'),  echelles);
 
     // Recharger le select et sélectionner l'échelle actuelle
     await chargerEchellesTemplates();
@@ -1016,9 +1022,9 @@ async function dupliquerEchelleActuelle() {
         baseSur: echelleTemplateActuelle.nom
     };
 
-    let echelles = await db.get('echellesTemplates') ||  [];
+    let echelles = await db.get(cle('echellesTemplates')) ||  [];
     echelles.push(nouvelleEchelle);
-    await db.set('echellesTemplates',  echelles);
+    await db.set(cle('echellesTemplates'),  echelles);
 
     // Mettre à jour l'interface
     echelleTemplateActuelle = nouvelleEchelle;
@@ -1053,9 +1059,9 @@ async function supprimerEchelle(echelleId) {
         window.marquerRessourceSupprimee(echelleId);
     }
 
-    let echelles = await db.get('echellesTemplates') ||  [];
+    let echelles = await db.get(cle('echellesTemplates')) ||  [];
     echelles = echelles.filter(e => e.id !== echelleId);
-    await db.set('echellesTemplates',  echelles);
+    await db.set(cle('echellesTemplates'),  echelles);
 
     await chargerEchellesTemplates();
     await afficherToutesLesEchellesNiveaux();
@@ -1370,12 +1376,12 @@ async function modifierNiveau(index, champ, valeur) {
     // ✅ FIX (10 jan 2026) : Synchroniser avec echelleTemplateActuelle et echellesTemplates
     if (echelleTemplateActuelle && echelleTemplateActuelle.id) {
         echelleTemplateActuelle.niveaux = niveaux;
-        let echelles = await db.get('echellesTemplates') || [];
+        let echelles = await db.get(cle('echellesTemplates')) || [];
         const idx = echelles.findIndex(e => e.id === echelleTemplateActuelle.id);
         if (idx !== -1) {
             echelles[idx].niveaux = niveaux;
             echelles[idx].dateModification = new Date().toISOString();
-            await db.set('echellesTemplates', echelles);
+            await db.set(cle('echellesTemplates'), echelles);
         }
     }
 
@@ -1855,7 +1861,7 @@ function mettreAJourOptionsEchelle(niveaux) {
  * }
  */
 async function exporterEchelles() {
-    const toutesEchelles = await db.get('echellesTemplates') || [];
+    const toutesEchelles = await db.get(cle('echellesTemplates')) || [];
 
     // ✅ MODIFIÉ (6 jan 2026) : Utiliser détection heuristique pour filtrer démo + importées
     const echelles = typeof filtrerRessourcesNonDemo === 'function'
@@ -1923,7 +1929,7 @@ async function exporterEchelleActive() {
         return;
     }
 
-    const echelles = await db.get('echellesTemplates') ||  [];
+    const echelles = await db.get(cle('echellesTemplates')) ||  [];
     const echelle = echelles.find(e => e.id === echelleTemplateActuelle.id);
 
     if (!echelle) {
@@ -2050,7 +2056,7 @@ async function importerDansEchelleActive(event) {
             }
 
             // Récupérer les échelles
-            const echelles = await db.get('echellesTemplates') ||  [];
+            const echelles = await db.get(cle('echellesTemplates')) ||  [];
             const index = echelles.findIndex(e => e.id === echelleTemplateActuelle.id);
 
             if (index === -1) {
@@ -2074,7 +2080,7 @@ async function importerDansEchelleActive(event) {
             echelles[index] = echelleMiseAJour;
 
             // Sauvegarder
-            await db.set('echellesTemplates',  echelles);
+            await db.set(cle('echellesTemplates'),  echelles);
 
             // Recharger l'échelle dans le formulaire
             await chargerEchellePourModif(echelleTemplateActuelle.id);
@@ -2279,7 +2285,7 @@ window.importerEchelles = importerEchelles;
    =============================== */
 
 async function afficherListeEchelles() {
-    const echelles = await db.get('echellesTemplates') ||  [];
+    const echelles = await db.get(cle('echellesTemplates')) ||  [];
 
     const container = document.getElementById('sidebarListeEchelles');
     if (!container) {
@@ -2333,7 +2339,7 @@ async function afficherListeEchelles() {
  * Avec filtre par discipline
  */
 async function preparerDonneesBibliothequeEchelles() {
-    const echelles = await db.get('echellesTemplates') || [];
+    const echelles = await db.get(cle('echellesTemplates')) || [];
     // Beta 99.39 (A.0) : masque les items démo en mode normal
     const echellesDansBibliotheque = BibliothequeUI.filtrerParModeDemo(
         echelles.filter(e => e.dansBibliotheque !== false)
@@ -2477,7 +2483,7 @@ async function afficherBibliothequeEchelles() {
                     <button data-action="afficherEchellesTrimestreModal" class="btn btn-secondaire btn-compact">Voir les échelles</button>
                     <button data-action="importerToutEchellesTrimestreModal" class="btn btn-principal btn-compact">Tout importer</button>
                 </div>
-                <div id="previewEchellesTrimestre" style="margin-top: 10px; display: none;"></div>
+                <div id="previewEchellesTrimestre" class="u-hide" style="margin-top: 10px;"></div>
             </div>`;
     }
 
@@ -2541,7 +2547,7 @@ async function afficherBibliothequeEchelles() {
  */
 async function ajouterEchelleIndividuelle(id) {
     try {
-        const echelles = await db.get('echellesTemplates') || [];
+        const echelles = await db.get(cle('echellesTemplates')) || [];
         let echelle = echelles.find(e => e.id === id);
         if (!echelle) {
             echelle = echelles.find(e => e.idOriginal === id);
@@ -2569,7 +2575,7 @@ async function ajouterEchelleIndividuelle(id) {
             echelle.dansBibliotheque = true;
         }
 
-        await db.set('echellesTemplates', echelles);
+        await db.set(cle('echellesTemplates'), echelles);
         fermerModalBibliothequeEchelles();
         await afficherListeEchelles();
         await afficherBibliothequeEchelles();
@@ -2581,7 +2587,7 @@ async function ajouterEchelleIndividuelle(id) {
 }
 
 async function retirerEchelleDeBibliotheque(id) {
-    const echelles = await db.get('echellesTemplates') || [];
+    const echelles = await db.get(cle('echellesTemplates')) || [];
     const echelle = echelles.find(e => e.id === id);
 
     if (!echelle) return;
@@ -2589,7 +2595,7 @@ async function retirerEchelleDeBibliotheque(id) {
     // Soft delete : marquer comme non présente dans la bibliothèque
     echelle.dansBibliotheque = false;
 
-    await db.set('echellesTemplates', echelles);
+    await db.set(cle('echellesTemplates'), echelles);
 
     // Rafraîchir les affichages
     await afficherListeEchelles();
@@ -2603,7 +2609,7 @@ async function retirerEchelleDeBibliotheque(id) {
  * @param {string} id - ID de l'échelle à supprimer
  */
 async function supprimerEchelleDefinitivement(id) {
-    const echelles = await db.get('echellesTemplates') || [];
+    const echelles = await db.get(cle('echellesTemplates')) || [];
     const echelle = echelles.find(e => e.id === id);
 
     if (!echelle) return;
@@ -2622,7 +2628,7 @@ async function supprimerEchelleDefinitivement(id) {
 
     // Suppression définitive du store local
     const nouvellesEchelles = echelles.filter(e => e.id !== id);
-    await db.set('echellesTemplates', nouvellesEchelles);
+    await db.set(cle('echellesTemplates'), nouvellesEchelles);
 
     // Suppression du store partagé
     if (typeof retirerEchelleDeLaBibliotheque === 'function') {
@@ -2660,7 +2666,7 @@ async function supprimerEchelleDeBibliothequePartagee(id) {
  */
 async function ajouterMesEchellesALaBibliotheque() {
     try {
-        const echelles = await db.get('echellesTemplates') || [];
+        const echelles = await db.get(cle('echellesTemplates')) || [];
 
         if (echelles.length === 0) {
             alert('Aucune échelle à ajouter.\n\nCréez d\'abord des échelles.');
@@ -2691,7 +2697,7 @@ async function ajouterMesEchellesALaBibliotheque() {
  * @param {string} id - ID de l'échelle à dupliquer
  */
 async function dupliquerEchelleBibliotheque(id) {
-    const echelles = await db.get('echellesTemplates') || [];
+    const echelles = await db.get(cle('echellesTemplates')) || [];
     const echelle = echelles.find(e => e.id === id);
 
     if (!echelle) {
@@ -2719,7 +2725,7 @@ async function dupliquerEchelleBibliotheque(id) {
 
     // Ajouter à la liste
     echelles.push(nouvelleEchelle);
-    await db.set('echellesTemplates', echelles);
+    await db.set(cle('echellesTemplates'), echelles);
 
     // Rafraîchir UI
     fermerModalBibliothequeEchelles();
@@ -2739,7 +2745,7 @@ async function ajouterEchellesABibliotheque() {
         return;
     }
 
-    const echelles = await db.get('echellesTemplates') || [];
+    const echelles = await db.get(cle('echellesTemplates')) || [];
     const echellesBibliotheque = obtenirToutesLesEchellesBibliotheque();
 
     let nbAjoutees = 0;
@@ -2770,7 +2776,7 @@ async function ajouterEchellesABibliotheque() {
         }
     });
 
-    await db.set('echellesTemplates', echelles);
+    await db.set(cle('echellesTemplates'), echelles);
 
     // Rafraîchir les affichages
     await afficherListeEchelles();
@@ -3210,7 +3216,7 @@ function annulerFormEchelle() {
 }
 
 async function chargerEchellePourModif(id) {
-    const echelles = await db.get('echellesTemplates') ||  [];
+    const echelles = await db.get(cle('echellesTemplates')) ||  [];
     const echelle = echelles.find(e => e.id === id);
 
     if (!echelle) return;
@@ -3266,13 +3272,13 @@ async function chargerEchellePourModif(id) {
  * Phase 4.B : fork une échelle démo et charge la copie en édition.
  */
 async function dupliquerEtEditerEchelle(id) {
-    const echelles = await db.get('echellesTemplates') || [];
+    const echelles = await db.get(cle('echellesTemplates')) || [];
     const echelle = echelles.find(e => e.id === id);
     if (!echelle) return;
 
     const copie = BibliothequeUI.forkerItem(echelle, 'ECH_');
     echelles.push(copie);
-    await db.set('echellesTemplates', echelles);
+    await db.set(cle('echellesTemplates'), echelles);
 
     await afficherListeEchelles();
     await chargerEchellePourModif(copie.id);
@@ -3425,7 +3431,7 @@ function afficherNiveauxEchelle(echelle) {
  * @param {any} valeur - Nouvelle valeur
  */
 async function modifierNiveauEchelle(echelleId, niveauIndex, champ, valeur) {
-    const echelles = await db.get('echellesTemplates') ||  [];
+    const echelles = await db.get(cle('echellesTemplates')) ||  [];
     const echelleIndex = echelles.findIndex(e => e.id === echelleId);
 
     if (echelleIndex === -1) {
@@ -3447,10 +3453,10 @@ async function modifierNiveauEchelle(echelleId, niveauIndex, champ, valeur) {
     echelles[echelleIndex] = echelle;
 
     // Sauvegarder dans localStorage
-    await db.set('echellesTemplates',  echelles);
+    await db.set(cle('echellesTemplates'),  echelles);
 
     // CRITIQUE: Recharger echelleTemplateActuelle depuis localStorage (évite références obsolètes)
-    const echellesRecharge = await db.get('echellesTemplates') ||  [];
+    const echellesRecharge = await db.get(cle('echellesTemplates')) ||  [];
     echelleTemplateActuelle = echellesRecharge.find(e => e.id === echelleId);
 
     // Mettre à jour db.setSync('niveauxEchelle') si c'est l'échelle active (compatibilité ancienne logique)
@@ -3468,7 +3474,7 @@ async function modifierNiveauEchelle(echelleId, niveauIndex, champ, valeur) {
  * @param {string} echelleId - ID de l'échelle
  */
 async function ajouterNiveauEchelle(echelleId) {
-    let echelles = await db.get('echellesTemplates') ||  [];
+    let echelles = await db.get(cle('echellesTemplates')) ||  [];
     const index = echelles.findIndex(e => e.id === echelleId);
 
     if (index === -1) {
@@ -3501,10 +3507,10 @@ async function ajouterNiveauEchelle(echelleId) {
     echelles[index] = echelle;
 
     // Sauvegarder dans localStorage
-    await db.set('echellesTemplates',  echelles);
+    await db.set(cle('echellesTemplates'),  echelles);
 
     // Recharger l'échelle depuis localStorage pour avoir la bonne référence
-    const echellesRecharge = await db.get('echellesTemplates') ||  [];
+    const echellesRecharge = await db.get(cle('echellesTemplates')) ||  [];
     echelleTemplateActuelle = echellesRecharge.find(e => e.id === echelleId);
 
     // Réafficher la liste des niveaux
@@ -3526,7 +3532,7 @@ async function ajouterNiveauEchelle(echelleId) {
 async function supprimerNiveauEchelle(echelleId, index) {
     if (!confirm('Supprimer ce niveau ?')) return;
 
-    let echelles = await db.get('echellesTemplates') ||  [];
+    let echelles = await db.get(cle('echellesTemplates')) ||  [];
     const echelleIndex = echelles.findIndex(e => e.id === echelleId);
 
     if (echelleIndex === -1 || !echelles[echelleIndex].niveaux) return;
@@ -3546,10 +3552,10 @@ async function supprimerNiveauEchelle(echelleId, index) {
     echelles[echelleIndex] = echelle;
 
     // Sauvegarder dans localStorage
-    await db.set('echellesTemplates',  echelles);
+    await db.set(cle('echellesTemplates'),  echelles);
 
     // Recharger echelleTemplateActuelle depuis localStorage
-    const echellesRecharge = await db.get('echellesTemplates') ||  [];
+    const echellesRecharge = await db.get(cle('echellesTemplates')) ||  [];
     echelleTemplateActuelle = echellesRecharge.find(e => e.id === echelleId);
 
     // Réafficher la liste des niveaux
@@ -3568,7 +3574,7 @@ async function supprimerNiveauEchelle(echelleId, index) {
 async function deplacerNiveauEchelleHaut(echelleId, index) {
     if (index === 0) return;
 
-    let echelles = await db.get('echellesTemplates') ||  [];
+    let echelles = await db.get(cle('echellesTemplates')) ||  [];
     const echelleIndex = echelles.findIndex(e => e.id === echelleId);
 
     if (echelleIndex === -1 || !echelles[echelleIndex].niveaux) return;
@@ -3582,10 +3588,10 @@ async function deplacerNiveauEchelleHaut(echelleId, index) {
     echelles[echelleIndex] = echelle;
 
     // Sauvegarder dans localStorage
-    await db.set('echellesTemplates',  echelles);
+    await db.set(cle('echellesTemplates'),  echelles);
 
     // Recharger echelleTemplateActuelle depuis localStorage
-    const echellesRecharge = await db.get('echellesTemplates') ||  [];
+    const echellesRecharge = await db.get(cle('echellesTemplates')) ||  [];
     echelleTemplateActuelle = echellesRecharge.find(e => e.id === echelleId);
 
     // Réafficher
@@ -3599,7 +3605,7 @@ async function deplacerNiveauEchelleHaut(echelleId, index) {
  * @param {number} index - Index du niveau à déplacer
  */
 async function deplacerNiveauEchelleBas(echelleId, index) {
-    let echelles = await db.get('echellesTemplates') ||  [];
+    let echelles = await db.get(cle('echellesTemplates')) ||  [];
     const echelleIndex = echelles.findIndex(e => e.id === echelleId);
 
     if (echelleIndex === -1 || !echelles[echelleIndex].niveaux) return;
@@ -3615,10 +3621,10 @@ async function deplacerNiveauEchelleBas(echelleId, index) {
     echelles[echelleIndex] = echelle;
 
     // Sauvegarder dans localStorage
-    await db.set('echellesTemplates',  echelles);
+    await db.set(cle('echellesTemplates'),  echelles);
 
     // Recharger echelleTemplateActuelle depuis localStorage
-    const echellesRecharge = await db.get('echellesTemplates') ||  [];
+    const echellesRecharge = await db.get(cle('echellesTemplates')) ||  [];
     echelleTemplateActuelle = echellesRecharge.find(e => e.id === echelleId);
 
     // Réafficher
@@ -3638,7 +3644,7 @@ async function definirEchelleActive(id) {
 }
 
 async function dupliquerEchelleDepuisSidebar(id) {
-    const echelles = await db.get('echellesTemplates') ||  [];
+    const echelles = await db.get(cle('echellesTemplates')) ||  [];
     const echelle = echelles.find(e => e.id === id);
 
     if (!echelle) return;
@@ -3651,7 +3657,7 @@ async function dupliquerEchelleDepuisSidebar(id) {
     };
 
     echelles.push(copie);
-    await db.set('echellesTemplates',  echelles);
+    await db.set(cle('echellesTemplates'),  echelles);
 
     await afficherListeEchelles();
     await chargerEchellePourModif(copie.id);
@@ -3718,7 +3724,7 @@ async function supprimerEchelleDepuisSidebar(id) {
 
     if (utilisation.utilisee) {
         // L'échelle est utilisée, offrir des choix à l'utilisateur
-        const echelles = await db.get('echellesTemplates') ||  [];
+        const echelles = await db.get(cle('echellesTemplates')) ||  [];
         const echelle = echelles.find(e => e.id === id);
         const nomEchelle = echelle?.nom || 'cette échelle';
 
@@ -3754,7 +3760,7 @@ async function supprimerEchelleDepuisSidebar(id) {
                     if (index !== -1) {
                         _marquerSiGabarit();
                         echelles.splice(index, 1);
-                        await db.set('echellesTemplates',  echelles);
+                        await db.set(cle('echellesTemplates'),  echelles);
                         await afficherListeEchelles();
                         document.getElementById('conteneurEditionEchelle').classList.add('u-hide');
                         // Note: Section optionsImportExportEchelles supprimée (Beta 92)
@@ -3777,13 +3783,13 @@ async function supprimerEchelleDepuisSidebar(id) {
         // L'échelle n'est pas utilisée, suppression directe
         if (!confirm('Supprimer cette échelle ?')) return;
 
-        const echelles = await db.get('echellesTemplates') ||  [];
+        const echelles = await db.get(cle('echellesTemplates')) ||  [];
         const index = echelles.findIndex(e => e.id === id);
 
         if (index !== -1) {
             _marquerSiGabarit();
             echelles.splice(index, 1);
-            await db.set('echellesTemplates',  echelles);
+            await db.set(cle('echellesTemplates'),  echelles);
             await afficherListeEchelles();
             document.getElementById('conteneurEditionEchelle').classList.add('u-hide');
             // Note: Section optionsImportExportEchelles supprimée (Beta 92)
@@ -3828,7 +3834,7 @@ async function sauvegarderEchelleComplete() {
     }
 
     // ✅ AJOUT (6 jan 2026) : Vérification des doublons
-    let echelles = await db.get('echellesTemplates') || [];
+    let echelles = await db.get(cle('echellesTemplates')) || [];
     const idActuel = echelleTemplateActuelle?.id || null;
     const isCreation = !echelleTemplateActuelle;
     const isNameChange = echelleTemplateActuelle && echelleTemplateActuelle.nom !== nom;
@@ -3849,7 +3855,7 @@ async function sauvegarderEchelleComplete() {
         if (resultat && resultat.action === 'ecraser') {
             // Supprimer l'échelle existante avec le même nom
             echelles = echelles.filter(e => e.nom !== nom);
-            await db.set('echellesTemplates', echelles);
+            await db.set(cle('echellesTemplates'), echelles);
         }
     }
 
@@ -3894,7 +3900,7 @@ async function sauvegarderEchelleComplete() {
 
         // Sauvegarder dans la base (utilise echelles déjà chargé)
         echelles.push(nouvelleEchelle);
-        await db.set('echellesTemplates', echelles);
+        await db.set(cle('echellesTemplates'), echelles);
 
         // Nettoyer les niveaux temporaires
         window._niveauxNouvelleEchelle = null;
@@ -4045,7 +4051,7 @@ window.importerEchellesExternes = function(nouvellesEchelles, options) {
     if (!nouvellesEchelles || nouvellesEchelles.length === 0) return 0;
     options = options || {};
 
-    var echelles = db.getSync('echellesTemplates', []);
+    var echelles = db.getSync(cle('echellesTemplates'), []);
     var compteur = 0;
 
     for (var i = 0; i < nouvellesEchelles.length; i++) {
@@ -4064,7 +4070,7 @@ window.importerEchellesExternes = function(nouvellesEchelles, options) {
     }
 
     if (compteur > 0) {
-        db.setSync('echellesTemplates', echelles);
+        db.setSync(cle('echellesTemplates'), echelles);
 
         if (!options.silencieux) {
             if (typeof chargerEchellesTemplates === 'function') chargerEchellesTemplates();

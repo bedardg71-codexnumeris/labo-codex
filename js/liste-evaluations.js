@@ -862,7 +862,7 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
 function obtenirNomCartouche(grilleId, cartoucheId) {
     if (!grilleId || !cartoucheId) return '-';
 
-    const cartouches = db.getSync(`cartouches_${grilleId}`, []);
+    const cartouches = db.getSync(cle(`cartouches_${grilleId}`), []);
     const cartouche = cartouches.find(c => c.id === cartoucheId);
 
     return cartouche ? cartouche.nom : '-';

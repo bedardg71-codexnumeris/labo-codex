@@ -1,4 +1,7 @@
 {
+  "enabledPlugins": {
+    "productivite-labo-codex@labo-codex": true
+  },
   "hooks": {
     "SessionStart": [
       {
