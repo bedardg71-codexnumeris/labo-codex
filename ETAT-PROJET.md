@@ -176,9 +176,20 @@ Présents et vérifiés sur `main` au 31 mai : `AUDIT.md`, `PRIVACY.md`, `INCIDE
 - **Reste** : **#298** — réviser `PRIVACY.md` (recadrage du référentiel Loi 25, alignement sur la
   fenêtre publique 3-30 juin). Dépend d'abord de l'analyse des logs Cloudflare par Grégoire.
 
-### 7.2 Hygiène GitHub / OpenSSF — Fait
-Présents et vérifiés sur `main` : `SECURITY.md`, `.github/dependabot.yml`, workflows CI
-(`.github/workflows/tests.yml`, `codeql.yml`). Livrés le 25 mai.
+### 7.2 Hygiène GitHub / OpenSSF — Fait (CodeQL et protection de branche retombés avec la privatisation)
+Présents et vérifiés sur `main` : `SECURITY.md`, `.github/dependabot.yml`, workflow CI
+`.github/workflows/tests.yml` (Vitest + Playwright, fonctionnel). Livrés le 25 mai.
+- **CodeQL retiré le 26 juin 2026.** Le code scanning CodeQL exige GitHub Advanced
+  Security, indisponible gratuitement sur un dépôt privé. Depuis la privatisation du
+  23 juin, le job échouait à chaque PR (« Code scanning is not enabled ») — check rouge
+  trompeur, sans rapport avec une alerte de sécurité réelle. `codeql.yml` supprimé
+  (zéro-dette : on retire ce qui ne peut structurellement pas fonctionner).
+- **Protection de branche `main` inactive** depuis la même privatisation : l'API GitHub
+  renvoie `403 — Upgrade to GitHub Pro`, la feature exigeant Pro sur un dépôt privé. Les
+  status checks documentés dans `.github/BRANCH-PROTECTION.md` (dont `Analyse CodeQL`) ne
+  sont donc plus appliqués. `BRANCH-PROTECTION.md` recadré le 26 juin (statut « suspendu »
+  en tête, références CodeQL nettoyées) ; il reste une référence à réappliquer si le dépôt
+  redevient public ou passe à GitHub Pro. `DEPLOY.md` §8.3 et la checklist Scorecard alignés.
 - **Note** : les plans d'audit (15 mai) les listent encore « absents » — état périmé.
 
 ### 7.3 Licences
