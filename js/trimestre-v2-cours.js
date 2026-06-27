@@ -872,7 +872,7 @@ function afficherSyntheseGroupeCours(gc) {
 
     // Construire le libellé
     const codeCours = coursInfo?.codeCours || coursInfo?.sigle || null;
-    const groupe = gc.groupe || gc.groupeNum || '00001';
+    const groupe = gc.groupeNum || '00001';
     const titre = codeCours ? `${codeCours} — Groupe ${groupe}` : `Groupe ${groupe}`;
 
     const nomEns = ens ? `${ens.prenom || ''} ${ens.nom || ''}`.trim() : '—';
@@ -880,7 +880,7 @@ function afficherSyntheseGroupeCours(gc) {
     const nomPratique = prat?.nom || gc.pratiqueId || '—';
 
     // Score de complétude
-    const elements = [gc.coursId, gc.enseignantId, gc.horaireId, gc.pratiqueId, gc.groupeNum || gc.groupe];
+    const elements = [gc.coursId, gc.enseignantId, gc.horaireId, gc.pratiqueId, gc.groupeNum];
     const complets = elements.filter(Boolean).length;
 
     sidebar.innerHTML = `

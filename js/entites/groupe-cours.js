@@ -60,7 +60,7 @@ async function creerGroupeCours(donnees) {
 
     // Vérifier qu'un groupe-cours avec le même cours et groupe n'existe pas déjà
     const existe = groupesCours.some(gc =>
-        gc.coursId === donnees.coursId && gc.groupe === donnees.groupe
+        gc.coursId === donnees.coursId && gc.groupeNum === donnees.groupeNum
     );
     if (existe) {
         return {
@@ -76,7 +76,7 @@ async function creerGroupeCours(donnees) {
         enseignantId: donnees.enseignantId,
         horaireId: donnees.horaireId,
         pratiqueId: donnees.pratiqueId || '',
-        groupe: donnees.groupe || '00001',
+        groupeNum: donnees.groupeNum || '00001',
         actif: groupesCours.length === 0, // Premier groupe-cours = actif par défaut
         dateCreation: new Date().toISOString(),
         dateModification: new Date().toISOString()
@@ -202,7 +202,7 @@ async function mettreAJourGroupeCours(trimestreId, groupeCoursId, modifications)
     }
 
     // Mettre à jour les champs (sauf id, trimestreId et dateCreation)
-    const champsModifiables = ['coursId', 'enseignantId', 'horaireId', 'pratiqueId', 'groupe', 'actif'];
+    const champsModifiables = ['coursId', 'enseignantId', 'horaireId', 'pratiqueId', 'groupeNum', 'actif'];
 
     champsModifiables.forEach(champ => {
         if (modifications[champ] !== undefined) {
@@ -330,7 +330,7 @@ async function validerDonneesGroupeCours(donnees) {
         }
     }
 
-    if (!donnees.groupe?.trim()) {
+    if (!donnees.groupeNum?.trim()) {
         erreurs.push('Le numéro de groupe est requis');
     }
 
@@ -354,7 +354,7 @@ async function validerDonneesGroupeCours(donnees) {
  */
 function genererLibelleGroupeCours(gc, cours, enseignant, horaire) {
     const codeCours = cours?.codeCours || cours?.code || cours?.sigle || null;
-    const groupe = gc?.groupe || gc?.groupeNum || '00001';
+    const groupe = gc?.groupeNum || '00001';
     const nomEns = enseignant ? `${enseignant.prenom?.[0] || ''}. ${enseignant.nom || ''}` : '';
     const nomHor = horaire?.nom || '';
 
@@ -379,7 +379,7 @@ function genererLibelleGroupeCours(gc, cours, enseignant, horaire) {
  */
 function genererLibelleCourtGroupeCours(gc, cours) {
     const codeCours = cours?.codeCours || cours?.code || cours?.sigle || null;
-    const groupe = gc?.groupe || gc?.groupeNum || '00001';
+    const groupe = gc?.groupeNum || '00001';
     // 🆕 FIX (9 jan 2026) : Libellé lisible même sans cours
     return codeCours ? `${codeCours} gr.${groupe}` : `Groupe ${groupe}`;
 }
@@ -493,7 +493,7 @@ async function synchroniserInfoCours(trimestreId) {
         pratiqueId: gcComplet.pratiqueId || '',
         // Canonique groupeNum d'abord ; `|| groupe` = filet transitoire pour un
         // enregistrement non encore purgé (cf. normaliserCanonique).
-        groupe: gcComplet.groupeNum || gcComplet.groupe || '',
+        groupe: gcComplet.groupeNum || '',
         trimestreId: gcComplet.trimestreId,
         actif: true,
         // Source v96
@@ -511,7 +511,7 @@ async function synchroniserInfoCours(trimestreId) {
         coursId: gcComplet.coursId,
         enseignantId: gcComplet.enseignantId,
         horaireId: gcComplet.horaireId,
-        groupe: gcComplet.groupeNum || gcComplet.groupe
+        groupe: gcComplet.groupeNum
     });
 
     // 🆕 BETA 95.2 : Synchroniser les séances horaire pour rétrocompatibilité

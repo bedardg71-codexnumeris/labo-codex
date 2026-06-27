@@ -200,7 +200,7 @@
                 var entree = echeances[gcId];
                 if (!entree || entree.assignee === false) return;
                 var gc = groupesCours.find(function (g) { return g.id === gcId; });
-                var groupeNum = gc ? (gc.groupe || gc.groupeNum || '') : '';
+                var groupeNum = gc ? (gc.groupeNum || '') : '';
                 var est = estimerPourLot(prod, gcId, groupeNum, fichiers, evaluations, stats, prefs);
                 if (est) {
                     est.dateRemise = entree.date || '';

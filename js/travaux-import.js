@@ -278,13 +278,13 @@
                 const gcCible = groupesCours.find(function(gc) {
                     return gc
                         && gc.coursId === etu.coursId
-                        && normaliser(gc.groupe || gc.groupeNum) === normaliser(groupeEtu);
+                        && normaliser(gc.groupeNum) === normaliser(groupeEtu);
                 });
                 if (!gcCible || gcCible.id === gcActifId) return;
                 if (!repartition[gcCible.id]) {
                     repartition[gcCible.id] = {
                         gcId: gcCible.id,
-                        groupe: gcCible.groupe || gcCible.groupeNum || '?',
+                        groupe: gcCible.groupeNum || '?',
                         gc: gcCible,
                         count: 0,
                         das: []

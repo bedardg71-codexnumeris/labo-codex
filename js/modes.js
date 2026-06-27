@@ -513,7 +513,7 @@ function obtenirContexteCoursActif() {
 
     // Champ canonique `groupeNum` d'abord (#130/#306) ; `|| groupe` = filet
     // transitoire pour un enregistrement non encore purgé (normaliserCanonique).
-    const groupeGC = gc.modeCours ? null : (gc.groupeNum || gc.groupe || null);
+    const groupeGC = gc.modeCours ? null : (gc.groupeNum || null);
     return Object.assign({}, infoCours, {
         groupe: groupeGC,
         _modeCours: !!gc.modeCours || groupeGC === null
