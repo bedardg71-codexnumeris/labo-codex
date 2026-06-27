@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
@@ -97,26 +97,37 @@ describe('convention canonique groupeNum · lectures verrouillées (ratchet stru
         expect(main.includes('purge groupe legacy')).toBe(true);
     });
 
-    it('synchroniserInfoCours lit groupeNum d’abord (plus de `gcComplet.groupe` nu)', () => {
+    it('synchroniserInfoCours résout groupeNum SEUL (plus aucun `gcComplet.groupe`)', () => {
         const ent = lire('js/entites/groupe-cours.js');
-        expect(ent.includes('gcComplet.groupeNum || gcComplet.groupe')).toBe(true);
-        // Les anciennes lectures nues ont disparu.
-        expect(ent.includes("groupe: gcComplet.groupe || ''")).toBe(false);
-        expect(ent.includes('groupe: gcComplet.groupe\n')).toBe(false);
+        expect(ent.includes('groupe: gcComplet.groupeNum')).toBe(true);
+        // `\b` n'attrape PAS `gcComplet.groupeNum` (groupe+Num = pas de frontière).
+        expect(/gcComplet\.groupe\b/.test(ent)).toBe(false);
     });
 
-    it('le hot-path #130 (modes.js obtenirContexteCoursActif) résout groupeNum d’abord', () => {
+    it('le hot-path #130 (modes.js obtenirContexteCoursActif) résout groupeNum SEUL', () => {
         const modes = lire('js/modes.js');
-        expect(modes.includes('gc.groupeNum || gc.groupe || null')).toBe(true);
-        expect(modes.includes('gc.groupe || gc.groupeNum || null')).toBe(false);
+        expect(modes.includes('gc.groupeNum || null')).toBe(true);
+        expect(/\bgc\.groupe\b/.test(modes)).toBe(false);
     });
 
-    it('orchestre + contexte écrivent les caches en résolvant groupeNum d’abord', () => {
-        const orch = lire('js/trimestre-v2-orchestre.js');
-        const ctx = lire('js/contexte.js');
-        // Plus aucune lecture legacy-first dans l'orchestrateur d'en-tête.
-        expect(orch.includes('gc.groupe || gc.groupeNum')).toBe(false);
-        expect(orch.includes('gc.groupeNum || gc.groupe')).toBe(true);
-        expect(ctx.includes('gcSelectionne.groupeNum || gcSelectionne.groupe')).toBe(true);
+    // Ratchet GLOBAL : la convention groupeNum-seul est verrouillée sur tout js/.
+    // Réintroduire un filet `|| groupe` (dans un sens ou l'autre) fait ROUGIR.
+    it('aucun filet `|| groupe` ne subsiste dans js/ (hors _archives, hors commentaires)', () => {
+        const dir = path.join(racine, 'js');
+        const fichiers = readdirSync(dir, { recursive: true })
+            .filter(f => typeof f === 'string' && f.endsWith('.js') && !f.includes('_archives'));
+        const offenders = [];
+        for (const rel of fichiers) {
+            const code = readFileSync(path.join(dir, rel), 'utf8')
+                .split('\n')
+                .filter(l => {
+                    const t = l.trim();
+                    return !(t.startsWith('//') || t.startsWith('*') || t.startsWith('/*') || t.startsWith('*/'));
+                })
+                .join('\n');
+            if (/\.groupe\s*\|\|\s*\w+\??\.groupeNum/.test(code)) offenders.push(`js/${rel} (groupe||groupeNum)`);
+            if (/\.groupeNum\s*\|\|\s*\w+\??\.groupe\b/.test(code)) offenders.push(`js/${rel} (groupeNum||groupe)`);
+        }
+        expect(offenders, `Filets legacy résiduels : ${offenders.join(', ')}`).toEqual([]);
     });
 });

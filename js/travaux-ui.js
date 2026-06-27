@@ -2500,7 +2500,7 @@
             if (!e.da || !e.groupe) return;
             const gc = tousGC.find(gc =>
                 gc.coursId === e.coursId &&
-                normaliserGroupe(gc.groupeNum || gc.groupe) === normaliserGroupe(e.groupe)
+                normaliserGroupe(gc.groupeNum) === normaliserGroupe(e.groupe)
             );
             if (gc) daVersGcId[e.da] = gc.id;
         });
@@ -6524,7 +6524,7 @@
                 const coursInfo = cours.find(c => c.id === gc.coursId) || {};
                 const ens = enseignants.find(e => e.id === gc.enseignantId) || {};
                 const sigle = coursInfo.codeCours || coursInfo.code || coursInfo.sigle || null;
-                const groupe = gc.groupeNum || gc.groupe || '00001';
+                const groupe = gc.groupeNum || '00001';
                 const nomEns = ens.prenom ? `${ens.prenom} ${(ens.nom || '').charAt(0)}.` : '';
                 let label = sigle ? `${sigle} gr.${groupe}` : `Groupe ${groupe}`;
                 if (nomEns) label += ` - ${nomEns}`;
