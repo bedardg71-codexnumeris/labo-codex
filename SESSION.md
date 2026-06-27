@@ -1,4 +1,59 @@
 <!-- =====================================================================
+     SESSION PHASE 2 — ORACLES SUR DONNÉES RÉELLES + D-D1 RECADRÉE + HYGIÈNE BLOC 1 LIVRÉ — 26 juin 2026 PM (Claude Code local).
+     ⮕ RELAI VERS LA VALIDATION MAC DU BLOC 1 + BLOC 2 (remap données) — lire ce bloc en premier à la reprise.
+
+     BRANCHE : claude/brique-D-instrumentation-L2-ratchet. TOUT NON COMMITÉ, ZÉRO écriture sur données réelles. Vitest 1009 vert.
+
+     1) ORACLES LANCÉS SUR LE CODEX RÉEL (révèlent l'ampleur) — fichier
+        « …/Suivi 101-102-103/codex-…H2026-A25-…12h29/donnees-.json » (25 juin, post-reconstruction A25 ; 3 trimestres
+        a2024/a2025/h2026). RÉSULTAT INATTENDU : **L2 = VERT** sur les 4 familles. L'isolation grade-bearing
+        (evaluation.grilleId/echelleId/cartoucheId/pratique) est DÉJÀ ACQUISE → le moteur « migration de masse risque max »
+        (résoudre un L2 ROUGE) a DISPARU. Le dry-run montrait 4 « partagés » : VÉRIFIÉ = champs `production.grilleId/echelleId`
+        PÉRIMÉS (les évals utilisent un id ISOLÉ distinct) — faux positifs côté contamination, même famille « ancien id non
+        migré » que #346 (coursId COURS1766455789356). + 1 cartouche orpheline (cartouche_1770743136309_jl11zpy74, 36 évals
+        h2026) = gabarit supprimé, ZÉRO perte (rétroaction+note en clair, 36/36). + 26 réserves + 4 divergences.
+
+     2) D-D1 (mécanique) RECADRÉE — Grégoire tranche « HYGIÈNE D'ABORD, RÉGIME ENSUITE » (régime à trancher à froid sur codex
+        assaini), puis « CODE + REMAP (les deux) » pour l'hygiène. Le régime D-D1 (§3.2 pleinement namespacé vs hybride) reste
+        EN SUSPENS. Vrai risque = PROSPECTIF : `evaluation-chargement.js` pré-sélectionnait `production.grilleId` à la création
+        d'une NOUVELLE éval (chargerProduction l.615 SANS garde) → un id périmé pointant une grille globale ré-injecterait un
+        modèle partagé (footgun vivant pour GRILLE1759529438501 / échelle 1767389426695, au catalogue global).
+
+     3) HYGIÈNE BLOC 1 LIVRÉ (code, ZÉRO écriture données) : helper `_modeleProductionPourEval` — la pré-sélection grille/
+        échelle/cartouche d'une NOUVELLE éval suit le modèle des ÉVALS EXISTANTES de la production (unanime), repli sur le champ
+        production seulement si aucune éval. 2 chemins durcis (chargerProduction + bloc 1re ouverture) + garde dropdown.
+        Sentinelle `tests/unit/sentinelle-modele-production-anti-repollution-briqueD.test.js` (7 cas, break-testée : 3 rougissent
+        si on fait confiance au champ périmé). node --check OK ; Vitest 1009 vert (1002 + 7).
+
+     4) BUG #145 (SUIVI-BUGS.md) — découvert par Grégoire au test : évaluer une production SANS fichier importé affiche un PDF
+        d'une AUTRE production + inonde la console de « AMBIGUÏTÉ (DA, ) ». Cause `trouverFichierPourEvaluation` (travaux-resolution.js:99,
+        résolution par DA seul quand productionId vide). AFFICHAGE SEUL, ZÉRO corruption (diagnostic workflow + vérif adverse, aucun
+        contre-exemple). INDÉPENDANT de la Brique D (Bloc 1 hors-cause confirmé). Correctif suggéré (non appliqué) : return null si
+        productionId absent, après audit des appelants. Priorité basse. Grégoire : « on note et on reprend le Bloc 2 ».
+
+     5) BLOC 2 (remap données) — COMPLET (ZÉRO écriture live faite ; NON commité). Trois pièces :
+        • `scripts/reparer-references-productions.mjs` (logique pure `calculerReparations`, exportée) — preuve hors-ligne sur l'export
+          réel : **14 références de production à remapper** (grilleId/echelleId périmé OU vide → id UNANIME des évals). `--ecrire`
+          prouvé CHIRURGICAL (diff = exactement 14 champs prod, ZÉRO collatéral, idempotent). Sentinelle 9 cas break-testée.
+        • CARTOUCHE orpheline (cartouche_…jl11zpy74, 36 évals h2026) = **SIGNALÉE mais JAMAIS réécrite** : les 36 évals sont TOUTES
+          VERROUILLÉES (invariant #350) ; rétroaction conservée en clair ; gain nul. (Constat clé du test de sûreté.)
+        • FONCTION CONSOLE LIVE `window.reparerReferencesProductions({dryRun,cartouches})` (migration-diagnostic.js) — miroir de
+          `calculerReparations`, lit/écrit la donnée LIVE via `cleSource()`+`db` (async), dryRun PAR DÉFAUT, écrit SEULEMENT
+          `<trim>_productions` (jamais les évals/notes), backup rappelé. Sentinelle live 6 cas break-testée. Vitest 1024 vert.
+
+     RESTE :
+       a) VALIDER BLOC 1 SUR MAC (Grégoire) — toujours en attente : ouvrir une production qui a déjà des évals → créer une nouvelle
+          éval pour un autre élève → grille/échelle/cartouche pré-remplie = celle des évals existantes (id isolé), PAS le champ périmé.
+          2 modes. PUIS commit si vert.
+       b) BLOC 2 — ✓ APPLIQUÉ (Grégoire, Mac, 27 juin) : dry-run live = 10 remaps (≠ 14 export : a2025 grilleId déjà corrigés
+          depuis le 25 juin ; restaient 7 H26 grilleId + 3 a2025 echelleId) ; `{dryRun:false}` → a2025_productions(11)+h2026_productions(12)
+          réécrits ; dry-run post-rechargement = 0 (IDEMPOTENCE VÉRIFIÉE). Notes/fichiers intacts. HYGIÈNE DONNÉES = FAITE.
+       c) COMMITTER LE LOT (non commité) : Bloc 1 + Bloc 2 (script + fonction console + 3 sentinelles) + bug #145 + bump
+          index.html ?v=2026062701 + traces. 1024 Vitest verts. Branche `claude/brique-D-instrumentation-L2-ratchet`.
+       d) PUIS trancher la mécanique D-D1 à froid (le régime), sur codex assaini.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION PHASE 2 — BRIQUE D ENTAMÉE (instrumentation + dry-run d'observation) — 26 juin 2026 PM (Claude Code local).
      ⮕ RELAI VERS LA DÉCISION D-D1 (mécanique) + MIGRATION RÉELLE — lire ce bloc en premier à la reprise.
 
