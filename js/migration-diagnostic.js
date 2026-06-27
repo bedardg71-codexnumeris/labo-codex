@@ -472,6 +472,102 @@
         return { remaps: remaps, cartouches: cartouches, ecrit: ecrit };
     }
 
+    /**
+     * Réaligne production.coursId sur l'id de cours UNANIME des évaluations de la
+     * production. Sibling coursId de reparerReferencesProductions : MÊME logique
+     * conservatrice. Le coursId périmé d'une production (ancien id avant namespacing,
+     * famille #346) la fait écarter par le filtre coursId d'obtenirDonneesSelonMode
+     * → portfolio vide, note à 0. On le réaligne sur l'id que portent ses évals.
+     *
+     * CONSERVATEUR : remap UNIQUEMENT si des évals existent, DÉCLARENT un coursId, et
+     * s'accordent sur un id ≠ du champ production. AUTO-LIMITÉ : un trimestre cohérent
+     * (ancien id légitime partagé par productions ET évals — cas A24/A25) ne produit
+     * AUCUN remap. Productions SANS éval (conteneur « Portfolio ») : NON touchées.
+     * N'écrit QUE <trimestre>_productions — NI les notes NI les fichiers NI A24/A25.
+     *
+     * ALGORITHME MIROIR de scripts/reparer-coursid-productions.mjs::calculerRemapsCoursId
+     * (logique testée : tests/unit/sentinelle-reparer-coursid-productions.test.js).
+     * Si l'un change, ALIGNER l'autre.
+     *
+     * Appel console (TOUJOURS `await`) :
+     *   await reparerCoursIdProductions()                   → DRY-RUN (défaut), rapport seul
+     *   await reparerCoursIdProductions({ dryRun: false })   → ÉCRIT les remaps — BACKUP CODEX AVANT
+     *
+     * @param {{dryRun?:boolean}} [options]
+     * @returns {Promise<{remaps:Array, ecrit:boolean}|null>}
+     */
+    async function reparerCoursIdProductions(options) {
+        options = options || {};
+        const dryRun = options.dryRun !== false;        // dry-run PAR DÉFAUT
+
+        if (typeof db === 'undefined' || typeof cleSource !== 'function' || typeof obtenirTrimestres !== 'function') {
+            console.error('[Réparation coursId] dépendances absentes (db / cleSource / obtenirTrimestres). Recharge la page.');
+            return null;
+        }
+
+        const trimestres = (obtenirTrimestres() || []).map(function (t) { return t && t.id; }).filter(Boolean);
+
+        function unanime(evals, champ) {
+            const vus = new Set();
+            for (const e of evals) vus.add((e && e[champ]) || '');
+            return vus.size === 1 ? Array.from(vus)[0] : null;
+        }
+
+        const remaps = [];
+        const aEcrire = [];   // { cle, valeur }
+
+        for (const t of trimestres) {
+            const kProd = cleSource('productions', t);
+            const kEval = cleSource('evaluationsSauvegardees', t);
+            const productions = (await db.get(kProd, [])) || [];
+            const evals = (await db.get(kEval, [])) || [];
+
+            let prodModifie = false;
+            for (const prod of productions) {
+                if (!prod || !prod.id) continue;
+                // Seules les évals ACTIVES qui DÉCLARENT un coursId « votent ».
+                const liees = evals.filter(function (e) {
+                    return e && !e.remplaceeParId && e.productionId === prod.id && e.coursId;
+                });
+                if (!liees.length) continue;                   // aucune éval votante (ex. conteneur) ⇒ on ne touche pas
+                const cible = unanime(liees, 'coursId');
+                if (cible === null) continue;                  // évals divergentes ⇒ on ne tranche pas
+                if ((prod.coursId || '') === cible) continue;  // déjà aligné (cas A24/A25 cohérent)
+                remaps.push({ trimestre: t, productionId: prod.id, titre: prod.titre || prod.nom || '', champ: 'coursId', de: prod.coursId || '', vers: cible, nbEvals: liees.length });
+                if (!dryRun) { prod.coursId = cible; prodModifie = true; }
+            }
+            if (prodModifie) aEcrire.push({ cle: kProd, valeur: productions });
+        }
+
+        // ── Rapport (console.warn : style du module ; pas de console.log de debug). ──
+        console.warn('═══ RÉPARATION coursId PRODUCTIONS — ' + (dryRun ? 'DRY-RUN (aucune écriture)' : 'ÉCRITURE LIVE') + ' ═══');
+        console.warn('Trimestres : ' + (trimestres.join(', ') || '(aucun)'));
+        console.warn('Productions à remapper : ' + remaps.length);
+        remaps.forEach(function (r) {
+            console.warn('  [' + r.trimestre + '] ' + r.productionId + (r.titre ? ' « ' + r.titre + ' »' : '') +
+                '  coursId : ' + (r.de || '∅') + ' → ' + r.vers + '  (' + r.nbEvals + ' éval. unanimes)');
+        });
+        // Transparence (parité avec le script offline) : clés qui SERAIENT écrites, AVANT décision.
+        const clesTouchees = Array.from(new Set(remaps.map(function (r) { return r.trimestre + '_productions'; }))).sort();
+        console.warn('Clés qui seraient écrites : ' + (clesTouchees.join(', ') || '(aucune)') + ' — notes, fichiers et autres trimestres NON touchés.');
+
+        let ecrit = false;
+        if (dryRun) {
+            console.warn('DRY-RUN — RIEN n\'a été modifié. Pour APPLIQUER les remaps : await reparerCoursIdProductions({ dryRun: false })');
+            console.warn('⚠ FAIRE UN BACKUP CODEX AVANT. (Notes, fichiers et autres trimestres NON touchés ; on écrit seulement le coursId des productions.)');
+        } else if (!aEcrire.length) {
+            console.warn('Rien à écrire : les coursId de production sont déjà propres.');
+        } else {
+            for (const w of aEcrire) {
+                await db.set(w.cle, w.valeur);
+                console.warn('ÉCRIT : ' + w.cle + ' (' + w.valeur.length + ' productions)');
+            }
+            ecrit = true;
+            console.warn('✅ APPLIQUÉ. Recharge la page pour voir l\'effet (portfolio recalculé). Idempotent : un 2e appel ne trouvera plus rien à remapper.');
+        }
+        return { remaps: remaps, ecrit: ecrit };
+    }
+
     // =========================================================================
     //  API PUBLIQUE
     // =========================================================================
@@ -482,5 +578,6 @@
     window.migrationSupprimerFichierId = migrationSupprimerFichierId;
     window.migrationAjouterStatut = migrationAjouterStatut;
     window.reparerReferencesProductions = reparerReferencesProductions;
+    window.reparerCoursIdProductions = reparerCoursIdProductions;
 
 })();
