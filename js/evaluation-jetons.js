@@ -17,14 +17,115 @@
    =============================== */
 
 /**
- * Obtient la configuration des jetons depuis modalitesEvaluation
+ * #328 L2-c — Normalise une config de jetons (forme plate OU imbriquée) vers la forme
+ * canonique imbriquée attendue par les consommateurs (`actif`, `delai.nombre`,
+ * `reprise.nombre`, `repriseCiblee`…). Les jetons d'une pratique ont vécu sous 3 formes :
+ *   - PLATE        : `{nombre, delaiDuree, repriseOriginale, cibleeActif, cibleePlafond}`
+ *   - IMBRIQUÉE    : `{actif, delai{}, reprise{}, repriseCiblee{}}`  (config.jetons)
+ *   - IMBRIQUÉE v2 : idem mais champ d'activation `activer`         (configuration.jetons, wizard)
+ * La conversion PLATE → canonique est IDENTIQUE à l'ancien `_synchroniserJetonsPratique`
+ * (préservation stricte du miroir dégonflé). Une forme NON reconnue ⇒ `null` (repli sûr
+ * et visible — jamais absorbée en silence).
+ *
+ * @param {object|null} brut - jetons bruts portés par la pratique
+ * @returns {object|null} config canonique, ou null si non reconnue
+ */
+function _normaliserConfigJetons(brut) {
+    if (!brut || typeof brut !== 'object') return null;
+
+    // Forme PLATE (marqueurs `nombre`/`delaiDuree`/`repriseOriginale`/`cibleeActif`).
+    const estPlat = brut.nombre !== undefined || brut.delaiDuree !== undefined
+        || brut.repriseOriginale !== undefined || brut.cibleeActif !== undefined;
+    if (estPlat) {
+        return {
+            actif: brut.actif !== false,
+            delai: { nombre: brut.nombre || 2, dureeJours: brut.delaiDuree || 2 },
+            reprise: {
+                nombre: brut.nombre || 2,
+                maxParProduction: 1,
+                archiverOriginale: brut.repriseOriginale === 'archiver'
+            },
+            repriseCiblee: {
+                actif: brut.cibleeActif || false,
+                plafondNote: brut.cibleePlafond || null
+            }
+        };
+    }
+
+    // Forme IMBRIQUÉE (delai/reprise sont des objets). `activer` (wizard) → `actif`.
+    if ((brut.delai && typeof brut.delai === 'object') || (brut.reprise && typeof brut.reprise === 'object')) {
+        const d = brut.delai || {};
+        const r = brut.reprise || {};
+        const rc = brut.repriseCiblee || null;
+        return {
+            actif: (brut.actif !== undefined ? brut.actif : brut.activer) !== false,
+            delai: { nombre: d.nombre != null ? d.nombre : 2, dureeJours: d.dureeJours != null ? d.dureeJours : 2 },
+            reprise: {
+                nombre: r.nombre != null ? r.nombre : 2,
+                maxParProduction: r.maxParProduction != null ? r.maxParProduction : 1,
+                archiverOriginale: r.archiverOriginale !== false
+            },
+            // #328 L2-c (décision Grégoire, 27 juin) : repriseCiblee NON configurée sur la forme
+            // imbriquée → défaut de l'app (ACTIF), cohérent avec jetonsDefaut et avec le comportement
+            // antérieur d'une pratique sans miroir. Une pratique qui veut l'éteindre pose actif:false.
+            repriseCiblee: rc
+                ? { actif: rc.actif !== false, nombre: rc.nombre != null ? rc.nombre : 2, plafondNote: rc.plafondNote != null ? rc.plafondNote : null }
+                : { actif: true, nombre: 2, plafondNote: null },
+            // Agrégat « jetons par élève » : porté UNIQUEMENT par la forme imbriquée (jamais par
+            // la forme plate, que l'ancien miroir ne synchronisait pas avec ce champ). undefined si
+            // absent → l'appelant retombe sur configurationJetons puis défaut (préservation stricte).
+            nombreParEleve: brut.nombreParEleve
+        };
+    }
+
+    // Forme non reconnue → null (repli LOUD : obtenirConfigJetons retombe sur le défaut).
+    return null;
+}
+
+/**
+ * #328 L2-c — Dérive la config des jetons depuis la PRATIQUE ACTIVE (SSOT vivante),
+ * en remplacement du miroir `modalitesEvaluation.configPAN.jetons` (décision D3 : pas de
+ * snapshot, la config suit la pratique vivante). Lit la pratique configurable du
+ * groupe-cours actif (ou demandée pour la simulation #307), puis normalise ses jetons.
+ * Renvoie `null` pour une pratique codée-dur (aucune entrée configurable) → l'appelant
+ * retombe sur son repli historique.
+ *
+ * @param {string|null} pratiqueIdDemande - pratique à inspecter (#307) ; absent ⇒ active
+ * @returns {object|null} config canonique des jetons, ou null
+ */
+function obtenirConfigJetonsPratique(pratiqueIdDemande = null) {
+    const pratiqueId = pratiqueIdDemande
+        || (typeof obtenirPratiqueActiveGroupeCours === 'function' ? obtenirPratiqueActiveGroupeCours() : null);
+    if (!pratiqueId) return null;
+
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+    if (!Array.isArray(pratiques)) return null;
+    const pratique = pratiques.find(p => p && p.id === pratiqueId);
+    if (!pratique) return null;
+
+    // Emplacement canonique → legacy : configuration.jetons (wizard) → config.jetons → jetons (plat).
+    const brut = (pratique.configuration && pratique.configuration.jetons)
+        || (pratique.config && pratique.config.jetons)
+        || pratique.jetons
+        || null;
+    return _normaliserConfigJetons(brut);
+}
+
+/**
+ * Obtient la configuration des jetons.
+ * #328 L2-c : DÉRIVE de la pratique active (SSOT) ; le miroir `configPAN.jetons` n'est
+ * plus lu. Repli historique conservé pour les pratiques codées-dur : `configurationJetons`
+ * (format v2 plat) puis valeurs par défaut.
  * @returns {object} Configuration des jetons avec valeurs par défaut
  */
 function obtenirConfigJetons() {
-    const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
-    const configPAN = modalites.configPAN || {};
+    // SSOT : config dérivée de la pratique active vivante.
+    const depuisPratique = obtenirConfigJetonsPratique();
+    if (depuisPratique) {
+        return depuisPratique;
+    }
 
-    // Valeurs par défaut si config PAN n'existe pas
+    // Valeurs par défaut si aucune config jetons résolue
     const jetonsDefaut = {
         actif: true,
         delai: { nombre: 2, dureeJours: 2 },  // 🆕 Beta 95.7 : défaut 2 jours
@@ -32,12 +133,8 @@ function obtenirConfigJetons() {
         repriseCiblee: { actif: true, nombre: 2, plafondNote: null }
     };
 
-    // Priorité: configPAN.jetons (format canonique), puis fallback vers configurationJetons (format v2 plat)
-    if (configPAN.jetons) {
-        return configPAN.jetons;
-    }
-
-    // Fallback: lire depuis configurationJetons (format plat du module v2) et convertir
+    // Fallback: configurationJetons (format plat du module v2) et convertir
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
     const configV2 = modalites.configurationJetons;
     if (configV2) {
         return {
@@ -709,9 +806,8 @@ function appliquerJetonRepriseCiblee(evaluationOriginaleId, critereId = null, ar
     // Vérifier la disponibilité des jetons de reprise ciblée pour cet étudiant
     // Pour l'instant, on utilise le même compteur que les reprises standard
     // TODO: Créer un compteur séparé si besoin
-    const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
-    const configPAN = modalites.configPAN || {};
-    const configRepriseCiblee = configPAN.jetons?.repriseCiblee || {};
+    // #328 L2-c : la config repriseCiblee dérive de la pratique active (plus de miroir configPAN.jetons).
+    const configRepriseCiblee = obtenirConfigJetons().repriseCiblee || {};
 
     if (!configRepriseCiblee.actif) {
         notifications.erreur('Fonction désactivée', 'Les jetons de reprise ciblée sont désactivés');
@@ -829,6 +925,7 @@ function nettoyerEvaluationsRepriseCiblee() {
 
 // Exporter les fonctions vers window pour qu'elles soient accessibles globalement
 window.obtenirConfigJetons = obtenirConfigJetons;
+window.obtenirConfigJetonsPratique = obtenirConfigJetonsPratique;  // #328 L2-c (réutilisé par les lecteurs migrés)
 window.compterJetonsUtilises = compterJetonsUtilises;
 window.verifierDisponibiliteJeton = verifierDisponibiliteJeton;
 window.appliquerJetonDelai = appliquerJetonDelai;
