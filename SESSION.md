@@ -27,12 +27,18 @@
      VALIDATION : Vitest 1033/1033 vert ; Playwright 67 vert + 1 ÉCHEC PRÉEXISTANT `maquettes-decouvrabilite-326.spec.js`
        (vérifié par remisage : rouge AUSSI sur la base, sans lien).
 
+     SUITE (commit f146e2c2, build-only — chip task_3776741b FAIT, hygiène pure ZÉRO comportement) :
+       • Filet `|| groupe` retiré de ~29 lectures (groupeNum SEUL). 4 derniers writers `groupe` du module Entité MORT
+         (creer/dédup/valider/champsModifiables) basculés sur groupeNum → plus aucun code ne produit le champ legacy.
+       • Sentinelle durcie + RATCHET GLOBAL (balaie tout js/, interdit tout filet `|| groupe`) ; break-testé.
+       • Vérif : 30 remplacements à comptage assertif, node --check ×14, grep direct+déstructuration = 0 lecture GC résiduelle,
+         Vitest 1033, Playwright 67 + #326 préexistant. NON FAIT (optionnel) : supprimer entièrement les méthodes Entité mortes
+         (aujourd'hui présentes mais groupeNum-cohérentes ; pas d'appelant vivant, _archives non chargé).
+
      RESTE :
        a) DONNÉES RÉELLES — Grégoire : backup Codex PUIS charger l'app (la migration purge les 2 GC + journalise
           `[purge groupe legacy] h2026/GC_… …` en console). Vérifier liste d'élèves + assiduité 601-101-MQ H26.
-       b) SUIVI TRACKÉ (chip task_3776741b) — nettoyage zéro-dette différé : retirer le filet `|| groupe` des ~18 lectures
-          restantes (ne lire que `groupeNum`) + supprimer le code mort du module Entité qui écrit encore `groupe`. À faire une
-          fois la migration passée partout.
+       b) Optionnel : suppression intégrale du module Entité mort (CRUD sans appelant vivant) — non tracké, à décider à froid.
      ===================================================================== -->
 
 <!-- =====================================================================
