@@ -178,6 +178,21 @@ H2026 actif et le golden master, résoudre le L2 ROUGE. **Sur copie + backup hor
 | D-D6 | Hash de divergence post-archivage (inclure **cartouches**, copiées seulement si length>0) | hash léger `[id, nom, critères, cartouches]` |
 | D-D7 | Inventaire exhaustif des clés à isoler (cf. §1bis : +objectifsTemplates, etc.) | statuer chaque clé MUST/CAN/global |
 
+> **MàJ 26 juin 2026 PM (Claude Code local) — instrumentation + dry-run d'observation LIVRÉS** (branche
+> `claude/brique-D-instrumentation-L2-ratchet`, non destructif, 1002 Vitest + 67 Playwright verts, break-testés) :
+> - **L2 ÉTENDU** aux 4 modèles (grilles/échelles/pratiques/cartouches) — `scripts/sentinelle-isolation-grilles-trimestre.mjs`,
+>   désormais **auto-vérifiable** (`tests/unit/sentinelle-isolation-modeles-trimestre-L2.test.js`). Le filet « L2 à étendre » du §3.4 est donc LEVÉ.
+> - **Cliquet `pratiquesConfigurables`** posé (`tests/unit/sentinelle-cle-nue-pratiques-config-ratchet.test.js`, scan récursif `js/`).
+>   ⚠ **CORRECTION** : le §3.4 demande de « généraliser le ratchet à `modalitesEvaluation` » — c'est DÉJÀ FAIT
+>   (`sentinelle-ssot-modalites-purge-L3`, scan récursif). Le ratchet restant ne concernait QUE `pratiquesConfigurables`.
+> - **Dry-run d'OBSERVATION** (read-only) — `scripts/dry-run-migration-modeles.mjs` : plan de migration + partages/orphelins/réserves/divergences,
+>   réconciliant **évaluations + productions**.
+> - **À TRANCHER avant la migration réelle** : (a) **mécanique D-D1** — tension entre §3.2 (« déplacer grilles/échelles
+>   `CLES_GLOBALES`→`CLES_NAMESPACEES` » = pleinement namespacé) et D-D1 (« hybride comme `bibliothequePratiques` » =
+>   catalogue global + copie locale) : les grilles n'ont qu'1 clé, les pratiques 2 ⇒ l'« hybride » suppose de CRÉER la
+>   séparation, ce n'est pas le simple déplacement de §3.2 ; (b) **critère §4-pt7** (tous attribuables vs utilisés) ;
+>   (c) `identifierTemplatesUtilises` (trimestres.js:587) ne lit que les **productions** (angle mort usage-éval).
+
 ### 3.4 Ordre + filet
 1. Trancher D-D1. 2. Backup (D-D4) + baseline L0/L2 capturés AVANT. 3. **Dry-run** (`identifierTemplatesUtilises`+`creerSnapshotRessources` en mode simulation, clés `_dryrun_`). 4. L0 sur la copie dry-run = VERT. 5. Migration réelle (modèles, flag idempotent **en dernier**). 6. L0/L2 post-migration. 7. (si D-D3=A) corriger les ~60 lectures `modalitesEvaluation`.
 
