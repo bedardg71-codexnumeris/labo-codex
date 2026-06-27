@@ -20,7 +20,10 @@
  * @property {string} enseignantId - Référence vers l'entité Enseignant
  * @property {string} horaireId - Référence vers l'entité Horaire
  * @property {string} pratiqueId - Référence vers la Pratique de notation
- * @property {string} groupe - Numéro de groupe (ex: "00001")
+ * @property {string} groupeNum - Numéro de groupe CANONIQUE (ex: "00001").
+ *   Champ d'identité qui fait foi : écrit par le chemin de création vivant
+ *   (`sauvegarderGroupeCoursV2`) et cohérent avec `nom`. L'ancien champ `groupe`
+ *   (chemin Entité archivé) est purgé au démarrage — cf. normaliserCanonique().
  * @property {boolean} actif - Si ce groupe-cours est actuellement actif
  * @property {string} dateCreation - Date de création ISO
  * @property {string} dateModification - Date de dernière modification ISO
@@ -413,6 +416,48 @@ async function obtenirTousLesGroupesCours() {
     return resultats;
 }
 
+/**
+ * Normalise une liste de groupe-cours sur le champ canonique `groupeNum`.
+ *
+ * Dette d'intégrité #130/#306 (27 juin 2026). L'identité d'un groupe-cours est
+ * portée par `groupeNum` — SEUL champ écrit par le chemin de création vivant
+ * (`sauvegarderGroupeCoursV2`) et structurellement cohérent avec `nom` (même
+ * champ de formulaire `#v2-gc-groupe`). Le champ legacy `groupe` n'est plus
+ * écrit que par du code archivé (`js/_archives/`) ; il a pu réapparaître périmé
+ * — voire inversé entre deux groupes (cas 601-101-MQ H26) — via une
+ * reconstruction ou un import de codex ancien, et il GAGNE alors à tort dans les
+ * lectures historiques `gc.groupe || gc.groupeNum`. On le retire.
+ *
+ * Règle pilotée par la donnée, jamais destructrice du canonique : si `groupeNum`
+ * est absent (très anciens enregistrements du chemin Entité archivé), on promeut
+ * `groupe` AVANT de le retirer ; un `groupeNum` présent n'est jamais écrasé.
+ * Idempotente (un second passage ne trouve plus de champ `groupe`). Mute la
+ * liste en place.
+ *
+ * @param {Array} liste - tableau de groupe-cours (muté en place)
+ * @returns {{modifie: boolean, divergences: Array<{id, nom, groupe, groupeNum}>}}
+ */
+function normaliserGroupesCoursCanonique(liste) {
+    const divergences = [];
+    let modifie = false;
+    if (!Array.isArray(liste)) return { modifie, divergences };
+    liste.forEach(gc => {
+        if (!gc || !Object.prototype.hasOwnProperty.call(gc, 'groupe')) return;
+        const numPresent = gc.groupeNum !== undefined && gc.groupeNum !== null && gc.groupeNum !== '';
+        const legacyPresent = gc.groupe !== undefined && gc.groupe !== null && gc.groupe !== '';
+        if (!numPresent && legacyPresent) {
+            // Promotion : le legacy devient le canonique avant son retrait.
+            gc.groupeNum = gc.groupe;
+        } else if (numPresent && legacyPresent && String(gc.groupe) !== String(gc.groupeNum)) {
+            // Trace d'audit : divergence legacy ≠ canonique (le canonique fait foi).
+            divergences.push({ id: gc.id, nom: gc.nom, groupe: gc.groupe, groupeNum: gc.groupeNum });
+        }
+        delete gc.groupe;
+        modifie = true;
+    });
+    return { modifie, divergences };
+}
+
 // ============================================
 // COMPATIBILITÉ AVEC infoCours (MIGRATION)
 // ============================================
@@ -446,7 +491,9 @@ async function synchroniserInfoCours(trimestreId) {
         formatHoraire: gcComplet.horaire?.formatHoraire || '',
         local: gcComplet.horaire?.local || '',
         pratiqueId: gcComplet.pratiqueId || '',
-        groupe: gcComplet.groupe || '',
+        // Canonique groupeNum d'abord ; `|| groupe` = filet transitoire pour un
+        // enregistrement non encore purgé (cf. normaliserCanonique).
+        groupe: gcComplet.groupeNum || gcComplet.groupe || '',
         trimestreId: gcComplet.trimestreId,
         actif: true,
         // Source v96
@@ -464,7 +511,7 @@ async function synchroniserInfoCours(trimestreId) {
         coursId: gcComplet.coursId,
         enseignantId: gcComplet.enseignantId,
         horaireId: gcComplet.horaireId,
-        groupe: gcComplet.groupe
+        groupe: gcComplet.groupeNum || gcComplet.groupe
     });
 
     // 🆕 BETA 95.2 : Synchroniser les séances horaire pour rétrocompatibilité
@@ -505,6 +552,7 @@ window.GroupeCoursEntite = {
 
     // Utilitaires
     hydrater: hydraterGroupeCours,
+    normaliserCanonique: normaliserGroupesCoursCanonique,
     valider: validerDonneesGroupeCours,
     genererLibelle: genererLibelleGroupeCours,
     genererLibelleCourt: genererLibelleCourtGroupeCours,

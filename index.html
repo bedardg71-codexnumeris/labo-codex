@@ -14625,7 +14625,7 @@
     <script src="js/config.js?v=2026062201"></script> <!-- #345 (22 juin) : flag COMPARATEUR_VISIBLE ; Refonte nav SP5-fix : sous-onglet id court 'vue' (au lieu de 'calendrier') pour éviter la redondance calendrier-calendrier -->
     <script src="js/navigation.js?v=2026062201"></script> <!-- #345 (22 juin) : filtre comparateur sous-nav Labo ; Refonte nav SP5 : tables migrées calendrier-* + nav-calendrier-* -->
     <script src="js/preferences.js?v=2026061101"></script> <!-- Beta 99.16 : API centralisée préférences + migration V3 (doit précéder modes.js) -->
-    <script src="js/modes.js?v=2026061102"></script> <!-- Refonte nav SP5 : commentaire et clé calendrier-trimestre -->
+    <script src="js/modes.js?v=2026062701"></script> <!-- Refonte nav SP5 : commentaire et clé calendrier-trimestre -->
     <script src="js/utils-notifications.js?v=20260521a"></script> <!-- Cat-B Track 4 chantier E (21 mai 2026) : source unique notifications toast — window.notifications.{succes,erreur,info} -->
     <script src="js/ui-dialogues.js?v=20260615a"></script> <!-- #315/#316 : modales async réutilisables — window.uiDialogues.{confirmerAction,demanderSaisie} (remplace confirm()/prompt() natifs) -->
 
@@ -14648,16 +14648,16 @@
     <script src="js/trimestre-v2-enseignants.js?v=20260517a"></script> <!-- Refactor étape 3 session A (17 mai 2026) : extrait de trimestre-v2.js (lignes 5438-5739) -->
     <script src="js/trimestre-v2-horaires.js?v=20260517a"></script> <!-- Refactor étape 3 session A (17 mai 2026) : extrait de trimestre-v2.js (lignes 3252-4073) -->
     <script src="js/trimestre-v2-liste.js?v=20260517a"></script> <!-- Refactor étape 3 session A (17 mai 2026) : extrait de trimestre-v2.js (lignes 946-1394) -->
-    <script src="js/trimestre-v2-cours.js?v=20260529e"></script> <!-- Beta 99.76 b0529-1139 : refonte chantier B — export _deriverSessionAnneeTrimestreActif + retrait lectures période -->
+    <script src="js/trimestre-v2-cours.js?v=2026062701"></script> <!-- Beta 99.76 b0529-1139 : refonte chantier B — export _deriverSessionAnneeTrimestreActif + retrait lectures période -->
     <script src="js/trimestre-v2-etudiants.js?v=20260517a"></script> <!-- Refactor étape 3 session B (17 mai 2026) : extrait de trimestre-v2.js (lignes 119-1014 + handlers 2188-2200, zone 4) -->
     <script src="js/trimestre-v2-groupes-cours.js?v=20260517a"></script> <!-- Refactor étape 3 session B (17 mai 2026) : extrait de trimestre-v2.js (lignes 119-219 + 360-1149, zone 6 — hub populerDropdownsAssemblageV2 reste résidu) -->
-    <script src="js/trimestre-v2-orchestre.js?v=20260517a"></script> <!-- Refactor étape 3 session C (17 mai 2026) : extrait de trimestre-v2.js (lignes 491-1216, zone 8 HIGH — monstre cyc 94 préservé Phase 1, éclatement Phase 2) -->
+    <script src="js/trimestre-v2-orchestre.js?v=2026062701"></script> <!-- Refactor étape 3 session C (17 mai 2026) : extrait de trimestre-v2.js (lignes 491-1216, zone 8 HIGH — monstre cyc 94 préservé Phase 1, éclatement Phase 2) -->
 
     <!-- ENTITÉS Beta 95.2 - Architecture modulaire groupe-cours -->
     <script src="js/entites/cours-entite.js?v=20260529a"></script>
     <script src="js/entites/enseignants.js?v=2026010601"></script>
     <script src="js/entites/horaires.js?v=2026010601"></script>
-    <script src="js/entites/groupe-cours.js?v=2026010601"></script>
+    <script src="js/entites/groupe-cours.js?v=2026062701"></script>
 
     <script src="js/pratique-notation-v2.js?v=2026061113"></script> <!-- Beta 95 : dropdown productions + terminologie "production" -->
     <script src="js/gabarits-utils.js?v=20260512b"></script> <!-- Beta 95 : Module utilitaire gabarits + filtres pratique -->
@@ -14667,10 +14667,10 @@
     <script src="js/pratiques-bibliotheque.js?v=2026062201"></script> <!-- #318 (22 juin) : gabarit DEN « Modèle de base » ; Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/pratiques-gestion.js?v=2026062601"></script> <!-- Brique C namespacing pas 5 : import inter-trimestre de pratiques (modèle COPIE) + vérif dépendances echelleId/grilleId (option A : avertir) -->
     <script src="js/preferences-v2.js?v=2026050104"></script> <!-- Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
-    <script src="js/donnees-v2.js?v=2026061113"></script> <!-- Refonte nav SP5 : afficherSection calendrier -->
+    <script src="js/donnees-v2.js?v=2026062701"></script> <!-- Refonte nav SP5 : afficherSection calendrier -->
     <script src="js/etudiants.js?v=2026061103"></script>
     <script src="js/productions-bibliotheque.js?v=2026050617"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/productions.js?v=20260512b"></script> <!-- Beta 99.41 b0511-1215 : #216 data-tooltip sur dates échéance multi-groupe -->
+    <script src="js/productions.js?v=2026062701"></script> <!-- Beta 99.41 b0511-1215 : #216 data-tooltip sur dates échéance multi-groupe -->
     <script src="js/productions-import-export.js?v=20260516a"></script> <!-- Refactor étape 3 (16 mai 2026) : extrait de productions.js (lignes 2630-3276) -->
     <script src="js/productions-liste.js?v=20260516b"></script> <!-- Refactor étape 3 (16 mai 2026) : sidebar + CRUD utilisateur extraits de productions.js -->
     <script src="js/productions-bibliotheque-ui.js?v=20260626a"></script> <!-- Fix preview « Voir les productions » : display:none inline → classe u-hide -->
@@ -14682,7 +14682,7 @@
     <script src="js/cartouches.js?v=20260512g"></script> <!-- Beta 99.42 b0512-1012 : #159 retiré (onglets + aperçu legacy supprimés) -->
     <script src="js/export-pdf.js?v=20260512b"></script> <!-- Beta 95.7 #30 : Export PDF -->
     <script src="js/cours.js?v=20260529b"></script> <!-- Beta 99.74 b0529-1016 : chantier 0 refonte — _diagnostiquerModeleCours (read-only) -->
-    <script src="js/contexte.js?v=2026013001"></script> <!-- Beta 95.2 : Support groupe-cours -->
+    <script src="js/contexte.js?v=2026062701"></script> <!-- Beta 95.2 : Support groupe-cours -->
 
     <!-- PRIORITÉ 3: Configuration et calcul des indices (AVANT affichage) -->
     <script src="js/interpretation-config.js?v=2025111501"></script>
@@ -14789,7 +14789,7 @@
     <script src="js/travaux-resolution.js?v=2026050206"></script> <!-- Beta 99.31 b0502-0745 : flag { silencieux: true } sur diagnostiquerDoublons (pour bandeau) -->
     <script src="js/travaux-doublons-ui.js?v=2026050225"></script> <!-- Beta 99.31 b0502-0940 : db.setSync (écriture localStorage immédiate) — bandeau se met à jour après validations -->
     <script src="js/migration-diagnostic.js?v=2026062701"></script>
-    <script src="js/travaux-ui.js?v=20260512b"></script> <!-- Beta 99.42 b0512-0641 : fix Safari #256-bis — Archivage utilise sa propre clé d'aide archiver-travaux -->
+    <script src="js/travaux-ui.js?v=2026062701"></script> <!-- Beta 99.42 b0512-0641 : fix Safari #256-bis — Archivage utilise sa propre clé d'aide archiver-travaux -->
     <script src="js/actions-rlo.js?v=2026041709"></script> <!-- Beta 99.17 (b0417-1100) : fix lecture LIVE prioritaire dans obtenirEvolutionRLOEtudiant -->
 
     <!-- PRIORITÉ 5: Modules fonctionnels -->
@@ -14866,7 +14866,7 @@
     <script src="js/export-resultats-finaux.js?v=2026061901"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=2026061101"></script> <!-- Refonte nav SP5 : naviguerVers calendrier-trimestre -->
+    <script src="js/main.js?v=2026062701"></script> <!-- Refonte nav SP5 : naviguerVers calendrier-trimestre -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
