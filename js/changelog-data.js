@@ -12,6 +12,15 @@
 
     var CHANGELOG = [
         {
+            version: '1.21',
+            couleur: 'vert',
+            titre: 'Import de pratiques de notation d’un autre trimestre',
+            items: [
+                'Tu peux maintenant importer une pratique de notation depuis un autre trimestre : elle est copiée dans le trimestre courant et l’originale reste intacte. Un avertissement te signale si son échelle ou ses grilles ne sont pas reprises automatiquement.',
+                'Correction : au désarchivage d’un trimestre, les copies de modèles (grilles, échelles, pratiques) ne sont plus dupliquées.'
+            ]
+        },
+        {
             version: '1.20',
             couleur: 'vert',
             titre: 'Note différée, export des résultats et bibliothèques complètes',
