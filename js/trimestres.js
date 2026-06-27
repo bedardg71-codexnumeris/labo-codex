@@ -734,7 +734,55 @@
 
         db.setSync('trimestres', trimestres);
 
-        return { success: true, trimestre: trimestre };
+        // 🆕 FIX #359 (26 juin 2026) : purger les copies de modèles namespacées posées à
+        // l'archivage (creerSnapshotRessources). Une fois le flag `archive` retiré, cle()
+        // ne les lit plus (il retombe sur les clés globales partagées) → elles deviennent
+        // des ORPHELINS MORTS : place perdue (cf. #353 quota saturé) et, pire, source de
+        // cartouches périmées si le trimestre est ré-archivé (la copie de cartouche n'est
+        // réécrite que si length>0). On PURGE au désarchivage plutôt que de modifier cle()
+        // (décision D-D5) : désarchiver = redevenir un trimestre éditable normal, qui
+        // partage le catalogue global — la copie figée n'a plus de rôle. Le snapshot de
+        // sauvegarde `snapshot_<id>_*` (référence historique) est CONSERVÉ.
+        const copiesPurgees = purgerCopiesModelesArchive(id);
+
+        return { success: true, trimestre: trimestre, copiesPurgees: copiesPurgees };
+    }
+
+    /**
+     * 🆕 FIX #359 (26 juin 2026) : retire les copies de modèles namespacées qu'un
+     * archivage (creerSnapshotRessources) a posées pour un trimestre — opération
+     * symétrique de cette création. À appeler au désarchivage : hors mode archive,
+     * cle() ne lit plus ces copies, qui ne sont donc plus que des orphelins.
+     *
+     * NE TOUCHE PAS au snapshot de sauvegarde `snapshot_<id>_*` : c'est un backup
+     * historique délibéré, pointé par `trimestre.snapshotRessources`.
+     *
+     * Les grilleIds des cartouches sont re-dérivés par identifierTemplatesUtilises(id)
+     * — la même source que l'archivage a utilisée pour CRÉER les copies (le trimestre
+     * étant en lecture seule pendant l'archive, cet ensemble est stable). removeSync
+     * retire la clé de toutes les couches (localStorage + cache + IDB), donc un orphelin
+     * refoulé en IDB-seul par la saturation (#353) est bien nettoyé.
+     *
+     * @param {string} id - ID du trimestre désarchivé
+     * @returns {Array<string>} Clés effectivement retirées (présentes avant la purge)
+     */
+    function purgerCopiesModelesArchive(id) {
+        const clesRetirees = [];
+        const retirer = (cleComplete) => {
+            if (db.getSync(cleComplete, null) !== null) {
+                db.removeSync(cleComplete);
+                clesRetirees.push(cleComplete);
+            }
+        };
+
+        // Copies de templates globaux figées à l'archivage (CLES_TEMPLATES_ARCHIVES).
+        CLES_TEMPLATES_ARCHIVES.forEach(nomCle => retirer(`${id}_${nomCle}`));
+
+        // Copies de cartouches, une par grille utilisée (mêmes grilleIds qu'à l'archivage).
+        const { grilleIds } = identifierTemplatesUtilises(id);
+        grilleIds.forEach(grilleId => retirer(`${id}_cartouches_${grilleId}`));
+
+        return clesRetirees;
     }
 
     /**
