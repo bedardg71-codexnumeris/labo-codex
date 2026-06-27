@@ -1,4 +1,29 @@
 <!-- =====================================================================
+     RELEASE 1.23.0 — CONSOLIDATION NAMESPACING-D (Brique D + coursId + groupeNum) — 27 juin 2026 (Claude Code). LIRE EN PREMIER.
+     ⮕ Les 3 chantiers parallèles ont été FUSIONNÉS sur main via claude/release-1.23.0-namespacing-D
+        (base = origin/main 1.22.0 / #328). Merges propres : seuls les 3 fichiers d'estampille en conflit,
+        résolus puis re-stampés par release.mjs (1.23.0). Vitest complet vert.
+
+     LIVRÉ (1.23.0) :
+     • Brique D — instrumentation L2 (4 modèles) + hygiène Bloc 1 (anti-re-pollution des modèles d'éval) +
+       Bloc 2 (remap grilleId/echelleId périmés). Bloc 1 validé Mac.
+     • coursId — réparation du coursId périmé des productions H26 (le filtre coursId mettait le portfolio à 0 ;
+       notes réelles rétablies). Appliqué live. window.reparerCoursIdProductions + scripts/reparer-coursid-productions.mjs
+       + 2 sentinelles (offline 8 + live 6) break-testées.
+     • groupeNum — champ canonique groupeNum, purge du legacy `groupe` inversé, harmonisation de 8 lectures, CRUD mort -312 l.
+
+     RESTE (priorisé — détail dans la mémoire Claude « audit-integrite-reconstruction-2026-06-27 ») :
+       1. Décision D-D1 (régime §3.2 : pleinement namespacé vs hybride) à trancher à froid sur codex assaini.
+       2. Doublons d'évals ACTIVES à notes DIVERGENTES (a2025 Taly B./Art4 = 4 actives 63/66/69/69 ;
+          Samuel M./Art4 = 77,3 vs 79) → fausse la note retenue. + doublons note-identique (h2026 Elisa/Art5 ; a2025 Ally/Art5).
+       3. h2026 : Vanesa G.-A./Art1 — note ≠ critères SANS justification (examiner en 1er) ; grilleId faux 5-critères
+          (Salma C./Art3, Elisa B./Art5) ; éval partielle 4/5 (Francine M.-T./Art2 = même défaut que Grace, non corrigé).
+       4. e2026 : groupesCours VIDE + grappe prod/éval sur coursId orphelin → décision à prendre.
+       5. Préférence `grilleReferenceDepistage` VIDE (radar de dépistage) → `definirPreference('grilleReferenceDepistage','GRILLE1759529438501')`.
+       6. Catalogue `cours` : 3 doublons `h2026-601-102-MQ-00001` à dédoublonner. a2024 = ingestion brute (pas prêt pour le longitudinal).
+     ===================================================================== -->
+
+<!-- =====================================================================
      BASCULE — DETTE D'INTÉGRITÉ « CHAMP CANONIQUE GROUPE-COURS » RÉSOLUE — 27 juin 2026 (Claude Code local).
      ⮕ Chantier indépendant de la Brique D (bloc suivant). Branche : claude/serene-aryabhata-1781cd. Release 1.21.3 (patch).
 
