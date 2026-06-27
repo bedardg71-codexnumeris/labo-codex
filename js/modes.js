@@ -511,8 +511,9 @@ function obtenirContexteCoursActif() {
     const gc = listeGC.find(function(g) { return g && g.actif && g.coursId === infoCours.id; });
     if (!gc) return infoCours;
 
-    // Mêmes priorités que l'orchestration (orchestre.js) : groupe || groupeNum.
-    const groupeGC = gc.modeCours ? null : (gc.groupe || gc.groupeNum || null);
+    // Champ canonique `groupeNum` d'abord (#130/#306) ; `|| groupe` = filet
+    // transitoire pour un enregistrement non encore purgé (normaliserCanonique).
+    const groupeGC = gc.modeCours ? null : (gc.groupeNum || null);
     return Object.assign({}, infoCours, {
         groupe: groupeGC,
         _modeCours: !!gc.modeCours || groupeGC === null

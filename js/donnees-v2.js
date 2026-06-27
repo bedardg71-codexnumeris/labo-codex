@@ -913,7 +913,7 @@
                         usages[gc.pratiqueId].cours.push({
                             trimestreId: trim.id,
                             groupeCoursId: gc.id,
-                            groupe: gc.groupe
+                            groupe: gc.groupeNum
                         });
                     }
                 });

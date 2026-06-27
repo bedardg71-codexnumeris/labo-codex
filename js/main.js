@@ -482,6 +482,39 @@ document.addEventListener('DOMContentLoaded', function () {
             db.setSync('migration_pratiqueId_to_configurable_id_done', true);
         }
 
+        // Purge du champ legacy `groupe` des groupe-cours (27 juin 2026, dette
+        // d'intégrité #130/#306). Le champ d'identité canonique est `groupeNum`
+        // (seul champ écrit par `sauvegarderGroupeCoursV2`, cohérent avec `nom`) ;
+        // l'ancien `groupe` n'est plus produit que par du code archivé et, quand
+        // il réapparaît périmé/inversé (reconstruction, import de codex ancien),
+        // il gagne à tort dans les lectures `groupe || groupeNum`. La règle
+        // (`GroupeCoursEntite.normaliserCanonique`) retire `groupe` sans jamais
+        // écraser un `groupeNum` présent. SANS flag (comme la purge de
+        // `dureePeriodeMinutes`) : idempotente et robuste face aux réintroductions
+        // — c'est le « tarir la source » du fond restant #306.
+        try {
+            if (window.GroupeCoursEntite && typeof window.GroupeCoursEntite.normaliserCanonique === 'function') {
+                const trimestres = db.getSync('trimestres', []);
+                if (Array.isArray(trimestres)) {
+                    trimestres.forEach(t => {
+                        if (!t || !t.id) return;
+                        const cleGC = `${t.id}_groupesCours`;
+                        const groupesCours = db.getSync(cleGC, null);
+                        if (!Array.isArray(groupesCours) || groupesCours.length === 0) return;
+                        const res = window.GroupeCoursEntite.normaliserCanonique(groupesCours);
+                        if (res.divergences && res.divergences.length > 0) {
+                            res.divergences.forEach(d => {
+                                console.warn(`[purge groupe legacy] ${t.id}/${d.id} : "groupe"="${d.groupe}" ≠ canonique groupeNum="${d.groupeNum}" (nom="${d.nom}") → retiré, groupeNum fait foi`);
+                            });
+                        }
+                        if (res.modifie) db.setSync(cleGC, groupesCours);
+                    });
+                }
+            }
+        } catch(e) {
+            console.warn('[purge groupe legacy] erreur ignorée:', e);
+        }
+
         // ✅ NOUVEAU (30 déc 2025): Recalculer les indices C et P si demandé (après chargement démo)
         recalculerIndicesSiDemande();
 

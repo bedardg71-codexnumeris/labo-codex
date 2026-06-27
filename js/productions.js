@@ -313,7 +313,7 @@ function peuplerEcheancesParGroupe(production) {
 
         // 🆕 Beta 98.4 : Indicateur de séance en mode simple
         if (inputSimple) {
-            const groupeNum = groupesFreres.length === 1 ? (groupesFreres[0].groupe || groupesFreres[0].groupeNum || null) : null;
+            const groupeNum = groupesFreres.length === 1 ? (groupesFreres[0].groupeNum || null) : null;
             let spanSimple = inputSimple.parentElement.querySelector('.info-seance-echeance');
             if (!spanSimple) {
                 spanSimple = document.createElement('span');
@@ -344,10 +344,11 @@ function peuplerEcheancesParGroupe(production) {
         const estAssigne = entree ? (entree.assignee !== false) : false;
         const dateVal = entree ? (entree.date || '') : '';
         // Extraire un label court (ex: "gr. 00002").
-        // gc.groupe est la source de vérité partout dans l'app (sélecteur d'en-tête,
-        // changerGroupeCoursActifV2). gc.groupeNum sert de fallback pour les anciens
-        // enregistrements ; les deux peuvent diverger après import/migration.
-        const numGroupe = gc.groupe || gc.groupeNum || '?';
+        // `groupeNum` est le champ d'identité canonique (#130/#306) : écrit par
+        // sauvegarderGroupeCoursV2 et cohérent avec `nom`. `|| groupe` = filet
+        // transitoire pour un enregistrement non encore purgé (cf.
+        // GroupeCoursEntite.normaliserCanonique).
+        const numGroupe = gc.groupeNum || '?';
         const labelGroupe = `gr. ${String(numGroupe).padStart(5, '0')}`;
 
         return `<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;" data-gc-id="${gc.id}">
@@ -380,7 +381,7 @@ function peuplerEcheancesParGroupe(production) {
     // 🆕 Beta 98.4 : Indicateur de séance à côté des dates
     // Construire un map gcId → groupeNum pour les lookups
     const mapGcGroupeNum = {};
-    groupesFreres.forEach(gc => { mapGcGroupeNum[gc.id] = gc.groupe || gc.groupeNum || null; });
+    groupesFreres.forEach(gc => { mapGcGroupeNum[gc.id] = gc.groupeNum || null; });
 
     // Multi-groupe : listener change + affichage initial
     listeContainer.querySelectorAll('.echeance-gc-date').forEach(dateInput => {
@@ -888,7 +889,7 @@ function validerEcheancesDansTrimestre(d) {
             const horsMax = dateMaxTri && entree.date > dateMaxTri;
             if (horsMin || horsMax) {
                 const gc = groupesCours.find(g => g.id === gcId);
-                const numGroupe = gc ? (gc.groupe || gc.groupeNum || '?') : '?';
+                const numGroupe = gc ? (gc.groupeNum || '?') : '?';
                 const label = `gr. ${String(numGroupe).padStart(5, '0')}`;
                 horsLimites.push(`${label} (${entree.date})`);
             }
