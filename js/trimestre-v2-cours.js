@@ -880,7 +880,7 @@ function afficherSyntheseGroupeCours(gc) {
     const nomPratique = prat?.nom || gc.pratiqueId || '—';
 
     // Score de complétude
-    const elements = [gc.coursId, gc.enseignantId, gc.horaireId, gc.pratiqueId, gc.groupe];
+    const elements = [gc.coursId, gc.enseignantId, gc.horaireId, gc.pratiqueId, gc.groupeNum || gc.groupe];
     const complets = elements.filter(Boolean).length;
 
     sidebar.innerHTML = `

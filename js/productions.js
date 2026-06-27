@@ -344,10 +344,11 @@ function peuplerEcheancesParGroupe(production) {
         const estAssigne = entree ? (entree.assignee !== false) : false;
         const dateVal = entree ? (entree.date || '') : '';
         // Extraire un label court (ex: "gr. 00002").
-        // gc.groupe est la source de vérité partout dans l'app (sélecteur d'en-tête,
-        // changerGroupeCoursActifV2). gc.groupeNum sert de fallback pour les anciens
-        // enregistrements ; les deux peuvent diverger après import/migration.
-        const numGroupe = gc.groupe || gc.groupeNum || '?';
+        // `groupeNum` est le champ d'identité canonique (#130/#306) : écrit par
+        // sauvegarderGroupeCoursV2 et cohérent avec `nom`. `|| groupe` = filet
+        // transitoire pour un enregistrement non encore purgé (cf.
+        // GroupeCoursEntite.normaliserCanonique).
+        const numGroupe = gc.groupeNum || gc.groupe || '?';
         const labelGroupe = `gr. ${String(numGroupe).padStart(5, '0')}`;
 
         return `<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;" data-gc-id="${gc.id}">

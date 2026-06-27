@@ -93,7 +93,7 @@ async function peuplerDropdownGroupeCoursActif() {
             const hor = horaires.find(h => h.id === gc.horaireId) || {};
 
             const sigle = coursInfo?.codeCours || coursInfo?.code || coursInfo?.sigle || null;
-            const groupe = gc.groupe || gc.groupeNum || '00001';
+            const groupe = gc.groupeNum || gc.groupe || '00001';
             const nomEns = ens.prenom ? `${ens.prenom} ${(ens.nom || '').charAt(0)}.` : '';
             const nomHor = hor.nom || '';
 
@@ -207,7 +207,7 @@ async function _definirInfoCoursModeGroupeCours(gc, trimestreActif, groupesCours
         coursId: gc.coursId,
         enseignantId: gc.enseignantId,
         horaireId: gc.horaireId,
-        groupe: gc.groupe || gc.groupeNum
+        groupe: gc.groupeNum || gc.groupe
     });
 
     // ✅ CORRIGÉ (11 jan 2026) : Mettre à jour infoCours directement (évite problèmes timing IndexedDB)
@@ -220,7 +220,7 @@ async function _definirInfoCoursModeGroupeCours(gc, trimestreActif, groupesCours
         id: gc.coursId,  // ID du cours (pour compatibilité avec e.coursId des étudiants)
         codeCours: sigleGC,
         nomCours: coursInfo?.nomCours || '',
-        groupe: gc.groupe || gc.groupeNum,
+        groupe: gc.groupeNum || gc.groupe,
         _modeCours: false,
         _source: 'groupe-cours',
         _groupeCoursId: gc.id  // ID du groupe-cours

@@ -2500,7 +2500,7 @@
             if (!e.da || !e.groupe) return;
             const gc = tousGC.find(gc =>
                 gc.coursId === e.coursId &&
-                normaliserGroupe(gc.groupe) === normaliserGroupe(e.groupe)
+                normaliserGroupe(gc.groupeNum || gc.groupe) === normaliserGroupe(e.groupe)
             );
             if (gc) daVersGcId[e.da] = gc.id;
         });

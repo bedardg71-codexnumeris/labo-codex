@@ -107,7 +107,7 @@ function changerCoursDepuisEntete(id, estGroupeCours) {
             coursId: gcSelectionne.coursId,
             enseignantId: gcSelectionne.enseignantId,
             horaireId: gcSelectionne.horaireId,
-            groupe: gcSelectionne.groupe
+            groupe: gcSelectionne.groupeNum || gcSelectionne.groupe
         });
 
         // Synchroniser vers infoCours pour compatibilité
