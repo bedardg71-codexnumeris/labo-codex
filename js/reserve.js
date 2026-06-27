@@ -454,7 +454,7 @@ function _resoudreGroupeCours(trimestre, groupeCoursId) {
             return {
                 id: gc.id,
                 coursId: gc.coursId,
-                groupe: _normaliserGroupe(gc.groupe || gc.groupeNum),
+                groupe: _normaliserGroupe(gc.groupeNum),
                 codeCours: codeCoursResolu,
                 nomCours: c.nomCours || '',
                 source: 'groupe-cours'
@@ -826,7 +826,7 @@ function listerGroupesVersables(trimestre) {
                 coursId: gc.coursId,
                 cours: codeCoursResolu,
                 nomCours: c.nomCours || '',
-                groupe: _normaliserGroupe(gc.groupe || gc.groupeNum),
+                groupe: _normaliserGroupe(gc.groupeNum),
                 source: 'groupe-cours'
             };
             info.dossier = _nomDossier(trimestreId, info);

@@ -496,7 +496,7 @@ function afficherEnteteCalendrier(leconId) {
             var coursInfo = cours.find(function(c) { return c.id === gc.coursId; });
             if (!coursInfo) coursInfo = listeCours.find(function(c) { return c.id === gc.coursId || c.sigle === gc.coursId; });
             var sigle = coursInfo ? (coursInfo.codeCours || coursInfo.code || coursInfo.sigle || '') : '';
-            var groupe = gc.groupeNum || gc.groupe || '';
+            var groupe = gc.groupeNum || '';
             var label = sigle ? sigle + ' gr.' + groupe : 'Groupe ' + groupe;
 
             // Séances du groupe (triées par ordre de semaine)

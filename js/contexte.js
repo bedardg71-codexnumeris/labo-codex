@@ -107,7 +107,7 @@ function changerCoursDepuisEntete(id, estGroupeCours) {
             coursId: gcSelectionne.coursId,
             enseignantId: gcSelectionne.enseignantId,
             horaireId: gcSelectionne.horaireId,
-            groupe: gcSelectionne.groupe
+            groupe: gcSelectionne.groupeNum
         });
 
         // Synchroniser vers infoCours pour compatibilité
@@ -130,7 +130,7 @@ function changerCoursDepuisEntete(id, estGroupeCours) {
                 codeCours: coursInfo.codeCours || '',
                 titre: coursInfo.nomCours || '',
                 nomCours: coursInfo.nomCours || '',
-                groupe: gcSelectionne.groupeNum || gcSelectionne.groupe || '00001',
+                groupe: gcSelectionne.groupeNum || '00001',
                 prenomEnseignant: enseignant.prenom || '',
                 nomEnseignant: enseignant.nom || '',
                 pratiqueId: gcSelectionne.pratiqueId

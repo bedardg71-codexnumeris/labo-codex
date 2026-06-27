@@ -915,11 +915,11 @@
 
         // Match par numero de groupe + coursId actif (cas multi-cours)
         if (coursIdActif) {
-            const gcExact = gcs.find(g => (g.groupeNum === eleve.groupe || g.groupe === eleve.groupe) && g.coursId === coursIdActif);
+            const gcExact = gcs.find(g => g.groupeNum === eleve.groupe && g.coursId === coursIdActif);
             if (gcExact) return gcExact.id;
         }
         // Fallback : juste par numero de groupe (un seul cours)
-        const gcParGroupe = gcs.find(g => g.groupeNum === eleve.groupe || g.groupe === eleve.groupe);
+        const gcParGroupe = gcs.find(g => g.groupeNum === eleve.groupe);
         if (gcParGroupe) return gcParGroupe.id;
 
         return null;

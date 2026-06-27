@@ -374,7 +374,7 @@ function mettreAJourCarteResumeGroupeCoursV2(gc) {
 
     let score = 0;
     if (gc.coursId && coursObj) score++;
-    if (gc.groupeNum || gc.groupe) score++;
+    if (gc.groupeNum) score++;
     if (gc.horaireId && horaireObj) score++;
     if (gc.enseignantId) score++;
     if (gc.pratiqueId) score++;
@@ -392,7 +392,7 @@ function mettreAJourCarteResumeGroupeCoursV2(gc) {
         <div class="resume-gc-nom">${echapperHtml(gc.nom || gc.id)}</div>
         <div class="resume-gc-details">
             <div><span class="label-gc">Cours</span><span>${echapperHtml(coursNom)}</span></div>
-            <div><span class="label-gc">Groupe</span><span>${echapperHtml(gc.groupeNum || gc.groupe || '—')}</span></div>
+            <div><span class="label-gc">Groupe</span><span>${echapperHtml(gc.groupeNum || '—')}</span></div>
             <div><span class="label-gc">Horaire</span><span>${echapperHtml(horaireNom)}</span></div>
             <div><span class="label-gc">Enseig.</span><span>${echapperHtml(enseignantNom)}</span></div>
         </div>
@@ -527,7 +527,7 @@ function editerGroupeCoursV2(gc) {
         selectTrimestre.value = gc.trimestreId || db.getSync('trimestreActif', '') || '';
     }
     if (selectCours) selectCours.value = gc.coursId || '';
-    if (selectGroupe) selectGroupe.value = gc.groupeNum || gc.groupe || '';
+    if (selectGroupe) selectGroupe.value = gc.groupeNum || '';
     if (selectHoraire) selectHoraire.value = gc.horaireId || '';
     if (selectEnseignant) selectEnseignant.value = gc.enseignantId || '';
     if (selectPratique) selectPratique.value = gc.pratiqueId || '';  // Beta 95.3
@@ -769,7 +769,7 @@ function ouvrirModalBibliothequeGroupeCours() {
         const hor = horaires.find(h => h.id === gc.horaireId);
 
         const codeCours = coursInfo?.codeCours || coursInfo?.sigle || null;
-        const groupe = gc.groupe || gc.groupeNum || '00001';
+        const groupe = gc.groupeNum || '00001';
         const titreNu = codeCours ? `${codeCours} — Groupe ${groupe}` : `Groupe ${groupe}`;
         const nomEns = ens ? `${ens.prenom || ''} ${ens.nom || ''}`.trim() : '';
         const nomHor = hor?.nom || '';

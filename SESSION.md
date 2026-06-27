@@ -1,4 +1,51 @@
 <!-- =====================================================================
+     BASCULE — DETTE D'INTÉGRITÉ « CHAMP CANONIQUE GROUPE-COURS » RÉSOLUE — 27 juin 2026 (Claude Code local).
+     ⮕ Chantier indépendant de la Brique D (bloc suivant). Branche : claude/serene-aryabhata-1781cd. Release 1.21.3 (patch).
+
+     CONSTAT : `h2026_groupesCours` (601-101-MQ) portait 2 GC dont le champ `groupe` était INVERSÉ vs `groupeNum`/`nom`
+       (GC_…7936 nom 00002 / groupeNum 00002 / groupe 00008 ; GC_…3057 l'inverse). Cause racine : DEUX chemins de création
+       écrivaient deux noms de champ — `sauvegarderGroupeCoursV2` (VIVANT) écrit `groupeNum` (cohérent avec `nom`, même champ
+       de formulaire) ; le module Entité (`creer`, appelé UNIQUEMENT depuis js/_archives/) écrivait `groupe`. Famille #130/#306
+       (« tarir la source du groupe legacy périmé »). N'AFFECTE PAS la note finale (résolue par `pratiqueId`, identique).
+
+     CONVENTION TRANCHÉE (Grégoire) : **`groupeNum` fait foi**. Fix CHIRURGICAL SÛR (option A), sur backup.
+
+     LIVRÉ (10 fichiers, NON poussé) :
+       • DONNÉES — migration idempotente SANS flag dans main.js (« purge groupe legacy ») via fonction pure exportée
+         `GroupeCoursEntite.normaliserCanonique` (entites/groupe-cours.js) : retire `groupe`, ne PROMEUT que si `groupeNum`
+         absent, n'écrase JAMAIS un `groupeNum` présent, journalise les divergences. Robuste à la ré-introduction par import
+         de codex ancien.
+       • LECTURES — audit des call-sites : purger `groupe` cassait 8 lectures vivantes SANS fallback (≠ « 2 » estimé au départ).
+         Toutes passées en `groupeNum`-first : synchroniserInfoCours (entites 449/467), hot-path #130 (modes.js 515),
+         caches orchestre (96/210/223) + contexte (110), travaux-ui (2503, matching élève↔GC), donnees-v2 (916),
+         score complétude trimestre-v2-cours (883), + commentaire trompeur productions.js (347). VÉRIFIÉS SÛRS, non touchés :
+         reserve.js (lit des objets résolus, pas les records), labo-codex-data.js (descripteur codex).
+       • SENTINELLE — tests/unit/sentinelle-groupe-canonique-groupenum.test.js (9 cas : comportementaux sur la règle +
+         ratchets structurels). BREAK-TESTÉE (§4) : sabotage purge + ordre lecture → 4 rougissent, revert → vert.
+       • index.html : ?v=2026062701 sur les 9 scripts modifiés (sinon migration non rechargée en cache offline).
+
+     VALIDATION : Vitest 1033/1033 vert ; Playwright 67 vert + 1 ÉCHEC PRÉEXISTANT `maquettes-decouvrabilite-326.spec.js`
+       (vérifié par remisage : rouge AUSSI sur la base, sans lien).
+
+     SUITE (commit f146e2c2, build-only — chip task_3776741b FAIT, hygiène pure ZÉRO comportement) :
+       • Filet `|| groupe` retiré de ~29 lectures (groupeNum SEUL). 4 derniers writers `groupe` du module Entité MORT
+         (creer/dédup/valider/champsModifiables) basculés sur groupeNum → plus aucun code ne produit le champ legacy.
+       • Sentinelle durcie + RATCHET GLOBAL (balaie tout js/, interdit tout filet `|| groupe`) ; break-testé.
+       • Vérif : 30 remplacements à comptage assertif, node --check ×14, grep direct+déstructuration = 0 lecture GC résiduelle,
+         Vitest 1033, Playwright 67 + #326 préexistant.
+
+     SUITE 2 (commit 4751e6dc, build-only — backup Codex fait par Grégoire) : CRUD MORT du module Entité SUPPRIMÉ (-312 lignes).
+       11 méthodes sans appelant vivant retirées (creer/obtenirTousSync/obtenirParId/obtenirComplet/mettreAJour/definirActif/
+       supprimer/valider/genererLibelleCourt/compter/obtenirTousTrims). Export réduit à 3 (obtenirTous, synchroniserInfoCours,
+       normaliserCanonique) ; helpers internes (actif/complet/hydrater/libellé) conservés pour la chaîne synchroniserInfoCours.
+       Graphe d'appels vérifié, grep = 0 référence vivante. Vitest 1033, Playwright 67 + #326 préexistant.
+
+     RESTE :
+       a) DONNÉES RÉELLES — la migration purge les 2 GC au chargement + journalise `[purge groupe legacy] h2026/GC_… …` en
+          console. Vérifier liste d'élèves + assiduité 601-101-MQ H26 (backup déjà fait).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION PHASE 2 — ORACLES SUR DONNÉES RÉELLES + D-D1 RECADRÉE + HYGIÈNE BLOC 1 LIVRÉ — 26 juin 2026 PM (Claude Code local).
      ⮕ RELAI VERS LA VALIDATION MAC DU BLOC 1 + BLOC 2 (remap données) — lire ce bloc en premier à la reprise.
 
