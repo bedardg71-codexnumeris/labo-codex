@@ -529,31 +529,33 @@ function demarrerEvaluationDepuisFichier(fichier, opts) {
         ? obtenirDonneesSelonMode('productions')
         : (typeof db !== 'undefined' ? db.getSync(cle('productions'), []) : []);
     const prod = productionIdEffective ? productions.find(p => p.id === productionIdEffective) : null;
-    if (prod && prod.grilleId) {
+    // Modèle isolé par trimestre (évals existantes prioritaires sur le champ périmé).
+    const refModele = _modeleProductionPourEval(prod);
+    if (prod && refModele.grilleId) {
         const selG = document.getElementById('selectGrille1');
-        if (selG && Array.from(selG.options).some(o => o.value === prod.grilleId)) {
-            selG.value = prod.grilleId;
-            window.evaluationEnCours.grilleId = prod.grilleId;
+        if (selG && Array.from(selG.options).some(o => o.value === refModele.grilleId)) {
+            selG.value = refModele.grilleId;
+            window.evaluationEnCours.grilleId = refModele.grilleId;
         }
 
-        if (prod.echelleId) {
+        if (refModele.echelleId) {
             const selE = document.getElementById('selectEchelle1');
-            if (selE && Array.from(selE.options).some(o => o.value === prod.echelleId)) {
-                selE.value = prod.echelleId;
-                window.evaluationEnCours.echelleId = prod.echelleId;
+            if (selE && Array.from(selE.options).some(o => o.value === refModele.echelleId)) {
+                selE.value = refModele.echelleId;
+                window.evaluationEnCours.echelleId = refModele.echelleId;
             }
         }
 
         if (typeof chargerGrilleSelectionnee === 'function') chargerGrilleSelectionnee();
 
-        if (prod.cartoucheId) {
+        if (refModele.cartoucheId) {
             var _tentativesCartouche = 0;
             var _essayerCartouche = function() {
                 _tentativesCartouche++;
                 var selC = document.getElementById('selectCartoucheEval');
-                if (selC && Array.from(selC.options).some(function(o) { return o.value === prod.cartoucheId; })) {
-                    selC.value = prod.cartoucheId;
-                    if (window.evaluationEnCours) window.evaluationEnCours.cartoucheId = prod.cartoucheId;
+                if (selC && Array.from(selC.options).some(function(o) { return o.value === refModele.cartoucheId; })) {
+                    selC.value = refModele.cartoucheId;
+                    if (window.evaluationEnCours) window.evaluationEnCours.cartoucheId = refModele.cartoucheId;
                     selC.dispatchEvent(new Event('change', { bubbles: true }));
                 } else if (_tentativesCartouche < 8) {
                     setTimeout(_essayerCartouche, 250);
@@ -564,6 +566,43 @@ function demarrerEvaluationDepuisFichier(fichier, opts) {
     }
 
     return productionIdEffective;
+}
+
+/**
+ * Modèle (grille / échelle / cartouche) à utiliser pour pré-remplir une NOUVELLE
+ * évaluation d'une production.
+ *
+ * SOURCE DE VÉRITÉ = les évaluations existantes de cette production dans le
+ * trimestre courant (toutes s'accordent sur un seul modèle par construction :
+ * une production = une grille pour tous ses élèves). On NE fait PAS confiance
+ * aveuglément à `production.grilleId/echelleId/cartoucheId` : ces champs peuvent
+ * être un résidu de migration périmé (cf. #346 coursId, famille Brique D #358)
+ * pointant un modèle GLOBAL partagé — les pré-sélectionner ré-injecterait ce
+ * modèle dans une éval fraîche et défairait l'isolation par trimestre (oracle L2).
+ *
+ * Repli sur les champs de la production seulement si AUCUNE éval n'existe encore
+ * pour elle, ou si les évals existantes divergent (cas anormal — on ne tranche
+ * pas ici). Lecture seule.
+ */
+function _modeleProductionPourEval(prod) {
+    if (!prod) return { grilleId: '', echelleId: '', cartoucheId: '' };
+    const evals = (typeof obtenirDonneesSelonMode === 'function')
+        ? obtenirDonneesSelonMode('evaluationsSauvegardees')
+        : (typeof db !== 'undefined' ? db.getSync(cle('evaluationsSauvegardees'), []) : []);
+    const liees = (evals || []).filter(function(e) {
+        return e && !e.remplaceeParId && e.productionId === prod.id && e.grilleId;
+    });
+    if (liees.length) {
+        const unique = function(champ) {
+            const vus = new Set(liees.map(function(e) { return e[champ] || ''; }));
+            return vus.size === 1 ? [...vus][0] : null;
+        };
+        const grilleId = unique('grilleId');
+        if (grilleId) {
+            return { grilleId: grilleId, echelleId: unique('echelleId') || '', cartoucheId: unique('cartoucheId') || '' };
+        }
+    }
+    return { grilleId: prod.grilleId || '', echelleId: prod.echelleId || '', cartoucheId: prod.cartoucheId || '' };
 }
 
 /**
@@ -592,32 +631,39 @@ function chargerProduction(productionNum) {
 
     if (production) {
 
+        // Modèle isolé par trimestre : les évals existantes priment sur le champ
+        // production.grilleId (potentiellement périmé → re-pollution, cf. oracle L2).
+        const refModele = _modeleProductionPourEval(production);
+
         // Pré-sélectionner la grille associée à cette production
-        if (production.grilleId) {
+        if (refModele.grilleId) {
             const selectGrille = document.getElementById('selectGrille1');
-            if (selectGrille) {
-                selectGrille.value = production.grilleId;
+            // Garde : ne poser que si la grille est offerte au dropdown actif
+            // (sinon on laisserait un id fantôme qui ne charge aucun critère).
+            if (selectGrille && Array.from(selectGrille.options).some(o => o.value === refModele.grilleId)) {
+                selectGrille.value = refModele.grilleId;
+                if (evaluationEnCours) evaluationEnCours.grilleId = refModele.grilleId;
 
                 // Pré-sélectionner l'échelle AVANT chargerGrilleSelectionnee
                 // (sinon echelleId est vide et les critères ne s'affichent pas)
-                if (production.echelleId) {
+                if (refModele.echelleId) {
                     const selE = document.getElementById('selectEchelle1');
-                    if (selE) selE.value = production.echelleId;
-                    if (evaluationEnCours) evaluationEnCours.echelleId = production.echelleId;
+                    if (selE) selE.value = refModele.echelleId;
+                    if (evaluationEnCours) evaluationEnCours.echelleId = refModele.echelleId;
                 }
 
                 // Déclencher le chargement de la grille et des cartouches
                 chargerGrilleSelectionnee();
 
                 // Pré-sélectionner la cartouche immédiatement (les options sont déjà là)
-                _selectionnerCartoucheProduction(production.cartoucheId);
+                _selectionnerCartoucheProduction(refModele.cartoucheId);
 
                 // Vérifier si une évaluation existante doit être chargée,
                 // puis réappliquer la cartouche au cas où le chargement l'écrase
                 setTimeout(() => {
                     verifierEtChargerEvaluationExistante();
-                    if (production.cartoucheId) {
-                        setTimeout(() => _selectionnerCartoucheProduction(production.cartoucheId), 200);
+                    if (refModele.cartoucheId) {
+                        setTimeout(() => _selectionnerCartoucheProduction(refModele.cartoucheId), 200);
                     }
                 }, 100);
             }
@@ -1374,5 +1420,10 @@ window.demarrerEvaluationDepuisFichier = demarrerEvaluationDepuisFichier;
 // Exposé pour la sentinelle auto-save ↔ verrouillage (Phase 0 A25, juin 2026) :
 // vérifie que l'auto-save ne réécrit JAMAIS une évaluation verrouillée.
 window._autoSauvegarderCriteres = _autoSauvegarderCriteres;
+
+// Exposé pour la sentinelle anti-re-pollution (Brique D hygiène, juin 2026) :
+// la pré-sélection d'une nouvelle éval suit le modèle des évals existantes,
+// pas un production.grilleId périmé qui ré-injecterait un modèle partagé.
+window._modeleProductionPourEval = _modeleProductionPourEval;
 
 })();
