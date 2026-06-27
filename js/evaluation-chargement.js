@@ -245,26 +245,8 @@ function _obtenirPratiqueIdActive() {
         ? obtenirPratiqueActiveGroupeCours() : null) || 'sommative';
 }
 
-function _synchroniserJetonsPratique(jetons) {
-    // Écriture via le module propriétaire (SSOT #328 Lot 1). NB : ce miroir
-    // configPAN.jetons est une cible du Lot 2 (dérivation depuis la pratique).
-    window.modalitesEvaluation.modifier(function (modalites) {
-        modalites.configPAN = modalites.configPAN || {};
-        modalites.configPAN.jetons = {
-            actif: jetons.actif !== false,
-            delai: { nombre: jetons.nombre || 2, dureeJours: jetons.delaiDuree || 2 },
-            reprise: {
-                nombre: jetons.nombre || 2,
-                maxParProduction: 1,
-                archiverOriginale: jetons.repriseOriginale === 'archiver'
-            },
-            repriseCiblee: {
-                actif: jetons.cibleeActif || false,
-                plafondNote: jetons.cibleePlafond || null
-            }
-        };
-    });
-}
+// #328 L2-c : `_synchroniserJetonsPratique` RETIRÉ — le miroir modalites.configPAN.jetons
+// n'est plus écrit ; obtenirConfigJetons() dérive la config des jetons de la pratique active.
 
 function _resoudreEchellePratique() {
     if (!window.PratiqueManager) return null;
@@ -274,7 +256,6 @@ function _resoudreEchellePratique() {
     const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
     const pratiqueData = pratiquesConfigurables.find(p => p.id === pratiqueId);
     if (!pratiqueData) return null;
-    if (pratiqueData.jetons) _synchroniserJetonsPratique(pratiqueData.jetons);
     if (!pratiqueData.config || !pratiqueData.config.echelle) return null;
     return {
         id: `pratique-${pratiqueId}`,

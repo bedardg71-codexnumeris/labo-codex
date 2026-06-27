@@ -699,8 +699,11 @@ function _collecterJetonsUtilisesParType(da) {
         if (e.jetonRepriseCibleeApplique) jetonsParType.repriseCiblee.push(echapperHtml(nomProd));
     });
     var totalUtilises = jetonsParType.delai.length + jetonsParType.reprise.length + jetonsParType.repriseCiblee.length;
+    // #328 L2-c : nombreParEleve dérive de la pratique active (plus du miroir configPAN.jetons) ;
+    // repli historique configurationJetons (config v2, non-miroir) puis défaut.
+    var configJetons = (typeof obtenirConfigJetons === 'function') ? obtenirConfigJetons() : null;
     var modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
-    var totalMax = (modalites.configPAN && modalites.configPAN.jetons && modalites.configPAN.jetons.nombreParEleve)
+    var totalMax = (configJetons && configJetons.nombreParEleve)
         || (modalites.configurationJetons && modalites.configurationJetons.nombreParEleve)
         || 2;
     return { jetonsParType, totalUtilises, totalMax };

@@ -830,13 +830,8 @@ function chargerConfigurationPratique(id) {
         modalites.configPAN.portfolio = config.portfolio;
     }
 
-    // ✅ 3. Appliquer la configuration des jetons
-    if (config.jetons) {
-        if (!modalites.configPAN) {
-            modalites.configPAN = {};
-        }
-        modalites.configPAN.jetons = config.jetons;
-    }
+    // #328 L2-c : la config des jetons n'est plus MIROIRÉE dans modalitesEvaluation —
+    // obtenirConfigJetons() la dérive de la pratique active (configuration/config/jetons).
 
     // Sauvegarder dans modalitesEvaluation
     window.modalitesEvaluation.remplacer(modalites);

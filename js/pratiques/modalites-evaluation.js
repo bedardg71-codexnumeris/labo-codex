@@ -12,7 +12,8 @@
  * Lot 2 (a/b1/b2) : les champs miroirs `pratique`, `pratiqueId` et
  * `approcheEvaluation` sont MORTS — dérivés de la SSOT
  * `groupesCours[].pratiqueId` via obtenirTypePratiqueActive /
- * obtenirPratiqueActiveGroupeCours. Reste `configPAN.jetons` (Lot 2-c).
+ * obtenirPratiqueActiveGroupeCours. Lot 2-c : `configPAN.jetons` purgé aussi —
+ * la config des jetons est dérivée de la pratique active (obtenirConfigJetons).
  *
  * Lot 3 (11 juin 2026) : le fallback de lecture sur la clé NON namespacée est
  * retiré (la migration namespacing de main.js, bornée, reste le seul lecteur
@@ -81,6 +82,8 @@
     // (vit dans pratique.configuration) et `pratique` (type — dérivé via
     // obtenirTypePratiqueActive depuis L2-b2) n'ont plus AUCUN lecteur.
     const CHAMPS_MIROIRS_MORTS = ['pratiqueId', 'approcheEvaluation', 'pratique'];
+    // #328 L2-c : sous-champ mort de `configPAN` (la config jetons vit sur la pratique).
+    const SOUS_CHAMP_JETONS_MORT = 'jetons';
 
     /**
      * Purge les champs legacy des modalités de CHAQUE trimestre :
@@ -89,7 +92,10 @@
      *    déjà ; la clé existante a toujours priorité, jamais d'écrasement ;
      *  - `pratiqueId` / `approcheEvaluation` (Lot 2-a) et `pratique`
      *    (Lot 2-b2) — miroirs morts, supprimés sans rapatriement (leur SSOT
-     *    vit ailleurs).
+     *    vit ailleurs) ;
+     *  - `configPAN.jetons` (Lot 2-c) — miroir mort ; la config des jetons vit
+     *    sur la pratique active. Seul ce sous-champ est retiré ; `configPAN.portfolio`
+     *    et le reste de `configPAN` sont conservés.
      *
      * Appelée à chaque démarrage (main.js, séquence db-ready) : idempotente
      * et robuste face aux réintroductions par import de données anciennes
@@ -119,6 +125,14 @@
                     delete m[champ];
                     modifie = true;
                 }
+            }
+            // #328 L2-c : miroir mort — la config des jetons vit sur la pratique active
+            // (obtenirConfigJetons la dérive). On retire UNIQUEMENT ce sous-champ ;
+            // `configPAN.portfolio` et le reste de `configPAN` sont conservés. Accès
+            // DYNAMIQUE (comme CHAMPS_MIROIRS_MORTS) pour rester invisible au ratchet statique.
+            if (m.configPAN && typeof m.configPAN === 'object' && SOUS_CHAMP_JETONS_MORT in m.configPAN) {
+                delete m.configPAN[SOUS_CHAMP_JETONS_MORT];
+                modifie = true;
             }
 
             if (modifie) {
