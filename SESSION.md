@@ -32,13 +32,17 @@
          (creer/dédup/valider/champsModifiables) basculés sur groupeNum → plus aucun code ne produit le champ legacy.
        • Sentinelle durcie + RATCHET GLOBAL (balaie tout js/, interdit tout filet `|| groupe`) ; break-testé.
        • Vérif : 30 remplacements à comptage assertif, node --check ×14, grep direct+déstructuration = 0 lecture GC résiduelle,
-         Vitest 1033, Playwright 67 + #326 préexistant. NON FAIT (optionnel) : supprimer entièrement les méthodes Entité mortes
-         (aujourd'hui présentes mais groupeNum-cohérentes ; pas d'appelant vivant, _archives non chargé).
+         Vitest 1033, Playwright 67 + #326 préexistant.
+
+     SUITE 2 (commit 4751e6dc, build-only — backup Codex fait par Grégoire) : CRUD MORT du module Entité SUPPRIMÉ (-312 lignes).
+       11 méthodes sans appelant vivant retirées (creer/obtenirTousSync/obtenirParId/obtenirComplet/mettreAJour/definirActif/
+       supprimer/valider/genererLibelleCourt/compter/obtenirTousTrims). Export réduit à 3 (obtenirTous, synchroniserInfoCours,
+       normaliserCanonique) ; helpers internes (actif/complet/hydrater/libellé) conservés pour la chaîne synchroniserInfoCours.
+       Graphe d'appels vérifié, grep = 0 référence vivante. Vitest 1033, Playwright 67 + #326 préexistant.
 
      RESTE :
-       a) DONNÉES RÉELLES — Grégoire : backup Codex PUIS charger l'app (la migration purge les 2 GC + journalise
-          `[purge groupe legacy] h2026/GC_… …` en console). Vérifier liste d'élèves + assiduité 601-101-MQ H26.
-       b) Optionnel : suppression intégrale du module Entité mort (CRUD sans appelant vivant) — non tracké, à décider à froid.
+       a) DONNÉES RÉELLES — la migration purge les 2 GC au chargement + journalise `[purge groupe legacy] h2026/GC_… …` en
+          console. Vérifier liste d'élèves + assiduité 601-101-MQ H26 (backup déjà fait).
      ===================================================================== -->
 
 <!-- =====================================================================
