@@ -1,4 +1,43 @@
 <!-- =====================================================================
+     SESSION PHASE 2 — BRIQUE D ENTAMÉE (instrumentation + dry-run d'observation) — 26 juin 2026 PM (Claude Code local).
+     ⮕ RELAI VERS LA DÉCISION D-D1 (mécanique) + MIGRATION RÉELLE — lire ce bloc en premier à la reprise.
+
+     BRANCHE : claude/brique-D-instrumentation-L2-ratchet (partie de main à jour, post-PR #64 / e38d71a9).
+     TOUT NON DESTRUCTIF, testé + break-testé. Filets : 1002 Vitest + 67 Playwright verts ; #326 rouge PRÉEXISTANT.
+
+     LIVRÉ :
+       1) L2 ÉTENDU aux 4 modèles — scripts/sentinelle-isolation-grilles-trimestre.mjs : ne surveillait que
+          grilleId ; couvre désormais grilles/échelles/pratiques/cartouches (echelleId préfixé « pratique- »
+          = pratique ; cartoucheId). --type focalise ; --simuler-isolation prouve rouge→vert sur les 4.
+          NOM DE FICHIER CONSERVÉ (réf. dans 5 docs) — rôle inchangé, contenu généralisé.
+       2) L2 AUTO-VÉRIFIABLE — tests/unit/sentinelle-isolation-modeles-trimestre-L2.test.js (7 cas, wrapper
+          qui lance le .mjs ; partage isolé PAR TYPE → chaque dimension mord seule). AVANT : l'oracle L2
+          n'était couvert par AUCUN test (lancé à la main sur A25).
+       3) CLIQUET GLOBAL pratiquesConfigurables — tests/unit/sentinelle-cle-nue-pratiques-config-ratchet.test.js
+          (calqué sur la L3 modalités, scan récursif js/). Interdit la lecture NUE SÈCHE (bug #341), tolère
+          le fallback de migration cle()||nue. main.js (boot) seul lecteur nu-sec autorisé. Le break-test
+          a révélé puis corrigé un trou guillemets doubles.
+       4) DRY-RUN D'OBSERVATION (read-only) — scripts/dry-run-migration-modeles.mjs + test (7 cas). Produit le
+          PLAN de migration : partages / orphelins / réserves / divergences, en RÉCONCILIANT évaluations +
+          productions. Exit 0, aucune écriture, aucune décision de mécanique.
+
+     CONSTAT (corrige le cadrage §3.4) : modalitesEvaluation est DÉJÀ entièrement ratcheté
+       (sentinelle-ssot-modalites-purge-L3, scan récursif, main.js seul autorisé). Le « ratchet à
+       généraliser » ne concernait donc QUE pratiquesConfigurables (fait ici).
+
+     RESTE À TRANCHER AVANT MIGRATION RÉELLE (à froid — chantier RISQUE MAX) :
+       a) MÉCANIQUE D-D1 : tension cadrage §3.2 (« déplacer grilles/échelles CLES_GLOBALES→CLES_NAMESPACEES »
+          = pleinement namespacé) vs D-D1 tranchée (« hybride comme bibliothequePratiques » = catalogue
+          global + copie locale). Les grilles n'ont qu'1 clé (catalogue=usage), les pratiques en ont 2 ⇒
+          « hybride » pour les grilles demande de CRÉER la séparation. Requiert le « pourquoi » de Grégoire.
+       b) CRITÈRE §4-pt7 : migrer TOUS les modèles attribuables vs seulement les utilisés (le dry-run liste
+          les « en réserve » pour éclairer).
+       c) identifierTemplatesUtilises (trimestres.js:587) ne lit que les PRODUCTIONS → angle mort usage-éval.
+       d) D-D5 (#359 fix désarchivage) + invariant « changerTrimestreActif ne swap pas » (§4-pt8, test anti-régression).
+     PROCHAIN PAS : lancer le L2 étendu + le dry-run sur le codex RÉEL A25/H26 (révèle l'ampleur), PUIS trancher (a)/(b).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION PHASE 2 — BRIQUE C PAS 5 LIVRÉ (import pratiques) — 26 juin 2026 PM (Claude Code local).
      ⮕ RELAI VERS LA VALIDATION TERRAIN + PUBLICATION — lire ce bloc en premier à la reprise.
 
