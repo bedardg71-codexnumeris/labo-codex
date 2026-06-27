@@ -333,6 +333,146 @@
     }
 
     // =========================================================================
+    //  RÉPARATION RÉFÉRENCES PRODUCTIONS — Brique D hygiène, Bloc 2 (juin 2026)
+    // =========================================================================
+    /**
+     * Répare les références de production PÉRIMÉES ou VIDES sur la donnée LIVE :
+     * production.grilleId/echelleId → id UNANIME des évaluations de la production
+     * (les évals ont réellement noté les élèves ⇒ source de vérité). Conservateur :
+     * remap UNIQUEMENT si des évals existent ET s'accordent sur un id ≠ du champ.
+     * N'écrit QUE le champ de la production — NI les notes NI les fichiers.
+     *
+     * Cartouches orphelines (gabarit supprimé) : SIGNALÉES avec { cartouches: true }
+     * mais JAMAIS réécrites — neutraliser une cartoucheId imposerait de réécrire une
+     * évaluation, or elles sont verrouillées (notes figées, invariant #350) ; la
+     * rétroaction est de toute façon conservée en clair sur l'évaluation.
+     *
+     * ALGORITHME MIROIR de scripts/reparer-references-productions.mjs::calculerReparations
+     * (logique testée : tests/unit/sentinelle-reparer-references-productions-briqueD).
+     * Si l'un change, ALIGNER l'autre. Ici la donnée est lue/écrite LIVE via
+     * cleSource() + db (clés <trimestre>_productions / <trimestre>_evaluationsSauvegardees).
+     *
+     * Appel console (TOUJOURS `await`) :
+     *   await reparerReferencesProductions()                      → DRY-RUN (défaut), rapport seul
+     *   await reparerReferencesProductions({ cartouches: true })  → dry-run + signalement cartouches
+     *   await reparerReferencesProductions({ dryRun: false })     → ÉCRIT les remaps — BACKUP CODEX AVANT
+     *
+     * @param {{dryRun?:boolean, cartouches?:boolean}} [options]
+     * @returns {Promise<{remaps:Array, cartouches:Array, ecrit:boolean}|null>}
+     */
+    async function reparerReferencesProductions(options) {
+        options = options || {};
+        const dryRun = options.dryRun !== false;        // dry-run PAR DÉFAUT
+        const avecCartouches = options.cartouches === true;
+
+        if (typeof db === 'undefined' || typeof cleSource !== 'function' || typeof obtenirTrimestres !== 'function') {
+            console.error('[Réparation] dépendances absentes (db / cleSource / obtenirTrimestres). Recharge la page.');
+            return null;
+        }
+
+        const trimestres = (obtenirTrimestres() || []).map(function (t) { return t && t.id; }).filter(Boolean);
+
+        function unanime(evals, champ) {
+            const vus = new Set();
+            for (const e of evals) vus.add((e && e[champ]) || '');
+            return vus.size === 1 ? Array.from(vus)[0] : null;
+        }
+
+        // Catalogue des cartouches existantes (toutes clés cartouches_*) — si demandé.
+        let cartouchesConnues = null;
+        if (avecCartouches) {
+            cartouchesConnues = new Set();
+            const toutesCles = await db.keys();
+            for (const k of toutesCles) {
+                if (/(^|_)cartouches_/.test(k)) {
+                    const liste = await db.get(k, []);
+                    if (Array.isArray(liste)) for (const c of liste) if (c && c.id) cartouchesConnues.add(c.id);
+                }
+            }
+        }
+
+        const remaps = [];
+        const cartouches = [];
+        const aEcrire = [];   // { cle, valeur }
+
+        for (const t of trimestres) {
+            const kProd = cleSource('productions', t);
+            const kEval = cleSource('evaluationsSauvegardees', t);
+            const productions = (await db.get(kProd, [])) || [];
+            const evals = (await db.get(kEval, [])) || [];
+
+            // 1) Remap des références de production.
+            let prodModifie = false;
+            for (const prod of productions) {
+                if (!prod || !prod.id) continue;
+                const liees = evals.filter(function (e) {
+                    return e && !e.remplaceeParId && e.productionId === prod.id && e.grilleId;
+                });
+                if (!liees.length) continue;
+                ['grilleId', 'echelleId'].forEach(function (champ) {
+                    if (!(champ in prod)) return;
+                    const cible = unanime(liees, champ);
+                    if (cible === null) return;                 // évals divergentes ⇒ on ne tranche pas
+                    if ((prod[champ] || '') === cible) return;  // déjà aligné
+                    remaps.push({ trimestre: t, productionId: prod.id, titre: prod.titre || prod.nom || '', champ: champ, de: prod[champ] || '', vers: cible, nbEvals: liees.length });
+                    if (!dryRun) { prod[champ] = cible; prodModifie = true; }
+                });
+            }
+            if (prodModifie) aEcrire.push({ cle: kProd, valeur: productions });
+
+            // 2) Cartouches orphelines (SIGNALÉES seulement, jamais réécrites).
+            if (avecCartouches) {
+                const parCartouche = {};
+                for (const e of evals) {
+                    if (!e || e.remplaceeParId) continue;
+                    const cid = e.cartoucheId;
+                    if (cid && !cartouchesConnues.has(cid)) {
+                        const r = parCartouche[cid] || (parCartouche[cid] = { nbEvals: 0, nbVerrouillees: 0 });
+                        r.nbEvals++;
+                        if (e.verrouillee === true) r.nbVerrouillees++;
+                    }
+                }
+                Object.keys(parCartouche).forEach(function (cid) {
+                    cartouches.push({ trimestre: t, cartoucheId: cid, nbEvals: parCartouche[cid].nbEvals, nbVerrouillees: parCartouche[cid].nbVerrouillees });
+                });
+            }
+        }
+
+        // ── Rapport (console.warn : style du module ; pas de console.log de debug). ──
+        console.warn('═══ RÉPARATION RÉFÉRENCES PRODUCTIONS — ' + (dryRun ? 'DRY-RUN (aucune écriture)' : 'ÉCRITURE LIVE') + ' ═══');
+        console.warn('Trimestres : ' + (trimestres.join(', ') || '(aucun)'));
+        console.warn('Productions à remapper : ' + remaps.length);
+        remaps.forEach(function (r) {
+            console.warn('  [' + r.trimestre + '] ' + r.productionId + (r.titre ? ' « ' + r.titre + ' »' : '') +
+                '  ' + r.champ + ' : ' + (r.de || '∅') + ' → ' + r.vers + '  (' + r.nbEvals + ' éval. unanimes)');
+        });
+        if (avecCartouches) {
+            console.warn('Cartouches orphelines (SIGNALÉES, non réécrites) : ' + cartouches.length);
+            cartouches.forEach(function (c) {
+                console.warn('  [' + c.trimestre + '] ' + c.cartoucheId + ' — ' + c.nbEvals + ' éval. (' + c.nbVerrouillees + ' verrouillée(s)) · rétroaction conservée · laissée telle quelle');
+            });
+        } else {
+            console.warn('(cartouches orphelines non examinées — passer { cartouches: true } pour les signaler)');
+        }
+
+        let ecrit = false;
+        if (dryRun) {
+            console.warn('DRY-RUN — RIEN n\'a été modifié. Pour APPLIQUER les remaps : await reparerReferencesProductions({ dryRun: false })');
+            console.warn('⚠ FAIRE UN BACKUP CODEX AVANT. (Notes et fichiers NON touchés ; on écrit seulement le champ grille/échelle des productions.)');
+        } else if (!aEcrire.length) {
+            console.warn('Rien à écrire : les références de production sont déjà propres.');
+        } else {
+            for (const w of aEcrire) {
+                await db.set(w.cle, w.valeur);
+                console.warn('ÉCRIT : ' + w.cle + ' (' + w.valeur.length + ' productions)');
+            }
+            ecrit = true;
+            console.warn('✅ APPLIQUÉ. Recharge la page pour voir l\'effet. Idempotent : un 2e appel ne trouvera plus rien à remapper.');
+        }
+        return { remaps: remaps, cartouches: cartouches, ecrit: ecrit };
+    }
+
+    // =========================================================================
     //  API PUBLIQUE
     // =========================================================================
 
@@ -341,5 +481,6 @@
     window.migrationRestaurer = migrationRestaurer;
     window.migrationSupprimerFichierId = migrationSupprimerFichierId;
     window.migrationAjouterStatut = migrationAjouterStatut;
+    window.reparerReferencesProductions = reparerReferencesProductions;
 
 })();
