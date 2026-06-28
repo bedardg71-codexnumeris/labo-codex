@@ -503,7 +503,11 @@ function retirerJetonReprise(evaluationId) {
     // #141 — appelée sur une ORIGINALE remplacée (et non sur la reprise) :
     // proposer la restauration au lieu de l'ancien no-op au message menteur
     // (« Jeton de reprise retiré » sans rien faire).
-    if (evaluationReprise.remplaceeParId) {
+    // #360 (Option A) — exclure un marqueur de réconciliation : un doublon
+    // `reconcilieParDoublon` porte `remplaceeParId` SANS être une originale
+    // archivée par reprise ; le traiter ici splice-supprimerait le survivant
+    // légitime (perte de la vraie note) avec un message mensonger.
+    if (evaluationReprise.remplaceeParId && !evaluationReprise.reconcilieParDoublon) {
         const indexRepriseLiee = evaluations.findIndex(e => e.id === evaluationReprise.remplaceeParId);
         const noteRepriseLiee = indexRepriseLiee !== -1 ? (evaluations[indexRepriseLiee].noteFinale || 0) : null;
         const confirmer = confirm(
@@ -524,10 +528,16 @@ function retirerJetonReprise(evaluationId) {
     } else {
 
     // Trouver l'évaluation originale si elle existe
+    // #360 (Option A) — parité avec restaurerOriginaleSiReprise : exclure un
+    // doublon réconcilié. Sans `!reconcilieParDoublon`, si un doublon note-égale
+    // pointe le survivant (cas reprise-survivante), ce find() peut le renvoyer
+    // AVANT l'originale archivée → on ressuscite le doublon (re-double-compte) et
+    // on splice la reprise légitime (perte de note) — exactement ce qu'on ferme.
     const evaluationOriginale = evaluations.find(e =>
         e.etudiantDA === evaluationReprise.etudiantDA &&
         e.productionId === evaluationReprise.productionId &&
-        e.remplaceeParId === evaluationId
+        e.remplaceeParId === evaluationId &&
+        !e.reconcilieParDoublon
     );
 
     if (evaluationOriginale) {

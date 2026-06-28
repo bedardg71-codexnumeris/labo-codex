@@ -176,8 +176,10 @@ class PratiqueSommative {
         });
 
         // Remplacées par reprise : exclues de la moyenne (parité), nommées pour l'honnêteté.
+        // #360 — exclure les doublons réconciliés : ils portent remplaceeParId SANS
+        // être des reprises ; les étiqueter « par une reprise » serait mensonger.
         evaluations
-            .filter(e => e.etudiantDA === da && e.remplaceeParId)
+            .filter(e => e.etudiantDA === da && e.remplaceeParId && !e.reconcilieParDoublon)
             .slice().sort(parDate)
             .forEach(e => {
                 resultats.push({
@@ -187,6 +189,21 @@ class PratiqueSommative {
                     note: (e.noteFinale ?? null),
                     sort: 'remplace',
                     detail: 'remplacée par une reprise · exclue de la moyenne'
+                });
+            });
+
+        // #360 — doublons note-égale réconciliés : exclus de la moyenne, motif honnête.
+        evaluations
+            .filter(e => e.etudiantDA === da && e.reconcilieParDoublon)
+            .slice().sort(parDate)
+            .forEach(e => {
+                resultats.push({
+                    label: titreProd(e.productionId),
+                    date: e.dateEvaluation || null,
+                    niveau: e.niveauFinal || null,
+                    note: (e.noteFinale ?? null),
+                    sort: 'remplace',
+                    detail: 'doublon note-égale · exclu de la moyenne'
                 });
             });
 

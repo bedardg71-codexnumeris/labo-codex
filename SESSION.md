@@ -1,5 +1,65 @@
 <!-- =====================================================================
-     SESSION — 28 juin 2026 (Claude Code, main 1.23.0). ⮕⮕ LIRE EN PREMIER (supersède les blocs ci-dessous). AUCUN changement de code repo ; gestes sur le codex LIVE + traces.
+     SESSION — 28 juin 2026 (code, Claude Code, main → 1.24.0). ⮕⮕ LIRE EN PREMIER (supersède les blocs ci-dessous). #360 CŒUR LIVRÉ.
+
+     ✅ FAIT — #360 (prévention des doublons d'évals) CODÉ + VÉRIFIÉ + RELEASE 1.24.0 (Option A).
+     • NOUVEAU module pur `js/entites/reconciliation-evaluations.js` → `window.ReconciliationEvaluations.reconcilierActivesNoteEgale(evals, da, pid)` :
+       marque les surnuméraires NOTE-ÉGALE (`remplaceeParId` = id survivant + drapeau `reconcilieParDoublon`). 6 conditions moteur ;
+       exclut les 4 marques de reprise (dont la CIBLÉE) + les verrouillées ; note normalisée 1 décimale ; survivant ciblée>reprise>1er.
+     • Câblé dans les 2 chemins de save : `evaluation-sauvegarde.js` (manuel, l.~414, PERSISTE si modifié avant la bascule §3.1) +
+       `evaluation-chargement.js` (auto-save, l.~1368, persiste si modifié pour survivre au return verrouillée).
+     • OPTION A — drapeau `reconcilieParDoublon` IGNORÉ par les link-followers de reprise : `restaurerOriginaleSiReprise`
+       (liste-evaluations.js), `retirerJetonReprise` DEUX branches (evaluation-jetons.js — la branche `else` était le constat MAJEUR
+       de la vérif adverse, corrigée), + avertissement cosmétique (liste-evaluations.js:1655). Le moteur exclut toujours via `remplaceeParId`.
+     • +2 fix d'affichage (vérif adverse) : label « remplacée par une reprise » mensonger sur un doublon → motif honnête séparé
+       (pratique-sommative.js) ; compteur « (sur N artefacts) » qui sur-comptait les remplacées → `!remplaceeParId` (profil-affichage:810).
+     • VÉRIF ADVERSE (workflow 6 agents, 5 lentilles + critique de complétude) : verdict « corrections requises » → 1 majeur + 2 mineurs
+       CORRIGÉS ; 5 faux positifs « persistance » écartés (db.js memoryCache rend la RÉFÉRENCE → mutation in-place déjà en SSOT).
+     • Sentinelle `tests/unit/sentinelle-reconciliation-doublons-360.test.js` (16 cas) ; 6 INVARIANTS BREAK-TESTÉS (A–F : chacun rougit
+       puis revient vert). Suite : Vitest 1078/1078 ; Playwright inchangé (#326 préexistant rouge, hors périmètre).
+
+     ⮕ RESTE pour l'enchaînement (décision Grégoire : #360 → #358 → #352/#353) :
+        1. ⏸ #358 MIGRATION RÉELLE des modèles (grilles/échelles → namespacées + catalogues globaux ; Option A archi tranchée le 28) =
+           RISQUE MAX, SESSION DÉDIÉE : BACKUP CODEX + dry-run AVANT toute écriture. NE PAS enchaîner sans le backup.
+        2. Sous-lots reportés de #360 : (a) tarir le `splice` de reprise = DÉCISION PRODUIT ; (b) diagnostic rétroactif = session dédiée risque données.
+        3. 🔴 #352/#353 (quota localStorage saturé / écrasement productions) — après #358.
+     Mémoire : [[distinguer-reprises-doublons]], [[audit-integrite-reconstruction-2026-06-27]], [[namespacing-par-trimestre]].
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 28 juin 2026 (suite, Claude Code, main 1.23.0). #360 cadrage consolidé en doc (superseded par le bloc ci-dessus). AUCUN code — consolidation doc de #360.
+
+     ✅ FAIT — #360 (prévention des doublons d'évals) : cadrage v1 du 28 juin RE-VÉRIFIÉ contre le code (workflow adverse v2 :
+        8 vérifications + synthèse + 3 critiques, 12 agents). Plan amendé écrit : `plans de travail/PLAN-360-prevention-doublons-evals.md`.
+     • Le cadrage v1 tient dans son squelette, MAIS la vérif l'a corrigé : « ~62 sites » → réel 134 occ / 33 fichiers ;
+       le moteur ne lit PAS 1 prédicat mais 6 (`_filtrerEvaluationsArtefactsValides` profil-etudiant-actions.js:251-262 :
+       !remplaceeParId + noteFinale non null + statutIntegrite ∉ {plagiat,ia}) ; auto-save = `.findIndex()` l.1369-1373 (pas
+       `.find()` à 1387) ; le splice de reprise existe en DEUX endroits (appliquerJetonReprise ~460 ET appliquerJetonRepriseCiblee ~868).
+     • DEUX trous confirmés, absents du cadrage v1 : (1) BLOQUANT — le save MANUEL ne persiste pas la réconciliation (la bascule
+       modification re-lit le disque et jette le tableau muté → la prévention ne taris rien sur le chemin le plus courant ;
+       correctif pur : persister avant la bascule). (2) DÉCISION — COLLISION sur `remplaceeParId` : 2 writers (restaurerOriginaleSiReprise
+       liste-evaluations.js:1947-1962, appelé à CHAQUE suppression ; retirerJetonReprise evaluation-jetons.js:506-561) traitent toute
+       éval marquée comme « originale archivée par reprise » → supprimer le survivant ressuscite le doublon ; rouvrir le doublon marqué
+       efface la VRAIE note. Le mécanisme du cadrage rouvre le bug qu'il prétend fermer.
+
+     ⮕ DÉCISION GRÉGOIRE (28 juin) : « PAUSE — consolider d'abord ». On ne code pas aujourd'hui ; le plan amendé est relisible à froid.
+     ⮕ RESTE pour la session de code dédiée :
+        1. Trancher §3.2 — collision : Option A (drapeau discriminant `reconcilieParDoublon`, RECOMMANDÉ — lu par 2 writers, PAS par
+           le moteur, donc pas le piège « champ d'état ignoré ») vs Option B (gater les writers, zéro nouveau champ mais régression
+           possible sur l'undo de reprise).
+        2. Coder le CŒUR : helper pur `_reconcilierActivesNoteEgale` (6 conditions + exclure les 4 marques de reprise dont la CIBLÉE +
+           invariant `verrouillee` interne + normaliser note 1 décimale) + 2 chemins de save (avec fix persistance) + garde/sentinelle
+           break-testée (rouge note-égale / vert Samuel divergent).
+        3. Sous-lots REPORTÉS (chacun sa propre ouverture) : (a) tarir le splice — PAS du code mort, branché sur une préférence
+           utilisateur vivante (radio « supprimer l'originale » index.html:6372 → toute la chaîne UI/config) = DÉCISION PRODUIT Grégoire ;
+           (b) diagnostic rétroactif sur migration-diagnostic.js (patron reparerCoursIdProductions, dry-run, par trimestre, 6 conditions,
+           faille [0] à corriger, LISTER les divergents) = SESSION DÉDIÉE, RISQUE DONNÉES (backup Codex).
+     ⮕ Limite assumée : la prévention ne couvre que les surnuméraires NOTE-ÉGALE ; un orphelin re-noté DIVERGENT (≈ Samuel) double une
+        production dans le top-N et reste invisible jusqu'au diagnostic rétroactif (à lister, jamais trancher seul).
+     Mémoire : [[distinguer-reprises-doublons]] (corrigée), [[audit-integrite-reconstruction-2026-06-27]].
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 28 juin 2026 (Claude Code, main 1.23.0). AUCUN changement de code repo ; gestes sur le codex LIVE + traces.
 
      ✅ FAIT — 3 GESTES LIVE (codex de Grégoire, hors repo) + 1 CHANTIER DE CONCEPTION CADRÉ.
      1. PRÉFÉRENCE DÉPISTAGE restaurée : `definirPreference('grilleReferenceDepistage','grille_1772187755149_uq1oiiafa')` (FR-HOLIS).

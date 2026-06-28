@@ -412,6 +412,22 @@ function sauvegarderEvaluation() {
     // Garde-fou : si une évaluation active existe déjà pour ce couple étudiant+production,
     // basculer en modification plutôt que d'en créer une deuxième (double-clic, etc.)
     let evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
+
+    // #360 — réconciliation des doublons NOTE-ÉGALE déjà présents pour ce couple
+    // (re-clic ou non-persistance d'un reload antérieur). On marque les
+    // surnuméraires AVANT la garde double-clic, pour que `existanteActive` voie
+    // l'état nettoyé et pointe le survivant. PERSISTER si modifié : la bascule en
+    // modification (`sauvegarderEvaluationModifiee`) RE-LIT le disque et jetterait
+    // sinon le tableau muté — le chemin de naissance le plus courant ne taris rien.
+    if (typeof window.ReconciliationEvaluations !== 'undefined') {
+        const recon = window.ReconciliationEvaluations.reconcilierActivesNoteEgale(
+            evaluations, etudiantDA, productionId
+        );
+        if (recon.modifie) {
+            sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
+        }
+    }
+
     const existanteActive = evaluations.find(e =>
         !e.remplaceeParId && e.etudiantDA === etudiantDA && e.productionId === productionId
     );

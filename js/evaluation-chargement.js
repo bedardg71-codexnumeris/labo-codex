@@ -1366,6 +1366,20 @@ function _autoSauvegarderCriteres(snapshot) {
     // ACCÈS DIRECT — read-modify-write : doit lire TOUTES les évaluations du trimestre
     // pour ne pas perdre celles d'autres cours lors de la réécriture (idem lignes 2222, 5656+)
     let evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
+
+    // #360 — réconciliation des doublons NOTE-ÉGALE pour ce couple AVANT de
+    // chercher l'active à mettre à jour, pour que `findIndex` pointe le survivant.
+    // Persister si modifié : la branche verrouillée plus bas `return` AVANT le
+    // `sauvegarderDonneesSelonMode` final → sans ça les marques seraient perdues.
+    if (typeof window.ReconciliationEvaluations !== 'undefined') {
+        const recon = window.ReconciliationEvaluations.reconcilierActivesNoteEgale(
+            evaluations, ec.etudiantDA, ec.productionId
+        );
+        if (recon.modifie) {
+            sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
+        }
+    }
+
     const idx = evaluations.findIndex(function(e) {
         return !e.remplaceeParId &&
             e.etudiantDA === ec.etudiantDA &&
