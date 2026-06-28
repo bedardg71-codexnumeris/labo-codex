@@ -21,8 +21,14 @@
         des doublons = non-persistance silencieuse (`db.js:1104` flush IDB avalé ; `memoryCache` volatile) → connecte #352/#353.
         Mémoire : [[distinguer-reprises-doublons]], [[audit-integrite-reconstruction-2026-06-27]].
 
-     ⮕ RESTE (inchangé) — CHANTIER INTERTRIMESTRE : A (mécanique D-D1, archi zéro écriture) → B (🔴 #352/#353 stockage) → objectif #36.
-        Voir le bloc 27 juin PM ci-dessous. Items d'intégrité restants : voir [[audit-integrite-reconstruction-2026-06-27]].
+     ✅ DÉCISION ARCHI D-D1 TRANCHÉE (28 juin, réflexion zéro écriture) — Option A (symétrie pratiques) + 2 corollaires :
+        grilles/échelles → copies locales namespacées (`grillesTemplates`/`echellesTemplates` déplacées CLES_GLOBALES→CLES_NAMESPACEES)
+        + catalogues globaux `bibliothequeGrilles`/`bibliothequeEchelles` CRÉÉS (patron `bibliothequePratiques`) ; migrer TOUS les
+        modèles attribuables (pas que les utilisés) ; corriger `identifierTemplatesUtilises` (trimestres.js:587 — lire les évals,
+        pas que les productions). Consigné : `plans de travail/CADRAGE-briques-C-D-namespacing.md` §3.3 (bloc 28 juin) + [[namespacing-par-trimestre]].
+     ⮕ RESTE — CHANTIER INTERTRIMESTRE : la MIGRATION RÉELLE des modèles (#358, RISQUE MAX, session dédiée : audit des lecteurs
+        `grillesTemplates`/`echellesTemplates` → copie+backup+L0, filet §3.4) → B (🔴 #352/#353 stockage) → objectif #36.
+        Items d'intégrité restants : voir [[audit-integrite-reconstruction-2026-06-27]].
      ===================================================================== -->
 
 <!-- =====================================================================

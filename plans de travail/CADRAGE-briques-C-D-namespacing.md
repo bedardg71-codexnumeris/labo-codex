@@ -192,6 +192,20 @@ H2026 actif et le golden master, résoudre le L2 ROUGE. **Sur copie + backup hor
 >   catalogue global + copie locale) : les grilles n'ont qu'1 clé, les pratiques 2 ⇒ l'« hybride » suppose de CRÉER la
 >   séparation, ce n'est pas le simple déplacement de §3.2 ; (b) **critère §4-pt7** (tous attribuables vs utilisés) ;
 >   (c) `identifierTemplatesUtilises` (trimestres.js:587) ne lit que les **productions** (angle mort usage-éval).
+>
+> **MàJ 28 juin 2026 — les 3 points À TRANCHER sont TRANCHÉS (Grégoire, réflexion d'archi, zéro écriture).**
+> - (a) **Mécanique D-D1 = Option A (symétrie pratiques).** `grillesTemplates`/`echellesTemplates` sont DÉPLACÉES de
+>   `CLES_GLOBALES` vers `CLES_NAMESPACEES` (deviennent les copies locales `<trim>_grillesTemplates`/`<trim>_echellesTemplates`,
+>   lues par le moteur via `cle()`) ; un catalogue global de partage `bibliothequeGrilles`/`bibliothequeEchelles` est CRÉÉ, à
+>   l'image de `bibliothequePratiques`. Motif : un seul patron pratiques↔grilles (deux patrons = dette). Vérifié 28 juin :
+>   `bibliothequeGrilles`/`Echelles` existent en données mais ne sont lues NULLE PART en db (≠ catalogues actifs ; seuls
+>   `bibliothequePratiques`/`bibliothequeProductions` le sont, clés nues non listées) ; `grillesTemplates` n'a qu'1 clé →
+>   l'hybride CRÉE la séparation. **Coût assumé** : auditer TOUS les lecteurs de `grillesTemplates`/`echellesTemplates` qui supposent du global.
+> - (b) **Critère §4-pt7 = migrer TOUS les modèles attribuables**, pas seulement les « utilisés » (sinon abandon des modèles en réserve).
+> - (c) **Corriger `identifierTemplatesUtilises`** (trimestres.js:587) : réconcilier les **évaluations** (`evaluation.grilleId`/`echelleId`,
+>   source grade-bearing) en plus des productions — le `production.grilleId` est souvent périmé. Le dry-run d'observation le fait déjà ;
+>   le mécanisme de migration réel (`creerSnapshotRessources`, trimestres.js:641) doit l'adopter.
+> **RESTE pour la session dédiée (risque max)** : audit des lecteurs `grillesTemplates`/`echellesTemplates`, puis migration sur copie + backup + L0 (filet §3.4).
 
 ### 3.4 Ordre + filet
 1. Trancher D-D1. 2. Backup (D-D4) + baseline L0/L2 capturés AVANT. 3. **Dry-run** (`identifierTemplatesUtilises`+`creerSnapshotRessources` en mode simulation, clés `_dryrun_`). 4. L0 sur la copie dry-run = VERT. 5. Migration réelle (modèles, flag idempotent **en dernier**). 6. L0/L2 post-migration. 7. (si D-D3=A) corriger les ~60 lectures `modalitesEvaluation`.
