@@ -1,5 +1,28 @@
 <!-- =====================================================================
-     SESSION — 28 juin 2026 (code, Claude Code, main → 1.24.0). ⮕⮕ LIRE EN PREMIER (supersède les blocs ci-dessous). #360 CŒUR LIVRÉ.
+     SESSION — 28 juin 2026 (suite, Claude Code, main 1.24.0). ⮕⮕ LIRE EN PREMIER (supersède les blocs ci-dessous). Prép #358 (lecture seule) + a2024 supprimé.
+
+     ✅ FAIT — PRÉPARATION #358 (migration des modèles, Option A) — LECTURE SEULE, poussée (`1c02953f`).
+     • Plan durable écrit : `plans de travail/PLAN-358-migration-modeles.md` (dry-run sur codex réel + audit 8 agents, 119 sites clé nue classés :
+       61 catalogue / 24 cle() / 15 archive / 19 a_decider→4 vraies décisions D1-D4 ; corollaires C1/C2 ; filet §3.4 ; risques ; 4 blocs).
+     • ⚠ PRÉMISSE FAUSSE CORRIGÉE (vérifiée au code) : les catalogues `bibliothequeGrilles`/`bibliothequeEchelles` NE sont PAS « lues nulle part » —
+       ils sont VIVANTS (`js/grilles-bibliotheque.js`/`echelles-bibliotheque.js`, chargés, db.get, `obtenirToutes*BibliothequeSync()` appelée).
+       Option A RÉUTILISE les catalogues, ne les crée pas. Cadrage §3.4 corrigé + mémoire [[namespacing-par-trimestre]] corrigée.
+     • Mécanique Option A : déplacer `grillesTemplates`/`echellesTemplates` `CLES_GLOBALES`→`CLES_NAMESPACEES` ; `grilles.js`/`echelles.js` lisent
+       DÉJÀ via `cle()` (189 sites, NE PAS toucher) ; re-pointer ~119 clé nue (catalogue → `obtenirToutes*BibliothequeSync()` ; trimestre → `cle()`).
+
+     ✅ FAIT — a2024 (TRIMESTRE DE TEST) SUPPRIMÉ EN LIVE (Grégoire, backup déposé `codex-…2026-06-28-09h03.zip`).
+       27 clés (`a2024_*` + 2 `seancesCompletes_*a2024*`) + entrée registre supprimées via snippet console. Registre = a2025 (archivé) + h2026 (actif).
+       ⚠ Piège vécu : cliquer a2024 dans le menu l'a rendu ACTIF (archivé+actif) → la garde anti-trimestre-actif du snippet a ABANDONNÉ (données protégées) ;
+       récup = sélectionner Hiver 2026 d'abord, puis relancer. Diagnostic post = 0 clé a2024. Réserves/divergences a2024 du dry-run #358 = caduques.
+
+     ⮕ NOUVEAU BACKLOG #361 (🟢) — intégrer une fonction de SUPPRESSION DE TRIMESTRE dans l'app (le stub `supprimerTrimestreActif`
+       trimestre-v2-liste.js:344 n'est qu'un alert). Logique sûre éprouvée (garde anti-actif + énumération IDB+localStorage+memoryCache + registre).
+     ⮕ RESTE (séquence Grégoire) : #358 MIGRATION RÉELLE (session dédiée, risque max, filet §3.4 ; trimestres = a2025 + h2026 seulement) → 🔴 #352/#353 (stockage) → objectif #36.
+     Mémoire : [[namespacing-par-trimestre]], [[distinguer-reprises-doublons]], [[objectif-reconstruction-multi-trimestres]].
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 28 juin 2026 (code, Claude Code, main → 1.24.0). #360 CŒUR LIVRÉ (superseded par le bloc ci-dessus).
 
      ✅ FAIT — #360 (prévention des doublons d'évals) CODÉ + VÉRIFIÉ + RELEASE 1.24.0 (Option A).
      • NOUVEAU module pur `js/entites/reconciliation-evaluations.js` → `window.ReconciliationEvaluations.reconcilierActivesNoteEgale(evals, da, pid)` :
