@@ -197,10 +197,12 @@ H2026 actif et le golden master, résoudre le L2 ROUGE. **Sur copie + backup hor
 > - (a) **Mécanique D-D1 = Option A (symétrie pratiques).** `grillesTemplates`/`echellesTemplates` sont DÉPLACÉES de
 >   `CLES_GLOBALES` vers `CLES_NAMESPACEES` (deviennent les copies locales `<trim>_grillesTemplates`/`<trim>_echellesTemplates`,
 >   lues par le moteur via `cle()`) ; un catalogue global de partage `bibliothequeGrilles`/`bibliothequeEchelles` est CRÉÉ, à
->   l'image de `bibliothequePratiques`. Motif : un seul patron pratiques↔grilles (deux patrons = dette). Vérifié 28 juin :
->   `bibliothequeGrilles`/`Echelles` existent en données mais ne sont lues NULLE PART en db (≠ catalogues actifs ; seuls
->   `bibliothequePratiques`/`bibliothequeProductions` le sont, clés nues non listées) ; `grillesTemplates` n'a qu'1 clé →
->   l'hybride CRÉE la séparation. **Coût assumé** : auditer TOUS les lecteurs de `grillesTemplates`/`echellesTemplates` qui supposent du global.
+>   l'image de `bibliothequePratiques`. Motif : un seul patron pratiques↔grilles (deux patrons = dette).
+>   **⛔ CORRECTION 28 juin (suite), VÉRIFIÉE AU CODE — la phrase suivante était FAUSSE** : « `bibliothequeGrilles`/`Echelles`
+>   existent mais ne sont lues NULLE PART ». Elles SONT VIVANTES : `js/grilles-bibliotheque.js` + `js/echelles-bibliotheque.js`
+>   (chargés index.html:14678/14680) lisent/écrivent `CLE_BIBLIOTHEQUE_GRILLES`/`_ECHELLES` en db ; `obtenirToutesLesGrillesBibliothequeSync()`
+>   est appelée (donnees-v2.js). **Donc Option A NE CRÉE PAS les catalogues — elle les RÉUTILISE.** Détail + plan : `plans de travail/PLAN-358-migration-modeles.md` §0.
+>   **Coût assumé** : auditer TOUS les lecteurs de `grillesTemplates`/`echellesTemplates` qui supposent du global (FAIT — 119 sites classés, cf. PLAN-358 §2).
 > - (b) **Critère §4-pt7 = migrer TOUS les modèles attribuables**, pas seulement les « utilisés » (sinon abandon des modèles en réserve).
 > - (c) **Corriger `identifierTemplatesUtilises`** (trimestres.js:587) : réconcilier les **évaluations** (`evaluation.grilleId`/`echelleId`,
 >   source grade-bearing) en plus des productions — le `production.grilleId` est souvent périmé. Le dry-run d'observation le fait déjà ;

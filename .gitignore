@@ -95,5 +95,6 @@ audit/reports/
 # Données réelles de classe — ne JAMAIS committer (PII étudiant·es)
 CODEX problématiques juin/
 *.codex.zip
+codex-*.zip
 codex-*/
 test-results/
