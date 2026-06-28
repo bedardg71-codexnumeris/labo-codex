@@ -807,7 +807,9 @@ function genererSectionAccompagnement(da) {
     const directionsCriteres = calculerDirectionsCriteres(da);
 
     // Compter le nombre total d'artefacts évalués (pour afficher la fiabilité des données)
-    const evaluationsDA = (obtenirDonneesSelonMode('evaluationsSauvegardees') || []).filter(e => e.etudiantDA === da && e.noteFinale != null);
+    // #360 — exclure les évals remplacées (reprises archivées ET doublons réconciliés) :
+    // le « (sur N) » doit refléter le pool réellement compté par le moteur, pas les exclues.
+    const evaluationsDA = (obtenirDonneesSelonMode('evaluationsSauvegardees') || []).filter(e => e.etudiantDA === da && e.noteFinale != null && !e.remplaceeParId);
     const nbTotalArtefacts = evaluationsDA.length;
 
     // Construire le texte de progression au format du rapport (basé sur les critères)

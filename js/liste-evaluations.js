@@ -1653,7 +1653,9 @@ function confirmerSuppressionFichier(fichierId, da) {
         const evalsTrim = db.getSync(cle('evaluationsSauvegardees'), []) || [];
         const prodId = fichier ? fichier.productionId : null;
         const contexteReprise = prodId && evalsTrim.some(e =>
-            e.etudiantDA === da && e.productionId === prodId && (e.repriseDeId || e.remplaceeParId)
+            // #360 — un doublon réconcilié porte `remplaceeParId` mais n'est PAS une
+            // reprise : ne pas afficher l'avertissement « lié à une reprise » à tort.
+            e.etudiantDA === da && e.productionId === prodId && (e.repriseDeId || (e.remplaceeParId && !e.reconcilieParDoublon))
         );
         if (contexteReprise) {
             avertissementReprise = `
@@ -1952,7 +1954,12 @@ function restaurerOriginaleSiReprise(evaluations, evaluationId) {
     // retirerJetonReprise effaçait les props de la reprise sans toucher
     // l'originale). Le garde-fou du 8 juin (#136) reste : on ne restaure que
     // l'originale qui pointe précisément l'évaluation supprimée.
-    const originale = evaluations.find(e => e && e.remplaceeParId === evaluationId);
+    // #360 (Option A) — IGNORER un marqueur de réconciliation de doublon :
+    // `reconcilieParDoublon` pose `remplaceeParId` pour exclure un doublon
+    // note-égale du moteur, MAIS ce n'est PAS une originale archivée par une
+    // reprise. Sans ce garde, supprimer le survivant « restaurerait » (=
+    // ressusciterait) le doublon → re-double-compte silencieux.
+    const originale = evaluations.find(e => e && e.remplaceeParId === evaluationId && !e.reconcilieParDoublon);
     if (!originale) return false;
     delete originale.remplaceeParId;
     delete originale.dateRemplacement;
