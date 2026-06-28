@@ -132,7 +132,9 @@ function initialiserModuleSnapshots() {
                         dernierSnapshotIntervention: null
                     }
                 };
-                db.set(cleSnap, structure);
+                // #353 Option C (W2) : setSync (tracké dans _pendingWrites, drainé
+                // par Option B), pas db.set() fire-and-forget. Idem repli ligne ~146.
+                db.setSync(cleSnap, structure);
             }
             // Rafraîchir l'affichage si on est dans Réglages
             if (typeof afficherStatutSnapshots === 'function') {

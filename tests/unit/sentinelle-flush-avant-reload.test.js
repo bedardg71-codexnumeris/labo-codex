@@ -14,7 +14,9 @@ import { fileURLToPath } from 'node:url';
 // extraction : tout fix défensif critique doit être verrouillé, sinon il
 // disparaît silencieusement au prochain refactoring).
 // Les reload de réinitialisation (alert après db.clear()) sont hors patron :
-// rien d'utile à flusher après un clear.
+// db.clear() est awaité et désormais durable (résout sur le commit de transaction,
+// #353 Option C : _clearIndexedDB + clearBlobs sur oncomplete) → les stores sont
+// vidés avant le reload, rien à flusher en plus.
 
 const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 

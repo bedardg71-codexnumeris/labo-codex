@@ -20,11 +20,16 @@
  *   - Grosses → memoryCache (seuil 200 Ko, pas de tentative localStorage)
  *   - Émet événement 'db-ready' quand terminé
  *
- * SÉCURITÉ DONNÉES:
- *   - Écritures IDB trackées dans _pendingWrites (Set de promesses)
- *   - beforeunload signale si des écritures sont en cours
- *   - db.flush() attend la fin de toutes les écritures pendantes
- *   - Notification utilisateur (une fois/session) si quota localStorage dépassé
+ * DURABILITÉ DONNÉES (#353 — Options A/B/C):
+ *   - Écritures ET suppressions IDB (keyvalue + fichiers) résolvent sur le COMMIT
+ *     de transaction (transaction.oncomplete), PAS request.onsuccess → durables
+ *     sous WebKit / origine file:// où le commit est différé après onsuccess
+ *   - Opérations fire-and-forget (setSync, removeSync, set() non-awaité) trackées
+ *     dans _pendingWrites (Set de promesses) via _trackOperation
+ *   - db.flush() attend la fin des opérations pendantes ; elles sont aussi drainées
+ *     au déchargement via visibilitychange/pagehide (Option B). beforeunload avertit.
+ *   - Quota localStorage dépassé : bascule silencieuse en memoryCache + IDB
+ *     (comportement géré, pas de notification utilisateur)
  *
  * MÉTHODES SYNCHRONES (getSync/setSync/removeSync):
  * - Lecture: memoryCache (prioritaire) puis localStorage
@@ -306,8 +311,12 @@
             if (!this._ecritureAutorisee(key, value)) return;
 
             if (this.useIndexedDB) {
-                // Écrire dans IndexedDB (stockage persistant)
-                await this._setIndexedDB(key, value);
+                // Écrire dans IndexedDB (stockage persistant). #353 Option C (W1) :
+                // tracker la promesse dans _pendingWrites pour qu'un `db.set(...)` NON
+                // awaité (fire-and-forget) reste drainable par flush() / Option B.
+                // _trackOperation retourne la promesse d'origine → `await` ci-dessous
+                // conserve la durabilité (commit via Option A) et la propagation d'erreur.
+                await this._trackOperation(this._setIndexedDB(key, value), 'écriture', key);
 
                 // Seuil IDB-first (#334 D) : harmonisé avec setSync — au-delà du
                 // seuil, on NE tente PAS localStorage (évite un QuotaExceededError
@@ -433,13 +442,29 @@
                 const store = transaction.objectStore('keyvalue');
                 const request = store.delete(key);
 
-                request.onsuccess = () => {
+                // #353 durabilité (Option C) : résoudre sur le COMMIT de la transaction
+                // (`oncomplete`), PAS sur `request.onsuccess`. Symétrie exacte avec
+                // _setIndexedDB : sous WebKit / origine file://, le commit readwrite est
+                // différé après onsuccess → résoudre trop tôt laissait une suppression
+                // non durable → un hard refresh avant le commit avortait la transaction
+                // → IndexedDB gardait la clé → réapparition silencieuse au boot
+                // (syncToLocalStorageCache réhydrate localStorage depuis l'IDB non purgé).
+                transaction.oncomplete = () => {
                     resolve();
                 };
+                transaction.onabort = () => {
+                    console.error(`[DB] Transaction suppression IndexedDB avortée clé "${key}":`, transaction.error);
+                    reject(transaction.error || new Error('IndexedDB transaction abort'));
+                };
+                transaction.onerror = () => {
+                    console.error(`[DB] Erreur transaction suppression IndexedDB clé "${key}":`, transaction.error);
+                    reject(transaction.error || new Error('IndexedDB transaction error'));
+                };
 
+                // Journalisation seule : l'échec de la requête fait avorter la
+                // transaction → onabort/onerror tranche (pas de double reject).
                 request.onerror = () => {
                     console.error(`[DB] Erreur suppression IndexedDB clé "${key}":`, request.error);
-                    reject(request.error);
                 };
             });
         }
@@ -569,13 +594,23 @@
                 const store = transaction.objectStore('keyvalue');
                 const request = store.clear();
 
-                request.onsuccess = () => {
+                // #353 durabilité (Option C) : résoudre sur le COMMIT (oncomplete).
+                // `clear()` est chaîné à un location.reload() (reinitialiserDonnees) :
+                // sans attendre le commit, le store pouvait n'être pas vidé avant le
+                // reload → toutes les données réapparaissaient.
+                transaction.oncomplete = () => {
                     resolve();
                 };
-
+                transaction.onabort = () => {
+                    console.error('[DB] Transaction vidage IndexedDB avortée:', transaction.error);
+                    reject(transaction.error || new Error('IndexedDB transaction abort'));
+                };
+                transaction.onerror = () => {
+                    console.error('[DB] Erreur transaction vidage IndexedDB:', transaction.error);
+                    reject(transaction.error || new Error('IndexedDB transaction error'));
+                };
                 request.onerror = () => {
                     console.error('[DB] Erreur vidage IndexedDB:', request.error);
-                    reject(request.error);
                 };
             });
         }
@@ -787,10 +822,19 @@
                 const tx = this.db.transaction(['fichiers'], 'readwrite');
                 const store = tx.objectStore('fichiers');
                 const request = store.put(record);
-                request.onsuccess = () => resolve();
+                // #353 durabilité (Option C) : résoudre sur le COMMIT (oncomplete) du
+                // store 'fichiers' — l'Option A ne couvrait que 'keyvalue'.
+                tx.oncomplete = () => resolve();
+                tx.onabort = () => {
+                    console.error(`[DB] Transaction storeBlob avortée "${record.id}":`, tx.error);
+                    reject(tx.error || new Error('IndexedDB transaction abort'));
+                };
+                tx.onerror = () => {
+                    console.error(`[DB] Erreur transaction storeBlob "${record.id}":`, tx.error);
+                    reject(tx.error || new Error('IndexedDB transaction error'));
+                };
                 request.onerror = () => {
                     console.error(`[DB] Erreur storeBlob "${record.id}":`, request.error);
-                    reject(request.error);
                 };
             });
         }
@@ -827,10 +871,18 @@
                 const tx = this.db.transaction(['fichiers'], 'readwrite');
                 const store = tx.objectStore('fichiers');
                 const request = store.delete(id);
-                request.onsuccess = () => resolve();
+                // #353 durabilité (Option C) : résoudre sur le COMMIT (oncomplete).
+                tx.oncomplete = () => resolve();
+                tx.onabort = () => {
+                    console.error(`[DB] Transaction deleteBlob avortée "${id}":`, tx.error);
+                    reject(tx.error || new Error('IndexedDB transaction abort'));
+                };
+                tx.onerror = () => {
+                    console.error(`[DB] Erreur transaction deleteBlob "${id}":`, tx.error);
+                    reject(tx.error || new Error('IndexedDB transaction error'));
+                };
                 request.onerror = () => {
                     console.error(`[DB] Erreur deleteBlob "${id}":`, request.error);
-                    reject(request.error);
                 };
             });
         }
@@ -924,10 +976,18 @@
                     key: 'travaux_fsapi_handle',
                     value: handle
                 });
-                request.onsuccess = () => resolve();
+                // #353 durabilité (Option C) : résoudre sur le COMMIT (oncomplete).
+                tx.oncomplete = () => resolve();
+                tx.onabort = () => {
+                    console.error('[DB] Transaction storeFSAPIHandle avortée:', tx.error);
+                    reject(tx.error || new Error('IndexedDB transaction abort'));
+                };
+                tx.onerror = () => {
+                    console.error('[DB] Erreur transaction storeFSAPIHandle:', tx.error);
+                    reject(tx.error || new Error('IndexedDB transaction error'));
+                };
                 request.onerror = () => {
                     console.error('[DB] Erreur storeFSAPIHandle:', request.error);
-                    reject(request.error);
                 };
             });
         }
@@ -964,8 +1024,13 @@
                 const tx = this.db.transaction(['keyvalue'], 'readwrite');
                 const store = tx.objectStore('keyvalue');
                 const request = store.delete('travaux_fsapi_handle');
-                request.onsuccess = () => resolve();
-                request.onerror = () => resolve();
+                // #353 durabilité (Option C) : attendre le COMMIT (oncomplete) de la
+                // suppression du handle (Défense D — MODELE-MENACES §D-03). Idempotent :
+                // on RÉSOUT aussi sur onabort/onerror (pas de reject) — contrat conservé.
+                tx.oncomplete = () => resolve();
+                tx.onabort = () => resolve();
+                tx.onerror = () => resolve();
+                request.onerror = () => {};
             });
         }
 
@@ -980,12 +1045,20 @@
                 const tx = this.db.transaction(['fichiers'], 'readwrite');
                 const store = tx.objectStore('fichiers');
                 const request = store.clear();
-                request.onsuccess = () => {
+                // #353 durabilité (Option C) : résoudre sur le COMMIT (oncomplete).
+                tx.oncomplete = () => {
                     resolve();
+                };
+                tx.onabort = () => {
+                    console.error('[DB] Transaction clearBlobs avortée:', tx.error);
+                    reject(tx.error || new Error('IndexedDB transaction abort'));
+                };
+                tx.onerror = () => {
+                    console.error('[DB] Erreur transaction clearBlobs:', tx.error);
+                    reject(tx.error || new Error('IndexedDB transaction error'));
                 };
                 request.onerror = () => {
                     console.error('[DB] Erreur clearBlobs:', request.error);
-                    reject(request.error);
                 };
             });
         }
@@ -1113,17 +1186,34 @@
         }
 
         /**
+         * Tracke une opération IDB (écriture OU suppression) dans _pendingWrites
+         * pour permettre son drainage par flush() / Option B
+         * (visibilitychange/pagehide). Primitive unique partagée par _trackWrite,
+         * removeSync et set() async (#353 Option C — symétrie écriture/suppression).
+         * @param {Promise} promise - promesse d'opération IDB (_setIndexedDB / _removeIndexedDB)
+         * @param {string} label - 'écriture' | 'suppression' (journalisation)
+         * @param {string} key
+         * @returns {Promise} la promesse d'ORIGINE (préserve l'await/reject de l'appelant)
+         */
+        _trackOperation(promise, label, key) {
+            var self = this;
+            // Copie CATCHÉE distincte : drainée par flush()/Option B sans masquer le
+            // reject de `promise` pour un appelant qui l'attend (set() async awaité).
+            var tracked = Promise.resolve(promise).then(function() {}, function(error) {
+                console.warn('[DB] Erreur ' + label + ' async IDB clé "' + key + '":', error);
+            }).finally(function() {
+                self._pendingWrites.delete(tracked);
+            });
+            this._pendingWrites.add(tracked);
+            return promise;
+        }
+
+        /**
          * Lance une écriture IDB et la tracke dans _pendingWrites
-         * pour permettre le flush dans beforeunload
+         * pour permettre le drainage au déchargement (flush() / Option B).
          */
         _trackWrite(key, value) {
-            var self = this;
-            var promise = this._setIndexedDB(key, value).catch(function(error) {
-                console.warn('[DB] Erreur écriture async IDB clé "' + key + '":', error);
-            }).finally(function() {
-                self._pendingWrites.delete(promise);
-            });
-            this._pendingWrites.add(promise);
+            this._trackOperation(this._setIndexedDB(key, value), 'écriture', key);
         }
 
         /**
@@ -1148,12 +1238,12 @@
             // 2. Suppression du cache mémoire
             this.memoryCache.delete(key);
 
-            // 3. Suppression asynchrone d'IndexedDB si disponible (en arrière-plan)
+            // 3. Suppression asynchrone d'IndexedDB si disponible, TRACKÉE dans
+            //    _pendingWrites (#353 Option C) → drainée par flush() / Option B au
+            //    déchargement, comme les écritures setSync. Sans ce tracking, une
+            //    suppression émise près d'un hard refresh n'était jamais drainée.
             if (this.ready && this.useIndexedDB) {
-                this._removeIndexedDB(key).catch(error => {
-                    console.warn(`[DB] Erreur suppression async IndexedDB clé "${key}":`, error);
-                    // caches déjà vidés, on continue
-                });
+                this._trackOperation(this._removeIndexedDB(key), 'suppression', key);
             }
         }
     }
