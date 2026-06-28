@@ -351,13 +351,30 @@
                 const store = transaction.objectStore('keyvalue');
                 const request = store.put({ key: key, value: value });
 
-                request.onsuccess = () => {
+                // #353 durabilité : résoudre sur le COMMIT de la transaction
+                // (`oncomplete`), PAS sur `request.onsuccess`. onsuccess = la requête
+                // put a réussi ; oncomplete = la transaction readwrite a COMMIT sur
+                // disque. Sous WebKit / origine file://, le commit est différé après
+                // onsuccess : résoudre trop tôt laissait `await db.set(...)` rendre la
+                // main avant que la donnée soit durable → un hard refresh avant le
+                // commit avortait la transaction → IndexedDB gardait l'ancienne valeur
+                // → revert silencieux (racine #352/#353/#346 + incidents 10-11 juin).
+                transaction.oncomplete = () => {
                     resolve();
                 };
+                transaction.onabort = () => {
+                    console.error(`[DB] Transaction IndexedDB avortée clé "${key}":`, transaction.error);
+                    reject(transaction.error || new Error('IndexedDB transaction abort'));
+                };
+                transaction.onerror = () => {
+                    console.error(`[DB] Erreur transaction IndexedDB clé "${key}":`, transaction.error);
+                    reject(transaction.error || new Error('IndexedDB transaction error'));
+                };
 
+                // Journaliser la clé fautive précise. Ne PAS reject ici : l'échec de la
+                // requête fait avorter la transaction → onabort/onerror tranche.
                 request.onerror = () => {
                     console.error(`[DB] Erreur écriture IndexedDB clé "${key}":`, request.error);
-                    reject(request.error);
                 };
             });
         }
@@ -1286,6 +1303,30 @@
             event.returnValue = '';
         }
     });
+
+    // #353 Option B — drainage proactif des écritures setSync fire-and-forget.
+    // `setSync()` lance ses écritures IDB sans les attendre (_trackWrite) ; le
+    // handler `beforeunload` ci-dessus ne fait qu'AVERTIR (un handler synchrone
+    // ne peut pas attendre une transaction async). On déclenche donc db.flush()
+    // au moment le plus fiable du cycle de vie : `visibilitychange`→hidden — qui
+    // tire sur changement d'onglet, mise en arrière-plan ou navigation, et où la
+    // page reste généralement vivante assez longtemps pour que le commit (rendu
+    // durable par l'Option A : résolution sur `transaction.oncomplete`) aboutisse.
+    // `pagehide` complète pour le déchargement réel / bfcache. flush() est un
+    // no-op immédiat quand _pendingWrites est vide → aucun coût sur un simple
+    // changement d'onglet sans écriture en attente.
+    function drainerEcrituresPendantes() {
+        if (db._pendingWrites.size === 0) return;
+        db.flush().catch(function(error) {
+            console.error('[DB] Échec du drainage des écritures pendantes:', error);
+        });
+    }
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'hidden') {
+            drainerEcrituresPendantes();
+        }
+    });
+    window.addEventListener('pagehide', drainerEcrituresPendantes);
 
     /**
      * Test de résistance stockage — exécutable via console :
