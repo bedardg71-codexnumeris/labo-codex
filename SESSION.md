@@ -1,4 +1,72 @@
 <!-- =====================================================================
+     SESSION — 28 juin 2026 (Claude Code, main 1.23.0). ⮕⮕ LIRE EN PREMIER (supersède les blocs ci-dessous). AUCUN changement de code repo ; gestes sur le codex LIVE + traces.
+
+     ✅ FAIT — 3 GESTES LIVE (codex de Grégoire, hors repo) + 1 CHANTIER DE CONCEPTION CADRÉ.
+     1. PRÉFÉRENCE DÉPISTAGE restaurée : `definirPreference('grilleReferenceDepistage','grille_1772187755149_uq1oiiafa')` (FR-HOLIS).
+        ⚠ La valeur du bloc RELEASE 1.23.0 (`GRILLE1759529438501`) était FR-ALGO = FAUSSE ; FR-HOLIS confirmé contre l'export 22 juin.
+     2. e2026 (trimestre de TEST) SUPPRIMÉ : 23 clés `e2026_*` (db.remove, localStorage+IDB) + 1 entrée `cours` (COURS_1780008321319)
+        + entrée registre `trimestres`. Garde anti-suppression-du-trimestre-actif. Trimestre actif = h2026 (non touché).
+     3. 3 DOUBLONS ORPHELINS d'évals NETTOYÉS, inertie PROUVÉE par recalcul des DEUX moteurs réels (legacy 'meilleurs' top-4 +
+        hybride) : Taly `EVAL_1760797515415` (a2025, moy 76,125 inchangée), Ally `EVAL_1761735149243` (a2025, 85,025),
+        Elisa `EVAL_1775489289020_4_…` (h2026, 77,5575). Orphelin = dans le pool mais HORS top-N → Δ=0. **Samuel LAISSÉ** (divergent,
+        déjà tranché 27 juin). Garde : ne supprimer qu'une éval SANS marque (`remplaceeParId`/`repriseDeId`/`jetonRepriseApplique`).
+        ⚠ 2 oracles intermédiaires faux (faux positifs : champ raté, puis contexte UI non chargé) AVANT la preuve déterministe par recalcul.
+     • CAVEAT d'audit LEVÉ : `_filtrerEvaluationsArtefactsValides` (profil-etudiant-actions.js:251) ne filtre QUE sur `!remplaceeParId`
+       et NE dédoublonne PAS par production ; sélection = `_selectionnerArtefactsLegacy` (note / `getNumeroProduction`) ou `…Hybride`.
+
+     ⮕ NOUVEAU CHANTIER #360 (BACKLOG) — distinguer/prévenir reprises vs doublons. TRACÉ POUR SESSION DÉDIÉE (décision Grégoire).
+        Synthèse d'un workflow adverse (4 approches, 2 rejetées 2 à amender). Orientation : PAS de nouveau champ d'état (le moteur ne
+        lit que `!remplaceeParId`, ~62 sites) → `filter()` posant `remplaceeParId` sur surnuméraires note-égale + garde/sentinelle
+        (divergent→vert = Samuel épargné) + tarir le `splice` de reprise + réutiliser `migration-diagnostic.js`. CAUSE RACINE probable
+        des doublons = non-persistance silencieuse (`db.js:1104` flush IDB avalé ; `memoryCache` volatile) → connecte #352/#353.
+        Mémoire : [[distinguer-reprises-doublons]], [[audit-integrite-reconstruction-2026-06-27]].
+
+     ⮕ RESTE (inchangé) — CHANTIER INTERTRIMESTRE : A (mécanique D-D1, archi zéro écriture) → B (🔴 #352/#353 stockage) → objectif #36.
+        Voir le bloc 27 juin PM ci-dessous. Items d'intégrité restants : voir [[audit-integrite-reconstruction-2026-06-27]].
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 27 juin 2026 PM (Claude Code, main 1.23.0). ⮕⮕ LIRE EN PREMIER (supersède le bloc RELEASE 1.23.0 ci-dessous).
+
+     ✅ FAIT CE BLOC — HYGIÈNE A25 VÉRIFIÉE CONTRE L'ORACLE OMNIVOX, PUIS CLÔTURÉE.
+     • Oracles = exports Omnivox « Sommaire » dans Suivi 101-102-103/ (a2025 gr00001, h2026 gr00002+00008, a2024 gr00002 ;
+       HTML déguisé en .xls, ISO-8859-1). Moteur de note REPRODUIT fidèlement Omnivox : a2025 MAE 0,28 (30 él., legacy 60/40) ;
+       h2026 MAE 0,39 (46 él. notés, mode FINALE ; 3 abandons « AE/X » exclus). → AUCUNE note du codex ne diverge d'Omnivox.
+     • « Doublons d'évals » RECLASSÉS (≠ corruption) : FIDÈLES aux notes Omnivox officielles. PRINCIPE ACTÉ Grégoire :
+       LA NOTE OMNIVOX REMISE À L'ÉLÈVE FAIT FOI.
+       - SAMUEL M. (a2025) : Artefact 4 compté 2× (77,3 + 79) = son 71,1 officiel ; Artefact 5 confirmé NON remis (capture
+         productions) ⇒ pas de réattribution possible. DÉCISION : GARDER le 2×A4, ZÉRO écriture. (Si compté 1×, 5e note = 66,5 → 69,5.)
+       - Taly (a2025) : doublons INERTES (sous le top-4) ; Elisa (h2026) : jumelle 73 = cosmétique.
+       - 4 résidus h2026 (Houle/Philibert/Handfield/Michaud-Lebel) = bruit < 2 pts (composante obligatoires/sélection ≠ formule
+         Omnivox), VÉRIFIÉ : PAS des reprises non nettoyées (reprises correctement appliquées) → ACCEPTÉS, Omnivox prime.
+     • Carte d'audit reclassée en mémoire : [[audit-integrite-reconstruction-2026-06-27]].
+
+     ⮕ GESTES PRÊTS À APPLIQUER EN LIVE (Grégoire ; backup Codex avant ; dry-run d'abord) :
+     1. QUICK WIN dépistage (FR-HOLIS confirmé) :
+        definirPreference('grilleReferenceDepistage','grille_1772187755149_uq1oiiafa')
+        — restaure le réglage effacé par la réparation coursId du 27 juin (FR-HOLIS, pas FR-ALGO = GRILLE1759529438501).
+     3. SUPPRIMER e2026 (trimestre de TEST) : snippet console fourni (l'app n'a PAS de suppression = stub).
+        Périmètre borné : 23 clés e2026_* via db.remove (couvre localStorage + IndexedDB) + 1 entrée `cours` globale
+        (trimestre==='e2026', COURS_1780008321319…) + entrée du registre `trimestres`. Garde anti-suppression-du-trimestre-actif.
+     4. NETTOYAGE COSMÉTIQUE (Taly/Elisa inertes) : EN ATTENTE — vérifier la couverture d'artefacts AVANT (leçon Samuel :
+        ne pas inventer de remise vers un slot vide). ZÉRO enjeu de note.
+     Préférence de travail notée : [[preference-chiffre-avant-decision]] (présenter le chiffre décisif avant toute question).
+
+     ⮕ PROCHAINE SESSION — CHANTIER INTERTRIMESTRE (Brique D #358). ORDRE VOULU PAR GRÉGOIRE : A, ENSUITE B, OBJECTIF #36.
+        A. Trancher la MÉCANIQUE D-D1 (le RÉGIME hybride est déjà choisi ; reste le « comment » : grilles = 1 clé vs pratiques = 2
+           ⇒ l'hybride suppose de CRÉER la séparation, ≠ simple déplacement CLES_GLOBALES→CLES_NAMESPACEES du §3.2) + critère
+           §4-pt7 (migrer TOUS les modèles attribuables, pas que les utilisés) + corriger l'angle mort identifierTemplatesUtilises
+           (lit les productions, PAS les évaluations). RÉFLEXION D'ARCHI, zéro écriture.
+        B. Traiter les 🔴 #352/#353 (quota localStorage saturé + contamination productions H26↔A25 à la cohabitation ;
+           plan « Plan - Archivage et stockage inter-trimestres.md »).
+        OBJECTIF FINAL : #36 (rapport comparatif inter-trimestres / longitudinal).
+        Précondition « décider à froid sur codex assaini » = REMPLIE (hygiène A25 close ci-dessus).
+        ⚠ La MIGRATION RÉELLE des modèles = RISQUE MAXIMAL (seul chantier pouvant bouger une note) → SESSION DÉDIÉE,
+           filet §3.4 obligatoire (backup + dry-run + L0 avant/après MAE Omnivox < 0,5 + break-test --prouver-rougit).
+           Philosophie : cf. CADRAGE-briques-C-D-namespacing.md §3 + [[namespacing-par-trimestre]].
+     ===================================================================== -->
+
+<!-- =====================================================================
      RELEASE 1.23.0 — CONSOLIDATION NAMESPACING-D (Brique D + coursId + groupeNum) — 27 juin 2026 (Claude Code). LIRE EN PREMIER.
      ⮕ Les 3 chantiers parallèles ont été FUSIONNÉS sur main via claude/release-1.23.0-namespacing-D
         (base = origin/main 1.22.0 / #328). Merges propres : seuls les 3 fichiers d'estampille en conflit,
