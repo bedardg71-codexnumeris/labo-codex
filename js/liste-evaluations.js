@@ -62,14 +62,25 @@ function calculerStatutWorkflow(ligne) {
             return 'importe';
         }
 
-        // Signaler qu'un fichier existe sur une autre production
+        // Signaler qu'un fichier existe sur une AUTRE production RÉELLE.
+        // #346-cleanup : on exige que le productionId du fichier corresponde à une
+        // production connue. Un productionId orphelin (legacy/coursId périmé, non
+        // migré) ne déclenche plus le warning « Fichier sous … » — il était
+        // trompeur (il prétendait pointer une autre production alors que la cible
+        // n'existe pas, ce qui retombait sur le libellé générique « autre
+        // production »). Le fichier orphelin reste traité par la branche
+        // « non associé » plus haut.
         const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
+        const productions = obtenirDonneesSelonMode('productions');
+        const productionIdsConnus = new Set(productions.map(p => p.id));
         const fichierAutreProduction = fichiers.find(f =>
-            f.etudiantDA === ligne.da && f.productionId && f.productionId !== ligne.productionId
+            f.etudiantDA === ligne.da
+            && f.productionId
+            && f.productionId !== ligne.productionId
+            && productionIdsConnus.has(f.productionId)
         );
         if (fichierAutreProduction) {
             ligne.fichierAutreProduction = true;
-            const productions = obtenirDonneesSelonMode('productions');
             const prodReelle = productions.find(p => p.id === fichierAutreProduction.productionId);
             ligne.fichierAutreProductionNom = prodReelle
                 ? (prodReelle.titre || prodReelle.nom || '')
