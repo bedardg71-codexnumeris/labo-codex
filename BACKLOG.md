@@ -200,9 +200,9 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - **De plus** : cette note **duplique mot pour mot** l'explication A/C/P de `etudiants.js:genererExplicationCalculIndices()` (page Liste des étudiant·es).
   - **À trancher / coder** : (i, recommandé) convertir la note en contenu injecté par JS et **consolider une seule source** partagée par les deux pages (zéro-dette) ; ou (ii) garder statique avec terme en dur (7744 « production », 7746 « artefact »). Voir §A1 du brief `refonte-textes-suivi-groupe.md`.
 
-- [ ] 📐 🟢 **#311** Nom d'affichage des pratiques incohérent
-  - **Contexte** : la même pratique est nommée de **trois façons** dans l'UI : « PAN-Standards » (`profil-etudiant-actions.js:187, 192` ; `etudiants.js` note), « PAN (Portfolio à nombre limité) » et « SOM (Sommative provisoire) » (`profil-etudiant-sections-affichage.js:4217`).
-  - **À trancher** : choisir **une** forme d'affichage et l'appliquer partout. Lié à la décision déjà prise de **retirer « PAN-Standards »** des notes *explicatives* (la décrire « par portfolio ») — mais les libellés *fonctionnels* qui nomment la pratique active restaient en suspens. Voir §A3 du brief `refonte-textes-profils-individuels.md`.
+- [x] 🟢 **#311** Nom d'affichage des pratiques incohérent — **TRANCHÉ + LIVRÉ 29 juin 2026** (décision Grégoire : forme canonique « **PAN-Standards** » / « Sommative »).
+  - **Livré** : le seul libellé *fonctionnel* divergent (`profil-etudiant-sections-affichage.js:4049`, « PAN (Portfolio à nombre limité) » / « SOM (Sommative provisoire) ») aligné sur la forme déjà dominante (`etudiants.js:381` ; des dizaines d'occurrences « PAN-Standards » ailleurs, déjà conformes). Aucun test ne verrouillait les anciens libellés ; Vitest 1179/1179.
+  - **Préservé** : les notes *explicatives* « par portfolio » (`profil-etudiant-actions.js:187`) restent inchangées (décision antérieure). Brief `refonte-textes-profils-individuels.md` §A3.
 
 - [ ] 📐 🟡 **#313** Deux sélecteurs « Production » dans le pipeline d'import — clarifier / dédupliquer
   - **Contexte** : le pipeline d'import (étape Optimisation) expose **deux** selects « Production ». Le **global** (`travaux-ui.js:1683`, `associerProductionGlobale`) écrit `productionId` sur **tous** les fichiers de la file (boucle `forEach`, `~l.2259`). Le **par fichier** (`l.1774`, `changerProductionPipeline(idx)`) n'agit que sur le fichier sélectionné — raccourci né de l'usage pour **corriger une attribution** (équivalent rapide d'« Éditer »). Même donnée (`f.productionId`), portées différentes.
