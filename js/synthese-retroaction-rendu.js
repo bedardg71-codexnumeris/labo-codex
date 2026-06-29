@@ -48,6 +48,7 @@
 
         const sections = [
             renderHeader(ctx),
+            renderMarqueurRecalcul(ctx),
             renderRuban(ctx),
             renderCriteres(ctx),
             renderNiveauGlobal(ctx),
@@ -225,6 +226,24 @@
             <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 3px;">
                 <div style="font-family: ${FONT_MONO}; font-size: 7.5px; color: ${MUTED}; letter-spacing: 0.3px;">PROGRESSION · TRIMESTRE</div>
                 <div style="display: flex; gap: 2px;">${cases}</div>
+            </div>`;
+    }
+
+    /* =====================================================================
+       1bis. MARQUEUR « VUE RECALCULÉE A POSTERIORI » (#347)
+       Avertit l'enseignant : le bilan (note de portfolio, progression) agrège
+       des artefacts ultérieurs à la remise de celui-ci. La synthèse affichée
+       n'est donc PAS la rétroaction historique reçue par l'élève au moment T.
+       Bandeau neutre, ton sobre — aligné sur les mentions « provisoire » du
+       fichier (inline px/hex, html2canvas ne résout pas var(--…)).
+       ===================================================================== */
+
+    function renderMarqueurRecalcul(ctx) {
+        if (!ctx.feedback || ctx.feedback.recalculee !== true) return '';
+        const message = 'Vue recalculée — peut différer de la rétroaction reçue par l’élève au moment de la remise.';
+        return `
+            <div style="margin-bottom: 10px; padding: 6px 9px; background: ${CARD}; border-left: 3px solid ${MUTED}; border-radius: 2px; font-size: 9px; font-style: italic; color: ${MUTED}; line-height: 1.4;">
+                ${esc(message)}
             </div>`;
     }
 
