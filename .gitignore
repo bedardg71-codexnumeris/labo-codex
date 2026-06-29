@@ -82,8 +82,10 @@ Sauvegarde *Archives*/
 # Artefacts techniques (9 juin 2026) — bruit de working tree
 # ============================================================
 
-# Dépendances installées (jamais versionnées)
-node_modules/
+# Dépendances installées (jamais versionnées).
+# Pas de slash final : matche aussi un symlink nommé node_modules
+# (un « / » final ne couvre que les dossiers, pas un lien déjà suivi).
+node_modules
 
 # Artefacts temporaires d'outils
 *.timestamp-*.mjs
