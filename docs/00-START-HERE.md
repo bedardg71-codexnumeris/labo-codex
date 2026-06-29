@@ -73,8 +73,8 @@ Consulter avant de remettre en cause une decision (framework, stockage, echelles
 
 ## Etat actuel du projet
 
-**Version** : Beta 99.64 (Build 0525-0623)
-**Objectif** : Suivi de l'apprentissage (dépistage SOLO) — Phase 6 nettoyage complet
+**Version** : voir `../version.json` (source unique de verite) — « Beta publique » est un libelle d'affichage.
+**Objectif** : Suivi de l'apprentissage (depistage SOLO). Horizon et etat courants : `../ETAT-PROJET.md`.
 **Priorite** : **Securite + Proprete > Nouvelles fonctionnalites**
 
 **Derniere session** : Voir `../SESSION.md` (racine du projet)
@@ -144,4 +144,4 @@ Gregoire a la memoire contextuelle reelle du projet.
 
 ---
 
-**Derniere mise a jour** : 16 fevrier 2026
+**Derniere mise a jour** : 28 juin 2026 (etat volatil delegue a SESSION.md / version.json / ETAT-PROJET.md)
