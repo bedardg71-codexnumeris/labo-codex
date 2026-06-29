@@ -1,5 +1,15 @@
 # RELAIS #326 — Réactivation du comparateur de pratiques : état vérifié et reste à faire
 
+> ✅ **CLÔTURÉ le 28 juin 2026 (release 1.26.0).** Les 5 constats T1-T5 sont traités,
+> validés sur Mac + iPad, et le comparateur est RÉACTIVÉ (`COMPARATEUR_VISIBLE=true`).
+> Décisions Grégoire : STD non bâtie → `null` (« non constructible ») ; dérivation =
+> créer + atterrir sur l'arbre sans wizard. Investigation : T3 = mismatch de forme
+> d'objet (corrigé à la source) ; le « 0 » STD venait du repli `calculerPerformance`
+> (discriminateur du correctif = famille `obtenirCode()==='STD'`, préserve SOM/SPE/DEN).
+> Observation sur données réelles : 0 note réelle affectée (seules 3 maquettes de test
+> incomplètes basculent en « non constructible »). Commits `dffac3d7` + `bb9ecfc7` ;
+> Vitest 1142/1142, Playwright 68/68. Ce dossier est conservé comme trace historique.
+
 **Date** : 28 juin 2026
 **Nature** : dossier de contexte autoportant, produit en session Cowork par analyse des trackers **et vérification du code** (lecture seule, aucune modification).
 **Destinataire** : la session Claude Code qui reprendra #326 **après** le chantier intertrimestre #358.
