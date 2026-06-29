@@ -28,6 +28,26 @@ function chargerPortfolio(performance) {
     return win;
 }
 
+// Harnais T1 : injecte AUSSI calculerDetailsNoteFinale (le chemin riche STD).
+// `detailsNote` = ce que rend calculerDetailsNoteFinale : `null` (famille non-STD au
+// sens réel) ou un objet (famille STD : { noteFinale, erreur?, recit? }). `code` = la
+// famille rendue par instance.obtenirCode() — c'est le DISCRIMINATEUR du moteur ('STD'
+// → la note portfolio riche est autoritative).
+function chargerPortfolioRiche({ detailsNote, performance, code }) {
+    const fakePratique = {
+        calculerCompletion: () => 0.5,
+        calculerPerformance: () => performance,
+        decrireCalcul: () => null
+    };
+    if (code) fakePratique.obtenirCode = () => code;
+    const win = chargerScript('js/portfolio.js', {
+        obtenirPratiqueParId: () => fakePratique,
+        calculerDetailsNoteFinale: () => detailsNote,
+        db: { getSync: (_c, d) => d, setSync: () => {}, get: async () => null, set: async () => {} }
+    });
+    return win;
+}
+
 describe('#326 — simulerIndices expose noteConstructible', () => {
     it('un 0 calculé est CONSTRUCTIBLE (noteConstructible: true, P: 0)', () => {
         const win = chargerPortfolio(0);
@@ -47,6 +67,57 @@ describe('#326 — simulerIndices expose noteConstructible', () => {
         const win = chargerPortfolio(0.42);
         const r = win.simulerIndices('DA1', 'prat-1');
         expect(r.P).toBe(42);
+        expect(r.noteConstructible).toBe(true);
+    });
+});
+
+describe('#326 T1 — un échec du chemin riche STD n\'est PLUS masqué par le repli', () => {
+    it('STD échoué (noteFinale null + erreur) → NON constructible, MÊME si calculerPerformance rendrait 0', () => {
+        // Le break-test : sur l\'ancien code, le repli calculerPerformance(=>0) masquait
+        // l\'échec → P:0, noteConstructible:true (le « 0 » trompeur du terrain T1).
+        const win = chargerPortfolioRiche({
+            code: 'STD',
+            detailsNote: { noteFinale: null, erreur: 'config portfolio absente', recit: null },
+            performance: 0
+        });
+        const r = win.simulerIndices('DA1', 'std-incomplete');
+        expect(r.noteConstructible).toBe(false);     // cœur T1 : plus de 0 trompeur
+        expect(r.details).toBeTruthy();               // l\'erreur de config reste accessible
+        expect(r.details.erreur).toBe('config portfolio absente');
+    });
+
+    it('STD réussi (noteFinale 75) → constructible ; le repli n\'est PAS consulté', () => {
+        // calculerPerformance rendrait 0,99 mais ne doit pas être utilisé.
+        const win = chargerPortfolioRiche({
+            code: 'STD',
+            detailsNote: { noteFinale: 75, recit: { famille: 'STD' } },
+            performance: 0.99
+        });
+        const r = win.simulerIndices('DA1', 'std-ok');
+        expect(r.P).toBe(75);
+        expect(r.noteConstructible).toBe(true);
+    });
+
+    it('famille NON-STD (calculerDetailsNoteFinale rend null) → repli calculerPerformance LÉGITIME', () => {
+        // SOM/SPE/DEN : la note vient du repli — ne doit pas régresser.
+        const win = chargerPortfolioRiche({ code: 'SOM', detailsNote: null, performance: 0.6 });
+        const r = win.simulerIndices('DA1', 'som-1');
+        expect(r.P).toBe(60);
+        expect(r.noteConstructible).toBe(true);
+    });
+
+    it('famille NON-STD sans donnée (null des deux côtés) → non constructible', () => {
+        const win = chargerPortfolioRiche({ code: 'SOM', detailsNote: null, performance: null });
+        const r = win.simulerIndices('DA1', 'som-vide');
+        expect(r.noteConstructible).toBe(false);
+    });
+
+    it('garde-fou : une STD dont le repli rendrait un nombre mais dont le chemin riche a échoué reste NON constructible (même avec un mock objet-null, le discriminateur est la famille)', () => {
+        // Ce cas verrouille le choix « famille » (vs « objet vs null ») : un objet
+        // {noteFinale:null} pour une NON-STD (pas d\'obtenirCode STD) NE bloque PAS le repli.
+        const win = chargerPortfolioRiche({ code: 'SOM', detailsNote: { noteFinale: null }, performance: 0.55 });
+        const r = win.simulerIndices('DA1', 'som-objet-null');
+        expect(r.P).toBe(55);                 // repli légitime pour une non-STD
         expect(r.noteConstructible).toBe(true);
     });
 });

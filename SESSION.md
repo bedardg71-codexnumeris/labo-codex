@@ -1,12 +1,23 @@
 <!-- =====================================================================
-     📌 SIGNET PERSISTANT — garder EN TÊTE de fichier, au-dessus des blocs de session. N'est PAS un bloc de session : ne pas le superséder ni l'enterrer, le REMONTER au-dessus du prochain bloc à chaque relais. Retirer seulement quand #326 est réactivé et clos.
+     SESSION — 28 juin 2026 NUIT/TARD (#326 RÉACTIVATION DU COMPARATEUR — LIVRÉE + VALIDÉE + RÉACTIVÉE, Claude Code, branche `claude/326-reactivation-comparateur`). ⮕⮕ LIRE EN PREMIER.
+     Les 5 constats terrain #326-T1 à T5 traités + validés Mac/iPad ; comparateur RÉACTIVÉ (`COMPARATEUR_VISIBLE=true`) ; release 1.26.0 ; PR vers main. Le SIGNET #326 est RETIRÉ (chantier clos). Mené en PARALLÈLE de #358 (worktree dédié, base `origin/main` 1.25.0 après merge #358).
 
-     CHANTIER PARALLÈLE (hors #358) — RÉACTIVATION DU COMPARATEUR DE PRATIQUES (#326).
-     ⮕ Dossier de contexte autoportant : `plans de travail/RELAIS-326-reactivation-comparateur.md` (28 juin 2026, vérifié au code).
-     Statut : comparateur CODÉ + complet, MASQUÉ depuis le 22 juin (#345 ; flag `COMPARATEUR_VISIBLE=false`, `js/config.js:106`). Candidat n°1 du paquet « bloqueurs CoP » ; échéance « app stable pour la CoP » mi-août 2026.
-     Reste RÉEL (vérif code 28 juin, ≠ ce que laissent croire les trackers) : T3 (préremplissage du formulaire en édition) + T4 (la dérivation ouvre le wizard complet 9 étapes au lieu de l'« assistant condensé » prévu SPEC §8). DÉJÀ réglés/écartés : T1-affichage (19 juin, `b18b34fb` — rendu + CSV lisent `noteConstructible`), T2 (quasi non-bug — bannière conditionnelle puis gatée par le flag), T5 (trivial — couleur du bandeau).
-     ⚠ Nœud « STD = 0 » = question de MOTEUR, pas d'UI : `simulerIndices` rend un 0 FINI pour PAN-Standards → marqué « constructible ». Décision Grégoire en attente (0 légitime vs rendre `null`) — relais §5.
-     Réactivation = repasser le flag à `true` quand #326-T1 à T5 sont traités, puis valider Mac + iPad (2 modes). ⚠ `SUIVI-BUGS.md` T1/T2 désync (non MAJ depuis les 19/22 juin) — relais §7.
+     ✅ INVESTIGATION (workflow 4 traceurs + vérif adverse, lecture seule) — a redistribué les cartes du relais :
+        • T1-affichage déjà réglé (19 juin) ; le test « notes>0 » est ACTIF (PAS en test.fixme — la prémisse du relais était inexacte).
+        • T3 : cause RÉELLE = mismatch de FORME d'objet (dupliquerPratique/deriverMaquette écrivaient `.config` SEUL, sans les champs top-level que `chargerPratiqueExistante` relit) — pas le wizard, pas une divergence comparateur/sidebar.
+        • T1/STD=0 : le 0 vient du REPLI `calculerPerformance` (portfolio.js) qui masque le `noteFinale=null` du chemin riche ; ⚠ `simulerIndices` alimente AUSSI l'export des résultats finaux (notes réelles) → vérif de périmètre obligatoire avant tout correctif moteur.
+
+     ✅ DÉCISIONS Grégoire : (1) STD non bâtie → rendre `null` = « non constructible » ; (2) dérivation → créer + atterrir sur l'arbre, SANS wizard ; (3) OBSERVER d'abord sur données réelles avant le correctif moteur.
+
+     ✅ OBSERVATION (probe read-only sur données réelles) : les 4 pratiques STD ABOUTIES construisent 100 % des notes → le correctif moteur ne change AUCUNE note réelle exportée. Les seuls « 0 » trompeurs = 3 MAQUETTES DE TEST incomplètes (config portfolio absente) → désormais « non constructible » (correct). ZÉRO « vrai non-constructible » (donnée vide).
+
+     ✅ LIVRÉ (2 commits sur la branche, base 1.25.0) :
+        • `dffac3d7` fix T1-T5 : T5 (bandeau → trio `--alerte-*-attention`, 2 modes) ; §7 (SUIVI-BUGS T1/T2 annotés) ; T3 (copie en forme CANONIQUE, `.config` exécutable conservé ; sentinelle 4 cas break-testée) ; T4 (deriverMaquette n'ouvre plus le wizard — notification + atterrissage arbre ; test retourné + break-testé) ; T1 (simulerIndices : discriminateur = FAMILLE `obtenirCode()==='STD'`, le repli ne masque plus l'échec STD ; préserve SOM/SPE/DEN ; sentinelle 12 cas break-testée).
+        • `bb9ecfc7` réactivation : `COMPARATEUR_VISIBLE=true` + bump `?v=` (config/pratiques/portfolio=2026062802, styles.css=20260628a) + release 1.26.0.
+        Tests : **Vitest 1142/1142, Playwright 68/68** (specs comparateur, jadis « rouge préexistant », VERTES). Validation Mac/iPad faite par Grégoire (superposition temporaire dans le dépôt principal, RESTAURÉE après).
+
+     ⮕ RESTE : merger la PR #326 vers main (alors le comparateur devient visible dans l'app quotidienne) ; supprimer les 3 maquettes de test (données — snippet fourni). ⚠ `.git/index.lock` PÉRIMÉ dans le dépôt principal (aucun process actif ; préexistait à ce travail) → `rm` manuel s'il bloque un commit. Dette pré-existante (chip ouvert) : `tests/node_modules` = symlink git cassé (pointe un worktree supprimé).
+     Mémoire : [[namespacing-par-trimestre]], [[verifier-avant-ecrire-donnees-reelles]].
      ===================================================================== -->
 
 <!-- =====================================================================

@@ -1,10 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
 
-// #326 R1 — dérivation d'une maquette (SPEC §8 ; renommage « variante d'essai » →
-// « maquette »). deriverMaquette(sourceId) : nom auto « <souche> · maquette N »,
-// duplication AVEC estMaquette:true + inspireDe.sourceId (via forgerInspireDe),
-// puis ouverture de l'assistant (editerPratique → ouvrirWizardV2(true, newId)).
+// #326 R1 — dérivation d'une maquette (renommage « variante d'essai » → « maquette »).
+// deriverMaquette(sourceId) : nom auto « <souche> · maquette N », duplication AVEC
+// estMaquette:true + inspireDe.sourceId (via forgerInspireDe). #326 T4 (terrain 21 juin) :
+// la dérivation N'OUVRE PLUS le wizard — elle crée la maquette puis l'appelant atterrit
+// sur l'arbre d'exploration (édition fine à la demande). Plus de « maquette fantôme »
+// (il n'y a plus de wizard à annuler).
 //
 // GARDE-FOU R1 « max 1 dérivé » : on ne dérive JAMAIS une maquette (profondeur 1).
 //
@@ -16,6 +18,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 let store;
 let wizardOuvert;
 let compteurId;
+let notifs;
 
 const db = {
     getSync: (k, d) => (k in store ? store[k] : (d !== undefined ? d : null)),
@@ -55,8 +58,14 @@ const construireConfigComplete = (p) => {
     };
 };
 
+const notifications = {
+    succes: (t, m) => { notifs.push(['succes', t, m]); },
+    info: (t, m) => { notifs.push(['info', t, m]); },
+    erreur: (t, m) => { notifs.push(['erreur', t, m]); }
+};
+
 const win = chargerScript('js/pratiques.js', {
-    db, cle, PratiqueManager, BibliothequeUI, construireConfigComplete,
+    db, cle, PratiqueManager, BibliothequeUI, construireConfigComplete, notifications,
     genererIdUnique: (p) => p + (++compteurId),
     ouvrirWizardV2: (mode, id) => { wizardOuvert = { mode, id }; }
 });
@@ -77,6 +86,7 @@ beforeEach(() => {
     store = { 'h2026_pratiquesConfigurables': [soucheWizard()] };
     wizardOuvert = null;
     compteurId = 0;
+    notifs = [];
 });
 
 describe('#326 R1 · deriverMaquette (source au format wizard — régression terrain)', () => {
@@ -107,9 +117,16 @@ describe('#326 R1 · deriverMaquette (source au format wizard — régression te
         expect(v2.nom).toBe('Standards Bédard · maquette 2');
     });
 
-    it('ouvre l\'assistant sur la nouvelle maquette (editerPratique → wizard édition)', async () => {
+    it('#326 T4 : N\'OUVRE PAS le wizard — crée la maquette puis atterrit sur l\'arbre', async () => {
         const id = await deriver('p_souche');
-        expect(wizardOuvert).toEqual({ mode: true, id });
+        // T4 : plus de wizard parasite à dérouler/annuler.
+        expect(wizardOuvert).toBeNull();
+        // La maquette est bien créée (l'appelant — dispatcher — rafraîchit l'arbre).
+        const maquette = store['h2026_pratiquesConfigurables'].find(p => p.id === id);
+        expect(maquette).toBeTruthy();
+        expect(maquette.estMaquette).toBe(true);
+        // Feedback explicite « Maquette créée » (l'arbre est le lieu d'atterrissage).
+        expect(notifs.some(n => n[0] === 'succes')).toBe(true);
     });
 
     it('GARDE-FOU « max 1 dérivé » : dériver une maquette → null, aucune création', async () => {

@@ -739,18 +739,34 @@ function _simulerIndicesInterne(da, pratiqueId) {
 
     // P = note finale de session de la pratique simulée (chemin portfolio paramétré,
     // Lot 2). Fallback sur calculerPerformance pour les familles sans note portfolio.
+    // #326 T1 : seule l'STD a une note portfolio « riche » (calculerDetailsNoteFinale)
+    // comme source AUTORITATIVE ; SOM/SPE/DEN tirent leur note de calculerPerformance.
+    // Le discriminateur est donc la FAMILLE de la pratique, pas la forme du retour. Si
+    // une pratique STD ne peut PAS bâtir sa note (config absente, pondérations manquantes,
+    // aucun artefact retenu), elle est NON CONSTRUCTIBLE — on n'emploie pas le repli, qui
+    // masquerait l'échec par un 0 trompeur (décision Grégoire, 28 juin).
+    const estStd = !!(pratique && typeof pratique.obtenirCode === 'function' && pratique.obtenirCode() === 'STD');
     let P_decimal = null;
     let noteFinale = null;
     let details = null;
+    let cheminRicheStdAEchoue = false;
     if (typeof calculerDetailsNoteFinale === 'function') {
         const d = calculerDetailsNoteFinale(da, pratiqueId);
         if (d && d.noteFinale !== null && d.noteFinale !== undefined) {
             noteFinale = d.noteFinale;
             P_decimal = d.noteFinale / 100;
             details = d;
+        } else if (d && estStd) {
+            // L'STD a tourné mais n'a pas pu bâtir la note. On garde `details` (il porte
+            // d.erreur de config + d.recit) et on N'utilise PAS le repli → non constructible.
+            details = d;
+            cheminRicheStdAEchoue = true;
         }
     }
-    if (P_decimal === null && typeof pratique.calculerPerformance === 'function') {
+    // Repli calculerPerformance : LÉGITIME pour les familles SANS note portfolio riche
+    // (SOM/SPE/DEN → calculerDetailsNoteFinale rend `null`). Écarté quand l'STD a
+    // explicitement échoué, sinon il re-masquerait le « non constructible ».
+    if (P_decimal === null && !cheminRicheStdAEchoue && typeof pratique.calculerPerformance === 'function') {
         P_decimal = pratique.calculerPerformance(da);
     }
 
@@ -759,9 +775,10 @@ function _simulerIndicesInterne(da, pratiqueId) {
     const P = P_decimal !== null && P_decimal !== undefined ? Math.round(P_decimal * 100) : 0;
 
     // #326 (sous-item) — distinguer un « 0 » LÉGITIME (le moteur a calculé 0)
-    // d'une note NON CONSTRUCTIBLE (P_decimal est resté null : ni portfolio
-    // paramétré ni calculerPerformance n'ont pu produire de valeur → P forcé à 0
-    // ci-dessus, trompeur). Champ ADDITIF, lecture seule : les consommateurs
+    // d'une note NON CONSTRUCTIBLE (P_decimal est resté null : soit le chemin riche STD
+    // a échoué — config absente, pondérations manquantes, aucun artefact — et on a
+    // écarté le repli (T1) ; soit calculerPerformance n'a pu produire de valeur → P
+    // forcé à 0 ci-dessus, trompeur). Champ ADDITIF, lecture seule : les consommateurs
     // historiques (golden masters, fiche profil) lisent C/P/noteFinale/details/
     // recit inchangés ; le banc s'en sert pour afficher « — non constructible ».
     const noteConstructible = (typeof P_decimal === 'number' && isFinite(P_decimal));
