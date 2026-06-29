@@ -18,8 +18,8 @@ Ce document te guidera vers :
 
 ## Etat actuel
 
-- **Version** : Bêta publique 1.0.0 (versionnage sémantique depuis le lancement public du 3 juin 2026)
-- **Objectif** : Suivi de l'apprentissage (dépistage SOLO) — Phase 6 nettoyage complet
+- **Version** : versionnage sémantique depuis le lancement public (3 juin 2026). Numéro courant = `version.json` (source unique de vérité) ; « Bêta publique » est un libellé d'affichage.
+- **Objectif** : Suivi de l'apprentissage (dépistage SOLO). Horizon et avancement courants : `ETAT-PROJET.md`.
 - **Session en cours** : Voir `SESSION.md`
 - **Backlog** : Voir `BACKLOG.md` (taches a faire)
 - **Etat du projet** : Voir `ETAT-PROJET.md` (situation vis-a-vis des objectifs de stabilite/perennite/qualite et des plans d'audit)
@@ -360,8 +360,8 @@ Labo Codex est utilise sur MacBook (M3) et iPad Air (M1). Cibles :
 
 Le changelog est affiche aux utilisateurs dans la section « Nouvelles » de l'accueil. Regles :
 
-- **1 entree par version majeure** (Beta 95, 96, 97, 98) — consolider les sous-versions
-- **Pas de dates** — seulement le numero de beta (`Beta 98`, pas `Beta 98 (20 fevrier)`)
+- **1 entree par version mineure** (`1.24`, `1.25`, `1.26`…) — consolider les patches
+- **Pas de dates** — seulement le numero SemVer (`1.25`, pas `1.25 (20 fevrier)`)
 - **Max 6-8 items par entree** — orientes fonctionnalite utilisateur
 - **Retirer** : corrections CSS, refactos internes, details d'implementation technique
 - **Garder** : fonctionnalites nouvelles, corrections de bugs visibles par l'utilisateur
@@ -369,8 +369,8 @@ Le changelog est affiche aux utilisateurs dans la section « Nouvelles » de l'a
 
 Structure d'une entree :
 ```javascript
-{ version: 'Beta XX', couleur: 'vert', titre: 'Titre court', items: ['...'] }
+{ version: '1.26', couleur: 'vert', titre: 'Titre court', items: ['...'] }
 ```
 Couleurs : vert (features), bleu (ameliorations), orange (corrections).
 
-**Derniere mise a jour** : 14 mars 2026
+**Derniere mise a jour** : 28 juin 2026 (schema SemVer — cf. `js/changelog-data.js`)
