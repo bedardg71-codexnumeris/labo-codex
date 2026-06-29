@@ -7786,18 +7786,10 @@
                             <div id="liste-etudiants-prioritaire" class="liste-etudiants-prioritaire"></div>
                         </div>
 
-                        <!-- Carte Note -->
-                        <div id="note-indicateurs" class="carte-info-toggle carte-info-note" style="display: none;">
-                            <strong>Note :</strong> Les indices A-C-P mesurent l'engagement des étudiant·es dans l'apprentissage.
-                            <br><br>
-                            <strong>Assiduité (A)</strong> : Proportion des heures de présence parmi les heures de cours <strong>effectivement données jusqu'à maintenant</strong>. Calculé uniquement sur les séances passées, pas sur le total prévu pour la session.
-                            <br><br>
-                            <strong>Complétion (C)</strong> : Proportion de travaux remis parmi les travaux <strong>effectivement réalisés jusqu'à maintenant</strong>. <span id="note-completion-realise">Une production devient «réalisée» dès qu'une première évaluation existe pour celle-ci.</span>
-                            <br><br>
-                            <strong>Performance (P)</strong> : Calculé selon la pratique de notation en vigueur (Sommative : moyenne pondérée provisoire de toutes les évaluations, ou par portfolio : moyenne des N meilleurs artefacts selon l'échelle IDME).
-                            <br><br>
-                            <em class="u-texte-09" style="color: var(--gris-moyen)">💡 Les mini-courbes de Gauss montrent la distribution du groupe. La ligne blanche = moyenne (μ), les pointillés = ±1 écart-type (σ).</em>
-                        </div>
+                        <!-- Carte Note — contenu injecté par tableau-bord-apercu.js (#310) :
+                             source unique genererExplicationCalculIndices() (etudiants.js),
+                             terme production/artefact dynamique (CSP : pas d'appel JS en HTML statique). -->
+                        <div id="note-indicateurs" class="carte-info-toggle carte-info-note" style="display: none;"></div>
 
                         <!-- Le contenu des indicateurs A-C-P est généré dynamiquement par tableau-bord-apercu.js -->
                         <!-- Barres de distribution avec nuages de points et courbes de Gauss pour A, C, P -->

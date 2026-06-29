@@ -361,19 +361,33 @@ function obtenirCouleurPerformance(performance) {
 // calculerCorrelationPearson → déplacé dans indices.js (#206)
 
 /**
- * Génère le contenu de la carte explicative sur le calcul des indices A-C-P
- * Affiche les détails selon la pratique active (PAN-Standards ou Sommative)
+ * Génère le contenu de la carte explicative sur le calcul des indices A-C-P.
+ * Source UNIQUE partagée par les deux pages qui exposent cette note (#310) :
+ * - Liste des étudiant·es (#note-calcul-indices-liste, ce module)
+ * - Suivi du groupe (#note-indicateurs, tableau-bord-apercu.js)
+ * Le terme production/artefact suit la pratique active via obtenirTermeProduction()
+ * — jamais codé en dur — pour rester cohérent avec les notes dynamiques des
+ * autres pages (CSP `script-src 'self'` : impossible depuis du HTML statique).
  *
+ * @param {string} complementHtml - HTML optionnel ajouté en pied (ex. la note
+ *   propre à la page Suivi du groupe sur les mini-courbes de Gauss). Microcopy
+ *   interne déjà sûr — aucune donnée utilisateur n'est injectée ici.
  * RETOUR:
  * - HTML formaté expliquant comment A, C et P sont calculés
  */
-function genererExplicationCalculIndices() {
+function genererExplicationCalculIndices(complementHtml = '') {
     // Récupérer la configuration de la pratique active
     const config = db.getSync(cle('modalitesEvaluation'), null) || {};
     // #328 L2-b1 : type dérivé de la SSOT (groupesCours), plus du miroir.
     const pratique = ((typeof obtenirTypePratiqueActive === 'function')
         ? obtenirTypePratiqueActive() : null) || (window.PRATIQUE_DEFAUT || 'standards');
     const isPAN = pratique === 'standards';
+
+    // Terme production/artefact dynamique (suit la pratique active) — #310.
+    const termeSing = (typeof obtenirTermeProduction === 'function')
+        ? obtenirTermeProduction('singulier') : 'artefact';
+    const termePlur = (typeof obtenirTermeProduction === 'function')
+        ? obtenirTermeProduction('pluriel') : 'artefacts';
 
     // Récupérer les paramètres de configuration
     const nbArtefacts = config.nombreArtefacts || 7;
@@ -394,8 +408,8 @@ function genererExplicationCalculIndices() {
     html += '<strong class="u-texte-bleu">C (Complétion)</strong> : ';
     html += 'Proportion de travaux remis parmi les travaux <strong>effectivement réalisés jusqu\'à maintenant</strong>. ';
     html += '<br>Formule : <code>C = (travaux remis / travaux réalisés) × 100</code>';
-    html += '<br><em class="etud-texte-gris-petit">→ Un artefact devient "réalisé" dès qu\'une première évaluation existe pour celui-ci</em>';
-    html += '<br><em class="etud-texte-gris-petit">→ Exemple : Si 8 artefacts réalisés sur 10 prévus, un étudiant ayant remis 8/8 a C = 100% (pas 80%)</em>';
+    html += '<br><em class="etud-texte-gris-petit">→ Un ' + termeSing + ' devient "réalisé" dès qu\'une première évaluation existe pour celui-ci</em>';
+    html += '<br><em class="etud-texte-gris-petit">→ Exemple : Si 8 ' + termePlur + ' réalisés sur 10 prévus, un étudiant ayant remis 8/8 a C = 100% (pas 80%)</em>';
     html += '<br><em class="etud-texte-gris-petit">→ Indépendant de la pratique de notation (mobilisation observable)</em>';
 
     html += '<br><br>';
@@ -405,9 +419,9 @@ function genererExplicationCalculIndices() {
     html += '<strong>Calculé selon la pratique de notation en vigueur</strong>. ';
 
     if (isPAN) {
-        html += '<br>→ <strong>PAN-Standards</strong> : Moyenne des <strong>' + nbArtefacts + ' meilleurs artefacts</strong> selon l\'échelle IDME. ';
+        html += '<br>→ <strong>PAN-Standards</strong> : Moyenne des <strong>' + nbArtefacts + ' meilleurs ' + termePlur + '</strong> selon l\'échelle IDME. ';
         html += '<br><em class="etud-texte-gris-petit">&nbsp;&nbsp;&nbsp;Les niveaux IDME (Incomplet, en Développement, Maîtrisé, Étendu) sont convertis en pourcentages.</em>';
-        html += '<br><em class="etud-texte-gris-petit">&nbsp;&nbsp;&nbsp;Seuls les ' + nbArtefacts + ' meilleurs artefacts comptent dans le calcul de P</em>';
+        html += '<br><em class="etud-texte-gris-petit">&nbsp;&nbsp;&nbsp;Seuls les ' + nbArtefacts + ' meilleurs ' + termePlur + ' comptent dans le calcul de P</em>';
     } else {
         html += '<br>→ <strong>Sommative</strong> : Moyenne pondérée de <strong>toutes les évaluations</strong>. ';
         html += '<br><em class="etud-texte-gris-petit">&nbsp;&nbsp;&nbsp;Formule : <code>P = Σ(note × pondération) / Σ(pondérations)</code></em>';
@@ -422,8 +436,15 @@ function genererExplicationCalculIndices() {
     html += '<br><br>';
     html += '<em class="etud-texte-gris-moyen">💡 La pratique de notation et ses paramètres peuvent être modifiés dans <strong>Conception › Pratiques de notation</strong></em>';
 
+    // Complément propre à la page appelante (ex. mention Gauss du Suivi du groupe).
+    if (complementHtml) {
+        html += '<br><br>' + complementHtml;
+    }
+
     return html;
 }
+// #310 : source unique exposée pour la page Suivi du groupe (tableau-bord-apercu.js).
+window.genererExplicationCalculIndices = genererExplicationCalculIndices;
 
 /**
  * Met à jour le contenu de la carte explicative sur le calcul des indices

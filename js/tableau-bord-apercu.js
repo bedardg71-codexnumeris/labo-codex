@@ -839,21 +839,24 @@ function genererBadgeSourceDonnees() {
  * Appelée par main.js au chargement
  */
 /**
- * Met à jour le terme de la note de Complétion selon la pratique de l'utilisateur·trice :
- * « artefact » dès qu'au moins un portfolio est utilisé, « production » sinon.
- * Le terme n'est jamais codé en dur — il reflète les productions réelles (type 'portfolio').
+ * Injecte la note explicative A-C-P du Suivi du groupe (#note-indicateurs) — #310.
+ * Source UNIQUE partagée avec la Liste des étudiant·es :
+ * genererExplicationCalculIndices() (etudiants.js). Le terme production/artefact y
+ * suit la pratique active (impossible depuis le HTML statique : CSP `script-src 'self'`).
+ * Le complément propre à cette page (mini-courbes de Gauss) est passé en argument.
  */
-function mettreAJourTermeCompletion() {
-    const el = document.getElementById('note-completion-realise');
+function mettreAJourNoteIndicateurs() {
+    const el = document.getElementById('note-indicateurs');
     if (!el) return;
-    let utiliseArtefacts = false;
-    try {
-        const prods = db.getSync(cle('productions'), []) || [];
-        utiliseArtefacts = Array.isArray(prods) && prods.some(p => p && p.type === 'portfolio');
-    } catch (e) { /* fallback : terme général « production » */ }
-    el.textContent = utiliseArtefacts
-        ? 'Un artefact devient «réalisé» dès qu\'une première évaluation existe pour celui-ci.'
-        : 'Une production devient «réalisée» dès qu\'une première évaluation existe pour celle-ci.';
+    if (typeof genererExplicationCalculIndices !== 'function') {
+        console.warn('⚠️ genererExplicationCalculIndices indisponible — note A-C-P non injectée');
+        return;
+    }
+    // Microcopy interne (pas de donnée utilisateur) propre à la page Suivi du groupe.
+    const complementGauss = '<em class="u-texte-09" style="color: var(--gris-moyen)">'
+        + '💡 Les mini-courbes de Gauss montrent la distribution du groupe. '
+        + 'La ligne blanche = moyenne (μ), les pointillés = ±1 écart-type (σ).</em>';
+    el.innerHTML = genererExplicationCalculIndices(complementGauss);
 }
 
 function initialiserModuleTableauBordApercu() {
@@ -864,8 +867,7 @@ function initialiserModuleTableauBordApercu() {
         chargerTableauBordApercu();
     }
 
-    // Terme de la note de Complétion (artefact en portfolio, production sinon) — jamais codé en dur
-    mettreAJourTermeCompletion();
+    // Note #note-indicateurs : injectée par chargerTableauBordApercu() à chaque rendu (#310).
 
     // Événements du panneau de suivi d'étudiants (délégation pour survivre aux rebuilds innerHTML)
     document.addEventListener('click', function(ev) {
@@ -1028,6 +1030,10 @@ function initialiserModuleTableauBordApercu() {
    =============================== */
 
 function chargerTableauBordApercu() {
+
+    // Note explicative A-C-P (#note-indicateurs) — réinjectée à chaque rendu pour
+    // que le terme production/artefact suive la pratique active courante (#310).
+    mettreAJourNoteIndicateurs();
 
     // 🆕 FIX #220 (3 mars 2026) : Régénérer les séances complètes du groupe-cours actif
     // AVANT de calculer l'assiduité. Les seancesCompletes en cache peuvent être stale
