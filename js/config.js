@@ -87,23 +87,21 @@ const configurationsOnglets = {
 };
 
 /* ===============================
-   🚧 FLAG D'AFFICHAGE — COMPARATEUR DE PRATIQUES (#345)
-   Décision Grégoire (21 juin 2026) : retirer le comparateur
-   (« Outil en développement ») de la surface exposée à la CoP de l'AQPC
-   le temps que les écarts terrain #326-T1 à T5 (Retours des testeurs/
-   SUIVI-BUGS.md) soient corrigés.
+   🚧 FLAG D'AFFICHAGE — COMPARATEUR DE PRATIQUES (#345 / #326)
+   Masqué le 21 juin 2026 (#345) le temps que les écarts terrain #326-T1 à T5
+   (Retours des testeurs/SUIVI-BUGS.md) soient traités.
+   RÉACTIVÉ le 28 juin 2026 : T1-T5 livrés et validés sur Mac + iPad (2 modes).
+   Le flag reste en place — repasser à `false` re-masque les entrées visibles
+   (le code et la page restent toujours présents, masquage réversible).
 
-   MASQUAGE réversible — le code et la page restent en place ; seules les
-   ENTRÉES VISIBLES sont masquées. RÉACTIVATION : repasser ce flag à `true`
-   QUAND #326-T1 à T5 sont traités (pas un masquage flou « au cas où »).
-
-   Points masqués quand false :
+   Entrées gérées par le flag (masquées quand false) :
    - entrée nav « Labo › Exploration des pratiques » (navigation.js,
      afficherSousNavigation) ;
    - lien « Ouvrir le comparateur du Labo » au récap du wizard
-     (wizard-pratique-v2.js).
+     (wizard-pratique-v2.js) ;
+   - bannière « Gérer mes maquettes » (pratiques-gestion.js).
    =============================== */
-const COMPARATEUR_VISIBLE = false;
+const COMPARATEUR_VISIBLE = true;
 
 /* ===============================
    🔄 VARIABLES GLOBALES D'ÉTAT

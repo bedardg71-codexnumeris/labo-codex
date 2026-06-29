@@ -19651,12 +19651,12 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 .comparateur-note-dev {
     margin: 10px 0 16px;
     padding: 10px 14px;
-    border-left: 3px solid var(--bleu-clair, #5dade2);
+    border-left: 3px solid var(--alerte-bordure-attention);
     border-radius: 0 6px 6px 0;
-    background: var(--surface-element, rgba(106, 172, 184, 0.08));
+    background: var(--alerte-fond-attention);
     font-size: 0.86rem;
     line-height: 1.45;
-    color: var(--texte-secondaire, #aac3cf);
+    color: var(--alerte-texte-attention);
 }
 .comparateur-note-dev strong { color: var(--texte-principal, #d0e0e4); }
 .comparateur-placeholder {
