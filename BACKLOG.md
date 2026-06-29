@@ -195,7 +195,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - **Restes** : fallbacks « Artefact inconnu » (`sections-affichage.js` ~508/517/4069 — cas d'erreur de titre individuel, non routés) ; libellés PAN/SOM (`4219`, dépend de **#311**/§6) ; « Aucune production obligatoire configurée » (conservé, brief E) ; **D2** « Aucun travail soumis ». Autres pages consommant le helper (Liste des étudiant·es : déjà routée ; `liste-evaluations.js` : `pluriel()` déjà en place).
   - **Audit méthode** : la relecture systématique des call-sites après routage a rattrapé 5 adjectifs (« meilleurs/tous/derniers ») laissés au masculin par des routages antérieurs — toujours relire les mots d'accord autour d'un terme déjà routé.
 
-- [ ] 📐 🟢 **#310** Note A/C/P statique de Suivi du groupe — convertir en JS-injecté + dédupliquer
+- [x] 📐 🟢 **#310** Note A/C/P statique de Suivi du groupe — convertir en JS-injecté + dédupliquer — ✅ LIVRÉ 29 juin 2026
   - **Contexte** : la carte-note `#note-indicateurs` (`index.html` ~7740-7746) est du **HTML statique** : elle ne peut pas appeler `obtenirTermeProduction()` (CSP `script-src 'self'`) donc le terme production/artefact y reste figé, incohérent avec les notes dynamiques des autres pages.
   - **De plus** : cette note **duplique mot pour mot** l'explication A/C/P de `etudiants.js:genererExplicationCalculIndices()` (page Liste des étudiant·es).
   - **À trancher / coder** : (i, recommandé) convertir la note en contenu injecté par JS et **consolider une seule source** partagée par les deux pages (zéro-dette) ; ou (ii) garder statique avec terme en dur (7744 « production », 7746 « artefact »). Voir §A1 du brief `refonte-textes-suivi-groupe.md`.
@@ -246,7 +246,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - Aujourd'hui : seulement les courts descriptifs de palette. Insuffisant pour rétroaction pédagogique significative.
   - À explorer : phrases complètes par critère/niveau, pistes d'amélioration, forces observées, ou génération assistée depuis le contexte production. Décision conceptuelle à prendre avant code.
 
-- [ ] 🟢 **#240** Tampon visuel pour jetons (Délai, Reprise, Reprise ciblée) sur les travaux annotés
+- [x] 🟢 **#240** Tampon visuel pour jetons (Délai, Reprise, Reprise ciblée) sur les travaux annotés — ✅ LIVRÉ 29 juin 2026
   - Cliquer sur le mot du jeton → curseur tampon → appose « JETON DE DÉLAI/REPRISE/REPRISE CIBLÉE » en rouge majuscule.
   - Une fois tamponné, checkbox du jeton se coche auto. Même mécanisme que les tampons existants. PDF montre clairement le jeton appliqué.
 
@@ -280,7 +280,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - Cosmétique : dates « Dernière mise à jour » de plusieurs skills.
   - Origine : balayage de fin de séance du 28 juin (les **docs d'entrée** CLAUDE.md/00-START-HERE/README ont été dé-hardcodés ce soir, PR #75 ; les **skills** restent à auditer à froid).
 
-- [ ] 🟢 **#347** Rétroaction d'un artefact recalculée « live » avec les résultats des artefacts ultérieurs → ≠ version historique reçue par l'élève — créé 25 juin 2026 (constat Grégoire, consultation A25)
+- [x] 🟢 **#347** Rétroaction d'un artefact recalculée « live » avec les résultats des artefacts ultérieurs → ≠ version historique reçue par l'élève — créé 25 juin 2026 (constat Grégoire, consultation A25) — ✅ LIVRÉ 29 juin 2026
   - **Constat** : la rétroaction générée/affichée pour l'**artefact 1** tient compte de **tous les résultats ultérieurs** (artefacts suivants, meilleurs comme obligatoires). Elle se recalcule à mesure que le portfolio se remplit et **ne correspond pas** à la rétroaction historique que l'élève a reçue au début du trimestre.
   - **Enjeu pédagogique** : une rétroaction est un acte **daté** (ce qui a été dit à l'élève au moment T). La recalculer rétroactivement avec des données postérieures fausse la trace pédagogique et la lecture longitudinale — l'élève n'a jamais vu cette version « rétro-corrigée ».
   - **Piste à cadrer** : distinguer une rétroaction **historique** (figée au moment de la remise/sauvegarde, snapshot) d'une vue **synthèse courante** (recalculée). Faut-il figer la rétroaction à la sauvegarde, ou au moins **marquer explicitement** quand une vue est recalculée a posteriori ?
@@ -307,7 +307,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
     2. **Fait observé sur l'éval A25** : la grille sélectionnée est « Global-5 (FR-ALGO) **H26** » (pondérations affichées : Structure 20 %, Plausibilité 15 %, Nuance 25 %, Français écrit 20 %) et le sélecteur « Échelle de performance » est **VIDE**. *Inférence à vérifier* : cohérent avec la subtilité §8 du diagnostic — A25 a été archivé dans une version antérieure au 28 jan 2026, donc pas de copies `a2025_*` des templates ; la conversion algorithmique FR échoue plausiblement faute d'échelle/seuils résolus, pas à cause du verrou archive.
     3. **À faire (demande Grégoire)** : reconstruire les grilles d'évaluation A25 telles qu'à l'époque — notamment **Français écrit à 30 %** (vs 20 % sur la grille H26 affichée) — puis les **réassocier** aux évaluations A25. Préalable probable à toute concordance avec l'officiel de décembre (les pondérations de critères changent les notes par production, donc tout l'amont du portfolio).
 
-- [ ] 🟢 **#304** Nettoyage terminologique interne « heures-contact » → « heure d'enseignement »
+- [x] 🟢 **#304** Nettoyage terminologique interne « heures-contact » → « heure d'enseignement » — ✅ LIVRÉ 29 juin 2026
   - **✅ Libellés UI faits (mini-guide « balises du cours », beta 99.79, commit `8f23964`)** : « Heures-contact attendues » → « Heures d'enseignement » + « Total d'heures en classe » → « Total d'heures d'enseignement » (`index.html`). Reste : identifiants techniques `v2-heuresContact`, fonction `proposerHeuresContactDepuisPonderation`, commentaires « heures-contact » de `js/trimestre-v2-cours.js`, doc `docs/ANALYSE-conformite-RREC-heures-contact.md`.
   - Justification : l'OQLF (Grand dictionnaire terminologique) **déconseille** « heure-contact » (calque de *contact hour*) au profit de « heure d'enseignement ».
   - Lié au chantier A conformité RREC + à l'ambiguïté **période (50-55 min) vs heure** à trancher (compter exigence et réalisé dans la même unité, idéalement en périodes). Réf. `Plan Accompagnement/SPEC_mini-guide_cours_balises.md` §2 et §5.
@@ -395,7 +395,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - 2-3 cartes complètes couvrant différentes disciplines. Utile pour la cohorte CoP (Rencontre 5 « Aligner sa pratique », janvier 2027).
   - Période cible : été 2026 (préparation pendant la phase expérimentateurs juin-août).
 
-- [ ] 🟢 **#351** Renommer les 20 élèves fictifs du pack démo (figures historiques/culturelles) — préparé en Cowork 26 juin 2026
+- [x] 🟢 **#351** Renommer les 20 élèves fictifs du pack démo (figures historiques/culturelles) — préparé en Cowork 26 juin 2026 — ✅ LIVRÉ 29 juin 2026
   - Remplacer les noms québécois fictifs par 20 figures (Achebe, de Beauvoir, Berlioz, Césaire, Comăneci, Curie, Einstein, Freud, van Gogh, Goodall, Kahlo, Kurosawa, Kusama, Lovelace, Mandela, Messi, Morrison, Parks, Sangaré, Shankar). Identifiants `id`/`da` (DEMO001-020) **inchangés** — seules les chaînes d'affichage changent.
   - **Périmètre** : un seul fichier de code, `js/pack-demo-20.js` (3 surfaces dénormalisées : `prenom`/`nom`, `etudiantNom` ×202, prénom incrusté dans les rétroactions ×~198) ; + docs hors archive. Aucun test à éditer (fixtures synthétiques / DA).
   - **Appariement positionnel** (décision Grégoire, 26 juin 2026) — inverse le genre sur 10 profils → vérifier les accords genrés des rétroactions.
