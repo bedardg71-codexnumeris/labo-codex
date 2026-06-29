@@ -1037,21 +1037,40 @@ async function dupliquerPratique(id, options = {}) {
         const configResolue = (typeof construireConfigComplete === 'function')
             ? construireConfigComplete(original)
             : (original.config || original.configuration || {});
+        const clone = (v) => JSON.parse(JSON.stringify(v));
+        // FIX #326 T3 (terrain 21 juin) : la copie naît en forme CANONIQUE — les mêmes
+        // champs TOP-LEVEL qu'une pratique du wizard (type / configuration / calcul_note /
+        // seuils / nbEvaluationsPrevues / variante / reglesSpeciales). Avant, la copie ne
+        // portait que `.config` (config résolue) → `chargerPratiqueExistante` lit ces
+        // champs au top-level et ne les trouvait pas → l'assistant rouvrait une maquette
+        // ou une copie avec les champs obligatoires VIDES (« Nombre d'évaluations
+        // prévues »…). Source unique = `configResolue` (construireConfigComplete, qui
+        // normalise les deux formes d'origine). `.config` est conservé : c'est la config
+        // EXÉCUTABLE consommée par la validation de sauvegarde et par le comparateur/moteur.
         const copie = {
             id: genererIdUnique('pratique_'),
             nom: nouveauNom,
             auteur: BibliothequeUI.obtenirAuteurActif(),
+            etablissement: original.etablissement || configResolue.etablissement || '',
+            description: original.description,
+            discipline: original.discipline || configResolue.discipline || '',
             isDemo: false,
             inspireDe: BibliothequeUI.forgerInspireDe(original),
-            description: original.description,
-            config: JSON.parse(JSON.stringify(configResolue)) // Deep copy de la config résolue
+            type: configResolue.type,
+            variante: configResolue.variante || null,
+            calcul_note: configResolue.calcul_note,
+            configuration: clone(configResolue.configuration || {}),
+            config: clone(configResolue) // Deep copy de la config résolue (exécutable)
         };
+        if (configResolue.seuils) copie.seuils = clone(configResolue.seuils);
+        if (configResolue.nbEvaluationsPrevues) copie.nbEvaluationsPrevues = configResolue.nbEvaluationsPrevues;
+        if (configResolue.reglesSpeciales) copie.reglesSpeciales = clone(configResolue.reglesSpeciales);
 
         // `estMaquette` (axe D / #326, SPEC §3.2 ; R1 : « essai » → « maquette ») :
         // maquette vivant dans l'Exploration des pratiques, masquée de la
         // sidebar/bibliothèque propre (filtre posé en D-2). OPT-IN : la duplication
         // ordinaire (bouton « Dupliquer ») produit une pratique ABOUTIE (flag omis)
-        // — pas de régression latente ; seule la dérivation (assistant condensé, D-3)
+        // — pas de régression latente ; seule la dérivation (deriverMaquette, D-3)
         // passera { estMaquette: true }.
         if (options.estMaquette === true) copie.estMaquette = true;
 
@@ -1066,8 +1085,8 @@ async function dupliquerPratique(id, options = {}) {
         // Recharger
         await afficherListePratiques();
 
-        // `silencieux` (#326 D-3) : la dérivation d'une variante d'essai enchaîne
-        // sur l'assistant et rafraîchit l'arbre elle-même → pas d'alerte ici.
+        // `silencieux` (#326 D-3, T4) : la dérivation affiche sa propre notification
+        // « Maquette créée » et l'appelant rafraîchit l'arbre → pas d'alerte ici.
         if (!options.silencieux) {
             alert(`✅ Pratique dupliquée avec succès !\n\n"${nouveauNom}" a été ajoutée à tes pratiques.`);
         }
@@ -1080,11 +1099,12 @@ async function dupliquerPratique(id, options = {}) {
 }
 
 /**
- * Dérive une MAQUETTE depuis une pratique source (#326 axe D, D-3, SPEC §8 ; R1).
+ * Dérive une MAQUETTE depuis une pratique source (#326 axe D, D-3 ; R1).
  * Geste raccourci : nom auto « <souche> · maquette N », duplication AVEC
  * `estMaquette:true` (dupliquerPratique pose déjà `auteur` + `inspireDe.sourceId`
- * via forgerInspireDe), puis ouverture directe de l'assistant sur les paramètres
- * (editerPratique). La maquette vit dans le Labo › Exploration (filtrée de la
+ * via forgerInspireDe). #326 T4 : on N'OUVRE PLUS le wizard — on crée et on ATTERRIT
+ * sur l'arbre d'exploration (l'appelant rafraîchit l'arbre). L'édition fine est à la
+ * demande depuis l'arbre. La maquette vit dans le Labo › Exploration (filtrée de la
  * sidebar/bibliothèque, D-2).
  *
  * GARDE-FOU « max 1 dérivé » (R1, décision Grégoire 16 juin) : on ne dérive JAMAIS
@@ -1121,8 +1141,15 @@ async function deriverMaquette(sourceId) {
         }
         return null;
     }
-    if (typeof editerPratique === 'function') {
-        await editerPratique(nouvelId);   // ouvre l'assistant sur les paramètres (D-3)
+    // #326 T4 (terrain 21 juin) : la dérivation NE déroule PLUS le wizard complet.
+    // On CRÉE la maquette puis on ATTERRIT sur l'arbre d'exploration (l'appelant —
+    // dispatcher du comparateur — enchaîne `_rafraichirArbre`, qui affiche le nouveau
+    // nœud). L'édition fine reste accessible À LA DEMANDE depuis l'arbre (bouton
+    // « Éditer » → editerPratique → wizard, désormais prérempli grâce à T3). Bénéfice :
+    // plus de « maquette fantôme » créée quand l'utilisateur Annulait le wizard parasite
+    // — il n'y a plus de wizard à annuler.
+    if (typeof notifications !== 'undefined' && notifications.succes) {
+        notifications.succes('Maquette créée', '« ' + nom + ' » est dans l\'arbre. Tu peux l\'éditer ou la comparer.');
     }
     return nouvelId;
 }
