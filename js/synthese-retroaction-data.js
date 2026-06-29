@@ -71,8 +71,52 @@
             stamps:    construireStamps(stats),
             errors:    construireErrors(stats),
             errorsTotal: stats ? stats.totalErreursFr : 0,
-            bilan:     construireBilan(evaluation, grille, echelle, stats)
+            bilan:     construireBilan(evaluation, grille, echelle, stats),
+            // Drapeau « vue recalculée a posteriori » (#347). Vrai quand des
+            // artefacts ultérieurs sont entrés dans le portfolio agrégé depuis
+            // la remise de CET artefact — auquel cas la synthèse ne reflète plus
+            // la rétroaction historique reçue par l'élève au moment de la remise.
+            recalculee: detecterRecalculPosteriori(evaluation)
         };
+    }
+
+    /**
+     * Détecte si la synthèse de cet artefact est RECALCULÉE A POSTERIORI.
+     *
+     * Le bilan (note de portfolio via `calculerDetailsNoteFinale`, points
+     * récurrents, progression) agrège TOUTES les évaluations de l'élève. Si au
+     * moins une évaluation de l'élève est postérieure (par `dateEvaluation`) à
+     * l'évaluation courante, des données ultérieures à la remise de cet artefact
+     * sont entrées dans le calcul : la vue n'est plus la rétroaction historique
+     * reçue par l'élève au moment T.
+     *
+     * Critère retenu : `dateEvaluation` — c'est l'horodatage de l'acte de
+     * correction (= la rétroaction reçue), déjà utilisé pour ordonner
+     * l'historique (cf. lireHistorique). Comparaison stricte (>) pour ne marquer
+     * que les évaluations réellement postérieures. Les évaluations remplacées
+     * (`remplaceeParId`) ou sans note (`noteFinale == null`) sont ignorées : elles
+     * n'entrent pas dans le portfolio agrégé.
+     *
+     * @param {Object} evaluation - Évaluation courante (l'artefact affiché)
+     * @returns {boolean}
+     */
+    function detecterRecalculPosteriori(evaluation) {
+        const da = evaluation && evaluation.etudiantDA;
+        if (!da) return false;
+        const dateCourante = evaluation.dateEvaluation
+            ? new Date(evaluation.dateEvaluation).getTime()
+            : NaN;
+        if (isNaN(dateCourante)) return false;
+
+        const evaluations = lireDonneesNamespace('evaluationsSauvegardees');
+        return evaluations.some(e => {
+            if (e.id === evaluation.id) return false;
+            if (e.etudiantDA !== da) return false;
+            if (e.remplaceeParId) return false;
+            if (e.noteFinale == null) return false;
+            const t = e.dateEvaluation ? new Date(e.dateEvaluation).getTime() : NaN;
+            return !isNaN(t) && t > dateCourante;
+        });
     }
 
     /* =====================================================================
