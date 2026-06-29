@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260526p"> <!-- Lot J extension : bug violet + anonymisation cyan -->
+    <link rel="stylesheet" href="styles.css?v=20260628a"> <!-- #326 (28 juin) : bandeau comparateur orange (T5) ; Lot J extension : bug violet + anonymisation cyan -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -14622,7 +14622,7 @@
     <script src="libs/jspdf-autotable.min.js"></script>
 
     <!-- PRIORITÉ 1: Fondations -->
-    <script src="js/config.js?v=2026062201"></script> <!-- #345 (22 juin) : flag COMPARATEUR_VISIBLE ; Refonte nav SP5-fix : sous-onglet id court 'vue' (au lieu de 'calendrier') pour éviter la redondance calendrier-calendrier -->
+    <script src="js/config.js?v=2026062802"></script> <!-- #326 (28 juin) : COMPARATEUR_VISIBLE=true (réactivation) ; #345 (22 juin) : flag COMPARATEUR_VISIBLE ; Refonte nav SP5-fix : sous-onglet id court 'vue' (au lieu de 'calendrier') pour éviter la redondance calendrier-calendrier -->
     <script src="js/navigation.js?v=2026062201"></script> <!-- #345 (22 juin) : filtre comparateur sous-nav Labo ; Refonte nav SP5 : tables migrées calendrier-* + nav-calendrier-* -->
     <script src="js/preferences.js?v=2026061101"></script> <!-- Beta 99.16 : API centralisée préférences + migration V3 (doit précéder modes.js) -->
     <script src="js/modes.js?v=2026062701"></script> <!-- Refonte nav SP5 : commentaire et clé calendrier-trimestre -->
@@ -14724,11 +14724,11 @@
     <script src="js/modal-doublon.js?v=2026010601"></script>
 
     <!-- Interface de gestion des pratiques configurables -->
-    <script src="js/pratiques.js?v=2026061113"></script> <!-- Beta 99.38 b0508-1425 : nettoyage wizard V1 fantôme (-1772 l.) -->
+    <script src="js/pratiques.js?v=2026062802"></script> <!-- #326 (28 juin) : T3 copie en forme canonique + T4 dérivation = arbre sans wizard ; Beta 99.38 b0508-1425 : nettoyage wizard V1 fantôme (-1772 l.) -->
     <script src="js/wizard-pratique-v2.js?v=2026062201"></script> <!-- #345 (22 juin) : lien « Ouvrir le comparateur » du récap gaté -->
     <script src="js/objectifs.js?v=2026061101"></script> <!-- Beta 99.39 b0509-0719 : #262 Phase 2 + precisionDate:minute -->
 
-    <script src="js/portfolio.js?v=2026061101"></script>
+    <script src="js/portfolio.js?v=2026062802"></script> <!-- #326 (28 juin) : T1 simulerIndices — note STD non bâtie = « non constructible » (plus de 0 trompeur du repli) -->
     <script src="js/saisie-presences.js?v=2026061101"></script> <!-- Refonte nav SP5 : naviguerVers calendrier -->
     <script src="js/indices.js?v=2026061103"></script>
 
