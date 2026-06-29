@@ -4,7 +4,7 @@
 
 [![Code — AGPL v3](https://img.shields.io/badge/Code-AGPL%20v3-red.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Contenu — CC BY-NC-SA 4.0](https://img.shields.io/badge/Contenu-CC%20BY--NC--SA%204.0-blue.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
-[![Version](https://img.shields.io/badge/Beta-99.61-green.svg)]()
+[![Version](https://img.shields.io/badge/version-voir%20version.json-green.svg)](version.json)
 [![Statut](https://img.shields.io/badge/Statut-En%20d%C3%A9veloppement-yellow.svg)]()
 
 ---
@@ -294,7 +294,7 @@ Labo Codex — laboratoire de codexnumeris.org
 - **Modules JavaScript** : 158 fichiers
 - **Commits** : ~2 886
 - **Période de développement** : septembre 2024 à aujourd'hui
-- **Version courante** : Beta 99.61 (voir [`version.json`](version.json))
+- **Version courante** : voir [`version.json`](version.json) (source unique de verite)
 
 ---
 
