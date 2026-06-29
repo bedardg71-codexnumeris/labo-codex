@@ -92,15 +92,23 @@
         // namespacée pour isoler chaque trimestre (modèle C). Le partage
         // inter-utilisateurs passera par la Voûte (future), pas par cette clé.
         // Migration au boot dans main.js (migration_pratiques_namespacees_done).
-        'pratiquesConfigurables'
+        'pratiquesConfigurables',
+        // 🆕 #358 (Option A — 28 juin 2026) : grilles/échelles de TRAVAIL namespacées
+        // par trimestre (chaque session porte ses propres modèles ; import inter-
+        // trimestre = COPIE). DÉPLACÉES depuis CLES_GLOBALES (l'« interrupteur »).
+        // Peuplement au boot par migrerModelesVersNamespace() (C1,
+        // migration_modeles_namespacees_done) AVANT tout lecteur, par USAGE.
+        // ⚠ Le catalogue de GABARITS (bibliothequeGrilles/Echelles) reste une
+        // collection DISJOINTE, intouchée. Le retrait de la clé globale héritée est
+        // la TOUTE DERNIÈRE étape (live, sur backup) — voir PLAN-358 §0bis.
+        'grillesTemplates',
+        'echellesTemplates'
     ];
 
     // Clés globales (partagées entre trimestres)
     // Ces clés ne sont JAMAIS préfixées (sauf si archivées)
     const CLES_GLOBALES = [
         'trimestres',
-        'grillesTemplates',
-        'echellesTemplates',
         'modeApplication',
         'etatsAccordeonsV2',
         'cours',       // Bibliothèque de cours partagée (clé canonique, remplace listeCours)
@@ -590,10 +598,19 @@
             || db.getSync(`${trimestreId}_productionsPedagogiques`, [])
             || [];
 
-        // Collecter les IDs des grilles utilisées
+        // 🆕 C2 (#358) : les ÉVALUATIONS sont la source grade-bearing des modèles
+        // réellement utilisés. Le `production.grilleId` est souvent périmé (résidu de
+        // contamination inter-trimestre) ; s'en tenir aux productions amputerait le
+        // snapshot d'archivage et la migration namespacée des modèles vraiment notés.
+        const evaluations = db.getSync(`${trimestreId}_evaluationsSauvegardees`, []) || [];
+
+        // Collecter les IDs des grilles utilisées (productions + évaluations)
         const grilleIds = new Set();
         productions.forEach(p => {
             if (p.grilleId) grilleIds.add(p.grilleId);
+        });
+        evaluations.forEach(e => {
+            if (e && e.grilleId) grilleIds.add(e.grilleId);
         });
 
         // Collecter les IDs des échelles utilisées (via les grilles ou directement)
@@ -612,6 +629,18 @@
         const pratiqueIds = new Set();
         productions.forEach(p => {
             if (p.pratiqueId) pratiqueIds.add(p.pratiqueId);
+        });
+
+        // 🆕 C2 (#358) : échelles et pratiques référencées DIRECTEMENT par les évals.
+        // Dans une évaluation, un `echelleId` préfixé « pratique- » désigne une pratique
+        // (cf. evaluation-chargement.js) ; sinon c'est une échelle classique.
+        evaluations.forEach(e => {
+            if (!e || typeof e.echelleId !== 'string' || !e.echelleId) return;
+            if (e.echelleId.startsWith('pratique-')) {
+                pratiqueIds.add(e.echelleId.slice('pratique-'.length));
+            } else {
+                echelleIds.add(e.echelleId);
+            }
         });
 
         // Récupérer aussi les pratiques ACTIVES des groupes-cours du trimestre
@@ -646,9 +675,13 @@
             // ✅ AJOUT (28 jan 2026) : Identifier les templates utilisés
             const { grilleIds, echelleIds, pratiqueIds } = identifierTemplatesUtilises(trimestreId);
 
-            // Récupérer tous les templates globaux
-            const toutesGrilles = db.getSync('grillesTemplates', []);
-            const toutesEchelles = db.getSync('echellesTemplates', []);
+            // Récupérer les modèles de travail du trimestre concerné.
+            // #358 Option A : la source des grilles/échelles est la copie namespacée
+            // `${trimestreId}_grillesTemplates` (peuplée par C1 au boot et maintenue par
+            // les writers `cle()`), plus le global hérité. Le filtrage par ids utilisés
+            // + l'écriture vers `${trimestreId}_*` (plus bas) restent inchangés.
+            const toutesGrilles = db.getSync(`${trimestreId}_grillesTemplates`, []);
+            const toutesEchelles = db.getSync(`${trimestreId}_echellesTemplates`, []);
             const toutesPratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
 
             // Filtrer pour ne garder que les utilisés
@@ -708,6 +741,163 @@
     }
 
     /**
+     * 🆕 C1 (#358) — Peuple la copie namespacée `<trim>_<nomCle>` d'UN trimestre
+     * à partir des modèles réellement utilisés. ADDITIF (ne retire jamais),
+     * IDEMPOTENT (n'écrit que s'il y a un ajout), SOURCE EXACTE (copie byte-à-byte
+     * depuis la copie locale existante puis la clé globale).
+     *
+     * @param {string} trimestreId
+     * @param {string} nomCle - 'grillesTemplates' ou 'echellesTemplates'
+     * @param {Set<string>} idsUtilises - ids des modèles utilisés (cf. identifierTemplatesUtilises)
+     * @returns {{total:number, ajoutes:number, introuvables:string[]}}
+     */
+    function _peuplerCopieModeleNamespace(trimestreId, nomCle, idsUtilises) {
+        const copieExistante = db.getSync(`${trimestreId}_${nomCle}`, []) || [];
+        const globalModeles = db.getSync(nomCle, []) || [];
+        const parId = new Map(copieExistante.map(m => [m.id, m]));
+        const ajoutes = [];
+        const introuvables = [];
+        idsUtilises.forEach(id => {
+            if (!id || parId.has(id)) return;            // déjà présent dans la copie locale
+            const modele = globalModeles.find(m => m && m.id === id);
+            if (modele) { parId.set(id, modele); ajoutes.push(id); }
+            else introuvables.push(id);                  // ni copie ni global → référence déjà cassée (pré-existante)
+        });
+        if (ajoutes.length > 0) {
+            db.setSync(`${trimestreId}_${nomCle}`, [...parId.values()]);
+        }
+        return { total: parId.size, ajoutes: ajoutes.length, introuvables };
+    }
+
+    /**
+     * 🆕 C1 (#358) — Socle de la migration Option A des modèles. Peuple les copies
+     * namespacées `<trim>_grillesTemplates` / `<trim>_echellesTemplates` de CHAQUE
+     * trimestre vivant à partir des modèles RÉELLEMENT utilisés (productions +
+     * évaluations grade-bearing, via `identifierTemplatesUtilises` corrigé par C2).
+     *
+     * Une fois ces copies complètes, basculer `cle()` vers le régime namespacé
+     * préserve chaque note (invariant vérifié par
+     * `tests/unit/sentinelle-integrite-migration-modeles-358.test.js`).
+     *
+     * NON-INTRUSIF : ne touche NI au catalogue `bibliothequeGrilles/Echelles`, NI à
+     * la clé globale, NI au registre `CLES_GLOBALES`/`CLES_NAMESPACEES`. Le
+     * déplacement du registre (l'interrupteur), le re-pointage des lecteurs bruts et
+     * le retrait du global forment un BLOC COORDONNÉ ultérieur — cette fonction n'est
+     * pas encore appelée au boot (câblage avec ce bloc, flag idempotent en dernier).
+     *
+     * @returns {{trimestres: Object}} rapport par trimestre/famille
+     */
+    function migrerModelesVersNamespace() {
+        const rapport = { trimestres: {} };
+        const trimestres = obtenirTrimestres().filter(t => t && t.id);
+        trimestres.forEach(t => {
+            const { grilleIds, echelleIds } = identifierTemplatesUtilises(t.id);
+            const grilles = _peuplerCopieModeleNamespace(t.id, 'grillesTemplates', grilleIds);
+            const echelles = _peuplerCopieModeleNamespace(t.id, 'echellesTemplates', echelleIds);
+            rapport.trimestres[t.id] = { grilles, echelles };
+            if (grilles.introuvables.length || echelles.introuvables.length) {
+                console.warn(`[Migration modèles #358] ${t.id} : références sans définition globale ` +
+                    `(pré-existantes, ignorées) — grilles ${JSON.stringify(grilles.introuvables)} · ` +
+                    `échelles ${JSON.stringify(echelles.introuvables)}`);
+            }
+        });
+        return rapport;
+    }
+
+    /**
+     * 🆕 G4 (#358) — Vidage de la clé GLOBALE héritée `grillesTemplates`/`echellesTemplates`.
+     * TOUTE DERNIÈRE étape de la migration Option A : appelée au boot APRÈS
+     * migrerModelesVersNamespace (même bloc flaggé `migration_modeles_namespacees_done`),
+     * une fois les copies `<trim>_*` peuplées et tous les lecteurs re-pointés vers
+     * cle()/le pool. Le global n'a plus de lecteur → zéro-dette, on le retire.
+     *
+     * PRÉSERVATION DES DONNÉES (contrainte non négociable — cf. CLAUDE.md) : on ne
+     * retire du global QUE les modèles REDONDANTS, ceux dont l'id est déjà capturé
+     * dans une copie de travail `<trim>_<nomCle>` (union pool). Un modèle global
+     * orphelin — présent NULLE PART ailleurs, sans trimestre propriétaire — est
+     * CONSERVÉ dans le global et journalisé, jamais perdu silencieusement. Cas
+     * nominal (tout capturé) : la clé globale est entièrement retirée.
+     *
+     * IDEMPOTENT : un global déjà vide/absent → no-op. NON-INTRUSIF pour le catalogue
+     * de gabarits (`bibliothequeGrilles/Echelles`) — collection DISJOINTE, intouchée.
+     *
+     * @returns {{grilles:Object, echelles:Object}} rapport {retires, conserves, orphelins[]} par famille
+     */
+    function viderModelesGlobalHerite() {
+        function viderUneFamille(nomCle) {
+            const globalModeles = db.getSync(nomCle, null);
+            if (!Array.isArray(globalModeles) || globalModeles.length === 0) {
+                // Déjà vide ou jamais peuplé : retirer la clé si elle traîne, sinon no-op.
+                if (globalModeles !== null && globalModeles !== undefined) db.removeSync(nomCle);
+                return { retires: 0, conserves: 0, orphelins: [] };
+            }
+            // Ids capturés dans la copie de travail d'un trimestre quelconque (pool).
+            const captures = new Set(
+                _toutesModelesTravail(nomCle).map(m => m && m.id).filter(Boolean)
+            );
+            const orphelins = globalModeles.filter(m => m && m.id && !captures.has(m.id));
+            const retires = globalModeles.length - orphelins.length;
+            if (orphelins.length === 0) {
+                db.removeSync(nomCle);
+            } else {
+                // security-ok: filtre d'une collection DÉJÀ stockée (conserve les orphelins non capturés), aucune donnée externe.
+                db.setSync(nomCle, orphelins);
+                console.warn(`[Migration modèles #358] ${nomCle} : ${retires} modèle(s) redondant(s) retiré(s) du global ; ` +
+                    `${orphelins.length} orphelin(s) NON capturé(s) CONSERVÉ(s) (sans trimestre propriétaire) : ` +
+                    JSON.stringify(orphelins.map(m => m.id)));
+            }
+            return { retires, conserves: orphelins.length, orphelins: orphelins.map(m => m.id) };
+        }
+        return {
+            grilles: viderUneFamille('grillesTemplates'),
+            echelles: viderUneFamille('echellesTemplates')
+        };
+    }
+
+    /**
+     * 🆕 #358 (Option A) — Union DÉDUPLIQUÉE des modèles de TRAVAIL (`<trim>_<nomCle>`)
+     * de TOUS les trimestres vivants. Source des sites POOL_INTER_TRIMESTRE (inventaires
+     * « toutes mes grilles », compteurs, lookup-par-id de suppression). N'inclut PAS le
+     * catalogue de GABARITS (`bibliothequeGrilles/Echelles`) — collection DISJOINTE.
+     * Dédup par id, PREMIER GAGNANT (l'ordre de obtenirTrimestres() départage les rares
+     * collisions d'id à contenu divergent — cf. PLAN-358 §1, D-D6).
+     * @param {'grillesTemplates'|'echellesTemplates'} nomCle
+     * @returns {Array<Object>}
+     */
+    function _toutesModelesTravail(nomCle) {
+        const parId = new Map();
+        obtenirTrimestres().forEach(t => {
+            if (!t || !t.id) return;
+            const liste = db.getSync(`${t.id}_${nomCle}`, []) || [];
+            liste.forEach(m => { if (m && m.id && !parId.has(m.id)) parId.set(m.id, m); });
+        });
+        return [...parId.values()];
+    }
+    function toutesGrillesTravail() { return _toutesModelesTravail('grillesTemplates'); }
+    function toutesEchellesTravail() { return _toutesModelesTravail('echellesTemplates'); }
+
+    /**
+     * 🆕 #358 (Option A) — Résout UN modèle (grille/échelle) PAR ID en régime namespacé :
+     * 1) copie du trimestre ACTIF (cle()), 2) REPLI sur l'union inter-trimestre. Un id
+     * grade-bearing doit rester résoluble même s'il a été créé dans un autre trimestre
+     * (ex. grille de dépistage h2026 consultée depuis a2025). NE consulte PAS le catalogue
+     * de gabarits. Remplace les lectures `db.getSync('grillesTemplates'/'echellesTemplates')`
+     * suivies d'un `.find(id)` aux sites de résolution-par-id (consolidation, pratique-
+     * registre, pan-standards). Retourne l'objet modèle ou null.
+     * @param {'grille'|'echelle'} type
+     * @param {string} id
+     * @returns {Object|null}
+     */
+    function resoudreModeleParId(type, id) {
+        if (!id) return null;
+        const nomCle = type === 'echelle' ? 'echellesTemplates' : 'grillesTemplates';
+        const actif = db.getSync(cle(nomCle), []) || [];
+        const trouve = actif.find(m => m && m.id === id);
+        if (trouve) return trouve;
+        return _toutesModelesTravail(nomCle).find(m => m && m.id === id) || null;
+    }
+
+    /**
      * Désarchive un trimestre (permet modifications à nouveau)
      *
      * @param {string} id - ID du trimestre à désarchiver
@@ -734,15 +924,15 @@
 
         db.setSync('trimestres', trimestres);
 
-        // 🆕 FIX #359 (26 juin 2026) : purger les copies de modèles namespacées posées à
-        // l'archivage (creerSnapshotRessources). Une fois le flag `archive` retiré, cle()
-        // ne les lit plus (il retombe sur les clés globales partagées) → elles deviennent
-        // des ORPHELINS MORTS : place perdue (cf. #353 quota saturé) et, pire, source de
-        // cartouches périmées si le trimestre est ré-archivé (la copie de cartouche n'est
-        // réécrite que si length>0). On PURGE au désarchivage plutôt que de modifier cle()
-        // (décision D-D5) : désarchiver = redevenir un trimestre éditable normal, qui
-        // partage le catalogue global — la copie figée n'a plus de rôle. Le snapshot de
-        // sauvegarde `snapshot_<id>_*` (référence historique) est CONSERVÉ.
+        // 🆕 FIX #359 (26 juin 2026) : purger les copies namespacées posées à
+        // l'archivage (creerSnapshotRessources) qui REDEVIENNENT orphelines une fois
+        // `archive` retiré — celles dont cle() retombe sur une clé GLOBALE partagée
+        // (cartouches ; et, avant Option A, grilles/échelles). Place perdue (cf. #353
+        // quota saturé) et, pire, source de cartouches périmées si ré-archivage.
+        // ⚠ RÉCONCILIATION #358 (Option A) : grilles/échelles ne sont PLUS purgées —
+        // namespacées, `<id>_grillesTemplates` est la donnée VIVANTE du trimestre
+        // désarchivé. purgerCopiesModelesArchive dérive la condition du registre
+        // (CLES_GLOBALES). Le snapshot de sauvegarde `snapshot_<id>_*` est CONSERVÉ.
         const copiesPurgees = purgerCopiesModelesArchive(id);
 
         return { success: true, trimestre: trimestre, copiesPurgees: copiesPurgees };
@@ -775,10 +965,21 @@
             }
         };
 
-        // Copies de templates globaux figées à l'archivage (CLES_TEMPLATES_ARCHIVES).
-        CLES_TEMPLATES_ARCHIVES.forEach(nomCle => retirer(`${id}_${nomCle}`));
+        // 🆕 #358 (réconciliation #359) : ne purger que les copies qui REDEVIENNENT
+        // ORPHELINES au désarchivage — celles dont cle() retombe sur la clé GLOBALE
+        // partagée une fois `archive` retiré. Après Option A, grillesTemplates/
+        // echellesTemplates ont rejoint CLES_NAMESPACEES : `<id>_grillesTemplates` est
+        // désormais la donnée VIVANTE du trimestre (lue par cle() hors archive) → NE
+        // PLUS la purger (sinon perte de notes). pratiquesConfigurables était déjà
+        // namespacé (même invariant). La condition est dérivée du REGISTRE
+        // (CLES_GLOBALES) et non d'un flag : elle s'auto-ajuste au déplacement du registre.
+        CLES_TEMPLATES_ARCHIVES
+            .filter(nomCle => CLES_GLOBALES.includes(nomCle))
+            .forEach(nomCle => retirer(`${id}_${nomCle}`));
 
         // Copies de cartouches, une par grille utilisée (mêmes grilleIds qu'à l'archivage).
+        // Les cartouches restent GLOBALES (`cartouches_<grilleId>`) → leur copie
+        // namespacée redevient bien orpheline au désarchivage : on la purge toujours.
         const { grilleIds } = identifierTemplatesUtilises(id);
         grilleIds.forEach(grilleId => retirer(`${id}_cartouches_${grilleId}`));
 
@@ -1307,8 +1508,10 @@
             // Les snapshots sont stockés comme { hebdomadaires: [...], interventions: [...], metadata: {...} }
             // On exporte les snapshots hebdomadaires
             const snapshots = snapshotsRaw.hebdomadaires || [];
-            const grilles = db.getSync('grillesTemplates', []);
-            const echelles = db.getSync('echellesTemplates', []);
+            // #358 Option A : modèles de travail du trimestre ACTIF (cohérent avec les
+            // étudiants/productions/évaluations namespacés collectés juste au-dessus).
+            const grilles = db.getSync(cle('grillesTemplates'), []);
+            const echelles = db.getSync(cle('echellesTemplates'), []);
             const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
             const indicesCP = db.getSync(cle('indicesCP'), {});
             const cours = db.getSync('cours', []);
@@ -2016,6 +2219,24 @@
     window.archiverTrimestre = archiverTrimestre;
     window.desarchiverTrimestre = desarchiverTrimestre;
     window.estTrimestreArchive = estTrimestreArchive;
+    // Exposé pour la sentinelle C2 (#358) : SSOT d'usage des modèles par trimestre
+    // (réconcilie productions + évaluations grade-bearing).
+    window.identifierTemplatesUtilises = identifierTemplatesUtilises;
+    // Exposé pour la sentinelle SPECIAL_ARCHIVE (#358) : le snapshot d'archivage lit la
+    // source des grilles/échelles dans la copie namespacée `${trim}_*`, pas le global.
+    window.creerSnapshotRessources = creerSnapshotRessources;
+    // 🆕 C1 (#358) : socle de migration (peuplement des copies namespacées). Exposé
+    // pour la sentinelle d'intégrité + le câblage boot (migration_modeles_namespacees_done).
+    window.migrerModelesVersNamespace = migrerModelesVersNamespace;
+    // 🆕 G4 (#358) : vidage de la clé globale héritée (dernière étape, au boot après C1).
+    // Exposé pour le câblage boot + la sentinelle (préservation des orphelins non capturés).
+    window.viderModelesGlobalHerite = viderModelesGlobalHerite;
+    // 🆕 #358 (Option A) : helpers de résolution namespacée des modèles.
+    // toutesGrillesTravail/toutesEchellesTravail = union inter-trimestre (sites POOL) ;
+    // resoudreModeleParId = namespace actif puis repli pool (sites résolution-par-id).
+    window.toutesGrillesTravail = toutesGrillesTravail;
+    window.toutesEchellesTravail = toutesEchellesTravail;
+    window.resoudreModeleParId = resoudreModeleParId;
     window.exporterTrimestreArchive = exporterTrimestreArchive;
     window.calculerStatistiquesFinales = calculerStatistiquesFinales;
     window.mettreAJourBandeauArchive = mettreAJourBandeauArchive;

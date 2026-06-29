@@ -46,7 +46,7 @@
 
         let grilles = [];
         try {
-            grilles = db.getSync('grillesTemplates') || [];
+            grilles = db.getSync(cle('grillesTemplates')) || [];
         } catch (e) {
             console.error('[preferences-v2] Erreur lecture grilles:', e);
         }

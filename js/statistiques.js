@@ -139,11 +139,11 @@ function chargerMaterielConfigure() {
     setStatText('stat-productions', productions.length);
     
     // Grilles de critères
-    const grilles = db.getSync('grillesTemplates', []);
+    const grilles = db.getSync(cle('grillesTemplates'), []);
     setStatText('stat-grilles', grilles.length);
     
     // Échelles de performance
-    const echellesTemplates = db.getSync('echellesTemplates', []);
+    const echellesTemplates = db.getSync(cle('echellesTemplates'), []);
     setStatText('stat-echelles', echellesTemplates.length);
     
     // Cartouches de rétroaction - compter TOUTES les cartouches

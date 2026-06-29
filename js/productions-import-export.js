@@ -389,7 +389,7 @@ window.confirmerImportProductions = async function(donnees) {
         }
 
         // PHASE 3.3: Détecter les dépendances manquantes (grilles référencées)
-        const grillesExistantes = await db.get('grillesTemplates') || [];
+        const grillesExistantes = await db.get(cle('grillesTemplates')) || [];
         const idsGrillesExistants = new Set(grillesExistantes.map(g => g.id));
         const grillesManquantes = [];
 

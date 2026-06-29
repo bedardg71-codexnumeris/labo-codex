@@ -246,8 +246,10 @@ function construireConfigComplete(pratiqueData) {
         // Chercher par ID dans configuration ou config
         const echelleId = pratiqueData.configuration?.echelleId || config.echelleId;
         if (echelleId) {
-            const echelles = db.getSync('echellesTemplates', []);
-            const echelleRef = echelles.find(e => e.id === echelleId);
+            // 🆕 #358 (Option A) : résolution namespacée par id (actif puis repli pool).
+            const echelleRef = (typeof resoudreModeleParId === 'function')
+                ? resoudreModeleParId('echelle', echelleId)
+                : ((db.getSync('echellesTemplates', []) || []).find(e => e.id === echelleId) || null);
             if (echelleRef) {
                 echelle = {
                     type: 'niveaux',

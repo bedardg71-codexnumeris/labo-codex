@@ -257,7 +257,7 @@ function genererBadgeCaracteristiques(pratique) {
 
     // 5. Échelle associée (nom abrégé)
     if (pratique.configuration?.echelleId) {
-        const echelles = db.getSync('echellesTemplates', []);
+        const echelles = db.getSync(cle('echellesTemplates'), []);
         const echelle = echelles.find(e => e.id === pratique.configuration.echelleId);
         if (echelle) {
             const nomCourt = echelle.code || echelle.nom?.substring(0, 12) || 'échelle';
@@ -611,11 +611,11 @@ function verifierDependancesPratique(pratique) {
     // items dansBibliotheque !== false. On filtre pareil pour que l'avertissement
     // (option A) ne rate pas le cas « présente mais retirée de la barre latérale ».
     if (conf.echelleId) {
-        const echelles = (db.getSync('echellesTemplates', []) || []).filter(e => e && e.dansBibliotheque !== false);
+        const echelles = (db.getSync(cle('echellesTemplates'), []) || []).filter(e => e && e.dansBibliotheque !== false);
         if (!echelles.some(e => e.id === conf.echelleId)) manquantes.push('échelle');
     }
     if (conf.grilleId) {
-        const grilles = (db.getSync('grillesTemplates', []) || []).filter(g => g && g.dansBibliotheque !== false);
+        const grilles = (db.getSync(cle('grillesTemplates'), []) || []).filter(g => g && g.dansBibliotheque !== false);
         if (!grilles.some(g => g.id === conf.grilleId)) manquantes.push('grille de rétroaction');
     }
     return manquantes;
@@ -1651,7 +1651,7 @@ async function chargerDropdownEchellesMat() {
 
     let echelles = [];
     try {
-        const toutesEchelles = await db.get('echellesTemplates') || [];
+        const toutesEchelles = await db.get(cle('echellesTemplates')) || [];
         // Filtrer pour n'afficher que les échelles dans la sidebar
         echelles = toutesEchelles.filter(e => e.dansBibliotheque !== false);
     } catch (e) {
@@ -1676,7 +1676,7 @@ async function chargerDropdownGrillesMat() {
 
     let grilles = [];
     try {
-        const toutes = await db.get('grillesTemplates') || [];
+        const toutes = await db.get(cle('grillesTemplates')) || [];
         grilles = toutes.filter(g => g.dansBibliotheque !== false);
     } catch (e) {
         grilles = [];
@@ -1707,7 +1707,7 @@ async function afficherPreviewEchelleMat() {
 
     let echelles = [];
     try {
-        echelles = await db.get('echellesTemplates') || [];
+        echelles = await db.get(cle('echellesTemplates')) || [];
     } catch (e) {
         echelles = [];
     }
@@ -1747,7 +1747,7 @@ function peuplerDropdownNoteMaximaleMat() {
         return;
     }
 
-    const echelles = db.getSync('echellesTemplates', []);
+    const echelles = db.getSync(cle('echellesTemplates'), []);
     const echelle = echelles.find(e => e.id === echelleId);
 
     if (!echelle || !echelle.niveaux) {

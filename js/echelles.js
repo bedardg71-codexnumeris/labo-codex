@@ -460,6 +460,15 @@ async function migrerEchellesVersBibliotheque() {
  * Facilite la compréhension du système pour les nouveaux utilisateurs
  */
 async function assurerEchelleGenerique() {
+    // 🆕 #358 — Garde anti-resemage du global hérité (jumeau de grilles.js). Au boot
+    // (DOMContentLoaded, AVANT db-ready) avec localStorage saturé (#353),
+    // `trimestreActif` n'est pas encore réhydraté → obtenirTrimestreId() est vide →
+    // cle('echellesTemplates') retombe sur la clé GLOBALE nue (trimestres.js:307).
+    // Semer ici recréerait l'exemple dans le global hérité que #358 retire. On ne
+    // sème QUE lorsque cle() résout vers une copie namespacée ; la navigation vers
+    // la section ré-appelle ce module une fois le trimestre actif établi.
+    if (cle('echellesTemplates') === 'echellesTemplates') return;
+
     const echelles = await db.get(cle('echellesTemplates')) || [];
 
     // Vérifier si l'échelle générique existe déjà ou a été supprimée volontairement
@@ -2257,6 +2266,8 @@ window.dupliquerEchelle = dupliquerEchelle;
 
 // Exports des fonctions existantes (pour compatibilité)
 window.initialiserModuleEchelles = initialiserModuleEchelles;
+// Exposée pour la sentinelle #358 (garde anti-resemage du global hérité).
+window.assurerEchelleGenerique = assurerEchelleGenerique;
 window.chargerEchellesTemplates = chargerEchellesTemplates;
 window.chargerEchelleTemplate = chargerEchelleTemplate;
 window.supprimerEchelle = supprimerEchelle;

@@ -46,10 +46,16 @@
  *
  * Options :
  *   --reference <csv>       CSV de reconstruction (« Note finale conforme » +
- *                           noms) — oracle de REPRODUCTION du moteur. Requis.
+ *                           noms) — oracle de REPRODUCTION du moteur. Requis SAUF
+ *                           si --omnivox est fourni (mode Omnivox-seul, ci-dessous).
  *   --omnivox <xls-html>    bulletin Omnivox (HTML ; col. « Moyenne actuelle »
- *                           X.X/100) — oracle de FIDÉLITÉ sur les 30. Optionnel
- *                           (à défaut : repli sur la colonne Omnivox du CSV).
+ *                           X.X/100) — oracle de FIDÉLITÉ. RÉPÉTABLE (un fichier
+ *                           par groupe ; les DA sont fusionnés). À défaut de
+ *                           --reference, ces bulletins deviennent l'UNIQUE oracle :
+ *                           la « ref » est synthétisée depuis eux (noms tirés de
+ *                           <trim>_groupeEtudiants, « conforme » sans objet, verdict
+ *                           porté sur la MAE Omnivox). Utile pour un trimestre sans
+ *                           CSV de reconstruction (ex. h2026, 2 groupes).
  *   --trimestre <prefixe>   préfixe namespacé du trimestre (défaut: a2025)
  *   --seuil <n>             seuil MAE vs Omnivox (défaut: 0.5)
  *   --epsilon <n>           tolérance moteur vs « conforme » (défaut: 0.1)
@@ -69,12 +75,12 @@ import { chargerScript } from '../tests/unit/_helpers/charger-script.js';
 // 1. Arguments
 // ────────────────────────────────────────────────────────────────────────────
 function lireArgs(argv) {
-    const a = { trimestre: 'a2025', seuil: 0.5, epsilon: 0.1, prouverRougit: false, verbeux: false };
+    const a = { trimestre: 'a2025', seuil: 0.5, epsilon: 0.1, prouverRougit: false, verbeux: false, omnivox: [] };
     for (let i = 2; i < argv.length; i++) {
         const t = argv[i];
         if (t === '--codex') a.codex = argv[++i];
         else if (t === '--reference') a.reference = argv[++i];
-        else if (t === '--omnivox') a.omnivox = argv[++i];
+        else if (t === '--omnivox') a.omnivox.push(argv[++i]); // répétable (un par groupe)
         else if (t === '--trimestre') a.trimestre = argv[++i];
         else if (t === '--seuil') a.seuil = parseFloat(argv[++i]);
         else if (t === '--epsilon') a.epsilon = parseFloat(argv[++i]);
@@ -82,8 +88,9 @@ function lireArgs(argv) {
         else if (t === '--verbeux') a.verbeux = true;
         else { console.error('Argument inconnu : ' + t); process.exit(2); }
     }
-    if (!a.codex || !a.reference) {
-        console.error('Usage : --codex <donnees.json> --reference <conforme.csv> [--omnivox <bulletin.xls>] [--trimestre a2025] [--seuil 0.5] [--epsilon 0.1] [--prouver-rougit] [--verbeux]');
+    // Au moins un oracle : CSV de reconstruction OU bulletin(s) Omnivox.
+    if (!a.codex || (!a.reference && a.omnivox.length === 0)) {
+        console.error('Usage : --codex <donnees.json> (--reference <conforme.csv> | --omnivox <bulletin.xls> [--omnivox ...]) [--trimestre a2025] [--seuil 0.5] [--epsilon 0.1] [--prouver-rougit] [--verbeux]');
         process.exit(2);
     }
     return a;
@@ -142,6 +149,30 @@ function parserOmnivoxXls(html) {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// 2 ter. Mode Omnivox-seul (trimestre sans CSV de reconstruction).
+//    Noms lisibles DA -> « Prénom Nom » depuis <trim>_groupeEtudiants, et « ref »
+//    synthétique dont l'UNIQUE oracle est Omnivox (conforme = null → la face
+//    « reproduction » est sans objet, le verdict porte sur la MAE Omnivox).
+// ────────────────────────────────────────────────────────────────────────────
+function indexerNoms(codex, prefixe) {
+    const noms = new Map();
+    for (const e of (codex[prefixe + '_groupeEtudiants'] || [])) {
+        const da = String((e && (e.da ?? e.numeroDA ?? e.DA)) || '').trim();
+        if (!da) continue;
+        noms.set(da, [e.prenom, e.nom].filter(Boolean).join(' ').trim() || null);
+    }
+    return noms;
+}
+
+function refDepuisOmnivox(omnivox30, noms) {
+    const ref = new Map();
+    for (const [da, note] of omnivox30) {
+        ref.set(da, { nom: noms.get(da) || null, conforme: null, portfolio: null, analyse: null, remises: '', omnivox: note });
+    }
+    return ref;
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // 3. Store du trimestre — extrait les clés namespacées utiles du codex.
 //    `portfoliosEleves` (array indexé par DA, très creux) est ignoré : le
 //    moteur ne le lit pas et il pèse l'essentiel des dizaines de Mo du codex.
@@ -180,7 +211,19 @@ function monterMoteur(store, prefixe) {
             '" absent de ' + prefixe + '_pratiquesConfigurables).');
     }
     const configuration = pratique.configuration || {};
-    const famille = configuration.type || pratique.type || 'standards';
+    // Famille canonique : MIROIR de TABLE_NORMALISATION_PRATIQUE (js/pratiques/
+    // pratique-registre.js — SSOT). Le moteur teste `obtenirTypePratiqueActive()
+    // === 'standards'` (profil-etudiant-actions.js:427) ; or un trimestre peut
+    // stocker le type legacy 'pan-standards' (cas h2026) qu'il faut folder en
+    // 'standards' comme le fait normaliserIdPratique() dans l'app. Sans ce fold,
+    // h2026 retournait null pour tous les élèves (faux « non calculé »).
+    const NORM_FAMILLE = {
+        'alternative': 'standards', 'pan-maitrise': 'standards', 'pan-maitrise-json': 'standards',
+        'pan-standards': 'standards', 'pan-objectifs': 'standards',
+        'pan-specifications': 'specifications', 'pan-denotation': 'denotation'
+    };
+    const familleBrute = configuration.type || pratique.type || 'standards';
+    const famille = NORM_FAMILLE[familleBrute] || familleBrute;
 
     // db : lit le store namespacé. cle() préfixe par le trimestre.
     const db = {
@@ -349,16 +392,22 @@ function perturberStore(store, prefixe) {
 // ────────────────────────────────────────────────────────────────────────────
 function main() {
     const args = lireArgs(process.argv);
-    let codex, refTexte, omnivox30 = null;
+    let codex, omnivox30 = null, ref;
     try {
         codex = JSON.parse(readFileSync(args.codex, 'utf8'));
-        refTexte = readFileSync(args.reference, 'utf8');
-        if (args.omnivox) omnivox30 = parserOmnivoxXls(readFileSync(args.omnivox, 'latin1'));
+        if (args.omnivox.length) {
+            omnivox30 = new Map(); // fusion des bulletins (un par groupe), DA -> note
+            for (const f of args.omnivox) {
+                for (const [da, note] of parserOmnivoxXls(readFileSync(f, 'latin1'))) omnivox30.set(da, note);
+            }
+        }
+        ref = args.reference
+            ? parserCsvReference(readFileSync(args.reference, 'utf8'))
+            : refDepuisOmnivox(omnivox30, indexerNoms(codex, args.trimestre)); // mode Omnivox-seul
     } catch (e) {
         console.error('Lecture impossible : ' + e.message);
         process.exit(2);
     }
-    const ref = parserCsvReference(refTexte);
     const store = extraireStoreTrimestre(codex, args.trimestre);
 
     let r, v;

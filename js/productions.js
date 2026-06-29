@@ -179,7 +179,7 @@ function genererIdCourtProduction(id) {
  */
 async function afficherTableauProductions() {
     const evaluations = await db.get(getCleProductions()) || [];
-    const grilles = await db.get('grillesTemplates') || [];
+    const grilles = await db.get(cle('grillesTemplates')) || [];
     const container = document.getElementById('tableauEvaluationsContainer');
 
     if (evaluations.length === 0) {
@@ -1673,7 +1673,7 @@ async function afficherToutesLesProductionsParType() {
     if (!container) return;
 
     const productions = await db.get(getCleProductions()) || [];
-    const grilles = await db.get('grillesTemplates') || [];
+    const grilles = await db.get(cle('grillesTemplates')) || [];
 
     if (productions.length === 0) {
         container.innerHTML = `
@@ -2072,38 +2072,6 @@ function definirProductionActive(id) {
 }
 
 /**
- * DÉSACTIVÉ - Met à jour les cartes métriques avec les infos de la production
- * Les cartes métriques ont été supprimées (redondantes avec le formulaire)
- *
- * @param {object|null} production - Production à afficher (ou null pour réinitialiser)
- */
-/*
-function mettreAJourMetriquesProduction(production) {
-    const grilles = db.getSync('grillesTemplates', []);
-
-    if (!production) {
-        document.getElementById('ponderationProdMetrique').textContent = '-';
-        document.getElementById('typeProdMetrique').textContent = '-';
-        document.getElementById('grilleProdMetrique').textContent = '-';
-        return;
-    }
-
-    // Pondération
-    const ponderation = production.type === 'artefact-portfolio' ? 'N/A' : `${production.ponderation || 0}%`;
-    document.getElementById('ponderationProdMetrique').textContent = ponderation;
-
-    // Type
-    const typeLabel = getTypeLabel(production.type);
-    document.getElementById('typeProdMetrique').textContent = typeLabel;
-
-    // Grille
-    const grille = grilles.find(g => g.id === production.grilleId);
-    const nomGrille = grille ? grille.nom : 'Aucune';
-    document.getElementById('grilleProdMetrique').textContent = nomGrille;
-}
-*/
-
-/**
  * Charge les grilles disponibles dans les selects de production
  * (Fonction helper pour éviter la duplication de code)
  * NOTE: Renommée pour éviter conflit avec chargerGrillesDisponibles() de pratiques.js
@@ -2156,7 +2124,7 @@ async function chargerGrillesDisponiblesPourProduction() {
 async function peuplerEchellesProduction() {
     const selectEchelle = document.getElementById('productionEchelle');
     if (!selectEchelle) return;
-    const echelles = await db.get('echellesTemplates') || [];
+    const echelles = await db.get(cle('echellesTemplates')) || [];
     selectEchelle.innerHTML = '<option value="">Aucune</option>' +
         echelles.map(e => `<option value="${echapperHtml(e.id)}">${echapperHtml(e.nom)}</option>`).join('');
 }

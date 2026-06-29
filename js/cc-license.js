@@ -1326,14 +1326,14 @@ async function afficherModalEditionMetadonnees(typeRessource, ressourceId) {
 
     switch(typeRessource) {
         case 'grille':
-            const grilles = await db.get('grillesTemplates') || [];
+            const grilles = await db.get(cle('grillesTemplates')) || [];
             ressource = grilles.find(g => g.id === ressourceId);
-            cleStockage = 'grillesTemplates';
+            cleStockage = cle('grillesTemplates');
             break;
         case 'echelle':
-            const echelles = await db.get('echellesTemplates') || [];
+            const echelles = await db.get(cle('echellesTemplates')) || [];
             ressource = echelles.find(e => e.id === ressourceId);
-            cleStockage = 'echellesTemplates';
+            cleStockage = cle('echellesTemplates');
             break;
         case 'production':
             const productions = await db.get(cle('productions')) || [];
@@ -1342,7 +1342,7 @@ async function afficherModalEditionMetadonnees(typeRessource, ressourceId) {
             break;
         case 'cartouche':
             // Les cartouches sont stockés par grille, on doit chercher dans toutes
-            const grillesTemplates = await db.get('grillesTemplates') || [];
+            const grillesTemplates = await db.get(cle('grillesTemplates')) || [];
             for (const grille of grillesTemplates) {
                 const cartouches = await db.get(`cartouches_${grille.id}`) || [];
                 ressource = cartouches.find(c => c.id === ressourceId);

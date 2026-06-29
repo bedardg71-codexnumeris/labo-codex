@@ -502,7 +502,7 @@ ajouterEntrees({
             direction: 'haut',
             priorite: 10,
             condition: function() {
-                var locales = (db.getSync('grillesTemplates', []) || [])
+                var locales = (db.getSync(cle('grillesTemplates'), []) || [])
                     .filter(function(g) { return g.dansBibliotheque !== false; });
                 return locales.length === 0;
             }
@@ -516,7 +516,7 @@ ajouterEntrees({
             direction: 'haut',
             priorite: 10,
             condition: function() {
-                var locales = (db.getSync('echellesTemplates', []) || [])
+                var locales = (db.getSync(cle('echellesTemplates'), []) || [])
                     .filter(function(e) { return e.dansBibliotheque !== false; });
                 return locales.length === 0;
             }
@@ -532,7 +532,7 @@ ajouterEntrees({
             condition: function() {
                 // cartouches stockées par grille (clé `cartouches_<grilleId>`) : on teste si
                 // au moins une cartouche locale existe pour une grille quelconque
-                var grilles = db.getSync('grillesTemplates', []) || [];
+                var grilles = db.getSync(cle('grillesTemplates'), []) || [];
                 for (var i = 0; i < grilles.length; i++) {
                     var cs = db.getSync('cartouches_' + grilles[i].id, []) || [];
                     if (cs.length > 0) return false;

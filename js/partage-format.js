@@ -168,7 +168,10 @@
 
         function ajouterGrille(grilleId, depuisType, depuisId) {
             var grille = null;
-            lireCollection('grillesTemplates').forEach(function (g) {
+            // #358 : résoudre parmi les grilles de travail de tous les trimestres (pool).
+            var grillesTravail = (typeof window.toutesGrillesTravail === 'function')
+                ? window.toutesGrillesTravail() : lireCollection('grillesTemplates');
+            grillesTravail.forEach(function (g) {
                 if (g.id === grilleId) grille = g;
             });
             if (!grille) return;

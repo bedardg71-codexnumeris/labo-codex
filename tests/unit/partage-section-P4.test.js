@@ -92,11 +92,11 @@ describe('lot P4 · sentinelle exports', () => {
 });
 
 describe('lot P4 · duplication grille (avec cartouches)', () => {
-    it('copie la grille dans grillesTemplates avec les conventions de duplication', () => {
+    it('copie la grille dans cle(grillesTemplates) avec les conventions de duplication', () => {
         const avant = instantanePartages();
         const r = w.partageSection.dupliquerVersMesDocuments('grille', 'PARTAGE_abc_GR_X');
 
-        const grilles = db.getSync('grillesTemplates', []);
+        const grilles = db.getSync('h2026_grillesTemplates', []);
         expect(grilles).toHaveLength(1);
         const copie = grilles[0];
         expect(copie.id).toBe('GRILLE_NEUF_1');
@@ -128,7 +128,7 @@ describe('lot P4 · duplication cartouche → sa grille entière', () => {
     it('duplique la grille parente avec toutes ses cartouches', () => {
         const r = w.partageSection.dupliquerVersMesDocuments('cartouche', 'PARTAGE_abc_CART_1');
         expect(r).not.toBeNull();
-        expect(db.getSync('grillesTemplates', [])).toHaveLength(1);
+        expect(db.getSync('h2026_grillesTemplates', [])).toHaveLength(1);
         expect(db.getSync('cartouches_' + r.idNouveau, [])).toHaveLength(1);
     });
 
@@ -136,7 +136,7 @@ describe('lot P4 · duplication cartouche → sa grille entière', () => {
         db.setSync('partage_grilles', []);
         const r = w.partageSection.dupliquerVersMesDocuments('cartouche', 'PARTAGE_abc_CART_1');
         expect(r).toBeNull();
-        expect(db.getSync('grillesTemplates', [])).toHaveLength(0);
+        expect(db.getSync('h2026_grillesTemplates', [])).toHaveLength(0);
     });
 });
 
@@ -144,7 +144,7 @@ describe('lot P4 · duplication production (avec sa grille partagée)', () => {
     it('copie la production + sa grille + les cartouches, grilleId remappé', () => {
         const r = w.partageSection.dupliquerVersMesDocuments('production', 'PARTAGE_abc_PROD_1');
         const productions = db.getSync('h2026_productions', []);
-        const grilles = db.getSync('grillesTemplates', []);
+        const grilles = db.getSync('h2026_grillesTemplates', []);
         expect(productions).toHaveLength(1);
         expect(grilles).toHaveLength(1);
         expect(productions[0].grilleId).toBe(grilles[0].id);
@@ -161,17 +161,17 @@ describe('lot P4 · duplication production (avec sa grille partagée)', () => {
 });
 
 describe('lot P4 · duplication échelle et pratique', () => {
-    it('échelle → echellesTemplates ; pratique → cle(pratiquesConfigurables)', () => {
+    it('échelle → cle(echellesTemplates) ; pratique → cle(pratiquesConfigurables)', () => {
         w.partageSection.dupliquerVersMesDocuments('echelle', 'PARTAGE_abc_ECH_1');
         w.partageSection.dupliquerVersMesDocuments('pratique', 'PARTAGE_abc_PR_1');
-        expect(db.getSync('echellesTemplates', [])).toHaveLength(1);
+        expect(db.getSync('h2026_echellesTemplates', [])).toHaveLength(1);
         expect(db.getSync('h2026_pratiquesConfigurables', [])).toHaveLength(1);
     });
 
     it('id introuvable → null, aucun effet', () => {
         const avant = instantanePartages();
         expect(w.partageSection.dupliquerVersMesDocuments('echelle', 'FANTOME')).toBeNull();
-        expect(db.getSync('echellesTemplates', [])).toHaveLength(0);
+        expect(db.getSync('h2026_echellesTemplates', [])).toHaveLength(0);
         expect(instantanePartages()).toBe(avant);
     });
 });

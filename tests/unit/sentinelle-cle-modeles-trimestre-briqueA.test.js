@@ -12,8 +12,9 @@ import { chargerScript } from './_helpers/charger-script.js';
 // Fix : brancher les 29 lectures de consultation/calcul/affichage sur cle().
 //
 // Cette sentinelle verrouille DEUX choses :
-//   1. le COMPORTEMENT de cle() — invariant H26 (actif non archivé = global INCHANGÉ),
-//      résolution archive (a2025_* quand la copie existe), repli global sinon ;
+//   1. le COMPORTEMENT de cle() — depuis #358 (Option A), grilles/échelles sont
+//      NAMESPACÉES : actif non archivé → <id>_*, archivé → copie <id>_* (ou clé
+//      namespacée même sans copie matérialisée). Les CARTOUCHES restent globales ;
 //   2. le RATCHET statique — ni le flux d'évaluation (5 fichiers, 24 juin) ni les
 //      écrans d'analyse (Brique A suite, PLAN-briqueA-ecrans-analyse-namespacing.md)
 //      ne relisent la clé nue : le symptôme exact ne peut pas revenir.
@@ -36,11 +37,13 @@ function chargerTrimestres(store) {
 }
 
 describe('Brique A · cle() route les modèles d’évaluation par trimestre', () => {
-    it('INVARIANT H26 — trimestre actif NON archivé : cle() rend la clé GLOBALE', () => {
+    it('RÉGIME #358 — trimestre actif NON archivé : grilles/échelles namespacées, cartouches globales', () => {
         const store = { trimestres: [{ id: 'h2026', actif: true, archive: false }] };
         const win = chargerTrimestres(store);
-        expect(win.cle('grillesTemplates')).toBe('grillesTemplates');
-        expect(win.cle('echellesTemplates')).toBe('echellesTemplates');
+        // Option A : grilles/échelles ont rejoint CLES_NAMESPACEES → clé préfixée.
+        expect(win.cle('grillesTemplates')).toBe('h2026_grillesTemplates');
+        expect(win.cle('echellesTemplates')).toBe('h2026_echellesTemplates');
+        // Cartouches restent GLOBALES (hors périmètre Bloc 1).
         expect(win.cle('cartouches_GRILLE1759529438501')).toBe('cartouches_GRILLE1759529438501');
     });
 
@@ -57,11 +60,14 @@ describe('Brique A · cle() route les modèles d’évaluation par trimestre', (
         expect(win.cle('cartouches_GRILLE_A2025_FR_ALGO')).toBe('a2025_cartouches_GRILLE_A2025_FR_ALGO');
     });
 
-    it('REPLI — A25 archivé SANS copie : cle() retombe sur la clé globale (rétrocompat)', () => {
+    it('ARCHIVÉ SANS COPIE — grilles/échelles routent vers la clé namespacée (plus de repli global #358) ; cartouches globales', () => {
         const store = { trimestres: [{ id: 'a2025', actif: true, archive: true }] };
         const win = chargerTrimestres(store);
-        expect(win.cle('grillesTemplates')).toBe('grillesTemplates');
-        expect(win.cle('echellesTemplates')).toBe('echellesTemplates');
+        // #358 : grilles/échelles namespacées → clé du trimestre même sans copie
+        // matérialisée (post-C1 elle existe ; le routage ne retombe plus sur le global).
+        expect(win.cle('grillesTemplates')).toBe('a2025_grillesTemplates');
+        expect(win.cle('echellesTemplates')).toBe('a2025_echellesTemplates');
+        // Cartouches restent globales → repli global conservé.
         expect(win.cle('cartouches_GRILLE_A2025_FR_ALGO')).toBe('cartouches_GRILLE_A2025_FR_ALGO');
     });
 

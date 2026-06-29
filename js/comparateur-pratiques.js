@@ -80,7 +80,7 @@
     // Échelle qui pilote les profils fictifs : celle de la pratique de référence si
     // elle en a une, sinon la 1ʳᵉ échelle disponible. null si aucune échelle.
     function _echelleActiveComparateur() {
-        var echelles = (typeof db !== 'undefined') ? (db.getSync('echellesTemplates', []) || []) : [];
+        var echelles = (typeof db !== 'undefined') ? (db.getSync(cle('echellesTemplates'), []) || []) : [];
         if (!echelles.length) return null;
         var cfg = _resoudreConfig(_refId());
         var echId = cfg && cfg.echelle && (cfg.echelle.echelle_id || cfg.echelle.id);
@@ -126,7 +126,7 @@
 
     // Productions / évaluations selon le mode (démo ou réel) + échelles globales.
     function _donnees() {
-        var echelles = (typeof db !== 'undefined') ? (db.getSync('echellesTemplates', []) || []) : [];
+        var echelles = (typeof db !== 'undefined') ? (db.getSync(cle('echellesTemplates'), []) || []) : [];
         // #326 R4 : en source fictive, le banc lit le corpus généré (R2), pas le
         // stockage. (Les notes passent par simulerIndices+injection ; ici c'est la
         // colonne « Niveau atteint » et la fiche qui lisent productions/évaluations.)

@@ -61,10 +61,20 @@
 
     function clesCandidates(type, contexteId) {
         switch (type) {
-            case 'grille':
-                return ['grillesTemplates', 'bibliothequeGrilles'];
-            case 'echelle':
-                return ['echellesTemplates', 'bibliothequeEchelles'];
+            // #358 Option A : modèles de travail namespacés (trimestre actif) puis
+            // catalogue de gabarits. Même patron que 'production'/'pratique' ci-dessous.
+            case 'grille': {
+                var clesG = [];
+                if (typeof window.cle === 'function') clesG.push(window.cle('grillesTemplates'));
+                clesG.push('bibliothequeGrilles');
+                return clesG;
+            }
+            case 'echelle': {
+                var clesE = [];
+                if (typeof window.cle === 'function') clesE.push(window.cle('echellesTemplates'));
+                clesE.push('bibliothequeEchelles');
+                return clesE;
+            }
             case 'production': {
                 var cles = [];
                 if (typeof getCleProductions === 'function') {
@@ -86,7 +96,11 @@
                 // sans contexte, balayage des grilles connues.
                 if (contexteId) return ['cartouches_' + contexteId];
                 var clesC = [];
-                getSyncSur('grillesTemplates').forEach(function (g) {
+                // #358 : balayer les grilles de travail de TOUS les trimestres (pool)
+                // pour retrouver les cartouches d'une grille créée dans n'importe lequel.
+                var grillesScan = (typeof window.toutesGrillesTravail === 'function')
+                    ? window.toutesGrillesTravail() : getSyncSur('grillesTemplates');
+                grillesScan.forEach(function (g) {
                     if (g && g.id) clesC.push('cartouches_' + g.id);
                 });
                 return clesC;
@@ -309,7 +323,8 @@
         }
         if (!type) {
             type = 'grille';
-            var grilles = getSyncSur('grillesTemplates').filter(function (g) {
+            var grilles = ((typeof window.toutesGrillesTravail === 'function')
+                ? window.toutesGrillesTravail() : getSyncSur('grillesTemplates')).filter(function (g) {
                 return !(window.BibliothequeUI && BibliothequeUI.estItemDemo && BibliothequeUI.estItemDemo(g));
             });
             if (!grilles.length) {
