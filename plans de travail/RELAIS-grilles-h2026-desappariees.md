@@ -17,6 +17,28 @@ Les 408 évaluations de h2026 référencent **3 grilles dont la définition est 
 
 ---
 
+## 0bis. MAJ 2026-06-28 (nuit) — dry-run sur données réelles + OUTIL prêt
+
+Vérifié sur l'export `…22h28/donnees.json` (lecture seule, aucune écriture) avec l'outil `scripts/reparer-grilles-h2026.mjs` (branche `claude/batch-mi-aout-justesse-filets`, PR #74). **Le mapping du §1 tient.** Mapping confirmé vers les jumelles **h2026** :
+
+| grilleId des évals | nb évals | ← jumelle h2026 (source) | couverture | nom propre proposé |
+|---|---|---|---|---|
+| `grille_1770742838756_23q82vbsk` | 205 | `GRILLE_1782504228330` (« Grille-4 A25 ») | **203/205** (2 outliers) | **Grille-4 (SRPN)** |
+| `grille_1772187755149_uq1oiiafa` | 92 | `GRILLE_1782504228322` (« Grille-5 FR-HOLIS-30 A25 ») | **91/92** (1 outlier) | **Grille-5 FR-HOLIS-30** |
+| `GRILLE1759529438501` | 86 | `GRILLE_1782504228333` (« Grille-5 FR-ALGO-30 A25 ») | **86/86** | **Grille-5 FR-ALGO-30** |
+
+**Précisions / corrections au plan initial :**
+1. **Champ piège** : dans une éval, l'id de critère est sous **`critereId`** (PAS `id`, qui est le champ des définitions). Le matching doit lire `critereId` — sinon empreinte vide, faux « 0 recréation ». (Bug corrigé dans l'outil, break-testé.)
+2. **Scoping** : la source doit être cherchée **dans `h2026_grillesTemplates` seulement** — les copies identiques en `a2025`/`demo` créent une fausse ambiguïté qui ferait tout refuser.
+3. **3 évals mal-estampillées** (outliers : 2 dans le groupe Grille-4, 1 dans FR-HOLIS) portent les critères d'une autre grille sous le grilleId du groupe. Elles n'empêchent pas la recréation de la définition, mais sont une anomalie à part (cf. « grilleId faux 5-critères », audit du 27 juin). Jamais réécrites.
+4. **Échelles ∅** : les copies A25 ont `echelleId` vide, alors que les évals portent des `echelleId` (`1767389426695`, `ECHELLE_DEMO`) probablement absents de `h2026_echellesTemplates` (1 seule entrée). **Désappariement d'échelles à instrumenter AVANT le live.**
+
+**Outils prêts (dry-run/read-only, sentinelle break-testée, revue adverse « sûr ») :** `scripts/reparer-grilles-h2026.mjs` (`--ecrire` gaté par `--sortie` + `--noms`) et `scripts/audit-attribution-cc.mjs` (#342 : 1 cas réel = `pan-standards-bruno` auteur « Bruno V. » → « Grégoire Bédard »).
+
+**RESTE = séance LIVE de jour, sur backup** : fixer le `--noms` (3 noms propres ci-dessus), trancher les échelles, lancer `--ecrire` puis ré-importer (OU porter la logique en fonction console), régler `grilleReferenceDepistage = grille_1772187755149_uq1oiiafa` (#354), retirer les copies orphelines + cartouches, **L0 h2026 self-compare AVANT==APRÈS**.
+
+---
+
 ## 1. Le fait, vérifié au code (export 18h00)
 
 **grilleId utilisés par les évals h2026 actives (`!remplaceeParId`)** :
