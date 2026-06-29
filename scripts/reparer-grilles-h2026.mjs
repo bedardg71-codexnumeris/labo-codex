@@ -83,35 +83,48 @@ function indexerGrilles(codex) {
     return idx;
 }
 
-// Empreinte ordonnée des critereId d'un ensemble de critères (signature comparable).
-function empreinteCriteres(criteres) {
-    const ids = (criteres || []).map(c => c && c.id).filter(Boolean);
-    return [...ids].sort().join('|');
+// Ids des critères d'une grille de DÉFINITION (champ `id`, repli `critereId`).
+function idsCriteresGrille(grille) {
+    return new Set(((grille && grille.criteres) || []).map(c => c && (c.id || c.critereId)).filter(Boolean));
 }
 
-// Empreinte attendue par un groupe d'évals : union triée des critereId stockés dans
-// leurs criteres (l'éval porte ses propres criteres avec un id = le critereId de la grille).
-function empreinteAttendueDesEvals(evals) {
-    const ids = new Set();
-    for (const e of evals) for (const c of (e && e.criteres) || []) {
-        if (c && c.id) ids.add(c.id);
-    }
-    return [...ids].sort().join('|');
+// Empreinte ordonnée d'un ensemble d'ids (signature comparable).
+function empreinteDeSet(set) {
+    return [...set].sort().join('|');
+}
+
+// Empreinte d'UNE évaluation. ATTENTION (bug corrigé #362) : dans une éval, le critère
+// porte son id sous `critereId` (et NON `id`, qui est le champ des DÉFINITIONS de grille).
+// Confondre les deux donnait une empreinte vide → aucun appariement → faux « 0 recréation ».
+function empreinteEval(evaluation) {
+    const ids = ((evaluation && evaluation.criteres) || []).map(c => c && (c.critereId || c.id)).filter(Boolean);
+    return empreinteDeSet(new Set(ids));
 }
 
 // CŒUR PUR (testable + réutilisable par une fonction console live). Calcule le plan de
 // RECRÉATION de définitions de grille sans rien muter, ni jamais toucher aux évaluations.
 //   noms : objet { idAttendu -> nomPropre } (facultatif en dry-run ; requis avant --ecrire).
 //
+// APPARIEMENT (révisé #362, après dry-run sur données réelles) :
+//   - L'absent-check se fait sur le POOL GLOBAL (toutes clés *_grillesTemplates).
+//   - La SOURCE est cherchée UNIQUEMENT dans les grilles DU TRIMESTRE (sinon les copies
+//     identiques en a2025/demo créent une fausse ambiguïté qui ferait tout refuser).
+//   - On choisit la grille du trimestre qui COUVRE le plus d'évals (empreinte de l'éval ⊆
+//     empreinte de la grille — robuste aux évals partielles). Conservateur : couverture
+//     MAJORITAIRE requise (> moitié) et meilleur STRICTEMENT unique, sinon on NE tranche pas.
+//   - nbOutliers = évals du groupe NON couvertes par la source choisie (ex. éval mal
+//     estampillée portant les critères d'une autre grille). Signalées, jamais réécrites.
+//
 // Rend { recreations, orphelines } où :
-//   recreations[] = { trimestre, cleCible, idAttendu, nbEvals, empreinte, sourceId, sourceCle,
-//                     nbCriteres, echelleId, nomPropre|null }
+//   recreations[] = { trimestre, cleCible, idAttendu, nbEvals, nbCouverts, nbOutliers,
+//                     empreinte, sourceId, sourceCle, nbCriteres, echelleId, nomPropre|null }
 //   orphelines[]  = { cle, id, nom, raison:'source-d-une-recreation'|'sans-eval' }   (signalées, NON retirées)
 export function calculerRecreationGrilles(codex, trimestre, noms) {
     noms = noms || {};
     const cleCible = trimestre + '_grillesTemplates';
     const evals = (codex[trimestre + '_evaluationsSauvegardees'] || []).filter(e => e && !e.remplaceeParId);
-    const pool = indexerGrilles(codex);
+    const poolGlobal = indexerGrilles(codex);                                      // absent-check : toutes clés
+    const sourcesTrimestre = (codex[cleCible] || []).filter(g => g && g.id);       // sources : SCOPÉES au trimestre
 
     // 1. Regrouper les évals actives par grilleId référencé.
     const parGrilleId = new Map();
@@ -122,35 +135,47 @@ export function calculerRecreationGrilles(codex, trimestre, noms) {
         parGrilleId.get(gid).push(e);
     }
 
-    // 2. Pour chaque grilleId ABSENT du pool, chercher la copie orpheline d'empreinte exacte.
+    // 2. Pour chaque grilleId ABSENT du pool global, choisir la grille DU TRIMESTRE qui couvre
+    //    le plus d'évals (couverture majoritaire + meilleur unique). Compter les outliers.
     const recreations = [];
     const sourcesUtilisees = new Set();
     for (const [idAttendu, evalsDuGroupe] of parGrilleId) {
-        if (pool.has(idAttendu)) continue;                 // déjà résoluble → rien à faire
-        const empreinteAttendue = empreinteAttendueDesEvals(evalsDuGroupe);
-        if (!empreinteAttendue) continue;                  // évals sans critère → aucun signal d'appariement
+        if (poolGlobal.has(idAttendu)) continue;           // déjà résoluble → rien à faire
+        const empreintesEval = evalsDuGroupe.map(empreinteEval).filter(Boolean);
+        if (!empreintesEval.length) continue;              // aucun critère stocké → aucun signal d'appariement
 
-        // Candidates : grilles du pool dont l'empreinte de critereId == empreinte attendue.
-        const candidates = [];
-        for (const [, { grille, cle }] of pool) {
-            if (empreinteCriteres(grille.criteres) === empreinteAttendue) candidates.push({ grille, cle });
-        }
-        if (candidates.length !== 1) continue;             // 0 ou ≥2 → ambigu, on NE tranche pas
-        const src = candidates[0];
+        // Scorer chaque grille du trimestre : combien d'évals elle COUVRE (⊆) + combien en EXACT.
+        const scores = sourcesTrimestre.map(g => {
+            const gset = idsCriteresGrille(g);
+            const gfp = empreinteDeSet(gset);
+            let couverts = 0, exacts = 0;
+            for (const fp of empreintesEval) {
+                if (fp.split('|').every(x => gset.has(x))) couverts++;
+                if (fp === gfp) exacts++;
+            }
+            return { grille: g, couverts, exacts };
+        }).sort((a, b) => b.couverts - a.couverts || b.exacts - a.exacts);
+
+        const best = scores[0];
+        if (!best || best.couverts === 0) continue;                       // aucune source plausible dans le trimestre
+        if (best.couverts <= evalsDuGroupe.length / 2) continue;          // couverture non majoritaire → on NE tranche pas
+        if (scores[1] && scores[1].couverts === best.couverts && scores[1].exacts === best.exacts) continue; // ambiguïté
 
         recreations.push({
             trimestre,
             cleCible,
             idAttendu,
             nbEvals: evalsDuGroupe.length,
-            empreinte: empreinteAttendue,
-            sourceId: src.grille.id,
-            sourceCle: src.cle,
-            nbCriteres: (src.grille.criteres || []).length,
-            echelleId: src.grille.echelleId || null,
+            nbCouverts: best.couverts,
+            nbOutliers: evalsDuGroupe.length - best.couverts,
+            empreinte: empreinteDeSet(idsCriteresGrille(best.grille)),
+            sourceId: best.grille.id,
+            sourceCle: cleCible,
+            nbCriteres: (best.grille.criteres || []).length,
+            echelleId: best.grille.echelleId || null,
             nomPropre: Object.prototype.hasOwnProperty.call(noms, idAttendu) ? noms[idAttendu] : null
         });
-        sourcesUtilisees.add(src.grille.id);
+        sourcesUtilisees.add(best.grille.id);
     }
     recreations.sort((a, b) => a.idAttendu.localeCompare(b.idAttendu));
 
@@ -224,7 +249,9 @@ function main() {
     for (const r of plan.recreations) {
         console.log('  [' + r.trimestre + '] recréer ' + r.idAttendu +
             '  ← copie ' + r.sourceId + ' (' + r.sourceCle + ')  · ' +
-            r.nbCriteres + ' critères · ' + r.nbEvals + ' éval. · échelle ' + (r.echelleId || '∅') +
+            r.nbCriteres + ' critères · ' + r.nbCouverts + '/' + r.nbEvals + ' évals couvertes' +
+            (r.nbOutliers ? ' (⚠ ' + r.nbOutliers + ' mal-estampillée(s) — autres critères)' : '') +
+            ' · échelle ' + (r.echelleId || '∅') +
             '  · nom propre : ' + (r.nomPropre ? '« ' + r.nomPropre + ' »' : '⚠ NON FOURNI (décision Grégoire)'));
         if (args.verbeux) console.log('       empreinte critereId : ' + r.empreinte);
     }
