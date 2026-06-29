@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audit de développement — Labo Codex (28 juin 2026)</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bleu-principal: #1a4a5e;
+    --bleu-fonce: #0c1a22;
+    --bleu-moyen: #244858;
+    --bleu-clair: #6aacb8;
+    --bleu-leger: #4a8a94;
+    --bleu-carte: #1a3a48;
+    --bleu-pale: #1a3040;
+    --fond-page: #0e1e28;
+    --texte: #d0e8f0;
+    --texte-secondaire: #8ab4c0;
+    --accent-vert: #4ecdc4;
+    --accent-orange: #f0a050;
+    --accent-rose: #e06080;
+    --accent-violet: #a070d0;
+    --shadow-normal: 0 2px 8px rgba(10, 30, 40, 0.4);
+    --shadow-prononce: 0 4px 14px rgba(10, 30, 40, 0.5);
+    --radius-grand: 12px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--fond-page);
+    color: var(--texte);
+    line-height: 1.75;
+    padding: 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  header {
+    text-align: center;
+    padding: 3rem 2rem;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, var(--bleu-fonce), var(--bleu-moyen));
+    border-radius: var(--radius-grand);
+    box-shadow: var(--shadow-prononce);
+    border: 1px solid rgba(106, 172, 184, 0.15);
+  }
+
+  header h1 { font-size: 2rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem; }
+  header .subtitle { font-size: 1.05rem; color: var(--bleu-clair); font-weight: 400; }
+  header .meta { margin-top: 1rem; font-size: 0.85rem; color: var(--texte-secondaire); }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+
+  .kpi {
+    background: var(--bleu-carte);
+    border-radius: var(--radius-grand);
+    padding: 1.4rem;
+    text-align: center;
+    box-shadow: var(--shadow-normal);
+    border: 1px solid rgba(106, 172, 184, 0.1);
+  }
+  .kpi .value { font-size: 1.9rem; font-weight: 700; color: var(--accent-vert); }
+  .kpi .label { font-size: 0.82rem; color: var(--texte-secondaire); margin-top: 0.3rem; }
+  .kpi small { display:block; color: var(--texte-secondaire); font-size:0.72rem; margin-top:2px; }
+
+  section { margin-bottom: 2.6rem; }
+
+  h2 {
+    font-size: 1.4rem; font-weight: 600; color: var(--bleu-clair);
+    margin-bottom: 1rem; padding-bottom: 0.5rem;
+    border-bottom: 2px solid rgba(106, 172, 184, 0.2);
+  }
+  .eyebrow { font-size:0.75rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--texte-secondaire); margin-bottom:0.3rem; }
+  h3 { font-size: 1.1rem; font-weight: 500; color: var(--texte); margin: 1.5rem 0 0.75rem; }
+  p { margin-bottom: 1rem; color: var(--texte); font-size: 0.95rem; }
+
+  .chart-container {
+    background: var(--bleu-carte); border-radius: var(--radius-grand);
+    padding: 1.5rem; margin: 1.5rem 0; box-shadow: var(--shadow-normal);
+    border: 1px solid rgba(106, 172, 184, 0.1); position: relative;
+  }
+  .chart-container canvas { max-height: 400px; }
+  .two-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1.5rem 0; }
+
+  @media (max-width: 768px) {
+    .two-charts { grid-template-columns: 1fr; }
+    body { padding: 1rem; }
+    header h1 { font-size: 1.5rem; }
+  }
+
+  .phase-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.88rem; }
+  .phase-table th { background: var(--bleu-moyen); color: var(--bleu-clair); padding: 0.7rem 0.9rem; text-align: left; font-weight: 500; }
+  .phase-table td { padding: 0.7rem 0.9rem; border-bottom: 1px solid rgba(106, 172, 184, 0.1); vertical-align: top; }
+  .phase-table tr:hover td { background: rgba(106, 172, 184, 0.05); }
+
+  .highlight { color: var(--accent-vert); font-weight: 600; }
+  .highlight-orange { color: var(--accent-orange); font-weight: 600; }
+  .highlight-rose { color: var(--accent-rose); font-weight: 600; }
+
+  /* Encadré pivot / callout */
+  .callout {
+    background: linear-gradient(135deg, rgba(78,205,196,0.10), rgba(36,72,88,0.4));
+    border: 1px solid rgba(78,205,196,0.3);
+    border-left: 4px solid var(--accent-vert);
+    border-radius: var(--radius-grand);
+    padding: 1.5rem 1.75rem; margin: 1.5rem 0;
+  }
+  .callout.warn {
+    background: linear-gradient(135deg, rgba(240,160,80,0.10), rgba(36,72,88,0.4));
+    border-color: rgba(240,160,80,0.35); border-left-color: var(--accent-orange);
+  }
+  .callout h3 { margin-top: 0; color:#fff; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  /* Timeline versions */
+  .timeline { position: relative; margin: 1.5rem 0 0.5rem; padding-left: 0; }
+  .tl-item { display:flex; gap:1rem; padding:0.6rem 0; border-bottom:1px solid rgba(106,172,184,0.1); align-items:baseline; }
+  .tl-item:last-child { border-bottom:none; }
+  .tl-ver { flex:0 0 90px; font-weight:700; color:var(--accent-vert); font-size:0.95rem; }
+  .tl-ver.major { color:#fff; }
+  .tl-date { flex:0 0 100px; color:var(--texte-secondaire); font-size:0.8rem; }
+  .tl-desc { flex:1; font-size:0.9rem; }
+  .badge { display:inline-block; font-size:0.68rem; padding:1px 7px; border-radius:10px; margin-left:6px; vertical-align:middle; }
+  .badge.major { background:rgba(224,96,128,0.2); color:var(--accent-rose); border:1px solid rgba(224,96,128,0.4); }
+  .badge.minor { background:rgba(78,205,196,0.15); color:var(--accent-vert); border:1px solid rgba(78,205,196,0.35); }
+  .badge.patch { background:rgba(138,180,192,0.15); color:var(--texte-secondaire); border:1px solid rgba(138,180,192,0.3); }
+
+  .note { font-size:0.82rem; color:var(--texte-secondaire); font-style: italic; }
+
+  footer {
+    text-align: center; padding: 2rem; color: var(--texte-secondaire);
+    font-size: 0.82rem; border-top: 1px solid rgba(106, 172, 184, 0.15); margin-top: 3rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Audit de développement — Labo Codex</h1>
+  <div class="subtitle">252 jours de développement assisté par Claude — première fenêtre pleinement post-lancement</div>
+  <div class="meta">Période 20 octobre 2025 → 28 juin 2026 &middot; Quatrième bilan (après le 14 avril, le 18 mai et le 8 juin) &middot; Build 0628-2126 (v1.26.0)</div>
+</header>
+
+<!-- KPI cumulés -->
+<section>
+  <div class="eyebrow">Cumul du projet (20 oct 2025 → 28 juin 2026)</div>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="value">~3 910</div><div class="label">Commits (all-branches)<small>~3 485 sur main seul</small></div></div>
+    <div class="kpi"><div class="value">~472</div><div class="label">Sessions de travail</div></div>
+    <div class="kpi"><div class="value">~1 046 h</div><div class="label">Heures git-actives<small>~575–735 h en temps réel</small></div></div>
+    <div class="kpi"><div class="value">85,7 %</div><div class="label">Jours actifs (216 / 252)</div></div>
+    <div class="kpi"><div class="value">~1 210</div><div class="label">Tests verts<small>rapporté — à recouper</small></div></div>
+    <div class="kpi"><div class="value">~203 k</div><div class="label">Lignes physiques JS · 180 modules<small>cloc indisponible — lignes physiques</small></div></div>
+  </div>
+</section>
+
+<!-- LA FENÊTRE -->
+<section>
+  <h2>Trois chantiers de fond, menés de front</h2>
+  <div class="callout">
+    <h3>Première fenêtre pleinement post-lancement (9 → 28 juin)</h3>
+    <p>Là où les fenêtres antérieures enchaînaient des phases <em>séquentielles</em> (consolidation → lancement → itération), celle-ci tient <strong>trois chantiers structurants en parallèle</strong> : (1) l'<span class="highlight">infrastructure de partage</span> — Voûte Phase 1 (signature ECDSA, TOFU, format <code>.lcz</code>) et durcissement de l'import codex iPad ; (2) l'<span class="highlight">architecture inter-trimestres</span> — namespacing des modèles par trimestre, fin de la SSOT <code>modalitesEvaluation</code>, durabilité IndexedDB, et une <strong>migration de données réelles en production</strong> ; (3) le <span class="highlight">raffinement des pratiques</span> — banc de décision du Comparateur, Dénotation éditable, prévention des doublons d'évals.</p>
+    <p>L'intensité du lancement ne retombe pas : elle se redéploie. <strong>20 jours actifs sur 20</strong>, soit 41 jours d'affilée depuis le 19 mai.</p>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="value" style="color:var(--accent-orange)">399</div><div class="label">Commits du 9 au 28 juin</div></div>
+    <div class="kpi"><div class="value" style="color:var(--accent-orange)">~107 h</div><div class="label">en 20 jours (~59–75 h réel)</div></div>
+    <div class="kpi"><div class="value" style="color:var(--accent-orange)">20 / 20</div><div class="label">jours actifs (100 %) — aucune pause</div></div>
+    <div class="kpi"><div class="value" style="color:var(--accent-orange)">45</div><div class="label">versions publiées (1.5.0 → 1.26.0)</div></div>
+  </div>
+</section>
+
+<!-- ÉVOLUTION MENSUELLE -->
+<section>
+  <h2>Évolution mensuelle</h2>
+  <p>Juin 2026, partiel dans le bilan précédent (8 jours), est ici quasi complet (1<sup>er</sup> → 28) : <span class="highlight">577 commits / ~153 h</span> — <strong>2<sup>e</sup> mois le plus chargé du projet en heures</strong>, derrière mai (184 h) et devant février (180 h), avec deux jours encore à courir.</p>
+  <div class="chart-container"><canvas id="chartMois"></canvas></div>
+</section>
+
+<!-- PHASES -->
+<section>
+  <h2>Les phases de la fenêtre</h2>
+  <table class="phase-table">
+    <thead><tr><th>Phase</th><th>Période</th><th>Heures</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td>… Fondation → Itération post-lancement</td><td>Oct 2025 – 8 juin</td><td>~940 h</td><td>Voir les bilans des 14 avril, 18 mai et 8 juin.</td></tr>
+      <tr><td><span class="highlight">Infrastructure &amp; partage</span></td><td>9 – 11 juin</td><td>~28 h</td><td>Répertoires de classement ; <strong>Voûte Phase 1</strong> (signature ECDSA, TOFU, <code>.lcz</code>) ; durcissement <strong>import codex iPad</strong> (pré-vol quota, journalisation, snapshot haché) ; garde-fous inter-appareils. Pic du <span class="highlight">10 juin (63 commits)</span>.</td></tr>
+      <tr><td><span class="highlight">Pratiques &amp; exploration</span></td><td>14 – 22 juin</td><td>~38 h</td><td>Ablation du vieil éditeur de pratique (zéro-dette) ; <strong>Exploration / banc de décision</strong> du Comparateur ; export des résultats finaux ; prévention CC ; <strong>Dénotation éditable inline</strong> (1.21.0).</td></tr>
+      <tr><td><span class="highlight-orange">Architecture inter-trimestres</span></td><td>23 – 28 juin</td><td>~30 h</td><td><strong>Namespacing par trimestre</strong> (briques A/B/C, restauration A25) ; <strong>fin de #328</strong> (SSOT modalitesEvaluation) ; <strong>durabilité IndexedDB</strong> ; prévention des doublons (#360) ; <strong>migration live des modèles</strong> (1.25.0) ; <strong>réactivation du Comparateur</strong> (1.26.0).</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- INTENSITÉ HEBDO -->
+<section>
+  <h2>Courbe d'intensité hebdomadaire</h2>
+  <p>La semaine du 8 juin (réévaluée à <span class="highlight">186</span>, contre 23 en partiel au bilan précédent) entre dans le tiers supérieur historique : c'est la semaine Voûte + import iPad, portée par le pic du 10 juin. Les deux semaines suivantes restent soutenues malgré une fin de session d'enseignement. La semaine du 11 mai (284) demeure le pic absolu.</p>
+  <div class="chart-container"><canvas id="chartSemaine"></canvas></div>
+</section>
+
+<!-- QUOTIDIEN FENÊTRE -->
+<section>
+  <h2>Jour par jour, 9 → 28 juin</h2>
+  <p>Le <span class="highlight">10 juin (63 commits)</span> est le <strong>4<sup>e</sup> jour le plus intense de tout le projet</strong> — le plus fort hors séquence d'audit annuel de mai. Le <span class="highlight-orange">28 juin (43)</span> clôt la fenêtre par une journée de 5 releases (migration live, durabilité, doublons, réactivation). Les creux des 20-22 et 24 juin (2-4-3 commits) coïncident avec un week-end et la fin de session d'enseignement.</p>
+  <div class="chart-container"><canvas id="chartJour"></canvas></div>
+</section>
+
+<!-- VERSIONS -->
+<section>
+  <h2>Quarante-cinq versions en vingt jours</h2>
+  <p>Record de cadence du projet (le double de la fenêtre précédente, 12 en 6 jours), rendu possible par le pipeline Cloudflare/Netlify et le script <code>release.mjs</code> (source unique de version, écriture atomique). Jalons curés ci-dessous ; les patchs intermédiaires sont omis.</p>
+  <div class="chart-container" style="padding-top:0.5rem;">
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-ver">1.5 – 1.6.4</div><div class="tl-date">9 – 10 juin</div><div class="tl-desc">Répertoires de classement transversaux aux bibliothèques (#320/#327) + correctifs terrain.<span class="badge minor">minor</span></div></div>
+      <div class="tl-item"><div class="tl-ver major">1.7 – 1.11</div><div class="tl-date">10 – 11 juin</div><div class="tl-desc"><strong>Voûte Phase 1</strong> — partage signé : ECDSA P-256, TOFU, format <code>.lcz</code>, sections « Partagés » dans les 5 bibliothèques.<span class="badge minor">minor</span></div></div>
+      <div class="tl-item"><div class="tl-ver">1.12 – 1.16</div><div class="tl-date">11 – 15 juin</div><div class="tl-desc"><strong>Import codex iPad</strong> durci (pré-vol quota, journalisation, snapshot haché) + garde-fous inter-appareils (#335).<span class="badge minor">minor</span></div></div>
+      <div class="tl-item"><div class="tl-ver">1.17 – 1.18</div><div class="tl-date">14 – 16 juin</div><div class="tl-desc">Ablation du vieil éditeur de pratique (#338) ; <strong>Exploration des pratiques</strong> (#326 D-2/D-3) ; modales intégrées ; export des résultats finaux.<span class="badge minor">minor</span></div></div>
+      <div class="tl-item"><div class="tl-ver">1.19 – 1.20</div><div class="tl-date">17 – 19 juin</div><div class="tl-desc"><strong>Banc de décision</strong> du Comparateur (R4-R6) ; <code>noteConstructible</code> ; prévention d'attribution CC (#342) ; export synthèse CSV.<span class="badge minor">minor</span></div></div>
+      <div class="tl-item"><div class="tl-ver major">1.21.0</div><div class="tl-date">22 juin</div><div class="tl-desc"><strong>Dénotation éditable inline</strong> + créable de 1<sup>er</sup> rang ; masquage réversible du comparateur (#345).<span class="badge minor">minor</span></div></div>
+      <div class="tl-item"><div class="tl-ver">1.21.1 – .3</div><div class="tl-date">26 – 27 juin</div><div class="tl-desc"><strong>Namespacing par trimestre</strong> (briques A/B/C, restauration A25 L0/L2) + import inter-trimestre de pratiques + <code>groupeNum</code> canonique.<span class="badge minor">minor</span></div></div>
+      <div class="tl-item"><div class="tl-ver major">1.22.0</div><div class="tl-date">27 juin</div><div class="tl-desc"><strong>Fin de #328</strong> — SSOT <code>modalitesEvaluation</code>, la dernière grande violation SSOT de l'audit annuel.<span class="badge minor">minor</span></div></div>
+      <div class="tl-item"><div class="tl-ver major">1.24.x</div><div class="tl-date">28 juin</div><div class="tl-desc">Prévention des <strong>doublons d'évals</strong> (#360) ; <strong>durabilité IndexedDB</strong> complète (#353) — risque de perte de données <strong>fermé</strong>.<span class="badge minor">minor</span></div></div>
+      <div class="tl-item"><div class="tl-ver major">1.25.0</div><div class="tl-date">28 juin</div><div class="tl-desc"><strong>Migration LIVE</strong> des modèles namespacés par trimestre (#358) — validée sur données réelles.<span class="badge minor">minor</span></div></div>
+      <div class="tl-item"><div class="tl-ver major">1.26.0</div><div class="tl-date">28 juin</div><div class="tl-desc"><strong>Réactivation du Comparateur</strong> (#326) — 5 constats terrain traités, Mac + iPad.<span class="badge minor">minor</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- OÙ EST PASSÉ LE TRAVAIL -->
+<section>
+  <h2>Où est passé le travail (9 → 28 juin)</h2>
+  <p><strong>17 nouveaux modules</strong> JS sont apparus dans la fenêtre — surtout le sous-système Voûte (8 fichiers) et l'élargissement des pratiques (4). Le churn marque aussi un <strong>net très négatif</strong> sur <code>pratiques.js</code> (-1094 lignes : ablation zéro-dette du vieil éditeur), preuve que la fenêtre retire autant qu'elle ajoute.</p>
+  <div class="two-charts">
+    <div class="chart-container"><canvas id="chartChurn"></canvas></div>
+    <div class="chart-container"><canvas id="chartNouveaux"></canvas></div>
+  </div>
+  <p class="note">Churn = lignes réécrites (min insertions/suppressions). Les fichiers « méta » (SESSION.md, BACKLOG.md, version.json) sont signalés ; les autres reflètent le travail applicatif.</p>
+</section>
+
+<!-- RYTHME -->
+<section>
+  <h2>Rythme de travail (fenêtre 9 → 28 juin)</h2>
+  <p>Évolution notable : le profil de la journée devient <span class="highlight">bimodal</span> — la matinée reste forte (5 h-13 h), mais la <span class="highlight-orange">reprise du soir (16 h-20 h)</span> atteint un second pic comparable. Côté semaine, le <span class="highlight">mercredi domine</span> (76 commits) et le dimanche reste élevé (67) — cohérent avec des sessions de conception en fin de semaine.</p>
+  <div class="two-charts">
+    <div class="chart-container"><canvas id="chartHeure"></canvas></div>
+    <div class="chart-container"><canvas id="chartSemaineJour"></canvas></div>
+  </div>
+  <div class="two-charts">
+    <div class="chart-container"><canvas id="chartSessions"></canvas></div>
+    <div class="chart-container"><canvas id="chartJalons"></canvas></div>
+  </div>
+</section>
+
+<!-- RÉGIME MULTI-AGENTS -->
+<section>
+  <h2>Une nouveauté de régime : le développement multi-agents</h2>
+  <div class="callout warn">
+    <h3>Du producteur unique au directeur d'agents</h3>
+    <p>La fenêtre voit émerger un <strong>mode de travail à plusieurs agents</strong> : des sessions Cowork de conception/cadrage (plan mi-août, dossiers-relais, rafraîchissement d'<code>ETAT-PROJET.md</code>) <em>et</em> des sessions Claude Code de codage autonome, parfois simultanées. Le mainteneur n'écrit plus tout le code : il <strong>dirige, vérifie et tranche</strong>.</p>
+    <p>Conséquences observables : multiplication des branches et worktrees ; une <strong>collision de rebase le 28 juin</strong>, réconciliée en merge <em>sans perte</em> ; et surtout un <strong>découplage accru entre commits et heures humaines</strong> — davantage de commits par heure de présence, donc des heures git-actives encore moins représentatives de l'effort humain (le proxy haut l'est plus que jamais).</p>
+    <p><em>Le goulot d'étranglement se déplace</em> : de la production de code vers la <strong>supervision, la décision et la coordination</strong> (réconciliations git, désyncs de trackers entre agents). Le <strong>congé de juillet annoncé</strong> (reprise visée 1<sup>er</sup> août) sera le premier test de robustesse de l'objet sans son unique pilote.</p>
+  </div>
+</section>
+
+<!-- ÉTAT DE L'OBJET -->
+<section>
+  <h2>État de l'objet au 28 juin</h2>
+  <p>L'indicateur le plus parlant : le filet de tests passe de <strong>~395 verts</strong> (8 juin) à <strong>~1 210</strong> (28 juin), <span class="highlight">×3 en 20 jours</span> — porté par les sentinelles de namespacing, les golden masters L0/L2 par trimestre, la durabilité IDB et le banc de décision. C'est le filet qui rend les migrations de données réelles tolérables.</p>
+
+  <table class="phase-table">
+    <thead><tr><th>Langage</th><th>Fichiers</th><th>Lignes physiques (8 juin → 28 juin)</th></tr></thead>
+    <tbody>
+      <tr><td>JavaScript (<code>js/</code>, avec démo)</td><td>164 → <span class="highlight">180</span></td><td>196 067 → <span class="highlight">~203 500</span> (+16 fichiers, ~+7 400 lignes)</td></tr>
+      <tr><td>HTML — <code>index.html</code> (la SPA)</td><td>1</td><td>15 616 → ~15 750</td></tr>
+      <tr><td>CSS — <code>styles.css</code></td><td>1</td><td>25 965 → ~24 800</td></tr>
+    </tbody>
+  </table>
+  <p class="note"><strong>Rupture de méthode signalée</strong> : <code>cloc</code> (lignes de code, hors commentaires/vides) était indisponible dans l'environnement de mesure du 28 juin ; les valeurs ci-dessus sont des <strong>lignes physiques</strong> (<code>git ls-files | wc -l</code>), comparables seulement aux « lignes physiques » du bilan du 8 juin, pas à ses « lignes de code cloc ». La croissance reste modérée et largement infrastructurelle (Voûte, namespacing), partiellement compensée par les ablations zéro-dette.</p>
+  <div class="two-charts">
+    <div class="chart-container"><canvas id="chartTests"></canvas></div>
+    <div class="chart-container" style="display:flex;flex-direction:column;justify-content:center;">
+      <h3 style="margin-top:0;">Lecture d'ensemble</h3>
+      <p style="font-size:0.9rem;">La fenêtre <strong>dépense le capital de maintenabilité</strong> accumulé en mai (golden masters, sentinelles, SSOT) pour oser une <em>migration de données réelles en production sans perte</em>. Le risque résiduel n'est plus la dette technique, mais la bande passante d'un mainteneur unique — désormais <strong>démultipliée par des agents</strong>.</p>
+      <p style="font-size:0.9rem;margin-bottom:0;">Ce régime soutient une cadence élevée (45 releases / 20 j) <em>tant que le mainteneur peut superviser</em>. Le congé de juillet en sera l'épreuve : la documentation (plan mi-août, relais, <code>ETAT-PROJET.md</code>) et le filet de tests suffiront-ils à reprendre <strong>à froid</strong> ?</p>
+    </div>
+  </div>
+</section>
+
+<!-- AUDIT ANNUEL : DIAGNOSTIC → RÉSOLUTION -->
+<section>
+  <h2>La qualité : le rouge le plus tenace cède</h2>
+  <p>L'<strong>audit annuel des 12-14 mai</strong> (6 axes, 25 sous-audits, cadres ISO 25010 / OWASP / WCAG / Loi 25 / OpenSSF / CHAOSS) avait classé l'<strong>architecture SSOT</strong> comme le rouge le plus dur. La fenêtre le fait <span class="highlight">nettement progresser</span> : <strong>fin de #328</strong> (<code>modalitesEvaluation</code>, la violation pivot) et namespacing par trimestre (#358).</p>
+
+  <div class="two-charts">
+    <div class="chart-container"><canvas id="chartRadar"></canvas></div>
+    <div class="chart-container" style="display:flex;flex-direction:column;justify-content:center;">
+      <h3 style="margin-top:0;">Trajectoire des 6 axes</h3>
+      <p style="font-size:0.9rem;">Le radar superpose trois dates : le diagnostic d'audit (12-14 mai), l'état au 8 juin, et l'état au 28 juin. Deux axes bougent nettement sur cette fenêtre :</p>
+      <div class="kpi-grid" style="margin:0.5rem 0 0;grid-template-columns:1fr 1fr;">
+        <div class="kpi"><div class="value" style="color:var(--accent-vert)">2,0 → 6,0</div><div class="label">Architecture SSOT (#328 traité, namespacing posé)</div></div>
+        <div class="kpi"><div class="value" style="color:var(--accent-vert)">7,5 → 8,0</div><div class="label">Sécurité &amp; données (durabilité + anti-perte)</div></div>
+        <div class="kpi"><div class="value" style="color:var(--accent-orange)">8,0 → 7,5</div><div class="label">Soutenabilité (privatisation : CodeQL/branche suspendus)</div></div>
+        <div class="kpi"><div class="value" style="color:var(--texte-secondaire)">5,0</div><div class="label">Accessibilité (stable — tests humains à venir)</div></div>
+      </div>
+    </div>
+  </div>
+  <p class="note">Score de santé 0-10 par axe dérivé de la distribution Vert/Jaune/Rouge (V = 10, J = 5, R = 2, partiel = 4). <strong>Inférence de lecture, pas une métrique de l'audit</strong> — l'audit ne produit que des statuts qualitatifs. La série « 28 juin » réévalue à partir des remédiations livrées dans la fenêtre.</p>
+
+  <table class="phase-table">
+    <thead><tr><th>Axe</th><th>À l'audit (12-14 mai)</th><th>Traité dans la fenêtre</th><th>28 juin</th></tr></thead>
+    <tbody>
+      <tr><td>1. Conformité pédagogique</td><td>Jaune</td><td>Banc de décision = appui au choix de pratique</td><td><span class="highlight">Jaune+</span></td></tr>
+      <tr><td>2. Santé du code</td><td><span class="highlight-rose">Rouge</span></td><td>Ablations zéro-dette (#338) + filet de tests ×3</td><td><span class="highlight">Vert-Jaune</span></td></tr>
+      <tr><td>3. Architecture (SSOT)</td><td><span class="highlight-rose">Rouge</span> (le pire)</td><td><strong>Fin de #328</strong> + namespacing par trimestre (#358) ; reste <code>reserve.js</code> (long terme)</td><td><span class="highlight">Jaune</span> (du rouge le plus dur)</td></tr>
+      <tr><td>4. Soutenabilité</td><td>Jaune</td><td>Pipeline + docs (mai) ; <strong>mais</strong> privatisation (23 juin) → CodeQL/branche suspendus</td><td><span class="highlight-orange">Vert-Jaune</span> (léger recul)</td></tr>
+      <tr><td>5. Sécurité et données</td><td>Jaune</td><td><strong>Durabilité IDB</strong> (#353) + prévention doublons (#360) + migrations sur golden masters</td><td><span class="highlight">Jaune+/Vert</span></td></tr>
+      <tr><td>6. Accessibilité</td><td><span class="highlight-rose">Rouge léger</span></td><td>a11y du comparateur (clavier/focus)</td><td><span class="highlight-orange">En cours</span> — tests VoiceOver/iPad</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <h3>Ce qui reste réellement ouvert</h3>
+    <p>Quatre résidus, tous tracés dans <code>ETAT-PROJET.md</code> : l'<strong>architecture SSOT</strong> (<code>reserve.js</code> en long terme ; <strong>recouper la clôture effective de #328</strong> — désync release/BACKLOG) ; l'<strong>accessibilité</strong> (tests manuels VoiceOver/iPad) ; la <strong>révision Loi 25</strong> de <code>PRIVACY.md</code> (#298) ; l'<strong>hygiène OpenSSF</strong> (CodeQL/protection de branche à réactiver si le dépôt redevient public ou passe à GitHub Pro). Aucun n'est masqué.</p>
+  </div>
+</section>
+
+<footer>
+  Labo Codex — Audit de développement (4<sup>e</sup> bilan) &middot; Document généré le 28 juin 2026 (Cowork)<br>
+  Données extraites de <code>git log</code> (commits dédupliqués sur l'ensemble des branches, fuseau America/Toronto) &middot; build <code>0628-2126</code>, <code>origin/main</code> 495cd99a<br>
+  Heures = proxy haut, <strong>davantage encore sous le régime multi-agents</strong> ; commits, sessions, jours actifs et churn = mesures directes &middot; lignes de code = physiques (cloc indisponible) &middot; tests ~1 210 rapportés, à recouper &middot; réconciliation avec le bilan du 8 juin : écart &lt; 0,2 %.
+</footer>
+
+<script>
+const PALETTE = {
+  vert: '#4ecdc4', vertClair: 'rgba(78, 205, 196, 0.3)',
+  bleu: '#6aacb8', bleuClair: 'rgba(106, 172, 184, 0.3)',
+  orange: '#f0a050', orangeClair: 'rgba(240, 160, 80, 0.3)',
+  rose: '#e06080', roseClair: 'rgba(224, 96, 128, 0.3)',
+  violet: '#a070d0', violetClair: 'rgba(160, 112, 208, 0.3)',
+  blanc: '#d0e8f0', gris: '#8ab4c0', fond: '#1a3a48',
+  grille: 'rgba(106, 172, 184, 0.1)',
+};
+Chart.defaults.color = PALETTE.gris;
+Chart.defaults.borderColor = PALETTE.grille;
+Chart.defaults.font.family = "'Inter', sans-serif";
+
+const baseOpts = (titre) => ({
+  responsive: true,
+  plugins: {
+    title: { display: !!titre, text: titre, color: PALETTE.blanc, font: { size: 14, weight: 500 } },
+    legend: { labels: { usePointStyle: true, padding: 12 } }
+  },
+  scales: { y: { beginAtZero: true, grid: { color: PALETTE.grille } }, x: { grid: { color: PALETTE.grille } } }
+});
+
+// 1. Heures + commits par mois
+new Chart(document.getElementById('chartMois'), {
+  type: 'bar',
+  data: {
+    labels: ['Oct','Nov','Déc','Jan','Fév','Mars','Avr','Mai','Juin*'],
+    datasets: [
+      { label: 'Heures git-actives', data: [37.3,81.9,74.1,104.6,180.1,109.5,120.4,183.6,153.1],
+        backgroundColor: ['#244858','#244858','#244858','#244858','#244858','#244858','#244858',PALETTE.vert,PALETTE.orange],
+        borderColor: [PALETTE.bleu,PALETTE.bleu,PALETTE.bleu,PALETTE.bleu,PALETTE.bleu,PALETTE.bleu,PALETTE.bleu,PALETTE.vert,PALETTE.orange],
+        borderWidth: 2, borderRadius: 6, yAxisID: 'y' },
+      { label: 'Commits', type: 'line', data: [171,357,285,432,584,313,448,734,577],
+        borderColor: PALETTE.orange, backgroundColor: 'transparent', borderWidth: 2,
+        pointRadius: 4, pointBackgroundColor: PALETTE.orange, tension: 0.3, yAxisID: 'y1' }
+    ]
+  },
+  options: {
+    ...baseOpts('Heures et commits par mois (juin* = 1-28, presque complet)'),
+    scales: {
+      y: { beginAtZero: true, position: 'left', grid: { color: PALETTE.grille }, title: { display: true, text: 'Heures' } },
+      y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Commits' } },
+      x: { grid: { color: PALETTE.grille } }
+    }
+  }
+});
+
+// 2. Commits par semaine
+new Chart(document.getElementById('chartSemaine'), {
+  type: 'bar',
+  data: {
+    labels: ['27 avr','4 mai','11 mai','18 mai','25 mai','1 juin','8 juin','15 juin','22 juin'],
+    datasets: [{ label: 'Commits / semaine', data: [85,103,284,147,164,158,186,112,124],
+      backgroundColor: ['#244858','#244858',PALETTE.rose,PALETTE.bleuClair,PALETTE.bleuClair,PALETTE.bleuClair,PALETTE.vert,PALETTE.bleuClair,PALETTE.bleuClair],
+      borderColor: [PALETTE.bleu,PALETTE.bleu,PALETTE.rose,PALETTE.bleu,PALETTE.bleu,PALETTE.bleu,PALETTE.vert,PALETTE.bleu,PALETTE.bleu],
+      borderWidth: 2, borderRadius: 6 }]
+  },
+  options: baseOpts('Commits par semaine (depuis le 27 avril)')
+});
+
+// 3. Commits par jour (fenêtre 9-28 juin)
+new Chart(document.getElementById('chartJour'), {
+  type: 'bar',
+  data: {
+    labels: ['9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28'],
+    datasets: [{ label: 'Commits / jour', data: [24,63,40,6,10,20,37,26,10,10,23,2,4,5,12,3,18,30,13,43],
+      backgroundColor: (c)=>{ const i=c.dataIndex; if(i===1) return PALETTE.vert; if(i===19) return PALETTE.orange; return PALETTE.bleuClair; },
+      borderColor: (c)=>{ const i=c.dataIndex; if(i===1) return PALETTE.vert; if(i===19) return PALETTE.orange; return PALETTE.bleu; },
+      borderWidth: 1.5, borderRadius: 4 }]
+  },
+  options: { ...baseOpts('Commits par jour — 9 (g.) au 28 juin (d.) · vert = 10 juin (4e du projet), orange = clôture'),
+    plugins: { ...baseOpts().plugins, legend: { display:false } } }
+});
+
+// 4. Churn fenêtre (top fichiers)
+new Chart(document.getElementById('chartChurn'), {
+  type: 'bar',
+  data: {
+    labels: ['BACKLOG.md (méta)','pratiques-gestion','pratiques.js (#338)','comparateur-pratiques','index.html','codex.js (#358)','SESSION.md (méta)','trimestres.js (#358)'],
+    datasets: [{ label: 'Churn (lignes réécrites)', data: [426,329,295,224,131,115,105,54],
+      backgroundColor: ['#1a3040',PALETTE.vert,PALETTE.orange,PALETTE.vert,'#244858',PALETTE.vert,'#1a3040',PALETTE.vert],
+      borderColor: [PALETTE.gris,PALETTE.vert,PALETTE.orange,PALETTE.vert,PALETTE.bleu,PALETTE.vert,PALETTE.gris,PALETTE.vert],
+      borderWidth: 2, borderRadius: 5 }]
+  },
+  options: { ...baseOpts('Fichiers les plus réécrits (fenêtre)'), indexAxis: 'y',
+    plugins: { title:{ display:true, text:'Fichiers les plus réécrits (fenêtre)', color:PALETTE.blanc, font:{size:14,weight:500} }, legend:{ display:false } } }
+});
+
+// 5. Nouveaux modules (par sous-système)
+new Chart(document.getElementById('chartNouveaux'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Voûte / partage (8)','Pratiques (4)','Intégrité données (2)','Export résultats (1)','Répertoires (1)','UI dialogues (1)'],
+    datasets: [{ data: [8,4,2,1,1,1],
+      backgroundColor: [PALETTE.vert,PALETTE.bleu,PALETTE.rose,PALETTE.orange,PALETTE.violet,PALETTE.gris],
+      borderColor: PALETTE.fond, borderWidth: 2 }]
+  },
+  options: { responsive:true, plugins: { title:{ display:true, text:'17 nouveaux modules JS dans la fenêtre', color:PALETTE.blanc, font:{size:14,weight:500} }, legend:{ position:'bottom', labels:{ usePointStyle:true, padding:10, font:{size:11} } } } }
+});
+
+// 6. Par heure du jour (fenêtre) — bimodal
+new Chart(document.getElementById('chartHeure'), {
+  type: 'bar',
+  data: {
+    labels: ['2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23'],
+    datasets: [{ label:'Commits', data:[6,8,13,25,28,36,11,19,17,27,32,17,5,8,28,19,36,21,28,6,6,3],
+      backgroundColor: (c)=>{ const i=c.dataIndex; if(i>=3 && i<=11) return PALETTE.vertClair; if(i>=14 && i<=18) return PALETTE.orangeClair; return PALETTE.bleuClair; },
+      borderColor: (c)=>{ const i=c.dataIndex; if(i>=3 && i<=11) return PALETTE.vert; if(i>=14 && i<=18) return PALETTE.orange; return PALETTE.bleu; },
+      borderWidth: 1.5, borderRadius: 4 }]
+  },
+  options: { ...baseOpts('Par heure du jour — profil bimodal (matin + soir)'),
+    plugins: { title:{display:true,text:'Par heure du jour (bimodal : matin + soir)',color:PALETTE.blanc,font:{size:14,weight:500}}, legend:{display:false} } }
+});
+
+// 7. Par jour de la semaine (fenêtre)
+new Chart(document.getElementById('chartSemaineJour'), {
+  type: 'bar',
+  data: {
+    labels: ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'],
+    datasets: [{ label:'Commits', data:[42,62,76,68,59,25,67],
+      backgroundColor: ['#244858','#244858',PALETTE.orange,'#244858','#244858','#244858','#244858'],
+      borderColor: [PALETTE.bleu,PALETTE.bleu,PALETTE.orange,PALETTE.bleu,PALETTE.bleu,PALETTE.bleu,PALETTE.bleu],
+      borderWidth: 2, borderRadius: 5 }]
+  },
+  options: { ...baseOpts('Par jour de la semaine — mercredi domine'),
+    plugins: { title:{display:true,text:'Par jour de la semaine (mercredi domine)',color:PALETTE.blanc,font:{size:14,weight:500}}, legend:{display:false} } }
+});
+
+// 8. Distribution des sessions (fenêtre)
+new Chart(document.getElementById('chartSessions'), {
+  type: 'bar',
+  data: {
+    labels: ['< 30 min','30-60 min','1-2 h','2-3 h','3-4 h','4 h +'],
+    datasets: [{ label:'Sessions', data:[14,8,10,6,2,10],
+      backgroundColor: [PALETTE.bleuClair,PALETTE.bleuClair,PALETTE.bleuClair,PALETTE.bleuClair,PALETTE.bleuClair,PALETTE.vert],
+      borderColor: [PALETTE.bleu,PALETTE.bleu,PALETTE.bleu,PALETTE.bleu,PALETTE.bleu,PALETTE.vert],
+      borderWidth: 2, borderRadius: 5 }]
+  },
+  options: { ...baseOpts('Durée des sessions — polarisée'),
+    plugins: { title:{display:true,text:'Durée des sessions (polarisée : micro vs marathon)',color:PALETTE.blanc,font:{size:14,weight:500}}, legend:{display:false} } }
+});
+
+// 9. Jalons (top jours fenêtre)
+new Chart(document.getElementById('chartJalons'), {
+  type: 'bar',
+  data: {
+    labels: ['10 juin','28 juin','11 juin','15 juin','26 juin','16 juin','9 juin','19 juin'],
+    datasets: [{ label:'Commits', data:[63,43,40,37,30,26,24,23],
+      backgroundColor: [PALETTE.vert,PALETTE.orange,'#244858','#244858','#244858','#244858','#244858','#244858'],
+      borderColor: [PALETTE.vert,PALETTE.orange,PALETTE.bleu,PALETTE.bleu,PALETTE.bleu,PALETTE.bleu,PALETTE.bleu,PALETTE.bleu],
+      borderWidth: 2, borderRadius: 5 }]
+  },
+  options: { ...baseOpts('Journées les plus intenses (fenêtre)'), indexAxis:'y',
+    plugins: { title:{display:true,text:'Journées les plus intenses (fenêtre)',color:PALETTE.blanc,font:{size:14,weight:500}}, legend:{display:false} } }
+});
+
+// 10. Croissance des tests
+new Chart(document.getElementById('chartTests'), {
+  type: 'line',
+  data: {
+    labels: ['8 mai','31 mai','8 juin','28 juin'],
+    datasets: [{ label:'Tests verts', data:[29,149,395,1210],
+      borderColor: PALETTE.vert, backgroundColor: PALETTE.vertClair, fill:true,
+      borderWidth: 3, pointRadius: 6, pointBackgroundColor: PALETTE.vert, tension: 0.25 }]
+  },
+  options: { ...baseOpts('Filet de tests : ×3 sur la fenêtre'),
+    plugins: { title:{display:true,text:'Filet de tests (Vitest + Playwright) — ~1 210 rapportés',color:PALETTE.blanc,font:{size:14,weight:500}}, legend:{display:false} } }
+});
+
+// 11. Radar des 6 axes — audit (12-14 mai) → 8 juin → 28 juin
+new Chart(document.getElementById('chartRadar'), {
+  type: 'radar',
+  data: {
+    labels: ['1. Conformité\npédagogique','2. Santé\ndu code','3. Architecture\n(SSOT)','4. Soutenabilité','5. Sécurité\net données','6. Accessibilité'],
+    datasets: [
+      { label: 'À l’audit (12-14 mai)', data: [6.7,4.2,2.0,5.3,7.0,3.3],
+        borderColor: PALETTE.rose, backgroundColor: 'rgba(224,96,128,0.12)',
+        borderWidth: 2, pointBackgroundColor: PALETTE.rose, pointRadius: 3 },
+      { label: 'Au 8 juin', data: [7.0,7.0,4.0,8.0,7.5,5.0],
+        borderColor: PALETTE.bleu, backgroundColor: 'rgba(106,172,184,0.10)',
+        borderWidth: 2, pointBackgroundColor: PALETTE.bleu, pointRadius: 3 },
+      { label: 'Au 28 juin', data: [7.0,7.5,6.0,7.5,8.0,5.0],
+        borderColor: PALETTE.vert, backgroundColor: 'rgba(78,205,196,0.18)',
+        borderWidth: 2, pointBackgroundColor: PALETTE.vert, pointRadius: 3 }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      title: { display: true, text: 'Santé par axe (0-10) — trajectoire diagnostic → 28 juin', color: PALETTE.blanc, font: { size: 14, weight: 500 } },
+      legend: { labels: { usePointStyle: true, padding: 12 } }
+    },
+    scales: { r: {
+      min: 0, max: 10, ticks: { stepSize: 2, color: PALETTE.gris, backdropColor: 'transparent' },
+      grid: { color: PALETTE.grille }, angleLines: { color: PALETTE.grille },
+      pointLabels: { color: PALETTE.blanc, font: { size: 10 } }
+    } }
+  }
+});
+</script>
+
+</body>
+</html>
