@@ -1,4 +1,10 @@
-# Analyse de conformité RREC — heures-contact des cours
+# Analyse de conformité RREC — heures d'enseignement des cours
+
+> **Note terminologique (#304)** : ce document emploie « heures d'enseignement »
+> (terme recommandé par l'OQLF), qui remplace l'ancien « heures-contact » (calque
+> de *contact hour*, déconseillé). Le **champ de données** `heuresContact` du code
+> n'a pas été renommé (renommer la clé migrerait les codex) : les occurrences entre
+> backticks désignent l'identifiant technique, pas la terminologie d'affichage.
 
 > **Statut** : analyse de code (lecture seule). Aucune modification appliquée.
 > **Date** : 29 mai 2026 · **Beta de référence** : 99.72 (HEAD `cddbd03`)
@@ -11,7 +17,7 @@
 
 ## 1. Vue d'ensemble
 
-Labo Codex ne mesure aujourd'hui **aucun total d'heures-contact**. Il compte des
+Labo Codex ne mesure aujourd'hui **aucun total d'heures d'enseignement**. Il compte des
 **jours** à partir du cadre calendaire, et n'a nulle part où stocker l'**exigence**
 réglementaire d'un cours. La conformité RREC est donc **non vérifiable** par l'outil
 en l'état — ce n'est pas un bug isolé mais l'absence de toute une chaîne.
@@ -19,7 +25,7 @@ en l'état — ce n'est pas un bug isolé mais l'absence de toute une chaîne.
 Le cas de l'été le rend visible : un trimestre intensif fait **les mêmes heures**
 qu'un trimestre régulier en **moins de jours**. Tant qu'on raisonne en jours, le
 chiffre paraît « petit » et l'on ne peut pas conclure. Dès qu'on raisonne en
-heures-contact, on dispose de l'invariant qui traverse régulier et intensif.
+heures d'enseignement, on dispose de l'invariant qui traverse régulier et intensif.
 
 ---
 
@@ -34,7 +40,7 @@ heures-contact, on dispose de l'invariant qui traverse régulier et intensif.
 | **Unité** | 45 h d'« activités d'apprentissage » — **inclut le travail personnel** | 2 ⅓ unités |
 | **Total d'apprentissage** | unités × 45 h | 2 ⅓ × 45 = **105 h** |
 | **Pondération** | théorie – laboratoire – travail personnel (heures/sem. sur 15 sem.) | 2 – 2 – 3 |
-| **Heures-contact** | (théorie + labo) × 15 — **temps en classe seulement** | (2+2) × 15 = **60 h** |
+| **Heures d'enseignement** | (théorie + labo) × 15 — **temps en classe seulement** | (2+2) × 15 = **60 h** |
 | **Travail personnel** | 3e nombre × 15 | 3 × 15 = 45 h |
 
 **Vérification croisée** : 60 h (contact) + 45 h (personnel) = 105 h = 2 ⅓ × 45. ✓
@@ -42,16 +48,16 @@ Les chiffres se valident mutuellement, ce qui sécurise le modèle.
 
 ### Distinction décisive pour la conception
 
-Les **unités ne suffisent pas** à déduire les heures-contact : 2 ⅓ unités = 105 h
+Les **unités ne suffisent pas** à déduire les heures d'enseignement : 2 ⅓ unités = 105 h
 *incluant* le travail personnel. Pour isoler les 60 h de classe, il faut la
-**pondération** (ou directement les heures-contact). C'est pourquoi le champ
-à ajouter doit porter sur les **heures-contact**, pas seulement sur les unités.
+**pondération** (ou directement les heures d'enseignement). C'est pourquoi le champ
+à ajouter doit porter sur les **heures d'enseignement**, pas seulement sur les unités.
 
 > ⚠️ Le facteur « × 15 semaines » est une **convention du trimestre régulier**.
 > En été, on vise les **mêmes 60 h en ~5 semaines** : la pondération hebdomadaire
 > « 2-2-3 » devient littéralement fausse (≈ 12-12-? h/sem), alors que **les 60
-> heures-contact restent l'invariant**. La source de vérité de la conformité doit
-> donc être les heures-contact, pas un calcul reposant sur « 15 ». (Cohérent avec
+> heures d'enseignement restent l'invariant**. La source de vérité de la conformité doit
+> donc être les heures d'enseignement, pas un calcul reposant sur « 15 ». (Cohérent avec
 > la règle projet « zéro fallback arbitraire ».)
 
 ---
@@ -62,8 +68,8 @@ Pour que « conforme » ait un sens, il faut comparer un **réalisé** à une **
 
 | Maillon | Rôle | État actuel |
 |---|---|---|
-| **① Exigence** | Heures-contact attendues du cours (60), saisies au gabarit | ❌ **absent** |
-| **② Réalisé** | Heures-contact effectives = Σ(séances × durée) sur les jours de cours | ❌ **absent** |
+| **① Exigence** | Heures d'enseignement attendues du cours (60), saisies au gabarit | ❌ **absent** |
+| **② Réalisé** | Heures d'enseignement effectives = Σ(séances × durée) sur les jours de cours | ❌ **absent** |
 | **③ Comparaison** | Réalisé vs Exigence → conforme / écart, avec message | ❌ impossible (① et ② manquent) |
 
 Le « 24 jours » observé est le **symptôme du maillon ② manquant** : l'app mesure le
@@ -95,11 +101,11 @@ hebdomadaires**, mais :
 - ces champs vivent sur l'objet cours **assemblé** (clé `cours`), pas sur l'entité
   pure `cours-entite.js` — incohérence de modèle à noter ;
 - ils décrivent un **rythme/semaine**, jamais multiplié par les semaines réelles →
-  ne produisent aucun total d'heures-contact ;
+  ne produisent aucun total d'heures d'enseignement ;
 - ils ne séparent pas contact / travail personnel (cf. §2) ;
 - en été, `periodesParSemaine = 4` serait factuellement faux (le rythme intensif
   est bien plus dense), ce qui confirme qu'un **rythme hebdomadaire ne peut pas être
-  la source de vérité** — seul le total d'heures-contact l'est.
+  la source de vérité** — seul le total d'heures d'enseignement l'est.
 
 Le formulaire (`js/trimestre-v2-cours.js`) pour les infos pédagogiques :
 - Lecture DOM : `_lireChampsInfosCoursDOM()` (l. 1004-1013) lit `v2-codeCours`,
@@ -107,7 +113,7 @@ Le formulaire (`js/trimestre-v2-cours.js`) pour les infos pédagogiques :
   `v2-elementsCompetence`.
 - Construction objet : `_construireObjetCoursV2()` (l. 1055-1082).
 - HTML : inputs `#v2-codeCours`, `#v2-nomCours`, `#v2-numeroCompetence`,
-  `#v2-competence` dans `index.html` (l. 6955-6975). Pas de champ heures-contact.
+  `#v2-competence` dans `index.html` (l. 6955-6975). Pas de champ heures d'enseignement.
 
 ### 4.2 Le « réalisé » n'est compté qu'en jours
 
@@ -139,7 +145,7 @@ pas à créer une nouvelle mécanique.
 
 ## 5. Recommandations de conception (pour décision Cowork)
 
-> Décision déjà prise par Grégoire : champ **heures-contact + pondération** au gabarit.
+> Décision déjà prise par Grégoire : champ **heures d'enseignement + pondération** au gabarit.
 
 ### Maillon ① — champ au gabarit de cours
 - Ajouter `heuresContact` (nombre) comme **source de vérité unique de l'exigence**
@@ -154,7 +160,7 @@ pas à créer une nouvelle mécanique.
 - ⚠️ Préservation des données : champ **optionnel** par défaut (les cours existants
   de Grégoire n'ont pas la valeur) ; pas de migration destructive.
 
-### Maillon ② — calcul des heures-contact réalisées
+### Maillon ② — calcul des heures d'enseignement réalisées
 - Nouvelle fonction (idéalement dans `horaire.js`, près des helpers existants) :
   Σ sur les jours `cours`/`reprise` du calendrier × durée des séances de ce jour
   via `obtenirSeancesHoraire` + `duree`/`periodesVersHeures`.
@@ -176,9 +182,9 @@ pas à créer une nouvelle mécanique.
 
 ## 6. Décision actée (Grégoire, 29 mai 2026)
 
-**Heures-contact = seule source de vérité de la conformité. Unités = repère affiché.**
+**Heures d'enseignement = seule source de vérité de la conformité. Unités = repère affiché.**
 
-- Le **contrôle RREC** se fait exclusivement sur les **heures-contact** (réalisé ②
+- Le **contrôle RREC** se fait exclusivement sur les **heures d'enseignement** (réalisé ②
   vs exigence ①). Aucune autre grandeur n'entre dans le verdict conforme/écart.
 - Les **unités** (ex. 2 ⅓) sont un **repère descriptif affiché**, **dérivé** et non
   saisi comme référence. Le travail personnel (3e nombre de la pondération) sert
@@ -191,5 +197,5 @@ Conséquences de conception :
   *propose* `heuresContact` = (théorie + labo) × 15 et *calcule* le repère
   d'unités = (somme des 3) × 15 / 45. Mais une fois `heuresContact` posé, c'est lui
   qui fait foi (cohérent avec l'invariant été du §2).
-- Affichage : « Heures-contact : 48 / 60 h » comme indicateur de conformité +
+- Affichage : « Heures d'enseignement : 48 / 60 h » comme indicateur de conformité +
   « ≈ 2 ⅓ unités » comme repère discret, non normatif.

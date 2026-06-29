@@ -26,7 +26,7 @@ const CLE_COURS = 'cours';
  * @property {string} numeroCompetence - Numéro de la compétence
  * @property {string} competence - Description de la compétence
  * @property {string} elementsCompetence - Éléments de compétence
- * @property {number|null} heuresContact - Heures-contact attendues du cours (RREC). Source de vérité de la conformité.
+ * @property {number|null} heuresContact - Heures d'enseignement attendues du cours (RREC). Source de vérité de la conformité.
  * @property {string} ponderation - Pondération « théorie-labo-perso » (ex. "2-2-3"). Métadonnée de saisie ; propose heuresContact et le repère d'unités.
  * @property {string} dateCreation - Date de création ISO
  * @property {string} dateModification - Date de dernière modification ISO

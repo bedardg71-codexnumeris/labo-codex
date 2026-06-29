@@ -608,7 +608,7 @@ function _remplirChampsInfosCours(cours) {
     setValue('v2-competence', cours.competence || '');
     setValue('v2-disciplineCours', cours.discipline || '');
     setValue('v2-elementsCompetence', cours.elementsCompetence || '');
-    setValue('v2-heuresContact', (cours.heuresContact === 0 || cours.heuresContact) ? cours.heuresContact : '');
+    setValue('v2-heuresEnseignement', (cours.heuresContact === 0 || cours.heuresContact) ? cours.heuresContact : '');
     setValue('v2-ponderation', cours.ponderation || '');
     majRepereUnitesCours();
 }
@@ -621,8 +621,8 @@ function remplirFormCoursV2(cours) {
 }
 
 /* ===============================
-   CONFORMITÉ RREC — pondération → heures-contact + repère d'unités (chantier A)
-   Heures-contact = source de vérité. Pondération = aide à la saisie.
+   CONFORMITÉ RREC — pondération → heures d'enseignement + repère d'unités (chantier A)
+   Heures d'enseignement = source de vérité. Pondération = aide à la saisie.
    Une unité = 45 h d'activités d'apprentissage (RREC, art. 1).
    =============================== */
 
@@ -675,13 +675,13 @@ function majRepereUnitesCours() {
 }
 
 /**
- * Handler live (data-on-input sur #v2-ponderation) : propose les heures-contact
+ * Handler live (data-on-input sur #v2-ponderation) : propose les heures d'enseignement
  * dérivées de la pondération — (théorie + labo) × 15 semaines — SANS écraser une
- * valeur déjà saisie manuellement (heures-contact reste la source de vérité).
+ * valeur déjà saisie manuellement (les heures d'enseignement restent la source de vérité).
  * Met aussi à jour le repère d'unités.
  */
-function proposerHeuresContactDepuisPonderation() {
-    const champHeures = document.getElementById('v2-heuresContact');
+function proposerHeuresEnseignementDepuisPonderation() {
+    const champHeures = document.getElementById('v2-heuresEnseignement');
     const pond = _parserPonderation(document.getElementById('v2-ponderation')?.value);
     if (champHeures && pond && (champHeures.value === '' || champHeures.value === undefined)) {
         // Proposition seulement : ne remplit que si le champ est vide.
@@ -924,7 +924,7 @@ function reinitialiserFormCoursV2() {
     // Refonte chantier C : seuls les champs ministériels subsistent dans ce formulaire.
     const champs = [
         'v2-codeCours', 'v2-nomCours', 'v2-numeroCompetence', 'v2-competence', 'v2-disciplineCours',
-        'v2-elementsCompetence', 'v2-heuresContact', 'v2-ponderation'
+        'v2-elementsCompetence', 'v2-heuresEnseignement', 'v2-ponderation'
     ];
     champs.forEach(id => setValue(id, ''));
     majRepereUnitesCours();
@@ -964,7 +964,7 @@ function annulerFormCoursV2() {
  * Sauvegarde le cours (création ou modification)
  */
 function _lireChampsInfosCoursDOM() {
-    const heuresBrut = document.getElementById('v2-heuresContact')?.value?.trim();
+    const heuresBrut = document.getElementById('v2-heuresEnseignement')?.value?.trim();
     return {
         codeCours: document.getElementById('v2-codeCours')?.value?.trim(),
         nomCours: document.getElementById('v2-nomCours')?.value?.trim(),
@@ -972,7 +972,7 @@ function _lireChampsInfosCoursDOM() {
         numeroCompetence: document.getElementById('v2-numeroCompetence')?.value?.trim() || '',
         competence: document.getElementById('v2-competence')?.value?.trim() || '',
         elementsCompetence: document.getElementById('v2-elementsCompetence')?.value?.trim() || '',
-        // Heures-contact = source de vérité de la conformité RREC (chantier A).
+        // Heures d'enseignement = source de vérité de la conformité RREC (chantier A).
         // Vide → null (cours sans exigence saisie), sinon nombre.
         heuresContact: (heuresBrut === '' || heuresBrut === undefined) ? null : (parseFloat(heuresBrut) || null),
         ponderation: document.getElementById('v2-ponderation')?.value?.trim() || ''
