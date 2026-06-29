@@ -13,8 +13,8 @@
 > idéalement sa source et sa date de vérification, pour éviter de propager un état périmé.
 >
 > **Dernière mise à jour** : 28 juin 2026 (Cowork) — bêta publique **1.26.0** / build `0628-2126`.
-> `origin/main` `495cd99a` ; **`main` local en avance** (merge docs plan mi-août + travail #362 en
-> cours, **non poussé** au moment de la rédaction). Dépôt **privatisé le 23 juin 2026**.
+> `origin/main` `72478557` (à jour) ; PR #74 (batch mi-août #346/#350/#362/#342) et #72 (untrack
+> node_modules) **mergées** ; docs d'entrée dé-hardcodés. Dépôt **privatisé le 23 juin 2026**.
 
 ---
 
@@ -177,8 +177,8 @@ Les cinq modules à forte complexité ont été éclatés en sous-modules et mer
 ## 6. Stabilité
 
 ### 6.1 Filet de tests
-- Suite **rapportée par la session 1.26.0 (28 juin) : 1142 Vitest + 68 Playwright (WebKit) verts.**
-  *Chiffre non re-vérifié en Cowork — à recouper via `cd tests && npm test`.* (Pour mémoire : 436 verts au 10 juin.)
+- Suite : **1179 Vitest + 68 Playwright (WebKit) verts** (Vitest recoupé `npx vitest run` le 28 juin,
+  après le batch mi-août #350/#362/#342 ; Playwright vert en CI sur PR #74). (Pour mémoire : 436 verts au 10 juin.)
 - Couvre : sécurité (CSP, sandbox, sanitisation, imports — Défense I/J), golden masters L0/L2 du calcul de note
   et de l'isolation par trimestre, sentinelles de namespacing (#358, briques A/B/C, special-archive), durabilité
   IDB (#353), prévention des doublons (#360), comparateur/maquettes (#326), DEN, répertoires de classement.
@@ -323,4 +323,5 @@ Synthèse :
 | 2026-05-31 | 0531-0840 | Création du document. État consolidé après audit du backlog et des plans Phase 2. |
 | 2026-05-31 (PM) | 0531-1409 | #294 fait (déploiement lancé). UI : bandeau orange, thème clair, anti-flash. « wizard » → « assistant ». Plan « Bêta publique 1.0.0 » prêt. |
 | 2026-06-10 | 0610-0512 | Rattrapage de 10 jours (124 commits, 1.0.0 → 1.6.1). Lancement public fait. #303 clos, #307/#318/#319/#320/#327 livrés, #300 clos. Tests 436 verts. Audit SSOT `modalitesEvaluation` livré (plan 4 lots). |
-| 2026-06-28 | 0628-2126 | **Rafraîchissement Cowork** (1.6.1 → 1.26.0, ~20 releases). Ajout §0 repère rapide + §10 bis. LIVRÉS : Voûte avant-pilote (1.11.0), comparateur réactivé (#326, 1.26.0), namespacing par trimestre + migration live (#358, 1.25.0), durabilité IDB (#353, 1.24.2), doublons (#360, 1.24.0), « fin de #328 » (1.22.0, **à recouper** — case BACKLOG ouverte). EN COURS : palier 1 mi-août (#362 fix `f9c824af`). Horizon **mi-août** cadré (`PLAN-mi-aout-2026.md`). Privatisation du dépôt (23 juin) → CodeQL/branch-protection suspendus. Contexte : passage Max 20x → Pro + congé juillet, reprise 1er août. Tests 1142+68 *rapportés* (à recouper). État vérifié au code/git ; non poussé. |
+| 2026-06-28 | 0628-2126 | **Rafraîchissement Cowork** (1.6.1 → 1.26.0, ~20 releases). Ajout §0 repère rapide + §10 bis. LIVRÉS : Voûte avant-pilote (1.11.0), comparateur réactivé (#326, 1.26.0), namespacing par trimestre + migration live (#358, 1.25.0), durabilité IDB (#353, 1.24.2), doublons (#360, 1.24.0), « fin de #328 » (1.22.0, **à recouper** — case BACKLOG ouverte). EN COURS : palier 1 mi-août (#362 fix `f9c824af`). Horizon **mi-août** cadré (`PLAN-mi-aout-2026.md`). Privatisation du dépôt (23 juin) → CodeQL/branch-protection suspendus. Contexte : passage Max 20x → Pro + congé juillet, reprise 1er août. Tests **1179** Vitest + 68 Playwright (Vitest recoupé 28 juin). État vérifié au code/git. |
+| 2026-06-28 (nuit, Claude Code) | 0628-2126 | Merge de PR #74 (batch mi-août #346/#350/#362/#342) et #72 (untrack symlinks `node_modules`) sur `main`. Dé-hardcodage des docs d'entrée (CLAUDE.md / 00-START-HERE / README → pointent `version.json`/`ETAT-PROJET.md`). Correction des lignes périmées de ce document (1142→1179, en-tête « non poussé »). Réorg `Rapports/audit-developpement/`. Outils #362/#342 prêts (dry-run/audit, revue adverse), run live reporté à une séance de jour sur backup. |
