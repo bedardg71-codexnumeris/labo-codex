@@ -64,7 +64,7 @@ test('Chantier C · création route via CoursEntite → ID COURS_* sans période
         if (selDisc) selDisc.value = disciplineChoisie;
         set('v2-codeCours', 'TEST-CHANTIER-C');
         set('v2-nomCours', 'Cours refonte pur');
-        set('v2-heuresContact', '60');
+        set('v2-heuresEnseignement', '60');
         set('v2-ponderation', '2-2-3');
 
         await window.sauvegarderCoursV2();
