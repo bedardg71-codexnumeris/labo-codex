@@ -1,4 +1,5 @@
-node_modules/
+# Sans slash final : matche aussi un symlink node_modules (pas que le dossier).
+node_modules
 test-results/
 playwright-report/
 playwright/.cache/
