@@ -12,6 +12,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.26',
+            couleur: 'bleu',
+            titre: 'Retour du comparateur de pratiques',
+            items: [
+                'Le comparateur de pratiques est de nouveau accessible en tout temps, dans le Labo sous « Exploration des pratiques » : compare 2 ou 3 pratiques (ou maquettes) côte à côte sur des profils-types tirés de ton échelle, sans passer par le mode démonstration.',
+                'Quand une pratique n’est pas encore complète, sa colonne affiche « — non constructible » au lieu d’un 0 trompeur ; les pratiques abouties construisent la note normalement.',
+                'Dériver une maquette te dépose directement sur l’arbre d’exploration (plus d’ouverture du formulaire de configuration) ; copier une maquette conserve fidèlement sa configuration.'
+            ]
+        },
+        {
             version: '1.25',
             couleur: 'bleu',
             titre: 'Données plus fiables et modèles isolés par trimestre',

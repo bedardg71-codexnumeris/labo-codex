@@ -14603,14 +14603,14 @@
      =================================== -->
 
     <!-- PRIORITÉ 0: Couche de stockage (Migration IndexedDB - Beta 91.5) -->
-    <script src="js/db.js?v=2026061112"></script> <!-- 1.16.0+ : #336 D — listBlobIds (purge espace précédent) -->
+    <script src="js/db.js?v=20260629a"></script> <!-- 1.16.0+ : #336 D — listBlobIds (purge espace précédent) -->
     <script src="js/pratiques/modalites-evaluation.js?v=2026061113"></script> <!-- SSOT #328 Lot 1 : module propriétaire de modalitesEvaluation (seul point d'écriture), chargé avec la couche stockage -->
     <script src="js/securite-hash.js?v=2026050615"></script> <!-- Beta 99.36 b0506-1400 : Défense H — sceau SHA-256 sur ressources partagées -->
     <script src="js/securite-export-validation.js?v=2026050824"></script> <!-- Beta 99.38 b0508-1445 : #259 follow-up — label « archive » (sans « réserve ») -->
     <script src="js/securite-export-preview.js?v=20260511e"></script> <!-- Beta 99.41 : #256-bis bouton aide-contextuelle data-aide=modal-export-preview -->
 
     <!-- Rapport de bug pour testeurs (Beta 94) - Chargé tôt pour capturer les erreurs -->
-    <script src="js/rapport-bug.js?v=2026061113"></script> <!-- Refonte nav SP5 : case 'calendrier' -->
+    <script src="js/rapport-bug.js?v=20260629a"></script> <!-- Refonte nav SP5 : case 'calendrier' -->
     <script src="js/modal-soutien.js?v=2026060801"></script> <!-- Bouton « Soutenir Labo Codex » (entête) -->
 
     <!-- Bibliothèque externe: Chart.js pour graphiques progression (Beta 93) -->
@@ -14637,10 +14637,10 @@
          vérité pour l'activation/désactivation du mode démo. Le legacy
          js/donnees-demo.js a été retiré en Phase 5.D.
          pack-demo-20.js est lazy-loadé par demo-namespace.js si nécessaire. -->
-    <script src="js/demo-activation.js?v=2026061101"></script>
+    <script src="js/demo-activation.js?v=20260629a"></script>
 
     <!-- PRIORITÉ 2: Données de base -->
-    <script src="js/trimestres.js?v=2026061106"></script> <!-- Beta 99.76 b0529-1139 : refonte chantier B — résolution trimestre via trimestre actif -->
+    <script src="js/trimestres.js?v=20260629a"></script> <!-- Beta 99.76 b0529-1139 : refonte chantier B — résolution trimestre via trimestre actif -->
     <script src="js/productions-namespace-garde.js?v=2026061500"></script> <!-- #340 : garde-fou anti-contamination productions inter-trimestres (db.set/setSync) -->
     <script src="js/trimestre.js?v=20260512b"></script> <!-- Beta 99.28 b0428-1915 : champ categorie + algo deux passes pour numérotation des semaines DÉ -->
     <script src="js/trimestre-v2.js?v=20260517f"></script> <!-- Refactor étape 3 sessions A+B+C (17 mai 2026) : zones LOW 1+2+5+7 + MEDIUM 3+4+6 + HIGH 8 extraites — résidu 599 LOC -->
@@ -14663,25 +14663,25 @@
     <script src="js/pratique-notation-v2.js?v=2026061113"></script> <!-- Beta 95 : dropdown productions + terminologie "production" -->
     <script src="js/gabarits-utils.js?v=20260512b"></script> <!-- Beta 95 : Module utilitaire gabarits + filtres pratique -->
     <script src="js/bibliotheque-ui.js?v=2026051020"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 (menu ⋮ kebab + refactor renderCarte) -->
-    <script src="js/spe-specifications.js?v=2026061101"></script> <!-- Beta 95 : Module PAN-Spécifications + gabarits François -->
+    <script src="js/spe-specifications.js?v=20260629a"></script> <!-- Beta 95 : Module PAN-Spécifications + gabarits François -->
     <script src="js/repertoires-bibliotheque.js"></script> <!-- #320 L0 : répertoires de classement (couche par-dessus les biblios) -->
     <script src="js/pratiques-bibliotheque.js?v=2026062201"></script> <!-- #318 (22 juin) : gabarit DEN « Modèle de base » ; Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/pratiques-gestion.js?v=2026062601"></script> <!-- Brique C namespacing pas 5 : import inter-trimestre de pratiques (modèle COPIE) + vérif dépendances echelleId/grilleId (option A : avertir) -->
-    <script src="js/preferences-v2.js?v=2026050104"></script> <!-- Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
-    <script src="js/donnees-v2.js?v=2026062701"></script> <!-- Refonte nav SP5 : afficherSection calendrier -->
+    <script src="js/pratiques-gestion.js?v=20260629a"></script> <!-- Brique C namespacing pas 5 : import inter-trimestre de pratiques (modèle COPIE) + vérif dépendances echelleId/grilleId (option A : avertir) -->
+    <script src="js/preferences-v2.js?v=20260629a"></script> <!-- Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
+    <script src="js/donnees-v2.js?v=20260629a"></script> <!-- Refonte nav SP5 : afficherSection calendrier -->
     <script src="js/etudiants.js?v=2026061103"></script>
     <script src="js/productions-bibliotheque.js?v=2026050617"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/productions.js?v=2026062701"></script> <!-- Beta 99.41 b0511-1215 : #216 data-tooltip sur dates échéance multi-groupe -->
-    <script src="js/productions-import-export.js?v=20260516a"></script> <!-- Refactor étape 3 (16 mai 2026) : extrait de productions.js (lignes 2630-3276) -->
+    <script src="js/productions.js?v=20260629a"></script> <!-- Beta 99.41 b0511-1215 : #216 data-tooltip sur dates échéance multi-groupe -->
+    <script src="js/productions-import-export.js?v=20260629a"></script> <!-- Refactor étape 3 (16 mai 2026) : extrait de productions.js (lignes 2630-3276) -->
     <script src="js/productions-liste.js?v=20260516b"></script> <!-- Refactor étape 3 (16 mai 2026) : sidebar + CRUD utilisateur extraits de productions.js -->
     <script src="js/productions-bibliotheque-ui.js?v=20260626a"></script> <!-- Fix preview « Voir les productions » : display:none inline → classe u-hide -->
     <script src="js/grilles-bibliotheque.js?v=2026050617"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/grilles.js?v=2026062603"></script> <!-- Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée -->
+    <script src="js/grilles.js?v=20260629a"></script> <!-- Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée -->
     <script src="js/echelles-bibliotheque.js?v=2026050617"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/echelles.js?v=20260626a"></script> <!-- Fix preview « Voir les échelles » : display:none inline → classe u-hide -->
+    <script src="js/echelles.js?v=20260629a"></script> <!-- Fix preview « Voir les échelles » : display:none inline → classe u-hide -->
     <script src="js/cartouches-bibliotheque.js?v=2026050617"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/cartouches.js?v=20260512g"></script> <!-- Beta 99.42 b0512-1012 : #159 retiré (onglets + aperçu legacy supprimés) -->
-    <script src="js/export-pdf.js?v=20260512b"></script> <!-- Beta 95.7 #30 : Export PDF -->
+    <script src="js/cartouches.js?v=20260629a"></script> <!-- Beta 99.42 b0512-1012 : #159 retiré (onglets + aperçu legacy supprimés) -->
+    <script src="js/export-pdf.js?v=20260629a"></script> <!-- Beta 95.7 #30 : Export PDF -->
     <script src="js/cours.js?v=20260529b"></script> <!-- Beta 99.74 b0529-1016 : chantier 0 refonte — _diagnostiquerModeleCours (read-only) -->
     <script src="js/contexte.js?v=2026062701"></script> <!-- Beta 95.2 : Support groupe-cours -->
 
@@ -14718,7 +14718,7 @@
     <script src="js/pratiques/profils-types-generateur.js?v=2026061701"></script>
 
     <!-- Licence Creative Commons (Beta 91.5 - Import/Export) -->
-    <script src="js/cc-license.js?v=2026051206"></script> <!-- Beta 99.42 b0512-0641 : fix Safari #264 — renommage "Nom de ta pratique" → "Titre de ce partage" -->
+    <script src="js/cc-license.js?v=20260629a"></script> <!-- Beta 99.42 b0512-0641 : fix Safari #264 — renommage "Nom de ta pratique" → "Titre de ce partage" -->
 
     <!-- Gestion des doublons (Beta 95.1) -->
     <script src="js/modal-doublon.js?v=2026010601"></script>
@@ -14740,7 +14740,7 @@
     <script src="js/profil-etudiant-diagnostics.js?v=20260518a"></script> <!-- Refactor session B : zone diagnostics SRPNF/Critères + blocs RLO + onglets (11 fonctions, ~830 LOC) -->
     <script src="js/profil-etudiant-confidentiel.js?v=20260518a"></script> <!-- Refactor session B : modal PII confidentiel + services adaptés + sous-catégories médicales (8 fonctions, ~300 LOC) -->
     <script src="js/profil-etudiant-actions.js?v=2026061103"></script> <!-- Refactor session C : actions cascade consulterEvaluation + calculerDetailsNoteFinale + jetons + patterns groupe (8 fonctions, ~560 LOC) -->
-    <script src="js/profil-etudiant-sections-affichage.js?v=2026061113"></script> <!-- Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
+    <script src="js/profil-etudiant-sections-affichage.js?v=20260629a"></script> <!-- Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
     <script src="js/presences-apercu.js?v=2025121017"></script>
     <script src="js/boite-outils.js?v=20260512b"></script> <!-- Beta 96.1 : Boîte à outils pédagogiques -->
     <script src="js/modelisation.js?v=2026022201"></script> <!-- Modélisation : annotation en projection -->
@@ -14770,8 +14770,8 @@
     <script src="libs/jszip.min.js?v=3.10.1"></script>
     <script src="libs/html2canvas.min.js?v=1.4.1"></script>
     <script src="js/travaux-stockage.js?v=2026020601"></script>
-    <script src="js/reserve.js?v=2026062701"></script> <!-- Beta 99.38 b0508-1440 : #262 archive-{dossier}-{date}.zip (sans CONFIDENTIEL-) -->
-    <script src="js/reserve-ouvrir.js?v=2026050823"></script> <!-- Beta 99.38 b0508-1440 : #262 label « Choisir un fichier .zip d'archive » -->
+    <script src="js/reserve.js?v=20260629a"></script> <!-- Beta 99.38 b0508-1440 : #262 archive-{dossier}-{date}.zip (sans CONFIDENTIEL-) -->
+    <script src="js/reserve-ouvrir.js?v=20260629a"></script> <!-- Beta 99.38 b0508-1440 : #262 label « Choisir un fichier .zip d'archive » -->
     <script src="js/reserve-reglages.js?v=2026050559"></script> <!-- #259 : strings UI Réserve → Archives -->
     <script src="js/securite-prefs.js?v=2026050613"></script> <!-- Beta 99.36 b0506-1335 : Défense D — toggle persistance FSAPI -->
     <script src="js/codex-data.js?v=20260511c"></script> <!-- Beta 99.41 : #264 progression sur extraction codex data -->
@@ -14806,31 +14806,31 @@
          Ordre requis : après cc-license.js et bibliotheque-ui.js, avant import-export.js ;
          signature.js avant partage-format.js (construirePackageSigne). -->
     <script src="js/partage-schemas.js?v=2026061001"></script>
-    <script src="js/partage-validation.js?v=2026061001"></script>
+    <script src="js/partage-validation.js?v=20260629a"></script>
     <script src="js/signature.js?v=2026061002"></script>
     <script src="js/trust-tofu.js?v=2026061003"></script>
-    <script src="js/partage-format.js?v=2026061002"></script>
-    <script src="js/partage-export.js?v=2026061004"></script>
-    <script src="js/partage-import.js?v=2026061005"></script>
-    <script src="js/partage-section.js?v=2026061006"></script>
-    <script src="js/import-export.js?v=2026061101"></script> <!-- Beta 99.41 : #264 progression sur exporterConfigurationComplete + executerExport -->
+    <script src="js/partage-format.js?v=20260629a"></script>
+    <script src="js/partage-export.js?v=20260629a"></script>
+    <script src="js/partage-import.js?v=20260629a"></script>
+    <script src="js/partage-section.js?v=20260629a"></script>
+    <script src="js/import-export.js?v=20260629a"></script> <!-- Beta 99.41 : #264 progression sur exporterConfigurationComplete + executerExport -->
     <script src="js/codex.js?v=2026061115"></script> <!-- 1.16.0+ : #336 D — preview purge espace précédent à l'ouverture -->
-    <script src="js/statistiques.js?v=2026061103"></script> <!-- Beta 99.76 b0529-1139 : refonte chantier B — libellé trimestre via trimestre actif -->
-    <script src="js/liste-evaluations.js?v=2026061101"></script> <!-- Beta 99.41 : Défense E — echapperHtml sur error.message + p.id (attribut) -->
+    <script src="js/statistiques.js?v=20260629a"></script> <!-- Beta 99.76 b0529-1139 : refonte chantier B — libellé trimestre via trimestre actif -->
+    <script src="js/liste-evaluations.js?v=20260629a"></script> <!-- Beta 99.41 : Défense E — echapperHtml sur error.message + p.id (attribut) -->
     <script src="js/journal.js?v=2026041706"></script>
-    <script src="js/snapshots.js?v=2026030201"></script>
+    <script src="js/snapshots.js?v=20260629a"></script>
     <script src="js/couleurs.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_GRAPHIQUE.tooltip + couleurs() -->
     <script src="js/graphiques-progression.js?v=2026061113"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_TOOLTIP délégué à STYLE_GRAPHIQUE -->
     <script src="js/correlations-longitudinales.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #246 tooltip via STYLE_GRAPHIQUE -->
         <script src="js/impact-jetons.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #246 tooltip via STYLE_GRAPHIQUE -->
-    <script src="js/consolidation.js?v=2026040801"></script>
+    <script src="js/consolidation.js?v=20260629a"></script>
 
     <!-- PRIORITÉ 7: Utilitaires -->
-    <script src="js/evaluation-jetons.js?v=2026061101"></script>
-    <script src="js/evaluation-chargement.js?v=2026061103"></script> <!-- Beta 99.48 : session A étape 3 refactor (17 fonctions Chargement+Auto-save) -->
+    <script src="js/evaluation-jetons.js?v=20260629a"></script>
+    <script src="js/evaluation-chargement.js?v=20260629a"></script> <!-- Beta 99.48 : session A étape 3 refactor (17 fonctions Chargement+Auto-save) -->
     <script src="js/evaluation-calcul.js?v=20260518d"></script> <!-- Beta 99.48 : session B 1er sous-module (6 fonctions Calcul + couleurs) -->
     <script src="js/evaluation-retroaction.js?v=20260518d"></script> <!-- Beta 99.48 : session B 2e sous-module (10 fonctions Rétroaction) -->
-    <script src="js/evaluation-sauvegarde.js?v=2026061101"></script> <!-- Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) -->
+    <script src="js/evaluation-sauvegarde.js?v=20260629a"></script> <!-- Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) -->
     <script src="js/evaluation.js?v=2026061103"></script> <!-- Beta 99.48 : résidu post-extractions Chargement+Calcul+Rétroaction+Sauvegarde+Handlers -->
     <script src="js/evaluation-handlers.js?v=20260518d"></script> <!-- Beta 99.48 : session A étape 3 refactor (3 fonctions extraites) -->
 
@@ -14841,12 +14841,12 @@
     <script src="js/migrations.js?v=2026061101"></script>
 
     <!-- Page d'accueil (Chantier 3) -->
-    <script src="js/accueil.js?v=2026050542"></script> <!-- Refonte nav SP5 : data-param calendrier -->
+    <script src="js/accueil.js?v=20260629a"></script> <!-- Refonte nav SP5 : data-param calendrier -->
     <!-- Guidage contextuel démo (Chantier 4) -->
     <script src="js/guidage-demo.js?v=20260512d"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=2026042819"></script> <!-- Beta 99.28 b0428-1915 : item numérotation semaines DÉ -->
+    <script src="js/changelog-data.js?v=20260629a"></script> <!-- Beta 99.28 b0428-1915 : item numérotation semaines DÉ -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
     <script src="js/etats-vides.js?v=2026050537"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre -->
@@ -14856,22 +14856,22 @@
          Un seul moteur pour hover, flèches didactiques, popups aide contextuelle,
          visite guidée et glossaire. API publique : window.accompagnement. -->
     <link rel="stylesheet" href="css/accompagnement.css?v=2026042002">
-    <script src="js/accompagnement.js?v=2026050539"></script> <!-- Refonte nav SP5 : section calendrier -->
+    <script src="js/accompagnement.js?v=20260629a"></script> <!-- Refonte nav SP5 : section calendrier -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
-    <script src="js/accompagnement-contenu-hover.js?v=20260512d"></script> <!-- Beta 99.42 b0512-0840 : #18 +4 clés Évaluations, -7 clés ea-* mortes -->
-    <script src="js/accompagnement-contenu-popup.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
-    <script src="js/accompagnement-contenu-terme.js?v=2026050528"></script>
-    <script src="js/guides-pedagogiques.js?v=2026060401"></script> <!-- Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->
-    <script src="js/comparateur-pratiques.js?v=2026061704"></script> <!-- Comparateur de pratiques (lot C1-a : squelette + garde démo, 6 juin 2026) -->
+    <script src="js/accompagnement-contenu-hover.js?v=20260629a"></script> <!-- Beta 99.42 b0512-0840 : #18 +4 clés Évaluations, -7 clés ea-* mortes -->
+    <script src="js/accompagnement-contenu-popup.js?v=20260629a"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
+    <script src="js/accompagnement-contenu-terme.js?v=20260629a"></script>
+    <script src="js/guides-pedagogiques.js?v=20260629a"></script> <!-- Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->
+    <script src="js/comparateur-pratiques.js?v=20260629a"></script> <!-- Comparateur de pratiques (lot C1-a : squelette + garde démo, 6 juin 2026) -->
     <script src="js/export-resultats-finaux.js?v=2026061901"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=2026062701"></script> <!-- Refonte nav SP5 : naviguerVers calendrier-trimestre -->
+    <script src="js/main.js?v=20260629a"></script> <!-- Refonte nav SP5 : naviguerVers calendrier-trimestre -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260518a"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260629a"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>
