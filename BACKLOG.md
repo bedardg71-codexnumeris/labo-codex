@@ -204,11 +204,11 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - **Livré** : le seul libellé *fonctionnel* divergent (`profil-etudiant-sections-affichage.js:4049`, « PAN (Portfolio à nombre limité) » / « SOM (Sommative provisoire) ») aligné sur la forme déjà dominante (`etudiants.js:381` ; des dizaines d'occurrences « PAN-Standards » ailleurs, déjà conformes). Aucun test ne verrouillait les anciens libellés ; Vitest 1179/1179.
   - **Préservé** : les notes *explicatives* « par portfolio » (`profil-etudiant-actions.js:187`) restent inchangées (décision antérieure). Brief `refonte-textes-profils-individuels.md` §A3.
 
-- [ ] 📐 🟡 **#313** Deux sélecteurs « Production » dans le pipeline d'import — clarifier / dédupliquer
+- [ ] 🟡 **#313** ✅ TRANCHÉ 29 juin — Deux sélecteurs « Production » dans le pipeline d'import — clarifier / dédupliquer
   - **Contexte** : le pipeline d'import (étape Optimisation) expose **deux** selects « Production ». Le **global** (`travaux-ui.js:1683`, `associerProductionGlobale`) écrit `productionId` sur **tous** les fichiers de la file (boucle `forEach`, `~l.2259`). Le **par fichier** (`l.1774`, `changerProductionPipeline(idx)`) n'agit que sur le fichier sélectionné — raccourci né de l'usage pour **corriger une attribution** (équivalent rapide d'« Éditer »). Même donnée (`f.productionId`), portées différentes.
   - **Risque** : le global **écrase silencieusement** les choix par-fichier, et les deux selects peuvent afficher des valeurs **divergentes** → confusion.
   - **Fait le 3 juin (lancement)** : le select par-fichier renommé « Production » → **« Modifier »** (commit `59358856`) pour signaler son rôle de correction, **sans toucher à la logique**.
-  - **À trancher post-AQPC** : (1) ajouter une **information dans l'interface** précisant la distinction global ↔ par-fichier ; (2) décider de fusionner, supprimer l'un, ou neutraliser le piège d'écrasement. Modèle cohérent pressenti : **production = globale (1 par lot)**, **étudiant·e = par fichier**. Options analysées le 3 juin (cf. échange de session).
+  - **✅ DÉCIDÉ (Grégoire, 29 juin 2026)** : neutraliser l’écrasement silencieux — le sélecteur GLOBAL ne réécrit plus un choix par-fichier divergent (préserve les corrections « Modifier ») + **info UI** clarifiant global ↔ par-fichier. Empreinte : `travaux-ui.js` (associerProductionGlobale :1683, boucle :2259), `travaux-import.js`. Conserver le raccourci « Modifier ». Contexte initial : (1) ajouter une **information dans l'interface** précisant la distinction global ↔ par-fichier ; (2) décider de fusionner, supprimer l'un, ou neutraliser le piège d'écrasement. Modèle cohérent pressenti : **production = globale (1 par lot)**, **étudiant·e = par fichier**. Options analysées le 3 juin (cf. échange de session).
 
 ### Fonctionnalités à compléter
 
@@ -314,10 +314,10 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 ### Cohérence visuelle UI
 
-- [ ] 🟢 **#344** Calendrier scolaire — fusionner les 3 cartes métriques dans la carte « Légende »
+- [ ] 🟢 **#344** ✅ TRANCHÉ 29 juin — Calendrier scolaire — fusionner les 3 cartes métriques dans la carte « Légende »
   - **Idée (Grégoire, 21 juin 2026, captures fournies)** : retirer les **3 cartes métriques** du haut de la page Calendrier scolaire (« Semaines scolaires », « Jours de cours », « Congés avec reprise ») et reporter ces 3 chiffres **à l'intérieur de la carte « Légende »**, en **disposition deux colonnes** : la légende des codes-couleur d'un côté, les 3 indicateurs chiffrés de l'autre. Une seule carte au lieu de quatre.
   - **Bénéfice attendu** : page plus compacte, moins d'éléments, la synthèse chiffrée cohabite avec la grille de lecture — cohérent avec le principe « densité maîtrisée, pas d'ornementation » du design system.
-  - **Point de conception à trancher** : aujourd'hui les 3 chiffres sont en tête de page (visibles d'un coup d'œil) ; la carte Légende est plus bas. S'ils descendent dans la Légende, ils perdent cette position de tête → décider si la carte fusionnée **remonte en haut** de la page ou si la Légende reste à sa place. Confirmer la disposition exacte des deux colonnes avec Grégoire.
+  - **✅ DÉCIDÉ (Grégoire, 29 juin 2026)** : la carte fusionnée **remonte EN HAUT** (prend la place des 3 cartes retirées), disposition **2 colonnes** (légende des couleurs | les 3 chiffres). Empreinte : `calendrier-vue.js`, `styles.css`, `index.html` (section calendrier). Vérif terrain : 2 modes + responsive (empilage en étroit). Contexte initial : aujourd'hui les 3 chiffres sont en tête de page (visibles d'un coup d'œil) ; la carte Légende est plus bas. S'ils descendent dans la Légende, ils perdent cette position de tête → décider si la carte fusionnée **remonte en haut** de la page ou si la Légende reste à sa place. Confirmer la disposition exacte des deux colonnes avec Grégoire.
   - **Vérif terrain** : rendu dans les deux modes (clair/sombre) + responsive (les deux colonnes doivent s'empiler proprement en étroit — cf. #283-T1 qui touche aussi cette page).
   - Fichier(s) : vue Calendrier scolaire (`index.html` section calendrier + rendu JS), `styles.css` (cartes métriques + carte légende).
 
