@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculerRecreationGrilles } from '../../scripts/reparer-grilles-h2026.mjs';
+import { calculerRecreationGrilles, appliquer, fabriquerGrille } from '../../scripts/reparer-grilles-h2026.mjs';
 
 // #362 — Grilles h2026 désappariées des évaluations. calculerRecreationGrilles()
 // calcule le plan de RECRÉATION de DÉFINITIONS de grille manquantes : un grilleId
@@ -20,8 +20,10 @@ import { calculerRecreationGrilles } from '../../scripts/reparer-grilles-h2026.m
 //      → les tests « 0 candidate » et « 2 candidates ambiguës » rougissent.
 //  - retirer le filtre `.filter(e => e && !e.remplaceeParId)` sur evals
 //      → le test « éval remplacée n'a pas voix » peut rougir (recrée pour une grille morte).
-//  - dans appliquer(), forcer `copie.id = src.grille.id` au lieu de rec.idAttendu :
-//      non couvert ici (logique d'écriture, hors cœur pur) — voir le CLI --ecrire.
+//  - dans fabriquerGrille(), forcer `copie.id = src.grille.id` au lieu de rec.idAttendu :
+//      le test « fabriquerGrille force l'id attendu » rougit (cf. describe appliquer).
+//  - dans appliquer(), retirer la garde `if (liste.some(... id === idAttendu)) continue;` :
+//      le test « appliquer est idempotent au niveau liste » rougit (doublon).
 
 // Fixtures : 3 critères FR-HOLIS, 3 critères Grille-4, etc. (ids = ceux que l'éval stocke).
 const CRIT_HOLIS = [
@@ -180,3 +182,84 @@ describe('#362 · calculerRecreationGrilles — recréation conservatrice de dé
         expect(parId.grille_ALGO).toBe('COPIE_ALGO');
     });
 });
+
+describe('#362 · appliquer / fabriquerGrille — écriture (copie) de définitions, jamais d’évaluations', () => {
+    function codexHolis() {
+        return {
+            h2026_evaluationsSauvegardees: [evalH('E1', 'grille_HOLIS', CRIT_HOLIS)],
+            h2026_grillesTemplates: [
+                { id: 'COPIE_A25', nom: 'FR-HOLIS A25', criteres: CRIT_HOLIS, echelleId: 'ECH_HOLIS', dansBibliotheque: true }
+            ]
+        };
+    }
+
+    it('fabriquerGrille force l’id ATTENDU (pas l’id source) et copie les critères de la source', () => {
+        const codex = codexHolis();
+        const plan = calculerRecreationGrilles(codex, 'h2026', { grille_HOLIS: 'Grille-5 FR-HOLIS-30' });
+        const grille = fabriquerGrille(codex, plan.recreations[0]);
+        // Le cœur de la réparation : l'id doit être celui qu'attendent les évals, JAMAIS la copie source.
+        expect(grille.id).toBe('grille_HOLIS');
+        expect(grille.id).not.toBe('COPIE_A25');
+        expect(grille.nom).toBe('Grille-5 FR-HOLIS-30');
+        expect(empreinteDe(grille.criteres)).toBe(empreinteDe(CRIT_HOLIS));
+        expect(grille.echelleId).toBe('ECH_HOLIS');           // échelle préservée depuis la source
+        expect(grille.recreeeDe).toBe('COPIE_A25');           // traçabilité de provenance
+        expect(grille.recreeePar).toBe('#362-reparer-grilles-h2026');
+    });
+
+    it('fabriquerGrille fait une COPIE PROFONDE : muter le résultat ne touche pas la source', () => {
+        const codex = codexHolis();
+        const plan = calculerRecreationGrilles(codex, 'h2026', { grille_HOLIS: 'N' });
+        const grille = fabriquerGrille(codex, plan.recreations[0]);
+        grille.criteres[0].ponderation = 999;
+        expect(codex.h2026_grillesTemplates[0].criteres[0].ponderation).toBe(15); // source intacte
+    });
+
+    it('appliquer AJOUTE la définition recréée sous l’id attendu dans *_grillesTemplates', () => {
+        const codex = codexHolis();
+        const plan = calculerRecreationGrilles(codex, 'h2026', { grille_HOLIS: 'Grille-5 FR-HOLIS-30' });
+        const out = appliquer(codex, plan);
+        const ids = out.h2026_grillesTemplates.map(g => g.id).sort();
+        expect(ids).toContain('grille_HOLIS');                // la définition manquante est désormais résoluble
+        expect(ids).toContain('COPIE_A25');                   // la copie source n'est PAS retirée par appliquer
+    });
+
+    it('appliquer NE touche PAS les évaluations (grade-bearing) — identiques avant/après', () => {
+        const codex = codexHolis();
+        const evalsAvant = JSON.stringify(codex.h2026_evaluationsSauvegardees);
+        const plan = calculerRecreationGrilles(codex, 'h2026', { grille_HOLIS: 'N' });
+        const out = appliquer(codex, plan);
+        expect(JSON.stringify(out.h2026_evaluationsSauvegardees)).toBe(evalsAvant);
+    });
+
+    it('appliquer NE mute PAS le codex d’entrée (écrit sur une copie profonde)', () => {
+        const codex = codexHolis();
+        const avant = JSON.stringify(codex);
+        appliquer(codex, calculerRecreationGrilles(codex, 'h2026', { grille_HOLIS: 'N' }));
+        expect(JSON.stringify(codex)).toBe(avant);
+    });
+
+    it('appliquer est idempotent au niveau liste : ré-appliquer ne crée pas de doublon', () => {
+        const codex = codexHolis();
+        const plan = calculerRecreationGrilles(codex, 'h2026', { grille_HOLIS: 'N' });
+        const out1 = appliquer(codex, plan);
+        // Re-calcul + re-application sur la sortie : la grille existe déjà → aucun ajout.
+        const plan2 = calculerRecreationGrilles(out1, 'h2026', { grille_HOLIS: 'N' });
+        const out2 = appliquer(out1, plan2);
+        const nbHolis = out2.h2026_grillesTemplates.filter(g => g.id === 'grille_HOLIS').length;
+        expect(nbHolis).toBe(1);
+    });
+
+    it('appliquer NE touche QUE *_grillesTemplates (aucune autre clé du codex modifiée)', () => {
+        const codex = Object.assign(codexHolis(), { h2026_presences: [{ da: 'X' }], autreCle: { a: 1 } });
+        const plan = calculerRecreationGrilles(codex, 'h2026', { grille_HOLIS: 'N' });
+        const out = appliquer(codex, plan);
+        expect(JSON.stringify(out.h2026_presences)).toBe(JSON.stringify(codex.h2026_presences));
+        expect(JSON.stringify(out.autreCle)).toBe(JSON.stringify(codex.autreCle));
+    });
+});
+
+// Empreinte (même règle que le script) : union triée des critereId, pour comparer deux jeux de critères.
+function empreinteDe(criteres) {
+    return (criteres || []).map(c => c && c.id).filter(Boolean).sort().join('|');
+}
