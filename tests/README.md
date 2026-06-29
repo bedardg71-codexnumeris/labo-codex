@@ -25,6 +25,27 @@ npx playwright install --with-deps webkit
 `playwright install` télécharge environ 300 Mo de browsers. Cible :
 WebKit (Safari) en headless, qui correspond à la cible production.
 
+## node_modules — jamais versionné, un par arbre de travail
+
+`node_modules/` n'est **jamais** suivi par git (ni ici, ni à la racine).
+Chaque arbre de travail — clone frais comme worktree git — installe ses
+propres dépendances :
+
+```bash
+cd tests && npm ci      # reproductible (depuis package-lock.json)
+# ou : npm install
+```
+
+Le hook `session-start.sh` et `scripts/hooks/pre-push` le font/skippent
+automatiquement selon que `tests/node_modules` existe ou non.
+
+Historique : `tests/node_modules` (et `node_modules` à la racine) ont déjà
+été suivis **par erreur** sous forme de symlinks pointant vers un worktree
+ensuite supprimé — un checkout frais cassait alors `cd tests && npm test`.
+Ne jamais recréer de symlink versionné. Si un `node_modules` partagé entre
+worktrees est souhaité, le faire avec un symlink **local non suivi** (déjà
+couvert par le `.gitignore`, pattern `node_modules` sans slash final).
+
 ## Commandes
 
 ```bash
