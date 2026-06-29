@@ -764,7 +764,9 @@ function _renderHtmlJetonPredefini(type, mp, artefacts, tokenImg) {
             '<div class="u-flex-gap-8 u-align-center">' +
                 '<input type="checkbox" id="' + mp.checkboxId + '" data-on-change="' + mp.handler + '"' + coche + '>' +
                 '<span class="' + mp.wrapperClass + '">' +
-                    '<span class="badge-jeton-titre" data-tooltip="' + mp.tooltip + '">' + echapperHtml(type.nom.replace(/^Jeton de /i, '').replace(/^./, function(c) { return c.toUpperCase(); })) + '</span>' +
+                    // #240 : cliquer le mot du jeton active le tampon texte (apposé sur le
+                    // travail annoté, il coche cette checkbox). role/tabindex = activable au clavier.
+                    '<span class="badge-jeton-titre badge-jeton-titre--tampon" data-tooltip="' + mp.tooltip + '" data-action="travauxOutils.activerTamponJeton" data-param="' + type.id + '" role="button" tabindex="0" title="Cliquer pour apposer le tampon « ' + echapperHtml(type.nom) + ' » sur le travail">' + echapperHtml(type.nom.replace(/^Jeton de /i, '').replace(/^./, function(c) { return c.toUpperCase(); })) + '</span>' +
                 '</span>' +
                 tokenImg +
             '</div>';
