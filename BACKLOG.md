@@ -400,7 +400,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - **Périmètre** : un seul fichier de code, `js/pack-demo-20.js` (3 surfaces dénormalisées : `prenom`/`nom`, `etudiantNom` ×202, prénom incrusté dans les rétroactions ×~198) ; + docs hors archive. Aucun test à éditer (fixtures synthétiques / DA).
   - **Appariement positionnel** (décision Grégoire, 26 juin 2026) — inverse le genre sur 10 profils → vérifier les accords genrés des rétroactions.
   - Décision esthétique en suspens : DEMO010 = profil « fort » (→ Goodall), DEMO004 = « en difficulté » (→ Césaire) — échangeable.
-  - **Consigne détaillée** : `CONSIGNE-renommage-eleves-demo.md` (racine du dépôt).
+  - **Consigne détaillée** : `plans de travail/CONSIGNE-renommage-eleves-demo.md`.
 
 ### Recherche / Analyse longitudinale
 
