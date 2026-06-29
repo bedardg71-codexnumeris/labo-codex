@@ -1,18 +1,21 @@
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
 
-// #359 — desarchiverTrimestre doit PURGER les copies de modèles namespacées posées à
-// l'archivage (creerSnapshotRessources : <id>_grillesTemplates / _echellesTemplates /
-// _pratiquesConfigurables / _cartouches_<grilleId>). Une fois le flag `archive` retiré,
-// cle() ne lit plus ces copies (il retombe sur les clés globales) → ORPHELINS MORTS :
-// place perdue (cf. #353 quota saturé) et cartouche périmée au ré-archivage (la copie de
-// cartouche n'est réécrite que si length>0). Décision D-D5 : purger au désarchivage
-// (≠ modifier cle()), car désarchiver = redevenir un trimestre éditable normal partageant
-// le catalogue global. Le backup `snapshot_<id>_*` (référence historique) est CONSERVÉ.
+// #359 (RÉCONCILIÉ #358, Option A) — desarchiverTrimestre ne purge QUE les copies qui
+// REDEVIENNENT ORPHELINES une fois `archive` retiré : celles dont cle() retombe sur une
+// clé GLOBALE partagée. Avant Option A : grilles/échelles/pratiques + cartouches étaient
+// toutes purgées. APRÈS : grilles/échelles/pratiques ont rejoint CLES_NAMESPACEES →
+// `<id>_*` est la donnée VIVANTE du trimestre désarchivé (lue par cle() hors archive) →
+// on NE LES PURGE PLUS (sinon perte de notes). NB : pratiquesConfigurables était déjà
+// namespacé → le purger était un bug latent, corrigé ici. Seules les CARTOUCHES
+// (cartouches_<grilleId>, restées globales) restent purgées. La condition est dérivée du
+// REGISTRE (CLES_GLOBALES), pas d'un flag → s'auto-ajuste au déplacement du registre.
+// Le backup `snapshot_<id>_*` (référence historique) est CONSERVÉ.
 //
-// Break-test : sur le code AVANT fix, desarchiverTrimestre ne retire rien → les assertions
-// « copie absente » rougissent. C'est la preuve que la sentinelle mord
-// (SKILL_verification_adverse, P2 — un test qui ne peut pas échouer ne prouve rien).
+// Break-test : re-purger une copie namespacée vivante (ex. <id>_grillesTemplates) fait
+// rougir « la copie namespacée SURVIT » ; ne plus purger la cartouche fait rougir « la
+// cartouche orpheline est retirée ». Un test qui ne peut pas échouer ne prouve rien
+// (SKILL_verification_adverse, P2).
 
 function dbDepuisStore(store) {
     return {
@@ -51,15 +54,22 @@ function storeArchive() {
     };
 }
 
-describe('#359 · désarchiver purge les copies de modèles namespacées', () => {
-    it('retire les 3 copies de templates + la copie de cartouche', () => {
+describe('#359 (réconcilié #358) · désarchiver préserve les modèles vivants, purge les orphelins', () => {
+    it('PRÉSERVE les copies namespacées VIVANTES (grilles/échelles/pratiques — Option A)', () => {
         const store = storeArchive();
         const win = chargerTrimestres(store);
         const r = win.desarchiverTrimestre('a2025');
         expect(r.success).toBe(true);
-        expect('a2025_grillesTemplates' in store).toBe(false);
-        expect('a2025_echellesTemplates' in store).toBe(false);
-        expect('a2025_pratiquesConfigurables' in store).toBe(false);
+        // Après Option A, ces copies sont la donnée vivante du trimestre → CONSERVÉES.
+        expect('a2025_grillesTemplates' in store).toBe(true);
+        expect('a2025_echellesTemplates' in store).toBe(true);
+        expect('a2025_pratiquesConfigurables' in store).toBe(true);
+    });
+
+    it('PURGE la copie de cartouche orpheline (restée globale)', () => {
+        const store = storeArchive();
+        const win = chargerTrimestres(store);
+        win.desarchiverTrimestre('a2025');
         expect('a2025_cartouches_G1' in store).toBe(false);
     });
 
@@ -80,14 +90,12 @@ describe('#359 · désarchiver purge les copies de modèles namespacées', () =>
         expect(t.statistiquesFinales).toEqual({ nbEtudiants: 20, nbCours: 1 });
     });
 
-    it('rapporte les clés effectivement purgées (copiesPurgees)', () => {
+    it('rapporte les clés effectivement purgées (copiesPurgees = la cartouche orpheline seule)', () => {
         const store = storeArchive();
         const win = chargerTrimestres(store);
         const r = win.desarchiverTrimestre('a2025');
-        expect(r.copiesPurgees).toEqual(expect.arrayContaining([
-            'a2025_grillesTemplates', 'a2025_echellesTemplates',
-            'a2025_pratiquesConfigurables', 'a2025_cartouches_G1'
-        ]));
+        // Plus aucune copie de modèle namespacée vivante dans la purge → seule la cartouche.
+        expect(r.copiesPurgees).toEqual(['a2025_cartouches_G1']);
     });
 
     it('GARDE — appel sur un trimestre non archivé : refusé, copies intactes', () => {

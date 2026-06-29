@@ -14,8 +14,8 @@ import { chargerScript } from './_helpers/charger-script.js';
 //   2. SOURCE INTACTE — la duplication ne mute jamais la source, même si le db ne
 //      protège pas (break-test : c'est copiePropre qui protège, pas le faux db) ;
 //   3. REMAP — id neuf + cc.grilleId = id de la copie ; snapshots internes intacts ;
-//   4. DESTINATION — clé globale nue (grillesTemplates), pas cle() : la migration des
-//      writers relève de la Brique D, pas du pas 3 ;
+//   4. DESTINATION — la copie va dans cle() (`<trim>_grillesTemplates`), PAS le global :
+//      la migration des writers (report assumé en Brique C) est LIVRÉE par la Brique D (#358) ;
 //   5. TÉMOIN D-C4 — echelleId d'une copie N'EST PAS remappé au pas 3 (report assumé ;
 //      ce test rougira quand le pas 4 ajoutera le remappage d'échelle).
 
@@ -78,12 +78,13 @@ describe('Brique C · dupliquerGrillePartagee — lecture de cartouches injecté
         expect(copies[0].id).toMatch(/^CART_NEUF_/);
     });
 
-    it('DESTINATION — la grille copiée va dans la clé GLOBALE nue, pas dans cle()', () => {
+    it('DESTINATION — la grille copiée va dans cle() (namespacé #358), pas le global nu', () => {
         const grille = { id: 'GR_D', nom: 'D', criteres: [] };
         w.partageSection.dupliquerGrillePartagee(grille, lireCartouchesParCle);
-        expect(db.getSync('grillesTemplates', [])).toHaveLength(1);
-        // si le code passait par cle() (w.cle = k => 'h2026_'+k), la copie atterrirait ici :
-        expect(db.getSync('h2026_grillesTemplates', [])).toHaveLength(0);
+        // #358 Brique D : le writer suit cle() (w.cle = k => 'h2026_'+k) ;
+        // break-test : si le code régressait vers la clé nue, ces deux lignes s'inversent.
+        expect(db.getSync('h2026_grillesTemplates', [])).toHaveLength(1);
+        expect(db.getSync('grillesTemplates', [])).toHaveLength(0);
     });
 
     it('SOURCE PLATE — même mécanique avec un lecteur par filtre (forme Voûte)', () => {
@@ -184,7 +185,7 @@ describe('Brique C · dupliquerGrillePartagee — lecture de cartouches injecté
         const r1 = w.partageSection.dupliquerGrillePartagee(grille, lireCartouchesParCle);
         const r2 = w.partageSection.dupliquerGrillePartagee(grille, lireCartouchesParCle);
         expect(r1.grille.id).not.toBe(r2.grille.id);
-        expect(db.getSync('grillesTemplates', [])).toHaveLength(2);
+        expect(db.getSync('h2026_grillesTemplates', [])).toHaveLength(2);
         expect(db.getSync('cartouches_' + r1.grille.id, [])[0].id)
             .not.toBe(db.getSync('cartouches_' + r2.grille.id, [])[0].id);
     });

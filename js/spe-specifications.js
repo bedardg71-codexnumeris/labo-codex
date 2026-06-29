@@ -891,9 +891,9 @@ La structure est claire (intro, développement, conclusion)"></textarea>
         };
 
         // Sauvegarder dans les grilles (clé globale grillesTemplates)
-        let grilles = await db.get('grillesTemplates') || [];
+        let grilles = await db.get(cle('grillesTemplates')) || [];
         grilles.push(nouvelleGrille);
-        await db.set('grillesTemplates', grilles);
+        await db.set(cle('grillesTemplates'), grilles);
 
         // Ajouter aussi à la bibliothèque partagée
         if (typeof ajouterGrilleALaBibliotheque === 'function') {

@@ -158,9 +158,9 @@
 
         // Compter chaque type (fusion bibliothèque + templates pour grilles et échelles)
         const grillesBiblio = typeof obtenirToutesLesGrillesBibliothequeSync === 'function' ? obtenirToutesLesGrillesBibliothequeSync() : [];
-        const grillesTempl = db.getSync('grillesTemplates', []) || [];
+        const grillesTempl = (typeof toutesGrillesTravail === 'function') ? toutesGrillesTravail() : (db.getSync('grillesTemplates', []) || []);
         const echellesBiblio = typeof obtenirToutesLesEchellesBibliothequeSync === 'function' ? obtenirToutesLesEchellesBibliothequeSync() : [];
-        const echellesTempl = db.getSync('echellesTemplates', []) || [];
+        const echellesTempl = (typeof toutesEchellesTravail === 'function') ? toutesEchellesTravail() : (db.getSync('echellesTemplates', []) || []);
 
         const counts = {
             pratiques: obtenirToutesPratiquesUtilisateur().length,
@@ -360,7 +360,7 @@
 
         const grillesBiblio = typeof obtenirToutesLesGrillesBibliothequeSync === 'function' ?
             obtenirToutesLesGrillesBibliothequeSync() : [];
-        const grillesTempl = db.getSync('grillesTemplates', []) || [];
+        const grillesTempl = (typeof toutesGrillesTravail === 'function') ? toutesGrillesTravail() : (db.getSync('grillesTemplates', []) || []);
         const grilles = fusionnerRessources(grillesBiblio, grillesTempl);
 
         if (grilles.length === 0) {
@@ -522,7 +522,7 @@
 
         const echellesBiblio = typeof obtenirToutesLesEchellesBibliothequeSync === 'function' ?
             obtenirToutesLesEchellesBibliothequeSync() : [];
-        const echellesTempl = db.getSync('echellesTemplates', []) || [];
+        const echellesTempl = (typeof toutesEchellesTravail === 'function') ? toutesEchellesTravail() : (db.getSync('echellesTemplates', []) || []);
         const echelles = fusionnerRessources(echellesBiblio, echellesTempl);
 
         if (echelles.length === 0) {
@@ -695,7 +695,7 @@
 
     function afficherTableauGrillesV2(container) {
         const grillesBiblio = typeof obtenirToutesLesGrillesBibliothequeSync === 'function' ? obtenirToutesLesGrillesBibliothequeSync() : [];
-        const grillesTempl = db.getSync('grillesTemplates', []) || [];
+        const grillesTempl = (typeof toutesGrillesTravail === 'function') ? toutesGrillesTravail() : (db.getSync('grillesTemplates', []) || []);
         const grilles = fusionnerRessources(grillesBiblio, grillesTempl);
 
         if (grilles.length === 0) {
@@ -742,7 +742,7 @@
 
     function afficherTableauEchellesV2(container) {
         const echellesBiblio = typeof obtenirToutesLesEchellesBibliothequeSync === 'function' ? obtenirToutesLesEchellesBibliothequeSync() : [];
-        const echellesTempl = db.getSync('echellesTemplates', []) || [];
+        const echellesTempl = (typeof toutesEchellesTravail === 'function') ? toutesEchellesTravail() : (db.getSync('echellesTemplates', []) || []);
         const echelles = fusionnerRessources(echellesBiblio, echellesTempl);
 
         if (echelles.length === 0) {
@@ -1357,7 +1357,7 @@
             const grillesBiblio = obtenirToutesLesGrillesBibliothequeSync();
             ressource = grillesBiblio.find(g => g.id === id);
             if (!ressource) {
-                const grillesTempl = db.getSync('grillesTemplates', []) || [];
+                const grillesTempl = (typeof toutesGrillesTravail === 'function') ? toutesGrillesTravail() : (db.getSync('grillesTemplates', []) || []);
                 ressource = grillesTempl.find(g => g.id === id);
             }
             const deps = verifierDependancesGrille(id);
@@ -1373,7 +1373,7 @@
             const echellesBiblio = obtenirToutesLesEchellesBibliothequeSync();
             ressource = echellesBiblio.find(e => e.id === id);
             if (!ressource) {
-                const echellesTempl = db.getSync('echellesTemplates', []) || [];
+                const echellesTempl = (typeof toutesEchellesTravail === 'function') ? toutesEchellesTravail() : (db.getSync('echellesTemplates', []) || []);
                 ressource = echellesTempl.find(e => e.id === id);
             }
             const deps = verifierDependancesEchelle(id);
@@ -1578,13 +1578,17 @@
             await retirerGrilleDeLaBibliotheque(grilleId);
         }
 
-        // Retirer aussi de grillesTemplates (dual storage)
+        // Retirer aussi des modèles de travail du trimestre ACTIF (dual storage).
+        // #358 Option A : `cle('grillesTemplates')` = `<trim>_grillesTemplates`. On ne
+        // purge QUE le trimestre actif — les copies archivées d'autres trimestres sont
+        // des enregistrements figés (reproductibilité des notes), on n'y touche pas.
         try {
-            let templates = db.getSync('grillesTemplates', []) || [];
+            let templates = db.getSync(cle('grillesTemplates'), []) || [];
             const avant = templates.length;
             templates = templates.filter(g => g.id !== grilleId);
             if (templates.length !== avant) {
-                await db.set('grillesTemplates', templates);
+                // security-ok: filtre d'une collection DÉJÀ stockée (retrait d'un id), aucune donnée externe.
+                await db.set(cle('grillesTemplates'), templates);
             }
         } catch (e) {
             console.warn('[donnees-v2] Erreur suppression grille templates:', e.message);
@@ -1622,13 +1626,16 @@
             await retirerEchelleDeLaBibliotheque(echelleId);
         }
 
-        // Retirer aussi de echellesTemplates (dual storage)
+        // Retirer aussi des modèles de travail du trimestre ACTIF (dual storage).
+        // #358 Option A : `cle('echellesTemplates')` = `<trim>_echellesTemplates`
+        // (trimestre actif uniquement — archives figées intactes, cf. grilles).
         try {
-            let templates = db.getSync('echellesTemplates', []) || [];
+            let templates = db.getSync(cle('echellesTemplates'), []) || [];
             const avant = templates.length;
             templates = templates.filter(e => e.id !== echelleId);
             if (templates.length !== avant) {
-                await db.set('echellesTemplates', templates);
+                // security-ok: filtre d'une collection DÉJÀ stockée (retrait d'un id), aucune donnée externe.
+                await db.set(cle('echellesTemplates'), templates);
             }
         } catch (e) {
             console.warn('[donnees-v2] Erreur suppression échelle templates:', e.message);

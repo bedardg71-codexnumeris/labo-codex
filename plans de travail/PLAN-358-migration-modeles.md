@@ -39,6 +39,57 @@ de clé nue soit vers les fonctions catalogue existantes, soit vers `cle()`.
 
 ---
 
+## 0 bis. CORRECTION MAJEURE — la prémisse « catalogue » est fausse EN DONNÉES (28 juin PM)
+
+> Vérifié sur le codex 10h24 + 2 orchestrations de 44 agents (classification + **vérif adverse**).
+> Cette section **supersède** le §0, le §2 (comptage 61/24/15/19) et le §3 (D1-D4) ci-dessous.
+
+**Le catalogue n'est PAS le pool des grilles de travail. Deux collections DISJOINTES (0 id commun) :**
+- `grillesTemplates` / `echellesTemplates` (clé GLOBALE, lue en clé nue) = les **grilles/échelles de
+  TRAVAIL réelles** (7 grilles / 3 échelles : « Global-5 (FR-HOLIS) H26 » = grille de dépistage, 94 évals
+  h2026 ; « Grille-4 A25 » ; générique…). **Grade-bearing.**
+- `bibliothequeGrilles` / `bibliothequeEchelles` (catalogue, via `obtenirToutesLes…BibliothequeSync()`)
+  = une bibliothèque de **GABARITS de départ** (« [Multi] Grille analytique », « [SPE] Gabarit - Portfolio »…),
+  injectés au boot.
+
+**Conséquence : AUCUN des 120 sites clé-nue ne se re-pointe vers le catalogue de gabarits.** Tous lisent
+des grilles de TRAVAIL → namespace (trimestre actif) ou pool (inter-trimestres). Le catalogue gabarits
+reste une bibliothèque séparée, **intouchée par #358**. La « correction de prémisse » du 28 juin AM
+(« Option A réutilise les catalogues ») était elle-même fausse.
+
+**Piège vérifié — le flag `dansBibliotheque`** est un drapeau SUR les grilles de travail (`g.dansBibliotheque
+!== false` = « publiée à la sidebar/bibliothèque »), **PAS** un marqueur du catalogue gabarits.
+`db.get('grillesTemplates').filter(g => g.dansBibliotheque !== false)` lit des grilles de TRAVAIL filtrées.
+Les deux audits ont d'abord confondu les deux (les 5 « GABARITS » candidats étaient des grilles de travail).
+
+### Carte d'exécution corrigée (audit v2, modèle correct) — détail : `audit-358-v2-sites.json`
+
+| Classe | Nb | Re-point |
+|---|---|---|
+| **NAMESPACE_ACTIF** | ~88 | `db.get(cle('grillesTemplates'/'echellesTemplates'))` — grilles de travail du trimestre actif (résolution d'éval, dropdowns de notation, listings/exports « ce trimestre », filtres `dansBibliotheque`). Inclut les 5 ex-« GABARITS » + les bugs préexistants (clé nue→cle()). |
+| **POOL_INTER_TRIMESTRE** | ~11 | helper `toutesGrillesTravail()` = **union des `<trim>_grillesTemplates`** : inventaire « toutes mes grilles » (donnees-v2 tableaux/compteurs), suppression-par-id, export config complète (backup). |
+| **SPECIAL_ARCHIVE** | ~17 | cas par cas : demo-activation (10, snapshot/restore), donnees-v2 (4), trimestres (2, machinerie C1/C2), productions (1, dual-storage). |
+| **A_DECIDER** | 4 | export-pdf 2287/2295 (prep PDF, filtre `dansBibliotheque`) → NAMESPACE_ACTIF ; import-export 3126/3127 (backup config complet) → POOL. |
+| **GABARITS** | 0 | (tous les candidats étaient des grilles de travail filtrées). |
+| **résolution par id grade-bearing** | — | pratique-registre:249, pratique-pan-standards:849 (dépistage), consolidation:180 → helper `resoudreModeleParId()` = namespace actif puis **repli union-pool** (décision Grégoire 28 juin). |
+
+### Deux helpers à créer
+1. `resoudreModeleParId(type, id)` — namespace actif → repli **union des `<trim>_*`** (PAS le catalogue gabarits).
+2. `toutesGrillesTravail()` / `toutesEchellesTravail()` — union des `<trim>_*`. Pour les sites POOL.
+
+### Séquence d'exécution (coordonnée, un seul déploiement)
+1. Helpers. 2. **C1 câblé au boot** (`migrerModelesVersNamespace()` + flag idempotent) — peuple `<trim>_*`
+   AVANT tout lecteur. 3. **Déplacer registre** `CLES_GLOBALES`→`CLES_NAMESPACEES` (`cle()` bascule en namespace).
+4. **Re-pointer les 120 sites** (88 cle() / 11 pool / 17 spécial / résolutions par id). 5. **Réconcilier #359** :
+   `purgerCopiesModelesArchive` ne doit PLUS purger `<id>_grillesTemplates`/`echellesTemplates` au désarchivage
+   (vivants après Option A) → conditionner au flag de migration. 6. **Retirer/vider la clé globale (DERNIER).**
+7. **Valider** : sentinelle d'intégrité résolution + Vitest + L0/L2 avant-après (browser pour la migration des données live).
+
+> ⚠ Les ~20 sites décisionnels (POOL + A_DECIDER + ex-GABARITS) **à relire site par site à l'exécution** —
+> les audits automatiques confondent grilles-de-travail / gabarits / flag `dansBibliotheque`.
+
+---
+
 ## 1. Scope confirmé (dry-run du 28 juin, codex réel)
 
 Trimestres réels = **a2025 + h2026** uniquement. **a2024 = trimestre de test → à supprimer**
@@ -84,8 +135,10 @@ Trimestres réels = **a2025 + h2026** uniquement. **a2024 = trimestre de test �
 **Bloc 1 — fondations (trimestres.js + corollaires + dry-run)**
 1. **Pré-vol** : trancher D1-D4 ; backup Codex horodaté ; baseline L0 (golden master/trimestre)
    + L2 (sentinelle isolation) AVANT toute modif.
-2. **Étendre L2** aux échelles (et idéalement pratiques/cartouches) — `sentinelle-isolation-grilles-trimestre.mjs`
-   ne scanne que les grilles (~l.89) ; **break-tester** (fuite injectée → ROUGE) avant de s'y fier.
+2. ~~**Étendre L2** aux échelles~~ **DÉJÀ FAIT (1.23.0, 26 juin).** `sentinelle-isolation-grilles-trimestre.mjs`
+   couvre les **4 familles** (grille/échelle/pratique/cartouche). Vérifié le 28 juin : VERT sur le codex 10h24
+   (aucun modèle partagé a2025↔h2026) **et break-testé** (fuite injectée éval h2026→grille a2025 → ROUGE ;
+   `--simuler-isolation h2026` → reverdit). Rien à coder ici.
 3. **Déplacer** `grillesTemplates`+`echellesTemplates` `CLES_GLOBALES`(l.102-103)→`CLES_NAMESPACEES`
    (bloc l.51-96) dans `trimestres.js`. NE PAS toucher `CLES_TEMPLATES_ARCHIVES` (l.112-116) ni
    `cleSource()` (son routage 4-étages reste correct).
@@ -125,9 +178,16 @@ complets), listings/imports `cartouches.js`, `import-export.js` (vers biblio), `
 - **Backup** Codex horodaté AVANT écriture ; migration sur copie ; suppression de la clé nue en dernier.
 - **Dry-run** `scripts/dry-run-migration-modeles.mjs` (déjà lancé le 28 juin — §1) ; l'étendre pour
   écrire dans des clés `_dryrun_` et y faire tourner L0 si besoin.
-- **L0 golden master** recalculé AVANT/APRÈS, MAE Omnivox **< 0,5** sur a2025 + h2026.
+- **L0 golden master** recalculé AVANT/APRÈS. **a2025** : MAE Omnivox **< 0,5** (mesuré 0,148 le 28 juin,
+  VERT). **h2026** : la fidélité Omnivox absolue **n'est PAS le critère** (trimestre EN COURS — Omnivox =
+  moyenne courante, le moteur = note finale projetée ; médiane 0,05 mais ~10 cas tirent la moyenne à 2,67).
+  Garde h2026 = **AVANT/APRÈS self-comparison** (les 46 notes recalculées ne doivent pas bouger). Outil :
+  `valider-golden-master-trimestre.mjs` accepte désormais `--omnivox` **répétable** + `--reference` optionnel
+  (mode Omnivox-seul). Baselines AVANT figées (codex 10h24) dans `Suivi 101-102-103/baselines-L0-AVANT-migration-358/`.
+  ⚠ **L0 est AVEUGLE à la migration** (agrège les notes STOCKÉES ; la migration déplace des MODÈLES) → oracle
+  PRIMAIRE = sentinelle d'intégrité de résolution ; L0 = défense secondaire (dommages collatéraux notes/config).
 - **Break-test L0** `--prouver-rougit` (injecter +15 sur un artefact DOIT rougir) — sinon l'oracle
-  est mort et son VERT ne prouve rien.
+  est mort et son VERT ne prouve rien. **Fait le 28 juin (a2025) : ROUGE prouvé.**
 - **L2** étendu + break-testé (fuite injectée → ROUGE).
 - **Tests** `cd tests && npm test` ; ≥ 1 test couvrant la migration (zone sensible `trimestres.js`
   + module sécurité `import-export.js`).

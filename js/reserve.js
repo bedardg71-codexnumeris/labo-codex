@@ -55,8 +55,9 @@ var CLES_GLOBALES_INCLUSES = [
     'cours',
     'enseignants',
     'horaires',
-    'grillesTemplates',
-    'echellesTemplates',
+    // #358 (G4) : grilles/échelles RETIRÉES de ce pass global — elles sont
+    // namespacées (`<trim>_grillesTemplates`) et capturées par le pass préfixe
+    // (CLES_SANS_FILTRE, l. 111-112). La clé globale héritée est vidée au boot.
     'productionsTemplates',
     'pratiquesConfigurables',
     'modalitesEvaluation',
@@ -674,12 +675,9 @@ async function _collecterDonnees(trimestre, gc, onProg) {
         var cg = CLES_GLOBALES_INCLUSES[g];
         var v = await db.get(cg, null);
         if (v !== null && v !== undefined) {
-            // Filtrer démo dans les bibliothèques
-            if (cg === 'grillesTemplates' && typeof window.filtrerRessourcesNonDemo === 'function') {
-                v = window.filtrerRessourcesNonDemo(v, 'grille');
-            } else if (cg === 'echellesTemplates' && typeof window.filtrerRessourcesNonDemo === 'function') {
-                v = window.filtrerRessourcesNonDemo(v, 'echelle');
-            } else if (cg === 'productionsTemplates' && typeof window.filtrerRessourcesNonDemo === 'function') {
+            // Filtrer démo dans les bibliothèques (grilles/échelles retirées en G4 :
+            // plus dans ce pass — cf. CLES_GLOBALES_INCLUSES).
+            if (cg === 'productionsTemplates' && typeof window.filtrerRessourcesNonDemo === 'function') {
                 v = window.filtrerRessourcesNonDemo(v, 'production');
             } else if (cg === 'pratiquesConfigurables' && typeof window.filtrerRessourcesNonDemo === 'function') {
                 v = window.filtrerRessourcesNonDemo(v, 'pratique');

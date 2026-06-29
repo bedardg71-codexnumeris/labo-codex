@@ -100,8 +100,8 @@ function definirModeExpertFromEl(el) {
 // === CONFIGURATION ===
 // VERSION_MAJEURE et BUILD_ID sont lus depuis version.json au chargement (source unique)
 // Les valeurs ici servent de fallback si version.json n'est pas disponible
-let VERSION_MAJEURE = '1.24.2';
-let BUILD_ID = '0628-1824';
+let VERSION_MAJEURE = '1.25.0';
+let BUILD_ID = '0628-2049';
 // Snapshot du build contenu dans CE fichier script (pour détecter les scripts périmés)
 const _SCRIPT_BUILD = BUILD_ID;
 
@@ -822,61 +822,10 @@ function changerFiltreCategorieFromEl(el) {
     }
 }
 
-// ===============================
-// SECTION: Debug + stubs obsolètes (ex-ligne 17788)
-// ===============================
-
-// ========================================
-// DEBUG: AFFICHER LE CONTENU DU LOCALSTORAGE
-// ========================================
-function debugLocalStorage() {
-    console.clear();
-
-    // Lister toutes les clés
-    for (let i = 0; i < localStorage.length; i++) {
-        const cle = localStorage.key(i);
-    }
-
-    // Vérifier productions (clé: productions)
-    const productions = localStorage.getItem('productions');
-    if (productions) {
-        try {
-            const parsed = JSON.parse(productions);
-        } catch (e) {
-        }
-    } else {
-    }
-
-    // Vérifier grillesTemplates
-    const grilles = localStorage.getItem('grillesTemplates');
-    if (grilles) {
-        try {
-            const parsed = JSON.parse(grilles);
-            if (Array.isArray(parsed)) {
-            } else {
-            }
-        } catch (e) {
-        }
-    } else {
-    }
-
-    // Vérifier échelles
-    const echellesTemplates = localStorage.getItem('echellesTemplates');
-    const niveauxEchelle = localStorage.getItem('niveauxEchelle');
-    const configEchelle = localStorage.getItem('configEchelle');
-
-    if (echellesTemplates || niveauxEchelle || configEchelle) {
-        if (echellesTemplates) {
-        }
-        if (niveauxEchelle) {
-        }
-        if (configEchelle) {
-        }
-    } else {
-    }
-
-    alert('Informations affichées dans la console du navigateur.\n\nAppuie sur F12 pour voir les détails.');
-}
+// #358 (G4) : fonction de debug morte `debugLocalStorage()` RETIRÉE (zéro référence,
+// branches vidées de leurs console.log ; lisait notamment la clé globale héritée
+// `grillesTemplates`/`echellesTemplates`, désormais namespacée). Le diagnostic du
+// localStorage passe par la skill `debug-localStorage`.
 
 // ========================================
 // EXPORT DES GRILLES D'ÉVALUATION

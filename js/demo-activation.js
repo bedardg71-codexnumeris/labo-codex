@@ -92,11 +92,11 @@ function migrerResidusPhase5() {
 
     // Helper : compte les items portant le flag isDemo/estDemo dans les 5 globaux
     function compterResidusFlag() {
+        // #358 (G3) : grilles/échelles exclues du compte — la démo ne fusionne plus
+        // de modèles vers le global, donc aucun résidu estDemo n'y subsiste.
         return (db.getSync('listeCours', []) || []).filter(function(c) { return c.isDemo; }).length
             + (db.getSync('cours', []) || []).filter(function(c) { return c.isDemo; }).length
-            + (db.getSync('enseignants', []) || []).filter(function(e) { return e.isDemo; }).length
-            + (db.getSync('grillesTemplates', []) || []).filter(function(g) { return g.estDemo; }).length
-            + (db.getSync('echellesTemplates', []) || []).filter(function(e) { return e.estDemo; }).length;
+            + (db.getSync('enseignants', []) || []).filter(function(e) { return e.isDemo; }).length;
     }
 
     // 1. Résidus isDemo/estDemo dans les 6 globaux + cartouches_*
@@ -188,32 +188,12 @@ function fusionnerDemoVersGlobaux() {
     }
     db.setSync('enseignants', enseignants);
 
-    // 4. grillesTemplates : push sans remplacer (préserve les grilles utilisateur
-    // ayant le même ID qu'une grille démo — cas observé pour GRILLE1759529438501
-    // alias « Global-5 (FR-ALGO) H26 » de Grégoire qui partage l'ID avec une
-    // grille du pack démo).
-    var grillesDemo = db.getSync('demo_grillesTemplates', []) || [];
-    var grilles = db.getSync('grillesTemplates', []) || [];
-    for (var g = 0; g < grillesDemo.length; g++) {
-        var grilleDemo = grillesDemo[g];
-        var existeGrille = grilles.some(function(x) { return x.id === grilleDemo.id; });
-        if (!existeGrille) {
-            grilles.push(Object.assign({}, grilleDemo, { estDemo: true }));
-        }
-    }
-    db.setSync('grillesTemplates', grilles);
-
-    // 5. echellesTemplates : push sans remplacer (même logique que grilles)
-    var echellesDemo = db.getSync('demo_echellesTemplates', []) || [];
-    var echelles = db.getSync('echellesTemplates', []) || [];
-    for (var e = 0; e < echellesDemo.length; e++) {
-        var echDemo = echellesDemo[e];
-        var existeEch = echelles.some(function(x) { return x.id === echDemo.id; });
-        if (!existeEch) {
-            echelles.push(Object.assign({}, echDemo, { estDemo: true }));
-        }
-    }
-    db.setSync('echellesTemplates', echelles);
+    // 4-5. #358 (G3) : grilles/échelles NON fusionnées vers le global.
+    // Sous le namespacing, trimestreActif='demo' route cle('grillesTemplates')
+    // vers demo_grillesTemplates (peuplé par peuplerNamespace en Phase 1) ; les
+    // dropdowns Contexte et bibliothèques lisent via cle() / le pool de travail,
+    // donc voient déjà les modèles démo SANS fusion vers la clé globale héritée.
+    // (Fusionner ici réintroduirait la pollution du global que #358 supprime.)
 
     // 6. modalitesEvaluation : écrasement (mêmes contraintes que legacy),
     // via le module propriétaire (SSOT #328 Lot 1)
@@ -271,9 +251,11 @@ async function activerModeDemo() {
             trimestres: trimestresAvant,
             listeCours: db.getSync('listeCours', []),
             cours: db.getSync('cours', []),
-            enseignants: db.getSync('enseignants', []),
-            grillesTemplates: db.getSync('grillesTemplates', []),
-            echellesTemplates: db.getSync('echellesTemplates', [])
+            enseignants: db.getSync('enseignants', [])
+            // #358 (G3) : grilles/échelles NON capturées — sous le namespacing,
+            // les modèles démo vivent dans demo_grillesTemplates/demo_echellesTemplates
+            // (permanents, jamais touchés par l'activation/désactivation). Le global
+            // hérité n'est plus pollué par la démo, donc rien à sauvegarder/restaurer.
         });
 
         // 2. Flag
@@ -438,17 +420,12 @@ function retirerItemsDemoDesGlobaux() {
         return e.id !== 'ENS_DEMO';
     }));
 
-    // grillesTemplates : ID dans le pack ET flag estDemo
-    var idsGrilles = idsDuPack('grillesTemplates');
-    db.setSync('grillesTemplates', (db.getSync('grillesTemplates', []) || []).filter(function(g) {
-        return !(idsGrilles.has(g.id) && estItemDemo(g));
-    }));
-
-    // echellesTemplates : idem
-    var idsEchelles = idsDuPack('echellesTemplates');
-    db.setSync('echellesTemplates', (db.getSync('echellesTemplates', []) || []).filter(function(e) {
-        return !(idsEchelles.has(e.id) && estItemDemo(e));
-    }));
+    // #358 (G3) : grilles/échelles NON retirées du global ici. Elles n'y sont
+    // plus injectées (fusionnerDemoVersGlobaux ne les fusionne plus), donc rien
+    // à nettoyer. ⚠ Un filtre naïf serait FAUX : cette fonction tourne pendant
+    // que trimestreActif='demo' (desactiverModeDemo l'appelle AVANT de restaurer
+    // le trimestre), or cle('grillesTemplates')=demo_grillesTemplates est PERMANENT —
+    // le filtrer corromprait le pack démo. Les modèles démo restent dans demo_*.
 
     // cartouches_* : lister dynamiquement les clés présentes dans le pack
     // et retirer uniquement les cartouches dont l'id est dans le pack ET
@@ -575,5 +552,8 @@ window.desactiverModeDemo = desactiverModeDemo;
 window.afficherBandeauDemo = afficherBandeauDemo;
 window.initialiserBandeauDemoSiActif = initialiserBandeauDemoSiActif;
 window.migrerResidusPhase5 = migrerResidusPhase5;
+// #358 (G3) : exposé pour la sentinelle — preuve comportementale que le nettoyage
+// démo ne touche PAS aux modèles namespacés (demo_grillesTemplates est permanent).
+window.retirerItemsDemoDesGlobaux = retirerItemsDemoDesGlobaux;
 
 })();

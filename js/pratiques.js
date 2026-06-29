@@ -505,7 +505,7 @@ function chargerGrillesDisponibles() {
     const valeurActuelle = select.value;
 
     // Lire les grilles depuis localStorage
-    const grilles = db.getSync('grillesTemplates', []);
+    const grilles = db.getSync(cle('grillesTemplates'), []);
 
     // Vider le select
     select.innerHTML = '<option value="">-- Sélectionner une grille --</option>';
@@ -2230,7 +2230,7 @@ function populerSelecteursNiveaux() {
     }
 
     // Charger les échelles disponibles (clé: echellesTemplates)
-    const echelles = db.getSync('echellesTemplates', []);
+    const echelles = db.getSync(cle('echellesTemplates'), []);
 
     // Vider et repeupler le sélecteur d'échelles
     selectEchelle.innerHTML = '<option value="">-- Choisir une échelle --</option>';
@@ -2272,7 +2272,7 @@ function onEchelleConformiteChange() {
     }
 
     // Charger l'échelle sélectionnée (clé: echellesTemplates)
-    const echelles = db.getSync('echellesTemplates', []);
+    const echelles = db.getSync(cle('echellesTemplates'), []);
     const echelle = echelles.find(e => e.id === echelleId);
 
     if (!echelle || !echelle.niveaux) {

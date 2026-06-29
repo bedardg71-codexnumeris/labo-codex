@@ -2080,8 +2080,8 @@ async function executerImportConfigComplete() {
         const remapGrilles = {};
 
         // Récupérer les ressources existantes
-        const echellesExistantes = db.getSync('echellesTemplates', []);
-        const grillesExistantes = db.getSync('grillesTemplates', []);
+        const echellesExistantes = db.getSync(cle('echellesTemplates'), []);
+        const grillesExistantes = db.getSync(cle('grillesTemplates'), []);
 
         // Créer des Sets d'IDs existants pour recherche rapide
         const idsEchellesExistants = new Set(echellesExistantes.map(e => e.id));
@@ -2109,7 +2109,7 @@ async function executerImportConfigComplete() {
 
             // Fusionner avec échelles existantes
             const echellesFusionnees = verifierUniciteIds([...echellesExistantes, ...echellesAImporter], 'échelles');
-            db.setSync('echellesTemplates', echellesFusionnees);
+            db.setSync(cle('echellesTemplates'), echellesFusionnees);
         }
 
         // 2. Importer les grilles avec détection de conflits
@@ -2134,7 +2134,7 @@ async function executerImportConfigComplete() {
 
             // Fusionner avec grilles existantes
             const grillesFusionnees = verifierUniciteIds([...grillesExistantes, ...grillesAImporter], 'grilles');
-            db.setSync('grillesTemplates', grillesFusionnees);
+            db.setSync(cle('grillesTemplates'), grillesFusionnees);
         }
 
         // 3. Importer les productions avec mise à jour des références aux grilles
@@ -2387,7 +2387,7 @@ async function executerImportVersBibliotheques() {
 
         // 2. GRILLES (depuis grillesTemplates et bibliothequeGrilles)
         // ✅ MODIFIÉ (6 jan 2026) : Gestion des doublons avec modal
-        let grillesExistantes = db.getSync('grillesTemplates', []);
+        let grillesExistantes = db.getSync(cle('grillesTemplates'), []);
         const idsGrillesExistants = new Set(grillesExistantes.map(g => g.id));
         let grillesNouvelles = [];
 
@@ -2448,9 +2448,9 @@ async function executerImportVersBibliotheques() {
             }
         }
 
-        if (grillesNouvelles.length > 0 || grillesExistantes.length !== db.getSync('grillesTemplates', []).length) {
+        if (grillesNouvelles.length > 0 || grillesExistantes.length !== db.getSync(cle('grillesTemplates'), []).length) {
             const grillesFusionnees = verifierUniciteIds([...grillesExistantes, ...grillesNouvelles], 'grilles');
-            db.setSync('grillesTemplates', grillesFusionnees);
+            db.setSync(cle('grillesTemplates'), grillesFusionnees);
             compteurs.grilles = grillesNouvelles.length;
         }
 
@@ -2459,7 +2459,7 @@ async function executerImportVersBibliotheques() {
         if (donnees.echellesTemplates) {
             const echellesImport = parseValeur(donnees.echellesTemplates);
             if (Array.isArray(echellesImport) && echellesImport.length > 0) {
-                let echellesExistantes = db.getSync('echellesTemplates', []);
+                let echellesExistantes = db.getSync(cle('echellesTemplates'), []);
                 const idsEchellesExistants = new Set(echellesExistantes.map(e => e.id));
                 let echellesNouvelles = [];
 
@@ -2496,9 +2496,9 @@ async function executerImportVersBibliotheques() {
                     }
                 }
 
-                if (echellesNouvelles.length > 0 || echellesExistantes.length !== db.getSync('echellesTemplates', []).length) {
+                if (echellesNouvelles.length > 0 || echellesExistantes.length !== db.getSync(cle('echellesTemplates'), []).length) {
                     const echellesFusionnees = verifierUniciteIds([...echellesExistantes, ...echellesNouvelles], 'échelles');
-                    db.setSync('echellesTemplates', echellesFusionnees);
+                    db.setSync(cle('echellesTemplates'), echellesFusionnees);
                     compteurs.echelles = echellesNouvelles.length;
                 }
             }
@@ -2708,7 +2708,7 @@ async function executerImportSelectif() {
 
         // Grilles - ✅ MODIFIÉ pour import sélectif individuel
         if (hasCheckedItems('grilles')) {
-            const grillesExistantes = db.getSync('grillesTemplates', []);
+            const grillesExistantes = db.getSync(cle('grillesTemplates'), []);
             const selectedIds = getCheckedItemIds('grilles');
             let grillesNouvelles = [];
 
@@ -2738,7 +2738,7 @@ async function executerImportSelectif() {
             });
 
             if (grillesNouvelles.length > 0) {
-                db.setSync('grillesTemplates', verifierUniciteIds([...grillesExistantes, ...grillesNouvelles], 'grilles'));
+                db.setSync(cle('grillesTemplates'), verifierUniciteIds([...grillesExistantes, ...grillesNouvelles], 'grilles'));
                 compteurs.ressources += grillesNouvelles.length;
                 details.push(`${grillesNouvelles.length} grille(s)`);
             }
@@ -2750,7 +2750,7 @@ async function executerImportSelectif() {
             const selectedIds = getCheckedItemIds('echelles');
 
             if (Array.isArray(echellesImport) && echellesImport.length > 0) {
-                const echellesExistantes = db.getSync('echellesTemplates', []);
+                const echellesExistantes = db.getSync(cle('echellesTemplates'), []);
                 const echellesNouvelles = echellesImport
                     .filter(e => selectedIds.includes(e.id) || selectedIds.includes(e.nom))
                     .filter(e => !echellesExistantes.some(ee => ee.nom === e.nom))
@@ -2766,7 +2766,7 @@ async function executerImportSelectif() {
                         };
                     });
                 if (echellesNouvelles.length > 0) {
-                    db.setSync('echellesTemplates', verifierUniciteIds([...echellesExistantes, ...echellesNouvelles], 'échelles'));
+                    db.setSync(cle('echellesTemplates'), verifierUniciteIds([...echellesExistantes, ...echellesNouvelles], 'échelles'));
                     compteurs.ressources += echellesNouvelles.length;
                     details.push(`${echellesNouvelles.length} échelle(s)`);
                 }
@@ -3123,8 +3123,8 @@ async function executerImportSelectif() {
  */
 async function exporterConfigurationComplete() {
     // 1. Rassembler toutes les ressources
-    const toutesEchelles = db.getSync('echellesTemplates', []);
-    const toutesGrilles = db.getSync('grillesTemplates', []);
+    const toutesEchelles = db.getSync(cle('echellesTemplates'), []);
+    const toutesGrilles = db.getSync(cle('grillesTemplates'), []);
     // 🆕 FIX (1er fév 2026) : Utiliser la clé namespacée pour les productions
     const cleProductions = cle('productions');
     const toutesProductions = db.getSync(cleProductions, []);

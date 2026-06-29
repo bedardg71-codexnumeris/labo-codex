@@ -54,9 +54,11 @@ describe('lot P2 · sentinelle exports', () => {
 });
 
 describe('lot P2 · résolution des entités par type', () => {
-    it('grille : trouvée dans grillesTemplates, puis repli sur bibliothequeGrilles', () => {
+    it('grille : trouvée dans cle(grillesTemplates), puis repli sur bibliothequeGrilles', () => {
+        // #358 Brique D : la résolution d'export cible la copie namespacée du trimestre
+        // actif (w.cle = k => 'h2026_'+k) avant le catalogue de gabarits.
         const w = charger({
-            grillesTemplates: [{ id: 'G1', nom: 'Grille perso' }],
+            h2026_grillesTemplates: [{ id: 'G1', nom: 'Grille perso' }],
             bibliothequeGrilles: [{ id: 'G2', nom: 'Grille pool' }]
         });
         expect(w.partageExport.resoudreEntite('grille', 'G1').nom).toBe('Grille perso');
@@ -64,8 +66,8 @@ describe('lot P2 · résolution des entités par type', () => {
         expect(w.partageExport.resoudreEntite('grille', 'G3')).toBeNull();
     });
 
-    it('echelle : echellesTemplates', () => {
-        const w = charger({ echellesTemplates: [{ id: 'E1', nom: 'Échelle' }] });
+    it('echelle : cle(echellesTemplates)', () => {
+        const w = charger({ h2026_echellesTemplates: [{ id: 'E1', nom: 'Échelle' }] });
         expect(w.partageExport.resoudreEntite('echelle', 'E1').nom).toBe('Échelle');
     });
 

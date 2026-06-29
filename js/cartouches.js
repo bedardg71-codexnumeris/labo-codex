@@ -178,7 +178,7 @@ async function initialiserModuleCartouches() {
  */
 async function assurerCartoucheGenerique() {
     // Vérifier que la grille générique existe
-    const grilles = await db.get('grillesTemplates') || [];
+    const grilles = await db.get(cle('grillesTemplates')) || [];
     const grilleGenerique = grilles.find(g => g.id === 'GRILLE_GENERIQUE');
     if (!grilleGenerique) return;
 
@@ -236,7 +236,7 @@ async function assurerCartoucheGenerique() {
  * Ajoute le flag dansBibliotheque=true à toutes les cartouches qui ne l'ont pas
  */
 async function migrerCartouchesVersBibliotheque() {
-    const grilles = await db.get('grillesTemplates') || [];
+    const grilles = await db.get(cle('grillesTemplates')) || [];
     let nbMigrees = 0;
 
     for (const grille of grilles) {
@@ -282,7 +282,7 @@ async function migrerCartouchesVersBibliotheque() {
  * - 'grillesTemplates' : Array des grilles créées dans module 05
  */
 async function chargerSelectGrillesRetroaction() {
-    const grilles = await db.get('grillesTemplates') || [];
+    const grilles = await db.get(cle('grillesTemplates')) || [];
     const select = document.getElementById('selectGrilleRetroaction');
     
     if (!select) return;
@@ -385,7 +385,7 @@ async function chargerCartouchesRetroaction() {
  */
 async function initialiserNouveauCartouche(grilleId) {
     // Récupérer la grille sélectionnée
-    const grilles = await db.get('grillesTemplates') || [];
+    const grilles = await db.get(cle('grillesTemplates')) || [];
     const grille = grilles.find(g => g.id === grilleId);
     
     if (!grille) {
@@ -403,7 +403,7 @@ async function initialiserNouveauCartouche(grilleId) {
         { code: 'M', nom: 'Maîtrisé', min: 75, max: 84 },
         { code: 'E', nom: 'Étendu', min: 85, max: 100 }
     ];
-    const echelles = await db.get('echellesTemplates', []);
+    const echelles = await db.get(cle('echellesTemplates'), []);
     const echelleActive = echelles.find(e => !e.estDemo) || echelles[0];
     const niveaux = echelleActive?.niveaux || niveauxDefaut;
     
@@ -557,7 +557,7 @@ async function afficherMatriceRetroaction() {
 
     // Si echelleId est défini, charger les couleurs depuis l'échelle source
     if (cartoucheActuel.echelleId) {
-        const echelles = await db.get('echellesTemplates') || [];
+        const echelles = await db.get(cle('echellesTemplates')) || [];
         const echelleSource = echelles.find(e => e.id === cartoucheActuel.echelleId) || echelles.find(e => e.idOriginal === cartoucheActuel.echelleId);
 
         if (echelleSource && echelleSource.niveaux) {
@@ -1017,7 +1017,7 @@ async function calculerPourcentageComplete() {
 
     // CRITIQUE: Utiliser la même logique que await afficherMatriceRetroaction()
     // pour compter tous les niveaux disponibles (pas seulement ceux de la cartouche)
-    const echelles = await db.get('echellesTemplates') || [];
+    const echelles = await db.get(cle('echellesTemplates')) || [];
 
     const niveauxDisponiblesMap = new Map();
 
@@ -1190,7 +1190,7 @@ async function afficherToutesLesGrillesEtCartouches() {
     const container = document.getElementById('vueGrillesCartouches');
     if (!container) return;
 
-    const grilles = await db.get('grillesTemplates') || [];
+    const grilles = await db.get(cle('grillesTemplates')) || [];
 
     if (grilles.length === 0) {
         container.innerHTML = `
@@ -1813,7 +1813,7 @@ window.confirmerImportCartouches = async function(donnees) {
         }
 
         // PHASE 3.3: Détecter les dépendances manquantes (grilles référencées)
-        const grillesExistantes = await db.get('grillesTemplates') || [];
+        const grillesExistantes = await db.get(cle('grillesTemplates')) || [];
         const idsGrillesExistants = new Set(grillesExistantes.map(g => g.id));
         const grillesManquantes = [];
 
@@ -2171,7 +2171,7 @@ async function exporterCartoucheEnTexte() {
     lignes.push('');
 
     // Récupérer le nom de la grille
-    const grilles = await db.get('grillesTemplates') || [];
+    const grilles = await db.get(cle('grillesTemplates')) || [];
     const grille = grilles.find(g => g.id === cartoucheActuel.grilleId);
     if (grille) {
         lignes.push('Grille : ' + grille.nom);
@@ -2685,7 +2685,7 @@ window.ouvrirFilePickerImportCartouches = ouvrirFilePickerImportCartouches;
  * Remplit le select avec toutes les grilles disponibles
  */
 async function chargerFiltreGrillesCartouche() {
-    const grilles = await db.get('grillesTemplates') || [];
+    const grilles = await db.get(cle('grillesTemplates')) || [];
     const selectFiltre = document.getElementById('filtreGrilleCartouche');
 
     if (!selectFiltre) return;
@@ -2708,7 +2708,7 @@ async function chargerFiltreGrillesCartouche() {
  * @param {string} grilleIdFiltre - ID de la grille à filtrer (optionnel)
  */
 async function afficherBanqueCartouches(grilleIdFiltre = '') {
-    const grilles = await db.get('grillesTemplates') || [];
+    const grilles = await db.get(cle('grillesTemplates')) || [];
     let toutesLesCartouches = [];
 
     // Récupérer toutes les cartouches de toutes les grilles
@@ -2813,7 +2813,7 @@ async function populerDropdownsCartouche(grilleId = '', echelleId = '', disabled
 
     // Peupler dropdown grille
     if (selectGrille) {
-        const grilles = await db.get('grillesTemplates') || [];
+        const grilles = await db.get(cle('grillesTemplates')) || [];
         let optionsHtml = '<option value="">-- Grille --</option>';
         grilles.forEach(grille => {
             const selected = (grille.id === grilleId || grille.idOriginal === grilleId) ? 'selected' : '';
@@ -2827,7 +2827,7 @@ async function populerDropdownsCartouche(grilleId = '', echelleId = '', disabled
 
     // Peupler dropdown échelle
     if (selectEchelle) {
-        const echelles = await db.get('echellesTemplates') || [];
+        const echelles = await db.get(cle('echellesTemplates')) || [];
         let optionsHtml = '<option value="">-- Échelle --</option>';
         let echelleMatchee = false;
         echelles.forEach(echelle => {
@@ -2888,7 +2888,7 @@ async function onChangeSelectionCartouche() {
  */
 async function initialiserNouveauCartoucheAvecEchelle(grilleId, echelleId) {
     // Récupérer la grille
-    const grilles = await db.get('grillesTemplates') || [];
+    const grilles = await db.get(cle('grillesTemplates')) || [];
     const grille = grilles.find(g => g.id === grilleId);
 
     if (!grille) {
@@ -2897,7 +2897,7 @@ async function initialiserNouveauCartoucheAvecEchelle(grilleId, echelleId) {
     }
 
     // Récupérer l'échelle
-    const echelles = await db.get('echellesTemplates') || [];
+    const echelles = await db.get(cle('echellesTemplates')) || [];
     const echelle = echelles.find(e => e.id === echelleId);
 
     if (!echelle) {
@@ -2950,8 +2950,8 @@ async function onChangeGrilleCartouche(grilleId) {
  * Affiche le formulaire avec dropdowns pour sélectionner grille ET échelle
  */
 async function creerNouvelleCartouche() {
-    const grilles = await db.get('grillesTemplates') || [];
-    const echelles = await db.get('echellesTemplates') || [];
+    const grilles = await db.get(cle('grillesTemplates')) || [];
+    const echelles = await db.get(cle('echellesTemplates')) || [];
 
     if (grilles.length === 0) {
         alert('Tu dois d\'abord créer au moins une grille de critères dans la section « Grilles de critères »');
@@ -3190,7 +3190,7 @@ function importerCartoucheJSON(event) {
             const cartouche = cartouches[0]; // Prendre la première
 
             // Demander quelle grille utiliser
-            const grilles = await db.get('grillesTemplates') || [];
+            const grilles = await db.get(cle('grillesTemplates')) || [];
             if (grilles.length === 0) {
                 alert('Crée d\'abord une grille de critères');
                 return;
@@ -3264,7 +3264,7 @@ function genererChecklistCriteresImport() {
  * Permet d'ajouter/retirer des cartouches de la sidebar
  */
 async function preparerDonneesBibliothequeCartouches() {
-    const grilles = await db.get('grillesTemplates') || [];
+    const grilles = await db.get(cle('grillesTemplates')) || [];
 
     // Récupérer les cartouches locales (de toutes les grilles)
     let cartouchesLocales = [];
@@ -3437,7 +3437,7 @@ async function afficherBibliothequeCartouches() {
 async function ajouterCartoucheIndividuelle(id, grilleId) {
     try {
         // Résoudre le grilleId vers une grille locale (le grilleId partagé peut différer)
-        const grilles = await db.get('grillesTemplates') || [];
+        const grilles = await db.get(cle('grillesTemplates')) || [];
         let grilleLocale = grilles.find(g => g.id === grilleId);
         if (!grilleLocale) {
             grilleLocale = grilles.find(g => g.idOriginal === grilleId);
@@ -3657,7 +3657,7 @@ async function ajouterCartouchesABibliotheque() {
 
             if (cartouche) {
                 // Trouver ou créer la grille correspondante
-                let grilles = await db.get('grillesTemplates') || [];
+                let grilles = await db.get(cle('grillesTemplates')) || [];
                 let grilleParente = grilles.find(g => g.id === cartouche.grilleId);
 
                 if (!grilleParente) {
@@ -3669,7 +3669,7 @@ async function ajouterCartouchesABibliotheque() {
                         discipline: cartouche.discipline || ''
                     };
                     grilles.push(grilleParente);
-                    await db.set('grillesTemplates', grilles);
+                    await db.set(cle('grillesTemplates'), grilles);
                 }
 
                 // Ajouter la cartouche

@@ -1,5 +1,230 @@
 <!-- =====================================================================
-     SESSION — 28 juin 2026 (suite, Claude Code, main 1.24.0). ⮕⮕ LIRE EN PREMIER (supersède les blocs ci-dessous). Prép #358 (lecture seule) + a2024 supprimé.
+     📌 SIGNET PERSISTANT — garder EN TÊTE de fichier, au-dessus des blocs de session. N'est PAS un bloc de session : ne pas le superséder ni l'enterrer, le REMONTER au-dessus du prochain bloc à chaque relais. Retirer seulement quand #326 est réactivé et clos.
+
+     CHANTIER PARALLÈLE (hors #358) — RÉACTIVATION DU COMPARATEUR DE PRATIQUES (#326).
+     ⮕ Dossier de contexte autoportant : `plans de travail/RELAIS-326-reactivation-comparateur.md` (28 juin 2026, vérifié au code).
+     Statut : comparateur CODÉ + complet, MASQUÉ depuis le 22 juin (#345 ; flag `COMPARATEUR_VISIBLE=false`, `js/config.js:106`). Candidat n°1 du paquet « bloqueurs CoP » ; échéance « app stable pour la CoP » mi-août 2026.
+     Reste RÉEL (vérif code 28 juin, ≠ ce que laissent croire les trackers) : T3 (préremplissage du formulaire en édition) + T4 (la dérivation ouvre le wizard complet 9 étapes au lieu de l'« assistant condensé » prévu SPEC §8). DÉJÀ réglés/écartés : T1-affichage (19 juin, `b18b34fb` — rendu + CSV lisent `noteConstructible`), T2 (quasi non-bug — bannière conditionnelle puis gatée par le flag), T5 (trivial — couleur du bandeau).
+     ⚠ Nœud « STD = 0 » = question de MOTEUR, pas d'UI : `simulerIndices` rend un 0 FINI pour PAN-Standards → marqué « constructible ». Décision Grégoire en attente (0 légitime vs rendre `null`) — relais §5.
+     Réactivation = repasser le flag à `true` quand #326-T1 à T5 sont traités, puis valider Mac + iPad (2 modes). ⚠ `SUIVI-BUGS.md` T1/T2 désync (non MAJ depuis les 19/22 juin) — relais §7.
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 28 juin 2026 NUIT (MIGRATION LIVE #358 EXÉCUTÉE + VALIDÉE + BUG DE BOOT CORRIGÉ, Claude Code, branche `claude/358-bloc1-fondations-modeles`). ⮕⮕ LIRE EN PREMIER (supersède les blocs ci-dessous).
+     Migration des modèles namespacés VALIDÉE sur données RÉELLES (L2/L0 + visuel) ; bug de re-semage du global CORRIGÉ (release 1.25.0) ; #346 productions re-réparé DURABLEMENT. Commit `bbe77cd5`, PUSH + PR #69.
+
+     CONTEXTE : application du `plans de travail/PROTOCOLE-358-migration-live.md`. Découverte au §1 : la migration avait DÉJÀ tourné (flag `migration_modeles_namespacees_done=true`, depuis l'incident 28 juin PM) → pivot en MODE VALIDATION (le boot risqué était déjà fait et avait persisté via Option A).
+
+     ✅ #358 VALIDÉ côté données (export 18h00 = APRÈS, baseline 10h24 = AVANT) :
+        • L2 isolation VERT (grilles/échelles/pratiques/cartouches) — APRÈS *et* AVANT → isolation déjà propre à l'usage ; #358 = relocalisation PRÉVENTIVE du stockage (a2025 archivé→copie d'archive ; h2026 actif→cle()=h2026_* ; ids DISJOINTS, noms « …A25 » = hérités de la reconstruction, cosmétiques).
+        • L0 a2025 : MAE Omnivox 0,148 (<0,5), 30/30, inchangée.
+        • L0 h2026 self-compare : 46/46 notes Moteur IDENTIQUES avant/après, 0 diff (ROUGE Omnivox = bruit pré-existant notes≠critères, hors sujet).
+        • `<trim>_*` peuplés (a2025 3/2, h2026 4/1, demo 3/2).
+
+     ✅ BUG DE BOOT TROUVÉ + CORRIGÉ (1.25.0, commit `bbe77cd5`) : le global nu `grillesTemplates`/`echellesTemplates` se RE-SEMAIT à chaque boot → vidage G4 impossible (critère 5 du protocole). Cause (#358×#353) : `assurerGrille/EchelleGenerique` tournent au DOMContentLoaded (AVANT db-ready) ; localStorage saturé → `trimestreActif` en IDB non réhydraté → `cle()` retombe sur la clé NUE (trimestres.js:307) → semage HORS namespace. FIX : garde `if (cle(X)===X) return;` dans les 2 fonctions (ne semer que namespacé ; la navigation ré-amorce). Sentinelle `sentinelle-generique-anti-resemage-global-358` (Cas A break-test ROUGE→VERT, Cas B, idempotence). Vitest 1133/1133. PROUVÉ LIVE : `viderModelesGlobalHerite()`+`db.flush()`+hard refresh → global RESTE `(retiré ✅)`.
+
+     ✅ #346 PRODUCTIONS re-réparé DURABLEMENT (révélé par la vérif visuelle §6) : les 11 productions h2026 avaient REVERTÉ à l'ancien coursId `COURS1766455789356` (la réparation PM n'était pas durable ; les hard refresh de la séance l'ont déclenché) → toutes « Non associé ». `reparerCoursIdProductions({dryRun:false})` ré-appliqué (10 remaps→`h2026-601-101-MQ-00001`, 11e conteneur laissé par design) + `db.flush()` → TIENT au hard refresh (durabilité Option A/B/C). Écran : tout le groupe « ÉVALUÉ » avec notes. ZÉRO code (la fonction existait).
+
+     ⚠ PRÉ-EXISTANTS signalés (PAS cette séance, PAS #358) : #354 « Pas de grille de référence » (23×) — la préf dépistage pointe `grille_1772187755149_uq1oiiafa`, ABSENT de h2026 (FR-HOLIS y porte `GRILLE_1782504228322…`) ; dropdown dépistage non sélectionné. Probable même revert de durabilité + id changé à la reconstruction → passe #354 dédiée (re-sélectionner FR-HOLIS ; Grégoire tranche la bonne référence). + `AMBIGUÏTÉ` fichiers sans evaluationId (résolution composite).
+
+     ⚠ FOLLOW-UP zéro-dette noté (NON bloquant) : au boot, G4 (`removeSync`) et le flag (`setSync`) sont 2 écritures fire-and-forget séparées → si le contexte meurt entre les deux, on peut avoir flag posé mais global non vidé (origine du reliquat). Pour les installs FRAÎCHES (CoP), le bloc de boot gagnerait à `await db.flush()` entre G4 et la pose du flag.
+
+     ⮕ RESTE : #354 dépistage (passe dédiée) ; renommage cosmétique optionnel des grilles h2026 « …A25 » ; puis #326 (réactivation comparateur — signet en tête). Filet : backup codex 18h00 + données live réparées.
+     Mémoire : [[namespacing-par-trimestre]] (#358 migré+validé+bug boot corrigé, 1.25.0), [[db-durabilite-revert-localstorage-sature]] (productions re-réparées durables), [[coursid-productions-h26-repare]] (revert + re-réparation), [[verifier-avant-ecrire-donnees-reelles]].
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 28 juin 2026 SOIR (CLÔTURE DURABILITÉ #71 + PRÉP MIGRATION LIVE #358, Claude Code, branche `claude/358-bloc1-fondations-modeles`). [SUPERSÉDÉ par le bloc ci-dessus — migration exécutée, validée, bug de boot corrigé.]
+     PR #71 (Option C) AUDITÉE + MERGÉE → main 1.24.2 ; #353 REPORTÉ ; branche #358 PRÉPARÉE (durabilité mergée) ; PROTOCOLE de migration live rédigé. ZÉRO écriture de données live cette session.
+
+     ✅ PR #71 (durabilité IDB complète — suppression/effacement/blobs/FSAPI/set async) : revue ADVERSE multi-agents (3 dim — correctness durabilité / sécurité-zéro-dette / solidité des sentinelles → toutes `merge-ready`, 0 finding confirmé) + lecture directe du diff db.js (motif `oncomplete` uniforme sur les 9 chemins ; `_trackOperation` retourne la promesse d'ORIGINE = piège du catch-qui-masque-le-reject évité ; `removeSync` tracké). CI Vitest verte, seul Playwright #326 rouge (préexistant). → MERGÉE squash `079a05e4`, main = **1.24.2**. Durabilité écriture + suppression désormais sur main.
+     ✅ #353 saturation localStorage : RECLASSÉ dette/conception (le risque de PERTE est fermé par A/B/C — la saturation bascule par un chemin durable) → **REPORTÉ à une session dédiée** (décision Grégoire) ; BACKLOG MAJ (🟢, 1er pas = Option 1 observabilité « mesurer avant de trancher ») ; rapport `plans de travail/RAPPORT-353-saturation-localstorage.md`.
+     ✅ BRANCHE #358 PRÊTE : merge de main (`5bac6d67`) → `db.js` IDENTIQUE à main (Option A/B/C durable), 4 points de version alignés sur **1.24.2 / 0628-1824**, G4 (`viderModelesGlobalHerite`) + retrait `debugLocalStorage` préservés. Vitest **1130/1130** (146 fichiers, +22 sentinelles durabilité héritées). Câblage migration au boot vérifié (`main.js:404-419` : peuplement C1 → vidage G4 → flag idempotent).
+     ✅ PROTOCOLE de migration live rédigé, autoportant : `plans de travail/PROTOCOLE-358-migration-live.md` (pré-vol backup → L2/L0 AVANT → boot migre → TEST HARD REFRESH → L2/L0 APRÈS + visuel → critères/rollback). Oracle PRIMAIRE = L2 isolation (+ notes ne bougent pas) ; L0 = défense secondaire (aveugle au déplacement de modèles). ⚠ Pas de baselines AVANT pré-existantes (dossier `Suivi 101-102-103/baselines-L0-AVANT-migration-358/` absent du worktree) → les RE-capturer en début de séance sur le backup frais.
+
+     ⮕ RESTE = EXÉCUTER LA MIGRATION LIVE #358 (séance dédiée à froid, Grégoire au navigateur, backup frais) en suivant le PROTOCOLE. La durabilité est en place → la migration TIENDRA au hard refresh (le showstopper du 28 juin PM est fermé à la racine). Après succès : pousser la branche + PR #69, release `minor` (changement de format de données — confirmer `major` avec Grégoire).
+     Mémoire : [[db-durabilite-revert-localstorage-sature]] (Option C mergée), [[namespacing-par-trimestre]] (branche #358 prête + protocole).
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 28 juin 2026 SOIR/NUIT (TRAVAIL AUTONOME — OPTION C : DURABILITÉ IDB COMPLÈTE → PR #71, Claude Code, branche `claude/durabilite-idb-complete`). [SUPERSÉDÉ par le bloc ci-dessus — PR #71 mergée + branche #358 préparée.]
+     PR #70 (A+B) MERGÉE dans main (`3912e72b`, 1.24.1). Audit adverse multi-agents de db.js → 9 trous de durabilité AU-DELÀ d'A+B (même motif : `onsuccess` au lieu de `oncomplete` + ops fire-and-forget non trackées), fermés en 5 volets → PR #71 (1.24.2, NON mergée — décision Grégoire). ZÉRO écriture de données live.
+
+     ✅ PR #71 https://github.com/bedardg71-codexnumeris/Monitorage_v6/pull/71 — branche `claude/durabilite-idb-complete` (issue de main), 6 commits, release 1.24.2 :
+        • V1 SUPPRESSION (`3e03269a`) : `_removeIndexedDB`→oncomplete + `removeSync` tracké (helper générique `_trackOperation`). C1/C2/C3/C7. FORT IMPACT (groupeEtudiants/trimestreActif/mappings/demo-actif pouvaient ressusciter au hard refresh).
+        • V2 EFFACEMENT+BLOBS (`73ff129c`) : `_clearIndexedDB`/`storeBlob`/`deleteBlob`/`clearBlobs`→oncomplete. C4/C5/W4.
+        • V3 ÉCRITURE ASYNC (`4a1e57c6`) : `set()` tracké via `_trackOperation` (W1) + snapshots→setSync (W2).
+        • V4 FSAPI (`4a1102ff`) : `storeFSAPIHandle`/`removeFSAPIHandle`→oncomplete, removeFSAPIHandle reste idempotent (C6).
+        • V5 DOC+RELEASE 1.24.2 (`361fe49f`) + RAPPORT #353 (`d6fb82f9`).
+     4 sentinelles break-testées (16 cas, mocks IDB onsuccess≠oncomplete, isolation `.call`, ROUGE→VERT) ; Vitest 1100/1100 ; Playwright 67/68 (#326 préexistant). Réconciliation/boot auditée À LA MAIN (dimension ratée par le workflow) : PAS de bug distinct (revert au boot = conséquence de la non-durabilité IDB, réglée à la racine).
+
+     ⮕ #353 saturation localStorage = **RÉFUTÉE comme trou de durabilité** (le chemin de surcharge emprunte A/B/C) → choix de conception, DÉCISION HUMAINE. Rapport `plans de travail/RAPPORT-353-saturation-localstorage.md` (sur PR #71) : 4 options, recommandé = observabilité d'abord (décider sur des chiffres). Hygiène zéro-dette (code mort `libereCacheLocalStorage`, `*_backup_v1`, `tamponsImages`) = session dédiée.
+     ⮕ À FAIRE (Grégoire) : merger PR #71 ; puis reprendre la migration live #358 (durabilité complète écriture+suppression en place).
+     Mémoire : [[db-durabilite-revert-localstorage-sature]] (MAJ Option C livrée + #353 réfuté).
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 28 juin 2026 SOIR (FIX DURABILITÉ COMMITTÉ → PR #70, Claude Code, branche DÉDIÉE `claude/fix-durabilite-db`). [SUPERSÉDÉ par le bloc ci-dessus — A+B mergé, C livré sur PR #71.]
+     Le fix db.js (Option A) + Option B sont COMMITTÉS, POUSSÉS, et sur PR #70 vers main (1.24.1). Tree #358 nettoyé de la copie redondante. ZÉRO écriture de données live cette session.
+
+     ✅ PR #70 https://github.com/bedardg71-codexnumeris/Monitorage_v6/pull/70 — branche `claude/fix-durabilite-db` (issue de MAIN car `db.js` IDENTIQUE entre main et la branche #358 → fix INDÉPENDANT de #358), version 1.24.1, 2 commits :
+        • OPTION A (`e282108b`) — `_setIndexedDB` (db.js:351) résout sur `transaction.oncomplete` (commit disque) + reject sur abort/error ; `request.onerror` garde la journalisation, ne reject plus. Rend `await db.set(...)` / `flush()` durable. Break-test `sentinelle-durabilite-set-idb.test.js` 2/2 ROUGE→VERT.
+        • OPTION B (`2a44b6d6`) — `db.flush()` branché sur `visibilitychange`→hidden / `pagehide` (`drainerEcrituresPendantes`, db.js:1307) pour drainer les écritures `setSync` fire-and-forget avant démontage ; no-op si `_pendingWrites` vide ; `beforeunload` conservé (avertissement). Break-test `sentinelle-durabilite-flush-cycle-vie.test.js` 4/4 ROUGE→VERT.
+     Fin-de-session conduite contre le diff PR : §2 PROPRE (0 innerHTML/handler/eval/console.log ; 3 `console.error` autorisés) ; Vitest 1084/1084 ; Playwright 67/68 (#326 préexistant, hors sujet) ; 4 points de version synchrones (1.24.1 / 0628-1724).
+
+     ⚠ RÉSERVE (passe connexions §4.2 — un VRAI trou, pas un test tautologique) : le CHEMIN DE SUPPRESSION reste exposé. `_removeIndexedDB` (db.js:413) résout encore sur `request.onsuccess` (même défaut qu'Option A, NON corrigé) ET `removeSync` (db.js:1136) appelle `_removeIndexedDB` en fire-and-forget SANS le tracker dans `_pendingWrites` → ni `flush()` ni Option B ne drainent les suppressions. Un `removeSync` près d'un hard refresh peut être perdu → une clé supprimée RESSUSCITE au rechargement. Candidat **OPTION C** (symétrie suppression : oncomplete + tracker removeSync), famille #353. Plus rare que l'écriture. Décision Grégoire à froid.
+
+     ✅ PR #70 MERGÉE dans main (2026-06-28 21h49, squash `3912e72b`, main = 1.24.1). Mergée malgré CI Playwright rouge = #326 maquettes PRÉEXISTANT (déjà rouge sur main, Vitest vert). SÉQUENCE CRITIQUE SATISFAITE : la durabilité écriture (A+B) est en place sur main AVANT la migration live #358. → #358 récupérera A+B au prochain rebase/merge sur main.
+     ⮕ SUITE (travail autonome en cours) : OPTION C (durabilité du chemin de SUPPRESSION) sur branche issue de main — `_removeIndexedDB` db.js:430 résout encore sur `onsuccess` (idem `_clearIndexedDB` db.js:566) + `removeSync` db.js:1144 non tracké dans `_pendingWrites`. 25 appelants removeSync / 12 remove() async (dont `groupeEtudiants`, `trimestreActif`, mappings anonymisation) → suppression perdue au hard refresh = donnée supprimée qui RESSUSCITE. Audit adverse exhaustif en cours.
+     RESTE : #353 (saturation localStorage = cause amont du repli IDB-seul) + Option C (suppression durable) = sessions dédiées ; #358 migration live = séance fraîche sur backup, APRÈS merge #70.
+     Mémoire : [[db-durabilite-revert-localstorage-sature]] (MAJ : PR #70 livrée + réserve chemin suppression).
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 28 juin 2026 PM (MIGRATION LIVE #358 → INCIDENT productions → RACINE DURABILITÉ db.js CORRIGÉE, Claude Code, branche `claude/358-bloc1-fondations-modeles`). [SUPERSÉDÉ par le bloc ci-dessus — fix désormais COMMITTÉ et sur PR #70.]
+     Fix db.js durabilité (Option A) LIVRÉ + VALIDÉ + PROUVÉ EN RÉEL ; coursId h2026 réparé live ; ZÉRO commit/push (db.js + 1 test NON committés). Vitest 1110/1110.
+
+     CONTEXTE : la migration live #358 (Grégoire, navigateur, file://) a fait apparaître TOUTES les productions h2026 en « Non associé » / « Aucune production configurée ». Diagnostic par probes console + 2 workflows multi-agents (dont enquête ADVERSE chargée de prouver une perte de données).
+
+     ✅ DONNÉES SAINES — prouvé de façon adverse (zéro chemin de corruption ; productions 11, évals 408 TOUTES avec productionId, fichiers 394 intacts). #358 INNOCENT : le code d'affichage/résolution (`modes.js` filtre coursId, `profil-etudiant-sections-affichage.js`, `travaux-resolution.js`) est INCHANGÉ par la branche ; `productions` était déjà namespacé AVANT #358. Le hard refresh n'a fait que RÉVÉLER un bug pré-existant.
+
+     ✅ SYMPTÔME = #346 coursId périmé : productions h2026 sur `coursId=COURS1766455789356` (ancien) ≠ groupe-cours `h2026-601-101-MQ-00001` (canonique) → filtre `obtenirDonneesSelonMode` (`modes.js:625`) rend 0 → « Aucune production configurée », tous fichiers « Non associé ». RÉPARÉ LIVE via `reparerCoursIdProductions({dryRun:false})` (`migration-diagnostic.js:499`, outil console conservateur) : 10 prod h2026 ré-alignées (évals unanimes 27-45), 11e (conteneur Portfolio sans éval votante) laissée par design, a2025 intouché.
+
+     ⚠→✅ RACINE DU REVERT (le vrai gain) : la réparation TENAIT au reload normal mais RÉGRESSAIT au hard refresh. Cause PROUVÉE LIVE = localStorage SATURÉ (#353, warning `[DB] Quota localStorage dépassé` `db.js:1074`) → écriture en IDB-seul async → `_setIndexedDB` (`db.js:348`) résolvait sur `request.onsuccess` (requête OK) et NON `transaction.oncomplete` (commit disque) → sous WebKit/file:// le commit est différé → hard refresh = contexte tué avant commit → transaction avortée → IDB garde l'ancien → revert. RACINE UNIQUE de #352/#353/#346 + incidents 10-11 juin.
+
+     ✅ FIX OPTION A LIVRÉ : `_setIndexedDB` résout désormais sur `transaction.oncomplete` (+ reject sur `onabort`/`onerror` ; `request.onerror` garde la journalisation). Rend tout `await db.set(...)` / `db.flush()` DURABLE. Diff db.js +19/-2 ; AUCUN innerHTML/handler inline/eval/console.log ajouté (2 `console.error` autorisés). Break-test `tests/unit/sentinelle-durabilite-set-idb.test.js` (isolation `.call({db})` car le setup d'instance ouvre des transactions de fond) PROUVÉ ROUGE (ancien onsuccess → 2 failed) puis VERT après fix. Vitest 1110/1110 (1108 base + 2). PROUVÉ EN RÉEL : après reload du nouveau db.js + ré-application du réparateur + hard refresh, le réparateur retrouve « 0 à remapper » (coursId persiste) et la vue montre 10 productions notées.
+
+     ⚠ CONNEXIONS (passe §4 adverse) — Option A couvre le chemin ATTENDU (`await db.set` / `flush`), PAS `setSync` fire-and-forget (`_trackWrite` non attendu ; `beforeunload` `db.js:1283` ne flushe pas). Une sauvegarde `setSync` near-unload reste exposée. RESTE = Option B (`pagehide`→`db.flush()`, jugée co-requise par l'agent adverse) + #353 saturation localStorage (cause amont, chantier distinct).
+
+     ⮕ DÉCISIONS POUR GRÉGOIRE (rien committé/poussé — fin-de-session en lecture seule) : (1) commit du fix db.js + test (intention `patch` ; sur cette branche ou branche dédiée car distinct de #358 ?) ; (2) Option B + #353 ; (3) reprendre #358 (la migration des modèles était saine ; mise en pause pour traiter la racine). Durabilité déjà validée terrain par Grégoire.
+
+     ⚠ Warnings résiduels NON liés : `Pas de grille de référence` = #354 (dépistage) ; `AMBIGUITÉ (DA, )` = fichiers sans evaluationId (résolution composite). Pré-existants.
+     🧹 Worktrees : `competent-mccarthy` (propre) + `exciting` (superséded par main) SUPPRIMÉS ; `wonderful` (modifs prod Brique C non commitées, diffèrent de main) + `zen` (`workers:1` UNIQUE et utile — isole les tests file://) GARDÉS, à trancher/lander.
+     Mémoire : [[db-durabilite-revert-localstorage-sature]] (racine + fix), [[coursid-productions-h26-repare]], [[catalogue-gabarits-vs-grilles-travail]], [[nettoyage-worktrees-2026-06-28]].
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 28 juin 2026 (EXÉCUTION #358 — SOUS-BLOC FINAL CODE, Claude Code, branche `claude/358-bloc1-fondations-modeles`). [SUPERSÉDÉ par le bloc ci-dessus.]
+     G3 (démo) + G4 (vidage du global hérité) + nettoyage zéro-dette LIVRÉS et COMMITTÉS (HEAD `437ef4d5`, +11 devant origin/main, NON poussée). ZÉRO écriture de données live. Vitest 1108/1108 ; 2 break-tests prouvés ROUGES puis révertis.
+
+     CONTEXTE : clôture du VOLET CODE de la migration Option A des modèles (#358). Le bloc précédent (G1+G2 SPECIAL_ARCHIVE) avait laissé « le sous-bloc final apparié à la migration live » : G3 démo + G4 vidage + cleanup. C'est fait.
+
+     ✅ G3 DÉMO (`demo-activation.js`) — la démo ne touche PLUS le global nu pour les modèles. `fusionnerDemoVersGlobaux` (sections 4-5), `retirerItemsDemoDesGlobaux`, le snapshot d'activation (275-276) et `compterResidusFlag` (98-99) dépouillés de leur volet grilles/échelles. Sous le namespacing, cle()=`demo_*` est lu directement par les dropdowns/biblio/pool → la fusion était redondante. ⚠ Piège du relais DÉSAMORCÉ par RETRAIT (pas re-point) : `retirerItemsDemoDesGlobaux` tourne quand `trimestreActif='demo'` → un re-point `→cle()` aurait filtré `demo_grillesTemplates` PERMANENT. `retirerItemsDemoDesGlobaux` exposée window pour la sentinelle.
+
+     ✅ G4 VIDAGE (`trimestres.js` + `main.js`) — nouvelle `viderModelesGlobalHerite()` appelée au boot JUSTE APRÈS le peuplement C1 (même bloc flaggé `migration_modeles_namespacees_done`). Le flag n'est posé qu'après peuplement + vidage RÉUSSIS (échec → re-tentative idempotente au boot suivant). ⚠ DÉVIATION DE SÛRETÉ assumée vs le littéral « removeSync » du relais : le vidage ne retire du global QUE les modèles REDONDANTS (id capturé dans une copie `<trim>_*`, via `_toutesModelesTravail`) ; tout ORPHELIN non capturé (sans trimestre propriétaire) est CONSERVÉ dans le global + journalisé `console.warn`, JAMAIS perdu (règle « les données de Grégoire survivent », non négociable). Cas nominal (tout capturé) = clé globale entièrement retirée. NON-INTRUSIF pour le catalogue de gabarits (disjoint).
+
+     ✅ NETTOYAGE ZÉRO-DETTE — `reserve.js` : grilles/échelles retirées du pass GLOBAL (`CLES_GLOBALES_INCLUSES` + branches `filtrerRessourcesNonDemo`) ; elles sont déjà capturées par le pass PRÉFIXE (`<trim>_*` via `CLES_SANS_FILTRE` l.111-112) — VÉRIFIÉ au code (db.keys()/préfixe), pas seulement via le relais. `productions.js` : fonction morte `mettreAJourMetriquesProduction` (commentée). `init-inline.js` : fonction morte `debugLocalStorage` (0 référence, branches vidées de leurs console.log).
+
+     ✅ FILET — sentinelle `sentinelle-special-archive-repoints-358.test.js` étendue (+5 cas, Groupes 3+4). Break-tests PROUVÉS : (1) re-point démo naïf `→cle()` vide `demo_grillesTemplates` (ROUGE) ; (2) drop dur perd l'orphelin `GORPH` (ROUGE). Pre-commit Défense J propre (`db.setSync(nomCle, orphelins)` acquitté `// security-ok`).
+
+     ⮕ RESTE = MIGRATION LIVE NAVIGATEUR (Grégoire, risque max) : backup Codex → charger le build → L0/L2 AVANT/APRÈS (a2025 MAE Omnivox <0,5 ; h2026 = self-compare avant/après). h2026 toujours actif → vidage sûr. ⚠ Surveiller un `console.warn [Migration modèles #358] … orphelin(s) … CONSERVÉ(s)` (listerait les ids global sans propriétaire). Puis B (#352/#353), objectif #36.
+     ⚠ INFRA hors #358 : `tests/node_modules` était un SYMLINK suivi par git, cassé en cours de route (Vitest ne résolvait plus) → réinstallé en vrai dossier (`npm install`, 62 paquets) ; le `D tests/node_modules` (suppression du symlink) est laissé NON COMMITTÉ (quirk d'infra, pas du #358).
+     Mémoire : [[namespacing-par-trimestre]] (MAJ G3+G4 — volet code de #358 CLOS), [[catalogue-gabarits-vs-grilles-travail]].
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 28 juin 2026 (EXÉCUTION #358 SUITE, Claude Code, branche `claude/358-bloc1-fondations-modeles`). [SUPERSÉDÉ par le bloc ci-dessus.]
+     AUDIT EXHAUSTIF des lecteurs du global + RE-POINTS SPECIAL_ARCHIVE Groupes 1+2 LIVRÉS et COMMITTÉS (HEAD `06110a5b`, +9 devant main, NON poussée). ZÉRO écriture de données live. Vitest 1103/1103 ; Playwright 67 (1 rouge préexistant #326, hors #358).
+
+     CONTEXTE : suite du bloc « risque-max » #358. Cap Grégoire : phase code d'abord (migration live navigateur séparée), puis « auditer partage-* d'abord » → carte exhaustive AVANT tout edit (réflexe zéro-dette).
+
+     ✅ AUDIT EXHAUSTIF (au-delà du JSON 120 sites) — le bloc réel = 4 groupes / ~10 fichiers (l'audit JSON avait un ANGLE MORT : le sous-système Voûte/partage lit/écrit le global nu).
+        • C1 SOURCE migration (trimestres 618 + `_peuplerCopieModeleNamespace` 752) = à GARDER jusqu'au vidage.
+        • PRÉSERVATION DONNÉES validée : codex export = `db.keys()` → capture `<trim>_grillesTemplates` ; réserve `CLES_SANS_FILTRE` capture les copies archivées → vider le global est sûr SI G1-G3 faits d'abord.
+        • HORS PÉRIMÈTRE confirmés : consolidation 183 = `lireBibliothequeGlobale` (Labo/recherche) ; codex `_estBiblioPartagee` + reserve 111/112 + import-export 1208/2715 gèrent déjà namespacé/legacy.
+
+     ✅ COMMIT `06110a5b` — Groupe 1 (mécaniques) + Groupe 2 (Voûte/partage) :
+        • G1 : donnees-v2 suppression définitive → `cle()` ; trimestres `creerSnapshotRessources` → `${trim}_*` ; export anonymisé → `cle()`.
+        • G2 (report assumé Brique C, partage-section.js:161-163, LIVRÉ ici) : writers de copie → `cle()` (grille+échelle ; productions/pratiques l'étaient déjà) ; clesCandidates export → `cle()`+catalogue ; scan/résolveurs format/import → pool `toutesGrillesTravail`.
+        • Filet : nouvelle sentinelle `sentinelle-special-archive-repoints-358.test.js` (8 cas ; break-test comportemental snapshot NS-vs-GLOBAL ROUGE prouvé + ratchets) ; 3 tests existants MIS À JOUR (duplication-source-briqueC, partage-section-P4, partage-export-P2 — verrouillaient l'ancien bare-global, prédisaient la bascule Brique D) ; break-test writer G2 prouvé (5 ROUGE). `creerSnapshotRessources` exposée window. 2 `// security-ok` (donnees-v2 = filtre d'une collection déjà stockée). Défense J clean.
+
+     ⮕ RESTE (sous-bloc final, apparié à la migration LIVE navigateur) :
+        • G3 DÉMO — simplifier : sous le namespacing `trimestreActif='demo'` ⟹ `cle()`=`demo_*` (peuplé par `peuplerNamespace`) → la fusion/snapshot/nettoyage grilles-échelles de demo-activation est REDONDANTE → la RETIRER (garder listeCours/cours/enseignants/cartouches_*). ⚠ Un re-point naïf `→cle()` serait FAUX (`retirerItemsDemoDesGlobaux` tourne quand `trimestreActif`='demo' → corromprait `demo_*` permanent). Vérif navigateur requise.
+        • G4 VIDAGE — C1 vide le global après peuplement (source 618/752 gardée jusque-là) + nettoyage zéro-dette (reserve 58/59 vestigiaux, productions 2082 mort, init-inline 851/864 diag).
+        • MIGRATION LIVE navigateur (Grégoire) : backup Codex → charger le build → L0/L2 avant/après. Puis B (#352/#353), objectif #36.
+     ⚠ Worktree périmé `.claude/worktrees/brave-agnesi-6fb6aa/` fait rougir faussement `npx vitest run` depuis la RACINE → commande canonique `cd tests && npx vitest run` ; à nettoyer (`git worktree remove`).
+     Mémoire : [[namespacing-par-trimestre]] (MAJ G1+G2 + carte exhaustive), [[catalogue-gabarits-vs-grilles-travail]].
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 28 juin 2026 (EXÉCUTION #358, Claude Code, branche `claude/358-bloc1-fondations-modeles`). [SUPERSÉDÉ par le bloc ci-dessus.]
+     BLOC 1 + RE-POINTS Pass 1 + Pass 2a LIVRÉS et COMMITTÉS sur la branche (NON poussée). ZÉRO écriture de données live. Vitest 1095/1095 ; Playwright 67 (1 rouge préexistant #326, hors #358).
+
+     CONTEXTE : exécution de la migration des modèles #358 (Option A), suite du filet + carte corrigée du bloc précédent. Ordre suivi (PLAN-358 §0bis) : helpers → C1 boot → interrupteur registre → re-points → #359 → [retrait global + live = RESTE]. Découpage validé par Grégoire : Bloc 1 (checkpoint) puis re-points en 2 passes (mécanique, puis POOL/SPECIAL « jugement »).
+
+     ✅ 3 COMMITS (HEAD `d9799880`, +7 devant origin/main, arbre propre) :
+        • `5474503f` BLOC 1 fondation : INTERRUPTEUR (grilles/échelles `CLES_GLOBALES`→`CLES_NAMESPACEES`, trimestres.js) ; 2 helpers (`toutesGrillesTravail`/`toutesEchellesTravail` = union dédup des `<trim>_*` ; `resoudreModeleParId` = namespace actif puis repli pool) ; C1 câblé au boot (main.js, flag `migration_modeles_namespacees_done`, peuple `<trim>_*` par USAGE avant lecteurs) ; 3 résolutions-par-id grade-bearing (consolidation:180, pratique-registre:249, pan-standards:849 dépistage) ; #359 RÉCONCILIÉ (`purgerCopiesModelesArchive` ne purge plus que les copies redevenues orphelines, dérivé de `CLES_GLOBALES` — préserve les copies namespacées VIVANTES au désarchivage ; corrige un bug latent sur `pratiquesConfigurables`). 5 sentinelles basculées au régime namespacé (briqueA/B/C, 358, 359) + 1 nouvelle (helpers) ; 3 break-tests prouvés.
+        • `d4a3f11e` PASS 1 : 89 sites NAMESPACE_ACTIF → `cle()` (16 fichiers). ~20 sites décisionnels RELUS À LA MAIN (l'audit JSON confondait grilles-travail / gabarits / flag `dansBibliotheque`) : 5 ex-« GABARITS » + pratiques-gestion 614/618 = grilles de TRAVAIL filtrées `dansBibliotheque` → `cle()` ; export-pdf 2287/2295 + import-export 3126/3127 (export config = « cours actif », productions déjà `cle()`) → `cle()` (≠ POOL recommandé par le plan, DIVERGENCE assumée et notée) ; cc-license : `cleStockage` apparié (1331/1336) re-pointé avec la lecture (raté par l'audit, sinon édition perdue). ⚠ 8 avertissements Défense J (écritures préexistantes dont seule la clé est re-pointée ; sanitisation amont non tracée → à acquitter par `// security-ok` ou audit du flux).
+        • `d9799880` PASS 2a : 8 sites POOL `donnees-v2` → helpers union (compteurs dropdown, tableaux ressources V1/V2, lookup-par-id modale suppression), fusion catalogue gabarits gardée, garde `typeof`.
+
+     ⚠ ÉTAT HYBRIDE VOLONTAIRE et VERT : le global persiste pour les SPECIAL non re-pointés ; C1 peuple les namespaces pour les lecteurs `cle()`. `trimestres.js` machinerie C1/C2 (610/671/672/1395/1396) EXCLUE de Pass 1 = lit le global comme SOURCE (chicken-and-egg) → à traiter AVEC le retrait du global, pas avant.
+
+     ⮕ RESTE = BLOC LIVE RISQUE-MAX (séance dédiée fraîche, sur backup) :
+        1. SPECIAL_ARCHIVE (~17) : demo-activation (10, snapshot/restore/cleanup intriqué), suppression dual-storage donnees-v2 (1583/1587/1627/1631), productions:2082, machinerie trimestres.
+        2. Retrait de la clé globale `grillesTemplates`/`echellesTemplates` (TOUTE dernière action, zéro-dette).
+        3. Migration live navigateur (Grégoire) : backup Codex → charger le build → L0/L2 avant/après (L0 a2025 MAE<0,5 ; h2026 = avant/après self-compare car trimestre en cours).
+        Puis B (#352/#353), objectif #36. Carte/séquence : `PLAN-358-migration-modeles.md` §0bis ; sites : `plans de travail/audit-358-v2-sites.json`.
+     Mémoire : [[namespacing-par-trimestre]] (MAJ exécution), [[catalogue-gabarits-vs-grilles-travail]], [[verifier-avant-ecrire-donnees-reelles]].
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 28 juin 2026 (bloc coordonné #358 : FILET + cartographie CORRIGÉE, Claude Code, branche `claude/358-bloc1-fondations-modeles`). [SUPERSÉDÉ par le bloc ci-dessus.]
+     ZÉRO écriture de données, ZÉRO re-point appliqué. 3 commits LOCAUX (non poussés). Vitest 1088/1088 vert.
+
+     CONTEXTE : reprise du « bloc coordonné » de migration des modèles #358. Préalables réunis : backup codex frais (`codex-…2026-06-28-10h24.zip`, racine repo) + oracles L0 (`…/Suivi 101-102-103/resultats-conformes-A25.csv` + bulletins Omnivox A25 00001 / H26 00002 / H26 00008).
+
+     ✅ FILET POSÉ ET PROUVÉ (commit `7ae6ca14`) :
+        • L0 a2025 VERT — MAE conforme 0,024 (30/30) / Omnivox 0,148 (max 0,32, seuil 0,5) ; break-test `--prouver-rougit` → ROUGE prouvé.
+        • L0 ÉTENDU à h2026 : `scripts/valider-golden-master-trimestre.mjs` accepte `--omnivox` RÉPÉTABLE (un par groupe) + `--reference` OPTIONNEL (mode Omnivox-seul) + normalisation famille `pan-standards`→`standards` (miroir TABLE_NORMALISATION_PRATIQUE — sans quoi h2026 rendait null pour tous). 46/46 calculés, MAE Omnivox 2,67 MAIS médiane 0,05 → h2026 EN COURS (Omnivox = moyenne courante ≠ note finale projetée) → garde h2026 = AVANT/APRÈS, pas l'absolu. Régression a2025 vérifiée identique.
+        • L2 (isolation, 4 modèles) VERT + break-test (fuite éval h2026→grille a2025 → ROUGE ; `--simuler-isolation h2026` → reverdit).
+        • Baselines AVANT figées : `…/Suivi 101-102-103/baselines-L0-AVANT-migration-358/` (a2025 + h2026, par élève, codex 10h24).
+        • ⚠ L0 AVEUGLE à la migration (agrège les notes STOCKÉES) → oracle PRIMAIRE = sentinelle d'intégrité de résolution (Vitest, 6 cas break-testés). L0 = défense secondaire (dommages collatéraux notes/config).
+
+     ⚠ SHOWSTOPPER attrapé AVANT toute écriture (commit doc `83adf877`) — la prémisse #358 était FAUSSE EN DONNÉES :
+        • `bibliothequeGrilles`/`bibliothequeEchelles` = bibliothèque de GABARITS de départ ([Multi]/[SPE]/[STD]). `grillesTemplates`/`echellesTemplates` (global, clé nue) = grilles/échelles de TRAVAIL réelles. **DISJOINTS (0 id commun).**
+        • Donc AUCUN des 120 sites clé-nue ne se re-pointe vers le catalogue ; tous lisent des grilles de travail → namespace ou pool. Le « 61 CATALOGUE_GLOBAL » des notes du 28 juin AM est INVALIDE.
+        • Piège : le flag `dansBibliotheque` est un drapeau SUR les grilles de travail, PAS le catalogue (les 2 audits l'ont d'abord confondu).
+        • Méthode : codex 10h24 + 2 orchestrations de 44 agents (classif + vérif adverse). Détail : [[catalogue-gabarits-vs-grilles-travail]] + PLAN-358 §0bis.
+
+     ✅ CARTE D'EXÉCUTION CORRIGÉE ET DURABLE (PLAN-358 §0bis + `plans de travail/audit-358-v2-sites.json`) :
+        ~88 NAMESPACE_ACTIF (`cle()`) / ~11 POOL_INTER_TRIMESTRE (helper `toutesGrillesTravail()` = union des `<trim>_grillesTemplates`) / ~17 SPECIAL_ARCHIVE / 4 A_DECIDER (résolus) / **0 GABARITS**.
+        DÉCISION Grégoire : résolution par id grade-bearing = NAMESPACE actif puis REPLI union-pool (helper `resoudreModeleParId`).
+
+     ⮕ RESTE = EXÉCUTION (séance dédiée fraîche, risque max, étape navigateur). Séquence PLAN-358 §0bis :
+        1. 2 helpers (`resoudreModeleParId`, `toutesGrillesTravail`). 2. Câbler C1 au boot (`migrerModelesVersNamespace()` + flag idempotent) — peuple `<trim>_*` AVANT lecteurs. 3. Déplacer registre `grillesTemplates`/`echellesTemplates` `CLES_GLOBALES`→`CLES_NAMESPACEES`. 4. Re-pointer 120 sites. 5. Réconcilier #359 (`purgerCopiesModelesArchive` ne doit PLUS purger `<id>_grillesTemplates`/`echellesTemplates` au désarchivage — vivants après Option A → conditionner au flag). 6. Retrait global (DERNIER). 7. Valider sentinelle + Vitest + L0/L2 avant-après (browser pour la migration des données live).
+        ⚠ Les ~20 sites décisionnels (POOL / A_DECIDER / ex-GABARITS) à RELIRE À LA MAIN (les audits confondent grilles-de-travail / gabarits / flag). Puis B (#352/#353), objectif #36.
+
+     ÉTAT DÉPÔT : branche `claude/358-bloc1-fondations-modeles`, HEAD `83adf877`, +3 commits devant origin/main, NON poussée. Arbre propre. Vitest 1088/1088 ; 1 échec Playwright `maquettes-decouvrabilite-326` PRÉEXISTANT (NON #358 — fichiers cibles identiques à origin/main, à isoler à part).
+     Mémoire : [[catalogue-gabarits-vs-grilles-travail]] (nouveau), [[namespacing-par-trimestre]] (MAJ), [[verifier-avant-ecrire-donnees-reelles]].
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 28 juin 2026 (impl. Bloc 1 #358, Claude Code, branche `claude/358-bloc1-fondations-modeles`). [SUPERSÉDÉ par le bloc ci-dessus.]
+     SOCLE BLOC 1 CODÉ + TESTÉ + VALIDÉ SUR DONNÉES RÉELLES. ZÉRO écriture live, RIEN commité/poussé. Vitest 1088/1088 vert.
+
+     ✅ RE-CADRAGE VÉRIFIÉ (codex réel 28 juin 09h42) — la prémisse « Option A résout le L2 ROUGE » est FAUSSE pour l'état actuel.
+        • L2 (évaluations = couche notes) DÉJÀ VERT : a2025 et h2026 ne partagent AUCUN modèle au niveau des évals.
+        • Les « 2 grilles partagées » (842/489 = grilles A25) ne le sont QUE via `production.grilleId` H26 périmé (h2026 évals: 0 ; productions: 5+3) — déjà en résolution cassée, hors couche note. → #358 devient PRÉVENTIF/structurel, pas un correctif d'urgence.
+        • Bloc 1 « étendre L2 » = DÉJÀ livré sur main (1.23.0, 4 modèles, 7 cas break-testés). Rien à refaire.
+
+     ✅ C2 LIVRÉ — `identifierTemplatesUtilises` (trimestres.js:587) lit les ÉVALUATIONS (pas que les productions) + exposée window.
+        Effet réel : h2026 grilleIds 3→5 (récupère 2 grilles d'évals que les productions rataient ; sans C2, archiver h2026 perdait 2/3 grilles notées). Sentinelle `tests/unit/sentinelle-identifier-templates-evals-358.test.js` (4 cas, break-testée).
+
+     ✅ C1 LIVRÉ (FONCTION, pas encore câblée au boot) — `window.migrerModelesVersNamespace()` (trimestres.js) peuple `<trim>_grillesTemplates`/`echellesTemplates` par USAGE (copie byte-exacte). ADDITIF / IDEMPOTENT / NON-INTRUSIF (catalogue + global + registre intouchés).
+        Sentinelle d'intégrité `tests/unit/sentinelle-integrite-migration-modeles-358.test.js` (6 cas, break-testée : résolution byte-identique après bascule). Dry-run CODE-RÉEL-sur-CODEX-RÉEL : h2026 crée 3 grilles/2 échelles, a2025 inchangé, 842/489 ignorées, global+catalogue intouchés.
+
+     ⮕ AFFINAGES vs PLAN-358 (assumés, prouvés sûrs par simulation break-testée) :
+        (a) l'INTERRUPTEUR (déplacement registre `CLES_GLOBALES`→`CLES_NAMESPACEES`) DIFFÉRÉ hors Bloc 1 — seul, avant re-pointage des 119 lecteurs bruts = état hybride → rejoint le bloc coordonné « global en dernier ».
+        (b) C1 = copie locale par USAGE (≠ « copie l'intégralité » du plan §4, qui polluerait h2026 de grilles A25) ; le CATALOGUE garde tout (§4-pt7).
+        (c) L0 reconfirmé AVEUGLE à cette migration (agrège les notes STOCKÉES) → l'oracle réel = la sentinelle d'intégrité de résolution. Fichiers L0 repérés (`…/Suivi 101-102-103/resultats-conformes-A25.csv` + Omnivox) pour la baseline du filet.
+
+     ⮕ RESTE (BLOC COORDONNÉ, session future, RISQUE MAX) : câbler C1 au boot (resync + flag idempotent EN DERNIER) + déplacer le registre + re-pointer les 119 lecteurs (Blocs 2-3) + fusion catalogue & retrait du global (Bloc 4) + L0/L2 avant-après sur backup. → puis B (#352/#353) → objectif #36.
+     ⮕ DÉCISION OUVERTE pour la reprise : commiter le socle Bloc 1 (patch) ? et confirmer la sémantique C1 (copie par usage + catalogue) avant d'attaquer le bloc coordonné.
+     Mémoire : [[namespacing-par-trimestre]] (MAJ impl Bloc 1), [[verifier-avant-ecrire-donnees-reelles]], [[objectif-reconstruction-multi-trimestres]].
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 28 juin 2026 (suite, Claude Code, main 1.24.0). Prép #358 (lecture seule) + a2024 supprimé.
 
      ✅ FAIT — PRÉPARATION #358 (migration des modèles, Option A) — LECTURE SEULE, poussée (`1c02953f`).
      • Plan durable écrit : `plans de travail/PLAN-358-migration-modeles.md` (dry-run sur codex réel + audit 8 agents, 119 sites clé nue classés :

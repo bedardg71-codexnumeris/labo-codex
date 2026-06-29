@@ -158,9 +158,10 @@
      * stockages différents — la Voûte (collection plate partage_cartouches, lecteur
      * par défaut) et un import inter-trimestre (cartouches par CLÉ cartouches_{grilleId},
      * lues via cleSource au pas 4). La source n'est JAMAIS mutée (copiePropre fait une
-     * copie profonde). La destination reste les collections du trimestre actif (clés
-     * grillesTemplates / cartouches_{nouvelId}) — la migration des writers vers cle()
-     * relève de la Brique D, pas d'ici.
+     * copie profonde). La destination = les collections du trimestre actif via cle()
+     * (#358 Option A, Brique D : `cle('grillesTemplates')` = `<trim>_grillesTemplates`).
+     * Les cartouches restent ancrées par `cartouches_{nouvelId}` (clé neuve, non
+     * namespacée par modèle — hors périmètre #358).
      *
      * Report ASSUMÉ au pas 4 (D-C4) : une cartouche copiée conserve son echelleId
      * source (pas de remappage d'échelle ici) — verrouillé par un test-témoin.
@@ -171,7 +172,7 @@
      */
     function dupliquerGrillePartagee(grilleSource, lireCartouchesDe) {
         var copie = copiePropre(grilleSource, 'grille');
-        ajouterACollection('grillesTemplates', copie);
+        ajouterACollection(window.cle('grillesTemplates'), copie);
 
         var lecteur = (typeof lireCartouchesDe === 'function') ? lireCartouchesDe : lireCartouchesPartageDe;
         var cartouchesLiees = lecteur(grilleSource) || [];
@@ -259,7 +260,7 @@
 
         if (type === 'echelle') {
             var copieE = copiePropre(item, 'echelle');
-            ajouterACollection('echellesTemplates', copieE);
+            ajouterACollection(window.cle('echellesTemplates'), copieE);
             return { idNouveau: copieE.id, libelle: 'Échelle « ' + nomDe(item) + ' » copiée dans tes documents' };
         }
 

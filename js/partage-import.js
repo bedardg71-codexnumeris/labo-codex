@@ -801,7 +801,8 @@
         }
         if (!type) {
             type = 'grille';
-            var grilles = lireCollection('grillesTemplates').filter(function (g) {
+            var grilles = ((typeof window.toutesGrillesTravail === 'function')
+                ? window.toutesGrillesTravail() : lireCollection('grillesTemplates')).filter(function (g) {
                 return !(window.BibliothequeUI && BibliothequeUI.estItemDemo && BibliothequeUI.estItemDemo(g));
             });
             if (!grilles.length) {

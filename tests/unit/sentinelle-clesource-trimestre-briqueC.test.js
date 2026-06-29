@@ -42,11 +42,14 @@ describe('Brique C · cleSource lit un trimestre nommé sans swap', () => {
         expect(win.cleSource('cartouches_GRILLE_A25', 'a2025')).toBe('a2025_cartouches_GRILLE_A25');
     });
 
-    it('GLOBAL PARTAGÉ — source sans copie : repli sur la clé globale (catalogue commun)', () => {
+    it('ROUTAGE SOURCE — #358 : grilles/échelles namespacées (clé de la source) ; cartouches/cours globales', () => {
         const store = { trimestres: [{ id: 'h2026', actif: true, archive: false }] };
         const win = chargerTrimestres(store);
-        expect(win.cleSource('grillesTemplates', 'a2025')).toBe('grillesTemplates');
-        expect(win.cleSource('echellesTemplates', 'a2025')).toBe('echellesTemplates');
+        // Option A : grilles/échelles ont rejoint CLES_NAMESPACEES → clé namespacée de la SOURCE
+        // (même sans copie matérialisée — emplacement canonique du trimestre nommé).
+        expect(win.cleSource('grillesTemplates', 'a2025')).toBe('a2025_grillesTemplates');
+        expect(win.cleSource('echellesTemplates', 'a2025')).toBe('a2025_echellesTemplates');
+        // Restent globales (catalogue commun) : cartouches, cours.
         expect(win.cleSource('cartouches_GRILLE_A25', 'a2025')).toBe('cartouches_GRILLE_A25');
         expect(win.cleSource('cours', 'a2025')).toBe('cours');
     });
@@ -68,8 +71,8 @@ describe('Brique C · cleSource lit un trimestre nommé sans swap', () => {
         win.cleSource('grillesTemplates', 'a2025');
         win.cleSource('pratiquesConfigurables', 'a2025');
         expect(win.obtenirTrimestreId()).toBe('h2026');
-        // Invariant H26 : pour le trimestre actif non archivé, cle() rend la clé globale.
-        expect(win.cle('grillesTemplates')).toBe('grillesTemplates');
+        // #358 : pour le trimestre actif non archivé, cle() rend la clé namespacée (h2026_*).
+        expect(win.cle('grillesTemplates')).toBe('h2026_grillesTemplates');
         expect(store.trimestres.find(t => t.id === 'h2026').actif).toBe(true);
     });
 

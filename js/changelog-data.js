@@ -12,6 +12,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.25',
+            couleur: 'bleu',
+            titre: 'Données plus fiables et modèles isolés par trimestre',
+            items: [
+                'Fiabilité renforcée : tes saisies, notes et corrections sont maintenant enregistrées de façon durable, même après un rechargement complet de la page — fini les retours en arrière inattendus après un rafraîchissement.',
+                'Chaque trimestre conserve ses propres grilles et échelles d’évaluation : les modifier dans un trimestre n’altère plus celles des autres, et changer de trimestre n’affecte pas tes modèles.',
+                'Correction : quand une même évaluation existe en double avec une note identique, elle n’est plus comptée deux fois dans le calcul de la note finale.'
+            ]
+        },
+        {
             version: '1.21',
             couleur: 'vert',
             titre: 'Import de pratiques de notation d’un autre trimestre',

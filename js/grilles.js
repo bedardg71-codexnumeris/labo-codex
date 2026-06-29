@@ -1524,6 +1524,16 @@ async function migrerGrillesVersBibliotheque() {
  * Facilite la compréhension du système pour les nouveaux utilisateurs
  */
 async function assurerGrilleGenerique() {
+    // 🆕 #358 — Garde anti-resemage du global hérité. Au boot (DOMContentLoaded,
+    // AVANT db-ready) avec localStorage saturé (#353), `trimestreActif` n'est pas
+    // encore réhydraté → obtenirTrimestreId() est vide → cle('grillesTemplates')
+    // retombe sur la clé GLOBALE nue (trimestres.js:307). Semer ici recréerait
+    // l'exemple dans le global hérité que #358 retire (re-création à chaque boot →
+    // vidage G4 impossible). On ne sème QUE lorsque cle() résout vers une copie
+    // namespacée ; la navigation vers la section ré-appelle ce module une fois le
+    // trimestre actif établi (navigation.js:223).
+    if (cle('grillesTemplates') === 'grillesTemplates') return;
+
     const grilles = await db.get(cle('grillesTemplates')) || [];
 
     // Vérifier si la grille générique existe déjà ou a été supprimée volontairement
@@ -2100,6 +2110,8 @@ window.importerDansGrilleActive = importerDansGrilleActive;
 window.importerGrilles = importerGrilles;
 window.enregistrerCommeGrille = enregistrerCommeGrille;
 window.initialiserModuleGrilles = initialiserModuleGrilles;
+// Exposée pour la sentinelle #358 (garde anti-resemage du global hérité).
+window.assurerGrilleGenerique = assurerGrilleGenerique;
 
 // ✅ AJOUT (8 décembre 2025) : Exports fonctions bibliothèque
 window.afficherBibliothequeGrilles = afficherBibliothequeGrilles;

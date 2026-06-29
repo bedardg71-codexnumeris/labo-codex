@@ -599,7 +599,8 @@
         // fixture sinon) → package valide ; dépendances incluses.
         var grilleSource = null;
         if (typeof db !== 'undefined' && db.getSync) {
-            var grilles = db.getSync('grillesTemplates', []);
+            var cleGrilles = (typeof cle === 'function') ? cle('grillesTemplates') : 'grillesTemplates';
+            var grilles = db.getSync(cleGrilles, []);
             if (Array.isArray(grilles) && grilles.length) grilleSource = grilles[0];
         }
         if (!grilleSource) {

@@ -846,8 +846,12 @@ class PratiquePANStandards {
             return null;
         }
 
-        const grilles = db.getSync('grillesTemplates', []);
-        const grille = grilles.find(g => g.id === grilleId);
+        // 🆕 #358 (Option A) : résolution namespacée par id (actif puis repli pool) —
+        // la grille de référence de dépistage peut vivre dans un autre trimestre que
+        // l'actif consulté (la préférence grilleReferenceDepistage est globale).
+        const grille = (typeof resoudreModeleParId === 'function')
+            ? resoudreModeleParId('grille', grilleId)
+            : ((db.getSync('grillesTemplates', []) || []).find(g => g.id === grilleId) || null);
 
         if (!grille) {
             console.error(`❌ [PAN-Standards] Grille "${grilleId}" introuvable`);

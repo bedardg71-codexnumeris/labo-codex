@@ -753,7 +753,7 @@ async function exporterGrillePDF(grille, options = {}) {
  * Exporte toutes les grilles en un seul PDF
  */
 async function exporterToutesGrillesPDF(options = {}) {
-    const grilles = await db.get('grillesTemplates') || [];
+    const grilles = await db.get(cle('grillesTemplates')) || [];
     if (grilles.length === 0) {
         alert('Aucune grille a exporter.');
         return;
@@ -890,7 +890,7 @@ async function exporterEchellePDF(echelle, options = {}) {
  * Exporte toutes les echelles en un seul PDF
  */
 async function exporterToutesEchellesPDF(options = {}) {
-    const echelles = await db.get('echellesTemplates') || [];
+    const echelles = await db.get(cle('echellesTemplates')) || [];
     if (echelles.length === 0) {
         alert('Aucune echelle a exporter.');
         return;
@@ -1097,8 +1097,8 @@ async function exporterReferentielCompletPDF(options = {}) {
 
     // Charger les donnees
     const productions = await db.get(cle('productions')) || [];
-    const grilles = await db.get('grillesTemplates') || [];
-    const echelles = await db.get('echellesTemplates') || [];
+    const grilles = await db.get(cle('grillesTemplates')) || [];
+    const echelles = await db.get(cle('echellesTemplates')) || [];
 
     // Section Productions
     if (productions.length > 0) {
@@ -1546,14 +1546,14 @@ async function chargerOptionsExportPDF() {
 
     // Charger les grilles
     if (selectGrille) {
-        const grilles = await db.get('grillesTemplates') || [];
+        const grilles = await db.get(cle('grillesTemplates')) || [];
         selectGrille.innerHTML = '<option value="">-- Sélectionner --</option>' +
             grilles.map(g => `<option value="${escapeHtml(g.id)}">${escapeHtml(g.nom || 'Sans nom')}</option>`).join('');
     }
 
     // Charger les echelles
     if (selectEchelle) {
-        const echelles = await db.get('echellesTemplates') || [];
+        const echelles = await db.get(cle('echellesTemplates')) || [];
         selectEchelle.innerHTML = '<option value="">-- Sélectionner --</option>' +
             echelles.map(e => `<option value="${escapeHtml(e.id)}">${escapeHtml(e.nom || 'Sans nom')}</option>`).join('');
     }
@@ -1605,8 +1605,8 @@ async function mettreAJourApercuPDF() {
     // Si grille et echelle selectionnees, generer l'apercu
     if (grilleId && echelleId) {
         // Charger les donnees
-        const grilles = await db.get('grillesTemplates') || [];
-        const echelles = await db.get('echellesTemplates') || [];
+        const grilles = await db.get(cle('grillesTemplates')) || [];
+        const echelles = await db.get(cle('echellesTemplates')) || [];
         const grille = grilles.find(g => g.id === grilleId);
         const echelle = echelles.find(e => e.id === echelleId);
 
@@ -1877,8 +1877,8 @@ async function exporterPDFCombine() {
 
     try {
         // Charger les donnees
-        const grilles = await db.get('grillesTemplates') || [];
-        const echelles = await db.get('echellesTemplates') || [];
+        const grilles = await db.get(cle('grillesTemplates')) || [];
+        const echelles = await db.get(cle('echellesTemplates')) || [];
         const grille = grilles.find(g => g.id === grilleId);
         const echelle = echelles.find(e => e.id === echelleId);
 
@@ -2284,7 +2284,7 @@ async function chargerOptionsPreparationPDF() {
 
     // Charger les grilles (filtrées par dansBibliotheque)
     if (selectGrille) {
-        const toutesGrilles = await db.get('grillesTemplates') || [];
+        const toutesGrilles = await db.get(cle('grillesTemplates')) || [];
         const grilles = toutesGrilles.filter(g => g.dansBibliotheque !== false);
         selectGrille.innerHTML = '<option value="">-- Sélectionner --</option>' +
             grilles.map(g => `<option value="${escapeHtml(g.id)}">${escapeHtml(g.nom || 'Sans nom')}</option>`).join('');
@@ -2292,7 +2292,7 @@ async function chargerOptionsPreparationPDF() {
 
     // Charger les echelles (filtrées par dansBibliotheque)
     if (selectEchelle) {
-        const toutesEchelles = await db.get('echellesTemplates') || [];
+        const toutesEchelles = await db.get(cle('echellesTemplates')) || [];
         const echelles = toutesEchelles.filter(e => e.dansBibliotheque !== false);
         selectEchelle.innerHTML = '<option value="">-- Sélectionner --</option>' +
             echelles.map(e => `<option value="${escapeHtml(e.id)}">${escapeHtml(e.nom || 'Sans nom')}</option>`).join('');
@@ -2373,8 +2373,8 @@ async function ouvrirApercuPDF() {
 
     try {
         // Charger les donnees
-        const grilles = await db.get('grillesTemplates') || [];
-        const echelles = await db.get('echellesTemplates') || [];
+        const grilles = await db.get(cle('grillesTemplates')) || [];
+        const echelles = await db.get(cle('echellesTemplates')) || [];
         const grille = grilles.find(g => g.id === grilleId);
         const echelle = echelles.find(e => e.id === echelleId);
 
@@ -2813,7 +2813,7 @@ async function chargerOptionsInlinePDF() {
     // Charger les grilles
     const selectGrille = scope.querySelector('#inlinePDF-grille');
     if (selectGrille) {
-        const grilles = await db.get('grillesTemplates') || [];
+        const grilles = await db.get(cle('grillesTemplates')) || [];
         selectGrille.innerHTML = '<option value="">-- Sélectionner --</option>' +
             grilles.map(g => `<option value="${escapeHtml(g.id)}">${escapeHtml(g.nom)}</option>`).join('');
     }
@@ -2821,7 +2821,7 @@ async function chargerOptionsInlinePDF() {
     // Charger les échelles
     const selectEchelle = scope.querySelector('#inlinePDF-echelle');
     if (selectEchelle) {
-        const echelles = await db.get('echellesTemplates') || [];
+        const echelles = await db.get(cle('echellesTemplates')) || [];
         selectEchelle.innerHTML = '<option value="">-- Sélectionner --</option>' +
             echelles.map(e => `<option value="${escapeHtml(e.id)}">${escapeHtml(e.nom)}</option>`).join('');
     }
@@ -2889,8 +2889,8 @@ async function ouvrirApercuPDFDepuisInline() {
     }
 
     // Récupérer les données
-    const grilles = await db.get('grillesTemplates') || [];
-    const echelles = await db.get('echellesTemplates') || [];
+    const grilles = await db.get(cle('grillesTemplates')) || [];
+    const echelles = await db.get(cle('echellesTemplates')) || [];
     const grille = grilles.find(g => g.id === grilleId);
     const echelle = echelles.find(e => e.id === echelleId);
 

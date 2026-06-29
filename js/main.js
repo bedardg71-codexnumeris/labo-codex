@@ -20,7 +20,7 @@
 // init-inline.js compare cette valeur au BUILD_ID lu depuis version.json :
 // si différent, Safari file:// a probablement un main.js périmé en cache,
 // et la séquence reload+bandeau s'enclenche. SYNCHRONISER À CHAQUE BUMP.
-window._SCRIPT_BUILD_main = '0628-1824';
+window._SCRIPT_BUILD_main = '0628-2049';
 
 /* ===============================
    FONCTION GLOBALE: Génération d'ID uniques
@@ -387,6 +387,39 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.warn('[migration_pratiques_namespacees] erreur ignorée:', e);
             }
             db.setSync('migration_pratiques_namespacees_done', true);
+        }
+
+        // Migration namespacing des MODÈLES grilles/échelles (#358, Option A —
+        // 28 juin 2026) : grillesTemplates / echellesTemplates ont été déplacés de
+        // CLES_GLOBALES vers CLES_NAMESPACEES (l'« interrupteur »). C1
+        // (migrerModelesVersNamespace) peuple <trim>_grillesTemplates /
+        // <trim>_echellesTemplates par USAGE (productions + évaluations grade-bearing,
+        // via identifierTemplatesUtilises) — AVANT tout lecteur — pour que la bascule
+        // cle() → régime namespacé préserve chaque note (sentinelle d'intégrité 358).
+        // ADDITIF / IDEMPOTENT : ne touche NI au catalogue de gabarits
+        // (bibliothequeGrilles/Echelles), NI à la clé globale héritée (son retrait est
+        // la dernière étape, live, sur backup). Flag idempotent. Placée APRÈS la
+        // migration des pratiques (registre des trimestres déjà stable) et avant tout
+        // rendu (aucune lecture de grilles/échelles plus haut dans ce handler db-ready).
+        if (!db.getSync('migration_modeles_namespacees_done', false)) {
+            try {
+                if (typeof migrerModelesVersNamespace === 'function') {
+                    migrerModelesVersNamespace();
+                    // G4 (#358) — VIDAGE de la clé globale héritée, TOUTE DERNIÈRE
+                    // étape : ne s'exécute QUE si le peuplement n'a pas levé d'exception
+                    // (sinon on garderait le global comme filet). Retire les modèles
+                    // redondants, CONSERVE + journalise les orphelins non capturés.
+                    if (typeof viderModelesGlobalHerite === 'function') {
+                        viderModelesGlobalHerite();
+                    }
+                }
+                // Flag posé seulement après peuplement + vidage réussis : un échec
+                // partiel laisse le global intact et fait re-tenter au prochain boot
+                // (migrerModelesVersNamespace est idempotent/additif).
+                db.setSync('migration_modeles_namespacees_done', true);
+            } catch(e) {
+                console.warn('[migration_modeles_namespacees] erreur ignorée:', e);
+            }
         }
 
         // Migration #326 R1 (16 juin 2026) : le flag transitoire de maquette

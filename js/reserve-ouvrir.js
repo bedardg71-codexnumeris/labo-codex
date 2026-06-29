@@ -213,8 +213,8 @@ async function _hydrateManifesteDepuisZip(zip, dossierVersement, fichierPatch, f
  * le payload ni dans les bibliothèques actives.
  */
 function _extraireRessources(donnees) {
-    var grillesActives = (window.db && db.getSync('grillesTemplates', [])) || [];
-    var echellesActives = (window.db && db.getSync('echellesTemplates', [])) || [];
+    var grillesActives = (window.db && db.getSync(cle('grillesTemplates'), [])) || [];
+    var echellesActives = (window.db && db.getSync(cle('echellesTemplates'), [])) || [];
     var tamponsActifs = (window.db && db.getSync('tamponsPersonnalises', [])) || [];
 
     var cleProdActive = (typeof window.cle === 'function') ? cle('productions') : 'productions';

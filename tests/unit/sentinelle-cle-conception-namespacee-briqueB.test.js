@@ -47,12 +47,14 @@ function chargerEchelles(store) {
 }
 
 describe('Lot B1 · grilles.js — éditeur de grilles namespacé par trimestre', () => {
-    it('BRANCHEMENT H26 — trimestre actif NON archivé : l’import écrit dans le GLOBAL', () => {
+    it('BRANCHEMENT H26 — trimestre actif NON archivé : l’import écrit dans h2026_ (namespacé #358)', () => {
         const store = { trimestres: [{ id: 'h2026', actif: true, archive: false }] };
         const win = chargerGrilles(store);
         win.importerGrillesExternes([{ id: 'G_TEST_B1' }], { silencieux: true });
-        expect((store.grillesTemplates || []).some(g => g.id === 'G_TEST_B1')).toBe(true);
-        expect(store.a2025_grillesTemplates).toBeUndefined();
+        // Option A : l'éditeur écrit dans la copie namespacée de l'actif, plus le global.
+        expect((store.h2026_grillesTemplates || []).some(g => g.id === 'G_TEST_B1')).toBe(true);
+        expect(store.grillesTemplates).toBeUndefined();          // clé globale héritée non écrite
+        expect(store.a2025_grillesTemplates).toBeUndefined();    // pas de contamination A25
     });
 
     it('BRANCHEMENT A25 — trimestre archivé AVEC copie : l’import écrit dans a2025_, PAS le global', () => {
@@ -87,12 +89,14 @@ describe('Lot B1 · grilles.js — éditeur de grilles namespacé par trimestre'
 });
 
 describe('Lot B2 · echelles.js — éditeur d’échelles namespacé par trimestre', () => {
-    it('BRANCHEMENT H26 — trimestre actif NON archivé : l’import écrit dans le GLOBAL', () => {
+    it('BRANCHEMENT H26 — trimestre actif NON archivé : l’import écrit dans h2026_ (namespacé #358)', () => {
         const store = { trimestres: [{ id: 'h2026', actif: true, archive: false }] };
         const win = chargerEchelles(store);
         win.importerEchellesExternes([{ id: 'E_TEST_B2' }], { silencieux: true });
-        expect((store.echellesTemplates || []).some(e => e.id === 'E_TEST_B2')).toBe(true);
-        expect(store.a2025_echellesTemplates).toBeUndefined();
+        // Option A : l'éditeur écrit dans la copie namespacée de l'actif, plus le global.
+        expect((store.h2026_echellesTemplates || []).some(e => e.id === 'E_TEST_B2')).toBe(true);
+        expect(store.echellesTemplates).toBeUndefined();         // clé globale héritée non écrite
+        expect(store.a2025_echellesTemplates).toBeUndefined();   // pas de contamination A25
     });
 
     it('BRANCHEMENT A25 — trimestre archivé AVEC copie : l’import écrit dans a2025_, PAS le global', () => {

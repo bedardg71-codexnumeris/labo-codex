@@ -13,9 +13,11 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // afficherFormProduction). Correctifs : peuplerEchellesProduction() + onchange
 // cartouche dans le chemin « Nouvelle production ».
 //
-// Ce test couvre les DEUX modes (données réelles + données démo), car les
-// échelles/cartouches sont lues dans les stores globaux où les données démo
-// sont aussi fusionnées (activerModeDemo → fusionnerDemoVersGlobaux).
+// Ce test couvre les DEUX modes (données réelles + données démo). Les grilles
+// sont namespacées (cle()) ; sans trimestre actif au chargement, cle() retombe
+// sur la clé nue (trimestres.js:306) — le test écrit donc directement les stores
+// lus par chargerGrillesDisponiblesPourProduction. (#358 G3 : la démo ne fusionne
+// plus de modèles vers le global ; en mode démo, cle()=demo_* est lu directement.)
 
 test('Production · échelle + cartouche se peuplent (données réelles)', async ({ page }) => {
     await page.goto(indexHtml);

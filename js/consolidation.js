@@ -174,10 +174,20 @@ function _detecterEchelle(productions) {
 
     if (!meilleurId) return null;
 
-    // Charger depuis echellesTemplates (non namespacé) ou depuis le codex data en mode Labo
-    var echelles = (window.LaboCodexData && typeof window.LaboCodexData.lireBibliothequeGlobale === 'function')
-        ? window.LaboCodexData.lireBibliothequeGlobale('echellesTemplates') || []
-        : db.getSync('echellesTemplates', []);
+    // 🆕 #358 (Option A) : résolution namespacée PAR ID. En mode Labo (codex data),
+    // lire la bibliothèque globale du format recherche ; sinon resoudreModeleParId
+    // (trimestre actif puis repli pool inter-trimestre — une échelleId portée par une
+    // production peut provenir d'un autre trimestre). Repli ultime : clé namespacée
+    // active (modules chargés isolément en test, hors app).
+    if (window.LaboCodexData && typeof window.LaboCodexData.lireBibliothequeGlobale === 'function') {
+        var echellesLabo = window.LaboCodexData.lireBibliothequeGlobale('echellesTemplates') || [];
+        return echellesLabo.find(function(e) { return e.id === meilleurId; }) || null;
+    }
+    if (typeof resoudreModeleParId === 'function') {
+        return resoudreModeleParId('echelle', meilleurId);
+    }
+    var cleEch = (typeof cle === 'function') ? cle('echellesTemplates') : 'echellesTemplates';
+    var echelles = db.getSync(cleEch, []);
     return echelles.find(function(e) { return e.id === meilleurId; }) || null;
 }
 
