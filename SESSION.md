@@ -2,7 +2,30 @@
      📌 SIGNET PERSISTANT — garder EN TÊTE de fichier, au-dessus des blocs de session. Le REMONTER au-dessus du prochain bloc à chaque relais.
      CHANTIER D'ENSEMBLE — STABILITÉ MI-AOÛT (CoP / expérimentateurs).
      ⮕ Plan d'ensemble mi-août (3 paliers, porteurs Claude Code vs Grégoire, 6 décisions à trancher §9) : `plans de travail/PLAN-mi-aout-2026.md` (28 juin 2026).
-     #326 (réactivation du comparateur, « bloqueur CoP » n°1) = CLOS le 28 juin (release 1.26.0) — voir le bloc de session #326 ci-dessous + `plans de travail/RELAIS-326-reactivation-comparateur.md` (clôturé).
+     #326 (réactivation du comparateur, « bloqueur CoP » n°1) = CLOS le 28 juin (release 1.26.0).
+     ⮕ ÉTAT AU 29 JUIN 2026 (release 1.26.2, DÉPLOYÉE) : grosse séance backlog — voir le bloc « 29 juin » ci-dessous. ⚠ GRÉGOIRE EN CONGÉ TOUT JUILLET, reprise AOÛT. À la reprise : paire #313+#344 prête à lancer en parallèle ; validations terrain en attente (#310/#311/#351/#240/#347, 2 modes) ; 5 worktrees à trier (ne pas supprimer sans examen).
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 29 JUIN 2026 (AUDIT ACCOMPAGNEMENT + 6 ITEMS BACKLOG + MÉNAGE RACINE, Claude Code, branche `claude/batch-mi-aout-justesse-filets` → mergée main + déployée). ⮕⮕ LIRE EN PREMIER, PUIS CONGÉ JUILLET.
+     Release 1.26.2 (build 0629-0909). Vitest 1187, Playwright 68/68. 11 commits ; toutes les vagues en worktrees isolés, empreintes disjointes vérifiées AVANT lancement → 0 conflit au merge.
+
+     ✅ AUDIT ACCOMPAGNEMENT (demande Grégoire) → tuyau livré (1.26.1) : cache-busting (`release.mjs` NE bumpe PAS les ?v= → ~115 fichiers en retard ; 41 bumpés ; chip d'automatisation déposé) + entrée changelog 1.26 manquante (comparateur, couleur bleu, menu réel « Exploration des pratiques »). Backlog #364 = reste de l'aide (T3 comparateur SANS aucune aide / T4 import inter-trimestre / T5 visite guidée — AUCUNE cible morte). Mémoire [[audit-accompagnement-utilisateur-2026-06-29]].
+
+     ✅ 6 ITEMS BACKLOG LIVRÉS + cochés :
+        • #351 — 20 élèves démo → figures historiques (pack-demo-20.js). ⚠ À VALIDER terrain : appariement Aimé Césaire (profil « en difficulté ») / Jane Goodall (« fort »), échangeable.
+        • #304 — terminologie interne « heures-contact » → « heure d'enseignement » (clé de données `heuresContact` PRÉSERVÉE). Bug latent signalé : handler `proposerHeures…` non exporté sur window (la proposition auto ne marche déjà pas, indépendant).
+        • #311 — libellé pratique active → « PAN-Standards » (1 ligne, profil-etudiant-sections-affichage.js:4049).
+        • #310 — note A/C/P Suivi du groupe injectée en JS + source consolidée (etudiants.js). ⚠ CHANGEMENT DE CRITÈRE assumé : le terme production/artefact suit la PRATIQUE ACTIVE (plus la présence de portfolio).
+        • #240 — tampons visuels de jetons. Le tampon Reprise déclenche le flux de reprise (CONFIRMÉ Grégoire = voulu).
+        • #347 — bandeau « Vue recalculée » sur rétroaction recalculée a posteriori (décision = MARQUER, pas figer). ⚠ À VALIDER terrain : pas trop bavard sur A25/H26.
+
+     ✅ MÉNAGE RACINE (tâche d'attente pendant que #347 codait) : 18→14 .md, 0 .txt. Corpus de gouvernance lié + exposé par README PRÉSERVÉ (AUDIT/DEPLOY/INCIDENTS/INFO-ELEVES/PRIVACY/SECURITY/LICENSE). 5 artefacts → `plans de travail/` + `Formation/` ; snippet jetable #346 supprimé.
+
+     ✅ #313 + #344 TRANCHÉS = PAIRE PARALLÈLE prête pour la reprise : #344 carte Légende fusionnée remonte EN HAUT (2 colonnes) ; #313 neutraliser l'écrasement silencieux du sélecteur global d'import + info UI. Empreintes disjointes (calendrier-vue/styles/index.html vs travaux-ui/travaux-import).
+
+     ⮕ À LA REPRISE (AOÛT) : (1) lancer la paire #313 + #344 (2 agents parallèles) ; (2) validations terrain en attente (#310/#311/#351/#240/#347, sombre+clair) ; (3) trier les 5 worktrees à contenu (wonderful = modifs Brique C non commitées ; zen = `workers:1` utile ; bold-wilson = 20 commits ; distracted/lucid = 1 chacun — EXAMINER, pas supprimer) ; (4) #364 T3/T4/T5 (contenu d'aide à valider).
+     Mémoire : [[audit-accompagnement-utilisateur-2026-06-29]], [[forfait-pro-conge-juillet-2026]].
      ===================================================================== -->
 
 <!-- =====================================================================
