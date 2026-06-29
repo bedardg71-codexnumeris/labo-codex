@@ -4046,7 +4046,7 @@ function genererSectionPerformance(da) {
         <div id="details-calculs-performance-${da}" class="carte-info-toggle carte-info-note u-hide">
             <strong>Méthodologie de calcul</strong>
             <br><br>
-            <strong>Pratique de notation active :</strong> ${indices.pratique === 'PAN' ? 'PAN (Portfolio à nombre limité)' : 'SOM (Sommative provisoire)'}
+            <strong>Pratique de notation active :</strong> ${indices.pratique === 'PAN' ? 'PAN-Standards' : 'Sommative'}
             <br><br>
             <strong>Règle de sélection :</strong> ${_genererTexteRegleSelectionPortfolio(portfolioActifRapport, methodeSelectionRapport, nombreARetenirConfig, configCategoriesRapport)}
             <br><br>
