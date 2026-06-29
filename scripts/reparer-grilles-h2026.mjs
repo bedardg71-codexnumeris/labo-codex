@@ -176,7 +176,7 @@ export function calculerRecreationGrilles(codex, trimestre, noms) {
 
 // Construit une entrée de DÉFINITION de grille à recréer (copie profonde de la source,
 // id forcé à l'id attendu, nom propre, drapeau de provenance). NE TOUCHE AUCUNE ÉVAL.
-function fabriquerGrille(codex, rec) {
+export function fabriquerGrille(codex, rec) {
     const pool = indexerGrilles(codex);
     const src = pool.get(rec.sourceId);
     const copie = JSON.parse(JSON.stringify(src.grille));
@@ -190,7 +190,7 @@ function fabriquerGrille(codex, rec) {
 // Applique le plan sur une COPIE profonde : AJOUTE les définitions recréées dans la clé
 // cible (sans écraser une grille de même id déjà présente → idempotent). N'écrit QUE
 // *_grillesTemplates. Ne retire PAS les orphelines, ne touche PAS la pref (décisions).
-function appliquer(codex, plan) {
+export function appliquer(codex, plan) {
     const out = JSON.parse(JSON.stringify(codex));
     for (const rec of plan.recreations) {
         if (!Array.isArray(out[rec.cleCible])) out[rec.cleCible] = [];
