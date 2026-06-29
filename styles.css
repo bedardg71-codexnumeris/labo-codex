@@ -9271,6 +9271,21 @@ body.mode-clair .bloc-rlo-separateur {
     font-size: 0.7rem;
     color: var(--texte-principal, #d0e0e4);
 }
+/* #240 : mot du jeton cliquable (active le tampon texte sur le travail annoté) */
+.badge-jeton-titre--tampon {
+    cursor: pointer;
+    text-decoration: underline dotted;
+    text-underline-offset: 2px;
+}
+.badge-jeton-titre--tampon:hover {
+    color: var(--accent-primaire);
+    text-decoration-style: solid;
+}
+.badge-jeton-titre--tampon:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    border-radius: 2px;
+}
 .jeton-icone {
     width: 20px;
     height: 20px;

@@ -993,6 +993,14 @@
      * @param {number} yNorm - Y normalise (0-1)
      */
     function poserAutocollant(autocollantId, xNorm, yNorm) {
+        // #240 — Tampon JETON : autocollant texte (pas d'image). Rendu en ROUGE
+        // MAJUSCULE, coche automatiquement la checkbox du jeton après apposition.
+        const def = _outils().getAutocollant ? _outils().getAutocollant(autocollantId) : null;
+        if (def && def.texteTampon) {
+            poserTamponTexte(def, xNorm, yNorm);
+            return;
+        }
+
         const tailleBase = 0.04; // 4% de la largeur du document (~66% de l'ancien 6%)
         const img = _outils().getImageAutocollant(autocollantId);
         const ratio = (img && img.naturalWidth && img.naturalHeight)
@@ -1023,11 +1031,90 @@
     }
 
     /**
+     * #240 — Pose un tampon JETON texte (ROUGE MAJUSCULE) à la position donnée.
+     * Réutilise la machinerie sticker (undo, sauvegarde, sélection, export PDF) : le
+     * sticker porte `texteTampon` au lieu d'une image, rendu par dessinerAutocollant.
+     * Après apposition, coche automatiquement la checkbox du jeton correspondant.
+     * @param {Object} def - Entrée du catalogue AUTOCOLLANTS (texteTampon, jetonType)
+     * @param {number} xNorm - X normalisé (0-1)
+     * @param {number} yNorm - Y normalisé (0-1)
+     */
+    function poserTamponTexte(def, xNorm, yNorm) {
+        const w = canvasAnnotation.width;
+        const h = canvasAnnotation.height;
+        const outils = _outils();
+        const scale = w / (outils && outils.RESOLUTION_REFERENCE ? outils.RESOLUTION_REFERENCE : 1000);
+        // Taille de référence ~22px à la résolution de référence (lisible à l'export).
+        const fontSize = 22 * scale;
+        const texte = def.texteTampon;
+
+        // Mesurer la largeur du texte pour dimensionner la bbox (sélection/hit-test).
+        ctxAnnotation.save();
+        ctxAnnotation.font = 'bold ' + fontSize + 'px sans-serif';
+        const largeurTextePx = ctxAnnotation.measureText(texte).width;
+        ctxAnnotation.restore();
+
+        const stickerW = (largeurTextePx / w) || 0.1;
+        const stickerH = (fontSize * 1.2) / h;
+
+        const sticker = {
+            id: 'STK_' + Date.now(),
+            autocollantId: def.id,
+            texteTampon: texte,
+            jetonType: def.jetonType || null,
+            x: xNorm - stickerW / 2,
+            y: yNorm - stickerH / 2,
+            width: stickerW,
+            height: stickerH
+        };
+
+        const donneesPage = obtenirDonneesPage();
+        donneesPage.stickers.push(sticker);
+        empilerUndo('ajout-autocollant', sticker);
+        reRendreAnnotations();
+        planifierSauvegarde();
+
+        // Cocher automatiquement la checkbox du jeton correspondant.
+        if (def.jetonType && typeof cocherCheckboxJeton === 'function') {
+            cocherCheckboxJeton(def.jetonType);
+        }
+    }
+
+    /**
+     * #240 — Coche (et déclenche) la checkbox du jeton correspondant après apposition
+     * du tampon. Réutilise les handlers existants (gererChangementCheckboxJeton*) en
+     * simulant un changement, pour passer par la même logique d'application du jeton.
+     * @param {string} jetonType - 'delai' | 'reprise' | 'repriseCiblee'
+     */
+    function cocherCheckboxJeton(jetonType) {
+        const map = {
+            delai: { id: 'checkboxJetonDelai', handler: 'gererChangementCheckboxJetonDelai' },
+            reprise: { id: 'checkboxJetonReprise', handler: 'gererChangementCheckboxJetonReprise' },
+            repriseCiblee: { id: 'checkboxJetonRepriseCiblee', handler: 'gererChangementCheckboxJetonRepriseCiblee' }
+        };
+        const cible = map[jetonType];
+        if (!cible) return;
+        const checkbox = document.getElementById(cible.id);
+        if (!checkbox || checkbox.checked) return; // déjà coché : ne rien refaire
+        checkbox.checked = true;
+        if (typeof window[cible.handler] === 'function') {
+            window[cible.handler]();
+        }
+    }
+
+    /**
      * Dessine un autocollant sur le canvas
      * @param {Object} sticker - Donnees du sticker
      */
     function dessinerAutocollant(sticker) {
         if (!_outils()) return;
+
+        // #240 — Tampon JETON texte (ROUGE MAJUSCULE), pas d'image.
+        if (sticker.texteTampon) {
+            dessinerTamponTexte(sticker);
+            return;
+        }
+
         const img = _outils().getImageAutocollant(sticker.autocollantId);
         if (!img) return;
 
@@ -1078,6 +1165,36 @@
         } else {
             ctxAnnotation.drawImage(img, sx, sy, sw, sh);
         }
+    }
+
+    /**
+     * #240 — Dessine un tampon JETON texte (ROUGE MAJUSCULE) sur le canvas.
+     * La couleur rouge est imposée (rouge sémantique du jeton) et reste lisible dans les
+     * deux modes ; l'export PDF rend ce canvas tel quel → le jeton apparaît clairement.
+     * @param {Object} sticker - Données du sticker (texteTampon, x, y, width, height)
+     */
+    function dessinerTamponTexte(sticker) {
+        const w = canvasAnnotation.width;
+        const h = canvasAnnotation.height;
+        const outils = _outils();
+        const scale = w / (outils && outils.RESOLUTION_REFERENCE ? outils.RESOLUTION_REFERENCE : 1000);
+        const fontSize = 22 * scale;
+
+        const sx = sticker.x * w;
+        const sy = sticker.y * h;
+
+        ctxAnnotation.save();
+        ctxAnnotation.font = 'bold ' + fontSize + 'px sans-serif';
+        ctxAnnotation.fillStyle = '#d32f2f'; // rouge jeton
+        ctxAnnotation.textAlign = 'left';
+        ctxAnnotation.textBaseline = 'top';
+        // Léger contour blanc pour rester lisible sur fonds variés (texte foncé du travail).
+        ctxAnnotation.lineWidth = Math.max(1, fontSize * 0.08);
+        ctxAnnotation.strokeStyle = 'rgba(255,255,255,0.85)';
+        ctxAnnotation.lineJoin = 'round';
+        ctxAnnotation.strokeText(sticker.texteTampon, sx, sy);
+        ctxAnnotation.fillText(sticker.texteTampon, sx, sy);
+        ctxAnnotation.restore();
     }
 
     /* ===============================

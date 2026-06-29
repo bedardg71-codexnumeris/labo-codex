@@ -331,8 +331,23 @@
         { id: 'citation',       nom: 'Citation',         fichier: 'int\u00e9gration citation.png',              categorie: 'diagnostic', legacy: true },
         { id: 'approfondir',    nom: 'Approfondir',      fichier: 'approfondir.png',                            categorie: 'diagnostic', legacy: true },
         { id: 'procedes',       nom: 'Proc\u00e9d\u00e9s', fichier: 'identifier les outils (proc\u00e9d\u00e9s).png', categorie: 'diagnostic', legacy: true },
-        { id: 'attention',      nom: 'Attention',        fichier: 'attention.png',                              categorie: 'diagnostic', legacy: true }
+        { id: 'attention',      nom: 'Attention',        fichier: 'attention.png',                              categorie: 'diagnostic', legacy: true },
+        // --- Jetons (#240) : tampons texte ROUGE MAJUSCULE, appos\u00e9s en cliquant le mot du
+        //     jeton dans le formulaire d'\u00e9valuation. Pas de fichier image : rendus en texte
+        //     (cf. dessinerAutocollant). `categorie: 'jeton'` les exclut de la palette tampons
+        //     (qui ne rend que action/comprehension/observations + perso). `jetonType` mappe
+        //     vers la checkbox \u00e0 cocher automatiquement apr\u00e8s apposition.
+        { id: 'jeton-delai',          nom: 'Jeton de d\u00e9lai',          texteTampon: 'JETON DE D\u00c9LAI',          categorie: 'jeton', jetonType: 'delai' },
+        { id: 'jeton-reprise',        nom: 'Jeton de reprise',        texteTampon: 'JETON DE REPRISE',        categorie: 'jeton', jetonType: 'reprise' },
+        { id: 'jeton-reprise-ciblee', nom: 'Jeton de reprise cibl\u00e9e', texteTampon: 'JETON DE REPRISE CIBL\u00c9E', categorie: 'jeton', jetonType: 'repriseCiblee' }
     ];
+
+    // Map jetonType (delai/reprise/repriseCiblee) -> id d'autocollant texte (#240).
+    const TAMPONS_JETON_PAR_TYPE = {
+        delai: 'jeton-delai',
+        reprise: 'jeton-reprise',
+        repriseCiblee: 'jeton-reprise-ciblee'
+    };
 
     // Sauvegarder les valeurs par defaut des autocollants avant toute personnalisation
     const _defautsAutocollants = AUTOCOLLANTS.map(a => ({ ...a }));
@@ -411,6 +426,31 @@
      */
     function getImageAutocollant(id) {
         return imagesAutocollants[id] || null;
+    }
+
+    /**
+     * Retourne l'objet autocollant du catalogue (ou null). #240 : utilisé par
+     * l'annotation pour détecter un tampon texte (`texteTampon`) vs image.
+     * @param {string} id - ID de l'autocollant
+     * @returns {Object|null}
+     */
+    function getAutocollant(id) {
+        return AUTOCOLLANTS.find(function(a) { return a.id === id; }) || null;
+    }
+
+    /**
+     * #240 — Active le mode tampon pour le jeton donné (delai/reprise/repriseCiblee).
+     * Apposé sur le travail annoté, ce tampon texte coche automatiquement la checkbox
+     * du jeton (cf. poserAutocollant dans travaux-annotation.js).
+     * @param {string} jetonType - 'delai' | 'reprise' | 'repriseCiblee'
+     */
+    function activerTamponJeton(jetonType) {
+        const id = TAMPONS_JETON_PAR_TYPE[jetonType];
+        if (!id) {
+            console.warn('[Travaux-Outils] Type de jeton inconnu pour le tampon :', jetonType);
+            return;
+        }
+        setAutocollantActif(id);
     }
 
     /**
@@ -3598,6 +3638,7 @@
         getEpaisseurActive: getEpaisseurActive,
         getTailleTexte: getTailleTexte,
         getImageAutocollant: getImageAutocollant,
+        getAutocollant: getAutocollant,
         getPromesseAutocollant: getPromesseAutocollant,
         attendreChargementAutocollants: attendreChargementAutocollants,
         getAutocollantActif: getAutocollantActif,
@@ -3607,6 +3648,7 @@
         setEpaisseurActive: setEpaisseurActive,
         setTailleTexte: setTailleTexte,
         setAutocollantActif: setAutocollantActif,
+        activerTamponJeton: activerTamponJeton,
         // Pression
         courbeDePresson: courbeDePresson,
         calculerEpaisseurPression: calculerEpaisseurPression,
