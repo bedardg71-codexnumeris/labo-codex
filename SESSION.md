@@ -1,8 +1,9 @@
 <!-- =====================================================================
      📌 SIGNET PERSISTANT — garder EN TÊTE de fichier, au-dessus des blocs de session. N'est PAS un bloc de session : ne pas le superséder ni l'enterrer, le REMONTER au-dessus du prochain bloc à chaque relais. Retirer seulement quand #326 est réactivé et clos.
 
-     CHANTIER PARALLÈLE (hors #358) — RÉACTIVATION DU COMPARATEUR DE PRATIQUES (#326).
-     ⮕ Dossier de contexte autoportant : `plans de travail/RELAIS-326-reactivation-comparateur.md` (28 juin 2026, vérifié au code).
+     CHANTIER PARALLÈLE (hors #358) — STABILITÉ MI-AOÛT (CoP / expérimentateurs) + RÉACTIVATION DU COMPARATEUR (#326).
+     ⮕ Plan d'ensemble mi-août (3 paliers, porteurs Claude Code vs Grégoire, 6 décisions à trancher §9) : `plans de travail/PLAN-mi-aout-2026.md` (28 juin 2026).
+     ⮕ Dossier autoportant #326 (« bloqueur CoP » n°1) : `plans de travail/RELAIS-326-reactivation-comparateur.md` (28 juin 2026, vérifié au code).
      Statut : comparateur CODÉ + complet, MASQUÉ depuis le 22 juin (#345 ; flag `COMPARATEUR_VISIBLE=false`, `js/config.js:106`). Candidat n°1 du paquet « bloqueurs CoP » ; échéance « app stable pour la CoP » mi-août 2026.
      Reste RÉEL (vérif code 28 juin, ≠ ce que laissent croire les trackers) : T3 (préremplissage du formulaire en édition) + T4 (la dérivation ouvre le wizard complet 9 étapes au lieu de l'« assistant condensé » prévu SPEC §8). DÉJÀ réglés/écartés : T1-affichage (19 juin, `b18b34fb` — rendu + CSV lisent `noteConstructible`), T2 (quasi non-bug — bannière conditionnelle puis gatée par le flag), T5 (trivial — couleur du bandeau).
      ⚠ Nœud « STD = 0 » = question de MOTEUR, pas d'UI : `simulerIndices` rend un 0 FINI pour PAN-Standards → marqué « constructible ». Décision Grégoire en attente (0 légitime vs rendre `null`) — relais §5.
