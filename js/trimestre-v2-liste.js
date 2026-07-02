@@ -117,16 +117,19 @@ function afficherListeTrimestreGestion() {
                 Exporter
             </button>`;
         } else if (estArchive) {
-            // Trimestre archivé : exporter ou désarchiver
+            // Trimestre archivé : exporter, désarchiver ou supprimer (#361)
             boutons = `
                 <button class="btn btn-secondaire btn-compact" data-action="exporterTrimestreArchive" data-param="${t.id}" title="Exporter les données">
                     Exporter
                 </button>
                 <button class="btn btn-secondaire btn-compact" data-action="confirmerDesarchivage" data-param="${t.id}" title="Désarchiver pour permettre les modifications">
                     Désarchiver
+                </button>
+                <button class="btn btn-supprimer btn-compact" data-action="confirmerSuppressionTrimestre" data-param="${t.id}" title="Supprimer définitivement ce trimestre et toutes ses données">
+                    Supprimer…
                 </button>`;
         } else {
-            // Trimestre inactif : peut être archivé ou activé
+            // Trimestre inactif : peut être activé, archivé ou supprimé (#361)
             boutons = `
                 <button class="btn btn-principal btn-compact" data-action="changerTrimestreActifV2" data-param="${t.id}" title="Activer ce trimestre">
                     Activer
@@ -136,6 +139,9 @@ function afficherListeTrimestreGestion() {
                 </button>
                 <button class="btn btn-secondaire btn-compact" data-action="exporterTrimestreArchive" data-param="${t.id}" title="Exporter les données">
                     Exporter
+                </button>
+                <button class="btn btn-supprimer btn-compact" data-action="confirmerSuppressionTrimestre" data-param="${t.id}" title="Supprimer définitivement ce trimestre et toutes ses données">
+                    Supprimer…
                 </button>`;
         }
 
@@ -262,11 +268,16 @@ function ouvrirBibliothequeTrimestreV2() {
         const actions = [];
         if (estArchive) {
             primaire = { label: 'Désarchiver', action: 'desarchiverTrimestre', param: t.id, classe: 'btn-confirmer', title: 'Restaurer ce trimestre comme actif' };
+            // #361 : suppression définitive (jamais sur le trimestre actif)
+            actions.push({ label: 'Supprimer…', action: 'confirmerSuppressionTrimestre', param: t.id, classe: 'btn-supprimer', title: 'Effacer définitivement ce trimestre et toutes ses données' });
         } else if (!estActif) {
             primaire = { label: 'Activer', action: 'changerTrimestreActifV2', param: t.id, classe: 'btn-confirmer', title: 'Définir comme trimestre actif' };
             actions.push({ label: 'Archiver', action: 'confirmerArchivage', param: t.id, classe: 'btn-secondaire', title: 'Conserver en lecture seule' });
+            // #361 : suppression définitive (jamais sur le trimestre actif)
+            actions.push({ label: 'Supprimer…', action: 'confirmerSuppressionTrimestre', param: t.id, classe: 'btn-supprimer', title: 'Effacer définitivement ce trimestre et toutes ses données' });
         } else {
             // Actif courant : aucune action primaire (déjà actif). Menu : archiver pour basculer ailleurs avant.
+            // Pas de « Supprimer » ici — garde anti-actif (#361).
             actions.push({ label: 'Archiver', action: 'confirmerArchivage', param: t.id, classe: 'btn-secondaire', title: 'Conserver en lecture seule' });
         }
 
@@ -338,11 +349,80 @@ function archiverTrimestreActif() {
 }
 
 /**
- * Supprime le trimestre actuellement actif (non implémenté)
- * 🆕 BETA 95.2
+ * 🆕 #361 (2 juillet 2026) : parcours de suppression DÉFINITIVE d'un trimestre.
+ * Remplace le stub supprimerTrimestreActif (retiré — le trimestre ACTIF ne
+ * peut justement PAS être supprimé, garde anti-actif dans trimestres.js).
+ *
+ * Parcours : garde anti-actif → explication archivage vs suppression →
+ * confirmation forte (ressaisir le nom exact) → export de sauvegarde
+ * automatique → suppression → message d'état.
  */
-function supprimerTrimestreActif() {
-    alert('La suppression de trimestre n\'est pas encore disponible.\n\nUtilisez l\'archivage pour conserver les données en lecture seule.');
+function confirmerSuppressionTrimestre(id) {
+    const trimestres = typeof obtenirTrimestres === 'function' ? obtenirTrimestres() : [];
+    const trimestre = trimestres.find(t => t.id === id);
+
+    if (!trimestre) {
+        alert('Trimestre non trouvé');
+        return;
+    }
+
+    const trimestreActif = typeof obtenirTrimestreActif === 'function' ? obtenirTrimestreActif() : null;
+    if ((trimestreActif && trimestreActif.id === id) || trimestre.actif === true) {
+        alert(
+            'Le trimestre actif ne peut pas être supprimé.\n\n' +
+            'Active un autre trimestre d\'abord, ou utilise l\'archivage pour le conserver en lecture seule.'
+        );
+        return;
+    }
+
+    const continuer = confirm(
+        `Supprimer définitivement le trimestre "${trimestre.nom}" ?\n\n` +
+        `⚠️ Contrairement à l'archivage (lecture seule, données conservées), la suppression EFFACE toutes les données de ce trimestre : étudiants, évaluations, présences, productions, captures et modèles.\n\n` +
+        `Un export de sauvegarde sera téléchargé automatiquement avant la suppression.\n\n` +
+        `Continuer ?`
+    );
+    if (!continuer) return;
+
+    // Confirmation forte : ressaisir le nom exact du trimestre
+    const saisie = prompt(
+        `Confirmation finale — cette action est IRRÉVERSIBLE.\n\n` +
+        `Pour supprimer "${trimestre.nom}" et toutes ses données, retape son nom exactement :`
+    );
+    if (saisie === null) return; // annulé
+    if (saisie.trim() !== trimestre.nom) {
+        alert('Le nom saisi ne correspond pas. Suppression annulée.');
+        return;
+    }
+
+    // Export de sauvegarde AVANT la suppression (filet de sécurité)
+    let exportOk = false;
+    if (typeof exporterTrimestreArchive === 'function') {
+        const resExport = exporterTrimestreArchive(id);
+        exportOk = !!(resExport && resExport.success);
+    }
+    if (!exportOk) {
+        const sansExport = confirm(
+            'L\'export de sauvegarde a échoué.\n\n' +
+            'Supprimer quand même, SANS copie de secours ?'
+        );
+        if (!sansExport) return;
+    }
+
+    supprimerTrimestre(id).then(function(result) {
+        if (result.success) {
+            alert(`Trimestre "${trimestre.nom}" supprimé (${result.nbCles} clés de données effacées).`);
+            populerDropdownTrimestreV2();
+            // Rafraîchir la modale bibliothèque si elle est ouverte
+            if (document.getElementById('modalBibliothequeTrimestres')) {
+                fermerModalBibliothequeTrimestres();
+                ouvrirBibliothequeTrimestreV2();
+            }
+        } else {
+            alert(`Erreur : ${result.error}`);
+        }
+    }).catch(function(e) {
+        alert(`Erreur : ${e.message}`);
+    });
 }
 
 /**
@@ -493,7 +573,7 @@ window.afficherFormulaireTrimestreActif = afficherFormulaireTrimestreActif;
 window.ouvrirBibliothequeTrimestreV2 = ouvrirBibliothequeTrimestreV2;
 window.fermerModalBibliothequeTrimestres = fermerModalBibliothequeTrimestres;
 window.archiverTrimestreActif = archiverTrimestreActif;
-window.supprimerTrimestreActif = supprimerTrimestreActif;
+window.confirmerSuppressionTrimestre = confirmerSuppressionTrimestre;
 window.changerTrimestreActifV2 = changerTrimestreActifV2;
 window.ouvrirModalNouveauTrimestre = ouvrirModalNouveauTrimestre;
 

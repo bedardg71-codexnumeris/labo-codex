@@ -1104,6 +1104,93 @@
     }
 
     /* ===============================
+       SUPPRESSION DÉFINITIVE D'UN TRIMESTRE (#361)
+       =============================== */
+
+    /**
+     * 🆕 #361 (2 juillet 2026) : supprime DÉFINITIVEMENT un trimestre et toutes
+     * ses données. Contrairement à l'archivage (lecture seule, données
+     * conservées), la suppression EFFACE. Logique éprouvée par le snippet
+     * console utilisé pour e2026/a2024 le 28 juin 2026 (cf. BACKLOG #361).
+     *
+     * Garde-fous :
+     *  - JAMAIS le trimestre ACTIF (garde anti-actif, sentinelle Vitest) ;
+     *  - énumération des clés = UNION de db.keys() (IndexedDB), localStorage
+     *    et db.memoryCache — db.keys() ne rend QUE l'IDB, les petites clés
+     *    localStorage seraient ratées sinon ;
+     *  - `await db.remove(k)` par clé (couvre localStorage + IDB + memoryCache) ;
+     *  - retrait de l'entrée du registre `trimestres` (jamais balayé par le
+     *    filtre de clés) + nettoyage des items du global `cours` ;
+     *  - `db.flush()` final (durabilité Option A/B/C).
+     *
+     * @param {string} id - ID du trimestre à supprimer (ex: 'a2024')
+     * @returns {Promise<Object>} { success, nbCles?, nom?, error? }
+     */
+    async function supprimerTrimestre(id) {
+        const trimestres = obtenirTrimestres();
+        const trimestre = id ? trimestres.find(t => t && t.id === id) : null;
+
+        if (!trimestre) {
+            return { success: false, error: 'Trimestre non trouvé' };
+        }
+
+        // GARDE ANTI-ACTIF : le trimestre actif porte l'espace de travail
+        // courant — sa suppression détruirait la session en cours.
+        const actif = obtenirTrimestreActif();
+        if ((actif && actif.id === id) || trimestre.actif === true) {
+            return {
+                success: false,
+                error: 'Impossible de supprimer le trimestre ACTIF. Active un autre trimestre d\'abord.'
+            };
+        }
+
+        try {
+            // Union des clés : IDB + localStorage + memoryCache
+            const clesIDB = await db.keys();
+            const clesLS = Object.keys(localStorage);
+            const clesMem = (db.memoryCache && typeof db.memoryCache.keys === 'function')
+                ? Array.from(db.memoryCache.keys())
+                : [];
+            const toutesLesCles = new Set([...clesIDB, ...clesLS, ...clesMem]);
+
+            // Clés liées au trimestre : id exact, préfixe namespace `<id>_…`,
+            // ou id inclus (copies d'archive, snapshots par groupe-cours).
+            // Le registre `trimestres` est protégé explicitement.
+            const cibles = [...toutesLesCles].filter(k =>
+                typeof k === 'string' && k !== 'trimestres' &&
+                (k === id || k.startsWith(id + '_') || k.includes(id))
+            );
+
+            for (const k of cibles) {
+                await db.remove(k);
+            }
+
+            // Retirer l'entrée du registre
+            db.setSync('trimestres', trimestres.filter(t => !t || t.id !== id));
+
+            // Nettoyer le global `cours` (items rattachés au trimestre supprimé)
+            const listeCours = db.getSync('cours', []);
+            if (Array.isArray(listeCours)) {
+                const coursRestants = listeCours.filter(c => !c || c.trimestreId !== id);
+                if (coursRestants.length !== listeCours.length) {
+                    db.setSync('cours', coursRestants);
+                }
+            }
+
+            // Durabilité : drainer les écritures avant de rendre la main
+            if (typeof db.flush === 'function') {
+                await db.flush();
+            }
+
+            return { success: true, nbCles: cibles.length, nom: trimestre.nom };
+
+        } catch (error) {
+            console.error('[Trimestres] Erreur suppression:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /* ===============================
        MIGRATION DES DONNÉES EXISTANTES
        =============================== */
 
@@ -2218,6 +2305,9 @@
     // Fonctions d'archivage
     window.archiverTrimestre = archiverTrimestre;
     window.desarchiverTrimestre = desarchiverTrimestre;
+    // 🆕 #361 : suppression définitive (garde anti-actif ; parcours UI avec
+    // confirmation forte dans trimestre-v2-liste.js → confirmerSuppressionTrimestre)
+    window.supprimerTrimestre = supprimerTrimestre;
     window.estTrimestreArchive = estTrimestreArchive;
     // Exposé pour la sentinelle C2 (#358) : SSOT d'usage des modèles par trimestre
     // (réconcilie productions + évaluations grade-bearing).

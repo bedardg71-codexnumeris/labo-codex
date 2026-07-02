@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260629a"> <!-- #326 (28 juin) : bandeau comparateur orange (T5) ; Lot J extension : bug violet + anonymisation cyan -->
+    <link rel="stylesheet" href="styles.css?v=20260702a"> <!-- #344 (2 juil.) : carte Légende fusionnée 2 colonnes (calendrier) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -14779,14 +14779,14 @@
     <script src="js/synthese-retroaction-data.js?v=20260629a"></script>
     <script src="js/synthese-retroaction-rendu.js?v=20260629a"></script>
     <script src="js/travaux-export-pdf.js?v=2026061113"></script> <!-- Beta 99.42 : ultrareview 2 Commit 2 — icones via forme.icone, pointille, sym-* -->
-    <script src="js/travaux-resolution.js?v=2026050206"></script> <!-- Beta 99.31 b0502-0745 : flag { silencieux: true } sur diagnostiquerDoublons (pour bandeau) -->
+    <script src="js/travaux-resolution.js?v=20260702a"></script> <!-- #145 (2 juil.) : refus de la résolution par DA seul (PDF étranger) -->
     <script src="js/travaux-doublons-ui.js?v=2026050225"></script> <!-- Beta 99.31 b0502-0940 : db.setSync (écriture localStorage immédiate) — bandeau se met à jour après validations -->
     <script src="js/migration-diagnostic.js?v=2026062701"></script>
-    <script src="js/travaux-ui.js?v=2026062701"></script> <!-- Beta 99.42 b0512-0641 : fix Safari #256-bis — Archivage utilise sa propre clé d'aide archiver-travaux -->
+    <script src="js/travaux-ui.js?v=20260702a"></script> <!-- #313 (2 juil.) : le sélecteur global n'écrase plus un choix par-fichier -->
     <script src="js/actions-rlo.js?v=2026041709"></script> <!-- Beta 99.17 (b0417-1100) : fix lecture LIVE prioritaire dans obtenirEvolutionRLOEtudiant -->
 
     <!-- PRIORITÉ 5: Modules fonctionnels -->
-    <script src="js/calendrier-vue.js?v=2026050545"></script> <!-- Refonte nav SP5 : section calendrier -->
+    <script src="js/calendrier-vue.js?v=20260702a"></script> <!-- #344 (2 juil.) : carte Légende fusionnée en tête de page -->
     <script src="js/horaire.js?v=2026061101"></script>
     <script src="js/groupe.js?v=2026032600"></script>
     <script src="js/interventions.js?v=20260512b"></script>
@@ -14810,7 +14810,7 @@
     <script src="js/statistiques.js?v=20260629a"></script> <!-- Beta 99.76 b0529-1139 : refonte chantier B — libellé trimestre via trimestre actif -->
     <script src="js/liste-evaluations.js?v=20260629a"></script> <!-- Beta 99.41 : Défense E — echapperHtml sur error.message + p.id (attribut) -->
     <script src="js/journal.js?v=2026041706"></script>
-    <script src="js/snapshots.js?v=20260629a"></script>
+    <script src="js/snapshots.js?v=20260702a"></script> <!-- #116 (2 juil.) : flux auto scopé au GC actif + dédoublonnage -->
     <script src="js/couleurs.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_GRAPHIQUE.tooltip + couleurs() -->
     <script src="js/graphiques-progression.js?v=2026061113"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_TOOLTIP délégué à STYLE_GRAPHIQUE -->
     <script src="js/correlations-longitudinales.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #246 tooltip via STYLE_GRAPHIQUE -->

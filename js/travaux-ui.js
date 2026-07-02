@@ -1595,8 +1595,10 @@
         const productions = obtenirDonneesSelonMode('productions');
 
         // Production globale actuelle (prioriser le choix explicite de l'utilisateur)
+        // #313 : un choix PAR-FICHIER (« Modifier ») n'est pas une production globale —
+        // l'afficher dans le sélecteur global créait la divergence visuelle du bug.
         const prodActuelle = travauxImport.getProductionGlobale()
-            || queue.find(f => f.productionId && !f.productionIdParLea)?.productionId
+            || queue.find(f => f.productionId && !f.productionIdParLea && !f.productionIdParFichier)?.productionId
             || sessionStorage.getItem('travaux-pipeline-production')
             || '';
 
@@ -1686,6 +1688,7 @@
                 ${productions.map(p => `<option value="${echapperHtml(p.id)}" ${prodActuelle === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
                 ${jetonsActifs ? `<option value="__jeton_reprise__" ${prodActuelle === '__jeton_reprise__' || modeJetonActif ? 'selected' : ''}>Jeton de reprise</option>` : ''}
             </select>
+            <p class="texte-muted u-texte-petit" style="margin:4px 0 0 0;">S'applique à tout le lot. Une correction faite via « Modifier » sur un fichier est conservée.</p>
         </div>`;
         // Sous-sélecteur : quelle production le jeton cible-t-il ?
         if (prodActuelle === '__jeton_reprise__' || modeJetonActif) {
@@ -1777,6 +1780,7 @@
                     ${productions.map(p => `<option value="${echapperHtml(p.id)}" ${f.productionId === p.id && !f.estReprise ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
                     ${jetonsActifs ? `<option value="__jeton_reprise__" ${f.estReprise ? 'selected' : ''}>Jeton de reprise</option>` : ''}
                 </select>
+                <p class="texte-muted u-texte-petit" style="margin:4px 0 0 0;">Ce fichier seulement — le sélecteur global « Production » ne l'écrasera pas.</p>
             </div>`;
             // Sous-sélecteur par fichier pour jeton
             if (f.estReprise) {
@@ -2213,29 +2217,13 @@
     }
 
     /**
-     * Associe une production a un fichier dans le pipeline
-     * @param {number} index - Index dans la file
-     * @param {string} productionId - ID de la production
-     */
-    function associerProductionPipeline(index, productionId) {
-        const queue = travauxImport.obtenirFileDAttente();
-        if (index < 0 || index >= queue.length) return;
-
-        queue[index].productionId = productionId;
-
-        // Passer en identifie si etudiant + production
-        if (queue[index].etudiantDA && queue[index].productionId &&
-            (queue[index].pipelineStatut === 'pret' || queue[index].pipelineStatut === 'identifie')) {
-            queue[index].pipelineStatut = 'identifie';
-        } else if (queue[index].pipelineStatut === 'identifie') {
-            queue[index].pipelineStatut = 'pret';
-        }
-
-        rafraichirPipelineUI();
-    }
-
-    /**
      * Associe une production a tous les fichiers de la queue
+     *
+     * 🔧 #313 (2 juillet 2026, décision Grégoire 29 juin) : le sélecteur GLOBAL
+     * ne réécrit plus un choix PAR-FICHIER divergent fait via « Modifier »
+     * (marqueur productionIdParFichier) — fin de l'écrasement silencieux.
+     * L'ancien setter par-fichier associerProductionPipeline (zéro appelant)
+     * a été retiré dans la même passe (zéro-dette).
      * @param {string} productionId - ID de la production
      */
     function associerProductionGlobale(productionIdOuEl) {
@@ -2258,13 +2246,18 @@
 
         const queue = travauxImport.obtenirFileDAttente();
         queue.forEach(f => {
+            // #313 : un choix PAR-FICHIER divergent (« Modifier ») est préservé —
+            // le global ne l'écrase plus silencieusement.
+            if (f.productionIdParFichier && f.productionId && f.productionId !== productionId) {
+                return;
+            }
             // Sélecteur global explicite : prime sur parseLea (intention utilisateur forte).
             // Si productionId vide, on désélectionne et on laisse parseLea reprendre la main.
             if (productionId) {
                 f.productionId = productionId;
                 f.productionIdParLea = false;
                 f.estReprise = false; // retour au mode normal
-            } else if (!f.productionIdParLea) {
+            } else if (!f.productionIdParLea && !f.productionIdParFichier) {
                 f.productionId = '';
                 f.estReprise = false;
             }
@@ -5425,12 +5418,16 @@
             queue[index].estReprise = true;
             queue[index].productionId = ''; // sera défini par le sous-sélecteur
             queue[index].productionIdParLea = false;
+            queue[index].productionIdParFichier = false;
             rafraichirPipelineUI();
             return;
         }
 
         queue[index].productionId = productionId;
         queue[index].productionIdParLea = false;
+        // #313 : marquer le choix par-fichier (protégé du sélecteur global) ;
+        // revenir à « — » (valeur vide) rend la main au global/parseLea.
+        queue[index].productionIdParFichier = !!productionId;
         queue[index].estReprise = false;
         rafraichirPipelineUI();
     }
@@ -6878,7 +6875,6 @@
         appliquerEtImporter: appliquerEtImporter,
         mettreAJourPreviewsPipeline: mettreAJourPreviewsPipeline,
         associerEtudiantPipeline: associerEtudiantPipeline,
-        associerProductionPipeline: associerProductionPipeline,
         associerProductionGlobale: associerProductionGlobale,
         renommerDoublon: renommerDoublon,
         associerJetonProduction: associerJetonProduction,

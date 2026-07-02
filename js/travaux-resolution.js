@@ -95,10 +95,17 @@
         if (!evaluation.etudiantDA) {
             return null;
         }
-        var fichiers = travauxStockage.obtenirFichiersEtudiant(evaluation.etudiantDA);
-        if (evaluation.productionId) {
-            fichiers = fichiers.filter(function(f) { return f.productionId === evaluation.productionId; });
+        // 🔧 FIX #145 (2 juillet 2026) : refuser la résolution par DA seul.
+        // Une évaluation SANS productionId (production sans fichier propre,
+        // productionIdEffective || '' dans evaluation-chargement.js) récupérait
+        // le fichier le plus récent de l'élève TOUTES productions confondues →
+        // PDF étranger affiché + flot de warnings « AMBIGUÏTÉ (DA, ) ».
+        // La symétrie existe déjà dans trouverEvaluationPourFichier (l.29).
+        if (!evaluation.productionId) {
+            return null;
         }
+        var fichiers = travauxStockage.obtenirFichiersEtudiant(evaluation.etudiantDA);
+        fichiers = fichiers.filter(function(f) { return f.productionId === evaluation.productionId; });
         if (fichiers.length === 0) {
             return null;
         }
