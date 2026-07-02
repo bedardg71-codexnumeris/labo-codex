@@ -392,6 +392,13 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
 /**
  * Vérifie si un nouveau snapshot hebdomadaire est nécessaire
  * Appelé automatiquement au chargement de l'application
+ *
+ * 🔧 FIX #116-A (2 juillet 2026) : les dates capturées viennent des séances
+ * du GROUPE-COURS ACTIF (obtenirSeancesCompletes, group-specific) et non plus
+ * du calendrier partagé du trimestre (union des jours de cours de TOUS les
+ * groupes-cours) qui créait des captures phantômes pour les jours où seul un
+ * AUTRE groupe a cours. Le wrapper LEGACY capturerSnapshotHebdomadaire a été
+ * retiré en même temps (zéro-dette).
  */
 async function verifierEtCapturerSnapshotHebdomadaire() {
     const snapshots = db.getSync(cleSnapshots(), null);
@@ -410,9 +417,31 @@ async function verifierEtCapturerSnapshotHebdomadaire() {
 
     // Vérifier si snapshot déjà capturé pour cette semaine
     const snapshotExiste = snapshots.hebdomadaires.some(s => s.numSemaine === numSemaineActuelle);
+    if (snapshotExiste) return;
 
-    if (!snapshotExiste) {
-        await capturerSnapshotHebdomadaire(numSemaineActuelle);
+    // Dates de la semaine courante où le groupe-cours ACTIF a réellement
+    // une séance (passées ou aujourd'hui — capturerSnapshotSeance refuse
+    // de toute façon les dates futures)
+    if (typeof obtenirSeancesCompletes !== 'function') return;
+    const seancesCompletes = obtenirSeancesCompletes();
+    if (!seancesCompletes) return;
+
+    const datesSemaine = Object.keys(seancesCompletes)
+        .filter(date => {
+            const seances = seancesCompletes[date];
+            return seances && seances.length > 0
+                && seances[0].numeroSemaine === numSemaineActuelle
+                && date <= aujourdhui;
+        })
+        .sort();
+
+    for (const date of datesSemaine) {
+        // numeroSemaine fourni par les séances group-specific : court-circuite
+        // la validation contre le calendrier partagé (même patron que la
+        // reconstruction rétroactive)
+        await capturerSnapshotSeance(date, null, {
+            numeroSemaine: seancesCompletes[date][0].numeroSemaine
+        });
     }
 }
 
@@ -666,7 +695,18 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
             };
         }
 
-        snapshots.hebdomadaires.push(snapshot);
+        // 🔧 FIX #116-B (2 juillet 2026) : dédoublonnage par séance — un snapshot
+        // existant pour la même dateSeance est REMPLACÉ (recapture = rafraîchir),
+        // jamais empilé. Le coursId fait déjà partie de la clé de stockage
+        // (cleSnapshots est scopée par groupe-cours), la dateSeance suffit ici.
+        const idxExistant = snapshots.hebdomadaires.findIndex(s =>
+            s.dateSeance === dateSeance || s.id === `SEANCE-${dateSeance}`
+        );
+        if (idxExistant >= 0) {
+            snapshots.hebdomadaires[idxExistant] = snapshot;
+        } else {
+            snapshots.hebdomadaires.push(snapshot);
+        }
         snapshots.metadata.dernierSnapshotHebdo = snapshot.timestamp;
 
         // ⚡ Sauvegarder dans IndexedDB (plusieurs GB disponibles)
@@ -678,33 +718,6 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
         console.error('❌ Erreur capture snapshot séance:', error);
         return null;
     }
-}
-
-/**
- * [LEGACY] Capture un snapshot hebdomadaire pour une semaine donnée
- * ⚠️ OBSOLÈTE : Utilisez capturerSnapshotSeance() à la place
- * Conservé pour compatibilité avec ancien code
- */
-async function capturerSnapshotHebdomadaire(numSemaine, evaluationsCacheParam = null) {
-    console.warn('⚠️ capturerSnapshotHebdomadaire() est obsolète. Utilisez capturerSnapshotSeance().');
-
-    // Trouver les dates de cette semaine
-    const calendrier = obtenirCalendrierComplet();
-    const datesSemaine = Object.keys(calendrier).filter(date => {
-        const jour = calendrier[date];
-        return jour.numeroSemaine === numSemaine && jour.statut === 'cours';
-    }).sort();
-
-    if (datesSemaine.length === 0) return null;
-
-    // Capturer un snapshot pour chaque date de cours de cette semaine
-    const snapshots = [];
-    for (const date of datesSemaine) {
-        const snapshot = await capturerSnapshotSeance(date, evaluationsCacheParam);
-        if (snapshot) snapshots.push(snapshot);
-    }
-
-    return snapshots.length > 0 ? snapshots[snapshots.length - 1] : null;
 }
 
 /**
@@ -1214,7 +1227,7 @@ function confirmerNettoyageSnapshots() {
 // Exporter les fonctions pour utilisation globale
 window.initialiserModuleSnapshots = initialiserModuleSnapshots;
 window.verifierEtCapturerSnapshotHebdomadaire = verifierEtCapturerSnapshotHebdomadaire;
-window.capturerSnapshotHebdomadaire = capturerSnapshotHebdomadaire;
+window.capturerSnapshotSeance = capturerSnapshotSeance;
 window.capturerSnapshotIntervention = capturerSnapshotIntervention;
 window.mettreAJourSnapshotIntervention = mettreAJourSnapshotIntervention;
 window.reconstruireSnapshotsHistoriques = reconstruireSnapshotsHistoriques;

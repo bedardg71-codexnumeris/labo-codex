@@ -12,6 +12,18 @@
 
     var CHANGELOG = [
         {
+            version: '1.27',
+            couleur: 'vert',
+            titre: 'Suppression de trimestre et corrections d’import',
+            items: [
+                'Tu peux maintenant supprimer définitivement un trimestre inutile (tests, essais) depuis la gestion des trimestres : confirmation forte en retapant son nom, export de sauvegarde automatique avant l’effacement, et le trimestre actif reste toujours protégé.',
+                'Page Calendrier scolaire : les trois indicateurs (semaines scolaires, jours de cours, congés avec reprise) rejoignent la carte « Légende », remontée en tête de page — une seule carte au lieu de quatre.',
+                'Import de travaux : le sélecteur global « Production » n’écrase plus une correction faite sur un fichier précis via « Modifier », et l’interface explique la différence entre les deux.',
+                'Correction : évaluer une production sans fichier importé n’affiche plus le document d’une autre production.',
+                'Correction : les captures de progression automatiques ne créent plus de captures pour les jours où seul un autre groupe a cours, et recapturer une même séance ne crée plus de doublon.'
+            ]
+        },
+        {
             version: '1.26',
             couleur: 'bleu',
             titre: 'Retour du comparateur de pratiques',

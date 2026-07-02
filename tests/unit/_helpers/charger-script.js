@@ -68,8 +68,11 @@ export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExist
     // depuis le scope du test. Les `var window`/`let window` à l'intérieur
     // du script projet (s'il y en avait) écraseraient le paramètre — il
     // n'y en a pas dans nos cibles, c'est sûr.
-    const noms = ['window', 'document', 'console', 'localStorage', 'sessionStorage', ...Object.keys(globaux)];
-    const valeurs = [fauxWindow, fauxDocument, console, fauxStorage(), fauxStorage(), ...Object.values(globaux)];
+    // Un `document` fourni dans `globaux` REMPLACE le stub par défaut
+    // (sentinelle #344 : capturer le innerHTML injecté par le rendu).
+    const { document: documentOverride, ...autresGlobaux } = globaux;
+    const noms = ['window', 'document', 'console', 'localStorage', 'sessionStorage', ...Object.keys(autresGlobaux)];
+    const valeurs = [fauxWindow, documentOverride || fauxDocument, console, fauxStorage(), fauxStorage(), ...Object.values(autresGlobaux)];
 
     const fn = new Function(...noms, '"use strict";\n' + code);
     fn(...valeurs);

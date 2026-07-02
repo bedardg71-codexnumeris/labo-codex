@@ -6900,6 +6900,27 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     font-style: italic;
 }
 
+/* #344 — carte Légende fusionnée (légende des couleurs | 3 métriques), en tête
+   de la page Calendrier scolaire. Les deux colonnes s'empilent en étroit. */
+.calendrier-legende-fusion {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.calendrier-legende-metriques {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+@media (max-width: 768px) {
+    .calendrier-legende-fusion {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* 🆕 BETA 91: Module interventions RàI */
 /* En-tête d'intervention avec titre et badges */
 .intervention-header {

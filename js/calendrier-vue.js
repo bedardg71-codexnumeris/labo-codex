@@ -498,97 +498,98 @@ function afficherCalendrierScolaire() {
         htmlCalendrier += genererHtmlMois(annee, moisAAfficher[i], calendrierComplet, mapEcheances);
     }
 
-    // Ajouter la légende comme dernier élément de la grille (6ème position)
-    htmlCalendrier += '<div class="calendrier-legende">';
-    htmlCalendrier += '<h3 class="calendrier-titre-mois">Légende</h3>';
-    htmlCalendrier += '<div class="calendrier-legende-grille">';
-
-    htmlCalendrier += '<div class="calendrier-legende-item">';
-    htmlCalendrier += '<div class="calendrier-legende-badge" style="background: var(--jour-cours-reel-bg); border: 2px solid var(--bleu-moyen);"></div>';
-    htmlCalendrier += '<span class="calendrier-legende-label"><strong>Jour de cours régulier</strong></span>';
+    // Fermer la grille des mois
     htmlCalendrier += '</div>';
 
-    htmlCalendrier += '<div class="calendrier-legende-item">';
-    htmlCalendrier += '<div class="calendrier-legende-badge cal-carte-blanche"></div>';
-    htmlCalendrier += '<span class="calendrier-legende-label">Jour ouvrable</span>';
-    htmlCalendrier += '</div>';
-
-    htmlCalendrier += '<div class="calendrier-legende-item">';
-    htmlCalendrier += '<div class="calendrier-legende-badge" style="background: var(--weekend-bg);"></div>';
-    htmlCalendrier += '<span class="calendrier-legende-label">Weekend</span>';
-    htmlCalendrier += '</div>';
-
-    htmlCalendrier += '<div class="calendrier-legende-item">';
-    htmlCalendrier += '<div class="calendrier-legende-badge" style="background: var(--conge-bg); border: 2px solid #ef5350;"></div>';
-    htmlCalendrier += '<span class="calendrier-legende-label">Congé prévu</span>';
-    htmlCalendrier += '</div>';
-
-    htmlCalendrier += '<div class="calendrier-legende-item">';
-    htmlCalendrier += '<div class="calendrier-legende-badge" style="background: var(--reprise-bg); border: 2px solid #ff9800;"></div>';
-    htmlCalendrier += '<span class="calendrier-legende-label">Reprise</span>';
-    htmlCalendrier += '</div>';
-
-    htmlCalendrier += '<div class="calendrier-legende-item">';
-    htmlCalendrier += '<div class="calendrier-legende-badge" style="background: var(--examens-bg); border: 2px solid #f06292;"></div>';
-    htmlCalendrier += '<span class="calendrier-legende-label">Semaine d\'examens</span>';
-    htmlCalendrier += '</div>';
-
-    htmlCalendrier += '<div class="calendrier-legende-item">';
-    htmlCalendrier += '<div class="calendrier-legende-badge" style="background: var(--planification-bg); border: 2px solid #ba68c8;"></div>';
-    htmlCalendrier += '<span class="calendrier-legende-label">Semaine de planification</span>';
-    htmlCalendrier += '</div>';
-
-    // Beta 99.30 : entrée légende pour les échéances de production
-    htmlCalendrier += '<div class="calendrier-legende-item">';
-    htmlCalendrier += '<div class="calendrier-legende-badge calendrier-legende-badge-echeance"><span class="cal-echeance-badge cal-echeance-badge-legende"></span></div>';
-    htmlCalendrier += '<span class="calendrier-legende-label">Échéance de production</span>';
-    htmlCalendrier += '</div>';
-
-    htmlCalendrier += '</div>';
-    htmlCalendrier += '<p class="calendrier-legende-astuce">';
-    htmlCalendrier += '<strong>Astuce :</strong> Sur ordinateur, survole un jour pour mettre sa semaine en évidence.';
-    htmlCalendrier += '</p>';
-    htmlCalendrier += '</div>';
-
-    // Fermer la grille
-    htmlCalendrier += '</div>';
-
-    // Statistiques - FORMAT HARMONISÉ (texte gauche / chiffre droite)
-    let htmlStats = '<div class="u-mb-20">';
-    htmlStats += '<div class="cal-grid-auto-200">';
-
-    // Carte 1 : Semaines scolaires
-    htmlStats += '<div class="cal-carte-importante">';
-    htmlStats += '<div class="u-flex-between">';
-    htmlStats += '<span class="cal-texte-gris">Semaines scolaires</span>';
-    htmlStats += '<strong class="cal-valeur-grande-bleu">' + nombreSemainesReel + '</strong>';
-    htmlStats += '</div>';
-    htmlStats += '</div>';
-
-    // Carte 2 : Jours de cours
-    htmlStats += '<div class="cal-carte-importante">';
-    htmlStats += '<div class="u-flex-between">';
-    htmlStats += '<span class="cal-texte-gris">Jours de cours</span>';
-    htmlStats += '<strong class="cal-valeur-grande-bleu">' + nombreJoursReel + '</strong>';
-    htmlStats += '</div>';
-    htmlStats += '</div>';
-
-    // Compter uniquement les congés AVEC reprise
+    // 🔧 #344 (2 juillet 2026, décision Grégoire 29 juin) : carte Légende
+    // FUSIONNÉE (légende des couleurs + les 3 métriques), remontée EN HAUT
+    // de la page à la place des 3 cartes métriques retirées. Deux colonnes
+    // qui s'empilent en étroit (.calendrier-legende-fusion, styles.css).
     const congesAvecReprise = tousEvenements.filter(function (evt) {
         return evt.dateReprise && evt.dateReprise !== '';
     }).length;
 
-    // Carte 3 : Congés institutionnels et fériés
-    htmlStats += '<div class="cal-carte-importante">';
-    htmlStats += '<div class="u-flex-between">';
-    htmlStats += '<span class="cal-texte-gris">Congés avec reprise</span>';
-    htmlStats += '<strong class="cal-valeur-grande-bleu">' + congesAvecReprise + '</strong>';
-    htmlStats += '</div>';
-    htmlStats += '</div>';
+    let htmlLegende = '<div class="calendrier-legende u-mb-20">';
+    htmlLegende += '<h3 class="calendrier-titre-mois">Légende</h3>';
+    htmlLegende += '<div class="calendrier-legende-fusion">';
+    htmlLegende += '<div class="calendrier-legende-grille">';
 
-    htmlStats += '</div></div>';
+    htmlLegende += '<div class="calendrier-legende-item">';
+    htmlLegende += '<div class="calendrier-legende-badge" style="background: var(--jour-cours-reel-bg); border: 2px solid var(--bleu-moyen);"></div>';
+    htmlLegende += '<span class="calendrier-legende-label"><strong>Jour de cours régulier</strong></span>';
+    htmlLegende += '</div>';
 
-    htmlCalendrier = htmlStats + htmlCalendrier;
+    htmlLegende += '<div class="calendrier-legende-item">';
+    htmlLegende += '<div class="calendrier-legende-badge cal-carte-blanche"></div>';
+    htmlLegende += '<span class="calendrier-legende-label">Jour ouvrable</span>';
+    htmlLegende += '</div>';
+
+    htmlLegende += '<div class="calendrier-legende-item">';
+    htmlLegende += '<div class="calendrier-legende-badge" style="background: var(--weekend-bg);"></div>';
+    htmlLegende += '<span class="calendrier-legende-label">Weekend</span>';
+    htmlLegende += '</div>';
+
+    htmlLegende += '<div class="calendrier-legende-item">';
+    htmlLegende += '<div class="calendrier-legende-badge" style="background: var(--conge-bg); border: 2px solid #ef5350;"></div>';
+    htmlLegende += '<span class="calendrier-legende-label">Congé prévu</span>';
+    htmlLegende += '</div>';
+
+    htmlLegende += '<div class="calendrier-legende-item">';
+    htmlLegende += '<div class="calendrier-legende-badge" style="background: var(--reprise-bg); border: 2px solid #ff9800;"></div>';
+    htmlLegende += '<span class="calendrier-legende-label">Reprise</span>';
+    htmlLegende += '</div>';
+
+    htmlLegende += '<div class="calendrier-legende-item">';
+    htmlLegende += '<div class="calendrier-legende-badge" style="background: var(--examens-bg); border: 2px solid #f06292;"></div>';
+    htmlLegende += '<span class="calendrier-legende-label">Semaine d\'examens</span>';
+    htmlLegende += '</div>';
+
+    htmlLegende += '<div class="calendrier-legende-item">';
+    htmlLegende += '<div class="calendrier-legende-badge" style="background: var(--planification-bg); border: 2px solid #ba68c8;"></div>';
+    htmlLegende += '<span class="calendrier-legende-label">Semaine de planification</span>';
+    htmlLegende += '</div>';
+
+    // Beta 99.30 : entrée légende pour les échéances de production
+    htmlLegende += '<div class="calendrier-legende-item">';
+    htmlLegende += '<div class="calendrier-legende-badge calendrier-legende-badge-echeance"><span class="cal-echeance-badge cal-echeance-badge-legende"></span></div>';
+    htmlLegende += '<span class="calendrier-legende-label">Échéance de production</span>';
+    htmlLegende += '</div>';
+
+    htmlLegende += '</div>'; // fin .calendrier-legende-grille (colonne gauche)
+
+    // Colonne droite : les 3 métriques (format harmonisé texte gauche / chiffre droite)
+    htmlLegende += '<div class="calendrier-legende-metriques">';
+
+    htmlLegende += '<div class="cal-carte-importante">';
+    htmlLegende += '<div class="u-flex-between">';
+    htmlLegende += '<span class="cal-texte-gris">Semaines scolaires</span>';
+    htmlLegende += '<strong class="cal-valeur-grande-bleu">' + nombreSemainesReel + '</strong>';
+    htmlLegende += '</div>';
+    htmlLegende += '</div>';
+
+    htmlLegende += '<div class="cal-carte-importante">';
+    htmlLegende += '<div class="u-flex-between">';
+    htmlLegende += '<span class="cal-texte-gris">Jours de cours</span>';
+    htmlLegende += '<strong class="cal-valeur-grande-bleu">' + nombreJoursReel + '</strong>';
+    htmlLegende += '</div>';
+    htmlLegende += '</div>';
+
+    htmlLegende += '<div class="cal-carte-importante">';
+    htmlLegende += '<div class="u-flex-between">';
+    htmlLegende += '<span class="cal-texte-gris">Congés avec reprise</span>';
+    htmlLegende += '<strong class="cal-valeur-grande-bleu">' + congesAvecReprise + '</strong>';
+    htmlLegende += '</div>';
+    htmlLegende += '</div>';
+
+    htmlLegende += '</div>'; // fin .calendrier-legende-metriques (colonne droite)
+    htmlLegende += '</div>'; // fin .calendrier-legende-fusion
+
+    htmlLegende += '<p class="calendrier-legende-astuce">';
+    htmlLegende += '<strong>Astuce :</strong> Sur ordinateur, survole un jour pour mettre sa semaine en évidence.';
+    htmlLegende += '</p>';
+    htmlLegende += '</div>'; // fin .calendrier-legende
+
+    htmlCalendrier = htmlLegende + htmlCalendrier;
 
     // Injecter dans le DOM
     const conteneurCalendrier = document.getElementById('calendrier-vue');
