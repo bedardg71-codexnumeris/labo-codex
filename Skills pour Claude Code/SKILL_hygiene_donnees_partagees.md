@@ -324,7 +324,7 @@ modules, incidents réels, fonctions de référence).
 
 | Projet | Skill enfant | Domaine d'instanciation |
 |---|---|---|
-| Labo Codex | `SKILL_integrite_globaux.md` | Collections globales `grillesTemplates`, `echellesTemplates`, `cours`, `enseignants`, `cartouches_*`, etc. Modules : `demo-activation.js`, `reserve.js`, `import-export.js`. |
+| Labo Codex | `SKILL_integrite_globaux.md` | Collections globales `cours`, `enseignants`, `cartouches_*` + collections multi-sources namespacées `grillesTemplates`, `echellesTemplates` (namespacées par trimestre depuis #358, 28 juin 2026). Modules : `demo-activation.js`, `reserve.js`, `import-export.js`. |
 
 (Mettre à jour quand un nouveau skill enfant naît.)
 

@@ -16,8 +16,9 @@ description: >
 
 # SKILL : Pratiques de notation — Architecture et moteur de calcul
 
-> **Dernière mise à jour** : 5 juin 2026 (établi par lecture de code lors du démarrage
-> du Comparateur de pratiques, lot C0 ; §2 bis ajouté le même jour — ancrage recherche/pratique).
+> **Dernière mise à jour** : 3 juillet 2026 (#363 — journal #326 complété jusqu'à la
+> réactivation 1.26.0 ; corps établi par lecture de code le 5 juin 2026, lot C0 ;
+> §2 bis ajouté le même jour — ancrage recherche/pratique).
 > **Nature** : volet **technique**, mais **pas un simple miroir du code**. Le §2 bis ancre
 > chaque famille dans la pratique et la recherche documentées (corpus GfG + CoP-PAN) et
 > nomme les **écarts** entre le code et ce que la recherche propose. La doctrine de l'outil
@@ -593,6 +594,7 @@ vraiment*.
 
 | Date | Changement |
 |------|------------|
+| 2026-06-28 (#326 CLOS, 1.26.0) | **Comparateur RÉACTIVÉ (`COMPARATEUR_VISIBLE=true`), PR #73 mergée (squash `495cd99a`), constats terrain T1-T5 traités.** Décisions Grégoire : (1) une note STD non constructible rend `null` (« non constructible »), plus jamais un `0` trompeur — `simulerIndices` discrimine par FAMILLE (`obtenirCode()==='STD'`), le repli `calculerPerformance` ne masque plus l'échec STD (préserve SOM/SPE/DEN ; sentinelle 12 cas break-testée) ; (2) dérivation d'une maquette → créer + atterrir sur l'arbre SANS wizard ; (3) T3 : cause réelle = mismatch de FORME (copies en `.config` seul) → `dupliquerPratique`/`deriverMaquette` écrivent la forme CANONIQUE (sentinelle 4 cas). ⚠ `simulerIndices` alimente AUSSI l'export des résultats finaux — vérifié : les 4 pratiques STD abouties construisent 100 % des notes réelles. Journal antérieur (R1-R6, 1.19.0) = étapes intermédiaires, supersédées par cette clôture. |
 | 2026-06-16 (#343 descriptions) | **Malentendu DEN corrigé dans les descriptions.** §2 bis (DEN) : « standards/specs implicites » → « doivent rester explicites » (cf. #343). 5 sites UI alignés (gabarits-utils, accompagnement terme/popup, wizard type + bannière). Reste #343 (b)+(c) modèle/formulaire (DEN porte échelle/grille optionnelles). |
 | 2026-06-17 (#326 R4b/R5/R6) | **Banc de décision — code COMPLET, release 1.19.0 préparée.** R4b : colonnes paires (sans réf, maquettes incluses) + section « Construction de la note » (R3, alignée par axe, « s.o. ») + section « Résultat » + lien par colonne vers le formulaire #319 + source fictif/réel + « Comparer » depuis l'arbre injecte une colonne. R5 : retrait du code démo mort (PROFILS/PHRASES_CONTEXTE/MICROCOPY_E1/estEnDemo/construireInvitation/activerDemoEtOuvrir). R6 : bump 1.19.0 + changelog. Tests `comparateur-banc-r4b-326` (11). ⚠️ Rendu UI = validation terrain (porte avant merge). |
 | 2026-06-17 (#326 R4a) | **Banc de décision — R4a : le banc tourne sur les profils fictifs générés (R2) injectés, sans mode démo.** `comparateur-pratiques.js` : `_corpusActif`/`_corpusInjection`/`_profilsActifs`/`_echelleActiveComparateur` ; `_note`/`_carteRecit`/`_donnees` consomment le corpus ; garde démo → corpus disponible. `genererCorpus` stampe `echelleId`. Test 8 cas (statique) break-testé. Rendu = terrain. Reste R4b (colonnes paires + lignes construction R3 + lien formulaire + source réelle), R5, R6. |

@@ -154,9 +154,9 @@ un même plan s'applique potentiellement à plusieurs groupes.
 |--------|---------|-----------------|
 | Réglages | Calendrier 15 semaines, horaire, séances | `{trimestreId}_calendrier`, `{trimestreId}_horaire` |
 | Construction | Productions (artefacts) | `{trimestreId}_productions` |
-| Construction | Grilles de critères | `grillesTemplates` |
-| Construction | Échelles de performance | `echellesTemplates` |
-| Construction | Pratique de notation | `modalitesEvaluation` |
+| Construction | Grilles de critères | `{trimestreId}_grillesTemplates` (namespacée depuis #358, 28 juin 2026 — via `cle()`) |
+| Construction | Échelles de performance | `{trimestreId}_echellesTemplates` (idem #358) |
+| Construction | Pratique de notation | `{trimestreId}_modalitesEvaluation` (namespacée depuis le 24 mai 2026 — via `cle()`) |
 
 ### Données propres (écriture)
 

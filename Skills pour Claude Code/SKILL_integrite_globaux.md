@@ -2,13 +2,16 @@
 name: integrite-globaux
 description: >
   Utiliser ce skill avant toute écriture, fusion, filtre ou suppression
-  dans les clés globales partagées de Labo Codex (grillesTemplates,
-  echellesTemplates, cours, listeCours, enseignants, cartouches_*,
-  pratiquesConfigurables, modalitesEvaluation). Déclencher dès que tu
-  travailles sur demo-activation.js, demo-namespace.js, reserve.js,
-  import-export.js, codex.js, ou tout futur module qui manipule ces clés
-  (notamment Plan 2 partage CC). Aussi pertinent pour toute migration de
-  masse sur des familles de clés (db.keys().forEach...).
+  dans les clés globales partagées de Labo Codex (cours, listeCours,
+  enseignants, cartouches_*) ou dans les collections multi-sources
+  namespacées (grillesTemplates, echellesTemplates,
+  pratiquesConfigurables, modalitesEvaluation — namespacées par trimestre
+  depuis #358/24 mai, mais toujours alimentées par plusieurs sources).
+  Déclencher dès que tu travailles sur demo-activation.js,
+  demo-namespace.js, reserve.js, import-export.js, codex.js, ou tout
+  futur module qui manipule ces clés (notamment Plan 2 partage CC). Aussi
+  pertinent pour toute migration de masse sur des familles de clés
+  (db.keys().forEach...).
 ---
 
 # SKILL : Intégrité des collections globales (Labo Codex)
@@ -37,37 +40,49 @@ dans Labo Codex. Ne pas les confondre.
 
 Dans `js/trimestres.js`, la constante `CLES_GLOBALES` énumère les clés
 JAMAIS préfixées par trimestre (sauf copie d'archivage). **Composition
-réelle vérifiée (7 clés)** :
+réelle vérifiée (5 clés, re-vérifiée 3 juillet 2026 post-#358)** :
 
 ```
-trimestres, grillesTemplates, echellesTemplates, modeApplication,
-etatsAccordeonsV2, cours, listeCours
+trimestres, modeApplication, etatsAccordeonsV2, cours, listeCours
 ```
 
 (`cours` est la clé canonique ; `listeCours` est legacy, migrée vers
 `cours` au chargement et conservée pour rétrocompatibilité.)
+
+> ⚠ **#358 (Option A, 28 juin 2026)** : `grillesTemplates` et
+> `echellesTemplates` ont QUITTÉ `CLES_GLOBALES` pour `CLES_NAMESPACEES`
+> (grilles/échelles de TRAVAIL propres à chaque trimestre,
+> `<trim>_grillesTemplates`). Le global nu est vidé au boot (G4) avec
+> garde anti-resemage (1.25.0, sentinelle break-testée) — ne JAMAIS y
+> réécrire. Le catalogue de GABARITS (`bibliothequeGrilles`/
+> `bibliothequeEchelles`) est une collection DISJOINTE (0 id commun avec
+> les grilles de travail), intouchée par #358.
 
 ### 1.2 Clés globales par d'AUTRES mécanismes
 
 Plusieurs clés sensibles sont partagées entre trimestres sans figurer
 dans `CLES_GLOBALES` :
 
-- **`pratiquesConfigurables`, `modalitesEvaluation`** : au contraire,
-  elles sont **namespacées** par trimestre (présentes dans `CLES_NAMESPACE`
-  de `trimestres.js`, migration au boot dans `main.js`). Elles ne sont
-  PAS dans `CLES_GLOBALES`. Mais `grillesTemplates`, `echellesTemplates`
-  et `pratiquesConfigurables` figurent dans `CLES_TEMPLATES_ARCHIVES`
-  (copiées vers `<trimestre>_grillesTemplates` etc. à l'archivage) — c'est
-  ce mécanisme d'archivage, pas la globalité, qui les rend sensibles.
-- **`enseignants`, `cartouches_*`** : globales de fait (manipulées comme
-  globales par `demo-activation.js`, le pack démo, etc.) sans être listées
-  dans `CLES_GLOBALES`. Toujours vérifier le mécanisme réel d'une clé
-  avant de la traiter.
+- **`pratiquesConfigurables`, `modalitesEvaluation`, `grillesTemplates`,
+  `echellesTemplates`** : **namespacées** par trimestre (présentes dans
+  `CLES_NAMESPACEES` de `trimestres.js` — les deux premières depuis le
+  24 mai, les deux dernières depuis #358 le 28 juin ; migrations au boot
+  dans `main.js`). Elles ne sont PAS dans `CLES_GLOBALES`, mais restent
+  des collections MULTI-SOURCES (utilisateur, pack démo, imports) : la
+  checklist §2 s'applique toujours. `grillesTemplates`,
+  `echellesTemplates` et `pratiquesConfigurables` figurent aussi dans
+  `CLES_TEMPLATES_ARCHIVES` (copie `<trimestre>_<cle>` posée à
+  l'archivage — mécanisme antérieur à #358, conservé).
+- **`enseignants`** : globale de fait (manipulée comme globale par
+  `demo-activation.js`, le pack démo, etc.) sans être listée dans
+  `CLES_GLOBALES`. **`cartouches_*`** : globales par mécanisme dédié dans
+  `cle()` (`startsWith('cartouches_')`), sauf copie d'archive. Toujours
+  vérifier le mécanisme réel d'une clé avant de la traiter.
 
 > **Conséquence pratique** : « globale » ≠ « dans `CLES_GLOBALES` ».
 > Avant de coder, grep la clé visée dans `trimestres.js` pour savoir
-> sous quel régime elle tombe (`CLES_GLOBALES`, `CLES_NAMESPACE`,
-> `CLES_TEMPLATES_ARCHIVES`).
+> sous quel régime elle tombe (`CLES_GLOBALES`, `CLES_NAMESPACEES`,
+> `CLES_TEMPLATES_ARCHIVES`, mécanisme `cartouches_*`).
 
 Ces clés reçoivent des items de **plusieurs sources** : items utilisateur
 (Grégoire), items du pack démo (`pack-demo-20.js` → `PACK_DEMARRAGE`),
@@ -132,11 +147,16 @@ garantie d'absence de collision.
 ### 3.2 Push sans replace — la protection réelle des fusions
 
 `fusionnerDemoVersGlobaux` (`js/demo-activation.js`) injecte les items
-démo dans `listeCours`, `cours`, `enseignants`, `grillesTemplates`,
-`echellesTemplates` et `cartouches_*` avec, pour chaque collection, un
-test `some(x => x.id === idDemo)` **avant** le `push`. Si l'ID existe
-déjà côté utilisateur, l'item démo n'est PAS ajouté — la version
-utilisateur est préservée. Aucun upsert/replace par ID.
+démo dans `listeCours`, `cours`, `enseignants` et `cartouches_*` avec,
+pour chaque collection, un test `some(x => x.id === idDemo)` **avant**
+le `push`. Si l'ID existe déjà côté utilisateur, l'item démo n'est PAS
+ajouté — la version utilisateur est préservée. Aucun upsert/replace par ID.
+
+> **#358 (G3, 28 juin 2026)** : grilles/échelles ne sont PLUS fusionnées
+> vers le global — `trimestreActif='demo'` route `cle('grillesTemplates')`
+> vers `demo_grillesTemplates` (permanent, peuplé par `peuplerNamespace`),
+> les lecteurs voient les modèles démo sans fusion. Fusionner ici
+> réintroduirait la pollution du global que #358 supprime.
 
 (Exception assumée : `modalitesEvaluation` est écrasé via
 `window.modalitesEvaluation.remplacer(...)`, son module propriétaire SSOT.)
@@ -153,12 +173,17 @@ démo au toggle OFF. Le filtre n'est PAS « identité seule » mais
 function estItemDemo(item) {
     return !!(item && (item.isDemo === true || item.estDemo === true));
 }
-// grillesTemplates :
-var idsGrilles = idsDuPack('grillesTemplates'); // IDs présents dans PACK_DEMARRAGE
-db.setSync('grillesTemplates', grilles.filter(g =>
-    !(idsGrilles.has(g.id) && estItemDemo(g))    // retire SEULEMENT si ID du pack ET flag démo
-));
+// listeCours (même patron pour cours) :
+var idsListeCours = idsDuPack('listeCours'); // IDs présents dans PACK_DEMARRAGE
+db.setSync('listeCours', (db.getSync('listeCours', []) || []).filter(function (c) {
+    return !(idsListeCours.has(c.id) && estItemDemo(c)); // retire SEULEMENT si ID du pack ET flag démo
+}));
 ```
+
+(Depuis #358 G3, grilles/échelles ne sont plus concernées : jamais
+injectées au global, rien à retirer. ⚠ Un filtre naïf y serait même
+FAUX — la fonction tourne pendant que `trimestreActif='demo'`, donc
+`cle('grillesTemplates')` pointe la clé démo PERMANENTE.)
 
 **Pourquoi c'est correct et non une violation du principe « filtrer par
 identité »** : ajouter le flag ici n'est pas un filtre aveugle par flag
@@ -214,7 +239,8 @@ exécution.
   etc.) sans les modifier — pas de risque de corruption des globaux.
 - À auditer si on étend reserve.js pour faire l'opération inverse
   (réimport sélectif, cf. backlog #254) : ce sera une nouvelle source qui
-  doit appliquer §2 avant d'écrire dans `grillesTemplates`.
+  doit appliquer §2 avant d'écrire dans `cle('grillesTemplates')`
+  (namespacée depuis #358 — jamais dans le global nu, vidé au boot).
 
 ### 4.3 Plan 2 — partage CC entre utilisateurs (à venir)
 
@@ -234,9 +260,13 @@ Avant de coder le pipeline d'import, appliquer §2 :
 - L'archivage copie `grillesTemplates`, `echellesTemplates`,
   `pratiquesConfigurables` vers `<trimestre>_grillesTemplates`, etc.
   (`CLES_TEMPLATES_ARCHIVES`).
-- Risque potentiel : si un trimestre est archivé puis désarchivé alors
-  que les globaux ont changé entre temps, comment fusionner ? À auditer
-  si une refonte du désarchivage est prévue.
+- **Désarchivage (#359, 26 juin 2026, réconcilié #358)** :
+  `purgerCopiesModelesArchive` retire au désarchivage les copies qui
+  REDEVIENNENT orphelines — celles dont `cle()` retombe sur une clé
+  globale partagée (cartouches). Depuis #358, `<id>_grillesTemplates`
+  est la donnée VIVANTE du trimestre désarchivé → JAMAIS purgée (perte
+  de notes sinon). La condition est dérivée du registre `CLES_GLOBALES`,
+  pas d'un flag — elle s'auto-ajuste si le registre bouge.
 
 ---
 
@@ -290,6 +320,12 @@ le code pour détecter les régressions ou nouveaux call-sites à risque.
 abstraits, agnostique au projet).
 
 **Date de création** : 26 avril 2026, suite à l'incident du 24 avril.
+**Dernière révision** : 3 juillet 2026 (#363, vague 3) — mise en
+conformité post-#358 : `grillesTemplates`/`echellesTemplates` sorties de
+`CLES_GLOBALES` (namespacées, global nu vidé au boot), démo sans fusion
+vers le global (G3), désarchivage #359, nom réel `CLES_NAMESPACEES`.
+Vérifiée CONTRE le code (`trimestres.js`, `demo-activation.js`), pas de
+mémoire.
 **Révision attendue** : à chaque ajout d'une nouvelle source dans les
 globaux (Plan 2, Voûte, futur partage), à chaque incident révélant un
 pattern non listé.
