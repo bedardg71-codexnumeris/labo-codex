@@ -413,9 +413,19 @@ document.addEventListener('DOMContentLoaded', function () {
                         viderModelesGlobalHerite();
                     }
                 }
-                // Flag posé seulement après peuplement + vidage réussis : un échec
-                // partiel laisse le global intact et fait re-tenter au prochain boot
-                // (migrerModelesVersNamespace est idempotent/additif).
+                // Boot ATOMIQUE (#358 follow-up, 3 juillet 2026) : G4 (removeSync) et
+                // le peuplement C1 (setSync) sont des écritures fire-and-forget — si le
+                // contexte meurt entre elles et la pose du flag, on pouvait obtenir
+                // « flag posé mais global non vidé » (origine du reliquat du 28 juin).
+                // On DRAINE donc tout (_pendingWrites → commit IDB) AVANT de poser le
+                // flag : un flush qui échoue lève → catch → flag NON posé → nouvelle
+                // tentative au prochain boot (migrerModelesVersNamespace est idempotent).
+                if (db && typeof db.flush === 'function') {
+                    await db.flush();
+                }
+                // Flag posé seulement après peuplement + vidage réussis ET durables :
+                // un échec partiel laisse le global intact et fait re-tenter au
+                // prochain boot (migrerModelesVersNamespace est idempotent/additif).
                 db.setSync('migration_modeles_namespacees_done', true);
             } catch(e) {
                 console.warn('[migration_modeles_namespacees] erreur ignorée:', e);
