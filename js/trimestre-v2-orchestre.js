@@ -21,7 +21,6 @@
    - allerVersAide
    - mettreAJourOptionsFormatHoraire/mettreAJourFormatHoraire/mettreAJourInfoDuree
 
-   Variable module-scope migrée : `enseignantEnEditionUI`.
 
    Atomicité critique préservée (Écart #6) :
    - Le couple `db.setSync('groupeCoursActif', X)` + `db.setSync('infoCours', Y)`
@@ -40,7 +39,6 @@
     post-refactor — voir SESSION.md L78.)
    =============================== */
 
-let enseignantEnEditionUI = null;
 
 /**
  * Peuple le dropdown "Groupe-cours actif" dans l'entête
@@ -477,66 +475,6 @@ function changerEnseignantSelectionneV2(enseignantId) {
 }
 
 /**
- * Affiche le formulaire d'ajout d'enseignant
- */
-function afficherFormEnseignantV2() {
-    enseignantEnEditionUI = null;
-
-    const fields = ['v2-ens-prenom', 'v2-ens-nom', 'v2-ens-courriel', 'v2-ens-institution', 'v2-ens-departement', 'v2-ens-discipline', 'v2-ens-siteWeb'];
-    fields.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
-    });
-
-    const titre = document.getElementById('v2-titreFormEnseignant');
-    const btnTexte = document.getElementById('v2-btnTexteEnseignant');
-    if (titre) titre.textContent = 'Nouvel enseignant·e';
-    if (btnTexte) btnTexte.textContent = 'Ajouter';
-
-    const form = document.getElementById('v2-formulaireEnseignant');
-    const apercu = document.getElementById('v2-apercuEnseignant');
-    if (form) form.classList.remove('u-hide');
-    if (apercu) apercu.classList.add('u-hide');
-}
-
-/**
- * Modifie l'enseignant sélectionné
- */
-async function modifierEnseignantSelectionneV2() {
-    const enseignantId = document.getElementById('v2-selectEnseignant')?.value;
-    if (!enseignantId || typeof EnseignantsEntite === 'undefined') return;
-
-    const ens = await EnseignantsEntite.obtenirParId(enseignantId);
-    if (!ens) return;
-
-    enseignantEnEditionUI = enseignantId;
-
-    const mapping = {
-        'v2-ens-prenom': ens.prenom,
-        'v2-ens-nom': ens.nom,
-        'v2-ens-courriel': ens.courriel,
-        'v2-ens-institution': ens.institution,
-        'v2-ens-departement': ens.departement,
-        'v2-ens-discipline': ens.discipline,
-        'v2-ens-siteWeb': ens.siteWeb
-    };
-    Object.entries(mapping).forEach(([id, val]) => {
-        const el = document.getElementById(id);
-        if (el) el.value = val || '';
-    });
-
-    const titre = document.getElementById('v2-titreFormEnseignant');
-    const btnTexte = document.getElementById('v2-btnTexteEnseignant');
-    if (titre) titre.textContent = 'Modifier l\'enseignant·e';
-    if (btnTexte) btnTexte.textContent = 'Enregistrer';
-
-    const form = document.getElementById('v2-formulaireEnseignant');
-    const apercu = document.getElementById('v2-apercuEnseignant');
-    if (form) form.classList.remove('u-hide');
-    if (apercu) apercu.classList.add('u-hide');
-}
-
-/**
  * Affiche le formulaire de création de groupe-cours
  */
 function afficherFormGroupeCoursV2() {
@@ -631,8 +569,6 @@ window.changerGroupeCoursDepuisHeader = changerGroupeCoursDepuisHeader;
 window.changerGroupeCoursActifV2 = changerGroupeCoursActifV2;
 window.peuplerDropdownEnseignants = peuplerDropdownEnseignants;
 window.changerEnseignantSelectionneV2 = changerEnseignantSelectionneV2;
-window.afficherFormEnseignantV2 = afficherFormEnseignantV2;
-window.modifierEnseignantSelectionneV2 = modifierEnseignantSelectionneV2;
 window.afficherFormGroupeCoursV2 = afficherFormGroupeCoursV2;
 window.mettreAJourApercuGroupeCours = mettreAJourApercuGroupeCours;
 

@@ -487,7 +487,8 @@ async function nouveauCoursV2() {
     if (etatVide) etatVide.classList.add('u-hide');
     if (formulaire) formulaire.classList.remove('u-hide');
     if (titre) titre.textContent = 'Nouveau cours';
-    if (btnTexte) btnTexte.textContent = 'Enregistrer';
+    // #306 Lot 1 : libellé canonique « Créer » en création (« Enregistrer » en édition)
+    if (btnTexte) btnTexte.textContent = 'Créer';
 
     // Réinitialiser tous les champs
     reinitialiserFormCoursV2();

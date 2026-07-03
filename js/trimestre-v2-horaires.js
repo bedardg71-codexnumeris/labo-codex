@@ -524,7 +524,8 @@ function nouveauHoraireV2() {
     const titre = document.getElementById('v2-titreFormHoraire');
     const btnTexte = document.getElementById('v2-btnTexteHoraire');
     if (titre) titre.textContent = 'Nouvel horaire';
-    if (btnTexte) btnTexte.textContent = 'Ajouter';
+    // #306 Lot 1 : libellé canonique « Créer » en création (« Enregistrer » en édition)
+    if (btnTexte) btnTexte.textContent = 'Créer';
 
     // Masquer le bouton supprimer (mode création)
     const btnSupprimer = document.getElementById('v2-btnSupprimerHoraire');
