@@ -189,12 +189,13 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - **✅ Analyse + cadrage (16 juin 2026)** : `plans de travail/RELAIS-283-responsive-sidebar.md` (lecture seule, cloud). Constat : les 5 pages biblio partagent `.layout-sidebar-2col` (stack @850, sidebar 220 px @1024) ; **Évaluation › Liste a un layout divergent** ; **désalignement de breakpoints** (chrome @1024/768 vs sidebar @850 → zone 850-1024 serrée). **3 options documentées** : (A) unifier sur `.layout-sidebar-2col` ; **(B, recommandée) aligner le stack 850→1024** (faible risque) ; (C) sidebar repliable (toggle).
   - **✅ Option B IMPLÉMENTÉE (16 juin 2026, décision Grégoire)** : `.layout-sidebar-2col` empile dès **< 1024 px** (fusion des media queries 1024 + 850, suppression de la zone serrée 220 px). Pur CSS, réversible. **Reste** : (1) **validation terrain** Mac+iPad (portrait/paysage, deux modes) ; (2) **Évaluation › Liste + Calendrier** (layout divergent) — option A à trancher après le terrain.
 
-- [ ] 📦 🟡 **#306** Uniformiser la page d'assemblage du groupe-cours (libellés « Créer/Enregistrer » + Trimestre en save explicite)
-  - **Origine** : retour testeur Grégoire — incohérence des boutons de la sous-section « Trimestre » (3 modèles de persistance y coexistent).
-  - **Plan détaillé prêt** : `plans de travail/PLAN-UNIFORMISATION-ASSEMBLAGE-GROUPE-COURS.md` (3 lots : libellés / save explicite Trimestre / test comportemental). Analyse source : `Rapports/analyse-coherence-assemblage-groupe-cours.md`.
-  - **Fenêtre échue (triage 10 juin 2026)** : la contrainte « ne pas remuer avant le 3 juin » (AQPC) est passée — chantier libre. Le Lot 1 (libellés, risque faible) peut passer seul ; le Lot 2 (persistance, risque moyen) à son heure.
-  - **Au moment de coder** : revérifier la cartographie (numéros de ligne) — le formulaire cours a été refondu (chantiers C/E, 29 mai) et l'écosystème pratiques touché (A-2, 30 mai).
-  - Décision UX ouverte (notée dans le plan) : aligner ou non l'apparition du formulaire Enseignant·e sur « état vide masqué ». Estimation : Lot 1 ~1h, Lot 2 ~2-3h, Lot 3 ~1h.
+- [x] 📦 🟡 **#306** Uniformiser la page d'assemblage du groupe-cours (libellés « Créer/Enregistrer » + Trimestre en save explicite) — **✅ LIVRÉ 3 juillet 2026 (vague 3, 1.27.2, non mergé)**
+  - **Lot 1 LIVRÉ** (`00be919a`) : Cours (création disait « Enregistrer »), Horaire (disait « Ajouter » ; le sous-formulaire de SÉANCE garde « Ajouter » — ajout à une collection, comme le Groupe d'étudiants), Enseignant·e (bouton figé → span `v2-btnTexteEnseignant` + bascule, y compris désélection), Groupe-cours (déjà conforme, verrouillé). Zéro-dette : `afficherFormEnseignantV2`/`modifierEnseignantSelectionneV2` (mortes) + `enseignantEnEditionUI` retirées de l'orchestre.
+  - **Lot 2 LIVRÉ** (`fba0c807`) : 11 `data-on-change` de persistance retirés ; le bouton « Enregistrer » appelle `sauvegarderTrimestreCompletV2` (identification PUIS cadre). Recalcul d'ID et validation #215 INTACTS ; les 2 seuls autres écrivains de `cadreCalendrier` = boutons « Réinitialiser » explicites (confirm) — audit connexions propre.
+  - **Lot 3 LIVRÉ** : 2 sentinelles comportementales (chargerScript) + statiques, 11 cas, break-testées ROUGES sur l'ancien code.
+  - **⚠ PORTE TERRAIN AOÛT (2 modes, Mac+iPad)** : parcours des 4 sections (Créer/Enregistrer) + saisie du trimestre (modifier sans cliquer → rien ne persiste ; cliquer → tout persiste).
+  - **📐 Décision UX restée ouverte (consignée, NON codée)** : aligner ou non l'apparition du formulaire Enseignant·e sur « état vide masqué » — hypothèse par défaut du plan respectée (pas touché).
+  - Origine : retour testeur Grégoire. Plan : `plans de travail/PLAN-UNIFORMISATION-ASSEMBLAGE-GROUPE-COURS.md` ; analyse : `Rapports/analyse-coherence-assemblage-groupe-cours.md`.
 
 ### Refonte des textes (juin 2026) — chantiers dérivés
 
