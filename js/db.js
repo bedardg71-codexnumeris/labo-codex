@@ -54,6 +54,15 @@
     // consommé par set(), setSync() et syncToLocalStorageCache().
     const SEUIL_IDB_FIRST = 200 * 1024; // 200 Ko
 
+    // #353 Option 1 (3 juillet 2026, décision Grégoire du 28 juin) — OBSERVABILITÉ
+    // de la saturation localStorage : on MESURE et on ALERTE, on ne change AUCUN
+    // comportement d'écriture (le choix entre les remédiations 2/3/4 du
+    // RAPPORT-353 se prendra sur ces chiffres). Budget = quota WebKit observé
+    // pour l'origine file:// (~5 Mo) ; chaque palier déclenche UN console.warn
+    // par session, vérification throttlée (au plus 1/min).
+    const BUDGET_LOCALSTORAGE = 5 * 1024 * 1024; // ~5 Mo (WebKit file://)
+    const PALIERS_ALERTE_OCCUPATION = [0.8, 0.95];
+
     /**
      * Classe Database - API unifiée pour stockage
      */
@@ -394,6 +403,10 @@
         _setLocalStorage(key, value) {
             const jsonString = JSON.stringify(value);
             localStorage.setItem(key, jsonString);
+            // #353 Option 1 : point de passage des écritures localStorage →
+            // vérification (throttlée) de l'occupation vs budget. Observabilité
+            // seule — ne modifie jamais l'écriture qui vient d'aboutir.
+            this._verifierBudgetLocalStorage();
         }
 
         /**
@@ -405,6 +418,112 @@
             } catch (e) {
                 return -1;
             }
+        }
+
+        /**
+         * #353 Option 1 — mesure FRAÎCHE de l'occupation localStorage.
+         * `.length` d'une chaîne est O(1) : le parcours des ~dizaines de clés
+         * est bon marché. Octets estimés en UTF-16 (clé + valeur) × 2, comme le
+         * snapshot de boot `window._storageStats`.
+         * @param {number} nbTop - nombre de plus grosses clés à détailler
+         * @returns {{octets:number, budget:number, ratio:number, nbCles:number,
+         *            topCles:Array<{cle:string,octets:number}>, contributeursConnus:Object}}
+         */
+        statsStockage(nbTop = 10) {
+            const tailles = [];
+            let octets = 0;
+            try {
+                for (let i = 0; i < localStorage.length; i++) {
+                    const cle = localStorage.key(i);
+                    if (cle === null) continue;
+                    const valeur = localStorage.getItem(cle) || '';
+                    const t = (cle.length + valeur.length) * 2; // UTF-16
+                    octets += t;
+                    tailles.push({ cle: cle, octets: t });
+                }
+            } catch (e) { /* mesure best-effort */ }
+            tailles.sort((a, b) => b.octets - a.octets);
+            // Contributeurs identifiés par le RAPPORT-353 §3, agrégés pour lecture rapide
+            const somme = (pred) => tailles.filter(pred).reduce((acc, x) => acc + x.octets, 0);
+            return {
+                octets: octets,
+                budget: BUDGET_LOCALSTORAGE,
+                ratio: octets / BUDGET_LOCALSTORAGE,
+                nbCles: tailles.length,
+                topCles: tailles.slice(0, nbTop),
+                contributeursConnus: {
+                    backupsV1: somme(x => x.cle.endsWith('_backup_v1')),
+                    tamponsImages: somme(x => x.cle.indexOf('tamponsImages') !== -1)
+                }
+            };
+        }
+
+        /**
+         * #353 Option 1 — alerte de budget, appelée au fil de l'eau par
+         * `_setLocalStorage`. Throttle 60 s ; chaque palier (80 %, 95 %) n'émet
+         * qu'UN console.warn par session. Aucune action corrective : le but est
+         * de produire le chiffre AVANT la décision (options 2/3/4 du rapport).
+         */
+        _verifierBudgetLocalStorage() {
+            const maintenant = Date.now();
+            if (this._budgetDerniereVerif && maintenant - this._budgetDerniereVerif < 60000) {
+                return;
+            }
+            this._budgetDerniereVerif = maintenant;
+            this._budgetPaliersEmis = this._budgetPaliersEmis || {};
+            const stats = this.statsStockage(5);
+            for (const palier of PALIERS_ALERTE_OCCUPATION) {
+                if (stats.ratio >= palier && !this._budgetPaliersEmis[palier]) {
+                    this._budgetPaliersEmis[palier] = true;
+                    const top = stats.topCles
+                        .map(x => x.cle + ' (' + (x.octets / 1024).toFixed(0) + ' Ko)')
+                        .join(', ');
+                    console.warn(
+                        '[DB #353] localStorage à ' + (stats.ratio * 100).toFixed(0) + ' % du budget ' +
+                        '(' + (stats.octets / 1024).toFixed(0) + ' Ko / ' + (stats.budget / 1024).toFixed(0) + ' Ko, ' +
+                        stats.nbCles + ' clés). Aucune donnée en danger (durabilité A/B/C) — ' +
+                        'au-delà du quota les écritures basculent en memoryCache+IDB. ' +
+                        'Top clés : ' + top + '. Détail : db.statsStockage().'
+                    );
+                }
+            }
+        }
+
+        /**
+         * #353 hygiène (outil CONSOLE, jamais appelé par l'app) — purge des
+         * sauvegardes `*_backup_v1` posées par migration-diagnostic.js et jamais
+         * nettoyées. DRY-RUN PAR DÉFAUT : liste les clés et leur poids sans rien
+         * toucher ; `db.purgerBackupsV1({ dryRun: false })` supprime réellement
+         * (removeSync → toutes les couches, durable via Option C). Décision
+         * d'exécution : Grégoire, sur données réelles (août).
+         */
+        purgerBackupsV1(options) {
+            const dryRun = !options || options.dryRun !== false;
+            const cibles = [];
+            try {
+                for (let i = 0; i < localStorage.length; i++) {
+                    const cle = localStorage.key(i);
+                    if (cle && cle.endsWith('_backup_v1')) {
+                        const valeur = localStorage.getItem(cle) || '';
+                        cibles.push({ cle: cle, octets: (cle.length + valeur.length) * 2 });
+                    }
+                }
+                // Les backups refoulés hors localStorage (saturation) vivent en
+                // memoryCache : les couvrir aussi.
+                this.memoryCache.forEach((_, cle) => {
+                    if (cle.endsWith('_backup_v1') && !cibles.some(c => c.cle === cle)) {
+                        cibles.push({ cle: cle, octets: -1 });
+                    }
+                });
+            } catch (e) { /* énumération best-effort */ }
+            if (!dryRun) {
+                cibles.forEach(c => this.removeSync(c.cle));
+            }
+            const totalKo = (cibles.reduce((acc, c) => acc + Math.max(c.octets, 0), 0) / 1024).toFixed(1);
+            console.warn('[DB #353] purgerBackupsV1 ' + (dryRun ? 'DRY-RUN' : 'EXÉCUTÉ') + ' : ' +
+                cibles.length + ' clé(s) *_backup_v1, ~' + totalKo + ' Ko' +
+                (dryRun ? ' — rien touché. Exécuter : db.purgerBackupsV1({ dryRun: false })' : ' supprimées.'));
+            return { dryRun: dryRun, cibles: cibles };
         }
 
         /**
@@ -648,48 +767,6 @@
         }
 
         /**
-         * Libère de l'espace dans le cache localStorage
-         * Supprime les grosses clés du cache (elles restent dans IndexedDB)
-         * @param {number} seuilOctets - Taille minimale pour supprimer (défaut: 100KB)
-         * @returns {Object} Résultat avec clés supprimées et espace libéré
-         */
-        async libereCacheLocalStorage(seuilOctets = 100000) {
-            if (!this.useIndexedDB) {
-                console.warn('[DB] Impossible de libérer le cache sans IndexedDB');
-                return { success: false, message: 'IndexedDB non disponible' };
-            }
-
-
-            const clesSupprimes = [];
-            let espaceLibere = 0;
-
-            // Parcourir toutes les clés localStorage
-            const keys = Object.keys(localStorage);
-            for (const key of keys) {
-                const value = localStorage.getItem(key);
-                if (value && value.length > seuilOctets) {
-                    // Vérifier que la clé existe dans IndexedDB avant de supprimer
-                    const existsInIndexedDB = await this.get(key) !== null;
-                    if (existsInIndexedDB) {
-                        espaceLibere += value.length;
-                        localStorage.removeItem(key);
-                        clesSupprimes.push({ key, size: value.length });
-                    }
-                }
-            }
-
-            const result = {
-                success: true,
-                clesSupprimes: clesSupprimes.length,
-                espaceLibere: espaceLibere,
-                espaceLibereKB: (espaceLibere / 1024).toFixed(1),
-                details: clesSupprimes
-            };
-
-            return result;
-        }
-
-        /**
          * Synchronisation IndexedDB → localStorage au démarrage
          * Charge toutes les données d'IndexedDB dans le cache localStorage
          * pour permettre un accès synchrone rapide
@@ -771,7 +848,11 @@
                     localStorage: {
                         nbCles: Object.keys(localStorage).length,
                         tailleEstimee: lsTaille,
-                        tailleFormatee: (lsTaille / 1024).toFixed(1) + ' Ko'
+                        tailleFormatee: (lsTaille / 1024).toFixed(1) + ' Ko',
+                        // #353 Option 1 : situe le snapshot par rapport au budget.
+                        // Mesure fraîche + top clés : db.statsStockage().
+                        budget: BUDGET_LOCALSTORAGE,
+                        ratio: lsTaille / BUDGET_LOCALSTORAGE
                     },
                     memoryCache: {
                         nbCles: this.memoryCache.size
