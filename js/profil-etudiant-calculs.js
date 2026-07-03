@@ -678,10 +678,10 @@ function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
     // Déterminer le nombre d'artefacts selon l'usage
     let nombreArtefacts;
     if (pourDepistage) {
-        // Pour dépistage : fenêtre glissante configurable (Réglages › Interprétation)
+        // Pour dépistage : fenêtre glissante (défauts interpretation-config.js — plus d'UI de réglage, #299)
         nombreArtefacts = obtenirNombreProductionsPourPatterns(); // Défaut 3
     } else {
-        // Pour performance finale : N meilleurs artefacts (Réglages › Portfolio)
+        // Pour performance finale : N meilleurs artefacts (config portfolio de la pratique active — Conception → Pratique de notation)
         const config = db.getSync(cle('modalitesEvaluation'), null) || {};
         nombreArtefacts = config.configPAN?.portfolio?.nombreARetenir || 4; // Défaut 4
     }
@@ -763,7 +763,7 @@ function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
 /**
  * Calcule la progression (direction) selon le Guide de monitorage
  * Compare la performance des N artefacts les plus récents (AM) vs les N suivants avec chevauchement (AL)
- * Le nombre N est configurable via Réglages → Interprétation des données
+ * Le nombre N vient des seuils d'interprétation (interpretation-config.js — plus d'UI de réglage, #299)
  *
  * Fenêtre glissante: Si artefacts = A, B, C, ..., N, N+1 (du plus récent au plus ancien)
  * - AM = moyenne(A, B, ..., N)
@@ -854,7 +854,7 @@ function calculerProgressionEleve(da) {
 
 /**
  * Identifie le défi spécifique (critère SRPNF le plus faible) sur les N derniers artefacts
- * Le nombre N est configurable via Réglages → Interprétation des données
+ * Le nombre N vient des seuils d'interprétation (interpretation-config.js — plus d'UI de réglage, #299)
  * Seuil: Valeur configurable (défaut: 71.25%, ajustable via interpretation-config.js)
  *
  * @param {string} da - Numéro de DA

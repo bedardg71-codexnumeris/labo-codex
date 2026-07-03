@@ -136,7 +136,7 @@ function initialiserModuleSnapshots() {
                 // par Option B), pas db.set() fire-and-forget. Idem repli ligne ~146.
                 db.setSync(cleSnap, structure);
             }
-            // Rafraîchir l'affichage si on est dans Réglages
+            // Rafraîchir l'affichage si on est dans Réglages → Données (bloc Captures)
             if (typeof afficherStatutSnapshots === 'function') {
                 afficherStatutSnapshots();
             }
@@ -1058,11 +1058,11 @@ function obtenirSnapshotsInterventions() {
 }
 
 /* ===============================
-   FONCTIONS UI (Réglages → Snapshots)
+   FONCTIONS UI (Réglages → Données — bloc « Captures de progression »)
    =============================== */
 
 /**
- * Affiche les statistiques des captures dans l'interface Réglages
+ * Affiche les statistiques des captures dans Réglages → Données
  * ✅ CORRECTIF (2 mars 2026): Lecture async depuis IndexedDB pour éviter
  * le cache localStorage périmé (db.getSync lit localStorage en premier)
  */

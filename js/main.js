@@ -809,11 +809,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // PRIORITÉ 4 : MODULES AVANCÉS
     // ===============================
 
-    // MODULE 14: Statistiques
-    if (typeof initialiserModuleStatistiques === 'function') {
-        initialiserModuleStatistiques();
-    }
-
     // MODULE 15: Profil étudiant
     if (typeof initialiserModuleProfilEtudiant === 'function') {
         initialiserModuleProfilEtudiant();

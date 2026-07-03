@@ -18,7 +18,7 @@ const CC_LICENSE_DEFAULTS = {
     licence_url: "https://creativecommons.org/licenses/by-nc-sa/4.0/",
     licence_resume: "Attribution - Pas d'utilisation commerciale - Partage dans les mêmes conditions 4.0 International",
     // #342 : aucune coordonnée personnelle par défaut. Sans identité résolue
-    // (Réglages › Enseignant ou enseignant marqué actif), l'auteur est « Inconnu »
+    // (Cadre › Trimestre › Enseignant·e ou enseignant marqué actif), l'auteur est « Inconnu »
     // et NI courriel NI site ne sont gravés — plutôt qu'un nom ou des coordonnées
     // posés silencieusement (cf. « par Bruno V. » sur une pratique de
     // littérature de Grégoire). Quand un enseignant réel est résolu, ses propres
@@ -35,12 +35,12 @@ const CC_LICENSE_DEFAULTS = {
 // L'auteur CC est l'utilisateur qui a créé ce document. Distinct du champ
 // métier « enseignant du groupe-cours ». Pour éviter de créditer le prof
 // démo (Primo Primavera) ou un co-enseignant comme auteur du matériel,
-// on lit l'identité uniquement depuis le profil utilisateur (Réglages ›
-// Enseignant), en excluant les entrées `isDemo: true`.
+// on lit l'identité uniquement depuis le profil utilisateur (Cadre ›
+// Trimestre › Enseignant·e), en excluant les entrées `isDemo: true`.
 
 /**
  * Retourne le profil CC de l'utilisateur : l'enseignant sélectionné dans
- * Réglages › Enseignant (le dropdown `v2-selectEnseignant`), avec fallback
+ * Cadre › Trimestre › Enseignant·e (le dropdown `v2-selectEnseignant`), avec fallback
  * sur l'enseignant marqué `actif`. #342 : plus de repli silencieux sur le
  * premier enseignant de la liste — sans désignation explicite, on retourne
  * `null` (l'auteur deviendra « Inconnu » en aval). Les entrées `isDemo: true`
@@ -63,7 +63,7 @@ function obtenirProfilAuteurActifSync() {
 
         let enseignant = null;
 
-        // 1. Dropdown Réglages › Enseignant (choix explicite de l'utilisateur)
+        // 1. Dropdown Cadre › Trimestre › Enseignant·e (choix explicite de l'utilisateur)
         const selectEnseignant = document.getElementById('v2-selectEnseignant');
         if (selectEnseignant && selectEnseignant.value) {
             enseignant = enseignantsReels.find(e => e.id === selectEnseignant.value);
@@ -79,7 +79,7 @@ function obtenirProfilAuteurActifSync() {
         // (premier de la liste) sur le matériel — c'est lui qui a stampé
         // « Bruno V. » sur une pratique de littérature de Grégoire.
         if (!enseignant) {
-            console.warn('[CC License] #342 : aucun enseignant désigné (ni sélection Réglages › Enseignant, ni marqué actif) — attribution « Inconnu ».');
+            console.warn('[CC License] #342 : aucun enseignant désigné (ni sélection Cadre › Trimestre › Enseignant·e, ni marqué actif) — attribution « Inconnu ».');
             return null;
         }
 
@@ -101,8 +101,8 @@ function obtenirProfilAuteurActifSync() {
 
 /**
  * Retourne le nom de l'identité CC de l'utilisateur (chaîne). #342 : fallback
- * `"Inconnu"` si aucun enseignant n'est désigné (ni sélectionné dans Réglages ›
- * Enseignant, ni marqué actif) — on n'invente jamais un auteur. À utiliser
+ * `"Inconnu"` si aucun enseignant n'est désigné (ni sélectionné dans Cadre ›
+ * Trimestre › Enseignant·e, ni marqué actif) — on n'invente jamais un auteur. À utiliser
  * partout où on veut tracer « qui est l'utilisateur » pour CC BY
  * (auteur_original, contributeurs).
  *
@@ -333,7 +333,7 @@ function demanderAttributionModification() {
 
 /**
  * Ajoute l'identité CC de l'utilisateur comme contributeur si elle n'est
- * pas déjà l'auteur original. L'identité provient de Réglages › Enseignant
+ * pas déjà l'auteur original. L'identité provient de Cadre › Trimestre › Enseignant·e
  * (voir `obtenirIdentiteCCUtilisateur`), pas du groupe-cours actif.
  *
  * @param {Object} document - Le document (production, grille, échelle, cartouche, pratique)
@@ -459,39 +459,7 @@ function avertirSansLicence(donnees) {
 // BADGE PERMANENT POUR RÉGLAGES
 // ============================================
 
-/**
- * Génère le HTML d'un badge CC permanent pour la section Réglages
- * @returns {string} - HTML du badge permanent
- */
-function genererBadgeCCPermanent() {
-    return `
-        <div class="cc-badge">
-            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">
-                <img src="icons/by-nc-sa-2.svg" alt="CC BY-NC-SA 4.0" style="height: 15px;">
-            </a>
 
-            <p class="cc-badge-titre">Matériel partagé sous licence libre</p>
-
-            <p class="cc-badge-auteur">
-                Ce matériel pédagogique est partagé sous licence
-                <strong>CC BY-NC-SA 4.0</strong> (Attribution - Pas d'utilisation commerciale - Partage dans les mêmes conditions).
-            </p>
-
-            <div class="cc-badge-conditions">
-                <p>
-                    Tu peux librement partager, modifier et réutiliser ce matériel à des fins éducatives,
-                    à condition d'attribuer les auteurs originaux, de ne pas en faire usage commercial,
-                    et de partager tes modifications sous la même licence. Cette licence protège le travail des enseignants
-                    tout en favorisant le partage et le bien commun en éducation.
-                </p>
-            </div>
-
-            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" class="cc-badge-lien">
-                En savoir plus sur la licence CC BY-NC-SA 4.0 →
-            </a>
-        </div>
-    `;
-}
 
 // ============================================
 // MODAL MÉTADONNÉES ENRICHIES (Beta 91)
@@ -1606,7 +1574,6 @@ window.enregistrerModificationCC = enregistrerModificationCC;
 window.demanderAttributionModification = demanderAttributionModification;
 window.verifierLicenceCC = verifierLicenceCC;
 window.avertirSansLicence = avertirSansLicence;
-window.genererBadgeCCPermanent = genererBadgeCCPermanent;
 window.demanderMetadonneesEnrichies = demanderMetadonneesEnrichies;
 window.demanderMetadonneesConfigComplete = demanderMetadonneesConfigComplete;
 window.genererFichierLISEZMOI = genererFichierLISEZMOI;
