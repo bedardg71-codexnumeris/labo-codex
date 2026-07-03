@@ -11271,6 +11271,21 @@ label:has(+ textarea:disabled) {
     margin: 16px 0;
 }
 
+/* 🔧 #283-T1 (3 juillet 2026) : le Calendrier scolaire ne s'empilait pas sous
+   1024 px — les mois restaient côte à côte et le 2ᵉ débordait à droite (scroll
+   horizontal). Aligné sur le breakpoint acté pour #283 option B (empilement des
+   pages à sidebar dès <1024 px). min-width:0 : même garde anti-« min-width:auto »
+   que #118 (un tableau de mois ne doit pas élargir sa piste au-delà de 1fr). */
+.cal-grid-2col > * {
+    min-width: 0;
+}
+
+@media (max-width: 1024px) {
+    .cal-grid-2col {
+        grid-template-columns: 1fr;
+    }
+}
+
 .cal-carte-blanche {
     background: var(--surface-carte, #1a3040);
     border: 2px solid var(--bleu-carte);
@@ -12685,6 +12700,19 @@ tr.etudiant-inactif td {
 
 #calendrier-trimestre .grille-2col-gap15 {
     gap: 8px;
+}
+
+/* 🔧 #118 (3 juillet 2026) : overflow horizontal du sous-onglet Trimestre (Safari
+   1470×956). Les enfants de grid ont min-width:auto → une colonne (Congés prévus /
+   Événements imprévus) ne peut pas rétrécir sous la largeur intrinsèque de son
+   contenu (formulaire interne en 1fr 1fr avec inputs date WebKit, cartes avec
+   boutons Modifier/Suppr.) et pousse toute la page au-delà du viewport (boutons
+   clippés + scrollbar). min-width:0 rend les pistes réellement 1fr ; les contrôles
+   (.controle-form, width:100%) suivent la piste au lieu de l'élargir. */
+#calendrier-trimestre .grille-2col > *,
+#calendrier-trimestre .grille-2col-gap15 > *,
+#calendrier-trimestre .formulaire-interne .groupe-form {
+    min-width: 0;
 }
 
 #calendrier-trimestre .grille-form-2col {
