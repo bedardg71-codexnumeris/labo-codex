@@ -63,6 +63,10 @@
  *                           exige que le verdict bascule de VERT à ROUGE
  *   --verbeux               affiche toutes les lignes (sinon seulement le résumé
  *                           et les lignes hors tolérance)
+ *   --nominatif             🆕 #356 : affiche les vrais noms et DA. PAR DÉFAUT la
+ *                           sortie est ANONYMISÉE (pseudonymes stables Élève-NNN
+ *                           + DA masqué « …483 ») — posture Loi 25 : un rapport
+ *                           collé dans une session/un ticket ne fuit rien.
  *
  * Codes de sortie : 0 = vert (ou rougissement prouvé) · 1 = rouge ·
  *                   2 = erreur d'exécution / harnais défaillant.
@@ -75,7 +79,7 @@ import { chargerScript } from '../tests/unit/_helpers/charger-script.js';
 // 1. Arguments
 // ────────────────────────────────────────────────────────────────────────────
 function lireArgs(argv) {
-    const a = { trimestre: 'a2025', seuil: 0.5, epsilon: 0.1, prouverRougit: false, verbeux: false, omnivox: [] };
+    const a = { trimestre: 'a2025', seuil: 0.5, epsilon: 0.1, prouverRougit: false, verbeux: false, nominatif: false, omnivox: [] };
     for (let i = 2; i < argv.length; i++) {
         const t = argv[i];
         if (t === '--codex') a.codex = argv[++i];
@@ -86,6 +90,7 @@ function lireArgs(argv) {
         else if (t === '--epsilon') a.epsilon = parseFloat(argv[++i]);
         else if (t === '--prouver-rougit') a.prouverRougit = true;
         else if (t === '--verbeux') a.verbeux = true;
+        else if (t === '--nominatif') a.nominatif = true; // 🆕 #356 : opt-in explicite
         else { console.error('Argument inconnu : ' + t); process.exit(2); }
     }
     // Au moins un oracle : CSV de reconstruction OU bulletin(s) Omnivox.
@@ -324,11 +329,37 @@ function verdict(r, args) {
 
 function f(n, d = 1) { return n == null ? '—' : Number(n).toFixed(d); }
 
+// ────────────────────────────────────────────────────────────────────────────
+// 6 bis. 🆕 #356 — anonymisation de la SORTIE (posture Loi 25).
+//    Par défaut, aucun nom ni DA complet n'est imprimé : pseudonymes stables
+//    « Élève-NNN » (ordre des DA triés — stable d'une exécution à l'autre pour
+//    une même cohorte) et DA masqué « …483 » (3 derniers chiffres, assez pour
+//    retrouver l'élève localement, pas pour l'identifier hors contexte).
+//    Les vrais noms/DA ne sortent qu'avec --nominatif (opt-in explicite).
+//    NB : conformément à SKILL_Securite_donnees §9.3, on n'imprime jamais un
+//    hash de DA (réversible par force brute) — on masque.
+// ────────────────────────────────────────────────────────────────────────────
+function construirePseudonymes(lignes) {
+    const das = lignes.map(l => String(l.da)).sort();
+    const map = new Map();
+    das.forEach((da, i) => map.set(da, 'Élève-' + String(i + 1).padStart(3, '0')));
+    return map;
+}
+
 function afficherRapport(r, v, args) {
     const pad = (s, n) => String(s).padEnd(n);
     const padL = (s, n) => String(s).padStart(n);
+    const pseudo = construirePseudonymes(r.lignes);
+    const nomAff = (l) => args.nominatif ? (l.nom || '') : (pseudo.get(String(l.da)) || 'Élève-???');
+    const daAff = (l) => {
+        const s = String(l.da);
+        return args.nominatif ? s : (s.length > 3 ? '…' + s.slice(-3) : s);
+    };
     console.log('');
     console.log('GOLDEN MASTER — trimestre ' + args.trimestre + ' · pratique ' + r.pratiqueId + ' (' + r.famille + ')');
+    if (!args.nominatif) {
+        console.log('(sortie anonymisée — pseudonymes stables + DA masqués ; --nominatif pour les vrais noms)');
+    }
     console.log('');
     const aMontrer = args.verbeux ? r.lignes : r.lignes.filter(l => l.noteMoteur == null || (l.dConforme != null && l.dConforme > args.epsilon));
     if (aMontrer.length) {
@@ -336,10 +367,10 @@ function afficherRapport(r, v, args) {
         console.log('─'.repeat(79));
         for (const l of aMontrer) {
             if (l.noteMoteur == null) {
-                console.log(pad(l.da, 9) + pad((l.nom || '').slice(0, 28), 30) + padL('NON CALCULÉ', 32) + '  ' + (l.erreur || ''));
+                console.log(pad(daAff(l), 9) + pad(nomAff(l).slice(0, 28), 30) + padL('NON CALCULÉ', 32) + '  ' + (l.erreur || ''));
             } else {
                 console.log(
-                    pad(l.da, 9) + pad((l.nom || '').slice(0, 28), 30) +
+                    pad(daAff(l), 9) + pad(nomAff(l).slice(0, 28), 30) +
                     padL(f(l.noteMoteur), 8) + padL(f(l.conforme), 8) + padL(f(l.dConforme, 2), 8) +
                     padL(f(l.omnivox), 8) + padL(f(l.dOmnivox, 2), 8)
                 );
@@ -353,14 +384,14 @@ function afficherRapport(r, v, args) {
     console.log('Reproduction « conforme »  : MAE ' + f(r.maeConforme, 3) + ' · max ' + f(r.maxConforme, 2) +
         ' · ' + (r.nbAvecConforme - v.horsTol.length) + '/' + r.nbAvecConforme + ' dans la tolérance (ε=' + args.epsilon + ')');
     console.log('Fidélité Omnivox (' + r.nbAvecOmnivox + ' él. · ' + r.sourceOmnivox + ') : MAE ' + f(r.maeOmnivox, 3) +
-        ' · max ' + f(r.maxOmnivox, 2) + (r.pireOmni ? ' [' + (r.pireOmni.nom || r.pireOmni.da) + ']' : '') + ' · seuil ' + args.seuil);
+        ' · max ' + f(r.maxOmnivox, 2) + (r.pireOmni ? ' [' + nomAff(r.pireOmni) + ']' : '') + ' · seuil ' + args.seuil);
     console.log('Élèves recalculés          : ' + (r.nbEleves - r.nbNonCalcule) + '/' + r.nbEleves);
     if (v.oracleOmnivox && v.horsTol.length > 0) {
         console.log('');
         console.log('⚠ Diagnostic (non bloquant) — ' + v.horsTol.length + ' valeur(s) « conforme » du CSV divergent du codex');
         console.log('  (le codex fait foi car il colle à Omnivox ; ces valeurs de la reconstruction sont à regénérer) :');
         for (const l of v.horsTol) {
-            console.log('    · ' + (l.nom || l.da) + ' : conforme ' + f(l.conforme) + ' vs moteur ' + f(l.noteMoteur) +
+            console.log('    · ' + nomAff(l) + ' : conforme ' + f(l.conforme) + ' vs moteur ' + f(l.noteMoteur) +
                 ' (Δ ' + f(l.dConforme, 2) + ') · Omnivox ' + f(l.omnivox) + ' (Δ ' + f(l.dOmnivox, 2) + ')');
         }
     }
