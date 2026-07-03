@@ -7,7 +7,10 @@
    de détection de progression, risque, et patterns d'apprentissage.
 
    UTILISATION:
-   - Les seuils peuvent être ajustés via l'interface Réglages → Interprétation
+   - AUCUNE UI de réglage depuis la refonte nav (#299) : l'ancienne page
+     d'interprétation de la section Réglages a été retirée. Les seuils vivent
+     en localStorage (chargerSeuilsInterpretation) et retombent sur
+     SEUILS_PAR_DEFAUT
    - Les valeurs sont sauvegardées dans localStorage
    - Les valeurs par défaut sont restaurées si aucune configuration n'existe
    =============================== */
