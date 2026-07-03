@@ -20,7 +20,9 @@
                 'Page Calendrier scolaire : les trois indicateurs (semaines scolaires, jours de cours, congés avec reprise) rejoignent la carte « Légende », remontée en tête de page — une seule carte au lieu de quatre.',
                 'Import de travaux : le sélecteur global « Production » n’écrase plus une correction faite sur un fichier précis via « Modifier », et l’interface explique la différence entre les deux.',
                 'Correction : évaluer une production sans fichier importé n’affiche plus le document d’une autre production.',
-                'Correction : les captures de progression automatiques ne créent plus de captures pour les jours où seul un autre groupe a cours, et recapturer une même séance ne crée plus de doublon.'
+                'Correction : les captures de progression automatiques ne créent plus de captures pour les jours où seul un autre groupe a cours, et recapturer une même séance ne crée plus de doublon.',
+                'Consultation d’un trimestre archivé : tu peux de nouveau passer d’un·e élève à l’autre dans une évaluation verrouillée (la navigation reste en lecture seule).',
+                'Accessibilité : le popup d’aide « Conseil » est maintenant annoncé correctement par les lecteurs d’écran et rend le focus au bouton qui l’a ouvert.'
             ]
         },
         {
