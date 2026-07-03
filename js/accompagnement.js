@@ -894,9 +894,15 @@ function afficherPopupPrimo(contentHTML) {
         document.body.appendChild(popup);
     }
 
+    // 🔧 #305 (2 juillet 2026) : nom accessible + sémantique de dialogue + focus,
+    // même patron que la modale sœur afficherAideContextuelle (reliquat du 19 juin).
+    popup.setAttribute('role', 'dialog');
+    popup.setAttribute('aria-modal', 'true');
+    popup.setAttribute('aria-labelledby', 'primo-popup-titre');
+
     popup.innerHTML = `
         <div class="primo-popup-header">
-            <span><span class="primo-icon"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span> Conseil</span>
+            <span id="primo-popup-titre"><span class="primo-icon"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span> Conseil</span>
             <button class="primo-popup-close" data-action="fermerPopupPrimo" aria-label="Fermer">×</button>
         </div>
         <div class="primo-popup-body">
@@ -904,17 +910,24 @@ function afficherPopupPrimo(contentHTML) {
         </div>
     `;
 
+    popup._declencheur = document.activeElement;
     overlay.classList.add('active');
     popup.classList.add('active');
     document.body.style.overflow = 'hidden';
+
+    const btnFermer = popup.querySelector('.primo-popup-close');
+    if (btnFermer) btnFermer.focus();
 }
 
 function fermerPopupPrimo() {
     const overlay = document.getElementById('primo-overlay');
     const popup = document.getElementById('primo-popup');
+    const declencheur = popup && popup._declencheur;
     if (overlay) overlay.classList.remove('active');
     if (popup) popup.classList.remove('active');
     document.body.style.overflow = '';
+    // #305 : rendre le focus au déclencheur (navigation clavier)
+    if (declencheur && typeof declencheur.focus === 'function') declencheur.focus();
 }
 
 function fermerPopup() {

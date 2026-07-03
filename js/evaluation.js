@@ -3404,9 +3404,12 @@ function afficherOuMasquerBoutonVerrouillage(afficher, estVerrouillee = false) {
 function desactiverFormulaireEvaluation(desactiver) {
 
     // Désactiver les selects de paramètres principaux
+    // 🔧 #355 (2 juillet 2026) : selectEtudiantEval RETIRÉ de la liste — c'est
+    // de la NAVIGATION (passer à l'élève suivant·e), pas de l'édition. En
+    // consultation/verrouillé, changer d'élève recharge son évaluation, qui
+    // ré-applique elle-même l'état verrouillé au reste du formulaire.
     const selects = [
         'selectGroupeEval',
-        'selectEtudiantEval',
         'selectProduction1',
         'selectGrille1',
         'selectCartoucheEval',
