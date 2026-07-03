@@ -193,6 +193,18 @@ function sauvegarderIdentificationTrimestreV2() {
     }
 }
 
+/**
+ * #306 Lot 2 (3 juillet 2026) : point de persistance UNIQUE du Trimestre.
+ * L'auto-save par champ (data-on-change) est retiré du HTML — seul le bouton
+ * « Enregistrer » de la section appelle cette fonction, qui sauvegarde
+ * l'identification PUIS le cadre (l'identification fixe l'id du trimestre
+ * dont dépend cle('cadreCalendrier')).
+ */
+function sauvegarderTrimestreCompletV2() {
+    sauvegarderIdentificationTrimestreV2();
+    sauvegarderCadreCalendrierV2();
+}
+
 /* ===============================
    CADRE CALENDRIER
    =============================== */
@@ -823,6 +835,7 @@ window.chargerIdentificationTrimestreV2 = chargerIdentificationTrimestreV2;
 window.sauvegarderIdentificationTrimestreV2 = sauvegarderIdentificationTrimestreV2;
 window.chargerCadreCalendrierV2 = chargerCadreCalendrierV2;
 window.sauvegarderCadreCalendrierV2 = sauvegarderCadreCalendrierV2;
+window.sauvegarderTrimestreCompletV2 = sauvegarderTrimestreCompletV2;
 window.reinitialiserBornesTrimestreV2 = reinitialiserBornesTrimestreV2;
 window.reinitialiserSemainesSpecialesV2 = reinitialiserSemainesSpecialesV2;
 window.chargerEvenementsPrevusV2 = chargerEvenementsPrevusV2;
