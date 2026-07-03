@@ -6,6 +6,11 @@
 > **Audit annuel de référence** : `audit/reports/03-1-ssot.md` (Beta 99.42, 12 mai 2026)
 > **Objectif** : documenter qui a le droit d'écrire dans chaque clé pour prévenir
 >               les violations SSOT, et tracer la dette résiduelle pour Sprint C.
+> **Note de currency (3 juillet 2026, #363)** : les colonnes NS/G des modèles de
+> travail ont été réalignées sur le code post-#358 (`grillesTemplates`,
+> `echellesTemplates`, `pratiquesConfigurables` = namespacées). Les listes de
+> contourneurs datent de l'audit Beta 99.62 (22 mai) — re-générer via
+> `scripts/audit-ssot.py` avant de s'y fier pour un chantier.
 
 ---
 
@@ -52,11 +57,11 @@ ci-dessous.
 | Clé | NS/G | Propriétaire | Lecteurs principaux | Contourneurs | Taille |
 |-----|------|-------------|---------------------|-------------|--------|
 | `productions` | NS | `productions.js` (via variable `cleProductions`, 41 lecteurs) | evaluation-*, travaux-ui, export-pdf | `migrations.js` (init, 1 écriture littérale) | < 200 Ko |
-| `grillesTemplates` | G | `grilles.js` | evaluation-*, grilles-bibliotheque, export-pdf (multi-lecteurs) | **6 contourneurs : cartouches, demo-activation, donnees-v2, import-export, spe-specifications, wizard-pratique-v2** (violation #3) | < 200 Ko |
-| `echellesTemplates` | G | `echelles.js` | evaluation-*, echelles-bibliotheque | **3 contourneurs : demo-activation, donnees-v2, import-export** (violation #4) | < 200 Ko |
+| `grillesTemplates` | NS (**#358, 28 juin 2026** — sortie de `CLES_GLOBALES`, namespacée par trimestre ; global nu vidé au boot, garde anti-resemage 1.25.0) | `grilles.js` | evaluation-*, grilles-bibliotheque, export-pdf (multi-lecteurs) | **6 contourneurs : cartouches, demo-activation, donnees-v2, import-export, spe-specifications, wizard-pratique-v2** (violation #3) | < 200 Ko |
+| `echellesTemplates` | NS (**#358, 28 juin 2026** — même régime que `grillesTemplates`) | `echelles.js` | evaluation-*, echelles-bibliotheque | **3 contourneurs : demo-activation, donnees-v2, import-export** (violation #4) | < 200 Ko |
 | `cartouches_[grilleId]` | G | `cartouches.js` | evaluation-*, cartouches-bibliotheque | import-export, primo-modal (au cas par cas) | < 100 Ko |
-| `pratiquesConfigurables` | G | `pratiques.js` | evaluation-*, wizard-pratique-v2, pratique-* | **4 contourneurs : donnees-v2, import-export, pratique-manager, wizard-pratique-v2** (violation #5) | < 200 Ko |
-| `modalitesEvaluation` | NS | **`js/pratiques/modalites-evaluation.js`** (module propriétaire #328 Lot 1 — API `lire()`/`modifier()`/`remplacer()`, seul écrivain de la clé NS) | evaluation-*, pratique-notation-v2, pratiques, profil-etudiant-*, tableau-bord (39 fichiers lecteurs) | Violation #1 **RÉSORBÉE côté écriture** (10 juin 2026) : Lot 0 intrus extraits (horaire, preferences-v2), Lot 1 les 12 écrivains du domaine routés sur le module. **Lot 3 LIVRÉ (11 juin 2026)** : fallbacks de lecture clé nue purgés partout (~57 sites), `pratiques/migration-pratiques.js` supprimé (ids legacy résolus à la volée par `normaliserIdPratique`), seul lecteur clé nue restant = migration namespacing bornée de `main.js` ; champ legacy `dureePeriodeMinutes` purgé des données par `purgerLegacy()` (module, appelé au boot). Sentinelle `tests/unit/sentinelle-ssot-modalites-purge-L3.test.js`. Reste Lot 2 : champs miroirs (`pratique`, `pratiqueId`, `approcheEvaluation`, `configPAN.jetons`) encore écrits à la main, à dériver de la pratique active. Sentinelle ratchet `tests/unit/sentinelle-ssot-modalites-ecrivains-L0.test.js` + contrat `tests/unit/modalites-evaluation-proprietaire-L1.test.js`. Audit : `Rapports/AUDIT-SSOT-MODALITES-EVALUATION-2026-06-10.md` | < 50 Ko |
+| `pratiquesConfigurables` | NS (namespacée par trimestre depuis le 24 mai 2026, `CLES_NAMESPACEES` ; copie d'archive via `CLES_TEMPLATES_ARCHIVES`) | `pratiques.js` | evaluation-*, wizard-pratique-v2, pratique-* | **4 contourneurs : donnees-v2, import-export, pratique-manager, wizard-pratique-v2** (violation #5) | < 200 Ko |
+| `modalitesEvaluation` | NS | **`js/pratiques/modalites-evaluation.js`** (module propriétaire #328 Lot 1 — API `lire()`/`modifier()`/`remplacer()`, seul écrivain de la clé NS) | evaluation-*, pratique-notation-v2, pratiques, profil-etudiant-*, tableau-bord (39 fichiers lecteurs) | Violation #1 **RÉSORBÉE côté écriture** (10 juin 2026) : Lot 0 intrus extraits (horaire, preferences-v2), Lot 1 les 12 écrivains du domaine routés sur le module. **Lot 3 LIVRÉ (11 juin 2026)** : fallbacks de lecture clé nue purgés partout (~57 sites), `pratiques/migration-pratiques.js` supprimé (ids legacy résolus à la volée par `normaliserIdPratique`), seul lecteur clé nue restant = migration namespacing bornée de `main.js` ; champ legacy `dureePeriodeMinutes` purgé des données par `purgerLegacy()` (module, appelé au boot). Sentinelle `tests/unit/sentinelle-ssot-modalites-purge-L3.test.js`. **Lot 2 LIVRÉ** (L2-a/b1 le 11 juin, L2-b2 le 12 juin `e3179c41`, L2-c le 27 juin PR #67 — fin de #328 en 1.22.0) : les champs miroirs (`pratique`, `pratiqueId`, `approcheEvaluation`, `configPAN.jetons`) DÉRIVENT de la pratique active, miroir mort purgé par `purgerLegacy()`. Sentinelle ratchet `tests/unit/sentinelle-ssot-modalites-ecrivains-L0.test.js` + contrat `tests/unit/modalites-evaluation-proprietaire-L1.test.js`. Audit : `Rapports/AUDIT-SSOT-MODALITES-EVALUATION-2026-06-10.md` | < 50 Ko |
 
 ---
 

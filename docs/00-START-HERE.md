@@ -50,7 +50,11 @@ Avant de commencer, identifie ce sur quoi tu travailles :
 
 L'application utilise le pattern **"Bibliotheque + Assemblage"** :
 
-- **Bibliotheque** : Entites reutilisables (NON namespacees, partagees)
+- **Bibliotheque** : Entites reutilisables. Depuis #358 (28 juin 2026), deux regimes :
+  les GABARITS de depart (`bibliothequeGrilles`/`bibliothequeEchelles`, `cours`,
+  `enseignants`) restent partages/globaux ; les modeles de TRAVAIL
+  (`grillesTemplates`, `echellesTemplates`, `pratiquesConfigurables`,
+  `modalitesEvaluation`) sont NAMESPACES par trimestre (via `cle()`).
 - **Assemblage** : Combinaison d'entites pour un contexte specifique
 
 Ce pattern est utilise dans :

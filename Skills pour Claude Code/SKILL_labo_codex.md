@@ -15,7 +15,8 @@ description: >
 
 # SKILL : Labo Codex — Application et développement
 
-> **Dernière mise à jour** : 11 juin 2026.
+> **Dernière mise à jour** : 3 juillet 2026 (#363 — principe Bibliothèque + Assemblage
+> réconcilié avec le namespacing #358 : gabarits partagés vs modèles de travail namespacés).
 > **Version** : SemVer, **source unique = `version.json`** (« Bêta publique » est un libellé
 > d'affichage, pas le numéro). Ne pas figer un numéro ici — toujours lire `version.json`.
 
@@ -57,7 +58,7 @@ public le 3 juin 2026, phase de nettoyage complet (Phase 6)
 | **Namespacing par trimestre** | Toutes les données préfixées via `window.cle('nomCle')` (ex: `h2026_groupeEtudiants`) |
 | **Communication indirecte** | Les modules ne se parlent JAMAIS directement. Uniquement via localStorage/IndexedDB. |
 | **Délégation aux pratiques** | Le calcul des indices dépend de la pratique configurée (interface `IPratique`). |
-| **Bibliothèque + Assemblage** | Entités réutilisables (non namespacées) assemblées pour un contexte précis. |
+| **Bibliothèque + Assemblage** | Entités réutilisables assemblées pour un contexte précis. ⚠ Depuis #358 (28 juin 2026), deux régimes : les GABARITS de départ (`bibliothequeGrilles`/`bibliothequeEchelles`, `cours`, `enseignants`) restent partagés ; les modèles de TRAVAIL (`grillesTemplates`, `echellesTemplates`, `pratiquesConfigurables`, `modalitesEvaluation`) sont NAMESPACÉS par trimestre (`cle()`). |
 | **Stabilité zéro-dette** | Tout nouveau chantier RETIRE ce qu'il remplace. Pas d'alias « au cas où », pas de code mort. Voir CLAUDE.md pour les détails. |
 
 ### Hiérarchie conceptuelle (sacrée)
