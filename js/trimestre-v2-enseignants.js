@@ -117,10 +117,14 @@ function chargerEnseignantSelectionneV2() {
     const select = document.getElementById('v2-selectEnseignant');
     const enseignantId = select?.value;
 
+    // #306 Lot 1 : bascule du libellé (« Créer » en création, « Enregistrer » en édition)
+    const btnTexte = document.getElementById('v2-btnTexteEnseignant');
+
     if (!enseignantId) {
-        // Aucune sélection - vider le formulaire
+        // Aucune sélection - vider le formulaire (mode création)
         viderFormulaireEnseignantV2();
         enseignantEnEditionId = null;
+        if (btnTexte) btnTexte.textContent = 'Créer';
         return;
     }
 
@@ -130,6 +134,7 @@ function chargerEnseignantSelectionneV2() {
     if (!enseignant) {
         viderFormulaireEnseignantV2();
         enseignantEnEditionId = null;
+        if (btnTexte) btnTexte.textContent = 'Créer';
         return;
     }
 
@@ -152,6 +157,7 @@ function chargerEnseignantSelectionneV2() {
     // Mettre à jour le titre et la carte
     const titre = document.getElementById('v2-titreFormEnseignant');
     if (titre) titre.textContent = 'Modifier le profil';
+    if (btnTexte) btnTexte.textContent = 'Enregistrer';
 
     mettreAJourCarteEnseignant();
 }
@@ -172,6 +178,10 @@ function nouveauProfilEnseignantV2() {
     // Mettre à jour le titre
     const titre = document.getElementById('v2-titreFormEnseignant');
     if (titre) titre.textContent = 'Nouveau profil';
+
+    // #306 Lot 1 : libellé canonique « Créer » en création
+    const btnTexte = document.getElementById('v2-btnTexteEnseignant');
+    if (btnTexte) btnTexte.textContent = 'Créer';
 
     // Focus sur le premier champ
     document.getElementById('v2-ens-prenom')?.focus();

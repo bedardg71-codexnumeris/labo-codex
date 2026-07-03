@@ -7248,7 +7248,7 @@
                                                 Annuler
                                             </button>
                                             <button class="btn btn-confirmer" data-action="sauvegarderEnseignantV2">
-                                                Enregistrer
+                                                <span id="v2-btnTexteEnseignant">Créer</span>
                                             </button>
                                         </div>
                                     </div>
@@ -14637,13 +14637,13 @@
     <script src="js/trimestre.js?v=20260512b"></script> <!-- Beta 99.28 b0428-1915 : champ categorie + algo deux passes pour numérotation des semaines DÉ -->
     <script src="js/trimestre-v2.js?v=20260517f"></script> <!-- Refactor étape 3 sessions A+B+C (17 mai 2026) : zones LOW 1+2+5+7 + MEDIUM 3+4+6 + HIGH 8 extraites — résidu 599 LOC -->
     <script src="js/trimestre-v2-init.js?v=20260517a"></script> <!-- Refactor étape 3 session A (17 mai 2026) : extrait de trimestre-v2.js (lignes 34-401 + 486-948) -->
-    <script src="js/trimestre-v2-enseignants.js?v=20260517a"></script> <!-- Refactor étape 3 session A (17 mai 2026) : extrait de trimestre-v2.js (lignes 5438-5739) -->
-    <script src="js/trimestre-v2-horaires.js?v=20260517a"></script> <!-- Refactor étape 3 session A (17 mai 2026) : extrait de trimestre-v2.js (lignes 3252-4073) -->
+    <script src="js/trimestre-v2-enseignants.js?v=20260703a"></script> <!-- #306 Lot 1 (3 juil.) : bascule Créer/Enregistrer du bouton profil -->
+    <script src="js/trimestre-v2-horaires.js?v=20260703a"></script> <!-- #306 Lot 1 (3 juil.) : création d'horaire = « Créer » (séance garde « Ajouter ») -->
     <script src="js/trimestre-v2-liste.js?v=20260517a"></script> <!-- Refactor étape 3 session A (17 mai 2026) : extrait de trimestre-v2.js (lignes 946-1394) -->
-    <script src="js/trimestre-v2-cours.js?v=20260629a"></script> <!-- Beta 99.76 b0529-1139 : refonte chantier B — export _deriverSessionAnneeTrimestreActif + retrait lectures période -->
+    <script src="js/trimestre-v2-cours.js?v=20260703a"></script> <!-- #306 Lot 1 (3 juil.) : création de cours = « Créer » -->
     <script src="js/trimestre-v2-etudiants.js?v=20260517a"></script> <!-- Refactor étape 3 session B (17 mai 2026) : extrait de trimestre-v2.js (lignes 119-1014 + handlers 2188-2200, zone 4) -->
     <script src="js/trimestre-v2-groupes-cours.js?v=2026062701"></script> <!-- Refactor étape 3 session B (17 mai 2026) : extrait de trimestre-v2.js (lignes 119-219 + 360-1149, zone 6 — hub populerDropdownsAssemblageV2 reste résidu) -->
-    <script src="js/trimestre-v2-orchestre.js?v=2026062701"></script> <!-- Refactor étape 3 session C (17 mai 2026) : extrait de trimestre-v2.js (lignes 491-1216, zone 8 HIGH — monstre cyc 94 préservé Phase 1, éclatement Phase 2) -->
+    <script src="js/trimestre-v2-orchestre.js?v=20260703a"></script> <!-- #306 Lot 1 (3 juil.) : retrait des fonctions enseignant mortes (zéro-dette) -->
 
     <!-- ENTITÉS Beta 95.2 - Architecture modulaire groupe-cours -->
     <script src="js/entites/cours-entite.js?v=20260629a"></script>
