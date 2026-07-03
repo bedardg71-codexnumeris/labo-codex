@@ -3,7 +3,31 @@
      CHANTIER D'ENSEMBLE — STABILITÉ MI-AOÛT (CoP / expérimentateurs).
      ⮕ Plan d'ensemble mi-août (3 paliers, porteurs Claude Code vs Grégoire, 6 décisions à trancher §9) : `plans de travail/PLAN-mi-aout-2026.md` (28 juin 2026).
      #326 (réactivation du comparateur, « bloqueur CoP » n°1) = CLOS le 28 juin (release 1.26.0).
-     ⮕ ÉTAT AU 2 JUILLET 2026 SOIR (release 1.27.1, branche `claude/relais-2026-07-02-tasks-w25heb`, NON déployée, PAS de PR) : vague 1 (#116/#145/#313/#344/#361) PUIS vague 2 (#356/#355/#305 livrés ; #359 et #365 = écarts de prémisse, déjà réglé/audit blanc ; #121 enquêté ; inventaire worktrees produit) — voir les 2 blocs « 2 juillet » ci-dessous. ⚠ GRÉGOIRE EN CONGÉ TOUT JUILLET, reprise AOÛT. À la reprise : MERGER la branche (2 vagues dessus) ; validations terrain (#310/#311/#351/#240/#347 + portes vague 1 #313/#344/#361 + vague 2 #355/#305/#121, 2 modes) ; triage des 5 worktrees AVEC `plans de travail/INVENTAIRE-worktrees-2026-07.md` ; #364 T3/T4/T5 ; trancher #365 (audit blanc).
+     ⮕ ÉTAT AU 3 JUILLET 2026 (VAGUE 3, branche `claude/relais-vague-3-etat-n3owyf` EMPILÉE sur le tip 1.27.1 des vagues 1-2, NON déployée, PAS de PR) : bilan factuel des vagues 1-2 = TABLEAU dans le bloc « 3 juillet » ci-dessous (12/12 tâches livrées ou closes par écart de prémisse ; AUCUN reliquat 2a). ⚠ GRÉGOIRE EN CONGÉ TOUT JUILLET, reprise AOÛT. À la reprise : MERGER la branche vague 3 (les 3 vagues sont empilées dessus — `w25heb` est un ANCÊTRE, un seul merge suffit ; Playwright n'aura tourné qu'à la PR) ; validations terrain (#310/#311/#351/#240/#347 + portes vague 1 #313/#344/#361 + vague 2 #355/#305/#121 + vague 3, 2 modes) ; triage des 5 worktrees AVEC `plans de travail/INVENTAIRE-worktrees-2026-07.md` ; #364 T3/T4/T5 ; trancher #365 (audit blanc). ⚠ RESTE SUR LE MAC (seule session locale/Grégoire peut agir) : `rm .git/index.lock .git/HEAD.lock .git/objects/maintenance.lock` ; le commit local `96f1294c` et le BACKLOG #365 du Mac sont OBSOLÈTES (contenu recréé/poussé par les vagues 1-2) ; le fichier relais vague 2 (`RELAIS-2026-07-02-vague-2.md`) n'a jamais été poussé — le committer du Mac si on veut la trace (le relais vague 3 est, lui, versionné ci-dessous).
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 3 JUILLET 2026 (RELAIS VAGUE 3 : ÉTAT DES LIEUX + BILAN DES VAGUES, Claude Code cloud, branche `claude/relais-vague-3-etat-n3owyf` REPARTIE du tip `9fb073ea` = 1.27.1). ⮕⮕ LIRE EN PREMIER.
+     Session CLOUD → Phase 0 pts 1-3 (verrous git Mac, commit 96f1294c, commits locaux) IMPOSSIBLES d'ici — consignés dans le signet ci-dessus. Vitest 1241/1241 (161 fichiers) revérifié sur le tip 1.27.1 AVANT tout travail. Playwright toujours NON exécutable en cloud (seul Chromium dans /opt/pw-browsers, le projet épingle WebKit) → CI à la PR. Relais vague 3 versionné : `plans de travail/RELAIS-2026-07-03-vague-3.md` (reçu en conversation, comme vague 1).
+
+     ✅ PHASE 0.4 — BILAN FACTUEL DES VAGUES 1-2 (preuves = commits/PR/fichiers, pas des souvenirs de session) :
+
+     | Tâche | Statut | Preuve |
+     |---|---|---|
+     | V1 #116 captures phantômes | LIVRÉE, non mergée | `a85ed8d7` (1.27.0) ; sentinelle `sentinelle-snapshots-phantom-dedup-116` (6 cas) ; SUIVI-BUGS → Corrigé |
+     | V1 #145 PDF étranger | LIVRÉE, non mergée | `a85ed8d7` ; sentinelle `sentinelle-resolution-fichier-sans-production-145` ; SUIVI-BUGS → Corrigé |
+     | V1 #313 double sélecteur Production | LIVRÉE, non mergée | `a85ed8d7` ; sentinelle `sentinelle-selecteur-production-global-313` ; BACKLOG coché |
+     | V1 #344 légende calendrier fusionnée | LIVRÉE, non mergée | `a85ed8d7` ; sentinelle `sentinelle-legende-fusionnee-calendrier-344` ; BACKLOG coché |
+     | V1 #361 suppression de trimestre | LIVRÉE, non mergée | `a85ed8d7` ; sentinelle `sentinelle-suppression-trimestre-361` (9 cas) ; BACKLOG coché |
+     | V2 #359 purge copies désarchivage | CLOSE (écart de prémisse : déjà livrée le 26 juin) | `eb6ba205` + PR #66 MERGÉE ; sentinelle 7/7 |
+     | V2 #365 namespacing bilan réflexif | AUDIT BLANC livré (aucun manque) — 📐 décision Grégoire | `e6ebf612` + `7574905f` ; question consignée à l'item |
+     | V2 #356 golden master anonymisé | LIVRÉE, non mergée | `6042639e` ; sentinelle `sentinelle-anonymisation-golden-master-356` |
+     | V2 #355 navigation élève en consultation | LIVRÉE, non mergée | `579e9d52` ; sentinelle `sentinelle-frictions-355-305` |
+     | V2 #305 a11y popup Conseil | LIVRÉE, non mergée | `579e9d52` ; même sentinelle |
+     | V2 #121 bouton fantôme Tirage au sort | ENQUÊTE livrée (bouton introuvable au code) — porte terrain août | `579e9d52` ; SUIVI-BUGS annoté |
+     | V2 inventaire worktrees | LIVRÉ (lecture seule, rien supprimé) | `plans de travail/INVENTAIRE-worktrees-2026-07.md` |
+
+     ⮕ CONSÉQUENCE : la file 2a (reliquats) est VIDE → vague 3 passe en 2b. Toutes les livraisons vagues 1-2 sont sur la branche `w25heb` (releases 1.27.0/1.27.1), SANS PR ni run CI — le merge reste une décision Grégoire (août).
      ===================================================================== -->
 
 <!-- =====================================================================
