@@ -66,6 +66,30 @@ Pas de catégorisation poussée, pas de templates rigides. L'idée est qu'on cap
 
 Format de bilan : 30 min - 1 h. Relire le journal. Repérer 3-5 patterns. Noter ce qui a évolué dans le projet (nouveaux formats créés, anciens retirés). Décider si quelque chose justifie une formalisation immédiate ou peut encore attendre.
 
+### Bilan — juillet 2026 (rédigé le 4 juillet en Cowork ; à compléter par GB, voir point 4)
+
+1. **Le journal n'a pas encore capté de signaux externes.** Deux entrées en deux mois,
+   toutes deux de GB (10 juin, terrain `.lcz`), sections 2-3-4 vides. Ce n'est pas un
+   échec du format de journal (30 s par note, adéquat) mais le reflet du calendrier :
+   les testeurs externes n'arrivent vraiment qu'avec la CoP (mi-août) et A2026. Le
+   bilan d'octobre sera le premier à avoir de la matière externe.
+2. **Pattern des deux entrées : la découvrabilité de l'IMPORT, pas le format.** Les
+   deux frictions touchent l'entrée du fichier dans l'app (où importer ; sélecteur
+   Safari qui grise `.lcz`), aucune ne remet en cause la structure des formats
+   eux-mêmes. À verser au guide P7 et à l'argumentaire P4 (déjà noté en juin).
+3. **Évolution des formats depuis la création du journal (9 mai)** : `.lcz` est passé
+   de spec à réalité livrée (P1→P4, TOFU, préfixage `PARTAGE_*`, release 1.11.0) ;
+   « import inter-trimestre = copie » acté et annoncé (changelog 1.21) ; export CSV
+   de synthèse livré (#333 Lot 2, 1.20.0). Aucun format retiré. Le `.lcz` fonctionne
+   de facto comme format formalisé sans spec publique — cohérent avec l'échéance de
+   mai 2027, rien à devancer.
+4. **Trou à combler (GB seulement)** : les signaux du colloque AQPC (3 juin) n'ont
+   jamais été transférés dans le journal — la checklist « Après (dans la semaine) »
+   ci-dessous est restée lettre morte. À la reprise d'août : transférer les notes
+   brutes si elles existent encore, ou acter ici que ces signaux sont perdus.
+5. **Décision proposée** : aucune formalisation immédiate ; maintenir le journal ;
+   prochaine échéance réelle = bilan d'octobre (premier trimestre d'usage externe).
+
 ---
 
 ## Checklist colloque AQPC (juin 2026)
