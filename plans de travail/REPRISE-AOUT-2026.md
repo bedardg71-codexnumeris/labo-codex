@@ -1,5 +1,21 @@
 # Dossier de reprise — août 2026
 
+> **Addendum du 10 juillet 2026 (Cowork)** : re-audit complet — RIEN n'a bougé
+> depuis le 4 juillet. Labo Codex est en pause propre : main local = 1.27.3
+> (identique à la prod vérifiée le 4), un SEUL geste en attente = `git push`
+> (commit `7a0bd098`, ce dossier ; `bb85cd6d` est poussé). La revue des PR (§3)
+> date du 4 juillet — re-vérifier leur statut à la reprise. Ce dossier reste LA
+> référence pour rouvrir le projet en août.
+>
+> **Correctif du 10 juillet 2026 (Claude Code, Mac)** : le constat « rien n'a
+> bougé » était vrai en LOCAL seulement. Au push, `origin/main` contenait 4
+> commits d'une session cloud postérieurs au 4 juillet (lots V/W/X :
+> pré-validation Chromium des portes terrain, filets Playwright WebKit
+> permanents, enquêtes #300/#301/#332-c1 closes — tip `5ba91564`). Le Mac a
+> été rebasé dessus puis poussé le 10 juillet ; les 3 verrous git périmés du
+> signet SESSION.md ont été retirés. À la reprise : lire aussi le bloc
+> SESSION.md des lots V/W/X.
+
 > Compilé le 4 juillet 2026 (Cowork). Une page pour rouvrir le projet sans relire
 > un mois de traces. Sources : SESSION.md (signet + bloc 3 juillet), BACKLOG.md,
 > PLAN-mi-aout-2026.md §9 (28 juin, expurgé des décisions tranchées depuis),
