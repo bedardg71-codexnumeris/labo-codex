@@ -7,6 +7,14 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — SUITE (LOTS V/W/X : PRÉ-VALIDATION VISUELLE + FILETS CI WEBKIT + ENQUÊTES, Claude Code cloud, Grégoire présent — « Lance les deux »). ⮕⮕ COMPLÈTE LE BLOC BATCH 2 CI-DESSOUS.
+     ✅ LOT V — PRÉ-VALIDATION VISUELLE CHROMIUM (8d025fbe) : app locale = commit prod, mode démo, 2 modes × 3 viewports (1470/1180/820). 6 portes OK (#344, #283-T1, #118 non-régression, #306 libellés + save explicite, #351), #310 = captures transmises, #313/#240/#347 = non pré-validables sans données. AUCUNE anomalie. Rapport : Rapports/PREVALIDATION-VISUELLE-2026-07-03.md ; liste RESSERRÉE pour la passe Safari d'août dedans. Plan : plans de travail/PLAN-prevalidation-visuelle-chromium-2026-07.md.
+     ✅ LOT W — FILETS CI WEBKIT (db11c4c9, PR #77 MERGÉE rebase, CI WebKit VERTE au 1er run) : tests/integration/portes-terrain-vague3.spec.js — 3 specs rejouées à chaque push dans le MOTEUR DE SAFARI : #118 (scrollWidth, formulaire ouvert, 1470+820 — le check qui aurait attrapé le bug à sa naissance), #283-T1+#344 (empilement mois + légende en tête), #306 (Créer×4 + rien-sans-clic). Smoke local Chromium 3/3 avant PR. Ces portes ne dépendent PLUS d'une passe manuelle.
+     ✅ LOT X — ENQUÊTES (70a57a5e) : #300 déjà livré (10 juin, archivé) ; #332-c1 fix DÉJÀ SUR MAIN depuis le 14 juin (7f3c73c7 via 05e43a7b — fiche « RIEN d'appliqué » corrigée, item coché, branche 332 absorbée→triage) ; #301 CLOS par évolution du modèle (consultation=ACTIVATION du trimestre archivé + reset copies dans changerTrimestreActif + SSOT-first #328). Rapport : Rapports/ENQUETES-300-301-332-2026-07-03.md. ⚠ LEÇON ×4 CE JOUR : la ligne « Dernier ID utilisé » de l'en-tête BACKLOG présente des items LIVRÉS comme ouverts — À PURGER à la reprise (proposition au rapport).
+     ⮕ PORTES AOÛT (mises à jour) : Safari réel = #118 visuel, #313 parcours d'import, #240/#347 travaux réels, #311 profil, coups d'œil subjectifs (captures déjà OK) ; #332-c1 (2 min) et #301 (2 min) ajoutés comme micro-vérifications.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 3 JUILLET 2026 SOIR (VAGUE 3 BATCH 2 : 4 CHANTIERS CHOISIS PAR GRÉGOIRE EN SESSION, Claude Code cloud, MÊME branche, APRÈS le merge/déploiement 1.27.2). ⮕⮕ LIRE APRÈS LE BLOC VAGUE 3 CI-DESSOUS.
      Release 1.27.3 (branche seulement — déploiement = décision Grégoire). Vitest 1271/1271. 3 sentinelles neuves break-testées ROUGE→VERT. Grégoire PRÉSENT en session (exception au « congé ») : a choisi les 4 chantiers via question fermée.
 
