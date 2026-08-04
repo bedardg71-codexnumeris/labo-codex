@@ -139,3 +139,39 @@ test('bouton Vue globale — dans la zone droite de la barre, hors du carrousel,
 
     expect(erreurs).toEqual([]);
 });
+
+test('renommer la carte — via le menu Actions, le titre central est retiré', async ({ page }) => {
+    // Accepter le prompt de renommage (enregistré AVANT le dismiss générique
+    // du helper : le premier handler gagne, le dismiss tardif est toléré).
+    page.on('dialog', (d) => {
+        if (d.type() === 'prompt') d.accept('Carte renommée par test').catch(() => {});
+    });
+    const erreurs = [];
+    attacherCaptureErreurs(page, erreurs);
+    await ouvrirAppEnDemo(page);
+    await montrerCarteMentale(page);
+    await page.evaluate(() => window.planificationCarte.initialiser());
+    await page.waitForTimeout(400);
+
+    // L'ancien titre éditable du centre de la barre n'existe plus (4 août 2026 :
+    // il dupliquait le sélecteur de gauche — le renommage vit dans Actions).
+    await expect(page.locator('#planif-titre-carte')).toHaveCount(0);
+
+    // Ouvrir le menu Actions → « Renommer cette carte » présent.
+    await page.click('#planif-btn-actions');
+    const itemRenommer = page.locator('#planif-btn-renommer-carte');
+    await expect(itemRenommer).toBeVisible();
+
+    // Renommer (le prompt est auto-accepté avec le nouveau nom).
+    await itemRenommer.click();
+    await page.waitForTimeout(400);
+
+    // Le sélecteur de gauche reflète le nouveau nom (source unique : l'index).
+    const nomSelectionne = await page.evaluate(() => {
+        const sel = document.getElementById('planif-liste-cartes');
+        return sel.options[sel.selectedIndex]?.textContent;
+    });
+    expect(nomSelectionne).toBe('Carte renommée par test');
+
+    expect(erreurs).toEqual([]);
+});
