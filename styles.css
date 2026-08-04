@@ -17392,7 +17392,11 @@ body.travaux-plein-ecran-actif .sous-nav {
 }
 
 /* Plein écran carte mentale */
-.planif-plein-ecran {
+/* FIX terrain alignement 601-101 (4 août) : le fond était posé par .planif-plein-ecran
+   seul, mais #conception-carte { background: none } (plus spécifique) le neutralisait →
+   conteneur transparent, la nav principale restait visible derrière. On qualifie le
+   sélecteur pour que le fond opaque gagne. */
+#conception-carte.planif-plein-ecran {
     position: fixed !important;
     top: 0; left: 0; right: 0; bottom: 0;
     z-index: 9999;
@@ -17406,6 +17410,14 @@ body.planif-plein-ecran-actif #header,
 body.planif-plein-ecran-actif .navigation-sous-sections,
 body.planif-plein-ecran-actif .sous-nav,
 body.planif-plein-ecran-actif .bandeau-groupe-cours {
+    display: none !important;
+}
+/* FIX terrain alignement 601-101 (4 août) : le plein écran embarque la sous-section
+   ENTIÈRE (#conception-carte) — son h2 « Alignement pédagogique » et son sous-titre
+   restaient affichés en haut à gauche du canvas. Référence : Annoter, dont le
+   conteneur plein écran ne porte pas de titre de section. */
+body.planif-plein-ecran-actif #conception-carte > h2,
+body.planif-plein-ecran-actif #conception-carte > .text-muted {
     display: none !important;
 }
 
