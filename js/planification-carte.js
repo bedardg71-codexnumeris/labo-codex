@@ -4946,22 +4946,25 @@ function mettreAJourCarrousel() {
     var navZone = document.getElementById('planif-nav-seq');
     if (!conteneur) return;
 
+    // Bouton Vue globale : sorti du carrousel (4 août 2026, exercice 601-101),
+    // il vit dans la zone droite de la barre (#planif-btn-vue-globale, index.html).
+    var btnVueGlobale = document.getElementById('planif-btn-vue-globale');
+
     var sequences = obtenirSequencesCarte();
     if (sequences.length === 0) {
         conteneur.innerHTML = '';
         if (navZone) navZone.style.display = 'none';
+        if (btnVueGlobale) btnVueGlobale.style.display = 'none';
         return;
     }
 
     if (navZone) navZone.style.display = '';
+    if (btnVueGlobale) {
+        btnVueGlobale.style.display = '';
+        btnVueGlobale.classList.toggle('actif', !sequenceActiveId);
+    }
 
-    // Badge Vue globale (premier élément, toujours présent)
-    var html = '<div class="planif-seq-badge planif-seq-badge-global' + (!sequenceActiveId ? ' actif' : '') + '"' +
-               ' data-action="planificationCarte.ouvrirSequence"' +
-               ' data-param=""' +
-               ' title="Afficher tous les nœuds">' +
-               '<span class="planif-seq-badge-nom">Vue globale</span>' +
-               '</div>';
+    var html = '';
     for (var i = 0; i < sequences.length; i++) {
         var seq = sequences[i];
         var nbLecons = (seq.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); }).length;
