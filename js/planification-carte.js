@@ -996,46 +996,59 @@ function ouvrirPanneau(id) {
     const extra = document.getElementById('planif-panneau-extra');
     extra.innerHTML = '';
 
-    if (donnees.type === 'activite' || donnees.type === 'lecon') {
+    // Chantier temps (4 ao\u00fbt 2026, d\u00e9cision Gr\u00e9goire) : les ACTIVIT\u00c9S portent
+    // une dur\u00e9e estim\u00e9e en minutes ; la dur\u00e9e d'une LE\u00c7ON est un rollup pur
+    // (somme de ses activit\u00e9s). La conversion en p\u00e9riodes suit TOUJOURS
+    // \u00ab Dur\u00e9e d'une p\u00e9riode \u00bb du cadre (obtenirDureePeriode) \u2014 jamais en dur.
+    if (donnees.type === 'activite') {
         var meta = donnees.metadata;
-        var hasDuree = meta.duree || meta.periodes || meta.minutesParPeriode;
+        var hasDuree = !!meta.duree;
         extra.innerHTML +=
             '<div class="planif-duree-section" id="planif-duree-section" style="' + (hasDuree ? '' : 'display:none') + '">' +
-                '<label>Dur\u00e9e</label>' +
+                '<label for="planif-duree-min">Dur\u00e9e estim\u00e9e</label>' +
                 '<div class="planif-duree-calc">' +
-                    '<input type="number" id="planif-duree-per" value="' + (meta.periodes || '') + '" min="1" max="10" placeholder="P\u00e9r.">' +
-                    '<span class="planif-duree-sep">\u00d7</span>' +
-                    '<input type="number" id="planif-duree-mpp" value="' + (meta.minutesParPeriode || '') + '" min="1" max="120" placeholder="Min/p\u00e9r.">' +
-                    '<span class="planif-duree-sep">=</span>' +
-                    '<span class="planif-duree-total" id="planif-duree-total">' + (meta.duree ? meta.duree + '\u2009min' : '') + '</span>' +
+                    '<input type="number" id="planif-duree-min" value="' + (meta.duree || '') + '" min="1" max="600" placeholder="min">' +
+                    '<span class="planif-duree-sep">min</span>' +
+                    '<span class="planif-duree-total" id="planif-duree-equiv">' + equivalencePeriodesTexte(meta.duree) + '</span>' +
                 '</div>' +
             '</div>' +
             '<button type="button" class="planif-duree-ajouter" id="planif-duree-ajouter" style="' + (hasDuree ? 'display:none' : '') + '">+ Dur\u00e9e</button>';
 
         function recalcDuree() {
-            var per = parseInt(document.getElementById('planif-duree-per').value) || 0;
-            var mpp = parseInt(document.getElementById('planif-duree-mpp').value) || 0;
-            var total = per * mpp;
-            meta.periodes = per || null;
-            meta.minutesParPeriode = mpp || null;
-            meta.duree = total || null;
-            document.getElementById('planif-duree-total').textContent = total ? total + '\u2009min' : '';
+            var min = parseInt(document.getElementById('planif-duree-min').value) || 0;
+            meta.duree = min || null;
+            // L'ancien couple p\u00e9riodes \u00d7 min/p\u00e9r PAR N\u0152UD faisait doublon avec
+            // la dur\u00e9e de p\u00e9riode du cadre : purg\u00e9 \u00e0 la premi\u00e8re r\u00e9\u00e9dition.
+            delete meta.periodes;
+            delete meta.minutesParPeriode;
+            document.getElementById('planif-duree-equiv').textContent = equivalencePeriodesTexte(min);
             propagerModification(id, 'metadata', JSON.parse(JSON.stringify(meta)));
             sauvegarder();
+            mettreAJourSommaire();
         }
 
-        var perInput = extra.querySelector('#planif-duree-per');
-        var mppInput = extra.querySelector('#planif-duree-mpp');
-        perInput.addEventListener('focus', function() { enregistrerPourUndo(); });
-        mppInput.addEventListener('focus', function() { enregistrerPourUndo(); });
-        perInput.addEventListener('input', recalcDuree);
-        mppInput.addEventListener('input', recalcDuree);
+        var minInput = extra.querySelector('#planif-duree-min');
+        minInput.addEventListener('focus', function() { enregistrerPourUndo(); });
+        minInput.addEventListener('input', recalcDuree);
 
         extra.querySelector('#planif-duree-ajouter').addEventListener('click', function() {
             document.getElementById('planif-duree-section').style.display = '';
             this.style.display = 'none';
-            document.getElementById('planif-duree-per').focus();
+            document.getElementById('planif-duree-min').focus();
         });
+    }
+
+    if (donnees.type === 'lecon') {
+        var totalLecon = dureeRollupNoeud(donnees);
+        extra.innerHTML +=
+            '<div class="planif-duree-section">' +
+                '<label>Dur\u00e9e (somme des activit\u00e9s)</label>' +
+                '<div class="planif-duree-rollup">' +
+                    (totalLecon
+                        ? '\u03a3 ' + totalLecon + '\u2009min ' + equivalencePeriodesTexte(totalLecon)
+                        : '\u2014 estime la dur\u00e9e de ses activit\u00e9s pour la calculer') +
+                '</div>' +
+            '</div>';
     }
 
     if (donnees.type === 'sequence') {
@@ -2391,7 +2404,7 @@ function reconstruireDOM() {
                     '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(n) + '">' + obtenirLabelNoeud(n) + '</span>' +
                 '</div>' +
                 '<div class="planif-noeud-titre">' + echapperHtml(n.titre || '') + '</div>' +
-                '<div class="planif-seq-compact-info">' + nbLecons + ' le\u00e7on' + (nbLecons > 1 ? 's' : '') + '</div>' +
+                '<div class="planif-seq-compact-info">' + nbLecons + ' le\u00e7on' + (nbLecons > 1 ? 's' : '') + (dureeRollupNoeud(n) ? ' \u00b7 ' + formaterPeriodes(dureeRollupNoeud(n)) : '') + '</div>' +
                 '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
                 '<div class="planif-noeud-port planif-port-gauche" data-dir="gauche"></div>' +
                 '<div class="planif-noeud-port planif-port-bas" data-dir="bas"></div>' +
@@ -4933,6 +4946,97 @@ function obtenirLeconsDeSequence(seq) {
     return lecons;
 }
 
+// === COMPTABILITÉ DU TEMPS (chantier du 4 août 2026) ===
+// Rollup pur : activité (durée saisie, min) → leçon → séquence → carte.
+// La conversion en périodes suit « Durée d'une période » du cadre (Horaire) —
+// source unique obtenirDureePeriode(), jamais de valeur en dur.
+
+function dureePeriodeMinutes() {
+    return (typeof obtenirDureePeriode === 'function' && obtenirDureePeriode()) || 55;
+}
+
+// Somme des durées (metadata.duree) des descendants non-conteneurs.
+function dureeRollupNoeud(nd) {
+    if (!nd) return 0;
+    var config = TYPES[nd.type];
+    if (!(config && config.conteneur)) {
+        return parseInt(nd.metadata && nd.metadata.duree) || 0;
+    }
+    var total = 0;
+    var enfants = nd.enfants || [];
+    for (var i = 0; i < enfants.length; i++) {
+        total += dureeRollupNoeud(etat.noeuds.get(enfants[i]));
+    }
+    return total;
+}
+
+function arrondirPeriodes(minutes) {
+    var per = Math.round((minutes / dureePeriodeMinutes()) * 10) / 10;
+    return (per % 1 === 0) ? String(per) : String(per).replace('.', ',');
+}
+
+// « 2 pér. » / « 1,9 pér. » ; sous une période → minutes brutes.
+function formaterPeriodes(minutes) {
+    if (!minutes) return '';
+    if (minutes < dureePeriodeMinutes()) return minutes + ' min';
+    return arrondirPeriodes(minutes) + ' pér.';
+}
+
+// « ≈ 0,6 pér. » — équivalence affichée en regard d'une durée en minutes.
+function equivalencePeriodesTexte(minutes) {
+    minutes = parseInt(minutes) || 0;
+    if (!minutes) return '';
+    return '≈ ' + arrondirPeriodes(minutes) + ' pér.';
+}
+
+// Heures d'enseignement (RREC) du cours actif — lecture seule (SSOT : cours).
+function obtenirHeuresCadreCoursActif() {
+    try {
+        var tous = db.getSync('cours', []);
+        var actif = tous.find(function(c) { return c.actif; });
+        if (!actif && typeof obtenirCoursActifId === 'function') {
+            var idActif = obtenirCoursActifId();
+            actif = tous.find(function(c) { return c.id === idActif; });
+        }
+        var h = actif ? parseFloat(actif.heuresContact) : NaN;
+        return (isNaN(h) || h <= 0) ? null : h;
+    } catch (e) {
+        return null;
+    }
+}
+
+// Jauge indicative au pied de la palette Navigation. JAMAIS bloquante :
+// du texte teinté, pas d'alerte (imprévus de session assumés).
+function mettreAJourJaugeTemps(sequences) {
+    var jauge = document.getElementById('planif-jauge-temps');
+    if (!jauge) return;
+    var totalMin = 0;
+    for (var i = 0; i < sequences.length; i++) {
+        totalMin += dureeRollupNoeud(sequences[i]);
+    }
+    if (!totalMin) {
+        jauge.style.display = 'none';
+        jauge.innerHTML = '';
+        return;
+    }
+    var dp = dureePeriodeMinutes();
+    var heures = Math.round((totalMin / 60) * 10) / 10;
+    var texte = 'Total planifié : <strong>' + arrondirPeriodes(totalMin) + ' pér.</strong>' +
+                ' (≈ ' + String(heures).replace('.', ',') + ' h)';
+    var classe = '';
+    var heuresCadre = obtenirHeuresCadreCoursActif();
+    if (heuresCadre) {
+        texte += ' / ' + String(heuresCadre).replace('.', ',') + ' h au cadre';
+        var ratio = (totalMin / 60) / heuresCadre;
+        if (ratio > 1.1) classe = ' planif-jauge-depasse';
+        else if (ratio >= 0.9) classe = ' planif-jauge-cible';
+    }
+    texte += '<span class="planif-jauge-rappel">1 pér. = ' + dp + ' min (Cadre › Horaire)</span>';
+    jauge.className = 'planif-jauge-temps' + classe;
+    jauge.style.display = '';
+    jauge.innerHTML = texte;
+}
+
 function mettreAJourSommaire() {
     var conteneur = document.getElementById('planif-sommaire');
     if (!conteneur) return;
@@ -4940,6 +5044,7 @@ function mettreAJourSommaire() {
     var sequences = obtenirSequencesCarte();
     if (sequences.length === 0) {
         conteneur.innerHTML = '<div class="planif-som-vide">Aucune séquence — glisse un nœud « Séquence » sur la carte pour naviguer ici.</div>';
+        mettreAJourJaugeTemps(sequences);
         return;
     }
 
@@ -4953,17 +5058,19 @@ function mettreAJourSommaire() {
     for (var i = 0; i < sequences.length; i++) {
         var seq = sequences[i];
         var lecons = obtenirLeconsDeSequence(seq);
+        var dureeSeq = dureeRollupNoeud(seq);
+        var pillSeq = dureeSeq ? formaterPeriodes(dureeSeq) : String(lecons.length);
         var seqActive = seq.id === sequenceActiveId;
         html += '<div class="planif-som-item planif-som-seq' + (seqActive ? ' actif' : '') + '"' +
                 ' data-action="planificationCarte.ouvrirSequence"' +
                 ' data-param="' + seq.id + '"' +
                 ' title="' + echapperHtml(seq.titre || 'Sans titre') + '">' +
                 '<span class="planif-som-nom">' + echapperHtml(seq.titre || 'Sans titre') + '</span>' +
-                '<span class="planif-som-pill">' + lecons.length + '</span>' +
+                '<span class="planif-som-pill">' + pillSeq + '</span>' +
                 '</div>';
         for (var j = 0; j < lecons.length; j++) {
             var lec = lecons[j];
-            var duree = lec.metadata && lec.metadata.duree ? lec.metadata.duree + ' min' : '';
+            var duree = formaterPeriodes(dureeRollupNoeud(lec));
             html += '<div class="planif-som-item planif-som-lecon' + (lec.id === leconActiveId ? ' actif' : '') + '"' +
                     ' data-action="planificationCarte.naviguerSommaireLecon"' +
                     ' data-param="' + lec.id + '"' +
@@ -4974,6 +5081,7 @@ function mettreAJourSommaire() {
         }
     }
     conteneur.innerHTML = html;
+    mettreAJourJaugeTemps(sequences);
 
     requestAnimationFrame(function() {
         var itemActif = conteneur.querySelector('.planif-som-lecon.actif') ||

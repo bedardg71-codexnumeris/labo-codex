@@ -18698,6 +18698,32 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     padding: 4px 6px;
     line-height: 1.4;
 }
+/* Jauge de temps (indicative, jamais bloquante) au pied de la palette */
+.planif-jauge-temps {
+    margin-top: 8px;
+    padding: 6px 8px 4px;
+    border-top: 1px solid var(--planif-couleur-bordure);
+    font-size: 11px;
+    line-height: 1.45;
+    color: var(--texte-secondaire, #8aa4b0);
+}
+.planif-jauge-temps strong { color: var(--planif-couleur-texte); }
+.planif-jauge-cible,
+.planif-jauge-cible strong { color: var(--alerte-texte-succes, #5ae080); }
+.planif-jauge-depasse,
+.planif-jauge-depasse strong { color: var(--alerte-texte-attention, #d4b878); }
+.planif-jauge-rappel {
+    display: block;
+    font-size: 10px;
+    color: var(--texte-muted, #5a7a88);
+    margin-top: 2px;
+}
+/* Lecture seule du Σ dans l'inspecteur d'une leçon */
+.planif-duree-rollup {
+    font-size: 12px;
+    color: var(--texte-secondaire, #8aa4b0);
+    padding: 4px 0;
+}
 
 /* Blocs compacts (vue globale) */
 .planif-seq-compact {
@@ -21950,6 +21976,12 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     background: #ffffff;
     border-color: rgba(3, 46, 92, 0.15);
 }
+/* --planif-couleur-texte est résolu sur :root (valeur sombre) : override direct */
+.mode-clair .planif-jauge-temps strong { color: var(--texte-principal); }
+.mode-clair .planif-jauge-cible,
+.mode-clair .planif-jauge-cible strong { color: var(--alerte-texte-succes); }
+.mode-clair .planif-jauge-depasse,
+.mode-clair .planif-jauge-depasse strong { color: var(--alerte-texte-attention); }
 .mode-clair .planif-action-item:hover {
     background: rgba(3, 46, 92, 0.06);
 }
