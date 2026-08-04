@@ -283,6 +283,98 @@ function exporterCartePourBibliotheque(carteId) {
     };
 }
 
+/* ===============================
+   IMPORT INTER-TRIMESTRE (4 août 2026 — patron Brique C, comme les
+   grilles/productions : COPIE vers le trimestre actif, source INTOUCHÉE,
+   id de carte neuf généré par l'index cible, trace importeDe.
+   Voie canonique de lecture = cleSource() (planification_mindmap est au
+   registre CLES_NAMESPACEES).
+   =============================== */
+
+/**
+ * Liste les autres trimestres qui possèdent au moins une carte mentale.
+ * Lecture SEULE. @returns {Array<{id, nom, cartes:[{id, nom, nbNoeuds}]}>}
+ */
+function listerTrimestresAvecCartes() {
+    if (typeof obtenirTrimestres !== 'function' || typeof cleSource !== 'function') return [];
+    const actif = (typeof obtenirTrimestreId === 'function') ? obtenirTrimestreId() : (window.trimestreActif || '');
+    const resultat = [];
+    (obtenirTrimestres() || []).forEach(t => {
+        if (!t || !t.id || t.id === actif) return;
+        const donnees = db.getSync(cleSource(CLE_DONNEES, t.id), null);
+        if (!donnees || !donnees.index || !Array.isArray(donnees.index.cartes) || donnees.index.cartes.length === 0) return;
+        const cartes = donnees.index.cartes.map(c => {
+            const contenu = (donnees.cartes && donnees.cartes[c.id]) || {};
+            return { id: c.id, nom: c.nom || 'Sans titre', nbNoeuds: (contenu.noeuds || []).length };
+        });
+        if (cartes.length > 0) resultat.push({ id: t.id, nom: t.nom || t.id, cartes: cartes });
+    });
+    resultat.sort((a, b) => String(b.id).localeCompare(String(a.id)));
+    return resultat;
+}
+
+/**
+ * Copie une carte d'un trimestre source vers le trimestre ACTIF.
+ * La source n'est jamais mutée (deep-clone via importerDepuisBibliotheque).
+ * Copie aussi les notes de séance (Objectif/Notes des vues leçon) des leçons
+ * de la carte — par id, sans jamais écraser une entrée existante de la cible.
+ * @returns {string|null} id de la nouvelle carte, ou null si échec
+ */
+function importerCarteDepuisTrimestre(trimestreSourceId, carteId) {
+    try {
+        const source = db.getSync(cleSource(CLE_DONNEES, trimestreSourceId), null);
+        if (!source || !source.cartes || !source.cartes[carteId]) return null;
+        const infos = ((source.index && source.index.cartes) || []).find(c => c.id === carteId);
+
+        const nouvelId = importerDepuisBibliotheque({
+            nom: (infos && infos.nom) || 'Carte importée',
+            donnees: source.cartes[carteId]
+        });
+        if (!nouvelId) return null;
+
+        // Trace de provenance sur l'entrée d'index fraîchement créée
+        const donnees = getDonnees();
+        const entree = donnees.index.cartes.find(c => c.id === nouvelId);
+        if (entree) {
+            entree.importeDe = { trimestre: trimestreSourceId, carte: carteId, date: new Date().toISOString() };
+            setDonnees(donnees);
+        }
+
+        copierSeancesLecons(trimestreSourceId, source.cartes[carteId]);
+        return nouvelId;
+    } catch (e) {
+        console.warn('[Planification] Import inter-trimestre échoué :', e);
+        return null;
+    }
+}
+
+/**
+ * Les Objectif/Notes des vues leçon vivent dans une clé séparée
+ * ('planification_seances', indexée par id de leçon — ids préservés à la
+ * copie). NB : cette clé est namespacée à l'exécution par cle() mais ABSENTE
+ * du registre CLES_NAMESPACEES (trou consigné au BACKLOG) → préfixe direct
+ * pour la source, cle() pour la cible. Push sans replace : on n'écrase
+ * jamais une note existante du trimestre actif.
+ */
+function copierSeancesLecons(trimestreSourceId, contenuCarte) {
+    try {
+        const seancesSource = db.getSync(trimestreSourceId + '_planification_seances', {}) || {};
+        const idsLecons = (contenuCarte.noeuds || []).filter(n => n.type === 'lecon').map(n => n.id);
+        if (idsLecons.length === 0) return;
+        const cible = db.getSync(cle('planification_seances'), {}) || {};
+        let modifie = false;
+        idsLecons.forEach(lid => {
+            if (seancesSource[lid] && !cible[lid]) {
+                cible[lid] = JSON.parse(JSON.stringify(seancesSource[lid]));
+                modifie = true;
+            }
+        });
+        if (modifie) db.setSync(cle('planification_seances'), cible); // security-ok: copie interne de données locales (autre trimestre du même utilisateur), pas de source externe
+    } catch (e) {
+        console.warn('[Planification] Copie des notes de séance échouée :', e);
+    }
+}
+
 // === EXPORT ===
 window.planificationDonnees = {
     getIndex: getIndex,
@@ -293,7 +385,9 @@ window.planificationDonnees = {
     initialiserSiNecessaire: initialiserSiNecessaire,
     migrerDonneesProto: migrerDonneesProto,
     importerDepuisBibliotheque: importerDepuisBibliotheque,
-    exporterCartePourBibliotheque: exporterCartePourBibliotheque
+    exporterCartePourBibliotheque: exporterCartePourBibliotheque,
+    listerTrimestresAvecCartes: listerTrimestresAvecCartes,
+    importerCarteDepuisTrimestre: importerCarteDepuisTrimestre
 };
 
 })();

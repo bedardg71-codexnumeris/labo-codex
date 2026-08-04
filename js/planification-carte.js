@@ -4645,6 +4645,24 @@ function initialiser() {
         });
     }
 
+    // Import inter-trimestre (4 août 2026, patron Brique C) : copie une carte
+    // d'un autre trimestre vers le trimestre actif — sans sortir de l'app.
+    var btnImportTri = document.getElementById('planif-btn-import-trimestre');
+    var panneauImportTri = document.getElementById('planif-import-tri-panel');
+    if (btnImportTri && panneauImportTri) {
+        btnImportTri.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var dropdownActions = document.getElementById('planif-actions-dropdown');
+            if (dropdownActions) dropdownActions.classList.remove('ouvert');
+            rendrePanneauImportTrimestre();
+            panneauImportTri.classList.add('ouvert');
+        });
+        document.addEventListener('click', function() {
+            panneauImportTri.classList.remove('ouvert');
+        });
+        panneauImportTri.addEventListener('click', function(e) { e.stopPropagation(); });
+    }
+
     var btnAnnuler = document.getElementById('planif-btn-annuler');
     if (btnAnnuler) btnAnnuler.addEventListener('click', annuler);
 
@@ -5087,6 +5105,44 @@ function mettreAJourSommaire() {
         var itemActif = conteneur.querySelector('.planif-som-lecon.actif') ||
                         conteneur.querySelector('.planif-som-seq.actif');
         if (itemActif) itemActif.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+}
+
+// === IMPORT INTER-TRIMESTRE — panneau (données : planification-donnees.js) ===
+function rendrePanneauImportTrimestre() {
+    var panneau = document.getElementById('planif-import-tri-panel');
+    if (!panneau) return;
+    var sources = window.planificationDonnees.listerTrimestresAvecCartes();
+    if (!sources.length) {
+        panneau.innerHTML = '<div class="planif-import-tri-vide">Aucune carte dans les autres trimestres.</div>';
+        return;
+    }
+    var html = '';
+    for (var i = 0; i < sources.length; i++) {
+        var t = sources[i];
+        html += '<div class="planif-import-tri-groupe">' + echapperHtml(t.nom) + '</div>';
+        for (var j = 0; j < t.cartes.length; j++) {
+            var c = t.cartes[j];
+            html += '<div class="planif-import-tri-ligne">' +
+                    '<span class="planif-import-tri-nom" title="' + echapperHtml(c.nom) + '">' + echapperHtml(c.nom) + '</span>' +
+                    '<span class="planif-import-tri-nb">' + c.nbNoeuds + ' nœud' + (c.nbNoeuds > 1 ? 's' : '') + '</span>' +
+                    '<button type="button" class="planif-btn-carte planif-import-tri-btn" data-tid="' + echapperHtml(t.id) + '" data-cid="' + echapperHtml(c.id) + '">Importer</button>' +
+                    '</div>';
+        }
+    }
+    panneau.innerHTML = html;
+    panneau.querySelectorAll('.planif-import-tri-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var nouvelId = window.planificationDonnees.importerCarteDepuisTrimestre(btn.dataset.tid, btn.dataset.cid);
+            panneau.classList.remove('ouvert');
+            if (nouvelId) {
+                mettreAJourListeCartes();
+                chargerCarte(nouvelId);
+                afficherToastLien('Carte importée — copie indépendante, la source reste intacte.');
+            } else {
+                afficherToastLien("L'import a échoué — rien n'a été modifié.");
+            }
+        });
     });
 }
 
