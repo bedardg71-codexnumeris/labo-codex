@@ -85,24 +85,16 @@ test('plein écran carte mentale — titre de section masqué, module seul visib
     });
     expect(wrapperTop).toBe(0);
 
-    // 3. Au point central de la nav principale, l'élément peint au-dessus
-    //    appartient à la carte (la nav n'est ni cliquable ni visible).
-    const dessus = await page.evaluate(() => {
-        const nav = document.querySelector('.navigation-principale');
-        const r = nav.getBoundingClientRect();
-        const el = document.elementFromPoint(
-            Math.round(r.left + r.width / 2),
-            Math.round(r.top + r.height / 2)
-        );
-        return el && el.closest('#conception-carte') ? 'carte' : (el ? el.tagName : 'rien');
-    });
-    expect(dessus).toBe('carte');
+    // 3. La navigation principale est masquée (demande terrain du 4 août :
+    //    rien d'autre que le module en plein écran, comme Annoter).
+    await expect(page.locator('.navigation-principale')).toBeHidden();
 
-    // Sortir du plein écran (Échap) : le titre revient.
+    // Sortir du plein écran (Échap) : le titre et la navigation reviennent.
     await page.keyboard.press('Escape');
     await page.waitForTimeout(300);
     await expect(h2).toBeVisible();
     await expect(sousTitre).toBeVisible();
+    await expect(page.locator('.navigation-principale')).toBeVisible();
 
     expect(erreurs).toEqual([]);
 });

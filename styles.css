@@ -17407,6 +17407,7 @@ body.travaux-plein-ecran-actif .sous-nav {
    qui restait visible et chevauchait la carte en plein écran. On cible la classe réelle. */
 body.planif-plein-ecran-actif header.entete,
 body.planif-plein-ecran-actif #header,
+body.planif-plein-ecran-actif .navigation-principale,
 body.planif-plein-ecran-actif .navigation-sous-sections,
 body.planif-plein-ecran-actif .sous-nav,
 body.planif-plein-ecran-actif .bandeau-groupe-cours {
