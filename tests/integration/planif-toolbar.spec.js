@@ -243,6 +243,58 @@ test('Alt/⌥+glisser un bloc — crée un doublon qui suit la souris, la source
     expect(erreurs).toEqual([]);
 });
 
+test('comptabilité du temps — rollup activités→leçon→séquence, périodes du cadre, jauge indicative', async ({ page }) => {
+    const erreurs = [];
+    attacherCaptureErreurs(page, erreurs);
+    await ouvrirAppEnDemo(page);
+    await montrerCarteMentale(page);
+    await page.evaluate(() => window.planificationCarte.initialiser());
+    await page.waitForTimeout(400);
+
+    await page.evaluate(() => {
+        // Durée de période du cadre = 50 min (source unique, Cadre › Horaire)
+        db.setSync(window.cle('dureePeriode'), 50);
+        // Heures d'enseignement (RREC) du cours actif : 1,5 h
+        const cours = db.getSync('cours', []);
+        if (cours.length) { cours.forEach(c => { if (c.actif) c.heuresContact = 1.5; }); db.setSync('cours', cours); }
+        window.planificationCarte.injecterNoeuds([
+            { id: 'seqR', type: 'sequence', titre: 'Séquence rollup', x: 400, y: 100, enfants: ['lecR'] },
+            { id: 'lecR', type: 'lecon', titre: 'Leçon rollup', x: 430, y: 160, parent: 'seqR', enfants: ['actR1', 'actR2'] },
+            { id: 'actR1', type: 'activite', titre: 'Act 1', x: 460, y: 210, parent: 'lecR', metadata: { duree: 60 } },
+            { id: 'actR2', type: 'activite', titre: 'Act 2', x: 620, y: 210, parent: 'lecR', metadata: { duree: 35 } }
+        ]);
+    });
+    await page.waitForTimeout(500);
+
+    // Rollup : 60 + 35 = 95 min ; à 50 min/pér → « 1,9 pér. » sur la leçon
+    // ET sur la séquence (somme de ses leçons).
+    const pillLecon = page.locator('#planif-sommaire .planif-som-lecon', { hasText: 'Leçon rollup' }).locator('.planif-som-pill');
+    const pillSeq = page.locator('#planif-sommaire .planif-som-seq', { hasText: 'Séquence rollup' }).locator('.planif-som-pill');
+    await expect(pillLecon).toHaveText(/1,9\s*pér\./);
+    await expect(pillSeq).toHaveText(/1,9\s*pér\./);
+
+    // Jauge indicative au pied de la palette : total, heures du cadre, rappel
+    // de la durée de période — et teinte « cible » (95 min ≈ 1,58 h / 1,5 h).
+    const jauge = page.locator('#planif-jauge-temps');
+    await expect(jauge).toBeVisible();
+    await expect(jauge).toContainText('Total planifié');
+    await expect(jauge).toContainText('1,5');
+    await expect(jauge).toContainText('1 pér. = 50 min');
+    await expect(jauge).toHaveClass(/planif-jauge-cible/);
+
+    // Preuve « rien en dur » : changer la durée de période du cadre à 25 min
+    // → les mêmes 95 min deviennent 3,8 pér. après rafraîchissement.
+    await page.evaluate(() => {
+        db.setSync(window.cle('dureePeriode'), 25);
+        window.planificationCarte.mettreAJourSommaire();
+    });
+    await page.waitForTimeout(300);
+    await expect(pillLecon).toHaveText(/3,8\s*pér\./);
+    await expect(jauge).toContainText('1 pér. = 25 min');
+
+    expect(erreurs).toEqual([]);
+});
+
 test('renommer la carte — via le menu Actions, le titre central est retiré', async ({ page }) => {
     // Accepter le prompt de renommage (enregistré AVANT le dismiss générique
     // du helper : le premier handler gagne, le dismiss tardif est toléré).

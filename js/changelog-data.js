@@ -12,6 +12,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.29',
+            couleur: 'vert',
+            titre: 'Alignement pédagogique : comptabilité du temps',
+            items: [
+                'Estime la durée de tes activités (en minutes) dans la carte mentale : la durée d’une leçon se calcule toute seule (somme de ses activités) et s’affiche en périodes dans le sommaire — selon la « Durée d’une période » réglée dans Cadre › Horaire, jamais une valeur fixe.',
+                'Jauge de temps au pied de la palette Navigation : total planifié en périodes et en heures, comparé aux heures d’enseignement (RREC) du cours — indicatif et jamais bloquant, les imprévus de session font partie de la vraie vie.',
+                'La vue globale affiche la durée totale de chaque séquence à côté de son nombre de leçons.'
+            ]
+        },
+        {
             version: '1.28',
             couleur: 'bleu',
             titre: 'Alignement pédagogique : navigation repensée',
@@ -19,7 +29,8 @@
                 'Nouvelle palette « Navigation » dans la carte mentale : un sommaire montre d’un coup d’œil toute la hiérarchie Vue globale › séquences › leçons — un clic ouvre directement la séquence ou la leçon voulue. La palette se déplace et se réduit comme celle des nœuds.',
                 'La barre d’outils de la carte est simplifiée : les carrousels de séquences et de leçons, les compteurs et leurs flèches sont remplacés par le sommaire ; le titre de la carte (en double avec le sélecteur) cède sa place — renomme ta carte via Actions → « Renommer cette carte ».',
                 'Nouveau bouton « Recentrer » (◎, aussi ⌘1) : ramène la vue sur le contenu — sur la séquence ouverte s’il y en a une. Il remplace les zooms pleine largeur/hauteur peu utilisés.',
-                'Le plein écran de la carte est maintenant vraiment plein écran : le titre de section et la navigation de l’application s’effacent, comme dans la page Annoter.'
+                'Le plein écran de la carte est maintenant vraiment plein écran : le titre de section et la navigation de l’application s’effacent, comme dans la page Annoter.',
+                'Nouveau raccourci : ⌥ (Mac) / Alt (Windows) + glisser un bloc en crée un doublon prêt à déposer — et l’aide-mémoire des raccourcis de la palette est complété (⌘D y manquait).'
             ]
         },
         {
