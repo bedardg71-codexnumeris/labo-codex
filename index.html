@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260804c"> <!-- Toolbar carte mentale (4 août) : titre central retiré, renommage via Actions -->
+    <link rel="stylesheet" href="styles.css?v=20260804d"> <!-- Palette Navigation (sommaire) + barre simplifiée (4 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -4174,27 +4174,8 @@
                                     <button class="planif-btn-carte" id="planif-btn-annuler" title="Ctrl+Z"><img src="icons/icon-undo.svg" alt="" class="planif-icon" style="width:14px;height:14px;margin-right:3px;vertical-align:middle;">Annuler</button>
                                     <input type="file" id="planif-fichier-import" accept=".json" style="display:none">
                                 </div>
-                                <!-- Carrousel séquences -->
-                                <div class="planif-toolbar-sequences" id="planif-toolbar-sequences"></div>
-                                <div class="planif-nav-seq" id="planif-nav-seq" style="display:none">
-                                    <button id="planif-btn-seq-prec" class="planif-btn-nav-seq" disabled data-action="planificationCarte.sequencePrecedente" title="Séquence précédente"><img src="icons/icon-chevron-left.svg" alt="" class="nav-seq-icon"></button>
-                                    <span id="planif-compteur-seq" class="planif-compteur-seq">-- / --</span>
-                                    <button id="planif-btn-seq-suiv" class="planif-btn-nav-seq" disabled data-action="planificationCarte.sequenceSuivante" title="Séquence suivante"><img src="icons/icon-chevron-right.svg" alt="" class="nav-seq-icon"></button>
-                                </div>
-                                <!-- Sous-carrousel leçons (visible quand séquence active) -->
-                                <div class="planif-sep-lecons" id="planif-sep-lecons" style="display:none"></div>
-                                <div class="planif-toolbar-lecons" id="planif-toolbar-lecons"></div>
-                                <div class="planif-nav-lecon" id="planif-nav-lecon" style="display:none">
-                                    <button id="planif-btn-lecon-prec" class="planif-btn-nav-seq" disabled data-action="planificationCarte.leconPrecedente" title="Leçon précédente"><img src="icons/icon-chevron-left.svg" alt="" class="nav-seq-icon"></button>
-                                    <span id="planif-compteur-lecon" class="planif-compteur-seq">-- / --</span>
-                                    <button id="planif-btn-lecon-suiv" class="planif-btn-nav-seq" disabled data-action="planificationCarte.leconSuivante" title="Leçon suivante"><img src="icons/icon-chevron-right.svg" alt="" class="nav-seq-icon"></button>
-                                </div>
                                 <div class="planif-toolbar-droite">
-                                    <div class="planif-seq-badge planif-seq-badge-global" id="planif-btn-vue-globale" data-action="planificationCarte.ouvrirSequence" data-param="" title="Afficher tous les nœuds" style="display:none">
-                                        <span class="planif-seq-badge-nom">Vue globale</span>
-                                    </div>
-                                    <button class="planif-btn-vue" id="planif-btn-largeur" title="Ajuster à la largeur (⌘2)" data-action="planificationCarte.zoomPleineLargeur"><img src="icons/icon-resize-horizontal.svg" alt="" class="planif-icon"></button>
-                                    <button class="planif-btn-vue" id="planif-btn-hauteur" title="Ajuster à la hauteur (⌘3)" data-action="planificationCarte.zoomPleineHauteur"><img src="icons/icon-resize-vertical.svg" alt="" class="planif-icon"></button>
+                                    <button class="planif-btn-vue" id="planif-btn-recentrer" title="Recentrer la carte (⌘1)" data-action="planificationCarte.recentrerVue"><img src="icons/icon-final-state.svg" alt="" class="planif-icon"></button>
                                     <span id="planif-zoom-info-header" class="planif-zoom-info-header" data-tooltip="planif-zoom">100%</span>
                                     <div class="planif-fond-picker" id="planif-fond-picker">
                                         <button class="planif-btn-vue" id="planif-btn-fond" title="Couleur de fond"><img src="icons/icon-paint-palette.svg" alt="" class="planif-icon"></button>
@@ -4320,6 +4301,16 @@
                                         <tr><td><kbd>⌘1</kbd></td><td>Recentrer</td></tr>
                                         <tr><td><kbd>⌘Z</kbd></td><td>Annuler</td></tr>
                                     </table>
+                                </div>
+                            </div>
+                            <!-- Palette Navigation : sommaire arborescent Vue globale › séquences › leçons -->
+                            <div id="planif-palette-nav" class="planif-palette-flottante">
+                                <div class="planif-palette-barre">
+                                    <span class="planif-palette-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>Navigation</span>
+                                    <button class="planif-palette-toggle" id="planif-palette-nav-toggle" title="Réduire la palette">−</button>
+                                </div>
+                                <div class="planif-palette-contenu planif-nav-contenu">
+                                    <div id="planif-sommaire" class="planif-sommaire"></div>
                                 </div>
                             </div>
                             <!-- Panneau guide déplacé au niveau section-conception -->
@@ -14748,7 +14739,7 @@
     <script src="js/planification-donnees.js?v=2026050554"></script> <!-- #261 : fallback automatique quand index.active pointe sur carte inexistante -->
 
     <script src="js/planification-bibliotheque.js?v=2026051026"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
-    <script src="js/planification-carte.js?v=20260804b"></script> <!-- Vue globale hors carrousel + renommage via Actions (4 août) -->
+    <script src="js/planification-carte.js?v=20260804c"></script> <!-- Sommaire de navigation en palette + recentrage (4 août) -->
     <script src="js/organisateur.js?v=2026062701"></script> <!-- Refonte nav SP4 : id conception-organisateur (3 occ.) -->
     <script src="js/planification.js?v=2026050522"></script> <!-- Refonte nav SP4 : hooks nomSection 'conception' + idSousSection conception-* -->
 
@@ -14832,7 +14823,7 @@
     <script src="js/guidage-demo.js?v=20260512d"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=20260629a"></script> <!-- Beta 99.28 b0428-1915 : item numérotation semaines DÉ -->
+    <script src="js/changelog-data.js?v=20260804a"></script> <!-- Entrée 1.28 : navigation Alignement repensée -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
     <script src="js/etats-vides.js?v=2026050537"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre -->
