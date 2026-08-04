@@ -99,7 +99,7 @@ test('plein écran carte mentale — titre de section masqué, module seul visib
     expect(erreurs).toEqual([]);
 });
 
-test('bouton Vue globale — dans la zone droite de la barre, hors du carrousel, état synchronisé', async ({ page }) => {
+test('palette Navigation — sommaire Vue globale › séquences › leçons, barre sans carrousels', async ({ page }) => {
     const erreurs = [];
     attacherCaptureErreurs(page, erreurs);
     await ouvrirAppEnDemo(page);
@@ -107,35 +107,58 @@ test('bouton Vue globale — dans la zone droite de la barre, hors du carrousel,
     await page.evaluate(() => window.planificationCarte.initialiser());
     await page.waitForTimeout(400);
 
-    // Donner des séquences à la carte (le bouton n'a de sens qu'avec des séquences).
     await page.evaluate(() => {
         window.planificationCarte.injecterNoeuds([
-            { id: 'seqT1', type: 'sequence', titre: 'Séquence test 1', x: 400, y: 100, enfants: [] },
-            { id: 'seqT2', type: 'sequence', titre: 'Séquence test 2', x: 900, y: 300, enfants: [] }
+            { id: 'seqT1', type: 'sequence', titre: 'Séquence test 1', x: 400, y: 100, enfants: ['lecT1'] },
+            { id: 'lecT1', type: 'lecon', titre: 'Leçon test 1', x: 430, y: 160, parent: 'seqT1' },
+            { id: 'seqT2', type: 'sequence', titre: 'Séquence test 2', x: 900, y: 400, enfants: [] }
         ]);
     });
     await page.waitForTimeout(500);
 
-    const btn = page.locator('.planif-toolbar-droite #planif-btn-vue-globale');
+    // Refonte du 4 août 2026 (exercice 601-101) : la navigation vit dans la
+    // palette « Navigation » (sommaire vertical), plus dans la barre d'outils.
+    await expect(page.locator('#planif-toolbar-sequences')).toHaveCount(0);
+    await expect(page.locator('#planif-nav-seq')).toHaveCount(0);
+    await expect(page.locator('#planif-toolbar-lecons')).toHaveCount(0);
+    await expect(page.locator('#planif-btn-largeur')).toHaveCount(0);
+    await expect(page.locator('#planif-btn-hauteur')).toHaveCount(0);
 
-    // Déplacé le 4 août 2026 (exercice 601-101) : le bouton vit dans la zone
-    // droite, plus DANS le carrousel des séquences.
-    await expect(btn).toBeVisible();
-    await expect(page.locator('#planif-toolbar-sequences .planif-seq-badge-global')).toHaveCount(0);
+    // Le bouton Recentrer remplace les zooms pleine largeur/hauteur.
+    await expect(page.locator('#planif-btn-recentrer')).toBeVisible();
 
-    // Vue globale par défaut → bouton actif.
-    await expect(btn).toHaveClass(/actif/);
+    const globale = page.locator('#planif-sommaire .planif-som-globale');
+    const sequencesSom = page.locator('#planif-sommaire .planif-som-seq');
+    const leconsSom = page.locator('#planif-sommaire .planif-som-lecon');
 
-    // Ouvrir une séquence → le bouton se désactive.
-    await page.click('#planif-toolbar-sequences .planif-seq-badge');
+    // Sommaire complet : Vue globale (active par défaut) + toutes les
+    // séquences + toutes les leçons, visibles d'un coup.
+    await expect(globale).toBeVisible();
+    await expect(globale).toHaveClass(/actif/);
+    const nbSeq = await sequencesSom.count();
+    expect(nbSeq).toBeGreaterThanOrEqual(2);
+    await expect(leconsSom.filter({ hasText: 'Leçon test 1' })).toHaveCount(1);
+
+    // Ouvrir une séquence depuis le sommaire → elle devient active.
+    await sequencesSom.filter({ hasText: 'Séquence test 2' }).click();
     await page.waitForTimeout(400);
-    await expect(btn).not.toHaveClass(/actif/);
+    await expect(globale).not.toHaveClass(/actif/);
+    await expect(sequencesSom.filter({ hasText: 'Séquence test 2' })).toHaveClass(/actif/);
 
-    // Cliquer le bouton → retour vue globale, aucun badge de séquence actif.
-    await btn.click();
+    // Cliquer une leçon d'une AUTRE séquence : bascule de séquence parente
+    // + ouverture de la vue leçon (niveau micro).
+    await leconsSom.filter({ hasText: 'Leçon test 1' }).click();
     await page.waitForTimeout(400);
-    await expect(btn).toHaveClass(/actif/);
-    await expect(page.locator('#planif-toolbar-sequences .planif-seq-badge.actif')).toHaveCount(0);
+    await expect(sequencesSom.filter({ hasText: 'Séquence test 1' })).toHaveClass(/actif/);
+    await expect(leconsSom.filter({ hasText: 'Leçon test 1' })).toHaveClass(/actif/);
+    await expect(page.locator('#planif-vue-lecon')).toBeVisible();
+
+    // Retour Vue globale : canevas restauré, plus aucune séquence active.
+    await globale.click();
+    await page.waitForTimeout(400);
+    await expect(globale).toHaveClass(/actif/);
+    await expect(page.locator('#planif-sommaire .planif-som-seq.actif')).toHaveCount(0);
+    await expect(page.locator('#planif-vue-lecon')).toBeHidden();
 
     expect(erreurs).toEqual([]);
 });

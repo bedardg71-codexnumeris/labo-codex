@@ -12,6 +12,17 @@
 
     var CHANGELOG = [
         {
+            version: '1.28',
+            couleur: 'bleu',
+            titre: 'Alignement pédagogique : navigation repensée',
+            items: [
+                'Nouvelle palette « Navigation » dans la carte mentale : un sommaire montre d’un coup d’œil toute la hiérarchie Vue globale › séquences › leçons — un clic ouvre directement la séquence ou la leçon voulue. La palette se déplace et se réduit comme celle des nœuds.',
+                'La barre d’outils de la carte est simplifiée : les carrousels de séquences et de leçons, les compteurs et leurs flèches sont remplacés par le sommaire ; le titre de la carte (en double avec le sélecteur) cède sa place — renomme ta carte via Actions → « Renommer cette carte ».',
+                'Nouveau bouton « Recentrer » (◎, aussi ⌘1) : ramène la vue sur le contenu — sur la séquence ouverte s’il y en a une. Il remplace les zooms pleine largeur/hauteur peu utilisés.',
+                'Le plein écran de la carte est maintenant vraiment plein écran : le titre de section et la navigation de l’application s’effacent, comme dans la page Annoter.'
+            ]
+        },
+        {
             version: '1.27',
             couleur: 'vert',
             titre: 'Suppression de trimestre et corrections d’import',

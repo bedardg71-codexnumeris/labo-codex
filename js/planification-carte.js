@@ -2477,7 +2477,7 @@ function reconstruireDOM() {
             if (masques && (masques.has(l.source) || masques.has(l.cible))) continue;
             dessinerLien(l);
         }
-        mettreAJourCarrousel();
+        mettreAJourSommaire();
     });
 }
 
@@ -2681,52 +2681,6 @@ function centrerVueSurContenu() {
         zoneTravail.scrollLeft = cx - zoneTravail.clientWidth / 2;
         zoneTravail.scrollTop = cy - zoneTravail.clientHeight / 2;
     }
-}
-
-function zoomPleineLargeur() {
-    if (!zoneTravail) return;
-    var viewportWidth = zoneTravail.clientWidth;
-    var contentWidth = ESPACE_W;
-    if (etat.noeuds.size > 0) {
-        var minX = Infinity, maxX = -Infinity;
-        for (var entry of etat.noeuds) {
-            var nd = entry[1];
-            var el = document.getElementById('noeud-' + nd.id);
-            var nodeW = el ? el.offsetWidth : 200;
-            if (nd.x < minX) minX = nd.x;
-            if (nd.x + nodeW > maxX) maxX = nd.x + nodeW;
-        }
-        contentWidth = (maxX - minX) + 200;
-    }
-    etat.zoom = Math.max(0.25, Math.min(3, viewportWidth / contentWidth));
-    appliquerZoom();
-    centrerVueSurContenu();
-    var zoomInfo = document.getElementById('planif-zoom-info');
-    if (zoomInfo) zoomInfo.textContent = Math.round(etat.zoom * 100) + '%';
-    mettreAJourBoutonsZoomPreset();
-}
-
-function zoomPleineHauteur() {
-    if (!zoneTravail) return;
-    var viewportHeight = zoneTravail.clientHeight;
-    var contentHeight = ESPACE_H;
-    if (etat.noeuds.size > 0) {
-        var minY = Infinity, maxY = -Infinity;
-        for (var entry of etat.noeuds) {
-            var nd = entry[1];
-            var el = document.getElementById('noeud-' + nd.id);
-            var nodeH = el ? el.offsetHeight : 100;
-            if (nd.y < minY) minY = nd.y;
-            if (nd.y + nodeH > maxY) maxY = nd.y + nodeH;
-        }
-        contentHeight = (maxY - minY) + 200;
-    }
-    etat.zoom = Math.max(0.25, Math.min(3, viewportHeight / contentHeight));
-    appliquerZoom();
-    centrerVueSurContenu();
-    var zoomInfo = document.getElementById('planif-zoom-info');
-    if (zoomInfo) zoomInfo.textContent = Math.round(etat.zoom * 100) + '%';
-    mettreAJourBoutonsZoomPreset();
 }
 
 // === ATTACHER ÉVÉNEMENTS D'UN NŒUD ===
@@ -4271,51 +4225,57 @@ function initialiser() {
         });
     });
 
-    // Drag palette flottante
+    // Drag + repli des palettes flottantes (Nœuds, Navigation — même mécanique)
+    function rendrePaletteFlottante(palette) {
+        if (!palette) return;
+        var paletteBarre = palette.querySelector('.planif-palette-barre');
+        if (paletteBarre) {
+            // Pointer Events : couvre souris, doigt (iPad) et Apple Pencil.
+            // Nécessite touch-action:none sur .planif-palette-barre (styles.css).
+            paletteBarre.addEventListener('pointerdown', function(e) {
+                if (e.target.closest('.planif-palette-toggle')) return;
+                if (!e.isPrimary) return;
+                e.preventDefault();
+                var pointerId = e.pointerId;
+                var startX = e.clientX;
+                var startY = e.clientY;
+                var rect = palette.getBoundingClientRect();
+                var wrapperRect = document.getElementById('planif-zone-wrapper').getBoundingClientRect();
+                var startLeft = rect.left - wrapperRect.left;
+                var startTop = rect.top - wrapperRect.top;
+                // La palette Navigation est ancrée par `right` : libérer l'ancre
+                // dès qu'on la déplace, sinon left+right s'affrontent (étirement).
+                palette.style.right = 'auto';
+
+                function onMove(e2) {
+                    if (e2.pointerId !== pointerId) return;
+                    palette.style.left = (startLeft + e2.clientX - startX) + 'px';
+                    palette.style.top = (startTop + e2.clientY - startY) + 'px';
+                }
+                function onUp(e2) {
+                    if (e2.pointerId !== pointerId) return;
+                    paletteBarre.removeEventListener('pointermove', onMove);
+                    paletteBarre.removeEventListener('pointerup', onUp);
+                    paletteBarre.removeEventListener('pointercancel', onUp);
+                }
+                paletteBarre.setPointerCapture(pointerId);
+                paletteBarre.addEventListener('pointermove', onMove);
+                paletteBarre.addEventListener('pointerup', onUp);
+                paletteBarre.addEventListener('pointercancel', onUp);
+            });
+        }
+        var paletteToggle = palette.querySelector('.planif-palette-toggle');
+        if (paletteToggle) {
+            paletteToggle.addEventListener('click', function() {
+                palette.classList.toggle('planif-palette-replie');
+                paletteToggle.textContent = palette.classList.contains('planif-palette-replie') ? '+' : '−';
+                paletteToggle.title = palette.classList.contains('planif-palette-replie') ? 'Ouvrir la palette' : 'Réduire la palette';
+            });
+        }
+    }
     var palette = document.getElementById('planif-palette');
-    var paletteBarre = palette ? palette.querySelector('.planif-palette-barre') : null;
-    if (paletteBarre) {
-        // Pointer Events : couvre souris, doigt (iPad) et Apple Pencil.
-        // Nécessite touch-action:none sur .planif-palette-barre (styles.css).
-        paletteBarre.addEventListener('pointerdown', function(e) {
-            if (e.target.closest('.planif-palette-toggle')) return;
-            if (!e.isPrimary) return;
-            e.preventDefault();
-            var pointerId = e.pointerId;
-            var startX = e.clientX;
-            var startY = e.clientY;
-            var rect = palette.getBoundingClientRect();
-            var wrapperRect = document.getElementById('planif-zone-wrapper').getBoundingClientRect();
-            var startLeft = rect.left - wrapperRect.left;
-            var startTop = rect.top - wrapperRect.top;
-
-            function onMove(e2) {
-                if (e2.pointerId !== pointerId) return;
-                palette.style.left = (startLeft + e2.clientX - startX) + 'px';
-                palette.style.top = (startTop + e2.clientY - startY) + 'px';
-            }
-            function onUp(e2) {
-                if (e2.pointerId !== pointerId) return;
-                paletteBarre.removeEventListener('pointermove', onMove);
-                paletteBarre.removeEventListener('pointerup', onUp);
-                paletteBarre.removeEventListener('pointercancel', onUp);
-            }
-            paletteBarre.setPointerCapture(pointerId);
-            paletteBarre.addEventListener('pointermove', onMove);
-            paletteBarre.addEventListener('pointerup', onUp);
-            paletteBarre.addEventListener('pointercancel', onUp);
-        });
-    }
-
-    // Toggle repli palette
-    var paletteToggle = document.getElementById('planif-palette-toggle');
-    if (paletteToggle && palette) {
-        paletteToggle.addEventListener('click', function() {
-            palette.classList.toggle('planif-palette-replie');
-            paletteToggle.textContent = palette.classList.contains('planif-palette-replie') ? '+' : '−';
-            paletteToggle.title = palette.classList.contains('planif-palette-replie') ? 'Ouvrir la palette' : 'Réduire la palette';
-        });
-    }
+    rendrePaletteFlottante(palette);
+    rendrePaletteFlottante(document.getElementById('planif-palette-nav'));
 
     // Inspecteur — bouton 🔎 de la palette
     var btnInspecteur = document.getElementById('planif-palette-inspecteur-btn');
@@ -4845,7 +4805,7 @@ function gererKeydown(e) {
     }
     if ((e.metaKey || e.ctrlKey) && e.key === '1' && pasDansChamp) {
         e.preventDefault();
-        centrerVueSurContenu();
+        recentrerVue();
         return;
     }
 
@@ -4918,7 +4878,10 @@ function injecterNoeuds(listeNoeuds) {
     });
 }
 
-// =========== CARROUSEL SÉQUENCES ===========
+// =========== SOMMAIRE DE NAVIGATION (palette Navigation) ===========
+// Remplace les carrousels séquences/leçons de la barre d'outils (4 août 2026,
+// exercice 601-101) : la hiérarchie Vue globale › séquences › leçons est
+// verticale par nature, le sommaire la montre d'un coup d'œil.
 
 var sequenceActiveId = null; // null = vue globale (tout visible)
 
@@ -4932,67 +4895,84 @@ function obtenirSequencesCarte() {
     return sequences;
 }
 
-function mettreAJourCarrousel() {
-    var conteneur = document.getElementById('planif-toolbar-sequences');
-    var navZone = document.getElementById('planif-nav-seq');
-    if (!conteneur) return;
+function obtenirLeconsDeSequence(seq) {
+    if (!seq || !seq.enfants) return [];
+    var lecons = [];
+    for (var i = 0; i < seq.enfants.length; i++) {
+        var nd = etat.noeuds.get(seq.enfants[i]);
+        if (nd && nd.type === 'lecon') lecons.push(nd);
+    }
+    // Ordre spatial de lecture (gauche → droite, puis haut → bas), pas
+    // l'ordre d'insertion dans enfants[].
+    lecons.sort(function(a, b) { return (a.x - b.x) || (a.y - b.y); });
+    return lecons;
+}
 
-    // Bouton Vue globale : sorti du carrousel (4 août 2026, exercice 601-101),
-    // il vit dans la zone droite de la barre (#planif-btn-vue-globale, index.html).
-    var btnVueGlobale = document.getElementById('planif-btn-vue-globale');
+function mettreAJourSommaire() {
+    var conteneur = document.getElementById('planif-sommaire');
+    if (!conteneur) return;
 
     var sequences = obtenirSequencesCarte();
     if (sequences.length === 0) {
-        conteneur.innerHTML = '';
-        if (navZone) navZone.style.display = 'none';
-        if (btnVueGlobale) btnVueGlobale.style.display = 'none';
+        conteneur.innerHTML = '<div class="planif-som-vide">Aucune séquence — glisse un nœud « Séquence » sur la carte pour naviguer ici.</div>';
         return;
     }
 
-    if (navZone) navZone.style.display = '';
-    if (btnVueGlobale) {
-        btnVueGlobale.style.display = '';
-        btnVueGlobale.classList.toggle('actif', !sequenceActiveId);
-    }
+    var html = '<div class="planif-som-item planif-som-globale' + (!sequenceActiveId ? ' actif' : '') + '"' +
+               ' data-action="planificationCarte.ouvrirSequence"' +
+               ' data-param=""' +
+               ' title="Afficher tous les nœuds">' +
+               '<span class="planif-som-nom">Vue globale</span>' +
+               '</div>';
 
-    var html = '';
     for (var i = 0; i < sequences.length; i++) {
         var seq = sequences[i];
-        var nbLecons = (seq.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); }).length;
-        var estActif = seq.id === sequenceActiveId;
-        html += '<div class="planif-seq-badge' + (estActif ? ' actif' : '') + '"' +
+        var lecons = obtenirLeconsDeSequence(seq);
+        var seqActive = seq.id === sequenceActiveId;
+        html += '<div class="planif-som-item planif-som-seq' + (seqActive ? ' actif' : '') + '"' +
                 ' data-action="planificationCarte.ouvrirSequence"' +
                 ' data-param="' + seq.id + '"' +
                 ' title="' + echapperHtml(seq.titre || 'Sans titre') + '">' +
-                '<span class="planif-seq-badge-nom">' + echapperHtml(seq.titre || 'Sans titre') + '</span>' +
-                '<span class="planif-seq-badge-pill">' + nbLecons + '</span>' +
+                '<span class="planif-som-nom">' + echapperHtml(seq.titre || 'Sans titre') + '</span>' +
+                '<span class="planif-som-pill">' + lecons.length + '</span>' +
                 '</div>';
+        for (var j = 0; j < lecons.length; j++) {
+            var lec = lecons[j];
+            var duree = lec.metadata && lec.metadata.duree ? lec.metadata.duree + ' min' : '';
+            html += '<div class="planif-som-item planif-som-lecon' + (lec.id === leconActiveId ? ' actif' : '') + '"' +
+                    ' data-action="planificationCarte.naviguerSommaireLecon"' +
+                    ' data-param="' + lec.id + '"' +
+                    ' title="' + echapperHtml(lec.titre || 'Sans titre') + '">' +
+                    '<span class="planif-som-nom">' + echapperHtml(lec.titre || 'Sans titre') + '</span>' +
+                    (duree ? '<span class="planif-som-pill planif-som-pill-duree">' + duree + '</span>' : '') +
+                    '</div>';
+        }
     }
     conteneur.innerHTML = html;
 
-    mettreAJourCompteurSequences();
-    mettreAJourCarrouselLecons();
-
     requestAnimationFrame(function() {
-        var badgeActif = conteneur.querySelector('.planif-seq-badge.actif');
-        if (badgeActif) badgeActif.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        var itemActif = conteneur.querySelector('.planif-som-lecon.actif') ||
+                        conteneur.querySelector('.planif-som-seq.actif');
+        if (itemActif) itemActif.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
 }
 
-function mettreAJourCompteurSequences() {
+// Clic sur une leçon du sommaire : ouvrir d'abord sa séquence parente si besoin.
+function naviguerSommaireLecon(leconId) {
+    if (!etat.noeuds.has(leconId)) return;
     var sequences = obtenirSequencesCarte();
-    var index = sequenceActiveId ? sequences.findIndex(function(s) { return s.id === sequenceActiveId; }) : -1;
+    var seqParente = null;
+    for (var i = 0; i < sequences.length; i++) {
+        if ((sequences[i].enfants || []).indexOf(leconId) !== -1) { seqParente = sequences[i]; break; }
+    }
+    if (seqParente && seqParente.id !== sequenceActiveId) ouvrirSequence(seqParente.id);
+    ouvrirLecon(leconId);
+}
 
-    var texte = index >= 0 ? (index + 1) + ' / ' + sequences.length : '-- / ' + (sequences.length || '--');
-
-    var compteur = document.getElementById('planif-compteur-seq');
-    if (compteur) compteur.textContent = texte;
-
-    var btnPrec = document.getElementById('planif-btn-seq-prec');
-    if (btnPrec) btnPrec.disabled = (index <= 0);
-
-    var btnSuiv = document.getElementById('planif-btn-seq-suiv');
-    if (btnSuiv) btnSuiv.disabled = (index < 0 || index >= sequences.length - 1);
+// Recentrer la vue selon le contexte (bouton ◎ de la barre + ⌘1).
+function recentrerVue() {
+    if (sequenceActiveId) centrerVueSurSequence(sequenceActiveId);
+    else centrerVueSurContenu();
 }
 
 function centrerVueSurSequence(seqId) {
@@ -5047,93 +5027,14 @@ function ouvrirSequence(seqId) {
     });
 }
 
-function sequencePrecedente() {
-    var sequences = obtenirSequencesCarte();
-    var index = sequenceActiveId ? sequences.findIndex(function(s) { return s.id === sequenceActiveId; }) : -1;
-    if (index > 0) ouvrirSequence(sequences[index - 1].id);
-}
 
-function sequenceSuivante() {
-    var sequences = obtenirSequencesCarte();
-    var index = sequenceActiveId ? sequences.findIndex(function(s) { return s.id === sequenceActiveId; }) : -1;
-    if (index >= 0 && index < sequences.length - 1) ouvrirSequence(sequences[index + 1].id);
-}
-
-// =========== SOUS-CARROUSEL LEÇONS ===========
+// =========== VUE LEÇON (niveau micro) ===========
 
 var leconActiveId = null; // null = vue séquence (méso), ID = vue leçon (micro)
 
-function obtenirLeconsDeLaSequence() {
-    if (!sequenceActiveId) return [];
-    var seq = etat.noeuds.get(sequenceActiveId);
-    if (!seq || !seq.enfants) return [];
-    var lecons = [];
-    for (var i = 0; i < seq.enfants.length; i++) {
-        var nd = etat.noeuds.get(seq.enfants[i]);
-        if (nd && nd.type === 'lecon') lecons.push(nd);
-    }
-    return lecons;
-}
-
-function mettreAJourCarrouselLecons() {
-    var conteneur = document.getElementById('planif-toolbar-lecons');
-    var navZone = document.getElementById('planif-nav-lecon');
-    var sep = document.getElementById('planif-sep-lecons');
-    if (!conteneur) return;
-
-    var lecons = obtenirLeconsDeLaSequence();
-    if (lecons.length === 0) {
-        conteneur.innerHTML = '';
-        if (navZone) navZone.style.display = 'none';
-        if (sep) sep.style.display = 'none';
-        return;
-    }
-
-    if (navZone) navZone.style.display = '';
-    if (sep) sep.style.display = '';
-
-    var html = '';
-    for (var i = 0; i < lecons.length; i++) {
-        var lec = lecons[i];
-        var estActif = lec.id === leconActiveId;
-        var duree = lec.metadata && lec.metadata.duree ? lec.metadata.duree + '\u2009min' : '';
-        html += '<div class="planif-seq-badge planif-lecon-badge' + (estActif ? ' actif' : '') + '"' +
-                ' data-action="planificationCarte.ouvrirLecon"' +
-                ' data-param="' + lec.id + '"' +
-                ' title="' + echapperHtml(lec.titre || 'Sans titre') + '">' +
-                '<span class="planif-seq-badge-nom">' + echapperHtml(lec.titre || 'Sans titre') + '</span>' +
-                (duree ? '<span class="planif-seq-badge-pill planif-lecon-pill">' + duree + '</span>' : '') +
-                '</div>';
-    }
-    conteneur.innerHTML = html;
-
-    mettreAJourCompteurLecons();
-
-    requestAnimationFrame(function() {
-        var badgeActif = conteneur.querySelector('.planif-lecon-badge.actif');
-        if (badgeActif) badgeActif.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-    });
-}
-
-function mettreAJourCompteurLecons() {
-    var lecons = obtenirLeconsDeLaSequence();
-    var index = leconActiveId ? lecons.findIndex(function(l) { return l.id === leconActiveId; }) : -1;
-
-    var texte = index >= 0 ? (index + 1) + ' / ' + lecons.length : '-- / ' + (lecons.length || '--');
-
-    var compteur = document.getElementById('planif-compteur-lecon');
-    if (compteur) compteur.textContent = texte;
-
-    var btnPrec = document.getElementById('planif-btn-lecon-prec');
-    if (btnPrec) btnPrec.disabled = (index <= 0);
-
-    var btnSuiv = document.getElementById('planif-btn-lecon-suiv');
-    if (btnSuiv) btnSuiv.disabled = (index < 0 || index >= lecons.length - 1);
-}
-
 function ouvrirLecon(leconId) {
     leconActiveId = leconId || null;
-    mettreAJourCarrouselLecons();
+    mettreAJourSommaire();
 
     var vueLecon = document.getElementById('planif-vue-lecon');
     if (leconActiveId) {
@@ -5232,19 +5133,7 @@ function rendreVueLecon(leconId) {
     });
 }
 
-function leconPrecedente() {
-    var lecons = obtenirLeconsDeLaSequence();
-    var index = leconActiveId ? lecons.findIndex(function(l) { return l.id === leconActiveId; }) : -1;
-    if (index > 0) ouvrirLecon(lecons[index - 1].id);
-}
-
-function leconSuivante() {
-    var lecons = obtenirLeconsDeLaSequence();
-    var index = leconActiveId ? lecons.findIndex(function(l) { return l.id === leconActiveId; }) : -1;
-    if (index >= 0 && index < lecons.length - 1) ouvrirLecon(lecons[index + 1].id);
-}
-
-// =========== FIN CARROUSEL ===========
+// =========== FIN NAVIGATION ===========
 
 window.planificationCarte = {
     initialiser: initialiser,
@@ -5266,20 +5155,15 @@ window.planificationCarte = {
     afficherDetailsProduction: afficherDetailsProduction,
     naviguerVers: naviguerVers,
     CLE_SEANCES: CLE_SEANCES,
-    zoomPleineLargeur: zoomPleineLargeur,
-    zoomPleineHauteur: zoomPleineHauteur,
+    recentrerVue: recentrerVue,
     injecterNoeuds: injecterNoeuds,
     nouvelleCarte: nouvelleCarte,
     ouvrirGuide: ouvrirGuide,
-    // Carrousel séquences
+    // Sommaire de navigation (palette Navigation)
     ouvrirSequence: ouvrirSequence,
-    sequencePrecedente: sequencePrecedente,
-    sequenceSuivante: sequenceSuivante,
-    mettreAJourCarrousel: mettreAJourCarrousel,
-    // Sous-carrousel leçons
     ouvrirLecon: ouvrirLecon,
-    leconPrecedente: leconPrecedente,
-    leconSuivante: leconSuivante,
+    naviguerSommaireLecon: naviguerSommaireLecon,
+    mettreAJourSommaire: mettreAJourSommaire,
     // Plein écran
     togglePleinEcran: togglePleinEcranCarte
 };
