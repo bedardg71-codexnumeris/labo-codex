@@ -1518,6 +1518,7 @@ function clonerNoeud(noeudId) {
 
     selectionnerNoeud(newId);
     sauvegarder();
+    return newId;
 }
 
 function supprimerLien(lienId) {
@@ -2696,6 +2697,30 @@ function attacherEvenements(el, donnees) {
         if (e.metaKey || e.ctrlKey) {
             toggleMultiSelection(id);
             return;
+        }
+
+        // ⌥ (Mac) / Alt (Windows) + glisser : dupliquer le bloc et glisser le
+        // doublon (4 août 2026, exercice 601-101). Conteneurs non clonables :
+        // clonerNoeud l'explique (toast) et on retombe sur le drag normal.
+        if (e.altKey) {
+            var cloneId = clonerNoeud(id);
+            if (cloneId) {
+                var clone = etat.noeuds.get(cloneId);
+                var cloneEl = document.getElementById(cloneId);
+                if (clone && cloneEl) {
+                    // Le doublon part de la position de la source (pas du
+                    // décalage de ⌘D) puis suit le curseur.
+                    clone.x = donnees.x;
+                    clone.y = donnees.y;
+                    cloneEl.style.left = clone.x + 'px';
+                    cloneEl.style.top = clone.y + 'px';
+                    cloneEl.dispatchEvent(new MouseEvent('mousedown', {
+                        bubbles: true, cancelable: true,
+                        clientX: e.clientX, clientY: e.clientY, button: 0
+                    }));
+                }
+                return;
+            }
         }
 
         // Multi-selection group drag

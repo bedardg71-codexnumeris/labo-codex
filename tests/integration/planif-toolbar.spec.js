@@ -170,6 +170,79 @@ test('palette Navigation — sommaire Vue globale › séquences › leçons, ba
     expect(erreurs).toEqual([]);
 });
 
+test('Alt/⌥+glisser un bloc — crée un doublon qui suit la souris, la source ne bouge pas', async ({ page }) => {
+    const erreurs = [];
+    attacherCaptureErreurs(page, erreurs);
+    await ouvrirAppEnDemo(page);
+    await montrerCarteMentale(page);
+    await page.evaluate(() => window.planificationCarte.initialiser());
+    await page.waitForTimeout(400);
+
+    await page.evaluate(() => {
+        window.planificationCarte.injecterNoeuds([
+            { id: 'actAlt1', type: 'activite', titre: 'Activité à dupliquer', x: 600, y: 300 }
+        ]);
+    });
+    await page.waitForTimeout(400);
+
+    const avant = await page.evaluate(() => window.planificationCarte.etat.noeuds.size);
+
+    // Le canevas est un grand espace défilable et le bas de l'écran est occupé
+    // par le bandeau/popup du mode démo : plutôt que de défiler (borné, fragile),
+    // TÉLÉPORTER le nœud en coordonnées données vers un point visible du haut
+    // du canevas — position d'écran connue, clic garanti.
+    await page.evaluate(() => {
+        const zone = document.getElementById('planif-zone-travail');
+        const el = document.getElementById('actAlt1');
+        const zr = zone.getBoundingClientRect();
+        const r = el.getBoundingClientRect();
+        const n = window.planificationCarte.etat.noeuds.get('actAlt1');
+        const zoom = window.planificationCarte.etat.zoom || 1;
+        n.x += ((zr.x + 320) - r.x) / zoom;
+        n.y += ((zr.y + 120) - r.y) / zoom;
+        el.style.left = n.x + 'px';
+        el.style.top = n.y + 'px';
+    });
+    await page.waitForTimeout(200);
+    const box = await page.locator('#actAlt1').boundingBox();
+    const posAvant = await page.evaluate(() => {
+        const n = window.planificationCarte.etat.noeuds.get('actAlt1');
+        return { x: n.x, y: n.y };
+    });
+    // Saisir le bloc par son EN-TÊTE : le centre est le titre contenteditable,
+    // que le drag (normal comme Alt) ignore par conception (clic = édition).
+    await page.keyboard.down('Alt');
+    await page.mouse.move(box.x + box.width / 2, box.y + 10);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width / 2 + 150, box.y + 10 + 90, { steps: 5 });
+    await page.mouse.up();
+    await page.keyboard.up('Alt');
+    await page.waitForTimeout(400);
+
+    const apres = await page.evaluate(() => {
+        const noeuds = Array.from(window.planificationCarte.etat.noeuds.values());
+        const source = noeuds.find(n => n.id === 'actAlt1');
+        const clone = noeuds.find(n => n.id !== 'actAlt1' && n.cloneSourceId === 'actAlt1');
+        return {
+            total: noeuds.length,
+            source: { x: source.x, y: source.y },
+            clone: clone ? { titre: clone.titre, x: clone.x, y: clone.y } : null
+        };
+    });
+
+    // Un doublon existe, marqué clone de la source (indicateur 🎯 existant).
+    expect(apres.total).toBe(avant + 1);
+    expect(apres.clone).not.toBeNull();
+    expect(apres.clone.titre).toBe('Activité à dupliquer');
+    // La source n'a pas bougé ; le clone a suivi la souris (+150/+90 px écran).
+    expect(apres.source.x).toBe(posAvant.x);
+    expect(apres.source.y).toBe(posAvant.y);
+    expect(apres.clone.x).toBeGreaterThan(posAvant.x + 100);
+    expect(apres.clone.y).toBeGreaterThan(posAvant.y + 50);
+
+    expect(erreurs).toEqual([]);
+});
+
 test('renommer la carte — via le menu Actions, le titre central est retiré', async ({ page }) => {
     // Accepter le prompt de renommage (enregistré AVANT le dismiss générique
     // du helper : le premier handler gagne, le dismiss tardif est toléré).
