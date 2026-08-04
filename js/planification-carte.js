@@ -3982,14 +3982,7 @@ function mettreAJourListeCartes() {
         var opt = document.createElement('option');
         opt.value = carte.id;
         opt.textContent = carte.nom;
-        if (carte.id === index.active) {
-            opt.selected = true;
-            var titreCarte = document.getElementById('planif-titre-carte');
-            if (titreCarte && document.activeElement !== titreCarte) {
-                titreCarte.value = carte.nom;
-                titreCarte.size = Math.max(10, carte.nom.length + 2);
-            }
-        }
+        if (carte.id === index.active) opt.selected = true;
         select.appendChild(opt);
     }
 }
@@ -4688,20 +4681,18 @@ function initialiser() {
         });
     }
 
-    // Titre carte éditable
-    var titreCarte = document.getElementById('planif-titre-carte');
-    if (titreCarte) {
-        function ajusterLargeurTitre() {
-            titreCarte.size = Math.max(10, titreCarte.value.length + 2);
-        }
-        titreCarte.addEventListener('input', function() {
-            renommerCarteActive(titreCarte.value.trim());
-            ajusterLargeurTitre();
+    // Renommer la carte active (menu Actions — remplace l'ancien titre éditable
+    // du centre de la barre, retiré le 4 août 2026 : il dupliquait le sélecteur)
+    var btnRenommerCarte = document.getElementById('planif-btn-renommer-carte');
+    if (btnRenommerCarte) {
+        btnRenommerCarte.addEventListener('click', function() {
+            var index = window.planificationDonnees.getIndex();
+            var carte = index && index.cartes.find(function(c) { return c.id === index.active; });
+            if (!carte) return;
+            var nom = prompt('Nouveau nom de la carte :', carte.nom);
+            if (nom === null) return;
+            renommerCarteActive(nom.trim());
         });
-        titreCarte.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') { e.preventDefault(); titreCarte.blur(); }
-        });
-        ajusterLargeurTitre();
     }
 
     // Fermer panneau

@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260804b"> <!-- Plein écran carte mentale (4 août) : titre masqué + fond opaque + nav principale masquée -->
+    <link rel="stylesheet" href="styles.css?v=20260804c"> <!-- Toolbar carte mentale (4 août) : titre central retiré, renommage via Actions -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -4163,6 +4163,7 @@
                                         <button class="planif-btn-carte" id="planif-btn-actions">Actions ▾</button>
                                         <div class="planif-actions-dropdown" id="planif-actions-dropdown">
                                             <button class="planif-action-item" id="planif-btn-nouvelle-carte">Nouvelle carte</button>
+                                            <button class="planif-action-item" id="planif-btn-renommer-carte">Renommer cette carte</button>
                                             <button class="planif-action-item" id="planif-btn-dupliquer-carte">Dupliquer cette carte</button>
                                             <button class="planif-action-item" id="planif-btn-importer-carte">Importer une carte</button>
                                             <button class="planif-action-item" id="planif-btn-exporter-carte">Exporter cette carte</button>
@@ -4173,7 +4174,6 @@
                                     <button class="planif-btn-carte" id="planif-btn-annuler" title="Ctrl+Z"><img src="icons/icon-undo.svg" alt="" class="planif-icon" style="width:14px;height:14px;margin-right:3px;vertical-align:middle;">Annuler</button>
                                     <input type="file" id="planif-fichier-import" accept=".json" style="display:none">
                                 </div>
-                                <h3 class="planif-toolbar-titre"><input type="text" id="planif-titre-carte" value="Sans titre" placeholder="Titre de la carte…"></h3>
                                 <!-- Carrousel séquences -->
                                 <div class="planif-toolbar-sequences" id="planif-toolbar-sequences"></div>
                                 <div class="planif-nav-seq" id="planif-nav-seq" style="display:none">
@@ -14748,7 +14748,7 @@
     <script src="js/planification-donnees.js?v=2026050554"></script> <!-- #261 : fallback automatique quand index.active pointe sur carte inexistante -->
 
     <script src="js/planification-bibliotheque.js?v=2026051026"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
-    <script src="js/planification-carte.js?v=20260804a"></script> <!-- Vue globale sortie du carrousel (4 août) -->
+    <script src="js/planification-carte.js?v=20260804b"></script> <!-- Vue globale hors carrousel + renommage via Actions (4 août) -->
     <script src="js/organisateur.js?v=2026062701"></script> <!-- Refonte nav SP4 : id conception-organisateur (3 occ.) -->
     <script src="js/planification.js?v=2026050522"></script> <!-- Refonte nav SP4 : hooks nomSection 'conception' + idSousSection conception-* -->
 
