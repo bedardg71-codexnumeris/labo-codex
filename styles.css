@@ -18594,6 +18594,31 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     text-align: right;
 }
 
+/* Badge « En évolution » de l'en-tête de section — TEMPORAIRE, retrait
+   prévu à la stabilisation du module (BACKLOG #366). */
+.planif-badge-evolution {
+    display: inline-block;
+    margin-left: 10px;
+    padding: 2px 10px;
+    border: 1px solid color-mix(in srgb, var(--section-conception) 55%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--section-conception) 14%, transparent);
+    color: var(--section-conception);
+    font-size: 0.72rem;
+    font-weight: 600;
+    vertical-align: middle;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+.planif-note-evolution {
+    font-size: 0.82rem;
+    margin-top: -6px;
+}
+.mode-clair .planif-badge-evolution {
+    color: color-mix(in srgb, var(--section-conception) 55%, #4a3f10);
+    background: color-mix(in srgb, var(--section-conception) 22%, transparent);
+}
+
 /* === SOMMAIRE DE NAVIGATION (palette Navigation) === */
 /* Remplace les carrousels séquences/leçons de la barre (4 août 2026). */
 .planif-nav-contenu {

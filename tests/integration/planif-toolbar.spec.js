@@ -62,19 +62,26 @@ test('plein écran carte mentale — titre de section masqué, module seul visib
     await montrerCarteMentale(page);
 
     const h2 = page.locator('#conception-carte > h2');
-    const sousTitre = page.locator('#conception-carte > p.text-muted');
+    // Deux lignes text-muted depuis le 4 août : sous-titre + note « En évolution » (#366).
+    const sousTitres = page.locator('#conception-carte > p.text-muted');
+    const badge = page.locator('#conception-carte .planif-badge-evolution');
 
-    // État normal : le titre de section est là.
+    // État normal : titre, badge « En évolution » (#366) et sous-titres sont là.
     await expect(h2).toBeVisible();
-    await expect(sousTitre).toBeVisible();
+    await expect(badge).toBeVisible();
+    await expect(sousTitres.first()).toBeVisible();
 
     // Entrer en plein écran par le vrai bouton (dispatcher data-action).
     await page.click('#planif-btn-plein-ecran');
     await page.waitForTimeout(300);
 
-    // 1. Le titre et le sous-titre de section disparaissent.
+    // 1. Le titre, le badge et les deux lignes de sous-titre disparaissent.
     await expect(h2).toBeHidden();
-    await expect(sousTitre).toBeHidden();
+    await expect(badge).toBeHidden();
+    const nbSousTitres = await sousTitres.count();
+    for (let i = 0; i < nbSousTitres; i++) {
+        await expect(sousTitres.nth(i)).toBeHidden();
+    }
 
     // 2. Le module occupe le viewport depuis le bord haut : le wrapper opaque
     //    commence à y=0 (c'est lui qui couvre la navigation principale,
@@ -93,7 +100,7 @@ test('plein écran carte mentale — titre de section masqué, module seul visib
     await page.keyboard.press('Escape');
     await page.waitForTimeout(300);
     await expect(h2).toBeVisible();
-    await expect(sousTitre).toBeVisible();
+    await expect(sousTitres.first()).toBeVisible();
     await expect(page.locator('.navigation-principale')).toBeVisible();
 
     expect(erreurs).toEqual([]);
