@@ -98,3 +98,44 @@ test('plein écran carte mentale — titre de section masqué, module seul visib
 
     expect(erreurs).toEqual([]);
 });
+
+test('bouton Vue globale — dans la zone droite de la barre, hors du carrousel, état synchronisé', async ({ page }) => {
+    const erreurs = [];
+    attacherCaptureErreurs(page, erreurs);
+    await ouvrirAppEnDemo(page);
+    await montrerCarteMentale(page);
+    await page.evaluate(() => window.planificationCarte.initialiser());
+    await page.waitForTimeout(400);
+
+    // Donner des séquences à la carte (le bouton n'a de sens qu'avec des séquences).
+    await page.evaluate(() => {
+        window.planificationCarte.injecterNoeuds([
+            { id: 'seqT1', type: 'sequence', titre: 'Séquence test 1', x: 400, y: 100, enfants: [] },
+            { id: 'seqT2', type: 'sequence', titre: 'Séquence test 2', x: 900, y: 300, enfants: [] }
+        ]);
+    });
+    await page.waitForTimeout(500);
+
+    const btn = page.locator('.planif-toolbar-droite #planif-btn-vue-globale');
+
+    // Déplacé le 4 août 2026 (exercice 601-101) : le bouton vit dans la zone
+    // droite, plus DANS le carrousel des séquences.
+    await expect(btn).toBeVisible();
+    await expect(page.locator('#planif-toolbar-sequences .planif-seq-badge-global')).toHaveCount(0);
+
+    // Vue globale par défaut → bouton actif.
+    await expect(btn).toHaveClass(/actif/);
+
+    // Ouvrir une séquence → le bouton se désactive.
+    await page.click('#planif-toolbar-sequences .planif-seq-badge');
+    await page.waitForTimeout(400);
+    await expect(btn).not.toHaveClass(/actif/);
+
+    // Cliquer le bouton → retour vue globale, aucun badge de séquence actif.
+    await btn.click();
+    await page.waitForTimeout(400);
+    await expect(btn).toHaveClass(/actif/);
+    await expect(page.locator('#planif-toolbar-sequences .planif-seq-badge.actif')).toHaveCount(0);
+
+    expect(erreurs).toEqual([]);
+});
