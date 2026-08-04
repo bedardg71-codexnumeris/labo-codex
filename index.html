@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260804f"> <!-- Comptabilité du temps : jauge + rollup (4 août) -->
+    <link rel="stylesheet" href="styles.css?v=20260804g"> <!-- Panneau import inter-trimestre (4 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -4167,11 +4167,14 @@
                                             <button class="planif-action-item" id="planif-btn-nouvelle-carte">Nouvelle carte</button>
                                             <button class="planif-action-item" id="planif-btn-renommer-carte">Renommer cette carte</button>
                                             <button class="planif-action-item" id="planif-btn-dupliquer-carte">Dupliquer cette carte</button>
-                                            <button class="planif-action-item" id="planif-btn-importer-carte">Importer une carte</button>
+                                            <button class="planif-action-item" id="planif-btn-importer-carte">Importer une carte (fichier)</button>
+                                            <button class="planif-action-item" id="planif-btn-import-trimestre">Importer d'un autre trimestre…</button>
                                             <button class="planif-action-item" id="planif-btn-exporter-carte">Exporter cette carte</button>
                                             <hr class="planif-action-sep">
                                             <button class="planif-action-item planif-danger" id="planif-btn-supprimer-carte">Supprimer cette carte</button>
                                         </div>
+                                        <!-- Panneau import inter-trimestre (rempli par JS, patron Brique C) -->
+                                        <div class="planif-actions-dropdown planif-import-tri-panel" id="planif-import-tri-panel"></div>
                                     </div>
                                     <button class="planif-btn-carte" id="planif-btn-annuler" title="Ctrl+Z"><img src="icons/icon-undo.svg" alt="" class="planif-icon" style="width:14px;height:14px;margin-right:3px;vertical-align:middle;">Annuler</button>
                                     <input type="file" id="planif-fichier-import" accept=".json" style="display:none">
@@ -14741,10 +14744,10 @@
     <script src="js/bilan-reflexif.js?v=20260515f"></script> <!-- §4.1.g : résidu (init + navigation + hooks) -->
 
     <!-- Module Planification (Carte mentale) -->
-    <script src="js/planification-donnees.js?v=2026050554"></script> <!-- #261 : fallback automatique quand index.active pointe sur carte inexistante -->
+    <script src="js/planification-donnees.js?v=20260804a"></script> <!-- Import inter-trimestre des cartes (4 août) -->
 
     <script src="js/planification-bibliotheque.js?v=2026051026"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
-    <script src="js/planification-carte.js?v=20260804e"></script> <!-- Comptabilité du temps : rollup périodes + jauge (4 août) -->
+    <script src="js/planification-carte.js?v=20260804f"></script> <!-- Import inter-trimestre : panneau Actions (4 août) -->
     <script src="js/organisateur.js?v=2026062701"></script> <!-- Refonte nav SP4 : id conception-organisateur (3 occ.) -->
     <script src="js/planification.js?v=2026050522"></script> <!-- Refonte nav SP4 : hooks nomSection 'conception' + idSousSection conception-* -->
 
@@ -14828,7 +14831,7 @@
     <script src="js/guidage-demo.js?v=20260512d"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=20260804b"></script> <!-- Entrées 1.28-1.29 : Alignement navigation + temps -->
+    <script src="js/changelog-data.js?v=20260804c"></script> <!-- Entrée 1.30 : import inter-trimestre -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
     <script src="js/etats-vides.js?v=2026050537"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre -->

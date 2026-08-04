@@ -295,6 +295,71 @@ test('comptabilité du temps — rollup activités→leçon→séquence, périod
     expect(erreurs).toEqual([]);
 });
 
+test('import inter-trimestre — copie vers le trimestre actif, source intacte, notes de séance suivies', async ({ page }) => {
+    const erreurs = [];
+    attacherCaptureErreurs(page, erreurs);
+    await ouvrirAppEnDemo(page);
+    await montrerCarteMentale(page);
+    await page.evaluate(() => window.planificationCarte.initialiser());
+    await page.waitForTimeout(400);
+
+    // Semer un trimestre source avec une carte (leçon + activité) et une note
+    // de séance rattachée à la leçon.
+    const sourceAvant = await page.evaluate(() => {
+        const trimestres = db.getSync('trimestres', []) || [];
+        trimestres.push({ id: 'h9099', nom: 'Hiver 9099 (test)' });
+        db.setSync('trimestres', trimestres); // security-ok: fixture de test locale
+        const doc = {
+            index: { active: 'carte_1', compteurCartes: 1, cartes: [{ id: 'carte_1', nom: 'Alignement 601-101 test', dateCreation: '2026-01-01' }] },
+            cartes: { carte_1: { compteur: 3, compteurLiens: 0, noeuds: [
+                { id: 'pl_seq1', type: 'sequence', titre: 'Séq source', x: 100, y: 100, enfants: ['pl_lec1'], parent: null },
+                { id: 'pl_lec1', type: 'lecon', titre: 'Leçon source', x: 130, y: 160, enfants: ['pl_act1'], parent: 'pl_seq1' },
+                { id: 'pl_act1', type: 'activite', titre: 'Act source', x: 160, y: 210, enfants: [], parent: 'pl_lec1', metadata: { duree: 40 } }
+            ], liens: [] } }
+        };
+        db.setSync('h9099_planification_mindmap', doc); // security-ok: fixture de test locale
+        db.setSync('h9099_planification_seances', { pl_lec1: { objectifPersonnalise: 'Objectif migré', notes: 'Note migrée' } }); // security-ok: fixture de test locale
+        return JSON.stringify(db.getSync('h9099_planification_mindmap'));
+    });
+
+    // Menu Actions → « Importer d'un autre trimestre… » → le panneau liste la carte
+    await page.click('#planif-btn-actions');
+    await page.click('#planif-btn-import-trimestre');
+    const panneau = page.locator('#planif-import-tri-panel');
+    await expect(panneau).toBeVisible();
+    await expect(panneau).toContainText('Hiver 9099 (test)');
+    await expect(panneau).toContainText('Alignement 601-101 test');
+    await expect(panneau).toContainText('3 nœuds');
+
+    // Importer → la carte devient active dans le trimestre courant
+    await panneau.locator('.planif-import-tri-btn').first().click();
+    await page.waitForTimeout(500);
+
+    const resultat = await page.evaluate(() => {
+        const sel = document.getElementById('planif-liste-cartes');
+        const index = window.planificationDonnees.getIndex();
+        const entree = index.cartes.find(c => c.id === index.active);
+        const seances = db.getSync(window.cle('planification_seances'), {});
+        return {
+            nomActif: sel.options[sel.selectedIndex]?.textContent,
+            importeDe: entree && entree.importeDe ? entree.importeDe.trimestre : null,
+            nbNoeudsCharges: window.planificationCarte.etat.noeuds.size,
+            noteSuivie: seances.pl_lec1 ? seances.pl_lec1.notes : null,
+            sourceApres: JSON.stringify(db.getSync('h9099_planification_mindmap'))
+        };
+    });
+
+    expect(resultat.nomActif).toBe('Alignement 601-101 test');
+    expect(resultat.importeDe).toBe('h9099');
+    expect(resultat.nbNoeudsCharges).toBe(3);
+    // Les Objectif/Notes de la vue leçon ont suivi la carte (ids préservés).
+    expect(resultat.noteSuivie).toBe('Note migrée');
+    // LE point non négociable : la source n'a pas bougé d'un octet.
+    expect(resultat.sourceApres).toBe(sourceAvant);
+
+    expect(erreurs).toEqual([]);
+});
+
 test('renommer la carte — via le menu Actions, le titre central est retiré', async ({ page }) => {
     // Accepter le prompt de renommage (enregistré AVANT le dismiss générique
     // du helper : le premier handler gagne, le dismiss tardif est toléré).

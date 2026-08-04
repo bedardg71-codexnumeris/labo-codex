@@ -12,6 +12,14 @@
 
     var CHANGELOG = [
         {
+            version: '1.30',
+            couleur: 'vert',
+            titre: 'Alignement : importer une carte d’un autre trimestre',
+            items: [
+                'Actions → « Importer d’un autre trimestre… » : copie une carte mentale d’un trimestre vers le trimestre actif sans sortir de l’application — comme pour les grilles et les productions. La carte d’origine reste intacte, et les notes de séance des leçons suivent la copie.'
+            ]
+        },
+        {
             version: '1.29',
             couleur: 'vert',
             titre: 'Alignement pédagogique : comptabilité du temps',
