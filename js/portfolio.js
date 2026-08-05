@@ -927,91 +927,9 @@ function calculerPerformanceParObjectif(da, ensembleId) {
     return performancesParObjectif;
 }
 
-/**
- * Calcule la note finale pondérée multi-objectifs
- *
- * Formule : Note_finale = Σ(P_obji × poids_i) / 100
- *
- * @param {string} da - Numéro DA de l'étudiant
- * @param {string} ensembleId - ID de l'ensemble d'objectifs
- * @returns {Object} - { noteFinale: 78.5, details: {...} }
- *
- * EXEMPLES :
- * calculerNoteFinaleMultiObjectifs('1234567', '<ensembleObjectifsId>')
- * → {
- *     noteFinale: 78.5,
- *     nbObjectifsEvalues: 13,
- *     nbObjectifsSansNote: 0,
- *     performances: { obj1: {P: 85, poids: 8}, ... }
- *   }
- */
-function calculerNoteFinaleMultiObjectifs(da, ensembleId) {
-    if (!da || !ensembleId) {
-        console.warn('[Multi-Objectifs] DA ou ensembleId manquant');
-        return null;
-    }
-
-    // 1. Charger l'ensemble d'objectifs
-    const ensembles = chargerEnsemblesObjectifs();
-    const ensemble = ensembles.find(e => e.id === ensembleId);
-
-    if (!ensemble || !ensemble.objectifs) {
-        console.warn('[Multi-Objectifs] Ensemble introuvable:', ensembleId);
-        return null;
-    }
-
-    // 2. Calculer performance par objectif
-    const performances = calculerPerformanceParObjectif(da, ensembleId);
-
-    if (!performances) {
-        return null;
-    }
-
-    // 3. Calculer la note finale pondérée
-    let noteFinale = 0;
-    let poidsTotal = 0;
-    let nbObjectifsEvalues = 0;
-    let nbObjectifsSansNote = 0;
-
-    const detailsPerformances = {};
-
-    ensemble.objectifs.forEach(objectif => {
-        const perf = performances[objectif.id];
-
-        if (perf && perf.P !== null) {
-            // Contribution de cet objectif = P × poids
-            noteFinale += (perf.P * objectif.poids) / 100;
-            poidsTotal += objectif.poids;
-            nbObjectifsEvalues++;
-
-            detailsPerformances[objectif.id] = {
-                nom: objectif.nom,
-                P: perf.P,
-                poids: objectif.poids,
-                contribution: (perf.P * objectif.poids) / 100,
-                nbArtefacts: perf.nbArtefacts
-            };
-        } else {
-            nbObjectifsSansNote++;
-            detailsPerformances[objectif.id] = {
-                nom: objectif.nom,
-                P: null,
-                poids: objectif.poids,
-                contribution: 0,
-                nbArtefacts: 0
-            };
-        }
-    });
-
-
-    return {
-        noteFinale: noteFinale,
-        nbObjectifsEvalues: nbObjectifsEvalues,
-        nbObjectifsSansNote: nbObjectifsSansNote,
-        poidsTotal: poidsTotal,
-        performances: detailsPerformances
-    };
-}
+/* #402 (L11, audit 5 août 2026) : calculerNoteFinaleMultiObjectifs RETIRÉE —
+   somme pondérée jamais normalisée par poidsTotal ET zéro appelant (grep js/ +
+   index.html + tests). Ablation zéro-dette plutôt que correction d'un mort. */
 
 /* ===============================
    🆕 CALCUL AVEC CATÉGORIES SÉLECTION/OBLIGATOIRES
@@ -1207,7 +1125,6 @@ window.toggleArtefactPortfolioFromEl = toggleArtefactPortfolioFromEl;
 
 // Exporter les fonctions multi-objectifs pour utilisation par d'autres modules
 window.calculerPerformanceParObjectif = calculerPerformanceParObjectif;
-window.calculerNoteFinaleMultiObjectifs = calculerNoteFinaleMultiObjectifs;
 
 // 🆕 Beta 95.4 : Exporter les fonctions de catégories
 window.calculerNoteAvecCategories = calculerNoteAvecCategories;
