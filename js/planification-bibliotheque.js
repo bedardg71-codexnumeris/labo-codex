@@ -554,7 +554,11 @@ function importerAlignementsTrimestre() {
  */
 async function importerCarteDepuisTrimestre(codeTrimestre, carteId) {
     try {
-        var donnees = db.getSync(codeTrimestre + '_planification_mindmap', null);
+        // #393 (audit 5 août) : voie canonique cleSource() — ne pas dupliquer le
+        // savoir du namespacing (repli conservé pour un chargement précoce).
+        var donnees = (typeof cleSource === 'function')
+            ? db.getSync(cleSource('planification_mindmap', codeTrimestre), null)
+            : db.getSync(codeTrimestre + '_planification_mindmap', null);
         if (!donnees || !donnees.cartes || !donnees.cartes[carteId]) {
             notifications.erreur('Carte introuvable.');
             return;

@@ -2292,7 +2292,11 @@ async function executerImportLocalStorageBrut(config) {
     } catch (erreur) {
         configCompleteEnAttente = null;
         console.error('Erreur lors de l\'import localStorage brut:', erreur);
-        alert('Erreur lors de l\'import.\n\n' + erreur.message);
+        // #393 (audit 5 août, rapport A8) : les clés écrites AVANT l'échec
+        // restent écrites — resynchroniser le cache et le dire, plutôt qu'une
+        // erreur muette sur un état à moitié importé.
+        try { await db.syncToLocalStorageCache(); } catch (e2) { /* best-effort */ }
+        alert('Import interrompu : ' + erreur.message + '\n\nLes éléments déjà importés avant l\'erreur sont conservés. Recharge la page pour repartir d\'un état à jour.');
     }
 }
 
@@ -2781,7 +2785,11 @@ async function executerImportSelectif() {
     } catch (erreur) {
         configCompleteEnAttente = null;
         console.error('Erreur lors de l\'import sélectif:', erreur);
-        alert('Erreur lors de l\'import.\n\n' + erreur.message);
+        // #393 (audit 5 août, rapport A8) : les clés écrites AVANT l'échec
+        // restent écrites — resynchroniser le cache et le dire, plutôt qu'une
+        // erreur muette sur un état à moitié importé.
+        try { await db.syncToLocalStorageCache(); } catch (e2) { /* best-effort */ }
+        alert('Import interrompu : ' + erreur.message + '\n\nLes éléments déjà importés avant l\'erreur sont conservés. Recharge la page pour repartir d\'un état à jour.');
     }
 }
 

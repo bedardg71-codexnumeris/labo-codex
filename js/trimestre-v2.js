@@ -130,6 +130,18 @@ function validerCadreTrimestre(cadre, evenements) {
         }
     });
 
+    // 7. #393 (audit 5 août) : deux journées sans cours à la même date —
+    // presque toujours une double saisie ; la seconde écrase la première dans
+    // les maps du générateur de calendrier, en silence.
+    const datesVues = new Set();
+    (Array.isArray(evenements) ? evenements : []).forEach(evt => {
+        if (!evt || !evt.dateEvenement) return;
+        if (datesVues.has(evt.dateEvenement)) {
+            avertissements.push(`Deux journées sans cours portent la même date (${evt.dateEvenement}) — vérifie s'il s'agit d'une double saisie.`);
+        }
+        datesVues.add(evt.dateEvenement);
+    });
+
     return avertissements;
 }
 
