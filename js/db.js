@@ -364,7 +364,9 @@
                 // seuil, on NE tente PAS localStorage (évite un QuotaExceededError
                 // systématique sur les grosses clés) et on sert getSync via
                 // memoryCache. Comportement observable identique, chemin plus propre.
-                if (this._estimateSize(value) > SEUIL_IDB_FIRST) {
+                // #401 : sérialiser UNE fois (taille + écriture sur la même chaîne).
+                const jsonString = JSON.stringify(value);
+                if (this._estimateSizeFromString(jsonString) > SEUIL_IDB_FIRST) {
                     this.memoryCache.set(key, value);
                     try { localStorage.removeItem(key); } catch (ex) { console.warn('[DB] localStorage.removeItem skipped:', key, ex.message || ex); }
                     return;
@@ -373,7 +375,7 @@
                 // Valeur raisonnable → AUSSI écrire dans localStorage (cache
                 // synchrone) pour que getSync() voie immédiatement la donnée.
                 try {
-                    this._setLocalStorage(key, value);
+                    this._setLocalStorageString(key, jsonString);
                     // Plus à jour que memoryCache : retirer une éventuelle copie périmée.
                     this.memoryCache.delete(key);
                 } catch (e) {
@@ -391,6 +393,23 @@
             } else {
                 this._setLocalStorage(key, value);
             }
+        }
+
+        /**
+         * #401 : lecture de TOUS les enregistrements IDB en UNE transaction
+         * readonly (getAll) — le boot faisait N allers-retours séquentiels
+         * (une transaction par clé), terme dominant probable des 729-1057 ms
+         * mesurés en terrain (Safari, codex réel, 5 août soir).
+         * @returns {Promise<Array<{key:string, value:*}>>}
+         */
+        async _getAllIndexedDB() {
+            return new Promise((resolve, reject) => {
+                const transaction = this.db.transaction(['keyvalue'], 'readonly');
+                const store = transaction.objectStore('keyvalue');
+                const request = store.getAll();
+                request.onsuccess = () => resolve(request.result || []);
+                request.onerror = () => reject(request.error || new Error('IndexedDB getAll error'));
+            });
         }
 
         /**
@@ -434,7 +453,17 @@
          * Écriture vers localStorage
          */
         _setLocalStorage(key, value) {
-            const jsonString = JSON.stringify(value);
+            this._setLocalStorageString(key, JSON.stringify(value));
+        }
+
+        /**
+         * #401 : écriture d'une chaîne DÉJÀ sérialisée — permet aux chemins qui
+         * viennent d'estimer la taille (setSync, set, syncToLocalStorageCache)
+         * de sérialiser UNE seule fois (mesuré à l'audit : 243 ms de double
+         * stringify au boot sur 5,2 Mo/120 clés, payés aussi à chaque écriture
+         * de grosse clé).
+         */
+        _setLocalStorageString(key, jsonString) {
             localStorage.setItem(key, jsonString);
             // #353 Option 1 : point de passage des écritures localStorage →
             // vérification (throttlée) de l'occupation vs budget. Observabilité
@@ -447,7 +476,19 @@
          */
         _estimateSize(value) {
             try {
-                return new Blob([JSON.stringify(value)]).size;
+                return this._estimateSizeFromString(JSON.stringify(value));
+            } catch (e) {
+                return -1;
+            }
+        }
+
+        /**
+         * #401 : taille (octets UTF-8) d'une chaîne déjà sérialisée — même
+         * métrique que _estimateSize, sans re-stringify.
+         */
+        _estimateSizeFromString(jsonString) {
+            try {
+                return new Blob([jsonString]).size;
             } catch (e) {
                 return -1;
             }
@@ -832,36 +873,52 @@
 
 
             try {
-                const indexedDBKeys = await this.keys();
+                // #401 : lecture de TOUT le magasin en UNE transaction getAll —
+                // avant : keys() puis `await this.get(key)` PAR clé (N transactions
+                // readonly séquentielles + double sérialisation par clé). La part
+                // CPU (double stringify) était de 243 ms mesurés sur 5,2 Mo/120
+                // clés ; le terme IDB (N allers-retours) dominait en terrain
+                // (729-1057 ms, Safari, codex réel).
+                const enregistrements = await this._getAllIndexedDB();
                 let synced = 0;
                 let inMemory = 0;
 
                 // #300 — Invalidation préventive du cache AVANT réhydratation.
                 // localStorage est un cache de la session précédente, qui peut
-                // être périmé vis-à-vis d'IndexedDB (source de vérité). Tant
-                // qu'une clé n'est pas réhydratée par la boucle ci-dessous,
-                // getSync doit rendre le DÉFAUT (sûr) plutôt qu'une valeur
-                // périmée — ex. `trimestres` aux id vides → `",,,"` lu avant
-                // `db-ready`. On ne vide QUE les clés présentes en IDB : elles
-                // sont restaurées juste après, donc aucune perte. Les clés
+                // être périmé vis-à-vis d'IndexedDB (source de vérité). On ne
+                // vide QUE les clés présentes en IDB : elles sont restaurées
+                // juste après (écritures désormais SYNCHRONES — la fenêtre
+                // « clé vidée pas encore réhydratée » du correctif #300 est
+                // réduite à ce bloc, sans await intercalé). Les clés
                 // localStorage-seules (jamais passées par IDB) restent intactes.
-                // On ne touche pas memoryCache : vide au boot, et porteur des
-                // données courantes lors des syncs post-import (pas périmé).
-                for (const key of indexedDBKeys) {
-                    if (key === 'travaux_fsapi_handle') continue;
-                    try { localStorage.removeItem(key); } catch (ex) {}
+                for (const rec of enregistrements) {
+                    if (!rec || rec.key === 'travaux_fsapi_handle') continue;
+                    try { localStorage.removeItem(rec.key); } catch (ex) {}
                 }
 
-                for (const key of indexedDBKeys) {
+                for (const rec of enregistrements) {
                     // Skip : FileSystemDirectoryHandle non sérialisable en JSON
-                    if (key === 'travaux_fsapi_handle') continue;
+                    if (!rec || rec.key === 'travaux_fsapi_handle') continue;
+                    const key = rec.key;
 
-                    // Lire depuis IndexedDB
-                    const value = await this.get(key);
+                    // #392/#401 : memoryCache-first, comme get() — lors d'un
+                    // re-sync post-import, memoryCache porte la donnée COURANTE
+                    // (une écriture IDB peut encore être en vol) ; l'enregistrement
+                    // getAll ne sert que si le cache n'a rien.
+                    const value = this.memoryCache.has(key) ? this.memoryCache.get(key) : rec.value;
+
+                    // #401 : sérialiser UNE fois (taille estimée sur la même chaîne)
+                    var jsonString;
+                    try {
+                        jsonString = JSON.stringify(value);
+                    } catch (eSer) {
+                        console.warn('[DB] Valeur non sérialisable ignorée à la sync :', key);
+                        continue;
+                    }
+                    var taille = this._estimateSizeFromString(jsonString);
 
                     // Seuil IDB-first : les grosses valeurs restent dans memoryCache
                     // (pas de tentative localStorage, cohérent avec setSync)
-                    var taille = this._estimateSize(value);
                     if (taille > SEUIL_IDB_FIRST) {
                         try { localStorage.removeItem(key); } catch (ex) {}
                         this.memoryCache.set(key, value);
@@ -871,7 +928,7 @@
 
                     // Valeur raisonnable → synchroniser dans localStorage
                     try {
-                        this._setLocalStorage(key, value);
+                        this._setLocalStorageString(key, jsonString);
                         this.memoryCache.delete(key);
                         synced++;
                     } catch (e) {
@@ -912,7 +969,7 @@
                         nbCles: this.memoryCache.size
                     },
                     idb: {
-                        nbCles: indexedDBKeys.length,
+                        nbCles: enregistrements.length,
                         syncLocalStorage: synced,
                         dansMemoryCache: inMemory
                     },
@@ -924,7 +981,7 @@
 
                 // Émettre événement pour notifier que les données sont prêtes
                 window.dispatchEvent(new CustomEvent('db-ready', {
-                    detail: { synced, inMemory, total: indexedDBKeys.length }
+                    detail: { synced, inMemory, total: enregistrements.length }
                 }));
             } catch (error) {
                 console.error('❌ [DB] Erreur synchronisation cache:', error);
@@ -1271,7 +1328,10 @@
 
             // Seuil IDB-first (constante unique module, #334 D) : les grosses
             // valeurs vont directement dans memoryCache + IDB (évite QuotaExceeded).
-            var taille = this._estimateSize(value);
+            // #401 : sérialiser UNE fois (la taille est estimée sur la même chaîne
+            // que celle écrite — avant, chaque setSync payait un double stringify).
+            var jsonString = JSON.stringify(value);
+            var taille = this._estimateSizeFromString(jsonString);
             var idbDispo = this.ready && this.useIndexedDB;
 
             if (idbDispo && taille > SEUIL_IDB_FIRST) {
@@ -1286,7 +1346,7 @@
 
             // 1. Essayer d'écrire dans localStorage (cache rapide)
             try {
-                this._setLocalStorage(key, value);
+                this._setLocalStorageString(key, jsonString);
                 // Supprimer du cache mémoire si la donnée est maintenant dans localStorage
                 this.memoryCache.delete(key);
             } catch (e) {

@@ -64,6 +64,9 @@ describe('#353 Option C volet 3 · set() async tracke son écriture IDB (W1)', (
             _setIndexedDB: db._setIndexedDB,
             _trackOperation: db._trackOperation,   // helper du volet 1
             _estimateSize: () => 10,               // sous le seuil IDB-first
+            // #401 : set() sérialise une fois et écrit la chaîne (helpers neufs)
+            _estimateSizeFromString: () => 10,
+            _setLocalStorageString() {},
             memoryCache: new Map(),
             _setLocalStorage() {},
             _pendingWrites: pendingWrites,

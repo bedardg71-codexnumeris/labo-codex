@@ -570,13 +570,21 @@ async function ouvrirModalExport() {
     }
 
     // Construire la liste des clés avec leurs tailles
+    // #401 : tailles SANS matérialiser les valeurs — l'ancienne boucle faisait
+    // `await db.get(cle)` PAR clé (transactions IDB + sérialisations, y compris
+    // les blobs de plusieurs Mo) juste pour afficher des Ko : 473-488 ms mesurés
+    // à chaque ouverture du modal (Safari, codex réel, 5 août soir). Après le
+    // boot, chaque clé vit dans localStorage (la chaîne est déjà là) ou dans
+    // db.memoryCache (l'objet est déjà en RAM : stringify seul, zéro I/O).
     let html = '';
     for (const cle of cles) {
         let tailleKo = '?';
         try {
-            const valeur = await db.get(cle, null);
-            if (valeur !== null) {
-                const jsonStr = JSON.stringify(valeur);
+            const chaineLS = localStorage.getItem(cle);
+            if (chaineLS !== null) {
+                tailleKo = ((cle.length + chaineLS.length) / 1024).toFixed(2);
+            } else if (db.memoryCache && db.memoryCache.has(cle)) {
+                const jsonStr = JSON.stringify(db.memoryCache.get(cle));
                 tailleKo = ((cle.length + jsonStr.length) / 1024).toFixed(2);
             }
         } catch (e) {
