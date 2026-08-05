@@ -31,36 +31,33 @@ describe('#300 Lot 2 · syncToLocalStorageCache vide le cache périmé avant ré
     // micro-tasks, AVANT que le test ne l'active. On l'active dans chaque test.
     beforeEach(() => { db = chargerDb(); });
 
-    it('lecture localStorage PENDANT l\'hydratation = défaut (clear préventif effectué)', async () => {
+    // #401 (5 août 2026) : la réhydratation lit désormais TOUT le magasin en UNE
+    // transaction getAll (_getAllIndexedDB) puis clear + réécrit SANS await
+    // intercalé — la fenêtre asynchrone « clé vidée, pas encore réhydratée » que
+    // ce test capturait via db.get(clé) n'existe structurellement plus. Le test
+    // verrouille l'invariant restant : plus AUCUNE lecture IDB par clé, et la
+    // valeur périmée ne survit jamais à la sync.
+    it('hydratation en UNE passe getAll : db.get par clé n\'est plus consulté, le périmé est remplacé', async () => {
         db.useIndexedDB = true;
-        // IDB = source de vérité (correct)
         const idb = { trimestres: [{ id: 'h2026', nom: 'Hiver 2026' }, { id: 'a2025' }] };
-        db.keys = async () => Object.keys(idb);
+        db._getAllIndexedDB = async () => Object.keys(idb).map(k => ({ key: k, value: idb[k] }));
 
         // localStorage = cache PÉRIMÉ de la session précédente (id vides)
         db._setLocalStorage('trimestres', [{ id: '' }, { id: '' }]);
 
-        // Capturer ce qu'une lecture localStorage rend AU MOMENT où l'hydratation
-        // va chercher la clé dans IDB.
-        let lectureLocalePendantHydratation = '__NON_LU__';
-        db.get = async (k) => {
-            if (k === 'trimestres') {
-                lectureLocalePendantHydratation = db._getLocalStorage('trimestres', '__DEFAUT__');
-            }
-            return idb[k];
-        };
+        let getParCle = 0;
+        db.get = async () => { getParCle++; return null; };
 
         await db.syncToLocalStorageCache();
 
-        // Le clear préventif a eu lieu avant l'hydratation → lecture = défaut, pas ",,,".
-        expect(lectureLocalePendantHydratation).toBe('__DEFAUT__');
+        expect(getParCle).toBe(0); // plus de N allers-retours par clé
+        expect(db._getLocalStorage('trimestres', null)).toEqual(idb.trimestres);
     });
 
     it('après la sync, localStorage reflète IDB (source de vérité)', async () => {
         db.useIndexedDB = true;
         const idb = { trimestres: [{ id: 'h2026' }, { id: 'a2025' }] };
-        db.keys = async () => Object.keys(idb);
-        db.get = async (k) => idb[k];
+        db._getAllIndexedDB = async () => Object.keys(idb).map(k => ({ key: k, value: idb[k] })); // #401
         db._setLocalStorage('trimestres', [{ id: '' }, { id: '' }]); // périmé
 
         await db.syncToLocalStorageCache();
@@ -71,8 +68,7 @@ describe('#300 Lot 2 · syncToLocalStorageCache vide le cache périmé avant ré
     it('une clé localStorage-seule (absente d\'IDB) reste INTACTE', async () => {
         db.useIndexedDB = true;
         const idb = { trimestres: [{ id: 'h2026' }] };
-        db.keys = async () => Object.keys(idb);
-        db.get = async (k) => idb[k];
+        db._getAllIndexedDB = async () => Object.keys(idb).map(k => ({ key: k, value: idb[k] })); // #401
 
         // Clé qui n'existe QUE dans localStorage (jamais passée par IDB).
         db._setLocalStorage('pref_locale_seule', { theme: 'sombre' });
