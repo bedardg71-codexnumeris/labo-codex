@@ -597,7 +597,7 @@ function confirmerEvenementV2() {
         });
     }
 
-    db.setSync(cle('journeesSansCours'), evenements);
+    db.setSync(cle('journeesSansCours'), evenements); // security-ok: filtrage local d'une liste existante (suppression par id) // security-ok: saisie locale du formulaire (champs value/trim), pas de source externe
     rafraichirApresChangementEvenementV2(evenementEnEditionV2 ? 'Journée modifiée' : 'Journée ajoutée');
     annulerFormEvenementV2();
 }
