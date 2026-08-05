@@ -16,37 +16,21 @@
     pas encore chargées quand ce module s'exécute)
    =============================== */
 
-function afficherStatistiquesTrimestreV2() {
-    // Lire depuis db avec clé namespacée
-    let calendrier = null;
-    try {
-        calendrier = db.getSync(cle('calendrierComplet'), null);
-    } catch (e) {
-        console.error('[Trimestre V2] Erreur lecture calendrier:', e);
-    }
-
-    // Éléments originaux (masqués pour compatibilité)
-    const elemSemaines = document.getElementById('v2-nombreSemaines');
-    const elemJours = document.getElementById('v2-nombreJoursCours');
-    const elemCongesReprises = document.getElementById('v2-statsCongesReprises');
-
-    // Éléments sidebar (Beta 95.2)
-    const elemSemainesSidebar = document.getElementById('v2-nombreSemainesSidebar');
-    const elemJoursSidebar = document.getElementById('v2-nombreJoursCoursSidebar');
-    const elemCongesReprisesSidebar = document.getElementById('v2-statsCongesReprisesSidebar');
-
-    // Vérifier si le calendrier existe ET a des données
+/**
+ * #366 (relais Cadre→Trimestre, 4 août 2026) : source UNIQUE du comptage des
+ * statistiques de calendrier. Fonction PURE, partagée par trimestre-v2 (sidebar
+ * + apercu) ET calendrier-vue (carte Légende) — remplace la communication par
+ * le DOM (ids `nombreSemaines`/`nombreJoursCours` inexistants) et les
+ * constantes de repli 15/75 qui affichaient un chiffre inventé.
+ * @param {Object|null} calendrier - calendrierComplet ({date: {statut, numeroSemaine}})
+ * @returns {{semaines:number, joursCours:number, conges:number, reprises:number}|null}
+ *          null si aucun calendrier exploitable — l'appelant affiche un état
+ *          vide explicite, jamais un chiffre par défaut.
+ */
+function calculerStatistiquesCalendrier(calendrier) {
     if (!calendrier || typeof calendrier !== 'object' || Object.keys(calendrier).length === 0) {
-        if (elemSemaines) elemSemaines.textContent = '0';
-        if (elemJours) elemJours.textContent = '0';
-        if (elemCongesReprises) elemCongesReprises.textContent = '';
-        if (elemSemainesSidebar) elemSemainesSidebar.textContent = '0';
-        if (elemJoursSidebar) elemJoursSidebar.textContent = '0';
-        if (elemCongesReprisesSidebar) elemCongesReprisesSidebar.textContent = '';
-        return;
+        return null;
     }
-
-    // Compter les jours de cours, congés, reprises et trouver le max de numeroSemaine
     let joursCours = 0;
     let conges = 0;
     let reprises = 0;
@@ -69,9 +53,45 @@ function afficherStatistiquesTrimestreV2() {
         if (jour.statut === 'conge') conges++;
     });
 
-    // Utiliser le numeroSemaine du calendrier (plus précis que diviser par 5)
-    // Fallback sur division par 5 si pas de numeroSemaine
+    // numeroSemaine du calendrier prioritaire ; repli division par 5
     const semaines = maxSemaine > 0 ? maxSemaine : Math.ceil(joursCours / 5);
+    return { semaines: semaines, joursCours: joursCours, conges: conges, reprises: reprises };
+}
+
+function afficherStatistiquesTrimestreV2() {
+    // Lire depuis db avec clé namespacée
+    let calendrier = null;
+    try {
+        calendrier = db.getSync(cle('calendrierComplet'), null);
+    } catch (e) {
+        console.error('[Trimestre V2] Erreur lecture calendrier:', e);
+    }
+
+    // Éléments originaux (masqués pour compatibilité)
+    const elemSemaines = document.getElementById('v2-nombreSemaines');
+    const elemJours = document.getElementById('v2-nombreJoursCours');
+    const elemCongesReprises = document.getElementById('v2-statsCongesReprises');
+
+    // Éléments sidebar (Beta 95.2)
+    const elemSemainesSidebar = document.getElementById('v2-nombreSemainesSidebar');
+    const elemJoursSidebar = document.getElementById('v2-nombreJoursCoursSidebar');
+    const elemCongesReprisesSidebar = document.getElementById('v2-statsCongesReprisesSidebar');
+
+    // Comptage : source unique #366 (fonction pure partagée)
+    const stats = calculerStatistiquesCalendrier(calendrier);
+    if (!stats) {
+        if (elemSemaines) elemSemaines.textContent = '0';
+        if (elemJours) elemJours.textContent = '0';
+        if (elemCongesReprises) elemCongesReprises.textContent = '';
+        if (elemSemainesSidebar) elemSemainesSidebar.textContent = '0';
+        if (elemJoursSidebar) elemJoursSidebar.textContent = '0';
+        if (elemCongesReprisesSidebar) elemCongesReprisesSidebar.textContent = '';
+        return;
+    }
+    const semaines = stats.semaines;
+    const joursCours = stats.joursCours;
+    const conges = stats.conges;
+    const reprises = stats.reprises;
 
     // Remplir éléments originaux (masqués)
     if (elemSemaines) elemSemaines.textContent = semaines;
@@ -334,6 +354,7 @@ window.mettreAJourInfoDuree = mettreAJourInfoDuree;
 // Exports zone 1 (init + identification + calendrier + événements) migrés vers trimestre-v2-init.js (session A, 17 mai 2026).
 // `afficherStatistiquesTrimestreV2` reste ici comme helper transversal.
 window.afficherStatistiquesTrimestreV2 = afficherStatistiquesTrimestreV2;
+window.calculerStatistiquesCalendrier = calculerStatistiquesCalendrier;
 // Exports zone 2 (liste trimestres) migrés vers trimestre-v2-liste.js (session A, 17 mai 2026).
 // Exports de la zone 5 (séances + chargerHoraireGroupeActifV2) migrés vers
 // trimestre-v2-horaires.js (session A, 17 mai 2026).

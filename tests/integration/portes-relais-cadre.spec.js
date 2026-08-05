@@ -94,6 +94,58 @@ test('#371 · Semaines spéciales : empilées, la borne de fin de planification 
     expect(erreurs).toEqual([]);
 });
 
+test('#366 · Les deux écrans affichent les MÊMES statistiques, calculées (plus de 15/75 inventés)', async ({ page }) => {
+    const erreurs = [];
+    attacherCaptureErreurs(page, erreurs);
+    await page.setViewportSize({ width: 1470, height: 956 });
+    await ouvrirAppEnDemo(page);
+
+    // Calendrier synthétique VOLONTAIREMENT différent de 15/75 : 8 jours de
+    // cours + 1 reprise = 9 jours, 2 semaines. Si un repli en dur revient,
+    // l'un des écrans montrera 15/75 et l'écart le trahira.
+    await page.evaluate(() => {
+        const calendrier = {};
+        const jours = ['2026-08-20', '2026-08-21', '2026-08-24', '2026-08-25', '2026-08-26',
+                       '2026-08-27', '2026-08-28', '2026-08-31'];
+        jours.forEach((d, i) => { calendrier[d] = { statut: 'cours', numeroSemaine: i < 5 ? 1 : 2 }; });
+        calendrier['2026-09-01'] = { statut: 'conge' };
+        calendrier['2026-09-02'] = { statut: 'reprise', numeroSemaine: 2 };
+        db.setSync(window.cle('calendrierComplet'), calendrier); // security-ok: fixture de test locale
+        db.setSync(window.cle('cadreCalendrier'), { dateDebut: '2026-08-20' }); // security-ok: fixture de test locale
+    });
+
+    // Écran 1 : sidebar du Trimestre (fonction pure via afficherStatistiquesTrimestreV2)
+    const sidebar = await page.evaluate(() => {
+        window.afficherStatistiquesTrimestreV2();
+        return {
+            semaines: document.getElementById('v2-nombreSemainesSidebar')?.textContent,
+            jours: document.getElementById('v2-nombreJoursCoursSidebar')?.textContent
+        };
+    });
+    expect(sidebar.semaines).toBe('2');
+    expect(sidebar.jours).toBe('9');
+
+    // Écran 2 : carte Légende du Calendrier scolaire (même fonction pure)
+    await page.evaluate(() => {
+        document.querySelectorAll('.section.active, .sous-section.active')
+            .forEach(el => el.classList.remove('active'));
+        document.getElementById('section-calendrier')?.classList.add('active');
+        document.getElementById('calendrier-vue')?.classList.add('active');
+        if (typeof window.afficherCalendrierScolaire === 'function') window.afficherCalendrierScolaire();
+    });
+    await page.waitForTimeout(400);
+
+    const legende = await page.evaluate(() => {
+        const valeurs = Array.from(document.querySelectorAll('.calendrier-legende-metriques .cal-valeur-grande-bleu'))
+            .map(el => el.textContent.trim());
+        return valeurs; // [semaines, jours, congés avec reprise]
+    });
+    expect(legende[0]).toBe('2');
+    expect(legende[1]).toBe('9');
+
+    expect(erreurs).toEqual([]);
+});
+
 test('#372 · Bouton Enregistrer du Trimestre : plus d\'encadré info-box vide autour', async ({ page }) => {
     const erreurs = [];
     attacherCaptureErreurs(page, erreurs);
