@@ -153,7 +153,8 @@ function calculerAssiduite(da, dateLimite) {
     var seancesCompletes = typeof obtenirSeancesCompletes === 'function'
         ? obtenirSeancesCompletes() : {};
 
-    var aujourdhui = dateLimite || new Date().toISOString().split('T')[0];
+    // #398 : date LOCALE (l'UTC basculait « aujourd'hui » à demain dès 20 h EDT)
+    var aujourdhui = dateLimite || window.dateLocaleYMD();
 
     // FIX #220 + #330 : dates saisies du groupe de l'étudiant·e (helper partagé)
     var datesSaisies = construireDatesSaisiesGroupe(da, presences);

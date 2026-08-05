@@ -407,7 +407,7 @@ async function verifierEtCapturerSnapshotHebdomadaire() {
     const calendrier = obtenirCalendrierComplet();
     if (!calendrier) return;
 
-    const aujourdhui = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+    const aujourdhui = window.dateLocaleYMD(); // #398 : date LOCALE (YYYY-MM-DD)
 
     // Trouver la semaine actuelle
     const jourActuel = calendrier[aujourdhui];
@@ -456,7 +456,7 @@ async function verifierEtCapturerSnapshotHebdomadaire() {
 async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, options = {}) {
     try {
         // ✨ NOUVEAU (8 déc 2025) : Empêcher la capture de snapshots pour dates futures
-        const aujourdhui = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        const aujourdhui = window.dateLocaleYMD(); // #398 : date LOCALE (YYYY-MM-DD)
         if (dateSeance > aujourdhui) {
             console.warn(`⚠️ Date ${dateSeance} est dans le futur, impossible de capturer un snapshot`);
             return null;
@@ -882,7 +882,7 @@ async function reconstruireSnapshotsHistoriques() {
 
         // ✨ NOUVEAU (8 déc 2025) : Ne créer des snapshots QUE pour les séances passées
         // Empêche l'affichage de données futures dans les graphiques
-        const aujourdhui = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        const aujourdhui = window.dateLocaleYMD(); // #398 : date LOCALE (YYYY-MM-DD)
 
         const datesCours = Object.keys(seancesCompletes)
             .filter(date => seancesCompletes[date] && seancesCompletes[date].length > 0)

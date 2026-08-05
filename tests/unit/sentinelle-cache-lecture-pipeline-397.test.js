@@ -111,6 +111,7 @@ describe('#397 · pipeline assiduité — lectures hissées (intégration indice
             sauvegarderPreference: () => {}
         });
         win.cle = (k) => k; // sauvegarderDonneesSelonMode passe par window.cle
+        win.dateLocaleYMD = () => '2026-02-01'; // #398 : SSOT « aujourd'hui » du harnais
         chargerScript('js/indices.js', {
             db, cle: (k) => k,
             obtenirDonneesSelonMode: (...a) => win.obtenirDonneesSelonMode(...a),

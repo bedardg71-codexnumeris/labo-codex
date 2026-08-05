@@ -768,7 +768,7 @@
      * Répartit les estimations dans les jours disponibles.
      */
     function repartirDansJours(estimations, joursCalendrier, joursHoraire, prefs, dateObjectif) {
-        var aujourdHui = new Date().toISOString().split('T')[0];
+        var aujourdHui = window.dateLocaleYMD(); // #398 : date LOCALE
         // Heures disponibles le jour de l'objectif si une heure limite est définie
         var heuresLimiteObjectif = 0;
         if (prefs.heureObjectif && dateObjectif) {
@@ -891,7 +891,7 @@
 
         var prefs = chargerPreferences();
         var joursHoraire = analyserHoraireHebdo();
-        var aujourdHui = new Date().toISOString().split('T')[0];
+        var aujourdHui = window.dateLocaleYMD(); // #398 : date LOCALE
 
         // Date de début : la plus ancienne date de remise, ou aujourd'hui
         var premierRemise = '';

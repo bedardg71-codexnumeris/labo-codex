@@ -648,7 +648,7 @@ function afficherFormulaireIntervention(daPreselectionne) {
     }
 
     // Créer l'intervention avec des valeurs par défaut
-    var aujourdhui = new Date().toISOString().split('T')[0];
+    var aujourdhui = window.dateLocaleYMD(); // #398 : date LOCALE
     var interventionId = creerIntervention({
         date: aujourdhui,
         duree: 2,
