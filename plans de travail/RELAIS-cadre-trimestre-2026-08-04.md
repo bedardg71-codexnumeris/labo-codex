@@ -96,7 +96,17 @@ exactement la semaine du 12 octobre.
 
 ## #367 🔴 Les jours de planification et d'examens sont comptés comme jours de cours
 
-- [ ] 🔴 **#367** La génération du calendrier ne retranche ni la semaine de planification ni
+> **✅ CLOS le 5 août 2026 SANS code générateur (constat de Grégoire, vérifié au code).**
+> Le générateur excluait DÉJÀ les deux semaines spéciales, aux deux passes
+> (`js/trimestre.js:145-147` passe 1 : aucun rôle/numéro ; `:190-193` passe 2 : statuts
+> dédiés `semaine-planification`/`semaine-examens`). Le +5 venait UNIQUEMENT de la borne
+> `semainePlanificationFin` vide (champ recouvert → #371) : `estDansPlage` retourne false
+> quand une borne manque (`js/trimestre.js:272`), donc la plage n'existait pas. Après le
+> correctif #371 (1.30.1) et la saisie 12-16 oct par Grégoire : sidebar = 15 sem. · 75 jours,
+> calendrier d'octobre correct (captures du 5 août). **Reliquat versé dans #369** :
+> avertir quand une borne « du/au » est partielle — ne jamais deviner en silence.
+
+- [x] 🔴 **#367** La génération du calendrier ne retranche ni la semaine de planification ni
       la semaine d'examens des jours de cours. Sur A2026 : **+5 jours** (80 au lieu de 75).
 
 - **Constat (données A2026 réelles)** : les 12, 13, 14, 15 et 16 octobre 2026 portent le statut
@@ -206,7 +216,16 @@ exactement la semaine du 12 octobre.
 
 ## #369 🟡 Aucune validation de cohérence sur les bornes du trimestre
 
-- [ ] 🟡 **#369** Les bornes du trimestre acceptent des valeurs incohérentes sans le signaler.
+> **✅ CLOS le 5 août 2026.** Fonction pure `validerCadreTrimestre(cadre, evenements)`
+> (`js/trimestre-v2.js`, exportée) : 6 règles du relais + reliquat #367 (borne du/au
+> partielle → « sera ignorée », jamais devinée). Zone `#v2-avertissementsCadre`
+> (alerte-attention, « À vérifier (rien n'est bloqué) ») au-dessus d'Enregistrer —
+> l'emplacement anticipé par #372 — rafraîchie au même point que les statistiques
+> (afficherStatistiquesTrimestreV2). Sentinelles : Vitest 7 cas (1 par règle + saisie
+> valide SILENCIEUSE, ablation break-testée ROUGE) + intégration Playwright
+> (visible sur les 2 cas réels, silence sur saisie propre).
+
+- [x] 🟡 **#369** Les bornes du trimestre acceptent des valeurs incohérentes sans le signaler.
 
 - **Constat (rencontré réellement par Grégoire le 4 août)** : « Remise des notes » saisie au
   **29/08/2026**, soit *avant* la fin des cours (11/12) et avant la fin du trimestre (21/12).
@@ -239,7 +258,18 @@ exactement la semaine du 12 octobre.
 
 ## #370 🟡 Le format des jours diffère entre les menus et le calendrier scolaire
 
-- [ ] 🟡 **#370** Les menus déroulants listent les jours en **L M M J V S D**, le calendrier
+> **✅ CLOS le 5 août 2026 — prémisse auditée, corrigé au vrai point de confusion.**
+> Audit : AUCUN menu de l'app ne liste 7 jours — tous les sélecteurs de jour sont
+> Lundi→Vendredi (horaire.js ×2, trimestre-v2-horaires.js, reprises ×2) ; la liste
+> 7 jours L-first de `entites/horaires.js` ne nourrit aucun menu (formatage seul).
+> L'ordre D-first du calendrier et l'ordre L→V des menus ne peuvent donc pas entrer
+> en conflit directement. Ce qui a réellement piégé Grégoire est le libellé ambigu :
+> « → Reprise **Lundi** le 2026-09-10 » (la note du relais le décrit). Corrigés :
+> cartes d'événements → « Reprise le **2026-09-10** (horaire du **lundi**) »
+> (`trimestre-v2-init.js`, avec echapperHtml ajouté) et options des deux menus de
+> reprise → « Horaire du lundi » (valeurs de données intactes).
+
+- [x] 🟡 **#370** Les menus déroulants listent les jours en **L M M J V S D**, le calendrier
       scolaire les affiche en **D L M M J V S**. Deux ordres pour la même semaine.
 
 - **Constat** : signalé par Grégoire le 4 août 2026 — **il s'est lui-même trompé à cause de ça**,

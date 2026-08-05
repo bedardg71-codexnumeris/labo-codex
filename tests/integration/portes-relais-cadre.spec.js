@@ -146,6 +146,45 @@ test('#366 · Les deux écrans affichent les MÊMES statistiques, calculées (pl
     expect(erreurs).toEqual([]);
 });
 
+test('#369 · Avertissements de cohérence : visibles sur saisie fautive, SILENCE sur saisie propre', async ({ page }) => {
+    const erreurs = [];
+    attacherCaptureErreurs(page, erreurs);
+    await page.setViewportSize({ width: 1470, height: 956 });
+    await ouvrirAppEnDemo(page);
+    await montrerTrimestre(page);
+
+    // Saisie fautive : les DEUX cas réels du relais (remise des notes en août
+    // + borne de planification manquante).
+    const fautif = await page.evaluate(() => {
+        db.setSync(window.cle('cadreCalendrier'), { // security-ok: fixture de test locale
+            dateDebut: '2026-08-20', finCours: '2026-12-11', finTrimestre: '2026-12-21',
+            remiseNotes: '2026-08-29', semainePlanificationDebut: '2026-10-12', semainePlanificationFin: ''
+        });
+        window.afficherStatistiquesTrimestreV2();
+        const zone = document.getElementById('v2-avertissementsCadre');
+        return { visible: !zone.classList.contains('u-hide'), texte: zone.textContent };
+    });
+    expect(fautif.visible).toBe(true);
+    expect(fautif.texte).toContain('remise des notes');
+    expect(fautif.texte).toContain('planification');
+    expect(fautif.texte).toContain('rien n\'est bloqué');
+
+    // Saisie corrigée → la zone se tait et disparaît.
+    const propre = await page.evaluate(() => {
+        db.setSync(window.cle('cadreCalendrier'), { // security-ok: fixture de test locale
+            dateDebut: '2026-08-20', finCours: '2026-12-11', finTrimestre: '2026-12-21',
+            remiseNotes: '2026-12-29', semainePlanificationDebut: '2026-10-12', semainePlanificationFin: '2026-10-16'
+        });
+        window.afficherStatistiquesTrimestreV2();
+        const zone = document.getElementById('v2-avertissementsCadre');
+        return { visible: !zone.classList.contains('u-hide'), texte: zone.textContent };
+    });
+    expect(propre.visible).toBe(false);
+    expect(propre.texte).toBe('');
+
+    expect(erreurs).toEqual([]);
+});
+
 test('#372 · Bouton Enregistrer du Trimestre : plus d\'encadré info-box vide autour', async ({ page }) => {
     const erreurs = [];
     attacherCaptureErreurs(page, erreurs);

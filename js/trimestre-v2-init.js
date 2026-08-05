@@ -459,9 +459,13 @@ function chargerEvenementsImprevusV2() {
  * Génère le HTML d'une carte événement (mode compact)
  */
 function genererCarteEvenementV2(evt, type) {
+    // #370 (relais 4 août) : « Reprise Lundi le 2026-09-10 » se lisait comme si
+    // la reprise avait lieu un lundi — or Lundi désigne l'HORAIRE adopté ce
+    // jour-là. Date d'abord, horaire entre parenthèses.
+    const horaireRepris = (evt.horaireReprise || '').replace('Horaire du ', '');
     const repriseInfo = evt.dateReprise ?
         `<div style="font-size: 0.85rem; color: var(--gris-moyen); margin-top: 4px;">
-            → Reprise <strong>${evt.horaireReprise || ''}</strong> le <strong>${evt.dateReprise}</strong>
+            → Reprise le <strong>${echapperHtml(evt.dateReprise)}</strong>${horaireRepris ? ` (horaire du <strong>${echapperHtml(horaireRepris.toLowerCase())}</strong>)` : ''}
         </div>` : '';
 
     const cat = evt.categorie || 'institutionnel';
