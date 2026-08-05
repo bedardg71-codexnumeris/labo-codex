@@ -12,6 +12,18 @@
 
     var CHANGELOG = [
         {
+            version: '1.31',
+            couleur: 'vert',
+            titre: 'Trimestre : journées sans cours unifiées',
+            items: [
+                'Une seule carte « Journées sans cours » remplace les deux listes d’événements — congés, fériés et journées personnelles au même endroit, tes données existantes migrent toutes seules.',
+                'Nouvelle nature « Férié (collège fermé) » : la fête du Travail n’est plus étiquetée « Institutionnel ».',
+                'Avertissements de cohérence sur les bornes du trimestre : une remise de notes avant la fin du trimestre ou une semaine à moitié saisie est signalée — rien n’est bloqué.',
+                'Les libellés de reprise disent maintenant « Reprise le [date] (horaire du lundi) » : fini l’ambiguïté sur le jour.',
+                'Les champs des semaines spéciales ne se chevauchent plus, et les deux compteurs de semaines/jours de cours affichent enfin le même calcul partout.'
+            ]
+        },
+        {
             version: '1.30',
             couleur: 'vert',
             titre: 'Alignement : importer une carte d’un autre trimestre',

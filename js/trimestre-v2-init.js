@@ -5,9 +5,9 @@
    `afficherStatistiquesTrimestreV2` qui reste au résidu comme helper
    transversal).
 
-   Périmètre : init + identification + cadre calendrier + événements
-   prévus/imprévus (21 fonctions + 2 variables module-scope
-   `evenementPrevuEnEditionV2`, `evenementImprevuEnEditionV2`).
+   Périmètre : init + identification + cadre calendrier + journées sans
+   cours (fusion #374 du 5 août 2026 : un seul jeu de fonctions événements,
+   variable module-scope `evenementEnEditionV2`).
 
    Dépendances cross-module accédées via `window.X` (résidu chargé AVANT) :
    - `window.chargerDropdownCoursV2` (zone 3)
@@ -37,8 +37,7 @@ function initialiserTrimestreV2() {
     chargerCadreCalendrierV2();
 
     // Charger les événements (prévus et imprévus)
-    chargerEvenementsPrevusV2();
-    chargerEvenementsImprevusV2();
+    chargerJourneesSansCoursV2();
 
     // Charger la liste des cours dans le dropdown
     window.chargerDropdownCoursV2();
@@ -406,14 +405,21 @@ function reinitialiserSemainesSpecialesV2() {
 /**
  * Charge et affiche les événements prévus
  */
-function chargerEvenementsPrevusV2() {
-    const evenements = db.getSync(cle('evenementsPrevus'), []);
-    const conteneur = document.getElementById('v2-congesPrevusContainer');
-    const compteur = document.getElementById('v2-nombreEvenementsPrevus');
+/* ===============================
+   JOURNÉES SANS COURS — fusion #374+#373 (relais 4 août 2026)
+   Une carte, un formulaire, UNE clé `journeesSansCours` (les anciennes
+   clés evenementsPrevus/evenementsImprevus sont fusionnées au boot par
+   migrerJourneesSansCours, js/migrations.js). Natures : institutionnel /
+   ferie / personnel. Reprise optionnelle, interdite sur personnel
+   (convention §3.0).
+   =============================== */
 
-    // Mettre à jour le compteur
+function chargerJourneesSansCoursV2() {
+    const evenements = db.getSync(cle('journeesSansCours'), []);
+    const conteneur = document.getElementById('v2-journeesSansCoursContainer');
+    const compteur = document.getElementById('v2-nombreJourneesSansCours');
+
     if (compteur) compteur.textContent = evenements.length;
-
     if (!conteneur) return;
 
     if (evenements.length === 0) {
@@ -421,44 +427,26 @@ function chargerEvenementsPrevusV2() {
         return;
     }
 
+    // Tri chronologique : la liste se lit comme le trimestre se déroule
+    const tries = [...evenements].sort((a, b) => String(a.dateEvenement).localeCompare(String(b.dateEvenement)));
     let html = '';
-    evenements.forEach(evt => {
-        html += genererCarteEvenementV2(evt, 'prevu');
+    tries.forEach(evt => {
+        html += genererCarteEvenementV2(evt);
     });
 
     conteneur.innerHTML = html;
 }
 
-/**
- * Charge et affiche les événements imprévus
- */
-function chargerEvenementsImprevusV2() {
-    const evenements = db.getSync(cle('evenementsImprevus'), []);
-    const conteneur = document.getElementById('v2-congesImprevusContainer');
-    const compteur = document.getElementById('v2-nombreEvenementsImprevus');
-
-    // Mettre à jour le compteur
-    if (compteur) compteur.textContent = evenements.length;
-
-    if (!conteneur) return;
-
-    if (evenements.length === 0) {
-        conteneur.innerHTML = '';
-        return;
-    }
-
-    let html = '';
-    evenements.forEach(evt => {
-        html += genererCarteEvenementV2(evt, 'imprevu');
-    });
-
-    conteneur.innerHTML = html;
-}
+const BADGES_NATURE_V2 = {
+    institutionnel: '<span class="badge-categorie-evenement badge-institutionnel">Institutionnel</span>',
+    ferie: '<span class="badge-categorie-evenement badge-ferie">Férié</span>',
+    personnel: '<span class="badge-categorie-evenement badge-personnel">Personnel</span>'
+};
 
 /**
- * Génère le HTML d'une carte événement (mode compact)
+ * Génère le HTML d'une carte journée sans cours (mode compact)
  */
-function genererCarteEvenementV2(evt, type) {
+function genererCarteEvenementV2(evt) {
     // #370 (relais 4 août) : « Reprise Lundi le 2026-09-10 » se lisait comme si
     // la reprise avait lieu un lundi — or Lundi désigne l'HORAIRE adopté ce
     // jour-là. Date d'abord, horaire entre parenthèses.
@@ -468,174 +456,105 @@ function genererCarteEvenementV2(evt, type) {
             → Reprise le <strong>${echapperHtml(evt.dateReprise)}</strong>${horaireRepris ? ` (horaire du <strong>${echapperHtml(horaireRepris.toLowerCase())}</strong>)` : ''}
         </div>` : '';
 
-    const cat = evt.categorie || 'institutionnel';
-    const badgeCat = cat === 'personnel'
-        ? '<span class="badge-categorie-evenement badge-personnel">Personnel</span>'
-        : '<span class="badge-categorie-evenement badge-institutionnel">Institutionnel</span>';
+    const badgeCat = BADGES_NATURE_V2[evt.categorie] || BADGES_NATURE_V2.institutionnel;
 
     return `
     <div class="item-carte-compact" style="margin-bottom: 12px; padding: 12px 15px; background: var(--bleu-tres-pale); border-radius: 8px; border-left: 4px solid var(--accent-primaire);">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 15px;">
             <div style="flex: 1; min-width: 0;">
                 <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                    <strong style="font-size: 1rem;">${evt.description}</strong>
+                    <strong style="font-size: 1rem;">${echapperHtml(evt.description || '')}</strong>
                     ${badgeCat}
-                    <span style="color: var(--accent-primaire); font-weight: 500;">${evt.dateEvenement}</span>
+                    <span style="color: var(--accent-primaire); font-weight: 500;">${echapperHtml(evt.dateEvenement || '')}</span>
                 </div>
                 ${repriseInfo}
             </div>
             <div style="display: flex; gap: 8px; flex-shrink: 0;">
-                <button data-action="modifierEvenementV2" data-param="${evt.id}" data-param2="${type}" class="btn btn-secondaire btn-sm" style="padding: 6px 12px; font-size: 0.85rem;">Modifier</button>
-                <button data-action="supprimerEvenementV2" data-param="${evt.id}" data-param2="${type}" class="btn btn-supprimer btn-sm" style="padding: 6px 12px; font-size: 0.85rem;">Suppr.</button>
+                <button data-action="modifierEvenementV2" data-param="${echapperHtml(evt.id || '')}" class="btn btn-secondaire btn-sm" style="padding: 6px 12px; font-size: 0.85rem;">Modifier</button>
+                <button data-action="supprimerEvenementV2" data-param="${echapperHtml(evt.id || '')}" class="btn btn-supprimer btn-sm" style="padding: 6px 12px; font-size: 0.85rem;">Suppr.</button>
             </div>
         </div>
     </div>`;
 }
 
-// Variables pour stocker l'ID de l'événement en édition
-let evenementPrevuEnEditionV2 = null;
-let evenementImprevuEnEditionV2 = null;
+// ID de la journée en cours d'édition (null = mode ajout)
+let evenementEnEditionV2 = null;
 
 /**
- * Affiche le formulaire d'ajout d'événement (intégré dans v2)
+ * Affiche le formulaire d'ajout (champs réinitialisés)
  */
-function afficherFormEvenementV2(type) {
-    if (type === 'prevu') {
-        evenementPrevuEnEditionV2 = null;
-        const form = document.getElementById('v2-formEvenementPrevu');
-        const titre = document.getElementById('v2-titreFormPrevu');
-        const btn = document.getElementById('v2-btnConfirmerPrevu');
+function afficherFormEvenementV2() {
+    evenementEnEditionV2 = null;
+    const form = document.getElementById('v2-formEvenement');
+    if (!form) return;
 
-        if (form) {
-            // Réinitialiser les champs
-            setValue('v2-dateEvenementPrevu', '');
-            setValue('v2-descriptionPrevu', '');
-            setValue('v2-categorieEvenementPrevu', 'institutionnel');
-            setValue('v2-horaireReprisePrevu', '');
-            setValue('v2-dateReprisePrevu', '');
-            majAffichageRepriseV2Prevu();
+    setValue('v2-dateEvenement', '');
+    setValue('v2-descriptionEvenement', '');
+    setValue('v2-categorieEvenement', 'institutionnel');
+    setValue('v2-horaireReprise', '');
+    setValue('v2-dateReprise', '');
+    majAffichageRepriseV2();
 
-            if (titre) titre.textContent = 'Nouvel événement prévu';
-            if (btn) btn.textContent = 'Ajouter';
+    const btn = document.getElementById('v2-btnConfirmerEvenement');
+    if (btn) btn.textContent = 'Ajouter';
 
-            form.classList.remove('u-hide');
-            // Ne pas faire défiler la page
-        }
-    } else if (type === 'imprevu') {
-        evenementImprevuEnEditionV2 = null;
-        const form = document.getElementById('v2-formEvenementImprevu');
-        const titre = document.getElementById('v2-titreFormImprevu');
-        const btn = document.getElementById('v2-btnConfirmerImprevu');
-
-        if (form) {
-            // Réinitialiser les champs
-            setValue('v2-dateEvenementImprevu', '');
-            setValue('v2-descriptionImprevu', '');
-            setValue('v2-categorieEvenementImprevu', 'institutionnel');
-            setValue('v2-horaireRepriseImprevu', '');
-            setValue('v2-dateRepriseImprevu', '');
-            majAffichageRepriseV2Imprevu();
-
-            if (titre) titre.textContent = 'Nouvel événement imprévu';
-            if (btn) btn.textContent = 'Ajouter';
-
-            form.classList.remove('u-hide');
-            // Ne pas faire défiler la page
-        }
-    }
+    form.classList.remove('u-hide');
 }
 
-function majAffichageRepriseV2Prevu() {
-    const cat = document.getElementById('v2-categorieEvenementPrevu')?.value || 'institutionnel';
-    const bloc = document.getElementById('v2-blocReprisePrevu');
+function majAffichageRepriseV2() {
+    const cat = document.getElementById('v2-categorieEvenement')?.value || 'institutionnel';
+    const bloc = document.getElementById('v2-blocReprise');
     if (!bloc) return;
+    // Convention §3.0 : pas de reprise sur événement personnel.
+    // Férié et institutionnel : reprise optionnelle (grève = institutionnel
+    // SANS reprise, ça doit rester exprimable — on n'exige jamais la reprise).
     if (cat === 'personnel') {
         bloc.style.display = 'none';
-        setValue('v2-horaireReprisePrevu', '');
-        setValue('v2-dateReprisePrevu', '');
-    } else {
-        bloc.style.display = 'grid';
-    }
-}
-
-function majAffichageRepriseV2Imprevu() {
-    const cat = document.getElementById('v2-categorieEvenementImprevu')?.value || 'institutionnel';
-    const bloc = document.getElementById('v2-blocRepriseImprevu');
-    if (!bloc) return;
-    if (cat === 'personnel') {
-        bloc.style.display = 'none';
-        setValue('v2-horaireRepriseImprevu', '');
-        setValue('v2-dateRepriseImprevu', '');
+        setValue('v2-horaireReprise', '');
+        setValue('v2-dateReprise', '');
     } else {
         bloc.style.display = 'grid';
     }
 }
 
 /**
- * Modifie un événement (pré-remplit le formulaire v2)
+ * Pré-remplit le formulaire pour modifier une journée existante
  */
-function modifierEvenementV2(id, type) {
-    const typeStorage = type === 'prevu' ? 'evenementsPrevus' : 'evenementsImprevus';
-    const evenements = db.getSync(cle(typeStorage), []);
+function modifierEvenementV2(id) {
+    const evenements = db.getSync(cle('journeesSansCours'), []);
     const evt = evenements.find(e => e.id === id);
 
     if (!evt) {
-        alert('Événement introuvable');
+        alert('Journée introuvable');
         return;
     }
 
-    if (type === 'prevu') {
-        evenementPrevuEnEditionV2 = id;
-        const form = document.getElementById('v2-formEvenementPrevu');
-        const titre = document.getElementById('v2-titreFormPrevu');
-        const btn = document.getElementById('v2-btnConfirmerPrevu');
+    evenementEnEditionV2 = id;
+    const form = document.getElementById('v2-formEvenement');
+    if (!form) return;
 
-        if (form) {
-            setValue('v2-dateEvenementPrevu', evt.dateEvenement || '');
-            setValue('v2-descriptionPrevu', evt.description || '');
-            setValue('v2-categorieEvenementPrevu', evt.categorie || 'institutionnel');
-            setValue('v2-horaireReprisePrevu', evt.horaireReprise || '');
-            setValue('v2-dateReprisePrevu', evt.dateReprise || '');
-            majAffichageRepriseV2Prevu();
+    setValue('v2-dateEvenement', evt.dateEvenement || '');
+    setValue('v2-descriptionEvenement', evt.description || '');
+    setValue('v2-categorieEvenement', evt.categorie || 'institutionnel');
+    setValue('v2-horaireReprise', evt.horaireReprise || '');
+    setValue('v2-dateReprise', evt.dateReprise || '');
+    majAffichageRepriseV2();
 
-            if (titre) titre.textContent = 'Modifier l\'événement';
-            if (btn) btn.textContent = 'Sauvegarder';
+    const btn = document.getElementById('v2-btnConfirmerEvenement');
+    if (btn) btn.textContent = 'Sauvegarder';
 
-            form.classList.remove('u-hide');
-            // Ne pas faire défiler la page
-        }
-    } else {
-        evenementImprevuEnEditionV2 = id;
-        const form = document.getElementById('v2-formEvenementImprevu');
-        const titre = document.getElementById('v2-titreFormImprevu');
-        const btn = document.getElementById('v2-btnConfirmerImprevu');
-
-        if (form) {
-            setValue('v2-dateEvenementImprevu', evt.dateEvenement || '');
-            setValue('v2-descriptionImprevu', evt.description || '');
-            setValue('v2-categorieEvenementImprevu', evt.categorie || 'institutionnel');
-            setValue('v2-horaireRepriseImprevu', evt.horaireReprise || '');
-            setValue('v2-dateRepriseImprevu', evt.dateReprise || '');
-            majAffichageRepriseV2Imprevu();
-
-            if (titre) titre.textContent = 'Modifier l\'événement';
-            if (btn) btn.textContent = 'Sauvegarder';
-
-            form.classList.remove('u-hide');
-            // Ne pas faire défiler la page
-        }
-    }
+    form.classList.remove('u-hide');
 }
 
 /**
- * Confirme l'ajout ou la modification d'un événement prévu
+ * Confirme l'ajout ou la modification d'une journée sans cours
  */
-function confirmerEvenementPrevuV2() {
-    const dateEvenement = document.getElementById('v2-dateEvenementPrevu')?.value;
-    const description = document.getElementById('v2-descriptionPrevu')?.value?.trim();
-    const categorie = document.getElementById('v2-categorieEvenementPrevu')?.value || 'institutionnel';
-    let horaireReprise = document.getElementById('v2-horaireReprisePrevu')?.value || '';
-    let dateReprise = document.getElementById('v2-dateReprisePrevu')?.value || '';
+function confirmerEvenementV2() {
+    const dateEvenement = document.getElementById('v2-dateEvenement')?.value;
+    const description = document.getElementById('v2-descriptionEvenement')?.value?.trim();
+    const categorie = document.getElementById('v2-categorieEvenement')?.value || 'institutionnel';
+    let horaireReprise = document.getElementById('v2-horaireReprise')?.value || '';
+    let dateReprise = document.getElementById('v2-dateReprise')?.value || '';
 
     // Convention §3.0 : pas de reprise sur événement personnel
     if (categorie === 'personnel') {
@@ -653,14 +572,13 @@ function confirmerEvenementPrevuV2() {
         return;
     }
 
-    const evenements = db.getSync(cle('evenementsPrevus'), []);
+    const evenements = db.getSync(cle('journeesSansCours'), []);
 
-    if (evenementPrevuEnEditionV2) {
-        // Mode édition
-        const index = evenements.findIndex(e => e.id === evenementPrevuEnEditionV2);
+    if (evenementEnEditionV2) {
+        const index = evenements.findIndex(e => e.id === evenementEnEditionV2);
         if (index !== -1) {
             evenements[index] = {
-                id: evenementPrevuEnEditionV2,
+                id: evenementEnEditionV2,
                 dateEvenement,
                 description,
                 categorie,
@@ -669,7 +587,6 @@ function confirmerEvenementPrevuV2() {
             };
         }
     } else {
-        // Mode ajout
         evenements.push({
             id: genererIdUnique('EVT_'),
             dateEvenement,
@@ -680,156 +597,50 @@ function confirmerEvenementPrevuV2() {
         });
     }
 
-    db.setSync(cle('evenementsPrevus'), evenements);
-
-    // Régénérer le calendrier
-    if (typeof genererCalendrierComplet === 'function') {
-        genererCalendrierComplet();
-    }
-    if (typeof genererSeancesCompletes === 'function') {
-        genererSeancesCompletes();
-    }
-
-    // Rafraîchir la vue calendaire si visible
-    if (typeof afficherCalendrierScolaire === 'function') {
-        afficherCalendrierScolaire();
-    }
-
-    annulerFormEvenementPrevuV2();
-    chargerEvenementsPrevusV2();
-    window.afficherStatistiquesTrimestreV2();
-
-    notifications.succes(evenementPrevuEnEditionV2 ? 'Événement modifié' : 'Événement ajouté');
-    evenementPrevuEnEditionV2 = null;
+    db.setSync(cle('journeesSansCours'), evenements);
+    rafraichirApresChangementEvenementV2(evenementEnEditionV2 ? 'Journée modifiée' : 'Journée ajoutée');
+    annulerFormEvenementV2();
 }
 
 /**
- * Annule le formulaire d'événement prévu
+ * Ferme le formulaire sans sauvegarder
  */
-function annulerFormEvenementPrevuV2() {
-    evenementPrevuEnEditionV2 = null;
-    const form = document.getElementById('v2-formEvenementPrevu');
+function annulerFormEvenementV2() {
+    evenementEnEditionV2 = null;
+    const form = document.getElementById('v2-formEvenement');
     if (form) form.classList.add('u-hide');
 }
 
 /**
- * Confirme l'ajout ou la modification d'un événement imprévu
+ * Supprime une journée sans cours
  */
-function confirmerEvenementImprevuV2() {
-    const dateEvenement = document.getElementById('v2-dateEvenementImprevu')?.value;
-    const description = document.getElementById('v2-descriptionImprevu')?.value?.trim();
-    const categorie = document.getElementById('v2-categorieEvenementImprevu')?.value || 'institutionnel';
-    let horaireReprise = document.getElementById('v2-horaireRepriseImprevu')?.value || '';
-    let dateReprise = document.getElementById('v2-dateRepriseImprevu')?.value || '';
+function supprimerEvenementV2(id) {
+    if (!confirm('Veux-tu vraiment supprimer cette journée sans cours ?')) return;
 
-    // Convention §3.0 : pas de reprise sur événement personnel
-    if (categorie === 'personnel') {
-        horaireReprise = '';
-        dateReprise = '';
-    }
-
-    if (!dateEvenement || !description) {
-        alert('Veuillez remplir la date et la description.');
-        return;
-    }
-
-    if (dateReprise && !horaireReprise) {
-        alert('Veuillez indiquer quel jour de cours est remplacé.');
-        return;
-    }
-
-    const evenements = db.getSync(cle('evenementsImprevus'), []);
-
-    if (evenementImprevuEnEditionV2) {
-        // Mode édition
-        const index = evenements.findIndex(e => e.id === evenementImprevuEnEditionV2);
-        if (index !== -1) {
-            evenements[index] = {
-                id: evenementImprevuEnEditionV2,
-                dateEvenement,
-                description,
-                categorie,
-                horaireReprise,
-                dateReprise
-            };
-        }
-    } else {
-        // Mode ajout
-        evenements.push({
-            id: genererIdUnique('EVT_'),
-            dateEvenement,
-            description,
-            categorie,
-            horaireReprise,
-            dateReprise
-        });
-    }
-
-    db.setSync(cle('evenementsImprevus'), evenements);
-
-    // Régénérer le calendrier
-    if (typeof genererCalendrierComplet === 'function') {
-        genererCalendrierComplet();
-    }
-    if (typeof genererSeancesCompletes === 'function') {
-        genererSeancesCompletes();
-    }
-
-    // Rafraîchir la vue calendaire si visible
-    if (typeof afficherCalendrierScolaire === 'function') {
-        afficherCalendrierScolaire();
-    }
-
-    annulerFormEvenementImprevuV2();
-    chargerEvenementsImprevusV2();
-    window.afficherStatistiquesTrimestreV2();
-
-    notifications.succes(evenementImprevuEnEditionV2 ? 'Événement modifié' : 'Événement ajouté');
-    evenementImprevuEnEditionV2 = null;
-}
-
-/**
- * Annule le formulaire d'événement imprévu
- */
-function annulerFormEvenementImprevuV2() {
-    evenementImprevuEnEditionV2 = null;
-    const form = document.getElementById('v2-formEvenementImprevu');
-    if (form) form.classList.add('u-hide');
-}
-
-/**
- * Supprime un événement
- */
-function supprimerEvenementV2(id, type) {
-    if (!confirm('Veux-tu vraiment supprimer cet événement ?')) return;
-
-    const typeStorage = type === 'prevu' ? 'evenementsPrevus' : 'evenementsImprevus';
-    let evenements = db.getSync(cle(typeStorage), []);
-
+    let evenements = db.getSync(cle('journeesSansCours'), []);
     evenements = evenements.filter(e => e.id !== id);
-    db.setSync(cle(typeStorage), evenements);
+    db.setSync(cle('journeesSansCours'), evenements);
 
-    // Régénérer le calendrier
+    rafraichirApresChangementEvenementV2('Journée supprimée');
+}
+
+/**
+ * Régénère calendrier + séances et rafraîchit toutes les vues après un
+ * changement dans les journées sans cours (point unique, ex-dupliqué ×3).
+ */
+function rafraichirApresChangementEvenementV2(messageSucces) {
     if (typeof genererCalendrierComplet === 'function') {
         genererCalendrierComplet();
     }
-
-    // Rafraîchir la vue calendaire si visible
+    if (typeof genererSeancesCompletes === 'function') {
+        genererSeancesCompletes();
+    }
     if (typeof afficherCalendrierScolaire === 'function') {
         afficherCalendrierScolaire();
     }
-
-    // Recharger l'affichage
-    if (type === 'prevu') {
-        chargerEvenementsPrevusV2();
-    } else {
-        chargerEvenementsImprevusV2();
-    }
-
-    // Mettre à jour les statistiques du trimestre
+    chargerJourneesSansCoursV2();
     window.afficherStatistiquesTrimestreV2();
-
-    notifications.succes('Événement supprimé');
+    notifications.succes(messageSucces);
 }
 
 // Exports — 21 fonctions migrées du bloc principal résidu (L4007-4026 originelles
@@ -842,17 +653,13 @@ window.sauvegarderCadreCalendrierV2 = sauvegarderCadreCalendrierV2;
 window.sauvegarderTrimestreCompletV2 = sauvegarderTrimestreCompletV2;
 window.reinitialiserBornesTrimestreV2 = reinitialiserBornesTrimestreV2;
 window.reinitialiserSemainesSpecialesV2 = reinitialiserSemainesSpecialesV2;
-window.chargerEvenementsPrevusV2 = chargerEvenementsPrevusV2;
-window.chargerEvenementsImprevusV2 = chargerEvenementsImprevusV2;
+window.chargerJourneesSansCoursV2 = chargerJourneesSansCoursV2;
 window.afficherFormEvenementV2 = afficherFormEvenementV2;
 window.modifierEvenementV2 = modifierEvenementV2;
 window.supprimerEvenementV2 = supprimerEvenementV2;
-window.confirmerEvenementPrevuV2 = confirmerEvenementPrevuV2;
-window.annulerFormEvenementPrevuV2 = annulerFormEvenementPrevuV2;
-window.confirmerEvenementImprevuV2 = confirmerEvenementImprevuV2;
-window.annulerFormEvenementImprevuV2 = annulerFormEvenementImprevuV2;
-window.majAffichageRepriseV2Prevu = majAffichageRepriseV2Prevu;
-window.majAffichageRepriseV2Imprevu = majAffichageRepriseV2Imprevu;
+window.confirmerEvenementV2 = confirmerEvenementV2;
+window.annulerFormEvenementV2 = annulerFormEvenementV2;
+window.majAffichageRepriseV2 = majAffichageRepriseV2;
 
 })();
 

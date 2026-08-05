@@ -185,6 +185,77 @@ test('#369 · Avertissements de cohérence : visibles sur saisie fautive, SILENC
     expect(erreurs).toEqual([]);
 });
 
+test('#374 · Fusion « Journées sans cours » : migration des 2 anciennes clés + carte unique + nature Férié', async ({ page }) => {
+    const erreurs = [];
+    attacherCaptureErreurs(page, erreurs);
+    await page.setViewportSize({ width: 1470, height: 956 });
+    await ouvrirAppEnDemo(page);
+    await montrerTrimestre(page);
+
+    // 1. MIGRATION : semer les DEUX anciennes clés (préfixe démo actif) puis
+    //    rejouer la migration boot — tout converge vers journeesSansCours.
+    const migration = await page.evaluate(() => {
+        const prefixe = window.cle('cadreCalendrier').replace('cadreCalendrier', '');
+        localStorage.setItem(prefixe + 'evenementsPrevus', JSON.stringify([ // security-ok: fixture de test locale
+            { id: 'EVT_A', dateEvenement: '2026-09-07', description: 'Fête du travail', categorie: 'institutionnel', horaireReprise: 'Lundi', dateReprise: '2026-09-10' }
+        ]));
+        localStorage.setItem(prefixe + 'evenementsImprevus', JSON.stringify([ // security-ok: fixture de test locale
+            { id: 'EVT_B', dateEvenement: '2026-10-20', description: 'Tempête', categorie: 'institutionnel', horaireReprise: '', dateReprise: '' }
+        ]));
+        const nb = window.migrerJourneesSansCours();
+        return {
+            nb,
+            fusionnes: db.getSync(window.cle('journeesSansCours'), []).map(e => e.id),
+            anciennesSupprimees: !localStorage.getItem(prefixe + 'evenementsPrevus') && !localStorage.getItem(prefixe + 'evenementsImprevus')
+        };
+    });
+    expect(migration.nb).toBe(2);
+    expect(migration.fusionnes).toEqual(['EVT_A', 'EVT_B']);
+    expect(migration.anciennesSupprimees).toBe(true);
+
+    // 2. CARTE UNIQUE : les deux événements migrés s'affichent, les anciens
+    //    conteneurs jumeaux n'existent plus.
+    const affichage = await page.evaluate(() => {
+        window.chargerJourneesSansCoursV2();
+        return {
+            nbCartes: document.querySelectorAll('#v2-journeesSansCoursContainer .item-carte-compact').length,
+            compteur: document.getElementById('v2-nombreJourneesSansCours')?.textContent,
+            anciensConteneurs: !!document.getElementById('v2-congesPrevusContainer') || !!document.getElementById('v2-congesImprevusContainer')
+        };
+    });
+    expect(affichage.nbCartes).toBe(2);
+    expect(affichage.compteur).toBe('2');
+    expect(affichage.anciensConteneurs).toBe(false);
+
+    // 3. NATURE FÉRIÉ : ajout par le vrai formulaire → badge « Férié » rendu,
+    //    et le générateur traite le férié comme un congé avec reprise.
+    const ferie = await page.evaluate(() => {
+        db.setSync(window.cle('cadreCalendrier'), { // security-ok: fixture de test locale
+            dateDebut: '2026-08-20', finCours: '2026-12-11', finTrimestre: '2026-12-21'
+        });
+        window.afficherFormEvenementV2();
+        document.getElementById('v2-dateEvenement').value = '2026-09-08';
+        document.getElementById('v2-descriptionEvenement').value = 'Férié test';
+        document.getElementById('v2-categorieEvenement').value = 'ferie';
+        document.getElementById('v2-horaireReprise').value = 'Mardi';
+        document.getElementById('v2-dateReprise').value = '2026-09-11';
+        window.confirmerEvenementV2();
+        const calendrier = db.getSync(window.cle('calendrierComplet'), {});
+        return {
+            badge: !!document.querySelector('#v2-journeesSansCoursContainer .badge-ferie'),
+            statutJour: calendrier['2026-09-08']?.statut,
+            categorieJour: calendrier['2026-09-08']?.categorieEvenement,
+            statutReprise: calendrier['2026-09-11']?.statut
+        };
+    });
+    expect(ferie.badge).toBe(true);
+    expect(ferie.statutJour).toBe('conge');
+    expect(ferie.categorieJour).toBe('ferie');
+    expect(ferie.statutReprise).toBe('reprise');
+
+    expect(erreurs).toEqual([]);
+});
+
 test('#372 · Bouton Enregistrer du Trimestre : plus d\'encadré info-box vide autour', async ({ page }) => {
     const erreurs = [];
     attacherCaptureErreurs(page, erreurs);

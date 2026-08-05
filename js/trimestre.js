@@ -55,8 +55,9 @@ function obtenirInfosJour(date) {
 function genererCalendrierComplet() {
 
     const cadre = db.getSync(cle('cadreCalendrier'), {});
-    const evenementsPrevus = db.getSync(cle('evenementsPrevus'), []);
-    const evenementsImprevus = db.getSync(cle('evenementsImprevus'), []);
+    // #374 (5 août 2026) : clé UNIQUE journeesSansCours (fusion des ex-clés
+    // evenementsPrevus/evenementsImprevus, migrées au boot par migrations.js).
+    const tousEvenements = db.getSync(cle('journeesSansCours'), []);
 
     // 🆕 FIX (16 fév 2026) : Synchroniser horaireHebdo depuis TOUTES les entités horaire
     // avant de générer le calendrier. Garantit que le calendrier reflète tous les groupes-cours.
@@ -97,7 +98,9 @@ function genererCalendrierComplet() {
 
     // Construction des maps. Convention §3.0 : un événement personnel n'a pas de reprise.
     // Si une dateReprise est saisie sur un événement personnel, on l'ignore et on warn.
-    const tousEvenements = [...evenementsPrevus, ...evenementsImprevus];
+    // Natures : institutionnel | ferie | personnel — seul « personnel » a un
+    // traitement propre ; « ferie » se comporte comme institutionnel (l'étiquette
+    // ne change RIEN au calcul, vérifié avec Grégoire, relais #373).
     const mapConges = {};
     const mapReprises = {};
     tousEvenements.forEach(evt => {

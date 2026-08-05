@@ -8,7 +8,7 @@
 
    Dépendances cross-module accédées via `window.X` (résidu chargé AVANT) :
    - Zone 1 : `chargerIdentificationTrimestreV2`, `chargerCadreCalendrierV2`,
-     `chargerEvenementsPrevusV2`, `chargerEvenementsImprevusV2`,
+     `chargerJourneesSansCoursV2` (fusion #374),
      `afficherStatistiquesTrimestreV2`
    - Zone 3 : `chargerDropdownCoursV2`
    - Zone 8 : `peuplerDropdownGroupeCoursActif`
@@ -236,8 +236,7 @@ function afficherFormulaireTrimestreActif() {
     // Les champs du formulaire sont déjà remplis par les fonctions existantes :
     // - window.chargerIdentificationTrimestreV2()
     // - window.chargerCadreCalendrierV2()
-    // - window.chargerEvenementsPrevusV2()
-    // - window.chargerEvenementsImprevusV2()
+    // - window.chargerJourneesSansCoursV2() (fusion #374)
     // - window.afficherStatistiquesTrimestreV2()
 
     // Cette fonction est appelée pour s'assurer que tout est à jour
@@ -440,8 +439,7 @@ function changerTrimestreActifV2(valeur) {
             // Recharger l'interface complète
             window.chargerIdentificationTrimestreV2();  // 🆕 FIX: Recharger nom, session, année
             window.chargerCadreCalendrierV2();
-            window.chargerEvenementsPrevusV2();
-            window.chargerEvenementsImprevusV2();
+            window.chargerJourneesSansCoursV2();
             window.afficherStatistiquesTrimestreV2();
 
             // Rafraîchir le dropdown trimestre et le formulaire
@@ -555,8 +553,7 @@ function ouvrirModalNouveauTrimestre() {
         if (activer) {
             // Recharger les données du nouveau trimestre
             window.chargerCadreCalendrierV2();
-            window.chargerEvenementsPrevusV2();
-            window.chargerEvenementsImprevusV2();
+            window.chargerJourneesSansCoursV2();
             window.afficherStatistiquesTrimestreV2();
         }
     } else {

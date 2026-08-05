@@ -2982,6 +2982,11 @@ input[type="number"].controle-form {
     background: rgba(255, 193, 7, 0.15);
     color: var(--niveau-attention-modere);
 }
+/* #373 (relais 4 août) : nature « Férié (collège fermé) » */
+.badge-categorie-evenement.badge-ferie {
+    background: rgba(58, 170, 138, 0.15);
+    color: var(--vert-leger);
+}
 
 /* === BADGES D'ENGAGEMENT === */
 .badge-engagement-tres-favorable {
