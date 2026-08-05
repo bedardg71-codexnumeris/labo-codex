@@ -315,6 +315,10 @@ async function chargerGroupesCoursV2(coursId) {
 
 // Variable pour tracker l'index en cours d'édition (-1 = mode ajout)
 let etudiantEnEditionIndex = -1;
+// #382 — DA d'ORIGINE de l'étudiant en édition : l'index capturé à l'ouverture
+// peut être périmé au moment de sauvegarder (liste modifiée entre-temps) ;
+// on retrouve l'étudiant par ce DA, jamais par l'index seul.
+let etudiantEnEditionDA = null;
 
 /**
  * Soumet le formulaire étudiant (ajout ou modification)
@@ -351,8 +355,23 @@ async function soumettreEtudiantV2() {
     let etudiants = await db.get(cleEtud) || [];
 
     if (etudiantEnEditionIndex >= 0) {
-        // Mode édition : mettre à jour l'étudiant existant
-        etudiants[etudiantEnEditionIndex] = etudiant;
+        // Mode édition — #382 (audit 5 août, rapport B4) :
+        // 1. retrouver l'étudiant par son DA d'ORIGINE (l'index capturé à
+        //    l'ouverture écrivait sur le MAUVAIS étudiant si la liste avait
+        //    changé entre-temps) ; refus explicite si introuvable (patron #332,
+        //    jamais de faux succès silencieux) ;
+        // 2. FUSIONNER au lieu de remplacer : l'objet reconstruit du formulaire
+        //    ne porte que 7 champs — le remplacement effaçait `statut`
+        //    (abandon/inactif réintégré aux moyennes en corrigeant une coquille)
+        //    et tout autre champ hors formulaire.
+        const indexReel = etudiantEnEditionDA !== null
+            ? etudiants.findIndex(e => e.da === etudiantEnEditionDA)
+            : -1;
+        if (indexReel === -1) {
+            notifications.erreur('Étudiant introuvable', 'La liste a changé depuis l\'ouverture du formulaire. Resélectionne l\'étudiant avant d\'enregistrer.');
+            return;
+        }
+        etudiants[indexReel] = { ...etudiants[indexReel], ...etudiant };
         await db.set(cleEtud, etudiants);
         notifications.succes(`${prenom} ${nom} modifié`);
     } else {
@@ -381,6 +400,9 @@ function editerEtudiantV2(da) {
 
     // Stocker l'index en édition (index dans la liste complète)
     etudiantEnEditionIndex = index;
+    // #382 : mémoriser le DA d'origine — la sauvegarde retrouve l'étudiant
+    // par ce DA, robuste aux changements de liste entre ouverture et save.
+    etudiantEnEditionDA = etudiant.da ?? null;
 
     // Remplir le formulaire
     document.getElementById('v2-etudiantDA').value = etudiant.da || '';
@@ -417,6 +439,7 @@ function annulerEditionEtudiantV2() {
  */
 function reinitialiserFormEtudiantV2() {
     etudiantEnEditionIndex = -1;
+    etudiantEnEditionDA = null; // #382
 
     // Vider les champs
     document.getElementById('v2-etudiantDA').value = '';

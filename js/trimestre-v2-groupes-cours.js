@@ -54,24 +54,26 @@ function _mettreAJourBoutonActiverGroupeCours(gcId) {
     }
 }
 
-function activerGroupeCoursV2() {
+async function activerGroupeCoursV2() {
     if (!groupeCoursEnEditionId) {
         console.warn('[Trimestre V2] Aucun groupe-cours sélectionné pour activation');
         return;
     }
     const cleGC = cle('groupesCours');
-    let groupesCours = db.getSync(cleGC, []);
+    const groupesCours = db.getSync(cleGC, []);
     const cible = groupesCours.find(g => g.id === groupeCoursEnEditionId);
     if (!cible) {
         console.warn('[Trimestre V2] Groupe-cours non trouvé pour activation:', groupeCoursEnEditionId);
         return;
     }
-    // Invariant single-active : ce GC actif, les autres non
-    groupesCours.forEach(g => { g.actif = (g.id === groupeCoursEnEditionId); });
-    db.setSync(cleGC, groupesCours);
-    db.setSync('groupeCoursActif', cible);
-
-    notifications.succes('Groupe-cours activé', cible.nom || cible.id);
+    // #381 (audit 5 août, rapport B3) : déléguer au chemin CANONIQUE, qui écrit
+    // le couple groupeCoursActif + infoCours atomiquement (invariant Écart #6,
+    // cf. en-tête trimestre-v2-orchestre.js) et rafraîchit toutes les vues.
+    // L'écriture directe de groupeCoursActif SEUL laissait infoCours sur
+    // l'ancien cours : mauvais groupe actif partout en multi-cours.
+    if (typeof window.changerGroupeCoursActifV2 === 'function') {
+        await window.changerGroupeCoursActifV2(groupeCoursEnEditionId);
+    }
 
     _mettreAJourBoutonActiverGroupeCours(groupeCoursEnEditionId);
     populerDropdownGroupeCoursV2();
@@ -865,24 +867,16 @@ function fermerModalBibliothequeGroupeCours() {
     document.removeEventListener('keydown', fermerModalBibliothequeGroupeCoursEscape);
 }
 
-function activerGroupeCoursDepuisBibliotheque(gcId) {
-    const cleGC = cle('groupesCours');
-    const groupesCours = db.getSync(cleGC, []);
-
-    // Désactiver tous les autres
-    groupesCours.forEach(gc => gc.actif = (gc.id === gcId));
-    db.setSync(cleGC, groupesCours);
-
-    // Sauvegarder comme groupe-cours actif
-    const gc = groupesCours.find(g => g.id === gcId);
-    if (gc) {
-        db.setSync('groupeCoursActif', gc);
+async function activerGroupeCoursDepuisBibliotheque(gcId) {
+    // #381 (audit 5 août, rapport B3) : même délégation au chemin canonique
+    // que activerGroupeCoursV2 — le couple groupeCoursActif + infoCours doit
+    // TOUJOURS s'écrire ensemble (l'écriture directe laissait infoCours sur
+    // l'ancien cours). La notification vient du délégué.
+    if (typeof window.changerGroupeCoursActifV2 === 'function') {
+        await window.changerGroupeCoursActifV2(gcId);
     }
 
     // Rafraîchir
-    if (typeof window.peuplerDropdownGroupeCoursActif === 'function') {
-        window.peuplerDropdownGroupeCoursActif();
-    }
     chargerGroupeCoursV2();
     if (groupeCoursEnEditionId) {
         _mettreAJourBoutonActiverGroupeCours(groupeCoursEnEditionId);
@@ -891,8 +885,6 @@ function activerGroupeCoursDepuisBibliotheque(gcId) {
     // Rafraîchir la modal
     fermerModalBibliothequeGroupeCours();
     ouvrirModalBibliothequeGroupeCours();
-
-    notifications.succes('Groupe-cours activé');
 }
 
 function supprimerGroupeCoursDepuisBibliotheque(gcId, nomGC) {
