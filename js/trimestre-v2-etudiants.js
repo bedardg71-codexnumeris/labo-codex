@@ -14,8 +14,6 @@
 
    Dépendances cross-module accédées via `window.X` (résidu trimestre-v2.js
    chargé AVANT ce fichier dans index.html) :
-   - `window.mettreAJourGuideGroupeCours` (helper transversal résiduel,
-     appelé après import/reset/suppression/sauvegarde de groupe)
 
    Note : `peuplerDropdownGroupeCours` (sans `Actif`) avec `typeof === 'function'`
    est défensif (legacy archivé `js/_archives/entites-ui.js`, ne sera jamais
@@ -773,9 +771,6 @@ async function confirmerImportV2() {
     notifications.succes(`${etudiants.length} étudiant(s) importé(s)`);
 
     // Mettre à jour le guide groupe-cours
-    if (typeof window.mettreAJourGuideGroupeCours === 'function') {
-        window.mettreAJourGuideGroupeCours();
-    }
 }
 
 /**
@@ -828,9 +823,6 @@ async function reinitialiserEtudiantsV2() {
     notifications.succes('Liste réinitialisée');
 
     // Mettre à jour le guide groupe-cours
-    if (typeof window.mettreAJourGuideGroupeCours === 'function') {
-        window.mettreAJourGuideGroupeCours();
-    }
 }
 
 /**
@@ -887,9 +879,6 @@ async function supprimerGroupeSelectionneV2() {
     notifications.succes(`Groupe ${groupeSelectionne} supprimé (${etudiantsDuGroupe.length} étudiant(s))`);
 
     // Mettre à jour le guide groupe-cours
-    if (typeof window.mettreAJourGuideGroupeCours === 'function') {
-        window.mettreAJourGuideGroupeCours();
-    }
 }
 
 /**
@@ -933,9 +922,6 @@ async function sauvegarderGroupeEtudiantsV2() {
     }
 
     // Mettre à jour le guide groupe-cours
-    if (typeof window.mettreAJourGuideGroupeCours === 'function') {
-        window.mettreAJourGuideGroupeCours();
-    }
 
     // Ouvrir l'accordéon Horaire pour continuer le workflow
     const accordeonHoraire = document.getElementById('accordeon-horaire');

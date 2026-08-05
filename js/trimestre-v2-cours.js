@@ -14,7 +14,6 @@
    Dépendances cross-module accédées via `window.X` (résidu trimestre-v2.js
    chargé AVANT ce fichier dans index.html) :
    - `window.populerDropdownsAssemblageV2` (hub résiduel)
-   - `window.mettreAJourGuideGroupeCours` (helper transversal résiduel)
    - `window.mettreAJourFormatHoraire` (résidu, zone format horaire)
    - `window.chargerGroupesCoursV2` (extrait dans trimestre-v2-etudiants.js
      également en session B, chargé après ce fichier)
@@ -1021,9 +1020,6 @@ function _postSauvegardeCoursV2(cours) {
     }
     if (typeof window.populerDropdownsAssemblageV2 === 'function') {
         window.populerDropdownsAssemblageV2();
-    }
-    if (typeof window.mettreAJourGuideGroupeCours === 'function') {
-        window.mettreAJourGuideGroupeCours();
     }
 }
 

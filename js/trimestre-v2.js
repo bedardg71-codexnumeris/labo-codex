@@ -462,54 +462,6 @@ window.afficherAvertissementsCadreV2 = afficherAvertissementsCadreV2;
 // Exports de la zone 5 (séances + chargerHoraireGroupeActifV2) migrés vers
 // trimestre-v2-horaires.js (session A, 17 mai 2026).
 // [Chantier 1] exports demo supprimes
-window.mettreAJourGuideGroupeCours = mettreAJourGuideGroupeCours;
-
-/* ===============================
-   GUIDE GROUPE-COURS : INDICATEURS D'ÉTAT
-   =============================== */
-
-/**
- * Met à jour les indicateurs d'état du guide groupe-cours
- * Vérifie si chaque étape est complétée : ○ (à faire) → ● (fait)
- */
-function mettreAJourGuideGroupeCours() {
-    const statusCours = document.getElementById('status-cours');
-    const statusGroupe = document.getElementById('status-groupe');
-    const statusHoraire = document.getElementById('status-horaire');
-    const statusEtudiants = document.getElementById('status-etudiants');
-
-    if (!statusCours) return; // Guide non présent sur la page
-
-    // 1. Cours configuré ?
-    const infoCours = db.getSync('infoCours', null);
-    const coursOk = infoCours && (infoCours.sigle || infoCours.codeCours);
-    statusCours.textContent = coursOk ? '●' : '○';
-    statusCours.style.color = coursOk ? 'var(--vert-succes)' : 'var(--gris-moyen)';
-
-    // 2. Groupe configuré ?
-    const groupeOk = infoCours && infoCours.groupe;
-    statusGroupe.textContent = groupeOk ? '●' : '○';
-    statusGroupe.style.color = groupeOk ? 'var(--vert-succes)' : 'var(--gris-moyen)';
-
-    // 3. Horaire configuré ?
-    const cleHoraire = infoCours ? `seancesHoraire_${infoCours.id}` : null;
-    let horaireOk = false;
-    if (cleHoraire) {
-        const seances = db.getSync(cleHoraire, []);
-        horaireOk = seances && seances.length > 0;
-    }
-    statusHoraire.textContent = horaireOk ? '●' : '○';
-    statusHoraire.style.color = horaireOk ? 'var(--vert-succes)' : 'var(--gris-moyen)';
-
-    // 4. Étudiants importés ?
-    const cleEtudiants = cle('groupeEtudiants');
-    const etudiants = db.getSync(cleEtudiants, []);
-    const etudiantsFiltres = infoCours ? etudiants.filter(e => e.coursId === infoCours.id) : etudiants;
-    const etudiantsOk = etudiantsFiltres.length > 0;
-    statusEtudiants.textContent = etudiantsOk ? '●' : '○';
-    statusEtudiants.style.color = etudiantsOk ? 'var(--vert-succes)' : 'var(--gris-moyen)';
-
-}
 
 /* ===============================
    NAVIGATION VERS AIDE

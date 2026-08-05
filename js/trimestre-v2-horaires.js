@@ -9,7 +9,6 @@
    Dépendances cross-module accédées via `window.X` :
    - `window.populerDropdownsAssemblageV2` (hub résiduel)
    - `window.afficherStatistiquesTrimestreV2` (helper transversal résiduel)
-   - `window.mettreAJourGuideGroupeCours` (helper transversal résiduel)
    =============================== */
 
 (function() {
@@ -273,8 +272,6 @@ function confirmerSeanceV2() {
         genererSeancesCompletes();
     }
 
-    // Mettre à jour le guide groupe-cours
-    window.mettreAJourGuideGroupeCours();
 }
 
 /**
@@ -300,8 +297,6 @@ function supprimerSeanceV2(index) {
         genererSeancesCompletes();
     }
 
-    // Mettre à jour le guide groupe-cours
-    window.mettreAJourGuideGroupeCours();
 }
 
 /**
@@ -727,8 +722,6 @@ function sauvegarderHoraireV2() {
     // 🆕 (10 jan 2026) : Rafraîchir le dropdown horaires dans Groupe-cours
     window.populerDropdownsAssemblageV2();
 
-    // Mettre à jour le guide groupe-cours
-    window.mettreAJourGuideGroupeCours();
 }
 
 /**
@@ -792,8 +785,6 @@ function supprimerHoraireV2() {
     // 🆕 (10 jan 2026) : Rafraîchir le dropdown horaires dans Groupe-cours
     window.populerDropdownsAssemblageV2();
 
-    // Mettre à jour le guide groupe-cours
-    window.mettreAJourGuideGroupeCours();
 
     notifications.succes(`Horaire "${nomHoraire}" supprimé`);
 }
