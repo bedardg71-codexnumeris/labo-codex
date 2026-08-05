@@ -488,6 +488,12 @@ exactement la semaine du 12 octobre.
 > #366-#368 déjà pris dans `BACKLOG.md` sur la branche d'alignement (badge « En évolution »,
 > namespacing `planification_seances`, migration carte 601-101). Verser les items de ce
 > relais sous **#369-#378** après le merge.
+>
+> ✅ **VERSEMENT FAIT le 5 août 2026** (post-merge → main `92ba8cb9`) : mapping **+3**
+> (relais #366→#369 … #375→#378). **#369-#377 étaient tous livrés** → archivés directement
+> dans `BACKLOG-ARCHIVE.md` (bloc « Versement du relais Cadre→Trimestre ») ; seul **#378**
+> (recalage, automne) est entré ouvert dans `BACKLOG.md`. Les numéros #366-#375 de ce
+> fichier sont donc PÉRIMÉS — toute référence future passe par les numéros définitifs.
 
 Questions d'origine (conservées pour trace) :
 

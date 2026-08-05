@@ -2565,3 +2565,24 @@ Deplacer dans la section "Complete" avec [x]
   - **✅ Activé par Grégoire (UI GitHub, 15 juin)** : `main` est désormais `protected: true`. Première PR gatée = #38 (merge 1.17.9). Force-push et suppression bloqués ; *Require status checks to pass before merging* avec `Vitest + Playwright (WebKit)` + `Analyse CodeQL` ; *Require a pull request* décoché (solo dev).
   - **Action manuelle (UI GitHub, ~2 min)** : `Settings → Branches → Add branch protection rule`, pattern `main`. La CI existe et tourne déjà (workflows `tests.yml` + `codeql.yml`, 248+ runs verts).
   - **Procédure détaillée** : `.github/BRANCH-PROTECTION.md`.
+
+---
+
+## Versement du relais Cadre→Trimestre (5 août 2026) — items #369 à #377, TOUS LIVRÉS avant versement
+
+> Relais Cowork du 4 août 2026 (`plans de travail/RELAIS-cadre-trimestre-2026-08-04.md`).
+> Les items portaient les numéros locaux #366-#375, en collision avec les #366-#368 déjà
+> pris dans BACKLOG.md (branche d'alignement) — renumérotés **+3 → #369-#378** au versement
+> post-merge (merge → main fait le 5 août, `92ba8cb9`). #369-#377 étaient déjà livrés au
+> moment du versement → archivés directement ici. Seul **#378** (recalage) reste ouvert dans
+> BACKLOG.md. Détail complet des livraisons : SESSION.md (blocs 4-5 août) + le relais.
+
+- [x] **#369** (relais #366) 🔴 Stats calendrier = constantes 15/75 inventées → fonction pure partagée `calculerStatistiquesCalendrier` — LIVRÉ 1.30.2, sentinelle 6 cas + cliquet + intégration.
+- [x] **#370** (relais #367) 🔴 Jours de planification/examens comptés comme jours de cours — CLOS PAR CONSTAT 5 août (l'exclusion existait ; cause réelle = borne vide, chaîne #374-relais/#371-relais).
+- [x] **#371** (relais #368) 🟡 Numérotation des semaines « paquet de 5 » — LIVRÉ 1.31.1 (⌈rang÷5⌉, comptage par rôle retiré), golden master 75/75 jours vérifié INTÉGRALEMENT contre le PDF officiel committé.
+- [x] **#372** (relais #369) 🟡 Validations de cohérence des bornes — LIVRÉ 1.30.3 (`validerCadreTrimestre` 6 règles, zone « À vérifier » non bloquante).
+- [x] **#373** (relais #370) 🟡 Format des jours menus vs calendrier — CLOS (prémisse auditée : aucun menu 7 jours ; vrai fix = libellé « Reprise le [date] (horaire du lundi) »).
+- [x] **#374** (relais #371) 🟡 Semaines spéciales : champs empilés (`pile-semaines-speciales`), borne de fin redevenue atteignable — LIVRÉ 1.30.1, spec Playwright break-testée.
+- [x] **#375** (relais #372) 🟢 Encadré info-box vide autour d'Enregistrer retiré — LIVRÉ 1.30.1.
+- [x] **#376** (relais #373) 🟡 Nature « Férié » + titre de carte — ABSORBÉ par la fusion (décision Grégoire « fusion immédiate »), LIVRÉ 1.31.0.
+- [x] **#377** (relais #374) 🟢 Zéro-dette : fusion des deux cartes d'événements en « Journées sans cours », clé unique `journeesSansCours`, migration boot sans flag idempotente (localStorage + memoryCache) — LIVRÉ 1.31.0, validé terrain Grégoire (capture 4 août 22h21) + 1.31.2.
