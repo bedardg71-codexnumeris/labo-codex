@@ -9,6 +9,10 @@
 
 # Calendriers institutionnels (fichiers locaux)
 DE_*.pdf
+# EXCEPTION (5 août 2026) : le calendrier officiel 2026-2027 est versionné —
+# c'est le golden master de la numérotation des semaines (#368, relais Cadre ;
+# document public adopté au CA du 27 janvier 2026).
+!DE_Calendrier scolaire_26-27.pdf
 
 # Archives (conservées localement, pas dans git)
 Archives/
