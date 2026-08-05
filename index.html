@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260804g"> <!-- Panneau import inter-trimestre (4 août) -->
+    <link rel="stylesheet" href="styles.css?v=20260804h"> <!-- Relais Cadre #371 : semaines spéciales empilées (4 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -6581,7 +6581,10 @@
                                         <div class="bloc-section bloc-section--bleu bloc-section--compact">
                                             <button data-action="reinitialiserSemainesSpecialesV2" class="btn-reset-bloc" title="Réinitialiser les semaines spéciales"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
                                             <h5 class="sous-titre-section" style="margin-top: 0;" data-tooltip="reglages-trim-semaines-speciales">Semaines spéciales</h5>
-                                            <div class="grille-2col-gap15">
+                                            <!-- #371 (relais 4 août) : empilées VERTICALEMENT — côte à côte, les deux
+                                                 paires « du/au » se chevauchaient et semainePlanificationFin restait
+                                                 invisible donc vide (cause racine du compte de jours faux). -->
+                                            <div class="pile-semaines-speciales">
                                                 <!-- Semaine de planification -->
                                                 <div>
                                                     <label class="u-texte-medium">Semaine de planification</label>
@@ -6730,8 +6733,10 @@
                                         </div>
                                     </div>
 
-                                    <!-- Statistiques calculées -->
-                                    <div class="info-box u-mt-15 u-text-right">
+                                    <!-- #372 (relais 4 août) : encadré info-box retiré — il ne contenait plus
+                                         que le bouton (ses statistiques ont déménagé depuis longtemps).
+                                         #369 ajoutera sa zone d'avertissements dédiée le moment venu. -->
+                                    <div class="u-mt-15 u-text-right">
                                         <button class="btn btn-confirmer btn-tres-compact" data-action="sauvegarderTrimestreCompletV2">Enregistrer</button>
                                     </div>
                                     <!-- Anciens spans masqués pour compatibilité -->
