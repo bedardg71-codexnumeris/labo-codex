@@ -187,6 +187,7 @@ async function afficherTableauProductions() {
         document.getElementById('typesEvaluations').innerHTML =
             '<span class="prod-texte-bleu-leger">Aucune évaluation configurée</span>';
         document.getElementById('nombreEvaluations').textContent = '0';
+        afficherAvertissementsProductions([]); // #394 : zone « À vérifier » muette
         return;
     }
 
@@ -253,6 +254,148 @@ async function afficherTableauProductions() {
 
     document.getElementById('nombreEvaluations').textContent = evaluations.length;
     mettreAJourResumeTypes(evaluations);
+
+    // #394 : avertissements de cohérence STD (zone « À vérifier », patron #369)
+    afficherAvertissementsProductions(evaluations);
+}
+
+/* ===============================
+   #394 — AVERTISSEMENTS DE COHÉRENCE STD (patron #369, non bloquants)
+   Décision D1 (Grégoire, 5 août 2026), règles 3 et 5 :
+   - transparence : production pondérée non participante et pondération obtenue
+     par complément → avertissement, jamais un silence ;
+   - migration legacy : terminale restée en type 'travail'/'examen' → JAMAIS de
+     conversion automatique ; cas non ambigu → bouton « Typer comme terminale »
+     (geste explicite) ; cas ambigu → liste + renvoi au formulaire.
+   =============================== */
+
+/**
+ * Valide la cohérence d'un corpus de productions pour le calcul STD.
+ * Fonction PURE (testable sans DOM) : retourne une liste d'avertissements
+ * { message, productionId? } — productionId présent UNIQUEMENT pour le cas
+ * « candidate terminale non ambiguë » (alimente le bouton de conversion).
+ *
+ * @param {Array} productions - productions du trimestre (cours actif)
+ * @returns {Array<{message: string, productionId?: string}>}
+ */
+function validerProductionsStd(productions) {
+    const avertissements = [];
+    if (!Array.isArray(productions) || productions.length === 0) return avertissements;
+
+    const terminale = (typeof identifierProductionTerminale === 'function')
+        ? identifierProductionTerminale(productions)
+        : (window.identifierProductionTerminale ? window.identifierProductionTerminale(productions) : null);
+    const conteneur = productions.find(p => p && p.type === 'portfolio');
+    const nomDe = (p) => p.titre || p.activiteApprentissage || p.description || p.id;
+
+    // Candidates au rôle de terminale : pondérées, hors conteneur/artefacts/terminale.
+    const candidates = productions.filter(p =>
+        p &&
+        p.type !== 'terminale' &&
+        p.type !== 'portfolio' &&
+        p.type !== 'artefact-portfolio' &&
+        typeof p.ponderation === 'number' && p.ponderation > 0
+    );
+
+    if (terminale) {
+        // Règle 3a : les pondérées non participantes n'entrent pas dans le calcul.
+        candidates.forEach(p => {
+            avertissements.push({
+                message: `« ${nomDe(p)} » porte une pondération (${p.ponderation} %) mais n'entre pas dans le calcul STD : seuls le pool d'artefacts et l'évaluation terminale comptent.`
+            });
+        });
+        // Règle 3a bis : pondération posée sur un artefact du pool (ignorée aussi).
+        productions
+            .filter(p => p && p.type === 'artefact-portfolio' && typeof p.ponderation === 'number' && p.ponderation > 0)
+            .forEach(p => {
+                avertissements.push({
+                    message: `« ${nomDe(p)} » est un artefact du pool : sa pondération (${p.ponderation} %) n'est pas utilisée par le calcul.`
+                });
+            });
+        // Pondération de la terminale manquante → note non constructible.
+        if (terminale.ponderation == null) {
+            avertissements.push({
+                message: `L'évaluation terminale « ${nomDe(terminale)} » n'a pas de pondération : la note finale n'est pas constructible tant qu'elle n'est pas saisie.`
+            });
+        } else if (!conteneur) {
+            // Règle 3b : pondération du pool obtenue par complément.
+            avertissements.push({
+                message: `Aucune production « Portfolio (conteneur) » : le pool d'artefacts vaut le complément de la terminale, soit ${Math.max(0, 100 - terminale.ponderation)} % (100 − ${terminale.ponderation}). C'est permis — vérifie que c'est voulu.`
+            });
+        }
+    } else if (candidates.length === 1) {
+        // Règle 5 : cas NON ambigu → geste explicite offert, jamais de conversion auto.
+        avertissements.push({
+            message: `« ${nomDe(candidates[0])} » est pondérée (${candidates[0].ponderation} %) mais son type est « ${getTypeLabel(candidates[0].type)} » : sans le type « Évaluation terminale », elle n'entre pas dans le calcul STD.`,
+            productionId: candidates[0].id
+        });
+    } else if (candidates.length > 1) {
+        // Règle 5 : cas ambigu → nommer, renvoyer au formulaire, ne pas choisir.
+        const noms = candidates.map(p => `« ${nomDe(p)} »`).join(', ');
+        avertissements.push({
+            message: `${candidates.length} productions pondérées sans évaluation terminale typée : ${noms}. Choisis laquelle est l'évaluation terminale dans son formulaire (type « Évaluation terminale ») — l'outil ne choisit pas à ta place.`
+        });
+    }
+
+    return avertissements;
+}
+
+/** La pratique active du groupe-cours est-elle de famille STD ? */
+function _pratiqueActiveEstStd() {
+    const id = (typeof obtenirPratiqueActiveGroupeCours === 'function') ? obtenirPratiqueActiveGroupeCours() : null;
+    if (!id) return false;
+    const inst = (typeof obtenirPratiqueParId === 'function') ? obtenirPratiqueParId(id) : null;
+    return !!(inst && typeof inst.obtenirCode === 'function' && inst.obtenirCode() === 'STD');
+}
+
+/**
+ * Rend la zone « À vérifier » de la section Productions (patron #369) :
+ * silencieuse quand la saisie est cohérente ou que la pratique active
+ * n'est pas STD (les rôles pool/terminale ne s'appliquent qu'à elle).
+ */
+function afficherAvertissementsProductions(productions) {
+    const zone = document.getElementById('zone-avertissements-productions');
+    if (!zone) return;
+    const avertissements = _pratiqueActiveEstStd() ? validerProductionsStd(productions || []) : [];
+    if (avertissements.length === 0) {
+        zone.classList.add('u-hide');
+        zone.innerHTML = '';
+        return;
+    }
+    zone.innerHTML = '<strong>À vérifier</strong> (rien n\'est bloqué) :<ul class="u-mt-8" style="margin-bottom: 0; padding-left: 20px;">'
+        + avertissements.map(a => '<li>' + echapperHtml(a.message)
+            + (a.productionId
+                ? ' <button class="btn btn-secondaire btn-tres-compact" data-action="typerProductionCommeTerminale" data-param="' + echapperHtml(a.productionId) + '" data-confirm="Typer cette production comme évaluation terminale ? Elle entrera dans le calcul STD avec sa pondération.">Typer comme terminale</button>'
+                : '')
+            + '</li>').join('')
+        + '</ul>';
+    zone.classList.remove('u-hide');
+}
+
+/**
+ * #394 (règle 5) : conversion PAR GESTE EXPLICITE d'une production legacy en
+ * évaluation terminale. Offerte seulement dans le cas non ambigu (une seule
+ * candidate, aucune terminale typée) ; regarde l'état au moment du clic.
+ */
+async function typerProductionCommeTerminale(productionId) {
+    const productionsListe = await db.get(getCleProductions()) || [];
+    const prod = productionsListe.find(p => p && p.id === productionId);
+    if (!prod) {
+        alert('Production introuvable — recharge la section Productions.');
+        return;
+    }
+    const dejaTypee = productionsListe.find(p => p && p.type === 'terminale');
+    if (dejaTypee) {
+        alert('Une évaluation terminale est déjà typée (« ' + (dejaTypee.titre || dejaTypee.id) + ' ») : une seule par trimestre. Rien n\'a été modifié.');
+        return;
+    }
+    prod.type = 'terminale';
+    await db.set(getCleProductions(), productionsListe);
+
+    // Recalculer les indices avec le nouveau rôle, puis rafraîchir la vue.
+    if (typeof calculerEtStockerIndicesCP === 'function') calculerEtStockerIndicesCP();
+    if (typeof afficherListeProductions === 'function') afficherListeProductions();
+    await afficherTableauProductions();
 }
 
 /* ===============================
@@ -1976,6 +2119,11 @@ window.chargerGrillesDisponiblesPourProduction = chargerGrillesDisponiblesPourPr
 
 // 🆕 Beta 98.3 : Échéances par groupe-cours
 window.obtenirEcheanceEffective = obtenirEcheanceEffective;
+// #394 : avertissements de cohérence STD (fonction pure + rendu) et conversion
+// par geste explicite (bouton « Typer comme terminale », dispatcher data-action)
+window.validerProductionsStd = validerProductionsStd;
+window.afficherAvertissementsProductions = afficherAvertissementsProductions;
+window.typerProductionCommeTerminale = typerProductionCommeTerminale;
 
 // Wrappers délégation (Phase 5) → extraits dans productions-import-export.js (refactor 16 mai 2026)
 

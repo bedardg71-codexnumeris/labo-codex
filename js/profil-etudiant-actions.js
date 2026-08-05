@@ -227,26 +227,10 @@ function _obtenirConfigPortfolioCalcul(modalites, pratiqueIdDemande = null) {
     };
 }
 
-function _identifierProductionTerminale(productions) {
-    return productions.find(p => p.type === 'terminale') || null;
-}
-
-function _obtenirArtefactsIdsPortfolio(productions, terminalId) {
-    let ids = productions
-        .filter(p => p.type === 'artefact-portfolio' && p.id !== terminalId)
-        .map(p => p.id);
-    // Fallback : productions à pondération 0 (hors portfolio et terminale)
-    if (ids.length === 0) {
-        ids = productions
-            .filter(p =>
-                p.type !== 'portfolio' &&
-                p.id !== terminalId &&
-                (p.ponderation === 0 || p.ponderation === undefined || p.ponderation === null)
-            )
-            .map(p => p.id);
-    }
-    return ids;
-}
+// #394 : l'identification de la terminale et du pool vit dans la SSOT partagée
+// avec l'instance registre (window.identifierProductionTerminale /
+// window.obtenirArtefactsIdsPoolStd, pratique-registre.js) — plus de définition
+// locale qui pourrait dériver de celle des snapshots/replis.
 
 function _filtrerEvaluationsArtefactsValides(evaluations, da, artefactsIds, terminalId) {
     return evaluations.filter(e => {
@@ -310,21 +294,19 @@ function _selectionnerArtefactsHybride(evalsArtefacts, productions, configCatego
 }
 
 function _selectionnerArtefactsLegacy(evalsArtefacts, productions, methodeSelection, nombreARetenir) {
-    const getNumeroProduction = (ev) => {
-        const prod = productions.find(p => p.id === ev.productionId);
-        return prod?.numero || parseInt(ev.productionId.match(/(\d+)$/)?.[1]) || 0;
-    };
+    // #394 (L9) : LE comparateur de récence du moteur STD (SSOT, pratique-registre.js).
+    const parRecence = window.creerComparateurRecenceStd(productions);
 
     let artefactsRetenus = [...evalsArtefacts];
     if (methodeSelection === 'meilleurs' || methodeSelection === 'hybride') {
         artefactsRetenus.sort((a, b) => b.noteFinale - a.noteFinale);
     } else if (methodeSelection === 'recents') {
-        artefactsRetenus.sort((a, b) => getNumeroProduction(b) - getNumeroProduction(a));
+        artefactsRetenus.sort(parRecence);
     } else if (methodeSelection === 'recents-meilleurs') {
         const nombreMeilleurs = Math.max(1, Math.ceil(artefactsRetenus.length * 0.5));
         artefactsRetenus.sort((a, b) => b.noteFinale - a.noteFinale);
         artefactsRetenus = artefactsRetenus.slice(0, nombreMeilleurs);
-        artefactsRetenus.sort((a, b) => getNumeroProduction(b) - getNumeroProduction(a));
+        artefactsRetenus.sort(parRecence);
     }
     artefactsRetenus = artefactsRetenus.slice(0, nombreARetenir);
 
@@ -462,10 +444,10 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     const productions = obtenirDonneesSelonMode('productions') || [];
 
     const productionPortfolio = productions.find(p => p.type === 'portfolio');
-    const productionTerminale = _identifierProductionTerminale(productions);
+    const productionTerminale = window.identifierProductionTerminale(productions);
     const terminalId = productionTerminale?.id || null;
 
-    const artefactsIds = _obtenirArtefactsIdsPortfolio(productions, terminalId);
+    const artefactsIds = window.obtenirArtefactsIdsPoolStd(productions, terminalId);
     const evaluationsArtefacts = _filtrerEvaluationsArtefactsValides(evaluations, da, artefactsIds, terminalId);
 
     // Statut Provisoire/Finale lu tôt — pilote la règle « obligatoires non
@@ -487,26 +469,38 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     const { moyenne: moyennePortfolio, plafonnement } = _appliquerPlafonnementConformite(moyenneBrute, reglesConformite, deficit);
 
     // Pondérations : déterminées par l'utilisateur, jamais de fallback arbitraire.
-    // - Pas de terminale → portfolio = 100% (conséquence logique, pas un défaut codé en dur).
-    // - Terminale présente → pondérations explicites obligatoires sur les deux productions.
+    // - Pas de terminale → pool = 100% (conséquence logique, pas un défaut codé en dur).
+    // - Terminale présente + conteneur portfolio présent → pondérations explicites
+    //   obligatoires sur les deux productions.
+    // - #394 (D1, règle du complément) : le conteneur « Portfolio » est OPTIONNEL —
+    //   sans conteneur, une terminale pondérée p donne au pool le complément 100 − p.
+    //   L'avertissement de transparence (zone « À vérifier » des Productions) le
+    //   signale ; ici on porte le flag ponderationParComplement dans le retour.
     let ponderationPortfolio;
     let ponderationTerminale;
     let erreurConfiguration = null;
+    let ponderationParComplement = false;
     if (productionTerminale === null) {
         ponderationPortfolio = 100;
         ponderationTerminale = 0;
     } else {
-        const pondP = productionPortfolio?.ponderation;
         const pondT = productionTerminale.ponderation;
-        if (pondP == null || pondT == null) {
-            const champsManquants = [];
-            if (productionPortfolio == null) champsManquants.push('production portfolio absente');
-            else if (pondP == null) champsManquants.push('pondération du portfolio');
-            if (pondT == null) champsManquants.push('pondération de l\'évaluation terminale');
-            erreurConfiguration = 'Pondération manquante (' + champsManquants.join(', ') + '). Corriger la configuration des productions pour que la note finale soit calculable.';
+        if (pondT == null) {
+            erreurConfiguration = 'Pondération manquante (pondération de l\'évaluation terminale). Corriger la configuration des productions pour que la note finale soit calculable.';
+            ponderationPortfolio = 0;
+            ponderationTerminale = 0;
+        } else if (productionPortfolio == null) {
+            ponderationTerminale = pondT;
+            ponderationPortfolio = Math.max(0, 100 - pondT);
+            ponderationParComplement = true;
+        } else {
+            const pondP = productionPortfolio.ponderation;
+            if (pondP == null) {
+                erreurConfiguration = 'Pondération manquante (pondération du portfolio). Corriger la configuration des productions pour que la note finale soit calculable.';
+            }
+            ponderationPortfolio = pondP ?? 0;
+            ponderationTerminale = pondT;
         }
-        ponderationPortfolio = pondP ?? 0;
-        ponderationTerminale = pondT ?? 0;
     }
     const totalPonderation = ponderationPortfolio + ponderationTerminale;
 
@@ -630,6 +624,7 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
         },
         noteFinale: noteFinale,
         estProvisoire: noteTerminale === null,
+        ponderationParComplement: ponderationParComplement,
         recit: recit
     };
 }

@@ -72,9 +72,13 @@ describe('#326 Étape 2 · simulerIndices — injection isolée en try/finally',
 });
 
 describe('#326 Étape 2 · pan-standards — lectures directes routées par l\'injection', () => {
-    it('les 3 lectures directes de productions consultent l\'injection (repli db.getSync inchangé)', () => {
+    it('les lectures directes de productions consultent l\'injection (repli db.getSync inchangé)', () => {
         const src = lire('js', 'pratiques', 'pratique-pan-standards.js');
         const occ = src.match(/obtenirDonneesSimulationOuNull\('productions'\)\)\s*\|\|\s*db\.getSync\(cle\('productions'\)/g) || [];
-        expect(occ.length).toBe(3);
+        // #394 (L10, 5 août 2026) : la 3e lecture (fallback configPAN legacy de
+        // _lireConfiguration) a été RETIRÉE par décision D1 — la config vient de
+        // pratiquesConfigurables. Restent 2 lectures routées : calculerPerformance
+        // et _calculerNiveauxParObjectif. Comportement délibérément changé.
+        expect(occ.length).toBe(2);
     });
 });

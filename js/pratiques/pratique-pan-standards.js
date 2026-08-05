@@ -118,7 +118,7 @@ class PratiquePANStandards {
     /**
      * Calcule l'indice P (Performance) selon PAN-Standards
      *
-     * Formule : Selon la modalité configurée dans modalitesEvaluation.configPAN.portfolio
+     * Formule : Selon la modalité configurée dans la pratique active (pratiquesConfigurables)
      *
      * @param {string} da - Numéro de dossier d'admission
      * @returns {number} Indice P entre 0 et 1, ou null si pas de données
@@ -162,10 +162,20 @@ class PratiquePANStandards {
         }
 
         // Lire les évaluations et productions
+        // #326 R2 : injection mémoire prioritaire (banc de décision) ; repli inchangé.
         const evaluations = this._lireEvaluations();
-        const artefactsIds = this._lireArtefactsPortfolio();
+        const productions = (typeof obtenirDonneesSimulationOuNull === 'function' && obtenirDonneesSimulationOuNull('productions')) || db.getSync(cle('productions'), []);
 
-        // Filtrer les évaluations de cet étudiant sur les artefacts portfolio
+        // #394 (D1) : rôles des productions par la SSOT partagée avec le chemin riche
+        // (pratique-registre.js) — terminale = type === 'terminale' STRICT, jamais
+        // une inférence par pondération ; pool = artefacts déclarés sinon productions
+        // non pondérées ; récence = numéro de production.
+        const productionTerminale = window.identifierProductionTerminale(productions);
+        const terminalId = productionTerminale?.id || null;
+        const artefactsIds = window.obtenirArtefactsIdsPoolStd(productions, terminalId);
+        const parRecence = window.creerComparateurRecenceStd(productions);
+
+        // Filtrer les évaluations de cet étudiant sur les artefacts du pool
         const evaluationsEleve = evaluations.filter(e =>
             e.etudiantDA === da &&
             artefactsIds.includes(e.productionId) &&
@@ -189,8 +199,8 @@ class PratiquePANStandards {
                 break;
 
             case 'recents':
-                // Trier par date décroissante et prendre les N plus récents
-                evaluationsEleve.sort((a, b) => new Date(b.dateEvaluation) - new Date(a.dateEvaluation));
+                // Trier par récence (SSOT #394) et prendre les N plus récents
+                evaluationsEleve.sort(parRecence);
                 artefactsRetenus = evaluationsEleve.slice(0, nombreARetenir);
                 break;
 
@@ -199,7 +209,7 @@ class PratiquePANStandards {
                 const nombreMeilleurs = Math.max(1, Math.ceil(evaluationsEleve.length * 0.5));
                 evaluationsEleve.sort((a, b) => b.noteFinale - a.noteFinale);
                 const topMeilleurs = evaluationsEleve.slice(0, nombreMeilleurs);
-                topMeilleurs.sort((a, b) => new Date(b.dateEvaluation) - new Date(a.dateEvaluation));
+                topMeilleurs.sort(parRecence);
                 artefactsRetenus = topMeilleurs.slice(0, nombreARetenir);
                 break;
 
@@ -215,28 +225,14 @@ class PratiquePANStandards {
                 break;
         }
 
-        // Calculer la moyenne du portfolio (N meilleurs artefacts)
+        // Calculer la moyenne du pool (N artefacts retenus)
         const somme = artefactsRetenus.reduce((acc, e) => acc + e.noteFinale, 0);
         const moyennePortfolio = somme / artefactsRetenus.length;
 
-        // ✅ NOUVEAU (Beta 94 - 10 déc 2025): Intégrer évaluation terminale avec pondération
-        // #326 R2 : injection mémoire prioritaire (banc de décision) ; repli inchangé.
-        const productions = (typeof obtenirDonneesSimulationOuNull === 'function' && obtenirDonneesSimulationOuNull('productions')) || db.getSync(cle('productions'), []);
-
-        // Trouver la production portfolio (conteneur)
-        const productionPortfolio = productions.find(p => p.type === 'portfolio');
-
-        // Trouver l'évaluation terminale (production avec pondération > 0 qui n'est ni portfolio ni artefact)
-        const productionTerminale = productions.find(p =>
-            p.ponderation > 0 &&
-            p.type !== 'portfolio' &&
-            p.type !== 'artefact-portfolio'
-        );
-
-        // Si pas de pondérations configurées, retourner juste la moyenne du portfolio
-        if (!productionPortfolio || !productionTerminale) {
-            const indiceP = moyennePortfolio / 100;
-            return indiceP;
+        // #394 (D1) : agrégation pool + terminale ALIGNÉE sur le chemin riche.
+        // Pas de terminale typée → rien n'en tient lieu, le pool vaut 100 %.
+        if (!productionTerminale) {
+            return moyennePortfolio / 100;
         }
 
         // Trouver l'évaluation de l'étudiant sur l'évaluation terminale
@@ -248,27 +244,38 @@ class PratiquePANStandards {
             e.noteFinale !== undefined
         );
 
-        // Si l'évaluation terminale n'est pas encore faite, retourner seulement le portfolio
+        // Si l'évaluation terminale n'est pas encore faite, note provisoire = pool seul
         if (!evalTerminale) {
-            const indiceP = moyennePortfolio / 100;
-            return indiceP;
+            return moyennePortfolio / 100;
         }
 
-        // Calculer P pondéré : (Portfolio × pond%) + (Terminale × pond%)
-        const ponderationPortfolio = productionPortfolio.ponderation || 60;
-        const ponderationTerminale = productionTerminale.ponderation || 40;
+        // Pondérations SAISIES par l'utilisateur — les défauts 60/40 sont morts (D1).
+        // Conteneur portfolio optionnel : absent → règle du complément (pool = 100 − p).
+        const productionPortfolio = productions.find(p => p.type === 'portfolio');
+        const ponderationTerminale = productionTerminale.ponderation;
+        if (ponderationTerminale == null) {
+            return null; // pondération manquante → non constructible (parité chemin riche)
+        }
+        let ponderationPortfolio;
+        if (!productionPortfolio) {
+            ponderationPortfolio = Math.max(0, 100 - ponderationTerminale);
+        } else {
+            ponderationPortfolio = productionPortfolio.ponderation;
+            if (ponderationPortfolio == null) {
+                return null; // pondération manquante → non constructible (parité chemin riche)
+            }
+        }
         const totalPonderation = ponderationPortfolio + ponderationTerminale;
+        if (!(totalPonderation > 0)) {
+            return null; // 0/0 : configuration invalide, jamais un NaN
+        }
 
         const moyennePonderee = (
             (moyennePortfolio * ponderationPortfolio / totalPonderation) +
             (evalTerminale.noteFinale * ponderationTerminale / totalPonderation)
         );
 
-        const indiceP = moyennePonderee / 100;
-
-        // ✅ DÉSACTIVÉ (10 déc 2025): Pour performance Safari
-
-        return indiceP;
+        return moyennePonderee / 100;
     }
 
     /**
@@ -300,9 +307,6 @@ class PratiquePANStandards {
             return null;
         }
 
-        // Lire artefacts portfolio
-        const artefactsIds = this._lireArtefactsPortfolio();
-
         // Utiliser le cache fourni (evaluationsEtudiants)
         if (!evaluationsCache || evaluationsCache.length === 0) {
             console.warn('[PAN-Historique] Cache évaluations vide ou manquant');
@@ -311,6 +315,12 @@ class PratiquePANStandards {
 
         // ✅ NOUVEAU (Beta 94 - 10 déc 2025): Lire productions pour dateEcheance
         const productions = this._lireProductions();
+
+        // #394 (D1) : rôles des productions par la SSOT partagée (même règle que
+        // calculerPerformance et que le chemin riche — les snapshots ne divergent plus).
+        const productionTerminaleHist = window.identifierProductionTerminale(productions);
+        const artefactsIds = window.obtenirArtefactsIdsPoolStd(productions, productionTerminaleHist?.id || null);
+        const parRecenceHist = window.creerComparateurRecenceStd(productions);
 
         // Fonction helper pour obtenir dateEcheance de la production
         // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
@@ -328,21 +338,6 @@ class PratiquePANStandards {
             }
             return production.dateEcheance || evaluation.dateEvaluation;
         };
-
-        // ✅ DEBUG TEMPORAIRE (10 déc 2025): Vérifier filtrage pour DA spécifique
-        if (da === '9000116') {
-            const toutes = evaluationsCache.filter(e => e.etudiantDA === da);
-
-            const avecDateEcheance = toutes.map(e => {
-                const prod = productions.find(p => p.id === e.productionId);
-                return {
-                    prodId: e.productionId,
-                    dateEcheance: prod?.dateEcheance || 'N/A',
-                    statutRemise: e.statutRemise,
-                    noteFinale: e.noteFinale
-                };
-            });
-        }
 
         // Filtrer évaluations de cet étudiant sur artefacts portfolio jusqu'à dateLimite
         // ✅ CORRECTIF CRITIQUE (10 déc 2025): Utiliser les bons noms de champs
@@ -389,7 +384,8 @@ class PratiquePANStandards {
                 break;
 
             case 'recents':
-                evaluationsEleve.sort((a, b) => new Date(b.dateEvaluation) - new Date(a.dateEvaluation));
+                // #394 (L9) : récence par numéro de production (SSOT), plus par dateEvaluation
+                evaluationsEleve.sort(parRecenceHist);
                 artefactsRetenus = evaluationsEleve.slice(0, nombreARetenir);
                 break;
 
@@ -398,7 +394,7 @@ class PratiquePANStandards {
                 // ✅ CORRECTIF (10 déc 2025): Utiliser noteFinale au lieu de note
                 evaluationsEleve.sort((a, b) => parseFloat(b.noteFinale) - parseFloat(a.noteFinale));
                 const topMeilleurs = evaluationsEleve.slice(0, nombreMeilleurs);
-                topMeilleurs.sort((a, b) => new Date(b.dateEvaluation) - new Date(a.dateEvaluation));
+                topMeilleurs.sort(parRecenceHist);
                 artefactsRetenus = topMeilleurs.slice(0, nombreARetenir);
                 break;
 
@@ -419,21 +415,11 @@ class PratiquePANStandards {
         const somme = artefactsRetenus.reduce((acc, e) => acc + parseFloat(e.noteFinale || 0), 0);
         const moyennePortfolio = somme / artefactsRetenus.length;
 
-        // ✅ NOUVEAU (Beta 94 - 10 déc 2025): Intégrer évaluation terminale avec pondération
-        // Trouver la production portfolio (conteneur)
-        const productionPortfolio = productions.find(p => p.type === 'portfolio');
-
-        // Trouver l'évaluation terminale (production avec pondération > 0 qui n'est ni portfolio ni artefact)
-        const productionTerminale = productions.find(p =>
-            p.ponderation > 0 &&
-            p.type !== 'portfolio' &&
-            p.type !== 'artefact-portfolio'
-        );
-
-        // Si pas de pondérations configurées, retourner juste la moyenne du portfolio
-        if (!productionPortfolio || !productionTerminale) {
-            const indiceP = moyennePortfolio / 100;
-            return indiceP;
+        // #394 (D1) : agrégation pool + terminale ALIGNÉE sur le chemin riche
+        // (terminale = déclaration explicite ; pas de terminale → pool = 100 %).
+        const productionTerminale = productionTerminaleHist;
+        if (!productionTerminale) {
+            return moyennePortfolio / 100;
         }
 
         // Vérifier si l'évaluation terminale était due avant dateLimite
@@ -443,9 +429,8 @@ class PratiquePANStandards {
             : { date: productionTerminale.dateEcheance, assignee: true };
         const dateEcheanceTerminale = echeanceTerminale.date;
         if (!dateEcheanceTerminale || dateEcheanceTerminale > dateLimite) {
-            // L'évaluation terminale n'était pas encore due, retourner seulement le portfolio
-            const indiceP = moyennePortfolio / 100;
-            return indiceP;
+            // L'évaluation terminale n'était pas encore due, retourner seulement le pool
+            return moyennePortfolio / 100;
         }
 
         // Trouver l'évaluation de l'étudiant sur l'évaluation terminale
@@ -457,29 +442,38 @@ class PratiquePANStandards {
             e.noteFinale !== undefined
         );
 
-        // Si l'évaluation terminale n'est pas encore faite, retourner seulement le portfolio
+        // Si l'évaluation terminale n'est pas encore faite, retourner seulement le pool
         if (!evalTerminale) {
-            const indiceP = moyennePortfolio / 100;
-            return indiceP;
+            return moyennePortfolio / 100;
         }
 
-        // Calculer P pondéré : (Portfolio × pond%) + (Terminale × pond%)
-        const ponderationPortfolio = productionPortfolio.ponderation || 60;
-        const ponderationTerminale = productionTerminale.ponderation || 40;
+        // Pondérations SAISIES par l'utilisateur — défauts 60/40 morts (D1) ;
+        // conteneur optionnel → règle du complément (pool = 100 − p).
+        const productionPortfolio = productions.find(p => p.type === 'portfolio');
+        const ponderationTerminale = productionTerminale.ponderation;
+        if (ponderationTerminale == null) {
+            return null;
+        }
+        let ponderationPortfolio;
+        if (!productionPortfolio) {
+            ponderationPortfolio = Math.max(0, 100 - ponderationTerminale);
+        } else {
+            ponderationPortfolio = productionPortfolio.ponderation;
+            if (ponderationPortfolio == null) {
+                return null;
+            }
+        }
         const totalPonderation = ponderationPortfolio + ponderationTerminale;
+        if (!(totalPonderation > 0)) {
+            return null;
+        }
 
         const moyennePonderee = (
             (moyennePortfolio * ponderationPortfolio / totalPonderation) +
             (parseFloat(evalTerminale.noteFinale) * ponderationTerminale / totalPonderation)
         );
 
-        const indiceP = moyennePonderee / 100;
-
-        // ✅ DEBUG TEMPORAIRE (10 déc 2025): Vérifier calcul historique
-        if (da === '9000116') {
-        }
-
-        return indiceP;
+        return moyennePonderee / 100;
     }
 
     /**
@@ -754,48 +748,37 @@ class PratiquePANStandards {
     // ========================================================================
 
     /**
-     * Lit la configuration PAN depuis db.getSync
+     * Lit la configuration du pool (portfolio) de la pratique
+     * #394 (L10) : source canonique = pratiquesConfigurables via
+     * obtenirConfigPratiqueActive (Phase G2-a) — la source legacy
+     * modalitesEvaluation.configPAN, qui driftait à l'édition wizard, n'est
+     * plus consultée. Repli explicite : défauts neutres (3 / meilleurs) pour
+     * l'id registre 'standards' sans configurable associée.
+     * Une instance SIMULÉE (#307) peut porter sa config via this.config.modalites
+     * (chemin conservé pour la parité du banc de décision).
      * @private
      */
     _lireConfiguration() {
-        const config = this._modalites();
-        const configPAN = config.configPAN || {};
+        let portfolio = null;
 
-        // ✅ PHASE 3: SINGLE SOURCE OF TRUTH centralisé dans modalitesEvaluation.configPAN.portfolio
-        // Lire depuis le nouvel emplacement avec fallback vers productions pour rétrocompatibilité
-        let portfolioActif = true;
-        let nombreARetenir = 3;
-        let minimumCompletion = 7;
-        let nombreTotal = 10;
-        let methodeSelection = 'meilleurs';
-
-        if (configPAN.portfolio) {
-            // Nouveau format (Phase 3)
-            portfolioActif = configPAN.portfolio.actif !== false;
-            nombreARetenir = configPAN.portfolio.nombreARetenir || 3;
-            minimumCompletion = configPAN.portfolio.minimumCompletion || 7;
-            nombreTotal = configPAN.portfolio.nombreTotal || 10;
-            methodeSelection = configPAN.portfolio.methodeSelection || 'meilleurs';
-        } else {
-            // Ancien format (fallback pour rétrocompatibilité)
-            // #326 R2 : injection mémoire prioritaire ; repli inchangé.
-            const productions = (typeof obtenirDonneesSimulationOuNull === 'function' && obtenirDonneesSimulationOuNull('productions')) || db.getSync(cle('productions'), []);
-            const portfolio = productions.find(p => p.type === 'portfolio');
-
-            if (portfolio && portfolio.regles) {
-                nombreARetenir = portfolio.regles.nombreARetenir || 3;
-                minimumCompletion = portfolio.regles.minimumCompletion || 7;
-                nombreTotal = portfolio.regles.nombreTotal || 10;
-            }
+        if (this.config && this.config.modalites && this.config.modalites.configPAN) {
+            // Instance simulée (#307) : config injectée, pas de lecture du stockage.
+            portfolio = this.config.modalites.configPAN.portfolio || null;
+        } else if (typeof obtenirConfigPratiqueActive === 'function') {
+            const cfgActive = obtenirConfigPratiqueActive();
+            portfolio = (cfgActive && cfgActive.portfolio) || null;
         }
 
+        let methodeSelection = (portfolio && portfolio.methodeSelection) || 'meilleurs';
+        if (methodeSelection === 'derniers') methodeSelection = 'recents'; // alias legacy (parité chemin riche)
+
         return {
-            nombreCours: configPAN.nombreCours || 3,  // 3, 7 ou 12 cours
-            portfolioActif: portfolioActif,           // Portfolio activé ou non
-            nombreARetenir: nombreARetenir,           // Lecture depuis modalitesEvaluation.configPAN.portfolio
-            minimumCompletion: minimumCompletion,     // Nouvelle donnée disponible
-            nombreTotal: nombreTotal,                 // Nouvelle donnée disponible
-            methodeSelection: methodeSelection        // Modalité de sélection des artefacts
+            nombreCours: 3,                                                        // fenêtre « récents » du dépistage (3 cours = 6 artefacts)
+            portfolioActif: portfolio ? portfolio.actif !== false : true,
+            nombreARetenir: (portfolio && portfolio.nombreARetenir) || 3,
+            minimumCompletion: (portfolio && portfolio.minimumCompletion) || 7,
+            nombreTotal: (portfolio && portfolio.nombreTotal) || 10,
+            methodeSelection: methodeSelection
         };
     }
 
@@ -812,16 +795,16 @@ class PratiquePANStandards {
     }
 
     /**
-     * Retourne les IDs des productions de type artefact-portfolio
+     * Retourne les IDs des productions du pool d'artefacts STD
+     * #394 : délègue à la SSOT partagée avec le chemin riche (pratique-registre.js) —
+     * artefacts déclarés, sinon repli sur les productions non pondérées.
      * @private
      */
     _lireArtefactsPortfolio() {
         // ✅ CORRECTION (30 déc 2025): Utiliser obtenirDonneesSelonMode pour respecter coursId
-        // Avant: db.getSync(cle('productions'), []) ne filtrait pas par cours actif
         const productions = this._lireProductions();
-        return productions
-            .filter(p => p.type === 'artefact-portfolio')
-            .map(p => p.id);
+        const terminale = window.identifierProductionTerminale(productions);
+        return window.obtenirArtefactsIdsPoolStd(productions, terminale?.id || null);
     }
 
     /**
