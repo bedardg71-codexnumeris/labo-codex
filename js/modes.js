@@ -550,6 +550,33 @@ function obtenirDonneesSimulationOuNull(cleBase) {
     return null;
 }
 
+// ============================================================================
+// #397 — CACHE DE LECTURE DE PIPELINE (perf)
+// Un « pipeline » (recalcul des indices sur N étudiants : assiduité, chaîne C/P,
+// rendu prioritaires) relit les MÊMES clés une fois PAR étudiant — chaque
+// obtenirDonneesSelonMode refait JSON.parse du blob entier + filtre coursId
+// (mesuré : ~460 ms de gel à 75 étudiants, croissance quasi quadratique).
+// L'orchestrateur encadre sa boucle de demarrerCacheLecture()/terminerCacheLecture()
+// (try/finally) : le RÉSULTAT d'obtenirDonneesSelonMode est mémoïsé par clé pour
+// la durée du lot. Réentrant (compteur de profondeur — la chaîne A → C/P imbrique
+// deux pipelines). Toute écriture via sauvegarderDonneesSelonMode VIDE le cache
+// (jamais de lecture périmée). Même couture que l'injection #326 R2 ci-dessus.
+// ============================================================================
+let _cacheLecturePipeline = null;
+let _cacheLectureProfondeur = 0;
+
+function demarrerCacheLecture() {
+    _cacheLectureProfondeur++;
+    if (_cacheLectureProfondeur === 1) _cacheLecturePipeline = {};
+}
+function terminerCacheLecture() {
+    _cacheLectureProfondeur--;
+    if (_cacheLectureProfondeur <= 0) {
+        _cacheLectureProfondeur = 0;
+        _cacheLecturePipeline = null;
+    }
+}
+
 function obtenirDonneesSelonMode(cle) {
     const mode = modeActuel;
 
@@ -564,6 +591,12 @@ function obtenirDonneesSelonMode(cle) {
             return _contexteSimulation[cleBaseSim];
         }
     }
+    // #397 : pendant un pipeline (lot de calculs sur N étudiants), le résultat
+    // par clé est mémoïsé — mêmes données, un seul parse + filtre coursId.
+    if (_cacheLecturePipeline && Object.prototype.hasOwnProperty.call(_cacheLecturePipeline, cle)) {
+        return _cacheLecturePipeline[cle];
+    }
+
     // ===================================
     // MODE NORMAL : Données réelles
     // ===================================
@@ -635,6 +668,11 @@ function obtenirDonneesSelonMode(cle) {
         donnees = anonymiserDonnees(cleBase, donnees);
     }
 
+    // #397 : mémoïsation pour la durée du pipeline (voir demarrerCacheLecture)
+    if (_cacheLecturePipeline) {
+        _cacheLecturePipeline[cle] = donnees;
+    }
+
     return donnees;
 }
 
@@ -660,6 +698,9 @@ function sauvegarderDonneesSelonMode(cle, donnees) {
         // Utiliser window.cle() pour le namespacing par trimestre (paramètre cle shadowed)
         const cleEffective = window.cle(cle);
         db.setSync(cleEffective, donnees);
+        // #397 : une écriture pendant un pipeline VIDE le cache de lecture —
+        // la prochaine lecture repart du stockage (jamais de valeur périmée).
+        if (_cacheLecturePipeline) _cacheLecturePipeline = {};
         return true;
     } catch (error) {
         // Détecter erreur de quota dépassé
@@ -959,6 +1000,10 @@ window.estAideContextuelleActive = estAideContextuelleActive;
 window.definirAideContextuelle = definirAideContextuelle;
 window.estEnModeDemo = estEnModeDemo;
 window.obtenirDonneesSelonMode = obtenirDonneesSelonMode;
+// #397 — cache de lecture de pipeline (orchestrateurs : indices.js, portfolio.js,
+// tableau-bord-apercu.js encadrent leurs boucles en try/finally)
+window.demarrerCacheLecture = demarrerCacheLecture;
+window.terminerCacheLecture = terminerCacheLecture;
 window.definirContexteSimulation = definirContexteSimulation;
 window.effacerContexteSimulation = effacerContexteSimulation;
 window.obtenirDonneesSimulationOuNull = obtenirDonneesSimulationOuNull;

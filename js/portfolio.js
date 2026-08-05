@@ -592,6 +592,19 @@ function convertirNiveauEnPourcentage(niveau, echelleId = null) {
  * @returns {Promise<Object>} - Structure avec indices pour chaque étudiant
  */
 function calculerEtStockerIndicesCP() {
+    // #397 : pipeline sur N étudiants — cache de lecture pour la durée du lot
+    // (calculerCompletion/calculerDetailsNoteFinale relisaient evaluations +
+    // productions PAR étudiant : ~350 ms de parses répétés à 75 étu, mesuré).
+    // Réentrant : la chaîne assiduité → C/P imbrique proprement (profondeur).
+    if (typeof demarrerCacheLecture === 'function') demarrerCacheLecture();
+    try {
+        return _calculerEtStockerIndicesCPInterne();
+    } finally {
+        if (typeof terminerCacheLecture === 'function') terminerCacheLecture();
+    }
+}
+
+function _calculerEtStockerIndicesCPInterne() {
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
     const productions = obtenirDonneesSelonMode('productions');
 
@@ -675,28 +688,13 @@ function calculerEtStockerIndicesCP() {
             }
         };
 
-        // Initialiser ou mettre à jour l'historique
-        if (!indicesCP[da]) {
-            indicesCP[da] = {
-                historique: [],
-                actuel: null
-            };
-        }
-
-        // Ajouter à l'historique (seulement si différent du dernier)
-        const dernierHistorique = indicesCP[da].historique[indicesCP[da].historique.length - 1];
-        const aDiffere = !dernierHistorique ||
-            dernierHistorique.pratique !== pratiqueId ||
-            dernierHistorique.C !== C ||
-            dernierHistorique.P !== P ||
-            (dernierHistorique.noteConstructible !== false) !== noteConstructible;
-
-        if (aDiffere) {
-            indicesCP[da].historique.push(entreeActuelle);
-        }
-
-        // Mettre à jour l'actuel
-        indicesCP[da].actuel = entreeActuelle;
+        // #397 (décision D3, 5 août 2026) : l'historique indicesCP est PURGÉ —
+        // zéro lecteur au grep (les trajectoires lisent les snapshots hebdomadaires
+        // de snapshots.js) et il croissait sans borne à chaque recalcul (la clé
+        // grossissait toute la session, rendu prioritaires 44 → 203 ms mesuré).
+        // L'entrée du DA est réécrite SANS le champ : purge progressive au recalcul,
+        // aucune migration de données.
+        indicesCP[da] = { actuel: entreeActuelle };
     });
 
     // Ajouter la date de calcul globale

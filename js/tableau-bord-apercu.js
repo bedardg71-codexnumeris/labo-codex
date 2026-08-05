@@ -112,8 +112,17 @@ function calculerEtudiantsPrioritaires() {
     var etudiants = obtenirEtudiantsCoursActif();
     var actifs = etudiants.filter(function(e) { return !estEtudiantExclu(e); });
 
+    // #397 : rendu sur N étudiants — lire indicesAssiduite/indicesCP UNE fois et
+    // les passer en caches (patron calculerIndicesEtudiant) ; cache de lecture de
+    // pipeline pour les autres lecteurs de la boucle (RàI, suivi). Mesuré à
+    // l'audit : 44 → 203 ms par rendu, croissant avec la taille d'indicesCP.
+    var cacheIndicesA = db.getSync(cle('indicesAssiduite'), {});
+    var cacheIndicesCP = (typeof obtenirDonneesSelonMode === 'function')
+        ? (obtenirDonneesSelonMode('indicesCP') || {}) : {};
+    if (typeof demarrerCacheLecture === 'function') demarrerCacheLecture();
+    try {
     actifs.forEach(function(e) {
-        var indices = calculerTousLesIndices(e.da);
+        var indices = calculerTousLesIndices(e.da, cacheIndicesA, cacheIndicesCP);
         var rai = typeof determinerNiveauRaiPedagogique === 'function'
             ? determinerNiveauRaiPedagogique(e.da) : { niveau: 0, pattern: '' };
 
@@ -142,6 +151,9 @@ function calculerEtudiantsPrioritaires() {
             suivi: suivi
         });
     });
+    } finally {
+        if (typeof terminerCacheLecture === 'function') terminerCacheLecture();
+    }
 
     appliquerFiltres();
     return _etudiantsPrioritaires;
