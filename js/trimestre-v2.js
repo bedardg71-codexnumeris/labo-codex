@@ -58,7 +58,111 @@ function calculerStatistiquesCalendrier(calendrier) {
     return { semaines: semaines, joursCours: joursCours, conges: conges, reprises: reprises };
 }
 
+/**
+ * #369 (relais Cadre→Trimestre, 4 août 2026) : validation de cohérence des
+ * bornes du trimestre. Fonction PURE — retourne une liste de messages
+ * d'avertissement (vide = saisie cohérente, rester SILENCIEUX).
+ * NON BLOQUANT par décision : un cégep peut avoir des cas légitimes qu'on
+ * n'anticipe pas ; on signale, on explique, on laisse passer.
+ * Ces champs se remplissent une fois en août et ne se revoient jamais —
+ * une erreur de mois invisible se découvre en décembre (cas réel : remise
+ * des notes saisie au 29/08 au lieu du 29/12).
+ * @param {Object|null} cadre - cadreCalendrier ({dateDebut, finCours, ...})
+ * @param {Array} evenements - événements prévus + imprévus fusionnés
+ * @returns {string[]} messages (quoi + pourquoi/quoi faire, une phrase)
+ */
+function validerCadreTrimestre(cadre, evenements) {
+    const avertissements = [];
+    if (!cadre || typeof cadre !== 'object') return avertissements;
+    // Les dates sont des chaînes YYYY-MM-DD : la comparaison lexicale suffit.
+    const debut = cadre.dateDebut || cadre.debutTrimestre || '';
+    const finCours = cadre.finCours || '';
+    const finTrimestre = cadre.finTrimestre || '';
+
+    // 1. Ordre des bornes principales
+    if (debut && finCours && debut >= finCours) {
+        avertissements.push(`La fin des cours réguliers (${finCours}) devrait suivre le début du trimestre (${debut}).`);
+    }
+    if (finCours && finTrimestre && finCours > finTrimestre) {
+        avertissements.push(`La fin du trimestre (${finTrimestre}) devrait suivre la fin des cours réguliers (${finCours}).`);
+    }
+
+    // 2. Remise des notes avant la fin du trimestre (cas réel : erreur de mois)
+    if (cadre.remiseNotes && finTrimestre && cadre.remiseNotes < finTrimestre) {
+        avertissements.push(`La remise des notes (${cadre.remiseNotes}) précède la fin du trimestre (${finTrimestre}) — vérifie le mois saisi.`);
+    }
+
+    // 3-4. Semaines spéciales : borne partielle (ne JAMAIS deviner en silence —
+    // une plage à une seule borne n'existe pas pour le calendrier, cf. #367)
+    // puis plage hors des bornes du trimestre.
+    const plages = [
+        { nom: 'semaine de planification', debut: cadre.semainePlanificationDebut, fin: cadre.semainePlanificationFin },
+        { nom: 'semaine d\'examens', debut: cadre.semaineExamensDebut, fin: cadre.semaineExamensFin }
+    ];
+    plages.forEach(p => {
+        if (!!p.debut !== !!p.fin) {
+            const manquant = p.debut ? 'de fin' : 'de début';
+            avertissements.push(`La ${p.nom} n'a pas de date ${manquant} : elle sera ignorée du calendrier tant que les deux bornes ne sont pas saisies.`);
+            return;
+        }
+        if (p.debut && p.fin) {
+            if (p.debut > p.fin) {
+                avertissements.push(`La ${p.nom} finit (${p.fin}) avant de commencer (${p.debut}).`);
+            } else if ((debut && p.debut < debut) || (finTrimestre && p.fin > finTrimestre)) {
+                avertissements.push(`La ${p.nom} (${p.debut} au ${p.fin}) déborde des bornes du trimestre.`);
+            }
+        }
+    });
+
+    // 5-6. Reprises : jour non ouvrable (silencieusement absente du calendrier
+    // généré — cas réel : reprise saisie un samedi) et reprise avant son congé.
+    (Array.isArray(evenements) ? evenements : []).forEach(evt => {
+        if (!evt || !evt.dateReprise) return;
+        const [a, m, j] = String(evt.dateReprise).split('-').map(Number);
+        if (a && m && j) {
+            const jourSem = new Date(a, m - 1, j).getDay();
+            if (jourSem === 0 || jourSem === 6) {
+                avertissements.push(`La reprise du ${evt.dateReprise} (« ${evt.description || 'sans description'} ») tombe une fin de semaine : elle n'apparaîtra pas au calendrier.`);
+            }
+        }
+        if (evt.dateEvenement && evt.dateReprise <= evt.dateEvenement) {
+            avertissements.push(`La reprise du ${evt.dateReprise} précède le congé qu'elle remplace (${evt.dateEvenement}).`);
+        }
+    });
+
+    return avertissements;
+}
+
+/**
+ * #369 : rend les avertissements de cohérence dans la zone au-dessus du bouton
+ * Enregistrer (emplacement prévu lors du retrait de l'info-box, #372).
+ * Silencieux quand tout est cohérent : zone masquée, aucun bruit.
+ */
+function afficherAvertissementsCadreV2() {
+    const zone = document.getElementById('v2-avertissementsCadre');
+    if (!zone) return;
+    const cadre = db.getSync(cle('cadreCalendrier'), null);
+    const evenements = [
+        ...db.getSync(cle('evenementsPrevus'), []),
+        ...db.getSync(cle('evenementsImprevus'), [])
+    ];
+    const avertissements = validerCadreTrimestre(cadre, evenements);
+    if (avertissements.length === 0) {
+        zone.classList.add('u-hide');
+        zone.innerHTML = '';
+        return;
+    }
+    zone.innerHTML = '<strong>À vérifier</strong> (rien n\'est bloqué) :<ul class="u-mt-8" style="margin-bottom: 0; padding-left: 20px;">'
+        + avertissements.map(msg => '<li>' + echapperHtml(msg) + '</li>').join('')
+        + '</ul>';
+    zone.classList.remove('u-hide');
+}
+
 function afficherStatistiquesTrimestreV2() {
+    // #369 : rafraîchir les avertissements au même rythme que les statistiques
+    // (après chaque save, chargement de section, ajout/retrait d'événement).
+    afficherAvertissementsCadreV2();
+
     // Lire depuis db avec clé namespacée
     let calendrier = null;
     try {
@@ -355,6 +459,8 @@ window.mettreAJourInfoDuree = mettreAJourInfoDuree;
 // `afficherStatistiquesTrimestreV2` reste ici comme helper transversal.
 window.afficherStatistiquesTrimestreV2 = afficherStatistiquesTrimestreV2;
 window.calculerStatistiquesCalendrier = calculerStatistiquesCalendrier;
+window.validerCadreTrimestre = validerCadreTrimestre;
+window.afficherAvertissementsCadreV2 = afficherAvertissementsCadreV2;
 // Exports zone 2 (liste trimestres) migrés vers trimestre-v2-liste.js (session A, 17 mai 2026).
 // Exports de la zone 5 (séances + chargerHoraireGroupeActifV2) migrés vers
 // trimestre-v2-horaires.js (session A, 17 mai 2026).

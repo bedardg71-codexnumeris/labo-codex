@@ -6654,11 +6654,11 @@
                                                         <label class="u-texte-medium">Horaire de reprise</label>
                                                         <select id="v2-horaireReprisePrevu" class="controle-form controle-form-compact">
                                                             <option value="">— Aucune —</option>
-                                                            <option value="Lundi">Lundi</option>
-                                                            <option value="Mardi">Mardi</option>
-                                                            <option value="Mercredi">Mercredi</option>
-                                                            <option value="Jeudi">Jeudi</option>
-                                                            <option value="Vendredi">Vendredi</option>
+                                                            <option value="Lundi">Horaire du lundi</option>
+                                                            <option value="Mardi">Horaire du mardi</option>
+                                                            <option value="Mercredi">Horaire du mercredi</option>
+                                                            <option value="Jeudi">Horaire du jeudi</option>
+                                                            <option value="Vendredi">Horaire du vendredi</option>
                                                         </select>
                                                     </div>
                                                     <div class="groupe-form">
@@ -6709,11 +6709,11 @@
                                                         <label class="u-texte-medium">Horaire de reprise</label>
                                                         <select id="v2-horaireRepriseImprevu" class="controle-form controle-form-compact">
                                                             <option value="">— Aucune —</option>
-                                                            <option value="Lundi">Lundi</option>
-                                                            <option value="Mardi">Mardi</option>
-                                                            <option value="Mercredi">Mercredi</option>
-                                                            <option value="Jeudi">Jeudi</option>
-                                                            <option value="Vendredi">Vendredi</option>
+                                                            <option value="Lundi">Horaire du lundi</option>
+                                                            <option value="Mardi">Horaire du mardi</option>
+                                                            <option value="Mercredi">Horaire du mercredi</option>
+                                                            <option value="Jeudi">Horaire du jeudi</option>
+                                                            <option value="Vendredi">Horaire du vendredi</option>
                                                         </select>
                                                     </div>
                                                     <div class="groupe-form">
@@ -6734,8 +6734,10 @@
                                     </div>
 
                                     <!-- #372 (relais 4 août) : encadré info-box retiré — il ne contenait plus
-                                         que le bouton (ses statistiques ont déménagé depuis longtemps).
-                                         #369 ajoutera sa zone d'avertissements dédiée le moment venu. -->
+                                         que le bouton (ses statistiques ont déménagé depuis longtemps). -->
+                                    <!-- #369 : avertissements de cohérence NON bloquants (validerCadreTrimestre),
+                                         masqués quand la saisie est cohérente. -->
+                                    <div id="v2-avertissementsCadre" class="alerte alerte-attention u-hide u-mt-15" style="text-align: left;"></div>
                                     <div class="u-mt-15 u-text-right">
                                         <button class="btn btn-confirmer btn-tres-compact" data-action="sauvegarderTrimestreCompletV2">Enregistrer</button>
                                     </div>
@@ -14634,8 +14636,8 @@
     <script src="js/trimestres.js?v=20260629a"></script> <!-- Beta 99.76 b0529-1139 : refonte chantier B — résolution trimestre via trimestre actif -->
     <script src="js/productions-namespace-garde.js?v=2026061500"></script> <!-- #340 : garde-fou anti-contamination productions inter-trimestres (db.set/setSync) -->
     <script src="js/trimestre.js?v=20260512b"></script> <!-- Beta 99.28 b0428-1915 : champ categorie + algo deux passes pour numérotation des semaines DÉ -->
-    <script src="js/trimestre-v2.js?v=20260805a"></script> <!-- #366 relais : fonction pure calculerStatistiquesCalendrier (5 août) -->
-    <script src="js/trimestre-v2-init.js?v=20260703a"></script> <!-- #306 Lot 2 (3 juil.) : save explicite du Trimestre — sauvegarderTrimestreCompletV2, auto-save retiré -->
+    <script src="js/trimestre-v2.js?v=20260805b"></script> <!-- #366+#369 relais : stats + validation de cohérence (5 août) -->
+    <script src="js/trimestre-v2-init.js?v=20260805a"></script> <!-- #370 relais : libellé reprise clarifié (5 août) -->
     <script src="js/trimestre-v2-enseignants.js?v=20260703a"></script> <!-- #306 Lot 1 (3 juil.) : bascule Créer/Enregistrer du bouton profil -->
     <script src="js/trimestre-v2-horaires.js?v=20260703a"></script> <!-- #306 Lot 1 (3 juil.) : création d'horaire = « Créer » (séance garde « Ajouter ») -->
     <script src="js/trimestre-v2-liste.js?v=20260517a"></script> <!-- Refactor étape 3 session A (17 mai 2026) : extrait de trimestre-v2.js (lignes 946-1394) -->
