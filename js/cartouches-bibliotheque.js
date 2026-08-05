@@ -187,8 +187,11 @@ function listerTrimestresAvecCartouches() {
     const trimestres = [];
     const trimestreActuel = window.trimestreActif || '';
 
-    for (let i = 0; i < localStorage.length; i++) {
-        const cle = localStorage.key(i);
+    // #389 : keysSync (localStorage ∪ memoryCache) — un trimestre dont la
+    // collection a basculé hors localStorage (quota) était invisible au scan.
+    const clesStockage = db.keysSync();
+    for (let i = 0; i < clesStockage.length; i++) {
+        const cle = clesStockage[i];
         if (cle && cle.endsWith('_cartouches')) {
             try {
                 const data = db.getSync(cle, null);

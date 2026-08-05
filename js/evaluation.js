@@ -300,7 +300,9 @@ function obtenirNomCartouche(cartoucheId, grilleId) {
 
     // Si pas de grilleId, chercher dans toutes les cartouches
     if (!grilleId) {
-        const cartouchesKeys = Object.keys(localStorage).filter(key => key.startsWith('cartouches_'));
+        // #389 : keysSync (localStorage ∪ memoryCache) — une banque de cartouches
+        // basculée hors localStorage (quota) disparaissait de l'évaluation.
+        const cartouchesKeys = db.keysSync().filter(key => key.startsWith('cartouches_'));
         for (let key of cartouchesKeys) {
             const cartouches = db.getSync(key, []);
             const cartouche = cartouches.find(c => c.id === cartoucheId);

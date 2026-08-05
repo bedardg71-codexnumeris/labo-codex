@@ -1246,7 +1246,12 @@ function detecterFormatConfig(config) {
     const clesPresentes = Object.keys(config);
     const nbClesReconnues = clesBrut.filter(cle => clesPresentes.includes(cle)).length;
 
-    if (nbClesReconnues >= 2 || clesPresentes.some(c => c.includes('_') && c.includes('2026'))) {
+    // #387 (audit 5 août, rapport A6) : détection des clés namespacées par
+    // PATRON de préfixe trimestre ([ahe]AAAA_ ou demo_), plus jamais par une
+    // année codée en dur — « 2026 » refusait les sauvegardes 2027+ (« Fichier
+    // non reconnu ») alors que la plupart des clés reconnaissables sont
+    // namespacées depuis #358/#328.
+    if (nbClesReconnues >= 2 || clesPresentes.some(c => /^(?:[ahe]\d{4}|demo)_/.test(c))) {
         return 'localStorage-brut';
     }
 
@@ -3200,8 +3205,10 @@ async function exporterConfigurationComplete() {
                     (toutesProductions.length - productions.length);
 
     // Cartouches (stockage par grille) - aussi filtrées avec heuristique
+    // #389 : keysSync (localStorage ∪ memoryCache) — les clés basculées hors
+    // localStorage sur quota manquaient silencieusement à l'export.
     const cartouches = {};
-    const allKeys = Object.keys(localStorage);
+    const allKeys = db.keysSync();
     for (let i = 0; i < allKeys.length; i++) {
         const key = allKeys[i];
         if (key && key.startsWith('cartouches_')) {
