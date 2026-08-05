@@ -87,12 +87,17 @@ function genererCalendrierComplet() {
         joursAvecCours = new Set(horaireHebdo.map(s => s.jour.toLowerCase()));
     }
 
-    const dateDebut = cadre.dateDebut || cadre.debutTrimestre || '2025-08-21';
-    const finCours = cadre.finCours || '2025-12-12';
-    const finTrimestre = cadre.finTrimestre || '2025-12-22';
+    // #399 (audit 5 août 2026) : les dates de repli EN DUR (2025-08-21/12-12/12-22)
+    // sont RETIRÉES — elles rendaient cette garde morte et généraient un calendrier
+    // fantôme 2025 sur cadre vide (sonde : 124 entrées dont 82 « cours »). Bornes
+    // absentes → la clé est PURGÉE (cohérent : plus de résidu à l'écran, #390).
+    const dateDebut = cadre.dateDebut || cadre.debutTrimestre;
+    const finCours = cadre.finCours;
+    const finTrimestre = cadre.finTrimestre;
 
     if (!dateDebut || !finCours || !finTrimestre) {
-        console.warn('⚠️ Dates du trimestre manquantes, calendrier non généré');
+        console.warn('⚠️ Dates du trimestre manquantes, calendrier non généré (clé purgée)');
+        db.setSync(cle('calendrierComplet'), {});
         return {};
     }
 
@@ -184,7 +189,15 @@ function genererCalendrierComplet() {
 
         let infosJour = { jourSemaine };
 
-        if (estWeekend(dateActuelle)) {
+        // #399 (L8, décision D4 5 août 2026) : mapReprises testée AVANT estWeekend —
+        // une reprise volontairement placée un samedi est HONORÉE comme jour de
+        // cours (branche « reprise » plus bas : numeroJour compté, offerte à la
+        // saisie de présences). Elle ne porte PAS de numeroSemaine propre : la
+        // numérotation « paquet de 5 » (passe 1) ne compte que les jours ouvrables
+        // du collège — un samedi n'y figure pas, numSemParDate le laisse vide.
+        // Changement MINIMAL : seule la préséance weekend↔reprise est inversée ;
+        // les plages planification/examens et les congés gardent leur priorité.
+        if (estWeekend(dateActuelle) && !mapReprises[dateStr]) {
             infosJour.statut = 'weekend';
         } else if (estDansPlage(dateStr, cadre.semainePlanificationDebut, cadre.semainePlanificationFin)) {
             infosJour.statut = 'semaine-planification';

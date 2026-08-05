@@ -503,6 +503,11 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
         }
     }
     const totalPonderation = ponderationPortfolio + ponderationTerminale;
+    // #399 (L6) : pondérations 0/0 — sans cette garde, la division par totalPond
+    // produit NaN, qui traverse « erreur == null » et se STOCKE (affichages « NaN »).
+    if (!erreurConfiguration && productionTerminale !== null && totalPonderation === 0) {
+        erreurConfiguration = 'Pondérations nulles (portfolio 0 % + terminale 0 %). Saisir des pondérations pour que la note finale soit calculable.';
+    }
 
     // Note terminale + agrégation finale
     const { noteTerminale, evaluationTerminale } = _obtenirNoteTerminaleEtudiant(evaluations, da, productionTerminale);
