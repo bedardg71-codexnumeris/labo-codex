@@ -873,15 +873,10 @@ async function executerExport() {
    IMPORT DES DONNÉES
    =============================== */
 
-let donneesImportEnAttente = null;
-
 function ouvrirModalImport() {
     const modal = document.getElementById('modalImport');
     document.getElementById('fichierImport').value = '';
     document.getElementById('apercu-import').classList.add('u-hide');
-    document.getElementById('btnExecuterImport').disabled = true;
-    document.getElementById('btnExecuterImport').style.opacity = '0.5';
-    donneesImportEnAttente = null;
     modal.classList.remove('u-hide');
     
     document.getElementById('fichierImport').onchange = previsualiserImport;
@@ -889,7 +884,6 @@ function ouvrirModalImport() {
 
 function fermerModalImport() {
     document.getElementById('modalImport').classList.add('u-hide');
-    donneesImportEnAttente = null;
 }
 
 function previsualiserImport(event) {
@@ -1003,77 +997,6 @@ function previsualiserImport(event) {
         }
     };
     lecteur.readAsText(fichier);
-}
-
-async function executerImport() {
-    if (!donneesImportEnAttente) return;
-
-    if (!confirm('Confirmer l\'importation ? Les données existantes seront écrasées pour les clés importées.')) {
-        return;
-    }
-
-    // Snapshot local : la fonction est async et fermerModalImport() peut
-    // reset donneesImportEnAttente à null pendant les await ci-dessous.
-    const donnees = donneesImportEnAttente;
-
-    try {
-        // ✅ CORRECTION: Utiliser db.set() (async/IndexedDB) au lieu de db.setSync()
-        // Pour éviter QuotaExceededError sur localStorage avec gros fichiers
-        const cles = Object.keys(donnees).filter(c => !c.startsWith('_'));
-        let nbCles = 0;
-
-        for (const cle of cles) {
-            let valeur = donnees[cle];
-
-            // ✅ CORRECTION: Parser les strings JSON (backups de l'ancienne version localStorage)
-            // Si la valeur est une string JSON, la parser avant de stocker
-            if (typeof valeur === 'string') {
-                try {
-                    valeur = JSON.parse(valeur);
-                } catch (e) {
-                    // Si ce n'est pas du JSON valide, garder la string telle quelle
-                }
-            }
-
-            await db.set(cle, valeur);
-            nbCles++;
-        }
-
-        // Détecter si ce sont les données de démo (pour déclencher tutoriel)
-        const clesDemoPresentes = ['groupeEtudiants', 'artefacts', 'modalitesEvaluation'].every(cle =>
-            donnees.hasOwnProperty(cle)
-        );
-
-        if (clesDemoPresentes && donnees.groupeEtudiants &&
-            Array.isArray(donnees.groupeEtudiants) &&
-            donnees.groupeEtudiants.length > 0) {
-            // Marquer que les données de démo ont été chargées
-            await db.set('donnees_demo_chargees', true);
-        }
-
-        // ✅ CRITIQUE: Synchroniser le cache localStorage avec IndexedDB
-        // Les modules utilisent db.getSync() qui lit depuis le cache localStorage
-        await db.syncToLocalStorageCache();
-
-        // 🆕 Restauration des blobs travaux depuis le ZIP
-        const nbRestores = await _restaurerBlobsDepuisZip(donnees);
-
-        fermerModalImport();
-
-        const msgBlobs = nbRestores > 0 ? ` + ${nbRestores} fichier(s) travaux` : '';
-        notifications.succes(`Import réussi : ${nbCles} clé(s) importée(s)${msgBlobs}`);
-
-        // Écritures IDB pendantes terminées AVANT le reload (bug terrain
-        // iPad 10 juin 2026 — cf. codex.js actionOuvrir, même patron).
-        await db.flush();
-        if (confirm('Import terminé ! Recharger la page pour appliquer les changements ?')) {
-            location.reload();
-        }
-    } catch (erreur) {
-        console.error('❌ Erreur lors de l\'import:', erreur);
-        alert(`Erreur lors de l'import : ${erreur.message}`);
-        fermerModalImport();
-    }
 }
 
 /**
@@ -1943,20 +1866,6 @@ function analyserRessourcesDetaillees(config) {
 }
 
 /**
- * Version simplifiée pour rétrocompatibilité (retourne juste les comptes)
- */
-function analyserRessourcesBibliotheques(config) {
-    const details = analyserRessourcesDetaillees(config);
-    return {
-        pratiques: details.pratiques.count,
-        grilles: details.grilles.count,
-        echelles: details.echelles.count,
-        productions: details.productions.count,
-        total: details.total
-    };
-}
-
-/**
  * Affiche le modal de prévisualisation de la configuration
  * @param {Object} config - Configuration complète à prévisualiser
  */
@@ -2384,304 +2293,6 @@ async function executerImportLocalStorageBrut(config) {
         configCompleteEnAttente = null;
         console.error('Erreur lors de l\'import localStorage brut:', erreur);
         alert('Erreur lors de l\'import.\n\n' + erreur.message);
-    }
-}
-
-/**
- * 🆕 BETA 95.1 : Import fusionné vers les bibliothèques
- * Extrait uniquement les ressources (pratiques, grilles, échelles, productions)
- * et les ajoute aux bibliothèques existantes SANS écraser les données du cours
- */
-async function executerImportVersBibliotheques() {
-    if (!configCompleteEnAttente) {
-        alert('Aucune configuration en attente d\'importation.');
-        return;
-    }
-
-    const config = configCompleteEnAttente;
-
-    // Retirer la propriété interne _format
-    const donnees = { ...config };
-    delete donnees._format;
-
-    // Helper pour parser les valeurs JSON
-    const parseValeur = (val) => {
-        if (typeof val === 'string') {
-            try { return JSON.parse(val); } catch (e) { return val; }
-        }
-        return val;
-    };
-
-    try {
-        let compteurs = { pratiques: 0, grilles: 0, echelles: 0, productions: 0 };
-
-        // 1. PRATIQUES CONFIGURABLES
-        if (donnees.pratiquesConfigurables) {
-            const pratiquesImport = parseValeur(donnees.pratiquesConfigurables);
-            if (Array.isArray(pratiquesImport) && pratiquesImport.length > 0) {
-                const pratiquesExistantes = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
-                const idsPratiquesExistants = new Set(pratiquesExistantes.map(p => p.id));
-
-                // 🆕 FIX (31 jan 2026) : Préserver les IDs originaux pour maintenir les références
-                const pratiquesNouvelles = pratiquesImport.filter(p => {
-                    // Éviter les doublons par ID seulement (pas par nom - l'ID est la référence unique)
-                    if (idsPratiquesExistants.has(p.id)) return false;
-                    return true;
-                }).map(p => ({
-                    ...p,
-                    // IMPORTANT: Garder l'ID original pour préserver les références (groupe-cours, etc.)
-                    dateImport: new Date().toISOString()
-                }));
-
-                if (pratiquesNouvelles.length > 0) {
-                    const pratiquesFusionnees = verifierUniciteIds([...pratiquesExistantes, ...pratiquesNouvelles], 'pratiques');
-                    db.setSync(cle('pratiquesConfigurables'), pratiquesFusionnees);
-                    compteurs.pratiques = pratiquesNouvelles.length;
-                }
-            }
-        }
-
-        // 2. GRILLES (depuis grillesTemplates et bibliothequeGrilles)
-        // ✅ MODIFIÉ (6 jan 2026) : Gestion des doublons avec modal
-        let grillesExistantes = db.getSync(cle('grillesTemplates'), []);
-        const idsGrillesExistants = new Set(grillesExistantes.map(g => g.id));
-        let grillesNouvelles = [];
-
-        // Collecter toutes les grilles à importer
-        let toutesGrillesImport = [];
-        if (donnees.grillesTemplates) {
-            const grillesImport = parseValeur(donnees.grillesTemplates);
-            if (Array.isArray(grillesImport)) {
-                toutesGrillesImport = toutesGrillesImport.concat(grillesImport);
-            }
-        }
-        if (donnees.bibliothequeGrilles) {
-            const grillesImport = parseValeur(donnees.bibliothequeGrilles);
-            if (Array.isArray(grillesImport)) {
-                toutesGrillesImport = toutesGrillesImport.concat(grillesImport);
-            }
-        }
-
-        // Traiter chaque grille avec gestion des doublons
-        for (const g of toutesGrillesImport) {
-            // Vérifier si déjà dans la liste des nouvelles
-            if (grillesNouvelles.some(gn => gn.nom === g.nom)) continue;
-
-            // Vérifier doublon par ID ou nom
-            const existeParId = idsGrillesExistants.has(g.id);
-            const existeParNom = grillesExistantes.some(ge => ge.nom === g.nom);
-
-            if (!existeParId && !existeParNom) {
-                // Pas de doublon - ajouter directement avec ID original
-                grillesNouvelles.push({
-                    ...g,
-                    // IMPORTANT: Garder l'ID original pour préserver les références
-                    dateImport: new Date().toISOString()
-                });
-            } else if (existeParNom && typeof afficherModalDoublon === 'function') {
-                // Doublon détecté - demander à l'utilisateur
-                const resultat = await afficherModalDoublon('grille', g.nom, { estImport: true });
-
-                if (resultat && resultat.action === 'renommer') {
-                    grillesNouvelles.push({
-                        ...g,
-                        nom: resultat.nouveauNom,
-                        // Garder l'ID original sauf si conflit d'ID
-                        ...(existeParId ? { id: genererIdUnique('GRILLE_') } : {}),
-                        dateImport: new Date().toISOString()
-                    });
-                } else if (resultat && resultat.action === 'ecraser') {
-                    // Supprimer l'existante et ajouter la nouvelle
-                    grillesExistantes = grillesExistantes.filter(ge => ge.nom !== g.nom);
-                    grillesNouvelles.push({
-                        ...g,
-                        // Garder l'ID original sauf si conflit d'ID
-                        ...(existeParId ? { id: genererIdUnique('GRILLE_') } : {}),
-                        dateImport: new Date().toISOString()
-                    });
-                }
-                // Si ignorer ou annuler, on ne fait rien
-            }
-        }
-
-        if (grillesNouvelles.length > 0 || grillesExistantes.length !== db.getSync(cle('grillesTemplates'), []).length) {
-            const grillesFusionnees = verifierUniciteIds([...grillesExistantes, ...grillesNouvelles], 'grilles');
-            db.setSync(cle('grillesTemplates'), grillesFusionnees);
-            compteurs.grilles = grillesNouvelles.length;
-        }
-
-        // 3. ÉCHELLES
-        // ✅ MODIFIÉ (6 jan 2026) : Gestion des doublons avec modal
-        if (donnees.echellesTemplates) {
-            const echellesImport = parseValeur(donnees.echellesTemplates);
-            if (Array.isArray(echellesImport) && echellesImport.length > 0) {
-                let echellesExistantes = db.getSync(cle('echellesTemplates'), []);
-                const idsEchellesExistants = new Set(echellesExistantes.map(e => e.id));
-                let echellesNouvelles = [];
-
-                for (const e of echellesImport) {
-                    const existeParId = idsEchellesExistants.has(e.id);
-                    const existeParNom = echellesExistantes.some(ee => ee.nom === e.nom);
-
-                    if (!existeParId && !existeParNom && !echellesNouvelles.some(en => en.nom === e.nom)) {
-                        echellesNouvelles.push({
-                            ...e,
-                            // IMPORTANT: Garder l'ID original pour préserver les références
-                            dateImport: new Date().toISOString()
-                        });
-                    } else if (existeParNom && typeof afficherModalDoublon === 'function') {
-                        const resultat = await afficherModalDoublon('echelle', e.nom, { estImport: true });
-
-                        if (resultat && resultat.action === 'renommer') {
-                            echellesNouvelles.push({
-                                ...e,
-                                nom: resultat.nouveauNom,
-                                // Garder l'ID original sauf si conflit d'ID
-                                ...(existeParId ? { id: genererIdUnique('ECH_') } : {}),
-                                dateImport: new Date().toISOString()
-                            });
-                        } else if (resultat && resultat.action === 'ecraser') {
-                            echellesExistantes = echellesExistantes.filter(ee => ee.nom !== e.nom);
-                            echellesNouvelles.push({
-                                ...e,
-                                // Garder l'ID original sauf si conflit d'ID
-                                ...(existeParId ? { id: genererIdUnique('ECH_') } : {}),
-                                dateImport: new Date().toISOString()
-                            });
-                        }
-                    }
-                }
-
-                if (echellesNouvelles.length > 0 || echellesExistantes.length !== db.getSync(cle('echellesTemplates'), []).length) {
-                    const echellesFusionnees = verifierUniciteIds([...echellesExistantes, ...echellesNouvelles], 'échelles');
-                    db.setSync(cle('echellesTemplates'), echellesFusionnees);
-                    compteurs.echelles = echellesNouvelles.length;
-                }
-            }
-        }
-
-        // 4. PRODUCTIONS (depuis bibliothequeProductions, productions, ET *_productions)
-        // 🆕 FIX (1er fév 2026) : Support clés namespacées *_productions
-        let clesProdsVersBibl = [];
-        let allProdsVersBibl = [];
-
-        // 1. Clé legacy bibliothequeProductions
-        if (donnees.bibliothequeProductions) {
-            const prodsTest = parseValeur(donnees.bibliothequeProductions);
-            if (Array.isArray(prodsTest) && prodsTest.length > 0) {
-                clesProdsVersBibl.push('bibliothequeProductions');
-                allProdsVersBibl = allProdsVersBibl.concat(prodsTest);
-            }
-        }
-
-        // 2. Clés productions et *_productions (namespacées)
-        Object.keys(donnees).forEach(cle => {
-            if (cle === 'productions' || cle.endsWith('_productions')) {
-                const prods = parseValeur(donnees[cle]);
-                if (Array.isArray(prods) && prods.length > 0) {
-                    clesProdsVersBibl.push(cle);
-                    allProdsVersBibl = allProdsVersBibl.concat(prods);
-                }
-            }
-        });
-
-        // Dédupliquer par ID
-        const prodsImportUniques = [];
-        const idsProdsVus = new Set();
-        allProdsVersBibl.forEach(p => {
-            if (p.id && !idsProdsVus.has(p.id)) {
-                idsProdsVus.add(p.id);
-                prodsImportUniques.push(p);
-            }
-        });
-
-        // ✅ MODIFIÉ (6 jan 2026) : Gestion des doublons avec modal
-        if (prodsImportUniques.length > 0) {
-            const prodsImport = prodsImportUniques;
-            if (Array.isArray(prodsImport) && prodsImport.length > 0) {
-                const cleProductions = cle('productions');
-                let prodsExistantes = db.getSync(cleProductions, []);
-                const idsProdsExistants = new Set(prodsExistantes.map(p => p.id));
-                let prodsNouvelles = [];
-
-                // Productions utilisent 'titre' comme nom
-                const getNomProd = (p) => p.titre || p.nom || '';
-
-                for (const p of prodsImport) {
-                    const nomProd = getNomProd(p);
-                    const existeParId = idsProdsExistants.has(p.id);
-                    const existeParNom = prodsExistantes.some(pe => getNomProd(pe) === nomProd);
-
-                    if (!existeParId && !existeParNom && !prodsNouvelles.some(pn => getNomProd(pn) === nomProd)) {
-                        prodsNouvelles.push({
-                            ...p,
-                            // IMPORTANT: Garder l'ID original pour préserver les références
-                            dateImport: new Date().toISOString()
-                        });
-                    } else if (existeParNom && typeof afficherModalDoublon === 'function') {
-                        const resultat = await afficherModalDoublon('production', nomProd, { estImport: true });
-
-                        if (resultat && resultat.action === 'renommer') {
-                            prodsNouvelles.push({
-                                ...p,
-                                titre: resultat.nouveauNom,
-                                // Garder l'ID original sauf si conflit d'ID
-                                ...(existeParId ? { id: genererIdUnique('PROD_') } : {}),
-                                dateImport: new Date().toISOString()
-                            });
-                        } else if (resultat && resultat.action === 'ecraser') {
-                            prodsExistantes = prodsExistantes.filter(pe => getNomProd(pe) !== nomProd);
-                            prodsNouvelles.push({
-                                ...p,
-                                // Garder l'ID original sauf si conflit d'ID
-                                ...(existeParId ? { id: genererIdUnique('PROD_') } : {}),
-                                dateImport: new Date().toISOString()
-                            });
-                        }
-                    }
-                }
-
-                if (prodsNouvelles.length > 0 || prodsExistantes.length !== db.getSync(cleProductions, []).length) {
-                    const prodsFusionnees = verifierUniciteIds([...prodsExistantes, ...prodsNouvelles], 'productions');
-                    db.setSync(cleProductions, prodsFusionnees);
-                    compteurs.productions = prodsNouvelles.length;
-                }
-            }
-        }
-
-        // Fermer le modal
-        fermerModalPreviewConfigComplete();
-
-        // Message de résumé
-        const total = compteurs.pratiques + compteurs.grilles + compteurs.echelles + compteurs.productions;
-
-        if (total === 0) {
-            alert('Aucune nouvelle ressource à ajouter.\n\nToutes les ressources du fichier existent déjà dans tes bibliothèques.');
-        } else {
-            let details = [];
-            if (compteurs.pratiques > 0) details.push(`${compteurs.pratiques} pratique(s)`);
-            if (compteurs.grilles > 0) details.push(`${compteurs.grilles} grille(s)`);
-            if (compteurs.echelles > 0) details.push(`${compteurs.echelles} échelle(s)`);
-            if (compteurs.productions > 0) details.push(`${compteurs.productions} production(s)`);
-
-            const message = `Fusion réussie !\n\n${details.join(', ')} ajoutée(s) à tes bibliothèques.\n\nTes données existantes ont été préservées.`;
-
-            notifications.succes(message);
-            alert(message);
-
-            // Écritures IDB pendantes terminées AVANT le reload (bug terrain
-            // iPad 10 juin 2026 — cf. codex.js actionOuvrir, même patron).
-            await db.flush();
-            if (confirm('Recharger la page pour voir les nouvelles ressources ?')) {
-                location.reload();
-            }
-        }
-
-
-    } catch (erreur) {
-        configCompleteEnAttente = null;
-        console.error('Erreur lors de l\'import vers bibliothèques:', erreur);
-        alert('Erreur lors de la fusion.\n\n' + erreur.message);
     }
 }
 
@@ -3398,7 +3009,6 @@ async function exporterConfigurationComplete() {
 
 // Fonctions appelées depuis le HTML (onclick)
 window.ouvrirModalImport = ouvrirModalImport;
-window.executerImport = executerImport;
 window.fermerModalImport = fermerModalImport;
 // window.exporterDonneesJSON = exporterDonneesJSON; // ❌ Fonction n'existe plus
 window.reinitialiserDonnees = reinitialiserDonnees;
@@ -3406,7 +3016,6 @@ window.reinitialiserDonnees = reinitialiserDonnees;
 window.executerImportConfigComplete = executerImportConfigComplete;
 window.fermerModalPreviewConfigComplete = fermerModalPreviewConfigComplete;
 window.exporterConfigurationComplete = exporterConfigurationComplete;
-window.executerImportVersBibliotheques = executerImportVersBibliotheques; // 🆕 BETA 95.1
 window.executerImportSelectif = executerImportSelectif; // 🆕 BETA 95.1
 
 // 🆕 Beta 96.2 : Export des fonctions d'export (corrigées pour IndexedDB)

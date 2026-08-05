@@ -13,7 +13,6 @@
    - `window.chargerDropdownCoursV2` (zone 3)
    - `window.chargerGroupeCoursV2` (zone 6)
    - `window.chargerListeEtudiantsV2` (zone 4)
-   - `window.mettreAJourGuideGroupeCours` (helper transversal résidu)
    - `window.afficherStatistiquesTrimestreV2` (zone 1 mais resté résidu)
    =============================== */
 
@@ -80,9 +79,6 @@ function initialiserTrimestreV2() {
     if (typeof restaurerEtatAccordeons === 'function') {
         restaurerEtatAccordeons();
     }
-
-    // Mettre à jour le guide groupe-cours (indicateurs d'état)
-    window.mettreAJourGuideGroupeCours();
 
 }
 

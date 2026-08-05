@@ -17,7 +17,6 @@
    Dépendances cross-module accédées via `window.X` (résidu trimestre-v2.js
    chargé AVANT ce fichier dans index.html) :
    - `window.populerDropdownsAssemblageV2` (hub résiduel)
-   - `window.mettreAJourGuideGroupeCours` (helper transversal résiduel)
    - `window.peuplerDropdownGroupeCoursActif` (zone 8 orchestre, encore résidu)
 
    Bug latent préservé : `supprimerGroupeCoursV2` était exporté deux fois dans
@@ -684,9 +683,6 @@ function sauvegarderGroupeCoursV2() {
     }
 
     // Mettre à jour le guide groupe-cours
-    if (typeof window.mettreAJourGuideGroupeCours === 'function') {
-        window.mettreAJourGuideGroupeCours();
-    }
 }
 
 /**
@@ -727,7 +723,7 @@ function supprimerGroupeCoursV2() {
     const gcActif = db.getSync('groupeCoursActif', null);
     if (gcActif && gcActif.id === groupeCoursEnEditionId) {
         db.setSync('groupeCoursActif', null);
-        db.setSync('infoCours', null);
+        db.setSync('infoCours', null); // security-ok: purge locale du couple (aucune donnée externe)
     }
 
     // Réinitialiser l'interface
@@ -910,7 +906,7 @@ function supprimerGroupeCoursDepuisBibliotheque(gcId, nomGC) {
     const gcActif = db.getSync('groupeCoursActif', null);
     if (gcActif && gcActif.id === gcId) {
         db.setSync('groupeCoursActif', null);
-        db.setSync('infoCours', null);
+        db.setSync('infoCours', null); // security-ok: purge locale du couple (aucune donnée externe)
     }
 
     // Rafraîchir
@@ -946,7 +942,7 @@ function masquerGroupeCoursDepuisBibliotheque(gcId) {
         const gcActif = db.getSync('groupeCoursActif', null);
         if (gcActif && gcActif.id === gcId) {
             db.setSync('groupeCoursActif', null);
-            db.setSync('infoCours', null);
+            db.setSync('infoCours', null); // security-ok: purge locale du couple (aucune donnée externe)
         }
 
         // Rafraîchir

@@ -15,7 +15,6 @@
    Helpers transversaux RESTÉS au résidu (accédés via window.X depuis ce
    module si jamais besoin) :
    - populerDropdownsAssemblageV2 (hub critique, Écart #4 et #5)
-   - mettreAJourGuideGroupeCours
    - mettreAJourBarreContexte
    - afficherStatistiquesTrimestreV2
    - allerVersAide
@@ -496,56 +495,6 @@ function afficherFormGroupeCoursV2() {
 }
 
 /**
- * Supprime un groupe-cours (ancienne version - redirige vers la nouvelle)
- * @deprecated Utiliser supprimerGroupeCoursV2() sans paramètre
- */
-async function _supprimerGroupeCoursV2_legacy(groupeCoursId) {
-    // Redirige vers la nouvelle fonction qui utilise groupeCoursEnEditionId.
-    // Post-session-B (17 mai 2026) : `supprimerGroupeCoursV2` extraite vers
-    // trimestre-v2-groupes-cours.js, appel via `window.X`.
-    if (typeof window.supprimerGroupeCoursV2 === 'function') {
-        window.supprimerGroupeCoursV2();
-    }
-}
-
-/**
- * Met à jour l'aperçu du groupe-cours
- */
-async function mettreAJourApercuGroupeCours() {
-    const coursId = document.getElementById('v2-gc-cours')?.value;
-    const groupe = document.getElementById('v2-gc-groupe')?.value;
-    const apercuSpan = document.getElementById('v2-gc-apercu-texte');
-
-    if (!apercuSpan) return;
-
-    if (!coursId || !groupe) {
-        apercuSpan.textContent = 'Complétez les champs obligatoires pour voir l\'aperçu';
-        apercuSpan.className = 'text-muted';
-        return;
-    }
-
-    // Récupérer infos cours
-    // 🆕 FIX (4 fév 2026) : Chercher dans toutes les sources, ajouter code pour Primo
-    let cours = null;
-    if (typeof CoursEntite !== 'undefined') {
-        cours = await CoursEntite.obtenirParId(coursId);
-    }
-    if (!cours) {
-        const coursCollection = db.getSync('cours', []);
-        cours = coursCollection.find(c => c.id === coursId || c.sigle === coursId || c.code === coursId);
-    }
-
-    // 🆕 FIX (9 jan 2026) : Libellé lisible même sans cours
-    const sigle = cours?.codeCours || cours?.sigle || cours?.code || null;
-    const apercu = sigle ? `${sigle} gr.${groupe}` : `Groupe ${groupe}`;
-
-    apercuSpan.textContent = apercu;
-    apercuSpan.className = '';
-    apercuSpan.style.color = 'var(--accent-primaire)';
-    apercuSpan.style.fontWeight = '500';
-}
-
-/**
  * Accès rapide au calendrier depuis le bandeau groupe-cours
  * 🆕 BETA 95.2
  */
@@ -570,6 +519,5 @@ window.changerGroupeCoursActifV2 = changerGroupeCoursActifV2;
 window.peuplerDropdownEnseignants = peuplerDropdownEnseignants;
 window.changerEnseignantSelectionneV2 = changerEnseignantSelectionneV2;
 window.afficherFormGroupeCoursV2 = afficherFormGroupeCoursV2;
-window.mettreAJourApercuGroupeCours = mettreAJourApercuGroupeCours;
 
 })();
