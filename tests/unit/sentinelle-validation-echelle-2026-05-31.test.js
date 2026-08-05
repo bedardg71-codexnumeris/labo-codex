@@ -69,7 +69,10 @@ describe('Bug #126 · le wizard pose une méthode de calcul par famille + bloque
     it('pose moyenne_ponderee / specifications / conversion_niveaux selon la famille', () => {
         expect(wizard).toMatch(/methode:\s*'moyenne_ponderee'/);
         expect(wizard).toMatch(/methode:\s*'specifications'/);
-        expect(wizard).toMatch(/'pan_par_objectif'\s*:\s*'conversion_niveaux'/);
+        // #396 (5 août 2026) : 'pan_par_objectif' RETIRÉ (décision D2) — la branche
+        // standards pose toujours conversion_niveaux, approche par objectifs comprise.
+        expect(wizard).toMatch(/methode:\s*'conversion_niveaux'/);
+        expect(wizard).not.toMatch(/pan_par_objectif/);
     });
 
     it('bloque la création d\'une PAN-Standards sans echelleId', () => {

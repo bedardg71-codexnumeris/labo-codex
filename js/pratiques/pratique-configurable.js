@@ -48,7 +48,8 @@ class PratiqueConfigurable {
         // et les Spécifications ('specifications') notent en % / par seuils, sans échelle
         // IDME. Avant, l'échelle était exigée pour TOUTES les pratiques → une SOM/SPE
         // créée au wizard échouait à l'instanciation (« Champ obligatoire manquant : echelle »).
-        const methodesAvecEchelle = ['conversion_niveaux', 'pan_par_objectif'];
+        // #396 : 'pan_par_objectif' retiré — seule conversion_niveaux consomme l'échelle.
+        const methodesAvecEchelle = ['conversion_niveaux'];
         const echelleRequise = methodesAvecEchelle.includes(this.config.calcul_note?.methode);
         if (echelleRequise && !this.config.echelle) {
             throw new Error('Champ obligatoire manquant : echelle');
@@ -121,76 +122,6 @@ class PratiqueConfigurable {
     // ========================================================================
 
     /**
-     * Calcule la performance selon la méthode PAN par objectif
-     * Pour chaque objectif, prend les N meilleurs artefacts, puis fait une moyenne pondérée
-     * @param {string} da - DA de l'étudiant
-     * @returns {number} Performance en pourcentage (0-100)
-     */
-    calculerPerformanceParObjectif(da) {
-        // Vérifier que la configuration contient les objectifs
-        if (!this.config.objectifs || !Array.isArray(this.config.objectifs)) {
-            console.warn('Configuration multi-objectifs manquante, fallback sur PAN standard');
-            const indicesCP = db.getSync(cle('indicesCP'), {});
-            return indicesCP[da]?.actuel?.PAN?.P || 0;
-        }
-
-        // Charger les évaluations de l'étudiant
-        const cleEval = cle('evaluationsSauvegardees');
-        const evaluations = db.getSync(cleEval, []);
-        const evaluationsEtudiant = (Array.isArray(evaluations) ? evaluations : Object.values(evaluations)).filter(evaluation => {
-            return (evaluation.etudiantDA === da || evaluation.etudiantId === da) &&
-                   evaluation.note !== null &&
-                   evaluation.note !== undefined &&
-                   !evaluation.remplaceeParId;  // Exclure les évaluations remplacées
-        });
-
-        if (evaluationsEtudiant.length === 0) {
-            return 0;
-        }
-
-        // Nombre d'artefacts à retenir par objectif (configurable)
-        const nombreArtefacts = this.config.calcul_note.nombre_artefacts || 3;
-
-        // Pour chaque objectif, calculer la moyenne des N meilleurs artefacts
-        let sommeNotesPonderees = 0;
-        let sommePoids = 0;
-
-        this.config.objectifs.forEach(objectif => {
-            // Filtrer les évaluations associées à cet objectif
-            const evaluationsObjectif = evaluationsEtudiant.filter(evaluation => {
-                // Vérifier si l'évaluation est taguée avec cet objectif
-                // (Suppose que les évaluations ont un champ 'objectifs' avec les IDs)
-                return evaluation.objectifs && evaluation.objectifs.includes(objectif.id);
-            });
-
-            if (evaluationsObjectif.length === 0) {
-                // Pas d'évaluation pour cet objectif, contribue 0 à la moyenne
-                return;
-            }
-
-            // Trier par note décroissante et prendre les N meilleures
-            const meilleures = evaluationsObjectif
-                .sort((a, b) => b.note - a.note)
-                .slice(0, nombreArtefacts);
-
-            // Calculer la moyenne pour cet objectif
-            const moyenneObjectif = meilleures.reduce((sum, evaluation) => sum + evaluation.note, 0) / meilleures.length;
-
-            // Ajouter à la somme pondérée
-            sommeNotesPonderees += moyenneObjectif * objectif.poids;
-            sommePoids += objectif.poids;
-        });
-
-        // Calcul de la moyenne pondérée finale
-        if (sommePoids === 0) {
-            return 0;
-        }
-
-        const performancePct = sommeNotesPonderees / sommePoids;
-        return Math.round(performancePct * 100) / 100;  // Arrondir à 2 décimales
-    }
-
-    /**
      * Calcule l'indice de performance selon la méthode configurée
      * @param {string} da - DA de l'étudiant
      * @returns {number} Indice P (0-1, décimal)
@@ -239,11 +170,6 @@ class PratiqueConfigurable {
                 // en Beta 95.5 — rendait P = 0 pour TOUT LE MONDE, affiché comme un
                 // vrai zéro. Instance jetable, lecture seule.
                 P_pct = this._calculerPerformanceSommative(da, donneesEtudiant);
-                break;
-
-            case 'pan_par_objectif':
-                // Calcul PAN par objectif : moyenne pondérée des N meilleurs par objectif
-                P_pct = this.calculerPerformanceParObjectif(da);
                 break;
 
             case 'specifications':
@@ -523,104 +449,9 @@ class PratiqueConfigurable {
             return defis;
         }
 
-        // === PRATIQUE MULTI-OBJECTIFS ===
-        if (this.config.calcul_note.methode === 'pan_par_objectif') {
-            // Utiliser les performances par objectif depuis indicesCP
-            const donnees = donneesEtudiant.actuel.PAN;
-
-            if (!donnees || !donnees.details || !donnees.details.performancesObjectifs) {
-                return defis;
-            }
-
-            const performances = donnees.details.performancesObjectifs;
-            const ensembleId = donnees.details.ensembleObjectifsId;
-
-            if (!ensembleId) {
-                return defis;
-            }
-
-            // Charger l'ensemble d'objectifs pour obtenir les types et poids
-            const ensembles = typeof chargerEnsemblesObjectifs === 'function'
-                ? chargerEnsemblesObjectifs()
-                : db.getSync('objectifsTemplates', []);
-            const ensemble = ensembles.find(e => e.id === ensembleId);
-
-            if (!ensemble || !ensemble.objectifs) {
-                return defis;
-            }
-
-            // Seuils configurés
-            const seuils = this.config.seuils || {};
-            const seuilIntegrateur = seuils.difficulte || 70;  // 70% pour objectifs intégrateurs
-            const seuilFondamental = seuils.acceptable || 75;   // 75% pour objectifs fondamentaux
-
-            let nbFondamentauxFaibles = 0;
-            let defisIntegrateurs = [];
-            let defisFondamentaux = [];
-            let defisTransversaux = [];
-
-            ensemble.objectifs.forEach(objectif => {
-                const perf = performances[objectif.id];
-
-                if (!perf || perf.P === null) {
-                    return; // Objectif non évalué
-                }
-
-                const P = perf.P;
-                const poids = objectif.poids;
-                const type = objectif.type;
-
-                // Détection selon le type d'objectif
-                if (type === 'integrateur' && poids >= 10 && P < seuilIntegrateur) {
-                    // Alerte prioritaire: Objectif intégrateur avec poids ≥ 10% et P < 70%
-                    defisIntegrateurs.push({
-                        nom: objectif.nom,
-                        P: P,
-                        poids: poids,
-                        priorite: 'haute'
-                    });
-                } else if (type === 'fondamental' && P < seuilFondamental) {
-                    // Compter les objectifs fondamentaux faibles
-                    nbFondamentauxFaibles++;
-                    defisFondamentaux.push({
-                        nom: objectif.nom,
-                        P: P,
-                        poids: poids
-                    });
-                } else if (type === 'transversal' && P < seuilFondamental) {
-                    // Suivi des objectifs transversaux
-                    defisTransversaux.push({
-                        nom: objectif.nom,
-                        P: P,
-                        poids: poids
-                    });
-                }
-            });
-
-            // Construire la liste des défis
-            // Format: nom de l'objectif (pas juste le type)
-            defisIntegrateurs.forEach(d => defis.push(d.nom));
-
-            // Alerte générale si 3+ objectifs fondamentaux faibles
-            if (nbFondamentauxFaibles >= 3) {
-                defisFondamentaux.forEach(d => defis.push(d.nom));
-            }
-
-            // Ajouter les objectifs transversaux en monitoring
-            defisTransversaux.forEach(d => defis.push(d.nom));
-
-
-            return defis;
-        }
-
         // === PRATIQUE TRADITIONNELLE (critères) ===
-        // Obtenir les données selon la méthode de calcul
-        let donnees;
-        if (this.config.calcul_note.methode === 'moyenne_ponderee') {
-            donnees = donneesEtudiant.actuel.SOM;
-        } else {
-            donnees = donneesEtudiant.actuel.PAN;
-        }
+        // #395/#396 : store PLAT (Beta 95.5) — l'aiguillage dual SOM/PAN est retiré.
+        const donnees = donneesEtudiant.actuel;
 
         if (!donnees) {
             return defis;

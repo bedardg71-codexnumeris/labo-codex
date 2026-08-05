@@ -273,6 +273,16 @@ function construireConfigComplete(pratiqueData) {
         }
     }
 
+    // #396 (5 août 2026) : la méthode 'pan_par_objectif' est RETIRÉE (chemin jamais
+    // fonctionnel — décision D2). Une config stockée qui la porte encore est
+    // NORMALISÉE ici, à la LECTURE, vers le mode STD correspondant — aucune
+    // écriture de données, avertissement visible.
+    let calcul_note = config.calcul_note || pratiqueData.calcul_note || { methode: 'conversion_niveaux' };
+    if (calcul_note && calcul_note.methode === 'pan_par_objectif') {
+        console.warn(`[construireConfigComplete] Méthode retirée « pan_par_objectif » (pratique « ${config.id || pratiqueData.id || '?'} ») — normalisée vers conversion_niveaux (#396). Ré-enregistrer la pratique au wizard pour faire disparaître cet avertissement.`);
+        calcul_note = Object.assign({}, calcul_note, { methode: 'conversion_niveaux' });
+    }
+
     return {
         // Champs obligatoires - prendre de config si présent, sinon de racine
         id: config.id || pratiqueData.id,
@@ -280,7 +290,7 @@ function construireConfigComplete(pratiqueData) {
         // Type canonique (famille) — requis par les représentations Session B
         type: config.type || pratiqueData.type || pratiqueData.configuration?.type,
         echelle: echelle,
-        calcul_note: config.calcul_note || pratiqueData.calcul_note || { methode: 'conversion_niveaux' },
+        calcul_note: calcul_note,
 
         // Champs optionnels
         description: config.description || pratiqueData.description,
