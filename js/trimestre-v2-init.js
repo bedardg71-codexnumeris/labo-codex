@@ -117,6 +117,32 @@ function chargerIdentificationTrimestreV2() {
 }
 
 /**
+ * #379 — Détecte si un trimestre possède des données namespacées.
+ * Énumère les DEUX couches du stockage hybride (localStorage ET memoryCache) :
+ * une clé peut vivre en memoryCache/IndexedDB seulement après une bascule
+ * silencieuse sur quota (leçon du 5 août 2026, cf. migrerJourneesSansCours).
+ * @param {string} trimestreId - id du trimestre (ex. 'h2026')
+ * @returns {boolean} true si au moins une clé `<id>_…` existe
+ */
+function _trimestreADesDonnees(trimestreId) {
+    var prefixe = trimestreId + '_';
+    try {
+        for (var i = 0; i < localStorage.length; i++) {
+            var k = localStorage.key(i);
+            if (k && k.indexOf(prefixe) === 0) return true;
+        }
+    } catch (e) { /* énumération best-effort */ }
+    try {
+        if (typeof db !== 'undefined' && db.memoryCache && typeof db.memoryCache.keys === 'function') {
+            for (var cleCache of db.memoryCache.keys()) {
+                if (cleCache && cleCache.indexOf(prefixe) === 0) return true;
+            }
+        }
+    } catch (e2) { /* idem */ }
+    return false;
+}
+
+/**
  * Sauvegarde l'identification du trimestre depuis les champs v2-
  * Crée un nouveau trimestre si nécessaire ou met à jour l'existant
  */
@@ -145,6 +171,34 @@ function sauvegarderIdentificationTrimestreV2() {
     if (index >= 0) {
         // Mettre à jour le trimestre actif
         const ancienId = trimestres[index].id;
+
+        // #379 — changer session/année change l'ID, donc le préfixe de TOUTES
+        // les clés namespacées du trimestre. Aucune migration n'existe : sans
+        // garde, les données restent sous l'ancien préfixe et « disparaissent »
+        // (famille de l'incident « cartes perdues » du 4 août). Deux gardes :
+        if (ancienId !== id) {
+            // 1. Collision : l'id cible appartient déjà à un AUTRE trimestre
+            //    du registre (deux entrées de même id = données partagées).
+            const collision = trimestres.some(function(t, i) { return i !== index && t.id === id; });
+            if (collision) {
+                notifications.erreur(
+                    'Trimestre déjà existant',
+                    'Le trimestre « ' + id + ' » existe déjà dans le registre. Pour y travailler, active-le depuis la bibliothèque des trimestres au lieu de renommer celui-ci.'
+                );
+                chargerIdentificationTrimestreV2();
+                return;
+            }
+            // 2. Orphelinage : des données vivent sous l'ancien préfixe.
+            if (_trimestreADesDonnees(ancienId)) {
+                notifications.erreur(
+                    'Changement bloqué',
+                    'Ce trimestre (« ' + ancienId + ' ») contient des données : changer sa session ou son année les rendrait invisibles. Crée plutôt un nouveau trimestre pour la nouvelle session.'
+                );
+                chargerIdentificationTrimestreV2();
+                return;
+            }
+        }
+
         trimestres[index].id = id;
         trimestres[index].nom = nomTrimestre;
         trimestres[index].session = sessionCode;
@@ -156,11 +210,17 @@ function sauvegarderIdentificationTrimestreV2() {
         window.trimestreActif = id;
         db.setSync('trimestreActif', id);
 
-        // Si l'ID a changé, il faudrait migrer les données (complexe, pour l'instant on log)
-        if (ancienId !== id) {
+    } else {
+        // #379 — même garde de collision à la création : ne jamais pousser un
+        // doublon d'id dans le registre (un trimestre inactif peut déjà le porter).
+        if (trimestres.some(function(t) { return t.id === id; })) {
+            notifications.erreur(
+                'Trimestre déjà existant',
+                'Le trimestre « ' + id + ' » existe déjà — active-le depuis la bibliothèque des trimestres.'
+            );
+            return;
         }
 
-    } else {
         // Créer un nouveau trimestre
         const nouveauTrimestre = {
             id: id,
