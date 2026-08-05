@@ -2344,10 +2344,14 @@
         const actif = obtenirTrimestreActif();
         const prefixeActif = actif ? actif.id + '_' : null;
 
-        // Scanner toutes les clés localStorage pour détecter les préfixes de trimestre
+        // #388 : scanner TOUTES les couches synchrones (localStorage ∪ memoryCache)
+        // — un trimestre orphelin dont les clés ont basculé hors localStorage
+        // (quota) était invisible à l'outil. Taille best-effort (les clés en
+        // memoryCache seulement comptent 0 octet localStorage).
         const prefixesTrouves = new Map();
-        for (let i = 0; i < localStorage.length; i++) {
-            const cle = localStorage.key(i);
+        const clesStockage = (typeof db.keysSync === 'function') ? db.keysSync() : Object.keys(localStorage);
+        for (let i = 0; i < clesStockage.length; i++) {
+            const cle = clesStockage[i];
             const match = cle.match(/^([a-z]\d{4})_/);
             if (match) {
                 const prefixe = match[1];
@@ -2380,18 +2384,20 @@
     }
 
     function purgerTrimestresOrphelins(prefixes) {
+        // #388 (audit 5 août, rapport C1) : la purge passait par
+        // localStorage.removeItem BRUT — la copie IndexedDB survivait et
+        // syncToLocalStorageCache RESSUSCITAIT les clés au boot suivant.
+        // db.removeSync supprime les TROIS couches (localStorage, memoryCache,
+        // IndexedDB, durable via Option C) ; énumération union comme
+        // supprimerTrimestre.
         let clesSupprimees = 0;
+        const toutesLesCles = (typeof db.keysSync === 'function') ? db.keysSync() : Object.keys(localStorage);
         prefixes.forEach(prefixe => {
-            const aSupprimer = [];
-            for (let i = 0; i < localStorage.length; i++) {
-                const cle = localStorage.key(i);
+            toutesLesCles.forEach(cle => {
                 if (cle.startsWith(prefixe + '_')) {
-                    aSupprimer.push(cle);
+                    db.removeSync(cle);
+                    clesSupprimees++;
                 }
-            }
-            aSupprimer.forEach(cle => {
-                localStorage.removeItem(cle);
-                clesSupprimees++;
             });
         });
         return clesSupprimees;

@@ -668,6 +668,27 @@
         }
 
         /**
+         * #389 — Énumération SYNCHRONE des clés visibles par getSync :
+         * localStorage ∪ memoryCache. Après le boot (syncToLocalStorageCache),
+         * cette union couvre toutes les clés d'IndexedDB. À utiliser à la
+         * place de Object.keys(localStorage) / localStorage.key(i) : une clé
+         * peut vivre en memoryCache SEULEMENT après une bascule silencieuse
+         * sur quota (leçon du 5 août 2026 — migration #374 muette).
+         * @returns {string[]}
+         */
+        keysSync() {
+            const cles = new Set();
+            try {
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    if (k !== null) cles.add(k);
+                }
+            } catch (e) { /* énumération best-effort */ }
+            this.memoryCache.forEach((_, k) => cles.add(k));
+            return Array.from(cles);
+        }
+
+        /**
          * Obtenir toutes les clés depuis IndexedDB
          */
         async _keysIndexedDB() {

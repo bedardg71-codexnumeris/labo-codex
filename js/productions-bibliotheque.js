@@ -211,8 +211,11 @@ function listerTrimestresAvecProductions() {
     const trimestreActuel = window.trimestreActif || '';
 
     // Scanner localStorage pour les clés *_productions
-    for (let i = 0; i < localStorage.length; i++) {
-        const cle = localStorage.key(i);
+    // #389 : keysSync (localStorage ∪ memoryCache) — un trimestre dont la
+    // collection a basculé hors localStorage (quota) était invisible au scan.
+    const clesStockage = db.keysSync();
+    for (let i = 0; i < clesStockage.length; i++) {
+        const cle = clesStockage[i];
         if (cle && cle.endsWith('_productions')) {
             try {
                 const data = db.getSync(cle, null);

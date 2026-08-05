@@ -1603,8 +1603,8 @@ async function exporterCartouches() {
     const cartouches = {};
     let nbExclues = 0;
 
-    // Parcourir toutes les clés localStorage
-    const allKeys = Object.keys(localStorage);
+    // #389 : toutes les couches synchrones (localStorage ∪ memoryCache)
+    const allKeys = db.keysSync();
     for (let i = 0; i < allKeys.length; i++) {
         const key = allKeys[i];
         if (key && key.startsWith('cartouches_')) {
