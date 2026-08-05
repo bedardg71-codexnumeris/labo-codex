@@ -77,6 +77,11 @@
             this.memoryCache = new Map();
             // Écritures IDB en cours (pour flush dans beforeunload)
             this._pendingWrites = new Set();
+            // #392 — opérations synchrones émises AVANT la fin de init() :
+            // sans file, un setSync/removeSync pré-init n'atteignait JAMAIS
+            // IndexedDB (clé invisible à db.keys(), suppression ressuscitée).
+            // Rejouées par _rejouerOperationsAvantInit() à la fin de _init().
+            this._operationsAvantInit = [];
             // #340 — Gardes d'écriture par clé de base. Une garde reçoit
             // (cleEffective, valeur) et retourne { coherent:false, raison } pour
             // BLOQUER une écriture incohérente (ex. productions d'un trimestre
@@ -154,7 +159,27 @@
             }
 
             this.ready = true;
+            this._rejouerOperationsAvantInit();
             return this;
+        }
+
+        /**
+         * #392 — Rejoue vers IndexedDB les setSync/removeSync émis avant la
+         * fin de l'init (leur couche synchrone était déjà servie ; seule la
+         * persistance IDB avait été silencieusement sautée). No-op si
+         * IndexedDB est indisponible (localStorage reste la seule couche).
+         */
+        _rejouerOperationsAvantInit() {
+            if (this._operationsAvantInit.length === 0) return;
+            const enAttente = this._operationsAvantInit.splice(0);
+            if (!this.useIndexedDB) return;
+            for (const op of enAttente) {
+                if (op.type === 'set') {
+                    this._trackWrite(op.key, op.value);
+                } else {
+                    this._trackOperation(this._removeIndexedDB(op.key), 'suppression', op.key);
+                }
+            }
         }
 
         /**
@@ -212,6 +237,14 @@
         async get(key, defaultValue = null) {
             if (!this.ready) {
                 await this.init();
+            }
+
+            // #392 — memoryCache d'abord : c'est la source de vérité des
+            // grosses clés (cf. en-tête) et son contenu peut être PLUS FRAIS
+            // qu'IndexedDB quand une écriture setSync est encore pendante
+            // (ex. export lancé dans la foulée d'une modification).
+            if (this.memoryCache.has(key)) {
+                return this.memoryCache.get(key);
             }
 
             if (this.useIndexedDB) {
@@ -1284,6 +1317,10 @@
             // 2. Écriture asynchrone dans IndexedDB si disponible (trackée pour flush)
             if (idbDispo) {
                 this._trackWrite(key, value);
+            } else if (!this.ready) {
+                // #392 — init pas terminée : mémoriser pour rejouer, sinon la
+                // clé ne vit qu'en localStorage (invisible à db.keys()).
+                this._operationsAvantInit.push({ type: 'set', key: key, value: value });
             }
         }
 
@@ -1346,6 +1383,10 @@
             //    suppression émise près d'un hard refresh n'était jamais drainée.
             if (this.ready && this.useIndexedDB) {
                 this._trackOperation(this._removeIndexedDB(key), 'suppression', key);
+            } else if (!this.ready) {
+                // #392 — symétrique de setSync : une suppression pré-init non
+                // rejouée laissait la copie IDB ressusciter la clé au boot.
+                this._operationsAvantInit.push({ type: 'remove', key: key });
             }
         }
     }
@@ -1617,9 +1658,12 @@
     // Les migrations et imports sont tolérés (non listés = warning seulement).
     // Voir docs/DATA-OWNERSHIP.md pour le registre complet.
     // ================================================================
+    // #392 — registre réaligné sur les écrivains RÉELS post-refactor
+    // trimestre-v2 (session A/B/C 17 mai) + fusion #374. Source : audit du
+    // 5 août 2026 (rapport C5) + docs/DATA-OWNERSHIP.md.
     db._SSOT_OWNERS = {
         // Données étudiantes
-        'groupeEtudiants':          ['trimestre-v2.js'],
+        'groupeEtudiants':          ['trimestre-v2-etudiants.js'],
         'evaluationsSauvegardees':  ['evaluation.js'],
         'presences':                ['saisie-presences.js'],
         'fichiersTravaux':          ['travaux-stockage.js', 'travaux-import.js'],
@@ -1637,11 +1681,12 @@
         'indicesAssiduite':         ['indices.js', 'saisie-presences.js'],
         // Planification
         'calendrierComplet':        ['trimestre.js'],
-        'cadreCalendrier':          ['trimestre.js'],
+        'cadreCalendrier':          ['trimestre-v2-init.js', 'trimestre.js'],
         'planification_mindmap':    ['planification-donnees.js'],
         // Configuration
         'modeApplication':          ['modes.js'],
-        'groupeCoursActif':         ['trimestre-v2.js']
+        'groupeCoursActif':         ['trimestre-v2-orchestre.js', 'trimestre-v2-groupes-cours.js'],
+        'journeesSansCours':        ['trimestre-v2-init.js', 'migrations.js']
     };
 
 })();
