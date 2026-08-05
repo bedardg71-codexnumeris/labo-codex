@@ -551,7 +551,12 @@ function ouvrirModalNouveauTrimestre() {
         populerDropdownTrimestreV2();
 
         if (activer) {
-            // Recharger les données du nouveau trimestre
+            // Recharger les données du nouveau trimestre.
+            // #379 (audit 5 août) : l'identification AUSSI — sans elle, les champs
+            // nom/session/année affichaient l'ANCIEN trimestre et un « Enregistrer »
+            // réécrivait l'id du nouveau trimestre actif avec ces valeurs périmées
+            // (même trou déjà corrigé dans changerTrimestreActifV2, cf. FIX ci-dessus).
+            window.chargerIdentificationTrimestreV2();
             window.chargerCadreCalendrierV2();
             window.chargerJourneesSansCoursV2();
             window.afficherStatistiquesTrimestreV2();
