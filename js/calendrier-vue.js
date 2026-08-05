@@ -460,21 +460,19 @@ function afficherCalendrierScolaire() {
     // pour les congés avec reprise (cf. congesAvecReprise).
     const tousEvenements = [...evenementsPrevus, ...evenementsImprevus];
 
-    // ✅ UTILISER LES STATISTIQUES DÉJÀ CALCULÉES PAR TRIMESTRE.JS
-    // Au lieu de recalculer, on lit directement depuis localStorage
-    let nombreSemainesReel = 15; // Valeur par défaut
-    let nombreJoursReel = 75;    // Valeur par défaut
-
-    // Lire les valeurs calculées par trimestre.js
-    if (document.getElementById('nombreSemaines')) {
-        nombreSemainesReel = parseInt(document.getElementById('nombreSemaines').textContent) || 15;
-    }
-    if (document.getElementById('nombreJoursCours')) {
-        nombreJoursReel = parseInt(document.getElementById('nombreJoursCours').textContent) || 75;
-    }
-
     // Utiliser le calendrier complet (source unique)
     const calendrierComplet = obtenirCalendrierComplet();
+
+    // #366 (relais 4 août 2026) : statistiques par la fonction pure PARTAGÉE
+    // (trimestre-v2.js) sur le MÊME calendrier — fini la lecture DOM d'ids
+    // inexistants (`nombreSemaines`/`nombreJoursCours`) dont le repli
+    // silencieux affichait 15/75 quelles que soient les données. Sans
+    // calendrier : état vide explicite (—), jamais un chiffre inventé.
+    const statsCalendrier = (typeof calculerStatistiquesCalendrier === 'function')
+        ? calculerStatistiquesCalendrier(calendrierComplet)
+        : null;
+    const nombreSemainesReel = statsCalendrier ? statsCalendrier.semaines : '—';
+    const nombreJoursReel = statsCalendrier ? statsCalendrier.joursCours : '—';
 
     // Beta 99.30 : construire la carte des échéances pour le groupe-cours actif
     const mapEcheances = construireMapEcheancesProductions();
