@@ -251,29 +251,36 @@ function calculerAssiduite(da, dateLimite) {
  * @returns {Object} Structure { sommatif: { da: {...} }, dateCalcul }
  */
 function calculerEtSauvegarderIndicesAssiduite() {
+    // #397 : pipeline sur N étudiants — cache de lecture pour la durée du lot
+    // (calculerAssiduite relisait presences + groupeEtudiants PAR étudiant :
+    // ~113 ms de parses répétés à 75 étudiants, mesuré à l'audit).
+    if (typeof demarrerCacheLecture === 'function') demarrerCacheLecture();
+    try {
+        var etudiants = obtenirDonneesSelonMode('groupeEtudiants');
 
-    var etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+        var indices = {
+            sommatif: {},
+            dateCalcul: new Date().toISOString()
+        };
 
-    var indices = {
-        sommatif: {},
-        dateCalcul: new Date().toISOString()
-    };
+        var etudiantsActifs = (etudiants || []).filter(function(e) {
+            return !estEtudiantExclu(e);
+        });
 
-    var etudiantsActifs = (etudiants || []).filter(function(e) {
-        return !estEtudiantExclu(e);
-    });
+        etudiantsActifs.forEach(function(etudiant) {
+            indices.sommatif[etudiant.da] = calculerAssiduite(etudiant.da, null);
+        });
 
-    etudiantsActifs.forEach(function(etudiant) {
-        indices.sommatif[etudiant.da] = calculerAssiduite(etudiant.da, null);
-    });
+        sauvegarderDonneesSelonMode('indicesAssiduite', indices);
 
-    sauvegarderDonneesSelonMode('indicesAssiduite', indices);
+        if (typeof calculerEtStockerIndicesCP === 'function') {
+            calculerEtStockerIndicesCP();
+        }
 
-    if (typeof calculerEtStockerIndicesCP === 'function') {
-        calculerEtStockerIndicesCP();
+        return indices;
+    } finally {
+        if (typeof terminerCacheLecture === 'function') terminerCacheLecture();
     }
-
-    return indices;
 }
 
 /**
@@ -466,12 +473,14 @@ function calculerPerformancePAN(da) {
  *   pratique: 'SOM'     // Pratique utilisée pour le calcul
  * }
  */
-function calculerTousLesIndices(da) {
+function calculerTousLesIndices(da, _cacheIndicesA, _cacheIndicesCP) {
     // ========================================
     // INDICE A : SINGLE SOURCE OF TRUTH
     // Lire depuis db.getSync('indicesAssiduite') (calculé par calculerEtSauvegarderIndicesAssiduite ci-dessus)
+    // #397 : caches optionnels (patron calculerIndicesEtudiant) — un rendu qui
+    // boucle sur N étudiants lit les deux clés UNE fois et les passe ici.
     // ========================================
-    const indicesAssiduite = db.getSync(cle('indicesAssiduite'), {});
+    const indicesAssiduite = _cacheIndicesA || db.getSync(cle('indicesAssiduite'), {});
     const assiduiteSommatif = indicesAssiduite.sommatif?.[da];
 
     // Extraire l'indice (gérer ancien format nombre et nouveau format objet)
@@ -496,8 +505,11 @@ function calculerTousLesIndices(da) {
     // absent (entrées antérieures) ⇒ constructible.
     let noteConstructible = true;
 
-    if (typeof obtenirIndicesCP === 'function') {
-        const indicesCP = obtenirIndicesCP(da);
+    if (_cacheIndicesCP || typeof obtenirIndicesCP === 'function') {
+        // #397 : cache fourni → entrée lue dedans ; sinon lecture SSOT historique.
+        const indicesCP = _cacheIndicesCP
+            ? (_cacheIndicesCP[da]?.actuel || null)
+            : obtenirIndicesCP(da);
         if (indicesCP) {
             C = (indicesCP.C || 0) / 100;
             P = (indicesCP.P || 0) / 100;
