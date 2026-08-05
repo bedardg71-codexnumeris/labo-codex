@@ -224,13 +224,21 @@ class PratiqueConfigurable {
         // Pour les pratiques configurables, utiliser la méthode définie dans la config
         switch (this.config.calcul_note.methode) {
             case 'conversion_niveaux':
-                // Comme PAN : moyenne des niveaux convertis
-                P_pct = donneesEtudiant.actuel.PAN?.P || 0;
+                // #395 : le store indicesCP est PLAT depuis Beta 95.5 ({date, pratique,
+                // C, P, details}) — l'ancienne lecture duale actuel.PAN?.P rendait
+                // toujours 0. NB : pour une configurable de famille STD, la note
+                // autoritative vient du chemin riche (calculerDetailsNoteFinale) en
+                // amont ; cette valeur stockée n'est qu'un dernier repli.
+                P_pct = donneesEtudiant.actuel.P || 0;
                 break;
 
             case 'moyenne_ponderee':
-                // Comme SOM : moyenne pondérée
-                P_pct = donneesEtudiant.actuel.SOM?.P || 0;
+                // #395 : délègue à la vraie moyenne pondérée de PratiqueSommative
+                // (patron exact de la délégation SPE du 6 juin, cf. 'specifications'
+                // ci-dessous). L'ancienne lecture duale actuel.SOM?.P — format retiré
+                // en Beta 95.5 — rendait P = 0 pour TOUT LE MONDE, affiché comme un
+                // vrai zéro. Instance jetable, lecture seule.
+                P_pct = this._calculerPerformanceSommative(da, donneesEtudiant);
                 break;
 
             case 'pan_par_objectif':
@@ -253,11 +261,40 @@ class PratiqueConfigurable {
 
             default:
                 console.warn(`Méthode de calcul inconnue : ${this.config.calcul_note.methode}`);
-                P_pct = donneesEtudiant.actuel.PAN?.P || 0;
+                // #395 : lecture du store PLAT (le dual PAN?.P rendait toujours 0)
+                P_pct = donneesEtudiant.actuel.P || 0;
+        }
+
+        // #395 : une délégation qui ne peut pas produire de valeur (aucune évaluation)
+        // rend null → « non calculable », jamais un zéro déguisé.
+        if (P_pct === null || P_pct === undefined) {
+            return null;
         }
 
         // Convertir en décimal 0-1
         return P_pct / 100;
+    }
+
+    /**
+     * #395 — Performance « moyenne_ponderee » (Sommative configurable) : délègue à
+     * la vraie logique de PratiqueSommative (moyenne pondérée des évaluations
+     * actives, production.ponderation || 1), au lieu de relire le format dual
+     * d'indicesCP retiré en Beta 95.5. Patron identique à la délégation SPE
+     * (_calculerPerformanceSpecifications, 6 juin 2026). Lecture seule, instance
+     * jetable.
+     *
+     * @param {string} da - DA de l'étudiant
+     * @param {Object} donneesEtudiant - entrée indicesCP[da] (repli si classe absente)
+     * @returns {number|null} P en pourcentage (0-100), null si non calculable
+     */
+    _calculerPerformanceSommative(da, donneesEtudiant) {
+        if (typeof window.PratiqueSommative !== 'function') {
+            // Classe absente → repli sur la valeur PLATE connue du store.
+            return donneesEtudiant?.actuel?.P || 0;
+        }
+        const inst = new window.PratiqueSommative();
+        const p = inst.calculerPerformance(da); // décimal 0-1, ou null
+        return p === null || p === undefined ? null : p * 100;
     }
 
     /**
@@ -399,8 +436,9 @@ class PratiqueConfigurable {
         const cfg = this.config.configuration || this.config;
         if (typeof window.PratiquePanSpecifications !== 'function' ||
             !cfg || !Array.isArray(cfg.typesTravaux) || !Array.isArray(cfg.tableBundles)) {
-            // Classe absente ou config incomplète → repli sur la valeur PAN connue.
-            return donneesEtudiant?.actuel?.PAN?.P || 0;
+            // Classe absente ou config incomplète → repli sur la valeur PLATE connue
+            // (#395 : le format dual actuel.PAN a été retiré en Beta 95.5).
+            return donneesEtudiant?.actuel?.P || 0;
         }
         const inst = new window.PratiquePanSpecifications();
         inst.configurerPratique({

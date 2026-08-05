@@ -10,7 +10,11 @@ import { chargerScript } from './_helpers/charger-script.js';
 // Régression visée : avant ce branchement, le cas 'specifications' renvoyait
 // donneesEtudiant.actuel.PAN.P (faux : ce n'était pas un calcul par spécifications).
 
-const INDICES = { '1234567': { actuel: { PAN: { P: 42 } } } };
+// #395 (5 août 2026) : fixture passée au format PLAT de Beta 95.5 ({C, P}) —
+// l'ancienne forme duale { PAN: { P } } était PRÉCISÉMENT le format retiré dont
+// la lecture rendait P=0 pour toutes les configurables (rapport d'audit L1).
+// Le repli lit désormais actuel.P ; les assertions (0,42) sont inchangées.
+const INDICES = { '1234567': { actuel: { P: 42 } } };
 
 function charger() {
     return chargerScript('js/pratiques/pratique-configurable.js', {
@@ -52,14 +56,14 @@ describe('SPE configurable · délégation à PratiquePanSpecifications', () => 
         expect(perf).toBeCloseTo(0.80, 5); // délégué — PAS 0.42 (la valeur PAN stockée)
     });
 
-    it('repli sur la valeur PAN si PratiquePanSpecifications est absente', () => {
+    it('repli sur la valeur stockée (plate) si PratiquePanSpecifications est absente', () => {
         const win = charger();
         win.PratiquePanSpecifications = undefined;
         const p = new win.PratiqueConfigurable(CONFIG_SPE);
         expect(p.calculerPerformance('1234567')).toBeCloseTo(0.42, 5);
     });
 
-    it('repli sur la valeur PAN si la config bundles est incomplète', () => {
+    it('repli sur la valeur stockée (plate) si la config bundles est incomplète', () => {
         const win = charger();
         win.PratiquePanSpecifications = class {
             configurerPratique() {}
