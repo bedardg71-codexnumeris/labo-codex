@@ -536,6 +536,20 @@ const SCHEMAS_IMPORT = {
 /** Limite de taille max pour un fichier JSON importé (50 Mo) */
 const TAILLE_MAX_IMPORT_OCTETS = 50 * 1024 * 1024;
 
+/** #380 — Clés du cadre calendrier reconnues à l'import (nues ou namespacées).
+ *  journeesSansCours = clé courante (fusion #374) ; les deux noms evenements*
+ *  restent acceptés en LECTURE pour les exports antérieurs (fusion au boot).
+ *  Source unique consommée par analyserRessourcesDetaillees (aperçu) ET
+ *  executerImportSelectif (import) — l'import de ces clés passe DÉSORMAIS par
+ *  une case à cocher dédiée, plus jamais en silence (audit 5 août, rapport A1). */
+const CLES_CALENDRIER_IMPORT = ['cadreCalendrier', 'calendrierComplet', 'journeesSansCours', 'evenementsPrevus', 'evenementsImprevus', 'seancesCompletes', 'horaireHebdo'];
+
+/** #380 — Une clé de config appartient-elle au cadre calendrier ? */
+function estCleCalendrierImport(cle) {
+    return CLES_CALENDRIER_IMPORT.includes(cle) ||
+        CLES_CALENDRIER_IMPORT.some(function(c) { return cle.endsWith('_' + c); });
+}
+
 /* ===============================
    EXPORT DES DONNÉES
    =============================== */
@@ -1547,7 +1561,7 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                 ` : ''}
 
                 <!-- 🆕 Beta 96.2 : SECTION: Entités structurelles -->
-                ${(analyse.entites?.groupesCours?.count > 0 || analyse.entites?.horaires?.count > 0 || analyse.entites?.enseignants?.present) ? `
+                ${(analyse.entites?.groupesCours?.count > 0 || analyse.entites?.horaires?.count > 0 || analyse.entites?.enseignants?.present || analyse.entites?.calendrier?.count > 0) ? `
                 <div style="margin-bottom: 20px;">
                     <h3 style="font-size: 0.9rem; color: var(--bleu-clair); margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
                         <span style="background: var(--bleu-pale); padding: 4px 8px; border-radius: 4px;">Structure du trimestre</span>
@@ -1557,6 +1571,7 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                         ${analyse.entites.groupesCours.count > 0 ? genererLigneDonnee('groupesCours', 'Groupe-cours', analyse.entites.groupesCours.count + ' groupe(s) - ' + analyse.entites.groupesCours.cles.join(', ')) : ''}
                         ${analyse.entites.horaires.count > 0 ? genererLigneDonnee('horaires', 'Horaires', analyse.entites.horaires.count + ' horaire(s) - ' + analyse.entites.horaires.cles.join(', ')) : ''}
                         ${analyse.entites.enseignants.present ? genererLigneDonnee('enseignants', 'Enseignants', analyse.entites.enseignants.count + ' profil(s)') : ''}
+                        ${analyse.entites.calendrier?.count > 0 ? genererLigneDonnee('calendrier', 'Cadre du trimestre (calendrier)', analyse.entites.calendrier.count + ' clé(s) - remplace bornes, journées sans cours et séances') : ''}
                     </div>
                     <p style="font-size: 0.75rem; color: var(--bleu-clair); margin: 8px 0 0 12px;">
                         Ces données sont essentielles pour que l'application fonctionne correctement
@@ -1581,7 +1596,7 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                 </div>
                 ` : ''}
 
-                ${analyse.totalRessources === 0 && analyse.totalDonnees === 0 && !(analyse.entites?.groupesCours?.count > 0) ? `
+                ${analyse.totalRessources === 0 && analyse.totalDonnees === 0 && !(analyse.entites?.groupesCours?.count > 0 || analyse.entites?.calendrier?.count > 0) ? `
                 <div style="background: var(--alerte-fond-attention); border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 20px;">
                     <p style="margin: 0; color: var(--gris-fonce);">Aucune ressource reconnue dans ce fichier.</p>
                 </div>
@@ -1593,7 +1608,7 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                         Annuler
                     </button>
                     <button class="btn btn-principal" data-action="executerImportSelectif"
-                            ${analyse.totalRessources === 0 && analyse.totalDonnees === 0 && !(analyse.entites?.groupesCours?.count > 0 || analyse.entites?.horaires?.count > 0 || analyse.entites?.enseignants?.present) ? 'disabled' : ''}>
+                            ${analyse.totalRessources === 0 && analyse.totalDonnees === 0 && !(analyse.entites?.groupesCours?.count > 0 || analyse.entites?.horaires?.count > 0 || analyse.entites?.enseignants?.present || analyse.entites?.calendrier?.count > 0) ? 'disabled' : ''}>
                         Importer la sélection
                     </button>
                 </div>
@@ -1633,7 +1648,9 @@ function analyserRessourcesDetaillees(config) {
         entites: {
             groupesCours: { count: 0, cles: [] },
             horaires: { count: 0, cles: [] },
-            enseignants: { count: 0, present: false }
+            enseignants: { count: 0, present: false },
+            // #380 : cadre calendrier — listé pour la case à cocher dédiée
+            calendrier: { count: 0, cles: [] }
         },
         // Fichiers travaux (PDF annotés)
         fichiersTravaux: { count: 0, cles: [], nbBlobsZip: 0 },
@@ -1837,6 +1854,18 @@ function analyserRessourcesDetaillees(config) {
             result.entites.enseignants.present = true;
         }
     }
+
+    // #380 : Cadre calendrier (clés nues ou namespacées) — recensé pour la
+    // case à cocher dédiée de la modale (import sur consentement seulement)
+    Object.keys(config).forEach(cle => {
+        if (estCleCalendrierImport(cle)) {
+            const dataCal = parseValeur(config[cle]);
+            if (dataCal && (Array.isArray(dataCal) ? dataCal.length > 0 : Object.keys(dataCal).length > 0)) {
+                result.entites.calendrier.cles.push(cle);
+                result.entites.calendrier.count++;
+            }
+        }
+    });
 
     // Fichiers travaux (clés: *fichiersTravaux)
     Object.keys(config).forEach(cle => {
@@ -2991,23 +3020,27 @@ async function executerImportSelectif() {
             }
         }
 
-        // 🆕 FIX (31 jan 2026) : Importer les données calendrier (cadreCalendrier, calendrierComplet, etc.)
-        // Ces clés sont namespacées et essentielles pour le fonctionnement du trimestre
-        // journeesSansCours = clé courante (fusion #374, 5 août 2026) ; les deux noms
-        // evenements* restent acceptés en LECTURE pour les exports antérieurs (fusion au boot).
-        var clesCalendrier = ['cadreCalendrier', 'calendrierComplet', 'journeesSansCours', 'evenementsPrevus', 'evenementsImprevus', 'seancesCompletes', 'horaireHebdo'];
-        let nbCalendrier = 0;
-        for (var cleCal of Object.keys(donnees)) {
-            if (clesCalendrier.includes(cleCal) || clesCalendrier.some(function(c) { return cleCal.endsWith('_' + c); })) {
-                var dataCal = parseValeur(donnees[cleCal]);
-                if (dataCal && (Array.isArray(dataCal) ? dataCal.length > 0 : Object.keys(dataCal).length > 0)) {
-                    await db.set(cleCal, dataCal);
-                    nbCalendrier++;
+        // #380 (audit 5 août, rapport A1) : les clés calendrier ne sont plus
+        // JAMAIS importées en silence — case à cocher dédiée dans la modale
+        // (isChecked), comptées dans le total, comme toute autre donnée.
+        // Historique : le FIX du 31 jan 2026 les écrivait inconditionnellement
+        // (« essentielles ») → le cadre du trimestre du poste était remplacé
+        // même quand RIEN n'était coché.
+        if (isChecked('calendrier')) {
+            let nbCalendrier = 0;
+            for (var cleCal of Object.keys(donnees)) {
+                if (estCleCalendrierImport(cleCal)) {
+                    var dataCal = parseValeur(donnees[cleCal]);
+                    if (dataCal && (Array.isArray(dataCal) ? dataCal.length > 0 : Object.keys(dataCal).length > 0)) {
+                        await db.set(cleCal, dataCal);
+                        nbCalendrier++;
+                    }
                 }
             }
-        }
-        if (nbCalendrier > 0) {
-            details.push(`${nbCalendrier} config(s) calendrier`);
+            if (nbCalendrier > 0) {
+                compteurs.donnees++;
+                details.push(`${nbCalendrier} config(s) calendrier`);
+            }
         }
 
         // Fichiers travaux (métadonnées + blobs ZIP)
@@ -3074,6 +3107,7 @@ async function executerImportSelectif() {
             isChecked('etudiants') || isChecked('presences') ||
             isChecked('evaluations') || isChecked('configuration') ||
             isChecked('groupesCours') || isChecked('horaires') || isChecked('enseignants') ||
+            isChecked('calendrier') ||
             isChecked('fichiersTravaux') || isChecked('annotationsTravaux');
 
         // Fermer le modal
