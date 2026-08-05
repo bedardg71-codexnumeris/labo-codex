@@ -1007,7 +1007,7 @@ function ouvrirPanneau(id) {
             '<div class="planif-duree-section" id="planif-duree-section" style="' + (hasDuree ? '' : 'display:none') + '">' +
                 '<label for="planif-duree-min">Dur\u00e9e estim\u00e9e</label>' +
                 '<div class="planif-duree-calc">' +
-                    '<input type="number" id="planif-duree-min" value="' + (meta.duree || '') + '" min="1" max="600" placeholder="min">' +
+                    '<input type="number" id="planif-duree-min" value="' + (parseInt(meta.duree, 10) || '') + '" min="1" max="600" placeholder="min">' +
                     '<span class="planif-duree-sep">min</span>' +
                     '<span class="planif-duree-total" id="planif-duree-equiv">' + equivalencePeriodesTexte(meta.duree) + '</span>' +
                 '</div>' +
