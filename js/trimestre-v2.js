@@ -238,7 +238,7 @@ function populerDropdownsAssemblageV2() {
         trimestres.forEach(t => {
             const nom = t.nom || t.id || 'Sans nom';
             const selected = (t.id === trimestreActif) ? ' selected' : '';
-            html += `<option value="${echapperHtml(t.id)}"${selected}>${nom}</option>`;
+            html += `<option value="${echapperHtml(t.id)}"${selected}>${echapperHtml(nom)}</option>`;
         });
         selectTrimestre.innerHTML = html;
     } else {
@@ -262,7 +262,7 @@ function populerDropdownsAssemblageV2() {
         };
         let html = '<option value="">— Choisir un cours —</option>';
         coursReels.forEach(c => {
-            html += `<option value="${echapperHtml(c.id)}">${labelCours(c)}</option>`;
+            html += `<option value="${echapperHtml(c.id)}">${echapperHtml(labelCours(c))}</option>`;
         });
         selectCours.innerHTML = html;
 
@@ -306,7 +306,7 @@ function populerDropdownsAssemblageV2() {
         let html = '<option value="">— Choisir un horaire —</option>';
         horairesReels.forEach(h => {
             const nom = h.nom || h.id || 'Sans nom';
-            html += `<option value="${echapperHtml(h.id)}">${nom}</option>`;
+            html += `<option value="${echapperHtml(h.id)}">${echapperHtml(nom)}</option>`;
         });
         selectHoraire.innerHTML = html;
 
@@ -325,7 +325,7 @@ function populerDropdownsAssemblageV2() {
         const labelEns = e => (`${e.prenom || ''} ${e.nom || ''}`.trim() || e.id);
         let html = '<option value="">— Choisir un enseignant —</option>';
         enseignantsReels.forEach(e => {
-            html += `<option value="${echapperHtml(e.id)}">${labelEns(e)}</option>`;
+            html += `<option value="${echapperHtml(e.id)}">${echapperHtml(labelEns(e))}</option>`;
         });
         selectEnseignant.innerHTML = html;
 
@@ -349,7 +349,7 @@ function populerDropdownsAssemblageV2() {
         let html = '<option value="">— À compléter quand configurée —</option>';
         pratiques.forEach(p => {
             const nom = p.nom || p.id || 'Sans nom';
-            html += `<option value="${echapperHtml(p.id)}">${nom}</option>`;
+            html += `<option value="${echapperHtml(p.id)}">${echapperHtml(nom)}</option>`;
         });
         selectPratique.innerHTML = html;
 

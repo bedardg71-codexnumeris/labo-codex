@@ -1054,9 +1054,9 @@ function ouvrirPanneau(id) {
     if (donnees.type === 'sequence') {
         extra.innerHTML +=
             '<label for="planif-panneau-sem-debut">Semaine début</label>' +
-            '<input type="number" id="planif-panneau-sem-debut" value="' + (donnees.metadata.semaineDebut || '') + '" min="1" max="15" placeholder="1">' +
+            '<input type="number" id="planif-panneau-sem-debut" value="' + (parseInt(donnees.metadata.semaineDebut, 10) || '') + '" min="1" max="15" placeholder="1">' +
             '<label for="planif-panneau-sem-fin">Semaine fin</label>' +
-            '<input type="number" id="planif-panneau-sem-fin" value="' + (donnees.metadata.semaineFin || '') + '" min="1" max="15" placeholder="5">';
+            '<input type="number" id="planif-panneau-sem-fin" value="' + (parseInt(donnees.metadata.semaineFin, 10) || '') + '" min="1" max="15" placeholder="5">';
         var semDebutInput = extra.querySelector('#planif-panneau-sem-debut');
         semDebutInput.addEventListener('focus', function() { enregistrerPourUndo(); });
         semDebutInput.addEventListener('input', function(e) {
@@ -1509,7 +1509,7 @@ function clonerNoeud(noeudId) {
         '<div class="planif-noeud-entete">' +
             '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(donnees) + '">' + obtenirLabelNoeud(donnees) + '</span>' +
         '</div>' +
-        '<div class="planif-noeud-titre" contenteditable="true">' + (donnees.titre || '') + '</div>' +
+        '<div class="planif-noeud-titre" contenteditable="true">' + echapperHtml(donnees.titre || '') + '</div>' +
         '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
         '<div class="planif-noeud-port planif-port-gauche" data-dir="gauche"></div>' +
         '<div class="planif-noeud-port planif-port-bas" data-dir="bas"></div>' +
@@ -2415,7 +2415,7 @@ function reconstruireDOM() {
                 '<div class="planif-noeud-entete">' +
                     '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(n) + '">' + obtenirLabelNoeud(n) + '</span>' +
                 '</div>' +
-                '<div class="planif-noeud-titre" contenteditable="true">' + (n.titre || '') + '</div>' +
+                '<div class="planif-noeud-titre" contenteditable="true">' + echapperHtml(n.titre || '') + '</div>' +
                 '<div class="planif-noeud-zone ' + (nbEnfants === 0 ? 'planif-vide' : '') + '">' +
                     (nbEnfants > 0 ? nbEnfants + ' \u00e9l\u00e9ment' + (nbEnfants > 1 ? 's' : '') : '') +
                 '</div>' +
@@ -2428,7 +2428,7 @@ function reconstruireDOM() {
                 '<div class="planif-noeud-entete">' +
                     '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(n) + '">' + obtenirLabelNoeud(n) + '</span>' +
                 '</div>' +
-                '<div class="planif-noeud-titre" contenteditable="true">' + (n.titre || '') + '</div>' +
+                '<div class="planif-noeud-titre" contenteditable="true">' + echapperHtml(n.titre || '') + '</div>' +
                 '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
                 '<div class="planif-noeud-port planif-port-gauche" data-dir="gauche"></div>' +
                 '<div class="planif-noeud-port planif-port-bas" data-dir="bas"></div>' +

@@ -1,0 +1,87 @@
+import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+// SENTINELLE — #386 (audit qualité 5 août 2026, rapports A5+B9+D2, 🟡) —
+// Lot échappement/coercition : des données utilisateur ou importées étaient
+// injectées BRUTES dans innerHTML (métadonnées du fichier importé dans la
+// modale config complète, libellés des dropdowns trimestre-v2, titre de nœud
+// planification sur 3 chemins, noms dans la bibliothèque d'alignements) et
+// dans des attributs value= (semaineDebut/Fin, symétriques au fix meta.duree).
+// Règle CLAUDE.md non négociable : echapperHtml() sur toute donnée injectée.
+// CSP bloque le script inline, PAS l'injection de balises.
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const racineProjet = path.resolve(__dirname, '..', '..');
+const lire = (f) => readFileSync(path.join(racineProjet, 'js', f), 'utf8');
+
+const importExport = lire('import-export.js');
+const tv2 = lire('trimestre-v2.js');
+const tv2liste = lire('trimestre-v2-liste.js');
+const tv2orch = lire('trimestre-v2-orchestre.js');
+const tv2gc = lire('trimestre-v2-groupes-cours.js');
+const carte = lire('planification-carte.js');
+const biblio = lire('planification-bibliotheque.js');
+
+describe('#386 · modale « configuration complète » : métadonnées du fichier échappées', () => {
+    it('meta.nom / meta.auteur / meta.description passent par echapperHtml', () => {
+        expect(importExport).toMatch(/\$\{echapperHtml\(meta\.nom \|\| ''\)\}/);
+        expect(importExport).toMatch(/\$\{echapperHtml\(meta\.auteur \|\| ''\)\}/);
+        expect(importExport).toMatch(/\$\{echapperHtml\(meta\.description\)\}/);
+    });
+
+    it('meta.discipline est gardée par Array.isArray (string → plus de TypeError avalé)', () => {
+        expect(importExport).toMatch(/Array\.isArray\(meta\.discipline\)/);
+    });
+
+    it('ne réintroduit aucune injection brute des métadonnées', () => {
+        expect(importExport).not.toMatch(/\$\{meta\.nom\}/);
+        expect(importExport).not.toMatch(/\$\{meta\.auteur\}/);
+        expect(importExport).not.toMatch(/\$\{meta\.description\}/);
+        expect(importExport).not.toMatch(/\$\{meta\.niveau\}/);
+    });
+});
+
+describe('#386 · dropdowns/listes trimestre-v2 : libellés utilisateur échappés', () => {
+    it('aucun libellé brut dans les <option> de la famille', () => {
+        expect(tv2).not.toMatch(/>\$\{nom\}<\/option>/);
+        expect(tv2).not.toMatch(/>\$\{labelCours\(c\)\}<\/option>/);
+        expect(tv2).not.toMatch(/>\$\{labelEns\(e\)\}<\/option>/);
+        expect(tv2orch).not.toMatch(/>\$\{label\}<\/option>/);
+        expect(tv2orch).not.toMatch(/>\$\{libelle\}<\/option>/);
+        expect(tv2gc).not.toMatch(/>\$\{gc\.nom \|\| gc\.id\}<\/option>/);
+        expect(tv2liste).not.toMatch(/>\$\{t\.nom\}<\/span>/);
+    });
+
+    it('les libellés passent par echapperHtml', () => {
+        expect(tv2).toMatch(/>\$\{echapperHtml\(labelCours\(c\)\)\}<\/option>/);
+        expect(tv2orch).toMatch(/>\$\{echapperHtml\(label\)\}<\/option>/);
+        expect(tv2liste).toMatch(/>\$\{echapperHtml\(t\.nom\)\}<\/span>/);
+    });
+});
+
+describe('#386 · planification : titre de nœud échappé, attributs value= coercés', () => {
+    it('plus aucun titre brut dans les innerHTML des nœuds (clone + chargement ×2)', () => {
+        expect(carte).not.toMatch(/contenteditable="true">' \+ \(donnees\.titre \|\| ''\)/);
+        expect(carte).not.toMatch(/contenteditable="true">' \+ \(n\.titre \|\| ''\)/);
+    });
+
+    it('les trois chemins passent par echapperHtml', () => {
+        expect(carte).toMatch(/contenteditable="true">' \+ echapperHtml\(donnees\.titre \|\| ''\)/);
+        const matches = carte.match(/contenteditable="true">' \+ echapperHtml\(n\.titre \|\| ''\)/g) || [];
+        expect(matches.length).toBe(2);
+    });
+
+    it('semaineDebut/semaineFin coercées en entier dans value= (symétrique meta.duree)', () => {
+        expect(carte).toMatch(/value="' \+ \(parseInt\(donnees\.metadata\.semaineDebut, 10\) \|\| ''\)/);
+        expect(carte).toMatch(/value="' \+ \(parseInt\(donnees\.metadata\.semaineFin, 10\) \|\| ''\)/);
+        expect(carte).not.toMatch(/value="' \+ \(donnees\.metadata\.semaine(Debut|Fin) \|\| ''\)/);
+    });
+
+    it('bibliothèque d\'alignements : nom de carte et attributs data-* échappés', () => {
+        expect(biblio).toMatch(/echapperHtml\(c\.nom\)/);
+        expect(biblio).toMatch(/data-param="' \+ echapperHtml\(code\) \+ '" data-param2="' \+ echapperHtml\(c\.id\) \+ '"/);
+        expect(biblio).not.toMatch(/'<span>' \+ c\.nom \+ '/);
+    });
+});

@@ -148,7 +148,7 @@ function afficherListeTrimestreGestion() {
         return `
             <div class="${itemClasses.join(' ')}">
                 <div class="item-trimestre-info">
-                    <span class="item-trimestre-nom">${t.nom}</span>${badge}
+                    <span class="item-trimestre-nom">${echapperHtml(t.nom)}</span>${badge}
                     ${statsInfo}
                 </div>
                 <div class="item-trimestre-actions">
