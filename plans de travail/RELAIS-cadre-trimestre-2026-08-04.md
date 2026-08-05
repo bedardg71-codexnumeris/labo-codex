@@ -162,8 +162,10 @@ exactement la semaine du 12 octobre.
 > des reprises (une reprise réutilise un jour déjà compté). La capture d'octobre de
 > Grégoire (« Sem. 7 » ven 2 → jeu 8) était donc DÉJÀ conforme à l'officiel.
 > Sentinelles : golden master 75 jours (7 paquets-ANCRES vérifiés au PDF par Cowork le
-> 4 août = 35 jours ; 8 paquets dérivés par la règle, cohérents avec la preuve 82−7=75 —
-> ⚠ COMMITTER LE PDF pour la vérification intégrale, puis lever la note dans le test) +
+> 4 août = 35 jours ; 8 paquets dérivés par la règle — **VÉRIFIÉS INTÉGRALEMENT le
+> 5 août** contre le PDF officiel committé par Grégoire à la racine du dépôt (exception
+> .gitignore dédiée) : 15/15 paquets, 75/75 jours conformes aux indices imprimés, +
+> recoupement des deux « LUN » de changement d'horaire, 10 sept et 13 nov — note ⚠ levée) +
 > monotonie (le recul 13→16 nov nommément) + grève SANS reprise (ROUGE sur l'ancien
 > algo) + congé personnel compté. Le diviseur 5 est rendu visible (15 paquets de 5
 > exigés). Échéances d'artefacts : AUCUN déplacement automatique (décision Grégoire, cf.

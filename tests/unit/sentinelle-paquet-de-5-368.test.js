@@ -5,15 +5,17 @@ import { chargerScript } from './_helpers/charger-script.js';
 // semaines par « paquet de 5 » : numeroSemaine = ⌈rang du jour effectif ÷ 5⌉.
 //
 // GOLDEN MASTER : calendrier officiel du Cégep de Drummondville 2026-2027
-// (adopté au CA du 27 janvier 2026), qui imprime le numéro de semaine sur
-// chaque jour. Provenance de la table ci-dessous :
-//   - 7 paquets-ANCRES (S1-S4, S11, S12, S15 = 35 jours) transcrits et
-//     vérifiés contre le PDF officiel lors de la séance Cowork du 4 août
-//     (relais §#368) — indépendants du code : le PDF n'a pas été écrit ici.
-//   - les 8 autres paquets dérivés par la règle et cohérents avec la preuve
-//     arithmétique du relais (82 ouvrables − 7 retraits = 75 = 15 × 5).
-//   ⚠ À la réception du PDF dans le dépôt : vérifier les 8 paquets dérivés
-//     contre l'impression officielle et retirer cette note.
+// (adopté au CA du 27 janvier 2026), qui imprime le numéro de semaine EN
+// INDICE sur chaque jour. Source versionnée dans le dépôt :
+// « DE_Calendrier scolaire_26-27.pdf » (racine, committé par Grégoire le
+// 5 août 2026). VÉRIFICATION INTÉGRALE faite le 5 août : les 15 paquets
+// (75/75 jours) sont conformes aux indices imprimés — 7 paquets-ancres
+// transcrits en séance Cowork le 4 août, les 8 autres confrontés au PDF
+// le 5 août (dont S8 qui enjambe la pause : 9 oct puis 19-22 oct).
+// Recoupements bonus : 10 sept imprimé « LUN₃ » et 13 nov « LUN₁₁ »
+// (changements d'horaire du lundi = les deux reprises saisies).
+// Le PDF n'a pas été écrit ici : c'est un juge que le code ne peut pas
+// contaminer. Toute divergence future = régression du générateur.
 //
 // Le bug d'origine (comptage PAR RÔLE : n-ième lundi = semaine n) : recul
 // ven 13 nov = sem 13 → lun 16 nov = sem 12, maxSemaine 17, une « semaine »
@@ -34,7 +36,7 @@ const JOURNEES_A2026 = [
     { id: 'E2', dateEvenement: '2026-11-09', description: 'Journée Carrière', categorie: 'institutionnel', horaireReprise: 'Lundi', dateReprise: '2026-11-13' }
 ];
 
-// numeroSemaine attendu par date — LES 75 JOURS. Ancres officielles : 1-4, 11, 12, 15.
+// numeroSemaine attendu par date — LES 75 JOURS, tous vérifiés contre le PDF officiel.
 const GOLDEN = {
     1: ['2026-08-20', '2026-08-21', '2026-08-24', '2026-08-25', '2026-08-26'],   // ANCRE
     2: ['2026-08-27', '2026-08-28', '2026-08-31', '2026-09-01', '2026-09-02'],   // ANCRE
