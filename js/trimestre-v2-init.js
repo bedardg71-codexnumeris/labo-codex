@@ -151,8 +151,14 @@ function sauvegarderIdentificationTrimestreV2() {
     const session = document.getElementById('v2-sessionTrimestre')?.value || '';
     const annee = document.getElementById('v2-anneeTrimestre')?.value || '';
 
-    // Validation minimale
+    // #390 (audit 5 août, rapport B7) : plus de retour SILENCIEUX — sous le
+    // bouton Enregistrer unique (#306), l'utilisateur voyait ensuite « Cadre
+    // du trimestre sauvegardé » et croyait l'identification enregistrée.
     if (!session || !annee) {
+        notifications.erreur(
+            'Identification incomplète',
+            'Choisis la session et l\'année du trimestre — elles déterminent où ses données sont rangées.'
+        );
         return;
     }
 
@@ -409,14 +415,16 @@ function reinitialiserBornesTrimestreV2() {
     cadre.remiseNotes = '';
     db.setSync(cle('cadreCalendrier'), cadre);
 
-    // Réinitialiser les statistiques
-    const elemSemaines = document.getElementById('v2-nombreSemaines');
-    const elemJours = document.getElementById('v2-nombreJoursCours');
-    const elemConges = document.getElementById('v2-totalConges');
-
-    if (elemSemaines) elemSemaines.textContent = '0';
-    if (elemJours) elemJours.textContent = '0';
-    if (elemConges) elemConges.textContent = '0';
+    // #390 (audit 5 août, rapport B5) : purger le calendrier généré — la
+    // sidebar gardait « 15 sem. · 75 jours » après réinitialisation. NE PAS
+    // régénérer ici : genererCalendrierComplet a des dates de repli en dur et
+    // fabriquerait un calendrier fantôme sur des bornes vides.
+    db.removeSync(cle('calendrierComplet'));
+    if (typeof afficherCalendrierScolaire === 'function') {
+        afficherCalendrierScolaire();
+    }
+    // Stats + avertissements à l'état vide (source unique #366)
+    window.afficherStatistiquesTrimestreV2();
 
     // Notification
     notifications.succes('Bornes du trimestre réinitialisées');
@@ -450,6 +458,17 @@ function reinitialiserSemainesSpecialesV2() {
     cadre.semaineExamensDebut = '';
     cadre.semaineExamensFin = '';
     db.setSync(cle('cadreCalendrier'), cadre);
+
+    // #390 (audit 5 août, rapport B5) : les semaines spéciales influencent le
+    // statut des jours — régénérer le calendrier (bornes toujours présentes)
+    // et rafraîchir stats + avertissements, comme le fait la sauvegarde.
+    if (typeof genererCalendrierComplet === 'function') {
+        genererCalendrierComplet();
+    }
+    if (typeof afficherCalendrierScolaire === 'function') {
+        afficherCalendrierScolaire();
+    }
+    window.afficherStatistiquesTrimestreV2();
 
     // Notification
     notifications.succes('Semaines spéciales réinitialisées');

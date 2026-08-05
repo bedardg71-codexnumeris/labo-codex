@@ -718,10 +718,16 @@ function supprimerGroupeCoursV2() {
     const groupesCoursFiltre = groupesCours.filter(g => g.id !== groupeCoursEnEditionId);
     db.setSync(cleGC, groupesCoursFiltre);
 
-    // Si c'était le groupe-cours actif, le désactiver
-    const gcActifId = db.getSync('groupeCoursActif', null);
-    if (gcActifId === groupeCoursEnEditionId) {
+    // Si c'était le groupe-cours actif, le désactiver.
+    // #390 (audit 5 août, rapport B6) : groupeCoursActif est un OBJET —
+    // l'ancienne comparaison objet === id n'était JAMAIS vraie : supprimer le
+    // GC actif laissait groupeCoursActif/infoCours pointer un GC effacé
+    // (données fantômes, surtout en supprimant le DERNIER groupe-cours, où
+    // l'auto-réparation du dropdown n'a plus de candidat).
+    const gcActif = db.getSync('groupeCoursActif', null);
+    if (gcActif && gcActif.id === groupeCoursEnEditionId) {
         db.setSync('groupeCoursActif', null);
+        db.setSync('infoCours', null);
     }
 
     // Réinitialiser l'interface
@@ -899,10 +905,12 @@ function supprimerGroupeCoursDepuisBibliotheque(gcId, nomGC) {
     groupesCours = groupesCours.filter(gc => gc.id !== gcId);
     db.setSync(cleGC, groupesCours);
 
-    // Si c'était le groupe-cours actif, désactiver
+    // Si c'était le groupe-cours actif, désactiver.
+    // #390 : purger AUSSI infoCours (le couple s'écrit et s'efface ensemble).
     const gcActif = db.getSync('groupeCoursActif', null);
     if (gcActif && gcActif.id === gcId) {
         db.setSync('groupeCoursActif', null);
+        db.setSync('infoCours', null);
     }
 
     // Rafraîchir
@@ -933,10 +941,12 @@ function masquerGroupeCoursDepuisBibliotheque(gcId) {
         gc.dansSidebar = false;
         db.setSync(cleGC, groupesCours);
 
-        // Si c'était le groupe-cours actif, le désactiver
+        // Si c'était le groupe-cours actif, le désactiver.
+        // #390 : purger AUSSI infoCours (le couple s'écrit et s'efface ensemble).
         const gcActif = db.getSync('groupeCoursActif', null);
         if (gcActif && gcActif.id === gcId) {
             db.setSync('groupeCoursActif', null);
+            db.setSync('infoCours', null);
         }
 
         // Rafraîchir
