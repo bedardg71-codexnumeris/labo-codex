@@ -41,13 +41,28 @@ break-testée à chaque fois ; s'arrêter proprement là où la session s'arrêt
 5. **#398** 🟡 Helper `dateLocaleYMD()` + bascule des 10 sites UTC (sentinelle TZ figée en soirée).
 6. **#399** 🟡 Lot gardes calendrier/calcul (décision reprise-samedi §3.4 ; + NaN 0/0, note 0
    du repli, retrait des dates de repli en dur — le golden master #368 doit RESTER VERT).
-7. **#400** 🟡 Garde idempotente des listeners du canvas spaghetti — le fix est sûr sans mesure ;
-   la confirmation terrain (getEventListeners) reste une porte de validation Grégoire, pas un préalable.
-8. **#402** 🟢 Entretien divers — seulement si la session a encore du budget.
+7. **#400** 🟡 Garde idempotente des listeners du canvas spaghetti — fix sûr par lecture statique ;
+   la mesure terrain a été REPORTÉE (5 août soir : aucune donnée de progression dans le contexte
+   réel → graphique jamais rendu). Recomptage = porte post-#362, pas un préalable.
+8. **#401** 🟢→🟡 Boot + modal export — **DÉBLOQUÉ par les mesures terrain de Grégoire (5 août
+   soir, Safari, codex réel)** : re-sync boot **729-1057 ms** (3 runs), modal export **473/488 ms**.
+   Correctifs du rapport : `getAll()` en une transaction, sérialiser UNE fois (vaut aussi pour
+   chaque `setSync`), tailles sans matérialiser les valeurs. Re-mesurer avec le même protocole
+   après fix (avant/après au commit).
+9. **#402** 🟢 Entretien divers — seulement si la session a encore du budget.
 
-**NE PAS TOUCHER** : **#401** (boot/modal export) — attend les 2 `console.time` terrain de Grégoire
-(protocoles au rapport). Pas de chiffre terrain → pas de correctif (décision de la consigne d'audit,
-reconduite).
+## 1 bis. Contexte terrain à connaître (5 août soir — diagnostic console avec Grégoire)
+
+Les données réelles h2026 sont **doublement désappariées** (item **#362 élargi** — lire sa fiche) :
+échelles (`h2026_echellesTemplates` = `ECHELLE_GENERIQUE` seul → flood
+`[construireConfigComplete] Échelle non trouvée`) ET productions↔cours (les 11 `h2026_productions`
+portent `COURS1766455789356`, le cours actif est `h2026-601-101-MQ-00001` → aucune production
+visible, C = 0, replis « Calcul à la volée » en boucle). **Conséquences pour cette session** :
+(1) des warnings terrain de ce type ne sont PAS causés par tes correctifs — ne pas les « réparer »
+au passage ; (2) la réparation de données #362 (3 facettes : grilles + échelles + coursId, backup
+préalable) est un chantier SÉPARÉ, hors de cette vague, décision Grégoire ; (3) toute validation
+terrain sur h2026 est biaisée tant que #362 n'est pas réparé — valider sur données synthétiques
+ou démo.
 
 ## 2. Méthode (non négociable)
 
@@ -108,7 +123,7 @@ numérotation « paquet de 5 » (pas de numeroSemaine propre). Golden master #36
 
 - ❌ Re-litiger une décision §3 (elles sont de Grégoire ; un doute d'implémentation se consigne,
   ne se tranche pas en changeant la décision).
-- ❌ #401 sans les chiffres terrain.
+- ❌ Toucher aux DONNÉES réelles désappariées (§1 bis) — la réparation #362 est un chantier séparé.
 - ❌ Zones protégées (`config.js`, `navigation.js`, `noms_stables.json`).
 - ❌ Migration/écriture automatique de données utilisateur (la décision 3.1.5 l'exclut ; les
   correctifs de ce lot sont du CODE de calcul + avertissements, pas des transformations de stockage).
@@ -122,5 +137,6 @@ numérotation « paquet de 5 » (pas de numeroSemaine propre). Golden master #36
 4. Push sur la branche de travail ; **le merge → main est une décision Grégoire** (le demander
    en fin de session, ne pas le présumer).
 5. Portes terrain à consigner pour Grégoire : parcours STD réel (profil + tableau de bord +
-   comparateur cohérents), formulaire Productions (avertissements #369 nouveaux),
-   `getEventListeners` spaghetti, 2 `console.time` (#401).
+   comparateur cohérents — APRÈS réparation #362), formulaire Productions (avertissements #369
+   nouveaux), recomptage listeners spaghetti (post-#362), re-mesure boot/modal (#401 avant/après —
+   protocole : les one-liners `performance.now()` du bloc SESSION.md 5 août soir).
