@@ -390,7 +390,7 @@ async function typerProductionCommeTerminale(productionId) {
         return;
     }
     prod.type = 'terminale';
-    await db.set(getCleProductions(), productionsListe);
+    await db.set(getCleProductions(), productionsListe); // security-ok: réécriture de la liste déjà en stockage, seul le champ type (valeur fixe locale) change
 
     // Recalculer les indices avec le nouveau rôle, puis rafraîchir la vue.
     if (typeof calculerEtStockerIndicesCP === 'function') calculerEtStockerIndicesCP();
