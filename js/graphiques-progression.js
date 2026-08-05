@@ -1605,6 +1605,21 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
             }
         }
 
+        // #400 (rapport P3) : garde idempotente des listeners du canvas — le
+        // canvas est PERSISTANT (DOM), le chart est détruit à chaque re-rendu,
+        // mais mouseleave/click/mousemove étaient RÉ-attachés sans retrait :
+        // +3 listeners par rendu, dont les closures retenaient le chart détruit
+        // et ses datasets (75 courbes × semaines). Patron #326 R1 : chaque
+        // attache retire d'abord le handler du rendu précédent (même type).
+        const _attacherListenerSpaghetti = function(type, handler) {
+            canvas._spaghettiHandlers = canvas._spaghettiHandlers || {};
+            if (canvas._spaghettiHandlers[type]) {
+                canvas.removeEventListener(type, canvas._spaghettiHandlers[type]);
+            }
+            canvas._spaghettiHandlers[type] = handler;
+            canvas.addEventListener(type, handler);
+        };
+
         // Réinitialiser les variables de suivi
         dernierDatasetSurvoleACP = -1;
         datasetVerrouilleACP = -1;
@@ -1923,7 +1938,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
         const chart = new Chart(ctx, config);
         graphiqueSpaghettiACPInstance = chart;
 
-        canvas.addEventListener('mouseleave', function() {
+        _attacherListenerSpaghetti('mouseleave', function() {
             var couleurIndice = couleursIndices[indice] || COULEURS_INDICES.P;
             if (datasetVerrouilleACP >= 0) {
                 dernierDatasetSurvoleACP = datasetVerrouilleACP;
@@ -1977,7 +1992,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
         // Gestionnaire de clic
         // NOTE: Chart.js utilise des coordonnées CSS en interne, pas des pixels canvas
         // Les zones du plugin sont donc en CSS, on utilise les coordonnées CSS du clic
-        canvas.addEventListener('click', function(event) {
+        _attacherListenerSpaghetti('click', function(event) {
             const rect = canvas.getBoundingClientRect();
             const clickX = event.clientX - rect.left;
             const clickY = event.clientY - rect.top;
@@ -2005,7 +2020,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
         });
 
         // Curseur pointer
-        canvas.addEventListener('mousemove', function(event) {
+        _attacherListenerSpaghetti('mousemove', function(event) {
             // Garde : si le chart est détruit (navigation SPA), ne rien faire
             if (!chart || !chart.canvas) return;
 
