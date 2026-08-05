@@ -7,26 +7,44 @@ import { chargerScript } from './_helpers/charger-script.js';
 // C'est une migration de données réelles : la préservation des données est
 // LA contrainte de rétro-compat du projet (CLAUDE.md).
 
-function creerEnvironnement(donnees) {
-    const store = { ...donnees };
+/**
+ * Reproduit les DEUX couches du stockage hybride réel (db.js) : localStorage
+ * ET memoryCache (IndexedDB hydratée au boot). Une clé peut vivre dans une
+ * seule des deux — c'est exactement le cas qui a fait rater la migration sur
+ * le poste réel de Grégoire (5 août : congés A2026 en memoryCache seulement,
+ * bascule silencieuse sur quota). Le premier stub de cette sentinelle
+ * confondait les couches : il validait sa propre prémisse.
+ * @param {Object} donneesLS - clés résidentes en localStorage
+ * @param {Object} donneesCache - clés résidentes en memoryCache/IDB seulement
+ */
+function creerEnvironnement(donneesLS, donneesCache = {}) {
+    const ls = { ...donneesLS };
+    const cache = new Map(Object.entries(donneesCache));
     const fauxLocalStorage = {
-        get length() { return Object.keys(store).length; },
-        key: (i) => Object.keys(store)[i] ?? null,
-        getItem: (k) => (k in store ? JSON.stringify(store[k]) : null),
-        setItem: (k, v) => { store[k] = JSON.parse(v); },
-        removeItem: (k) => { delete store[k]; }
+        get length() { return Object.keys(ls).length; },
+        key: (i) => Object.keys(ls)[i] ?? null,
+        getItem: (k) => (k in ls ? JSON.stringify(ls[k]) : null),
+        setItem: (k, v) => { ls[k] = JSON.parse(v); },
+        removeItem: (k) => { delete ls[k]; }
     };
     const db = {
-        getSync: (k, d) => (k in store ? store[k] : d),
-        setSync: (k, v) => { store[k] = v; },
-        removeSync: (k) => { delete store[k]; },
-        get: async (k, d) => (k in store ? store[k] : d),
-        set: async (k, v) => { store[k] = v; }
+        memoryCache: cache,
+        // Lecture : memoryCache prioritaire puis localStorage (comme db.js)
+        getSync: (k, d) => (cache.has(k) ? cache.get(k) : (k in ls ? ls[k] : d)),
+        setSync: (k, v) => { ls[k] = v; },
+        removeSync: (k) => { delete ls[k]; cache.delete(k); },
+        get: async (k, d) => (cache.has(k) ? cache.get(k) : (k in ls ? ls[k] : d)),
+        set: async (k, v) => { ls[k] = v; }
     };
     const win = chargerScript('js/migrations.js', {
         db, localStorage: fauxLocalStorage, cle: (k) => 'h2026_' + k
     });
-    return { win, store };
+    // Vue fusionnée pour les assertions (les deux couches)
+    const store = new Proxy({}, {
+        get: (_, k) => (cache.has(k) ? cache.get(k) : ls[k]),
+        has: (_, k) => cache.has(k) || (k in ls)
+    });
+    return { win, store, ls, cache };
 }
 
 const EVT = (id, date, desc, cat) => ({ id, dateEvenement: date, description: desc, categorie: cat || 'institutionnel' });
@@ -65,6 +83,21 @@ describe('#374 — migrerJourneesSansCours (fusion des deux clés d\'événement
         expect(store.h2026_journeesSansCours.map(e => e.id)).toEqual(['A', 'B']);
         expect(win.migrerJourneesSansCours()).toBe(0); // plus rien à faire
         expect(store.h2026_journeesSansCours).toHaveLength(2);
+    });
+
+    it('CAS DU 5 AOÛT : clés résidentes en memoryCache SEULEMENT (éviction quota) → migrées quand même', () => {
+        // Sur le poste réel : localStorage ne contenait PAS les congés A2026
+        // (bascule silencieuse vers IndexedDB) ; l'énumération localStorage
+        // seule rendait la migration muette → « 0 déclarée », 77 jours, 16 sem.
+        const { win, store, ls } = creerEnvironnement(
+            {}, // localStorage VIDE
+            {
+                a2026_evenementsPrevus: [EVT('A', '2026-09-07', 'Fête du travail'), EVT('B', '2026-11-09', 'Journée Carrière')]
+            }
+        );
+        expect(win.migrerJourneesSansCours()).toBe(2);
+        expect(ls.a2026_journeesSansCours.map(e => e.id)).toEqual(['A', 'B']);
+        expect('a2026_evenementsPrevus' in store).toBe(false);
     });
 
     it('no-op sans anciennes clés : journeesSansCours existant reste INTACT', () => {
