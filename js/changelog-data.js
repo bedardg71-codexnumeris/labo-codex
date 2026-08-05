@@ -20,7 +20,8 @@
                 'Nouvelle nature « Férié (collège fermé) » : la fête du Travail n’est plus étiquetée « Institutionnel ».',
                 'Avertissements de cohérence sur les bornes du trimestre : une remise de notes avant la fin du trimestre ou une semaine à moitié saisie est signalée — rien n’est bloqué.',
                 'Les libellés de reprise disent maintenant « Reprise le [date] (horaire du lundi) » : fini l’ambiguïté sur le jour.',
-                'Les champs des semaines spéciales ne se chevauchent plus, et les deux compteurs de semaines/jours de cours affichent enfin le même calcul partout.'
+                'Les champs des semaines spéciales ne se chevauchent plus, et les deux compteurs de semaines/jours de cours affichent enfin le même calcul partout.',
+                'La numérotation des semaines suit la règle officielle du cégep : des paquets de 5 jours de cours effectifs, qui s’étirent autour des fériés et enjambent les pauses — elle ne peut plus reculer ni inventer une 17e semaine.'
             ]
         },
         {
