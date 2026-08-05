@@ -416,7 +416,11 @@ function obtenirIndicesCP(da) {
  */
 function calculerPerformancePAN(da) {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da && e.noteFinale);
+    // #399 (L7) : filtre aligné sur le motif standard du moteur — un 0 est une
+    // note VALIDE (le filtre truthy l'excluait du corpus : repli « 3 meilleures »
+    // rendait 0,70 au lieu de 0,467 sur [0, 80, 60]).
+    const evaluationsEleve = evaluations.filter(e =>
+        e.etudiantDA === da && e.noteFinale !== null && e.noteFinale !== undefined);
 
     if (evaluationsEleve.length === 0) {
         return 0;

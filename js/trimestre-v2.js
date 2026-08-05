@@ -114,15 +114,16 @@ function validerCadreTrimestre(cadre, evenements) {
         }
     });
 
-    // 5-6. Reprises : jour non ouvrable (silencieusement absente du calendrier
-    // généré — cas réel : reprise saisie un samedi) et reprise avant son congé.
+    // 5-6. Reprises : jour de fin de semaine (#399/L8 : désormais HONORÉE comme
+    // jour de cours — l'avertissement reste, en transparence, pour confirmer que
+    // c'est voulu) et reprise avant son congé.
     (Array.isArray(evenements) ? evenements : []).forEach(evt => {
         if (!evt || !evt.dateReprise) return;
         const [a, m, j] = String(evt.dateReprise).split('-').map(Number);
         if (a && m && j) {
             const jourSem = new Date(a, m - 1, j).getDay();
             if (jourSem === 0 || jourSem === 6) {
-                avertissements.push(`La reprise du ${evt.dateReprise} (« ${evt.description || 'sans description'} ») tombe une fin de semaine : elle n'apparaîtra pas au calendrier.`);
+                avertissements.push(`La reprise du ${evt.dateReprise} (« ${evt.description || 'sans description'} ») tombe une fin de semaine : elle sera comptée comme un jour de cours — vérifie que c'est voulu.`);
             }
         }
         if (evt.dateEvenement && evt.dateReprise <= evt.dateEvenement) {
