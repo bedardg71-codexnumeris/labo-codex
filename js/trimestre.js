@@ -116,57 +116,53 @@ function genererCalendrierComplet() {
     });
 
     // ============================================================
-    // PASSE 1 — Séquence des jours pédagogiques avec rôle effectif
+    // PASSE 1 — Numérotation « paquet de 5 » (#368, relais 4 août 2026)
     // ============================================================
-    // Pour chaque jour entre dateDebut et finCours, déterminer si c'est un jour
-    // pédagogique du collège et quel rôle (Lundi/Mardi/...) il joue.
-    // Le n-ième jour d'un rôle reçoit numeroSemaine = n (cf. plan §3.2 passe 2).
+    // Règle validée par Grégoire et vérifiée contre le calendrier officiel
+    // du cégep 2026-2027 : numeroSemaine = ⌈rang du jour de cours effectif ÷ 5⌉.
+    // Une semaine scolaire est un paquet de 5 jours de cours effectifs du
+    // COLLÈGE, pas une semaine calendaire : elle s'étire autour des fériés
+    // (A2026 : la semaine 3 absorbe le lundi 7 sept et finit le jeudi 10)
+    // et enjambe les pauses. Aucun jour de bascule présupposé — contrainte
+    // Grégoire : « il ne faut pas coder en dur ma pratique ».
     //
-    // Règles :
-    //  - Weekend / semaine planif / semaine examens → ignoré
-    //  - Férié institutionnel sans reprise → ignoré (jour pédagogique perdu)
-    //  - Férié institutionnel avec reprise → ignoré ici (la date de reprise prend le rôle)
-    //  - Férié personnel → inclus, rôle = jour calendaire (le collège n'a rien annulé)
-    //  - Jour de reprise institutionnelle → rôle = jour cible
-    //  - Jour normal → rôle = jour calendaire
-    const compteursRoles = { Lundi: 0, Mardi: 0, Mercredi: 0, Jeudi: 0, Vendredi: 0 };
+    // Compte comme jour effectif : tout jour entre dateDebut et finCours qui
+    // n'est ni weekend, ni semaine planification/examens, ni congé
+    // institutionnel ou férié (jour pédagogique perdu pour le collège).
+    // Un congé PERSONNEL compte (le collège n'a rien annulé) ; un jour de
+    // reprise est un jour ouvrable ordinaire, compté à sa propre date.
+    //
+    // L'ancien comptage PAR RÔLE (n-ième lundi = semaine n) reculait dès
+    // qu'un congé décalait un rôle (constat A2026 : ven 13 nov = sem 13 puis
+    // lun 16 nov = sem 12, maxSemaine 17 au lieu de 15) — RETIRÉ.
+
+    // Diviseur = nombre de jours OUVRABLES d'une semaine (lun-ven, le
+    // complément exact d'estWeekend) — hypothèse documentée, rendue visible
+    // par le golden master #368 (la changer le fait rougir).
+    const JOURS_OUVRABLES_PAR_SEMAINE = 5;
     const numSemParDate = {};
-    const roleParDate = {};
 
     let curseur = creerDateLocale(dateDebut);
     const finCoursDate = creerDateLocale(finCours);
+    let rangJourEffectif = 0;
     let limitePasse1 = 0;
     while (curseur <= finCoursDate && limitePasse1 < 1000) {
         limitePasse1++;
         const dateStr = formaterDateTrimestreYMD(curseur);
-        const jourCalendaire = obtenirNomJour(curseur);
 
-        let roleEffectif = null;
-
+        let compte = true;
         if (estWeekend(curseur)) {
-            // ignoré
+            compte = false;
         } else if (estDansPlage(dateStr, cadre.semainePlanificationDebut, cadre.semainePlanificationFin)
                 || estDansPlage(dateStr, cadre.semaineExamensDebut, cadre.semaineExamensFin)) {
-            // ignoré
-        } else if (mapConges[dateStr]) {
-            const evt = mapConges[dateStr];
-            const cat = evt.categorie || 'institutionnel';
-            if (cat === 'personnel') {
-                roleEffectif = jourCalendaire;
-            }
-            // institutionnel : ignoré (la reprise éventuelle prendra le rôle ailleurs)
-        } else if (mapReprises[dateStr]) {
-            const evt = mapReprises[dateStr];
-            const jourRemplace = (evt.horaireReprise || '').replace('Horaire du ', '');
-            roleEffectif = jourRemplace.charAt(0).toUpperCase() + jourRemplace.slice(1);
-        } else {
-            roleEffectif = jourCalendaire;
+            compte = false;
+        } else if (mapConges[dateStr] && (mapConges[dateStr].categorie || 'institutionnel') !== 'personnel') {
+            compte = false;
         }
 
-        if (roleEffectif && Object.prototype.hasOwnProperty.call(compteursRoles, roleEffectif)) {
-            compteursRoles[roleEffectif]++;
-            numSemParDate[dateStr] = compteursRoles[roleEffectif];
-            roleParDate[dateStr] = roleEffectif;
+        if (compte) {
+            rangJourEffectif++;
+            numSemParDate[dateStr] = Math.ceil(rangJourEffectif / JOURS_OUVRABLES_PAR_SEMAINE);
         }
 
         curseur.setDate(curseur.getDate() + 1);

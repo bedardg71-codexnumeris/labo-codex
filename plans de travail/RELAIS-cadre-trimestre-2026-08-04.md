@@ -152,7 +152,24 @@ exactement la semaine du 12 octobre.
 
 ## #368 🟡 Numérotation des semaines : formaliser la règle du « paquet de 5 »
 
-- [ ] 🟡 **#368** La numérotation des semaines scolaires est incohérente : elle **recule**.
+> **✅ CLOS le 5 août 2026 (release 1.31.1).** Passe 1 de `genererCalendrierComplet`
+> réécrite : numeroSemaine = ⌈rang du jour effectif ÷ 5⌉ (constante nommée
+> JOURS_OUVRABLES_PAR_SEMAINE, hypothèse documentée). Le comptage PAR RÔLE est retiré.
+> Découverte du break-test : sur des données propres où chaque congé est repris dans le
+> MÊME rôle, l'ancien comptage coïncidait avec l'officiel — le défaut était LATENT et ne
+> mordait qu'avec une borne absente (le 17/80 observé) ou un congé jamais repris (grève,
+> le cas réel témoigné). Corollaire prouvé : la numérotation du collège est INDÉPENDANTE
+> des reprises (une reprise réutilise un jour déjà compté). La capture d'octobre de
+> Grégoire (« Sem. 7 » ven 2 → jeu 8) était donc DÉJÀ conforme à l'officiel.
+> Sentinelles : golden master 75 jours (7 paquets-ANCRES vérifiés au PDF par Cowork le
+> 4 août = 35 jours ; 8 paquets dérivés par la règle, cohérents avec la preuve 82−7=75 —
+> ⚠ COMMITTER LE PDF pour la vérification intégrale, puis lever la note dans le test) +
+> monotonie (le recul 13→16 nov nommément) + grève SANS reprise (ROUGE sur l'ancien
+> algo) + congé personnel compté. Le diviseur 5 est rendu visible (15 paquets de 5
+> exigés). Échéances d'artefacts : AUCUN déplacement automatique (décision Grégoire, cf.
+> #375).
+
+- [x] 🟡 **#368** La numérotation des semaines scolaires est incohérente : elle **recule**.
       Sur A2026, elle atteint 17 au lieu de 15.
 
 - **Constat (données A2026 réelles)** : les `numeroSemaine` observés ne sont pas monotones.
