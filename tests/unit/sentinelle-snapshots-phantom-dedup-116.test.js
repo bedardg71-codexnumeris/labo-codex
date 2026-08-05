@@ -69,7 +69,7 @@ function creerSandbox() {
         set: async (k, v) => { stores.set(k, v); }
     };
 
-    return chargerScript('js/snapshots.js', {
+    const win = chargerScript('js/snapshots.js', {
         db,
         cle: (k) => 'h2026_' + k,
         obtenirCalendrierComplet: () => calendrier,
@@ -79,6 +79,10 @@ function creerSandbox() {
         obtenirDonneesSelonMode: () => [],
         obtenirEcheanceEffective: () => ({ date: null, assignee: false })
     });
+    // #398 : les sites « aujourd'hui » consultent la SSOT window.dateLocaleYMD
+    // (changement de harnais seulement — mêmes dates qu'avant via isoDate).
+    win.dateLocaleYMD = () => AUJOURDHUI;
+    return win;
 }
 
 beforeEach(() => {

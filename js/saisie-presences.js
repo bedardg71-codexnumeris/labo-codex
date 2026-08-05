@@ -70,7 +70,7 @@ function initialiserModuleSaisiePresences() {
 
     // Restaurer la date (seulement si valide et pas dans le futur)
     if (dateInput && dateSauvegardee) {
-        const aujourdhui = new Date().toISOString().split('T')[0];
+        const aujourdhui = window.dateLocaleYMD(); // #398 : date LOCALE
         if (dateSauvegardee <= aujourdhui) {
             dateInput.value = dateSauvegardee;
         }

@@ -98,7 +98,7 @@ function calculerStatistiquesPresences(etudiants, indicesAssiduite, presences) {
     // Aligné avec indices.js qui utilise la même source pour le calcul d'assiduité.
     const seancesCompletes = typeof obtenirSeancesCompletes === 'function'
         ? obtenirSeancesCompletes() : {};
-    const aujourdhui = new Date().toISOString().split('T')[0];
+    const aujourdhui = window.dateLocaleYMD(); // #398 : date LOCALE
     const toutesDatesSessions = Object.keys(seancesCompletes);
     const totalSeances = toutesDatesSessions.length;
     const seancesCompletees = toutesDatesSessions.filter(d => d <= aujourdhui).length;
@@ -162,7 +162,7 @@ function calculerHeuresManquees(presences, etudiants) {
  */
 function calculerSeancesCompletees(presences) {
     const datesUniques = new Set();
-    const aujourdhui = new Date().toISOString().split('T')[0];
+    const aujourdhui = window.dateLocaleYMD(); // #398 : date LOCALE
     const calendrier = db.getSync(cle('calendrierComplet'), {});
 
     // ✅ CORRIGÉ (22 janvier 2026) : Vérifier que presences est un tableau
