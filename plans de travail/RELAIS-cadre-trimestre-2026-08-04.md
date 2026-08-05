@@ -410,6 +410,16 @@ exactement la semaine du 12 octobre.
 > dédoublonnage break-testée ROUGE) + Playwright bout-en-bout (migration → carte
 > unique → férié → générateur). 2 sentinelles historiques verrouillant l'ancien
 > markup mises à jour en connaissance de cause (#306, #118).
+>
+> **⚠ CORRECTIF TERRAIN le soir même (1.31.2)** : sur le poste réel de Grégoire, la
+> migration était MUETTE (« 0 déclarée », 77 jours/16 sem.) — ses congés A2026 vivaient
+> en memoryCache/IndexedDB SEULEMENT (bascule silencieuse sur quota, db.js), et
+> l'énumération ne couvrait que localStorage. Données intactes, jamais en danger
+> (removeSync ne touchait pas les clés ratées). Fix : énumérer localStorage ∪
+> db.memoryCache.keys(). Sentinelle « CAS DU 5 AOÛT » ajoutée, ROUGE sur l'ancienne
+> migration ; le stub de test reproduit désormais les DEUX couches du stockage hybride
+> — le premier stub confondait les couches et validait sa propre prémisse (même leçon
+> que planification_seances le 4 août).
 
 - [x] 🟢 **#374** « Congés fériés et activités institutionnelles » et « Événements imprévus »
       partagent **exactement** le même formulaire. Deux clés, deux `<select>` identiques, deux

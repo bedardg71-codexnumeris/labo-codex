@@ -873,13 +873,18 @@ function migrerCleProductionsPedagogiques() {
  */
 function migrerJourneesSansCours() {
     let nbMigres = 0;
-    // Énumération directe : les listes d'événements sont < 200 Ko, donc en
-    // localStorage (jamais côté IndexedDB du stockage hybride).
-    const clesAMigrer = [];
+    // Énumérer les DEUX couches du stockage hybride. Une clé même petite
+    // peut vivre UNIQUEMENT dans memoryCache+IndexedDB (bascule silencieuse
+    // sur quota localStorage, cf. db.js en-tête) — constaté le 5 août sur le
+    // poste réel de Grégoire : localStorage seul ratait ses 2 congés A2026.
+    const nomsCles = new Set();
     for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (/(^|_)evenements(Prevus|Imprevus)$/.test(k)) clesAMigrer.push(k);
+        nomsCles.add(localStorage.key(i));
     }
+    if (typeof db !== 'undefined' && db.memoryCache && typeof db.memoryCache.keys === 'function') {
+        for (const k of db.memoryCache.keys()) nomsCles.add(k);
+    }
+    const clesAMigrer = [...nomsCles].filter(k => /(^|_)evenements(Prevus|Imprevus)$/.test(k));
     if (clesAMigrer.length === 0) return 0;
 
     const parPrefixe = {};

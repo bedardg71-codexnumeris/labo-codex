@@ -100,8 +100,8 @@ function definirModeExpertFromEl(el) {
 // === CONFIGURATION ===
 // VERSION_MAJEURE et BUILD_ID sont lus depuis version.json au chargement (source unique)
 // Les valeurs ici servent de fallback si version.json n'est pas disponible
-let VERSION_MAJEURE = '1.31.1';
-let BUILD_ID = '0804-2137';
+let VERSION_MAJEURE = '1.31.2';
+let BUILD_ID = '0804-2220';
 // Snapshot du build contenu dans CE fichier script (pour détecter les scripts périmés)
 const _SCRIPT_BUILD = BUILD_ID;
 
