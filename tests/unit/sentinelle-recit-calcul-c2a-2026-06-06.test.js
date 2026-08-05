@@ -67,7 +67,11 @@ beforeAll(() => {
         obtenirPratiqueParId: () => ({ obtenirCode: () => 'STD' }),
         obtenirPratiqueActiveGroupeCours: () => PRAT
     };
-    win = chargerScript('js/profil-etudiant-actions.js', globaux);
+    // #394 : les rôles des productions STD (terminale, pool, récence) vivent en
+    // SSOT dans pratique-registre.js — le charger d'abord sur le même window.
+    // Changement de HARNAIS seulement : les assertions du récit sont inchangées.
+    win = chargerScript('js/pratiques/pratique-registre.js', { db: globaux.db, cle: globaux.cle });
+    chargerScript('js/profil-etudiant-actions.js', globaux, win);
     details = win.calculerDetailsNoteFinale(DA, PRAT);
 });
 
@@ -122,14 +126,16 @@ describe('C2-a · récit de calcul STD (traçabilité additive)', () => {
     });
 
     it('cas non calculable → recit null (forme cohérente)', () => {
-        const win2 = chargerScript('js/profil-etudiant-actions.js', {
+        const globaux2 = {
             db: { getSync: (k, d) => (d !== undefined ? d : null), setSync: () => {}, get: async () => null, set: async () => {} },
             cle: (k) => k,
             obtenirDonneesSelonMode: () => [],
             obtenirConfigPratiqueActive: () => null, // pas de config → erreur
             obtenirPratiqueParId: () => ({ obtenirCode: () => 'STD' }),
             obtenirPratiqueActiveGroupeCours: () => PRAT
-        });
+        };
+        const win2 = chargerScript('js/pratiques/pratique-registre.js', { db: globaux2.db, cle: globaux2.cle });
+        chargerScript('js/profil-etudiant-actions.js', globaux2, win2);
         const d = win2.calculerDetailsNoteFinale(DA, PRAT);
         expect(d.erreur).toBeTruthy();
         expect(d.recit).toBeNull();

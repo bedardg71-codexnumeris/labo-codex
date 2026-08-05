@@ -135,6 +135,8 @@ function calculerEtudiantsPrioritaires() {
             A: indices.A,
             C: indices.C,
             P: indices.P,
+            // #394 (règle 4) : P stocké « non constructible » → l'affichage montre « — »
+            noteConstructible: indices.noteConstructible !== false,
             M: M,
             scoreMulti: scoreMulti,
             suivi: suivi
@@ -357,7 +359,8 @@ function genererPanneauSuiviEtudiants() {
         var badges = '';
         if (filtrePrio && enrichi) {
             badges = '<span class="etudiant-prioritaire-indices">'
-                + _badgeIndiceSuivi('A', enrichi.A) + _badgeIndiceSuivi('C', enrichi.C) + _badgeIndiceSuivi('P', enrichi.P)
+                + _badgeIndiceSuivi('A', enrichi.A) + _badgeIndiceSuivi('C', enrichi.C)
+                + _badgeIndiceSuivi('P', enrichi.noteConstructible === false ? null : enrichi.P)
                 + '</span>';
         }
 
@@ -370,8 +373,12 @@ function genererPanneauSuiviEtudiants() {
     }).join('');
 }
 
-/** Helper badge pour le panneau suivi unifié */
+/** Helper badge pour le panneau suivi unifié.
+ *  #394 : valeur null = note non constructible → « — » (jamais un 0 trompeur). */
 function _badgeIndiceSuivi(label, valeur) {
+    if (valeur === null || valeur === undefined) {
+        return '<span class="prioritaire-indice" title="Note non constructible avec la configuration actuelle">' + label + ' —</span>';
+    }
     var cls = 'prioritaire-indice';
     if (valeur < 65) cls += ' prioritaire-indice-critique';
     else if (valeur < 75) cls += ' prioritaire-indice-attention';
@@ -1547,7 +1554,9 @@ function afficherMetriquesGlobales(etudiants) {
         nom: e.nom,
         prenom: e.prenom,
         valeur: e.sommatif.performance,
-        sansEvaluation: e.sommatif.completion === 0 && e.sommatif.performance === 0
+        sansEvaluation: e.sommatif.completion === 0 && e.sommatif.performance === 0,
+        // #394 (règle 4) : P stocké « non constructible » → point distinct, pas un 0
+        nonConstructible: e.sommatif.noteConstructible === false
     }));
 
     const etudiantsPAN_P = etudiantsPourP_PAN.map(e => ({
@@ -1555,7 +1564,8 @@ function afficherMetriquesGlobales(etudiants) {
         nom: e.nom,
         prenom: e.prenom,
         valeur: e.alternatif.performance,
-        sansEvaluation: e.alternatif.completion === 0 && e.alternatif.performance === 0
+        sansEvaluation: e.alternatif.completion === 0 && e.alternatif.performance === 0,
+        nonConstructible: e.alternatif.noteConstructible === false
     }));
 
     // 🆕 BETA 91: Calculer les corrélations A-P et C-P pour interprétation
@@ -1699,7 +1709,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
     let moyennePAN = null;
 
     if (afficherSom && etudiantsSOM.length > 0) {
-        const etudiantsAvecEvalSOM = etudiantsSOM.filter(e => !e.sansEvaluation);
+        const etudiantsAvecEvalSOM = etudiantsSOM.filter(e => !e.sansEvaluation && !e.nonConstructible);
         if (etudiantsAvecEvalSOM.length > 0) {
             const somme = etudiantsAvecEvalSOM.reduce((acc, e) => acc + e.valeur, 0);
             moyenneSOM = Math.round((somme / etudiantsAvecEvalSOM.length) * 100);
@@ -1707,7 +1717,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
     }
 
     if (afficherPan && etudiantsPAN.length > 0) {
-        const etudiantsAvecEvalPAN = etudiantsPAN.filter(e => !e.sansEvaluation);
+        const etudiantsAvecEvalPAN = etudiantsPAN.filter(e => !e.sansEvaluation && !e.nonConstructible);
         if (etudiantsAvecEvalPAN.length > 0) {
             const somme = etudiantsAvecEvalPAN.reduce((acc, e) => acc + e.valeur, 0);
             moyennePAN = Math.round((somme / etudiantsAvecEvalPAN.length) * 100);
@@ -1876,13 +1886,13 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 const scaleDown = (1 - scaleVar).toFixed(2);
                 const duration = (8 - (ampNum - 8) * 0.4).toFixed(1); // 8s à 4s selon amplitude
                 // 🆕 BETA 98.9: Traitement visuel distinct pour élèves sans évaluation
-                const classesSansEval = e.sansEvaluation ? ' barre-etudiant-sans-eval' : '';
-                const tooltipValeur = e.sansEvaluation ? `${accordTermeProduction('aucun', 1)} ${obtenirTermeProduction('singulier')} ${accordTermeProduction('evalue', 1)}` : `${Math.round(e.valeur * 100)}%`;
+                const classesSansEval = (e.sansEvaluation || e.nonConstructible) ? ' barre-etudiant-sans-eval' : '';
+                const tooltipValeur = e.nonConstructible ? 'note non constructible' : (e.sansEvaluation ? `${accordTermeProduction('aucun', 1)} ${obtenirTermeProduction('singulier')} ${accordTermeProduction('evalue', 1)}` : `${Math.round(e.valeur * 100)}%`);
                                 lignesSOM += `<div class="barre-etudiant barre-etudiant-som${classesSansEval}"
                     style="left: ${positionFinale}%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --jitterV: ${jitterV.toFixed(1)}px; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown}; --duration: ${duration}s;"
                     data-da="${e.da}"
                     data-nom="${echapperHtml(nomAffiche)}"
-                    data-valeur="${e.sansEvaluation ? '' : Math.round(e.valeur * 100) + '%'}"
+                    data-valeur="${(e.sansEvaluation || e.nonConstructible) ? '' : Math.round(e.valeur * 100) + '%'}"
                     title="${echapperHtml(nomAffiche)} : ${tooltipValeur}"></div>`;
             });
         });
@@ -1935,13 +1945,13 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 const scaleDown = (1 - scaleVar).toFixed(2);
                 const duration = (8 - (ampNum - 8) * 0.4).toFixed(1); // 8s à 4s selon amplitude
                 // 🆕 BETA 98.9: Traitement visuel distinct pour élèves sans évaluation
-                const classesSansEval = e.sansEvaluation ? ' barre-etudiant-sans-eval' : '';
-                const tooltipValeur = e.sansEvaluation ? `${accordTermeProduction('aucun', 1)} ${obtenirTermeProduction('singulier')} ${accordTermeProduction('evalue', 1)}` : `${Math.round(e.valeur * 100)}%`;
+                const classesSansEval = (e.sansEvaluation || e.nonConstructible) ? ' barre-etudiant-sans-eval' : '';
+                const tooltipValeur = e.nonConstructible ? 'note non constructible' : (e.sansEvaluation ? `${accordTermeProduction('aucun', 1)} ${obtenirTermeProduction('singulier')} ${accordTermeProduction('evalue', 1)}` : `${Math.round(e.valeur * 100)}%`);
                                 lignesPAN += `<div class="barre-etudiant barre-etudiant-std${classesSansEval}"
                     style="left: ${positionFinale}%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --jitterV: ${jitterV.toFixed(1)}px; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown}; --duration: ${duration}s;"
                     data-da="${e.da}"
                     data-nom="${echapperHtml(nomAffiche)}"
-                    data-valeur="${e.sansEvaluation ? '' : Math.round(e.valeur * 100) + '%'}"
+                    data-valeur="${(e.sansEvaluation || e.nonConstructible) ? '' : Math.round(e.valeur * 100) + '%'}"
                     title="${echapperHtml(nomAffiche)} : ${tooltipValeur}"></div>`;
             });
         });
@@ -2006,7 +2016,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
         let titreInfo = '';
         if (type === 'P') {
             const etudiantsRef = afficherPan ? etudiantsPAN : etudiantsSOM;
-            const nbAvecEval = etudiantsRef.filter(e => !e.sansEvaluation).length;
+            const nbAvecEval = etudiantsRef.filter(e => !e.sansEvaluation && !e.nonConstructible).length;
             const nbSans = etudiantsRef.length - nbAvecEval;
             titreInfo = ` title="Moyenne sur ${nbAvecEval} étudiant·e·s ayant au moins 1 évaluation (${nbSans} exclu·e·s). La liste des individus inclut tous les étudiant·e·s."`;
         }

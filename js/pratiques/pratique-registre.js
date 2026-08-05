@@ -678,8 +678,72 @@ function obtenirTypePratiqueActive(contexte) {
     }
 }
 
+/* ===============================
+   #394 — RÔLES DES PRODUCTIONS DANS LE CALCUL STD (SSOT)
+   Les DEUX systèmes de calcul (chemin riche calculerDetailsNoteFinale et
+   instance PratiquePANStandards, snapshots compris) DOIVENT passer par ces
+   trois fonctions. Décision D1 (Grégoire, 5 août 2026) :
+   - une production joue le rôle de terminale ssi type === 'terminale'
+     (déclaration explicite au formulaire Productions, JAMAIS une inférence
+     par pondération) ;
+   - le pool = artefacts déclarés, sinon productions non pondérées (repli) —
+     le conteneur « portfolio » est optionnel ;
+   - la récence = numéro de production décroissant (correctif 24 jan 2026),
+     pas la date d'évaluation.
+   =============================== */
+
+/**
+ * Identifie LA production terminale d'un corpus : type === 'terminale' strict.
+ * Pas de terminale typée → null (rien n'en tient lieu, aucun fallback pondéré).
+ */
+function identifierProductionTerminale(productions) {
+    if (!Array.isArray(productions)) return null;
+    return productions.find(p => p && p.type === 'terminale') || null;
+}
+
+/**
+ * Ids du pool d'artefacts STD : les artefacts déclarés (type 'artefact-portfolio'),
+ * sinon repli sur les productions non pondérées (hors conteneur et terminale).
+ */
+function obtenirArtefactsIdsPoolStd(productions, terminalId) {
+    if (!Array.isArray(productions)) return [];
+    let ids = productions
+        .filter(p => p && p.type === 'artefact-portfolio' && p.id !== terminalId)
+        .map(p => p.id);
+    if (ids.length === 0) {
+        ids = productions
+            .filter(p =>
+                p &&
+                p.type !== 'portfolio' &&
+                p.type !== 'terminale' &&
+                p.id !== terminalId &&
+                (p.ponderation === 0 || p.ponderation === undefined || p.ponderation === null)
+            )
+            .map(p => p.id);
+    }
+    return ids;
+}
+
+/**
+ * Comparateur de récence des évaluations (ordre décroissant) : par NUMÉRO de
+ * production — une reprise évaluée tard reste « ancienne » si sa production
+ * l'est (L9 : la date d'évaluation divergeait entre les deux systèmes).
+ */
+function creerComparateurRecenceStd(productions) {
+    const liste = Array.isArray(productions) ? productions : [];
+    const numero = (ev) => {
+        const prod = liste.find(p => p && p.id === ev.productionId);
+        return prod?.numero || parseInt(String(ev.productionId).match(/(\d+)$/)?.[1]) || 0;
+    };
+    return (a, b) => numero(b) - numero(a);
+}
+
 // Fonctions principales
 window.enregistrerPratique = enregistrerPratique;
+// #394 — rôles des productions STD (SSOT des deux systèmes de calcul)
+window.identifierProductionTerminale = identifierProductionTerminale;
+window.obtenirArtefactsIdsPoolStd = obtenirArtefactsIdsPoolStd;
+window.creerComparateurRecenceStd = creerComparateurRecenceStd;
 window.obtenirPratiqueActive = obtenirPratiqueActive;
 window.obtenirIdPratiqueActive = obtenirIdPratiqueActive;
 window.obtenirTypePratiqueActive = obtenirTypePratiqueActive;

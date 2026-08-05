@@ -491,12 +491,17 @@ function calculerTousLesIndices(da) {
     // INDICES C, P : Lire depuis indicesCP (Single Source of Truth)
     let C = 0;
     let P = 0;
+    // #394 (règle 4) : une note stockée « non constructible » se propage aux
+    // affichages (qui montrent « — » au lieu d'un 0 trompeur). Champ additif :
+    // absent (entrées antérieures) ⇒ constructible.
+    let noteConstructible = true;
 
     if (typeof obtenirIndicesCP === 'function') {
         const indicesCP = obtenirIndicesCP(da);
         if (indicesCP) {
             C = (indicesCP.C || 0) / 100;
             P = (indicesCP.P || 0) / 100;
+            noteConstructible = indicesCP.noteConstructible !== false;
         } else {
             // Fallback : calculer à la volée si pas encore généré
             console.warn(`⚠️ indicesCP non trouvé pour ${da} (${pratique}) - Calcul à la volée`);
@@ -524,7 +529,8 @@ function calculerTousLesIndices(da) {
         C: Math.round(C * 100),
         P: Math.round(P * 100),
         M: parseFloat(M.toFixed(3)),
-        pratique: pratique
+        pratique: pratique,
+        noteConstructible: noteConstructible
     };
 }
 
@@ -564,7 +570,9 @@ function calculerIndicesEtudiant(da, _cacheIndicesA, _cacheIndicesCP) {
         completion: indicesSOM ? indicesSOM.C / 100 : 0,
         performance: indicesSOM ? indicesSOM.P / 100 : 0,
         nombreSeances: nombreSeances,
-        nombreEvaluations: nombreEvals
+        nombreEvaluations: nombreEvals,
+        // #394 (règle 4) : additif — absent sur les entrées antérieures ⇒ constructible
+        noteConstructible: !indicesCPEtudiant || indicesCPEtudiant.noteConstructible !== false
     };
 
     // Rétrocompat : alternatif pointe vers sommatif

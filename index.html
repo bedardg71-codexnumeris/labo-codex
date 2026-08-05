@@ -4706,6 +4706,11 @@
                                 </button>
                             </div>
 
+                            <!-- #394 (patron #369) : avertissements de cohérence STD NON bloquants
+                                 (production pondérée non participante, pondération par complément,
+                                 terminale legacy à typer). Masqués quand tout est cohérent. -->
+                            <div id="zone-avertissements-productions" class="alerte alerte-attention u-hide u-mb-15" style="text-align: left;"></div>
+
                             <!-- Message d'accueil initial -->
                             <div class="zone-principale-accueil" id="accueilProductions">
                                 <p>Sélectionne une production dans la barre latérale ou crée une nouvelle production</p>
@@ -14611,7 +14616,7 @@
     <script src="js/donnees-v2.js?v=20260629a"></script> <!-- Refonte nav SP5 : afficherSection calendrier -->
     <script src="js/etudiants.js?v=20260629a"></script>
     <script src="js/productions-bibliotheque.js?v=2026050617"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/productions.js?v=20260629a"></script> <!-- Beta 99.41 b0511-1215 : #216 data-tooltip sur dates échéance multi-groupe -->
+    <script src="js/productions.js?v=20260805a"></script> <!-- Beta 99.41 b0511-1215 : #216 data-tooltip sur dates échéance multi-groupe -->
     <script src="js/productions-import-export.js?v=20260629a"></script> <!-- Refactor étape 3 (16 mai 2026) : extrait de productions.js (lignes 2630-3276) -->
     <script src="js/productions-liste.js?v=20260516b"></script> <!-- Refactor étape 3 (16 mai 2026) : sidebar + CRUD utilisateur extraits de productions.js -->
     <script src="js/productions-bibliotheque-ui.js?v=20260626a"></script> <!-- Fix preview « Voir les productions » : display:none inline → classe u-hide -->
@@ -14633,12 +14638,12 @@
     <script src="js/pratiques/denotation-jugements.js?v=2026060801"></script>
     <!-- IMPORTANT: pratique-configurable.js doit être chargé EN PREMIER car pratique-registre.js l'utilise -->
     <script src="js/pratiques/pratique-configurable.js?v=2025122901"></script>
-    <script src="js/pratiques/pratique-registre.js?v=2026061113"></script>
+    <script src="js/pratiques/pratique-registre.js?v=20260805a"></script>
     <!-- migration-pratiques.js retiré (Lot 3 #328, 11 juin 2026) : migration des ids
          legacy sur la clé nue pré-namespacing, morte sur tout appareil courant ;
          normaliserIdPratique résout de toute façon les ids legacy à la volée -->
     <script src="js/pratiques/pratique-test.js?v=2025120705"></script>
-    <script src="js/pratiques/pratique-pan-standards.js?v=2026061101"></script>
+    <script src="js/pratiques/pratique-pan-standards.js?v=20260805a"></script>
     <script src="js/pratiques/pratique-sommative.js?v=2025121003"></script>
     <script src="js/pratiques/pratique-pan-specifications.js?v=2025112600"></script>
     <script src="js/pratiques/config-francois-chimie.js?v=2025112600"></script>
@@ -14668,18 +14673,18 @@
     <script src="js/wizard-pratique-v2.js?v=2026062201"></script> <!-- #345 (22 juin) : lien « Ouvrir le comparateur » du récap gaté -->
     <script src="js/objectifs.js?v=2026061101"></script> <!-- Beta 99.39 b0509-0719 : #262 Phase 2 + precisionDate:minute -->
 
-    <script src="js/portfolio.js?v=2026062802"></script> <!-- #326 (28 juin) : T1 simulerIndices — note STD non bâtie = « non constructible » (plus de 0 trompeur du repli) -->
+    <script src="js/portfolio.js?v=20260805a"></script> <!-- #326 (28 juin) : T1 simulerIndices — note STD non bâtie = « non constructible » (plus de 0 trompeur du repli) -->
     <script src="js/saisie-presences.js?v=2026061101"></script> <!-- Refonte nav SP5 : naviguerVers calendrier -->
-    <script src="js/indices.js?v=2026061103"></script>
+    <script src="js/indices.js?v=20260805a"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
-    <script src="js/tableau-bord-apercu.js?v=20260629a"></script> <!-- Refonte nav SP5 : faux ami CSS class préservée -->
+    <script src="js/tableau-bord-apercu.js?v=20260805a"></script> <!-- Refonte nav SP5 : faux ami CSS class préservée -->
     <script src="js/profil-etudiant-helpers.js?v=2026061103"></script> <!-- Refactor session A : zone helpers extraite (16 fonctions, ~590 LOC) -->
     <script src="js/profil-etudiant-calculs.js?v=2026061103"></script> <!-- Refactor session A : zone calculs pédagogiques extraite (14 fonctions, ~1500 LOC) -->
     <script src="js/profil-etudiant-rapport.js?v=20260518a"></script> <!-- Refactor session A : zone rapport API extraite (7 fonctions, ~390 LOC) -->
     <script src="js/profil-etudiant-diagnostics.js?v=20260518a"></script> <!-- Refactor session B : zone diagnostics SRPNF/Critères + blocs RLO + onglets (11 fonctions, ~830 LOC) -->
     <script src="js/profil-etudiant-confidentiel.js?v=20260518a"></script> <!-- Refactor session B : modal PII confidentiel + services adaptés + sous-catégories médicales (8 fonctions, ~300 LOC) -->
-    <script src="js/profil-etudiant-actions.js?v=2026061103"></script> <!-- Refactor session C : actions cascade consulterEvaluation + calculerDetailsNoteFinale + jetons + patterns groupe (8 fonctions, ~560 LOC) -->
+    <script src="js/profil-etudiant-actions.js?v=20260805a"></script> <!-- Refactor session C : actions cascade consulterEvaluation + calculerDetailsNoteFinale + jetons + patterns groupe (8 fonctions, ~560 LOC) -->
     <script src="js/profil-etudiant-sections-affichage.js?v=20260629a"></script> <!-- Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
     <script src="js/presences-apercu.js?v=2025121017"></script>
     <script src="js/boite-outils.js?v=20260512b"></script> <!-- Beta 96.1 : Boîte à outils pédagogiques -->

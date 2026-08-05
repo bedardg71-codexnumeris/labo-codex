@@ -131,11 +131,12 @@ function chargerPortfolioEleveDetail(da) {
         const selectionsPortfolios = db.getSync(cle('portfoliosEleves'), {});
         const selectionEleve = selectionsPortfolios[da]?.[portfolio.id] || { artefactsRetenus: [] };
 
-        // ✅ Configuration depuis modalitesEvaluation (avec fallback sur portfolio.regles)
-        const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
-        const configPortfolio = modalites.configPAN?.portfolio || {};
+        // #394 (L10) : configuration depuis pratiquesConfigurables (source canonique
+        // G2-a, la même que le calcul) — plus de lecture du snapshot configPAN qui
+        // driftait ; fallback conservé sur portfolio.regles (ancien format productions).
+        const configPortfolio = (typeof obtenirConfigPratiqueActive === 'function'
+            ? obtenirConfigPratiqueActive()?.portfolio : null) || {};
 
-        // Lire depuis nouvelle source (Phase 3), sinon ancienne source (rétrocompatibilité)
         const nombreTotal = configPortfolio.nombreTotal || portfolio.regles?.nombreTotal || artefactsPortfolio.length;
         const minimumRequis = configPortfolio.minimumCompletion || portfolio.regles?.minimumCompletion || 7;
         const nombreARetenir = configPortfolio.nombreARetenir || portfolio.regles?.nombreARetenir || 3;
@@ -632,29 +633,43 @@ function calculerEtStockerIndicesCP() {
         const C_decimal = pratique.calculerCompletion(da);
 
         // Calculer P via calculerDetailsNoteFinale (si disponible)
-        // pour garantir la cohérence avec la note affichée dans le profil
+        // pour garantir la cohérence avec la note affichée dans le profil.
+        // #394 (L3) : MÊME discrimination par famille que _simulerIndicesInterne
+        // (#326 T1) — une STD dont le chemin riche échoue est NON CONSTRUCTIBLE ;
+        // le repli calculerPerformance ne masque plus l'échec par un nombre. Le
+        // repli reste LÉGITIME pour les familles sans note portfolio riche
+        // (SOM/SPE/DEN → calculerDetailsNoteFinale rend null).
+        const estStd = !!(typeof pratique.obtenirCode === 'function' && pratique.obtenirCode() === 'STD');
         let P_decimal = null;
+        let cheminRicheStdAEchoue = false;
         if (typeof calculerDetailsNoteFinale === 'function') {
             const detailsNote = calculerDetailsNoteFinale(da);
-            if (detailsNote && detailsNote.noteFinale !== null) {
+            if (detailsNote && detailsNote.noteFinale !== null && detailsNote.noteFinale !== undefined) {
                 P_decimal = detailsNote.noteFinale / 100; // Convertir % → 0-1
+            } else if (detailsNote && estStd) {
+                cheminRicheStdAEchoue = true;
             }
         }
 
-        // Fallback : utiliser la pratique si calculerDetailsNoteFinale n'est pas disponible
-        if (P_decimal === null) {
+        if (P_decimal === null && !cheminRicheStdAEchoue) {
             P_decimal = pratique.calculerPerformance(da);
         }
 
+        // #394 (D1 règle 4) : encodage STOCKÉ de « non constructible » — champ
+        // ADDITIF, miroir exact de simulerIndices. Les lecteurs historiques de .P
+        // continuent de lire un nombre (0) ; les affichages montrent « — ».
+        const noteConstructible = (typeof P_decimal === 'number' && isFinite(P_decimal));
+
         // Convertir 0-1 → 0-100
         const C = C_decimal !== null ? Math.round(C_decimal * 100) : 0;
-        const P = P_decimal !== null ? Math.round(P_decimal * 100) : 0;
+        const P = noteConstructible ? Math.round(P_decimal * 100) : 0;
 
         const entreeActuelle = {
             date: dateCalcul,
             pratique: pratiqueId,
             C: C,
             P: P,
+            noteConstructible: noteConstructible,
             details: {
                 calculViaPratique: true
             }
@@ -673,7 +688,8 @@ function calculerEtStockerIndicesCP() {
         const aDiffere = !dernierHistorique ||
             dernierHistorique.pratique !== pratiqueId ||
             dernierHistorique.C !== C ||
-            dernierHistorique.P !== P;
+            dernierHistorique.P !== P ||
+            (dernierHistorique.noteConstructible !== false) !== noteConstructible;
 
         if (aDiffere) {
             indicesCP[da].historique.push(entreeActuelle);
@@ -886,9 +902,10 @@ function calculerPerformanceParObjectif(da, ensembleId) {
         }
 
         // Trier par note décroissante et prendre les N meilleurs
-        // Utiliser la configuration PAN pour le nombre à retenir
-        const config = obtenirDonneesSelonMode('modalitesEvaluation') || {};
-        const nombreARetenir = config.configPAN?.portfolio?.nombreARetenir || 3;
+        // #394 (L10) : nombre à retenir depuis la config de la pratique active
+        // (pratiquesConfigurables, G2-a) — plus de lecture du snapshot configPAN.
+        const nombreARetenir = (typeof obtenirConfigPratiqueActive === 'function'
+            ? obtenirConfigPratiqueActive()?.portfolio?.nombreARetenir : null) || 3;
 
         evaluationsObjectif.sort((a, b) => b.noteFinale - a.noteFinale);
         const meilleurs = evaluationsObjectif.slice(0, nombreARetenir);
