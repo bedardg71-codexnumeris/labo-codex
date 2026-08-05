@@ -937,31 +937,6 @@ async function sauvegarderGroupeEtudiantsV2() {
     }
 }
 
-/**
- * Active un groupe (compat)
- */
-function activerGroupeV2(numeroGroupe) {
-    const coursActif = db.getSync('infoCours', {});
-    coursActif.groupe = numeroGroupe;
-    db.setSync('infoCours', coursActif);
-    chargerListeEtudiantsV2();
-}
-
-/**
- * Gère les étudiants d'un groupe (compat - charge simplement la liste)
- */
-function gererEtudiantsGroupeV2(numeroGroupe) {
-    chargerListeEtudiantsV2();
-}
-
-/**
- * Ouvre la gestion des étudiants (compat)
- */
-function ouvrirModalNouveauGroupe() {
-    // L'accordéon groupes est déjà intégré, pas besoin de redirection
-    chargerListeEtudiantsV2();
-}
-
 /* ===============================
    WRAPPERS DELEGATION (Phase 5 — Lot 5.12a)
    Adaptent la signature (el) du dispatcher change
@@ -978,9 +953,6 @@ function remarqueEtudiantV2Handler(el) {
 
 // Exports — 25 fonctions migrées du bloc exports résidu L2213-2237 + handlers 2222/2224.
 window.chargerGroupesCoursV2 = chargerGroupesCoursV2;
-window.activerGroupeV2 = activerGroupeV2;
-window.gererEtudiantsGroupeV2 = gererEtudiantsGroupeV2;
-window.ouvrirModalNouveauGroupe = ouvrirModalNouveauGroupe;
 window.chargerListeEtudiantsV2 = chargerListeEtudiantsV2;
 window.ajouterEtudiantV2 = ajouterEtudiantV2;
 window.supprimerEtudiantV2 = supprimerEtudiantV2;
