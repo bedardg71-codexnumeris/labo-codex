@@ -350,10 +350,15 @@ function importerCarteDepuisTrimestre(trimestreSourceId, carteId) {
 
 /**
  * Les Objectif/Notes des vues leçon vivent dans une clé séparée
- * ('planification_seances', indexée par id de leçon — ids préservés à la
- * copie). NB : cette clé est namespacée à l'exécution par cle() mais ABSENTE
- * du registre CLES_NAMESPACEES (trou consigné au BACKLOG) → préfixe direct
- * pour la source, cle() pour la cible. Push sans replace : on n'écrase
+ * ('planification_seances', indexée par id de leçon — ids préservés à la copie).
+ * ⚠ RÉALITÉ VÉRIFIÉE (sonde 4 août 2026, correctif du commentaire initial) :
+ * cette clé est ABSENTE du registre CLES_NAMESPACEES et cle() la retourne NUE
+ * → elle est aujourd'hui PARTAGÉE entre tous les trimestres (démo comprise).
+ * Conséquence : les notes « suivent » déjà une carte importée via la clé
+ * partagée, et la lecture `<tid>_planification_seances` ci-dessous est un
+ * no-op tant que #367 (migration nue→namespacée, décision Grégoire) n'est pas
+ * livré. La fonction est le comportement CORRECT du monde post-#367 ; elle
+ * s'activera d'elle-même à la migration. Push sans replace : on n'écrase
  * jamais une note existante du trimestre actif.
  */
 function copierSeancesLecons(trimestreSourceId, contenuCarte) {

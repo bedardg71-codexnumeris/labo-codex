@@ -318,6 +318,10 @@ test('import inter-trimestre — copie vers le trimestre actif, source intacte, 
             ], liens: [] } }
         };
         db.setSync('h9099_planification_mindmap', doc); // security-ok: fixture de test locale
+        // NB (re-diagnostic 4 août) : en PRODUCTION, planification_seances est
+        // aujourd'hui une clé NUE partagée entre trimestres (cf. BACKLOG #367) —
+        // cette fixture préfixée teste le monde POST-migration ; d'ici là, la
+        // copie est un no-op et les notes suivent via la clé partagée.
         db.setSync('h9099_planification_seances', { pl_lec1: { objectifPersonnalise: 'Objectif migré', notes: 'Note migrée' } }); // security-ok: fixture de test locale
         return JSON.stringify(db.getSync('h9099_planification_mindmap'));
     });
