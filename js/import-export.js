@@ -2993,7 +2993,9 @@ async function executerImportSelectif() {
 
         // 🆕 FIX (31 jan 2026) : Importer les données calendrier (cadreCalendrier, calendrierComplet, etc.)
         // Ces clés sont namespacées et essentielles pour le fonctionnement du trimestre
-        var clesCalendrier = ['cadreCalendrier', 'calendrierComplet', 'evenementsPrevus', 'evenementsImprevus', 'seancesCompletes', 'horaireHebdo'];
+        // journeesSansCours = clé courante (fusion #374, 5 août 2026) ; les deux noms
+        // evenements* restent acceptés en LECTURE pour les exports antérieurs (fusion au boot).
+        var clesCalendrier = ['cadreCalendrier', 'calendrierComplet', 'journeesSansCours', 'evenementsPrevus', 'evenementsImprevus', 'seancesCompletes', 'horaireHebdo'];
         let nbCalendrier = 0;
         for (var cleCal of Object.keys(donnees)) {
             if (clesCalendrier.includes(cleCal) || clesCalendrier.some(function(c) { return cleCal.endsWith('_' + c); })) {

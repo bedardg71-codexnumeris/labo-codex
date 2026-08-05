@@ -51,8 +51,7 @@
     const CLES_NAMESPACEES = [
         'calendrierComplet',
         'cadreCalendrier',
-        'evenementsPrevus',
-        'evenementsImprevus',
+        'journeesSansCours', // fusion #374 (5 août 2026), ex evenementsPrevus+evenementsImprevus
         'seancesCompletes',
         'horaireHebdo',
         'interventions',
@@ -1336,8 +1335,7 @@
             'cadreCalendrier',
             'horaireHebdo',
             'seancesCompletes',
-            'evenementsPrevus',
-            'evenementsImprevus',
+            'journeesSansCours', // fusion #374 (5 août 2026)
             // Indices et snapshots (existants)
             'interventions',
             'indicesAssiduite',

@@ -33,8 +33,7 @@
    
    LocalStorage utilisé:
    - 'cadreCalendrier' : Object avec dates clés du trimestre
-   - 'evenementsPrevus' : Array des congés officiels
-   - 'evenementsImprevus' : Array des congés ajoutés
+   - 'journeesSansCours' : Array des congés/fériés/journées personnelles (fusion #374)
    - 'seancesHoraire' : Array des séances (pour déterminer jours de cours)
    
    MODULES DÉPENDANTS:
@@ -453,12 +452,9 @@ function afficherCalendrierScolaire() {
 
     // Récupérer les paramètres depuis db.getSync (namespacés par trimestre)
     const cadreCalendrier = db.getSync(cle('cadreCalendrier'), {});
-    const evenementsPrevus = db.getSync(cle('evenementsPrevus'), []);
-    const evenementsImprevus = db.getSync(cle('evenementsImprevus'), []);
-
-    // Fusionner tous les événements (prévus + imprévus) — utilisé plus bas
+    // #374 (5 août 2026) : clé unique journeesSansCours — utilisée plus bas
     // pour les congés avec reprise (cf. congesAvecReprise).
-    const tousEvenements = [...evenementsPrevus, ...evenementsImprevus];
+    const tousEvenements = db.getSync(cle('journeesSansCours'), []);
 
     // Utiliser le calendrier complet (source unique)
     const calendrierComplet = obtenirCalendrierComplet();
@@ -631,8 +627,7 @@ function afficherCalendrierScolaire() {
  * 
  * LOCALSTORAGE:
  * - 'cadreCalendrier' : Object avec dates clés
- * - 'evenementsPrevus' : Array des congés officiels
- * - 'evenementsImprevus' : Array des congés ajoutés
+ * - 'journeesSansCours' : Array des congés/fériés/journées personnelles (fusion #374)
  * - 'seancesHoraire' : Array des séances (jours de cours)
  * 
  * MODULES DÉPENDANTS:

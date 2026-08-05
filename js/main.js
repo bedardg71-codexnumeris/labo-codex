@@ -20,7 +20,7 @@
 // init-inline.js compare cette valeur au BUILD_ID lu depuis version.json :
 // si différent, Safari file:// a probablement un main.js périmé en cache,
 // et la séquence reload+bandeau s'enclenche. SYNCHRONISER À CHAQUE BUMP.
-window._SCRIPT_BUILD_main = '0804-2106';
+window._SCRIPT_BUILD_main = '0804-2125';
 
 /* ===============================
    FONCTION GLOBALE: Génération d'ID uniques
@@ -1042,6 +1042,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // Copier productionsPedagogiques → productions (clé canonique)
     if (typeof migrerCleProductionsPedagogiques === 'function') {
         migrerCleProductionsPedagogiques();
+    }
+
+    // ===============================
+    // 3.6b-bis FUSION JOURNÉES SANS COURS (#374, 5 août 2026)
+    // ===============================
+    // evenementsPrevus + evenementsImprevus → journeesSansCours (tous
+    // trimestres). Sans flag : couvre aussi les imports d'archives pré-fusion.
+    if (typeof migrerJourneesSansCours === 'function') {
+        migrerJourneesSansCours();
     }
 
     // ===============================

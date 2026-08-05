@@ -142,10 +142,7 @@ function afficherAvertissementsCadreV2() {
     const zone = document.getElementById('v2-avertissementsCadre');
     if (!zone) return;
     const cadre = db.getSync(cle('cadreCalendrier'), null);
-    const evenements = [
-        ...db.getSync(cle('evenementsPrevus'), []),
-        ...db.getSync(cle('evenementsImprevus'), [])
-    ];
+    const evenements = db.getSync(cle('journeesSansCours'), []);
     const avertissements = validerCadreTrimestre(cadre, evenements);
     if (avertissements.length === 0) {
         zone.classList.add('u-hide');

@@ -94,6 +94,9 @@ var CLES_SANS_FILTRE = [
     'preferencesUtilisateur',
     // Trimestre-shared (cadre temporel / planification / horaires)
     'cadreCalendrier',
+    'journeesSansCours',
+    // Héritage (archives antérieures au 5 août 2026) : fusionnées vers
+    // journeesSansCours au boot par migrerJourneesSansCours (migrations.js)
     'evenementsPrevus',
     'evenementsImprevus',
     'horaires',

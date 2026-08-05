@@ -861,6 +861,61 @@ function migrerCleProductionsPedagogiques() {
 }
 
 /**
+ * #374 (relais Cadre→Trimestre, 5 août 2026) — Fusion des deux clés
+ * d'événements en UNE : evenementsPrevus + evenementsImprevus →
+ * journeesSansCours (par trimestre). La prévisibilité n'est plus une
+ * propriété de l'endroit de saisie.
+ *
+ * SANS flag « fait » : re-scanne à chaque boot (coût : une passe sur les
+ * clés localStorage) pour couvrir aussi les codex/archives antérieurs à la
+ * fusion, dont l'import réécrit les anciennes clés puis recharge l'app.
+ * Idempotente : dédoublonne par id, retire les anciennes clés après fusion.
+ */
+function migrerJourneesSansCours() {
+    let nbMigres = 0;
+    // Énumération directe : les listes d'événements sont < 200 Ko, donc en
+    // localStorage (jamais côté IndexedDB du stockage hybride).
+    const clesAMigrer = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (/(^|_)evenements(Prevus|Imprevus)$/.test(k)) clesAMigrer.push(k);
+    }
+    if (clesAMigrer.length === 0) return 0;
+
+    const parPrefixe = {};
+    clesAMigrer.forEach(k => {
+        const prefixe = k.replace(/evenements(Prevus|Imprevus)$/, '');
+        (parPrefixe[prefixe] = parPrefixe[prefixe] || []).push(k);
+    });
+
+    Object.keys(parPrefixe).forEach(prefixe => {
+        const cleFusion = prefixe + 'journeesSansCours';
+        const fusionnes = db.getSync(cleFusion, []);
+        const idsVus = new Set(fusionnes.map(e => e && e.id).filter(Boolean));
+        // Prévus d'abord : préserve l'ordre de saisie par bloc d'origine
+        ['evenementsPrevus', 'evenementsImprevus'].forEach(suffixe => {
+            const anciens = db.getSync(prefixe + suffixe, null);
+            if (Array.isArray(anciens)) {
+                anciens.forEach(evt => {
+                    if (!evt) return;
+                    if (evt.id && idsVus.has(evt.id)) return;
+                    if (evt.id) idsVus.add(evt.id);
+                    fusionnes.push(evt);
+                    nbMigres++;
+                });
+            }
+            db.removeSync(prefixe + suffixe);
+        });
+        db.setSync(cleFusion, fusionnes);
+    });
+
+    if (nbMigres > 0) {
+        console.warn('[Migration #374] ' + nbMigres + ' événement(s) fusionné(s) vers journeesSansCours');
+    }
+    return nbMigres;
+}
+
+/**
  * 🆕 Beta 99.01 — Migration des clés sans namespace vers clés namespacées
  * Concerne : indicesPatternsRaI, indicesEvaluation, horaireSelectionne
  * Ces clés étaient stockées sans préfixe trimestre. Cette migration copie
@@ -910,6 +965,7 @@ if (typeof window !== 'undefined') {
     window.executerMigrationsBeta96 = executerMigrationsBeta96;
     // 🆕 Beta 97 - Unification clé productions
     window.migrerCleProductionsPedagogiques = migrerCleProductionsPedagogiques;
+    window.migrerJourneesSansCours = migrerJourneesSansCours;
     // 🆕 Beta 99.01 - Clés sans namespace → namespacées
     window.migrerClesSansNamespace = migrerClesSansNamespace;
     window.migrerVersEntiteEnseignants = migrerVersEntiteEnseignants;

@@ -23,11 +23,10 @@ function creerSandbox() {
 
     const stores = new Map();
     stores.set('h2026_cadreCalendrier', { dateDebut: '2026-01-19' });
-    stores.set('h2026_evenementsPrevus', [
+    // Fusion #374 (5 août 2026) : une seule clé journeesSansCours
+    stores.set('h2026_journeesSansCours', [
         { dateEvenement: '2026-02-02', dateReprise: '2026-02-16', description: 'Congé A' },
-        { dateEvenement: '2026-03-02', dateReprise: '', description: 'Congé sans reprise' }
-    ]);
-    stores.set('h2026_evenementsImprevus', [
+        { dateEvenement: '2026-03-02', dateReprise: '', description: 'Congé sans reprise' },
         { dateEvenement: '2026-04-01', dateReprise: '2026-04-08', description: 'Congé B' }
     ]);
     stores.set('h2026_groupesCours', []);

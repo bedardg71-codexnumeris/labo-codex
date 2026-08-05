@@ -98,7 +98,8 @@ describe('sentinelle · save explicite du Trimestre (#306 Lot 2)', () => {
         expect(html).not.toContain('data-on-change="sauvegarderIdentificationTrimestreV2"');
         expect(html).not.toContain('data-on-change="sauvegarderCadreCalendrierV2"');
         // Les data-on-change d'AFFICHAGE (non persistants) restent en place
-        expect(html).toContain('data-on-change="majAffichageRepriseV2Prevu"');
+        // (fusion #374, 5 août 2026 : un seul handler pour la carte unique)
+        expect(html).toContain('data-on-change="majAffichageRepriseV2"');
     });
 
     it('statique — le bouton de la section est câblé sur le point de persistance unique', () => {

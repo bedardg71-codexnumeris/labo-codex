@@ -333,7 +333,14 @@ exactement la semaine du 12 octobre.
 
 ## #373 🟡 Ajouter la nature « Férié » et corriger le titre de la carte
 
-- [ ] 🟡 **#373** La carte s'intitule « Congés fériés **et** activités institutionnelles », mais
+> **✅ CLOS le 5 août 2026 — absorbé dans la fusion #374** (décision Grégoire : fusion
+> immédiate). Nature « Férié (collège fermé) » au menu unique + badge vert « Férié ».
+> Comme convenu : étiquette SEULEMENT, aucun effet calcul (le générateur ne traite à
+> part que « personnel » ; férié = comportement institutionnel). Les cas réels restent
+> exprimables : grève = institutionnel SANS reprise, tempête = institutionnel AVEC
+> reprise, maladie = personnel sans reprise (bloc reprise masqué, convention §3.0).
+
+- [x] 🟡 **#373** La carte s'intitule « Congés fériés **et** activités institutionnelles », mais
       le menu n'offre que « Institutionnel (collège) » et « Personnel (toi seulement) ».
       La fête du Travail se retrouve étiquetée « Institutionnel », ce qui est faux.
 
@@ -374,7 +381,20 @@ exactement la semaine du 12 octobre.
 
 ## #374 🟢 Zéro-dette : les deux cartes d'événements sont le même objet, dupliqué
 
-- [ ] 🟢 **#374** « Congés fériés et activités institutionnelles » et « Événements imprévus »
+> **✅ CLOS le 5 août 2026 (release 1.31.0).** Une carte « Journées sans cours », un
+> formulaire, UNE clé `journeesSansCours` (tri chronologique à l'affichage). Le jeu
+> dupliqué …V2Prevu/…V2Imprevu (14 fonctions) est RETIRÉ, remplacé par 7 fonctions +
+> un point de rafraîchissement unique. Migration boot `migrerJourneesSansCours()`
+> (migrations.js, appelée de main.js) : SANS flag, idempotente (dédoublonnage par id),
+> tous préfixes de trimestre, anciennes clés supprimées après fusion — couvre aussi
+> les codex/archives pré-fusion (reserve.js et import-export.js gardent les anciens
+> noms EN LECTURE, datés). Registres à jour : CLES_NAMESPACEES, DATA-OWNERSHIP.md
+> (owner : trimestre-v2-init.js). Sentinelles : Vitest 4 cas migration (ablation du
+> dédoublonnage break-testée ROUGE) + Playwright bout-en-bout (migration → carte
+> unique → férié → générateur). 2 sentinelles historiques verrouillant l'ancien
+> markup mises à jour en connaissance de cause (#306, #118).
+
+- [x] 🟢 **#374** « Congés fériés et activités institutionnelles » et « Événements imprévus »
       partagent **exactement** le même formulaire. Deux clés, deux `<select>` identiques, deux
       chemins de code, un seul concept.
 

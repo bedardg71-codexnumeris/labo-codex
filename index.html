@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260804h"> <!-- Relais Cadre #371 : semaines spéciales empilées (4 août) -->
+    <link rel="stylesheet" href="styles.css?v=20260805a"> <!-- Fusion #374 : badge Férié (5 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -6619,117 +6619,64 @@
                                         </div>
                                     </div>
 
-                                    <!-- Congés et événements -->
-                                    <div class="grille-2col u-mt-15">
+                                    <!-- Journées sans cours (fusion #374+#373, relais 4 août — décision
+                                         Grégoire : une carte, un formulaire, une clé `journeesSansCours`).
+                                         La prévisibilité n'est plus une propriété de l'endroit de saisie ;
+                                         nature (institutionnel/férié/personnel) + reprise optionnelle
+                                         couvrent les cas réels : grève = institutionnel sans reprise,
+                                         tempête = institutionnel avec reprise, maladie = personnel sans. -->
+                                    <div class="bloc-section bloc-section--bleu bloc-section--compact u-mt-15" style="margin-bottom: 0;">
+                                        <h5 class="sous-titre-section u-texte-petit" style="margin-top: 0" data-tooltip="reglages-trim-conges">Journées sans cours</h5>
+                                        <div id="v2-journeesSansCoursContainer" class="u-mb-10">
+                                            <!-- Liste des journées sans cours générée dynamiquement -->
+                                        </div>
 
-                                        <!-- COLONNE GAUCHE: Congés prévus -->
-                                        <div class="bloc-section bloc-section--bleu bloc-section--compact" style="margin-bottom: 0;">
-                                            <h5 class="sous-titre-section u-texte-petit" style="margin-top: 0" data-tooltip="reglages-trim-conges">Congés fériés et activités institutionnelles</h5>
-                                            <div id="v2-congesPrevusContainer" class="u-mb-10">
-                                                <!-- Liste des événements prévus générée dynamiquement -->
-                                            </div>
-
-                                            <!-- Formulaire ajout événement prévu (caché par défaut) -->
-                                            <div id="v2-formEvenementPrevu" class="formulaire-interne u-hide">
-                                                <button data-action="annulerFormEvenementPrevuV2" class="btn-fermer" title="Annuler"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
-                                                <div class="u-mb-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
-                                                    <div class="groupe-form">
-                                                        <label>Date <span class="text-danger u-texte-medium">*</span></label>
-                                                        <input type="date" id="v2-dateEvenementPrevu" class="controle-form controle-form-compact">
-                                                    </div>
-                                                    <div class="groupe-form">
-                                                        <label>Description <span class="text-danger u-texte-medium">*</span></label>
-                                                        <input type="text" id="v2-descriptionPrevu" class="controle-form controle-form-compact" placeholder="Ex: Fête du travail">
-                                                    </div>
+                                        <!-- Formulaire ajout/édition (caché par défaut) -->
+                                        <div id="v2-formEvenement" class="formulaire-interne u-hide">
+                                            <button data-action="annulerFormEvenementV2" class="btn-fermer" title="Annuler"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
+                                            <div class="u-mb-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
+                                                <div class="groupe-form">
+                                                    <label>Date <span class="text-danger u-texte-medium">*</span></label>
+                                                    <input type="date" id="v2-dateEvenement" class="controle-form controle-form-compact">
                                                 </div>
-                                                <div class="u-mb-8 groupe-form">
-                                                    <label class="u-texte-medium">Type d'événement</label>
-                                                    <select id="v2-categorieEvenementPrevu" class="controle-form controle-form-compact" data-on-change="majAffichageRepriseV2Prevu">
-                                                        <option value="institutionnel">Institutionnel (collège)</option>
-                                                        <option value="personnel">Personnel (toi seulement)</option>
+                                                <div class="groupe-form">
+                                                    <label>Description <span class="text-danger u-texte-medium">*</span></label>
+                                                    <input type="text" id="v2-descriptionEvenement" class="controle-form controle-form-compact" placeholder="Ex: Fête du travail, tempête, maladie">
+                                                </div>
+                                            </div>
+                                            <div class="u-mb-8 groupe-form">
+                                                <label class="u-texte-medium">Nature</label>
+                                                <select id="v2-categorieEvenement" class="controle-form controle-form-compact" data-on-change="majAffichageRepriseV2">
+                                                    <option value="institutionnel">Institutionnel (collège)</option>
+                                                    <option value="ferie">Férié (collège fermé)</option>
+                                                    <option value="personnel">Personnel (toi seulement)</option>
+                                                </select>
+                                            </div>
+                                            <div class="u-mb-8" id="v2-blocReprise" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
+                                                <div class="groupe-form">
+                                                    <label class="u-texte-medium">Horaire de reprise</label>
+                                                    <select id="v2-horaireReprise" class="controle-form controle-form-compact">
+                                                        <option value="">— Aucune —</option>
+                                                        <option value="Lundi">Horaire du lundi</option>
+                                                        <option value="Mardi">Horaire du mardi</option>
+                                                        <option value="Mercredi">Horaire du mercredi</option>
+                                                        <option value="Jeudi">Horaire du jeudi</option>
+                                                        <option value="Vendredi">Horaire du vendredi</option>
                                                     </select>
                                                 </div>
-                                                <div class="u-mb-8" id="v2-blocReprisePrevu" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
-                                                    <div class="groupe-form">
-                                                        <label class="u-texte-medium">Horaire de reprise</label>
-                                                        <select id="v2-horaireReprisePrevu" class="controle-form controle-form-compact">
-                                                            <option value="">— Aucune —</option>
-                                                            <option value="Lundi">Horaire du lundi</option>
-                                                            <option value="Mardi">Horaire du mardi</option>
-                                                            <option value="Mercredi">Horaire du mercredi</option>
-                                                            <option value="Jeudi">Horaire du jeudi</option>
-                                                            <option value="Vendredi">Horaire du vendredi</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="groupe-form">
-                                                        <label class="u-texte-medium">Date de reprise</label>
-                                                        <input type="date" id="v2-dateReprisePrevu" class="controle-form controle-form-compact">
-                                                    </div>
-                                                </div>
-                                                <div class="u-text-right">
-                                                    <button id="v2-btnConfirmerPrevu" class="btn btn-confirmer btn-tres-compact" data-action="confirmerEvenementPrevuV2">Ajouter</button>
+                                                <div class="groupe-form">
+                                                    <label class="u-texte-medium">Date de reprise</label>
+                                                    <input type="date" id="v2-dateReprise" class="controle-form controle-form-compact">
                                                 </div>
                                             </div>
-
-                                            <div class="u-flex-between" style="font-size: 0.8rem">
-                                                <span class="text-muted"><span id="v2-nombreEvenementsPrevus">0</span> déclarés</span>
-                                                <button class="btn btn-confirmer btn-tres-compact" data-action="afficherFormEvenementV2" data-param="prevu">+ Ajouter</button>
+                                            <div class="u-text-right">
+                                                <button id="v2-btnConfirmerEvenement" class="btn btn-confirmer btn-tres-compact" data-action="confirmerEvenementV2">Ajouter</button>
                                             </div>
                                         </div>
 
-                                        <!-- COLONNE DROITE: Événements imprévus -->
-                                        <div class="bloc-section bloc-section--bleu bloc-section--compact" style="margin-bottom: 0;">
-                                            <h5 class="sous-titre-section u-texte-petit" style="margin-top: 0" data-tooltip="reglages-trim-imprevus">Événements imprévus</h5>
-                                            <div id="v2-congesImprevusContainer" class="u-mb-10">
-                                                <!-- Liste des événements imprévus générée dynamiquement -->
-                                            </div>
-
-                                            <!-- Formulaire ajout événement imprévu (caché par défaut) -->
-                                            <div id="v2-formEvenementImprevu" class="formulaire-interne u-hide">
-                                                <button data-action="annulerFormEvenementImprevuV2" class="btn-fermer" title="Annuler"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
-                                                <div class="u-mb-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
-                                                    <div class="groupe-form">
-                                                        <label>Date <span class="text-danger u-texte-medium">*</span></label>
-                                                        <input type="date" id="v2-dateEvenementImprevu" class="controle-form controle-form-compact">
-                                                    </div>
-                                                    <div class="groupe-form">
-                                                        <label>Description <span class="text-danger u-texte-medium">*</span></label>
-                                                        <input type="text" id="v2-descriptionImprevu" class="controle-form controle-form-compact" placeholder="Ex: Tempête">
-                                                    </div>
-                                                </div>
-                                                <div class="u-mb-8 groupe-form">
-                                                    <label class="u-texte-medium">Type d'événement</label>
-                                                    <select id="v2-categorieEvenementImprevu" class="controle-form controle-form-compact" data-on-change="majAffichageRepriseV2Imprevu">
-                                                        <option value="institutionnel">Institutionnel (collège)</option>
-                                                        <option value="personnel">Personnel (toi seulement)</option>
-                                                    </select>
-                                                </div>
-                                                <div class="u-mb-8" id="v2-blocRepriseImprevu" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
-                                                    <div class="groupe-form">
-                                                        <label class="u-texte-medium">Horaire de reprise</label>
-                                                        <select id="v2-horaireRepriseImprevu" class="controle-form controle-form-compact">
-                                                            <option value="">— Aucune —</option>
-                                                            <option value="Lundi">Horaire du lundi</option>
-                                                            <option value="Mardi">Horaire du mardi</option>
-                                                            <option value="Mercredi">Horaire du mercredi</option>
-                                                            <option value="Jeudi">Horaire du jeudi</option>
-                                                            <option value="Vendredi">Horaire du vendredi</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="groupe-form">
-                                                        <label class="u-texte-medium">Date de reprise</label>
-                                                        <input type="date" id="v2-dateRepriseImprevu" class="controle-form controle-form-compact">
-                                                    </div>
-                                                </div>
-                                                <div class="u-text-right">
-                                                    <button id="v2-btnConfirmerImprevu" class="btn btn-confirmer btn-tres-compact" data-action="confirmerEvenementImprevuV2">Ajouter</button>
-                                                </div>
-                                            </div>
-
-                                            <div class="u-flex-between" style="font-size: 0.8rem">
-                                                <span class="text-muted"><span id="v2-nombreEvenementsImprevus">0</span> déclarés</span>
-                                                <button class="btn btn-confirmer btn-tres-compact" data-action="afficherFormEvenementV2" data-param="imprevu">+ Ajouter</button>
-                                            </div>
+                                        <div class="u-flex-between" style="font-size: 0.8rem">
+                                            <span class="text-muted"><span id="v2-nombreJourneesSansCours">0</span> déclarées</span>
+                                            <button class="btn btn-confirmer btn-tres-compact" data-action="afficherFormEvenementV2">+ Ajouter</button>
                                         </div>
                                     </div>
 
@@ -14633,14 +14580,14 @@
     <script src="js/demo-activation.js?v=20260629a"></script>
 
     <!-- PRIORITÉ 2: Données de base -->
-    <script src="js/trimestres.js?v=20260629a"></script> <!-- Beta 99.76 b0529-1139 : refonte chantier B — résolution trimestre via trimestre actif -->
+    <script src="js/trimestres.js?v=20260805a"></script> <!-- Fusion #374 : clé journeesSansCours dans CLES_NAMESPACEES (5 août) -->
     <script src="js/productions-namespace-garde.js?v=2026061500"></script> <!-- #340 : garde-fou anti-contamination productions inter-trimestres (db.set/setSync) -->
-    <script src="js/trimestre.js?v=20260512b"></script> <!-- Beta 99.28 b0428-1915 : champ categorie + algo deux passes pour numérotation des semaines DÉ -->
-    <script src="js/trimestre-v2.js?v=20260805b"></script> <!-- #366+#369 relais : stats + validation de cohérence (5 août) -->
-    <script src="js/trimestre-v2-init.js?v=20260805a"></script> <!-- #370 relais : libellé reprise clarifié (5 août) -->
+    <script src="js/trimestre.js?v=20260805a"></script> <!-- Fusion #374 : générateur lit journeesSansCours (5 août) -->
+    <script src="js/trimestre-v2.js?v=20260805c"></script> <!-- #366+#369+#374 relais : stats, validations, clé unique (5 août) -->
+    <script src="js/trimestre-v2-init.js?v=20260805b"></script> <!-- Fusion #374 : jeu unique de fonctions Journées sans cours (5 août) -->
     <script src="js/trimestre-v2-enseignants.js?v=20260703a"></script> <!-- #306 Lot 1 (3 juil.) : bascule Créer/Enregistrer du bouton profil -->
     <script src="js/trimestre-v2-horaires.js?v=20260703a"></script> <!-- #306 Lot 1 (3 juil.) : création d'horaire = « Créer » (séance garde « Ajouter ») -->
-    <script src="js/trimestre-v2-liste.js?v=20260517a"></script> <!-- Refactor étape 3 session A (17 mai 2026) : extrait de trimestre-v2.js (lignes 946-1394) -->
+    <script src="js/trimestre-v2-liste.js?v=20260805a"></script> <!-- Fusion #374 : appel chargerJourneesSansCoursV2 (5 août) -->
     <script src="js/trimestre-v2-cours.js?v=20260703a"></script> <!-- #306 Lot 1 (3 juil.) : création de cours = « Créer » -->
     <script src="js/trimestre-v2-etudiants.js?v=20260517a"></script> <!-- Refactor étape 3 session B (17 mai 2026) : extrait de trimestre-v2.js (lignes 119-1014 + handlers 2188-2200, zone 4) -->
     <script src="js/trimestre-v2-groupes-cours.js?v=2026062701"></script> <!-- Refactor étape 3 session B (17 mai 2026) : extrait de trimestre-v2.js (lignes 119-219 + 360-1149, zone 6 — hub populerDropdownsAssemblageV2 reste résidu) -->
@@ -14763,7 +14710,7 @@
     <script src="libs/jszip.min.js?v=3.10.1"></script>
     <script src="libs/html2canvas.min.js?v=1.4.1"></script>
     <script src="js/travaux-stockage.js?v=2026020601"></script>
-    <script src="js/reserve.js?v=20260629a"></script> <!-- Beta 99.38 b0508-1440 : #262 archive-{dossier}-{date}.zip (sans CONFIDENTIEL-) -->
+    <script src="js/reserve.js?v=20260805a"></script> <!-- Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) -->
     <script src="js/reserve-ouvrir.js?v=20260629a"></script> <!-- Beta 99.38 b0508-1440 : #262 label « Choisir un fichier .zip d'archive » -->
     <script src="js/reserve-reglages.js?v=2026050559"></script> <!-- #259 : strings UI Réserve → Archives -->
     <script src="js/securite-prefs.js?v=2026050613"></script> <!-- Beta 99.36 b0506-1335 : Défense D — toggle persistance FSAPI -->
@@ -14787,7 +14734,7 @@
     <script src="js/actions-rlo.js?v=2026041709"></script> <!-- Beta 99.17 (b0417-1100) : fix lecture LIVE prioritaire dans obtenirEvolutionRLOEtudiant -->
 
     <!-- PRIORITÉ 5: Modules fonctionnels -->
-    <script src="js/calendrier-vue.js?v=20260805a"></script> <!-- #366 relais : stats par fonction pure, fin des 15/75 en dur (5 août) -->
+    <script src="js/calendrier-vue.js?v=20260805b"></script> <!-- #366+#374 relais : stats fonction pure + clé unique (5 août) -->
     <script src="js/horaire.js?v=2026061101"></script>
     <script src="js/groupe.js?v=2026032600"></script>
     <script src="js/interventions.js?v=20260512b"></script>
@@ -14806,7 +14753,7 @@
     <script src="js/partage-export.js?v=20260629a"></script>
     <script src="js/partage-import.js?v=20260629a"></script>
     <script src="js/partage-section.js?v=20260629a"></script>
-    <script src="js/import-export.js?v=20260629a"></script> <!-- Beta 99.41 : #264 progression sur exporterConfigurationComplete + executerExport -->
+    <script src="js/import-export.js?v=20260805a"></script> <!-- Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) -->
     <script src="js/codex.js?v=2026061115"></script> <!-- 1.16.0+ : #336 D — preview purge espace précédent à l'ouverture -->
     <script src="js/liste-evaluations.js?v=20260629a"></script> <!-- Beta 99.41 : Défense E — echapperHtml sur error.message + p.id (attribut) -->
     <script src="js/journal.js?v=2026041706"></script>
@@ -14830,7 +14777,7 @@
     <script src="js/modal-backup-reminder.js?v=2025122803"></script>
 
     <!-- MIGRATIONS BETA 93.5 - Ajout coursId aux données (Beta 93.5) -->
-    <script src="js/migrations.js?v=2026061101"></script>
+    <script src="js/migrations.js?v=20260805a"></script> <!-- Fusion #374 : migrerJourneesSansCours (5 août) -->
 
     <!-- Page d'accueil (Chantier 3) -->
     <script src="js/accueil.js?v=20260629a"></script> <!-- Refonte nav SP5 : data-param calendrier -->
@@ -14859,7 +14806,7 @@
     <script src="js/export-resultats-finaux.js?v=2026061901"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260703b"></script> <!-- Boot atomique #358 (3 juil.) : await db.flush() entre G4 et la pose du flag -->
+    <script src="js/main.js?v=20260805a"></script> <!-- Fusion #374 : appel migration au boot (5 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->

@@ -57,7 +57,9 @@ describe('sentinelle · overflow horizontal Calendrier (#118 + #283-T1)', () => 
         expect(vue).toContain("'<div class=\"cal-grid-2col\">'");
         // Même garde pour le sous-onglet Trimestre : la grille HTML existe toujours.
         expect(html).toMatch(/id="calendrier-trimestre"/);
-        expect(html).toMatch(/<div class="grille-2col u-mt-15">/);
+        // Fusion #374 (5 août 2026) : la grille 2 colonnes des événements est
+        // remplacée par la carte unique Journées sans cours.
+        expect(html).toMatch(/id="v2-journeesSansCoursContainer"/);
     });
 
     it('cache-busting : styles.css?v= bumpé au moins au 20260703', () => {
