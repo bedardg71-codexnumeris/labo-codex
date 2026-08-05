@@ -2656,10 +2656,11 @@ async function creerPratiqueV2() {
         // DEN couche 2 (#318) : la note est un jugement saisi (moteur DEN-1).
         pratique.calcul_note = { methode: 'jugement_global' };
     } else {
-        // pan-standards : par objectifs → pan_par_objectif, sinon conversion de niveaux
-        pratique.calcul_note = {
-            methode: r.approcheEvaluation === 'par-objectifs' ? 'pan_par_objectif' : 'conversion_niveaux'
-        };
+        // #396 (5 août 2026) : la méthode de calcul dédiée « par objectif » est
+        // RETIRÉE (jamais fonctionnelle — décision D2). L'approche « par objectifs »
+        // vit dans Standards (fold Session C) et se calcule comme elle : conversion
+        // de niveaux. Le détail par-objectifs reste porté par configuration.objectifs.
+        pratique.calcul_note = { methode: 'conversion_niveaux' };
     }
 
     // Seuils personnels (toutes branches)

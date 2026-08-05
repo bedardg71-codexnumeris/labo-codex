@@ -75,7 +75,9 @@ const GOLDEN = {
             objectifs: { modeCalcul: 'seuils-critiques', nbObjectifs: 5,
                 seuilsCritiques: { seuilReussite: 'M', noteBaseReussite: 80, bonusParNiveau: 3.33 } }
         },
-        calcul_note: { methode: 'pan_par_objectif' }
+        // #396 (5 août 2026) : 'pan_par_objectif' RETIRÉ (décision D2) — le wizard
+        // pose conversion_niveaux pour l'approche par objectifs (fold Standards).
+        calcul_note: { methode: 'conversion_niveaux' }
     },
     STD_art: {
         id: 'fixe-STD_art', nom: 'Golden STD-art', auteur: '', etablissement: '', description: '', discipline: '',
