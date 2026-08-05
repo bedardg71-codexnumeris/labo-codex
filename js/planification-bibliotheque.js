@@ -542,8 +542,8 @@ function importerAlignementsTrimestre() {
     var html = '';
     cartes.forEach(function (c) {
         html += '<div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--bordure);">' +
-            '<span>' + c.nom + ' <small class="text-muted">(' + c.noeuds + ' noeuds, ' + c.liens + ' liens)</small></span>' +
-            '<button class="btn btn-confirmer btn-tres-compact" data-action="importerCarteDepuisTrimestre" data-param="' + code + '" data-param2="' + c.id + '">Importer dans la bibliothèque</button>' +
+            '<span>' + echapperHtml(c.nom) + ' <small class="text-muted">(' + c.noeuds + ' noeuds, ' + c.liens + ' liens)</small></span>' +
+            '<button class="btn btn-confirmer btn-tres-compact" data-action="importerCarteDepuisTrimestre" data-param="' + echapperHtml(code) + '" data-param2="' + echapperHtml(c.id) + '">Importer dans la bibliothèque</button>' +
         '</div>';
     });
     container.innerHTML = html;

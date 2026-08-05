@@ -101,7 +101,7 @@ async function peuplerDropdownGroupeCoursActif() {
             if (nomHor) label += ` (${nomHor})`;
 
             const selected = gcActif && !gcActif.modeCours && gc.id === gcActif.id ? ' selected' : '';
-            options += `<option value="${echapperHtml(gc.id)}"${selected}>${label}</option>`;
+            options += `<option value="${echapperHtml(gc.id)}"${selected}>${echapperHtml(label)}</option>`;
         });
         options += '</optgroup>';
 
@@ -117,7 +117,7 @@ async function peuplerDropdownGroupeCoursActif() {
                 const nbGroupes = gcs.length;
                 const label = nbGroupes > 1 ? `${sigle} (${nbGroupes} groupes)` : sigle;
                 const selected = gcActif && gcActif.modeCours && gcActif.coursId === coursId ? ' selected' : '';
-                options += `<option value="cours:${coursId}"${selected}>${label}</option>`;
+                options += `<option value="cours:${echapperHtml(coursId)}"${selected}>${echapperHtml(label)}</option>`;
             });
             options += '</optgroup>';
         }
@@ -433,7 +433,7 @@ async function peuplerDropdownEnseignants() {
         const libelle = typeof EnseignantsEntite !== 'undefined'
             ? EnseignantsEntite.genererLibelle(ens)
             : `${ens.prenom} ${ens.nom}`;
-        options += `<option value="${echapperHtml(ens.id)}">${libelle}</option>`;
+        options += `<option value="${echapperHtml(ens.id)}">${echapperHtml(libelle)}</option>`;
     });
 
     select.innerHTML = options;

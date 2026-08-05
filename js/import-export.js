@@ -2001,15 +2001,15 @@ function afficherModalPreviewConfigComplete(config) {
                 <div style="background: var(--bleu-tres-pale); border-radius: 8px;
                      padding: 15px; margin-bottom: 20px;">
                     <h3 style="margin: 0 0 8px 0; font-size: 1.05rem; color: var(--texte-secondaire);">
-                        ${meta.nom}
+                        ${echapperHtml(meta.nom || '')}
                     </h3>
                     <p style="margin: 0; font-size: 0.9rem; color: var(--gris-moyen);">
-                        Par <strong>${meta.auteur}</strong>
-                        ${meta.discipline && meta.discipline.length > 0 ? ` · ${meta.discipline.join(', ')}` : ''}
-                        ${meta.niveau ? ` · ${meta.niveau}` : ''}
+                        Par <strong>${echapperHtml(meta.auteur || '')}</strong>
+                        ${Array.isArray(meta.discipline) && meta.discipline.length > 0 ? ` · ${echapperHtml(meta.discipline.join(', '))}` : ''}
+                        ${meta.niveau ? ` · ${echapperHtml(meta.niveau)}` : ''}
                     </p>
                     ${meta.description
-                        ? `<p style="margin: 10px 0 0 0; font-size: 0.9rem; font-style: italic; color: var(--gris-moyen);">${meta.description}</p>`
+                        ? `<p style="margin: 10px 0 0 0; font-size: 0.9rem; font-style: italic; color: var(--gris-moyen);">${echapperHtml(meta.description)}</p>`
                         : ''}
                 </div>
 

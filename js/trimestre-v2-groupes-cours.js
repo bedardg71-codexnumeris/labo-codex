@@ -160,7 +160,7 @@ function populerDropdownGroupeCoursV2() {
 
     let html = '<option value="">— Choisir pour modifier —</option>';
     reels.forEach(gc => {
-        html += `<option value="${echapperHtml(gc.id)}">${gc.nom || gc.id}</option>`;
+        html += `<option value="${echapperHtml(gc.id)}">${echapperHtml(gc.nom || gc.id)}</option>`;
     });
     select.innerHTML = html;
 
