@@ -798,13 +798,20 @@ async function executerExport() {
     const partieAuteur = auteurNettoye ? `-${auteurNettoye}` : '';
 
     // 🆕 Export ZIP si fichiersTravaux est sélectionné (inclut les blobs)
-    const cleFT = clesSelectionnees.find(c => c.includes('fichiersTravaux'));
-    if (cleFT && typeof JSZip !== 'undefined' && typeof travauxStockage !== 'undefined') {
+    // #384 (audit 5 août, rapport A3) : TOUTES les clés fichiersTravaux
+    // sélectionnées (une par trimestre) — l'ancien `find` n'embarquait les
+    // blobs QUE de la première clé trouvée : backup multi-trimestre incomplet,
+    // perte découverte à la restauration.
+    const clesFT = clesSelectionnees.filter(c => c.includes('fichiersTravaux'));
+    if (clesFT.length > 0 && typeof JSZip !== 'undefined' && typeof travauxStockage !== 'undefined') {
         if (_hasProg) window.majProgression(65, 'Préparation du ZIP...');
         const zip = new JSZip();
         zip.file('donnees.json', json);
 
-        const metadonnees = donnees[cleFT] || [];
+        const metadonnees = [];
+        for (const cleFT of clesFT) {
+            if (Array.isArray(donnees[cleFT])) metadonnees.push(...donnees[cleFT]);
+        }
         if (Array.isArray(metadonnees)) {
             const dossier = zip.folder('travaux');
             let nbBlobs = 0;
@@ -1079,10 +1086,14 @@ async function _restaurerBlobsDepuisZip(donnees) {
     if (!donnees._zipTravaux || typeof travauxStockage === 'undefined') return 0;
 
     const zip = donnees._zipTravaux;
-    const cleFT = Object.keys(donnees).find(c => c.includes('fichiersTravaux'));
-    const metadonnees = cleFT ? donnees[cleFT] : [];
+    // #384 : TOUTES les clés fichiersTravaux (une par trimestre) — symétrique
+    // à l'export ; l'ancien `find` ne restaurait que la première.
+    const metadonnees = [];
+    for (const cleFT of Object.keys(donnees).filter(c => c.includes('fichiersTravaux'))) {
+        if (Array.isArray(donnees[cleFT])) metadonnees.push(...donnees[cleFT]);
+    }
 
-    if (!Array.isArray(metadonnees) || metadonnees.length === 0) return 0;
+    if (metadonnees.length === 0) return 0;
 
     let nbRestores = 0;
     for (const f of metadonnees) {
@@ -1090,6 +1101,17 @@ async function _restaurerBlobsDepuisZip(donnees) {
             const entries = zip.file(new RegExp('^travaux/' + f.id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\.'));
             if (entries && entries.length > 0) {
                 const blob = await entries[0].async('blob');
+                // #385 (audit 5 août, rapport A4) : même garde que le chemin
+                // codex (codex.js) — un ZIP altéré peut contenir un blob
+                // malveillant déguisé en image/PDF. Règle CLAUDE.md :
+                // validerMagicBytes sur TOUT blob importé.
+                if (window.travauxImport && typeof window.travauxImport.validerMagicBytes === 'function') {
+                    const magicOk = await window.travauxImport.validerMagicBytes(blob);
+                    if (!magicOk) {
+                        console.warn(`[Import ZIP] Blob refusé (magic bytes invalides) pour ${f.id}`);
+                        continue;
+                    }
+                }
                 await travauxStockage.stockerBlob(f.id, blob, f.etudiantDA, f.productionId);
                 nbRestores++;
             }
@@ -1487,7 +1509,7 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                         ${genererLigneRessource('grilles', 'Grilles de critères', analyse.ressources.grilles.count, analyse.ressources.grilles.items)}
                         ${genererLigneRessource('echelles', 'Échelles de performance', analyse.ressources.echelles.count, analyse.ressources.echelles.items)}
                         ${genererLigneRessource('productions', 'Productions', analyse.ressources.productions.count, analyse.ressources.productions.items)}
-                        ${analyse.ressources.cartouches.count > 0 ? genererLigneRessource('cartouches', 'Cartouches de rétroaction', analyse.ressources.cartouches.count, analyse.ressources.cartouches.items.map(c => ({nom: c.count + ' pour grille ' + c.grilleId.substring(0,8)}))) : ''}
+                        ${analyse.ressources.cartouches.count > 0 ? genererLigneRessource('cartouches', 'Cartouches de rétroaction', analyse.ressources.cartouches.count, analyse.ressources.cartouches.items.map(c => ({id: 'cartouches_' + c.grilleId, nom: c.count + ' pour grille ' + c.grilleId.substring(0,8)}))) : ''}
                     </div>
                 </div>
                 ` : ''}
@@ -2863,20 +2885,23 @@ async function executerImportSelectif() {
             }
         }
 
-        // Cartouches - ✅ MODIFIÉ pour import sélectif individuel
+        // Cartouches - #383 (audit 5 août, rapport A2) : la modale liste UNE ligne
+        // par grille avec data-item-id = clé `cartouches_<grilleId>` — le filtre
+        // se fait donc PAR CLÉ. L'ancien filtre comparait les ids AGRÉGÉS de la
+        // modale (`cartouches_0`, `cartouches_1`…) aux ids INDIVIDUELS des
+        // cartouches : aucune correspondance possible, cocher « Cartouches »
+        // n'importait JAMAIS rien.
         if (hasCheckedItems('cartouches')) {
             const selectedIds = getCheckedItemIds('cartouches');
             let nbCartouches = 0;
             Object.keys(donnees).forEach(cle => {
-                if (cle.startsWith('cartouches_')) {
+                if (cle.startsWith('cartouches_') && selectedIds.includes(cle)) {
                     const cartouches = parseValeur(donnees[cle]);
                     if (Array.isArray(cartouches) && cartouches.length > 0) {
                         const cartouchesExistantes = db.getSync(cle, []);
-                        // Filtrer par sélection et assainir via SCHEMAS_IMPORT.cartouche
-                        // (descend dans criteres, niveaux, commentaires — voir
-                        // MODELE-MENACES.md §3.1.bis).
+                        // Assainir via SCHEMAS_IMPORT.cartouche (descend dans
+                        // criteres, niveaux, commentaires — MODELE-MENACES §3.1.bis).
                         const cartouchesSelectionnees = cartouches
-                            .filter(c => selectedIds.includes(c.id) || selectedIds.includes(c.nom))
                             .map(c => ({
                                 ...assainirObjet(c, SCHEMAS_IMPORT.cartouche),
                                 dateImport: new Date().toISOString(),
