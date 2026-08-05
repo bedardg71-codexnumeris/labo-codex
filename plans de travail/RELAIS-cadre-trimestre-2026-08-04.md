@@ -394,6 +394,24 @@ exactement la semaine du 12 octobre.
 
 ## Ce qui reste à trancher par Grégoire
 
+> **✅ TRANCHÉ le 4 août 2026 au soir (Grégoire, via Claude Code, question fermée) :**
+>
+> 1. **Fusion immédiate** : #374 d'abord, #373 absorbé dedans (« Il n'y a pas de migration,
+>    puisqu'aucune donnée. Pas de souci. » — NB Claude Code : les 2 congés déjà saisis sur
+>    A2026 seront migrés quand même, filet trivial). Une carte « Journées sans cours »,
+>    une clé, natures institutionnel / férié / personnel, reprise optionnelle partout.
+> 2. **Semaine de planification : 12-16 octobre, bloc simple** (comme le CSV de séquence).
+> 3. **Semaine d'examens : corrigée par Grégoire lui-même** (14→18/12, fait dans l'UI).
+> 4. **Pas de statut « RC » dédié** — absorbé dans le bloc 12-16 oct (cohérent avec 2) ;
+>    la Journée Carrière du 9 nov = congé institutionnel avec reprise (déjà exprimable).
+>
+> ⚠ **Renumérotation au versement** : #366-#368 de ce relais entrent en collision avec les
+> #366-#368 déjà pris dans `BACKLOG.md` sur la branche d'alignement (badge « En évolution »,
+> namespacing `planification_seances`, migration carte 601-101). Verser les items de ce
+> relais sous **#369-#378** après le merge.
+
+Questions d'origine (conservées pour trace) :
+
 1. **#374 avant ou après #373** — fusionner les deux cartes maintenant, ou ajouter « Férié »
    deux fois puis fusionner à l'automne.
 2. **Semaine de planification : 12-16 octobre ou 14-16 ?** Le calendrier officiel distingue
