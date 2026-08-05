@@ -18618,10 +18618,16 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 .planif-note-evolution {
     font-size: 0.82rem;
     margin-top: -6px;
+    /* Demande Grégoire (4 août soir) : phrase EN COULEUR, assortie au badge */
+    color: var(--section-conception);
 }
 .mode-clair .planif-badge-evolution {
     color: color-mix(in srgb, var(--section-conception) 55%, #4a3f10);
     background: color-mix(in srgb, var(--section-conception) 22%, transparent);
+}
+/* Note : mix plus sombre que le badge (texte courant sur fond blanc → 4.5:1) */
+.mode-clair .planif-note-evolution {
+    color: color-mix(in srgb, var(--section-conception) 30%, #4a3f10);
 }
 
 /* === SOMMAIRE DE NAVIGATION (palette Navigation) === */
