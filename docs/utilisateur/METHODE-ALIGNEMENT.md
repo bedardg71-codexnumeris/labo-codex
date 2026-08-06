@@ -172,6 +172,38 @@ Faut-il : les garder indépendants ? Faire du personnalisé un *raffinement* du
 dérivé ? Signaler leur divergence comme un défaut d'alignement ? À trancher
 par l'usage, pas d'avance.
 
+### 4.1 bis — Diagnostic : pourquoi l'objectif est introuvable
+
+Constat de Grégoire (6 août) : *« J'ai cherché à quel endroit était l'objectif
+des leçons, et je ne le trouve pas de façon rapide et intuitive. »*
+
+Vérification au code : le constat est **structurel**, pas un manque d'habitude.
+L'objectif de leçon existe à **trois endroits distincts, dont aucun n'est la
+carte elle-même**.
+
+| # | Emplacement | Contenu | Problème d'accès |
+|---|-------------|---------|------------------|
+| 1 | **Vue leçon** (niveau 3 de la carte) | Objectif personnalisé, texte libre éditable | `ouvrirLecon()` fait `zoneTravail.style.display = 'none'` → **la carte disparaît**. On ne peut jamais voir l'objectif *et* la carte ensemble. |
+| 2 | **Organisateur** (autre sous-onglet) | Objectif *dérivé* des idées maîtresses, formulé automatiquement | Hors de la carte ; accès par deux menus déroulants (séquence, puis leçon). |
+| 3 | **Badge 🎯** sur le nœud | Rien — signale la seule *présence* d'un objectif | **N'apparaît que si l'objectif existe déjà** (condition `_seancesDOM[n.id].objectifPersonnalise`). |
+
+**La cause racine est le point 3** : le seul indice visuel de l'existence de la
+fonctionnalité n'apparaît **qu'après** l'avoir utilisée. Une leçon sans
+objectif n'offre **aucune affordance** — rien n'indique qu'un champ objectif
+existe. C'est un cercle : pour découvrir la fonction, il faut déjà s'en être
+servi.
+
+**▣ GÉNÉRAL — principe candidat.** *Ce qui structure la conception doit être
+visible sur l'objet conçu, pas dans une vue qui le remplace.* L'objectif est
+la boussole de la leçon : il doit être lisible au moment où l'on dispose les
+connaissances, les activités et les évaluations — donc **dans** la carte, pas
+à côté.
+
+**Besoin exprimé (6 août)** : voir l'objectif de chaque leçon **directement
+dans la carte mentale**, pour organiser l'ensemble en le gardant à l'œil ; puis
+en entrant dans la leçon, disposer connaissances / activités / évaluations
+**orientées par cet objectif**.
+
 ### 4.2 ⚠ Risque à connaître AVANT toute saisie massive
 
 L'objectif personnalisé, les notes de leçon et les rétroactions d'activité
@@ -219,33 +251,59 @@ sommaire). Est-ce suffisant, ou faut-il un lien explicite de progression ?
 
 ## 5. Séquence, séance, leçon : la question de vocabulaire
 
-**◈ OUVERT — à trancher tôt, car tout le reste en dépend.**
+### 5.1 ✅ TRANCHÉ (6 août) — la séquence est logique, pas temporelle
 
-Trois notions se recouvrent partiellement, et le cas de Grégoire les tend :
+**▣ GÉNÉRAL.** La séquence est une unité **logique** : un groupe de leçons
+tendues vers un objectif commun. Sa taille **plancher** est en pratique la
+semaine ; elle n'a pas de plafond.
 
-| Notion | Définition du cadre théorique | Proposition de Grégoire (A2026) |
-|--------|-------------------------------|--------------------------------|
-| **Séquence** | Groupe de leçons vers un **objectif commun** (unité *logique*) | **Une semaine** (unité *temporelle*) |
-| **Séance** | Rencontre physique héritée du calendrier | 2 par semaine, 2 périodes chacune |
-| **Leçon** | Unité d'enseignement à structure interne | ◈ rapport à la séance non tranché |
+Formulation retenue : *l'unité de séquence la plus petite est probablement la
+semaine, mais une séquence peut s'étendre sur plusieurs semaines.*
 
-Deux questions en découlent :
+Ceci confirme le cadre théorique et écarte l'équation « séquence = semaine »
+comme règle. La semaine reste un **repère de grandeur**, pas une définition.
 
-1. **La séquence est-elle temporelle ou logique ?** Si « séquence = semaine »,
-   le conteneur devient un calendrier et perd sa fonction de regroupement par
-   intention. Un apprentissage qui s'étend sur trois semaines n'aurait alors
-   plus de contenant propre. À l'inverse, l'ancrage temporel rend le budget de
-   temps immédiatement lisible. **Les deux lectures sont défendables** — mais
-   elles produisent des cartes très différentes.
+**▢ PARTICULIER (601-101, A2026).**
 
-2. **Une leçon = une séance ?** Si oui, 30 leçons, chacune de 2 périodes. Si
-   non (plusieurs leçons courtes dans une séance, ou une leçon à cheval sur
-   deux séances), la comptabilité du temps (jauge de la palette Navigation,
-   1.29.0) et le sommaire changent de sens.
+| Séquence envisagée | Étendue |
+|--------------------|---------|
+| Introduction | ~1 semaine |
+| Bases de l'analyse littéraire | **plusieurs séquences**, plusieurs semaines |
 
-**▣ GÉNÉRAL en germe.** Quelle que soit la réponse, la méthode générale devra
-énoncer que **l'enseignant choisit ce que la séquence signifie pour lui**, et
-que l'outil doit rendre ce choix explicite plutôt que le supposer.
+### 5.2 ◈ OUVERT — le niveau au-dessus de la séquence
+
+Le cas des « bases de l'analyse littéraire » révèle un besoin non couvert :
+un regroupement **au-dessus** de la séquence — ce que Grégoire nomme
+provisoirement *modules*, *grands thèmes* ou *grands objectifs*.
+
+**État de l'outil.** La hiérarchie est **strictement à trois niveaux** :
+
+```
+Séquence  ⊃  Leçon  ⊃  Activités / Soutien / Révision / Évaluation
+```
+
+`peutContenir()` (planification-carte.js:1969) autorise **uniquement**
+`séquence → leçon`. **Une séquence ne peut pas en contenir une autre.**
+
+**Deux voies possibles, à trancher :**
+
+| Voie | Mécanisme | Coût | Effet |
+|------|-----------|------|-------|
+| **A — Imbrication** | Autoriser séquence ⊃ séquence | Structurel (navigation, sommaire, jauge, comptabilité du temps) | Le module *contient* visuellement ses séquences |
+| **B — Lien** | Relier une **Idée maîtresse** à plusieurs séquences | **Existe déjà** (`idee-maitresse>sequence` = « se concrétise dans ») | Le module *chapeaute* sans contenir |
+
+La voie B est déjà outillée et conforme au cadre théorique (l'idée maîtresse
+est justement le « concept-parapluie qui organise le contenu »). Sa limite :
+un lien ne se voit pas comme une imbrication — le regroupement reste abstrait.
+
+### 5.3 ◈ OUVERT — une leçon = une séance ?
+
+Si oui : 30 leçons de 2 périodes. Sinon (plusieurs leçons courtes dans une
+séance, ou une leçon à cheval sur deux séances), la comptabilité du temps
+(jauge de la palette Navigation, 1.29.0) et le sommaire changent de sens.
+
+**▣ GÉNÉRAL en germe.** L'enseignant choisit ce que la séquence signifie pour
+lui ; l'outil doit rendre ce choix explicite plutôt que le supposer.
 
 ---
 
@@ -255,9 +313,10 @@ Chaque friction rencontrée pendant l'alignement réel est consignée ici :
 date, geste empêché, décision prise. Une friction n'est pas un bug à
 contourner — c'est le signal qui dicte le prochain outil à construire.
 
-| Date | Geste voulu | Ce qui s'est passé | Décision / suite |
-|------|-------------|--------------------|------------------|
-| _(à remplir au fil de la session)_ | | | |
+| # | Date | Geste voulu | Ce qui s'est passé | Décision / suite |
+|---|------|-------------|--------------------|------------------|
+| **F1** | 6 août | Trouver et poser l'objectif d'une leçon | Introuvable « de façon rapide et intuitive ». Diagnostic §4.1 bis : 3 emplacements, aucun dans la carte ; le badge 🎯 n'apparaît qu'une fois l'objectif saisi → aucune affordance au départ. | ◈ À concevoir : rendre l'objectif visible **sur le nœud leçon** dans la carte, et saisissable sans quitter la carte. |
+| **F2** | 6 août | Regrouper plusieurs séquences sous un grand thème | Impossible : `peutContenir()` n'autorise que séquence → leçon. | ◈ Trancher voie A (imbrication) vs voie B (lien vers idée maîtresse, déjà outillé) — §5.2. |
 
 ---
 
