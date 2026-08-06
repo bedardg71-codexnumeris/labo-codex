@@ -375,6 +375,9 @@ contourner — c'est le signal qui dicte le prochain outil à construire.
 |---|------|-------------|--------------------|------------------|
 | **F1** | 6 août | Trouver et poser l'objectif d'une leçon | Introuvable « de façon rapide et intuitive ». Diagnostic §4.1 bis : 3 emplacements, aucun dans la carte ; le badge 🎯 n'apparaît qu'une fois l'objectif saisi → aucune affordance au départ. | ✅ **LIVRÉ (1.32.0)** — objectif dans le bloc leçon, badge-bascule toujours présent, stockage sur le nœud. |
 | **F2** | 6 août | Regrouper plusieurs séquences sous un grand thème | Impossible : `peutContenir()` n'autorise que séquence → leçon. | ✅ Tranché : voie A, séquences de séquences (§5.2). À livrer **après** F1. |
+| **F3** | 6 août | Voir ses séquences dans l'ordre du trimestre | Vue calendrier : **Sem. 1 → Sem. 15 → Sem. 9**. Le numéro de semaine est dans le titre, pas dans `metadata.semaineDebut` → tri inopérant. | ◈ Chantier planificateur (§6 quater). Préalable : faire du temps une **donnée**. |
+| **F4** | 6 août | Replier un objectif sans perdre le reste | Les badges d'alignement (crochets) disparaissaient au repli. | ✅ Corrigé (1.33.1) — ordre d'appel : reconstruire le DOM **puis** reposer les badges. |
+| **F5** | 6 août | Voir le travail livré dans son Chrome local | Rien ne changeait : `?v=` figés (cache), puis branche `main` au lieu de la branche de travail. | ✅ Cache-busting systématisé. **▣ Leçon générale** : sur ce projet, tout fichier modifié doit voir son `?v=` bumpé — sinon le navigateur sert l'ancienne version (classe #364). |
 
 ---
 
@@ -525,6 +528,102 @@ disparaît sinon. Ni troncature, ni survol à inventer.
 
 À noter : en **vue globale compacte**, les séquences sont résumées et les
 leçons n'apparaissent pas — la question ne se pose qu'au niveau séquence.
+
+---
+
+## 6 quater. Deux vues complémentaires : logique et logistique
+
+**▣ GÉNÉRAL — distinction posée le 6 août.** Concevoir un cours mobilise deux
+raisonnements qui ne se mélangent pas bien :
+
+| Vue | Question | Objets |
+|-----|----------|--------|
+| **Alignement pédagogique** | *Qu'est-ce qui s'enseigne, dans quel ordre logique, et comment le vérifie-t-on ?* | Objectifs, connaissances, activités, évaluations, liens |
+| **Planificateur** (« Vue calendrier ») | *Quand cela tombe-t-il dans le trimestre réel ?* | Semaines, dates, ancrage au calendrier officiel |
+
+L'une organise la **progression** ; l'autre l'**ancre dans le temps**. Un
+enseignant a besoin des deux, mais les tenir séparées évite de confondre
+« ce qui vient logiquement après » et « ce qui tombe la semaine suivante ».
+
+### État réel constaté au code (6 août 2026)
+
+Deux faits qui renversent l'intuition de départ :
+
+1. **La « Vue calendrier » n'est pas un planificateur.** C'est une vue
+   **dérivée, en lecture**, qui réutilise le rendu de la carte
+   (`genererSeancesHTML()`) puis le **découpe en post-traitement DOM** :
+   retirer les flèches d'alignement, ajouter les dates, ajouter des boutons.
+   En faire un vrai planificateur suppose de la **réécrire**, pas de
+   l'étendre — un rendu recyclé puis rogné ne supporte pas le glisser-déposer.
+
+2. **L'ancrage temporel est déjà saisi… dans l'alignement.** Les séquences
+   portent `metadata.semaineDebut` / `semaineFin`, saisis dans l'inspecteur de
+   la carte, et l'Organisateur ne fait que les **lire** (tri des séquences,
+   en-têtes « Sem. 3–5 », exports).
+
+3. **Mais personne ne les remplit — et ça se voit.** Dans la Vue calendrier
+   réelle du 601-101 (capture du 6 août), les séquences s'affichent dans
+   l'ordre **Sem. 1 → Sem. 15 → Sem. 9**. Le tri par `semaineDebut`
+   (`organisateur.js:1621`) retombe sur sa valeur de repli `999` pour toutes,
+   parce que le numéro de semaine vit dans le **titre**, en texte libre, pas
+   dans la métadonnée prévue pour lui. Même chose pour les leçons, nommées
+   « Séance 1 (2 périodes) » — position et durée écrites à la main.
+
+**▣ GÉNÉRAL — ce que cette observation démontre.** Un repère écrit dans un
+titre est **invisible pour l'outil** : il ne peut ni trier, ni compter, ni
+avertir. Tant que la semaine reste du texte, le planificateur ne peut rien en
+faire. Faire du temps une **donnée** est donc le préalable au chantier, pas
+une de ses fonctionnalités.
+
+### ◈ LA décision structurante : qui possède l'ancrage temporel ?
+
+La proposition (« c'est dans le planificateur que les semaines s'organisent ;
+l'alignement les affiche si on le souhaite ») **renverse la propriété
+actuelle**. C'est une question de Single Source of Truth, pas d'interface :
+
+| | Aujourd'hui | Proposé |
+|---|---|---|
+| **Écrit** la semaine | Inspecteur de la carte | Planificateur |
+| **Lit** la semaine | Organisateur, exports | Carte (affichage optionnel), exports |
+
+Tant qu'elle n'est pas tranchée, tout champ temporel ajouté à la carte est de
+la dette à défaire. **À trancher avant de coder l'un ou l'autre.**
+
+**▣ GÉNÉRAL — principe candidat.** *Le lieu où une donnée se saisit doit être
+celui où la question se pose.* « En quelle semaine ? » est une question de
+logistique : elle appartient au planificateur. L'alignement l'affiche parce
+que c'est utile, pas parce qu'il la possède.
+
+### Numérotation
+
+Deux repères distincts, à ne pas confondre :
+
+- **Numéro de semaine** — position dans le trimestre (1 à 15). Relève du
+  planificateur.
+- **Numéro de leçon** (`1/30`, `2/30`…) — position dans la progression.
+  Déductible du nombre de leçons ; **calculé, jamais saisi**.
+
+Une numérotation qui se maintient seule au glisser-déposer est un acquis du
+projet (cf. le paquet-de-5 du calendrier, #368) : ne pas la faire ressaisir.
+
+### ◈ Ordre des chantiers — recommandation
+
+**Séquentiel, pas parallèle**, pour trois raisons vérifiées :
+
+1. Le planificateur manipule des séquences ; or la hiérarchie doit encore
+   devenir **récursive** (§5.2, tranché non livré). Le bâtir avant, c'est le
+   refaire après.
+2. La « Vue calendrier » est du post-traitement du rendu de la carte : deux
+   chantiers de front sur des fichiers déjà couplés multiplient les
+   régressions.
+3. Ce n'est pas un bloqueur : nommer ses séquences « Sem. 1 », « Sem. 11 » à
+   la main fonctionne. Le planificateur est un **confort**, l'alignement une
+   **condition**.
+
+**Mais observation parallèle.** Chaque besoin « planificateur » qui surgit
+pendant l'alignement se note au journal des frictions. Quand le chantier
+s'ouvrira, son cahier des charges viendra de l'usage réel — pas d'une
+anticipation.
 
 ---
 
