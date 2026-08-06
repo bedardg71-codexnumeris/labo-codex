@@ -50,7 +50,7 @@ describe('Poignée · rendue sur les feuilles, jamais sur les conteneurs', () =>
     });
 
     it('la taille mémorisée n’est appliquée qu’aux feuilles', () => {
-        expect(carte).toMatch(/if \(!estConteneur && n\.metadata\)[\s\S]{0,220}metadata\.largeur/);
+        expect(carte).toMatch(/if \(!estConteneur && n\.metadata[\s\S]{0,320}metadata\.largeur\) el\.style\.width/);
     });
 });
 
@@ -87,6 +87,23 @@ describe('Poignée · mécanique', () => {
             /poignee\.addEventListener\('dblclick'[\s\S]{0,400}delete donnees\.metadata\.largeur/
         );
         expect(carte).toMatch(/dblclick[\s\S]{0,500}el\.style\.width = '';/);
+    });
+
+    it('le plafond de largeur (max-width 240 px) est libéré quand on retaille', () => {
+        // Sans ça, `el.style.width = 400px` restait plafonné à 240 : la poignée
+        // semblait ne rien faire au-delà.
+        expect(css).toContain('.planif-noeud--taille-libre');
+        expect(css).toMatch(/\.planif-noeud--taille-libre\s*\{[^}]*max-width:\s*none/);
+        // Posée pendant le glissement ET au rendu d'un bloc déjà retaillé.
+        const poses = carte.match(/classList\.add\('planif-noeud--taille-libre'\)/g) || [];
+        expect(poses.length).toBeGreaterThanOrEqual(2);
+        // Et retirée par le retour à la taille automatique.
+        expect(carte).toMatch(/classList\.remove\('planif-noeud--taille-libre'\)/);
+    });
+
+    it('la poignée passe au-dessus des ports de liaison', () => {
+        // Les ports sont en z-index 20 ; le coin doit appartenir à la poignée.
+        expect(css).toMatch(/\.planif-noeud-poignee\s*\{[\s\S]*?z-index:\s*21/);
     });
 
     it('les écouteurs de document sont retirés au relâchement', () => {

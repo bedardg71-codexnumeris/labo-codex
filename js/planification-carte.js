@@ -2614,7 +2614,10 @@ function reconstruireDOM() {
         // Taille choisie à la poignée (feuilles uniquement) : la disposition
         // automatique la respecte, puisqu'elle mesure les enfants au lieu de
         // les contraindre.
-        if (!estConteneur && n.metadata) {
+        if (!estConteneur && n.metadata && (n.metadata.largeur || n.metadata.hauteur)) {
+            // La classe libère le max-width de 240 px, sans quoi une largeur
+            // posée en ligne resterait plafonnée.
+            el.classList.add('planif-noeud--taille-libre');
             if (n.metadata.largeur) el.style.width = n.metadata.largeur + 'px';
             if (n.metadata.hauteur) el.style.height = n.metadata.hauteur + 'px';
         }
@@ -3644,6 +3647,7 @@ function attacherEvenements(el, donnees) {
                 var z = etat.zoom || 1;
                 var w = Math.max(LARGEUR_MIN_NOEUD, largeurDepart + (ev.clientX - departX) / z);
                 var h = Math.max(HAUTEUR_MIN_NOEUD, hauteurDepart + (ev.clientY - departY) / z);
+                el.classList.add('planif-noeud--taille-libre');
                 el.style.width = w + 'px';
                 el.style.height = h + 'px';
                 mettreAJourLiens(id);
@@ -3677,6 +3681,7 @@ function attacherEvenements(el, donnees) {
                 delete donnees.metadata.largeur;
                 delete donnees.metadata.hauteur;
             }
+            el.classList.remove('planif-noeud--taille-libre');
             el.style.width = '';
             el.style.height = '';
             sauvegarder();
