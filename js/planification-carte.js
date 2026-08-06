@@ -1618,11 +1618,14 @@ function ouvrirPanneau(id) {
         }
     }
 
-    // Bouton cloner
+    // Bouton cloner/dupliquer : feuille = instance liée (« Cloner »),
+    // conteneur = copie indépendante en profondeur (« Dupliquer »).
     var btnCloner = document.getElementById('planif-btn-cloner');
     if (btnCloner) {
-        var estConteneur = config && config.conteneur;
-        btnCloner.disabled = !!estConteneur;
+        var estConteneurP = config && config.conteneur;
+        btnCloner.disabled = false;
+        btnCloner.innerHTML = '<img src="icons/icon-copy.svg" alt="" class="btn-inline-icon"> ' + // security-ok: ternaire de deux littéraux statiques, aucune donnée utilisateur
+            (estConteneurP ? 'Dupliquer' : 'Cloner');
         btnCloner.onclick = function() {
             clonerNoeud(id);
             fermerPanneau();
@@ -1845,13 +1848,97 @@ function propagerModification(noeudId, champ, valeur) {
     }
 }
 
+/**
+ * Dupliquer un CONTENEUR en profondeur — copie INDÉPENDANTE, pas une
+ * instance liée (demande Grégoire, 6 août soir : le patron « prototype »
+ * de Keynote — une leçon modèle qu'on duplique puis dont on modifie le
+ * contenu librement). Le clonage-miroir reste réservé aux feuilles : pour
+ * un conteneur, la synchronisation des ENFANTS entre instances n'a pas de
+ * réponse simple, et la metadata propagée embarquerait la semaine.
+ *
+ * La copie : nouveaux ids partout, cloneSourceId null (indépendance),
+ * positions relatives conservées (+40/+40), objectifs recopiés avec de
+ * NOUVEAUX ids (l'unicité prépare #403), liens INTERNES recréés entre les
+ * copies — les liens vers l'extérieur ne sont PAS copiés : la copie n'est
+ * pas encore alignée, ne pas le prétendre.
+ * @returns {string|null} id de la racine copiée
+ */
+function dupliquerConteneurEnProfondeur(noeudId) {
+    var source = etat.noeuds.get(noeudId);
+    if (!source) return null;
+    var configD = TYPES[source.type];
+    if (!configD || !configD.conteneur) return null;
+
+    enregistrerPourUndo();
+    var DX = 40, DY = 40;
+    var correspondance = new Map();
+
+    function copier(nid, parentId) {
+        var n = etat.noeuds.get(nid);
+        if (!n) return null;
+        var nouveau = {
+            id: 'planif-noeud_' + (++etat.compteur),
+            type: n.type,
+            titre: n.titre || '',
+            description: n.description || '',
+            x: n.x + DX,
+            y: n.y + DY,
+            parent: parentId,
+            enfants: [],
+            metadata: JSON.parse(JSON.stringify(n.metadata || {})),
+            cloneSourceId: null
+        };
+        if (Array.isArray(nouveau.metadata.objectifs)) {
+            nouveau.metadata.objectifs.forEach(function(o) { if (o) o.id = nouvelIdObjectif(); });
+        }
+        etat.noeuds.set(nouveau.id, nouveau);
+        correspondance.set(nid, nouveau.id);
+        (n.enfants || []).forEach(function(eid) {
+            var copie = copier(eid, nouveau.id);
+            if (copie) nouveau.enfants.push(copie);
+        });
+        return nouveau.id;
+    }
+
+    var racineId = copier(noeudId, source.parent);
+
+    // Le prototype vit dans une séquence ? La copie y entre aussi.
+    if (source.parent) {
+        var parentD = etat.noeuds.get(source.parent);
+        if (parentD) {
+            if (!parentD.enfants) parentD.enfants = [];
+            parentD.enfants.push(racineId);
+        }
+    }
+
+    for (var entryLD of etat.liens) {
+        var lD = entryLD[1];
+        if (correspondance.has(lD.source) && correspondance.has(lD.cible)) {
+            var idLien = 'planif-lien_' + (++etat.compteurLiens);
+            etat.liens.set(idLien, {
+                id: idLien,
+                source: correspondance.get(lD.source),
+                cible: correspondance.get(lD.cible),
+                type: lD.type
+            });
+        }
+    }
+
+    reconstruireDOM();
+    sauvegarder();
+    if (source.parent) reLayoutAvecAnimation(source.parent);
+    afficherToastLien('Copie indépendante créée — modifie-la sans toucher l\'originale.');
+    return racineId;
+}
+
 function clonerNoeud(noeudId) {
     var source = etat.noeuds.get(noeudId);
     if (!source) return;
     var config = TYPES[source.type];
     if (config && config.conteneur) {
-        afficherToastLien('Les conteneurs ne peuvent pas être clonés.');
-        return;
+        // Conteneur : copie indépendante en profondeur (le miroir lié reste
+        // réservé aux feuilles — cf. dupliquerConteneurEnProfondeur).
+        return dupliquerConteneurEnProfondeur(noeudId);
     }
     enregistrerPourUndo();
 
@@ -2813,7 +2900,11 @@ function _collecterDescendants(noeudId, ensemble) {
 }
 
 function reconstruireDOM() {
-    if (coucheNoeuds) coucheNoeuds.innerHTML = '';
+    // Sans canevas monté (module pas encore initialisé, ou bac à sable de
+    // test), il n'y a rien à reconstruire — les DONNÉES restent la vérité,
+    // le rendu suivra au montage.
+    if (!coucheNoeuds) return;
+    coucheNoeuds.innerHTML = '';
     if (coucheLiens) coucheLiens.innerHTML = '';
 
     // (L'objectif de leçon vit sur le nœud — `metadata.objectif` — depuis le
@@ -3269,20 +3360,24 @@ function attacherEvenements(el, donnees) {
         }
 
         // ⌥ (Mac) / Alt (Windows) + glisser : dupliquer le bloc et glisser le
-        // doublon (4 août 2026, exercice 601-101). Conteneurs non clonables :
-        // clonerNoeud l'explique (toast) et on retombe sur le drag normal.
+        // doublon (4 août 2026, exercice 601-101). Feuille = instance liée ;
+        // conteneur = copie indépendante en profondeur (6 août soir).
         if (e.altKey) {
             var cloneId = clonerNoeud(id);
             if (cloneId) {
                 var clone = etat.noeuds.get(cloneId);
                 var cloneEl = document.getElementById(cloneId);
                 if (clone && cloneEl) {
-                    // Le doublon part de la position de la source (pas du
-                    // décalage de ⌘D) puis suit le curseur.
-                    clone.x = donnees.x;
-                    clone.y = donnees.y;
-                    cloneEl.style.left = clone.x + 'px';
-                    cloneEl.style.top = clone.y + 'px';
+                    if (!estConteneur) {
+                        // Le doublon (feuille) part de la position de la source
+                        // (pas du décalage de ⌘D) puis suit le curseur. Un
+                        // CONTENEUR copié garde son +40/+40 : téléporter sa
+                        // racine seule décollerait ses enfants.
+                        clone.x = donnees.x;
+                        clone.y = donnees.y;
+                        cloneEl.style.left = clone.x + 'px';
+                        cloneEl.style.top = clone.y + 'px';
+                    }
                     cloneEl.dispatchEvent(new MouseEvent('mousedown', {
                         bubbles: true, cancelable: true,
                         clientX: e.clientX, clientY: e.clientY, button: 0
@@ -6292,6 +6387,8 @@ window.planificationCarte = {
     basculerDetailLecon: basculerDetailLecon,
     // Lot 3 : déplacement dans la grille + annulation
     deposerDansGrille: deposerDansGrille,
+    dupliquerConteneurEnProfondeur: dupliquerConteneurEnProfondeur,
+    clonerNoeud: clonerNoeud,
     deplacerSequenceVersSemaine: deplacerSequenceVersSemaine,
     annuler: annuler,
     retablir: retablir,
