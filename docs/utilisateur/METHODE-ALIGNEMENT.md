@@ -344,6 +344,57 @@ Ce n'est pas rédhibitoire — le nom choisi n'aurait d'effet que dans le module
 Alignement — mais l'aide contextuelle et les messages devront être écrits en
 conséquence, et la porte de renommage devrait le signaler.
 
+### ✅ Cours ≠ leçon — la distinction qui ferme la collision
+
+Précision du 6 août, et elle tranche la question du paragraphe précédent :
+
+> **Le cours**, c'est l'objet **disciplinaire** inscrit au programme (601-101).
+> **La leçon**, c'est ce qui est **délivré en classe**.
+
+Les deux mots ne sont donc pas interchangeables, et « cours » ne devrait
+**pas** être proposé comme renommage de *leçon* : ce serait effacer une
+distinction que l'enseignant tient pour importante. L'application, qui réserve
+déjà `cours` à l'entité ministérielle, est alignée sur cette lecture.
+
+**▣ GÉNÉRAL.** *Ce qui est au programme n'est pas ce qui se passe en classe.*
+C'est précisément l'écart que l'alignement pédagogique cherche à rendre
+visible — d'où l'importance de ne pas le dissoudre dans le vocabulaire.
+
+### La granularité complète (décrite le 6 août)
+
+```
+Ensembles          modules, étapes — séquences de séquences (§5.2)
+  └─ Séquence      regroupement, renommable
+      └─ Leçon     ce qui est délivré en classe ; porte les objectifs
+          └─ Période   unité courte, 50 / 55 / 60 min selon le collège
+              └─ Activités
+```
+
+**Ce qui existe déjà.** La durée d'une période est **paramétrable par
+trimestre** (`dureePeriode`, défaut 55 min, SSOT du domaine horaire —
+`horaire.js:285`). Les charges s'affichent en périodes, jamais en minutes
+converties à la main. La préoccupation « chaque collège a sa durée » est donc
+déjà couverte, y compris l'usage courant qui confond *période* et *heure*.
+
+**◈ OUVERT — la période : unité de mesure ou contenant ?** Question à trancher,
+car les deux lectures produisent des outils différents :
+
+| Lecture | Ce que ça veut dire | État |
+|---------|---------------------|------|
+| **Mesure** | Une activité dure N minutes ; l'outil convertit et affiche « 1,5 période ». La période n'est jamais un lieu. | **C'est l'implémentation actuelle** (1.29.0) |
+| **Contenant** | La leçon se subdivise en périodes ; on place les activités *dans* la période 1 ou 2. | Niveau hiérarchique supplémentaire à créer |
+
+La formulation « à l'intérieur des périodes, il y a des activités » suggère la
+seconde. Mais la première fonctionne déjà et coûte moins cher en structure —
+il faut savoir si le besoin est de *situer* les activités dans la séance ou
+seulement de *compter* le temps.
+
+**◈ OUVERT (rappel) — séance et leçon sont-elles la même chose ?** « Les
+séances peuvent être une leçon » laisse entendre que non toujours. Le cas de
+Grégoire : 1 cours hebdomadaire = 4 périodes = 2 séances. Si une leçon peut
+s'étendre sur deux séances, ou une séance porter deux leçons, la comptabilité
+du temps et le sommaire changent de sens (§5.3).
+
 ### ▣ GÉNÉRAL — ce qui ne se renomme pas : la structure
 
 Le nom est libre ; **le rapport entre les niveaux ne l'est pas**.
