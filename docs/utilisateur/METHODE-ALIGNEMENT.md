@@ -860,7 +860,76 @@ Navigation est un panneau flottant, déplaçable et réductible.)
 
 Report assumé : à traiter après le cœur de l'alignement.
 
-### ◈ Ordre des chantiers — recommandation
+### ◈ Fusionner la palette Navigation et le planificateur ?
+
+Proposition du 6 août, appuyée sur deux captures du 601-101. Le rapprochement
+est justifié : **les deux vues affichent le même arbre**.
+
+| | Palette Navigation | Vue calendrier |
+|---|---|---|
+| Contenu | séquences › leçons | séquences › leçons › **contenus** |
+| Profondeur | 2 niveaux + compteur | 3 niveaux |
+| Rôle | **se déplacer** (clic = aller à) | **lire le déroulé** |
+| Emplacement | palette flottante, dans Alignement | autre onglet |
+
+La Vue calendrier est donc une Navigation **avec un niveau de plus**.
+
+**⚠ La preuve que le doublon coûte déjà quelque chose.** Les deux vues
+affichent les mêmes séquences **dans des ordres différents** : la Navigation
+suit l'ordre **spatial** (position sur la carte, x puis y), la Vue calendrier
+suit `semaineDebut` — qui retombe sur son repli `999` pour toutes (F3). Sur les
+captures : Navigation commence par « Sem. 10 », Vue calendrier par « Sem. 1 ».
+
+Deux lectures du même plan qui ne s'accordent pas sur l'ordre, c'est une source
+de confusion permanente. **Une seule source de rendu = un seul ordre.**
+
+**Ce que la fusion doit préserver** — les deux intentions sont réelles et ne
+doivent pas être sacrifiées l'une à l'autre : se **déplacer** vite (arbre
+compact, clic pour naviguer) et **lire** le déroulé (contenu déplié). La
+réponse naturelle est un **niveau de détail réglable** : replier/déplier le
+contenu des leçons dans un arbre unique.
+
+**⚠ Piège technique, déjà relevé (§ ci-dessus).** La Vue calendrier ne se
+déplace pas telle quelle : elle recycle le rendu de la carte
+(`genererSeancesHTML()`) puis le **découpe en post-traitement DOM**. La fusion
+suppose de **réécrire** ce rendu, pas de le transplanter.
+
+### ◈ Retirer les boutons « Copier » du planificateur ?
+
+Ils servent à copier le contenu vers un plan de cours ou un calendrier, en
+attendant un export repensé.
+
+**⚠ Le zéro-dette ne s'applique pas ici.** La règle est de retirer ce qu'on
+**remplace** — or l'export repensé n'existe pas encore. Les retirer maintenant
+serait une **perte nette** d'un usage réel, pas un nettoyage. Deux cas :
+
+- si ces boutons ne servent plus dans la pratique → les retirer sans regret ;
+- s'ils servent encore → les garder jusqu'à ce que l'export les rende inutiles,
+  et les retirer **dans le même chantier**.
+
+### ◈ Poignée de redimensionnement des blocs
+
+Proposition : une poignée au coin inférieur droit, comme les palettes
+d'Annoter/Évaluer.
+
+**⚠ Ce patron n'existe pas encore.** Les palettes du module Alignement sont
+**déplaçables et réductibles**, pas redimensionnables ; les poignées
+d'Annoter/Évaluer agissent sur un canevas d'annotation, pas sur un panneau. Il
+y a donc du neuf à écrire.
+
+**⚠ Conflit de fond avec la disposition automatique.** Les blocs conteneurs
+sont **calculés** : `reLayoutConteneur` fixe leur largeur et leur hauteur à
+partir de leurs enfants. Une taille posée à la main serait **écrasée au
+prochain ajout d'enfant**. Trois façons de résoudre, à trancher avant de coder :
+
+| Option | Principe | Effet |
+|--------|----------|-------|
+| **A** | Poignée sur les **feuilles seulement** (activités, connaissances, évaluations) | Aucun conflit ; les conteneurs restent calculés |
+| **B** | La poignée fixe une **largeur minimale**, la hauteur reste calculée | Compromis ; règle le cas des titres longs |
+| **C** | La poignée bascule le bloc en **mode manuel** | Le plus libre ; exige un retour explicite à l'automatique, sinon le bloc cesse de suivre son contenu |
+
+L'option A suffit probablement au besoin observé (les blocs qui gênent la
+lecture sont les feuilles au texte long). C'est aussi la seule sans dette.
 
 **Séquentiel, pas parallèle**, pour trois raisons vérifiées :
 
