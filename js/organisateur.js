@@ -1097,9 +1097,6 @@ function rafraichirCalendrier() {
         // Post-traitement : ajouter les dates aux leçons
         ajouterDatesAuxLecons();
 
-        // Post-traitement : ajouter boutons Copier sur séquences et leçons
-        ajouterBoutonsCopier();
-
         // Ajouter listeners de navigation
         calendrierContenu.querySelectorAll('[data-noeud]').forEach(function(el) {
             el.addEventListener('click', function(e) {
@@ -1233,116 +1230,6 @@ function ajouterDatesAuxLecons() {
         });
     } catch(e) {
         console.warn('Dates leçons calendrier:', e);
-    }
-}
-
-/**
- * Copie le contenu de la vue calendrier en texte indenté pour traitement de texte.
- */
-/**
- * Ajoute des boutons « Copier » sur chaque en-tête de séquence et de leçon.
- */
-function ajouterBoutonsCopier() {
-    if (!calendrierContenu) return;
-
-    // Boutons sur les séquences
-    calendrierContenu.querySelectorAll('.planif-cal-sequence-header').forEach(function(header) {
-        var btn = document.createElement('button');
-        btn.className = 'org-cal-btn-copier';
-        btn.textContent = 'Copier';
-        btn.title = 'Copier la séquence';
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            var seqEl = header.closest('.planif-cal-sequence');
-            if (seqEl) {
-                var texte = extraireTexteSequence(seqEl);
-                copierDansPressePapiers(texte, btn);
-            }
-        });
-        header.appendChild(btn);
-    });
-
-    // Boutons sur les leçons
-    calendrierContenu.querySelectorAll('.planif-cal-lecon-header').forEach(function(header) {
-        var btn = document.createElement('button');
-        btn.className = 'org-cal-btn-copier';
-        btn.textContent = 'Copier';
-        btn.title = 'Copier la leçon';
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            var leconEl = header.closest('.planif-cal-lecon');
-            if (leconEl) {
-                var texte = extraireTexteLecon(leconEl, '');
-                copierDansPressePapiers(texte, btn);
-            }
-        });
-        header.appendChild(btn);
-    });
-}
-
-/**
- * Extrait le texte d'une leçon depuis le DOM du calendrier.
- */
-function extraireTexteLecon(leconEl, indent) {
-    var lignes = [];
-    var header = leconEl.querySelector('.planif-cal-lecon-header');
-    var titreLecon = header ? header.querySelector('.planif-cal-titre') : null;
-    var dateLecon = header ? header.querySelector('.org-cal-date-lecon') : null;
-    var dureeLecon = header ? header.querySelector('.planif-cal-duree') : null;
-
-    var l = indent + (titreLecon ? titreLecon.textContent.trim() : 'Leçon');
-    if (dateLecon) l += '  —  ' + dateLecon.textContent.trim();
-    if (dureeLecon) l += '  (' + dureeLecon.textContent.trim() + ')';
-    lignes.push(l);
-
-    // Enfants (connaissances/activités)
-    leconEl.querySelectorAll('.planif-cal-item').forEach(function(itemEl) {
-        var titreItem = itemEl.querySelector('.planif-cal-item-titre');
-        var dureeItem = itemEl.querySelector('.planif-cal-duree');
-        var txt = indent + '    ' + (titreItem ? titreItem.textContent.trim() : '');
-        if (dureeItem) txt += '  (' + dureeItem.textContent.trim() + ')';
-        lignes.push(txt);
-    });
-
-    var total = leconEl.querySelector('.planif-cal-total');
-    if (total) lignes.push(indent + '    ' + total.textContent.trim());
-
-    return lignes.join('\n');
-}
-
-/**
- * Extrait le texte d'une séquence complète (titre + toutes ses leçons).
- */
-function extraireTexteSequence(seqEl) {
-    var lignes = [];
-    var titreSeq = seqEl.querySelector('.planif-cal-titre');
-    var semaines = seqEl.querySelector('.planif-cal-semaines');
-
-    if (titreSeq) {
-        lignes.push(titreSeq.textContent.trim() + (semaines ? '  (' + semaines.textContent.trim() + ')' : ''));
-    }
-
-    seqEl.querySelectorAll('.planif-cal-lecon').forEach(function(leconEl) {
-        lignes.push(extraireTexteLecon(leconEl, '    '));
-    });
-
-    var totalSeq = seqEl.querySelector(':scope > .planif-cal-total');
-    if (totalSeq) lignes.push('    ' + totalSeq.textContent.trim());
-
-    return lignes.join('\n');
-}
-
-/**
- * Copie du texte dans le presse-papiers et montre un feedback visuel.
- */
-function copierDansPressePapiers(texte, btn) {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(texte).then(function() {
-            if (btn) {
-                btn.innerHTML = 'Copié <span class="icone-inline icone-inline--check" aria-hidden="true"></span>';
-                setTimeout(function() { btn.textContent = 'Copier'; }, 1500);
-            }
-        });
     }
 }
 

@@ -2242,6 +2242,10 @@ function detacherDuConteneur(noeudId) {
 
 var _layoutEnCours = new Set();
 var _zoneEnCours = new Set();
+// Bornes de la poignée de redimensionnement (feuilles seulement).
+var LARGEUR_MIN_NOEUD = 100;
+var HAUTEUR_MIN_NOEUD = 44;
+
 var LAYOUT_GAP = 60;
 var LAYOUT_PADDING = 30;
 var LAYOUT_HEADER_H = 45;
@@ -2607,6 +2611,13 @@ function reconstruireDOM() {
         el.style.left = n.x + 'px';
         el.style.top = n.y + 'px';
         el.style.borderColor = obtenirCouleurNoeud(n);
+        // Taille choisie à la poignée (feuilles uniquement) : la disposition
+        // automatique la respecte, puisqu'elle mesure les enfants au lieu de
+        // les contraindre.
+        if (!estConteneur && n.metadata) {
+            if (n.metadata.largeur) el.style.width = n.metadata.largeur + 'px';
+            if (n.metadata.hauteur) el.style.height = n.metadata.hauteur + 'px';
+        }
 
         if (estCompact) {
             // Vue globale compacte : bloc résumé (titre + badge leçons)
@@ -2714,7 +2725,12 @@ function reconstruireDOM() {
                 '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
                 '<div class="planif-noeud-port planif-port-gauche" data-dir="gauche"></div>' +
                 '<div class="planif-noeud-port planif-port-bas" data-dir="bas"></div>' +
-                '<div class="planif-noeud-port planif-port-haut" data-dir="haut"></div>';
+                '<div class="planif-noeud-port planif-port-haut" data-dir="haut"></div>' +
+                // Poignée de redimensionnement — FEUILLES SEULEMENT (option A,
+                // décision du 6 août). Les conteneurs sont dimensionnés par
+                // reLayoutConteneur à partir de leurs enfants : une taille posée
+                // à la main y serait écrasée au prochain ajout.
+                '<div class="planif-noeud-poignee" role="separator" aria-label="Redimensionner ce bloc"></div>';
         }
         attacherEvenements(el, n);
         coucheNoeuds.appendChild(el);
@@ -3607,6 +3623,67 @@ function attacherEvenements(el, donnees) {
             demarrerLien(id, port.dataset.dir, e);
         });
     });
+
+    // === POIGNÉE DE REDIMENSIONNEMENT (feuilles seulement) ===
+    var poignee = el.querySelector('.planif-noeud-poignee');
+    if (poignee) {
+        poignee.addEventListener('mousedown', function(e) {
+            e.stopPropagation();  // sinon le bloc partirait en déplacement
+            e.preventDefault();
+            enregistrerPourUndo();
+
+            var departX = e.clientX;
+            var departY = e.clientY;
+            var largeurDepart = el.offsetWidth;
+            var hauteurDepart = el.offsetHeight;
+
+            var surDeplacement = throttleRAF(function(ev) {
+                // Les deltas sont en pixels ÉCRAN ; les tailles du nœud sont en
+                // coordonnées de carte. Diviser par le zoom, comme le fait la
+                // conversion de position (cf. clientX → coordonnées carte).
+                var z = etat.zoom || 1;
+                var w = Math.max(LARGEUR_MIN_NOEUD, largeurDepart + (ev.clientX - departX) / z);
+                var h = Math.max(HAUTEUR_MIN_NOEUD, hauteurDepart + (ev.clientY - departY) / z);
+                el.style.width = w + 'px';
+                el.style.height = h + 'px';
+                mettreAJourLiens(id);
+            });
+
+            var surRelachement = function() {
+                document.removeEventListener('mousemove', surDeplacement);
+                document.removeEventListener('mouseup', surRelachement);
+                if (!donnees.metadata) donnees.metadata = {};
+                donnees.metadata.largeur = Math.round(el.offsetWidth);
+                donnees.metadata.hauteur = Math.round(el.offsetHeight);
+                sauvegarder();
+                // Le parent se dimensionne d'après ses enfants : il doit
+                // reprendre la mesure du bloc qu'on vient de retailler.
+                if (donnees.parent) {
+                    reLayoutConteneur(donnees.parent);
+                    mettreAJourTousLesBadges();
+                }
+            };
+
+            document.addEventListener('mousemove', surDeplacement);
+            document.addEventListener('mouseup', surRelachement);
+        });
+
+        // Double-clic : revenir à la taille automatique.
+        poignee.addEventListener('dblclick', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            enregistrerPourUndo();
+            if (donnees.metadata) {
+                delete donnees.metadata.largeur;
+                delete donnees.metadata.hauteur;
+            }
+            el.style.width = '';
+            el.style.height = '';
+            sauvegarder();
+            if (donnees.parent) reLayoutConteneur(donnees.parent);
+            mettreAJourTousLesBadges();
+        });
+    }
 
     el.addEventListener('click', function(e) {
         if (e.target.classList.contains('planif-noeud-port')) return;

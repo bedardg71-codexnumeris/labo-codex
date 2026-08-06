@@ -889,6 +889,29 @@ compact, clic pour naviguer) et **lire** le déroulé (contenu déplié). La
 réponse naturelle est un **niveau de détail réglable** : replier/déplier le
 contenu des leçons dans un arbre unique.
 
+### ✅ TRANCHÉ (6 août) — ce qu'on déplace, et où
+
+Dans le planificateur fusionné, **seules les leçons et les niveaux supérieurs
+sont déplaçables**. Les cellules — activités, connaissances, évaluations — se
+traitent dans la carte d'alignement.
+
+**▣ GÉNÉRAL — la règle de partage qui en découle.** Elle prolonge exactement la
+distinction logique / logistique du §6 quater :
+
+| Vue | Ce qu'on y déplace | Geste |
+|-----|--------------------|-------|
+| **Planificateur** | leçons, séquences, ensembles | les situer **dans le temps** |
+| **Alignement** | activités, connaissances, évaluations | **composer** l'intérieur d'une leçon |
+
+Autrement dit : *on déplace dans le temps ce qui a une place dans le
+calendrier, et on compose dans la carte ce qui a une place dans une leçon.* La
+leçon est la charnière — le plancher pédagogique (§5.2) est aussi la plus
+petite unité déplaçable.
+
+Cette règle donne du même coup sa forme à la « réparation en cours de route »
+(§ ci-dessus) : absorber un retard, c'est déplacer des **leçons**, jamais des
+activités isolées.
+
 **⚠ Piège technique, déjà relevé (§ ci-dessus).** La Vue calendrier ne se
 déplace pas telle quelle : elle recycle le rendu de la carte
 (`genererSeancesHTML()`) puis le **découpe en post-traitement DOM**. La fusion
@@ -899,13 +922,10 @@ suppose de **réécrire** ce rendu, pas de le transplanter.
 Ils servent à copier le contenu vers un plan de cours ou un calendrier, en
 attendant un export repensé.
 
-**⚠ Le zéro-dette ne s'applique pas ici.** La règle est de retirer ce qu'on
-**remplace** — or l'export repensé n'existe pas encore. Les retirer maintenant
-serait une **perte nette** d'un usage réel, pas un nettoyage. Deux cas :
-
-- si ces boutons ne servent plus dans la pratique → les retirer sans regret ;
-- s'ils servent encore → les garder jusqu'à ce que l'export les rende inutiles,
-  et les retirer **dans le même chantier**.
+**✅ RETIRÉS (1.36.0).** Le cas « ils ne servent plus » s'applique : Grégoire
+est à ce jour le seul utilisateur de l'application et ne s'en sert pas. Retrait
+complet — boutons, fonctions d'extraction devenues mortes, CSS. L'export
+Markdown de la modale, lui, est intact : c'est une autre fonction.
 
 ### ◈ Poignée de redimensionnement des blocs
 
@@ -928,8 +948,12 @@ prochain ajout d'enfant**. Trois façons de résoudre, à trancher avant de code
 | **B** | La poignée fixe une **largeur minimale**, la hauteur reste calculée | Compromis ; règle le cas des titres longs |
 | **C** | La poignée bascule le bloc en **mode manuel** | Le plus libre ; exige un retour explicite à l'automatique, sinon le bloc cesse de suivre son contenu |
 
-L'option A suffit probablement au besoin observé (les blocs qui gênent la
-lecture sont les feuilles au texte long). C'est aussi la seule sans dette.
+**✅ LIVRÉ (1.36.0) — option A.** Poignée au coin inférieur droit des feuilles
+seulement ; les conteneurs restent calculés. Trois précautions : les deltas
+sont divisés par le **zoom** de la carte (sans quoi la poignée dériverait du
+curseur hors 100 %), une taille minimale borne le geste, et un **double-clic
+rend la main à la taille automatique** — sans retour possible, un bloc retaillé
+cesserait définitivement de suivre son contenu.
 
 **Séquentiel, pas parallèle**, pour trois raisons vérifiées :
 
