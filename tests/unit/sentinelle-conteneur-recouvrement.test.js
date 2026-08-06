@@ -159,6 +159,28 @@ describe('F6/F7 · invariants statiques des gestes', () => {
         expect(sourceCarte).toMatch(/peutEtreEnfant = donnees\.type === 'lecon' \|\| donnees\.type === 'sequence'/);
     });
 
+    it('le parent reste FIGÉ pendant le drag d’un enfant (pas de zone qui poursuit)', () => {
+        // Bug terrain (6 août soir) : mettreAJourZoneConteneur appelé à chaque
+        // mousemove — avec un enfant unique, la zone recalculée SUIT le bloc
+        // 1:1, « la leçon vient toujours avec », impossible d'en sortir.
+        // Reproduit au glisser incrémental (25 pas de 30 px), invisible au
+        // bond unique des sondes précédentes.
+        const casB = sourceCarte.slice(sourceCarte.indexOf('// CAS B'), sourceCarte.indexOf('// CAS C'));
+        const onMoveB = casB.slice(casB.indexOf('function onMoveB'), casB.indexOf('function onUpB'));
+        expect(onMoveB).not.toMatch(/mettreAJourZoneConteneur/);
+
+        const casC = sourceCarte.slice(sourceCarte.indexOf('// CAS C'), sourceCarte.indexOf('// CAS D'));
+        const onMoveC = casC.slice(casC.indexOf('function onMoveC'), casC.indexOf('function onUpC'));
+        expect(onMoveC).not.toMatch(/mettreAJourZoneConteneur/);
+
+        // La zone se réajuste AU RELÂCHEMENT : CAS B via reLayoutAvecAnimation,
+        // CAS C via mettreAJourZoneConteneur quand le bloc reste dans son parent.
+        const onUpC = casC.slice(casC.indexOf('function onUpC'));
+        expect(onUpC).toMatch(/else if \(donnees\.parent\) \{[\s\S]*?mettreAJourZoneConteneur\(donnees\.parent\)/);
+        const onUpB = casB.slice(casB.indexOf('function onUpB'));
+        expect(onUpB).toMatch(/reLayoutAvecAnimation\(donnees\.parent\)/);
+    });
+
     it('le nouveau modèle est documenté dans le panneau Raccourcis', () => {
         expect(sourceIndex).not.toMatch(/⌘\+Glisser/);
         expect(sourceIndex).toMatch(/Un bloc se déplace seul/);
