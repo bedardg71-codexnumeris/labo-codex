@@ -1913,8 +1913,6 @@ function genererLeconMD(lecon, etat, seances, carte, estEleve) {
         }
     }
 
-    if (donnees.notes) md += '**Notes** : ' + donnees.notes + '\n\n';
-
     md += '---\n\n';
     return md;
 }
@@ -1939,7 +1937,7 @@ function parserDuree(texte) {
  * { sequences: [], orphelines: [] }
  *
  * Chaque séquence : { titre, semaineDebut, semaineFin, lecons: [] }
- * Chaque leçon : { titre, dureeMin, objectif, evaluation, notes }
+ * Chaque leçon : { titre, dureeMin, objectif, evaluation }
  */
 function parserPlanMD(texte) {
     var resultat = { sequences: [], orphelines: [] };
@@ -1984,8 +1982,7 @@ function parserPlanMD(texte) {
                 titre: matchLecon[1].trim(),
                 dureeMin: matchLecon[2] ? parserDuree(matchLecon[2].trim()) : 0,
                 objectif: '',
-                evaluation: '',
-                notes: ''
+                evaluation: ''
             };
             if (sequenceCourante) {
                 sequenceCourante.lecons.push(leconCourante);
@@ -2003,9 +2000,6 @@ function parserPlanMD(texte) {
 
             var matchEval = ligne.match(/^\*\*Évaluation\*\*\s*:\s*(.*)/);
             if (matchEval) { leconCourante.evaluation = matchEval[1].trim(); champCourant = 'evaluation'; continue; }
-
-            var matchNotes = ligne.match(/^\*\*Notes\*\*\s*:\s*(.*)/);
-            if (matchNotes) { leconCourante.notes = matchNotes[1].trim(); champCourant = 'notes'; continue; }
 
             // Continuation multi-ligne : texte qui n'est pas un nouveau marqueur
             if (champCourant && ligne.trim() && !(/^#{1,3}\s/.test(ligne)) && !(/^\*\*\w/.test(ligne))) {
@@ -2061,7 +2055,6 @@ function importerPlanDepuisMD(texte, nouvelleCarteMode) {
     }
 
     var noeuds = [];
-    var seancesImport = chargerSeances();
     var compteur = carte.etat.compteur;
     var LAYOUT_X_START = 200;
     var LAYOUT_X_GAP = 350;
@@ -2113,10 +2106,6 @@ function importerPlanDepuisMD(texte, nouvelleCarteMode) {
             // L'objectif est une propriété du nœud (une seule vérité,
             // suit la leçon aux copies et imports inter-trimestre).
             if (lecon.objectif) leconNoeud.metadata.objectif = lecon.objectif;
-            if (lecon.notes) {
-                if (!seancesImport[leconId]) seancesImport[leconId] = {};
-                seancesImport[leconId].notes = lecon.notes;
-            }
         }
 
         noeuds.push(seqNoeud);
@@ -2146,18 +2135,14 @@ function importerPlanDepuisMD(texte, nouvelleCarteMode) {
         noeuds.push(orpNoeud);
 
         if (orp.objectif) orpNoeud.metadata.objectif = orp.objectif;
-        if (orp.notes) {
-            if (!seancesImport[orpId]) seancesImport[orpId] = {};
-            seancesImport[orpId].notes = orp.notes;
-        }
     }
 
     // Mettre à jour le compteur et injecter
     carte.etat.compteur = compteur;
     carte.injecterNoeuds(noeuds);
 
-    // Sauvegarder les séances en un seul write
-    sauvegarderSeances(seancesImport);
+    // (Plus rien à écrire dans la clé des séances : l'objectif voyage sur le
+    // nœud et les notes de leçon ont été retirées.)
 
     return { sequences: nbSeq, lecons: nbLecons };
 }

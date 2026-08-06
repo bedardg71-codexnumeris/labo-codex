@@ -18874,8 +18874,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     border-radius: 8px;
     margin-left: 4px;
 }
-.planif-vue-lecon-objectif,
-.planif-vue-lecon-notes {
+.planif-vue-lecon-objectif {
     padding: 10px 14px;
     border: 1px solid var(--planif-couleur-bordure);
     border-radius: 8px;
@@ -18887,19 +18886,16 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     outline: none;
     transition: border-color 0.15s;
 }
-.planif-vue-lecon-objectif:focus,
-.planif-vue-lecon-notes:focus {
+.planif-vue-lecon-objectif:focus {
     border-color: var(--planif-couleur-selection);
     box-shadow: var(--focus-ring);
 }
-.planif-vue-lecon-objectif:empty::before,
-.planif-vue-lecon-notes:empty::before {
+.planif-vue-lecon-objectif:empty::before {
     content: attr(data-champ);
     color: var(--texte-secondaire);
     opacity: 0.5;
 }
 .planif-vue-lecon-objectif:empty::before { content: 'Objectif de la leçon…'; }
-.planif-vue-lecon-notes:empty::before { content: 'Notes…'; }
 .planif-vue-lecon-activites {
     display: flex;
     flex-direction: column;
@@ -18937,12 +18933,10 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 }
 .mode-clair .planif-vue-lecon-breadcrumb,
 .mode-clair .planif-vue-lecon-objectif,
-.mode-clair .planif-vue-lecon-notes,
 .mode-clair .planif-vue-lecon-act-titre {
     color: var(--texte-principal);
 }
-.mode-clair .planif-vue-lecon-objectif,
-.mode-clair .planif-vue-lecon-notes {
+.mode-clair .planif-vue-lecon-objectif {
     background: #ffffff;
     border-color: rgba(3, 46, 92, 0.15);
 }

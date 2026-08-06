@@ -5404,10 +5404,8 @@ function rendreVueLecon(leconId) {
     var lec = etat.noeuds.get(leconId);
     if (!lec) { vueLecon.innerHTML = ''; return; }
 
-    // Données de séances (objectif, notes, durée)
-    var seances = {};
-    try { seances = db.getSync(window.cle(CLE_SEANCES), {}); } catch(e) {}
-    var donnees = seances[leconId] || {};
+    // (Plus aucune lecture de CLE_SEANCES ici : l'objectif est porté par le
+    // nœud, et la section « Notes » a été retirée.)
     var duree = lec.metadata && lec.metadata.duree ? lec.metadata.duree : '';
 
     // Séquence parente
@@ -5457,37 +5455,25 @@ function rendreVueLecon(leconId) {
         html += '</div>';
     }
 
-    // Notes
-    html += '<div class="planif-vue-lecon-section">';
-    html += '<h4>Notes</h4>';
-    html += '<div class="planif-vue-lecon-notes" contenteditable="true" data-lecon-id="' + leconId + '" data-champ="notes">' +
-            echapperHtml(donnees.notes || '') + '</div>';
-    html += '</div>';
+    // (Section « Notes » RETIRÉE le 6 août 2026 — décision Grégoire : champ
+    // sans fonction à ce stade. Retiré partout, y compris de l'export et de
+    // l'import Markdown de l'Organisateur.)
 
     html += '</div>';
     vueLecon.innerHTML = html;
 
-    // Brancher la sauvegarde sur les champs éditables
+    // Brancher la sauvegarde sur les champs éditables. L'objectif est le SEUL
+    // champ de cette vue, et il vit sur le nœud — une seule vérité, partagée
+    // avec la carte.
     vueLecon.querySelectorAll('[contenteditable]').forEach(function(el) {
         el.addEventListener('blur', function() {
             var lid = el.dataset.leconId;
-            var champ = el.dataset.champ;
-            if (!lid || !champ) return;
-            // L'objectif vit sur le nœud (une seule vérité, partagée avec la
-            // carte) ; les notes restent dans CLE_SEANCES en attendant #367.
-            if (champ === 'objectif') {
-                var noeud = etat.noeuds.get(lid);
-                if (!noeud) return;
-                if (!noeud.metadata) noeud.metadata = {};
-                noeud.metadata.objectif = el.textContent.trim();
-                sauvegarder();
-                return;
-            }
-            var s = {};
-            try { s = db.getSync(window.cle(CLE_SEANCES), {}); } catch(e2) {}
-            if (!s[lid]) s[lid] = {};
-            s[lid][champ] = el.textContent.trim();
-            try { db.setSync(window.cle(CLE_SEANCES), s); } catch(e3) {}
+            if (!lid || el.dataset.champ !== 'objectif') return;
+            var noeud = etat.noeuds.get(lid);
+            if (!noeud) return;
+            if (!noeud.metadata) noeud.metadata = {};
+            noeud.metadata.objectif = el.textContent.trim();
+            sauvegarder();
         });
     });
 }

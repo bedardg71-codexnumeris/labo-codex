@@ -188,8 +188,12 @@ describe('F1 · invariants de rendu et de routage', () => {
     });
 
     it('la vue leçon route le champ « objectif » vers le nœud, pas vers CLE_SEANCES', () => {
+        // Réaligné le 6 août après le retrait des notes : l'objectif étant
+        // devenu le SEUL champ de cette vue, la garde a changé de forme
+        // (aiguillage sur `champ` → garde d'entrée). L'invariant vérifié est
+        // le même : la saisie atterrit sur le nœud, jamais dans CLE_SEANCES.
         expect(source).toMatch(/data-champ="objectif"/);
-        expect(source).toMatch(/if \(champ === 'objectif'\)[\s\S]{0,260}noeud\.metadata\.objectif = /);
+        expect(source).toMatch(/dataset\.champ !== 'objectif'\) return;[\s\S]{0,220}noeud\.metadata\.objectif = /);
         // L'ancien champ ne doit plus être écrit par la vue leçon.
         expect(source).not.toMatch(/data-champ="objectifPersonnalise"/);
     });
@@ -237,5 +241,45 @@ describe('F1 · l’Organisateur lit et écrit le même objectif que la carte', 
     it('la carte expose bien les deux portes utilisées par l’Organisateur', () => {
         expect(source).toMatch(/objectifDeLeconParId: objectifDeLeconParId/);
         expect(source).toMatch(/definirObjectifLecon: definirObjectifLecon/);
+    });
+});
+
+// =======================================================================
+// E. RETRAIT DES NOTES DE LEÇON (décision Grégoire, 6 août)
+// =======================================================================
+// Le champ « Notes » de la vue leçon n'avait pas de fonction à ce stade. Il
+// n'était PAS inerte pour autant : il participait au cycle export/import
+// Markdown de l'Organisateur. Retiré des trois endroits d'un coup — sinon
+// l'import aurait continué de peupler une clé que plus rien n'affiche.
+describe('F1 · les notes de leçon sont retirées partout', () => {
+    const organisateur = readFileSync(path.join(racineProjet, 'js', 'organisateur.js'), 'utf8');
+    const css = readFileSync(path.join(racineProjet, 'styles.css'), 'utf8');
+
+    it('la vue leçon n’a plus de champ Notes', () => {
+        expect(source).not.toContain('planif-vue-lecon-notes');
+        expect(source).not.toMatch(/data-champ="notes"/);
+    });
+
+    it('l’export Markdown n’écrit plus de section Notes', () => {
+        expect(organisateur).not.toMatch(/\*\*Notes\*\* : /);
+    });
+
+    it('le parseur Markdown ne reconnaît plus le marqueur Notes', () => {
+        expect(organisateur).not.toMatch(/matchNotes/);
+    });
+
+    it('le CSS des notes est retiré (pas de règle orpheline)', () => {
+        expect(css).not.toContain('planif-vue-lecon-notes');
+    });
+
+    it('l’import n’ouvre plus d’aller-retour inutile sur la clé des séances', () => {
+        // Après le retrait, plus aucune écriture n'avait lieu entre le
+        // chargerSeances() et le sauvegarderSeances() de l'import.
+        expect(organisateur).not.toContain('seancesImport');
+    });
+
+    it('les notes d’étapes de l’enseignement explicite sont INTACTES (autre donnée)', () => {
+        // Garde-fou : `org-ee-notes` n'a rien à voir avec les notes de leçon.
+        expect(organisateur).toContain('org-ee-notes');
     });
 });
