@@ -91,6 +91,12 @@ function placerCurseurEnFin(el) {
     } catch (e) { /* focus seul suffit */ }
 }
 
+// Ligne d'accueil transitoire après un clic sur « + ». Un objectif vide n'est
+// jamais persisté (appliquerObjectifs écarte les lignes vides) : cet état dit
+// au rendu d'ouvrir une ligne à remplir au bon rang, sans polluer les données.
+// { noeudId, rang } ou null.
+var _ajoutObjectif = null;
+
 var _compteurObjectif = 0;
 function nouvelIdObjectif() {
     _compteurObjectif++;
@@ -2604,15 +2610,42 @@ function reconstruireDOM() {
             var htmlObjectifs = '';
             if (objDeplie) {
                 htmlObjectifs = '<div class="planif-noeud-objectifs">';
-                for (var io_ = 0; io_ < objs.length; io_++) {
-                    htmlObjectifs += '<div class="planif-noeud-objectif" contenteditable="true" data-obj-rang="' + io_ + '">' +
-                                     echapperHtml(objs[io_].texte) + '</div>';
+                if (objs.length === 0) {
+                    // Liste vide : une ligne \u00e0 remplir, sans boutons \u2014 il n'y a
+                    // encore rien \u00e0 retirer ni apr\u00e8s quoi ins\u00e9rer.
+                    htmlObjectifs += '<div class="planif-noeud-objectif-ligne">' +
+                                     '<div class="planif-noeud-objectif" contenteditable="true" data-obj-rang="0"' +
+                                     ' data-placeholder="Sera en mesure de\u2026"></div>' +
+                                     '</div>';
+                } else {
+                    var rangAccueil = (_ajoutObjectif && _ajoutObjectif.noeudId === n.id)
+                        ? _ajoutObjectif.rang : -1;
+                    var rangRendu = 0;
+                    for (var io_ = 0; io_ <= objs.length; io_++) {
+                        if (io_ === rangAccueil) {
+                            htmlObjectifs += '<div class="planif-noeud-objectif-ligne">' +
+                                '<div class="planif-noeud-objectif" contenteditable="true"' +
+                                ' data-obj-rang="' + rangRendu + '" data-accueil="1"' +
+                                ' data-placeholder="Sera en mesure de\u2026"></div>' +
+                                '</div>';
+                            rangRendu++;
+                        }
+                        if (io_ === objs.length) break;
+                        htmlObjectifs +=
+                            '<div class="planif-noeud-objectif-ligne">' +
+                                '<div class="planif-noeud-objectif" contenteditable="true" data-obj-rang="' + rangRendu + '">' +
+                                    echapperHtml(objs[io_].texte) +
+                                '</div>' +
+                                '<span class="planif-obj-btn planif-obj-ajouter" data-obj-rang="' + rangRendu + '"' +
+                                ' role="button" tabindex="0" aria-label="Ajouter un objectif apr\u00e8s celui-ci"' +
+                                ' title="Ajouter un objectif">+</span>' +
+                                '<span class="planif-obj-btn planif-obj-retirer" data-obj-rang="' + rangRendu + '"' +
+                                ' role="button" tabindex="0" aria-label="Retirer cet objectif"' +
+                                ' title="Retirer cet objectif">\u2212</span>' +
+                            '</div>';
+                        rangRendu++;
+                    }
                 }
-                // Ligne vide permanente en fin de liste : ajouter un objectif ne
-                // demande aucun bouton \u00e0 d\u00e9couvrir.
-                htmlObjectifs += '<div class="planif-noeud-objectif planif-noeud-objectif--vide" contenteditable="true"' +
-                                 ' data-obj-rang="' + objs.length + '"' +
-                                 ' data-placeholder="' + (objs.length === 0 ? 'Sera en mesure de\u2026' : 'Ajouter un objectif\u2026') + '"></div>';
                 htmlObjectifs += '</div>';
             }
             el.innerHTML =
@@ -2795,6 +2828,7 @@ function viderCanvas() {
 function chargerCarte(carteId) {
     sequenceActiveId = null;
     leconActiveId = null;
+    _ajoutObjectif = null;
     viderCanvas();
     var donnees = window.planificationDonnees.chargerCarte(carteId);
     if (!donnees) { centrerVueSurContenu(); return; }
@@ -3376,6 +3410,7 @@ function attacherEvenements(el, donnees) {
             e.preventDefault();
             if (!donnees.metadata) donnees.metadata = {};
             donnees.metadata.objectifDeplie = !donnees.metadata.objectifDeplie;
+            _ajoutObjectif = null;
             sauvegarder();
             // Reposer les badges APRÈS la reconstruction (cf. definirObjectifLecon).
             reconstruireDOM();
@@ -3420,6 +3455,12 @@ function attacherEvenements(el, donnees) {
             // — le champ perdrait le focus à chaque caractère.
             ligne.addEventListener('input', function() {
                 appliquerObjectifs(donnees, lireLignes());
+                // Dès que la ligne d'accueil porte du texte, elle est devenue un
+                // objectif comme les autres : l'état transitoire n'a plus lieu.
+                if (ligne.dataset.accueil && ligne.textContent.trim() !== '') {
+                    delete ligne.dataset.accueil;
+                    _ajoutObjectif = null;
+                }
                 if (badgeObjectif) {
                     var vide = objectifsDeLecon(donnees).length === 0;
                     badgeObjectif.classList.toggle('planif-badge-objectif--vide', vide);
@@ -3430,9 +3471,17 @@ function attacherEvenements(el, donnees) {
                 var rang = parseInt(ligne.dataset.objRang, 10) || 0;
                 if (e.key === 'Enter' && !e.shiftKey) {
                     // Entrée = objectif suivant (patron des éditeurs de listes).
+                    // Même mécanique que le bouton « + » : une ligne d'accueil,
+                    // pas un objectif vide persisté.
                     e.preventDefault();
                     appliquerObjectifs(donnees, lireLignes());
-                    rerendreEtFocaliser(rang + 1);
+                    if (ligne.textContent.trim() === '') return; // rien à enchaîner
+                    _ajoutObjectif = { noeudId: id, rang: rang + 1 };
+                    reconstruireDOM();
+                    mettreAJourTousLesBadges();
+                    var fr = document.getElementById(id);
+                    var acc = fr && fr.querySelector('.planif-noeud-objectif[data-accueil]');
+                    if (acc) placerCurseurEnFin(acc);
                     return;
                 }
                 if (e.key === 'Backspace' && ligne.textContent.trim() === '' &&
@@ -3450,11 +3499,51 @@ function attacherEvenements(el, donnees) {
                 // Une ligne vidée en plein milieu laisserait un trou : on
                 // recompacte, mais seulement si la structure a bougé.
                 var avant = objectifsDeLecon(donnees).length;
+                var abandonAccueil = !!ligne.dataset.accueil && ligne.textContent.trim() === '';
+                if (abandonAccueil) _ajoutObjectif = null;
                 appliquerObjectifs(donnees, lireLignes());
-                if (objectifsDeLecon(donnees).length !== avant) {
+                if (abandonAccueil || objectifsDeLecon(donnees).length !== avant) {
                     reconstruireDOM();
                     mettreAJourTousLesBadges();
                 }
+            });
+        });
+
+        // Boutons + / − : les raccourcis clavier (Entrée, Retour arrière) ne se
+        // voient pas. Même travers que l'ancien badge 🎯 — une commande
+        // invisible n'existe pas pour qui ne la connaît pas déjà.
+        zoneObjectifs.querySelectorAll('.planif-obj-btn').forEach(function(btn) {
+            btn.addEventListener('mousedown', function(e) {
+                // Sans quoi le mousedown du bloc démarrerait un déplacement.
+                e.stopPropagation();
+                e.preventDefault();
+            });
+            var agir = function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                var rang = parseInt(btn.dataset.objRang, 10) || 0;
+                var textes = lireLignes();
+                if (btn.classList.contains('planif-obj-ajouter')) {
+                    // Un objectif vide n'est jamais persisté : on demande au
+                    // rendu d'ouvrir une ligne d'accueil au rang suivant.
+                    appliquerObjectifs(donnees, textes);
+                    _ajoutObjectif = { noeudId: id, rang: rang + 1 };
+                    reconstruireDOM();
+                    mettreAJourTousLesBadges();
+                    var frais = document.getElementById(id);
+                    var accueil = frais && frais.querySelector('.planif-noeud-objectif[data-accueil]');
+                    if (accueil) placerCurseurEnFin(accueil);
+                } else {
+                    textes.splice(rang, 1);
+                    _ajoutObjectif = null;
+                    appliquerObjectifs(donnees, textes);
+                    reconstruireDOM();
+                    mettreAJourTousLesBadges();
+                }
+            };
+            btn.addEventListener('click', agir);
+            btn.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') agir(e);
             });
         });
     }
