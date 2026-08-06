@@ -23,8 +23,7 @@ const etat = {
     lienEnCours: null,
     panneauOuvert: false,
     zoom: 1,
-    initialise: false,
-    modeIndividuel: null
+    initialise: false
 };
 
 // === FLAG D'ACTIVATION ===
@@ -1301,12 +1300,6 @@ function toutSelectionner() {
 function deselectionner() {
     deselectionnerTout();
     fermerPanneau();
-    // Reset mode individuel
-    if (etat.modeIndividuel) {
-        var mEl = document.getElementById(etat.modeIndividuel);
-        if (mEl) mEl.classList.remove('planif-mode-individuel');
-        etat.modeIndividuel = null;
-    }
 }
 
 // === PANNEAU LATÉRAL ===
@@ -1652,7 +1645,6 @@ function ouvrirPanneau(id) {
             if (cibleDep) {
                 rattacherAuConteneur(id, cibleDep);
             } else if (donnees.parent) {
-                etat.modeIndividuel = null;
                 detacherDuConteneur(id);
             }
             sauvegarder();
@@ -2329,11 +2321,6 @@ function trouverMeilleursPorts(sourceId, cibleId) {
 }
 
 // === GESTION DES CONTENEURS ===
-function trouverConteneurRacine(noeudId) {
-    var n = etat.noeuds.get(noeudId);
-    if (!n || !n.parent) return noeudId;
-    return trouverConteneurRacine(n.parent);
-}
 
 function collecterDescendants(racine, parent, liste) {
     var enfants = parent.enfants || [];
@@ -2794,7 +2781,6 @@ function clonerEtatPersistant() {
     return {
         compteur: etat.compteur,
         compteurLiens: etat.compteurLiens,
-        modeIndividuel: etat.modeIndividuel,
         noeuds: Array.from(etat.noeuds.values()).map(function(n) {
             return {
                 id: n.id, type: n.type, titre: n.titre, description: n.description,
@@ -3102,7 +3088,6 @@ function restaurerSnapshot(snapshot) {
     reconstruireDOM();
     etat.selection = null;
     etat.multiSelection.clear();
-    etat.modeIndividuel = snapshot.modeIndividuel || null;
     fermerPanneau();
     fermerMenuLien();
     sauvegarder();
@@ -3279,41 +3264,7 @@ function attacherEvenements(el, donnees) {
         e.preventDefault();
 
         if (e.metaKey || e.ctrlKey) {
-            // Deux gestes sur la même touche, départagés au MOUVEMENT :
-            // ⌘+clic (sans bouger) = sélection multiple, comme avant ;
-            // ⌘+glisser = saisir le bloc SEUL et le déplacer — proposition
-            // Grégoire (6 août 2026), calquée sur ⌥+glisser qui clone. Pour un
-            // enfant, c'est l'équivalent direct du mode individuel sans passer
-            // par le double-clic ; pour un nœud libre, c'est le drag normal.
-            var mStartX = e.clientX, mStartY = e.clientY;
-            var basculeDrag = false;
-            var nettoyerMeta = function() {
-                document.removeEventListener('mousemove', surMoveMeta);
-                document.removeEventListener('mouseup', surUpMeta);
-            };
-            var surMoveMeta = function(e2) {
-                if (basculeDrag) return;
-                if (Math.abs(e2.clientX - mStartX) + Math.abs(e2.clientY - mStartY) < 4) return;
-                basculeDrag = true;
-                nettoyerMeta();
-                if (donnees.parent) {
-                    etat.modeIndividuel = id;
-                    document.querySelectorAll('.planif-mode-individuel').forEach(function(mel) { mel.classList.remove('planif-mode-individuel'); });
-                    el.classList.add('planif-mode-individuel');
-                }
-                // Relancer le routage normal (sans modificateur) : l'enfant
-                // part en drag individuel, un nœud libre en drag simple.
-                el.dispatchEvent(new MouseEvent('mousedown', {
-                    bubbles: true, cancelable: true,
-                    clientX: mStartX, clientY: mStartY, button: 0
-                }));
-            };
-            var surUpMeta = function() {
-                nettoyerMeta();
-                if (!basculeDrag) toggleMultiSelection(id);
-            };
-            document.addEventListener('mousemove', surMoveMeta);
-            document.addEventListener('mouseup', surUpMeta);
+            toggleMultiSelection(id);
             return;
         }
 
@@ -3410,117 +3361,17 @@ function attacherEvenements(el, donnees) {
         var startDataX = donnees.x;
         var startDataY = donnees.y;
 
-        // Si l'enfant est visuellement hors de son conteneur, activer le mode individuel
-        if (donnees.parent && etat.modeIndividuel !== id) {
-            var parentConteneur = etat.noeuds.get(donnees.parent);
-            if (parentConteneur) {
-                var pEl = document.getElementById(donnees.parent);
-                var pw = pEl ? (parseFloat(pEl.style.width) || pEl.offsetWidth || 200) : 200;
-                var ph = pEl ? (parseFloat(pEl.style.height) || pEl.offsetHeight || 80) : 80;
-                var horsLimites = donnees.x + 20 < parentConteneur.x ||
-                                  donnees.x > parentConteneur.x + pw + 20 ||
-                                  donnees.y + 20 < parentConteneur.y ||
-                                  donnees.y > parentConteneur.y + ph + 20;
-                if (horsLimites) {
-                    etat.modeIndividuel = id;
-                    document.querySelectorAll('.planif-mode-individuel').forEach(function(mel) { mel.classList.remove('planif-mode-individuel'); });
-                    el.classList.add('planif-mode-individuel');
-                }
-            }
-        }
-
-        // CAS A: Enfant en mode normal → drag du groupe entier (remonte au conteneur racine)
-        if (donnees.parent && etat.modeIndividuel !== id) {
-            var racineId = trouverConteneurRacine(id);
-            var racine = etat.noeuds.get(racineId);
-            if (!racine) return;
-
-            var racineStartX = racine.x;
-            var racineStartY = racine.y;
-            var descendantsGrp = [];
-            collecterDescendants(racine, racine, descendantsGrp);
-
-            var racineEl = document.getElementById(racineId);
-            if (racineEl) racineEl.classList.add('planif-dragging');
-
-            // Voie A : un groupe-séquence peut être déposé dans une séquence.
-            var peutDropRacine = racine.type === 'lecon' || racine.type === 'sequence';
-            var survolConteneurGrp = null;
-
-            function onMoveA(e2) {
-                var dx = (e2.clientX - startMouseX2) / etat.zoom;
-                var dy = (e2.clientY - startMouseY2) / etat.zoom;
-
-                racine.x = racineStartX + dx;
-                racine.y = racineStartY + dy;
-                if (racineEl) {
-                    racineEl.style.left = racine.x + 'px';
-                    racineEl.style.top = racine.y + 'px';
-                }
-                mettreAJourLiens(racineId);
-
-                for (var j = 0; j < descendantsGrp.length; j++) {
-                    var di = descendantsGrp[j];
-                    var dd = etat.noeuds.get(di.id);
-                    if (!dd) continue;
-                    dd.x = racine.x + di.dx;
-                    dd.y = racine.y + di.dy;
-                    var del2 = document.getElementById(di.id);
-                    if (del2) { del2.style.left = dd.x + 'px'; del2.style.top = dd.y + 'px'; }
-                    mettreAJourLiens(di.id);
-                }
-
-                if (peutDropRacine) {
-                    var ancienSurvol = survolConteneurGrp;
-                    survolConteneurGrp = trouverConteneurPour(e2.clientX, e2.clientY, racineId, racine.type);
-                    if (ancienSurvol !== survolConteneurGrp) {
-                        if (ancienSurvol) {
-                            var aEl = document.getElementById(ancienSurvol);
-                            if (aEl) aEl.classList.remove('planif-conteneur-survol');
-                        }
-                        if (survolConteneurGrp) {
-                            var sEl = document.getElementById(survolConteneurGrp);
-                            if (sEl) sEl.classList.add('planif-conteneur-survol');
-                        }
-                    }
-                }
-            }
-
-            function onUpA() {
-                if (racineEl) racineEl.classList.remove('planif-dragging');
-                document.removeEventListener('mousemove', onMoveAThrottled);
-                document.removeEventListener('mouseup', onUpA);
-                document.querySelectorAll('.planif-conteneur-survol').forEach(function(c) { c.classList.remove('planif-conteneur-survol'); });
-
-                if (peutDropRacine) {
-                    if (survolConteneurGrp && survolConteneurGrp !== racine.parent) {
-                        rattacherAuConteneur(racineId, survolConteneurGrp);
-                    } else if (!survolConteneurGrp && racine.parent) {
-                        detacherDuConteneur(racineId);
-                    }
-                }
-
-                sauvegarder();
-            }
-
-            var onMoveAThrottled = throttleRAF(onMoveA);
-            document.addEventListener('mousemove', onMoveAThrottled);
-            document.addEventListener('mouseup', onUpA);
-            return;
-        }
-
-        // CAS B: Enfant en mode individuel → drag individuel + détachement
-        if (donnees.parent && etat.modeIndividuel === id) {
+        // CAS B — INVERSION DU MODÈLE (décision Grégoire, 6 août 2026) :
+        // saisir une FEUILLE la déplace SEULE, sans double-clic ni ⌘. C'est le
+        // geste de Keynote/Figma/Miro : on saisit un objet, on déplace cet
+        // objet. Pour déplacer le groupe, on saisit le CADRE du conteneur
+        // (CAS C) — un conteneur emporte naturellement son contenu.
+        // L'ancien « mode individuel » (rituel de double-clic) est RETIRÉ.
+        if (donnees.parent && !estConteneur) {
             el.classList.add('planif-dragging');
             var parentId = donnees.parent;
             var parentData = etat.noeuds.get(parentId);
             var survolConteneurB = null;
-
-            // Si c'est un conteneur avec enfants, collecter les descendants pour les déplacer ensemble
-            var descendantsB = [];
-            if (estConteneur && donnees.enfants && donnees.enfants.length > 0) {
-                collecterDescendants(donnees, donnees, descendantsB);
-            }
 
             function onMoveB(e2) {
                 donnees.x = startDataX + (e2.clientX - startMouseX2) / etat.zoom;
@@ -3528,18 +3379,6 @@ function attacherEvenements(el, donnees) {
                 el.style.left = donnees.x + 'px';
                 el.style.top = donnees.y + 'px';
                 mettreAJourLiens(id);
-
-                // Déplacer les descendants avec le conteneur
-                for (var db = 0; db < descendantsB.length; db++) {
-                    var dbi = descendantsB[db];
-                    var dbd = etat.noeuds.get(dbi.id);
-                    if (!dbd) continue;
-                    dbd.x = donnees.x + dbi.dx;
-                    dbd.y = donnees.y + dbi.dy;
-                    var dbEl = document.getElementById(dbi.id);
-                    if (dbEl) { dbEl.style.left = dbd.x + 'px'; dbEl.style.top = dbd.y + 'px'; }
-                    mettreAJourLiens(dbi.id);
-                }
 
                 // Un AUTRE conteneur d'accueil sous le curseur ? (déménagement
                 // direct, 6 août 2026 : « je ne suis pas capable de sortir
@@ -3600,8 +3439,6 @@ function attacherEvenements(el, donnees) {
                     if (parRecouvrement && parRecouvrement !== parentId) cibleB = parRecouvrement;
                 }
                 if (cibleB) {
-                    etat.modeIndividuel = null;
-                    el.classList.remove('planif-mode-individuel');
                     // rattacherAuConteneur détache de l'ancien parent (qui se
                     // re-dispose) puis dispose la cible.
                     rattacherAuConteneur(id, cibleB);
@@ -3620,8 +3457,6 @@ function attacherEvenements(el, donnees) {
                                            donnees.y + (el.offsetHeight || 50) < parentData.y ||
                                            donnees.y > parentData.y + ch2;
                         if (outOfBounds2) {
-                            etat.modeIndividuel = null;
-                            el.classList.remove('planif-mode-individuel');
                             detacherDuConteneur(id);
                             sauvegarder();
                             return;
@@ -3794,17 +3629,10 @@ function attacherEvenements(el, donnees) {
             return;
         }
 
-        if (donnees.parent) {
-            // Enfant → active mode individuel
-            etat.modeIndividuel = id;
-            document.querySelectorAll('.planif-mode-individuel').forEach(function(mel) { mel.classList.remove('planif-mode-individuel'); });
-            el.classList.add('planif-mode-individuel');
-            selectionnerNoeud(id);
-            ouvrirPanneau(id);
-        } else {
-            selectionnerNoeud(id);
-            ouvrirPanneau(id);
-        }
+        // Enfant ou libre : même geste, l'inspecteur. (L'ancien « mode
+        // individuel » de drag est retiré — inversion du 6 août.)
+        selectionnerNoeud(id);
+        ouvrirPanneau(id);
     });
 
     var titreEl = el.querySelector('.planif-noeud-titre');

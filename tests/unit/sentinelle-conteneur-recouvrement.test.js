@@ -124,8 +124,16 @@ describe('F6/F7 · invariants statiques des gestes', () => {
         expect(casD).toMatch(/survolConteneurD = trouverConteneurParRecouvrement\(id, donnees\.type\)/);
     });
 
-    it('CAS B : le mode individuel DÉMÉNAGE vers un autre conteneur (pas seulement détacher)', () => {
+    // === INVERSION DU MODÈLE (décision Grégoire, 6 août 2026) ===
+    // Saisir une FEUILLE la déplace SEULE ; saisir le CADRE d'un conteneur
+    // déplace le groupe. Plus de rituel : ni double-clic « mode individuel »,
+    // ni ⌘+glisser. C'est le geste de Keynote/Figma/Miro.
+
+    it('INVERSION : une feuille avec parent se saisit SEULE, sans rituel', () => {
         const casB = sourceCarte.slice(sourceCarte.indexOf('// CAS B'), sourceCarte.indexOf('// CAS C'));
+        // La garde est « feuille avec parent » — aucun mode requis.
+        expect(casB).toMatch(/if \(donnees\.parent && !estConteneur\) \{/);
+        // Elle DÉMÉNAGE vers le conteneur du relâchement (pas seulement détacher).
         expect(casB).toMatch(/rattacherAuConteneur\(id, cibleB\)/);
         // Feedback de survol pendant le drag, parent courant jamais surligné.
         expect(casB).toMatch(/candidatB !== parentId\) \? candidatB : null/);
@@ -133,23 +141,27 @@ describe('F6/F7 · invariants statiques des gestes', () => {
         expect(casB).toMatch(/detacherDuConteneur\(id\)/);
     });
 
-    it('voie A : les drags de conteneurs acceptent les séquences comme cibles', () => {
-        expect(sourceCarte).toMatch(/peutEtreEnfant = donnees\.type === 'lecon' \|\| donnees\.type === 'sequence'/);
-        expect(sourceCarte).toMatch(/peutDropRacine = racine\.type === 'lecon' \|\| racine\.type === 'sequence'/);
+    it('INVERSION : l’escalade au groupe racine (ex-CAS A) est RETIRÉE', () => {
+        expect(sourceCarte).not.toMatch(/CAS A: Enfant en mode normal/);
+        expect(sourceCarte).not.toMatch(/trouverConteneurRacine/);
+        // Le concept de « mode individuel » est mort avec elle.
+        expect(sourceCarte).not.toMatch(/modeIndividuel/);
+        expect(sourceCarte).not.toMatch(/planif-mode-individuel/);
     });
 
-    it('⌘+glisser saisit le bloc seul ; ⌘+clic immobile garde la multi-sélection', () => {
+    it('⌘+clic est redevenu la multi-sélection immédiate (⌘+glisser retiré)', () => {
         const meta = sourceCarte.slice(sourceCarte.indexOf('if (e.metaKey || e.ctrlKey) {'), sourceCarte.indexOf('if (e.altKey) {'));
-        // Départagé au mouvement (seuil), pas au clic.
-        expect(meta).toMatch(/< 4\) return;/);
-        expect(meta).toMatch(/etat\.modeIndividuel = id;/);
-        expect(meta).toMatch(/if \(!basculeDrag\) toggleMultiSelection\(id\);/);
-        // Plus de bascule immédiate au mousedown.
-        expect(meta).not.toMatch(/^\s*toggleMultiSelection\(id\);\s*\n\s*return;/m);
+        expect(meta).toMatch(/toggleMultiSelection\(id\);\s*\n\s*return;/);
+        expect(meta).not.toMatch(/surMoveMeta|basculeDrag/);
     });
 
-    it('le geste est documenté dans le panneau Raccourcis', () => {
-        expect(sourceIndex).toMatch(/⌘\+Glisser<\/kbd><\/td><td>Sortir un bloc de son conteneur/);
+    it('voie A : le drag d’un conteneur accepte une séquence comme cible', () => {
+        expect(sourceCarte).toMatch(/peutEtreEnfant = donnees\.type === 'lecon' \|\| donnees\.type === 'sequence'/);
+    });
+
+    it('le nouveau modèle est documenté dans le panneau Raccourcis', () => {
+        expect(sourceIndex).not.toMatch(/⌘\+Glisser/);
+        expect(sourceIndex).toMatch(/Un bloc se déplace seul/);
     });
 
     it('l’inspecteur offre « Dans la leçon » — le chemin SANS geste (iPad)', () => {

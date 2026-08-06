@@ -19288,14 +19288,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     z-index: 10;
 }
 
-/* !important nécessaire : le JS pose borderColor inline sur .planif-noeud */
-.planif-noeud.planif-mode-individuel {
-    border: 2px solid var(--planif-couleur-selection) !important;
-    border-style: solid !important;
-    box-shadow: 0 0 0 3px rgba(59,130,246,0.25);
-    z-index: 12;
-}
-
 .planif-noeud-entete {
     display: flex;
     align-items: center;
