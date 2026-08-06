@@ -67,6 +67,29 @@ function objectifEstDeplie(n) {
     return !!(n && n.metadata && n.metadata.objectifDeplie);
 }
 
+/** Lecture par id — porte d'entrée des autres modules (Organisateur). */
+function objectifDeLeconParId(leconId) {
+    return objectifDeLecon(etat.noeuds.get(leconId));
+}
+
+/**
+ * Écriture par id — porte de sortie UNIQUE des autres modules (Organisateur).
+ * Évite d'exposer `sauvegarder()` brut : un seul chemin d'écriture pour
+ * l'objectif, donc une seule vérité.
+ * @returns {boolean} true si le nœud existait et a été mis à jour
+ */
+function definirObjectifLecon(leconId, texte) {
+    var n = etat.noeuds.get(leconId);
+    if (!n || n.type !== 'lecon') return false;
+    if (!n.metadata) n.metadata = {};
+    var valeur = (texte === null || texte === undefined) ? '' : String(texte).trim();
+    if (valeur === '') delete n.metadata.objectif;
+    else n.metadata.objectif = valeur;
+    sauvegarder();
+    reconstruireDOM();
+    return true;
+}
+
 /**
  * Migration one-shot, par carte : CLE_SEANCES[leconId].objectifPersonnalise
  * → noeud.metadata.objectif.
@@ -5493,6 +5516,8 @@ window.planificationCarte = {
     CLE_SEANCES: CLE_SEANCES,
     migrerObjectifsVersMetadata: migrerObjectifsVersMetadata,
     objectifDeLecon: objectifDeLecon,
+    objectifDeLeconParId: objectifDeLeconParId,
+    definirObjectifLecon: definirObjectifLecon,
     recentrerVue: recentrerVue,
     injecterNoeuds: injecterNoeuds,
     nouvelleCarte: nouvelleCarte,

@@ -172,7 +172,11 @@ function brancherEvenements() {
             var leconId = selectLecon ? selectLecon.value : '';
             if (!leconId) return;
             var texte = objectifContenu.textContent.trim();
-            sauvegarderDonneeLecon(leconId, 'objectifPersonnalise', texte || null);
+            // L'objectif vit sur le nœud (metadata.objectif) depuis le 6 août
+            // 2026 : une seule vérité, partagée avec la carte mentale.
+            if (window.planificationCarte && window.planificationCarte.definirObjectifLecon) {
+                window.planificationCarte.definirObjectifLecon(leconId, texte || null);
+            }
             if (btnReinitObjectif) btnReinitObjectif.style.display = texte ? '' : 'none';
         });
     }
@@ -180,7 +184,9 @@ function brancherEvenements() {
         btnReinitObjectif.addEventListener('click', function() {
             var leconId = selectLecon ? selectLecon.value : '';
             if (!leconId) return;
-            sauvegarderDonneeLecon(leconId, 'objectifPersonnalise', null);
+            if (window.planificationCarte && window.planificationCarte.definirObjectifLecon) {
+                window.planificationCarte.definirObjectifLecon(leconId, null);
+            }
             btnReinitObjectif.style.display = 'none';
             afficherObjectif(leconId);
         });
@@ -372,12 +378,13 @@ function afficherObjectif(leconId) {
     var carte = window.planificationCarte;
     if (!carte) return;
 
-    var seances = chargerSeances();
-    var donnees = seances[leconId] || {};
+    // (Plus aucune lecture de la clé des séances ici : l'objectif est porté par
+    // le nœud depuis le 6 août 2026.)
 
-    // Vérifier si un objectif personnalisé existe
-    if (donnees.objectifPersonnalise) {
-        objectifContenu.textContent = donnees.objectifPersonnalise;
+    // Vérifier si un objectif a été saisi (porté par le nœud)
+    var objectifSaisi = carte.objectifDeLeconParId ? carte.objectifDeLeconParId(leconId) : '';
+    if (objectifSaisi) {
+        objectifContenu.textContent = objectifSaisi;
         objectifContenu.contentEditable = 'true';
         objectifContenu.classList.remove('org-placeholder');
         objectifContenu.dataset.autoDerive = 'false';
@@ -1668,8 +1675,9 @@ function genererLeconTXT(lecon, etat, seances, carte, estEleve) {
 
     var donnees = seances[lecon.id] || {};
 
-    // Objectif (tous publics)
-    var objectif = donnees.objectifPersonnalise;
+    // Objectif (tous publics) — porté par le nœud depuis le 6 août 2026 ;
+    // à défaut, dérivé des idées maîtresses ancêtres (ci-dessous).
+    var objectif = carte.objectifDeLeconParId ? carte.objectifDeLeconParId(lecon.id) : '';
     if (!objectif) {
         var ideesM = carte.trouverIdeesMaitressesAncetres(lecon.id);
         if (ideesM.length === 1) {
@@ -1824,8 +1832,9 @@ function genererLeconMD(lecon, etat, seances, carte, estEleve) {
 
     var donnees = seances[lecon.id] || {};
 
-    // Objectif
-    var objectif = donnees.objectifPersonnalise;
+    // Objectif — porté par le nœud depuis le 6 août 2026 ; à défaut,
+    // dérivé des idées maîtresses ancêtres (ci-dessous).
+    var objectif = carte.objectifDeLeconParId ? carte.objectifDeLeconParId(lecon.id) : '';
     if (!objectif) {
         var ideesM = carte.trouverIdeesMaitressesAncetres(lecon.id);
         if (ideesM.length === 1) {
@@ -2101,11 +2110,9 @@ function importerPlanDepuisMD(texte, nouvelleCarteMode) {
             seqNoeud.enfants.push(leconId);
             noeuds.push(leconNoeud);
 
-            // Stocker l'objectif dans les données de séances
-            if (lecon.objectif) {
-                if (!seancesImport[leconId]) seancesImport[leconId] = {};
-                seancesImport[leconId].objectifPersonnalise = lecon.objectif;
-            }
+            // L'objectif est une propriété du nœud (une seule vérité,
+            // suit la leçon aux copies et imports inter-trimestre).
+            if (lecon.objectif) leconNoeud.metadata.objectif = lecon.objectif;
             if (lecon.notes) {
                 if (!seancesImport[leconId]) seancesImport[leconId] = {};
                 seancesImport[leconId].notes = lecon.notes;
@@ -2138,10 +2145,7 @@ function importerPlanDepuisMD(texte, nouvelleCarteMode) {
         if (orp.dureeMin > 0) orpNoeud.metadata.duree = orp.dureeMin;
         noeuds.push(orpNoeud);
 
-        if (orp.objectif) {
-            if (!seancesImport[orpId]) seancesImport[orpId] = {};
-            seancesImport[orpId].objectifPersonnalise = orp.objectif;
-        }
+        if (orp.objectif) orpNoeud.metadata.objectif = orp.objectif;
         if (orp.notes) {
             if (!seancesImport[orpId]) seancesImport[orpId] = {};
             seancesImport[orpId].notes = orp.notes;
