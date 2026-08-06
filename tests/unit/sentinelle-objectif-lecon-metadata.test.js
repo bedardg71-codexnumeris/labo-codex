@@ -311,6 +311,27 @@ describe('F1 · invariants de rendu et de routage', () => {
         expect(source).toMatch(/btn\.addEventListener\('mousedown'[\s\S]{0,160}stopPropagation/);
     });
 
+    it('la ligne d’accueil porte AUSSI ses commandes + et −', () => {
+        // Constaté en terrain le 6 août : la ligne qu'on venait d'ajouter était
+        // la seule sans boutons — elle est rendue par une branche distincte.
+        const brancheAccueil = source.slice(
+            source.indexOf('if (io_ === rangAccueil)'),
+            source.indexOf('if (io_ === objs.length) break;')
+        );
+        expect(brancheAccueil).toContain('data-accueil="1"');
+        expect(brancheAccueil).toContain('planif-obj-ajouter');
+        expect(brancheAccueil).toContain('planif-obj-retirer');
+    });
+
+    it('« + » convertit l’index de ligne en index d’objectif', () => {
+        // Les boutons portent un rang de LIGNE (accueil vide compris), alors
+        // que l'état d'accueil s'exprime en index d'OBJECTIF : sans conversion,
+        // un ajout au milieu d'une liste comportant déjà une ligne d'accueil
+        // ouvrirait la nouvelle ligne au mauvais endroit.
+        expect(source).toMatch(/var rangObjectif = textes\.slice\(0, rang \+ 1\)\.filter/);
+        expect(source).toMatch(/_ajoutObjectif = \{ noeudId: id, rang: rangObjectif \}/);
+    });
+
     it('« + » ouvre une ligne d’accueil au lieu de persister un objectif vide', () => {
         // appliquerObjectifs écarte les lignes vides : un objectif vide ne
         // survivrait pas à l'enregistrement. L'état transitoire évite ça.
@@ -318,7 +339,7 @@ describe('F1 · invariants de rendu et de routage', () => {
         // aussi dans le raccourci Entrée, et une assertion globale passerait
         // même si le bouton cessait de la poser (constaté au break-test).
         expect(source).toMatch(
-            /classList\.contains\('planif-obj-ajouter'\)[\s\S]{0,400}_ajoutObjectif = \{ noeudId: id, rang: rang \+ 1 \}/
+            /classList\.contains\('planif-obj-ajouter'\)[\s\S]{0,500}_ajoutObjectif = \{ noeudId: id, rang: rangObjectif \}/
         );
         expect(source).toContain('data-accueil');
         // Le rendu doit savoir ouvrir cette ligne au bon rang.
