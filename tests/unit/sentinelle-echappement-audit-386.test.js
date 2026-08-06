@@ -73,10 +73,23 @@ describe('#386 · planification : titre de nœud échappé, attributs value= coe
         expect(matches.length).toBe(2);
     });
 
-    it('semaineDebut/semaineFin coercées en entier dans value= (symétrique meta.duree)', () => {
-        expect(carte).toMatch(/value="' \+ \(parseInt\(donnees\.metadata\.semaineDebut, 10\) \|\| ''\)/);
-        expect(carte).toMatch(/value="' \+ \(parseInt\(donnees\.metadata\.semaineFin, 10\) \|\| ''\)/);
-        expect(carte).not.toMatch(/value="' \+ \(donnees\.metadata\.semaine(Debut|Fin) \|\| ''\)/);
+    // L'ancrage temporel a migré de la séquence (couple semaineDebut/semaineFin)
+    // vers la leçon (`metadata.semaine`, lot 1 du planificateur en grille,
+    // 6 août 2026). L'invariant d'origine ne change pas : la seule valeur
+    // utilisateur injectée dans un attribut `value=` de l'inspecteur doit être
+    // un ENTIER coercé, jamais une chaîne brute.
+    it('la semaine de leçon est coercée en entier dans value= (symétrique meta.duree)', () => {
+        // `semaineDeLecon()` retourne un entier ou null — jamais la valeur brute.
+        expect(carte).toMatch(/var semLecon = semaineDeLecon\(donnees\);/);
+        expect(carte).toMatch(/id="planif-panneau-semaine" value="' \+ \(semLecon === null \? '' : semLecon\)/);
+        expect(carte).toMatch(/return \(isNaN\(s\) \|\| s < SEMAINE_MIN\) \? null : s;/);
+        // Aucune metadata temporelle brute ne repart dans un attribut.
+        expect(carte).not.toMatch(/value="' \+ \(donnees\.metadata\.semaine[A-Za-z]* \|\| ''\)/);
+    });
+
+    it('les deux champs de semaine de la SÉQUENCE ont bien été retirés', () => {
+        expect(carte).not.toMatch(/planif-panneau-sem-debut/);
+        expect(carte).not.toMatch(/planif-panneau-sem-fin/);
     });
 
     it('bibliothèque d\'alignements : nom de carte et attributs data-* échappés', () => {

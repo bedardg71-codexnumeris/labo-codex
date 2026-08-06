@@ -284,6 +284,56 @@ function chargerSelectionsOrg() {
 //  SÉLECTEURS SÉQUENCE / LEÇON
 // ============================================================
 
+/**
+ * Ancrage temporel d'une leçon, pour la résolution des dates réelles.
+ *
+ * Depuis le 6 août 2026, la semaine est portée par la LEÇON (D3 du plan du
+ * planificateur en grille) et non plus par sa séquence parente : la carte
+ * n'expose plus que la dérivation.
+ *
+ * Le rang retourné est celui de la leçon PARMI CELLES DE LA MÊME SEMAINE —
+ * c'est lui qui choisit la nième séance dans l'horaire du groupe. Sous
+ * l'ancien modèle, toutes les leçons d'une séquence partageaient la semaine de
+ * celle-ci, donc « rang dans la séquence » valait « rang dans la semaine » ;
+ * ce n'est plus vrai dès qu'une séquence s'étale sur plusieurs semaines.
+ *
+ * @returns {{ semaine: number|null, rang: number }} semaine null = non planifiée
+ */
+function ancrageLeconPourDates(carte, leconId) {
+    var vide = { semaine: null, rang: 0 };
+    if (!carte || !carte.etat || typeof carte.semaineDeLecon !== 'function') return vide;
+
+    var lecon = carte.etat.noeuds.get(leconId);
+    if (!lecon) return vide;
+
+    var semaine = carte.semaineDeLecon(lecon);
+    if (semaine === null) return vide;
+
+    var memeSemaine = [];
+    for (var entry of carte.etat.noeuds) {
+        var n = entry[1];
+        if (n.type === 'lecon' && carte.semaineDeLecon(n) === semaine) memeSemaine.push(n);
+    }
+    // Ordre de lecture de la carte (gauche → droite, puis haut → bas), comme
+    // partout ailleurs dans le module.
+    memeSemaine.sort(function(a, b) { return ((a.x || 0) - (b.x || 0)) || ((a.y || 0) - (b.y || 0)); });
+
+    for (var r = 0; r < memeSemaine.length; r++) {
+        if (memeSemaine[r].id === leconId) return { semaine: semaine, rang: r };
+    }
+    return { semaine: semaine, rang: 0 };
+}
+
+/** Tri temporel des séquences : étendue dérivée, non planifiées en fin. */
+function trierSequencesParEtendue(carte, sequences) {
+    sequences.sort(function(a, b) {
+        var ra = carte.rangTemporel(a), rb = carte.rangTemporel(b);
+        if (ra !== rb) return ra - rb;
+        return (a.x || 0) - (b.x || 0);
+    });
+    return sequences;
+}
+
 function peuplerSelecteursOrganisateur() {
     var carte = window.planificationCarte;
     if (!carte || !carte.etat) return;
@@ -294,12 +344,7 @@ function peuplerSelecteursOrganisateur() {
     for (var entry of etat.noeuds) {
         if (entry[1].type === 'sequence') sequences.push(entry[1]);
     }
-    sequences.sort(function(a, b) {
-        var sa = (a.metadata && a.metadata.semaineDebut) || 0;
-        var sb = (b.metadata && b.metadata.semaineDebut) || 0;
-        if (sa !== sb) return sa - sb;
-        return (a.x || 0) - (b.x || 0);
-    });
+    trierSequencesParEtendue(carte, sequences);
 
     var valActuelle = selectSequence.value;
     selectSequence.innerHTML = '<option value="">— Séquence —</option>';
@@ -437,25 +482,10 @@ function afficherEnteteCalendrier(leconId) {
         var lecon = carte.etat.noeuds.get(leconId);
         if (!lecon) { enteteCalendrier.style.display = 'none'; return; }
 
-        // 1. Trouver la séquence parente → numéro de semaine
-        var seq = lecon.parent ? carte.etat.noeuds.get(lecon.parent) : null;
-        var numSemaine = (seq && seq.metadata) ? seq.metadata.semaineDebut : null;
-
-        // 2. Rang de la leçon dans la séquence (triée par X, comme la vue calendrier)
-        var rangLecon = 0;
-        if (seq && seq.enfants) {
-            var leconsSeq = seq.enfants.filter(function(eid) {
-                var n = carte.etat.noeuds.get(eid);
-                return n && n.type === 'lecon';
-            });
-            leconsSeq.sort(function(a, b) {
-                var na = carte.etat.noeuds.get(a), nb = carte.etat.noeuds.get(b);
-                return ((na && na.x) || 0) - ((nb && nb.x) || 0);
-            });
-            for (var r = 0; r < leconsSeq.length; r++) {
-                if (leconsSeq[r] === leconId) { rangLecon = r; break; }
-            }
-        }
+        // 1-2. Semaine de la leçon + son rang dans cette semaine
+        var ancrage = ancrageLeconPourDates(carte, leconId);
+        var numSemaine = ancrage.semaine;
+        var rangLecon = ancrage.rang;
 
         // 3. Charger données
         var groupes = db.getSync(window.cle('groupesCours'), null) || [];
@@ -1170,24 +1200,9 @@ function ajouterDatesAuxLecons() {
             var lecon = carte.etat.noeuds.get(leconId);
             if (!lecon) return;
 
-            var seq = lecon.parent ? carte.etat.noeuds.get(lecon.parent) : null;
-            var numSemaine = (seq && seq.metadata) ? seq.metadata.semaineDebut : null;
-
-            // Rang de la leçon dans la séquence
-            var rangLecon = 0;
-            if (seq && seq.enfants) {
-                var leconsSeq = seq.enfants.filter(function(eid) {
-                    var n = carte.etat.noeuds.get(eid);
-                    return n && n.type === 'lecon';
-                });
-                leconsSeq.sort(function(a, b) {
-                    var na = carte.etat.noeuds.get(a), nb = carte.etat.noeuds.get(b);
-                    return ((na && na.x) || 0) - ((nb && nb.x) || 0);
-                });
-                for (var r = 0; r < leconsSeq.length; r++) {
-                    if (leconsSeq[r] === leconId) { rangLecon = r; break; }
-                }
-            }
+            var ancrage = ancrageLeconPourDates(carte, leconId);
+            var numSemaine = ancrage.semaine;
+            var rangLecon = ancrage.rang;
 
             // Résoudre les dates
             var datesSemaine = {};
@@ -1400,10 +1415,14 @@ function previsualiserImportMD() {
     for (var i = 0; i < parsed.sequences.length; i++) {
         var sq = parsed.sequences[i];
         html += '<li>' + echapperHtml(sq.titre);
-        if (sq.semaineDebut != null) {
-            html += ' <span style="opacity:0.6">(Sem. ' + sq.semaineDebut;
-            if (sq.semaineFin && sq.semaineFin !== sq.semaineDebut) html += '–' + sq.semaineFin;
-            html += ')</span>';
+        // Étendue prévisualisée : dérivée des semaines lues sur les LEÇONS.
+        var semaines = sq.lecons
+            .map(function(l) { return l.semaine; })
+            .filter(function(s) { return typeof s === 'number'; });
+        if (semaines.length > 0) {
+            var minSem = Math.min.apply(null, semaines);
+            var maxSem = Math.max.apply(null, semaines);
+            html += ' <span style="opacity:0.6">(Sem. ' + minSem + (maxSem !== minSem ? '–' + maxSem : '') + ')</span>';
         }
         html += ' — ' + sq.lecons.length + ' leçon' + (sq.lecons.length > 1 ? 's' : '') + '</li>';
     }
@@ -1506,7 +1525,7 @@ function genererExportTXT(estEleve) {
         if (nd.type === 'sequence') sequences.push(nd);
         else if (nd.type === 'lecon' && !nd.parent) leconsOrphelines.push(nd);
     }
-    sequences.sort(function(a, b) { return (a.metadata && a.metadata.semaineDebut || 999) - (b.metadata && b.metadata.semaineDebut || 999); });
+    trierSequencesParEtendue(carte, sequences);
 
     var txt = '═══════════════════════════════════════\n';
     txt += 'PLAN DE COURS — ' + nomCarte + '\n';
@@ -1532,14 +1551,8 @@ function genererExportTXT(estEleve) {
 }
 
 function genererSequenceTXT(seq, etat, seances, carte, estEleve) {
-    var semTxt = '';
-    if (seq.metadata && seq.metadata.semaineDebut) {
-        semTxt = ' (Sem. ' + seq.metadata.semaineDebut;
-        if (seq.metadata.semaineFin && seq.metadata.semaineFin !== seq.metadata.semaineDebut) {
-            semTxt += '–' + seq.metadata.semaineFin;
-        }
-        semTxt += ')';
-    }
+    var etendue = carte.formaterEtendue(carte.etendueTemporelle(seq));
+    var semTxt = etendue ? ' (' + etendue + ')' : '';
 
     var txt = '───────────────────────────────────────\n';
     txt += '▌ SÉQUENCE : ' + (seq.titre || 'Sans titre') + semTxt + '\n';
@@ -1667,7 +1680,7 @@ function genererExportMD(estEleve) {
         if (nd.type === 'sequence') sequences.push(nd);
         else if (nd.type === 'lecon' && !nd.parent) leconsOrphelines.push(nd);
     }
-    sequences.sort(function(a, b) { return (a.metadata && a.metadata.semaineDebut || 999) - (b.metadata && b.metadata.semaineDebut || 999); });
+    trierSequencesParEtendue(carte, sequences);
 
     var md = '# Plan de cours — ' + nomCarte + '\n';
     md += '> Exporté le ' + new Date().toLocaleDateString('fr-CA') + '\n\n---\n\n';
@@ -1687,17 +1700,15 @@ function genererExportMD(estEleve) {
     return md;
 }
 
+// L'ancrage temporel du format Markdown a suivi le modèle (6 août 2026) : il
+// est porté par la LEÇON, pas par la séquence. Le marqueur de séquence garde
+// une étendue « Sem. 3–5 » parce qu'elle se lit bien dans un plan de cours,
+// mais elle est DÉRIVÉE et purement informative — l'import ne la relit pas.
+// Sans quoi un aller-retour pourrait réécrire dans la carte une étendue de
+// séquence que le modèle ne sait plus stocker.
 function genererSequenceMD(seq, etat, seances, carte, estEleve) {
-    var marqueur = '';
-    if (seq.metadata && seq.metadata.semaineDebut) {
-        marqueur = ' [Séquence | Sem. ' + seq.metadata.semaineDebut;
-        if (seq.metadata.semaineFin && seq.metadata.semaineFin !== seq.metadata.semaineDebut) {
-            marqueur += '–' + seq.metadata.semaineFin;
-        }
-        marqueur += ']';
-    } else {
-        marqueur = ' [Séquence]';
-    }
+    var etendue = carte.formaterEtendue(carte.etendueTemporelle(seq));
+    var marqueur = etendue ? ' [Séquence | ' + etendue + ']' : ' [Séquence]';
 
     var md = '## ' + (seq.titre || 'Sans titre') + marqueur + '\n\n';
 
@@ -1713,9 +1724,13 @@ function genererSequenceMD(seq, etat, seances, carte, estEleve) {
 }
 
 function genererLeconMD(lecon, etat, seances, carte, estEleve) {
-    var marqueurLecon = lecon.metadata && lecon.metadata.duree
-        ? ' [Leçon | ' + formatDuree(lecon.metadata.duree) + ']'
-        : ' [Leçon]';
+    // Marqueur : [Leçon], [Leçon | 2 pér.], [Leçon | Sem. 3], [Leçon | 2 pér. | Sem. 3]
+    // La semaine est ici la donnée qui FAIT FOI — c'est celle que l'import relit.
+    var champs = [];
+    if (lecon.metadata && lecon.metadata.duree) champs.push(formatDuree(lecon.metadata.duree));
+    var semLecon = carte.semaineDeLecon(lecon);
+    if (semLecon !== null) champs.push('Sem. ' + semLecon);
+    var marqueurLecon = champs.length ? ' [Leçon | ' + champs.join(' | ') + ']' : ' [Leçon]';
     var md = '### ' + (lecon.titre || 'Sans titre') + marqueurLecon + '\n\n';
 
     var donnees = seances[lecon.id] || {};
@@ -1824,8 +1839,15 @@ function parserDuree(texte) {
  * Parse un plan de cours en Markdown et retourne une structure
  * { sequences: [], orphelines: [] }
  *
- * Chaque séquence : { titre, semaineDebut, semaineFin, lecons: [] }
- * Chaque leçon : { titre, dureeMin, objectif, evaluation }
+ * Chaque séquence : { titre, lecons: [] }
+ * Chaque leçon : { titre, dureeMin, semaine, objectif, evaluation }
+ *
+ * L'ancrage temporel est lu sur la LEÇON (`[Leçon | 2 pér. | Sem. 3]`), jamais
+ * sur la séquence : depuis le 6 août 2026 la séquence n'a plus d'étendue
+ * propre, elle la dérive de ses leçons. Un « Sem. X » resté sur une ligne de
+ * séquence (fichier exporté avant ce jour) est toléré par la regex pour ne pas
+ * casser le parsing, mais sa valeur est IGNORÉE — la reporter sur les leçons
+ * reviendrait à inventer une répartition que l'enseignant n'a pas écrite.
  */
 function parserPlanMD(texte) {
     var resultat = { sequences: [], orphelines: [] };
@@ -1841,12 +1863,11 @@ function parserPlanMD(texte) {
         var ligne = lignes[i];
 
         // Séquence : ## Titre [Séquence | Sem. X–Y]  ou  ## Titre [Séquence]
-        var matchSeq = ligne.match(/^##\s+(.+?)\s*\[Séquence(?:\s*\|\s*Sem\.\s*(\d+)(?:\s*[–-]\s*(\d+))?)?\]/);
+        // L'étendue est tolérée à la lecture mais non capturée : elle est dérivée.
+        var matchSeq = ligne.match(/^##\s+(.+?)\s*\[Séquence(?:\s*\|\s*Sem\.\s*\d+(?:\s*[–-]\s*\d+)?)?\]/);
         if (matchSeq) {
             sequenceCourante = {
                 titre: matchSeq[1].trim(),
-                semaineDebut: matchSeq[2] ? parseInt(matchSeq[2]) : null,
-                semaineFin: matchSeq[3] ? parseInt(matchSeq[3]) : (matchSeq[2] ? parseInt(matchSeq[2]) : null),
                 lecons: []
             };
             resultat.sequences.push(sequenceCourante);
@@ -1863,12 +1884,31 @@ function parserPlanMD(texte) {
             continue;
         }
 
-        // Leçon : ### Titre [Leçon | durée]  ou  ### Titre [Leçon]
+        // Leçon : ### Titre [Leçon | durée | Sem. N] — les deux champs sont
+        // optionnels et leur ordre est indifférent ; « Sem. N » est reconnu au
+        // motif, le reste est lu comme une durée.
         var matchLecon = ligne.match(/^###\s+(.+?)\s*\[Leçon(?:\s*\|\s*(.+?))?\]/);
         if (matchLecon) {
+            var dureeMin = 0;
+            var semaineLecon = null;
+            if (matchLecon[2]) {
+                var champs = matchLecon[2].split('|');
+                for (var c = 0; c < champs.length; c++) {
+                    var champ = champs[c].trim();
+                    if (!champ) continue;
+                    var mSem = champ.match(/^Sem\.\s*(\d+)$/);
+                    if (mSem) {
+                        var val = parseInt(mSem[1], 10);
+                        if (val >= 1) semaineLecon = val;
+                    } else if (!dureeMin) {
+                        dureeMin = parserDuree(champ);
+                    }
+                }
+            }
             leconCourante = {
                 titre: matchLecon[1].trim(),
-                dureeMin: matchLecon[2] ? parserDuree(matchLecon[2].trim()) : 0,
+                dureeMin: dureeMin,
+                semaine: semaineLecon,
                 objectif: '',
                 evaluation: ''
             };
@@ -1967,8 +2007,7 @@ function importerPlanDepuisMD(texte, nouvelleCarteMode) {
             metadata: {},
             cloneSourceId: null
         };
-        if (seq.semaineDebut != null) seqNoeud.metadata.semaineDebut = seq.semaineDebut;
-        if (seq.semaineFin != null) seqNoeud.metadata.semaineFin = seq.semaineFin;
+        // Rien d'ancré sur la séquence : son étendue se dérive de ses leçons.
 
         // Leçons : grille (4 colonnes max) quand 5+ leçons, ligne sinon
         for (var li = 0; li < seq.lecons.length; li++) {
@@ -1988,6 +2027,7 @@ function importerPlanDepuisMD(texte, nouvelleCarteMode) {
                 cloneSourceId: null
             };
             if (lecon.dureeMin > 0) leconNoeud.metadata.duree = lecon.dureeMin;
+            if (lecon.semaine != null) leconNoeud.metadata.semaine = lecon.semaine;
             seqNoeud.enfants.push(leconId);
             noeuds.push(leconNoeud);
 
@@ -2020,6 +2060,7 @@ function importerPlanDepuisMD(texte, nouvelleCarteMode) {
             cloneSourceId: null
         };
         if (orp.dureeMin > 0) orpNoeud.metadata.duree = orp.dureeMin;
+        if (orp.semaine != null) orpNoeud.metadata.semaine = orp.semaine;
         noeuds.push(orpNoeud);
 
         if (orp.objectif) orpNoeud.metadata.objectif = orp.objectif;
@@ -2165,7 +2206,12 @@ function naviguerVersLecon(leconId) {
 
 window.initialiserModuleOrganisateur = initialiserModuleOrganisateur;
 window.organisateur = {
-    naviguerVersLecon: naviguerVersLecon
+    naviguerVersLecon: naviguerVersLecon,
+    // Fonctions pures exposées pour la vérification automatisée : le
+    // découpage des marqueurs `[Leçon | 2 pér. | Sem. 3]` est la logique la
+    // plus facile à casser sans que rien ne le signale à l'écran.
+    parserPlanMD: parserPlanMD,
+    ancrageLeconPourDates: ancrageLeconPourDates
 };
 
 })();
