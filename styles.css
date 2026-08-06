@@ -18729,8 +18729,10 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     color: var(--texte-muted, #5a7a88);
     margin-top: 2px;
 }
-/* Lecture seule du Σ dans l'inspecteur d'une leçon */
-.planif-duree-rollup {
+/* Lecture seule dans l'inspecteur : Σ des durées (leçon) et étendue temporelle
+   dérivée des leçons (séquence). Même rôle visuel, une seule règle. */
+.planif-duree-rollup,
+.planif-panneau-derive {
     font-size: 12px;
     color: var(--texte-secondaire, #8aa4b0);
     padding: 4px 0;

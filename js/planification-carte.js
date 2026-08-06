@@ -236,6 +236,150 @@ function migrerObjectifsVersMetadata() {
     return migres.length;
 }
 
+// === ANCRAGE TEMPOREL (lot 1 du planificateur en grille, 6 août 2026) ===
+// D3 du plan : l'ancrage temporel appartient à la LEÇON, et à elle seule. Une
+// leçon porte `metadata.semaine` (entier ≥ 1) ; absente = NON PLANIFIÉE.
+// Les niveaux supérieurs ne stockent RIEN : leur étendue se DÉRIVE de leurs
+// leçons (première → dernière). Une séquence ne peut donc pas annoncer la
+// semaine 3 pendant qu'une de ses leçons vit en semaine 5 — la contradiction
+// devient structurellement impossible plutôt que simplement déconseillée.
+//
+// Avant le 6 août, `metadata.semaineDebut` / `semaineFin` vivaient sur la
+// SÉQUENCE et se saisissaient dans l'inspecteur de la carte. Deux défauts :
+//  1. la séquence pouvait contredire ses leçons ;
+//  2. personne ne les remplissait, et les tris qui en dépendaient retombaient
+//     tous sur leur repli 999 — d'où deux vues du même plan affichées dans des
+//     ordres différents (constat terrain du 601-101, 6 août).
+// `migrerAncrageTemporelVersLecon()` retire ces deux champs. Elle ne DEVINE
+// aucune semaine : ni depuis l'ancienne valeur de la séquence, ni depuis les
+// « Sem. 3 » écrits dans les titres. Tout repart non planifié, l'enseignant
+// assigne. Interpréter à sa place produirait des ancrages faux indiscernables
+// de vrais.
+var SEMAINE_MIN = 1;
+
+/** Semaine d'une leçon, ou null si non planifiée / nœud d'un autre type. */
+function semaineDeLecon(n) {
+    if (!n || n.type !== 'lecon' || !n.metadata) return null;
+    var s = parseInt(n.metadata.semaine, 10);
+    return (isNaN(s) || s < SEMAINE_MIN) ? null : s;
+}
+
+/**
+ * Étendue temporelle dérivée d'un nœud : { debut, fin } ou null si rien de
+ * planifié en dessous. Récursive DÈS MAINTENANT, alors que la hiérarchie n'a
+ * encore que deux niveaux de conteneurs : les séquences de séquences (voie A,
+ * tranchée le 6 août) n'auront ainsi rien à réécrire ici.
+ * `vus` garde contre un cycle dans `enfants` — une étendue ne vaut pas une
+ * boucle infinie au chargement.
+ */
+function etendueTemporelle(n, vus) {
+    if (!n) return null;
+    // La leçon d'abord : elle est AUSSI un conteneur (de ses activités), mais
+    // c'est sa propre semaine qui fait foi, pas celle de son contenu.
+    if (n.type === 'lecon') {
+        var s = semaineDeLecon(n);
+        return s === null ? null : { debut: s, fin: s };
+    }
+    var config = TYPES[n.type];
+    if (!(config && config.conteneur)) return null;
+
+    if (!vus) vus = new Set();
+    if (vus.has(n.id)) return null;
+    vus.add(n.id);
+
+    var debut = null, fin = null;
+    var enfants = n.enfants || [];
+    for (var i = 0; i < enfants.length; i++) {
+        var sous = etendueTemporelle(etat.noeuds.get(enfants[i]), vus);
+        if (!sous) continue;
+        if (debut === null || sous.debut < debut) debut = sous.debut;
+        if (fin === null || sous.fin > fin) fin = sous.fin;
+    }
+    return debut === null ? null : { debut: debut, fin: fin };
+}
+
+/** Porte d'entrée par id — pour l'Organisateur et les exports. */
+function etendueTemporelleParId(noeudId) {
+    return etendueTemporelle(etat.noeuds.get(noeudId));
+}
+
+/** « Sem. 3 », « Sem. 3–5 », ou '' si rien n'est planifié. */
+function formaterEtendue(etendue) {
+    if (!etendue) return '';
+    return 'Sem. ' + etendue.debut + (etendue.fin !== etendue.debut ? '–' + etendue.fin : '');
+}
+
+/**
+ * Clé de tri temporel : les non planifiés vont EN FIN de liste, jamais en
+ * tête. Repli volontairement au-delà de tout cadre plausible — l'ancien code
+ * utilisait 999 sur une valeur que personne ne remplissait, ce qui revenait à
+ * ne trier sur rien.
+ */
+function rangTemporel(n) {
+    var e = etendueTemporelle(n);
+    return e ? e.debut : Number.MAX_SAFE_INTEGER;
+}
+
+/**
+ * Écriture — porte de sortie UNIQUE de l'ancrage (même patron que
+ * `definirObjectifsLecon`). `semaine` null/0/'' = repasser en non planifié.
+ * @returns {boolean} true si la leçon existait et a été mise à jour
+ */
+function definirSemaineLecon(leconId, semaine) {
+    var n = etat.noeuds.get(leconId);
+    if (!n || n.type !== 'lecon') return false;
+    if (!n.metadata) n.metadata = {};
+
+    var s = parseInt(semaine, 10);
+    if (isNaN(s) || s < SEMAINE_MIN) {
+        if (!('semaine' in n.metadata)) return false;
+        delete n.metadata.semaine;
+    } else {
+        if (n.metadata.semaine === s) return false;
+        n.metadata.semaine = s;
+    }
+    propagerModification(leconId, 'metadata', JSON.parse(JSON.stringify(n.metadata)));
+    sauvegarder();
+    return true;
+}
+
+/**
+ * Ablation de l'ancrage porté par la séquence (zéro-dette). Idempotente :
+ * une carte déjà migrée ne réécrit rien et ne repasse pas par `sauvegarder()`.
+ * Même garde de persistance que `migrerObjectifsVersMetadata()` — sans cible
+ * de persistance, on ne mute pas l'état en mémoire.
+ * @returns {number} nombre de nœuds purgés
+ */
+function migrerAncrageTemporelVersLecon() {
+    var index = null;
+    try {
+        index = window.planificationDonnees && typeof window.planificationDonnees.getIndex === 'function'
+            ? window.planificationDonnees.getIndex()
+            : null;
+    } catch (e0) { return 0; }
+    if (!index || !index.active) return 0;
+
+    var purges = 0;
+    for (var entry of etat.noeuds) {
+        var n = entry[1];
+        if (!n.metadata) continue;
+        if (!('semaineDebut' in n.metadata) && !('semaineFin' in n.metadata)) continue;
+        // Purge sèche : l'ancienne valeur n'est REPORTÉE sur aucune leçon.
+        delete n.metadata.semaineDebut;
+        delete n.metadata.semaineFin;
+        purges++;
+    }
+    if (purges === 0) return 0;
+
+    try {
+        sauvegarder();
+    } catch (e) {
+        console.warn('[Planification] Migration de l\'ancrage temporel : sauvegarde échouée', e);
+        return 0;
+    }
+    return purges;
+}
+
 // === INDEX INVERSE CLONES (sourceId → Set d'IDs) ===
 var _cloneIndex = new Map();
 
@@ -1236,26 +1380,31 @@ function ouvrirPanneau(id) {
             '</div>';
     }
 
-    if (donnees.type === 'sequence') {
+    // Ancrage temporel : SAISI sur la leçon (D3), DÉRIVÉ sur la séquence.
+    // L'ancien couple « Semaine début / Semaine fin » de la séquence est retiré
+    // — il pouvait contredire ses propres leçons.
+    if (donnees.type === 'lecon') {
+        var semLecon = semaineDeLecon(donnees);
         extra.innerHTML +=
-            '<label for="planif-panneau-sem-debut">Semaine début</label>' +
-            '<input type="number" id="planif-panneau-sem-debut" value="' + (parseInt(donnees.metadata.semaineDebut, 10) || '') + '" min="1" max="15" placeholder="1">' +
-            '<label for="planif-panneau-sem-fin">Semaine fin</label>' +
-            '<input type="number" id="planif-panneau-sem-fin" value="' + (parseInt(donnees.metadata.semaineFin, 10) || '') + '" min="1" max="15" placeholder="5">';
-        var semDebutInput = extra.querySelector('#planif-panneau-sem-debut');
-        semDebutInput.addEventListener('focus', function() { enregistrerPourUndo(); });
-        semDebutInput.addEventListener('input', function(e) {
-            donnees.metadata.semaineDebut = parseInt(e.target.value) || null;
-            propagerModification(id, 'metadata', JSON.parse(JSON.stringify(donnees.metadata)));
-            sauvegarder();
+            '<label for="planif-panneau-semaine">Semaine</label>' +
+            '<input type="number" id="planif-panneau-semaine" value="' + (semLecon === null ? '' : semLecon) + '" min="1" placeholder="non planifiée">';
+        var semInput = extra.querySelector('#planif-panneau-semaine');
+        semInput.addEventListener('focus', function() { enregistrerPourUndo(); });
+        semInput.addEventListener('input', function(e) {
+            definirSemaineLecon(id, e.target.value);
+            mettreAJourSommaire();
         });
-        var semFinInput = extra.querySelector('#planif-panneau-sem-fin');
-        semFinInput.addEventListener('focus', function() { enregistrerPourUndo(); });
-        semFinInput.addEventListener('input', function(e) {
-            donnees.metadata.semaineFin = parseInt(e.target.value) || null;
-            propagerModification(id, 'metadata', JSON.parse(JSON.stringify(donnees.metadata)));
-            sauvegarder();
-        });
+    }
+
+    if (donnees.type === 'sequence') {
+        var etendueSeq = etendueTemporelle(donnees);
+        extra.innerHTML +=
+            '<label>Semaines (dérivées des leçons)</label>' +
+            '<div class="planif-panneau-derive">' +
+                (etendueSeq
+                    ? formaterEtendue(etendueSeq)
+                    : '— assigne une semaine à ses leçons') +
+            '</div>';
     }
 
     if (TYPES_PREALABLE[donnees.type]) {
@@ -2977,6 +3126,9 @@ function chargerCarte(carteId) {
     // Bascule des objectifs de leçon vers le nœud (idempotente, avant le rendu
     // pour que la carte affiche déjà les objectifs migrés).
     migrerObjectifsVersMetadata();
+    // Ablation de l'ancrage porté par la séquence, avant le rendu pour que
+    // l'étendue affichée soit déjà la dérivée et non l'ancienne valeur saisie.
+    migrerAncrageTemporelVersLecon();
 
     reconstruireDOM();
     if (liensModifies) sauvegarder();
@@ -3799,9 +3951,8 @@ function genererSeancesHTML() {
     }
 
     sequences.sort(function(a, b) {
-        var sa = (a.metadata && a.metadata.semaineDebut) || 0;
-        var sb = (b.metadata && b.metadata.semaineDebut) || 0;
-        if (sa !== sb) return sa - sb;
+        var ra = rangTemporel(a), rb = rangTemporel(b);
+        if (ra !== rb) return ra - rb;
         return (a.x || 0) - (b.x || 0);
     });
 
@@ -3904,11 +4055,8 @@ function genererSeancesHTML() {
         html += '<span class="planif-cal-pastille" style="background: ' + configSeq.couleur + '"></span>';
         html += '<span class="planif-cal-titre">' + (seq.titre || 'Séquence') + '</span>';
 
-        if (seq.metadata && seq.metadata.semaineDebut) {
-            var semTxt = 'Sem. ' + seq.metadata.semaineDebut;
-            if (seq.metadata.semaineFin && seq.metadata.semaineFin !== seq.metadata.semaineDebut) {
-                semTxt += '–' + seq.metadata.semaineFin;
-            }
+        var semTxt = formaterEtendue(etendueTemporelle(seq));
+        if (semTxt) {
             html += '<span class="planif-cal-semaines">' + semTxt + '</span>';
         }
         html += '</div>';
@@ -3984,9 +4132,7 @@ function peuplerSelecteursOrganisateur() {
     for (var entry of etat.noeuds) {
         if (entry[1].type === 'sequence') sequences.push(entry[1]);
     }
-    sequences.sort(function(a, b) {
-        return (a.metadata && a.metadata.semaineDebut || 999) - (b.metadata && b.metadata.semaineDebut || 999);
-    });
+    sequences.sort(function(a, b) { return rangTemporel(a) - rangTemporel(b); });
 
     // Peupler select séquence
     var valActuelle = orgSelectSequence.value;
@@ -4319,7 +4465,7 @@ function genererPlanTexte() {
         else if (nd.type === 'lecon' && !nd.parent) leconsOrphelines.push(nd);
     }
 
-    sequences.sort(function(a, b) { return (a.metadata && a.metadata.semaineDebut || 999) - (b.metadata && b.metadata.semaineDebut || 999); });
+    sequences.sort(function(a, b) { return rangTemporel(a) - rangTemporel(b); });
 
     function formatDuree(min) {
         if (!min) return '';
@@ -4347,14 +4493,8 @@ function genererPlanTexte() {
 
     for (var i = 0; i < sequences.length; i++) {
         var seq = sequences[i];
-        var semTxt = '';
-        if (seq.metadata && seq.metadata.semaineDebut) {
-            semTxt = ' (Sem. ' + seq.metadata.semaineDebut;
-            if (seq.metadata.semaineFin && seq.metadata.semaineFin !== seq.metadata.semaineDebut) {
-                semTxt += '–' + seq.metadata.semaineFin;
-            }
-            semTxt += ')';
-        }
+        var etendueSeq = formaterEtendue(etendueTemporelle(seq));
+        var semTxt = etendueSeq ? ' (' + etendueSeq + ')' : '';
 
         txt += '───────────────────────────────────────\n';
         txt += '▌ SÉQUENCE : ' + (seq.titre || 'Sans titre') + semTxt + '\n';
@@ -4430,7 +4570,7 @@ function genererPlanTSV() {
         else if (nd.type === 'lecon' && !nd.parent) leconsOrphelines.push(nd);
     }
 
-    sequences.sort(function(a, b) { return (a.metadata && a.metadata.semaineDebut || 999) - (b.metadata && b.metadata.semaineDebut || 999); });
+    sequences.sort(function(a, b) { return rangTemporel(a) - rangTemporel(b); });
 
     var tsv = 'Séquence\tSemaines\tSéance\tDurée séance (min)\tType\tTitre\tDurée (min)\tLiens\n';
 
@@ -4448,13 +4588,12 @@ function genererPlanTSV() {
 
     for (var i = 0; i < sequences.length; i++) {
         var seq = sequences[i];
-        var semTxt = '';
-        if (seq.metadata && seq.metadata.semaineDebut) {
-            semTxt = seq.metadata.semaineDebut.toString();
-            if (seq.metadata.semaineFin && seq.metadata.semaineFin !== seq.metadata.semaineDebut) {
-                semTxt += '–' + seq.metadata.semaineFin;
-            }
-        }
+        // Colonne « Semaines » du TSV : sans le préfixe « Sem. », c'est un
+        // en-tête de colonne qui le porte.
+        var etendueSeq = etendueTemporelle(seq);
+        var semTxt = etendueSeq
+            ? etendueSeq.debut + (etendueSeq.fin !== etendueSeq.debut ? '–' + etendueSeq.fin : '')
+            : '';
         var seqLiens = liensCompacts(seq.id);
         var seqNom = escape(seq.titre || 'Sans titre');
         var enfants = (seq.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); });
@@ -5902,6 +6041,14 @@ window.planificationCarte = {
     objectifDeLeconParId: objectifDeLeconParId,
     objectifsDeLeconParId: objectifsDeLeconParId,
     definirObjectifsLecon: definirObjectifsLecon,
+    // Ancrage temporel : la leçon écrit, tout le reste dérive (D3)
+    migrerAncrageTemporelVersLecon: migrerAncrageTemporelVersLecon,
+    semaineDeLecon: semaineDeLecon,
+    etendueTemporelle: etendueTemporelle,
+    etendueTemporelleParId: etendueTemporelleParId,
+    formaterEtendue: formaterEtendue,
+    rangTemporel: rangTemporel,
+    definirSemaineLecon: definirSemaineLecon,
     recentrerVue: recentrerVue,
     injecterNoeuds: injecterNoeuds,
     nouvelleCarte: nouvelleCarte,

@@ -1045,6 +1045,52 @@ concept fait les trois.**
 n'a aucune leçon) n'aurait alors aucune position. Il lui faut un ancrage propre
 ou une zone « non planifié ».
 
+### ✅ LIVRÉ (6 août, 1.38.0) — le lot 1 : l'ordre devient une donnée
+
+Le socle est en place. `metadata.semaine` vit sur la leçon ; les niveaux
+supérieurs dérivent leur étendue, récursivement. Le couple
+`semaineDebut` / `semaineFin` de la séquence est **retiré**, y compris ses
+deux champs de l'inspecteur — remplacés par une ligne en lecture seule
+(« Semaines (dérivées des leçons) »).
+
+**▣ GÉNÉRAL — ce que l'ablation démontre.** Tant que la séquence *pouvait*
+porter sa propre semaine, deux vérités coexistaient et rien n'empêchait
+qu'elles divergent. En retirant le champ, la contradiction devient
+**structurellement impossible** au lieu d'être seulement déconseillée. Une
+règle qu'on doit rappeler dans une doc est une règle que le modèle devrait
+porter à sa place.
+
+**Les quatre questions du plan, tranchées le 6 août :**
+
+| # | Question | Décision |
+|---|----------|----------|
+| Q1+Q2 | Séquence vide, leçon sans semaine | **Zone « non planifié »** en pied de grille, une seule et même zone |
+| Q3 | Le déplacement dans la grille bouge-t-il le bloc sur le canevas ? | **Non** — un indicateur, pas un déplacement. La position sur une carte mentale et l'ordre chronologique sont deux choses différentes |
+| Q4 | Séquences de séquences avant ou après ? | **Après le lot 1, avant le lot 2** — la dérivation est déjà récursive, mais la grille en lecture ne doit pas être écrite pour trois niveaux fixes |
+| Q5 | Les deux champs de l'inspecteur de séquence | **Retirés dans le lot 1**, dérivation partout |
+
+**⚠ Ce que la migration ne fait PAS, et pourquoi.** Elle ne reporte aucune
+semaine : ni celle qu'une séquence portait, ni celles écrites dans les titres
+(« Sem. 3 - … »). Tout repart non planifié.
+
+> **▣ GÉNÉRAL — principe candidat.** *Un outil qui devine produit des données
+> indiscernables de celles que l'utilisateur a saisies.* Une répartition
+> inventée aurait l'exacte apparence d'un choix pédagogique. Mieux vaut une
+> case vide, qui se voit, qu'un ancrage faux, qui ne se voit pas.
+
+**Effet de bord assumé sur le format Markdown.** Le marqueur de semaine a suivi
+le modèle : il est passé de la ligne de séquence à celle de la leçon
+(`### Accueil [Leçon | 1h50 | Sem. 1]`). Le marqueur de séquence garde une
+étendue « Sem. 3–5 » parce qu'elle se lit bien dans un plan de cours, mais elle
+est **dérivée et informative** — l'import ne la relit plus.
+
+**Portes laissées ouvertes.** Les bornes hautes (« pas au-delà du cadre ») ne
+sont pas posées : elles appartiennent au lot 3, et surtout la dérivation des
+rangées depuis le cadre du trimestre reste à vérifier — `calendrier-vue.js`
+qualifie `nombreSemaines` de champ « inexistant » dont le repli est calculé,
+alors que le plan le donne pour acquis (`trimestre-v2-init.js:285-288`). **À
+trancher au lot 2**, avant de construire les rangées dessus.
+
 ### ◈ Plusieurs groupes : un alignement, N planifications
 
 Piste ouverte le 6 août, **à ne pas construire maintenant** :

@@ -59,6 +59,28 @@ D'où ce plan écrit. La méthode « friction → correctif » a atteint sa limi
 
 ---
 
+## ✅ ÉTAT AU 6 AOÛT AU SOIR
+
+**Q1 à Q4 tranchées** (+ une Q5 apparue à l'audit), **lot 1 LIVRÉ en 1.38.0.**
+Détail des décisions et de leurs conséquences : `docs/utilisateur/METHODE-ALIGNEMENT.md`
+§ « LIVRÉ (6 août, 1.38.0) ». Prochaine étape : **séquences de séquences**, puis lot 2.
+
+| # | Décision |
+|---|----------|
+| Q1+Q2 | Zone « non planifié » unique en pied de grille |
+| Q3 | Non — indicateur, pas déplacement du bloc sur le canevas |
+| Q4 | Séquences de séquences **après le lot 1, avant le lot 2** |
+| Q5 | Les deux champs de l'inspecteur de séquence **retirés dans le lot 1** |
+
+**⚠ L'audit des call-sites a trouvé 26 sites, pas les « ~12 » annoncés au §5** :
+12 de plus dans `planification-carte.js` (exports TXT/TSV/MD, sélecteurs,
+Vue calendrier) et une sentinelle existante (`sentinelle-echappement-audit-386`)
+qui verrouillait les deux champs supprimés. Compter les call-sites d'une
+structure partagée **avant** d'annoncer un périmètre : le plan sous-estimait de
+moitié.
+
+---
+
 ## 4. Questions à trancher AVANT le lot 1
 
 | # | Question | Pourquoi ça bloque |
@@ -82,7 +104,7 @@ D1. Mais le dire explicitement à l'usage (un indicateur, pas un déplacement).
 Chaque lot est **livrable et validable séparément**. Aucun ne laisse l'outil
 dans un état intermédiaire inutilisable.
 
-### Lot 1 — L'ordre devient une donnée *(socle, invisible)*
+### ✅ Lot 1 — L'ordre devient une donnée *(socle, invisible)* — LIVRÉ 1.38.0
 
 - `metadata.semaine` sur les leçons (entier, ou absent = non planifié).
 - Fonction de dérivation : étendue d'une séquence = min/max des semaines de ses
