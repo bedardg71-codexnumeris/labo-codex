@@ -20,7 +20,7 @@
 // init-inline.js compare cette valeur au BUILD_ID lu depuis version.json :
 // si différent, Safari file:// a probablement un main.js périmé en cache,
 // et la séquence reload+bandeau s'enclenche. SYNCHRONISER À CHAQUE BUMP.
-window._SCRIPT_BUILD_main = '0806-1337';
+window._SCRIPT_BUILD_main = '0806-1420';
 
 /* ===============================
    FONCTION GLOBALE: Génération d'ID uniques
@@ -233,6 +233,23 @@ document.addEventListener('DOMContentLoaded', function () {
     // ===============================
     // Recharger les données quand la synchronisation IndexedDB → localStorage est terminée
     window.addEventListener('db-ready', async function(event) {
+
+        // #374-bis (6 août 2026) : RE-scanner la fusion des journées sans cours
+        // maintenant que memoryCache est hydraté. La passe de DOMContentLoaded
+        // (§3.6b-bis) rate les clés vivant UNIQUEMENT en IndexedDB — classe de
+        // bug #142 « lu trop tôt, relu à db-ready ». Constaté le 6 août : les
+        // 2 congés A2026 de Grégoire, jamais fusionnés, semblaient disparus.
+        // Idempotente (dédoublonnage id + contenu) ; si elle rattrape des
+        // événements, le calendrier doit être régénéré pour les refléter.
+        if (typeof migrerJourneesSansCours === 'function') {
+            try {
+                if (migrerJourneesSansCours() > 0 && typeof genererCalendrierComplet === 'function') {
+                    genererCalendrierComplet();
+                }
+            } catch (e) {
+                console.warn('[Migration #374-bis] re-scan db-ready échoué:', e);
+            }
+        }
 
         // Migration consolidation onboarding v6.21 (21 avril 2026) : nettoie
         // les flags localStorage + IDB orphelins après retrait des modules

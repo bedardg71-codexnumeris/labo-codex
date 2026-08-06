@@ -468,7 +468,11 @@
        =============================== */
 
     var JOURS_SEMAINE = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
-    var JOURS_COMPLETS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+    // Semaine affichée du DIMANCHE au SAMEDI — format du calendrier de la
+    // direction des études, adopté pour toutes les vues calendaires (décision
+    // Grégoire, 6 août 2026). L'ordre suit `getDay()` : une seule liste sert
+    // de mapping ET d'ordre d'affichage (l'ancienne JOURS_COMPLETS lundi→
+    // dimanche, retirée, ne servait qu'à contredire le calendrier scolaire).
     var NOMS_JOURS_JS = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 
     /**
@@ -698,17 +702,18 @@
             ? obtenirCalendrierComplet()
             : db.getSync(cle('calendrierComplet'), {});
 
-        var joursAcceptes = prefs.weekends ? JOURS_COMPLETS : JOURS_SEMAINE;
+        var joursAcceptes = prefs.weekends ? NOMS_JOURS_JS : JOURS_SEMAINE;
 
-        // Élargir au lundi de la semaine de début
+        // Élargir au DIMANCHE de la semaine de début — la semaine affichée va
+        // du dimanche au samedi (format direction des études, 6 août 2026).
         var dDebut = new Date(dateDebut + 'T12:00:00');
-        while (NOMS_JOURS_JS[dDebut.getDay()] !== 'Lundi') {
+        while (NOMS_JOURS_JS[dDebut.getDay()] !== 'Dimanche') {
             dDebut.setDate(dDebut.getDate() - 1);
         }
 
-        // Élargir au vendredi (ou dimanche) de la semaine de fin
+        // Élargir au vendredi (ou samedi) de la semaine de fin
         var dFin = new Date(dateFin + 'T12:00:00');
-        var jourFinSem = prefs.weekends ? 'Dimanche' : 'Vendredi';
+        var jourFinSem = prefs.weekends ? 'Samedi' : 'Vendredi';
         while (NOMS_JOURS_JS[dFin.getDay()] !== jourFinSem) {
             dFin.setDate(dFin.getDate() + 1);
         }
@@ -748,17 +753,28 @@
             d.setDate(d.getDate() + 1);
         }
 
-        // Deuxième passage : inférer les numéros de semaine manquants (congés, weekends)
-        // D'abord vers l'avant, puis vers l'arrière
+        // Deuxième passage : inférer les numéros de semaine manquants (congés,
+        // weekends). Le DIMANCHE ouvre la semaine (format dimanche→samedi) :
+        // il hérite de la semaine SUIVANTE (passe arrière), jamais de la
+        // précédente — sinon il se rangerait en queue de la semaine finie et
+        // l'affichage redeviendrait lundi→dimanche. Le samedi, lui, ferme la
+        // semaine : héritage vers l'avant.
         var dernierNum = null;
         for (var i = 0; i < joursBruts.length; i++) {
             if (joursBruts[i].numeroSemaine) dernierNum = joursBruts[i].numeroSemaine;
-            else if (dernierNum) joursBruts[i].numeroSemaine = dernierNum;
+            else if (dernierNum && joursBruts[i].jourSemaine !== 'Dimanche') joursBruts[i].numeroSemaine = dernierNum;
         }
         dernierNum = null;
         for (var k = joursBruts.length - 1; k >= 0; k--) {
             if (joursBruts[k].numeroSemaine) dernierNum = joursBruts[k].numeroSemaine;
             else if (dernierNum) joursBruts[k].numeroSemaine = dernierNum;
+        }
+        // Filet : un dimanche en toute fin de plage n'a rien après lui —
+        // héritage vers l'avant plutôt que de rester sans semaine.
+        dernierNum = null;
+        for (var m = 0; m < joursBruts.length; m++) {
+            if (joursBruts[m].numeroSemaine) dernierNum = joursBruts[m].numeroSemaine;
+            else if (dernierNum) joursBruts[m].numeroSemaine = dernierNum;
         }
 
         return joursBruts;
@@ -1051,7 +1067,7 @@
 
         // Compter par jour × tranche
         var grille = {};
-        JOURS_COMPLETS.forEach(function (j) {
+        NOMS_JOURS_JS.forEach(function (j) {
             grille[j] = { 'matin': 0, 'apres-midi': 0, 'soiree': 0, 'nuit': 0 };
         });
 
@@ -1085,14 +1101,14 @@
         // Construire le heatmap
         var html = '<div class="rythme-heatmap">';
         html += '<div class="rythme-heatmap-coin"></div>';
-        JOURS_COMPLETS.forEach(function (j) {
+        NOMS_JOURS_JS.forEach(function (j) {
             var abr = j.substring(0, 3);
             html += '<div class="rythme-heatmap-jour">' + abr + '</div>';
         });
 
         TRANCHES_HEURE.forEach(function (t) {
             html += '<div class="rythme-heatmap-tranche">' + t.label + '</div>';
-            JOURS_COMPLETS.forEach(function (j) {
+            NOMS_JOURS_JS.forEach(function (j) {
                 var n = grille[j][t.id];
                 var intensite = maxCount > 0 ? n / maxCount : 0;
                 var cls = 'rythme-heatmap-cellule';
@@ -1264,6 +1280,9 @@
     // Export
     window.Rythme = {
         afficherRythme: afficherRythme,
+        // Fonction pure exposée pour la vérification automatisée : l'ancrage
+        // dimanche→samedi et l'héritage de semaine du dimanche s'y jouent.
+        obtenirJoursCalendrier: obtenirJoursCalendrier,
         collecterDurees: collecterDurees,
         calculerStatsParActivite: calculerStatsParActivite,
         sauvegarderPreferences: sauvegarderPreferences,
