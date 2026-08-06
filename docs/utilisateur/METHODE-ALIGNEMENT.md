@@ -510,6 +510,57 @@ devenir la commande de ce qu'il indique.* Signaler qu'une information existe
 sans offrir de l'ouvrir crée une impasse ; l'inverse fait d'un badge passif
 une porte d'entrée.
 
+### ✅ Structure de l'en-tête — précisée le 6 août
+
+Recentrage explicite : la date et le numéro de semaine sont **secondaires**.
+L'objet du chantier est la **cohérence du contenu** — que connaissances,
+activités, évaluations et objectifs se répondent.
+
+```
+┌──────────────────────────────────┐
+│ LEÇON                            │  ← 1. type du bloc
+│  • Objectif A                    │  ← 2. LES objectifs (pluriel)
+│  • Objectif B                    │
+├──────────────────────────────────┤
+│ [connaissances, activités,       │  ← 3. contenu, inchangé
+│  évaluations… tel qu'aujourd'hui]│
+└──────────────────────────────────┘
+```
+
+> ⚠ **Impact sur le livré.** Les versions 1.32-1.33 stockent **un** objectif
+> (`metadata.objectif`, une chaîne). Le passage au **pluriel** change le modèle
+> de données : à traiter avant que la saisie ne représente un travail réel.
+
+**◈ OUVERT — le nom de la leçon.** Il ne figure plus dans cette description.
+Est-il retiré, ou déplacé sous l'en-tête avec le contenu ? Rappel du §6 ter :
+le titre alimente quatre usages hors du bloc (sommaire de la palette, vue
+calendrier, menus de l'Organisateur, exports TXT/Markdown). S'il disparaît sans
+repli, ces quatre endroits affichent « Leçon 1, Leçon 2… ».
+
+### ◈ Relier les objectifs aux activités (piste du 6 août)
+
+Idée : un lien d'**apparence distincte** entre un objectif et les activités qui
+le servent, permettant de vérifier que **chaque objectif est couvert**.
+
+C'est de l'alignement au sens fort du module (principe 3 : les liens *sont*
+l'alignement) et la contrepartie exacte du §3.1 : si l'objectif est un maillon,
+il doit pouvoir se raccorder. Cela rouvre — assumé — la décision « objectif =
+texte simple, sans connecteurs ».
+
+**Le point dur : un objectif reliable cesse d'être du texte.** Il devient une
+**entité identifiable**. Deux modèles possibles :
+
+| Modèle | Forme | Ce que ça donne | Ce que ça coûte |
+|--------|-------|-----------------|-----------------|
+| **A — liste dans le nœud** | `metadata.objectifs = [{id, texte}]` | Léger ; rendu dans l'en-tête tel que décrit | Les liens actuels vont de **nœud à nœud** : relier un sous-élément demande un second système de liens |
+| **B — objectif = type de nœud** | Nœud enfant de la leçon, rendu *inline* dans l'en-tête | Liens, vérifications et badges fonctionnent **nativement** | Rendu spécial à écrire (ancrages de liaison sur chaque ligne) |
+
+**Recommandation : ne pas trancher maintenant, mais ne pas se fermer la
+porte.** Livrer d'abord le pluriel en texte — mais stocker dès le départ une
+**liste d'objets porteurs d'un id**, jamais un tableau de chaînes. Le surcoût
+est nul aujourd'hui, et c'est ce qui rendra les liens possibles demain sans
+migration.
+
 ### ◈ OUVERT — questions restantes sur la bascule
 
 - **Portée.** La bascule est **par leçon**. Or juger l'enchaînement (§3.1)
@@ -605,6 +656,22 @@ Deux repères distincts, à ne pas confondre :
 
 Une numérotation qui se maintient seule au glisser-déposer est un acquis du
 projet (cf. le paquet-de-5 du calendrier, #368) : ne pas la faire ressaisir.
+
+### ◈ Où vit le planificateur ? (précision du 6 août)
+
+Pas dans un onglet séparé : **un panneau coulissant à l'intérieur du module
+Alignement**, visible en même temps que la carte.
+
+> *« Ce sont deux perspectives différentes et complémentaires sur le même
+> trimestre. »*
+
+**▣ GÉNÉRAL.** Deux perspectives sur un même objet gagnent à être
+**co-visibles**. Les séparer en onglets force l'enseignant à tenir l'une de
+mémoire pendant qu'il regarde l'autre — précisément ce qu'un outil de
+conception devrait lui épargner. (Le module a déjà le patron : la palette
+Navigation est un panneau flottant, déplaçable et réductible.)
+
+Report assumé : à traiter après le cœur de l'alignement.
 
 ### ◈ Ordre des chantiers — recommandation
 
