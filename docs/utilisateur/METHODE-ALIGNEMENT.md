@@ -1140,6 +1140,38 @@ identifiants d'objectifs.
 
 ---
 
+## 6 quinquies. ▣ GÉNÉRAL — l'exigence est progressive (6 août, discussion)
+
+Formulation de Grégoire, en fin de journée d'alignement :
+
+> *« Il est simple et peut en même temps être complexe si l'utilisateur le
+> souhaite. Un enseignant pourrait créer des leçons avec juste des activités
+> s'il le voulait, sans même avoir d'objectifs. C'est ce que font la plupart
+> des enseignants dans mon département. Par contre, quelqu'un qui veut
+> vraiment aligner ses cours peut y ajouter des objectifs et des idées
+> maîtresses et l'application vérifie l'alignement. »*
+
+**Le principe** : l'outil n'impose pas l'alignement, il le **rend visible** ;
+l'exigence est progressive et appartient à l'enseignant. Concrètement : les
+badges signalent (« ! » gris, ⚠ orange), ils ne bloquent jamais — un badge
+gris est une invitation, pas une erreur. L'usage minimal (séquences → leçons
+→ activités) est un outil complet.
+
+**Ce que la vérification fait, précisément** : des connexions typées,
+orientées et **transitives** (une idée maîtresse atteint sa compétence
+directement *ou via une autre idée* ; le ⚠ remonte la chaîne jusqu'à
+« aucune évaluation ne vérifie cette compétence »). Ce qu'elle ne fait
+pas : juger la **pertinence** d'un lien — aucune reconnaissance sémantique.
+Le moteur sémantique est l'enseignant ; l'outil rend la structure visible
+pour que ce jugement puisse s'exercer, il ne prétend pas l'exercer.
+
+**◈ Rappel de périmètre** : les objectifs de leçon ne sont PAS encore dans
+la boucle de vérification (la chaîne passe par compétence / idées
+maîtresses). C'est la piste des liens objectif → activité (§6 ter) — les
+identifiants sont prêts depuis 1.34.0.
+
+---
+
 ## 7. Vers l'instruction générale
 
 Section à écrire **en dernier**, quand la démarche aura été éprouvée. Elle
