@@ -174,8 +174,9 @@ function brancherEvenements() {
             var texte = objectifContenu.textContent.trim();
             // L'objectif vit sur le nœud (metadata.objectif) depuis le 6 août
             // 2026 : une seule vérité, partagée avec la carte mentale.
-            if (window.planificationCarte && window.planificationCarte.definirObjectifLecon) {
-                window.planificationCarte.definirObjectifLecon(leconId, texte || null);
+            if (window.planificationCarte && window.planificationCarte.definirObjectifsLecon) {
+                // Une ligne = un objectif (une leçon en a toujours plusieurs).
+                window.planificationCarte.definirObjectifsLecon(leconId, texte ? texte.split('\n') : []);
             }
             if (btnReinitObjectif) btnReinitObjectif.style.display = texte ? '' : 'none';
         });
@@ -184,8 +185,8 @@ function brancherEvenements() {
         btnReinitObjectif.addEventListener('click', function() {
             var leconId = selectLecon ? selectLecon.value : '';
             if (!leconId) return;
-            if (window.planificationCarte && window.planificationCarte.definirObjectifLecon) {
-                window.planificationCarte.definirObjectifLecon(leconId, null);
+            if (window.planificationCarte && window.planificationCarte.definirObjectifsLecon) {
+                window.planificationCarte.definirObjectifsLecon(leconId, []);
             }
             btnReinitObjectif.style.display = 'none';
             afficherObjectif(leconId);

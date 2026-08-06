@@ -52,7 +52,13 @@ function monterModule({ index = { active: 'carte_1' }, sauvegardeLance = false }
 
     const win = chargerScript('js/planification-carte.js', {
         db,
-        cle: (k) => `a2026_${k}`
+        cle: (k) => `a2026_${k}`,
+        // Globaux du projet dont le rendu a besoin : definirObjectifsLecon
+        // re-rend, donc traverse reconstruireDOM().
+        echapperHtml: (t) => String(t === null || t === undefined ? '' : t)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;'),
+        requestAnimationFrame: (fn) => { fn(); return 0; }
     });
     // Le module namespace ses clés via `window.cle(...)` : le sandbox doit le
     // porter sur le faux window, pas seulement comme global.
@@ -72,7 +78,7 @@ describe('F1 · migration des objectifs vers metadata.objectif', () => {
     let api;
     beforeEach(() => { api = monterModule(); });
 
-    it('bascule un objectif de l’ancienne clé vers le nœud', () => {
+    it('bascule un objectif de l’ancienne clé vers le nœud, en LISTE', () => {
         poserLecon(api, 'planif-n1');
         store['a2026_planification_seances'] = {
             'planif-n1': { objectifPersonnalise: 'Repérer les marqueurs de relation' }
@@ -81,8 +87,23 @@ describe('F1 · migration des objectifs vers metadata.objectif', () => {
         const migres = api.migrerObjectifsVersMetadata();
 
         expect(migres).toBe(1);
-        expect(api.etat.noeuds.get('planif-n1').metadata.objectif)
-            .toBe('Repérer les marqueurs de relation');
+        const objs = api.etat.noeuds.get('planif-n1').metadata.objectifs;
+        expect(objs).toHaveLength(1);
+        expect(objs[0].texte).toBe('Repérer les marqueurs de relation');
+        // Porteur d'un id : c'est ce qui rendra les liens possibles sans migration.
+        expect(objs[0].id).toBeTruthy();
+    });
+
+    it('bascule aussi le format intermédiaire (chaîne unique metadata.objectif)', () => {
+        poserLecon(api, 'planif-n1', { objectif: 'Analyser un texte littéraire' });
+
+        expect(api.migrerObjectifsVersMetadata()).toBe(1);
+
+        const meta = api.etat.noeuds.get('planif-n1').metadata;
+        expect(meta.objectifs).toHaveLength(1);
+        expect(meta.objectifs[0].texte).toBe('Analyser un texte littéraire');
+        // Zéro-dette : l'ancien champ ne survit pas à la migration.
+        expect(meta.objectif).toBeUndefined();
     });
 
     it('retire l’ancienne source après migration (une seule vérité)', () => {
@@ -100,14 +121,17 @@ describe('F1 · migration des objectifs vers metadata.objectif', () => {
         expect(seances['planif-n1'].notes).toBe('garder ces notes');
     });
 
-    it('est idempotente : ne réécrit pas un objectif déjà porté par le nœud', () => {
-        poserLecon(api, 'planif-n1', { objectif: 'Objectif déjà migré' });
+    it('est idempotente : ne réécrit pas des objectifs déjà portés par le nœud', () => {
+        poserLecon(api, 'planif-n1', { objectifs: [{ id: 'obj_x', texte: 'Objectif déjà migré' }] });
         store['a2026_planification_seances'] = {
             'planif-n1': { objectifPersonnalise: 'Vieille valeur' }
         };
 
         expect(api.migrerObjectifsVersMetadata()).toBe(0);
-        expect(api.etat.noeuds.get('planif-n1').metadata.objectif).toBe('Objectif déjà migré');
+        const objs = api.etat.noeuds.get('planif-n1').metadata.objectifs;
+        expect(objs).toHaveLength(1);
+        expect(objs[0].texte).toBe('Objectif déjà migré');
+        expect(objs[0].id).toBe('obj_x');
     });
 
     it('ignore les objectifs vides et les nœuds qui ne sont pas des leçons', () => {
@@ -121,8 +145,8 @@ describe('F1 · migration des objectifs vers metadata.objectif', () => {
         };
 
         expect(api.migrerObjectifsVersMetadata()).toBe(0);
-        expect(api.etat.noeuds.get('planif-vide').metadata.objectif).toBeUndefined();
-        expect(api.etat.noeuds.get('planif-act').metadata.objectif).toBeUndefined();
+        expect(api.etat.noeuds.get('planif-vide').metadata.objectifs).toBeUndefined();
+        expect(api.etat.noeuds.get('planif-act').metadata.objectifs).toBeUndefined();
     });
 
     it('ne purge JAMAIS l’ancienne source si la sauvegarde échoue', () => {
@@ -146,7 +170,7 @@ describe('F1 · migration des objectifs vers metadata.objectif', () => {
 
         expect(api.migrerObjectifsVersMetadata()).toBe(0);
         // La garde protège contre la perte sèche : rien muté, rien purgé.
-        expect(api.etat.noeuds.get('planif-n1').metadata.objectif).toBeUndefined();
+        expect(api.etat.noeuds.get('planif-n1').metadata.objectifs).toBeUndefined();
         expect(store['a2026_planification_seances']['planif-n1'].objectifPersonnalise)
             .toBe('Objectif à ne pas perdre');
     });
@@ -155,19 +179,84 @@ describe('F1 · migration des objectifs vers metadata.objectif', () => {
 // =======================================================================
 // B. LECTURE — l'objectif se lit sur le nœud
 // =======================================================================
-describe('F1 · objectifDeLecon lit le nœud, jamais l’ancienne clé', () => {
+describe('F1 · lecture des objectifs sur le nœud', () => {
     let api;
     beforeEach(() => { api = monterModule(); });
 
-    it('retourne l’objectif porté par metadata', () => {
-        expect(api.objectifDeLecon({ metadata: { objectif: 'Analyser un texte' } }))
-            .toBe('Analyser un texte');
+    const troisObjectifs = {
+        metadata: { objectifs: [
+            { id: 'o1', texte: 'Appliquer des techniques d’annotation' },
+            { id: 'o2', texte: 'Identifier des émotions et des thèmes' },
+            { id: 'o3', texte: 'Formuler une hypothèse' }
+        ] }
+    };
+
+    it('rend la liste complète des objectifs', () => {
+        expect(api.objectifsDeLecon(troisObjectifs)).toHaveLength(3);
     });
 
-    it('retourne une chaîne vide quand rien n’est posé (jamais undefined)', () => {
+    it('rend toujours un tableau, jamais undefined', () => {
+        expect(api.objectifsDeLecon({ metadata: {} })).toEqual([]);
+        expect(api.objectifsDeLecon({})).toEqual([]);
+        expect(api.objectifsDeLecon(null)).toEqual([]);
+    });
+
+    it('ignore les entrées malformées plutôt que de les laisser casser le rendu', () => {
+        const abime = { metadata: { objectifs: [{ id: 'o1', texte: 'Valide' }, null, { id: 'o2' }] } };
+        expect(api.objectifsDeLecon(abime)).toHaveLength(1);
+    });
+
+    it('objectifDeLecon rend le PREMIER objectif (repli une-ligne)', () => {
+        expect(api.objectifDeLecon(troisObjectifs)).toBe('Appliquer des techniques d’annotation');
         expect(api.objectifDeLecon({ metadata: {} })).toBe('');
-        expect(api.objectifDeLecon({})).toBe('');
-        expect(api.objectifDeLecon(null)).toBe('');
+    });
+});
+
+// On teste `appliquerObjectifs` (mutation + persistance) plutôt que la porte
+// publique `definirObjectifsLecon`, qui enchaîne un re-rendu : la logique
+// métier est dans la première, le DOM n'ajoute rien à vérifier ici. Le fait que
+// la frappe ne re-rende PAS est verrouillé au bloc C.
+describe('F1 · écriture des objectifs (pluriel)', () => {
+    let api, lecon;
+    const definir = (textes) => api.appliquerObjectifs(lecon, textes);
+    beforeEach(() => {
+        api = monterModule();
+        poserLecon(api, 'planif-n1');
+        lecon = api.etat.noeuds.get('planif-n1');
+    });
+
+    it('enregistre plusieurs objectifs d’un coup', () => {
+        definir(['Appliquer', 'Identifier', 'Formuler']);
+        expect(api.etat.noeuds.get('planif-n1').metadata.objectifs).toHaveLength(3);
+    });
+
+    it('écarte les lignes vides sans décaler les autres', () => {
+        definir(['Premier', '   ', 'Second', '']);
+        const objs = api.etat.noeuds.get('planif-n1').metadata.objectifs;
+        expect(objs.map(o => o.texte)).toEqual(['Premier', 'Second']);
+    });
+
+    it('CONSERVE l’id d’un objectif dont on corrige la formulation', () => {
+        // Décisif : un lien qui vise cet objectif doit survivre à une retouche.
+        definir(['Formulation initiale', 'Deuxième']);
+        const avant = api.etat.noeuds.get('planif-n1').metadata.objectifs.map(o => o.id);
+
+        definir(['Formulation corrigée', 'Deuxième']);
+        const apres = api.etat.noeuds.get('planif-n1').metadata.objectifs.map(o => o.id);
+
+        expect(apres).toEqual(avant);
+    });
+
+    it('donne des identifiants distincts à chaque objectif', () => {
+        definir(['A', 'B', 'C']);
+        const ids = api.etat.noeuds.get('planif-n1').metadata.objectifs.map(o => o.id);
+        expect(new Set(ids).size).toBe(3);
+    });
+
+    it('vider la liste retire la métadonnée au lieu de laisser un tableau vide', () => {
+        definir(['A']);
+        definir([]);
+        expect(api.etat.noeuds.get('planif-n1').metadata.objectifs).toBeUndefined();
     });
 });
 
@@ -198,8 +287,16 @@ describe('F1 · invariants de rendu et de routage', () => {
         expect(source).not.toMatch(/data-champ="objectifPersonnalise"/);
     });
 
-    it('la saisie sur la carte écrit dans metadata.objectif', () => {
-        expect(source).toMatch(/donnees\.metadata\.objectif = objectifEl\.textContent/);
+    it('la saisie au fil de la frappe ne reconstruit PAS le DOM', () => {
+        // Reconstruire à chaque caractère ferait perdre le focus : l'écriture
+        // passe par appliquerObjectifs (mutation seule), pas par la porte
+        // publique qui re-rend.
+        expect(source).toMatch(/ligne\.addEventListener\('input'[\s\S]{0,120}appliquerObjectifs/);
+    });
+
+    it('l’en-tête porte le TYPE, et le titre est décalé SOUS les objectifs', () => {
+        // Ordre imposé : type → objectifs → titre → contenu.
+        expect(source).toMatch(/planif-noeud-entete[\s\S]{0,900}htmlObjectifs \+\s*\n\s*'<div class="planif-noeud-titre"/);
     });
 
     it('le badge n’enclenche pas le déplacement du bloc', () => {
@@ -223,8 +320,8 @@ describe('F1 · l’Organisateur lit et écrit le même objectif que la carte', 
         expect(organisateur).not.toContain('objectifPersonnalise');
     });
 
-    it('la saisie et la réinitialisation passent par definirObjectifLecon', () => {
-        const appels = organisateur.match(/definirObjectifLecon\(/g) || [];
+    it('la saisie et la réinitialisation passent par definirObjectifsLecon', () => {
+        const appels = organisateur.match(/definirObjectifsLecon\(/g) || [];
         expect(appels.length).toBeGreaterThanOrEqual(2);
     });
 
@@ -240,7 +337,7 @@ describe('F1 · l’Organisateur lit et écrit le même objectif que la carte', 
 
     it('la carte expose bien les deux portes utilisées par l’Organisateur', () => {
         expect(source).toMatch(/objectifDeLeconParId: objectifDeLeconParId/);
-        expect(source).toMatch(/definirObjectifLecon: definirObjectifLecon/);
+        expect(source).toMatch(/definirObjectifsLecon: definirObjectifsLecon/);
     });
 });
 

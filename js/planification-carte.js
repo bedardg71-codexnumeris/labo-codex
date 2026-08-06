@@ -59,17 +59,62 @@ var CLE_SEANCES = 'planification_seances';
 // tous les trimestres et avec la démo) à dictionnaire PLAT par id de leçon,
 // alors que ces ids ne sont uniques que par carte (#367, rouge D1 de l'audit du
 // 5 août). `migrerObjectifsVersMetadata()` fait la bascule.
+// Une leçon a TOUJOURS plusieurs objectifs (constat de Grégoire, 6 août 2026 :
+// un Keynote de leçon en aligne 4 ou 5). Ils sont stockés en liste d'OBJETS
+// porteurs d'un id — jamais en tableau de chaînes — pour qu'un objectif puisse
+// devenir la cible d'un lien (« telle activité sert tel objectif ») sans
+// migration ultérieure. Une activité peut servir plusieurs objectifs et
+// inversement : la relation est N:N, donc les deux bouts ont besoin d'identité.
+function objectifsDeLecon(n) {
+    if (!n || !n.metadata) return [];
+    var liste = n.metadata.objectifs;
+    if (!Array.isArray(liste)) return [];
+    return liste.filter(function(o) { return o && typeof o.texte === 'string'; });
+}
+
+/** Texte du premier objectif — repli d'affichage là où une seule ligne tient. */
 function objectifDeLecon(n) {
-    return (n && n.metadata && typeof n.metadata.objectif === 'string') ? n.metadata.objectif : '';
+    var liste = objectifsDeLecon(n);
+    return liste.length > 0 ? liste[0].texte : '';
+}
+
+/** Donne le focus à une zone éditable en plaçant le curseur après le texte. */
+function placerCurseurEnFin(el) {
+    el.focus();
+    try {
+        var plage = document.createRange();
+        plage.selectNodeContents(el);
+        plage.collapse(false);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(plage);
+    } catch (e) { /* focus seul suffit */ }
+}
+
+var _compteurObjectif = 0;
+function nouvelIdObjectif() {
+    _compteurObjectif++;
+    return 'obj_' + Date.now().toString(36) + '_' + _compteurObjectif;
 }
 
 function objectifEstDeplie(n) {
     return !!(n && n.metadata && n.metadata.objectifDeplie);
 }
 
-/** Lecture par id — porte d'entrée des autres modules (Organisateur). */
+/**
+ * Lecture par id — porte d'entrée des autres modules (Organisateur, exports).
+ * Rend le texte des objectifs, un par ligne : les consommateurs affichent ou
+ * exportent du texte, ils n'ont pas besoin des identifiants.
+ */
 function objectifDeLeconParId(leconId) {
-    return objectifDeLecon(etat.noeuds.get(leconId));
+    return objectifsDeLecon(etat.noeuds.get(leconId))
+        .map(function(o) { return o.texte; })
+        .join('\n');
+}
+
+/** Liste structurée par id — pour qui a besoin des identifiants (liens à venir). */
+function objectifsDeLeconParId(leconId) {
+    return objectifsDeLecon(etat.noeuds.get(leconId));
 }
 
 /**
@@ -78,14 +123,36 @@ function objectifDeLeconParId(leconId) {
  * l'objectif, donc une seule vérité.
  * @returns {boolean} true si le nœud existait et a été mis à jour
  */
-function definirObjectifLecon(leconId, texte) {
+function appliquerObjectifs(n, textes) {
+    if (!n.metadata) n.metadata = {};
+
+    var liste = Array.isArray(textes) ? textes : (textes ? [textes] : []);
+    var anciens = objectifsDeLecon(n);
+    var nouveaux = [];
+    for (var i = 0; i < liste.length; i++) {
+        var texte = String(liste[i] === null || liste[i] === undefined ? '' : liste[i]).trim();
+        if (texte === '') continue;
+        // Réutiliser l'id de l'objectif de même rang : les liens qui le visent
+        // survivent à une simple correction de formulation.
+        var id = (anciens[nouveaux.length] && anciens[nouveaux.length].id) || nouvelIdObjectif();
+        nouveaux.push({ id: id, texte: texte });
+    }
+    if (nouveaux.length === 0) delete n.metadata.objectifs;
+    else n.metadata.objectifs = nouveaux;
+    sauvegarder();
+    return true;
+}
+
+/**
+ * Porte publique (Organisateur, vue leçon) : applique PUIS re-rend.
+ * Séparée d'appliquerObjectifs() parce que la saisie au fil de la frappe ne
+ * doit surtout pas reconstruire le DOM — le champ perdrait le focus à chaque
+ * caractère.
+ */
+function definirObjectifsLecon(leconId, textes) {
     var n = etat.noeuds.get(leconId);
     if (!n || n.type !== 'lecon') return false;
-    if (!n.metadata) n.metadata = {};
-    var valeur = (texte === null || texte === undefined) ? '' : String(texte).trim();
-    if (valeur === '') delete n.metadata.objectif;
-    else n.metadata.objectif = valeur;
-    sauvegarder();
+    if (!appliquerObjectifs(n, textes)) return false;
     // reconstruireDOM() repart d'un DOM vide : les badges de validation, posés
     // par appendChild sur les éléments existants, disparaîtraient si on ne les
     // reposait pas APRÈS. Même ordre que chargerCarte().
@@ -95,12 +162,14 @@ function definirObjectifLecon(leconId, texte) {
 }
 
 /**
- * Migration one-shot, par carte : CLE_SEANCES[leconId].objectifPersonnalise
- * → noeud.metadata.objectif.
- * Idempotente : ne touche que les leçons dont `metadata.objectif` est absent.
+ * Migration one-shot, par carte, vers `noeud.metadata.objectifs` (liste).
+ * Couvre les DEUX formats antérieurs :
+ *   1. CLE_SEANCES[leconId].objectifPersonnalise (avant le 6 août 2026) ;
+ *   2. noeud.metadata.objectif, chaîne unique (versions 1.32-1.33).
+ * Idempotente : ne touche que les leçons sans `metadata.objectifs`.
  * L'ancienne source n'est retirée qu'APRÈS une sauvegarde réussie — zéro-dette
  * (une seule vérité) sans fenêtre de perte.
- * @returns {number} nombre d'objectifs migrés
+ * @returns {number} nombre de leçons migrées
  */
 function migrerObjectifsVersMetadata() {
     // `sauvegarder()` sort SILENCIEUSEMENT s'il n'y a pas de carte active : sans
@@ -122,11 +191,22 @@ function migrerObjectifsVersMetadata() {
     for (var entry of etat.noeuds) {
         var n = entry[1];
         if (n.type !== 'lecon') continue;
-        if (n.metadata && typeof n.metadata.objectif === 'string') continue;
+        if (n.metadata && Array.isArray(n.metadata.objectifs)) continue;
+
+        // Format 2 (chaîne unique) : bascule en mémoire, rien à purger ailleurs.
+        if (n.metadata && typeof n.metadata.objectif === 'string' && n.metadata.objectif.trim() !== '') {
+            n.metadata.objectifs = [{ id: nouvelIdObjectif(), texte: n.metadata.objectif.trim() }];
+            delete n.metadata.objectif;
+            migres.push(n.id);
+            continue;
+        }
+        if (n.metadata && 'objectif' in n.metadata) delete n.metadata.objectif;
+
+        // Format 1 (ancienne clé de séances).
         var ancien = seances[n.id] && seances[n.id].objectifPersonnalise;
         if (typeof ancien !== 'string' || ancien.trim() === '') continue;
         if (!n.metadata) n.metadata = {};
-        n.metadata.objectif = ancien;
+        n.metadata.objectifs = [{ id: nouvelIdObjectif(), texte: ancien.trim() }];
         migres.push(n.id);
     }
     if (migres.length === 0) return 0;
@@ -2514,24 +2594,39 @@ function reconstruireDOM() {
             // gris\u00e9, il signale qu'un objectif PEUT \u00eatre pos\u00e9 (l'ancien badge
             // n'apparaissait qu'une fois l'objectif saisi \u2014 la fonction \u00e9tait
             // donc ind\u00e9couvrable).
+            // En-t\u00eate \u00e0 deux \u00e9tages : le TYPE du bloc (\u00ab Le\u00e7on \u00bb), puis LES
+            // objectifs \u2014 une le\u00e7on en a toujours plusieurs. Le TITRE, lui, est
+            // d\u00e9cal\u00e9 SOUS l'en-t\u00eate : c'est une information, pas l'identit\u00e9 du
+            // bloc. (Structure pr\u00e9cis\u00e9e par Gr\u00e9goire le 6 ao\u00fbt 2026.)
             var estLecon = n.type === 'lecon';
-            var objTexte = estLecon ? objectifDeLecon(n) : '';
+            var objs = estLecon ? objectifsDeLecon(n) : [];
             var objDeplie = estLecon && objectifEstDeplie(n);
+            var htmlObjectifs = '';
+            if (objDeplie) {
+                htmlObjectifs = '<div class="planif-noeud-objectifs">';
+                for (var io_ = 0; io_ < objs.length; io_++) {
+                    htmlObjectifs += '<div class="planif-noeud-objectif" contenteditable="true" data-obj-rang="' + io_ + '">' +
+                                     echapperHtml(objs[io_].texte) + '</div>';
+                }
+                // Ligne vide permanente en fin de liste : ajouter un objectif ne
+                // demande aucun bouton \u00e0 d\u00e9couvrir.
+                htmlObjectifs += '<div class="planif-noeud-objectif planif-noeud-objectif--vide" contenteditable="true"' +
+                                 ' data-obj-rang="' + objs.length + '"' +
+                                 ' data-placeholder="' + (objs.length === 0 ? 'Sera en mesure de\u2026' : 'Ajouter un objectif\u2026') + '"></div>';
+                htmlObjectifs += '</div>';
+            }
             el.innerHTML =
                 '<div class="planif-noeud-entete">' +
                     '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(n) + '">' + obtenirLabelNoeud(n) + '</span>' +
                     (estLecon
-                        ? '<span class="planif-badge-objectif' + (objTexte ? '' : ' planif-badge-objectif--vide') + '"' +
+                        ? '<span class="planif-badge-objectif' + (objs.length ? '' : ' planif-badge-objectif--vide') + '"' +
                           ' role="button" tabindex="0" aria-expanded="' + (objDeplie ? 'true' : 'false') + '"' +
-                          ' title="' + (objTexte ? 'Objectif d\u00e9fini' : 'Aucun objectif') + ' \u2014 cliquer pour ' + (objDeplie ? 'replier' : 'd\u00e9plier') + '">\ud83c\udfaf</span>'
+                          ' title="' + (objs.length ? objs.length + ' objectif' + (objs.length > 1 ? 's' : '') : 'Aucun objectif') +
+                          ' \u2014 cliquer pour ' + (objDeplie ? 'replier' : 'd\u00e9plier') + '">\ud83c\udfaf</span>'
                         : '') +
                 '</div>' +
+                htmlObjectifs +
                 '<div class="planif-noeud-titre" contenteditable="true">' + echapperHtml(n.titre || '') + '</div>' +
-                (objDeplie
-                    ? '<div class="planif-noeud-objectif" contenteditable="true"' +
-                      ' data-placeholder="Au terme de la le\u00e7on, l\u2019\u00e9tudiant\u00b7e sera capable de\u2026">' +
-                      echapperHtml(objTexte) + '</div>'
-                    : '') +
                 '<div class="planif-noeud-zone ' + (nbEnfants === 0 ? 'planif-vide' : '') + '">' +
                     (nbEnfants > 0 ? nbEnfants + ' \u00e9l\u00e9ment' + (nbEnfants > 1 ? 's' : '') : '') +
                 '</div>' +
@@ -3298,27 +3393,69 @@ function attacherEvenements(el, donnees) {
         });
     }
 
-    var objectifEl = el.querySelector('.planif-noeud-objectif');
-    if (objectifEl) {
-        objectifEl.addEventListener('focus', function() {
-            enregistrerPourUndo();
-        });
-        objectifEl.addEventListener('input', function() {
-            if (!donnees.metadata) donnees.metadata = {};
-            donnees.metadata.objectif = objectifEl.textContent;
-            sauvegarder();
-        });
-        objectifEl.addEventListener('blur', function() {
-            // Le badge change d'état (grisé ↔ coloré) selon que l'objectif est
-            // vide ou non : on le réaligne à la sortie du champ.
-            if (badgeObjectif) {
-                var vide = objectifDeLecon(donnees).trim() === '';
-                badgeObjectif.classList.toggle('planif-badge-objectif--vide', vide);
-                badgeObjectif.title = (vide ? 'Aucun objectif' : 'Objectif défini') + ' — cliquer pour replier';
-            }
-        });
-        objectifEl.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); objectifEl.blur(); }
+    var zoneObjectifs = el.querySelector('.planif-noeud-objectifs');
+    if (zoneObjectifs) {
+        // Chaque ligne est un objectif ; la dernière, vide, sert à en ajouter.
+        var lireLignes = function() {
+            var textes = [];
+            zoneObjectifs.querySelectorAll('.planif-noeud-objectif').forEach(function(ligne) {
+                textes.push(ligne.textContent.trim());
+            });
+            return textes;
+        };
+        var rerendreEtFocaliser = function(rang) {
+            reconstruireDOM();
+            mettreAJourTousLesBadges();
+            var frais = document.getElementById(id);
+            if (!frais) return;
+            var lignes = frais.querySelectorAll('.planif-noeud-objectif');
+            var cible = lignes[Math.min(rang, lignes.length - 1)];
+            if (cible) placerCurseurEnFin(cible);
+        };
+
+        zoneObjectifs.querySelectorAll('.planif-noeud-objectif').forEach(function(ligne) {
+            ligne.addEventListener('focus', function() { enregistrerPourUndo(); });
+
+            // Au fil de la frappe : mettre à jour les données SANS reconstruire
+            // — le champ perdrait le focus à chaque caractère.
+            ligne.addEventListener('input', function() {
+                appliquerObjectifs(donnees, lireLignes());
+                if (badgeObjectif) {
+                    var vide = objectifsDeLecon(donnees).length === 0;
+                    badgeObjectif.classList.toggle('planif-badge-objectif--vide', vide);
+                }
+            });
+
+            ligne.addEventListener('keydown', function(e) {
+                var rang = parseInt(ligne.dataset.objRang, 10) || 0;
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    // Entrée = objectif suivant (patron des éditeurs de listes).
+                    e.preventDefault();
+                    appliquerObjectifs(donnees, lireLignes());
+                    rerendreEtFocaliser(rang + 1);
+                    return;
+                }
+                if (e.key === 'Backspace' && ligne.textContent.trim() === '' &&
+                    objectifsDeLecon(donnees).length > 0 && rang > 0) {
+                    // Vider une ligne puis reculer la supprime.
+                    e.preventDefault();
+                    var textes = lireLignes();
+                    textes.splice(rang, 1);
+                    appliquerObjectifs(donnees, textes);
+                    rerendreEtFocaliser(rang - 1);
+                }
+            });
+
+            ligne.addEventListener('blur', function() {
+                // Une ligne vidée en plein milieu laisserait un trou : on
+                // recompacte, mais seulement si la structure a bougé.
+                var avant = objectifsDeLecon(donnees).length;
+                appliquerObjectifs(donnees, lireLignes());
+                if (objectifsDeLecon(donnees).length !== avant) {
+                    reconstruireDOM();
+                    mettreAJourTousLesBadges();
+                }
+            });
         });
     }
 
@@ -5437,7 +5574,7 @@ function rendreVueLecon(leconId) {
     html += '<div class="planif-vue-lecon-section">';
     html += '<h4>Objectif</h4>';
     html += '<div class="planif-vue-lecon-objectif" contenteditable="true" data-lecon-id="' + leconId + '" data-champ="objectif">' +
-            echapperHtml(objectifDeLecon(lec)) + '</div>';
+            echapperHtml(objectifsDeLecon(lec).map(function(o) { return o.texte; }).join('\n')) + '</div>';
     html += '</div>';
 
     // Activités
@@ -5508,8 +5645,11 @@ window.planificationCarte = {
     CLE_SEANCES: CLE_SEANCES,
     migrerObjectifsVersMetadata: migrerObjectifsVersMetadata,
     objectifDeLecon: objectifDeLecon,
+    objectifsDeLecon: objectifsDeLecon,
+    appliquerObjectifs: appliquerObjectifs,
     objectifDeLeconParId: objectifDeLeconParId,
-    definirObjectifLecon: definirObjectifLecon,
+    objectifsDeLeconParId: objectifsDeLeconParId,
+    definirObjectifsLecon: definirObjectifsLecon,
     recentrerVue: recentrerVue,
     injecterNoeuds: injecterNoeuds,
     nouvelleCarte: nouvelleCarte,

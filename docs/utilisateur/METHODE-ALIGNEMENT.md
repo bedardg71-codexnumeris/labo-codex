@@ -527,15 +527,20 @@ activités, évaluations et objectifs se répondent.
 └──────────────────────────────────┘
 ```
 
-> ⚠ **Impact sur le livré.** Les versions 1.32-1.33 stockent **un** objectif
-> (`metadata.objectif`, une chaîne). Le passage au **pluriel** change le modèle
-> de données : à traiter avant que la saisie ne représente un travail réel.
+**✅ LIVRÉ (1.34.0).** Objectifs au pluriel, stockés en liste d'objets porteurs
+d'un id. Migration depuis les deux formats antérieurs. Saisie : une ligne par
+objectif, Entrée pour le suivant, ligne vide permanente pour ajouter.
 
-**◈ OUVERT — le nom de la leçon.** Il ne figure plus dans cette description.
-Est-il retiré, ou déplacé sous l'en-tête avec le contenu ? Rappel du §6 ter :
-le titre alimente quatre usages hors du bloc (sommaire de la palette, vue
-calendrier, menus de l'Organisateur, exports TXT/Markdown). S'il disparaît sans
-repli, ces quatre endroits affichent « Leçon 1, Leçon 2… ».
+**✅ RÉSOLU — type ≠ titre.** Nuance clarifiée le 6 août : le **type** du bloc
+(« Leçon ») reste en haut de l'en-tête ; c'est le **titre** qui est décalé sous
+l'en-tête. Le titre n'est donc **pas supprimé** — ses quatre usages hors du bloc
+(sommaire de la palette, vue calendrier, menus de l'Organisateur, exports) sont
+préservés, et aucun repli n'est nécessaire.
+
+**▣ GÉNÉRAL — la distinction vaut d'être nommée.** *Le type dit ce qu'est le
+bloc ; le titre dit lequel c'est.* Le premier est structurel et non modifiable,
+le second est une information libre. Les confondre conduit à croire qu'on peut
+supprimer l'un en gardant l'autre.
 
 ### ◈ Relier les objectifs aux activités (piste du 6 août)
 
@@ -555,11 +560,62 @@ texte simple, sans connecteurs ».
 | **A — liste dans le nœud** | `metadata.objectifs = [{id, texte}]` | Léger ; rendu dans l'en-tête tel que décrit | Les liens actuels vont de **nœud à nœud** : relier un sous-élément demande un second système de liens |
 | **B — objectif = type de nœud** | Nœud enfant de la leçon, rendu *inline* dans l'en-tête | Liens, vérifications et badges fonctionnent **nativement** | Rendu spécial à écrire (ancrages de liaison sur chaque ligne) |
 
-**Recommandation : ne pas trancher maintenant, mais ne pas se fermer la
-porte.** Livrer d'abord le pluriel en texte — mais stocker dès le départ une
-**liste d'objets porteurs d'un id**, jamais un tableau de chaînes. Le surcoût
-est nul aujourd'hui, et c'est ce qui rendra les liens possibles demain sans
-migration.
+**Recommandation appliquée en 1.34.0 : ne pas trancher, mais ne pas se fermer
+la porte.** Le pluriel est livré en texte, mais stocké en **liste d'objets
+porteurs d'un id**, jamais en tableau de chaînes. Mieux : corriger la
+formulation d'un objectif **conserve son id** — un lien qui le viserait
+survivrait donc à une retouche. Le surcoût était nul ; la migration future est
+évitée.
+
+### La forme d'un objectif — ce que révèle la pratique réelle
+
+Extrait d'un Keynote de leçon du 601-101 (semaine 1b) :
+
+> **À la fin de cette séquence, tu seras en mesure de :**
+> 1. **Appliquer** des techniques d'annotation d'un texte
+> 2. **Appliquer** des stratégies de lecture
+> 3. **Pratiquer** des postures de lecture
+> 4. **Identifier** des émotions et des thèmes
+> 5. **Formuler** une hypothèse d'objectif de communication
+
+Trois enseignements :
+
+1. **Le préambule est commun**, l'objectif ne le répète pas. Ce qui se saisit
+   est le **verbe + son complément**, pas la phrase entière. (Le placeholder de
+   l'outil dit donc « Sera en mesure de… ».)
+2. **Le verbe porte le sens** — il est en gras dans le Keynote. C'est lui qui
+   dit ce que l'étudiant devra *faire*.
+3. **Une leçon en aligne quatre ou cinq.** Le pluriel n'est pas un cas limite,
+   c'est la norme.
+
+### ◈ Convergence inattendue : les verbes et les niveaux cognitifs
+
+Le module embarque déjà `NIVEAUX_COGNITIFS` (taxonomie de Bloom révisée :
+Mémoriser, Comprendre, Appliquer, Analyser, Évaluer, Créer) **et** une
+`BANQUE_VERBES` de dix verbes par niveau. Or les verbes du Keynote y figurent
+déjà :
+
+| Verbe employé | Niveau correspondant | Dans la banque ? |
+|---------------|----------------------|------------------|
+| **Appliquer** | Appliquer | oui |
+| **Identifier** | Mémoriser | oui |
+| **Formuler** | Créer | oui |
+| **Pratiquer** | (proche d'Appliquer) | non — synonyme |
+
+**La pratique de l'enseignant et l'outil parlent déjà le même langage, sans le
+savoir.** Deux conséquences possibles, à explorer :
+
+- un objectif pourrait porter un **niveau cognitif**, déduit de son verbe ;
+- l'alignement deviendrait vérifiable **en profondeur** : une activité de
+  niveau « Mémoriser » ne sert pas un objectif de niveau « Analyser ».
+
+À noter : `TYPES_AVEC_NIVEAU_COGNITIF` couvre compétence, idée maîtresse,
+activité, soutien, révision et évaluation — **pas** la leçon. C'est cohérent :
+le niveau appartiendrait à l'**objectif**, pas à la leçon qui les rassemble.
+
+**◈ OUVERT.** Le Keynote dit « à la fin de cette **séquence** ». Les objectifs
+existent-ils aussi au niveau séquence, ou est-ce le vocabulaire courant pour ce
+que l'outil appelle une leçon ? À clarifier avant d'étendre.
 
 ### ◈ OUVERT — questions restantes sur la bascule
 
