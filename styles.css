@@ -19201,6 +19201,12 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 
 .planif-noeud:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 
+/* Bloc retaillé à la poignée : `max-width: 240px` plafonnait la largeur posée
+   en ligne, rendant l'élargissement inopérant au-delà de 240 px. */
+.planif-noeud--taille-libre {
+    max-width: none;
+}
+
 /* !important nécessaire : le JS pose transition inline pendant le drag */
 .planif-snap-transition {
     transition: left 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
@@ -20552,6 +20558,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
         linear-gradient(135deg, transparent 0 70%, currentColor 70% 78%, transparent 78% 100%) no-repeat;
     color: var(--texte-secondaire, #6aacb8);
     border-bottom-right-radius: 6px;
+    z-index: 21; /* au-dessus des ports (20) : le coin appartient à la poignée */
 }
 
 .planif-noeud:hover .planif-noeud-poignee {
