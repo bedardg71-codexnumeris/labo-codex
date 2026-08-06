@@ -997,6 +997,89 @@ anticipation.
 
 ---
 
+### ✅ La forme du planificateur (6 août) — une grille temporelle
+
+Décision : **pas un arbre, une grille**. Une colonne, une rangée par semaine,
+numérotées à gauche — l'inspiration explicite est la palette **« Ordre de
+composition » de Keynote**.
+
+```
+  1 │ Sem. 1 (introduction)      ▸ 2 leçons
+  2 │ Sem. 2                     ▸ …
+  …
+ 16 │ Semaine de planification
+ 17 │ Semaine d'examens
+```
+
+**▣ GÉNÉRAL — ce que la grille résout que l'arbre ne résolvait pas.** Un arbre
+*affiche* un ordre ; une grille **assigne une position**. La semaine cesse
+d'être un mot écrit dans un titre pour devenir une **coordonnée** — c'est le
+préalable identifié en F3. Le tri devient une conséquence de la structure au
+lieu d'un calcul fragile.
+
+**Ce qui se déplace** : séquences et leçons, verticalement. Le contenu
+(activités, connaissances, évaluations) reste dans le canevas — règle de
+partage du §6 quater.
+
+**⚠ Les rangées ne se configurent pas ici.** Le cadre du trimestre stocke déjà
+`nombreSemaines`, `semainePlanificationDebut/Fin` et `semaineExamensDebut/Fin`
+(`trimestre-v2-init.js:285-288`). La grille doit les **dériver**, jamais les
+redemander — sinon deux sources de vérité pour la même chose, et 15 rangées
+d'un côté contre 17 de l'autre.
+
+### ✅ L'ancrage temporel appartient à la LEÇON (6 août)
+
+> *« L'unité est la leçon. Par-dessus on peut indiquer séances, séquences,
+> séquences de séquences, etc. »*
+
+Chaque leçon porte sa semaine ; les niveaux supérieurs **dérivent** leur
+étendue de leurs leçons (de la première à la dernière). Aucune contradiction
+possible — une séquence ne peut pas annoncer la semaine 3 pendant qu'une de ses
+leçons vit en semaine 5.
+
+Cohérent avec tout le reste : la leçon est le plancher pédagogique, la plus
+petite unité déplaçable, et maintenant le porteur de l'ancrage. **Un seul
+concept fait les trois.**
+
+**◈ Reste à couvrir** : une séquence encore vide (le « Sem. 9 – » du 601-101
+n'a aucune leçon) n'aurait alors aucune position. Il lui faut un ancrage propre
+ou une zone « non planifié ».
+
+### ◈ Plusieurs groupes : un alignement, N planifications
+
+Piste ouverte le 6 août, **à ne pas construire maintenant** :
+
+> *« Une séance pourrait avoir lieu un lundi pour un groupe et la même séance
+> un mardi pour un autre groupe. […] On pourra décliner plusieurs
+> planifications, une pour chaque groupe. »*
+
+**▣ GÉNÉRAL — c'est le patron Bibliothèque + Assemblage du projet**, et c'est
+déjà la position doctrinale du module : *« le plan de cours est rattaché au
+cours, pas au groupe : un même plan s'applique potentiellement à plusieurs
+groupes »* (skill Alignement §3).
+
+| Niveau | Rattaché à | Ce qu'il porte |
+|--------|-----------|----------------|
+| **Alignement** (patron) | le **cours** | progression, objectifs, assignation aux **semaines** |
+| **Planification** (instance) | le **groupe-cours** | **dates réelles** dérivées de l'horaire, écarts propres au groupe |
+
+Autrement dit : *la semaine est commune, le jour appartient au groupe.* Quand un
+groupe prend du retard, c'est **son** instance qui diverge — la « réparation en
+cours de route » devient elle aussi propre au groupe.
+
+**⚠ Point dur relevé au code : la carte n'est rattachée à AUCUN cours.**
+`planification-donnees.js` indexe les cartes par trimestre
+(`{ index: { active, compteurCartes, cartes: [] }, cartes: {…} }`) — pas un seul
+`coursId`. La doctrine du skill n'est donc **pas** implémentée. Décliner par
+groupe suppose d'abord que la carte sache à quel cours elle appartient.
+
+**Conséquence pour le chantier en cours** : construire la grille au niveau du
+**cours** (le patron), jamais du groupe. Ce qui, aujourd'hui, revient à la
+construire telle quelle — mais en gardant la porte ouverte, comme pour les
+identifiants d'objectifs.
+
+---
+
 ## 7. Vers l'instruction générale
 
 Section à écrire **en dernier**, quand la démarche aura été éprouvée. Elle
