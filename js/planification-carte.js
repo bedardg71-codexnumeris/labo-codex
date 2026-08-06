@@ -1126,7 +1126,7 @@ const ESPACE_H = 6000;
 let zoneTravail, espace, espaceWrapper, coucheNoeuds, coucheLiens, canvas, lienTemp;
 let panneau, menuLien, rectSelection;
 let panneauSeances, panneauSeancesContenu, btnSeances;
-let orgSelectSequence, orgSelectLecon, orgLecon, orgCalendrierContenu, orgCalendrierToggle;
+let orgSelectSequence, orgSelectLecon, orgLecon;
 let seancesOuvert = false;
 
 // === UTILITAIRES DE COORDONNÉES ===
@@ -1346,7 +1346,7 @@ function ouvrirPanneau(id) {
             document.getElementById('planif-duree-equiv').textContent = equivalencePeriodesTexte(min);
             propagerModification(id, 'metadata', JSON.parse(JSON.stringify(meta)));
             sauvegarder();
-            mettreAJourSommaire();
+            mettreAJourPlanificateur();
         }
 
         var minInput = extra.querySelector('#planif-duree-min');
@@ -1385,7 +1385,7 @@ function ouvrirPanneau(id) {
         semInput.addEventListener('focus', function() { enregistrerPourUndo(); });
         semInput.addEventListener('input', function(e) {
             definirSemaineLecon(id, e.target.value);
-            mettreAJourSommaire();
+            mettreAJourPlanificateur();
         });
     }
 
@@ -1648,7 +1648,7 @@ function ouvrirPanneau(id) {
                 detacherDuConteneur(id);
             }
             sauvegarder();
-            mettreAJourSommaire();
+            mettreAJourPlanificateur();
         });
     }
 
@@ -3040,7 +3040,7 @@ function reconstruireDOM() {
             if (masques && (masques.has(l.source) || masques.has(l.cible))) continue;
             dessinerLien(l);
         }
-        mettreAJourSommaire();
+        mettreAJourPlanificateur();
     });
 }
 
@@ -3962,196 +3962,6 @@ function naviguerVers(noeudId) {
     }, 1200);
 }
 
-function genererSeancesHTML() {
-    // Hiérarchie aplatie : chaque sous-séquence apparaît UNE fois, comme
-    // section à part entière, juste après son parent (voie A, 6 août 2026).
-    var hierarchie = listerSequencesHierarchie('temporel');
-    var leconsOrphelines = [];
-
-    for (var entry of etat.noeuds) {
-        var nd = entry[1];
-        if (nd.type === 'lecon' && !nd.parent) leconsOrphelines.push(nd);
-    }
-
-    if (hierarchie.length === 0 && leconsOrphelines.length === 0) {
-        return '<div class="planif-cal-vide">Aucune séquence ou leçon pour le moment.<br>Ajoute des éléments à la carte.</div>';
-    }
-
-    var html = '';
-
-    function genererEnfant(enfantId) {
-        var enfant = etat.noeuds.get(enfantId);
-        if (!enfant) return '';
-        var config = TYPES[enfant.type];
-        if (!config) return '';
-
-        if (enfant.type === 'lecon') return genererLeconBloc(enfant);
-
-        var itemHtml = '<div class="planif-cal-item" data-noeud="' + enfantId + '">';
-        itemHtml += '<span class="planif-cal-pastille-mini" style="background: ' + obtenirCouleurNoeud(enfant) + '"></span>';
-        itemHtml += '<div>';
-        itemHtml += '<span class="planif-cal-item-titre">' + (enfant.titre || obtenirLabelNoeud(enfant)) + '</span>';
-
-        if (enfant.metadata && enfant.metadata.duree) {
-            itemHtml += ' <span class="planif-cal-duree">' + enfant.metadata.duree + ' min</span>';
-        }
-
-        var liens = getLiensDeNoeud(enfantId);
-        if (liens.length > 0) {
-            itemHtml += '<div class="planif-cal-liens">';
-            for (var j = 0; j < liens.length; j++) {
-                var l = liens[j];
-                var lNoeud = etat.noeuds.get(l.noeudId);
-                var couleur = lNoeud ? obtenirCouleurNoeud(lNoeud) : '#94a3b8';
-                var fleche = l.direction === 'sortant' ? '→' : '←';
-                itemHtml += '<div class="planif-cal-lien-item" data-noeud="' + l.noeudId + '">';
-                itemHtml += '<span class="planif-cal-lien-pastille" style="background: ' + couleur + '"></span>';
-                itemHtml += fleche + ' ' + l.lienLabel + ' : ' + l.noeudTitre;
-                itemHtml += '</div>';
-            }
-            itemHtml += '</div>';
-        }
-
-        itemHtml += '</div></div>';
-        return itemHtml;
-    }
-
-    function genererLeconBloc(lecon) {
-        var config = TYPES['lecon'];
-        var dureeTotal = 0;
-        var bloc = '<div class="planif-cal-lecon">';
-        bloc += '<div class="planif-cal-lecon-header" data-noeud="' + lecon.id + '">';
-        bloc += '<span class="planif-cal-pastille" style="background: ' + config.couleur + '"></span>';
-        bloc += '<span class="planif-cal-titre">' + (lecon.titre || 'Leçon') + '</span>';
-        if (lecon.metadata && lecon.metadata.duree) {
-            bloc += '<span class="planif-cal-duree">' + lecon.metadata.duree + ' min</span>';
-            dureeTotal += lecon.metadata.duree;
-        }
-        bloc += '</div>';
-
-        var enfants = (lecon.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); });
-        if (enfants.length > 0) {
-            bloc += '<div class="planif-cal-enfants">';
-            for (var j = 0; j < enfants.length; j++) {
-                var ed = etat.noeuds.get(enfants[j]);
-                if (ed && ed.metadata && ed.metadata.duree) dureeTotal += ed.metadata.duree;
-                bloc += genererEnfant(enfants[j]);
-            }
-            bloc += '</div>';
-        }
-
-        var liensLecon = getLiensDeNoeud(lecon.id);
-        if (liensLecon.length > 0) {
-            bloc += '<div class="planif-cal-enfants">';
-            for (var k = 0; k < liensLecon.length; k++) {
-                var ll = liensLecon[k];
-                var lNoeud2 = etat.noeuds.get(ll.noeudId);
-                var couleur2 = lNoeud2 ? obtenirCouleurNoeud(lNoeud2) : '#94a3b8';
-                var fleche2 = ll.direction === 'sortant' ? '→' : '←';
-                bloc += '<div class="planif-cal-lien-item" data-noeud="' + ll.noeudId + '">';
-                bloc += '<span class="planif-cal-lien-pastille" style="background: ' + couleur2 + '"></span>';
-                bloc += fleche2 + ' ' + ll.lienLabel + ' : ' + ll.noeudTitre;
-                bloc += '</div>';
-            }
-            bloc += '</div>';
-        }
-
-        if (dureeTotal > 0) {
-            var h = Math.floor(dureeTotal / 60);
-            var m = dureeTotal % 60;
-            var tempsStr = h > 0 ? h + 'h' + (m > 0 ? String(m).padStart(2, '0') : '') : m + ' min';
-            bloc += '<div class="planif-cal-total">Total : <strong>' + tempsStr + '</strong></div>';
-        }
-
-        bloc += '</div>';
-        return bloc;
-    }
-
-    // Séquences (ordre hiérarchique : parent, puis ses sous-séquences)
-    for (var i = 0; i < hierarchie.length; i++) {
-        var seq = hierarchie[i].seq;
-        var niveauSeq = hierarchie[i].niveau;
-        var configSeq = TYPES['sequence'];
-        html += '<div class="planif-cal-sequence' + (niveauSeq > 0 ? ' planif-cal-sequence--imbriquee' : '') + '"' +
-                (niveauSeq > 0 ? ' style="margin-left:' + (niveauSeq * 16) + 'px"' : '') + '>';
-        html += '<div class="planif-cal-sequence-header" data-noeud="' + seq.id + '">';
-        html += '<span class="planif-cal-pastille" style="background: ' + configSeq.couleur + '"></span>';
-        html += '<span class="planif-cal-titre">' + (niveauSeq > 0 ? cheminSequence(seq) : (seq.titre || 'Séquence')) + '</span>';
-
-        var semTxt = formaterEtendue(etendueTemporelle(seq));
-        if (semTxt) {
-            html += '<span class="planif-cal-semaines">' + semTxt + '</span>';
-        }
-        html += '</div>';
-
-        var enfSeq = (seq.enfants || []).filter(function(eid) {
-            var nd0 = etat.noeuds.get(eid);
-            // Les sous-séquences ont leur propre section : ne pas les
-            // re-rendre comme items génériques du parent.
-            return nd0 && nd0.type !== 'sequence';
-        });
-        enfSeq.sort(function(a, b) {
-            var na = etat.noeuds.get(a), nb = etat.noeuds.get(b);
-            return ((na && na.x) || 0) - ((nb && nb.x) || 0);
-        });
-        var dureeSeq = 0;
-
-        for (var j = 0; j < enfSeq.length; j++) {
-            var ed = etat.noeuds.get(enfSeq[j]);
-            if (!ed) continue;
-
-            if (ed.type === 'lecon') {
-                html += genererLeconBloc(ed);
-                if (ed.metadata && ed.metadata.duree) dureeSeq += ed.metadata.duree;
-                for (var k = 0; k < (ed.enfants || []).length; k++) {
-                    var cd = etat.noeuds.get(ed.enfants[k]);
-                    if (cd && cd.metadata && cd.metadata.duree) dureeSeq += cd.metadata.duree;
-                }
-            } else {
-                html += '<div class="planif-cal-enfants">' + genererEnfant(enfSeq[j]) + '</div>';
-                if (ed.metadata && ed.metadata.duree) dureeSeq += ed.metadata.duree;
-            }
-        }
-
-        var liensSeq = getLiensDeNoeud(seq.id);
-        if (liensSeq.length > 0) {
-            html += '<div class="planif-cal-enfants">';
-            for (var m = 0; m < liensSeq.length; m++) {
-                var ls = liensSeq[m];
-                var lNoeud3 = etat.noeuds.get(ls.noeudId);
-                var couleur3 = lNoeud3 ? obtenirCouleurNoeud(lNoeud3) : '#94a3b8';
-                var fleche3 = ls.direction === 'sortant' ? '→' : '←';
-                html += '<div class="planif-cal-lien-item" data-noeud="' + ls.noeudId + '">';
-                html += '<span class="planif-cal-lien-pastille" style="background: ' + couleur3 + '"></span>';
-                html += fleche3 + ' ' + ls.lienLabel + ' : ' + ls.noeudTitre;
-                html += '</div>';
-            }
-            html += '</div>';
-        }
-
-        if (dureeSeq > 0) {
-            var hSeq = Math.floor(dureeSeq / 60);
-            var mSeq = dureeSeq % 60;
-            var tempsSeq = hSeq > 0 ? hSeq + 'h' + (mSeq > 0 ? String(mSeq).padStart(2, '0') : '') : mSeq + ' min';
-            html += '<div class="planif-cal-total">Durée totale : <strong>' + tempsSeq + '</strong></div>';
-        }
-
-        html += '</div>';
-    }
-
-    // Leçons orphelines
-    if (leconsOrphelines.length > 0) {
-        html += '<div class="planif-cal-orphelines">';
-        html += '<div class="planif-cal-orphelines-titre">Leçons hors séquence</div>';
-        for (var p = 0; p < leconsOrphelines.length; p++) {
-            html += genererLeconBloc(leconsOrphelines[p]);
-        }
-        html += '</div>';
-    }
-
-    return html;
-}
-
 // === ORGANISATEUR — SÉLECTEURS ET AFFICHAGE LEÇON ===
 
 function peuplerSelecteursOrganisateur() {
@@ -4460,20 +4270,9 @@ function afficherLeconOrganisateur() {
 
 function rafraichirSeances() {
     if (!seancesOuvert) return;
-
-    // Peupler les sélecteurs
+    // Peupler les sélecteurs. (La Vue calendrier — rendu recyclé + rognage
+    // DOM — est RETIRÉE au lot 2 : le planificateur en grille la remplace.)
     if (orgSelectSequence) peuplerSelecteursOrganisateur();
-
-    // Vue calendrier (dans la sous-section en bas)
-    var cible = orgCalendrierContenu || panneauSeancesContenu;
-    cible.innerHTML = genererSeancesHTML();
-    cible.querySelectorAll('[data-noeud]').forEach(function(el) {
-        el.addEventListener('click', function(e) {
-            e.stopPropagation();
-            var noeudId = el.dataset.noeud;
-            if (noeudId) naviguerVers(noeudId);
-        });
-    });
 }
 
 // === EXPORT DU PLAN DE COURS ===
@@ -4872,8 +4671,6 @@ function initialiser() {
     orgSelectSequence = document.getElementById('planif-org-select-sequence');
     orgSelectLecon = document.getElementById('planif-org-select-lecon');
     orgLecon = document.getElementById('planif-org-lecon');
-    orgCalendrierContenu = document.getElementById('planif-org-calendrier-contenu');
-    orgCalendrierToggle = document.getElementById('planif-org-calendrier-toggle');
 
     if (!zoneTravail || !espace) {
         console.warn('[Planification] DOM non prêt.');
@@ -5491,19 +5288,6 @@ function initialiser() {
             sauvegarder();
         });
     }
-    if (orgCalendrierToggle) {
-        orgCalendrierToggle.addEventListener('click', function() {
-            var contenu = orgCalendrierContenu;
-            var chevron = orgCalendrierToggle.querySelector('.planif-org-chevron');
-            if (contenu.style.display === 'none') {
-                contenu.style.display = '';
-                if (chevron) chevron.textContent = '▾';
-            } else {
-                contenu.style.display = 'none';
-                if (chevron) chevron.textContent = '▸';
-            }
-        });
-    }
 
     // Export texte/TSV
     var btnExportTexte = document.getElementById('planif-btn-export-texte');
@@ -5870,16 +5654,133 @@ function mettreAJourJaugeTemps(sequences) {
     jauge.innerHTML = texte;
 }
 
-function mettreAJourSommaire() {
+// =========== PLANIFICATEUR EN GRILLE (lot 2, 6 août 2026) ===========
+// Remplace le sommaire arborescent de la palette Navigation ET la Vue
+// calendrier (rendu recyclé + post-traitement DOM, retirés au même lot).
+// D2 : une rangée par semaine, numérotée à gauche (« Ordre de composition »
+// de Keynote). D5 : les rangées DÉRIVENT du calendrier généré par le Cadre
+// du trimestre — jamais redemandées ici. Q1/Q2 : tout ce qui n'a pas
+// d'ancrage vit dans la zone « Non planifié » en pied de grille.
+
+// Leçons dont le déroulé est déplié dans la grille (état d'affichage, non persisté).
+var _leconsDepliees = new Set();
+
+function basculerDetailLecon(leconId) {
+    if (_leconsDepliees.has(leconId)) _leconsDepliees.delete(leconId);
+    else _leconsDepliees.add(leconId);
+    mettreAJourPlanificateur();
+}
+
+/**
+ * Rangées de la grille, dérivées du calendrier complet (parcours
+ * chronologique) : semaines numérotées (paquet-de-5) et semaines spéciales
+ * à leur position réelle. Repli sans cadre : les semaines déjà utilisées
+ * par les leçons, pour ne rien cacher.
+ * @returns {{rangees: Array<{type: string, num?: number}>, source: string}}
+ */
+function deriverRangeesGrille() {
+    var cal = null;
+    try { cal = db.getSync(cle('calendrierComplet'), null); } catch (e) { cal = null; }
+
+    if (cal && typeof cal === 'object' && Object.keys(cal).length > 0) {
+        var rangees = [];
+        var vues = new Set();
+        var vuPlanif = false, vuExamens = false;
+        Object.keys(cal).sort().forEach(function(dateStr) {
+            var j = cal[dateStr];
+            if (!j) return;
+            if ((j.statut === 'cours' || j.statut === 'reprise') && j.numeroSemaine && !vues.has(j.numeroSemaine)) {
+                vues.add(j.numeroSemaine);
+                rangees.push({ type: 'semaine', num: j.numeroSemaine });
+            } else if (j.statut === 'semaine-planification' && !vuPlanif) {
+                vuPlanif = true;
+                rangees.push({ type: 'planification' });
+            } else if (j.statut === 'semaine-examens' && !vuExamens) {
+                vuExamens = true;
+                rangees.push({ type: 'examens' });
+            }
+        });
+        if (rangees.length > 0) return { rangees: rangees, source: 'cadre' };
+    }
+
+    // Repli : aucune rangée dérivable — montrer au moins les semaines saisies.
+    var maxSem = 0;
+    for (var entry of etat.noeuds) {
+        var sem = semaineDeLecon(entry[1]);
+        if (sem !== null && sem > maxSem) maxSem = sem;
+    }
+    var repli = [];
+    for (var n = 1; n <= maxSem; n++) repli.push({ type: 'semaine', num: n });
+    return { rangees: repli, source: 'repli' };
+}
+
+function itemSequenceGrille(seq, niveau) {
+    var etendue = etendueTemporelle(seq);
+    var libelle = niveau > 0 ? cheminSequence(seq) : (seq.titre || 'Sans titre');
+    var dureeSeq = dureeRollupNoeud(seq);
+    var pill = etendue && etendue.fin !== etendue.debut
+        ? formaterEtendue(etendue)
+        : (dureeSeq ? formaterPeriodes(dureeSeq) : compterLeconsDescendantes(seq) + ' leçon' + (compterLeconsDescendantes(seq) > 1 ? 's' : ''));
+    return '<div class="planif-som-item planif-som-seq' + (seq.id === sequenceActiveId ? ' actif' : '') + '"' +
+           ' data-action="planificationCarte.ouvrirSequence"' +
+           ' data-param="' + seq.id + '"' +
+           ' title="' + echapperHtml(libelle) + '">' +
+           '<span class="planif-som-nom">' + echapperHtml(libelle) + '</span>' +
+           '<span class="planif-som-pill">' + echapperHtml(pill) + '</span>' +
+           '</div>';
+}
+
+function itemLeconGrille(lec, avecContexte) {
+    var duree = formaterPeriodes(dureeRollupNoeud(lec));
+    var depliee = _leconsDepliees.has(lec.id);
+    var enfants = (lec.enfants || []).map(function(eid) { return etat.noeuds.get(eid); }).filter(Boolean);
+    var parent = lec.parent ? etat.noeuds.get(lec.parent) : null;
+    var contexte = (avecContexte && parent && parent.type === 'sequence')
+        ? '<span class="planif-grille-contexte">' + echapperHtml(parent.titre || 'Sans titre') + '</span>'
+        : '';
+
+    var html = '<div class="planif-som-item planif-som-lecon' + (lec.id === leconActiveId ? ' actif' : '') + '"' +
+        ' data-action="planificationCarte.naviguerSommaireLecon"' +
+        ' data-param="' + lec.id + '"' +
+        ' title="' + echapperHtml(lec.titre || 'Sans titre') + '">' +
+        (enfants.length > 0
+            ? '<span class="planif-grille-chevron" data-action="planificationCarte.basculerDetailLecon" data-param="' + lec.id + '" title="' + (depliee ? 'Replier' : 'Déplier') + ' le déroulé">' + (depliee ? '▾' : '▸') + '</span>'
+            : '<span class="planif-grille-chevron planif-grille-chevron--vide"></span>') +
+        '<span class="planif-som-nom">' + echapperHtml(lec.titre || 'Sans titre') + contexte + '</span>' +
+        (duree ? '<span class="planif-som-pill planif-som-pill-duree">' + duree + '</span>' : '') +
+        '</div>';
+
+    if (depliee && enfants.length > 0) {
+        html += '<div class="planif-grille-detail">';
+        for (var i = 0; i < enfants.length; i++) {
+            var en = enfants[i];
+            var config = TYPES[en.type];
+            if (!config) continue;
+            html += '<div class="planif-grille-detail-item" data-action="planificationCarte.naviguerVers" data-param="' + en.id + '">' +
+                '<span class="planif-cal-pastille-mini" style="background: ' + obtenirCouleurNoeud(en) + '"></span>' +
+                '<span class="planif-grille-detail-titre">' + echapperHtml(en.titre || obtenirLabelNoeud(en)) + '</span>' +
+                (en.metadata && en.metadata.duree ? '<span class="planif-som-pill planif-som-pill-duree">' + en.metadata.duree + ' min</span>' : '') +
+                '</div>';
+        }
+        html += '</div>';
+    }
+    return html;
+}
+
+function mettreAJourPlanificateur() {
     var conteneur = document.getElementById('planif-sommaire');
     if (!conteneur) return;
 
-    // Hiérarchie (voie A) : les sous-séquences apparaissent SOUS leur parent,
-    // indentées — jamais dupliquées à la racine. La jauge, elle, ne somme que
-    // les RACINES : le rollup d'un parent inclut déjà ses sous-séquences.
-    var hierarchie = listerSequencesHierarchie('spatial');
-    if (hierarchie.length === 0) {
-        conteneur.innerHTML = '<div class="planif-som-vide">Aucune séquence — glisse un nœud « Séquence » sur la carte pour naviguer ici.</div>';
+    var derive = deriverRangeesGrille();
+    var hierarchie = listerSequencesHierarchie('temporel');
+    var toutesLecons = [];
+    for (var entry of etat.noeuds) {
+        if (entry[1].type === 'lecon') toutesLecons.push(entry[1]);
+    }
+    toutesLecons.sort(function(a, b) { return ((a.x || 0) - (b.x || 0)) || ((a.y || 0) - (b.y || 0)); });
+
+    if (hierarchie.length === 0 && toutesLecons.length === 0) {
+        conteneur.innerHTML = '<div class="planif-som-vide">Aucune séquence — glisse un nœud « Séquence » sur la carte pour planifier ici.</div>';
         mettreAJourJaugeTemps([]);
         return;
     }
@@ -5891,34 +5792,52 @@ function mettreAJourSommaire() {
                '<span class="planif-som-nom">Vue globale</span>' +
                '</div>';
 
-    for (var i = 0; i < hierarchie.length; i++) {
-        var seq = hierarchie[i].seq;
-        var niveau = hierarchie[i].niveau;
-        var retrait = niveau > 0 ? ' style="margin-left:' + (niveau * 12) + 'px"' : '';
-        var lecons = obtenirLeconsDeSequence(seq);
-        var dureeSeq = dureeRollupNoeud(seq);
-        var pillSeq = dureeSeq ? formaterPeriodes(dureeSeq) : String(compterLeconsDescendantes(seq));
-        var seqActive = seq.id === sequenceActiveId;
-        html += '<div class="planif-som-item planif-som-seq' + (seqActive ? ' actif' : '') + '"' + retrait +
-                ' data-action="planificationCarte.ouvrirSequence"' +
-                ' data-param="' + seq.id + '"' +
-                ' title="' + echapperHtml(seq.titre || 'Sans titre') + '">' +
-                '<span class="planif-som-nom">' + echapperHtml(seq.titre || 'Sans titre') + '</span>' +
-                '<span class="planif-som-pill">' + pillSeq + '</span>' +
-                '</div>';
-        for (var j = 0; j < lecons.length; j++) {
-            var lec = lecons[j];
-            var duree = formaterPeriodes(dureeRollupNoeud(lec));
-            html += '<div class="planif-som-item planif-som-lecon' + (lec.id === leconActiveId ? ' actif' : '') + '"' +
-                    (niveau > 0 ? ' style="margin-left:' + (niveau * 12) + 'px"' : '') +
-                    ' data-action="planificationCarte.naviguerSommaireLecon"' +
-                    ' data-param="' + lec.id + '"' +
-                    ' title="' + echapperHtml(lec.titre || 'Sans titre') + '">' +
-                    '<span class="planif-som-nom">' + echapperHtml(lec.titre || 'Sans titre') + '</span>' +
-                    (duree ? '<span class="planif-som-pill planif-som-pill-duree">' + duree + '</span>' : '') +
-                    '</div>';
-        }
+    if (derive.source === 'repli' && derive.rangees.length > 0) {
+        html += '<div class="planif-grille-avis">Semaines dérivées des leçons — configure le Cadre du trimestre (Réglages) pour les rangées réelles.</div>';
     }
+
+    html += '<div class="planif-grille">';
+    for (var r = 0; r < derive.rangees.length; r++) {
+        var rangee = derive.rangees[r];
+        if (rangee.type !== 'semaine') {
+            html += '<div class="planif-grille-rangee planif-grille-rangee--speciale">' +
+                    '<div class="planif-grille-num">—</div>' +
+                    '<div class="planif-grille-cellule">' +
+                    (rangee.type === 'planification' ? 'Semaine de planification' : "Semaine d'examens") +
+                    '</div></div>';
+            continue;
+        }
+        var num = rangee.num;
+        var contenu = '';
+        for (var h = 0; h < hierarchie.length; h++) {
+            var et = etendueTemporelle(hierarchie[h].seq);
+            if (et && et.debut === num) contenu += itemSequenceGrille(hierarchie[h].seq, hierarchie[h].niveau);
+        }
+        for (var l = 0; l < toutesLecons.length; l++) {
+            if (semaineDeLecon(toutesLecons[l]) === num) contenu += itemLeconGrille(toutesLecons[l], true);
+        }
+        html += '<div class="planif-grille-rangee' + (contenu ? '' : ' planif-grille-rangee--vide') + '">' +
+                '<div class="planif-grille-num">' + num + '</div>' +
+                '<div class="planif-grille-cellule">' + contenu + '</div>' +
+                '</div>';
+    }
+    html += '</div>';
+
+    // Zone « Non planifié » (Q1/Q2) : séquences sans étendue + leçons sans
+    // semaine. À la migration, TOUT part ici — c'est la liste de travail.
+    var nonPlanifie = '';
+    for (var h2 = 0; h2 < hierarchie.length; h2++) {
+        if (!etendueTemporelle(hierarchie[h2].seq)) nonPlanifie += itemSequenceGrille(hierarchie[h2].seq, hierarchie[h2].niveau);
+    }
+    for (var l2 = 0; l2 < toutesLecons.length; l2++) {
+        if (semaineDeLecon(toutesLecons[l2]) === null) nonPlanifie += itemLeconGrille(toutesLecons[l2], true);
+    }
+    if (nonPlanifie) {
+        html += '<div class="planif-grille-nonplanifie">' +
+                '<div class="planif-grille-nonplanifie-titre">Non planifié</div>' +
+                nonPlanifie + '</div>';
+    }
+
     conteneur.innerHTML = html;
     mettreAJourJaugeTemps(hierarchie.filter(function(e) { return e.niveau === 0; })
         .map(function(e) { return e.seq; }));
@@ -6045,7 +5964,7 @@ var leconActiveId = null; // null = vue séquence (méso), ID = vue leçon (micr
 
 function ouvrirLecon(leconId) {
     leconActiveId = leconId || null;
-    mettreAJourSommaire();
+    mettreAJourPlanificateur();
 
     var vueLecon = document.getElementById('planif-vue-lecon');
     if (leconActiveId) {
@@ -6156,7 +6075,6 @@ window.planificationCarte = {
     obtenirCouleurNoeud: obtenirCouleurNoeud,
     TYPES: TYPES,
     TYPES_LIENS: TYPES_LIENS,
-    genererSeancesHTML: genererSeancesHTML,
     trouverIdeesMaitressesAncetres: trouverIdeesMaitressesAncetres,
     chargerProductions: chargerProductions,
     afficherDetailsProduction: afficherDetailsProduction,
@@ -6191,7 +6109,8 @@ window.planificationCarte = {
     ouvrirSequence: ouvrirSequence,
     ouvrirLecon: ouvrirLecon,
     naviguerSommaireLecon: naviguerSommaireLecon,
-    mettreAJourSommaire: mettreAJourSommaire,
+    mettreAJourPlanificateur: mettreAJourPlanificateur,
+    basculerDetailLecon: basculerDetailLecon,
     // Plein écran
     togglePleinEcran: togglePleinEcranCarte
 };

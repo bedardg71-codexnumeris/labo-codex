@@ -62,7 +62,12 @@ D'où ce plan écrit. La méthode « friction → correctif » a atteint sa limi
 ## ✅ ÉTAT AU 6 AOÛT AU SOIR
 
 **Q1 à Q4 tranchées** (+ une Q5 apparue à l'audit), **lot 1 LIVRÉ en 1.38.0**,
-**séquences de séquences LIVRÉES en 1.39.0** (voie A — cf. METHODE-ALIGNEMENT §5.2).
+**séquences de séquences LIVRÉES en 1.39.0** (voie A — cf. METHODE-ALIGNEMENT §5.2),
+**lot 2 LIVRÉ en 1.43.0** (grille dans la palette — renommée « Planificateur » —,
+rangées dérivées de `calendrierComplet` en parcours chronologique avec semaines
+spéciales intercalées à leur position réelle, zone « Non planifié », déroulé de
+leçon dépliable, navigation conservée ; Vue calendrier RETIRÉE des trois surfaces
++ CSS et tooltips purgés). Reste : **lot 3** (le déplacement dans la grille).
 Détail des décisions : `docs/utilisateur/METHODE-ALIGNEMENT.md` § « LIVRÉ (6 août, 1.38.0) ».
 Prochaine étape : **lot 2** (la grille en lecture). ⚠ Avant de construire les
 rangées : vérifier la dérivation du nombre de semaines — la source est
@@ -120,7 +125,7 @@ dans un état intermédiaire inutilisable.
 - **Sentinelle** : dérivation d'étendue (leçons dispersées, séquence vide,
   imbrication), migration idempotente, aucune extraction depuis les titres.
 
-### Lot 2 — La grille en lecture *(remplace les deux vues)*
+### ✅ Lot 2 — La grille en lecture *(remplace les deux vues)* — LIVRÉ 1.43.0
 
 - Panneau dans le module Alignement (patron `rendrePaletteFlottante` existant).
 - Rangées dérivées du cadre ; semaines spéciales étiquetées.

@@ -648,11 +648,9 @@ const TOOLTIPS = {
     'orga-sous-nav':
         'Vue textuelle et structurée des données de la carte mentale. Sélectionne une séquence et une leçon pour afficher son plan.',
     'orga-selecteur-sequence':
-        'Filtre par séquence pour restreindre la vue calendrier.',
+        'Filtre par séquence pour restreindre l\'affichage.',
     'orga-selecteur-lecon':
         'Sélectionne une leçon pour afficher son plan détaillé.',
-    'orga-vue-calendrier':
-        'Vue hiérarchique textuelle des séquences, séances et activités avec leurs liens pédagogiques.',
     'orga-entete-lecon':
         'Groupes-cours auxquels cette leçon s\'applique, avec leurs plages horaires.',
     'orga-objectif':

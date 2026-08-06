@@ -21,7 +21,7 @@ var contenuLecon, enteteCalendrier, enteteCalendrierContenu;
 var objectifContenu, btnReinitObjectif;
 var prerequisContenu, productionsContenu;
 var eeCheckbox, coeurBrut, coeurContenu, eeEtapes;
-var listeNonAssignees, calendrierContenu;
+var listeNonAssignees;
 var btnExport, modaleExport;
 
 // === NOMS DES ÉTAPES EE ===
@@ -55,7 +55,6 @@ function initialiserModuleOrganisateur() {
         coeurContenu = document.getElementById('org-coeur-contenu');
         eeEtapes = document.getElementById('org-ee-etapes');
         listeNonAssignees = document.getElementById('org-ee-liste-non-assignees');
-        calendrierContenu = document.getElementById('org-calendrier-contenu');
         btnExport = document.getElementById('org-btn-export');
         modaleExport = document.getElementById('org-modale-export');
 
@@ -93,7 +92,6 @@ function initialiserModuleOrganisateur() {
         }
     }
 
-    rafraichirCalendrier();
 }
 
 // ============================================================
@@ -110,7 +108,6 @@ function brancherEvenements() {
         }
         sauvegarderSelectionsOrg();
         peuplerSelecteursOrganisateur();
-        rafraichirCalendrier();
     });
 
     if (selectSequence) selectSequence.addEventListener('change', function() {
@@ -1106,150 +1103,10 @@ function configurerDragDrop() {
 }
 
 // ============================================================
-//  PHASE 4 : VUE CALENDRIER
-// ============================================================
-
-function rafraichirCalendrier() {
-    var carte = window.planificationCarte;
-    if (!calendrierContenu || !carte) return;
-
-    // Utiliser la fonction existante de la carte si disponible
-    if (typeof carte.genererSeancesHTML === 'function') {
-        var html = carte.genererSeancesHTML();
-        calendrierContenu.innerHTML = html;
-
-        // Post-traitement : supprimer les liens d'alignement (flèches → ←)
-        calendrierContenu.querySelectorAll('.planif-cal-lien-item').forEach(function(el) {
-            el.remove();
-        });
-        // Supprimer les conteneurs de liens maintenant vides
-        calendrierContenu.querySelectorAll('.planif-cal-liens').forEach(function(el) {
-            if (el.children.length === 0) el.remove();
-        });
-
-        // Post-traitement : ajouter les dates aux leçons
-        ajouterDatesAuxLecons();
-
-        // Ajouter listeners de navigation
-        calendrierContenu.querySelectorAll('[data-noeud]').forEach(function(el) {
-            el.addEventListener('click', function(e) {
-                e.stopPropagation();
-                var noeudId = el.dataset.noeud;
-                if (noeudId) {
-                    var carte2 = window.planificationCarte;
-                    if (carte2 && carte2.etat) {
-                        var noeud = carte2.etat.noeuds.get(noeudId);
-                        if (noeud) {
-                            if (noeud.type === 'lecon') {
-                                if (noeud.parent) {
-                                    selectSequence.value = noeud.parent;
-                                    sauvegarderSelectionsOrg();
-                                    peuplerSelecteurLecons();
-                                }
-                                selectLecon.value = noeudId;
-                                leconActiveId = noeudId;
-                                sauvegarderSelectionsOrg();
-                                afficherLecon();
-                            } else if (noeud.type === 'sequence') {
-                                selectSequence.value = noeudId;
-                                sauvegarderSelectionsOrg();
-                                peuplerSelecteurLecons();
-                            }
-                        }
-                    }
-                }
-            });
-        });
-    }
-}
-
-/**
- * Ajoute les dates exactes des séances à côté de chaque leçon dans la vue calendrier.
- * Réutilise la même logique de résolution que afficherEnteteCalendrier.
- */
-function ajouterDatesAuxLecons() {
-    var carte = window.planificationCarte;
-    if (!carte || !carte.etat) return;
-    if (typeof db === 'undefined' || typeof window.cle !== 'function') return;
-
-    try {
-        var groupes = db.getSync(window.cle('groupesCours'), null) || [];
-        var horaires = db.getSync(window.cle('horaires'), null) || [];
-        var calendrier = db.getSync(window.cle('calendrierComplet'), null) || {};
-        var cours = db.getSync('cours', []);
-        var gcActif = db.getSync('groupeCoursActif', null);
-        var coursIdActif = gcActif ? gcActif.coursId : null;
-        if (coursIdActif) {
-            groupes = groupes.filter(function(g) { return g.coursId === coursIdActif; });
-        }
-        if (groupes.length === 0) return;
-
-        var JOURS = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
-        var MOIS_COURTS = ['jan.','fév.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
-
-        function formaterDateCourte(ds) {
-            if (!ds) return '';
-            var p = ds.split('-');
-            var d = parseInt(p[2], 10);
-            var m = parseInt(p[1], 10) - 1;
-            var dateObj = new Date(parseInt(p[0], 10), m, d);
-            var jour = JOURS[dateObj.getDay()];
-            return jour + ' ' + d + ' ' + MOIS_COURTS[m];
-        }
-
-        // Pour chaque leçon dans la vue calendrier
-        calendrierContenu.querySelectorAll('.planif-cal-lecon-header[data-noeud]').forEach(function(headerEl) {
-            var leconId = headerEl.dataset.noeud;
-            var lecon = carte.etat.noeuds.get(leconId);
-            if (!lecon) return;
-
-            var ancrage = ancrageLeconPourDates(carte, leconId);
-            var numSemaine = ancrage.semaine;
-            var rangLecon = ancrage.rang;
-
-            // Résoudre les dates
-            var datesSemaine = {};
-            if (numSemaine && calendrier) {
-                for (var dateStr in calendrier) {
-                    var info = calendrier[dateStr];
-                    if (info && info.numeroSemaine === numSemaine && (info.statut === 'cours' || info.statut === 'reprise')) {
-                        var jourCal = (info.jourRemplace || info.jourSemaine || '').toLowerCase();
-                        if (jourCal) datesSemaine[jourCal] = dateStr;
-                    }
-                }
-            }
-
-            var dates = [];
-            for (var i = 0; i < groupes.length; i++) {
-                var gc = groupes[i];
-                var horaireGC = horaires.filter(function(h) { return h.groupeCoursId === gc.id; });
-                horaireGC.sort(function(a, b) { return (a.jour || '').localeCompare(b.jour || '') || (a.heureDebut || '').localeCompare(b.heureDebut || ''); });
-                var seanceIdx = 0;
-                for (var s = 0; s < horaireGC.length; s++) {
-                    if (seanceIdx === rangLecon) {
-                        var jourH = (horaireGC[s].jour || '').toLowerCase();
-                        var dateExacte = datesSemaine[jourH] || '';
-                        if (dateExacte) {
-                            dates.push(formaterDateCourte(dateExacte));
-                        }
-                        break;
-                    }
-                    seanceIdx++;
-                }
-            }
-
-            if (dates.length > 0) {
-                var uniqueDates = dates.filter(function(d, idx, arr) { return arr.indexOf(d) === idx; });
-                var span = document.createElement('span');
-                span.className = 'org-cal-date-lecon';
-                span.textContent = uniqueDates.join(' / ');
-                headerEl.appendChild(span);
-            }
-        });
-    } catch(e) {
-        console.warn('Dates leçons calendrier:', e);
-    }
-}
+//  (La « Vue calendrier » — rendu de la carte recyclé puis rogné en
+//  post-traitement DOM — est RETIRÉE au lot 2 du planificateur en grille,
+//  6 août 2026. La grille de la palette la remplace ; l'Organisateur, lui,
+//  garde l'en-tête de dates réelles via ancrageLeconPourDates.)
 
 // ============================================================
 //  PHASE 5 : EXPORTS
