@@ -351,6 +351,31 @@ describe('F1 · invariants de rendu et de routage', () => {
         expect(source).toMatch(/function chargerCarte[\s\S]{0,160}_ajoutObjectif = null;/);
     });
 
+    it('la hauteur d’en-tête est MESURÉE, plus jamais figée à une constante', () => {
+        // LAYOUT_HEADER_H (45 px) n'était juste que pour un en-tête d'une ligne.
+        // Avec les objectifs dépliables et les titres sur deux lignes, une
+        // hauteur figée faisait chevaucher les activités sur le titre.
+        expect(source).toContain('function hauteurEnteteConteneur');
+        // Plus AUCUNE affectation directe de la constante à un HEADER_H local.
+        expect(source).not.toMatch(/var HEADER_H = LAYOUT_HEADER_H;/);
+        // Les trois fonctions de disposition mesurent.
+        const appels = source.match(/hauteurEnteteConteneur\(/g) || [];
+        expect(appels.length).toBeGreaterThanOrEqual(4); // 1 déclaration + 3 usages
+    });
+
+    it('la mesure prend le BAS du dernier élément d’en-tête', () => {
+        expect(source).toMatch(/offsetTop \+ e\.offsetHeight \+ LAYOUT_RESPIRATION/);
+        // Ordre du DOM : entête → objectifs → titre ; le titre borne le bas.
+        expect(source).toMatch(
+            /reperes = \['\.planif-noeud-titre', '\.planif-noeud-objectifs', '\.planif-noeud-entete'\]/
+        );
+    });
+
+    it('la frappe redispose le conteneur (titre ET objectifs), throttlée en rAF', () => {
+        expect(source).toMatch(/titreEl\.addEventListener\('input', throttleRAF[\s\S]{0,400}reLayoutConteneur\(id\)/);
+        expect(source).toMatch(/ligne\.addEventListener\('input', throttleRAF[\s\S]{0,1100}reLayoutConteneur\(id\)/);
+    });
+
     it('le badge n’enclenche pas le déplacement du bloc', () => {
         // Le mousedown du bloc démarre le drag : le badge doit l'intercepter.
         expect(source).toMatch(/badgeObjectif\.addEventListener\('mousedown'[\s\S]{0,120}stopPropagation/);
