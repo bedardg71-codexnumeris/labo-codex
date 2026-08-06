@@ -322,11 +322,51 @@ existant récursif. Un seul concept, appliqué à deux échelles.
 *bloc* : ce ne sont que des noms. La structure est la même. L'enseignant nomme
 ses regroupements comme sa discipline le demande.
 
-**◈ OUVERT — renommer « Séquence » en « Ensemble » ?** Piste évoquée : appeler
-le type *ensemble* (neutre quant à l'échelle) et laisser l'utilisateur inscrire
-son propre vocabulaire. À évaluer plus tard — c'est un changement de
-vocabulaire global (UI, skills, documentation) qui ne doit pas précéder
-l'usage.
+**◈ Types renommables par l'utilisateur (piste précisée le 6 août).** Séquence
+*et* leçon devraient à terme être renommables. Les usages observés :
+
+| Type | Noms possibles selon l'enseignant |
+|------|-----------------------------------|
+| **Séquence** | module, étape, thème, bloc, **cours** |
+| **Leçon** | séance, cours, période, rencontre |
+
+> *« Mon cours a 4 heures, mais est divisé en deux séances. Je pourrais appeler
+> ça un cours. »*
+
+**⚠ Collision à prévoir : le mot « cours » est déjà pris.** Dans l'application,
+`cours` désigne l'entité ministérielle (601-101) dans la hiérarchie
+`TRIMESTRE > COURS > GROUPE` — clé `coursId`, présente dans Réglages,
+Construction, Évaluations. Un utilisateur qui renommerait « séquence » en
+« cours » créerait une **homonymie** entre son vocabulaire et celui de
+l'application (« le cours actif », « les productions du cours »).
+
+Ce n'est pas rédhibitoire — le nom choisi n'aurait d'effet que dans le module
+Alignement — mais l'aide contextuelle et les messages devront être écrits en
+conséquence, et la porte de renommage devrait le signaler.
+
+### ▣ GÉNÉRAL — ce qui ne se renomme pas : la structure
+
+Le nom est libre ; **le rapport entre les niveaux ne l'est pas**.
+
+> *« Ce qui est important, c'est l'organisation logique, le rapport entre la
+> séquence, qui est un ensemble, et la leçon, qui est un cours précis avec une
+> durée. »*
+
+Cette distinction est déjà inscrite dans le code (`peutContenir()`), et c'est
+elle qui survit à n'importe quel vocabulaire :
+
+| Niveau | Ce qu'il peut contenir | Nature |
+|--------|------------------------|--------|
+| **Séquence** | des leçons, et rien d'autre | pur **regroupement** |
+| **Leçon** | activités, soutien, révision, connaissances, évaluations | **plancher pédagogique** — le niveau où le contenu vit |
+
+Autrement dit : **la leçon est le niveau terminal de l'organisation**, celui qui
+porte une durée et un contenu enseignable ; la séquence ne fait que rassembler.
+Quand la séquence deviendra récursive (§5.2), elle pourra contenir des
+séquences — mais la leçon, elle, restera terminale.
+
+C'est cette invariance qui autorise le renommage sans risque : on laisse
+changer l'étiquette parce que l'outil raisonne sur la **structure**.
 
 **Définition qui, elle, est stable :**
 
