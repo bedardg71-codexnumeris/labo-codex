@@ -3403,24 +3403,12 @@ function attacherEvenements(el, donnees) {
                     }
                 }
 
-                // Check if dragged out of parent bounds
-                if (parentData) {
-                    var cel = document.getElementById(parentId);
-                    if (cel) {
-                        var cw = parseFloat(cel.style.width) || cel.offsetWidth || 200;
-                        var ch = parseFloat(cel.style.height) || cel.offsetHeight || 80;
-                        var outOfBounds = donnees.x + (el.offsetWidth || 140) < parentData.x ||
-                                          donnees.x > parentData.x + cw ||
-                                          donnees.y + (el.offsetHeight || 50) < parentData.y ||
-                                          donnees.y > parentData.y + ch;
-                        if (outOfBounds) {
-                            // Will detach on mouseup
-                            return;
-                        }
-                    }
-
-                    mettreAJourZoneConteneur(parentId);
-                }
+                // ⚠ NE PAS recalculer la zone du parent pendant le drag :
+                // avec un enfant unique, la zone recalculée SUIT le bloc 1:1 —
+                // « la leçon vient toujours avec », impossible d'en sortir
+                // (constat terrain Grégoire, 6 août soir ; reproduit au
+                // glisser incrémental). Le parent reste FIGÉ ; il se referme
+                // au relâchement (reLayoutAvecAnimation / detacher).
             }
 
             function onUpB(e2) {
@@ -3508,9 +3496,8 @@ function attacherEvenements(el, donnees) {
                     mettreAJourLiens(di.id);
                 }
 
-                if (donnees.parent) {
-                    mettreAJourZoneConteneur(donnees.parent);
-                }
+                // (Zone du parent NON recalculée pendant le drag — même
+                // poursuite qu'au CAS B ; réajustée au relâchement.)
 
                 if (peutEtreEnfant) {
                     var ancienSurvol = survolConteneur;
@@ -3549,6 +3536,10 @@ function attacherEvenements(el, donnees) {
                         rattacherAuConteneur(id, survolConteneur);
                     } else if (!survolConteneur && donnees.parent) {
                         detacherDuConteneur(id);
+                    } else if (donnees.parent) {
+                        // Resté dans son parent : la zone (figée pendant le
+                        // drag) se réajuste maintenant.
+                        mettreAJourZoneConteneur(donnees.parent);
                     }
                 }
 
