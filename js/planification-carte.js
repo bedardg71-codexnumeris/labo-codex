@@ -2623,10 +2623,20 @@ function reconstruireDOM() {
                     var rangRendu = 0;
                     for (var io_ = 0; io_ <= objs.length; io_++) {
                         if (io_ === rangAccueil) {
+                            // La ligne d'accueil porte les M\u00caMES commandes que
+                            // les autres : sans elles, la ligne qu'on vient
+                            // d'ajouter serait la seule sans + / \u2212 (constat\u00e9 en
+                            // terrain le 6 ao\u00fbt).
                             htmlObjectifs += '<div class="planif-noeud-objectif-ligne">' +
                                 '<div class="planif-noeud-objectif" contenteditable="true"' +
                                 ' data-obj-rang="' + rangRendu + '" data-accueil="1"' +
                                 ' data-placeholder="Sera en mesure de\u2026"></div>' +
+                                '<span class="planif-obj-btn planif-obj-ajouter" data-obj-rang="' + rangRendu + '"' +
+                                ' role="button" tabindex="0" aria-label="Ajouter un objectif apr\u00e8s celui-ci"' +
+                                ' title="Ajouter un objectif">+</span>' +
+                                '<span class="planif-obj-btn planif-obj-retirer" data-obj-rang="' + rangRendu + '"' +
+                                ' role="button" tabindex="0" aria-label="Retirer cet objectif"' +
+                                ' title="Retirer cet objectif">\u2212</span>' +
                                 '</div>';
                             rangRendu++;
                         }
@@ -3521,19 +3531,26 @@ function attacherEvenements(el, donnees) {
             var agir = function(e) {
                 e.stopPropagation();
                 e.preventDefault();
+                // `rang` est un index de LIGNE RENDUE (une ligne d'accueil vide
+                // en fait partie), alors que l'état d'accueil s'exprime en
+                // index d'OBJECTIF — les lignes vides ne sont pas persistées.
                 var rang = parseInt(btn.dataset.objRang, 10) || 0;
                 var textes = lireLignes();
                 if (btn.classList.contains('planif-obj-ajouter')) {
+                    var rangObjectif = textes.slice(0, rang + 1).filter(function(t) {
+                        return t !== '';
+                    }).length;
                     // Un objectif vide n'est jamais persisté : on demande au
-                    // rendu d'ouvrir une ligne d'accueil au rang suivant.
+                    // rendu d'ouvrir une ligne d'accueil au bon rang.
                     appliquerObjectifs(donnees, textes);
-                    _ajoutObjectif = { noeudId: id, rang: rang + 1 };
+                    _ajoutObjectif = { noeudId: id, rang: rangObjectif };
                     reconstruireDOM();
                     mettreAJourTousLesBadges();
                     var frais = document.getElementById(id);
                     var accueil = frais && frais.querySelector('.planif-noeud-objectif[data-accueil]');
                     if (accueil) placerCurseurEnFin(accueil);
                 } else {
+                    // Retirer marche sur la ligne, accueil compris (l'annuler).
                     textes.splice(rang, 1);
                     _ajoutObjectif = null;
                     appliquerObjectifs(donnees, textes);
