@@ -2301,7 +2301,12 @@ function collecterDescendants(racine, parent, liste) {
 }
 
 function peutContenir(conteneurType, enfantType) {
-    if (conteneurType === 'sequence') return enfantType === 'lecon';
+    // Voie A (tranchée le 6 août 2026, livrée ici) : une séquence peut contenir
+    // des SÉQUENCES — le regroupement au-dessus (module, étape, thème) est le
+    // conteneur existant rendu récursif, pas un nouveau type. Un seul concept,
+    // appliqué à deux échelles. Les cycles sont bloqués par estDescendantDe()
+    // dans trouverConteneurPour().
+    if (conteneurType === 'sequence') return enfantType === 'lecon' || enfantType === 'sequence';
     if (conteneurType === 'lecon') return enfantType === 'activite' || enfantType === 'soutien' || enfantType === 'revision' || TYPES_CONNAISSANCE.indexOf(enfantType) !== -1 || enfantType === 'evaluation';
     return false;
 }
@@ -2783,14 +2788,22 @@ function reconstruireDOM() {
         }
 
         if (estCompact) {
-            // Vue globale compacte : bloc résumé (titre + badge leçons)
-            var nbLecons = (n.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); }).length;
+            // Vue globale compacte : bloc résumé (titre + badge leçons).
+            // Leçons DESCENDANTES (voie A) : un simple compte d'enfants aurait
+            // rangé les sous-séquences parmi les « leçons ».
+            var nbLecons = compterLeconsDescendantes(n);
+            var nbSousSeq = (n.enfants || []).filter(function(eid) {
+                var se = etat.noeuds.get(eid);
+                return se && se.type === 'sequence';
+            }).length;
+            var infoCompact = nbLecons + ' le\u00e7on' + (nbLecons > 1 ? 's' : '');
+            if (nbSousSeq > 0) infoCompact = nbSousSeq + ' séquence' + (nbSousSeq > 1 ? 's' : '') + ' \u00b7 ' + infoCompact;
             el.innerHTML =
                 '<div class="planif-noeud-entete">' +
                     '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(n) + '">' + obtenirLabelNoeud(n) + '</span>' +
                 '</div>' +
                 '<div class="planif-noeud-titre">' + echapperHtml(n.titre || '') + '</div>' +
-                '<div class="planif-seq-compact-info">' + nbLecons + ' le\u00e7on' + (nbLecons > 1 ? 's' : '') + (dureeRollupNoeud(n) ? ' \u00b7 ' + formaterPeriodes(dureeRollupNoeud(n)) : '') + '</div>' +
+                '<div class="planif-seq-compact-info">' + infoCompact + (dureeRollupNoeud(n) ? ' \u00b7 ' + formaterPeriodes(dureeRollupNoeud(n)) : '') + '</div>' +
                 '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
                 '<div class="planif-noeud-port planif-port-gauche" data-dir="gauche"></div>' +
                 '<div class="planif-noeud-port planif-port-bas" data-dir="bas"></div>' +
@@ -3937,24 +3950,19 @@ function naviguerVers(noeudId) {
 }
 
 function genererSeancesHTML() {
-    var sequences = [];
+    // Hiérarchie aplatie : chaque sous-séquence apparaît UNE fois, comme
+    // section à part entière, juste après son parent (voie A, 6 août 2026).
+    var hierarchie = listerSequencesHierarchie('temporel');
     var leconsOrphelines = [];
 
     for (var entry of etat.noeuds) {
         var nd = entry[1];
-        if (nd.type === 'sequence') sequences.push(nd);
-        else if (nd.type === 'lecon' && !nd.parent) leconsOrphelines.push(nd);
+        if (nd.type === 'lecon' && !nd.parent) leconsOrphelines.push(nd);
     }
 
-    if (sequences.length === 0 && leconsOrphelines.length === 0) {
+    if (hierarchie.length === 0 && leconsOrphelines.length === 0) {
         return '<div class="planif-cal-vide">Aucune séquence ou leçon pour le moment.<br>Ajoute des éléments à la carte.</div>';
     }
-
-    sequences.sort(function(a, b) {
-        var ra = rangTemporel(a), rb = rangTemporel(b);
-        if (ra !== rb) return ra - rb;
-        return (a.x || 0) - (b.x || 0);
-    });
 
     var html = '';
 
@@ -4046,14 +4054,16 @@ function genererSeancesHTML() {
         return bloc;
     }
 
-    // Séquences
-    for (var i = 0; i < sequences.length; i++) {
-        var seq = sequences[i];
+    // Séquences (ordre hiérarchique : parent, puis ses sous-séquences)
+    for (var i = 0; i < hierarchie.length; i++) {
+        var seq = hierarchie[i].seq;
+        var niveauSeq = hierarchie[i].niveau;
         var configSeq = TYPES['sequence'];
-        html += '<div class="planif-cal-sequence">';
+        html += '<div class="planif-cal-sequence' + (niveauSeq > 0 ? ' planif-cal-sequence--imbriquee' : '') + '"' +
+                (niveauSeq > 0 ? ' style="margin-left:' + (niveauSeq * 16) + 'px"' : '') + '>';
         html += '<div class="planif-cal-sequence-header" data-noeud="' + seq.id + '">';
         html += '<span class="planif-cal-pastille" style="background: ' + configSeq.couleur + '"></span>';
-        html += '<span class="planif-cal-titre">' + (seq.titre || 'Séquence') + '</span>';
+        html += '<span class="planif-cal-titre">' + (niveauSeq > 0 ? cheminSequence(seq) : (seq.titre || 'Séquence')) + '</span>';
 
         var semTxt = formaterEtendue(etendueTemporelle(seq));
         if (semTxt) {
@@ -4061,7 +4071,12 @@ function genererSeancesHTML() {
         }
         html += '</div>';
 
-        var enfSeq = (seq.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); });
+        var enfSeq = (seq.enfants || []).filter(function(eid) {
+            var nd0 = etat.noeuds.get(eid);
+            // Les sous-séquences ont leur propre section : ne pas les
+            // re-rendre comme items génériques du parent.
+            return nd0 && nd0.type !== 'sequence';
+        });
         enfSeq.sort(function(a, b) {
             var na = etat.noeuds.get(a), nb = etat.noeuds.get(b);
             return ((na && na.x) || 0) - ((nb && nb.x) || 0);
@@ -4459,13 +4474,13 @@ function genererPlanTexte() {
         if (c) nomCarte = c.nom;
     }
 
+    // Ordre hiérarchique : chaque sous-séquence a sa section, après son parent.
+    var hierarchie = listerSequencesHierarchie('temporel');
     for (var entry of etat.noeuds) {
         var nd = entry[1];
-        if (nd.type === 'sequence') sequences.push(nd);
-        else if (nd.type === 'lecon' && !nd.parent) leconsOrphelines.push(nd);
+        if (nd.type === 'lecon' && !nd.parent) leconsOrphelines.push(nd);
     }
-
-    sequences.sort(function(a, b) { return rangTemporel(a) - rangTemporel(b); });
+    sequences = hierarchie.map(function(e) { return e.seq; });
 
     function formatDuree(min) {
         if (!min) return '';
@@ -4496,12 +4511,19 @@ function genererPlanTexte() {
         var etendueSeq = formaterEtendue(etendueTemporelle(seq));
         var semTxt = etendueSeq ? ' (' + etendueSeq + ')' : '';
 
+        // Une sous-séquence est titrée par son CHEMIN (« Parent › Enfant »)
+        // pour rester lisible dans un document plat.
+        var titreSeq = hierarchie[i].niveau > 0 ? cheminSequence(seq) : (seq.titre || 'Sans titre');
         txt += '───────────────────────────────────────\n';
-        txt += '▌ SÉQUENCE : ' + (seq.titre || 'Sans titre') + semTxt + '\n';
+        txt += '▌ SÉQUENCE : ' + titreSeq + semTxt + '\n';
         txt += '───────────────────────────────────────\n';
         txt += liensTexte(seq.id, '  ');
 
-        var enfants = (seq.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); });
+        var enfants = (seq.enfants || []).filter(function(eid) {
+            var nd1 = etat.noeuds.get(eid);
+            // Les sous-séquences ont leur propre section plus bas.
+            return nd1 && nd1.type !== 'sequence';
+        });
         var dureeSeq = 0;
 
         for (var j = 0; j < enfants.length; j++) {
@@ -4561,16 +4583,16 @@ function genererPlanTexte() {
 }
 
 function genererPlanTSV() {
-    var sequences = [];
     var leconsOrphelines = [];
 
+    // Ordre hiérarchique ; la colonne « Séquence » d'une sous-séquence porte
+    // son chemin (« Parent › Enfant ») — le format tabulaire reste plat.
+    var hierarchie = listerSequencesHierarchie('temporel');
     for (var entry of etat.noeuds) {
         var nd = entry[1];
-        if (nd.type === 'sequence') sequences.push(nd);
-        else if (nd.type === 'lecon' && !nd.parent) leconsOrphelines.push(nd);
+        if (nd.type === 'lecon' && !nd.parent) leconsOrphelines.push(nd);
     }
-
-    sequences.sort(function(a, b) { return rangTemporel(a) - rangTemporel(b); });
+    var sequences = hierarchie.map(function(e) { return e.seq; });
 
     var tsv = 'Séquence\tSemaines\tSéance\tDurée séance (min)\tType\tTitre\tDurée (min)\tLiens\n';
 
@@ -4595,8 +4617,12 @@ function genererPlanTSV() {
             ? etendueSeq.debut + (etendueSeq.fin !== etendueSeq.debut ? '–' + etendueSeq.fin : '')
             : '';
         var seqLiens = liensCompacts(seq.id);
-        var seqNom = escape(seq.titre || 'Sans titre');
-        var enfants = (seq.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); });
+        var seqNom = escape(hierarchie[i].niveau > 0 ? cheminSequence(seq) : (seq.titre || 'Sans titre'));
+        var enfants = (seq.enfants || []).filter(function(eid) {
+            var nd2 = etat.noeuds.get(eid);
+            // Les sous-séquences ont leurs propres lignes plus bas.
+            return nd2 && nd2.type !== 'sequence';
+        });
 
         if (enfants.length === 0) {
             tsv += seqNom + '\t' + semTxt + '\t\t\tSéquence\t' + seqNom + '\t\t' + escape(seqLiens) + '\n';
@@ -5645,6 +5671,80 @@ function obtenirSequencesCarte() {
     return sequences;
 }
 
+// === SÉQUENCES DE SÉQUENCES (voie A, 6 août 2026) — lecture hiérarchique ===
+// Toute vue qui LISTE les séquences doit passer par ces helpers, jamais par un
+// scan plat de `type === 'sequence'` : depuis la voie A, une séquence peut en
+// contenir d'autres, et un scan plat afficherait chaque sous-séquence DEUX
+// fois (à la racine et sous son parent).
+
+/** Une séquence racine n'est pas contenue dans une autre séquence. */
+function estSequenceRacine(n) {
+    if (!n || n.type !== 'sequence') return false;
+    if (!n.parent) return true;
+    var p = etat.noeuds.get(n.parent);
+    return !(p && p.type === 'sequence');
+}
+
+/**
+ * Liste hiérarchique aplatie : chaque racine suivie de ses sous-séquences,
+ * en profondeur d'abord. `ordre` s'applique ENTRE FRÈRES à chaque niveau :
+ * 'spatial' (position sur la carte — palette Navigation) ou 'temporel'
+ * (étendue dérivée — Vue calendrier, exports).
+ * @returns {Array<{seq: Object, niveau: number}>}
+ */
+function listerSequencesHierarchie(ordre) {
+    var comparer = ordre === 'temporel'
+        ? function(a, b) { return (rangTemporel(a) - rangTemporel(b)) || ((a.x || 0) - (b.x || 0)); }
+        : function(a, b) { return ((a.y || 0) - (b.y || 0)) || ((a.x || 0) - (b.x || 0)); };
+
+    var resultat = [];
+    var vus = new Set();
+    function visiter(seq, niveau) {
+        if (vus.has(seq.id)) return;
+        vus.add(seq.id);
+        resultat.push({ seq: seq, niveau: niveau });
+        (seq.enfants || [])
+            .map(function(eid) { return etat.noeuds.get(eid); })
+            .filter(function(nd) { return nd && nd.type === 'sequence'; })
+            .sort(comparer)
+            .forEach(function(s) { visiter(s, niveau + 1); });
+    }
+    obtenirSequencesCarte().filter(estSequenceRacine).sort(comparer)
+        .forEach(function(s) { visiter(s, 0); });
+    return resultat;
+}
+
+/** « Parent › Enfant » — contexte d'une sous-séquence dans les documents. */
+function cheminSequence(seq) {
+    var morceaux = [seq.titre || 'Sans titre'];
+    var vus = new Set([seq.id]);
+    var courant = seq;
+    while (courant && courant.parent) {
+        var p = etat.noeuds.get(courant.parent);
+        if (!p || p.type !== 'sequence' || vus.has(p.id)) break;
+        vus.add(p.id);
+        morceaux.unshift(p.titre || 'Sans titre');
+        courant = p;
+    }
+    return morceaux.join(' › ');
+}
+
+/** Leçons descendantes, à toute profondeur (badge des séquences compactes). */
+function compterLeconsDescendantes(n, vus) {
+    if (!n || !n.enfants) return 0;
+    if (!vus) vus = new Set();
+    if (vus.has(n.id)) return 0;
+    vus.add(n.id);
+    var total = 0;
+    for (var i = 0; i < n.enfants.length; i++) {
+        var e = etat.noeuds.get(n.enfants[i]);
+        if (!e) continue;
+        if (e.type === 'lecon') total++;
+        else if (e.type === 'sequence') total += compterLeconsDescendantes(e, vus);
+    }
+    return total;
+}
+
 function obtenirLeconsDeSequence(seq) {
     if (!seq || !seq.enfants) return [];
     var lecons = [];
@@ -5753,10 +5853,13 @@ function mettreAJourSommaire() {
     var conteneur = document.getElementById('planif-sommaire');
     if (!conteneur) return;
 
-    var sequences = obtenirSequencesCarte();
-    if (sequences.length === 0) {
+    // Hiérarchie (voie A) : les sous-séquences apparaissent SOUS leur parent,
+    // indentées — jamais dupliquées à la racine. La jauge, elle, ne somme que
+    // les RACINES : le rollup d'un parent inclut déjà ses sous-séquences.
+    var hierarchie = listerSequencesHierarchie('spatial');
+    if (hierarchie.length === 0) {
         conteneur.innerHTML = '<div class="planif-som-vide">Aucune séquence — glisse un nœud « Séquence » sur la carte pour naviguer ici.</div>';
-        mettreAJourJaugeTemps(sequences);
+        mettreAJourJaugeTemps([]);
         return;
     }
 
@@ -5767,13 +5870,15 @@ function mettreAJourSommaire() {
                '<span class="planif-som-nom">Vue globale</span>' +
                '</div>';
 
-    for (var i = 0; i < sequences.length; i++) {
-        var seq = sequences[i];
+    for (var i = 0; i < hierarchie.length; i++) {
+        var seq = hierarchie[i].seq;
+        var niveau = hierarchie[i].niveau;
+        var retrait = niveau > 0 ? ' style="margin-left:' + (niveau * 12) + 'px"' : '';
         var lecons = obtenirLeconsDeSequence(seq);
         var dureeSeq = dureeRollupNoeud(seq);
-        var pillSeq = dureeSeq ? formaterPeriodes(dureeSeq) : String(lecons.length);
+        var pillSeq = dureeSeq ? formaterPeriodes(dureeSeq) : String(compterLeconsDescendantes(seq));
         var seqActive = seq.id === sequenceActiveId;
-        html += '<div class="planif-som-item planif-som-seq' + (seqActive ? ' actif' : '') + '"' +
+        html += '<div class="planif-som-item planif-som-seq' + (seqActive ? ' actif' : '') + '"' + retrait +
                 ' data-action="planificationCarte.ouvrirSequence"' +
                 ' data-param="' + seq.id + '"' +
                 ' title="' + echapperHtml(seq.titre || 'Sans titre') + '">' +
@@ -5784,6 +5889,7 @@ function mettreAJourSommaire() {
             var lec = lecons[j];
             var duree = formaterPeriodes(dureeRollupNoeud(lec));
             html += '<div class="planif-som-item planif-som-lecon' + (lec.id === leconActiveId ? ' actif' : '') + '"' +
+                    (niveau > 0 ? ' style="margin-left:' + (niveau * 12) + 'px"' : '') +
                     ' data-action="planificationCarte.naviguerSommaireLecon"' +
                     ' data-param="' + lec.id + '"' +
                     ' title="' + echapperHtml(lec.titre || 'Sans titre') + '">' +
@@ -5793,7 +5899,8 @@ function mettreAJourSommaire() {
         }
     }
     conteneur.innerHTML = html;
-    mettreAJourJaugeTemps(sequences);
+    mettreAJourJaugeTemps(hierarchie.filter(function(e) { return e.niveau === 0; })
+        .map(function(e) { return e.seq; }));
 
     requestAnimationFrame(function() {
         var itemActif = conteneur.querySelector('.planif-som-lecon.actif') ||
@@ -6049,6 +6156,11 @@ window.planificationCarte = {
     formaterEtendue: formaterEtendue,
     rangTemporel: rangTemporel,
     definirSemaineLecon: definirSemaineLecon,
+    // Séquences de séquences (voie A) : lecture hiérarchique partagée
+    listerSequencesHierarchie: listerSequencesHierarchie,
+    cheminSequence: cheminSequence,
+    compterLeconsDescendantes: compterLeconsDescendantes,
+    peutContenir: peutContenir,
     recentrerVue: recentrerVue,
     injecterNoeuds: injecterNoeuds,
     nouvelleCarte: nouvelleCarte,

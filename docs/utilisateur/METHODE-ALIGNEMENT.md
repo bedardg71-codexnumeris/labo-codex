@@ -311,6 +311,16 @@ comme règle. La semaine reste un **repère de grandeur**, pas une définition.
 
 ### 5.2 ✅ TRANCHÉ (6 août) — voie A : des séquences de séquences
 
+> **✅ LIVRÉ (6 août, 1.39.0).** Le verrou `peutContenir` est levé : une
+> séquence peut contenir des séquences (glisser sur le canevas, comme une
+> leçon). L'étendue temporelle, la palette Navigation (indentation), la Vue
+> calendrier et les exports TXT/TSV/MD suivent la hiérarchie — chaque
+> sous-séquence apparaît UNE fois, sous son parent, jamais dupliquée à la
+> racine. Dans les documents plats (TXT/TSV), une sous-séquence est titrée
+> par son chemin (« Parent › Enfant ») ; le Markdown garde le titre nu pour
+> que l'aller-retour d'import ne pollue pas les titres — l'imbrication n'y
+> survit pas, c'est assumé (format de bootstrap, 2 niveaux).
+
 **Décision.** Le regroupement au-dessus de la séquence sera une **séquence
 contenant des séquences** — l'imbrication, pas le lien.
 
