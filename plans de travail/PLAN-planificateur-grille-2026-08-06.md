@@ -69,9 +69,8 @@ spéciales intercalées à leur position réelle, zone « Non planifié », dér
 leçon dépliable, navigation conservée ; Vue calendrier RETIRÉE des trois surfaces
 + CSS et tooltips purgés). Reste : **lot 3** (le déplacement dans la grille).
 Détail des décisions : `docs/utilisateur/METHODE-ALIGNEMENT.md` § « LIVRÉ (6 août, 1.38.0) ».
-Prochaine étape : **lot 2** (la grille en lecture). ⚠ Avant de construire les
-rangées : vérifier la dérivation du nombre de semaines — la source est
-`calculerStatistiquesCalendrier(calendrierComplet)` (#366), pas un champ stocké.
+(La question du préalable des rangées est RÉGLÉE au lot 2 : dérivation par
+parcours chronologique de `calendrierComplet`, même source que #366.)
 
 | # | Décision |
 |---|----------|
