@@ -130,27 +130,9 @@ describe('voie A · lecture hiérarchique', () => {
     });
 });
 
-describe('voie A · Vue calendrier (genererSeancesHTML)', () => {
-    let api;
-    beforeEach(() => { api = monterModule(); poserHierarchie(api); });
-
-    it('la sous-séquence a UNE section, avec chemin, et n’est pas re-rendue comme item du parent', () => {
-        const html = api.genererSeancesHTML();
-
-        // Une seule section par séquence (4 en-têtes pour 4 séquences).
-        const enTetes = html.match(/planif-cal-sequence-header/g) || [];
-        expect(enTetes).toHaveLength(4);
-        // Le chemin dans le titre de la sous-séquence.
-        expect(html).toContain('Thème 1 › Ouverture');
-        // Marqueur visuel d'imbrication.
-        expect(html).toContain('planif-cal-sequence--imbriquee');
-        // La sous-séquence n'apparaît PAS comme item générique dans le parent.
-        expect(html).not.toMatch(/planif-cal-item" data-noeud="planif-sA"/);
-        // La leçon de la sous-séquence est rendue sous ELLE (une seule fois).
-        const lecons = html.match(/data-noeud="planif-l1"/g) || [];
-        expect(lecons.length).toBeGreaterThan(0);
-    });
-});
+// (La Vue calendrier — genererSeancesHTML — a été RETIRÉE au lot 2 du
+// planificateur en grille : ses invariants hiérarchiques vivent désormais
+// dans sentinelle-grille-planificateur.test.js.)
 
 describe('voie A · invariants statiques (les consommateurs migrés)', () => {
     it('plus aucun scan plat de séquences dans les vues listantes de la carte', () => {

@@ -18709,6 +18709,98 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     padding: 4px 6px;
     line-height: 1.4;
 }
+/* === Planificateur en grille (lot 2, 6 août 2026) ===
+   Une rangée par semaine (numéro en gouttière), semaines spéciales
+   étiquetées, zone « Non planifié » en pied. Les items réutilisent
+   .planif-som-item (séquences/leçons) — mêmes gestes, même look. */
+.planif-grille {
+    display: flex;
+    flex-direction: column;
+}
+.planif-grille-rangee {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    border-top: 1px solid var(--bordure-discrete, rgba(128,128,128,.15));
+    padding: 3px 0;
+}
+.planif-grille-num {
+    flex: 0 0 20px;
+    text-align: right;
+    font-size: 10.5px;
+    font-variant-numeric: tabular-nums;
+    color: var(--texte-muted, #5a7a88);
+    padding-top: 5px;
+}
+.planif-grille-cellule {
+    flex: 1;
+    min-width: 0;
+}
+.planif-grille-rangee--vide .planif-grille-cellule { min-height: 14px; }
+.planif-grille-rangee--speciale .planif-grille-cellule {
+    font-size: 11px;
+    font-style: italic;
+    color: var(--texte-muted, #5a7a88);
+    padding: 4px 2px;
+}
+.planif-grille-avis {
+    font-size: 11px;
+    color: var(--texte-muted, #5a7a88);
+    padding: 4px 6px;
+    line-height: 1.35;
+}
+.planif-grille-contexte {
+    margin-left: 6px;
+    font-size: 10px;
+    color: var(--texte-muted, #5a7a88);
+}
+.planif-grille-chevron {
+    flex: 0 0 14px;
+    text-align: center;
+    font-size: 10px;
+    color: var(--texte-muted, #5a7a88);
+    cursor: pointer;
+    border-radius: 3px;
+}
+.planif-grille-chevron:hover { color: var(--planif-couleur-selection); }
+.planif-grille-chevron--vide { cursor: default; }
+.planif-grille-detail {
+    margin: 0 0 3px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+.planif-grille-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--texte-secondaire, #8aa4b0);
+    padding: 2px 4px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.planif-grille-detail-item:hover { background: var(--surface-element, rgba(128,128,128,.08)); }
+.planif-grille-detail-titre {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.planif-grille-nonplanifie {
+    margin-top: 8px;
+    border-top: 2px solid var(--bordure-discrete, rgba(128,128,128,.25));
+    padding-top: 4px;
+}
+.planif-grille-nonplanifie-titre {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--texte-muted, #5a7a88);
+    padding: 2px 4px 4px;
+}
 /* Jauge de temps (indicative, jamais bloquante) au pied de la palette */
 .planif-jauge-temps {
     margin-top: 8px;
@@ -20748,158 +20840,15 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     padding: 12px;
 }
 
-.planif-cal-sequence {
-    margin-bottom: 16px;
-    border: 1px solid rgba(106, 172, 184, 0.25);
-    border-radius: 10px;
-    overflow: hidden;
-}
 /* Sous-séquence (voie A) : section rattachée visuellement à son parent.
    Le retrait horizontal est posé en ligne (proportionnel au niveau). */
-.planif-cal-sequence--imbriquee {
-    margin-top: -8px;
-    border-left: 3px solid var(--planif-couleur-sequence);
-}
-.planif-cal-sequence-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 12px;
-    background: color-mix(in srgb, var(--planif-couleur-sequence) 15%, var(--surface-conteneur, #142428));
-    border-bottom: 1px solid rgba(106, 172, 184, 0.25);
-    cursor: pointer;
-}
-.planif-cal-sequence-header:hover { background: color-mix(in srgb, var(--planif-couleur-sequence) 22%, var(--surface-conteneur, #142428)); }
-.planif-cal-sequence-header .planif-cal-pastille {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-.planif-cal-sequence-header .planif-cal-titre {
-    font-size: 13px;
-    font-weight: 600;
-    flex: 1;
-}
-.planif-cal-sequence-header .planif-cal-semaines {
-    font-size: 11px;
-    color: var(--texte-secondaire, #8aa4b0);
-}
-
-.planif-cal-lecon {
-    border-top: 1px solid #f1f5f9;
-}
-.planif-cal-lecon-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 12px 10px 24px;
-    background: color-mix(in srgb, var(--planif-couleur-lecon) 12%, var(--surface-conteneur, #142428));
-    cursor: pointer;
-    line-height: 1.4;
-}
-.planif-cal-lecon-header:hover { background: color-mix(in srgb, var(--planif-couleur-lecon) 20%, var(--surface-conteneur, #142428)); }
-.planif-cal-lecon-header .planif-cal-pastille {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-.planif-cal-lecon-header .planif-cal-titre {
-    font-size: 12px;
-    font-weight: 600;
-    flex: 1;
-}
-.planif-cal-duree {
-    font-size: 10px;
-    color: var(--texte-secondaire, #8aa4b0);
-    background: rgba(106, 172, 184, 0.06);
-    padding: 2px 6px;
-    border-radius: 4px;
-    white-space: nowrap;
-}
-
-.planif-cal-enfants {
-    padding: 6px 12px 10px 36px;
-}
-
-.planif-cal-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 5px 4px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background 0.1s;
-    line-height: 1.45;
-}
-.planif-cal-item:hover { background: var(--surface-element, #244858); }
-.planif-cal-item .planif-cal-pastille-mini {
+.planif-cal-pastille-mini {
     width: 7px;
     height: 7px;
     border-radius: 50%;
     flex-shrink: 0;
     margin-top: 5px;
 }
-.planif-cal-item .planif-cal-item-titre {
-    font-size: 12px;
-    color: var(--planif-couleur-texte);
-    flex: 1;
-    line-height: 1.45;
-}
-
-.planif-cal-liens {
-    margin-top: 3px;
-    padding-left: 14px;
-}
-.planif-cal-liens .planif-cal-lien-item {
-    font-size: 10px;
-    color: var(--texte-muted, #5a7a88);
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 2px 0;
-    cursor: pointer;
-    line-height: 1.4;
-}
-.planif-cal-liens .planif-cal-lien-item:hover { color: var(--planif-couleur-selection); }
-.planif-cal-liens .planif-cal-lien-pastille {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-.planif-cal-total {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    padding: 6px 12px;
-    border-top: 1px solid #f1f5f9;
-    font-size: 11px;
-    color: var(--texte-secondaire, #8aa4b0);
-    gap: 4px;
-}
-
-.planif-cal-vide {
-    text-align: center;
-    padding: 32px 16px;
-    color: var(--texte-muted, #5a7a88);
-    font-size: 13px;
-}
-
-.planif-cal-orphelines {
-    margin-top: 12px;
-}
-.planif-cal-orphelines-titre {
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--texte-muted, #5a7a88);
-    padding: 8px 12px 4px;
-}
-
 .planif-cal-header-actions {
     display: flex;
     align-items: center;
@@ -21078,22 +21027,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 }
 
 /* Colonne droite : panneau calendrier */
-.org-panneau-calendrier {
-    width: 420px;
-    flex-shrink: 0;
-    overflow-y: auto;
-    border-left: 1px solid rgba(106, 172, 184, 0.25);
-    padding: 14px 20px;
-    background: rgba(106, 172, 184, 0.03);
-}
-.org-panneau-calendrier-titre {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    color: var(--accent-primaire, #6aacb8);
-    margin-bottom: 12px;
-}
 .org-cal-date-lecon {
     display: block;
     font-size: 10px;
@@ -21453,13 +21386,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 .org-activite.org-drag-en-cours { opacity: 0.4; }
 
 /* Calendrier */
-.org-cal-vide {
-    text-align: center;
-    padding: 32px 16px;
-    color: var(--texte-muted, #5a7a88);
-    font-size: 13px;
-}
-
 /* Modale d'export — utilise les classes design system (.modal-overlay, .modal-contenu, etc.) */
 
 /* === FIN ORGANISATEUR === */

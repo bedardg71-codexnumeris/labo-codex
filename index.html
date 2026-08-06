@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260806m"> <!-- Retrait du style du mode individuel (inversion, 6 août) -->
+    <link rel="stylesheet" href="styles.css?v=20260806n"> <!-- Grille du planificateur + purge CSS de l'ancienne Vue calendrier (6 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -4314,7 +4314,7 @@
                             <!-- Palette Navigation : sommaire arborescent Vue globale › séquences › leçons -->
                             <div id="planif-palette-nav" class="planif-palette-flottante">
                                 <div class="planif-palette-barre">
-                                    <span class="planif-palette-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>Navigation</span>
+                                    <span class="planif-palette-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>Planificateur</span>
                                     <button class="planif-palette-toggle" id="planif-palette-nav-toggle" title="Réduire la palette">−</button>
                                 </div>
                                 <div class="planif-palette-contenu planif-nav-contenu">
@@ -4421,16 +4421,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Vue calendrier (toujours visible, en bas) -->
-                                    <div id="planif-org-calendrier">
-                                        <div class="planif-org-section-titre planif-org-section-titre-collapse" id="planif-org-calendrier-toggle">
-                                            Vue calendrier
-                                            <span class="planif-org-chevron">▾</span>
-                                        </div>
-                                        <div id="planif-org-calendrier-contenu">
-                                            <div class="planif-cal-vide">Aucune séquence ou leçon pour le moment.<br>Ajoute des éléments à la carte.</div>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -4576,13 +4566,6 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                                <!-- Colonne droite : vue calendrier (panneau latéral) -->
-                                <div class="org-panneau-calendrier">
-                                    <div class="org-panneau-calendrier-titre" data-tooltip="orga-vue-calendrier">Vue calendrier</div>
-                                    <div id="org-calendrier-contenu">
-                                        <div class="org-cal-vide">Aucune séquence ou leçon pour le moment.<br>Ajoute des éléments à la carte.</div>
                                     </div>
                                 </div>
                             </div>
@@ -11827,7 +11810,7 @@
                             <ul>
                                 <li><strong>Glisser-déposer</strong> : Glisse les activités vers les 5 étapes pour les réorganiser</li>
                                 <li><strong>Notes enseignant</strong> : Ajoute des notes personnelles par étape (zone de texte)</li>
-                                <li><strong>Vue calendrier</strong> : Planifie tes séances avec dates, heures et locaux</li>
+                                <li><strong>Planificateur</strong> : Une rangée par semaine du trimestre — vois où chaque séquence et chaque leçon atterrit</li>
                                 <li><strong>Export JSON</strong> : Exporte l'alignement pédagogique complet pour archivage ou partage</li>
                             </ul>
 
@@ -14708,8 +14691,8 @@
     <script src="js/planification-donnees.js?v=20260804a"></script> <!-- Import inter-trimestre des cartes (4 août) -->
 
     <script src="js/planification-bibliotheque.js?v=2026051026"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
-    <script src="js/planification-carte.js?v=20260806o"></script> <!-- Inversion du modèle : une feuille se saisit seule, le cadre déplace le groupe (6 août) -->
-    <script src="js/organisateur.js?v=20260806k"></script> <!-- Exports MD/TXT en ordre hiérarchique (voie A, 6 août) -->
+    <script src="js/planification-carte.js?v=20260806p"></script> <!-- Lot 2 : planificateur en grille, ancienne Vue calendrier retirée (6 août) -->
+    <script src="js/organisateur.js?v=20260806l"></script> <!-- Retrait du post-traitement DOM de la Vue calendrier (lot 2, 6 août) -->
     <script src="js/planification.js?v=2026050522"></script> <!-- Refonte nav SP4 : hooks nomSection 'conception' + idSousSection conception-* -->
 
     <!-- BETA 96.3 : Module Travaux (import, annotation, archivage) -->
@@ -14805,7 +14788,7 @@
     <script src="js/accompagnement.js?v=20260702b"></script> <!-- #305 (2 juil.) : popup Conseil — nom accessible + focus -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
-    <script src="js/accompagnement-contenu-hover.js?v=20260629a"></script> <!-- Beta 99.42 b0512-0840 : #18 +4 clés Évaluations, -7 clés ea-* mortes -->
+    <script src="js/accompagnement-contenu-hover.js?v=20260806a"></script> <!-- Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
     <script src="js/accompagnement-contenu-popup.js?v=20260629a"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
     <script src="js/accompagnement-contenu-terme.js?v=20260629a"></script>
     <script src="js/guides-pedagogiques.js?v=20260629a"></script> <!-- Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->
