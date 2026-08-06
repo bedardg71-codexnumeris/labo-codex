@@ -61,9 +61,12 @@ D'où ce plan écrit. La méthode « friction → correctif » a atteint sa limi
 
 ## ✅ ÉTAT AU 6 AOÛT AU SOIR
 
-**Q1 à Q4 tranchées** (+ une Q5 apparue à l'audit), **lot 1 LIVRÉ en 1.38.0.**
-Détail des décisions et de leurs conséquences : `docs/utilisateur/METHODE-ALIGNEMENT.md`
-§ « LIVRÉ (6 août, 1.38.0) ». Prochaine étape : **séquences de séquences**, puis lot 2.
+**Q1 à Q4 tranchées** (+ une Q5 apparue à l'audit), **lot 1 LIVRÉ en 1.38.0**,
+**séquences de séquences LIVRÉES en 1.39.0** (voie A — cf. METHODE-ALIGNEMENT §5.2).
+Détail des décisions : `docs/utilisateur/METHODE-ALIGNEMENT.md` § « LIVRÉ (6 août, 1.38.0) ».
+Prochaine étape : **lot 2** (la grille en lecture). ⚠ Avant de construire les
+rangées : vérifier la dérivation du nombre de semaines — la source est
+`calculerStatistiquesCalendrier(calendrierComplet)` (#366), pas un champ stocké.
 
 | # | Décision |
 |---|----------|

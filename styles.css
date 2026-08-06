@@ -20762,6 +20762,12 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     border-radius: 10px;
     overflow: hidden;
 }
+/* Sous-séquence (voie A) : section rattachée visuellement à son parent.
+   Le retrait horizontal est posé en ligne (proportionnel au niveau). */
+.planif-cal-sequence--imbriquee {
+    margin-top: -8px;
+    border-left: 3px solid var(--planif-couleur-sequence);
+}
 .planif-cal-sequence-header {
     display: flex;
     align-items: center;

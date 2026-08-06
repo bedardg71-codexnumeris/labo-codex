@@ -1521,14 +1521,15 @@ function genererExportTXT(estEleve) {
         if (c) nomCarte = c.nom;
     }
 
-    var sequences = [];
+    // Ordre hiérarchique (voie A, 6 août 2026) : chaque sous-séquence a sa
+    // propre section, une seule fois, juste après son parent. Un scan plat
+    // dupliquerait les sous-séquences (racine + sous le parent).
     var leconsOrphelines = [];
     for (var entry of etat.noeuds) {
         var nd = entry[1];
-        if (nd.type === 'sequence') sequences.push(nd);
-        else if (nd.type === 'lecon' && !nd.parent) leconsOrphelines.push(nd);
+        if (nd.type === 'lecon' && !nd.parent) leconsOrphelines.push(nd);
     }
-    trierSequencesParEtendue(carte, sequences);
+    var sequences = carte.listerSequencesHierarchie('temporel').map(function(e) { return e.seq; });
 
     var txt = '═══════════════════════════════════════\n';
     txt += 'PLAN DE COURS — ' + nomCarte + '\n';
@@ -1557,8 +1558,10 @@ function genererSequenceTXT(seq, etat, seances, carte, estEleve) {
     var etendue = carte.formaterEtendue(carte.etendueTemporelle(seq));
     var semTxt = etendue ? ' (' + etendue + ')' : '';
 
+    // cheminSequence(racine) = son titre seul ; pour une sous-séquence,
+    // « Parent › Enfant » — le document plat garde la hiérarchie lisible.
     var txt = '───────────────────────────────────────\n';
-    txt += '▌ SÉQUENCE : ' + (seq.titre || 'Sans titre') + semTxt + '\n';
+    txt += '▌ SÉQUENCE : ' + carte.cheminSequence(seq) + semTxt + '\n';
     txt += '───────────────────────────────────────\n';
 
     var enfants = (seq.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); });
@@ -1676,14 +1679,15 @@ function genererExportMD(estEleve) {
         if (c) nomCarte = c.nom;
     }
 
-    var sequences = [];
+    // Ordre hiérarchique (voie A, 6 août 2026) : chaque sous-séquence a sa
+    // propre section, une seule fois, juste après son parent. Un scan plat
+    // dupliquerait les sous-séquences (racine + sous le parent).
     var leconsOrphelines = [];
     for (var entry of etat.noeuds) {
         var nd = entry[1];
-        if (nd.type === 'sequence') sequences.push(nd);
-        else if (nd.type === 'lecon' && !nd.parent) leconsOrphelines.push(nd);
+        if (nd.type === 'lecon' && !nd.parent) leconsOrphelines.push(nd);
     }
-    trierSequencesParEtendue(carte, sequences);
+    var sequences = carte.listerSequencesHierarchie('temporel').map(function(e) { return e.seq; });
 
     var md = '# Plan de cours — ' + nomCarte + '\n';
     md += '> Exporté le ' + new Date().toLocaleDateString('fr-CA') + '\n\n---\n\n';
