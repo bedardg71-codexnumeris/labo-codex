@@ -2244,6 +2244,16 @@ var _layoutEnCours = new Set();
 var _zoneEnCours = new Set();
 // Bornes de la poignée de redimensionnement (feuilles seulement).
 var LARGEUR_MIN_NOEUD = 100;
+
+/**
+ * Largeur plancher d'un conteneur, posée à la poignée (option B).
+ * La disposition automatique garde la main sur tout le reste : elle ne fait
+ * qu'élargir jusqu'à ce plancher si son calcul donne moins.
+ */
+function largeurPlancher(noeud) {
+    return (noeud && noeud.metadata && noeud.metadata.largeurMin) || 0;
+}
+
 var HAUTEUR_MIN_NOEUD = 44;
 
 var LAYOUT_GAP = 60;
@@ -2367,6 +2377,7 @@ function reLayoutConteneur(conteneurId) {
 
     // Container dimensions
     var newW = maxW + PADDING * 2;
+    newW = Math.max(newW, largeurPlancher(conteneur));
     var newH = totalH + PADDING * 2 + HEADER_H;
 
     // Stack children in centered column
@@ -2440,7 +2451,7 @@ function reLayoutConteneurSaufDragged(conteneurId, draggedId) {
     }
     totalH += GAP * (enfants.length - 1);
 
-    var newW = maxW + PADDING * 2;
+    var newW = Math.max(maxW + PADDING * 2, largeurPlancher(conteneur));
     var newH = totalH + PADDING * 2 + HEADER_H;
 
     var curY = conteneur.y + HEADER_H + PADDING;
@@ -2511,7 +2522,7 @@ function mettreAJourZoneConteneur(conteneurId) {
 
     var newX = minX - PADDING;
     var newY = minY - PADDING - HEADER_H;
-    var newW = (maxX - minX) + PADDING * 2;
+    var newW = Math.max((maxX - minX) + PADDING * 2, largeurPlancher(conteneur));
     var newH = (maxY - minY) + PADDING * 2 + HEADER_H;
 
     conteneur.x = newX;
@@ -2718,7 +2729,12 @@ function reconstruireDOM() {
                 '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
                 '<div class="planif-noeud-port planif-port-gauche" data-dir="gauche"></div>' +
                 '<div class="planif-noeud-port planif-port-bas" data-dir="bas"></div>' +
-                '<div class="planif-noeud-port planif-port-haut" data-dir="haut"></div>';
+                '<div class="planif-noeud-port planif-port-haut" data-dir="haut"></div>' +
+                // Option B (6 août) : sur un conteneur, la poignée ne règle que
+                // la LARGEUR — une largeur plancher. La hauteur reste calculée
+                // depuis les enfants, donc aucun geste n'est jamais défait.
+                '<div class="planif-noeud-poignee planif-noeud-poignee--largeur"' +
+                ' role="separator" aria-label="Ajuster la largeur de ce bloc"></div>';
         } else {
             el.innerHTML =
                 '<div class="planif-noeud-entete">' +
@@ -3646,6 +3662,17 @@ function attacherEvenements(el, donnees) {
                 // conversion de position (cf. clientX → coordonnées carte).
                 var z = etat.zoom || 1;
                 var w = Math.max(LARGEUR_MIN_NOEUD, largeurDepart + (ev.clientX - departX) / z);
+
+                if (estConteneur) {
+                    // Option B : on ne pose qu'une largeur PLANCHER et on laisse
+                    // la disposition recalculer. Écrire style.width serait vain
+                    // — reLayoutConteneur l'écraserait au prochain passage.
+                    if (!donnees.metadata) donnees.metadata = {};
+                    donnees.metadata.largeurMin = Math.round(w);
+                    reLayoutConteneur(id);
+                    return;
+                }
+
                 var h = Math.max(HAUTEUR_MIN_NOEUD, hauteurDepart + (ev.clientY - departY) / z);
                 el.classList.add('planif-noeud--taille-libre');
                 el.style.width = w + 'px';
@@ -3657,15 +3684,15 @@ function attacherEvenements(el, donnees) {
                 document.removeEventListener('mousemove', surDeplacement);
                 document.removeEventListener('mouseup', surRelachement);
                 if (!donnees.metadata) donnees.metadata = {};
-                donnees.metadata.largeur = Math.round(el.offsetWidth);
-                donnees.metadata.hauteur = Math.round(el.offsetHeight);
+                if (!estConteneur) {
+                    donnees.metadata.largeur = Math.round(el.offsetWidth);
+                    donnees.metadata.hauteur = Math.round(el.offsetHeight);
+                }
                 sauvegarder();
                 // Le parent se dimensionne d'après ses enfants : il doit
                 // reprendre la mesure du bloc qu'on vient de retailler.
-                if (donnees.parent) {
-                    reLayoutConteneur(donnees.parent);
-                    mettreAJourTousLesBadges();
-                }
+                if (donnees.parent) reLayoutConteneur(donnees.parent);
+                mettreAJourTousLesBadges();
             };
 
             document.addEventListener('mousemove', surDeplacement);
@@ -3680,11 +3707,13 @@ function attacherEvenements(el, donnees) {
             if (donnees.metadata) {
                 delete donnees.metadata.largeur;
                 delete donnees.metadata.hauteur;
+                delete donnees.metadata.largeurMin;
             }
             el.classList.remove('planif-noeud--taille-libre');
             el.style.width = '';
             el.style.height = '';
             sauvegarder();
+            if (estConteneur) reLayoutConteneur(id);
             if (donnees.parent) reLayoutConteneur(donnees.parent);
             mettreAJourTousLesBadges();
         });

@@ -20561,6 +20561,16 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     z-index: 21; /* au-dessus des ports (20) : le coin appartient à la poignée */
 }
 
+/* Conteneur : la poignée ne règle QUE la largeur (option B) — le curseur le
+   dit, et un seul trait vertical remplace les deux obliques. */
+.planif-noeud-poignee--largeur {
+    cursor: ew-resize;
+    background:
+        linear-gradient(90deg, transparent 0 44%, currentColor 44% 56%, transparent 56% 100%) no-repeat;
+    background-size: 100% 70%;
+    background-position: center;
+}
+
 .planif-noeud:hover .planif-noeud-poignee {
     opacity: 0.55;
 }
