@@ -2338,6 +2338,51 @@ function trouverConteneurPour(clientX, clientY, excludeId, enfantType) {
     return meilleur;
 }
 
+/**
+ * Conteneur d'accueil d'après le RECOUVREMENT du bloc — complément de
+ * `trouverConteneurPour`, qui ne regarde que le point du curseur. Un bloc posé
+ * majoritairement (> 50 % de sa surface) sur un conteneur qui accepte son type
+ * lui appartient : c'est le geste que l'utilisateur a fait, même si le curseur
+ * a relâché quelques pixels à côté. (Cas réel du 6 août : activité créée
+ * « sur » une leçon, restée orpheline en débordement — et impossible à
+ * raccrocher puisque rien ne signalait qu'elle était dehors.)
+ * @returns {string|null} id du plus petit conteneur majoritairement recouvert
+ */
+function trouverConteneurParRecouvrement(noeudId, enfantType) {
+    var noeud = etat.noeuds.get(noeudId);
+    if (!noeud) return null;
+    var nel = document.getElementById(noeudId);
+    var nw = nel ? (nel.offsetWidth || 140) : 140;
+    var nh = nel ? (nel.offsetHeight || 50) : 50;
+    var aire = nw * nh;
+    if (!aire) return null;
+
+    var meilleur = null;
+    var meilleurAire = Infinity;
+    for (var entry of etat.noeuds) {
+        var cid = entry[0];
+        var cdata = entry[1];
+        if (cid === noeudId) continue;
+        var config = TYPES[cdata.type];
+        if (!config || !config.conteneur) continue;
+        if (!peutContenir(cdata.type, enfantType)) continue;
+        if (estDescendantDe(cid, noeudId)) continue;
+        var cel = document.getElementById(cid);
+        if (!cel) continue;
+        var cw = parseFloat(cel.style.width) || cel.offsetWidth || 200;
+        var ch = parseFloat(cel.style.height) || cel.offsetHeight || 80;
+        var ix = Math.max(0, Math.min(noeud.x + nw, cdata.x + cw) - Math.max(noeud.x, cdata.x));
+        var iy = Math.max(0, Math.min(noeud.y + nh, cdata.y + ch) - Math.max(noeud.y, cdata.y));
+        if ((ix * iy) / aire <= 0.5) continue;
+        var aireC = cw * ch;
+        if (aireC < meilleurAire) {
+            meilleur = cid;
+            meilleurAire = aireC;
+        }
+    }
+    return meilleur;
+}
+
 function estDescendantDe(candidatId, noeudId, visited) {
     if (!visited) visited = new Set();
     if (visited.has(noeudId)) return false;
@@ -3186,7 +3231,41 @@ function attacherEvenements(el, donnees) {
         e.preventDefault();
 
         if (e.metaKey || e.ctrlKey) {
-            toggleMultiSelection(id);
+            // Deux gestes sur la même touche, départagés au MOUVEMENT :
+            // ⌘+clic (sans bouger) = sélection multiple, comme avant ;
+            // ⌘+glisser = saisir le bloc SEUL et le déplacer — proposition
+            // Grégoire (6 août 2026), calquée sur ⌥+glisser qui clone. Pour un
+            // enfant, c'est l'équivalent direct du mode individuel sans passer
+            // par le double-clic ; pour un nœud libre, c'est le drag normal.
+            var mStartX = e.clientX, mStartY = e.clientY;
+            var basculeDrag = false;
+            var nettoyerMeta = function() {
+                document.removeEventListener('mousemove', surMoveMeta);
+                document.removeEventListener('mouseup', surUpMeta);
+            };
+            var surMoveMeta = function(e2) {
+                if (basculeDrag) return;
+                if (Math.abs(e2.clientX - mStartX) + Math.abs(e2.clientY - mStartY) < 4) return;
+                basculeDrag = true;
+                nettoyerMeta();
+                if (donnees.parent) {
+                    etat.modeIndividuel = id;
+                    document.querySelectorAll('.planif-mode-individuel').forEach(function(mel) { mel.classList.remove('planif-mode-individuel'); });
+                    el.classList.add('planif-mode-individuel');
+                }
+                // Relancer le routage normal (sans modificateur) : l'enfant
+                // part en drag individuel, un nœud libre en drag simple.
+                el.dispatchEvent(new MouseEvent('mousedown', {
+                    bubbles: true, cancelable: true,
+                    clientX: mStartX, clientY: mStartY, button: 0
+                }));
+            };
+            var surUpMeta = function() {
+                nettoyerMeta();
+                if (!basculeDrag) toggleMultiSelection(id);
+            };
+            document.addEventListener('mousemove', surMoveMeta);
+            document.addEventListener('mouseup', surUpMeta);
             return;
         }
 
@@ -3316,7 +3395,8 @@ function attacherEvenements(el, donnees) {
             var racineEl = document.getElementById(racineId);
             if (racineEl) racineEl.classList.add('planif-dragging');
 
-            var peutDropRacine = racine.type === 'lecon';
+            // Voie A : un groupe-séquence peut être déposé dans une séquence.
+            var peutDropRacine = racine.type === 'lecon' || racine.type === 'sequence';
             var survolConteneurGrp = null;
 
             function onMoveA(e2) {
@@ -3386,6 +3466,7 @@ function attacherEvenements(el, donnees) {
             el.classList.add('planif-dragging');
             var parentId = donnees.parent;
             var parentData = etat.noeuds.get(parentId);
+            var survolConteneurB = null;
 
             // Si c'est un conteneur avec enfants, collecter les descendants pour les déplacer ensemble
             var descendantsB = [];
@@ -3412,6 +3493,29 @@ function attacherEvenements(el, donnees) {
                     mettreAJourLiens(dbi.id);
                 }
 
+                // Un AUTRE conteneur d'accueil sous le curseur ? (déménagement
+                // direct, 6 août 2026 : « je ne suis pas capable de sortir
+                // l'activité pour la mettre dans une autre leçon »). Le parent
+                // courant n'est jamais surligné — rester dedans est l'état
+                // normal, pas une cible.
+                var ancienSurvolB = survolConteneurB;
+                var candidatB = trouverConteneurPour(e2.clientX, e2.clientY, id, donnees.type);
+                survolConteneurB = (candidatB && candidatB !== parentId) ? candidatB : null;
+                if (ancienSurvolB !== survolConteneurB) {
+                    if (ancienSurvolB) {
+                        var aElB = document.getElementById(ancienSurvolB);
+                        if (aElB) aElB.classList.remove('planif-conteneur-survol');
+                        var znB = aElB ? aElB.querySelector('.planif-noeud-zone') : null;
+                        if (znB) znB.classList.remove('planif-survol');
+                    }
+                    if (survolConteneurB) {
+                        var sElB = document.getElementById(survolConteneurB);
+                        if (sElB) sElB.classList.add('planif-conteneur-survol');
+                        var znB2 = sElB ? sElB.querySelector('.planif-noeud-zone') : null;
+                        if (znB2) znB2.classList.add('planif-survol');
+                    }
+                }
+
                 // Check if dragged out of parent bounds
                 if (parentData) {
                     var cel = document.getElementById(parentId);
@@ -3432,10 +3536,30 @@ function attacherEvenements(el, donnees) {
                 }
             }
 
-            function onUpB() {
+            function onUpB(e2) {
                 el.classList.remove('planif-dragging');
                 document.removeEventListener('mousemove', onMoveBThrottled);
                 document.removeEventListener('mouseup', onUpB);
+                document.querySelectorAll('.planif-noeud-zone.planif-survol').forEach(function(z) { z.classList.remove('planif-survol'); });
+                document.querySelectorAll('.planif-conteneur-survol').forEach(function(c) { c.classList.remove('planif-conteneur-survol'); });
+
+                // Déménagement direct vers un autre conteneur : curseur
+                // d'abord, recouvrement en filet (bloc posé majoritairement
+                // sur la cible, curseur relâché à côté).
+                var cibleB = survolConteneurB;
+                if (!cibleB) {
+                    var parRecouvrement = trouverConteneurParRecouvrement(id, donnees.type);
+                    if (parRecouvrement && parRecouvrement !== parentId) cibleB = parRecouvrement;
+                }
+                if (cibleB) {
+                    etat.modeIndividuel = null;
+                    el.classList.remove('planif-mode-individuel');
+                    // rattacherAuConteneur détache de l'ancien parent (qui se
+                    // re-dispose) puis dispose la cible.
+                    rattacherAuConteneur(id, cibleB);
+                    sauvegarder();
+                    return;
+                }
 
                 // Check if out of bounds → detach
                 if (parentData) {
@@ -3478,7 +3602,9 @@ function attacherEvenements(el, donnees) {
                 collecterDescendants(donnees, donnees, descendantsInit);
             }
 
-            var peutEtreEnfant = donnees.type === 'lecon';
+            // Voie A (6 août 2026) : une séquence peut aussi être déposée dans
+            // une séquence — même geste que pour une leçon.
+            var peutEtreEnfant = donnees.type === 'lecon' || donnees.type === 'sequence';
             var survolConteneur = null;
 
             function onMoveC(e2) {
@@ -3532,6 +3658,10 @@ function attacherEvenements(el, donnees) {
                 document.querySelectorAll('.planif-conteneur-survol').forEach(function(c) { c.classList.remove('planif-conteneur-survol'); });
 
                 if (peutEtreEnfant) {
+                    // Recouvrement en filet, comme pour les feuilles.
+                    if (!survolConteneur) {
+                        survolConteneur = trouverConteneurParRecouvrement(id, donnees.type);
+                    }
                     if (survolConteneur && survolConteneur !== donnees.parent) {
                         rattacherAuConteneur(id, survolConteneur);
                     } else if (!survolConteneur && donnees.parent) {
@@ -3584,6 +3714,13 @@ function attacherEvenements(el, donnees) {
 
             document.querySelectorAll('.planif-noeud-zone.planif-survol').forEach(function(z) { z.classList.remove('planif-survol'); });
             document.querySelectorAll('.planif-conteneur-survol').forEach(function(c) { c.classList.remove('planif-conteneur-survol'); });
+
+            // Le curseur d'abord, le recouvrement en filet : un bloc relâché
+            // majoritairement SUR un conteneur lui appartient, même si le
+            // curseur a fini quelques pixels à côté.
+            if (!survolConteneurD) {
+                survolConteneurD = trouverConteneurParRecouvrement(id, donnees.type);
+            }
 
             if (survolConteneurD && survolConteneurD !== donnees.parent) {
                 rattacherAuConteneur(id, survolConteneurD);
@@ -5222,13 +5359,21 @@ function initialiser() {
             conteneurCible = trouverConteneurPour(e.clientX, e.clientY, newId, type);
         }
 
-        if (conteneurCible) {
-            // Différer au prochain macrotask pour garantir le rendu complet de l'élément
-            setTimeout(function() {
+        // Différer au prochain macrotask pour garantir le rendu complet de
+        // l'élément — et, à ce moment-là seulement, tenter le RECOUVREMENT :
+        // le bloc créé s'étend à gauche/au-dessus du curseur (pos -70/-20), il
+        // peut donc être posé « sur » un conteneur alors que le curseur a
+        // relâché juste à côté. Sans ce filet, le bloc restait orphelin en
+        // débordement visuel (constat terrain, 6 août).
+        setTimeout(function() {
+            if (!conteneurCible) {
+                conteneurCible = trouverConteneurParRecouvrement(newId, type);
+            }
+            if (conteneurCible) {
                 rattacherAuConteneur(newId, conteneurCible);
                 sauvegarder();
-            }, 0);
-        }
+            }
+        }, 0);
 
         paletteDragType = null;
         paletteSurvolConteneur = null;
@@ -6161,6 +6306,7 @@ window.planificationCarte = {
     cheminSequence: cheminSequence,
     compterLeconsDescendantes: compterLeconsDescendantes,
     peutContenir: peutContenir,
+    trouverConteneurParRecouvrement: trouverConteneurParRecouvrement,
     recentrerVue: recentrerVue,
     injecterNoeuds: injecterNoeuds,
     nouvelleCarte: nouvelleCarte,
