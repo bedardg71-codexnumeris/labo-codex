@@ -948,12 +948,35 @@ prochain ajout d'enfant**. Trois façons de résoudre, à trancher avant de code
 | **B** | La poignée fixe une **largeur minimale**, la hauteur reste calculée | Compromis ; règle le cas des titres longs |
 | **C** | La poignée bascule le bloc en **mode manuel** | Le plus libre ; exige un retour explicite à l'automatique, sinon le bloc cesse de suivre son contenu |
 
-**✅ LIVRÉ (1.36.0) — option A.** Poignée au coin inférieur droit des feuilles
-seulement ; les conteneurs restent calculés. Trois précautions : les deltas
-sont divisés par le **zoom** de la carte (sans quoi la poignée dériverait du
-curseur hors 100 %), une taille minimale borne le geste, et un **double-clic
-rend la main à la taille automatique** — sans retour possible, un bloc retaillé
+**✅ LIVRÉ — A puis B (1.36.0, complété en 1.37.0).** Deux comportements selon
+la nature du bloc :
+
+| Bloc | Ce que règle la poignée | Ce qui reste calculé |
+|------|-------------------------|----------------------|
+| **Feuille** (activité, connaissance, évaluation) | largeur **et** hauteur | rien |
+| **Conteneur** (leçon, séquence) | une largeur **plancher** | la hauteur, et la largeur au-delà du plancher |
+
+**▣ GÉNÉRAL — pourquoi un plancher et non une largeur figée.** Le conteneur
+doit pouvoir continuer de grandir quand son contenu l'exige. Un plancher
+exprime « au moins cette largeur » sans reprendre à l'outil la responsabilité
+de contenir les enfants : *l'utilisateur fixe un minimum, l'automatique garde
+la main sur le reste.* C'est ce qui permet d'ouvrir le geste aux conteneurs
+sans rouvrir le conflit qui les en excluait.
+
+Conséquence technique : sur un conteneur, la largeur est posée en **métadonnée**
+(`largeurMin`), jamais en style inline — la disposition l'écraserait au passage
+suivant.
+
+Précautions communes : deltas divisés par le **zoom** de la carte (sans quoi la
+poignée dérive du curseur hors 100 %), taille minimale, et **double-clic pour
+rendre la main à l'automatique** — sans retour possible, un bloc retaillé
 cesserait définitivement de suivre son contenu.
+
+**▢ Ce qui a fait basculer A → B.** L'option A avait été retenue sur mon
+analyse ; le terrain l'a corrigée en une capture. Le besoin réel était
+d'élargir une **leçon** dont le titre courait sur deux lignes — or les leçons
+sont des conteneurs, précisément ce que A excluait. *Une option choisie sur
+raisonnement, invalidée par le premier usage réel.*
 
 **Séquentiel, pas parallèle**, pour trois raisons vérifiées :
 

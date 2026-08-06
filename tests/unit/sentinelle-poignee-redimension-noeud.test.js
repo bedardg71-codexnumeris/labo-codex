@@ -4,14 +4,19 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 // Poignée de redimensionnement des blocs (exercice d'alignement 601-101,
-// 6 août 2026) — OPTION A : sur les FEUILLES uniquement.
+// 6 août 2026). Deux comportements, selon la nature du bloc :
 //
-// Pourquoi pas sur les conteneurs : reLayoutConteneur CALCULE leur largeur et
-// leur hauteur à partir des enfants. Une taille posée à la main y serait
-// écrasée au prochain ajout d'enfant — l'utilisateur verrait son geste défait
-// sans comprendre pourquoi. Les trois autres options (largeur minimale, mode
-// manuel avec retour explicite) sont documentées dans
-// docs/utilisateur/METHODE-ALIGNEMENT.md ; A est la seule sans dette.
+//   FEUILLE (option A)    — largeur ET hauteur libres, mémorisées telles quelles.
+//   CONTENEUR (option B)  — largeur PLANCHER seulement ; la hauteur, et la
+//                           largeur au-delà du plancher, restent calculées par
+//                           reLayoutConteneur depuis les enfants.
+//
+// Pourquoi un plancher et non une largeur fixe : le conteneur doit pouvoir
+// continuer de grandir quand son contenu l'exige. Poser style.width sur un
+// conteneur serait vain — la disposition l'écraserait au passage suivant.
+// L'option B a été retenue le 6 août après constat terrain : le besoin réel
+// était d'élargir une LEÇON dont le titre courait sur deux lignes, or les
+// leçons sont des conteneurs.
 //
 // Retrait joint : les boutons « Copier » de la vue calendrier, devenus inutiles
 // (Grégoire est le seul utilisateur et ne s'en sert pas — l'export sera
@@ -23,34 +28,55 @@ const carte = readFileSync(path.join(racineProjet, 'js', 'planification-carte.js
 const organisateur = readFileSync(path.join(racineProjet, 'js', 'organisateur.js'), 'utf8');
 const css = readFileSync(path.join(racineProjet, 'styles.css'), 'utf8');
 
-describe('Poignée · rendue sur les feuilles, jamais sur les conteneurs', () => {
+describe('Poignée · rendue sur les feuilles ET les conteneurs, différemment', () => {
     it('la poignée existe dans le rendu et le CSS', () => {
         expect(carte).toContain('planif-noeud-poignee');
         expect(css).toContain('.planif-noeud-poignee');
     });
 
-    it('elle n’est PAS rendue dans les deux branches conteneur', () => {
-        // Le rendu a trois branches : compacte, conteneur, feuille. Seule la
-        // dernière doit porter la poignée.
+    it('le conteneur reçoit la variante « largeur seulement »', () => {
+        expect(carte).toContain('planif-noeud-poignee--largeur');
+        expect(css).toMatch(/\.planif-noeud-poignee--largeur\s*\{[^}]*cursor:\s*ew-resize/);
+    });
+
+    it('la vue globale COMPACTE n’en porte pas (les séquences y sont résumées)', () => {
         const brancheCompacte = carte.slice(
             carte.indexOf('if (estCompact) {'),
             carte.indexOf('} else if (estConteneur) {')
         );
-        const brancheConteneur = carte.slice(
-            carte.indexOf('} else if (estConteneur) {'),
-            carte.indexOf("'<div class=\"planif-noeud-port planif-port-droite\" data-dir=\"droite\"></div>' +\n                '<div class=\"planif-noeud-port planif-port-gauche\"")
-        );
         expect(brancheCompacte).not.toContain('planif-noeud-poignee');
-        expect(brancheConteneur).not.toContain('planif-noeud-poignee');
     });
 
-    it('une seule occurrence dans le rendu (la branche feuille)', () => {
-        const rendus = carte.match(/'<div class="planif-noeud-poignee"/g) || [];
-        expect(rendus).toHaveLength(1);
-    });
-
-    it('la taille mémorisée n’est appliquée qu’aux feuilles', () => {
+    it('la taille libre (largeur ET hauteur) reste réservée aux feuilles', () => {
         expect(carte).toMatch(/if \(!estConteneur && n\.metadata[\s\S]{0,320}metadata\.largeur\) el\.style\.width/);
+        // Sur un conteneur, on ne mémorise QUE le plancher.
+        expect(carte).toMatch(/if \(!estConteneur\) \{[\s\S]{0,220}metadata\.hauteur = Math\.round/);
+    });
+});
+
+describe('Poignée · option B, la largeur plancher des conteneurs', () => {
+    it('le plancher est posé en métadonnée, pas en style inline', () => {
+        // Poser style.width sur un conteneur serait vain : reLayoutConteneur
+        // l'écraserait au passage suivant.
+        expect(carte).toMatch(/if \(estConteneur\)[\s\S]{0,400}metadata\.largeurMin = Math\.round\(w\)/);
+        expect(carte).toMatch(/metadata\.largeurMin = Math\.round\(w\);[\s\S]{0,120}reLayoutConteneur\(id\)/);
+    });
+
+    it('les TROIS fonctions de disposition respectent le plancher', () => {
+        expect(carte).toContain('function largeurPlancher');
+        const usages = carte.match(/largeurPlancher\(conteneur\)/g) || [];
+        expect(usages).toHaveLength(3);
+    });
+
+    it('c’est un PLANCHER, pas une largeur figée', () => {
+        // Math.max : le conteneur continue de grandir si son contenu l'exige.
+        expect(carte).toMatch(/Math\.max\(newW, largeurPlancher\(conteneur\)\)/);
+        expect(carte).toMatch(/Math\.max\(maxW \+ PADDING \* 2, largeurPlancher\(conteneur\)\)/);
+    });
+
+    it('le double-clic efface aussi le plancher et redispose le conteneur', () => {
+        expect(carte).toMatch(/delete donnees\.metadata\.largeurMin/);
+        expect(carte).toMatch(/dblclick[\s\S]{0,600}if \(estConteneur\) reLayoutConteneur\(id\)/);
     });
 });
 
