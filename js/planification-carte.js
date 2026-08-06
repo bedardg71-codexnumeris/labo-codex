@@ -1396,6 +1396,35 @@ function ouvrirPanneau(id) {
         });
     }
 
+    // « Dans la leçon » — déplacement SANS geste, depuis l'inspecteur (friction
+    // F7, précision du 6 août : sur iPad il n'existe ni ⌘ ni glisser de nœud
+    // — le tactile du canevas est une porte ouverte du relais. Le double-clic
+    // qui ouvre cet inspecteur, lui, marche partout : le sélecteur devient le
+    // chemin universel pour changer une activité de leçon ou la sortir.)
+    if (peutContenir('lecon', donnees.type)) {
+        var leconsCarte = [];
+        for (var entryL of etat.noeuds) {
+            if (entryL[1].type === 'lecon') leconsCarte.push(entryL[1]);
+        }
+        leconsCarte.sort(function(a, b) { return ((a.y || 0) - (b.y || 0)) || ((a.x || 0) - (b.x || 0)); });
+        if (leconsCarte.length > 0) {
+            var htmlDeplacer = '<label for="planif-panneau-deplacer">Dans la leçon</label>' +
+                '<select id="planif-panneau-deplacer">' +
+                '<option value=""' + (donnees.parent ? '' : ' selected') + '>— Aucune (bloc libre)</option>';
+            for (var li2 = 0; li2 < leconsCarte.length; li2++) {
+                var lc2 = leconsCarte[li2];
+                htmlDeplacer += '<option value="' + lc2.id + '"' + (donnees.parent === lc2.id ? ' selected' : '') + '>' +
+                    echapperHtml(lc2.titre || 'Sans titre') + '</option>';
+            }
+            htmlDeplacer += '</select>';
+            extra.innerHTML += htmlDeplacer;
+            // ⚠ Le listener est posé EN FIN de ouvrirPanneau : tout
+            // `extra.innerHTML +=` ultérieur (ex. bloc niveau cognitif des
+            // activités) re-sérialise le conteneur et tuerait un listener
+            // posé ici.
+        }
+    }
+
     if (donnees.type === 'sequence') {
         var etendueSeq = etendueTemporelle(donnees);
         extra.innerHTML +=
@@ -1611,6 +1640,25 @@ function ouvrirPanneau(id) {
         supprimerNoeud(id);
         fermerPanneau();
     };
+
+    // « Dans la leçon » : attaché APRÈS la dernière écriture d'innerHTML dans
+    // `extra` — une écriture ultérieure re-crée les éléments et perd les
+    // listeners posés avant elle (constaté à la sonde Chromium, 6 août).
+    var selDeplacer = extra.querySelector('#planif-panneau-deplacer');
+    if (selDeplacer) {
+        selDeplacer.addEventListener('change', function(e) {
+            enregistrerPourUndo();
+            var cibleDep = e.target.value;
+            if (cibleDep) {
+                rattacherAuConteneur(id, cibleDep);
+            } else if (donnees.parent) {
+                etat.modeIndividuel = null;
+                detacherDuConteneur(id);
+            }
+            sauvegarder();
+            mettreAJourSommaire();
+        });
+    }
 
     panneau.classList.add('visible');
     etat.panneauOuvert = true;

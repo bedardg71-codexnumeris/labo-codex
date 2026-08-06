@@ -151,4 +151,38 @@ describe('F6/F7 · invariants statiques des gestes', () => {
     it('le geste est documenté dans le panneau Raccourcis', () => {
         expect(sourceIndex).toMatch(/⌘\+Glisser<\/kbd><\/td><td>Sortir un bloc de son conteneur/);
     });
+
+    it('l’inspecteur offre « Dans la leçon » — le chemin SANS geste (iPad)', () => {
+        // Gabarit du sélecteur : gardé par peutContenir('lecon', type), titres
+        // échappés (règle innerHTML), déplacement par les portes uniques.
+        const bloc = sourceCarte.slice(
+            sourceCarte.indexOf("if (peutContenir('lecon', donnees.type)) {"),
+            sourceCarte.indexOf("if (donnees.type === 'sequence') {")
+        );
+        expect(bloc.length).toBeGreaterThan(100);
+        expect(bloc).toMatch(/id="planif-panneau-deplacer"/);
+        expect(bloc).toMatch(/echapperHtml\(lc2\.titre \|\| 'Sans titre'\)/);
+    });
+
+    it('le listener du sélecteur est posé APRÈS la dernière écriture innerHTML du panneau', () => {
+        // Régression réelle (sonde Chromium, 6 août) : posé dans le bloc de
+        // gabarit, le listener mourait au `extra.innerHTML +=` suivant (bloc
+        // niveau cognitif des activités) — le sélecteur s'affichait mais ne
+        // faisait RIEN. L'attache doit vivre en FIN de ouvrirPanneau, après
+        // le bouton Supprimer (dernier point fixe du panneau).
+        const finPanneau = sourceCarte.slice(
+            sourceCarte.indexOf("document.getElementById('planif-btn-supprimer').onclick"),
+            sourceCarte.indexOf('etat.panneauOuvert = true;')
+        );
+        expect(finPanneau).toMatch(/querySelector\('#planif-panneau-deplacer'\)/);
+        expect(finPanneau).toMatch(/rattacherAuConteneur\(id, cibleDep\)/);
+        expect(finPanneau).toMatch(/detacherDuConteneur\(id\)/);
+        expect(finPanneau).toMatch(/enregistrerPourUndo\(\)/);
+        // Et le gabarit, lui, n'attache RIEN (il serait perdu).
+        const blocGabarit = sourceCarte.slice(
+            sourceCarte.indexOf("if (peutContenir('lecon', donnees.type)) {"),
+            sourceCarte.indexOf("if (donnees.type === 'sequence') {")
+        );
+        expect(blocGabarit).not.toMatch(/addEventListener/);
+    });
 });
