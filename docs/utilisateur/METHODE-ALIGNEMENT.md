@@ -268,6 +268,19 @@ automatiquement** du type des deux nœuds reliés (`VERBES_AUTO`) :
 > `evalue_par`, `soutenu_par`, `revise_dans`, `sequence_avant`). Le skill est
 > **périmé** sur ce point ; le code fait foi. À corriger dans le skill.
 
+### Dette de documentation à reprendre plus tard
+
+`SKILL_Alignement.md` devra être remis à jour **à la fin du chantier**, pas au
+fil de l'eau — les concepts bougent encore. Écarts relevés à ce jour :
+
+| # | Écart | Référence |
+|---|-------|-----------|
+| D1 | Verbes de liens documentés ≠ verbes du code | §4.3 ci-dessus |
+| D2 | Hiérarchie décrite à 3 niveaux ; devient récursive (séquences de séquences) | §5.2 |
+| D3 | La séquence y est définie sans son plancher pratique (la semaine) | §5.1 |
+| D4 | L'objectif de leçon n'y figure pas comme concept central | §3.1 |
+| D5 | Structure de leçon présentée en « phases » (Ouverture → Objectivation) sans lien avec le modèle de données réel | skill §4 |
+
 **◈ OUVERT.** Le temps 2 de la démarche demande d'**enchaîner les objectifs**
 (leçon → leçon, dans l'ordre). Aucun verbe de séquencement temporel n'existe
 aujourd'hui entre leçons — l'ordre est **spatial** (position x puis y dans le
@@ -393,6 +406,85 @@ supprime pas.
 perdre les objectifs déjà saisis.
 
 **◈ OUVERT** — décision à confirmer avant implémentation.
+
+---
+
+## 6 ter. Design retenu pour F1 — l'objectif dans le bloc leçon
+
+**Décision (6 août).** L'objectif s'affiche **dans le bloc leçon lui-même**, en
+en-tête à deux sections :
+
+1. une section qui **identifie le bloc** (le mot « Leçon » + son titre) ;
+2. juste en dessous, une section **« Objectif »**, considérée comme faisant
+   partie de l'en-tête.
+
+**L'objectif est du texte simple.** Pas de connecteurs, pas de ports de liaison
+sur cette zone — décision de simplicité assumée, révisable à l'usage.
+
+### Structure actuelle du bloc conteneur
+
+Relevé au code (planification-carte.js:2412-2425). La moitié du design
+**existe déjà** :
+
+```
+.planif-noeud
+  ├─ .planif-noeud-entete   « Leçon »          ← section 1, existe
+  ├─ .planif-noeud-titre    titre éditable      ← section 1, existe
+  ├─ .planif-noeud-zone     « N éléments »      ← accueille les enfants
+  └─ 4 ports de liaison
+```
+
+### Structure cible
+
+```
+┌──────────────────────────────┐
+│ Leçon                        │  ← .planif-noeud-entete      (existe)
+│ Titre de la leçon            │  ← .planif-noeud-titre       (existe)
+├──────────────────────────────┤
+│ Objectif : …                 │  ← .planif-noeud-objectif    (À CRÉER)
+├──────────────────────────────┤
+│ 5 éléments                   │  ← .planif-noeud-zone        (existe)
+└──────────────────────────────┘
+```
+
+Une seule ligne à insérer, entre le titre et la zone des enfants.
+
+### Ce que le code rend facile
+
+**Aucun conflit entre saisie et déplacement.** Le gestionnaire de `mousedown`
+(planification-carte.js:2707) exclut déjà tout élément éditable du drag :
+
+```js
+if (e.target.classList.contains('planif-noeud-port') || e.target.isContentEditable) return;
+```
+
+La garde est générique : une nouvelle zone `contenteditable` en hérite sans
+modification.
+
+### Conséquences en cascade (zéro-dette)
+
+| Élément | Sort |
+|---------|------|
+| **Badge 🎯** | **À RETIRER.** Il signalait la seule *présence* d'un objectif ; l'objectif affiché en clair le rend inutile. C'est aussi lui qui causait F1 (aucune affordance sans objectif préalable). |
+| **Champ Objectif de la vue leçon** (niveau 3) | **CONSERVÉ**, mais doit lire et écrire **la même source** que la carte. Aucune duplication de donnée. |
+| **Objectif dérivé** (Organisateur) | Inchangé pour l'instant. Son articulation avec l'objectif saisi reste ◈ ouverte (§4.1). |
+
+### ◈ OUVERT — la question de la densité
+
+C'est la tension à surveiller. Le besoin du §3.1 est de voir **plusieurs
+objectifs ensemble** pour juger de leur enchaînement ; or un objectif rédigé
+(« Au terme de la leçon, l'étudiant·e sera capable de… ») occupe une à deux
+lignes. Multiplié par les leçons d'une séquence, puis par les séquences, le
+texte peut noyer la carte.
+
+Pistes, à départager par l'usage :
+
+- **Troncature à N lignes** avec le texte complet au survol (`title`).
+- **Affichage complet**, en laissant le bloc grandir.
+- **Bascule d'affichage** (afficher / masquer les objectifs) dans la barre.
+
+À noter : en **vue globale compacte**, les séquences sont résumées et les
+leçons n'apparaissent pas — la question ne se pose qu'au niveau séquence.
 
 ---
 
