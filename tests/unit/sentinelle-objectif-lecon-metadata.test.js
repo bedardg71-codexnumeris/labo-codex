@@ -203,3 +203,39 @@ describe('F1 · invariants de rendu et de routage', () => {
         expect(source).toMatch(/badgeObjectif\.addEventListener\('mousedown'[\s\S]{0,120}stopPropagation/);
     });
 });
+
+// =======================================================================
+// D. L'ORGANISATEUR SUIT LA MÊME SOURCE
+// =======================================================================
+// Régression attrapée le 6 août, APRÈS le premier commit de F1 : la bascule
+// avait laissé 8 sites d'organisateur.js sur l'ancienne clé. Comme la migration
+// purge cette clé, l'Organisateur (« Plan de la leçon ») aurait affiché des
+// objectifs vides et réécrit dans une clé que plus personne ne lit — deux
+// vérités divergentes, exactement ce que la bascule visait à supprimer.
+describe('F1 · l’Organisateur lit et écrit le même objectif que la carte', () => {
+    const organisateur = readFileSync(path.join(racineProjet, 'js', 'organisateur.js'), 'utf8');
+
+    it('aucun site d’organisateur.js ne touche plus objectifPersonnalise', () => {
+        expect(organisateur).not.toContain('objectifPersonnalise');
+    });
+
+    it('la saisie et la réinitialisation passent par definirObjectifLecon', () => {
+        const appels = organisateur.match(/definirObjectifLecon\(/g) || [];
+        expect(appels.length).toBeGreaterThanOrEqual(2);
+    });
+
+    it('l’affichage et les deux exports lisent objectifDeLeconParId', () => {
+        const lectures = organisateur.match(/objectifDeLeconParId\(/g) || [];
+        expect(lectures.length).toBeGreaterThanOrEqual(3);
+    });
+
+    it('l’import Markdown pose l’objectif sur le nœud construit', () => {
+        expect(organisateur).toMatch(/leconNoeud\.metadata\.objectif = lecon\.objectif/);
+        expect(organisateur).toMatch(/orpNoeud\.metadata\.objectif = orp\.objectif/);
+    });
+
+    it('la carte expose bien les deux portes utilisées par l’Organisateur', () => {
+        expect(source).toMatch(/objectifDeLeconParId: objectifDeLeconParId/);
+        expect(source).toMatch(/definirObjectifLecon: definirObjectifLecon/);
+    });
+});
