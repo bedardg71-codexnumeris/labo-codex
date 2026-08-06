@@ -18788,6 +18788,16 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+/* Lot 3 : glisser vertical dans la grille */
+.planif-grille-item-drag {
+    opacity: .45;
+    outline: 1px dashed var(--planif-couleur-selection);
+}
+.planif-grille-rangee--cible,
+.planif-grille-nonplanifie.planif-grille-rangee--cible {
+    background: color-mix(in srgb, var(--planif-couleur-selection) 12%, transparent);
+    border-radius: 6px;
+}
 .planif-grille-nonplanifie {
     margin-top: 8px;
     border-top: 2px solid var(--bordure-discrete, rgba(128,128,128,.25));

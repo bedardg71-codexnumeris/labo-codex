@@ -41,11 +41,26 @@ function monterModule() {
         get: async (k, d) => (k in store ? store[k] : d),
         set: async (k, v) => { store[k] = v; }
     };
+    // Élément factice assez riche pour survivre à reconstruireDOM (annuler()
+    // repasse par lui : listeners, requêtes, dataset).
+    const fauxElement = () => ({
+        style: {}, dataset: {}, innerHTML: '', textContent: '',
+        classList: { add() {}, remove() {}, contains: () => false, toggle() {} },
+        setAttribute() {}, getAttribute: () => null, appendChild() {}, remove() {},
+        addEventListener() {}, removeEventListener() {},
+        // attacherEvenements enchaîne querySelector(...).addEventListener :
+        // rendre un stub, jamais null.
+        querySelector: () => fauxElement(),
+        querySelectorAll: () => [],
+        closest: () => null, contains: () => false,
+        offsetWidth: 140, offsetHeight: 50
+    });
     const fauxDocument = {
         getElementById: (id) => elements[id] || null,
         querySelectorAll: () => [],
         addEventListener: () => {},
-        createElement: () => ({ style: {}, classList: { add() {}, remove() {} }, setAttribute() {}, appendChild() {} }),
+        createElement: fauxElement,
+        createElementNS: fauxElement,
         body: {}
     };
     const win = chargerScript('js/planification-carte.js', {
@@ -190,6 +205,109 @@ describe('lot 2 · contenu des rangées et zone « Non planifié » (Q1/Q2)', ()
 
         expect(html).toContain('Thème 1 › Ouverture');
         expect((html.match(/data-param="planif-sA"/g) || [])).toHaveLength(1);
+    });
+});
+
+describe('lot 3 · déplacement dans la grille', () => {
+    let api;
+    beforeEach(() => { api = monterModule(); poserCalendrier(); });
+
+    function poserSequenceDispersee() {
+        poser(api, 'planif-l1', 'lecon', { titre: 'A', parent: 'planif-s1', metadata: { semaine: 2 } });
+        poser(api, 'planif-l2', 'lecon', { titre: 'B', parent: 'planif-s1', metadata: { semaine: 3 } });
+        poser(api, 'planif-l3', 'lecon', { titre: 'C', parent: 'planif-s1', metadata: {} }); // non planifiée
+        poser(api, 'planif-s1', 'sequence', { titre: 'Ouverture', enfants: ['planif-l1', 'planif-l2', 'planif-l3'] });
+    }
+
+    it('déplacer une séquence CONSERVE les écarts relatifs de ses leçons', () => {
+        poserSequenceDispersee();
+        // Étendue 2–3, déposée sur la rangée 1 : delta -1.
+        expect(api.deplacerSequenceVersSemaine('planif-s1', 1, 3)).toBe(true);
+        expect(api.semaineDeLecon(api.etat.noeuds.get('planif-l1'))).toBe(1);
+        expect(api.semaineDeLecon(api.etat.noeuds.get('planif-l2'))).toBe(2);
+        // La leçon non planifiée n'est PAS inventée.
+        expect(api.semaineDeLecon(api.etat.noeuds.get('planif-l3'))).toBeNull();
+    });
+
+    it('bornes : le delta se CALE — jamais de semaine 0, jamais au-delà du cadre', () => {
+        poserSequenceDispersee();
+        // Cible 1 déjà appliquée ci-dessus ; ici étendue 2–3 avec max 3 :
+        // cible 3 pousserait B en semaine 4 → calé pour que B finisse à 3.
+        expect(api.deplacerSequenceVersSemaine('planif-s1', 3, 3)).toBe(false); // delta calé à 0 : 2–3 est déjà collé au plafond
+        expect(api.semaineDeLecon(api.etat.noeuds.get('planif-l2'))).toBe(3);
+    });
+
+    it('déposer sur « Non planifié » désancre le bloc entier', () => {
+        poserSequenceDispersee();
+        expect(api.deplacerSequenceVersSemaine('planif-s1', null, 3)).toBe(true);
+        expect(api.semaineDeLecon(api.etat.noeuds.get('planif-l1'))).toBeNull();
+        expect(api.semaineDeLecon(api.etat.noeuds.get('planif-l2'))).toBeNull();
+        expect(api.etendueTemporelleParId('planif-s1')).toBeNull();
+    });
+
+    it('un bloc entièrement NON planifié déposé sur une rangée s’y ancre en entier', () => {
+        poser(api, 'planif-l1', 'lecon', { titre: 'A', parent: 'planif-s1', metadata: {} });
+        poser(api, 'planif-l2', 'lecon', { titre: 'B', parent: 'planif-s1', metadata: {} });
+        poser(api, 'planif-s1', 'sequence', { titre: 'Ouverture', enfants: ['planif-l1', 'planif-l2'] });
+
+        expect(api.deplacerSequenceVersSemaine('planif-s1', 2, 3)).toBe(true);
+        expect(api.semaineDeLecon(api.etat.noeuds.get('planif-l1'))).toBe(2);
+        expect(api.semaineDeLecon(api.etat.noeuds.get('planif-l2'))).toBe(2);
+    });
+
+    it('voie A : les leçons des SOUS-séquences bougent avec le bloc', () => {
+        poser(api, 'planif-l1', 'lecon', { titre: 'A', parent: 'planif-sA', metadata: { semaine: 1 } });
+        poser(api, 'planif-sA', 'sequence', { titre: 'Ouverture', parent: 'planif-th', enfants: ['planif-l1'] });
+        poser(api, 'planif-th', 'sequence', { titre: 'Thème', enfants: ['planif-sA'] });
+
+        expect(api.deplacerSequenceVersSemaine('planif-th', 3, 3)).toBe(true);
+        expect(api.semaineDeLecon(api.etat.noeuds.get('planif-l1'))).toBe(3);
+    });
+
+    it('ANNULATION : chaque branche mutante enregistre l’undo AVANT d’écrire', () => {
+        // (La restauration effective par ⌘Z traverse reconstruireDOM — elle
+        // est prouvée par la sonde Chromium, pas par le bac à sable.)
+        const corps = sourceCarte.slice(
+            sourceCarte.indexOf('function deplacerSequenceVersSemaine'),
+            sourceCarte.indexOf('function deposerDansGrille')
+        );
+        const branches = corps.split('enregistrerPourUndo()');
+        // 3 branches mutantes (désancrage, bloc non planifié, décalage) = 4 morceaux.
+        expect(branches).toHaveLength(4);
+        branches.slice(1).forEach((apres) => {
+            // L'écriture suit l'enregistrement, jamais l'inverse.
+            expect(apres.indexOf('ecrire(')).toBeGreaterThan(-1);
+        });
+        const depot = sourceCarte.slice(
+            sourceCarte.indexOf('function deposerDansGrille'),
+            sourceCarte.indexOf('function initialiserDragGrille')
+        );
+        expect(depot).toMatch(/enregistrerPourUndo\(\);\s*\n\s*definirSemaineLecon/);
+    });
+
+    it('déposer une LEÇON écrit sa semaine (plafonnée au cadre) ; Q3 : le canevas ne bouge pas', () => {
+        poser(api, 'planif-l1', 'lecon', { titre: 'A', x: 340, y: 300, metadata: { semaine: 1 } });
+        const avant = { x: 340, y: 300 };
+
+        expect(api.deposerDansGrille('lecon', 'planif-l1', 9)).toBe(true); // cadre : max 3
+        expect(api.semaineDeLecon(api.etat.noeuds.get('planif-l1'))).toBe(3);
+        expect(api.deposerDansGrille('lecon', 'planif-l1', null)).toBe(true);
+        expect(api.semaineDeLecon(api.etat.noeuds.get('planif-l1'))).toBeNull();
+        // Q3 : l'ordre logique change, la position sur la carte ne change pas.
+        expect(api.etat.noeuds.get('planif-l1').x).toBe(avant.x);
+        expect(api.etat.noeuds.get('planif-l1').y).toBe(avant.y);
+    });
+
+    it('le câblage du glisser existe : cibles sur les rangées, délégation unique', () => {
+        poser(api, 'planif-l1', 'lecon', { titre: 'A', metadata: { semaine: 1 } });
+        api.mettreAJourPlanificateur();
+        const html = elements['planif-sommaire'].innerHTML;
+        expect(html).toMatch(/data-grille-semaine="1"/);
+        expect(html).toMatch(/data-grille-type="lecon" data-grille-id="planif-l1"/);
+        expect(sourceCarte).toMatch(/function initialiserDragGrille\(\)/);
+        expect(sourceCarte).toMatch(/initialiserDragGrille\(\);/);
+        // Le simple clic reste la navigation : seuil de mouvement avant drag.
+        expect(sourceCarte).toMatch(/< 5\) return;[\s\S]*?planif-grille-item-drag/);
     });
 });
 

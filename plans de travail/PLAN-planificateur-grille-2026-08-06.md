@@ -67,7 +67,12 @@ D'où ce plan écrit. La méthode « friction → correctif » a atteint sa limi
 rangées dérivées de `calendrierComplet` en parcours chronologique avec semaines
 spéciales intercalées à leur position réelle, zone « Non planifié », déroulé de
 leçon dépliable, navigation conservée ; Vue calendrier RETIRÉE des trois surfaces
-+ CSS et tooltips purgés). Reste : **lot 3** (le déplacement dans la grille).
++ CSS et tooltips purgés), **lot 3 LIVRÉ en 1.44.0** (glisser vertical par pointer
+events — leçon vers sa semaine, séquence en bloc avec écarts conservés, dépôt sur
+« Non planifié » = désancrage, bornes calées au cadre, ⌘Z fonctionnel, clic simple
+= navigation ; cible résolue GÉOMÉTRIQUEMENT, pas par elementFromPoint). **LE PLAN
+EST COMPLET.** Portes restantes : tactile (grille + canevas), auto-défilement au
+bord de la palette pendant un glisser, déclinaison par groupe (§6, hors périmètre).
 Détail des décisions : `docs/utilisateur/METHODE-ALIGNEMENT.md` § « LIVRÉ (6 août, 1.38.0) ».
 (La question du préalable des rangées est RÉGLÉE au lot 2 : dérivation par
 parcours chronologique de `calendrierComplet`, même source que #366.)
@@ -140,7 +145,7 @@ dans un état intermédiaire inutilisable.
 - **Sentinelle** : rangées dérivées et non redemandées, ordre unique, plus
   aucune trace de l'ancien post-traitement DOM.
 
-### Lot 3 — Le déplacement
+### ✅ Lot 3 — Le déplacement — LIVRÉ 1.44.0
 
 - Glisser vertical d'une leçon d'une semaine à l'autre → écrit `metadata.semaine`.
 - Glisser d'une séquence → déplace ses leçons en bloc, en conservant leurs

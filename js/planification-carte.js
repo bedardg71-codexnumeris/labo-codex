@@ -4835,6 +4835,7 @@ function initialiser() {
     var palette = document.getElementById('planif-palette');
     rendrePaletteFlottante(palette);
     rendrePaletteFlottante(document.getElementById('planif-palette-nav'));
+    initialiserDragGrille();
 
     // Inspecteur — bouton 🔎 de la palette
     var btnInspecteur = document.getElementById('planif-palette-inspecteur-btn');
@@ -5713,6 +5714,7 @@ function itemSequenceGrille(seq, niveau) {
         ? formaterEtendue(etendue)
         : (dureeSeq ? formaterPeriodes(dureeSeq) : compterLeconsDescendantes(seq) + ' leçon' + (compterLeconsDescendantes(seq) > 1 ? 's' : ''));
     return '<div class="planif-som-item planif-som-seq' + (seq.id === sequenceActiveId ? ' actif' : '') + '"' +
+           ' data-grille-type="sequence" data-grille-id="' + seq.id + '"' +
            ' data-action="planificationCarte.ouvrirSequence"' +
            ' data-param="' + seq.id + '"' +
            ' title="' + echapperHtml(libelle) + '">' +
@@ -5731,6 +5733,7 @@ function itemLeconGrille(lec, avecContexte) {
         : '';
 
     var html = '<div class="planif-som-item planif-som-lecon' + (lec.id === leconActiveId ? ' actif' : '') + '"' +
+        ' data-grille-type="lecon" data-grille-id="' + lec.id + '"' +
         ' data-action="planificationCarte.naviguerSommaireLecon"' +
         ' data-param="' + lec.id + '"' +
         ' title="' + echapperHtml(lec.titre || 'Sans titre') + '">' +
@@ -5756,6 +5759,191 @@ function itemLeconGrille(lec, avecContexte) {
         html += '</div>';
     }
     return html;
+}
+
+/** Leçons descendantes d'une séquence, à toute profondeur (voie A). */
+function leconsDescendantesDe(seq, vus) {
+    if (!vus) vus = new Set();
+    if (!seq || vus.has(seq.id)) return [];
+    vus.add(seq.id);
+    var resultat = [];
+    (seq.enfants || []).forEach(function(eid) {
+        var e = etat.noeuds.get(eid);
+        if (!e) return;
+        if (e.type === 'lecon') resultat.push(e);
+        else if (e.type === 'sequence') resultat = resultat.concat(leconsDescendantesDe(e, vus));
+    });
+    return resultat;
+}
+
+/**
+ * Lot 3 — déplacer une SÉQUENCE dans la grille : ses leçons bougent en bloc,
+ * en conservant leurs écarts relatifs (D4). Bornes : jamais sous la semaine 1,
+ * jamais au-delà du cadre (delta calé). Cas particuliers, sans deviner :
+ *  - cible null (zone « Non planifié ») → toutes les leçons sont désancrées ;
+ *  - leçons mixtes → seules les PLANIFIÉES se décalent (pas d'invention
+ *    d'ancrage pour les autres) ;
+ *  - aucune leçon planifiée → le dépôt sur une rangée ancre tout le bloc à
+ *    cette semaine (c'est le geste d'assignation, pas une déduction).
+ * @returns {boolean} true si quelque chose a changé
+ */
+function deplacerSequenceVersSemaine(seqId, cible, maxSemaine) {
+    var seq = etat.noeuds.get(seqId);
+    if (!seq || seq.type !== 'sequence') return false;
+    var lecons = leconsDescendantesDe(seq);
+    if (lecons.length === 0) return false;
+
+    var ecrire = function(l, valeur) {
+        if (!l.metadata) l.metadata = {};
+        if (valeur === null) delete l.metadata.semaine;
+        else l.metadata.semaine = valeur;
+        propagerModification(l.id, 'metadata', JSON.parse(JSON.stringify(l.metadata)));
+    };
+
+    if (cible === null) {
+        var aDesancrer = lecons.filter(function(l) { return semaineDeLecon(l) !== null; });
+        if (aDesancrer.length === 0) return false;
+        enregistrerPourUndo();
+        aDesancrer.forEach(function(l) { ecrire(l, null); });
+        sauvegarder();
+        mettreAJourPlanificateur();
+        return true;
+    }
+
+    cible = parseInt(cible, 10);
+    if (isNaN(cible) || cible < SEMAINE_MIN) return false;
+
+    var planifiees = lecons.filter(function(l) { return semaineDeLecon(l) !== null; });
+
+    if (planifiees.length === 0) {
+        // Bloc entièrement non planifié : le dépôt EST l'assignation.
+        enregistrerPourUndo();
+        lecons.forEach(function(l) { ecrire(l, cible); });
+        sauvegarder();
+        mettreAJourPlanificateur();
+        return true;
+    }
+
+    var min = Infinity, max = -Infinity;
+    planifiees.forEach(function(l) {
+        var s = semaineDeLecon(l);
+        if (s < min) min = s;
+        if (s > max) max = s;
+    });
+    // L'étendue ne rentre pas dans le cadre : refuser plutôt que d'écraser
+    // les écarts.
+    if (maxSemaine && (max - min) > (maxSemaine - SEMAINE_MIN)) {
+        afficherToastLien('Cette séquence s\'étale sur plus de semaines que le trimestre n\'en a.');
+        return false;
+    }
+    var delta = cible - min;
+    if (min + delta < SEMAINE_MIN) delta = SEMAINE_MIN - min;
+    if (maxSemaine && max + delta > maxSemaine) delta = maxSemaine - max;
+    if (delta === 0) return false;
+
+    enregistrerPourUndo();
+    planifiees.forEach(function(l) { ecrire(l, semaineDeLecon(l) + delta); });
+    sauvegarder();
+    mettreAJourPlanificateur();
+    return true;
+}
+
+/** Lot 3 — point d'entrée du dépôt dans la grille (leçon OU séquence). */
+function deposerDansGrille(type, id, semaine) {
+    var maxSemaine = 0;
+    deriverRangeesGrille().rangees.forEach(function(r) {
+        if (r.type === 'semaine' && r.num > maxSemaine) maxSemaine = r.num;
+    });
+    if (type === 'lecon') {
+        var n = etat.noeuds.get(id);
+        if (!n || n.type !== 'lecon') return false;
+        if (semaine !== null && maxSemaine && semaine > maxSemaine) semaine = maxSemaine;
+        var avant = semaineDeLecon(n);
+        var apres = (semaine === null) ? null : semaine;
+        if (avant === apres) return false;
+        enregistrerPourUndo();
+        definirSemaineLecon(id, semaine === null ? '' : semaine);
+        mettreAJourPlanificateur();
+        return true;
+    }
+    if (type === 'sequence') {
+        return deplacerSequenceVersSemaine(id, semaine, maxSemaine || null);
+    }
+    return false;
+}
+
+// Lot 3 — glisser vertical dans la grille (pointer events : souris d'abord ;
+// le tactile du canevas ET de la grille reste une porte ouverte du relais).
+// Délégation UNIQUE sur le conteneur : la grille se re-rend souvent, les
+// listeners ne doivent pas vivre sur les items.
+function initialiserDragGrille() {
+    var conteneur = document.getElementById('planif-sommaire');
+    if (!conteneur) return;
+    var drag = null; // { id, type, item, x0, y0, demarre }
+    var rangeeCible = null;
+
+    function nettoyerCible() {
+        if (rangeeCible) rangeeCible.classList.remove('planif-grille-rangee--cible');
+        rangeeCible = null;
+    }
+
+    // Cible résolue GÉOMÉTRIQUEMENT (spans verticaux des rangées), pas par
+    // elementFromPoint : un overlay ou un z-index quelconque ne doit pas
+    // avaler le dépôt, et dans une grille seule la verticale compte.
+    function rangeeSousPointeur(x, y) {
+        var rc = conteneur.getBoundingClientRect();
+        if (x < rc.left - 60 || x > rc.right + 60) return null; // sorti de la palette
+        var cibles = conteneur.querySelectorAll('[data-grille-semaine]');
+        for (var i = 0; i < cibles.length; i++) {
+            var r = cibles[i].getBoundingClientRect();
+            if (r.height > 0 && y >= r.top && y <= r.bottom) return cibles[i];
+        }
+        return null;
+    }
+
+    conteneur.addEventListener('pointerdown', function(e) {
+        if (e.button) return;
+        var item = e.target.closest('[data-grille-id]');
+        if (!item) return;
+        drag = { id: item.dataset.grilleId, type: item.dataset.grilleType, item: item,
+                 x0: e.clientX, y0: e.clientY, demarre: false };
+    });
+
+    document.addEventListener('pointermove', function(e) {
+        if (!drag) return;
+        if (!drag.demarre) {
+            if (Math.abs(e.clientX - drag.x0) + Math.abs(e.clientY - drag.y0) < 5) return;
+            drag.demarre = true;
+            drag.item.classList.add('planif-grille-item-drag');
+        }
+        var rangee = rangeeSousPointeur(e.clientX, e.clientY);
+        if (rangee !== rangeeCible) {
+            nettoyerCible();
+            if (rangee) {
+                rangeeCible = rangee;
+                rangee.classList.add('planif-grille-rangee--cible');
+            }
+        }
+    });
+
+    document.addEventListener('pointerup', function(e) {
+        if (!drag) return;
+        var info = drag;
+        drag = null;
+        nettoyerCible();
+        if (!info.demarre) return; // simple clic : la navigation suit son cours
+        info.item.classList.remove('planif-grille-item-drag');
+        // Avaler le clic de navigation qui suit un vrai glisser.
+        document.addEventListener('click', function(ev) {
+            ev.stopPropagation();
+            ev.preventDefault();
+        }, { capture: true, once: true });
+
+        var rangee = rangeeSousPointeur(e.clientX, e.clientY);
+        if (!rangee) return;
+        var brut = rangee.getAttribute('data-grille-semaine');
+        deposerDansGrille(info.type, info.id, brut === '' ? null : parseInt(brut, 10));
+    });
 }
 
 function mettreAJourPlanificateur() {
@@ -5807,7 +5995,7 @@ function mettreAJourPlanificateur() {
         for (var l = 0; l < toutesLecons.length; l++) {
             if (semaineDeLecon(toutesLecons[l]) === num) contenu += itemLeconGrille(toutesLecons[l], true);
         }
-        html += '<div class="planif-grille-rangee' + (contenu ? '' : ' planif-grille-rangee--vide') + '">' +
+        html += '<div class="planif-grille-rangee' + (contenu ? '' : ' planif-grille-rangee--vide') + '" data-grille-semaine="' + num + '">' +
                 '<div class="planif-grille-num">' + num + '</div>' +
                 '<div class="planif-grille-cellule">' + contenu + '</div>' +
                 '</div>';
@@ -5824,7 +6012,7 @@ function mettreAJourPlanificateur() {
         if (semaineDeLecon(toutesLecons[l2]) === null) nonPlanifie += itemLeconGrille(toutesLecons[l2], true);
     }
     if (nonPlanifie) {
-        html += '<div class="planif-grille-nonplanifie">' +
+        html += '<div class="planif-grille-nonplanifie" data-grille-semaine="">' +
                 '<div class="planif-grille-nonplanifie-titre">Non planifié</div>' +
                 nonPlanifie + '</div>';
     }
@@ -6102,6 +6290,11 @@ window.planificationCarte = {
     naviguerSommaireLecon: naviguerSommaireLecon,
     mettreAJourPlanificateur: mettreAJourPlanificateur,
     basculerDetailLecon: basculerDetailLecon,
+    // Lot 3 : déplacement dans la grille + annulation
+    deposerDansGrille: deposerDansGrille,
+    deplacerSequenceVersSemaine: deplacerSequenceVersSemaine,
+    annuler: annuler,
+    retablir: retablir,
     // Plein écran
     togglePleinEcran: togglePleinEcranCarte
 };
