@@ -376,18 +376,31 @@ trimestre** (`dureePeriode`, défaut 55 min, SSOT du domaine horaire —
 converties à la main. La préoccupation « chaque collège a sa durée » est donc
 déjà couverte, y compris l'usage courant qui confond *période* et *heure*.
 
-**◈ OUVERT — la période : unité de mesure ou contenant ?** Question à trancher,
-car les deux lectures produisent des outils différents :
+### ✅ TRANCHÉ (6 août) — la période MESURE, elle ne contient pas
 
-| Lecture | Ce que ça veut dire | État |
-|---------|---------------------|------|
-| **Mesure** | Une activité dure N minutes ; l'outil convertit et affiche « 1,5 période ». La période n'est jamais un lieu. | **C'est l'implémentation actuelle** (1.29.0) |
-| **Contenant** | La leçon se subdivise en périodes ; on place les activités *dans* la période 1 ou 2. | Niveau hiérarchique supplémentaire à créer |
+Pas de niveau hiérarchique « période ». On n'y touche pas.
 
-La formulation « à l'intérieur des périodes, il y a des activités » suggère la
-seconde. Mais la première fonctionne déjà et coûte moins cher en structure —
-il faut savoir si le besoin est de *situer* les activités dans la séance ou
-seulement de *compter* le temps.
+> *« Un enseignant se garde toujours une marge de manœuvre de toute façon. Les
+> activités à l'intérieur des leçons peuvent parfois déborder non seulement sur
+> la période ou la séance, mais même sur la leçon suivante. »*
+
+**▣ GÉNÉRAL — la raison est pédagogique, pas technique.** Le temps
+d'enseignement **déborde par nature**. Une structure qui enfermerait les
+activités dans des périodes étanches modéliserait un cours qui n'existe pas, et
+obligerait l'enseignant à mentir à l'outil dès la première semaine. La période
+reste donc une **unité de mesure** : elle compte le temps, elle ne le
+cloisonne pas.
+
+**◈ Ce que cette souplesse ouvre — piste forte.** Si le contenu n'est pas
+scellé dans des cases, il devient **déplaçable**. L'enseignant pourrait alors
+absorber les aléas du trimestre — retards, avances, absences — en déplaçant du
+contenu *dans* une leçon ou *entre* les leçons, et voir son calendrier se
+réorganiser.
+
+C'est une fonction que ni la conception ni le monitorage ne couvrent
+aujourd'hui : la **réparation en cours de route**. Elle prolonge naturellement
+le planificateur (§6 quater) et mérite d'être gardée en vue — c'est peut-être
+là que le module devient indispensable plutôt qu'utile.
 
 **◈ OUVERT (rappel) — séance et leçon sont-elles la même chose ?** « Les
 séances peuvent être une leçon » laisse entendre que non toujours. Le cas de
@@ -618,9 +631,16 @@ activités, évaluations et objectifs se répondent.
 └──────────────────────────────────┘
 ```
 
-**✅ LIVRÉ (1.34.0).** Objectifs au pluriel, stockés en liste d'objets porteurs
-d'un id. Migration depuis les deux formats antérieurs. Saisie : une ligne par
-objectif, Entrée pour le suivant, ligne vide permanente pour ajouter.
+**✅ LIVRÉ (1.34.0, complété en 1.35.0).** Objectifs au pluriel, stockés en
+liste d'objets porteurs d'un id ; migration depuis les deux formats antérieurs.
+Saisie : une ligne par objectif, avec **boutons `+` et `−` sur chaque ligne**
+(1.35.0) doublés des raccourcis Entrée / Retour arrière.
+
+**▣ GÉNÉRAL — la leçon de F1, réappliquée.** Les raccourcis clavier ne se
+voient pas : livrés seuls, ils reproduisaient le défaut du badge 🎯 d'avant F1
+— une commande que seul connaît celui qui la connaît déjà. Les boutons rendent
+l'action visible ; les raccourcis restent pour qui va vite. *Une commande
+invisible n'existe pas.*
 
 **✅ RÉSOLU — type ≠ titre.** Nuance clarifiée le 6 août : le **type** du bloc
 (« Leçon ») reste en haut de l'en-tête ; c'est le **titre** qui est décalé sous

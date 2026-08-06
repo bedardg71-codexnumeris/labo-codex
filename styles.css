@@ -20533,9 +20533,18 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     padding: 4px 0;
 }
 
+/* Une ligne = un objectif + ses deux commandes. */
+.planif-noeud-objectif-ligne {
+    display: flex;
+    align-items: flex-start;
+    gap: 2px;
+}
+
 .planif-noeud-objectif {
     position: relative;
-    padding: 3px 10px 3px 22px;
+    flex: 1;
+    min-width: 0;
+    padding: 3px 4px 3px 22px;
     font-size: 12px;
     font-weight: 400;
     font-style: italic;
@@ -20544,6 +20553,58 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     min-height: 16px;
     word-wrap: break-word;
     white-space: pre-wrap;
+}
+
+/* Commandes + / − : les raccourcis clavier ne se voient pas, ces boutons si. */
+.planif-obj-btn {
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1;
+    font-style: normal;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.12s, background 0.12s;
+    color: var(--planif-couleur-lecon);
+    user-select: none;
+}
+
+/* Discrètes au repos, révélées au survol ou au focus clavier de la ligne. */
+.planif-noeud-objectif-ligne:hover .planif-obj-btn,
+.planif-noeud-objectif-ligne:focus-within .planif-obj-btn {
+    opacity: 0.65;
+}
+
+.planif-obj-btn:hover {
+    opacity: 1;
+    background: color-mix(in srgb, var(--planif-couleur-lecon) 22%, transparent);
+}
+
+/* Toujours atteignable au clavier, même sans survol. */
+.planif-obj-btn:focus-visible {
+    opacity: 1;
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+.planif-obj-retirer:hover {
+    background: color-mix(in srgb, var(--rouge-erreur) 22%, transparent);
+    color: var(--rouge-erreur);
+}
+
+/* Tactile (iPad) : pas de survol — les commandes restent visibles. */
+@media (hover: none) {
+    .planif-obj-btn {
+        opacity: 0.55;
+        width: 28px;
+        height: 28px;
+    }
 }
 
 /* Puce de liste — marque chaque objectif comme une unité distincte. */

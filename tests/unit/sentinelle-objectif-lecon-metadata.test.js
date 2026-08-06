@@ -299,6 +299,37 @@ describe('F1 · invariants de rendu et de routage', () => {
         expect(source).toMatch(/planif-noeud-entete[\s\S]{0,900}htmlObjectifs \+\s*\n\s*'<div class="planif-noeud-titre"/);
     });
 
+    it('chaque objectif porte ses commandes + et − (les raccourcis ne se voient pas)', () => {
+        expect(source).toContain('planif-obj-ajouter');
+        expect(source).toContain('planif-obj-retirer');
+        // Atteignables au clavier, pas seulement à la souris.
+        expect(source).toMatch(/planif-obj-ajouter[\s\S]{0,200}role="button" tabindex="0" aria-label=/);
+        expect(source).toMatch(/planif-obj-retirer[\s\S]{0,200}role="button" tabindex="0" aria-label=/);
+    });
+
+    it('les boutons n’enclenchent pas le déplacement du bloc', () => {
+        expect(source).toMatch(/btn\.addEventListener\('mousedown'[\s\S]{0,160}stopPropagation/);
+    });
+
+    it('« + » ouvre une ligne d’accueil au lieu de persister un objectif vide', () => {
+        // appliquerObjectifs écarte les lignes vides : un objectif vide ne
+        // survivrait pas à l'enregistrement. L'état transitoire évite ça.
+        // Assertion ancrée sur LE chemin du bouton : la même affectation existe
+        // aussi dans le raccourci Entrée, et une assertion globale passerait
+        // même si le bouton cessait de la poser (constaté au break-test).
+        expect(source).toMatch(
+            /classList\.contains\('planif-obj-ajouter'\)[\s\S]{0,400}_ajoutObjectif = \{ noeudId: id, rang: rang \+ 1 \}/
+        );
+        expect(source).toContain('data-accueil');
+        // Le rendu doit savoir ouvrir cette ligne au bon rang.
+        expect(source).toMatch(/rangAccueil[\s\S]{0,600}data-accueil="1"/);
+    });
+
+    it('l’état d’accueil est nettoyé au repli et au changement de carte', () => {
+        expect(source).toMatch(/objectifDeplie;\s*\n\s*_ajoutObjectif = null;/);
+        expect(source).toMatch(/function chargerCarte[\s\S]{0,160}_ajoutObjectif = null;/);
+    });
+
     it('le badge n’enclenche pas le déplacement du bloc', () => {
         // Le mousedown du bloc démarre le drag : le badge doit l'intercepter.
         expect(source).toMatch(/badgeObjectif\.addEventListener\('mousedown'[\s\S]{0,120}stopPropagation/);
