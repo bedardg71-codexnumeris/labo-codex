@@ -613,9 +613,29 @@ savoir.** Deux conséquences possibles, à explorer :
 activité, soutien, révision et évaluation — **pas** la leçon. C'est cohérent :
 le niveau appartiendrait à l'**objectif**, pas à la leçon qui les rassemble.
 
-**◈ OUVERT.** Le Keynote dit « à la fin de cette **séquence** ». Les objectifs
-existent-ils aussi au niveau séquence, ou est-ce le vocabulaire courant pour ce
-que l'outil appelle une leçon ? À clarifier avant d'étendre.
+### ✅ TRANCHÉ (6 août) — les objectifs vivent au niveau de la LEÇON, un point
+
+Le « séquence » du Keynote était le mot courant, pas le terme de l'outil.
+
+> *« C'est peut-être tout simplement moi qui, au fil du temps, ai changé
+> l'usage des mots "séquences" et "leçons". »*
+
+**▣ GÉNÉRAL — observation de méthode.** Le vocabulaire d'un enseignant
+**dérive** au fil des années : les mêmes mots ne désignent plus les mêmes
+choses. C'est un argument de plus pour laisser l'utilisateur **nommer ses
+regroupements** (§5.2) plutôt que de lui imposer un lexique, et pour que
+l'outil s'appuie sur la **structure** (ce qui contient quoi) plutôt que sur les
+étiquettes.
+
+C'est aussi un rappel pour ce document : ce qui est écrit ici est daté. Un
+terme employé aujourd'hui n'aura pas forcément le même sens dans deux
+trimestres — d'où l'utilité de consigner *quand* chaque décision a été prise.
+
+**◈ Piste reportée — les supra-objectifs.** Des « grands objectifs » attachés à
+une séquence, un module ou une étape restent envisageables **plus tard**. Ils
+formeraient l'étage supérieur de la chaîne de convergence (§3.1) et
+rejoindraient naturellement les séquences de séquences (§5.2). Rien à
+construire aujourd'hui : le besoin n'est pas apparu à l'usage.
 
 ### ◈ OUVERT — questions restantes sur la bascule
 
