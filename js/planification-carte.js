@@ -86,7 +86,11 @@ function definirObjectifLecon(leconId, texte) {
     if (valeur === '') delete n.metadata.objectif;
     else n.metadata.objectif = valeur;
     sauvegarder();
+    // reconstruireDOM() repart d'un DOM vide : les badges de validation, posés
+    // par appendChild sur les éléments existants, disparaîtraient si on ne les
+    // reposait pas APRÈS. Même ordre que chargerCarte().
     reconstruireDOM();
+    mettreAJourTousLesBadges();
     return true;
 }
 
@@ -3278,7 +3282,9 @@ function attacherEvenements(el, donnees) {
             if (!donnees.metadata) donnees.metadata = {};
             donnees.metadata.objectifDeplie = !donnees.metadata.objectifDeplie;
             sauvegarder();
+            // Reposer les badges APRÈS la reconstruction (cf. definirObjectifLecon).
             reconstruireDOM();
+            mettreAJourTousLesBadges();
             // Déplier depuis le badge = intention d'écrire : donner le focus.
             if (donnees.metadata.objectifDeplie) {
                 var frais = document.getElementById(id);
