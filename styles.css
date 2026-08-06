@@ -20535,6 +20535,42 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     padding: 2px 0;
 }
 
+/* Poignée de redimensionnement — coin inférieur droit des blocs FEUILLES.
+   Absente des conteneurs : leur taille est calculée à partir de leurs enfants. */
+.planif-noeud-poignee {
+    position: absolute;
+    right: 1px;
+    bottom: 1px;
+    width: 14px;
+    height: 14px;
+    cursor: nwse-resize;
+    opacity: 0;
+    transition: opacity 0.12s;
+    /* Deux traits obliques — la convention des poignées de redimensionnement. */
+    background:
+        linear-gradient(135deg, transparent 0 46%, currentColor 46% 54%, transparent 54% 100%) no-repeat,
+        linear-gradient(135deg, transparent 0 70%, currentColor 70% 78%, transparent 78% 100%) no-repeat;
+    color: var(--texte-secondaire, #6aacb8);
+    border-bottom-right-radius: 6px;
+}
+
+.planif-noeud:hover .planif-noeud-poignee {
+    opacity: 0.55;
+}
+
+.planif-noeud-poignee:hover {
+    opacity: 1;
+}
+
+/* Tactile (iPad) : pas de survol — la poignée reste visible et plus large. */
+@media (hover: none) {
+    .planif-noeud-poignee {
+        opacity: 0.5;
+        width: 20px;
+        height: 20px;
+    }
+}
+
 /* Une ligne = un objectif + ses deux commandes. */
 .planif-noeud-objectif-ligne {
     display: flex;
@@ -21041,18 +21077,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     color: var(--accent-primaire, #6aacb8);
     margin-bottom: 12px;
 }
-.org-cal-btn-copier {
-    background: rgba(106, 172, 184, 0.1);
-    border: 1px solid rgba(106, 172, 184, 0.25);
-    border-radius: 4px;
-    padding: 2px 8px;
-    font-size: 10px;
-    color: var(--accent-primaire, #6aacb8);
-    cursor: pointer;
-    margin-left: auto;
-    flex-shrink: 0;
-}
-.org-cal-btn-copier:hover { background: rgba(106, 172, 184, 0.2); }
 .org-cal-date-lecon {
     display: block;
     font-size: 10px;
@@ -22303,11 +22327,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     border-left-color: rgba(3, 46, 92, 0.1);
 }
 .mode-clair .org-panneau-calendrier-titre {
-    color: var(--accent-primaire);
-}
-.mode-clair .org-cal-btn-copier {
-    background: rgba(6, 93, 187, 0.08);
-    border-color: rgba(6, 93, 187, 0.2);
     color: var(--accent-primaire);
 }
 .mode-clair .org-cal-date-lecon {
