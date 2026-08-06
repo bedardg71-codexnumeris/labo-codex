@@ -20522,15 +20522,20 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     opacity: 0.8;
 }
 
-/* Deuxième section de l'en-tête : l'objectif de la leçon.
-   Teinté avec la couleur du type Leçon (color-mix sur transparent) : le rendu
+/* Deuxième étage de l'en-tête : LES objectifs de la leçon (toujours plusieurs).
+   Teintés avec la couleur du type Leçon (color-mix sur transparent) : le rendu
    suit le fond du bloc, donc les deux modes sans règle dédiée. */
-.planif-noeud-objectif {
-    padding: 6px 10px;
+.planif-noeud-objectifs {
     margin: 0 10px 8px;
     border-left: 2px solid var(--planif-couleur-lecon);
     background: color-mix(in srgb, var(--planif-couleur-lecon) 10%, transparent);
     border-radius: 0 4px 4px 0;
+    padding: 4px 0;
+}
+
+.planif-noeud-objectif {
+    position: relative;
+    padding: 3px 10px 3px 22px;
     font-size: 12px;
     font-weight: 400;
     font-style: italic;
@@ -20541,10 +20546,26 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     white-space: pre-wrap;
 }
 
+/* Puce de liste — marque chaque objectif comme une unité distincte. */
+.planif-noeud-objectif::after {
+    content: "•";
+    position: absolute;
+    left: 10px;
+    top: 3px;
+    color: var(--planif-couleur-lecon);
+    font-style: normal;
+}
+
 .planif-noeud-objectif:focus {
     box-shadow: var(--focus-ring);
     font-style: normal;
     background: color-mix(in srgb, var(--planif-couleur-lecon) 18%, transparent);
+    border-radius: 3px;
+}
+
+/* La ligne d'ajout reste discrète tant qu'on ne s'en sert pas. */
+.planif-noeud-objectif--vide::after {
+    opacity: 0.35;
 }
 
 .planif-noeud-objectif:empty::before {
