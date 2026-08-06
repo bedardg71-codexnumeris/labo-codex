@@ -465,23 +465,52 @@ modification.
 
 | Élément | Sort |
 |---------|------|
-| **Badge 🎯** | **À RETIRER.** Il signalait la seule *présence* d'un objectif ; l'objectif affiché en clair le rend inutile. C'est aussi lui qui causait F1 (aucune affordance sans objectif préalable). |
+| **Badge 🎯** | **PROMU EN BASCULE** — voir ci-dessous. (Première intention : le retirer. Meilleure idée retenue le 6 août.) |
 | **Champ Objectif de la vue leçon** (niveau 3) | **CONSERVÉ**, mais doit lire et écrire **la même source** que la carte. Aucune duplication de donnée. |
 | **Objectif dérivé** (Organisateur) | Inchangé pour l'instant. Son articulation avec l'objectif saisi reste ◈ ouverte (§4.1). |
 
-### ◈ OUVERT — la question de la densité
+### ✅ Le badge devient la bascule (décision du 6 août)
 
-C'est la tension à surveiller. Le besoin du §3.1 est de voir **plusieurs
-objectifs ensemble** pour juger de leur enchaînement ; or un objectif rédigé
-(« Au terme de la leçon, l'étudiant·e sera capable de… ») occupe une à deux
-lignes. Multiplié par les leçons d'une séquence, puis par les séquences, le
-texte peut noyer la carte.
+Plutôt que de retirer le badge 🎯, on lui donne un rôle : **il déplie et replie
+l'objectif** sous la leçon.
 
-Pistes, à départager par l'usage :
+| État du badge | Signification | Clic |
+|---------------|---------------|------|
+| **Coloré** | La leçon a un objectif | Déplie / replie l'objectif |
+| **Grisé** | La leçon n'a pas encore d'objectif | Déplie la zone, vide et prête à la saisie |
 
-- **Troncature à N lignes** avec le texte complet au survol (`title`).
-- **Affichage complet**, en laissant le bloc grandir.
-- **Bascule d'affichage** (afficher / masquer les objectifs) dans la barre.
+**▣ GÉNÉRAL — pourquoi cette solution est bonne.** Elle résout **trois
+problèmes d'un seul geste** :
+
+1. **La densité** (§ ci-dessous) — chacun choisit ce qu'il déplie ; la carte
+   ne se noie pas.
+2. **L'affordance**, cause racine de F1 — le badge est **toujours présent**,
+   même sans objectif. Grisé, il dit : *ici, un objectif peut être posé.* Le
+   cercle « pour découvrir la fonction, il faut déjà s'en être servi » est
+   rompu.
+3. **La lisibilité replié** — l'objectif existe et se voit d'un coup d'œil,
+   sans occuper d'espace.
+
+**▣ GÉNÉRAL — principe qui s'en dégage.** *Un indicateur d'état gagne à
+devenir la commande de ce qu'il indique.* Signaler qu'une information existe
+sans offrir de l'ouvrir crée une impasse ; l'inverse fait d'un badge passif
+une porte d'entrée.
+
+### ◈ OUVERT — questions restantes sur la bascule
+
+- **Portée.** La bascule est **par leçon**. Or juger l'enchaînement (§3.1)
+  suppose de voir plusieurs objectifs ensemble → une commande « tout déplier /
+  tout replier » sera peut-être nécessaire dans la barre. À voir à l'usage.
+- **Persistance.** L'état plié/déplié survit-il au rechargement ? Deux
+  options : état de session (tout replié au démarrage) ou état mémorisé par
+  leçon. À trancher.
+
+### La question de la densité (largement désamorcée)
+
+Le besoin du §3.1 est de voir **plusieurs objectifs ensemble** ; un objectif
+rédigé occupe une à deux lignes, et pouvait noyer la carte. La bascule règle
+l'essentiel : le texte s'affiche **en entier** quand on le demande, et
+disparaît sinon. Ni troncature, ni survol à inventer.
 
 À noter : en **vue globale compacte**, les séquences sont résumées et les
 leçons n'apparaissent pas — la question ne se pose qu'au niveau séquence.
