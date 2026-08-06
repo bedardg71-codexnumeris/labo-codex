@@ -2271,6 +2271,34 @@ function reLayoutAvecAnimation(conteneurId) {
     }, 350);
 }
 
+/**
+ * Hauteur RÉELLE de l'en-tête d'un conteneur, mesurée dans le DOM.
+ *
+ * LAYOUT_HEADER_H (45 px) était une constante juste tant que l'en-tête tenait
+ * en une ligne. Depuis les objectifs dépliables (1.32+) elle ne l'est plus : un
+ * en-tête peut porter le type, N objectifs et un titre sur deux lignes. Une
+ * hauteur figée faisait alors chevaucher les activités par-dessus le titre
+ * (constaté en terrain le 6 août).
+ *
+ * On mesure le bas du dernier élément d'en-tête présent. `offsetTop` est
+ * relatif au nœud (positionné en absolu) et `offsetHeight` ignore le zoom de la
+ * carte — les deux sont donc dans le même repère que x/y.
+ * La constante ne sert plus que de repli si le DOM n'est pas encore rendu.
+ */
+var LAYOUT_RESPIRATION = 8;
+function hauteurEnteteConteneur(el) {
+    if (!el) return LAYOUT_HEADER_H;
+    // Ordre du DOM : entête → objectifs → titre. Le dernier présent borne le bas.
+    var reperes = ['.planif-noeud-titre', '.planif-noeud-objectifs', '.planif-noeud-entete'];
+    for (var i = 0; i < reperes.length; i++) {
+        var e = el.querySelector(reperes[i]);
+        if (e && e.offsetHeight > 0) {
+            return e.offsetTop + e.offsetHeight + LAYOUT_RESPIRATION;
+        }
+    }
+    return LAYOUT_HEADER_H;
+}
+
 function reLayoutConteneur(conteneurId) {
     if (_layoutEnCours.has(conteneurId)) return;
     _layoutEnCours.add(conteneurId);
@@ -2317,7 +2345,7 @@ function reLayoutConteneur(conteneurId) {
 
     var GAP = LAYOUT_GAP;
     var PADDING = LAYOUT_PADDING;
-    var HEADER_H = LAYOUT_HEADER_H;
+    var HEADER_H = hauteurEnteteConteneur(document.getElementById(conteneurId));
 
     // Measure children widths/heights
     var maxW = 0;
@@ -2393,7 +2421,7 @@ function reLayoutConteneurSaufDragged(conteneurId, draggedId) {
 
     var GAP = LAYOUT_GAP;
     var PADDING = LAYOUT_PADDING;
-    var HEADER_H = LAYOUT_HEADER_H;
+    var HEADER_H = hauteurEnteteConteneur(document.getElementById(conteneurId));
 
     var maxW = 0;
     var totalH = 0;
@@ -2462,7 +2490,7 @@ function mettreAJourZoneConteneur(conteneurId) {
     el.classList.add('planif-a-enfants');
 
     var PADDING = LAYOUT_PADDING;
-    var HEADER_H = LAYOUT_HEADER_H;
+    var HEADER_H = hauteurEnteteConteneur(el);
 
     var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
     for (var i = 0; i < enfants.length; i++) {
@@ -3398,10 +3426,13 @@ function attacherEvenements(el, donnees) {
     titreEl.addEventListener('focus', function() {
         enregistrerPourUndo();
     });
-    titreEl.addEventListener('input', function() {
+    titreEl.addEventListener('input', throttleRAF(function() {
         donnees.titre = titreEl.textContent;
         sauvegarder();
-    });
+        // Un titre qui passe sur deux lignes grandit l'en-tête : les enfants
+        // doivent redescendre d'autant (même cause que pour les objectifs).
+        if (estConteneur) reLayoutConteneur(id);
+    }));
     titreEl.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') { e.preventDefault(); titreEl.blur(); }
     });
@@ -3463,7 +3494,7 @@ function attacherEvenements(el, donnees) {
 
             // Au fil de la frappe : mettre à jour les données SANS reconstruire
             // — le champ perdrait le focus à chaque caractère.
-            ligne.addEventListener('input', function() {
+            ligne.addEventListener('input', throttleRAF(function() {
                 appliquerObjectifs(donnees, lireLignes());
                 // Dès que la ligne d'accueil porte du texte, elle est devenue un
                 // objectif comme les autres : l'état transitoire n'a plus lieu.
@@ -3475,7 +3506,11 @@ function attacherEvenements(el, donnees) {
                     var vide = objectifsDeLecon(donnees).length === 0;
                     badgeObjectif.classList.toggle('planif-badge-objectif--vide', vide);
                 }
-            });
+                // Un objectif qui passe sur deux lignes grandit l'en-tête : sans
+                // ça, les activités resteraient sous l'ancienne hauteur et se
+                // feraient recouvrir. Throttlé en rAF — une passe par frame.
+                reLayoutConteneur(id);
+            }));
 
             ligne.addEventListener('keydown', function(e) {
                 var rang = parseInt(ligne.dataset.objRang, 10) || 0;
