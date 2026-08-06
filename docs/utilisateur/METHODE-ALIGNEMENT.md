@@ -667,7 +667,26 @@ bloc ; le titre dit lequel c'est.* Le premier est structurel et non modifiable,
 le second est une information libre. Les confondre conduit à croire qu'on peut
 supprimer l'un en gardant l'autre.
 
-### ◈ Relier les objectifs aux activités (piste du 6 août)
+### ✅ TRANCHÉ (6 août, soir) — relier les objectifs aux activités ET aux évaluations
+
+**Design décidé par Grégoire (BACKLOG #403), à construire après le lot 2 :**
+même philosophie que les idées maîtresses — l'application vérifie la
+**structure**, jamais le contenu : elle prend pour acquis la compétence et
+l'expertise de l'enseignant.
+
+- **Le lien vit sur le nœud servant** : `metadata.objectifsServis = [id…]`
+  sur l'activité et sur l'évaluation. Pas de nouveau type de nœud — le
+  modèle A ci-dessous gagne, complété d'un registre côté servant.
+- **Saisie déclarative** dans l'inspecteur (cases à cocher), objectifs de
+  SA leçon. Fonctionne sur iPad (F7 bis).
+- **Vérifié = servi par ≥ 1 activité, ET vérifié par une évaluation** —
+  en direct (évaluation formative, orale, in situ : un nœud évaluation à
+  rétroaction orale coche très bien ça) **ou** en transitif (une des
+  activités qui le servent est reliée à une évaluation) — le patron exact
+  des idées maîtresses.
+- **Pastille par objectif, grise = invitation** (§6 quinquies).
+
+*Analyse d'origine (6 août, matin) conservée ci-dessous :*
 
 Idée : un lien d'**apparence distincte** entre un objectif et les activités qui
 le servent, permettant de vérifier que **chaque objectif est couvert**.
