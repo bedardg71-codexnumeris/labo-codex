@@ -127,6 +127,32 @@ déduites de ce que l'activité exige, non listées a priori comme un programme
 de contenus. C'est un renversement notable par rapport au réflexe courant
 (« quelle matière dois-je couvrir ? »).
 
+### 3.1 L'objectif de leçon est un maillon, pas une étiquette
+
+**▣ GÉNÉRAL — précision décisive apportée le 6 août.** Poser un objectif par
+leçon n'est pas un geste de documentation. Les objectifs de leçon forment une
+**chaîne convergente** : chacun prépare le suivant, et tous tendent vers
+l'objectif terminal du cours — la compétence du trimestre.
+
+> *« Je dois pouvoir disposer dans ma carte mentale mes différents objectifs
+> afin de les aligner globalement les uns avec les autres vers l'objectif
+> final, qui est la compétence du trimestre. »*
+
+C'est **la définition opérationnelle de l'alignement** dans cette méthode, et
+elle rejoint le principe 3 du module : les liens entre nœuds *sont*
+l'alignement. La question à poser à toute leçon devient : **en quoi cet
+objectif rapproche-t-il de la compétence terminale ?** Une leçon dont on ne
+sait pas répondre est une leçon à revoir.
+
+**Conséquence pour l'outil.** L'objectif ne peut pas être une propriété
+enfouie qu'on consulte une leçon à la fois : il faut voir **plusieurs
+objectifs ensemble** pour juger de leur enchaînement. D'où le besoin de les
+afficher sur la carte (§4.1 bis) — c'est le seul endroit où la convergence est
+visible d'un coup d'œil.
+
+**▢ PARTICULIER (601-101, A2026).** Compétence terminale visée :
+**être capable de rédiger une analyse littéraire en bonne et due forme.**
+
 **◈ OUVERT — à vérifier par l'usage.** Cette démarche tiendra-t-elle telle
 quelle ? Hypothèses de dérive à surveiller :
 - Le temps 1 (30 objectifs d'affilée) pourrait s'avérer épuisant hors contexte.
@@ -270,31 +296,50 @@ comme règle. La semaine reste un **repère de grandeur**, pas une définition.
 | Introduction | ~1 semaine |
 | Bases de l'analyse littéraire | **plusieurs séquences**, plusieurs semaines |
 
-### 5.2 ◈ OUVERT — le niveau au-dessus de la séquence
+### 5.2 ✅ TRANCHÉ (6 août) — voie A : des séquences de séquences
 
-Le cas des « bases de l'analyse littéraire » révèle un besoin non couvert :
-un regroupement **au-dessus** de la séquence — ce que Grégoire nomme
-provisoirement *modules*, *grands thèmes* ou *grands objectifs*.
+**Décision.** Le regroupement au-dessus de la séquence sera une **séquence
+contenant des séquences** — l'imbrication, pas le lien.
 
-**État de l'outil.** La hiérarchie est **strictement à trois niveaux** :
+**Raison retenue : la simplicité.** Plutôt que d'introduire un type de nœud
+supplémentaire (« module », « étape », « thème »), on rend le conteneur
+existant récursif. Un seul concept, appliqué à deux échelles.
+
+**▣ GÉNÉRAL — le nom appartient à l'utilisateur.** *Module*, *étape*, *thème*,
+*bloc* : ce ne sont que des noms. La structure est la même. L'enseignant nomme
+ses regroupements comme sa discipline le demande.
+
+**◈ OUVERT — renommer « Séquence » en « Ensemble » ?** Piste évoquée : appeler
+le type *ensemble* (neutre quant à l'échelle) et laisser l'utilisateur inscrire
+son propre vocabulaire. À évaluer plus tard — c'est un changement de
+vocabulaire global (UI, skills, documentation) qui ne doit pas précéder
+l'usage.
+
+**Définition qui, elle, est stable :**
+
+> **Une séquence est un ensemble de leçons.** Un regroupement de séquences
+> reste une séquence — seule l'échelle change.
+
+**État de l'outil.** La hiérarchie est aujourd'hui **strictement à trois
+niveaux** :
 
 ```
 Séquence  ⊃  Leçon  ⊃  Activités / Soutien / Révision / Évaluation
 ```
 
 `peutContenir()` (planification-carte.js:1969) autorise **uniquement**
-`séquence → leçon`. **Une séquence ne peut pas en contenir une autre.**
+`séquence → leçon`.
 
-**Deux voies possibles, à trancher :**
+**Coût à prévoir (honnête).** Passer à une profondeur variable touche tout ce
+qui suppose trois niveaux fixes : le sommaire de la palette Navigation, la
+navigation `vue globale → séquence → leçon`, `naviguerNiveauLecon()` qui
+cherche **la** séquence parente, la jauge de temps et le cumul des durées.
+Ce n'est pas un blocage, mais ce n'est pas une ligne de code non plus.
 
-| Voie | Mécanisme | Coût | Effet |
-|------|-----------|------|-------|
-| **A — Imbrication** | Autoriser séquence ⊃ séquence | Structurel (navigation, sommaire, jauge, comptabilité du temps) | Le module *contient* visuellement ses séquences |
-| **B — Lien** | Relier une **Idée maîtresse** à plusieurs séquences | **Existe déjà** (`idee-maitresse>sequence` = « se concrétise dans ») | Le module *chapeaute* sans contenir |
-
-La voie B est déjà outillée et conforme au cadre théorique (l'idée maîtresse
-est justement le « concept-parapluie qui organise le contenu »). Sa limite :
-un lien ne se voit pas comme une imbrication — le regroupement reste abstrait.
+**Voie B, écartée pour l'instant** (conservée ici pour mémoire) : relier une
+**Idée maîtresse** à plusieurs séquences par le lien « se concrétise dans »,
+déjà outillé. Elle chapeaute sans contenir — le regroupement y reste abstrait.
+Les deux voies ne s'excluent pas à terme.
 
 ### 5.3 ◈ OUVERT — une leçon = une séance ?
 
@@ -316,7 +361,38 @@ contourner — c'est le signal qui dicte le prochain outil à construire.
 | # | Date | Geste voulu | Ce qui s'est passé | Décision / suite |
 |---|------|-------------|--------------------|------------------|
 | **F1** | 6 août | Trouver et poser l'objectif d'une leçon | Introuvable « de façon rapide et intuitive ». Diagnostic §4.1 bis : 3 emplacements, aucun dans la carte ; le badge 🎯 n'apparaît qu'une fois l'objectif saisi → aucune affordance au départ. | ◈ À concevoir : rendre l'objectif visible **sur le nœud leçon** dans la carte, et saisissable sans quitter la carte. |
-| **F2** | 6 août | Regrouper plusieurs séquences sous un grand thème | Impossible : `peutContenir()` n'autorise que séquence → leçon. | ◈ Trancher voie A (imbrication) vs voie B (lien vers idée maîtresse, déjà outillé) — §5.2. |
+| **F2** | 6 août | Regrouper plusieurs séquences sous un grand thème | Impossible : `peutContenir()` n'autorise que séquence → leçon. | ✅ Tranché : voie A, séquences de séquences (§5.2). À livrer **après** F1. |
+
+---
+
+## 6 bis. Où doit vivre l'objectif de leçon ? (proposition d'architecture)
+
+**Constat.** L'objectif personnalisé est aujourd'hui stocké dans
+`planification_seances[leconId].objectifPersonnalise` — la clé **nue, non
+namespacée, à dictionnaire plat** décrite au §4.2. Or les autres propriétés
+structurantes d'un nœud (`duree`, `niveauCognitif`, `prealable`,
+`semaineDebut`/`semaineFin`, `productionId`) vivent dans **`noeud.metadata`**,
+donc à l'intérieur de `planification_mindmap` — la clé propre du module,
+correctement namespacée par trimestre.
+
+**Proposition : déplacer l'objectif vers `noeud.metadata.objectif`.**
+
+| Gain | Détail |
+|------|--------|
+| **Sort de la clé fragile** | Plus de partage entre trimestres ni avec la démo pour la donnée la plus centrale de la méthode. |
+| **Suit les copies et imports** | L'import inter-trimestre (1.30.0) copie les nœuds avec leurs metadata. Aujourd'hui `copierSeancesLecons()` est un **no-op** tant que #367 n'est pas livré — l'objectif ne suit donc pas proprement. |
+| **Disponible au rendu** | Le nœud connaît son objectif sans lecture d'une seconde clé (`_seancesDOM`), ce qui simplifie l'affichage sur la carte. |
+| **Zéro-dette** | Retire un usage de la clé problématique au lieu d'en ajouter un. |
+
+**Ce que ça ne règle pas.** #367 reste ouvert pour les **notes de leçon** et les
+**rétroactions d'activité**, qui continuent de vivre dans
+`planification_seances`. La proposition réduit l'exposition, elle ne la
+supprime pas.
+
+**À prévoir.** Une migration one-shot idempotente (patron #358) pour ne pas
+perdre les objectifs déjà saisis.
+
+**◈ OUVERT** — décision à confirmer avant implémentation.
 
 ---
 
