@@ -897,6 +897,16 @@ function migrerJourneesSansCours() {
         const cleFusion = prefixe + 'journeesSansCours';
         const fusionnes = db.getSync(cleFusion, []);
         const idsVus = new Set(fusionnes.map(e => e && e.id).filter(Boolean));
+        // Dédoublonnage par CONTENU en plus de l'id (6 août 2026) : si la
+        // fusion arrive en retard (hydratation IndexedDB terminée après la
+        // première passe) et que l'utilisateur a déjà RECRÉÉ le même congé à
+        // la main, la copie recréée porte un id neuf — l'id seul laisserait
+        // entrer un doublon « même jour, même libellé ». Constaté sur les 2
+        // congés A2026 de Grégoire, recréés le 6 août.
+        const cleContenu = e => e && e.dateEvenement
+            ? e.dateEvenement + '|' + String(e.description || '').trim().toLowerCase()
+            : null;
+        const contenusVus = new Set(fusionnes.map(cleContenu).filter(Boolean));
         // Prévus d'abord : préserve l'ordre de saisie par bloc d'origine
         ['evenementsPrevus', 'evenementsImprevus'].forEach(suffixe => {
             const anciens = db.getSync(prefixe + suffixe, null);
@@ -904,7 +914,10 @@ function migrerJourneesSansCours() {
                 anciens.forEach(evt => {
                     if (!evt) return;
                     if (evt.id && idsVus.has(evt.id)) return;
+                    const contenu = cleContenu(evt);
+                    if (contenu && contenusVus.has(contenu)) return;
                     if (evt.id) idsVus.add(evt.id);
+                    if (contenu) contenusVus.add(contenu);
                     fusionnes.push(evt);
                     nbMigres++;
                 });

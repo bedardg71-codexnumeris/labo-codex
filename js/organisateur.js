@@ -540,7 +540,10 @@ function afficherEnteteCalendrier(leconId) {
             // Séances du groupe (triées par ordre de semaine)
             var hor = gc.horaireId ? horaires.find(function(h) { return h.id === gc.horaireId; }) : null;
             var seances = (hor && hor.seances) ? hor.seances : [];
-            var ordreJours = ['lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+            // Semaine du dimanche au samedi (format direction des études,
+            // 6 août 2026). L'ancien ordre omettait « dimanche » : indexOf -1
+            // l'aurait trié en tête par accident, pas par convention.
+            var ordreJours = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
             seances = seances.slice().sort(function(a, b) {
                 return ordreJours.indexOf((a.jour || '').toLowerCase()) - ordreJours.indexOf((b.jour || '').toLowerCase());
             });
