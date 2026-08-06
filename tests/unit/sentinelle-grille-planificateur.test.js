@@ -61,7 +61,7 @@ function monterModule() {
         addEventListener: () => {},
         createElement: fauxElement,
         createElementNS: fauxElement,
-        body: {}
+        body: { appendChild() {}, removeChild() {} }
     };
     const win = chargerScript('js/planification-carte.js', {
         db,
