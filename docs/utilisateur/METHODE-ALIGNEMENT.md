@@ -373,7 +373,7 @@ contourner — c'est le signal qui dicte le prochain outil à construire.
 
 | # | Date | Geste voulu | Ce qui s'est passé | Décision / suite |
 |---|------|-------------|--------------------|------------------|
-| **F1** | 6 août | Trouver et poser l'objectif d'une leçon | Introuvable « de façon rapide et intuitive ». Diagnostic §4.1 bis : 3 emplacements, aucun dans la carte ; le badge 🎯 n'apparaît qu'une fois l'objectif saisi → aucune affordance au départ. | ◈ À concevoir : rendre l'objectif visible **sur le nœud leçon** dans la carte, et saisissable sans quitter la carte. |
+| **F1** | 6 août | Trouver et poser l'objectif d'une leçon | Introuvable « de façon rapide et intuitive ». Diagnostic §4.1 bis : 3 emplacements, aucun dans la carte ; le badge 🎯 n'apparaît qu'une fois l'objectif saisi → aucune affordance au départ. | ✅ **LIVRÉ (1.32.0)** — objectif dans le bloc leçon, badge-bascule toujours présent, stockage sur le nœud. |
 | **F2** | 6 août | Regrouper plusieurs séquences sous un grand thème | Impossible : `peutContenir()` n'autorise que séquence → leçon. | ✅ Tranché : voie A, séquences de séquences (§5.2). À livrer **après** F1. |
 
 ---
@@ -405,7 +405,18 @@ supprime pas.
 **À prévoir.** Une migration one-shot idempotente (patron #358) pour ne pas
 perdre les objectifs déjà saisis.
 
-**◈ OUVERT** — décision à confirmer avant implémentation.
+**✅ CONFIRMÉ ET LIVRÉ (6 août, 1.32.0).** L'objectif vit sur le nœud
+(`metadata.objectif`). Migration one-shot idempotente depuis l'ancienne clé,
+avec deux gardes contre la perte :
+
+- l'ancienne source n'est retirée **qu'après** une sauvegarde réussie ;
+- rien n'est migré s'il n'y a **pas de carte active** — `sauvegarder()` sort
+  silencieusement dans ce cas, et purger malgré tout aurait effacé des
+  objectifs sans rien avoir persisté. *(Trou trouvé en écrivant la sentinelle,
+  pas en écrivant le code.)*
+
+Les **notes de leçon** et les **rétroactions d'activité** restent dans
+`planification_seances` : #367 demeure ouvert pour elles.
 
 ---
 
