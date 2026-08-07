@@ -16,6 +16,114 @@ const CLE_DONNEES = 'planification_mindmap';
 const PROTO_PREFIXE = 'proto_cm_';
 const PROTO_CLE_INDEX = PROTO_PREFIXE + 'index';
 
+// === RATTACHEMENT CARTE → COURS (lot 1, 7 août 2026) ===
+//
+// Pourquoi ce champ existe. La carte vit dans `planification_mindmap`,
+// NAMESPACÉ par trimestre : elle est enfermée dans sa session. Le cours, lui,
+// est une collection GLOBALE (`db.getSync('cours', [])`, jamais préfixée) —
+// 601-101 est le même objet d'un trimestre à l'autre. Le `coursId` est donc la
+// seule identité de la carte qui survive au changement de trimestre, et c'est
+// ce qui rendra la reprise d'une session à l'autre possible (#368, aujourd'hui
+// un geste manuel qui revient chaque session).
+//
+// Le champ vit dans l'ENTRÉE D'INDEX, pas dans le contenu de la carte :
+// retrouver les cartes d'un cours ne doit pas obliger à charger toutes les
+// cartes.
+//
+// ⚠ `cours` est une collection globale partagée (cf. SKILL_integrite_globaux) :
+// on ne stocke ici que son ID, jamais une copie de l'objet, et la résolution se
+// fait par IDENTITÉ contre la collection vivante — jamais par un flag recopié
+// sur la carte, qui se périmerait en silence.
+
+/** ID du cours actif, ou null. Jamais d'exception : une carte vit sans cours. */
+function coursActifId() {
+    try {
+        if (typeof obtenirCoursActifId !== 'function') return null;
+        return obtenirCoursActifId() || null;
+    } catch (e) {
+        console.warn('[Planification] Cours actif indisponible :', e);
+        return null;
+    }
+}
+
+/**
+ * Entrée d'index d'une carte — FABRIQUE UNIQUE.
+ * Les six sites de création posaient le même littéral `{id, nom, dateCreation}`
+ * chacun de leur côté ; ajouter un champ obligeait à les retrouver tous. Ils
+ * passent tous par ici.
+ */
+function creerEntreeIndex(id, nom) {
+    var entree = {
+        id: id,
+        nom: nom || 'Sans titre',
+        dateCreation: new Date().toISOString()
+    };
+    var cid = coursActifId();
+    if (cid) entree.coursId = cid;
+    return entree;
+}
+
+/** ID du cours rattaché à une carte, ou null. N'atteste RIEN de son existence. */
+function obtenirCoursDeCarte(carteId) {
+    const index = getIndex();
+    if (!index || !Array.isArray(index.cartes)) return null;
+    const carte = index.cartes.find(function(c) { return c && c.id === carteId; });
+    return (carte && carte.coursId) || null;
+}
+
+/**
+ * Porte d'écriture UNIQUE du rattachement (même patron que
+ * `definirSemaineLecon` / `definirObjectifsLecon`).
+ * `coursId` null/'' = détacher.
+ * @returns {boolean} true si l'index a changé
+ */
+function definirCoursDeCarte(carteId, coursId) {
+    const index = getIndex();
+    if (!index || !Array.isArray(index.cartes)) return false;
+    const carte = index.cartes.find(function(c) { return c && c.id === carteId; });
+    if (!carte) return false;
+
+    const vise = coursId || null;
+    if ((carte.coursId || null) === vise) return false;
+
+    if (vise === null) delete carte.coursId;
+    else carte.coursId = vise;
+
+    sauvegarderIndex(index);
+    return true;
+}
+
+/**
+ * Le cours rattaché, RÉSOLU contre la collection globale vivante.
+ * @returns {Object|null} l'objet cours, ou null si la carte n'a pas de
+ *   rattachement OU si le cours rattaché n'existe plus (rattachement
+ *   ORPHELIN — voir `rattachementOrphelin`). Dans les deux cas la carte
+ *   reste parfaitement utilisable : un cours supprimé ne doit jamais rendre
+ *   un alignement inaccessible.
+ */
+function resoudreCoursDeCarte(carteId) {
+    const id = obtenirCoursDeCarte(carteId);
+    if (!id) return null;
+    let liste;
+    try {
+        liste = db.getSync('cours', []);
+    } catch (e) {
+        console.warn('[Planification] Lecture de la collection cours échouée :', e);
+        return null;
+    }
+    if (!Array.isArray(liste)) return null;
+    return liste.find(function(c) { return c && c.id === id; }) || null;
+}
+
+/**
+ * Vrai quand la carte PORTE un rattachement dont le cours a disparu.
+ * Distinguer ce cas de « pas de rattachement » est nécessaire à l'interface :
+ * l'un se répare (réassigner), l'autre est un état normal.
+ */
+function rattachementOrphelin(carteId) {
+    return !!obtenirCoursDeCarte(carteId) && resoudreCoursDeCarte(carteId) === null;
+}
+
 // === FONCTIONS INTERNES ===
 
 /**
@@ -105,11 +213,7 @@ function initialiserSiNecessaire() {
         const index = {
             active: 'carte_1',
             compteurCartes: 1,
-            cartes: [{
-                id: 'carte_1',
-                nom: 'Sans titre',
-                dateCreation: new Date().toISOString()
-            }]
+            cartes: [creerEntreeIndex('carte_1', 'Sans titre')]
         };
         donnees = { index: index, cartes: {} };
         setDonnees(donnees);
@@ -168,7 +272,7 @@ function migrerDonneesProto() {
         const index = {
             active: 'carte_1',
             compteurCartes: 1,
-            cartes: [{ id: 'carte_1', nom: 'Sans titre', dateCreation: new Date().toISOString() }]
+            cartes: [creerEntreeIndex('carte_1', 'Sans titre')]
         };
         const donnees = {
             index: index,
@@ -231,11 +335,10 @@ function importerDepuisBibliotheque(alignementBiblio) {
     var nouvelId = 'carte_' + index.compteurCartes;
 
     // Ajouter à l'index
-    index.cartes.push({
-        id: nouvelId,
-        nom: alignementBiblio.nom || 'Alignement importé',
-        dateCreation: new Date().toISOString()
-    });
+    // Le cours vient du contexte d'IMPORT (le cours actif ici), jamais de
+    // l'item de bibliothèque : un alignement partagé par un collègue porterait
+    // un coursId qui n'existe pas dans ce codex.
+    index.cartes.push(creerEntreeIndex(nouvelId, alignementBiblio.nom || 'Alignement importé'));
 
     // Deep-clone les données de la carte
     var contenuClone = JSON.parse(JSON.stringify(alignementBiblio.donnees));
@@ -340,6 +443,20 @@ function importerCarteDepuisTrimestre(trimestreSourceId, carteId) {
             setDonnees(donnees);
         }
 
+        // Le rattachement SUIT la carte d'un trimestre à l'autre : `cours` est
+        // une collection globale, donc le même coursId reste valide dans le
+        // trimestre d'arrivée. C'est tout l'intérêt du champ — reprendre le
+        // 601-101 de la session précédente sans le réassigner à la main.
+        // On ne recopie que si le cours EXISTE encore : un id mort vaut moins
+        // que le cours actif posé par défaut à la création.
+        if (infos && infos.coursId) {
+            let coursVivants = [];
+            try { coursVivants = db.getSync('cours', []) || []; } catch (e) { coursVivants = []; }
+            if (Array.isArray(coursVivants) && coursVivants.some(c => c && c.id === infos.coursId)) {
+                definirCoursDeCarte(nouvelId, infos.coursId);
+            }
+        }
+
         copierSeancesLecons(trimestreSourceId, source.cartes[carteId]);
         return nouvelId;
     } catch (e) {
@@ -392,7 +509,12 @@ window.planificationDonnees = {
     importerDepuisBibliotheque: importerDepuisBibliotheque,
     exporterCartePourBibliotheque: exporterCartePourBibliotheque,
     listerTrimestresAvecCartes: listerTrimestresAvecCartes,
-    importerCarteDepuisTrimestre: importerCarteDepuisTrimestre
+    importerCarteDepuisTrimestre: importerCarteDepuisTrimestre,
+    creerEntreeIndex: creerEntreeIndex,
+    obtenirCoursDeCarte: obtenirCoursDeCarte,
+    definirCoursDeCarte: definirCoursDeCarte,
+    resoudreCoursDeCarte: resoudreCoursDeCarte,
+    rattachementOrphelin: rattachementOrphelin
 };
 
 })();
