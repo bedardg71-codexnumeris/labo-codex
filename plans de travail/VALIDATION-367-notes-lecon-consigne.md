@@ -1,5 +1,27 @@
 # Validation terrain — #367, migration des notes de leçon
 
+> ## ⚠ DÉCISION GRÉGOIRE, 7 août 2026 — PROTOCOLE RAMENÉ AU MINIMUM
+>
+> **Ce protocole complet n'a PAS été exécuté, et c'est délibéré.** Constat de
+> Grégoire : la clé `planification_seances` ne contenait que des **productions
+> de test**, sans valeur. Un protocole calibré pour des données précieuses était
+> disproportionné.
+>
+> **Ce qui reste dû** — non pour protéger les anciennes notes, mais pour
+> confirmer que le MÉCANISME tourne : le contrôle §3.1 (drapeau posé, clé nue
+> purgée) et un geste réel (écrire une note, recharger, la retrouver). Si la
+> migration échouait en silence, le système resterait à moitié converti et les
+> notes ÉCRITES ENSUITE en pâtiraient.
+>
+> Les sections 1, 3.2, 3.3, 4 et 5 ne s'appliquent qu'à un codex portant de
+> vraies notes. Elles restent valides pour un autre utilisateur, ou pour
+> Grégoire lui-même une fois qu'il aura de la matière.
+>
+> ⮕ Conséquence sur **#409** : l'archive `planification_seances_archive_pre367`
+> protégeait ces données-là. Elle peut être retirée sans attendre.
+
+---
+
 > **7 août 2026.** À faire sur le Mac, sur les données réelles de Grégoire,
 > AVANT de pousser `main`. C'est le seul chantier de la journée qui migre des
 > données existantes.
