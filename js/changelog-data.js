@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.51',
+            couleur: 'vert',
+            titre: 'Alignement : la semaine se choisit dans le bloc',
+            items: [
+                'Un sélecteur de semaine apparaît à côté du type, dans chaque leçon et chaque séquence. Plus besoin d’écrire « Sem. 11 » dans tes titres : le bloc se place tout seul dans le planificateur. Sur une séquence, choisir une semaine DÉPLACE tout le bloc — ses leçons suivent en gardant leurs écarts.',
+                'Le sélecteur et le glisser dans la grille sont deux façons de faire le même geste : ce que tu changes d’un côté se voit immédiatement de l’autre.',
+                'Le planificateur ne répète plus le nom d’une séquence sur chacune de ses leçons quand elle est déjà affichée dans la même semaine. Il le garde pour les leçons qui s’affichent loin de leur séquence, où le repère sert vraiment.'
+            ]
+        },
+        {
             version: '1.50',
             couleur: 'orange',
             titre: 'Alignement : les notes de leçon cessent de se mélanger',
