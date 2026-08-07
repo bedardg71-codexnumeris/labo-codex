@@ -5982,6 +5982,51 @@ function initialiserDragGrille() {
         rangeeCible = null;
     }
 
+    // Auto-défilement au bord (6 août soir) : le contenu de la palette est
+    // plafonné en hauteur, donc une rangée défilée hors de la fenêtre était
+    // littéralement INATTEIGNABLE — rangeeSousPointeur ne voit que le visible.
+    // Approcher un bord pendant le glisser fait défiler ; la vitesse croît
+    // avec la profondeur d'approche (geste précis près du bord, rapide au
+    // ras). Boucle rAF autonome : le défilement continue même pointeur
+    // immobile, sinon il faudrait remuer la souris pour avancer.
+    var ZONE_BORD = 44;
+    var VITESSE_MAX = 14;
+    var _rafDefilement = null;
+    var _vitesseDefilement = 0;
+
+    function zoneDefilable() {
+        return conteneur.closest('.planif-nav-contenu') || conteneur.parentElement || conteneur;
+    }
+
+    function evaluerDefilement(y) {
+        var zone = zoneDefilable();
+        if (!zone) { _vitesseDefilement = 0; return; }
+        var r = zone.getBoundingClientRect();
+        if (y < r.top + ZONE_BORD) {
+            _vitesseDefilement = -Math.ceil(VITESSE_MAX * Math.min(1, (r.top + ZONE_BORD - y) / ZONE_BORD));
+        } else if (y > r.bottom - ZONE_BORD) {
+            _vitesseDefilement = Math.ceil(VITESSE_MAX * Math.min(1, (y - (r.bottom - ZONE_BORD)) / ZONE_BORD));
+        } else {
+            _vitesseDefilement = 0;
+        }
+        if (_vitesseDefilement !== 0 && !_rafDefilement) boucleDefilement();
+    }
+
+    function boucleDefilement() {
+        _rafDefilement = requestAnimationFrame(function() {
+            _rafDefilement = null;
+            if (!drag || !drag.demarre || _vitesseDefilement === 0) return;
+            var zone = zoneDefilable();
+            if (zone) zone.scrollTop += _vitesseDefilement;
+            boucleDefilement();
+        });
+    }
+
+    function arreterDefilement() {
+        _vitesseDefilement = 0;
+        if (_rafDefilement) { cancelAnimationFrame(_rafDefilement); _rafDefilement = null; }
+    }
+
     // Cible résolue GÉOMÉTRIQUEMENT (spans verticaux des rangées), pas par
     // elementFromPoint : un overlay ou un z-index quelconque ne doit pas
     // avaler le dépôt, et dans une grille seule la verticale compte.
@@ -6011,6 +6056,7 @@ function initialiserDragGrille() {
             drag.demarre = true;
             drag.item.classList.add('planif-grille-item-drag');
         }
+        evaluerDefilement(e.clientY);
         var rangee = rangeeSousPointeur(e.clientX, e.clientY);
         if (rangee !== rangeeCible) {
             nettoyerCible();
@@ -6025,6 +6071,7 @@ function initialiserDragGrille() {
         if (!drag) return;
         var info = drag;
         drag = null;
+        arreterDefilement();
         nettoyerCible();
         if (!info.demarre) return; // simple clic : la navigation suit son cours
         info.item.classList.remove('planif-grille-item-drag');

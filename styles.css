@@ -18634,7 +18634,12 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 /* Remplace les carrousels séquences/leçons de la barre (4 août 2026). */
 .planif-nav-contenu {
     padding: 8px;
-    max-height: min(420px, 55vh);
+    /* Plafond relevé le 6 août au soir : à 420 px, la grille du planificateur
+       (18 rangées + zone « Non planifié ») ne montrait qu'un tiers de son
+       contenu, et une rangée défilée hors de la fenêtre était une cible de
+       dépôt INATTEIGNABLE. Le complément est l'auto-défilement au bord
+       pendant le glisser (initialiserDragGrille). */
+    max-height: min(720px, 70vh);
     overflow-y: auto;
     scrollbar-width: thin;
 }
