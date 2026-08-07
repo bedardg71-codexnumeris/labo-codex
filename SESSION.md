@@ -7,6 +7,44 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 7 AOÛT 2026, SOIR (reprise après relais, Claude Code cloud, branche `claude/pedagogical-alignment-planner-y7eppc` NON mergée). ⮕⮕ LIRE EN PREMIER À LA REPRISE.
+     ÉTAT FACTUEL : branche = **1.47.4**, **52 commits devant `origin/main`** (49 au relais + 2 releases + ce bloc), zéro commit de main absent, arbre propre. `origin/main` = **1.31.22**, en production. Vitest **1646/1646** (relancé, pas repris d'une attestation). Playwright WebKit non exécutable en conteneur (`Executable doesn't exist at /opt/pw-browsers/webkit-2287`) → CI à la PR. Dernier ID BACKLOG : **#405**.
+
+     ⚠ **ÉCART DE PRÉMISSE À RETENIR POUR LE PROCHAIN RELAIS** : le conteneur de cette session a démarré sur `claude/pedagogical-alignment-planner-**fhjf8p**`, une simple copie d'`origin/main` (1.31.22, zéro commit d'alignement), alors que le travail vit sur `...-**y7eppc**`. Le rituel de début l'a attrapé au §1. ⮕ La consigne de relance doit nommer la branche ET le conteneur doit être ouvert dessus, sinon la session code sur une base vieille de 16 versions mineures.
+
+     ✅ LIVRÉ CE SOIR — 2 releases, les deux décidées par Grégoire au relais :
+        • **1.47.3 — #404, la leçon ancrée hors cadre retombe dans « Non planifié ».** Réserve ouverte du 6 août. Décision Grégoire : RETOMBER à l'affichage, et non borner la saisie — la valeur reste écrite, la leçon reprend sa rangée si le Cadre s'étend. Pastille « Sem. N hors cadre » pour que le repli ne passe pas pour un effacement. **Facette absente de la réserve, trouvée au code** : le cadre est TROUÉ (une semaine de planification n'a pas de numéro), donc une semaine 4 manquante au milieu disparaissait comme une semaine 42 — d'où un Set des semaines rendues, pas une borne haute. Même défaut sur une SÉQUENCE dont l'étendue commence hors cadre. Sentinelle 9 cas, 6 break-tests.
+        • **1.47.4 — #405, la poignée de bloc répond au doigt (44 px).** ⚠ **Le vrai défaut n'était pas la taille** : le geste était câblé en `mousedown`/`mousemove`, et Safari ne synthétise pas de `mousemove` au tactile — la poignée était MUETTE au doigt. Élargir seule aurait refait 1.47.0 à l'identique : une cible plus grande et toujours inerte. Bascule sur les pointer events (capture, `pointercancel`), idiome de la palette de 1.47.1. Cible CENTRÉE sur le coin (22 dedans, 22 dehors) parce qu'un bloc descend à 44 px de haut — un carré de 44 posé en dedans lui volerait sa sélection. Sentinelle 10 cas, 8 break-tests.
+
+     ▣ **CE QUE LES BREAK-TESTS ONT ATTRAPÉ CE SOIR — 3 sentinelles vertes et FAUSSES.** Elles méritent d'être retenues, c'est le même motif trois fois : *une assertion peut être satisfaite par autre chose que ce qu'elle croit vérifier.*
+        (1) « la séquence hors cadre retombe » cherchait le TITRE de la séquence — que la leçon affiche déjà comme étiquette de contexte. Verte sans que la séquence soit rendue. Réancrée sur `data-grille-id`.
+        (2) « le geste écoute `pointercancel` » cherchait le mot — présent dans le `removeEventListener` du relâchement. Verte alors que l'écoute n'était jamais posée. Resserrée sur `addEventListener(`.
+        (3) Idem pour `pointermove`/`pointerup`, même cause, même correction.
+        ⮕ **Règle qui s'en dégage** : quand une sentinelle lit du TEXTE (source ou HTML), vérifier qu'aucun AUTRE fragment du même fichier ne contient la chaîne cherchée. Le break-test est le seul moyen de le voir — les trois étaient vertes et le sont restées au premier break.
+
+     ⮕ **CE QUI A ÉTÉ TRANCHÉ PAR GRÉGOIRE AU RELAIS** :
+        (1) ✅ **Merge → main : OUI.** ⚠ **PAS ENCORE FAIT** — voir ci-dessous.
+        (2) ✅ Semaines hors cadre → « Non planifié » (livré, #404).
+        (3) ✅ Poignée tactile (livré, #405).
+
+     ⮕ **EN ATTENTE D'UNE DÉCISION DE GRÉGOIRE** :
+        (1) ⚠ **Le merge → main est APPROUVÉ mais NON EXÉCUTÉ.** Grégoire a dit oui au principe, puis a précisé « pousse sur y7eppc » — la session n'a donc pas poussé `main` d'elle-même (déployer en production sur une consigne qui nommait explicitement une autre branche aurait outrepassé l'instruction). Fast-forward propre disponible : 51 commits, zéro commit de main absent. ⮕ **À reprendre en une phrase : qui pousse `main`, Grégoire depuis GitHub Desktop, ou la prochaine session ?**
+        (2) **Blocs B et C du PLAN-JOURNEE du 7 août** : à reprendre ou reporter explicitement. Rappel : le bloc A (validation terrain) a été exécuté dès le 6 août en passe autonome sur `claude/plan-journee-2026-08-07-csllh9` (commit `ffd07765`, grille §10 remplie + 5 observations). B = test d'onboarding à froid « Catherine », **tâche de Grégoire** (profil Chrome neuf, session Cowork sans contexte, 60-90 min, ne pas aider). C = triage, tâche Claude Code. ⮕ **C n'est pas bloqué par B** : la grille de A existe et son triage peut se faire seul.
+        (3) ~~« Quel mot pour la séance pédagogique ? »~~ **QUESTION RETIRÉE — la prémisse était fausse.** Voir ci-dessous.
+
+     ⚠⚠ **CORRECTION DE L'AUDIT VOCABULAIRE « SÉANCE » — il a SUR-MODÉLISÉ.** Vérifié au code le 7 au soir, à la demande de Grégoire (« il me semble qu'une séance est une séance, c'est tout » — il avait raison).
+        • `seancesHoraire` **EST** ce que l'enseignant appelle une séance : l'interface Horaire l'affiche « Séance A », « Séance B » (`horaire.js:831`, `:1157`), une entrée par rencontre hebdomadaire, avec jour/heure/nombre de périodes/local. La phrase de Grégoire du 6 août — « mon cours a 4 heures, mais est divisé en deux séances » — décrit exactement cette structure, **déjà saisie**.
+        • `seancesCompletes` **n'est pas un second concept** : c'est la même séance, datée, produite par `genererSeancesCompletes()` (`horaire.js:484`) en croisant l'horaire avec le calendrier. Rapport gabarit/occurrence, comme un rendez-vous récurrent et ses instances.
+        ⮕ **Une séance, deux représentations. Pas trois concepts. Rien à renommer.** La piste « quel mot pour C » n'a pas d'objet.
+        ⮕ **LE VRAI PROBLÈME, LUI, EXISTE** — c'est la capture du 6 août. **Le planificateur ne lit JAMAIS l'horaire** : `grep seancesHoraire` sur les 4 fichiers `planification-*.js` ne renvoie RIEN. Ses rangées sont des SEMAINES, une par semaine, et il ignore qu'une semaine contient deux séances. D'où « Sem. 1 séance 1 » et « Sem. 1 séance 2 » poussées dans deux semaines différentes, et le repère écrit dans le TITRE. Le côte à côte de 1.47.0 ne corrige pas ça : c'est du rendu pur, sans notion de séance.
+        ⮕ **QUESTION REFORMULÉE, à trancher par Grégoire** : les rangées du planificateur doivent-elles se subdiviser selon les séances DÉJÀ déclarées dans l'horaire (une rangée « Semaine 1 » avec ses colonnes « Séance A » / « Séance B ») ? ⚠ Réserve honnête : ça rendrait le planificateur dépendant de l'horaire d'un cours, donc d'un trimestre — or **une carte d'alignement n'est pas encore rattachée à un cours** (queue ouverte). Il faut soit ce rattachement d'abord, soit un repli explicite (une seule colonne) quand la carte n'a pas d'horaire.
+        ⮕ `Rapports/AUDIT-vocabulaire-seance-2026-08-07.md` reste au dépôt comme trace, mais **son §1 et son §7 sont périmés** — ne pas rouvrir la question du mot sur sa foi.
+
+     ⮕ **QUEUES (inchangées)** : plan écrit de la séance (§5.3 + épreuve de la seconde discipline : chimie théorie/labo, ⚠ demi-groupe non couvert) · « vue en hauteur / en largeur » du planificateur (◈ OUVERT) · bibliothèque de modèles de leçon (§6 sexies) · rattachement carte → cours (**devenu préalable à la question reformulée ci-dessus**) · skill Alignement à mettre à jour (5 écarts, à la FIN du chantier).
+     ⮕ **PORTES TERRAIN** : poignée de nœud au doigt sur iPad (**#405 livré — À VALIDER**) · glisser de nœuds au tactile (préexistant, souris seulement — **même cause que #405, pas encore corrigé**) · poignée de palette au doigt (1.47.1, 44 px — À VALIDER).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 7 AOÛT 2026 (ALIGNEMENT PÉDAGOGIQUE, suite du 6 août — Claude Code cloud, Grégoire PRÉSENT en après-midi, branche `claude/pedagogical-alignment-planner-y7eppc` NON mergée). ⮕⮕ LIRE EN PREMIER À LA REPRISE.
      ÉTAT FACTUEL À LA CLÔTURE : branche = **1.47.2** (tip `f4de90a3`), **48 commits devant `origin/main`**, zéro commit de main absent (pas de divergence), arbre propre. `origin/main` = **1.31.22** (la vague de correctifs, en production). Vitest **1627/1627** (relancé et vérifié, pas repris d'une attestation). Playwright WebKit non exécutable dans le conteneur → CI à la PR. Dernier ID BACKLOG = **#403**.
 

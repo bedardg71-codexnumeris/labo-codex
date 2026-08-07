@@ -1,5 +1,29 @@
 # AUDIT — la collision de vocabulaire « séance »
 
+> ## ⛔ PÉRIMÉ EN PARTIE — NE PAS OUVRIR DE CHANTIER SUR CE RAPPORT
+>
+> **7 août 2026, soir.** Relu au code à la demande de Grégoire. **Ce rapport a
+> sur-modélisé : sa prémisse centrale est fausse.**
+>
+> Il pose trois concepts rivaux. Il n'y en a qu'**un**, avec deux
+> représentations :
+> - `seancesHoraire` **EST** la séance de l'enseignant — l'interface Horaire
+>   l'affiche « Séance A », « Séance B » (`horaire.js:831`, `:1157`), une
+>   entrée par rencontre hebdomadaire.
+> - `seancesCompletes` n'est pas un second concept : c'est la même séance,
+>   datée, dérivée par `genererSeancesCompletes()` (`horaire.js:484`).
+>   Gabarit et occurrence, comme un rendez-vous récurrent et ses instances.
+>
+> ⮕ **Rien à renommer. Le §1 et le §7 (« quel mot pour C ? ») sont sans objet.**
+> Les §2 à §6 gardent leur valeur *descriptive* (volumétrie, fichiers mixtes,
+> clés de stockage), mais ne commandent aucun travail.
+>
+> ⮕ **Le vrai problème est ailleurs et il est plus petit** : le planificateur
+> ne lit jamais l'horaire (`grep seancesHoraire` sur `js/planification-*.js` ne
+> renvoie rien). Ses rangées sont des semaines, il ignore qu'une semaine porte
+> deux séances — d'où le repère écrit dans les titres. La question ouverte est
+> consignée dans `SESSION.md` (bloc du 7 août soir), pas ici.
+
 > **7 août 2026.** Lecture seule, aucun renommage exécuté.
 > Demandé par `docs/utilisateur/METHODE-ALIGNEMENT.md` §5.3, point 5 :
 > *« Renommage inter-modules → audit des call-sites AVANT d'annoncer un
