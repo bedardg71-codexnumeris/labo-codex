@@ -4910,11 +4910,27 @@ function mettreAJourListeCartes() {
     var select = document.getElementById('planif-liste-cartes');
     if (!select) return;
     select.innerHTML = '';
+
+    // Le cours rattaché s'affiche ICI, là où l'enseignant regarde déjà. Un champ
+    // qui n'est visible que dans un panneau finit par ne pas être rempli — c'est
+    // exactement ce qui est arrivé à la semaine des leçons (F1/F3, 6 août).
+    // Résolu contre la collection vivante : un cours supprimé n'affiche rien
+    // plutôt qu'un code fantôme.
+    var coursParId = {};
+    try {
+        var listeCours = db.getSync('cours', []);
+        if (Array.isArray(listeCours)) {
+            listeCours.forEach(function(c) { if (c && c.id) coursParId[c.id] = c; });
+        }
+    } catch (e) { /* pas de cours lisible : les cartes s'affichent nues */ }
+
     for (var i = 0; i < index.cartes.length; i++) {
         var carte = index.cartes[i];
         var opt = document.createElement('option');
         opt.value = carte.id;
-        opt.textContent = carte.nom;
+        var coursDeLaCarte = carte.coursId ? coursParId[carte.coursId] : null;
+        var suffixe = coursDeLaCarte ? (coursDeLaCarte.code || coursDeLaCarte.nom || '') : '';
+        opt.textContent = carte.nom + (suffixe ? ' · ' + suffixe : '');
         if (carte.id === index.active) opt.selected = true;
         select.appendChild(opt);
     }
@@ -4925,7 +4941,7 @@ function nouvelleCarte(nom) {
     var index = window.planificationDonnees.getIndex();
     if (!index) index = { active: null, compteurCartes: 0, cartes: [] };
     var id = 'carte_' + (++index.compteurCartes);
-    index.cartes.push({ id: id, nom: nom || 'Sans titre', dateCreation: new Date().toISOString() });
+    index.cartes.push(window.planificationDonnees.creerEntreeIndex(id, nom));
     index.active = id;
     window.planificationDonnees.sauvegarderIndex(index);
     viderCanvas();
@@ -4978,7 +4994,7 @@ function importerCarte(fichier) {
             var index = window.planificationDonnees.getIndex();
             if (!index) index = { active: null, compteurCartes: 0, cartes: [] };
             var id = 'carte_' + (++index.compteurCartes);
-            index.cartes.push({ id: id, nom: nom, dateCreation: new Date().toISOString() });
+            index.cartes.push(window.planificationDonnees.creerEntreeIndex(id, nom));
             index.active = id;
             window.planificationDonnees.sauvegarderIndex(index);
             // Migration anciens types de connaissances → Anderson (fichiers importés)
@@ -5035,7 +5051,7 @@ function dupliquerCarteActive() {
     var nom = prompt('Nom de la copie :', nomOrigine + ' (copie)');
     if (nom === null) return;
     var id = 'carte_' + (++index.compteurCartes);
-    index.cartes.push({ id: id, nom: nom.trim() || nomOrigine + ' (copie)', dateCreation: new Date().toISOString() });
+    index.cartes.push(window.planificationDonnees.creerEntreeIndex(id, nom.trim() || nomOrigine + ' (copie)'));
     var contenu = {
         compteur: etat.compteur,
         compteurLiens: etat.compteurLiens,
@@ -5685,6 +5701,22 @@ function initialiser() {
             panneauImportTri.classList.remove('ouvert');
         });
         panneauImportTri.addEventListener('click', function(e) { e.stopPropagation(); });
+    }
+
+    var btnCoursCarte = document.getElementById('planif-btn-cours-carte');
+    var panneauCoursCarte = document.getElementById('planif-cours-carte-panel');
+    if (btnCoursCarte && panneauCoursCarte) {
+        btnCoursCarte.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var dropdownActions = document.getElementById('planif-actions-dropdown');
+            if (dropdownActions) dropdownActions.classList.remove('ouvert');
+            rendrePanneauCoursCarte();
+            panneauCoursCarte.classList.add('ouvert');
+        });
+        document.addEventListener('click', function() {
+            panneauCoursCarte.classList.remove('ouvert');
+        });
+        panneauCoursCarte.addEventListener('click', function(e) { e.stopPropagation(); });
     }
 
     var btnAnnuler = document.getElementById('planif-btn-annuler');
@@ -6685,6 +6717,76 @@ function rendrePanneauImportTrimestre() {
             } else {
                 afficherToastLien("L'import a échoué — rien n'a été modifié.");
             }
+        });
+    });
+}
+
+// === COURS RATTACHÉ À LA CARTE — panneau (lot 1, 7 août 2026) ===
+//
+// Le rattachement se CHOISIT, il ne se devine pas. Même règle que la migration
+// d'ancrage temporel du 6 août : on ne déduit rien du titre de la carte, parce
+// qu'un rattachement faux serait indiscernable d'un vrai. Les cartes déjà
+// existantes restent donc sans cours jusqu'à ce que l'enseignant en désigne un.
+function rendrePanneauCoursCarte() {
+    var panneau = document.getElementById('planif-cours-carte-panel');
+    if (!panneau) return;
+    var index = window.planificationDonnees.getIndex();
+    var carteId = index && index.active;
+    if (!carteId) {
+        panneau.innerHTML = '<div class="planif-import-tri-vide">Aucune carte active.</div>';
+        return;
+    }
+
+    var liste = [];
+    try { liste = db.getSync('cours', []) || []; } catch (e) { liste = []; }
+    if (!Array.isArray(liste)) liste = [];
+
+    var actuel = window.planificationDonnees.obtenirCoursDeCarte(carteId);
+    var orphelin = window.planificationDonnees.rattachementOrphelin(carteId);
+
+    var html = '<div class="planif-import-tri-groupe">Cours de cette carte</div>';
+
+    // Un rattachement orphelin se DIT — sinon le panneau afficherait « Aucun »
+    // et l'enseignant croirait n'avoir jamais rien rattaché.
+    if (orphelin) {
+        html += '<div class="planif-import-tri-vide">Le cours rattaché n\'existe plus dans ce codex. ' +
+                'La carte reste utilisable — choisis-en un autre, ou détache-la.</div>';
+    }
+
+    if (!liste.length) {
+        html += '<div class="planif-import-tri-vide">Aucun cours dans ce codex. ' +
+                'Crée-le dans Réglages, puis reviens ici.</div>';
+    }
+
+    for (var i = 0; i < liste.length; i++) {
+        var c = liste[i];
+        if (!c || !c.id) continue;
+        var libelle = c.code ? (c.code + (c.nom ? ' — ' + c.nom : '')) : (c.nom || c.id);
+        var estActuel = !orphelin && c.id === actuel;
+        html += '<div class="planif-import-tri-ligne">' +
+                '<span class="planif-import-tri-nom" title="' + echapperHtml(libelle) + '">' + echapperHtml(libelle) + '</span>' +
+                (estActuel
+                    ? '<span class="planif-import-tri-nb">rattachée</span>'
+                    : '<button type="button" class="planif-btn-carte planif-cours-carte-btn" data-cours="' + echapperHtml(c.id) + '">Rattacher</button>') +
+                '</div>';
+    }
+
+    if (actuel) {
+        html += '<div class="planif-import-tri-ligne">' +
+                '<span class="planif-import-tri-nom">Aucun cours</span>' +
+                '<button type="button" class="planif-btn-carte planif-cours-carte-btn" data-cours="">Détacher</button>' +
+                '</div>';
+    }
+
+    panneau.innerHTML = html;
+    panneau.querySelectorAll('.planif-cours-carte-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            window.planificationDonnees.definirCoursDeCarte(carteId, btn.dataset.cours || null);
+            panneau.classList.remove('ouvert');
+            mettreAJourListeCartes();
+            afficherToastLien(btn.dataset.cours
+                ? 'Carte rattachée — elle suivra ce cours d\'un trimestre à l\'autre.'
+                : 'Carte détachée de son cours.');
         });
     });
 }
