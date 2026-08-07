@@ -454,8 +454,14 @@ describe('F1 · les notes de leçon sont retirées partout', () => {
         expect(organisateur).not.toContain('seancesImport');
     });
 
-    it('les notes d’étapes de l’enseignement explicite sont INTACTES (autre donnée)', () => {
-        // Garde-fou : `org-ee-notes` n'a rien à voir avec les notes de leçon.
-        expect(organisateur).toContain('org-ee-notes');
+    it('les étapes de l’enseignement explicite ont quitté l’organisateur — par DÉCISION', () => {
+        // Historique inversé le 7 août 2026. Ce cas protégeait `org-ee-notes`
+        // contre un retrait ACCIDENTEL pendant l'ablation des notes de leçon
+        // (1.33.0). Depuis, Grégoire a décidé de faire des étapes EE des NŒUDS
+        // de la carte (frères d'Activité) et de retirer l'UI du plan —
+        // suppression franche actée. Le garde-fou change donc de sens : toute
+        // RÉAPPARITION serait une régression. La contrepartie positive vit
+        // dans `sentinelle-enseignement-explicite.test.js`.
+        expect(organisateur).not.toContain('org-ee-notes');
     });
 });

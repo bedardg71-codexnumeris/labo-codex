@@ -20,12 +20,11 @@ var selectCarte, selectSequence, selectLecon;
 var contenuLecon, enteteCalendrier, enteteCalendrierContenu;
 var objectifContenu, btnReinitObjectif;
 var prerequisContenu, productionsContenu;
-var eeCheckbox, coeurBrut, coeurContenu, eeEtapes;
-var listeNonAssignees;
+var coeurBrut, coeurContenu;
 var btnExport, modaleExport;
 
 // === NOMS DES ÉTAPES EE ===
-var NOMS_ETAPES = ['ouverture', 'modelisation', 'pratiqueGuidee', 'pratiqueAutonome', 'cloture'];
+
 
 // ============================================================
 //  INITIALISATION
@@ -50,11 +49,8 @@ function initialiserModuleOrganisateur() {
         btnReinitObjectif = document.getElementById('org-btn-reinit-objectif');
         prerequisContenu = document.getElementById('org-prerequis-contenu');
         productionsContenu = document.getElementById('org-productions-contenu');
-        eeCheckbox = document.getElementById('org-ee-checkbox');
         coeurBrut = document.getElementById('org-coeur-brut');
         coeurContenu = document.getElementById('org-coeur-contenu');
-        eeEtapes = document.getElementById('org-ee-etapes');
-        listeNonAssignees = document.getElementById('org-ee-liste-non-assignees');
         btnExport = document.getElementById('org-btn-export');
         modaleExport = document.getElementById('org-modale-export');
 
@@ -118,48 +114,6 @@ function brancherEvenements() {
         leconActiveId = selectLecon.value || null;
         sauvegarderSelectionsOrg();
         afficherLecon();
-    });
-
-    // Enseignement explicite — toggle
-    if (eeCheckbox) eeCheckbox.addEventListener('change', function() {
-        var leconId = selectLecon ? selectLecon.value : '';
-        if (!leconId) return;
-        sauvegarderDonneeLecon(leconId, 'enseignementExplicite', eeCheckbox.checked);
-        basculerEE(eeCheckbox.checked);
-    });
-
-    // Checkboxes des étapes EE
-    document.querySelectorAll('.org-ee-etape-check').forEach(function(cb) {
-        cb.addEventListener('change', function() {
-            var leconId = selectLecon ? selectLecon.value : '';
-            if (!leconId) return;
-            var etape = cb.dataset.etape;
-            var seances = chargerSeances();
-            var kA = cleNote(leconId);
-            if (!kA) return;
-            if (!seances[kA]) seances[kA] = {};
-            if (!seances[kA].etapes) seances[kA].etapes = creerEtapesVides();
-            seances[kA].etapes[etape].active = cb.checked;
-            sauvegarderSeances(seances);
-            var corps = cb.closest('.org-ee-etape').querySelector('.org-ee-etape-corps');
-            if (corps) corps.style.display = cb.checked ? '' : 'none';
-        });
-    });
-
-    // Notes des étapes EE
-    document.querySelectorAll('.org-ee-notes').forEach(function(ta) {
-        ta.addEventListener('input', debounce(function() {
-            var leconId = selectLecon ? selectLecon.value : '';
-            if (!leconId) return;
-            var etape = ta.dataset.etape;
-            var seances = chargerSeances();
-            var kC = cleNote(leconId);
-            if (!kC) return;
-            if (!seances[kC]) seances[kC] = {};
-            if (!seances[kC].etapes) seances[kC].etapes = creerEtapesVides();
-            seances[kC].etapes[etape].contenu = ta.value;
-            sauvegarderSeances(seances);
-        }, 500));
     });
 
     // Objectif éditable
@@ -234,7 +188,6 @@ function brancherEvenements() {
     }
 
     // Drag & drop pour les activités dans les étapes EE
-    configurerDragDrop();
 }
 
 // ============================================================
@@ -720,10 +673,6 @@ function afficherCoeurLecon(leconId) {
     var seances = chargerSeances();
     var donnees = seances[cleNote(leconId)] || {};
 
-    // Checkbox EE
-    var eeActif = !!donnees.enseignementExplicite;
-    if (eeCheckbox) eeCheckbox.checked = eeActif;
-    basculerEE(eeActif);
 
     // Collecter les enfants de la leçon (activités + types de connaissances)
     var TYPES_CONTENEURS = { 'sequence': true, 'lecon': true };
@@ -747,7 +696,6 @@ function afficherCoeurLecon(leconId) {
 
     // === Étapes EE (quand EE coché) ===
     if (eeActif) {
-        afficherEtapesEE(leconId, activites, donnees);
     }
 }
 
@@ -869,245 +817,6 @@ function brancherSelecteursActivites(conteneur, leconId) {
 // ============================================================
 //  PHASE 3 : ENSEIGNEMENT EXPLICITE (5 ÉTAPES)
 // ============================================================
-
-function basculerEE(actif) {
-    if (coeurBrut) coeurBrut.style.display = actif ? 'none' : '';
-    if (eeEtapes) eeEtapes.style.display = actif ? '' : 'none';
-
-    var ouvertureContainer = document.getElementById('org-ee-ouverture-sections');
-    var clotureContainer = document.getElementById('org-ee-cloture-sections');
-    var objectifSection = document.getElementById('org-objectif');
-    var prerequisSection = document.getElementById('org-prerequis');
-    var contenuLecon = document.getElementById('org-contenu-lecon');
-
-    if (actif) {
-        // Déplacer Objectif et Prérequis dans l'Ouverture
-        if (ouvertureContainer && objectifSection) ouvertureContainer.appendChild(objectifSection);
-        if (ouvertureContainer && prerequisSection) ouvertureContainer.appendChild(prerequisSection);
-
-        // Générer le rappel des compétences dans la Clôture
-        if (clotureContainer) {
-            var objectifTexte = objectifContenu ? objectifContenu.textContent.trim() : '';
-            clotureContainer.innerHTML = '';
-            if (objectifTexte) {
-                var div = document.createElement('div');
-                div.className = 'org-section org-ee-cloture-rappel';
-                var titre = document.createElement('div');
-                titre.className = 'org-section-titre';
-                titre.textContent = 'Compétences développées';
-                var contenu = document.createElement('div');
-                contenu.className = 'org-section-contenu';
-                contenu.textContent = objectifTexte;
-                div.appendChild(titre);
-                div.appendChild(contenu);
-                clotureContainer.appendChild(div);
-            }
-        }
-    } else {
-        // Remettre Objectif et Prérequis dans le contenu leçon (avant Productions)
-        var productionsSection = document.getElementById('org-productions');
-        if (contenuLecon && objectifSection) contenuLecon.insertBefore(objectifSection, productionsSection);
-        if (contenuLecon && prerequisSection) contenuLecon.insertBefore(prerequisSection, productionsSection);
-
-        // Vider le rappel Clôture
-        if (clotureContainer) clotureContainer.innerHTML = '';
-    }
-}
-
-function afficherEtapesEE(leconId, activites, donnees) {
-    var carte = window.planificationCarte;
-    if (!carte || !carte.etat) return;
-    var etat = carte.etat;
-
-    var etapesData = donnees.etapes || creerEtapesVides();
-    var activitesAssignees = {}; // actId → true si dans au moins une étape
-
-    // Index d'ordre selon la position dans la carte (enfants de la leçon)
-    var lecon = etat.noeuds.get(leconId);
-    var ordreCarteIndex = {};
-    if (lecon && lecon.enfants) {
-        for (var o = 0; o < lecon.enfants.length; o++) {
-            ordreCarteIndex[lecon.enfants[o]] = o;
-        }
-    }
-
-    // Pré-calculer quelles activités sont assignées à au moins une étape
-    for (var p = 0; p < NOMS_ETAPES.length; p++) {
-        var acts = (etapesData[NOMS_ETAPES[p]] || {}).activites || [];
-        for (var q = 0; q < acts.length; q++) {
-            activitesAssignees[acts[q]] = true;
-        }
-    }
-
-    // Remplir chaque étape
-    for (var i = 0; i < NOMS_ETAPES.length; i++) {
-        var nomEtape = NOMS_ETAPES[i];
-        var etapeData = etapesData[nomEtape] || { active: true, contenu: '', activites: [] };
-
-        // Mettre à jour checkbox et corps
-        var checkEl = document.querySelector('.org-ee-etape-check[data-etape="' + nomEtape + '"]');
-        if (checkEl) checkEl.checked = etapeData.active;
-        var corpsEl = document.querySelector('.org-ee-etape[data-etape="' + nomEtape + '"] .org-ee-etape-corps');
-        if (corpsEl) corpsEl.style.display = etapeData.active ? '' : 'none';
-
-        // Remplir les notes
-        var notesEl = document.querySelector('.org-ee-notes[data-etape="' + nomEtape + '"]');
-        if (notesEl) notesEl.value = etapeData.contenu || '';
-
-        // Remplir la zone de dépôt avec les activités assignées (triées selon l'ordre de la carte)
-        var zoneDepot = document.querySelector('.org-ee-zone-depot[data-etape="' + nomEtape + '"]');
-        if (zoneDepot) {
-            var htmlZone = '';
-            var actsEtape = (etapeData.activites || []).slice().sort(function(a, b) {
-                return (ordreCarteIndex[a] || 0) - (ordreCarteIndex[b] || 0);
-            });
-            for (var a = 0; a < actsEtape.length; a++) {
-                var actId = actsEtape[a];
-                var noeud = etat.noeuds.get(actId);
-                if (noeud) {
-                    htmlZone += genererActiviteMiniHTML(noeud, carte, nomEtape);
-                }
-            }
-            zoneDepot.innerHTML = htmlZone || '<span class="org-placeholder">Glisser des activités ici</span>';
-        }
-    }
-
-    // Activités non assignées (dans aucune étape)
-    if (listeNonAssignees) {
-        var htmlNon = '';
-        for (var j = 0; j < activites.length; j++) {
-            var actNoeud = etat.noeuds.get(activites[j]);
-            if (actNoeud && !activitesAssignees[actNoeud.id]) {
-                htmlNon += genererActiviteMiniHTML(actNoeud, carte, null);
-            }
-        }
-        listeNonAssignees.innerHTML = htmlNon || '<span class="org-placeholder">Toutes les activités sont assignées.</span>';
-
-        // Montrer/masquer la section non-assignées
-        var sectionNonAssignees = document.getElementById('org-ee-non-assignees');
-        if (sectionNonAssignees) {
-            sectionNonAssignees.style.display = htmlNon ? '' : 'none';
-        }
-    }
-}
-
-function genererActiviteMiniHTML(noeud, carte, etape) {
-    var couleur = carte.obtenirCouleurNoeud(noeud);
-    var label = carte.obtenirLabelNoeud(noeud);
-    var h = '<div class="org-ee-activite-mini" data-noeud="' + noeud.id + '" draggable="true">';
-    h += '<span class="org-pastille" style="background: ' + couleur + '"></span>';
-    h += '<span class="org-ee-activite-titre">' + escHtml(noeud.titre || label) + '</span>';
-    h += '<span class="org-ee-activite-type">' + label.toUpperCase() + '</span>';
-    if (noeud.metadata && noeud.metadata.duree) {
-        h += '<span class="org-duree">' + noeud.metadata.duree + ' min</span>';
-    }
-    if (etape) {
-        h += '<button class="org-ee-retirer" data-noeud="' + noeud.id + '" data-etape="' + etape + '" title="Retirer de cette étape"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>';
-    }
-    h += '</div>';
-    return h;
-}
-
-// ============================================================
-//  DRAG & DROP (ACTIVITÉS → ÉTAPES EE)
-// ============================================================
-
-function configurerDragDrop() {
-    var conteneur = document.getElementById('conception-organisateur');
-    if (!conteneur) return;
-
-    // Retirer une activité d'une étape spécifique (bouton ×)
-    conteneur.addEventListener('click', function(e) {
-        var btn = e.target.closest('.org-ee-retirer');
-        if (!btn) return;
-        e.preventDefault();
-        var noeudId = btn.dataset.noeud;
-        var etape = btn.dataset.etape;
-        var leconId = selectLecon ? selectLecon.value : '';
-        if (!leconId || !noeudId || !etape) return;
-
-        var seances = chargerSeances();
-        var kR = cleNote(leconId);
-        if (!kR || !seances[kR] || !seances[kR].etapes) return;
-        var actsEtape = seances[kR].etapes[etape].activites;
-        var idx = actsEtape.indexOf(noeudId);
-        if (idx !== -1) actsEtape.splice(idx, 1);
-        sauvegarderSeances(seances);
-        afficherCoeurLecon(leconId);
-    });
-
-    conteneur.addEventListener('dragstart', function(e) {
-        var activiteEl = e.target.closest('.org-ee-activite-mini, .org-activite');
-        if (!activiteEl) return;
-        e.dataTransfer.setData('text/plain', activiteEl.dataset.noeud);
-        e.dataTransfer.effectAllowed = 'move';
-        activiteEl.classList.add('org-drag-en-cours');
-    });
-
-    conteneur.addEventListener('dragend', function(e) {
-        var activiteEl = e.target.closest('.org-ee-activite-mini, .org-activite');
-        if (activiteEl) activiteEl.classList.remove('org-drag-en-cours');
-        conteneur.querySelectorAll('.org-ee-zone-depot').forEach(function(z) {
-            z.classList.remove('org-depot-survol');
-        });
-    });
-
-    conteneur.addEventListener('dragover', function(e) {
-        var zone = e.target.closest('.org-ee-zone-depot, .org-ee-liste');
-        if (zone) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-            if (zone.classList.contains('org-ee-zone-depot')) {
-                zone.classList.add('org-depot-survol');
-            }
-        }
-    });
-
-    conteneur.addEventListener('dragleave', function(e) {
-        var zone = e.target.closest('.org-ee-zone-depot');
-        if (zone) zone.classList.remove('org-depot-survol');
-    });
-
-    conteneur.addEventListener('drop', function(e) {
-        var zone = e.target.closest('.org-ee-zone-depot, .org-ee-liste');
-        if (!zone) return;
-        e.preventDefault();
-        var noeudId = e.dataTransfer.getData('text/plain');
-        if (!noeudId) return;
-
-        zone.classList.remove('org-depot-survol');
-
-        var leconId = selectLecon ? selectLecon.value : '';
-        if (!leconId) return;
-
-        var seances = chargerSeances();
-        var kD = cleNote(leconId);
-        if (!kD) return;
-        if (!seances[kD]) seances[kD] = {};
-        if (!seances[kD].etapes) seances[kD].etapes = creerEtapesVides();
-
-        if (zone.classList.contains('org-ee-zone-depot')) {
-            // Ajouter à l'étape cible (sans retirer des autres)
-            var etapeCible = zone.dataset.etape;
-            if (etapeCible && seances[kD].etapes[etapeCible]) {
-                var actsTarget = seances[kD].etapes[etapeCible].activites;
-                if (actsTarget.indexOf(noeudId) === -1) {
-                    actsTarget.push(noeudId);
-                }
-            }
-        } else {
-            // Drop dans non-assignées → retirer de toutes les étapes
-            for (var i = 0; i < NOMS_ETAPES.length; i++) {
-                var actsEtape = seances[kD].etapes[NOMS_ETAPES[i]].activites;
-                var idx = actsEtape.indexOf(noeudId);
-                if (idx !== -1) actsEtape.splice(idx, 1);
-            }
-        }
-
-        sauvegarderSeances(seances);
-        afficherCoeurLecon(leconId);
-    });
-}
 
 // ============================================================
 //  (La « Vue calendrier » — rendu de la carte recyclé puis rogné en
@@ -1484,46 +1193,15 @@ function genererLeconTXT(lecon, etat, seances, carte, estEleve) {
 
     if (!estEleve) {
         // Enseignant : détails pédagogiques
-        if (donnees.enseignementExplicite && donnees.etapes) {
-            var labelsEtapes = {
-                ouverture: 'Ouverture',
-                modelisation: 'Modélisation',
-                pratiqueGuidee: 'Pratique guidée',
-                pratiqueAutonome: 'Pratique autonome',
-                cloture: 'Clôture'
-            };
-            for (var ei = 0; ei < NOMS_ETAPES.length; ei++) {
-                var ne = NOMS_ETAPES[ei];
-                var etapeD = donnees.etapes[ne];
-                if (!etapeD || !etapeD.active) continue;
-                txt += '  │ [' + labelsEtapes[ne] + ']\n';
-                if (etapeD.contenu) {
-                    var lignes = etapeD.contenu.split('\n');
-                    for (var li = 0; li < lignes.length; li++) {
-                        txt += '  │   ' + lignes[li] + '\n';
-                    }
-                }
-                if (etapeD.activites && etapeD.activites.length > 0) {
-                    for (var ai = 0; ai < etapeD.activites.length; ai++) {
-                        var actNoeud = etat.noeuds.get(etapeD.activites[ai]);
-                        if (actNoeud) {
-                            txt += '  │   • ' + (actNoeud.titre || carte.obtenirLabelNoeud(actNoeud));
-                            if (actNoeud.metadata && actNoeud.metadata.duree) txt += ' (' + formatDuree(actNoeud.metadata.duree) + ')';
-                            txt += '\n';
-                        }
-                    }
-                }
-            }
-        } else {
-            // Pas d'EE — lister les activités
-            var enfants = (lecon.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); });
-            for (var j = 0; j < enfants.length; j++) {
-                var enf = etat.noeuds.get(enfants[j]);
-                if (!enf) continue;
-                var dureeAct = enf.metadata && enf.metadata.duree ? ' (' + formatDuree(enf.metadata.duree) + ')' : '';
-                txt += '  │ • [' + carte.obtenirLabelNoeud(enf) + '] ' + (enf.titre || 'Sans titre') + dureeAct + '\n';
-            }
+        // Pas d'EE — lister les activités
+        var enfants = (lecon.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); });
+        for (var j = 0; j < enfants.length; j++) {
+            var enf = etat.noeuds.get(enfants[j]);
+            if (!enf) continue;
+            var dureeAct = enf.metadata && enf.metadata.duree ? ' (' + formatDuree(enf.metadata.duree) + ')' : '';
+            txt += '  │ • [' + carte.obtenirLabelNoeud(enf) + '] ' + (enf.titre || 'Sans titre') + dureeAct + '\n';
         }
+    
     }
 
     txt += '  └─\n';
@@ -1646,45 +1324,18 @@ function genererLeconMD(lecon, etat, seances, carte, estEleve) {
 
     if (!estEleve) {
         // Enseignant : étapes EE ou activités brutes
-        if (donnees.enseignementExplicite && donnees.etapes) {
-            var labelsEtapes = {
-                ouverture: 'Ouverture',
-                modelisation: 'Modélisation',
-                pratiqueGuidee: 'Pratique guidée',
-                pratiqueAutonome: 'Pratique autonome',
-                cloture: 'Clôture'
-            };
-            for (var ei = 0; ei < NOMS_ETAPES.length; ei++) {
-                var ne = NOMS_ETAPES[ei];
-                var etapeD = donnees.etapes[ne];
-                if (!etapeD || !etapeD.active) continue;
-                md += '#### ' + labelsEtapes[ne] + '\n\n';
-                if (etapeD.contenu) md += etapeD.contenu + '\n\n';
-                if (etapeD.activites && etapeD.activites.length > 0) {
-                    for (var ai = 0; ai < etapeD.activites.length; ai++) {
-                        var actNoeud = etat.noeuds.get(etapeD.activites[ai]);
-                        if (actNoeud) {
-                            md += '- **' + (actNoeud.titre || carte.obtenirLabelNoeud(actNoeud)) + '**';
-                            if (actNoeud.metadata && actNoeud.metadata.duree) md += ' (' + formatDuree(actNoeud.metadata.duree) + ')';
-                            md += '\n';
-                        }
-                    }
-                    md += '\n';
-                }
+        var enfants = (lecon.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); });
+        if (enfants.length > 0) {
+            md += '**Activités** :\n';
+            for (var j = 0; j < enfants.length; j++) {
+                var enf = etat.noeuds.get(enfants[j]);
+                if (!enf) continue;
+                var dureeAct = enf.metadata && enf.metadata.duree ? ' (' + formatDuree(enf.metadata.duree) + ')' : '';
+                md += '- [' + carte.obtenirLabelNoeud(enf) + '] ' + (enf.titre || 'Sans titre') + dureeAct + '\n';
             }
-        } else {
-            var enfants = (lecon.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); });
-            if (enfants.length > 0) {
-                md += '**Activités** :\n';
-                for (var j = 0; j < enfants.length; j++) {
-                    var enf = etat.noeuds.get(enfants[j]);
-                    if (!enf) continue;
-                    var dureeAct = enf.metadata && enf.metadata.duree ? ' (' + formatDuree(enf.metadata.duree) + ')' : '';
-                    md += '- [' + carte.obtenirLabelNoeud(enf) + '] ' + (enf.titre || 'Sans titre') + dureeAct + '\n';
-                }
-                md += '\n';
-            }
+            md += '\n';
         }
+    
     }
 
     md += '---\n\n';
@@ -1999,13 +1650,7 @@ function sauvegarderChoixActivite(leconId, activiteId, retroaction, productionId
     sauvegarderSeances(seances);
 }
 
-function creerEtapesVides() {
-    var etapes = {};
-    for (var i = 0; i < NOMS_ETAPES.length; i++) {
-        etapes[NOMS_ETAPES[i]] = { active: true, contenu: '', activites: [] };
-    }
-    return etapes;
-}
+
 
 // ============================================================
 //  UTILITAIRES

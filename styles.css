@@ -18466,6 +18466,15 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     --planif-couleur-revision: #15803d;
     /* Évaluation — Rose/magenta */
     --planif-couleur-evaluation: #D946EF;
+
+    /* Enseignement explicite (7 août 2026) — cyan→sarcelle, clair→foncé :
+       le dégradé suit le transfert de responsabilité (je fais → nous
+       faisons → tu fais). Seule famille encore libre parmi les nœuds. */
+    --planif-couleur-ouverture: #22d3ee;
+    --planif-couleur-modelisation: #06b6d4;
+    --planif-couleur-pratique-guidee: #0891b2;
+    --planif-couleur-pratique-autonome: #0e7490;
+    --planif-couleur-cloture: #155e75;
     /* Utilitaires — adaptés palette ocean */
     --planif-couleur-fond: var(--surface-conteneur, #142428);
     --planif-couleur-texte: var(--texte-principal, #d0e0e4);
@@ -19305,12 +19314,14 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 .planif-palette-categorie[data-zone="comment"]   { background: rgba(22, 163, 74, 0.06); }
 .planif-palette-categorie[data-zone="verifier"]  { background: rgba(217, 70, 239, 0.06); }
 .planif-palette-categorie[data-zone="structure"] { background: rgba(147, 51, 234, 0.06); }
+.planif-palette-categorie[data-zone="explicite"] { background: rgba(6, 182, 212, 0.06); }
 
 .planif-palette-categorie[data-zone="pourquoi"]  .planif-palette-zone-label { color: #3b82f6; }
 .planif-palette-categorie[data-zone="quoi"]      .planif-palette-zone-label { color: #f97316; }
 .planif-palette-categorie[data-zone="comment"]   .planif-palette-zone-label { color: #16a34a; }
 .planif-palette-categorie[data-zone="verifier"]  .planif-palette-zone-label { color: #D946EF; }
 .planif-palette-categorie[data-zone="structure"] .planif-palette-zone-label { color: #9333ea; }
+.planif-palette-categorie[data-zone="explicite"] .planif-palette-zone-label { color: #0891b2; }
 
 .planif-palette-zone-label {
     display: flex;
@@ -19321,13 +19332,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     white-space: nowrap;
-}
-.planif-palette-zone-sous-titre {
-    padding: 0 4px 1px;
-    font-size: 8px;
-    font-style: italic;
-    color: var(--texte-muted, #5a7a88);
-    line-height: 1.2;
 }
 
 .planif-palette-groupe {
@@ -21309,8 +21313,8 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 .planif-org-chevron { font-size: 10px; }
 .planif-org-section-contenu { font-size: 12px; line-height: 1.5; color: var(--planif-couleur-texte); }
 .planif-org-placeholder { color: var(--texte-muted, #5a7a88); font-style: italic; font-size: 12px; }
-.planif-org-ee-bar { background: rgba(200, 160, 96, 0.12); padding: 8px 16px; }
-.planif-org-ee-bar .planif-checkbox-label { font-size: 12px; }
+
+
 
 /* Activités dans l'Organisateur */
 .planif-org-activite {
@@ -21424,13 +21428,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     margin-top: 1px;
 }
 
-/* Checkbox EE dans la toolbar */
-.org-ee-toggle {
-    flex-shrink: 0;
-    white-space: nowrap;
-    font-size: 12px;
-    margin-left: 4px;
-}
+
 
 /* Sections */
 .org-section {
@@ -21641,134 +21639,41 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     cursor: pointer;
 }
 
-/* Enseignement explicite — barre (legacy, plus utilisée dans l'entête) */
-.org-ee-section { padding: 0; }
-.org-ee-bar {
-    background: rgba(200, 160, 96, 0.12);
-    padding: 12px 24px;
-    border-bottom: 1px solid rgba(200, 160, 96, 0.3);
-}
 
-/* Sections déplacées dans les étapes EE (Ouverture / Clôture) */
-#org-ee-ouverture-sections .org-section,
-#org-ee-cloture-sections .org-section {
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(106, 172, 184, 0.15);
-}
-#org-ee-ouverture-sections .org-section:last-child,
-#org-ee-cloture-sections .org-section:last-child {
-    margin-bottom: 8px;
-}
-.org-ee-cloture-rappel .org-section-contenu {
-    font-style: italic;
-    color: var(--texte-secondaire, #8aa4b0);
-}
+
+
+
+
+
 
 /* Étapes EE */
 #org-coeur-brut { padding: 14px 24px; }
-#org-ee-etapes { padding: 0; }
 
-.org-ee-non-assignees {
-    background: var(--surface-carte, #1a3040);
-    padding: 12px 24px;
-    border-bottom: 1px solid rgba(106, 172, 184, 0.25);
-}
-.org-ee-liste {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    min-height: 32px;
-}
 
-.org-ee-etape {
-    border-bottom: 1px solid rgba(106, 172, 184, 0.25);
-}
-.org-ee-etape-entete {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 24px;
-    background: rgba(59, 130, 246, 0.04);
-}
-.org-ee-etape-desc {
-    font-size: 11px;
-    color: var(--texte-muted, #5a7a88);
-    font-style: italic;
-}
-.org-ee-etape-corps {
-    padding: 10px 24px 14px;
-}
-.org-ee-notes {
-    width: 100%;
-    min-height: 48px;
-    padding: 8px 10px;
-    border: 1px solid rgba(106, 172, 184, 0.25);
-    border-radius: 6px;
-    font-size: 12px;
-    font-family: inherit;
-    resize: vertical;
-    margin-bottom: 8px;
-    color: var(--planif-couleur-texte, #1e293b);
-}
-.org-ee-notes:focus { border-color: #3b82f6; outline: none; box-shadow: var(--focus-ring); }
 
-/* Zone de dépôt drag & drop */
-.org-ee-zone-depot {
-    min-height: 36px;
-    border: 2px dashed rgba(106, 172, 184, 0.3);
-    border-radius: 8px;
-    padding: 8px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    align-items: center;
-    transition: border-color 0.15s, background 0.15s;
-}
-.org-ee-zone-depot .org-placeholder {
-    width: 100%;
-    text-align: center;
-    font-size: 11px;
-}
+
+
+
+
+
+
+
+
+
+
+
 .org-depot-survol {
     border-color: #3b82f6;
     background: rgba(59, 130, 246, 0.05);
 }
 
-/* Activité mini (dans EE) */
-.org-ee-activite-mini {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    background: var(--surface-carte, #1a3040);
-    border: 1px solid rgba(106, 172, 184, 0.25);
-    border-radius: 6px;
-    font-size: 12px;
-    cursor: grab;
-    transition: box-shadow 0.15s;
-}
-.org-ee-activite-mini:hover { box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-.org-ee-activite-mini.org-drag-en-cours { opacity: 0.4; }
-.org-ee-retirer {
-    background: none;
-    border: none;
-    color: var(--texte-muted, #5a7a88);
-    font-size: 14px;
-    cursor: pointer;
-    padding: 0 2px;
-    line-height: 1;
-    margin-left: 2px;
-    flex-shrink: 0;
-}
-.org-ee-retirer:hover { color: #ef4444; }
-.org-ee-activite-titre { font-weight: 500; }
-.org-ee-activite-type {
-    font-size: 9px;
-    font-weight: 600;
-    color: var(--texte-muted, #5a7a88);
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-}
+
+
+
+
+
+
+
 
 /* Activité draggable dans le cœur brut */
 .org-activite[draggable="true"] { cursor: grab; }
@@ -22683,44 +22588,19 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     border-color: rgba(3, 46, 92, 0.15);
     color: var(--texte-secondaire);
 }
-.mode-clair .org-ee-notes {
-    background: #ffffff;
-    border-color: rgba(3, 46, 92, 0.15);
-    color: var(--texte-principal);
-}
+
 .mode-clair .org-checkbox-label {
     color: var(--texte-principal);
 }
 
-/* Enseignement explicite — mode clair */
-.mode-clair .org-ee-non-assignees {
-    background: #f8fafc;
-    border-bottom-color: rgba(3, 46, 92, 0.1);
-}
-.mode-clair .org-ee-etape {
-    border-bottom-color: rgba(3, 46, 92, 0.1);
-}
-.mode-clair .org-ee-etape-entete {
-    background: rgba(6, 93, 187, 0.04);
-}
-.mode-clair .org-ee-etape-desc {
-    color: var(--texte-muted);
-}
-.mode-clair .org-ee-zone-depot {
-    border-color: rgba(3, 46, 92, 0.2);
-}
-.mode-clair .org-ee-activite-mini {
-    background: #ffffff;
-    border-color: rgba(3, 46, 92, 0.15);
-    color: var(--texte-principal);
-}
-.mode-clair .org-ee-cloture-rappel .org-section-contenu {
-    color: var(--texte-secondaire);
-}
-.mode-clair #org-ee-ouverture-sections .org-section,
-.mode-clair #org-ee-cloture-sections .org-section {
-    border-bottom-color: rgba(3, 46, 92, 0.08);
-}
+
+
+
+
+
+
+
+
 
 /* Cartes accueil V3 — mode clair (les cartes orange .accueil-aide-demi
    ne sont pas redéfinies : la palette --acc-* est globale et identique aux 2 modes) */

@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260807e"> <!-- Poignée de redimensionnement du planificateur + libellés de case à cocher (7 août) -->
+    <link rel="stylesheet" href="styles.css?v=20260807f"> <!-- Poignée de redimensionnement du planificateur + libellés de case à cocher (7 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -4219,8 +4219,7 @@
                                 </div>
                                 <div class="planif-palette-contenu">
                                     <div class="planif-palette-categorie" data-zone="pourquoi">
-                                        <div class="planif-palette-zone-label" data-tooltip="planif-pouvoir-enseigner">Pourquoi enseigner</div>
-                                        <div class="planif-palette-zone-sous-titre">intention curriculaire</div>
+                                        <div class="planif-palette-zone-label" data-tooltip="planif-pouvoir-enseigner">Intention curriculaire</div>
                                         <div class="planif-palette-groupe">
                                             <button class="planif-palette-btn" data-type="competence" draggable="true">
                                                 <span class="planif-pastille" style="background: var(--planif-couleur-competence)"></span>Compétence
@@ -4231,8 +4230,7 @@
                                         </div>
                                     </div>
                                     <div class="planif-palette-categorie" data-zone="quoi">
-                                        <div class="planif-palette-zone-label" data-tooltip="planif-quoi-enseigner">Quoi enseigner</div>
-                                        <div class="planif-palette-zone-sous-titre">types de connaissances</div>
+                                        <div class="planif-palette-zone-label" data-tooltip="planif-quoi-enseigner">Types de connaissances</div>
                                         <div class="planif-palette-groupe">
                                             <button class="planif-palette-btn" data-type="factuelle" draggable="true">
                                                 <span class="planif-pastille" style="background: var(--planif-couleur-factuelle)"></span>Factuelle
@@ -4249,8 +4247,7 @@
                                         </div>
                                     </div>
                                     <div class="planif-palette-categorie" data-zone="comment">
-                                        <div class="planif-palette-zone-label" data-tooltip="planif-comment-enseigner">Comment enseigner</div>
-                                        <div class="planif-palette-zone-sous-titre">mise en action</div>
+                                        <div class="planif-palette-zone-label" data-tooltip="planif-comment-enseigner">Mise en action</div>
                                         <div class="planif-palette-groupe">
                                             <button class="planif-palette-btn" data-type="activite" draggable="true">
                                                 <span class="planif-pastille" style="background: var(--planif-couleur-activite)"></span>Activité
@@ -4264,8 +4261,7 @@
                                         </div>
                                     </div>
                                     <div class="planif-palette-categorie" data-zone="verifier">
-                                        <div class="planif-palette-zone-label" data-tooltip="planif-design-apprentissages">Vérifier l'apprentissage</div>
-                                        <div class="planif-palette-zone-sous-titre">preuve de réussite</div>
+                                        <div class="planif-palette-zone-label" data-tooltip="planif-design-apprentissages">Preuve de réussite</div>
                                         <div class="planif-palette-groupe">
                                             <button class="planif-palette-btn" data-type="evaluation" draggable="true">
                                                 <span class="planif-pastille" style="background: var(--planif-couleur-evaluation)"></span>Évaluation
@@ -4273,14 +4269,33 @@
                                         </div>
                                     </div>
                                     <div class="planif-palette-categorie" data-zone="conception">
-                                        <div class="planif-palette-zone-label" data-tooltip="planif-structure">Conception</div>
-                                        <div class="planif-palette-zone-sous-titre">organisation</div>
+                                        <div class="planif-palette-zone-label" data-tooltip="planif-structure">Organisation</div>
                                         <div class="planif-palette-groupe">
                                             <button class="planif-palette-btn" data-type="sequence" draggable="true">
                                                 <span class="planif-pastille" style="background: var(--planif-couleur-sequence)"></span>Séquence
                                             </button>
                                             <button class="planif-palette-btn" data-type="lecon" draggable="true">
                                                 <span class="planif-pastille" style="background: var(--planif-couleur-lecon)"></span>Leçon
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="planif-palette-categorie" data-zone="explicite">
+                                        <div class="planif-palette-zone-label">Enseignement explicite</div>
+                                        <div class="planif-palette-groupe">
+                                            <button class="planif-palette-btn" data-type="ouverture" draggable="true" title="Captation de l'attention, justification de l'objectif, vérification des préalables">
+                                                <span class="planif-pastille" style="background: var(--planif-couleur-ouverture)"></span>Ouverture
+                                            </button>
+                                            <button class="planif-palette-btn" data-type="modelisation" draggable="true" title="Démonstration, exemples et contre-exemples, aide-mémoire">
+                                                <span class="planif-pastille" style="background: var(--planif-couleur-modelisation)"></span>Modélisation
+                                            </button>
+                                            <button class="planif-palette-btn" data-type="pratique-guidee" draggable="true" title="Pratique collective, rétroactions, évaluation formative">
+                                                <span class="planif-pastille" style="background: var(--planif-couleur-pratique-guidee)"></span>Pratique guidée
+                                            </button>
+                                            <button class="planif-palette-btn" data-type="pratique-autonome" draggable="true" title="Exercices individuels, différenciation, retrait des aides">
+                                                <span class="planif-pastille" style="background: var(--planif-couleur-pratique-autonome)"></span>Pratique autonome
+                                            </button>
+                                            <button class="planif-palette-btn" data-type="cloture" draggable="true" title="Synthèse, métacognition, objectif de la prochaine leçon">
+                                                <span class="planif-pastille" style="background: var(--planif-couleur-cloture)"></span>Clôture
                                             </button>
                                         </div>
                                     </div>
@@ -4397,12 +4412,7 @@
                                 <div id="planif-panneau-seances-contenu">
                                     <!-- Sections leçon (visibles quand une leçon est sélectionnée) -->
                                     <div id="planif-org-lecon" style="display:none">
-                                        <div class="planif-org-section planif-org-ee-bar">
-                                            <label class="planif-checkbox-label">
-                                                <input type="checkbox" id="planif-org-ee-checkbox">
-                                                Enseignement explicite
-                                            </label>
-                                        </div>
+                                        
                                         <div class="planif-org-section" id="planif-org-objectif">
                                             <div class="planif-org-section-titre">Objectif de la leçon</div>
                                             <div class="planif-org-section-contenu planif-org-placeholder">
@@ -4461,10 +4471,7 @@
                                 <select id="org-select-carte"><option value="">— Carte —</option></select>
                                 <select id="org-select-sequence" data-tooltip="orga-selecteur-sequence"><option value="">— Séquence —</option></select>
                                 <select id="org-select-lecon" data-tooltip="orga-selecteur-lecon"><option value="">— Leçon —</option></select>
-                                <label class="org-checkbox-label org-ee-toggle" data-tooltip="orga-enseignement-explicite">
-                                    <input type="checkbox" id="org-ee-checkbox">
-                                    Enseignement explicite
-                                </label>
+                                
                             </div>
                             <div class="org-toolbar-droite">
                                 <button id="org-btn-guide" class="planif-btn-carte" title="Guide d'import/export"><img src="icons/icon-book.svg" alt="" class="planif-icon" style="width:14px;height:14px;"></button>
@@ -4508,72 +4515,10 @@
                                             </div>
                                         </div>
                                         <!-- Enseignement explicite -->
-                                        <div class="org-section org-ee-section" id="org-ee">
-                                            <!-- Cœur brut (visible quand EE décoché) -->
-                                            <div id="org-coeur-brut">
+                                        <div class="org-section" id="org-coeur-brut">
                                                 <div class="org-section-titre" data-tooltip="orga-coeur-lecon">Cœur de la leçon</div>
                                                 <div class="org-section-contenu" id="org-coeur-contenu"></div>
                                             </div>
-                                            <!-- 5 étapes EE (visible quand EE coché) -->
-                                            <div id="org-ee-etapes" style="display:none">
-                                                <div class="org-ee-non-assignees" id="org-ee-non-assignees">
-                                                    <div class="org-section-titre">Activités non assignées</div>
-                                                    <div class="org-ee-liste" id="org-ee-liste-non-assignees"></div>
-                                                </div>
-                                                <div class="org-ee-etape" data-etape="ouverture">
-                                                    <div class="org-ee-etape-entete">
-                                                        <label class="org-checkbox-label"><input type="checkbox" class="org-ee-etape-check" data-etape="ouverture" checked> 1. Ouverture</label>
-                                                        <span class="org-ee-etape-desc">Captation de l'attention, justification de l'objectif, vérification des préalables</span>
-                                                    </div>
-                                                    <div class="org-ee-etape-corps">
-                                                        <div id="org-ee-ouverture-sections"></div>
-                                                        <div class="org-ee-zone-depot" data-etape="ouverture"><span class="org-placeholder">Glisser des activités ici</span></div>
-                                                        <textarea class="org-ee-notes" data-etape="ouverture" placeholder="Tes notes…"></textarea>
-                                                    </div>
-                                                </div>
-                                                <div class="org-ee-etape" data-etape="modelisation">
-                                                    <div class="org-ee-etape-entete">
-                                                        <label class="org-checkbox-label"><input type="checkbox" class="org-ee-etape-check" data-etape="modelisation" checked> 2. Modélisation</label>
-                                                        <span class="org-ee-etape-desc">Démonstration, exemples et contre-exemples, aide-mémoire</span>
-                                                    </div>
-                                                    <div class="org-ee-etape-corps">
-                                                        <div class="org-ee-zone-depot" data-etape="modelisation"><span class="org-placeholder">Glisser des activités ici</span></div>
-                                                        <textarea class="org-ee-notes" data-etape="modelisation" placeholder="Tes notes…"></textarea>
-                                                    </div>
-                                                </div>
-                                                <div class="org-ee-etape" data-etape="pratiqueGuidee">
-                                                    <div class="org-ee-etape-entete">
-                                                        <label class="org-checkbox-label"><input type="checkbox" class="org-ee-etape-check" data-etape="pratiqueGuidee" checked> 3. Pratique guidée</label>
-                                                        <span class="org-ee-etape-desc">Pratique collective, rétroactions, évaluation formative</span>
-                                                    </div>
-                                                    <div class="org-ee-etape-corps">
-                                                        <div class="org-ee-zone-depot" data-etape="pratiqueGuidee"><span class="org-placeholder">Glisser des activités ici</span></div>
-                                                        <textarea class="org-ee-notes" data-etape="pratiqueGuidee" placeholder="Tes notes…"></textarea>
-                                                    </div>
-                                                </div>
-                                                <div class="org-ee-etape" data-etape="pratiqueAutonome">
-                                                    <div class="org-ee-etape-entete">
-                                                        <label class="org-checkbox-label"><input type="checkbox" class="org-ee-etape-check" data-etape="pratiqueAutonome" checked> 4. Pratique autonome</label>
-                                                        <span class="org-ee-etape-desc">Exercices individuels, différenciation, retrait des aides</span>
-                                                    </div>
-                                                    <div class="org-ee-etape-corps">
-                                                        <div class="org-ee-zone-depot" data-etape="pratiqueAutonome"><span class="org-placeholder">Glisser des activités ici</span></div>
-                                                        <textarea class="org-ee-notes" data-etape="pratiqueAutonome" placeholder="Tes notes…"></textarea>
-                                                    </div>
-                                                </div>
-                                                <div class="org-ee-etape" data-etape="cloture">
-                                                    <div class="org-ee-etape-entete">
-                                                        <label class="org-checkbox-label"><input type="checkbox" class="org-ee-etape-check" data-etape="cloture" checked> 5. Clôture</label>
-                                                        <span class="org-ee-etape-desc">Synthèse, métacognition, objectif de la prochaine leçon</span>
-                                                    </div>
-                                                    <div class="org-ee-etape-corps">
-                                                        <div id="org-ee-cloture-sections"></div>
-                                                        <div class="org-ee-zone-depot" data-etape="cloture"><span class="org-placeholder">Glisser des activités ici</span></div>
-                                                        <textarea class="org-ee-notes" data-etape="cloture" placeholder="Tes notes…"></textarea>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -11760,13 +11705,14 @@
                                 <li>Relie les éléments entre eux en cliquant pour créer des liens pédagogiques</li>
                             </ol>
 
-                            <p><strong>12 types d'éléments disponibles :</strong></p>
+                            <p><strong>17 types d'éléments disponibles :</strong></p>
                             <ul>
-                                <li><strong>Pourquoi enseigner</strong> : Compétence, Idée maîtresse</li>
-                                <li><strong>Quoi enseigner</strong> : Factuelle, Conceptuelle, Procédurale, Métacognitive</li>
-                                <li><strong>Comment enseigner</strong> : Apprentissage, Soutien, Révision</li>
-                                <li><strong>Vérifier</strong> : Évaluation</li>
-                                <li><strong>Conception</strong> : Séquence, Leçon</li>
+                                <li><strong>Intention curriculaire</strong> : Compétence, Idée maîtresse</li>
+                                <li><strong>Types de connaissances</strong> : Factuelle, Conceptuelle, Procédurale, Métacognitive</li>
+                                <li><strong>Mise en action</strong> : Activité, Soutien, Révision</li>
+                                <li><strong>Preuve de réussite</strong> : Évaluation</li>
+                                <li><strong>Organisation</strong> : Séquence, Leçon</li>
+                                <li><strong>Enseignement explicite</strong> : Ouverture, Modélisation, Pratique guidée, Pratique autonome, Clôture</li>
                             </ul>
 
                             <p><strong>Outils de navigation :</strong></p>
@@ -14699,8 +14645,8 @@
     <script src="js/planification-donnees.js?v=20260807e"></script> <!-- Import inter-trimestre des cartes (4 août) -->
 
     <script src="js/planification-bibliotheque.js?v=2026051026"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
-    <script src="js/planification-carte.js?v=20260807e"></script> <!-- Poignée de redimensionnement du planificateur (7 août) -->
-    <script src="js/organisateur.js?v=20260807e"></script> <!-- Retrait du post-traitement DOM de la Vue calendrier (lot 2, 6 août) -->
+    <script src="js/planification-carte.js?v=20260807f"></script> <!-- Poignée de redimensionnement du planificateur (7 août) -->
+    <script src="js/organisateur.js?v=20260807f"></script> <!-- Retrait du post-traitement DOM de la Vue calendrier (lot 2, 6 août) -->
     <script src="js/planification.js?v=2026050522"></script> <!-- Refonte nav SP4 : hooks nomSection 'conception' + idSousSection conception-* -->
 
     <!-- BETA 96.3 : Module Travaux (import, annotation, archivage) -->
@@ -14783,7 +14729,7 @@
     <script src="js/guidage-demo.js?v=20260512d"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=20260807e"></script> <!-- Entrée 1.30 : import inter-trimestre -->
+    <script src="js/changelog-data.js?v=20260807f"></script> <!-- Entrée 1.30 : import inter-trimestre -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
     <script src="js/etats-vides.js?v=2026050537"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre -->
@@ -14804,7 +14750,7 @@
     <script src="js/export-resultats-finaux.js?v=2026061901"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260807e"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260807f"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->

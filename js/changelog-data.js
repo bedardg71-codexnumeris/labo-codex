@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.54',
+            couleur: 'vert',
+            titre: 'Alignement : l’enseignement explicite entre dans la carte',
+            items: [
+                'Cinq nouveaux nœuds dans la palette — Ouverture, Modélisation, Pratique guidée, Pratique autonome, Clôture. Tu les glisses dans une leçon comme des activités : ils portent une durée, se relient aux connaissances et servent les objectifs. Le dégradé de leur couleur suit le transfert de responsabilité de la méthode.',
+                'Les étapes à cocher du Plan de la leçon sont retirées : la méthode se construit maintenant dans la carte, au même endroit que le reste de ta leçon.',
+                'Les sections de la palette parlent ton vocabulaire : Intention curriculaire, Types de connaissances, Mise en action, Preuve de réussite, Organisation — une ligne au lieu de deux, plus de place pour les nœuds.'
+            ]
+        },
+        {
             version: '1.53',
             couleur: 'vert',
             titre: 'Alignement : la réserve « Non planifié » au choix',
