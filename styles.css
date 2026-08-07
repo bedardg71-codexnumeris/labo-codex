@@ -20791,6 +20791,91 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     font-style: italic;
 }
 
+/* === #403 — pastille d'alignement d'un objectif ===
+   Elle REMPLACE la puce « • » : même place, même rôle de marqueur d'unité,
+   plus un état. Trois états de même gabarit, pour que la colonne se lise d'un
+   coup d'œil. Elle ne bloque jamais rien (§6 quinquies : l'exigence est
+   progressive) — c'est un indicateur, pas une commande, d'où l'absence de
+   cible tactile de 44 px. */
+.planif-obj-pastille {
+    flex: 0 0 auto;
+    width: 14px;
+    height: 14px;
+    margin-top: 3px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    line-height: 1;
+    font-style: normal;
+    font-weight: 700;
+    cursor: help;
+    user-select: none;
+    box-sizing: border-box;
+}
+
+/* La puce n'a plus lieu d'être quand la pastille la précède. */
+.planif-obj-pastille + .planif-noeud-objectif { padding-left: 3px; }
+.planif-obj-pastille + .planif-noeud-objectif::after { content: none; }
+
+/* Gris pointillé : personne ne sert encore cet objectif — une invitation. */
+.planif-obj-pastille--invitation {
+    background: transparent;
+    color: var(--planif-couleur-lecon);
+    border: 1px dashed color-mix(in srgb, var(--planif-couleur-lecon) 55%, transparent);
+    opacity: 0.55;
+}
+
+/* Orange : servi, mais rien ne le vérifie. Même teinte que le ⚠ des nœuds. */
+.planif-obj-pastille--servi {
+    background: transparent;
+    color: #F59E0B;
+    border: 1px solid #F59E0B;
+}
+
+/* Plein : servi ET vérifié — même code que le ✓ des badges de nœud. */
+.planif-obj-pastille--verifie {
+    background: var(--planif-couleur-lecon);
+    color: #fff;
+    border: 1px solid transparent;
+}
+
+/* === #403 — « Objectifs servis » dans l'inspecteur === */
+.planif-objectifs-servis {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 10px;
+}
+
+.planif-objectif-servi-ligne {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 5px 4px;
+    border-radius: 4px;
+    font-size: 12.5px;
+    line-height: 1.35;
+    cursor: pointer;
+    /* 44 px de haut au doigt : ici c'est bien une commande (cf. la pastille,
+       qui n'en est pas une). */
+    min-height: 30px;
+}
+
+.planif-objectif-servi-ligne:hover {
+    background: color-mix(in srgb, var(--planif-couleur-lecon) 12%, transparent);
+}
+
+.planif-objectif-servi-ligne input[type="checkbox"] {
+    flex: 0 0 auto;
+    margin-top: 1px;
+}
+
+@media (hover: none) {
+    .planif-objectif-servi-ligne { min-height: 44px; align-items: center; }
+}
+
 .mode-clair .planif-badge-objectif:hover {
     background: color-mix(in srgb, var(--planif-couleur-lecon) 14%, transparent);
 }

@@ -106,6 +106,58 @@ function objectifEstDeplie(n) {
     return !!(n && n.metadata && n.metadata.objectifDeplie);
 }
 
+// ---------------------------------------------------------------------------
+// #403 — liens objectif → activité / évaluation (design tranché le 6 août 2026)
+//
+// Le lien vit sur le nœud SERVANT (`metadata.objectifsServis = [idObjectif…]`),
+// jamais sur l'objectif : pas de nouveau type de nœud, pas de second système de
+// liens. La relation est N:N et les deux bouts ont une identité — les objectifs
+// portent un id depuis 1.34.0 précisément pour ça.
+//
+// Les types servants sont les mêmes que partout ailleurs dans le module :
+// activité, soutien et révision forment un trio (cf. connaissanceAtteinActivite
+// et evaluerBadge), plus l'évaluation qui peut cocher en direct. Restreindre au
+// seul type « activité » aurait créé une exception locale — une activité de
+// révision qui sert un objectif ne pourrait pas le déclarer.
+var TYPES_SERVANTS_OBJECTIF = ['activite', 'soutien', 'revision', 'evaluation'];
+
+/** La leçon qui contient ce nœud, ou null s'il est libre / ailleurs. */
+function leconParenteDe(n) {
+    if (!n || !n.parent) return null;
+    var parent = etat.noeuds.get(n.parent);
+    return parent && parent.type === 'lecon' ? parent : null;
+}
+
+/**
+ * Objectifs déclarés servis par ce nœud, FILTRÉS aux objectifs de sa propre
+ * leçon. Le filtre n'est pas défensif, il est structurel : un clone déplacé
+ * dans une autre leçon garderait sinon des ids étrangers, et un objectif retiré
+ * laisserait une référence morte. La leçon parente fait foi à la lecture.
+ */
+function objectifsServisPar(n) {
+    if (!n || !n.metadata || !Array.isArray(n.metadata.objectifsServis)) return [];
+    var lecon = leconParenteDe(n);
+    if (!lecon) return [];
+    var idsLecon = {};
+    objectifsDeLecon(lecon).forEach(function(o) { idsLecon[o.id] = true; });
+    return n.metadata.objectifsServis.filter(function(id) { return idsLecon[id]; });
+}
+
+/** Écriture — porte unique, comme appliquerObjectifs l'est pour les objectifs. */
+function definirObjectifsServis(noeudId, ids) {
+    var n = etat.noeuds.get(noeudId);
+    if (!n) return false;
+    if (TYPES_SERVANTS_OBJECTIF.indexOf(n.type) === -1) return false;
+    if (!n.metadata) n.metadata = {};
+    var propres = (Array.isArray(ids) ? ids : []).filter(function(id) {
+        return typeof id === 'string' && id !== '';
+    });
+    if (propres.length === 0) delete n.metadata.objectifsServis;
+    else n.metadata.objectifsServis = propres;
+    sauvegarder();
+    return true;
+}
+
 /**
  * Lecture par id — porte d'entrée des autres modules (Organisateur, exports).
  * Rend le texte des objectifs, un par ligne : les consommateurs affichent ou
@@ -126,6 +178,27 @@ function objectifsDeLeconParId(leconId) {
  * Écriture par id — porte de sortie UNIQUE des autres modules (Organisateur).
  * Évite d'exposer `sauvegarder()` brut : un seul chemin d'écriture pour
  * l'objectif, donc une seule vérité.
+ *
+ * Accepte des chaînes OU des objets `{id, texte}`. L'id compte depuis #403 :
+ * il est la cible des `objectifsServis`, donc le RÉATTRIBUER, c'est déplacer
+ * silencieusement un lien d'un objectif à un autre. Trois résolutions, dans
+ * cet ordre :
+ *
+ *   1. **par id fourni** — la carte connaît l'identité de chaque ligne (elle
+ *      la porte en `data-obj-id`) : insertion et retrait au milieu sont exacts ;
+ *   2. **par texte inchangé** — l'Organisateur n'envoie que du texte ; un
+ *      objectif dont la formulation n'a pas bougé garde son id même si son
+ *      RANG a bougé (c'est le cas « j'insère une ligne au milieu du champ ») ;
+ *   3. **par rang**, pour le reste — c'est ce qui fait survivre une simple
+ *      correction de formulation.
+ *
+ * Chaque ancien id n'est consommé qu'une fois : deux objectifs ne peuvent pas
+ * hériter du même, sans quoi un lien viserait les deux.
+ *
+ * ⚠ Avant le 7 août 2026, seule l'étape 3 existait. Insérer un objectif au
+ * milieu décalait donc tous les ids d'un cran — inoffensif tant que rien ne
+ * les visait, faux dès #403.
+ *
  * @returns {boolean} true si le nœud existait et a été mis à jour
  */
 function appliquerObjectifs(n, textes) {
@@ -133,15 +206,48 @@ function appliquerObjectifs(n, textes) {
 
     var liste = Array.isArray(textes) ? textes : (textes ? [textes] : []);
     var anciens = objectifsDeLecon(n);
-    var nouveaux = [];
+    var consommes = {};
+
+    // Normalisation : { texte, idDemande } — les entrées vides ne sont jamais
+    // persistées (une ligne d'accueil en cours de saisie en est une).
+    var entrees = [];
     for (var i = 0; i < liste.length; i++) {
-        var texte = String(liste[i] === null || liste[i] === undefined ? '' : liste[i]).trim();
+        var brut = liste[i];
+        var estObjet = brut && typeof brut === 'object';
+        var texte = String((estObjet ? brut.texte : brut) == null ? '' : (estObjet ? brut.texte : brut)).trim();
         if (texte === '') continue;
-        // Réutiliser l'id de l'objectif de même rang : les liens qui le visent
-        // survivent à une simple correction de formulation.
-        var id = (anciens[nouveaux.length] && anciens[nouveaux.length].id) || nouvelIdObjectif();
-        nouveaux.push({ id: id, texte: texte });
+        entrees.push({ texte: texte, idDemande: estObjet && brut.id ? String(brut.id) : null });
     }
+
+    function reserver(id) {
+        if (!id || consommes[id]) return null;
+        if (!anciens.some(function(o) { return o.id === id; })) return null;
+        consommes[id] = true;
+        return id;
+    }
+
+    // Passes 1 et 2 d'abord, sur TOUTES les entrées : une résolution certaine
+    // ne doit jamais se faire voler son id par un repli de rang situé plus haut.
+    for (var p = 0; p < entrees.length; p++) {
+        entrees[p].id = reserver(entrees[p].idDemande);
+    }
+    for (var q = 0; q < entrees.length; q++) {
+        if (entrees[q].id) continue;
+        var jumeau = anciens.find(function(o) {
+            return !consommes[o.id] && o.texte.trim() === entrees[q].texte;
+        });
+        if (jumeau) entrees[q].id = reserver(jumeau.id);
+    }
+    // Passe 3 : repli par rang sur ce qui reste des deux côtés.
+    var restants = anciens.filter(function(o) { return !consommes[o.id]; });
+    var curseur = 0;
+    for (var r = 0; r < entrees.length; r++) {
+        if (entrees[r].id) continue;
+        entrees[r].id = (restants[curseur] && reserver(restants[curseur].id)) || nouvelIdObjectif();
+        curseur++;
+    }
+
+    var nouveaux = entrees.map(function(e) { return { id: e.id, texte: e.texte }; });
     if (nouveaux.length === 0) delete n.metadata.objectifs;
     else n.metadata.objectifs = nouveaux;
     sauvegarder();
@@ -911,6 +1017,117 @@ function ideeMaitresseAtteinEvaluation(noeudId, visited) {
     return false;
 }
 
+/**
+ * #403 — état d'alignement d'UN objectif de leçon.
+ *
+ * Le patron est celui des idées maîtresses, transposé d'un cran plus bas :
+ *   servi   = au moins une activité de SA leçon le déclare (entrée)
+ *   vérifié = une évaluation le vérifie (sortie), en DIRECT (une évaluation de
+ *             la leçon le coche — le nœud évaluation à rétroaction orale coche
+ *             très bien ça) ou en TRANSITIF (une des activités qui le servent
+ *             est reliée à une évaluation).
+ *
+ * Trois états, jamais bloquants (§6 quinquies — l'exigence est progressive) :
+ *   'invitation' — personne ne le sert encore ; gris, c'est une invitation
+ *   'servi'      — servi mais rien ne le vérifie ; ⚠ orange
+ *   'verifie'    — servi ET vérifié ; ✓
+ *
+ * Comme partout dans le module, les LIENS sont agrégés sur les clones (identité
+ * partagée) ; le CONTENANT, lui, est celui du nœud courant.
+ *
+ * @returns {{etat: string, message: string}}
+ */
+function evaluerObjectif(lecon, objectifId) {
+    if (!lecon || !objectifId) {
+        return { etat: 'invitation', message: 'Aucune activité ne sert cet objectif' };
+    }
+    var enfants = (lecon.enfants || [])
+        .map(function(eid) { return etat.noeuds.get(eid); })
+        .filter(Boolean);
+
+    var servants = enfants.filter(function(e) {
+        return e.type !== 'evaluation' &&
+               TYPES_SERVANTS_OBJECTIF.indexOf(e.type) !== -1 &&
+               objectifsServisPar(e).indexOf(objectifId) !== -1;
+    });
+
+    if (servants.length === 0) {
+        return { etat: 'invitation', message: 'Aucune activité ne sert cet objectif' };
+    }
+
+    var verifieDirect = enfants.some(function(e) {
+        return e.type === 'evaluation' && objectifsServisPar(e).indexOf(objectifId) !== -1;
+    });
+
+    var verifieTransitif = !verifieDirect && servants.some(function(s) {
+        var clones = trouverClones(s.id);
+        for (var ci = 0; ci < clones.length; ci++) {
+            var liens = getLiensDeNoeud(clones[ci].id);
+            for (var li = 0; li < liens.length; li++) {
+                if (liens[li].noeudType === 'evaluation') return true;
+            }
+        }
+        return false;
+    });
+
+    var nb = servants.length;
+    var texteServi = 'Servi par ' + nb + ' activit' + (nb > 1 ? 'és' : 'é');
+
+    if (verifieDirect || verifieTransitif) {
+        return {
+            etat: 'verifie',
+            message: texteServi + ' — vérifié par une évaluation' +
+                     (verifieDirect ? '' : ' (via une activité reliée)')
+        };
+    }
+    return {
+        etat: 'servi',
+        message: texteServi + ", mais aucune évaluation ne le vérifie"
+    };
+}
+
+var SYMBOLES_PASTILLE_OBJECTIF = { invitation: '!', servi: '⚠', verifie: '✓' };
+
+/**
+ * Pastille d'un objectif, rendue DANS l'innerHTML de la leçon plutôt que posée
+ * par appendChild comme les badges de nœud. Ce n'est pas un détail : le 6 août,
+ * des badges ajoutés par appendChild ont été effacés par un reconstruireDOM()
+ * appelé après coup (régression 2 du relais). Rendue avec la ligne, la pastille
+ * ne peut pas se désynchroniser de son objectif.
+ */
+function pastilleObjectifHTML(lecon, objectifId) {
+    var res = evaluerObjectif(lecon, objectifId);
+    // security-ok: res.etat ne peut valoir que 'invitation', 'servi' ou
+    // 'verifie' — trois littéraux rendus par evaluerObjectif, jamais de donnée
+    // utilisateur. L'id et le message, eux, sont échappés.
+    return '<span class="planif-obj-pastille planif-obj-pastille--' + res.etat + '"' +
+           ' data-obj-id="' + echapperHtml(objectifId) + '"' +
+           ' title="' + echapperHtml(res.message) + '"' +
+           ' aria-label="' + echapperHtml(res.message) + '">' +
+           SYMBOLES_PASTILLE_OBJECTIF[res.etat] + '</span>';
+}
+
+/**
+ * Recalcule les pastilles déjà rendues d'une leçon, sans reconstruire le DOM :
+ * l'état d'un objectif dépend d'AUTRES nœuds (ses activités, leurs liens), donc
+ * il change sans que la leçon soit touchée. Branché dans mettreAJourBadge() —
+ * le point que tous les chemins de modification appellent déjà.
+ */
+function rafraichirPastillesObjectifs(lecon) {
+    if (!lecon || lecon.type !== 'lecon') return;
+    var el = document.getElementById(lecon.id);
+    if (!el) return;
+    var pastilles = el.querySelectorAll('.planif-obj-pastille');
+    for (var i = 0; i < pastilles.length; i++) {
+        var p = pastilles[i];
+        var res = evaluerObjectif(lecon, p.getAttribute('data-obj-id'));
+        p.className = 'planif-obj-pastille planif-obj-pastille--' + res.etat;
+        p.textContent = SYMBOLES_PASTILLE_OBJECTIF[res.etat];
+        p.title = res.message;
+        p.setAttribute('aria-label', res.message);
+    }
+}
+
 // Retourne { entree: {valide, message}, sortie: {valide, message} }
 // entree = amont (compétence/objectif), sortie = aval (leçon/activité)
 // NOTE clones : Les LIENS sont agrégés sur tous les clones (identité partagée),
@@ -1106,6 +1323,11 @@ function mettreAJourBadge(donnees) {
     } else if (triangle) {
         triangle.style.display = 'none';
     }
+
+    // #403 : les pastilles d'objectif d'une leçon dépendent de ses activités et
+    // de leurs liens — elles se rafraîchissent donc au même moment que les
+    // badges, par le même point d'entrée.
+    if (donnees.type === 'lecon') rafraichirPastillesObjectifs(donnees);
 
     mettreAJourIndicateurClone(donnees);
 }
@@ -1418,6 +1640,37 @@ function ouvrirPanneau(id) {
         }
     }
 
+    // #403 — « Objectifs servis » : saisie DÉCLARATIVE par cases à cocher, pas
+    // par tracé de lien. Trois raisons : le geste marche sur iPad (où il n'y a
+    // ni ⌘ ni glisser de nœud), l'objectif n'est pas un nœud donc rien à viser
+    // sur le canevas, et la liste est bornée aux objectifs de SA leçon — on ne
+    // peut pas se tromper de cible. La section n'apparaît pas quand il n'y a
+    // rien à servir : une leçon sans objectif reste un usage complet.
+    if (TYPES_SERVANTS_OBJECTIF.indexOf(donnees.type) !== -1) {
+        var leconHote = leconParenteDe(donnees);
+        var objsHote = leconHote ? objectifsDeLecon(leconHote) : [];
+        if (objsHote.length > 0) {
+            var dejaServis = objectifsServisPar(donnees);
+            var htmlServis = '<label>Objectifs servis</label>' +
+                '<div class="planif-objectifs-servis" id="planif-objectifs-servis">';
+            for (var osi = 0; osi < objsHote.length; osi++) {
+                var oServi = objsHote[osi];
+                var coche = dejaServis.indexOf(oServi.id) !== -1 ? ' checked' : '';
+                htmlServis +=
+                    '<label class="planif-checkbox-label planif-objectif-servi-ligne">' +
+                        '<input type="checkbox" class="planif-objectif-servi"' +
+                        ' data-obj-id="' + echapperHtml(oServi.id) + '"' + coche + '>' +
+                        ' <span>' + echapperHtml(oServi.texte) + '</span>' +
+                    '</label>';
+            }
+            htmlServis += '</div>';
+            extra.innerHTML += htmlServis;
+            // ⚠ Listeners posés EN FIN de ouvrirPanneau, comme « Dans la
+            // leçon » : un `extra.innerHTML +=` ultérieur (niveau cognitif des
+            // activités, juste en dessous) re-sérialise le conteneur.
+        }
+    }
+
     if (donnees.type === 'sequence') {
         var etendueSeq = etendueTemporelle(donnees);
         extra.innerHTML +=
@@ -1655,6 +1908,29 @@ function ouvrirPanneau(id) {
         });
     }
 
+    // #403 : même contrainte d'ordre que « Dans la leçon » ci-dessus.
+    var casesServies = extra.querySelectorAll('.planif-objectif-servi');
+    if (casesServies.length > 0) {
+        var appliquerCasesServies = function() {
+            var choisis = [];
+            var toutes = extra.querySelectorAll('.planif-objectif-servi');
+            for (var ci3 = 0; ci3 < toutes.length; ci3++) {
+                if (toutes[ci3].checked) choisis.push(toutes[ci3].getAttribute('data-obj-id'));
+            }
+            definirObjectifsServis(id, choisis);
+            // La pastille vit sur la LEÇON, pas sur le nœud qu'on édite : c'est
+            // elle qu'il faut rafraîchir pour que le geste ait un retour visible.
+            var leconMaj = leconParenteDe(donnees);
+            if (leconMaj) rafraichirPastillesObjectifs(leconMaj);
+        };
+        for (var ci4 = 0; ci4 < casesServies.length; ci4++) {
+            casesServies[ci4].addEventListener('change', function() {
+                enregistrerPourUndo();
+                appliquerCasesServies();
+            });
+        }
+    }
+
     panneau.classList.add('visible');
     etat.panneauOuvert = true;
 }
@@ -1872,6 +2148,12 @@ function dupliquerConteneurEnProfondeur(noeudId) {
     enregistrerPourUndo();
     var DX = 40, DY = 40;
     var correspondance = new Map();
+    // #403 : les objectifs de la copie reçoivent de NOUVEAUX ids (ci-dessous),
+    // donc les `objectifsServis` de ses activités doivent suivre — sinon la
+    // copie naît avec des liens pointant vers les objectifs de l'ORIGINALE,
+    // que objectifsServisPar() écarterait silencieusement. La leçon est copiée
+    // avant ses enfants : la correspondance est toujours prête à temps.
+    var correspondanceObjectifs = new Map();
 
     function copier(nid, parentId) {
         var n = etat.noeuds.get(nid);
@@ -1889,7 +2171,20 @@ function dupliquerConteneurEnProfondeur(noeudId) {
             cloneSourceId: null
         };
         if (Array.isArray(nouveau.metadata.objectifs)) {
-            nouveau.metadata.objectifs.forEach(function(o) { if (o) o.id = nouvelIdObjectif(); });
+            nouveau.metadata.objectifs.forEach(function(o) {
+                if (!o) return;
+                var ancienIdObj = o.id;
+                o.id = nouvelIdObjectif();
+                if (ancienIdObj) correspondanceObjectifs.set(ancienIdObj, o.id);
+            });
+        }
+        if (Array.isArray(nouveau.metadata.objectifsServis)) {
+            nouveau.metadata.objectifsServis = nouveau.metadata.objectifsServis
+                .map(function(oid) { return correspondanceObjectifs.get(oid) || null; })
+                .filter(Boolean);
+            if (nouveau.metadata.objectifsServis.length === 0) {
+                delete nouveau.metadata.objectifsServis;
+            }
         }
         etat.noeuds.set(nouveau.id, nouveau);
         correspondance.set(nid, nouveau.id);
@@ -3028,7 +3323,13 @@ function reconstruireDOM() {
                         if (io_ === objs.length) break;
                         htmlObjectifs +=
                             '<div class="planif-noeud-objectif-ligne">' +
-                                '<div class="planif-noeud-objectif" contenteditable="true" data-obj-rang="' + rangRendu + '">' +
+                                pastilleObjectifHTML(n, objs[io_].id) +
+                                // data-obj-id : l'identité voyage AVEC la ligne.
+                                // Sans lui, appliquerObjectifs() doit la deviner
+                                // au rang — et se trompe dès qu'on insère ou
+                                // retire au milieu (cf. son en-tête, #403).
+                                '<div class="planif-noeud-objectif" contenteditable="true" data-obj-rang="' + rangRendu + '"' +
+                                ' data-obj-id="' + echapperHtml(objs[io_].id) + '">' +
                                     echapperHtml(objs[io_].texte) +
                                 '</div>' +
                                 '<span class="planif-obj-btn planif-obj-ajouter" data-obj-rang="' + rangRendu + '"' +
@@ -3771,12 +4072,18 @@ function attacherEvenements(el, donnees) {
     var zoneObjectifs = el.querySelector('.planif-noeud-objectifs');
     if (zoneObjectifs) {
         // Chaque ligne est un objectif ; la dernière, vide, sert à en ajouter.
+        // Rend des { id, texte } et non des chaînes : la ligne d'accueil n'a pas
+        // d'id (objectif neuf), les autres portent le leur. C'est ce qui rend
+        // l'insertion et le retrait au milieu exacts pour les liens #403.
         var lireLignes = function() {
-            var textes = [];
+            var lues = [];
             zoneObjectifs.querySelectorAll('.planif-noeud-objectif').forEach(function(ligne) {
-                textes.push(ligne.textContent.trim());
+                lues.push({
+                    id: ligne.getAttribute('data-obj-id') || null,
+                    texte: ligne.textContent.trim()
+                });
             });
-            return textes;
+            return lues;
         };
         var rerendreEtFocaliser = function(rang) {
             reconstruireDOM();
@@ -3872,7 +4179,7 @@ function attacherEvenements(el, donnees) {
                 var textes = lireLignes();
                 if (btn.classList.contains('planif-obj-ajouter')) {
                     var rangObjectif = textes.slice(0, rang + 1).filter(function(t) {
-                        return t !== '';
+                        return t.texte !== '';
                     }).length;
                     // Un objectif vide n'est jamais persisté : on demande au
                     // rendu d'ouvrir une ligne d'accueil au bon rang.
@@ -6408,6 +6715,12 @@ window.planificationCarte = {
     objectifDeLeconParId: objectifDeLeconParId,
     objectifsDeLeconParId: objectifsDeLeconParId,
     definirObjectifsLecon: definirObjectifsLecon,
+    // #403 — liens objectif → activité / évaluation
+    TYPES_SERVANTS_OBJECTIF: TYPES_SERVANTS_OBJECTIF,
+    leconParenteDe: leconParenteDe,
+    objectifsServisPar: objectifsServisPar,
+    definirObjectifsServis: definirObjectifsServis,
+    evaluerObjectif: evaluerObjectif,
     // Ancrage temporel : la leçon écrit, tout le reste dérive (D3)
     migrerAncrageTemporelVersLecon: migrerAncrageTemporelVersLecon,
     semaineDeLecon: semaineDeLecon,
