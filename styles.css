@@ -20791,6 +20791,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     color: var(--texte-secondaire, #6aacb8);
     border-bottom-right-radius: 6px;
     z-index: 21; /* au-dessus des ports (20) : le coin appartient à la poignée */
+    touch-action: none; /* le glisser au doigt appartient à la poignée */
 }
 
 /* Conteneur : la poignée ne règle QUE la largeur (option B) — le curseur le
@@ -20811,12 +20812,29 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     opacity: 1;
 }
 
-/* Tactile (iPad) : pas de survol — la poignée reste visible et plus large. */
+/* Tactile (iPad) : pas de survol — la poignée reste visible, et sa cible passe
+   à 44 px (porte terrain du 7 août ; 20 px était sous le minimum tactile).
+
+   Elle est CENTRÉE sur le coin, moitié dedans moitié dehors, au lieu de grandir
+   vers l'intérieur. La raison est arithmétique : un bloc descend à
+   HAUTEUR_MIN_NOEUD = 44 px, donc un carré de 44 px posé en dedans couvrirait
+   TOUTE sa hauteur — le bloc ne serait plus sélectionnable par son coin droit.
+   Centrée, elle n'en prend que 22, soit la moitié du plus petit bloc et moins
+   du tiers de sa largeur minimale (100 px). Le reste déborde sur le canevas,
+   qui est vide à cet endroit.
+
+   Le dessin ne bouge pas : 14 px, dans le coin réel du bloc. Seule la zone
+   sensible grandit. */
 @media (hover: none) {
     .planif-noeud-poignee {
         opacity: 0.5;
-        width: 20px;
-        height: 20px;
+        width: 44px;
+        height: 44px;
+        right: -22px;
+        bottom: -22px;
+        background-position: right 22px bottom 22px, right 22px bottom 22px;
+        background-size: 14px 14px, 14px 14px;
+        border-bottom-right-radius: 0;
     }
 }
 
