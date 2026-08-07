@@ -5233,6 +5233,82 @@ function initialiser() {
                 paletteToggle.title = palette.classList.contains('planif-palette-replie') ? 'Ouvrir la palette' : 'Réduire la palette';
             });
         }
+
+        // Poignée de redimensionnement — présente sur le planificateur seulement
+        // (index.html). Ajoutée le 7 août : le côte à côte de 1.47.0 supposait
+        // une palette redimensionnable qui N'EXISTAIT PAS — `rendrePaletteFlottante`
+        // ne la rendait que déplaçable. Pointer events, donc souris, doigt et
+        // Pencil ; le glisser de nœuds au tactile reste, lui, une porte ouverte.
+        var paletteContenu = palette.querySelector('.planif-palette-contenu');
+        var paletteHandle = palette.querySelector('.planif-palette-poignee');
+        if (paletteHandle && paletteContenu) {
+            // Bornes LUES dans le CSS plutôt que redéclarées ici : une seule
+            // source de vérité, et la sentinelle géométrique vérifie que ces
+            // bornes laissent réellement tenir deux blocs côte à côte.
+            var bornesPalette = function() {
+                var cs = window.getComputedStyle(palette);
+                var min = parseFloat(cs.minWidth);
+                var max = parseFloat(cs.maxWidth);
+                return {
+                    min: isNaN(min) ? 190 : min,
+                    max: isNaN(max) ? 720 : max
+                };
+            };
+
+            paletteHandle.addEventListener('pointerdown', function(e) {
+                if (!e.isPrimary) return;
+                e.preventDefault();
+                e.stopPropagation(); // sinon la palette partirait en déplacement
+                var pointerId = e.pointerId;
+                var departX = e.clientX;
+                var departY = e.clientY;
+                var largeurDepart = palette.offsetWidth;
+                var hauteurDepart = paletteContenu.clientHeight;
+                var bornes = bornesPalette();
+
+                // La palette est ancrée à DROITE par défaut, mais un déplacement
+                // antérieur a pu la basculer sur `left` (cf. la barre de titre).
+                // On refige le bord droit pour la durée du geste : sans ça, la
+                // largeur pousserait le bloc au lieu de l'élargir sur place.
+                var wrapperRect = document.getElementById('planif-zone-wrapper').getBoundingClientRect();
+                var rect = palette.getBoundingClientRect();
+                palette.style.right = (wrapperRect.right - rect.right) + 'px';
+                palette.style.left = 'auto';
+
+                // Plafond de hauteur : le bas de la fenêtre, marge gardée. Le
+                // `max-height` CSS (min(720px, 70vh)) est un DÉFAUT, pas une
+                // limite — la poignée existe pour en sortir.
+                var hauteurMax = Math.max(120, window.innerHeight - rect.top - 24);
+
+                function onMove(e2) {
+                    if (e2.pointerId !== pointerId) return;
+                    // Ancrée à droite : tirer vers la GAUCHE élargit.
+                    var w = largeurDepart + (departX - e2.clientX);
+                    var h = hauteurDepart + (e2.clientY - departY);
+                    palette.style.width = Math.min(bornes.max, Math.max(bornes.min, w)) + 'px';
+                    paletteContenu.style.maxHeight = Math.min(hauteurMax, Math.max(120, h)) + 'px';
+                }
+                function onUp(e2) {
+                    if (e2.pointerId !== pointerId) return;
+                    paletteHandle.removeEventListener('pointermove', onMove);
+                    paletteHandle.removeEventListener('pointerup', onUp);
+                    paletteHandle.removeEventListener('pointercancel', onUp);
+                }
+                paletteHandle.setPointerCapture(pointerId);
+                paletteHandle.addEventListener('pointermove', onMove);
+                paletteHandle.addEventListener('pointerup', onUp);
+                paletteHandle.addEventListener('pointercancel', onUp);
+            });
+
+            // Double-clic : retour à la taille par défaut — même idiome que la
+            // poignée des nœuds, où il rend la main à la disposition automatique.
+            paletteHandle.addEventListener('dblclick', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                palette.style.width = '';
+                paletteContenu.style.maxHeight = '';
+            });
+        }
     }
     var palette = document.getElementById('planif-palette');
     rendrePaletteFlottante(palette);

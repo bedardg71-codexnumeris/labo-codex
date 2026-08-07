@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260807b"> <!-- Côte à côte dans les rangées du planificateur (7 août) -->
+    <link rel="stylesheet" href="styles.css?v=20260807c"> <!-- Poignée de redimensionnement du planificateur + libellés de case à cocher (7 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -4317,6 +4317,7 @@
                                     <span class="planif-palette-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>Planificateur</span>
                                     <button class="planif-palette-toggle" id="planif-palette-nav-toggle" title="Réduire la palette">−</button>
                                 </div>
+                                <div class="planif-palette-poignee" role="separator" aria-label="Redimensionner le planificateur" title="Glisser pour redimensionner · double-clic pour revenir à la taille par défaut"></div>
                                 <div class="planif-palette-contenu planif-nav-contenu">
                                     <div id="planif-sommaire" class="planif-sommaire"></div>
                                     <div id="planif-jauge-temps" class="planif-jauge-temps" style="display:none"></div>
@@ -14691,7 +14692,7 @@
     <script src="js/planification-donnees.js?v=20260804a"></script> <!-- Import inter-trimestre des cartes (4 août) -->
 
     <script src="js/planification-bibliotheque.js?v=2026051026"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
-    <script src="js/planification-carte.js?v=20260807b"></script> <!-- Côte à côte dans les rangées du planificateur (7 août) -->
+    <script src="js/planification-carte.js?v=20260807c"></script> <!-- Poignée de redimensionnement du planificateur (7 août) -->
     <script src="js/organisateur.js?v=20260806l"></script> <!-- Retrait du post-traitement DOM de la Vue calendrier (lot 2, 6 août) -->
     <script src="js/planification.js?v=2026050522"></script> <!-- Refonte nav SP4 : hooks nomSection 'conception' + idSousSection conception-* -->
 
