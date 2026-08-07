@@ -683,6 +683,40 @@ heure, un local, un groupe : c'est un créneau, pas un événement pédagogique)
 ⚠ Renommage inter-modules → **audit des call-sites AVANT d'annoncer un
 périmètre** (rappel du 6 août : 26 sites trouvés là où le plan en annonçait 12).
 
+##### ✅ AUDIT FAIT (7 août) — et il corrige la piste
+
+→ `Rapports/AUDIT-vocabulaire-seance-2026-08-07.md`
+
+L'audit demandé ci-dessus a été exécuté. Il rapporte trois choses, dont une
+qui **déplace la question** :
+
+1. **Le mot porte déjà DEUX concepts, pas un.** `seancesHoraire` = le créneau
+   récurrent, sans date (`{lettre, jour, debut, duree, local, groupe}`) ;
+   `seancesCompletes` = son **occurrence datée**, dérivée en croisant l'horaire
+   et le calendrier. La séance pédagogique du §5.3 serait la **troisième**.
+   → Renommer l'horaire en « créneau » laisse l'occurrence s'appeler « séance »,
+   et c'est elle qui ressemble le plus à la séance pédagogique. La collision se
+   **déplacerait** au lieu de disparaître.
+2. **≈ 2470 occurrences**, 113 identifiants distincts, 3 clés de stockage. Cent
+   fois l'ordre de grandeur du chantier de la veille. Renommer les clés = une
+   migration sur les données réelles — la seule contrainte dure de `CLAUDE.md`.
+3. **L'interface est presque épargnée** : les 64 occurrences d'`index.html` sont
+   toutes des identifiants, **aucun libellé visible**. Le vocabulaire que
+   l'enseignant lit tient en quelques dizaines de chaînes générées en JS.
+
+**▣ GÉNÉRAL en germe.** *Le vocabulaire que voit l'utilisateur et le vocabulaire
+du code sont deux chantiers, pas un.* Le premier se corrige en une session et
+c'est celui qui bloque ; le second est une dette de lisibilité qui peut attendre
+et se payer par tranches. Les confondre transforme une décision de mots en
+migration de données.
+
+**◈ Reste à trancher (Grégoire)** : quel mot pour la séance pédagogique. Le
+choix commande le reste — lui donner « séance » force à renommer l'occurrence,
+lui donner un autre mot laisse le code tranquille mais impose un terme que
+personne n'emploie en salle des profs. ⚠ Si la séance pédagogique existe, la
+piste du §5.2 « renommer *Leçon* en *Séance* » devient incohérente et doit
+sortir de la liste des renommages proposés.
+
 #### 6. La comptabilité du temps y gagne encore
 
 En littérature, deux créneaux équivalents rendent le débordement léger. Un
