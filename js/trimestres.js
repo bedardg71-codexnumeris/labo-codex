@@ -80,6 +80,14 @@
         'seancesHoraire',
         // 🆕 FIX (17 fév 2026) : Carte mentale doit être namespacée pour le mode démo
         'planification_mindmap',
+        // 🆕 #367 (7 août 2026) : notes/étapes des vues leçon. Elle n'avait
+        // JAMAIS été namespacée — `cle()` la retournait nue, donc les notes
+        // étaient partagées entre tous les trimestres ET avec la démo (sonde
+        // Chromium du 4 août). Migration au boot dans main.js
+        // (migration_planification_seances_done), qui compose aussi la clé du
+        // dictionnaire en `<carteId>::<leconId>` : namespacer sans composer
+        // n'aurait réglé que la moitié du rouge D1.
+        'planification_seances',
         // 🆕 Corbeille fichiers travaux (4 mars 2026)
         'corbeilleFichiers',
         // 🆕 (24 mai 2026) Pratique de notation active : namespacée par trimestre

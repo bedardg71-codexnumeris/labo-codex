@@ -50,6 +50,51 @@ function throttleRAF(fn) {
 // === CLÉ DE STOCKAGE SÉANCES ===
 var CLE_SEANCES = 'planification_seances';
 
+// === #367 (7 août 2026) — LA CLÉ COMPOSITE DES NOTES DE LEÇON ===
+//
+// Deux défauts, découverts séparément et corrigés ensemble parce qu'ils
+// demandent la MÊME migration :
+//
+//  1. `planification_seances` n'était PAS namespacée : `cle()` la retournait
+//     NUE (cas « clé non reconnue »), donc les notes étaient partagées entre
+//     TOUS les trimestres — et la démo y écrivait aussi.
+//  2. Le dictionnaire était PLAT, indexé par id de leçon. Or ces ids
+//     (`planif-noeud_N`) sont produits par un compteur PAR CARTE : deux cartes
+//     ont chacune leur `planif-noeud_3`. Les notes étaient donc déjà aliassées
+//     ENTRE CARTES d'un même trimestre (rouge D1 de l'audit du 5 août).
+//
+// Namespacer sans composer n'aurait réglé que la moitié — c'est pourquoi les
+// deux vont ensemble.
+//
+// La clé devient `<carteId>::<leconId>`. Le carteId est TOUJOURS celui de la
+// carte active : on ne lit et n'écrit les notes que de la carte ouverte.
+var SEPARATEUR_NOTE = '::';
+
+/**
+ * Porte UNIQUE de composition de la clé d'une note de leçon.
+ * @param {string} leconId
+ * @param {string} [carteId] force une carte (migration, copie) ; sinon l'active
+ * @returns {string|null} null si aucune carte n'est identifiable — l'appelant
+ *   doit alors s'abstenir plutôt que d'écrire sous une clé nue, qui
+ *   recréerait l'aliasing qu'on retire ici.
+ */
+function cleNoteLecon(leconId, carteId) {
+    if (!leconId) return null;
+    var cid = carteId;
+    if (!cid) {
+        try {
+            var index = window.planificationDonnees && typeof window.planificationDonnees.getIndex === 'function'
+                ? window.planificationDonnees.getIndex()
+                : null;
+            cid = index && index.active;
+        } catch (e) {
+            cid = null;
+        }
+    }
+    if (!cid) return null;
+    return cid + SEPARATEUR_NOTE + leconId;
+}
+
 // === OBJECTIF DE LEÇON ===
 // L'objectif vit sur le nœud lui-même (`metadata.objectif`), donc dans la clé
 // propre du module (`planification_mindmap`, namespacée par trimestre). Il suit
@@ -314,7 +359,8 @@ function migrerObjectifsVersMetadata() {
         if (n.metadata && 'objectif' in n.metadata) delete n.metadata.objectif;
 
         // Format 1 (ancienne clé de séances).
-        var ancien = seances[n.id] && seances[n.id].objectifPersonnalise;
+        var cleAncienne = cleNoteLecon(n.id);
+        var ancien = cleAncienne && seances[cleAncienne] && seances[cleAncienne].objectifPersonnalise;
         if (typeof ancien !== 'string' || ancien.trim() === '') continue;
         if (!n.metadata) n.metadata = {};
         n.metadata.objectifs = [{ id: nouvelIdObjectif(), texte: ancien.trim() }];
@@ -332,7 +378,8 @@ function migrerObjectifsVersMetadata() {
     // Sauvegarde confirmée : retirer l'ancienne source.
     try {
         for (var i = 0; i < migres.length; i++) {
-            if (seances[migres[i]]) delete seances[migres[i]].objectifPersonnalise;
+            var cleM = cleNoteLecon(migres[i]);
+            if (cleM && seances[cleM]) delete seances[cleM].objectifPersonnalise;
         }
         db.setSync(window.cle(CLE_SEANCES), seances); // security-ok: données locales du module, aucune source externe
     } catch (e2) {
@@ -1987,6 +2034,26 @@ function supprimerNoeud(id) {
     for (var li = 0; li < liensASupprimer.length; li++) {
         supprimerLien(liensASupprimer[li]);
     }
+    // Purge de la note de leçon (#367, 7 août 2026). Elle ne l'était JAMAIS :
+    // l'entrée survivait au nœud et, comme les ids de leçon sont recyclés par le
+    // compteur de la carte, une leçon créée plus tard pouvait HÉRITER des notes
+    // d'une leçon supprimée. La clé composite le rend possible sans risque de
+    // toucher une autre carte.
+    if (donnees && donnees.type === 'lecon') {
+        try {
+            var cleNotePurge = cleNoteLecon(id);
+            if (cleNotePurge) {
+                var notes = db.getSync(window.cle(CLE_SEANCES), {}) || {};
+                if (cleNotePurge in notes) {
+                    delete notes[cleNotePurge];
+                    db.setSync(window.cle(CLE_SEANCES), notes); // security-ok: purge locale, aucune source externe
+                }
+            }
+        } catch (e) {
+            console.warn('[Planification] Purge de la note de leçon échouée (bénin) :', e);
+        }
+    }
+
     etat.noeuds.delete(id);
     const el = document.getElementById(id);
     if (el) el.remove();
@@ -4505,10 +4572,12 @@ function afficherDetailsProduction(productionId, productions) {
 
 function sauvegarderChoixActivite(leconId, activiteId, retroaction, productionId) {
     if (typeof db === 'undefined' || typeof window.cle !== 'function') return;
+    var cleNote = cleNoteLecon(leconId);
+    if (!cleNote) return; // pas de carte identifiable : ne rien écrire sous une clé nue
     var seances = db.getSync(window.cle(CLE_SEANCES), {});
-    if (!seances[leconId]) seances[leconId] = {};
-    if (!seances[leconId].activites) seances[leconId].activites = {};
-    seances[leconId].activites[activiteId] = { retroaction: retroaction, productionId: productionId || null };
+    if (!seances[cleNote]) seances[cleNote] = {};
+    if (!seances[cleNote].activites) seances[cleNote].activites = {};
+    seances[cleNote].activites[activiteId] = { retroaction: retroaction, productionId: productionId || null };
     db.setSync(window.cle(CLE_SEANCES), seances);
 }
 
@@ -4571,13 +4640,14 @@ function afficherLeconOrganisateur() {
     // Charger les productions depuis Construction de la note
     var productions = chargerProductions();
     var seances = typeof db !== 'undefined' ? db.getSync(window.cle(CLE_SEANCES), {}) : {};
+    var cleNoteCourante = cleNoteLecon(leconId);
 
     if (activites.length === 0) {
         coeurContenu.innerHTML = '<div class="planif-org-placeholder">Aucune activité dans cette leçon.</div>';
     } else {
         // Vérifier cohérence évaluation
         var aucuneProd = activites.every(function(eid) {
-            var choix = (seances[leconId] && seances[leconId].activites && seances[leconId].activites[eid]) || {};
+            var choix = (seances[cleNoteCourante] && seances[cleNoteCourante].activites && seances[cleNoteCourante].activites[eid]) || {};
             return !choix.productionId;
         });
         var h = '';
@@ -4588,7 +4658,7 @@ function afficherLeconOrganisateur() {
         for (var j = 0; j < activites.length; j++) {
             var enf = etat.noeuds.get(activites[j]);
             if (!enf) continue;
-            var choixAct = (seances[leconId] && seances[leconId].activites && seances[leconId].activites[enf.id]) || { retroaction: 'aucune', productionId: null };
+            var choixAct = (seances[cleNoteCourante] && seances[cleNoteCourante].activites && seances[cleNoteCourante].activites[enf.id]) || { retroaction: 'aucune', productionId: null };
 
             h += '<div class="planif-org-activite" data-noeud="' + enf.id + '">';
             h += '<div class="planif-org-activite-entete">';
@@ -7096,6 +7166,8 @@ window.planificationCarte = {
     afficherDetailsProduction: afficherDetailsProduction,
     naviguerVers: naviguerVers,
     CLE_SEANCES: CLE_SEANCES,
+    cleNoteLecon: cleNoteLecon,
+    SEPARATEUR_NOTE: SEPARATEUR_NOTE,
     migrerObjectifsVersMetadata: migrerObjectifsVersMetadata,
     objectifDeLecon: objectifDeLecon,
     objectifsDeLecon: objectifsDeLecon,

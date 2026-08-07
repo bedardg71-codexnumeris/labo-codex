@@ -81,7 +81,7 @@ describe('F1 · migration des objectifs vers metadata.objectif', () => {
     it('bascule un objectif de l’ancienne clé vers le nœud, en LISTE', () => {
         poserLecon(api, 'planif-n1');
         store['a2026_planification_seances'] = {
-            'planif-n1': { objectifPersonnalise: 'Repérer les marqueurs de relation' }
+            'carte_1::planif-n1': { objectifPersonnalise: 'Repérer les marqueurs de relation' }
         };
 
         const migres = api.migrerObjectifsVersMetadata();
@@ -109,22 +109,24 @@ describe('F1 · migration des objectifs vers metadata.objectif', () => {
     it('retire l’ancienne source après migration (une seule vérité)', () => {
         poserLecon(api, 'planif-n1');
         store['a2026_planification_seances'] = {
-            'planif-n1': { objectifPersonnalise: 'Objectif A', notes: 'garder ces notes' }
+            'carte_1::planif-n1': { objectifPersonnalise: 'Objectif A', notes: 'garder ces notes' }
         };
 
         api.migrerObjectifsVersMetadata();
 
         const seances = store['a2026_planification_seances'];
-        expect(seances['planif-n1'].objectifPersonnalise).toBeUndefined();
-        // Les notes NE sont PAS touchées : elles restent dans cette clé
-        // jusqu'à ce que #367 soit tranché.
-        expect(seances['planif-n1'].notes).toBe('garder ces notes');
+        expect(seances['carte_1::planif-n1'].objectifPersonnalise).toBeUndefined();
+        // Les notes NE sont PAS touchées : seul l'objectif migre vers le nœud.
+        // ⮕ Clé COMPOSITE depuis #367 (7 août 2026) : `<carteId>::<leconId>`.
+        // Le dictionnaire plat aliassait les notes entre cartes d'un même
+        // trimestre, les ids de leçon n'étant uniques que par carte.
+        expect(seances['carte_1::planif-n1'].notes).toBe('garder ces notes');
     });
 
     it('est idempotente : ne réécrit pas des objectifs déjà portés par le nœud', () => {
         poserLecon(api, 'planif-n1', { objectifs: [{ id: 'obj_x', texte: 'Objectif déjà migré' }] });
         store['a2026_planification_seances'] = {
-            'planif-n1': { objectifPersonnalise: 'Vieille valeur' }
+            'carte_1::planif-n1': { objectifPersonnalise: 'Vieille valeur' }
         };
 
         expect(api.migrerObjectifsVersMetadata()).toBe(0);
@@ -153,11 +155,11 @@ describe('F1 · migration des objectifs vers metadata.objectif', () => {
         api = monterModule({ sauvegardeLance: true });
         poserLecon(api, 'planif-n1');
         store['a2026_planification_seances'] = {
-            'planif-n1': { objectifPersonnalise: 'Objectif à ne pas perdre' }
+            'carte_1::planif-n1': { objectifPersonnalise: 'Objectif à ne pas perdre' }
         };
 
         expect(api.migrerObjectifsVersMetadata()).toBe(0);
-        expect(store['a2026_planification_seances']['planif-n1'].objectifPersonnalise)
+        expect(store['a2026_planification_seances']['carte_1::planif-n1'].objectifPersonnalise)
             .toBe('Objectif à ne pas perdre');
     });
 
@@ -165,13 +167,13 @@ describe('F1 · migration des objectifs vers metadata.objectif', () => {
         api = monterModule({ index: null });
         poserLecon(api, 'planif-n1');
         store['a2026_planification_seances'] = {
-            'planif-n1': { objectifPersonnalise: 'Objectif à ne pas perdre' }
+            'carte_1::planif-n1': { objectifPersonnalise: 'Objectif à ne pas perdre' }
         };
 
         expect(api.migrerObjectifsVersMetadata()).toBe(0);
         // La garde protège contre la perte sèche : rien muté, rien purgé.
         expect(api.etat.noeuds.get('planif-n1').metadata.objectifs).toBeUndefined();
-        expect(store['a2026_planification_seances']['planif-n1'].objectifPersonnalise)
+        expect(store['a2026_planification_seances']['carte_1::planif-n1'].objectifPersonnalise)
             .toBe('Objectif à ne pas perdre');
     });
 });

@@ -21,6 +21,15 @@
 
     var CHANGELOG = [
         {
+            version: '1.50',
+            couleur: 'orange',
+            titre: 'Alignement : les notes de leçon cessent de se mélanger',
+            items: [
+                'Les Objectif et Notes des vues leçon appartiennent désormais à LEUR carte et à LEUR trimestre. Ils étaient partagés : deux cartes pouvaient afficher la même note sans que tu l’aies écrite deux fois, et la démo écrivait au même endroit que tes vraies sessions. Tes notes existantes sont réparties automatiquement au premier démarrage — chaque carte garde exactement ce qu’elle affichait, rien n’est perdu.',
+                'Supprimer une leçon efface aussi ses notes. Elles survivaient au nœud, et une leçon créée plus tard pouvait hériter des notes d’une leçon disparue.'
+            ]
+        },
+        {
             version: '1.49',
             couleur: 'vert',
             titre: 'Alignement : reprendre ta carte d’une session à l’autre',
