@@ -512,14 +512,86 @@ Ensembles          modules, étapes — séquences de séquences (§5.2)
                   └─ Activités
 ```
 
-**◈ LA question dure, à trancher AVANT de coder — elle appartient à Grégoire :**
-*où vivent les activités ?* Aujourd'hui dans la leçon. Pédagogiquement, une
-activité se déroule pendant une séance PRÉCISE.
+### ✅ Ce qui distingue vraiment une séance d'une leçon (précisé le 6 août, tard)
 
-| Option | Ce que ça donne | Ce que ça coûte |
-|--------|-----------------|-----------------|
-| **Activités dans la SÉANCE** | On peut dire quelle activité tombe quelle séance ; la comptabilité du temps devient exacte par créneau | **Migration de tout le contenu existant** ; la leçon devient un pur conteneur logique |
-| **Activités restent dans la LEÇON** | Léger, aucune migration ; la séance est un créneau de livraison | On ne peut PAS dire quelle activité tombe quelle séance — le besoin d'origine n'est qu'à moitié servi |
+> *« La séance est davantage contrainte par l'horaire que la leçon. Si un
+> enseignant donne son contenu en un seul bloc de 4 h le lundi, la question de
+> la séance ne se pose pas. S'il donne le même contenu en deux séances, le
+> lundi suivi du mardi, ce n'est pas la même chose. »*
+
+**▣ GÉNÉRAL.** *La leçon est libre, la séance est contrainte par l'horaire.*
+C'est la distinction logique/logistique du §6 quater, appliquée un cran plus
+bas — et non une différence de nom ou de taille.
+
+Conséquence immédiate : **le bouton radio « leçon / séance » ne tient pas.**
+Ce n'est pas une propriété du bloc, c'est le rapport entre le bloc et
+l'horaire. (Idée examinée puis écartée le 6 août au soir.)
+
+### ✅ Le modèle retenu (6 août, tard) — scinder une leçon en séances
+
+**Le geste** (proposition de Grégoire) : on scinde une leçon, et des
+compartiments apparaissent à l'intérieur pour y répartir le contenu des deux
+jours. La disposition — horizontale ou verticale — est **indifférente** :
+
+> *« Ce qui est important ici, c'est la hiérarchie et le lien entre les
+> éléments, peu importe leur nom ou leur disposition dans l'espace. »*
+
+**La séance est un VRAI NŒUD, pas un rendu.** ⚠ Ce point a été **renversé en
+cours de discussion**, et le renversement mérite d'être conservé : des
+compartiments de simple affichage (une étiquette `créneau` sur chaque activité)
+avaient d'abord été recommandés pour leur réversibilité. La division du travail
+énoncée ensuite par Grégoire (voir §6 quater, ▣ GÉNÉRAL) les disqualifie : si
+le canevas existe pour exposer **la hiérarchie et les liens**, une séance qui
+n'est qu'un rendu est structurellement **invisible** — elle ne contient rien au
+sens du modèle, rien ne peut s'y rattacher. Elle doit donc être un conteneur
+réel, enfant de la leçon.
+
+Répartition qui en découle, parallèle à ce que fait déjà la leçon :
+
+| | Où ça vit | Qui s'en occupe |
+|---|---|---|
+| **La séance** (conteneur de contenu) | hiérarchie, canevas | structure |
+| **Son créneau** (lundi, mardi) | horaire, calendrier | planificateur |
+
+*Exactement comme la leçon : elle vit dans le canevas, elle reçoit sa semaine
+dans la grille. La séance ne fait qu'ajouter un cran.*
+
+**◈ Piste complémentaire — l'occupation** (examinée le même soir, non tranchée).
+Plutôt qu'un type ou un lien : *combien de créneaux de sa semaine ce bloc
+occupe-t-il ?* Une leçon donnée en deux séances est alors **un** bloc qui
+occupe deux créneaux — le besoin de « lier les séances sœurs » disparaît, comme
+une cellule fusionnée. Cette piste décrit la vue **grille** ; la scission en
+compartiments décrit la vue **canevas**. Les deux sont la même donnée vue de
+deux endroits, elles ne se concurrencent pas.
+
+**Les créneaux existent DÉJÀ, à ne pas ressaisir.** Vérifié au code le 6 août :
+`horaires` porte `seances: [{ jour, heureDebut, heureFin, nombrePeriodes }]`,
+et `ancrageLeconPourDates()` (organisateur.js) résout déjà une leçon vers sa
+date réelle en appariant son **rang dans la semaine** au nième créneau de
+l'horaire du groupe. Le concept est à moitié implémenté sans avoir été nommé.
+→ Ce serait **D5 un cran plus bas** : *les créneaux d'une semaine dérivent de
+l'horaire, jamais ressaisis.* Avec la nuance du §6 : **le nombre de créneaux
+appartient au cours** (4 h en 2 blocs vaut pour tous les groupes), **le jour
+appartient au groupe**.
+
+**Ce que la scission apporte au-delà de la disposition** : la comptabilité du
+temps **par créneau**. La jauge somme aujourd'hui toute la leçon ; scindée,
+elle dirait « lundi : 1,8 pér. / mardi : 2,2 pér. » — c'est-à-dire exactement
+les « débordements » que Grégoire cherchait à voir. La scission ne range pas
+seulement le contenu : elle rend le débordement **visible**.
+
+**⚠ Le coût réel, à traiter dans le plan** : scinder devient une opération sur
+les données (les activités existantes descendent dans la séance 1), dé-scinder
+doit les remonter. **Les deux sens doivent être sans perte** — c'est le test du
+modèle, et il est testable. La mécanique existe : le parcours de sous-arbre
+avec reparentage est celui de `dupliquerConteneurEnProfondeur()` (1.45.0).
+
+**L'exigence reste progressive** (§6 quinquies) :
+
+> *« Un enseignant pourrait organiser son contenu en leçons hebdomadaires même
+> si son horaire est en blocs 2 × 2 h, et ne pas se soucier des débordements. »*
+
+Qui ne scinde jamais ne voit jamais la notion.
 
 **◈ Collision de vocabulaire à revoir** : §5.2 listait « séance » parmi les
 renommages possibles de *Leçon*. Si Séance devient un type distinct, cette
@@ -897,6 +969,42 @@ raisonnements qui ne se mélangent pas bien :
 L'une organise la **progression** ; l'autre l'**ancre dans le temps**. Un
 enseignant a besoin des deux, mais les tenir séparées évite de confondre
 « ce qui vient logiquement après » et « ce qui tombe la semaine suivante ».
+
+### ✅ TRANCHÉ (6 août, tard) — LA division du travail entre les deux vues
+
+Énoncé par Grégoire en fin de journée, après une journée entière passée à
+décider au cas par cas :
+
+> *« Le planificateur sert seulement à disposer le tout dans le temps en
+> fonction de l'horaire et du calendrier (et éventuellement des groupes-cours,
+> c'est l'étape suivante dans l'organisation). Le canevas existe pour exposer
+> les liens entre les éléments, c'est pour ça que c'est une carte mentale. »*
+
+> **▣ GÉNÉRAL — la règle de décision.**
+> **Le canevas expose les LIENS. Le planificateur dispose dans le TEMPS.**
+> Devant toute fonctionnalité nouvelle, la question devient : *est-ce que ça
+> montre une relation entre des éléments, ou est-ce que ça place quelque chose
+> dans le temps ?* La réponse désigne la vue — et interdit les hybrides.
+
+**Ce principe était déjà à l'œuvre, il lui manquait d'être écrit.** Il justifie
+rétroactivement trois décisions prises le même jour, chacune tranchée alors au
+cas par cas :
+
+| Décision | Ce que le principe en dit |
+|---|---|
+| **Q3** — déplacer dans la grille ne bouge pas le bloc sur le canevas | Deux vues, deux rôles : l'ordre chronologique n'est pas la position logique |
+| **D4** — seuls leçons et séquences se déplacent dans la grille ; le contenu reste au canevas | Le contenu porte des liens → canevas. Les conteneurs se placent dans le temps → grille |
+| **Retrait de la Vue calendrier** (lot 2) | C'était précisément un **hybride** : un rendu de carte mentale rogné pour faire du calendrier — les deux à moitié |
+
+**Corollaire de conception** : un élément peut légitimement exister dans les
+deux vues, mais pour des raisons différentes — la leçon vit dans le canevas
+(elle porte objectifs et liens) et reçoit sa semaine dans la grille. Ce n'est
+pas une duplication : c'est la même chose regardée sous ses deux angles.
+
+**◈ L'étape suivante, nommée ici** : les **groupes-cours**. Le planificateur
+dispose aujourd'hui dans l'horaire et le calendrier ; il disposera ensuite par
+groupe (§6, « un alignement, N planifications » — la semaine est commune, le
+jour appartient au groupe).
 
 ### État réel constaté au code (6 août 2026)
 
