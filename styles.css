@@ -18841,9 +18841,26 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 }
 
 /* Le bouton de bascule, dans la barre du planificateur. Il reprend
-   .planif-palette-toggle : aucune taille ni couleur nouvelle. */
-#planif-btn-disposition-reserve.actif {
-    color: var(--planif-couleur-selection, #3b82f6);
+   .planif-palette-toggle : aucune taille ni couleur nouvelle.
+
+   LE GLYPHE DÉPEINT LA DISPOSITION COURANTE (idée de Grégoire, 7 août) :
+   ◧ montre la moitié pleine à GAUCHE — la réserve en colonne. Pivoté de −90°,
+   cette moitié passe EN BAS : la réserve sous la grille. Un seul caractère,
+   deux états lisibles.
+
+   Pourquoi une rotation CSS et pas un second caractère : le bloc Unicode sûr
+   (Formes géométriques) ne contient PAS de « carré moitié basse noircie » —
+   ⬓ (U+2B13) vit dans Miscellaneous Symbols and Arrows, celui-là même qui a
+   donné le carré vide de 1.53.1. La rotation garde le glyphe dans le bloc sûr.
+
+   ⚠ La forme, et non la couleur, porte l'état : un état signalé par la seule
+   couleur est invisible à qui la distingue mal. */
+#planif-btn-disposition-reserve {
+    transition: transform 0.15s;
+}
+/* Sans .actif = disposition « bas » : la moitié pleine descend. */
+#planif-btn-disposition-reserve:not(.actif) {
+    transform: rotate(-90deg);
 }
 
 /* Pas de media query ici, volontairement : le repli doit suivre la largeur de

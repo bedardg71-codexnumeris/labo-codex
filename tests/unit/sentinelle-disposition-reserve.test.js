@@ -30,12 +30,26 @@ const sourceCarte = readFileSync(path.join(racineProjet, 'js', 'planification-ca
 let store;
 let elements;
 let prefs;
+let boutonDispo;
 
 function monterModule() {
     store = {};
     prefs = {};
+    boutonDispo = {
+        title: '', attributs: {}, classes: new Set(),
+        setAttribute(k, v) { this.attributs[k] = v; },
+        getAttribute(k) { return this.attributs[k]; },
+        classList: {
+            toggle: (c, on) => { if (on) boutonDispo.classes.add(c); else boutonDispo.classes.delete(c); },
+            add: (c) => boutonDispo.classes.add(c),
+            remove: (c) => boutonDispo.classes.delete(c),
+            contains: (c) => boutonDispo.classes.has(c)
+        },
+        addEventListener() {}
+    };
     elements = {
-        'planif-sommaire': { innerHTML: '', querySelector: () => null, querySelectorAll: () => [] }
+        'planif-sommaire': { innerHTML: '', querySelector: () => null, querySelectorAll: () => [] },
+        'planif-btn-disposition-reserve': boutonDispo
     };
     const db = {
         getSync: (k, d) => (k in store ? store[k] : (d !== undefined ? d : null)),
@@ -304,5 +318,68 @@ describe('Sélecteurs · désigner et styler sont deux rôles distincts', () => 
         const ligne = /<button[^>]*id="planif-btn-disposition-reserve"[^>]*>/.exec(sourceIndex);
         expect(ligne).toBeTruthy();
         expect(ligne[0]).not.toContain('planif-palette-replier');
+    });
+});
+
+// =======================================================================
+// L'ÉTAT SE LIT DANS LA FORME — proposition de Grégoire, 7 août
+// =======================================================================
+//
+// Le glyphe dépeint la disposition COURANTE : ◧ montre la moitié pleine à
+// gauche (réserve en colonne) ; pivoté de −90°, elle passe en bas (réserve sous
+// la grille). Un seul caractère, deux états.
+//
+// Pourquoi une rotation CSS plutôt qu'un second caractère : le bloc sûr (Formes
+// géométriques) ne contient pas de « carré moitié basse noircie ». ⬓ (U+2B13)
+// vit dans Miscellaneous Symbols and Arrows — le bloc même qui a donné le carré
+// vide de 1.53.1. La rotation garde le glyphe dans le bloc sûr.
+
+describe('Bouton de disposition · l’état se lit dans la FORME', () => {
+    const regleRotation = /#planif-btn-disposition-reserve:not\(\.actif\)\s*\{[^}]*\}/.exec(sourceCss);
+
+    it('l’état « bas » pivote le glyphe', () => {
+        expect(regleRotation).toBeTruthy();
+        expect(regleRotation[0]).toMatch(/transform:\s*rotate\(\s*-?90deg\s*\)/);
+    });
+
+    it('les deux états ne se distinguent PAS par la seule couleur', () => {
+        // Règle d'accessibilité du projet : un état signalé uniquement par la
+        // couleur est invisible à qui la distingue mal. La rotation porte
+        // l'information ; la couleur ne suffirait pas.
+        const reglesBouton = [...sourceCss.matchAll(
+            /#planif-btn-disposition-reserve[^{]*\{([^}]*)\}/g
+        )].map((m) => m[1]).join('\n');
+        expect(reglesBouton).toMatch(/transform/);
+    });
+
+    it('le title annonce ce que le clic PRODUIRA, dans les DEUX états', () => {
+        // Vérifié sur le bouton réel, pas par recherche de chaîne : un
+        // `if (false)` ou un libellé déplacé dans une autre ligne passait
+        // inaperçu à la lecture de la source (break-tests AA/AB).
+        api.basculerDispositionReserve(); // → gauche
+        expect(boutonDispo.title).toContain('remettre sous la grille');
+
+        api.basculerDispositionReserve(); // → bas
+        expect(boutonDispo.title).toContain('mettre à gauche');
+    });
+
+    it('un aria-label décrit l’état ET l’action — le glyphe seul est muet', () => {
+        api.basculerDispositionReserve(); // → gauche
+        const enColonne = boutonDispo.getAttribute('aria-label');
+        expect(enColonne).toBeTruthy();
+        expect(enColonne).toContain('colonne');
+        expect(enColonne).toContain('cliquer');
+
+        api.basculerDispositionReserve(); // → bas
+        const enBas = boutonDispo.getAttribute('aria-label');
+        expect(enBas).toContain('sous la grille');
+        expect(enBas).not.toBe(enColonne);
+    });
+
+    it('la classe d’état suit réellement la disposition', () => {
+        api.basculerDispositionReserve();
+        expect(boutonDispo.classList.contains('actif')).toBe(true);
+        api.basculerDispositionReserve();
+        expect(boutonDispo.classList.contains('actif')).toBe(false);
     });
 });

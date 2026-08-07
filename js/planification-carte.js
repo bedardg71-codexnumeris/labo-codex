@@ -6566,9 +6566,15 @@ function mettreAJourBoutonDisposition() {
     var aGauche = dispositionReserve() === 'gauche';
     btn.setAttribute('aria-pressed', aGauche ? 'true' : 'false');
     btn.classList.toggle('actif', aGauche);
+    // Le glyphe dépeint la disposition COURANTE (rotation CSS via `.actif`) ;
+    // le title dit ce que le CLIC produira. Les deux se complètent au lieu de
+    // se répéter.
     btn.title = aGauche
-        ? 'Réserve « Non planifié » : sous la grille'
-        : 'Réserve « Non planifié » : à gauche de la grille';
+        ? 'Réserve « Non planifié » : la remettre sous la grille'
+        : 'Réserve « Non planifié » : la mettre à gauche de la grille';
+    btn.setAttribute('aria-label', aGauche
+        ? 'Réserve en colonne à gauche — cliquer pour la remettre sous la grille'
+        : 'Réserve sous la grille — cliquer pour la mettre en colonne à gauche');
 }
 
 function basculerDetailLecon(leconId) {
