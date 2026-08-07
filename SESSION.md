@@ -5424,6 +5424,79 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
 ## §3 — Consigne de démarrage pour la prochaine session
 
+> **Rédigée le 7 août 2026 au rituel de fin.** Remplace la consigne du 26 mai (migration d'icônes SVG), déclassée en §3bis — son cycle est clos depuis trois mois.
+
+### ⚠ AVANT TOUT — la branche
+
+**Ouvrir le conteneur sur `main`.** Le chantier alignement a été **mergé et déployé le 7 août au soir** : `main` = **1.54.0**, et la branche `claude/pedagogical-alignment-planner-y7eppc` est à **zéro écart** avec elle. Il n'y a plus de travail en avance sur une branche.
+
+⮕ **Pourquoi c'est en tête de la consigne** : le 7 août, le conteneur a démarré sur `claude/pedagogical-alignment-planner-**fhjf8p**`, une simple copie d'`origin/main` **vieille de 16 versions mineures** (1.31.22), alors que le travail vivait sur `...-**y7eppc**`. Le rituel de début l'a attrapé au §1, mais une session moins attentive aurait codé sur une base périmée. **Nommer la branche dans la prémisse ne suffit pas — il faut que le conteneur soit ouvert dessus.**
+
+### Prémisse à vérifier au rituel de début (§1)
+
+| Point | Valeur attendue |
+|---|---|
+| `origin/main` | **1.54.0** — tip = le commit `docs(session): §3 — consigne de démarrage pour le 8 août` (dernier commit du 7 août). ⚠ Pas de hash figé ici : un commit ne peut pas contenir le sien. Vérifier par `git log --oneline -1 origin/main`. |
+| Version | `{"build":"0807-1529","beta":"1.54.0"}` |
+| Vitest | **1770/1770** (212 fichiers) |
+| Playwright WebKit | non exécutable en conteneur → CI à la PR |
+| Dernier ID BACKLOG | **#417** |
+| Arbre | propre |
+
+### Priorité 1 — #414, les 14 autres écouteurs `db-ready` (~1 h)
+
+**C'est le reliquat le plus sérieux de la journée, et il porte un risque de données.**
+
+Le 7 août, #413 a révélé que l'écouteur `db-ready` de `main.js` était posé **après** que l'événement puisse être émis : le bloc de migrations ne s'exécutait alors jamais. Ce n'était pas un bug de #367 — #367 l'a seulement rendu visible, en étant la première migration dont Grégoire pouvait constater l'absence sur ses données réelles.
+
+**14 autres écouteurs `db-ready` vivent dans 10 fichiers** (accueil, actions-rlo, pratiques, preferences, trimestre-v2, donnees-v2, preferences-v2, travaux-outils, spe-specifications, `_archives/entites-ui`) et sont exposés à **exactement la même course**. `actions-rlo.js` et `codex.js` se protègent déjà ; les autres n'ont **pas** été vérifiés.
+
+**Le geste attendu n'est pas « ajouter un rattrapage partout »** — c'est un tri :
+- ceux qui portent des **migrations ou des écritures** → grave, à corriger comme #413 ;
+- ceux qui ne font que **rafraîchir de l'UI** → bénin (si la DB était prête avant le premier rendu, l'état initial est déjà correct) ; le rattrapage y ajouterait du bruit sans rien gagner.
+
+⮕ Chaque correctif de la première catégorie = une sentinelle, **break-testée** (le patron de `sentinelle-db-ready-course.test.js` est directement réutilisable : retirer le rattrapage doit faire rougir).
+
+### Priorité 2 — #417, `release.mjs` et le `?v=` (~20 min)
+
+`scripts/release.mjs` réécrit `VERSION_MAJEURE`, `BUILD_ID` et `_SCRIPT_BUILD` dans `js/init-inline.js` **à chaque release**, mais ne bumpe jamais son paramètre anti-cache dans `index.html` — resté à `?v=20260629a` (29 juin) après plus de vingt réécritures.
+
+⚠ **Le correctif n'est PAS de bumper à la main** : ce serait recommencer à la prochaine release. C'est **`release.mjs` qui doit bumper le `?v=` des fichiers qu'il réécrit**. Puis étendre `sentinelle-cache-busting-main.test.js` (aujourd'hui volontairement limitée à `main.js`, qui porte les migrations) à `init-inline.js`.
+
+### Puis, au choix de Grégoire
+
+- **#409** — retirer l'archive `planification_seances_archive_pre367`. **Ne dépend que d'une confirmation de Grégoire** : ses notes de leçon sont-elles correctes dans A2026 et H2026 depuis la 1.50.0 ? Si oui, retrait immédiat (la clé ne contenait que des productions de test — décision du 7 août).
+- **#416** — exports PRÉSENTABLES du plan de leçon (CSV, tableau pour traitement de texte, texte simple). ⚠ **Trois questions 📐 à trancher AVANT de coder** : où vit l'export (Plan de la leçon ou module Alignement) ; la frontière avec les exports existants (carte : Texte/TSV/MD ; organisateur : modale) — **consolider plutôt qu'empiler** ; et le périmètre « présentable » (avec ou sans les notes internes de l'enseignant — deux publics, deux contenus).
+- **#406** — blocs B et C du PLAN-JOURNEE (B = test d'onboarding à froid « Catherine », **tâche de Grégoire**, non délégable ; C = triage, tâche Claude Code, **non bloqué par B**).
+- **Passe terrain iPad** — les deux poignées (nœud #405, palette 1.47.1), la bascule de disposition au plancher 520 px, le dégradé de couleurs EE. Rien de tout cela n'a été validé au doigt.
+- **Le panneau « Organisateur » mort** dans le module Alignement, et le double nommage « Organisateur / Plan de la leçon ».
+
+### 📐 La décision de fond qui attend Grégoire
+
+**Les rangées du planificateur doivent-elles se subdiviser selon les séances déjà déclarées dans l'horaire** (une rangée « Semaine 1 » avec ses colonnes « Séance A » / « Séance B ») ?
+
+C'est le vrai problème derrière la capture du 6 août : **le planificateur ne lit jamais l'horaire** (`grep seancesHoraire` sur les quatre `planification-*.js` ne renvoie rien). Ses rangées sont des semaines, et il ignore qu'une semaine contient deux séances — d'où « Sem. 1 séance 1 » et « Sem. 1 séance 2 » poussées dans deux semaines différentes, et le repère écrit à la main dans le titre.
+
+⮕ **Son préalable est levé** : le rattachement carte→cours (#407) a été livré le 7 août. Reste la réserve honnête à poser à Grégoire — cela rendrait le planificateur dépendant de l'horaire d'un cours, donc d'un trimestre ; il faut un repli explicite (une seule colonne) quand la carte n'a pas d'horaire.
+
+⚠ **Ne PAS rouvrir la question du renommage de « séance »** : la prémisse était fausse et Grégoire l'a rejetée à raison, vérification au code à l'appui (`seancesHoraire` **est** la séance, affichée « Séance A/B » dans l'Horaire ; `seancesCompletes` en est l'occurrence datée). Le §1 et le §7 de `Rapports/AUDIT-vocabulaire-seance-2026-08-07.md` sont **périmés** — ne pas rouvrir sur leur foi.
+
+### Rappel de méthode — ce que les break-tests ont attrapé le 7 août
+
+Deux formes distinctes, à garder en tête avant de faire confiance à une sentinelle neuve :
+
+1. **Une assertion peut être satisfaite par autre chose que ce qu'elle croit vérifier** (leçon du 7 au soir : le titre d'une séquence trouvé parce que la leçon l'affiche aussi comme étiquette de contexte ; `pointercancel` trouvé dans un `removeEventListener`).
+2. **Une sentinelle peut couvrir le GESTE sans couvrir ce que le geste EMPORTE** (leçon de la clôture : `sentinelle-reprise-inter-trimestre` vérifiait que la carte se copie avec son contenu et son cours, mais jamais que **ses notes** suivaient — casser la traduction de clé laissait les 1767 tests verts). ⮕ Quand un chantier fait voyager des données d'une clé à une autre, **viser la traduction de clé**, pas seulement l'arrivée de l'objet principal.
+
+⮕ Et la règle qui vaut pour tout diagnostic de migration : **quand une migration « ne s'applique pas », faire mesurer le build embarqué (`window._SCRIPT_BUILD_main`) avant de blâmer le cache.** Le 7 août, cette mesure a démenti mon hypothèse du cache en une ligne et a mené à la vraie cause (#413).
+
+## §3bis — Archives des consignes de démarrage précédentes
+
+### Archive — consigne du 26 mai 2026 (migration d'icônes SVG, cycle clos)
+
+> Déclassée le 7 août 2026 : le cycle chromatique et la migration d'icônes ne sont plus le chantier courant. Conservée pour les apprentissages techniques (mask-image base64, `flex-shrink: 0`, `background-blend-mode`), toujours valables.
+
+
 > **Session 26 mai PM productive** : cycle chromatique Lots F + I + J + extension livrés (commit ~final 0526-1120). Convention chromatique posée dans le code (orange/vert/cyan/bleu/violet pour les 5 sections de nav, jaune pour assistance/configuration). **Reste du plan migration icônes** : Lots A, B, D, C, E, H, G (~6h30-7h30 cumulés). **AQPC dans 8 jours (3 juin 2026)** — keynote Grégoire prête, filet captures d'écran en plan B (cf. mémoire `project-aqpc-keynote-filet`).
 
 ### Priorité 1 — Lot A migration icônes (chantier recommandé, ~45 min)
@@ -5557,7 +5630,6 @@ Si Grégoire n'a pas encore déployé la beta 99.66 b0526-1120, les changements 
 
 ---
 
-## §3bis — Archives des consignes de démarrage précédentes
 
 > Anciennes consignes — déclassées car cycles clos. Sprint A (livrée 22 mai matin) + Cat-B (clos 21 mai). Conservées comme référence pour les conventions worktree, hook pré-push, etc. **Pour le détail Sprint A : voir `git log SESSION.md` ou commit `ad4d0ec`.** Pour Cat-B, voir ci-dessous.
 
