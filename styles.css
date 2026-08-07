@@ -18757,8 +18757,13 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 
 .planif-grille-bloc {
     flex: 1 1 auto;
-    /* Plancher : en dessous, on passe à la ligne. Jamais de titre écrasé. */
-    min-width: 190px;
+    /* Plancher : en dessous, on passe a la ligne. Jamais de titre ecrase.
+       Abaisse de 190 a 150 px le 7 aout : a 190, deux blocs reclamaient 384 px
+       utiles, donc une palette de 428 px — au-dela de tout reglage possible, et
+       une bouchee de canevas que personne n'a demandee. Les titres longs sont
+       tronques aux DEUX valeurs : le plancher ne choisissait pas entre tronque
+       et lisible, seulement le seuil de passage a la ligne. */
+    min-width: 150px;
     max-width: 100%;
 }
 
@@ -19102,11 +19107,59 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 }
 /* La palette Navigation s'ancre à droite (déclaré APRÈS la base commune
    pour que left:auto l'emporte). */
+/* Largeur du planificateur (revue le 7 aout — constat terrain Gregoire).
+   Le cote a cote livre en 1.47.0 etait INERTE : plafond a 250 px, dont il faut
+   retirer 44 px de chrome (2 bordures + 16 de padding + 20 de gouttiere de
+   numero + 6 de gap), soit 206 px utiles — quand deux blocs en reclamaient
+   384. Aucun reglage de l'utilisateur ne pouvait l'atteindre : la palette
+   n'etait que DEPLACABLE, jamais redimensionnable. Meme classe que le defaut
+   de HAUTEUR corrige la veille en 1.45.1.
+   Le defaut est desormais choisi pour que deux blocs tiennent SANS geste
+   (360 - 44 = 316 utiles >= 2 x 150 + 4), et la poignee couvre le reste. */
 #planif-palette-nav {
     left: auto;
     right: 12px;
     min-width: 190px;
-    max-width: 250px;
+    width: 360px;
+    max-width: 720px;
+}
+
+/* Poignee de redimensionnement du planificateur (7 aout).
+   Coin BAS-GAUCHE, et non bas-droite comme sur les noeuds : la palette est
+   ancree par `right`, donc elle s'elargit vers la gauche. Tirer le bord qui
+   bouge reellement est le seul geste qui ne surprend pas. */
+.planif-palette-poignee {
+    position: absolute;
+    left: 1px;
+    bottom: 1px;
+    width: 14px;
+    height: 14px;
+    cursor: nesw-resize;
+    opacity: 0;
+    transition: opacity 0.12s;
+    /* Deux traits obliques, comme .planif-noeud-poignee — miroir horizontal. */
+    background:
+        linear-gradient(45deg, transparent 0 46%, currentColor 46% 54%, transparent 54% 100%) no-repeat,
+        linear-gradient(45deg, transparent 0 70%, currentColor 70% 78%, transparent 78% 100%) no-repeat;
+    color: var(--texte-secondaire, #6aacb8);
+    border-bottom-left-radius: 10px;
+    z-index: 2;
+    touch-action: none; /* le glisser au doigt appartient a la poignee */
+}
+#planif-palette-nav:hover .planif-palette-poignee { opacity: 0.55; }
+.planif-palette-poignee:hover { opacity: 0.9; }
+/* Repliee, la palette n'a plus de contenu a dimensionner. */
+.planif-palette-replie .planif-palette-poignee { display: none; }
+@media (hover: none) {
+    /* iPad : cible de 44 px, toujours visible — il n'y a pas de survol pour la
+       reveler. Le dessin reste dans son coin, seule la zone sensible grandit. */
+    .planif-palette-poignee {
+        width: 44px;
+        height: 44px;
+        opacity: 0.5;
+        background-position: left 2px bottom 2px, left 2px bottom 2px;
+        background-size: 14px 14px, 14px 14px;
+    }
 }
 
 .planif-palette-barre {
@@ -20584,6 +20637,33 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     font-size: 13px; color: var(--planif-couleur-texte); cursor: pointer;
 }
 .planif-checkbox-label input[type="checkbox"] { width: auto; margin: 0; accent-color: var(--planif-couleur-prerequis); }
+
+/* ⚠ Re-déclaration au poids d'un ID, obligatoire. `#planif-panneau label`
+   (plus haut) impose display:block + MAJUSCULES + gris à TOUT label de
+   l'inspecteur, et un sélecteur d'ID bat une simple classe. Sans ce rattrapage,
+   une case à cocher et son texte s'EMPILENT, et le texte — qui est ici de la
+   donnée saisie par l'enseignant, pas un intitulé de champ — s'affiche en
+   majuscules grisées, indiscernable d'un titre de section.
+   Constat terrain Gregoire, 7 aout : « a quoi servent les cases a cocher ? ».
+   Le defaut preexistait sur « Prealable » (un mot seul se laissait lire comme
+   un titre) ; #403 l'a rendu criant en y mettant du texte d'utilisateur. */
+#planif-panneau label.planif-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: normal;
+    color: var(--planif-couleur-texte);
+    margin-top: 0;
+    margin-bottom: 0;
+}
+.mode-clair #planif-panneau label.planif-checkbox-label { color: var(--planif-couleur-texte); }
+#planif-panneau label.planif-objectif-servi-ligne {
+    align-items: flex-start;
+    font-size: 12.5px;
+}
 
 /* === NIVEAU COGNITIF (Anderson) === */
 .planif-panneau-niveau-desc {
