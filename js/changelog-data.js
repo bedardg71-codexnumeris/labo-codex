@@ -21,6 +21,15 @@
 
     var CHANGELOG = [
         {
+            version: '1.49',
+            couleur: 'vert',
+            titre: 'Alignement : reprendre ta carte d’une session à l’autre',
+            items: [
+                'À la rentrée, un planificateur vide te propose de reprendre la carte du même cours de la session précédente — en un clic, sans fouiller la liste des trimestres. La carte d’origine reste intacte : tu peux retoucher la copie sans toucher au plan de la session déjà donnée.',
+                'Actions → « Importer d’un autre trimestre… » remonte en tête les cartes qui portent le même cours, sous « Même cours ». Le reste de la liste ne bouge pas.'
+            ]
+        },
+        {
             version: '1.48',
             couleur: 'vert',
             titre: 'Alignement pédagogique : le planificateur',

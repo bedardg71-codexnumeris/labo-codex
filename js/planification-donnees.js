@@ -408,12 +408,46 @@ function listerTrimestresAvecCartes() {
         if (!donnees || !donnees.index || !Array.isArray(donnees.index.cartes) || donnees.index.cartes.length === 0) return;
         const cartes = donnees.index.cartes.map(c => {
             const contenu = (donnees.cartes && donnees.cartes[c.id]) || {};
-            return { id: c.id, nom: c.nom || 'Sans titre', nbNoeuds: (contenu.noeuds || []).length };
+            return {
+                id: c.id,
+                nom: c.nom || 'Sans titre',
+                nbNoeuds: (contenu.noeuds || []).length,
+                coursId: c.coursId || null
+            };
         });
         if (cartes.length > 0) resultat.push({ id: t.id, nom: t.nom || t.id, cartes: cartes });
     });
     resultat.sort((a, b) => String(b.id).localeCompare(String(a.id)));
     return resultat;
+}
+
+/**
+ * Les cartes des AUTRES trimestres qui portent ce cours (lot 2, 7 août 2026).
+ *
+ * C'est la requête qui ferme #368 : chaque rentrée, retrouver la carte du
+ * 601-101 de la session précédente était un geste manuel — ouvrir la liste de
+ * tous les trimestres, reconnaître la bonne carte à son nom. Le `coursId` posé
+ * au lot 1 permet de la DÉSIGNER.
+ *
+ * ⚠ Aucun tri chronologique n'est promis ici. `listerTrimestresAvecCartes()`
+ * ordonne par id décroissant, ce qui n'est pas l'ordre de l'année scolaire
+ * (a2026 SUIT h2026, mais 'h' > 'a'). Plutôt que de deviner la « bonne »
+ * source, on rend TOUT ce qui correspond et on laisse choisir dès qu'il y a
+ * plus d'un candidat.
+ *
+ * @returns {Array<{trimestreId, trimestreNom, carte:{id, nom, nbNoeuds}}>}
+ */
+function listerReprisesPourCours(coursId) {
+    if (!coursId) return [];
+    const reprises = [];
+    listerTrimestresAvecCartes().forEach(t => {
+        t.cartes.forEach(c => {
+            if (c.coursId && c.coursId === coursId) {
+                reprises.push({ trimestreId: t.id, trimestreNom: t.nom, carte: c });
+            }
+        });
+    });
+    return reprises;
 }
 
 /**
@@ -509,6 +543,7 @@ window.planificationDonnees = {
     importerDepuisBibliotheque: importerDepuisBibliotheque,
     exporterCartePourBibliotheque: exporterCartePourBibliotheque,
     listerTrimestresAvecCartes: listerTrimestresAvecCartes,
+    listerReprisesPourCours: listerReprisesPourCours,
     importerCarteDepuisTrimestre: importerCarteDepuisTrimestre,
     creerEntreeIndex: creerEntreeIndex,
     obtenirCoursDeCarte: obtenirCoursDeCarte,

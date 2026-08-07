@@ -6600,6 +6600,7 @@ function mettreAJourPlanificateur() {
 
     if (hierarchie.length === 0 && toutesLecons.length === 0) {
         conteneur.innerHTML = '<div class="planif-som-vide">Aucune séquence — glisse un nœud « Séquence » sur la carte pour planifier ici.</div>';
+        ajouterOffreDeReprise(conteneur.querySelector('.planif-som-vide'));
         mettreAJourJaugeTemps([]);
         return;
     }
@@ -6692,7 +6693,26 @@ function rendrePanneauImportTrimestre() {
         panneau.innerHTML = '<div class="planif-import-tri-vide">Aucune carte dans les autres trimestres.</div>';
         return;
     }
+    // Les cartes du MÊME COURS remontent en tête (lot 2) : c'est le geste de
+    // rentrée, et le fouiller dans la liste complète était justement la corvée
+    // de #368. Elles restent listées à leur place ensuite — le groupe du haut
+    // est un raccourci, pas un filtre qui cacherait le reste.
+    var coursEnJeu = coursEnJeuPourReprise();
+    var reprises = coursEnJeu ? window.planificationDonnees.listerReprisesPourCours(coursEnJeu) : [];
+
     var html = '';
+    if (reprises.length) {
+        html += '<div class="planif-import-tri-groupe">Même cours</div>';
+        for (var r = 0; r < reprises.length; r++) {
+            var rep = reprises[r];
+            html += '<div class="planif-import-tri-ligne">' +
+                    '<span class="planif-import-tri-nom" title="' + echapperHtml(rep.carte.nom) + '">' + echapperHtml(rep.carte.nom) + '</span>' +
+                    '<span class="planif-import-tri-nb">' + echapperHtml(rep.trimestreNom) + '</span>' +
+                    '<button type="button" class="planif-btn-carte planif-import-tri-btn" data-tid="' + echapperHtml(rep.trimestreId) + '" data-cid="' + echapperHtml(rep.carte.id) + '">Reprendre</button>' +
+                    '</div>';
+        }
+    }
+
     for (var i = 0; i < sources.length; i++) {
         var t = sources[i];
         html += '<div class="planif-import-tri-groupe">' + echapperHtml(t.nom) + '</div>';
@@ -6719,6 +6739,98 @@ function rendrePanneauImportTrimestre() {
             }
         });
     });
+}
+
+// === REPRISE D'UN TRIMESTRE À L'AUTRE (lot 2, 7 août 2026) ===
+//
+// Ferme #368 : chaque rentrée, retrouver la carte du 601-101 de la session
+// précédente était un geste manuel. Le `coursId` du lot 1 permet de la
+// DÉSIGNER — l'offre apparaît dans l'ÉTAT VIDE du planificateur, c'est-à-dire
+// exactement quand elle sert : carte neuve, rien à afficher, et une carte du
+// même cours qui dort dans un autre trimestre.
+//
+// Elle ne s'importe JAMAIS toute seule. Une carte recopiée d'office serait
+// indiscernable d'une carte voulue — même principe que la migration d'ancrage
+// du 6 août, qui a refusé de deviner les semaines.
+
+/** Le cours « en jeu » : celui de la carte active, à défaut le cours actif. */
+function coursEnJeuPourReprise() {
+    var index = window.planificationDonnees.getIndex();
+    var carteId = index && index.active;
+    var cid = carteId ? window.planificationDonnees.obtenirCoursDeCarte(carteId) : null;
+    if (cid) return cid;
+    try {
+        return (typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null) || null;
+    } catch (e) {
+        return null;
+    }
+}
+
+function reprisesDisponibles() {
+    try {
+        return window.planificationDonnees.listerReprisesPourCours(coursEnJeuPourReprise()) || [];
+    } catch (e) {
+        console.warn('[Planification] Recherche de reprise échouée :', e);
+        return [];
+    }
+}
+
+/**
+ * Ajoute l'offre de reprise à l'état vide, s'il y a lieu.
+ *
+ * Construite en DOM plutôt qu'en chaîne HTML : le nom de la carte et celui du
+ * trimestre sont des données saisies par l'enseignant, et `textContent` les
+ * empêche d'être ANALYSÉS comme du balisage — ce qui est plus fort
+ * qu'`echapperHtml()`, qui les laisse traverser le parseur après nettoyage.
+ * Bénéfice joint : l'audit statique `audit-innerhtml.sh` ne voit plus ici de
+ * concaténation à inspecter (le lint a signalé le premier jet, en chaînes).
+ */
+function ajouterOffreDeReprise(hote) {
+    if (!hote) return;
+    var reprises = reprisesDisponibles();
+    if (!reprises.length) return;
+
+    var zone = document.createElement('div');
+    zone.className = 'planif-som-vide-action';
+
+    var bouton = document.createElement('button');
+    bouton.type = 'button';
+    bouton.className = 'planif-btn-carte';
+
+    // UN seul candidat : on le nomme, le geste est direct.
+    // PLUSIEURS : on ouvre le choix plutôt que d'en élire un — l'ordre des
+    // trimestres n'est pas chronologique (cf. listerReprisesPourCours), donc
+    // « le plus récent » serait une devinette.
+    if (reprises.length === 1) {
+        var r = reprises[0];
+        bouton.textContent = 'Reprendre « ' + r.carte.nom + ' » (' + r.trimestreNom + ')';
+        bouton.addEventListener('click', function() {
+            reprendreCarte(r.trimestreId, r.carte.id);
+        });
+    } else {
+        bouton.textContent = 'Reprendre une carte de ce cours (' + reprises.length + ')…';
+        bouton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var panneau = document.getElementById('planif-import-tri-panel');
+            if (!panneau) return;
+            rendrePanneauImportTrimestre();
+            panneau.classList.add('ouvert');
+        });
+    }
+
+    zone.appendChild(bouton);
+    hote.appendChild(zone);
+}
+
+function reprendreCarte(trimestreId, carteId) {
+    var nouvelId = window.planificationDonnees.importerCarteDepuisTrimestre(trimestreId, carteId);
+    if (!nouvelId) {
+        afficherToastLien("La reprise a échoué — rien n'a été modifié.");
+        return;
+    }
+    mettreAJourListeCartes();
+    chargerCarte(nouvelId);
+    afficherToastLien('Carte reprise — copie indépendante, celle du trimestre d\'origine reste intacte.');
 }
 
 // === COURS RATTACHÉ À LA CARTE — panneau (lot 1, 7 août 2026) ===

@@ -18714,6 +18714,16 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     padding: 4px 6px;
     line-height: 1.4;
 }
+/* Offre de reprise inter-trimestre (lot 2, 7 août 2026) — l'état vide guide
+   vers l'action suivante plutôt que de constater le vide. Le bouton réutilise
+   .planif-btn-carte : aucune couleur ni taille nouvelle. */
+.planif-som-vide-action {
+    margin-top: 8px;
+}
+.planif-som-vide-action .planif-btn-carte {
+    width: 100%;
+    text-align: left;
+}
 /* === Planificateur en grille (lot 2, 6 août 2026) ===
    Une rangée par semaine (numéro en gouttière), semaines spéciales
    étiquetées, zone « Non planifié » en pied. Les items réutilisent
