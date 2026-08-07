@@ -255,4 +255,29 @@ describe('Sentinelle · libellés de case à cocher dans l’inspecteur', () => 
     it('les objectifs servis utilisent bien cette classe de case à cocher', () => {
         expect(sourceCarte).toContain('planif-checkbox-label planif-objectif-servi-ligne');
     });
+
+    // ⚠ Le trou du 1er jet : la règle de LABEL avait été neutralisée, celle des
+    // CHAMPS non. `#planif-panneau input` posait width:100% + padding:8px sur la
+    // case, qui chassait son texte au bord droit du panneau. Deux règles
+    // génériques portées par un ID, une seule neutralisée.
+
+    it('la règle générique des champs étire bien tout input à 100 % (le second piège existe)', () => {
+        const generique = declarations('#planif-panneau input');
+        expect(generique.width).toBe('100%');
+    });
+
+    it('une case à cocher échappe à la largeur 100 % et au padding des champs', () => {
+        const rattrapage = declarations('#planif-panneau label.planif-checkbox-label input[type="checkbox"]');
+        expect(rattrapage.width).toBe('auto');
+        // `0` sans unité est valide en CSS — px() exige un suffixe `px` et
+        // renverrait NaN. Comparer la valeur normalisée.
+        expect(parseFloat(rattrapage.padding)).toBe(0);
+        expect(rattrapage.flex).toBe('0 0 auto');
+    });
+
+    it('le texte de l’objectif prend la place restante au lieu de déborder', () => {
+        const span = declarations('#planif-panneau label.planif-checkbox-label > span');
+        expect(span.flex).toBe('1 1 auto');
+        expect(span['min-width']).toBe('0');
+    });
 });
