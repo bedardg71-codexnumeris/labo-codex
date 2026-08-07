@@ -164,7 +164,8 @@ function objectifEstDeplie(n) {
 // et evaluerBadge), plus l'évaluation qui peut cocher en direct. Restreindre au
 // seul type « activité » aurait créé une exception locale — une activité de
 // révision qui sert un objectif ne pourrait pas le déclarer.
-var TYPES_SERVANTS_OBJECTIF = ['activite', 'soutien', 'revision', 'evaluation'];
+var TYPES_SERVANTS_OBJECTIF = ['activite', 'soutien', 'revision', 'evaluation',
+    'ouverture', 'modelisation', 'pratique-guidee', 'pratique-autonome', 'cloture'];
 
 /** La leçon qui contient ce nœud, ou null s'il est libre / ailleurs. */
 function leconParenteDe(n) {
@@ -737,6 +738,17 @@ const TYPES = {
     'activite':       { label: 'Activité',          couleur: 'var(--planif-couleur-activite)' },
     'soutien':        { label: 'Soutien',           couleur: 'var(--planif-couleur-soutien)' },
     'revision':       { label: 'Révision',          couleur: 'var(--planif-couleur-revision)' },
+    // Enseignement explicite (7 août 2026, décision Grégoire) : les CINQ étapes
+    // de la méthode deviennent des nœuds, FRÈRES D'ACTIVITÉ — mêmes contenants,
+    // même durée, mêmes liens. L'ancienne UI d'étapes du Plan de la leçon est
+    // RETIRÉE (suppression franche actée) : le concept entre dans le modèle au
+    // lieu d'être compensé par un formulaire — même mouvement que la semaine
+    // (#410) et les objectifs (F1).
+    'ouverture':         { label: 'Ouverture',         couleur: 'var(--planif-couleur-ouverture)' },
+    'modelisation':      { label: 'Modélisation',      couleur: 'var(--planif-couleur-modelisation)' },
+    'pratique-guidee':   { label: 'Pratique guidée',   couleur: 'var(--planif-couleur-pratique-guidee)' },
+    'pratique-autonome': { label: 'Pratique autonome', couleur: 'var(--planif-couleur-pratique-autonome)' },
+    'cloture':           { label: 'Clôture',           couleur: 'var(--planif-couleur-cloture)' },
     // Évaluation
     'evaluation':     { label: 'Évaluation',        couleur: 'var(--planif-couleur-evaluation)' }
 };
@@ -811,7 +823,11 @@ var VERBES_AUTO = {
 
 // Groupes de types pour normalisation (verbes horizontaux)
 var TYPES_CONNAISSANCE = ['factuelle', 'conceptuelle', 'procedurale', 'metacognitive'];
-var TYPES_ACTIVITE = ['activite', 'soutien', 'revision'];
+// « Frère d'Activité » se définit ICI et nulle part ailleurs : tout site qui
+// énumérait le triplet en dur a été rabattu sur cette liste (7 août 2026) —
+// sans quoi chaque nouveau frère devait retrouver tous les triplets.
+var TYPES_ACTIVITE = ['activite', 'soutien', 'revision',
+    'ouverture', 'modelisation', 'pratique-guidee', 'pratique-autonome', 'cloture'];
 
 function normaliserType(type) {
     if (TYPES_CONNAISSANCE.indexOf(type) !== -1) return 'connaissance';
@@ -846,6 +862,10 @@ var BANQUE_VERBES = {
 };
 
 // Types de nœuds qui acceptent le sélecteur de niveau cognitif
+// ⚠ Les cinq types d'enseignement explicite N'Y SONT PAS, et c'est délibéré
+// (7 août 2026) : le niveau cognitif (Anderson & Krathwohl) qualifie une TÂCHE
+// d'apprentissage ; une étape de méthode (Ouverture, Clôture…) n'en a pas.
+// Ce n'est donc pas un « triplet en dur » à rabattre sur TYPES_ACTIVITE.
 var TYPES_AVEC_NIVEAU_COGNITIF = ['competence', 'idee-maitresse', 'activite', 'soutien', 'revision', 'evaluation'];
 
 // === GUIDE INTÉGRÉ — 8 pages (7 pédagogiques + 1 technique import/export) ===
@@ -1198,7 +1218,7 @@ function connaissanceAtteinActivite(noeudId, visited) {
     }
     for (var i = 0; i < liens.length; i++) {
         var l = liens[i];
-        if (l.noeudType === 'activite' || l.noeudType === 'soutien' || l.noeudType === 'revision') return true;
+        if (TYPES_ACTIVITE.indexOf(l.noeudType) !== -1) return true;
         if (TYPES_CONNAISSANCE.indexOf(l.noeudType) !== -1) {
             if (connaissanceAtteinActivite(l.noeudId, visited)) return true;
         }
@@ -1236,7 +1256,7 @@ function ideeMaitresseAtteinEvaluation(noeudId, visited) {
                     // Connaissance (factuelle/conceptuelle/procédurale/métacognitive) → activité → évaluation
                     if (TYPES_CONNAISSANCE.indexOf(enfant.type) !== -1) {
                         for (var k = 0; k < liensEnfant.length; k++) {
-                            if (liensEnfant[k].noeudType === 'activite' || liensEnfant[k].noeudType === 'soutien' || liensEnfant[k].noeudType === 'revision') {
+                            if (TYPES_ACTIVITE.indexOf(liensEnfant[k].noeudType) !== -1) {
                                 var liensAct = getLiensDeNoeud(liensEnfant[k].noeudId);
                                 if (liensAct.some(function(la) { return la.noeudType === 'evaluation'; })) return true;
                             }
@@ -1426,6 +1446,11 @@ function evaluerBadge(noeud) {
         case 'activite':
         case 'soutien':
         case 'revision':
+        case 'ouverture':
+        case 'modelisation':
+        case 'pratique-guidee':
+        case 'pratique-autonome':
+        case 'cloture':
             var lieeConnaissanceE = liens.some(function(l) {
                 return TYPES_CONNAISSANCE.indexOf(l.noeudType) !== -1;
             });
@@ -1458,7 +1483,7 @@ function evaluerBadge(noeud) {
             });
             var aAct = (noeud.enfants || []).some(function(eid) {
                 var e = etat.noeuds.get(eid);
-                return e && (e.type === 'activite' || e.type === 'soutien' || e.type === 'revision');
+                return e && TYPES_ACTIVITE.indexOf(e.type) !== -1;
             });
             var msgsSortie = [];
             if (!aConn) msgsSortie.push("Aucune connaissance");
@@ -1474,9 +1499,8 @@ function evaluerBadge(noeud) {
 
         case 'evaluation':
             var typesAmontEval = ['idee-maitresse', 'factuelle', 'conceptuelle', 'procedurale', 'metacognitive'];
-            var typesActivite = ['activite', 'soutien', 'revision'];
             var lieeActiviteOuContenu = liens.some(function(l) {
-                return typesAmontEval.indexOf(l.noeudType) !== -1 || typesActivite.indexOf(l.noeudType) !== -1;
+                return typesAmontEval.indexOf(l.noeudType) !== -1 || TYPES_ACTIVITE.indexOf(l.noeudType) !== -1;
             });
             return {
                 entree: lieeActiviteOuContenu
@@ -1776,7 +1800,7 @@ function ouvrirPanneau(id) {
     // une dur\u00e9e estim\u00e9e en minutes ; la dur\u00e9e d'une LE\u00c7ON est un rollup pur
     // (somme de ses activit\u00e9s). La conversion en p\u00e9riodes suit TOUJOURS
     // \u00ab Dur\u00e9e d'une p\u00e9riode \u00bb du cadre (obtenirDureePeriode) \u2014 jamais en dur.
-    if (donnees.type === 'activite') {
+    if (TYPES_ACTIVITE.indexOf(donnees.type) !== -1) {
         var meta = donnees.metadata;
         var hasDuree = !!meta.duree;
         extra.innerHTML +=
@@ -2976,7 +3000,7 @@ function peutContenir(conteneurType, enfantType) {
     // appliqué à deux échelles. Les cycles sont bloqués par estDescendantDe()
     // dans trouverConteneurPour().
     if (conteneurType === 'sequence') return enfantType === 'lecon' || enfantType === 'sequence';
-    if (conteneurType === 'lecon') return enfantType === 'activite' || enfantType === 'soutien' || enfantType === 'revision' || TYPES_CONNAISSANCE.indexOf(enfantType) !== -1 || enfantType === 'evaluation';
+    if (conteneurType === 'lecon') return TYPES_ACTIVITE.indexOf(enfantType) !== -1 || TYPES_CONNAISSANCE.indexOf(enfantType) !== -1 || enfantType === 'evaluation';
     return false;
 }
 
@@ -4845,7 +4869,7 @@ function afficherLeconOrganisateur() {
     var enfants = (lecon.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); });
     var activites = enfants.filter(function(eid) {
         var e = etat.noeuds.get(eid);
-        return e && (e.type === 'activite' || e.type === 'soutien' || e.type === 'revision');
+        return e && TYPES_ACTIVITE.indexOf(e.type) !== -1;
     });
 
     // Charger les productions depuis Construction de la note
@@ -7611,6 +7635,8 @@ window.planificationCarte = {
     cheminSequence: cheminSequence,
     compterLeconsDescendantes: compterLeconsDescendantes,
     peutContenir: peutContenir,
+    TYPES_ACTIVITE: TYPES_ACTIVITE,
+    normaliserType: normaliserType,
     trouverConteneurParRecouvrement: trouverConteneurParRecouvrement,
     recentrerVue: recentrerVue,
     injecterNoeuds: injecterNoeuds,
