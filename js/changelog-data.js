@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.52',
+            couleur: 'vert',
+            titre: 'Alignement : le planificateur en pastilles',
+            items: [
+                'Les leçons et les séquences ne s’étirent plus sur toute la largeur de leur rangée : elles épousent leur contenu, comme des pastilles. Une semaine chargée se lit d’un coup d’œil au lieu de défiler, et il en tient plusieurs par ligne.',
+                'Actions → « Nettoyer les repères de semaine… » : maintenant que la semaine se choisit dans le bloc, les « Sem. 11 – » écrits dans tes titres font double emploi. L’outil te les montre un par un, avec l’avant et l’après, et rien ne part sans ton clic.',
+                'Il refuse de trancher à ta place : si le titre annonce une semaine différente de celle qui est posée, il te le signale sans rien toucher. Si retirer le repère ne laissait rien de lisible, il te laisse réécrire le titre toi-même. Et il ne touche jamais aux repères de séance — la séance n’a pas encore sa place dans le modèle.'
+            ]
+        },
+        {
             version: '1.51',
             couleur: 'vert',
             titre: 'Alignement : la semaine se choisit dans le bloc',

@@ -18765,20 +18765,45 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     gap: 3px 4px;
 }
 
+/* PASTILLES (7 aout 2026, 2e passe).
+
+   Les blocs s'ETIRAIENT (`flex: 1 1 auto`) : une seule lecon occupait toute la
+   largeur de sa rangee, et une semaine chargee defilait pour rien. Ils EPOUSENT
+   desormais leur contenu — on lit d'un coup d'oeil combien une semaine porte,
+   et il en tient plusieurs par ligne.
+
+   Plancher : en dessous, on passe a la ligne. Jamais de titre ecrase. Descendu
+   de 190 a 150 px puis a 96 px. L'arithmetique du cote a cote n'en souffre
+   pas : la sentinelle exige `utile >= 2 x plancher + gouttiere`, une inegalite
+   qu'un plancher PLUS BAS rend seulement plus facile a satisfaire. Les titres
+   longs restent tronques avec ellipse, le titre complet vit dans `title`. */
 .planif-grille-bloc {
-    flex: 1 1 auto;
-    /* Plancher : en dessous, on passe a la ligne. Jamais de titre ecrase.
-       Abaisse de 190 a 150 px le 7 aout : a 190, deux blocs reclamaient 384 px
-       utiles, donc une palette de 428 px — au-dela de tout reglage possible, et
-       une bouchee de canevas que personne n'a demandee. Les titres longs sont
-       tronques aux DEUX valeurs : le plancher ne choisissait pas entre tronque
-       et lisible, seulement le seuil de passage a la ligne. */
-    min-width: 150px;
+    flex: 0 1 auto;
+    min-width: 96px;
     max-width: 100%;
 }
 
-/* Une leçon dépliée reprend la pleine largeur : son déroulé se lit en hauteur. */
-.planif-grille-bloc--large { flex-basis: 100%; }
+/* Une leçon dépliée reprend la pleine largeur : son déroulé se lit en hauteur,
+   le mettre en colonne étroite le rendrait illisible. */
+.planif-grille-bloc--large { flex: 1 1 100%; }
+
+/* L'allure de pastille : plus serrée que l'item de sommaire dont elle hérite,
+   et un contour permanent pour qu'on voie où commence et finit chaque bloc
+   quand ils sont trois sur une ligne. Portée au bloc de GRILLE seulement —
+   l'item garde son allure ailleurs (Vue globale, palette). */
+.planif-grille-bloc > .planif-som-item {
+    padding: 3px 7px;
+    gap: 4px;
+    border-radius: 10px;
+    border-color: var(--bordure-discrete, rgba(128,128,128,.22));
+    background: var(--surface-element, rgba(128,128,128,.06));
+}
+.planif-grille-bloc > .planif-som-item:hover {
+    border-color: var(--planif-couleur-bordure, rgba(128,128,128,.5));
+}
+/* Le chevron d'une leçon SANS déroulé occupait une gouttière pour rien —
+   sur une pastille de 96 px, c'est une part visible de la largeur. */
+.planif-grille-bloc .planif-grille-chevron--vide { display: none; }
 
 /* Le titre de la zone coiffe la rangée, il n'entre pas dans le flux latéral. */
 .planif-grille-nonplanifie-titre { flex: 0 0 100%; }
