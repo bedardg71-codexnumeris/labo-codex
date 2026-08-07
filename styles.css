@@ -19248,7 +19248,17 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 }
 .planif-palette-barre:active { cursor: grabbing; }
 
-.planif-palette-titre { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--texte-secondaire, #8aa4b0); }
+/* `flex: 1` sur le titre, et non `space-between` sur la barre (correctif du
+   7 août) : avec DEUX boutons, `space-between` répartissait les trois enfants et
+   posait le bouton de disposition SEUL au milieu de la barre — il n'avait plus
+   l'air d'un contrôle, mais d'un artefact. Le titre absorbe la place libre, les
+   boutons se regroupent à droite. Le cas à un seul bouton (palette Nœuds) rend
+   exactement comme avant. */
+.planif-palette-titre {
+    flex: 1;
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--texte-secondaire, #8aa4b0);
+}
 
 .planif-palette-toggle {
     width: 20px; height: 20px; border: none; background: none;

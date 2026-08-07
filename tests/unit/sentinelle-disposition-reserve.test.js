@@ -1,5 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const racineProjet = path.resolve(__dirname, '..', '..');
+const sourceIndex = readFileSync(path.join(racineProjet, 'index.html'), 'utf8');
+const sourceCss = readFileSync(path.join(racineProjet, 'styles.css'), 'utf8');
 
 // DISPOSITION DE LA RÉSERVE « NON PLANIFIÉ » (7 août 2026).
 //
@@ -188,5 +196,71 @@ describe('Disposition · le GLISSER ne doit pas la connaître', () => {
 
         expect(rendu()).toContain('data-grille-semaine="1"');
         expect(rendu()).toContain('data-grille-semaine="2"');
+    });
+});
+
+// =======================================================================
+// LE BOUTON DOIT EXISTER À L'ŒIL — correctif du 7 août
+// =======================================================================
+//
+// Constat terrain de Grégoire : « je ne vois pas de bouton ». Il était pourtant
+// dans le DOM, avec son écouteur et sa préférence. Deux défauts qu'AUCUNE de mes
+// sentinelles ne pouvait voir, parce qu'elles vérifiaient le balisage et
+// l'arithmétique :
+//
+//  1. le glyphe « ⫿ » (U+2AFF, Supplemental Math Operators) n'existe pas dans
+//     les polices courantes — il s'affichait en carré vide. Un glyphe qui ne
+//     rend pas est un bouton qui n'existe pas ;
+//  2. `justify-content: space-between` répartit TROIS enfants : le bouton se
+//     retrouvait seul au milieu de la barre, sans l'air d'un contrôle.
+//
+// C'est « vert et inerte » une troisième fois, dans un costume que les tests
+// précédents ne couvraient pas.
+
+describe('Bouton de disposition · visible et lisible', () => {
+    /** Blocs Unicode sûrs — présents dans les polices système Mac et iPad. */
+    const BLOCS_SURS = [
+        [0x20, 0x7e],     // Latin de base
+        [0xa0, 0xff],     // Latin-1
+        [0x2000, 0x206f], // Ponctuation générale (dont − U+2212 ? non : 2212 est ci-dessous)
+        [0x2190, 0x21ff], // Flèches
+        [0x2200, 0x22ff], // Opérateurs mathématiques (− U+2212)
+        [0x25a0, 0x25ff]  // Formes géométriques (◧ U+25E7)
+    ];
+    const estSur = (cp) => BLOCS_SURS.some(([a, b]) => cp >= a && cp <= b);
+
+    const libelles = [...sourceIndex.matchAll(
+        /<button[^>]*class="planif-palette-toggle"[^>]*>([^<]*)<\/button>/g
+    )].map((m) => m[1]);
+
+    it('les boutons de barre de palette sont bien là', () => {
+        expect(libelles.length).toBeGreaterThanOrEqual(2);
+    });
+
+    it('AUCUN n’utilise un glyphe hors des blocs sûrs', () => {
+        for (const libelle of libelles) {
+            for (const car of [...libelle.trim()]) {
+                const cp = car.codePointAt(0);
+                expect(
+                    estSur(cp),
+                    `U+${cp.toString(16).toUpperCase()} (« ${car} ») risque le carré vide`
+                ).toBe(true);
+            }
+        }
+    });
+
+    it('chacun porte un title — le glyphe seul ne dit pas ce qu’il fait', () => {
+        const boutons = [...sourceIndex.matchAll(
+            /<button[^>]*class="planif-palette-toggle"[^>]*>/g
+        )].map((m) => m[0]);
+        for (const b of boutons) expect(b).toMatch(/title="/);
+    });
+
+    it('la barre GROUPE ses boutons — le titre absorbe la place libre', () => {
+        // Sans `flex: 1` sur le titre, `space-between` éparpille les trois
+        // enfants et isole le bouton au milieu de la barre.
+        const regle = /\.planif-palette-titre\s*\{[^}]*\}/.exec(sourceCss);
+        expect(regle).toBeTruthy();
+        expect(regle[0]).toMatch(/flex:\s*1/);
     });
 });
