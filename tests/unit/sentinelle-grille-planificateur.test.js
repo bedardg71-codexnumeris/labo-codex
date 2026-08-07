@@ -343,6 +343,117 @@ describe('lot 3 · déplacement dans la grille', () => {
     });
 });
 
+// Déblocage du 7 août (identifié le 6 au soir, §5.3 du document de méthode) :
+// les éléments d'une même semaine se lisaient EMPILÉS. Ils passent côte à côte
+// — rendu pur, aucun type, aucune migration. La contrainte tenue est que ce ne
+// soit PAS la « deux colonnes imposée » écartée la veille : un élément seul
+// garde sa pleine largeur, et une leçon dépliée aussi.
+/**
+ * Contenu du `.planif-grille-bloc` qui englobe `marqueur`, par comptage des
+ * <div> ouverts/fermés. Lire l'imbrication RÉELLE est le seul moyen de
+ * distinguer « le déroulé est dans le bloc » de « il est juste après » — deux
+ * rendus identiques en ordre de caractères, opposés à l'écran.
+ */
+function contenuBlocContenant(html, marqueur) {
+    const iMarqueur = html.indexOf(marqueur);
+    if (iMarqueur === -1) throw new Error('marqueur absent du rendu : ' + marqueur);
+    const iBloc = html.lastIndexOf('<div class="planif-grille-bloc', iMarqueur);
+    if (iBloc === -1) throw new Error('aucune enveloppe de bloc avant le marqueur');
+
+    let profondeur = 0;
+    const jeton = /<div\b|<\/div>/g;
+    jeton.lastIndex = iBloc;
+    let m;
+    while ((m = jeton.exec(html)) !== null) {
+        profondeur += m[0] === '</div>' ? -1 : 1;
+        if (profondeur === 0) return html.slice(iBloc, m.index + m[0].length);
+    }
+    throw new Error('enveloppe de bloc non refermée');
+}
+
+describe('7 août · côte à côte dans la rangée', () => {
+    let api;
+    beforeEach(() => { api = monterModule(); poserCalendrier(); });
+
+    it('chaque élément d’une rangée est enveloppé dans un bloc (flux latéral)', () => {
+        poser(api, 'planif-l1', 'lecon', { titre: 'Accueil', parent: 'planif-s1', metadata: { semaine: 1 } });
+        poser(api, 'planif-l2', 'lecon', { titre: 'Annotation', parent: 'planif-s1', metadata: { semaine: 1 } });
+        poser(api, 'planif-s1', 'sequence', { titre: 'Ouverture', enfants: ['planif-l1', 'planif-l2'] });
+
+        api.mettreAJourPlanificateur();
+        const html = elements['planif-sommaire'].innerHTML;
+        const r1 = html.split('planif-grille-rangee').find((r) => r.includes('num">1<'));
+
+        // Séquence + 2 leçons de la semaine 1 = 3 blocs dans la même rangée.
+        expect((r1.match(/class="planif-grille-bloc/g) || [])).toHaveLength(3);
+        expect(r1).toContain('Accueil');
+        expect(r1).toContain('Annotation');
+    });
+
+    it('une leçon DÉPLIÉE reprend la pleine largeur (son déroulé se lit en hauteur)', () => {
+        poser(api, 'planif-a1', 'activite', { titre: 'Atelier', parent: 'planif-l1', metadata: { duree: 50 } });
+        poser(api, 'planif-l1', 'lecon', { titre: 'Accueil', parent: 'planif-s1', enfants: ['planif-a1'], metadata: { semaine: 1 } });
+        poser(api, 'planif-s1', 'sequence', { titre: 'Ouverture', enfants: ['planif-l1'] });
+
+        api.mettreAJourPlanificateur();
+        expect(elements['planif-sommaire'].innerHTML).not.toContain('planif-grille-bloc--large');
+
+        api.basculerDetailLecon('planif-l1');
+        expect(elements['planif-sommaire'].innerHTML).toContain('planif-grille-bloc--large');
+
+        api.basculerDetailLecon('planif-l1');
+        expect(elements['planif-sommaire'].innerHTML).not.toContain('planif-grille-bloc--large');
+    });
+
+    it('le déroulé reste SOLIDAIRE de sa leçon (DANS le même bloc, pas à côté)', () => {
+        // Sans l'enveloppe, le déroulé deviendrait un frère de la leçon dans le
+        // flux flex et s'afficherait à sa DROITE au lieu de dessous. Il faut
+        // donc vérifier l'IMBRICATION réelle : un simple ordre de position ne
+        // distingue pas « dans le bloc » de « juste après le bloc ».
+        poser(api, 'planif-a1', 'activite', { titre: 'Atelier', parent: 'planif-l1', metadata: { duree: 50 } });
+        poser(api, 'planif-l1', 'lecon', { titre: 'Accueil', parent: 'planif-s1', enfants: ['planif-a1'], metadata: { semaine: 1 } });
+        poser(api, 'planif-l2', 'lecon', { titre: 'Annotation', parent: 'planif-s1', metadata: { semaine: 1 } });
+        poser(api, 'planif-s1', 'sequence', { titre: 'Ouverture', enfants: ['planif-l1', 'planif-l2'] });
+
+        api.basculerDetailLecon('planif-l1');
+        const html = elements['planif-sommaire'].innerHTML;
+
+        const bloc = contenuBlocContenant(html, 'data-grille-id="planif-l1"');
+        expect(bloc).toContain('Accueil');
+        expect(bloc).toContain('planif-grille-detail');
+        expect(bloc).toContain('Atelier');
+        // Et il ne débordera pas sur la leçon voisine.
+        expect(bloc).not.toContain('Annotation');
+    });
+
+    it('la zone « Non planifié » profite du même flux, titre en pleine largeur', () => {
+        poser(api, 'planif-lx', 'lecon', { titre: 'Errante A', metadata: {} });
+        poser(api, 'planif-ly', 'lecon', { titre: 'Errante B', metadata: {} });
+
+        api.mettreAJourPlanificateur();
+        const zone = elements['planif-sommaire'].innerHTML;
+        const nonPlanifie = zone.slice(zone.indexOf('planif-grille-nonplanifie'));
+
+        expect((nonPlanifie.match(/class="planif-grille-bloc/g) || [])).toHaveLength(2);
+        expect(nonPlanifie).toContain('planif-grille-nonplanifie-titre');
+    });
+
+    it('le glisser survit à l’enveloppe : la cible reste l’item, pas le bloc', () => {
+        // Le glisser résout sa prise par closest('[data-grille-id]') : l'attribut
+        // doit rester sur l'ITEM. S'il migrait sur l'enveloppe, le lot 3 casserait.
+        poser(api, 'planif-l1', 'lecon', { titre: 'Accueil', parent: 'planif-s1', metadata: { semaine: 1 } });
+        poser(api, 'planif-s1', 'sequence', { titre: 'Ouverture', enfants: ['planif-l1'] });
+
+        api.mettreAJourPlanificateur();
+        const html = elements['planif-sommaire'].innerHTML;
+
+        expect(html).not.toMatch(/class="planif-grille-bloc[^"]*"[^>]*data-grille-id/);
+        expect(html).toMatch(/planif-som-lecon[^>]*data-grille-type="lecon"/);
+        // La rangée reste la cible de dépôt (résolution géométrique par Y).
+        expect(html).toContain('data-grille-semaine="1"');
+    });
+});
+
 describe('lot 2 · zéro-dette — l’ancienne Vue calendrier est morte', () => {
     it('plus AUCUNE trace du rendu recyclé ni du post-traitement DOM', () => {
         expect(sourceCarte).not.toMatch(/genererSeancesHTML/);

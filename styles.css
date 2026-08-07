@@ -18741,6 +18741,37 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     flex: 1;
     min-width: 0;
 }
+
+/* Côte à côte dans une rangée (7 août) — les éléments d'une même semaine se
+   lisent en largeur au lieu de s'empiler. Rendu pur : aucun type, aucune
+   migration. Ce n'est PAS la « deux colonnes imposée » écartée le 6 août :
+   un élément seul garde toute la largeur, et la largeur plancher fait passer
+   à la ligne plutôt que de resserrer des titres déjà tronqués. */
+.planif-grille-cellule,
+.planif-grille-nonplanifie {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 3px 4px;
+}
+
+.planif-grille-bloc {
+    flex: 1 1 auto;
+    /* Plancher : en dessous, on passe à la ligne. Jamais de titre écrasé. */
+    min-width: 190px;
+    max-width: 100%;
+}
+
+/* Une leçon dépliée reprend la pleine largeur : son déroulé se lit en hauteur. */
+.planif-grille-bloc--large { flex-basis: 100%; }
+
+/* Le titre de la zone coiffe la rangée, il n'entre pas dans le flux latéral. */
+.planif-grille-nonplanifie-titre { flex: 0 0 100%; }
+
+/* Pas de media query ici, volontairement : le repli doit suivre la largeur de
+   la PALETTE (redimensionnable, 1.36.0), pas celle de la fenêtre. La largeur
+   plancher au-dessus le fait déjà — deux blocs qui ne tiennent pas passent à
+   la ligne, quelle que soit la taille de l'écran. */
 .planif-grille-rangee--vide .planif-grille-cellule { min-height: 14px; }
 .planif-grille-rangee--speciale .planif-grille-cellule {
     font-size: 11px;
