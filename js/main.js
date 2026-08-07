@@ -20,7 +20,7 @@
 // init-inline.js compare cette valeur au BUILD_ID lu depuis version.json :
 // si différent, Safari file:// a probablement un main.js périmé en cache,
 // et la séquence reload+bandeau s'enclenche. SYNCHRONISER À CHAQUE BUMP.
-window._SCRIPT_BUILD_main = '0807-1428';
+window._SCRIPT_BUILD_main = '0807-1447';
 
 /* ===============================
    FONCTION GLOBALE: Génération d'ID uniques
@@ -232,7 +232,23 @@ document.addEventListener('DOMContentLoaded', function () {
     // 0. ÉCOUTER LA SYNCHRONISATION IndexedDB
     // ===============================
     // Recharger les données quand la synchronisation IndexedDB → localStorage est terminée
-    window.addEventListener('db-ready', async function(event) {
+    // ⚠ COURSE CORRIGÉE LE 7 AOÛT 2026 — la cause de #367 non migré.
+    //
+    // Ce bloc porte les MIGRATIONS AU BOOT. Il ne s'abonnait qu'à `db-ready`,
+    // depuis `DOMContentLoaded`. Or `db.syncToLocalStorageCache()` émet cet
+    // événement dès la fin de la synchro IndexedDB — qui peut se terminer AVANT
+    // que ce code ait posé son écouteur. Dans ce cas l'événement est déjà passé,
+    // l'écouteur ne se déclenche jamais, et TOUTES les migrations de ce bloc
+    // sont sautées EN SILENCE — sans erreur, sans trace.
+    //
+    // Constat terrain (Grégoire, 7 août) : `migration_planification_seances_done`
+    // encore à `false` et 38 entrées dans la clé nue, des heures après le
+    // déploiement, avec un main.js pourtant à jour.
+    //
+    // `codex.js` connaissait déjà le piège et le contourne correctement. Le
+    // même patron est appliqué ici : si la DB est DÉJÀ prête, on exécute
+    // immédiatement ; sinon on attend l'événement.
+    async function auDbReady(event) {
 
         // #374-bis (6 août 2026) : RE-scanner la fusion des journées sans cours
         // maintenant que memoryCache est hydraté. La passe de DOMContentLoaded
@@ -661,7 +677,15 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // [Chantier 1] chargerEtatCheckboxDemo supprimée
-    });
+    }
+
+    // L'écouteur reste posé (db-ready peut être réémis après un import), ET le
+    // rattrapage couvre le cas où il a déjà eu lieu. Les migrations du bloc sont
+    // toutes idempotentes (drapeaux), donc une double exécution est sans effet.
+    window.addEventListener('db-ready', auDbReady);
+    if (window.dbReady) {
+        auDbReady({ detail: { rattrapage: true } });
+    }
 
     // ===============================
     // 1. GÉNÉRATION DYNAMIQUE DES BULLES — VORTEX (Beta 99.19+)

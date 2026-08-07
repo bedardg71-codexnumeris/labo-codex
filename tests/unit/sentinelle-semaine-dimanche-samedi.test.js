@@ -189,8 +189,10 @@ describe('#374-bis · fusion des journées sans cours (dédoublonnage par conten
 
     it('main.js re-scanne à db-ready (#374-bis) et régénère le calendrier si besoin', () => {
         const handler = sourceMain.slice(
-            sourceMain.indexOf("addEventListener('db-ready'"),
-            sourceMain.indexOf("addEventListener('db-ready'") + 2000
+            // Recalé le 7 août : le corps du handler vit désormais dans la
+            // fonction nommée `auDbReady` (correctif de la course db-ready).
+            sourceMain.indexOf('async function auDbReady('),
+            sourceMain.indexOf('async function auDbReady(') + 2000
         );
         expect(handler).toMatch(/migrerJourneesSansCours\(\) > 0/);
         expect(handler).toMatch(/genererCalendrierComplet\(\)/);
