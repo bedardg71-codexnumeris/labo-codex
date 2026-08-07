@@ -491,7 +491,7 @@ function importerCarteDepuisTrimestre(trimestreSourceId, carteId) {
             }
         }
 
-        copierSeancesLecons(trimestreSourceId, source.cartes[carteId]);
+        copierSeancesLecons(trimestreSourceId, carteId, nouvelId, source.cartes[carteId]);
         return nouvelId;
     } catch (e) {
         console.warn('[Planification] Import inter-trimestre échoué :', e);
@@ -502,17 +502,15 @@ function importerCarteDepuisTrimestre(trimestreSourceId, carteId) {
 /**
  * Les Objectif/Notes des vues leçon vivent dans une clé séparée
  * ('planification_seances', indexée par id de leçon — ids préservés à la copie).
- * ⚠ RÉALITÉ VÉRIFIÉE (sonde 4 août 2026, correctif du commentaire initial) :
- * cette clé est ABSENTE du registre CLES_NAMESPACEES et cle() la retourne NUE
- * → elle est aujourd'hui PARTAGÉE entre tous les trimestres (démo comprise).
- * Conséquence : les notes « suivent » déjà une carte importée via la clé
- * partagée, et la lecture `<tid>_planification_seances` ci-dessous est un
- * no-op tant que #367 (migration nue→namespacée, décision Grégoire) n'est pas
- * livré. La fonction est le comportement CORRECT du monde post-#367 ; elle
- * s'activera d'elle-même à la migration. Push sans replace : on n'écrase
- * jamais une note existante du trimestre actif.
+ * ✅ #367 LIVRÉ (7 août 2026) : la clé est namespacée par trimestre ET son
+ * dictionnaire est composé en `<carteId>::<leconId>`. Cette fonction est donc
+ * ACTIVE — elle ne l'était pas avant (les notes « suivaient » par accident, via
+ * la clé nue partagée). Les ids de leçon étant préservés à la copie mais les
+ * ids de CARTE non, la note se lit sous la carte source et s'écrit sous la
+ * carte d'arrivée. Push sans replace : on n'écrase jamais une note existante
+ * du trimestre actif.
  */
-function copierSeancesLecons(trimestreSourceId, contenuCarte) {
+function copierSeancesLecons(trimestreSourceId, carteSourceId, nouvelleCarteId, contenuCarte) {
     try {
         const seancesSource = db.getSync(trimestreSourceId + '_planification_seances', {}) || {};
         const idsLecons = (contenuCarte.noeuds || []).filter(n => n.type === 'lecon').map(n => n.id);
@@ -520,8 +518,13 @@ function copierSeancesLecons(trimestreSourceId, contenuCarte) {
         const cible = db.getSync(cle('planification_seances'), {}) || {};
         let modifie = false;
         idsLecons.forEach(lid => {
-            if (seancesSource[lid] && !cible[lid]) {
-                cible[lid] = JSON.parse(JSON.stringify(seancesSource[lid]));
+            // Clés COMPOSITES des deux côtés (#367) : les ids de leçon ne sont
+            // uniques que par carte, donc la note se lit sous la carte SOURCE et
+            // s'écrit sous la carte d'ARRIVÉE — qui porte un id différent.
+            const cleSourceNote = `${carteSourceId}::${lid}`;
+            const cleCibleNote = `${nouvelleCarteId}::${lid}`;
+            if (seancesSource[cleSourceNote] && !cible[cleCibleNote]) {
+                cible[cleCibleNote] = JSON.parse(JSON.stringify(seancesSource[cleSourceNote]));
                 modifie = true;
             }
         });

@@ -20,7 +20,7 @@
 // init-inline.js compare cette valeur au BUILD_ID lu depuis version.json :
 // si différent, Safari file:// a probablement un main.js périmé en cache,
 // et la séquence reload+bandeau s'enclenche. SYNCHRONISER À CHAQUE BUMP.
-window._SCRIPT_BUILD_main = '0807-0954';
+window._SCRIPT_BUILD_main = '0807-1138';
 
 /* ===============================
    FONCTION GLOBALE: Génération d'ID uniques
@@ -363,6 +363,73 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.warn('[migration_modalites_namespacees] erreur ignorée:', e);
             }
             db.setSync('migration_modalites_namespacees_done', true);
+        }
+
+        // === #367 (7 août 2026) — notes de leçon : namespacer ET composer ===
+        //
+        // `planification_seances` n'avait jamais été namespacée : les notes
+        // étaient partagées entre TOUS les trimestres et avec la démo. Et son
+        // dictionnaire était PLAT par id de leçon, alors que ces ids sont
+        // produits par un compteur PAR CARTE — les notes étaient donc déjà
+        // aliassées entre cartes d'un même trimestre (rouge D1, audit 5 août).
+        //
+        // SÉMANTIQUE RETENUE — chaque carte GARDE CE QU'ELLE AFFICHE AUJOURD'HUI.
+        // Puisque toutes les cartes lisent actuellement le même dictionnaire
+        // plat, une carte qui montre la note X pour `planif-noeud_3` continue de
+        // la montrer. La migration fige l'état visible ; elle ne propage rien de
+        // neuf et ne retire rien à personne. C'est la lecture la plus sûre de la
+        // décision Grégoire du 7 août (« dupliquer vers tous, purger la nue »).
+        //
+        // Aucune perte possible : la clé nue est ARCHIVÉE avant d'être purgée.
+        // ⮕ Retrait de l'archive prévu quand Grégoire aura confirmé la migration
+        //    sur ses données réelles (item BACKLOG #409) — pas de « au cas où »
+        //    sans date.
+        if (!db.getSync('migration_planification_seances_done', false)) {
+            try {
+                const notesNues = db.getSync('planification_seances', null);
+                const aDesNotes = notesNues && typeof notesNues === 'object' && Object.keys(notesNues).length > 0;
+
+                if (aDesNotes) {
+                    db.setSync('planification_seances_archive_pre367', notesNues);
+
+                    const listeTrim = db.getSync('trimestres', []);
+                    if (Array.isArray(listeTrim)) {
+                        listeTrim.forEach(t => {
+                            if (!t || !t.id) return;
+                            const donneesCartes = db.getSync(`${t.id}_planification_mindmap`, null);
+                            if (!donneesCartes || !donneesCartes.cartes) return;
+
+                            const cleCible = `${t.id}_planification_seances`;
+                            const cible = db.getSync(cleCible, {}) || {};
+                            let modifie = false;
+
+                            Object.keys(donneesCartes.cartes).forEach(carteId => {
+                                const contenu = donneesCartes.cartes[carteId];
+                                const noeuds = (contenu && contenu.noeuds) || [];
+                                noeuds.forEach(n => {
+                                    if (!n || n.type !== 'lecon') return;
+                                    const source = notesNues[n.id];
+                                    if (!source) return;
+                                    const cleComposite = `${carteId}::${n.id}`;
+                                    if (cleComposite in cible) return; // idempotent
+                                    cible[cleComposite] = JSON.parse(JSON.stringify(source));
+                                    modifie = true;
+                                });
+                            });
+
+                            if (modifie) db.setSync(cleCible, cible); // security-ok: redistribution interne de données locales
+                        });
+                    }
+
+                    // Purge de la nue : sans elle, `cle()` continuerait de la
+                    // servir aux codex qui n'ont pas encore migré ET la démo
+                    // continuerait d'y écrire.
+                    db.setSync('planification_seances', {});
+                }
+            } catch (e) {
+                console.warn('[migration_planification_seances] erreur ignorée:', e);
+            }
+            db.setSync('migration_planification_seances_done', true);
         }
 
         // Purge du champ legacy dureePeriodeMinutes dans les modalités de
