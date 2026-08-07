@@ -45,9 +45,9 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - **Cartes existantes** : restent sans cours. Aucune devinette depuis le titre — même règle que la migration d'ancrage du 6 août.
   - **RESTE (lot 2)** : la reprise inter-trimestre pilotée par le cours (« retrouve le 601-101 de la session précédente ») — c'est ce qui ferme #368.
 
-- [ ] 📐 **#408** Le changelog utilisateur s'arrête à **1.31** alors que la production est à **1.48.0** — créé 7 août 2026 au merge.
+- [x] **#408 RÉGLÉ 7 août 2026** — Le changelog utilisateur s'arrête à **1.31** alors que la production est à **1.48.0** — créé 7 août 2026 au merge.
   - Les 16 versions mineures du chantier alignement (1.32 → 1.47) n'ont **aucune entrée** dans `js/changelog-data.js`, et elles sont maintenant déployées et visibles des testeurs.
-  - 📐 **Décision Grégoire** : la règle CLAUDE.md dit « 1 entrée par version mineure », ce qui ferait 16 entrées pour un chantier encore en cours. Consolider en une seule entrée « Alignement pédagogique » ? Attendre la fin du chantier ? Je n'ai pas écrit de copie utilisateur à ta place.
+  - ✅ **TRANCHÉ par Grégoire (7 août)** : **consolidation en UNE entrée** `1.48` « Alignement pédagogique : le planificateur », 8 items orientés utilisateur. L'exception est documentée en tête de `js/changelog-data.js` pour qu'une session ultérieure ne la « répare » pas en la découpant : ces 16 mineures ont vécu sur une branche non mergée et ont été déployées d'un seul coup — du point de vue de l'utilisateur, qui passait de 1.31 à 1.48, elles sont UNE livraison.
 
 - [ ] **#406** Blocs B et C du PLAN-JOURNEE du 7 août — **REPORTÉS explicitement par Grégoire (7 août, soir)**, à ne pas perdre.
   - Rappel de ce que c'est (les lettres seules ne le disent pas) : **B** = test d'onboarding à froid, persona « Catherine » — profil Chrome neuf, app à l'état premier lancement, session Cowork sans aucun contexte projet, 60-90 min, **ne pas aider pendant le test**. C'est une **tâche de Grégoire**, non délégable : tout l'intérêt est qu'un agent découvre l'app sans savoir ce qu'elle fait. **C** = triage des deux livrables en items BACKLOG (chantier ONBOARDING, priorité 1 actée le 6 août), tâche Claude Code.

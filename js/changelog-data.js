@@ -1,16 +1,40 @@
 /**
  * changelog-data.js — Données structurées du changelog + rendu HTML
  *
- * Convention : 1 entrée par version majeure. Depuis 1.0.0 (3 juin 2026),
- * versionnage sémantique (SemVer MAJEUR.MINEUR.CORRECTIF) ; avant, schéma
- * « Beta XX » (95, 96, 97, 98, 99).
+ * Convention : 1 entrée par version MINEURE (cf. CLAUDE.md). Depuis 1.0.0
+ * (3 juin 2026), versionnage sémantique (SemVer MAJEUR.MINEUR.CORRECTIF) ;
+ * avant, schéma « Beta XX » (95, 96, 97, 98, 99).
  * Pas de dates. Max 6-8 items orientés utilisateur.
- * Couleurs : vert (features), bleu (améliorations).
+ * Couleurs : vert (features), bleu (améliorations), orange (corrections).
+ *
+ * ⚠ EXCEPTION ASSUMÉE — l'entrée 1.48 (décision Grégoire, 7 août 2026).
+ * Elle CONSOLIDE le chantier alignement 1.32 → 1.48. Ce n'est pas un oubli à
+ * réparer en la découpant : ces seize versions mineures ont vécu sur une
+ * branche non mergée et ont été déployées d'un seul coup. Du point de vue de
+ * l'utilisateur, qui passait de 1.31 à 1.48, elles sont UNE livraison — et
+ * seize entrées auraient décrit un historique de développement qu'il n'a
+ * jamais vécu. La règle « 1 entrée par mineure » vaut pour le rythme normal,
+ * où chaque mineure est déployée seule.
  */
 (function() {
     'use strict';
 
     var CHANGELOG = [
+        {
+            version: '1.48',
+            couleur: 'vert',
+            titre: 'Alignement pédagogique : le planificateur',
+            items: [
+                'Un planificateur en grille remplace le sommaire et la Vue calendrier : une rangée par semaine, tirée directement de ton Cadre du trimestre — plus rien à ressaisir. Les leçons d’une même semaine s’affichent côte à côte, et tu déplaces ton contenu d’une semaine à l’autre en le glissant. Ce qui n’est pas encore placé attend en pied de grille, dans « Non planifié ».',
+                'La semaine appartient maintenant à la leçon, et non plus à la séquence qui pouvait la contredire : l’étendue d’une séquence se calcule à partir des leçons qu’elle contient. Une leçon ancrée hors du cadre de ton trimestre retombe dans « Non planifié » au lieu de disparaître.',
+                'Les objectifs d’une leçon s’écrivent et se voient directement dans la carte, au pluriel, avec des boutons pour en ajouter ou en retirer. Reformuler un objectif ne le remplace pas : ses liens survivent à la retouche.',
+                'Chaque objectif indique s’il est servi par une activité et vérifié par une évaluation — tu coches les nœuds concernés dans l’inspecteur, et une pastille par objectif montre ce qui reste à couvrir.',
+                'Une séquence peut contenir des séquences : tu regroupes à l’échelle que ta discipline demande — module, étape, thème — sans nouveau type de nœud à apprendre.',
+                'Le déplacement a été repensé : saisir un bloc déplace ce bloc, ⌘+glisser en fait une copie, et « Dans la leçon » range un nœud depuis l’inspecteur sans aucun geste de glisser. Un conteneur se duplique avec tout son contenu.',
+                'Les blocs et la palette se redimensionnent — à la souris comme au doigt sur iPad, avec retour à la taille automatique par double-clic.',
+                'Une carte peut être rattachée à son cours, pour la retrouver d’une session à l’autre. Le cours s’affiche à côté du nom de la carte.'
+            ]
+        },
         {
             version: '1.31',
             couleur: 'vert',
