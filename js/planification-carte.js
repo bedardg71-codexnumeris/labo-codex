@@ -495,6 +495,82 @@ function definirSemaineLecon(leconId, semaine) {
     return true;
 }
 
+// === SÉLECTEUR DE SEMAINE DANS LE BLOC (7 août 2026) ===
+//
+// Demande de Grégoire : « à côté du type Leçon ou Séquence, un dropdown avec
+// toutes les semaines du trimestre ». Le champ existait déjà — dans
+// l'inspecteur, en saisie libre — mais personne ne le remplissait, et
+// l'enseignant compensait en écrivant « Sem. 11 » dans ses titres. C'est le
+// motif de F1 et F3 une troisième fois : un champ qui n'est pas là où le
+// travail se fait se fait compenser dans le texte.
+//
+// ⮕ Les deux gestes se répondent parce qu'ils passent par la MÊME porte :
+// `deposerDansGrille()`, déjà utilisée par le glisser dans la grille. Sur une
+// leçon elle ÉCRIT `metadata.semaine` ; sur une séquence elle DÉPLACE le bloc
+// entier (décalage de toutes ses leçons, étendue toujours dérivée). Rien de
+// nouveau n'est stocké sur la séquence — la contradiction séquence/leçons
+// retirée le 6 août ne se rouvre pas.
+
+/**
+ * Rendu PARESSEUX : seule l'option courante est écrite au rendu du bloc. La
+ * liste complète est peuplée au premier contact (`peuplerSelecteurSemaine`).
+ * `reconstruireDOM()` passe souvent et une carte porte des dizaines de blocs :
+ * écrire quinze options par bloc à chaque passage serait du travail jeté.
+ */
+function selecteurSemaineHTML(n) {
+    if (!n || (n.type !== 'lecon' && n.type !== 'sequence')) return '';
+    var courante = null;
+    if (n.type === 'lecon') {
+        courante = semaineDeLecon(n);
+    } else {
+        var e = etendueTemporelle(n);
+        courante = e ? e.debut : null;
+    }
+    var estSeq = n.type === 'sequence';
+    return '<select class="planif-noeud-semaine" data-semaine-noeud="' + echapperHtml(n.id) + '"' +
+        ' title="' + (estSeq
+            ? 'Semaine de début — déplace toute la séquence'
+            : 'Semaine de cette leçon') + '"' +
+        ' aria-label="' + (estSeq ? 'Semaine de début de la séquence' : 'Semaine de la leçon') + '">' +
+        '<option value="' + (courante === null ? '' : courante) + '" selected>' +
+        (courante === null ? '—' : 'S' + courante) + '</option>' +
+        '</select>';
+}
+
+/** Peuple la liste au premier contact. Idempotent. */
+function peuplerSelecteurSemaine(select) {
+    if (!select || select.dataset.peuple === '1') return;
+    var courant = select.value;
+    var cadre = cadreSemainesGrille(deriverRangeesGrille().rangees);
+    var nums = Array.from(cadre).sort(function(a, b) { return a - b; });
+
+    // Construit en DOM : aucune donnée d'enseignant ici, mais `innerHTML` sur
+    // une chaîne concaténée serait signalé par l'audit statique — et le DOM est
+    // de toute façon plus clair pour une liste d'options.
+    select.textContent = '';
+    var vide = document.createElement('option');
+    vide.value = '';
+    vide.textContent = '—';
+    select.appendChild(vide);
+
+    if (nums.length === 0) {
+        var aucune = document.createElement('option');
+        aucune.value = '';
+        aucune.disabled = true;
+        aucune.textContent = 'Configure le Cadre du trimestre';
+        select.appendChild(aucune);
+    }
+
+    for (var i = 0; i < nums.length; i++) {
+        var opt = document.createElement('option');
+        opt.value = String(nums[i]);
+        opt.textContent = 'S' + nums[i];
+        select.appendChild(opt);
+    }
+    select.value = courant;
+    select.dataset.peuple = '1';
+}
+
 /**
  * Ablation de l'ancrage porté par la séquence (zéro-dette). Idempotente :
  * une carte déjà migrée ne réécrit rien et ne repasse pas par `sauvegarder()`.
@@ -3414,6 +3490,7 @@ function reconstruireDOM() {
             el.innerHTML =
                 '<div class="planif-noeud-entete">' +
                     '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(n) + '">' + obtenirLabelNoeud(n) + '</span>' +
+                    selecteurSemaineHTML(n) +
                     (estLecon
                         ? '<span class="planif-badge-objectif' + (objs.length ? '' : ' planif-badge-objectif--vide') + '"' +
                           ' role="button" tabindex="0" aria-expanded="' + (objDeplie ? 'true' : 'false') + '"' +
@@ -4280,6 +4357,31 @@ function attacherEvenements(el, donnees) {
             demarrerLien(id, port.dataset.dir, e);
         });
     });
+
+    // === SÉLECTEUR DE SEMAINE (leçons et séquences) ===
+    var selSemaine = el.querySelector('.planif-noeud-semaine');
+    if (selSemaine) {
+        // `stopPropagation` sur la pression : sans lui, toucher le sélecteur
+        // démarrerait le déplacement du bloc — le geste serait inutilisable au
+        // doigt, où la pression et le glisser sont le même début de geste.
+        ['pointerdown', 'mousedown', 'click'].forEach(function(evt) {
+            selSemaine.addEventListener(evt, function(e) { e.stopPropagation(); });
+        });
+        ['pointerdown', 'focus'].forEach(function(evt) {
+            selSemaine.addEventListener(evt, function() { peuplerSelecteurSemaine(selSemaine); });
+        });
+        selSemaine.addEventListener('change', function(e) {
+            e.stopPropagation();
+            var brut = selSemaine.value;
+            var cible = brut === '' ? null : parseInt(brut, 10);
+            if (brut !== '' && isNaN(cible)) return;
+            // MÊME porte que le glisser dans la grille : sur une leçon elle
+            // écrit, sur une séquence elle déplace tout le bloc. Les deux
+            // gestes ne peuvent donc pas diverger.
+            deposerDansGrille(donnees.type, id, cible);
+            reconstruireDOM();
+        });
+    }
 
     // === POIGNÉE DE REDIMENSIONNEMENT (feuilles seulement) ===
     var poignee = el.querySelector('.planif-noeud-poignee');
@@ -6699,15 +6801,24 @@ function mettreAJourPlanificateur() {
         }
         var num = rangee.num;
         var contenu = '';
+        // Les séquences posées dans CETTE rangée. Sert à décider si une leçon a
+        // besoin de son étiquette de contexte (7 août 2026) : sur la semaine 11,
+        // le nom de la séquence apparaissait TROIS fois — une comme séquence, et
+        // une sur chacune de ses deux leçons. L'étiquette existe pour la leçon
+        // qui s'affiche LOIN de sa séquence ; quand la séquence est deux lignes
+        // au-dessus, c'est du bruit.
+        var seqDeLaRangee = new Set();
         for (var h = 0; h < hierarchie.length; h++) {
             var et = etendueTemporelle(hierarchie[h].seq);
             if (et && et.debut === num) {
+                seqDeLaRangee.add(hierarchie[h].seq.id);
                 contenu += blocGrille(itemSequenceGrille(hierarchie[h].seq, hierarchie[h].niveau), false);
             }
         }
         for (var l = 0; l < toutesLecons.length; l++) {
             if (semaineDeLecon(toutesLecons[l]) === num) {
-                contenu += blocGrille(itemLeconGrille(toutesLecons[l], true),
+                var besoinContexte = !(toutesLecons[l].parent && seqDeLaRangee.has(toutesLecons[l].parent));
+                contenu += blocGrille(itemLeconGrille(toutesLecons[l], besoinContexte),
                                       _leconsDepliees.has(toutesLecons[l].id));
             }
         }
@@ -7207,6 +7318,8 @@ window.planificationCarte = {
     basculerDetailLecon: basculerDetailLecon,
     // Lot 3 : déplacement dans la grille + annulation
     deposerDansGrille: deposerDansGrille,
+    selecteurSemaineHTML: selecteurSemaineHTML,
+    peuplerSelecteurSemaine: peuplerSelecteurSemaine,
     dupliquerConteneurEnProfondeur: dupliquerConteneurEnProfondeur,
     clonerNoeud: clonerNoeud,
     deplacerSequenceVersSemaine: deplacerSequenceVersSemaine,
