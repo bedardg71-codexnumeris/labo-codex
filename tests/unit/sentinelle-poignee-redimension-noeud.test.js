@@ -82,7 +82,11 @@ describe('Poignée · option B, la largeur plancher des conteneurs', () => {
 
 describe('Poignée · mécanique', () => {
     it('le glissement n’enclenche pas le déplacement du bloc', () => {
-        expect(carte).toMatch(/poignee\.addEventListener\('mousedown'[\s\S]{0,120}stopPropagation/);
+        // Recalé sur `pointerdown` le 7 août : le geste a quitté les événements
+        // souris pour répondre au doigt et au Pencil (cf.
+        // `sentinelle-poignee-tactile-noeud`). L'intention gardée ici est
+        // inchangée — la pression sur la poignée ne doit pas remonter au bloc.
+        expect(carte).toMatch(/poignee\.addEventListener\('pointerdown'[\s\S]{0,220}stopPropagation/);
     });
 
     it('les deltas sont divisés par le zoom de la carte', () => {
@@ -132,9 +136,12 @@ describe('Poignée · mécanique', () => {
         expect(css).toMatch(/\.planif-noeud-poignee\s*\{[\s\S]*?z-index:\s*21/);
     });
 
-    it('les écouteurs de document sont retirés au relâchement', () => {
-        expect(carte).toMatch(/removeEventListener\('mousemove', surDeplacement\)/);
-        expect(carte).toMatch(/removeEventListener\('mouseup', surRelachement\)/);
+    it('les écouteurs du geste sont retirés au relâchement', () => {
+        // Ils vivent désormais sur la POIGNÉE (qui capture le pointeur) et non
+        // plus sur `document` — la capture rend l'écoute globale inutile.
+        expect(carte).toMatch(/poignee\.removeEventListener\('pointermove', surDeplacement\)/);
+        expect(carte).toMatch(/poignee\.removeEventListener\('pointerup', surRelachement\)/);
+        expect(carte).toMatch(/poignee\.removeEventListener\('pointercancel', surRelachement\)/);
     });
 });
 

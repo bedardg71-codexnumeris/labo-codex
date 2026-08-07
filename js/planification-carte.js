@@ -4217,17 +4217,27 @@ function attacherEvenements(el, donnees) {
     // === POIGNÉE DE REDIMENSIONNEMENT (feuilles seulement) ===
     var poignee = el.querySelector('.planif-noeud-poignee');
     if (poignee) {
-        poignee.addEventListener('mousedown', function(e) {
+        // Pointer events, et non `mousedown` (7 août 2026) : au doigt et au
+        // Pencil, la poignée ne répondait PAS — Safari ne synthétise pas de
+        // `mousemove` pendant un glisser tactile. Agrandir la cible à 44 px
+        // sans ce changement aurait produit une zone plus large et toujours
+        // inerte : le défaut de 1.47.0, à l'identique.
+        // Même idiome que la poignée de palette (capture du pointeur, filtre
+        // sur `pointerId`, `pointercancel` traité comme un relâchement).
+        poignee.addEventListener('pointerdown', function(e) {
+            if (!e.isPrimary) return;
             e.stopPropagation();  // sinon le bloc partirait en déplacement
             e.preventDefault();
             enregistrerPourUndo();
 
+            var pointerId = e.pointerId;
             var departX = e.clientX;
             var departY = e.clientY;
             var largeurDepart = el.offsetWidth;
             var hauteurDepart = el.offsetHeight;
 
             var surDeplacement = throttleRAF(function(ev) {
+                if (ev.pointerId !== pointerId) return;
                 // Les deltas sont en pixels ÉCRAN ; les tailles du nœud sont en
                 // coordonnées de carte. Diviser par le zoom, comme le fait la
                 // conversion de position (cf. clientX → coordonnées carte).
@@ -4251,9 +4261,11 @@ function attacherEvenements(el, donnees) {
                 mettreAJourLiens(id);
             });
 
-            var surRelachement = function() {
-                document.removeEventListener('mousemove', surDeplacement);
-                document.removeEventListener('mouseup', surRelachement);
+            var surRelachement = function(ev) {
+                if (ev && ev.pointerId !== undefined && ev.pointerId !== pointerId) return;
+                poignee.removeEventListener('pointermove', surDeplacement);
+                poignee.removeEventListener('pointerup', surRelachement);
+                poignee.removeEventListener('pointercancel', surRelachement);
                 if (!donnees.metadata) donnees.metadata = {};
                 if (!estConteneur) {
                     donnees.metadata.largeur = Math.round(el.offsetWidth);
@@ -4266,8 +4278,12 @@ function attacherEvenements(el, donnees) {
                 mettreAJourTousLesBadges();
             };
 
-            document.addEventListener('mousemove', surDeplacement);
-            document.addEventListener('mouseup', surRelachement);
+            // Capture : le geste continue même si le doigt sort du carré de
+            // 44 px, ce qui arrive dès les premiers pixels d'un agrandissement.
+            poignee.setPointerCapture(pointerId);
+            poignee.addEventListener('pointermove', surDeplacement);
+            poignee.addEventListener('pointerup', surRelachement);
+            poignee.addEventListener('pointercancel', surRelachement);
         });
 
         // Double-clic : revenir à la taille automatique.
