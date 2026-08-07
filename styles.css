@@ -20665,6 +20665,26 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     font-size: 12.5px;
 }
 
+/* ⚠ SECOND rattrapage, pour la MÊME raison — et il manquait au premier jet.
+   `#planif-panneau input, textarea, select` (plus haut) pose `width: 100%` +
+   `padding: 8px` sur TOUT champ de l'inspecteur, et bat `.planif-checkbox-label
+   input[type="checkbox"]` exactement comme la règle de label battait la classe.
+   Une case à cocher large de 100 % chasse son texte au bord droit du panneau,
+   où il se casse en deux lignes. Second constat terrain Grégoire, 7 août.
+   ▣ LEÇON : quand une règle générique portée par un ID doit être neutralisée,
+   les neutraliser TOUTES d'un coup — corriger le sélecteur qui a produit le
+   symptôme visible laisse ses frères mordre au prochain rendu. */
+#planif-panneau label.planif-checkbox-label input[type="checkbox"] {
+    flex: 0 0 auto;
+    width: auto;
+    padding: 0;
+    margin: 0;
+    accent-color: var(--planif-couleur-prerequis);
+}
+/* Le texte occupe le reste : un objectif long doit se replier sous lui-même,
+   pas déborder ni pousser la case. */
+#planif-panneau label.planif-checkbox-label > span { flex: 1 1 auto; min-width: 0; }
+
 /* === NIVEAU COGNITIF (Anderson) === */
 .planif-panneau-niveau-desc {
     font-size: 11px;

@@ -28,6 +28,28 @@ prescriptions pour tous.
 énoncer *pourquoi* il vaudrait pour un autre enseignant, d'une autre
 discipline. Tant qu'on ne sait pas le dire, il reste particulier.
 
+### ⚠ Ce document n'est PAS une file de tâches
+
+**Aucune phrase d'ici n'autorise à coder.** C'est un journal de raisonnement :
+il consigne des décisions, des réflexions en cours et des précautions de
+méthode, mêlées, parce que c'est ainsi que la pensée avance dans une session de
+travail. Le lecteur qui était dans la discussion fait le tri tout seul ; **une
+session neuve, non.**
+
+En particulier, un ⚠ ici est une **mise en garde adressée à qui ouvrira le
+chantier** — jamais une consigne de l'ouvrir. Le 7 août 2026, une session sans
+contexte a lu au §5.3 la précaution *« Renommage inter-modules → audit des
+call-sites AVANT d'annoncer un périmètre »* comme une tâche à exécuter, et a
+produit un audit de 177 lignes sur une question que Grégoire n'avait pas posée.
+Le même jour, un « déblocage bon marché identifié » du même paragraphe a été
+construit — et livré **inerte**, faute d'avoir été confronté à la géométrie
+réelle de l'interface.
+
+**Les files de travail réelles sont ailleurs, et elles seules font foi :**
+`SESSION.md` (état courant + prochaine étape), `BACKLOG.md` (items numérotés),
+`plans de travail/` (chantiers découpés en lots). En cas de contradiction avec
+ce document-ci, **ce sont elles qui l'emportent.**
+
 ---
 
 ## 1. Le cadre matériel : compter avant de concevoir
