@@ -214,3 +214,61 @@ describe('Reprise · l’INDÉPENDANCE de la copie (harnais par référence)', (
         expect(origine.noeuds[0].metadata.semaine).toBe(3);
     });
 });
+
+describe('Reprise · les notes de leçon suivent la carte (#367 × #407)', () => {
+    let api;
+    beforeEach(() => { api = monterModule().planificationDonnees; });
+
+    // TROU DÉTECTÉ AU BREAK-TEST DU 7 AOÛT (rituel de fin de session, §4).
+    // `copierSeancesLecons()` traduit la clé composite de la carte SOURCE vers
+    // celle de la carte d'ARRIVÉE — les ids de leçon (`planif-noeud_N`) venant
+    // d'un compteur PAR CARTE, la copie porte un id de carte différent.
+    // Sans cette traduction, la note s'écrivait dans le trimestre d'arrivée
+    // sous la clé de la carte source : invisible sur la carte reprise, et
+    // silencieusement collisionnable. Les trois volets ci-dessous rougissent
+    // quand on remplace `cleCibleNote` par `cleSourceNote`.
+
+    function poserRepriseAvecNote(notesSource) {
+        poserTrimestre('h2026', [{
+            id: 'carte_1', nom: '601-101', coursId: 'c-601',
+            noeuds: [{ id: 'planif-noeud_3', type: 'lecon', titre: 'Accueil' }]
+        }]);
+        poserTrimestre('a2026', [{ id: 'carte_9', nom: 'Vide' }]);
+        store['cours'] = [{ id: 'c-601', code: '601-101' }];
+        store['h2026_planification_seances'] = notesSource;
+        return api.importerCarteDepuisTrimestre('h2026', 'carte_1');
+    }
+
+    it('la note arrive sous la clé composite de la carte d’ARRIVÉE', () => {
+        const nouvelId = poserRepriseAvecNote({
+            'carte_1::planif-noeud_3': { note: 'Prévoir 20 min de plénière' }
+        });
+
+        const notes = store['a2026_planification_seances'];
+        expect(notes[`${nouvelId}::planif-noeud_3`]).toEqual({ note: 'Prévoir 20 min de plénière' });
+        // La clé de la carte SOURCE n'a rien à faire dans le trimestre d'arrivée.
+        expect(notes['carte_1::planif-noeud_3']).toBeUndefined();
+    });
+
+    it('la note du trimestre d’origine reste en place — c’est une COPIE', () => {
+        poserRepriseAvecNote({
+            'carte_1::planif-noeud_3': { note: 'Prévoir 20 min de plénière' }
+        });
+
+        expect(store['h2026_planification_seances']['carte_1::planif-noeud_3'])
+            .toEqual({ note: 'Prévoir 20 min de plénière' });
+    });
+
+    it('la note d’une AUTRE carte du trimestre source ne suit pas', () => {
+        // Même id de leçon, autre carte : sans filtrage par clé composite
+        // source, cette note serait aspirée dans la reprise.
+        const nouvelId = poserRepriseAvecNote({
+            'carte_1::planif-noeud_3': { note: 'la bonne' },
+            'carte_7::planif-noeud_3': { note: 'celle d’une autre carte' }
+        });
+
+        const notes = store['a2026_planification_seances'];
+        expect(notes[`${nouvelId}::planif-noeud_3`]).toEqual({ note: 'la bonne' });
+        expect(Object.keys(notes)).toHaveLength(1);
+    });
+});
