@@ -571,6 +571,115 @@ function peuplerSelecteurSemaine(select) {
     select.dataset.peuple = '1';
 }
 
+// === NETTOYAGE DES REPÈRES DE SEMAINE DANS LES TITRES (7 août 2026) ===
+//
+// Tant que la semaine n'avait pas de logement visible, l'enseignant l'écrivait
+// dans ses titres : « Sem. 11 – «Kanatuut» : … ». Depuis le sélecteur (1.51.0)
+// le repère est redondant — mais c'est SA donnée, pas notre rendu.
+//
+// ⚠ RIEN N'EST APPLIQUÉ D'OFFICE. La migration d'ancrage du 6 août a refusé de
+// LIRE la semaine dans les titres, au motif qu'interpréter produit des ancrages
+// faux indiscernables de vrais. La réciproque tient : on ne réécrit pas les
+// titres de l'enseignant depuis un champ. On PROPOSE, avec aperçu, et il
+// tranche cas par cas.
+//
+// ⚠ Le repère de SÉANCE (« Sem. 1 séance 2 ») n'est pas touché : la séance
+// n'a pas encore de logement dans le modèle (colonnes reportées le 7 août).
+// Retirer un repère qui compense un concept manquant ferait perdre l'info.
+
+var RE_REPERE_SEMAINE = /^\s*sem(?:aine)?\s*\.?\s*(\d{1,2})\s*(?:[-–—:.·]+\s*)?/i;
+var RE_REPERE_SEANCE = /s[ée]ance\s*\d+/i;
+
+/**
+ * Analyse le titre d'un nœud à la recherche d'un repère de semaine.
+ * Fonction PURE : elle ne lit et n'écrit aucun stockage.
+ *
+ * @returns {Object|null} null si le titre ne porte pas de repère, sinon
+ *   `{ id, titre, titreNettoye, semaineTitre, semaineAncree, categorie, aRepereSeance }`
+ *   où `categorie` vaut :
+ *     'pret'     — le repère CONCORDE avec la semaine ancrée : retrait sûr ;
+ *     'ancrable' — repère présent, leçon NON ancrée : proposer d'ancrer puis
+ *                  de retirer (l'enseignant confirme — ce n'est pas une
+ *                  déduction silencieuse) ;
+ *     'conflit'  — le repère CONTREDIT la semaine ancrée : ne rien toucher,
+ *                  seul lui sait laquelle fait foi ;
+ *     'vide'     — retirer le repère ne laisserait rien de signifiant
+ *                  (titre vide, ou réduit à un repère de séance).
+ */
+function analyserRepereTitre(n) {
+    if (!n || (n.type !== 'lecon' && n.type !== 'sequence')) return null;
+    var titre = String(n.titre || '');
+    var m = RE_REPERE_SEMAINE.exec(titre);
+    if (!m) return null;
+
+    var semaineTitre = parseInt(m[1], 10);
+    if (isNaN(semaineTitre) || semaineTitre < SEMAINE_MIN) return null;
+
+    var reste = titre.slice(m[0].length).trim();
+    var aRepereSeance = RE_REPERE_SEANCE.test(titre);
+
+    // Une séquence n'a pas de semaine à elle : son étendue est dérivée.
+    var semaineAncree = n.type === 'lecon' ? semaineDeLecon(n) : null;
+    if (n.type === 'sequence') {
+        var e = etendueTemporelle(n);
+        semaineAncree = e ? e.debut : null;
+    }
+
+    var categorie;
+    // Le titre ne doit JAMAIS devenir vide ou réduit à un repère orphelin :
+    // « Sem. 1 séance 2 » deviendrait « séance 2 », qui ne nomme rien.
+    if (reste === '' || RE_REPERE_SEANCE.test(reste) && reste.replace(RE_REPERE_SEANCE, '').trim() === '') {
+        categorie = 'vide';
+    } else if (semaineAncree === null) {
+        categorie = 'ancrable';
+    } else if (semaineAncree === semaineTitre) {
+        categorie = 'pret';
+    } else {
+        categorie = 'conflit';
+    }
+
+    return {
+        id: n.id,
+        type: n.type,
+        titre: titre,
+        titreNettoye: reste,
+        semaineTitre: semaineTitre,
+        semaineAncree: semaineAncree,
+        categorie: categorie,
+        aRepereSeance: aRepereSeance
+    };
+}
+
+/** Tous les repères de la carte, triés par catégorie. Lecture pure. */
+function inventaireReperesTitres() {
+    var res = { pret: [], ancrable: [], conflit: [], vide: [] };
+    for (var entry of etat.noeuds) {
+        var a = analyserRepereTitre(entry[1]);
+        if (a) res[a.categorie].push(a);
+    }
+    return res;
+}
+
+/**
+ * Applique le retrait sur UN nœud. Ne touche jamais à une catégorie que
+ * l'enseignant n'a pas choisie : l'appelant filtre en amont.
+ * @returns {boolean} true si le titre a changé
+ */
+function retirerRepereTitre(noeudId, ancrerAussi) {
+    var n = etat.noeuds.get(noeudId);
+    if (!n) return false;
+    var a = analyserRepereTitre(n);
+    if (!a || a.categorie === 'conflit' || a.categorie === 'vide') return false;
+
+    if (ancrerAussi && a.categorie === 'ancrable' && n.type === 'lecon') {
+        definirSemaineLecon(noeudId, a.semaineTitre);
+    }
+    n.titre = a.titreNettoye;
+    propagerModification(noeudId, 'titre', a.titreNettoye);
+    sauvegarder();
+    return true;
+}
+
 /**
  * Ablation de l'ancrage porté par la séquence (zéro-dette). Idempotente :
  * une carte déjà migrée ne réécrit rien et ne repasse pas par `sauvegarder()`.
@@ -5891,6 +6000,22 @@ function initialiser() {
         panneauCoursCarte.addEventListener('click', function(e) { e.stopPropagation(); });
     }
 
+    var btnNettoyage = document.getElementById('planif-btn-nettoyer-titres');
+    var panneauNettoyage = document.getElementById('planif-nettoyage-titres-panel');
+    if (btnNettoyage && panneauNettoyage) {
+        btnNettoyage.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var dropdownActions = document.getElementById('planif-actions-dropdown');
+            if (dropdownActions) dropdownActions.classList.remove('ouvert');
+            rendrePanneauNettoyageTitres();
+            panneauNettoyage.classList.add('ouvert');
+        });
+        document.addEventListener('click', function() {
+            panneauNettoyage.classList.remove('ouvert');
+        });
+        panneauNettoyage.addEventListener('click', function(e) { e.stopPropagation(); });
+    }
+
     var btnAnnuler = document.getElementById('planif-btn-annuler');
     if (btnAnnuler) btnAnnuler.addEventListener('click', annuler);
 
@@ -7014,6 +7139,77 @@ function reprendreCarte(trimestreId, carteId) {
     afficherToastLien('Carte reprise — copie indépendante, celle du trimestre d\'origine reste intacte.');
 }
 
+// === NETTOYAGE DES REPÈRES DE SEMAINE — panneau (7 août 2026) ===
+//
+// Le panneau PROPOSE : chaque ligne montre l'avant et l'après, et rien ne part
+// sans un clic. Les catégories qu'on ne sait pas trancher (conflit, titre qui
+// deviendrait vide) sont affichées SANS bouton — les cacher laisserait croire
+// que le ménage est complet.
+function rendrePanneauNettoyageTitres() {
+    var panneau = document.getElementById('planif-nettoyage-titres-panel');
+    if (!panneau) return;
+    var inv = inventaireReperesTitres();
+    var total = inv.pret.length + inv.ancrable.length + inv.conflit.length + inv.vide.length;
+
+    if (total === 0) {
+        panneau.innerHTML = '<div class="planif-import-tri-vide">Aucun repère de semaine dans les titres de cette carte.</div>';
+        return;
+    }
+
+    var html = '';
+
+    function ligne(a, action, libelleBouton) {
+        return '<div class="planif-import-tri-ligne">' +
+            '<span class="planif-import-tri-nom" title="' + echapperHtml(a.titre) + '">' +
+                echapperHtml(a.titre) + ' → ' + echapperHtml(a.titreNettoye || '(vide)') +
+            '</span>' +
+            (action
+                ? '<button type="button" class="planif-btn-carte planif-nettoyage-btn"' +
+                  ' data-noeud="' + echapperHtml(a.id) + '" data-ancrer="' + (action === 'ancrer' ? '1' : '0') + '">' +
+                  libelleBouton + '</button>'
+                : '<span class="planif-import-tri-nb">' + libelleBouton + '</span>') +
+            '</div>';
+    }
+
+    if (inv.pret.length) {
+        html += '<div class="planif-import-tri-groupe">Repère redondant — la semaine est déjà posée</div>';
+        inv.pret.forEach(function(a) { html += ligne(a, 'retirer', 'Retirer'); });
+    }
+    if (inv.ancrable.length) {
+        html += '<div class="planif-import-tri-groupe">Non planifié — ancrer à la semaine du titre, puis retirer</div>';
+        inv.ancrable.forEach(function(a) { html += ligne(a, 'ancrer', 'Ancrer S' + a.semaineTitre); });
+    }
+    if (inv.conflit.length) {
+        html += '<div class="planif-import-tri-groupe">⚠ Le titre contredit la semaine posée — à trancher par toi</div>';
+        inv.conflit.forEach(function(a) {
+            html += ligne(a, null, 'titre S' + a.semaineTitre + ' / posée S' + a.semaineAncree);
+        });
+    }
+    if (inv.vide.length) {
+        html += '<div class="planif-import-tri-groupe">Le titre ne dirait plus rien — à réécrire à la main</div>';
+        inv.vide.forEach(function(a) { html += ligne(a, null, 'titre vide'); });
+    }
+
+    var aSeance = [].concat(inv.pret, inv.ancrable, inv.conflit, inv.vide)
+        .filter(function(a) { return a.aRepereSeance; }).length;
+    if (aSeance) {
+        html += '<div class="planif-import-tri-vide">' + aSeance + ' titre' + (aSeance > 1 ? 's portent' : ' porte') +
+                ' aussi un repère de séance. Il n\'est PAS retiré : la séance n\'a pas encore sa place dans le modèle.</div>';
+    }
+
+    panneau.innerHTML = html;
+    panneau.querySelectorAll('.planif-nettoyage-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            enregistrerPourUndo();
+            var ok = retirerRepereTitre(btn.dataset.noeud, btn.dataset.ancrer === '1');
+            if (!ok) { afficherToastLien('Ce titre n\'a pas pu être nettoyé — rien n\'a changé.'); return; }
+            reconstruireDOM();
+            mettreAJourPlanificateur();
+            rendrePanneauNettoyageTitres(); // la liste rétrécit sous les yeux
+        });
+    });
+}
+
 // === COURS RATTACHÉ À LA CARTE — panneau (lot 1, 7 août 2026) ===
 //
 // Le rattachement se CHOISIT, il ne se devine pas. Même règle que la migration
@@ -7318,6 +7514,9 @@ window.planificationCarte = {
     basculerDetailLecon: basculerDetailLecon,
     // Lot 3 : déplacement dans la grille + annulation
     deposerDansGrille: deposerDansGrille,
+    analyserRepereTitre: analyserRepereTitre,
+    inventaireReperesTitres: inventaireReperesTitres,
+    retirerRepereTitre: retirerRepereTitre,
     selecteurSemaineHTML: selecteurSemaineHTML,
     peuplerSelecteurSemaine: peuplerSelecteurSemaine,
     dupliquerConteneurEnProfondeur: dupliquerConteneurEnProfondeur,
