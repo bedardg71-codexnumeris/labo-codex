@@ -597,6 +597,100 @@ Qui ne scinde jamais ne voit jamais la notion.
 renommages possibles de *Leçon*. Si Séance devient un type distinct, cette
 piste de renommage doit être révisée — on ne peut pas offrir de renommer
 « Leçon » en « Séance » si les deux coexistent.
+→ ⚠ **Aggravé le même soir** : l'horaire emploie DÉJÀ le mot pour tout autre
+chose. Voir « L'épreuve de la seconde discipline », point 5, ci-dessous.
+
+### ✅ L'ÉPREUVE DE LA SECONDE DISCIPLINE (6 août, fin de journée) — la chimie
+
+> *« On parle de mes cours de littérature ici, mais la question des séances se
+> pose aussi pour les cours de chimie par exemple, avec les cours théoriques et
+> les labos… »* — Grégoire
+
+**▣ GÉNÉRAL — un modèle validé sur une seule discipline n'est pas validé.**
+Ce n'est pas le cas qui a inspiré le modèle qui l'éprouve, c'est le second.
+Tout §5.3 ci-dessus a été raisonné sur le 601-101 : deux séances **de même
+nature**, séparées par l'horaire. La chimie fournit le contre-cas, et il tient
+— mais il déplace trois choses.
+
+#### 1. Deux chemins vers une leçon multi-séances, pas un seul
+
+| | Point de départ | Geste | Exemple |
+|---|---|---|---|
+| **Scission** (descendante) | une leçon déjà écrite | l'horaire la coupe | littérature : lundi + mardi |
+| **Composition** (ascendante) | deux moments distincts | ils forment une leçon | chimie : théorie + labo |
+
+§5.3 ne décrivait que la **scission**. Les deux chemins doivent aboutir à la
+**même structure** — sinon on aura deux modèles de séance qui divergent. En
+chimie, personne ne « scinde » : le labo existe d'abord, et c'est le lien avec
+la théorie qui se construit ensuite.
+
+#### 2. La séance peut être hétérogène — ce qui **tranche définitivement** le « vrai nœud »
+
+En littérature, les deux séances d'une leçon sont interchangeables par nature :
+même local, même type de travail, seule l'horloge les sépare. En chimie, non —
+la théorie et le labo diffèrent par le **local**, la **durée**, la **nature du
+travail**, parfois l'**effectif**.
+
+C'est l'argument qui clôt le renversement consigné plus haut : un compartiment
+de simple rendu ne peut porter ni un local, ni une nature, ni ses propres
+activités d'un autre genre. **Un fragment d'affichage n'a pas d'identité ; une
+séance de labo en a une.**
+
+#### 3. Vérifié au code — l'horaire en sait plus qu'on ne croyait
+
+Structure réelle (`horaire.js`, `confirmerSeances()`), plus riche que ce qui
+était noté ci-dessus :
+
+```
+Séance = { id, lettre: 'A'…'F', groupe, jour, debut,
+            nombrePeriodes, duree, local, verrouille }
+```
+
+Donc le **local** — ce qui distingue justement 2309 du laboratoire — est
+**déjà saisi**, et les créneaux sont **déjà nommés** (A, B…). → **D5 encore un
+cran plus bas** : la nature d'une séance est en grande partie **dérivable** de
+l'horaire, elle ne doit pas être redemandée. Ce qui reste à l'enseignant, c'est
+ce que l'horaire ne peut pas savoir : que la séance B *poursuit* la séance A.
+
+#### ⚠ 4. Ce que la chimie ouvre et qu'on ne sait PAS traiter — le sous-groupe
+
+Un labo se donne souvent en **demi-groupe** : une moitié le lundi, l'autre le
+mercredi, **même contenu, étudiants différents**. La séance d'horaire porte
+déjà un champ `groupe`, donc la donnée existe — mais le modèle du §6 ne couvre
+pas ce cas : il pose *« la semaine est commune, le jour appartient au groupe »*,
+c'est-à-dire **une** planification par groupe-cours. Ici, **un seul groupe-cours
+a deux créneaux pour le même contenu**. Ce n'est ni la leçon scindée (contenus
+différents, mêmes étudiants) ni le multi-groupes (contenus identiques, groupes
+distincts) : c'est un troisième cas.
+
+**À nommer, pas à résoudre ce soir.** Mais il doit être écrit dans le plan de la
+séance comme un cas à ne pas **rendre impossible** — c'est le rôle du §6 pour
+les groupes, et la même prudence s'applique.
+
+#### ⚠ 5. La collision de vocabulaire devient bloquante
+
+Ce n'était qu'une note de bas de page au §5.2 (« séance » parmi les renommages
+possibles de *Leçon*). C'est maintenant un problème dur : **l'application appelle
+déjà « séance » le créneau hebdomadaire récurrent** (`horaire.js`,
+`afficherSeancesExistantes`, `genererSeancesCompletes`, clés de données). Si le
+module Alignement introduit une « séance » pédagogique, **deux séances
+différentes coexistent dans la même application** — exactement le genre
+d'ambiguïté que la doctrine zéro-dette interdit.
+
+**Piste à peser au plan** : renommer l'objet de l'horaire en **créneau** — mot
+déjà employé par le tableau du §5.3 ci-dessus, et plus juste (un jour, une
+heure, un local, un groupe : c'est un créneau, pas un événement pédagogique).
+⚠ Renommage inter-modules → **audit des call-sites AVANT d'annoncer un
+périmètre** (rappel du 6 août : 26 sites trouvés là où le plan en annonçait 12).
+
+#### 6. La comptabilité du temps y gagne encore
+
+En littérature, deux créneaux équivalents rendent le débordement léger. Un
+cours à 2 h de théorie + 3 h de labo a des capacités **non interchangeables** :
+du contenu de labo ne « déborde » pas dans la théorie. La jauge par créneau
+(§5.3 ci-dessus) passe donc de confort à **nécessité** dès la seconde discipline.
+
+---
 
 ### ◈ OUVERT — deux vues du planificateur (hauteur / largeur)
 
