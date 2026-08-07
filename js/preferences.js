@@ -77,6 +77,11 @@
         modeClair: true,
         accompagnementActif: true,
         banniereAccueilRepliee: false,
+        // Disposition de la réserve « Non planifié » du planificateur
+        // (7 août 2026) : 'bas' = sous la grille (défaut historique),
+        // 'gauche' = en colonne à côté. Choix de l'utilisateur selon l'espace
+        // dont il dispose — le compromis dépend de son écran, pas du nôtre.
+        planifReserveDisposition: 'bas',
 
         // Flags de transitions pédagogiques (js/transitions.js) — suivent
         // la progression de l'utilisateur entre les 4 étapes du parcours

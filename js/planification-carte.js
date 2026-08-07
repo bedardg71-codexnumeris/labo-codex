@@ -6000,6 +6000,15 @@ function initialiser() {
         panneauCoursCarte.addEventListener('click', function(e) { e.stopPropagation(); });
     }
 
+    var btnDisposition = document.getElementById('planif-btn-disposition-reserve');
+    if (btnDisposition) {
+        btnDisposition.addEventListener('click', function(e) {
+            e.stopPropagation(); // la barre porte le glisser de la palette
+            basculerDispositionReserve();
+        });
+        mettreAJourBoutonDisposition();
+    }
+
     var btnNettoyage = document.getElementById('planif-btn-nettoyer-titres');
     var panneauNettoyage = document.getElementById('planif-nettoyage-titres-panel');
     if (btnNettoyage && panneauNettoyage) {
@@ -6480,6 +6489,80 @@ function mettreAJourJaugeTemps(sequences) {
 // Leçons dont le déroulé est déplié dans la grille (état d'affichage, non persisté).
 var _leconsDepliees = new Set();
 
+// === DISPOSITION DE LA RÉSERVE « NON PLANIFIÉ » (7 août 2026) ===
+//
+// Proposition de Grégoire du 6 août, tranchée le 7 : offrir DEUX dispositions
+// et laisser l'utilisateur choisir. ▣ GÉNÉRAL — quand un compromis d'affichage
+// dépend de l'écran de l'utilisateur, le lui offrir vaut mieux que de trancher
+// à sa place.
+//
+//   'bas'    — la réserve sous la grille (défaut historique) ;
+//   'gauche' — la réserve en colonne À CÔTÉ. Elle cesse alors de défiler avec
+//              la grille, ce qui est tout l'objet : on y PUISE des pastilles
+//              pendant que la grille défile dessous (l'auto-défilement du
+//              glisser, livré en 1.45.1, fait le reste).
+//
+// ⚠ PLANCHER DE LARGEUR — la leçon de 1.47.0, où un côte à côte parfaitement
+// écrit était INERTE faute de place. À 360 px (largeur par défaut), la palette
+// offre 316 px utiles ; une colonne de réserve de 170 px n'en laisserait que
+// ~142 à la grille, soit UNE pastille par rangée : la grille redeviendrait une
+// file verticale et la fonction serait pire que ce qu'elle remplace.
+// Basculer à gauche élargit donc la palette au plancher si elle est en dessous.
+// Revenir en bas ne la rétrécit PAS : la largeur est un réglage de l'utilisateur.
+var LARGEUR_RESERVE_COLONNE = 170;
+var PLANCHER_PALETTE_COTE_A_COTE = 520;
+
+/** Disposition courante, lue de la préférence. Repli sûr sur le défaut. */
+function dispositionReserve() {
+    try {
+        if (typeof obtenirPreference !== 'function') return 'bas';
+        return obtenirPreference('planifReserveDisposition') === 'gauche' ? 'gauche' : 'bas';
+    } catch (e) {
+        return 'bas';
+    }
+}
+
+/**
+ * Permute la disposition. En passant à gauche, garantit le plancher de largeur
+ * — sans quoi la bascule ne rendrait service qu'à qui a pensé à élargir la
+ * palette d'abord, ce que personne ne devine.
+ */
+function basculerDispositionReserve() {
+    var vers = dispositionReserve() === 'gauche' ? 'bas' : 'gauche';
+    try {
+        if (typeof definirPreference === 'function') {
+            definirPreference('planifReserveDisposition', vers);
+        }
+    } catch (e) {
+        console.warn('[Planification] Préférence de disposition non enregistrée :', e);
+    }
+
+    if (vers === 'gauche') {
+        var palette = document.getElementById('planif-palette-nav');
+        if (palette) {
+            var cs = window.getComputedStyle(palette);
+            var max = parseFloat(cs.maxWidth);
+            var plancher = isNaN(max) ? PLANCHER_PALETTE_COTE_A_COTE
+                                      : Math.min(PLANCHER_PALETTE_COTE_A_COTE, max);
+            if (palette.offsetWidth < plancher) palette.style.width = plancher + 'px';
+        }
+    }
+
+    mettreAJourPlanificateur();
+    mettreAJourBoutonDisposition();
+}
+
+function mettreAJourBoutonDisposition() {
+    var btn = document.getElementById('planif-btn-disposition-reserve');
+    if (!btn) return;
+    var aGauche = dispositionReserve() === 'gauche';
+    btn.setAttribute('aria-pressed', aGauche ? 'true' : 'false');
+    btn.classList.toggle('actif', aGauche);
+    btn.title = aGauche
+        ? 'Réserve « Non planifié » : sous la grille'
+        : 'Réserve « Non planifié » : à gauche de la grille';
+}
+
 function basculerDetailLecon(leconId) {
     if (_leconsDepliees.has(leconId)) _leconsDepliees.delete(leconId);
     else _leconsDepliees.add(leconId);
@@ -6913,11 +6996,14 @@ function mettreAJourPlanificateur() {
         html += '<div class="planif-grille-avis">Semaines dérivées des leçons — configure le Cadre du trimestre (Réglages) pour les rangées réelles.</div>';
     }
 
-    html += '<div class="planif-grille">';
+    var aGauche = dispositionReserve() === 'gauche';
+    // La grille se construit à part, puis se COMPOSE avec la réserve. Assembler
+    // par concaténation dans l'ordre voulu évite de retoucher du HTML déjà bâti.
+    var htmlGrille = '<div class="planif-grille">';
     for (var r = 0; r < derive.rangees.length; r++) {
         var rangee = derive.rangees[r];
         if (rangee.type !== 'semaine') {
-            html += '<div class="planif-grille-rangee planif-grille-rangee--speciale">' +
+            htmlGrille += '<div class="planif-grille-rangee planif-grille-rangee--speciale">' +
                     '<div class="planif-grille-num">—</div>' +
                     '<div class="planif-grille-cellule">' +
                     (rangee.type === 'planification' ? 'Semaine de planification' : "Semaine d'examens") +
@@ -6947,12 +7033,12 @@ function mettreAJourPlanificateur() {
                                       _leconsDepliees.has(toutesLecons[l].id));
             }
         }
-        html += '<div class="planif-grille-rangee' + (contenu ? '' : ' planif-grille-rangee--vide') + '" data-grille-semaine="' + num + '">' +
+        htmlGrille += '<div class="planif-grille-rangee' + (contenu ? '' : ' planif-grille-rangee--vide') + '" data-grille-semaine="' + num + '">' +
                 '<div class="planif-grille-num">' + num + '</div>' +
                 '<div class="planif-grille-cellule">' + contenu + '</div>' +
                 '</div>';
     }
-    html += '</div>';
+    htmlGrille += '</div>';
 
     // Zone « Non planifié » (Q1/Q2) : séquences sans étendue + leçons sans
     // semaine. À la migration, TOUT part ici — c'est la liste de travail.
@@ -6973,11 +7059,21 @@ function mettreAJourPlanificateur() {
                                       _leconsDepliees.has(toutesLecons[l2].id));
         }
     }
-    if (nonPlanifie) {
-        html += '<div class="planif-grille-nonplanifie" data-grille-semaine="">' +
-                '<div class="planif-grille-nonplanifie-titre">Non planifié</div>' +
-                nonPlanifie + '</div>';
-    }
+    // Elle se rend en COLONNE avant la grille, ou en bloc après — mais son
+    // balisage est le MÊME : `data-grille-semaine=""` porte la sémantique
+    // « déposer ici = désancrer », et le glisser ne doit pas connaître la
+    // disposition. Un mode qui changerait l'attribut casserait le dépôt en
+    // silence.
+    var zoneReserve = nonPlanifie
+        ? '<div class="planif-grille-nonplanifie' + (aGauche ? ' planif-reserve-colonne' : '') + '"' +
+          ' data-grille-semaine="">' +
+          '<div class="planif-grille-nonplanifie-titre">Non planifié</div>' +
+          nonPlanifie + '</div>'
+        : '';
+
+    html += aGauche
+        ? '<div class="planif-cotecote">' + zoneReserve + htmlGrille + '</div>'
+        : htmlGrille + zoneReserve;
 
     conteneur.innerHTML = html;
     mettreAJourJaugeTemps(hierarchie.filter(function(e) { return e.niveau === 0; })
@@ -7514,6 +7610,10 @@ window.planificationCarte = {
     basculerDetailLecon: basculerDetailLecon,
     // Lot 3 : déplacement dans la grille + annulation
     deposerDansGrille: deposerDansGrille,
+    dispositionReserve: dispositionReserve,
+    basculerDispositionReserve: basculerDispositionReserve,
+    LARGEUR_RESERVE_COLONNE: LARGEUR_RESERVE_COLONNE,
+    PLANCHER_PALETTE_COTE_A_COTE: PLANCHER_PALETTE_COTE_A_COTE,
     analyserRepereTitre: analyserRepereTitre,
     inventaireReperesTitres: inventaireReperesTitres,
     retirerRepereTitre: retirerRepereTitre,

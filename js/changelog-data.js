@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.53',
+            couleur: 'vert',
+            titre: 'Alignement : la réserve « Non planifié » au choix',
+            items: [
+                'Un bouton dans la barre du planificateur place la réserve « Non planifié » sous la grille (comme avant) ou EN COLONNE à sa gauche. En colonne, elle ne défile plus avec la grille : tu y puises une pastille et tu la déposes dans n’importe quelle semaine sans la perdre de vue.',
+                'Passer en colonne élargit la palette au minimum nécessaire si elle est trop étroite — sinon la grille n’aurait plus la place d’aligner deux pastilles et la colonne coûterait plus qu’elle ne rapporte. Revenir à la disposition du bas ne rétrécit rien : ta largeur reste la tienne.',
+                'Le choix est mémorisé.'
+            ]
+        },
+        {
             version: '1.52',
             couleur: 'vert',
             titre: 'Alignement : le planificateur en pastilles',
