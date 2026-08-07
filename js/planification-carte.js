@@ -6163,6 +6163,29 @@ function itemLeconGrille(lec, avecContexte) {
     return html;
 }
 
+/**
+ * Enveloppe d'un élément dans une rangée (7 août 2026).
+ *
+ * Les éléments d'une même semaine se lisaient EMPILÉS, une ligne chacun : une
+ * semaine à trois leçons occupait trois rangs de hauteur et la grille défilait
+ * pour rien. Ils passent côte à côte — c'est du RENDU pur, aucun type, aucune
+ * migration (déblocage identifié au §5.3 du document de méthode).
+ *
+ * Ce n'est pas la « disposition à deux colonnes » écartée le 6 août : celle-là
+ * était imposée et resserrait des titres déjà tronqués. Ici un élément seul
+ * garde toute la largeur, et une largeur plancher fait PASSER À LA LIGNE plutôt
+ * que de rétrécir. Une leçon dépliée reprend la pleine largeur : son déroulé se
+ * lit en hauteur, le mettre en colonne étroite le rendrait illisible.
+ *
+ * L'enveloppe sert aussi à garder la leçon et son déroulé solidaires — sans
+ * elle, le déroulé deviendrait un frère de la leçon dans le flux flex et
+ * s'afficherait À CÔTÉ d'elle.
+ */
+function blocGrille(html, pleineLargeur) {
+    return '<div class="planif-grille-bloc' +
+           (pleineLargeur ? ' planif-grille-bloc--large' : '') + '">' + html + '</div>';
+}
+
 /** Leçons descendantes d'une séquence, à toute profondeur (voie A). */
 function leconsDescendantesDe(seq, vus) {
     if (!vus) vus = new Set();
@@ -6439,10 +6462,15 @@ function mettreAJourPlanificateur() {
         var contenu = '';
         for (var h = 0; h < hierarchie.length; h++) {
             var et = etendueTemporelle(hierarchie[h].seq);
-            if (et && et.debut === num) contenu += itemSequenceGrille(hierarchie[h].seq, hierarchie[h].niveau);
+            if (et && et.debut === num) {
+                contenu += blocGrille(itemSequenceGrille(hierarchie[h].seq, hierarchie[h].niveau), false);
+            }
         }
         for (var l = 0; l < toutesLecons.length; l++) {
-            if (semaineDeLecon(toutesLecons[l]) === num) contenu += itemLeconGrille(toutesLecons[l], true);
+            if (semaineDeLecon(toutesLecons[l]) === num) {
+                contenu += blocGrille(itemLeconGrille(toutesLecons[l], true),
+                                      _leconsDepliees.has(toutesLecons[l].id));
+            }
         }
         html += '<div class="planif-grille-rangee' + (contenu ? '' : ' planif-grille-rangee--vide') + '" data-grille-semaine="' + num + '">' +
                 '<div class="planif-grille-num">' + num + '</div>' +
@@ -6455,10 +6483,15 @@ function mettreAJourPlanificateur() {
     // semaine. À la migration, TOUT part ici — c'est la liste de travail.
     var nonPlanifie = '';
     for (var h2 = 0; h2 < hierarchie.length; h2++) {
-        if (!etendueTemporelle(hierarchie[h2].seq)) nonPlanifie += itemSequenceGrille(hierarchie[h2].seq, hierarchie[h2].niveau);
+        if (!etendueTemporelle(hierarchie[h2].seq)) {
+            nonPlanifie += blocGrille(itemSequenceGrille(hierarchie[h2].seq, hierarchie[h2].niveau), false);
+        }
     }
     for (var l2 = 0; l2 < toutesLecons.length; l2++) {
-        if (semaineDeLecon(toutesLecons[l2]) === null) nonPlanifie += itemLeconGrille(toutesLecons[l2], true);
+        if (semaineDeLecon(toutesLecons[l2]) === null) {
+            nonPlanifie += blocGrille(itemLeconGrille(toutesLecons[l2], true),
+                                      _leconsDepliees.has(toutesLecons[l2].id));
+        }
     }
     if (nonPlanifie) {
         html += '<div class="planif-grille-nonplanifie" data-grille-semaine="">' +
