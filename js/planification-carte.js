@@ -5538,7 +5538,15 @@ function initialiser() {
                 paletteBarre.addEventListener('pointercancel', onUp);
             });
         }
-        var paletteToggle = palette.querySelector('.planif-palette-toggle');
+        // ⚠ `.planif-palette-replier` et NON `.planif-palette-toggle` (correctif
+        // du 7 août). La seconde est la classe de STYLE, partagée par tous les
+        // boutons de la barre : depuis l'ajout du bouton de disposition,
+        // `querySelector` rendait le PREMIER de la barre — donc le mauvais. Le
+        // comportement « replier » s'attachait au bouton de disposition, qui
+        // réécrivait au passage son propre libellé en « + » / « − », et le vrai
+        // bouton de repli ne faisait plus rien. Une classe qui sert à styler ne
+        // peut pas servir à désigner.
+        var paletteToggle = palette.querySelector('.planif-palette-replier');
         if (paletteToggle) {
             paletteToggle.addEventListener('click', function() {
                 palette.classList.toggle('planif-palette-replie');

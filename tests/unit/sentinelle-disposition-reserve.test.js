@@ -8,6 +8,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
 const sourceIndex = readFileSync(path.join(racineProjet, 'index.html'), 'utf8');
 const sourceCss = readFileSync(path.join(racineProjet, 'styles.css'), 'utf8');
+const sourceCarte = readFileSync(path.join(racineProjet, 'js', 'planification-carte.js'), 'utf8');
 
 // DISPOSITION DE LA RÉSERVE « NON PLANIFIÉ » (7 août 2026).
 //
@@ -230,7 +231,7 @@ describe('Bouton de disposition · visible et lisible', () => {
     const estSur = (cp) => BLOCS_SURS.some(([a, b]) => cp >= a && cp <= b);
 
     const libelles = [...sourceIndex.matchAll(
-        /<button[^>]*class="planif-palette-toggle"[^>]*>([^<]*)<\/button>/g
+        /<button[^>]*class="[^"]*planif-palette-toggle[^"]*"[^>]*>([^<]*)<\/button>/g
     )].map((m) => m[1]);
 
     it('les boutons de barre de palette sont bien là', () => {
@@ -251,7 +252,7 @@ describe('Bouton de disposition · visible et lisible', () => {
 
     it('chacun porte un title — le glyphe seul ne dit pas ce qu’il fait', () => {
         const boutons = [...sourceIndex.matchAll(
-            /<button[^>]*class="planif-palette-toggle"[^>]*>/g
+            /<button[^>]*class="[^"]*planif-palette-toggle[^"]*"[^>]*>/g
         )].map((m) => m[0]);
         for (const b of boutons) expect(b).toMatch(/title="/);
     });
@@ -262,5 +263,46 @@ describe('Bouton de disposition · visible et lisible', () => {
         const regle = /\.planif-palette-titre\s*\{[^}]*\}/.exec(sourceCss);
         expect(regle).toBeTruthy();
         expect(regle[0]).toMatch(/flex:\s*1/);
+    });
+});
+
+// =======================================================================
+// UNE CLASSE DE STYLE NE DÉSIGNE PAS UN BOUTON — correctif du 7 août
+// =======================================================================
+//
+// Second constat terrain de Grégoire : « il n'y a plus de disposition verticale
+// une fois qu'on a choisi l'horizontale ». Cause :
+// `palette.querySelector('.planif-palette-toggle')` rend le PREMIER élément de
+// cette classe. Depuis l'ajout du bouton de disposition, c'était LUI — donc le
+// comportement « replier » s'y attachait, réécrivait son libellé en « + » / « − »
+// (d'où le glyphe ◧ disparu des captures), et le vrai bouton de repli ne faisait
+// plus rien. Le bouton de disposition devenait inatteignable : un aller sans
+// retour.
+//
+// ▣ GÉNÉRAL — une classe qui sert à STYLER ne peut pas servir à DÉSIGNER. Dès
+// qu'un deuxième élément la porte, tout `querySelector` sur elle devient un pari
+// sur l'ordre du DOM.
+
+describe('Sélecteurs · désigner et styler sont deux rôles distincts', () => {
+    it('la classe de style est bien PARTAGÉE — c’est ce qui rend le piège réel', () => {
+        const toggles = sourceIndex.match(/class="planif-palette-toggle[^"]*"/g) || [];
+        expect(toggles.length).toBeGreaterThanOrEqual(3);
+    });
+
+    it('le comportement « replier » vise une classe DÉDIÉE', () => {
+        expect(sourceCarte).toContain("querySelector('.planif-palette-replier')");
+        expect(sourceCarte).not.toContain("querySelector('.planif-palette-toggle')");
+    });
+
+    it('chaque palette porte exactement UN bouton de repli', () => {
+        // Deux palettes (Nœuds, Planificateur) → deux boutons, pas trois.
+        const replier = sourceIndex.match(/planif-palette-replier/g) || [];
+        expect(replier.length).toBe(2);
+    });
+
+    it('le bouton de disposition NE porte PAS la classe de repli', () => {
+        const ligne = /<button[^>]*id="planif-btn-disposition-reserve"[^>]*>/.exec(sourceIndex);
+        expect(ligne).toBeTruthy();
+        expect(ligne[0]).not.toContain('planif-palette-replier');
     });
 });
