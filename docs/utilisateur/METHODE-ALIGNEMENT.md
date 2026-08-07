@@ -468,7 +468,88 @@ Ce n'est pas un blocage, mais ce n'est pas une ligne de code non plus.
 déjà outillé. Elle chapeaute sans contenir — le regroupement y reste abstrait.
 Les deux voies ne s'excluent pas à terme.
 
-### 5.3 ◈ OUVERT — une leçon = une séance ?
+### 5.3 ✅ RÉPONDU PAR L'USAGE (6 août, soir) — non : une leçon peut s'étaler
+### sur plusieurs séances
+
+> **La preuve est une capture, pas un raisonnement.** Le planificateur de
+> Grégoire, au soir du 6 août, affichait « Sem. 1 séance 1 » en rangée 1 et
+> « Sem. 1 séance 2 » en rangée 2 — **deux séances de la même semaine, que la
+> grille a forcées dans deux semaines différentes**. Et le repère « séance N »
+> était écrit dans le TITRE.
+>
+> **▣ GÉNÉRAL — le motif de F3, à nouveau.** *Un repère écrit dans un titre est
+> le symptôme d'un concept qui manque au modèle.* L'enseignant compense dans le
+> texte ce que l'outil ne sait pas représenter. C'est la deuxième fois de la
+> journée que ce signal apparaît (la semaine en F3, la séance ici) : c'est
+> maintenant un **test de diagnostic** à appliquer systématiquement.
+
+**Demande de Grégoire (6 août, soir)** : ajouter un type **Séance**, et pouvoir
+disposer les séances d'une même semaine **côte à côte** dans la rangée.
+
+**⚠ Ce que ça rouvre.** Ce n'est pas un ajout local :
+
+- **§5.3 elle-même**, laissée ouverte le matin — l'usage y répond : **non**,
+  leçon ≠ séance.
+- **D3 du plan de la grille** (« l'ancrage temporel appartient à la LEÇON ») :
+  si la séance existe, c'est ELLE qui atterrit dans une semaine.
+
+**La généralisation qui réconcilie tout (à valider).** D3 ne se contredit pas,
+il se **généralise** : *l'ancrage appartient au plus petit conteneur planifié*.
+Une séance porte sa semaine ; une leçon qui a des séances **dérive** d'elles ;
+une leçon sans séance garde la sienne, comme aujourd'hui. La dérivation
+d'étendue étant **déjà récursive** (lot 1), le modèle ne coûte presque rien —
+et l'exigence reste progressive (§6 quinquies) : qui n'a pas besoin de séances
+n'en voit jamais.
+
+Granularité qui en résulterait :
+
+```
+Ensembles          modules, étapes — séquences de séquences (§5.2)
+  └─ Séquence      regroupement LOGIQUE, renommable
+      └─ Leçon     unité LOGIQUE ; porte les objectifs
+          └─ Séance    créneau de LIVRAISON ; porte la semaine   ← NOUVEAU
+              └─ Période   mesure, ne contient pas
+                  └─ Activités
+```
+
+**◈ LA question dure, à trancher AVANT de coder — elle appartient à Grégoire :**
+*où vivent les activités ?* Aujourd'hui dans la leçon. Pédagogiquement, une
+activité se déroule pendant une séance PRÉCISE.
+
+| Option | Ce que ça donne | Ce que ça coûte |
+|--------|-----------------|-----------------|
+| **Activités dans la SÉANCE** | On peut dire quelle activité tombe quelle séance ; la comptabilité du temps devient exacte par créneau | **Migration de tout le contenu existant** ; la leçon devient un pur conteneur logique |
+| **Activités restent dans la LEÇON** | Léger, aucune migration ; la séance est un créneau de livraison | On ne peut PAS dire quelle activité tombe quelle séance — le besoin d'origine n'est qu'à moitié servi |
+
+**◈ Collision de vocabulaire à revoir** : §5.2 listait « séance » parmi les
+renommages possibles de *Leçon*. Si Séance devient un type distinct, cette
+piste de renommage doit être révisée — on ne peut pas offrir de renommer
+« Leçon » en « Séance » si les deux coexistent.
+
+### ◈ OUVERT — deux vues du planificateur (hauteur / largeur)
+
+Proposition de Grégoire, même soir : offrir **deux dispositions** du
+planificateur — la verticale actuelle, ou une disposition « en largeur » à deux
+colonnes — **l'utilisateur choisissant selon l'espace dont il dispose à
+l'écran**.
+
+**▣ GÉNÉRAL.** *Quand un compromis d'affichage dépend de l'écran de
+l'utilisateur, le lui offrir vaut mieux que de trancher à sa place.* (Le même
+soir, une disposition à deux colonnes IMPOSÉE avait été écartée précisément
+parce qu'elle resserrait des titres déjà tronqués — le choix lève l'objection.)
+
+**◈ À préciser avant de coder** : « vue en largeur » = la file « Non planifié »
+en colonne À CÔTÉ de la grille, ou les **semaines** déroulées horizontalement ?
+Les deux lectures sont plausibles et le travail n'est pas du tout le même.
+
+**Déblocage bon marché identifié, indépendant de tout ça** : afficher **côte à
+côte** les éléments d'une même semaine dans leur rangée. C'est du rendu, pas de
+la structure — aucun type, aucune migration — et ça répond déjà à la moitié
+visible de la friction.
+
+---
+
+### 5.3 bis — l'analyse d'origine (6 août matin), conservée
 
 Si oui : 30 leçons de 2 périodes. Sinon (plusieurs leçons courtes dans une
 séance, ou une leçon à cheval sur deux séances), la comptabilité du temps
