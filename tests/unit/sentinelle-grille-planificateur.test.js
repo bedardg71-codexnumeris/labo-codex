@@ -298,6 +298,38 @@ describe('lot 3 · déplacement dans la grille', () => {
         expect(api.etat.noeuds.get('planif-l1').y).toBe(avant.y);
     });
 
+    it('AUTO-DÉFILEMENT : une rangée hors de la fenêtre reste atteignable', () => {
+        // Bug terrain (Grégoire, 6 août soir) : « le planificateur est trop
+        // petit sur la hauteur, je ne peux pas déplacer les éléments du bas
+        // vers le haut ». Cause : .planif-nav-contenu plafonne la hauteur, et
+        // rangeeSousPointeur ne voit QUE le visible — une rangée défilée hors
+        // fenêtre était une cible de dépôt inatteignable.
+        const drag = sourceCarte.slice(
+            sourceCarte.indexOf('function initialiserDragGrille'),
+            sourceCarte.indexOf('function mettreAJourPlanificateur')
+        );
+        // Zone de bord + vitesse progressive (geste précis près du bord).
+        expect(drag).toMatch(/ZONE_BORD/);
+        expect(drag).toMatch(/VITESSE_MAX/);
+        expect(drag).toMatch(/zone\.scrollTop \+= _vitesseDefilement/);
+        // Évalué à chaque déplacement du pointeur.
+        expect(drag).toMatch(/evaluerDefilement\(e\.clientY\);/);
+        // Boucle rAF autonome : défile même pointeur IMMOBILE (sinon il
+        // faudrait remuer la souris pour avancer).
+        expect(drag).toMatch(/function boucleDefilement\(\)[\s\S]*?requestAnimationFrame/);
+        expect(drag).toMatch(/boucleDefilement\(\);\s*\n\s*\}\);/);
+        // Et il s'arrête au relâchement (pas de rAF orphelin).
+        expect(drag).toMatch(/arreterDefilement\(\);/);
+        expect(drag).toMatch(/cancelAnimationFrame\(_rafDefilement\)/);
+    });
+
+    it('la hauteur de la palette n’est plus le goulot (plafond relevé)', () => {
+        const css = readFileSync(path.join(racineProjet, 'styles.css'), 'utf8');
+        const regle = css.slice(css.indexOf('.planif-nav-contenu {'), css.indexOf('.planif-sommaire {'));
+        expect(regle).toMatch(/max-height: min\(720px, 70vh\)/);
+        expect(regle).not.toMatch(/min\(420px, 55vh\)/);
+    });
+
     it('le câblage du glisser existe : cibles sur les rangées, délégation unique', () => {
         poser(api, 'planif-l1', 'lecon', { titre: 'A', metadata: { semaine: 1 } });
         api.mettreAJourPlanificateur();

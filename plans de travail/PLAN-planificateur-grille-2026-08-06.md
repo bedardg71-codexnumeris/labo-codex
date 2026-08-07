@@ -71,8 +71,14 @@ leçon dépliable, navigation conservée ; Vue calendrier RETIRÉE des trois sur
 events — leçon vers sa semaine, séquence en bloc avec écarts conservés, dépôt sur
 « Non planifié » = désancrage, bornes calées au cadre, ⌘Z fonctionnel, clic simple
 = navigation ; cible résolue GÉOMÉTRIQUEMENT, pas par elementFromPoint). **LE PLAN
-EST COMPLET.** Portes restantes : tactile (grille + canevas), auto-défilement au
-bord de la palette pendant un glisser, déclinaison par groupe (§6, hors périmètre).
+EST COMPLET.** Portes restantes : tactile (grille + canevas), déclinaison par
+groupe (§6, hors périmètre). ⚠ L'auto-défilement au bord, annoncé ici comme une
+« porte », était en réalité un TROU du lot 3 : le contenu de la palette est
+plafonné en hauteur, donc une rangée défilée hors de la fenêtre était une cible
+de dépôt INATTEIGNABLE (constat terrain Grégoire). Corrigé en 1.45.1 —
+auto-défilement au bord + plafond relevé de 420 px à 70vh. **Leçon** : ce qu'on
+classe en « porte ouverte » mérite d'être re-questionné — une limite qui empêche
+un geste n'est pas une porte, c'est un défaut.
 Détail des décisions : `docs/utilisateur/METHODE-ALIGNEMENT.md` § « LIVRÉ (6 août, 1.38.0) ».
 (La question du préalable des rangées est RÉGLÉE au lot 2 : dérivation par
 parcours chronologique de `calendrierComplet`, même source que #366.)
