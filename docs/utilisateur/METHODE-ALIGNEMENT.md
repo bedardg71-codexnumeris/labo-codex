@@ -494,7 +494,7 @@ contourner — c'est le signal qui dicte le prochain outil à construire.
 | **F5** | 6 août | Voir le travail livré dans son Chrome local | Rien ne changeait : `?v=` figés (cache), puis branche `main` au lieu de la branche de travail. | ✅ Cache-busting systématisé. **▣ Leçon générale** : sur ce projet, tout fichier modifié doit voir son `?v=` bumpé — sinon le navigateur sert l'ancienne version (classe #364). |
 | **F6** | 6 août | Poser une activité « sur » une leçon | Créée à côté du geste : seule la position du **curseur** décidait de l'adoption. Curseur à 10 px du bord → bloc orphelin, à cheval sur la leçon, qui ne s'ajuste pas — et semble « coincé ». | ✅ **LIVRÉ (1.40.0)** — filet de **recouvrement** : un bloc posé majoritairement (> 50 %) sur un conteneur qui accepte son type lui appartient, curseur ou pas. **▣ GÉNÉRAL en germe** : le geste de l'utilisateur, c'est le bloc qu'il tient, pas le pixel de son curseur. |
 | **F7** | 6 août | Sortir une activité d'une leçon vers une autre | Impossible en un geste : glisser l'enfant déplaçait tout le groupe ; le mode individuel (double-clic) ne savait que **détacher**, pas déménager. | ✅ **LIVRÉ (1.40.0)** — déménagement direct (l'enfant glissé se dépose dans l'autre conteneur, surligné au survol) + **⌘+glisser** pour saisir un bloc seul sans double-clic (proposition Grégoire, calquée sur ⌥+glisser qui clone ; ⌘+clic immobile reste la multi-sélection). |
-| **F9** | 6 août | Cloner une leçon « prototype » pour la remplir ensuite (patron du modèle Keynote) | Refusé : « Les conteneurs ne peuvent pas être clonés ». Raison réelle : « cloner » = INSTANCE LIÉE (miroir vivant), sans réponse simple pour les enfants d'un conteneur. Mais le besoin était une COPIE. | ✅ **LIVRÉ (1.45.0)** — les conteneurs se **dupliquent** (copie indépendante en profondeur : nouveaux ids, objectifs re-identifiés, liens internes recréés, liens externes non copiés — la copie n'est pas encore alignée). Mêmes gestes (⌘D, ⌥+glisser, bouton « Dupliquer »). **▣ GÉNÉRAL** : même geste, deux sémantiques nommées — l'instance (feuille) et la copie (conteneur) ; c'est le nom dans l'inspecteur qui porte la différence. |
+| **F9** | 6 août | Cloner une leçon « prototype » pour la remplir ensuite (patron du modèle Keynote) | Refusé : « Les conteneurs ne peuvent pas être clonés ». Raison réelle : « cloner » = INSTANCE LIÉE (miroir vivant), sans réponse simple pour les enfants d'un conteneur. Mais le besoin était une COPIE. | ✅ **LIVRÉ (1.45.0)** — les conteneurs se **dupliquent** (copie indépendante en profondeur : nouveaux ids, objectifs re-identifiés, liens internes recréés, liens externes non copiés — la copie n'est pas encore alignée). Mêmes gestes (⌘D, ⌥+glisser, bouton « Dupliquer »). **▣ GÉNÉRAL** : même geste, deux sémantiques nommées — l'instance (feuille) et la copie (conteneur) ; c'est le nom dans l'inspecteur qui porte la différence. **Suite ouverte** : la bibliothèque de modèles (§6 sexies). |
 | **F8** | 6 août | « Le geste n'est pas intuitif » — verdict terrain sur F7 | Les remèdes de F7 (⌘+glisser, double-clic) restaient des RITUELS : le canevas faisait l'inverse de Keynote/Figma/Miro, où saisir un objet déplace CET objet. | ✅ **LIVRÉ (1.42.0), décision Grégoire** — **inversion du modèle** : glisser une feuille la déplace SEULE (et la dépose où on la relâche) ; glisser le CADRE d'une leçon/séquence déplace le groupe. Double-clic = inspecteur, rien d'autre. ⌘+glisser et le « mode individuel » sont RETIRÉS (zéro-dette : livrés le matin, retirés le soir — c'est le développement piloté par la pratique qui marche). **▣ GÉNÉRAL** : *la manipulation directe suit les conventions que l'utilisateur apporte* — un canevas qui exige un rituel pour le geste le plus fréquent est mal inversé. |
 | **F7 bis** | 6 août | Même geste **sans clavier ni souris** (iPad) | ⌘ n'existe pas au tactile, et le glisser des nœuds du canevas est de toute façon souris-seulement (porte ouverte du relais). Le double-clic, lui, ouvre l'inspecteur partout. | ✅ **LIVRÉ (1.41.0)** — sélecteur « **Dans la leçon** » dans l'inspecteur de tout bloc qu'une leçon peut contenir : choisir la leçon d'accueil (ou « Aucune » = bloc libre), sans geste. **▣ GÉNÉRAL** : tout geste de manipulation directe doit avoir un équivalent **déclaratif** — le geste est rapide, le déclaratif est universel. Piège d'implémentation consigné : un listener posé dans le gabarit meurt au `innerHTML +=` suivant ; l'attache vit en fin de `ouvrirPanneau`. |
 
@@ -1189,6 +1189,94 @@ pour que ce jugement puisse s'exercer, il ne prétend pas l'exercer.
 la boucle de vérification (la chaîne passe par compétence / idées
 maîtresses). C'est la piste des liens objectif → activité (§6 ter) — les
 identifiants sont prêts depuis 1.34.0.
+
+---
+
+## 6 sexies. ◈ OUVERT — réutiliser : du prototype à la bibliothèque de modèles
+
+**État : idée consignée le 6 août au soir, volontairement NON tranchée.**
+Décision de Grégoire : *« On laisse mûrir, c'est plus sage »* — l'usage réel
+dira si le besoin est intra-carte (déjà couvert) ou inter-cartes. Ce qui suit
+est le design instruit ce soir-là, pour qu'il ne s'évanouisse pas avec la
+discussion.
+
+### Ce qui est déjà livré (1.45.0)
+
+La **duplication d'un conteneur** : ⌘D, ⌥+glisser ou le bouton « Dupliquer »
+de l'inspecteur créent une copie indépendante en profondeur d'une leçon ou
+d'une séquence — le patron « prototype » de Keynote, **à l'intérieur d'une
+carte**. Ce que ça ne fait pas : réutiliser un modèle d'une carte à l'autre,
+d'un cours à l'autre, ou d'un trimestre au suivant.
+
+### L'idée de Grégoire
+
+> *« La question des modèles de leçons reprend un peu le même principe que les
+> bibliothèques et les productions qu'on y met dedans. Il y a déjà une
+> bibliothèque de cartes. On pourrait peut-être y ajouter, dans cette
+> bibliothèque de cartes, une bibliothèque de leçons. »*
+
+**▣ GÉNÉRAL — pourquoi c'est juste.** Un besoin de réutilisation qui ressemble
+à un besoin déjà résolu ailleurs dans l'outil doit emprunter le **même patron**
+plutôt qu'en inventer un. L'utilisateur y retrouve des gestes qu'il connaît, et
+le code y retrouve des modules déjà éprouvés.
+
+### Vérifications au code (6 août)
+
+- `bibliothequeAlignements` : clé **non namespacée**, partagée entre tous les
+  trimestres. Forme d'une entrée :
+  `{ nom, dateCreation, donnees: { compteur, compteurLiens, noeuds, liens } }`.
+- **Un modèle de leçon a exactement cette forme** — c'est le même objet,
+  restreint à un **sous-arbre** au lieu de la carte entière.
+- Le moteur existe : `dupliquerConteneurEnProfondeur()` parcourt déjà un
+  sous-arbre, régénère les ids, recopie les objectifs avec de **nouveaux**
+  identifiants et recrée les liens **internes** en ignorant les externes.
+  Exporter et estampiller sont ces deux moitiés, séparées par un stockage.
+- **Nuance qui renforce l'idée** : le patron canonique (`cours`, `enseignants`,
+  `horaires`) fonctionne par **référence par id** — l'assemblage ne copie pas.
+  Mais `importerDepuisBibliotheque()` **clone en profondeur**, délibérément.
+  Une bibliothèque de leçons suivrait donc la variante **carte** du patron
+  (copie à l'usage), pas la variante *cours* (référence) — et c'est
+  précisément la sémantique qu'un modèle exige.
+
+### ⚠ Le piège identifié
+
+**Ne pas** mettre cartes et leçons dans la même collection avec un champ
+`type`. `SKILL_integrite_globaux.md` est catégorique : *ne jamais filtrer par
+flag, toujours par identité de la source*. Donc **deux clés**
+(`bibliothequeAlignements` + une nouvelle `bibliothequeLecons`) et **une seule
+modale** à deux sections — l'unité est dans l'interface, pas dans le tableau.
+
+### Ce qui viendrait presque gratuitement
+
+- **Répertoires** : `repertoires-bibliotheque.js` est entièrement générique,
+  paramétré par un nom de bibliothèque (`biblio`) — classer les modèles en
+  dossiers ne demanderait aucun code de rangement.
+- **Modale** : `bibliotheque-ui.js` est générique.
+- **Partage** : `exporterAlignementJSON` / `importerAlignementFichier` existent
+  déjà — les modèles deviendraient échangeables entre collègues.
+
+### Ce qu'un modèle ne doit PAS emporter
+
+- Sa **semaine** : un modèle n'est pas ancré dans un trimestre (règle neuve).
+- Ses **liens externes** : il n'est pas aligné tant qu'il n'est pas posé
+  (règle déjà appliquée par la duplication de 1.45.0).
+
+### Questions restées ouvertes
+
+- **Leçons seulement, ou conteneurs** (leçons *et* séquences) ? La
+  sérialisation est identique ; une séquence-type semble au moins aussi utile.
+  Penchant : « Modèles » tout court, acceptant les deux.
+- **Création** : « Enregistrer comme modèle » depuis l'inspecteur d'une leçon
+  existante — on modélise depuis le réel, jamais dans un éditeur à part.
+- **Vignette** : un rendu miniature fidèle est coûteux et fragile ; une carte
+  nommée avec résumé (« Atelier lecture · 3 activités · 2 pér. ») donnerait
+  l'essentiel de la valeur.
+
+### Le signal qui déclencherait le chantier
+
+Se surprendre à vouloir un modèle **d'un cours à l'autre** ou **d'un trimestre
+au suivant**. Tant que le besoin reste dans une seule carte, la duplication
+suffit et la bibliothèque serait du confort.
 
 ---
 
