@@ -18808,6 +18808,44 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 /* Le titre de la zone coiffe la rangée, il n'entre pas dans le flux latéral. */
 .planif-grille-nonplanifie-titre { flex: 0 0 100%; }
 
+/* === RÉSERVE EN COLONNE (7 août 2026) — disposition au choix ===
+   Deux dispositions, l'utilisateur tranche selon son écran : la réserve sous la
+   grille (défaut), ou À CÔTÉ. En colonne, elle cesse de défiler avec la grille
+   — c'est tout l'objet : on y puise des pastilles pendant que la grille défile
+   dessous (l'auto-défilement du glisser, 1.45.1, fait le reste).
+
+   ⚠ ARITHMÉTIQUE. La colonne prend 170 px. À 360 px de palette (316 utiles), il
+   n'en resterait que ~142 pour la grille — UNE pastille par rangée, soit pire
+   que ce qu'on remplace. C'est pourquoi la bascule élève la palette au plancher
+   de 520 px (PLANCHER_PALETTE_COTE_A_COTE, js/planification-carte.js), qui
+   laisse ~300 px de cellule. La sentinelle géométrique verrouille ce calcul —
+   c'est le défaut de 1.47.0, où un côte à côte juste était inerte faute de
+   place. */
+.planif-cotecote {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+.planif-cotecote .planif-grille {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.planif-reserve-colonne {
+    flex: 0 0 170px;
+    max-height: 60vh;
+    overflow-y: auto;
+    align-content: flex-start;
+    padding: 4px;
+    border: 1px dashed var(--bordure-discrete, rgba(128,128,128,.28));
+    border-radius: 8px;
+}
+
+/* Le bouton de bascule, dans la barre du planificateur. Il reprend
+   .planif-palette-toggle : aucune taille ni couleur nouvelle. */
+#planif-btn-disposition-reserve.actif {
+    color: var(--planif-couleur-selection, #3b82f6);
+}
+
 /* Pas de media query ici, volontairement : le repli doit suivre la largeur de
    la PALETTE (redimensionnable, 1.36.0), pas celle de la fenêtre. La largeur
    plancher au-dessus le fait déjà — deux blocs qui ne tiennent pas passent à
