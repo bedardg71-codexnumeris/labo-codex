@@ -84,6 +84,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 - [ ] **#409** Retirer l'archive `planification_seances_archive_pre367` — créée 7 août 2026 par la migration #367.
   - Filet de sécurité de la migration : copie intégrale de la clé nue avant purge. Elle couvre le cas des notes orphelines (leçon absente de toute carte), qui n'ont pas de destination composite.
   - ⮕ **Protocole de validation** : `plans de travail/VALIDATION-367-notes-lecon-consigne.md` (8 sections, grille de résultats). ⚠ L'étape 1 se fait AVANT de charger la nouvelle version — la migration se déclenche au premier démarrage.
+  - ⚠ **DÉCISION GRÉGOIRE (7 août)** : la clé ne contenait que des **productions de test**, sans valeur. Le protocole de validation complet est ramené au minimum (drapeau + clé nue purgée + un geste réel), et **l'archive peut être retirée sans attendre** — elle protégeait précisément ces données-là.
   - ⮕ **À retirer quand Grégoire aura confirmé** que ses notes de leçon sont correctes dans A2026 et H2026 après le premier démarrage en 1.50.0. Retrait = supprimer la clé + le `db.setSync` d'archivage dans `main.js` (le bloc de migration ne rejoue pas, le drapeau est posé). Pas de « au cas où » sans date : c'est cette ligne-ci qui en tient lieu.
 
 - [ ] **#406** Blocs B et C du PLAN-JOURNEE du 7 août — **REPORTÉS explicitement par Grégoire (7 août, soir)**, à ne pas perdre.
