@@ -6184,6 +6184,40 @@ function deriverRangeesGrille() {
     return { rangees: repli, source: 'repli' };
 }
 
+/**
+ * Le CADRE effectivement rendu : l'ensemble des numéros de semaine qui ont une
+ * rangée dans la grille (7 août 2026).
+ *
+ * Sans lui, un ancrage hors cadre faisait DISPARAÎTRE la leçon : elle ne
+ * correspondait à aucune rangée, et « Non planifié » n'attrapait que
+ * `semaine === null`. Deux chemins y menaient — le champ « Semaine » de
+ * l'inspecteur (aucun attribut `max`) et l'import Markdown (`val >= 1`, sans
+ * borne haute) ; seul le glisser était protégé (calage sur `maxSemaine`).
+ *
+ * Le cadre n'est PAS l'intervalle [1..max] : les rangées dérivent du calendrier
+ * et sont trouées (une semaine de planification ou d'examens n'a pas de numéro).
+ * Une semaine 4 tombant dans ce trou était invisible au même titre qu'une
+ * semaine 42 — d'où un Set, et non une borne haute.
+ *
+ * Décision Grégoire (7 août) : l'ancrage hors cadre RETOMBE dans « Non
+ * planifié », il n'est pas refusé à la saisie. La valeur reste écrite dans
+ * `metadata.semaine` — si le Cadre du trimestre s'étend plus tard, la leçon
+ * reprend sa rangée d'elle-même.
+ */
+function cadreSemainesGrille(rangees) {
+    var cadre = new Set();
+    for (var i = 0; i < rangees.length; i++) {
+        if (rangees[i].type === 'semaine') cadre.add(rangees[i].num);
+    }
+    return cadre;
+}
+
+/** Semaine d'accueil d'une leçon dans la grille, ou null si hors cadre. */
+function semaineGrilleLecon(lec, cadre) {
+    var s = semaineDeLecon(lec);
+    return (s !== null && cadre.has(s)) ? s : null;
+}
+
 function itemSequenceGrille(seq, niveau) {
     var etendue = etendueTemporelle(seq);
     var libelle = niveau > 0 ? cheminSequence(seq) : (seq.titre || 'Sans titre');
@@ -6201,7 +6235,12 @@ function itemSequenceGrille(seq, niveau) {
            '</div>';
 }
 
-function itemLeconGrille(lec, avecContexte) {
+/**
+ * @param {number|null} [semaineHorsCadre] Semaine ancrée mais sans rangée
+ *   d'accueil. Affichée en pastille pour que « Non planifié » ne donne pas
+ *   l'impression d'avoir effacé la saisie de l'enseignant.
+ */
+function itemLeconGrille(lec, avecContexte, semaineHorsCadre) {
     var duree = formaterPeriodes(dureeRollupNoeud(lec));
     var depliee = _leconsDepliees.has(lec.id);
     var enfants = (lec.enfants || []).map(function(eid) { return etat.noeuds.get(eid); }).filter(Boolean);
@@ -6219,6 +6258,10 @@ function itemLeconGrille(lec, avecContexte) {
             ? '<span class="planif-grille-chevron" data-action="planificationCarte.basculerDetailLecon" data-param="' + lec.id + '" title="' + (depliee ? 'Replier' : 'Déplier') + ' le déroulé">' + (depliee ? '▾' : '▸') + '</span>'
             : '<span class="planif-grille-chevron planif-grille-chevron--vide"></span>') +
         '<span class="planif-som-nom">' + echapperHtml(lec.titre || 'Sans titre') + contexte + '</span>' +
+        (typeof semaineHorsCadre === 'number'
+            ? '<span class="planif-som-pill" title="Le cadre du trimestre ne comporte pas de semaine ' + semaineHorsCadre +
+              ' — glisse la leçon dans une rangée, ou étends le Cadre du trimestre.">Sem. ' + semaineHorsCadre + ' hors cadre</span>'
+            : '') +
         (duree ? '<span class="planif-som-pill planif-som-pill-duree">' + duree + '</span>' : '') +
         '</div>';
 
@@ -6499,6 +6542,7 @@ function mettreAJourPlanificateur() {
     if (!conteneur) return;
 
     var derive = deriverRangeesGrille();
+    var cadre = cadreSemainesGrille(derive.rangees);
     var hierarchie = listerSequencesHierarchie('temporel');
     var toutesLecons = [];
     for (var entry of etat.noeuds) {
@@ -6557,15 +6601,20 @@ function mettreAJourPlanificateur() {
 
     // Zone « Non planifié » (Q1/Q2) : séquences sans étendue + leçons sans
     // semaine. À la migration, TOUT part ici — c'est la liste de travail.
+    // Elle recueille AUSSI ce qui est ancré hors cadre — sans quoi la leçon
+    // (ou la séquence dont l'étendue commence hors cadre) n'apparaîtrait nulle
+    // part : les rangées ci-dessus ne peuvent accueillir que leurs propres
+    // numéros. Voir `cadreSemainesGrille()`.
     var nonPlanifie = '';
     for (var h2 = 0; h2 < hierarchie.length; h2++) {
-        if (!etendueTemporelle(hierarchie[h2].seq)) {
+        var et2 = etendueTemporelle(hierarchie[h2].seq);
+        if (!et2 || !cadre.has(et2.debut)) {
             nonPlanifie += blocGrille(itemSequenceGrille(hierarchie[h2].seq, hierarchie[h2].niveau), false);
         }
     }
     for (var l2 = 0; l2 < toutesLecons.length; l2++) {
-        if (semaineDeLecon(toutesLecons[l2]) === null) {
-            nonPlanifie += blocGrille(itemLeconGrille(toutesLecons[l2], true),
+        if (semaineGrilleLecon(toutesLecons[l2], cadre) === null) {
+            nonPlanifie += blocGrille(itemLeconGrille(toutesLecons[l2], true, semaineDeLecon(toutesLecons[l2])),
                                       _leconsDepliees.has(toutesLecons[l2].id));
         }
     }
