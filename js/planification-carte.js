@@ -1113,11 +1113,11 @@ var GUIDE_PAGES = [
             '<p>Cette carte t\u2019aide à vérifier que tout ce que tu enseignes est relié à ce que tu évalues. C\u2019est ça, l\u2019alignement pédagogique.</p>' +
             '<p>Chaque élément affiche deux <strong>badges</strong> (gauche\u00a0= amont, droite\u00a0= aval) qui t\u2019indiquent l\u2019état de ses connexions\u00a0:</p>' +
             '<ul>' +
-                '<li><span class="icone-inline icone-inline--check" aria-hidden="true"></span> = cet élément est bien relié (le badge prend la couleur de l\u2019élément).</li>' +
-                '<li><strong>!</strong> (badge gris) = il manque une connexion.</li>' +
-                '<li><span class="icone-inline icone-inline--warning" aria-hidden="true"></span> = attention, une évaluation manque quelque part dans la chaîne.</li>' +
+                '<li><span class="guide-glyphe guide-glyphe--check">\u2713</span> = cet élément est bien relié (le badge prend la couleur de l\u2019élément).</li>' +
+                '<li><span class="guide-glyphe guide-glyphe--gris">!</span> (badge gris) = il manque une connexion.</li>' +
+                '<li><span class="guide-glyphe guide-glyphe--warning">\u26A0</span> = attention, une évaluation manque quelque part dans la chaîne.</li>' +
             '</ul>' +
-            '<p>Ce guide te propose 7\u00a0étapes pour construire ta carte et utiliser l\u2019import\u00a0/\u00a0export. Tu peux le consulter à tout moment depuis la palette.</p>' +
+            '<p>Ce guide te propose 7\u00a0étapes pour construire ta carte et exporter ton plan. Tu peux le consulter à tout moment depuis la palette.</p>' +
             '<p class="planif-guide-ref">Anderson, L.\u00a0W. (2026). <em>Curricular alignment: A re-examination</em> (Educational Practices Series, No.\u00a037). UNESCO International Bureau of Education. <a href="https://unesdoc.unesco.org/ark:/48223/pf0000397143.locale=en" target="_blank" rel="noopener">unesdoc.unesco.org</a></p>'
     },
     {
@@ -1137,7 +1137,7 @@ var GUIDE_PAGES = [
             '<ol>' +
                 '<li>Glisse une <span class="planif-guide-type" style="background:var(--planif-couleur-idee-maitresse)"></span> <strong>Idée maîtresse</strong> sur le canevas.</li>' +
                 '<li>Relie-la à sa compétence en tirant un lien d\u2019un port à l\u2019autre. Le verbe <em>«\u00a0se décline en\u00a0»</em> s\u2019affiche automatiquement.</li>' +
-                '<li>Le badge d\u2019entrée de l\u2019idée maîtresse affiche <span class="icone-inline icone-inline--check" aria-hidden="true"></span> — elle est connectée en amont.</li>' +
+                '<li>Le badge d\u2019entrée de l\u2019idée maîtresse affiche <span class="guide-glyphe guide-glyphe--check">\u2713</span> — elle est connectée en amont.</li>' +
             '</ol>'
     },
     {
@@ -1175,7 +1175,7 @@ var GUIDE_PAGES = [
                 '<li>Relie-la à la connaissance qu\u2019elle permet d\u2019acquérir. Le verbe <em>«\u00a0s\u2019acquiert par\u00a0»</em> apparaît.</li>' +
                 '<li>Utilise le <strong>sélecteur de niveau cognitif</strong> dans l\u2019<strong>Inspecteur</strong> pour t\u2019assurer que l\u2019activité vise le bon niveau.</li>' +
             '</ol>' +
-            '<div class="planif-guide-astuce"><span class="planif-guide-type" style="background:var(--planif-couleur-soutien)"></span> <strong>Soutien</strong> et <span class="planif-guide-type" style="background:var(--planif-couleur-revision)"></span> <strong>Révision</strong> sont des types d\u2019activités spécialisées. Utilise «\u00a0Soutien\u00a0» pour l\u2019aide supplémentaire, «\u00a0Révision\u00a0» pour le réinvestissement.</div>'
+            '<div class="planif-guide-astuce">La famille compte d\u2019autres blocs\u00a0: <span class="planif-guide-type" style="background:var(--planif-couleur-expose)"></span> <strong>Exposé</strong> pose ton temps d\u2019enseignement\u00a0; <span class="planif-guide-type" style="background:var(--planif-couleur-soutien)"></span> <strong>Soutien</strong> sert à l\u2019aide supplémentaire et <span class="planif-guide-type" style="background:var(--planif-couleur-revision)"></span> <strong>Révision</strong> au réinvestissement\u00a0; et les cinq étapes de l\u2019<strong>enseignement explicite</strong> (Ouverture, Modélisation, Pratique guidée, Pratique autonome, Clôture) sont des activités à part entière.</div>'
     },
     {
         titre: 'Vérifie que c\u2019est acquis',
@@ -1186,33 +1186,33 @@ var GUIDE_PAGES = [
                 '<li>Relie-la aux éléments qu\u2019elle évalue\u00a0: idées maîtresses, connaissances ou activités. Le verbe <em>«\u00a0se vérifie par\u00a0»</em> apparaît.</li>' +
                 '<li>Quand une compétence est atteinte par au moins une évaluation à travers la chaîne, son badge d\u2019avertissement disparaît.</li>' +
             '</ol>' +
-            '<p class="planif-guide-conclusion">L\u2019objectif\u00a0: quand tous les badges de ta carte affichent <span class="icone-inline icone-inline--check" aria-hidden="true"></span> et qu\u2019il n\u2019y a plus de <span class="icone-inline icone-inline--warning" aria-hidden="true"></span>, ton cours est aligné — chaque compétence est enseignée et évaluée de manière cohérente.</p>'
+            '<p class="planif-guide-conclusion">L\u2019objectif\u00a0: quand tous les badges de ta carte affichent <span class="guide-glyphe guide-glyphe--check">\u2713</span> et qu\u2019il n\u2019y a plus de <span class="guide-glyphe guide-glyphe--warning">\u26A0</span>, ton cours est aligné — chaque compétence est enseignée et évaluée de manière cohérente.</p>'
     },
     {
-        titre: 'Exporter et importer un plan',
+        // Réécrite le 8 août 2026 (1.57.0 a supprimé la page « Plan de la
+        // leçon » et l'import MD) : la page documente le RÉEL — le menu
+        // Actions, les niveaux par usage, le Personnalisé, et les deux
+        // imports qui existent encore (JSON, inter-trimestre).
+        titre: 'Exporte ton plan',
         contenu:
-            '<p class="planif-guide-pourquoi">Tu peux exporter ton plan de leçons en format texte (Markdown), le retravailler avec une IA ou un collègue, puis le réimporter. La carte se reconstruit automatiquement.</p>' +
+            '<p class="planif-guide-pourquoi">Ta carte sait produire le document que tu remets\u00a0: plan de cours, déroulement pour la classe, ou preuve d\u2019alignement. Un geste, neuf documents possibles.</p>' +
             '<p><strong>Exporter</strong></p>' +
             '<ol>' +
-                '<li>Va dans <strong>Plan de la leçon</strong> (onglet du haut).</li>' +
-                '<li>Clique <strong>Exporter\u00a0/\u00a0Importer</strong>.</li>' +
-                '<li>Utilise <strong>Copier MD</strong> pour copier le plan dans le presse-papiers, ou <strong>Exporter MD</strong> pour télécharger un fichier.</li>' +
+                '<li>Clique <strong>Actions\u00a0\u25BE</strong> (barre d\u2019outils), puis <strong>Exporter le plan\u2026</strong></li>' +
+                '<li>Choisis le <strong>niveau</strong>\u00a0: <em>Plan de cours</em> (le sommaire collable), <em>En classe</em> (objectifs, activités, durées, rétroactions) ou <em>Preuve d\u2019alignement</em> (tout, liens compris).</li>' +
+                '<li>Choisis le <strong>format</strong> — texte, tableau (TSV, se colle dans Numbers ou Excel) ou Markdown — puis <strong>Copier</strong> ou <strong>Télécharger</strong>.</li>' +
             '</ol>' +
-            '<p><strong>Retravailler avec une IA</strong></p>' +
+            '<p><strong>Personnaliser</strong></p>' +
             '<ol>' +
-                '<li>Colle le plan dans un assistant IA de ton choix.</li>' +
-                '<li>Demande-lui d\u2019enrichir les objectifs, d\u2019ajouter des leçons, de réorganiser les séquences\u2026</li>' +
-                '<li>L\u2019IA comprend les marqueurs <code>[Séquence]</code> et <code>[Leçon]</code> — elle les conservera dans sa réponse.</li>' +
+                '<li><strong>Régler le niveau personnalisé\u2026</strong> ouvre une fenêtre\u00a0: coche les contenus, choisis l\u2019ordre des sections — l\u2019aperçu suit.</li>' +
+                '<li>Ton réglage est mémorisé\u00a0: le niveau <em>Personnalisé</em> l\u2019utilise tel quel, d\u2019un export à l\u2019autre.</li>' +
             '</ol>' +
-            '<p><strong>Réimporter</strong></p>' +
+            '<div class="planif-guide-astuce">Le document copié se retravaille où tu veux — avec une IA, un collègue, ton traitement de texte. C\u2019est un document de SORTIE\u00a0: la carte reste la source.</div>' +
+            '<p><strong>Importer</strong></p>' +
             '<ol>' +
-                '<li>Retourne dans <strong>Exporter\u00a0/\u00a0Importer</strong>, onglet <strong>Importer MD</strong>.</li>' +
-                '<li>Colle le plan retravaillé dans la zone de texte.</li>' +
-                '<li>Clique <strong>Prévisualiser</strong> pour vérifier ce qui sera créé.</li>' +
-                '<li>Choisis <em>Créer une nouvelle carte</em> ou <em>Ajouter à la carte active</em>.</li>' +
-                '<li>Clique <strong>Importer</strong>.</li>' +
-            '</ol>' +
-            '<div class="planif-guide-astuce">Après l\u2019import, tu peux réorganiser les nœuds sur le canevas et relier les éléments à tes compétences et idées maîtresses.</div>'
+                '<li><strong>Importer une carte (fichier)</strong> recharge une carte exportée en JSON.</li>' +
+                '<li><strong>Importer d\u2019un autre trimestre\u2026</strong> reprend la carte d\u2019un cours donné à une session précédente — copie indépendante, la source reste intacte.</li>' +
+            '</ol>'
     }
 ];
 

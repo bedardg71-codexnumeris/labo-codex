@@ -7,7 +7,26 @@
      ===================================================================== -->
 
 <!-- =====================================================================
-     SESSION — 8 AOÛT 2026, FIN D'APRÈS-MIDI (même conteneur, branche `claude/session-startup-a8obyo`). ⮕⮕ LIRE EN PREMIER À LA REPRISE.
+     SESSION — 8 AOÛT 2026, SOIR (même conteneur, branche `claude/session-startup-a8obyo`). ⮕⮕ LIRE EN PREMIER À LA REPRISE.
+     ÉTAT FACTUEL : **1.59.0** (build 0808-1706), fusionnée `main`. Vitest **1947/1947** (226 fichiers). Dernier ID BACKLOG : **#432**.
+
+     ✅ LIVRÉ — **#432 : LES GUIDES HARMONISÉS** (forme + contenu). Grégoire a envoyé les 8 captures du guide de la Carte (Chrome/Mac) : « des polices parfois trop grosses, uniformiser la présentation », puis « je voudrais que les trois guides se ressemblent » avant de s'absenter. Plan versionné AVANT de coder : `plans de travail/PLAN-guides-harmonisation-2026-08-08.md`.
+
+     ▣ **CE QUE « LES TROIS GUIDES » RECOUVRE — décision prise en son absence, consignée.** L'app a DEUX moteurs : celui de la Carte (`GUIDE_PAGES`, classes `planif-guide-*`) et le moteur unifié `guides-pedagogiques.js` (SOLO, ACP, RàI, SOM, PAN — classes `guide-pedagogique-*`). Quelle que soit la lecture de « trois », l'intention est la même : **toutes les surfaces de guide partagent une présentation**. Périmètre retenu = les deux familles. Correction bon marché si Grégoire visait autre chose.
+     ▣ **LA FORME — le correctif est structurel, pas cosmétique.** Aucune règle générique fautive au grep (les `p` à `font-size` du fichier ne visent pas le guide) : la cause exacte du gonflement Chrome n'a PAS été identifiée à distance — dit tel quel. ⮕ Correctif DÉTERMINISTE quand même : **poser une taille explicite sur chaque élément** (`p`, `li`, astuce, référence, conclusion) + `text-size-adjust: 100%`. *Un style qui ne dépend plus de l'héritage ne peut plus être gonflé par ce qu'on n'a pas trouvé.* Corps de la Carte remonté **10.5px → 0.9rem** (l'échelle du moteur pédagogique, qui était la bonne) ; panneau élargi à 240-340px pour respirer.
+        ⮕ Et surtout : les déclarations sont **GROUPÉES** (`.planif-guide-corps, .guide-pedagogique-corps { … }`). Deux blocs jumeaux se ressembleraient aujourd'hui et divergeraient au prochain patch — la sentinelle interdit désormais qu'une famille redéclare sa taille seule.
+     ▣ **LES ICÔNES INVISIBLES — un échec sans trace.** Pages 1, 3 et 7 : `<span class="icone-inline icone-inline--check">` rend par masque SVG et sortait **VIDE** chez Grégoire (visible sur ses captures : des blancs avant « = cet élément est bien relié »). Le « ! » voisin, lui, s'affichait — parce que c'est du TEXTE. ⮕ Les trois glyphes du guide passent en **texte stylé** (✓ / ! / ⚠). *Un span vide échoue sans rien laisser voir ; du texte ne peut pas disparaître.* Les masques restent légitimes ailleurs (boutons d'aide) — le retrait ne vise que les contenus de guide.
+     ▣ **LE CONTENU — la page 8 documentait ce qu'on avait supprimé le matin même.** Elle décrivait « Va dans Plan de la leçon (onglet du haut) », « Exporter / Importer », « Copier MD », l'onglet « Importer MD », « Prévisualiser » — tout cela retiré en 1.57.0 (#424 Lot G). Réécrite autour du réel : menu Actions → Exporter le plan…, les trois niveaux par usage, le Personnalisé et sa fenêtre de réglage, puis les DEUX imports qui existent encore (carte JSON, reprise inter-trimestre). ⮕ **Le récit IA est GARDÉ mais rendu honnête** (arbitrage de Grégoire) : le document copié se retravaille où l'on veut — « c'est un document de SORTIE : la carte reste la source ». Le retour automatique n'existe plus.
+        ⮕ Page 6 : l'astuce ignorait l'**Exposé** et les **cinq étapes d'enseignement explicite** livrés les 7-8 août — la famille est maintenant complète. Page 1 : pitch réaligné. Anderson (2026) : **confirmé par Grégoire** (février 2026), conservé.
+
+     ▣ **RITUEL DE FIN.** §2 : zéro motif ajouté (contenus de guide 100 % statiques, aucune donnée utilisateur). §3 : 1947/1947 en ~27 s ; WebKit → CI. §4 : **3 break-tests ROUGE** (redéclaration divergente d'une famille, retour d'un masque `icone-inline`, retour de la page morte dans le contenu). ⚠ **Une assertion a rougi au premier run, et c'était MON test qui visait à côté** : le motif « isolé » de `.guide-pedagogique-corps` matchait aussi la FIN du sélecteur groupé. Ancré en début de ligne, commenté sur place. *Une assertion qui vise à côté peut tout aussi bien rester verte sur du code cassé — celle-ci a eu la politesse de rougir.* §5 : release minor → **1.59.0 / 0808-1706**, 4 points synchrones, changelog 1.59.
+
+     ⚠ **PORTES TERRAIN 1.59.0** : rouvrir le guide de la Carte (les 8 pages : tailles homogènes ? glyphes ✓/!/⚠ visibles ? page 8 conforme à ce que tu fais vraiment ?), puis un guide pédagogique (SOLO ou RàI) pour confirmer qu'ils **se ressemblent** — et les deux modes.
+     ⮕ **QUEUES OUVERTES** : **#421 reliquat** (infobulles `planif-*` + §4 de METHODE-ALIGNEMENT.md — le guide intégré, surface 1, est FAIT) · **#426** (renommage onglet) · #430/#428 (dettes rentrée) · #425 · #418 · #427 (~20 août) · 📐 import « à rebours » (idée non tranchée, chantier neuf si confirmée).
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 8 AOÛT 2026, FIN D'APRÈS-MIDI (même conteneur, branche `claude/session-startup-a8obyo`).
      ÉTAT FACTUEL : **1.58.0** (build 0808-1538), fusionnée `main`. Vitest **1934/1934** (225 fichiers). Dernier ID BACKLOG : **#431**.
 
      ✅ LIVRÉ — **#152 + #431 : le retour terrain de 1.57.0 traité LE JOUR MÊME.** Grégoire a collé son premier TSV dans Numbers (capture), signalé les DEUX colonnes de semaine, et demandé un niveau d'export personnalisé pour les gabarits départementaux. Plan court versionné (`plans de travail/PLAN-export-personnalise-2026-08-08.md`), décisions actées en conversation, trois commits.
@@ -5677,12 +5696,12 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
 | Point | Valeur attendue |
 |---|---|
-| `origin/main` | **1.58.0** — porte #424 (lots A→G) + #152 + #431 |
+| `origin/main` | **1.59.0** — porte #424 (lots A→G) + #152 + #431 + #432 |
 | Branches en avance | **AUCUNE.** ⚠ Le vérifier, ne pas le croire — balayage ci-dessous |
-| Version | `{"build":"0808-1538","beta":"1.58.0"}` |
-| Vitest | **1934/1934** (225 fichiers) |
+| Version | `{"build":"0808-1706","beta":"1.59.0"}` |
+| Vitest | **1947/1947** (226 fichiers) |
 | Playwright WebKit | non exécutable en conteneur → CI à la PR |
-| Dernier ID BACKLOG | **#431** |
+| Dernier ID BACKLOG | **#432** |
 | Arbre | propre |
 
 ⚠ **Le clone du conteneur peut être SHALLOW** (50 commits) : `git fetch

@@ -19852,8 +19852,8 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     border: 1px solid var(--planif-couleur-bordure);
     border-radius: 10px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.10);
-    min-width: 220px;
-    max-width: 280px;
+    min-width: 240px;
+    max-width: 340px; /* harmonisation 8 août : l'échelle 0.9rem respire */
     user-select: none;
 }
 .planif-guide-barre {
@@ -19915,30 +19915,15 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 }
 .planif-guide-corps {
     flex: 1; overflow-y: auto; padding: 8px 12px;
-    font-size: 10.5px; line-height: 1.55; color: var(--texte-secondaire, #8aa4b0);
 }
-.planif-guide-corps p { margin: 0 0 6px; }
-.planif-guide-corps ol, .planif-guide-corps ul { margin: 4px 0 8px; padding-left: 18px; }
-.planif-guide-corps li { margin-bottom: 4px; }
-.planif-guide-corps strong { color: var(--texte-principal, #d0e0e4); }
 .planif-guide-corps em { color: var(--texte-muted, #5a7a88); font-style: italic; }
 .planif-guide-pourquoi {
     color: var(--texte-principal, #d0e0e4);
     font-style: italic;
     border-left: 2px solid rgba(106, 172, 184, 0.3);
     padding-left: 8px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
-.planif-guide-astuce {
-    background: rgba(249, 115, 22, 0.06);
-    border: 1px solid rgba(249, 115, 22, 0.15);
-    border-radius: 6px;
-    padding: 6px 8px;
-    margin-top: 6px;
-    font-size: 10.5px;
-    line-height: 1.5;
-}
-.planif-guide-astuce::before { content: '\1F4A1 '; }
 .planif-guide-type {
     display: inline-block; width: 10px; height: 10px;
     border-radius: 3px; vertical-align: middle; margin-right: 2px;
@@ -19951,13 +19936,11 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     margin-top: 10px;
     font-weight: 600;
     color: var(--planif-couleur-evaluation);
+    font-size: 0.9rem; /* harmonisation 8 août : l'accent est la couleur, pas la taille */
 }
 .planif-guide-ref {
     margin-top: 10px;
-    font-size: 9px;
-    color: var(--texte-muted, #5a7a88);
     opacity: 0.7;
-    line-height: 1.4;
 }
 .planif-guide-ref a {
     color: var(--texte-muted, #5a7a88);
@@ -20446,20 +20429,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    font-size: 0.9rem;
-    line-height: 1.6;
-    color: var(--texte-secondaire, #8aa4b0);
     padding-right: 4px;
-}
-.guide-pedagogique-corps p { margin: 0 0 12px; }
-.guide-pedagogique-corps ul, .guide-pedagogique-corps ol { margin: 0 0 12px; padding-left: 20px; }
-.guide-pedagogique-corps li { margin-bottom: 6px; }
-.guide-pedagogique-corps strong { color: var(--texte-principal, #d0e0e4); }
-.guide-pedagogique-corps h4 {
-    margin: 16px 0 6px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--texte-principal, #d0e0e4);
 }
 .guide-pedagogique-corps code {
     font-size: 0.82rem;
@@ -20489,16 +20459,52 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 .guide-pedagogique-patterns-liste li:last-child { border-bottom: none; }
 .guide-pedagogique-tampons-liste .guide-pedagogique-pictogramme { margin: 0 6px 0 0; }
 .guide-pedagogique-patterns-liste [class^="badge-pattern-"] { white-space: nowrap; }
-.guide-pedagogique-astuce {
+
+/* === TYPOGRAPHIE COMMUNE DES GUIDES (harmonisation, 8 août 2026) ===
+   UNE échelle pour le guide de la Carte ET les guides pédagogiques
+   (SOLO, ACP, RàI, SOM, PAN) — demande Grégoire : « que les guides se
+   ressemblent ». Tailles EXPLICITES sur chaque élément : l'uniformité ne
+   dépend plus de l'héritage (captures Chrome/Mac : des <p> gonflés dans
+   le guide flottant pendant que les listes restaient petites). */
+.planif-guide-corps, .guide-pedagogique-corps {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--texte-secondaire, #8aa4b0);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+.planif-guide-corps p, .guide-pedagogique-corps p { font-size: 0.9rem; margin: 0 0 10px; }
+.planif-guide-corps li, .guide-pedagogique-corps li { font-size: 0.9rem; margin-bottom: 5px; }
+.planif-guide-corps ol, .planif-guide-corps ul,
+.guide-pedagogique-corps ol, .guide-pedagogique-corps ul { margin: 0 0 10px; padding-left: 20px; }
+.planif-guide-corps strong, .guide-pedagogique-corps strong { color: var(--texte-principal, #d0e0e4); }
+.planif-guide-corps h4, .guide-pedagogique-corps h4 {
+    margin: 14px 0 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--texte-principal, #d0e0e4);
+}
+.planif-guide-pourquoi { font-size: 1rem; line-height: 1.55; }
+.planif-guide-astuce, .guide-pedagogique-astuce {
     background: rgba(249, 115, 22, 0.06);
     border: 1px solid rgba(249, 115, 22, 0.15);
     border-radius: 6px;
-    padding: 10px 12px;
-    margin: 12px 0;
+    padding: 8px 10px;
+    margin: 10px 0;
     font-size: 0.85rem;
     line-height: 1.55;
 }
-.guide-pedagogique-astuce::before { content: '\1F4A1 '; }
+.planif-guide-astuce::before, .guide-pedagogique-astuce::before { content: '\1F4A1 '; }
+.planif-guide-ref, .guide-pedagogique-ref { font-size: 0.8rem; line-height: 1.45; }
+
+/* Glyphes TEXTE des badges dans les guides (8 août 2026) : les masques SVG
+   (.icone-inline) rendaient VIDE chez Grégoire — un span sans texte échoue
+   sans laisser de trace. Du texte stylé ne peut pas disparaître. */
+.guide-glyphe { font-weight: 700; }
+.guide-glyphe--check { color: var(--succes, #2e7d32); }
+.guide-glyphe--gris { color: var(--texte-muted, #5a7a88); }
+.guide-glyphe--warning { color: var(--orange-attention, #e8a838); }
+
 .guide-pedagogique-ref {
     margin-top: 16px;
     padding-top: 12px;
