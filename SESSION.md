@@ -7,6 +7,39 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 8 AOÛT 2026, NUIT (Claude Code cloud, Grégoire parti se coucher — travail AUTONOME sur sa consigne). ⮕⮕ LIRE EN PREMIER À LA REPRISE.
+     ÉTAT FACTUEL : branche `claude/rituel-de-debut-rbirt5` = **1.57.0** (build 0807-2132), poussée, arbre propre. Vitest **1832/1832** (215 fichiers). Playwright WebKit non exécutable en conteneur → CI à la PR. Dernier ID BACKLOG : **#421**.
+
+     ⮕⮕ **LE DOCUMENT À LIRE AVANT TOUTE REPRISE DE CE CHANTIER** : `plans de travail/PLAN-alignement-noeuds-et-duree-2026-08-08.md`. Écrit AVANT de coder, à la demande explicite de Grégoire (« je crains la compression de la conversation en cours de codage »). Il porte **10 décisions actées**, **7 pistes ÉCARTÉES avec leur motif** (§3, la section la plus importante — chacune paraît bonne à froid et a déjà été instruite), et les **faits relevés au code** (§4). Une instance qui reprend avec un contexte tronqué ne doit rouvrir aucune de ces discussions.
+
+     ✅ LIVRÉ CETTE NUIT — 2 releases.
+
+     ▣ **1.56.0 — #420, le graphe accueille l'enseignement.** Deux choses qui tiennent ensemble.
+        ⚠ **LE BUG LE PLUS IMPORTANT DE LA JOURNÉE — #415 était décoratif.** Les cinq nœuds d'enseignement explicite livrés la veille avaient **ZÉRO paire** dans `VERBES_AUTO`. Ils étaient entrés dans `TYPES`, `TYPES_ACTIVITE`, `TYPES_SERVANTS_OBJECTIF` et la palette — jamais dans le graphe. `VERBES_HORIZONTAUX` n'ayant pas de `connaissance>activite`, `resoudreVerbe` rendait `null` : le toast « Ce lien n'est pas possible ». **Aucune connaissance ne pouvait être reliée à une Modélisation.** Une couleur, une durée, une place dans la leçon, et aucune relation. ⮕ **Règle générale** : *ajouter un type à une palette ne l'ajoute pas au MODÈLE. Un nœud qui ne se relie à rien est un dessin.*
+        ⮕ **Correctif = repli sur la FAMILLE**, 3 lignes, et non les ~50 paires écrites à la main (empilement, et à recommencer au type suivant). C'est la ligne de #415 lui-même, qui avait rabattu les six triplets en dur sur `TYPES_ACTIVITE` — le chantier avait rabattu les triplets, pas la table des verbes. ⚠ SECOURS et non remplacement : le brut est consulté d'abord et gagne toujours.
+        **Nœud « Exposé »** : il manquait un nœud pour dire « j'enseigne ». La famille était entièrement tournée vers l'ÉLÈVE qui agit (Activité, Soutien, Révision), et l'enseignant n'apparaissait qu'à l'intérieur d'UNE méthode — qui ne pratique pas l'EE n'avait aucun moyen de se mettre lui-même dans sa leçon. **Complément** des cinq nœuds d'EE, pas leur substitut. Famille « Mise en action » → « **Déroulement** » (un nom tourné vers le seul élève mentait sur un de ses membres).
+
+     ▣ **1.57.0 — #421, la durée se saisit et se totalise sur la carte.** Champ dans l'en-tête du nœud (10 types), **toujours visible** ; compteur Σ sur leçons et séquences, rafraîchi en direct en remontant la chaîne. Inspecteur allégé de ses deux blocs de durée. ⚠ `TYPES_AVEC_DUREE` est une liste **séparée** de `TYPES_ACTIVITE` — cette dernière pilote `normaliserType`, donc les verbes de liens ; y glisser `evaluation` aurait changé en silence les relations possibles entre nœuds.
+
+     ▣ **CE QUE LES BREAK-TESTS ONT ATTRAPÉ — 30 mutations, QUATRE faux-verts.** C'est la moisson la plus riche depuis qu'on fait ça, et les quatre sont de la même famille : *l'assertion vérifiait autre chose que ce qu'elle croyait.*
+        (1) ⚠ **Non-régression des verbes** — « les paires brutes gardent leur verbe » est restée VERTE quand on a fait passer le repli DEVANT le brut. Motif : dans la table actuelle, **chaque paire brute porte le même verbe que son équivalent de famille**, donc inverser l'ordre ne change rien d'observable. L'invariant était vrai, l'assertion aveugle. ⮕ Corrigé en **injectant un verbe distinctif** le temps d'un test — et la PREMIÈRE tentative était encore fausse : le cas choisi (`soutien>evaluation`) était du mauvais côté, `normaliserType('evaluation')` rendant `evaluation`, donc clé de famille IDENTIQUE à la clé brute. Il fallait une **cible** de la famille d'activité (`factuelle>soutien`). **Deux passes pour rendre un ordre observable.**
+        (2) ⚠ **La remontée du rollup** — « il remonte sur deux niveaux » testait `dureeRollupNoeud`, un calcul qui **récurse de lui-même et préexistait au lot**. Arrêter la remontée DOM au parent direct laissait le test vert : *on testait le calcul en croyant tester le rafraîchissement*. Réécrit avec des compteurs DOM observables.
+        (3) **Cible tactile iPad** — la regex cherchait `@media (hover: none)` suivi de `.planif-noeud-duree` à moins de 200 caractères ; le fichier contient PLUSIEURS blocs `@media (hover: none)` et elle se satisfaisait d'un autre. Ancrée sur le bloc précis.
+        (4) **Deux faux ROUGES** dans mes propres assertions du matin : `objectif` est un préfixe de `objectifs`, et `=` un préfixe de `===` — la regex accusait du code sain.
+        ⮕ **Règle qui se dégage et qui vaut pour la suite** : *quand un invariant NEUF porte sur un mécanisme qui double un mécanisme ANCIEN (un calcul qui récurse déjà, une table dont les verbes sont uniformes), l'assertion attrape l'ancien et croit tenir le neuf. Le break-test est le seul moyen de les distinguer.*
+
+     ⚠ **SÉCURITÉ — un invariant qui voyage.** `sentinelle-inspecteur-duree-coercition` verrouille que `meta.duree` (donnée qui peut venir d'un IMPORT) passe par `parseInt` avant injection dans un attribut `value=`. Le champ ayant quitté l'Inspecteur, elle serait devenue **verte pour rien** pendant que le risque, lui, déménageait avec le champ. Réorientée **et** passée au comportement : on rend le contrôle avec une valeur empoisonnée et on regarde ce qui sort. ⮕ *Un invariant de sécurité voyage avec le champ qu'il protège ; le déplacer sans déplacer sa garde, c'est le désarmer en silence.* Le rafraîchissement du compteur écrit par `textContent` et non `innerHTML` — un point d'injection supprimé vaut mieux qu'un point d'injection annoté « sûr ».
+
+     ⮕ **DÉCISIONS DE GRÉGOIRE DANS LA SOIRÉE** (toutes au §2 du plan) : Inspecteur CONSERVÉ, allégé du redondant ✔ · durée sur les connaissances ABANDONNÉE ✔ · taxonomie hybride assumée et documentée ✔ · **formative/certificative** (contre ma recommandation « sommative » — hypothèse posée : le mot cohabite avec SOM, il ne le remplace pas) ✔ · niveau cognitif SCINDÉ (le choix descend, la banque de verbes reste) ✔ · input de durée toujours visible ✔ · nœud « Exposé » ✔ · famille « Déroulement » ✔ · Exposé en tête de famille ✔.
+
+     ⮕ **CE QUI RESTE DU CHANTIER ALIGNEMENT** (détail au §8 du plan) : **lot C** (rétroaction + niveau cognitif + formative/certificative dans les en-têtes) · **lot D** (ménage final de l'Inspecteur — ⚠ **rebrancher la banque de verbes sur `.planif-noeud-titre`**, elle vise `#planif-panneau-titre` et deviendrait muette sans bruit) · **lot E** (connaissance « Conditionnelle » + déplacement de « Préalable ») · **lot F** (largeur des nœuds, **mesurée** et non devinée) · **#419** (conformité documentaire, **3 surfaces**).
+
+     ⮕ **PORTES TERRAIN DUES, ET ELLES S'ACCUMULENT** : (a) saisie de durée **au doigt** sur iPad ; (b) lisibilité de l'en-tête sur un nœud étroit — le lot « largeur » n'est pas fait, et l'en-tête a reçu deux contrôles ; (c) reliquats du matin : les deux boutons de palette, et la carte entièrement dépliée sur une grosse carte.
+
+     ⮕ **QUEUES HORS ALIGNEMENT, INCHANGÉES** : **#414** (14 écouteurs `db-ready` — priorité 1 du §3, toujours pas entamée, et c'est le seul reliquat qui touche aux DONNÉES) · **#417** (`release.mjs` et le `?v=`) · **#409** (débloqué par Grégoire ce matin, non fait) · **#416** · **#406**.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 8 AOÛT 2026 (Claude Code cloud, Grégoire présent, branche `claude/rituel-de-debut-rbirt5`). ⮕⮕ LIRE EN PREMIER À LA REPRISE.
      ÉTAT FACTUEL : branche = **1.55.0** (build 0807-2004), partie de `main` à 1.54.0 (zéro écart au départ, cf. rituel de début), arbre propre. Vitest **1792/1792** (213 fichiers). Playwright WebKit non exécutable en conteneur → CI à la PR. Dernier ID BACKLOG : **#418**.
 
@@ -5456,71 +5489,90 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
 ## §3 — Consigne de démarrage pour la prochaine session
 
-> **Rédigée le 7 août 2026 au rituel de fin.** Remplace la consigne du 26 mai (migration d'icônes SVG), déclassée en §3bis — son cycle est clos depuis trois mois.
+> **Rédigée le 8 août 2026 en fin de cycle autonome.** Remplace la consigne du
+> 7 août, dont les priorités 1 et 2 (#414, #417) sont **toujours valides et
+> toujours non entamées** — la journée du 8 a bifurqué sur le module Alignement
+> à la demande de Grégoire, deux fois.
 
 ### ⚠ AVANT TOUT — la branche
 
-**Ouvrir le conteneur sur `main`.** Le chantier alignement a été **mergé et déployé le 7 août au soir** : `main` = **1.54.0**, et la branche `claude/pedagogical-alignment-planner-y7eppc` est à **zéro écart** avec elle. Il n'y a plus de travail en avance sur une branche.
-
-⮕ **Pourquoi c'est en tête de la consigne** : le 7 août, le conteneur a démarré sur `claude/pedagogical-alignment-planner-**fhjf8p**`, une simple copie d'`origin/main` **vieille de 16 versions mineures** (1.31.22), alors que le travail vivait sur `...-**y7eppc**`. Le rituel de début l'a attrapé au §1, mais une session moins attentive aurait codé sur une base périmée. **Nommer la branche dans la prémisse ne suffit pas — il faut que le conteneur soit ouvert dessus.**
+**Ouvrir le conteneur sur `claude/rituel-de-debut-rbirt5`**, qui porte tout le
+travail du 8 août (1.55.0 → 1.57.0) et n'est **pas mergée**. `origin/main` est
+resté à **1.54.0**. Ouvrir sur `main` ferait coder trois versions mineures en
+arrière — c'est le piège du 7 août, une classe qu'on a déjà payée.
 
 ### Prémisse à vérifier au rituel de début (§1)
 
 | Point | Valeur attendue |
 |---|---|
-| `origin/main` | **1.54.0** — tip = le commit `docs(session): §3 — consigne de démarrage pour le 8 août` (dernier commit du 7 août). ⚠ Pas de hash figé ici : un commit ne peut pas contenir le sien. Vérifier par `git log --oneline -1 origin/main`. |
-| Version | `{"build":"0807-1529","beta":"1.54.0"}` |
-| Vitest | **1770/1770** (212 fichiers) |
+| Branche | `claude/rituel-de-debut-rbirt5`, **3 commits devant `origin/main`** |
+| Version | `{"build":"0807-2132","beta":"1.57.0"}` |
+| Vitest | **1832/1832** (215 fichiers) |
 | Playwright WebKit | non exécutable en conteneur → CI à la PR |
-| Dernier ID BACKLOG | **#417** |
+| Dernier ID BACKLOG | **#421** |
 | Arbre | propre |
 
-### Priorité 1 — #414, les 14 autres écouteurs `db-ready` (~1 h)
+### ⮕ LIRE EN PREMIER SI LE CHANTIER ALIGNEMENT CONTINUE
 
-**C'est le reliquat le plus sérieux de la journée, et il porte un risque de données.**
+`plans de travail/PLAN-alignement-noeuds-et-duree-2026-08-08.md`. Écrit avant de
+coder, à la demande de Grégoire, **comme filet contre la compression**. Son §3
+(« ce qui a été ÉCARTÉ ») est la section décisive : sept pistes qui paraissent
+bonnes à froid et qui ont déjà été instruites. Ne pas les rouvrir.
 
-Le 7 août, #413 a révélé que l'écouteur `db-ready` de `main.js` était posé **après** que l'événement puisse être émis : le bloc de migrations ne s'exécutait alors jamais. Ce n'était pas un bug de #367 — #367 l'a seulement rendu visible, en étant la première migration dont Grégoire pouvait constater l'absence sur ses données réelles.
+### Décision qui attend Grégoire
 
-**14 autres écouteurs `db-ready` vivent dans 10 fichiers** (accueil, actions-rlo, pratiques, preferences, trimestre-v2, donnees-v2, preferences-v2, travaux-outils, spe-specifications, `_archives/entites-ui`) et sont exposés à **exactement la même course**. `actions-rlo.js` et `codex.js` se protègent déjà ; les autres n'ont **pas** été vérifiés.
+**Merger vers `main` ?** Trois releases sont sur la branche (1.55.0 simplification,
+1.56.0 graphe + Exposé, 1.57.0 durée). La 1.56.0 contient un **correctif de bug**
+qui rend fonctionnels les cinq nœuds livrés le 7 août — sans elle, ce qui est en
+production est décoratif. C'est un argument pour déployer, mais la décision reste
+la sienne.
 
-**Le geste attendu n'est pas « ajouter un rattrapage partout »** — c'est un tri :
-- ceux qui portent des **migrations ou des écritures** → grave, à corriger comme #413 ;
-- ceux qui ne font que **rafraîchir de l'UI** → bénin (si la DB était prête avant le premier rendu, l'état initial est déjà correct) ; le rattrapage y ajouterait du bruit sans rien gagner.
+### Priorité 1 — les portes terrain, qui s'accumulent
 
-⮕ Chaque correctif de la première catégorie = une sentinelle, **break-testée** (le patron de `sentinelle-db-ready-course.test.js` est directement réutilisable : retirer le rattrapage doit faire rougir).
+Trois lots ont été livrés en deux jours sans validation au doigt. À faire dans
+l'ordre où l'usage les rencontre :
 
-### Priorité 2 — #417, `release.mjs` et le `?v=` (~20 min)
+1. **Saisie de durée sur iPad** — le champ est dans l'en-tête d'un bloc qui se
+   glisse ; la pression est interceptée, mais ça n'a pas été vérifié au doigt.
+2. **Lisibilité de l'en-tête sur un nœud étroit** — il a reçu deux contrôles et
+   le lot « largeur » (F) n'est pas fait.
+3. **Reliquats du 8 août matin** — les deux boutons de palette, et la carte
+   entièrement dépliée sur une grosse carte réelle.
 
-`scripts/release.mjs` réécrit `VERSION_MAJEURE`, `BUILD_ID` et `_SCRIPT_BUILD` dans `js/init-inline.js` **à chaque release**, mais ne bumpe jamais son paramètre anti-cache dans `index.html` — resté à `?v=20260629a` (29 juin) après plus de vingt réécritures.
+### Priorité 2 — #414, les 14 écouteurs `db-ready` (~1 h)
 
-⚠ **Le correctif n'est PAS de bumper à la main** : ce serait recommencer à la prochaine release. C'est **`release.mjs` qui doit bumper le `?v=` des fichiers qu'il réécrit**. Puis étendre `sentinelle-cache-busting-main.test.js` (aujourd'hui volontairement limitée à `main.js`, qui porte les migrations) à `init-inline.js`.
+**Toujours le seul reliquat qui porte un risque de DONNÉES**, et toujours pas
+entamé après deux jours. Le geste attendu est un **tri** : ceux qui portent des
+migrations ou des écritures → corriger comme #413 ; ceux qui ne font que
+rafraîchir de l'UI → laisser. Chaque correctif = une sentinelle break-testée
+(patron réutilisable : `sentinelle-db-ready-course.test.js`).
 
 ### Puis, au choix de Grégoire
 
-- **#409** — retirer l'archive `planification_seances_archive_pre367`. **Ne dépend que d'une confirmation de Grégoire** : ses notes de leçon sont-elles correctes dans A2026 et H2026 depuis la 1.50.0 ? Si oui, retrait immédiat (la clé ne contenait que des productions de test — décision du 7 août).
-- **#416** — exports PRÉSENTABLES du plan de leçon (CSV, tableau pour traitement de texte, texte simple). ⚠ **Trois questions 📐 à trancher AVANT de coder** : où vit l'export (Plan de la leçon ou module Alignement) ; la frontière avec les exports existants (carte : Texte/TSV/MD ; organisateur : modale) — **consolider plutôt qu'empiler** ; et le périmètre « présentable » (avec ou sans les notes internes de l'enseignant — deux publics, deux contenus).
-- **#406** — blocs B et C du PLAN-JOURNEE (B = test d'onboarding à froid « Catherine », **tâche de Grégoire**, non délégable ; C = triage, tâche Claude Code, **non bloqué par B**).
-- **Passe terrain iPad** — les deux poignées (nœud #405, palette 1.47.1), la bascule de disposition au plancher 520 px, le dégradé de couleurs EE. Rien de tout cela n'a été validé au doigt.
-- **Le panneau « Organisateur » mort** dans le module Alignement, et le double nommage « Organisateur / Plan de la leçon ».
+- **#417** — `release.mjs` doit bumper lui-même le `?v=` des fichiers qu'il
+  réécrit. Pas un bump à la main.
+- **#409** — l'archive `planification_seances_archive_pre367` : Grégoire a
+  **confirmé le 8 août** que ses notes sont correctes. Retrait immédiat possible.
+- **Lots C à F du chantier Alignement** — §8 du plan.
+- **#419** — conformité documentaire, **après** que l'interface ait cessé de
+  bouger.
 
-### 📐 La décision de fond qui attend Grégoire
+### Rappel de méthode — ce que quatre faux-verts ont appris en deux jours
 
-**Les rangées du planificateur doivent-elles se subdiviser selon les séances déjà déclarées dans l'horaire** (une rangée « Semaine 1 » avec ses colonnes « Séance A » / « Séance B ») ?
-
-C'est le vrai problème derrière la capture du 6 août : **le planificateur ne lit jamais l'horaire** (`grep seancesHoraire` sur les quatre `planification-*.js` ne renvoie rien). Ses rangées sont des semaines, et il ignore qu'une semaine contient deux séances — d'où « Sem. 1 séance 1 » et « Sem. 1 séance 2 » poussées dans deux semaines différentes, et le repère écrit à la main dans le titre.
-
-⮕ **Son préalable est levé** : le rattachement carte→cours (#407) a été livré le 7 août. Reste la réserve honnête à poser à Grégoire — cela rendrait le planificateur dépendant de l'horaire d'un cours, donc d'un trimestre ; il faut un repli explicite (une seule colonne) quand la carte n'a pas d'horaire.
-
-⚠ **Ne PAS rouvrir la question du renommage de « séance »** : la prémisse était fausse et Grégoire l'a rejetée à raison, vérification au code à l'appui (`seancesHoraire` **est** la séance, affichée « Séance A/B » dans l'Horaire ; `seancesCompletes` en est l'occurrence datée). Le §1 et le §7 de `Rapports/AUDIT-vocabulaire-seance-2026-08-07.md` sont **périmés** — ne pas rouvrir sur leur foi.
-
-### Rappel de méthode — ce que les break-tests ont attrapé le 7 août
-
-Deux formes distinctes, à garder en tête avant de faire confiance à une sentinelle neuve :
-
-1. **Une assertion peut être satisfaite par autre chose que ce qu'elle croit vérifier** (leçon du 7 au soir : le titre d'une séquence trouvé parce que la leçon l'affiche aussi comme étiquette de contexte ; `pointercancel` trouvé dans un `removeEventListener`).
-2. **Une sentinelle peut couvrir le GESTE sans couvrir ce que le geste EMPORTE** (leçon de la clôture : `sentinelle-reprise-inter-trimestre` vérifiait que la carte se copie avec son contenu et son cours, mais jamais que **ses notes** suivaient — casser la traduction de clé laissait les 1767 tests verts). ⮕ Quand un chantier fait voyager des données d'une clé à une autre, **viser la traduction de clé**, pas seulement l'arrivée de l'objet principal.
-
-⮕ Et la règle qui vaut pour tout diagnostic de migration : **quand une migration « ne s'applique pas », faire mesurer le build embarqué (`window._SCRIPT_BUILD_main`) avant de blâmer le cache.** Le 7 août, cette mesure a démenti mon hypothèse du cache en une ligne et a mené à la vraie cause (#413).
+1. **Une assertion peut être satisfaite par autre chose que ce qu'elle croit
+   vérifier** : un appel trouvé dans un commentaire, un `@media` voisin, un
+   préfixe (`objectif` dans `objectifs`, `=` dans `===`).
+2. **Une sentinelle peut couvrir le geste sans couvrir ce qu'il emporte** : la
+   carte se copie, ses notes ne suivent pas ; la sélection change, la
+   multi-sélection survit.
+3. ⮕ **NOUVEAU, 8 août** : *quand un invariant NEUF porte sur un mécanisme qui
+   double un mécanisme ANCIEN, l'assertion attrape l'ancien et croit tenir le
+   neuf.* Deux cas le même soir — un calcul qui récursait déjà, une table dont
+   les verbes étaient uniformes. **Pour tout invariant de comportement : monter
+   le module et observer l'effet, jamais lire la source.**
+4. ⮕ **Un invariant de SÉCURITÉ voyage avec le champ qu'il protège.** Déplacer
+   le champ sans déplacer sa garde, c'est le désarmer en silence — et la
+   sentinelle reste verte.
 
 ## §3bis — Archives des consignes de démarrage précédentes
 
