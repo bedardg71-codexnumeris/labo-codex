@@ -5575,89 +5575,104 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
 ## §3 — Consigne de démarrage pour la prochaine session
 
-> **Réécrite le 8 août 2026 au soir, à la réconciliation de deux sessions
-> parallèles.** Elle remplace DEUX §3 : celui du 7 août (resté sur `main`, et
-> qui a causé la collision) et celui de la session de nuit (resté sur sa
-> branche, donc illisible par la session du matin).
+> **Réécrite le 8 août 2026 au soir, APRÈS la fusion vers `main`.** Elle
+> remplace deux §3 concurrents : celui du 7 août (resté sur `main`, et qui a
+> causé la collision du 8) et celui de la session de nuit (resté sur sa branche,
+> donc illisible par la session du matin).
 
-### ⚠⚠ AVANT TOUT — lire ceci, c'est ce qui a cassé aujourd'hui
+### ⚠ CE QUI A CASSÉ AUJOURD'HUI — à lire avant le rituel
 
 Le 8 août, **deux sessions sont parties du même commit sans se voir**. Toutes
 deux ont livré une « 1.55.0 » différente et pris les mêmes identifiants de
-backlog. La cause n'est pas un défaut d'attention : la session du matin a fait
-le rituel, vérifié la prémisse, et trouvé **zéro écart** — parce que la
-prémisse qu'elle lisait, sur `main`, avait été périmée par une branche qu'elle
-ne pouvait pas voir.
+backlog. Ce n'était pas un défaut d'attention : la session du matin a fait le
+rituel, vérifié la prémisse, et trouvé **zéro écart** — parce que la prémisse
+qu'elle lisait, sur `main`, avait été périmée par une branche qu'elle ne pouvait
+pas voir.
 
 ⮕ **La consigne de relais vit dans un fichier versionné. Si le travail vit sur
-une branche non mergée, la consigne qui le dit vit sur cette branche aussi —
-et la session suivante lit celle de `main`.** C'est circulaire, et aucun soin
+une branche non mergée, la consigne qui le dit vit sur cette branche aussi — et
+la session suivante lit celle de `main`.** C'est circulaire, et aucun soin
 apporté au rituel ne le compense.
+
+⮕ **Ce qui a été fait pour que ça ne se reproduise pas** : tout a été fusionné
+dans `main`. Il n'existe plus aucun travail en avance sur une branche. Ce §3-ci
+vit sur `main`, donc toute session le lira, quelle que soit la branche ouverte.
 
 ### Prémisse à vérifier au rituel de début (§1)
 
 | Point | Valeur attendue |
 |---|---|
-| `origin/main` | **1.55.1** — porte #414, #417 et #419 (session du matin, fusionnée en fast-forward le 8 au soir) |
-| Branche de travail | `claude/rituel-de-debut-rbirt5` — **1.56.0**, `main` fusionné dedans, **NON mergée vers `main`** |
-| Vitest | à mesurer ; ~**1840** attendus (215+ fichiers) |
+| `origin/main` | **1.56.0** — porte TOUT : #414/#417/#419 (session du matin) et #420/#422/#423 (session de nuit) |
+| Branches en avance | **AUCUNE.** ⚠ Le vérifier, ne pas le croire — voir ci-dessous |
+| Version | `{"build":"0808-0839","beta":"1.56.0"}` |
+| Vitest | **1867/1867** (218 fichiers) |
 | Playwright WebKit | non exécutable en conteneur → CI à la PR |
 | Dernier ID BACKLOG | **#427** |
 | Arbre | propre |
 
-⚠ **Ouvrir le conteneur sur `claude/rituel-de-debut-rbirt5`**, qui porte trois
-chantiers Alignement absents de `main`. Et **avant toute chose, exécuter
-`git branch -r --sort=-committerdate | head` pour vérifier qu'aucune AUTRE
-branche n'a bougé depuis** — c'est le contrôle qui manquait aujourd'hui, et il
-coûte cinq secondes.
+### ⚠ AJOUT AU RITUEL DE DÉBUT — le contrôle qui manquait
 
-### Décision n°1 qui attend Grégoire — le correctif structurel
+Avant toute chose, **balayer les branches distantes** :
 
-Trois sorties possibles, de la plus légère à la plus solide :
+```
+git fetch origin --prune
+git for-each-ref --sort=-committerdate --format='%(committerdate:short) %(refname:short)' refs/remotes/origin | head
+```
 
-1. Un `RELAIS.md` à la racine, **toujours poussé sur `main`** en fin de
-   session, qui ne dit qu'une chose : où vit le travail en cours.
+Si une branche est plus récente que `main`, **s'arrêter et le signaler à
+Grégoire** avant de coder. C'est le contrôle de cinq secondes qui aurait évité
+la collision du 8 août.
+
+### Décision qui attend Grégoire — le correctif structurel
+
+La fusion d'aujourd'hui règle le cas présent, pas la classe de problème. Trois
+sorties, de la plus légère à la plus solide :
+
+1. Un `RELAIS.md` à la racine, **toujours poussé sur `main`** en fin de session,
+   qui ne dit qu'une chose : où vit le travail en cours.
 2. Un commit minuscule sur `main` en fin de session, même information.
 3. **Merger vers `main` à la fin de chaque session** — le vrai remède.
 
 ⮕ **Recommandation : la 3, avec la 1 comme filet** quand un merge doit vraiment
 attendre. C'est le report du merge qui ouvre la fenêtre de divergence, et il a
-été reporté trois fois cette semaine.
-
-### Décision n°2 — merger la branche courante vers `main` ?
-
-Elle porte **1.56.0** : la simplification du module Alignement, le nœud
-« Exposé » avec le correctif du graphe (#415 était **décoratif** — ses cinq
-nœuds ne se reliaient à rien), et la durée dans les en-têtes. Rien n'en est en
-production.
+été reporté trois fois cette semaine avant de coûter une journée.
 
 ### Priorité 1 — les portes terrain, qui s'accumulent depuis trois jours
 
-Aucun des chantiers livrés n'a été validé au doigt :
-1. **Saisie de durée sur iPad** — champ dans l'en-tête d'un bloc qui se glisse.
+**Cinq chantiers livrés, aucun validé au doigt.** C'est le vrai risque courant.
+
+1. **Saisie de durée sur iPad** — le champ vit dans l'en-tête d'un bloc qui se
+   glisse ; la pression est interceptée, mais rien n'a été vérifié au doigt.
 2. **Lisibilité de l'en-tête sur un nœud étroit** — il a reçu deux contrôles et
    le lot « largeur » n'est pas fait.
 3. **Les deux boutons de palette**, et **la carte entièrement dépliée** sur une
-   grosse carte réelle.
-4. ⚠ **Porte terrain héritée du matin** : des préférences d'avant le 16 avril
-   peuvent réapparaître au premier démarrage — c'est la migration qui fait
-   enfin son travail, pas un bug.
+   grosse carte réelle (le filtrage a été retiré : plus rien n'est masqué).
+4. ⚠ **Héritée de la session du matin** : des préférences d'avant le 16 avril
+   peuvent réapparaître au premier démarrage. **Ce n'est pas un bug** — c'est la
+   migration qui fait enfin son travail après avoir été morte-née pendant
+   quatre mois.
 
 ### Puis, au choix de Grégoire
 
-- **#424 → #427** : le chantier « Carte d'alignement », instruit par
+- **Le chantier « Carte d'alignement »** — #424 → #427, instruit par
   `plans de travail/AUDIT-carte-alignement-exports-productions-2026-08-08.md`.
   ⚠ **Six décisions D1-D6 y attendent**, chacune avec recommandation explicite
   au §3 de ce document. ⚠ **Ne pas supprimer le « Plan de la leçon » avant
-  d'avoir inventorié `planification_seances[...].activites`** — il y a des
-  données dedans.
+  d'avoir inventorié `planification_seances[...].activites`** : il y a des
+  données dedans, et l'axe de profondeur d'export que Grégoire demande existe
+  déjà à moitié dans cette page.
+- **#426** — renommer l'onglet en « **Carte d'alignement** » (tranché par
+  Grégoire). ⚠ `js/config.js` est en zone protégée ; l'autorisation est
+  consignée à l'audit.
 - **#421** — conformité documentaire, sur **trois** surfaces. À faire quand
   l'interface aura cessé de bouger.
-- **#418** (leur) — `db-ready` jamais émis si IndexedDB est indisponible.
+- **#418** — `db-ready` jamais émis si IndexedDB est indisponible.
 - **#409** — l'archive `planification_seances_archive_pre367` : Grégoire a
   confirmé le 8 août que ses notes sont correctes. Retrait immédiat possible.
+- **#427** — refermer l'accès public (Cloudflare Access) vers le 20 août.
+  ⚠ Les 50 sièges étaient déjà saturés en mai ; à trancher avant.
 
-### Rappel de méthode — les faux-verts de la semaine
+### Rappel de méthode — cinq faux-verts en trois jours
 
 1. **Une assertion peut être satisfaite par autre chose que ce qu'elle croit
    vérifier** : un appel trouvé dans un commentaire, un `@media` voisin, un
@@ -5668,10 +5683,8 @@ Aucun des chantiers livrés n'a été validé au doigt :
    récursait déjà, une table dont les verbes étaient uniformes.
 4. **Un invariant de SÉCURITÉ voyage avec le champ qu'il protège.** Le déplacer
    sans déplacer sa garde, c'est le désarmer en silence.
-5. ⮕ **NOUVEAU, 8 août** : *le rituel de début ne protège que contre ce que
-   `main` sait.* Il ne voit pas une branche qu'on ne lui a pas nommée. Ajouter
-   le balayage des branches distantes au §1.
-
+5. ⮕ **Le rituel de début ne protège que contre ce que `main` sait.** Il ne voit
+   pas une branche qu'on ne lui a pas nommée — d'où le balayage ajouté ci-dessus.
 
 ## §3bis — Archives des consignes de démarrage précédentes
 
