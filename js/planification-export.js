@@ -10,11 +10,12 @@
    double comptage) et que les objectifs sortent au pluriel (§1.6) — corrigés
    UNE fois, pas six.
 
-   ⚠ RÉTROACTIONS — deux porteurs, priorité au nœud (contrainte D2) : tant que
-   la migration du Lot F n'a pas eu lieu, la rétroaction FORMATIVE d'une
-   activité vit dans planification_seances[<carte>::<lecon>].activites ; le
-   générateur lit d'abord metadata.retroaction du nœud, puis ce porteur
-   historique. Le Lot F devient ainsi un basculement sans retouche ici.
+   ⚠ RÉTROACTIONS — deux porteurs, priorité au nœud (contrainte D2). Depuis
+   le Lot G, le porteur historique (planification_seances[...].activites)
+   n'existe plus qu'au travers d'un backup Codex réimporté d'avant le
+   portage, entre son import et le passage de la moissonneuse (main.js).
+   Le repli de lecture ci-dessous couvre cette fenêtre ; il se retire AVEC
+   la moissonneuse (BACKLOG #430, rentrée).
 
    Export: window.planificationExport
    =============================== */

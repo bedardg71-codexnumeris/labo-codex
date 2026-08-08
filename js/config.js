@@ -38,7 +38,10 @@ const configurationsOnglets = {
     'accueil': [],
     'conception': [
         { id: 'carte', label: 'Alignement pédagogique' },
-        { id: 'organisateur', label: 'Plan de la leçon' },
+        // « Plan de la leçon » RETIRÉ le 8 août 2026 (#424 Lot G) : ses exports
+        // et sa rétroaction formative vivent dans la Carte (menu Actions +
+        // Inspecteur). Autorisation de toucher cette zone protégée : plan de
+        // chantier acté par Grégoire (PLAN-portage-exports-carte-2026-08-08.md).
         { id: 'productions', label: 'Productions étudiantes' },
         { id: 'grille-criteres', label: 'Grilles de critères' },
         { id: 'echelle-performance', label: 'Échelles de performance' },

@@ -431,36 +431,11 @@ describe('F1 · invariants de rendu et de routage', () => {
 });
 
 // =======================================================================
-// D. L'ORGANISATEUR SUIT LA MÊME SOURCE
+// D. (ALLÉGÉ, #424 Lot G) — l'Organisateur est parti avec la page « Plan de
+// la leçon » ; il ne reste que la porte que la carte expose encore.
 // =======================================================================
-// Régression attrapée le 6 août, APRÈS le premier commit de F1 : la bascule
-// avait laissé 8 sites d'organisateur.js sur l'ancienne clé. Comme la migration
-// purge cette clé, l'Organisateur (« Plan de la leçon ») aurait affiché des
-// objectifs vides et réécrit dans une clé que plus personne ne lit — deux
-// vérités divergentes, exactement ce que la bascule visait à supprimer.
-describe('F1 · l’Organisateur lit et écrit le même objectif que la carte', () => {
-    const organisateur = readFileSync(path.join(racineProjet, 'js', 'organisateur.js'), 'utf8');
-
-    it('aucun site d’organisateur.js ne touche plus objectifPersonnalise', () => {
-        expect(organisateur).not.toContain('objectifPersonnalise');
-    });
-
-    it('la saisie et la réinitialisation passent par definirObjectifsLecon', () => {
-        const appels = organisateur.match(/definirObjectifsLecon\(/g) || [];
-        expect(appels.length).toBeGreaterThanOrEqual(2);
-    });
-
-    it('l’affichage et les deux exports lisent objectifDeLeconParId', () => {
-        const lectures = organisateur.match(/objectifDeLeconParId\(/g) || [];
-        expect(lectures.length).toBeGreaterThanOrEqual(3);
-    });
-
-    it('l’import Markdown pose l’objectif sur le nœud construit', () => {
-        expect(organisateur).toMatch(/leconNoeud\.metadata\.objectif = lecon\.objectif/);
-        expect(organisateur).toMatch(/orpNoeud\.metadata\.objectif = orp\.objectif/);
-    });
-
-    it('la carte expose bien les deux portes utilisées par l’Organisateur', () => {
+describe('F1 · la carte expose toujours les portes de l’objectif', () => {
+    it('les deux portes restent exposées (générateur d’export, vue leçon future)', () => {
         expect(source).toMatch(/objectifDeLeconParId: objectifDeLeconParId/);
         expect(source).toMatch(/definirObjectifsLecon: definirObjectifsLecon/);
     });
@@ -474,40 +449,17 @@ describe('F1 · l’Organisateur lit et écrit le même objectif que la carte', 
 // Markdown de l'Organisateur. Retiré des trois endroits d'un coup — sinon
 // l'import aurait continué de peupler une clé que plus rien n'affiche.
 describe('F1 · les notes de leçon sont retirées partout', () => {
-    const organisateur = readFileSync(path.join(racineProjet, 'js', 'organisateur.js'), 'utf8');
     const css = readFileSync(path.join(racineProjet, 'styles.css'), 'utf8');
+    // (Les cas qui lisaient organisateur.js sont partis avec la page, #424
+    // Lot G — il reste l'assertion CSS, qui garde le retrait entier.)
 
     // (L'assertion « la vue leçon n'a plus de champ Notes » est retirée le
     // 7 août : la vue leçon elle-même n'existe plus, l'assertion serait vraie
     // sans rien garder. Son absence est couverte par le test de suppression
     // ci-dessus, qui porte sur le préfixe entier.)
 
-    it('l’export Markdown n’écrit plus de section Notes', () => {
-        expect(organisateur).not.toMatch(/\*\*Notes\*\* : /);
-    });
-
-    it('le parseur Markdown ne reconnaît plus le marqueur Notes', () => {
-        expect(organisateur).not.toMatch(/matchNotes/);
-    });
-
     it('le CSS de la vue leçon est retiré en ENTIER (pas de règle orpheline)', () => {
         expect(css).not.toContain('planif-vue-lecon');
     });
 
-    it('l’import n’ouvre plus d’aller-retour inutile sur la clé des séances', () => {
-        // Après le retrait, plus aucune écriture n'avait lieu entre le
-        // chargerSeances() et le sauvegarderSeances() de l'import.
-        expect(organisateur).not.toContain('seancesImport');
-    });
-
-    it('les étapes de l’enseignement explicite ont quitté l’organisateur — par DÉCISION', () => {
-        // Historique inversé le 7 août 2026. Ce cas protégeait `org-ee-notes`
-        // contre un retrait ACCIDENTEL pendant l'ablation des notes de leçon
-        // (1.33.0). Depuis, Grégoire a décidé de faire des étapes EE des NŒUDS
-        // de la carte (frères d'Activité) et de retirer l'UI du plan —
-        // suppression franche actée. Le garde-fou change donc de sens : toute
-        // RÉAPPARITION serait une régression. La contrepartie positive vit
-        // dans `sentinelle-enseignement-explicite.test.js`.
-        expect(organisateur).not.toContain('org-ee-notes');
-    });
 });

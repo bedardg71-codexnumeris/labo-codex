@@ -3,7 +3,6 @@
    Point d'entrée du module Planification.
    Gère le cycle de vie, l'activation/désactivation
    des raccourcis clavier et l'initialisation.
-   Gère aussi la bascule entre Carte et Organisateur.
 
    Export: window.initialiserModulePlanification
    =============================== */
@@ -66,15 +65,12 @@ if (typeof _originalAfficherSection === 'function') {
     };
 }
 
-// Observer les changements de sous-section : désactiver la carte quand on passe à l'Organisateur
+// Observer les changements de sous-section : réactiver les raccourcis carte
+// au retour sur la carte. (La branche « Organisateur » est partie avec la
+// page « Plan de la leçon », #424 Lot G.)
 var _originalAfficherSousSection = window.afficherSousSection;
 if (typeof _originalAfficherSousSection === 'function') {
     window.afficherSousSection = function(idSousSection) {
-        // Désactiver les raccourcis carte quand on passe à l'Organisateur
-        if (idSousSection === 'conception-organisateur') {
-            desactiverPlanification();
-        }
-        // Réactiver les raccourcis carte quand on revient à la carte
         if (idSousSection === 'conception-carte' && dejaInitialise) {
             if (window.planificationCarte) {
                 window.planificationCarte.activer();

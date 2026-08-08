@@ -28,7 +28,6 @@ import { chargerScript } from './_helpers/charger-script.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
 const sourceCarte = readFileSync(path.join(racineProjet, 'js', 'planification-carte.js'), 'utf8');
-const sourceOrganisateur = readFileSync(path.join(racineProjet, 'js', 'organisateur.js'), 'utf8');
 
 // --- Sandbox ------------------------------------------------------------
 let store;
@@ -300,79 +299,11 @@ describe('lot 1 · definirSemaineLecon', () => {
 });
 
 // =======================================================================
-// E. ALLER-RETOUR MARKDOWN — la semaine voyage sur la LEÇON
+// E. (RETIRÉ, #424 Lot G) — l'aller-retour Markdown est parti avec la page
+// « Plan de la leçon » : l'import MD était lossy par construction et
+// Grégoire ne s'en servait pas (décision du 8 août). Les invariants F qui
+// suivent ne portent que sur la carte.
 // =======================================================================
-function monterOrganisateur() {
-    const win = chargerScript('js/organisateur.js', {
-        db: { getSync: (k, d) => d, setSync: () => {} },
-        cle: (k) => `a2026_${k}`,
-        echapperHtml: (t) => String(t === null || t === undefined ? '' : t),
-        document: { getElementById: () => null, querySelectorAll: () => [] }
-    });
-    return win.organisateur;
-}
-
-describe('lot 1 · marqueurs Markdown', () => {
-    let org;
-    beforeEach(() => { org = monterOrganisateur(); });
-
-    // Formats de durée réellement émis par `formatDuree` : « 45 min », « 1h50 ».
-    it('lit « Sem. N » sur la leçon, avec ou sans durée, dans les deux ordres', () => {
-        const md = [
-            '## Ouverture [Séquence]',
-            '### Accueil [Leçon | 1h50 | Sem. 1]',
-            '### Diagnostic [Leçon | Sem. 2]',
-            '### Inversé [Leçon | Sem. 4 | 45 min]',
-            '### Sans ancrage [Leçon | 45 min]',
-            '### Nu [Leçon]'
-        ].join('\n');
-
-        const lecons = org.parserPlanMD(md).sequences[0].lecons;
-
-        expect(lecons.map((l) => l.semaine)).toEqual([1, 2, 4, null, null]);
-        // La durée continue d'être lue, quelle que soit sa place dans le marqueur.
-        expect(lecons.map((l) => l.dureeMin)).toEqual([110, 0, 45, 45, 0]);
-    });
-
-    it('aller-retour : ce que l’export écrit, l’import le relit à l’identique', () => {
-        // Le marqueur exporté est `[Leçon | <formatDuree> | Sem. N]`.
-        const md = '### Atelier [Leçon | 1h50 | Sem. 6]';
-        const lecon = org.parserPlanMD(md).orphelines[0];
-        expect(lecon.dureeMin).toBe(110);
-        expect(lecon.semaine).toBe(6);
-    });
-
-    it('IGNORE l’étendue restée sur une ligne de séquence (vieux fichier)', () => {
-        const md = [
-            '## Ouverture [Séquence | Sem. 3–5]',
-            '### Accueil [Leçon]'
-        ].join('\n');
-
-        const seq = org.parserPlanMD(md).sequences[0];
-
-        // Le fichier reste lisible…
-        expect(seq.titre).toBe('Ouverture');
-        expect(seq.lecons).toHaveLength(1);
-        // …mais l'étendue n'est ni conservée, ni répartie sur les leçons.
-        expect(seq.semaineDebut).toBeUndefined();
-        expect(seq.semaineFin).toBeUndefined();
-        expect(seq.lecons[0].semaine).toBeNull();
-    });
-
-    it('une leçon hors séquence garde son ancrage', () => {
-        const md = [
-            '## Divers [Orphelines]',
-            '### Rattrapage [Leçon | Sem. 12]'
-        ].join('\n');
-
-        expect(org.parserPlanMD(md).orphelines[0].semaine).toBe(12);
-    });
-
-    it('une semaine 0 dans le Markdown ne devient pas un ancrage', () => {
-        const md = '### Test [Leçon | Sem. 0]';
-        expect(org.parserPlanMD(md).orphelines[0].semaine).toBeNull();
-    });
-});
 
 // =======================================================================
 // F. INVARIANTS DE SOURCE — l'interdit d'extraction depuis les titres
@@ -397,20 +328,8 @@ describe('lot 1 · invariants statiques', () => {
             if (!/semaineDebut|semaineFin/.test(ligne)) continue;
             expect(ligne).toMatch(/delete n\.metadata\.|in n\.metadata|^\/\//);
         }
-        expect(sourceOrganisateur).not.toMatch(/semaineDebut|semaineFin/);
     });
 
-    it('l’import Markdown lit la semaine sur la LEÇON, jamais sur la séquence', () => {
-        // Le marqueur de séquence reste toléré (vieux fichiers) mais sa valeur
-        // n'est plus capturée : aucun groupe de capture pour « Sem. » sur ##.
-        expect(sourceOrganisateur).toMatch(/\[Séquence\(\?:\\s\*\\\|\\s\*Sem\\\.\\s\*\\d\+\(\?:\\s\*\[–-\]\\s\*\\d\+\)\?\)\?\\\]/);
-        expect(sourceOrganisateur).toMatch(/leconNoeud\.metadata\.semaine = lecon\.semaine/);
-        expect(sourceOrganisateur).toMatch(/orpNoeud\.metadata\.semaine = orp\.semaine/);
-    });
-
-    it('l’Organisateur passe par la dérivation exposée, jamais par un champ de séquence', () => {
-        expect(sourceOrganisateur).toMatch(/carte\.etendueTemporelle\(seq\)/);
-        expect(sourceOrganisateur).toMatch(/function ancrageLeconPourDates/);
-        expect(sourceOrganisateur).toMatch(/carte\.semaineDeLecon\(lecon\)/);
-    });
+    // (Les deux cas qui lisaient organisateur.js — import MD et dérivation —
+    // sont partis avec la page, #424 Lot G.)
 });

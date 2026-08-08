@@ -7451,8 +7451,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 /* Espacement utilitaires */
 
 
-
-
 /* Nouveaux patterns (Phase B Beta 91) */
 .profil-section-titre-large {
     color: var(--accent-primaire);
@@ -7719,7 +7717,6 @@ body.mode-clair .bloc-rlo-separateur {
 }
 
 
-
 .profil-flex-gap15-baseline {
     display: flex;
     gap: 15px;
@@ -7767,7 +7764,6 @@ body.mode-clair .bloc-rlo-separateur {
 }
 
 
-
 .profil-position-relative-mt15 {
     position: relative;
     margin-top: 15px;
@@ -7804,7 +7800,6 @@ body.mode-clair .bloc-rlo-separateur {
     font-size: 0.75rem;
     color: var(--texte-secondaire, #8aa4b0);
 }
-
 
 
 .tb-p-20 {
@@ -7928,7 +7923,6 @@ body.mode-clair .bloc-rlo-separateur {
 /* 🆕 BETA 91: Module interventions (optimisations Phase B) */
 
 
-
 .intervention-mt-0 {
     margin-top: 0;
 }
@@ -7959,7 +7953,6 @@ body.mode-clair .bloc-rlo-separateur {
     gap: 10px;
     justify-content: flex-end;
 }
-
 
 
 /* 🆕 BETA 91: Module echelles (optimisations Phase B) */
@@ -8080,7 +8073,6 @@ body.mode-clair .bloc-rlo-separateur {
     color: var(--texte-muted, #5a7a88);
     font-style: italic;
 }
-
 
 
 .eval-grid-critere {
@@ -8265,7 +8257,6 @@ body.mode-clair .bloc-rlo-separateur {
     font-weight: normal;
     opacity: 0.9;
 }
-
 
 
 .prod-italic {
@@ -11157,7 +11148,6 @@ label:has(+ textarea:disabled) {
 /* 🆕 BETA 91: Module cartouches (optimisations Phase B) */
 
 
-
 .cartouche-texte-italique-bleu-leger {
     color: var(--bleu-leger);
     font-style: italic;
@@ -11297,7 +11287,6 @@ label:has(+ textarea:disabled) {
 }
 
 /* 🆕 BETA 91: Module portfolio (optimisations Phase B) */
-
 
 
 .portfolio-texte-gris-fade {
@@ -21096,66 +21085,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     background: color-mix(in srgb, var(--planif-couleur-lecon) 14%, transparent);
 }
 
-/* === PANNEAU SÉANCES === */
-#planif-btn-seances {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 10px;
-    border: 1px solid var(--planif-couleur-bordure);
-    border-radius: 6px;
-    background: var(--surface-carte, #1a3040);
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    color: var(--texte-secondaire, #8aa4b0);
-    transition: all 0.15s;
-    white-space: nowrap;
-}
-#planif-btn-seances:hover { background: rgba(106, 172, 184, 0.06); color: var(--planif-couleur-texte); border-color: var(--planif-couleur-selection); }
-#planif-btn-seances.actif { background: rgba(106, 172, 184, 0.1); color: var(--planif-couleur-selection); border-color: var(--planif-couleur-selection); }
-
-#planif-panneau-seances {
-    position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    width: 360px;
-    background: var(--surface-page, #0c1a22);
-    border-left: 1px solid var(--planif-couleur-bordure);
-    z-index: 55;
-    transform: translateX(100%);
-    transition: transform 0.25s ease;
-    display: flex;
-    flex-direction: column;
-    box-shadow: -2px 0 12px rgba(0,0,0,0.06);
-}
-#planif-panneau-seances.visible { transform: translateX(0); }
-
-.planif-cal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--planif-couleur-bordure);
-    flex-shrink: 0;
-}
-.planif-cal-header h3 { font-size: 14px; font-weight: 600; margin: 0; }
-.planif-cal-header .planif-btn-fermer {
-    background: none;
-    border: none;
-    font-size: 18px;
-    cursor: pointer;
-    color: var(--texte-muted, #5a7a88);
-    line-height: 1;
-}
-
-#planif-panneau-seances-contenu {
-    flex: 1;
-    overflow-y: auto;
-    padding: 12px;
-}
-
 /* Sous-séquence (voie A) : section rattachée visuellement à son parent.
    Le retrait horizontal est posé en ligne (proportionnel au niveau). */
 .planif-cal-pastille-mini {
@@ -21165,25 +21094,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     flex-shrink: 0;
     margin-top: 5px;
 }
-.planif-cal-header-actions {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-.planif-cal-btn-export {
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    padding: 4px 8px;
-    border: 1px solid var(--planif-couleur-bordure);
-    border-radius: 5px;
-    background: var(--surface-carte, #1a3040);
-    font-size: 11px;
-    cursor: pointer;
-    color: var(--texte-secondaire, #8aa4b0);
-    transition: all 0.15s;
-}
-.planif-cal-btn-export:hover { background: rgba(106, 172, 184, 0.06); color: var(--planif-couleur-texte); border-color: var(--planif-couleur-selection); }
 
 /* === TOAST LIEN INVALIDE === */
 .planif-toast-lien {
@@ -21205,402 +21115,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
 }
-
-/* === ORGANISATEUR — SECTIONS === */
-.planif-org-selecteur {
-    display: flex; gap: 8px; padding: 10px 16px;
-    border-bottom: 1px solid var(--planif-couleur-bordure);
-    flex-shrink: 0;
-}
-.planif-org-selecteur select {
-    flex: 1; padding: 6px 8px;
-    border: 1px solid var(--planif-couleur-bordure);
-    border-radius: 6px; font-size: 12px;
-    background: var(--surface-carte, #1a3040); color: var(--planif-couleur-texte);
-}
-.planif-org-section {
-    border-bottom: 1px solid rgba(106, 172, 184, 0.15);
-    padding: 10px 16px;
-}
-.planif-org-section-titre {
-    font-size: 11px; font-weight: 600;
-    text-transform: uppercase; letter-spacing: 0.3px;
-    color: var(--texte-secondaire, #8aa4b0); margin-bottom: 6px;
-}
-.planif-org-section-titre-collapse {
-    cursor: pointer; display: flex;
-    justify-content: space-between; align-items: center;
-    padding: 10px 16px; margin-bottom: 0;
-}
-.planif-org-section-titre-collapse:hover { color: var(--planif-couleur-selection); }
-.planif-org-chevron { font-size: 10px; }
-.planif-org-section-contenu { font-size: 12px; line-height: 1.5; color: var(--planif-couleur-texte); }
-.planif-org-placeholder { color: var(--texte-muted, #5a7a88); font-style: italic; font-size: 12px; }
-
-
-
-/* Activités dans l'Organisateur */
-.planif-org-activite {
-    border: 1px solid rgba(106, 172, 184, 0.25); border-radius: 8px;
-    padding: 8px 10px; margin-bottom: 8px; background: var(--surface-carte, #1a3a48);
-}
-.planif-org-activite-entete {
-    display: flex; align-items: center; gap: 6px; cursor: pointer;
-    margin-bottom: 4px;
-}
-.planif-org-activite-entete:hover { color: var(--planif-couleur-selection); }
-.planif-org-activite-type {
-    font-size: 9px; font-weight: 600; color: var(--texte-muted, #5a7a88);
-    text-transform: uppercase; letter-spacing: 0.3px; margin-left: auto;
-}
-.planif-org-activite-detail {
-    display: flex; align-items: center; gap: 6px;
-    padding: 3px 0 3px 18px; font-size: 12px;
-}
-.planif-org-activite-detail label {
-    color: var(--texte-secondaire, #8aa4b0); font-size: 11px; min-width: 80px; flex-shrink: 0;
-}
-.planif-org-activite-detail select {
-    flex: 1; padding: 3px 6px; border: 1px solid rgba(106, 172, 184, 0.25);
-    border-radius: 4px; font-size: 11px; background: var(--surface-carte, #1a3040);
-    color: var(--planif-couleur-texte);
-}
-.planif-org-prod-details {
-    padding: 4px 18px; font-size: 11px; color: var(--texte-muted, #5a7a88);
-    line-height: 1.4; font-style: italic;
-}
-.planif-org-avertissement {
-    background: rgba(200, 160, 96, 0.1); border: 1px solid rgba(200, 160, 96, 0.3); border-radius: 6px;
-    padding: 6px 10px; font-size: 11px; color: var(--alerte-texte-attention); margin-bottom: 8px;
-}
-
-/* =============================================================
-   ORGANISATEUR — MODULE INDÉPENDANT (sous-onglet Planification)
-   ============================================================= */
-
-/* Conteneur principal pleine page */
-.org-conteneur {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    background: var(--surface-page, #0c1a22);
-}
-
-/* En-tête */
-.org-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 8px 16px;
-    border-bottom: 1px solid var(--planif-couleur-bordure, rgba(106, 172, 184, 0.25));
-    background: var(--surface-carte, #1a3040);
-    flex-shrink: 0;
-}
-.org-toolbar-gauche {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-.org-toolbar-droite {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
-}
-.org-toolbar select {
-    padding: 6px 10px;
-    border: 1px solid rgba(106, 172, 184, 0.2);
-    border-radius: 6px;
-    font-size: 13px;
-    background: var(--surface-carte, #1a3040);
-    color: var(--planif-couleur-texte, #e2e8f0);
-}
-
-/* Corps — conteneur flex vertical */
-.org-corps {
-    flex: 1;
-    overflow: hidden;
-    padding: 0;
-    width: 100%;
-}
-
-/* Split 2 colonnes */
-.org-corps-split {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-    height: 100%;
-}
-
-/* Colonne gauche : plan de la leçon */
-.org-plan-lecon {
-    flex: 1;
-    overflow-y: auto;
-    max-width: 900px;
-    padding: 0;
-}
-
-/* Colonne droite : panneau calendrier */
-.org-cal-date-lecon {
-    display: block;
-    font-size: 10px;
-    font-weight: 400;
-    color: var(--texte-muted, #5a7a88);
-    margin-top: 1px;
-}
-
-
-
-/* Sections */
-.org-section {
-    border-bottom: 1px solid rgba(106, 172, 184, 0.15);
-    padding: 14px 24px;
-}
-.org-section-titre {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    color: var(--texte-secondaire, #8aa4b0);
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-.org-section-contenu {
-    font-size: 13px;
-    line-height: 1.6;
-    color: var(--planif-couleur-texte, #1e293b);
-}
-.org-placeholder {
-    color: var(--texte-muted, #5a7a88);
-    font-style: italic;
-    font-size: 12px;
-}
-
-/* Bouton réinitialiser objectif */
-.org-btn-reinit {
-    background: none;
-    border: 1px solid rgba(106, 172, 184, 0.2);
-    border-radius: 4px;
-    font-size: 10px;
-    color: var(--texte-secondaire, #8aa4b0);
-    cursor: pointer;
-    padding: 2px 6px;
-    margin-left: auto;
-}
-.org-btn-reinit:hover { color: #3b82f6; border-color: #3b82f6; }
-
-/* Objectif éditable */
-.org-objectif-contenu {
-    min-height: 40px;
-    padding: 8px 12px;
-    border: 1px solid transparent;
-    border-radius: 6px;
-    transition: border-color 0.15s;
-}
-.org-objectif-contenu:hover { border-color: rgba(106, 172, 184, 0.25); }
-.org-objectif-contenu:focus {
-    border-color: #3b82f6;
-    outline: none;
-    box-shadow: var(--focus-ring);
-    background: var(--surface-element, #244858);
-}
-
-/* Prérequis */
-.org-prerequis-item {
-    padding: 4px 0;
-    font-size: 12px;
-    line-height: 1.5;
-}
-.org-prerequis-nom { font-weight: 600; }
-.org-prerequis-type { color: var(--texte-muted, #5a7a88); }
-.org-prerequis-fleche { color: var(--texte-muted, #5a7a88); }
-.org-prerequis-cible { color: var(--planif-couleur-texte, #1e293b); }
-
-/* Productions associées */
-.org-production-item {
-    padding: 6px 0;
-    font-size: 12px;
-    line-height: 1.5;
-    border-bottom: 1px solid rgba(106, 172, 184, 0.1);
-}
-.org-production-item:last-child { border-bottom: none; }
-.org-production-pond { color: var(--texte-secondaire, #8aa4b0); }
-.org-production-detail { color: var(--texte-muted, #5a7a88); font-size: 11px; }
-
-/* Pastille couleur */
-.org-pastille {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-/* Durée */
-.org-duree {
-    font-size: 10px;
-    color: var(--texte-secondaire, #8aa4b0);
-    background: rgba(106, 172, 184, 0.06);
-    padding: 2px 6px;
-    border-radius: 4px;
-    white-space: nowrap;
-}
-
-/* Activités dans le cœur */
-.org-activite {
-    border: 1px solid rgba(106, 172, 184, 0.25);
-    border-radius: 8px;
-    padding: 10px 12px;
-    margin-bottom: 10px;
-    background: var(--surface-carte, #1a3a48);
-    transition: box-shadow 0.15s;
-}
-.org-activite:hover { box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-.org-activite-entete {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 6px;
-}
-.org-activite-titre {
-    font-size: 13px;
-    font-weight: 500;
-    flex: 1;
-}
-.org-activite-type {
-    font-size: 9px;
-    font-weight: 600;
-    color: var(--texte-muted, #5a7a88);
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    margin-left: auto;
-}
-.org-activite-detail {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 4px 0 4px 20px;
-    font-size: 12px;
-}
-.org-activite-detail label {
-    color: var(--texte-secondaire, #8aa4b0);
-    font-size: 11px;
-    min-width: 80px;
-    flex-shrink: 0;
-}
-.org-activite-detail select {
-    flex: 1;
-    padding: 4px 8px;
-    border: 1px solid rgba(106, 172, 184, 0.25);
-    border-radius: 5px;
-    font-size: 11px;
-    background: var(--surface-carte, #1a3040);
-    color: var(--planif-couleur-texte);
-}
-.org-prod-details {
-    padding: 4px 20px;
-    font-size: 11px;
-    color: var(--texte-muted, #5a7a88);
-    line-height: 1.4;
-    font-style: italic;
-}
-.org-avertissement {
-    background: rgba(200, 160, 96, 0.1);
-    border: 1px solid rgba(200, 160, 96, 0.3);
-    border-radius: 8px;
-    padding: 8px 12px;
-    font-size: 12px;
-    color: var(--alerte-texte-attention);
-    margin-bottom: 10px;
-}
-
-/* Séances planifiées — badges */
-.org-seances-badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    background: none !important;
-    border: none !important;
-    padding: 4px 0 !important;
-}
-.org-seance-badge {
-    background: rgba(106, 172, 184, 0.08);
-    border: 1px solid rgba(106, 172, 184, 0.25);
-    border-radius: 8px;
-    padding: 6px 12px;
-    font-size: 11.5px;
-    color: var(--accent-primaire, #6aacb8);
-    line-height: 1.4;
-}
-.org-seance-badge-groupe {
-    font-weight: 700;
-    font-size: 11px;
-    letter-spacing: 0.3px;
-}
-.org-seance-badge-detail {
-    font-size: 11px;
-    opacity: 0.85;
-    margin-top: 1px;
-}
-
-/* Checkbox label */
-.org-checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    cursor: pointer;
-    font-weight: 500;
-}
-.org-checkbox-label input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-    cursor: pointer;
-}
-
-
-
-
-
-
-
-
-/* Étapes EE */
-#org-coeur-brut { padding: 14px 24px; }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-.org-depot-survol {
-    border-color: #3b82f6;
-    background: rgba(59, 130, 246, 0.05);
-}
-
-
-
-
-
-
-
-
-
-/* Activité draggable dans le cœur brut */
-.org-activite[draggable="true"] { cursor: grab; }
-.org-activite.org-drag-en-cours { opacity: 0.4; }
 
 /* Calendrier */
 /* Modale d'export — utilise les classes design system (.modal-overlay, .modal-contenu, etc.) */
@@ -22410,120 +21924,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 .mode-clair .prep-section[id="prep-section-rotation"]  { background: rgba(249, 115, 22, 0.08); }
 .mode-clair .prep-section[id="prep-section-decoupe"]   { background: rgba(22, 163, 74, 0.08); }
 .mode-clair .prep-section[id="prep-section-image"]     { background: rgba(106, 172, 184, 0.08); }
-
-/* Calendrier intégré à la palette */
-.mode-clair .planif-cal-liens .planif-cal-lien-item {
-    color: var(--texte-principal);
-}
-
-/* Organisateur / Plan de la leçon — mode clair */
-.mode-clair .org-conteneur {
-    background: #ffffff;
-}
-.mode-clair .org-toolbar {
-    background: #ffffff;
-    border-bottom-color: rgba(3, 46, 92, 0.08);
-}
-.mode-clair .org-toolbar select {
-    background: #ffffff;
-    border-color: rgba(3, 46, 92, 0.2);
-    color: var(--texte-principal);
-}
-.mode-clair .org-section {
-    border-bottom-color: rgba(3, 46, 92, 0.08);
-}
-.mode-clair .org-section-titre {
-    color: var(--texte-secondaire);
-}
-.mode-clair .org-section-contenu {
-    color: var(--texte-principal);
-}
-.mode-clair .org-objectif-contenu {
-    color: var(--texte-principal);
-}
-.mode-clair .org-objectif-contenu:hover {
-    border-color: rgba(3, 46, 92, 0.15);
-}
-.mode-clair .org-objectif-contenu:focus {
-    background: #f0f8ff;
-}
-.mode-clair .org-prerequis-nom {
-    color: var(--texte-principal);
-}
-.mode-clair .org-prerequis-type,
-.mode-clair .org-prerequis-fleche {
-    color: var(--texte-secondaire);
-}
-.mode-clair .org-prerequis-cible {
-    color: var(--texte-principal);
-}
-.mode-clair .org-activite {
-    background: #ffffff;
-    border-color: rgba(3, 46, 92, 0.12);
-}
-.mode-clair .org-activite-titre {
-    color: var(--texte-principal);
-}
-.mode-clair .org-activite-type {
-    color: var(--texte-secondaire);
-}
-.mode-clair .org-activite-detail label {
-    color: var(--texte-secondaire);
-}
-.mode-clair .org-activite-detail select {
-    background: #ffffff;
-    border-color: rgba(3, 46, 92, 0.15);
-    color: var(--texte-principal);
-}
-.mode-clair .org-placeholder {
-    color: var(--texte-muted);
-}
-.mode-clair .org-seance-badge {
-    background: rgba(6, 93, 187, 0.06);
-    border-color: rgba(6, 93, 187, 0.2);
-    color: var(--accent-primaire);
-}
-.mode-clair .org-panneau-calendrier {
-    background: rgba(3, 46, 92, 0.02);
-    border-left-color: rgba(3, 46, 92, 0.1);
-}
-.mode-clair .org-panneau-calendrier-titre {
-    color: var(--accent-primaire);
-}
-.mode-clair .org-cal-date-lecon {
-    color: var(--texte-secondaire);
-}
-.mode-clair .org-duree {
-    color: var(--texte-secondaire);
-    background: rgba(3, 46, 92, 0.05);
-}
-.mode-clair .org-production-pond {
-    color: var(--texte-secondaire);
-}
-.mode-clair .org-production-detail {
-    color: var(--texte-muted);
-}
-.mode-clair .org-avertissement {
-    background: rgba(180, 130, 40, 0.08);
-    border-color: rgba(180, 130, 40, 0.25);
-    color: #92600a;
-}
-.mode-clair .org-btn-reinit {
-    border-color: rgba(3, 46, 92, 0.15);
-    color: var(--texte-secondaire);
-}
-
-.mode-clair .org-checkbox-label {
-    color: var(--texte-principal);
-}
-
-
-
-
-
-
-
-
 
 
 /* Cartes accueil V3 — mode clair (les cartes orange .accueil-aide-demi

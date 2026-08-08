@@ -151,7 +151,8 @@ const TOOLTIPS_SOUS_NAV = {
     // Aperçu : section plate, pas de sous-nav
     // Structure
     'conception-carte': 'nav-conception-alignement',
-    'conception-organisateur': 'nav-conception-organisateur',
+    // 'conception-organisateur' RETIRÉ le 8 août 2026 (#424 Lot G, autorisation
+    // = plan de chantier acté) : la page « Plan de la leçon » n'existe plus.
     'conception-productions': 'nav-conception-productions',
     'conception-grille-criteres': 'nav-conception-grilles',
     'conception-echelle-performance': 'nav-conception-echelles',
@@ -207,11 +208,6 @@ const INITIALISATEURS_SOUS_SECTION = {
     'conception-carte': function () {
         if (typeof initialiserModulePlanification === 'function') {
             setTimeout(initialiserModulePlanification, 100);
-        }
-    },
-    'conception-organisateur': function () {
-        if (typeof initialiserModuleOrganisateur === 'function') {
-            setTimeout(initialiserModuleOrganisateur, 100);
         }
     },
     'conception-productions': function () {

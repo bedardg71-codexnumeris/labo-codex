@@ -592,7 +592,7 @@ const TOOLTIPS = {
     'planif-alignement':
         'Carte mentale interactive pour construire visuellement l\'alignement pédagogique de ton cours — les liens entre objectifs, activités et évaluations.',
     'planif-sous-nav':
-        'Deux vues complémentaires : la carte mentale d\'alignement et l\'organisateur du cours.',
+        'La carte mentale d\'alignement du cours.',
     'planif-selecteur-cours':
         'Choisis le cours à planifier. Chaque cours a sa propre carte d\'alignement.',
     'planif-aide':
@@ -638,45 +638,6 @@ const TOOLTIPS = {
         'Crée un clone de ce nœud. Les modifications se propagent à toutes les copies.',
     'planif-supprimer-noeud':
         'Supprime ce nœud et ses liens de la carte.',
-
-    // =================================================================
-    // T10 — PLANIFICATION — Organisateur (leçons)
-    // =================================================================
-
-    // --- Leçons et séquences ---
-
-    'orga-sous-nav':
-        'Vue textuelle et structurée des données de la carte mentale. Sélectionne une séquence et une leçon pour afficher son plan.',
-    'orga-selecteur-sequence':
-        'Filtre par séquence pour restreindre l\'affichage.',
-    'orga-selecteur-lecon':
-        'Sélectionne une leçon pour afficher son plan détaillé.',
-    'orga-entete-lecon':
-        'Groupes-cours auxquels cette leçon s\'applique, avec leurs plages horaires.',
-    'orga-objectif':
-        'Ce que l\'étudiant·e sera capable de faire au terme de la leçon.',
-
-    // --- Structure et contenu ---
-
-    'orga-enseignement-explicite':
-        'Structure en 5 phases : ouverture, modelage, pratique guidée, pratique autonome, objectivation.',
-    'orga-connaissances-prealables':
-        'Savoirs préalables à vérifier ou revoir avant d\'aborder cette leçon.',
-    'orga-item-a-revoir':
-        'Élément préalable à revoir en début de séance avant de poursuivre.',
-    'orga-coeur-lecon':
-        'Activités pédagogiques de la leçon. Associe des productions pour compléter l\'alignement.',
-    'orga-productions':
-        'Productions liées aux activités de cette leçon (mises en pratique, exercices d\'application, travaux).',
-    'orga-selecteur-production':
-        'Associe une production (mise en pratique, exercice, travail) à cette activité.',
-
-    // --- Liens pédagogiques ---
-
-    'orga-lien-pedagogique':
-        'Connexion vers un autre élément de la carte mentale (compétence, prérequis, stratégie, etc.).',
-    'orga-alerte-alignement':
-        'Incohérence d\'alignement détectée : une évaluation ou un objectif n\'est pas encore relié à une production.',
 
     // =================================================================
     // T11 — NAVIGATION principale et sous-navigation
@@ -764,8 +725,6 @@ const TOOLTIPS = {
         'Planification pédagogique : alignement objectifs-activités-évaluations et organisation des leçons.',
     'nav-conception-alignement':
         'Carte mentale interactive : visualise l\'alignement objectifs → activités → évaluations.',
-    'nav-conception-organisateur':
-        'Calendrier des séquences sur 15 semaines et plans de leçons avec option d\'enseignement explicite en 5 phases.',
 
     // --- Labo ---
 

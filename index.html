@@ -4399,63 +4399,7 @@
                                 <button class="planif-btn-supprimer" id="planif-btn-supprimer" data-tooltip="planif-supprimer-noeud"><img src="icons/icons8-trash.svg" alt="" class="btn-inline-icon"> Supprimer ce n&oelig;ud</button>
                             </div>
 
-                            <div id="planif-panneau-seances">
-                                <div class="planif-cal-header">
-                                    <h3>Organisateur</h3>
-                                    <div class="planif-cal-header-actions">
-                                        <!-- Les boutons Texte/TSV sont partis dans « Actions → Exporter le plan… » (portage #424) -->
-                                        <button class="planif-btn-fermer" id="planif-btn-fermer-seances"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
-                                    </div>
-                                </div>
-
-                                <!-- Sélecteur séquence / leçon -->
-                                <div id="planif-org-selecteur" class="planif-org-section planif-org-selecteur">
-                                    <select id="planif-org-select-sequence"><option value="">— Séquence —</option></select>
-                                    <select id="planif-org-select-lecon"><option value="">— Leçon —</option></select>
-                                </div>
-
-                                <!-- Contenu scrollable -->
-                                <div id="planif-panneau-seances-contenu">
-                                    <!-- Sections leçon (visibles quand une leçon est sélectionnée) -->
-                                    <div id="planif-org-lecon" style="display:none">
-                                        
-                                        <div class="planif-org-section" id="planif-org-objectif">
-                                            <div class="planif-org-section-titre">Objectif de la leçon</div>
-                                            <div class="planif-org-section-contenu planif-org-placeholder">
-                                                Sélectionner une leçon pour voir son objectif dérivé.
-                                            </div>
-                                        </div>
-                                        <div class="planif-org-section" id="planif-org-prealables">
-                                            <div class="planif-org-section-titre">Connaissances préalables à vérifier</div>
-                                            <div class="planif-org-section-contenu planif-org-placeholder">
-                                                Les prérequis seront dérivés des liens de la carte.
-                                            </div>
-                                        </div>
-                                        <div class="planif-org-section" id="planif-org-productions">
-                                            <div class="planif-org-section-titre">Productions associées</div>
-                                            <div class="planif-org-section-contenu planif-org-placeholder">
-                                                Les productions seront dérivées des « Pratiques de notation ».
-                                            </div>
-                                        </div>
-                                        <div class="planif-org-section" id="planif-org-coeur">
-                                            <div class="planif-org-section-titre">Cœur de la leçon</div>
-                                            <div class="planif-org-section-contenu" id="planif-org-coeur-contenu">
-                                                <!-- Activités, soutiens, révisions de la leçon -->
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- planif-zoom-info conservé pour compatibilité JS -->
-                        <span class="u-hide" id="planif-zoom-info">100%</span>
-
-                    </div><!-- fin planif-wrapper -->
-                </div><!-- fin sous-section conception-carte -->
-
-                <!-- Panneau guide flottant — accessible depuis la carte ET l'organisateur -->
+                <!-- Panneau guide flottant -->
                 <div id="planif-guide-panel" class="planif-guide-flottante" style="display: none;">
                     <div class="planif-guide-barre">
                         <span class="planif-palette-titre">Guide</span>
@@ -4469,114 +4413,8 @@
                     </div>
                 </div>
 
-                <div id="conception-organisateur" class="sous-section">
-                    <div class="org-conteneur">
-                        <!-- Toolbar unifiée -->
-                        <div class="org-toolbar">
-                            <div class="org-toolbar-gauche">
-                                <select id="org-select-carte"><option value="">— Carte —</option></select>
-                                <select id="org-select-sequence" data-tooltip="orga-selecteur-sequence"><option value="">— Séquence —</option></select>
-                                <select id="org-select-lecon" data-tooltip="orga-selecteur-lecon"><option value="">— Leçon —</option></select>
-                                
-                            </div>
-                            <div class="org-toolbar-droite">
-                                <button id="org-btn-guide" class="planif-btn-carte" title="Guide d'import/export"><img src="icons/icon-book.svg" alt="" class="planif-icon" style="width:14px;height:14px;"></button>
-                                <button id="org-btn-export" class="planif-btn-carte">Exporter / Importer</button>
-                            </div>
-                        </div>
-                        <div class="org-corps">
-                            <!-- Layout 2 colonnes -->
-                            <div class="org-corps-split">
-                                <!-- Colonne gauche : plan de la leçon -->
-                                <div class="org-plan-lecon">
-                                    <!-- Séances planifiées (badges groupe-cours / date / heure / local) -->
-                                    <div id="org-entete-calendrier" class="org-section" style="display:none">
-                                        <div class="org-section-titre" data-tooltip="orga-entete-lecon">Séances planifiées</div>
-                                        <div class="org-section-contenu org-seances-badges" id="org-entete-calendrier-contenu"></div>
-                                    </div>
-                                    <!-- Contenu leçon (généré dynamiquement) -->
-                                    <div id="org-contenu-lecon" style="display:none">
-                                        <!-- Objectif de la leçon -->
-                                        <div class="org-section" id="org-objectif">
-                                            <div class="org-section-titre" data-tooltip="orga-objectif">
-                                                Objectif de la leçon
-                                                <button class="org-btn-reinit" id="org-btn-reinit-objectif" title="Réinitialiser l'objectif dérivé" style="display:none">↺ Réinitialiser</button>
-                                            </div>
-                                            <div class="org-section-contenu org-objectif-contenu" id="org-objectif-contenu" contenteditable="false">
-                                                Sélectionner une leçon pour voir son objectif dérivé.
-                                            </div>
-                                        </div>
-                                        <!-- Prérequis -->
-                                        <div class="org-section" id="org-prerequis">
-                                            <div class="org-section-titre" data-tooltip="orga-connaissances-prealables">Connaissances préalables à vérifier</div>
-                                            <div class="org-section-contenu" id="org-prerequis-contenu">
-                                                <span class="org-placeholder">Les prérequis seront dérivés des liens de la carte.</span>
-                                            </div>
-                                        </div>
-                                        <!-- Productions associées -->
-                                        <div class="org-section" id="org-productions">
-                                            <div class="org-section-titre" data-tooltip="orga-productions">Productions associées</div>
-                                            <div class="org-section-contenu" id="org-productions-contenu">
-                                                <span class="org-placeholder">Les productions seront dérivées des « Pratiques de notation ».</span>
-                                            </div>
-                                        </div>
-                                        <!-- Enseignement explicite -->
-                                        <div class="org-section" id="org-coeur-brut">
-                                                <div class="org-section-titre" data-tooltip="orga-coeur-lecon">Cœur de la leçon</div>
-                                                <div class="org-section-contenu" id="org-coeur-contenu"></div>
-                                            </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Modale export/import -->
-                    <div id="org-modale-export" class="modal-overlay">
-                        <div class="modal-contenu" style="max-width: 560px">
-                            <button class="modal-fermer" id="org-modale-fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
-                            <!-- Onglets -->
-                            <div class="org-modale-onglets" style="display: flex; gap: 0; margin-bottom: 1rem; border-bottom: 2px solid var(--bordure)">
-                                <button class="org-onglet actif" data-onglet="export" style="padding: 0.5rem 1.2rem; border: none; background: none; font-size: 0.95rem; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; color: var(--texte-secondaire)">Exporter</button>
-                                <button class="org-onglet" data-onglet="import" style="padding: 0.5rem 1.2rem; border: none; background: none; font-size: 0.95rem; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; color: var(--texte-secondaire)">Importer</button>
-                            </div>
-                            <!-- Panneau Export -->
-                            <div class="org-panneau-onglet" id="org-panneau-export">
-                                <div class="modal-section">
-                                    <p id="org-export-resume" class="u-texte-09" style="color: var(--texte-secondaire); line-height: 1.6; margin: 0">
-                                        Exporte l'ensemble des séquences, leçons et données d'alignement.
-                                    </p>
-                                </div>
-                                <div class="modal-actions" style="flex-wrap: wrap; gap: 0.5rem">
-                                    <button class="btn btn-annuler" id="org-modale-annuler">Annuler</button>
-                                    <button class="btn btn-secondaire" id="org-modale-copier-md">Copier MD</button>
-                                    <button class="btn btn-secondaire" id="org-modale-telecharger-md">Exporter MD</button>
-                                    <button class="btn btn-confirmer" id="org-modale-telecharger">Exporter JSON</button>
-                                </div>
-                            </div>
-                            <!-- Panneau Import -->
-                            <div class="org-panneau-onglet" id="org-panneau-import" style="display: none">
-                                <p class="u-texte-09" style="color: var(--texte-secondaire); line-height: 1.6; margin: 0 0 0.75rem">
-                                    Colle un plan de cours en format Markdown. Les séquences et leçons seront recréées sur la carte d'alignement.
-                                </p>
-                                <textarea id="org-import-md-texte" rows="10" placeholder="Coller le plan Markdown ici..." style="width: 100%; font-family: monospace; font-size: 0.85rem; resize: vertical; background: var(--fond-input); color: var(--texte); border: 1px solid var(--bordure); border-radius: var(--radius-sm); padding: 0.5rem"></textarea>
-                                <div id="org-import-resume" style="display: none; margin-top: 0.5rem; padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); background: var(--fond-surface); font-size: 0.85rem"></div>
-                                <div style="margin-top: 0.75rem; display: flex; flex-direction: column; gap: 0.35rem">
-                                    <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; cursor: pointer">
-                                        <input type="radio" name="org-import-cible" value="nouvelle" checked> Créer une nouvelle carte
-                                    </label>
-                                    <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; cursor: pointer">
-                                        <input type="radio" name="org-import-cible" value="ajouter"> Ajouter à la carte active
-                                    </label>
-                                </div>
-                                <div class="modal-actions" style="margin-top: 1rem">
-                                    <button class="btn btn-annuler" id="org-import-annuler">Annuler</button>
-                                    <button class="btn btn-secondaire" id="org-import-previsualiser">Prévisualiser</button>
-                                    <button class="btn btn-confirmer" id="org-import-confirmer" disabled>Importer</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div><!-- fin sous-section conception-organisateur -->
+                <!-- « Plan de la leçon » RETIRÉ le 8 août 2026 (#424 Lot G) :
+                     exports → Carte, menu Actions ; rétroaction formative → Inspecteur. -->
 
                 <div id="conception-productions" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
@@ -11731,55 +11569,6 @@
                         </div>
                     </div>
 
-                    <!-- Carte: Organiser le plan de leçon -->
-                    <div class="carte accordeon" id="accordeon-aide-organisateur">
-                        <div class="accordeon-header">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Organiser le plan de leçon
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu">
-                            <p><strong>Navigation :</strong> Conception → Plan de la leçon</p>
-
-                            <p>Ce module transforme ta carte mentale en plans de leçon structurés, prêts à être enseignés.</p>
-
-                            <p><strong>Sélectionner une leçon :</strong></p>
-                            <ol>
-                                <li>Choisis une <strong>carte mentale</strong> dans le premier sélecteur</li>
-                                <li>Sélectionne une <strong>séquence</strong> parmi celles de la carte</li>
-                                <li>Choisis la <strong>leçon</strong> à planifier</li>
-                            </ol>
-
-                            <p>Les sections <strong>objectif</strong>, <strong>prérequis</strong> et <strong>productions associées</strong> se remplissent automatiquement depuis la carte mentale.</p>
-
-                            <p><strong>Deux modes de planification :</strong></p>
-                            <ul>
-                                <li><strong>Mode simple</strong> : Liste libre des activités du cœur de la leçon</li>
-                                <li><strong>Mode Enseignement explicite</strong> : 5 étapes structurées :
-                                    <ul>
-                                        <li><strong>Ouverture</strong> — Activation des connaissances antérieures</li>
-                                        <li><strong>Modélisation</strong> — Démonstration par l'enseignant</li>
-                                        <li><strong>Pratique guidée</strong> — Exercice accompagné</li>
-                                        <li><strong>Pratique autonome</strong> — Travail individuel</li>
-                                        <li><strong>Clôture</strong> — Synthèse et vérification</li>
-                                    </ul>
-                                </li>
-                            </ul>
-
-                            <p><strong>Fonctionnalités :</strong></p>
-                            <ul>
-                                <li><strong>Glisser-déposer</strong> : Glisse les activités vers les 5 étapes pour les réorganiser</li>
-                                <li><strong>Notes enseignant</strong> : Ajoute des notes personnelles par étape (zone de texte)</li>
-                                <li><strong>Planificateur</strong> : Une rangée par semaine du trimestre — vois où chaque séquence et chaque leçon atterrit</li>
-                                <li><strong>Export JSON</strong> : Exporte l'alignement pédagogique complet pour archivage ou partage</li>
-                            </ul>
-
-                            <div class="alerte alerte-information">
-                                <strong><span class="icone-info-aide taille-inline" aria-hidden="true"></span> Astuce :</strong> Le mode Enseignement explicite est particulièrement adapté aux leçons magistrales et aux démonstrations techniques. Utilise le mode simple pour les ateliers ou les séances de travail autonome.
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Carte: Préparer et importer les travaux -->
                     <div class="carte accordeon" id="accordeon-aide-preparer-importer">
                         <div class="accordeon-header">
@@ -14653,7 +14442,6 @@
     <script src="js/planification-bibliotheque.js?v=2026051026"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
     <script src="js/planification-carte.js?v=20260808e"></script> <!-- Simplification : le planificateur cadre la carte, il ne la filtre plus (8 août) -->
     <script src="js/planification-export.js?v=20260808a"></script> <!-- LE générateur d'export : 3 niveaux × 3 formats (portage #424, 8 août) -->
-    <script src="js/organisateur.js?v=20260807f"></script> <!-- Retrait du post-traitement DOM de la Vue calendrier (lot 2, 6 août) -->
     <script src="js/planification.js?v=2026050522"></script> <!-- Refonte nav SP4 : hooks nomSection 'conception' + idSousSection conception-* -->
 
     <!-- BETA 96.3 : Module Travaux (import, annotation, archivage) -->

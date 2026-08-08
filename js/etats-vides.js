@@ -131,9 +131,6 @@ var ETATS_VIDES = {
     },
     'conception-carte': {
         message: 'Ta carte mentale est vide. Commence par glisser un n\u0153ud depuis la palette. La comp\u00e9tence du devis minist\u00e9riel ou du plan-cadre de ton cours est un bon point de d\u00e9part. Relie ensuite tes connaissances requises, tes activit\u00e9s d\u2019apprentissage et tes \u00e9valuations pour rendre visible l\u2019alignement p\u00e9dagogique.'
-    },
-    'conception-organisateur': {
-        message: 'Aucune s\u00e9quence d\u00e9finie. Les s\u00e9quences organisent tes le\u00e7ons sur les 15 semaines du trimestre. Une s\u00e9quence peut contenir plusieurs le\u00e7ons. Cr\u00e9e ta premi\u00e8re s\u00e9quence, puis ajoute des le\u00e7ons avec l\u2019option d\u2019enseignement explicite en 5 phases.'
     }
 
     // Note : `suivi-profil` est exclu. Son module affiche son propre

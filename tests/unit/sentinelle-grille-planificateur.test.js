@@ -19,7 +19,6 @@ import { chargerScript } from './_helpers/charger-script.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
 const sourceCarte = readFileSync(path.join(racineProjet, 'js', 'planification-carte.js'), 'utf8');
-const sourceOrganisateur = readFileSync(path.join(racineProjet, 'js', 'organisateur.js'), 'utf8');
 const sourceIndex = readFileSync(path.join(racineProjet, 'index.html'), 'utf8');
 
 // --- Sandbox avec conteneur mesurable ----------------------------------
@@ -462,8 +461,6 @@ describe('lot 2 · zéro-dette — l’ancienne Vue calendrier est morte', () =>
     it('plus AUCUNE trace du rendu recyclé ni du post-traitement DOM', () => {
         expect(sourceCarte).not.toMatch(/genererSeancesHTML/);
         expect(sourceCarte).not.toMatch(/genererLeconBloc/);
-        expect(sourceOrganisateur).not.toMatch(/rafraichirCalendrier/);
-        expect(sourceOrganisateur).not.toMatch(/ajouterDatesAuxLecons/);
         expect(sourceIndex).not.toMatch(/org-calendrier-contenu/);
         expect(sourceIndex).not.toMatch(/planif-org-calendrier/);
     });
@@ -474,7 +471,6 @@ describe('lot 2 · zéro-dette — l’ancienne Vue calendrier est morte', () =>
         expect(sourceCarte).not.toMatch(/function mettreAJourSommaire\(\)/);
     });
 
-    it('l’en-tête de dates réelles de l’Organisateur SURVIT (il n’était pas la Vue calendrier)', () => {
-        expect(sourceOrganisateur).toMatch(/function ancrageLeconPourDates/);
-    });
+    // (« l'en-tête de dates réelles de l'Organisateur survit » : plus
+    // maintenant — la page entière est partie, #424 Lot G.)
 });
