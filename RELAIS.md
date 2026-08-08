@@ -12,14 +12,12 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | `main` |
-| **Version** | **1.56.4** — build `0808-1156` |
+| **Version** | **1.57.0** — build `0808-1445` |
 | **Travail en avance sur `main`** | **aucun** |
-| **Dernière mise à jour** | 8 août 2026, en matinée |
+| **Dernière mise à jour** | 8 août 2026, en après-midi (portage #424 livré) |
 
 ⮕ Le détail des priorités, de la prémisse chiffrée et des décisions en attente
-est au **§3 de `SESSION.md`**. **Prochain chantier préparé** : portage des
-exports — plan complet dans
-`plans de travail/PLAN-portage-exports-carte-2026-08-08.md`.
+est au **§3 de `SESSION.md`**. **Le portage des exports (#424) est LIVRÉ et fusionné** ; prochaines priorités au §3 de `SESSION.md` (portes terrain, puis #421+#426).
 
 ---
 

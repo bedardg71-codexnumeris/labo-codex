@@ -21,6 +21,20 @@
 
     var CHANGELOG = [
         {
+            version: '1.57',
+            couleur: 'vert',
+            titre: 'La Carte exporte ton plan — et la page « Plan de la leçon » tire sa révérence',
+            items: [
+                'Nouveau menu « Exporter le plan… » dans les Actions de la carte : trois niveaux (Plan de cours, En classe, Preuve d’alignement) croisés avec trois formats (texte, tableau collable, Markdown). Neuf documents, un seul geste — Copier ou Télécharger.',
+                'Le niveau « Plan de cours » donne le sommaire collable : séquences, semaines, leçons et évaluations avec leur pondération. « En classe » ajoute les objectifs, les activités, les durées et les rétroactions. « Preuve d’alignement » montre tout : connaissances, liens verbalisés, objectifs servis, grilles.',
+                'Les documents disent enfin « Leçon » (plus jamais « Séance » pour une leçon), les durées sont les totaux réels de la carte — fini le double comptage — et TOUS les objectifs sortent, plus seulement le premier.',
+                'La rétroaction formative se pose maintenant sur les activités, directement dans l’Inspecteur. Le sélecteur du nœud Évaluation reste et se clarifie : « Rétroaction sur le rendu » — deux notions, deux libellés.',
+                'Correction : les sélecteurs Rétroaction et Production du nœud Évaluation ne sauvegardaient plus rien — ils réagissent de nouveau.',
+                'La page « Plan de la leçon » est retirée : tout ce qu’elle faisait vit désormais dans la carte. Tes rétroactions déjà posées y sont transportées automatiquement au démarrage.',
+                'Reprendre une carte d’un autre trimestre ne transporte plus de références mortes vers des productions qui n’existent pas dans le trimestre d’arrivée.'
+            ]
+        },
+        {
             version: '1.56',
             couleur: 'vert',
             titre: 'Carte d’alignement : l’enseignant y entre, et le temps s’y compte',
