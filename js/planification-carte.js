@@ -4311,6 +4311,11 @@ function attacherEvenements(el, donnees) {
                 document.querySelectorAll('.planif-noeud-zone.planif-survol').forEach(function(z) { z.classList.remove('planif-survol'); });
                 document.querySelectorAll('.planif-conteneur-survol').forEach(function(c) { c.classList.remove('planif-conteneur-survol'); });
 
+                // #433 : relâché sur la corbeille = supprimé. Le retour est
+                // ANTICIPÉ — sans lui, le rattachement ci-dessous s'exécuterait
+                // sur un nœud qui n'existe plus.
+                if (deposerDansCorbeille(e2, id)) return;
+
                 // Déménagement direct vers un autre conteneur : curseur
                 // d'abord, recouvrement en filet (bloc posé majoritairement
                 // sur la cible, curseur relâché à côté).
@@ -4424,6 +4429,8 @@ function attacherEvenements(el, donnees) {
                 document.querySelectorAll('.planif-noeud-zone.planif-survol').forEach(function(z) { z.classList.remove('planif-survol'); });
                 document.querySelectorAll('.planif-conteneur-survol').forEach(function(c) { c.classList.remove('planif-conteneur-survol'); });
 
+                if (deposerDansCorbeille(e2, id)) return;   // #433
+
                 if (peutEtreEnfant) {
                     // Recouvrement en filet, comme pour les feuilles.
                     if (!survolConteneur) {
@@ -4489,6 +4496,8 @@ function attacherEvenements(el, donnees) {
 
             document.querySelectorAll('.planif-noeud-zone.planif-survol').forEach(function(z) { z.classList.remove('planif-survol'); });
             document.querySelectorAll('.planif-conteneur-survol').forEach(function(c) { c.classList.remove('planif-conteneur-survol'); });
+
+            if (deposerDansCorbeille(e2, id)) return;   // #433
 
             // Le curseur d'abord, le recouvrement en filet : un bloc relâché
             // majoritairement SUR un conteneur lui appartient, même si le
@@ -4880,6 +4889,81 @@ function attacherEvenements(el, donnees) {
     });
 }
 
+
+// === CORBEILLE DE LA PALETTE (#433, 8 août 2026) ===
+//
+// ⚠ POURQUOI ELLE EXISTE — constat terrain de Grégoire (« pas possible de
+// supprimer sur iPad »), NUANCÉ par la vérification au code : la suppression
+// EST atteignable au doigt, mais en TROIS gestes — sélectionner le nœud,
+// ouvrir l'Inspecteur par le bouton 🕵️ du bas de la palette, puis
+// « Supprimer ce nœud ». Les deux chemins directs, eux, sont hors d'atteinte :
+// la touche Suppr suppose un clavier, et l'Inspecteur ne s'ouvre au canevas
+// qu'au DOUBLE-CLIC.
+// ⮕ Ce n'est donc pas une capacité manquante, c'est une friction : trois
+// gestes derrière une icône dont le nom n'apparaît qu'au survol — inexistant
+// au doigt. La corbeille ramène le geste à UN, et réutilise le seul mécanisme
+// déjà prouvé fiable au doigt depuis #148 : le drag en Pointer Events.
+//
+// Le dépôt est résolu par GÉOMÉTRIE (rectangle de la corbeille contre le
+// point de relâchement), jamais par la cible de l'événement : pendant un
+// drag, l'élément sous le doigt est le nœud lui-même, pas ce qu'il survole.
+
+function elementCorbeille() {
+    return document.getElementById('planif-corbeille');
+}
+
+/** Vrai si ce point (coordonnées client) tombe dans la corbeille. */
+function pointSurCorbeille(x, y) {
+    var el = elementCorbeille();
+    if (!el || el.offsetParent === null) return false; // palette masquée
+    var r = el.getBoundingClientRect();
+    return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+}
+
+/**
+ * Le nœud relâché sur la corbeille est-il supprimé ? Appelée EN TÊTE de
+ * chaque `onUp` de drag, qui sort aussitôt : sans ce retour anticipé, le
+ * rattachement au conteneur s'exécuterait sur un nœud déjà disparu.
+ * @returns {boolean} true si la suppression a eu lieu
+ */
+function deposerDansCorbeille(e, id) {
+    if (!e || !pointSurCorbeille(e.clientX, e.clientY)) return false;
+    var nd = etat.noeuds.get(id);
+    if (!nd) return false;
+    var nom = nd.titre || obtenirLabelNoeud(nd);
+    supprimerNoeud(id);   // enregistre l'undo lui-même
+    fermerPanneau();
+    majEtatCorbeille(false);
+    // Le bouton « Annuler » de la barre d'outils est le filet au doigt :
+    // ⌘Z n'existe pas sur iPad. On le dit, parce qu'une suppression sans
+    // confirmation doit annoncer sa porte de sortie.
+    afficherToastLien('« ' + nom + ' » supprimé — le bouton Annuler le ramène.');
+    return true;
+}
+
+/** Armée pendant un drag, « ouverte » quand le doigt la survole. */
+function majEtatCorbeille(survolee) {
+    var el = elementCorbeille();
+    if (!el) return;
+    el.classList.toggle('planif-corbeille-survol', !!survolee);
+}
+
+function armerCorbeille(armee) {
+    var el = elementCorbeille();
+    if (!el) return;
+    el.classList.toggle('planif-corbeille-armee', !!armee);
+    if (!armee) el.classList.remove('planif-corbeille-survol');
+}
+
+// UN listener global plutôt qu'une retouche des trois `onMove` du drag :
+// il sort immédiatement quand rien n'est en cours de déplacement.
+document.addEventListener('pointermove', function(e) {
+    var enDrag = document.querySelector('.planif-dragging');
+    armerCorbeille(!!enDrag);
+    if (enDrag) majEtatCorbeille(pointSurCorbeille(e.clientX, e.clientY));
+});
+document.addEventListener('pointerup', function() { armerCorbeille(false); });
+document.addEventListener('pointercancel', function() { armerCorbeille(false); });
 
 function getLiensDeNoeud(noeudId) {
     var resultat = [];
@@ -7680,6 +7764,10 @@ window.planificationCarte = {
     // Exposée pour la sentinelle du panneau d'export (#424 Lot D) : le rendu
     // se vérifie en RENDANT le panneau, pas en relisant la source.
     rendrePanneauExportPlan: rendrePanneauExportPlan,
+    // Exposées pour la sentinelle de la corbeille (#433) : le dépôt se
+    // vérifie en l'EXERÇANT sur une géométrie connue, pas en lisant la source.
+    pointSurCorbeille: pointSurCorbeille,
+    deposerDansCorbeille: deposerDansCorbeille,
     // Exposées pour la sentinelle de la modale personnalisée (#431).
     remplirModaleExportPerso: remplirModaleExportPerso,
     ouvrirModaleExportPerso: ouvrirModaleExportPerso,

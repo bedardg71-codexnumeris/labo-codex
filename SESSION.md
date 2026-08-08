@@ -7,7 +7,27 @@
      ===================================================================== -->
 
 <!-- =====================================================================
-     SESSION — 8 AOÛT 2026, SOIR (même conteneur, branche `claude/session-startup-a8obyo`). ⮕⮕ LIRE EN PREMIER À LA REPRISE.
+     SESSION — 8 AOÛT 2026, SOIR (suite) — CORBEILLE DE LA PALETTE. ⮕⮕ LIRE EN PREMIER À LA REPRISE.
+     ÉTAT FACTUEL : **1.60.0** (build 0808-1836), fusionnée `main`. Vitest **1960/1960** (227 fichiers). Dernier ID BACKLOG : **#433**.
+
+     ✅ LIVRÉ — **#433 : la corbeille de la palette**, sur retour terrain iPad de Grégoire (« il n\u2019est pas possible de supprimer des éléments quand on est sur iPad »), avec sa solution proposée : une corbeille au bas de la palette Nœuds.
+
+     ▣ **LE CONSTAT ÉTAIT À NUANCER — et c\u2019est la vérification qui l\u2019a montré.** Avant de coder, relevé des chemins de suppression : (a) touche Suppr/Retour arrière — suppose un clavier ; (b) bouton « Supprimer ce nœud » de l\u2019Inspecteur — mais l\u2019Inspecteur ne s\u2019ouvre au canevas qu\u2019au **double-clic** ; (c) **et un troisième chemin trouvé en poursuivant** : le bouton 🕵️ « Inspecteur » du bas de la palette ouvre le panneau pour le nœud SÉLECTIONNÉ, et le tap simple sélectionne bien (`selectionnerNoeud` au pointerdown). ⮕ **Donc supprimer au doigt ÉTAIT possible — en trois gestes, derrière une icône de détective dont le libellé n\u2019apparaît qu\u2019au survol, inexistant au doigt.** Friction de découvrabilité, pas capacité manquante. La corbeille reste pleinement justifiée (un geste au lieu de trois, et l\u2019affordance tactile naturelle) mais le RÉCIT change — consigné tel quel dans le code, SUIVI-BUGS #153 et le BACKLOG. *J\u2019avais écrit « aucun des deux chemins n\u2019est fiable » dans le commentaire du module avant d\u2019avoir fini de chercher : corrigé sur place. Le troisième chemin était à deux greps.*
+     ▣ **MÉCANIQUE — trois décisions qui valent d\u2019être retenues.**
+        ⮕ **Le dépôt se résout par GÉOMÉTRIE** (rectangle de la corbeille contre le point de relâchement), jamais par la cible de l\u2019événement : pendant un drag, l\u2019élément sous le doigt est le bloc qu\u2019on déplace, pas ce qu\u2019il survole. Un `elementFromPoint` ou un listener sur la corbeille aurait été muet.
+        ⮕ **Retour ANTICIPÉ dans les trois `onUp`** (cas B, C, D du drag). Sans lui, `rattacherAuConteneur` / `detacherDuConteneur` s\u2019exécuteraient juste après, sur un nœud qui n\u2019existe plus. La sentinelle vérifie que le test précède le rattachement DANS CHAQUE cas.
+        ⮕ **Un seul listener `pointermove` global** pour l\u2019état armé/survolé, au lieu de retoucher les trois `onMove` — il sort immédiatement quand rien n\u2019est en drag.
+     ▣ **UX** : discrète au repos, **armée** dès qu\u2019un déplacement commence (elle se révèle quand elle devient utile), **rouge** quand le doigt la survole. Cible 44 px, `touch-action:none` (#148), deux modes. Le toast nomme le bloc supprimé et **rappelle le bouton Annuler** — ⌘Z n\u2019existe pas au doigt, une suppression sans confirmation doit annoncer sa porte de sortie.
+     ⚠ **Couleur** : `--danger` n\u2019existe PAS dans la palette du projet — écrit par réflexe, attrapé au grep, remplacé par `--rouge-erreur`. La sentinelle interdit désormais le token inventé (anti-pattern « inventer des couleurs hors palette »).
+
+     ▣ **RITUEL DE FIN.** §2 : zéro motif ajouté (aucun listener souris — ratchet #148 respecté). §3 : 1960/1960. §4 : **3 break-tests ROUGE** (retrait d\u2019UNE des trois sorties anticipées, garde « palette masquée » sauté, cible tactile ramenée à 20 px). §5 : release minor → **1.60.0 / 0808-1836**, changelog 1.60.
+
+     ⚠⚠ **PORTE TERRAIN ET QUESTION OUVERTE (la plus importante du bloc)** : **le double-clic ouvre-t-il l\u2019Inspecteur au doigt sur iPad ?** Impossible à trancher ici (WebKit indisponible en conteneur). Si NON, tout l\u2019Inspecteur — durée, semaine, objectifs servis, et la **rétroaction formative livrée hier (#424 Lot E)** — n\u2019est atteignable que par le bouton 🕵️ de la palette. Ça mériterait alors un geste plus direct (tap long ? bouton sur le bloc sélectionné ?). ⮕ **À vérifier par Grégoire en deux touchers**, avant tout autre chantier Alignement.
+     ⮕ **QUEUES OUVERTES** : inchangées (#421 reliquat · #426 · #430/#428 rentrée · #425 · #418 · #427 ~20 août) + 📐 double-clic iPad ci-dessus.
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 8 AOÛT 2026, SOIR (même conteneur, branche `claude/session-startup-a8obyo`).
      ÉTAT FACTUEL : **1.59.0** (build 0808-1706), fusionnée `main`. Vitest **1947/1947** (226 fichiers). Dernier ID BACKLOG : **#432**.
 
      ✅ LIVRÉ — **#432 : LES GUIDES HARMONISÉS** (forme + contenu). Grégoire a envoyé les 8 captures du guide de la Carte (Chrome/Mac) : « des polices parfois trop grosses, uniformiser la présentation », puis « je voudrais que les trois guides se ressemblent » avant de s'absenter. Plan versionné AVANT de coder : `plans de travail/PLAN-guides-harmonisation-2026-08-08.md`.
@@ -5696,12 +5716,12 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
 | Point | Valeur attendue |
 |---|---|
-| `origin/main` | **1.59.0** — porte #424 (lots A→G) + #152 + #431 + #432 |
+| `origin/main` | **1.60.0** — porte #424 (lots A→G) + #152 + #431 + #432 + #433 |
 | Branches en avance | **AUCUNE.** ⚠ Le vérifier, ne pas le croire — balayage ci-dessous |
-| Version | `{"build":"0808-1706","beta":"1.59.0"}` |
-| Vitest | **1947/1947** (226 fichiers) |
+| Version | `{"build":"0808-1836","beta":"1.60.0"}` |
+| Vitest | **1960/1960** (227 fichiers) |
 | Playwright WebKit | non exécutable en conteneur → CI à la PR |
-| Dernier ID BACKLOG | **#432** |
+| Dernier ID BACKLOG | **#433** |
 | Arbre | propre |
 
 ⚠ **Le clone du conteneur peut être SHALLOW** (50 commits) : `git fetch

@@ -19761,6 +19761,51 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     padding: 8px 12px;
     overflow: auto;
 }
+/* === CORBEILLE DE LA PALETTE (#433, 8 août 2026) ===
+   Cible de DÉPÔT, pas un bouton : on y glisse un bloc pour le supprimer.
+   Discrète au repos, elle s'ARME dès qu'un déplacement commence (c'est là
+   qu'elle devient utile) et s'OUVRE quand le doigt la survole. Hauteur
+   généreuse : c'est une cible tactile, visée en fin de geste. */
+.planif-corbeille {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 4px 6px 0;
+    padding: 8px 6px;
+    min-height: 44px;                    /* cible tactile iPad */
+    border: 1px dashed rgba(106, 172, 184, 0.25);
+    border-radius: 8px;
+    color: var(--texte-muted, #5a7a88);
+    font-size: 11px;
+    opacity: 0.55;
+    transition: opacity 0.15s, border-color 0.15s, background 0.15s;
+    touch-action: none;                  /* #148 : le geste appartient au drag */
+}
+.planif-corbeille .palette-icon { width: 16px; height: 16px; }
+.planif-corbeille-libelle { letter-spacing: 0.02em; }
+
+/* Armée : un déplacement est en cours, le dépôt est possible. */
+.planif-corbeille-armee {
+    opacity: 1;
+    border-style: solid;
+    border-color: rgba(106, 172, 184, 0.5);
+}
+/* Survolée : relâcher ICI supprime — l'avertissement doit être sans ambiguïté. */
+.planif-corbeille-survol {
+    background: rgba(220, 38, 38, 0.12);
+    border-color: var(--rouge-erreur, #dc2626);
+    color: var(--rouge-erreur, #dc2626);
+    opacity: 1;
+}
+.mode-clair .planif-corbeille { border-color: rgba(6, 93, 187, 0.25); }
+.mode-clair .planif-corbeille-armee { border-color: rgba(6, 93, 187, 0.5); }
+.mode-clair .planif-corbeille-survol {
+    background: rgba(220, 38, 38, 0.08);
+    border-color: var(--rouge-erreur, #dc2626);
+    color: var(--rouge-erreur, #dc2626);
+}
+
 .planif-palette-bas-btns {
     display: flex;
     justify-content: center;
