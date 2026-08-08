@@ -272,3 +272,97 @@ describe('Reprise · les notes de leçon suivent la carte (#367 × #407)', () =>
         expect(Object.keys(notes)).toHaveLength(1);
     });
 });
+
+describe('Reprise · vivacité de productionId (#425 préalable)', () => {
+    let api;
+    beforeEach(() => { api = monterModule().planificationDonnees; });
+
+    // `productions` est NAMESPACÉE par trimestre (contrairement à `cours`,
+    // global) : une reprise inter-trimestre emportait donc des références
+    // mortes EN SILENCE, sur DEUX chemins — la metadata des nœuds Évaluation
+    // et les `activites[].productionId` des notes de séance. Le trou s'ouvrait
+    // à chaque rentrée (audit du 8 août, §2.2 et §3bis D6).
+
+    function poserReprise({ noeuds, notesSource, productionsCible, productionsNues }) {
+        poserTrimestre('h2026', [{
+            id: 'carte_1', nom: '601-101', coursId: 'c-601',
+            noeuds: noeuds || []
+        }]);
+        poserTrimestre('a2026', [{ id: 'carte_9', nom: 'Vide' }]);
+        store['cours'] = [{ id: 'c-601', code: '601-101' }];
+        if (notesSource) store['h2026_planification_seances'] = notesSource;
+        if (productionsCible) store['a2026_productions'] = productionsCible;
+        if (productionsNues) store['productions'] = productionsNues;
+        return api.importerCarteDepuisTrimestre('h2026', 'carte_1');
+    }
+
+    it('nœud Évaluation : une production MORTE dans le trimestre d’arrivée → champ absent', () => {
+        const nouvelId = poserReprise({
+            noeuds: [{ id: 'n1', type: 'evaluation', titre: 'Dissertation',
+                       metadata: { productionId: 'prod-h2026-morte' } }],
+            productionsCible: [{ id: 'prod-a2026-autre', nom: 'Autre' }]
+        });
+
+        const noeud = store['a2026_planification_mindmap'].cartes[nouvelId].noeuds[0];
+        expect(noeud.metadata.productionId).toBeUndefined();
+    });
+
+    it('nœud Évaluation : une production VIVANTE est conservée', () => {
+        const nouvelId = poserReprise({
+            noeuds: [{ id: 'n1', type: 'evaluation', titre: 'Dissertation',
+                       metadata: { productionId: 'prod-commune' } }],
+            productionsCible: [{ id: 'prod-commune', nom: 'Dissertation' }]
+        });
+
+        const noeud = store['a2026_planification_mindmap'].cartes[nouvelId].noeuds[0];
+        expect(noeud.metadata.productionId).toBe('prod-commune');
+    });
+
+    it('le repli sur la clé NUE compte comme vivant (leçon #419 : lire par le chemin par lequel on juge)', () => {
+        // Un trimestre dont les productions n'ont pas migré vers la clé
+        // namespacée les sert encore par la clé nue (`trimestres.js`). Sans le
+        // repli, le contrôle déclarerait mortes des références vivantes — un
+        // faux massacre.
+        const nouvelId = poserReprise({
+            noeuds: [{ id: 'n1', type: 'evaluation', titre: 'Dissertation',
+                       metadata: { productionId: 'prod-nue' } }],
+            productionsNues: [{ id: 'prod-nue', nom: 'Servie par la clé nue' }]
+        });
+
+        const noeud = store['a2026_planification_mindmap'].cartes[nouvelId].noeuds[0];
+        expect(noeud.metadata.productionId).toBe('prod-nue');
+    });
+
+    it('la SOURCE garde sa référence intacte — le contrôle ne juge que la copie', () => {
+        poserReprise({
+            noeuds: [{ id: 'n1', type: 'evaluation', titre: 'Dissertation',
+                       metadata: { productionId: 'prod-h2026-morte' } }]
+        });
+
+        const origine = store['h2026_planification_mindmap'].cartes['carte_1'].noeuds[0];
+        expect(origine.metadata.productionId).toBe('prod-h2026-morte');
+    });
+
+    it('notes de séance : productionId MORT dans les activités copiées → null, la rétroaction survit', () => {
+        const nouvelId = poserReprise({
+            noeuds: [{ id: 'planif-noeud_3', type: 'lecon', titre: 'Accueil' }],
+            notesSource: {
+                'carte_1::planif-noeud_3': {
+                    note: 'Plénière',
+                    activites: {
+                        'act_1': { retroaction: 'orale', productionId: 'prod-h2026-morte' },
+                        'act_2': { retroaction: 'ecrite', productionId: 'prod-commune' }
+                    }
+                }
+            },
+            productionsCible: [{ id: 'prod-commune', nom: 'Dissertation' }]
+        });
+
+        const entree = store['a2026_planification_seances'][`${nouvelId}::planif-noeud_3`];
+        expect(entree.activites['act_1'].productionId).toBeNull();
+        expect(entree.activites['act_1'].retroaction).toBe('orale');
+        expect(entree.activites['act_2'].productionId).toBe('prod-commune');
+        expect(entree.note).toBe('Plénière');
+    });
+});
+
