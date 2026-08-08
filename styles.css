@@ -19058,6 +19058,22 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 .mode-clair .planif-import-tri-nom { color: var(--texte-principal); }
 .mode-clair .planif-import-tri-ligne:hover { background: rgba(6, 93, 187, 0.06); }
 
+/* Panneau « Exporter le plan… » (portage #424) — patron des panneaux du menu
+   Actions ; seules les rangées de radios lui sont propres. */
+.planif-export-plan-choix {
+    padding: 6px 4px;
+    border-radius: 6px;
+    min-height: 32px;
+}
+.planif-export-plan-choix:hover { background: var(--surface-element, #244858); }
+.mode-clair .planif-export-plan-choix:hover { background: rgba(6, 93, 187, 0.06); }
+.planif-export-plan-choix input[type="radio"] {
+    width: auto;
+    margin: 0;
+    accent-color: var(--accent-primaire, #3b82f6);
+}
+.planif-export-plan-actions { justify-content: flex-end; margin-top: 6px; }
+
 /* #371 (relais Cadre→Trimestre, 4 août) : semaines spéciales empilées —
    deux paires de dates « du/au » ne tiennent pas sur une demi-largeur. */
 .pile-semaines-speciales {

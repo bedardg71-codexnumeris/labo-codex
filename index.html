@@ -4171,10 +4171,13 @@
                                             <button class="planif-action-item" id="planif-btn-dupliquer-carte">Dupliquer cette carte</button>
                                             <button class="planif-action-item" id="planif-btn-importer-carte">Importer une carte (fichier)</button>
                                             <button class="planif-action-item" id="planif-btn-import-trimestre">Importer d'un autre trimestre…</button>
+                                            <button class="planif-action-item" id="planif-btn-exporter-plan">Exporter le plan&hellip;</button>
                                             <button class="planif-action-item" id="planif-btn-exporter-carte">Exporter cette carte</button>
                                             <hr class="planif-action-sep">
                                             <button class="planif-action-item planif-danger" id="planif-btn-supprimer-carte">Supprimer cette carte</button>
                                         </div>
+                                        <!-- Panneau d'export du plan : 3 niveaux × 3 formats (portage #424, même patron) -->
+                                        <div class="planif-actions-dropdown planif-import-tri-panel" id="planif-export-plan-panel"></div>
                                         <!-- Panneau import inter-trimestre (rempli par JS, patron Brique C) -->
                                         <div class="planif-actions-dropdown planif-import-tri-panel" id="planif-import-tri-panel"></div>
                                         <!-- Panneau du cours rattaché (même patron, rempli par JS) -->
@@ -4400,8 +4403,7 @@
                                 <div class="planif-cal-header">
                                     <h3>Organisateur</h3>
                                     <div class="planif-cal-header-actions">
-                                        <button class="planif-cal-btn-export" id="planif-btn-export-texte" title="Exporter en texte">&#128196; Texte</button>
-                                        <button class="planif-cal-btn-export" id="planif-btn-export-tsv" title="Exporter en TSV">&#128202; TSV</button>
+                                        <!-- Les boutons Texte/TSV sont partis dans « Actions → Exporter le plan… » (portage #424) -->
                                         <button class="planif-btn-fermer" id="planif-btn-fermer-seances"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
                                     </div>
                                 </div>
