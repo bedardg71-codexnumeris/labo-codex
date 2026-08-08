@@ -17,7 +17,9 @@
 | **Dernière mise à jour** | 8 août 2026, en matinée |
 
 ⮕ Le détail des priorités, de la prémisse chiffrée et des décisions en attente
-est au **§3 de `SESSION.md`**.
+est au **§3 de `SESSION.md`**. **Prochain chantier préparé** : portage des
+exports — plan complet dans
+`plans de travail/PLAN-portage-exports-carte-2026-08-08.md`.
 
 ---
 
