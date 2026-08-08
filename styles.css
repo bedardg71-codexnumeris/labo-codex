@@ -19005,9 +19005,8 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     color: var(--texte-muted, #5a7a88);
     margin-top: 2px;
 }
-/* Lecture seule dans l'inspecteur : Σ des durées (leçon) et étendue temporelle
-   dérivée des leçons (séquence). Même rôle visuel, une seule règle. */
-.planif-duree-rollup,
+/* Lecture seule dans l'inspecteur : étendue temporelle dérivée des leçons.
+   (Le Σ des durées est parti le 8 août — il vit dans l'en-tête du nœud.) */
 .planif-panneau-derive {
     font-size: 12px;
     color: var(--texte-secondaire, #8aa4b0);
@@ -19489,6 +19488,63 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
    compte PAS sur l'héritage, chaque propriété est posée ici (leçon du
    rattrapage 1.47.2, où deux règles génériques au poids d'un ID écrasaient
    des classes). */
+/* Durée dans l'en-tête du nœud (8 aout 2026). L'input est TOUJOURS visible,
+   vide quand rien n'est posé : rendre la fonction visible plutôt que devinable
+   (même décision que le badge objectif grisé, friction F1). */
+.planif-noeud-duree-boite {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: auto;
+}
+.planif-noeud-duree {
+    width: 34px;
+    padding: 0 2px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--texte-secondaire, #8aa4b0);
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 600;
+    text-align: right;
+    -moz-appearance: textfield;
+}
+.planif-noeud-duree::-webkit-outer-spin-button,
+.planif-noeud-duree::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.planif-noeud-duree:hover { border-color: var(--planif-couleur-bordure); }
+.planif-noeud-duree:focus {
+    outline: none;
+    border-color: var(--planif-couleur-selection);
+    background: var(--surface-carte, #1a3040);
+    color: var(--planif-couleur-texte);
+}
+.planif-noeud-duree-unite {
+    font-size: 9px;
+    color: var(--texte-muted, #5a7a88);
+}
+/* Compteur de rollup sur les conteneurs — AFFICHAGE seul, jamais saisissable :
+   il se déduit du contenu, l'écrire à la main le contredirait. */
+.planif-noeud-rollup {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--accent-primaire);
+    white-space: nowrap;
+    margin-left: auto;
+}
+.planif-noeud-rollup--vide { color: var(--texte-muted, #5a7a88); font-weight: 400; }
+/* Deux éléments réclament `margin-left: auto` dans le même en-tête : seul le
+   PREMIER doit pousser, sinon ils s'éparpillent (piège du 7 aout, #412). */
+.planif-noeud-rollup + .planif-noeud-semaine { margin-left: 6px; }
+
+/* iPad : la cible doit rester atteignable au doigt sans grossir la boite. */
+@media (hover: none) {
+    .planif-noeud-duree { min-height: 24px; width: 40px; font-size: 11px; }
+}
+
+.mode-clair .planif-noeud-duree { color: var(--texte-secondaire); }
+.mode-clair .planif-noeud-duree:focus { background: #ffffff; color: var(--texte-principal); }
+
 .planif-noeud-semaine {
     margin-left: auto;
     font-size: 10px;
@@ -20585,43 +20641,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 }
 .mode-clair #planif-panneau label {
     color: var(--texte-secondaire);
-}
-
-/* Calculateur de durée */
-.planif-duree-calc {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-.planif-duree-calc input {
-    width: 70px !important;
-    text-align: center;
-    flex: none;
-}
-.planif-duree-sep {
-    color: var(--texte-muted, #5a7a88);
-    font-size: 13px;
-}
-.planif-duree-total {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--accent-primaire);
-    white-space: nowrap;
-}
-.planif-duree-ajouter {
-    margin-top: 12px;
-    padding: 6px 12px;
-    font-size: 12px;
-    color: var(--texte-secondaire);
-    background: none;
-    border: 1px dashed var(--planif-couleur-bordure);
-    border-radius: 6px;
-    cursor: pointer;
-    width: 100%;
-}
-.planif-duree-ajouter:hover {
-    color: var(--accent-primaire);
-    border-color: var(--accent-primaire);
 }
 
 #planif-panneau .planif-btn-supprimer {

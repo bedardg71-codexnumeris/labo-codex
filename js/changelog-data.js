@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            version: '1.57',
+            couleur: 'bleu',
+            titre: 'Alignement : la durée se lit sur la carte',
+            items: [
+                'La durée estimée se saisit directement dans l’en-tête du bloc, sur la carte. Plus besoin d’ouvrir l’Inspecteur ni de cliquer « + Durée » pour la révéler : le champ est toujours là, vide tant que tu n’as rien posé.',
+                'Les leçons et les séquences affichent un compteur « Σ » dans leur en-tête : le total de tout ce qu’elles contiennent, mis à jour pendant que tu tapes. Une activité de 20 min ajoutée à une leçon fait monter le total de la leçon ET celui de sa séquence.',
+                'L’évaluation porte maintenant une durée, elle aussi — elle occupe du temps de classe comme le reste.',
+                'L’Inspecteur ne répète plus la durée : il sert à ajouter ce qui ne tient pas dans un bloc (description, objectifs servis, production rattachée), pas à redire ce que la carte montre déjà.'
+            ]
+        },
+        {
             version: '1.56',
             couleur: 'vert',
             titre: 'Alignement : l’enseignant entre dans la carte',

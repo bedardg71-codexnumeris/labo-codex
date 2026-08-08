@@ -550,6 +550,98 @@ function definirSemaineLecon(leconId, semaine) {
  * `reconstruireDOM()` passe souvent et une carte porte des dizaines de blocs :
  * écrire quinze options par bloc à chaque passage serait du travail jeté.
  */
+/**
+ * Champ de durée posé DANS l'en-tête du nœud (8 août 2026, décision Grégoire).
+ *
+ * Il vivait dans l'Inspecteur, derrière un bouton « + » qui le révélait. Deux
+ * défauts : il fallait ouvrir un panneau pour lire une information qu'on
+ * consulte en survolant sa carte, et la fonction était indécouvrable tant
+ * qu'aucune durée n'était posée — le reproche exact fait au badge 🎯 avant
+ * qu'on le grise (friction F1). L'input est donc TOUJOURS VISIBLE, vide quand
+ * il n'y a rien : rendre la fonction visible plutôt que devinable.
+ *
+ * ⚠ SÉCURITÉ — `parseInt` n'est pas cosmétique. `metadata.duree` est une donnée
+ * PERSISTÉE qui peut venir d'un import (bibliothèque d'alignements, import
+ * inter-trimestre) : sans coercition, une valeur non numérique sortirait de
+ * l'interpolation dans l'attribut `value=`, et la CSP ne protège pas
+ * l'injection d'attributs. Invariant hérité de l'Inspecteur, il voyage avec le
+ * champ — cf. `sentinelle-inspecteur-duree-coercition`.
+ */
+function dureeControleHTML(n) {
+    if (!n || TYPES_AVEC_DUREE.indexOf(n.type) === -1) return '';
+    var minutes = parseInt(n.metadata && n.metadata.duree, 10) || '';
+    return '<span class="planif-noeud-duree-boite">' +
+        '<input type="number" class="planif-noeud-duree" data-duree-noeud="' + echapperHtml(n.id) + '"' +
+        ' value="' + minutes + '" min="1" max="600" placeholder="—"' +
+        ' title="Durée estimée, en minutes"' +
+        ' aria-label="Durée estimée de ce bloc, en minutes">' +
+        '<span class="planif-noeud-duree-unite" aria-hidden="true">min</span>' +
+        '</span>';
+}
+
+/**
+ * Compteur de durée dans l'en-tête d'une leçon ou d'une séquence.
+ *
+ * AFFICHAGE PUR : `dureeRollupNoeud` calcule déjà ce total, récursivement, et
+ * alimente le planificateur depuis le 6 août. Aucun calcul neuf, aucune
+ * nouvelle source de vérité — on montre sur la carte ce qui n'était lisible
+ * qu'en ouvrant l'Inspecteur ou en regardant la grille.
+ */
+/**
+ * Texte du compteur. Une SEULE formulation, partagée par le rendu initial et le
+ * rafraîchissement — sinon les deux divergent au premier ajustement, et le
+ * total afficherait deux formes selon qu'on vient de charger la carte ou de
+ * taper une durée. Espaces insécables LITTÉRALES (\u00a0) et non `&nbsp;` :
+ * elles traversent aussi bien `innerHTML` que `textContent`, ce qui permet au
+ * rafraîchissement de se passer d'`innerHTML`.
+ */
+function texteRollup(total) {
+    return total ? '\u03a3\u00a0' + total + '\u00a0min' : '\u03a3\u00a0\u2014';
+}
+
+function compteurDureeHTML(n) {
+    if (!n || !(TYPES[n.type] && TYPES[n.type].conteneur)) return '';
+    var total = dureeRollupNoeud(n);
+    return '<span class="planif-noeud-rollup' + (total ? '' : ' planif-noeud-rollup--vide') + '"' +
+        ' data-rollup-noeud="' + echapperHtml(n.id) + '"' +
+        ' title="' + (total
+            ? 'Somme des durées de son contenu'
+            : 'Aucune durée estimée dans son contenu') + '">' +
+        texteRollup(total) +
+        '</span>';
+}
+
+/**
+ * Rafraîchit les compteurs de TOUS les ancêtres d'un nœud, sans reconstruire le
+ * DOM. C'est la seule logique neuve du lot : le rollup n'existait qu'à deux
+ * endroits recalculés à l'ouverture (l'Inspecteur, le planificateur) ; dans
+ * l'en-tête d'un nœud il devient permanent, donc taper une durée sur une
+ * activité doit remonter la chaîne activité → leçon → séquence.
+ *
+ * On remonte par `parent` plutôt que de tout re-rendre : reconstruire le DOM à
+ * chaque frappe ferait perdre le focus de l'input qu'on est en train de remplir.
+ */
+function rafraichirRollupsAncetres(noeudId) {
+    var vus = new Set();
+    var courant = etat.noeuds.get(noeudId);
+    while (courant && courant.parent && !vus.has(courant.parent)) {
+        vus.add(courant.parent);
+        var parent = etat.noeuds.get(courant.parent);
+        if (!parent) break;
+        var el = document.getElementById(parent.id);
+        var cible = el && el.querySelector('[data-rollup-noeud]');
+        if (cible) {
+            var total = dureeRollupNoeud(parent);
+            // `textContent` et non `innerHTML` : le total est un nombre, mais
+            // un point d'injection qu'on peut supprimer vaut mieux qu'un point
+            // d'injection qu'on annote comme sûr.
+            cible.textContent = texteRollup(total);
+            cible.classList.toggle('planif-noeud-rollup--vide', !total);
+        }
+        courant = parent;
+    }
+}
+
 function selecteurSemaineHTML(n) {
     if (!n || (n.type !== 'lecon' && n.type !== 'sequence')) return '';
     var courante = null;
@@ -872,6 +964,35 @@ var TYPES_CONNAISSANCE = ['factuelle', 'conceptuelle', 'procedurale', 'metacogni
 // sans quoi chaque nouveau frère devait retrouver tous les triplets.
 var TYPES_ACTIVITE = ['expose', 'activite', 'soutien', 'revision',
     'ouverture', 'modelisation', 'pratique-guidee', 'pratique-autonome', 'cloture'];
+
+/**
+ * Ce qui CONSOMME DU TEMPS DE CLASSE (8 août 2026).
+ *
+ * ⚠ Liste SÉPARÉE de `TYPES_ACTIVITE`, et non un ajout dedans. Les deux disent
+ * des choses différentes : `TYPES_ACTIVITE` répond à « est-ce une tâche
+ * d'apprentissage ? » et alimente `normaliserType()`, donc la résolution des
+ * verbes de liens. Y glisser `evaluation` ferait retomber
+ * `normaliserType('evaluation')` sur `'activite'` et changerait en silence les
+ * verbes disponibles pour les paires non couvertes — relier deux évaluations
+ * offrirait soudain « complète / conduit à », qui ne donne rien aujourd'hui.
+ *
+ * Une évaluation occupe une période sans être une activité. Même raisonnement
+ * que `TYPES_AVEC_NIVEAU_COGNITIF` plus bas, qui exclut délibérément les cinq
+ * étapes de méthode : un prédicat par question, jamais un rabattement forcé.
+ *
+ * ⚠ Les TYPES DE CONNAISSANCES n'y sont PAS, et c'est une décision (Grégoire,
+ * 8 août). Une connaissance ne consomme pas de temps — l'exposé ou l'activité
+ * qui la fait acquérir, oui. Lui donner une durée la ferait compter EN PLUS de
+ * cette activité dans `dureeRollupNoeud`, qui additionne tous les descendants
+ * d'une leçon : le compteur afficherait un total faux sans rien pour le
+ * signaler. Et le clonage aggraverait le tout — `propagerModification` recopie
+ * la metadata entière vers toutes les instances, or une connaissance est
+ * précisément ce qu'on réutilise d'une leçon à l'autre : les trois instances
+ * partageraient UNE durée.
+ *
+ * ⮕ Règle qui arbitre : UNE MINUTE DE CLASSE APPARTIENT À EXACTEMENT UN NŒUD.
+ */
+var TYPES_AVEC_DUREE = TYPES_ACTIVITE.concat(['evaluation']);
 
 function normaliserType(type) {
     if (TYPES_CONNAISSANCE.indexOf(type) !== -1) return 'connaissance';
@@ -1868,60 +1989,16 @@ function ouvrirPanneau(id) {
     const extra = document.getElementById('planif-panneau-extra');
     extra.innerHTML = '';
 
-    // Chantier temps (4 ao\u00fbt 2026, d\u00e9cision Gr\u00e9goire) : les ACTIVIT\u00c9S portent
-    // une dur\u00e9e estim\u00e9e en minutes ; la dur\u00e9e d'une LE\u00c7ON est un rollup pur
-    // (somme de ses activit\u00e9s). La conversion en p\u00e9riodes suit TOUJOURS
-    // \u00ab Dur\u00e9e d'une p\u00e9riode \u00bb du cadre (obtenirDureePeriode) \u2014 jamais en dur.
-    if (TYPES_ACTIVITE.indexOf(donnees.type) !== -1) {
-        var meta = donnees.metadata;
-        var hasDuree = !!meta.duree;
-        extra.innerHTML +=
-            '<div class="planif-duree-section" id="planif-duree-section" style="' + (hasDuree ? '' : 'display:none') + '">' +
-                '<label for="planif-duree-min">Dur\u00e9e estim\u00e9e</label>' +
-                '<div class="planif-duree-calc">' +
-                    '<input type="number" id="planif-duree-min" value="' + (parseInt(meta.duree, 10) || '') + '" min="1" max="600" placeholder="min">' +
-                    '<span class="planif-duree-sep">min</span>' +
-                    '<span class="planif-duree-total" id="planif-duree-equiv">' + equivalencePeriodesTexte(meta.duree) + '</span>' +
-                '</div>' +
-            '</div>' +
-            '<button type="button" class="planif-duree-ajouter" id="planif-duree-ajouter" style="' + (hasDuree ? 'display:none' : '') + '">+ Dur\u00e9e</button>';
+    // ▣ LA DURÉE A QUITTÉ CE PANNEAU (8 août 2026, décision Grégoire).
+    // Le champ « Durée estimée » vit désormais dans l'EN-TÊTE DU NŒUD, et le
+    // rollup de la leçon y est un compteur permanent. Deux motifs :
+    //   • on consultait ici, en ouvrant un panneau, une information qu'on lit
+    //     en survolant sa carte ;
+    //   • le rollup était une LECTURE SEULE répétée — l'Inspecteur doit ajouter
+    //     de l'information, pas redoubler ce que la carte montre déjà.
+    // Voir `dureeControleHTML` et `compteurDureeHTML`. La coercition `parseInt`
+    // et la propagation aux clones ont voyagé avec le champ.
 
-        function recalcDuree() {
-            var min = parseInt(document.getElementById('planif-duree-min').value) || 0;
-            meta.duree = min || null;
-            // L'ancien couple p\u00e9riodes \u00d7 min/p\u00e9r PAR N\u0152UD faisait doublon avec
-            // la dur\u00e9e de p\u00e9riode du cadre : purg\u00e9 \u00e0 la premi\u00e8re r\u00e9\u00e9dition.
-            delete meta.periodes;
-            delete meta.minutesParPeriode;
-            document.getElementById('planif-duree-equiv').textContent = equivalencePeriodesTexte(min);
-            propagerModification(id, 'metadata', JSON.parse(JSON.stringify(meta)));
-            sauvegarder();
-            mettreAJourPlanificateur();
-        }
-
-        var minInput = extra.querySelector('#planif-duree-min');
-        minInput.addEventListener('focus', function() { enregistrerPourUndo(); });
-        minInput.addEventListener('input', recalcDuree);
-
-        extra.querySelector('#planif-duree-ajouter').addEventListener('click', function() {
-            document.getElementById('planif-duree-section').style.display = '';
-            this.style.display = 'none';
-            document.getElementById('planif-duree-min').focus();
-        });
-    }
-
-    if (donnees.type === 'lecon') {
-        var totalLecon = dureeRollupNoeud(donnees);
-        extra.innerHTML +=
-            '<div class="planif-duree-section">' +
-                '<label>Dur\u00e9e (somme des activit\u00e9s)</label>' +
-                '<div class="planif-duree-rollup">' +
-                    (totalLecon
-                        ? '\u03a3 ' + totalLecon + '\u2009min ' + equivalencePeriodesTexte(totalLecon)
-                        : '\u2014 estime la dur\u00e9e de ses activit\u00e9s pour la calculer') +
-                '</div>' +
-            '</div>';
-    }
 
     // Ancrage temporel : SAISI sur la leçon (D3), DÉRIVÉ sur la séquence.
     // L'ancien couple « Semaine début / Semaine fin » de la séquence est retiré
@@ -3653,6 +3730,7 @@ function reconstruireDOM() {
             el.innerHTML =
                 '<div class="planif-noeud-entete">' +
                     '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(n) + '">' + obtenirLabelNoeud(n) + '</span>' +
+                    compteurDureeHTML(n) +
                     selecteurSemaineHTML(n) +
                     (estLecon
                         ? '<span class="planif-badge-objectif' + (objs.length ? '' : ' planif-badge-objectif--vide') + '"' +
@@ -3679,6 +3757,7 @@ function reconstruireDOM() {
             el.innerHTML =
                 '<div class="planif-noeud-entete">' +
                     '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(n) + '">' + obtenirLabelNoeud(n) + '</span>' +
+                    dureeControleHTML(n) +
                 '</div>' +
                 '<div class="planif-noeud-titre" contenteditable="true">' + echapperHtml(n.titre || '') + '</div>' +
                 '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
@@ -4531,6 +4610,38 @@ function attacherEvenements(el, donnees) {
             // gestes ne peuvent donc pas diverger.
             deposerDansGrille(donnees.type, id, cible);
             reconstruireDOM();
+        });
+    }
+
+    // === DURÉE DANS L'EN-TÊTE (8 août 2026) ===
+    var champDuree = el.querySelector('.planif-noeud-duree');
+    if (champDuree) {
+        // Même précaution que le sélecteur de semaine : sans `stopPropagation`,
+        // toucher le champ démarrerait le déplacement du bloc.
+        ['pointerdown', 'mousedown', 'click', 'dblclick'].forEach(function(evt) {
+            champDuree.addEventListener(evt, function(e) { e.stopPropagation(); });
+        });
+        champDuree.addEventListener('focus', function() { enregistrerPourUndo(); });
+        champDuree.addEventListener('input', function(e) {
+            e.stopPropagation();
+            var min = parseInt(champDuree.value, 10) || 0;
+            if (!donnees.metadata) donnees.metadata = {};
+            donnees.metadata.duree = min || null;
+            // L'ancien couple périodes × min/pér PAR NŒUD faisait doublon avec
+            // la durée de période du cadre : purgé à la première réédition.
+            // (Comportement repris tel quel de l'Inspecteur, d'où ce champ
+            // descend — le retirer laisserait des clés mortes se réveiller.)
+            delete donnees.metadata.periodes;
+            delete donnees.metadata.minutesParPeriode;
+            // ⚠ La propagation aux clones VOYAGE avec le champ. Un nœud cloné
+            // est une instance liée : sa durée est la même partout, sinon deux
+            // instances du même bloc afficheraient des nombres différents.
+            propagerModification(id, 'metadata', JSON.parse(JSON.stringify(donnees.metadata)));
+            // On remonte la chaîne au lieu de reconstruire : reconstruire ferait
+            // perdre le focus du champ qu'on est en train de remplir.
+            rafraichirRollupsAncetres(id);
+            sauvegarder();
+            mettreAJourPlanificateur();
         });
     }
 
@@ -7625,6 +7736,13 @@ window.planificationCarte = {
     peutContenir: peutContenir,
     // Exposés pour la sentinelle du graphe (8 août) : les invariants de LIEN et
     // de DURÉE se vérifient en exerçant le module, jamais en lisant sa source.
+    // Exposée pour la sentinelle de coercition : l'invariant de sécurité se
+    // vérifie en RENDANT le contrôle avec une valeur empoisonnée, pas en
+    // relisant la source.
+    dureeControleHTML: dureeControleHTML,
+    compteurDureeHTML: compteurDureeHTML,
+    rafraichirRollupsAncetres: rafraichirRollupsAncetres,
+    TYPES_AVEC_DUREE: TYPES_AVEC_DUREE,
     resoudreVerbe: resoudreVerbe,
     dureeRollupNoeud: dureeRollupNoeud,
     // ⚠ Exposée pour UNE raison précise (8 août) : l'ordre « brut d'abord,
