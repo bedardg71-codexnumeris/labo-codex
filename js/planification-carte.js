@@ -934,6 +934,30 @@ const RETROACTIONS = [
     ['pairs', 'Par les pairs']
 ];
 
+// Le sélecteur de rétroaction de l'Inspecteur — DEUX libellés, une fabrique
+// (#424 Lot E, décision D2b option 2) : « Rétroaction formative » sur une
+// activité, « Rétroaction sur le rendu » sur une évaluation. Libellés
+// statiques, valeurs de RETROACTIONS : rien à échapper.
+function selecteurRetroactionHTML(libelle, valeurCourante) {
+    var val = valeurCourante || 'aucune';
+    var html = '<label for="planif-panneau-retroaction">' + libelle + '</label>' +
+        '<select id="planif-panneau-retroaction">';
+    for (var ri = 0; ri < RETROACTIONS.length; ri++) {
+        html += '<option value="' + RETROACTIONS[ri][0] + '"' +
+            (val === RETROACTIONS[ri][0] ? ' selected' : '') + '>' + RETROACTIONS[ri][1] + '</option>';
+    }
+    return html + '</select>';
+}
+
+// Porte d'écriture UNIQUE de metadata.retroaction (#424 Lot E). « aucune »
+// RETIRE le champ : un défaut n'est pas un rattachement — même règle que le
+// relevé D1, qui ne comptait pas les 'aucune' comme des données.
+function appliquerRetroactionNoeud(donnees, valeur) {
+    if (!donnees.metadata) donnees.metadata = {};
+    if (!valeur || valeur === 'aucune') delete donnees.metadata.retroaction;
+    else donnees.metadata.retroaction = valeur;
+}
+
 const TYPES_LIENS = [
     { id: 'se_decline_en',        label: 'se décline en' },
     { id: 'se_concretise_dans',   label: 'se concrétise dans' },
@@ -2158,15 +2182,22 @@ function ouvrirPanneau(id) {
         });
     }
 
+    // #424 Lot E (veto D2b) : la rétroaction FORMATIVE vit sur l'ACTIVITÉ —
+    // elle porte sur le travail PENDANT qu'il se fait. Jusqu'ici, poser ce
+    // geste n'était possible que depuis la page « Plan de la leçon », celle
+    // qu'on supprime : la capacité entre dans l'Inspecteur avant que la page
+    // meure. Écrit metadata.retroaction du nœud activité.
+    if (TYPES_ACTIVITE.indexOf(donnees.type) !== -1) {
+        extra.innerHTML += selecteurRetroactionHTML('Rétroaction formative', donnees.metadata.retroaction);
+        // ⚠ Listener posé EN FIN de ouvrirPanneau — le bloc « niveau
+        // cognitif » ci-dessous re-sérialise `extra`.
+    }
+
     if (donnees.type === 'evaluation') {
-        var retros = RETROACTIONS;
-        var retVal = donnees.metadata.retroaction || 'aucune';
-        var htmlRetro = '<label for="planif-panneau-retroaction">Rétroaction</label>' +
-            '<select id="planif-panneau-retroaction">';
-        for (var ri = 0; ri < retros.length; ri++) {
-            htmlRetro += '<option value="' + retros[ri][0] + '"' + (retVal === retros[ri][0] ? ' selected' : '') + '>' + retros[ri][1] + '</option>';
-        }
-        htmlRetro += '</select>';
+        // Décision Grégoire (option 2, 8 août midi) : ce sélecteur-ci garde un
+        // sens DISTINCT — la rétroaction sur le RENDU, comment l'étudiant
+        // reçoit son travail commenté. Deux notions, deux libellés.
+        extra.innerHTML += selecteurRetroactionHTML('Rétroaction sur le rendu', donnees.metadata.retroaction);
 
         var prodVal = donnees.metadata.productionId || '';
         var productions = chargerProductions();
@@ -2195,18 +2226,13 @@ function ouvrirPanneau(id) {
         }
         htmlProd += '</select>';
 
-        extra.innerHTML += htmlRetro + htmlProd;
-
-        extra.querySelector('#planif-panneau-retroaction').addEventListener('change', function(e) {
-            enregistrerPourUndo();
-            donnees.metadata.retroaction = e.target.value;
-            sauvegarder();
-        });
-        extra.querySelector('#planif-panneau-production').addEventListener('change', function(e) {
-            enregistrerPourUndo();
-            donnees.metadata.productionId = e.target.value || null;
-            sauvegarder();
-        });
+        extra.innerHTML += htmlProd;
+        // ⚠ Listeners posés EN FIN de ouvrirPanneau, pas ici. L'ancien câblage
+        // s'attachait AVANT le bloc « niveau cognitif » — dont le
+        // `extra.innerHTML +=` re-sérialisait le conteneur : sur un nœud
+        // Évaluation (présent dans TYPES_AVEC_NIVEAU_COGNITIF), les sélecteurs
+        // Rétroaction et Production étaient MUETS. Bug préexistant, corrigé
+        // par le Lot E — même contrainte que « Dans la leçon » (6 août).
     }
 
     // Sélecteur de niveau cognitif (Anderson)
@@ -2361,6 +2387,28 @@ function ouvrirPanneau(id) {
             }
             sauvegarder();
             mettreAJourPlanificateur();
+        });
+    }
+
+    // #424 Lot E : rétroaction (formative sur activité, « sur le rendu » sur
+    // évaluation) et production — même contrainte d'ordre que « Dans la
+    // leçon ». La valeur « aucune » RETIRE le champ : un défaut n'est pas un
+    // rattachement (même règle que le relevé D1).
+    var selRetro = extra.querySelector('#planif-panneau-retroaction');
+    if (selRetro) {
+        selRetro.addEventListener('change', function(e) {
+            enregistrerPourUndo();
+            appliquerRetroactionNoeud(donnees, e.target.value);
+            sauvegarder();
+        });
+    }
+    var selProd = extra.querySelector('#planif-panneau-production');
+    if (selProd) {
+        selProd.addEventListener('change', function(e) {
+            enregistrerPourUndo();
+            if (!donnees.metadata) donnees.metadata = {};
+            donnees.metadata.productionId = e.target.value || null;
+            sauvegarder();
         });
     }
 
@@ -7944,6 +7992,11 @@ window.planificationCarte = {
     // Exposée pour la sentinelle du panneau d'export (#424 Lot D) : le rendu
     // se vérifie en RENDANT le panneau, pas en relisant la source.
     rendrePanneauExportPlan: rendrePanneauExportPlan,
+    // Exposées pour la sentinelle de la rétroaction formative (#424 Lot E) :
+    // les deux libellés se vérifient en RENDANT le sélecteur, l'écriture en
+    // EXERÇANT la porte unique.
+    selecteurRetroactionHTML: selecteurRetroactionHTML,
+    appliquerRetroactionNoeud: appliquerRetroactionNoeud,
     // ⚠ Exposés pour le HARNAIS DE PARITÉ du portage #424 (Lot C) : le nouveau
     // générateur doit couvrir tout ce que les anciens émettent, et le harnais
     // les appelle pour le prouver. Ils MEURENT au Lot G, exports compris.
