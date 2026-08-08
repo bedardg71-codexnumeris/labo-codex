@@ -1729,20 +1729,34 @@
     // INITIALISATION AU CHARGEMENT
     // =========================================================================
 
+    // ⚠ #414 (8 août 2026) : les deux branches étaient mortes, et pour les
+    // mêmes deux raisons que `preferences.js` — garde sur `db.isReady`, une
+    // propriété inexistante (donc toujours fausse), et repli sur
+    // `document.addEventListener('db-ready', …)` alors que `db.js` émet sur
+    // `window`. Défaut de naissance, présent depuis le 18 décembre 2025
+    // (« Beta 95 Phase 5 — Onglet Données complet »).
+    //
+    // `initialiserDonneesV2` n'ayant aucun autre appelant, les statistiques de
+    // snapshots et les compteurs de ressources de l'onglet Données n'étaient
+    // jamais chargés au démarrage. Pas de migration ici : le défaut est
+    // d'affichage, mais il rendait la section muette.
+    //
+    // ⚠ La garde DOM est CONSERVÉE, et ce n'est pas de la prudence décorative :
+    // `chargerStatistiquesSnapshots` et `chargerCompteursRessources` sortent en
+    // silence si leurs nœuds manquent (`if (!statHebdo …) return`). Attendre la
+    // seule DB aurait pu les faire tourner avant que `#v2-stat-snapshots-hebdo`
+    // et `#select-type-ressource` existent : un correctif VERT ET INERTE, la
+    // classe d'erreur de 1.47.0. Les deux nœuds sont statiques dans index.html,
+    // donc présents à `DOMContentLoaded` — la garde est nécessaire et suffisante.
+    // Les deux conditions sont indépendantes : DOM au-dehors, DB au-dedans.
+    function initialiserQuandDomEtDbPrets() {
+        window.auDbPret(initialiserDonneesV2);
+    }
+
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-            if (typeof db !== 'undefined' && db.isReady) {
-                initialiserDonneesV2();
-            } else {
-                document.addEventListener('db-ready', initialiserDonneesV2);
-            }
-        });
+        document.addEventListener('DOMContentLoaded', initialiserQuandDomEtDbPrets);
     } else {
-        if (typeof db !== 'undefined' && db.isReady) {
-            initialiserDonneesV2();
-        } else {
-            document.addEventListener('db-ready', initialiserDonneesV2);
-        }
+        initialiserQuandDomEtDbPrets();
     }
 
 

@@ -28,6 +28,28 @@ export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExist
     const code = readFileSync(chemin, 'utf8');
 
     const fauxWindow = fauxWindowExistant || {};
+
+    // #414 (8 août 2026) — le portillon d'attente de la DB.
+    // `db.js` est le PREMIER script chargé par index.html : quand n'importe
+    // quel autre script s'exécute, `window.auDbPret` existe forcément. Sans ce
+    // stub, un script qui attend la DB planterait ici pour une raison qui
+    // n'existe pas dans l'application — un faux rouge.
+    // Sémantique reproduite fidèlement : on enregistre le rappel, et on ne
+    // l'exécute tout de suite que si le test a posé `dbReady` (rattrapage).
+    // Un test qui veut déclencher la suite pose `dbReady` AVANT de charger,
+    // ou fournit son propre `auDbPret` via `fauxWindowExistant`.
+    if (typeof fauxWindow.auDbPret !== 'function') {
+        fauxWindow.auDbPret = function (rappel) {
+            if (typeof rappel !== 'function') return;
+            if (typeof fauxWindow.addEventListener === 'function') {
+                fauxWindow.addEventListener('db-ready', rappel);
+            }
+            if (fauxWindow.dbReady) {
+                rappel({ detail: { rattrapage: true } });
+            }
+        };
+    }
+
     const fauxDocument = {
         addEventListener: () => {},
         removeEventListener: () => {},

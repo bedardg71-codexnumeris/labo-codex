@@ -916,11 +916,14 @@
 
     // Hook de démarrage : attendre que db soit prêt (certaines annotations peuvent
     // vivre uniquement dans memoryCache, chargé par syncToLocalStorageCache).
-    if (typeof db !== 'undefined' && db.ready) {
-        migrerIdsActionsRLO();
-    } else {
-        window.addEventListener('db-ready', migrerIdsActionsRLO, { once: true });
-    }
+    //
+    // ⚠ #414 (8 août 2026) : la garde était `db.ready` — vrai dès la fin
+    // d'`init()`, soit avant que `syncToLocalStorageCache()` ait hydraté
+    // `memoryCache`. C'est exactement la condition que le commentaire ci-dessus
+    // cherchait à éviter : les annotations volumineuses vivant en IDB seul
+    // étaient invisibles, la migration les sautait, et son drapeau
+    // `migrationRLO_ids_v1_done` fermait la porte définitivement.
+    window.auDbPret(migrerIdsActionsRLO);
 
     function obtenirOrdreAutocollants(categorie) {
         const key = 'ordreAutocollants_' + categorie;
@@ -1032,7 +1035,20 @@
         // Ne persister les défauts que si IDB a fini de charger.
         // Sinon les raccourcis personnalisés (en IDB) seraient écrasés
         // avant d'avoir été synchronisés en mémoire.
-        if (db.ready) {
+        //
+        // ⚠ #414 (8 août 2026) : cette garde était `db.ready` — et ne faisait
+        // donc PAS ce que la phrase ci-dessus annonce. `db.ready` passe à vrai
+        // à la fin d'`init()`, soit AVANT `syncToLocalStorageCache()` : sur ce
+        // créneau, `stored` est vide (les raccourcis personnalisés ne sont
+        // encore qu'en IDB), on tombe dans cette branche « générer les défauts »,
+        // et on ÉCRASE les raccourcis de l'utilisateur avec les défauts —
+        // exactement l'accident que la garde devait empêcher. Seul
+        // `window.dbReady` signifie « les données sont lisibles ».
+        //
+        // Repli sûr quand la DB n'est pas prête : on renvoie les défauts SANS
+        // les persister, et l'invalidation du cache à `db-ready` (plus bas)
+        // force un recalcul dès que les vraies valeurs sont hydratées.
+        if (window.dbReady) {
             db.setSync('raccourcisAnnotation', defauts);
         }
         _raccourcisCache = defauts;
@@ -1111,9 +1127,15 @@
     // Quand IDB finit de charger, invalider le cache des raccourcis
     // pour que la prochaine lecture récupère les vrais raccourcis
     // (au lieu des défauts temporaires générés avant le chargement IDB)
-    window.addEventListener('db-ready', function() {
+    //
+    // #414 : `once: false` — l'invalidation doit être rejouée à CHAQUE
+    // `db-ready`, l'événement étant réémis après un import (les raccourcis
+    // importés doivent chasser ceux du cache). Le rattrapage couvre le cas où
+    // l'événement est déjà passé : sans lui, le cache gardait les défauts
+    // temporaires générés avant l'hydratation d'IDB.
+    window.auDbPret(function() {
         _raccourcisCache = null;
-    });
+    }, { once: false });
 
     /**
      * Applique les personnalisations (noms, images, couleurs) directement

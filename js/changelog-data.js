@@ -21,6 +21,19 @@
 
     var CHANGELOG = [
         {
+            version: '1.55',
+            couleur: 'orange',
+            titre: 'Des réglages qui ne se perdent plus au démarrage',
+            items: [
+                'Tes préférences sont de nouveau reprises au démarrage. Certains réglages faits il y a plusieurs mois n’étaient plus relus et l’application repartait de ses valeurs par défaut : ils peuvent réapparaître à ce premier lancement.',
+                'La section Données affiche enfin ses compteurs et ses statistiques de captures au chargement.',
+                'La case « Données démo » ne se décoche plus toute seule quand tu recharges la page.',
+                'Tes raccourcis d’annotation ne sont plus remplacés par les raccourcis par défaut au démarrage.',
+                'La liste des grilles et ta grille de référence pour le dépistage se rechargent correctement à l’ouverture.',
+                'Après une mise à jour, ton navigateur ne peut plus servir d’anciennes versions des fichiers : les corrections arrivent du premier coup.'
+            ]
+        },
+        {
             version: '1.54',
             couleur: 'vert',
             titre: 'Alignement : l’enseignement explicite entre dans la carte',
