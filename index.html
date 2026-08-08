@@ -14508,7 +14508,7 @@
     <!-- PRIORITÉ 1: Fondations -->
     <script src="js/config.js?v=2026062802"></script> <!-- #326 (28 juin) : COMPARATEUR_VISIBLE=true (réactivation) ; #345 (22 juin) : flag COMPARATEUR_VISIBLE ; Refonte nav SP5-fix : sous-onglet id court 'vue' (au lieu de 'calendrier') pour éviter la redondance calendrier-calendrier -->
     <script src="js/navigation.js?v=2026062201"></script> <!-- #345 (22 juin) : filtre comparateur sous-nav Labo ; Refonte nav SP5 : tables migrées calendrier-* + nav-calendrier-* -->
-    <script src="js/preferences.js?v=20260808b"></script> <!-- Beta 99.16 : API centralisée préférences + migration V3 (doit précéder modes.js) -->
+    <script src="js/preferences.js?v=20260808c"></script> <!-- Beta 99.16 : API centralisée préférences + migration V3 (doit précéder modes.js) -->
     <script src="js/modes.js?v=20260805b"></script> <!-- Refonte nav SP5 : commentaire et clé calendrier-trimestre -->
     <script src="js/utils-notifications.js?v=20260521a"></script> <!-- Cat-B Track 4 chantier E (21 mai 2026) : source unique notifications toast — window.notifications.{succes,erreur,info} -->
     <script src="js/ui-dialogues.js?v=20260615a"></script> <!-- #315/#316 : modales async réutilisables — window.uiDialogues.{confirmerAction,demanderSaisie} (remplace confirm()/prompt() natifs) -->
@@ -14750,11 +14750,11 @@
     <script src="js/export-resultats-finaux.js?v=2026061901"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260808b"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260808c"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260808b"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260808c"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>
