@@ -12,12 +12,12 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | `main` |
-| **Version** | **1.57.0** — build `0808-1445` |
+| **Version** | **1.58.0** — build `0808-1538` |
 | **Travail en avance sur `main`** | **aucun** |
 | **Dernière mise à jour** | 8 août 2026, en après-midi (portage #424 livré) |
 
 ⮕ Le détail des priorités, de la prémisse chiffrée et des décisions en attente
-est au **§3 de `SESSION.md`**. **Le portage des exports (#424) est LIVRÉ et fusionné** ; prochaines priorités au §3 de `SESSION.md` (portes terrain, puis #421+#426).
+est au **§3 de `SESSION.md`**. **Le portage des exports (#424) et l'export personnalisé (#431) sont LIVRÉS et fusionnés** ; prochaines priorités au §3 de `SESSION.md` (portes terrain, puis #421+#426).
 
 ---
 
