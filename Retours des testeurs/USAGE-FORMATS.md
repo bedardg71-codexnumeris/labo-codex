@@ -113,3 +113,5 @@ Format de bilan : 30 min - 1 h. Relire le journal. Repérer 3-5 patterns. Noter 
 ## Notes pour l'année
 
 *(zone libre pour observations qui n'entrent pas dans les 4 sections — évolution des formats internes, décisions ponctuelles, hypothèses à vérifier)*
+
+- **2026-08-08 — GB** : premier usage réel des exports de plan (1.57.0) : TSV « Plan de cours » collé dans Numbers, capture à l'appui. Besoin exprimé dans la foulée : un niveau **personnalisé** (cocher les contenus, choisir l'ordre, prévisualiser) pour se conformer aux **exigences du département / habitudes institutionnelles**. ⮕ Chantier ouvert le jour même (#431). Hypothèse à vérifier au terrain : un seul réglage personnalisé suffit-il, ou faudra-t-il des gabarits nommés (« plan département », « contrat étudiant ») ?

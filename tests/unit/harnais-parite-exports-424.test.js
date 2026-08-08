@@ -317,4 +317,20 @@ describe('Correctifs #424 · ce que le portage règle une fois pour toutes', () 
         expect(doc).toContain('Le récit réaliste › Sous-parcours poésie');
         expect(doc).toContain('Leçon nichée');
     });
+
+    it('#152 — le TSV n’a qu’UNE colonne de semaine, dans les trois niveaux', () => {
+        // Capture Numbers de Grégoire (8 août) : « Semaines » (étendue de la
+        // séquence) + « Semaine » (leçon) = redondant et illisible en tableau.
+        for (const niveau of ['sommaire', 'deroulement', 'alignement']) {
+            const entete = exporteur.genererExport(niveau, 'tsv').split('\n')[0].split('\t');
+            expect(entete.filter(c => /^Semaine/.test(c)), niveau).toEqual(['Semaine']);
+        }
+        // Et la colonne porte les DEUX informations : le numéro sur la ligne
+        // de leçon, l'étendue sur une ligne de séquence sans contenu direct.
+        const lignes = exporteur.genererExport('sommaire', 'tsv').split('\n');
+        const entetes = lignes[0].split('\t');
+        const iSem = entetes.indexOf('Semaine');
+        const ligneL1 = lignes.find(l => l.includes('L’incipit'));
+        expect(ligneL1.split('\t')[iSem]).toBe('3');
+    });
 });
