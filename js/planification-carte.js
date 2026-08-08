@@ -662,6 +662,39 @@ function selecteurSemaineHTML(n) {
         '</select>';
 }
 
+// #150 (8 août 2026) — le bloc porte son propre sélecteur de semaine, et une
+// écriture venue de l'INSPECTEUR ne le rafraîchissait pas : la valeur était
+// bien sauvegardée, mais la feuille du canevas ne bougeait pas (l'inverse,
+// bloc → inspecteur, passait par reconstruireDOM et marchait). On ne peut ni
+// reconstruire le DOM ici (le handler de l'inspecteur est sur `input` : une
+// reconstruction pendant la frappe détruirait le focus du champ), ni poser
+// `.value` à l'aveugle (la liste est peuplée PARESSEUSEMENT — avant le premier
+// contact le <select> n'a qu'une option). On le ramène donc à son état de
+// premier rendu : une option unique qui reflète la donnée, et la liste se
+// repeuplera au prochain contact.
+function synchroniserSelecteurSemaine(noeudId) {
+    var el = document.getElementById(noeudId);
+    if (!el) return;
+    var select = el.querySelector('.planif-noeud-semaine');
+    if (!select) return;
+    var n = etat.noeuds.get(noeudId);
+    if (!n) return;
+    var courante;
+    if (n.type === 'lecon') {
+        courante = semaineDeLecon(n);
+    } else {
+        var e = etendueTemporelle(n);
+        courante = e ? e.debut : null;
+    }
+    select.textContent = '';
+    var opt = document.createElement('option');
+    opt.value = courante === null ? '' : String(courante);
+    opt.textContent = courante === null ? '—' : 'S' + courante;
+    opt.selected = true;
+    select.appendChild(opt);
+    delete select.dataset.peuple;
+}
+
 /** Peuple la liste au premier contact. Idempotent. */
 function peuplerSelecteurSemaine(select) {
     if (!select || select.dataset.peuple === '1') return;
@@ -2012,6 +2045,12 @@ function ouvrirPanneau(id) {
         semInput.addEventListener('focus', function() { enregistrerPourUndo(); });
         semInput.addEventListener('input', function(e) {
             definirSemaineLecon(id, e.target.value);
+            // #150 : la feuille du canevas doit suivre — le bloc et ses
+            // séquences ancêtres (dont la semaine est DÉRIVÉE des leçons).
+            synchroniserSelecteurSemaine(id);
+            for (var pSem = etat.noeuds.get(donnees.parent); pSem; pSem = etat.noeuds.get(pSem.parent)) {
+                if (pSem.type === 'sequence') synchroniserSelecteurSemaine(pSem.id);
+            }
             mettreAJourPlanificateur();
         });
     }
