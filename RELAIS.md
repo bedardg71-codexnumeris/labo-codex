@@ -12,9 +12,9 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | `main` |
-| **Version** | **1.56.0** — build `0808-0839` |
+| **Version** | **1.56.1** — build `0808-0914` |
 | **Travail en avance sur `main`** | **aucun** |
-| **Dernière mise à jour** | 8 août 2026, en soirée |
+| **Dernière mise à jour** | 8 août 2026, fin de soirée |
 
 ⮕ Le détail des priorités, de la prémisse chiffrée et des décisions en attente
 est au **§3 de `SESSION.md`**.

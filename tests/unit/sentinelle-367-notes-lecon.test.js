@@ -49,6 +49,55 @@ function extraireMigration() {
 
 const CODE_MIGRATION = extraireMigration();
 
+// --- Extraction de la purge #409 ----------------------------------------
+// La purge de l'archive vit HORS du bloc de migration (elle est sans drapeau,
+// pour rattraper un backup réimporté). Elle a donc son propre extracteur.
+// ⚠ Bornes vérifiées AVANT le slice : c'est le défaut trouvé le 8 août sur la
+// sentinelle de #413 — un `indexOf` devenu -1 y découpait tout le reste du
+// fichier, et l'assertion restait VERTE en ayant cessé de viser sa cible.
+function finDeBloc(depuis) {
+    let profondeur = 0;
+    let i = sourceMain.indexOf('{', depuis);
+    expect(i).toBeGreaterThan(-1);
+    for (; i < sourceMain.length; i++) {
+        if (sourceMain[i] === '{') profondeur++;
+        else if (sourceMain[i] === '}') { profondeur--; if (profondeur === 0) return i; }
+    }
+    throw new Error('accolade fermante introuvable');
+}
+
+function extrairePurge409() {
+    const ancre = sourceMain.indexOf('#409 (8 août 2026) — retrait de');
+    expect(ancre).toBeGreaterThan(-1);
+    const debut = sourceMain.indexOf('try {', ancre);
+    expect(debut).toBeGreaterThan(ancre);
+
+    // Le `catch` doit être emporté avec le `try`, sinon le fragment extrait
+    // n'est pas du JS valide (« Missing catch or finally after try »).
+    const finTry = finDeBloc(debut);
+    const ouvertureCatch = sourceMain.indexOf('catch', finTry);
+    expect(ouvertureCatch).toBeGreaterThan(finTry);
+    const finCatch = finDeBloc(ouvertureCatch);
+    return sourceMain.slice(debut, finCatch + 1);
+}
+
+const CODE_PURGE_409 = extrairePurge409();
+
+function rejouerPurge409(store) {
+    // ⚠ `setSync` est indispensable ICI alors que la purge ne l'appelle pas.
+    // Sans lui, une purge mise SOUS DRAPEAU par mégarde poserait son drapeau via
+    // un `setSync` inexistant → TypeError → avalé par le `catch` de la purge →
+    // le drapeau ne serait jamais posé et le test « sans drapeau » resterait
+    // VERT devant la régression même qu'il surveille. Constaté au break-test du
+    // 8 août : le stub incomplet rendait la moitié comportementale aveugle.
+    const db = {
+        getSync: (k, d) => (k in store ? JSON.parse(JSON.stringify(store[k])) : (d !== undefined ? d : null)),
+        setSync: (k, v) => { store[k] = JSON.parse(JSON.stringify(v)); },
+        removeSync: (k) => { delete store[k]; }
+    };
+    new Function('db', 'console', '"use strict";\n' + CODE_PURGE_409)(db, console);
+}
+
 /**
  * @param {boolean} parReference Modélise le chemin `memoryCache` de `db.js`,
  *   qui garde l'objet tel quel au lieu de le sérialiser comme localStorage.
@@ -105,28 +154,78 @@ describe('#367 · le registre et les portes', () => {
     });
 });
 
-describe('#367 · la migration — aucune perte', () => {
-    it('archive la clé nue AVANT de la purger', () => {
+describe('#409 · l’archive est retirée — le filet de #367 n’existe plus', () => {
+    // Le filet a été retiré le 8 août : Grégoire a vérifié ses données réelles
+    // après le premier démarrage en 1.50.0, la clé nue ne portait que des
+    // productions de TEST. L'archive n'a JAMAIS eu de lecteur — c'était une
+    // copie morte, sans chemin de restauration.
+
+    it('la migration ne crée PLUS d’archive', () => {
         store['planification_seances'] = { 'planif-noeud_3': { note: 'A' } };
         poserTrimestre(store, 'h2026', { carte_1: ['planif-noeud_3'] });
 
         rejouerMigration(store);
 
-        expect(store['planification_seances_archive_pre367']).toEqual({ 'planif-noeud_3': { note: 'A' } });
+        expect(store['planification_seances_archive_pre367']).toBeUndefined();
+        // ⚠ Et la distribution, elle, doit être INTACTE : retirer le filet ne
+        // doit pas avoir touché à ce que la migration fait vraiment.
+        expect(store['h2026_planification_seances']['carte_1::planif-noeud_3']).toEqual({ note: 'A' });
     });
 
-    it('une note dont la leçon n’existe NULLE PART survit dans l’archive', () => {
-        // Sans archive, cette note serait perdue à la purge — et « dupliquer
-        // vers tous, aucune perte » serait faux.
+    it('une note ORPHELINE est désormais perdue — conséquence assumée du retrait', () => {
+        // Ce test disait l'inverse jusqu'au 8 août (« survit dans l'archive »).
+        // Il est retourné et NON supprimé : la portée exacte de la décision de
+        // Grégoire doit rester lisible et verrouillée, pas disparaître du dépôt.
+        // Si quelqu'un rétablit un filet un jour, c'est ICI que ça se discute.
         store['planification_seances'] = { 'planif-noeud_99': { note: 'orpheline' } };
         poserTrimestre(store, 'h2026', { carte_1: ['planif-noeud_3'] });
 
         rejouerMigration(store);
 
-        expect(store['planification_seances_archive_pre367']['planif-noeud_99']).toEqual({ note: 'orpheline' });
+        expect(store['planification_seances_archive_pre367']).toBeUndefined();
         expect(store['h2026_planification_seances'] || {}).toEqual({});
     });
 
+    it('la purge retire l’archive DÉJÀ stockée (1.50.0-1.55.x)', () => {
+        store['planification_seances_archive_pre367'] = { 'planif-noeud_3': { note: 'A' } };
+
+        rejouerPurge409(store);
+
+        expect(store['planification_seances_archive_pre367']).toBeUndefined();
+    });
+
+    it('la purge est SANS DRAPEAU — un backup réimporté est rattrapé', () => {
+        // C'est la raison d'être du motif : un backup Codex pris dans la fenêtre
+        // du 7-8 août porte la clé. Une purge à drapeau ne repasserait jamais.
+        store['planification_seances_archive_pre367'] = { 'planif-noeud_3': { note: 'A' } };
+        rejouerPurge409(store);
+
+        // Second import, plus tard : la clé revient.
+        store['planification_seances_archive_pre367'] = { 'planif-noeud_7': { note: 'revenue' } };
+        rejouerPurge409(store);
+
+        expect(store['planification_seances_archive_pre367']).toBeUndefined();
+        expect(CODE_PURGE_409).not.toMatch(/getSync\(\s*'migration_/);
+    });
+
+    it('la purge ne touche à RIEN d’autre', () => {
+        store['planification_seances_archive_pre367'] = { 'planif-noeud_3': { note: 'A' } };
+        store['h2026_planification_seances'] = { 'carte_1::planif-noeud_3': { note: 'vivante' } };
+        store['planification_seances'] = {};
+
+        rejouerPurge409(store);
+
+        expect(store['h2026_planification_seances']).toEqual({ 'carte_1::planif-noeud_3': { note: 'vivante' } });
+        expect(store['planification_seances']).toEqual({});
+    });
+
+    it('plus AUCUNE écriture de l’archive ne subsiste dans main.js', () => {
+        // La régression à empêcher : réintroduire le filet « au cas où ».
+        expect(sourceMain).not.toMatch(/setSync\(\s*'planification_seances_archive_pre367'/);
+    });
+});
+
+describe('#367 · la migration — aucune perte', () => {
     it('la clé nue est PURGÉE — sinon la démo continuerait d’y écrire', () => {
         store['planification_seances'] = { 'planif-noeud_3': { note: 'A' } };
         poserTrimestre(store, 'h2026', { carte_1: ['planif-noeud_3'] });
@@ -231,12 +330,11 @@ describe('#367 · la migration — idempotence et innocuité', () => {
         expect(store['h2026_planification_seances']['carte_1::planif-noeud_3']).toEqual({ note: 'déjà là' });
     });
 
-    it('un codex SANS notes ne crée ni archive ni clés vides', () => {
+    it('un codex SANS notes ne crée pas de clés vides', () => {
         poserTrimestre(store, 'h2026', { carte_1: ['planif-noeud_3'] });
 
         rejouerMigration(store);
 
-        expect(store['planification_seances_archive_pre367']).toBeUndefined();
         expect(store['h2026_planification_seances']).toBeUndefined();
         expect(store['migration_planification_seances_done']).toBe(true);
     });
