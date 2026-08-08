@@ -23,6 +23,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
 const source = readFileSync(path.join(racineProjet, 'js', 'planification-carte.js'), 'utf8');
+const indexHtml = readFileSync(path.join(racineProjet, 'index.html'), 'utf8');
 
 // --- Sandbox ------------------------------------------------------------
 let store;
@@ -278,15 +279,41 @@ describe('F1 · invariants de rendu et de routage', () => {
         expect(source).not.toContain('var _seancesDOM');
     });
 
-    it('la vue leçon route le champ « objectif » vers le nœud, pas vers CLE_SEANCES', () => {
-        // Réaligné le 6 août après le retrait des notes : l'objectif étant
-        // devenu le SEUL champ de cette vue, la garde a changé de forme
-        // (aiguillage sur `champ` → garde d'entrée). L'invariant vérifié est
-        // le même : la saisie atterrit sur le nœud, jamais dans CLE_SEANCES.
-        expect(source).toMatch(/data-champ="objectif"/);
-        expect(source).toMatch(/dataset\.champ !== 'objectif'\) return;[\s\S]{0,220}noeud\.metadata\.objectif = /);
-        // L'ancien champ ne doit plus être écrit par la vue leçon.
-        expect(source).not.toMatch(/data-champ="objectifPersonnalise"/);
+    // ▣ 7 AOÛT (soir) — la « vue leçon » est SUPPRIMÉE, et avec elle ce champ.
+    // Il ne se contentait pas d'être redondant avec la carte : il LISAIT
+    // `metadata.objectifs` (la liste) et RÉÉCRIVAIT `metadata.objectif` (la
+    // chaîne, format mort depuis la migration). Ce qu'on y saisissait n'était
+    // donc plus jamais relu. L'assertion change de cible : au lieu de vérifier
+    // où ce champ écrivait, on verrouille que PLUS PERSONNE n'écrit dans le
+    // champ mort — hors la migration, qui l'efface après l'avoir récupéré.
+    it('plus aucun code ne réécrit le champ mort `metadata.objectif`', () => {
+        // ⚠ Deux pièges dans cette regex, tous deux rencontrés en l'écrivant :
+        // `objectif` est un PRÉFIXE de `objectifs` (la liste vivante), et `=`
+        // est un préfixe de `===` (les comparaisons du sauvetage). Sans les
+        // deux gardes, la sentinelle échouait sur du code parfaitement sain.
+        const ecritures = [...source.matchAll(/\.metadata\.objectif(?!s)\s*=(?!=)/g)];
+        expect(ecritures.length).toBe(0);
+    });
+
+    it('la vue leçon (niveau micro) a bien disparu du module et du DOM', () => {
+        expect(source).not.toContain('rendreVueLecon');
+        expect(source).not.toContain('planif-vue-lecon');
+        expect(indexHtml).not.toContain('planif-vue-lecon');
+    });
+
+    it('la migration RÉCUPÈRE ce que ce champ avait avalé avant de le purger', () => {
+        // Le sauvetage doit venir AVANT le `continue` qui saute les leçons
+        // déjà pourvues d'une liste — sinon il ne s'exécuterait jamais, ce qui
+        // est précisément le défaut qui a rendu la perte silencieuse.
+        const iSauvetage = source.indexOf("&& typeof n.metadata.objectif === 'string'");
+        const iSaut = source.indexOf('if (n.metadata && Array.isArray(n.metadata.objectifs)) continue;');
+        expect(iSauvetage).toBeGreaterThan(-1);
+        expect(iSaut).toBeGreaterThan(-1);
+        expect(iSauvetage).toBeLessThan(iSaut);
+        // Redécoupage sur les sauts de ligne + filtrage des doublons : le champ
+        // rendait TOUS les objectifs dans une seule zone.
+        expect(source).toMatch(/n\.metadata\.objectif\.split\('\\n'\)/);
+        expect(source).toMatch(/filter\(function\(t\) \{ return t !== '' && !connus\[t\]; \}\)/);
     });
 
     it('la saisie au fil de la frappe ne reconstruit PAS le DOM', () => {
@@ -431,10 +458,10 @@ describe('F1 · les notes de leçon sont retirées partout', () => {
     const organisateur = readFileSync(path.join(racineProjet, 'js', 'organisateur.js'), 'utf8');
     const css = readFileSync(path.join(racineProjet, 'styles.css'), 'utf8');
 
-    it('la vue leçon n’a plus de champ Notes', () => {
-        expect(source).not.toContain('planif-vue-lecon-notes');
-        expect(source).not.toMatch(/data-champ="notes"/);
-    });
+    // (L'assertion « la vue leçon n'a plus de champ Notes » est retirée le
+    // 7 août : la vue leçon elle-même n'existe plus, l'assertion serait vraie
+    // sans rien garder. Son absence est couverte par le test de suppression
+    // ci-dessus, qui porte sur le préfixe entier.)
 
     it('l’export Markdown n’écrit plus de section Notes', () => {
         expect(organisateur).not.toMatch(/\*\*Notes\*\* : /);
@@ -444,8 +471,8 @@ describe('F1 · les notes de leçon sont retirées partout', () => {
         expect(organisateur).not.toMatch(/matchNotes/);
     });
 
-    it('le CSS des notes est retiré (pas de règle orpheline)', () => {
-        expect(css).not.toContain('planif-vue-lecon-notes');
+    it('le CSS de la vue leçon est retiré en ENTIER (pas de règle orpheline)', () => {
+        expect(css).not.toContain('planif-vue-lecon');
     });
 
     it('l’import n’ouvre plus d’aller-retour inutile sur la clé des séances', () => {

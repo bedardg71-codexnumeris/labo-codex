@@ -18564,6 +18564,36 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     border-color: var(--planif-couleur-selection);
     color: var(--planif-couleur-texte);
 }
+
+/* Boutons d'affichage des palettes (barre d'outils, 7 aout 2026). Ils portent
+   le NOM de la palette plutot qu'un glyphe : « Noeuds » et « Planificateur »
+   sont deja les titres affiches sur les palettes elles-memes, et deux icones
+   abstraites cote a cote se seraient confondues. Ils empruntent la boite de
+   .planif-btn-vue et n'en changent que la largeur, imposee par le texte. */
+.planif-btn-palette {
+    width: auto;
+    padding: 0 10px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+/* Palette affichee = etat ENFONCE. Meme convention que le bouton de
+   disposition de la reserve : aria-pressed dit l'etat, le title dit l'effet. */
+.planif-btn-palette.actif {
+    border-color: var(--planif-couleur-selection);
+    color: var(--planif-couleur-texte);
+    background: color-mix(in srgb, var(--planif-couleur-selection) 16%, transparent);
+}
+.mode-clair .planif-btn-palette.actif {
+    background: color-mix(in srgb, var(--planif-couleur-selection) 12%, #ffffff);
+    color: var(--texte-principal);
+}
+/* iPad : la barre d'outils est tactile — cible de 44 px de haut sans deformer
+   la rangee, en elargissant la zone cliquable sous le bouton. */
+@media (hover: none) {
+    .planif-btn-palette { min-height: 32px; padding: 0 12px; }
+}
 /* Icônes SVG dans les boutons planification — pattern « icône 100 %
    + hover sur le bouton » (BACKLOG #289). */
 .planif-icon {
@@ -19033,162 +19063,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     gap: 12px;
 }
 
-/* Blocs compacts (vue globale) */
-.planif-seq-compact {
-    min-width: 140px;
-    max-width: 220px;
-    cursor: pointer;
-}
-.planif-seq-compact .planif-noeud-titre {
-    font-size: 13px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    cursor: pointer;
-}
-.planif-seq-compact-info {
-    padding: 4px 10px 6px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--planif-couleur-sequence);
-    opacity: 0.8;
-}
-.planif-seq-compact:hover {
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
-    transform: translateY(-1px);
-    transition: box-shadow 0.15s, transform 0.15s;
-}
-
-
-/* === VUE LEÇON (niveau micro) === */
-.planif-vue-lecon {
-    position: absolute;
-    inset: 0;
-    overflow-y: auto;
-    background: var(--surface-principale, #0f1c24);
-    z-index: 5;
-    padding: 32px;
-}
-.planif-vue-lecon-inner {
-    max-width: 720px;
-    margin: 0 auto;
-}
-.planif-vue-lecon-header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--planif-couleur-bordure);
-}
-.planif-vue-lecon-breadcrumb {
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--planif-couleur-texte);
-}
-.planif-vue-lecon-seq {
-    color: var(--planif-couleur-sequence);
-}
-.planif-vue-lecon-sep {
-    color: var(--texte-secondaire);
-    margin: 0 4px;
-}
-.planif-vue-lecon-duree {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--planif-couleur-lecon);
-    white-space: nowrap;
-}
-.planif-vue-lecon-section {
-    margin-bottom: 20px;
-}
-.planif-vue-lecon-section h4 {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--texte-secondaire);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin: 0 0 8px 0;
-}
-.planif-vue-lecon-count {
-    font-size: 11px;
-    background: var(--planif-couleur-bordure);
-    padding: 1px 6px;
-    border-radius: 8px;
-    margin-left: 4px;
-}
-.planif-vue-lecon-objectif {
-    padding: 10px 14px;
-    border: 1px solid var(--planif-couleur-bordure);
-    border-radius: 8px;
-    background: var(--surface-carte, #1a3040);
-    color: var(--planif-couleur-texte);
-    font-size: 14px;
-    line-height: 1.5;
-    min-height: 40px;
-    outline: none;
-    transition: border-color 0.15s;
-}
-.planif-vue-lecon-objectif:focus {
-    border-color: var(--planif-couleur-selection);
-    box-shadow: var(--focus-ring);
-}
-.planif-vue-lecon-objectif:empty::before {
-    content: attr(data-champ);
-    color: var(--texte-secondaire);
-    opacity: 0.5;
-}
-.planif-vue-lecon-objectif:empty::before { content: 'Objectif de la leçon…'; }
-.planif-vue-lecon-activites {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-.planif-vue-lecon-activite {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 12px;
-    border: 1px solid var(--planif-couleur-bordure);
-    border-radius: 8px;
-    background: var(--surface-carte, #1a3040);
-}
-.planif-vue-lecon-act-type {
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    flex-shrink: 0;
-}
-.planif-vue-lecon-act-titre {
-    flex: 1;
-    font-size: 14px;
-    color: var(--planif-couleur-texte);
-}
-.planif-vue-lecon-act-duree {
-    font-size: 12px;
-    color: var(--texte-secondaire);
-    flex-shrink: 0;
-}
-
-/* Mode clair — vue leçon */
-.mode-clair .planif-vue-lecon {
-    background: var(--surface-principale, #f8fafc);
-}
-.mode-clair .planif-vue-lecon-breadcrumb,
-.mode-clair .planif-vue-lecon-objectif,
-.mode-clair .planif-vue-lecon-act-titre {
-    color: var(--texte-principal);
-}
-.mode-clair .planif-vue-lecon-objectif {
-    background: #ffffff;
-    border-color: rgba(3, 46, 92, 0.15);
-}
-.mode-clair .planif-vue-lecon-activite {
-    background: #ffffff;
-    border-color: rgba(3, 46, 92, 0.12);
-}
-
 /* === PALETTE FLOTTANTE === */
 #planif-palette,
 #planif-palette-nav {
@@ -19247,8 +19121,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 }
 #planif-palette-nav:hover .planif-palette-poignee { opacity: 0.55; }
 .planif-palette-poignee:hover { opacity: 0.9; }
-/* Repliee, la palette n'a plus de contenu a dimensionner. */
-.planif-palette-replie .planif-palette-poignee { display: none; }
 @media (hover: none) {
     /* iPad : cible de 44 px, toujours visible — il n'y a pas de survol pour la
        reveler. Le dessin reste dans son coin, seule la zone sensible grandit. */
@@ -19340,11 +19212,11 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     gap: 3px;
 }
 
-.planif-palette-flottante.planif-palette-replie .planif-palette-contenu { display: none; }
-#planif-palette.planif-palette-replie .planif-guide { display: none; }
-#planif-palette.planif-palette-replie .planif-palette-aide-btn,
-#planif-palette.planif-palette-replie .planif-palette-bas-btns { display: none; }
-.planif-palette-flottante.planif-palette-replie .planif-palette-barre { border-bottom: none; border-radius: 10px; }
+/* Masquee depuis la barre d'outils. Le repli partiel (barre de titre laissee
+   sur le canevas) est retire le 7 aout 2026 : afficher ou masquer, rien entre
+   les deux. `display:none` et non une opacite, pour que la palette ne capte
+   plus ni clic ni tabulation quand elle est absente. */
+.planif-palette-flottante.planif-palette-masquee { display: none; }
 
 .planif-palette-btn {
     display: flex;

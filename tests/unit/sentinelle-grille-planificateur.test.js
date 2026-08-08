@@ -172,8 +172,12 @@ describe('lot 2 · contenu des rangées et zone « Non planifié » (Q1/Q2)', ()
         api.mettreAJourPlanificateur();
         const html = elements['planif-sommaire'].innerHTML;
 
-        expect(html).toContain('data-action="planificationCarte.ouvrirSequence"');
+        // Depuis le 7 août, ces deux gestes CADRENT la carte au lieu de la
+        // filtrer : `ouvrirSequence` (qui masquait tout le reste) est remplacé
+        // par `cadrerSurSequence`.
+        expect(html).toContain('data-action="planificationCarte.cadrerSurSequence"');
         expect(html).toContain('data-action="planificationCarte.naviguerSommaireLecon"');
+        expect(html).not.toContain('planificationCarte.ouvrirSequence');
     });
 
     it('le déroulé d’une leçon se déplie (niveau de détail réglable)', () => {

@@ -7,6 +7,38 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 8 AOÛT 2026 (Claude Code cloud, Grégoire présent, branche `claude/rituel-de-debut-rbirt5`). ⮕⮕ LIRE EN PREMIER À LA REPRISE.
+     ÉTAT FACTUEL : branche = **1.55.0** (build 0807-2004), partie de `main` à 1.54.0 (zéro écart au départ, cf. rituel de début), arbre propre. Vitest **1792/1792** (213 fichiers). Playwright WebKit non exécutable en conteneur → CI à la PR. Dernier ID BACKLOG : **#418**.
+
+     ▣ **RITUEL DE DÉBUT — AUCUN ÉCART MATÉRIEL.** Version, Vitest (1770/1770 au départ), dernier ID, arbre propre : tout conforme à la prémisse du §3. Seul écart, **nominal** : le conteneur a démarré sur `claude/rituel-de-debut-rbirt5` et non sur `main` — mais la branche était un calque exact de `main` (0/0). Le piège du 7 août (démarrer 16 versions mineures en arrière) **ne s'est pas reproduit**. Les 82 échecs Playwright sont tous `Executable doesn't exist at /opt/pw-browsers/webkit-2287` — limite connue du conteneur, zéro échec d'assertion.
+
+     ⮕ **#409 DÉBLOQUÉ** : Grégoire a confirmé que ses notes de leçon sont correctes. L'archive `planification_seances_archive_pre367` peut être retirée — **NON FAIT ce cycle**, le chantier a bifurqué sur sa demande.
+
+     ✅ LIVRÉ — **1.55.0, #418 : simplification du module Alignement** (chantier hors file, demande de Grégoire appuyée sur deux captures).
+
+     ▣ **LE CONSTAT, ET CE QUE L'AUDIT A AJOUTÉ.** Grégoire : cliquer un élément du planificateur affichait derrière une fiche en lecture seule, redondante avec le canevas, avec toujours le même titre de séquence quel que soit l'élément cliqué. Vérifié au code : le fil d'Ariane lisait `sequenceActiveId` et non le parent de la leçon, et `naviguerSommaireLecon` ne mettait cette variable à jour que pour une leçon enfant DIRECTE — d'où le titre figé. Bug **jamais corrigé, rendu sans objet** par la suppression. Sa seconde capture a prouvé la redondance : le canevas rend la même leçon avec ses activités, **plus** les liens, le sélecteur de semaine et le badge d'objectif. La fiche rendait strictement MOINS.
+
+     ⚠ **LA TROUVAILLE QUI A CHANGÉ LE CHANTIER — le compagnon caché.** Le canevas portait **deux** états d'affichage commandés par la MÊME variable : la vue focalisée (filtrage par séquence) et la vue globale **compacte** (chaque séquence réduite à un bloc résumé, ses leçons et activités masquées). Il n'existait **aucun** mode « tout visible, tout déplié ». Retirer le filtrage seul — la décision initiale — aurait donc laissé Grégoire en permanence devant des blocs résumés **sans moyen de les ouvrir** : la vue même qu'il venait d'envoyer comme preuve aurait disparu. Arrêt avant de coder, question posée, décision prise en connaissance de cause : **les deux partent ensemble**.
+     ⮕ **RÈGLE GÉNÉRALE QUI S'EN DÉGAGE** : quand deux mécanismes se sont appelés l'un l'autre assez longtemps, retirer le premier ne libère pas le second — **il le laisse ORPHELIN et actif**. Chercher le compagnon fait partie de l'ablation, pas du nettoyage d'après. (Parenté avec la leçon du 7 août sur ce que le geste EMPORTE : ici, ce que l'ablation LAISSE.)
+
+     ⚠ **SAUVETAGE DE DONNÉES.** Le champ « Objectif » de la vue supprimée n'était pas en lecture seule : il LISAIT `metadata.objectifs` (la liste vivante) et RÉÉCRIVAIT `metadata.objectif` (la chaîne, format mort depuis la migration). Comme `migrerObjectifsVersMetadata()` saute toute leçon déjà pourvue d'une liste, ce qui y était saisi **n'a plus jamais été relu**. Supprimer le champ sans récupérer d'abord aurait figé la perte. Le sauvetage s'exécute AVANT le saut d'idempotence, redécoupe sur les sauts de ligne (le champ rendait TOUS les objectifs dans une seule zone et réécrivait le bloc entier) et écarte les doublons. Contrainte de préservation des données de CLAUDE.md respectée.
+
+     ⮕ **DÉCISIONS DE GRÉGOIRE** : filtrage par séquence retiré — cadrer, ne plus masquer ✔ · compaction retirée avec lui ✔ · clic sur une leçon = centrer + sélectionner (`naviguerVers`) ✔ · le bouton de barre d'outils **REMPLACE** le repli des palettes ✔ · symétrie « Nœuds » + « Planificateur » ✔ · bouton « Vue globale » retiré ✔.
+
+     ▣ **CE QUE LES BREAK-TESTS ONT ATTRAPÉ — 12 mutations, 3 passes, 2 faux-verts.**
+        (1) ⚠ **Les DEUX assertions centrales étaient vertes et fausses.** Elles lisaient la source (« `naviguerSommaireLecon` appelle-t-il `naviguerVers` ? ») et **survivaient à la mise en commentaire de l'appel** — le texte cherché vivait dans le commentaire. C'est la forme n°1 du 7 août, rencontrée une fois de plus, et sur le cœur même du chantier. Réécrites en tests de **COMPORTEMENT** : module monté dans le bac à sable, sélection observée. Elles rougissent maintenant sur la mutation qui les trompait.
+        (2) 3e passe : assertion sur `etat.selection` seule **ne couvrait pas** `deselectionnerTout()` — `selectionnerNoeud` réécrit ce champ de toute façon. Retirer la désélection laissait le test vert alors qu'une **multi-sélection antérieure survivait** au nouveau clic. Assertion étendue à `multiSelection`.
+        (3) Deux faux ROUGES au passage, dans mes propres assertions : `objectif` est un préfixe de `objectifs`, et `=` un préfixe de `===` — la regex accusait du code sain. Gardes ajoutées.
+        (4) Une mutation reste verte **à raison** : retirer la garde d'entrée de `naviguerSommaireLecon` ne change rien, `naviguerVers` se garde lui-même. Garde redondante, conservée comme contrat de frontière — pas un trou.
+
+     **Retiré** : `rendreVueLecon` · `ouvrirLecon` · `leconActiveId` · `ouvrirSequence` · `sequenceActiveId` · `_collecterDescendants` · les Sets `visibles`/`masques` · le bloc compact (+4 règles CSS) · `#planif-vue-lecon` (+25 règles CSS) · les 2 boutons de repli (+6 règles CSS) — dont le piège `.planif-palette-toggle` / `.planif-palette-replier` qui avait coûté un aller-retour la veille. **Ajouté** : `cadrerSurSequence`, le registre `PALETTES_FLOTTANTES` (la symétrie vient de la TABLE, pas d'une discipline de copie), 2 préférences. **Net : −83 lignes.**
+
+     ⮕ **PORTES TERRAIN DUES** : (a) **iPad** — les deux boutons de palette (cible 32 px + `@media (hover:none)`) ; (b) ⚠ **la carte entièrement dépliée** — vérifier qu'une grosse carte reste navigable maintenant que plus rien n'est masqué (zoom, ⌘1, planificateur). C'est la contrepartie assumée de la décision, et elle n'a pas été mesurée sur les données réelles de Grégoire.
+
+     ⮕ **QUEUES OUVERTES, INCHANGÉES** : **#414** (14 écouteurs `db-ready` — priorité 1 du §3, non entamée) · **#417** (`release.mjs` et le `?v=`) · **#409** (débloqué ci-dessus, à faire) · **#416** · **#406** · le panneau « Organisateur » MORT et le double nommage — délibérément NON emportés par ce chantier, signalés à Grégoire.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 7 AOÛT 2026, CLÔTURE DE JOURNÉE (Claude Code cloud, Grégoire présent, branche `claude/pedagogical-alignment-planner-y7eppc`). ⮕⮕ LIRE EN PREMIER À LA REPRISE.
      ÉTAT FACTUEL À LA CLÔTURE : branche = **1.54.0** (tip `db142248`), **1 commit devant `origin/main`** (main a été poussé à 1.53.4 EN COURS de journée, décision Grégoire), zéro commit de main absent, arbre propre. Vitest **1770/1770** (relancé après le rituel, pas repris d'une attestation). Playwright WebKit non exécutable en conteneur → CI à la PR. Dernier ID BACKLOG : **#417**.
 

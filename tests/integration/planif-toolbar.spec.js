@@ -106,7 +106,7 @@ test('plein écran carte mentale — titre de section masqué, module seul visib
     expect(erreurs).toEqual([]);
 });
 
-test('palette Navigation — sommaire Vue globale › séquences › leçons, barre sans carrousels', async ({ page }) => {
+test('planificateur — il CADRE la carte, il ne la filtre plus ; palettes commandées par la barre', async ({ page }) => {
     const erreurs = [];
     attacherCaptureErreurs(page, erreurs);
     await ouvrirAppEnDemo(page);
@@ -124,48 +124,73 @@ test('palette Navigation — sommaire Vue globale › séquences › leçons, ba
     await page.waitForTimeout(500);
 
     // Refonte du 4 août 2026 (exercice 601-101) : la navigation vit dans la
-    // palette « Navigation » (sommaire vertical), plus dans la barre d'outils.
+    // palette, plus dans la barre d'outils.
     await expect(page.locator('#planif-toolbar-sequences')).toHaveCount(0);
     await expect(page.locator('#planif-nav-seq')).toHaveCount(0);
     await expect(page.locator('#planif-toolbar-lecons')).toHaveCount(0);
     await expect(page.locator('#planif-btn-largeur')).toHaveCount(0);
     await expect(page.locator('#planif-btn-hauteur')).toHaveCount(0);
-
-    // Le bouton Recentrer remplace les zooms pleine largeur/hauteur.
     await expect(page.locator('#planif-btn-recentrer')).toBeVisible();
 
-    const globale = page.locator('#planif-sommaire .planif-som-globale');
     const sequencesSom = page.locator('#planif-sommaire .planif-som-seq');
     const leconsSom = page.locator('#planif-sommaire .planif-som-lecon');
 
-    // Sommaire complet : Vue globale (active par défaut) + toutes les
-    // séquences + toutes les leçons, visibles d'un coup.
-    await expect(globale).toBeVisible();
-    await expect(globale).toHaveClass(/actif/);
+    // ▣ 7 AOÛT (soir) — « Vue globale » est RETIRÉ : le canevas ne se filtre
+    // plus, il n'y a donc plus de vue à quitter pour y revenir.
+    await expect(page.locator('#planif-sommaire .planif-som-globale')).toHaveCount(0);
+    await expect(page.locator('#planif-vue-lecon')).toHaveCount(0);
+
     const nbSeq = await sequencesSom.count();
     expect(nbSeq).toBeGreaterThanOrEqual(2);
     await expect(leconsSom.filter({ hasText: 'Leçon test 1' })).toHaveCount(1);
 
-    // Ouvrir une séquence depuis le sommaire → elle devient active.
+    // LE POINT CENTRAL DU CHANTIER : désigner une séquence la SÉLECTIONNE et
+    // cadre la carte dessus — sans faire disparaître quoi que ce soit. Avant,
+    // ce clic masquait tout le reste du canevas.
     await sequencesSom.filter({ hasText: 'Séquence test 2' }).click();
     await page.waitForTimeout(400);
-    await expect(globale).not.toHaveClass(/actif/);
     await expect(sequencesSom.filter({ hasText: 'Séquence test 2' })).toHaveClass(/actif/);
+    // La séquence 1 et sa leçon sont TOUJOURS rendues sur le canevas.
+    await expect(page.locator('#seqT1')).toBeVisible();
+    await expect(page.locator('#lecT1')).toBeVisible();
 
-    // Cliquer une leçon d'une AUTRE séquence : bascule de séquence parente
-    // + ouverture de la vue leçon (niveau micro).
+    // Idem pour une leçon : elle se sélectionne, le canevas reste entier, et
+    // AUCUNE vue de lecture ne vient se substituer à lui.
     await leconsSom.filter({ hasText: 'Leçon test 1' }).click();
     await page.waitForTimeout(400);
-    await expect(sequencesSom.filter({ hasText: 'Séquence test 1' })).toHaveClass(/actif/);
     await expect(leconsSom.filter({ hasText: 'Leçon test 1' })).toHaveClass(/actif/);
-    await expect(page.locator('#planif-vue-lecon')).toBeVisible();
+    await expect(page.locator('#seqT2')).toBeVisible();
+    await expect(page.locator('#planif-zone-travail')).toBeVisible();
 
-    // Retour Vue globale : canevas restauré, plus aucune séquence active.
-    await globale.click();
-    await page.waitForTimeout(400);
-    await expect(globale).toHaveClass(/actif/);
-    await expect(page.locator('#planif-sommaire .planif-som-seq.actif')).toHaveCount(0);
-    await expect(page.locator('#planif-vue-lecon')).toBeHidden();
+    // Une séquence n'est jamais rendue en bloc « compact » : la compaction est
+    // retirée avec le filtrage dont elle était le compagnon.
+    await expect(page.locator('.planif-seq-compact')).toHaveCount(0);
+
+    // Les deux palettes se commandent depuis la barre d'outils, et l'ancien
+    // bouton de repli a disparu de leur barre de titre.
+    await expect(page.locator('.planif-palette-replier')).toHaveCount(0);
+    const btnPlanif = page.locator('#planif-btn-palette-planificateur');
+    await expect(btnPlanif).toBeVisible();
+    await expect(btnPlanif).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#planif-palette-nav')).toBeVisible();
+
+    await btnPlanif.click();
+    await page.waitForTimeout(300);
+    await expect(btnPlanif).toHaveAttribute('aria-pressed', 'false');
+    await expect(page.locator('#planif-palette-nav')).toBeHidden();
+
+    await btnPlanif.click();
+    await page.waitForTimeout(300);
+    await expect(page.locator('#planif-palette-nav')).toBeVisible();
+
+    // Symétrie : la palette « Nœuds » se commande exactement pareil.
+    const btnNoeuds = page.locator('#planif-btn-palette-noeuds');
+    await btnNoeuds.click();
+    await page.waitForTimeout(300);
+    await expect(page.locator('#planif-palette')).toBeHidden();
+    await btnNoeuds.click();
+    await page.waitForTimeout(300);
+    await expect(page.locator('#planif-palette')).toBeVisible();
 
     expect(erreurs).toEqual([]);
 });

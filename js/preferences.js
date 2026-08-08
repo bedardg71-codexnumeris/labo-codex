@@ -83,6 +83,15 @@
         // dont il dispose — le compromis dépend de son écran, pas du nôtre.
         planifReserveDisposition: 'bas',
 
+        // Affichage des deux palettes flottantes du module Alignement
+        // (7 août 2026) : elles se commandent depuis la barre d'outils de la
+        // carte. Visibles par défaut — masquer est un geste de l'enseignant qui
+        // veut tout l'écran, pas un état dans lequel on le fait démarrer.
+        // Remplace l'ancien « repli » porté par les palettes elles-mêmes : un
+        // seul mécanisme, et il survit au rechargement.
+        planifPaletteNoeudsVisible: true,
+        planifPalettePlanificateurVisible: true,
+
         // Flags de transitions pédagogiques (js/transitions.js) — suivent
         // la progression de l'utilisateur entre les 4 étapes du parcours
         // Numérisation → Croisement → Observation → Compétence.
