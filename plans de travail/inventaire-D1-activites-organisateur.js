@@ -5,8 +5,13 @@
  *   « `planification_seances[<carte>::<lecon>].activites[<act>]` contient-il
  *     quelque chose qui vaut d'être migré, ou est-ce vide ? »
  *
- * Si le total est ZÉRO : on supprime net, D2 tombe, rien à migrer.
- * Si ce n'est pas zéro : on sait quoi migrer, vers quoi, et combien.
+ * Si le total est ZÉRO : rien à MIGRER — mais la page ne peut PAS être
+ *   supprimée pour autant. Le veto D2b du 8 août a montré que l'Organisateur
+ *   porte une CAPACITÉ absente de la Carte : l'Inspecteur ne propose la
+ *   rétroaction que sur un nœud Évaluation (`type === 'evaluation'`), jamais
+ *   sur une activité. Ce relevé tranche l'existence de DONNÉES, pas celle du
+ *   BESOIN.
+ * Si ce n'est pas zéro : on sait en plus quoi migrer, vers quoi, et combien.
  *
  * LECTURE SEULE. Aucune écriture, aucun db.setSync, aucune purge. Le script
  * balaie TOUS les trimestres (pas seulement l'actif) : la clé est namespacée
@@ -114,7 +119,11 @@
 
     var aMigrer = total.retroactions + total.productions;
     if (aMigrer === 0) {
-        console.warn('[D1] ⮕ VERDICT : RIEN à migrer. La page peut être supprimée net, et D2 tombe.');
+        console.warn('[D1] ⮕ VERDICT : RIEN à migrer.');
+        console.warn('[D1] ⚠ Cela ne veut PAS dire que la page peut être supprimée : '
+            + 'le sélecteur de rétroaction n’existe que sur les nœuds Évaluation, '
+            + 'donc l’Organisateur reste le seul endroit où poser une rétroaction '
+            + 'formative sur une activité. La CAPACITÉ est à porter dans tous les cas.');
     } else {
         console.warn('[D1] ⮕ VERDICT : ' + aMigrer + ' rattachement(s) à migrer ('
             + total.retroactions + ' rétroaction(s), ' + total.productions + ' production(s)).'

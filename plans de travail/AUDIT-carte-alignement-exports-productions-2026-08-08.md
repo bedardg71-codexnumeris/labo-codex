@@ -362,12 +362,19 @@ Défendable si les portes terrain et #414 passent devant.
 > Autorité : ces choix sont un arbitrage technique, pas un décret. **D2b est le
 > seul point réellement pédagogique** — il est signalé comme tel, et c'est celui
 > sur lequel un veto de Grégoire est le plus attendu.
+>
+> ⮕ **ET LE VETO EST TOMBÉ, le soir même** : « les rétroactions sont formatives,
+> sur les activités ». D2b était fausse. Voir la section D2b ci-dessous — la
+> correction ouvre du travail **non prévu** (une capacité absente de la Carte),
+> et invalide une phrase de cet arbitrage (« si D1 rend zéro, D2b tombe »).
+> ▣ *Le point qui avait été signalé comme le plus fragile est celui qui a cassé.
+> Le signalement valait donc quelque chose — mais signaler n'est pas vérifier.*
 
 | # | Tranché | Amendement |
 |---|---|---|
 | **D1** | **Option 1** — inventorier d'abord | ⮕ le relevé est **écrit et livré**, la décision est exécutable ce soir |
 | **D2** | **Option 1** — la donnée vit sur le nœud | ⮕ **contrainte d'ordre neuve** : APRÈS D3/D4/D5, jamais avant |
-| **D2b** | Sur l'**évaluation**, pas l'activité | 📐 seul point pédagogique — veto attendu |
+| **D2b** | ❌ **VETO** — sur l'**ACTIVITÉ** (formative) | ⮕ révèle une **CAPACITÉ** manquante, pas des données |
 | **D3** | **Option 1** — porter, puis supprimer | — |
 | **D4** | **Option 1** — trois niveaux | — |
 | **D5** | **Option 1** — deux axes, un générateur | — |
@@ -410,18 +417,82 @@ au blanc. **D2 ne peut donc s'exécuter qu'APRÈS D3/D4/D5**, quand les exports
 portés lisent le nœud. Même famille que l'archive de #409 : un porteur sans
 lecteur n'est pas une source de vérité, c'est une copie morte.
 
-### D2b → sur l'ÉVALUATION 📐
+### D2b → ❌ ~~sur l'ÉVALUATION~~ · **VETO DE GRÉGOIRE, 8 août au soir**
 
-Retenu, avec un argument tiré du code plutôt que du goût : une production porte
-`ponderation`, `grilleId` et `dateEcheance` (`chargerProductions`,
-`planification-carte.js:4890`). **Aucune de ces trois notions ne veut dire quoi
-que ce soit sur une activité** — ce sont des notions d'évaluation. Le porteur
-qui a du sens est celui dont le vocabulaire s'accorde avec la donnée.
+> « Les rétroactions sont formatives, sur les activités. »
 
-📐 **C'est le seul des sept points qui relève de la pédagogie et non de la
-technique.** Si tu poses des rétroactions *formatives* sur des activités —
-pendant le travail, pas sur le rendu — alors ma lecture est fausse et le
-rattachement doit vivre aux deux endroits, avec deux sens distincts. Tu tranches.
+⮕ **La rétroaction vit sur l'ACTIVITÉ.** La proposition était fausse et le veto
+la corrige.
+
+**Où était l'erreur, parce qu'elle est réutilisable.** L'argument avancé
+s'appuyait sur `ponderation`, `grilleId` et `dateEcheance` — trois attributs de
+la **production**. Ils plaident effectivement pour que le rattachement
+`productionId` vive sur l'évaluation. Mais ils ne disent **rien** de la
+rétroaction, qui est une autre notion : *l'argument a été transféré d'un
+rattachement à l'autre parce qu'ils voyageaient dans le même objet
+`{retroaction, productionId}`.* La cohabitation de deux champs dans une
+structure n'est pas un argument sur leur nature.
+
+⮕ **Les deux rattachements se séparent donc, avec deux porteurs distincts :**
+
+| Rattachement | Porteur | Pourquoi |
+|---|---|---|
+| `retroaction` | le nœud **ACTIVITÉ** | formative — elle porte sur le travail *pendant* qu'il se fait |
+| `productionId` | le nœud **ÉVALUATION** | sommative — la production porte grille, pondération, échéance |
+
+---
+
+### ⚠⚠ CE QUE LE VETO RÉVÈLE — ce n'est pas de la donnée, c'est une CAPACITÉ
+
+Vérification faite après le veto, et c'est la conséquence la plus lourde de tout
+l'audit :
+
+```js
+if (donnees.type === 'evaluation') {          // planification-carte.js:2110
+    var retros = [['aucune','Aucune'], ['orale','Orale'], …];
+```
+
+**L'Inspecteur ne propose la rétroaction que sur un nœud Évaluation.** Sur une
+activité, il n'y a pas de champ. ⮕ **Aujourd'hui, poser une rétroaction
+formative sur une activité n'est possible QUE depuis l'Organisateur — la page
+qu'on s'apprête à supprimer.**
+
+⮕ **Supprimer la page ne ferait donc pas perdre des données : ça ferait perdre
+le seul endroit où le geste que Grégoire décrit est possible.** C'est un cran
+au-dessus de la trouvaille §1.2.
+
+⮕ **CORRECTION D'UNE ERREUR DE L'ARBITRAGE INITIAL** : il y était écrit « si le
+relevé D1 rend zéro, D2 et D2b tombent ». **C'est faux.** Un relevé à zéro dirait
+seulement qu'il n'y a rien à *migrer* ; la **capacité**, elle, doit être portée
+dans tous les cas. D1 tranche l'existence de données, pas celle du besoin.
+
+⮕ **Travail neuf, non prévu, requis AVANT la suppression** : ajouter le sélecteur
+de rétroaction aux types d'activité dans l'Inspecteur (`TYPES_ACTIVITE`), et
+écrire dans `metadata.retroaction` du nœud activité.
+
+### ⚠ Dette adjacente relevée au passage (zéro-dette : à fondre dans le portage)
+
+- **`sauvegarderChoixActivite` est DUPLIQUÉE VERBATIM** — `organisateur.js:1643`
+  **et** `planification-carte.js:4937`. Deux fonctions homonymes, même corps,
+  qui écrivent la même clé. Une seule doit survivre au portage.
+- **La liste d'options `retros` est en dur à TROIS endroits** —
+  `organisateur.js:742`, `planification-carte.js:2111` et `:5041`. Elle devient
+  une constante unique quand le sélecteur gagne les activités, sinon le prochain
+  ajout d'option se fera à deux endroits sur trois.
+
+### 📐 QUESTION OUVERTE que le veto soulève — à trancher par Grégoire
+
+Si toute rétroaction est formative et vit sur l'activité, **que devient le
+sélecteur de rétroaction du nœud Évaluation** ? Deux lectures :
+
+1. **Il est de trop** — il a été posé là par défaut, et le geste réel est
+   ailleurs. On le retire en même temps (zéro-dette).
+2. **Il garde un sens distinct** — la rétroaction *sur le rendu* (sommative,
+   « comment je remets le travail commenté »), différente de la formative.
+   Les deux coexistent alors, avec deux libellés qui les distinguent.
+
+⮕ Non tranché ici **volontairement** : c'est exactement le terrain où
+l'arbitrage vient de se tromper une fois.
 
 ### D3, D4, D5 → Options 1, sans réserve
 
@@ -473,8 +544,14 @@ Le §4 ci-dessous reste juste, avec **deux inflexions** :
    ensuite (D4), vocabulaire « leçon » rétabli, durées par `dureeRollupNoeud`,
    objectifs au pluriel.
 5. **Puis** migrer les rattachements vers le nœud (D2) — *pas avant, sous peine
-   d'exports blancs.*
-6. **Puis** supprimer la page.
+   d'exports blancs.* ⮕ **Étape élargie par le veto D2b** : ajouter d'abord le
+   sélecteur de rétroaction aux **types d'activité** dans l'Inspecteur (il est
+   aujourd'hui réservé à `evaluation`), puis migrer `retroaction` vers le nœud
+   ACTIVITÉ et `productionId` vers le nœud ÉVALUATION — deux porteurs, pas un.
+   Fondre au passage la duplication de `sauvegarderChoixActivite` et les trois
+   copies de `retros`.
+6. **Puis** supprimer la page — *jamais avant l'étape 5, sous peine de retirer
+   le seul endroit où une rétroaction formative se pose.*
 7. **Puis** les productions : D → C → B → A (D6).
 
 ⮕ **#416 est clos par cet arbitrage** : ses trois questions 📐 sont répondues
