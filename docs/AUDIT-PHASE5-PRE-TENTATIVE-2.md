@@ -1,7 +1,7 @@
 # Audit Phase 5 — Pré-tentative 2
 
 **Statut** : Audit 1 livré (24 avril 2026). Audits 2 et 3 à suivre après validation avec Grégoire.
-**Plan directeur** : `plans de travail/PLAN-AUDIT-PHASE5-DEMO.md`
+**Plan directeur** : `plans de travail/_archives/PLAN-AUDIT-PHASE5-DEMO.md`
 **Contexte** : tentative du 22 avril reverted (`7e47f4e`). Mode démo legacy réactif. Ne pas recoder avant que les 6 tables soient produites et validées.
 
 ---

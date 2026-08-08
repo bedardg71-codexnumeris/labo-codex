@@ -12,7 +12,10 @@
 > bascule de session importante. Le §11 (journal) trace les révisions. Chaque ligne d'état porte
 > idéalement sa source et sa date de vérification, pour éviter de propager un état périmé.
 >
-> **Dernière mise à jour** : 28 juin 2026 (Cowork) — bêta publique **1.26.0** / build `0628-2126`.
+> **Dernière mise à jour** : 8 août 2026 (Claude Code) — bêta publique **1.60.0** / build `0808-1836`.
+> Point sur le répertoire `plans de travail/` au **§4bis**. Les sections 0-4 et 5-11 datent du 28 juin
+> et n'ont **pas** été revues depuis : les lire avec cette réserve.
+> *(Repère précédent : 28 juin 2026 (Cowork) — bêta publique 1.26.0 / build `0628-2126`.)*
 > `origin/main` `72478557` (à jour) ; PR #74 (batch mi-août #346/#350/#362/#342) et #72 (untrack
 > node_modules) **mergées** ; docs d'entrée dé-hardcodés. Dépôt **privatisé le 23 juin 2026**.
 
@@ -133,6 +136,43 @@ accrue** depuis le 10 juin (526 commits de retard à l'époque ; ~20 releases li
 d'archivage** vers `main` n'est **toujours pas fait**. Conflits attendus seulement sur `SESSION.md`/`BACKLOG.md`
 (réconciliation manuelle) ; **zéro conflit de code**. Archivage à faible risque, pas une migration de données.
 Candidat naturel pour une séance « hygiène » à la reprise d'août.
+
+---
+
+## 4bis. Répertoire `plans de travail/` — point du 8 août 2026
+
+> **Origine** : question de Grégoire — « y en a-t-il qui n'ont pas encore été
+> amorcés ? ». Méthode : croisement des 91 documents avec `BACKLOG.md`,
+> `SESSION.md` et `BACKLOG-ARCHIVE.md`, puis **vérification au code** des
+> 15 documents qu'aucun de ces fichiers ne citait.
+
+**Le résultat qui compte** : « jamais cité » ne veut pas dire « jamais fait ».
+Sur ces 15, **cinq étaient livrés** — le plan dormait, le travail était en
+production. Un plan ne dit pas son propre état ; seul le code le dit.
+
+### Jamais amorcés et encore pertinents — quatre
+
+| Plan | Item | Échéance |
+|---|---|---|
+| `Checklist Levée Cloudflare Access .txt` | #427 | **septembre 2026** (reporté du ~20 août par Grégoire, 8 août) |
+| `PLAN_sessionC_calcul_303.md` | #303 Session C | non datée ; Sessions A et B livrées, débloque #307 |
+| `Plan - Désaturation localStorage (analyse).md` | #353 | reportée (session dédiée) ; Option 1 livrée le 3 juillet, options 2/3/4 en attente de **mesures** |
+| `PLAN_recadrage_skill_ecosysteme.md` | — | reporté explicitement par Grégoire (5 juin) |
+
+### Archivés le 8 août — 11 documents
+
+Déplacés sous `plans de travail/_archives/` (`git mv`, rien de supprimé) :
+cinq **livrés** (bilan réflexif, nettoyage wizard V1, audit Phase 5 démo,
+Rythme, ménage du root) et six **périmés ou clos par décision** (RELAIS #326,
+validation #367, reprise août, brouillon Session B #303, carrousel de
+séquences, refonte import/export de janvier). Le détail et les **preuves
+relevées au code** sont dans `plans de travail/_archives/README.md`.
+
+⚠ **Ce qui reste à faire** : les **76 plans cités** dans BACKLOG/SESSION n'ont
+**pas** été audités un par un. Être cité prouve qu'un plan a été *ouvert*, pas
+qu'il est *terminé* — un second passage les trierait. Les plans du 6-8 août
+sont volontairement restés en place : livrés, mais leurs **portes terrain** ne
+sont pas encore passées chez Grégoire.
 
 ---
 

@@ -128,7 +128,7 @@ Quand une tâche est « terrain », le rôle de Claude Code se limite à **prép
 ## 10. Pointeurs
 
 - **Suivi** : `BACKLOG.md` (légende + items), `Retours des testeurs/SUIVI-BUGS.md` (priorité absolue).
-- **Comparateur** : `plans de travail/RELAIS-326-reactivation-comparateur.md`, `SPEC_D_exploration_pratiques.md`.
+- **Comparateur** : `plans de travail/_archives/RELAIS-326-reactivation-comparateur.md`, `SPEC_D_exploration_pratiques.md`.
 - **Grilles h2026** : `plans de travail/RELAIS-grilles-h2026-desappariees.md` (#362).
 - **Voûte** : `plans de travail/PLAN-VOUTE-PHASES-1-8.md` (#329).
 - **SSOT modalités** : `plans de travail/PLAN-328-L2-degonfler-miroir.md`, `Rapports/AUDIT-SSOT-MODALITES-EVALUATION-2026-06-10.md`.
