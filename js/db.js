@@ -1706,6 +1706,61 @@
     // NOTE: obtenirDonneesSelonMode est exportée par modes.js (version avec cle() namespace)
     // Ne PAS exporter la version locale qui lit les clés brutes sans namespace
 
+    // =========================================================================
+    // PORTILLON UNIQUE D'ATTENTE DE LA DB — #414 (8 août 2026)
+    // =========================================================================
+    // `db-ready` est un événement FUGACE : qui n'écoute pas au moment où il
+    // passe ne le voit jamais. Neuf sites l'attendaient chacun à leur manière,
+    // et l'audit de #414 a trouvé TROIS familles de défauts, aucune détectable
+    // à la lecture d'un site isolé :
+    //
+    //   1. LA COURSE (#413, 7 août) — écouteur posé APRÈS l'émission. Le
+    //      handler ne s'exécute jamais, en silence. C'est ce qui a sauté
+    //      TOUTES les migrations du boot dans main.js.
+    //   2. LA MAUVAISE CIBLE — `document.addEventListener('db-ready', …)`.
+    //      L'événement est émis sur `window` (l. 983/993) et ne descend PAS
+    //      vers `document` : l'écouteur est mort-né. Jamais une régression —
+    //      `db.js` n'a jamais émis sur `document` (vérifié sur tout l'historique).
+    //   3. LE MAUVAIS DRAPEAU — `db.ready` est vrai dès la fin d'`init()`,
+    //      soit AVANT `syncToLocalStorageCache()` : lire à ce moment-là donne
+    //      un `memoryCache` non hydraté. Une migration qui s'y fie migre des
+    //      données incomplètes puis pose son drapeau « fait ». `db.isReady`,
+    //      lui, n'a jamais existé — la garde était donc toujours fausse.
+    //
+    // Le seul drapeau qui signifie « les données sont lisibles » est
+    // `window.dbReady`, posé juste avant l'émission. Ce portillon est le seul
+    // endroit du code qui a le droit de le savoir.
+    //
+    // @param {Function} callback   exécuté quand la DB est prête (ou tout de suite si elle l'est déjà)
+    // @param {{once?: boolean}} [options]
+    //        once=true (défaut) : migrations et initialisations one-shot.
+    //        once=false : rejoué à chaque `db-ready` — l'événement est réémis
+    //        après un import, et ce qui dépend des données doit alors se relire.
+    function auDbPret(callback, options) {
+        if (typeof callback !== 'function') return;
+        var once = !options || options.once !== false;
+        var dejaFait = false;
+
+        function executer(evenement) {
+            if (once) {
+                if (dejaFait) return;
+                dejaFait = true;
+                window.removeEventListener('db-ready', executer);
+            }
+            callback(evenement);
+        }
+
+        // L'écouteur est posé DANS TOUS LES CAS avant le rattrapage : si la DB
+        // est déjà prête on exécute immédiatement, sinon on attend l'événement.
+        // Les deux chemins ne peuvent pas se doubler (once) ni se manquer.
+        window.addEventListener('db-ready', executer);
+        if (window.dbReady) {
+            executer({ detail: { rattrapage: true } });
+        }
+    }
+
+    window.auDbPret = auDbPret;
+
     // Export pour modules ES6 (futur)
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = db;

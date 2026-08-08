@@ -34,9 +34,13 @@ describe('sentinelle · boot atomique migration modèles #358 (flush avant flag)
         // Recalé le 7 août : le handler est devenu une fonction NOMMÉE
         // (`auDbReady`) pour pouvoir être rappelée quand db-ready a déjà été
         // émis (correctif de la course qui sautait les migrations au boot).
-        // L'intention testée ici est inchangée : le handler doit être async.
+        // Recalé le 8 août (#414) : l'abonnement passe par le portillon unique
+        // `window.auDbPret` au lieu d'un `addEventListener` brut.
+        // L'intention testée ici est inchangée depuis l'origine : le handler
+        // qui porte le `await db.flush()` doit être async, et il doit bien être
+        // celui que le boot déclenche.
         expect(main).toContain("async function auDbReady(");
-        expect(main).toMatch(/addEventListener\('db-ready',\s*auDbReady\)/);
+        expect(main).toMatch(/window\.auDbPret\(\s*auDbReady/);
     });
 
     it('ordre atomique : peuplement C1 → vidage G4 → await db.flush() → pose du flag', () => {

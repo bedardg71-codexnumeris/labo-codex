@@ -981,8 +981,16 @@ La structure est claire (intro, développement, conclusion)"></textarea>
         setTimeout(tentativeInitSPE, 100);
     }
 
-    // Écouter aussi db-ready au cas où
-    document.addEventListener('db-ready', tentativeInitSPE);
+    // #414 (8 août 2026) : l'écouteur `db-ready` posé ici était MORT — il
+    // écoutait sur `document` alors que `db.js` émet sur `window`. RETIRÉ
+    // plutôt que réparé, après vérification que rien n'en dépend :
+    // `creerGabaritsSPE()` lit ses collections par `await db.get()`, qui
+    // retombe sur IndexedDB quand `memoryCache` n'a pas la clé. La lecture
+    // « existe déjà ? » est donc autoritaire même avant
+    // `syncToLocalStorageCache()` : pas de risque de gabarit dupliqué, et donc
+    // rien à gagner à attendre `db-ready`. Le brancher pour de bon n'aurait
+    // ajouté qu'un 4e déclencheur à une fonction déjà idempotente
+    // (`speInitialise`) et déjà couverte par les trois ci-dessus.
 
     // Et window.onload comme fallback
     window.addEventListener('load', () => setTimeout(tentativeInitSPE, 500));

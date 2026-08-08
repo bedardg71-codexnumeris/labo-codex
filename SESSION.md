@@ -7,19 +7,105 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+
+<!-- =====================================================================
+     SESSION — 8 AOÛT 2026, SOIR : RÉCONCILIATION DE DEUX SESSIONS PARALLÈLES. ⮕⮕ LIRE EN PREMIER À LA REPRISE.
+     ÉTAT FACTUEL : `origin/main` = **1.55.1** (fusion fast-forward de la session du matin, poussée). Branche `claude/rituel-de-debut-rbirt5` = **1.56.0**, `main` fusionné dedans, sept conflits résolus.
+
+     ⚠⚠ **CE QUI S'EST PASSÉ, ET POURQUOI ÇA DOIT NE PLUS SE REPRODUIRE.**
+     Deux sessions du 8 août sont parties du **MÊME commit `3e8065c3`** sans se voir :
+       • la nuit du 7→8 (celle-ci) — simplification Alignement, Exposé + graphe, durée ;
+       • le matin du 8 — #414 + #417 + #419, le portillon `window.auDbPret`.
+     Les deux ont pris **1.55.0**. Les deux ont pris **#418** puis **#419**, pour des choses différentes.
+
+     ▣ **LA CAUSE, VÉRIFIÉE.** La consigne de relais (§3) vit DANS `SESSION.md`, un fichier versionné. Le §3 réécrit à la fin de la session de nuit a été poussé **sur sa branche seulement**. `origin/main` portait donc toujours le §3 du 7 août, qui disait en gras : « **Ouvrir le conteneur sur `main`.** […] `main` = **1.54.0** […] Il n'y a plus de travail en avance sur une branche. » La session du matin a ouvert une branche neuve depuis `main`, fait le rituel de début, mesuré 1.54.0 — **exactement ce que la prémisse annonçait** — conclu « aucun écart », et travaillé de parfaite bonne foi.
+     ⮕ **RÈGLE GÉNÉRALE, et c'est la leçon du jour** : *le rituel a fonctionné, la prémisse a été vérifiée, et elle était fausse quand même.* Une consigne de relais qui vit sur la branche qu'elle décrit est **circulaire** : une session qui ne démarre pas sur la bonne branche ne peut pas lire l'instruction qui lui dit quelle branche prendre. Aucun soin apporté au rituel ne compense ça.
+     ⮕ Ironie à retenir : le §3 du 7 août s'ouvrait précisément sur une mise en garde contre cette classe de problème (conteneur démarré sur une copie périmée de `main`). L'avertissement était juste — et il a été mis en échec par le même mécanisme le lendemain, **parce que son correctif a été écrit là où la session suivante ne pouvait pas le lire**.
+
+     ⮕ **RÉSOLUTION (décision Grégoire)** : la session du matin passe devant, pour gravité — elle a trouvé **deux migrations jamais exécutées** (l'une depuis le 16 avril, l'autre depuis le 18 décembre 2025) et une migration de préférences qui effaçait du legacy jamais lu ; c'est du risque de DONNÉES, quand le travail de nuit est de l'ergonomie et un correctif de graphe. Sa branche a été fusionnée dans `main` en fast-forward (suite Vitest relancée sur son code AVANT de pousser : 1805/1805, pas repris de son attestation). Puis `main` a été fusionné ici.
+     ⮕ **RENUMÉROTATION** : mes IDs glissent de **+2** (#418→#420 … #425→#427, dernier ID = **#427**). Mes trois releases (1.55.0 / 1.56.0 / 1.57.0), **jamais parvenues en production**, fusionnent en une seule **1.56.0** avec une entrée de changelog consolidée — même précédent que la 1.48. ⚠ Les messages des commits `637f03b1`, `cc69fcff`, `d611477f` portent les ANCIENS numéros : **l'historique n'a pas été réécrit**, c'est consigné ici à la place.
+
+     ▣ **SEPT CONFLITS, ET CE QU'ILS DISENT.** `version.json`, `init-inline.js`, `main.js` = estampilles seules (résolues sur `main`, réestampillées ensuite). `index.html` = deux `?v=` seulement. `changelog-data.js`, `BACKLOG.md`, `SESSION.md` = deux récits à fondre. ⮕ **`js/preferences.js` a fusionné TOUT SEUL** alors que les deux sessions l'ont modifié — j'y ai ajouté deux clés de préférence, eux ont refondu la migration : deux zones disjointes du même fichier. Et **aucun conflit sur `planification-carte.js` ni `styles.css`** : la session du matin n'y a pas touché. Les deux chantiers ne se recouvraient pas — la collision était documentaire et versionnelle, pas fonctionnelle.
+
+     ⚠ **DETTE LAISSÉE PAR MOI, À VÉRIFIER** : mes trois releases ont été faites AVANT que #417 n'entre dans `main`. J'ai bumpé mes `?v=` à la main, et le nouveau `release.mjs` ne bumpe que les fichiers **non commités** — mes fichiers l'étaient déjà. Les `?v=` ont été vérifiés un à un à la réconciliation, mais c'est exactement la classe de défaut que #417 corrige, et je suis passé à côté trois fois avant qu'il n'existe.
+
+     ⮕ **CORRECTIF STRUCTUREL — à trancher par Grégoire, proposé au §3** : merger vers `main` en fin de CHAQUE session (le vrai remède : c'est le report du merge qui ouvre la fenêtre de divergence, et il a été reporté trois fois cette semaine), avec un `RELAIS.md` toujours poussé sur `main` comme filet quand un merge doit attendre.
+     ===================================================================== -->
+
+
+     SESSION — 8 AOÛT 2026 (Claude Code cloud, branche `claude/continuation-travail-precedent-kai7sh`, ouverte SUR `main` à 1.54.0 — la consigne du 7 au soir a été suivie). ⮕⮕ LIRE EN PREMIER À LA REPRISE.
+     ÉTAT FACTUEL : branche = **1.55.1**, partie de `main` = 1.54.0, arbre propre. Vitest **1805/1805** (215 fichiers ; +35 depuis hier). Playwright WebKit non exécutable en conteneur → CI à la PR. Dernier ID BACKLOG : **#419**.
+
+     ✅ **RITUEL DE DÉBUT — prémisse du §3 vérifiée point par point, ZÉRO écart** (1.54.0, build 0807-1529, Vitest 1770/1770, dernier ID #417, arbre propre). ⚠ Note utile pour les prochains relais : le clone du conteneur est **shallow (50 commits)** — toute archéologie git y est trompeuse. Il a fallu `git fetch --unshallow` pour dater honnêtement les défauts ci-dessous ; sans ça, `git log -S` désigne la frontière du clone et on conclut faux.
+
+     ✅ LIVRÉ — **1.55.0 (#414 + #417)** puis **1.55.1 (#419)**, ce dernier trouvé par la validation terrain de Grégoire moins d'une heure après la livraison. Le second item de 1.55.0 est devenu un prérequis du premier en cours de route.
+
+     ▣ **#414 — L'AUDIT A TROUVÉ TROIS FAMILLES DE DÉFAUTS, PAS UNE.** Le ticket disait « la même course que #413, 14 fois ». C'est faux, et c'est la leçon du jour : deux des trois familles étaient **invisibles à la relecture d'un site isolé**, faute de point de comparaison.
+        1. **La course de #413** — `pratiques.js`, `accueil.js`, `travaux-outils.js`. ⚠ Les deux premiers sont posés **depuis `main.js`, à l'instant EXACT** où l'écouteur de #413 se posait trop tard : la course y était identique, pas théorique.
+        2. **La mauvaise cible** — `document.addEventListener('db-ready', …)` alors que `db.js` émet sur `window`, et l'a **TOUJOURS** fait (vérifié sur l'historique complet). Écouteurs **mort-nés**, jamais des régressions. ⮕ `migrerPreferencesV3` (**depuis le 16 avril 2026**) et `initialiserDonneesV2` (**depuis le 18 décembre 2025**) n'ont **JAMAIS tourné**, sans une seule erreur en console, sans aucun autre appelant.
+        3. **Le mauvais drapeau** — `db.ready` passe à vrai à la fin d'`init()`, donc **AVANT** `syncToLocalStorageCache()`. Une migration qui s'y fie lit un `memoryCache` non hydraté, migre des données incomplètes, **puis pose son drapeau « fait »**. Et **`db.isReady` n'a jamais existé** (3 usages) : garde toujours fausse.
+        ⮕ **Correctif de fond, et c'est lui le vrai sujet** : le geste « attendre la DB » était réécrit à la main en **neuf exemplaires**. Neuf occasions de se tromper, aucune de comparer. Un **portillon unique `window.auDbPret(rappel, {once})`** vit maintenant dans `db.js` ; les **12 sites** y passent — y compris `main.js` et les 4 qui étaient DÉJÀ corrects, parce que laisser une variante manuelle à côté du portillon, c'est l'empilement que la règle zéro-dette interdit.
+
+     ▣ **CE QUE `obtenirPreference` RENDAIT PENDANT CE TEMPS.** Elle lit UNIQUEMENT le magasin V3, **sans repli sur le legacy**. La migration morte signifie donc que toute préférence restée dans `modalitesEvaluation`/`preferencesAffichage` était ignorée au profit de `DEFAUTS`, silencieusement, depuis avril.
+        ⮕ **PORTE TERRAIN, à valider par Grégoire** : au premier démarrage de 1.55.0, des réglages d'avant le 16 avril peuvent **réapparaître** (`modeClair`, `modeExpert`, `activerRai`, `grilleReferenceDepistage`…). Ce n'est pas un bug : c'est la migration qui fait enfin son travail. Mais ça se voit, donc ça se dit.
+        ⮕ **Réveil audité AVANT branchement** (règle « code dormant » du CLAUDE.md — le cas d'école `51e5cdc`/primo-accueil) : la migration purge le legacy via `nettoyerLegacy()`. Vérifié — `preferencesAffichage` a **zéro lecteur** ailleurs, et les 5 champs retirés de `modalitesEvaluation` n'ont **aucune lecture qualifiée** (les occurrences visent `modalites.portfolio.decouplerPN`, champ imbriqué distinct). Elle n'écrase jamais une valeur déjà en V3, et l'ordre est fail-safe.
+
+     ▣ **HORS ÉCOUTEURS, MÊME FAMILLE — une écriture qui écrasait des données.** `travaux-outils.js` gardait par `db.ready` un `db.setSync('raccourcisAnnotation', defauts)`, sous un commentaire qui disait « ne persister que si IDB a fini de charger ». La garde ne faisait donc PAS ce qu'elle annonçait : sur le créneau init()→synchro, `stored` est vide, on tombe dans la branche « générer les défauts », et on **écrase les raccourcis personnalisés de l'utilisateur** — exactement l'accident que la garde devait empêcher. ⮕ **Un commentaire qui décrit l'intention ne prouve pas que la garde la réalise.** Lire le drapeau, pas la phrase.
+
+     ▣ **RETIRÉ PLUTÔT QUE RÉPARÉ.** L'écouteur mort de `spe-specifications.js` : j'ai d'abord cru à une écriture non gardée dans les collections globales (`creerGabaritsSPE` crée échelle/grille/production « si inexistante »), donc à un risque de doublon. **Vérification au code : faux** — la lecture passe par `await db.get()`, qui retombe sur IndexedDB quand `memoryCache` n'a pas la clé, donc elle est autoritaire même avant la synchro. Rien à gagner à attendre `db-ready` : l'écouteur a été **supprimé**, pas branché. Le brancher n'aurait ajouté qu'un 4e déclencheur à une fonction déjà idempotente et déjà couverte — « du bruit sans rien gagner », ce que la consigne du 7 mettait précisément en garde.
+
+     ▣ **#417 EST DEVENU BLOQUANT EN COURS DE ROUTE — et c'est la sentinelle qui l'a dit.** Le chantier modifiait 12 fichiers JS ; sans bump du `?v=`, un navigateur en cache aurait servi les anciens et le correctif aurait été **livré et inerte** (mécanisme de #367). La sentinelle de cache-busting est passée AU ROUGE dès la release, `?v=` de `main.js` figé au 0807 pendant que le build passait au 0808. Constat au passage : `init-inline.js` était resté à **`?v=20260629a` — 29 juin**, après 20+ réécritures.
+        ⮕ **Correctif conforme à la consigne : dans `release.mjs`, pas à la main.** Le script bumpe (a) ce qu'il réécrit et (b) **tout fichier JS modifié non commité** (`git status`), c'est-à-dire ce que la release embarque vraiment. Sans (b), le défaut se déplaçait simplement au fichier suivant. Suffixe bijectif base-26 qui s'incrémente à date égale — deux releases le même jour doivent produire deux URL différentes, et c'est les jours de correctif qu'on livre plusieurs fois. Un module **intouché garde son `?v=`** : bumper tout reviendrait à supprimer le cache.
+
+     ▣ **CE QUE LES BREAK-TESTS ONT DONNÉ — 18 mutations, 17 ROUGE.** Et le 18e vert est le plus instructif.
+        • Le vert honnête : « le `?v=` d'un module ordinaire retombe d'un jour » **n'a PAS rougi**. Normal — la sentinelle statique ne sait vérifier que `main.js` et `init-inline.js`, seuls fichiers qui embarquent un build auquel comparer leur `?v=`. Pour les dix autres, **aucune vérité statique n'existe** : la garantie ne peut venir que du script de release. ⮕ D'où une seconde sentinelle qui **exécute réellement `release.mjs` sur un dépôt git jetable**. Le vert n'a pas été « corrigé » en affaiblissant l'assertion — il a été traité comme l'aveu d'une couverture manquante.
+        • **Piège évité de justesse, à retenir** : en passant `donnees-v2.js` au portillon, j'ai d'abord **retiré sa garde `DOMContentLoaded`**. Or ses deux fonctions sortent en silence si leurs nœuds manquent (`if (!statHebdo) return`) : le correctif aurait été **vert et inerte**, la classe d'erreur de 1.47.0. Garde DOM rétablie **au-dehors**, portillon DB **au-dedans** — deux conditions indépendantes.
+        • **Une sentinelle a été trouvée silencieusement affaiblie par le refactor** : celle de #413 découpait le bloc de migrations via `indexOf("window.addEventListener('db-ready', auDbReady)")`, qui rend désormais **-1** — `slice(x, -1)` découpait donc tout le reste du fichier, et l'assertion restait VERTE en ayant cessé de viser sa cible. Bornes vérifiées avant le slice, et le motif est commenté sur place.
+
+     ▣▣ **#419 (1.55.1) — CE QUE LA VALIDATION TERRAIN A TROUVÉ, MOINS D'UNE HEURE APRÈS LA LIVRAISON.** C'est le bloc le plus important de la journée, et il n'existerait pas sans la vérification sur données réelles.
+        Grégoire a lancé les trois commandes de contrôle. Drapeau de migration `true`, legacy purgé, build à jour — tout vert. **Mais son dump montrait `grilleReferenceDepistage: ''`**, et la commande de diagnostic a révélé ses vraies valeurs (`GRILLE1759529438501`) **intactes dans `a2024/a2025/h2026_modalitesEvaluation`**.
+        ⮕ **Rien n'a été perdu chez lui — mais seulement par hasard**, et c'est ce hasard qui a rendu le défaut visible plutôt que coûteux.
+        • **Défaut 1, l'asymétrie lecture/purge.** `modalitesEvaluation` est **namespacée par trimestre**. La migration lisait la clé **BRUTE** (`safeGet('modalitesEvaluation')`) — qui n'existe pas, donc elle ne voyait **jamais rien à migrer** — pendant que `nettoyerLegacy()` purgeait par le **module propriétaire**, c'est-à-dire la clé **namespacée du trimestre actif**. ⚠ **Une migration qui efface une clé qu'elle n'a jamais lue.** Grégoire a échappé à la purge parce que son trimestre actif (A2026) n'a aucune clé `modalitesEvaluation` ; un testeur dont le trimestre actif porte ces 5 champs les aurait perdus.
+        • **Défaut 2** : `if (entree.cible in prefs) continue` — un espace réservé vide comptait comme « déjà migré », donc la valeur legacy était écartée PUIS effacée. Corrigé par un test explicite de `''`/`null`/`undefined`, **surtout pas par un test de véracité** : ça aurait écrasé tous les `false` et `0` délibérés — l'erreur symétrique, et plus coûteuse.
+        • **Défaut 3** : `nettoyerLegacy()` tourne à chaque démarrage et purge le trimestre ACTIF ; un changement de trimestre des mois plus tard supprimait ses 5 champs alors que la migration, déjà « faite », ne repasserait jamais. Corrigé : **on ne purge que ce qui est déjà à l'abri** dans le magasin V3.
+        ⮕ **LEÇON, et elle vaut au-delà de ce cas** : *réveiller du code dormant ne suffit pas — il faut vérifier qu'il fait bien ce qu'il croit faire.* J'avais audité le réveil (§ « code dormant » du CLAUDE.md) et conclu qu'il était sûr : c'était vrai pour la question posée (« qui lit encore le legacy ? »), et faux pour celle que je n'avais pas posée (« la migration lit-elle la même clé que celle qu'elle purge ? »). **L'audit des call-sites ne remplace pas la lecture du chemin de données lui-même.**
+        ⮕ **Second enseignement, méthodologique** : aucune sentinelle ne pouvait attraper ça, parce que le laboratoire de test aurait naturellement exposé la donnée sous la clé brute ET sous le module. Le défaut n'était visible que sur des **données réelles namespacées**. La sentinelle de #419 modélise donc désormais le namespacing explicitement — c'est ce détail-là qui la rend capable de rougir.
+
+     ⮕ **OUVERT PAR CE CHANTIER — #418, et il est sérieux.** `db-ready` n'est **jamais émis** si IndexedDB est indisponible : `syncToLocalStorageCache()` (seul endroit qui pose `window.dbReady` et émet) n'est appelée que `if (db.useIndexedDB)`. En mode localStorage-seul, **aucun rappel `auDbPret` ne part jamais** — donc aucune migration du boot. Ne touche pas Grégoire (IDB actif), mais tout testeur en navigation privée Safari. ⚠ Le portillon rend ce trou **uniforme** : rien n'est aggravé (le défaut préexiste), mais c'est désormais le dernier chemin par lequel une migration peut disparaître en silence. Correctif pressenti (poser le drapeau et émettre aussi en mode localStorage-seul) = **décision Grégoire**, car ça change la sémantique du boot pour une classe d'utilisateurs.
+
+     ⮕ **QUEUES OUVERTES À LA REPRISE** (inchangées sauf mention) : **#418** (neuf) · **#409** (retirer l'archive `planification_seances_archive_pre367`, dès confirmation de Grégoire) · **#416** (exports présentables — 3 questions 📐 avant de coder) · **#406** (blocs B/C du PLAN-JOURNEE) · la **passe terrain iPad** · le panneau « Organisateur » mort et le double nommage · **#417-bis** (`_archives/entites-ui.js`, à supprimer lors d'une passe de ménage).
+     ⮕ **QUESTION DE FOND TOUJOURS OUVERTE** : les rangées du planificateur doivent-elles se subdiviser selon les séances déjà déclarées dans l'horaire ? Préalable levé depuis #407. ⚠ **Ne PAS rouvrir le renommage « séance »** — prémisse fausse, rejetée à raison par Grégoire.
+     ===================================================================== -->
+
+<!-- =====================================================================
+<!-- =====================================================================
+     ⚠ AVERTISSEMENT DE LECTURE (posé à la réconciliation du 8 août au soir) :
+     les DEUX blocs ci-dessous ont été écrits sans connaissance de la session du
+     matin. Deux affirmations y sont périmées et NON réécrites — le bloc est un
+     état de croyance daté, pas une page de référence :
+       • « #414 toujours pas entamé, seul reliquat qui touche aux données » —
+         FAUX depuis 1.55.0 : la session du matin l'a livré, et y a trouvé trois
+         familles de défauts au lieu d'une.
+       • « #417 ouvert » — FAUX depuis 1.55.0 : `release.mjs` bumpe désormais
+         lui-même les `?v=`.
+     Les identifiants et les numéros de version ont, eux, ÉTÉ corrigés (+2 sur
+     les IDs, trois releases fusionnées en 1.56.0).
+     ===================================================================== -->
+
+
      SESSION — 8 AOÛT 2026, NUIT (Claude Code cloud, Grégoire parti se coucher — travail AUTONOME sur sa consigne). ⮕⮕ LIRE EN PREMIER À LA REPRISE.
-     ÉTAT FACTUEL : branche `claude/rituel-de-debut-rbirt5` = **1.57.0** (build 0807-2132), poussée, arbre propre. Vitest **1832/1832** (215 fichiers). Playwright WebKit non exécutable en conteneur → CI à la PR. Dernier ID BACKLOG : **#421**.
+     ÉTAT FACTUEL : branche `claude/rituel-de-debut-rbirt5` = **1.56.0** (build 0807-2132), poussée, arbre propre. Vitest **1832/1832** (215 fichiers). Playwright WebKit non exécutable en conteneur → CI à la PR. Dernier ID BACKLOG : **#423**.
 
      ⮕⮕ **LE DOCUMENT À LIRE AVANT TOUTE REPRISE DE CE CHANTIER** : `plans de travail/PLAN-alignement-noeuds-et-duree-2026-08-08.md`. Écrit AVANT de coder, à la demande explicite de Grégoire (« je crains la compression de la conversation en cours de codage »). Il porte **10 décisions actées**, **7 pistes ÉCARTÉES avec leur motif** (§3, la section la plus importante — chacune paraît bonne à froid et a déjà été instruite), et les **faits relevés au code** (§4). Une instance qui reprend avec un contexte tronqué ne doit rouvrir aucune de ces discussions.
 
      ✅ LIVRÉ CETTE NUIT — 2 releases.
 
-     ▣ **1.56.0 — #420, le graphe accueille l'enseignement.** Deux choses qui tiennent ensemble.
+     ▣ **1.56.0 — #422, le graphe accueille l'enseignement.** Deux choses qui tiennent ensemble.
         ⚠ **LE BUG LE PLUS IMPORTANT DE LA JOURNÉE — #415 était décoratif.** Les cinq nœuds d'enseignement explicite livrés la veille avaient **ZÉRO paire** dans `VERBES_AUTO`. Ils étaient entrés dans `TYPES`, `TYPES_ACTIVITE`, `TYPES_SERVANTS_OBJECTIF` et la palette — jamais dans le graphe. `VERBES_HORIZONTAUX` n'ayant pas de `connaissance>activite`, `resoudreVerbe` rendait `null` : le toast « Ce lien n'est pas possible ». **Aucune connaissance ne pouvait être reliée à une Modélisation.** Une couleur, une durée, une place dans la leçon, et aucune relation. ⮕ **Règle générale** : *ajouter un type à une palette ne l'ajoute pas au MODÈLE. Un nœud qui ne se relie à rien est un dessin.*
         ⮕ **Correctif = repli sur la FAMILLE**, 3 lignes, et non les ~50 paires écrites à la main (empilement, et à recommencer au type suivant). C'est la ligne de #415 lui-même, qui avait rabattu les six triplets en dur sur `TYPES_ACTIVITE` — le chantier avait rabattu les triplets, pas la table des verbes. ⚠ SECOURS et non remplacement : le brut est consulté d'abord et gagne toujours.
         **Nœud « Exposé »** : il manquait un nœud pour dire « j'enseigne ». La famille était entièrement tournée vers l'ÉLÈVE qui agit (Activité, Soutien, Révision), et l'enseignant n'apparaissait qu'à l'intérieur d'UNE méthode — qui ne pratique pas l'EE n'avait aucun moyen de se mettre lui-même dans sa leçon. **Complément** des cinq nœuds d'EE, pas leur substitut. Famille « Mise en action » → « **Déroulement** » (un nom tourné vers le seul élève mentait sur un de ses membres).
 
-     ▣ **1.57.0 — #421, la durée se saisit et se totalise sur la carte.** Champ dans l'en-tête du nœud (10 types), **toujours visible** ; compteur Σ sur leçons et séquences, rafraîchi en direct en remontant la chaîne. Inspecteur allégé de ses deux blocs de durée. ⚠ `TYPES_AVEC_DUREE` est une liste **séparée** de `TYPES_ACTIVITE` — cette dernière pilote `normaliserType`, donc les verbes de liens ; y glisser `evaluation` aurait changé en silence les relations possibles entre nœuds.
+     ▣ **1.56.0 — #423, la durée se saisit et se totalise sur la carte.** Champ dans l'en-tête du nœud (10 types), **toujours visible** ; compteur Σ sur leçons et séquences, rafraîchi en direct en remontant la chaîne. Inspecteur allégé de ses deux blocs de durée. ⚠ `TYPES_AVEC_DUREE` est une liste **séparée** de `TYPES_ACTIVITE` — cette dernière pilote `normaliserType`, donc les verbes de liens ; y glisser `evaluation` aurait changé en silence les relations possibles entre nœuds.
 
      ▣ **CE QUE LES BREAK-TESTS ONT ATTRAPÉ — 30 mutations, QUATRE faux-verts.** C'est la moisson la plus riche depuis qu'on fait ça, et les quatre sont de la même famille : *l'assertion vérifiait autre chose que ce qu'elle croyait.*
         (1) ⚠ **Non-régression des verbes** — « les paires brutes gardent leur verbe » est restée VERTE quand on a fait passer le repli DEVANT le brut. Motif : dans la table actuelle, **chaque paire brute porte le même verbe que son équivalent de famille**, donc inverser l'ordre ne change rien d'observable. L'invariant était vrai, l'assertion aveugle. ⮕ Corrigé en **injectant un verbe distinctif** le temps d'un test — et la PREMIÈRE tentative était encore fausse : le cas choisi (`soutien>evaluation`) était du mauvais côté, `normaliserType('evaluation')` rendant `evaluation`, donc clé de famille IDENTIQUE à la clé brute. Il fallait une **cible** de la famille d'activité (`factuelle>soutien`). **Deux passes pour rendre un ordre observable.**
@@ -32,7 +118,7 @@
 
      ⮕ **DÉCISIONS DE GRÉGOIRE DANS LA SOIRÉE** (toutes au §2 du plan) : Inspecteur CONSERVÉ, allégé du redondant ✔ · durée sur les connaissances ABANDONNÉE ✔ · taxonomie hybride assumée et documentée ✔ · **formative/certificative** (contre ma recommandation « sommative » — hypothèse posée : le mot cohabite avec SOM, il ne le remplace pas) ✔ · niveau cognitif SCINDÉ (le choix descend, la banque de verbes reste) ✔ · input de durée toujours visible ✔ · nœud « Exposé » ✔ · famille « Déroulement » ✔ · Exposé en tête de famille ✔.
 
-     ⮕ **CE QUI RESTE DU CHANTIER ALIGNEMENT** (détail au §8 du plan) : **lot C** (rétroaction + niveau cognitif + formative/certificative dans les en-têtes) · **lot D** (ménage final de l'Inspecteur — ⚠ **rebrancher la banque de verbes sur `.planif-noeud-titre`**, elle vise `#planif-panneau-titre` et deviendrait muette sans bruit) · **lot E** (connaissance « Conditionnelle » + déplacement de « Préalable ») · **lot F** (largeur des nœuds, **mesurée** et non devinée) · **#419** (conformité documentaire, **3 surfaces**).
+     ⮕ **CE QUI RESTE DU CHANTIER ALIGNEMENT** (détail au §8 du plan) : **lot C** (rétroaction + niveau cognitif + formative/certificative dans les en-têtes) · **lot D** (ménage final de l'Inspecteur — ⚠ **rebrancher la banque de verbes sur `.planif-noeud-titre`**, elle vise `#planif-panneau-titre` et deviendrait muette sans bruit) · **lot E** (connaissance « Conditionnelle » + déplacement de « Préalable ») · **lot F** (largeur des nœuds, **mesurée** et non devinée) · **#421** (conformité documentaire, **3 surfaces**).
 
      ⮕ **PORTES TERRAIN DUES, ET ELLES S'ACCUMULENT** : (a) saisie de durée **au doigt** sur iPad ; (b) lisibilité de l'en-tête sur un nœud étroit — le lot « largeur » n'est pas fait, et l'en-tête a reçu deux contrôles ; (c) reliquats du matin : les deux boutons de palette, et la carte entièrement dépliée sur une grosse carte.
 
@@ -41,13 +127,13 @@
 
 <!-- =====================================================================
      SESSION — 8 AOÛT 2026 (Claude Code cloud, Grégoire présent, branche `claude/rituel-de-debut-rbirt5`). ⮕⮕ LIRE EN PREMIER À LA REPRISE.
-     ÉTAT FACTUEL : branche = **1.55.0** (build 0807-2004), partie de `main` à 1.54.0 (zéro écart au départ, cf. rituel de début), arbre propre. Vitest **1792/1792** (213 fichiers). Playwright WebKit non exécutable en conteneur → CI à la PR. Dernier ID BACKLOG : **#418**.
+     ÉTAT FACTUEL : branche = **1.56.0** (build 0807-2004), partie de `main` à 1.54.0 (zéro écart au départ, cf. rituel de début), arbre propre. Vitest **1792/1792** (213 fichiers). Playwright WebKit non exécutable en conteneur → CI à la PR. Dernier ID BACKLOG : **#420**.
 
      ▣ **RITUEL DE DÉBUT — AUCUN ÉCART MATÉRIEL.** Version, Vitest (1770/1770 au départ), dernier ID, arbre propre : tout conforme à la prémisse du §3. Seul écart, **nominal** : le conteneur a démarré sur `claude/rituel-de-debut-rbirt5` et non sur `main` — mais la branche était un calque exact de `main` (0/0). Le piège du 7 août (démarrer 16 versions mineures en arrière) **ne s'est pas reproduit**. Les 82 échecs Playwright sont tous `Executable doesn't exist at /opt/pw-browsers/webkit-2287` — limite connue du conteneur, zéro échec d'assertion.
 
      ⮕ **#409 DÉBLOQUÉ** : Grégoire a confirmé que ses notes de leçon sont correctes. L'archive `planification_seances_archive_pre367` peut être retirée — **NON FAIT ce cycle**, le chantier a bifurqué sur sa demande.
 
-     ✅ LIVRÉ — **1.55.0, #418 : simplification du module Alignement** (chantier hors file, demande de Grégoire appuyée sur deux captures).
+     ✅ LIVRÉ — **1.56.0, #420 : simplification du module Alignement** (chantier hors file, demande de Grégoire appuyée sur deux captures).
 
      ▣ **LE CONSTAT, ET CE QUE L'AUDIT A AJOUTÉ.** Grégoire : cliquer un élément du planificateur affichait derrière une fiche en lecture seule, redondante avec le canevas, avec toujours le même titre de séquence quel que soit l'élément cliqué. Vérifié au code : le fil d'Ariane lisait `sequenceActiveId` et non le parent de la leçon, et `naviguerSommaireLecon` ne mettait cette variable à jour que pour une leçon enfant DIRECTE — d'où le titre figé. Bug **jamais corrigé, rendu sans objet** par la suppression. Sa seconde capture a prouvé la redondance : le canevas rend la même leçon avec ses activités, **plus** les liens, le sélecteur de semaine et le badge d'objectif. La fiche rendait strictement MOINS.
 
@@ -5489,90 +5575,103 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
 ## §3 — Consigne de démarrage pour la prochaine session
 
-> **Rédigée le 8 août 2026 en fin de cycle autonome.** Remplace la consigne du
-> 7 août, dont les priorités 1 et 2 (#414, #417) sont **toujours valides et
-> toujours non entamées** — la journée du 8 a bifurqué sur le module Alignement
-> à la demande de Grégoire, deux fois.
+> **Réécrite le 8 août 2026 au soir, à la réconciliation de deux sessions
+> parallèles.** Elle remplace DEUX §3 : celui du 7 août (resté sur `main`, et
+> qui a causé la collision) et celui de la session de nuit (resté sur sa
+> branche, donc illisible par la session du matin).
 
-### ⚠ AVANT TOUT — la branche
+### ⚠⚠ AVANT TOUT — lire ceci, c'est ce qui a cassé aujourd'hui
 
-**Ouvrir le conteneur sur `claude/rituel-de-debut-rbirt5`**, qui porte tout le
-travail du 8 août (1.55.0 → 1.57.0) et n'est **pas mergée**. `origin/main` est
-resté à **1.54.0**. Ouvrir sur `main` ferait coder trois versions mineures en
-arrière — c'est le piège du 7 août, une classe qu'on a déjà payée.
+Le 8 août, **deux sessions sont parties du même commit sans se voir**. Toutes
+deux ont livré une « 1.55.0 » différente et pris les mêmes identifiants de
+backlog. La cause n'est pas un défaut d'attention : la session du matin a fait
+le rituel, vérifié la prémisse, et trouvé **zéro écart** — parce que la
+prémisse qu'elle lisait, sur `main`, avait été périmée par une branche qu'elle
+ne pouvait pas voir.
+
+⮕ **La consigne de relais vit dans un fichier versionné. Si le travail vit sur
+une branche non mergée, la consigne qui le dit vit sur cette branche aussi —
+et la session suivante lit celle de `main`.** C'est circulaire, et aucun soin
+apporté au rituel ne le compense.
 
 ### Prémisse à vérifier au rituel de début (§1)
 
 | Point | Valeur attendue |
 |---|---|
-| Branche | `claude/rituel-de-debut-rbirt5`, **3 commits devant `origin/main`** |
-| Version | `{"build":"0807-2132","beta":"1.57.0"}` |
-| Vitest | **1832/1832** (215 fichiers) |
+| `origin/main` | **1.55.1** — porte #414, #417 et #419 (session du matin, fusionnée en fast-forward le 8 au soir) |
+| Branche de travail | `claude/rituel-de-debut-rbirt5` — **1.56.0**, `main` fusionné dedans, **NON mergée vers `main`** |
+| Vitest | à mesurer ; ~**1840** attendus (215+ fichiers) |
 | Playwright WebKit | non exécutable en conteneur → CI à la PR |
-| Dernier ID BACKLOG | **#421** |
+| Dernier ID BACKLOG | **#427** |
 | Arbre | propre |
 
-### ⮕ LIRE EN PREMIER SI LE CHANTIER ALIGNEMENT CONTINUE
+⚠ **Ouvrir le conteneur sur `claude/rituel-de-debut-rbirt5`**, qui porte trois
+chantiers Alignement absents de `main`. Et **avant toute chose, exécuter
+`git branch -r --sort=-committerdate | head` pour vérifier qu'aucune AUTRE
+branche n'a bougé depuis** — c'est le contrôle qui manquait aujourd'hui, et il
+coûte cinq secondes.
 
-`plans de travail/PLAN-alignement-noeuds-et-duree-2026-08-08.md`. Écrit avant de
-coder, à la demande de Grégoire, **comme filet contre la compression**. Son §3
-(« ce qui a été ÉCARTÉ ») est la section décisive : sept pistes qui paraissent
-bonnes à froid et qui ont déjà été instruites. Ne pas les rouvrir.
+### Décision n°1 qui attend Grégoire — le correctif structurel
 
-### Décision qui attend Grégoire
+Trois sorties possibles, de la plus légère à la plus solide :
 
-**Merger vers `main` ?** Trois releases sont sur la branche (1.55.0 simplification,
-1.56.0 graphe + Exposé, 1.57.0 durée). La 1.56.0 contient un **correctif de bug**
-qui rend fonctionnels les cinq nœuds livrés le 7 août — sans elle, ce qui est en
-production est décoratif. C'est un argument pour déployer, mais la décision reste
-la sienne.
+1. Un `RELAIS.md` à la racine, **toujours poussé sur `main`** en fin de
+   session, qui ne dit qu'une chose : où vit le travail en cours.
+2. Un commit minuscule sur `main` en fin de session, même information.
+3. **Merger vers `main` à la fin de chaque session** — le vrai remède.
 
-### Priorité 1 — les portes terrain, qui s'accumulent
+⮕ **Recommandation : la 3, avec la 1 comme filet** quand un merge doit vraiment
+attendre. C'est le report du merge qui ouvre la fenêtre de divergence, et il a
+été reporté trois fois cette semaine.
 
-Trois lots ont été livrés en deux jours sans validation au doigt. À faire dans
-l'ordre où l'usage les rencontre :
+### Décision n°2 — merger la branche courante vers `main` ?
 
-1. **Saisie de durée sur iPad** — le champ est dans l'en-tête d'un bloc qui se
-   glisse ; la pression est interceptée, mais ça n'a pas été vérifié au doigt.
+Elle porte **1.56.0** : la simplification du module Alignement, le nœud
+« Exposé » avec le correctif du graphe (#415 était **décoratif** — ses cinq
+nœuds ne se reliaient à rien), et la durée dans les en-têtes. Rien n'en est en
+production.
+
+### Priorité 1 — les portes terrain, qui s'accumulent depuis trois jours
+
+Aucun des chantiers livrés n'a été validé au doigt :
+1. **Saisie de durée sur iPad** — champ dans l'en-tête d'un bloc qui se glisse.
 2. **Lisibilité de l'en-tête sur un nœud étroit** — il a reçu deux contrôles et
-   le lot « largeur » (F) n'est pas fait.
-3. **Reliquats du 8 août matin** — les deux boutons de palette, et la carte
-   entièrement dépliée sur une grosse carte réelle.
-
-### Priorité 2 — #414, les 14 écouteurs `db-ready` (~1 h)
-
-**Toujours le seul reliquat qui porte un risque de DONNÉES**, et toujours pas
-entamé après deux jours. Le geste attendu est un **tri** : ceux qui portent des
-migrations ou des écritures → corriger comme #413 ; ceux qui ne font que
-rafraîchir de l'UI → laisser. Chaque correctif = une sentinelle break-testée
-(patron réutilisable : `sentinelle-db-ready-course.test.js`).
+   le lot « largeur » n'est pas fait.
+3. **Les deux boutons de palette**, et **la carte entièrement dépliée** sur une
+   grosse carte réelle.
+4. ⚠ **Porte terrain héritée du matin** : des préférences d'avant le 16 avril
+   peuvent réapparaître au premier démarrage — c'est la migration qui fait
+   enfin son travail, pas un bug.
 
 ### Puis, au choix de Grégoire
 
-- **#417** — `release.mjs` doit bumper lui-même le `?v=` des fichiers qu'il
-  réécrit. Pas un bump à la main.
+- **#424 → #427** : le chantier « Carte d'alignement », instruit par
+  `plans de travail/AUDIT-carte-alignement-exports-productions-2026-08-08.md`.
+  ⚠ **Six décisions D1-D6 y attendent**, chacune avec recommandation explicite
+  au §3 de ce document. ⚠ **Ne pas supprimer le « Plan de la leçon » avant
+  d'avoir inventorié `planification_seances[...].activites`** — il y a des
+  données dedans.
+- **#421** — conformité documentaire, sur **trois** surfaces. À faire quand
+  l'interface aura cessé de bouger.
+- **#418** (leur) — `db-ready` jamais émis si IndexedDB est indisponible.
 - **#409** — l'archive `planification_seances_archive_pre367` : Grégoire a
-  **confirmé le 8 août** que ses notes sont correctes. Retrait immédiat possible.
-- **Lots C à F du chantier Alignement** — §8 du plan.
-- **#419** — conformité documentaire, **après** que l'interface ait cessé de
-  bouger.
+  confirmé le 8 août que ses notes sont correctes. Retrait immédiat possible.
 
-### Rappel de méthode — ce que quatre faux-verts ont appris en deux jours
+### Rappel de méthode — les faux-verts de la semaine
 
 1. **Une assertion peut être satisfaite par autre chose que ce qu'elle croit
    vérifier** : un appel trouvé dans un commentaire, un `@media` voisin, un
    préfixe (`objectif` dans `objectifs`, `=` dans `===`).
-2. **Une sentinelle peut couvrir le geste sans couvrir ce qu'il emporte** : la
-   carte se copie, ses notes ne suivent pas ; la sélection change, la
-   multi-sélection survit.
-3. ⮕ **NOUVEAU, 8 août** : *quand un invariant NEUF porte sur un mécanisme qui
-   double un mécanisme ANCIEN, l'assertion attrape l'ancien et croit tenir le
-   neuf.* Deux cas le même soir — un calcul qui récursait déjà, une table dont
-   les verbes étaient uniformes. **Pour tout invariant de comportement : monter
-   le module et observer l'effet, jamais lire la source.**
-4. ⮕ **Un invariant de SÉCURITÉ voyage avec le champ qu'il protège.** Déplacer
-   le champ sans déplacer sa garde, c'est le désarmer en silence — et la
-   sentinelle reste verte.
+2. **Une sentinelle peut couvrir le geste sans couvrir ce qu'il emporte.**
+3. **Quand un invariant NEUF porte sur un mécanisme qui double un mécanisme
+   ANCIEN, l'assertion attrape l'ancien et croit tenir le neuf** — un calcul qui
+   récursait déjà, une table dont les verbes étaient uniformes.
+4. **Un invariant de SÉCURITÉ voyage avec le champ qu'il protège.** Le déplacer
+   sans déplacer sa garde, c'est le désarmer en silence.
+5. ⮕ **NOUVEAU, 8 août** : *le rituel de début ne protège que contre ce que
+   `main` sait.* Il ne voit pas une branche qu'on ne lui a pas nommée. Ajouter
+   le balayage des branches distantes au §1.
+
 
 ## §3bis — Archives des consignes de démarrage précédentes
 

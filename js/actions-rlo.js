@@ -294,10 +294,16 @@
 
     // Hook de démarrage : attendre db-ready. Cet écouteur est enregistré APRÈS
     // celui de `migrerIdsActionsRLO` (travaux-outils.js), donc s'exécute après
-    // la migration des IDs sur le même tick.
-    if (typeof db !== 'undefined' && db.ready) {
-        migrerActionsRLOEvaluations();
-    } else {
-        window.addEventListener('db-ready', migrerActionsRLOEvaluations, { once: true });
-    }
+    // la migration des IDs. Le portillon préserve cet ordre : que la DB soit
+    // déjà prête (exécution immédiate, dans l'ordre de parse des scripts) ou
+    // non (écouteurs déclenchés dans l'ordre d'enregistrement), travaux-outils.js
+    // étant chargé avant actions-rlo.js dans index.html.
+    //
+    // ⚠ #414 (8 août 2026) : la garde était `db.ready`, qui passe à vrai à la
+    // fin d'`init()` — donc AVANT `syncToLocalStorageCache()`. Sur ce créneau,
+    // la migration lisait un `memoryCache` non hydraté, écrivait des évaluations
+    // à partir de données incomplètes, puis posait son drapeau d'idempotence :
+    // le travail manquant n'aurait jamais été repris. `auDbPret` s'appuie sur
+    // `window.dbReady`, le seul drapeau qui signifie « les données sont lisibles ».
+    window.auDbPret(migrerActionsRLOEvaluations);
 })();
