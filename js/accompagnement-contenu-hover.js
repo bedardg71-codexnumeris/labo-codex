@@ -620,7 +620,7 @@ const TOOLTIPS = {
     'planif-quoi-enseigner':
         'Quoi enseigner : types de connaissances (Anderson) — factuelle, conceptuelle, procédurale et métacognitive.',
     'planif-comment-enseigner':
-        'Comment enseigner : dispositifs d\'enseignement, activités de soutien et occasions de révision.',
+        'Comment enseigner : exposés, activités, soutien et occasions de révision — tout ce qui occupe le temps de classe, le tien comme celui de tes élèves.',
     'planif-structure':
         'Quand enseigner : organisation temporelle en séquences (semaines) et leçons (séances).',
     'planif-design-apprentissages':

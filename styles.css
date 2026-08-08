@@ -18460,7 +18460,11 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     /* Conteneurs — Violet */
     --planif-couleur-sequence: #7e22ce;
     --planif-couleur-lecon: #c084fc;
-    /* Activités — Vert */
+    /* Déroulement — Vert. « Exposé » (8 aout 2026) est le temps de parole du
+       prof : il reste dans la famille du temps de classe, mais prend le vert
+       le plus sombre pour se distinguer d'un coup d'oeil des trois nœuds
+       tournés vers l'élève qui agit. */
+    --planif-couleur-expose: #065f46;
     --planif-couleur-activite: #16a34a;
     --planif-couleur-soutien: #22c55e;
     --planif-couleur-revision: #15803d;
@@ -21733,6 +21737,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 .planif-palette-btn[data-type="metacognitive"]  { border-color: var(--planif-couleur-metacognitive); }
 .planif-palette-btn[data-type="sequence"]       { border-color: var(--planif-couleur-sequence); border-style: dashed; }
 .planif-palette-btn[data-type="lecon"]          { border-color: var(--planif-couleur-lecon); border-style: dashed; }
+.planif-palette-btn[data-type="expose"]         { border-color: var(--planif-couleur-expose); }
 .planif-palette-btn[data-type="activite"]       { border-color: var(--planif-couleur-activite); }
 .planif-palette-btn[data-type="soutien"]        { border-color: var(--planif-couleur-soutien); }
 .planif-palette-btn[data-type="revision"]       { border-color: var(--planif-couleur-revision); }

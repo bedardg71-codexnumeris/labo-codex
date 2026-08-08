@@ -172,9 +172,18 @@ describe('EE · l’ablation du Plan de la leçon est complète', () => {
 
 describe('Palette · les descriptions sont devenues les titres', () => {
     it('les cinq zones portent leur description en titre', () => {
-        for (const titre of ['Intention curriculaire', 'Types de connaissances', 'Mise en action', 'Preuve de réussite', 'Organisation']) {
-            expect(sourceIndex).toContain('planif-palette-zone-label" data-tooltip="planif-' );
-            expect(sourceIndex, titre).toContain('>' + titre + '</div>');
+        // « Mise en action » est devenu « Déroulement » le 8 août : la famille
+        // accueille désormais l'Exposé — le temps de parole du prof — et un nom
+        // tourné vers le seul élève qui agit mentait sur un de ses membres.
+        //
+        // ⚠ La première assertion de cette boucle ne dépendait PAS de `titre` :
+        // elle répétait cinq fois le même contrôle. Resserrée en même temps —
+        // une assertion qui ne varie pas dans une boucle est un faux-vert qui
+        // s'ignore.
+        for (const titre of ['Intention curriculaire', 'Types de connaissances', 'Déroulement', 'Preuve de réussite', 'Organisation']) {
+            expect(sourceIndex, titre).toMatch(
+                new RegExp('planif-palette-zone-label" data-tooltip="planif-[a-z-]+">' + titre + '</div>')
+            );
         }
     });
 
