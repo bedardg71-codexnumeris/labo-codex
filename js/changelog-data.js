@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.60',
+            couleur: 'vert',
+            titre: 'Une corbeille dans la palette — supprimer au doigt',
+            items: [
+                'Nouvelle corbeille au bas de la palette « Nœuds » : glisse un bloc dessus pour le supprimer. Sur iPad, c’était le geste qui manquait — la suppression exigeait jusqu’ici un clavier, ou trois touchers en passant par l’Inspecteur.',
+                'La corbeille apparaît dès que tu commences à déplacer un bloc, et devient rouge quand le doigt la survole : tu vois ce qui va se passer avant de relâcher.',
+                'Un bloc supprimé par erreur revient avec le bouton « Annuler » de la barre d’outils — le message te le rappelle au moment de la suppression.'
+            ]
+        },
+        {
             version: '1.59',
             couleur: 'bleu',
             titre: 'Les guides se ressemblent enfin',
