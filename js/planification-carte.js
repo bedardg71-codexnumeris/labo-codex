@@ -6377,33 +6377,24 @@ function initialiser() {
         });
     }
 
-    // Export texte/TSV
-    var btnExportTexte = document.getElementById('planif-btn-export-texte');
-    if (btnExportTexte) {
-        btnExportTexte.addEventListener('click', function() {
-            var index = window.planificationDonnees.getIndex();
-            var nomCarte = 'plan';
-            if (index && index.cartes) {
-                var c = index.cartes.find(function(cc) { return cc.id === index.active; });
-                if (c) nomCarte = c.nom;
-            }
-            var nomFichier = nomCarte.replace(/[^a-zA-Z0-9\u00C0-\u017F _-]/g, '') + '_plan.txt';
-            telechargerFichier(genererPlanTexte(), nomFichier, 'text/plain');
+    // Export du plan \u2014 3 niveaux \u00D7 3 formats (portage #424). Remplace les
+    // boutons Texte/TSV du panneau : un seul point d'entr\u00E9e, dans Actions,
+    // \u00E0 c\u00F4t\u00E9 d'Exporter/Importer JSON. M\u00EAme patron de panneau que l'import
+    // inter-trimestre.
+    var btnExporterPlan = document.getElementById('planif-btn-exporter-plan');
+    var panneauExportPlan = document.getElementById('planif-export-plan-panel');
+    if (btnExporterPlan && panneauExportPlan) {
+        btnExporterPlan.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var dropdownActions = document.getElementById('planif-actions-dropdown');
+            if (dropdownActions) dropdownActions.classList.remove('ouvert');
+            rendrePanneauExportPlan();
+            panneauExportPlan.classList.add('ouvert');
         });
-    }
-
-    var btnExportTSV = document.getElementById('planif-btn-export-tsv');
-    if (btnExportTSV) {
-        btnExportTSV.addEventListener('click', function() {
-            var index = window.planificationDonnees.getIndex();
-            var nomCarte = 'plan';
-            if (index && index.cartes) {
-                var c = index.cartes.find(function(cc) { return cc.id === index.active; });
-                if (c) nomCarte = c.nom;
-            }
-            var nomFichier = nomCarte.replace(/[^a-zA-Z0-9\u00C0-\u017F _-]/g, '') + '_plan.tsv';
-            telechargerFichier(genererPlanTSV(), nomFichier, 'text/tab-separated-values');
+        document.addEventListener('click', function() {
+            panneauExportPlan.classList.remove('ouvert');
         });
+        panneauExportPlan.addEventListener('click', function(e) { e.stopPropagation(); });
     }
 
     // Recentrer
@@ -7498,6 +7489,85 @@ function rendrePanneauImportTrimestre() {
     });
 }
 
+// === EXPORT DU PLAN — PANNEAU NIVEAU × FORMAT (portage #424, 8 août 2026) ===
+//
+// La mémoire du choix vit le temps de la session d'écran, pas en préférence :
+// l'enseignant qui exporte trois niveaux d'affilée ne re-choisit que ce qui
+// change. Défaut : « En classe » en texte — l'usage le plus fréquent (D4).
+var exportPlanNiveau = 'deroulement';
+var exportPlanFormat = 'texte';
+
+function rendrePanneauExportPlan() {
+    var panneau = document.getElementById('planif-export-plan-panel');
+    var exporteur = window.planificationExport;
+    if (!panneau || !exporteur) return;
+
+    function groupeRadios(titre, nomGroupe, options, valeurCourante) {
+        var html = '<div class="planif-import-tri-groupe">' + titre + '</div>';
+        options.forEach(function(opt) {
+            var coche = opt.id === valeurCourante ? ' checked' : '';
+            html += '<label class="planif-checkbox-label planif-export-plan-choix">' +
+                '<input type="radio" name="' + nomGroupe + '" value="' + opt.id + '"' + coche + '> ' +
+                echapperHtml(opt.label) +
+                '</label>';
+        });
+        return html;
+    }
+
+    // Libellés statiques des constantes du module — echapperHtml par principe.
+    var html = groupeRadios('Niveau', 'planif-export-niveau', exporteur.NIVEAUX, exportPlanNiveau) +
+        groupeRadios('Format', 'planif-export-format', exporteur.FORMATS, exportPlanFormat) +
+        '<div class="planif-import-tri-ligne planif-export-plan-actions">' +
+        '<button type="button" class="planif-btn-carte" id="planif-export-plan-copier">Copier</button>' +
+        '<button type="button" class="planif-btn-carte" id="planif-export-plan-telecharger">Télécharger</button>' +
+        '</div>';
+    panneau.innerHTML = html;
+
+    panneau.querySelectorAll('input[name="planif-export-niveau"]').forEach(function(radio) {
+        radio.addEventListener('change', function() { exportPlanNiveau = radio.value; });
+    });
+    panneau.querySelectorAll('input[name="planif-export-format"]').forEach(function(radio) {
+        radio.addEventListener('change', function() { exportPlanFormat = radio.value; });
+    });
+
+    document.getElementById('planif-export-plan-telecharger').addEventListener('click', function() {
+        var doc = exporteur.genererExport(exportPlanNiveau, exportPlanFormat);
+        if (!doc) { afficherToastLien("L'export a échoué — aucune carte active."); return; }
+        var format = exporteur.FORMATS.find(function(f) { return f.id === exportPlanFormat; });
+        telechargerFichier(doc, exporteur.nomFichierExport(exportPlanNiveau, exportPlanFormat), format.mime);
+        panneau.classList.remove('ouvert');
+    });
+
+    document.getElementById('planif-export-plan-copier').addEventListener('click', function() {
+        var doc = exporteur.genererExport(exportPlanNiveau, exportPlanFormat);
+        if (!doc) { afficherToastLien("L'export a échoué — aucune carte active."); return; }
+        function copieReussie() {
+            afficherToastLien('Plan copié — colle-le où tu veux.');
+            panneau.classList.remove('ouvert');
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(doc).then(copieReussie).catch(function() {
+                copierExportFallback(doc); copieReussie();
+            });
+        } else {
+            copierExportFallback(doc); copieReussie();
+        }
+    });
+}
+
+// Repli presse-papiers (Safari file:// sans clipboard API) — même idiome que
+// l'ancien copierMDFallback de l'Organisateur, qui meurt avec la page.
+function copierExportFallback(texte) {
+    var ta = document.createElement('textarea');
+    ta.value = texte;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+}
+
 // === REPRISE D'UN TRIMESTRE À L'AUTRE (lot 2, 7 août 2026) ===
 //
 // Ferme #368 : chaque rentrée, retrouver la carte du 601-101 de la session
@@ -7871,6 +7941,9 @@ window.planificationCarte = {
     VERBES_AUTO: VERBES_AUTO,
     TYPES_ACTIVITE: TYPES_ACTIVITE,
     RETROACTIONS: RETROACTIONS,
+    // Exposée pour la sentinelle du panneau d'export (#424 Lot D) : le rendu
+    // se vérifie en RENDANT le panneau, pas en relisant la source.
+    rendrePanneauExportPlan: rendrePanneauExportPlan,
     // ⚠ Exposés pour le HARNAIS DE PARITÉ du portage #424 (Lot C) : le nouveau
     // générateur doit couvrir tout ce que les anciens émettent, et le harnais
     // les appelle pour le prouver. Ils MEURENT au Lot G, exports compris.
