@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            version: '1.55',
+            couleur: 'bleu',
+            titre: 'Alignement : une seule vue, et des palettes qu’on range',
+            items: [
+                'Cliquer une leçon ou une séquence dans le planificateur ne remplace plus la carte par une fiche en lecture seule. La carte se déplace jusqu’à l’élément et le sélectionne : tu le vois dans son contexte, avec ses liens, et tu peux l’éditer sur place au lieu de le relire.',
+                'La carte montre désormais TOUT, tout le temps. Ouvrir une séquence ne masque plus les autres, et les séquences ne se replient plus en pastille résumée : ce que tu as construit reste à l’écran.',
+                'Le bouton « Vue globale » disparaît — il n’y a plus de vue à quitter pour y revenir.',
+                'Deux boutons dans la barre d’outils, « Nœuds » et « Planificateur », affichent ou masquent chaque palette. Elles libèrent tout l’écran quand tu n’en as pas besoin, et ton choix est mémorisé d’une séance à l’autre.',
+                'Un objectif de leçon saisi dans l’ancienne fiche de lecture n’était plus jamais réaffiché : ces textes sont récupérés et remis dans les objectifs de la leçon, sans doublon.'
+            ]
+        },
+        {
             version: '1.54',
             couleur: 'vert',
             titre: 'Alignement : l’enseignement explicite entre dans la carte',

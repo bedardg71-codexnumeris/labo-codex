@@ -249,7 +249,10 @@ describe('Bouton de disposition · visible et lisible', () => {
     )].map((m) => m[1]);
 
     it('les boutons de barre de palette sont bien là', () => {
-        expect(libelles.length).toBeGreaterThanOrEqual(2);
+        // Un seul depuis le 7 août : les boutons de « repli » des deux palettes
+        // sont retirés au profit des boutons d'affichage de la barre d'outils.
+        // Reste le bouton de disposition de la réserve.
+        expect(libelles.length).toBeGreaterThanOrEqual(1);
     });
 
     it('AUCUN n’utilise un glyphe hors des blocs sûrs', () => {
@@ -297,27 +300,45 @@ describe('Bouton de disposition · visible et lisible', () => {
 // qu'un deuxième élément la porte, tout `querySelector` sur elle devient un pari
 // sur l'ordre du DOM.
 
+// ▣ MISE À JOUR DU 7 AOÛT (soir) — le mécanisme de repli est RETIRÉ : afficher
+// ou masquer une palette se commande depuis la barre d'outils. Les assertions
+// qui portaient sur `.planif-palette-replier` sont donc supprimées plutôt que
+// laissées vraies-pour-rien : une assertion dont le sujet a disparu est un
+// faux-vert, pas une garde.
+//
+// CE QUI SURVIT, et qui est le vrai invariant : le code ne doit JAMAIS désigner
+// un bouton par `.planif-palette-toggle`. La règle est intacte et reste
+// mordante — c'est elle qui rattrapera le jour où un deuxième bouton rejoindra
+// la barre et où quelqu'un tendra la main vers la classe de style.
+
 describe('Sélecteurs · désigner et styler sont deux rôles distincts', () => {
-    it('la classe de style est bien PARTAGÉE — c’est ce qui rend le piège réel', () => {
-        const toggles = sourceIndex.match(/class="planif-palette-toggle[^"]*"/g) || [];
-        expect(toggles.length).toBeGreaterThanOrEqual(3);
-    });
-
-    it('le comportement « replier » vise une classe DÉDIÉE', () => {
-        expect(sourceCarte).toContain("querySelector('.planif-palette-replier')");
+    it('aucun comportement ne se branche sur la classe de STYLE', () => {
         expect(sourceCarte).not.toContain("querySelector('.planif-palette-toggle')");
+        expect(sourceCarte).not.toContain('querySelector(".planif-palette-toggle")');
     });
 
-    it('chaque palette porte exactement UN bouton de repli', () => {
-        // Deux palettes (Nœuds, Planificateur) → deux boutons, pas trois.
-        const replier = sourceIndex.match(/planif-palette-replier/g) || [];
-        expect(replier.length).toBe(2);
+    it('les boutons qui portent un comportement sont désignés par leur id', () => {
+        // Chaque bouton de la barre de palette et de la barre d'outils est
+        // atteint par getElementById — une identité, pas une apparence.
+        for (const id of ['planif-btn-disposition-reserve',
+                          'planif-btn-palette-noeuds',
+                          'planif-btn-palette-planificateur']) {
+            expect(sourceIndex).toContain(`id="${id}"`);
+        }
+        expect(sourceCarte).toContain("getElementById('planif-btn-disposition-reserve')");
     });
 
-    it('le bouton de disposition NE porte PAS la classe de repli', () => {
-        const ligne = /<button[^>]*id="planif-btn-disposition-reserve"[^>]*>/.exec(sourceIndex);
-        expect(ligne).toBeTruthy();
-        expect(ligne[0]).not.toContain('planif-palette-replier');
+    it('le mécanisme de repli a bien disparu du DOM, du CSS et du comportement', () => {
+        // Le HTML et le CSS ne doivent plus porter la moindre trace : là-bas,
+        // toute occurrence est vivante.
+        expect(sourceIndex).not.toContain('planif-palette-replier');
+        expect(sourceCss).not.toContain('planif-palette-replie');
+        // Dans le JS, on vise l'USAGE et non la chaîne : le commentaire qui
+        // raconte le retrait mentionne la classe, et c'est très bien ainsi —
+        // une sentinelle qui interdirait d'en parler effacerait la mémoire du
+        // piège en même temps que le code.
+        expect(sourceCarte).not.toMatch(/querySelector\(['"]\.planif-palette-replier/);
+        expect(sourceCarte).not.toMatch(/classList\.\w+\(['"]planif-palette-replie/);
     });
 });
 

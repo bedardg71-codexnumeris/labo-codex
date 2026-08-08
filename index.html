@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260807f"> <!-- Poignée de redimensionnement du planificateur + libellés de case à cocher (7 août) -->
+    <link rel="stylesheet" href="styles.css?v=20260808a"> <!-- Simplification Alignement : vue leçon + compaction retirées, boutons de palette (8 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -4186,6 +4186,11 @@
                                     <input type="file" id="planif-fichier-import" accept=".json" style="display:none">
                                 </div>
                                 <div class="planif-toolbar-droite">
+                                    <!-- Affichage des deux palettes flottantes. Remplace le bouton
+                                         « replier » que chacune portait : un seul mécanisme, et
+                                         l'état survit au rechargement (préférences). -->
+                                    <button class="planif-btn-vue planif-btn-palette" id="planif-btn-palette-noeuds" title="Masquer la palette « Nœuds »" aria-pressed="true">Nœuds</button>
+                                    <button class="planif-btn-vue planif-btn-palette" id="planif-btn-palette-planificateur" title="Masquer la palette « Planificateur »" aria-pressed="true">Planificateur</button>
                                     <button class="planif-btn-vue" id="planif-btn-recentrer" title="Recentrer la carte (⌘1)" data-action="planificationCarte.recentrerVue"><img src="icons/icon-final-state.svg" alt="" class="planif-icon"></button>
                                     <span id="planif-zoom-info-header" class="planif-zoom-info-header" data-tooltip="planif-zoom">100%</span>
                                     <div class="planif-fond-picker" id="planif-fond-picker">
@@ -4215,7 +4220,6 @@
                             <div id="planif-palette" class="planif-palette-flottante">
                                 <div class="planif-palette-barre">
                                     <span class="planif-palette-titre" data-tooltip="planif-palette"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>Nœuds</span>
-                                    <button class="planif-palette-toggle planif-palette-replier" id="planif-palette-toggle" title="Réduire la palette">−</button>
                                 </div>
                                 <div class="planif-palette-contenu">
                                     <div class="planif-palette-categorie" data-zone="pourquoi">
@@ -4332,12 +4336,12 @@
                                     </table>
                                 </div>
                             </div>
-                            <!-- Palette Navigation : sommaire arborescent Vue globale › séquences › leçons -->
+                            <!-- Planificateur : grille des semaines + réserve « Non planifié ».
+                                 Il NAVIGUE dans la carte (cadrage + sélection) ; il ne la filtre plus. -->
                             <div id="planif-palette-nav" class="planif-palette-flottante">
                                 <div class="planif-palette-barre">
                                     <span class="planif-palette-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>Planificateur</span>
                                     <button class="planif-palette-toggle" id="planif-btn-disposition-reserve" title="Réserve « Non planifié » : à gauche de la grille" aria-pressed="false">◧</button>
-                                    <button class="planif-palette-toggle planif-palette-replier" id="planif-palette-nav-toggle" title="Réduire la palette">−</button>
                                 </div>
                                 <div class="planif-palette-poignee" role="separator" aria-label="Redimensionner le planificateur" title="Glisser pour redimensionner · double-clic pour revenir à la taille par défaut"></div>
                                 <div class="planif-palette-contenu planif-nav-contenu">
@@ -4372,9 +4376,6 @@
                                 </div>
                                 </div>
                             </div>
-
-                            <!-- Vue leçon (niveau micro) — mutuellement exclusif avec le canevas -->
-                            <div id="planif-vue-lecon" class="planif-vue-lecon" style="display:none"></div>
 
                             <div id="planif-panneau">
                                 <div class="planif-panneau-entete">
@@ -14508,7 +14509,7 @@
     <!-- PRIORITÉ 1: Fondations -->
     <script src="js/config.js?v=2026062802"></script> <!-- #326 (28 juin) : COMPARATEUR_VISIBLE=true (réactivation) ; #345 (22 juin) : flag COMPARATEUR_VISIBLE ; Refonte nav SP5-fix : sous-onglet id court 'vue' (au lieu de 'calendrier') pour éviter la redondance calendrier-calendrier -->
     <script src="js/navigation.js?v=2026062201"></script> <!-- #345 (22 juin) : filtre comparateur sous-nav Labo ; Refonte nav SP5 : tables migrées calendrier-* + nav-calendrier-* -->
-    <script src="js/preferences.js?v=20260807e"></script> <!-- Beta 99.16 : API centralisée préférences + migration V3 (doit précéder modes.js) -->
+    <script src="js/preferences.js?v=20260808a"></script> <!-- Beta 99.16 : API centralisée préférences + migration V3 (doit précéder modes.js) -->
     <script src="js/modes.js?v=20260805b"></script> <!-- Refonte nav SP5 : commentaire et clé calendrier-trimestre -->
     <script src="js/utils-notifications.js?v=20260521a"></script> <!-- Cat-B Track 4 chantier E (21 mai 2026) : source unique notifications toast — window.notifications.{succes,erreur,info} -->
     <script src="js/ui-dialogues.js?v=20260615a"></script> <!-- #315/#316 : modales async réutilisables — window.uiDialogues.{confirmerAction,demanderSaisie} (remplace confirm()/prompt() natifs) -->
@@ -14645,7 +14646,7 @@
     <script src="js/planification-donnees.js?v=20260807e"></script> <!-- Import inter-trimestre des cartes (4 août) -->
 
     <script src="js/planification-bibliotheque.js?v=2026051026"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
-    <script src="js/planification-carte.js?v=20260807f"></script> <!-- Poignée de redimensionnement du planificateur (7 août) -->
+    <script src="js/planification-carte.js?v=20260808a"></script> <!-- Simplification : le planificateur cadre la carte, il ne la filtre plus (8 août) -->
     <script src="js/organisateur.js?v=20260807f"></script> <!-- Retrait du post-traitement DOM de la Vue calendrier (lot 2, 6 août) -->
     <script src="js/planification.js?v=2026050522"></script> <!-- Refonte nav SP4 : hooks nomSection 'conception' + idSousSection conception-* -->
 
@@ -14729,7 +14730,7 @@
     <script src="js/guidage-demo.js?v=20260512d"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=20260807f"></script> <!-- Entrée 1.30 : import inter-trimestre -->
+    <script src="js/changelog-data.js?v=20260808a"></script> <!-- Entrée 1.55 : simplification du module Alignement -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
     <script src="js/etats-vides.js?v=2026050537"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre -->

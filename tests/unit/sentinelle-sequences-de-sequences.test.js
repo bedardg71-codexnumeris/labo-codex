@@ -157,7 +157,13 @@ describe('voie A · invariants statiques (les consommateurs migrés)', () => {
         expect(sourceCarte).toMatch(/mettreAJourJaugeTemps\(hierarchie\.filter\(function\(e\) \{ return e\.niveau === 0; \}\)/);
     });
 
-    it('le bloc compact compte les leçons DESCENDANTES', () => {
-        expect(sourceCarte).toMatch(/var nbLecons = compterLeconsDescendantes\(n\);/);
+    // ▣ 7 AOÛT (soir) — le bloc compact n'existe plus : la compaction des
+    // séquences est retirée avec le filtrage du canevas, dont elle était le
+    // compagnon. L'invariant de fond survit ailleurs (le planificateur, lui,
+    // compte toujours les leçons DESCENDANTES et non les enfants directs) :
+    // c'est là qu'on le verrouille désormais.
+    it('le planificateur compte les leçons DESCENDANTES, pas les enfants directs', () => {
+        expect(sourceCarte).toMatch(/compterLeconsDescendantes\(seq\)/);
+        expect(sourceCarte).not.toContain('planif-seq-compact');
     });
 });

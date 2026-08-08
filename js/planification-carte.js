@@ -348,6 +348,38 @@ function migrerObjectifsVersMetadata() {
     for (var entry of etat.noeuds) {
         var n = entry[1];
         if (n.type !== 'lecon') continue;
+
+        // SAUVETAGE (7 août 2026) — une leçon peut porter les DEUX champs.
+        // La « vue leçon » retirée ce jour offrait un champ d'objectif qui LISAIT
+        // `metadata.objectifs` (la liste) mais RÉÉCRIVAIT `metadata.objectif` (la
+        // chaîne, format mort). Comme la migration ci-dessous saute toute leçon
+        // ayant déjà une liste, ce qui y était saisi n'a plus jamais été relu :
+        // du texte d'enseignant dormant dans un champ que rien ne lit. Retirer
+        // le chemin d'écriture sans récupérer d'abord aurait rendu la perte
+        // définitive.
+        //
+        // Le champ rendait tous les objectifs dans une seule zone, séparés par
+        // des sauts de ligne, et réécrivait le bloc entier : on redécoupe donc,
+        // et on n'ajoute que les lignes ABSENTES de la liste — sans quoi chaque
+        // objectif déjà présent reviendrait en double.
+        if (n.metadata && Array.isArray(n.metadata.objectifs)
+            && typeof n.metadata.objectif === 'string' && n.metadata.objectif.trim() !== '') {
+            var connus = {};
+            objectifsDeLecon(n).forEach(function(o) { connus[o.texte.trim()] = true; });
+            var recuperes = n.metadata.objectif.split('\n')
+                .map(function(t) { return t.trim(); })
+                .filter(function(t) { return t !== '' && !connus[t]; });
+            recuperes.forEach(function(texte) {
+                n.metadata.objectifs.push({ id: nouvelIdObjectif(), texte: texte });
+            });
+            delete n.metadata.objectif;
+            migres.push(n.id);
+            if (recuperes.length > 0) {
+                console.warn('[Planification] Objectif récupéré d\'un champ mort sur la leçon ' + n.id
+                             + ' (' + recuperes.length + ' ligne' + (recuperes.length > 1 ? 's' : '') + ')');
+            }
+            continue;
+        }
         if (n.metadata && Array.isArray(n.metadata.objectifs)) continue;
 
         // Format 2 (chaîne unique) : bascule en mémoire, rien à purger ailleurs.
@@ -3461,15 +3493,6 @@ function enregistrerPourUndo() {
     pileRedo = [];
 }
 
-function _collecterDescendants(noeudId, ensemble) {
-    ensemble.add(noeudId);
-    var nd = etat.noeuds.get(noeudId);
-    if (!nd || !nd.enfants) return;
-    for (var i = 0; i < nd.enfants.length; i++) {
-        _collecterDescendants(nd.enfants[i], ensemble);
-    }
-}
-
 function reconstruireDOM() {
     // Sans canevas monté (module pas encore initialisé, ou bac à sable de
     // test), il n'y a rien à reconstruire — les DONNÉES restent la vérité,
@@ -3481,37 +3504,25 @@ function reconstruireDOM() {
     // (L'objectif de leçon vit sur le nœud — `metadata.objectif` — depuis le
     // 6 août 2026 : plus aucune lecture de CLE_SEANCES n'est nécessaire ici.)
 
-    // Filtrage par séquence active (null = tout visible)
-    var visibles = null;  // Set des nœuds à afficher (vue focalisée)
-    var masques = null;   // Set des nœuds à masquer (vue globale compacte)
-    if (sequenceActiveId && etat.noeuds.has(sequenceActiveId)) {
-        visibles = new Set();
-        _collecterDescendants(sequenceActiveId, visibles);
-    } else {
-        // Vue globale : compacter les séquences (masquer leurs descendants)
-        var seqs = obtenirSequencesCarte();
-        if (seqs.length > 0) {
-            masques = new Set();
-            for (var si = 0; si < seqs.length; si++) {
-                var enfantsSeq = seqs[si].enfants || [];
-                for (var ei = 0; ei < enfantsSeq.length; ei++) {
-                    _collecterDescendants(enfantsSeq[ei], masques);
-                }
-            }
-        }
-    }
+    // LE CANEVAS MONTRE TOUT (7 août 2026). Il portait jusqu'ici DEUX états
+    // d'affichage, commandés par la même variable `sequenceActiveId` :
+    //   • une vue « focalisée » sur une séquence, qui masquait tout le reste ;
+    //   • une vue globale « compacte », où chaque séquence se réduisait à un
+    //     bloc résumé et où ses leçons et activités disparaissaient.
+    // La compaction n'existait que pour rendre lisible un global qu'on ne
+    // pouvait pas focaliser : elle était le COMPAGNON du filtrage, pas une
+    // fonction autonome. Le filtrage retiré, elle perd son objet — et la garder
+    // aurait laissé l'enseignant devant des blocs résumés sans moyen de les
+    // ouvrir. Un seul état d'affichage, donc : tout est rendu, tout le temps.
+    // La navigation dans cette carte entière est le rôle du planificateur.
 
     for (var entry of etat.noeuds) {
         var n = entry[1];
-        if (visibles && !visibles.has(n.id)) continue;
-        if (masques && masques.has(n.id)) continue;
         var config = TYPES[n.type];
         if (!config) continue;
         var estConteneur = config.conteneur === true;
-        var estCompact = masques && n.type === 'sequence';
         var el = document.createElement('div');
         el.className = (estConteneur ? 'planif-noeud planif-conteneur' : 'planif-noeud') + ' planif-type-' + n.type;
-        if (estCompact) el.classList.add('planif-seq-compact');
         if (n.parent) el.classList.add('planif-enfant-conteneur');
         el.id = n.id;
         el.style.left = n.x + 'px';
@@ -3528,28 +3539,7 @@ function reconstruireDOM() {
             if (n.metadata.hauteur) el.style.height = n.metadata.hauteur + 'px';
         }
 
-        if (estCompact) {
-            // Vue globale compacte : bloc résumé (titre + badge leçons).
-            // Leçons DESCENDANTES (voie A) : un simple compte d'enfants aurait
-            // rangé les sous-séquences parmi les « leçons ».
-            var nbLecons = compterLeconsDescendantes(n);
-            var nbSousSeq = (n.enfants || []).filter(function(eid) {
-                var se = etat.noeuds.get(eid);
-                return se && se.type === 'sequence';
-            }).length;
-            var infoCompact = nbLecons + ' le\u00e7on' + (nbLecons > 1 ? 's' : '');
-            if (nbSousSeq > 0) infoCompact = nbSousSeq + ' séquence' + (nbSousSeq > 1 ? 's' : '') + ' \u00b7 ' + infoCompact;
-            el.innerHTML =
-                '<div class="planif-noeud-entete">' +
-                    '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(n) + '">' + obtenirLabelNoeud(n) + '</span>' +
-                '</div>' +
-                '<div class="planif-noeud-titre">' + echapperHtml(n.titre || '') + '</div>' +
-                '<div class="planif-seq-compact-info">' + infoCompact + (dureeRollupNoeud(n) ? ' \u00b7 ' + formaterPeriodes(dureeRollupNoeud(n)) : '') + '</div>' +
-                '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
-                '<div class="planif-noeud-port planif-port-gauche" data-dir="gauche"></div>' +
-                '<div class="planif-noeud-port planif-port-bas" data-dir="bas"></div>' +
-                '<div class="planif-noeud-port planif-port-haut" data-dir="haut"></div>';
-        } else if (estConteneur) {
+        if (estConteneur) {
             var nbEnfants = (n.enfants || []).length;
             // Le\u00e7on : en-t\u00eate \u00e0 deux sections \u2014 identification (\u00ab Le\u00e7on \u00bb +
             // titre) puis objectif d\u00e9pliable. Le badge \ud83c\udfaf est la bascule ;
@@ -3683,12 +3673,10 @@ function reconstruireDOM() {
     }
 
     requestAnimationFrame(function() {
-        // Répartition automatique des conteneurs (skip masqués et compacts)
+        // Répartition automatique des conteneurs. (Plus aucun saut de nœud
+        // masqué ou compact : tout ce qui est dans la carte est rendu.)
         for (var entry2 of etat.noeuds) {
             var n2 = entry2[1];
-            if (visibles && !visibles.has(n2.id)) continue;
-            if (masques && masques.has(n2.id)) continue;
-            if (masques && n2.type === 'sequence') continue; // Compact : pas de layout enfants
             if (TYPES[n2.type] && TYPES[n2.type].conteneur && n2.enfants && n2.enfants.length > 0 && !n2.parent) {
                 reLayoutConteneur(n2.id);
             }
@@ -3696,18 +3684,13 @@ function reconstruireDOM() {
         // Handle containers with no children
         for (var entry2b of etat.noeuds) {
             var n2b = entry2b[1];
-            if (visibles && !visibles.has(n2b.id)) continue;
-            if (masques && masques.has(n2b.id)) continue;
             if (TYPES[n2b.type] && TYPES[n2b.type].conteneur && (!n2b.enfants || n2b.enfants.length === 0)) {
                 mettreAJourZoneConteneur(n2b.id);
             }
         }
-        // Liens : seulement si les deux extrémités sont visibles (pas masquées)
+        // Liens : tous tracés, les deux extrémités étant toujours rendues.
         for (var entry3 of etat.liens) {
-            var l = entry3[1];
-            if (visibles && (!visibles.has(l.source) || !visibles.has(l.cible))) continue;
-            if (masques && (masques.has(l.source) || masques.has(l.cible))) continue;
-            dessinerLien(l);
+            dessinerLien(entry3[1]);
         }
         mettreAJourPlanificateur();
     });
@@ -3808,8 +3791,6 @@ function viderCanvas() {
 }
 
 function chargerCarte(carteId) {
-    sequenceActiveId = null;
-    leconActiveId = null;
     _ajoutObjectif = null;
     viderCanvas();
     var donnees = window.planificationDonnees.chargerCarte(carteId);
@@ -4287,11 +4268,8 @@ function attacherEvenements(el, donnees) {
     el.addEventListener('dblclick', function(e) {
         if (e.target.isContentEditable) return;
 
-        // Bloc compact → ouvrir la vue focalisée
-        if (el.classList.contains('planif-seq-compact')) {
-            ouvrirSequence(id);
-            return;
-        }
+        // (La branche « bloc compact → vue focalisée » est retirée avec la
+        // compaction elle-même : une séquence n'a plus d'état replié.)
 
         // Enfant ou libre : même geste, l'inspecteur. (L'ancien « mode
         // individuel » de drag est retiré — inversion du 6 août.)
@@ -5242,7 +5220,6 @@ function mettreAJourListeCartes() {
 }
 
 function nouvelleCarte(nom) {
-    sequenceActiveId = null;
     var index = window.planificationDonnees.getIndex();
     if (!index) index = { active: null, compteurCartes: 0, cartes: [] };
     var id = 'carte_' + (++index.compteurCartes);
@@ -5562,22 +5539,13 @@ function initialiser() {
                 paletteBarre.addEventListener('pointercancel', onUp);
             });
         }
-        // ⚠ `.planif-palette-replier` et NON `.planif-palette-toggle` (correctif
-        // du 7 août). La seconde est la classe de STYLE, partagée par tous les
-        // boutons de la barre : depuis l'ajout du bouton de disposition,
-        // `querySelector` rendait le PREMIER de la barre — donc le mauvais. Le
-        // comportement « replier » s'attachait au bouton de disposition, qui
-        // réécrivait au passage son propre libellé en « + » / « − », et le vrai
-        // bouton de repli ne faisait plus rien. Une classe qui sert à styler ne
-        // peut pas servir à désigner.
-        var paletteToggle = palette.querySelector('.planif-palette-replier');
-        if (paletteToggle) {
-            paletteToggle.addEventListener('click', function() {
-                palette.classList.toggle('planif-palette-replie');
-                paletteToggle.textContent = palette.classList.contains('planif-palette-replie') ? '+' : '−';
-                paletteToggle.title = palette.classList.contains('planif-palette-replie') ? 'Ouvrir la palette' : 'Réduire la palette';
-            });
-        }
+        // (Le bouton « replier » de la barre de palette est RETIRÉ le 7 août :
+        // afficher ou masquer une palette se commande depuis la barre d'outils,
+        // et un seul mécanisme vaut mieux que deux voisins. Disparaît avec lui
+        // le piège `.planif-palette-toggle` / `.planif-palette-replier` — une
+        // classe de STYLE partagée que `querySelector` confondait avec un
+        // sélecteur d'identité, ce qui avait fait voler le comportement de repli
+        // par le bouton de disposition.)
 
         // Poignée de redimensionnement — présente sur le planificateur seulement
         // (index.html). Ajoutée le 7 août : le côte à côte de 1.47.0 supposait
@@ -6041,6 +6009,13 @@ function initialiser() {
         mettreAJourBoutonDisposition();
     }
 
+    Object.keys(PALETTES_FLOTTANTES).forEach(function(quoi) {
+        var btn = document.getElementById(PALETTES_FLOTTANTES[quoi].bouton);
+        if (!btn) return;
+        btn.addEventListener('click', function() { basculerPalette(quoi); });
+    });
+    appliquerAffichagePalettes();
+
     var btnNettoyage = document.getElementById('planif-btn-nettoyer-titres');
     var panneauNettoyage = document.getElementById('planif-nettoyage-titres-panel');
     if (btnNettoyage && panneauNettoyage) {
@@ -6315,12 +6290,15 @@ function injecterNoeuds(listeNoeuds) {
     });
 }
 
-// =========== SOMMAIRE DE NAVIGATION (palette Navigation) ===========
+// =========== PLANIFICATEUR (palette de navigation) ===========
 // Remplace les carrousels séquences/leçons de la barre d'outils (4 août 2026,
-// exercice 601-101) : la hiérarchie Vue globale › séquences › leçons est
-// verticale par nature, le sommaire la montre d'un coup d'œil.
-
-var sequenceActiveId = null; // null = vue globale (tout visible)
+// exercice 601-101) : la hiérarchie séquences › leçons est verticale par
+// nature, le planificateur la montre d'un coup d'œil.
+//
+// Il NAVIGUE, il ne filtre plus (7 août 2026) : désigner une séquence ou une
+// leçon ici la sélectionne et cadre la carte dessus. Le canevas montre toujours
+// tout — c'est le retrait conjoint de la vue focalisée, de la compaction des
+// séquences et du bouton « Vue globale », qui n'existaient qu'ensemble.
 
 function obtenirSequencesCarte() {
     var sequences = [];
@@ -6584,6 +6562,76 @@ function basculerDispositionReserve() {
     mettreAJourBoutonDisposition();
 }
 
+// =========== AFFICHAGE DES PALETTES FLOTTANTES (7 août 2026) ===========
+// Les deux palettes — « Nœuds » et « Planificateur » — se commandent depuis la
+// barre d'outils de la carte. Elles portaient auparavant chacune un bouton de
+// « repli » qui n'escamotait que leur contenu, en laissant leur barre de titre
+// sur le canevas. Un seul mécanisme les remplace : afficher ou masquer, pour de
+// bon, et l'état survit au rechargement.
+//
+// Le registre associe l'identifiant DOM de la palette, sa préférence et le
+// bouton qui la commande. Passer par une table plutôt que par deux blocs
+// jumeaux garantit que les deux palettes se comportent exactement pareil — la
+// symétrie est dans la donnée, pas dans une discipline de copie.
+var PALETTES_FLOTTANTES = {
+    noeuds: {
+        palette: 'planif-palette',
+        pref: 'planifPaletteNoeudsVisible',
+        bouton: 'planif-btn-palette-noeuds',
+        nom: 'Nœuds'
+    },
+    planificateur: {
+        palette: 'planif-palette-nav',
+        pref: 'planifPalettePlanificateurVisible',
+        bouton: 'planif-btn-palette-planificateur',
+        nom: 'Planificateur'
+    }
+};
+
+/** Une palette est visible sauf si la préférence dit explicitement le contraire. */
+function paletteVisible(quoi) {
+    var def = PALETTES_FLOTTANTES[quoi];
+    if (!def) return true;
+    try {
+        if (typeof obtenirPreference !== 'function') return true;
+        return obtenirPreference(def.pref) !== false;
+    } catch (e) {
+        return true;
+    }
+}
+
+function basculerPalette(quoi) {
+    var def = PALETTES_FLOTTANTES[quoi];
+    if (!def) return;
+    var vers = !paletteVisible(quoi);
+    try {
+        if (typeof definirPreference === 'function') definirPreference(def.pref, vers);
+    } catch (e) {
+        console.warn('[Planification] Affichage de palette non enregistré :', e);
+    }
+    appliquerAffichagePalettes();
+}
+
+/** Applique l'état des deux palettes au DOM — au boot et après chaque bascule. */
+function appliquerAffichagePalettes() {
+    Object.keys(PALETTES_FLOTTANTES).forEach(function(quoi) {
+        var def = PALETTES_FLOTTANTES[quoi];
+        var visible = paletteVisible(quoi);
+        var palette = document.getElementById(def.palette);
+        if (palette) palette.classList.toggle('planif-palette-masquee', !visible);
+        var btn = document.getElementById(def.bouton);
+        if (!btn) return;
+        // `aria-pressed` décrit l'état COURANT (la palette est-elle affichée ?),
+        // le title dit ce que le clic produira — même partage que le bouton de
+        // disposition juste en dessous.
+        btn.setAttribute('aria-pressed', visible ? 'true' : 'false');
+        btn.classList.toggle('actif', visible);
+        btn.title = visible ? 'Masquer la palette « ' + def.nom + ' »'
+                            : 'Afficher la palette « ' + def.nom + ' »';
+        btn.setAttribute('aria-label', btn.title);
+    });
+}
+
 function mettreAJourBoutonDisposition() {
     var btn = document.getElementById('planif-btn-disposition-reserve');
     if (!btn) return;
@@ -6691,9 +6739,12 @@ function itemSequenceGrille(seq, niveau) {
     var pill = etendue && etendue.fin !== etendue.debut
         ? formaterEtendue(etendue)
         : (dureeSeq ? formaterPeriodes(dureeSeq) : compterLeconsDescendantes(seq) + ' leçon' + (compterLeconsDescendantes(seq) > 1 ? 's' : ''));
-    return '<div class="planif-som-item planif-som-seq' + (seq.id === sequenceActiveId ? ' actif' : '') + '"' +
+    // « Actif » suit désormais la SÉLECTION du canevas, et non un état de vue
+    // propre au planificateur : il n'y a plus qu'une seule notion de « ce sur
+    // quoi je travaille », partagée par la carte, l'Inspecteur et cette grille.
+    return '<div class="planif-som-item planif-som-seq' + (seq.id === etat.selection ? ' actif' : '') + '"' +
            ' data-grille-type="sequence" data-grille-id="' + seq.id + '"' +
-           ' data-action="planificationCarte.ouvrirSequence"' +
+           ' data-action="planificationCarte.cadrerSurSequence"' +
            ' data-param="' + seq.id + '"' +
            ' title="' + echapperHtml(libelle) + '">' +
            '<span class="planif-som-nom">' + echapperHtml(libelle) + '</span>' +
@@ -6715,7 +6766,7 @@ function itemLeconGrille(lec, avecContexte, semaineHorsCadre) {
         ? '<span class="planif-grille-contexte">' + echapperHtml(parent.titre || 'Sans titre') + '</span>'
         : '';
 
-    var html = '<div class="planif-som-item planif-som-lecon' + (lec.id === leconActiveId ? ' actif' : '') + '"' +
+    var html = '<div class="planif-som-item planif-som-lecon' + (lec.id === etat.selection ? ' actif' : '') + '"' +
         ' data-grille-type="lecon" data-grille-id="' + lec.id + '"' +
         ' data-action="planificationCarte.naviguerSommaireLecon"' +
         ' data-param="' + lec.id + '"' +
@@ -7023,12 +7074,9 @@ function mettreAJourPlanificateur() {
         return;
     }
 
-    var html = '<div class="planif-som-item planif-som-globale' + (!sequenceActiveId ? ' actif' : '') + '"' +
-               ' data-action="planificationCarte.ouvrirSequence"' +
-               ' data-param=""' +
-               ' title="Afficher tous les nœuds">' +
-               '<span class="planif-som-nom">Vue globale</span>' +
-               '</div>';
+    // (Le bouton « Vue globale » est retiré : le canevas ne se filtre plus, il
+    // n'y a donc plus de vue à quitter pour y revenir.)
+    var html = '';
 
     if (derive.source === 'repli' && derive.rangees.length > 0) {
         html += '<div class="planif-grille-avis">Semaines dérivées des leçons — configure le Cadre du trimestre (Réglages) pour les rangées réelles.</div>';
@@ -7414,22 +7462,43 @@ function rendrePanneauCoursCarte() {
     });
 }
 
-// Clic sur une leçon du sommaire : ouvrir d'abord sa séquence parente si besoin.
+/**
+ * Clic sur une leçon du planificateur : la carte se CADRE dessus (7 août 2026).
+ *
+ * Ce clic ouvrait auparavant une « vue leçon » de niveau micro qui remplaçait
+ * le canevas par une lecture. Cette vue affichait STRICTEMENT MOINS que la
+ * carte — le même objectif et les mêmes activités, mais sans les liens, sans
+ * le sélecteur de semaine, et sans possibilité d'écrire. Elle est retirée : le
+ * planificateur navigue, il ne redouble pas le canevas.
+ */
 function naviguerSommaireLecon(leconId) {
     if (!etat.noeuds.has(leconId)) return;
-    var sequences = obtenirSequencesCarte();
-    var seqParente = null;
-    for (var i = 0; i < sequences.length; i++) {
-        if ((sequences[i].enfants || []).indexOf(leconId) !== -1) { seqParente = sequences[i]; break; }
-    }
-    if (seqParente && seqParente.id !== sequenceActiveId) ouvrirSequence(seqParente.id);
-    ouvrirLecon(leconId);
+    naviguerVers(leconId);
+    mettreAJourPlanificateur(); // rafraîchit le surlignage « actif » de la grille
 }
 
-// Recentrer la vue selon le contexte (bouton ◎ de la barre + ⌘1).
+/**
+ * Clic sur une séquence du planificateur : la carte se cadre sur son ÉTENDUE.
+ *
+ * Pour une séquence, `naviguerVers` viserait le seul bloc conteneur ; c'est
+ * l'ensemble « séquence + descendants » qu'on veut à l'écran, d'où le cadrage
+ * sur la boîte englobante. La sélection, elle, suit le même geste que pour une
+ * leçon : ce qu'on désigne dans le planificateur devient ce qu'édite
+ * l'Inspecteur.
+ */
+function cadrerSurSequence(seqId) {
+    if (!etat.noeuds.has(seqId)) return;
+    deselectionnerTout();
+    selectionnerNoeud(seqId);
+    centrerVueSurSequence(seqId);
+    mettreAJourPlanificateur();
+}
+
+// Recentrer la vue (bouton ◎ de la barre + ⌘1). Le canevas n'a plus qu'un seul
+// état d'affichage depuis le retrait du filtrage par séquence : recentrer, c'est
+// donc toujours cadrer sur TOUT le contenu.
 function recentrerVue() {
-    if (sequenceActiveId) centrerVueSurSequence(sequenceActiveId);
-    else centrerVueSurContenu();
+    centrerVueSurContenu();
 }
 
 function centrerVueSurSequence(seqId) {
@@ -7462,127 +7531,6 @@ function centrerVueSurSequence(seqId) {
         left: cx - zoneTravail.clientWidth / 2,
         top: cy - zoneTravail.clientHeight / 2,
         behavior: 'smooth'
-    });
-}
-
-function ouvrirSequence(seqId) {
-    var ancienId = sequenceActiveId;
-    sequenceActiveId = seqId || null; // "" ou null = vue globale
-    leconActiveId = null;
-    // Restaurer le canevas si on revient du niveau micro
-    var vueLecon = document.getElementById('planif-vue-lecon');
-    if (vueLecon) vueLecon.style.display = 'none';
-    if (zoneTravail) zoneTravail.style.display = '';
-    if (sequenceActiveId === ancienId) return;
-    reconstruireDOM();
-    requestAnimationFrame(function() {
-        if (sequenceActiveId) {
-            centrerVueSurSequence(sequenceActiveId);
-        } else {
-            centrerVueSurContenu();
-        }
-    });
-}
-
-
-// =========== VUE LEÇON (niveau micro) ===========
-
-var leconActiveId = null; // null = vue séquence (méso), ID = vue leçon (micro)
-
-function ouvrirLecon(leconId) {
-    leconActiveId = leconId || null;
-    mettreAJourPlanificateur();
-
-    var vueLecon = document.getElementById('planif-vue-lecon');
-    if (leconActiveId) {
-        // Niveau 3 : masquer le canevas, afficher la vue leçon
-        if (zoneTravail) zoneTravail.style.display = 'none';
-        if (vueLecon) { vueLecon.style.display = ''; rendreVueLecon(leconActiveId); }
-    } else {
-        // Retour au niveau 2 : masquer la vue leçon, restaurer le canevas
-        if (vueLecon) vueLecon.style.display = 'none';
-        if (zoneTravail) zoneTravail.style.display = '';
-    }
-}
-
-function rendreVueLecon(leconId) {
-    var vueLecon = document.getElementById('planif-vue-lecon');
-    if (!vueLecon) return;
-
-    var lec = etat.noeuds.get(leconId);
-    if (!lec) { vueLecon.innerHTML = ''; return; }
-
-    // (Plus aucune lecture de CLE_SEANCES ici : l'objectif est porté par le
-    // nœud, et la section « Notes » a été retirée.)
-    var duree = lec.metadata && lec.metadata.duree ? lec.metadata.duree : '';
-
-    // Séquence parente
-    var seqParent = sequenceActiveId ? etat.noeuds.get(sequenceActiveId) : null;
-    var seqTitre = seqParent ? echapperHtml(seqParent.titre || '') : '';
-
-    // Activités enfants
-    var activites = (lec.enfants || []).map(function(eid) { return etat.noeuds.get(eid); }).filter(Boolean);
-
-    // Construire le HTML
-    var html = '<div class="planif-vue-lecon-inner">';
-
-    // En-tête
-    html += '<div class="planif-vue-lecon-header">';
-    html += '<div class="planif-vue-lecon-breadcrumb">';
-    if (seqTitre) html += '<span class="planif-vue-lecon-seq">' + seqTitre + '</span> <span class="planif-vue-lecon-sep">\u203A</span> ';
-    html += '<span class="planif-vue-lecon-titre-label">' + echapperHtml(lec.titre || 'Sans titre') + '</span>';
-    html += '</div>';
-    if (duree) html += '<span class="planif-vue-lecon-duree">' + duree + '\u2009min</span>';
-    html += '</div>';
-
-    // Objectif — même source que la carte (`metadata.objectif`), aucune copie.
-    html += '<div class="planif-vue-lecon-section">';
-    html += '<h4>Objectif</h4>';
-    html += '<div class="planif-vue-lecon-objectif" contenteditable="true" data-lecon-id="' + leconId + '" data-champ="objectif">' +
-            echapperHtml(objectifsDeLecon(lec).map(function(o) { return o.texte; }).join('\n')) + '</div>';
-    html += '</div>';
-
-    // Activités
-    if (activites.length > 0) {
-        html += '<div class="planif-vue-lecon-section">';
-        html += '<h4>Activit\u00e9s <span class="planif-vue-lecon-count">' + activites.length + '</span></h4>';
-        html += '<div class="planif-vue-lecon-activites">';
-        for (var i = 0; i < activites.length; i++) {
-            var act = activites[i];
-            var typeConfig = TYPES[act.type];
-            var couleur = typeConfig ? typeConfig.couleur : 'var(--texte-secondaire)';
-            var label = typeConfig ? typeConfig.label : act.type;
-            var actDuree = act.metadata && act.metadata.duree ? act.metadata.duree + '\u2009min' : '';
-            html += '<div class="planif-vue-lecon-activite">';
-            html += '<span class="planif-vue-lecon-act-type" style="color:' + couleur + '">' + label + '</span>';
-            html += '<span class="planif-vue-lecon-act-titre">' + echapperHtml(act.titre || '') + '</span>';
-            if (actDuree) html += '<span class="planif-vue-lecon-act-duree">' + actDuree + '</span>';
-            html += '</div>';
-        }
-        html += '</div>';
-        html += '</div>';
-    }
-
-    // (Section « Notes » RETIRÉE le 6 août 2026 — décision Grégoire : champ
-    // sans fonction à ce stade. Retiré partout, y compris de l'export et de
-    // l'import Markdown de l'Organisateur.)
-
-    html += '</div>';
-    vueLecon.innerHTML = html;
-
-    // Brancher la sauvegarde sur les champs éditables. L'objectif est le SEUL
-    // champ de cette vue, et il vit sur le nœud — une seule vérité, partagée
-    // avec la carte.
-    vueLecon.querySelectorAll('[contenteditable]').forEach(function(el) {
-        el.addEventListener('blur', function() {
-            var lid = el.dataset.leconId;
-            if (!lid || el.dataset.champ !== 'objectif') return;
-            var noeud = etat.noeuds.get(lid);
-            if (!noeud) return;
-            if (!noeud.metadata) noeud.metadata = {};
-            noeud.metadata.objectif = el.textContent.trim();
-            sauvegarder();
-        });
     });
 }
 
@@ -7642,9 +7590,8 @@ window.planificationCarte = {
     injecterNoeuds: injecterNoeuds,
     nouvelleCarte: nouvelleCarte,
     ouvrirGuide: ouvrirGuide,
-    // Sommaire de navigation (palette Navigation)
-    ouvrirSequence: ouvrirSequence,
-    ouvrirLecon: ouvrirLecon,
+    // Planificateur (palette de navigation)
+    cadrerSurSequence: cadrerSurSequence,
     naviguerSommaireLecon: naviguerSommaireLecon,
     mettreAJourPlanificateur: mettreAJourPlanificateur,
     basculerDetailLecon: basculerDetailLecon,
@@ -7652,6 +7599,11 @@ window.planificationCarte = {
     deposerDansGrille: deposerDansGrille,
     dispositionReserve: dispositionReserve,
     basculerDispositionReserve: basculerDispositionReserve,
+    // Affichage des palettes flottantes (barre d'outils)
+    PALETTES_FLOTTANTES: PALETTES_FLOTTANTES,
+    paletteVisible: paletteVisible,
+    basculerPalette: basculerPalette,
+    appliquerAffichagePalettes: appliquerAffichagePalettes,
     LARGEUR_RESERVE_COLONNE: LARGEUR_RESERVE_COLONNE,
     PLANCHER_PALETTE_COTE_A_COTE: PLANCHER_PALETTE_COTE_A_COTE,
     analyserRepereTitre: analyserRepereTitre,
