@@ -108,7 +108,13 @@
         // État de la visite guidée 6 étapes (js/accompagnement.js)
         tourGuide_etape: null,
         tourGuide_complete: false,
-        tourGuide_etapes_vues: []
+        tourGuide_etapes_vues: [],
+
+        // Export du plan — niveau « Personnalisé » (#431, 8 août 2026).
+        // null = jamais réglé (la modale part alors du preset « En classe »).
+        // Forme : { contenus: {…8 drapeaux}, ordre: [ids de sections] } —
+        // normalisée par js/planification-export.js à la lecture.
+        exportPlanPersonnalise: null
     };
 
     // Abonnés : { cle: [callback, callback, ...] }
