@@ -1,7 +1,7 @@
 # Phase 5 — Parcours utilisateur & tests d'acceptation
 
 **Statut** : à valider par Grégoire avant l'implémentation (sous-phase 5.A).
-**Document directeur** : `plans de travail/PLAN-AUDIT-PHASE5-DEMO.md` §5.
+**Document directeur** : `plans de travail/_archives/PLAN-AUDIT-PHASE5-DEMO.md` §5.
 **Dépend de** : `docs/AUDIT-PHASE5-PRE-TENTATIVE-2.md` (audits complets, Option A recommandée).
 **Date** : 24 avril 2026.
 
