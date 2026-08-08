@@ -7,7 +7,30 @@
      ===================================================================== -->
 
 <!-- =====================================================================
-     SESSION — 8 AOÛT 2026, MATIN (Claude Code cloud, branche `claude/labo-codex-session-start-gc1whl`, ouverte SUR `main`). ⮕⮕ LIRE EN PREMIER À LA REPRISE.
+     SESSION — 8 AOÛT 2026, APRÈS-MIDI (Claude Code cloud, branche `claude/session-startup-a8obyo`, ouverte sur `main`). ⮕⮕ LIRE EN PREMIER À LA REPRISE.
+     ÉTAT FACTUEL : **1.57.0** (build 0808-1445), fusionnée `main`. Vitest **1914/1914** (223 fichiers). Arbre propre. Dernier ID BACKLOG : **#430**.
+
+     ▣ **RITUEL DE DÉBUT — ZÉRO ÉCART.** Prémisse du §3 vérifiée point par point (1.56.4, build 0808-1156, Vitest 1889/1889, #429, arbre propre, AUCUNE branche en avance — vérifié après `git fetch --unshallow`, le clone était shallow comme annoncé). RELAIS.md lu en premier : `main`, aucun travail en avance. Le balayage de branches a confirmé que la réconciliation du 8 août avait tout emporté (3 branches du jour à 0 commit d'avance).
+
+     ✅ LIVRÉ — **LE PORTAGE DES EXPORTS (#424, lots A→G) EN UNE SESSION, release 1.57.0.** Le plan `plans de travail/PLAN-portage-exports-carte-2026-08-08.md` a été exécuté sans en rouvrir les décisions. Sept commits, un par lot.
+
+     ▣ **LOT A DEVENU SANS OBJET PAR DÉCISION** : Grégoire ne se sert pas de l'import Markdown → RETIRÉ (mort avec la page au Lot G) au lieu de corrigé. Le correctif « champ mort » n'avait plus de raison d'être — zéro-dette : on ne polit pas ce qu'on supprime.
+     ▣ **LOT B (#425 préalable)** : vivacité de `productionId` sur les DEUX chemins de la reprise inter-trimestre (metadata des nœuds + activités copiées), avec repli clé nue (leçon #419). 5 cas, 3 break-tests ROUGE.
+     ▣ **LOT C — LE GÉNÉRATEUR UNIQUE** (`js/planification-export.js`) : construirePlan() traverse la carte UNE fois, la profondeur filtre (Sommaire/Déroulement/Alignement), le format met en forme (texte/TSV/markdown). Neuf sorties pour un moteur ; « SÉANCE »→« LEÇON », durées par dureeRollupNoeud (fin du double comptage), objectifs pluriels + servis + liens verbalisés — corrigés une fois au lieu de six. Rétroactions lues sur les DEUX porteurs, nœud PRIORITAIRE (contrainte D2). **Harnais de parité par TOKENS** contre les trois anciens générateurs vivants : vert avant la coupe, c'est lui qui a autorisé le Lot G. Seul écart admis, documenté : la durée legacy des leçons, abandonnée PAR le correctif §1.5. 4 break-tests ROUGE.
+     ▣ **LOT D — UI** : « Exporter le plan… » au menu Actions (même patron de panneau que l'import inter-trimestre, pas de modale), niveaux nommés par l'USAGE (Plan de cours / En classe / Preuve d'alignement), Copier + Télécharger, défaut « En classe » en texte. Les boutons 📄/📊 du panneau RETIRÉS — remplacés, pas empilés.
+     ▣ **LOT E — LA CAPACITÉ DU VETO D2b** : sélecteur « Rétroaction formative » sur les TYPES_ACTIVITE dans l'Inspecteur (porte d'écriture unique appliquerRetroactionNoeud — « aucune » RETIRE le champ) ; celui de l'Évaluation SURVIT relibellé « Rétroaction sur le rendu » (option 2). Constante RETROACTIONS unique.
+        ⚠⚠ **BUG PRÉEXISTANT TROUVÉ ET CORRIGÉ EN CHEMIN — les sélecteurs de l'Évaluation étaient MUETS.** Leurs listeners étaient posés AVANT le bloc « niveau cognitif », dont le `extra.innerHTML +=` re-sérialise le conteneur — et `evaluation` EST dans TYPES_AVEC_NIVEAU_COGNITIF. Changer Rétroaction ou Production sur un nœud Évaluation n'écrivait RIEN. C'est la contrainte « Dans la leçon » du 6 août, déjà commentée dans le code, qui n'avait pas été appliquée à ce bloc-là. Tous les listeners du panneau sont désormais posés EN FIN de ouvrirPanneau, verrouillés par un ratchet d'ordre à bornes vérifiées (leçon #413). ⮕ *Éclaire l'amendement D2 : si personne ne lisait metadata.retroaction, c'est aussi que l'écrire était difficile.*
+     ▣ **LOT F — LA MOISSONNEUSE** (`main.js`, à la suite de la purge #409, SANS drapeau — un backup d'avant le portage réintroduit `activites` à l'import) : porte les rétroactions vers le nœud ACTIVITÉ (jamais d'écrasement, le nœud est prioritaire ; « aucune » n'est pas un rattachement), un éventuel productionId vers l'ÉVALUATION unique et libre de la même leçon — sinon consigne et LAISSE EN PLACE, ne rien inventer. Balaie TOUS les trimestres (leçon #429). ⚠ **Les 3 rétroactions du relevé D1 ne sont PAS encore migrées chez Grégoire** — elles le seront à son prochain boot ; le cas nominal est prouvé au banc sur le périmètre exact du relevé. Sentinelle sur le code EXTRAIT (patron sentinelle-367, stub db COMPLET — leçon des deux faux-verts du 8 août). 3 break-tests ROUGE, dont « mise sous drapeau » qui rougit le volet COMPORTEMENTAL, pas seulement le statique.
+     ▣ **LOT G — LA SUPPRESSION** : onglet (js/config.js, zone protégée — autorisation = plan acté), hook navigation.js (idem), section HTML, accordéon d'aide, js/organisateur.js entier, les 4 générateurs + exports de parité, les 2 sauvegarderChoixActivite, 108 règles CSS orphelines. **Découverte en route : le panneau « Organisateur » de la Carte (planif-panneau-seances) était DÉJÀ MORT** — aucun bouton ne l'ouvrait (`planif-btn-seances` absent du HTML) ; parti avec le reste. SURVIVENT : la clé planification_seances (notes #367) et le repli legacy du générateur (fenêtre backup→moisson, se retire avec #430). Sentinelles : cas sans objet RETIRÉS dans 7 fichiers, pas affaiblis ; ratchet d'ablation neuf break-testé par RÉSURRECTION de l'onglet → ROUGE.
+
+     ▣ **RITUEL DE FIN.** §2 statique sur le diff : zéro innerHTML non échappé AJOUTÉ (les sites neufs n'injectent que des libellés statiques ou passent par echapperHtml ; ⚠ noté : le htmlProd PRÉEXISTANT injecte prod.nom sans échappement — baseline, pas introduit ici), zéro handler inline, zéro eval, zéro console.log, zéro listener mouse (ratchet #148 respecté). §3 : Vitest 1914/1914 en 27 s ; Playwright WebKit non exécutable en conteneur → CI à la PR. §4 : **15 break-tests, 15 ROUGE sur la bonne assertion** (B:3, C:4, D:1, E:3, F:3, G:1 par résurrection), restaurations vérifiées arbre propre. Récit↔code : 0 ancien générateur au grep, 0 sauvegarderChoixActivite, 2 seuls écrivains de metadata.retroaction (porte unique + moisson), 1 seule liste RETROACTIONS. Passe connexions : plus AUCUN écrivain de `.activites[]` (les deux sont morts) ; le chemin copierSeancesLecons peut encore COPIER des activites d'un vieux trimestre — couvert par la moisson au boot suivant + vivacité Lot B. §5 : release.mjs minor → **1.57.0 / 0808-1445**, 4 points synchrones, ?v= bumpés sur les 10 fichiers touchés + changelog 1.57 (8 items).
+
+     ⮕ **QUEUES OUVERTES** : **#430** (retirer moissonneuse + repli legacy, rentrée — même échéance que #428) · **#421 + #426** (conformité doc 3 surfaces + renommage onglet : l'interface a CESSÉ de bouger, c'est maintenant possible) · **#425** (directions D→C→B→A, préalable livré) · **#418** (db-ready sans IndexedDB) · **#427** (Cloudflare ~20 août) · **#428** (purge pre367, rentrée) · les **portes terrain** ci-dessous.
+     ⚠ **PORTES TERRAIN DU PORTAGE (Grégoire)** : (1) un export de chaque niveau ouvert sur SA carte A26 — dont le TSV collé dans Numbers ; (2) poser une rétroaction formative sur une activité AU DOIGT sur iPad ; (3) au premier boot : vérifier que ses 3 rétroactions apparaissent sur les nœuds (console : `[moisson #424]` silencieux = tout moissonné) ; (4) constater que « Plan de la leçon » a disparu sans manque ; (5) les sélecteurs Rétroaction/Production d'un nœud Évaluation ÉCRIVENT désormais — geste rapide pour confirmer le correctif du bug muet.
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 8 AOÛT 2026, MATIN (Claude Code cloud, branche `claude/labo-codex-session-start-gc1whl`, ouverte SUR `main`).
      ÉTAT FACTUEL : **1.56.4** (build 0808-1156), fusionnée `main`. Vitest **1889/1889** (219 fichiers). Arbre propre. Dernier ID BACKLOG : **#429**.
 
      ▣ **RITUEL DE DÉBUT — ZÉRO ÉCART MATÉRIEL, et le balayage de branches a servi.** Prémisse vérifiée point par point (1.56.0, build 0808-0839, Vitest 1867/1867, dernier ID #427, arbre propre) : tout conforme. Les deux branches du 8 août sont à **0 commit d'avance** — la réconciliation a bien tout emporté.
@@ -5629,140 +5652,87 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
 ## §3 — Consigne de démarrage pour la prochaine session
 
-> **Réécrite le 8 août 2026 au soir, APRÈS la fusion vers `main`.** Elle
-> remplace deux §3 concurrents : celui du 7 août (resté sur `main`, et qui a
-> causé la collision du 8) et celui de la session de nuit (resté sur sa branche,
-> donc illisible par la session du matin).
-
-### ⚠ CE QUI A CASSÉ AUJOURD'HUI — à lire avant le rituel
-
-Le 8 août, **deux sessions sont parties du même commit sans se voir**. Toutes
-deux ont livré une « 1.55.0 » différente et pris les mêmes identifiants de
-backlog. Ce n'était pas un défaut d'attention : la session du matin a fait le
-rituel, vérifié la prémisse, et trouvé **zéro écart** — parce que la prémisse
-qu'elle lisait, sur `main`, avait été périmée par une branche qu'elle ne pouvait
-pas voir.
-
-⮕ **La consigne de relais vit dans un fichier versionné. Si le travail vit sur
-une branche non mergée, la consigne qui le dit vit sur cette branche aussi — et
-la session suivante lit celle de `main`.** C'est circulaire, et aucun soin
-apporté au rituel ne le compense.
-
-⮕ **Ce qui a été fait pour que ça ne se reproduise pas** : tout a été fusionné
-dans `main`. Il n'existe plus aucun travail en avance sur une branche. Ce §3-ci
-vit sur `main`, donc toute session le lira, quelle que soit la branche ouverte.
+> **Réécrite le 8 août 2026 en après-midi, APRÈS la fusion de 1.57.0 vers
+> `main`.** Le portage des exports (#424, lots A→G) est LIVRÉ ; la page
+> « Plan de la leçon » n'existe plus.
 
 ### Prémisse à vérifier au rituel de début (§1)
 
 | Point | Valeur attendue |
 |---|---|
-| `origin/main` | **1.56.4** — porte TOUT : les chantiers des 7-8 août, l'arbitrage D1-D6 consommé, la vague terrain #148-#151 VALIDÉE au doigt, #429 |
-| Branches en avance | **AUCUNE.** ⚠ Le vérifier, ne pas le croire — voir ci-dessous |
-| Version | `{"build":"0808-1156","beta":"1.56.4"}` |
-| Vitest | **1889/1889** (219 fichiers) |
+| `origin/main` | **1.57.0** — porte le portage complet #424 (lots A→G) |
+| Branches en avance | **AUCUNE.** ⚠ Le vérifier, ne pas le croire — balayage ci-dessous |
+| Version | `{"build":"0808-1445","beta":"1.57.0"}` |
+| Vitest | **1914/1914** (223 fichiers) |
 | Playwright WebKit | non exécutable en conteneur → CI à la PR |
-| Dernier ID BACKLOG | **#429** |
+| Dernier ID BACKLOG | **#430** |
 | Arbre | propre |
 
-⚠ **Le clone du conteneur peut être SHALLOW** (50 commits). Le balayage par DATE
-ci-dessous reste valable, mais **tout `ahead/behind` est alors un artefact** du
-point de greffe — des branches de juin s'affichent « 3448 commits d'avance ».
-Faire `git fetch --unshallow` avant de comparer des CONTENUS, jamais après.
+⚠ **Le clone du conteneur peut être SHALLOW** (50 commits) : `git fetch
+--unshallow` AVANT toute comparaison de contenu. Le balayage par DATE reste
+valable malgré le shallow.
 
-### ⚠ AJOUT AU RITUEL DE DÉBUT — le contrôle qui manquait
-
-Avant toute chose, **balayer les branches distantes** :
+### Rituel de début — les deux gestes AVANT tout
 
 ```
 git fetch origin --prune
+cat RELAIS.md
 git for-each-ref --sort=-committerdate --format='%(committerdate:short) %(refname:short)' refs/remotes/origin | head
 ```
 
-Si une branche est plus récente que `main`, **s'arrêter et le signaler à
-Grégoire** avant de coder. C'est le contrôle de cinq secondes qui aurait évité
-la collision du 8 août.
+Si une branche est plus récente que `main`, ou si RELAIS.md nomme autre chose
+que `main` : **s'arrêter et le signaler à Grégoire avant de coder.**
 
-### ✅ Le correctif structurel est EN PLACE (décision Grégoire, 8 août)
+### Priorité 1 — les PORTES TERRAIN du portage (Grégoire, ~10 min)
 
-**On fusionne vers `main` en fin de CHAQUE session**, et `RELAIS.md` (racine,
-toujours sur `main`) sert de filet quand un merge doit vraiment attendre. La
-règle est dans CLAUDE.md ; le rituel de début lit RELAIS.md en premier.
+Avant tout nouveau chantier sur l'Alignement, la passe au doigt du bloc
+« PORTES TERRAIN DU PORTAGE » (§0 ci-dessus) : un export de chaque niveau sur
+la carte A26 (TSV collé dans Numbers), une rétroaction formative posée sur
+iPad, les 3 rétroactions moissonnées visibles au premier boot, et les
+sélecteurs du nœud Évaluation qui écrivent enfin (bug muet corrigé en 1.57.0).
 
-### Priorité 1 — LE PORTAGE DES EXPORTS vers la Carte d'alignement
+### Priorité 2 — #421 + #426, DÉBLOQUÉS : l'interface a cessé de bouger
 
-**Le chantier est entièrement instruit — la session exécute, elle ne débat pas.**
-
-⮕ **PLAN DE CHANTIER** : `plans de travail/PLAN-portage-exports-carte-2026-08-08.md`
-— lots A→G ordonnés (l'ordre est une CONTRAINTE : la migration des rétroactions
-APRÈS les exports, la suppression de la page EN DERNIER, harnais de parité vert
-exigé). Ses §0 (tranché — ne pas rouvrir) et §4 (pièges) sont le filet contre la
-compression. Les décisions encore ouvertes sont au §3 du plan, avec
-recommandations : l'emplacement de l'UI (menu Actions ★), le format « tableau
-collable » (TSV ★), le sort de l'import Markdown (📐 **demander à Grégoire s'il
-s'en sert** — lossy par construction, le retirer sinon), l'intention de version
-(minor ★, à confirmer).
-
-Tout ce qui nourrit le plan est acquis : l'audit consommé (§3bis tranché), le
-veto D2b résolu (option 2 — deux sélecteurs, deux libellés), le relevé D1 chiffré
-(**3 rétroactions, 0 production, 0 référence morte** — migration minuscule), la
-capacité manquante identifiée (rétroaction formative absente de l'Inspecteur).
-
-**Consigne prête à coller pour Grégoire :**
-
-```
-Nouvelle session sur Labo Codex — chantier : portage des exports.
-
-Exécute d'abord le rituel de début (Skills pour Claude Code/SKILL_Debut_de_session.md),
-balayage des branches distantes compris ; si le clone est shallow, `git fetch
---unshallow` avant toute comparaison de contenu.
-
-Prémisse à vérifier :
-  • origin/main = 1.56.4, build 0808-1156 — aucune branche en avance
-  • Vitest 1889/1889 (219 fichiers) ; Playwright WebKit → CI à la PR
-  • dernier ID BACKLOG : #429 ; arbre propre
-
-Puis ouvre le plan de chantier :
-  plans de travail/PLAN-portage-exports-carte-2026-08-08.md
-Lis ses §0 (tranché, ne pas rouvrir) et §4 (pièges) avant la première ligne de
-code. Charge SKILL_labo_codex et SKILL_verification_adverse. Les 📐 du §3 du
-plan se tranchent avec moi en début de session — dont l'import Markdown :
-je te dirai si je m'en sers.
-
-Ordre des lots : A (import MD champ mort) → B (vivacité productionId, 2 chemins)
-→ C (LE générateur unique + harnais de parité) → D (UI 3 niveaux × 3 formats)
-→ E (rétroaction formative sur les activités + libellés) → F (migration des
-3 rétroactions) → G (suppression de la page, parité verte exigée).
-Arrête-toi et présente-moi l'état des lieux avant de coder.
-```
+Le portage était le préalable explicite de la conformité documentaire.
+- **#426** : renommer l'onglet → « Carte d'alignement » (tranché, autorisation
+  config.js consignée à l'audit).
+- **#421** : trois surfaces — le guide intégré (GUIDE_PAGES), les infobulles
+  `planif-*`, le §4 de METHODE-ALIGNEMENT.md. ⚠ S'y ajoutent les mentions
+  PROSE de l'Organisateur laissées volontairement par le Lot G :
+  `accompagnement-contenu-terme.js` (3 entrées « voir : Planification >
+  Organisateur ») et le guide s'il cite la page.
 
 ### Priorités suivantes, dans l'ordre
 
-- **#418** — `db-ready` jamais émis si IndexedDB est indisponible (décision de
-  sémantique à instruire pour Grégoire).
-- **#421 + #426** — conformité documentaire (trois surfaces) + renommage de
-  l'onglet « Carte d'alignement » : APRÈS le portage, quand l'interface aura
-  cessé de bouger.
-- **#427** — refermer l'accès public (Cloudflare Access) vers le **20 août**.
-  ⚠ Les 50 sièges étaient déjà saturés en mai ; à trancher avant.
-- **#428** — retirer la purge de l'archive pre367 à la rentrée (dette datée).
+- **#425** — intégration des productions, directions D → C → B → A (le
+  préalable de vivacité est LIVRÉ avec 1.57.0).
+- **#418** — `db-ready` jamais émis si IndexedDB indisponible (décision de
+  sémantique à instruire).
+- **#427** — refermer l'accès public (Cloudflare) vers le **20 août** ; les
+  50 sièges étaient saturés en mai, à trancher avant.
+- **#428 + #430** — dettes DATÉES de la rentrée : purge pre367, moissonneuse
+  #424 + repli legacy du générateur. Les retirer ENSEMBLE quand les backups
+  d'avant le portage seront hors rotation.
 - ⚠ **CI WebKit** : à la première PR, `planif-drag-pointer-148.spec.js` passe
-  pour la première fois sous WebKit — si elle rougit, c'est l'environnement de
-  la spec (bandeau démo, timing), pas le drag : ajuster la spec, ne pas
-  soupçonner #148 (validé au doigt le 8 août).
+  pour la première fois sous WebKit — si elle rougit, ajuster la spec
+  (environnement), ne pas soupçonner #148 (validé au doigt le 8 août).
 
-### Rappel de méthode — cinq faux-verts en trois jours
+### Rappel de méthode — ce que cette session a confirmé
 
-1. **Une assertion peut être satisfaite par autre chose que ce qu'elle croit
-   vérifier** : un appel trouvé dans un commentaire, un `@media` voisin, un
-   préfixe (`objectif` dans `objectifs`, `=` dans `===`).
-2. **Une sentinelle peut couvrir le geste sans couvrir ce qu'il emporte.**
-3. **Quand un invariant NEUF porte sur un mécanisme qui double un mécanisme
-   ANCIEN, l'assertion attrape l'ancien et croit tenir le neuf** — un calcul qui
-   récursait déjà, une table dont les verbes étaient uniformes.
-4. **Un invariant de SÉCURITÉ voyage avec le champ qu'il protège.** Le déplacer
-   sans déplacer sa garde, c'est le désarmer en silence.
-5. ⮕ **Le rituel de début ne protège que contre ce que `main` sait.** Il ne voit
-   pas une branche qu'on ne lui a pas nommée — d'où le balayage ajouté ci-dessus.
+1. **Un listener posé avant un `innerHTML +=` ultérieur est un listener
+   MORT** — et il peut le rester des semaines sans qu'aucun test le voie.
+   Le bug muet des sélecteurs de l'Évaluation vivait derrière une suite
+   verte. La contrainte « poser en FIN de panneau » est désormais un ratchet.
+2. **Un harnais de parité par TOKENS autorise une suppression** : pas un
+   diff byte-à-byte (le vocabulaire change exprès), une couverture de
+   contenu — et il doit être VERT AVANT la coupe, puis partir AVEC ce qu'il
+   comparait.
+3. **Le stub COMPLET reste la règle** (deux faux-verts du 8 août au matin) :
+   la mutation « mise sous drapeau » de la moissonneuse a rougi le volet
+   COMPORTEMENTAL parce que le stub exposait `setSync`/`removeSync`.
+4. **« Aucune » n'est pas un rattachement** — la valeur par défaut d'un
+   sélecteur ne se migre pas, ne se stocke pas, ne se compte pas (relevé D1,
+   porte d'écriture, moissonneuse : trois fois la même règle).
 
 ## §3bis — Archives des consignes de démarrage précédentes
 
