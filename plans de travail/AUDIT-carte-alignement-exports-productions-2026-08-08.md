@@ -217,7 +217,7 @@ ce lien** — sinon on bâtit sur une attache qui casse à chaque rentrée.
 
 ## 3. Décisions à trancher — choix arrêtés et recommandations
 
-> ✅ **TRANCHÉES le 8 août 2026 en fin de soirée** (arbitrage demandé par
+> ✅ **TRANCHÉES le 8 août 2026 au matin** (arbitrage demandé par
 > Grégoire). Verdict et amendements : **§3bis, juste en dessous** — à lire
 > AVANT les options, qui restent ci-dessous comme pièces du dossier.
 
@@ -352,7 +352,7 @@ Défendable si les portes terrain et #414 passent devant.
 
 ---
 
-## 3bis. ✅ ARBITRAGE — les six décisions tranchées (8 août 2026, fin de soirée)
+## 3bis. ✅ ARBITRAGE — les six décisions tranchées (8 août 2026, au matin)
 
 > Grégoire a demandé de trancher. **Les six recommandations ★ sont retenues.**
 > Mais l'arbitrage n'a pas été un tampon : chaque décision a été **revérifiée au

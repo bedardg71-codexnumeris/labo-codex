@@ -7,8 +7,8 @@
      ===================================================================== -->
 
 <!-- =====================================================================
-     SESSION — 8 AOÛT 2026, FIN DE SOIRÉE (Claude Code cloud, branche `claude/labo-codex-session-start-gc1whl`, ouverte SUR `main`). ⮕⮕ LIRE EN PREMIER À LA REPRISE.
-     ÉTAT FACTUEL : **1.56.1** (build 0808-0914), fusionnée `main`. Vitest **1871/1871** (218 fichiers, +4). Arbre propre. Dernier ID BACKLOG : **#428**.
+     SESSION — 8 AOÛT 2026, MATIN (Claude Code cloud, branche `claude/labo-codex-session-start-gc1whl`, ouverte SUR `main`). ⮕⮕ LIRE EN PREMIER À LA REPRISE.
+     ÉTAT FACTUEL : **1.56.3** (build 0808-1124), fusionnée `main`. Vitest **1884/1884** (219 fichiers). Arbre propre. Dernier ID BACKLOG : **#428**.
 
      ▣ **RITUEL DE DÉBUT — ZÉRO ÉCART MATÉRIEL, et le balayage de branches a servi.** Prémisse vérifiée point par point (1.56.0, build 0808-0839, Vitest 1867/1867, dernier ID #427, arbre propre) : tout conforme. Les deux branches du 8 août sont à **0 commit d'avance** — la réconciliation a bien tout emporté.
         ⚠ **MAIS LE CLONE ÉTAIT SHALLOW** (50 commits), et les compteurs `ahead/behind` du balayage étaient des **artefacts du point de greffe** : des branches de juin affichaient « 3448 commits d'avance ». `git fetch --unshallow` AVANT de conclure. ⮕ *Le balayage par DATE passe malgré le shallow ; toute comparaison de CONTENU ment.* La note du 8 août au matin disait déjà « archéologie git trompeuse » — c'est vrai aussi du contrôle de relais lui-même.
@@ -42,6 +42,12 @@
         ⮕ **Dette adjacente sortie au passage** : `sauvegarderChoixActivite` est **dupliquée verbatim** dans `organisateur.js:1643` ET `planification-carte.js:4937` (deux homonymes, même corps, même clé) ; la liste `retros` est en dur à **trois** endroits. À fondre dans le portage.
         📐 **QUESTION OUVERTE, laissée ouverte volontairement** : que devient le sélecteur de rétroaction du nœud Évaluation — de trop, ou sens distinct (rétroaction sur le rendu) ? **Non tranchée : c'est précisément le terrain où l'arbitrage vient de se tromper.**
         ▣ **CE QUE L'ÉPISODE ENSEIGNE SUR LE RITUEL.** D2b avait été signalé comme le point le plus fragile des sept — et c'est celui qui a cassé. Le signalement valait donc quelque chose. Mais **signaler n'est pas vérifier** : j'avais les moyens de lire le `if (type === 'evaluation')` avant de recommander, et l'aurait retourné tout seul. ⮕ *Un point marqué « fragile, veto attendu » mérite la vérification EN PLUS du marquage, pas à sa place.*
+
+     ✅ LIVRÉ — **VAGUE TERRAIN DU MATIN** : Grégoire a lancé sa passe et remonté CINQ observations en direct ; toutes diagnostiquées au code, quatre corrigées dans l'heure (1.56.2 puis 1.56.3), consignées SUIVI-BUGS #148-#151.
+
+     ▣ **#148, LE CHANTIER PORTEUR (1.56.3) — le canevas était resté SOURIS.** « Sortir une évaluation : la leçon suit toujours » + « deux leçons empilées indissociables » = même racine : 27 listeners mousedown/mousemove/mouseup dans `planification-carte.js`. La cause exacte de #144 (11 juin), corrigée alors pour les palettes, JAMAIS portée au canevas — et le code le savait, deux commentaires des 6-7 août nomment la porte ouverte sans qu'aucun item ne la porte. ⮕ *Un « reste à faire » qui ne vit que dans un commentaire n'existe pas.* Conversion TOTALE en Pointer Events : drag de nœuds (4 CAS), liens aux ports, reconnexion SVG, panneaux, gardes, re-dispatch ⌥ en PointerEvent. Lasso gardé souris-seulement PAR DÉCISION (`pointerType`) — au doigt, le fond doit défiler. `touch-action:none` sur les trois surfaces. Le filtre `pointerId` partout — un 2e doigt ne vole pas le drag.
+        ⮕ **MÉTHODE, la partie qui vaut relais.** (a) La sentinelle-ratchet (zéro listener souris, 8 cas, 4 break-tests ROUGE) a attrapé au passage un `pointercancel` MANQUANT préexistant dans le drag des pastilles du planificateur. (b) Playwright WebKit inexécutable ici → specs planif lancées sur le **Chromium du conteneur** : 4 échecs… et la MÊME base sur le code d'avant — échecs préexistants de la spec, conversion NEUTRE. (c) Puis PREUVE POSITIVE : spec neuve `planif-drag-pointer-148.spec.js` (drag suit + extraction détache), déboguée aux COMPTEURS (`elementFromPoint` a démasqué le `transition-bandeau` du mode démo qui avalait les pointerdown en headless ; le re-layout au dépôt sur la carte démo imposait de mesurer PENDANT le drag). VERTE 2/2. ⚠ Passage WebKit à confirmer à la prochaine CI ; validation TACTILE réelle chez Grégoire.
+        ⮕ #149 ABSORBÉ par #148 (deux queues consignées non bloquantes : position de naissance d'un nœud, porte d'inspecteur leçon-dans-séquence). **#150 (1.56.2)** : la semaine de l'inspecteur resynchronise le bloc — `synchroniserSelecteurSemaine`, état non-peuplé, remontée aux séquences ancêtres, SANS reconstruireDOM (focus). **#151 (1.56.2)** : le 🎯 vide était `grayscale + .45` — F1 revenue par le STYLE ; désormais liséré pointillé, sentinelle qui lit styles.css. ⚠ Au harnais de #150, un FAUX-VERT évité de justesse : le stub sans `setSync` rendait le test aveugle à une purge sous drapeau — même leçon que #409 le matin même.
 
      ⮕ **#416 EST CLOS** par cet arbitrage : ses trois questions 📐 sont répondues par D4 (le « présentable » se règle par le niveau **Sommaire**) et D5 (format et profondeur séparés ; les trois formats demandés deviennent le second axe, pas trois générateurs de plus).
 
@@ -5644,10 +5650,10 @@ vit sur `main`, donc toute session le lira, quelle que soit la branche ouverte.
 
 | Point | Valeur attendue |
 |---|---|
-| `origin/main` | **1.56.1** — porte TOUT : #414/#417/#419 (matin du 8), #420/#422/#423 (nuit du 7→8), #409 (fin de soirée) |
+| `origin/main` | **1.56.3** — porte TOUT : #414/#417/#419, #420/#422/#423 (nuit du 7→8), #409, l'arbitrage D1-D6, et la vague terrain du matin (#148-#151 de SUIVI-BUGS) |
 | Branches en avance | **AUCUNE.** ⚠ Le vérifier, ne pas le croire — voir ci-dessous |
-| Version | `{"build":"0808-0914","beta":"1.56.1"}` |
-| Vitest | **1871/1871** (218 fichiers) |
+| Version | `{"build":"0808-1124","beta":"1.56.3"}` |
+| Vitest | **1884/1884** (219 fichiers) |
 | Playwright WebKit | non exécutable en conteneur → CI à la PR |
 | Dernier ID BACKLOG | **#428** |
 | Arbre | propre |
