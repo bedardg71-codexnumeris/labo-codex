@@ -217,6 +217,10 @@ ce lien** — sinon on bâtit sur une attache qui casse à chaque rentrée.
 
 ## 3. Décisions à trancher — choix arrêtés et recommandations
 
+> ✅ **TRANCHÉES le 8 août 2026 en fin de soirée** (arbitrage demandé par
+> Grégoire). Verdict et amendements : **§3bis, juste en dessous** — à lire
+> AVANT les options, qui restent ci-dessous comme pièces du dossier.
+
 > Chaque décision est présentée avec ses options et **une recommandation
 > explicite**. Répondre par le numéro de l'option suffit.
 
@@ -345,6 +349,137 @@ pas encore (§2.2).
 
 **Option 3 — Ne rien faire ce cycle** et rester sur le rattachement actuel.
 Défendable si les portes terrain et #414 passent devant.
+
+---
+
+## 3bis. ✅ ARBITRAGE — les six décisions tranchées (8 août 2026, fin de soirée)
+
+> Grégoire a demandé de trancher. **Les six recommandations ★ sont retenues.**
+> Mais l'arbitrage n'a pas été un tampon : chaque décision a été **revérifiée au
+> code**, et cette relecture a produit **trois amendements** qui changent l'ordre
+> des travaux. Ils sont signalés ⮕ **AMENDEMENT**.
+>
+> Autorité : ces choix sont un arbitrage technique, pas un décret. **D2b est le
+> seul point réellement pédagogique** — il est signalé comme tel, et c'est celui
+> sur lequel un veto de Grégoire est le plus attendu.
+
+| # | Tranché | Amendement |
+|---|---|---|
+| **D1** | **Option 1** — inventorier d'abord | ⮕ le relevé est **écrit et livré**, la décision est exécutable ce soir |
+| **D2** | **Option 1** — la donnée vit sur le nœud | ⮕ **contrainte d'ordre neuve** : APRÈS D3/D4/D5, jamais avant |
+| **D2b** | Sur l'**évaluation**, pas l'activité | 📐 seul point pédagogique — veto attendu |
+| **D3** | **Option 1** — porter, puis supprimer | — |
+| **D4** | **Option 1** — trois niveaux | — |
+| **D5** | **Option 1** — deux axes, un générateur | — |
+| **D6** | **Option 1** — le préalable, puis D→C→B→A | ⮕ le préalable couvre **deux chemins**, pas un |
+
+---
+
+### D1 → Option 1, et le relevé est livré
+
+Trancher « inventorier d'abord » sans fournir l'inventaire, c'est déplacer la
+décision d'un cran, pas la prendre. ⮕ **AMENDEMENT** : le relevé existe —
+`plans de travail/inventaire-D1-activites-organisateur.js`. Lecture seule, à
+coller en console, **balaie tous les trimestres** (la clé est namespacée depuis
+#367 et un rattachement peut dormir dans un trimestre inactif).
+
+Il compte séparément les rétroactions **posées sciemment** — `'aucune'` est la
+valeur par défaut du sélecteur et n'est pas un rattachement — et signale au
+passage les **références mortes**, ce qui instruit D6 gratuitement.
+
+⚠ Un piège évité en l'écrivant, qui vaut d'être noté : `trimestres.js:717` lit
+les productions avec un **repli sur la clé nue**. Un relevé qui l'ignorerait
+déclarerait mortes toutes les références d'un trimestre dont les productions
+n'ont pas migré — un faux massacre. *Lire par un chemin et juger par un autre,
+c'est exactement le défaut de #419.* Le repli est donc dans le script.
+
+### D2 → Option 1 (le nœud), MAIS pas tout de suite
+
+La destination est la bonne : une seule vérité portée par le nœud, comme la
+durée, la semaine et les objectifs depuis les chantiers du 6-8 août.
+
+⮕ **AMENDEMENT — contrainte d'ordre que l'audit ne dit pas.** Vérifié au code :
+`metadata.productionId` et `metadata.retroaction` ne sont lus par **personne**
+hors de l'Inspecteur qui les écrit (`planification-carte.js:2120`, `:2156` — et
+c'est tout). Pendant que `activites[].productionId`, lui, **est lu par les
+exports** (`organisateur.js:633`, `:726`).
+
+*Migrer maintenant, ce serait déplacer la donnée du seul porteur qui a des
+lecteurs vers un porteur qui n'en a aucun* — les exports iraient silencieusement
+au blanc. **D2 ne peut donc s'exécuter qu'APRÈS D3/D4/D5**, quand les exports
+portés lisent le nœud. Même famille que l'archive de #409 : un porteur sans
+lecteur n'est pas une source de vérité, c'est une copie morte.
+
+### D2b → sur l'ÉVALUATION 📐
+
+Retenu, avec un argument tiré du code plutôt que du goût : une production porte
+`ponderation`, `grilleId` et `dateEcheance` (`chargerProductions`,
+`planification-carte.js:4890`). **Aucune de ces trois notions ne veut dire quoi
+que ce soit sur une activité** — ce sont des notions d'évaluation. Le porteur
+qui a du sens est celui dont le vocabulaire s'accorde avec la donnée.
+
+📐 **C'est le seul des sept points qui relève de la pédagogie et non de la
+technique.** Si tu poses des rétroactions *formatives* sur des activités —
+pendant le travail, pas sur le rendu — alors ma lecture est fausse et le
+rattachement doit vivre aux deux endroits, avec deux sens distincts. Tu tranches.
+
+### D3, D4, D5 → Options 1, sans réserve
+
+**D3** est directement la règle du projet : « tout nouveau chantier RETIRE ce
+qu'il remplace » — ce qu'on *remplace*, pas ce qu'on *compte* remplacer.
+Supprimer d'abord, ce serait retirer une capacité (l'axe d'audience du §1.9)
+pour la rebâtir après.
+
+**D4** — trois niveaux : Sommaire (le plan de cours), Déroulement (toi, en
+classe), Alignement (la preuve). Deux ne donnent pas le sommaire collable, qui
+est précisément la demande.
+
+**D5** — la profondeur et le format sont orthogonaux. C'est la décision la plus
+rentable des six : **six générateurs qui se recopient deviennent un**, et les
+croiser naïvement en donnerait neuf. Les défauts §1.4 (« SÉANCE » pour une
+leçon) et §1.5 (double comptage de durée) se corrigent alors **une fois**, pas
+six. ⮕ Corollaire : D5 avant D4 dans l'exécution — le générateur unique d'abord,
+les trois niveaux comme paramètre ensuite.
+
+### D6 → Option 1, et le préalable est plus large qu'annoncé
+
+⮕ **AMENDEMENT.** L'audit pose le préalable sur `metadata.productionId`. La
+vérification en donne **deux, pas un** :
+
+1. `planification-donnees.js` — `productionId` y a **zéro occurrence**. La
+   reprise recopie la metadata en bloc, sans le contrôle de vivacité qu'elle
+   applique pourtant au cours (`:486-492`, commenté « un id mort vaut moins que
+   le cours actif »).
+2. `copierSeancesLecons` — deep-copy de l'entrée de séance **entière**, donc
+   `.activites[].productionId` avec. Second chemin, même trou, non relevé.
+
+⮕ Un correctif qui ne traiterait que le premier laisserait la moitié du trou
+ouvert. Et il est **daté** : `productions` est namespacée par trimestre, donc
+le trou s'ouvre **à chaque rentrée** — reprendre le 601-101 d'H2026 pour A2026
+emporte des références mortes en silence. À faire avant d'appuyer davantage sur
+ce lien.
+
+---
+
+### Ordre d'exécution qui découle de l'arbitrage
+
+Le §4 ci-dessous reste juste, avec **deux inflexions** :
+
+1. **D1** — passer le relevé (5 min, chez Grégoire). *Si zéro : D2 et D2b
+   tombent, et l'étape 5 se simplifie.*
+2. Corriger l'import Markdown qui écrit dans le champ mort (§1.3).
+3. Corriger la vivacité de `productionId` — **les deux chemins** (D6 préalable).
+4. Porter les exports : **le générateur unique d'abord (D5)**, les trois niveaux
+   ensuite (D4), vocabulaire « leçon » rétabli, durées par `dureeRollupNoeud`,
+   objectifs au pluriel.
+5. **Puis** migrer les rattachements vers le nœud (D2) — *pas avant, sous peine
+   d'exports blancs.*
+6. **Puis** supprimer la page.
+7. **Puis** les productions : D → C → B → A (D6).
+
+⮕ **#416 est clos par cet arbitrage** : ses trois questions 📐 sont répondues
+par D4 (le périmètre « présentable » = le niveau **Sommaire**) et D5 (format et
+profondeur séparés).
 
 ---
 
