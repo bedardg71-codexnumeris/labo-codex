@@ -24,7 +24,6 @@ import { chargerScript } from './_helpers/charger-script.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
 const sourceCarte = readFileSync(path.join(racineProjet, 'js', 'planification-carte.js'), 'utf8');
-const sourceOrganisateur = readFileSync(path.join(racineProjet, 'js', 'organisateur.js'), 'utf8');
 const sourceIndex = readFileSync(path.join(racineProjet, 'index.html'), 'utf8');
 const sourceCss = readFileSync(path.join(racineProjet, 'styles.css'), 'utf8');
 
@@ -146,12 +145,6 @@ describe('EE · frères d’Activité — le contrat', () => {
 });
 
 describe('EE · l’ablation du Plan de la leçon est complète', () => {
-    it('l’organisateur ne connaît plus ni étapes ni checkbox EE', () => {
-        for (const marqueur of ['NOMS_ETAPES', 'enseignementExplicite', 'org-ee', 'basculerEE', 'creerEtapesVides', 'afficherEtapesEE']) {
-            expect(sourceOrganisateur, marqueur).not.toContain(marqueur);
-        }
-    });
-
     it('le HTML ne porte plus aucun vestige org-ee', () => {
         expect(sourceIndex).not.toContain('org-ee');
         expect(sourceIndex).not.toContain('Enseignement explicite\n                                </label>');
@@ -161,13 +154,9 @@ describe('EE · l’ablation du Plan de la leçon est complète', () => {
         expect(sourceCss).not.toContain('org-ee');
     });
 
-    it('le cœur de la leçon reste — c’était la moitié NON-EE du bloc', () => {
-        // L'ablation devait retirer les étapes, pas la liste d'activités avec
-        // rétroaction/production qui vivait dans la même enveloppe.
-        expect(sourceIndex).toContain('id="org-coeur-brut"');
-        expect(sourceIndex).toContain('id="org-coeur-contenu"');
-        expect(sourceOrganisateur).toContain('coeurContenu');
-    });
+    // (« le cœur de la leçon reste » est parti avec la page entière, #424
+    // Lot G — la capacité rétroaction/production vit désormais dans
+    // l'Inspecteur, sentinelle-retroaction-formative-424.)
 });
 
 describe('Palette · les descriptions sont devenues les titres', () => {

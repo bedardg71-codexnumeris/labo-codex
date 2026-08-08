@@ -97,7 +97,7 @@ describe('Anti-cache · main.js porte les migrations, il ne doit jamais être se
         // Un fichier sans paramètre est mis en cache sans aucune porte de sortie.
         const modules = [
             'js/main.js', 'js/planification-carte.js', 'js/planification-donnees.js',
-            'js/organisateur.js', 'js/trimestres.js', 'js/preferences.js',
+            'js/trimestres.js', 'js/preferences.js',
             'js/changelog-data.js'
         ];
         for (const m of modules) {

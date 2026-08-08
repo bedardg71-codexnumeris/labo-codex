@@ -1105,7 +1105,7 @@ const ETAPES_TOUR = [
         titre: 'Alignement et plan de le\u00e7on (optionnel)',
         texte: "La carte d'alignement rend visible l'alignement p\u00e9dagogique de ton cours\u00a0: ce que tu vises, comment tu l'enseignes et comment tu le v\u00e9rifies. Le plan de la le\u00e7on structure tes le\u00e7ons sur les semaines de ton trimestre. Ce module est compl\u00e9mentaire. Tu peux l'explorer quand tu te sens \u00e0 l'aise avec les autres sections.",
         correspond: function(idSousSection) {
-            return idSousSection === 'conception-carte' || idSousSection === 'conception-organisateur';
+            return idSousSection === 'conception-carte';
         }
     },
     {

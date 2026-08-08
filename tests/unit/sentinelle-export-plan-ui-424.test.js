@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
@@ -17,6 +17,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
 const sourceIndex = readFileSync(path.join(racine, 'index.html'), 'utf8');
 const sourceCarte = readFileSync(path.join(racine, 'js', 'planification-carte.js'), 'utf8');
+const sourceConfig = readFileSync(path.join(racine, 'js', 'config.js'), 'utf8');
 
 describe('Lot D · statique — le chrome est remplacé, pas empilé', () => {
     it('le menu Actions porte « Exporter le plan… » et son panneau', () => {
@@ -36,6 +37,33 @@ describe('Lot D · statique — le chrome est remplacé, pas empilé', () => {
 
     it('le module d’export est chargé par index.html', () => {
         expect(sourceIndex).toMatch(/src="js\/planification-export\.js\?v=[^"]+"/);
+    });
+});
+
+describe('Lot G · ratchet d’ablation — la page « Plan de la leçon » est partie', () => {
+    // Ratchet d'ABSENCE (cas §4 « ratchet » de SKILL_verification_adverse) :
+    // toute réapparition d'un de ces symboles est une régression. Break-testé
+    // par RÉSURRECTION (réintroduire l'onglet dans config.js → rouge).
+    it('l’onglet, la section, la balise script et le fichier n’existent plus', () => {
+        expect(sourceConfig).not.toContain("id: 'organisateur'");
+        expect(sourceIndex).not.toContain('conception-organisateur');
+        expect(sourceIndex).not.toContain('js/organisateur.js');
+        expect(existsSync(path.join(racine, 'js', 'organisateur.js'))).toBe(false);
+    });
+
+    it('les anciens générateurs et le panneau mort de la Carte sont partis', () => {
+        for (const symbole of ['function genererPlanTexte', 'function genererPlanTSV',
+                               'function sauvegarderChoixActivite', 'function afficherLeconOrganisateur',
+                               'planif-panneau-seances']) {
+            expect(sourceCarte, symbole).not.toContain(symbole);
+        }
+        expect(sourceIndex).not.toContain('planif-panneau-seances');
+    });
+
+    it('la clé des notes (#367) SURVIT — seule la machinerie activites est morte', () => {
+        // La suppression ne devait PAS emporter les notes de leçon.
+        expect(sourceCarte).toContain("CLE_SEANCES");
+        expect(sourceCarte).toContain('cleNoteLecon');
     });
 });
 

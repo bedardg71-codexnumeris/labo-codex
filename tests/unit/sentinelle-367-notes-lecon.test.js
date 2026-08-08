@@ -28,7 +28,6 @@ const racineProjet = path.resolve(__dirname, '..', '..');
 const sourceMain = readFileSync(path.join(racineProjet, 'js', 'main.js'), 'utf8');
 const sourceTrimestres = readFileSync(path.join(racineProjet, 'js', 'trimestres.js'), 'utf8');
 const sourceCarte = readFileSync(path.join(racineProjet, 'js', 'planification-carte.js'), 'utf8');
-const sourceOrganisateur = readFileSync(path.join(racineProjet, 'js', 'organisateur.js'), 'utf8');
 
 // --- Rejeu de la migration du boot -------------------------------------
 // Le bloc vit dans main.js, hors de toute fonction exportable. On l'EXTRAIT et
@@ -138,16 +137,11 @@ describe('#367 · le registre et les portes', () => {
         // l'aliasing entre cartes que ce chantier retire.
         expect(sourceCarte).not.toMatch(/seances\[leconId\]/);
         expect(sourceCarte).not.toMatch(/seances\[n\.id\]/);
-        expect(sourceOrganisateur).not.toMatch(/seances\[leconId\]/);
-        expect(sourceOrganisateur).not.toMatch(/seances\[lecon\.id\]/);
     });
 
-    it('l’organisateur passe par la porte du module carte, sans clé de repli nue', () => {
-        expect(sourceOrganisateur).toMatch(/planificationCarte\.cleNoteLecon/);
-        // Un repli `|| 'planification_seances'` sur la composition rouvrirait
-        // le trou : sans carte identifiable, on s'ABSTIENT.
-        expect(sourceOrganisateur).toMatch(/function cleNote\(leconId\)[\s\S]{0,320}return null;/);
-    });
+    // (Le cas « l’organisateur passe par la porte du module carte » est parti
+    // avec la page « Plan de la leçon », #424 Lot G. Les cas de la migration
+    // #367 ci-dessous restent entiers.)
 
     it('supprimer une leçon purge sa note', () => {
         expect(sourceCarte).toMatch(/donnees\.type === 'lecon'[\s\S]{0,600}delete notes\[cleNotePurge\]/);

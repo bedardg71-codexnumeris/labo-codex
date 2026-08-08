@@ -25,7 +25,6 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
 const carte = readFileSync(path.join(racineProjet, 'js', 'planification-carte.js'), 'utf8');
-const organisateur = readFileSync(path.join(racineProjet, 'js', 'organisateur.js'), 'utf8');
 const css = readFileSync(path.join(racineProjet, 'styles.css'), 'utf8');
 
 describe('Poignée · rendue sur les feuilles ET les conteneurs, différemment', () => {
@@ -146,22 +145,10 @@ describe('Poignée · mécanique', () => {
 });
 
 describe('Vue calendrier · les boutons « Copier » sont retirés partout', () => {
-    it('plus aucun bouton ni fonction de copie', () => {
-        expect(organisateur).not.toContain('ajouterBoutonsCopier');
-        expect(organisateur).not.toContain('org-cal-btn-copier');
-        expect(organisateur).not.toContain('copierDansPressePapiers');
-    });
-
-    it('les extracteurs de texte qui ne servaient qu’à eux sont retirés aussi', () => {
-        expect(organisateur).not.toContain('extraireTexteLecon');
-        expect(organisateur).not.toContain('extraireTexteSequence');
-    });
-
+    // (Les cas qui lisaient organisateur.js sont partis avec la page entière,
+    // #424 Lot G — il ne reste que l'assertion CSS.)
     it('le CSS ne garde pas de règle orpheline', () => {
         expect(css).not.toContain('org-cal-btn-copier');
     });
 
-    it('l’export Markdown de la modale, lui, est INTACT (autre fonction)', () => {
-        expect(organisateur).toContain('copierExportMD');
-    });
 });

@@ -26,7 +26,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
 const sourceRythme = readFileSync(path.join(racineProjet, 'js', 'rythme.js'), 'utf8');
 const sourceMain = readFileSync(path.join(racineProjet, 'js', 'main.js'), 'utf8');
-const sourceOrganisateur = readFileSync(path.join(racineProjet, 'js', 'organisateur.js'), 'utf8');
 
 // --- Sandbox Rythme -----------------------------------------------------
 function monterRythme(store) {
@@ -113,9 +112,8 @@ describe('semaine dimanche→samedi · invariants statiques', () => {
         expect(sourceRythme).toMatch(/prefs\.weekends \? 'Samedi' : 'Vendredi'/);
     });
 
-    it('l’Organisateur ordonne les séances du dimanche au samedi (dimanche présent)', () => {
-        expect(sourceOrganisateur).toMatch(/ordreJours = \['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'\]/);
-    });
+    // (Le cas Organisateur est parti avec la page « Plan de la leçon »,
+    // #424 Lot G.)
 });
 
 // --- Sandbox Migrations -------------------------------------------------

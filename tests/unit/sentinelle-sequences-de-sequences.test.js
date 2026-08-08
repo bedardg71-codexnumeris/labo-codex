@@ -18,7 +18,6 @@ import { chargerScript } from './_helpers/charger-script.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
 const sourceCarte = readFileSync(path.join(racineProjet, 'js', 'planification-carte.js'), 'utf8');
-const sourceOrganisateur = readFileSync(path.join(racineProjet, 'js', 'organisateur.js'), 'utf8');
 
 // --- Sandbox ------------------------------------------------------------
 let store;
@@ -147,11 +146,9 @@ describe('voie A · invariants statiques (les consommateurs migrés)', () => {
         expect(sourceCarte).toMatch(/function obtenirSequencesCarte\(\)/);
     });
 
-    it('les exports de l’Organisateur passent par la hiérarchie et le chemin', () => {
-        const appels = (sourceOrganisateur.match(/carte\.listerSequencesHierarchie\('temporel'\)/g) || []);
-        expect(appels).toHaveLength(2); // TXT + MD
-        expect(sourceOrganisateur).toMatch(/carte\.cheminSequence\(seq\)/);
-    });
+    // (Le cas « les exports de l'Organisateur » est parti avec la page et ses
+    // générateurs, #424 Lot G — le générateur unique est couvert par
+    // harnais-parite-exports-424.)
 
     it('le sommaire somme la jauge sur les RACINES seulement (pas de double-compte)', () => {
         expect(sourceCarte).toMatch(/mettreAJourJaugeTemps\(hierarchie\.filter\(function\(e\) \{ return e\.niveau === 0; \}\)/);

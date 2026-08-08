@@ -20,10 +20,9 @@ import { chargerScript } from './_helpers/charger-script.js';
 // Et la contrainte D2 : la rétroaction se lit sur les DEUX porteurs,
 // priorité au nœud.
 //
-// ⚠ Au Lot G, les anciens générateurs meurent : le describe « parité contre
-// les anciens » sera retiré AVEC eux. Les describes « contrats de niveau »
-// et « les correctifs du générateur » restent — ils ne dépendent que du
-// nouveau moteur.
+// ⚠ Lot G PASSÉ : la parité par tokens contre les anciens générateurs a été
+// verte avant leur suppression, puis retirée avec eux. Restent les contrats
+// de niveau et les correctifs — ils ne dépendent que du nouveau moteur.
 
 let win;
 let api;      // window.planificationCarte
@@ -93,7 +92,6 @@ function monterTout() {
         sauvegarderCarte: () => {},
         chargerCarte: () => null
     };
-    chargerScript('js/organisateur.js', globaux, win);
     chargerScript('js/planification-export.js', globaux, win);
     api = win.planificationCarte;
     exporteur = win.planificationExport;
@@ -177,64 +175,10 @@ function poserFixture() {
 beforeAll(() => { monterTout(); });
 
 // -----------------------------------------------------------------------
-// Outils de comparaison de CONTENU
+// 1. (RETIRÉ AU LOT G, comme annoncé) — la parité par tokens contre les
+//    anciens générateurs a été VERTE avant leur suppression : c'est elle qui
+//    a autorisé le Lot G. Les anciens sont partis, le describe avec eux.
 // -----------------------------------------------------------------------
-
-// Vocabulaire dont le changement est VOULU (audit §1.4) + habillage.
-const TOKENS_EXCLUS = new Set([
-    'SÉANCE', 'SÉANCES', 'Séance', 'Séances', 'séance',
-    // habillage des anciens documents, sans valeur d'information
-    'HORS', 'SÉQUENCE', 'Exporté', 'Document', 'pédagogique', 'enseignant·e',
-    'Durée', 'totale', 'Semaines', 'Type', 'Titre', 'Liens', 'PLAN', 'COURS',
-    'Objectif', 'Objectifs', 'Évaluation', 'Activités', 'Rétroaction',
-    'Échéance', 'Grille', 'Échelle', 'Leçon', 'Orphelines'
-]);
-
-// ⚠ Le SEUL écart de contenu admis, et il est le CORRECTIF §1.5 : la durée
-// LEGACY de la leçon (metadata.duree = 60, d'avant le 4 août) est abandonnée
-// au profit du rollup. Ses tokens dans les anciens documents : « 1h » → '1'
-// (texte, markdown) et '60' (colonne TSV). Tout autre token perdu est une
-// RÉGRESSION de parité.
-const TOKENS_ABANDONNES = new Set(['1', '60']);
-
-/** Les mots porteurs (≥ 4 caractères) et les nombres d'un document. */
-function tokensDe(texte) {
-    const bruts = String(texte).match(/[A-Za-zÀ-ſ’''’-]{4,}|\d+(?:[.,]\d+)?/g) || [];
-    return new Set(bruts.filter(t => !TOKENS_EXCLUS.has(t)));
-}
-
-function manquants(ancien, nouveau) {
-    const attendus = tokensDe(ancien);
-    const obtenus = tokensDe(nouveau);
-    return [...attendus].filter(t => !obtenus.has(t) && !TOKENS_ABANDONNES.has(t));
-}
-
-// -----------------------------------------------------------------------
-// 1. PARITÉ CONTRE LES ANCIENS GÉNÉRATEURS (meurt avec eux au Lot G)
-// -----------------------------------------------------------------------
-
-describe('Parité #424 · le niveau Alignement couvre tout ce que les anciens émettaient', () => {
-    it('genererPlanTexte → texte/alignement : aucun token porteur perdu', () => {
-        const ancien = api.genererPlanTexte();
-        const nouveau = exporteur.genererExport('alignement', 'texte');
-        expect(ancien.length).toBeGreaterThan(100); // l'ancien a bien émis
-        expect(manquants(ancien, nouveau)).toEqual([]);
-    });
-
-    it('genererPlanTSV → tsv/alignement : aucun token porteur perdu', () => {
-        const ancien = api.genererPlanTSV();
-        const nouveau = exporteur.genererExport('alignement', 'tsv');
-        expect(ancien.length).toBeGreaterThan(100);
-        expect(manquants(ancien, nouveau)).toEqual([]);
-    });
-
-    it('genererExportMD (enseignant) → markdown/alignement : aucun token porteur perdu', () => {
-        const ancien = win.organisateur.genererExportMD(false);
-        const nouveau = exporteur.genererExport('alignement', 'markdown');
-        expect(ancien.length).toBeGreaterThan(100);
-        expect(manquants(ancien, nouveau)).toEqual([]);
-    });
-});
 
 // -----------------------------------------------------------------------
 // 2. LES CONTRATS DE NIVEAU (D4) — survivent au Lot G

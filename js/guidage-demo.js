@@ -84,10 +84,6 @@ const GUIDAGE_TEXTES = {
         titre: 'Planification \u2014 Carte mentale',
         texte: 'La carte mentale te permet de visualiser l\u2019alignement p\u00e9dagogique de ton cours. La d\u00e9mo inclut une carte compl\u00e8te \u00ab\u00a0\u00c9criture et litt\u00e9rature\u00a0\u00bb avec 26\u00a0n\u0153uds et 45\u00a0liens. Explore les s\u00e9quences, le\u00e7ons et activit\u00e9s pour voir comment les \u00e9l\u00e9ments se relient.'
     },
-    'conception-organisateur': {
-        titre: 'Planification \u2014 Plan de le\u00e7on',
-        texte: 'L\u2019organisateur transforme ta carte mentale en plans de le\u00e7on structur\u00e9s. S\u00e9lectionne une carte, une s\u00e9quence et une le\u00e7on pour voir les sections auto-d\u00e9riv\u00e9es (objectif, pr\u00e9requis, productions).'
-    },
     'labo-modelisation': {
         titre: 'Labo \u2014 Mod\u00e9lisation',
         texte: 'La mod\u00e9lisation te permet d\u2019ouvrir un PDF pour l\u2019annoter en direct lors d\u2019une projection en classe. Ouvre un fichier depuis ton ordinateur pour tester les outils d\u2019annotation.'
