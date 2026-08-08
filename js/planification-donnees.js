@@ -451,6 +451,28 @@ function listerReprisesPourCours(coursId) {
 }
 
 /**
+ * Ids des productions VIVANTES du trimestre ACTIF (celui de l'arrivée).
+ * ⚠ Même chemin de lecture que `trimestres.js` : clé namespacée AVEC repli sur
+ * la clé nue — sans le repli, un trimestre dont les productions n'ont pas
+ * migré verrait TOUTES ses références déclarées mortes (leçon #419 : on juge
+ * par le chemin par lequel on lit).
+ */
+function idsProductionsVivantes() {
+    let productions;
+    try {
+        productions = db.getSync(cle('productions')) || db.getSync('productions', []);
+    } catch (e) {
+        console.warn('[Planification] Lecture des productions échouée :', e);
+        productions = [];
+    }
+    const ids = new Set();
+    (Array.isArray(productions) ? productions : []).forEach(p => {
+        if (p && p.id) ids.add(p.id);
+    });
+    return ids;
+}
+
+/**
  * Copie une carte d'un trimestre source vers le trimestre ACTIF.
  * La source n'est jamais mutée (deep-clone via importerDepuisBibliotheque).
  * Copie aussi les notes de séance (Objectif/Notes des vues leçon) des leçons
@@ -474,8 +496,20 @@ function importerCarteDepuisTrimestre(trimestreSourceId, carteId) {
         const entree = donnees.index.cartes.find(c => c.id === nouvelId);
         if (entree) {
             entree.importeDe = { trimestre: trimestreSourceId, carte: carteId, date: new Date().toISOString() };
-            setDonnees(donnees);
         }
+
+        // #425 préalable : contrôle de vivacité de `metadata.productionId`,
+        // symétrique de celui du cours ci-dessous — mais contre les productions
+        // du trimestre d'ARRIVÉE, car `productions` est NAMESPACÉE par
+        // trimestre (contrairement à `cours`, global) : le trou s'ouvrait à
+        // chaque rentrée. Une référence morte vaut moins qu'un champ absent.
+        const vivantes = idsProductionsVivantes();
+        (((donnees.cartes || {})[nouvelId] || {}).noeuds || []).forEach(n => {
+            if (n && n.metadata && n.metadata.productionId && !vivantes.has(n.metadata.productionId)) {
+                delete n.metadata.productionId;
+            }
+        });
+        setDonnees(donnees);
 
         // Le rattachement SUIT la carte d'un trimestre à l'autre : `cours` est
         // une collection globale, donc le même coursId reste valide dans le
@@ -516,6 +550,10 @@ function copierSeancesLecons(trimestreSourceId, carteSourceId, nouvelleCarteId, 
         const idsLecons = (contenuCarte.noeuds || []).filter(n => n.type === 'lecon').map(n => n.id);
         if (idsLecons.length === 0) return;
         const cible = db.getSync(cle('planification_seances'), {}) || {};
+        // #425 préalable, second chemin : la deep-copy de l'entrée de séance
+        // emporte `.activites[].productionId` — même contrôle de vivacité que
+        // la metadata de nœud (deux chemins, même trou ; audit §3bis D6).
+        const vivantes = idsProductionsVivantes();
         let modifie = false;
         idsLecons.forEach(lid => {
             // Clés COMPOSITES des deux côtés (#367) : les ids de leçon ne sont
@@ -524,7 +562,14 @@ function copierSeancesLecons(trimestreSourceId, carteSourceId, nouvelleCarteId, 
             const cleSourceNote = `${carteSourceId}::${lid}`;
             const cleCibleNote = `${nouvelleCarteId}::${lid}`;
             if (seancesSource[cleSourceNote] && !cible[cleCibleNote]) {
-                cible[cleCibleNote] = JSON.parse(JSON.stringify(seancesSource[cleSourceNote]));
+                const copie = JSON.parse(JSON.stringify(seancesSource[cleSourceNote]));
+                Object.keys(copie.activites || {}).forEach(aid => {
+                    const act = copie.activites[aid];
+                    if (act && act.productionId && !vivantes.has(act.productionId)) {
+                        act.productionId = null;
+                    }
+                });
+                cible[cleCibleNote] = copie;
                 modifie = true;
             }
         });
