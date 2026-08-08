@@ -361,6 +361,73 @@
         return rapport;
     }
 
+    // #429 (8 août 2026) — ENRICHISSEMENT : la migration V3 ne lisait que le
+    // trimestre ACTIF. `lireModalitesLegacy()` passe par le module propriétaire,
+    // donc par la clé namespacée du trimestre actif — si CELUI-CI n'a pas de
+    // `modalitesEvaluation` (cas réel : A2026 chez Grégoire, créé après le
+    // 16 avril), la migration ne trouve RIEN et pose les DÉFAUTS, pendant que
+    // les vraies valeurs dorment dans a2024/a2025/h2026. Constaté au premier
+    // contrôle terrain : grille de dépistage vide, fenetrePatterns 4 → 3.
+    //
+    // Ce correctif balaie TOUS les trimestres (du plus récent au plus ancien,
+    // par dateCreation) et adopte, pour chaque champ resté à sa valeur PAR
+    // DÉFAUT, la première valeur trouvée qui en diffère. LECTURE SEULE des clés
+    // de trimestre — aucune purge : c'est l'asymétrie lecture/purge qui a fait
+    // #419, on ne la recrée pas dans le correctif de son propre dégât.
+    //
+    // ONE-SHOT (drapeau propre) : sans drapeau, un utilisateur qui REMET un
+    // champ à son défaut (vider la grille de référence, par exemple) le verrait
+    // se re-remplir à chaque démarrage depuis un vieux trimestre.
+    const CLE_FLAG_ENRICHISSEMENT = 'migrationPrefs_v3_enrichie_trimestres';
+
+    function enrichirPrefsV3DepuisTrimestres() {
+        const rapport = { effectuee: false, champsRecuperes: 0, erreurs: [] };
+        try {
+            if (db.getSync(CLE_FLAG_ENRICHISSEMENT, false) === true) return rapport;
+
+            const champs = MIGRATION_MAP.filter(m => m.source === 'modalitesEvaluation');
+            const trimestres = db.getSync('trimestres', []) || [];
+            const tries = Array.isArray(trimestres)
+                ? trimestres.slice().sort(function(a, b) {
+                    return String((b && b.dateCreation) || '').localeCompare(String((a && a.dateCreation) || ''));
+                })
+                : [];
+
+            const prefs = lireStockage();
+            let modifie = false;
+
+            champs.forEach(function(entree) {
+                const courante = entree.cible in prefs ? prefs[entree.cible] : undefined;
+                const estDefaut = courante === undefined || courante === DEFAUTS[entree.cible];
+                if (!estDefaut) return; // valeur posée (migration ou main) : intouchable
+
+                for (let i = 0; i < tries.length; i++) {
+                    const t = tries[i];
+                    if (!t || !t.id) continue;
+                    const mod = safeGet(t.id + '_modalitesEvaluation');
+                    if (entree.champ in mod && mod[entree.champ] !== undefined &&
+                        mod[entree.champ] !== DEFAUTS[entree.cible]) {
+                        prefs[entree.cible] = mod[entree.champ];
+                        rapport.champsRecuperes++;
+                        modifie = true;
+                        break;
+                    }
+                }
+            });
+
+            if (modifie) {
+                ecrireStockage(prefs);
+                console.warn('[preferences] Enrichissement V3 depuis les trimestres :', rapport.champsRecuperes, 'champ(s) récupéré(s)');
+            }
+            db.setSync(CLE_FLAG_ENRICHISSEMENT, true);
+            rapport.effectuee = true;
+        } catch (e) {
+            rapport.erreurs.push(e.message);
+            console.error('[preferences] Erreur pendant l\'enrichissement V3 :', e);
+        }
+        return rapport;
+    }
+
     /**
      * Supprime les emplacements legacy que la migration a absorbés :
      *   - les 5 champs de modalitesEvaluation qui sont devenus des préférences ;
@@ -477,6 +544,7 @@
     window.abonnerPreference = abonnerPreference;
     window.desabonnerPreference = desabonnerPreference;
     window.migrerPreferencesV3 = migrerPreferencesV3;
+    window.enrichirPrefsV3DepuisTrimestres = enrichirPrefsV3DepuisTrimestres;
     window.obtenirDefautsPreferences = obtenirDefauts;
     window.listerClesPreferencesConnues = listerClesConnues;
 
@@ -527,7 +595,12 @@
     // trous. Et si l'écriture V3 échoue, `nettoyerLegacy()` n'est pas atteint —
     // l'ordre est déjà fail-safe.
     function lancerMigrationAuDemarrage() {
-        window.auDbPret(migrerPreferencesV3);
+        window.auDbPret(function() {
+            migrerPreferencesV3();
+            // #429 : l'enrichissement vient APRÈS — il ne comble que ce que la
+            // migration a laissé au défaut, jamais ce qu'elle a posé.
+            enrichirPrefsV3DepuisTrimestres();
+        });
     }
 
     if (document.readyState === 'loading') {
