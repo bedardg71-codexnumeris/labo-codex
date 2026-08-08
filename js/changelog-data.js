@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.56',
+            couleur: 'vert',
+            titre: 'Alignement : l’enseignant entre dans la carte',
+            items: [
+                'Nouveau nœud « Exposé », en tête de la famille « Déroulement » (l’ancienne « Mise en action »). Il te donne enfin un bloc pour dire « j’enseigne » : ton temps de parole se pose dans la leçon, porte une durée, et compte dans le total — au même titre qu’une activité.',
+                'Correction : les cinq nœuds d’enseignement explicite (Ouverture, Modélisation, Pratique guidée, Pratique autonome, Clôture) ne pouvaient être reliés à AUCUNE connaissance ni à aucune évaluation — le lien était refusé. Ils avaient une couleur et une place, mais aucune relation. C’est réparé : « cette connaissance procédurale s’acquiert par cette modélisation » se trace maintenant, et le verbe s’écrit tout seul.',
+                'La famille « Mise en action » devient « Déroulement » : elle ne contient plus seulement ce que fait l’élève, mais tout ce qui occupe le temps de classe.'
+            ]
+        },
+        {
             version: '1.55',
             couleur: 'bleu',
             titre: 'Alignement : une seule vue, et des palettes qu’on range',

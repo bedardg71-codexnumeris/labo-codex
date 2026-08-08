@@ -164,7 +164,7 @@ function objectifEstDeplie(n) {
 // et evaluerBadge), plus l'évaluation qui peut cocher en direct. Restreindre au
 // seul type « activité » aurait créé une exception locale — une activité de
 // révision qui sert un objectif ne pourrait pas le déclarer.
-var TYPES_SERVANTS_OBJECTIF = ['activite', 'soutien', 'revision', 'evaluation',
+var TYPES_SERVANTS_OBJECTIF = ['expose', 'activite', 'soutien', 'revision', 'evaluation',
     'ouverture', 'modelisation', 'pratique-guidee', 'pratique-autonome', 'cloture'];
 
 /** La leçon qui contient ce nœud, ou null s'il est libre / ailleurs. */
@@ -766,7 +766,19 @@ const TYPES = {
     // Conteneurs
     'sequence':       { label: 'Séquence',          couleur: 'var(--planif-couleur-sequence)',  conteneur: true },
     'lecon':          { label: 'Leçon',             couleur: 'var(--planif-couleur-lecon)',     conteneur: true },
-    // Activités
+    // Déroulement — ce qui occupe le temps de classe, prof ET élève
+    // « Exposé » (8 août 2026, décision Grégoire) : il manquait un nœud pour
+    // dire « j'enseigne ». La famille était entièrement tournée vers l'ÉLÈVE
+    // qui agit (Activité, Soutien, Révision), et l'enseignant n'apparaissait
+    // que dans l'enseignement explicite — donc à l'intérieur d'UNE méthode.
+    // Qui ne la pratique pas n'avait aucun moyen de se mettre lui-même dans sa
+    // leçon, ni d'y compter son temps de parole.
+    // ⚠ Ce n'est PAS un substitut aux cinq nœuds d'EE, c'en est le complément :
+    // qui pratique la méthode pose une Ouverture et une Modélisation ; qui
+    // expose hors méthode pose un Exposé. (Réserve instruite puis écartée par
+    // Grégoire : non, l'enseignement du déclaratif ne se fait pas qu'en amorce
+    // de leçon — il a lieu à tout moment.)
+    'expose':         { label: 'Exposé',            couleur: 'var(--planif-couleur-expose)' },
     'activite':       { label: 'Activité',          couleur: 'var(--planif-couleur-activite)' },
     'soutien':        { label: 'Soutien',           couleur: 'var(--planif-couleur-soutien)' },
     'revision':       { label: 'Révision',          couleur: 'var(--planif-couleur-revision)' },
@@ -858,7 +870,7 @@ var TYPES_CONNAISSANCE = ['factuelle', 'conceptuelle', 'procedurale', 'metacogni
 // « Frère d'Activité » se définit ICI et nulle part ailleurs : tout site qui
 // énumérait le triplet en dur a été rabattu sur cette liste (7 août 2026) —
 // sans quoi chaque nouveau frère devait retrouver tous les triplets.
-var TYPES_ACTIVITE = ['activite', 'soutien', 'revision',
+var TYPES_ACTIVITE = ['expose', 'activite', 'soutien', 'revision',
     'ouverture', 'modelisation', 'pratique-guidee', 'pratique-autonome', 'cloture'];
 
 function normaliserType(type) {
@@ -898,7 +910,10 @@ var BANQUE_VERBES = {
 // (7 août 2026) : le niveau cognitif (Anderson & Krathwohl) qualifie une TÂCHE
 // d'apprentissage ; une étape de méthode (Ouverture, Clôture…) n'en a pas.
 // Ce n'est donc pas un « triplet en dur » à rabattre sur TYPES_ACTIVITE.
-var TYPES_AVEC_NIVEAU_COGNITIF = ['competence', 'idee-maitresse', 'activite', 'soutien', 'revision', 'evaluation'];
+// « expose » y entre (8 août) : un exposé vise un niveau cognitif comme une
+// activité — on n'expose pas pour mémoriser comme on expose pour analyser.
+// Il ne rejoint donc PAS les cinq étapes de méthode exclues juste au-dessus.
+var TYPES_AVEC_NIVEAU_COGNITIF = ['competence', 'idee-maitresse', 'expose', 'activite', 'soutien', 'revision', 'evaluation'];
 
 // === GUIDE INTÉGRÉ — 8 pages (7 pédagogiques + 1 technique import/export) ===
 var GUIDE_PAGES = [
@@ -1112,9 +1127,34 @@ function resoudreVerbe(sourceId, cibleId) {
     var cbl = etat.noeuds.get(cibleId);
     if (!src || !cbl) return null;
 
-    // 1. Chercher un verbe vertical (automatique)
-    var cle = src.type + '>' + cbl.type;
-    var match = VERBES_AUTO[cle];
+    // 1. Chercher un verbe vertical (automatique), sur les types BRUTS
+    var match = VERBES_AUTO[src.type + '>' + cbl.type];
+
+    // 1 bis. REPLI SUR LA FAMILLE (8 août 2026) — corrige #415.
+    //
+    // Les cinq nœuds d'enseignement explicite sont entrés le 7 août dans TYPES,
+    // TYPES_ACTIVITE, TYPES_SERVANTS_OBJECTIF et la palette — mais JAMAIS dans
+    // `VERBES_AUTO`. Ils y avaient zéro paire, et `VERBES_HORIZONTAUX` n'a pas
+    // de `connaissance>activite` : relier une connaissance à une Modélisation
+    // rendait donc null, c'est-à-dire le toast « Ce lien n'est pas possible ».
+    // Ces nœuds étaient décoratifs au sens strict — une couleur, une durée, une
+    // place dans la leçon, et aucune relation.
+    //
+    // Le correctif n'est pas d'écrire les ~50 paires manquantes à la main : ce
+    // serait de l'empilement, et il faudrait recommencer au type suivant. On
+    // rabat sur la FAMILLE, comme #415 avait rabattu les six triplets en dur
+    // sur TYPES_ACTIVITE. `conceptuelle>modelisation` retombe ainsi sur
+    // `conceptuelle>activite` (« s'acquiert par ») et `modelisation>evaluation`
+    // sur `activite>evaluation` (« se vérifie par »).
+    //
+    // ⚠ C'est un SECOURS, jamais un remplacement : la correspondance brute est
+    // consultée d'abord et gagne toujours. Un type de la famille qui mériterait
+    // un verbe à lui garde donc le sien.
+    if (!match) {
+        match = VERBES_AUTO[src.type + '>' + normaliserType(cbl.type)]
+             || VERBES_AUTO[normaliserType(src.type) + '>' + cbl.type];
+    }
+
     if (match) {
         if (match.inverser) {
             return { type: 'vertical', verbe: match.verbe, source: cibleId, cible: sourceId };
@@ -7583,6 +7623,16 @@ window.planificationCarte = {
     cheminSequence: cheminSequence,
     compterLeconsDescendantes: compterLeconsDescendantes,
     peutContenir: peutContenir,
+    // Exposés pour la sentinelle du graphe (8 août) : les invariants de LIEN et
+    // de DURÉE se vérifient en exerçant le module, jamais en lisant sa source.
+    resoudreVerbe: resoudreVerbe,
+    dureeRollupNoeud: dureeRollupNoeud,
+    // ⚠ Exposée pour UNE raison précise (8 août) : l'ordre « brut d'abord,
+    // famille en secours » n'est pas observable sur la table actuelle, où
+    // chaque paire brute porte le même verbe que son équivalent de famille.
+    // La sentinelle y injecte donc un verbe distinctif le temps d'un test.
+    // Le break-test l'a exigé : sans ça, inverser l'ordre passait inaperçu.
+    VERBES_AUTO: VERBES_AUTO,
     TYPES_ACTIVITE: TYPES_ACTIVITE,
     normaliserType: normaliserType,
     trouverConteneurParRecouvrement: trouverConteneurParRecouvrement,

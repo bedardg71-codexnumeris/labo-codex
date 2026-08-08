@@ -33,7 +33,7 @@
 |-----|---------------|
 | `planif-pouvoir-enseigner` | Cadre curriculaire : compétence ministérielle et idées maîtresses de ton cours. |
 | `planif-quoi-enseigner` | Quoi enseigner : types de connaissances (Anderson) — factuelle, conceptuelle, procédurale et métacognitive. |
-| `planif-comment-enseigner` | Comment enseigner : dispositifs d'enseignement, activités de soutien et occasions de révision. |
+| `planif-comment-enseigner` | Comment enseigner : exposés, activités, soutien et occasions de révision — tout ce qui occupe le temps de classe, le tien comme celui de tes élèves. |
 | `planif-structure` | Quand enseigner : organisation temporelle en séquences (semaines) et leçons (séances). |
 | `planif-design-apprentissages` | Productions et évaluations : lie les objectifs aux moyens de vérifier l'apprentissage pour compléter l'alignement. |
 
