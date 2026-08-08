@@ -13,11 +13,10 @@
 > idéalement sa source et sa date de vérification, pour éviter de propager un état périmé.
 >
 > **Dernière mise à jour** : 8 août 2026 (Claude Code) — bêta publique **1.60.0** / build `0808-1836`.
-> Point sur le répertoire `plans de travail/` au **§4bis**. Les sections 0-4 et 5-11 datent du 28 juin
-> et n'ont **pas** été revues depuis : les lire avec cette réserve.
-> *(Repère précédent : 28 juin 2026 (Cowork) — bêta publique 1.26.0 / build `0628-2126`.)*
-> `origin/main` `72478557` (à jour) ; PR #74 (batch mi-août #346/#350/#362/#342) et #72 (untrack
-> node_modules) **mergées** ; docs d'entrée dé-hardcodés. Dépôt **privatisé le 23 juin 2026**.
+> Repère à jour au **§0** ; point sur le répertoire `plans de travail/` au **§4bis**.
+> Les sections **1 à 11** datent du 28 juin et n'ont **pas** été revues : les lire avec cette réserve.
+> *(Repère précédent : 28 juin 2026 (Cowork) — 1.26.0 / build `0628-2126`, `origin/main` `72478557`,
+> PR #74 et #72 mergées. Dépôt **privatisé le 23 juin 2026**.)*
 
 ---
 
@@ -33,7 +32,52 @@
 
 ---
 
-## 0. Repère rapide (28 juin 2026)
+## 0. Repère rapide (8 août 2026)
+
+> Ce repère REMPLACE celui du 28 juin (conservé juste en dessous comme trace).
+> ⚠ Les sections **1 à 11** datent toujours du 28 juin et n'ont **pas** été
+> revues : les lire avec cette réserve, sauf §4bis (8 août).
+
+- **Version** : **1.60.0** (build `0808-1836`). `origin/main` = `858e126a`.
+  Vitest **1960/1960** (227 fichiers). Arbre propre, aucun travail en avance.
+- **Semaine du 6-8 août — ce qui a été livré** : le **portage des exports**
+  vers la Carte d'alignement (#424, lots A→G : générateur unique 3 niveaux ×
+  3 formats, rétroaction formative dans l'Inspecteur, **page « Plan de la
+  leçon » supprimée**) · l'**export personnalisé** (#431, cases + ordre +
+  aperçu vivant, modale) · l'**harmonisation des guides** (#432, une seule
+  échelle typographique pour les deux familles) · la **corbeille de la
+  palette** (#433, supprimer au doigt) · les correctifs #152, #414-#419, #429,
+  et le canevas passé en Pointer Events (#148, iPad).
+- **Ce qui reste dû, et qui n'est pas du code** : les **portes terrain** de
+  1.57 → 1.60 chez Grégoire (dont l'iPad), jamais passées. Elles sont la
+  condition de confiance de tout ce qui précède.
+- **Horizon courant** : la **cohorte CoP** — Rencontre 1 « Outiller son
+  regard » **mi à fin septembre**, à communiquer **4 semaines à l'avance**
+  (donc date à arrêter maintenant). Référence : `docs/CALENDRIER.md` §6.
+- **Décision de calendrier (8 août)** : #427 (refermer l'accès public par
+  Cloudflare Access) **reporté du ~20 août à septembre**. Effet favorable :
+  le geste quitte la semaine de rentrée, que `DEPLOY.md` désigne justement
+  comme le pire moment (bande passante mentale des enseignants).
+
+### ⚠ Tension à regarder en face
+
+Le calendrier d'août (`docs/CALENDRIER.md` §6) prévoit **pilote Voûte +
+outil de modération + tests cross-browser + matériel Rencontre 1**, et il
+reste trois semaines. Relevé au code : la Voûte a `signature.js`,
+`trust-tofu.js` et six `partage-*.js`, mais **`gestion-cles.js` et
+`trust-wot.js` n'existent pas** ; l'outil de modération non plus. Par
+ailleurs **#353 chiffre le budget localStorage à 173 %** (8882 Ko / 5120 Ko,
+456 clés) — une cohorte qui produit des données réelles arrive sur une
+saturation déjà constatée.
+
+⮕ Ordre proposé (non tranché par Grégoire) : **1.** date de R1 + son matériel
+(seuls vrais irréversibles — une date ne se rattrape pas) ; **2.** #353
+(risque de données pendant la cohorte) ; **3.** le pilote Voûte se décale
+s'il le faut — il sert la Rencontre 5, pas la 1.
+
+---
+
+## 0bis. Repère précédent (28 juin 2026)
 
 État sain, dépôt très actif. Repères pour se situer en un coup d'œil :
 
@@ -168,11 +212,34 @@ validation #367, reprise août, brouillon Session B #303, carrousel de
 séquences, refonte import/export de janvier). Le détail et les **preuves
 relevées au code** sont dans `plans de travail/_archives/README.md`.
 
-⚠ **Ce qui reste à faire** : les **76 plans cités** dans BACKLOG/SESSION n'ont
-**pas** été audités un par un. Être cité prouve qu'un plan a été *ouvert*, pas
-qu'il est *terminé* — un second passage les trierait. Les plans du 6-8 août
-sont volontairement restés en place : livrés, mais leurs **portes terrain** ne
-sont pas encore passées chez Grégoire.
+### Second passage — les 76 plans cités (même jour, en soirée)
+
+Ce qui a tranché le tri : **un document de passation cadre UNE session, qui a
+eu lieu**. Relais, consignes d'audit et protocoles citent des items encore
+ouverts parce qu'ils listent des SUITES — pas parce qu'ils restent à faire.
+
+**12 documents archivés de plus** : 2 périmés vérifiés (`PLAN-ORGANISATEUR-LAYOUT`
+— la page est supprimée ; `PLAN_chrome_unifie` — livré le 24 mai alors qu'il
+portait encore « à exécuter ») et 10 documents de passation consommés (5 relais,
+le protocole #358 exécuté le 28 juin, 2 consignes d'audit versées en #379-#393
+et #394-#402, la consigne de correctifs livrée en 1.31.14→22, le plan du
+planificateur en grille). Les 5 fichiers qui les référençaient ont été
+**recâblés** — aucun lien mort.
+
+**Bilan du répertoire** : 91 documents au départ → **69 à la racine, 24 en
+archives**.
+
+**Laissés en place par jugement** (nommés dans `_archives/README.md`) : le
+**dossier #307** — sept documents de spec et de conception pour un chantier
+jamais fait, c'est de la matière vivante ; les plans du 6-8 août (portes
+terrain ouvertes) ; les protocoles encore à dérouler ;
+`RELAIS-326-refonte-banc-decision`, désigné **source unique** par un skill ; et
+quatre documents dont les items (#336, #283, #297) sont ouverts.
+
+⚠ **Limite de la méthode** : ce tri classe par **nature** et par **état des
+items cités**, pas par lecture intégrale. Les seize documents laissés sont
+précisément ceux dont le statut demandait un jugement — ils sont nommés, donc
+contestables un par un.
 
 ---
 
@@ -365,3 +432,4 @@ Synthèse :
 | 2026-06-10 | 0610-0512 | Rattrapage de 10 jours (124 commits, 1.0.0 → 1.6.1). Lancement public fait. #303 clos, #307/#318/#319/#320/#327 livrés, #300 clos. Tests 436 verts. Audit SSOT `modalitesEvaluation` livré (plan 4 lots). |
 | 2026-06-28 | 0628-2126 | **Rafraîchissement Cowork** (1.6.1 → 1.26.0, ~20 releases). Ajout §0 repère rapide + §10 bis. LIVRÉS : Voûte avant-pilote (1.11.0), comparateur réactivé (#326, 1.26.0), namespacing par trimestre + migration live (#358, 1.25.0), durabilité IDB (#353, 1.24.2), doublons (#360, 1.24.0), « fin de #328 » (1.22.0, **à recouper** — case BACKLOG ouverte). EN COURS : palier 1 mi-août (#362 fix `f9c824af`). Horizon **mi-août** cadré (`PLAN-mi-aout-2026.md`). Privatisation du dépôt (23 juin) → CodeQL/branch-protection suspendus. Contexte : passage Max 20x → Pro + congé juillet, reprise 1er août. Tests **1179** Vitest + 68 Playwright (Vitest recoupé 28 juin). État vérifié au code/git. |
 | 2026-06-28 (nuit, Claude Code) | 0628-2126 | Merge de PR #74 (batch mi-août #346/#350/#362/#342) et #72 (untrack symlinks `node_modules`) sur `main`. Dé-hardcodage des docs d'entrée (CLAUDE.md / 00-START-HERE / README → pointent `version.json`/`ETAT-PROJET.md`). Correction des lignes périmées de ce document (1142→1179, en-tête « non poussé »). Réorg `Rapports/audit-developpement/`. Outils #362/#342 prêts (dry-run/audit, revue adverse), run live reporté à une séance de jour sur backup. |
+| 2026-08-08 (soir, Claude Code) | 0808-1836 | **Rafraîchissement 1.26.0 → 1.60.0** (34 releases). Nouveau §0 (repère du 8 août : semaine du portage des exports #424, export personnalisé #431, guides harmonisés #432, corbeille #433 ; portes terrain dues ; **tension du calendrier d'août** face à la Rencontre 1 de la CoP) ; ancien §0 conservé en §0bis. Nouveau **§4bis** : audit complet du répertoire `plans de travail/` (91 documents → 69 + 24 archivés), deux passages, méthode et limites déclarées. #427 reporté à septembre. ⚠ **Sections 1 à 11 NON revues** — elles datent du 28 juin. |
