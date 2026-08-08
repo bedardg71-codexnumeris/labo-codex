@@ -354,7 +354,7 @@ describe('F1 · invariants de rendu et de routage', () => {
     });
 
     it('les boutons n’enclenchent pas le déplacement du bloc', () => {
-        expect(source).toMatch(/btn\.addEventListener\('mousedown'[\s\S]{0,160}stopPropagation/);
+        expect(source).toMatch(/btn\.addEventListener\('pointerdown'[\s\S]{0,160}stopPropagation/);
     });
 
     it('la ligne d’accueil porte AUSSI ses commandes + et −', () => {
@@ -423,8 +423,10 @@ describe('F1 · invariants de rendu et de routage', () => {
     });
 
     it('le badge n’enclenche pas le déplacement du bloc', () => {
-        // Le mousedown du bloc démarre le drag : le badge doit l'intercepter.
-        expect(source).toMatch(/badgeObjectif\.addEventListener\('mousedown'[\s\S]{0,120}stopPropagation/);
+        // Le pointerdown du bloc démarre le drag (#148 — le canevas est passé
+        // en Pointer Events, une garde mousedown ne stopperait plus rien) :
+        // le badge doit intercepter le MÊME événement que l'entrée écoute.
+        expect(source).toMatch(/badgeObjectif\.addEventListener\('pointerdown'[\s\S]{0,120}stopPropagation/);
     });
 });
 

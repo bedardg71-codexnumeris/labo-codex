@@ -2764,6 +2764,7 @@ function supprimerLien(lienId) {
 
 // === LIENS ===
 function demarrerLien(noeudId, direction, e) {
+    var pid = e ? e.pointerId : undefined;
     etat.lienEnCours = { noeudSourceId: noeudId, portDirection: direction };
     const pos = getPortPosition(noeudId, direction);
     lienTemp.setAttribute('x1', pos.x);
@@ -2779,9 +2780,11 @@ function demarrerLien(noeudId, direction, e) {
     }
 
     function onUp(e2) {
+        if (pid !== undefined && e2.pointerId !== pid) return;
         lienTemp.style.display = 'none';
-        document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', onUp);
+        document.removeEventListener('pointermove', onMove);
+        document.removeEventListener('pointerup', onUp);
+        document.removeEventListener('pointercancel', onUp);
 
         var elSous = document.elementFromPoint(e2.clientX, e2.clientY);
         var noeudCibleEl = elSous ? elSous.closest('.planif-noeud') : null;
@@ -2791,8 +2794,9 @@ function demarrerLien(noeudId, direction, e) {
         etat.lienEnCours = null;
     }
 
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup', onUp);
+    document.addEventListener('pointercancel', onUp);
 }
 
 function creerLien(sourceId, cibleId, typeLien) {
@@ -2927,7 +2931,8 @@ function creerPoigneeLien(x, y, lienId, extremite) {
     cercle.setAttribute('data-lien', lienId);
     cercle.setAttribute('data-extremite', extremite);
 
-    cercle.addEventListener('mousedown', function(e) {
+    cercle.addEventListener('pointerdown', function(e) {
+        if (!e.isPrimary || e.button > 0) return;
         e.stopPropagation();
         e.preventDefault();
         demarrerReconnexion(lienId, extremite, e);
@@ -2937,6 +2942,7 @@ function creerPoigneeLien(x, y, lienId, extremite) {
 }
 
 function demarrerReconnexion(lienId, extremite, e) {
+    var pid = e ? e.pointerId : undefined;
     var lien = etat.liens.get(lienId);
     if (!lien) return;
 
@@ -2959,9 +2965,11 @@ function demarrerReconnexion(lienId, extremite, e) {
     }
 
     function onUp(e2) {
+        if (pid !== undefined && e2.pointerId !== pid) return;
         lienTemp.style.display = 'none';
-        document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', onUp);
+        document.removeEventListener('pointermove', onMove);
+        document.removeEventListener('pointerup', onUp);
+        document.removeEventListener('pointercancel', onUp);
 
         var elSous = document.elementFromPoint(e2.clientX, e2.clientY);
         var noeudCibleEl = elSous && elSous.closest ? elSous.closest('.planif-noeud') : null;
@@ -2980,8 +2988,9 @@ function demarrerReconnexion(lienId, extremite, e) {
         }
     }
 
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup', onUp);
+    document.addEventListener('pointercancel', onUp);
 }
 
 function mettreAJourLiens(noeudId) {
@@ -4067,9 +4076,16 @@ function attacherEvenements(el, donnees) {
     var config = TYPES[donnees.type];
     var estConteneur = config && config.conteneur === true;
 
-    el.addEventListener('mousedown', function(e) {
+    // #148 (8 août 2026) — Pointer Events : souris, doigt (iPad) et Pencil.
+    // Même conversion que #144 (palettes, 11 juin) : le canevas était resté
+    // souris-seulement — sur iPad AUCUN nœud ne se déplaçait. Nécessite
+    // touch-action:none sur .planif-noeud (styles.css), sinon Safari cède le
+    // geste au défilement natif et envoie pointercancel.
+    el.addEventListener('pointerdown', function(e) {
         if (e.target.classList.contains('planif-noeud-port') || e.target.isContentEditable) return;
+        if (!e.isPrimary || e.button > 0) return;
         e.preventDefault();
+        var pid = e.pointerId;
 
         if (e.metaKey || e.ctrlKey) {
             toggleMultiSelection(id);
@@ -4095,9 +4111,11 @@ function attacherEvenements(el, donnees) {
                         cloneEl.style.left = clone.x + 'px';
                         cloneEl.style.top = clone.y + 'px';
                     }
-                    cloneEl.dispatchEvent(new MouseEvent('mousedown', {
+                    cloneEl.dispatchEvent(new PointerEvent('pointerdown', {
                         bubbles: true, cancelable: true,
-                        clientX: e.clientX, clientY: e.clientY, button: 0
+                        clientX: e.clientX, clientY: e.clientY, button: 0,
+                        pointerId: e.pointerId, isPrimary: true,
+                        pointerType: e.pointerType || 'mouse'
                     }));
                 }
                 return;
@@ -4130,6 +4148,7 @@ function attacherEvenements(el, donnees) {
             el.classList.add('planif-dragging');
 
             function onMoveGroupe(e2) {
+                if (e2.pointerId !== pid) return;
                 var dx2 = (e2.clientX - startMouseX) / etat.zoom;
                 var dy2 = (e2.clientY - startMouseY) / etat.zoom;
 
@@ -4149,16 +4168,19 @@ function attacherEvenements(el, donnees) {
                 }
             }
 
-            function onUpGroupe() {
+            function onUpGroupe(e2) {
+                if (e2 && e2.pointerId !== pid) return;
                 el.classList.remove('planif-dragging');
-                document.removeEventListener('mousemove', onMoveGroupeThrottled);
-                document.removeEventListener('mouseup', onUpGroupe);
+                document.removeEventListener('pointermove', onMoveGroupeThrottled);
+                document.removeEventListener('pointerup', onUpGroupe);
+                document.removeEventListener('pointercancel', onUpGroupe);
                 sauvegarder();
             }
 
             var onMoveGroupeThrottled = throttleRAF(onMoveGroupe);
-            document.addEventListener('mousemove', onMoveGroupeThrottled);
-            document.addEventListener('mouseup', onUpGroupe);
+            document.addEventListener('pointermove', onMoveGroupeThrottled);
+            document.addEventListener('pointerup', onUpGroupe);
+            document.addEventListener('pointercancel', onUpGroupe);
             return;
         }
 
@@ -4186,6 +4208,7 @@ function attacherEvenements(el, donnees) {
             var survolConteneurB = null;
 
             function onMoveB(e2) {
+                if (e2.pointerId !== pid) return;
                 donnees.x = startDataX + (e2.clientX - startMouseX2) / etat.zoom;
                 donnees.y = startDataY + (e2.clientY - startMouseY2) / etat.zoom;
                 el.style.left = donnees.x + 'px';
@@ -4224,9 +4247,11 @@ function attacherEvenements(el, donnees) {
             }
 
             function onUpB(e2) {
+                if (e2 && e2.pointerId !== pid) return;
                 el.classList.remove('planif-dragging');
-                document.removeEventListener('mousemove', onMoveBThrottled);
-                document.removeEventListener('mouseup', onUpB);
+                document.removeEventListener('pointermove', onMoveBThrottled);
+                document.removeEventListener('pointerup', onUpB);
+                document.removeEventListener('pointercancel', onUpB);
                 document.querySelectorAll('.planif-noeud-zone.planif-survol').forEach(function(z) { z.classList.remove('planif-survol'); });
                 document.querySelectorAll('.planif-conteneur-survol').forEach(function(c) { c.classList.remove('planif-conteneur-survol'); });
 
@@ -4272,8 +4297,9 @@ function attacherEvenements(el, donnees) {
             }
 
             var onMoveBThrottled = throttleRAF(onMoveB);
-            document.addEventListener('mousemove', onMoveBThrottled);
-            document.addEventListener('mouseup', onUpB);
+            document.addEventListener('pointermove', onMoveBThrottled);
+            document.addEventListener('pointerup', onUpB);
+            document.addEventListener('pointercancel', onUpB);
             return;
         }
 
@@ -4291,6 +4317,7 @@ function attacherEvenements(el, donnees) {
             var survolConteneur = null;
 
             function onMoveC(e2) {
+                if (e2.pointerId !== pid) return;
                 donnees.x = startDataX + (e2.clientX - startMouseX2) / etat.zoom;
                 donnees.y = startDataY + (e2.clientY - startMouseY2) / etat.zoom;
                 el.style.left = donnees.x + 'px';
@@ -4331,10 +4358,12 @@ function attacherEvenements(el, donnees) {
                 }
             }
 
-            function onUpC() {
+            function onUpC(e2) {
+                if (e2 && e2.pointerId !== pid) return;
                 el.classList.remove('planif-dragging');
-                document.removeEventListener('mousemove', onMoveCThrottled);
-                document.removeEventListener('mouseup', onUpC);
+                document.removeEventListener('pointermove', onMoveCThrottled);
+                document.removeEventListener('pointerup', onUpC);
+                document.removeEventListener('pointercancel', onUpC);
 
                 document.querySelectorAll('.planif-noeud-zone.planif-survol').forEach(function(z) { z.classList.remove('planif-survol'); });
                 document.querySelectorAll('.planif-conteneur-survol').forEach(function(c) { c.classList.remove('planif-conteneur-survol'); });
@@ -4359,8 +4388,9 @@ function attacherEvenements(el, donnees) {
             }
 
             var onMoveCThrottled = throttleRAF(onMoveC);
-            document.addEventListener('mousemove', onMoveCThrottled);
-            document.addEventListener('mouseup', onUpC);
+            document.addEventListener('pointermove', onMoveCThrottled);
+            document.addEventListener('pointerup', onUpC);
+            document.addEventListener('pointercancel', onUpC);
             return;
         }
 
@@ -4369,6 +4399,7 @@ function attacherEvenements(el, donnees) {
         var survolConteneurD = null;
 
         function onMoveD(e2) {
+            if (e2.pointerId !== pid) return;
             donnees.x = startDataX + (e2.clientX - startMouseX2) / etat.zoom;
             donnees.y = startDataY + (e2.clientY - startMouseY2) / etat.zoom;
             el.style.left = donnees.x + 'px';
@@ -4393,10 +4424,12 @@ function attacherEvenements(el, donnees) {
             }
         }
 
-        function onUpD() {
+        function onUpD(e2) {
+            if (e2 && e2.pointerId !== pid) return;
             el.classList.remove('planif-dragging');
-            document.removeEventListener('mousemove', onMoveDThrottled);
-            document.removeEventListener('mouseup', onUpD);
+            document.removeEventListener('pointermove', onMoveDThrottled);
+            document.removeEventListener('pointerup', onUpD);
+            document.removeEventListener('pointercancel', onUpD);
 
             document.querySelectorAll('.planif-noeud-zone.planif-survol').forEach(function(z) { z.classList.remove('planif-survol'); });
             document.querySelectorAll('.planif-conteneur-survol').forEach(function(c) { c.classList.remove('planif-conteneur-survol'); });
@@ -4418,8 +4451,9 @@ function attacherEvenements(el, donnees) {
         }
 
         var onMoveDThrottled = throttleRAF(onMoveD);
-        document.addEventListener('mousemove', onMoveDThrottled);
-        document.addEventListener('mouseup', onUpD);
+        document.addEventListener('pointermove', onMoveDThrottled);
+        document.addEventListener('pointerup', onUpD);
+        document.addEventListener('pointercancel', onUpD);
     });
 
     // Double-clic: mode individuel pour enfants, panneau pour le reste
@@ -4453,9 +4487,9 @@ function attacherEvenements(el, donnees) {
     // === OBJECTIF DE LEÇON (bascule + saisie) ===
     var badgeObjectif = el.querySelector('.planif-badge-objectif');
     if (badgeObjectif) {
-        // Le mousedown du bloc démarre le déplacement : on l'intercepte AVANT
-        // qu'il ne remonte (les ports font de même).
-        badgeObjectif.addEventListener('mousedown', function(e) {
+        // Le pointerdown du bloc démarre le déplacement (#148) : on
+        // l'intercepte AVANT qu'il ne remonte (les ports font de même).
+        badgeObjectif.addEventListener('pointerdown', function(e) {
             e.stopPropagation();
             e.preventDefault();
         });
@@ -4577,8 +4611,8 @@ function attacherEvenements(el, donnees) {
         // voient pas. Même travers que l'ancien badge 🎯 — une commande
         // invisible n'existe pas pour qui ne la connaît pas déjà.
         zoneObjectifs.querySelectorAll('.planif-obj-btn').forEach(function(btn) {
-            btn.addEventListener('mousedown', function(e) {
-                // Sans quoi le mousedown du bloc démarrerait un déplacement.
+            btn.addEventListener('pointerdown', function(e) {
+                // Sans quoi le pointerdown du bloc démarrerait un déplacement.
                 e.stopPropagation();
                 e.preventDefault();
             });
@@ -4620,7 +4654,8 @@ function attacherEvenements(el, donnees) {
     }
 
     el.querySelectorAll('.planif-noeud-port').forEach(function(port) {
-        port.addEventListener('mousedown', function(e) {
+        port.addEventListener('pointerdown', function(e) {
+            if (!e.isPrimary || e.button > 0) return;
             e.stopPropagation();
             e.preventDefault();
             demarrerLien(id, port.dataset.dir, e);
@@ -5858,9 +5893,11 @@ function initialiser() {
         // Drag panneau raccourcis
         var raccBarre = raccourcisPanel.querySelector('.planif-guide-barre');
         if (raccBarre) {
-            raccBarre.addEventListener('mousedown', function(e) {
+            raccBarre.addEventListener('pointerdown', function(e) {
                 if (e.target.closest('.planif-raccourcis-panel-fermer') || e.target.closest('.planif-raccourcis-panel-replier')) return;
+                if (!e.isPrimary || e.button > 0) return;
                 e.preventDefault();
+                var pid = e.pointerId;
                 var startX = e.clientX;
                 var startY = e.clientY;
                 var rect = raccourcisPanel.getBoundingClientRect();
@@ -5868,16 +5905,20 @@ function initialiser() {
                 var startLeft = rect.left - wrapperRect.left;
                 var startTop = rect.top - wrapperRect.top;
                 function onMove(e2) {
+                    if (e2.pointerId !== pid) return;
                     raccourcisPanel.style.left = (startLeft + e2.clientX - startX) + 'px';
                     raccourcisPanel.style.top = (startTop + e2.clientY - startY) + 'px';
                     raccourcisPanel.style.right = 'auto';
                 }
-                function onUp() {
-                    document.removeEventListener('mousemove', onMove);
-                    document.removeEventListener('mouseup', onUp);
+                function onUp(e2) {
+                    if (e2 && e2.pointerId !== pid) return;
+                    document.removeEventListener('pointermove', onMove);
+                    document.removeEventListener('pointerup', onUp);
+                    document.removeEventListener('pointercancel', onUp);
                 }
-                document.addEventListener('mousemove', onMove);
-                document.addEventListener('mouseup', onUp);
+                document.addEventListener('pointermove', onMove);
+                document.addEventListener('pointerup', onUp);
+                document.addEventListener('pointercancel', onUp);
             });
         }
     }
@@ -5917,9 +5958,11 @@ function initialiser() {
     // Drag panneau guide flottant — même pattern que la palette
     var guideBarre = guidePanel ? guidePanel.querySelector('.planif-guide-barre') : null;
     if (guideBarre) {
-        guideBarre.addEventListener('mousedown', function(e) {
+        guideBarre.addEventListener('pointerdown', function(e) {
             if (e.target.closest('.planif-guide-panel-fermer') || e.target.closest('.planif-guide-panel-replier')) return;
+            if (!e.isPrimary || e.button > 0) return;
             e.preventDefault();
+            var pid = e.pointerId;
             var startX = e.clientX;
             var startY = e.clientY;
             var rect = guidePanel.getBoundingClientRect();
@@ -5928,16 +5971,20 @@ function initialiser() {
             var startTop = rect.top - wrapperRect.top;
 
             function onMove(e2) {
+                if (e2.pointerId !== pid) return;
                 guidePanel.style.left = (startLeft + e2.clientX - startX) + 'px';
                 guidePanel.style.top = (startTop + e2.clientY - startY) + 'px';
                 guidePanel.style.right = 'auto';
             }
-            function onUp() {
-                document.removeEventListener('mousemove', onMove);
-                document.removeEventListener('mouseup', onUp);
+            function onUp(e2) {
+                if (e2 && e2.pointerId !== pid) return;
+                document.removeEventListener('pointermove', onMove);
+                document.removeEventListener('pointerup', onUp);
+                document.removeEventListener('pointercancel', onUp);
             }
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup', onUp);
+            document.addEventListener('pointermove', onMove);
+            document.addEventListener('pointerup', onUp);
+            document.addEventListener('pointercancel', onUp);
         });
     }
 
@@ -5945,7 +5992,7 @@ function initialiser() {
     var _zIndexPanneaux = 81;
     [raccourcisPanel, guidePanel].forEach(function(panel) {
         if (panel) {
-            panel.addEventListener('mousedown', function() {
+            panel.addEventListener('pointerdown', function() {
                 panel.style.zIndex = ++_zIndexPanneaux;
             });
         }
@@ -6025,8 +6072,14 @@ function initialiser() {
         paletteSurvolConteneur = null;
     });
 
-    // Sélection par rectangle (lasso)
-    espace.addEventListener('mousedown', function(e) {
+    // Sélection par rectangle (lasso) — SOURIS SEULEMENT, à dessein (#148) :
+    // au doigt, le même geste sur le fond doit rester le DÉFILEMENT natif du
+    // canevas (zoneTravail est un conteneur à scroll). Le lasso au toucher
+    // volerait la navigation ; Pointer Events quand même, pour que la garde
+    // soit une DÉCISION lisible (pointerType) et non un oubli d'API.
+    espace.addEventListener('pointerdown', function(e) {
+        if (e.pointerType !== 'mouse') return;
+        if (!e.isPrimary || e.button > 0) return;
         if (e.target.closest('.planif-noeud') || e.target.closest('.planif-lien-groupe') || e.target.closest('.planif-noeud-port')) return;
         if (e.target !== espace && e.target !== canvas && e.target.tagName !== 'svg'
             && e.target.id !== 'planif-couche-noeuds' && !e.target.closest('#planif-couche-svg-offset')) return;
@@ -6069,8 +6122,9 @@ function initialiser() {
         }
 
         function onUp(e2) {
-            document.removeEventListener('mousemove', onMoveThrottled);
-            document.removeEventListener('mouseup', onUp);
+            document.removeEventListener('pointermove', onMoveThrottled);
+            document.removeEventListener('pointerup', onUp);
+            document.removeEventListener('pointercancel', onUp);
             rectSelection.style.display = 'none';
 
             if (!moved) { deselectionner(); return; }
@@ -6108,8 +6162,9 @@ function initialiser() {
         }
 
         var onMoveThrottled = throttleRAF(onMove);
-        document.addEventListener('mousemove', onMoveThrottled);
-        document.addEventListener('mouseup', onUp);
+        document.addEventListener('pointermove', onMoveThrottled);
+        document.addEventListener('pointerup', onUp);
+        document.addEventListener('pointercancel', onUp);
     });
 
     // Événements multi-cartes
@@ -7221,6 +7276,18 @@ function initialiserDragGrille() {
                 rangee.classList.add('planif-grille-rangee--cible');
             }
         }
+    });
+
+    // #148 : sans pointercancel, un drag de pastille interrompu (Safari
+    // reprend le geste) laissait le style de drag collé et le défilement
+    // automatique en marche. Trouvé par la sentinelle, préexistant.
+    document.addEventListener('pointercancel', function() {
+        if (!drag) return;
+        var info = drag;
+        drag = null;
+        arreterDefilement();
+        nettoyerCible();
+        if (info.demarre) info.item.classList.remove('planif-grille-item-drag');
     });
 
     document.addEventListener('pointerup', function(e) {

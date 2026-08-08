@@ -32,7 +32,8 @@
                 'Cliquer une leçon dans le planificateur ne remplace plus la carte par une fiche en lecture seule : la carte se déplace jusqu’à l’élément et le sélectionne, pour que tu l’édites sur place au lieu de le relire.',
                 'La carte montre désormais TOUT, tout le temps. Ouvrir une séquence ne masque plus les autres, et les séquences ne se replient plus en pastille résumée. Le bouton « Vue globale » disparaît — il n’y a plus de vue à quitter pour y revenir.',
                 'Deux boutons dans la barre d’outils, « Nœuds » et « Planificateur », affichent ou masquent chaque palette. Ton choix est mémorisé d’une séance à l’autre.',
-                'Un objectif de leçon saisi dans l’ancienne fiche de lecture n’était plus jamais réaffiché : ces textes sont récupérés et remis dans les objectifs de la leçon, sans doublon.'
+                'Un objectif de leçon saisi dans l’ancienne fiche de lecture n’était plus jamais réaffiché : ces textes sont récupérés et remis dans les objectifs de la leçon, sans doublon.',
+                'Sur iPad, la carte répond enfin au doigt : déplacer un bloc, sortir une évaluation d’une leçon, tracer un lien — tout ce qui exigeait une souris. Le badge 🎯 d’une leçon sans objectif redevient repérable, et la semaine changée dans l’Inspecteur se reflète immédiatement sur le bloc.'
             ]
         },
         {

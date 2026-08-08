@@ -19341,6 +19341,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     stroke: var(--planif-couleur-lien);
     stroke-width: 2;
     cursor: grab;
+    touch-action: none; /* #148 : la reconnexion au doigt appartient à la poignée */
     pointer-events: all;
     opacity: 0;
     transition: opacity 0.15s;
@@ -19359,6 +19360,10 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 /* === NŒUDS === */
 .planif-noeud {
     position: absolute;
+    /* #148 : le glisser au doigt appartient au nœud (ports et badges compris —
+       touch-action s'évalue sur toute la chaîne d'ancêtres). Sans ça, Safari
+       cède le geste au défilement natif et envoie pointercancel. */
+    touch-action: none;
     min-width: 140px;
     max-width: 240px;
     border-radius: 10px;
@@ -19757,6 +19762,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     align-items: center;
     justify-content: space-between;
     padding: 6px 10px;
+    touch-action: none; /* #148 : drag au doigt (iPad), même motif que les palettes #144 */
     cursor: grab;
     border-bottom: 1px solid var(--planif-couleur-bordure);
     border-radius: 10px 10px 0 0;
