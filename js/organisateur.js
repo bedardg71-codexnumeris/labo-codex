@@ -1744,7 +1744,11 @@ window.organisateur = {
     // découpage des marqueurs `[Leçon | 2 pér. | Sem. 3]` est la logique la
     // plus facile à casser sans que rien ne le signale à l'écran.
     parserPlanMD: parserPlanMD,
-    ancrageLeconPourDates: ancrageLeconPourDates
+    ancrageLeconPourDates: ancrageLeconPourDates,
+    // ⚠ Exposé pour le HARNAIS DE PARITÉ du portage #424 (Lot C) : le nouveau
+    // générateur doit couvrir ce que l'export Markdown émettait. Meurt au
+    // Lot G avec la page.
+    genererExportMD: genererExportMD
 };
 
 })();

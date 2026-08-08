@@ -922,6 +922,18 @@ const TYPES = {
     'evaluation':     { label: 'Évaluation',        couleur: 'var(--planif-couleur-evaluation)' }
 };
 
+// Options de rétroaction — CONSTANTE UNIQUE (portage #424, 8 août 2026).
+// La liste vivait en dur à trois endroits (deux ici, un dans organisateur.js) :
+// le prochain ajout d'option se serait fait à deux endroits sur trois. Les
+// copies internes sont rabattues ici ; celle de l'Organisateur meurt avec la
+// page au Lot G. Exportée : le générateur d'export en résout les libellés.
+const RETROACTIONS = [
+    ['aucune', 'Aucune'],
+    ['orale', 'Orale'],
+    ['ecrite', 'Écrite'],
+    ['pairs', 'Par les pairs']
+];
+
 const TYPES_LIENS = [
     { id: 'se_decline_en',        label: 'se décline en' },
     { id: 'se_concretise_dans',   label: 'se concrétise dans' },
@@ -2147,7 +2159,7 @@ function ouvrirPanneau(id) {
     }
 
     if (donnees.type === 'evaluation') {
-        var retros = [['aucune', 'Aucune'], ['orale', 'Orale'], ['ecrite', 'Écrite'], ['pairs', 'Par les pairs']];
+        var retros = RETROACTIONS;
         var retVal = donnees.metadata.retroaction || 'aucune';
         var htmlRetro = '<label for="planif-panneau-retroaction">Rétroaction</label>' +
             '<select id="planif-panneau-retroaction">';
@@ -5112,7 +5124,7 @@ function afficherLeconOrganisateur() {
             h += '<div class="planif-org-activite-detail">';
             h += '<label>Rétroaction\u00a0:</label>';
             h += '<select class="planif-org-select-retro" data-activite="' + enf.id + '" data-lecon="' + leconId + '">';
-            var retros = [['aucune', 'Aucune'], ['orale', 'Orale'], ['ecrite', 'Écrite'], ['pairs', 'Par les pairs']];
+            var retros = RETROACTIONS;
             for (var r = 0; r < retros.length; r++) {
                 h += '<option value="' + retros[r][0] + '"' + (choixAct.retroaction === retros[r][0] ? ' selected' : '') + '>' + retros[r][1] + '</option>';
             }
@@ -7858,6 +7870,12 @@ window.planificationCarte = {
     // Le break-test l'a exigé : sans ça, inverser l'ordre passait inaperçu.
     VERBES_AUTO: VERBES_AUTO,
     TYPES_ACTIVITE: TYPES_ACTIVITE,
+    RETROACTIONS: RETROACTIONS,
+    // ⚠ Exposés pour le HARNAIS DE PARITÉ du portage #424 (Lot C) : le nouveau
+    // générateur doit couvrir tout ce que les anciens émettent, et le harnais
+    // les appelle pour le prouver. Ils MEURENT au Lot G, exports compris.
+    genererPlanTexte: genererPlanTexte,
+    genererPlanTSV: genererPlanTSV,
     normaliserType: normaliserType,
     trouverConteneurParRecouvrement: trouverConteneurParRecouvrement,
     recentrerVue: recentrerVue,
