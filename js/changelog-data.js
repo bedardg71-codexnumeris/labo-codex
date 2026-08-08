@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            version: '1.59',
+            couleur: 'bleu',
+            titre: 'Les guides se ressemblent enfin',
+            items: [
+                'Tous les guides — celui de la carte d’alignement comme les guides SOLO, ACP, RàI, sommative et modalités — partagent désormais la même présentation : une seule taille de texte, les mêmes encadrés, la même mise en page.',
+                'Correction : dans le guide de la carte, certains paragraphes s’affichaient beaucoup plus gros que les listes, et le texte du guide était trop petit pour être lu confortablement.',
+                'Correction : les pictogrammes de badge (✓, !, ⚠) n’apparaissaient pas dans le guide — ils sont maintenant affichés en toutes lettres.',
+                'La dernière page du guide décrit le nouvel export du plan (menu Actions, trois niveaux, personnalisation) au lieu de l’ancienne page « Plan de la leçon » qui n’existe plus.',
+                'La page sur les activités mentionne maintenant l’Exposé et les cinq étapes de l’enseignement explicite.'
+            ]
+        },
+        {
             version: '1.58',
             couleur: 'vert',
             titre: 'L’export du plan se règle à ta façon',

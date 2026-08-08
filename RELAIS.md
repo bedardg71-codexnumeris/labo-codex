@@ -12,7 +12,7 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | `main` |
-| **Version** | **1.58.0** — build `0808-1538` |
+| **Version** | **1.59.0** — build `0808-1706` |
 | **Travail en avance sur `main`** | **aucun** |
 | **Dernière mise à jour** | 8 août 2026, en après-midi (portage #424 livré) |
 
