@@ -1,6 +1,6 @@
 # Audit PERFORMANCE + LOGIQUE — 5 août 2026 (soir)
 
-> **Mandat** : `plans de travail/AUDIT-PERF-LOGIQUE-consigne.md` (Grégoire, 5 août fin de journée).
+> **Mandat** : `plans de travail/_archives/AUDIT-PERF-LOGIQUE-consigne.md` (Grégoire, 5 août fin de journée).
 > **Session** : Claude Code cloud, branche `claude/audit-perf-logique-6i4qol`, lecture seule stricte
 > (aucun correctif code, aucune exception). Base auditée : `main` 1.31.13 (`0889c063`), Vitest 1354/1354
 > vérifié en début et fin de session. Skills chargés : vérification adverse, pratiques de notation, labo codex.
