@@ -470,6 +470,102 @@ document.addEventListener('DOMContentLoaded', function () {
             console.warn('[purge archive pre367] erreur ignorée:', e);
         }
 
+        // #424 Lot F (8 août 2026) — MOISSONNEUSE des rattachements d'activités.
+        // La page « Plan de la leçon » écrivait {retroaction, productionId}
+        // dans planification_seances[<carte>::<lecon>].activites[<actId>] — un
+        // porteur PARALLÈLE au nœud. Depuis le portage #424, la vérité vit sur
+        // le nœud : metadata.retroaction de l'ACTIVITÉ (formative, Lot E),
+        // metadata.productionId de l'ÉVALUATION (Inspecteur). La moisson porte
+        // les valeurs vers le nœud puis retire le sous-objet — TOUS les
+        // trimestres (leçon #429), par les clés namespacées composites (leçon
+        // #419 : on moissonne par le chemin par lequel on lit).
+        // SANS DRAPEAU, patron #409/#428 : un backup Codex d'avant le portage
+        // réintroduirait `activites` à l'import ; une moisson à drapeau ne
+        // repasserait jamais. Idempotente : le nœud est PRIORITAIRE, une
+        // valeur déjà posée n'est jamais écrasée.
+        // ⚠ Ne rien inventer : ce qui ne se résout pas (carte disparue, nœud
+        // absent, production sans évaluation unique libre dans la leçon) est
+        // CONSIGNÉ en console et LAISSÉ EN PLACE — une entrée n'est retirée
+        // que moissonnée.
+        // ⮕ À RETIRER quand les backups d'avant le portage seront hors
+        //    rotation — au plus tard à la rentrée (septembre 2026). BACKLOG #430.
+        try {
+            const listeTrimMoisson = db.getSync('trimestres', []);
+            (Array.isArray(listeTrimMoisson) ? listeTrimMoisson : []).forEach(t => {
+                if (!t || !t.id) return;
+                const cleSeancesT = `${t.id}_planification_seances`;
+                const seancesT = db.getSync(cleSeancesT, null);
+                if (!seancesT || typeof seancesT !== 'object') return;
+
+                const mindmap = db.getSync(`${t.id}_planification_mindmap`, null);
+                let seancesModifiees = false;
+                let mindmapModifiee = false;
+
+                Object.keys(seancesT).forEach(cleComposite => {
+                    const entree = seancesT[cleComposite];
+                    if (!entree || typeof entree !== 'object' || !entree.activites) return;
+                    const morceaux = cleComposite.split('::');
+                    const carte = mindmap && mindmap.cartes && mindmap.cartes[morceaux[0]];
+                    if (!carte || !Array.isArray(carte.noeuds)) {
+                        console.warn('[moisson #424] ' + t.id + '/' + cleComposite + ' : carte introuvable, rattachements laissés en place');
+                        return;
+                    }
+                    const leconId = morceaux[1];
+                    const activites = entree.activites;
+
+                    Object.keys(activites).forEach(actId => {
+                        const choix = activites[actId] || {};
+                        const noeudAct = carte.noeuds.find(n => n && n.id === actId);
+                        if (!noeudAct) {
+                            console.warn('[moisson #424] ' + t.id + '/' + cleComposite + ' : nœud ' + actId + ' introuvable, rattachement laissé en place');
+                            return;
+                        }
+
+                        // productionId posé sur une ACTIVITÉ (0 au relevé D1 —
+                        // cas backup ancien) : sa destination est le nœud
+                        // ÉVALUATION de la MÊME leçon, s'il est UNIQUE et
+                        // encore libre. Sinon : ne rien inventer.
+                        if (choix.productionId) {
+                            const lecon = carte.noeuds.find(n => n && n.id === leconId);
+                            const evals = ((lecon && lecon.enfants) || [])
+                                .map(eid => carte.noeuds.find(n => n && n.id === eid))
+                                .filter(n => n && n.type === 'evaluation');
+                            const cibleLibre = evals.length === 1 && !(evals[0].metadata && evals[0].metadata.productionId);
+                            if (!cibleLibre) {
+                                console.warn('[moisson #424] ' + t.id + '/' + cleComposite + '/' + actId + ' : production ' + choix.productionId + ' sans évaluation unique libre, rattachement laissé en place');
+                                return; // l'entrée reste, on ne détruit pas ce qu'on n'a pas porté
+                            }
+                            if (!evals[0].metadata) evals[0].metadata = {};
+                            evals[0].metadata.productionId = choix.productionId;
+                            mindmapModifiee = true;
+                        }
+
+                        // Rétroaction formative → le nœud ACTIVITÉ, s'il n'en
+                        // porte pas déjà une (« aucune » n'est pas un rattachement).
+                        if (choix.retroaction && choix.retroaction !== 'aucune'
+                            && !(noeudAct.metadata && noeudAct.metadata.retroaction)) {
+                            if (!noeudAct.metadata) noeudAct.metadata = {};
+                            noeudAct.metadata.retroaction = choix.retroaction;
+                            mindmapModifiee = true;
+                        }
+
+                        delete activites[actId];
+                        seancesModifiees = true;
+                    });
+
+                    if (Object.keys(activites).length === 0) {
+                        delete entree.activites;
+                        seancesModifiees = true;
+                    }
+                });
+
+                if (mindmapModifiee) db.setSync(`${t.id}_planification_mindmap`, mindmap); // security-ok: redistribution interne de données locales du même utilisateur
+                if (seancesModifiees) db.setSync(cleSeancesT, seancesT); // security-ok: idem
+            });
+        } catch (e) {
+            console.warn('[moisson #424] erreur ignorée:', e);
+        }
+
         // Purge du champ legacy dureePeriodeMinutes dans les modalités de
         // chaque trimestre (Lot 3 #328, 11 juin 2026). Sans flag : idempotente
         // et robuste face aux réintroductions par import de données anciennes
