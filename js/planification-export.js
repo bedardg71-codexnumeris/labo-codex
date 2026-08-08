@@ -24,10 +24,13 @@
 'use strict';
 
 // Niveaux nommés par leur USAGE (D4) — l'id est technique, le label est l'UX.
+// « Personnalisé » (#431) : cases + ordre réglés par l'utilisateur, mémorisés
+// en préférence — pour se conformer aux gabarits départementaux.
 var NIVEAUX = [
     { id: 'sommaire',    label: 'Plan de cours' },
     { id: 'deroulement', label: 'En classe' },
-    { id: 'alignement',  label: 'Preuve d’alignement' }
+    { id: 'alignement',  label: 'Preuve d’alignement' },
+    { id: 'personnalise', label: 'Personnalisé' }
 ];
 var FORMATS = [
     { id: 'texte',    label: 'Texte',    extension: '.txt', mime: 'text/plain' },
@@ -272,11 +275,112 @@ function formaterLiens(liens) {
 /** Les éléments qu'un niveau montre, dans l'ordre de la carte. */
 function elementsVisibles(elements, inc) {
     return elements.filter(function(el) {
-        if (el.categorie === 'evaluation') return true;
+        // Les presets ne définissent pas `evaluations` : elles sont toujours
+        // montrées (contrat du sommaire). Le niveau Personnalisé (#431) pose
+        // le drapeau explicitement.
+        if (el.categorie === 'evaluation') return inc.evaluations !== false;
         if (el.categorie === 'activite') return inc.activites;
         if (el.categorie === 'connaissance') return inc.connaissances;
         return inc.connaissances; // « autre » (idée maîtresse posée là…) : niveau preuve
     });
+}
+
+// ---------------------------------------------------------------------------
+// NIVEAU PERSONNALISÉ (#431) — quatre sections ordonnables, huit contenus
+// ---------------------------------------------------------------------------
+// L'ordre porte sur les CONTENUS d'une leçon (sections en texte/Markdown,
+// groupes de colonnes en TSV), JAMAIS sur la structure séquences → leçons :
+// la structure du document EST la carte (décision du 8 août, en conversation).
+
+var SECTIONS_PLAN = [
+    { id: 'objectifs',   label: 'Objectifs' },
+    { id: 'deroulement', label: 'Déroulement (activités et évaluations)' },
+    { id: 'productions', label: 'Productions rattachées' },
+    { id: 'liens',       label: 'Liens et objectifs servis' }
+];
+
+var CONTENUS_PLAN = [
+    { id: 'objectifs',        label: 'Objectifs des leçons' },
+    { id: 'activites',        label: 'Activités et exposés' },
+    { id: 'evaluations',      label: 'Évaluations' },
+    { id: 'durees',           label: 'Durées (Σ compris)' },
+    { id: 'retroactions',     label: 'Rétroactions' },
+    { id: 'connaissances',    label: 'Connaissances' },
+    { id: 'liens',            label: 'Liens et objectifs servis' },
+    { id: 'productionsDetail', label: 'Détail des productions (grille, échelle)' }
+];
+
+var ORDRE_DEFAUT = SECTIONS_PLAN.map(function(s) { return s.id; });
+
+/** Le point de départ d'une personnalisation : les cases d'un preset. */
+function configDepuisPreset(presetId) {
+    var inc = INCLUSIONS[presetId] || INCLUSIONS.deroulement;
+    return {
+        contenus: {
+            objectifs: !!inc.objectifs,
+            activites: !!inc.activites,
+            evaluations: true,
+            durees: !!inc.durees,
+            retroactions: !!inc.retroactions,
+            connaissances: !!inc.connaissances,
+            liens: !!inc.liens,
+            productionsDetail: !!inc.productionsDetail
+        },
+        ordre: ORDRE_DEFAUT.slice()
+    };
+}
+
+/**
+ * Normalise une config venue du stockage : ids de section inconnus retirés,
+ * sections manquantes rajoutées en queue (une mise à jour qui ajoute une
+ * section ne casse pas un réglage existant), drapeaux manquants pris du
+ * preset « En classe ». Rend toujours une config complète et sûre.
+ */
+function normaliserConfigPersonnalisee(brute) {
+    var base = configDepuisPreset('deroulement');
+    if (!brute || typeof brute !== 'object') return base;
+    var contenus = {};
+    CONTENUS_PLAN.forEach(function(c) {
+        var v = brute.contenus && brute.contenus[c.id];
+        contenus[c.id] = typeof v === 'boolean' ? v : base.contenus[c.id];
+    });
+    var connus = {};
+    var ordre = (Array.isArray(brute.ordre) ? brute.ordre : []).filter(function(id) {
+        if (connus[id] || ORDRE_DEFAUT.indexOf(id) === -1) return false;
+        connus[id] = true;
+        return true;
+    });
+    ORDRE_DEFAUT.forEach(function(id) { if (!connus[id]) ordre.push(id); });
+    return { contenus: contenus, ordre: ordre };
+}
+
+/** La config mémorisée (préférence), normalisée — ou le départ « En classe ». */
+function lireConfigPersonnalisee() {
+    var brute = null;
+    try {
+        if (typeof window.obtenirPreference === 'function') {
+            brute = window.obtenirPreference('exportPlanPersonnalise');
+        }
+    } catch (e) { brute = null; }
+    return normaliserConfigPersonnalisee(brute);
+}
+
+/** Les drapeaux de rendu dérivés d'une config personnalisée. */
+function incDepuisConfig(cfg) {
+    var c = cfg.contenus;
+    return {
+        objectifs: c.objectifs,
+        activites: c.activites,
+        evaluations: c.evaluations,
+        durees: c.durees,
+        retroactions: c.retroactions,
+        liens: c.liens,
+        connaissances: c.connaissances,
+        productionsDetail: c.productionsDetail,
+        // En mode sections, la production sort dans SA section, pas sous
+        // chaque élément.
+        productionsInline: false
+    };
 }
 
 // ---------------------------------------------------------------------------
@@ -288,7 +392,7 @@ function rendreElementTexte(el, inc, indent) {
     var duree = inc.durees && el.duree ? ' (' + formatDuree(el.duree) + ')' : '';
     var marqueur = el.categorie === 'evaluation' ? '◆' : '•';
     txt += indent + marqueur + ' [' + el.label + '] ' + el.titre + duree + '\n';
-    if (el.production) {
+    if (el.production && inc.productionsInline !== false) {
         txt += indent + '  Évaluation : ' + ligneProduction(el.production, inc.productionsDetail) + '\n';
     }
     if (inc.retroactions && el.retroaction) {
@@ -306,32 +410,57 @@ function rendreElementTexte(el, inc, indent) {
     return txt;
 }
 
-function rendreLeconTexte(lecon, inc) {
+// Ordre HISTORIQUE des presets texte (contrat du harnais 424) : liens,
+// objectifs, éléments — la production reste alors SOUS son élément.
+var ORDRE_TEXTE_PRESET = ['liens', 'objectifs', 'deroulement'];
+
+function rendreLeconTexte(lecon, inc, ordre) {
     var duree = inc.durees && lecon.dureeRollup ? ' — Σ ' + formatDuree(lecon.dureeRollup) : '';
     var sem = lecon.semaine !== null ? ' (Sem. ' + lecon.semaine + ')' : '';
     var txt = '\n  ┌ LEÇON : ' + lecon.titre + sem + duree + '\n';
-    if (inc.liens) {
-        formaterLiens(lecon.liens).forEach(function(l) { txt += '  │ ' + l + '\n'; });
-    }
-    if (inc.objectifs) {
-        if (lecon.objectifs.length > 0) {
-            txt += '  │ Objectifs :\n';
-            lecon.objectifs.forEach(function(o) { txt += '  │   — ' + o + '\n'; });
-        } else if (lecon.objectifDerive) {
-            lecon.objectifDerive.split('\n').forEach(function(ligne) {
-                txt += '  │ Objectif : ' + ligne + '\n';
+
+    var sections = {
+        liens: function() {
+            if (!inc.liens) return;
+            formaterLiens(lecon.liens).forEach(function(l) { txt += '  │ ' + l + '\n'; });
+        },
+        objectifs: function() {
+            if (!inc.objectifs) return;
+            if (lecon.objectifs.length > 0) {
+                txt += '  │ Objectifs :\n';
+                lecon.objectifs.forEach(function(o) { txt += '  │   — ' + o + '\n'; });
+            } else if (lecon.objectifDerive) {
+                lecon.objectifDerive.split('\n').forEach(function(ligne) {
+                    txt += '  │ Objectif : ' + ligne + '\n';
+                });
+            }
+        },
+        deroulement: function() {
+            elementsVisibles(lecon.elements, inc).forEach(function(el) {
+                txt += rendreElementTexte(el, inc, '  │ ');
+            });
+        },
+        productions: function() {
+            // Section propre du mode Personnalisé — la production est une
+            // information de la LEÇON, montrée même si l'élément porteur est
+            // masqué par les cases.
+            lecon.elements.forEach(function(el) {
+                if (!el.production) return;
+                txt += '  │ Évaluation : ' + ligneProduction(el.production, inc.productionsDetail) + '\n';
             });
         }
-    }
-    elementsVisibles(lecon.elements, inc).forEach(function(el) {
-        txt += rendreElementTexte(el, inc, '  │ ');
+    };
+
+    (ordre || ORDRE_TEXTE_PRESET).forEach(function(id) {
+        if (sections[id]) sections[id]();
     });
     txt += '  └─\n';
     return txt;
 }
 
-function rendreTexte(plan, niveauId) {
-    var inc = INCLUSIONS[niveauId];
+function rendreTexte(plan, niveauId, incPerso, ordrePerso) {
+    var inc = incPerso || INCLUSIONS[niveauId];
+    var ordre = ordrePerso || null;
     var txt = '═══════════════════════════════════════\n';
     txt += 'PLAN DE COURS — ' + plan.nomCarte + '\n';
     txt += 'Niveau : ' + labelNiveau(niveauId) + '\n';
@@ -349,7 +478,7 @@ function rendreTexte(plan, niveauId) {
             formaterLiens(seq.liens).forEach(function(l) { txt += '  ' + l + '\n'; });
         }
         seq.lecons.forEach(function(lecon) {
-            txt += rendreLeconTexte(lecon, inc);
+            txt += rendreLeconTexte(lecon, inc, ordre);
         });
         elementsVisibles(seq.elements, inc).forEach(function(el) {
             txt += rendreElementTexte(el, inc, '  ');
@@ -365,7 +494,7 @@ function rendreTexte(plan, niveauId) {
         txt += '▌ LEÇONS HORS SÉQUENCE\n';
         txt += '───────────────────────────────────────\n';
         plan.leconsOrphelines.forEach(function(lecon) {
-            txt += rendreLeconTexte(lecon, inc);
+            txt += rendreLeconTexte(lecon, inc, ordre);
         });
     }
     return txt;
@@ -497,75 +626,199 @@ function rendreTSV(plan, niveauId) {
 }
 
 // ---------------------------------------------------------------------------
+// FORMAT TSV — PERSONNALISÉ (#431) : colonnes dynamiques par groupes ordonnés
+// ---------------------------------------------------------------------------
+// Préfixe FIXE (Séquence | Leçon | Semaine — la structure est la carte), puis
+// les groupes de colonnes suivent l'ordre des sections de la config.
+
+function groupesColonnesTSV(inc) {
+    return {
+        objectifs: inc.objectifs ? ['Objectifs'] : [],
+        deroulement: (function() {
+            if (!inc.activites && !inc.evaluations && !inc.connaissances) return [];
+            var c = ['Type', 'Titre'];
+            if (inc.durees) c.push('Durée (min)');
+            if (inc.retroactions) c.push('Rétroaction');
+            return c;
+        })(),
+        productions: (function() {
+            var c = ['Production', 'Pondération (%)', 'Échéance'];
+            if (inc.productionsDetail) c.push('Grille', 'Échelle');
+            return c;
+        })(),
+        liens: inc.liens ? ['Objectifs servis', 'Liens'] : []
+    };
+}
+
+function rendreTSVPersonnalise(plan, inc, ordre) {
+    var groupes = groupesColonnesTSV(inc);
+    var colonnes = ['Séquence', 'Leçon', 'Semaine'];
+    ordre.forEach(function(id) { colonnes = colonnes.concat(groupes[id] || []); });
+    var lignes = [colonnes.join('\t')];
+
+    function cellulesDe(ctx) {
+        // ctx : { seqTitre, lecon, el, estLecon }
+        var valeurs = {
+            objectifs: function() {
+                if (!ctx.estLecon) return [''];
+                return [ctx.lecon.objectifs.length > 0
+                    ? ctx.lecon.objectifs.join(' ; ')
+                    : (ctx.lecon.objectifDerive || '')];
+            },
+            deroulement: function() {
+                var c;
+                if (ctx.estLecon) c = ['Leçon', ctx.lecon.titre];
+                else c = [ctx.el.label, ctx.el.titre];
+                if (inc.durees) c.push(ctx.estLecon ? (ctx.lecon.dureeRollup || '') : (ctx.el.duree || ''));
+                if (inc.retroactions) {
+                    var retro = '';
+                    if (!ctx.estLecon) {
+                        if (ctx.el.retroaction) retro = libelleRetroaction(ctx.el.retroaction);
+                        else if (ctx.el.retroactionRendu) retro = 'Sur le rendu : ' + libelleRetroaction(ctx.el.retroactionRendu);
+                    }
+                    c.push(retro);
+                }
+                return c;
+            },
+            productions: function() {
+                var prod = !ctx.estLecon && ctx.el.production;
+                var c = [
+                    prod ? prod.nomProduction : '',
+                    prod ? (prod.ponderation || 0) : '',
+                    prod && prod.dateEcheance ? prod.dateEcheance : ''
+                ];
+                if (inc.productionsDetail) c.push(prod ? prod.nomGrille : '', prod ? prod.nomEchelle : '');
+                return c;
+            },
+            liens: function() {
+                if (ctx.estLecon) return ['', formaterLiens(ctx.lecon.liens).join(' ; ')];
+                return [ctx.el.objectifsServis.join(' ; '), formaterLiens(ctx.el.liens).join(' ; ')];
+            }
+        };
+        var cellules = [
+            ctx.seqTitre,
+            ctx.lecon ? ctx.lecon.titre : '',
+            ctx.lecon && ctx.lecon.semaine !== null ? ctx.lecon.semaine : ''
+        ];
+        ordre.forEach(function(id) {
+            if ((groupes[id] || []).length > 0) cellules = cellules.concat(valeurs[id]());
+        });
+        lignes.push(cellules.map(nettoyerTSV).join('\t'));
+    }
+
+    function pousserLecon(seqTitre, lecon) {
+        cellulesDe({ seqTitre: seqTitre, lecon: lecon, estLecon: true });
+        elementsVisibles(lecon.elements, inc).forEach(function(el) {
+            cellulesDe({ seqTitre: seqTitre, lecon: lecon, el: el, estLecon: false });
+        });
+    }
+
+    plan.sequences.forEach(function(seq) {
+        if (seq.lecons.length === 0 && seq.elements.length === 0) {
+            var vides = colonnes.length - 3;
+            lignes.push([nettoyerTSV(seq.titre), '', etendueTexteTSV(seq.etendue)]
+                .concat(new Array(vides).fill('')).join('\t'));
+            return;
+        }
+        seq.lecons.forEach(function(lecon) { pousserLecon(seq.titre, lecon); });
+        elementsVisibles(seq.elements, inc).forEach(function(el) {
+            cellulesDe({ seqTitre: seq.titre, lecon: null, el: el, estLecon: false });
+        });
+    });
+    plan.leconsOrphelines.forEach(function(lecon) { pousserLecon('(Hors séquence)', lecon); });
+
+    return lignes.join('\n') + '\n';
+}
+
+// ---------------------------------------------------------------------------
 // FORMAT MARKDOWN
 // ---------------------------------------------------------------------------
 
-function rendreLeconMD(lecon, inc) {
+// Ordre HISTORIQUE des presets Markdown (contrat du harnais 424) : objectifs,
+// **Évaluation** (productions), **Déroulement**, **Liens**.
+var ORDRE_MD_PRESET = ['objectifs', 'productions', 'deroulement', 'liens'];
+
+function rendreLeconMD(lecon, inc, ordre) {
     var champs = [];
     if (lecon.semaine !== null) champs.push('Sem. ' + lecon.semaine);
     if (inc.durees && lecon.dureeRollup) champs.push('Σ ' + formatDuree(lecon.dureeRollup));
     var marqueur = champs.length ? ' [Leçon | ' + champs.join(' | ') + ']' : ' [Leçon]';
     var md = '### ' + lecon.titre + marqueur + '\n\n';
 
-    if (inc.objectifs) {
-        if (lecon.objectifs.length > 0) {
-            md += '**Objectifs** :\n';
-            lecon.objectifs.forEach(function(o) { md += '- ' + o + '\n'; });
+    var sections = {
+        objectifs: function() {
+            if (!inc.objectifs) return;
+            if (lecon.objectifs.length > 0) {
+                md += '**Objectifs** :\n';
+                lecon.objectifs.forEach(function(o) { md += '- ' + o + '\n'; });
+                md += '\n';
+            } else if (lecon.objectifDerive) {
+                md += '**Objectif** : ' + lecon.objectifDerive.split('\n').join(' ') + '\n\n';
+            }
+        },
+        productions: function() {
+            // Les productions rattachées de la leçon — le contrat du sommaire.
+            var partiesEval = [];
+            lecon.elements.forEach(function(el) {
+                if (el.production) partiesEval.push(ligneProduction(el.production, inc.productionsDetail));
+            });
+            if (partiesEval.length > 0) {
+                md += '**Évaluation** : ' + partiesEval.join(' ; ') + '\n\n';
+            }
+        },
+        deroulement: function() {
+            var visibles = elementsVisibles(lecon.elements, inc);
+            if (visibles.length === 0 || !niveauMontreDesLignes(visibles, inc)) return;
+            md += '**Déroulement** :\n';
+            visibles.forEach(function(el) {
+                if (el.categorie === 'evaluation' && !evalDansDeroulement(inc)) return; // déjà en Évaluation
+                var duree = inc.durees && el.duree ? ' (' + formatDuree(el.duree) + ')' : '';
+                md += '- [' + el.label + '] ' + el.titre + duree;
+                var details = [];
+                if (inc.retroactions && el.retroaction) details.push('Rétroaction : ' + libelleRetroaction(el.retroaction));
+                if (inc.retroactions && el.retroactionRendu) details.push('Rétroaction sur le rendu : ' + libelleRetroaction(el.retroactionRendu));
+                if (details.length) md += ' — ' + details.join(' · ');
+                md += '\n';
+                if (inc.liens && el.objectifsServis.length > 0) {
+                    md += '    - sert : ' + el.objectifsServis.join(' ; ') + '\n';
+                }
+                if (inc.liens) {
+                    formaterLiens(el.liens).forEach(function(l) { md += '    - ' + l + '\n'; });
+                }
+            });
             md += '\n';
-        } else if (lecon.objectifDerive) {
-            md += '**Objectif** : ' + lecon.objectifDerive.split('\n').join(' ') + '\n\n';
+        },
+        liens: function() {
+            if (!inc.liens || lecon.liens.length === 0) return;
+            md += '**Liens** :\n';
+            formaterLiens(lecon.liens).forEach(function(l) { md += '- ' + l + '\n'; });
+            md += '\n';
         }
-    }
+    };
 
-    // Les productions rattachées de la leçon — le contrat du sommaire.
-    var partiesEval = [];
-    lecon.elements.forEach(function(el) {
-        if (el.production) partiesEval.push(ligneProduction(el.production, inc.productionsDetail));
+    (ordre || ORDRE_MD_PRESET).forEach(function(id) {
+        if (sections[id]) sections[id]();
     });
-    if (partiesEval.length > 0) {
-        md += '**Évaluation** : ' + partiesEval.join(' ; ') + '\n\n';
-    }
-
-    var visibles = elementsVisibles(lecon.elements, inc);
-    if (visibles.length > 0 && niveauMontreDesLignes(visibles, inc)) {
-        md += '**Déroulement** :\n';
-        visibles.forEach(function(el) {
-            if (el.categorie === 'evaluation' && !inc.activites) return; // déjà en Évaluation
-            var duree = inc.durees && el.duree ? ' (' + formatDuree(el.duree) + ')' : '';
-            md += '- [' + el.label + '] ' + el.titre + duree;
-            var details = [];
-            if (inc.retroactions && el.retroaction) details.push('Rétroaction : ' + libelleRetroaction(el.retroaction));
-            if (inc.retroactions && el.retroactionRendu) details.push('Rétroaction sur le rendu : ' + libelleRetroaction(el.retroactionRendu));
-            if (details.length) md += ' — ' + details.join(' · ');
-            md += '\n';
-            if (inc.liens && el.objectifsServis.length > 0) {
-                md += '    - sert : ' + el.objectifsServis.join(' ; ') + '\n';
-            }
-            if (inc.liens) {
-                formaterLiens(el.liens).forEach(function(l) { md += '    - ' + l + '\n'; });
-            }
-        });
-        md += '\n';
-    }
-
-    if (inc.liens && lecon.liens.length > 0) {
-        md += '**Liens** :\n';
-        formaterLiens(lecon.liens).forEach(function(l) { md += '- ' + l + '\n'; });
-        md += '\n';
-    }
-
     md += '---\n\n';
     return md;
 }
 
+// Les presets ne posent pas `evaluations` : les lignes ◆ du Déroulement
+// suivent alors `activites` (comportement historique — au sommaire, l'éval ne
+// sort que par la ligne **Évaluation**). Le Personnalisé pose le drapeau.
+function evalDansDeroulement(inc) {
+    return inc.evaluations !== undefined ? inc.evaluations : inc.activites;
+}
+
 function niveauMontreDesLignes(visibles, inc) {
     return visibles.some(function(el) {
-        return el.categorie !== 'evaluation' || inc.activites;
+        return el.categorie !== 'evaluation' || evalDansDeroulement(inc);
     });
 }
 
-function rendreMarkdown(plan, niveauId) {
-    var inc = INCLUSIONS[niveauId];
+function rendreMarkdown(plan, niveauId, incPerso, ordrePerso) {
+    var inc = incPerso || INCLUSIONS[niveauId];
+    var ordre = ordrePerso || null;
     var md = '# Plan de cours — ' + plan.nomCarte + '\n';
     md += '> Niveau : ' + labelNiveau(niveauId) + ' · Exporté le ' + new Date().toLocaleDateString('fr-CA') + '\n\n---\n\n';
 
@@ -580,7 +833,7 @@ function rendreMarkdown(plan, niveauId) {
             formaterLiens(seq.liens).forEach(function(l) { md += '- ' + l + '\n'; });
             md += '\n';
         }
-        seq.lecons.forEach(function(lecon) { md += rendreLeconMD(lecon, inc); });
+        seq.lecons.forEach(function(lecon) { md += rendreLeconMD(lecon, inc, ordre); });
         var horsLecon = elementsVisibles(seq.elements, inc);
         if (horsLecon.length > 0) {
             md += '**Hors leçon** :\n';
@@ -596,7 +849,7 @@ function rendreMarkdown(plan, niveauId) {
 
     if (plan.leconsOrphelines.length > 0) {
         md += '## Leçons hors séquence\n\n';
-        plan.leconsOrphelines.forEach(function(lecon) { md += rendreLeconMD(lecon, inc); });
+        plan.leconsOrphelines.forEach(function(lecon) { md += rendreLeconMD(lecon, inc, ordre); });
     }
     return md;
 }
@@ -607,13 +860,26 @@ function rendreMarkdown(plan, niveauId) {
 
 /**
  * LE générateur (D5) : un plan, une profondeur, un format.
- * @param {string} niveauId  sommaire | deroulement | alignement
+ * @param {string} niveauId  sommaire | deroulement | alignement | personnalise
  * @param {string} formatId  texte | tsv | markdown
+ * @param {Object} [configEssai]  #431 — config non normalisée à ESSAYER
+ *   (aperçu de la modale) au lieu de la préférence mémorisée
  * @returns {string|null} le document, ou null sans carte
  */
-function genererExport(niveauId, formatId) {
+function genererExport(niveauId, formatId, configEssai) {
+    var plan;
+    if (niveauId === 'personnalise') {
+        var cfg = configEssai ? normaliserConfigPersonnalisee(configEssai) : lireConfigPersonnalisee();
+        var inc = incDepuisConfig(cfg);
+        plan = construirePlan();
+        if (!plan) return null;
+        if (formatId === 'texte') return rendreTexte(plan, niveauId, inc, cfg.ordre);
+        if (formatId === 'tsv') return rendreTSVPersonnalise(plan, inc, cfg.ordre);
+        if (formatId === 'markdown') return rendreMarkdown(plan, niveauId, inc, cfg.ordre);
+        return null;
+    }
     if (!INCLUSIONS[niveauId]) return null;
-    var plan = construirePlan();
+    plan = construirePlan();
     if (!plan) return null;
     if (formatId === 'texte') return rendreTexte(plan, niveauId);
     if (formatId === 'tsv') return rendreTSV(plan, niveauId);
@@ -640,7 +906,13 @@ window.planificationExport = {
     INCLUSIONS: INCLUSIONS,
     construirePlan: construirePlan,
     genererExport: genererExport,
-    nomFichierExport: nomFichierExport
+    nomFichierExport: nomFichierExport,
+    // #431 — niveau Personnalisé : constantes et portes de la modale.
+    SECTIONS_PLAN: SECTIONS_PLAN,
+    CONTENUS_PLAN: CONTENUS_PLAN,
+    configDepuisPreset: configDepuisPreset,
+    normaliserConfigPersonnalisee: normaliserConfigPersonnalisee,
+    lireConfigPersonnalisee: lireConfigPersonnalisee
 };
 
 })();
