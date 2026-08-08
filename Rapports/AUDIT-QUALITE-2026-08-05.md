@@ -1,6 +1,6 @@
 # Audit qualité — 5 août 2026 (session autonome, rejoint « audit blanc »)
 
-> **Référence** : `plans de travail/AUDIT-2026-08-05-consigne.md`. Audit en LECTURE SEULE
+> **Référence** : `plans de travail/_archives/AUDIT-2026-08-05-consigne.md`. Audit en LECTURE SEULE
 > des 4 modules dans l'ordre de risque (import-export → trimestre-v2-* → db.js →
 > planification-*). Chaque trouvaille a passé la vérification adverse (tentative de
 > réfutation par lecture des appelants, grep des garde-fous, contraste avec le code

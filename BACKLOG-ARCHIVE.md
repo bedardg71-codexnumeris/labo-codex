@@ -2570,7 +2570,7 @@ Deplacer dans la section "Complete" avec [x]
 
 ## Versement du relais Cadre→Trimestre (5 août 2026) — items #369 à #377, TOUS LIVRÉS avant versement
 
-> Relais Cowork du 4 août 2026 (`plans de travail/RELAIS-cadre-trimestre-2026-08-04.md`).
+> Relais Cowork du 4 août 2026 (`plans de travail/_archives/RELAIS-cadre-trimestre-2026-08-04.md`).
 > Les items portaient les numéros locaux #366-#375, en collision avec les #366-#368 déjà
 > pris dans BACKLOG.md (branche d'alignement) — renumérotés **+3 → #369-#378** au versement
 > post-merge (merge → main fait le 5 août, `92ba8cb9`). #369-#377 étaient déjà livrés au
