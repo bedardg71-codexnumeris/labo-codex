@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            version: '1.58',
+            couleur: 'vert',
+            titre: 'L’export du plan se règle à ta façon',
+            items: [
+                'Nouveau niveau « Personnalisé » dans « Exporter le plan… » : coche les contenus que tu veux voir (objectifs, activités, évaluations, durées, rétroactions, connaissances, liens, détail des productions) et choisis l’ordre des sections — pour te conformer au gabarit de ton département.',
+                'Un aperçu VIVANT montre le document pendant que tu règles : chaque case cochée ou section déplacée se reflète immédiatement, dans le format de ton choix.',
+                'Ton réglage est mémorisé : le niveau « Personnalisé » du menu d’export le réutilise tel quel, et tu peux repartir d’un des trois niveaux de base en un clic.',
+                'Correction : le tableau TSV n’a plus deux colonnes de semaine — une seule, qui porte l’étendue sur la ligne de séquence et le numéro sur la ligne de leçon.'
+            ]
+        },
+        {
             version: '1.57',
             couleur: 'vert',
             titre: 'La Carte exporte ton plan — et la page « Plan de la leçon » tire sa révérence',

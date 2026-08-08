@@ -7,7 +7,24 @@
      ===================================================================== -->
 
 <!-- =====================================================================
-     SESSION — 8 AOÛT 2026, APRÈS-MIDI (Claude Code cloud, branche `claude/session-startup-a8obyo`, ouverte sur `main`). ⮕⮕ LIRE EN PREMIER À LA REPRISE.
+     SESSION — 8 AOÛT 2026, FIN D'APRÈS-MIDI (même conteneur, branche `claude/session-startup-a8obyo`). ⮕⮕ LIRE EN PREMIER À LA REPRISE.
+     ÉTAT FACTUEL : **1.58.0** (build 0808-1538), fusionnée `main`. Vitest **1934/1934** (225 fichiers). Dernier ID BACKLOG : **#431**.
+
+     ✅ LIVRÉ — **#152 + #431 : le retour terrain de 1.57.0 traité LE JOUR MÊME.** Grégoire a collé son premier TSV dans Numbers (capture), signalé les DEUX colonnes de semaine, et demandé un niveau d'export personnalisé pour les gabarits départementaux. Plan court versionné (`plans de travail/PLAN-export-personnalise-2026-08-08.md`), décisions actées en conversation, trois commits.
+
+     ▣ **#152** : une seule colonne « Semaine » au TSV — la ligne de séquence y met son étendue, la ligne de leçon son numéro. Sentinelle au harnais, break-test par résurrection de la colonne « Semaines ».
+     ▣ **#431 MOTEUR** : 4e jeu de réglages sur le générateur unique (D5 inchangé) — 8 cases de contenu, 4 sections ordonnables. **L'ordre porte sur les CONTENUS, jamais sur la structure** (la structure du document EST la carte — décision actée). Texte/MD : sections de la leçon ; TSV : groupes de colonnes à préfixe fixe. Préférence `exportPlanPersonnalise` (DEFAUTS de preferences.js — pas de clé sauvage), **normalisée à CHAQUE lecture** (ids inconnus retirés, sections manquantes rajoutées en queue : une mise à jour n'invalide pas un réglage). Les rendeurs texte/MD sont devenus section-ordonnés, les presets passent leur ordre HISTORIQUE — le harnais 424 est resté vert SANS retouche de ses assertions : les presets sont des contrats.
+     ▣ **#431 MODALE** : réglages + aperçu VIVANT (le générateur est pur — re-rendu à chaque case cochée). Modale ASSUMÉE et consignée : cases + ordre + aperçu ne tiennent pas dans un panneau de 380 px, l'anti-pattern « pas de modale » vise les cas où un panneau suffit (idée suggérée par Grégoire). Persistance IMMÉDIATE à chaque changement — ce qu'on voit dans l'aperçu est ce que le panneau exportera, pas de bouton « Enregistrer » qui piégerait un état non sauvé. Aperçu par textContent, jamais innerHTML (il porte des titres saisis) — verrouillé par la sentinelle, break-testé. « Partir de : » les trois presets. Cibles 32 px (iPad).
+     ▣ **UN RÉGLAGE mémorisé, pas des gabarits nommés** — hypothèse inscrite à USAGE-FORMATS avec la question terrain : « plan département » vs « contrat étudiant » exigeront-ils plusieurs configs ?
+
+     ▣ **RITUEL DE FIN (cycle #152+#431).** §2 statique sur le diff : zéro motif (les innerHTML de la modale = libellés statiques via echapperHtml ; zéro souris, zéro console.log). §3 : Vitest 1934/1934 ; WebKit → CI. §4 : **5 break-tests, 5 ROUGE** (#152 résurrection ; moteur : normalisation avaleuse, ordre ignoré, préférence non lue ; modale : aperçu muté innerHTML → 2 assertions mordent). Récit↔code : clé déclarée dans DEFAUTS (grep), harnais presets inchangé. §5 : release minor → **1.58.0 / 0808-1538**, 4 points synchrones, ?v= bumpés (5 fichiers), changelog 1.58.
+
+     ⚠ **PORTES TERRAIN 1.58.0 (s'ajoutent à celles de 1.57.0, toujours dues)** : (1) rouvrir « Exporter le plan… » → « Régler le niveau personnalisé… » : régler, déplacer une section, vérifier l'aperçu qui suit ; (2) recoller le TSV Plan de cours dans Numbers — UNE colonne Semaine ; (3) fermer/rouvrir la modale : le réglage a été retenu ; (4) la modale au doigt sur iPad (flèches ↑↓, défilement de l'aperçu).
+     ⮕ **QUEUES OUVERTES** : inchangées (#430 rentrée · #421+#426 débloqués · #425 D→C→B→A · #418 · #427 ~20 août · #428) + l'hypothèse gabarits nommés (terrain).
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 8 AOÛT 2026, APRÈS-MIDI (Claude Code cloud, branche `claude/session-startup-a8obyo`, ouverte sur `main`).
      ÉTAT FACTUEL : **1.57.0** (build 0808-1445), fusionnée `main`. Vitest **1914/1914** (223 fichiers). Arbre propre. Dernier ID BACKLOG : **#430**.
 
      ▣ **RITUEL DE DÉBUT — ZÉRO ÉCART.** Prémisse du §3 vérifiée point par point (1.56.4, build 0808-1156, Vitest 1889/1889, #429, arbre propre, AUCUNE branche en avance — vérifié après `git fetch --unshallow`, le clone était shallow comme annoncé). RELAIS.md lu en premier : `main`, aucun travail en avance. Le balayage de branches a confirmé que la réconciliation du 8 août avait tout emporté (3 branches du jour à 0 commit d'avance).
@@ -5660,12 +5677,12 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
 | Point | Valeur attendue |
 |---|---|
-| `origin/main` | **1.57.0** — porte le portage complet #424 (lots A→G) |
+| `origin/main` | **1.58.0** — porte #424 (lots A→G) + #152 + #431 |
 | Branches en avance | **AUCUNE.** ⚠ Le vérifier, ne pas le croire — balayage ci-dessous |
-| Version | `{"build":"0808-1445","beta":"1.57.0"}` |
-| Vitest | **1914/1914** (223 fichiers) |
+| Version | `{"build":"0808-1538","beta":"1.58.0"}` |
+| Vitest | **1934/1934** (225 fichiers) |
 | Playwright WebKit | non exécutable en conteneur → CI à la PR |
-| Dernier ID BACKLOG | **#430** |
+| Dernier ID BACKLOG | **#431** |
 | Arbre | propre |
 
 ⚠ **Le clone du conteneur peut être SHALLOW** (50 commits) : `git fetch
@@ -5683,7 +5700,12 @@ git for-each-ref --sort=-committerdate --format='%(committerdate:short) %(refnam
 Si une branche est plus récente que `main`, ou si RELAIS.md nomme autre chose
 que `main` : **s'arrêter et le signaler à Grégoire avant de coder.**
 
-### Priorité 1 — les PORTES TERRAIN du portage (Grégoire, ~10 min)
+### Priorité 1 — les PORTES TERRAIN de 1.57.0 ET 1.58.0 (Grégoire, ~15 min)
+
+⚠ S'ajoutent aux portes du portage : la modale « Régler le niveau
+personnalisé… » (réglage retenu, aperçu qui suit, flèches au doigt sur iPad)
+et le TSV recollé dans Numbers — UNE colonne Semaine (#152).
+
 
 Avant tout nouveau chantier sur l'Alignement, la passe au doigt du bloc
 « PORTES TERRAIN DU PORTAGE » (§0 ci-dessus) : un export de chaque niveau sur

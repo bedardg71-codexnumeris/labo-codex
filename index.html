@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260808d"> <!-- Simplification Alignement : vue leçon + compaction retirées, boutons de palette (8 août) -->
+    <link rel="stylesheet" href="styles.css?v=20260808e"> <!-- Simplification Alignement : vue leçon + compaction retirées, boutons de palette (8 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -14334,7 +14334,7 @@
     <!-- PRIORITÉ 1: Fondations -->
     <script src="js/config.js?v=20260808a"></script> <!-- #326 (28 juin) : COMPARATEUR_VISIBLE=true (réactivation) ; #345 (22 juin) : flag COMPARATEUR_VISIBLE ; Refonte nav SP5-fix : sous-onglet id court 'vue' (au lieu de 'calendrier') pour éviter la redondance calendrier-calendrier -->
     <script src="js/navigation.js?v=20260808a"></script> <!-- #345 (22 juin) : filtre comparateur sous-nav Labo ; Refonte nav SP5 : tables migrées calendrier-* + nav-calendrier-* -->
-    <script src="js/preferences.js?v=20260808e"></script> <!-- Beta 99.16 : API centralisée préférences + migration V3 (doit précéder modes.js) -->
+    <script src="js/preferences.js?v=20260808a"></script> <!-- Beta 99.16 : API centralisée préférences + migration V3 (doit précéder modes.js) -->
     <script src="js/modes.js?v=20260805b"></script> <!-- Refonte nav SP5 : commentaire et clé calendrier-trimestre -->
     <script src="js/utils-notifications.js?v=20260521a"></script> <!-- Cat-B Track 4 chantier E (21 mai 2026) : source unique notifications toast — window.notifications.{succes,erreur,info} -->
     <script src="js/ui-dialogues.js?v=20260615a"></script> <!-- #315/#316 : modales async réutilisables — window.uiDialogues.{confirmerAction,demanderSaisie} (remplace confirm()/prompt() natifs) -->
@@ -14471,8 +14471,8 @@
     <script src="js/planification-donnees.js?v=20260808a"></script> <!-- #425 préalable : vivacité de productionId à la reprise (8 août) -->
 
     <script src="js/planification-bibliotheque.js?v=2026051026"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
-    <script src="js/planification-carte.js?v=20260808f"></script> <!-- Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
-    <script src="js/planification-export.js?v=20260808a"></script> <!-- LE générateur d'export : 3 niveaux × 3 formats (portage #424, 8 août) -->
+    <script src="js/planification-carte.js?v=20260808g"></script> <!-- Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
+    <script src="js/planification-export.js?v=20260808b"></script> <!-- LE générateur d'export : 3 niveaux × 3 formats (portage #424, 8 août) -->
     <script src="js/planification.js?v=20260808a"></script> <!-- Refonte nav SP4 : hooks nomSection 'conception' + idSousSection conception-* -->
 
     <!-- BETA 96.3 : Module Travaux (import, annotation, archivage) -->
@@ -14555,7 +14555,7 @@
     <script src="js/guidage-demo.js?v=20260808a"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=20260808d"></script> <!-- Entrée 1.56 : trois chantiers Alignement consolidés -->
+    <script src="js/changelog-data.js?v=20260808f"></script> <!-- Entrée 1.56 : trois chantiers Alignement consolidés -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
     <script src="js/etats-vides.js?v=20260808a"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre -->
@@ -14576,11 +14576,11 @@
     <script src="js/export-resultats-finaux.js?v=2026061901"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260808i"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260808j"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260808i"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260808j"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>
