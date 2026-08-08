@@ -21,36 +21,31 @@
 
     var CHANGELOG = [
         {
-            version: '1.57',
-            couleur: 'bleu',
-            titre: 'Alignement : la durée se lit sur la carte',
-            items: [
-                'La durée estimée se saisit directement dans l’en-tête du bloc, sur la carte. Plus besoin d’ouvrir l’Inspecteur ni de cliquer « + Durée » pour la révéler : le champ est toujours là, vide tant que tu n’as rien posé.',
-                'Les leçons et les séquences affichent un compteur « Σ » dans leur en-tête : le total de tout ce qu’elles contiennent, mis à jour pendant que tu tapes. Une activité de 20 min ajoutée à une leçon fait monter le total de la leçon ET celui de sa séquence.',
-                'L’évaluation porte maintenant une durée, elle aussi — elle occupe du temps de classe comme le reste.',
-                'L’Inspecteur ne répète plus la durée : il sert à ajouter ce qui ne tient pas dans un bloc (description, objectifs servis, production rattachée), pas à redire ce que la carte montre déjà.'
-            ]
-        },
-        {
             version: '1.56',
             couleur: 'vert',
-            titre: 'Alignement : l’enseignant entre dans la carte',
+            titre: 'Carte d’alignement : l’enseignant y entre, et le temps s’y compte',
             items: [
-                'Nouveau nœud « Exposé », en tête de la famille « Déroulement » (l’ancienne « Mise en action »). Il te donne enfin un bloc pour dire « j’enseigne » : ton temps de parole se pose dans la leçon, porte une durée, et compte dans le total — au même titre qu’une activité.',
-                'Correction : les cinq nœuds d’enseignement explicite (Ouverture, Modélisation, Pratique guidée, Pratique autonome, Clôture) ne pouvaient être reliés à AUCUNE connaissance ni à aucune évaluation — le lien était refusé. Ils avaient une couleur et une place, mais aucune relation. C’est réparé : « cette connaissance procédurale s’acquiert par cette modélisation » se trace maintenant, et le verbe s’écrit tout seul.',
-                'La famille « Mise en action » devient « Déroulement » : elle ne contient plus seulement ce que fait l’élève, mais tout ce qui occupe le temps de classe.'
+                'Nouveau nœud « Exposé », en tête de la famille « Déroulement » (l’ancienne « Mise en action »). Il te donne enfin un bloc pour dire « j’enseigne » : ton temps de parole se pose dans la leçon, porte une durée, et compte dans le total.',
+                'Correction : les cinq nœuds d’enseignement explicite (Ouverture, Modélisation, Pratique guidée, Pratique autonome, Clôture) ne pouvaient être reliés à AUCUNE connaissance ni à aucune évaluation — le lien était refusé. Ils avaient une couleur et une place, mais aucune relation. « Cette connaissance procédurale s’acquiert par cette modélisation » se trace maintenant, et le verbe s’écrit tout seul.',
+                'La durée estimée se saisit directement dans l’en-tête du bloc, sur la carte — plus besoin d’ouvrir l’Inspecteur ni de la faire apparaître. L’évaluation en porte une elle aussi : elle occupe du temps de classe comme le reste.',
+                'Les leçons et les séquences affichent un compteur « Σ » : le total de ce qu’elles contiennent, mis à jour pendant que tu tapes. Une activité de 20 min ajoutée à une leçon fait monter le total de la leçon ET celui de sa séquence.',
+                'Cliquer une leçon dans le planificateur ne remplace plus la carte par une fiche en lecture seule : la carte se déplace jusqu’à l’élément et le sélectionne, pour que tu l’édites sur place au lieu de le relire.',
+                'La carte montre désormais TOUT, tout le temps. Ouvrir une séquence ne masque plus les autres, et les séquences ne se replient plus en pastille résumée. Le bouton « Vue globale » disparaît — il n’y a plus de vue à quitter pour y revenir.',
+                'Deux boutons dans la barre d’outils, « Nœuds » et « Planificateur », affichent ou masquent chaque palette. Ton choix est mémorisé d’une séance à l’autre.',
+                'Un objectif de leçon saisi dans l’ancienne fiche de lecture n’était plus jamais réaffiché : ces textes sont récupérés et remis dans les objectifs de la leçon, sans doublon.'
             ]
         },
         {
             version: '1.55',
-            couleur: 'bleu',
-            titre: 'Alignement : une seule vue, et des palettes qu’on range',
+            couleur: 'orange',
+            titre: 'Des réglages qui ne se perdent plus au démarrage',
             items: [
-                'Cliquer une leçon ou une séquence dans le planificateur ne remplace plus la carte par une fiche en lecture seule. La carte se déplace jusqu’à l’élément et le sélectionne : tu le vois dans son contexte, avec ses liens, et tu peux l’éditer sur place au lieu de le relire.',
-                'La carte montre désormais TOUT, tout le temps. Ouvrir une séquence ne masque plus les autres, et les séquences ne se replient plus en pastille résumée : ce que tu as construit reste à l’écran.',
-                'Le bouton « Vue globale » disparaît — il n’y a plus de vue à quitter pour y revenir.',
-                'Deux boutons dans la barre d’outils, « Nœuds » et « Planificateur », affichent ou masquent chaque palette. Elles libèrent tout l’écran quand tu n’en as pas besoin, et ton choix est mémorisé d’une séance à l’autre.',
-                'Un objectif de leçon saisi dans l’ancienne fiche de lecture n’était plus jamais réaffiché : ces textes sont récupérés et remis dans les objectifs de la leçon, sans doublon.'
+                'Tes préférences sont de nouveau reprises au démarrage. Certains réglages faits il y a plusieurs mois n’étaient plus relus et l’application repartait de ses valeurs par défaut : ils peuvent réapparaître à ce premier lancement.',
+                'La section Données affiche enfin ses compteurs et ses statistiques de captures au chargement.',
+                'La case « Données démo » ne se décoche plus toute seule quand tu recharges la page.',
+                'Tes raccourcis d’annotation ne sont plus remplacés par les raccourcis par défaut au démarrage.',
+                'La liste des grilles et ta grille de référence pour le dépistage se rechargent correctement à l’ouverture.',
+                'Après une mise à jour, ton navigateur ne peut plus servir d’anciennes versions des fichiers : les corrections arrivent du premier coup.'
             ]
         },
         {

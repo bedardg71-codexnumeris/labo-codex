@@ -277,8 +277,30 @@
         try {
             if (db.getSync(CLE_FLAG_MIGRATION, false) !== true) {
                 // Lire les 3 anciennes sources
+                // ⚠⚠ #419 (8 août 2026) — ASYMÉTRIE LECTURE/PURGE, corrigée ici.
+                //
+                // `modalitesEvaluation` est NAMESPACÉE PAR TRIMESTRE (registre
+                // `CLES_NAMESPACEES`, trimestres.js) : les vraies données vivent
+                // dans `a2025_modalitesEvaluation`, `h2026_modalitesEvaluation`…
+                // Cette migration lisait pourtant la clé BRUTE `modalitesEvaluation`,
+                // qui n'existe pas — elle ne voyait donc JAMAIS rien à migrer —
+                // pendant que `nettoyerLegacy()` purgeait, lui, à travers le module
+                // propriétaire, c'est-à-dire la clé namespacée du trimestre ACTIF.
+                //
+                // Une migration qui efface une clé qu'elle n'a jamais lue. Chez un
+                // utilisateur dont le trimestre actif porte ces cinq champs, ils
+                // étaient supprimés sans jamais atteindre le magasin V3.
+                //
+                // Constat du 8 août : Grégoire n'a été épargné que par un hasard —
+                // son trimestre actif (A2026) n'a aucune clé `modalitesEvaluation`,
+                // donc la purge n'a rien trouvé. Ses valeurs réelles survivaient
+                // dans a2024/a2025/h2026.
+                //
+                // ⮕ On lit désormais PAR LE MÊME CHEMIN qu'on purge : le module
+                // propriétaire (SSOT #328 Lot 1). Repli sur la clé brute si le
+                // module n'est pas chargé, pour ne pas dépendre d'un ordre de script.
                 const sources = {
-                    modalitesEvaluation: safeGet('modalitesEvaluation'),
+                    modalitesEvaluation: lireModalitesLegacy(),
                     preferencesAffichage: safeGet('preferencesAffichage'),
                     seuilsInterpretation: safeGet('seuilsInterpretation')
                 };
@@ -293,7 +315,29 @@
                     const valeur = source[entree.champ];
                     // Ne pas écraser une valeur déjà migrée (migration idempotente par design,
                     // mais aussi : si l'utilisateur a modifié après une migration partielle)
-                    if (entree.cible in prefs) continue;
+                    //
+                    // ⚠ #419 (8 août 2026) — « déjà migrée » ne peut PAS se réduire à
+                    // « la clé existe ». Constat terrain le jour où cette migration a
+                    // enfin tourné (#414) : le magasin V3 contenait
+                    // `grilleReferenceDepistage: ''`. La clé était présente, donc la
+                    // copie était sautée — puis `nettoyerLegacy()` purgeait la source.
+                    // Une valeur legacy réelle aurait été écartée ET effacée, en
+                    // silence, alors que le magasin d'arrivée n'avait qu'un espace
+                    // réservé vide.
+                    //
+                    // Un espace réservé n'est pas un choix de l'utilisateur : `''`,
+                    // `null` et `undefined` sont traités comme ABSENTS, et la valeur
+                    // legacy l'emporte. Un `false` ou un `0`, eux, sont de vrais choix
+                    // et restent protégés — d'où le test explicite plutôt qu'un
+                    // simple test de véracité, qui les aurait écrasés.
+                    const dejaRenseigne = (entree.cible in prefs)
+                        && prefs[entree.cible] !== ''
+                        && prefs[entree.cible] !== null
+                        && prefs[entree.cible] !== undefined;
+                    if (dejaRenseigne) continue;
+
+                    // Symétrie : ne pas remplacer un espace réservé vide par un autre.
+                    if (valeur === '' || valeur === null || valeur === undefined) continue;
 
                     prefs[entree.cible] = valeur;
                     rapport.champsMigres++;
@@ -326,36 +370,81 @@
      * a eu lieu) pour résister aux réintroductions (import de données anciennes,
      * restauration post-démo).
      */
+    // Une valeur est « mise à l'abri » quand le magasin V3 en porte une VRAIE
+    // (ni absente, ni espace réservé vide). C'est la seule condition qui rend
+    // la suppression de la source légitime. Un `false` ou un `0` comptent :
+    // ce sont des choix.
+    function estRecueilli(cible, prefs) {
+        return (cible in prefs)
+            && prefs[cible] !== ''
+            && prefs[cible] !== null
+            && prefs[cible] !== undefined;
+    }
+
     function nettoyerLegacy() {
-        const CHAMPS_LEGACY_MODALITES = [
-            'afficherDescriptionsSOLO',
-            'activerRai',
-            'grilleReferenceDepistage',
-            'decouplerPN',
-            'fenetrePatterns'
-        ];
+        // ⚠ #419 : dérivé de MIGRATION_MAP au lieu d'être recopié à la main.
+        // Une seconde liste en dur aurait pu diverger de la carte de migration
+        // — et purger un champ que la migration ne recueille pas.
+        const CHAMPS_LEGACY_MODALITES = MIGRATION_MAP
+            .filter(function (e) { return e.source === 'modalitesEvaluation'; });
 
         try {
-            const modalites = window.modalitesEvaluation.lire();
+            const prefs = lireStockage();
+
+            // ⚠⚠ #419 — ON NE PURGE QUE CE QUI EST DÉJÀ À L'ABRI.
+            //
+            // `nettoyerLegacy()` tourne à CHAQUE démarrage, y compris longtemps
+            // après que le drapeau de migration a été posé — et il purge le
+            // trimestre ACTIF. Un utilisateur qui change de trimestre des mois
+            // plus tard voyait donc les cinq champs de ce trimestre-là
+            // supprimés alors que la migration, déjà marquée « faite », ne
+            // repasserait jamais les recueillir. La purge devançait la mise à
+            // l'abri au lieu de la suivre.
+            const modalites = lireModalitesLegacy();
             if (modalites && typeof modalites === 'object') {
-                const aNettoyer = CHAMPS_LEGACY_MODALITES.some(function (champ) {
-                    return champ in modalites;
+                const aPurger = CHAMPS_LEGACY_MODALITES.filter(function (e) {
+                    return (e.champ in modalites) && estRecueilli(e.cible, prefs);
                 });
-                if (aNettoyer) {
+                if (aPurger.length > 0) {
                     // Écriture via le module propriétaire (SSOT #328 Lot 1)
                     window.modalitesEvaluation.modifier(function (m) {
-                        for (const champ of CHAMPS_LEGACY_MODALITES) {
-                            delete m[champ];
+                        for (const e of aPurger) {
+                            delete m[e.champ];
                         }
                     });
                 }
             }
 
-            // Suppression de la clé entière (no-op si déjà absente)
-            db.removeSync('preferencesAffichage');
+            // Même règle pour la clé entière : elle ne disparaît que lorsque
+            // TOUT ce qu'elle porte encore d'utile est recueilli. Sinon on la
+            // laisse en place — une clé legacy qui traîne coûte quelques
+            // octets, une préférence effacée ne se retrouve pas.
+            const affichage = safeGet('preferencesAffichage');
+            const resteAMigrer = MIGRATION_MAP.some(function (e) {
+                return e.source === 'preferencesAffichage'
+                    && (e.champ in affichage)
+                    && !estRecueilli(e.cible, prefs);
+            });
+            if (!resteAMigrer) {
+                db.removeSync('preferencesAffichage'); // no-op si déjà absente
+            }
         } catch (e) {
             console.error('[preferences] Erreur pendant le nettoyage legacy :', e);
         }
+    }
+
+    // Lecture du legacy `modalitesEvaluation` par le MÊME chemin que la purge
+    // (#419). Le module propriétaire applique le namespace du trimestre actif ;
+    // la clé brute ne sert que de repli si le module n'est pas encore chargé.
+    function lireModalitesLegacy() {
+        try {
+            if (window.modalitesEvaluation && typeof window.modalitesEvaluation.lire === 'function') {
+                return window.modalitesEvaluation.lire() || {};
+            }
+        } catch (e) {
+            console.warn('[preferences] Lecture du legacy modalitesEvaluation impossible :', e);
+        }
+        return safeGet('modalitesEvaluation');
     }
 
     function safeGet(cle) {
@@ -407,12 +496,38 @@
     // AUTO-INITIALISATION : migration au démarrage
     // =========================================================================
 
+    // ⚠⚠ #414 (8 août 2026) — CETTE MIGRATION N'A JAMAIS TOURNÉ.
+    //
+    // Deux défauts de naissance, présents depuis son écriture (16 avril 2026,
+    // « Chantier RLO 1.2 — Branchement preferences.js »), et qui se couvraient
+    // l'un l'autre :
+    //   • la garde testait `db.isReady`, une propriété qui N'EXISTE PAS sur
+    //     `db` (le drapeau d'instance est `db.ready`, le drapeau global
+    //     `window.dbReady`) → toujours fausse, donc jamais d'exécution directe ;
+    //   • le repli écoutait sur `document`, alors que `db.js` émet sur `window`
+    //     et l'a TOUJOURS fait (vérifié sur l'historique complet). Un événement
+    //     émis sur `window` ne descend pas vers `document` : écouteur mort-né.
+    //
+    // Aucun autre appelant : `migrerPreferencesV3` n'avait donc aucun chemin
+    // d'exécution. Conséquence silencieuse — `obtenirPreference()` lit
+    // UNIQUEMENT le magasin V3, sans repli sur le legacy : toute préférence
+    // restée dans `modalitesEvaluation` / `preferencesAffichage` était ignorée
+    // au profit de `DEFAUTS`.
+    //
+    // Réveil audité avant branchement (règle « code dormant » du CLAUDE.md),
+    // car la migration purge le legacy via `nettoyerLegacy()` :
+    //   • `preferencesAffichage` — clé supprimée en entier : ZÉRO lecteur
+    //     ailleurs dans le code, la purge est sans effet de bord ;
+    //   • les 5 champs retirés de `modalitesEvaluation` — aucune lecture
+    //     qualifiée (`modalites.decouplerPN` etc.) ; les occurrences trouvées
+    //     visent `modalites.portfolio.decouplerPN`, champ imbriqué distinct,
+    //     que `nettoyerLegacy` ne touche pas.
+    // La migration n'écrase jamais une valeur déjà présente en V3
+    // (`if (entree.cible in prefs) continue`) : elle ne fait que combler les
+    // trous. Et si l'écriture V3 échoue, `nettoyerLegacy()` n'est pas atteint —
+    // l'ordre est déjà fail-safe.
     function lancerMigrationAuDemarrage() {
-        if (typeof db !== 'undefined' && db.isReady) {
-            migrerPreferencesV3();
-        } else {
-            document.addEventListener('db-ready', migrerPreferencesV3);
-        }
+        window.auDbPret(migrerPreferencesV3);
     }
 
     if (document.readyState === 'loading') {

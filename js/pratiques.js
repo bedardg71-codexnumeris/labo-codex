@@ -163,8 +163,19 @@ function initialiserModulePratiques() {
     // 🎨 Mettre à jour l'interface de la pratique par défaut
     mettreAJourUIPratiqueDefaut();
 
-    // 🔄 Écouter l'événement db-ready pour recharger les grilles après synchronisation IndexedDB
-    window.addEventListener('db-ready', function() {
+    // 🔄 Recharger les grilles après synchronisation IndexedDB.
+    //
+    // #414 (8 août 2026) : cet écouteur est posé depuis `initialiserModulePratiques()`,
+    // que `main.js` appelle sous `DOMContentLoaded` — c'est-à-dire À L'INSTANT
+    // EXACT où l'écouteur de #413 se posait trop tard. La course n'est donc pas
+    // théorique ici : c'est la même, au même moment. Quand `db-ready` était déjà
+    // passé, la liste des grilles restait celle d'avant l'hydratation d'IDB et
+    // la préférence `grilleReferenceDepistage` n'était jamais réappliquée au
+    // sélecteur.
+    //
+    // `once: false` : à réexécuter à chaque `db-ready`, l'événement étant réémis
+    // après un import — les grilles importées doivent apparaître dans la liste.
+    window.auDbPret(function() {
         chargerGrillesDisponibles();
 
         // Restaurer la grille de référence (préférence utilisateur)
@@ -180,7 +191,7 @@ function initialiserModulePratiques() {
         if (checkCategorisation) {
             checkCategorisation.checked = modalitesDB.activerCategorisationErreurs === true;
         }
-    });
+    }, { once: false });
 }
 
 /* ===============================

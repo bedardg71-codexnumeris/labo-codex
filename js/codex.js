@@ -220,11 +220,9 @@ function initialiserCodex() {
     // #336 : réafficher le plan de purge persisté par le dernier import (le
     // reload post-import efface la console — constat terrain 11 juin). Après
     // db-ready : la clé peut n'être qu'en IDB au premier rendu.
-    if (window.dbReady) {
-        _restaurerPlanPurge();
-    } else {
-        window.addEventListener('db-ready', _restaurerPlanPurge, { once: true });
-    }
+    // #414 (8 août 2026) : site déjà correct — c'est même celui dont le patron a
+    // servi à corriger #413 — passé au portillon commun sans changer de sens.
+    window.auDbPret(_restaurerPlanPurge);
 
     // CLE_ETAT_CODEX pointe maintenant vers _codex_etat
     // Fallback sur l'ancienne clé pour le premier chargement avant que la migration async ne termine
@@ -246,11 +244,8 @@ function initialiserCodex() {
                 _mettreAJourIndicateur();
             }
         };
-        if (window.dbReady) {
-            relireEtatTardif();
-        } else {
-            window.addEventListener('db-ready', relireEtatTardif, { once: true });
-        }
+        // #414 : idem — portillon commun, sémantique inchangée.
+        window.auDbPret(relireEtatTardif);
     }
     _mettreAJourIndicateur();
 
