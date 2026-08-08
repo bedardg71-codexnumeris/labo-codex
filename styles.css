@@ -20790,13 +20790,19 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     outline: none;
     box-shadow: var(--focus-ring);
 }
-/* Aucun objectif encore posé : présent mais en retrait. */
+/* Aucun objectif encore posé : DISCRET mais JAMAIS estompé (#151, 8 août).
+   L'ancien retrait (grayscale + opacity .45 en 12 px) rendait le badge
+   introuvable — F1 revenue par le style après avoir été corrigée au rendu :
+   l'affordance qui crée le PREMIER objectif disparaissait précisément quand
+   il y en avait zéro. Le « à remplir » se dit désormais par un liséré
+   pointillé (même langage que les zones de dépôt vides), pas par l'effacement. */
 .planif-badge-objectif--vide {
-    filter: grayscale(1);
-    opacity: 0.45;
+    opacity: 0.8;
+    outline: 1px dashed color-mix(in srgb, var(--planif-couleur-lecon) 55%, transparent);
+    outline-offset: 1px;
 }
 .planif-badge-objectif--vide:hover {
-    opacity: 0.8;
+    opacity: 1;
 }
 
 /* Deuxième étage de l'en-tête : LES objectifs de la leçon (toujours plusieurs).

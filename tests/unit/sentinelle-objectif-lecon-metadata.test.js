@@ -24,6 +24,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
 const source = readFileSync(path.join(racineProjet, 'js', 'planification-carte.js'), 'utf8');
 const indexHtml = readFileSync(path.join(racineProjet, 'index.html'), 'utf8');
+const sourceCss = readFileSync(path.join(racineProjet, 'styles.css'), 'utf8');
 
 // --- Sandbox ------------------------------------------------------------
 let store;
@@ -272,6 +273,22 @@ describe('F1 · invariants de rendu et de routage', () => {
         // d'un objectif, donc la fonction ne se découvrait jamais.
         expect(source).toMatch(/estLecon\s*\n?\s*\?\s*'<span class="planif-badge-objectif'/);
         expect(source).toContain('planif-badge-objectif--vide');
+    });
+
+    it('le badge 🎯 VIDE reste VISIBLE — F1 ne revient pas par le style (#151)', () => {
+        // 8 août 2026, terrain Grégoire : « il n'y a pas d'émoji 🎯 ». Le badge
+        // ÉTAIT rendu — mais `--vide` le passait en grayscale(1) + opacity .45
+        // sur 12 px : introuvable, confirmé par capture (prod, mode clair).
+        // F1 avait été corrigée au RENDU (test ci-dessus, resté vert) et était
+        // revenue par le STYLE. Cette assertion couvre le second chemin :
+        // l'état « aucun objectif » a le droit d'être discret, jamais estompé.
+        const blocs = sourceCss.match(/\.planif-badge-objectif--vide[^{]*\{[^}]*\}/g) || [];
+        expect(blocs.length).toBeGreaterThan(0);
+        blocs.forEach(function (b) {
+            expect(b).not.toMatch(/grayscale/);
+            const op = b.match(/opacity:\s*([\d.]+)/);
+            if (op) expect(parseFloat(op[1])).toBeGreaterThanOrEqual(0.7);
+        });
     });
 
     it('ne réintroduit pas l’ancien badge conditionné aux données de séances', () => {

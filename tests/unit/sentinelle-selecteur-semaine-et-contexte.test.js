@@ -234,6 +234,48 @@ describe('Sélecteur de semaine · les deux gestes ne peuvent pas diverger', () 
     });
 });
 
+describe('Sélecteur de semaine · l’INSPECTEUR resynchronise le bloc (#150, terrain 8 août)', () => {
+    // Terrain Grégoire : « changer un numéro de semaine dans l'inspecteur n'a
+    // aucun effet sur la feuille dans le canevas ». La valeur était sauvegardée
+    // — seul l'AFFICHAGE du bloc ne suivait pas : le chemin bloc→inspecteur
+    // passait par reconstruireDOM, le chemin inverse ne rafraîchissait rien.
+
+    function blocInspecteurSemaine() {
+        const debut = sourceCarte.indexOf("extra.querySelector('#planif-panneau-semaine')");
+        expect(debut).toBeGreaterThan(-1);
+        const fin = sourceCarte.indexOf('});', sourceCarte.indexOf("addEventListener('input'", debut));
+        expect(fin).toBeGreaterThan(debut);
+        return sourceCarte.slice(debut, fin + 3);
+    }
+
+    it('le handler input de l’inspecteur appelle la synchro du bloc', () => {
+        const bloc = blocInspecteurSemaine();
+        expect(bloc).toContain('synchroniserSelecteurSemaine(id)');
+    });
+
+    it('… et remonte aux séquences ancêtres, dont la semaine est DÉRIVÉE', () => {
+        // Une leçon déplacée en semaine 3 change l'étendue de sa séquence :
+        // synchroniser le seul bloc leçon laisserait la séquence mentir.
+        const bloc = blocInspecteurSemaine();
+        expect(bloc).toMatch(/parent[\s\S]{0,200}sequence[\s\S]{0,120}synchroniserSelecteurSemaine/);
+    });
+
+    it('… SANS reconstruireDOM — le handler est sur `input`, le focus doit survivre', () => {
+        // reconstruireDOM pendant la frappe détruirait le champ en cours de
+        // saisie : « 12 » deviendrait « 1 », perte de focus à chaque chiffre.
+        const bloc = blocInspecteurSemaine();
+        expect(bloc).not.toContain('reconstruireDOM');
+    });
+
+    it('la synchro ramène le <select> à l’état NON PEUPLÉ — liste paresseuse oblige', () => {
+        // Poser `.value` sans repeupler échouerait en silence : avant le
+        // premier contact, le <select> n'a qu'une seule option. L'état de
+        // premier rendu (une option + dataset.peuple effacé) est le seul état
+        // sûr — la liste complète revient au prochain contact.
+        expect(sourceCarte).toMatch(/function synchroniserSelecteurSemaine[\s\S]{0,900}delete select\.dataset\.peuple/);
+    });
+});
+
 describe('Sélecteur de semaine · déplacer une séquence ne lui donne pas de semaine', () => {
     let api;
     beforeEach(() => { api = monterModule(); poserCadre(); });
