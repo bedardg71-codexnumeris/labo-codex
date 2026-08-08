@@ -7,6 +7,31 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 8 AOÛT 2026, FIN DE SOIRÉE (Claude Code cloud, branche `claude/labo-codex-session-start-gc1whl`, ouverte SUR `main`). ⮕⮕ LIRE EN PREMIER À LA REPRISE.
+     ÉTAT FACTUEL : **1.56.1** (build 0808-0914), fusionnée `main`. Vitest **1871/1871** (218 fichiers, +4). Arbre propre. Dernier ID BACKLOG : **#428**.
+
+     ▣ **RITUEL DE DÉBUT — ZÉRO ÉCART MATÉRIEL, et le balayage de branches a servi.** Prémisse vérifiée point par point (1.56.0, build 0808-0839, Vitest 1867/1867, dernier ID #427, arbre propre) : tout conforme. Les deux branches du 8 août sont à **0 commit d'avance** — la réconciliation a bien tout emporté.
+        ⚠ **MAIS LE CLONE ÉTAIT SHALLOW** (50 commits), et les compteurs `ahead/behind` du balayage étaient des **artefacts du point de greffe** : des branches de juin affichaient « 3448 commits d'avance ». `git fetch --unshallow` AVANT de conclure. ⮕ *Le balayage par DATE passe malgré le shallow ; toute comparaison de CONTENU ment.* La note du 8 août au matin disait déjà « archéologie git trompeuse » — c'est vrai aussi du contrôle de relais lui-même.
+        ⮕ **UN COMMIT ORPHELIN TROUVÉ** : `ffd07765` (6 août) sur `claude/plan-journee-2026-08-07-csllh9` — le rapport `Rapports/VALIDATION-AUTONOME-BLOC-A-2026-08-06.md`, jamais fusionné. **Rapatrié sur `main`** (`b3fd0652`). Grille §10 remplie + 5 observations O1-O5. C'est de la validation terrain déjà faite qui dormait hors de `main`.
+
+     ✅ LIVRÉ — **checklist des portes terrain** (`plans de travail/CHECKLIST-portes-terrain-2026-08-08.md`) puis **#409 (1.56.1)**.
+
+     ▣ **CHECKLIST DES PORTES TERRAIN.** Cinq chantiers livrés en trois jours, aucun validé au doigt. Condensée pour NE PAS revalider l'acquis : le §7 liste les **sept contrats déjà prouvés au banc du 6 août** (V2 ×4,8, cohérence STD 20/20, 0 listener net, dates soirée…) — coup d'œil bienvenu, re-mesure inutile. Le reliquat réel tient en trois choses : **V1 boot sur corpus réel** (le banc démo était non concluant), **l'iPad**, et l'œil de Grégoire sur ses données. Les commandes console du §1 ont été **vérifiées contre `js/preferences.js`** : `preferencesUtilisateur` et `migrationPrefs_v3_done` ne sont PAS dans `CLES_NAMESPACEES`, elles se collent telles quelles.
+
+     ▣ **#409 — L'ARCHIVE DE #367 RETIRÉE, EN DEUX GESTES ET NON UN.** La consigne disait « supprimer la clé + le `db.setSync` d'archivage ». Le `db.setSync` est parti ; mais retirer l'écriture **ne retire rien de ce qui est déjà stocké** chez qui a démarré 1.50.0-1.55.x, et c'est une copie intégrale du dictionnaire de notes qui pèse pour rien sur le budget localStorage (#353). D'où un second geste : une **purge SANS DRAPEAU**.
+        ⮕ **Pourquoi sans drapeau, et c'est le point.** Grégoire fait des backups Codex réguliers. Un backup pris dans la fenêtre du **7-8 août PORTE cette clé** et la réintroduirait à l'import. Une purge à drapeau ne repasserait jamais. Même motif — et même justification écrite — que la purge `dureePeriodeMinutes` de #328 qui vit juste en dessous depuis le 11 juin.
+        ⮕ **CE QUI A RENDU LE RETRAIT SANS RÉSERVE** : la clé n'avait **AUCUN lecteur** (grep : une écriture, zéro lecture). Aucun chemin de restauration n'a jamais existé — c'était une copie morte, pas un filet utilisable. *Un « filet » que personne ne lit n'est pas un filet, c'est du poids.*
+        ⚠ **CONSÉQUENCE ASSUMÉE, ÉNONCÉE PLUTÔT QUE TUE** : sur un codex qui n'a **pas encore** migré, une note orpheline (leçon absente de toute carte) est désormais **perdue** à la purge au lieu d'être archivée. C'est la portée exacte de la décision du 7 août (« la clé ne contenait que des productions de test »). ⮕ Le test qui affirmait l'inverse a été **RETOURNÉ, PAS SUPPRIMÉ** — la décision reste lisible et verrouillée dans le dépôt. Si quelqu'un veut rétablir un filet un jour, c'est là que ça se discute.
+        ⮕ **DETTE INSCRITE AVEC SA DATE — #428** : la purge elle-même est à retirer quand les backups de la fenêtre 7-8 août seront hors rotation, **au plus tard à la rentrée**. Pas de « au cas où » sans date : #409 l'était pour l'archive, #428 l'est pour la purge.
+
+     ▣ **BREAK-TESTS — 5 mutations ROUGE, et UN FAUX-VERT ATTRAPÉ QUI VALAIT LE DÉTOUR.** La mutation « mettre la purge sous drapeau » ne rougissait que l'assertion **statique** (`CODE_PURGE_409` ne doit pas contenir `getSync('migration_`). Le volet **comportemental** — réimporter l'archive et vérifier qu'une seconde purge la reprend — restait VERT devant la régression même qu'il surveille.
+        ⮕ **Cause** : mon stub `rejouerPurge409` n'exposait que `getSync` et `removeSync`. La pose du drapeau (`db.setSync`) lançait donc un `TypeError`… **avalé par le `catch` de la purge**. Le drapeau n'était jamais posé, la seconde purge tournait, l'assertion passait. ⮕ **Règle qui se dégage** : *un harnais incomplet devient complice du `try/catch` du code testé — l'erreur qui prouverait la mutation est silencieusement mangée.* `setSync` ajouté au stub **alors que la purge ne l'appelle pas**, précisément pour que la mutation soit fidèle ; commenté sur place. Mutation refaite : l'assertion comportementale mord (`{ planif-noeud_7 } to be undefined`).
+        ⮕ Second piège, déjà connu et évité : l'extracteur de la purge découpait le `try` **sans son `catch`** (« Missing catch or finally »). Bornes vérifiées AVANT chaque slice — c'est le défaut de la sentinelle #413 du 8 août, où un `indexOf` devenu -1 découpait tout le reste du fichier en restant vert.
+
+     ⮕ **QUEUES OUVERTES, INCHANGÉES** : **#418** (`db-ready` jamais émis sans IndexedDB — décision de sémantique) · **#416** (exports présentables, 3 questions 📐) · **#406** (bloc C triable seul) · **#421** (conformité doc) · **#424-#427** (Carte d'alignement, **6 décisions D1-D6 en attente**) · **#428** (neuf) · les **portes terrain**, chez Grégoire.
+     ===================================================================== -->
+
+<!-- =====================================================================
 
 <!-- =====================================================================
      SESSION — 8 AOÛT 2026, SOIR : RÉCONCILIATION DE DEUX SESSIONS PARALLÈLES. ⮕⮕ LIRE EN PREMIER À LA REPRISE.
@@ -5602,13 +5627,18 @@ vit sur `main`, donc toute session le lira, quelle que soit la branche ouverte.
 
 | Point | Valeur attendue |
 |---|---|
-| `origin/main` | **1.56.0** — porte TOUT : #414/#417/#419 (session du matin) et #420/#422/#423 (session de nuit) |
+| `origin/main` | **1.56.1** — porte TOUT : #414/#417/#419 (matin du 8), #420/#422/#423 (nuit du 7→8), #409 (fin de soirée) |
 | Branches en avance | **AUCUNE.** ⚠ Le vérifier, ne pas le croire — voir ci-dessous |
-| Version | `{"build":"0808-0839","beta":"1.56.0"}` |
-| Vitest | **1867/1867** (218 fichiers) |
+| Version | `{"build":"0808-0914","beta":"1.56.1"}` |
+| Vitest | **1871/1871** (218 fichiers) |
 | Playwright WebKit | non exécutable en conteneur → CI à la PR |
-| Dernier ID BACKLOG | **#427** |
+| Dernier ID BACKLOG | **#428** |
 | Arbre | propre |
+
+⚠ **Le clone du conteneur peut être SHALLOW** (50 commits). Le balayage par DATE
+ci-dessous reste valable, mais **tout `ahead/behind` est alors un artefact** du
+point de greffe — des branches de juin s'affichent « 3448 commits d'avance ».
+Faire `git fetch --unshallow` avant de comparer des CONTENUS, jamais après.
 
 ### ⚠ AJOUT AU RITUEL DE DÉBUT — le contrôle qui manquait
 
@@ -5641,6 +5671,11 @@ attendre. C'est le report du merge qui ouvre la fenêtre de divergence, et il a
 
 **Cinq chantiers livrés, aucun validé au doigt.** C'est le vrai risque courant.
 
+⮕ **CHECKLIST EXÉCUTABLE** : `plans de travail/CHECKLIST-portes-terrain-2026-08-08.md`
+(8 août). Elle reprend les points ci-dessous en gestes, et son §7 liste les **sept
+contrats déjà prouvés au banc du 6 août** — à NE PAS revalider. Le reliquat réel :
+V1 boot sur corpus réel, l'iPad, et l'œil de Grégoire.
+
 1. **Saisie de durée sur iPad** — le champ vit dans l'en-tête d'un bloc qui se
    glisse ; la pression est interceptée, mais rien n'a été vérifié au doigt.
 2. **Lisibilité de l'en-tête sur un nœud étroit** — il a reçu deux contrôles et
@@ -5667,8 +5702,10 @@ attendre. C'est le report du merge qui ouvre la fenêtre de divergence, et il a
 - **#421** — conformité documentaire, sur **trois** surfaces. À faire quand
   l'interface aura cessé de bouger.
 - **#418** — `db-ready` jamais émis si IndexedDB est indisponible.
-- **#409** — l'archive `planification_seances_archive_pre367` : Grégoire a
-  confirmé le 8 août que ses notes sont correctes. Retrait immédiat possible.
+- ~~**#409**~~ — **LIVRÉ le 8 août (1.56.1)**. Écriture retirée de la migration
+  **et** purge sans drapeau de la clé déjà stockée (un backup Codex du 7-8 août
+  la porte et la réintroduirait). ⮕ Laisse **#428** derrière lui : retirer cette
+  purge quand ces backups seront hors rotation, au plus tard à la rentrée.
 - **#427** — refermer l'accès public (Cloudflare Access) vers le 20 août.
   ⚠ Les 50 sièges étaient déjà saturés en mai ; à trancher avant.
 

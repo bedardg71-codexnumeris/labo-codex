@@ -20,7 +20,7 @@
 // init-inline.js compare cette valeur au BUILD_ID lu depuis version.json :
 // si différent, Safari file:// a probablement un main.js périmé en cache,
 // et la séquence reload+bandeau s'enclenche. SYNCHRONISER À CHAQUE BUMP.
-window._SCRIPT_BUILD_main = '0808-0839';
+window._SCRIPT_BUILD_main = '0808-0914';
 
 /* ===============================
    FONCTION GLOBALE: Génération d'ID uniques
@@ -396,18 +396,22 @@ document.addEventListener('DOMContentLoaded', function () {
         // neuf et ne retire rien à personne. C'est la lecture la plus sûre de la
         // décision Grégoire du 7 août (« dupliquer vers tous, purger la nue »).
         //
-        // Aucune perte possible : la clé nue est ARCHIVÉE avant d'être purgée.
-        // ⮕ Retrait de l'archive prévu quand Grégoire aura confirmé la migration
-        //    sur ses données réelles (item BACKLOG #409) — pas de « au cas où »
-        //    sans date.
+        // ⚠ FILET RETIRÉ le 8 août 2026 (#409). La migration archivait d'abord la
+        // clé nue dans `planification_seances_archive_pre367`. Grégoire a vérifié
+        // ses données réelles (A2026 et H2026) après le premier démarrage en
+        // 1.50.0 : la clé nue ne portait que des productions de TEST, et l'archive
+        // ne protégeait précisément que celles-là. Elle n'a jamais eu de lecteur —
+        // aucun chemin de restauration n'existait, seulement une copie morte.
+        // ⮕ CONSÉQUENCE ASSUMÉE, et c'est la seule : sur un codex qui n'a PAS
+        //    encore migré, une note dont la leçon n'existe dans aucune carte n'a
+        //    pas de destination composite et est désormais PERDUE à la purge, au
+        //    lieu d'être archivée. C'est la portée exacte de la décision du 7 août.
         if (!db.getSync('migration_planification_seances_done', false)) {
             try {
                 const notesNues = db.getSync('planification_seances', null);
                 const aDesNotes = notesNues && typeof notesNues === 'object' && Object.keys(notesNues).length > 0;
 
                 if (aDesNotes) {
-                    db.setSync('planification_seances_archive_pre367', notesNues);
-
                     const listeTrim = db.getSync('trimestres', []);
                     if (Array.isArray(listeTrim)) {
                         listeTrim.forEach(t => {
@@ -446,6 +450,24 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.warn('[migration_planification_seances] erreur ignorée:', e);
             }
             db.setSync('migration_planification_seances_done', true);
+        }
+
+        // #409 (8 août 2026) — retrait de l'archive de #367 déjà STOCKÉE.
+        // Retirer l'écriture ci-dessus ne suffit pas : la clé existe déjà chez
+        // qui a démarré 1.50.0-1.55.x, et c'est une copie intégrale du
+        // dictionnaire de notes qui pèse pour rien sur le budget localStorage
+        // (#353). Sans drapeau, comme la purge dureePeriodeMinutes juste en
+        // dessous, et pour la même raison : un backup Codex pris dans la fenêtre
+        // du 7-8 août PORTE cette clé et la réintroduirait à l'import. Une purge
+        // à drapeau, elle, ne repasserait jamais.
+        // ⮕ À RETIRER quand les backups de cette fenêtre seront hors rotation —
+        //    au plus tard à la rentrée (septembre 2026). Item BACKLOG #428.
+        try {
+            if (db.getSync('planification_seances_archive_pre367', null) !== null) {
+                db.removeSync('planification_seances_archive_pre367');
+            }
+        } catch (e) {
+            console.warn('[purge archive pre367] erreur ignorée:', e);
         }
 
         // Purge du champ legacy dureePeriodeMinutes dans les modalités de
