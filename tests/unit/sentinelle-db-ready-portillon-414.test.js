@@ -285,10 +285,37 @@ describe('#414 · cliquet — un seul endroit sait attendre la DB', () => {
         ];
         for (const [fichier, fonction] of attendus) {
             const code = readFileSync(path.join(dossierJs, fichier), 'utf8');
+            // La fonction peut être confiée NUE (`auDbPret(fn)`) ou dans une
+            // enveloppe (`auDbPret(function() { fn(); ... })` — #429 y ajoute
+            // l'enrichissement). Ce qui est verrouillé : l'appel vit à
+            // L'INTÉRIEUR de l'argument d'auDbPret, pas ailleurs dans le boot.
             expect(
                 code,
                 `${fichier} : ${fonction} n’est plus confiée à window.auDbPret`
-            ).toMatch(new RegExp(`window\\.auDbPret\\(\\s*${fonction}`));
+            ).toMatch(new RegExp(`window\\.auDbPret\\((?:\\s*${fonction}|[\\s\\S]{0,200}?${fonction}\\(\\))`));
         }
+
+        // #429 : l'enrichissement post-migration attend la DB lui aussi — hors
+        // portillon, il lirait des clés de trimestre pas encore hydratées et
+        // poserait son drapeau one-shot sur une lecture VIDE : perte définitive.
+        // ⚠ Extraction par ÉQUILIBRAGE de parenthèses, pas par regex paresseuse :
+        // la première version ([\s\S]{0,400}?\);\s*\}) s'étirait AU-DELÀ du
+        // portillon et restait verte avec l'appel déplacé dehors — faux-vert
+        // attrapé au break-test du 8 août.
+        const prefs = readFileSync(path.join(dossierJs, 'preferences.js'), 'utf8');
+        const debutPortillon = prefs.indexOf('window.auDbPret(');
+        expect(debutPortillon, 'preferences.js : appel auDbPret introuvable').toBeGreaterThan(-1);
+        let profondeur = 0;
+        let iP = prefs.indexOf('(', debutPortillon);
+        for (; iP < prefs.length; iP++) {
+            if (prefs[iP] === '(') profondeur++;
+            else if (prefs[iP] === ')') { profondeur--; if (profondeur === 0) break; }
+        }
+        expect(iP).toBeLessThan(prefs.length);
+        const argumentPortillon = prefs.slice(debutPortillon, iP + 1);
+        expect(
+            argumentPortillon,
+            'enrichirPrefsV3DepuisTrimestres ne passe plus par le portillon db-ready'
+        ).toContain('enrichirPrefsV3DepuisTrimestres(');
     });
 });

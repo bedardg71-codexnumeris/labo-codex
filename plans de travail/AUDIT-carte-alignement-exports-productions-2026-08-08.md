@@ -480,19 +480,18 @@ de rétroaction aux types d'activité dans l'Inspecteur (`TYPES_ACTIVITE`), et
   une constante unique quand le sélecteur gagne les activités, sinon le prochain
   ajout d'option se fera à deux endroits sur trois.
 
-### 📐 QUESTION OUVERTE que le veto soulève — à trancher par Grégoire
+### ✅ QUESTION TRANCHÉE — décision Grégoire, 8 août midi : **option 2**
 
-Si toute rétroaction est formative et vit sur l'activité, **que devient le
-sélecteur de rétroaction du nœud Évaluation** ? Deux lectures :
+Le sélecteur de rétroaction du nœud Évaluation **garde un sens distinct** : la
+rétroaction *sur le rendu* — comment l'étudiant reçoit son travail commenté —
+différente de la formative qui vit sur l'activité. Conséquence d'exécution :
+le portage **AJOUTE** un champ aux activités (formative) et **CONSERVE** celui
+de l'évaluation, avec un **libellé clarifié** pour que les deux notions ne se
+confondent pas.
 
-1. **Il est de trop** — il a été posé là par défaut, et le geste réel est
-   ailleurs. On le retire en même temps (zéro-dette).
-2. **Il garde un sens distinct** — la rétroaction *sur le rendu* (sommative,
-   « comment je remets le travail commenté »), différente de la formative.
-   Les deux coexistent alors, avec deux libellés qui les distinguent.
-
-⮕ Non tranché ici **volontairement** : c'est exactement le terrain où
-l'arbitrage vient de se tromper une fois.
+⮕ Et le relevé D1, exécuté le même midi, dit ce qu'il y a à migrer : **3
+rétroactions, 0 production, 0 référence morte** — les trois vers le nœud
+ACTIVITÉ, rien vers l'évaluation.
 
 ### D3, D4, D5 → Options 1, sans réserve
 

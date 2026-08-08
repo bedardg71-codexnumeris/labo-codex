@@ -209,3 +209,119 @@ describe('#419 · la migration lit par le MÊME chemin qu’elle purge', () => {
         ).toBeDefined();
     });
 });
+
+// =======================================================================
+// #429 — L'ENRICHISSEMENT : la migration ne lisait que le trimestre ACTIF
+// =======================================================================
+// Constaté au contrôle terrain du 8 août, sur le dump de Grégoire : V3 portait
+// `grilleReferenceDepistage: ''` et `fenetrePatterns: 3` (défauts), pendant que
+// a2024/a2025/h2026 portaient la grille réelle et `4`. Cause : le trimestre
+// ACTIF (A2026, créé après le 16 avril) n'a pas de `modalitesEvaluation` — la
+// migration lit par le module propriétaire, donc par LA clé du trimestre actif,
+// et n'a rien trouvé. L'enrichissement balaie TOUS les trimestres, du plus
+// récent au plus ancien, en LECTURE SEULE, et ne comble que les DÉFAUTS.
+
+function laboratoireEnrichissement(prefsV3, trimestres, cles) {
+    const store = Object.assign({
+        preferencesUtilisateur: prefsV3,
+        trimestres: trimestres
+    }, cles);
+    const db = {
+        getSync: (cle, def) => (cle in store ? store[cle] : def),
+        setSync: (cle, val) => { store[cle] = val; },
+        removeSync: (cle) => { delete store[cle]; },
+        get: async (cle, def) => (cle in store ? store[cle] : def),
+        set: async () => {}
+    };
+    const win = chargerScript('js/preferences.js', { db }, {});
+    return { win, store };
+}
+
+describe('#429 · l’enrichissement V3 depuis les trimestres', () => {
+    const TRIMS = [
+        { id: 'a2024', dateCreation: '2024-08-15' },
+        { id: 'h2026', dateCreation: '2026-01-10' }
+    ];
+
+    it('récupère un champ resté au DÉFAUT — le cas réel du terrain (grille + fenêtre)', () => {
+        const { win, store } = laboratoireEnrichissement(
+            { grilleReferenceDepistage: '', fenetrePatterns: 3 },
+            TRIMS,
+            { h2026_modalitesEvaluation: { grilleReferenceDepistage: 'GRILLE_REELLE', fenetrePatterns: 4 } }
+        );
+        const rapport = win.enrichirPrefsV3DepuisTrimestres();
+
+        expect(rapport.champsRecuperes).toBe(2);
+        expect(store.preferencesUtilisateur.grilleReferenceDepistage).toBe('GRILLE_REELLE');
+        expect(store.preferencesUtilisateur.fenetrePatterns).toBe(4);
+    });
+
+    it('ne touche JAMAIS une valeur qui n’est plus au défaut', () => {
+        // Une valeur posée — par la migration ou par la main de l'utilisateur —
+        // est intouchable : l'enrichissement comble, il ne corrige pas.
+        const { win, store } = laboratoireEnrichissement(
+            { grilleReferenceDepistage: 'CHOIX_RECENT' },
+            TRIMS,
+            { h2026_modalitesEvaluation: { grilleReferenceDepistage: 'VIEILLE_GRILLE' } }
+        );
+        win.enrichirPrefsV3DepuisTrimestres();
+
+        expect(store.preferencesUtilisateur.grilleReferenceDepistage).toBe('CHOIX_RECENT');
+    });
+
+    it('le trimestre le plus RÉCENT gagne (dateCreation, pas l’ordre du tableau)', () => {
+        // Le tableau liste a2024 APRÈS h2026 exprès : un tri absent ou inversé
+        // adopterait la vieille valeur.
+        const { win, store } = laboratoireEnrichissement(
+            { grilleReferenceDepistage: '' },
+            [
+                { id: 'h2026', dateCreation: '2026-01-10' },
+                { id: 'a2024', dateCreation: '2024-08-15' }
+            ].reverse(),
+            {
+                a2024_modalitesEvaluation: { grilleReferenceDepistage: 'VIEILLE' },
+                h2026_modalitesEvaluation: { grilleReferenceDepistage: 'RECENTE' }
+            }
+        );
+        win.enrichirPrefsV3DepuisTrimestres();
+
+        expect(store.preferencesUtilisateur.grilleReferenceDepistage).toBe('RECENTE');
+    });
+
+    it('ONE-SHOT : vider un champ APRÈS l’enrichissement est un choix qui tient', () => {
+        // Sans drapeau, l'utilisateur qui vide sa grille de référence la
+        // verrait revenir de a2024 à chaque démarrage.
+        const { win, store } = laboratoireEnrichissement(
+            { grilleReferenceDepistage: '' },
+            TRIMS,
+            { h2026_modalitesEvaluation: { grilleReferenceDepistage: 'GRILLE_REELLE' } }
+        );
+        win.enrichirPrefsV3DepuisTrimestres();
+        expect(store.preferencesUtilisateur.grilleReferenceDepistage).toBe('GRILLE_REELLE');
+
+        // L'utilisateur vide la grille (choix délibéré), puis l'app redémarre.
+        store.preferencesUtilisateur.grilleReferenceDepistage = '';
+        const rapport2 = win.enrichirPrefsV3DepuisTrimestres();
+
+        expect(rapport2.champsRecuperes).toBe(0);
+        expect(store.preferencesUtilisateur.grilleReferenceDepistage).toBe('');
+    });
+
+    it('LECTURE SEULE : les clés de trimestre ne sont ni modifiées ni purgées', () => {
+        // L'asymétrie lecture/purge a fait #419 — le correctif de son dégât ne
+        // doit pas la recréer. Les vieilles clés restent intactes : c'est
+        // nettoyerLegacy (bornée au trimestre actif) qui décide des purges.
+        const source = { grilleReferenceDepistage: 'GRILLE_REELLE', fenetrePatterns: 4, autreChamp: 'x' };
+        const { win, store } = laboratoireEnrichissement(
+            {},
+            TRIMS,
+            { h2026_modalitesEvaluation: source }
+        );
+        win.enrichirPrefsV3DepuisTrimestres();
+
+        expect(store.h2026_modalitesEvaluation).toBe(source);
+        expect(store.h2026_modalitesEvaluation).toEqual(
+            { grilleReferenceDepistage: 'GRILLE_REELLE', fenetrePatterns: 4, autreChamp: 'x' }
+        );
+    });
+});
