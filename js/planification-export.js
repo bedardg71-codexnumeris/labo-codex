@@ -379,11 +379,19 @@ function nettoyerTSV(str) {
     return String(str == null ? '' : str).replace(/\t/g, ' ').replace(/\n/g, ' ').replace(/\r/g, '');
 }
 
+// ⚠ UNE seule colonne « Semaine » (#152, capture Numbers de Grégoire) : la
+// ligne de séquence y met son ÉTENDUE (« 3–5 »), la ligne de leçon son numéro.
+// Deux colonnes disaient deux fois la même dérivation — illisible en tableau.
 var COLONNES_TSV = {
-    sommaire: ['Séquence', 'Semaines', 'Leçon', 'Semaine', 'Évaluation', 'Pondération (%)', 'Échéance'],
-    deroulement: ['Séquence', 'Semaines', 'Leçon', 'Semaine', 'Type', 'Titre', 'Durée (min)', 'Rétroaction', 'Production', 'Pondération (%)', 'Échéance', 'Objectifs'],
-    alignement: ['Séquence', 'Semaines', 'Leçon', 'Semaine', 'Type', 'Titre', 'Durée (min)', 'Rétroaction', 'Production', 'Pondération (%)', 'Échéance', 'Objectifs', 'Objectifs servis', 'Liens', 'Grille', 'Échelle']
+    sommaire: ['Séquence', 'Leçon', 'Semaine', 'Évaluation', 'Pondération (%)', 'Échéance'],
+    deroulement: ['Séquence', 'Leçon', 'Semaine', 'Type', 'Titre', 'Durée (min)', 'Rétroaction', 'Production', 'Pondération (%)', 'Échéance', 'Objectifs'],
+    alignement: ['Séquence', 'Leçon', 'Semaine', 'Type', 'Titre', 'Durée (min)', 'Rétroaction', 'Production', 'Pondération (%)', 'Échéance', 'Objectifs', 'Objectifs servis', 'Liens', 'Grille', 'Échelle']
 };
+
+function etendueTexteTSV(etendue) {
+    if (!etendue) return '';
+    return etendue.debut + (etendue.fin !== etendue.debut ? '–' + etendue.fin : '');
+}
 
 function rendreTSV(plan, niveauId) {
     var inc = INCLUSIONS[niveauId];
@@ -394,10 +402,7 @@ function rendreTSV(plan, niveauId) {
     }
 
     function baseSeq(seq) {
-        var etendue = seq.etendue
-            ? seq.etendue.debut + (seq.etendue.fin !== seq.etendue.debut ? '–' + seq.etendue.fin : '')
-            : '';
-        return [seq.titre, etendue];
+        return [seq.titre];
     }
 
     function ligneElement(base, lecon, el) {
@@ -475,8 +480,9 @@ function rendreTSV(plan, niveauId) {
         var base = baseSeq(seq);
         var aucunContenu = seq.lecons.length === 0 && seq.elements.length === 0;
         if (aucunContenu) {
-            var vide = COLONNES_TSV[niveauId].length - 2;
-            pousser(base.concat(new Array(vide).fill('')));
+            // #152 : l'étendue de la séquence vit dans LA colonne Semaine.
+            var vide = COLONNES_TSV[niveauId].length - 3;
+            pousser(base.concat(['', etendueTexteTSV(seq.etendue)]).concat(new Array(vide).fill('')));
             return;
         }
         seq.lecons.forEach(function(lecon) { ligneLecon(base, lecon); });
@@ -484,7 +490,7 @@ function rendreTSV(plan, niveauId) {
     });
 
     plan.leconsOrphelines.forEach(function(lecon) {
-        ligneLecon(['(Hors séquence)', ''], lecon);
+        ligneLecon(['(Hors séquence)'], lecon);
     });
 
     return lignes.join('\n') + '\n';
