@@ -5656,12 +5656,12 @@ vit sur `main`, donc toute session le lira, quelle que soit la branche ouverte.
 
 | Point | Valeur attendue |
 |---|---|
-| `origin/main` | **1.56.3** — porte TOUT : #414/#417/#419, #420/#422/#423 (nuit du 7→8), #409, l'arbitrage D1-D6, et la vague terrain du matin (#148-#151 de SUIVI-BUGS) |
+| `origin/main` | **1.56.4** — porte TOUT : les chantiers des 7-8 août, l'arbitrage D1-D6 consommé, la vague terrain #148-#151 VALIDÉE au doigt, #429 |
 | Branches en avance | **AUCUNE.** ⚠ Le vérifier, ne pas le croire — voir ci-dessous |
-| Version | `{"build":"0808-1124","beta":"1.56.3"}` |
-| Vitest | **1884/1884** (219 fichiers) |
+| Version | `{"build":"0808-1156","beta":"1.56.4"}` |
+| Vitest | **1889/1889** (219 fichiers) |
 | Playwright WebKit | non exécutable en conteneur → CI à la PR |
-| Dernier ID BACKLOG | **#428** |
+| Dernier ID BACKLOG | **#429** |
 | Arbre | propre |
 
 ⚠ **Le clone du conteneur peut être SHALLOW** (50 commits). Le balayage par DATE
@@ -5682,20 +5682,91 @@ Si une branche est plus récente que `main`, **s'arrêter et le signaler à
 Grégoire** avant de coder. C'est le contrôle de cinq secondes qui aurait évité
 la collision du 8 août.
 
-### Décision qui attend Grégoire — le correctif structurel
+### ✅ Le correctif structurel est EN PLACE (décision Grégoire, 8 août)
 
-La fusion d'aujourd'hui règle le cas présent, pas la classe de problème. Trois
-sorties, de la plus légère à la plus solide :
+**On fusionne vers `main` en fin de CHAQUE session**, et `RELAIS.md` (racine,
+toujours sur `main`) sert de filet quand un merge doit vraiment attendre. La
+règle est dans CLAUDE.md ; le rituel de début lit RELAIS.md en premier.
 
-1. Un `RELAIS.md` à la racine, **toujours poussé sur `main`** en fin de session,
-   qui ne dit qu'une chose : où vit le travail en cours.
-2. Un commit minuscule sur `main` en fin de session, même information.
-3. **Merger vers `main` à la fin de chaque session** — le vrai remède.
+### Priorité 1 — LE PORTAGE DES EXPORTS vers la Carte d'alignement
 
-⮕ **Recommandation : la 3, avec la 1 comme filet** quand un merge doit vraiment
-attendre. C'est le report du merge qui ouvre la fenêtre de divergence, et il a
-été reporté trois fois cette semaine avant de coûter une journée.
+**Le chantier est entièrement instruit — la session exécute, elle ne débat pas.**
 
+⮕ **PLAN DE CHANTIER** : `plans de travail/PLAN-portage-exports-carte-2026-08-08.md`
+— lots A→G ordonnés (l'ordre est une CONTRAINTE : la migration des rétroactions
+APRÈS les exports, la suppression de la page EN DERNIER, harnais de parité vert
+exigé). Ses §0 (tranché — ne pas rouvrir) et §4 (pièges) sont le filet contre la
+compression. Les décisions encore ouvertes sont au §3 du plan, avec
+recommandations : l'emplacement de l'UI (menu Actions ★), le format « tableau
+collable » (TSV ★), le sort de l'import Markdown (📐 **demander à Grégoire s'il
+s'en sert** — lossy par construction, le retirer sinon), l'intention de version
+(minor ★, à confirmer).
+
+Tout ce qui nourrit le plan est acquis : l'audit consommé (§3bis tranché), le
+veto D2b résolu (option 2 — deux sélecteurs, deux libellés), le relevé D1 chiffré
+(**3 rétroactions, 0 production, 0 référence morte** — migration minuscule), la
+capacité manquante identifiée (rétroaction formative absente de l'Inspecteur).
+
+**Consigne prête à coller pour Grégoire :**
+
+```
+Nouvelle session sur Labo Codex — chantier : portage des exports.
+
+Exécute d'abord le rituel de début (Skills pour Claude Code/SKILL_Debut_de_session.md),
+balayage des branches distantes compris ; si le clone est shallow, `git fetch
+--unshallow` avant toute comparaison de contenu.
+
+Prémisse à vérifier :
+  • origin/main = 1.56.4, build 0808-1156 — aucune branche en avance
+  • Vitest 1889/1889 (219 fichiers) ; Playwright WebKit → CI à la PR
+  • dernier ID BACKLOG : #429 ; arbre propre
+
+Puis ouvre le plan de chantier :
+  plans de travail/PLAN-portage-exports-carte-2026-08-08.md
+Lis ses §0 (tranché, ne pas rouvrir) et §4 (pièges) avant la première ligne de
+code. Charge SKILL_labo_codex et SKILL_verification_adverse. Les 📐 du §3 du
+plan se tranchent avec moi en début de session — dont l'import Markdown :
+je te dirai si je m'en sers.
+
+Ordre des lots : A (import MD champ mort) → B (vivacité productionId, 2 chemins)
+→ C (LE générateur unique + harnais de parité) → D (UI 3 niveaux × 3 formats)
+→ E (rétroaction formative sur les activités + libellés) → F (migration des
+3 rétroactions) → G (suppression de la page, parité verte exigée).
+Arrête-toi et présente-moi l'état des lieux avant de coder.
+```
+
+### Priorités suivantes, dans l'ordre
+
+- **#418** — `db-ready` jamais émis si IndexedDB est indisponible (décision de
+  sémantique à instruire pour Grégoire).
+- **#421 + #426** — conformité documentaire (trois surfaces) + renommage de
+  l'onglet « Carte d'alignement » : APRÈS le portage, quand l'interface aura
+  cessé de bouger.
+- **#427** — refermer l'accès public (Cloudflare Access) vers le **20 août**.
+  ⚠ Les 50 sièges étaient déjà saturés en mai ; à trancher avant.
+- **#428** — retirer la purge de l'archive pre367 à la rentrée (dette datée).
+- ⚠ **CI WebKit** : à la première PR, `planif-drag-pointer-148.spec.js` passe
+  pour la première fois sous WebKit — si elle rougit, c'est l'environnement de
+  la spec (bandeau démo, timing), pas le drag : ajuster la spec, ne pas
+  soupçonner #148 (validé au doigt le 8 août).
+
+### Rappel de méthode — cinq faux-verts en trois jours
+
+1. **Une assertion peut être satisfaite par autre chose que ce qu'elle croit
+   vérifier** : un appel trouvé dans un commentaire, un `@media` voisin, un
+   préfixe (`objectif` dans `objectifs`, `=` dans `===`).
+2. **Une sentinelle peut couvrir le geste sans couvrir ce qu'il emporte.**
+3. **Quand un invariant NEUF porte sur un mécanisme qui double un mécanisme
+   ANCIEN, l'assertion attrape l'ancien et croit tenir le neuf** — un calcul qui
+   récursait déjà, une table dont les verbes étaient uniformes.
+4. **Un invariant de SÉCURITÉ voyage avec le champ qu'il protège.** Le déplacer
+   sans déplacer sa garde, c'est le désarmer en silence.
+5. ⮕ **Le rituel de début ne protège que contre ce que `main` sait.** Il ne voit
+   pas une branche qu'on ne lui a pas nommée — d'où le balayage ajouté ci-dessus.
+
+## §3bis — Archives des consignes de démarrage précédentes
+
+<!-- ARCHIVÉ le 8 août après-midi — PORTES TERRAIN SOLDÉES (validation au doigt 11h32-midi, cf. §0) :
 ### Priorité 1 — les portes terrain, qui s'accumulent depuis trois jours
 
 **Cinq chantiers livrés, aucun validé au doigt.** C'est le vrai risque courant.
@@ -5738,21 +5809,8 @@ V1 boot sur corpus réel, l'iPad, et l'œil de Grégoire.
 - **#427** — refermer l'accès public (Cloudflare Access) vers le 20 août.
   ⚠ Les 50 sièges étaient déjà saturés en mai ; à trancher avant.
 
-### Rappel de méthode — cinq faux-verts en trois jours
+-->
 
-1. **Une assertion peut être satisfaite par autre chose que ce qu'elle croit
-   vérifier** : un appel trouvé dans un commentaire, un `@media` voisin, un
-   préfixe (`objectif` dans `objectifs`, `=` dans `===`).
-2. **Une sentinelle peut couvrir le geste sans couvrir ce qu'il emporte.**
-3. **Quand un invariant NEUF porte sur un mécanisme qui double un mécanisme
-   ANCIEN, l'assertion attrape l'ancien et croit tenir le neuf** — un calcul qui
-   récursait déjà, une table dont les verbes étaient uniformes.
-4. **Un invariant de SÉCURITÉ voyage avec le champ qu'il protège.** Le déplacer
-   sans déplacer sa garde, c'est le désarmer en silence.
-5. ⮕ **Le rituel de début ne protège que contre ce que `main` sait.** Il ne voit
-   pas une branche qu'on ne lui a pas nommée — d'où le balayage ajouté ci-dessus.
-
-## §3bis — Archives des consignes de démarrage précédentes
 
 ### Archive — consigne du 26 mai 2026 (migration d'icônes SVG, cycle clos)
 
