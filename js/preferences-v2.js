@@ -478,12 +478,14 @@
     // Et le flag global est window.dbReady (pas db.isReady). Sans ce fix,
     // initialiserPreferencesV2 n'était jamais appelée au démarrage et la pref
     // animationPoints=false n'était pas appliquée jusqu'à l'ouverture du panneau.
+    // #414 (8 août 2026) : site déjà correct, passé au portillon commun sans
+    // changement de sémantique. Le commentaire ci-dessus a d'ailleurs documenté
+    // dès la Beta 99.30 les DEUX pièges que l'audit a retrouvés ailleurs
+    // (cible `document`, drapeau `db.isReady`) — mais dans un commentaire local,
+    // que ni `preferences.js` ni `donnees-v2.js` n'ont jamais lu. Un portillon
+    // partagé porte la connaissance là où elle s'applique.
     function _initSiPret() {
-        if (window.dbReady) {
-            initialiserPreferencesV2();
-        } else {
-            window.addEventListener('db-ready', initialiserPreferencesV2, { once: true });
-        }
+        window.auDbPret(initialiserPreferencesV2);
     }
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', _initSiPret);

@@ -263,7 +263,18 @@ function initialiserAccueil() {
     // Checkbox « Données démo » : re-synchroniser avec l'état réel après
     // db-ready (l'état peut venir d'IDB qui n'est pas dispo au premier rendu).
     // Bugfix 22 avril : la case se décochait au refresh malgré mode démo actif.
-    window.addEventListener('db-ready', function() {
+    //
+    // #414 (8 août 2026) : `initialiserAccueil()` est appelée par `main.js` sous
+    // `DOMContentLoaded`, donc cet écouteur se posait au même instant que celui
+    // de #413 — et se manquait de la même façon. Quand `db-ready` était déjà
+    // passé, la resynchronisation n'avait jamais lieu et le bug du 22 avril
+    // revenait tel quel : la case « Données démo » se décochait au refresh
+    // alors que le mode démo était bien actif. Le rattrapage du portillon ferme
+    // la seule brèche qui restait à ce correctif.
+    //
+    // `once: false` : rejoué à chaque `db-ready` — après un import, le mode
+    // démo peut avoir changé et les cases doivent le refléter.
+    window.auDbPret(function() {
         const cbDemo = document.getElementById('checkbox-demo-accueil');
         if (cbDemo) {
             cbDemo.checked = typeof estEnModeDemo === 'function' && estEnModeDemo();
@@ -272,7 +283,7 @@ function initialiserAccueil() {
         if (cbAcc) {
             cbAcc.checked = accompagnementEstActif();
         }
-    });
+    }, { once: false });
 }
 
 /* ===============================

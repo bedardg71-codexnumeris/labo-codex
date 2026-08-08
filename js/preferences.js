@@ -398,12 +398,38 @@
     // AUTO-INITIALISATION : migration au démarrage
     // =========================================================================
 
+    // ⚠⚠ #414 (8 août 2026) — CETTE MIGRATION N'A JAMAIS TOURNÉ.
+    //
+    // Deux défauts de naissance, présents depuis son écriture (16 avril 2026,
+    // « Chantier RLO 1.2 — Branchement preferences.js »), et qui se couvraient
+    // l'un l'autre :
+    //   • la garde testait `db.isReady`, une propriété qui N'EXISTE PAS sur
+    //     `db` (le drapeau d'instance est `db.ready`, le drapeau global
+    //     `window.dbReady`) → toujours fausse, donc jamais d'exécution directe ;
+    //   • le repli écoutait sur `document`, alors que `db.js` émet sur `window`
+    //     et l'a TOUJOURS fait (vérifié sur l'historique complet). Un événement
+    //     émis sur `window` ne descend pas vers `document` : écouteur mort-né.
+    //
+    // Aucun autre appelant : `migrerPreferencesV3` n'avait donc aucun chemin
+    // d'exécution. Conséquence silencieuse — `obtenirPreference()` lit
+    // UNIQUEMENT le magasin V3, sans repli sur le legacy : toute préférence
+    // restée dans `modalitesEvaluation` / `preferencesAffichage` était ignorée
+    // au profit de `DEFAUTS`.
+    //
+    // Réveil audité avant branchement (règle « code dormant » du CLAUDE.md),
+    // car la migration purge le legacy via `nettoyerLegacy()` :
+    //   • `preferencesAffichage` — clé supprimée en entier : ZÉRO lecteur
+    //     ailleurs dans le code, la purge est sans effet de bord ;
+    //   • les 5 champs retirés de `modalitesEvaluation` — aucune lecture
+    //     qualifiée (`modalites.decouplerPN` etc.) ; les occurrences trouvées
+    //     visent `modalites.portfolio.decouplerPN`, champ imbriqué distinct,
+    //     que `nettoyerLegacy` ne touche pas.
+    // La migration n'écrase jamais une valeur déjà présente en V3
+    // (`if (entree.cible in prefs) continue`) : elle ne fait que combler les
+    // trous. Et si l'écriture V3 échoue, `nettoyerLegacy()` n'est pas atteint —
+    // l'ordre est déjà fail-safe.
     function lancerMigrationAuDemarrage() {
-        if (typeof db !== 'undefined' && db.isReady) {
-            migrerPreferencesV3();
-        } else {
-            document.addEventListener('db-ready', migrerPreferencesV3);
-        }
+        window.auDbPret(migrerPreferencesV3);
     }
 
     if (document.readyState === 'loading') {

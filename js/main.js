@@ -20,7 +20,7 @@
 // init-inline.js compare cette valeur au BUILD_ID lu depuis version.json :
 // si différent, Safari file:// a probablement un main.js périmé en cache,
 // et la séquence reload+bandeau s'enclenche. SYNCHRONISER À CHAQUE BUMP.
-window._SCRIPT_BUILD_main = '0807-1529';
+window._SCRIPT_BUILD_main = '0808-0756';
 
 /* ===============================
    FONCTION GLOBALE: Génération d'ID uniques
@@ -682,10 +682,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // L'écouteur reste posé (db-ready peut être réémis après un import), ET le
     // rattrapage couvre le cas où il a déjà eu lieu. Les migrations du bloc sont
     // toutes idempotentes (drapeaux), donc une double exécution est sans effet.
-    window.addEventListener('db-ready', auDbReady);
-    if (window.dbReady) {
-        auDbReady({ detail: { rattrapage: true } });
-    }
+    //
+    // #414 (8 août 2026) : le rattrapage écrit à la main ici le 7 août est passé
+    // au portillon commun `auDbPret` — sémantique STRICTEMENT identique
+    // (`once: false` = écouteur maintenu + exécution immédiate si l'événement
+    // est déjà passé). L'audit de #414 a montré que ce geste était réécrit à la
+    // main en neuf endroits, avec trois familles de défauts ; le laisser en
+    // version manuelle ICI, sur le bloc de migrations le plus critique du boot,
+    // aurait maintenu la variante que le cliquet doit précisément interdire.
+    window.auDbPret(auDbReady, { once: false });
 
     // ===============================
     // 1. GÉNÉRATION DYNAMIQUE DES BULLES — VORTEX (Beta 99.19+)

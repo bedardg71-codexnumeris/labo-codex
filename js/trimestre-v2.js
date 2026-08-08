@@ -614,16 +614,16 @@ window.mettreAJourBarreContexte = mettreAJourBarreContexte;
 document.addEventListener('DOMContentLoaded', function() {
     // ✅ CORRIGÉ (8 janvier 2026) : Attendre window.dbReady (synchronisation IndexedDB → localStorage terminée)
     // Avant, on vérifiait db.getSync qui existe AVANT la fin de la synchronisation
-    if (window.dbReady) {
+    //
+    // #414 (8 août 2026) : ce site était DÉJÀ correct — il est passé au
+    // portillon commun sans changer de sémantique. C'est le but du cliquet :
+    // une seule façon d'attendre la DB, donc plus aucune variante manuelle où
+    // se cacher (l'audit de #414 a trouvé trois familles de défauts parce qu'il
+    // y avait neuf écritures différentes du même geste).
+    window.auDbPret(function() {
         initialiserTrimestreV2();
         mettreAJourBarreContexte();
-    } else {
-        // Attendre l'événement db-ready (déclenché après syncToLocalStorageCache)
-        window.addEventListener('db-ready', function() {
-            initialiserTrimestreV2();
-            mettreAJourBarreContexte();
-        }, { once: true });
-    }
+    });
 });
 
 })();

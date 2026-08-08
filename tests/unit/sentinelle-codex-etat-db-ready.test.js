@@ -28,14 +28,22 @@ describe('sentinelle · relecture de _codex_etat après db-ready (#142)', () => 
     });
 
     it('relit CLE_ETAT_CODEX à db-ready quand la lecture initiale est vide', () => {
-        expect(corps).toContain("addEventListener('db-ready'");
+        // #414 (8 août 2026) : l'attente passe par le portillon unique
+        // `window.auDbPret` (db.js) au lieu d'un couple
+        // `if (window.dbReady) … else addEventListener` écrit à la main.
+        expect(corps).toMatch(/window\.auDbPret\(\s*relireEtatTardif/);
         // La relecture doit viser la clé d'état (pas un autre usage de db-ready).
         const blocRelecture = corps.slice(corps.indexOf('relireEtatTardif'));
         expect(blocRelecture).toContain('CLE_ETAT_CODEX');
     });
 
-    it('gère le cas où db-ready est déjà passé (garde window.dbReady)', () => {
-        expect(corps).toContain('window.dbReady');
+    it('gère le cas où db-ready est déjà passé (rattrapage du portillon)', () => {
+        // Le rattrapage lui-même vit maintenant dans `auDbPret` — c'est
+        // `sentinelle-db-ready-course.test.js` (maillon 2) qui le verrouille.
+        // Ce qui se vérifie ICI, c'est que codex.js ne s'est pas remis à
+        // attendre `db-ready` à la main, ce qui le ferait sortir du portillon
+        // et perdre le rattrapage sans qu'aucune sentinelle ne bronche.
+        expect(corps).not.toContain("addEventListener('db-ready'");
     });
 
     it('ne ré-écrase pas un état activé entre-temps par un geste utilisateur', () => {
