@@ -19063,6 +19063,100 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 }
 .planif-export-plan-actions { justify-content: flex-end; margin-top: 6px; }
 
+/* Modale « Export personnalisé » (#431) — réglages + aperçu vivant.
+   Variables existantes seulement, deux modes couverts par les tokens. */
+.modal-export-perso {
+    max-width: 980px;
+    width: min(96vw, 980px);
+}
+.export-perso-intro {
+    font-size: 13px;
+    color: var(--texte-secondaire, #8aa4b0);
+    margin: 0 0 12px;
+}
+.export-perso-corps {
+    display: flex;
+    gap: 16px;
+    align-items: stretch;
+    flex-wrap: wrap; /* iPad portrait : les volets s'empilent */
+}
+.export-perso-reglages {
+    flex: 1 1 280px;
+    min-width: 260px;
+}
+.export-perso-volet-apercu {
+    flex: 1.4 1 340px;
+    min-width: 280px;
+    display: flex;
+    flex-direction: column;
+}
+.export-perso-groupe {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--texte-muted, #5a7a88);
+    padding: 10px 0 4px;
+}
+.export-perso-partir {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.export-perso-choix {
+    padding: 5px 2px;
+    border-radius: 6px;
+    min-height: 30px;
+}
+.export-perso-choix input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+    accent-color: var(--accent-primaire, #3b82f6);
+}
+.export-perso-ordre-ligne {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 2px;
+}
+.export-perso-ordre-nom {
+    flex: 1;
+    font-size: 13px;
+    color: var(--texte, #d6e4ea);
+}
+.export-perso-monter, .export-perso-descendre {
+    min-width: 32px;
+    min-height: 32px; /* cible tactile iPad */
+}
+.export-perso-monter[disabled], .export-perso-descendre[disabled] {
+    opacity: 0.35;
+    cursor: default;
+}
+.export-perso-format.actif {
+    background: rgba(106, 172, 184, 0.12);
+    color: var(--accent-primaire, #3b82f6);
+    border-color: var(--accent-primaire, #3b82f6);
+}
+.export-perso-apercu {
+    flex: 1;
+    margin-top: 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--bordure, #2a4a58);
+    border-radius: 8px;
+    background: var(--surface-page, #0c1a22);
+    color: var(--texte, #d6e4ea);
+    font-size: 11.5px;
+    line-height: 1.45;
+    white-space: pre;
+    overflow: auto;
+    max-height: 55vh;
+    min-height: 220px;
+}
+.mode-clair .export-perso-apercu {
+    background: var(--surface-page, #f6f8fa);
+    color: var(--texte, #22303a);
+}
+
 /* #371 (relais Cadre→Trimestre, 4 août) : semaines spéciales empilées —
    deux paires de dates « du/au » ne tiennent pas sur une demi-largeur. */
 .pile-semaines-speciales {

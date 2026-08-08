@@ -4075,6 +4075,37 @@
             </div>
         </div>
 
+        <!-- ========== MODALE EXPORT PERSONNALISÉ (#431) ==========
+             Réglages + aperçu vivant du niveau « Personnalisé » du plan.
+             Modale ASSUMÉE : cases + ordre + aperçu ne tiennent pas dans un
+             panneau du menu Actions (décision du 8 août, plan #431). -->
+        <div id="modalExportPersonnalise" class="modal-overlay">
+            <div class="modal-contenu modal-export-perso" tabindex="-1">
+                <button class="modal-fermer" id="export-perso-fermer" aria-label="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
+                <h2 class="modal-titre">Export personnalisé du plan</h2>
+                <p class="export-perso-intro">Coche les contenus, choisis leur ordre — l'aperçu suit. Ton réglage est mémorisé pour les prochains exports « Personnalisé ».</p>
+                <div class="export-perso-corps">
+                    <div class="export-perso-reglages">
+                        <div class="export-perso-groupe">Partir de</div>
+                        <div id="export-perso-partir" class="export-perso-partir"></div>
+                        <div class="export-perso-groupe">Contenus</div>
+                        <div id="export-perso-contenus"></div>
+                        <div class="export-perso-groupe">Ordre des sections</div>
+                        <div id="export-perso-ordre"></div>
+                    </div>
+                    <div class="export-perso-volet-apercu">
+                        <div class="export-perso-groupe">Aperçu</div>
+                        <div id="export-perso-formats" class="export-perso-partir"></div>
+                        <pre id="export-perso-apercu" class="export-perso-apercu"></pre>
+                    </div>
+                </div>
+                <div class="modal-actions-centre">
+                    <button class="btn" id="export-perso-copier">Copier</button>
+                    <button class="btn btn-principal" id="export-perso-telecharger">Télécharger</button>
+                </div>
+            </div>
+        </div>
+
         <!-- ========== MODAL INTRODUCTION (Visite guidée) ========== -->
 
         <!-- NAVIGATION PRINCIPALE -->

@@ -5952,6 +5952,17 @@ function initialiser() {
         panneauExportPlan.addEventListener('click', function(e) { e.stopPropagation(); });
     }
 
+    // Modale de l'export personnalisé (#431) : fermeture par le bouton et
+    // par un clic sur le voile.
+    var modaleExportPerso = document.getElementById('modalExportPersonnalise');
+    if (modaleExportPerso) {
+        var btnFermerPerso = document.getElementById('export-perso-fermer');
+        if (btnFermerPerso) btnFermerPerso.addEventListener('click', fermerModaleExportPerso);
+        modaleExportPerso.addEventListener('click', function(e) {
+            if (e.target === modaleExportPerso) fermerModaleExportPerso();
+        });
+    }
+
     // Recentrer
     var btnRecentrer = document.getElementById('planif-btn-recentrer');
     if (btnRecentrer) btnRecentrer.addEventListener('click', function() { centrerVueSurContenu(); });
@@ -7071,6 +7082,9 @@ function rendrePanneauExportPlan() {
 
     // Libellés statiques des constantes du module — echapperHtml par principe.
     var html = groupeRadios('Niveau', 'planif-export-niveau', exporteur.NIVEAUX, exportPlanNiveau) +
+        '<div class="planif-import-tri-ligne planif-export-plan-actions">' +
+        '<button type="button" class="planif-btn-carte" id="planif-export-plan-personnaliser">Régler le niveau personnalisé…</button>' +
+        '</div>' +
         groupeRadios('Format', 'planif-export-format', exporteur.FORMATS, exportPlanFormat) +
         '<div class="planif-import-tri-ligne planif-export-plan-actions">' +
         '<button type="button" class="planif-btn-carte" id="planif-export-plan-copier">Copier</button>' +
@@ -7081,6 +7095,14 @@ function rendrePanneauExportPlan() {
     panneau.querySelectorAll('input[name="planif-export-niveau"]').forEach(function(radio) {
         radio.addEventListener('change', function() { exportPlanNiveau = radio.value; });
     });
+    var btnPersonnaliser = document.getElementById('planif-export-plan-personnaliser');
+    if (btnPersonnaliser) {
+        btnPersonnaliser.addEventListener('click', function() {
+            exportPlanNiveau = 'personnalise';
+            panneau.classList.remove('ouvert');
+            ouvrirModaleExportPerso();
+        });
+    }
     panneau.querySelectorAll('input[name="planif-export-format"]').forEach(function(radio) {
         radio.addEventListener('change', function() { exportPlanFormat = radio.value; });
     });
@@ -7108,6 +7130,166 @@ function rendrePanneauExportPlan() {
             copierExportFallback(doc); copieReussie();
         }
     });
+}
+
+// === EXPORT PERSONNALISÉ — MODALE RÉGLAGES + APERÇU (#431, 8 août 2026) ===
+//
+// La modale est ASSUMÉE (décision du 8 août) : cases + ordre + aperçu ne
+// tiennent pas dans un panneau de 380 px — l'anti-pattern « pas de modale »
+// vise les cas où un panneau suffit. Chaque changement est PERSISTÉ
+// immédiatement (préférence exportPlanPersonnalise) et l'aperçu re-rendu :
+// le générateur est une fonction pure, le re-rendu est instantané.
+
+var exportPersoFormatApercu = 'texte';
+
+function ouvrirModaleExportPerso() {
+    var modale = document.getElementById('modalExportPersonnalise');
+    var exporteur = window.planificationExport;
+    if (!modale || !exporteur) return;
+    remplirModaleExportPerso();
+    modale.classList.add('actif');
+    var contenu = modale.querySelector('.modal-contenu');
+    if (contenu && contenu.focus) contenu.focus();
+}
+
+function fermerModaleExportPerso() {
+    var modale = document.getElementById('modalExportPersonnalise');
+    if (modale) modale.classList.remove('actif');
+}
+
+function persisterConfigExportPerso(config) {
+    try {
+        if (typeof window.definirPreference === 'function') {
+            window.definirPreference('exportPlanPersonnalise', config);
+        }
+    } catch (e) {
+        console.warn('[Planification] Réglage export personnalisé non persisté :', e);
+    }
+}
+
+function remplirModaleExportPerso() {
+    var exporteur = window.planificationExport;
+    var config = exporteur.lireConfigPersonnalisee();
+
+    var zonePartir = document.getElementById('export-perso-partir');
+    var zoneContenus = document.getElementById('export-perso-contenus');
+    var zoneOrdre = document.getElementById('export-perso-ordre');
+    var zoneFormats = document.getElementById('export-perso-formats');
+    var apercu = document.getElementById('export-perso-apercu');
+    if (!zonePartir || !zoneContenus || !zoneOrdre || !zoneFormats || !apercu) return;
+
+    function rafraichirApercu() {
+        // ⚠ textContent, jamais innerHTML : l'aperçu porte les TITRES saisis
+        // par l'enseignant (règle sécurité — pas de HTML non échappé).
+        var doc = exporteur.genererExport('personnalise', exportPersoFormatApercu, config);
+        apercu.textContent = doc || 'Aucune carte active.';
+    }
+
+    function rendreReglages() {
+        // « Partir de » — les trois presets comme points de départ.
+        var htmlPartir = '';
+        exporteur.NIVEAUX.filter(function(n) { return n.id !== 'personnalise'; }).forEach(function(n) {
+            htmlPartir += '<button type="button" class="planif-btn-carte export-perso-preset" data-preset="' +
+                echapperHtml(n.id) + '">' + echapperHtml(n.label) + '</button>';
+        });
+        zonePartir.innerHTML = htmlPartir;
+
+        var htmlContenus = '';
+        exporteur.CONTENUS_PLAN.forEach(function(c) {
+            var coche = config.contenus[c.id] ? ' checked' : '';
+            htmlContenus += '<label class="planif-checkbox-label export-perso-choix">' +
+                '<input type="checkbox" class="export-perso-contenu" data-contenu="' + echapperHtml(c.id) + '"' + coche + '> ' +
+                echapperHtml(c.label) + '</label>';
+        });
+        zoneContenus.innerHTML = htmlContenus;
+
+        var htmlOrdre = '';
+        config.ordre.forEach(function(id, rang) {
+            var section = exporteur.SECTIONS_PLAN.find(function(s) { return s.id === id; });
+            htmlOrdre += '<div class="export-perso-ordre-ligne" data-section="' + echapperHtml(id) + '">' +
+                '<span class="export-perso-ordre-nom">' + echapperHtml(section ? section.label : id) + '</span>' +
+                '<button type="button" class="planif-btn-carte export-perso-monter" aria-label="Monter"' + (rang === 0 ? ' disabled' : '') + '>↑</button>' +
+                '<button type="button" class="planif-btn-carte export-perso-descendre" aria-label="Descendre"' + (rang === config.ordre.length - 1 ? ' disabled' : '') + '>↓</button>' +
+                '</div>';
+        });
+        zoneOrdre.innerHTML = htmlOrdre;
+
+        var htmlFormats = '';
+        exporteur.FORMATS.forEach(function(f) {
+            var actif = f.id === exportPersoFormatApercu ? ' actif' : '';
+            htmlFormats += '<button type="button" class="planif-btn-carte export-perso-format' + actif + '" data-format="' +
+                echapperHtml(f.id) + '">' + echapperHtml(f.label) + '</button>';
+        });
+        zoneFormats.innerHTML = htmlFormats;
+
+        // Listeners posés APRÈS toutes les écritures innerHTML (contrainte
+        // « Dans la leçon », Lot E) — chaque re-rendu les repose.
+        zonePartir.querySelectorAll('.export-perso-preset').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                config = exporteur.configDepuisPreset(btn.dataset.preset);
+                persisterConfigExportPerso(config);
+                rendreReglages();
+                rafraichirApercu();
+            });
+        });
+        zoneContenus.querySelectorAll('.export-perso-contenu').forEach(function(caseC) {
+            caseC.addEventListener('change', function() {
+                config.contenus[caseC.dataset.contenu] = caseC.checked;
+                persisterConfigExportPerso(config);
+                rafraichirApercu();
+            });
+        });
+        zoneOrdre.querySelectorAll('.export-perso-ordre-ligne').forEach(function(ligne) {
+            function deplacer(delta) {
+                var id = ligne.dataset.section;
+                var i = config.ordre.indexOf(id);
+                var j = i + delta;
+                if (i === -1 || j < 0 || j >= config.ordre.length) return;
+                config.ordre[i] = config.ordre[j];
+                config.ordre[j] = id;
+                persisterConfigExportPerso(config);
+                rendreReglages();
+                rafraichirApercu();
+            }
+            ligne.querySelector('.export-perso-monter').addEventListener('click', function() { deplacer(-1); });
+            ligne.querySelector('.export-perso-descendre').addEventListener('click', function() { deplacer(1); });
+        });
+        zoneFormats.querySelectorAll('.export-perso-format').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                exportPersoFormatApercu = btn.dataset.format;
+                rendreReglages();
+                rafraichirApercu();
+            });
+        });
+    }
+
+    rendreReglages();
+    rafraichirApercu();
+
+    var btnCopier = document.getElementById('export-perso-copier');
+    var btnTelecharger = document.getElementById('export-perso-telecharger');
+    if (btnCopier) {
+        btnCopier.onclick = function() {
+            var doc = exporteur.genererExport('personnalise', exportPersoFormatApercu, config);
+            if (!doc) return;
+            function fini() { afficherToastLien('Plan copié — colle-le où tu veux.'); }
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(doc).then(fini).catch(function() {
+                    copierExportFallback(doc); fini();
+                });
+            } else {
+                copierExportFallback(doc); fini();
+            }
+        };
+    }
+    if (btnTelecharger) {
+        btnTelecharger.onclick = function() {
+            var doc = exporteur.genererExport('personnalise', exportPersoFormatApercu, config);
+            if (!doc) return;
+            var format = exporteur.FORMATS.find(function(f) { return f.id === exportPersoFormatApercu; });
+            telechargerFichier(doc, exporteur.nomFichierExport('personnalise', exportPersoFormatApercu), format.mime);
+        };
+    }
 }
 
 // Repli presse-papiers (Safari file:// sans clipboard API).
@@ -7498,6 +7680,9 @@ window.planificationCarte = {
     // Exposée pour la sentinelle du panneau d'export (#424 Lot D) : le rendu
     // se vérifie en RENDANT le panneau, pas en relisant la source.
     rendrePanneauExportPlan: rendrePanneauExportPlan,
+    // Exposées pour la sentinelle de la modale personnalisée (#431).
+    remplirModaleExportPerso: remplirModaleExportPerso,
+    ouvrirModaleExportPerso: ouvrirModaleExportPerso,
     // Exposées pour la sentinelle de la rétroaction formative (#424 Lot E) :
     // les deux libellés se vérifient en RENDANT le sélecteur, l'écriture en
     // EXERÇANT la porte unique.
