@@ -58,11 +58,39 @@ explicitement une demande sur un travail déjà en cours.
 
 **Objectif** : connaître le HEAD réel et l'état du dépôt.
 
+### 1.0 ⚠ D'ABORD : où vit le travail ? (ajouté le 8 août 2026)
+
+**Deux gestes, dans cet ordre, AVANT le reste.**
+
+```bash
+git fetch origin --prune
+cat RELAIS.md                      # le fichier vit sur main : il dit la branche à prendre
+git for-each-ref --sort=-committerdate \
+    --format='%(committerdate:short) %(refname:short)' refs/remotes/origin | head
+```
+
+**Si une branche distante est plus récente que `main`** — ou si `RELAIS.md`
+nomme une branche autre que `main` — **s'arrêter et le signaler à Grégoire
+avant de coder**. Ne pas supposer que la prémisse de relance en tient compte.
+
+▣ **POURQUOI CE CONTRÔLE EXISTE.** Le 8 août 2026, deux sessions sont parties
+du même commit sans se voir : chacune a livré une « 1.55.0 » différente et pris
+les mêmes identifiants de backlog. La seconde **avait fait ce rituel**, vérifié
+la prémisse, et trouvé **zéro écart** — parce que la prémisse qu'elle lisait,
+sur `main`, avait été périmée par une branche qu'elle ne pouvait pas voir.
+
+⮕ **La leçon générale** : la consigne de relais est un fichier VERSIONNÉ. Quand
+le travail vit sur une branche non mergée, la consigne qui le dit vit sur cette
+branche aussi. *Une session qui ne démarre pas sur la bonne branche ne peut pas
+lire l'instruction qui lui dit quelle branche prendre.* Le rituel ne protège
+que contre ce que `main` sait — d'où ce balayage, qui coûte cinq secondes.
+
+### 1.1 Ensuite, l'inventaire proprement dit
+
 ```bash
 # depuis la racine du dépôt
 git status
 git log --oneline main -10
-git fetch origin
 ```
 
 Produire :

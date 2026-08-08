@@ -268,6 +268,52 @@ n'a pas tourné — ne pas committer, le relancer. Ne jamais éditer ces valeurs
 
 ---
 
+## 5 bis. FERMER LE RELAIS — fusion vers `main`, ou filet explicite
+
+> **Règle adoptée par Grégoire le 8 août 2026**, après une journée perdue à
+> réconcilier deux sessions parties du même commit sans se voir.
+
+### 5bis.1 Le geste par défaut : fusionner vers `main`
+
+Une fois la version bumpée et la suite verte, **fusionner la branche de travail
+dans `main` et pousser**. C'est le remède, pas une formalité : c'est le REPORT
+du merge qui ouvre la fenêtre de divergence.
+
+```bash
+git push -u origin <branche>
+git checkout main && git merge --ff-only <branche>
+git push origin main
+```
+
+⚠ **Avant de pousser `main`, relancer la suite sur l'état fusionné** — pas
+reprendre l'attestation de la branche. Et si la fusion n'est pas un
+fast-forward, c'est qu'une AUTRE session a poussé entre-temps : s'arrêter et le
+signaler à Grégoire plutôt que de résoudre seul des conflits qu'on n'a pas
+instruits.
+
+### 5bis.2 Si le merge doit vraiment attendre
+
+Cas légitimes : travail à mi-chemin, validation terrain en suspens, décision de
+Grégoire non prise. Alors, et **seulement** alors :
+
+1. remplir `RELAIS.md` à la racine (modèle à la fin du fichier) en nommant la
+   branche, sa version, et ce qu'elle porte ;
+2. le committer et le **pousser sur `main` SEUL**, sans le reste du travail.
+
+⮕ **Pourquoi sur `main`** : le §3 de `SESSION.md` est un fichier versionné. S'il
+vit sur une branche non mergée, la session suivante lira celui de `main`, qui
+sera périmé — et son rituel de début ne verra **aucun écart**, parce qu'il aura
+vérifié une prémisse fausse. `RELAIS.md` est le seul point que toute session
+lit, quelle que soit la branche ouverte.
+
+### 5bis.3 Dans les deux cas
+
+Remettre `RELAIS.md` à jour : « aucun travail en avance » après une fusion, ou
+la branche et sa dette après un report. Un `RELAIS.md` périmé est pire que pas
+de `RELAIS.md` — il donne une fausse assurance à la session suivante.
+
+---
+
 ## 6. RAPPORT FINAL
 
 **Objectif** : produire une synthèse en une seule sortie lisible.

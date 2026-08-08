@@ -168,6 +168,17 @@ Utiliser `window.cle('nomCle')` pour obtenir la cle namespacee.
 
 ## Avant de coder
 
+**REGLE DE RELAIS (adoptee le 8 aout 2026)** : on FUSIONNE vers `main` a la fin
+de CHAQUE session. Si un merge doit vraiment attendre, remplir `RELAIS.md` a la
+racine et le pousser sur `main` SEUL. Motif : le 8 aout, deux sessions sont
+parties du meme commit sans se voir — chacune a livre une « 1.55.0 » differente
+et pris les memes identifiants de backlog. La seconde avait fait le rituel et
+verifie la premisse : elle a trouve zero ecart, parce que la premisse qu'elle
+lisait sur `main` avait ete perimee par une branche qu'elle ne pouvait pas voir.
+La consigne de relais est un fichier VERSIONNE — si le travail vit sur une
+branche non mergee, la consigne qui le dit y vit aussi. `RELAIS.md` est le seul
+point que toute session lit, quelle que soit la branche ouverte.
+
 **EN TOUT PREMIER, AU DEBUT DE CHAQUE SESSION** : executer le rituel de debut de session decrit dans `Skills pour Claude Code/SKILL_Debut_de_session.md`. Audit factuel git + tests + version + lecture SESSION.md/BACKLOG.md + comparaison avec la premisse de relance recue. Lecture seule, aucune modification. Acte le 28 mai 2026 PM apres ecart de 24h sur le Lot A ✴ (premisse demandait un travail deja livre la veille). Pendant inverse de `SKILL_Fin_de_session.md`.
 
 1. Lire `docs/00-START-HERE.md`
