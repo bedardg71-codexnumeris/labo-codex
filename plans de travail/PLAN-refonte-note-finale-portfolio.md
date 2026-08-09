@@ -253,7 +253,7 @@ Quand `productionPortfolio === null` ET `productionTerminale === null` (cas h202
     « Par objectifs (4 modes de calcul) » **inatteignable**. Le doublon avec
     `mat-portfolio-selection` est confirmé : trois valeurs sur quatre se
     recouvrent, avec deux vocabulaires différents.
-  - ~~**G2-b**~~ **LIVRÉE le 9 août 2026** (#436, 1.64.0) — sept lectures d'affichage migrées, les deux écrivains de `pratiques.js` retirés, l'îlot multi-objectifs de `objectifs.js` supprimé. Deux valeurs affichées GELÉES en constantes explicites (décision en attente, voir #436). Deux survivants légitimes break-testés (purge du module propriétaire, injection de simulation #307). ⮕ Le miroir stocké n'a plus ni lecteur ni écrivain, mais **occupe encore de la place** dans les données — purge = migration destructive, à décider.
+  - ~~**G2-b**~~ **LIVRÉE le 9 août 2026** (#436, 1.64.0) — neuf lectures d'affichage migrées, les deux écrivains de `pratiques.js` retirés, l'îlot multi-objectifs de `objectifs.js` supprimé. Deux valeurs affichées GELÉES en constantes explicites (décision en attente, voir #436). Deux survivants légitimes break-testés (purge du module propriétaire, injection de simulation #307). ⮕ Le miroir stocké n'a plus ni lecteur ni écrivain, mais **occupe encore de la place** dans les données — purge = migration destructive, à décider.
 
 ### Synthèse architecturale (nouvelle conception)
 
