@@ -7,6 +7,31 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 9 AOÛT 2026, PM (reprise après clôture — branche `claude/poursuite-travail-matin-es3hu9`).
+     ÉTAT AU DÉPART : `main` = **1.65.1** (build 0809-0958), Vitest **2057/2057** (232 fichiers), arbre propre, dernier ID **#438**. **Rituel de début : ZÉRO ÉCART** — les six lignes de la prémisse du §3 conformes. La branche du conteneur est un calque EXACT de `origin/main` (même hash `02298a4b`), donc le piège du clone shallow n'a rien pu fausser ici.
+
+     ⮕ **CAP : l'audit de `Plan Accompagnement/`** — le dernier angle mort, désigné par le §4ter le matin même. 14 documents jamais passés au crible. Même méthode : lire l'en-tête, puis **aller au code**. Versé au **§4quater de `ETAT-PROJET.md`**.
+
+     ⚠⚠ **LE RÉSULTAT PREND LE CONTRE-PIED DE LA PRÉMISSE, ET C'EST LA LEÇON DU JOUR.** Le §4ter accusait « au moins trois documents désignant du travail non fait ». **Deux des trois étaient intégralement livrés** : `SPEC_mini-guide_cours_balises` (la popup `cadre-cours-balises`, la bulle de survol, ET le renommage OQLF — `v2-heuresContact` n'existe même plus) et `PLAN_decouvrabilite_guides` (les CINQ lots, du `data-param` moteur au champ `guide:` du glossaire). ⮕ **Le compte de plans ouverts BAISSE.** *La règle « un plan ne dit pas son propre état » vaut dans les deux sens — et on ne l'applique spontanément que dans celui qui inquiète.* Le matin, elle avait servi à découvrir du travail non fait ; l'après-midi, à découvrir du travail fait.
+
+     ▣ **BILAN** : 7 terminés · 3 consommés (dont `PLAN_guide_PAN_pedagogique_CSE`, périmé par le CDC du 6 juin — à garder comme trace datée, pas à réécrire) · 2 partiels · 1 jamais amorcé. ⮕ **Livré par un autre chemin** deux fois : le guide RàI vit dans le module unifié et non dans le `js/guide-rai.js` que son plan prévoyait ; l'uniformisation de l'Accompagnement est livrée en cartes-accordéon et non par le patron du §2.
+
+     ✅ **CE QUI RESTE VRAIMENT OUVERT, versé en #439/#440/📐#441** :
+        1. **#439** — les deux guides manquants (5 sur 7). ⮕ `pan-rrec` n'est PAS un chantier de conception : ses 4 pages sont **déjà rédigées** au §3 de son plan, prêtes à coller. Registre à ne pas diluer : le guide ne dit jamais que l'app *garantit* la conformité (`seuilReussite` est configurable — le promettre serait faux).
+        2. **#440** — le SRPNF codé en dur. ⚠ **Le §7 du plan maître disait « signalé pour le backlog » le 23 mai ; `grep SRPNF BACKLOG.md` rendait ZÉRO le 9 août.** Deux mois et demi perdus dans le trajet plan → backlog, pas dans le diagnostic. ⮕ **Et l'état réel est plus favorable ET plus précis que ce que le plan décrivait** : le CALCUL a été généralisé depuis (les accumulateurs se construisent depuis la grille de référence) ; ce qui reste en dur, ce sont **deux sites d'AFFICHAGE** et le regex d'`identifierDefiSpecifique`. Conséquence à confirmer au terrain : sur une grille non-SRPNF, forces/défis s'affichent mais le tableau de scores et les barres restent vides.
+        3. **📐 #441** — le chantier 3 de SOLO (association déclarée dans l'éditeur d'échelle) : jamais amorcé, mais **invisible pour l'utilisateur** — la révision du 4 juin avait réécrit la page 5 du guide pour décrire l'app telle qu'elle est. Ni promesse trahie, ni porte morte : une intention de mai jamais annulée. Question à Grégoire.
+
+     ✅ **NETTOYAGE ZÉRO-DETTE, le jour même** (règle CLAUDE.md : un audit qui révèle du code mort le nettoie dans la même session). Le patron `.option-accompagnement` — bloc, tête, checkbox, titre, description, sous-options et les deux règles `:has()` — **~51 lignes de `styles.css`, zéro porteur** dans `index.html`, `js/`, `tests/` ni `design-system.html`. Remplacé par les cartes-accordéon le 26 mai, jamais retiré. Seul `.option-accompagnement-guide-btn` sert encore (5 en-têtes).
+     ▣ **Le cliquet ne liste PAS les classes mortes d'aujourd'hui** : il vérifie que *toute* classe `.option-accompagnement*` déclarée a un porteur réel. Une liste figée n'aurait rien dit de la prochaine.
+     ⚠⚠ **UN BREAK-TEST EST RESTÉ VERT, ET C'ÉTAIT MON TEST QUI VISAIT À CÔTÉ.** Renommer la classe du bouton en `…-guide-btnX` laissait les cinq matchs en place — la sonde comptait une **sous-chaîne**. Resserré sur l'attribut entier (`class="…"`), puis rouge sur les deux mutations (renommage ET suppression). *Une assertion en sous-chaîne ne prouve pas une classe : celle-là aurait couvert cinq boutons sans style.* Même famille que l'ancre manquante du 8 août — deuxième fois en deux jours qu'un motif trop lâche passe.
+     ▣ **4 break-tests ROUGE** au total : résurrection d'une règle morte (2 assertions), renommage de la classe vivante, suppression d'un bouton, retrait d'un correctif de contraste mode clair.
+
+     ▣ **CORRIGÉ AU PASSAGE** : l'en-tête de `ETAT-PROJET.md` annonçait **1.64.0 / `0809-0906`** alors que `main` portait 1.65.1 — les deux sessions du matin ont fusionné sans repasser par le document qui « situe le projet ». *Le document qui surveille les désyncs des autres en produit aussi* — c'est la deuxième fois qu'on l'écrit sur ce fichier.
+
+     ⮕ **CE QUI RESTE, INCHANGÉ ET TOUJOURS PRIORITAIRE** : les **81 portes terrain** (`PORTES-TERRAIN-1.57-1.65.md`) et les **quatre valeurs gelées**. Rien de ce qui précède n'y touche : l'audit est en lecture, le nettoyage porte sur du CSS sans porteur.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 9 AOÛT 2026, FIN (rituel de clôture passé).
      ÉTAT FINAL : `main` = **1.65.1** (build 0809-0958), arbre propre, 0 divergence. Vitest **2057/2057** (232 fichiers). Dernier ID **#438**. Les deux branches du jour sont fusionnées ; `RELAIS.md` est à « aucun travail en avance ».
 

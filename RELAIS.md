@@ -11,16 +11,35 @@
 
 | | |
 |---|---|
-| **Branche à ouvrir** | **`main`** |
-| **Version** | **1.65.1** — build `0809-0958` |
-| **Travail en avance sur `main`** | **aucun** |
-| **Dernière mise à jour** | 9 août 2026, **clôture de session** — rituel de fin passé, relais préparé |
+| **Branche à ouvrir** | ⚠ **`claude/poursuite-travail-matin-es3hu9`** |
+| **Version** | **1.65.2** — build `0809-1101` |
+| **Travail en avance sur `main`** | **1 commit** — audit de `Plan Accompagnement/` (§4quater), versement #439/#440/📐#441, nettoyage du patron `.option-accompagnement` |
+| **Dernière mise à jour** | 9 août 2026, **PM** — session de reprise, après la clôture du matin |
+
+⚠ **DETTE DE FUSION OUVERTE, et la même contrainte que le 9 août au matin** :
+le conteneur de cette session est **contraint à sa branche de développement**.
+Elle ne peut ni fusionner vers `main`, ni y pousser ce fichier seul. Le filet est
+rempli — il n'est pas à l'endroit où il devrait être. **Seul Grégoire peut l'y
+mettre**, ou autoriser la fusion. La fusion est un `--ff-only` (la branche est
+partie du `main` courant et rien n'a bougé depuis).
+
+⮕ **Ce que la branche porte** : rien qui touche au calcul ni aux données. Un audit
+(lecture seule) versé en documentation, trois items de backlog, et le retrait de
+~51 lignes de CSS **sans aucun porteur** — vérifié dans `index.html`, `js/`,
+`tests/` et `design-system.html`, et verrouillé par un cliquet générique. Vitest
+**2062/2062** (233 fichiers).
 
 ⮕ **Où lire la suite** : le **§3 de `SESSION.md`** porte la consigne de démarrage
 complète — prémisse chiffrée à vérifier, priorités dans l'ordre, décisions en
-attente, et les cinq leçons de méthode que cette journée a coûtées.
+attente, et les cinq leçons de méthode que le 9 août a coûtées. **Ses priorités
+sont inchangées** : les 81 portes terrain et les quatre valeurs gelées restent en
+tête, et rien de cette session n'y touche.
 
-✅ **La dette de fusion du 9 août est SOLDÉE.** Les deux sessions parallèles
+> ▣ **Tout ce qui suit décrit la journée du 9 août au MATIN** — la collision des
+> deux sessions et sa résolution. C'est de l'historique, conservé pour la méthode
+> qu'il porte. L'état courant est le tableau ci-dessus.
+
+✅ **La dette de fusion du 9 août (matin) est SOLDÉE.** Les deux sessions parallèles
 (carte d'alignement #437, pratiques #434/#435/#436/#438) sont dans `main`, en
 fast-forward, suite rejouée sur l'état fusionné : **Vitest 2057/2057**
 (232 fichiers). Dernier ID utilisé : **#438**.
