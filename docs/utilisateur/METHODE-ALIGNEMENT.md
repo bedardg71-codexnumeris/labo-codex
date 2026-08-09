@@ -188,39 +188,55 @@ Ces dérives ne seront **pas des échecs** : ce sont les données du chantier.
 
 ## 4. État de l'outil face à cette démarche
 
-Relevé au code le 6 août 2026 (version 1.31.22), pour situer où l'outil
+Relevé au code le **9 août 2026 (version 1.60.0)**, pour situer où l'outil
 soutient la démarche et où il ne la soutient pas encore.
+
+> *Le relevé précédent datait du 6 août (1.31.22) et avait vieilli de 26
+> versions : il décrivait encore la vue Leçon et l'Organisateur, tous deux
+> supprimés depuis (#424 Lot G). Les paragraphes qui les décrivaient ont été
+> réécrits, pas effacés — le diagnostic du 6 août reste lisible en §4.1 bis,
+> parce que c'est lui qui a motivé le correctif.*
 
 ### 4.1 Ce qui existe
 
-**Types de nœuds** (`planification-carte.js`, `TYPES`) :
+**Types de nœuds** (`planification-carte.js`, `TYPES`) — **18**, répartis dans
+les six zones de la palette :
 
-| Famille | Types disponibles |
+| Zone de la palette | Types disponibles |
 |---------|-------------------|
-| Objectifs | Compétence, Idée maîtresse |
-| Connaissances (Anderson & Krathwohl) | Factuelle, Conceptuelle, Procédurale, Métacognitive |
-| Conteneurs | **Séquence**, **Leçon** |
-| Activités | Activité, Soutien, Révision |
-| Évaluation | Évaluation |
+| Intention curriculaire | Compétence, Idée maîtresse |
+| Types de connaissances (Anderson & Krathwohl) | Factuelle, Conceptuelle, Procédurale, Métacognitive |
+| Déroulement | **Exposé**, Activité, Soutien, Révision |
+| Preuve de réussite | Évaluation |
+| Organisation (conteneurs) | **Séquence**, **Leçon** |
+| Enseignement explicite | Ouverture, Modélisation, Pratique guidée, Pratique autonome, Clôture |
 
-**Deux notions d'objectif de leçon coexistent déjà** — point directement
-pertinent pour le temps 1 de la démarche :
+**L'objectif de leçon est désormais UN, et il vit sur la leçon.** Les deux
+notions qui coexistaient le 6 août ont été ramenées à une seule :
 
-- **Objectif dérivé** (organisateur de leçon) : calculé en remontant les liens
-  jusqu'aux idées maîtresses ancêtres, et formulé automatiquement
-  « Au terme de la leçon, l'étudiant·e sera capable de… ».
-- **Objectif personnalisé** (vue Leçon) : champ de texte libre, éditable,
-  signalé par un badge 🎯 sur le nœud.
+- l'objectif est une **liste** portée par le nœud lui-même
+  (`noeud.metadata.objectifs`) — une leçon en a le plus souvent plusieurs ;
+- il se saisit **dans l'en-tête du bloc Leçon**, que le badge 🎯 déplie ;
+- ce que chaque activité, exposé ou évaluation **sert** se déclare par cases à
+  cocher dans l'Inspecteur (« Objectifs servis », #403), bornées aux objectifs
+  de sa propre leçon.
 
-**◈ OUVERT — décision de méthode.** Ces deux objectifs ne sont **pas
-articulés** : l'un est déduit de la structure, l'autre est saisi à la main, et
-rien ne les confronte. Or la démarche de Grégoire commence par le second
-(saisir l'objectif) alors que l'outil privilégie le premier (le déduire).
-Faut-il : les garder indépendants ? Faire du personnalisé un *raffinement* du
-dérivé ? Signaler leur divergence comme un défaut d'alignement ? À trancher
-par l'usage, pas d'avance.
+**✅ La décision de méthode ouverte le 6 août est tranchée par le code** :
+l'objectif *dérivé* (formulé automatiquement en remontant les idées maîtresses
+ancêtres) est parti avec l'Organisateur. Il ne reste que l'objectif **saisi** —
+c'est-à-dire l'ordre de la démarche, pas celui que l'outil privilégiait.
 
-### 4.1 bis — Diagnostic : pourquoi l'objectif est introuvable
+### 4.1 bis — ✅ RÉSOLU (8 août) — Diagnostic : pourquoi l'objectif était introuvable
+
+> **Statut au 9 août 2026** : les trois emplacements décrits ci-dessous ont été
+> ramenés à **un seul**. La vue leçon et l'Organisateur n'existent plus ; le
+> badge 🎯 s'affiche désormais **grisé** quand aucun objectif n'est posé, ce qui
+> ferme le cercle diagnostiqué ici (« pour découvrir la fonction, il faut déjà
+> s'en être servi »). Et le guide intégré en fait maintenant une étape à part
+> entière (page « Ce que la leçon vise », #421).
+>
+> Le diagnostic est conservé **tel qu'écrit** : c'est lui qui a produit le
+> correctif, et le principe candidat qu'il dégage vaut au-delà de ce cas.
 
 Constat de Grégoire (6 août) : *« J'ai cherché à quel endroit était l'objectif
 des leçons, et je ne le trouve pas de façon rapide et intuitive. »*
@@ -252,25 +268,24 @@ dans la carte mentale**, pour organiser l'ensemble en le gardant à l'œil ; pui
 en entrant dans la leçon, disposer connaissances / activités / évaluations
 **orientées par cet objectif**.
 
-### 4.2 ⚠ Risque à connaître AVANT toute saisie massive
+### 4.2 ✅ FERMÉ (7-8 août) — le risque qui pesait sur toute saisie massive
 
-L'objectif personnalisé, les notes de leçon et les rétroactions d'activité
-sont stockés dans la clé **`planification_seances`**, qui présente deux
-défauts connus et non corrigés :
+Ce paragraphe portait un avertissement : ne pas saisir 30 objectifs de leçon
+avant d'avoir réparé la clé qui les stocke. **Les deux défauts sont corrigés**,
+la mise en garde est levée. Vérifié au code le 9 août :
 
-1. **Clé non namespacée.** Elle est absente du registre `CLES_NAMESPACEES`, donc
-   `cle()` la retourne **nue** : elle est **partagée entre tous les trimestres
-   et avec le mode démo** (constat adverse du 4 août 2026, item BACKLOG #367).
-2. **Dictionnaire plat indexé par id de leçon**, alors que les ids de leçon ne
-   sont uniques **que par carte** (rouge n°4 de l'audit qualité du 5 août) →
-   deux leçons de deux cartes différentes peuvent partager un id et
-   **s'écraser mutuellement**.
+| Défaut du 6 août | État au 9 août |
+|---|---|
+| **Clé non namespacée** — `planification_seances` retournée nue par `cle()`, donc partagée entre tous les trimestres et avec le mode démo (constat adverse du 4 août, #367) | **Corrigé** — migration `migration_planification_seances_done` (`main.js`) : les notes sont réparties dans `<trimestre>_planification_seances` |
+| **Dictionnaire plat indexé par id de leçon**, alors qu'un id de leçon n'est unique **que par carte** → deux cartes pouvaient s'écraser mutuellement (rouge n°4 de l'audit qualité du 5 août) | **Corrigé** — la clé est composée `<carteId>::<leconId>` (`planification-carte.js`, `planification-donnees.js`) |
 
-**Conséquence pratique pour la démarche** : le temps 1 (saisir 30 objectifs de
-leçon) investit précisément dans la structure la plus fragile du module. La
-décision de migration (#367, jumelée à la clé composite `carteId+leconId`)
-devrait être prise **avant** que la saisie représente un travail coûteux à
-perdre.
+⮕ **Et la donnée elle-même a déménagé** : les objectifs ne vivent plus dans
+`planification_seances` mais sur le nœud (`noeud.metadata.objectifs`, §4.1),
+donc dans la carte — migration one-shot `migrerObjectifsVersMetadata()`, qui ne
+retire l'ancienne source qu'**après** une sauvegarde réussie.
+
+⚠ Reste, sans rapport avec la saisie : **#428**, une purge sans drapeau de
+l'archive `pre367` à retirer de `main.js` à la rentrée.
 
 ### 4.3 Verbes de liens disponibles
 

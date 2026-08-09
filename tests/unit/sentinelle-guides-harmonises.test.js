@@ -69,7 +69,7 @@ describe('Guides · B — les tailles sont explicites, pas héritées', () => {
         expect(css).toMatch(/\.planif-guide-corps li,\s*\.guide-pedagogique-corps li\s*\{[^}]*font-size/);
     });
 
-    it('la conclusion de la page 7 est dans l’échelle (l’accent est la couleur)', () => {
+    it('la conclusion de la page « Vérifie que c’est acquis » est dans l’échelle (l’accent est la couleur)', () => {
         expect(css).toMatch(/\.planif-guide-conclusion\s*\{[^}]*font-size/);
     });
 
@@ -122,8 +122,14 @@ describe('Guides · D — le contenu décrit l’application RÉELLE (post-#424)
         expect(bloc).toContain('enseignement explicite');
     });
 
-    it('le guide compte toujours ses 8 pages, chacune avec un titre', () => {
+    it('le guide compte toujours ses 9 pages, chacune avec un titre', () => {
+        // 8 le 8 août ; la 9e est « Ce que la leçon vise », ajoutée le 9 août
+        // par #421 — le guide faisait construire la carte sans jamais nommer
+        // l'objectif de leçon. Le compte reste FIGÉ ici volontairement : c'est
+        // ce qui force à passer par ce test quand on ajoute ou retire une page.
+        // La cohérence entre ce compte et le « N étapes » annoncé en page 1 est
+        // vérifiée, elle, par calcul — sentinelle-carte-alignement-421-426.
         const titres = blocGuidePages().match(/titre: '/g) || [];
-        expect(titres.length).toBe(8);
+        expect(titres.length).toBe(9);
     });
 });

@@ -4174,13 +4174,13 @@
 
             <!-- ===================================
      SECTION: CONCEPTION
-     Alignement pédagogique, planification, matériel d'évaluation
+     Carte d'alignement, productions, matériel d'évaluation
      =================================== -->
             <section id="section-conception" class="section">
 
                 <div id="conception-carte" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
-                        <span>Alignement pédagogique</span>
+                        <span>Carte d'alignement</span>
                         <span class="planif-badge-evolution" title="Module en développement actif">🔧 Présentement en développement actif</span>
                     </h2>
                     <p class="text-muted">Organiser visuellement les séquences, leçons et activités du cours</p>
@@ -4321,7 +4321,7 @@
                                         </div>
                                     </div>
                                     <div class="planif-palette-categorie" data-zone="explicite">
-                                        <div class="planif-palette-zone-label">Enseignement explicite</div>
+                                        <div class="planif-palette-zone-label" data-tooltip="planif-enseignement-explicite">Enseignement explicite</div>
                                         <div class="planif-palette-groupe">
                                             <button class="planif-palette-btn" data-type="ouverture" draggable="true" title="Captation de l'attention, justification de l'objectif, vérification des préalables">
                                                 <span class="planif-pastille" style="background: var(--planif-couleur-ouverture)"></span>Ouverture
@@ -11574,9 +11574,9 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p><strong>Navigation :</strong> Conception → Alignement pédagogique</p>
+                            <p><strong>Navigation :</strong> Conception → Carte d'alignement</p>
 
-                            <p>L'onglet Planification offre une <strong>carte mentale visuelle</strong> pour organiser tes séquences, leçons et activités pédagogiques.</p>
+                            <p>L'onglet <strong>Carte d'alignement</strong> offre une <strong>carte mentale visuelle</strong> pour organiser tes séquences, leçons et activités pédagogiques.</p>
 
                             <p><strong>Créer une carte :</strong></p>
                             <ol class="lh-2">
@@ -11596,12 +11596,19 @@
                                 <li><strong>Enseignement explicite</strong> : Ouverture, Modélisation, Pratique guidée, Pratique autonome, Clôture</li>
                             </ul>
 
+                            <p><strong>L'objectif d'une leçon :</strong> le badge 🎯 dans l'en-tête du bloc <strong>Leçon</strong> déplie la zone des objectifs — grisé, il indique qu'aucun objectif n'est encore posé. Le <strong>+</strong> en ajoute un, le <strong>−</strong> le retire. Une leçon peut en porter plusieurs.</p>
+
+                            <p><strong>Régler un élément :</strong> sélectionne-le, puis ouvre l'<strong>Inspecteur</strong> (bouton 🕵️ de la palette, ou double-clic sur le bloc). Selon le type du bloc : la semaine, la leçon d'accueil, les objectifs qu'il sert, son niveau cognitif, sa rétroaction formative. La <strong>durée estimée</strong>, elle, se saisit dans l'en-tête du bloc — la leçon en affiche le total.</p>
+
                             <p><strong>Outils de navigation :</strong></p>
                             <ul>
-                                <li><strong>Zoom</strong> : Préréglages 25%, 50%, 75%, 100% + recentrer, ajuster largeur/hauteur</li>
-                                <li><strong>Annuler</strong> : Ctrl+Z pour revenir en arrière</li>
-                                <li><strong>Multi-cartes</strong> : Crée plusieurs cartes, duplique-les, passe de l'une à l'autre</li>
-                                <li><strong>Import/Export</strong> : Importe un alignement existant au format JSON</li>
+                                <li><strong>Zoom</strong> : molette ou pincement ; le pourcentage s'affiche dans la barre. <strong>Recentrer</strong> (⌘1) ramène toute la carte à l'écran</li>
+                                <li><strong>Plein écran</strong> : masque le titre de section et ne laisse que la carte</li>
+                                <li><strong>Annuler</strong> : Ctrl+Z, ou le bouton <strong>Annuler</strong> de la barre (le seul chemin sur iPad)</li>
+                                <li><strong>Supprimer un bloc</strong> : glisse-le sur la <strong>corbeille</strong> de la palette</li>
+                                <li><strong>Multi-cartes</strong> : crée plusieurs cartes, duplique-les, passe de l'une à l'autre</li>
+                                <li><strong>Importer</strong> : une carte exportée en JSON, ou la carte d'un cours donné à un trimestre précédent</li>
+                                <li><strong>Exporter le plan…</strong> : trois niveaux (Plan de cours, En classe, Preuve d'alignement) × trois formats (texte, tableau TSV, Markdown), plus un niveau <strong>Personnalisé</strong> que tu règles toi-même</li>
                             </ul>
                         </div>
                     </div>
@@ -14338,7 +14345,7 @@
     <script src="libs/jspdf-autotable.min.js"></script>
 
     <!-- PRIORITÉ 1: Fondations -->
-    <script src="js/config.js?v=20260808a"></script> <!-- #326 (28 juin) : COMPARATEUR_VISIBLE=true (réactivation) ; #345 (22 juin) : flag COMPARATEUR_VISIBLE ; Refonte nav SP5-fix : sous-onglet id court 'vue' (au lieu de 'calendrier') pour éviter la redondance calendrier-calendrier -->
+    <script src="js/config.js?v=20260809a"></script> <!-- #326 (28 juin) : COMPARATEUR_VISIBLE=true (réactivation) ; #345 (22 juin) : flag COMPARATEUR_VISIBLE ; Refonte nav SP5-fix : sous-onglet id court 'vue' (au lieu de 'calendrier') pour éviter la redondance calendrier-calendrier -->
     <script src="js/navigation.js?v=20260808a"></script> <!-- #345 (22 juin) : filtre comparateur sous-nav Labo ; Refonte nav SP5 : tables migrées calendrier-* + nav-calendrier-* -->
     <script src="js/preferences.js?v=20260808a"></script> <!-- Beta 99.16 : API centralisée préférences + migration V3 (doit précéder modes.js) -->
     <script src="js/modes.js?v=20260805b"></script> <!-- Refonte nav SP5 : commentaire et clé calendrier-trimestre -->
@@ -14477,7 +14484,7 @@
     <script src="js/planification-donnees.js?v=20260808a"></script> <!-- #425 préalable : vivacité de productionId à la reprise (8 août) -->
 
     <script src="js/planification-bibliotheque.js?v=2026051026"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
-    <script src="js/planification-carte.js?v=20260808k"></script> <!-- Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
+    <script src="js/planification-carte.js?v=20260809a"></script> <!-- Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
     <script src="js/planification-export.js?v=20260808b"></script> <!-- LE générateur d'export : 3 niveaux × 3 formats (portage #424, 8 août) -->
     <script src="js/planification.js?v=20260808a"></script> <!-- Refonte nav SP4 : hooks nomSection 'conception' + idSousSection conception-* -->
 
@@ -14561,7 +14568,7 @@
     <script src="js/guidage-demo.js?v=20260808a"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=20260808h"></script> <!-- Entrée 1.56 : trois chantiers Alignement consolidés -->
+    <script src="js/changelog-data.js?v=20260809a"></script> <!-- Entrée 1.56 : trois chantiers Alignement consolidés -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
     <script src="js/etats-vides.js?v=20260808a"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre -->
@@ -14571,22 +14578,22 @@
          Un seul moteur pour hover, flèches didactiques, popups aide contextuelle,
          visite guidée et glossaire. API publique : window.accompagnement. -->
     <link rel="stylesheet" href="css/accompagnement.css?v=2026042002">
-    <script src="js/accompagnement.js?v=20260808a"></script> <!-- #305 (2 juil.) : popup Conseil — nom accessible + focus -->
+    <script src="js/accompagnement.js?v=20260809a"></script> <!-- #305 (2 juil.) : popup Conseil — nom accessible + focus -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
-    <script src="js/accompagnement-contenu-hover.js?v=20260808c"></script> <!-- Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
-    <script src="js/accompagnement-contenu-popup.js?v=20260629a"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
-    <script src="js/accompagnement-contenu-terme.js?v=20260629a"></script>
+    <script src="js/accompagnement-contenu-hover.js?v=20260809a"></script> <!-- Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
+    <script src="js/accompagnement-contenu-popup.js?v=20260809a"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
+    <script src="js/accompagnement-contenu-terme.js?v=20260809a"></script>
     <script src="js/guides-pedagogiques.js?v=20260629a"></script> <!-- Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->
     <script src="js/comparateur-pratiques.js?v=20260629a"></script> <!-- Comparateur de pratiques (lot C1-a : squelette + garde démo, 6 juin 2026) -->
     <script src="js/export-resultats-finaux.js?v=2026061901"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260808l"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260809a"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260808l"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260809a"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>
