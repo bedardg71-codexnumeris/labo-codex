@@ -5757,10 +5757,6 @@
                                                         <option value="derniers">N derniers artefacts</option>
                                                         <option value="tous">Tous les artefacts</option>
                                                         <option value="hybride">Hybride (N meilleures + Obligatoires)</option>
-                                                        <!-- #434 (9 août 2026) : reprise du seul chemin qui menait au
-                                                             panneau « Par objectifs », porté jusque-là par le champ
-                                                             legacy « Comment construis-tu la note finale ? ». -->
-                                                        <option value="par-objectifs">Par objectifs (4 modes de calcul)</option>
                                                     </select>
                                                     <div id="mat-portfolio-selection-description" class="u-mt-10 u-texte-petit" style="display: none; padding: 10px 12px; background: var(--gris-tres-pale); border-radius: var(--radius-moyen); color: var(--gris-fonce)"></div>
                                                 </div>
@@ -5875,144 +5871,10 @@
                                             </div>
                                         </div>
 
-                                        <!-- Config Par-Objectifs (variante: par-objectifs) -->
-                                        <div id="mat-config-par-objectifs" style="display: none;">
-
-                                            <!-- Sélecteur de mode de calcul -->
-                                            <div class="u-mb-20">
-                                                <div class="groupe-form">
-                                                    <label for="mat-objectifs-mode-calcul" class="u-texte-gras" style="display: block; margin-bottom: 6px">
-                                                        Mode de calcul de la note finale
-                                                    </label>
-                                                    <select id="mat-objectifs-mode-calcul" class="controle-form" data-on-change="changerModeCalculObjectifsMat">
-                                                        <option value="comptage">Comptage d'objectifs (Bruno V.)</option>
-                                                        <option value="moyenne-ponderee">Moyenne pondérée (Michel B.)</option>
-                                                        <option value="seuils-critiques">Seuils critiques (Xavier C.-T.)</option>
-                                                        <option value="holistique">Holistique (Isabelle M.)</option>
-                                                    </select>
-                                                </div>
-                                                <div id="mat-objectifs-mode-description" class="u-mt-10 u-texte-petit" style="display: none; padding: 10px 12px; background: var(--gris-tres-pale); border-radius: var(--radius-moyen); color: var(--gris-fonce)">
-                                                </div>
-                                            </div>
-
-                                            <!-- Liste des objectifs (partagée entre tous les modes) -->
-                                            <div class="u-mb-20">
-                                                <div class="u-flex-between u-mb-10">
-                                                    <h4 style="margin: 0; font-size: 1rem;">Liste des objectifs</h4>
-                                                    <button type="button" class="btn btn-principal btn-compact" data-action="ajouterObjectifMat">
-                                                        + Ajouter un objectif
-                                                    </button>
-                                                </div>
-                                                <div id="mat-objectifs-liste">
-                                                    <!-- Liste générée dynamiquement selon le mode -->
-                                                </div>
-                                            </div>
-
-                                            <!-- Section Mode Comptage (Bruno V.) -->
-                                            <div id="mat-config-mode-comptage" style="display: none;">
-                                                <div class="u-mb-15 u-p-12" style="background: var(--alerte-fond-succes); border-left: 3px solid var(--alerte-bordure-succes); border-radius: 6px">
-                                                    <p class="u-texte-petit" style="margin: 0; line-height: 1.5">
-                                                        <strong>Comptage (Bruno V.)</strong> : La note finale dépend du nombre d'objectifs maîtrisés.
-                                                        Les objectifs « essentiels » doivent TOUS être maîtrisés, sinon la note est plafonnée.
-                                                    </p>
-                                                </div>
-                                                <div class="u-mb-20" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px">
-                                                    <div class="groupe-form">
-                                                        <label for="mat-comptage-seuil-maitrise" class="u-texte-gras" style="display: block; margin-bottom: 6px">
-                                                            Seuil de maîtrise (%)
-                                                        </label>
-                                                        <input type="number" id="mat-comptage-seuil-maitrise" class="controle-form" min="50" max="100" value="75" data-on-change="sauvegarderConfigPratiqueMat">
-                                                        <small class="text-muted" style="display: block; margin-top: 4px;">Note minimale pour considérer un objectif « Maîtrisé »</small>
-                                                    </div>
-                                                    <div class="groupe-form">
-                                                        <label for="mat-comptage-plafond-essentiel" class="u-texte-gras" style="display: block; margin-bottom: 6px">
-                                                            Plafond si essentiels non maîtrisés (%)
-                                                        </label>
-                                                        <input type="number" id="mat-comptage-plafond-essentiel" class="controle-form" min="0" max="60" value="55" data-on-change="sauvegarderConfigPratiqueMat">
-                                                        <small class="text-muted" style="display: block; margin-top: 4px;">Note maximale si un objectif essentiel n'est pas maîtrisé</small>
-                                                    </div>
-                                                </div>
-                                                <!-- Grille de conversion -->
-                                                <div class="u-mb-15">
-                                                    <div class="u-flex-between u-mb-10">
-                                                        <h4 style="margin: 0; font-size: 1rem;">Grille de conversion</h4>
-                                                        <small class="text-muted">Clique sur une note pour la modifier</small>
-                                                    </div>
-                                                    <div id="mat-comptage-grille-conversion" style="max-height: 300px; overflow-y: auto;">
-                                                        <!-- Grille générée dynamiquement -->
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Section Mode Moyenne pondérée (Michel B.) -->
-                                            <div id="mat-config-mode-moyenne-ponderee" style="display: none;">
-                                                <div class="u-mb-15 u-p-12" style="background: var(--bleu-pale); border-left: 3px solid var(--bleu-clair); border-radius: 6px">
-                                                    <p class="u-texte-petit" style="margin: 0; line-height: 1.5">
-                                                        <strong>Moyenne pondérée (Michel B.)</strong> : La note finale est la moyenne des niveaux atteints,
-                                                        pondérée par l'importance de chaque objectif. Configure les pondérations dans la liste ci-dessus.
-                                                    </p>
-                                                </div>
-                                                <div class="alerte-info u-p-10" style="margin: 10px 0">
-                                                    <strong>Configuration :</strong> Ajuste les pondérations (%) de chaque objectif dans le tableau ci-dessus.
-                                                    Le total devrait être 100%.
-                                                </div>
-                                            </div>
-
-                                            <!-- Section Mode Seuils critiques (Xavier C.-T.) -->
-                                            <div id="mat-config-mode-seuils-critiques" style="display: none;">
-                                                <div class="alerte alerte-attention u-mb-15">
-                                                    <p class="u-texte-petit" style="margin: 0; line-height: 1.5">
-                                                        <strong>Seuils critiques (Xavier C.-T.)</strong> : Tous les objectifs doivent atteindre un niveau minimum.
-                                                        Bonus pour les objectifs au niveau supérieur.
-                                                    </p>
-                                                </div>
-                                                <div class="u-mb-20" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px">
-                                                    <div class="groupe-form">
-                                                        <label for="mat-seuils-niveau-reussite" class="u-texte-gras" style="display: block; margin-bottom: 6px">
-                                                            Niveau requis pour réussite
-                                                        </label>
-                                                        <input type="number" id="mat-seuils-niveau-reussite" class="controle-form" min="1" max="4" value="3" data-on-change="sauvegarderConfigPratiqueMat">
-                                                        <small class="text-muted" style="display: block; margin-top: 4px;">Tous les objectifs doivent atteindre ce niveau</small>
-                                                    </div>
-                                                    <div class="groupe-form">
-                                                        <label for="mat-seuils-note-base" class="u-texte-gras" style="display: block; margin-bottom: 6px">
-                                                            Note si tous réussis (%)
-                                                        </label>
-                                                        <input type="number" id="mat-seuils-note-base" class="controle-form" min="60" max="100" value="80" data-on-change="sauvegarderConfigPratiqueMat">
-                                                        <small class="text-muted" style="display: block; margin-top: 4px;">Note obtenue si tous au niveau requis</small>
-                                                    </div>
-                                                    <div class="groupe-form">
-                                                        <label for="mat-seuils-bonus-niveau4" class="u-texte-gras" style="display: block; margin-bottom: 6px">
-                                                            Bonus par objectif niveau 4 (%)
-                                                        </label>
-                                                        <input type="number" id="mat-seuils-bonus-niveau4" class="controle-form" min="0" max="10" step="0.5" value="3.33" data-on-change="sauvegarderConfigPratiqueMat">
-                                                        <small class="text-muted" style="display: block; margin-top: 4px;">Points bonus par objectif au niveau 4</small>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Section Mode Holistique (Isabelle M.) -->
-                                            <div id="mat-config-mode-holistique" style="display: none;">
-                                                <div class="u-mb-15 u-p-12" style="background: var(--alerte-fond-violet); border-left: 3px solid var(--alerte-bordure-violet); border-radius: 6px">
-                                                    <p class="u-texte-petit" style="margin: 0; line-height: 1.5">
-                                                        <strong>Holistique (Isabelle M.)</strong> : Le système suggère une note basée sur une analyse statistique,
-                                                        mais l'enseignant·e valide avec son jugement professionnel.
-                                                    </p>
-                                                </div>
-                                                <div class="groupe-form">
-                                                    <label for="mat-holistique-methode" class="u-texte-gras" style="display: block; margin-bottom: 6px">
-                                                        Méthode de suggestion
-                                                    </label>
-                                                    <select id="mat-holistique-methode" class="controle-form" data-on-change="sauvegarderConfigPratiqueMat">
-                                                        <option value="mode">Mode (niveau le plus fréquent)</option>
-                                                        <option value="mediane">Médiane</option>
-                                                        <option value="moyenne">Moyenne</option>
-                                                    </select>
-                                                    <small class="text-muted" style="display: block; margin-top: 4px;">La suggestion peut être modifiée par l'enseignant·e lors de l'évaluation finale</small>
-                                                </div>
-                                            </div>
-
-                                        </div><!-- fin mat-config-par-objectifs -->
+                                        <!-- Le panneau « Par objectifs » (mat-config-par-objectifs, 4 modes de
+                                             calcul) a été RETIRÉ le 9 août 2026 (#435, extension de #396) : son
+                                             moteur appariait les productions par un `objectifId` qu'aucun code
+                                             n'écrit — il n'a jamais pu calculer. Décision Grégoire du 9 août. -->
 
                                     </div>
 
@@ -14382,8 +14244,8 @@
     <script src="js/bibliotheque-ui.js?v=2026051020"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 (menu ⋮ kebab + refactor renderCarte) -->
     <script src="js/spe-specifications.js?v=20260808b"></script> <!-- Beta 95 : Module PAN-Spécifications + gabarits François -->
     <script src="js/repertoires-bibliotheque.js"></script> <!-- #320 L0 : répertoires de classement (couche par-dessus les biblios) -->
-    <script src="js/pratiques-bibliotheque.js?v=20260809a"></script> <!-- #318 (22 juin) : gabarit DEN « Modèle de base » ; Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/pratiques-gestion.js?v=20260809a"></script> <!-- Brique C namespacing pas 5 : import inter-trimestre de pratiques (modèle COPIE) + vérif dépendances echelleId/grilleId (option A : avertir) -->
+    <script src="js/pratiques-bibliotheque.js?v=20260809b"></script> <!-- #318 (22 juin) : gabarit DEN « Modèle de base » ; Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
+    <script src="js/pratiques-gestion.js?v=20260809b"></script> <!-- Brique C namespacing pas 5 : import inter-trimestre de pratiques (modèle COPIE) + vérif dépendances echelleId/grilleId (option A : avertir) -->
     <script src="js/preferences-v2.js?v=20260808b"></script> <!-- Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
     <script src="js/donnees-v2.js?v=20260808b"></script> <!-- Refonte nav SP5 : afficherSection calendrier -->
     <script src="js/etudiants.js?v=20260629a"></script>
@@ -14415,7 +14277,7 @@
          legacy sur la clé nue pré-namespacing, morte sur tout appareil courant ;
          normaliserIdPratique résout de toute façon les ids legacy à la volée -->
     <script src="js/pratiques/pratique-test.js?v=2025120705"></script>
-    <script src="js/pratiques/pratique-pan-standards.js?v=20260805a"></script>
+    <script src="js/pratiques/pratique-pan-standards.js?v=20260809a"></script>
     <script src="js/pratiques/pratique-sommative.js?v=2025121003"></script>
     <script src="js/pratiques/pratique-pan-specifications.js?v=2025112600"></script>
     <script src="js/pratiques/config-francois-chimie.js?v=2025112600"></script>
@@ -14562,7 +14424,7 @@
     <script src="js/guidage-demo.js?v=20260808a"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=20260809b"></script> <!-- Entrée 1.56 : trois chantiers Alignement consolidés -->
+    <script src="js/changelog-data.js?v=20260809c"></script> <!-- Entrée 1.56 : trois chantiers Alignement consolidés -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
     <script src="js/etats-vides.js?v=20260808a"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre -->
@@ -14583,11 +14445,11 @@
     <script src="js/export-resultats-finaux.js?v=2026061901"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260809c"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260809d"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260809c"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260809d"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>

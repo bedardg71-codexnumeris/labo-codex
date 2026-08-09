@@ -55,24 +55,25 @@ describe('DEN-1 · suggererNoteHolistique (helper partagé, golden master)', () 
     });
 });
 
-describe('DEN-1 · parité STD : _calculerModeHolistique délègue au helper', () => {
-    it('produit exactement la même valeur que le helper (mode/médiane/moyenne)', () => {
+describe('DEN-1 · survie des deux dépendances STD de la suggestion DEN (post-#435)', () => {
+    // #435 (9 août 2026) a retiré _calculerModeHolistique et les trois autres
+    // modes « par objectifs » du moteur STD (extension de #396 — chemin jamais
+    // fonctionnel). Le test de parité méthode↔helper n'a donc plus de sujet :
+    // la parité valait tant que DEUX chemins coexistaient ; il n'en reste qu'un.
+    // Ce qui doit survivre — et que ce bloc verrouille — ce sont les deux
+    // dépendances de la suggestion holistique DEN (denotation-saisie-ui.js) :
+    // le helper pur (golden master ci-dessus) et _calculerNiveauxParObjectif.
+    it('_calculerNiveauxParObjectif existe toujours sur l’instance STD (DEN s’en sert)', () => {
         const std = new winStd.PratiquePANStandards();
-        const lvls = niveaux(0.8, 0.8, 0.65, 0.5);
-        // Court-circuite la lecture des évaluations : on fixe les niveaux par objectif.
-        std._calculerNiveauxParObjectif = () => lvls;
-        const objectifs = [{ id: 'o1' }, { id: 'o2' }, { id: 'o3' }, { id: 'o4' }];
-
-        ['mode', 'mediane', 'moyenne'].forEach(methode => {
-            const viaMethode = std._calculerModeHolistique('DA', objectifs, { methodeSuggestion: methode });
-            const viaHelper = suggererNoteHolistique(lvls, methode);
-            expect(viaMethode).toBe(viaHelper);
-        });
+        expect(typeof std._calculerNiveauxParObjectif).toBe('function');
     });
-    it('niveaux non calculables → null (garde préservé)', () => {
+    it('le moteur par objectifs, lui, ne revient pas (cliquet, même famille que #396)', () => {
         const std = new winStd.PratiquePANStandards();
-        std._calculerNiveauxParObjectif = () => null;
-        expect(std._calculerModeHolistique('DA', [{ id: 'o1' }], {})).toBeNull();
+        for (const morte of ['_calculerPerformanceParObjectifs', '_calculerModeComptage',
+                             '_calculerModeMoyennePonderee', '_calculerModeSeuilsCritiques',
+                             '_calculerModeHolistique', '_convertirNoteEnNiveau']) {
+            expect(std[morte], morte).toBeUndefined();
+        }
     });
 });
 

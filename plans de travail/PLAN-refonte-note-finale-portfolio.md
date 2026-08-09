@@ -155,7 +155,19 @@ Quand `productionPortfolio === null` ET `productionTerminale === null` (cas h202
 
 **Fichier** : `js/profil-etudiant-sections-affichage.js:2728-2779`. Conditionner l'affichage du bloc terminale sur `detailsNoteFinale.terminal.present`. Adapter la formule (« 100% » au lieu de « 60% + 40% = 100% » si pas de terminale).
 
-### Phase D — Retrait du champ legacy `mat-variante-calcul` — **LIVRÉE 9 août 2026 (#434, 1.62.0)**
+### Phase D — Retrait du champ legacy `mat-variante-calcul` — **LIVRÉE 9 août 2026 (#434), AMENDÉE le jour même (#435, 1.63.0)**
+
+> ⚠⚠ **AMENDEMENT #435 (9 août, après vérification demandée par Grégoire).**
+> #434 avait migré la bascule « Par objectifs » vers le mode de sélection — en
+> croyant corriger un panneau cassé. Or la famille « par objectifs » avait été
+> **condamnée le 5 août** (#396, décision D2 : chemins jamais fonctionnels), et
+> le moteur STD visé ici portait le même défaut de naissance (appariement par un
+> `objectifId` sans écrivain). Décision Grégoire : **étendre le retrait de #396**.
+> Le mode, son moteur (4 modes de calcul), son panneau, ses dix fonctions
+> d'édition et ses quatre gabarits sont RETIRÉS. Les pratiques legacy sont
+> normalisées en lecture seule (console.warn, aucune réécriture). Détail : #435
+> au BACKLOG. Les paragraphes ci-dessous décrivent l'état INTERMÉDIAIRE de
+> #434, conservés pour la traçabilité de la journée.
 
 > **Ce n'a pas pu être le « retrait pur » prescrit.** La vérification au code a
 > trouvé deux raisons, dont une que le plan ne soupçonnait pas :

@@ -20,15 +20,17 @@
     'use strict';
 
     var CHANGELOG = [
+        // (1.62 n'a jamais été déployée — consolidée dans 1.63, même précédent
+        //  que l'entrée 1.48 : l'utilisateur ne verra qu'UNE livraison.)
         {
-            version: '1.62',
+            version: '1.63',
             couleur: 'orange',
             titre: 'Une seule question sur la construction de la note',
             items: [
                 'Dans les réglages d’une pratique PAN-Standards, le champ « Comment construis-tu la note finale ? » disparaît : il posait la même question que « Mode de sélection », avec d’autres mots, et les deux réponses pouvaient se contredire. Une seule commande reste.',
-                'Correction : le mode « Par objectifs (4 modes de calcul) » est enfin atteignable. Il figurait au menu, mais son panneau de réglages ne s’ouvrait jamais — il se choisit maintenant dans le Mode de sélection et s’affiche pour de bon.',
                 'Chaque mode de sélection affiche une courte explication de ce qu’il fait.',
-                'Les pratiques déjà enregistrées en « Par objectifs » se rouvrent sur le bon panneau, avec leur configuration intacte.'
+                'Le mode « Par objectifs (4 modes de calcul) » est retiré de l’application. Il n’a jamais pu calculer une note — le lien entre productions et objectifs qu’il supposait n’a jamais existé — et son panneau de réglages ne s’était jamais affiché. Les quatre gabarits du catalogue qui l’illustraient partent avec lui.',
+                'Une pratique enregistrée avec ce mode s’ouvre désormais sur son mode de sélection réel, sans rien perdre : sa configuration n’est ni effacée ni réécrite.'
             ]
         },
         {
