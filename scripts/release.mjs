@@ -149,19 +149,32 @@ function prochainParamCache(actuel, dateDuJour) {
   return dateDuJour + incrementerSuffixe(m[2]);
 }
 
-// Fichiers JS que CETTE release embarque : ceux que le script reecrit
-// lui-meme, plus ceux que le developpeur a modifies sans les avoir commites.
-// Sans ce second groupe, un chantier qui touche dix modules livrerait dix
-// fichiers sous leur ancienne URL — le meme defaut, un fichier plus loin.
-function fichiersJsModifies(racine) {
+// Fichiers que CETTE release embarque : ceux que le script reecrit lui-meme,
+// plus ceux que le developpeur a modifies sans les avoir commites. Sans ce
+// second groupe, un chantier qui touche dix modules livrerait dix fichiers
+// sous leur ancienne URL — le meme defaut, un fichier plus loin.
+//
+// ⚠ #438 (9 aout 2026) — LE CSS EN FAIT PARTIE. Le bloc #417 ci-dessus ne
+// balayait que `js/` : `styles.css` n'a JAMAIS ete bumpe par ce script. Deux
+// releases du 9 aout ont du le faire a la main. Or la regle de #417 vaut mot
+// pour mot pour une feuille de style — un correctif CSS servi sous la meme
+// URL sort du cache dans sa version perimee, donc il est INERTE, et rien ne
+// le signale : la page s'affiche, simplement avec l'ancien style. C'est la
+// lecon de #417 qui n'avait pas ete poussee jusqu'au CSS.
+//
+// La boucle de bump plus bas n'avait, elle, rien de specifique au JS : elle
+// cherche `<chemin>?v=` sans savoir si c'est un <script src> ou un <link
+// href>. Il ne manquait que le fichier dans la liste.
+function fichiersModifies(racine) {
   try {
-    const sortie = execFileSync('git', ['status', '--porcelain', '--', 'js'], {
+    // Perimetre : le code JS, la feuille principale, et le dossier css/.
+    const sortie = execFileSync('git', ['status', '--porcelain', '--', 'js', 'styles.css', 'css'], {
       cwd: racine, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'],
     });
     return sortie
       .split('\n')
       .map((l) => l.slice(3).trim())
-      .filter((f) => f.endsWith('.js') && !f.includes('_archives/'));
+      .filter((f) => (f.endsWith('.js') || f.endsWith('.css')) && !f.includes('_archives/'));
   } catch {
     // Pas de git (archive, tarball) : on ne bloque pas la release, mais on ne
     // fait pas semblant non plus — l'appelant affiche l'avertissement.
@@ -243,7 +256,7 @@ const indexPath = join(root, 'index.html');
 const indexRaw = read(indexPath, 'index.html');
 const dateDuJour = anneeToronto() + newBuild.slice(0, 4); // AAAA + MMJJ
 
-const modifies = fichiersJsModifies(root);
+const modifies = fichiersModifies(root);
 const gitIndisponible = modifies === null;
 // `init-inline.js` et `main.js` sont reecrits par ce script : ils sont toujours
 // de la partie, meme si git ne les signale pas encore comme modifies.
@@ -274,7 +287,7 @@ for (const relatif of aBumper) {
 console.log('Version : ' + curVersion + '  ->  ' + newVersion + (buildOnly ? '   (inchangee)' : ''));
 console.log('Build   : ' + curBuild + '  ->  ' + newBuild);
 console.log('Fichiers: version.json, js/init-inline.js (x2), js/main.js');
-console.log('Anti-cache index.html : ' + bumpes.length + ' <script> bumpe(s)');
+console.log('Anti-cache index.html : ' + bumpes.length + ' fichier(s) bumpe(s) (script + css)');
 for (const ligne of bumpes) console.log('  · ' + ligne);
 if (absents.length) {
   console.log('  (non references dans index.html, ignores : ' + absents.join(', ') + ')');

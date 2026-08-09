@@ -12,8 +12,8 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | ⚠ **`claude/incomplete-work-plans-h1nimp`** — elle contient `main` |
-| **Version** | **1.65.0** — build `0809-0937` (identique sur les deux) |
-| **Travail encore en avance sur `main`** | **16 commits** (1.61.0 → 1.64.0, #434/#435/#436) — ✅ **conflits PRÉ-RÉSOLUS, fusion en fast-forward** |
+| **Version** | **1.65.1** sur la branche (`main` : 1.65.0) — patch #438, correctif de `release.mjs` |
+| **Travail encore en avance sur `main`** | **18 commits** (1.61.0 → 1.64.0 + 1.65.1, #434/#435/#436 + **#438**) — ✅ **conflits PRÉ-RÉSOLUS, fusion en fast-forward** |
 | **Dernière mise à jour** | 9 août 2026, fin de journée — après la résolution des conflits côté pratiques |
 
 ---
@@ -71,7 +71,11 @@ git push origin main
 consigne du point 5 est honorée sans intervention (la branche ne les avait pas
 touchées).
 
-⮕ **Vitest 2054/2054 (232 fichiers) sur l'état FUSIONNÉ** — pas l'attestation
+⮕ **#438 pris après la fusion** (correctif de `release.mjs` : il ne bumpait pas
+le `?v=` de `styles.css`, trou signalé par la session carte qui l'avait fait à la
+main deux fois). Le dernier ID est donc **#438**, pas #437.
+
+⮕ **Vitest 2057/2057 (232 fichiers) sur l'état FUSIONNÉ** — pas l'attestation
 d'un des deux côtés, la suite rejouée après résolution.
 
 ### La recette d'origine, conservée pour mémoire
