@@ -11,10 +11,24 @@
 
 | | |
 |---|---|
-| **Branche à ouvrir** | ⚠ **`claude/incomplete-work-plans-h1nimp`** — elle contient `main` |
-| **Version** | **1.65.1** sur la branche (`main` : 1.65.0) — patch #438, correctif de `release.mjs` |
-| **Travail encore en avance sur `main`** | **18 commits** (1.61.0 → 1.64.0 + 1.65.1, #434/#435/#436 + **#438**) — ✅ **conflits PRÉ-RÉSOLUS, fusion en fast-forward** |
-| **Dernière mise à jour** | 9 août 2026, fin de journée — après la résolution des conflits côté pratiques |
+| **Branche à ouvrir** | **`main`** |
+| **Version** | **1.65.1** — build `0809-0958` |
+| **Travail en avance sur `main`** | **aucun** |
+| **Dernière mise à jour** | 9 août 2026, fin de journée — **les deux branches du 9 août sont fusionnées** |
+
+✅ **La dette de fusion du 9 août est SOLDÉE.** Les deux sessions parallèles
+(carte d'alignement #437, pratiques #434/#435/#436/#438) sont dans `main`, en
+fast-forward, suite rejouée sur l'état fusionné : **Vitest 2057/2057**
+(232 fichiers). Dernier ID utilisé : **#438**.
+
+⮕ Ce qui reste dû n'est plus du code mais du **terrain** :
+`plans de travail/PORTES-TERRAIN-1.57-1.65.md`, **complété des portes 1.61→1.64**
+qui y manquaient tant que la branche pratiques n'était pas fusionnée (champ
+legacy des pratiques PAN-Standards, mode « par objectifs » retiré, suggestion
+holistique DEN, libellé d'onglet « Carte d'alignement », page 9 du guide).
+Plus **quatre valeurs gelées** en attente de verdict (deux par session), et la
+porte du 8 août toujours sans réponse : *le double-clic ouvre-t-il l'Inspecteur
+au doigt sur iPad ?*
 
 ---
 
@@ -46,16 +60,11 @@ inutilisable au moment où on en a besoin.
 c'est délibéré : sa fusion n'a plus à refondre deux séries entrelacées, mais
 seulement à garder le numéro le plus haut.
 
-### ✅ FAIT — les conflits sont résolus, la fusion est un fast-forward
+### ✅ FAIT — conflits résolus, puis FUSION EFFECTUÉE
 
-> Mis à jour par la session **pratiques**, après lecture de ce dossier.
-> `main` a été fusionnée DANS la branche : elle est passée de 4 commits de
-> retard à **0**. Il ne reste qu'un `git merge --ff-only`.
-
-```bash
-git checkout main && git merge --ff-only claude/incomplete-work-plans-h1nimp
-git push origin main
-```
+> `main` a d'abord été fusionnée DANS la branche pratiques (5 conflits résolus,
+> détail ci-dessous), ce qui l'a rendue fast-forwardable. La fusion inverse a
+> ensuite été faite et poussée : `188213fc..529a5779`.
 
 **Comment les cinq conflits ont été tranchés** (recette ci-dessous honorée) :
 
