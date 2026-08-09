@@ -33,7 +33,9 @@ note ou des chiffres affichés**, pas seulement l'apparence. Elles sont marquée
 
 ## 0. AVANT DE COMMENCER
 
-- [ ] Ouvrir sur **`main`**, vérifier en bas de page : **1.65.1**, build `0809-0958`
+- [ ] Ouvrir sur **`main`**, vérifier en bas de page : **1.65.2**, build `0809-1101`
+      *(1.65.2 = audit documentaire + retrait de CSS mort, aucun changement visible
+      par rapport à 1.65.1 — les portes ci-dessous sont inchangées)*
 - [ ] Faire un **backup Codex** avant de toucher aux données réelles
 - [ ] Prévoir **les deux appareils** : MacBook (Chrome + Safari) et iPad Air
 - [ ] Prévoir **les deux modes** (sombre et clair) — plusieurs portes en dépendent
