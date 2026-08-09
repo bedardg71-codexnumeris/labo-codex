@@ -12,9 +12,12 @@
 > bascule de session importante. Le §11 (journal) trace les révisions. Chaque ligne d'état porte
 > idéalement sa source et sa date de vérification, pour éviter de propager un état périmé.
 >
-> **Dernière mise à jour** : 8 août 2026 (Claude Code) — bêta publique **1.60.0** / build `0808-1836`.
-> Repère à jour au **§0** ; point sur le répertoire `plans de travail/` au **§4bis**.
-> Les sections **1 à 11** datent du 28 juin et n'ont **pas** été revues : les lire avec cette réserve.
+> **Dernière mise à jour** : 9 août 2026 (Claude Code) — bêta publique **1.61.0** / build `0809-0733`.
+> Repère au **§0** (8 août) ; audit du répertoire `plans de travail/` au **§4bis** (8 août) ;
+> **vérification au code des 43 plans non tranchés au §4ter (9 août)**.
+> Les sections **1 à 11** datent du 28 juin et n'ont **pas** été revues, à deux exceptions
+> corrigées le 9 août : la ligne #328 du **§2** et le premier point du **§5.3** (voir §4ter).
+> Les lire avec cette réserve pour tout le reste.
 > *(Repère précédent : 28 juin 2026 (Cowork) — 1.26.0 / build `0628-2126`, `origin/main` `72478557`,
 > PR #74 et #72 mergées. Dépôt **privatisé le 23 juin 2026**.)*
 
@@ -121,7 +124,7 @@ annuel (`AUDIT.md`, ADR-012). Trois objectifs orientent toute décision de déve
 | Audit annuel 2026 — Phase 1 (corrections) | **Fait** | §3 |
 | Audit annuel 2026 — Phase 2 (refactoring god modules + transverse) | **Fait** | §3, §5 |
 | Lancement public (bêta 1.0.0, AQPC 3 juin) | **Fait** | §8 |
-| SSOT `modalitesEvaluation` (#328, Tier 6.5 — dernière violation SSOT de l'audit) | **Fait** (probable — 1.22.0 « fin de #328 », 27 juin ; case BACKLOG non cochée → à recouper) | §5.3 |
+| SSOT `modalitesEvaluation` (#328, Tier 6.5 — dernière violation SSOT de l'audit) | **Fait** — recoupé au code le 9 août (sentinelles L2-b2 et L2-c) ; case BACKLOG cochée depuis le 3 juillet | §5.3, §4ter |
 | Namespacing par trimestre (#358) — modèles namespacés, migration **live** | **Fait** (1.25.0, 28 juin) | §6.3 |
 | Durabilité IndexedDB (#353) — risque de perte de données | **Fait** (1.24.2 ; risque de perte **fermé**) | §6.2 |
 | Prévention des doublons d'évals note-égale (#360) | **Fait** (1.24.0) | §6.2 |
@@ -243,6 +246,112 @@ contestables un par un.
 
 ---
 
+## 4ter. Les 43 plans non tranchés — vérification au code (9 août 2026)
+
+> **Origine** : demande de Grégoire — le §4bis avait classé les 91 documents par
+> **nature** et par **état des items cités**, et déclarait lui-même sa limite. Il
+> nommait 25 documents (4 jamais amorcés + 16 laissés par jugement + les plans du
+> 6-8 août). Les **43 autres** n'avaient jamais reçu de verdict de complétion.
+>
+> **Méthode** : lecture de l'en-tête de chacun, puis **vérification au code** —
+> présence du module, de la sentinelle, ou de la clé attendue. Ce qui suit dit
+> pour chacun *terminé / partiel / non amorcé*, avec la preuve relevée.
+>
+> ⚠ **Ce qui distingue ce passage du §4bis** : il ne demande pas au plan ce qu'il
+> pense de lui-même. Un plan qui porte « implémentation non démarrée » depuis
+> avril peut avoir été livré par un autre chemin — c'est arrivé cinq fois au
+> premier passage.
+
+### A. Terminés — le travail est fait, le plan peut être archivé (15)
+
+| Plan | Preuve relevée au code |
+|---|---|
+| `AUDIT-COULEURS-SECTIONS.md` | les 5 hex de la palette auditée sont dans `styles.css` |
+| `CADRAGE-320-repertoires-bibliotheques.md` | `js/repertoires-bibliotheque.js` (#320, 1.5.0) |
+| `CADRAGE-327-classement-transversal-biblios.md` | #327 en 1.6.0 ; specs Playwright T1/T2/T3 + L1/L2 |
+| `CADRAGE-briques-C-D-namespacing.md` | #358 migration live validée (1.25.0) ; #359 livré le 26 juin |
+| `CADRAGE-premier-essai-verification-adverse-338.md` | #338 clos le 14 juin (~1987 lignes mortes retirées) |
+| `CONSIGNE-renommage-eleves-demo.md` | #351 livré le 29 juin |
+| `NOTE-COWORK-integration-guides-som-pan.md` | `guides-pedagogiques.js` porte bien les clés `som:` et `pan:` |
+| `PLAN-328-L2-degonfler-miroir.md` | **L2-b2 ET L2-c livrés** — voir la note ci-dessous |
+| `PLAN-358-migration-modeles.md` | migration exécutée et validée le 28 juin (1.25.0) |
+| `PLAN-360-prevention-doublons-evals.md` | #360 livré en 1.24.0 |
+| `PLAN-AUTONOMISATION-UTILISATEUR.md` | Plan 1 livré (Beta 99.24) — attesté par `HOOKS-PLAN2.md` §1 |
+| `PLAN-namespacing-par-trimestre.md` | briques A/B/C/D toutes livrées |
+| `PLAN-passage-1.0-AQPC.md` | 1.0.0 lancée le 3 juin |
+| `PLAN-UNIFORMISATION-ASSEMBLAGE-GROUPE-COURS.md` | #306 lots 1-2-3 livrés le 3 juillet |
+| `PLAN_sessionB_representations_303.md` | Session B livrée le 4 juin |
+
+▣ **#328 est clos, et le recoupement demandé depuis le 28 juin est fait.**
+Vérification au code : `sentinelle-mode-affichage-tableau-bord-2026-06-02.js`
+affirme « L2-b2 : le miroir `config.pratique` n'est PLUS lu — la SSOT prime »,
+et deux sentinelles `…-L2c` verrouillent la dérivation des jetons plus son
+cliquet. La dernière grande violation SSOT de l'audit annuel est close.
+
+⮕ **Et la désync n'était pas où ce document la plaçait.** Le §2 et le §5.3
+ci-dessous annoncent « case `BACKLOG.md` non cochée → à recouper ». **C'est
+faux depuis le 3 juillet** : la case y est `[x]`, avec la trace « l'item n'avait
+pas suivi les livraisons L2-b2/L2-c ». Le retard était **ici**, dans les
+sections 1 à 11 gelées au 28 juin. Corrigé au §2 et au §5.3. Leçon à retenir
+telle quelle : *un document qui surveille les désyncs des autres trackers en
+produit aussi.*
+
+### B. Documents de passation et artefacts consommés (6)
+
+`PLAN-TRAVAIL-26-MAI.md` (⚠ cité par la légende de `BACKLOG.md` — recâbler avant
+d'archiver) · `PLAN-prevalidation-visuelle-chromium-2026-07.md` ·
+`VALIDATION-C0-2026-06-06.md` · `audit-358-v2-sites.json` ·
+`campagne-C0-diagnostic.js` · `inventaire-D1-activites-organisateur.js`
+(l'Organisateur qu'il inventoriait est supprimé).
+
+### C. Partiels — commencés, pas finis (8)
+
+| Plan | Ce qui est fait | Ce qui reste |
+|---|---|---|
+| `CADRAGE-guides-pedagogiques-post-AQPC.md` | **5 guides sur 7** : `solo`, `acp`, `rai`, `som`, `pan` | **« Enseignement explicite » (4 p.) et `pan-rrec`** (cadre réglementaire) — jamais écrits |
+| `PLAN-refonte-note-finale-portfolio.md` | Phase A livrée le 24 mai ; **Phase E = #328, désormais close** | **Phases B et C** — refonte de la section Note finale du PDF de rétroaction, puis cohérence du panneau dans le profil. ⮕ **Elles étaient bloquées par la Phase E : le verrou vient de sauter** |
+| `PLAN-MIGRATION-ICONES-SVG.md` | `icons/` est passé de 70 à **134 SVG** | **277 emojis dans `index.html`, ~2400 dans `js/`** — le gros du chantier |
+| `PLAN-VOUTE-PHASES-1-8.md` | Phase 1 avant-pilote code-complet (`signature.js`, `trust-tofu.js`, 6 `partage-*.js`) | `gestion-cles.js` et `trust-wot.js` **n'existent pas** ; outil de modération non plus |
+| `PLAN-export-resultats-finaux.md` (#333) | `js/export-resultats-finaux.js` existe ; Lot 2 (CSV synthèse) livré le 19 juin | le volet **PDF** et la présentation de la pratique en vigueur |
+| `PLAN-restauration-longitudinale-A25.md` | pilote A25 engagé, §8.4 livré | **réplication A24 / H24** (§7) |
+| `SPEC_D_exploration_pratiques.md` + `NOTE-CONCEPTION-D-…` | #326 réactivé (1.26.0) ; `js/comparateur-pratiques.js` et `pratiques-exploration.js` en place | l'**axe D** proprement dit — variantes et parenté arborescente |
+| `SPEC_DEN_couche2.md` + `NOTE-COWORK-modele-DEN.md` | #318 parcours créable livré (1.21.0) | modes « différée » / « réduite » et le **câblage DEN dans `calculerDetailsNoteFinale`** |
+
+### D. Jamais amorcés (4, en plus des 4 déjà connus du §4bis)
+
+| Plan | État | Ce qui bloque |
+|---|---|---|
+| `PLAN-339-config-portfolio-explicite.md` (#339) | plan + audit prêts, **aucun code** | trois verrous §1, dont un **changement de format de données ⇒ version MAJEURE** ; décisions de Grégoire en attente (§7) |
+| `PLAN-PARTAGE-RESSOURCES.md` (Plan 2) | **plan source de la Voûte** (cité en préséance « Base » par `PLAN-VOUTE-PHASES-1-8.md`) | rien — il vit tant que la Voûte n'est pas finie |
+| `HOOKS-PLAN2.md` | cadrage des points d'extension de Plan 2 | la session de cadrage Plan 2 n'a jamais eu lieu |
+| `Plan - Archivage et stockage inter-trimestres.md` | réflexion du **5 avril**, « à reprendre post-AQPC » | jamais repris. Recoupe #353 (budget de stockage) |
+
+### E. Vivants — cadres de référence, pas des files de tâches (4)
+
+`PLAN-mi-aout-2026.md` (⚠ **son horizon est atteint** — à requalifier ou verser
+dans le suivant) · `PLAN-reconstruction-trimestres.md` (feuille de route, horizon
+automne 2026) · `RAPPORT-353-saturation-localstorage.md` (rapport de décision,
+en attente de **mesures**) · `INVENTAIRE-worktrees-2026-07.md` (triage dû à
+Grégoire, sur le Mac).
+
+### F. Un angle mort du §4bis, et une limite de celui-ci
+
+⮕ **`Plan Accompagnement/` n'a jamais été audité.** Le §4bis portait sur
+`plans de travail/` seul. Ce dossier contient **14 documents**, dont au moins
+trois désignent du travail non fait : `PLAN_guide_PAN_refonte_RREC.md`,
+`PLAN_decouvrabilite_guides.md`, `SPEC_mini-guide_cours_balises.md`. Le compte
+réel de plans ouverts du projet est donc supérieur à ce que le §4bis laissait
+croire.
+
+⚠ **Limite déclarée de ce passage-ci** : la preuve relevée est la **présence**
+d'un module, d'une sentinelle ou d'une clé — elle établit qu'un chantier a été
+mené, pas qu'il a été mené *complètement*. `PLAN-briqueA-ecrans-analyse-namespacing.md`
+est le cas le plus fragile : classé **terminé avec #358**, sur la foi de
+`cle()` désormais présent dans `profil-etudiant-helpers.js` et
+`profil-etudiant-sections-affichage.js` — pas d'une relecture de ses §3 site par site.
+
+---
+
 ## 5. Qualité du code
 
 ### 5.1 Refactoring des god modules (Phase 2) — Fait
@@ -266,7 +375,9 @@ Les cinq modules à forte complexité ont été éclatés en sous-modules et mer
 
 ### 5.3 Dette structurelle
 
-- **Tier 6.5 `modalitesEvaluation` (#328) — Fait (probable, à recouper).** C'était la dernière grande
+- **Tier 6.5 `modalitesEvaluation` (#328) — Fait, recoupé au code le 9 août** (voir §4ter : sentinelles
+  L2-b2 et L2-c en place ; la case `BACKLOG.md` est cochée depuis le 3 juillet — c'est **ce paragraphe**
+  qui avait pris du retard, pas le backlog). C'était la dernière grande
   violation SSOT de l'audit annuel (14 écrivains sur la même clé, miroir non déclaré de la SSOT pratiques).
   La consolidation en lots a avancé tout juin (Lot 0/1/3 + L2-0/a/b1 livrés 10-11 juin) et **la release
   1.22.0 du 27 juin est étiquetée « fin de #328 »** (PR #68). **⚠ Désync de tracker** : la case `#328` de
@@ -433,3 +544,4 @@ Synthèse :
 | 2026-06-28 | 0628-2126 | **Rafraîchissement Cowork** (1.6.1 → 1.26.0, ~20 releases). Ajout §0 repère rapide + §10 bis. LIVRÉS : Voûte avant-pilote (1.11.0), comparateur réactivé (#326, 1.26.0), namespacing par trimestre + migration live (#358, 1.25.0), durabilité IDB (#353, 1.24.2), doublons (#360, 1.24.0), « fin de #328 » (1.22.0, **à recouper** — case BACKLOG ouverte). EN COURS : palier 1 mi-août (#362 fix `f9c824af`). Horizon **mi-août** cadré (`PLAN-mi-aout-2026.md`). Privatisation du dépôt (23 juin) → CodeQL/branch-protection suspendus. Contexte : passage Max 20x → Pro + congé juillet, reprise 1er août. Tests **1179** Vitest + 68 Playwright (Vitest recoupé 28 juin). État vérifié au code/git. |
 | 2026-06-28 (nuit, Claude Code) | 0628-2126 | Merge de PR #74 (batch mi-août #346/#350/#362/#342) et #72 (untrack symlinks `node_modules`) sur `main`. Dé-hardcodage des docs d'entrée (CLAUDE.md / 00-START-HERE / README → pointent `version.json`/`ETAT-PROJET.md`). Correction des lignes périmées de ce document (1142→1179, en-tête « non poussé »). Réorg `Rapports/audit-developpement/`. Outils #362/#342 prêts (dry-run/audit, revue adverse), run live reporté à une séance de jour sur backup. |
 | 2026-08-08 (soir, Claude Code) | 0808-1836 | **Rafraîchissement 1.26.0 → 1.60.0** (34 releases). Nouveau §0 (repère du 8 août : semaine du portage des exports #424, export personnalisé #431, guides harmonisés #432, corbeille #433 ; portes terrain dues ; **tension du calendrier d'août** face à la Rencontre 1 de la CoP) ; ancien §0 conservé en §0bis. Nouveau **§4bis** : audit complet du répertoire `plans de travail/` (91 documents → 69 + 24 archivés), deux passages, méthode et limites déclarées. #427 reporté à septembre. ⚠ **Sections 1 à 11 NON revues** — elles datent du 28 juin. |
+| 2026-08-09 (Claude Code) | 0809-0733 | **1.60.0 → 1.61.0.** #426 (l'onglet devient « Carte d'alignement ») et #421 (conformité du manuel, 4 surfaces) livrés — sentinelle 14 cas, 10 break-tests ROUGE, Vitest 1974/1974. Nouveau **§4ter** : vérification AU CODE des **43 plans** que le §4bis n'avait pas tranchés — 15 terminés, 6 documents de passation consommés, 8 partiels, 4 jamais amorcés, 4 vivants. Deux constats qui changent la lecture du reste : (1) le §4bis n'a **jamais audité `Plan Accompagnement/`** (14 documents, dont 3 au moins non faits) — le compte de plans ouverts est plus élevé qu'annoncé ; (2) les **phases B et C de `PLAN-refonte-note-finale-portfolio.md` sont débloquées** — leur préalable était #328, clos. Corrigé : la ligne #328 du §2 et le §5.3 annonçaient une case BACKLOG non cochée, fausse depuis le 3 juillet. |
