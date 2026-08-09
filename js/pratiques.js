@@ -382,7 +382,7 @@ function mettreAJourUIPratiqueDefaut() {
 // Elle écrivait le miroir de configuration depuis `productions[].regles`
 // (structure V1), derrière un drapeau de migration.
 // Ce miroir n'a plus AUCUN lecteur : le calcul de la note en a été coupé par
-// G2-a (24 mai), les sept derniers écrans d'affichage par G2-b. Le garder,
+// G2-a (24 mai), les neuf dernières lectures d'affichage par G2-b. Le garder,
 // c'était entretenir une copie qui dérivait dès qu'une pratique était éditée.
 
 

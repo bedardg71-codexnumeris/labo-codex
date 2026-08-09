@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url';
 // l'enseignant édite cette pratique ensuite.
 //
 // G2-a (24 mai 2026) a coupé le CALCUL DE LA NOTE du miroir. G2-b coupe tout le
-// reste : sept lectures d'affichage, les deux écrivains, et l'îlot mort qui en
+// reste : neuf lectures d'affichage, les deux écrivains, et l'îlot mort qui en
 // dépendait.
 //
 // ⚠ CE QUE CE FICHIER PROTÈGE VRAIMENT — la dérive est INVISIBLE. Rien ne
