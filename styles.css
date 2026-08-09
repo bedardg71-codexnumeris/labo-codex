@@ -2182,39 +2182,19 @@ span.header-icon {
 }
 
 /* ============================================
-   PATRON OPTION ACCOMPAGNEMENT (uniformisé)
-   Utilisé dans Réglages > Observation et dépistage
-   Spec : Plan Accompagnement/PLAN_uniformisation_Accompagnement.md §2
+   BOUTON « GUIDE » DES EN-TÊTES DE CARTE
+   Réglages > Observation et dépistage (SOLO, ACP, RàI) et
+   Conception > Pratiques de notation (som, pan) — 5 porteurs.
+
+   Ce qu'il reste du patron `.option-accompagnement` de
+   `Plan Accompagnement/PLAN_uniformisation_Accompagnement.md` §2 (23 mai
+   2026) : le bloc, sa tête, sa checkbox, son titre, sa description et ses
+   sous-options conditionnelles ont été rendus inutiles par la refonte de
+   la page en cartes-accordéon (26 mai, PM2) et retirés le 9 août 2026 —
+   ils n'avaient plus aucun porteur dans `index.html` ni dans `js/`.
+   Seul ce bouton a survécu à la refonte.
+   Cliquet : tests/unit/sentinelle-patron-option-accompagnement.test.js
    ============================================ */
-
-.option-accompagnement {
-    background: var(--bleu-tres-pale);
-    border-radius: 6px;
-    padding: 14px 16px;
-    margin-bottom: 12px;
-    transition: opacity 0.2s ease;
-}
-
-.option-accompagnement-tete {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 6px;
-}
-
-.option-accompagnement-checkbox {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    flex: 1;
-}
-
-.option-accompagnement-titre {
-    font-weight: 600;
-    color: var(--texte-principal);
-}
 
 .option-accompagnement-guide-btn {
     background: rgba(255, 255, 255, 0.08);
@@ -2250,30 +2230,6 @@ span.header-icon {
 }
 .mode-clair .option-accompagnement-guide-btn img.btn-inline-icon {
     filter: brightness(0) invert(1);
-}
-
-.option-accompagnement-description {
-    font-size: 0.85rem;
-    color: var(--gris-moyen);
-    margin: 4px 0 0 28px;
-    line-height: 1.5;
-}
-
-.option-accompagnement-sous-options {
-    margin: 10px 0 0 28px;
-    padding-top: 10px;
-    border-top: 1px dashed rgba(255, 255, 255, 0.10);
-}
-
-/* État désactivé : sous-options masquées, opacité réduite sur le bloc entier.
-   Sélecteur restreint à la checkbox PRINCIPALE de la tête de l'option, sinon
-   une checkbox non cochée à l'intérieur des sous-options (ex : Découpler P/N
-   dans RàI) déclencherait à tort le masquage de tout le bloc. */
-.option-accompagnement:has(> .option-accompagnement-tete input[type="checkbox"]:not(:checked)) .option-accompagnement-sous-options {
-    display: none;
-}
-.option-accompagnement:has(> .option-accompagnement-tete input[type="checkbox"]:not(:checked)) {
-    opacity: 0.75;
 }
 
 /* ============================================

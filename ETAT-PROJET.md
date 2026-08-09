@@ -12,9 +12,12 @@
 > bascule de session importante. Le §11 (journal) trace les révisions. Chaque ligne d'état porte
 > idéalement sa source et sa date de vérification, pour éviter de propager un état périmé.
 >
-> **Dernière mise à jour** : 9 août 2026 (Claude Code) — bêta publique **1.64.0** / build `0809-0906`.
+> **Dernière mise à jour** : 9 août 2026, PM (Claude Code) — bêta publique **1.65.2** / build `0809-1101`.
 > Repère au **§0** (8 août) ; audit du répertoire `plans de travail/` au **§4bis** (8 août) ;
-> **vérification au code des 43 plans non tranchés au §4ter (9 août)**.
+> **vérification au code des 43 plans non tranchés au §4ter (9 août matin)** ;
+> **audit de `Plan Accompagnement/`, le dernier angle mort, au §4quater (9 août PM)**.
+> *(L'en-tête était resté à 1.64.0 / `0809-0906` alors que `main` portait 1.65.1 : les deux
+> sessions parallèles du 9 août ont fusionné sans repasser ici. Corrigé.)*
 > Les sections **1 à 11** datent du 28 juin et n'ont **pas** été revues, à deux exceptions
 > corrigées le 9 août : la ligne #328 du **§2** et le premier point du **§5.3** (voir §4ter).
 > Les lire avec cette réserve pour tout le reste.
@@ -375,6 +378,114 @@ est le cas le plus fragile : classé **terminé avec #358**, sur la foi de
 
 ---
 
+## 4quater. `Plan Accompagnement/` — l'angle mort comblé (9 août 2026, PM)
+
+> **Origine** : le §4ter ci-dessus désigne ce dossier comme le trou de l'audit —
+> **14 documents jamais passés au crible**, « dont au moins trois désignent du
+> travail non fait ». Ce passage les traite un par un, avec la même méthode :
+> lire l'en-tête, puis **aller au code** chercher la preuve.
+>
+> ⚠ **Résultat inattendu, et c'est le point à retenir** : sur les trois documents
+> que le §4ter accusait, **deux étaient intégralement livrés**. Le compte de plans
+> ouverts du projet n'est pas *supérieur* à ce qu'on croyait de ce côté — il est
+> **inférieur**. La règle « un plan ne dit pas son propre état » vaut dans les
+> deux sens, et on ne l'applique spontanément que dans celui qui inquiète.
+
+### A. Terminés — vérifiés au code (7)
+
+| Document | Preuve relevée |
+|---|---|
+| `SPEC_mini-guide_cours_balises.md` | popup `cadre-cours-balises` (`accompagnement-contenu-popup.js:28` + `index.html:6457`), bulle `reglages-cours-ponderation-heures` (`…-hover.js:68` + `index.html:6455`), **et** le renommage OQLF : `index.html:6462` dit « Heures d'enseignement », `v2-heuresContact` n'existe plus |
+| `PLAN_decouvrabilite_guides.md` | les **5 lots** : `data-param` sur `case 'action'` (`accompagnement.js:779`), bannière (`accueil.js:72`+`79`), 7e étape `id: 6` « Labo (optionnel) » (`accompagnement.js:1112`), 5 boutons « Ouvrir le guide » au catalogue popup, champ `guide:` sur 8 termes + son rendu (`accompagnement.js:1429`, `:1570`) |
+| `CONTENU_apropos_sources-remerciements.md` | #325 — `index.html:9724`, verrouillé par `sentinelle-apropos-sources-325.test.js` |
+| `REVISION_contenu_guides_SOLO-ACP-RAI.md` | les **7 corrections** au code : seuil « 64 % » (et non 65), chemins `autocollants/solo/comprehension-*.svg`, « étudiant·e » (40 occurrences contre 2 « élève »), « PAN – Standards » |
+| `CONTENU_guides_som-pan_2026-06-06.md` | clés `som` et `pan` dans `GUIDES_PEDAGOGIQUES` |
+| `PLAN_chrome_unifie_Labo_Codex.md` | livré le 24 mai (SESSION.md §1quinquies) — bouton `⋯` et popover utilitaires, `index.html:3931` et `:3949` |
+| `PLAN_guide_RaI.md` | clé `rai`, 4 pages — **livré par un autre chemin que celui du plan** : le plan prévoyait un module `js/guide-rai.js` dédié, le guide vit dans le module unifié. Meilleure décision, prise après coup |
+
+### B. Documents consommés — à archiver, pas à exécuter (3)
+
+- `LISEZ-MOI_orchestration_chantiers.md` — coordination des cinq plans de mai ; tous soldés ou tranchés.
+- `CDC_guides_pratiques_notation_2026-06-06.md` — cahier des charges dont le livrable (`CONTENU_guides_som-pan`) est intégré.
+- `PLAN_guide_PAN_pedagogique_CSE.md` — « spec finalisée » du 29 mai, **explicitement périmée** par le CDC du 6 juin (recadrage PRÉN ≠ PAN, Girouard-Gagné et al. 2024). Le guide `pan` livré suit le CDC. ⮕ À garder comme **trace datée**, pas à réécrire.
+
+### C. Partiels (2)
+
+| Document | Fait | Reste |
+|---|---|---|
+| `PLAN_taxonomie_SOLO.md` | chantiers **1** (4 tampons SOLO, `travaux-outils.js:304-307`, catégorie conditionnée à la préférence) et **2** (guide `solo`, 5 pages) | **chantier 3 jamais amorcé** : l'association d'un niveau SOLO *déclarée par l'enseignant* dans l'éditeur d'échelle. `echelles.js` n'a ni sélecteur ni pictogramme. ⚠ Ne pas confondre avec `critere.niveauSOLO` de `grilles.js`, qui existe et porte sur les **critères de grille** — autre objet |
+| `PLAN_uniformisation_Accompagnement.md` | l'intention est livrée : hiérarchie revue, paramètres avancés repliables (`parametres-avances-pliable`), guide ACP | **livré par un autre patron** — la page a été refondue en cartes-accordéon le 26 mai (PM2). Le patron `.option-accompagnement` du §2 a donc été remplacé sans être retiré (voir le nettoyage ci-dessous) |
+
+### D. Le maître, et ce qu'il porte encore (1)
+
+`PLAN_guides_pedagogiques.md` — **architecture livrée** (module unifié, structure
+`GUIDES_PEDAGOGIQUES`, panneau générique, styles partagés). Restent trois choses,
+de trois natures différentes :
+
+1. **§4 — le guide « Enseignement explicite » n'a jamais été écrit.** Aucune clé au
+   module, et la préférence `enseignementExpliciteDefaut` du §4.1 n'existe nulle part.
+   ⚠ Son gabarit HTML (§4.1) est **bâti sur le patron `.option-accompagnement` retiré
+   aujourd'hui** : à écrire un jour sur le patron accordéon réel, pas sur celui-là.
+2. **§3.4 — la migration du guide Alignement n'a pas été faite.** Les deux moteurs
+   coexistent toujours (`GUIDE_PAGES` de `planification-carte.js` d'un côté,
+   `guides-pedagogiques.js` de l'autre) — constat déjà posé le 8 août (#432), qui les
+   a harmonisés **visuellement** sans les fusionner. Le plan disait « à migrer ou
+   laisser » : c'est « laisser », et personne ne l'a jamais tranché explicitement.
+3. **§7 — le signalement SRPNF n'a jamais atteint le BACKLOG.** Le plan écrivait
+   « signalé pour le backlog » le 23 mai ; `grep SRPNF BACKLOG.md` rend **zéro
+   occurrence** au 9 août. Deux mois et demi. Versé aujourd'hui (#440).
+
+### E. Le guide `pan-rrec` — jamais amorcé, et le seul du lot (1)
+
+`PLAN_guide_PAN_refonte_RREC.md` : `GUIDES_PEDAGOGIQUES` porte **cinq** clés
+(`solo`, `acp`, `rai`, `som`, `pan`) — pas `pan-rrec`. Le §4ter avait raison sur
+celui-ci. ⮕ Particularité qui change son coût : **les 4 pages sont intégralement
+rédigées** au §3 du plan, prêtes à coller. Ce n'est pas un chantier de conception,
+c'est une intégration. Versé avec le guide « Enseignement explicite » en **#439**.
+
+### F. Ce que l'audit a trouvé au passage, et qui est corrigé le jour même
+
+▣ **Du code mort, exactement là où le remplacement n'avait pas retiré le remplacé.**
+Le patron `.option-accompagnement` (le bloc, sa tête, sa checkbox, son titre, sa
+description, ses sous-options et les deux règles `:has()` qui les masquaient) vivait
+encore dans `styles.css` — **~51 lignes, zéro porteur** dans `index.html`, `js/`,
+`tests/` ou `design-system.html`. Seul `.option-accompagnement-guide-btn` sert
+encore, sur les cinq en-têtes de carte. Retiré, avec un cliquet
+(`sentinelle-patron-option-accompagnement.test.js`).
+
+⮕ **Le cliquet ne liste pas les classes mortes d'aujourd'hui** — il vérifie que
+*toute* classe `.option-accompagnement*` déclarée a un porteur réel. Une liste
+figée n'aurait rien dit de la prochaine.
+
+⚠ **Et une leçon de méthode, payée sur ce test même.** Le break-test « je renomme
+la classe du bouton » est resté **VERT** au premier essai : l'assertion comptait
+la sous-chaîne `option-accompagnement-guide-btn`, que `…-guide-btnX` contient
+encore. Elle a été resserrée sur l'attribut entier (`class="…"`). *Une assertion
+en sous-chaîne ne prouve pas une classe* — et celle-là aurait couvert cinq boutons
+sans style.
+
+### G. Bilan de l'angle mort
+
+| Verdict | Documents |
+|---|---|
+| Terminés | **7** |
+| Consommés / à archiver | **3** |
+| Partiels | **2** |
+| Jamais amorcé | **1** (+ le §4 du maître) |
+| **Ouvert pour de bon** | **`pan-rrec`, le guide « Enseignement explicite », le chantier 3 de SOLO, et le SRPNF codé en dur** |
+
+⮕ **Le compte de plans ouverts du projet BAISSE.** Le §4ter annonçait au moins
+trois chantiers non faits dans ce dossier ; il y en a un (`pan-rrec`), plus deux
+que le §4ter ne connaissait pas (le §4 et le §7 du plan maître). Les deux autres
+accusés étaient livrés depuis des semaines.
+
+⚠ **Limite déclarée, la même qu'au §4ter** : la preuve relevée reste une
+**présence** au code. Pour les documents de contenu (`REVISION_…`,
+`CONTENU_guides_som-pan`), j'ai vérifié un échantillon de corrections nommées,
+pas la totalité du texte rédigé contre la totalité du texte livré.
+
+---
+
 ## 5. Qualité du code
 
 ### 5.1 Refactoring des god modules (Phase 2) — Fait
@@ -569,4 +680,5 @@ Synthèse :
 | 2026-08-08 (soir, Claude Code) | 0808-1836 | **Rafraîchissement 1.26.0 → 1.60.0** (34 releases). Nouveau §0 (repère du 8 août : semaine du portage des exports #424, export personnalisé #431, guides harmonisés #432, corbeille #433 ; portes terrain dues ; **tension du calendrier d'août** face à la Rencontre 1 de la CoP) ; ancien §0 conservé en §0bis. Nouveau **§4bis** : audit complet du répertoire `plans de travail/` (91 documents → 69 + 24 archivés), deux passages, méthode et limites déclarées. #427 reporté à septembre. ⚠ **Sections 1 à 11 NON revues** — elles datent du 28 juin. |
 | 2026-08-09 (Claude Code) | 0809-0733 | **1.60.0 → 1.61.0.** #426 (l'onglet devient « Carte d'alignement ») et #421 (conformité du manuel, 4 surfaces) livrés — sentinelle 14 cas, 10 break-tests ROUGE, Vitest 1974/1974. Nouveau **§4ter** : vérification AU CODE des **43 plans** que le §4bis n'avait pas tranchés — 15 terminés, 6 documents de passation consommés, 8 partiels, 4 jamais amorcés, 4 vivants. Deux constats qui changent la lecture du reste : (1) le §4bis n'a **jamais audité `Plan Accompagnement/`** (14 documents, dont 3 au moins non faits) — le compte de plans ouverts est plus élevé qu'annoncé ; (2) les **phases B et C de `PLAN-refonte-note-finale-portfolio.md` sont débloquées** — leur préalable était #328, clos. Corrigé : la ligne #328 du §2 et le §5.3 annonçaient une case BACKLOG non cochée, fausse depuis le 3 juillet. |
 | 2026-08-09 (suite, Claude Code) | 0809-0835 | **1.61.0 → 1.63.0.** Phases B/C de la note finale : constatées LIVRÉES (verrou 11 break-tests) + rectificatif du §4ter (je les avais annoncées « à faire » en lisant les titres du plan au lieu du code). #434 Phase D (sélecteur unique). Puis **#435 sur question de Grégoire** : #434 avait rendu atteignable le mode STD « par-objectifs » que la décision #396 condamnait — même défaut de naissance (`objectifId` sans écrivain), panneau jamais affiché, 4 gabarits sans aucun objectif. **Ablation complète** (moteur 4 modes, panneau, 10 fonctions, 4 gabarits, projections), pratiques legacy normalisées en lecture seule, dépendances DEN préservées et break-testées. Leçon consignée : vérifier l'HISTORIQUE avant de rendre disponible, pas seulement le code. 1.62 consolidée dans 1.63 (jamais déployée). Vitest 1998/1998. |
+| 2026-08-09 (PM, Claude Code) | 0809-1101 | **1.65.1 → 1.65.2.** Nouveau **§4quater** : audit de `Plan Accompagnement/`, le dernier angle mort désigné par le §4ter — 14 documents traités au code. **7 terminés, 3 consommés, 2 partiels, 1 jamais amorcé.** ⚠ **Le compte de plans ouverts BAISSE** : sur les trois documents que le §4ter accusait, **deux étaient intégralement livrés** — `SPEC_mini-guide_cours_balises` (popup, bulle de survol ET le renommage OQLF « heures d'enseignement ») et `PLAN_decouvrabilite_guides` (les cinq lots). *La règle « un plan ne dit pas son propre état » vaut dans les deux sens ; on ne l'applique spontanément que dans celui qui inquiète.* Reste ouvert : `pan-rrec` (4 pages déjà rédigées), le guide « Enseignement explicite », le chantier 3 de SOLO, et le SRPNF codé en dur — versés en **#439/#440/📐#441**. Le §7 du plan maître disait « signalé pour le backlog » le 23 mai : il n'y était **jamais arrivé**. **Nettoyage zéro-dette du jour même** : patron `.option-accompagnement` (~51 lignes de `styles.css`) sans porteur depuis la refonte en accordéons du 26 mai, retiré, cliquet générique posé, **4 break-tests ROUGE** — dont un qui a d'abord été VERT et a révélé une assertion en sous-chaîne dans ma propre sentinelle. Vitest 2062/2062. En-tête du document recalé (il annonçait 1.64.0 alors que `main` portait 1.65.1). |
 | 2026-08-09 (fin, Claude Code) | 0809-0906 | **1.63.1 → 1.64.0.** Correctif du badge « par objectifs » survivant à #435 (il lisait un champ que les pratiques STOCKÉES portent encore, et masquait le badge portfolio de ces mêmes pratiques). Puis **#436 Phase G2-b** : fin du miroir `configPAN` — 9 lectures d'affichage migrées (chiffre rectifié au rituel de fin — annoncé 7), les 2 écrivains de `pratiques.js` retirés (dont une migration qui tournait à chaque boot), l'îlot multi-objectifs supprimé. **Le plan de refonte de la note finale est CLOS** (A, E, F, G1, G2-a, B, C, D, G2-b). ⚠ Deux valeurs affichées GELÉES en constantes explicites, décision en attente (dénominateur de l'indice C ; quota des jetons) — les brancher sur la SSOT changerait ce que l'utilisateur voit. Deux survivants légitimes break-testés. Le miroir stocké subsiste dans les données (purge = migration destructive, à décider ; recoupe #353). Vitest 2018/2018. |
