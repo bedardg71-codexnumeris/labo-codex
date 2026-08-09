@@ -49,9 +49,16 @@ beforeAll(() => {
     // C'est LUI le cas que rien ne couvrait avant #417.
     writeFileSync(path.join(bac, 'js', 'module-ordinaire.js'), '// v1\n');
     writeFileSync(path.join(bac, 'js', 'module-intouche.js'), '// stable\n');
+    // #438 : le CSS. `styles.css` est un <link>, pas un <script> — c'est
+    // exactement ce qui l'avait fait échapper au balayage de #417.
+    mkdirSync(path.join(bac, 'css'));
+    writeFileSync(path.join(bac, 'styles.css'), '/* v1 */\n');
+    writeFileSync(path.join(bac, 'css', 'accompagnement.css'), '/* stable */\n');
     writeFileSync(
         path.join(bac, 'index.html'),
         [
+            '<link rel="stylesheet" href="styles.css?v=20260101a">',
+            '<link rel="stylesheet" href="css/accompagnement.css?v=20260101a">',
             '<script src="js/init-inline.js?v=20260101a"></script>',
             '<script src="js/main.js?v=20260101a"></script>',
             '<script src="js/module-ordinaire.js?v=20260101a"></script>',
@@ -66,8 +73,10 @@ beforeAll(() => {
     git('add', '-A');
     git('commit', '-qm', 'base');
 
-    // Le chantier simulé : un seul module ordinaire est modifié, non commité.
+    // Le chantier simulé : un module ordinaire ET la feuille de style
+    // principale sont modifiés, non commités. Le second est le cas de #438.
     writeFileSync(path.join(bac, 'js', 'module-ordinaire.js'), '// v2 — le correctif du jour\n');
+    writeFileSync(path.join(bac, 'styles.css'), '/* v2 — le correctif CSS du jour */\n');
 
     execFileSync('node', [scriptRelease, 'patch', '--root', bac], { encoding: 'utf8' });
 });
@@ -124,5 +133,32 @@ describe('#417 · release.mjs bumpe le ?v= de ce qu’il embarque', () => {
         writeFileSync(path.join(bac, 'js', 'module-ordinaire.js'), '// v3\n');
         execFileSync('node', [scriptRelease, 'patch', '--root', bac], { encoding: 'utf8' });
         expect(paramDe('js/main.js')).not.toBe(avant);
+    });
+});
+
+describe('#438 · le CSS aussi — la règle de #417 poussée jusqu’à la feuille de style', () => {
+    // TROU TROUVÉ le 9 août 2026 : le balayage de #417 ne regardait que `js/`.
+    // `styles.css` n'a jamais été bumpé par le script, et deux releases du même
+    // jour ont dû le faire à la main.
+    //
+    // ⚠ Ce qui rend ce trou VICIEUX : un correctif CSS livré derrière un cache
+    // non invalidé est INERTE, et rien ne le signale. La page s'affiche, sans
+    // erreur, simplement avec l'ancien style. Aucun test ne peut voir ça — la
+    // garantie ne peut venir que du script de release, comme pour #417.
+    it('⭐ une feuille de style modifiée est bumpée', () => {
+        expect(
+            paramDe('styles.css'),
+            'styles.css garde son ancienne URL : le correctif CSS sera servi depuis le cache'
+        ).not.toBe('20260101a');
+    });
+
+    it('une feuille INTOUCHÉE garde son ?v=', () => {
+        // Même précision que pour le JS : bumper tout reviendrait à supprimer
+        // le cache.
+        expect(paramDe('css/accompagnement.css')).toBe('20260101a');
+    });
+
+    it('elle porte la même date de build que les fichiers JS bumpés', () => {
+        expect(paramDe('styles.css').slice(0, 8)).toBe(paramDe('js/main.js').slice(0, 8));
     });
 });
