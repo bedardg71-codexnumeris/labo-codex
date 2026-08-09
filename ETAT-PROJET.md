@@ -12,7 +12,7 @@
 > bascule de session importante. Le §11 (journal) trace les révisions. Chaque ligne d'état porte
 > idéalement sa source et sa date de vérification, pour éviter de propager un état périmé.
 >
-> **Dernière mise à jour** : 9 août 2026 (Claude Code) — bêta publique **1.63.0** / build `0809-0835`.
+> **Dernière mise à jour** : 9 août 2026 (Claude Code) — bêta publique **1.64.0** / build `0809-0906`.
 > Repère au **§0** (8 août) ; audit du répertoire `plans de travail/` au **§4bis** (8 août) ;
 > **vérification au code des 43 plans non tranchés au §4ter (9 août)**.
 > Les sections **1 à 11** datent du 28 juin et n'ont **pas** été revues, à deux exceptions
