@@ -7,6 +7,23 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 9 AOÛT 2026, PM, SUITE : RETOUR TESTEUR #154 (priorité absolue, plan interrompu).
+     ÉTAT FINAL : **1.65.3** (build 0809-1337), `main`, Vitest **2068/2068** (234 fichiers). Dernier ID **#442**.
+
+     ⚠⚠ **#154 — Grégoire, en passant la porte terrain §1.3 sur Chrome** : « Aucune production configurée », C=0 %, formulaire GC « vide ». 3 captures.
+     ▣ **MÉTHODE : sonde AVANT correctif** (patron #129). `scripts/diagnostic-154-productions-inaccessibles.js` (lecture seule, 3 étages LS/memoryCache/IDB) collée par Grégoire → verdict NET : les 11 productions H26 portent `coursId=COURS1766455789356` (pré-migration, déc. 2025) quand le cours actif est `h2026-601-101-MQ-00001`. Le filtre de `obtenirDonneesSelonMode` rend 0 → C=0 % en cascade. **Rien de perdu** — les 3 étages concordent. La capture « GC vide » était l'ÉTAT DE REPOS du formulaire (2 GC présents, le bon actif) : un tiers du rapport de bug était une fausse piste, et c'est la sonde qui l'a dit, pas une intuition.
+     ▣ **LE VECTEUR, éclairci par UNE phrase de Grégoire** (« Chrome pour la première fois depuis l'été — je travaillais sur Safari en juin ») : **chaque navigateur est une île.** La réparation #346 du 24 juin a soigné la copie Safari ; Chrome ne l'a jamais reçue. Son état est MIXTE (magasin `cours` migré, productions non) — et le magasin porte un **triple doublon** de 601-102 à id identique, signature de fusions d'imports (→ **#442**). Le garde #335 à l'import couvrait « modèle antérieur qui ARRIVE » ; personne ne couvrait « désappariement DÉJÀ installé ».
+     ⮕ **Leçon à retenir : « assez fréquent » + multi-appareils = penser ÎLES DE STOCKAGE avant de penser code.** La réparation d'une copie ne répare pas les autres, et un correctif « en données » sans vecteur bouché revient par la première synchro manuelle venue.
+
+     ✅ **LIVRÉ, dans l'ordre du diagnostic** :
+        1. **Sonde** `diagnostic-154-productions-inaccessibles.js` — réutilisable pour toute rupture de cette famille.
+        2. **Réparation** `reparation-154-coursid-productions.js` (patron #129 : `reparer154()` dry-run → `{executer:true}` → `annuler154()` même-session). Garde-fous : cible = coursId du GC actif VALIDÉ au magasin ; refuse toute ambiguïté ; ne touche que les items dont l'id n'existe dans AUCUN cours. **Dry-run validé sur les données réelles** : 11 productions → cible, 408 évals et 1617 présences saines (0 à toucher). Exécution par Grégoire en cours.
+        3. **Correctif de fond (1.65.3)** : le filtre qui avale tout DOIT le dire — `console.warn [#154]` dans `modes.js` quand tout est écarté et qu'aucun coursId écarté n'existe au magasin `cours`. Une fois par clé/session ; multi-cours légitime silencieux ; zéro changement de comportement (le bloc remplacé était du code MORT — un `modeLabel` calculé jamais lu). Sentinelle 6 cas **née ROUGE sur le code muet** (A/B rouges avant implémentation — TDD naturel) + break-test de la garde anti-faux-positif (retrait du contrôle magasin → C rougit).
+     ▣ **Constat collatéral consigné** : localStorage de Grégoire à **200 %** du budget (10 239/5 120 Ko, 472 clés) — pire que les 173 % du #353. Les 408 évaluations vivent en memoryCache+IDB seulement. #353 monte d'un cran.
+     ⮕ **OUVERTS** : #442 (doublons magasin `cours` + hygiène de fusion à l'import — charger SKILL_integrite_globaux) · confirmation d'exécution de la réparation par Grégoire · question posée : laquelle des copies (Chrome vs Safari) est le corpus CANONIQUE ?
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 9 AOÛT 2026, PM (reprise après clôture — branche `claude/poursuite-travail-matin-es3hu9`).
      ÉTAT AU DÉPART : `main` = **1.65.1** (build 0809-0958), Vitest **2057/2057** (232 fichiers), arbre propre, dernier ID **#438**. **Rituel de début : ZÉRO ÉCART** — les six lignes de la prémisse du §3 conformes. La branche du conteneur est un calque EXACT de `origin/main` (même hash `02298a4b`), donc le piège du clone shallow n'a rien pu fausser ici.
 
