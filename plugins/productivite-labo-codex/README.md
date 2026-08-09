@@ -13,9 +13,21 @@ Le plugin route selon le type de demande :
 | Dossier | Rôle | Ce qu'on y trouve |
 |---------|------|-------------------|
 | **Dépôt de code** (`Monitorage_v6`) | Développement, code, suivi technique | `CLAUDE.md`, `BACKLOG.md`, `SESSION.md`, `ETAT-PROJET.md`, `Skills pour Claude Code/`, `docs/`, `Retours des testeurs/`, `version.json` |
-| **Dossier Cowork** (`Claude H2026 cowork…`) | Pédagogie, communauté, communication | `communauté/`, `Ressources partagées/`, présentations, formations, plans de travail, notes de conception |
+| **Dossier Cowork** (`Cowork H26 App Labo Codex`) | Pédagogie, communauté, communication, **gestion du projet** | `communauté/`, `Ressources partagées/`, présentations, formations, plans de travail, notes de conception, `Gestion du projet/`, `Institutionnalisation de Labo Codex/` |
 
-Tâche, bug, code, architecture → dépôt de code. Pédagogie, communauté de pratique, matériel, formation → dossier Cowork.
+Tâche, bug, code, architecture → dépôt de code. Pédagogie, communauté de pratique, matériel, formation, **échéances, dépenses et démarches institutionnelles** → dossier Cowork.
+
+### Gestion du projet (v3.1.0)
+
+Le versant administratif du projet s'appuie sur deux fichiers sources dans le dossier Cowork, et sur le dossier des démarches institutionnelles :
+
+| Fichier | Rôle |
+|---|---|
+| `Gestion du projet/ECHEANCIER.md` | Échéances, rencontres, jalons, et section distincte pour les intentions non engagées |
+| `Gestion du projet/DEPENSES.md` | Abonnements récurrents, registre mensuel, cumul autofinancé, demandes budgétaires |
+| `Institutionnalisation de Labo Codex/` | Document d'entrée du dossier, plus un sous-dossier par interlocuteur |
+
+**Règle de rigueur inscrite dans le skill** : ne jamais consigner au passé une démarche qui n'a pas eu lieu. Les intentions vont au §4 de l'échéancier et n'en sortent que sur confirmation. Cette règle vient d'un incident réel documenté dans `PRIVACY.md` v1.2.
 
 ## Sources de vérité (ordre de priorité)
 
@@ -41,6 +53,7 @@ Tâche, bug, code, architecture → dépôt de code. Pédagogie, communauté de 
 |-------|-------------|
 | `memory-management` | Décode le jargon pédagogique et technique en consultant les sources canoniques (pas de cache dupliqué) |
 | `task-management` | Pilote `BACKLOG.md` selon ses conventions réelles (items `#ID`, sections thématiques, emoji de priorité) |
+| `gestion-projet` | Pilote l'échéancier, le registre des dépenses et les dossiers institutionnels (dossier Cowork). Distinct du développement. |
 
 ## Articulation avec les skills racine
 
