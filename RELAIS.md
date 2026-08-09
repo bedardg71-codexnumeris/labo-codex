@@ -14,7 +14,11 @@
 | **Branche à ouvrir** | **`main`** |
 | **Version** | **1.65.1** — build `0809-0958` |
 | **Travail en avance sur `main`** | **aucun** |
-| **Dernière mise à jour** | 9 août 2026, fin de journée — **les deux branches du 9 août sont fusionnées** |
+| **Dernière mise à jour** | 9 août 2026, **clôture de session** — rituel de fin passé, relais préparé |
+
+⮕ **Où lire la suite** : le **§3 de `SESSION.md`** porte la consigne de démarrage
+complète — prémisse chiffrée à vérifier, priorités dans l'ordre, décisions en
+attente, et les cinq leçons de méthode que cette journée a coûtées.
 
 ✅ **La dette de fusion du 9 août est SOLDÉE.** Les deux sessions parallèles
 (carte d'alignement #437, pratiques #434/#435/#436/#438) sont dans `main`, en
