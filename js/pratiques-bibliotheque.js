@@ -899,50 +899,15 @@ async function appliquerConfigurationPratique(configId) {
                 modalites.specifications?.typesTravaux || []
             );
         }
-    } else if (typeConfig === 'standards') {
-        // Rafraîchir interface STD
-
-        // 1. Mettre à jour le dropdown de variante
-        const varianteSelect = document.getElementById('v2-variante-calcul');
-        if (varianteSelect && modalites.varianteCalcul) {
-            varianteSelect.value = modalites.varianteCalcul;
-            // Déclencher l'événement change pour afficher la description
-            if (typeof changerVariantePANStandards === 'function') {
-                changerVariantePANStandards();
-            }
-        }
-
-        // 2. Mettre à jour les champs portfolio
-        const portfolioSelection = document.getElementById('v2-portfolio-selection');
-        if (portfolioSelection && modalites.portfolio?.methodeSelection) {
-            portfolioSelection.value = modalites.portfolio.methodeSelection;
-        }
-
-        const portfolioNombre = document.getElementById('v2-portfolio-nombre');
-        if (portfolioNombre && modalites.portfolio?.nombreARetenir) {
-            portfolioNombre.value = modalites.portfolio.nombreARetenir;
-        }
-
-        const portfolioMinimum = document.getElementById('v2-portfolio-minimum');
-        if (portfolioMinimum && modalites.portfolio?.minimumCompletion) {
-            portfolioMinimum.value = modalites.portfolio.minimumCompletion;
-        }
-
-        const portfolioTotal = document.getElementById('v2-portfolio-total');
-        if (portfolioTotal && modalites.portfolio?.nombreTotal) {
-            portfolioTotal.value = modalites.portfolio.nombreTotal;
-        }
-
-        const decouplerPN = document.getElementById('v2-decoupler-pn');
-        if (decouplerPN && modalites.portfolio?.decouplerPN !== undefined) {
-            decouplerPN.checked = modalites.portfolio.decouplerPN;
-        }
-
-        // 3. Charger la configuration par-objectifs si applicable
-        if (modalites.varianteCalcul === 'par-objectifs' && typeof chargerConfigParObjectifs === 'function') {
-            chargerConfigParObjectifs();
-        }
     }
+    // #434 (9 août 2026) — le bloc de rafraîchissement « interface STD » qui
+    // suivait est RETIRÉ : ses six `getElementById` visaient des ids `v2-*`
+    // (`v2-variante-calcul`, `v2-portfolio-selection`, `v2-portfolio-nombre`,
+    // `v2-portfolio-minimum`, `v2-portfolio-total`, `v2-decoupler-pn`) qui
+    // n'existent plus dans `index.html` — le DOM de l'éditeur V2 est parti.
+    // Chaque `if (element && …)` sortait donc silencieusement : du code qui ne
+    // pouvait plus rien rafraîchir, et qui ne pouvait pas non plus échouer.
+    // C'est le formulaire `mat-*` qui recharge l'interface, via chargerPratiqueDansFormulaireMat().
 
     return true;
 }

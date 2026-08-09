@@ -1131,28 +1131,28 @@ function remplirFormulairePratique(pratique) {
         let modeSelection = config.portfolio?.methodeSelection || 'meilleurs';
         if (estHybride) modeSelection = 'hybride';
 
-        // Variante de calcul - 🆕 #24 : Déduire depuis portfolio si non défini
-        let varianteCalcul = config.varianteCalcul || '';
-        if (!varianteCalcul && config.portfolio) {
-            // Mapper methodeSelection vers varianteCalcul
-            if (estHybride) {
-                varianteCalcul = 'hybride';
-            } else if (modeSelection === 'meilleurs' || modeSelection === 'n_meilleurs') {
-                varianteCalcul = 'n-meilleurs';
-            } else if (modeSelection === 'derniers') {
-                varianteCalcul = 'n-recents';
-            }
+        // ⚠ #434 (9 août 2026) — REPRISE DES PRATIQUES EXISTANTES, pas un défaut.
+        // Le mode « Par objectifs » vivait dans le champ legacy `varianteCalcul`,
+        // retiré en Phase D. Une pratique déjà enregistrée le porte encore : sans
+        // cette lecture, elle s'ouvrirait sur le panneau Portfolio et une simple
+        // sauvegarde la reclasserait en silence — perte de configuration.
+        // `config.parObjectifs` sert de second témoin : une pratique dont la
+        // variante aurait été perdue mais qui a des objectifs configurés est,
+        // de fait, une pratique par objectifs.
+        if (config.varianteCalcul === 'par-objectifs' || config.parObjectifs) {
+            modeSelection = 'par-objectifs';
         }
-        setValeurChamp('mat-variante-calcul', varianteCalcul);
-        changerVariantePANStandardsMat();
+
+        // Le mode de sélection se pose TOUJOURS — y compris sans `config.portfolio`,
+        // ce qui est précisément le cas d'une pratique par objectifs.
+        setValeurChamp('mat-portfolio-selection', modeSelection);
+        appliquerModeSelectionMat(modeSelection);
 
         // Portfolio
         // 🆕 Beta 95.7 : Accepter noms wizard (nbArtefacts*) ET noms legacy (nombreARetenir/nombreTotal) (#4)
         if (config.portfolio) {
             const valNombre = config.portfolio.nbArtefactsRetenus || config.portfolio.nombreARetenir || 5;
 
-            // 🆕 #24 : Utiliser le mode calculé (avec hybride si applicable)
-            setValeurChamp('mat-portfolio-selection', modeSelection);
             setValeurChamp('mat-portfolio-nombre', valNombre);
             setValeurChamp('mat-portfolio-minimum', config.portfolio.minAvantCalculFormatif || config.portfolio.minimumCompletion || 7);
             setValeurChamp('mat-portfolio-total', config.portfolio.nbArtefactsSoumis || config.portfolio.nombreTotal || 10);
@@ -1286,9 +1286,9 @@ function afficherConfigurationTypeMat(type) {
         if (el) el.style.display = 'none';
     });
 
-    // Variante PAN-Standards
-    const variantePAN = document.getElementById('mat-variante-pan-standards');
-    toggleDisplay(variantePAN, typeCanon === 'standards');
+    // (#434, 9 août 2026 : le bloc « Variante PAN-Standards » est retiré — le
+    //  mode de sélection vit dans la section `mat-config-pan-standards`, dont
+    //  la visibilité est déjà pilotée juste en dessous.)
 
     // Afficher la section appropriée
     let configId = 'mat-config-defaut';
@@ -1336,48 +1336,6 @@ function changerTypePratiqueMat() {
         // Utiliser la description personnalisée si disponible, sinon la taxonomique
         const descCustom = getValeurChamp('mat-pratique-description');
         descriptionPratique.textContent = descCustom || obtenirDescriptionCourtePratique({ type });
-    }
-
-    sauvegarderConfigPratiqueMat();
-}
-
-/**
- * Handler : Changement de variante PAN-Standards
- * Bascule entre la configuration Portfolio et Par-Objectifs
- */
-function changerVariantePANStandardsMat() {
-    const variante = getValeurChamp('mat-variante-calcul');
-    const descriptionDiv = document.getElementById('mat-variante-description');
-    const configPortfolio = document.getElementById('mat-config-portfolio');
-    const configParObjectifs = document.getElementById('mat-config-par-objectifs');
-
-    const descriptions = {
-        'n-meilleurs': 'Les N meilleures évaluations sont retenues pour calculer la note finale. Valorise le progrès.',
-        'n-recents': 'Les N évaluations les plus récentes sont retenues. Valorise l\'état actuel de maîtrise.',
-        'grille-profils': 'La note est déterminée selon une grille de profils (ex: 3M + 2M+ → 85%).',
-        'par-objectifs': 'Calcul par objectifs avec 4 modes possibles (comptage, moyenne, seuils, holistique).',
-        'autre': 'Méthode personnalisée à décrire dans la description.'
-    };
-
-    // Afficher la description de la variante
-    if (descriptions[variante]) {
-        descriptionDiv.textContent = descriptions[variante];
-        descriptionDiv.classList.remove('u-hide');
-    } else {
-        descriptionDiv.classList.add('u-hide');
-    }
-
-    // Basculer entre Portfolio et Par-Objectifs
-    if (variante === 'par-objectifs') {
-        if (configPortfolio) configPortfolio.classList.add('u-hide');
-        if (configParObjectifs) {
-            configParObjectifs.classList.remove('u-hide');
-            // Charger les données (changerModeCalculObjectifsMat est appelé à la fin)
-            chargerConfigParObjectifsMat();
-        }
-    } else {
-        if (configPortfolio) configPortfolio.classList.remove('u-hide');
-        if (configParObjectifs) configParObjectifs.classList.add('u-hide');
     }
 
     sauvegarderConfigPratiqueMat();
@@ -1504,13 +1462,24 @@ async function sauvegarderConfigPratiqueMat() {
 
     // Sauvegarder selon le type (comparaison canonique)
     if (typeCanon === 'standards') {
-        const varianteCalcul = getValeurChamp('mat-variante-calcul');
-        configurations[index].configuration.varianteCalcul = varianteCalcul;
+        // #434 — le mode de sélection est la SEULE saisie ; `varianteCalcul` en
+        // est désormais une PROJECTION, plus un second champ que l'utilisateur
+        // remplit. C'est ce qui ferme le Bug 5 du plan : deux commandes qui
+        // pouvaient diverger sont devenues une commande et sa dérivée.
+        //
+        // ⚠ Pourquoi la projection subsiste au lieu de disparaître : le moteur
+        // la LIT — `pratique-pan-standards.js:134` route `calculerPerformance`
+        // vers le calcul par objectifs sur `modalites.varianteCalcul`. Faire
+        // lire `methodeSelection` au moteur est un changement du contrat de
+        // calcul : il appartient au même lot que G2-b (les lecteurs legacy du
+        // snapshot `modalitesEvaluation`), pas à un retrait d'UI.
+        const modeSelection = getValeurChamp('mat-portfolio-selection') || 'meilleurs';
+        configurations[index].configuration.varianteCalcul = varianteCalculDepuisMode(modeSelection);
 
-        // Configuration Portfolio (pour variantes: n-meilleurs, n-recents, grille-profils, autre)
-        if (varianteCalcul !== 'par-objectifs') {
+        // Configuration Portfolio (tous les modes sauf « par objectifs »)
+        if (modeSelection !== 'par-objectifs') {
             configurations[index].configuration.portfolio = {
-                methodeSelection: getValeurChamp('mat-portfolio-selection') || 'meilleurs',
+                methodeSelection: modeSelection,
                 nombreARetenir: parseInt(getValeurChamp('mat-portfolio-nombre')) || 5,
                 minimumCompletion: parseInt(getValeurChamp('mat-portfolio-minimum')) || 7,
                 nombreTotal: parseInt(getValeurChamp('mat-portfolio-total')) || 10,
@@ -1531,8 +1500,8 @@ async function sauvegarderConfigPratiqueMat() {
             };
         }
 
-        // Configuration Par-Objectifs (variante: par-objectifs)
-        if (varianteCalcul === 'par-objectifs') {
+        // Configuration Par-Objectifs
+        if (modeSelection === 'par-objectifs') {
             // Initialiser parObjectifs si absent
             if (!configurations[index].configuration.parObjectifs) {
                 configurations[index].configuration.parObjectifs = { objectifs: [] };
@@ -2439,16 +2408,102 @@ function toggleSystemeJetonsMat() {
  * 🆕 #24 : Gère le changement du mode de sélection portfolio
  * Active automatiquement les catégories si "hybride" est sélectionné
  */
+// #434 (9 août 2026) — descriptions du mode de sélection. Elles viennent du
+// champ legacy retiré en Phase D ; seules celles dont l'option existe encore
+// sont conservées (« grille de profils » et « autre » n'ont jamais été des
+// modes de sélection, elles décrivaient des intentions sans effet de calcul).
+const DESCRIPTIONS_MODE_SELECTION = {
+    'meilleurs':     'Les N meilleures évaluations sont retenues pour calculer la note finale. Valorise le progrès.',
+    'derniers':      'Les N évaluations les plus récentes sont retenues. Valorise l\'état actuel de maîtrise.',
+    'tous':          'Toutes les évaluations du portfolio comptent, sans sélection.',
+    'hybride':       'Les N meilleures de la Sélection, plus les productions Obligatoires, avec une pondération par bloc.',
+    'par-objectifs': 'Calcul par objectifs avec 4 modes possibles (comptage, moyenne, seuils, holistique).'
+};
+
+/**
+ * Projette le mode de sélection vers le champ historique `varianteCalcul`.
+ *
+ * ⚠ #434 — cette table est le PONT entre la seule commande de l'interface et
+ * le champ que le moteur de calcul lit encore (`pratique-pan-standards.js` y
+ * route le calcul par objectifs). Les deux vocabulaires diffèrent depuis
+ * toujours — c'est exactement ce qui rendait les deux anciens sélecteurs
+ * capables de diverger sans que rien ne le signale.
+ *
+ * Seule la valeur `par-objectifs` a un effet de calcul aujourd'hui ; les
+ * autres sont conservées à l'identique pour ne pas réécrire les pratiques
+ * existantes ni les entrées du catalogue de `pratiques-bibliotheque.js`.
+ */
+function varianteCalculDepuisMode(mode) {
+    switch (mode) {
+        case 'par-objectifs': return 'par-objectifs';
+        case 'hybride':       return 'hybride';
+        case 'meilleurs':     return 'n-meilleurs';
+        case 'derniers':      return 'n-recents';
+        default:              return '';   // « tous » n'a jamais eu d'équivalent
+    }
+}
+
+/**
+ * Handler : changement du mode de sélection du portfolio.
+ *
+ * ⚠ #434 — c'est désormais l'UNIQUE commande de la construction de la note.
+ * Elle a absorbé la bascule Portfolio ↔ Par-Objectifs, que portait le champ
+ * legacy `mat-variante-calcul` retiré en Phase D. Ce champ était le SEUL
+ * chemin qui révélait `mat-config-par-objectifs` : sans cette reprise, le mode
+ * « Par objectifs » serait devenu inatteignable.
+ */
 function onPortfolioSelectionChangeMat() {
     const select = document.getElementById('mat-portfolio-selection');
     const checkbox = document.getElementById('mat-categories-actif');
+    const mode = select ? select.value : '';
 
-    if (select && select.value === 'hybride' && checkbox && !checkbox.checked) {
+    if (mode === 'hybride' && checkbox && !checkbox.checked) {
         checkbox.checked = true;
         toggleCategoriesMat();
     }
 
+    appliquerModeSelectionMat(mode);
     sauvegarderConfigPratiqueMat();
+}
+
+/**
+ * Reflète le mode de sélection dans l'interface : description, et bascule
+ * entre le panneau Portfolio et le panneau Par-Objectifs.
+ *
+ * Séparée du handler parce que le CHARGEMENT d'une pratique doit produire le
+ * même écran qu'un changement manuel — sans repasser par une sauvegarde.
+ */
+function appliquerModeSelectionMat(mode) {
+    const descriptionDiv = document.getElementById('mat-portfolio-selection-description');
+    const configPortfolio = document.getElementById('mat-config-portfolio');
+    const configParObjectifs = document.getElementById('mat-config-par-objectifs');
+
+    if (descriptionDiv) {
+        if (DESCRIPTIONS_MODE_SELECTION[mode]) {
+            descriptionDiv.textContent = DESCRIPTIONS_MODE_SELECTION[mode];
+            descriptionDiv.classList.remove('u-hide');
+            descriptionDiv.style.display = '';
+        } else {
+            descriptionDiv.classList.add('u-hide');
+            descriptionDiv.style.display = 'none';
+        }
+    }
+
+    if (mode === 'par-objectifs') {
+        if (configPortfolio) configPortfolio.classList.add('u-hide');
+        if (configParObjectifs) {
+            configParObjectifs.classList.remove('u-hide');
+            configParObjectifs.style.display = '';
+            // Charger les données (changerModeCalculObjectifsMat est appelé à la fin)
+            chargerConfigParObjectifsMat();
+        }
+    } else {
+        if (configPortfolio) configPortfolio.classList.remove('u-hide');
+        if (configParObjectifs) {
+            configParObjectifs.classList.add('u-hide');
+            configParObjectifs.style.display = 'none';
+        }
+    }
 }
 
 /**
@@ -3114,7 +3169,6 @@ window.importerPratiquesUtilisateur = importerPratiquesUtilisateur;
 
 // Handlers formulaire (préfixe mat-)
 window.changerTypePratiqueMat = changerTypePratiqueMat;
-window.changerVariantePANStandardsMat = changerVariantePANStandardsMat;
 window.mettreAJourNomPratiqueMat = mettreAJourNomPratiqueMat;
 window.mettreAJourDescriptionPratiqueMat = mettreAJourDescriptionPratiqueMat;
 window.mettreAJourDisciplinePratiqueMat = mettreAJourDisciplinePratiqueMat;
