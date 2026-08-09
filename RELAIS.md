@@ -12,8 +12,8 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | ⚠ **`claude/incomplete-work-plans-h1nimp`** |
-| **Version** | **1.61.0** — build `0809-0733` |
-| **Travail en avance sur `main`** | **2 commits** — #426 (l'onglet devient « Carte d'alignement ») + #421 (conformité du manuel, 4 surfaces) + le §4ter de `ETAT-PROJET.md` (vérification au code des 43 plans non tranchés) |
+| **Version** | **1.61.1** — build `0809-0756` |
+| **Travail en avance sur `main`** | **3 commits** — #426 (l'onglet devient « Carte d'alignement ») + #421 (conformité du manuel, 4 surfaces) + le §4ter de `ETAT-PROJET.md` (43 plans vérifiés au code) + le verrou des phases B/C de la note finale |
 | **Dernière mise à jour** | 9 août 2026 |
 
 ⚠ **NE PAS ouvrir le conteneur sur `main`** : il est à **1.60.0**, soit une
