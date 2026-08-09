@@ -21,6 +21,19 @@
 
     var CHANGELOG = [
         {
+            version: '1.65',
+            couleur: 'orange',
+            titre: 'Carte d’alignement — la durée s’affiche, les objectifs se réordonnent',
+            items: [
+                'La durée d’un bloc est maintenant visible dès que tu le poses. Elle n’apparaissait qu’après un rechargement de la page — sur les Exposés comme sur les cinq étapes d’enseignement explicite.',
+                'Même correctif pour une Leçon qu’on vient de créer : son total Σ, son sélecteur de semaine, son badge 🎯 et sa poignée de redimensionnement sont là tout de suite.',
+                'Deux nouvelles flèches ▲▼ sur chaque objectif de leçon : change leur ordre sans les retaper. Les liens entre un objectif et les activités qui le servent suivent le déplacement.',
+                'Un titre collé depuis une autre application prend la typographie de la carte au lieu de garder la sienne.',
+                'Les cinq étapes d’enseignement explicite partagent une seule couleur sarcelle : la famille se repère d’un coup d’œil.',
+                'Le bandeau « Présentement en développement actif » est retiré de l’en-tête du module.'
+            ]
+        },
+        {
             version: '1.64',
             couleur: 'bleu',
             titre: 'Les réglages d’une pratique s’appliquent partout, tout de suite',

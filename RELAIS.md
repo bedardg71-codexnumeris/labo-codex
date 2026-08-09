@@ -11,19 +11,67 @@
 
 | | |
 |---|---|
-| **Branche à ouvrir** | ⚠ **`claude/incomplete-work-plans-h1nimp`** |
-| **Version** | **1.64.0** — build `0809-0906` |
-| **Base de la branche** | `83ee41d3` (= `origin/main` au 9 août, 1.60.0) |
-| **Travail en avance sur `main`** | **12 commits** — voir le tableau de réconciliation ci-dessous |
-| **Dernière mise à jour** | 9 août 2026, fin de journée |
-
-⚠ **NE PAS ouvrir le conteneur sur `main`.** Vérifier `git log origin/main` :
-si son sommet est encore `83ee41d3`, il est à **1.60.0**, soit quatre versions
-mineures en arrière, et son §3 de `SESSION.md` ne connaît pas cette branche.
+| **Branche à ouvrir** | `main` **pour la carte d'alignement** · ⚠ **`claude/incomplete-work-plans-h1nimp`** pour les pratiques |
+| **Version sur `main`** | **1.65.0** — build `0809-0937` (carte d'alignement, #437, FUSIONNÉE) |
+| **Travail encore en avance sur `main`** | **12 commits** sur `claude/incomplete-work-plans-h1nimp` (1.61.0 → 1.64.0, #434/#435/#436) — voir le tableau ci-dessous |
+| **Dernière mise à jour** | 9 août 2026, fin de journée — après la fusion de la carte |
 
 ---
 
-## ⚠⚠ DEUX SESSIONS TRAVAILLENT EN PARALLÈLE — lire avant de fusionner
+## ✅ CE QUI EST FAIT : la collision a eu lieu, et elle est RÉSOLUE
+
+**La collision annoncée plus bas s'est produite.** Les deux sessions du 9 août
+ont pris les mêmes ressources, à 24 minutes d'écart :
+
+| Ressource | `incomplete-work-plans-h1nimp` | session « carte d'alignement » |
+|---|---|---|
+| Version | 1.64.0 (build `0809-0906`) | 1.64.0 (build `0809-0930`) |
+| Identifiant | **#436** (G2-b, miroir `configPAN`) | **#436** (carte d'alignement) |
+
+⮕ **C'est la session « carte » qui a renuméroté** : **1.65.0** et **#437**. Elle
+est fusionnée dans `main` (fast-forward `164c4077..0f99b6d2`), Vitest
+**1996/1996** (228 fichiers).
+
+▣ **Pourquoi elle, et pas l'autre — le critère qui a servi.** La recette ci-dessous
+dit « la seconde session à fusionner », mais ce critère ne départageait pas :
+aucune des deux n'avait fusionné son code au moment du constat. Le critère qui
+départage vraiment est le **coût**. La série 1.61.0 → 1.64.0 est contiguë et déjà
+consommée dans quatre documents sur douze commits ; la session carte, c'était un
+commit, une version, un identifiant. ⮕ **Retenir la règle pour la prochaine
+fois : c'est le PLUS PETIT côté qui renumérote, pas le second à fusionner.** Le
+second à fusionner est indéterminé tant que personne n'a fusionné — donc
+inutilisable au moment où on en a besoin.
+
+⚠ **1.65.0 a été choisie AU-DESSUS de toute la série de l'autre branche**, et
+c'est délibéré : sa fusion n'a plus à refondre deux séries entrelacées, mais
+seulement à garder le numéro le plus haut.
+
+### Ce qui reste à faire quand `incomplete-work-plans-h1nimp` fusionnera
+
+1. **Version** : garder **1.65.0** (ou au-delà). Ne pas redescendre à 1.64.0.
+2. **Conflits certains** — les quatre points de vérité (`version.json`,
+   `js/init-inline.js` ×2, `js/main.js`), les `?v=` d'`index.html`, la tête de
+   `js/changelog-data.js`, et les quatre trackers.
+3. **`js/changelog-data.js`** : l'entrée **1.65** (carte d'alignement) est déjà
+   en tête. Les entrées 1.61 → 1.64 de l'autre branche se glissent SOUS elle —
+   et se consolident entre elles, selon le point 3 de la recette.
+4. **Code applicatif** : risque faible. La session carte n'a touché que
+   `js/planification-carte.js`, `styles.css`, `index.html` et trois fichiers de
+   tests — **aucun** des fichiers `js/pratiques*` du chantier G2-b.
+5. ⚠ **Deux sentinelles ont été RETARGETÉES** par la session carte
+   (`sentinelle-objectif-lecon-metadata`, `sentinelle-echappement-audit-386`) :
+   elles lisaient un balisage devenu fonction. En cas de conflit, garder la
+   version de `main` — chaque invariant y a été revérifié au rendu réel avant
+   réécriture, et doublé d'un équivalent comportemental.
+
+---
+
+## ⚠⚠ LE DOSSIER D'ORIGINE — conservé tel qu'écrit
+
+> Ce qui suit a été écrit AVANT la collision, par la session
+> `incomplete-work-plans-h1nimp`. **Il avait raison sur tout**, y compris sur le
+> fait qu'elle viendrait. Conservé sans retouche : il vaut mieux qu'un compte
+> rendu après coup.
 
 **Grégoire a signalé le 9 août qu'un autre agent travaillait sur `main`** pendant
 que cette branche avançait. Au dernier `git fetch` de cette session,

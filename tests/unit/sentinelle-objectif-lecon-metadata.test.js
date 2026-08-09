@@ -268,10 +268,24 @@ describe('F1 · écriture des objectifs (pluriel)', () => {
 // C. RENDU ET ROUTAGE — invariants de source (couplage DOM assumé)
 // =======================================================================
 describe('F1 · invariants de rendu et de routage', () => {
+    // ⚠ QUATRE ASSERTIONS DE CE BLOC RETARGETÉES LE 9 AOÛT 2026 (#437).
+    // Le rendu d'un nœud était construit à trois endroits dont deux
+    // incomplets ; il a été fondu en `contenuNoeudHTML`, et le balisage des
+    // objectifs vit désormais dans `objectifsLeconHTML` /
+    // `commandesObjectifHTML`. Les invariants ci-dessous n'ont pas changé —
+    // seule la FORME de source qu'ils lisaient a bougé, et chacun a été
+    // vérifié au rendu réel avant d'être réécrit ici.
+    //
+    // ⮕ Ces quatre-là sont doublés par des assertions COMPORTEMENTALES dans
+    // `sentinelle-carte-rendu-unique-437.test.js` (§H), qui rendent un nœud
+    // au lieu de relire la source. C'est la leçon du jour : une assertion de
+    // source dit où le code est écrit, jamais ce qu'il produit — elle a
+    // survécu sans broncher aux quatre en-têtes rendues incomplètes.
     it('le badge 🎯 est rendu pour TOUTE leçon, pas seulement celles qui ont un objectif', () => {
         // Cause racine de F1 : l'ancien badge était conditionné à la présence
         // d'un objectif, donc la fonction ne se découvrait jamais.
-        expect(source).toMatch(/estLecon\s*\n?\s*\?\s*'<span class="planif-badge-objectif'/);
+        expect(source).toMatch(/function badgeObjectifHTML\(n\) \{\s*\n\s*if \(n\.type !== 'lecon'\) return '';/);
+        expect(source).toMatch(/'<span class="planif-badge-objectif'/);
         expect(source).toContain('planif-badge-objectif--vide');
     });
 
@@ -342,15 +356,19 @@ describe('F1 · invariants de rendu et de routage', () => {
 
     it('l’en-tête porte le TYPE, et le titre est décalé SOUS les objectifs', () => {
         // Ordre imposé : type → objectifs → titre → contenu.
-        expect(source).toMatch(/planif-noeud-entete[\s\S]{0,900}htmlObjectifs \+\s*\n\s*'<div class="planif-noeud-titre"/);
+        expect(source).toMatch(/enTete \+\s*\n\s*objectifsLeconHTML\(n\) \+\s*\n\s*'<div class="planif-noeud-titre"/);
     });
 
     it('chaque objectif porte ses commandes + et − (les raccourcis ne se voient pas)', () => {
         expect(source).toContain('planif-obj-ajouter');
         expect(source).toContain('planif-obj-retirer');
-        // Atteignables au clavier, pas seulement à la souris.
-        expect(source).toMatch(/planif-obj-ajouter[\s\S]{0,200}role="button" tabindex="0" aria-label=/);
-        expect(source).toMatch(/planif-obj-retirer[\s\S]{0,200}role="button" tabindex="0" aria-label=/);
+        // Atteignables au clavier, pas seulement à la souris. Les quatre
+        // commandes partagent une fabrique unique depuis #437 : c'est ELLE
+        // qui doit poser le contrat clavier, sinon une commande ajoutée plus
+        // tard naîtrait inaccessible.
+        expect(source).toMatch(/role="button" tabindex="0" aria-label="' \+ libelle \+ '"/);
+        expect(source).toMatch(/commandeObjectifHTML\('planif-obj-ajouter'/);
+        expect(source).toMatch(/commandeObjectifHTML\('planif-obj-retirer'/);
     });
 
     it('les boutons n’enclenchent pas le déplacement du bloc', () => {
@@ -365,8 +383,13 @@ describe('F1 · invariants de rendu et de routage', () => {
             source.indexOf('if (io_ === objs.length) break;')
         );
         expect(brancheAccueil).toContain('data-accueil="1"');
-        expect(brancheAccueil).toContain('planif-obj-ajouter');
-        expect(brancheAccueil).toContain('planif-obj-retirer');
+        // Les deux branches appellent la MÊME fabrique de commandes depuis
+        // #437 — c'est ce qui rend structurellement impossible qu'une des deux
+        // reparte sans ses boutons.
+        expect(brancheAccueil).toContain('commandesObjectifHTML(');
+        // Ses flèches sont inertes : une ligne pas encore persistée n'a rien
+        // à déplacer. Les deux booléens `true` disent exactement cela.
+        expect(brancheAccueil).toContain('commandesObjectifHTML(rangRendu, true, true)');
     });
 
     it('« + » convertit l’index de ligne en index d’objectif', () => {
