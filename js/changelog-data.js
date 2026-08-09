@@ -21,7 +21,7 @@
 
     var CHANGELOG = [
         {
-            version: '1.64',
+            version: '1.65',
             couleur: 'orange',
             titre: 'Carte d’alignement — la durée s’affiche, les objectifs se réordonnent',
             items: [

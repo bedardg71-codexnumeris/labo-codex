@@ -67,7 +67,7 @@ describe('#386 · planification : titre de nœud échappé, attributs value= coe
         expect(carte).not.toMatch(/contenteditable="true">' \+ \(n\.titre \|\| ''\)/);
     });
 
-    // ⚠ ASSERTION REVUE LE 9 AOÛT 2026 (#436) — la cible a changé, l'invariant
+    // ⚠ ASSERTION REVUE LE 9 AOÛT 2026 (#437) — la cible a changé, l'invariant
     // NON. Les « trois chemins » (création, clone, reconstruction) ont été
     // fondus en un seul, `contenuNoeudHTML` : c'était précisément le correctif
     // du jour, les deux premiers rendaient un nœud incomplet. Le titre n'est
