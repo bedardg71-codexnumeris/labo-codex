@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            version: '1.61',
+            couleur: 'bleu',
+            titre: 'L’onglet s’appelle « Carte d’alignement »',
+            items: [
+                'L’onglet « Alignement pédagogique » devient « Carte d’alignement ». Les six autres onglets de Conception nomment un objet de travail ; celui-là nommait une théorie — et « carte d’alignement » était déjà le mot employé partout ailleurs dans l’application.',
+                'Le guide de la carte gagne une étape : « Ce que la leçon vise ». Elle explique où saisir l’objectif d’une leçon (le badge 🎯 de son en-tête) et comment cocher, sur chaque activité, les objectifs qu’elle sert.',
+                'Le manuel décrit à nouveau l’application réelle : l’aide, les info-bulles, le glossaire et la visite guidée ne renvoient plus à des pages ni à des commandes retirées cet été.',
+                'La zone « Enseignement explicite » de la palette a maintenant son info-bulle, comme les cinq autres.'
+            ]
+        },
+        {
             version: '1.60',
             couleur: 'vert',
             titre: 'Une corbeille dans la palette — supprimer au doigt',

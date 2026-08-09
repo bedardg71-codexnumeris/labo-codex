@@ -1117,7 +1117,7 @@ var GUIDE_PAGES = [
                 '<li><span class="guide-glyphe guide-glyphe--gris">!</span> (badge gris) = il manque une connexion.</li>' +
                 '<li><span class="guide-glyphe guide-glyphe--warning">\u26A0</span> = attention, une évaluation manque quelque part dans la chaîne.</li>' +
             '</ul>' +
-            '<p>Ce guide te propose 7\u00a0étapes pour construire ta carte et exporter ton plan. Tu peux le consulter à tout moment depuis la palette.</p>' +
+            '<p>Ce guide te propose 8\u00a0étapes pour construire ta carte et exporter ton plan. Tu peux le consulter à tout moment depuis la palette.</p>' +
             '<p class="planif-guide-ref">Anderson, L.\u00a0W. (2026). <em>Curricular alignment: A re-examination</em> (Educational Practices Series, No.\u00a037). UNESCO International Bureau of Education. <a href="https://unesdoc.unesco.org/ark:/48223/pf0000397143.locale=en" target="_blank" rel="noopener">unesdoc.unesco.org</a></p>'
     },
     {
@@ -1149,6 +1149,22 @@ var GUIDE_PAGES = [
                 '<li>Relie chaque leçon à une ou plusieurs idées maîtresses. Le verbe <em>«\u00a0se concrétise dans\u00a0»</em> apparaît.</li>' +
             '</ol>' +
             '<div class="planif-guide-astuce">Tu peux déplacer une leçon d\u2019une séquence à l\u2019autre en la glissant.</div>'
+    },
+    {
+        // Ajoutée le 9 août 2026 (#421). Le guide faisait construire la carte
+        // sans jamais nommer l'objectif de leçon — celui-là même que Grégoire
+        // ne trouvait pas (METHODE-ALIGNEMENT §4.1 bis, 6 août). La cause
+        // racine y était diagnostiquée comme un défaut d'affordance ; le badge
+        // grisé l'a réglée dans l'interface, le manuel devait suivre.
+        titre: 'Ce que la leçon vise',
+        contenu:
+            '<p class="planif-guide-pourquoi">L’objectif de leçon est la boussole : c’est lui qui dit ce que l’étudiant saura faire à la fin, et c’est par rapport à lui que se choisissent les connaissances, les activités et l’évaluation.</p>' +
+            '<ol>' +
+                '<li>Sur un bloc <span class="planif-guide-type" style="background:var(--planif-couleur-lecon)"></span> <strong>Leçon</strong>, clique le badge <strong>🎯</strong> de l’en-tête : il déplie la zone des objectifs. Grisé, il t’indique qu’aucun objectif n’est encore posé.</li>' +
+                '<li>Écris l’objectif. Le <strong>+</strong> en ajoute un autre, le <strong>−</strong> retire celui de la ligne — une leçon en porte souvent plusieurs.</li>' +
+                '<li>Dans l’<strong>Inspecteur</strong> d’une activité, d’un exposé ou d’une évaluation de cette leçon, coche les <strong>objectifs servis</strong>. C’est ainsi que tu vérifies qu’aucun objectif ne reste sans moyen.</li>' +
+            '</ol>' +
+            '<div class="planif-guide-astuce">Pose aussi la <strong>semaine</strong> de la leçon (Inspecteur) et la <strong>durée</strong> de chaque bloc (dans son en-tête) : la leçon totalise les durées de ce qu’elle contient, et le planificateur place le tout sur les semaines de ton trimestre.</div>'
     },
     {
         titre: 'Ce que tu enseignes concrètement',
@@ -1251,7 +1267,7 @@ function ouvrirGuide() {
     var btnNext = guide.querySelector('.planif-guide-btn-next');
     var dotsContainer = guide.querySelector('.planif-guide-dots');
 
-    // Créer les 7 points de navigation
+    // Créer les points de navigation (un par page de GUIDE_PAGES)
     for (var i = 0; i < GUIDE_PAGES.length; i++) {
         var dot = document.createElement('button');
         dot.className = 'planif-guide-dot';

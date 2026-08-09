@@ -17,8 +17,10 @@ description: >
 
 # Module Alignement — Labo Codex
 
-> **Nommage.** Le module est **affiché « Alignement pédagogique »**
-> (`js/config.js`, section `{ id: 'carte', label: 'Alignement pédagogique' }`).
+> **Nommage.** Le module est **affiché « Carte d'alignement »** depuis le
+> 9 août 2026 (#426 ; il s'appelait « Alignement pédagogique » avant — les six
+> onglets voisins de Conception nomment un objet de travail, pas une théorie).
+> Source : `js/config.js`, section `{ id: 'carte', label: "Carte d'alignement" }`.
 > Son code historique porte le préfixe `planification*` : `js/planification.js`
 > (orchestration), `js/planification-carte.js` (éditeur de carte mentale, le
 > gros du module), `js/planification-donnees.js` (couche stockage),
