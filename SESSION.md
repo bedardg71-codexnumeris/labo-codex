@@ -7,6 +7,21 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 9 AOÛT 2026, FIN (rituel de clôture passé).
+     ÉTAT FINAL : `main` = **1.65.1** (build 0809-0958), arbre propre, 0 divergence. Vitest **2057/2057** (232 fichiers). Dernier ID **#438**. Les deux branches du jour sont fusionnées ; `RELAIS.md` est à « aucun travail en avance ».
+
+     ▣ **RITUEL DE FIN — ce qu'il a donné.** §2 : zéro innerHTML/handler inline/eval/console.log sur ma surface ; zones protégées intactes ; CSP intacte. §3 : 2057/2057 en 26 s, zéro only/skip, Playwright toujours hors conteneur (artefact : `webkit-2287` absent). §4 : **13 break-tests rejoués SUR L'ARBRE FUSIONNÉ, 13 ROUGE** — je n'ai pas repris ceux d'avant la fusion, l'arbre n'était plus le même.
+     ▣ **AUDIT CROISÉ du code arrivé par la fusion** (l'autre session) : 3 `innerHTML` ajoutés, tous par la fabrique `contenuNoeudHTML`. **Instruit, pas supposé** : elle échappe `n.titre` dans ses deux branches, ses sous-fabriques échappent leur donnée utilisateur, et les deux qui n'échappent rien (`obtenirLabelNoeud`, `badgeObjectifHTML`) ne rendent QUE du statique (`config.label` de la table TYPES, un compte d'objectifs). **Verdict : sain.**
+     ▣ **LES DEUX CÔTÉS DE LA FUSION SONT GARDÉS** — break-test le plus utile de la journée : restaurer l'ancien libellé d'onglet fait rougir la sentinelle #426, réintroduire le bandeau fait rougir celle de #437. L'union d'intentions n'est pas seulement correcte, elle est protégée dans les deux sens.
+
+     ⚠ **PASSE CONNEXIONS — un reliquat trouvé, non corrigé.** Après #438 (release.mjs bumpe enfin `styles.css`), le balayage de TOUS les `?v=` d'index.html montre **trois bibliothèques tierces hors périmètre** : `libs/html2canvas.min.js`, `libs/jszip.min.js`, `libs/pdf.min.js`. Même classe de défaut — mais **un seul commit sur `libs/` depuis le 1er mai**. Risque faible, consigné au §3, à traiter le jour où une lib est mise à jour.
+
+     ▣ **CE QUE LA JOURNÉE A COÛTÉ, ET CE QU'ELLE A APPRIS** (les cinq leçons sont au §3) : une collision de sessions à 24 minutes d'écart, réglée sans perte parce que le dossier de réconciliation était écrit AVANT ; une porte rouverte par erreur (#434) que la question de Grégoire a rattrapée ; deux chiffres faux dans mes propres documents, trouvés par le §4.2 et non par un test.
+
+     ⮕ **CE QUI RESTE, ET QUI N'EST PLUS DU CODE** : 81 portes terrain (`PORTES-TERRAIN-1.57-1.65.md`), quatre valeurs gelées en attente de verdict, et l'audit jamais fait de `Plan Accompagnement/`. Détail et ordre au §3.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 9 AOÛT 2026, CLÔTURE (même conteneur, même branche).
      ÉTAT FINAL : **1.65.0** (build 0809-0937), branche **16 commits devant `main`, 0 derrière**, Vitest **2054/2054** (232 fichiers), arbre propre.
 
@@ -5784,90 +5799,109 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
 ## §3 — Consigne de démarrage pour la prochaine session
 
-> **Réécrite le 9 août 2026.** #426 et #421 sont LIVRÉS ; l'onglet s'appelle
-> « Carte d'alignement ». Le §4ter de `ETAT-PROJET.md` est neuf : il tranche
-> l'état des 43 plans que le §4bis avait laissés sans verdict.
+> **Réécrite le 9 août 2026 en clôture**, après la fusion des DEUX branches du
+> jour. Tout est sur `main`. Il n'y a plus de dette de fusion.
 
 ### Prémisse à vérifier au rituel de début (§1)
 
 | Point | Valeur attendue |
 |---|---|
-| Branche | ⚠ **`claude/incomplete-work-plans-h1nimp`** — le travail du 9 août **n'est PAS sur `main`** (voir `RELAIS.md`) |
-| Version | `{"build":"0809-0835","beta":"1.63.0"}` |
-| Vitest | **1998/1998** (230 fichiers) |
+| Branche | **`main`** — plus rien en avance (`RELAIS.md` le confirme) |
+| Version | `{"build":"0809-0958","beta":"1.65.1"}` |
+| Vitest | **2057/2057** (232 fichiers) |
 | Playwright WebKit | non exécutable en conteneur → CI à la PR |
-| Dernier ID BACKLOG | **#435** |
+| Dernier ID BACKLOG | **#438** |
 | Arbre | propre |
 
 ⚠ **Le clone du conteneur est SHALLOW.** `git fetch --unshallow` AVANT toute
 comparaison. Sans ça, `main` local paraît vieux de plusieurs semaines et
 `git rev-list --count main...HEAD` annonce une divergence **entièrement
-fictive** — constaté le 9 août (83/57 commits, réel : 0/0).
+fictive** — constaté le 9 août au matin (83/57 commits ; réel : 0/0).
 
-### ⚠⚠ Priorité 0 — LA FUSION, ET UNE SECONDE SESSION SUR `main`
+⚠ **`main` a bougé TROIS fois le 9 août sous les pieds d'une session.** Faire
+`git fetch` juste avant de pousser, pas seulement en ouvrant. Un push rejeté
+n'est pas un incident : c'est le filet qui fonctionne.
 
-**Grégoire a signalé le 9 août qu'un autre agent travaillait sur `main`** pendant
-que cette branche avançait. Au dernier `fetch`, `origin/main` était **encore à
-`83ee41d3`** (1.60.0) : rien n'était poussé, donc **aucune collision réelle au
-moment où ces lignes sont écrites**. Elle viendra quand l'autre poussera.
+---
 
-⮕ **Le dossier de réconciliation est dans `RELAIS.md`** : versions consommées
-(1.61.0 → 1.64.0), identifiants pris (#434, #435, #436), fichiers où le conflit
-est certain, et la recette. C'est la configuration du 8 août — écrite AVANT la
-collision cette fois, pas après.
+### ⚠⚠ Priorité 0 — CE QUI N'EST PAS DU CODE, et qui bloque tout le reste
 
-⮕ **Ce que cette session a fait pour limiter la casse** : plus aucune release
-après 1.64.0, aucun identifiant pris au-delà de #436, et la purge de `configPAN`
-versée à la séance #353 **sans ouvrir de nouvel item**.
+**Les portes terrain.** Neuf versions livrées les 8 et 9 août, **aucune validée
+au doigt ni sur les données réelles**. La checklist est prête et complète :
+**`plans de travail/PORTES-TERRAIN-1.57-1.65.md`** — 81 cases, 1.57 → 1.65 sans
+trou, avec ce qu'il ne faut PAS revalider (§11) pour ne pas repayer le déjà-prouvé.
 
-### Priorité 0 bis — LA FUSION VERS `main` (Grégoire, 2 min)
+⮕ **Ne pas ouvrir de nouveau chantier Alignement ou Pratiques avant.** Trois de
+ces portes touchent le **calcul de la note ou des chiffres affichés** (§3, §4.2,
+§1.3) — construire par-dessus sans les avoir passées, c'est empiler sur du non
+vérifié.
 
-La session du 9 août tournait dans un conteneur **contraint à sa branche**.
-La règle de relais de `CLAUDE.md` (« on fusionne à la fin de CHAQUE session »)
-n'a donc pas pu être appliquée par la session elle-même. `RELAIS.md` a été
-rempli sur la branche — mais **il ne peut pas être poussé sur `main` d'ici**,
-c'est-à-dire à l'endroit exact où le rituel du 8 août dit qu'il doit vivre.
-⮕ **C'est la limite structurelle du 8 août qui se rejoue.** Fusionner d'abord.
+⮕ **La plus ancienne, deux touchers, sans réponse depuis le 8 août** :
+*le double-clic ouvre-t-il l'Inspecteur au doigt sur iPad ?* Si non, toute la
+rétroaction formative de #424 n'est atteignable que par l'icône 🕵️.
 
-### Priorité 1 — les PORTES TERRAIN, toujours dues (Grégoire, ~20 min)
+### Priorité 1 — QUATRE décisions attendues de Grégoire
 
-Celles de 1.57 → 1.60 n'ont jamais été passées, et 1.61 en ajoute deux qui se
-voient tout de suite : le **nouveau libellé d'onglet** (« Carte d'alignement »
-dans la sous-nav, dans le titre de page et dans le tour guidé) et la **page 9
-du guide** (« Ce que la leçon vise »). Vérifier aussi que le badge 🎯 grisé se
-voit au doigt sur iPad — le guide l'annonce désormais comme le geste d'entrée.
+Aucune ne se code sans lui. Toutes sont au **§1 de la checklist**, avec la
+question de fond posée et l'endroit unique à changer :
 
-### Priorités suivantes, dans l'ordre — ce que le §4ter a débloqué
+| # | Valeur gelée | Nature |
+|---|---|---|
+| 1.1 | cible tactile 28 px de la ligne d'objectif | se voit |
+| 1.2 | sarcelle `#0891b2` des cinq étapes | se voit |
+| 1.3 | **dénominateur de l'indice C = 3** | se raisonne — chiffre affiché |
+| 1.4 | **quota affiché des jetons = 2** | se raisonne — chiffre affiché |
 
-- **`PLAN-refonte-note-finale-portfolio.md`, phases B et C** — le meilleur
-  rapport valeur/risque du moment : elles étaient bloquées par la Phase E
-  (= #328), et #328 est clos. B = refonte de la section Note finale du PDF de
-  rétroaction ; C = cohérence du panneau Note finale dans le profil.
-- **Auditer `Plan Accompagnement/`** (14 documents, jamais passés au crible) —
-  une demi-heure, même méthode que le §4ter. Trois y désignent déjà du travail
-  non fait.
+⚠ **Ne pas confondre les deux paires** : 1.1/1.2 viennent de #437 (carte),
+1.3/1.4 de #436 (pratiques). La confusion a déjà eu lieu une fois entre les deux
+sessions du 9 août.
+
+### Priorité 2 — les chantiers ouverts, dans l'ordre
+
+- **`Plan Accompagnement/` n'a JAMAIS été audité** (14 documents, ≥ 3 désignent
+  du travail non fait : `PLAN_guide_PAN_refonte_RREC`, `PLAN_decouvrabilite_guides`,
+  `SPEC_mini-guide_cours_balises`). Même méthode que le §4ter de `ETAT-PROJET.md` :
+  aller au code, pas au titre du plan. Une demi-heure.
+- **Le chantier « guides » est à 5 sur 7** : `solo`/`acp`/`rai`/`som`/`pan` sont
+  livrés ; **« Enseignement explicite » et `pan-rrec` n'ont jamais été écrits**.
 - **#425** (intégration des productions, D → C → B → A) · **#418** (`db-ready`
   jamais émis si IndexedDB indisponible) · **#427** (Cloudflare, septembre) ·
   **#428 + #430** (dettes datées de la rentrée, à retirer ENSEMBLE).
-- **Décision à trancher** : `docs/refonte-textes/infobulles-T9/T10` — archiver
-  ces specs datées, ou corriger l'en-tête de `accompagnement-contenu-hover.js`
-  pour dire que le code fait foi. T10 documente une page supprimée.
+- **Séance #353** (budget localStorage à 173 %) — elle a gagné un point le
+  9 août : **purger le miroir `configPAN`**, désormais sans lecteur ni écrivain
+  mais toujours présent dans les données. ⚠ Purge **sans drapeau** (comme #409) :
+  un backup Codex antérieur porte la clé et la réintroduirait à l'import.
+- **Décision en attente** : `docs/refonte-textes/infobulles-T9/T10` — specs datées
+  du 19 avril dont le JS se dit encore « la source ». T10 documente une page
+  supprimée. Les archiver, ou corriger l'en-tête du JS pour dire que le code fait foi.
 
-### Rappel de méthode — ce que le 9 août a confirmé
+### ◈ Reliquat connu, non corrigé (trouvé à la passe « connexions » du 9 août)
 
-1. **Un renommage est un révélateur.** Suivre les chemins de navigation cités
-   en prose a montré trois renvois vers une section disparue **le 3 avril** —
-   personne ne les avait vus parce que personne ne les avait suivis.
-2. **Une assertion qui recopie un chiffre ne protège rien.** Le guide annonçait
-   « 7 étapes » pour 8 pages. La sentinelle **calcule** le compte attendu
-   depuis le nombre réel de pages : l'erreur ne peut plus revenir en silence.
-3. **Écrire un manuel de mémoire reproduit le défaut qu'on corrige.** Deux
-   affirmations fausses posées puis retirées le même jour (la durée et les
-   objectifs de leçon placés dans l'Inspecteur — le code dit l'en-tête du nœud
-   et le badge 🎯).
-4. **Un document qui surveille les désyncs en produit aussi.** `ETAT-PROJET.md`
-   annonçait une case BACKLOG non cochée pour #328 — fausse depuis cinq
-   semaines.
+**Trois bibliothèques tierces portent un `?v=` hors du périmètre de
+`release.mjs`** : `libs/html2canvas.min.js`, `libs/jszip.min.js`,
+`libs/pdf.min.js`. Même classe que #438 — mais **un seul commit sur `libs/`
+depuis le 1er mai**, donc risque faible et fréquence quasi nulle. À traiter si
+une mise à jour de lib est prévue, pas avant.
+
+---
+
+### Rappel de méthode — ce que le 9 août a coûté et appris
+
+1. **Aller au code avant de conclure** — mais aussi **à l'historique avant de
+   rendre disponible**. #434 a rouvert une porte que #396 avait condamnée quatre
+   jours plus tôt : le code seul ne disait pas pourquoi elle était fermée.
+2. **Un plan ne dit pas son propre état.** Les phases B et C du plan note finale
+   se donnaient « à faire » alors qu'elles étaient livrées depuis des semaines.
+   Le §4ter en a trouvé quinze du même genre.
+3. **Une assertion qui recopie un chiffre ne protège rien.** Deux sentinelles du
+   9 août CALCULENT leur attendu depuis le source ; c'est ce qui a permis
+   d'attraper un « 7 » qui valait 9.
+4. **Le plus petit côté renumérote** (règle corrigée le 9 août). « Le second à
+   fusionner » est indéterminé tant que personne n'a fusionné — inutilisable au
+   moment précis où on en a besoin.
+5. **Un conflit de fusion peut demander une UNION, pas un choix.** L'en-tête du
+   module croisait un renommage et un retrait de bandeau : prendre un côté aurait
+   supprimé l'autre en silence, et aucune sentinelle des deux côtés ne l'aurait vu.
 
 ## §3ter — Consigne du 8 août (archivée le 9 août — #424/#431/#432/#433 livrés, #426 et #421 livrés depuis)
 
