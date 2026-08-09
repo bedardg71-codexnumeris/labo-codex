@@ -155,7 +155,49 @@ Quand `productionPortfolio === null` ET `productionTerminale === null` (cas h202
 
 **Fichier** : `js/profil-etudiant-sections-affichage.js:2728-2779`. Conditionner l'affichage du bloc terminale sur `detailsNoteFinale.terminal.present`. Adapter la formule (« 100% » au lieu de « 60% + 40% = 100% » si pas de terminale).
 
-### Phase D — Retrait du champ legacy `mat-variante-calcul` — **À FAIRE en dernier**
+### Phase D — Retrait du champ legacy `mat-variante-calcul` — **LIVRÉE 9 août 2026 (#434, 1.62.0)**
+
+> **Ce n'a pas pu être le « retrait pur » prescrit.** La vérification au code a
+> trouvé deux raisons, dont une que le plan ne soupçonnait pas :
+>
+> 1. **`varianteCalcul` n'est pas un champ d'UI.** `pratique-pan-standards.js`
+>    y route `calculerPerformance` vers le calcul par objectifs. C'est un **flag
+>    de calcul**, porté par les pratiques déjà enregistrées.
+> 2. **Le panneau « Par objectifs » ne pouvait JAMAIS s'afficher.** L'ancien
+>    handler ne faisait que `classList.remove('u-hide')`, or
+>    `#mat-config-par-objectifs` porte un `style="display: none;"` **inline** et
+>    n'a aucune classe. Retirer une classe absente ne lève pas un style inline.
+>    Le champ legacy n'était donc pas seulement un doublon : **son unique
+>    fonction propre était cassée**, sans erreur ni trace.
+>
+> **Forme retenue** — le mode de sélection devient l'UNIQUE commande :
+> - `mat-portfolio-selection` gagne l'option `par-objectifs` et pilote la
+>   bascule des deux panneaux (`appliquerModeSelectionMat`), en levant le style
+>   inline ;
+> - `varianteCalcul` devient une **projection** du mode
+>   (`varianteCalculDepuisMode`) — deux commandes qui pouvaient diverger sont
+>   devenues une commande et sa dérivée. C'est la fermeture du Bug 5 ;
+> - **reprise des pratiques existantes** : `config.varianteCalcul ===
+>   'par-objectifs'` **ou** la présence de `config.parObjectifs` rouvre sur le
+>   bon panneau. Sans elle, une pratique par objectifs s'ouvrait sur Portfolio
+>   et la première sauvegarde effaçait sa configuration ;
+> - le mode se pose **hors** du garde `if (config.portfolio)` — cas exact d'une
+>   pratique par objectifs, qui n'a pas de bloc portfolio ;
+> - retiré au passage : le bloc de rafraîchissement « interface STD » de
+>   `pratiques-bibliotheque.js` (six `getElementById` sur des ids `v2-*`
+>   absents du DOM — du code qui ne pouvait ni agir ni échouer).
+>
+> ⮕ **Ce qui reste dû, et qui appartient à G2-b** : faire lire `methodeSelection`
+> au moteur pour que la projection disparaisse. C'est un changement du **contrat
+> de calcul**, pas un retrait d'UI — même lot que les autres lecteurs legacy du
+> snapshot `modalitesEvaluation`.
+>
+> Sentinelle : `tests/unit/sentinelle-phase-D-variante-calcul-434.test.js`,
+> 13 cas, **12 break-tests ROUGE**. L'un des cas **évalue la vraie fonction de
+> projection** extraite du source, plutôt que de redécrire une table parallèle
+> qui pourrait diverger.
+
+#### Prescription d'origine (24 mai 2026), conservée
 
 **Décision Grégoire** : retrait pur (option a).
 
@@ -191,7 +233,7 @@ Quand `productionPortfolio === null` ET `productionTerminale === null` (cas h202
   Verrouillées depuis par `tests/unit/sentinelle-note-finale-portfolio-BC.test.js`
   (11 cas, 11 break-tests ROUGE), qui couvre aussi les décisions §4-1, §4-2 et §4-3.
 - **Phases D et G2-b** : **réellement en attente** (vérifié le 9 août).
-  - **Phase D** — le bloc `mat-variante-pan-standards` est toujours dans
+  - ~~**Phase D**~~ **LIVRÉE le 9 août 2026** (#434). *État constaté avant travaux, conservé :* le bloc `mat-variante-pan-standards` était toujours dans
     `index.html:5524`, son sélecteur `mat-variante-calcul` et le handler
     `changerVariantePANStandardsMat` aussi. ⚠ **La question ouverte est réelle et
     bloquante** : ce handler est le **seul chemin** qui révèle le panneau
@@ -218,7 +260,7 @@ Quand `productionPortfolio === null` ET `productionTerminale === null` (cas h202
 - ~~#3 — Appliquer le modèle aux notes réelles et valider~~ → **porte terrain**, toujours due
 - ~~#5 — Phase B~~ → **LIVRÉE** (constatée au code le 9 août)
 - ~~#6 — Phase C~~ → **LIVRÉE** (constatée au code le 9 août)
-- **#7 — Phase D — Retrait du champ legacy `mat-variante-calcul`** → **seule phase réellement ouverte**, avec sa question de migration (voir §5)
+- ~~#7 — Phase D~~ → **LIVRÉE le 9 août 2026** (#434, 1.62.0) — voir le §3 pour ce qui a rendu le « retrait pur » impossible
 - ~~#8 — Phase E~~ → **LIVRÉE** le 24 mai
 - **G2-b** — migrer les ~30 lecteurs legacy de `configPAN.portfolio`
 

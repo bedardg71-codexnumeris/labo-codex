@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            version: '1.62',
+            couleur: 'orange',
+            titre: 'Une seule question sur la construction de la note',
+            items: [
+                'Dans les réglages d’une pratique PAN-Standards, le champ « Comment construis-tu la note finale ? » disparaît : il posait la même question que « Mode de sélection », avec d’autres mots, et les deux réponses pouvaient se contredire. Une seule commande reste.',
+                'Correction : le mode « Par objectifs (4 modes de calcul) » est enfin atteignable. Il figurait au menu, mais son panneau de réglages ne s’ouvrait jamais — il se choisit maintenant dans le Mode de sélection et s’affiche pour de bon.',
+                'Chaque mode de sélection affiche une courte explication de ce qu’il fait.',
+                'Les pratiques déjà enregistrées en « Par objectifs » se rouvrent sur le bon panneau, avec leur configuration intacte.'
+            ]
+        },
+        {
             version: '1.61',
             couleur: 'bleu',
             titre: 'L’onglet s’appelle « Carte d’alignement »',
