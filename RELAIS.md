@@ -11,13 +11,25 @@
 
 | | |
 |---|---|
-| **Branche à ouvrir** | `main` |
-| **Version** | **1.60.0** — build `0808-1836` |
-| **Travail en avance sur `main`** | **aucun** |
-| **Dernière mise à jour** | 8 août 2026, en après-midi (portage #424 livré) |
+| **Branche à ouvrir** | ⚠ **`claude/incomplete-work-plans-h1nimp`** |
+| **Version** | **1.61.0** — build `0809-0733` |
+| **Travail en avance sur `main`** | **2 commits** — #426 (l'onglet devient « Carte d'alignement ») + #421 (conformité du manuel, 4 surfaces) + le §4ter de `ETAT-PROJET.md` (vérification au code des 43 plans non tranchés) |
+| **Dernière mise à jour** | 9 août 2026 |
 
-⮕ Le détail des priorités, de la prémisse chiffrée et des décisions en attente
-est au **§3 de `SESSION.md`**. **Le portage des exports (#424) et l'export personnalisé (#431) sont LIVRÉS et fusionnés** ; prochaines priorités au §3 de `SESSION.md` (portes terrain, puis #421+#426).
+⚠ **NE PAS ouvrir le conteneur sur `main`** : il est à **1.60.0**, soit une
+version en arrière. Le §3 de `SESSION.md` sur `main` est celui du 8 août et
+**ne connaît pas** cette branche.
+
+▣ **Pourquoi ce fichier pointe ailleurs que `main`, alors que la règle dit de
+fusionner à chaque session.** La session du 9 août tournait dans un conteneur
+**contraint à sa branche de développement** : elle ne pouvait ni fusionner ni
+pousser `RELAIS.md` seul sur `main`. C'est **exactement la boucle décrite plus
+bas** — la consigne qui dit où vit le travail vit sur la branche où il vit.
+La différence : cette fois c'est **écrit et assumé**, pas subi.
+
+⮕ **Premier geste de Grégoire : fusionner cette branche dans `main`**, puis
+repasser ce tableau à « aucun ». Le détail des priorités est au **§3 de
+`SESSION.md`** (version de la branche).
 
 ---
 

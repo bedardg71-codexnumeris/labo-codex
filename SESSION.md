@@ -7,6 +7,37 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 9 AOÛT 2026 (conteneur cloud, branche `claude/incomplete-work-plans-h1nimp`).
+     ÉTAT FACTUEL AU DÉPART : `origin/main` = `83ee41d3`, **1.60.0** (build 0808-1836), Vitest **1960/1960** (227 fichiers), arbre propre, dernier ID BACKLOG **#433**. Prémisse du §3 vérifiée : **zéro écart**.
+     ⚠ **PIÈGE D'ENVIRONNEMENT, à connaître pour les prochains conteneurs** : le clone était **SHALLOW**. Avant `git fetch --unshallow`, `main` local pointait au **10 juillet** et `git rev-list --count main...HEAD` affichait une divergence de **83/57 commits** — entièrement fausse. Après unshallow : `0/0`. Le §3 le disait ; le vérifier avant de conclure quoi que ce soit sur une divergence.
+     ⚠ **Playwright WebKit NON EXÉCUTABLE ici** (`webkit-2287` absent de `/opt/pw-browsers`). Ce n'est pas une régression — CI à la PR. Ne pas le lire comme 68 tests rouges.
+
+     ✅ LIVRÉ — **#426 + #421 (1.61.0)**. L'onglet « Alignement pédagogique » devient **« Carte d'alignement »**, et le manuel dit enfin le vrai.
+     ▣ **#426 — sept surfaces, et un révélateur.** `config.js` (zone protégée, autorisation du 8 août ; `noms_stables.json` protège le NOM `configurationsOnglets`, pas les libellés) · titre de la sous-section · accordéon d'aide · popup des verbes actifs · glossaire (6 `voir:`) · étape 5 du tour guidé + `TOUR_TITRE_COURT` · `SKILL_Alignement.md`.
+        ⮕ **Le renommage a servi de révélateur** : le glossaire renvoyait à « Planification > Organisateur » (page supprimée le 8 août) ET à « Planification > Alignement » — or la section « Planification » n'existe plus depuis la **réorganisation du 3 avril 2026**. Trois chemins de navigation faux depuis quatre mois, que personne n'avait vus parce que personne ne les avait suivis.
+        ⮕ **Distinction tenue, et VERROUILLÉE PAR UN TEST** : le CONCEPT « alignement pédagogique » n'est PAS renommé — seul l'ONGLET l'est. Sans l'assertion `terme: 'Alignement pédagogique'` toujours présent, un test qui ne vérifie que la disparition du libellé autoriserait une purge trop large, et personne ne la verrait.
+     ▣ **#421 — quatre surfaces, l'audit en annonçait trois.**
+        1. **Le guide intégré** gagne une page, « Ce que la leçon vise » (8 → 9). Il faisait construire la carte de bout en bout **sans jamais nommer l'objectif de leçon** — celui-là même que Grégoire ne trouvait pas (METHODE §4.1 bis, 6 août). Le badge grisé avait réglé l'affordance le 8 août ; le manuel ne l'avait pas suivi. **Corrigé au passage : la page 1 annonçait 7 étapes pour 8 pages.**
+        2. **Les infobulles** : 5 clés mortes retirées (`planif-alignement`/`planif-sous-nav` doublons de `nav-conception-alignement` ; `planif-barre-outils`/`planif-filtres` décrivaient les filtres du canevas retirés par #420 ; `nav-planification` nommait la section disparue en avril), 6 textes réécrits, 1 ajoutée — la zone **Enseignement explicite** était la seule des six sans infobulle depuis #422.
+        3. **`METHODE-ALIGNEMENT.md` §4**, relevé **26 versions en arrière** (6 août / 1.31.22). Table des types portée à 18 en six zones ; §4.1 bis marqué RÉSOLU (diagnostic **conservé tel qu'écrit** — c'est lui qui a produit le correctif) ; **§4.2 FERMÉ** : les deux défauts de `planification_seances` sont corrigés (namespacée + clé composite `<carteId>::<leconId>`), l'avertissement « ne pas saisir 30 objectifs avant réparation » est levé.
+        4. **Non prévue** — l'accordéon d'aide annonçait des préréglages de zoom 25/50/75/100 % qui n'existent plus, et ignorait l'Inspecteur, la corbeille, le plein écran et l'export du plan.
+     ▣ **UNE ERREUR ATTRAPÉE EN COURS DE ROUTE, à retenir.** J'avais écrit que la durée et les objectifs de leçon vivaient dans l'Inspecteur. Le code dit autre chose : la **durée** est dans l'en-tête du nœud (décision Grégoire du 8 août : « l'Inspecteur doit ajouter de l'information, pas redoubler ce que la carte montre déjà ») et les **objectifs** sont sur le bloc leçon, derrière le badge 🎯. Écrire un manuel de mémoire reproduit exactement le défaut qu'on corrige.
+     ▣ **SENTINELLE** : `tests/unit/sentinelle-carte-alignement-421-426.test.js`, 14 cas, **10 break-tests ROUGE**. Deux assertions se **CALCULENT** au lieu de recopier un chiffre — le « N étapes » de la page 1 et le compte de pages de l'infobulle sont dérivés du nombre réel de pages. C'est l'erreur exacte qu'on corrigeait : elle ne peut plus revenir en silence. Vitest **1974/1974** (228 fichiers).
+
+     ✅ LIVRÉ — **VÉRIFICATION AU CODE DES 43 PLANS NON TRANCHÉS** (nouveau **§4ter de `ETAT-PROJET.md`**).
+     ▣ Le §4bis du 8 août classait par **nature** ; il nommait 25 documents et laissait 43 sans verdict de complétion. Verdict : **15 terminés** (archivables), **6 documents de passation consommés**, **8 partiels**, **4 jamais amorcés**, **4 vivants**.
+     ⚠⚠ **DEUX CONSTATS QUI CHANGENT LA LECTURE DU RESTE** :
+        1. **`Plan Accompagnement/` n'a JAMAIS été audité** — 14 documents, dont au moins trois désignent du travail non fait (`PLAN_guide_PAN_refonte_RREC`, `PLAN_decouvrabilite_guides`, `SPEC_mini-guide_cours_balises`). Le compte de plans ouverts du projet est **supérieur** à ce que le §4bis laissait croire.
+        2. **Les phases B et C de `PLAN-refonte-note-finale-portfolio.md` sont DÉBLOQUÉES** : leur préalable déclaré était la Phase E = #328, close. Refonte de la section Note finale du PDF de rétroaction, puis cohérence du panneau dans le profil.
+     ▣ **Le chantier « guides » est à 5 sur 7** : `solo`/`acp`/`rai`/`som`/`pan` sont au code ; **« Enseignement explicite » et `pan-rrec` n'ont jamais été écrits**.
+     ▣ **#328 recoupé et clos** — sentinelles L2-b2 et L2-c au code. ⮕ **Et la désync n'était pas où `ETAT-PROJET.md` la plaçait** : son §2 et son §5.3 annonçaient une case BACKLOG non cochée, **fausse depuis le 3 juillet**. Le retard était dans le document qui surveille les retards des autres. Corrigé.
+     ▣ **Méthode, et sa limite déclarée** : la preuve relevée est la **présence** d'un module, d'une sentinelle ou d'une clé — elle établit qu'un chantier a été mené, pas qu'il l'a été *complètement*. `PLAN-briqueA-ecrans-analyse-namespacing.md` est le cas le plus fragile, classé terminé avec #358 sans relecture site par site : il est nommé au §4ter pour être contestable.
+
+     ⮕ **QUEUES OUVERTES** : #425 · #418 · #427 (septembre) · #430/#428 (rentrée) · #429 clos · **portes terrain 1.57→1.61 TOUJOURS DUES** (dont l'iPad, et maintenant le nouveau libellé d'onglet + la page 9 du guide).
+     ⮕ **DÉCISION EN ATTENTE DE GRÉGOIRE** : `docs/refonte-textes/infobulles-T9/T10` sont les specs datées du 19 avril dont `accompagnement-contenu-hover.js` se dit encore « la source ». T10 documente en entier une page supprimée. Les archiver (ce sont des traces datées — les réécrire falsifierait un dossier), ou corriger l'en-tête du JS pour dire que le code fait foi. **Non tranché seul.**
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 8 AOÛT 2026, SOIR (suite) — CORBEILLE DE LA PALETTE. ⮕⮕ LIRE EN PREMIER À LA REPRISE.
      ÉTAT FACTUEL : **1.60.0** (build 0808-1836), fusionnée `main`. Vitest **1960/1960** (227 fichiers). Dernier ID BACKLOG : **#433**.
 
@@ -5707,6 +5738,77 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
 
 ## §3 — Consigne de démarrage pour la prochaine session
+
+> **Réécrite le 9 août 2026.** #426 et #421 sont LIVRÉS ; l'onglet s'appelle
+> « Carte d'alignement ». Le §4ter de `ETAT-PROJET.md` est neuf : il tranche
+> l'état des 43 plans que le §4bis avait laissés sans verdict.
+
+### Prémisse à vérifier au rituel de début (§1)
+
+| Point | Valeur attendue |
+|---|---|
+| Branche | ⚠ **`claude/incomplete-work-plans-h1nimp`** — le travail du 9 août **n'est PAS sur `main`** (voir `RELAIS.md`) |
+| Version | `{"build":"0809-0733","beta":"1.61.0"}` |
+| Vitest | **1974/1974** (228 fichiers) |
+| Playwright WebKit | non exécutable en conteneur → CI à la PR |
+| Dernier ID BACKLOG | **#433** (inchangé — aucun item neuf ouvert le 9 août) |
+| Arbre | propre |
+
+⚠ **Le clone du conteneur est SHALLOW.** `git fetch --unshallow` AVANT toute
+comparaison. Sans ça, `main` local paraît vieux de plusieurs semaines et
+`git rev-list --count main...HEAD` annonce une divergence **entièrement
+fictive** — constaté le 9 août (83/57 commits, réel : 0/0).
+
+### Priorité 0 — LA FUSION VERS `main` (Grégoire, 2 min)
+
+La session du 9 août tournait dans un conteneur **contraint à sa branche**.
+La règle de relais de `CLAUDE.md` (« on fusionne à la fin de CHAQUE session »)
+n'a donc pas pu être appliquée par la session elle-même. `RELAIS.md` a été
+rempli sur la branche — mais **il ne peut pas être poussé sur `main` d'ici**,
+c'est-à-dire à l'endroit exact où le rituel du 8 août dit qu'il doit vivre.
+⮕ **C'est la limite structurelle du 8 août qui se rejoue.** Fusionner d'abord.
+
+### Priorité 1 — les PORTES TERRAIN, toujours dues (Grégoire, ~20 min)
+
+Celles de 1.57 → 1.60 n'ont jamais été passées, et 1.61 en ajoute deux qui se
+voient tout de suite : le **nouveau libellé d'onglet** (« Carte d'alignement »
+dans la sous-nav, dans le titre de page et dans le tour guidé) et la **page 9
+du guide** (« Ce que la leçon vise »). Vérifier aussi que le badge 🎯 grisé se
+voit au doigt sur iPad — le guide l'annonce désormais comme le geste d'entrée.
+
+### Priorités suivantes, dans l'ordre — ce que le §4ter a débloqué
+
+- **`PLAN-refonte-note-finale-portfolio.md`, phases B et C** — le meilleur
+  rapport valeur/risque du moment : elles étaient bloquées par la Phase E
+  (= #328), et #328 est clos. B = refonte de la section Note finale du PDF de
+  rétroaction ; C = cohérence du panneau Note finale dans le profil.
+- **Auditer `Plan Accompagnement/`** (14 documents, jamais passés au crible) —
+  une demi-heure, même méthode que le §4ter. Trois y désignent déjà du travail
+  non fait.
+- **#425** (intégration des productions, D → C → B → A) · **#418** (`db-ready`
+  jamais émis si IndexedDB indisponible) · **#427** (Cloudflare, septembre) ·
+  **#428 + #430** (dettes datées de la rentrée, à retirer ENSEMBLE).
+- **Décision à trancher** : `docs/refonte-textes/infobulles-T9/T10` — archiver
+  ces specs datées, ou corriger l'en-tête de `accompagnement-contenu-hover.js`
+  pour dire que le code fait foi. T10 documente une page supprimée.
+
+### Rappel de méthode — ce que le 9 août a confirmé
+
+1. **Un renommage est un révélateur.** Suivre les chemins de navigation cités
+   en prose a montré trois renvois vers une section disparue **le 3 avril** —
+   personne ne les avait vus parce que personne ne les avait suivis.
+2. **Une assertion qui recopie un chiffre ne protège rien.** Le guide annonçait
+   « 7 étapes » pour 8 pages. La sentinelle **calcule** le compte attendu
+   depuis le nombre réel de pages : l'erreur ne peut plus revenir en silence.
+3. **Écrire un manuel de mémoire reproduit le défaut qu'on corrige.** Deux
+   affirmations fausses posées puis retirées le même jour (la durée et les
+   objectifs de leçon placés dans l'Inspecteur — le code dit l'en-tête du nœud
+   et le badge 🎯).
+4. **Un document qui surveille les désyncs en produit aussi.** `ETAT-PROJET.md`
+   annonçait une case BACKLOG non cochée pour #328 — fausse depuis cinq
+   semaines.
+
+## §3ter — Consigne du 8 août (archivée le 9 août — #424/#431/#432/#433 livrés, #426 et #421 livrés depuis)
 
 > **Réécrite le 8 août 2026 en après-midi, APRÈS la fusion de 1.57.0 vers
 > `main`.** Le portage des exports (#424, lots A→G) est LIVRÉ ; la page
