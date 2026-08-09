@@ -630,6 +630,7 @@ function obtenirDonneesSelonMode(cle) {
         const coursActif = obtenirContexteCoursActif();
         if (coursActif && coursActif.id) {
             const totalAvant = donnees.length;
+            const avantFiltre = donnees;
             // 🆕 BETA 95.3 : Mode cours = tous les groupes fusionnés
             const estModeCours = coursActif._modeCours || coursActif.groupe === null;
 
@@ -657,8 +658,31 @@ function obtenirDonneesSelonMode(cle) {
                 }
                 return item.coursId === coursActif.id;
             });
-            if (donnees.length !== totalAvant) {
-                const modeLabel = estModeCours ? 'tous groupes' : `groupe ${coursActif.groupe}`;
+            // #154 (9 août 2026) — un filtre qui avale TOUT doit le dire.
+            // Cas réel : les 11 productions H26 portaient le coursId d'AVANT
+            // la migration des ids de cours (COURS1766455789356) ; ce filtre
+            // rendait 0 partout — « Aucune production configurée », indice C
+            // à 0 % — sans une ligne de console. Si plus rien ne passe et
+            // qu'AUCUN coursId écarté n'existe dans le magasin `cours`, ce
+            // ne sont pas des données d'un autre cours : c'est un modèle
+            // ANTÉRIEUR (résurgence #346 — copie de navigateur jamais
+            // migrée, import ancien). On le dit une fois par clé et par
+            // session ; le multi-cours légitime (ids écartés présents au
+            // magasin) reste silencieux.
+            if (donnees.length === 0 && totalAvant > 0) {
+                window._avertis154 = window._avertis154 || {};
+                if (!window._avertis154[cleBase]) {
+                    const idsEcartes = [...new Set(avantFiltre.map(it => it && it.coursId).filter(Boolean))];
+                    const idsMagasin = new Set((db.getSync('cours', []) || []).map(c => c && c.id));
+                    if (idsEcartes.length > 0 && idsEcartes.every(id => !idsMagasin.has(id))) {
+                        window._avertis154[cleBase] = true;
+                        console.warn('[#154] ' + cleEffective + ' : ' + totalAvant +
+                            ' item(s) écartés par le filtre de cours — coursId inconnus du magasin (' +
+                            idsEcartes.join(', ') + ') vs cours actif « ' + coursActif.id + ' ». ' +
+                            'Désappariement probable (famille #346) : réparer avec ' +
+                            'scripts/reparation-154-coursid-productions.js');
+                    }
+                }
             }
         }
     }
