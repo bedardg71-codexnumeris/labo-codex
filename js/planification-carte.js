@@ -1964,30 +1964,13 @@ function creerNoeud(type, x, y) {
     el.id = id;
     el.style.left = x + 'px';
     el.style.top = y + 'px';
-    el.style.borderColor = estConteneur ? '' : obtenirCouleurNoeud(donnees);
+    // La bordure était laissée VIDE sur un conteneur, alors que
+    // `reconstruireDOM` la pose : une Leçon neuve n'avait donc pas son liseré
+    // mauve avant le rechargement suivant. Même divergence que le contenu,
+    // même correctif — l'état rendu au rechargement fait foi.
+    el.style.borderColor = obtenirCouleurNoeud(donnees);
 
-    if (estConteneur) {
-        el.innerHTML =
-            '<div class="planif-noeud-entete">' +
-                '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(donnees) + '">' + obtenirLabelNoeud(donnees) + '</span>' +
-            '</div>' +
-            '<div class="planif-noeud-titre" contenteditable="true"></div>' +
-            '<div class="planif-noeud-zone planif-vide"></div>' +
-            '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
-            '<div class="planif-noeud-port planif-port-gauche" data-dir="gauche"></div>' +
-            '<div class="planif-noeud-port planif-port-bas" data-dir="bas"></div>' +
-            '<div class="planif-noeud-port planif-port-haut" data-dir="haut"></div>';
-    } else {
-        el.innerHTML =
-            '<div class="planif-noeud-entete">' +
-                '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(donnees) + '">' + obtenirLabelNoeud(donnees) + '</span>' +
-            '</div>' +
-            '<div class="planif-noeud-titre" contenteditable="true"></div>' +
-            '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
-            '<div class="planif-noeud-port planif-port-gauche" data-dir="gauche"></div>' +
-            '<div class="planif-noeud-port planif-port-bas" data-dir="bas"></div>' +
-            '<div class="planif-noeud-port planif-port-haut" data-dir="haut"></div>';
-    }
+    el.innerHTML = contenuNoeudHTML(donnees);
 
     attacherEvenements(el, donnees);
     coucheNoeuds.appendChild(el);
@@ -2798,15 +2781,7 @@ function clonerNoeud(noeudId) {
     el.style.top = donnees.y + 'px';
     el.style.borderColor = obtenirCouleurNoeud(donnees);
 
-    el.innerHTML =
-        '<div class="planif-noeud-entete">' +
-            '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(donnees) + '">' + obtenirLabelNoeud(donnees) + '</span>' +
-        '</div>' +
-        '<div class="planif-noeud-titre" contenteditable="true">' + echapperHtml(donnees.titre || '') + '</div>' +
-        '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
-        '<div class="planif-noeud-port planif-port-gauche" data-dir="gauche"></div>' +
-        '<div class="planif-noeud-port planif-port-bas" data-dir="bas"></div>' +
-        '<div class="planif-noeud-port planif-port-haut" data-dir="haut"></div>';
+    el.innerHTML = contenuNoeudHTML(donnees);
 
     attacherEvenements(el, donnees);
     coucheNoeuds.appendChild(el);
@@ -3731,6 +3706,231 @@ function enregistrerPourUndo() {
     pileRedo = [];
 }
 
+/**
+ * Coller dans un champ de la carte, c'est coller du TEXTE (9 août 2026).
+ *
+ * Constat terrain de Grégoire, capture à l'appui : un titre collé depuis une
+ * autre application arrive avec SA typographie — corps, graisse, police — et
+ * ne s'aligne pas sur la carte. Le défaut est natif : dans un
+ * `contenteditable`, coller insère le `text/html` du presse-papiers, balises
+ * et styles en ligne compris.
+ *
+ * ▣ Ce que ça cassait vraiment, au-delà du coup d'œil. La DONNÉE, elle, est
+ * saine — `donnees.titre = titreEl.textContent` ne retient que le texte, et
+ * un rechargement rendait le titre propre. Mais entre les deux, le DOM porte
+ * un balisage étranger : c'est lui que `reLayoutConteneur` mesure pour
+ * décider de la hauteur du bloc et de la descente de ses enfants. Un titre
+ * collé en corps 24 poussait donc la disposition, jusqu'au prochain
+ * rechargement, sans qu'aucune donnée ne soit fautive.
+ *
+ * ⮕ `execCommand('insertText')` est déprécié, et c'est pourtant le bon outil :
+ * c'est le seul qui insère dans la pile d'annulation NATIVE du champ. Une
+ * insertion par `Range` obligerait ⌘Z à défaire autre chose que ce que
+ * l'utilisateur vient de faire. Le repli manuel n'existe que pour les moteurs
+ * qui refuseraient la commande — mieux vaut une annulation imparfaite qu'un
+ * collage muet.
+ *
+ * Les sauts de ligne deviennent des espaces : les deux champs concernés sont
+ * des libellés d'UNE ligne, tous deux interceptent déjà la touche Entrée
+ * (le titre sort du champ, un objectif en ouvre un autre). Un collage
+ * multiligne qui poserait N objectifs d'un coup serait une fonction en soi,
+ * pas un effet de bord du presse-papiers.
+ */
+function collerEnTexteBrut(champ) {
+    if (!champ) return;
+    champ.addEventListener('paste', function(e) {
+        var presse = e.clipboardData || (typeof window !== 'undefined' && window.clipboardData);
+        if (!presse) return;
+        e.preventDefault();
+        var texte = String(presse.getData('text/plain') || '').replace(/\s*\r?\n\s*/g, ' ').trim();
+        if (!texte) return;
+        var insere = false;
+        try {
+            insere = document.execCommand('insertText', false, texte);
+        } catch (err) {
+            insere = false;
+        }
+        if (insere) return;
+        var sel = typeof window !== 'undefined' && window.getSelection && window.getSelection();
+        if (!sel || !sel.rangeCount) return;
+        var plage = sel.getRangeAt(0);
+        plage.deleteContents();
+        var noeudTexte = document.createTextNode(texte);
+        plage.insertNode(noeudTexte);
+        plage.setStartAfter(noeudTexte);
+        plage.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(plage);
+        // Le repli ne déclenche pas `input` tout seul : sans ça, le texte
+        // serait à l'écran mais jamais enregistré.
+        champ.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+}
+
+/**
+ * Une commande de ligne d'objectif. Quatre par ligne depuis le 9 août 2026 :
+ * ▲ ▼ pour l'ordre, + − pour la structure.
+ *
+ * `inerte` rend le bouton PRÉSENT mais muet (première ligne qui ne peut pas
+ * monter, dernière qui ne peut pas descendre, ligne d'accueil pas encore
+ * persistée). Présent et non retiré : quatre lignes qui n'ont pas le même
+ * nombre de commandes ne s'alignent plus, et la largeur du texte se met à
+ * danser d'une ligne à l'autre. Muet et non désactivé : `aria-hidden` le
+ * retire du parcours clavier et de la synthèse vocale, où un bouton qui ne
+ * fait rien n'a rien à annoncer.
+ */
+function commandeObjectifHTML(classe, rang, glyphe, libelle, inerte) {
+    if (inerte) {
+        return '<span class="planif-obj-btn ' + classe + ' planif-obj-btn--inerte"' +
+               ' aria-hidden="true">' + glyphe + '</span>';
+    }
+    return '<span class="planif-obj-btn ' + classe + '" data-obj-rang="' + rang + '"' +
+           ' role="button" tabindex="0" aria-label="' + libelle + '"' +
+           ' title="' + libelle + '">' + glyphe + '</span>';
+}
+
+/** Le groupe complet des quatre commandes, dans l'ordre ordre → structure. */
+function commandesObjectifHTML(rang, premier, dernier) {
+    return commandeObjectifHTML('planif-obj-monter', rang, '▲',
+               'Déplacer cet objectif vers le haut', premier) +
+           commandeObjectifHTML('planif-obj-descendre', rang, '▼',
+               'Déplacer cet objectif vers le bas', dernier) +
+           commandeObjectifHTML('planif-obj-ajouter', rang, '+',
+               'Ajouter un objectif après celui-ci', false) +
+           commandeObjectifHTML('planif-obj-retirer', rang, '−',
+               'Retirer cet objectif', false);
+}
+
+/** Le bloc dépliable des objectifs d'une leçon. '' si replié ou pas une leçon. */
+function objectifsLeconHTML(n) {
+    if (n.type !== 'lecon' || !objectifEstDeplie(n)) return '';
+    var objs = objectifsDeLecon(n);
+    var html = '<div class="planif-noeud-objectifs">';
+    if (objs.length === 0) {
+        // Liste vide : une ligne à remplir, sans commandes — il n'y a encore
+        // rien à retirer, ni après quoi insérer, ni quoi réordonner.
+        html += '<div class="planif-noeud-objectif-ligne">' +
+                '<div class="planif-noeud-objectif" contenteditable="true" data-obj-rang="0"' +
+                ' data-placeholder="Sera en mesure de…"></div>' +
+                '</div>';
+        return html + '</div>';
+    }
+    var rangAccueil = (_ajoutObjectif && _ajoutObjectif.noeudId === n.id)
+        ? _ajoutObjectif.rang : -1;
+    // Nombre de lignes RENDUES (la ligne d'accueil en est une) : c'est la
+    // borne qui dit quelle ligne ne peut plus descendre.
+    var nbLignes = objs.length + (rangAccueil >= 0 ? 1 : 0);
+    var rangRendu = 0;
+    for (var io_ = 0; io_ <= objs.length; io_++) {
+        if (io_ === rangAccueil) {
+            // La ligne d'accueil porte les MÊMES commandes que les autres :
+            // sans elles, la ligne qu'on vient d'ajouter serait la seule sans
+            // + / − (constaté en terrain le 6 août). Ses flèches sont inertes :
+            // elle n'est pas encore un objectif, il n'y a rien à déplacer.
+            html += '<div class="planif-noeud-objectif-ligne">' +
+                '<div class="planif-noeud-objectif" contenteditable="true"' +
+                ' data-obj-rang="' + rangRendu + '" data-accueil="1"' +
+                ' data-placeholder="Sera en mesure de…"></div>' +
+                commandesObjectifHTML(rangRendu, true, true) +
+                '</div>';
+            rangRendu++;
+        }
+        if (io_ === objs.length) break;
+        html +=
+            '<div class="planif-noeud-objectif-ligne">' +
+                pastilleObjectifHTML(n, objs[io_].id) +
+                // data-obj-id : l'identité voyage AVEC la ligne.
+                // Sans lui, appliquerObjectifs() doit la deviner
+                // au rang — et se trompe dès qu'on insère ou
+                // retire au milieu (cf. son en-tête, #403).
+                '<div class="planif-noeud-objectif" contenteditable="true" data-obj-rang="' + rangRendu + '"' +
+                ' data-obj-id="' + echapperHtml(objs[io_].id) + '">' +
+                    echapperHtml(objs[io_].texte) +
+                '</div>' +
+                commandesObjectifHTML(rangRendu, rangRendu === 0, rangRendu === nbLignes - 1) +
+            '</div>';
+        rangRendu++;
+    }
+    return html + '</div>';
+}
+
+/**
+ * LE contenu d'un nœud — chemin de rendu UNIQUE (9 août 2026).
+ *
+ * ⚠ POURQUOI CETTE FONCTION EXISTE. Le contenu d'un nœud se construisait à
+ * TROIS endroits : `creerNoeud` (glisser depuis la palette), le clone
+ * Alt+glisser, et `reconstruireDOM` (rechargement de la carte). Seul le
+ * troisième était complet. Un bloc fraîchement posé sortait donc SANS son
+ * champ de durée et SANS sa poignée de redimensionnement ; un conteneur neuf,
+ * sans son compteur Σ, son sélecteur de semaine ni son badge 🎯. Tout
+ * réapparaissait au rechargement suivant, quand `reconstruireDOM` reprenait la
+ * main — d'où le symptôme rapporté en terrain : « la durée n'est pas TOUJOURS
+ * visible sur les feuilles Exposé ».
+ *
+ * ⮕ Le défaut n'était pas dans le champ de durée : il était dans la
+ * duplication. Trois copies d'un même rendu ne peuvent que diverger, et
+ * elles avaient divergé à CHAQUE enrichissement de l'en-tête depuis (la durée,
+ * la semaine, les objectifs, la poignée — quatre fois le même oubli, au même
+ * endroit). Les trois appelants passent désormais ici : un contrôle ajouté à
+ * l'en-tête est visible par construction, quel que soit le chemin qui a créé
+ * le nœud. Sentinelle : `sentinelle-carte-rendu-unique-437`.
+ */
+function contenuNoeudHTML(n) {
+    var estConteneur = !!(TYPES[n.type] && TYPES[n.type].conteneur);
+    var enTete =
+        '<div class="planif-noeud-entete">' +
+            '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(n) + '">' + obtenirLabelNoeud(n) + '</span>' +
+            (estConteneur
+                ? compteurDureeHTML(n) + selecteurSemaineHTML(n) + badgeObjectifHTML(n)
+                : dureeControleHTML(n)) +
+        '</div>';
+    var ports =
+        '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
+        '<div class="planif-noeud-port planif-port-gauche" data-dir="gauche"></div>' +
+        '<div class="planif-noeud-port planif-port-bas" data-dir="bas"></div>' +
+        '<div class="planif-noeud-port planif-port-haut" data-dir="haut"></div>';
+
+    if (estConteneur) {
+        var nbEnfants = (n.enfants || []).length;
+        return enTete +
+            objectifsLeconHTML(n) +
+            '<div class="planif-noeud-titre" contenteditable="true">' + echapperHtml(n.titre || '') + '</div>' +
+            '<div class="planif-noeud-zone ' + (nbEnfants === 0 ? 'planif-vide' : '') + '">' +
+                (nbEnfants > 0 ? nbEnfants + ' élément' + (nbEnfants > 1 ? 's' : '') : '') +
+            '</div>' +
+            ports +
+            // Option B (6 août) : sur un conteneur, la poignée ne règle que
+            // la LARGEUR — une largeur plancher. La hauteur reste calculée
+            // depuis les enfants, donc aucun geste n'est jamais défait.
+            '<div class="planif-noeud-poignee planif-noeud-poignee--largeur"' +
+            ' role="separator" aria-label="Ajuster la largeur de ce bloc"></div>';
+    }
+    return enTete +
+        '<div class="planif-noeud-titre" contenteditable="true">' + echapperHtml(n.titre || '') + '</div>' +
+        ports +
+        // Poignée de redimensionnement — FEUILLES SEULEMENT (option A,
+        // décision du 6 août). Les conteneurs sont dimensionnés par
+        // reLayoutConteneur à partir de leurs enfants : une taille posée
+        // à la main y serait écrasée au prochain ajout.
+        '<div class="planif-noeud-poignee" role="separator" aria-label="Redimensionner ce bloc"></div>';
+}
+
+/**
+ * Badge 🎯 des objectifs — leçons uniquement.
+ * Grisé, il signale qu'un objectif PEUT être posé : l'ancien badge
+ * n'apparaissait qu'une fois l'objectif saisi, la fonction était donc
+ * indécouvrable (friction F1).
+ */
+function badgeObjectifHTML(n) {
+    if (n.type !== 'lecon') return '';
+    var objs = objectifsDeLecon(n);
+    var deplie = objectifEstDeplie(n);
+    return '<span class="planif-badge-objectif' + (objs.length ? '' : ' planif-badge-objectif--vide') + '"' +
+           ' role="button" tabindex="0" aria-expanded="' + (deplie ? 'true' : 'false') + '"' +
+           ' title="' + (objs.length ? objs.length + ' objectif' + (objs.length > 1 ? 's' : '') : 'Aucun objectif') +
+           ' — cliquer pour ' + (deplie ? 'replier' : 'déplier') + '">🎯</span>';
+}
+
 function reconstruireDOM() {
     // Sans canevas monté (module pas encore initialisé, ou bac à sable de
     // test), il n'y a rien à reconstruire — les DONNÉES restent la vérité,
@@ -3777,120 +3977,7 @@ function reconstruireDOM() {
             if (n.metadata.hauteur) el.style.height = n.metadata.hauteur + 'px';
         }
 
-        if (estConteneur) {
-            var nbEnfants = (n.enfants || []).length;
-            // Le\u00e7on : en-t\u00eate \u00e0 deux sections \u2014 identification (\u00ab Le\u00e7on \u00bb +
-            // titre) puis objectif d\u00e9pliable. Le badge \ud83c\udfaf est la bascule ;
-            // gris\u00e9, il signale qu'un objectif PEUT \u00eatre pos\u00e9 (l'ancien badge
-            // n'apparaissait qu'une fois l'objectif saisi \u2014 la fonction \u00e9tait
-            // donc ind\u00e9couvrable).
-            // En-t\u00eate \u00e0 deux \u00e9tages : le TYPE du bloc (\u00ab Le\u00e7on \u00bb), puis LES
-            // objectifs \u2014 une le\u00e7on en a toujours plusieurs. Le TITRE, lui, est
-            // d\u00e9cal\u00e9 SOUS l'en-t\u00eate : c'est une information, pas l'identit\u00e9 du
-            // bloc. (Structure pr\u00e9cis\u00e9e par Gr\u00e9goire le 6 ao\u00fbt 2026.)
-            var estLecon = n.type === 'lecon';
-            var objs = estLecon ? objectifsDeLecon(n) : [];
-            var objDeplie = estLecon && objectifEstDeplie(n);
-            var htmlObjectifs = '';
-            if (objDeplie) {
-                htmlObjectifs = '<div class="planif-noeud-objectifs">';
-                if (objs.length === 0) {
-                    // Liste vide : une ligne \u00e0 remplir, sans boutons \u2014 il n'y a
-                    // encore rien \u00e0 retirer ni apr\u00e8s quoi ins\u00e9rer.
-                    htmlObjectifs += '<div class="planif-noeud-objectif-ligne">' +
-                                     '<div class="planif-noeud-objectif" contenteditable="true" data-obj-rang="0"' +
-                                     ' data-placeholder="Sera en mesure de\u2026"></div>' +
-                                     '</div>';
-                } else {
-                    var rangAccueil = (_ajoutObjectif && _ajoutObjectif.noeudId === n.id)
-                        ? _ajoutObjectif.rang : -1;
-                    var rangRendu = 0;
-                    for (var io_ = 0; io_ <= objs.length; io_++) {
-                        if (io_ === rangAccueil) {
-                            // La ligne d'accueil porte les M\u00caMES commandes que
-                            // les autres : sans elles, la ligne qu'on vient
-                            // d'ajouter serait la seule sans + / \u2212 (constat\u00e9 en
-                            // terrain le 6 ao\u00fbt).
-                            htmlObjectifs += '<div class="planif-noeud-objectif-ligne">' +
-                                '<div class="planif-noeud-objectif" contenteditable="true"' +
-                                ' data-obj-rang="' + rangRendu + '" data-accueil="1"' +
-                                ' data-placeholder="Sera en mesure de\u2026"></div>' +
-                                '<span class="planif-obj-btn planif-obj-ajouter" data-obj-rang="' + rangRendu + '"' +
-                                ' role="button" tabindex="0" aria-label="Ajouter un objectif apr\u00e8s celui-ci"' +
-                                ' title="Ajouter un objectif">+</span>' +
-                                '<span class="planif-obj-btn planif-obj-retirer" data-obj-rang="' + rangRendu + '"' +
-                                ' role="button" tabindex="0" aria-label="Retirer cet objectif"' +
-                                ' title="Retirer cet objectif">\u2212</span>' +
-                                '</div>';
-                            rangRendu++;
-                        }
-                        if (io_ === objs.length) break;
-                        htmlObjectifs +=
-                            '<div class="planif-noeud-objectif-ligne">' +
-                                pastilleObjectifHTML(n, objs[io_].id) +
-                                // data-obj-id : l'identité voyage AVEC la ligne.
-                                // Sans lui, appliquerObjectifs() doit la deviner
-                                // au rang — et se trompe dès qu'on insère ou
-                                // retire au milieu (cf. son en-tête, #403).
-                                '<div class="planif-noeud-objectif" contenteditable="true" data-obj-rang="' + rangRendu + '"' +
-                                ' data-obj-id="' + echapperHtml(objs[io_].id) + '">' +
-                                    echapperHtml(objs[io_].texte) +
-                                '</div>' +
-                                '<span class="planif-obj-btn planif-obj-ajouter" data-obj-rang="' + rangRendu + '"' +
-                                ' role="button" tabindex="0" aria-label="Ajouter un objectif apr\u00e8s celui-ci"' +
-                                ' title="Ajouter un objectif">+</span>' +
-                                '<span class="planif-obj-btn planif-obj-retirer" data-obj-rang="' + rangRendu + '"' +
-                                ' role="button" tabindex="0" aria-label="Retirer cet objectif"' +
-                                ' title="Retirer cet objectif">\u2212</span>' +
-                            '</div>';
-                        rangRendu++;
-                    }
-                }
-                htmlObjectifs += '</div>';
-            }
-            el.innerHTML =
-                '<div class="planif-noeud-entete">' +
-                    '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(n) + '">' + obtenirLabelNoeud(n) + '</span>' +
-                    compteurDureeHTML(n) +
-                    selecteurSemaineHTML(n) +
-                    (estLecon
-                        ? '<span class="planif-badge-objectif' + (objs.length ? '' : ' planif-badge-objectif--vide') + '"' +
-                          ' role="button" tabindex="0" aria-expanded="' + (objDeplie ? 'true' : 'false') + '"' +
-                          ' title="' + (objs.length ? objs.length + ' objectif' + (objs.length > 1 ? 's' : '') : 'Aucun objectif') +
-                          ' \u2014 cliquer pour ' + (objDeplie ? 'replier' : 'd\u00e9plier') + '">\ud83c\udfaf</span>'
-                        : '') +
-                '</div>' +
-                htmlObjectifs +
-                '<div class="planif-noeud-titre" contenteditable="true">' + echapperHtml(n.titre || '') + '</div>' +
-                '<div class="planif-noeud-zone ' + (nbEnfants === 0 ? 'planif-vide' : '') + '">' +
-                    (nbEnfants > 0 ? nbEnfants + ' \u00e9l\u00e9ment' + (nbEnfants > 1 ? 's' : '') : '') +
-                '</div>' +
-                '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
-                '<div class="planif-noeud-port planif-port-gauche" data-dir="gauche"></div>' +
-                '<div class="planif-noeud-port planif-port-bas" data-dir="bas"></div>' +
-                '<div class="planif-noeud-port planif-port-haut" data-dir="haut"></div>' +
-                // Option B (6 août) : sur un conteneur, la poignée ne règle que
-                // la LARGEUR — une largeur plancher. La hauteur reste calculée
-                // depuis les enfants, donc aucun geste n'est jamais défait.
-                '<div class="planif-noeud-poignee planif-noeud-poignee--largeur"' +
-                ' role="separator" aria-label="Ajuster la largeur de ce bloc"></div>';
-        } else {
-            el.innerHTML =
-                '<div class="planif-noeud-entete">' +
-                    '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(n) + '">' + obtenirLabelNoeud(n) + '</span>' +
-                    dureeControleHTML(n) +
-                '</div>' +
-                '<div class="planif-noeud-titre" contenteditable="true">' + echapperHtml(n.titre || '') + '</div>' +
-                '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
-                '<div class="planif-noeud-port planif-port-gauche" data-dir="gauche"></div>' +
-                '<div class="planif-noeud-port planif-port-bas" data-dir="bas"></div>' +
-                '<div class="planif-noeud-port planif-port-haut" data-dir="haut"></div>' +
-                // Poignée de redimensionnement — FEUILLES SEULEMENT (option A,
-                // décision du 6 août). Les conteneurs sont dimensionnés par
-                // reLayoutConteneur à partir de leurs enfants : une taille posée
-                // à la main y serait écrasée au prochain ajout.
-                '<div class="planif-noeud-poignee" role="separator" aria-label="Redimensionner ce bloc"></div>';
-        }
+        el.innerHTML = contenuNoeudHTML(n);
         attacherEvenements(el, n);
         coucheNoeuds.appendChild(el);
         // Indicateur clone synchrone (avant le rAF layout)
@@ -4551,6 +4638,7 @@ function attacherEvenements(el, donnees) {
     });
 
     var titreEl = el.querySelector('.planif-noeud-titre');
+    collerEnTexteBrut(titreEl);
     titreEl.addEventListener('focus', function() {
         enregistrerPourUndo();
     });
@@ -4624,6 +4712,7 @@ function attacherEvenements(el, donnees) {
         };
 
         zoneObjectifs.querySelectorAll('.planif-noeud-objectif').forEach(function(ligne) {
+            collerEnTexteBrut(ligne);
             ligne.addEventListener('focus', function() { enregistrerPourUndo(); });
 
             // Au fil de la frappe : mettre à jour les données SANS reconstruire
@@ -4705,6 +4794,28 @@ function attacherEvenements(el, donnees) {
                 // index d'OBJECTIF — les lignes vides ne sont pas persistées.
                 var rang = parseInt(btn.dataset.objRang, 10) || 0;
                 var textes = lireLignes();
+                var monte = btn.classList.contains('planif-obj-monter');
+                if (monte || btn.classList.contains('planif-obj-descendre')) {
+                    // Réordonner (9 août 2026, demande de Grégoire). Permuter
+                    // les LIGNES LUES suffit : chacune porte son `id` depuis
+                    // #403, et `appliquerObjectifs` résout par id AVANT le rang
+                    // — les `objectifsServis` qui visent ces objectifs suivent
+                    // donc le déplacement au lieu de glisser d'un cran.
+                    var cible = rang + (monte ? -1 : 1);
+                    if (cible < 0 || cible >= textes.length) return;
+                    // Le bouton empêche le focus (preventDefault au
+                    // pointerdown) : sans cet appel, aucun état n'est empilé et
+                    // ⌘Z sauterait par-dessus le déplacement.
+                    enregistrerPourUndo();
+                    textes.splice(cible, 0, textes.splice(rang, 1)[0]);
+                    _ajoutObjectif = null;
+                    appliquerObjectifs(donnees, textes);
+                    // Focalise la ligne à sa NOUVELLE place : ses commandes
+                    // restent révélées (`:focus-within`), donc un second appui
+                    // enchaîne sans avoir à retrouver la ligne des yeux.
+                    rerendreEtFocaliser(cible);
+                    return;
+                }
                 if (btn.classList.contains('planif-obj-ajouter')) {
                     var rangObjectif = textes.slice(0, rang + 1).filter(function(t) {
                         return t.texte !== '';
@@ -7765,6 +7876,15 @@ window.planificationCarte = {
     // relisant la source.
     dureeControleHTML: dureeControleHTML,
     compteurDureeHTML: compteurDureeHTML,
+    // Exposée pour la sentinelle du rendu unique (#437) : la seule preuve
+    // qui vaille est de RENDRE un nœud et d'y chercher ses contrôles. Vérifier
+    // que les trois appelants « ont l'air d'appeler la même chose » relit la
+    // source — c'est exactement ce qui n'a rien vu pendant quatre ajouts.
+    contenuNoeudHTML: contenuNoeudHTML,
+    objectifsLeconHTML: objectifsLeconHTML,
+    // Exposée pour la sentinelle du collage (#437) : ce que fait un
+    // gestionnaire de `paste` se vérifie en lui ENVOYANT un presse-papiers.
+    collerEnTexteBrut: collerEnTexteBrut,
     rafraichirRollupsAncetres: rafraichirRollupsAncetres,
     TYPES_AVEC_DUREE: TYPES_AVEC_DUREE,
     resoudreVerbe: resoudreVerbe,
