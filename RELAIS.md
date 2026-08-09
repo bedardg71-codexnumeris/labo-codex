@@ -12,12 +12,12 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | ⚠ **`claude/incomplete-work-plans-h1nimp`** |
-| **Version** | **1.61.1** — build `0809-0756` |
-| **Travail en avance sur `main`** | **3 commits** — #426 (l'onglet devient « Carte d'alignement ») + #421 (conformité du manuel, 4 surfaces) + le §4ter de `ETAT-PROJET.md` (43 plans vérifiés au code) + le verrou des phases B/C de la note finale |
+| **Version** | **1.62.0** — build `0809-0811` |
+| **Travail en avance sur `main`** | **5 commits** — #426 (« Carte d'alignement ») · #421 (conformité du manuel, 4 surfaces) · §4ter de `ETAT-PROJET.md` (43 plans vérifiés au code) · verrou des phases B/C de la note finale · **#434 Phase D** (une seule commande pour la construction de la note) |
 | **Dernière mise à jour** | 9 août 2026 |
 
 ⚠ **NE PAS ouvrir le conteneur sur `main`** : il est à **1.60.0**, soit une
-version en arrière. Le §3 de `SESSION.md` sur `main` est celui du 8 août et
+version en arrière. ⚠ **Deux portes terrain neuves** : le nouveau libellé d'onglet + la page 9 du guide (1.61), et le mode « Par objectifs » qui s'affiche pour la première fois (1.62). Le §3 de `SESSION.md` sur `main` est celui du 8 août et
 **ne connaît pas** cette branche.
 
 ▣ **Pourquoi ce fichier pointe ailleurs que `main`, alors que la règle dit de
