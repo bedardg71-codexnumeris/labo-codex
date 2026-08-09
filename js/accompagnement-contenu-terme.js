@@ -326,7 +326,7 @@ const GLOSSAIRE = {
         categorie: 'Planification',
         etape: 'competence',
         definition: 'Le lien de cohérence entre ce que tu vises (compétence, connaissances), comment tu l\'enseignes (activités, soutien) et comment tu le vérifies (évaluations). La carte mentale de Labo Codex rend ces liens visibles et signale les incohérences — un objectif sans production liée, une connaissance sans évaluation prévue. Ces alertes sont des pistes de réflexion, pas des erreurs à corriger.',
-        voir: 'Planification > Alignement'
+        voir: 'Conception > Carte d\'alignement'
     },
 
     'carte-mentale': {
@@ -335,7 +335,7 @@ const GLOSSAIRE = {
         categorie: 'Planification',
         etape: 'competence',
         definition: 'L\'outil visuel interactif qui représente l\'alignement pédagogique de ton cours. Tu y places des nœuds (compétence, connaissances, activités, évaluations) et tu les relies pour rendre visibles les connexions. La compétence du devis ministériel ou du plan-cadre est un bon point de départ.',
-        voir: 'Planification > Alignement'
+        voir: 'Conception > Carte d\'alignement'
     },
 
     'noeud': {
@@ -344,7 +344,7 @@ const GLOSSAIRE = {
         categorie: 'Planification',
         etape: 'competence',
         definition: 'Un élément cognitif dans la carte mentale : compétence, connaissance, activité d\'apprentissage, évaluation, soutien, etc. Chaque nœud peut être relié à d\'autres pour matérialiser l\'alignement pédagogique.',
-        voir: 'Planification > Alignement'
+        voir: 'Conception > Carte d\'alignement'
     },
 
     'sequence': {
@@ -352,8 +352,8 @@ const GLOSSAIRE = {
         terme: 'Séquence',
         categorie: 'Planification',
         etape: 'competence',
-        definition: 'Un regroupement de leçons dans l\'organisateur. Les séquences organisent tes leçons sur les 15 semaines du trimestre. Une séquence peut contenir plusieurs leçons et couvrir plusieurs séances.',
-        voir: 'Planification > Organisateur'
+        definition: 'Un regroupement de leçons qui poursuivent les mêmes idées maîtresses. La séquence est un regroupement LOGIQUE, pas une case du calendrier : c\'est chaque leçon qui porte sa semaine. Une séquence peut en contenir une autre.',
+        voir: 'Conception > Carte d\'alignement'
     },
 
     'lecon': {
@@ -361,8 +361,8 @@ const GLOSSAIRE = {
         terme: 'Leçon',
         categorie: 'Planification',
         etape: 'competence',
-        definition: 'Un plan pédagogique structuré à l\'intérieur d\'une séquence. Chaque leçon peut suivre le canevas d\'enseignement explicite en 5 phases : ouverture, modelage, pratique guidée, pratique autonome, objectivation.',
-        voir: 'Planification > Organisateur'
+        definition: 'Un bloc pédagogique à l\'intérieur d\'une séquence, porteur de ses objectifs et de sa semaine. Une leçon peut s\'étaler sur plusieurs séances. Elle accueille des connaissances, des activités et des évaluations — dont, si tu le veux, les cinq blocs d\'enseignement explicite.',
+        voir: 'Conception > Carte d\'alignement'
     },
 
     'enseignement-explicite-5-phases': {
@@ -370,8 +370,8 @@ const GLOSSAIRE = {
         terme: 'Enseignement explicite (5 phases)',
         categorie: 'Planification',
         etape: 'competence',
-        definition: 'Structure pédagogique en cinq étapes pour organiser une leçon : ouverture (activer les connaissances antérieures), modelage (démontrer), pratique guidée (accompagner), pratique autonome (laisser faire seul·e), objectivation (consolider). L\'option est disponible dans l\'organisateur mais n\'est pas imposée.',
-        voir: 'Planification > Organisateur'
+        definition: 'Structure pédagogique en cinq étapes pour organiser une leçon : Ouverture (capter l\'attention, justifier l\'objectif, vérifier les préalables), Modélisation (démontrer), Pratique guidée (accompagner), Pratique autonome (laisser faire seul·e), Clôture (synthétiser). Les cinq blocs sont dans la palette de la carte, dans leur propre zone — ce sont des activités à part entière, et rien ne t\'oblige à les utiliser.',
+        voir: 'Conception > Carte d\'alignement'
     },
 
     'som-sommative': {

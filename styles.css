@@ -18460,14 +18460,26 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     /* Évaluation — Rose/magenta */
     --planif-couleur-evaluation: #D946EF;
 
-    /* Enseignement explicite (7 août 2026) — cyan→sarcelle, clair→foncé :
-       le dégradé suit le transfert de responsabilité (je fais → nous
-       faisons → tu fais). Seule famille encore libre parmi les nœuds. */
-    --planif-couleur-ouverture: #22d3ee;
-    --planif-couleur-modelisation: #06b6d4;
-    --planif-couleur-pratique-guidee: #0891b2;
-    --planif-couleur-pratique-autonome: #0e7490;
-    --planif-couleur-cloture: #155e75;
+    /* Enseignement explicite — UNE sarcelle pour les cinq étapes
+       (9 août 2026, décision Grégoire : « pour simplifier la lecture »).
+
+       ▣ Ce qui est retiré, et qu'il faut savoir avant de le rétablir : la
+       famille portait un dégradé cyan→sarcelle, clair→foncé, dont l'ordre
+       suivait le transfert de responsabilité (je fais → nous faisons → tu
+       fais). L'encodage était juste, mais il demandait de comparer cinq
+       teintes voisines pour se lire — sur une carte dense, la famille se
+       repère mieux qu'elle ne se décompose. L'ordre reste dit par la palette
+       et par les libellés, qui n'ont jamais eu besoin de la couleur.
+
+       ⮕ UN SEUL token, et les cinq y pointent : cinq copies de la même
+       valeur divergent au premier ajustement, et on se retrouve avec un
+       dégradé involontaire — celui-là même qu'on vient de retirer. */
+    --planif-couleur-enseignement-explicite: #0891b2;
+    --planif-couleur-ouverture: var(--planif-couleur-enseignement-explicite);
+    --planif-couleur-modelisation: var(--planif-couleur-enseignement-explicite);
+    --planif-couleur-pratique-guidee: var(--planif-couleur-enseignement-explicite);
+    --planif-couleur-pratique-autonome: var(--planif-couleur-enseignement-explicite);
+    --planif-couleur-cloture: var(--planif-couleur-enseignement-explicite);
     /* Utilitaires — adaptés palette ocean */
     --planif-couleur-fond: var(--surface-conteneur, #142428);
     --planif-couleur-texte: var(--texte-principal, #d0e0e4);
@@ -18631,36 +18643,11 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     text-align: right;
 }
 
-/* Badge « En évolution » de l'en-tête de section — TEMPORAIRE, retrait
-   prévu à la stabilisation du module (BACKLOG #366). */
-.planif-badge-evolution {
-    display: inline-block;
-    margin-left: 10px;
-    padding: 2px 10px;
-    border: 1px solid color-mix(in srgb, var(--section-conception) 55%, transparent);
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--section-conception) 14%, transparent);
-    color: var(--section-conception);
-    font-size: 0.72rem;
-    font-weight: 600;
-    vertical-align: middle;
-    letter-spacing: 0.02em;
-    white-space: nowrap;
-}
-.planif-note-evolution {
-    font-size: 0.82rem;
-    margin-top: -6px;
-    /* Demande Grégoire (4 août soir) : phrase EN COULEUR, assortie au badge */
-    color: var(--section-conception);
-}
-.mode-clair .planif-badge-evolution {
-    color: color-mix(in srgb, var(--section-conception) 55%, #4a3f10);
-    background: color-mix(in srgb, var(--section-conception) 22%, transparent);
-}
-/* Note : mix plus sombre que le badge (texte courant sur fond blanc → 4.5:1) */
-.mode-clair .planif-note-evolution {
-    color: color-mix(in srgb, var(--section-conception) 30%, #4a3f10);
-}
+/* Le badge « 🔧 Présentement en développement actif » et sa note de bas de
+   titre sont RETIRÉS (9 août 2026, demande de Grégoire). Ils étaient annoncés
+   temporaires dès leur pose — « retrait prévu à la stabilisation du module ».
+   Les quatre règles partent avec le balisage : un style sans porteur est du
+   code mort qui se recopie tout seul au prochain module « en évolution ». */
 
 /* === SOMMAIRE DE NAVIGATION (palette Navigation) === */
 /* Remplace les carrousels séquences/leçons de la barre (4 août 2026). */
@@ -20675,6 +20662,30 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     word-wrap: break-word;
 }
 
+/* La carte impose SA typographie au contenu collé (9 août 2026).
+   Le collage est nettoyé en amont (`collerEnTexteBrut`), mais le
+   presse-papiers n'est pas la seule porte : un glisser-déposer de texte
+   enrichi depuis une autre application n'émet PAS d'événement `paste` et
+   passerait donc à côté du filtre JS. Ce filet-ci est structurel — quelle que
+   soit la porte, ce qui atterrit dans un champ de la carte se rend avec la
+   typographie de la carte.
+   `!important` assumé : le balisage collé porte ses styles EN LIGNE, qui
+   gagnent sur toute règle de feuille sans lui. */
+.planif-noeud-titre *,
+.planif-noeud-objectif * {
+    font: inherit !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    font-style: inherit !important;
+    letter-spacing: inherit !important;
+    line-height: inherit !important;
+    color: inherit !important;
+    background: transparent !important;
+    text-decoration: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
 .planif-noeud-titre:focus {
     box-shadow: var(--focus-ring);
 }
@@ -21081,10 +21092,34 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     user-select: none;
 }
 
+/* Les flèches ▲▼ portent un glyphe naturellement plus gros que + et − à
+   taille de police égale : réduites pour peser le même poids visuel. */
+.planif-obj-monter,
+.planif-obj-descendre {
+    font-size: 9px;
+}
+
 /* Discrètes au repos, révélées au survol ou au focus clavier de la ligne. */
 .planif-noeud-objectif-ligne:hover .planif-obj-btn,
 .planif-noeud-objectif-ligne:focus-within .planif-obj-btn {
     opacity: 0.65;
+}
+
+/* Bouton présent mais muet (première ligne, dernière ligne, ligne d'accueil) :
+   il tient la colonne pour que les quatre commandes restent alignées d'une
+   ligne à l'autre, sans se donner l'air cliquable. Il reste PLUS visible au
+   survol que les autres ne le sont au repos — sinon la borne se lit comme une
+   commande manquante plutôt que comme une commande sans objet. */
+.planif-obj-btn--inerte {
+    cursor: default;
+}
+.planif-noeud-objectif-ligne:hover .planif-obj-btn--inerte,
+.planif-noeud-objectif-ligne:focus-within .planif-obj-btn--inerte {
+    opacity: 0.18;
+}
+.planif-obj-btn--inerte:hover {
+    opacity: 0.18;
+    background: transparent;
 }
 
 .planif-obj-btn:hover {
@@ -21110,6 +21145,12 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
         opacity: 0.55;
         width: 28px;
         height: 28px;
+    }
+    /* Quatre commandes par ligne depuis le 9 août : la ligne est dense au
+       doigt. La cible reste à 28 px — la rétrécir pour gagner de la place
+       reviendrait à rendre les quatre moins sûres pour en loger une de plus. */
+    .planif-obj-btn--inerte {
+        opacity: 0.15;
     }
 }
 

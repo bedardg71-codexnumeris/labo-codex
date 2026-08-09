@@ -584,34 +584,32 @@ const TOOLTIPS = {
         'Bilan post-intervention. Comparaison automatique avant/après sur les critères ciblés. L\'«avant» est capturé au moment de la première sauvegarde, l\'«après» est calculé en temps réel.',
 
     // =================================================================
-    // T9 — PLANIFICATION — Alignement (carte mentale)
+    // T9 — CONCEPTION — Carte d'alignement
     // =================================================================
+    // Révisé le 9 août 2026 (#421) contre l'interface réelle de la 1.60.0.
+    // Quatre clés RETIRÉES : `planif-alignement` et `planif-sous-nav` (aucune
+    // ancre dans le DOM — la sous-nav est servie par `nav-conception-alignement`,
+    // T11) ; `planif-barre-outils` et `planif-filtres` (les filtres d'affichage
+    // ont été retirés du canevas par #420, et ces deux clés n'étaient plus
+    // ancrées nulle part). Le catalogue ne décrit que ce qui existe.
 
     // --- Vue d'ensemble ---
 
-    'planif-alignement':
-        'Carte mentale interactive pour construire visuellement l\'alignement pédagogique de ton cours — les liens entre objectifs, activités et évaluations.',
-    'planif-sous-nav':
-        'La carte mentale d\'alignement du cours.',
     'planif-selecteur-cours':
-        'Choisis le cours à planifier. Chaque cours a sa propre carte d\'alignement.',
+        'Choisis la carte à afficher. Un cours peut en avoir plusieurs ; « Cours rattaché… » dit à quel cours celle-ci appartient.',
     'planif-aide':
-        'Ouvre le guide de la carte mentale (7 pages, panneau flottant indépendant).',
+        'Ouvre le guide de la carte (9 pages, panneau flottant indépendant).',
 
     // --- Canevas et outils ---
 
     'planif-canevas':
-        'Espace de travail de la carte mentale. Glisse des noeuds (différents éléments cognitifs), crée des liens, organise visuellement ton cours.',
+        'Espace de travail de la carte. Glisse des nœuds (les éléments de ton cours), crée des liens, organise visuellement ton enseignement.',
     'planif-palette':
-        'Glisse un élément vers le canevas pour l\'ajouter à la carte mentale.',
-    'planif-barre-outils':
-        'Contrôles de zoom, filtres d\'affichage et options de vue du canevas.',
+        'Glisse un élément vers le canevas pour l\'ajouter à la carte. Glisse un bloc sur la corbeille pour le supprimer.',
     'planif-boutons-action':
-        'Ajoute, supprime, coupe, copie et colle des nœuds sur le canevas.',
-    'planif-filtres':
-        'Filtre l\'affichage des nœuds et des liens sur le canevas.',
+        'Choisis la carte affichée, ouvre le menu Actions (nouvelle carte, cours rattaché, imports, export du plan) et annule le dernier geste.',
     'planif-zoom':
-        'Ajuste le niveau de zoom du canevas.',
+        'Niveau de zoom courant. Zoome à la molette ou au pincement ; « Recentrer » (⌘1) ramène toute la carte à l\'écran.',
 
     // --- Catégories pédagogiques ---
 
@@ -621,17 +619,19 @@ const TOOLTIPS = {
         'Quoi enseigner : types de connaissances (Anderson) — factuelle, conceptuelle, procédurale et métacognitive.',
     'planif-comment-enseigner':
         'Comment enseigner : exposés, activités, soutien et occasions de révision — tout ce qui occupe le temps de classe, le tien comme celui de tes élèves.',
+    'planif-enseignement-explicite':
+        'Les cinq étapes du modèle : Ouverture, Modélisation, Pratique guidée, Pratique autonome, Clôture. Ce sont des activités à part entière — elles se placent dans une leçon, et rien ne t\'oblige à les utiliser.',
     'planif-structure':
-        'Quand enseigner : organisation temporelle en séquences (semaines) et leçons (séances).',
+        'Quand enseigner : la séquence regroupe des leçons qui poursuivent les mêmes idées maîtresses ; c\'est la leçon qui porte sa semaine.',
     'planif-design-apprentissages':
-        'Productions et évaluations : lie les objectifs aux moyens de vérifier l\'apprentissage pour compléter l\'alignement.',
+        'L\'évaluation ferme la boucle : relie-la à ce qu\'elle vérifie — idées maîtresses, connaissances ou activités.',
 
     // --- Nœuds ---
 
     'planif-panneau-proprietes':
-        'Propriétés du nœud sélectionné : titre, description, clonage et suppression.',
+        'Inspecteur : ce qui se règle sur le bloc sélectionné — titre, description, et selon son type la semaine, la leçon d\'accueil, les objectifs qu\'il sert, son niveau cognitif ou sa rétroaction formative.',
     'planif-titre-noeud':
-        'Nom du noeud tel qu\'il apparaît sur la carte.',
+        'Nom du nœud tel qu\'il apparaît sur la carte.',
     'planif-description-noeud':
         'Notes ou précisions sur cet élément. Champ libre.',
     'planif-cloner':
@@ -721,10 +721,11 @@ const TOOLTIPS = {
 
     // --- Planification ---
 
-    'nav-planification':
-        'Planification pédagogique : alignement objectifs-activités-évaluations et organisation des leçons.',
+    // `nav-planification` retiré le 9 août 2026 (#421) : la section
+    // « Planification » a disparu à la réorganisation de la navigation du
+    // 3 avril 2026 et la clé n'était plus ancrée nulle part.
     'nav-conception-alignement':
-        'Carte mentale interactive : visualise l\'alignement objectifs → activités → évaluations.',
+        'Carte d\'alignement : visualise les liens objectifs → activités → évaluations, et exporte le plan du cours.',
 
     // --- Labo ---
 

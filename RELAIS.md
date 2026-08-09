@@ -11,19 +11,108 @@
 
 | | |
 |---|---|
-| **Branche à ouvrir** | ⚠ **`claude/incomplete-work-plans-h1nimp`** |
-| **Version** | **1.64.0** — build `0809-0906` |
-| **Base de la branche** | `83ee41d3` (= `origin/main` au 9 août, 1.60.0) |
-| **Travail en avance sur `main`** | **12 commits** — voir le tableau de réconciliation ci-dessous |
-| **Dernière mise à jour** | 9 août 2026, fin de journée |
+| **Branche à ouvrir** | **`main`** |
+| **Version** | **1.65.1** — build `0809-0958` |
+| **Travail en avance sur `main`** | **aucun** |
+| **Dernière mise à jour** | 9 août 2026, fin de journée — **les deux branches du 9 août sont fusionnées** |
 
-⚠ **NE PAS ouvrir le conteneur sur `main`.** Vérifier `git log origin/main` :
-si son sommet est encore `83ee41d3`, il est à **1.60.0**, soit quatre versions
-mineures en arrière, et son §3 de `SESSION.md` ne connaît pas cette branche.
+✅ **La dette de fusion du 9 août est SOLDÉE.** Les deux sessions parallèles
+(carte d'alignement #437, pratiques #434/#435/#436/#438) sont dans `main`, en
+fast-forward, suite rejouée sur l'état fusionné : **Vitest 2057/2057**
+(232 fichiers). Dernier ID utilisé : **#438**.
+
+⮕ Ce qui reste dû n'est plus du code mais du **terrain** :
+`plans de travail/PORTES-TERRAIN-1.57-1.65.md`, **complété des portes 1.61→1.64**
+qui y manquaient tant que la branche pratiques n'était pas fusionnée (champ
+legacy des pratiques PAN-Standards, mode « par objectifs » retiré, suggestion
+holistique DEN, libellé d'onglet « Carte d'alignement », page 9 du guide).
+Plus **quatre valeurs gelées** en attente de verdict (deux par session), et la
+porte du 8 août toujours sans réponse : *le double-clic ouvre-t-il l'Inspecteur
+au doigt sur iPad ?*
 
 ---
 
-## ⚠⚠ DEUX SESSIONS TRAVAILLENT EN PARALLÈLE — lire avant de fusionner
+## ✅ CE QUI EST FAIT : la collision a eu lieu, et elle est RÉSOLUE
+
+**La collision annoncée plus bas s'est produite.** Les deux sessions du 9 août
+ont pris les mêmes ressources, à 24 minutes d'écart :
+
+| Ressource | `incomplete-work-plans-h1nimp` | session « carte d'alignement » |
+|---|---|---|
+| Version | 1.64.0 (build `0809-0906`) | 1.64.0 (build `0809-0930`) |
+| Identifiant | **#436** (G2-b, miroir `configPAN`) | **#436** (carte d'alignement) |
+
+⮕ **C'est la session « carte » qui a renuméroté** : **1.65.0** et **#437**. Elle
+est fusionnée dans `main` (fast-forward `164c4077..0f99b6d2`), Vitest
+**1996/1996** (228 fichiers).
+
+▣ **Pourquoi elle, et pas l'autre — le critère qui a servi.** La recette ci-dessous
+dit « la seconde session à fusionner », mais ce critère ne départageait pas :
+aucune des deux n'avait fusionné son code au moment du constat. Le critère qui
+départage vraiment est le **coût**. La série 1.61.0 → 1.64.0 est contiguë et déjà
+consommée dans quatre documents sur douze commits ; la session carte, c'était un
+commit, une version, un identifiant. ⮕ **Retenir la règle pour la prochaine
+fois : c'est le PLUS PETIT côté qui renumérote, pas le second à fusionner.** Le
+second à fusionner est indéterminé tant que personne n'a fusionné — donc
+inutilisable au moment où on en a besoin.
+
+⚠ **1.65.0 a été choisie AU-DESSUS de toute la série de l'autre branche**, et
+c'est délibéré : sa fusion n'a plus à refondre deux séries entrelacées, mais
+seulement à garder le numéro le plus haut.
+
+### ✅ FAIT — conflits résolus, puis FUSION EFFECTUÉE
+
+> `main` a d'abord été fusionnée DANS la branche pratiques (5 conflits résolus,
+> détail ci-dessous), ce qui l'a rendue fast-forwardable. La fusion inverse a
+> ensuite été faite et poussée : `188213fc..529a5779`.
+
+**Comment les cinq conflits ont été tranchés** (recette ci-dessous honorée) :
+
+| Conflit | Résolution |
+|---|---|
+| Les 4 points de vérité | **1.65.0 / build `0809-0937`** conservés — jamais redescendus à 1.64.0 |
+| `js/changelog-data.js` | l'entrée **1.65 coiffe** la série ; 1.64, 1.63 et 1.61 dessous. ⚠ Le conflit coupait **au milieu d'une entrée** — recomposition manuelle, syntaxe revérifiée |
+| `index.html`, en-tête du module | **UNION D'INTENTIONS** : le renommage « Carte d'alignement » (#426) **ET** le retrait du bandeau « en développement » (#437). Prendre un côté aurait perdu l'autre en silence |
+| `index.html`, deux hunks de `?v=` | la valeur la **plus haute** de chaque côté — aucune valeur retenue n'a jamais été servie plus bas, donc tout cache se casse |
+| `js/planification-carte.js` | **auto-fusionné**, et vérifié : la page 9 du guide (#421) et les flèches ▲▼ (#437) coexistent |
+
+⮕ **Les deux sentinelles retargetées sont à l'octet près celles de `main`** — la
+consigne du point 5 est honorée sans intervention (la branche ne les avait pas
+touchées).
+
+⮕ **#438 pris après la fusion** (correctif de `release.mjs` : il ne bumpait pas
+le `?v=` de `styles.css`, trou signalé par la session carte qui l'avait fait à la
+main deux fois). Le dernier ID est donc **#438**, pas #437.
+
+⮕ **Vitest 2057/2057 (232 fichiers) sur l'état FUSIONNÉ** — pas l'attestation
+d'un des deux côtés, la suite rejouée après résolution.
+
+### La recette d'origine, conservée pour mémoire
+
+1. **Version** : garder **1.65.0** (ou au-delà). Ne pas redescendre à 1.64.0.
+2. **Conflits certains** — les quatre points de vérité (`version.json`,
+   `js/init-inline.js` ×2, `js/main.js`), les `?v=` d'`index.html`, la tête de
+   `js/changelog-data.js`, et les quatre trackers.
+3. **`js/changelog-data.js`** : l'entrée **1.65** (carte d'alignement) est déjà
+   en tête. Les entrées 1.61 → 1.64 de l'autre branche se glissent SOUS elle —
+   et se consolident entre elles, selon le point 3 de la recette.
+4. **Code applicatif** : risque faible. La session carte n'a touché que
+   `js/planification-carte.js`, `styles.css`, `index.html` et trois fichiers de
+   tests — **aucun** des fichiers `js/pratiques*` du chantier G2-b.
+5. ⚠ **Deux sentinelles ont été RETARGETÉES** par la session carte
+   (`sentinelle-objectif-lecon-metadata`, `sentinelle-echappement-audit-386`) :
+   elles lisaient un balisage devenu fonction. En cas de conflit, garder la
+   version de `main` — chaque invariant y a été revérifié au rendu réel avant
+   réécriture, et doublé d'un équivalent comportemental.
+
+---
+
+## ⚠⚠ LE DOSSIER D'ORIGINE — conservé tel qu'écrit
+
+> Ce qui suit a été écrit AVANT la collision, par la session
+> `incomplete-work-plans-h1nimp`. **Il avait raison sur tout**, y compris sur le
+> fait qu'elle viendrait. Conservé sans retouche : il vaut mieux qu'un compte
+> rendu après coup.
 
 **Grégoire a signalé le 9 août qu'un autre agent travaillait sur `main`** pendant
 que cette branche avançait. Au dernier `git fetch` de cette session,
