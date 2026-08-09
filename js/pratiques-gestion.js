@@ -212,13 +212,14 @@ function genererBadgeCaracteristiques(pratique) {
 
     const caracteristiques = [];
 
-    // 1. Mode de calcul par objectifs (variante STD)
-    if (pratique.configuration?.varianteCalcul === 'par-objectifs') {
-        caracteristiques.push('par objectifs');
-    }
+    // (#435 : le badge « par objectifs » est RETIRÉ avec le mode. Il lisait
+    //  `configuration.varianteCalcul`, que les pratiques STOCKÉES portent
+    //  encore — il aurait donc continué d'annoncer, dans la liste des
+    //  pratiques, un mode qui n'existe plus. Et son test inverse masquait le
+    //  badge portfolio de ces mêmes pratiques, qui est désormais le seul vrai.)
 
-    // 2. Portfolio actif (N meilleures, ou hybride N meilleures + M obligatoires)
-    if (pratique.configuration?.portfolio && pratique.configuration.varianteCalcul !== 'par-objectifs') {
+    // Portfolio actif (N meilleures, ou hybride N meilleures + M obligatoires)
+    if (pratique.configuration?.portfolio) {
         const config = pratique.configuration;
         const categoriesActif = config.categories?.actif || config.portfolio?.hybride || false;
 

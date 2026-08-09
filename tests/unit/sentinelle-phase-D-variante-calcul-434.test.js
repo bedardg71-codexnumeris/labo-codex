@@ -136,6 +136,15 @@ describe('#435 · cliquet d’absence — le chemin par-objectifs ne revient pas
         expect(sourceBiblio).not.toMatch(/modalites\.parObjectifs = JSON\.parse/);
         expect(sourceBiblio).not.toMatch(/parObjectifs: modalites\.parObjectifs/);
     });
+
+    it('la liste des pratiques n’affiche plus de badge « par objectifs »', () => {
+        // ⚠ Le cas qui échappe le plus facilement à une ablation : les pratiques
+        // STOCKÉES portent encore `varianteCalcul: 'par-objectifs'`. Un badge qui
+        // le lit continue d'annoncer un mode retiré — et, pire, son test inverse
+        // masquait le badge portfolio de ces mêmes pratiques, le seul vrai.
+        expect(sourceGestion).not.toMatch(/caracteristiques\.push\('par objectifs'\)/);
+        expect(sourceGestion).not.toMatch(/pratique\.configuration\.varianteCalcul !== 'par-objectifs'/);
+    });
 });
 
 describe('#435 · les pratiques legacy sont normalisées, jamais réécrites en douce', () => {
