@@ -67,10 +67,34 @@ describe('#386 · planification : titre de nœud échappé, attributs value= coe
         expect(carte).not.toMatch(/contenteditable="true">' \+ \(n\.titre \|\| ''\)/);
     });
 
-    it('les trois chemins passent par echapperHtml', () => {
-        expect(carte).toMatch(/contenteditable="true">' \+ echapperHtml\(donnees\.titre \|\| ''\)/);
-        const matches = carte.match(/contenteditable="true">' \+ echapperHtml\(n\.titre \|\| ''\)/g) || [];
-        expect(matches.length).toBe(2);
+    // ⚠ ASSERTION REVUE LE 9 AOÛT 2026 (#436) — la cible a changé, l'invariant
+    // NON. Les « trois chemins » (création, clone, reconstruction) ont été
+    // fondus en un seul, `contenuNoeudHTML` : c'était précisément le correctif
+    // du jour, les deux premiers rendaient un nœud incomplet. Le titre n'est
+    // donc plus injecté qu'aux deux branches de CETTE fonction (conteneur et
+    // feuille), et l'ancienne forme `echapperHtml(donnees.titre)` n'a plus de
+    // sujet.
+    //
+    // ⮕ L'assertion se resserre au lieu de se relâcher : au lieu de compter
+    // les échappements aux trois endroits qui injectaient, on verrouille qu'il
+    // n'existe QU'UN endroit qui injecte, et qu'il échappe. Un quatrième
+    // chemin qui se remettrait à fabriquer son innerHTML — le défaut corrigé —
+    // ferait rougir le compte.
+    it('le titre n’est injecté QUE par le rendu unique, et il y est échappé', () => {
+        const injections = carte.match(/contenteditable="true">' \+ echapperHtml\(n\.titre \|\| ''\)/g) || [];
+        expect(injections.length, 'deux branches : conteneur et feuille').toBe(2);
+        // Plus aucune injection depuis les anciens chemins.
+        expect(carte).not.toMatch(/contenteditable="true">' \+ echapperHtml\(donnees\.titre/);
+    });
+
+    it('tout innerHTML de nœud passe par le rendu unique', () => {
+        // Le vrai gardien : si un appelant se remettait à composer sa propre
+        // chaîne, il pourrait y interpoler un titre brut sans que l'assertion
+        // ci-dessus ne bouge d'un pouce.
+        const delegations = carte.match(/el\.innerHTML = contenuNoeudHTML\(/g) || [];
+        expect(delegations.length).toBe(3);
+        const fabriques = carte.match(/'<div class="planif-noeud-entete">'/g) || [];
+        expect(fabriques.length, 'une seule fabrique d’en-tête').toBe(1);
     });
 
     // L'ancrage temporel a migré de la séquence (couple semaineDebut/semaineFin)
