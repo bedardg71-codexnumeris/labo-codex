@@ -157,8 +157,9 @@ function initialiserModulePratiques() {
     initialiserReglesConformite();
 
 
-    // 🔄 Migration automatique de la configuration (Phase 3)
-    migrerConfigurationPortfolio();
+    // (#436 G2-b : `migrerConfigurationPortfolio()` retirée — elle alimentait le
+    //  miroir `configPAN.portfolio`, que plus personne ne lit. La SSOT est
+    //  `pratiquesConfigurables[id].configuration.portfolio`.)
 
     // 🎨 Mettre à jour l'interface de la pratique par défaut
     mettreAJourUIPratiqueDefaut();
@@ -377,86 +378,13 @@ function mettreAJourUIPratiqueDefaut() {
    🔄 MIGRATION CONFIGURATION (Phase 3)
    =============================== */
 
-/**
- * Migre la configuration du portfolio depuis productions vers modalitesEvaluation
- *
- * CONTEXTE Phase 3:
- * Auparavant, la configuration (nombreARetenir, minimumCompletion, nombreTotal)
- * était stockée dans productions[].regles. Nous la déplaçons vers
- * modalitesEvaluation.configPAN.portfolio pour centraliser toute la config.
- *
- * Cette fonction s'exécute automatiquement au chargement et :
- * 1. Vérifie si la migration est nécessaire
- * 2. Lit l'ancienne configuration depuis productions
- * 3. Crée la nouvelle structure dans modalitesEvaluation.configPAN.portfolio
- * 4. Marque la migration comme complétée
- * 5. Préserve l'ancienne config pour rétrocompatibilité
- *
- * @returns {boolean} True si migration effectuée, false si déjà faite ou rien à migrer
- */
-function migrerConfigurationPortfolio() {
-    // Lecture via le module propriétaire (SSOT #328 Lot 1)
-    let modalites = window.modalitesEvaluation.lire();
+// #436 G2-b (9 août 2026) — `migrerConfigurationPortfolio()` est RETIRÉE.
+// Elle écrivait le miroir de configuration depuis `productions[].regles`
+// (structure V1), derrière un drapeau de migration.
+// Ce miroir n'a plus AUCUN lecteur : le calcul de la note en a été coupé par
+// G2-a (24 mai), les sept derniers écrans d'affichage par G2-b. Le garder,
+// c'était entretenir une copie qui dérivait dès qu'une pratique était éditée.
 
-    // Vérifier si migration déjà effectuée
-    if (modalites.configPAN && modalites.configPAN.portfolio && modalites.configPAN._migrationV1Complete) {
-        return false;
-    }
-
-
-    // Lire productions pour trouver le portfolio
-    const productions = db.getSync(cle('productions'), []);
-    const portfolio = productions.find(p => p.type === 'portfolio');
-
-    if (!portfolio || !portfolio.regles) {
-        console.warn('[Migration Phase 3] ⚠️ Aucun portfolio avec règles trouvé, création config par défaut');
-
-        // Créer config par défaut
-        if (!modalites.configPAN) {
-            modalites.configPAN = {};
-        }
-
-        modalites.configPAN.portfolio = {
-            actif: true,
-            nombreARetenir: 5,
-            minimumCompletion: 7,
-            nombreTotal: 10,
-            methodeSelection: 'meilleurs'
-        };
-
-        modalites.configPAN._migrationV1Complete = true;
-        window.modalitesEvaluation.remplacer(modalites);
-
-        return true;
-    }
-
-    // Migrer depuis productions.regles
-    const anciennesRegles = portfolio.regles;
-
-
-    // Créer nouvelle structure
-    if (!modalites.configPAN) {
-        modalites.configPAN = {};
-    }
-
-    modalites.configPAN.portfolio = {
-        actif: true,
-        nombreARetenir: anciennesRegles.nombreARetenir || 5,
-        minimumCompletion: anciennesRegles.minimumCompletion || 7,
-        nombreTotal: anciennesRegles.nombreTotal || 10,
-        methodeSelection: 'meilleurs' // Default: N meilleurs artefacts
-    };
-
-    // Marquer migration comme complétée
-    modalites.configPAN._migrationV1Complete = true;
-    modalites.configPAN._migrationDate = new Date().toISOString();
-
-    // Sauvegarder via le module propriétaire (SSOT #328 Lot 1)
-    window.modalitesEvaluation.remplacer(modalites);
-
-
-    return true;
-}
 
 /* ===============================
    UTILITAIRES PUBLICS
@@ -833,13 +761,9 @@ function chargerConfigurationPratique(id) {
     // ✅ NOUVEAU (9 décembre 2025) : Rafraîchir la sidebar pour mettre à jour le style de sélection
     afficherListePratiquesSidebar();
 
-    // ✅ Appliquer la configuration du portfolio
-    if (config.portfolio) {
-        if (!modalites.configPAN) {
-            modalites.configPAN = {};
-        }
-        modalites.configPAN.portfolio = config.portfolio;
-    }
+    // (#436 G2-b : le miroitage de `config.portfolio` vers
+    //  `modalites.configPAN.portfolio` est retiré. La configuration vit dans
+    //  `pratiquesConfigurables` ; les lecteurs y vont directement.)
 
     // #328 L2-c : la config des jetons n'est plus MIROIRÉE dans modalitesEvaluation —
     // obtenirConfigJetons() la dérive de la pratique active (configuration/config/jetons).

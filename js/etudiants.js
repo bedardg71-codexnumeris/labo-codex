@@ -905,10 +905,13 @@ function afficherListeEtudiantsConsultation() {
     });
 
     // Déterminer le seuil minimum d'évaluations pour P
+    // G2-b (#436, 9 août 2026) : la SSOT `pratiquesConfigurables` était déjà lue en
+    // premier ; les DEUX replis sur le miroir `configPAN.portfolio` sont retirés.
+    // Ils ne pouvaient servir que quand la SSOT était muette — auquel cas le miroir
+    // est, par construction, encore plus périmé qu'elle.
     const configPratiqueActiveTab = typeof obtenirConfigPratiqueActive === 'function' ? obtenirConfigPratiqueActive() : null;
-    const modalitesTab = db.getSync(cle('modalitesEvaluation'), null) || {};
-    const configPortfolioTab = configPratiqueActiveTab?.portfolio || modalitesTab.configPAN?.portfolio || {};
-    const minimumCompletionTab = configPortfolioTab.minimumCompletion || modalitesTab.configPAN?.portfolio?.minimumCompletion || 3;
+    const configPortfolioTab = configPratiqueActiveTab?.portfolio || {};
+    const minimumCompletionTab = configPortfolioTab.minimumCompletion || 3;
 
     // Compter les évaluations par étudiant (artefacts-portfolio évalués)
     // Pré-indexé par DA pour éviter O(N*M) — une seule passe sur les évaluations

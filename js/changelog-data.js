@@ -20,6 +20,15 @@
     'use strict';
 
     var CHANGELOG = [
+        {
+            version: '1.64',
+            couleur: 'bleu',
+            titre: 'Les réglages d’une pratique s’appliquent partout, tout de suite',
+            items: [
+                'Les écrans de suivi (profil, aperçu du groupe, liste des étudiant·es) lisent maintenant la configuration de ta pratique directement à sa source. Avant, ils lisaient une copie figée au moment où tu avais appliqué la pratique : modifier le nombre d’artefacts à retenir changeait la note du profil, mais pas les autres écrans, qui restaient sur l’ancienne valeur sans rien signaler.',
+                'Ménage interne : cette copie figée n’est plus entretenue nulle part, et l’ancien mécanisme de migration qui s’exécutait à chaque démarrage est retiré.'
+            ]
+        },
         // (1.62 n'a jamais été déployée — consolidée dans 1.63, même précédent
         //  que l'entrée 1.48 : l'utilisateur ne verra qu'UNE livraison.)
         {
