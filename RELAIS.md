@@ -11,23 +11,26 @@
 
 | | |
 |---|---|
-| **Branche à ouvrir** | ⚠ **`claude/poursuite-travail-matin-es3hu9`** |
+| **Branche à ouvrir** | **`main`** |
 | **Version** | **1.65.2** — build `0809-1101` |
-| **Travail en avance sur `main`** | **1 commit** — audit de `Plan Accompagnement/` (§4quater), versement #439/#440/📐#441, nettoyage du patron `.option-accompagnement` |
-| **Dernière mise à jour** | 9 août 2026, **PM** — session de reprise, après la clôture du matin |
+| **Travail en avance sur `main`** | **aucun** |
+| **Dernière mise à jour** | 9 août 2026, **PM** — session de reprise fusionnée (`--ff-only`), sur instruction de Grégoire |
 
-⚠ **DETTE DE FUSION OUVERTE, et la même contrainte que le 9 août au matin** :
-le conteneur de cette session est **contraint à sa branche de développement**.
-Elle ne peut ni fusionner vers `main`, ni y pousser ce fichier seul. Le filet est
-rempli — il n'est pas à l'endroit où il devrait être. **Seul Grégoire peut l'y
-mettre**, ou autoriser la fusion. La fusion est un `--ff-only` (la branche est
-partie du `main` courant et rien n'a bougé depuis).
+✅ **Aucune dette de fusion.** La session du 9 août PM (audit de
+`Plan Accompagnement/` → §4quater, versement #439/#440/📐#441, retrait du patron
+`.option-accompagnement`) est dans `main` en fast-forward `02298a4b..acf47e61`.
+Suite rejouée **sur l'arbre fusionné** : Vitest **2062/2062** (233 fichiers),
+arbre propre. Dernier ID utilisé : **#441**.
 
-⮕ **Ce que la branche porte** : rien qui touche au calcul ni aux données. Un audit
-(lecture seule) versé en documentation, trois items de backlog, et le retrait de
-~51 lignes de CSS **sans aucun porteur** — vérifié dans `index.html`, `js/`,
-`tests/` et `design-system.html`, et verrouillé par un cliquet générique. Vitest
-**2062/2062** (233 fichiers).
+⚠ **PIÈGE D'ENVIRONNEMENT CONFIRMÉ UNE FOIS DE PLUS, et il a mordu à la fusion**
+(pas au rituel de début, où la branche était un calque exact du `main` distant) :
+le clone du conteneur était **shallow**, et `main` LOCAL pointait au **10 juillet**,
+200 commits en retard. `git merge --ff-only` a répondu **« refusing to merge
+unrelated histories »** — un message qui fait croire à un dépôt corrompu alors
+qu'il ne dit que « l'historique est tronqué ». ⮕ **`git fetch --unshallow` AVANT
+toute fusion**, pas seulement avant les comparaisons. Vérifier ensuite que le
+`main` local est bien un **ancêtre** d'`origin/main` (`git merge-base --is-ancestor`)
+avant de le faire avancer : c'est ce qui distingue « en retard » de « divergent ».
 
 ⮕ **Où lire la suite** : le **§3 de `SESSION.md`** porte la consigne de démarrage
 complète — prémisse chiffrée à vérifier, priorités dans l'ordre, décisions en
