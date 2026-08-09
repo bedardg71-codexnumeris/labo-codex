@@ -7,6 +7,27 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 9 AOÛT 2026, SUITE (même conteneur, même branche).
+     ÉTAT FACTUEL EN FIN : **1.63.0** (build 0809-0835), branche à 7 commits devant `main`, Vitest **1998/1998** (230 fichiers). Dernier ID BACKLOG **#435**.
+
+     ✅ LIVRÉ — **phases B et C du plan note finale : rien à coder, tout à VERROUILLER.** Vérifiées au code : livrées depuis longtemps, sans trace ni filet — le motif « le plan dormait, le travail était en production » du §4ter, une fois de plus, et cette fois SUR MA PROPRE LIGNE du matin (le §4ter les annonçait « débloquées par #328 » : faux, j'avais lu les titres du plan au lieu du code). Sentinelle `sentinelle-note-finale-portfolio-BC.test.js`, 11 cas, 11 break-tests ROUGE. Rectificatif consigné au §4ter et dans le plan (liste périmée BARRÉE, pas effacée). 1.61.1.
+
+     ✅ LIVRÉ — **#434 Phase D (1.62.0, jamais déployée)** : le champ legacy « Comment construis-tu la note finale ? » retiré, le mode de sélection devient l'unique commande, `varianteCalcul` en projection. Bloc V2 mort retiré de `pratiques-bibliotheque.js`.
+
+     ⚠⚠ **PUIS LA QUESTION DE GRÉGOIRE QUI A TOUT RATTRAPÉ** : « il me semble que la config PAN STD par objectifs avait été retirée après décision ». VÉRIFIÉ : #396 (5 août, D2) avait condamné la famille — et #434 venait d'OUVRIR une porte utilisateur vers le moteur STD par objectifs sans vérifier l'historique. Ce moteur portait le MÊME défaut de naissance que le chemin retiré par #396 : appariement production→objectif par un `objectifId` qu'aucun code n'écrit. Et détail cruel : les 4 gabarits du catalogue qui l'illustraient n'avaient AUCUN objectif défini — jamais calculables, même moteur sain.
+     ⮕ **LEÇON, à retenir en face de celle du matin** : le rituel dit « aller au code avant de conclure » ; il faut AUSSI aller à l'HISTORIQUE avant de rendre disponible. Une porte fermée n'est pas forcément un bug — demander d'abord pourquoi elle est fermée. (#434 a annoncé « enfin atteignable » au changelog ce qu'une décision de quatre jours plus tôt avait condamné.)
+
+     ✅ LIVRÉ — **#435 (1.63.0) : ablation du mode « par-objectifs », extension de #396** (décision Grégoire, 9 août). Partis : routage + 4 modes du moteur STD (~6,8 Ko) · panneau `mat-config-par-objectifs` (137 lignes, jamais affichées — le style inline n'était jamais levé) · 10 fonctions d'édition + 12 exports (~14,8 Ko) · les 4 gabarits · les projections `parObjectifs`.
+     ▣ **SURVIVANTS BREAK-TESTÉS — le piège du prochain nettoyage** : `_calculerNiveauxParObjectif` et `suggererNoteHolistique` ont l'air morts avec le moteur, ils ne le sont PAS — la suggestion holistique DEN (`denotation-saisie-ui.js`) les appelle. Deux break-tests dédiés les protègent (les supprimer ROUGIT).
+     ▣ **Pratiques legacy : normalisation lecture seule**, patron #396 — console.warn + affichage sur le `methodeSelection` réel, AUCUNE réécriture spontanée. Une modalité stockée portant encore le flag tombe dans le calcul portfolio.
+     ▣ **Tests adaptés, pas contournés** : le bloc « parité méthode↔helper » de `denotation-moteur-DEN1.test.js` n'avait plus de SUJET (la parité valait tant que deux chemins coexistaient) — reconverti en verrou de survie des dépendances DEN + cliquet d'absence. Sentinelle #434 réécrite en cliquet #434+#435, 13 cas. **12 break-tests ROUGE** au total.
+     ▣ **Changelog : 1.62 consolidée dans 1.63** (précédent 1.48 — jamais déployée, l'utilisateur ne verra qu'une livraison, qui ne promet plus un mode retiré).
+
+     ⮕ **PORTES TERRAIN 1.63** : ouvrir une pratique PAN-Standards → le champ legacy absent, la description sous le Mode de sélection ; une pratique legacy « par objectifs » (s'il en existe une chez toi) s'ouvre sur son mode réel avec l'avertissement console ; la suggestion holistique DEN fonctionne toujours à l'ancrage.
+     ⮕ **QUEUES** : G2-b (~30 lecteurs `configPAN` + faire lire `methodeSelection` au moteur pour retirer la projection `varianteCalcul`) · #425 · #418 · #427 (septembre) · #428/#430 (rentrée) · portes terrain 1.57→1.63 · décision infobulles-T9/T10.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 9 AOÛT 2026 (conteneur cloud, branche `claude/incomplete-work-plans-h1nimp`).
      ÉTAT FACTUEL AU DÉPART : `origin/main` = `83ee41d3`, **1.60.0** (build 0808-1836), Vitest **1960/1960** (227 fichiers), arbre propre, dernier ID BACKLOG **#433**. Prémisse du §3 vérifiée : **zéro écart**.
      ⚠ **PIÈGE D'ENVIRONNEMENT, à connaître pour les prochains conteneurs** : le clone était **SHALLOW**. Avant `git fetch --unshallow`, `main` local pointait au **10 juillet** et `git rev-list --count main...HEAD` affichait une divergence de **83/57 commits** — entièrement fausse. Après unshallow : `0/0`. Le §3 le disait ; le vérifier avant de conclure quoi que ce soit sur une divergence.
@@ -5748,10 +5769,10 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 | Point | Valeur attendue |
 |---|---|
 | Branche | ⚠ **`claude/incomplete-work-plans-h1nimp`** — le travail du 9 août **n'est PAS sur `main`** (voir `RELAIS.md`) |
-| Version | `{"build":"0809-0733","beta":"1.61.0"}` |
-| Vitest | **1974/1974** (228 fichiers) |
+| Version | `{"build":"0809-0835","beta":"1.63.0"}` |
+| Vitest | **1998/1998** (230 fichiers) |
 | Playwright WebKit | non exécutable en conteneur → CI à la PR |
-| Dernier ID BACKLOG | **#433** (inchangé — aucun item neuf ouvert le 9 août) |
+| Dernier ID BACKLOG | **#435** |
 | Arbre | propre |
 
 ⚠ **Le clone du conteneur est SHALLOW.** `git fetch --unshallow` AVANT toute

@@ -129,11 +129,14 @@ class PratiquePANStandards {
             return null;
         }
 
-        // ✅ NOUVEAU (Beta 95) : Vérifier si la variante est "par-objectifs"
-        const modalites = this._modalites();
-        if (modalites.varianteCalcul === 'par-objectifs') {
-            return this._calculerPerformanceParObjectifs(da);
-        }
+        // #435 (9 août 2026) — le routage « par-objectifs » est RETIRÉ, extension
+        // de la décision #396 (Grégoire, 5 août : retirer les chemins par
+        // objectifs jamais fonctionnels). Celui-ci avait le même défaut de
+        // naissance que pan_par_objectif : _calculerNiveauxParObjectif apparie
+        // les productions par `objectifId` (AUCUN écrivain dans js/) ou par
+        // égalité stricte texte-libre ↔ nom d'objectif. Une modalité stockée
+        // portant encore `varianteCalcul: 'par-objectifs'` tombe désormais dans
+        // le calcul portfolio ci-dessous — qui, lui, calcule.
 
         // 🆕 Beta 95.4 : Vérifier si les catégories Sélection/Obligatoires sont actives
         const configCategories = typeof obtenirConfigCategories === 'function' ? obtenirConfigCategories() : null;
@@ -1380,179 +1383,13 @@ class PratiquePANStandards {
         return seuilsDefaut[nomSeuil] || 0.75;
     }
 
-    // =========================================================================
-    // SYSTÈME DE COMPTAGE D'OBJECTIFS - Beta 95
-    // =========================================================================
-
-    /**
-     * Calcule la performance selon le système de comptage d'objectifs
-     *
-     * Logique :
-     * 1. Pour chaque objectif configuré, trouver la meilleure note de l'étudiant
-     * 2. Un objectif est "maîtrisé" si note >= seuil de maîtrise
-     * 3. Note finale = grille de conversion[nb objectifs maîtrisés]
-     * 4. Si un objectif essentiel n'est pas maîtrisé → plafond à 55%
-     *
-     * @param {string} da - Numéro de dossier d'admission
-     * @returns {number} Indice P entre 0 et 1, ou null si pas de données
-     * @private
-     */
-    _calculerPerformanceParObjectifs(da) {
-        const modalites = this._modalites();
-        const config = modalites.parObjectifs || {};
-        const mode = config.modeCalcul || 'comptage';
-
-        const objectifs = config.objectifs || [];
-
-        if (objectifs.length === 0) {
-            console.warn('[PAN-Standards] Aucun objectif configuré');
-            return null;
-        }
-
-        // Dispatch vers le mode de calcul approprié
-        switch (mode) {
-            case 'comptage':
-                return this._calculerModeComptage(da, objectifs, config.comptage || {});
-            case 'moyenne-ponderee':
-                return this._calculerModeMoyennePonderee(da, objectifs, config.moyennePonderee || {});
-            case 'seuils-critiques':
-                return this._calculerModeSeuilsCritiques(da, objectifs, config.seuilsCritiques || {});
-            case 'holistique':
-                return this._calculerModeHolistique(da, objectifs, config.holistique || {});
-            default:
-                console.warn(`[PAN-Standards] Mode inconnu: ${mode}, utilisation du mode comptage`);
-                return this._calculerModeComptage(da, objectifs, config.comptage || {});
-        }
-    }
-
-    /**
-     * Mode Comptage
-     * Note = grille de conversion selon nombre d'objectifs maîtrisés
-     * Plafond si objectifs essentiels non maîtrisés
-     */
-    _calculerModeComptage(da, objectifs, configComptage) {
-        const seuilMaitrise = (configComptage.seuilMaitrise || 75) / 100;
-        const plafond = (configComptage.plafondSiEssentielNonMaitrise || 55) / 100;
-        const grilleConversion = configComptage.grilleConversion || {};
-
-        const niveauxParObjectif = this._calculerNiveauxParObjectif(da, objectifs);
-        if (!niveauxParObjectif) return null;
-
-        let nbObjectifsMaitrises = 0;
-        let essentielsNonMaitrises = [];
-
-        objectifs.forEach((obj, index) => {
-            const niveau = niveauxParObjectif[index];
-            if (niveau && niveau.note >= seuilMaitrise) {
-                nbObjectifsMaitrises++;
-            } else if (obj.essentiel) {
-                essentielsNonMaitrises.push(obj.nom);
-            }
-        });
-
-        // Note selon grille de conversion
-        let noteFinale = (grilleConversion[nbObjectifsMaitrises] || 0) / 100;
-
-        // Plafond si essentiels non maîtrisés
-        if (essentielsNonMaitrises.length > 0) {
-            noteFinale = Math.min(noteFinale, plafond);
-        }
-
-        return noteFinale;
-    }
-
-    /**
-     * Mode Moyenne pondérée
-     * Note = moyenne des niveaux × pondération de chaque objectif
-     */
-    _calculerModeMoyennePonderee(da, objectifs, configMoyenne) {
-        const niveauxParObjectif = this._calculerNiveauxParObjectif(da, objectifs);
-        if (!niveauxParObjectif) return null;
-
-        let sommeNotesPonderees = 0;
-        let sommePonderations = 0;
-
-        objectifs.forEach((obj, index) => {
-            const niveau = niveauxParObjectif[index];
-            const ponderation = obj.ponderation || 0;
-
-            if (niveau && ponderation > 0) {
-                sommeNotesPonderees += niveau.note * ponderation;
-                sommePonderations += ponderation;
-            }
-        });
-
-        if (sommePonderations === 0) return null;
-
-        return sommeNotesPonderees / sommePonderations;
-    }
-
-    /**
-     * Mode Seuils critiques (Xavier C.-T.)
-     * Tous les objectifs doivent atteindre niveau 3+, bonus pour niveau 4
-     */
-    _calculerModeSeuilsCritiques(da, objectifs, configSeuils) {
-        // ✅ CORRECTION (4 jan 2026) : Prioriser les noms des formulaires, garder fallback pour compatibilité
-        const niveauMinimum = configSeuils.seuilReussite || configSeuils.niveauMinimum || 3;
-        const noteBase = (configSeuils.noteBaseReussite || configSeuils.noteBase || 80) / 100;
-        const bonusNiveau4 = (configSeuils.bonusNiveau4 || 3.33) / 100;
-
-        const niveauxParObjectif = this._calculerNiveauxParObjectif(da, objectifs);
-        if (!niveauxParObjectif) return null;
-
-        let objectifsNonAtteints = 0;
-        let objectifsNiveau4 = 0;
-        let objectifsNiveau2 = 0;
-        let objectifsNiveau1 = 0;
-
-        objectifs.forEach((obj, index) => {
-            const niveau = niveauxParObjectif[index];
-            if (!niveau) {
-                objectifsNonAtteints++;
-                return;
-            }
-
-            // Convertir la note (0-1) en niveau (1-4)
-            const niveauNum = this._convertirNoteEnNiveau(niveau.note);
-
-            if (niveauNum >= 4) {
-                objectifsNiveau4++;
-            } else if (niveauNum >= niveauMinimum) {
-                // OK, niveau atteint
-            } else if (niveauNum === 2) {
-                objectifsNiveau2++;
-            } else {
-                objectifsNiveau1++;
-            }
-        });
-
-        // Règles Xavier : tous niveau 3+ → 80% | Bonus niveau 4 → +3.33%
-        // Un objectif niveau 2 → 55% | Deux niveau 2 OU un niveau 1 → 50%
-        if (objectifsNiveau1 > 0 || objectifsNiveau2 >= 2) {
-            return 0.50;
-        }
-        if (objectifsNiveau2 === 1) {
-            return 0.55;
-        }
-
-        // Tous les objectifs au niveau requis ou plus
-        return Math.min(1.0, noteBase + (objectifsNiveau4 * bonusNiveau4));
-    }
-
-    /**
-     * Mode Holistique
-     * Suggestion statistique (mode, médiane, moyenne) + validation enseignant
-     */
-    _calculerModeHolistique(da, objectifs, configHolistique) {
-        const methode = configHolistique.methodeSuggestion || 'mode';
-        const niveauxParObjectif = this._calculerNiveauxParObjectif(da, objectifs);
-        if (!niveauxParObjectif) return null;
-
-        // Logique mode/médiane/moyenne extraite dans le helper partagé (DEN-1).
-        // niveauxParObjectif est aligné index-pour-index sur objectifs (il en est
-        // le map), donc itérer dessus produit la même liste de notes qu'avant.
-        return suggererNoteHolistique(niveauxParObjectif, methode);
-    }
+    // #435 (9 août 2026) — le « système de comptage d'objectifs » (Beta 95) est
+    // RETIRÉ : _calculerPerformanceParObjectifs et ses quatre modes (comptage,
+    // moyenne-ponderee, seuils-critiques, holistique) sont partis avec le
+    // routage de calculerPerformance. `_calculerNiveauxParObjectif` (juste en
+    // dessous) et le helper pur `suggererNoteHolistique` SURVIVENT : la
+    // suggestion holistique de DEN (denotation-saisie-ui.js) s'en sert — et
+    // elle est défensive (null si rien d'exploitable), pas un chemin de note.
 
     /**
      * Calcule les niveaux atteints par objectif pour un étudiant
@@ -1600,15 +1437,8 @@ class PratiquePANStandards {
         });
     }
 
-    /**
-     * Convertit une note (0-1) en niveau IDME (1-4)
-     */
-    _convertirNoteEnNiveau(note) {
-        if (note >= 0.85) return 4; // Étendu
-        if (note >= 0.75) return 3; // Maîtrisé
-        if (note >= 0.65) return 2; // en Développement
-        return 1; // Incomplet
-    }
+    // (#435 : _convertirNoteEnNiveau est partie avec _calculerModeSeuilsCritiques,
+    //  son unique appelant.)
 }
 
 // ============================================================================

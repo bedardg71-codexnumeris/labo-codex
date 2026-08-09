@@ -104,6 +104,11 @@ const MODELES_PRATIQUES_PREDEFINIS = {
         }
     },
     // === PAN-STANDARDS ===
+    // #435 (9 août 2026) : les quatre gabarits « par objectifs » (Par objectifs
+    // (Pondéré), STD Chimie organique, STD Interfaces et BD, STD Anatomie) sont
+    // RETIRÉS avec le mode — chacun illustrait un des 4 modes de calcul retirés
+    // et aucun ne portait le moindre objectif (zéro entrée `objectifs: []`) :
+    // même appliqués, ils n'ont jamais rien pu calculer.
     'STD-n-meilleurs': {
         id: 'STD-n-meilleurs',
         nom: 'N meilleures évaluations',
@@ -144,133 +149,14 @@ const MODELES_PRATIQUES_PREDEFINIS = {
             }
         }
     },
-    'STD-par-objectifs-pondere': {
-        id: 'STD-par-objectifs-pondere',
-        nom: 'Par objectifs (Pondéré)',
-        description: 'Mode mathématiques : moyenne pondérée des objectifs',
-        type: 'standards',
-        auteur: 'Gabarit Labo Codex',
-        discipline: 'Mathématiques',
-        estGabarit: true,
-        pratiques: ['STD'],
-        configuration: {
-            varianteCalcul: 'par-objectifs',
-            portfolio: {
-                methodeSelection: 'meilleurs',
-                nombreARetenir: 5,
-                minimumCompletion: 5,
-                nombreTotal: 10,
-                decouplerPN: false
-            },
-            parObjectifs: {
-                modeCalcul: 'moyenne-ponderee',
-                objectifs: [
-                    { id: 1, nom: 'Objectif principal', essentiel: true, ponderation: 50 },
-                    { id: 2, nom: 'Objectif secondaire', essentiel: false, ponderation: 30 },
-                    { id: 3, nom: 'Objectif complémentaire', essentiel: false, ponderation: 20 }
-                ]
-            }
-        }
-    },
-
     // ============================================================================
     // PRATIQUE PERSONNALISÉE : Chimie organique
     // Standards avec critères par standard, meilleurs résultats (N=1)
     // ============================================================================
-    'STD-chimie-organique': {
-        id: 'STD-chimie-organique',
-        nom: 'STD Chimie organique',
-        description: 'Standards avec critères par standard, meilleurs résultats. Reprises illimitées au bureau.',
-        type: 'standards',
-        auteur: 'Gabarit Labo Codex',
-        discipline: 'Chimie',
-        estGabarit: true,
-        pratiques: ['STD'],
-        configuration: {
-            varianteCalcul: 'par-objectifs',
-            echelleId: 'ECHELLE_BRUNO_CHIMIE',
-            portfolio: {
-                methodeSelection: 'meilleurs',
-                nombreARetenir: 1,  // Meilleur résultat par standard
-                minimumCompletion: 1,
-                nombreTotal: 12,    // 12 occasions formelles
-                decouplerPN: true   // Critères par standard, pas par éval
-            },
-            parObjectifs: {
-                modeCalcul: 'comptage',
-                objectifs: [
-                    { id: 1, nom: 'Nomenclature organique', essentiel: true, ponderation: 0 },
-                    { id: 2, nom: 'Réactions acidobasiques', essentiel: true, ponderation: 0 },
-                    { id: 3, nom: 'Additions sur alcènes', essentiel: true, ponderation: 0 },
-                    { id: 4, nom: 'Substitutions nucléophiles', essentiel: true, ponderation: 0 },
-                    { id: 5, nom: 'Éliminations', essentiel: true, ponderation: 0 },
-                    { id: 6, nom: 'Synthèses multi-étapes', essentiel: true, ponderation: 0 }
-                ],
-                comptage: {
-                    seuilMaitrise: 75,              // Niveau "Acquis"
-                    plafondSiEssentielNonMaitrise: 55,
-                    grilleConversion: { 0: 0, 1: 50, 2: 55, 3: 60, 4: 70, 5: 80, 6: 100 }
-                }
-            }
-        },
-        seuils: {
-            vaBien: 75,
-            difficulte: 60,
-            grandeDifficulte: 55
-        }
-    },
-
     // ============================================================================
     // PRATIQUE PERSONNALISÉE : Informatique
     // 6 objectifs, tous niveau 3+ requis, calcul conditionnel
     // ============================================================================
-    'STD-info-interfaces-bd': {
-        id: 'STD-info-interfaces-bd',
-        nom: 'STD Interfaces et BD',
-        description: '6 objectifs requis niveau 3+. Base 80% + bonus 3.33% par niveau 4. Hybride STD/SPE.',
-        type: 'standards',
-        auteur: 'Gabarit Labo Codex',
-        discipline: 'Informatique',
-        estGabarit: true,
-        pratiques: ['STD'],
-        configuration: {
-            varianteCalcul: 'par-objectifs',
-            echelleId: 'ECHELLE_XAVIER_INFO',
-            portfolio: {
-                methodeSelection: 'meilleurs',
-                nombreARetenir: 1,
-                minimumCompletion: 1,
-                nombreTotal: 3,     // 3 évaluations (projet, examen pratique, examens théoriques)
-                decouplerPN: true
-            },
-            parObjectifs: {
-                modeCalcul: 'seuils-critiques',
-                objectifs: [
-                    { id: 1, nom: 'Modélisation de données', essentiel: true, ponderation: 0 },
-                    { id: 2, nom: 'Procédures stockées et déclencheurs', essentiel: true, ponderation: 0 },
-                    { id: 3, nom: 'Sécurité et sauvegardes', essentiel: true, ponderation: 0 },
-                    { id: 4, nom: 'Programmation DB First', essentiel: true, ponderation: 0 },
-                    { id: 5, nom: 'Conception d\'interfaces', essentiel: true, ponderation: 0 },
-                    { id: 6, nom: 'Programmation LINQ', essentiel: true, ponderation: 0 }
-                ],
-                // ✅ CORRECTION (4 jan 2026) : Harmoniser avec les noms des formulaires Trimestre
-                seuilsCritiques: {
-                    seuilReussite: 3,               // Tous doivent être niveau 3+
-                    noteBaseReussite: 80,           // 80% si tous niveau 3+
-                    bonusParNiveau4: 3.33,          // +3.33% par objectif niveau 4
-                    notes1Objectif2: 55,            // 1 objectif niveau 2 → 55%
-                    notes2Objectifs2ou1Obj1: 50,    // 2 obj niveau 2 OU 1 obj niveau 1 → 50%
-                    notesAutresCas: 40              // Plafond autres cas
-                }
-            }
-        },
-        seuils: {
-            vaBien: 80,
-            difficulte: 55,
-            grandeDifficulte: 50
-        }
-    },
-
     // ============================================================================
     // PRATIQUES SOMMATIVES TRADITIONNELLES
     // ============================================================================
@@ -434,47 +320,6 @@ const MODELES_PRATIQUES_PREDEFINIS = {
     // PRATIQUE PERSONNALISÉE : Biologie
     // PAN-Standards avec jugement global (holistique)
     // ============================================================================
-    'STD-anatomie': {
-        id: 'STD-anatomie',
-        nom: 'STD Anatomie',
-        description: 'PAN – Standards avec jugement global. 11 évaluations. Progression qualitative sans calcul strict.',
-        type: 'standards',
-        auteur: 'Gabarit Labo Codex',
-        discipline: 'Biologie',
-        etablissement: 'Cégep',
-        estGabarit: true,
-        pratiques: ['STD'],
-        configuration: {
-            varianteCalcul: 'par-objectifs',
-            echelleId: 'ECHELLE_ISABELLE_BIO',
-            portfolio: {
-                methodeSelection: 'tous',
-                nombreTotal: 11,
-                decouplerPN: true
-            },
-            parObjectifs: {
-                modeCalcul: 'holistique',
-                description: 'Jugement professionnel global basé sur la progression',
-                objectifs: [
-                    { id: 1, nom: 'Compétence anatomie', essentiel: true, ponderation: 0 }
-                ],
-                holistique: {
-                    baseSurProgression: true,
-                    criteresProjets: true,
-                    criteresExamens: false,
-                    jugementProfessionnel: true
-                }
-            }
-        },
-        seuils: {
-            vaBien: null,
-            difficulte: null,
-            grandeDifficulte: null,
-            type: 'qualitatif'
-        },
-        avertissement: 'Cette pratique nécessite un jugement professionnel final. Les indicateurs sont un soutien, pas un calcul automatique.'
-    },
-
     // ============================================================================
     // PRATIQUE PERSONNALISÉE : Philosophie
     // Sommative avec mécanisme de remplacement
@@ -666,7 +511,7 @@ async function obtenirConfigurationPratiqueParId(configId) {
 async function ajouterPratiqueALaBibliotheque(configuration) {
     // B-β — passage obligé par assainirObjet. Le schéma pratique inclut
     // `configuration` en type 'object' brut pour préserver la structure
-    // riche (typesTravaux, forfaits, portfolio, parObjectifs) sans devoir
+    // riche (typesTravaux, forfaits, portfolio) sans devoir
     // la modéliser exhaustivement.
     const configSafe = (typeof window.assainirObjet === 'function' && window.SCHEMAS_IMPORT && window.SCHEMAS_IMPORT.pratique)
         ? window.assainirObjet(configuration, window.SCHEMAS_IMPORT.pratique)
@@ -807,8 +652,7 @@ async function sauvegarderConfigurationActuelle(nom, description = '') {
                 decouplerPN: modalites.portfolio.decouplerPN || false
             } : null,
 
-            // Configuration par-objectifs (si applicable)
-            parObjectifs: modalites.parObjectifs ? JSON.parse(JSON.stringify(modalites.parObjectifs)) : null
+            parObjectifs: null // #435 : mode retiré — ne plus propager une config morte
         };
     }
 
@@ -856,7 +700,7 @@ async function appliquerConfigurationPratique(configId) {
         modalites.specifications.modeleNom = config.nom;
 
     } else if (typeConfig === 'standards') {
-        // Variante de calcul (n-meilleurs, n-recents, par-objectifs, etc.)
+        // Variante de calcul (n-meilleurs, n-recents, hybride)
         if (config.configuration?.varianteCalcul) {
             modalites.varianteCalcul = config.configuration.varianteCalcul;
         }
@@ -869,10 +713,7 @@ async function appliquerConfigurationPratique(configId) {
             };
         }
 
-        // Configuration par-objectifs (si variante = 'par-objectifs')
-        if (config.configuration?.parObjectifs) {
-            modalites.parObjectifs = JSON.parse(JSON.stringify(config.configuration.parObjectifs));
-        }
+        // (#435 : plus de projection `parObjectifs` — le moteur ne la lit plus.)
 
         // Marquer la configuration appliquée
         modalites.configurationSTDAppliquee = {

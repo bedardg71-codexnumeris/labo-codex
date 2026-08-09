@@ -1131,16 +1131,18 @@ function remplirFormulairePratique(pratique) {
         let modeSelection = config.portfolio?.methodeSelection || 'meilleurs';
         if (estHybride) modeSelection = 'hybride';
 
-        // ⚠ #434 (9 août 2026) — REPRISE DES PRATIQUES EXISTANTES, pas un défaut.
-        // Le mode « Par objectifs » vivait dans le champ legacy `varianteCalcul`,
-        // retiré en Phase D. Une pratique déjà enregistrée le porte encore : sans
-        // cette lecture, elle s'ouvrirait sur le panneau Portfolio et une simple
-        // sauvegarde la reclasserait en silence — perte de configuration.
-        // `config.parObjectifs` sert de second témoin : une pratique dont la
-        // variante aurait été perdue mais qui a des objectifs configurés est,
-        // de fait, une pratique par objectifs.
+        // #435 (9 août 2026) — NORMALISATION des pratiques legacy, extension de
+        // #396 (décision Grégoire, 9 août) : le mode « par-objectifs » est
+        // retiré de l'application, moteur compris — il n'a jamais pu calculer
+        // (appariement par un `objectifId` qu'aucun code n'écrit). Une pratique
+        // stockée qui le porte encore s'ouvre sur son mode de sélection réel
+        // (`methodeSelection`), avec un avertissement console. LECTURE SEULE :
+        // aucune écriture tant que l'utilisateur ne sauvegarde pas lui-même —
+        // même patron que la normalisation de `pan_par_objectif` (#396).
         if (config.varianteCalcul === 'par-objectifs' || config.parObjectifs) {
-            modeSelection = 'par-objectifs';
+            console.warn('[Pratiques] Mode « par-objectifs » retiré (#435) : la pratique « '
+                + (pratique.nom || pratique.id) + ' » est affichée avec son mode de sélection « '
+                + modeSelection + ' ». Sa configuration parObjectifs est ignorée.');
         }
 
         // Le mode de sélection se pose TOUJOURS — y compris sans `config.portfolio`,
@@ -1476,8 +1478,9 @@ async function sauvegarderConfigPratiqueMat() {
         const modeSelection = getValeurChamp('mat-portfolio-selection') || 'meilleurs';
         configurations[index].configuration.varianteCalcul = varianteCalculDepuisMode(modeSelection);
 
-        // Configuration Portfolio (tous les modes sauf « par objectifs »)
-        if (modeSelection !== 'par-objectifs') {
+        // Configuration Portfolio (#435 : plus de branche « par objectifs » —
+        // le portfolio est LA configuration STD, toujours écrite)
+        {
             configurations[index].configuration.portfolio = {
                 methodeSelection: modeSelection,
                 nombreARetenir: parseInt(getValeurChamp('mat-portfolio-nombre')) || 5,
@@ -1500,37 +1503,10 @@ async function sauvegarderConfigPratiqueMat() {
             };
         }
 
-        // Configuration Par-Objectifs
-        if (modeSelection === 'par-objectifs') {
-            // Initialiser parObjectifs si absent
-            if (!configurations[index].configuration.parObjectifs) {
-                configurations[index].configuration.parObjectifs = { objectifs: [] };
-            }
-
-            const modeCalcul = getValeurChamp('mat-objectifs-mode-calcul') || 'comptage';
-            configurations[index].configuration.parObjectifs.modeCalcul = modeCalcul;
-
-            // Paramètres selon le mode
-            if (modeCalcul === 'comptage') {
-                configurations[index].configuration.parObjectifs.comptage = {
-                    seuilMaitrise: parseInt(getValeurChamp('mat-comptage-seuil-maitrise')) || 75,
-                    plafondEssentiel: parseInt(getValeurChamp('mat-comptage-plafond-essentiel')) || 55,
-                    grilleConversion: configurations[index].configuration.parObjectifs.comptage?.grilleConversion || []
-                };
-            } else if (modeCalcul === 'seuils-critiques') {
-                // ✅ CORRECTION (4 jan 2026) : Harmoniser avec les noms des formulaires Trimestre
-                configurations[index].configuration.parObjectifs.seuilsCritiques = {
-                    seuilReussite: parseInt(getValeurChamp('mat-seuils-niveau-reussite')) || 3,
-                    noteBaseReussite: parseInt(getValeurChamp('mat-seuils-note-base')) || 80,
-                    bonusNiveau4: parseFloat(getValeurChamp('mat-seuils-bonus-niveau4')) || 3.33
-                };
-            } else if (modeCalcul === 'holistique') {
-                configurations[index].configuration.parObjectifs.holistique = {
-                    methode: getValeurChamp('mat-holistique-methode') || 'mode'
-                };
-            }
-            // moyenne-ponderee : les pondérations sont stockées dans les objectifs eux-mêmes
-        }
+        // (#435 : la branche de sauvegarde « Par objectifs » est retirée avec le
+        //  mode. Une config legacy `parObjectifs` déjà stockée n'est NI relue NI
+        //  réécrite ici — elle reste inerte tant que l'utilisateur ne sauvegarde
+        //  pas, et la normalisation d'ouverture l'a signalée en console.)
     } else if (typeCanon === 'specifications') {
         configurations[index].configuration.seuilAcceptable = parseInt(getValeurChamp('mat-spec-seuil')) || 75;
         // typesTravaux et forfaits sont gérés par leurs propres fonctions
@@ -2416,8 +2392,7 @@ const DESCRIPTIONS_MODE_SELECTION = {
     'meilleurs':     'Les N meilleures évaluations sont retenues pour calculer la note finale. Valorise le progrès.',
     'derniers':      'Les N évaluations les plus récentes sont retenues. Valorise l\'état actuel de maîtrise.',
     'tous':          'Toutes les évaluations du portfolio comptent, sans sélection.',
-    'hybride':       'Les N meilleures de la Sélection, plus les productions Obligatoires, avec une pondération par bloc.',
-    'par-objectifs': 'Calcul par objectifs avec 4 modes possibles (comptage, moyenne, seuils, holistique).'
+    'hybride':       'Les N meilleures de la Sélection, plus les productions Obligatoires, avec une pondération par bloc.'
 };
 
 /**
@@ -2435,7 +2410,7 @@ const DESCRIPTIONS_MODE_SELECTION = {
  */
 function varianteCalculDepuisMode(mode) {
     switch (mode) {
-        case 'par-objectifs': return 'par-objectifs';
+        // ('par-objectifs' retiré par #435 — le mode n'existe plus.)
         case 'hybride':       return 'hybride';
         case 'meilleurs':     return 'n-meilleurs';
         case 'derniers':      return 'n-recents';
@@ -2467,42 +2442,24 @@ function onPortfolioSelectionChangeMat() {
 }
 
 /**
- * Reflète le mode de sélection dans l'interface : description, et bascule
- * entre le panneau Portfolio et le panneau Par-Objectifs.
+ * Reflète le mode de sélection dans l'interface (description sous le sélecteur).
  *
  * Séparée du handler parce que le CHARGEMENT d'une pratique doit produire le
  * même écran qu'un changement manuel — sans repasser par une sauvegarde.
+ *
+ * (#435 : la bascule Portfolio ↔ Par-Objectifs qu'elle portait est retirée
+ * avec le panneau et son moteur — extension de #396.)
  */
 function appliquerModeSelectionMat(mode) {
     const descriptionDiv = document.getElementById('mat-portfolio-selection-description');
-    const configPortfolio = document.getElementById('mat-config-portfolio');
-    const configParObjectifs = document.getElementById('mat-config-par-objectifs');
-
-    if (descriptionDiv) {
-        if (DESCRIPTIONS_MODE_SELECTION[mode]) {
-            descriptionDiv.textContent = DESCRIPTIONS_MODE_SELECTION[mode];
-            descriptionDiv.classList.remove('u-hide');
-            descriptionDiv.style.display = '';
-        } else {
-            descriptionDiv.classList.add('u-hide');
-            descriptionDiv.style.display = 'none';
-        }
-    }
-
-    if (mode === 'par-objectifs') {
-        if (configPortfolio) configPortfolio.classList.add('u-hide');
-        if (configParObjectifs) {
-            configParObjectifs.classList.remove('u-hide');
-            configParObjectifs.style.display = '';
-            // Charger les données (changerModeCalculObjectifsMat est appelé à la fin)
-            chargerConfigParObjectifsMat();
-        }
+    if (!descriptionDiv) return;
+    if (DESCRIPTIONS_MODE_SELECTION[mode]) {
+        descriptionDiv.textContent = DESCRIPTIONS_MODE_SELECTION[mode];
+        descriptionDiv.classList.remove('u-hide');
+        descriptionDiv.style.display = '';
     } else {
-        if (configPortfolio) configPortfolio.classList.remove('u-hide');
-        if (configParObjectifs) {
-            configParObjectifs.classList.add('u-hide');
-            configParObjectifs.style.display = 'none';
-        }
+        descriptionDiv.classList.add('u-hide');
+        descriptionDiv.style.display = 'none';
     }
 }
 
@@ -2690,368 +2647,16 @@ async function recalculerPonderationsUnitaires() {
 }
 
 /* ===============================
-   PAR-OBJECTIFS (variante STD)
-   =============================== */
-
-/**
- * Descriptions des 4 modes de calcul par-objectifs
- */
-const MODES_PAR_OBJECTIFS = {
-    'comptage': {
-        nom: 'Comptage d\'objectifs',
-        auteur: 'Labo Codex',
-        description: 'La note finale dépend du nombre d\'objectifs maîtrisés. Les objectifs « essentiels » doivent TOUS être maîtrisés, sinon la note est plafonnée.'
-    },
-    'moyenne-ponderee': {
-        nom: 'Moyenne pondérée',
-        auteur: 'Labo Codex',
-        description: 'La note finale est la moyenne des niveaux atteints, pondérée par l\'importance de chaque objectif.'
-    },
-    'seuils-critiques': {
-        nom: 'Seuils critiques',
-        auteur: 'Labo Codex',
-        description: 'Tous les objectifs doivent atteindre un niveau minimum. Bonus pour les objectifs au niveau supérieur.'
-    },
-    'holistique': {
-        nom: 'Holistique',
-        auteur: 'Labo Codex',
-        description: 'Le système suggère une note basée sur une analyse statistique, mais l\'enseignant·e valide avec son jugement professionnel.'
-    }
-};
-
-/**
- * Charge la configuration Par-Objectifs depuis la pratique en édition
- */
-async function chargerConfigParObjectifsMat() {
-    if (!pratiqueEnEditionMateriel) return;
-
-    let configurations = [];
-    try {
-        configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
-    } catch (e) {
-        configurations = [];
-    }
-
-    const pratique = configurations.find(p => p.id === pratiqueEnEditionMateriel);
-    if (!pratique) return;
-
-    const parObjectifs = pratique.configuration?.parObjectifs || {};
-
-    // Mode de calcul
-    setValeurChamp('mat-objectifs-mode-calcul', parObjectifs.modeCalcul || 'comptage');
-
-    // Afficher la liste des objectifs
-    afficherListeObjectifsMat(parObjectifs.objectifs || []);
-
-    // Paramètres du mode Comptage
-    setValeurChamp('mat-comptage-seuil-maitrise', parObjectifs.comptage?.seuilMaitrise || 75);
-    setValeurChamp('mat-comptage-plafond-essentiel', parObjectifs.comptage?.plafondEssentiel || 55);
-
-    // Paramètres du mode Seuils critiques
-    // ✅ CORRECTION (4 jan 2026) : Harmoniser avec les noms des formulaires Trimestre
-    setValeurChamp('mat-seuils-niveau-reussite', parObjectifs.seuilsCritiques?.seuilReussite || 3);
-    setValeurChamp('mat-seuils-note-base', parObjectifs.seuilsCritiques?.noteBaseReussite || 80);
-    setValeurChamp('mat-seuils-bonus-niveau4', parObjectifs.seuilsCritiques?.bonusNiveau4 || 3.33);
-
-    // Paramètres du mode Holistique
-    setValeurChamp('mat-holistique-methode', parObjectifs.holistique?.methode || 'mode');
-
-    // Grille de conversion (mode Comptage)
-    if (parObjectifs.comptage?.grilleConversion) {
-        afficherGrilleConversionMat(parObjectifs.comptage.grilleConversion);
-    }
-
-    // Afficher la bonne section de mode (APRÈS avoir chargé les données)
-    changerModeCalculObjectifsMat();
-}
-
-/**
- * Handler : Changement du mode de calcul par-objectifs
- */
-function changerModeCalculObjectifsMat() {
-    const mode = getValeurChamp('mat-objectifs-mode-calcul');
-    const descriptionDiv = document.getElementById('mat-objectifs-mode-description');
-
-    // Afficher la description du mode
-    const modeInfo = MODES_PAR_OBJECTIFS[mode];
-    if (modeInfo && descriptionDiv) {
-        descriptionDiv.innerHTML = `<strong>${modeInfo.nom} (${modeInfo.auteur})</strong> : ${modeInfo.description}`;
-        descriptionDiv.classList.remove('u-hide');
-    } else if (descriptionDiv) {
-        descriptionDiv.classList.add('u-hide');
-    }
-
-    // Masquer toutes les sections de mode
-    const sections = ['mat-config-mode-comptage', 'mat-config-mode-moyenne-ponderee',
-                      'mat-config-mode-seuils-critiques', 'mat-config-mode-holistique'];
-    sections.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.classList.add('u-hide');
-    });
-
-    // Afficher la section correspondante
-    const sectionId = `mat-config-mode-${mode}`;
-    const section = document.getElementById(sectionId);
-    if (section) section.classList.remove('u-hide');
-
-    // Rafraîchir la liste des objectifs (colonnes différentes selon le mode)
-    rafraichirListeObjectifsMat();
-
-    sauvegarderConfigPratiqueMat();
-}
-
-/**
- * Affiche la liste des objectifs dans le tableau
- */
-function afficherListeObjectifsMat(objectifs) {
-    const conteneur = document.getElementById('mat-objectifs-liste');
-    if (!conteneur) return;
-
-    if (!objectifs || objectifs.length === 0) {
-        conteneur.innerHTML = '<p style="color: var(--gris-clair); font-style: italic;">Aucun objectif défini. Clique sur "+ Ajouter un objectif".</p>';
-        return;
-    }
-
-    const mode = getValeurChamp('mat-objectifs-mode-calcul') || 'comptage';
-
-    let html = '<table class="table-bordures" style="width: 100%;">';
-    html += '<thead><tr>';
-    html += '<th style="width: 40%;">Nom de l\'objectif</th>';
-
-    // Colonnes spécifiques selon le mode
-    if (mode === 'comptage') {
-        html += '<th style="width: 20%;">Type</th>';
-    } else if (mode === 'moyenne-ponderee') {
-        html += '<th style="width: 20%;">Pondération (%)</th>';
-    }
-
-    html += '<th style="width: 80px;">Actions</th>';
-    html += '</tr></thead>';
-    html += '<tbody>';
-
-    objectifs.forEach((obj, index) => {
-        html += `<tr data-index="${index}">`;
-        html += `<td><input type="text" class="controle-form" value="${obj.nom || ''}"
-                    data-on-change="modifierObjectifMatHandler" data-mat-index="${index}" data-champ="nom"></td>`;
-
-        if (mode === 'comptage') {
-            html += `<td>
-                <select class="controle-form" data-on-change="modifierObjectifMatHandler" data-mat-index="${index}" data-champ="type">
-                    <option value="complementaire" ${obj.type !== 'essentiel' ? 'selected' : ''}>Complémentaire</option>
-                    <option value="essentiel" ${obj.type === 'essentiel' ? 'selected' : ''}>Essentiel</option>
-                </select>
-            </td>`;
-        } else if (mode === 'moyenne-ponderee') {
-            html += `<td><input type="number" class="controle-form" value="${obj.ponderation || 0}"
-                        min="0" max="100" style="width: 80px;"
-                        data-on-change="modifierObjectifMatHandler" data-mat-index="${index}" data-champ="ponderation">%</td>`;
-        }
-
-        html += `<td style="text-align: center;">
-            <button data-action="supprimerObjectifMat" data-param="${index}" class="btn btn-supprimer btn-tres-compact"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>
-        </td>`;
-        html += '</tr>';
-    });
-
-    html += '</tbody></table>';
-
-    // Afficher le total des pondérations pour le mode moyenne-ponderee
-    if (mode === 'moyenne-ponderee') {
-        const total = objectifs.reduce((sum, obj) => sum + (parseInt(obj.ponderation) || 0), 0);
-        const couleur = total === 100 ? 'var(--vert-succes)' : 'var(--rouge-erreur)';
-        html += `<p style="margin-top: 10px; font-weight: 600; color: ${couleur};">
-            Total des pondérations : ${total}% ${total !== 100 ? '(devrait être 100%)' : '<span class="icone-inline icone-inline--check" aria-hidden="true"></span>'}
-        </p>`;
-    }
-
-    conteneur.innerHTML = html;
-}
-
-/**
- * Rafraîchit la liste des objectifs (recharge depuis les données en mémoire)
- */
-async function rafraichirListeObjectifsMat() {
-    if (!pratiqueEnEditionMateriel) return;
-
-    let configurations = [];
-    try {
-        configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
-    } catch (e) {
-        configurations = [];
-    }
-
-    const pratique = configurations.find(p => p.id === pratiqueEnEditionMateriel);
-    if (!pratique) return;
-
-    const objectifs = pratique.configuration?.parObjectifs?.objectifs || [];
-    afficherListeObjectifsMat(objectifs);
-}
-
-/**
- * Ajoute un nouvel objectif à la liste
- */
-async function ajouterObjectifMat() {
-    if (!pratiqueEnEditionMateriel) return;
-
-    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
-    const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
-
-    if (index === -1) return;
-
-    // Initialiser la structure si nécessaire
-    if (!configurations[index].configuration) {
-        configurations[index].configuration = {};
-    }
-    if (!configurations[index].configuration.parObjectifs) {
-        configurations[index].configuration.parObjectifs = { objectifs: [] };
-    }
-    if (!configurations[index].configuration.parObjectifs.objectifs) {
-        configurations[index].configuration.parObjectifs.objectifs = [];
-    }
-
-    const nbObjectifs = configurations[index].configuration.parObjectifs.objectifs.length;
-    configurations[index].configuration.parObjectifs.objectifs.push({
-        id: genererIdUnique('obj_'),
-        nom: `Objectif ${nbObjectifs + 1}`,
-        type: 'complementaire',
-        ponderation: 0
-    });
-
-    await db.set(cle('pratiquesConfigurables'), configurations);
-    afficherListeObjectifsMat(configurations[index].configuration.parObjectifs.objectifs);
-}
-
-/**
- * Modifie une propriété d'un objectif
- */
-async function modifierObjectifMat(indexObjectif, propriete, valeur) {
-    if (!pratiqueEnEditionMateriel) return;
-
-    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
-    const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
-
-    if (index === -1 || !configurations[index].configuration?.parObjectifs?.objectifs) return;
-
-    if (propriete === 'ponderation') {
-        valeur = parseInt(valeur) || 0;
-    }
-
-    configurations[index].configuration.parObjectifs.objectifs[indexObjectif][propriete] = valeur;
-    await db.set(cle('pratiquesConfigurables'), configurations);
-
-    // Rafraîchir si mode moyenne-ponderee (pour mettre à jour le total)
-    if (propriete === 'ponderation') {
-        afficherListeObjectifsMat(configurations[index].configuration.parObjectifs.objectifs);
-    }
-}
-
-/**
- * Supprime un objectif de la liste
- */
-async function supprimerObjectifMat(indexObjectif) {
-    if (!pratiqueEnEditionMateriel) return;
-
-    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
-    const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
-
-    if (index === -1 || !configurations[index].configuration?.parObjectifs?.objectifs) return;
-
-    configurations[index].configuration.parObjectifs.objectifs.splice(indexObjectif, 1);
-    await db.set(cle('pratiquesConfigurables'), configurations);
-    afficherListeObjectifsMat(configurations[index].configuration.parObjectifs.objectifs);
-
-    // Regénérer la grille de conversion si mode comptage
-    const mode = getValeurChamp('mat-objectifs-mode-calcul');
-    if (mode === 'comptage') {
-        genererGrilleConversionMat();
-    }
-}
-
-/**
- * Affiche la grille de conversion (mode Comptage)
- */
-function afficherGrilleConversionMat(grille) {
-    const conteneur = document.getElementById('mat-comptage-grille-conversion');
-    if (!conteneur) return;
-
-    if (!grille || grille.length === 0) {
-        conteneur.innerHTML = '<p style="color: var(--gris-clair); font-style: italic;">Ajoute des objectifs pour générer la grille de conversion.</p>';
-        return;
-    }
-
-    let html = '<table class="table-bordures" style="width: 100%;">';
-    html += '<thead><tr><th>Objectifs maîtrisés</th><th>Note (%)</th></tr></thead>';
-    html += '<tbody>';
-
-    grille.forEach((ligne, index) => {
-        html += `<tr>
-            <td>${ligne.nbObjectifs} objectif(s)</td>
-            <td><input type="number" class="controle-form" value="${echapperHtml(ligne.note)}"
-                    min="0" max="100" style="width: 80px;"
-                    data-on-change="modifierGrilleConversionMatHandler" data-mat-index="${index}">%</td>
-        </tr>`;
-    });
-
-    html += '</tbody></table>';
-    html += `<button type="button" class="btn btn-secondaire btn-compact" style="margin-top: 10px;"
-             data-action="genererGrilleConversionMat">Regénérer la grille</button>`;
-
-    conteneur.innerHTML = html;
-}
-
-/**
- * Génère automatiquement la grille de conversion basée sur le nombre d'objectifs
- */
-async function genererGrilleConversionMat() {
-    if (!pratiqueEnEditionMateriel) return;
-
-    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
-    const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
-
-    if (index === -1) return;
-
-    const objectifs = configurations[index].configuration?.parObjectifs?.objectifs || [];
-    const nbObjectifs = objectifs.length;
-
-    if (nbObjectifs === 0) {
-        afficherGrilleConversionMat([]);
-        return;
-    }
-
-    // Générer une grille linéaire de base
-    const grille = [];
-    for (let i = 0; i <= nbObjectifs; i++) {
-        const note = Math.round((i / nbObjectifs) * 40 + 60); // De 60% à 100%
-        grille.push({ nbObjectifs: i, note: Math.min(note, 100) });
-    }
-
-    // Sauvegarder
-    if (!configurations[index].configuration.parObjectifs.comptage) {
-        configurations[index].configuration.parObjectifs.comptage = {};
-    }
-    configurations[index].configuration.parObjectifs.comptage.grilleConversion = grille;
-
-    await db.set(cle('pratiquesConfigurables'), configurations);
-    afficherGrilleConversionMat(grille);
-}
-
-/**
- * Modifie une note dans la grille de conversion
- */
-async function modifierGrilleConversionMat(indexLigne, valeur) {
-    if (!pratiqueEnEditionMateriel) return;
-
-    let configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
-    const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
-
-    if (index === -1) return;
-
-    const grille = configurations[index].configuration?.parObjectifs?.comptage?.grilleConversion;
-    if (!grille) return;
-
-    grille[indexLigne].note = parseInt(valeur) || 0;
-    await db.set(cle('pratiquesConfigurables'), configurations);
-}
+   PAR-OBJECTIFS — RETIRÉ (#435, 9 août 2026)
+   ===============================
+   La section entière (table MODES_PAR_OBJECTIFS + 10 fonctions d'édition :
+   chargerConfigParObjectifsMat, changerModeCalculObjectifsMat,
+   afficherListeObjectifsMat, rafraichirListeObjectifsMat, ajouterObjectifMat,
+   modifierObjectifMat, supprimerObjectifMat, afficherGrilleConversionMat,
+   genererGrilleConversionMat, modifierGrilleConversionMat) est partie avec le
+   panneau `mat-config-par-objectifs` et le moteur `_calculerPerformanceParObjectifs`.
+   Extension de la décision #396 (Grégoire) : chemin jamais fonctionnel —
+   l'appariement production→objectif reposait sur un `objectifId` sans écrivain. */
 
 /* ===============================
    WRAPPERS DELEGATION (Phase 5)
@@ -3076,19 +2681,6 @@ function modifierTravailForfaitMatHandler(el) {
     var index = parseInt(el.dataset.matIndex);
     var typeId = parseInt(el.dataset.typeId);
     modifierTravailForfaitMat(index, typeId, el.value);
-}
-
-/** Handler pour modifierObjectifMat(index, champ, value) */
-function modifierObjectifMatHandler(el) {
-    var index = parseInt(el.dataset.matIndex);
-    var champ = el.dataset.champ;
-    modifierObjectifMat(index, champ, el.value);
-}
-
-/** Handler pour modifierGrilleConversionMat(index, value) */
-function modifierGrilleConversionMatHandler(el) {
-    var index = parseInt(el.dataset.matIndex);
-    modifierGrilleConversionMat(index, el.value);
 }
 
 /** Handler pour toggleProductionCategorie(prodId, categorie, checked) */
@@ -3201,16 +2793,6 @@ window.modifierTravailForfaitMat = modifierTravailForfaitMat;
 window.supprimerForfaitMat = supprimerForfaitMat;
 
 // PAN-Standards : Par-Objectifs (variante STD)
-window.chargerConfigParObjectifsMat = chargerConfigParObjectifsMat;
-window.changerModeCalculObjectifsMat = changerModeCalculObjectifsMat;
-window.afficherListeObjectifsMat = afficherListeObjectifsMat;
-window.rafraichirListeObjectifsMat = rafraichirListeObjectifsMat;
-window.ajouterObjectifMat = ajouterObjectifMat;
-window.modifierObjectifMat = modifierObjectifMat;
-window.supprimerObjectifMat = supprimerObjectifMat;
-window.afficherGrilleConversionMat = afficherGrilleConversionMat;
-window.genererGrilleConversionMat = genererGrilleConversionMat;
-window.modifierGrilleConversionMat = modifierGrilleConversionMat;
 
 // Anciennes fonctions (compatibilité)
 window.mettreAJourNomPratique = mettreAJourNomPratique;
@@ -3232,8 +2814,6 @@ window.supprimerPratiqueDeBibliothequePartagee = supprimerPratiqueDeBibliotheque
 window.modifierTypeTravailMatHandler = modifierTypeTravailMatHandler;
 window.modifierForfaitMatHandler = modifierForfaitMatHandler;
 window.modifierTravailForfaitMatHandler = modifierTravailForfaitMatHandler;
-window.modifierObjectifMatHandler = modifierObjectifMatHandler;
-window.modifierGrilleConversionMatHandler = modifierGrilleConversionMatHandler;
 window.toggleProductionCategorieHandler = toggleProductionCategorieHandler;
 window.ouvrirFilePickerImportPratiques = ouvrirFilePickerImportPratiques;
 window.fermerModalImportPratiques = fermerModalImportPratiques;
