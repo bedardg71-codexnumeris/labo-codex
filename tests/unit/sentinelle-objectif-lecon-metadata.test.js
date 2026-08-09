@@ -268,7 +268,7 @@ describe('F1 · écriture des objectifs (pluriel)', () => {
 // C. RENDU ET ROUTAGE — invariants de source (couplage DOM assumé)
 // =======================================================================
 describe('F1 · invariants de rendu et de routage', () => {
-    // ⚠ QUATRE ASSERTIONS DE CE BLOC RETARGETÉES LE 9 AOÛT 2026 (#436).
+    // ⚠ QUATRE ASSERTIONS DE CE BLOC RETARGETÉES LE 9 AOÛT 2026 (#437).
     // Le rendu d'un nœud était construit à trois endroits dont deux
     // incomplets ; il a été fondu en `contenuNoeudHTML`, et le balisage des
     // objectifs vit désormais dans `objectifsLeconHTML` /
@@ -277,7 +277,7 @@ describe('F1 · invariants de rendu et de routage', () => {
     // vérifié au rendu réel avant d'être réécrit ici.
     //
     // ⮕ Ces quatre-là sont doublés par des assertions COMPORTEMENTALES dans
-    // `sentinelle-carte-rendu-unique-436.test.js` (§H), qui rendent un nœud
+    // `sentinelle-carte-rendu-unique-437.test.js` (§H), qui rendent un nœud
     // au lieu de relire la source. C'est la leçon du jour : une assertion de
     // source dit où le code est écrit, jamais ce qu'il produit — elle a
     // survécu sans broncher aux quatre en-têtes rendues incomplètes.
@@ -363,7 +363,7 @@ describe('F1 · invariants de rendu et de routage', () => {
         expect(source).toContain('planif-obj-ajouter');
         expect(source).toContain('planif-obj-retirer');
         // Atteignables au clavier, pas seulement à la souris. Les quatre
-        // commandes partagent une fabrique unique depuis #436 : c'est ELLE
+        // commandes partagent une fabrique unique depuis #437 : c'est ELLE
         // qui doit poser le contrat clavier, sinon une commande ajoutée plus
         // tard naîtrait inaccessible.
         expect(source).toMatch(/role="button" tabindex="0" aria-label="' \+ libelle \+ '"/);
@@ -384,7 +384,7 @@ describe('F1 · invariants de rendu et de routage', () => {
         );
         expect(brancheAccueil).toContain('data-accueil="1"');
         // Les deux branches appellent la MÊME fabrique de commandes depuis
-        // #436 — c'est ce qui rend structurellement impossible qu'une des deux
+        // #437 — c'est ce qui rend structurellement impossible qu'une des deux
         // reparte sans ses boutons.
         expect(brancheAccueil).toContain('commandesObjectifHTML(');
         // Ses flèches sont inertes : une ligne pas encore persistée n'a rien

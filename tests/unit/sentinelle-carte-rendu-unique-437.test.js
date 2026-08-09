@@ -6,7 +6,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 
 // =======================================================================
 // SENTINELLE — chemin de rendu unique, ordre des objectifs, sarcelle unie
-// (#436, 9 août 2026)
+// (#437, 9 août 2026)
 // =======================================================================
 //
 // Constat terrain de Grégoire, capture à l'appui : « la durée n'est pas
@@ -100,7 +100,7 @@ beforeEach(() => {
 });
 
 // -----------------------------------------------------------------------
-describe('#436 · A — un seul chemin construit l’en-tête (cliquet)', () => {
+describe('#437 · A — un seul chemin construit l’en-tête (cliquet)', () => {
     it('la classe « planif-noeud-entete » n’est fabriquée qu’à UN endroit', () => {
         // C'est LE test qui aurait vu le défaut. On compte les occurrences
         // où la classe est écrite dans une chaîne de construction : il doit y
@@ -129,7 +129,7 @@ describe('#436 · A — un seul chemin construit l’en-tête (cliquet)', () => 
 });
 
 // -----------------------------------------------------------------------
-describe('#436 · B — le rendu porte ses contrôles, quel que soit le type', () => {
+describe('#437 · B — le rendu porte ses contrôles, quel que soit le type', () => {
     it('une feuille « Exposé » porte son champ de durée ET sa poignée', () => {
         const n = poserNoeud('n-1', 'expose', { metadata: { duree: 50 } });
         const html = api.contenuNoeudHTML(n);
@@ -176,7 +176,7 @@ describe('#436 · B — le rendu porte ses contrôles, quel que soit le type', (
 });
 
 // -----------------------------------------------------------------------
-describe('#436 · C — réordonner ne déplace pas les liens', () => {
+describe('#437 · C — réordonner ne déplace pas les liens', () => {
     it('permuter deux objectifs conserve leurs id', () => {
         // L'invariant qui compte. Les `objectifsServis` d'une activité visent
         // un id d'objectif (#403) : si réordonner réattribuait les id au rang,
@@ -213,7 +213,7 @@ describe('#436 · C — réordonner ne déplace pas les liens', () => {
 });
 
 // -----------------------------------------------------------------------
-describe('#436 · D — les quatre commandes de ligne', () => {
+describe('#437 · D — les quatre commandes de ligne', () => {
     function lignesDe(lecon) {
         return api.objectifsLeconHTML(lecon).split('planif-noeud-objectif-ligne').slice(1);
     }
@@ -294,7 +294,7 @@ describe('#436 · D — les quatre commandes de ligne', () => {
 });
 
 // -----------------------------------------------------------------------
-describe('#436 · F — coller apporte le texte, pas la typographie', () => {
+describe('#437 · F — coller apporte le texte, pas la typographie', () => {
     function champEspion() {
         const champ = {
             ecouteurs: {},
@@ -375,7 +375,7 @@ describe('#436 · F — coller apporte le texte, pas la typographie', () => {
 });
 
 // -----------------------------------------------------------------------
-describe('#436 · G — le bandeau « en développement actif » est parti', () => {
+describe('#437 · G — le bandeau « en développement actif » est parti', () => {
     const indexHtml = readFileSync(path.join(racine, 'index.html'), 'utf8');
 
     it('ni le badge ni sa note ne sont dans la page', () => {
@@ -408,7 +408,7 @@ describe('#436 · G — le bandeau « en développement actif » est parti', () 
 // Les mêmes règles sont donc reprises ici en RENDANT un nœud. Les deux
 // familles se complètent — l'une attrape le déplacement du code, l'autre
 // attrape le rendu qui ment.
-describe('#436 · H — les invariants F1, vérifiés au rendu', () => {
+describe('#437 · H — les invariants F1, vérifiés au rendu', () => {
     it('une leçon SANS objectif rend quand même son badge 🎯, marqué vide', () => {
         // Cause racine de F1 : un badge conditionné à la présence d'un
         // objectif ne se découvre jamais.
@@ -469,7 +469,7 @@ describe('#436 · H — les invariants F1, vérifiés au rendu', () => {
 });
 
 // -----------------------------------------------------------------------
-describe('#436 · E — une seule sarcelle pour l’enseignement explicite', () => {
+describe('#437 · E — une seule sarcelle pour l’enseignement explicite', () => {
     const ETAPES = ['ouverture', 'modelisation', 'pratique-guidee', 'pratique-autonome', 'cloture'];
 
     it('le token unique existe', () => {

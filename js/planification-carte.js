@@ -3857,7 +3857,7 @@ function objectifsLeconHTML(n) {
  * la semaine, les objectifs, la poignée — quatre fois le même oubli, au même
  * endroit). Les trois appelants passent désormais ici : un contrôle ajouté à
  * l'en-tête est visible par construction, quel que soit le chemin qui a créé
- * le nœud. Sentinelle : `sentinelle-carte-rendu-unique-436`.
+ * le nœud. Sentinelle : `sentinelle-carte-rendu-unique-437`.
  */
 function contenuNoeudHTML(n) {
     var estConteneur = !!(TYPES[n.type] && TYPES[n.type].conteneur);
@@ -7860,13 +7860,13 @@ window.planificationCarte = {
     // relisant la source.
     dureeControleHTML: dureeControleHTML,
     compteurDureeHTML: compteurDureeHTML,
-    // Exposée pour la sentinelle du rendu unique (#436) : la seule preuve
+    // Exposée pour la sentinelle du rendu unique (#437) : la seule preuve
     // qui vaille est de RENDRE un nœud et d'y chercher ses contrôles. Vérifier
     // que les trois appelants « ont l'air d'appeler la même chose » relit la
     // source — c'est exactement ce qui n'a rien vu pendant quatre ajouts.
     contenuNoeudHTML: contenuNoeudHTML,
     objectifsLeconHTML: objectifsLeconHTML,
-    // Exposée pour la sentinelle du collage (#436) : ce que fait un
+    // Exposée pour la sentinelle du collage (#437) : ce que fait un
     // gestionnaire de `paste` se vérifie en lui ENVOYANT un presse-papiers.
     collerEnTexteBrut: collerEnTexteBrut,
     rafraichirRollupsAncetres: rafraichirRollupsAncetres,
