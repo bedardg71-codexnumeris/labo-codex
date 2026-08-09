@@ -868,77 +868,15 @@ Tu peux utiliser, modifier et partager ce matériel selon les conditions de la l
 // CONFIGURATION PRATIQUE MULTI-OBJECTIFS
 // ============================================================================
 
-/**
- * Active la pratique multi-objectifs avec un ensemble spécifique
- *
- * @param {string} ensembleId - ID de l'ensemble d'objectifs à activer
- * @returns {boolean} - true si activation réussie
- *
- * EXEMPLE:
- * activerPratiqueMultiObjectifs('<ensembleObjectifsId>');
- */
-function activerPratiqueMultiObjectifs(ensembleId) {
-    const ensembles = chargerEnsemblesObjectifs();
-    const ensemble = ensembles.find(e => e.id === ensembleId);
+// #436 G2-b (9 août 2026) — ÎLOT « multi-objectifs » RETIRÉ.
+// activerPratiqueMultiObjectifs / desactiverPratiqueMultiObjectifs /
+// verifierPratiqueMultiObjectifs étaient exposées sur `window` mais n'avaient
+// AUCUN appelant : ni `data-action` dans index.html, ni appel JS (grep sur tout
+// le dépôt). Elles étaient les dernières consommatrices du champ d'instantané
+// qui désignait l'ensemble d'objectifs actif.
+// Même famille que ce que #435 a retiré le même jour : la note « par objectifs »
+// reposait sur un lien production→objectif qui n'a jamais existé.
 
-    if (!ensemble) {
-        console.error('[Multi-Objectifs] Ensemble introuvable:', ensembleId);
-        return false;
-    }
-
-    // Écriture via le module propriétaire (SSOT #328 Lot 1)
-    window.modalitesEvaluation.modifier(function (modalites) {
-        if (!modalites.configPAN) {
-            modalites.configPAN = {};
-        }
-        // Activer la pratique multi-objectifs
-        modalites.configPAN.ensembleObjectifsId = ensembleId;
-    });
-
-    return true;
-}
-
-/**
- * Désactive la pratique multi-objectifs (retour à la pratique PAN classique)
- *
- * @returns {boolean} - true si désactivation réussie
- */
-function desactiverPratiqueMultiObjectifs() {
-    const modalites = window.modalitesEvaluation.lire();
-
-    if (modalites.configPAN) {
-        // Écriture via le module propriétaire (SSOT #328 Lot 1)
-        window.modalitesEvaluation.modifier(function (m) {
-            if (m.configPAN) delete m.configPAN.ensembleObjectifsId;
-        });
-        return true;
-    }
-
-    return false;
-}
-
-/**
- * Vérifie si la pratique multi-objectifs est active
- *
- * @returns {Object|null} - { actif: boolean, ensembleId: string, ensemble: Object } ou null
- */
-function verifierPratiqueMultiObjectifs() {
-    const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
-    const ensembleId = modalites.configPAN?.ensembleObjectifsId;
-
-    if (!ensembleId) {
-        return { actif: false, ensembleId: null, ensemble: null };
-    }
-
-    const ensembles = chargerEnsemblesObjectifs();
-    const ensemble = ensembles.find(e => e.id === ensembleId);
-
-    return {
-        actif: true,
-        ensembleId: ensembleId,
-        ensemble: ensemble || null
-    };
-}
 
 // ============================================================================
 // WRAPPERS POUR DELEGATION
@@ -975,9 +913,6 @@ window.traiterImportObjectifs = traiterImportObjectifs;
 window.chargerEnsemblesObjectifs = chargerEnsemblesObjectifs;
 
 // Nouvelles fonctions pour pratique multi-objectifs
-window.activerPratiqueMultiObjectifs = activerPratiqueMultiObjectifs;
-window.desactiverPratiqueMultiObjectifs = desactiverPratiqueMultiObjectifs;
-window.verifierPratiqueMultiObjectifs = verifierPratiqueMultiObjectifs;
 
 
 

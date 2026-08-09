@@ -83,7 +83,11 @@ Quand `productionPortfolio === null` ET `productionTerminale === null` (cas h202
 
 **Tests** : 85 Vitest + 18 Playwright = 103/103 verts.
 
-### Phase E — Namespacing complet de `modalitesEvaluation` — **EN COURS**
+### Phase E — Namespacing complet de `modalitesEvaluation` — **LIVRÉE 24 mai 2026**
+
+> ⚠ *Ce titre portait « EN COURS » jusqu'au 9 août 2026 alors que le §5 du même
+> document la donnait « livrée » depuis le 24 mai. Le plan se contredisait
+> lui-même, et c'est ce titre-là qui a été cru.*
 
 **Décision Grégoire (24 mai matin)** : namespacing complet plutôt qu'archive a2025. Stratégie progressive.
 
@@ -110,7 +114,21 @@ Quand `productionPortfolio === null` ET `productionTerminale === null` (cas h202
 - Après migration boot, `h2026_modalitesEvaluation` et `a2025_modalitesEvaluation` seront initialisés avec la valeur globale actuelle (Hybride h2026).
 - Pour retrouver le 71% transmis à Léa : Grégoire bascule sur a2025, édite la pratique pour passer à « 4 meilleurs », sauvegarde → écrit dans `a2025_modalitesEvaluation`. h2026 ne bouge pas.
 
-### Phase B — Refonte section Note finale du PDF rétroaction — **À FAIRE après Phase E**
+### Phase B — Refonte section Note finale du PDF rétroaction — **LIVRÉE (constatée au code le 9 août 2026)**
+
+> ⚠ **Livrée sans trace.** Ni le journal du plan ni `BACKLOG.md` ne l'ont
+> consignée ; elle a été découverte en vérifiant le code, pas en lisant un
+> statut. Verrouillée depuis par `tests/unit/sentinelle-note-finale-portfolio-BC.test.js`.
+>
+> **Preuves relevées** — `synthese-retroaction-data.js` : `selection` filtre
+> `categorie !== 'obligatoire'` et `obligatoiresRetenus` filtre l'inverse (fin
+> du doublon) ; `ponderationSelection` / `ponderationObligatoires` exposées ;
+> `estFinale` dérivé de `cfgConfiguration.notesFinales`.
+> `synthese-retroaction-rendu.js` : titre `estFinale ? 'Note finale' :
+> 'Note provisoire'`, `badgePondSel` / `badgePondObl` rendus par bloc, et un
+> calcul détaillé par catégorie que le plan ne demandait même pas.
+> Le toggle vit sur la case `mat-notes-finales` du formulaire de pratique
+> (`pratiques-gestion.js`, lecture `setCheckbox` + écriture `getCheckbox`).
 
 **Objectif** : la rétroaction PDF que l'élève reçoit doit expliciter honnêtement la construction de la note.
 
@@ -122,13 +140,76 @@ Quand `productionPortfolio === null` ET `productionTerminale === null` (cas h202
 - `js/synthese-retroaction-data.js:678-779` (`construireNoteProvisoire`) : refonte du data shape — séparer `selection` vs `obligatoires`, exposer pondérations numériques, flag `estHybride`, flag `estFinale` piloté par toggle utilisateur.
 - `js/synthese-retroaction-rendu.js:542-605` (`renderRangeeNote`) : refonte du rendu — éliminer doublon, titre dynamique, formule explicite.
 
-### Phase C — Cohérence du panneau Note finale dans le profil — **À FAIRE après Phase B**
+### Phase C — Cohérence du panneau Note finale dans le profil — **LIVRÉE (constatée au code le 9 août 2026)**
+
+> ⚠ **Livrée sans trace**, comme la Phase B.
+>
+> **Preuves relevées** — `profil-etudiant-sections-affichage.js` :
+> `const carteTerminale = terminal.present ? …` (plus de bloc fantôme) ;
+> `formuleClassique` bascule sur « Note finale (portfolio à 100%) » quand il n'y
+> a pas de terminale ; la grille prend `note-finale-grid-single` ; et le mode
+> hybride sans terminale a sa **propre branche** (Sélection / Obligatoires),
+> ce que le plan n'avait pas prévu.
 
 **Objectif** : ne plus afficher de bloc « Évaluation terminale × 0% » fantôme quand aucune terminale n'existe.
 
 **Fichier** : `js/profil-etudiant-sections-affichage.js:2728-2779`. Conditionner l'affichage du bloc terminale sur `detailsNoteFinale.terminal.present`. Adapter la formule (« 100% » au lieu de « 60% + 40% = 100% » si pas de terminale).
 
-### Phase D — Retrait du champ legacy `mat-variante-calcul` — **À FAIRE en dernier**
+### Phase D — Retrait du champ legacy `mat-variante-calcul` — **LIVRÉE 9 août 2026 (#434), AMENDÉE le jour même (#435, 1.63.0)**
+
+> ⚠⚠ **AMENDEMENT #435 (9 août, après vérification demandée par Grégoire).**
+> #434 avait migré la bascule « Par objectifs » vers le mode de sélection — en
+> croyant corriger un panneau cassé. Or la famille « par objectifs » avait été
+> **condamnée le 5 août** (#396, décision D2 : chemins jamais fonctionnels), et
+> le moteur STD visé ici portait le même défaut de naissance (appariement par un
+> `objectifId` sans écrivain). Décision Grégoire : **étendre le retrait de #396**.
+> Le mode, son moteur (4 modes de calcul), son panneau, ses dix fonctions
+> d'édition et ses quatre gabarits sont RETIRÉS. Les pratiques legacy sont
+> normalisées en lecture seule (console.warn, aucune réécriture). Détail : #435
+> au BACKLOG. Les paragraphes ci-dessous décrivent l'état INTERMÉDIAIRE de
+> #434, conservés pour la traçabilité de la journée.
+
+> **Ce n'a pas pu être le « retrait pur » prescrit.** La vérification au code a
+> trouvé deux raisons, dont une que le plan ne soupçonnait pas :
+>
+> 1. **`varianteCalcul` n'est pas un champ d'UI.** `pratique-pan-standards.js`
+>    y route `calculerPerformance` vers le calcul par objectifs. C'est un **flag
+>    de calcul**, porté par les pratiques déjà enregistrées.
+> 2. **Le panneau « Par objectifs » ne pouvait JAMAIS s'afficher.** L'ancien
+>    handler ne faisait que `classList.remove('u-hide')`, or
+>    `#mat-config-par-objectifs` porte un `style="display: none;"` **inline** et
+>    n'a aucune classe. Retirer une classe absente ne lève pas un style inline.
+>    Le champ legacy n'était donc pas seulement un doublon : **son unique
+>    fonction propre était cassée**, sans erreur ni trace.
+>
+> **Forme retenue** — le mode de sélection devient l'UNIQUE commande :
+> - `mat-portfolio-selection` gagne l'option `par-objectifs` et pilote la
+>   bascule des deux panneaux (`appliquerModeSelectionMat`), en levant le style
+>   inline ;
+> - `varianteCalcul` devient une **projection** du mode
+>   (`varianteCalculDepuisMode`) — deux commandes qui pouvaient diverger sont
+>   devenues une commande et sa dérivée. C'est la fermeture du Bug 5 ;
+> - **reprise des pratiques existantes** : `config.varianteCalcul ===
+>   'par-objectifs'` **ou** la présence de `config.parObjectifs` rouvre sur le
+>   bon panneau. Sans elle, une pratique par objectifs s'ouvrait sur Portfolio
+>   et la première sauvegarde effaçait sa configuration ;
+> - le mode se pose **hors** du garde `if (config.portfolio)` — cas exact d'une
+>   pratique par objectifs, qui n'a pas de bloc portfolio ;
+> - retiré au passage : le bloc de rafraîchissement « interface STD » de
+>   `pratiques-bibliotheque.js` (six `getElementById` sur des ids `v2-*`
+>   absents du DOM — du code qui ne pouvait ni agir ni échouer).
+>
+> ⮕ **Ce qui reste dû, et qui appartient à G2-b** : faire lire `methodeSelection`
+> au moteur pour que la projection disparaisse. C'est un changement du **contrat
+> de calcul**, pas un retrait d'UI — même lot que les autres lecteurs legacy du
+> snapshot `modalitesEvaluation`.
+>
+> Sentinelle : `tests/unit/sentinelle-phase-D-variante-calcul-434.test.js`,
+> 13 cas, **12 break-tests ROUGE**. L'un des cas **évalue la vraie fonction de
+> projection** extraite du source, plutôt que de redécrire une table parallèle
+> qui pourrait diverger.
+
+#### Prescription d'origine (24 mai 2026), conservée
 
 **Décision Grégoire** : retrait pur (option a).
 
@@ -160,7 +241,19 @@ Quand `productionPortfolio === null` ET `productionTerminale === null` (cas h202
 - **Wizard fix (pratiques-gestion.js)** : livré. La constante `CLE_PRATIQUES_CONFIGURATIONS` (67 sites dans ce fichier) écrivait vers la clé globale, masquant Phase F. Maintenant migrée vers `cle()`. C'est ce fix-là qui a finalement débloqué la propagation wizard → calcul.
 - **Métadonnées de pratique** : corrigées via snippet. La pratique « PAN-Littérature A25 » est désormais attribuée à Grégoire Bédard (Cégep de Drummondville). Id renommé `pan-standards-bruno` → `pan-standards-bedard` dans toutes les références.
 - **Validation arithmétique finale** : a2025 Bermudez Ambriz = 73,5% avec mode « N meilleurs, 4 » — cohérent à 0,3% près avec les 73,2% transmis à Léa en décembre 2025.
-- **Phases B, C, D, G2-b** : en attente.
+- **Phases B et C** : ⚠ **LIVRÉES — constaté au code le 9 août 2026**, jamais consignées.
+  Verrouillées depuis par `tests/unit/sentinelle-note-finale-portfolio-BC.test.js`
+  (11 cas, 11 break-tests ROUGE), qui couvre aussi les décisions §4-1, §4-2 et §4-3.
+- **Phases D et G2-b** : **LIVRÉES le 9 août 2026** (#434+#435, puis #436). *État constaté avant travaux, conservé ci-dessous.*
+  - ~~**Phase D**~~ **LIVRÉE le 9 août 2026** (#434). *État constaté avant travaux, conservé :* le bloc `mat-variante-pan-standards` était toujours dans
+    `index.html:5524`, son sélecteur `mat-variante-calcul` et le handler
+    `changerVariantePANStandardsMat` aussi. ⚠ **La question ouverte est réelle et
+    bloquante** : ce handler est le **seul chemin** qui révèle le panneau
+    `mat-config-par-objectifs`. Le retirer sans migrer la bascule rendrait
+    « Par objectifs (4 modes de calcul) » **inatteignable**. Le doublon avec
+    `mat-portfolio-selection` est confirmé : trois valeurs sur quatre se
+    recouvrent, avec deux vocabulaires différents.
+  - ~~**G2-b**~~ **LIVRÉE le 9 août 2026** (#436, 1.64.0) — neuf lectures d'affichage migrées, les deux écrivains de `pratiques.js` retirés, l'îlot multi-objectifs de `objectifs.js` supprimé. Deux valeurs affichées GELÉES en constantes explicites (décision en attente, voir #436). Deux survivants légitimes break-testés (purge du module propriétaire, injection de simulation #307). ⮕ Le miroir stocké n'a plus ni lecteur ni écrivain, mais **occupe encore de la place** dans les données — purge = migration destructive, à décider.
 
 ### Synthèse architecturale (nouvelle conception)
 
@@ -171,11 +264,17 @@ Quand `productionPortfolio === null` ET `productionTerminale === null` (cas h202
 
 ## 6. Tâches actives (référence)
 
-- #3 — Appliquer le modèle aux notes réelles et valider (pending)
-- #5 — Phase B — Refonte section Note finale du PDF rétroaction (pending)
-- #6 — Phase C — Cohérence du panneau Note finale de session dans le profil (pending)
-- #7 — Phase D — Retrait du champ legacy mat-variante-calcul (pending)
-- #8 — Phase E — Namespacing complet de modalitesEvaluation (pending, prochaine action)
+> ⚠ **Liste périmée, corrigée le 9 août 2026.** Elle portait encore B, C et E
+> comme « pending » alors que les trois sont livrées. Elle est conservée pour
+> mémoire, barrée, plutôt que supprimée — c'est elle qui a induit le §4ter de
+> `ETAT-PROJET.md` en erreur, et l'effacer effacerait la leçon.
+
+- ~~#3 — Appliquer le modèle aux notes réelles et valider~~ → **porte terrain**, toujours due
+- ~~#5 — Phase B~~ → **LIVRÉE** (constatée au code le 9 août)
+- ~~#6 — Phase C~~ → **LIVRÉE** (constatée au code le 9 août)
+- ~~#7 — Phase D~~ → **LIVRÉE le 9 août 2026** (#434, 1.62.0) — voir le §3 pour ce qui a rendu le « retrait pur » impossible
+- ~~#8 — Phase E~~ → **LIVRÉE** le 24 mai
+- ~~**G2-b**~~ → **LIVRÉE le 9 août 2026** (#436)
 
 ---
 

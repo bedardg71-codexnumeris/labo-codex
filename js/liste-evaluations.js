@@ -206,20 +206,34 @@ function calculerCompletionSommative(da) {
     return Math.min(indice, 1);
 }
 
+// G2-b (#436) : dénominateur de la complétion alternative. Valeur historique
+// EFFECTIVE (le champ de config qu'on croyait lire n'a jamais existé) —
+// gelée ici jusqu'à décision, parce qu'elle sort à l'écran. Voir le corps de
+// calculerCompletionAlternative.
+const NB_ARTEFACTS_COMPLETION_ALTERNATIVE = 3;
+
 /**
  * Calcule la complétion ALTERNATIVE (sur les N meilleurs artefacts)
  * Formule : Nombre de meilleurs artefacts remis ÷ N
- * 
+ *
  * @param {string} da - Numéro DA de l'étudiant
  * @returns {number} - Indice entre 0 et 1
  */
 function calculerCompletionAlternative(da) {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
-    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
-    
-    // Obtenir le nombre d'artefacts depuis les réglages
-    const nombreArtefacts = config.configPAN?.nombreArtefacts || 3;
-    
+
+    // G2-b (#436, 9 août 2026) — LECTURE FANTÔME RETIRÉE, VALEUR PRÉSERVÉE.
+    // Ce nombre lisait `configPAN.nombreArtefacts`, un champ du miroir qu'AUCUN
+    // code n'écrit : il rendait donc toujours 3, depuis toujours.
+    //
+    // ⚠ On ne le branche PAS sur la pratique active, alors que c'est ce que
+    // G2-b fait partout ailleurs. Motif : `indice = meilleurs.length / N`
+    // alimente `e.alternatif.completion`, l'indice C AFFICHÉ au tableau de
+    // bord. Passer de 3 à `nombreARetenir` (4) ou `nombreTotal` (10) changerait
+    // ce chiffre chez l'utilisateur — décision de sens, pas de nettoyage.
+    // Question ouverte consignée au BACKLOG (#436).
+    const nombreArtefacts = NB_ARTEFACTS_COMPLETION_ALTERNATIVE;
+
     
     // Récupérer les évaluations de cet étudiant
     const evalsEtudiant = evaluations.filter(e => e.etudiantDA === da);

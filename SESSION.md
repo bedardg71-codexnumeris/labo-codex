@@ -7,6 +7,82 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 9 AOÛT 2026, CLÔTURE (même conteneur, même branche).
+     ÉTAT FINAL : **1.65.0** (build 0809-0937), branche **16 commits devant `main`, 0 derrière**, Vitest **2054/2054** (232 fichiers), arbre propre.
+
+     ▣ **LA COLLISION A EU LIEU — et elle est réglée.** Vingt-quatre minutes après ma dernière poussée, la session « carte d'alignement » a poussé la MÊME version 1.64.0 et le MÊME identifiant #436, pour un chantier sans rapport. Exactement ce que `RELAIS.md` annonçait le matin même.
+     ⮕ **C'est elle qui a renuméroté** (1.65.0, #437) et fusionné — donc MA série 1.61→1.64 et mes IDs #434/#435/#436 restent valides, sans renumérotation. C'était son choix délibéré : prendre un numéro AU-DESSUS de toute ma série pour que ma fusion n'ait qu'à garder le plus haut.
+     ⮕ **Elle a corrigé la règle, et elle a raison** : « c'est le PLUS PETIT côté qui renumérote », pas « le second à fusionner ». Le second à fusionner est indéterminé tant que personne n'a fusionné — donc inutilisable au moment précis où on en a besoin. La règle du 8 août était inapplicable ; celle-ci départage.
+     ▣ **Ce que le dossier de réconciliation a servi à quelque chose** : écrit AVANT la collision, il a permis à l'autre session de trancher en connaissance de cause au lieu de découvrir l'écart au merge. Le filet a fonctionné dans le seul sens où il pouvait fonctionner.
+
+     ✅ **FUSION DE `main` DANS LA BRANCHE — les 5 conflits résolus, la branche est fast-forwardable.**
+     ▣ Les 4 points de vérité → 1.65.0 conservés (consigne « ne pas redescendre » honorée).
+     ▣ `changelog-data.js` → 1.65 en tête, ma série dessous. ⚠ Le conflit coupait AU MILIEU d'une entrée : recomposition manuelle, `node --check` après.
+     ▣ **`index.html`, en-tête du module — le conflit qui comptait** : mon renommage « Carte d'alignement » (#426) contre leur retrait du bandeau « en développement » (#437). **Résolu par UNION, pas par choix d'un côté** — prendre l'un aurait supprimé l'autre sans que rien ne le signale, et aucune sentinelle des deux côtés ne l'aurait vu.
+     ▣ `?v=` → la valeur la plus haute de chaque côté (aucune retenue n'a jamais été servie plus bas).
+     ▣ `planification-carte.js` **auto-fusionné**, et VÉRIFIÉ au lieu d'être cru : page 9 du guide (#421) présente, compte d'étapes cohérent, flèches ▲▼ (#437) présentes.
+     ▣ Les 2 sentinelles retargetées par l'autre session sont **à l'octet près** celles de `main` — consigne honorée sans intervention.
+
+     ⚠ **MALENTENDU À LEVER — « les deux valeurs gelées » désignent DEUX PAIRES DIFFÉRENTES.** L'autre session a lu la formule comme visant les siennes (cible tactile 28 px, sarcelle `#0891b2`, #437). Les miennes sont celles de **#436** : le **dénominateur de l'indice C** au tableau de bord (3, alors que la SSOT dirait 4 ou 10) et le **quota affiché des jetons** (2, dont le champ source était activement PURGÉ par le module propriétaire depuis #328 L2-c). Les deux paires existent, les quatre attendent un verdict.
+
+     ⚠ **TROU CONFIRMÉ, signalé par l'autre session et vérifié ici** : `scripts/release.mjs` ne bumpe PAS le `?v=` de `styles.css`. Vérification : **zéro occurrence de `css`** dans le script ; son bloc anti-cache (#417) ne traite que les `<script src>`, or `styles.css` est un `<link rel="stylesheet">` (index.html:14). ⮕ C'est la leçon de #417 non poussée jusqu'au CSS — et son propre commentaire d'en-tête décrit déjà le mode de défaillance : « un fichier réécrit mais servi sous la même URL peut sortir du cache dans sa version PÉRIMÉE ». Non corrigé ici : nouveau chantier, nouvel identifiant, décision de Grégoire.
+
+     ⮕ **RESTE DÛ** : la fusion `--ff-only` (2 min) · les portes terrain, dont celles de 1.61→1.64 volontairement absentes de la checklist de l'autre session tant que ma branche n'est pas fusionnée · les 4 valeurs gelées · le trou `release.mjs`/CSS · la porte du 8 août toujours sans réponse (le double-clic ouvre-t-il l'Inspecteur au doigt sur iPad ?).
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 9 AOÛT 2026, SUITE (même conteneur, même branche).
+     ÉTAT FACTUEL EN FIN : **1.63.0** (build 0809-0835), branche à 7 commits devant `main`, Vitest **1998/1998** (230 fichiers). Dernier ID BACKLOG **#435**.
+
+     ✅ LIVRÉ — **phases B et C du plan note finale : rien à coder, tout à VERROUILLER.** Vérifiées au code : livrées depuis longtemps, sans trace ni filet — le motif « le plan dormait, le travail était en production » du §4ter, une fois de plus, et cette fois SUR MA PROPRE LIGNE du matin (le §4ter les annonçait « débloquées par #328 » : faux, j'avais lu les titres du plan au lieu du code). Sentinelle `sentinelle-note-finale-portfolio-BC.test.js`, 11 cas, 11 break-tests ROUGE. Rectificatif consigné au §4ter et dans le plan (liste périmée BARRÉE, pas effacée). 1.61.1.
+
+     ✅ LIVRÉ — **#434 Phase D (1.62.0, jamais déployée)** : le champ legacy « Comment construis-tu la note finale ? » retiré, le mode de sélection devient l'unique commande, `varianteCalcul` en projection. Bloc V2 mort retiré de `pratiques-bibliotheque.js`.
+
+     ⚠⚠ **PUIS LA QUESTION DE GRÉGOIRE QUI A TOUT RATTRAPÉ** : « il me semble que la config PAN STD par objectifs avait été retirée après décision ». VÉRIFIÉ : #396 (5 août, D2) avait condamné la famille — et #434 venait d'OUVRIR une porte utilisateur vers le moteur STD par objectifs sans vérifier l'historique. Ce moteur portait le MÊME défaut de naissance que le chemin retiré par #396 : appariement production→objectif par un `objectifId` qu'aucun code n'écrit. Et détail cruel : les 4 gabarits du catalogue qui l'illustraient n'avaient AUCUN objectif défini — jamais calculables, même moteur sain.
+     ⮕ **LEÇON, à retenir en face de celle du matin** : le rituel dit « aller au code avant de conclure » ; il faut AUSSI aller à l'HISTORIQUE avant de rendre disponible. Une porte fermée n'est pas forcément un bug — demander d'abord pourquoi elle est fermée. (#434 a annoncé « enfin atteignable » au changelog ce qu'une décision de quatre jours plus tôt avait condamné.)
+
+     ✅ LIVRÉ — **#435 (1.63.0) : ablation du mode « par-objectifs », extension de #396** (décision Grégoire, 9 août). Partis : routage + 4 modes du moteur STD (~6,8 Ko) · panneau `mat-config-par-objectifs` (137 lignes, jamais affichées — le style inline n'était jamais levé) · 10 fonctions d'édition + 12 exports (~14,8 Ko) · les 4 gabarits · les projections `parObjectifs`.
+     ▣ **SURVIVANTS BREAK-TESTÉS — le piège du prochain nettoyage** : `_calculerNiveauxParObjectif` et `suggererNoteHolistique` ont l'air morts avec le moteur, ils ne le sont PAS — la suggestion holistique DEN (`denotation-saisie-ui.js`) les appelle. Deux break-tests dédiés les protègent (les supprimer ROUGIT).
+     ▣ **Pratiques legacy : normalisation lecture seule**, patron #396 — console.warn + affichage sur le `methodeSelection` réel, AUCUNE réécriture spontanée. Une modalité stockée portant encore le flag tombe dans le calcul portfolio.
+     ▣ **Tests adaptés, pas contournés** : le bloc « parité méthode↔helper » de `denotation-moteur-DEN1.test.js` n'avait plus de SUJET (la parité valait tant que deux chemins coexistaient) — reconverti en verrou de survie des dépendances DEN + cliquet d'absence. Sentinelle #434 réécrite en cliquet #434+#435, 13 cas. **12 break-tests ROUGE** au total.
+     ▣ **Changelog : 1.62 consolidée dans 1.63** (précédent 1.48 — jamais déployée, l'utilisateur ne verra qu'une livraison, qui ne promet plus un mode retiré).
+
+     ⮕ **PORTES TERRAIN 1.63** : ouvrir une pratique PAN-Standards → le champ legacy absent, la description sous le Mode de sélection ; une pratique legacy « par objectifs » (s'il en existe une chez toi) s'ouvre sur son mode réel avec l'avertissement console ; la suggestion holistique DEN fonctionne toujours à l'ancrage.
+     ⮕ **QUEUES** : G2-b (~30 lecteurs `configPAN` + faire lire `methodeSelection` au moteur pour retirer la projection `varianteCalcul`) · #425 · #418 · #427 (septembre) · #428/#430 (rentrée) · portes terrain 1.57→1.63 · décision infobulles-T9/T10.
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 9 AOÛT 2026 (conteneur cloud, branche `claude/incomplete-work-plans-h1nimp`).
+     ÉTAT FACTUEL AU DÉPART : `origin/main` = `83ee41d3`, **1.60.0** (build 0808-1836), Vitest **1960/1960** (227 fichiers), arbre propre, dernier ID BACKLOG **#433**. Prémisse du §3 vérifiée : **zéro écart**.
+     ⚠ **PIÈGE D'ENVIRONNEMENT, à connaître pour les prochains conteneurs** : le clone était **SHALLOW**. Avant `git fetch --unshallow`, `main` local pointait au **10 juillet** et `git rev-list --count main...HEAD` affichait une divergence de **83/57 commits** — entièrement fausse. Après unshallow : `0/0`. Le §3 le disait ; le vérifier avant de conclure quoi que ce soit sur une divergence.
+     ⚠ **Playwright WebKit NON EXÉCUTABLE ici** (`webkit-2287` absent de `/opt/pw-browsers`). Ce n'est pas une régression — CI à la PR. Ne pas le lire comme 68 tests rouges.
+
+     ✅ LIVRÉ — **#426 + #421 (1.61.0)**. L'onglet « Alignement pédagogique » devient **« Carte d'alignement »**, et le manuel dit enfin le vrai.
+     ▣ **#426 — sept surfaces, et un révélateur.** `config.js` (zone protégée, autorisation du 8 août ; `noms_stables.json` protège le NOM `configurationsOnglets`, pas les libellés) · titre de la sous-section · accordéon d'aide · popup des verbes actifs · glossaire (6 `voir:`) · étape 5 du tour guidé + `TOUR_TITRE_COURT` · `SKILL_Alignement.md`.
+        ⮕ **Le renommage a servi de révélateur** : le glossaire renvoyait à « Planification > Organisateur » (page supprimée le 8 août) ET à « Planification > Alignement » — or la section « Planification » n'existe plus depuis la **réorganisation du 3 avril 2026**. Trois chemins de navigation faux depuis quatre mois, que personne n'avait vus parce que personne ne les avait suivis.
+        ⮕ **Distinction tenue, et VERROUILLÉE PAR UN TEST** : le CONCEPT « alignement pédagogique » n'est PAS renommé — seul l'ONGLET l'est. Sans l'assertion `terme: 'Alignement pédagogique'` toujours présent, un test qui ne vérifie que la disparition du libellé autoriserait une purge trop large, et personne ne la verrait.
+     ▣ **#421 — quatre surfaces, l'audit en annonçait trois.**
+        1. **Le guide intégré** gagne une page, « Ce que la leçon vise » (8 → 9). Il faisait construire la carte de bout en bout **sans jamais nommer l'objectif de leçon** — celui-là même que Grégoire ne trouvait pas (METHODE §4.1 bis, 6 août). Le badge grisé avait réglé l'affordance le 8 août ; le manuel ne l'avait pas suivi. **Corrigé au passage : la page 1 annonçait 7 étapes pour 8 pages.**
+        2. **Les infobulles** : 5 clés mortes retirées (`planif-alignement`/`planif-sous-nav` doublons de `nav-conception-alignement` ; `planif-barre-outils`/`planif-filtres` décrivaient les filtres du canevas retirés par #420 ; `nav-planification` nommait la section disparue en avril), 6 textes réécrits, 1 ajoutée — la zone **Enseignement explicite** était la seule des six sans infobulle depuis #422.
+        3. **`METHODE-ALIGNEMENT.md` §4**, relevé **26 versions en arrière** (6 août / 1.31.22). Table des types portée à 18 en six zones ; §4.1 bis marqué RÉSOLU (diagnostic **conservé tel qu'écrit** — c'est lui qui a produit le correctif) ; **§4.2 FERMÉ** : les deux défauts de `planification_seances` sont corrigés (namespacée + clé composite `<carteId>::<leconId>`), l'avertissement « ne pas saisir 30 objectifs avant réparation » est levé.
+        4. **Non prévue** — l'accordéon d'aide annonçait des préréglages de zoom 25/50/75/100 % qui n'existent plus, et ignorait l'Inspecteur, la corbeille, le plein écran et l'export du plan.
+     ▣ **UNE ERREUR ATTRAPÉE EN COURS DE ROUTE, à retenir.** J'avais écrit que la durée et les objectifs de leçon vivaient dans l'Inspecteur. Le code dit autre chose : la **durée** est dans l'en-tête du nœud (décision Grégoire du 8 août : « l'Inspecteur doit ajouter de l'information, pas redoubler ce que la carte montre déjà ») et les **objectifs** sont sur le bloc leçon, derrière le badge 🎯. Écrire un manuel de mémoire reproduit exactement le défaut qu'on corrige.
+     ▣ **SENTINELLE** : `tests/unit/sentinelle-carte-alignement-421-426.test.js`, 14 cas, **10 break-tests ROUGE**. Deux assertions se **CALCULENT** au lieu de recopier un chiffre — le « N étapes » de la page 1 et le compte de pages de l'infobulle sont dérivés du nombre réel de pages. C'est l'erreur exacte qu'on corrigeait : elle ne peut plus revenir en silence. Vitest **1974/1974** (228 fichiers).
+
+     ✅ LIVRÉ — **VÉRIFICATION AU CODE DES 43 PLANS NON TRANCHÉS** (nouveau **§4ter de `ETAT-PROJET.md`**).
+     ▣ Le §4bis du 8 août classait par **nature** ; il nommait 25 documents et laissait 43 sans verdict de complétion. Verdict : **15 terminés** (archivables), **6 documents de passation consommés**, **8 partiels**, **4 jamais amorcés**, **4 vivants**.
+     ⚠⚠ **DEUX CONSTATS QUI CHANGENT LA LECTURE DU RESTE** :
+        1. **`Plan Accompagnement/` n'a JAMAIS été audité** — 14 documents, dont au moins trois désignent du travail non fait (`PLAN_guide_PAN_refonte_RREC`, `PLAN_decouvrabilite_guides`, `SPEC_mini-guide_cours_balises`). Le compte de plans ouverts du projet est **supérieur** à ce que le §4bis laissait croire.
+        2. **Les phases B et C de `PLAN-refonte-note-finale-portfolio.md` sont DÉBLOQUÉES** : leur préalable déclaré était la Phase E = #328, close. Refonte de la section Note finale du PDF de rétroaction, puis cohérence du panneau dans le profil.
+     ▣ **Le chantier « guides » est à 5 sur 7** : `solo`/`acp`/`rai`/`som`/`pan` sont au code ; **« Enseignement explicite » et `pan-rrec` n'ont jamais été écrits**.
+     ▣ **#328 recoupé et clos** — sentinelles L2-b2 et L2-c au code. ⮕ **Et la désync n'était pas où `ETAT-PROJET.md` la plaçait** : son §2 et son §5.3 annonçaient une case BACKLOG non cochée, **fausse depuis le 3 juillet**. Le retard était dans le document qui surveille les retards des autres. Corrigé.
+     ▣ **Méthode, et sa limite déclarée** : la preuve relevée est la **présence** d'un module, d'une sentinelle ou d'une clé — elle établit qu'un chantier a été mené, pas qu'il l'a été *complètement*. `PLAN-briqueA-ecrans-analyse-namespacing.md` est le cas le plus fragile, classé terminé avec #358 sans relecture site par site : il est nommé au §4ter pour être contestable.
+
+     ⮕ **QUEUES OUVERTES** : #425 · #418 · #427 (septembre) · #430/#428 (rentrée) · #429 clos · **portes terrain 1.57→1.61 TOUJOURS DUES** (dont l'iPad, et maintenant le nouveau libellé d'onglet + la page 9 du guide).
+     ⮕ **DÉCISION EN ATTENTE DE GRÉGOIRE** : `docs/refonte-textes/infobulles-T9/T10` sont les specs datées du 19 avril dont `accompagnement-contenu-hover.js` se dit encore « la source ». T10 documente en entier une page supprimée. Les archiver (ce sont des traces datées — les réécrire falsifierait un dossier), ou corriger l'en-tête du JS pour dire que le code fait foi. **Non tranché seul.**
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 8 AOÛT 2026, SOIR (suite) — CORBEILLE DE LA PALETTE. ⮕⮕ LIRE EN PREMIER À LA REPRISE.
      ÉTAT FACTUEL : **1.60.0** (build 0808-1836), fusionnée `main`. Vitest **1960/1960** (227 fichiers). Dernier ID BACKLOG : **#433**.
 
@@ -5707,6 +5783,93 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
 
 ## §3 — Consigne de démarrage pour la prochaine session
+
+> **Réécrite le 9 août 2026.** #426 et #421 sont LIVRÉS ; l'onglet s'appelle
+> « Carte d'alignement ». Le §4ter de `ETAT-PROJET.md` est neuf : il tranche
+> l'état des 43 plans que le §4bis avait laissés sans verdict.
+
+### Prémisse à vérifier au rituel de début (§1)
+
+| Point | Valeur attendue |
+|---|---|
+| Branche | ⚠ **`claude/incomplete-work-plans-h1nimp`** — le travail du 9 août **n'est PAS sur `main`** (voir `RELAIS.md`) |
+| Version | `{"build":"0809-0835","beta":"1.63.0"}` |
+| Vitest | **1998/1998** (230 fichiers) |
+| Playwright WebKit | non exécutable en conteneur → CI à la PR |
+| Dernier ID BACKLOG | **#435** |
+| Arbre | propre |
+
+⚠ **Le clone du conteneur est SHALLOW.** `git fetch --unshallow` AVANT toute
+comparaison. Sans ça, `main` local paraît vieux de plusieurs semaines et
+`git rev-list --count main...HEAD` annonce une divergence **entièrement
+fictive** — constaté le 9 août (83/57 commits, réel : 0/0).
+
+### ⚠⚠ Priorité 0 — LA FUSION, ET UNE SECONDE SESSION SUR `main`
+
+**Grégoire a signalé le 9 août qu'un autre agent travaillait sur `main`** pendant
+que cette branche avançait. Au dernier `fetch`, `origin/main` était **encore à
+`83ee41d3`** (1.60.0) : rien n'était poussé, donc **aucune collision réelle au
+moment où ces lignes sont écrites**. Elle viendra quand l'autre poussera.
+
+⮕ **Le dossier de réconciliation est dans `RELAIS.md`** : versions consommées
+(1.61.0 → 1.64.0), identifiants pris (#434, #435, #436), fichiers où le conflit
+est certain, et la recette. C'est la configuration du 8 août — écrite AVANT la
+collision cette fois, pas après.
+
+⮕ **Ce que cette session a fait pour limiter la casse** : plus aucune release
+après 1.64.0, aucun identifiant pris au-delà de #436, et la purge de `configPAN`
+versée à la séance #353 **sans ouvrir de nouvel item**.
+
+### Priorité 0 bis — LA FUSION VERS `main` (Grégoire, 2 min)
+
+La session du 9 août tournait dans un conteneur **contraint à sa branche**.
+La règle de relais de `CLAUDE.md` (« on fusionne à la fin de CHAQUE session »)
+n'a donc pas pu être appliquée par la session elle-même. `RELAIS.md` a été
+rempli sur la branche — mais **il ne peut pas être poussé sur `main` d'ici**,
+c'est-à-dire à l'endroit exact où le rituel du 8 août dit qu'il doit vivre.
+⮕ **C'est la limite structurelle du 8 août qui se rejoue.** Fusionner d'abord.
+
+### Priorité 1 — les PORTES TERRAIN, toujours dues (Grégoire, ~20 min)
+
+Celles de 1.57 → 1.60 n'ont jamais été passées, et 1.61 en ajoute deux qui se
+voient tout de suite : le **nouveau libellé d'onglet** (« Carte d'alignement »
+dans la sous-nav, dans le titre de page et dans le tour guidé) et la **page 9
+du guide** (« Ce que la leçon vise »). Vérifier aussi que le badge 🎯 grisé se
+voit au doigt sur iPad — le guide l'annonce désormais comme le geste d'entrée.
+
+### Priorités suivantes, dans l'ordre — ce que le §4ter a débloqué
+
+- **`PLAN-refonte-note-finale-portfolio.md`, phases B et C** — le meilleur
+  rapport valeur/risque du moment : elles étaient bloquées par la Phase E
+  (= #328), et #328 est clos. B = refonte de la section Note finale du PDF de
+  rétroaction ; C = cohérence du panneau Note finale dans le profil.
+- **Auditer `Plan Accompagnement/`** (14 documents, jamais passés au crible) —
+  une demi-heure, même méthode que le §4ter. Trois y désignent déjà du travail
+  non fait.
+- **#425** (intégration des productions, D → C → B → A) · **#418** (`db-ready`
+  jamais émis si IndexedDB indisponible) · **#427** (Cloudflare, septembre) ·
+  **#428 + #430** (dettes datées de la rentrée, à retirer ENSEMBLE).
+- **Décision à trancher** : `docs/refonte-textes/infobulles-T9/T10` — archiver
+  ces specs datées, ou corriger l'en-tête de `accompagnement-contenu-hover.js`
+  pour dire que le code fait foi. T10 documente une page supprimée.
+
+### Rappel de méthode — ce que le 9 août a confirmé
+
+1. **Un renommage est un révélateur.** Suivre les chemins de navigation cités
+   en prose a montré trois renvois vers une section disparue **le 3 avril** —
+   personne ne les avait vus parce que personne ne les avait suivis.
+2. **Une assertion qui recopie un chiffre ne protège rien.** Le guide annonçait
+   « 7 étapes » pour 8 pages. La sentinelle **calcule** le compte attendu
+   depuis le nombre réel de pages : l'erreur ne peut plus revenir en silence.
+3. **Écrire un manuel de mémoire reproduit le défaut qu'on corrige.** Deux
+   affirmations fausses posées puis retirées le même jour (la durée et les
+   objectifs de leçon placés dans l'Inspecteur — le code dit l'en-tête du nœud
+   et le badge 🎯).
+4. **Un document qui surveille les désyncs en produit aussi.** `ETAT-PROJET.md`
+   annonçait une case BACKLOG non cochée pour #328 — fausse depuis cinq
+   semaines.
+
+## §3ter — Consigne du 8 août (archivée le 9 août — #424/#431/#432/#433 livrés, #426 et #421 livrés depuis)
 
 > **Réécrite le 8 août 2026 en après-midi, APRÈS la fusion de 1.57.0 vers
 > `main`.** Le portage des exports (#424, lots A→G) est LIVRÉ ; la page

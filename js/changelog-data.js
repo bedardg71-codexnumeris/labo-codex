@@ -21,6 +21,52 @@
 
     var CHANGELOG = [
         {
+            version: '1.65',
+            couleur: 'orange',
+            titre: 'Carte d’alignement — la durée s’affiche, les objectifs se réordonnent',
+            items: [
+                'La durée d’un bloc est maintenant visible dès que tu le poses. Elle n’apparaissait qu’après un rechargement de la page — sur les Exposés comme sur les cinq étapes d’enseignement explicite.',
+                'Même correctif pour une Leçon qu’on vient de créer : son total Σ, son sélecteur de semaine, son badge 🎯 et sa poignée de redimensionnement sont là tout de suite.',
+                'Deux nouvelles flèches ▲▼ sur chaque objectif de leçon : change leur ordre sans les retaper. Les liens entre un objectif et les activités qui le servent suivent le déplacement.',
+                'Un titre collé depuis une autre application prend la typographie de la carte au lieu de garder la sienne.',
+                'Les cinq étapes d’enseignement explicite partagent une seule couleur sarcelle : la famille se repère d’un coup d’œil.',
+                'Le bandeau « Présentement en développement actif » est retiré de l’en-tête du module.'
+            ]
+        },
+        {
+            version: '1.64',
+            couleur: 'bleu',
+            titre: 'Les réglages d’une pratique s’appliquent partout, tout de suite',
+            items: [
+                'Les écrans de suivi (profil, aperçu du groupe, liste des étudiant·es) lisent maintenant la configuration de ta pratique directement à sa source. Avant, ils lisaient une copie figée au moment où tu avais appliqué la pratique : modifier le nombre d’artefacts à retenir changeait la note du profil, mais pas les autres écrans, qui restaient sur l’ancienne valeur sans rien signaler.',
+                'Ménage interne : cette copie figée n’est plus entretenue nulle part, et l’ancien mécanisme de migration qui s’exécutait à chaque démarrage est retiré.'
+            ]
+        },
+        // (1.62 n'a jamais été déployée — consolidée dans 1.63, même précédent
+        //  que l'entrée 1.48 : l'utilisateur ne verra qu'UNE livraison.)
+        {
+            version: '1.63',
+            couleur: 'orange',
+            titre: 'Une seule question sur la construction de la note',
+            items: [
+                'Dans les réglages d’une pratique PAN-Standards, le champ « Comment construis-tu la note finale ? » disparaît : il posait la même question que « Mode de sélection », avec d’autres mots, et les deux réponses pouvaient se contredire. Une seule commande reste.',
+                'Chaque mode de sélection affiche une courte explication de ce qu’il fait.',
+                'Le mode « Par objectifs (4 modes de calcul) » est retiré de l’application. Il n’a jamais pu calculer une note — le lien entre productions et objectifs qu’il supposait n’a jamais existé — et son panneau de réglages ne s’était jamais affiché. Les quatre gabarits du catalogue qui l’illustraient partent avec lui.',
+                'Une pratique enregistrée avec ce mode s’ouvre désormais sur son mode de sélection réel, sans rien perdre : sa configuration n’est ni effacée ni réécrite.'
+            ]
+        },
+        {
+            version: '1.61',
+            couleur: 'bleu',
+            titre: 'L’onglet s’appelle « Carte d’alignement »',
+            items: [
+                'L’onglet « Alignement pédagogique » devient « Carte d’alignement ». Les six autres onglets de Conception nomment un objet de travail ; celui-là nommait une théorie — et « carte d’alignement » était déjà le mot employé partout ailleurs dans l’application.',
+                'Le guide de la carte gagne une étape : « Ce que la leçon vise ». Elle explique où saisir l’objectif d’une leçon (le badge 🎯 de son en-tête) et comment cocher, sur chaque activité, les objectifs qu’elle sert.',
+                'Le manuel décrit à nouveau l’application réelle : l’aide, les info-bulles, le glossaire et la visite guidée ne renvoient plus à des pages ni à des commandes retirées cet été.',
+                'La zone « Enseignement explicite » de la palette a maintenant son info-bulle, comme les cinq autres.'
+            ]
+        },
+        {
             version: '1.60',
             couleur: 'vert',
             titre: 'Une corbeille dans la palette — supprimer au doigt',

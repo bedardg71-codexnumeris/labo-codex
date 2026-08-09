@@ -1102,8 +1102,8 @@ const ETAPES_TOUR = [
     },
     {
         id: 5,
-        titre: 'Alignement et plan de le\u00e7on (optionnel)',
-        texte: "La carte d'alignement rend visible l'alignement p\u00e9dagogique de ton cours\u00a0: ce que tu vises, comment tu l'enseignes et comment tu le v\u00e9rifies. Le plan de la le\u00e7on structure tes le\u00e7ons sur les semaines de ton trimestre. Ce module est compl\u00e9mentaire. Tu peux l'explorer quand tu te sens \u00e0 l'aise avec les autres sections.",
+        titre: 'Carte d\'alignement (optionnel)',
+        texte: "La carte d'alignement rend visible l'alignement p\u00e9dagogique de ton cours\u00a0: ce que tu vises, comment tu l'enseignes et comment tu le v\u00e9rifies. Tu y organises aussi tes s\u00e9quences et tes le\u00e7ons sur les semaines du trimestre, et tu en exportes le plan. Ce module est compl\u00e9mentaire\u00a0: explore-le quand tu te sens \u00e0 l'aise avec les autres sections.",
         correspond: function(idSousSection) {
             return idSousSection === 'conception-carte';
         }
@@ -1131,7 +1131,7 @@ const TOUR_NAV = {
 };
 
 // Libellés courts pour le bouton « Suivant : <section> » (indexés par id d'étape).
-const TOUR_TITRE_COURT = ['Bienvenue', 'Cadre', 'Conception', 'Évaluations', 'Suivi', 'Alignement'];
+const TOUR_TITRE_COURT = ['Bienvenue', 'Cadre', 'Conception', 'Évaluations', 'Suivi', 'Carte d\'alignement'];
 
 // Phase 4 : publier les 6 étapes dans le catalogue unifié sous mode `tour`.
 // La clé est `tour-etape-<id>`. L'orchestration continue d'utiliser le tableau

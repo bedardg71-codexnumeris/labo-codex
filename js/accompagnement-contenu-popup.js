@@ -884,7 +884,7 @@ const AIDE_CONTEXTUELLE = {
     },
 
     'planification-alignement': {
-        titre: 'Alignement pédagogique (carte mentale)',
+        titre: 'Carte d’alignement',
         sections: [
             {
                 type: 'texte',
@@ -968,7 +968,7 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'conseil',
-                contenu: 'Évite les verbes vagues comme <strong>savoir</strong>, <strong>comprendre</strong> ou <strong>connaître</strong>. La carte d’alignement (Conception → Alignement pédagogique) propose une banque de verbes classés par niveau cognitif.'
+                contenu: 'Évite les verbes vagues comme <strong>savoir</strong>, <strong>comprendre</strong> ou <strong>connaître</strong>. La carte d’alignement (Conception → Carte d’alignement) propose une banque de verbes classés par niveau cognitif.'
             },
         ],
         voirAussi: ['planification-alignement', 'conception-productions']

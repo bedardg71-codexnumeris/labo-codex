@@ -284,11 +284,25 @@ function _genererBadgesJetonsHTML(evaluations, productions, da) {
     return '<div class="u-flex-gap-8 u-mt-10">' + badgesHTML + '</div>';
 }
 
+// G2-b (#436) : dénominateur de la barre « jetons utilisés ». Valeur historique
+// EFFECTIVE — gelée jusqu'à décision, parce qu'elle sort à l'écran.
+const QUOTA_JETONS_AFFICHE_DEFAUT = 2;
+
 function _genererBlocGestionJetons(statutJetons, evaluations, productions, da) {
     if (typeof obtenirStatutJetonsEtudiant !== 'function') return '';
     const totalJetonsUtilisesTousTypes = Object.values(statutJetons).reduce((sum, info) => sum + info.utilises, 0);
-    const configBeta = db.getSync(cle('modalitesEvaluation'), null) || {};
-    const quotaGlobal = configBeta.configPAN?.jetons?.nombreParEleve || 2;  // Beta 95.7 : défaut 2
+    // G2-b (#436, 9 août 2026) — LECTURE MORTE RETIRÉE, VALEUR PRÉSERVÉE.
+    // Ce quota lisait `configPAN.jetons.nombreParEleve`. Or #328 L2-c a fait de
+    // ce sous-champ un miroir mort : `modalites-evaluation.js` le SUPPRIME
+    // activement au nettoyage. Le module purgeait donc un champ qu'un autre
+    // continuait de lire — la lecture rendait toujours le défaut, 2.
+    //
+    // ⚠ On ne la branche PAS sur `obtenirConfigJetons()` : sa SSOT n'expose
+    // AUCUN quota global, mais des nombres par usage (`delai.nombre`,
+    // `reprise.nombre`). Or le numérateur ici somme TOUS les types. Choisir un
+    // dénominateur est une décision de sens — et elle change une barre de
+    // progression affichée. Question ouverte consignée au BACKLOG (#436).
+    const quotaGlobal = QUOTA_JETONS_AFFICHE_DEFAUT;
     return `
         <!-- Encadré pour le titre et la barre de progression globale -->
         <div class="profil-encadre-jetons">
@@ -388,13 +402,16 @@ function genererSectionMobilisationEngagement(da) {
     const { artefacts, evaluationsEleve, artefactsPortfolio } = _construireListeArtefactsMobilisation(da, productions, evaluations);
 
     // 🆕 LIRE LA CONFIGURATION DE LA PRATIQUE DE NOTATION
-    // Source de vérité : pratiquesConfigurables (Material Settings), fallback sur modalitesEvaluation
+    // Source unique : `pratiquesConfigurables` via obtenirConfigPratiqueActive.
+    // G2-b (#436, 9 août 2026) : les deux replis sur le miroir
+    // `modalites.configPAN.portfolio` sont retirés. Ce miroir ne se rafraîchit
+    // qu'à l'APPLICATION d'une pratique : sur cet écran, il pouvait contredire
+    // le calcul de la note juste au-dessus, coupé du miroir par G2-a en mai.
     const configPratiqueActive = typeof obtenirConfigPratiqueActive === 'function' ? obtenirConfigPratiqueActive() : null;
-    const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
-    const configPortfolio = configPratiqueActive?.portfolio || modalites.configPAN?.portfolio || {};
+    const configPortfolio = configPratiqueActive?.portfolio || {};
     const portfolioActif = configPortfolio.actif !== false;
     let nombreARetenir = configPortfolio.nombreARetenir || portfolio?.regles?.nombreARetenir || 3;
-    const minimumCompletion = configPortfolio.minimumCompletion || modalites.configPAN?.portfolio?.minimumCompletion || 3;
+    const minimumCompletion = configPortfolio.minimumCompletion || 3;
     let methodeSelection = configPortfolio.methodeSelection || 'meilleurs';
     // Mapper les noms Material Settings → legacy : 'derniers' → 'recents'
     if (methodeSelection === 'derniers') methodeSelection = 'recents';

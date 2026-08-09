@@ -37,7 +37,14 @@ const configurationsOnglets = {
     // Sections créées: apercu (plate), structure, contexte, suivi
     'accueil': [],
     'conception': [
-        { id: 'carte', label: 'Alignement pédagogique' },
+        // Renommé le 9 août 2026 (#426) : les six onglets voisins de Conception
+        // nomment un OBJET de travail ; seul celui-ci nommait une théorie. Et
+        // « carte d'alignement » est déjà le mot de l'app (le guide intégré
+        // s'intitule « Construis ta carte d'alignement »). Autorisation de
+        // toucher cette zone protégée : décision de Grégoire du 8 août 2026,
+        // consignée à l'audit. `noms_stables.json` protège le NOM de la
+        // constante `configurationsOnglets`, pas la valeur des libellés.
+        { id: 'carte', label: "Carte d'alignement" },
         // « Plan de la leçon » RETIRÉ le 8 août 2026 (#424 Lot G) : ses exports
         // et sa rétroaction formative vivent dans la Carte (menu Actions +
         // Inspecteur). Autorisation de toucher cette zone protégée : plan de
