@@ -309,13 +309,36 @@ d'archiver) · `PLAN-prevalidation-visuelle-chromium-2026-07.md` ·
 | Plan | Ce qui est fait | Ce qui reste |
 |---|---|---|
 | `CADRAGE-guides-pedagogiques-post-AQPC.md` | **5 guides sur 7** : `solo`, `acp`, `rai`, `som`, `pan` | **« Enseignement explicite » (4 p.) et `pan-rrec`** (cadre réglementaire) — jamais écrits |
-| `PLAN-refonte-note-finale-portfolio.md` | Phase A livrée le 24 mai ; **Phase E = #328, désormais close** | **Phases B et C** — refonte de la section Note finale du PDF de rétroaction, puis cohérence du panneau dans le profil. ⮕ **Elles étaient bloquées par la Phase E : le verrou vient de sauter** |
+| `PLAN-refonte-note-finale-portfolio.md` | Phases A, E, F, G1, G2-a **et — vérifié le 9 août — B et C** (voir le rectificatif ci-dessous) | **Phase D** (retrait du champ legacy `mat-variante-calcul`, avec une question ouverte : où migrer la bascule Portfolio ↔ Par-Objectifs) · **G2-b** (~30 lecteurs legacy de `configPAN.portfolio`) |
 | `PLAN-MIGRATION-ICONES-SVG.md` | `icons/` est passé de 70 à **134 SVG** | **277 emojis dans `index.html`, ~2400 dans `js/`** — le gros du chantier |
 | `PLAN-VOUTE-PHASES-1-8.md` | Phase 1 avant-pilote code-complet (`signature.js`, `trust-tofu.js`, 6 `partage-*.js`) | `gestion-cles.js` et `trust-wot.js` **n'existent pas** ; outil de modération non plus |
 | `PLAN-export-resultats-finaux.md` (#333) | `js/export-resultats-finaux.js` existe ; Lot 2 (CSV synthèse) livré le 19 juin | le volet **PDF** et la présentation de la pratique en vigueur |
 | `PLAN-restauration-longitudinale-A25.md` | pilote A25 engagé, §8.4 livré | **réplication A24 / H24** (§7) |
 | `SPEC_D_exploration_pratiques.md` + `NOTE-CONCEPTION-D-…` | #326 réactivé (1.26.0) ; `js/comparateur-pratiques.js` et `pratiques-exploration.js` en place | l'**axe D** proprement dit — variantes et parenté arborescente |
 | `SPEC_DEN_couche2.md` + `NOTE-COWORK-modele-DEN.md` | #318 parcours créable livré (1.21.0) | modes « différée » / « réduite » et le **câblage DEN dans `calculerDetailsNoteFinale`** |
+
+▣ **RECTIFICATIF, 9 août en fin de journée — je m'étais trompé sur une ligne.**
+Ce tableau annonçait que les **phases B et C** de
+`PLAN-refonte-note-finale-portfolio.md` restaient à faire, et qu'elles venaient
+d'être débloquées par la clôture de #328. **Les deux sont livrées** — vérifié au
+code : la carte de la terminale est conditionnée à `terminal.present`, la formule
+et la grille s'adaptent, le mode hybride sans terminale a sa branche ; côté PDF,
+`selection` et `obligatoires` sont strictement séparés, les pondérations par bloc
+sont rendues, et le titre suit le réglage `notesFinales` de l'enseignant.
+Reste **Phase D** et **G2-b**.
+
+⮕ **La cause de l'erreur mérite d'être notée, parce que c'est celle que ce §4ter
+dénonce.** J'ai lu les titres du §3 du plan (« Phase B — **À FAIRE** après Phase
+E ») au lieu d'aller au code. Le plan se contredit d'ailleurs lui-même : son §3
+porte la Phase E « EN COURS », son §5 la donne « livrée ». *Un plan ne dit pas
+son propre état* — la phrase est écrite en tête de cette section, et je l'ai
+enfreinte sur la ligne où elle comptait le plus.
+
+⮕ **Ce qui en sort de bon** : B et C étaient livrées **sans aucun filet**, et ce
+sont des défauts d'AFFICHAGE — ils ne cassent aucun calcul, aucun test ne les
+voit, et ils sortent chez l'élève dans un PDF. `tests/unit/sentinelle-note-finale-portfolio-BC.test.js`
+(11 cas, 11 break-tests ROUGE) les verrouille désormais, avec les trois
+garde-fous du calcul (§4-1, §4-2, §4-3 du plan).
 
 ### D. Jamais amorcés (4, en plus des 4 déjà connus du §4bis)
 
