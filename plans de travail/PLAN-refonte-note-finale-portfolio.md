@@ -244,7 +244,7 @@ Quand `productionPortfolio === null` ET `productionTerminale === null` (cas h202
 - **Phases B et C** : ⚠ **LIVRÉES — constaté au code le 9 août 2026**, jamais consignées.
   Verrouillées depuis par `tests/unit/sentinelle-note-finale-portfolio-BC.test.js`
   (11 cas, 11 break-tests ROUGE), qui couvre aussi les décisions §4-1, §4-2 et §4-3.
-- **Phases D et G2-b** : **réellement en attente** (vérifié le 9 août).
+- **Phases D et G2-b** : **LIVRÉES le 9 août 2026** (#434+#435, puis #436). *État constaté avant travaux, conservé ci-dessous.*
   - ~~**Phase D**~~ **LIVRÉE le 9 août 2026** (#434). *État constaté avant travaux, conservé :* le bloc `mat-variante-pan-standards` était toujours dans
     `index.html:5524`, son sélecteur `mat-variante-calcul` et le handler
     `changerVariantePANStandardsMat` aussi. ⚠ **La question ouverte est réelle et
@@ -253,7 +253,7 @@ Quand `productionPortfolio === null` ET `productionTerminale === null` (cas h202
     « Par objectifs (4 modes de calcul) » **inatteignable**. Le doublon avec
     `mat-portfolio-selection` est confirmé : trois valeurs sur quatre se
     recouvrent, avec deux vocabulaires différents.
-  - **G2-b** — `configPAN` est encore lu dans une dizaine de modules.
+  - ~~**G2-b**~~ **LIVRÉE le 9 août 2026** (#436, 1.64.0) — sept lectures d'affichage migrées, les deux écrivains de `pratiques.js` retirés, l'îlot multi-objectifs de `objectifs.js` supprimé. Deux valeurs affichées GELÉES en constantes explicites (décision en attente, voir #436). Deux survivants légitimes break-testés (purge du module propriétaire, injection de simulation #307). ⮕ Le miroir stocké n'a plus ni lecteur ni écrivain, mais **occupe encore de la place** dans les données — purge = migration destructive, à décider.
 
 ### Synthèse architecturale (nouvelle conception)
 
@@ -274,7 +274,7 @@ Quand `productionPortfolio === null` ET `productionTerminale === null` (cas h202
 - ~~#6 — Phase C~~ → **LIVRÉE** (constatée au code le 9 août)
 - ~~#7 — Phase D~~ → **LIVRÉE le 9 août 2026** (#434, 1.62.0) — voir le §3 pour ce qui a rendu le « retrait pur » impossible
 - ~~#8 — Phase E~~ → **LIVRÉE** le 24 mai
-- **G2-b** — migrer les ~30 lecteurs legacy de `configPAN.portfolio`
+- ~~**G2-b**~~ → **LIVRÉE le 9 août 2026** (#436)
 
 ---
 

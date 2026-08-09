@@ -1462,9 +1462,13 @@ function afficherMetriquesGlobales(etudiants) {
         }
     }
 
-    // 2. Sinon, chercher dans modalitesEvaluation (ancienne config ou fallback)
+    // 2. Sinon, repli sur modalitesEvaluation.
+    // G2-b (#436, 9 août 2026) : le miroir `configPAN.portfolio` est retiré de ce
+    // repli. Il ne se rafraîchit qu'à l'APPLICATION d'une pratique — il pouvait
+    // donc contredire le seuil que l'étape 1 lit à la SSOT, sur le même écran.
+    // `config.portfolio` (racine des modalités) reste, il n'appartient pas au miroir.
     if (!seuilTrouve) {
-        const configPortfolio = config.configPAN?.portfolio || config.portfolio || {};
+        const configPortfolio = config.portfolio || {};
         if (configPortfolio.minimumCompletion !== undefined) {
             seuilP = configPortfolio.minimumCompletion;
             seuilTrouve = true;

@@ -212,21 +212,28 @@ function calculerMoyennesCriteres(da) {
     return aucuneDonnee ? null : moyennes;
 }
 
+// G2-b (#436) : fenêtre « artefacts récents » du profil. 3 cours × 2 artefacts.
+// Valeur effective inchangée depuis toujours — voir le commentaire dans
+// calculerMoyennesCriteresRecents pour pourquoi elle n'était pas une constante.
+const NB_ARTEFACTS_RECENTS_DEFAUT = 6;
+
 /**
  * Calcule les moyennes des critères sur les N derniers artefacts
  * Spécifique à la PAN-maîtrise (regarde les artefacts récents, pas toutes les évaluations)
  * Utilise la grille de référence configurée pour les critères.
  *
  * @param {string} da - Numéro DA de l'étudiant
- * @param {number} nombreArtefacts - Nombre d'artefacts récents à considérer (défaut: lire config.configPAN.nombreCours)
+ * @param {number} nombreArtefacts - Nombre d'artefacts récents à considérer (défaut: NB_ARTEFACTS_RECENTS_DEFAUT)
  * @returns {Object|null} - Moyennes par critère (clés normalisées) ou null
  */
 function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
-    // Lire le nombre d'artefacts depuis la config si non fourni
     if (nombreArtefacts === null) {
-        const config = db.getSync(cle('modalitesEvaluation'), null) || {};
-        nombreArtefacts = config.configPAN?.nombreCours || 3; // Par défaut 3 cours = 6 artefacts
-        nombreArtefacts = nombreArtefacts * 2; // 3 cours = 6 artefacts (2 par cours)
+        // G2-b (#436, 9 août 2026) : ce défaut lisait `configPAN.nombreCours`,
+        // un champ du miroir qu'AUCUN code n'écrit — il rendait donc toujours 3,
+        // et la valeur effective était toujours 6. La lecture fantôme est
+        // retirée ; la constante dit ce que le code faisait réellement.
+        // (Le moteur STD code d'ailleurs le même 3 en dur, cf. _lireConfiguration.)
+        nombreArtefacts = NB_ARTEFACTS_RECENTS_DEFAUT;
     }
 
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
@@ -681,9 +688,13 @@ function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
         // Pour dépistage : fenêtre glissante (défauts interpretation-config.js — plus d'UI de réglage, #299)
         nombreArtefacts = obtenirNombreProductionsPourPatterns(); // Défaut 3
     } else {
-        // Pour performance finale : N meilleurs artefacts (config portfolio de la pratique active — Conception → Pratique de notation)
-        const config = db.getSync(cle('modalitesEvaluation'), null) || {};
-        nombreArtefacts = config.configPAN?.portfolio?.nombreARetenir || 4; // Défaut 4
+        // Pour performance finale : N meilleurs artefacts (config portfolio de la pratique active).
+        // G2-b (#436) : lu à la SSOT `pratiquesConfigurables` via obtenirConfigPratiqueActive,
+        // comme le calcul de la note (G2-a). Le miroir `configPAN.portfolio` qu'on lisait ici
+        // ne se rafraîchit qu'à l'APPLICATION d'une pratique : éditer le N dans les réglages
+        // changeait la note du profil sans changer ce nombre-ci.
+        const cfgActive = typeof obtenirConfigPratiqueActive === 'function' ? obtenirConfigPratiqueActive() : null;
+        nombreArtefacts = cfgActive?.portfolio?.nombreARetenir || 4; // Défaut 4
     }
 
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
