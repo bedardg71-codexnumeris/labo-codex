@@ -11,10 +11,10 @@
 
 | | |
 |---|---|
-| **Branche à ouvrir** | `main` **pour la carte d'alignement** · ⚠ **`claude/incomplete-work-plans-h1nimp`** pour les pratiques |
-| **Version sur `main`** | **1.65.0** — build `0809-0937` (carte d'alignement, #437, FUSIONNÉE) |
-| **Travail encore en avance sur `main`** | **12 commits** sur `claude/incomplete-work-plans-h1nimp` (1.61.0 → 1.64.0, #434/#435/#436) — voir le tableau ci-dessous |
-| **Dernière mise à jour** | 9 août 2026, fin de journée — après la fusion de la carte |
+| **Branche à ouvrir** | ⚠ **`claude/incomplete-work-plans-h1nimp`** — elle contient `main` |
+| **Version** | **1.65.0** — build `0809-0937` (identique sur les deux) |
+| **Travail encore en avance sur `main`** | **16 commits** (1.61.0 → 1.64.0, #434/#435/#436) — ✅ **conflits PRÉ-RÉSOLUS, fusion en fast-forward** |
+| **Dernière mise à jour** | 9 août 2026, fin de journée — après la résolution des conflits côté pratiques |
 
 ---
 
@@ -46,7 +46,35 @@ inutilisable au moment où on en a besoin.
 c'est délibéré : sa fusion n'a plus à refondre deux séries entrelacées, mais
 seulement à garder le numéro le plus haut.
 
-### Ce qui reste à faire quand `incomplete-work-plans-h1nimp` fusionnera
+### ✅ FAIT — les conflits sont résolus, la fusion est un fast-forward
+
+> Mis à jour par la session **pratiques**, après lecture de ce dossier.
+> `main` a été fusionnée DANS la branche : elle est passée de 4 commits de
+> retard à **0**. Il ne reste qu'un `git merge --ff-only`.
+
+```bash
+git checkout main && git merge --ff-only claude/incomplete-work-plans-h1nimp
+git push origin main
+```
+
+**Comment les cinq conflits ont été tranchés** (recette ci-dessous honorée) :
+
+| Conflit | Résolution |
+|---|---|
+| Les 4 points de vérité | **1.65.0 / build `0809-0937`** conservés — jamais redescendus à 1.64.0 |
+| `js/changelog-data.js` | l'entrée **1.65 coiffe** la série ; 1.64, 1.63 et 1.61 dessous. ⚠ Le conflit coupait **au milieu d'une entrée** — recomposition manuelle, syntaxe revérifiée |
+| `index.html`, en-tête du module | **UNION D'INTENTIONS** : le renommage « Carte d'alignement » (#426) **ET** le retrait du bandeau « en développement » (#437). Prendre un côté aurait perdu l'autre en silence |
+| `index.html`, deux hunks de `?v=` | la valeur la **plus haute** de chaque côté — aucune valeur retenue n'a jamais été servie plus bas, donc tout cache se casse |
+| `js/planification-carte.js` | **auto-fusionné**, et vérifié : la page 9 du guide (#421) et les flèches ▲▼ (#437) coexistent |
+
+⮕ **Les deux sentinelles retargetées sont à l'octet près celles de `main`** — la
+consigne du point 5 est honorée sans intervention (la branche ne les avait pas
+touchées).
+
+⮕ **Vitest 2054/2054 (232 fichiers) sur l'état FUSIONNÉ** — pas l'attestation
+d'un des deux côtés, la suite rejouée après résolution.
+
+### La recette d'origine, conservée pour mémoire
 
 1. **Version** : garder **1.65.0** (ou au-delà). Ne pas redescendre à 1.64.0.
 2. **Conflits certains** — les quatre points de vérité (`version.json`,

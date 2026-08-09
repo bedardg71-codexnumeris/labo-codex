@@ -7,6 +7,30 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 9 AOÛT 2026, CLÔTURE (même conteneur, même branche).
+     ÉTAT FINAL : **1.65.0** (build 0809-0937), branche **16 commits devant `main`, 0 derrière**, Vitest **2054/2054** (232 fichiers), arbre propre.
+
+     ▣ **LA COLLISION A EU LIEU — et elle est réglée.** Vingt-quatre minutes après ma dernière poussée, la session « carte d'alignement » a poussé la MÊME version 1.64.0 et le MÊME identifiant #436, pour un chantier sans rapport. Exactement ce que `RELAIS.md` annonçait le matin même.
+     ⮕ **C'est elle qui a renuméroté** (1.65.0, #437) et fusionné — donc MA série 1.61→1.64 et mes IDs #434/#435/#436 restent valides, sans renumérotation. C'était son choix délibéré : prendre un numéro AU-DESSUS de toute ma série pour que ma fusion n'ait qu'à garder le plus haut.
+     ⮕ **Elle a corrigé la règle, et elle a raison** : « c'est le PLUS PETIT côté qui renumérote », pas « le second à fusionner ». Le second à fusionner est indéterminé tant que personne n'a fusionné — donc inutilisable au moment précis où on en a besoin. La règle du 8 août était inapplicable ; celle-ci départage.
+     ▣ **Ce que le dossier de réconciliation a servi à quelque chose** : écrit AVANT la collision, il a permis à l'autre session de trancher en connaissance de cause au lieu de découvrir l'écart au merge. Le filet a fonctionné dans le seul sens où il pouvait fonctionner.
+
+     ✅ **FUSION DE `main` DANS LA BRANCHE — les 5 conflits résolus, la branche est fast-forwardable.**
+     ▣ Les 4 points de vérité → 1.65.0 conservés (consigne « ne pas redescendre » honorée).
+     ▣ `changelog-data.js` → 1.65 en tête, ma série dessous. ⚠ Le conflit coupait AU MILIEU d'une entrée : recomposition manuelle, `node --check` après.
+     ▣ **`index.html`, en-tête du module — le conflit qui comptait** : mon renommage « Carte d'alignement » (#426) contre leur retrait du bandeau « en développement » (#437). **Résolu par UNION, pas par choix d'un côté** — prendre l'un aurait supprimé l'autre sans que rien ne le signale, et aucune sentinelle des deux côtés ne l'aurait vu.
+     ▣ `?v=` → la valeur la plus haute de chaque côté (aucune retenue n'a jamais été servie plus bas).
+     ▣ `planification-carte.js` **auto-fusionné**, et VÉRIFIÉ au lieu d'être cru : page 9 du guide (#421) présente, compte d'étapes cohérent, flèches ▲▼ (#437) présentes.
+     ▣ Les 2 sentinelles retargetées par l'autre session sont **à l'octet près** celles de `main` — consigne honorée sans intervention.
+
+     ⚠ **MALENTENDU À LEVER — « les deux valeurs gelées » désignent DEUX PAIRES DIFFÉRENTES.** L'autre session a lu la formule comme visant les siennes (cible tactile 28 px, sarcelle `#0891b2`, #437). Les miennes sont celles de **#436** : le **dénominateur de l'indice C** au tableau de bord (3, alors que la SSOT dirait 4 ou 10) et le **quota affiché des jetons** (2, dont le champ source était activement PURGÉ par le module propriétaire depuis #328 L2-c). Les deux paires existent, les quatre attendent un verdict.
+
+     ⚠ **TROU CONFIRMÉ, signalé par l'autre session et vérifié ici** : `scripts/release.mjs` ne bumpe PAS le `?v=` de `styles.css`. Vérification : **zéro occurrence de `css`** dans le script ; son bloc anti-cache (#417) ne traite que les `<script src>`, or `styles.css` est un `<link rel="stylesheet">` (index.html:14). ⮕ C'est la leçon de #417 non poussée jusqu'au CSS — et son propre commentaire d'en-tête décrit déjà le mode de défaillance : « un fichier réécrit mais servi sous la même URL peut sortir du cache dans sa version PÉRIMÉE ». Non corrigé ici : nouveau chantier, nouvel identifiant, décision de Grégoire.
+
+     ⮕ **RESTE DÛ** : la fusion `--ff-only` (2 min) · les portes terrain, dont celles de 1.61→1.64 volontairement absentes de la checklist de l'autre session tant que ma branche n'est pas fusionnée · les 4 valeurs gelées · le trou `release.mjs`/CSS · la porte du 8 août toujours sans réponse (le double-clic ouvre-t-il l'Inspecteur au doigt sur iPad ?).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 9 AOÛT 2026, SUITE (même conteneur, même branche).
      ÉTAT FACTUEL EN FIN : **1.63.0** (build 0809-0835), branche à 7 commits devant `main`, Vitest **1998/1998** (230 fichiers). Dernier ID BACKLOG **#435**.
 
