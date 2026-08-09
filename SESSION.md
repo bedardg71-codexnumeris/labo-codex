@@ -5780,7 +5780,23 @@ comparaison. Sans ça, `main` local paraît vieux de plusieurs semaines et
 `git rev-list --count main...HEAD` annonce une divergence **entièrement
 fictive** — constaté le 9 août (83/57 commits, réel : 0/0).
 
-### Priorité 0 — LA FUSION VERS `main` (Grégoire, 2 min)
+### ⚠⚠ Priorité 0 — LA FUSION, ET UNE SECONDE SESSION SUR `main`
+
+**Grégoire a signalé le 9 août qu'un autre agent travaillait sur `main`** pendant
+que cette branche avançait. Au dernier `fetch`, `origin/main` était **encore à
+`83ee41d3`** (1.60.0) : rien n'était poussé, donc **aucune collision réelle au
+moment où ces lignes sont écrites**. Elle viendra quand l'autre poussera.
+
+⮕ **Le dossier de réconciliation est dans `RELAIS.md`** : versions consommées
+(1.61.0 → 1.64.0), identifiants pris (#434, #435, #436), fichiers où le conflit
+est certain, et la recette. C'est la configuration du 8 août — écrite AVANT la
+collision cette fois, pas après.
+
+⮕ **Ce que cette session a fait pour limiter la casse** : plus aucune release
+après 1.64.0, aucun identifiant pris au-delà de #436, et la purge de `configPAN`
+versée à la séance #353 **sans ouvrir de nouvel item**.
+
+### Priorité 0 bis — LA FUSION VERS `main` (Grégoire, 2 min)
 
 La session du 9 août tournait dans un conteneur **contraint à sa branche**.
 La règle de relais de `CLAUDE.md` (« on fusionne à la fin de CHAQUE session »)
