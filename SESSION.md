@@ -7,6 +7,77 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 10 AOÛT 2026, SOIR (5) : #353 — L'ALERTE CRIAIT DANS LA MAUVAISE MONNAIE.
+     ÉTAT FINAL : **1.70.0** (build 0810-1548), Vitest **2158/2158** (243 fichiers).
+
+     ⚠⚠ **LE FAIT CENTRAL, MESURÉ AVANT D'ÊTRE CRU.** Le navigateur facture localStorage en **unités de
+     code UTF-16 — des caractères**, pas des octets. Vérifié au navigateur (Chromium, `file://`) en
+     remplissant jusqu'au `QuotaExceededError` : **4,94 M caractères tenus avec 'x'** (1 octet UTF-8)
+     **ET avec 'é'** (2 octets UTF-8). Même capacité en caractères des deux côtés ⇒ c'est le caractère
+     qui est compté. Un test ASCII seul n'aurait rien tranché (1 car. = 1 octet UTF-8) : **c'est l'accent
+     qui fait la preuve.**
+
+     ⮕ **`statsStockage` comptait `(clé+valeur).length × 2` et divisait par 5 Mi. Le ratio affiché valait
+     le DOUBLE.** Les « 173 % » du 9 août étaient **86 %** ; les « 200 % » du 10 août sont **100 %**.
+     ▣ **Et c'est le pire cas de figure pour une alerte** : un ratio impossible — 200 % d'un quota qu'on
+     ne peut par définition pas dépasser — invite à ne plus la croire. L'alerte disait la vérité (le seuil
+     de 80 % avait bien été franchi) dans une unité qui la rendait incroyable.
+
+     ⮕ **UNE TROISIÈME UNITÉ COHABITAIT.** `SEUIL_IDB_FIRST` (200 Ko) était comparé à des **octets UTF-8**
+     (`new Blob(...).size`). Un seuil et un budget qui ne parlent pas de la même chose de part et d'autre
+     du même `>`. C'est précisément ce qui rendait impossible l'arbitrage « sur chiffres » que le
+     RAPPORT-353 réclamait depuis le 28 juin. Une seule monnaie désormais — le caractère — partout.
+     ▣ **VALIDATION CROISÉE, la seule qui vaille** : le ratio corrigé vaut **99,4 % au moment EXACT** où
+     le navigateur refuse la première écriture. Une unité juste, pas seulement plausible.
+
+     ⚠ **CE QUE LA MESURE DIT DE L'ÉTAT DE GRÉGOIRE, ET QUI EST PLUS SÉRIEUX QUE LE CHIFFRE FAUX** :
+     5 119 K car. / 5 120 K car. = **100 % du plafond. Son localStorage est PLEIN.** Rien n'est en danger
+     (durabilité A/B/C), mais **toute écriture bascule désormais en memoryCache + IDB** : le « chemin
+     IDB-seul » que #353 voulait rendre plus RARE est devenu **le seul**.
+
+     ▣ **DE QUOI TRANCHER L'OPTION 2 — la projection.** `statsStockage()` rend `projectionSeuils` : pour
+     25/50/100/200 Ki caractères, combien de clés basculeraient et combien de place serait libérée.
+     ⮕ **Ce que les chiffres connus laissent déjà voir** : le top 5 du 9 août pèse 116/115/95/91/89 K car.
+     — **tous très en dessous des 200 Ki du seuil**, d'où leur présence en localStorage. Et 472 clés pour
+     5 119 K car. : **la masse est dans la longue traîne, pas dans quelques géants.** L'option 3 (liste
+     blanche de grosses clés) déplacerait donc peu ; l'option 2 (abaisser le seuil) est à chiffrer d'abord.
+     ⏳ **Geste dû par Grégoire** : `db.statsStockage()` en console, me rapporter `projectionSeuils`.
+
+     ▣ **PURGE `configPAN` (décision Grégoire du 9 août) — faite PAR LE PROPRIÉTAIRE.** Pas une nouvelle
+     purge dans `main.js` : une extension de `purgerLegacy()` du module SSOT, qui purgeait déjà
+     `dureePeriodeMinutes` et les miroirs morts. #328 L2-c n'ôtait que `configPAN.jetons` parce que
+     `portfolio` avait encore des lecteurs ; **G2-b (#436) a retiré les derniers**, vérifié au code
+     (zéro lecteur, zéro écrivain hors commentaires dans tout `js/`).
+     ⚠ **Et le gain est NÉGLIGEABLE : ~285 caractères par trimestre, mesuré sur le pack démo — 0,02 % du
+     budget.** Le BACKLOG l'annonçait comme « un pur gain de budget » ; c'est de l'hygiène zéro-dette, et
+     le dire évite de croire le problème traité.
+
+     ⚠ **UNE SENTINELLE S'APPELAIT « CE QUI DOIT SURVIVRE (le piège du prochain nettoyage) » — et elle
+     visait exactement ce que je faisais.** Elle exigeait littéralement `delete m.configPAN[SOUS_CHAMP_
+     JETONS_MORT]`. ⮕ Vérification faite, mon changement sert MIEUX l'invariant qu'elle protège (« le mort
+     ne reste pas dans les données ») : elle épinglait une LIGNE, pas l'invariant. Dépinglée, motif écrit
+     sur place. *Épingler une implémentation, c'est interdire de faire mieux.*
+     ▣ **AUDIT DES CALL-SITES AVANT DE PURGER** (règle CLAUDE.md) : le seul autre lecteur de `configPAN`
+     est le chemin d'injection de simulation (#307) — et il est **inatteignable** : `config.modalites`
+     n'a **aucun producteur** dans tout `js/`. La purge ne pouvait donc rien casser de ce côté. ⮕ Constat
+     versé, non corrigé : ce code mort appartient à #307, pas à cette séance.
+
+     ▣ **§4 : 6 break-tests sur ce cycle (46 sur la session), 6 ROUGE après resserrement.**
+     ⚠⚠ **UN EST RESTÉ VERT — le troisième de la session, et le plus instructif** : remettre
+     `new Blob(...).size` (octets UTF-8) dans l'estimateur ne faisait rougir AUCUN cas. Rien ne
+     verrouillait la monnaie de l'estimateur — celle qui décide du routage. Cas ajouté, avec l'accent
+     comme témoin (`'é'.repeat(1000)` → 1000, pas 2000). ⮕ *Trois fois cette semaine, un break-test resté
+     vert a désigné un trou du TEST, jamais du code. C'est exactement à ça qu'il sert.*
+     ▣ **Pas d'entrée au changelog** : le pourcentage et l'unité du rapport de bogue changent, rien qu'un
+     utilisateur reconnaîtrait comme une fonctionnalité. Même arbitrage que #447.
+
+     ⮕ **PRIORITÉ 0 VIDÉE.** Restent des chantiers de fond (#425, #416, #403, #418, #428+#430, #440, #439)
+     et les quatre valeurs gelées sans verdict.
+     ⏳ **DÛ PAR GRÉGOIRE** : `reparer442()` en exécution · `db.statsStockage()` → `projectionSeuils` ·
+     porte terrain #445 (iPad + Mac).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 10 AOÛT 2026, SOIR (4) : #443 LIVRÉ — la dernière surface qui promettait un moteur mort.
      ÉTAT FINAL : **1.69.0** (build 0810-1523), Vitest **2154/2154** (243 fichiers).
 
