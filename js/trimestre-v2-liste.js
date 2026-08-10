@@ -462,8 +462,25 @@ function changerTrimestreActifV2(valeur) {
             // l'ancien trimestre (absent du nouveau namespace) → la sauvegarde
             // suivante ratait son findIndex en silence (no-op + faux succès).
             // Même geste que la réinitialisation de l'éditeur d'horaire ci-dessus.
-            if (typeof afficherEtatVideGroupeCoursV2 === 'function') {
-                afficherEtatVideGroupeCoursV2();
+            //
+            // ⚠⚠ #446 (10 août 2026) — CE CORRECTIF N'AVAIT JAMAIS TOURNÉ.
+            // `afficherEtatVideGroupeCoursV2` vit dans `trimestre-v2-groupes-cours.js`,
+            // qui est une IIFE, et n'était pas exportée : le `typeof … === 'function'`
+            // valait donc FAUX à chaque bascule, et la garde sortait en silence.
+            // Constaté au terrain — après un passage H26 → A26, le bloc affichait
+            // encore « H2026-601-101-MQ-00008 » alors qu'A26 n'a aucun groupe-cours.
+            // La fonction est exportée depuis, et l'appel passe par `window.` : plus
+            // de résolution par chaîne de scope, donc plus d'échec muet possible.
+            // ⮕ Deuxième fois dans la journée qu'un garde `typeof` sur un nom
+            // inaccessible avale un correctif entier (cf. #444, `sauvegarderPreference`).
+            if (typeof window.afficherEtatVideGroupeCoursV2 === 'function') {
+                window.afficherEtatVideGroupeCoursV2();
+            }
+            // La carte de résumé de la sidebar est rendue à part : l'état vide ne
+            // la touche pas (à l'ANNULATION d'une édition, elle doit rester). Ici,
+            // en revanche, le groupe qu'elle décrit appartient au trimestre quitté.
+            if (typeof window.mettreAJourCarteResumeGroupeCoursV2 === 'function') {
+                window.mettreAJourCarteResumeGroupeCoursV2(null);
             }
 
             // 🆕 BETA 95.2 : Rafraîchir le dropdown groupe-cours actif
@@ -498,8 +515,8 @@ function changerTrimestreActifV2(valeur) {
             if (typeof window.mettreAJourBarreContexte === 'function') {
                 window.mettreAJourBarreContexte();
             }
-            if (typeof populerDropdownGroupeCoursV2 === 'function') {
-                populerDropdownGroupeCoursV2();
+            if (typeof window.populerDropdownGroupeCoursV2 === 'function') {
+                window.populerDropdownGroupeCoursV2();
             }
         }
     } else {
