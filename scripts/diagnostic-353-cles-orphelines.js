@@ -37,8 +37,43 @@
         (db.getSync('cours', []) || []).forEach(function (c) { if (c && c.id) coursVivants[c.id] = true; });
     } catch (e) { /* magasin illisible : on le dira plus bas */ }
 
-    L('Trimestres déclarés : ' + (Object.keys(idsTrimestres).join(', ') || 'AUCUN'));
-    L('Cours au magasin    : ' + (Object.keys(coursVivants).join(', ') || 'AUCUN'));
+    // ⚠⚠ CORRECTIF DU 10 AOÛT — LA PREMIÈRE VERSION DE CE SCRIPT SE TROMPAIT ICI,
+    // et le faux positif aurait coûté cher.
+    //
+    // `cleSnapshots()` (snapshots.js:90) construit `<trim>_snapshots_<id>` où
+    // `<id>` vient d'`obtenirCoursIdPourSnapshots()` : **`infoCours._groupeCoursId`
+    // EN PRIORITÉ**, et seulement à défaut `infoCours.id`. La variable s'appelle
+    // `coursId` mais porte, dans le cas normal, un id de GROUPE-COURS — le
+    // commentaire du module le dit d'ailleurs : « Clé format :
+    // h2026_snapshots_GC123456789 ».
+    //
+    // ⮕ Confronter ces clés au seul magasin `cours` classait donc TOUS les
+    // snapshots vivants comme orphelins : chez Grégoire, 4 clés bien réelles
+    // (115 + 95 + 91 + 55 K car.) de trajectoires hebdomadaires a2025/h2026.
+    // Les supprimer aurait détruit des données actives.
+    //
+    // On accepte désormais les DEUX registres : cours ET groupes-cours de chaque
+    // trimestre. Un suffixe inconnu des deux est seul déclaré orphelin.
+    var idsAcceptes = {};
+    Object.keys(coursVivants).forEach(function (id) { idsAcceptes[id] = 'cours'; });
+    var nbGC = 0;
+    Object.keys(idsTrimestres).concat(['demo']).forEach(function (t) {
+        var liste = [];
+        try { liste = db.getSync(t + '_groupesCours', []) || []; } catch (e) { liste = []; }
+        (Array.isArray(liste) ? liste : []).forEach(function (g) {
+            if (g && g.id) { idsAcceptes[g.id] = 'groupe-cours'; nbGC++; }
+            // Le pointeur peut aussi porter le coursId du GC : l'accepter aussi.
+            if (g && g.coursId) idsAcceptes[g.coursId] = 'cours (via GC)';
+        });
+    });
+
+    L('Trimestres déclarés  : ' + (Object.keys(idsTrimestres).join(', ') || 'AUCUN'));
+    L('Cours au magasin     : ' + (Object.keys(coursVivants).join(', ') || 'AUCUN'));
+    L('Groupes-cours connus : ' + nbGC);
+    if (nbGC === 0) {
+        L('⚠ AUCUN groupe-cours lu : la section « snapshots » ne peut pas conclure.');
+        L('  Elle sera SAUTÉE plutôt que de désigner des données vivantes.');
+    }
     L('');
 
     // ── Inventaire de localStorage ───────────────────────────────────────
@@ -64,10 +99,14 @@
             familles.trimestreInconnu.push(x);
             return;
         }
-        // 2. Snapshots nommés d'après un coursId qui n'existe plus.
-        //    Forme réelle : `<trim>_snapshots_<coursId>` (snapshots.js:96).
+        // 2. Snapshots dont le suffixe n'est NI un cours NI un groupe-cours.
+        //    Forme réelle : `<trim>_snapshots_<id>` où `<id>` est le
+        //    `_groupeCoursId` en priorité (snapshots.js:77-96).
+        //    ⚠ On ne conclut QUE si les registres ont pu être lus : sans eux,
+        //    tout paraîtrait orphelin — c'est exactement le faux positif du
+        //    premier jet. Mieux vaut ne rien dire que désigner du vivant.
         var ms = /_snapshots_(.+)$/.exec(x.cle);
-        if (ms && Object.keys(coursVivants).length > 0 && !coursVivants[ms[1]]) {
+        if (ms && nbGC > 0 && !idsAcceptes[ms[1]]) {
             familles.snapshotOrphelin.push(x);
             return;
         }
@@ -89,8 +128,9 @@
 
     bloc('TRIMESTRE ABSENT du registre', familles.trimestreInconnu,
          '⚠ Vérifier AVANT de supprimer : un trimestre archivé peut être légitime et vouloir être conservé.');
-    bloc('SNAPSHOTS orphelins (coursId inconnu du magasin)', familles.snapshotOrphelin,
-         'Nommés `<trim>_snapshots_<coursId>` : plus aucun lecteur ne reconstruit ce nom.');
+    bloc('SNAPSHOTS orphelins (suffixe inconnu des DEUX registres)', familles.snapshotOrphelin,
+         'Nommés `<trim>_snapshots_<id>` où `<id>` est un GROUPE-COURS en priorité (snapshots.js:77).\n' +
+         '    Confrontés ici aux cours ET aux groupes-cours : un snapshot vivant n\'est plus signalé.');
     bloc('SANS PRODUCTEUR connu dans js/', familles.sansProducteur,
          'Résidu d\'une version antérieure — aucun code n\'écrit ni ne lit ce nom aujourd\'hui.');
 
