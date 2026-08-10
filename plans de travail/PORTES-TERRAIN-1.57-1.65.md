@@ -33,9 +33,12 @@ note ou des chiffres affichés**, pas seulement l'apparence. Elles sont marquée
 
 ## 0. AVANT DE COMMENCER
 
-- [ ] Ouvrir sur **`main`**, vérifier en bas de page : **1.65.2**, build `0809-1101`
-      *(1.65.2 = audit documentaire + retrait de CSS mort, aucun changement visible
-      par rapport à 1.65.1 — les portes ci-dessous sont inchangées)*
+- [ ] Ouvrir sur **`main`**, vérifier en bas de page : **1.65.2 ou plus récent**
+      *(les patchs 1.65.2+ sont des correctifs sans changement visible — les portes
+      ci-dessous restent celles de 1.65.1 ; seul un numéro ANTÉRIEUR est un échec)*
+- [ ] ⚠ **Si l'app tourne en `file://` depuis le clone Git local** : faire
+      `git pull` d'abord — l'app est à la version du dernier pull, pas du dépôt.
+      (Constaté le 10 août : portes passées sur un build en retard.)
 - [ ] Faire un **backup Codex** avant de toucher aux données réelles
 - [ ] Prévoir **les deux appareils** : MacBook (Chrome + Safari) et iPad Air
 - [ ] Prévoir **les deux modes** (sombre et clair) — plusieurs portes en dépendent
