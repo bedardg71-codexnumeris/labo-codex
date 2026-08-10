@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.68',
+            couleur: 'vert',
+            titre: 'Relier une activité à un objectif, au tracé',
+            items: [
+                'Tu peux maintenant tracer un lien depuis une activité, un exposé ou une évaluation et le déposer sur la ligne d’un objectif de sa leçon : la case « objectifs servis » se coche toute seule. Les cases de l’Inspecteur restent là — c’est le même geste, par un autre chemin.',
+                'Si le dépôt ne peut pas aboutir (bloc d’une autre leçon, type qui ne sert pas d’objectif), l’application te le dit au lieu de ne rien faire.',
+                'Les pastilles des objectifs (!, ⚠, ✓) ont enfin une légende : dans l’Inspecteur de la leçon et dans la page 5 du guide. Leur sens ne vivait que dans une infobulle au survol — invisible sur iPad.'
+            ]
+        },
+        {
             version: '1.67',
             couleur: 'orange',
             titre: 'Changer de trimestre ne laisse plus rien derri\u00e8re',

@@ -22,6 +22,11 @@ const etat = {
     multiSelection: new Set(),
     lienEnCours: null,
     panneauOuvert: false,
+    // #445 : QUEL nœud l'Inspecteur montre. `panneauOuvert` seul ne suffit
+    // pas pour synchroniser une case : deux blocs d'une même leçon affichent
+    // les mêmes objectifs, donc la case existe aussi quand l'Inspecteur parle
+    // d'un autre bloc.
+    panneauNoeudId: null,
     zoom: 1,
     initialise: false
 };
@@ -1127,6 +1132,46 @@ var BANQUE_VERBES = {
 // Il ne rejoint donc PAS les cinq étapes de méthode exclues juste au-dessus.
 var TYPES_AVEC_NIVEAU_COGNITIF = ['competence', 'idee-maitresse', 'expose', 'activite', 'soutien', 'revision', 'evaluation'];
 
+// #403/#445 — LES TROIS ÉTATS D'UN OBJECTIF, source unique.
+//
+// ⚠ Ces symboles et ces libellés apparaissent maintenant sur TROIS surfaces :
+// la pastille elle-même, la légende de l'Inspecteur de leçon, et la page 5 du
+// guide. Deux surfaces qui disent deux vérités, c'est exactement le défaut que
+// #443 a mis au jour ailleurs dans l'app — d'où la table unique, déclarée ICI,
+// au-dessus de `GUIDE_PAGES` : ce tableau est évalué au chargement et appelle
+// la légende, donc les constantes doivent exister avant lui.
+var SYMBOLES_PASTILLE_OBJECTIF = { invitation: '!', servi: '⚠', verifie: '✓' };
+
+var LEGENDE_PASTILLES_OBJECTIF = [
+    { etat: 'invitation', libelle: 'Aucun bloc ne sert encore cet objectif.' },
+    { etat: 'servi', libelle: 'Servi par au moins un bloc, mais aucune évaluation ne le vérifie.' },
+    { etat: 'verifie', libelle: 'Servi et vérifié par une évaluation.' }
+];
+
+/**
+ * #445 — La légende des pastilles, rendue à l'identique partout.
+ *
+ * POURQUOI ELLE EXISTE. Le sens des pastilles ne vivait que dans l'attribut
+ * `title` : une infobulle au survol. Sur iPad il n'y a pas de survol — le
+ * code couleur était donc purement décoratif pour la moitié des usages, et
+ * indevinable pour l'autre.
+ */
+function legendePastillesObjectifHTML() {
+    var html = '<div class="planif-legende-pastilles">';
+    for (var i = 0; i < LEGENDE_PASTILLES_OBJECTIF.length; i++) {
+        var e = LEGENDE_PASTILLES_OBJECTIF[i];
+        // security-ok: états et libellés sont des littéraux de ce fichier —
+        // aucune donnée utilisateur ne traverse cette fonction.
+        html += '<div class="planif-legende-pastille-ligne">' +
+            '<span class="planif-obj-pastille planif-obj-pastille--' + e.etat + '">' +
+                SYMBOLES_PASTILLE_OBJECTIF[e.etat] +
+            '</span>' +
+            '<span class="planif-legende-pastille-texte">' + e.libelle + '</span>' +
+        '</div>';
+    }
+    return html + '</div>';
+}
+
 // === GUIDE INTÉGRÉ — 8 pages (7 pédagogiques + 1 technique import/export) ===
 var GUIDE_PAGES = [
     {
@@ -1185,7 +1230,10 @@ var GUIDE_PAGES = [
                 '<li>Sur un bloc <span class="planif-guide-type" style="background:var(--planif-couleur-lecon)"></span> <strong>Leçon</strong>, clique le badge <strong>🎯</strong> de l’en-tête : il déplie la zone des objectifs. Grisé, il t’indique qu’aucun objectif n’est encore posé.</li>' +
                 '<li>Écris l’objectif. Le <strong>+</strong> en ajoute un autre, le <strong>−</strong> retire celui de la ligne — une leçon en porte souvent plusieurs.</li>' +
                 '<li>Dans l’<strong>Inspecteur</strong> d’une activité, d’un exposé ou d’une évaluation de cette leçon, coche les <strong>objectifs servis</strong>. C’est ainsi que tu vérifies qu’aucun objectif ne reste sans moyen.</li>' +
+                '<li>Plus rapide : <strong>trace un lien</strong> depuis le bloc et <strong>dépose-le sur la ligne de l’objectif</strong> — la case se coche toute seule. Le bloc doit être dans la même leçon que l’objectif.</li>' +
             '</ol>' +
+            '<p class="planif-guide-pourquoi">Chaque objectif porte une <strong>pastille</strong> qui dit où il en est\u00a0:</p>' +
+            legendePastillesObjectifHTML() +
             '<div class="planif-guide-astuce">Pose aussi la <strong>semaine</strong> de la leçon (Inspecteur) et la <strong>durée</strong> de chaque bloc (dans son en-tête) : la leçon totalise les durées de ce qu’elle contient, et le planificateur place le tout sur les semaines de ton trimestre.</div>'
     },
     {
@@ -1637,8 +1685,6 @@ function evaluerObjectif(lecon, objectifId) {
         message: texteServi + ", mais aucune évaluation ne le vérifie"
     };
 }
-
-var SYMBOLES_PASTILLE_OBJECTIF = { invitation: '!', servi: '⚠', verifie: '✓' };
 
 /**
  * Pastille d'un objectif, rendue DANS l'innerHTML de la leçon plutôt que posée
@@ -2109,6 +2155,18 @@ function ouvrirPanneau(id) {
         });
     }
 
+    // #445 — la légende des pastilles, dans l'Inspecteur de la LEÇON.
+    // C'est le seul endroit atteignable au doigt : sur iPad il n'y a pas de
+    // survol, donc l'infobulle `title` des pastilles n'existe pas. L'Inspecteur,
+    // lui, s'ouvre au double-tap et par le bouton de la barre depuis #444.
+    // Affichée seulement quand la leçon PORTE des objectifs : sans eux il n'y a
+    // aucune pastille à l'écran, et la légende serait du bruit.
+    if (donnees.type === 'lecon' && objectifsDeLecon(donnees).length > 0) {
+        extra.innerHTML +=
+            '<label>Pastilles des objectifs</label>' +
+            legendePastillesObjectifHTML();
+    }
+
     // « Dans la leçon » — déplacement SANS geste, depuis l'inspecteur (friction
     // F7, précision du 6 août : sur iPad il n'existe ni ⌘ ni glisser de nœud
     // — le tactile du canevas est une porte ouverte du relais. Le double-clic
@@ -2455,11 +2513,13 @@ function ouvrirPanneau(id) {
 
     panneau.classList.add('visible');
     etat.panneauOuvert = true;
+    etat.panneauNoeudId = id;
 }
 
 function fermerPanneau() {
     if (panneau) panneau.classList.remove('visible');
     etat.panneauOuvert = false;
+    etat.panneauNoeudId = null;
 }
 
 // === SUPPRESSION ===
@@ -2857,6 +2917,15 @@ function demarrerLien(noeudId, direction, e) {
         document.removeEventListener('pointercancel', onUp);
 
         var elSous = document.elementFromPoint(e2.clientX, e2.clientY);
+        // #445 — une LIGNE D'OBJECTIF intercepte le dépôt avant le nœud qui la
+        // contient. L'ordre compte : la ligne vit DANS la leçon, donc
+        // `closest('.planif-noeud')` la capterait aussi et le geste retomberait
+        // dans le menu de lien, où l'objectif n'existe pas comme cible.
+        var ligneObjectif = elSous ? elSous.closest('.planif-noeud-objectif-ligne') : null;
+        if (ligneObjectif && deposerLienSurObjectif(noeudId, ligneObjectif)) {
+            etat.lienEnCours = null;
+            return;
+        }
         var noeudCibleEl = elSous ? elSous.closest('.planif-noeud') : null;
         if (noeudCibleEl && noeudCibleEl.id !== noeudId) {
             afficherMenuLien(e2.clientX, e2.clientY, noeudId, noeudCibleEl.id);
@@ -2867,6 +2936,84 @@ function demarrerLien(noeudId, direction, e) {
     document.addEventListener('pointermove', onMove);
     document.addEventListener('pointerup', onUp);
     document.addEventListener('pointercancel', onUp);
+}
+
+/**
+ * #445 (10 août 2026) — Déposer un lien sur une ligne d'objectif COCHE la case
+ * « objectifs servis » du nœud source.
+ *
+ * POURQUOI CE CHEMIN EXISTE. #403 a tranché que le lien objectif↔activité se
+ * déclare par cases à cocher, et ce choix reste le bon (l'objectif n'est pas un
+ * nœud, la liste est bornée à sa leçon, et ça marche au doigt). Mais le canevas
+ * enseigne le tracé de lien partout ailleurs : au terrain du 10 août, Grégoire a
+ * tenté de relier une activité à un objectif **en traçant**, et n'a rien obtenu.
+ * Ce n'était pas un bug — c'était un canal inexistant, donc un silence. On ne
+ * remplace pas le déclaratif : on branche le geste que l'interface a appris à
+ * l'utilisateur sur la MÊME écriture (`definirObjectifsServis`), porte unique.
+ *
+ * ⮕ Le dépôt AJOUTE, il ne bascule pas : « cette activité sert cet objectif »
+ * est une affirmation, et un second dépôt sur la même ligne ne peut pas
+ * raisonnablement vouloir dire le contraire. Le décochage reste à l'Inspecteur,
+ * là où l'état est visible.
+ *
+ * ⚠ Refus EXPLICITES plutôt que silence — c'est tout le sujet de l'item : un
+ * geste sans effet et sans message est indiscernable d'un bug.
+ *
+ * @param {string} sourceId - nœud d'où part le lien
+ * @param {HTMLElement} ligneEl - la ligne d'objectif sous le point de dépôt
+ * @returns {boolean} true si le dépôt a été TRAITÉ ici (écriture ou refus dit),
+ *   false s'il faut laisser le chemin normal du menu de lien s'appliquer.
+ */
+function deposerLienSurObjectif(sourceId, ligneEl) {
+    var champ = ligneEl.querySelector('.planif-noeud-objectif[data-obj-id]');
+    var objectifId = champ ? champ.getAttribute('data-obj-id') : null;
+    // Ligne d'accueil (objectif pas encore créé) : rien à servir. On rend la
+    // main au chemin normal plutôt que d'inventer un message.
+    if (!objectifId) return false;
+
+    var source = etat.noeuds.get(sourceId);
+    if (!source) return false;
+
+    if (TYPES_SERVANTS_OBJECTIF.indexOf(source.type) === -1) {
+        afficherToastLien('Ce bloc ne peut pas servir un objectif — seules les activités, les exposés et les évaluations le peuvent.');
+        return true;
+    }
+
+    var leconEl = ligneEl.closest('.planif-noeud');
+    var leconObjectif = leconEl ? etat.noeuds.get(leconEl.id) : null;
+    var leconSource = leconParenteDe(source);
+    if (!leconObjectif || !leconSource || leconObjectif.id !== leconSource.id) {
+        // Refus assumé, et pas défensif : `objectifsServisPar` filtre à la leçon
+        // parente. Écrire un id étranger produirait une case cochée que la
+        // lecture écarterait aussitôt — un mensonge silencieux.
+        afficherToastLien('Un objectif ne peut être servi que par un bloc de SA leçon. Déplace le bloc dans cette leçon d’abord.');
+        return true;
+    }
+
+    // Base = la liste FILTRÉE : les ids devenus étrangers (clone déplacé,
+    // objectif retiré) ne sont pas réécrits au passage.
+    var deja = objectifsServisPar(source);
+    if (deja.indexOf(objectifId) !== -1) {
+        afficherToastLien('Déjà coché : ce bloc sert cet objectif.');
+        return true;
+    }
+
+    enregistrerPourUndo();
+    definirObjectifsServis(sourceId, deja.concat([objectifId]));
+    rafraichirPastillesObjectifs(leconObjectif);
+
+    // Si l'Inspecteur est ouvert SUR CE NŒUD, sa case doit suivre — sinon deux
+    // surfaces diraient deux choses. On vise par l'id du nœud inspecté, pas par
+    // la seule présence d'une case : un autre bloc de la même leçon affiche les
+    // mêmes objectifs, et cocher la sienne serait faux.
+    if (etat.panneauOuvert && etat.panneauNoeudId === sourceId) {
+        var caseInspecteur = document.querySelector(
+            '.planif-objectif-servi[data-obj-id="' + (window.CSS && CSS.escape ? CSS.escape(objectifId) : objectifId) + '"]');
+        if (caseInspecteur) caseInspecteur.checked = true;
+    }
+
+    afficherToastLien('Objectif coché — ce bloc le sert désormais.');
+    return true;
 }
 
 function creerLien(sourceId, cibleId, typeLien) {
@@ -8009,6 +8156,15 @@ window.planificationCarte = {
     objectifsServisPar: objectifsServisPar,
     definirObjectifsServis: definirObjectifsServis,
     evaluerObjectif: evaluerObjectif,
+    // #445 — exposées pour la sentinelle, et pour la même raison que les
+    // voisines : ce que fait un DÉPÔT se vérifie en le lui donnant, jamais en
+    // relisant sa source. Un refus dit et un refus muet s'écrivent presque
+    // pareil ; seule l'exécution les distingue. La légende suit : elle est la
+    // source unique de trois surfaces, sa dérive ne se verrait pas au grep.
+    deposerLienSurObjectif: deposerLienSurObjectif,
+    legendePastillesObjectifHTML: legendePastillesObjectifHTML,
+    LEGENDE_PASTILLES_OBJECTIF: LEGENDE_PASTILLES_OBJECTIF,
+    SYMBOLES_PASTILLE_OBJECTIF: SYMBOLES_PASTILLE_OBJECTIF,
     // Ancrage temporel : la leçon écrit, tout le reste dérive (D3)
     migrerAncrageTemporelVersLecon: migrerAncrageTemporelVersLecon,
     semaineDeLecon: semaineDeLecon,

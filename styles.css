@@ -21247,6 +21247,38 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     border: 1px solid transparent;
 }
 
+/* === #445 — légende des pastilles d'objectif ===
+   Le sens des pastilles ne vivait que dans l'attribut `title` : une infobulle
+   au SURVOL, donc inexistante sur iPad et indevinable ailleurs. Cette légende
+   est rendue à l'identique dans l'Inspecteur de la leçon (atteignable au doigt
+   depuis #444) et dans la page 5 du guide, depuis la même fonction.
+   Ce n'est pas une commande — pas de cible de 44 px, comme la pastille elle-même. */
+.planif-legende-pastilles {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 10px;
+}
+
+.planif-legende-pastille-ligne {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    font-size: 12.5px;
+    line-height: 1.35;
+}
+
+/* La pastille de la légende ne survole rien : le curseur « help » de la
+   pastille du canevas y serait un mensonge. */
+.planif-legende-pastille-ligne .planif-obj-pastille {
+    cursor: default;
+    margin-top: 2px;
+}
+
+.planif-legende-pastille-texte {
+    color: var(--texte-secondaire);
+}
+
 /* === #403 — « Objectifs servis » dans l'inspecteur === */
 .planif-objectifs-servis {
     display: flex;
