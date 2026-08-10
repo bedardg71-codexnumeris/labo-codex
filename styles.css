@@ -19252,7 +19252,13 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     gap: 4px;
     width: 100%;
     padding: 1px 4px 0;
-    min-height: 44px;
+    /* ⚠ 36 px, pas 44 (retour terrain du 10 août : « l'espace occupé par les
+       familles est trop grand »). La règle des 44 px vise les petites cibles
+       carrées ; celle-ci fait TOUTE LA LARGEUR de la palette (~200 px), donc
+       36 × 200 reste une cible large et sûre au doigt. Six familles repliées
+       passent ainsi de ~350 px à ~230 px — la palette tient enfin sur l'écran
+       iPad, ce qui était le but du chantier. */
+    min-height: 36px;
     background: transparent;
     border: 0;
     cursor: pointer;
@@ -19283,6 +19289,14 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 }
 .planif-palette-zone-label[aria-expanded="false"] + .planif-palette-groupe {
     display: none;
+}
+/* Famille repliée : la catégorie se réduit à son en-tête. Sans ça, son propre
+   padding et son fond coloré continuaient d'occuper la place d'un bloc plein —
+   six familles fermées prenaient presque autant qu'ouvertes, et le repli ne
+   servait à rien. Le padding vit sur l'étiquette, qui reste seule visible. */
+.planif-palette-categorie:has(.planif-palette-zone-label[aria-expanded="false"]) {
+    padding: 0;
+    gap: 0;
 }
 
 .planif-palette-groupe {

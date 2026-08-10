@@ -112,15 +112,33 @@ describe('#444 · C — les familles de la palette sont des accordéons', () => 
         expect(css).toMatch(/\.planif-palette-zone-label\[aria-expanded="false"\] \+ \.planif-palette-groupe \{[^}]*display:\s*none/);
     });
 
-    it('l’étiquette est une cible tactile de 44 px', () => {
+    it('l’étiquette reste une cible tactile confortable (≥ 36 px de haut)', () => {
         // ⚠ Sélecteur ancré en DÉBUT DE LIGNE : sans l'ancre, le motif tombait
         // sur `.planif-palette-categorie[data-zone="pourquoi"] .planif-palette-zone-label
         // { color: … }` — une règle de couleur, qui n'a évidemment pas de
-        // min-height. Troisième fois aujourd'hui que la sous-chaîne piège :
+        // min-height. Troisième fois dans la journée que la sous-chaîne piège :
         // une borne de slice doit être ancrée, toujours.
+        //
+        // ▣ 36 px et non 44, sur retour terrain du 10 août (« l'espace occupé
+        // par les familles est trop grand »). Le compromis est explicite : la
+        // règle des 44 px vise les petites cibles carrées, celle-ci fait TOUTE
+        // LA LARGEUR de la palette (~200 px). Mesuré au navigateur : six
+        // familles repliées passent de ~360 px à 291 px, soit 27 % de l'écran
+        // iPad — c'est ce chiffre-là qui décidait du chantier.
         const regle = css.match(/^\.planif-palette-zone-label \{[^}]*\}/m);
         expect(regle, 'la règle de base de l’étiquette est introuvable').not.toBeNull();
-        expect(regle[0]).toMatch(/min-height:\s*44px/);
+        const min = regle[0].match(/min-height:\s*(\d+)px/);
+        expect(min, 'plus de min-height : la cible tactile n’est plus garantie').not.toBeNull();
+        expect(Number(min[1])).toBeGreaterThanOrEqual(36);
+    });
+
+    it('une famille repliée ne garde PAS le gabarit d’un bloc plein', () => {
+        // Sans cette règle, le padding et le fond de la catégorie continuaient
+        // d'occuper la place — six familles fermées prenaient presque autant
+        // qu'ouvertes, et le repli ne servait à rien.
+        expect(css).toMatch(
+            /\.planif-palette-categorie:has\(\.planif-palette-zone-label\[aria-expanded="false"\]\) \{[^}]*padding:\s*0/
+        );
     });
 
     it('l’état est persisté par une préférence DÉCLARÉE dans les DEFAUTS', () => {
