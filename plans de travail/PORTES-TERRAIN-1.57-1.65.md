@@ -309,7 +309,12 @@ source de **neuf lectures**, réparties sur **cinq écrans** de suivi, qui consu
 ⚠⚠ **LA QUESTION OUVERTE LA PLUS IMPORTANTE, toujours sans réponse depuis le
 8 août — deux touchers suffisent** :
 
-- [ ] **Le double-clic ouvre-t-il l'Inspecteur au doigt sur iPad ?**
+- [x] **Le double-clic ouvre-t-il l'Inspecteur au doigt sur iPad ?**
+      ⮕ **RÉPONDU le 10 août 2026 : NON.** Et la capture iPad du même jour
+      montre que le bouton 🕵️ de secours est LUI-MÊME coupé par la hauteur
+      de l'écran (palette trop longue). Les deux constats sont versés en
+      **#444** (chantier tactile : boutons du bas → barre d'outils, corbeille
+      flottante, double-tap), décision de principe actée, arbitrages en cours.
 
 > Si **non**, tout l'Inspecteur — durée, semaine, objectifs servis, **et la
 > rétroaction formative de #424 Lot E** — n'est atteignable que par l'icône 🕵️

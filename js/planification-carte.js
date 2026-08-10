@@ -3496,9 +3496,9 @@ function reLayoutConteneur(conteneurId) {
 
     var GAP = LAYOUT_GAP;
     var PADDING = LAYOUT_PADDING;
-    var HEADER_H = hauteurEnteteConteneur(document.getElementById(conteneurId));
 
-    // Measure children widths/heights
+    // Measure children widths/heights (leur taille ne dépend pas de la
+    // largeur du conteneur : feuilles positionnées en absolu)
     var maxW = 0;
     var totalH = 0;
     var dims = [];
@@ -3512,9 +3512,21 @@ function reLayoutConteneur(conteneurId) {
     }
     totalH += GAP * (enfants.length - 1);
 
-    // Container dimensions
+    // Container width
     var newW = maxW + PADDING * 2;
     newW = Math.max(newW, largeurPlancher(conteneur));
+
+    // #157 (terrain 10 août 2026) : poser la LARGEUR AVANT de mesurer
+    // l'en-tête. La hauteur des objectifs et du titre dépend de la largeur
+    // (le texte se replie) : mesurée sur l'ancienne largeur, la zone dépliée
+    // du badge 🎯 rendait un en-tête trop court, les enfants étaient posés
+    // dessous, puis le texte se repliait sur la nouvelle largeur et le titre
+    // descendait sur la première feuille. Invisible avec des objectifs
+    // courts (une ligne ne se replie pas) — systématique avec des vrais.
+    var celMesure = document.getElementById(conteneurId);
+    if (celMesure) celMesure.style.width = newW + 'px';
+    var HEADER_H = hauteurEnteteConteneur(celMesure);
+
     var newH = totalH + PADDING * 2 + HEADER_H;
 
     // Stack children in centered column
@@ -3573,7 +3585,6 @@ function reLayoutConteneurSaufDragged(conteneurId, draggedId) {
 
     var GAP = LAYOUT_GAP;
     var PADDING = LAYOUT_PADDING;
-    var HEADER_H = hauteurEnteteConteneur(document.getElementById(conteneurId));
 
     var maxW = 0;
     var totalH = 0;
@@ -3589,6 +3600,13 @@ function reLayoutConteneurSaufDragged(conteneurId, draggedId) {
     totalH += GAP * (enfants.length - 1);
 
     var newW = Math.max(maxW + PADDING * 2, largeurPlancher(conteneur));
+
+    // #157 : même consigne que reLayoutConteneur — la largeur AVANT la
+    // mesure de l'en-tête (le repli du texte des objectifs en dépend).
+    var celMesure = document.getElementById(conteneurId);
+    if (celMesure) celMesure.style.width = newW + 'px';
+    var HEADER_H = hauteurEnteteConteneur(celMesure);
+
     var newH = totalH + PADDING * 2 + HEADER_H;
 
     var curY = conteneur.y + HEADER_H + PADDING;

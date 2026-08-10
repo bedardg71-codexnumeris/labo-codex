@@ -7,6 +7,18 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 10 AOÛT 2026, MATIN, SUITE : TROIS RETOURS iPad/Mac EN RAFALE (#157 + #444 + la réponse du 8 août).
+     ÉTAT FINAL : **1.65.5** (build 0810-0811), `main`, Vitest **2082/2082** (236 fichiers). Dernier ID **#444**.
+
+     ⚠⚠ **LA QUESTION DU 8 AOÛT EST RÉPONDUE : le double-clic n'ouvre PAS l'Inspecteur sur iPad.** Et la capture iPad du même message montre que le bouton 🕵️ de secours est LUI-MÊME hors écran (palette de 18 pastilles > hauteur iPad ; la Corbeille est le dernier élément visible). Les deux défauts se verrouillent : toute la rétroaction formative de #424 est inatteignable au doigt. ⮕ **#444** : décision de PRINCIPE de Grégoire actée (boutons du bas → barre d'outils) + contre-proposition consignée (la Corbeille est une CIBLE DE DÉPÔT, pas un bouton — la rendre flottante au canevas pendant le drag plutôt que l'envoyer en haut) + double-tap manuel pour l'Inspecteur. Trois arbitrages attendus. Grégoire teste l'iPad via **app.codexnumeris.org** (la prod suit `main`) — pas de git pull côté iPad.
+
+     ✅ **#157 LIVRÉ (1.65.5)** — « l'espacement entre le titre et la feuille ne s'ajuste pas au dépli des objectifs ».
+     ▣ **REPRODUIT au Chromium avec des textes LONGS — et c'est le cœur du bug** : `reLayoutConteneur` mesurait l'en-tête PUIS posait la largeur du conteneur ; la hauteur des objectifs dépend de la largeur (repli du texte). En-tête mesuré trop court → enfants posés dessous → le texte se replie sur la nouvelle largeur → le titre descend sur la première feuille (15 px mesurés). *Des objectifs courts d'une ligne ne replient pas : tous les essais à blanc passaient, les objectifs réels échouaient toujours.* Leçon de repro : SEMER DES DONNÉES À LA TAILLE DU RÉEL.
+     ▣ Correctif dans les DEUX fonctions de placement (normale + pendant drag) : la largeur AVANT la mesure. Revérifié au Chromium (36 px de respiration, replié intact). Sentinelle statique 4 cas (ordre des opérations dans la source, break-test d'inversion ROUGE ×2) + spec comportementale WebKit pour la CI (`planif-objectifs-espacement-157.spec.js`) — le duo statique-partout / comportemental-à-la-CI, patron #148.
+     ⮕ **OUVERTS** : #444 (3 arbitrages) · #443 (wizard, décision) · DIAG #156 attendu (échelles invisibles) · #442 · #353 (200 %).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 10 AOÛT 2026, MATIN : RETOUR TESTEUR #155 (portes 1.64 en cours chez Grégoire).
      ÉTAT FINAL : **1.65.4** (build 0810-0718), `main`, Vitest **2078/2078** (235 fichiers).
 
