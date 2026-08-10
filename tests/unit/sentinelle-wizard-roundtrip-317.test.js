@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -70,39 +70,46 @@ describe('#132 · round-trip d\'édition — portfolio (par-artefacts)', () => {
     });
 });
 
-describe('#132 · round-trip d\'édition — objectifs (par-objectifs)', () => {
-    it('restaure le mode comptage ET ses paramètres', () => {
-        pratiquesStore = [{
-            id: 'p-cpt', nom: 'Test Comptage', type: 'standards',
-            configuration: {
-                approcheEvaluation: 'par-objectifs',
-                objectifs: { modeCalcul: 'comptage', nbObjectifs: 8,
-                    comptage: { seuilMaitrise: 70, plafondSiEssentielNonMaitrise: 50 } }
-            }
-        }];
-        win.chargerPratiqueExistante('p-cpt');
-        const r = win.wizardState.reponses;
-        expect(r.modeCalcul).toBe('comptage');
-        expect(r.nbObjectifs).toBe(8);
-        expect(r.seuilMaitrise).toBe(70);
-        expect(r.plafondSiEssentielNonMaitrise).toBe(50);
+describe('#443 · une pratique legacy « par objectifs » s\'ouvre sur le portfolio', () => {
+    // Remplace le bloc « #132 · round-trip d'édition — objectifs » : l'approche
+    // est retirée du wizard (décision Grégoire, 10 août), donc il n'y a plus de
+    // round-trip à garder. Ce qui reste à garantir est l'inverse — qu'une
+    // pratique STOCKÉE qui la porte encore ne casse pas et ne soit pas mutée
+    // en douce. Même patron que #396 (registre) et #435 (pratiques-gestion).
+
+    const legacy = () => ({
+        id: 'p-obj', nom: 'Ancienne par objectifs', type: 'standards',
+        configuration: {
+            approcheEvaluation: 'par-objectifs',
+            objectifs: { modeCalcul: 'comptage', nbObjectifs: 8,
+                comptage: { seuilMaitrise: 70, plafondSiEssentielNonMaitrise: 50 } }
+        }
     });
 
-    it('restaure le mode seuils-critiques ET ses paramètres', () => {
-        pratiquesStore = [{
-            id: 'p-sc', nom: 'Test Seuils', type: 'standards',
-            configuration: {
-                approcheEvaluation: 'par-objectifs',
-                objectifs: { modeCalcul: 'seuils-critiques', nbObjectifs: 5,
-                    seuilsCritiques: { seuilReussite: 'M', noteBaseReussite: 80, bonusParNiveau: 3.33 } }
-            }
-        }];
-        win.chargerPratiqueExistante('p-sc');
-        const r = win.wizardState.reponses;
-        expect(r.modeCalcul).toBe('seuils-critiques');
-        expect(r.seuilReussite).toBe('M');
-        expect(r.noteBaseReussite).toBe(80);
-        expect(r.bonusParNiveau).toBe(3.33);
+    it('elle s\'ouvre sur l\'approche portfolio, pas sur une approche morte', () => {
+        pratiquesStore = [legacy()];
+        win.chargerPratiqueExistante('p-obj');
+        expect(win.wizardState.reponses.approcheEvaluation).toBe('par-artefacts');
+    });
+
+    it('la source stockée n\'est PAS mutée par l\'ouverture (lecture seule)', () => {
+        const source = legacy();
+        pratiquesStore = [source];
+        win.chargerPratiqueExistante('p-obj');
+        // Le patron #396/#435 : rien n'est réécrit tant que l'utilisateur ne
+        // sauvegarde pas lui-même. Une normalisation qui mute au chargement
+        // convertirait une simple consultation en migration silencieuse.
+        expect(source.configuration.approcheEvaluation).toBe('par-objectifs');
+        expect(source.configuration.objectifs).toBeTruthy();
+    });
+
+    it('l\'ouverture le DIT en console (pas de conversion muette)', () => {
+        pratiquesStore = [legacy()];
+        const journal = [];
+        const espion = vi.spyOn(console, 'warn').mockImplementation(m => journal.push(String(m)));
+        win.chargerPratiqueExistante('p-obj');
+        espion.mockRestore();
+        expect(journal.join('\n')).toMatch(/#443/);
     });
 });
 

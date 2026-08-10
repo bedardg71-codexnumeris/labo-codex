@@ -108,6 +108,30 @@
     }
 
     /**
+     * Champs par lesquels les copies diffèrent de l'exemplaire gardé.
+     * Le retrait reste un no-op fonctionnel (les copies sont inatteignables),
+     * mais « elles diffèrent » sans dire EN QUOI est une alerte sans matière —
+     * et c'est justement le moment où l'on décide de supprimer.
+     */
+    function _comparerCopies(garde, copies) {
+        const ecarts = [];
+        copies.forEach(function (copie, n) {
+            const champs = new Set([...Object.keys(garde || {}), ...Object.keys(copie || {})]);
+            const diffs = [];
+            champs.forEach(function (k) {
+                const a = JSON.stringify(garde ? garde[k] : undefined);
+                const b = JSON.stringify(copie ? copie[k] : undefined);
+                if (a !== b) {
+                    diffs.push(k + ' : ' + (a === undefined ? '(absent)' : a) +
+                               '  →  ' + (b === undefined ? '(absent)' : b));
+                }
+            });
+            if (diffs.length) ecarts.push({ copie: n + 2, diffs: diffs });
+        });
+        return ecarts;
+    }
+
+    /**
      * Analyse une liste : groupes d'ids en double (retirables) et groupes
      * d'homonymes à ids différents (rapportés seulement).
      */
@@ -132,7 +156,11 @@
                 nom: _nomLisible(garde.item),
                 nbTotal: occurrences.length,
                 indicesRetires: retires.map(o => o.index),
-                identiques: retires.every(o => JSON.stringify(o.item) === refJson)
+                identiques: retires.every(o => JSON.stringify(o.item) === refJson),
+                // Ce qui DIFFÈRE entre l'exemplaire gardé et les autres. Sans ça,
+                // « les copies diffèrent » est une inquiétude sans matière : on ne
+                // peut pas décider d'un retrait qu'on ne voit pas.
+                ecarts: _comparerCopies(garde.item, retires.map(o => o.item))
             });
         });
 
@@ -198,8 +226,17 @@
             a.doublonsId.forEach(d => {
                 L('    · ' + d.id + ' « ' + d.nom + ' » — ' + d.nbTotal + ' exemplaires, on garde le 1er, on retire ' +
                   d.indicesRetires.length +
-                  (d.identiques ? ' (copies identiques au caractère près)'
-                                : ' ⚠ (les copies DIFFÈRENT du 1er — voir la note plus bas)'));
+                  (d.identiques ? ' (copies identiques au caractère près)' : ' ⚠ (les copies DIFFÈRENT du 1er)'));
+                d.ecarts.forEach(e => {
+                    L('        ⚠ exemplaire n°' + e.copie + ' — ce qui diffère du gardé :');
+                    e.diffs.forEach(x => L('            ' + x));
+                });
+                if (d.ecarts.length) {
+                    L('        ⮕ Le retrait reste sans effet sur l\'application : tous les lecteurs');
+                    L('          résolvent par `find` sur l\'id, donc SEUL le 1er exemplaire était lu.');
+                    L('          Ces écarts n\'étaient donc déjà visibles nulle part. Mais si l\'un');
+                    L('          d\'eux porte la valeur que tu voulais, corrige le 1er AVANT d\'exécuter.');
+                }
             });
             a.homonymes.forEach(h => {
                 homonymesGlobaux.push({ cle: k, nom: h.nom, ids: h.ids });
