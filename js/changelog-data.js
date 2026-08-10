@@ -41,6 +41,14 @@
             ]
         },
         {
+            version: '1.71',
+            couleur: 'orange',
+            titre: 'Le bouton Supprimer d’un groupe-cours réapparaît',
+            items: [
+                'Le bouton « Supprimer » d’un groupe-cours restait invisible quand tu arrivais sur la section : l’application restaurait bien ton groupe actif et ouvrait son formulaire, mais la commande de suppression ne s’affichait pas. Elle n’apparaissait qu’après avoir rouvert le menu déroulant.'
+            ]
+        },
+        {
             version: '1.67',
             couleur: 'orange',
             titre: 'Changer de trimestre ne laisse plus rien derri\u00e8re',

@@ -548,9 +548,19 @@ function editerGroupeCoursV2(gc) {
     if (etatVide) etatVide.classList.add('u-hide');
     if (formulaire) formulaire.classList.remove('u-hide');
 
-    // Afficher le bouton Supprimer (mode édition)
+    // Afficher le bouton Supprimer (mode édition).
+    // ⚠ `classList.remove`, PAS `style.display = ''` : `.u-hide` vaut
+    // `display: none !important` (styles.css:654), qu'un style en ligne ne peut
+    // pas contrer. Le `style.display` d'origine ne révélait donc RIEN.
+    // ⮕ Le défaut n'était visible que par UN chemin : `changerGroupeCours-
+    // SelectionneV2` retire la classe lui-même après avoir appelé cette
+    // fonction, ce qui masquait le problème dès qu'on touchait au menu. Mais
+    // `chargerGroupeCoursV2` (restauration du groupe actif à l'arrivée sur la
+    // section) appelle cette fonction SANS ce filet : le formulaire s'ouvrait
+    // et le bouton Supprimer restait introuvable. Trouvé le 10 août 2026 en
+    // répondant à « je ne trouve pas le bouton Supprimer ».
     const btnSupprimer = document.getElementById('v2-btnSupprimerGroupeCours');
-    if (btnSupprimer) btnSupprimer.style.display = '';
+    if (btnSupprimer) btnSupprimer.classList.remove('u-hide');
 }
 
 /**

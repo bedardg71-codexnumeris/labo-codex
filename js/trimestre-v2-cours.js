@@ -604,9 +604,16 @@ async function modifierCoursSelectionneV2() {
         // Remplir les champs avec les données du cours
         remplirFormCoursV2(coursSelectionne);
 
-        // Afficher le bouton Supprimer (mode édition)
+        // Afficher le bouton Supprimer (mode édition).
+        // Même correctif que son jumeau des groupes-cours (10 août 2026) :
+        // `.u-hide` vaut `display: none !important`, donc un style en ligne ne
+        // peut pas le contrer. Ici le bouton était DÉJÀ déclassé par
+        // `changerCoursSelectionneV2` (l'utilisateur sélectionne le cours avant
+        // de cliquer Modifier), donc rien ne se voyait — mais la ligne laissait
+        // croire qu'elle révélait, et le jour où l'autre chemin bougerait le
+        // bouton disparaîtrait en silence.
         const btnSupprimer = document.getElementById('v2-btnSupprimerCours');
-        if (btnSupprimer) btnSupprimer.style.display = '';
+        if (btnSupprimer) btnSupprimer.classList.remove('u-hide');
 
         formulaire.scrollIntoView({ behavior: 'smooth' });
     }
