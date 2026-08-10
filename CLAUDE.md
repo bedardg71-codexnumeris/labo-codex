@@ -202,6 +202,13 @@ point que toute session lit, quelle que soit la branche ouverte.
      filtrer par identite). Skill parent de `SKILL_integrite_globaux.md`, applicable
      a tout projet. **Charger pour tout nouveau projet ou module manipulant des
      donnees de sources heterogenes.**
+   - `SKILL_portes_terrain.md` — modèle OBLIGATOIRE de toute liste de
+     vérifications destinée a Gregoire (« portes terrain »). Deux livrables
+     jumeaux : artefact interactif + markdown versionne. Regle premiere : le
+     « pourquoi » raconte le SYMPTOME vecu, jamais le mecanisme — **Gregoire
+     n'est pas developpeur**. **Charger des qu'un cycle livre du changement
+     que la session ne peut pas eprouver elle-meme** (Safari, iPad, corpus
+     reel). Acte le 10 aout 2026 a sa demande.
    - `SKILL_verification_adverse.md` — principes abstraits pour verifier la qualite
      d'un travail (le sien en auto-verification, ou celui d'une autre session en audit
      tiers). Coeur : l'attestation n'est pas la preuve, et un test doit pouvoir echouer
@@ -209,7 +216,7 @@ point que toute session lit, quelle que soit la branche ouverte.
      par `SKILL_Fin_de_session.md` §4. **Charger AVANT de declarer un chantier fini ou
      quand on demande de verifier/auditer un travail.** Analyse fondatrice :
      `Skills pour Claude Code/ANALYSE-verification-adverse.md`.
-   Ces neuf skills sont complementaires et constituent la reference metier du projet.
+   Ces dix skills sont complementaires et constituent la reference metier du projet.
    **Si travail sur les donnees** (codex, reserve, import/export, anonymisation) :
    charger `SKILL_Securite_donnees.md` EN PRIORITE — les regles de la section 9
    sont obligatoires pour tout code touchant aux donnees.
