@@ -7,6 +7,69 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 10 AOÛT 2026, SOIR (3) : #445 LIVRÉ — le geste que l'interface enseignait existe enfin.
+     ÉTAT FINAL : **1.68.0** (build 0810-1501), Vitest **2149/2149** (243 fichiers).
+
+     ▣ **LE PROBLÈME N'ÉTAIT PAS UN BUG, ET C'EST CE QUI LE RENDAIT INVISIBLE.** Le canevas enseigne le
+     tracé de lien partout ; #403 a tranché (à raison) que le lien objectif↔activité se déclare par cases
+     à cocher. Grégoire a donc tracé, et n'a rien obtenu — pas d'erreur, pas de message : un canal
+     inexistant se comporte exactement comme une panne. ⮕ On ne remplace pas le déclaratif : on branche le
+     geste appris sur la **même écriture** (`definirObjectifsServis`, porte unique). Pas de second système.
+
+     ▣ **TROIS ARBITRAGES, ET LEUR MOTIF.**
+        1. **La ligne d'objectif intercepte le dépôt AVANT le nœud qui la contient.** Elle vit DANS la
+           leçon : sans cet ordre, `closest('.planif-noeud')` la capterait et le geste retomberait dans le
+           menu de lien — muet à nouveau.
+        2. **Le dépôt AJOUTE, il ne bascule pas.** « Ce bloc sert cet objectif » est une affirmation ; un
+           second dépôt ne peut pas raisonnablement vouloir dire l'inverse. Le décochage reste à
+           l'Inspecteur, là où l'état est VISIBLE — décocher à l'aveugle serait pire que ne rien faire.
+        3. **Les refus sont DITS.** ⚠ Et celui de « bloc d'une autre leçon » n'est pas défensif :
+           `objectifsServisPar` filtre à la leçon parente, donc écrire un id étranger produirait **une case
+           cochée que la lecture écarterait aussitôt** — exactement le mensonge silencieux que l'item
+           dénonçait, retourné contre nous.
+
+     ▣ **LA LÉGENDE : UNE SOURCE, DEUX SURFACES.** Le sens des pastilles ne vivait que dans l'attribut
+     `title` — une infobulle au SURVOL, donc **inexistante sur iPad**, où toute la carte se manipule depuis
+     #444. `legendePastillesObjectifHTML()` est désormais appelée par l'Inspecteur de la LEÇON et par la
+     page 5 du guide. ⮕ Table unique déclarée AU-DESSUS de `GUIDE_PAGES` : ce tableau est évalué au
+     chargement et appelle la légende — les constantes doivent exister avant lui. Zéro-dette : l'ancienne
+     déclaration de `SYMBOLES_PASTILLE_OBJECTIF` a été retirée, pas dupliquée.
+
+     ▣▣ **CE QUE LE NAVIGATEUR A ATTRAPÉ, ET QU'AUCUN TEST DE SOURCE N'AURAIT VU.** Le DOM **préfixe les
+     ids** (`planif-lecon_1`) alors que mes premières scènes de test utilisaient l'id nu. Ma résolution
+     `etat.noeuds.get(leconEl.id)` ne tient que parce que `chargerCarte` applique le MÊME préfixe aux clés
+     d'état — vérifié sur pièces (`clesEtat` == `noeudsDOM`). Une sentinelle qui fabrique ses propres ids
+     aurait été verte des deux côtés d'un désaccord.
+     ▣ **Vérifié au navigateur** : écriture, bascule de pastille `invitation` → `servi`, toast, légende
+     présente sur une leçon à objectifs et **absente** sur une leçon sans objectif, cases #403 intactes sur
+     l'activité, `panneauNoeudId` qui suit le bloc inspecté.
+     ⚠ **NON vérifié au navigateur, et c'est dit** : la séquence pointer complète (pointerdown sur le port
+     → pointerup sur la ligne). Le canevas d'Alignement ne se révèle pas en headless — section
+     conditionnée, `getBoundingClientRect` à 0×0, `elementFromPoint` sans cible. L'ordre d'interception est
+     donc couvert par un **cliquet de source, déclaré comme tel dans la sentinelle**. ⮕ **Porte terrain due
+     sur iPad ET sur Mac.**
+
+     ⚠⚠ **UN BREAK-TEST EST RESTÉ VERT, ET LA FAUTE ÉTAIT DANS MON TEST.** Retirer l'appel de la légende
+     dans l'Inspecteur n'a rien fait rougir : le cas comptait les lignes contenant
+     `legendePastillesObjectifHTML()` avec un seuil « ≥ 2 » — or **la ligne de DÉCLARATION en fait partie**.
+     Déclaration + guide = 2 : l'assertion passait sur du code amputé. Resserrée sur le compte EXACT
+     d'appels, déclaration exclue, commentaires retirés d'abord. ⮕ *Un break-test resté vert est une
+     information sur le TEST, pas sur le code* — troisième fois en trois jours que cette phrase sert.
+
+     ▣ **§4 : 8 break-tests sur ce cycle (25 sur la session), 8 ROUGE après resserrement** — écriture
+     retirée (4) · garde « même leçon » sauté (1) · dépôt qui bascule (1) · ligne d'accueil qui parle (1) ·
+     ordre d'interception inversé (1) · légende Inspecteur retirée (1) · légende guide retirée (1) · CSS
+     de la légende disparu (1). Arbre restauré propre.
+     ▣ **Design** : aucune couleur en dur (assertion dans la sentinelle), `--texte-secondaire` existe dans
+     les deux modes, la pastille de la légende passe en `cursor: default` — celle du canevas porte
+     `cursor: help` parce qu'une infobulle l'attend ; le même curseur dans la légende promettrait une aide
+     qui n'existe pas. Changelog 1.68 (3 items).
+
+     ⮕ **OUVERTS** : 📐#443 (wizard, décision de Grégoire attendue) · #353 (localStorage à 200 %).
+     ⏳ **DÛ PAR GRÉGOIRE** : `reparer442()` en console (Chrome ET Safari) · porte terrain #445 (iPad + Mac).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 10 AOÛT 2026, SOIR (2) : #447 — LA PRÉMISSE ÉTAIT FAUSSE, LE TROU ÉTAIT À CÔTÉ.
      ÉTAT FINAL : **1.67.3** (build 0810-1434), Vitest **2136/2136** (242 fichiers).
 
