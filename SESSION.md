@@ -7,6 +7,82 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 10 AOÛT 2026, SOIR (7, CLÔTURE) : FUSION SUR MAIN + LE MODÈLE DES PORTES DEVIENT LA RÈGLE.
+     ÉTAT FINAL : **1.71.1** (build 0810-1754), `main`, Vitest **2169/2169** (244 fichiers), 18 commits.
+
+     ▣ **FUSION FAITE (accord explicite de Grégoire).** Les 11 commits de la branche sont dans `main`, son
+     commit de captures (`88afeb65`) intégré sans conflit. **Suite rejouée SUR L'ARBRE FUSIONNÉ** avant le
+     push — 2163/2163 à ce moment-là, le hook pré-push l'a reconfirmée. `origin/main ↔ HEAD : 0 / 0`.
+     ⮕ **Ce qui a déclenché la fusion est instructif** : Grégoire a collé mes commandes et reçu
+     `retirerCours is not defined`. Cause — **les scripts n'existaient que sur ma branche.** Son clone est
+     sur `main`. J'avais donné des commandes sans dire d'où venaient les fichiers ; il a ensuite collé mes
+     COMMENTAIRES d'usage au lieu du contenu des fichiers. ⮕ **Règle désormais dans le skill des portes** :
+     tout script de console dit QUOI copier, OÙ le coller, ET ce qui doit s'afficher si c'est chargé.
+     La commande `cat <fichier> | pbcopy` est la seule forme qui a marché du premier coup.
+
+     ⚠⚠ **UN DÉFAUT TROUVÉ EN RÉPONDANT À « JE NE TROUVE PAS LE BOUTON SUPPRIMER » (1.71.1).**
+     `.u-hide` vaut `display: none !important` ; `editerGroupeCoursV2` révélait le bouton par
+     `style.display = ''`, impuissant contre un `!important`. **UN seul chemin masquait le défaut** —
+     `changerGroupeCoursSelectionneV2` retire la classe lui-même après avoir appelé la fonction. Mais
+     `chargerGroupeCoursV2` (restauration du groupe actif à l'ARRIVÉE sur la section, donc le cas NORMAL)
+     l'appelle SANS ce filet : le formulaire s'ouvrait, le bouton restait introuvable.
+     ▣ **Troisième fois du cycle que le même motif revient** : un garde `typeof` sur un nom jamais exporté
+     (#446), une invalidation de cache qu'aucune écriture ne déclenche (#447), un affichage qui n'affiche
+     pas. **Aucune ne lève. Toutes se taisent.**
+     ⚠ **ET MON DIAGNOSTIC A ÉTÉ FAUX DEUX FOIS AVANT D'ÊTRE JUSTE** : j'ai d'abord annoncé que le bouton
+     du COURS ne s'affichait jamais (faux — ligne 301 le déclasse correctement), puis mon script d'audit a
+     produit un faux négatif sur le groupe-cours (fenêtre de recherche de 400 caractères, trop courte).
+     Le vrai défaut n'est apparu qu'en lisant les quatre sites d'appel un par un. ⮕ *Un audit automatique
+     mal borné ne dit pas « je ne sais pas » : il dit « rien ».*
+
+     ▣ **#442 CLOS AUTREMENT QUE PRÉVU.** Le dry-run a confirmé les 3 exemplaires ; Grégoire a tranché que
+     **601-102-MQ était FICTIF** et l'a supprimé par l'interface. `supprimerCoursV2` filtre par id → les
+     trois sont partis ensemble. ⮕ **Vérifié AVANT** (one-liner) : aucun groupe-cours, aucune production,
+     aucune évaluation, aucune présence ne portait ce `coursId`. Rien d'orphelin derrière.
+     ⚠ **Sa capture avait rattrapé une perte que ma règle ne voyait pas** : la 3e copie portait
+     `heuresContact: 60` et `ponderation: '2-2-3'`, invisibles (seul le 1er exemplaire est lu). Un retrait
+     « sans effet » les aurait effacées. ⮕ *« Ne rien casser » n'est pas « ne rien perdre ».* Le script
+     REFUSE désormais d'exécuter tant que l'humain n'a pas tranché (`fusionnerChamps` / `ignorerChamps`).
+     ⮕ **Devenu sans objet ici** (fiche entière fictive), mais le mécanisme reste pour le prochain cas réel.
+
+     ⚠⚠ **LE FAUX POSITIF LE PLUS GRAVE DU CYCLE, RATTRAPÉ AVANT EXÉCUTION.** Mon détecteur d'orphelines
+     classait des snapshots **VIVANTS** comme morts : ils sont nommés d'après le **GROUPE-COURS**
+     (`obtenirCoursIdPourSnapshots` rend `_groupeCoursId` EN PRIORITÉ), et je les confrontais au seul
+     magasin `cours`. **Quatre clés réelles de Grégoire — 356 K car. de trajectoires a2025/h2026 — étaient
+     dans la liste à supprimer.** Rattrapé en relisant SON rapport avant de lui dire d'exécuter.
+     ⮕ Corrigé : les deux registres, et la section est SAUTÉE si les groupes-cours ne sont pas lisibles
+     (sans registre, tout paraît orphelin — le défaut du premier jet). ⮕ Et **le détecteur et la purge
+     vivent désormais dans le MÊME fichier** : si le rapport et l'action étaient séparés, corriger l'un
+     pourrait ne pas atteindre l'autre, et on supprimerait sur une classification périmée.
+
+     ✅ **#448 et #449 VERSÉS.** #448 : les cartouches se dupliquent à l'import — deux lots datables par
+     l'horodatage des ids (24 mars, 27 juin), copies citées 0 fois, mécanisme lu au code
+     (`ajouterCartouchesABibliotheque` fait un `push` nu) — **NON REPRODUIT, à rejouer avant de corriger**.
+     #449 : proposition de Grégoire, vérifiée au code — `cours` est la SEULE bibliothèque sans suppression
+     par fiche (grilles, échelles, productions l'ont toutes). ⮕ Deux conditions écrites avant de déplacer.
+
+     ▣▣ **LE MODÈLE DES PORTES TERRAIN DEVIENT LA RÈGLE DU PROJET — `SKILL_portes_terrain.md`.**
+     Demande explicite de Grégoire, après avoir versé au dépôt des captures du modèle. Deux livrables
+     JUMEAUX : artefact interactif (cocher) + markdown versionné (pour qu'une prochaine session retrouve ce
+     qui reste dû SANS accès à la conversation).
+     ⚠⚠ **SA RÈGLE PREMIÈRE VIENT DE SON RAPPEL « JE NE SUIS PAS DÉVELOPPEUR »** : le « pourquoi » d'une
+     porte raconte le SYMPTÔME VÉCU, jamais le mécanisme. Mon artefact contenait justement la faute
+     (« `.u-hide` vaut `display:none !important` ») là où il fallait écrire « le bouton n'apparaissait
+     qu'après avoir rouvert le menu ». **L'erreur est consignée telle quelle dans le skill** — un
+     anti-patron avec un cas réel se retient mieux qu'une consigne abstraite.
+     ⮕ Autres règles : chaque geste dit son ATTENDU · un seul geste par rangée · les tags marquent la
+     NATURE du geste (données/iPad/console), pas le module · **une porte juste teste le VECTEUR, pas
+     l'état** (constater qu'il n'y a plus de doublon ne prouve que le nettoyage ; refaire l'import prouve
+     que le défaut ne revient pas) · **le §4 « ce que je n'ai pas pu vérifier » est non négociable**.
+
+     ⮕ **LIVRABLES DU CYCLE COMPLET (1.67.1 → 1.71.1, 18 commits)** : #442 · #447 · #445 · #443 · #353 ·
+     le bouton Supprimer · #448 et #449 versés · `SKILL_portes_terrain.md` · trois outils console
+     (`reparation-442-doublons`, `reparation-retirer-cours`, `diagnostic-353-cles-orphelines`) ·
+     artefact + `plans de travail/PORTES-TERRAIN-2026-08-10.md`.
+     ⏳ **Grégoire fait les vérifications DEMAIN** — rien n'est validé au terrain à cette heure.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 10 AOÛT 2026, SOIR (6) : #353 OPTION 2 TRANCHÉE — le seuil était au-dessus de tout.
      ÉTAT FINAL : **1.71.0** (build 0810-1651), Vitest **2159/2159** (243 fichiers).
 
@@ -6290,163 +6366,108 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
 ## §3 — Consigne de démarrage pour la prochaine session
 
-> **Réécrite le 10 août 2026 en clôture de journée.** Tout est sur `main`, arbre
-> propre, zéro divergence. Pas de dette de fusion. ⮕ **La campagne des 81 portes
-> terrain est CLOSE (81/81)** — le blocage qui tenait la priorité 0 depuis trois
-> jours a sauté. La priorité 0 change de nature : ce ne sont plus des
-> vérifications dues, ce sont les **défauts que ces vérifications ont trouvés**.
+> **Réécrite le 10 août 2026 en clôture du cycle du soir.** Tout est sur `main`,
+> arbre propre, zéro divergence. Pas de dette de fusion.
+> ⏳ **RIEN N'EST VALIDÉ AU TERRAIN** : Grégoire fait les vérifications **demain**.
 
 ### Prémisse à vérifier au rituel de début (§1)
 
 | Point | Valeur attendue |
 |---|---|
 | Branche | **`main`** — plus rien en avance (`RELAIS.md` le confirme) |
-| Version | `{"build":"0810-1304","beta":"1.67.1"}` |
-| Vitest | **2111/2111** (239 fichiers) |
+| Version | `{"build":"0810-1754","beta":"1.71.1"}` |
+| Vitest | **2169/2169** (244 fichiers) |
 | Playwright WebKit | non exécutable en conteneur → CI à la PR |
-| Dernier ID BACKLOG | **#447** |
+| Dernier ID BACKLOG | **#449** |
 | Arbre | propre · `origin/main ↔ HEAD : 0 / 0` |
 
 ⚠ **Le clone du conteneur est SHALLOW.** `git fetch --unshallow` AVANT toute
-comparaison **et avant toute fusion**. Sans ça, `main` local paraît vieux de
-plusieurs semaines : `git rev-list --count main...HEAD` annonce une divergence
-**entièrement fictive** (9 août matin : 83/57 annoncés, réel 0/0), et
-`git merge --ff-only` répond **« refusing to merge unrelated histories »** — un
-message qui fait croire à un dépôt corrompu alors qu'il ne dit que « historique
-tronqué » (9 août PM). Vérifier ensuite que le `main` local est bien un
+comparaison ET avant toute fusion, puis vérifier que le `main` local est bien un
 **ancêtre** d'`origin/main` (`git merge-base --is-ancestor`) : c'est ce qui
 distingue « en retard » de « divergent ».
 
-⚠ **`git fetch` juste avant de pousser**, pas seulement en ouvrant. Un push
-rejeté n'est pas un incident : c'est le filet qui fonctionne.
-
-⚠⚠ **LE BUILD DE GRÉGOIRE N'EST PAS `main`.** Il lance l'app en **`file://`
-depuis son clone Git** sur Mac (donc à la version de son dernier `git pull`) et
-via **app.codexnumeris.org** sur iPad (la prod, elle, suit `main`). ⮕ **Première
-case de toute checklist terrain : `git pull`.** Sur les quatre échecs des
-81 portes, **deux étaient des FAUX ROUGES produits par un build en retard** — et
-un faux rouge de cette famille est indétectable au récit, parce qu'il décrit
-exactement l'état pré-correctif, qui est précisément ce que la porte teste.
+⚠⚠ **LE BUILD DE GRÉGOIRE N'EST PAS `main`** — `file://` depuis son clone sur
+Mac, prod sur iPad. ⮕ **`git pull` en case 1 de toute checklist terrain.**
+⮕ **Et ses SCRIPTS non plus** : le 10 août au soir il a reçu trois fois
+`is not defined` parce que les outils console vivaient sur une branche non
+fusionnée. **Un script se colle EN ENTIER, une commande s'appelle APRÈS** ;
+donner systématiquement `cat scripts/<fichier>.js | pbcopy`.
 
 ---
 
-### Priorité 0 — ce que les 81 portes ont laissé sur la table
+### ⏳ PRIORITÉ 0 — le terrain de demain, puis SES retours
 
-Cinq items, dans l'ordre de gêne pour l'utilisateur. **#447 est en tête parce
-qu'il affiche des CHIFFRES FAUX** — pas une gêne d'ergonomie, une erreur lue.
+**Grégoire exécute les portes demain.** Elles sont dans
+`plans de travail/PORTES-TERRAIN-2026-08-10.md` (jumeau markdown de l'artefact).
+**Ne pas ouvrir de chantier de fond avant d'avoir ses résultats** — la règle
+`CLAUDE.md` est explicite : un retour testeur interrompt le plan.
 
-| # | Objet | Pourquoi ce rang |
+Ce qu'il doit rapporter, dans l'ordre :
+
+| # | Objet | Ce qu'on en attend |
 |---|---|---|
-| **#447** 🟡 | l'aperçu du groupe lit des indices C/P stockés **sans garantie de fraîcheur** | la Liste recalcule et stocke, l'aperçu lit le stocké (#397, cache de perf). Visiter l'aperçu AVANT la Liste = distribution périmée. Le 10 août : « Incomplet : 23 » à l'aperçu pendant que le profil calculait 69,8 % en direct. ⮕ **Geste de contournement à redire à Grégoire tant que ce n'est pas corrigé : ouvrir « Liste des étudiant·es », PUIS l'aperçu.** À arbitrer contre la perf #397 (~460 ms à 75 étudiants avant les caches) |
-| **#445** 🟡 | affordance du lien objectif↔activité + légende `!` / `⚠` / `✓` | le canevas apprend à glisser des liens partout ; l'utilisateur essaiera toujours de relier une activité à un objectif **en traçant** — canal qui n'existe pas (#403 a choisi les cases déclaratives). Et la légende des pastilles ne vit que dans une infobulle de survol, **inexistante sur iPad** |
-| 📐 **#443** | le wizard offre encore « Par objectifs d'apprentissage » | **décision UX de Grégoire attendue avant de coder** : sauter l'étape (11 → 10) ou la garder à une carte d'information ? Deux surfaces disent deux vérités depuis #396+#435 |
-| **#442** 🟡 | doublons à id identique dans le magasin global `cours` + échelles orphelines en a2025 | ⚠ charger **`SKILL_integrite_globaux.md`** avant d'y toucher — filtrer par identité de la source, jamais par drapeau |
-| **#353** | budget localStorage **à 200 %** (10 239 / 5 120 Ko, 472 clés) | monté d'un cran le 9 août. Gagne un point : purger le miroir `configPAN`, sans lecteur ni écrivain mais toujours dans les données. ⚠ Purge **sans drapeau** (comme #409) : un backup Codex antérieur porte la clé et la réintroduirait à l'import |
-
-### Priorité 1 — QUATRE décisions toujours attendues de Grégoire
-
-**Aucun verdict n'est consigné au 10 août au soir.** Elles sont au **§1 de
-`plans de travail/PORTES-TERRAIN-1.57-1.65.md`**, chacune avec la question de
-fond et l'endroit unique à changer. Aucune ne se code sans lui.
-
-| # | Valeur gelée | Chantier | Nature |
-|---|---|---|---|
-| 1.1 | cible tactile **28 px** de la ligne d'objectif | #437 (carte) | se tranche **en regardant** |
-| 1.2 | sarcelle **`#0891b2`** des cinq étapes | #437 (carte) | se tranche **en regardant** |
-| 1.3 | dénominateur de l'**indice C** = **3** | #436 (pratiques) | se tranche **en raisonnant** — chiffre affiché |
-| 1.4 | **quota affiché des jetons** = **2** | #436 (pratiques) | se tranche **en raisonnant** |
-
-⚠ **Ne pas confondre les deux paires** : 1.1/1.2 viennent de la carte, 1.3/1.4
-des pratiques. La confusion a déjà eu lieu une fois entre les deux sessions du
-9 août.
-
-⮕ **Deux autres décisions dorment** : 📐 **#441** (le chantier 3 de SOLO a-t-il
-encore un objet ? — invisible pour l'utilisateur, ni promesse trahie ni porte
-morte) et `docs/refonte-textes/infobulles-T9/T10` (specs du 19 avril dont le JS
-se dit encore « la source » ; T10 documente une page supprimée — les archiver,
-ou corriger l'en-tête du JS pour dire que le code fait foi).
-
-### Priorité 2 — les chantiers de fond, si le terrain laisse de l'air
-
-- **Le chantier « guides » est à 5 sur 7** (**#439**) : « Enseignement explicite »
-  et `pan-rrec` n'ont jamais été écrits. ⮕ `pan-rrec` **n'est pas un chantier de
-  conception** : ses 4 pages sont **déjà rédigées** au §3 de son plan, prêtes à
-  coller. ⚠ Registre à ne pas diluer : le guide ne dit jamais que l'app
-  *garantit* la conformité (`seuilReussite` est configurable — le promettre
-  serait faux).
-- **#440** 🟡 — SRPNF codé en dur dans l'**affichage** des diagnostics (le calcul,
-  lui, a été généralisé depuis). Deux sites d'affichage + le regex
-  d'`identifierDefiSpecifique`. **À confirmer au terrain avant de dimensionner** :
-  sur une grille non-SRPNF, forces/défis s'affichent mais le tableau de scores et
-  les barres restent vides.
-- **#425** (intégration des productions, D → C → B → A) · **#416** (exports du
-  plan de la leçon présentables) · **#403** (liens objectif → activité/évaluation,
-  design déjà tranché — et **#445 en est le retour terrain**, les traiter ensemble).
-- **#418** — `db-ready` **jamais émis** si IndexedDB est indisponible : toutes les
-  migrations du boot sont sautées.
-- **#428 + #430** — dettes datées de la rentrée, **à retirer ENSEMBLE**.
-- **#427** — refermer l'accès public (Cloudflare Access, OTP courriel).
-  **Échéance reportée à septembre 2026** par Grégoire.
-
-### ◈ Reliquat connu, non corrigé (passe « connexions » du 9 août, toujours vrai)
-
-**Trois bibliothèques tierces portent un `?v=` hors du périmètre de
-`release.mjs`** : `libs/html2canvas.min.js`, `libs/jszip.min.js`,
-`libs/pdf.min.js`. Même classe que #438 — mais **un seul commit sur `libs/`
-depuis le 1er mai**, donc risque faible. À traiter si une mise à jour de lib est
-prévue, pas avant.
+| 1.1 | occupation du localStorage après rechargement | **~44 %** attendu (était 100 % Chrome / 88,3 % Safari). Si le chiffre ne bouge pas, le seuil ne s'est pas réappliqué → chantier |
+| 1.2-1.5 | purges a2024 · `simulation_indicesCP` · snapshots orphelins, **dans les deux navigateurs** | ⚠ le détecteur a été CORRIGÉ : exiger un dry-run frais, le rapport du 10 août ne vaut plus |
+| 2.1-2.5 | bouton Supprimer à l'arrivée · dépôt de lien sur objectif · légende des pastilles · wizard · bibliothèque sans doublon | 2.5 a une **seconde rangée qui teste le VECTEUR** (refaire un import) — c'est elle qui compte |
+| 2.6 | **`a2026` n'existe que dans Chrome** | touche sa RENTRÉE. Décision + peut-être un item |
 
 ---
 
-### Rappel de méthode — ce que le 10 août a coûté et appris
+### Priorité 1 — décisions toujours attendues de lui
 
-**Six leçons, et les trois premières sont la même famille : une vérification qui
-atteste au lieu de prouver.**
+| # | Objet | Nature |
+|---|---|---|
+| 3.1 | les **quatre valeurs gelées** (28 px · sarcelle `#0891b2` · dénominateur C = 3 · quota jetons = 2) | ⚠ **deux chantiers différents** (#437 carte, #436 pratiques) — la confusion a déjà eu lieu |
+| 📐 **#449** | forme de la suppression dans la bibliothèque de cours | deux conditions écrites dans l'item, à ne pas contourner |
+| 3.3 | les deux « IDME et niv 0 » d'a2025 | **toutes deux référencées** (6 et 4 citations) — pas des doublons |
+| 📐 **#441** | le chantier 3 de la taxonomie SOLO a-t-il encore un objet ? | invisible pour l'utilisateur |
 
-1. ⚠⚠ **Un garde défensif convertit une erreur de programmation en
-   NON-ÉVÉNEMENT.** Deux fois dans la journée : `sauvegarderPreference` n'existe
-   pas (c'est `definirPreference`) — les accordéons se repliaient mais ne
-   persistaient jamais ; `afficherEtatVideGroupeCoursV2` n'a **jamais été
-   exportée** de son IIFE — le correctif #332 livré pour ça **n'a pas tourné une
-   seule fois depuis sa livraison**. Dans les deux cas, un
-   `if (typeof … !== 'function') return;` a avalé l'échec en silence. ⮕ **Vérifier
-   l'EXPORT réel, pas la présence de l'appel.** Le maillon manquant ne se voit
-   pas en lisant l'appelant.
-2. ⚠⚠ **Le piège de la sous-chaîne — QUATRE fois dans la journée.**
-   `.palette-icon {` matchait `.planif-corbeille .palette-icon {` ·
-   `.planif-palette-zone-label {` matchait la règle de COULEUR
-   `[data-zone="…"] …` · `_dernierTap = 0;` matchait sa propre déclaration ·
-   `groupesCours[0]` matchait **mon propre commentaire explicatif** (un
-   commentaire cite forcément l'ancien comportement qu'il décrit : la sonde le
-   trouvait AVANT le code et mesurait l'ordre à l'envers). ⮕ **Toute borne de
-   slice ou motif de sentinelle s'ANCRE** (`^…` multiligne, `\n` en tête, attribut
-   `class="…"` entier) — et **on retire les commentaires avant de chercher du
-   code**.
-3. ⚠ **Vérifier la présence d'un garde ne prouve pas qu'il garde.** Retirer
-   `&& proche` de la condition du double-tap n'a rien fait rougir : l'assertion
-   vérifiait que la borne de distance EXISTAIT (la variable était encore
-   calculée), pas qu'elle était **employée**. Resserrée sur le `if` complet.
-   *Un break-test resté vert est une information sur le TEST, pas sur le code.*
-4. **Chaque navigateur est une île de stockage.** « Assez fréquent » +
-   multi-appareils ⇒ penser îles AVANT de penser code. La réparation #346 de juin
-   a soigné la copie Safari ; Chrome ne l'a jamais reçue, et son état était MIXTE
-   (magasin `cours` migré, productions non) — c'est tout #154. ⮕ Et un correctif
-   « en données » sans **vecteur bouché** revient par la première synchro manuelle
-   venue : d'où le `console.warn` de `modes.js`, qui fait parler le filtre au lieu
-   de le laisser avaler.
-5. **Reproduire avant de demander.** Le conteneur a Chromium : #155 a été
-   reproduit à VIDE en trois minutes, ce qui a prouvé « bug de code » sans
-   toucher aux données de Grégoire, puis daté la régression AU COMMIT par un test
-   d'équilibre de balises sur l'historique.
-6. **Semer des données à la taille du réel.** #157 ne se reproduisait qu'avec des
-   textes LONGS : la hauteur d'un en-tête dépend de la largeur (repli du texte),
-   donc des objectifs courts d'une ligne ne replient pas et **tous les essais à
-   blanc passaient** pendant que les objectifs réels échouaient toujours.
+---
 
-⮕ **Et une leçon de campagne** : les portes passées sur un build en retard
-produisent des faux rouges parfaitement plausibles. La case « git pull d'abord »
-a été ajoutée au §0 de la checklist **après** le début de la campagne — la
-prochaine la met en **case 1**.
+### Priorité 2 — si le terrain laisse de l'air
+
+- **#448** — les cartouches se dupliquent à l'import. ⚠ **NON REPRODUIT** :
+  mécanisme lu au code (`ajouterCartouchesABibliotheque`, `push` nu avec id
+  neuf) et corroboré par les horodatages des ids. **Rejouer avant de corriger**
+  — c'est exactement la leçon du cycle.
+- **#353, ce qui reste** : `tamponsImages` base64 non namespacé,
+  `db.purgerBackupsV1()` (dry-run par défaut, exécution = décision Grégoire).
+  L'option 4 (quota piloté) n'est plus urgente : à 44 %, l'alerte à 80 % a de
+  la marge.
+- **#439** (guides 5 sur 7) · **#440** (SRPNF en dur dans l'affichage) ·
+  **#425** · **#416** · **#403** · **#418** · **#428 + #430** (à retirer
+  ENSEMBLE, dettes datées de la rentrée) · **#427** (reporté à septembre).
+
+---
+
+### ⚠⚠ LA LEÇON DU CYCLE — à lire avant de diagnostiquer quoi que ce soit
+
+**Quatre diagnostics posés par LECTURE DE CODE se sont révélés faux, et c'est la
+MESURE qui les a corrigés :**
+
+1. **#447** — le BACKLOG affirmait « l'aperçu lit le stocké sans recalculer » et
+   prescrivait un contournement à l'utilisateur. `tableau-bord-apercu.js:1069`
+   recalcule à chaque rendu. Prouvé en FAUSSANT le stockage puis en observant.
+2. **#353** — l'alerte criait « 200 % » d'un quota indépassable. Le navigateur
+   facture en **caractères UTF-16**, la mesure comptait des octets. *Un ratio
+   impossible invite à ne plus croire l'alerte* — le pire résultat possible.
+3. **Le détecteur d'orphelines** classait des snapshots VIVANTS comme morts.
+   Rattrapé avant exécution, en relisant le rapport de Grégoire.
+4. **Le bouton Supprimer** — annoncé cassé côté cours (faux), puis raté par mon
+   propre script d'audit (fenêtre trop courte). Trouvé en lisant les quatre
+   sites d'appel un par un.
+
+⮕ **La règle : sur les DONNÉES et sur le DOM, un diagnostic lu au code est une
+HYPOTHÈSE.** Le conteneur a Chromium — reproduire coûte trois minutes.
+⮕ **Corollaire, trouvé sur pièces** : « ne rien casser » n'est pas « ne rien
+perdre ». Un retrait démontrablement sans effet peut quand même effacer des
+valeurs que personne ne lisait.
+⮕ **Et sur les tests** : **quatre break-tests sont restés VERTS au premier jet**
+ce cycle, chaque fois par la faute du TEST — assertion qui vise la variable au
+lieu de son emploi, la sous-chaîne au lieu de l'ancre, l'autre élément de la
+même fonction. *Un break-test resté vert est une information sur le test.*
+
+---
 
 ## §3ter — Consigne du 9 août (archivée le 10 août — 81 portes closes, #154/#155/#157/#158/#444/#446 livrés, audit `Plan Accompagnement/` versé)
 

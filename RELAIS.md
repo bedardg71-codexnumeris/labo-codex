@@ -12,57 +12,68 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | **`main`** |
-| **Version** | **1.71.0** — build `0810-1651` |
+| **Version** | **1.71.1** — build `0810-1754` |
 | **Travail en avance sur `main`** | **aucun** |
-| **Dernière mise à jour** | 10 août 2026, **soir (2e cycle)** — fusion faite, tout poussé sur `main` |
+| **Dernière mise à jour** | 10 août 2026, **clôture du cycle du soir** — tout fusionné et poussé |
 
-✅ **Aucune dette de fusion.** Le cycle du soir (11 commits, **1.67.1 → 1.71.0**) est
-fusionné dans `main`. Suite rejouée **sur l'arbre fusionné** : Vitest **2163/2163**
-(243 fichiers). Dernier ID utilisé : **#448**.
+✅ **Aucune dette de fusion.** Le cycle du soir (**18 commits, 1.67.1 → 1.71.1**) est
+sur `main`. Suite rejouée sur l'arbre fusionné : Vitest **2169/2169** (244 fichiers),
+arbre propre, `origin/main ↔ HEAD : 0 / 0`. Dernier ID utilisé : **#449**.
 
-⮕ **Ce que le cycle a livré** — les cinq items de la priorité 0 des 81 portes :
-**#442** (la fusion `listeCours`→`cours` dédoublonne enfin par identité) · **#447**
-(⚠ la prémisse de l'item était FAUSSE — l'aperçu recalcule bel et bien ; un vrai trou
-dormait à côté, le cache de lecture #397) · **#445** · 📐**#443** · **#353** (l'unité du
-quota). **#448** versé (les cartouches se dupliquent à l'import, non reproduit).
+⏳ **RIEN N'EST VALIDÉ AU TERRAIN.** Grégoire fait les vérifications **demain**.
+Elles sont dans **`plans de travail/PORTES-TERRAIN-2026-08-10.md`** (jumeau markdown
+d'un artefact interactif). **Ne pas ouvrir de chantier de fond avant ses résultats** —
+la règle `CLAUDE.md` est explicite : un retour testeur interrompt le plan.
 
-⚠⚠ **LA LEÇON DU CYCLE, ET ELLE EST TRANSVERSALE : TROIS DIAGNOSTICS POSÉS PAR LECTURE
-DE CODE SE SONT RÉVÉLÉS FAUX, ET LA MESURE LES A CORRIGÉS.**
+⮕ **Ce que le cycle a livré** : les cinq items de la priorité 0 des 81 portes —
+**#442** (fusion des cours dédoublonnée par identité, + le cours fictif retiré de ses
+données) · **#447** (⚠ la prémisse de l'item était FAUSSE ; un vrai trou dormait à
+côté) · **#445** · 📐**#443** · **#353** (l'unité du quota + seuil IDB-first 200 → 25 Ki)
+· le **bouton Supprimer d'un groupe-cours** (1.71.1). **#448** et **#449** versés.
+⮕ **Et une règle de projet neuve** : **`SKILL_portes_terrain.md`**, adoptée à la demande
+de Grégoire — modèle OBLIGATOIRE de toute liste de vérifications, deux livrables
+jumeaux (artefact + markdown versionné).
+
+⚠⚠ **LA LEÇON DU CYCLE, ET ELLE COMMANDE LA SUIVANTE : QUATRE DIAGNOSTICS POSÉS PAR
+LECTURE DE CODE SE SONT RÉVÉLÉS FAUX, ET C'EST LA MESURE QUI LES A CORRIGÉS.**
  1. **#447** — le BACKLOG affirmait « l'aperçu lit le stocké sans recalculer » et
-    prescrivait un contournement à l'utilisateur. `tableau-bord-apercu.js:1069`
-    recalcule à chaque rendu. Prouvé en FAUSSANT le stockage puis en observant.
- 2. **#353** — l'alerte criait « 200 % » d'un quota qu'on ne peut pas dépasser. Le
-    navigateur facture en **caractères UTF-16**, la mesure comptait des octets. *Un
-    ratio impossible invite à ne plus croire l'alerte* — le pire résultat possible.
- 3. **Le détecteur d'orphelines** classait des snapshots VIVANTS comme morts : ils sont
-    nommés d'après le **groupe-cours**, pas le cours. Rattrapé avant exécution.
-⮕ **La règle qui en sort** : sur les DONNÉES, un diagnostic lu au code est une
-hypothèse. Le conteneur a Chromium — reproduire coûte trois minutes.
+    prescrivait un contournement à l'utilisateur ; l'aperçu recalcule à chaque rendu.
+    Prouvé en FAUSSANT le stockage puis en observant.
+ 2. **#353** — l'alerte criait « 200 % » d'un quota indépassable : le navigateur facture
+    en **caractères UTF-16**, la mesure comptait des octets. *Un ratio impossible invite
+    à ne plus croire l'alerte* — le pire résultat pour une alerte.
+ 3. **Le détecteur d'orphelines** classait des snapshots **VIVANTS** comme morts (ils
+    sont nommés d'après le GROUPE-COURS) : **356 K car. de données réelles** étaient
+    dans la liste à supprimer. Rattrapé en relisant SON rapport avant de dire d'exécuter.
+ 4. **Le bouton Supprimer** — annoncé cassé côté cours (faux), puis raté par mon propre
+    script d'audit (fenêtre trop courte). Trouvé en lisant les sites d'appel un par un.
+⮕ **Sur les DONNÉES et sur le DOM, un diagnostic lu au code est une HYPOTHÈSE.** Le
+conteneur a Chromium ; reproduire coûte trois minutes.
+⮕ **Corollaire, trouvé sur pièces** : *« ne rien casser » n'est pas « ne rien perdre »*.
+La 3e copie du cours portait `heuresContact: 60` et `ponderation: '2-2-3'`, invisibles
+parce que seul le 1er exemplaire est lu — un retrait « sans effet » les aurait effacées.
+Les scripts de purge REFUSENT désormais tant que l'humain n'a pas tranché.
+⮕ **Et sur les tests** : **quatre break-tests sont restés VERTS au premier jet**, chaque
+fois par la faute du TEST. *Un break-test resté vert est une information sur le test.*
 
-⚠ **ET UN COROLLAIRE, TROUVÉ SUR PIÈCES** : « ne rien casser » n'est pas « ne rien
-perdre ». La 3e copie de `h2026-601-102-MQ-00001` portait `heuresContact: 60` et
-`ponderation: '2-2-3'`, invisibles (seul le 1er exemplaire est lu). Un retrait « sans
-effet » les aurait effacées — invisible avant ET après. Les scripts de purge REFUSENT
-désormais d'exécuter tant que l'humain n'a pas tranché.
-
-⏳ **DÛ PAR GRÉGOIRE** (les scripts sont dans `scripts/`, à coller en console) :
-`retirerCours('h2026-601-102-MQ-00001')` (601-102 = fictif, confirmé) ·
-`reparer353(...)` pour a2024 + `simulation_indicesCP` + snapshots orphelins ·
-porte terrain **#445** (iPad + Mac) · confirmer que localStorage retombe vers 44 %.
-
-⚠ **Deux divergences Chrome/Safari relevées le 10 août** : `a2026` (la rentrée !)
-n'existe QUE dans Chrome ; et Safari porte un `demo_snapshots_<GC réel de h2026>`,
-croisement de contexte de la famille #446.
+⚠ **GRÉGOIRE N'EST PAS DÉVELOPPEUR** — il l'a rappelé en adoptant le modèle des portes.
+C'est la **règle première** de `SKILL_portes_terrain.md` : le « pourquoi » raconte le
+SYMPTÔME VÉCU, jamais le mécanisme.
 
 ⚠ **PIÈGE D'ENVIRONNEMENT — toujours vrai.** Le clone du conteneur est **shallow** :
 `git fetch --unshallow` AVANT toute comparaison ET toute fusion, puis vérifier que le
-`main` local est bien un **ancêtre** d'`origin/main` (`git merge-base --is-ancestor`).
+`main` local est un **ancêtre** d'`origin/main` (`git merge-base --is-ancestor`).
 
-⚠⚠ **ET LE MÊME PIÈGE, CÔTÉ TESTEUR.** Grégoire lance l'app en **`file://` depuis son
-clone Git** sur Mac : son build est celui de son dernier `git pull`. ⮕ **`git pull` en
-case 1 de toute checklist terrain.** Le 10 août au soir, il a appelé des fonctions de
-scripts qui n'existaient que sur la branche — `is not defined` : le symptôme de la
-même cause.
+⚠⚠ **ET LE MÊME PIÈGE, CÔTÉ TESTEUR — deux formes.** (1) Son app tourne en `file://`
+depuis son clone : son build est celui de son dernier `git pull`. (2) **Ses SCRIPTS
+aussi** : le 10 août il a reçu trois fois `is not defined` parce que les outils console
+vivaient sur une branche non fusionnée — puis parce qu'il avait collé mes commentaires
+d'usage au lieu du contenu des fichiers. ⮕ **Un script se colle EN ENTIER, une commande
+s'appelle APRÈS**, et on donne toujours `cat scripts/<fichier>.js | pbcopy`.
+
+⮕ **Où lire la suite** : le **§3 de `SESSION.md`** porte la consigne complète — prémisse
+chiffrée, priorité 0 (les résultats du terrain de demain), les quatre décisions en
+attente, et la leçon du cycle en entier.
 
 > ▣ **Tout ce qui suit décrit les journées du 9 août** — la collision des deux
 > sessions et sa résolution. C'est de l'historique, conservé pour la méthode
