@@ -61,6 +61,10 @@ describe('#353 Option C volet 3 · set() async tracke son écriture IDB (W1)', (
             useIndexedDB: true,
             db: ctrl.connection,
             _ecritureAutorisee: () => true,
+            // #447 : `set()` signale l'écriture (crochet d'invalidation du cache
+            // de lecture #397). On branche la VRAIE méthode — sans abonné elle
+            // ne fait rien, et le routage testé ici reste le seul objet du cas.
+            _signalerEcriture: db._signalerEcriture,
             _setIndexedDB: db._setIndexedDB,
             _trackOperation: db._trackOperation,   // helper du volet 1
             _estimateSize: () => 10,               // sous le seuil IDB-first

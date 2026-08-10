@@ -39,47 +39,114 @@ function _tupleCoursNaturel(c) {
     return `${code}|${session}${annee}`;
 }
 
+/**
+ * Décide de la fusion `listeCours` (legacy) → `cours` (canonique).
+ * FONCTION PURE : ne lit ni n'écrit le stockage, ne mute pas ses arguments.
+ * Exportée (`window._fusionnerListeCoursDansCours`) pour être testable
+ * directement — la sentinelle #442 s'appuie dessus.
+ *
+ * #442 (10 août 2026, soir) — DEUX dédoublonnages, dans cet ordre :
+ *
+ *  1. par IDENTITÉ (`id`) — la règle non négociable des collections
+ *     partagées (`SKILL_integrite_globaux` §3.2, patron « push sans
+ *     replace » de `fusionnerDemoVersGlobaux`). C'est le garde qui
+ *     MANQUAIT : `idsV2` était calculé mais n'était consulté que dans la
+ *     branche « pas de tuple ». Un cours legacy au tuple DIFFÉRENT mais à
+ *     l'id IDENTIQUE passait donc au travers et s'ajoutait au magasin —
+ *     à chaque import qui repeuplait `listeCours`. Constat sur les données
+ *     réelles de Grégoire (dry-run `reparer154()`, 9 août) : TROIS entrées
+ *     601-102-MQ portant toutes `h2026-601-102-MQ-00001`.
+ *     ⮕ Le cas concret : la V2 porte `session`+`annee` (tuple
+ *     `601-102-MQ|H2026`), la copie legacy restaurée par un import ancien
+ *     ne les porte pas (tuple dégradé `601-102-MQ`). Deux tuples, un seul id.
+ *
+ *  2. par TUPLE NATUREL (code|SESSION+ANNÉE) — le critère d'origine,
+ *     conservé tel quel : il attrape les doublons qui portent des ids
+ *     DIFFÉRENTS, que le point 1 ne peut pas voir.
+ *
+ * ▣ Pourquoi écarter par id ne perd RIEN : tous les lecteurs du magasin
+ *   résolvent par `find`/`findIndex`/`some` sur `.id` (cours.js, contexte.js,
+ *   modes.js, planification-donnees.js…). Une seconde entrée au même id est
+ *   donc INATTEIGNABLE par construction — elle n'ajoute que du poids au
+ *   budget de stockage (cf. #353). L'écarter est un no-op fonctionnel ; la
+ *   laisser entrer était le défaut.
+ *
+ * @param {Array} coursExistants - contenu actuel du magasin `cours`
+ * @param {Array} anciensListeCours - contenu de la clé legacy `listeCours`
+ * @returns {{ajouts: Array, doublonsTuple: Array, collisionsId: Array}}
+ */
+function _fusionnerListeCoursDansCours(coursExistants, anciensListeCours) {
+    const existants = Array.isArray(coursExistants) ? coursExistants : [];
+    const legacy = Array.isArray(anciensListeCours) ? anciensListeCours : [];
+
+    const tuples = new Map();
+    existants.forEach(c => {
+        if (!c) return;
+        const t = _tupleCoursNaturel(c);
+        if (t) tuples.set(t, c);
+    });
+    const ids = new Set(existants.filter(c => c && c.id).map(c => c.id));
+
+    const ajouts = [];
+    const doublonsTuple = [];
+    const collisionsId = [];
+
+    legacy.forEach(c => {
+        if (!c) return;
+        const t = _tupleCoursNaturel(c);
+
+        // 1. Identité d'abord — un id déjà présent n'est JAMAIS réinjecté.
+        if (c.id && ids.has(c.id)) {
+            collisionsId.push({ id: c.id, tuple: t });
+            return;
+        }
+        // 2. Puis le tuple naturel (doublon à id différent).
+        if (t && tuples.has(t)) {
+            doublonsTuple.push({ tuple: t, legacyId: c.id, v2Id: tuples.get(t).id });
+            return;
+        }
+        // Ni tuple ni id : rien pour identifier l'entrée, on ne l'ajoute pas.
+        if (!t && !c.id) return;
+
+        ajouts.push(c);
+        // Refermer les deux portes DANS le lot : deux entrées legacy au même
+        // id (ou au même tuple) ne doivent pas entrer toutes les deux.
+        if (t) tuples.set(t, c);
+        if (c.id) ids.add(c.id);
+    });
+
+    return { ajouts, doublonsTuple, collisionsId };
+}
+
 function _migrerListeCoursVersCoursV2() {
     const anciensListeCours = db.getSync('listeCours', []);
     if (!Array.isArray(anciensListeCours) || anciensListeCours.length === 0) return;
 
     const coursExistants = db.getSync('cours', []);
-    const tuplesV2 = new Map();
-    coursExistants.forEach(c => {
-        const t = _tupleCoursNaturel(c);
-        if (t) tuplesV2.set(t, c);
-    });
-    const idsV2 = new Set(coursExistants.filter(c => c.id).map(c => c.id));
+    const { ajouts, doublonsTuple, collisionsId } =
+        _fusionnerListeCoursDansCours(coursExistants, anciensListeCours);
 
-    const ajoutsLegacy = [];
-    const doublonsIgnores = [];
-
-    anciensListeCours.forEach(c => {
-        const t = _tupleCoursNaturel(c);
-        if (t && tuplesV2.has(t)) {
-            doublonsIgnores.push({ tuple: t, legacyId: c.id, v2Id: tuplesV2.get(t).id });
-        } else if (!t) {
-            if (c.id && !idsV2.has(c.id)) ajoutsLegacy.push(c);
-        } else {
-            ajoutsLegacy.push(c);
-            tuplesV2.set(t, c);
-        }
-    });
-
-    if (ajoutsLegacy.length > 0) {
-        db.setSync('cours', [...coursExistants, ...ajoutsLegacy]); // security-ok: cours legacy locaux, déjà persistés dans listeCours
-        console.info(`[Migration listeCours] ${ajoutsLegacy.length} cours legacy fusionné(s) dans « cours »`);
+    if (ajouts.length > 0) {
+        db.setSync('cours', [...coursExistants, ...ajouts]); // security-ok: cours legacy locaux, déjà persistés dans listeCours
+        console.info(`[Migration listeCours] ${ajouts.length} cours legacy fusionné(s) dans « cours »`);
     }
     db.setSync('listeCours', []); // security-ok: vidage clé legacy après migration
 
-    if (doublonsIgnores.length > 0) {
+    if (collisionsId.length > 0) {
         console.warn(
-            `[Migration listeCours] ${doublonsIgnores.length} doublon(s) détecté(s) et ignoré(s) — V2 préservée`,
-            doublonsIgnores
+            `[Migration listeCours] #442 — ${collisionsId.length} cours legacy écarté(s) : leur id existe déjà dans « cours » (l'entrée en place est préservée)`,
+            collisionsId
+        );
+    }
+
+    if (doublonsTuple.length > 0) {
+        console.warn(
+            `[Migration listeCours] ${doublonsTuple.length} doublon(s) détecté(s) et ignoré(s) — V2 préservée`,
+            doublonsTuple
         );
         if (typeof notifications !== 'undefined' && notifications.info) {
             notifications.info(
-                `Migration cours : ${doublonsIgnores.length} doublon(s) ignoré(s)`,
+                `Migration cours : ${doublonsTuple.length} doublon(s) ignoré(s)`,
                 'La version V2 a été préservée. Détails dans la console.'
             );
         }
@@ -1091,5 +1158,10 @@ window.setValue = setValue;
 // partagé avec les autres modules (statistiques.js, etc.) qui ne doivent plus lire
 // la période depuis l'objet cours.
 window._deriverSessionAnneeTrimestreActif = _deriverSessionAnneeTrimestreActif;
+
+// #442 — décision de fusion legacy→canonique, pure et exportée pour être
+// testée directement (sentinelle `sentinelle-fusion-cours-442`). Vérifier
+// l'EXPORT réel, pas la présence de l'appel (leçon du 10 août).
+window._fusionnerListeCoursDansCours = _fusionnerListeCoursDansCours;
 
 })();
