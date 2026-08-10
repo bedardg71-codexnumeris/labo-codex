@@ -12,48 +12,57 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | **`main`** |
-| **Version** | **1.67.1** — build `0810-1304` |
+| **Version** | **1.71.0** — build `0810-1651` |
 | **Travail en avance sur `main`** | **aucun** |
-| **Dernière mise à jour** | 10 août 2026, **fin de journée** — rituel de clôture passé, tout poussé sur `main` |
+| **Dernière mise à jour** | 10 août 2026, **soir (2e cycle)** — fusion faite, tout poussé sur `main` |
 
-✅ **Aucune dette de fusion.** La journée du 10 août (19 commits, **1.65.2 →
-1.67.1**) est intégralement sur `main`. Suite rejouée sur l'arbre final :
-Vitest **2111/2111** (239 fichiers), arbre propre, `origin/main ↔ HEAD : 0 / 0`.
-Dernier ID utilisé : **#447**.
+✅ **Aucune dette de fusion.** Le cycle du soir (11 commits, **1.67.1 → 1.71.0**) est
+fusionné dans `main`. Suite rejouée **sur l'arbre fusionné** : Vitest **2163/2163**
+(243 fichiers). Dernier ID utilisé : **#448**.
 
-⮕ **Ce que la journée a livré** : audit de `Plan Accompagnement/` (le dernier
-angle mort — §4quater), puis **six retours terrain traités en priorité** selon la
-règle de `CLAUDE.md` — **#154** (productions inaccessibles : sonde, réparation
-exécutée sur les données réelles, et le filtre qui avalait tout parle désormais)
-· **#155** (les cinq pages de Conception rendaient vide) · **#157** ·
-**#158** · **#444** (la carte utilisable au doigt) · **#446** (le contexte de
-trimestre cessait de mentir). ⮕ **La campagne des 81 portes terrain est CLOSE :
-81/81.**
+⮕ **Ce que le cycle a livré** — les cinq items de la priorité 0 des 81 portes :
+**#442** (la fusion `listeCours`→`cours` dédoublonne enfin par identité) · **#447**
+(⚠ la prémisse de l'item était FAUSSE — l'aperçu recalcule bel et bien ; un vrai trou
+dormait à côté, le cache de lecture #397) · **#445** · 📐**#443** · **#353** (l'unité du
+quota). **#448** versé (les cartouches se dupliquent à l'import, non reproduit).
 
-⚠ **PIÈGE D'ENVIRONNEMENT — toujours vrai, et il a mordu deux fois autrement le
-9 août.** Le clone du conteneur est **shallow** : `main` LOCAL peut pointer des
-semaines en arrière, `git rev-list --count` annonce alors une divergence
-**entièrement fictive**, et `git merge --ff-only` répond **« refusing to merge
-unrelated histories »** — un message qui fait croire à un dépôt corrompu alors
-qu'il ne dit que « l'historique est tronqué ». ⮕ **`git fetch --unshallow` AVANT
-toute comparaison ET avant toute fusion.** Vérifier ensuite que le `main` local
-est bien un **ancêtre** d'`origin/main` (`git merge-base --is-ancestor`) : c'est
-ce qui distingue « en retard » de « divergent ».
+⚠⚠ **LA LEÇON DU CYCLE, ET ELLE EST TRANSVERSALE : TROIS DIAGNOSTICS POSÉS PAR LECTURE
+DE CODE SE SONT RÉVÉLÉS FAUX, ET LA MESURE LES A CORRIGÉS.**
+ 1. **#447** — le BACKLOG affirmait « l'aperçu lit le stocké sans recalculer » et
+    prescrivait un contournement à l'utilisateur. `tableau-bord-apercu.js:1069`
+    recalcule à chaque rendu. Prouvé en FAUSSANT le stockage puis en observant.
+ 2. **#353** — l'alerte criait « 200 % » d'un quota qu'on ne peut pas dépasser. Le
+    navigateur facture en **caractères UTF-16**, la mesure comptait des octets. *Un
+    ratio impossible invite à ne plus croire l'alerte* — le pire résultat possible.
+ 3. **Le détecteur d'orphelines** classait des snapshots VIVANTS comme morts : ils sont
+    nommés d'après le **groupe-cours**, pas le cours. Rattrapé avant exécution.
+⮕ **La règle qui en sort** : sur les DONNÉES, un diagnostic lu au code est une
+hypothèse. Le conteneur a Chromium — reproduire coûte trois minutes.
 
-⚠⚠ **ET LE MÊME PIÈGE, CÔTÉ TESTEUR — c'est la nouveauté du 10 août.** Grégoire
-lance l'app en **`file://` depuis son clone Git** sur Mac : son build est celui
-de son dernier `git pull`, pas celui de `main`. **Deux des quatre échecs des
-81 portes étaient des FAUX ROUGES produits par un build en retard** — et ce
-type de faux rouge est indétectable au récit, parce qu'il décrit exactement
-l'état pré-correctif, qui est précisément ce que la porte teste. ⮕ **`git pull`
-en case 1 de toute checklist terrain.** (Sur iPad il passe par
-**app.codexnumeris.org**, qui suit `main` — pas de pull de ce côté.)
+⚠ **ET UN COROLLAIRE, TROUVÉ SUR PIÈCES** : « ne rien casser » n'est pas « ne rien
+perdre ». La 3e copie de `h2026-601-102-MQ-00001` portait `heuresContact: 60` et
+`ponderation: '2-2-3'`, invisibles (seul le 1er exemplaire est lu). Un retrait « sans
+effet » les aurait effacées — invisible avant ET après. Les scripts de purge REFUSENT
+désormais d'exécuter tant que l'humain n'a pas tranché.
 
-⮕ **Où lire la suite** : le **§3 de `SESSION.md`** porte la consigne de démarrage
-complète — prémisse chiffrée à vérifier, priorité 0 (les cinq items que les
-81 portes ont laissés : **#447**, **#445**, 📐**#443**, **#442**, **#353**), les
-quatre valeurs gelées toujours sans verdict, et les **six leçons de méthode** du
-10 août.
+⏳ **DÛ PAR GRÉGOIRE** (les scripts sont dans `scripts/`, à coller en console) :
+`retirerCours('h2026-601-102-MQ-00001')` (601-102 = fictif, confirmé) ·
+`reparer353(...)` pour a2024 + `simulation_indicesCP` + snapshots orphelins ·
+porte terrain **#445** (iPad + Mac) · confirmer que localStorage retombe vers 44 %.
+
+⚠ **Deux divergences Chrome/Safari relevées le 10 août** : `a2026` (la rentrée !)
+n'existe QUE dans Chrome ; et Safari porte un `demo_snapshots_<GC réel de h2026>`,
+croisement de contexte de la famille #446.
+
+⚠ **PIÈGE D'ENVIRONNEMENT — toujours vrai.** Le clone du conteneur est **shallow** :
+`git fetch --unshallow` AVANT toute comparaison ET toute fusion, puis vérifier que le
+`main` local est bien un **ancêtre** d'`origin/main` (`git merge-base --is-ancestor`).
+
+⚠⚠ **ET LE MÊME PIÈGE, CÔTÉ TESTEUR.** Grégoire lance l'app en **`file://` depuis son
+clone Git** sur Mac : son build est celui de son dernier `git pull`. ⮕ **`git pull` en
+case 1 de toute checklist terrain.** Le 10 août au soir, il a appelé des fonctions de
+scripts qui n'existaient que sur la branche — `is not defined` : le symptôme de la
+même cause.
 
 > ▣ **Tout ce qui suit décrit les journées du 9 août** — la collision des deux
 > sessions et sa résolution. C'est de l'historique, conservé pour la méthode
