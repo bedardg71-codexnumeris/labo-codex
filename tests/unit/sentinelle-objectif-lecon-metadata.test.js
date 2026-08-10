@@ -337,7 +337,11 @@ describe('F1 · invariants de rendu et de routage', () => {
         // déjà pourvues d'une liste — sinon il ne s'exécuterait jamais, ce qui
         // est précisément le défaut qui a rendu la perte silencieuse.
         const iSauvetage = source.indexOf("&& typeof n.metadata.objectif === 'string'");
-        const iSaut = source.indexOf('if (n.metadata && Array.isArray(n.metadata.objectifs)) continue;');
+        const iSaut = source.indexOf('if (n.metadata && Array.isArray(n.metadata.objectifs)) {')
+        // #158 (10 août 2026) : le saut « déjà au format liste » n'est plus un
+        // continue sec — il stampe d'abord les ids manquants. La sonde suit
+        // l'OUVERTURE de la branche ; l'invariant d'ordre (sauvetage AVANT le
+        // saut) reste vérifié à l'identique.;
         expect(iSauvetage).toBeGreaterThan(-1);
         expect(iSaut).toBeGreaterThan(-1);
         expect(iSauvetage).toBeLessThan(iSaut);

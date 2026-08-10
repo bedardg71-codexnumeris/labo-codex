@@ -266,7 +266,11 @@ describe('données · ce que la vue supprimée avait avalé est récupéré', ()
     // sans récupérer d'abord aurait figé la perte.
     it('le sauvetage s’exécute AVANT le saut qui l’aurait rendu inatteignable', () => {
         const iSauvetage = sourceCarte.indexOf("&& typeof n.metadata.objectif === 'string'");
-        const iSaut = sourceCarte.indexOf('if (n.metadata && Array.isArray(n.metadata.objectifs)) continue;');
+        const iSaut = sourceCarte.indexOf('if (n.metadata && Array.isArray(n.metadata.objectifs)) {')
+        // #158 (10 août 2026) : le saut « déjà au format liste » n'est plus un
+        // continue sec — il stampe d'abord les ids manquants. La sonde suit
+        // l'OUVERTURE de la branche ; l'invariant d'ordre (sauvetage AVANT le
+        // saut) reste vérifié à l'identique.;
         expect(iSauvetage).toBeGreaterThan(-1);
         expect(iSaut).toBeGreaterThan(-1);
         expect(iSauvetage).toBeLessThan(iSaut);
