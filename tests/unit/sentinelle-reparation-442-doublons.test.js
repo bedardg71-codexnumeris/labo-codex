@@ -89,6 +89,33 @@ describe('#442 · script de nettoyage des doublons', () => {
         expect(ids).toHaveLength(new Set(ids).size);
     });
 
+    it('B2 · quand les copies diffèrent, le rapport DIT en quoi', async () => {
+        // Terrain du 10 août (dry-run de Grégoire) : les trois exemplaires de
+        // 601-102-MQ diffèrent entre eux. Le premier jet annonçait « les copies
+        // DIFFÈRENT du 1er — voir la note plus bas » et cette note n'existait
+        // pas. Une alerte sans matière au moment précis où l'on décide de
+        // supprimer est pire qu'un silence : elle inquiète sans informer.
+        const { db } = fauxStockage({
+            cours: [
+                { id: 'X', codeCours: '601-102-MQ', nomCours: 'Littérature et imaginaire' },
+                { id: 'X', codeCours: '601-102-MQ', titre: 'Littérature et imaginaire', session: 'Hiver' }
+            ]
+        });
+        const journal = [];
+        const espion = vi.spyOn(console, 'log').mockImplementation(m => journal.push(String(m)));
+
+        const win = chargerScriptReparation(db);
+        await win.reparer442();
+        espion.mockRestore();
+
+        const rapport = journal.join('\n');
+        expect(rapport).toContain('ce qui diffère du gardé');
+        expect(rapport).toContain('nomCours');   // présent au gardé, absent à la copie
+        expect(rapport).toContain('session');    // absent au gardé, présent à la copie
+        // Et la phrase qui remet l'écart à sa place : il n'était lu nulle part.
+        expect(rapport).toContain('SEUL le 1er exemplaire était lu');
+    });
+
     it('C · deux modèles homonymes à ids DIFFÉRENTS ne sont pas touchés', async () => {
         const donnees = {
             a2025_echellesTemplates: [

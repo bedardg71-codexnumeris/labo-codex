@@ -67,18 +67,11 @@ const GOLDEN = {
         configuration: { afficherRang: false, afficherMoyenneGroupe: true, reglesSommatives: [] },
         calcul_note: { methode: 'moyenne_ponderee' }, nbEvaluationsPrevues: 6
     },
-    STD_obj: {
-        id: 'fixe-STD_obj', nom: 'Golden STD-obj', auteur: '', etablissement: '', description: '', discipline: '',
-        type: 'standards', variante: 'seuils-critiques', pratiques: ['STD'], dansBibliotheque: true,
-        configuration: {
-            approcheEvaluation: 'par-objectifs', echelleId: 'ech1', grilleId: 'gr1', varianteCalcul: 'n-meilleurs',
-            objectifs: { modeCalcul: 'seuils-critiques', nbObjectifs: 5,
-                seuilsCritiques: { seuilReussite: 'M', noteBaseReussite: 80, bonusParNiveau: 3.33 } }
-        },
-        // #396 (5 août 2026) : 'pan_par_objectif' RETIRÉ (décision D2) — le wizard
-        // pose conversion_niveaux pour l'approche par objectifs (fold Standards).
-        calcul_note: { methode: 'conversion_niveaux' }
-    },
+    // #443 (10 août 2026) : le golden STD_obj est RETIRÉ AVEC la fonctionnalité.
+    // Un golden décrit un parcours que l'application OFFRE ; le parcours « par
+    // objectifs » n'existe plus (carte retirée du wizard, décision Grégoire).
+    // ⚠ On ne l'a pas « mis à jour » sur ce que le code émet désormais : un
+    // golden réaligné sur le code qu'il surveille ne surveille plus rien.
     STD_art: {
         id: 'fixe-STD_art', nom: 'Golden STD-art', auteur: '', etablissement: '', description: '', discipline: '',
         type: 'standards', variante: 'n-meilleurs', pratiques: ['STD'], dansBibliotheque: true,
@@ -103,9 +96,6 @@ const GOLDEN = {
 
 const REPONSES = {
     SOM: { calcNoteFinale: 'moyenne', reglesSommatives: [], nom: 'Golden SOM', nbEvaluationsPrevues: 6 },
-    STD_obj: { calcNoteFinale: 'niveaux', approcheEvaluation: 'par-objectifs', modeCalcul: 'seuils-critiques',
-        nbObjectifs: 5, seuilReussite: 'M', noteBaseReussite: 80, bonusParNiveau: 3.33,
-        echelleId: 'ech1', grilleId: 'gr1', nom: 'Golden STD-obj' },
     STD_art: { calcNoteFinale: 'niveaux', approcheEvaluation: 'par-artefacts', modeSelectionPortfolio: 'n_meilleurs',
         nbArtefactsSoumis: 12, nbArtefactsRetenus: 7, minAvantCalculFormatif: 3, utiliserPortfolio: true,
         reprisesPermises: 'limite', echelleId: 'ech1', grilleId: 'gr1', nom: 'Golden STD-art' },
@@ -114,15 +104,15 @@ const REPONSES = {
 };
 
 describe('Golden master #319 — objet pratique produit (invariant Lot 1)', () => {
-    for (const cas of ['SOM', 'STD_obj', 'STD_art', 'SPE']) {
+    for (const cas of ['SOM', 'STD_art', 'SPE']) {
         it(`parcours ${cas} — objet sauvegardé identique au golden`, async () => {
             const obj = await produire('fixe-' + cas, REPONSES[cas]);
             expect(obj).toEqual(GOLDEN[cas]);
         });
     }
 
-    it('le type sauvegardé est canonique pour les 4 parcours (jamais pan-*)', async () => {
-        for (const cas of ['SOM', 'STD_obj', 'STD_art', 'SPE']) {
+    it('le type sauvegardé est canonique pour les 3 parcours (jamais pan-*)', async () => {
+        for (const cas of ['SOM', 'STD_art', 'SPE']) {
             const obj = await produire('fixe-' + cas, REPONSES[cas]);
             expect(obj.type).not.toMatch(/^pan-/);
         }
@@ -132,7 +122,7 @@ describe('Golden master #319 — objet pratique produit (invariant Lot 1)', () =
 describe('#319 Lot 1 — canonicalisation du vocabulaire interne', () => {
     it('deduireTypePratique renvoie le code canonique (plus pan-*)', () => {
         expect(win.deduireTypePratique({ calcNoteFinale: 'moyenne' }).type).toBe('sommative');
-        expect(win.deduireTypePratique({ calcNoteFinale: 'niveaux', approcheEvaluation: 'par-objectifs', modeCalcul: 'comptage' }).type).toBe('standards');
+        expect(win.deduireTypePratique({ calcNoteFinale: 'niveaux', approcheEvaluation: 'par-artefacts' }).type).toBe('standards');
         expect(win.deduireTypePratique({ calcNoteFinale: 'acceptable' }).type).toBe('specifications');
     });
 
@@ -275,9 +265,18 @@ describe('#319 Lot 3 (a3) — reprises configurables', () => {
         expect(obj.configuration.reprises).toEqual({ permises: true, mode: 'limite' });
     });
 
-    it('Objectifs persiste configuration.reprises (mode « non » → permises false)', async () => {
-        const obj = await produire('fixe-rep-obj', { ...REPONSES.STD_obj, reprisesPermises: 'non' });
-        expect(obj.configuration.reprises).toEqual({ permises: false, mode: 'non' });
+    it('Artefacts range les reprises dans configuration.portfolio (mode « non »)', async () => {
+        // #443 : ce cas portait sur l'étape « objectifs », retirée. Il est
+        // REPORTÉ sur le portfolio plutôt que supprimé — l'invariant qu'il
+        // gardait (« non » → permises:false) vaut pour toutes les branches, et
+        // le perdre serait une régression de couverture déguisée en ménage.
+        const obj = await produire('fixe-rep-art', { ...REPONSES.STD_art, reprisesPermises: 'non' });
+        // ⚠ La branche portfolio ne range PAS les reprises au même endroit que
+        // la sommative : elles vivent dans `configuration.portfolio`. Premier
+        // jet de ce report écrit sur `configuration.reprises` — rouge, et à
+        // raison : c'était supposer une symétrie que le code n'a jamais eue.
+        expect(obj.configuration.reprises).toBeUndefined();
+        expect(obj.configuration.portfolio.reprisesPermises).toBe('non');
     });
 
     it('sans champ reprises, aucune configuration.reprises (golden inchangé)', async () => {
@@ -293,22 +292,47 @@ describe('#319 Lot 3 (a3) — reprises configurables', () => {
     });
 });
 
-describe('#319 Lot 3 (a4) — garde-fou nombre d\'objectifs', () => {
-    const champsObj = (rep) => win.ETAPES_WIZARD['config-objectifs-definition'].getChampsDynamiques(rep);
+describe('#443 · cliquet d\'absence — la branche « par objectifs » ne revient pas', () => {
+    // Remplace le bloc « #319 Lot 3 (a4) — garde-fou nombre d'objectifs » : ce
+    // garde-fou vivait dans `config-objectifs-definition`, étape retirée le
+    // 10 août avec l'approche qu'elle configurait (décision Grégoire, #443).
+    // Le cliquet prend sa place — même endroit du fichier, invariant inverse.
+    for (const morte of ['config-objectifs-definition', 'mode-calcul-objectifs', 'config-mode-calcul']) {
+        it(`l'étape ${morte} est purgée`, () => {
+            expect(win.ETAPES_WIZARD[morte]).toBeUndefined();
+        });
+    }
 
-    it('affiche l\'info non bloquante au-delà de 15 objectifs (variante attention)', () => {
-        const guard = champsObj({ nbObjectifs: 20 }).find(c => c.id === 'infoTropObjectifs');
-        expect(guard).toBeTruthy();
-        expect(guard.variante).toBe('attention');
+    it('l\'étape « approche » n\'offre plus qu\'une carte, pré-cochée', () => {
+        const champ = win.ETAPES_WIZARD['approche-evaluation'].champs.find(c => c.id === 'approcheEvaluation');
+        expect(champ.options).toHaveLength(1);
+        expect(champ.options[0].value).toBe('par-artefacts');
+        // Pré-cochée : le collecteur lit `input:checked`, donc sans `default`
+        // il faudrait cliquer une option sans alternative pour satisfaire `required`.
+        expect(champ.default).toBe('par-artefacts');
     });
-    it('ne l\'affiche pas à 15 ou moins', () => {
-        expect(champsObj({ nbObjectifs: 6 }).some(c => c.id === 'infoTropObjectifs')).toBe(false);
-        expect(champsObj({ nbObjectifs: 15 }).some(c => c.id === 'infoTropObjectifs')).toBe(false);
+
+    it('le RENDU pré-coche vraiment la carte (pas seulement la définition)', () => {
+        // Une définition qui porte `default` et un rendu qui l'ignore se
+        // cassent séparément — et c'est le rendu que l'utilisateur voit.
+        const champ = win.ETAPES_WIZARD['approche-evaluation'].champs.find(c => c.id === 'approcheEvaluation');
+        const html = win.genererRadioCards(champ);
+        expect(html).toMatch(/value="par-artefacts"[\s\S]{0,80}checked/);
     });
-    it('le champ nbObjectifs déclenche un re-rendu live (garde-fou réactif à la saisie)', () => {
-        const champ = champsObj({}).find(c => c.id === 'nbObjectifs');
-        expect(champ.onChange).toBe('wizardV2RafraichirEtapeCourante');
-        expect(typeof win.wizardV2RafraichirEtapeCourante).toBe('function');
+
+    it('l\'étape est CONSERVÉE, en écran d\'information (arbitrage Grégoire)', () => {
+        // L'autre option était de sauter l'étape (11 → 10). Décision du 10 août :
+        // la garder, pour qu'elle NOMME ce sur quoi PAN-Standards s'appuie au
+        // lieu de le décider en coulisse.
+        const etape = win.ETAPES_WIZARD['approche-evaluation'];
+        expect(etape).toBeDefined();
+        expect(etape.champs.some(c => c.type === 'info')).toBe(true);
+    });
+
+    it('le branchement Standards mène toujours au portfolio', () => {
+        const apres = win.obtenirEtapeSuivante('seuils-personnels',
+            { calcNoteFinale: 'niveaux', approcheEvaluation: 'par-artefacts' });
+        expect(apres).toBe('config-portfolio');
     });
 });
 

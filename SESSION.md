@@ -7,6 +7,61 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 10 AOÛT 2026, SOIR (4) : #443 LIVRÉ — la dernière surface qui promettait un moteur mort.
+     ÉTAT FINAL : **1.69.0** (build 0810-1523), Vitest **2154/2154** (243 fichiers).
+
+     ✅ **DÉCISION GRÉGOIRE (question fermée, 10 août)** : *garder l'étape en écran d'information*, plutôt
+     que la sauter (11 → 10 étapes). Motif retenu : l'étape NOMME ce sur quoi PAN-Standards s'appuie au
+     lieu de le décider en coulisse. La carte unique est **pré-cochée** — le collecteur lit
+     `input:checked`, donc sans `default` il faudrait cliquer une option qui n'a pas d'alternative.
+
+     ▣ **ZÉRO-DETTE ÉLARGI AU RÉEL : trois étapes purgées, pas une.** Le BACKLOG n'en nommait qu'une
+     (`config-objectifs-definition`). En suivant les arêtes, `mode-calcul-objectifs` et `config-mode-calcul`
+     devenaient inatteignables elles aussi. Sont partis avec : la branche d'écriture
+     `configuration.objectifs`, la ligne « Mode de calcul » du récapitulatif, le libellé mort, et
+     l'aiguillage à trois voies de `deduireTypePratique`. ⮕ **Un aiguillage dont deux sorties sont mortes
+     finit par être relu comme un choix** — c'est ce qui a produit le défaut d'origine.
+
+     ▣ **LEGACY : lecture seule, et DITE.** Une config stockée `approcheEvaluation: 'par-objectifs'`
+     s'ouvre sur le portfolio avec un `console.warn [#443]`, **sans mutation de la source** — patron
+     #396/#435, avec un cas de sentinelle qui vérifie que l'objet stocké est intact après ouverture.
+
+     ⚠ **QUATRE SENTINELLES VOISINES MISES EN ACCORD AVEC LA DÉCISION, PAS CONTOURNÉES.**
+        · le **golden master `STD_obj` est RETIRÉ AVEC la fonctionnalité** — et c'est l'arbitrage à ne pas
+          rater : le « mettre à jour » sur ce que le code émet désormais en aurait fait une tautologie.
+          *Un golden réaligné sur le code qu'il surveille ne surveille plus rien.*
+        · le round-trip « objectifs » (#132) est remplacé par l'**invariant inverse** (s'ouvre sur
+          portfolio · source non mutée · conversion dite en console) ;
+        · le garde-fou « nombre d'objectifs » (#319 a4) cède sa place au cliquet d'absence, au même
+          endroit du fichier ;
+        · le cas « reprises » est **REPORTÉ** sur le portfolio, pas supprimé — le perdre aurait été une
+          régression de couverture déguisée en ménage.
+
+     ⚠⚠ **DEUX PIÈGES, ET LES DEUX APPRENNENT QUELQUE CHOSE.**
+        1. **Mon propre commentaire a fait rougir un cliquet.** En documentant la normalisation, j'ai cité
+           le jeton retiré par #396 — dont la sentinelle est un cliquet d'ABSENCE qui grep le fichier
+           ENTIER, commentaires compris. **Cinquième fois en trois jours** que le piège de la sous-chaîne
+           mord. ⮕ J'ai choisi de reformuler plutôt que d'assouplir la sentinelle : pour ce fichier-là,
+           « le jeton n'apparaît nulle part, pas même en note » est un invariant plus fort et légitime.
+           Une note sur place prévient la prochaine instance.
+        2. **Le report du cas « reprises » a rougi, et j'avais tort.** La branche portfolio ne range PAS
+           les reprises au même endroit que la sommative : `configuration.portfolio.reprisesPermises`, et
+           non `configuration.reprises`. ⮕ *J'avais supposé une symétrie que le code n'a jamais eue* —
+           et c'est le test qui l'a dit, pas la relecture.
+
+     ▣ **§4 : 7 break-tests sur ce cycle (34 sur la session), 7 ROUGE** — carte « Par objectifs » de
+     retour · `default` retiré de la définition · **rendu qui ignore `default`** · écran d'information
+     vidé · normalisation qui mute la source · conversion redevenue muette · étape morte ressuscitée.
+     ⮕ Le troisième a exigé d'exposer `genererRadioCards` : **qu'une définition porte `default` ne prouve
+     pas que le RENDU pré-coche**, et c'est le rendu que l'utilisateur voit. Les deux se cassent séparément.
+     ▣ **Vérifié au navigateur** : une carte, pré-cochée, lue par le collecteur, écran d'information
+     présent, trois étapes purgées. Changelog 1.69 (3 items).
+
+     ⮕ **OUVERT** : #353 (localStorage à 200 %) — seul item de priorité 0 restant.
+     ⏳ **DÛ PAR GRÉGOIRE** : exécuter `reparer442()` (dry-run passé) · porte terrain #445 (iPad + Mac).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 10 AOÛT 2026, SOIR (3) : #445 LIVRÉ — le geste que l'interface enseignait existe enfin.
      ÉTAT FINAL : **1.68.0** (build 0810-1501), Vitest **2149/2149** (243 fichiers).
 

@@ -322,7 +322,7 @@ const ETAPES_WIZARD = {
             if (reponses.typePratique === 'sommative') return 'config-sommative';
             if (reponses.typePratique === 'specifications') return 'choix-modele-bundles';
             if (reponses.typePratique === 'denotation') return 'config-denotation';
-            return 'grille-criteres'; // PAN-Standards (par-artefacts ou par-objectifs)
+            return 'grille-criteres'; // PAN-Standards (portfolio — seule approche depuis #443)
         }
     },
 
@@ -568,11 +568,10 @@ const ETAPES_WIZARD = {
                 return 'config-sommative-regles';
             }
             if (type === 'sommative') return 'config-sommative';
-            if (type === 'standards') {
-                if (reponses.approcheEvaluation === 'par-objectifs') return 'config-objectifs-definition';
-                if (reponses.approcheEvaluation === 'par-artefacts') return 'config-portfolio';
-                return 'mode-calcul-objectifs';
-            }
+            // #443 : PAN-Standards n'a plus qu'une approche. Le branchement à
+            // trois voies est retiré avec les étapes qu'il servait — un aiguillage
+            // dont deux sorties sont mortes finit par être relu comme un choix.
+            if (type === 'standards') return 'config-portfolio';
             if (type === 'specifications') return 'config-specifications';
             return 'infos-base';
         },
@@ -697,54 +696,6 @@ const ETAPES_WIZARD = {
         precedent: () => 'seuils-personnels'
     },
 
-    'config-objectifs-definition': {
-        id: 'config-objectifs-definition',
-        titre: 'Définition des objectifs d\'apprentissage',
-        description: 'Ajoute tes objectifs d\'apprentissage avec leurs pondérations. Les poids doivent totaliser 100%.',
-        branche: 'standards-objectifs',
-        ordre: 6,
-        champs: [], // Dynamiques : garde-fou a4 (>15) + reprises a3
-        getChampsDynamiques: (reponses) => {
-            const champs = [
-                {
-                    id: 'infoObjectifs',
-                    type: 'info',
-                    texte: 'Chaque objectif a un nom, un poids (%) et un type (fondamental, intégrateur ou transversal). Les objectifs intégrateurs sont les plus complexes et les plus importants.'
-                },
-                {
-                    id: 'nbObjectifs',
-                    label: 'Nombre d\'objectifs d\'apprentissage',
-                    type: 'number',
-                    min: 1,
-                    max: 30,
-                    default: 6,
-                    required: true,
-                    // a4 : re-rendre l'étape à la saisie pour afficher/masquer le garde-fou.
-                    onChange: 'wizardV2RafraichirEtapeCourante'
-                },
-                {
-                    id: 'infoObjectifsConfig',
-                    type: 'info',
-                    texte: 'La définition détaillée de chaque objectif (nom, poids, type) sera configurable dans Conception → Pratiques de notation après la création de la pratique.'
-                }
-            ];
-            // #319 Lot 3 (a4) : garde-fou doux au-delà de ~15 objectifs (non bloquant).
-            if (parseInt(reponses.nbObjectifs) > 15) {
-                champs.push({
-                    id: 'infoTropObjectifs',
-                    type: 'info',
-                    variante: 'attention',
-                    texte: 'Au-delà d\'environ 15 objectifs, l\'évaluation devient difficile à soutenir sur une session — c\'est toi qui décides.'
-                });
-            }
-            // #319 Lot 3 (a3) : reprises configurables pour les objectifs.
-            champs.push(...champsReprises('limite'));
-            return champs;
-        },
-        suivant: () => 'mode-calcul-objectifs',
-        precedent: () => 'seuils-personnels'
-    },
-
     // ─────────────────────────────────────────────────────────────────────────
     // BRANCHE SOMMATIVE
     // ─────────────────────────────────────────────────────────────────────────
@@ -785,23 +736,36 @@ const ETAPES_WIZARD = {
         description: 'Comment souhaites-tu structurer tes évaluations ?',
         branche: 'standards',
         ordre: 4,
+        // #443 (10 août 2026, décision Grégoire) — la carte « Par objectifs
+        // d'apprentissage » est RETIRÉE. Elle promettait « la note finale selon
+        // le niveau atteint pour chaque objectif » : #396 (5 août) avait déjà
+        // rerouté son calcul vers `conversion_niveaux` au lieu de la retirer, et
+        // #435 (9 août) a abattu le moteur sans repasser par cette surface. Le
+        // wizard proposait donc un paradigme qu'aucun moteur ne tenait plus —
+        // deux surfaces, deux vérités, exactement la confusion signalée au terrain.
+        //
+        // ⮕ L'étape est CONSERVÉE en écran d'information (arbitrage Grégoire) :
+        // elle nomme explicitement ce sur quoi PAN-Standards s'appuie, au lieu
+        // de le décider en coulisse. La carte unique est pré-cochée pour ne pas
+        // faire cliquer sur une question sans alternative.
         champs: [
             {
                 id: 'approcheEvaluation',
                 type: 'radio-cards',
                 required: true,
+                default: 'par-artefacts',
                 options: [
                     {
                         value: 'par-artefacts',
                         label: 'Par artefacts (portfolio)',
                         description: 'Les étudiant·es soumettent des artefacts. La note finale est calculée à partir des N meilleurs artefacts.'
-                    },
-                    {
-                        value: 'par-objectifs',
-                        label: 'Par objectifs d\'apprentissage',
-                        description: 'La note finale est calculée selon le niveau atteint pour chaque objectif d\'apprentissage.'
                     }
                 ]
+            },
+            {
+                id: 'infoApprocheUnique',
+                type: 'info',
+                texte: 'PAN-Standards s\'appuie sur le portfolio : c\'est la progression à travers les artefacts qui construit la note.'
             }
         ],
         suivant: () => 'nb-evaluations',
@@ -872,142 +836,6 @@ const ETAPES_WIZARD = {
     },
 
     // --- Branche objectifs ---
-
-    'mode-calcul-objectifs': {
-        id: 'mode-calcul-objectifs',
-        titre: 'Mode de calcul',
-        description: 'Comment la note finale sera-t-elle calculée à partir des objectifs ?',
-        branche: 'standards-objectifs',
-        ordre: 5,
-        champs: [
-            {
-                id: 'modeCalcul',
-                type: 'radio-cards',
-                required: true,
-                options: [
-                    {
-                        value: 'comptage',
-                        label: 'Comptage d\'objectifs',
-                        description: 'Note = nombre d\'objectifs maîtrisés. Distingue objectifs essentiels vs complémentaires.'
-                    },
-                    {
-                        value: 'moyenne-ponderee',
-                        label: 'Moyenne pondérée',
-                        description: 'Note = moyenne des niveaux × pondération par objectif.'
-                    },
-                    {
-                        value: 'seuils-critiques',
-                        label: 'Seuils critiques',
-                        description: 'Tous les objectifs doivent atteindre un niveau minimum. Bonus pour niveau supérieur.'
-                    },
-                    {
-                        value: 'holistique',
-                        label: 'Holistique',
-                        description: 'Suggestion statistique (mode/médiane/moyenne) + jugement professionnel.'
-                    }
-                ]
-            }
-        ],
-        suivant: (reponses) => 'config-mode-calcul',
-        precedent: () => 'seuils-personnels'
-    },
-
-    'config-mode-calcul': {
-        id: 'config-mode-calcul',
-        titre: 'Configuration du mode de calcul',
-        description: 'Paramètre les détails du calcul',
-        branche: 'standards-objectifs',
-        ordre: 6,
-        champs: [], // Champs dynamiques selon modeCalcul
-        getChampsDynamiques: (reponses) => {
-            if (reponses.modeCalcul === 'comptage') {
-                return [
-                    {
-                        id: 'seuilMaitrise',
-                        label: 'Seuil de maîtrise (%)',
-                        type: 'number',
-                        min: 50,
-                        max: 100,
-                        default: 75,
-                        required: true
-                    },
-                    {
-                        id: 'plafondSiEssentielNonMaitrise',
-                        label: 'Plafond si objectif essentiel non maîtrisé (%)',
-                        type: 'number',
-                        min: 0,
-                        max: 100,
-                        default: 55
-                    }
-                ];
-            }
-            if (reponses.modeCalcul === 'moyenne-ponderee') {
-                return [
-                    {
-                        id: 'infoPonderation',
-                        type: 'info',
-                        texte: 'Les pondérations par objectif seront configurables dans Conception → Pratiques de notation après la création de la pratique.'
-                    }
-                ];
-            }
-            // ✅ CORRECTION (4 jan 2026) : Harmoniser avec les noms des formulaires Trimestre
-            if (reponses.modeCalcul === 'seuils-critiques') {
-                return [
-                    {
-                        id: 'seuilReussite',
-                        label: 'Niveau minimum requis',
-                        type: 'select',
-                        options: [
-                            { value: 'D', label: 'Développement (D)' },
-                            { value: 'M', label: 'Maîtrisé (M)' }
-                        ],
-                        default: 'M',
-                        required: true
-                    },
-                    {
-                        id: 'noteBaseReussite',
-                        label: 'Note de base si tous au minimum (%)',
-                        type: 'number',
-                        min: 50,
-                        max: 100,
-                        default: 80
-                    },
-                    {
-                        id: 'bonusParNiveau',
-                        label: 'Bonus par objectif au niveau supérieur (%)',
-                        type: 'number',
-                        min: 0,
-                        max: 10,
-                        default: 3.33,
-                        step: 0.01
-                    }
-                ];
-            }
-            if (reponses.modeCalcul === 'holistique') {
-                return [
-                    {
-                        id: 'methodeSuggestion',
-                        label: 'Méthode de suggestion',
-                        type: 'select',
-                        options: [
-                            { value: 'mode', label: 'Mode (niveau le plus fréquent)' },
-                            { value: 'mediane', label: 'Médiane' },
-                            { value: 'moyenne', label: 'Moyenne arrondie' }
-                        ],
-                        default: 'mode'
-                    },
-                    {
-                        id: 'infoJugement',
-                        type: 'info',
-                        texte: 'La note suggérée pourra être ajustée par jugement professionnel lors de l\'évaluation finale.'
-                    }
-                ];
-            }
-            return [];
-        },
-        suivant: () => 'echelle-performance',
-        precedent: () => 'mode-calcul-objectifs'
-    },
 
     // ─────────────────────────────────────────────────────────────────────────
     // BRANCHE PAN-SPÉCIFICATIONS
@@ -1147,10 +975,7 @@ const ETAPES_WIZARD = {
         ],
         suivant: () => 'grille-criteres',
         precedent: (reponses) => {
-            if (reponses.typePratique === 'standards') {
-                if (reponses.approcheEvaluation === 'par-artefacts') return 'config-portfolio';
-                return 'config-mode-calcul';
-            }
+            if (reponses.typePratique === 'standards') return 'config-portfolio';
             return 'choix-modele-bundles';
         }
     },
@@ -1419,7 +1244,7 @@ function wizardV2RafraichirEtapeCourante() {
 function calculerNbEtapes() {
     // #134 : dériver le total du graphe réel (obtenirEtapeSuivante) au lieu d'un compteur
     // manuel qui divergeait — il oubliait des étapes conditionnelles (config-sommative-regles,
-    // config-objectifs-definition…) → « étape 8 sur 7 » et dots désynchronisés. Le parcours
+    // config-sommative-regles…) → « étape 8 sur 7 » et dots désynchronisés. Le parcours
     // suit exactement les mêmes transitions et conditions que la navigation, donc le total
     // reste synchrone par construction selon les réponses actuelles.
     let count = 1; // point d'entrée du parcours (#319 Lot 2 : plus 'infos-base')
@@ -1783,11 +1608,19 @@ function genererRadioCards(champ) {
     let cards = champ.options.map(opt => {
         const disabled = opt.disabled ? 'disabled' : '';
         const disabledClass = opt.disabled ? 'wizard-v2-card-disabled' : '';
+        // #443 : `champ.default` pré-coche une carte. Le collecteur lit
+        // `input:checked` dans le DOM, donc une carte cochée d'avance suffit à
+        // satisfaire `required` — pas besoin de semer la réponse à côté.
+        // Utilisé par « Approche d'évaluation », devenue une étape à carte
+        // unique : sans ça, l'utilisateur devrait cliquer une option qui n'a
+        // pas d'alternative.
+        const checked = (champ.default !== undefined && opt.value === champ.default) ? 'checked' : '';
         return `
             <label class="wizard-v2-radio-card ${disabledClass}">
                 <input type="radio"
                        name="${champ.id}"
                        value="${echapperHtml(opt.value)}"
+                       ${checked}
                        ${disabled}>
                 <div class="wizard-v2-card-content">
                     <div class="wizard-v2-card-title">${opt.label}</div>
@@ -2112,9 +1945,11 @@ function genererRecapitulatif() {
     if (r.typePratique === 'standards') {
         html += '<div class="wizard-v2-recap-section">';
         html += '<h4>Configuration PAN-Standards</h4>';
+        // #443 : le libellé « Par objectifs » part avec la carte. Le repli
+        // `|| r.approcheEvaluation` reste : une pratique stockée qui porte encore
+        // l'ancienne valeur s'affiche telle quelle plutôt que « undefined ».
         const approcheLabels = {
-            'par-artefacts': 'Par artefacts (portfolio)',
-            'par-objectifs': 'Par objectifs d\'apprentissage'
+            'par-artefacts': 'Par artefacts (portfolio)'
         };
         html += `<p><strong>Approche\u00a0:</strong> ${approcheLabels[r.approcheEvaluation] || r.approcheEvaluation}</p>`;
 
@@ -2133,14 +1968,6 @@ function genererRecapitulatif() {
             };
             const modeSelection = r.modeSelectionPortfolio || 'n_meilleurs';
             html += `<p><strong>Construction de la note\u00a0:</strong> ${modeSelectionLabels[modeSelection] || modeSelection}</p>`;
-        } else if (r.approcheEvaluation === 'par-objectifs') {
-            const modeLabels = {
-                'comptage': 'Comptage d\'objectifs',
-                'moyenne-ponderee': 'Moyenne pondérée',
-                'seuils-critiques': 'Seuils critiques',
-                'holistique': 'Holistique'
-            };
-            html += `<p><strong>Mode de calcul\u00a0:</strong> ${modeLabels[r.modeCalcul] || r.modeCalcul}</p>`;
         }
         html += '</div>';
     }
@@ -2518,14 +2345,10 @@ function deduireTypePratique(reponses) {
     }
 
     if (q1 === 'niveaux') {
-        let variante = '';
-        if (reponses.approcheEvaluation === 'par-artefacts') {
-            variante = 'n-meilleurs';
-        } else if (reponses.approcheEvaluation === 'par-objectifs') {
-            variante = reponses.modeCalcul || 'objectifs-ponderes';
-        }
-
-        return { type: 'standards', variante, regles: [], confiance: 1.0 };
+        // #443 : PAN-Standards n'a plus qu'une approche — la variante est
+        // constante. Un `if` à branche unique donnerait à croire qu'il en
+        // existe une autre.
+        return { type: 'standards', variante: 'n-meilleurs', regles: [], confiance: 1.0 };
     }
 
     if (q1 === 'acceptable') {
@@ -2659,7 +2482,8 @@ async function creerPratiqueV2() {
         // #396 (5 août 2026) : la méthode de calcul dédiée « par objectif » est
         // RETIRÉE (jamais fonctionnelle — décision D2). L'approche « par objectifs »
         // vit dans Standards (fold Session C) et se calcule comme elle : conversion
-        // de niveaux. Le détail par-objectifs reste porté par configuration.objectifs.
+        // de niveaux. (#443 : l'approche par objectifs est retirée du wizard ;
+        // ce repli couvre toute la famille Standards, qui n'a plus qu'une voie.)
         pratique.calcul_note = { methode: 'conversion_niveaux' };
     }
 
@@ -2797,37 +2621,6 @@ async function creerPratiqueV2() {
                         nombre: parseInt(modalites.categories?.obligatoires?.nombre) || 2,
                         ponderation: parseInt(modalites.categories?.obligatoires?.ponderation) || 35
                     }
-                };
-            }
-        } else if (r.approcheEvaluation === 'par-objectifs') {
-            pratique.configuration.objectifs = {
-                modeCalcul: r.modeCalcul,
-                nbObjectifs: parseInt(r.nbObjectifs) || 6
-            };
-
-            if (r.modeCalcul === 'comptage') {
-                pratique.configuration.objectifs.comptage = {
-                    seuilMaitrise: parseInt(r.seuilMaitrise) || 75,
-                    plafondSiEssentielNonMaitrise: parseInt(r.plafondSiEssentielNonMaitrise) || 55
-                };
-            } else if (r.modeCalcul === 'seuils-critiques') {
-                // ✅ CORRECTION (4 jan 2026) : Harmoniser avec les noms des formulaires Trimestre
-                pratique.configuration.objectifs.seuilsCritiques = {
-                    seuilReussite: r.seuilReussite || 'M',
-                    noteBaseReussite: parseInt(r.noteBaseReussite) || 80,
-                    bonusParNiveau: parseFloat(r.bonusParNiveau) || 3.33
-                };
-            } else if (r.modeCalcul === 'holistique') {
-                pratique.configuration.objectifs.holistique = {
-                    methodeSuggestion: r.methodeSuggestion || 'mode'
-                };
-            }
-
-            // #319 Lot 3 (a3) : reprises configurables aussi pour les objectifs.
-            if (r.reprisesPermises) {
-                pratique.configuration.reprises = {
-                    permises: r.reprisesPermises !== 'non',
-                    mode: r.reprisesPermises
                 };
             }
         }
@@ -3118,23 +2911,24 @@ function chargerPratiqueExistante(pratiqueId) {
                     : (methodeVersMode[config.portfolio.methodeSelection] || 'n_meilleurs');
             }
 
-            if (config.objectifs) {
-                // #132 : restaurer le mode ET ses paramètres (TODO jadis inachevé).
-                // Symétrique de l'écriture (creerPratiqueV2, branche par-objectifs).
-                wizardState.reponses.modeCalcul = config.objectifs.modeCalcul;
-                wizardState.reponses.nbObjectifs = config.objectifs.nbObjectifs;
-                if (config.objectifs.comptage) {
-                    wizardState.reponses.seuilMaitrise = config.objectifs.comptage.seuilMaitrise;
-                    wizardState.reponses.plafondSiEssentielNonMaitrise = config.objectifs.comptage.plafondSiEssentielNonMaitrise;
-                } else if (config.objectifs.seuilsCritiques) {
-                    wizardState.reponses.seuilReussite = config.objectifs.seuilsCritiques.seuilReussite;
-                    wizardState.reponses.noteBaseReussite = config.objectifs.seuilsCritiques.noteBaseReussite;
-                    wizardState.reponses.bonusParNiveau = config.objectifs.seuilsCritiques.bonusParNiveau;
-                } else if (config.objectifs.holistique) {
-                    wizardState.reponses.methodeSuggestion = config.objectifs.holistique.methodeSuggestion;
-                }
-                // #319 Lot 3 (a3) : restaurer les reprises des objectifs (round-trip).
-                if (config.reprises) wizardState.reponses.reprisesPermises = config.reprises.mode;
+            // #443 (10 août 2026) — NORMALISATION d'une pratique legacy « par
+            // objectifs », dans la continuité de #396 et #435. L'approche est
+            // retirée du wizard : une config stockée qui la porte encore
+            // s'ouvre sur sa structure RÉELLE (le portfolio), avec un
+            // avertissement console. LECTURE SEULE : rien n'est réécrit tant
+            // que l'utilisateur ne sauvegarde pas lui-même — même patron que
+            // les normalisations de #396 (registre) et #435
+            // (pratiques-gestion.js:1135).
+            //
+            // ⚠ NE PAS écrire ici le nom du jeton retiré par #396 : sa
+            // sentinelle est un cliquet d'ABSENCE qui grep ce fichier en
+            // entier, commentaires compris. Une note de bas de page suffit à
+            // le faire rougir — c'est arrivé en écrivant celle-ci.
+            if (config.approcheEvaluation === 'par-objectifs' || config.objectifs) {
+                console.warn('[WizardV2] Approche « par objectifs » retirée (#443) : la pratique « '
+                    + (pratique.nom || pratique.id) + ' » s\'ouvre sur le portfolio. '
+                    + 'Sa configuration `objectifs` est ignorée, et sera remplacée si tu sauvegardes.');
+                wizardState.reponses.approcheEvaluation = 'par-artefacts';
             }
         } else if (typeCanon === 'denotation') {
             // #343 (b) round-trip d'édition DEN (gap pré-existant comblé) : restaurer
@@ -3181,6 +2975,10 @@ window.obtenirEtapeSuivante = obtenirEtapeSuivante;
 window.wizardState = wizardState;
 // #319 Lot 3 : testabilité des configs de champs (défaut reprises a3, garde-fou a4).
 window.ETAPES_WIZARD = ETAPES_WIZARD;
+// #443 — exposé pour la sentinelle : que la définition d'étape porte un
+// `default` ne prouve pas que le RENDU pré-coche. Les deux se cassent
+// séparément, et seul le rendu compte pour l'utilisateur.
+window.genererRadioCards = genererRadioCards;
 window.champsReprises = champsReprises;
 window.calculerExempleConsequence = calculerExempleConsequence; // #319 Lot 4 a8 (testabilité)
 window.genererRecapitulatif = genererRecapitulatif;             // #319 Lot 4 a8/a9 (testabilité du rendu)

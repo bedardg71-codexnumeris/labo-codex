@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.69',
+            couleur: 'orange',
+            titre: 'L’assistant ne propose plus « Par objectifs »',
+            items: [
+                'L’étape « Approche d’évaluation » de l’assistant de pratique n’offrait encore que deux choix, dont « Par objectifs d’apprentissage » — un paradigme retiré de l’application en 1.63, moteur compris. L’assistant promettait donc quelque chose que plus rien ne calculait. La carte disparaît.',
+                'L’étape reste, avec sa seule approche réelle déjà cochée : elle dit ce sur quoi PAN-Standards s’appuie au lieu de le décider en coulisse.',
+                'Une pratique enregistrée autrefois « par objectifs » s’ouvre maintenant sur le portfolio, sans rien perdre : sa configuration n’est ni effacée ni réécrite tant que tu ne sauvegardes pas toi-même.'
+            ]
+        },
+        {
             version: '1.68',
             couleur: 'vert',
             titre: 'Relier une activité à un objectif, au tracé',
