@@ -27,7 +27,8 @@
             items: [
                 'Le groupe-cours que tu avais laiss\u00e9 actif dans un trimestre est bien celui qui revient quand tu y retournes. Avant, l\u2019application reprenait le premier de la liste \u2014 ton groupe actif pouvait changer sans que rien ne le signale, et les \u00e9crans de suivi suivaient.',
                 'La barre de progression du Cadre et le s\u00e9lecteur des groupes-cours se mettent \u00e0 jour imm\u00e9diatement : ils affichaient encore les chiffres et les groupes du trimestre que tu venais de quitter.',
-                'Correction : une fiche d\u2019\u00e9tudiant\u00b7e sans nom (import incomplet) emp\u00eachait l\u2019affichage de la liste enti\u00e8re et faisait \u00e9chouer le tirage au sort, sans message.'
+                'Correction : une fiche d\u2019\u00e9tudiant\u00b7e sans nom (import incomplet) emp\u00eachait l\u2019affichage de la liste enti\u00e8re et faisait \u00e9chouer le tirage au sort, sans message.',
+                'Correction : ta biblioth\u00e8que de cours accumulait des exemplaires identiques du m\u00eame cours \u00e0 chaque import \u2014 la m\u00eame fiche pouvait appara\u00eetre deux ou trois fois dans le s\u00e9lecteur. Les imports n\u2019en ajoutent plus.'
             ]
         },
         {

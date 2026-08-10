@@ -7,6 +7,60 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 10 AOÛT 2026, SOIR : #442 LIVRÉ — le magasin de cours cesse d'accumuler des sosies.
+     ÉTAT FINAL : **1.67.2** (build 0810-1406), Vitest **2128/2128** (241 fichiers).
+
+     ▣ **RITUEL DE DÉBUT — ZÉRO ÉCART.** `RELAIS.md` lu en premier (branche `main`, rien en avance), balayage
+     des branches distantes : `claude/poursuite-travail-matin-es3hu9` est à **0 commit d'avance** (résidu du jour,
+     déjà fusionné), les autres sont derrière. Les six lignes de la prémisse du §3 conformes : 1.67.1 / build
+     0810-1304 / Vitest 2111-2111 (239 fichiers) / dernier ID #447 / arbre propre / `origin/main ↔ HEAD : 0 / 0`.
+     ⚠ Le clone est shallow, mais HEAD est **bit-à-bit** le commit d'`origin/main` (`24c448d4`) — le piège de la
+     divergence fictive ne pouvait rien fausser ici. Playwright WebKit toujours hors conteneur : **non exécuté, et c'est dit**.
+
+     ⚠⚠ **#442 — LE MÉCANISME, ET POURQUOI IL PRODUISAIT EXACTEMENT TROIS EXEMPLAIRES.**
+     `_migrerListeCoursVersCoursV2` (`js/trimestre-v2-cours.js`) dédoublonnait la fusion `listeCours`→`cours`
+     par **tuple naturel** (code|SESSION+ANNÉE) et calculait bien un `Set` d'ids… **qu'elle ne consultait QUE
+     dans la branche « pas de tuple »**. Le garde existait donc dans le code sans jamais garder le chemin
+     principal. ⮕ Et le cas n'est pas exotique, il est **structurel** : l'entrée V2 porte `session`+`annee`
+     (tuple complet `601-102-MQ|H2026`), la copie legacy restaurée par un import ancien ne les porte pas
+     (tuple **dégradé** `601-102-MQ`). Deux tuples, un seul id, et `listeCours` étant repeuplée par chaque
+     import puis vidée après fusion : **un exemplaire de plus à chaque passage**.
+
+     ▣ **CE QUI REND LE NETTOYAGE DÉMONTRABLEMENT SÛR, et pourquoi « garder le plus riche » aurait été pire.**
+     Tous les lecteurs du magasin résolvent par `find`/`findIndex`/`some` sur `.id`. Le **premier** exemplaire est
+     donc déjà le seul que l'application atteigne ; les suivants sont **inatteignables par construction** et ne
+     pèsent que sur le budget de stockage (#353). Retirer les suivants est un no-op fonctionnel prouvable —
+     garder « le plus riche » aurait CHANGÉ le comportement sous couvert de l'améliorer. Le script garde le premier.
+     ⮕ Corollaire pour la fusion : écarter un legacy dont l'id existe déjà ne perd rien, puisque cette entrée
+     n'aurait jamais été lue. Le correctif ne troque pas un défaut contre une perte.
+
+     ⚠ **CE QUE LE SCRIPT NE FAIT PAS, ET C'EST VOULU.** Les **homonymes à ids DIFFÉRENTS** (le « IDME et niv 0 »
+     en double d'a2025, sonde #159) ne sont **jamais** retirés : deux modèles au même nom peuvent être deux objets
+     légitimes, et l'un peut être référencé par des cartouches, des grilles ou des évaluations. Ils sont RAPPORTÉS,
+     avec le nombre de clés où chaque id est cité (comptage textuel, honnête sur ce qu'il mesure) — la décision
+     reste humaine. ⮕ Et la signature d'homonymie est **période-consciente pour `cours`** : deux fiches au même
+     intitulé en H26 et A26 sont le cas normal de chaque rentrée, les signaler aurait été une fausse alerte annuelle.
+
+     ▣ **ZÉRO-DETTE — `scripts/dedoublonner-biblios.js` RETIRÉ.** Il visait encore les globales **NUES**
+     `grillesTemplates`/`echellesTemplates`, vidées au boot depuis #358 : il tournait sur du vide. Il n'avait ni
+     dry-run ni annulation. Sa portée réelle (cartouches_*, bibliothèques pratiques/productions) est **reprise** par
+     le nouveau script et **verrouillée par une assertion** — un retrait qui perdrait du terrain serait pire que la dette.
+
+     ▣ **§4 BREAK-TESTS : 12 rejoués, 12 ROUGE sur la bonne assertion**, arbre restauré propre après chacun.
+     Fusion : garde d'identité neutralisé (4 rouges) · `ids.add` retiré du lot (1) · dédoublonnage par tuple retiré (1) ·
+     **export retiré** (8 rouges — la faute du 10 août rejouée exprès). Script : dry-run qui écrit (1) · on garde le
+     dernier au lieu du premier (1) · regroupement par nom (1) · pré-image non enregistrée (1) · portée rétrécie (2).
+     ⮕ **Une observation du BT « export retiré » vaut d'être notée** : le cas F (bout-en-bout) est resté VERT — il
+     pilote `chargerDropdownCoursV2`, qui appelle la fonction *interne*, pas l'export. C'est exactement la division
+     du travail voulue : **F prouve la chaîne, G prouve l'export**. Aucun des deux ne remplace l'autre.
+
+     ⏳ **CE QUI RESTE À GRÉGOIRE POUR CLORE #442** : coller `scripts/reparation-442-doublons.js` en console,
+     `await reparer442()`, **coller le rapport avant d'exécuter**. ⚠ **Dans Chrome ET dans Safari** — chaque
+     navigateur est une île de stockage (leçon #154/#346), et les doublons ont été constatés côté Chrome.
+     ⮕ **OUVERTS** : #447 (fraîcheur aperçu) · #445 (affordance liens + légende) · 📐#443 (wizard, décision) · #353 (200 %).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 10 AOÛT 2026, FIN : #446 LIVRÉ (le contexte cesse de mentir) + RITUEL DE CLÔTURE PASSÉ.
      ÉTAT FINAL : **1.67.1** (build 0810-1304), `main`, arbre propre, `origin/main ↔ HEAD : 0 / 0`. Vitest **2111/2111** (239 fichiers). Dernier ID **#447**. 19 commits sur la journée, 1.65.2 → 1.67.1.
 
