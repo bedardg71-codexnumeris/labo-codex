@@ -132,6 +132,46 @@
         }
 
         /**
+         * #447 (10 août 2026) — Signale qu'une clé va être écrite.
+         *
+         * POURQUOI CE CROCHET EXISTE. Le cache de lecture de pipeline (#397,
+         * `modes.js`) promet dans son propre commentaire « jamais de lecture
+         * périmée », et il tenait cette promesse par un seul moyen : toute
+         * écriture passant par `sauvegarderDonneesSelonMode` le vidait. Mais
+         * une partie du code écrit ses clés en `db.setSync`/`db.set` DIRECT
+         * (le propriétaire SSOT écrit sa propre clé — c'est légitime), et ces
+         * écritures-là ne vidaient rien. Mesuré au navigateur le 10 août :
+         * pendant un seul `chargerTableauBordApercu()`, `indicesCP` est écrit
+         * à une profondeur de pipeline de 2 — le pipeline extérieur SURVIT à
+         * l'écriture et garde sa mémoïsation d'avant.
+         *
+         * ⮕ La promesse est donc rétablie à l'endroit où TOUTES les écritures
+         * passent, au lieu de dépendre de la discipline de chaque appelant.
+         * `db.js` se contente d'émettre ; c'est `modes.js` (couche au-dessus)
+         * qui s'abonne — le sens des dépendances est préservé.
+         *
+         * Aucune écriture n'est modifiée, aucun mode n'est changé : ce crochet
+         * ne fait que notifier.
+         */
+        _signalerEcriture(key) {
+            var abonne = this._surEcriture;
+            if (typeof abonne !== 'function') return;
+            try { abonne(key); } catch (e) {
+                // Un abonné ne doit jamais casser une écriture.
+                console.warn('[DB] abonné _surEcriture a levé une exception :', e && e.message);
+            }
+        }
+
+        /**
+         * Abonne un rappel aux écritures (voir `_signalerEcriture`).
+         * Un seul abonné : le besoin est unique et connu (invalidation du
+         * cache de lecture #397). Pas de liste « au cas où ».
+         */
+        surEcriture(rappel) {
+            this._surEcriture = typeof rappel === 'function' ? rappel : null;
+        }
+
+        /**
          * Initialisation de la base de données
          * Détecte IndexedDB et initialise si disponible
          */
@@ -351,6 +391,8 @@
             // #340 — Garde d'écriture : bloque une écriture incohérente avant
             // qu'elle n'atteigne IDB et localStorage (les deux couches).
             if (!this._ecritureAutorisee(key, value)) return;
+
+            this._signalerEcriture(key);
 
             if (this.useIndexedDB) {
                 // Écrire dans IndexedDB (stockage persistant). #353 Option C (W1) :
@@ -1325,6 +1367,8 @@
             // #340 — Garde d'écriture : bloque une écriture incohérente avant
             // toute persistance (localStorage, memoryCache ou IDB).
             if (!this._ecritureAutorisee(key, value)) return;
+
+            this._signalerEcriture(key);
 
             // Seuil IDB-first (constante unique module, #334 D) : les grosses
             // valeurs vont directement dans memoryCache + IDB (évite QuotaExceeded).

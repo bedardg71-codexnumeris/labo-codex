@@ -559,8 +559,8 @@ function obtenirDonneesSimulationOuNull(cleBase) {
 // L'orchestrateur encadre sa boucle de demarrerCacheLecture()/terminerCacheLecture()
 // (try/finally) : le RÉSULTAT d'obtenirDonneesSelonMode est mémoïsé par clé pour
 // la durée du lot. Réentrant (compteur de profondeur — la chaîne A → C/P imbrique
-// deux pipelines). Toute écriture via sauvegarderDonneesSelonMode VIDE le cache
-// (jamais de lecture périmée). Même couture que l'injection #326 R2 ci-dessus.
+// deux pipelines). TOUTE écriture vide le cache (jamais de lecture périmée) —
+// voir `invaliderCacheLecture` ci-dessous. Même couture que l'injection #326 R2.
 // ============================================================================
 let _cacheLecturePipeline = null;
 let _cacheLectureProfondeur = 0;
@@ -575,6 +575,46 @@ function terminerCacheLecture() {
         _cacheLectureProfondeur = 0;
         _cacheLecturePipeline = null;
     }
+}
+
+/**
+ * #447 (10 août 2026) — Vide le cache de lecture parce qu'une écriture vient
+ * d'avoir lieu. Branché sur `db.surEcriture` : TOUTE écriture le déclenche,
+ * quel que soit le chemin.
+ *
+ * ⮕ CE QUI NE MARCHAIT PAS. L'invalidation ne vivait qu'au bas de
+ * `sauvegarderDonneesSelonMode`. Or plusieurs propriétaires SSOT écrivent
+ * leur propre clé en `db.setSync`/`db.set` DIRECT — c'est légitime, mais ces
+ * écritures ne vidaient rien. Mesuré au navigateur le 10 août : pendant un
+ * seul `chargerTableauBordApercu()`, `indicesCP` est écrit à une profondeur
+ * de pipeline de **2** ; le pipeline extérieur survit à l'écriture et
+ * conserve sa mémoïsation d'AVANT. Aucune lecture périmée n'était servie ce
+ * jour-là — mais rien n'empêchait le prochain lecteur ajouté dans cette
+ * fenêtre d'en recevoir une, en silence.
+ *
+ * ⮕ C'est la famille du 10 août : une promesse écrite en commentaire que le
+ * code ne tenait qu'à moitié. Elle est désormais tenue à l'endroit où toutes
+ * les écritures passent, plutôt que par la discipline de chaque appelant.
+ *
+ * ⚠ L'INVALIDATION EST CIBLÉE SUR LA CLÉ ÉCRITE, et ce n'est pas un raffinement
+ * gratuit : vider TOUT le cache à chaque écriture a été mesuré au navigateur le
+ * 10 août à **+329 ms** sur un rendu d'aperçu à 75 étudiants — soit l'ordre de
+ * grandeur du gain que #397 était venu chercher. Le rabot aurait rendu le cache
+ * honnête en le rendant inutile. Seule la clé écrite est périmée ; c'est donc la
+ * seule qu'on retire, et l'écart retombe dans le bruit de mesure.
+ *
+ * `db` passe la clé RÉELLE (`demo_indicesCP`), les lecteurs mémoïsent souvent la
+ * clé de base (`indicesCP`) : les deux entrées sont retirées. Sans argument, on
+ * retombe sur l'invalidation totale — l'ignorance se paie en prudence.
+ *
+ * @param {string} [cleEcrite] - clé réelle qui vient d'être écrite
+ */
+function invaliderCacheLecture(cleEcrite) {
+    if (!_cacheLecturePipeline) return;
+    if (!cleEcrite) { _cacheLecturePipeline = {}; return; }
+    delete _cacheLecturePipeline[cleEcrite];
+    const m = String(cleEcrite).match(/^(?:[aeh]\d{4}|demo)_(.+)$/);
+    if (m) delete _cacheLecturePipeline[m[1]];
 }
 
 function obtenirDonneesSelonMode(cle) {
@@ -722,9 +762,13 @@ function sauvegarderDonneesSelonMode(cle, donnees) {
         // Utiliser window.cle() pour le namespacing par trimestre (paramètre cle shadowed)
         const cleEffective = window.cle(cle);
         db.setSync(cleEffective, donnees);
-        // #397 : une écriture pendant un pipeline VIDE le cache de lecture —
-        // la prochaine lecture repart du stockage (jamais de valeur périmée).
-        if (_cacheLecturePipeline) _cacheLecturePipeline = {};
+        // #397/#447 : l'invalidation est CIBLÉE sur la clé écrite (voir
+        // invaliderCacheLecture). Elle est faite ici explicitement ET signalée
+        // par `db` : ce n'est pas une ceinture-bretelles décorative — cette
+        // fonction doit tenir sa propre promesse sans dépendre d'un abonnement
+        // qu'elle ne possède pas. La seconde invalidation est un `delete` sur
+        // une entrée déjà retirée : gratuite.
+        invaliderCacheLecture(cleEffective);
         return true;
     } catch (error) {
         // Détecter erreur de quota dépassé
@@ -1028,6 +1072,19 @@ window.obtenirDonneesSelonMode = obtenirDonneesSelonMode;
 // tableau-bord-apercu.js encadrent leurs boucles en try/finally)
 window.demarrerCacheLecture = demarrerCacheLecture;
 window.terminerCacheLecture = terminerCacheLecture;
+window.invaliderCacheLecture = invaliderCacheLecture;
+
+// #447 — abonnement au crochet d'écriture de `db` : c'est CE branchement qui
+// fait tenir la promesse « jamais de lecture périmée » pour les écritures
+// directes des propriétaires SSOT, pas seulement pour celles qui passent par
+// sauvegarderDonneesSelonMode. `db.js` est le premier script chargé par
+// index.html : `db` existe forcément ici.
+if (typeof db !== 'undefined' && typeof db.surEcriture === 'function') {
+    db.surEcriture(invaliderCacheLecture);
+} else {
+    // Pas de garde muette : si le crochet disparaît, on veut le savoir.
+    console.error('[#447] db.surEcriture indisponible — le cache de lecture #397 peut servir des valeurs périmées.');
+}
 window.definirContexteSimulation = definirContexteSimulation;
 window.effacerContexteSimulation = effacerContexteSimulation;
 window.obtenirDonneesSimulationOuNull = obtenirDonneesSimulationOuNull;

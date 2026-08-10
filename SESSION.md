@@ -7,6 +7,67 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 10 AOÛT 2026, SOIR (2) : #447 — LA PRÉMISSE ÉTAIT FAUSSE, LE TROU ÉTAIT À CÔTÉ.
+     ÉTAT FINAL : **1.67.3** (build 0810-1434), Vitest **2136/2136** (242 fichiers).
+
+     ⚠⚠ **LE FAIT LE PLUS IMPORTANT DE CE CYCLE : L'ITEM DÉCRIVAIT UN DÉFAUT QUI N'EXISTE PAS.**
+     Le BACKLOG #447 affirmait « l'aperçu LIT les indices stockés sans recalculer ; visiter l'aperçu AVANT
+     la Liste = distribution périmée », et prescrivait même un geste de contournement à Grégoire.
+     **`tableau-bord-apercu.js:1069` appelle `calculerEtStockerIndicesCP()` à CHAQUE rendu.**
+     ⮕ Vérifié par une expérience décisive au navigateur (Chromium, pack démo, `file://`) : on FAUSSE
+     `indicesCP` dans le stockage (tous les P à 0, `dateCalcul` à 1999), on rend l'aperçu **sans** passer
+     par la Liste — les valeurs justes reviennent et `dateCalcul` est réécrite à l'instant. Le diagnostic
+     d'origine avait été posé **par lecture de code, jamais exécuté**.
+     ⮕ Donc le « Incomplet : 23 » du terrain n'était pas un défaut de fraîcheur : c'était l'aperçu rendant
+     FIDÈLEMENT des données cassées — productions désappariées (#154, réparé le jour même) et contexte de
+     trimestre croisé (#446, corrigé en 1.67.0/1.67.1). Les deux causes ont disparu.
+     ⮕ **Le geste « ouvrir la Liste PUIS l'aperçu » est CADUC.** Il ne servait à rien. Ne plus le redire.
+
+     ✅ **MAIS UN VRAI TROU EXISTAIT À CÔTÉ — trouvé en cherchant, et refermé.** Le cache de lecture de
+     pipeline (#397) promet dans son propre commentaire « jamais de lecture périmée ». Il ne l'assurait que
+     pour les écritures passant par `sauvegarderDonneesSelonMode` — or les propriétaires SSOT écrivent leur
+     clé en `db.setSync`/`db.set` DIRECT, ce qui est légitime, et ces écritures-là ne vidaient rien.
+     ⮕ **Fenêtre RÉELLE, mesurée** : pendant un seul `chargerTableauBordApercu()`, `indicesCP` est écrit à
+     une profondeur de pipeline de **2** — le pipeline extérieur survit à l'écriture et garde sa mémoïsation
+     d'avant. ⮕ **Mais AUCUNE lecture périmée n'était servie** : détecteur posé sur `obtenirDonneesSelonMode`
+     comparant chaque retour à la vérité du stockage, **0 divergence sur quatre parcours réels**. Le défaut
+     était donc **LATENT** — et c'est exactement ce qu'il fallait dire, ni plus ni moins : le prochain lecteur
+     ajouté dans cette fenêtre en aurait reçu une, en silence. Même famille que le 10 août : **une promesse
+     écrite en commentaire que le code ne tenait qu'à moitié.**
+
+     ▣ **L'ARBITRAGE « FRAÎCHEUR vs PERF #397 » QUE L'ITEM DEMANDAIT — TRANCHÉ SUR MESURES, PAS SUR AVIS.**
+     Premier jet : toute écriture vide le cache. Mesuré en A/B **entrelacé** sur le même build (15 rendus
+     alternés, pour annuler la dérive de chauffe) : **+329 ms** sur un rendu d'aperçu à 75 étudiants — soit
+     l'ordre de grandeur du gain que #397 était venu chercher. **Le rabot rendait le cache honnête en le
+     rendant inutile.** Seconde version, invalidation **CIBLÉE sur la clé écrite** : **+22 ms sur 618**,
+     plages entièrement superposées ([548–768] vs [554–790]), et −2 ms à 20 étudiants.
+     ⮕ La leçon de méthode : le premier correctif correct n'était pas le bon ; c'est la MESURE qui l'a dit,
+     pas la relecture. Un correctif de justesse qui annule une optimisation mesurée n'est pas un progrès.
+
+     ▣ **FORME DU CORRECTIF.** `db.js` **émet** (`surEcriture` / `_signalerEcriture`, un seul abonné, pas de
+     liste « au cas où »), `modes.js` **s'abonne** — le sens des dépendances est préservé (la couche basse ne
+     connaît pas la haute). `sauvegarderDonneesSelonMode` garde en plus son invalidation explicite : ce n'est
+     pas de la ceinture-bretelles, c'est une fonction qui tient sa propre promesse sans dépendre d'un
+     abonnement qu'elle ne possède pas. Un abonné qui lève ne casse jamais une écriture (testé).
+
+     ▣ **QUATRE STUBS `db` DE TESTS VOISINS MIS EN ACCORD AVEC LE CONTRAT RÉEL.** Ils décrivaient un `db` qui
+     ne signale pas ses écritures — donc attestaient d'un contrat que l'application n'a plus. Corrigés plutôt
+     que contournés (et le `console.error` qui les dénonçait a été GARDÉ : un crochet manquant doit se voir).
+     ▣ **UN CAS DE LA SENTINELLE CHARGE LE VRAI `js/db.js`** : sans lui, retirer le crochet côté db.js ne
+     ferait rougir personne — les sept autres cas tournent sur un `db` de test qui, lui, signale. Prouvé :
+     BT17 ne fait rougir QUE ce cas-là.
+
+     ▣ **§4 BREAK-TESTS : 5 sur ce cycle (17 sur la session), 5 ROUGE** — abonnement retiré (2 rouges) ·
+     `invaliderCacheLecture` en no-op (4) · invalidation redevenue rabot (1, le cas « ciblée ») · clé de base
+     plus retirée (3) · `db.setSync` cesse de signaler (1, le cas « vrai db.js »). Arbre restauré propre.
+     ▣ **Pas d'entrée au changelog** : rien de visible pour l'utilisateur n'a changé (le défaut était latent).
+     Les règles du changelog écartent explicitement les refactos internes.
+
+     ⮕ **OUVERTS** : #445 (affordance liens + légende) · 📐#443 (wizard, décision) · #353 (200 %).
+     ⏳ **Toujours dû par Grégoire** : `reparer442()` en console, Chrome ET Safari (voir bloc précédent).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 10 AOÛT 2026, SOIR : #442 LIVRÉ — le magasin de cours cesse d'accumuler des sosies.
      ÉTAT FINAL : **1.67.2** (build 0810-1406), Vitest **2128/2128** (241 fichiers).
 
