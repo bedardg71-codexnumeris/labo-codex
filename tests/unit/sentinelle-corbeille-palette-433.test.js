@@ -22,7 +22,9 @@ import { chargerScript } from './_helpers/charger-script.js';
 //   B. déposer supprime réellement le nœud ;
 //   C. les trois `onUp` du drag sortent ANTICIPÉ après un dépôt — sans
 //      quoi le rattachement s'exécuterait sur un nœud disparu ;
-//   D. la corbeille est une cible tactile (44 px) et vit dans la palette.
+//   D. la corbeille est une cible tactile (44 px) — et depuis #444 (10 août
+//      2026) elle vit au BAS DU CANEVAS, plus dans la palette : celle-ci
+//      dépassait la hauteur de l'écran iPad et la coupait.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
@@ -166,11 +168,43 @@ describe('#433 · C — les trois onUp sortent ANTICIPÉ après un dépôt', () 
 });
 
 describe('#433 · D — la corbeille est une vraie cible tactile', () => {
-    it('elle vit dans la palette des nœuds, avec un libellé', () => {
+    // ⚠ RETARGETÉ le 10 août 2026 (#444). Ce bloc affirmait « elle vit dans la
+    // PALETTE » — c'était vrai le 8 août, et c'est devenu faux : sur iPad la
+    // palette dépasse la hauteur de l'écran et la coupait. La corbeille est
+    // maintenant flottante au bas du CANEVAS. Les trois invariants qui
+    // comptaient (identité, cible 44 px, touch-action) sont conservés à
+    // l'identique ; seul l'ANCRAGE change, et il est vérifié ci-dessous.
+    it('elle existe, avec un libellé et un nom accessible', () => {
         expect(sourceIndex).toContain('id="planif-corbeille"');
         expect(sourceIndex).toContain('planif-corbeille-libelle');
         // Un titre ET un aria-label : au doigt, le survol n'existe pas.
         expect(sourceIndex).toMatch(/id="planif-corbeille"[^>]*aria-label="/);
+    });
+
+    it('#444 — elle vit au CANEVAS, plus dans la palette', () => {
+        // L'ancrage se lit dans la structure : la corbeille est un frère de la
+        // palette sous #planif-zone-wrapper, pas un de ses descendants.
+        const iWrapper = sourceIndex.indexOf('<div id="planif-zone-wrapper">');
+        const iPalette = sourceIndex.indexOf('<div id="planif-palette"', iWrapper);
+        const iFinPalette = sourceIndex.indexOf('<!-- #444', iPalette);
+        const iCorbeille = sourceIndex.indexOf('id="planif-corbeille"', iWrapper);
+        expect(iWrapper).toBeGreaterThan(-1);
+        expect(iCorbeille).toBeGreaterThan(iFinPalette);
+        // Et le CSS l'ancre au canevas plutôt qu'au flux de la palette.
+        const regle = css.match(/\.planif-corbeille \{[^}]*\}/);
+        expect(regle[0]).toMatch(/position:\s*fixed/);
+        expect(regle[0]).toMatch(/bottom:/);
+    });
+
+    it('#444 — invisible au repos, elle se montre quand un drag commence', () => {
+        const regle = css.match(/\.planif-corbeille \{[^}]*\}/);
+        // Vivant sur le canevas, elle ne doit pas l'encombrer ni intercepter
+        // quoi que ce soit tant qu'elle est cachée.
+        expect(regle[0]).toMatch(/opacity:\s*0\b/);
+        expect(regle[0]).toMatch(/pointer-events:\s*none/);
+        const armee = css.match(/\.planif-corbeille-armee \{[^}]*\}/);
+        expect(armee).not.toBeNull();
+        expect(armee[0]).toMatch(/opacity:\s*1/);
     });
 
     it('elle mesure au moins 44 px de haut (cible tactile iPad)', () => {
@@ -187,7 +221,14 @@ describe('#433 · D — la corbeille est une vraie cible tactile', () => {
     it('les deux modes sont couverts et les couleurs viennent de la palette', () => {
         expect(css).toContain('.mode-clair .planif-corbeille-survol');
         // Anti-pattern du projet : aucune couleur inventée hors variables.
-        const bloc = css.slice(css.indexOf('.planif-corbeille {'), css.indexOf('.planif-palette-bas-btns {'));
+        // Borne de fin retargetée (#444) : `.planif-palette-bas-btns` a été
+        // retirée avec les boutons qu'elle habillait.
+        // ⚠ La borne est ancrée en DÉBUT DE LIGNE (`\n.palette-icon {`) : sans
+        // l'ancre, elle tombait sur `.planif-corbeille .palette-icon {`, deux
+        // lignes plus bas — le bloc mesuré devenait quasi vide et l'assertion
+        // « les couleurs viennent de la palette » passait sur du vide. Même
+        // piège de sous-chaîne que la sentinelle #157 le matin même.
+        const bloc = css.slice(css.indexOf('.planif-corbeille {'), css.indexOf('\n.palette-icon {'));
         expect(bloc).not.toMatch(/var\(--danger[,)]/); // token inexistant dans la palette
         expect(bloc).toContain('var(--rouge-erreur');
     });

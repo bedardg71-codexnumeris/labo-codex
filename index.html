@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260809c"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
+    <link rel="stylesheet" href="styles.css?v=20260810a"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -4243,6 +4243,15 @@
                                         </div>
                                     </div>
                                     <button class="planif-btn-vue" id="planif-btn-plein-ecran" title="Plein &eacute;cran" data-action="planificationCarte.togglePleinEcran"><img src="icons/icon-fit-to-width.svg" alt="" class="planif-icon"></button>
+                                    <!-- #444 : les quatre boutons du bas de la palette montent ICI.
+                                         Motif : sur iPad la palette dépasse l'écran et les coupait —
+                                         l'Inspecteur devenait inatteignable au doigt, or le
+                                         double-clic ne l'ouvre pas non plus (constat du 10 août). -->
+                                    <span class="planif-toolbar-separateur" aria-hidden="true"></span>
+                                    <button class="planif-btn-vue" id="planif-palette-inspecteur-btn" title="Inspecteur (double-tap sur un bloc)" aria-label="Inspecteur"><img src="icons/icon-detective.svg" alt="" class="planif-icon"></button>
+                                    <button class="planif-btn-vue" id="planif-palette-raccourcis-btn" title="Raccourcis clavier" aria-label="Raccourcis clavier"><img src="icons/icon-shortcut.svg" alt="" class="planif-icon"></button>
+                                    <button class="planif-btn-vue" id="planif-palette-aide-btn" data-tooltip="planif-aide" aria-label="Guide"><img src="icons/icon-book.svg" alt="" class="planif-icon"></button>
+                                    <button class="planif-btn-vue" id="planif-palette-bibliotheque-btn" title="Biblioth&egrave;que de cartes d'alignement" aria-label="Biblioth&egrave;que"><img src="icons/icons8-library-2.svg" alt="" class="planif-icon"></button>
                                 </div>
                             </div>
                         </div>
@@ -4255,7 +4264,7 @@
                                 </div>
                                 <div class="planif-palette-contenu">
                                     <div class="planif-palette-categorie" data-zone="pourquoi">
-                                        <div class="planif-palette-zone-label" data-tooltip="planif-pouvoir-enseigner">Intention curriculaire</div>
+                                        <button type="button" class="planif-palette-zone-label" aria-expanded="true" data-tooltip="planif-pouvoir-enseigner"><span class="planif-zone-chevron" aria-hidden="true">▾</span>Intention curriculaire</button>
                                         <div class="planif-palette-groupe">
                                             <button class="planif-palette-btn" data-type="competence" draggable="true">
                                                 <span class="planif-pastille" style="background: var(--planif-couleur-competence)"></span>Compétence
@@ -4266,7 +4275,7 @@
                                         </div>
                                     </div>
                                     <div class="planif-palette-categorie" data-zone="quoi">
-                                        <div class="planif-palette-zone-label" data-tooltip="planif-quoi-enseigner">Types de connaissances</div>
+                                        <button type="button" class="planif-palette-zone-label" aria-expanded="true" data-tooltip="planif-quoi-enseigner"><span class="planif-zone-chevron" aria-hidden="true">▾</span>Types de connaissances</button>
                                         <div class="planif-palette-groupe">
                                             <button class="planif-palette-btn" data-type="factuelle" draggable="true">
                                                 <span class="planif-pastille" style="background: var(--planif-couleur-factuelle)"></span>Factuelle
@@ -4283,7 +4292,7 @@
                                         </div>
                                     </div>
                                     <div class="planif-palette-categorie" data-zone="comment">
-                                        <div class="planif-palette-zone-label" data-tooltip="planif-comment-enseigner">Déroulement</div>
+                                        <button type="button" class="planif-palette-zone-label" aria-expanded="true" data-tooltip="planif-comment-enseigner"><span class="planif-zone-chevron" aria-hidden="true">▾</span>Déroulement</button>
                                         <div class="planif-palette-groupe">
                                             <button class="planif-palette-btn" data-type="expose" draggable="true">
                                                 <span class="planif-pastille" style="background: var(--planif-couleur-expose)"></span>Exposé
@@ -4300,7 +4309,7 @@
                                         </div>
                                     </div>
                                     <div class="planif-palette-categorie" data-zone="verifier">
-                                        <div class="planif-palette-zone-label" data-tooltip="planif-design-apprentissages">Preuve de réussite</div>
+                                        <button type="button" class="planif-palette-zone-label" aria-expanded="true" data-tooltip="planif-design-apprentissages"><span class="planif-zone-chevron" aria-hidden="true">▾</span>Preuve de réussite</button>
                                         <div class="planif-palette-groupe">
                                             <button class="planif-palette-btn" data-type="evaluation" draggable="true">
                                                 <span class="planif-pastille" style="background: var(--planif-couleur-evaluation)"></span>Évaluation
@@ -4308,7 +4317,7 @@
                                         </div>
                                     </div>
                                     <div class="planif-palette-categorie" data-zone="conception">
-                                        <div class="planif-palette-zone-label" data-tooltip="planif-structure">Organisation</div>
+                                        <button type="button" class="planif-palette-zone-label" aria-expanded="true" data-tooltip="planif-structure"><span class="planif-zone-chevron" aria-hidden="true">▾</span>Organisation</button>
                                         <div class="planif-palette-groupe">
                                             <button class="planif-palette-btn" data-type="sequence" draggable="true">
                                                 <span class="planif-pastille" style="background: var(--planif-couleur-sequence)"></span>Séquence
@@ -4319,7 +4328,7 @@
                                         </div>
                                     </div>
                                     <div class="planif-palette-categorie" data-zone="explicite">
-                                        <div class="planif-palette-zone-label" data-tooltip="planif-enseignement-explicite">Enseignement explicite</div>
+                                        <button type="button" class="planif-palette-zone-label" aria-expanded="true" data-tooltip="planif-enseignement-explicite"><span class="planif-zone-chevron" aria-hidden="true">▾</span>Enseignement explicite</button>
                                         <div class="planif-palette-groupe">
                                             <button class="planif-palette-btn" data-type="ouverture" draggable="true" title="Captation de l'attention, justification de l'objectif, vérification des préalables">
                                                 <span class="planif-pastille" style="background: var(--planif-couleur-ouverture)"></span>Ouverture
@@ -4339,18 +4348,17 @@
                                         </div>
                                     </div>
                                 </div>
-                                <!-- Corbeille (#433) : glisser un bloc dessus le supprime.
-                                     Seul geste de suppression en UN temps au doigt. -->
-                                <div id="planif-corbeille" class="planif-corbeille" title="Glisse un bloc ici pour le supprimer" aria-label="Corbeille — glisse un bloc ici pour le supprimer">
-                                    <img src="icons/icons8-trash.svg" alt="" class="palette-icon">
-                                    <span class="planif-corbeille-libelle">Corbeille</span>
-                                </div>
-                                <div class="planif-palette-bas-btns">
-                                    <button id="planif-palette-inspecteur-btn" class="planif-palette-aide-btn" title="Inspecteur"><img src="icons/icon-detective.svg" alt="" class="palette-icon"></button>
-                                    <button id="planif-palette-raccourcis-btn" class="planif-palette-aide-btn" title="Raccourcis clavier"><img src="icons/icon-shortcut.svg" alt="" class="palette-icon"></button>
-                                    <button id="planif-palette-aide-btn" class="planif-palette-aide-btn" data-tooltip="planif-aide"><img src="icons/icon-book.svg" alt="" class="palette-icon"></button>
-                                    <button id="planif-palette-bibliotheque-btn" class="planif-palette-aide-btn" title="Biblioth&egrave;que de cartes d'alignement"><img src="icons/icons8-library-2.svg" alt="" class="palette-icon"></button>
-                                </div>
+                            </div>
+                            <!-- #444 (10 août 2026) — la corbeille et les quatre boutons ont
+                                 QUITTÉ le bas de la palette : sur iPad, la palette dépasse la
+                                 hauteur de l'écran et les coupait (retour terrain de Grégoire).
+                                 Les BOUTONS montent dans la barre d'outils (toujours visible) ;
+                                 la CORBEILLE, qui n'est pas un bouton mais une cible de dépôt,
+                                 devient flottante au bas du CANEVAS — visible seulement pendant
+                                 un déplacement, là où le geste se termine. -->
+                            <div id="planif-corbeille" class="planif-corbeille" title="Glisse un bloc ici pour le supprimer" aria-label="Corbeille — glisse un bloc ici pour le supprimer">
+                                <img src="icons/icons8-trash.svg" alt="" class="palette-icon">
+                                <span class="planif-corbeille-libelle">Déposer ici pour supprimer</span>
                             </div>
                             <!-- Panneau raccourcis flottant -->
                             <div id="planif-raccourcis-panel" class="planif-guide-flottante" style="display: none;">
@@ -14212,7 +14220,7 @@
     <!-- PRIORITÉ 1: Fondations -->
     <script src="js/config.js?v=20260809a"></script> <!-- #326 (28 juin) : COMPARATEUR_VISIBLE=true (réactivation) ; #345 (22 juin) : flag COMPARATEUR_VISIBLE ; Refonte nav SP5-fix : sous-onglet id court 'vue' (au lieu de 'calendrier') pour éviter la redondance calendrier-calendrier -->
     <script src="js/navigation.js?v=20260808a"></script> <!-- #345 (22 juin) : filtre comparateur sous-nav Labo ; Refonte nav SP5 : tables migrées calendrier-* + nav-calendrier-* -->
-    <script src="js/preferences.js?v=20260808a"></script> <!-- Beta 99.16 : API centralisée préférences + migration V3 (doit précéder modes.js) -->
+    <script src="js/preferences.js?v=20260810a"></script> <!-- Beta 99.16 : API centralisée préférences + migration V3 (doit précéder modes.js) -->
     <script src="js/modes.js?v=20260809a"></script> <!-- Refonte nav SP5 : commentaire et clé calendrier-trimestre -->
     <script src="js/utils-notifications.js?v=20260521a"></script> <!-- Cat-B Track 4 chantier E (21 mai 2026) : source unique notifications toast — window.notifications.{succes,erreur,info} -->
     <script src="js/ui-dialogues.js?v=20260615a"></script> <!-- #315/#316 : modales async réutilisables — window.uiDialogues.{confirmerAction,demanderSaisie} (remplace confirm()/prompt() natifs) -->
@@ -14349,7 +14357,7 @@
     <script src="js/planification-donnees.js?v=20260808a"></script> <!-- #425 préalable : vivacité de productionId à la reprise (8 août) -->
 
     <script src="js/planification-bibliotheque.js?v=2026051026"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
-    <script src="js/planification-carte.js?v=20260810b"></script> <!-- Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
+    <script src="js/planification-carte.js?v=20260810c"></script> <!-- Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
     <script src="js/planification-export.js?v=20260808b"></script> <!-- LE générateur d'export : 3 niveaux × 3 formats (portage #424, 8 août) -->
     <script src="js/planification.js?v=20260808a"></script> <!-- Refonte nav SP4 : hooks nomSection 'conception' + idSousSection conception-* -->
 
@@ -14433,7 +14441,7 @@
     <script src="js/guidage-demo.js?v=20260808a"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=20260810a"></script> <!-- Entrée 1.56 : trois chantiers Alignement consolidés -->
+    <script src="js/changelog-data.js?v=20260810b"></script> <!-- Entrée 1.56 : trois chantiers Alignement consolidés -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
     <script src="js/etats-vides.js?v=20260808a"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre -->
@@ -14454,11 +14462,11 @@
     <script src="js/export-resultats-finaux.js?v=2026061901"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260810c"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260810d"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260810c"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260810d"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>

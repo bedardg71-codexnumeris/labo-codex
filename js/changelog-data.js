@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            version: '1.66',
+            couleur: 'vert',
+            titre: 'Carte d\u2019alignement \u2014 utilisable au doigt',
+            items: [
+                'Un double-tap sur un bloc ouvre l\u2019Inspecteur sur iPad. Le double-clic n\u2019y fonctionnait pas : la dur\u00e9e, la semaine, les objectifs servis et la r\u00e9troaction formative n\u2019\u00e9taient atteignables que par le bouton \u00ab Inspecteur \u00bb.',
+                'Les boutons Inspecteur, Raccourcis, Guide et Biblioth\u00e8que passent du bas de la palette \u00e0 la barre d\u2019outils \u2014 ils y sont toujours visibles, m\u00eame sur un \u00e9cran court.',
+                'Les six familles de la palette \u00ab N\u0153uds \u00bb se replient d\u2019un toucher sur leur titre. Ton choix est m\u00e9moris\u00e9.',
+                'La corbeille quitte la palette : elle appara\u00eet au bas de la carte d\u00e8s que tu commences \u00e0 d\u00e9placer un bloc, et dispara\u00eet ensuite.'
+            ]
+        },
+        {
             version: '1.65',
             couleur: 'orange',
             titre: 'Carte d’alignement — la durée s’affiche, les objectifs se réordonnent',

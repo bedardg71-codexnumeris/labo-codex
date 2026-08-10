@@ -92,6 +92,13 @@
         planifPaletteNoeudsVisible: true,
         planifPalettePlanificateurVisible: true,
 
+        // #444 (10 août 2026) — familles REPLIÉES de la palette Nœuds, par
+        // `data-zone`. Tableau des zones fermées : vide = tout ouvert, qui est
+        // le comportement d'avant. Motif : les 18 pastilles en 6 familles
+        // dépassent la hauteur de l'écran iPad ; replier ce dont on ne se sert
+        // pas dans la séance rend la palette utilisable au doigt.
+        planifPaletteFamillesRepliees: [],
+
         // Flags de transitions pédagogiques (js/transitions.js) — suivent
         // la progression de l'utilisateur entre les 4 étapes du parcours
         // Numérisation → Croisement → Observation → Compétence.
