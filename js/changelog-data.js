@@ -21,13 +21,34 @@
 
     var CHANGELOG = [
         {
+            version: '1.69',
+            couleur: 'orange',
+            titre: 'L’assistant ne propose plus « Par objectifs »',
+            items: [
+                'L’étape « Approche d’évaluation » de l’assistant de pratique n’offrait encore que deux choix, dont « Par objectifs d’apprentissage » — un paradigme retiré de l’application en 1.63, moteur compris. L’assistant promettait donc quelque chose que plus rien ne calculait. La carte disparaît.',
+                'L’étape reste, avec sa seule approche réelle déjà cochée : elle dit ce sur quoi PAN-Standards s’appuie au lieu de le décider en coulisse.',
+                'Une pratique enregistrée autrefois « par objectifs » s’ouvre maintenant sur le portfolio, sans rien perdre : sa configuration n’est ni effacée ni réécrite tant que tu ne sauvegardes pas toi-même.'
+            ]
+        },
+        {
+            version: '1.68',
+            couleur: 'vert',
+            titre: 'Relier une activité à un objectif, au tracé',
+            items: [
+                'Tu peux maintenant tracer un lien depuis une activité, un exposé ou une évaluation et le déposer sur la ligne d’un objectif de sa leçon : la case « objectifs servis » se coche toute seule. Les cases de l’Inspecteur restent là — c’est le même geste, par un autre chemin.',
+                'Si le dépôt ne peut pas aboutir (bloc d’une autre leçon, type qui ne sert pas d’objectif), l’application te le dit au lieu de ne rien faire.',
+                'Les pastilles des objectifs (!, ⚠, ✓) ont enfin une légende : dans l’Inspecteur de la leçon et dans la page 5 du guide. Leur sens ne vivait que dans une infobulle au survol — invisible sur iPad.'
+            ]
+        },
+        {
             version: '1.67',
             couleur: 'orange',
             titre: 'Changer de trimestre ne laisse plus rien derri\u00e8re',
             items: [
                 'Le groupe-cours que tu avais laiss\u00e9 actif dans un trimestre est bien celui qui revient quand tu y retournes. Avant, l\u2019application reprenait le premier de la liste \u2014 ton groupe actif pouvait changer sans que rien ne le signale, et les \u00e9crans de suivi suivaient.',
                 'La barre de progression du Cadre et le s\u00e9lecteur des groupes-cours se mettent \u00e0 jour imm\u00e9diatement : ils affichaient encore les chiffres et les groupes du trimestre que tu venais de quitter.',
-                'Correction : une fiche d\u2019\u00e9tudiant\u00b7e sans nom (import incomplet) emp\u00eachait l\u2019affichage de la liste enti\u00e8re et faisait \u00e9chouer le tirage au sort, sans message.'
+                'Correction : une fiche d\u2019\u00e9tudiant\u00b7e sans nom (import incomplet) emp\u00eachait l\u2019affichage de la liste enti\u00e8re et faisait \u00e9chouer le tirage au sort, sans message.',
+                'Correction : ta biblioth\u00e8que de cours accumulait des exemplaires identiques du m\u00eame cours \u00e0 chaque import \u2014 la m\u00eame fiche pouvait appara\u00eetre deux ou trois fois dans le s\u00e9lecteur. Les imports n\u2019en ajoutent plus.'
             ]
         },
         {

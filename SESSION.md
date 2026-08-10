@@ -7,6 +7,370 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 10 AOÛT 2026, SOIR (6) : #353 OPTION 2 TRANCHÉE — le seuil était au-dessus de tout.
+     ÉTAT FINAL : **1.71.0** (build 0810-1651), Vitest **2159/2159** (243 fichiers).
+
+     ▣ **LE RELEVÉ TERRAIN A VALIDÉ LA CONVERSION À 0,05 % PRÈS.** Grégoire a collé `db.statsStockage()`
+     depuis son build d'AVANT le correctif : `octets: 10 480 642`, `ratio: 1.9990`. Converti dans la
+     monnaie du quota : **5 240 321 car. / 5 242 880 = 99,95 %**. Les « 200 % » étaient bien 100 %,
+     vérifié cette fois sur ses données réelles et non sur un remplissage synthétique.
+     ⮕ Marge restante à ce moment-là : **2 559 caractères.** L'équivalent d'une ligne de texte.
+
+     ⚠⚠ **ET LE RELEVÉ A DONNÉ LE DIAGNOSTIC QUE LA PROJECTION SEULE NE DONNAIT PAS.**
+     À l'ancien seuil de 200 Ki, **ZÉRO clé ne basculait — sa plus grosse clé pèse 184 K car.**
+     Le mécanisme IDB-first existe depuis #334 D (mars) et **n'avait jamais pu se déclencher chez lui**.
+     ⮕ *Un seuil placé au-dessus du plus gros objet du magasin n'est pas un seuil, c'est un plafond
+     décoratif.* Il a passé cinq mois à ne rien faire sans que rien ne le signale — même famille que le
+     garde muet du 10 août au matin, à une échelle plus grande.
+
+     ▣ **DÉCISION DE GRÉGOIRE, PRISE SUR LA TABLE : 200 Ki → 25 Ki caractères.**
+        seuil      Chrome reste   Safari reste   clés déplacées
+        200 Ki        100 %           88 %          0  /  0      ← l'ancien
+        100 Ki         88 %           84 %          4  /  2
+         50 Ki         70 %           68 %         17  / 13
+         25 Ki         44 %           44 %         60  / 55      ← retenu
+         10 Ki          9 %            8 %        165  /161
+     ⮕ **Deux jeux de données DISTINCTS convergent sur 44 %** : la masse est dans la LONGUE TRAÎNE
+     (475 clés pour 5 119 K car.), pas dans quelques géants. **Cela écarte l'option 3** (liste blanche de
+     grosses clés) sur des chiffres, pas sur une intuition — ce que le rapport réclamait depuis juin.
+
+     ▣ **VÉRIFIÉ AU NAVIGATEUR, pas seulement raisonné** : semis au gabarit du terrain (184 / 46 / 12 / 1 K
+     car.), rechargement, relevé. Les clés > 25 Ki ont **quitté localStorage**, sont servies depuis
+     `memoryCache`, et **restent lisibles par `getSync`** — seul le lieu change, rien n'est perdu.
+     ⮕ Donc **la projection se réalise au rechargement suivant, sans script de migration** :
+     `syncToLocalStorageCache` réapplique le seuil à chaque boot. C'était une promesse lue au code ; elle
+     est maintenant une observation.
+     ⚠ **Sans IndexedDB, le routage retombe sur localStorage** (garde `idbDispo`) : abaisser le seuil
+     n'expose RIEN de neuf. Break-testé (BT42) — et l'assertion a d'abord échoué parce que j'avais écrit
+     l'inverse : dans le bac à sable Node, IDB est ABSENT, donc la clé DOIT rester en localStorage.
+     *Mon assertion était fausse, pas le code.* Corrigée en verrouillant le repli, qui est la propriété
+     de sûreté qui rend la baisse acceptable.
+
+     ⚠ **TROIS FORMES DE CLÉS MORTES TROUVÉES DANS LE TOP 20** — vérifiées au code, pas supposées :
+        · **`a2024_presences` + `a2024_evaluationsSauvegardees` = 363 K car., en CHROME SEULEMENT** (7 % du
+          quota, pour un trimestre d'il y a deux ans ; absentes de Safari — les îles, encore) ;
+        · **`h2026_snapshots_COURS1766455789356` (46 K car.)** — nommée d'après l'id de cours d'AVANT la
+          migration, celui que `reparer154()` a réapparié le 10 août. Les snapshots se nomment
+          `<trim>_snapshots_<coursId>` (`snapshots.js:96`) : **plus aucun lecteur ne reconstruit ce nom.**
+          ⮕ La réparation #154 a soigné les productions ; cette clé-là est restée derrière.
+        · **`simulation_indicesCP` (72 K car.)** — **aucun producteur dans tout `js/`**, vérifié au grep.
+     ⮕ **`scripts/diagnostic-353-cles-orphelines.js`** livré : il confronte chaque clé aux registres
+     VIVANTS (`trimestres`, magasin `cours`) au lieu de deviner, et **n'écrit rien**. Essayé dans l'app
+     avec semis des trois formes ET de deux témoins légitimes : les trois sont classées, aucun témoin ne
+     l'est. ⏳ À lancer par Grégoire dans les DEUX navigateurs.
+
+     ▣ **§4 : 2 break-tests sur ce cycle (48 sur la session), 2 ROUGE.** Seuil remonté à 200 Ki (2 rouges,
+     dont le cas qui porte la table de décision) · garde `idbDispo` retiré (1).
+     ⮕ **Ce qui reste de #353** : l'exécution des purges (orphelines + `db.purgerBackupsV1()`, dry-run par
+     défaut) et `tamponsImages` base64 non namespacé. L'option 4 (quota piloté) n'est plus urgente : à
+     44 %, l'alerte à 80 % a de la marge devant elle.
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 10 AOÛT 2026, SOIR (5) : #353 — L'ALERTE CRIAIT DANS LA MAUVAISE MONNAIE.
+     ÉTAT FINAL : **1.70.0** (build 0810-1548), Vitest **2158/2158** (243 fichiers).
+
+     ⚠⚠ **LE FAIT CENTRAL, MESURÉ AVANT D'ÊTRE CRU.** Le navigateur facture localStorage en **unités de
+     code UTF-16 — des caractères**, pas des octets. Vérifié au navigateur (Chromium, `file://`) en
+     remplissant jusqu'au `QuotaExceededError` : **4,94 M caractères tenus avec 'x'** (1 octet UTF-8)
+     **ET avec 'é'** (2 octets UTF-8). Même capacité en caractères des deux côtés ⇒ c'est le caractère
+     qui est compté. Un test ASCII seul n'aurait rien tranché (1 car. = 1 octet UTF-8) : **c'est l'accent
+     qui fait la preuve.**
+
+     ⮕ **`statsStockage` comptait `(clé+valeur).length × 2` et divisait par 5 Mi. Le ratio affiché valait
+     le DOUBLE.** Les « 173 % » du 9 août étaient **86 %** ; les « 200 % » du 10 août sont **100 %**.
+     ▣ **Et c'est le pire cas de figure pour une alerte** : un ratio impossible — 200 % d'un quota qu'on
+     ne peut par définition pas dépasser — invite à ne plus la croire. L'alerte disait la vérité (le seuil
+     de 80 % avait bien été franchi) dans une unité qui la rendait incroyable.
+
+     ⮕ **UNE TROISIÈME UNITÉ COHABITAIT.** `SEUIL_IDB_FIRST` (200 Ko) était comparé à des **octets UTF-8**
+     (`new Blob(...).size`). Un seuil et un budget qui ne parlent pas de la même chose de part et d'autre
+     du même `>`. C'est précisément ce qui rendait impossible l'arbitrage « sur chiffres » que le
+     RAPPORT-353 réclamait depuis le 28 juin. Une seule monnaie désormais — le caractère — partout.
+     ▣ **VALIDATION CROISÉE, la seule qui vaille** : le ratio corrigé vaut **99,4 % au moment EXACT** où
+     le navigateur refuse la première écriture. Une unité juste, pas seulement plausible.
+
+     ⚠ **CE QUE LA MESURE DIT DE L'ÉTAT DE GRÉGOIRE, ET QUI EST PLUS SÉRIEUX QUE LE CHIFFRE FAUX** :
+     5 119 K car. / 5 120 K car. = **100 % du plafond. Son localStorage est PLEIN.** Rien n'est en danger
+     (durabilité A/B/C), mais **toute écriture bascule désormais en memoryCache + IDB** : le « chemin
+     IDB-seul » que #353 voulait rendre plus RARE est devenu **le seul**.
+
+     ▣ **DE QUOI TRANCHER L'OPTION 2 — la projection.** `statsStockage()` rend `projectionSeuils` : pour
+     25/50/100/200 Ki caractères, combien de clés basculeraient et combien de place serait libérée.
+     ⮕ **Ce que les chiffres connus laissent déjà voir** : le top 5 du 9 août pèse 116/115/95/91/89 K car.
+     — **tous très en dessous des 200 Ki du seuil**, d'où leur présence en localStorage. Et 472 clés pour
+     5 119 K car. : **la masse est dans la longue traîne, pas dans quelques géants.** L'option 3 (liste
+     blanche de grosses clés) déplacerait donc peu ; l'option 2 (abaisser le seuil) est à chiffrer d'abord.
+     ⏳ **Geste dû par Grégoire** : `db.statsStockage()` en console, me rapporter `projectionSeuils`.
+
+     ▣ **PURGE `configPAN` (décision Grégoire du 9 août) — faite PAR LE PROPRIÉTAIRE.** Pas une nouvelle
+     purge dans `main.js` : une extension de `purgerLegacy()` du module SSOT, qui purgeait déjà
+     `dureePeriodeMinutes` et les miroirs morts. #328 L2-c n'ôtait que `configPAN.jetons` parce que
+     `portfolio` avait encore des lecteurs ; **G2-b (#436) a retiré les derniers**, vérifié au code
+     (zéro lecteur, zéro écrivain hors commentaires dans tout `js/`).
+     ⚠ **Et le gain est NÉGLIGEABLE : ~285 caractères par trimestre, mesuré sur le pack démo — 0,02 % du
+     budget.** Le BACKLOG l'annonçait comme « un pur gain de budget » ; c'est de l'hygiène zéro-dette, et
+     le dire évite de croire le problème traité.
+
+     ⚠ **UNE SENTINELLE S'APPELAIT « CE QUI DOIT SURVIVRE (le piège du prochain nettoyage) » — et elle
+     visait exactement ce que je faisais.** Elle exigeait littéralement `delete m.configPAN[SOUS_CHAMP_
+     JETONS_MORT]`. ⮕ Vérification faite, mon changement sert MIEUX l'invariant qu'elle protège (« le mort
+     ne reste pas dans les données ») : elle épinglait une LIGNE, pas l'invariant. Dépinglée, motif écrit
+     sur place. *Épingler une implémentation, c'est interdire de faire mieux.*
+     ▣ **AUDIT DES CALL-SITES AVANT DE PURGER** (règle CLAUDE.md) : le seul autre lecteur de `configPAN`
+     est le chemin d'injection de simulation (#307) — et il est **inatteignable** : `config.modalites`
+     n'a **aucun producteur** dans tout `js/`. La purge ne pouvait donc rien casser de ce côté. ⮕ Constat
+     versé, non corrigé : ce code mort appartient à #307, pas à cette séance.
+
+     ▣ **§4 : 6 break-tests sur ce cycle (46 sur la session), 6 ROUGE après resserrement.**
+     ⚠⚠ **UN EST RESTÉ VERT — le troisième de la session, et le plus instructif** : remettre
+     `new Blob(...).size` (octets UTF-8) dans l'estimateur ne faisait rougir AUCUN cas. Rien ne
+     verrouillait la monnaie de l'estimateur — celle qui décide du routage. Cas ajouté, avec l'accent
+     comme témoin (`'é'.repeat(1000)` → 1000, pas 2000). ⮕ *Trois fois cette semaine, un break-test resté
+     vert a désigné un trou du TEST, jamais du code. C'est exactement à ça qu'il sert.*
+     ▣ **Pas d'entrée au changelog** : le pourcentage et l'unité du rapport de bogue changent, rien qu'un
+     utilisateur reconnaîtrait comme une fonctionnalité. Même arbitrage que #447.
+
+     ⮕ **PRIORITÉ 0 VIDÉE.** Restent des chantiers de fond (#425, #416, #403, #418, #428+#430, #440, #439)
+     et les quatre valeurs gelées sans verdict.
+     ⏳ **DÛ PAR GRÉGOIRE** : `reparer442()` en exécution · `db.statsStockage()` → `projectionSeuils` ·
+     porte terrain #445 (iPad + Mac).
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 10 AOÛT 2026, SOIR (4) : #443 LIVRÉ — la dernière surface qui promettait un moteur mort.
+     ÉTAT FINAL : **1.69.0** (build 0810-1523), Vitest **2154/2154** (243 fichiers).
+
+     ✅ **DÉCISION GRÉGOIRE (question fermée, 10 août)** : *garder l'étape en écran d'information*, plutôt
+     que la sauter (11 → 10 étapes). Motif retenu : l'étape NOMME ce sur quoi PAN-Standards s'appuie au
+     lieu de le décider en coulisse. La carte unique est **pré-cochée** — le collecteur lit
+     `input:checked`, donc sans `default` il faudrait cliquer une option qui n'a pas d'alternative.
+
+     ▣ **ZÉRO-DETTE ÉLARGI AU RÉEL : trois étapes purgées, pas une.** Le BACKLOG n'en nommait qu'une
+     (`config-objectifs-definition`). En suivant les arêtes, `mode-calcul-objectifs` et `config-mode-calcul`
+     devenaient inatteignables elles aussi. Sont partis avec : la branche d'écriture
+     `configuration.objectifs`, la ligne « Mode de calcul » du récapitulatif, le libellé mort, et
+     l'aiguillage à trois voies de `deduireTypePratique`. ⮕ **Un aiguillage dont deux sorties sont mortes
+     finit par être relu comme un choix** — c'est ce qui a produit le défaut d'origine.
+
+     ▣ **LEGACY : lecture seule, et DITE.** Une config stockée `approcheEvaluation: 'par-objectifs'`
+     s'ouvre sur le portfolio avec un `console.warn [#443]`, **sans mutation de la source** — patron
+     #396/#435, avec un cas de sentinelle qui vérifie que l'objet stocké est intact après ouverture.
+
+     ⚠ **QUATRE SENTINELLES VOISINES MISES EN ACCORD AVEC LA DÉCISION, PAS CONTOURNÉES.**
+        · le **golden master `STD_obj` est RETIRÉ AVEC la fonctionnalité** — et c'est l'arbitrage à ne pas
+          rater : le « mettre à jour » sur ce que le code émet désormais en aurait fait une tautologie.
+          *Un golden réaligné sur le code qu'il surveille ne surveille plus rien.*
+        · le round-trip « objectifs » (#132) est remplacé par l'**invariant inverse** (s'ouvre sur
+          portfolio · source non mutée · conversion dite en console) ;
+        · le garde-fou « nombre d'objectifs » (#319 a4) cède sa place au cliquet d'absence, au même
+          endroit du fichier ;
+        · le cas « reprises » est **REPORTÉ** sur le portfolio, pas supprimé — le perdre aurait été une
+          régression de couverture déguisée en ménage.
+
+     ⚠⚠ **DEUX PIÈGES, ET LES DEUX APPRENNENT QUELQUE CHOSE.**
+        1. **Mon propre commentaire a fait rougir un cliquet.** En documentant la normalisation, j'ai cité
+           le jeton retiré par #396 — dont la sentinelle est un cliquet d'ABSENCE qui grep le fichier
+           ENTIER, commentaires compris. **Cinquième fois en trois jours** que le piège de la sous-chaîne
+           mord. ⮕ J'ai choisi de reformuler plutôt que d'assouplir la sentinelle : pour ce fichier-là,
+           « le jeton n'apparaît nulle part, pas même en note » est un invariant plus fort et légitime.
+           Une note sur place prévient la prochaine instance.
+        2. **Le report du cas « reprises » a rougi, et j'avais tort.** La branche portfolio ne range PAS
+           les reprises au même endroit que la sommative : `configuration.portfolio.reprisesPermises`, et
+           non `configuration.reprises`. ⮕ *J'avais supposé une symétrie que le code n'a jamais eue* —
+           et c'est le test qui l'a dit, pas la relecture.
+
+     ▣ **§4 : 7 break-tests sur ce cycle (34 sur la session), 7 ROUGE** — carte « Par objectifs » de
+     retour · `default` retiré de la définition · **rendu qui ignore `default`** · écran d'information
+     vidé · normalisation qui mute la source · conversion redevenue muette · étape morte ressuscitée.
+     ⮕ Le troisième a exigé d'exposer `genererRadioCards` : **qu'une définition porte `default` ne prouve
+     pas que le RENDU pré-coche**, et c'est le rendu que l'utilisateur voit. Les deux se cassent séparément.
+     ▣ **Vérifié au navigateur** : une carte, pré-cochée, lue par le collecteur, écran d'information
+     présent, trois étapes purgées. Changelog 1.69 (3 items).
+
+     ⮕ **OUVERT** : #353 (localStorage à 200 %) — seul item de priorité 0 restant.
+     ⏳ **DÛ PAR GRÉGOIRE** : exécuter `reparer442()` (dry-run passé) · porte terrain #445 (iPad + Mac).
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 10 AOÛT 2026, SOIR (3) : #445 LIVRÉ — le geste que l'interface enseignait existe enfin.
+     ÉTAT FINAL : **1.68.0** (build 0810-1501), Vitest **2149/2149** (243 fichiers).
+
+     ▣ **LE PROBLÈME N'ÉTAIT PAS UN BUG, ET C'EST CE QUI LE RENDAIT INVISIBLE.** Le canevas enseigne le
+     tracé de lien partout ; #403 a tranché (à raison) que le lien objectif↔activité se déclare par cases
+     à cocher. Grégoire a donc tracé, et n'a rien obtenu — pas d'erreur, pas de message : un canal
+     inexistant se comporte exactement comme une panne. ⮕ On ne remplace pas le déclaratif : on branche le
+     geste appris sur la **même écriture** (`definirObjectifsServis`, porte unique). Pas de second système.
+
+     ▣ **TROIS ARBITRAGES, ET LEUR MOTIF.**
+        1. **La ligne d'objectif intercepte le dépôt AVANT le nœud qui la contient.** Elle vit DANS la
+           leçon : sans cet ordre, `closest('.planif-noeud')` la capterait et le geste retomberait dans le
+           menu de lien — muet à nouveau.
+        2. **Le dépôt AJOUTE, il ne bascule pas.** « Ce bloc sert cet objectif » est une affirmation ; un
+           second dépôt ne peut pas raisonnablement vouloir dire l'inverse. Le décochage reste à
+           l'Inspecteur, là où l'état est VISIBLE — décocher à l'aveugle serait pire que ne rien faire.
+        3. **Les refus sont DITS.** ⚠ Et celui de « bloc d'une autre leçon » n'est pas défensif :
+           `objectifsServisPar` filtre à la leçon parente, donc écrire un id étranger produirait **une case
+           cochée que la lecture écarterait aussitôt** — exactement le mensonge silencieux que l'item
+           dénonçait, retourné contre nous.
+
+     ▣ **LA LÉGENDE : UNE SOURCE, DEUX SURFACES.** Le sens des pastilles ne vivait que dans l'attribut
+     `title` — une infobulle au SURVOL, donc **inexistante sur iPad**, où toute la carte se manipule depuis
+     #444. `legendePastillesObjectifHTML()` est désormais appelée par l'Inspecteur de la LEÇON et par la
+     page 5 du guide. ⮕ Table unique déclarée AU-DESSUS de `GUIDE_PAGES` : ce tableau est évalué au
+     chargement et appelle la légende — les constantes doivent exister avant lui. Zéro-dette : l'ancienne
+     déclaration de `SYMBOLES_PASTILLE_OBJECTIF` a été retirée, pas dupliquée.
+
+     ▣▣ **CE QUE LE NAVIGATEUR A ATTRAPÉ, ET QU'AUCUN TEST DE SOURCE N'AURAIT VU.** Le DOM **préfixe les
+     ids** (`planif-lecon_1`) alors que mes premières scènes de test utilisaient l'id nu. Ma résolution
+     `etat.noeuds.get(leconEl.id)` ne tient que parce que `chargerCarte` applique le MÊME préfixe aux clés
+     d'état — vérifié sur pièces (`clesEtat` == `noeudsDOM`). Une sentinelle qui fabrique ses propres ids
+     aurait été verte des deux côtés d'un désaccord.
+     ▣ **Vérifié au navigateur** : écriture, bascule de pastille `invitation` → `servi`, toast, légende
+     présente sur une leçon à objectifs et **absente** sur une leçon sans objectif, cases #403 intactes sur
+     l'activité, `panneauNoeudId` qui suit le bloc inspecté.
+     ⚠ **NON vérifié au navigateur, et c'est dit** : la séquence pointer complète (pointerdown sur le port
+     → pointerup sur la ligne). Le canevas d'Alignement ne se révèle pas en headless — section
+     conditionnée, `getBoundingClientRect` à 0×0, `elementFromPoint` sans cible. L'ordre d'interception est
+     donc couvert par un **cliquet de source, déclaré comme tel dans la sentinelle**. ⮕ **Porte terrain due
+     sur iPad ET sur Mac.**
+
+     ⚠⚠ **UN BREAK-TEST EST RESTÉ VERT, ET LA FAUTE ÉTAIT DANS MON TEST.** Retirer l'appel de la légende
+     dans l'Inspecteur n'a rien fait rougir : le cas comptait les lignes contenant
+     `legendePastillesObjectifHTML()` avec un seuil « ≥ 2 » — or **la ligne de DÉCLARATION en fait partie**.
+     Déclaration + guide = 2 : l'assertion passait sur du code amputé. Resserrée sur le compte EXACT
+     d'appels, déclaration exclue, commentaires retirés d'abord. ⮕ *Un break-test resté vert est une
+     information sur le TEST, pas sur le code* — troisième fois en trois jours que cette phrase sert.
+
+     ▣ **§4 : 8 break-tests sur ce cycle (25 sur la session), 8 ROUGE après resserrement** — écriture
+     retirée (4) · garde « même leçon » sauté (1) · dépôt qui bascule (1) · ligne d'accueil qui parle (1) ·
+     ordre d'interception inversé (1) · légende Inspecteur retirée (1) · légende guide retirée (1) · CSS
+     de la légende disparu (1). Arbre restauré propre.
+     ▣ **Design** : aucune couleur en dur (assertion dans la sentinelle), `--texte-secondaire` existe dans
+     les deux modes, la pastille de la légende passe en `cursor: default` — celle du canevas porte
+     `cursor: help` parce qu'une infobulle l'attend ; le même curseur dans la légende promettrait une aide
+     qui n'existe pas. Changelog 1.68 (3 items).
+
+     ⮕ **OUVERTS** : 📐#443 (wizard, décision de Grégoire attendue) · #353 (localStorage à 200 %).
+     ⏳ **DÛ PAR GRÉGOIRE** : `reparer442()` en console (Chrome ET Safari) · porte terrain #445 (iPad + Mac).
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 10 AOÛT 2026, SOIR (2) : #447 — LA PRÉMISSE ÉTAIT FAUSSE, LE TROU ÉTAIT À CÔTÉ.
+     ÉTAT FINAL : **1.67.3** (build 0810-1434), Vitest **2136/2136** (242 fichiers).
+
+     ⚠⚠ **LE FAIT LE PLUS IMPORTANT DE CE CYCLE : L'ITEM DÉCRIVAIT UN DÉFAUT QUI N'EXISTE PAS.**
+     Le BACKLOG #447 affirmait « l'aperçu LIT les indices stockés sans recalculer ; visiter l'aperçu AVANT
+     la Liste = distribution périmée », et prescrivait même un geste de contournement à Grégoire.
+     **`tableau-bord-apercu.js:1069` appelle `calculerEtStockerIndicesCP()` à CHAQUE rendu.**
+     ⮕ Vérifié par une expérience décisive au navigateur (Chromium, pack démo, `file://`) : on FAUSSE
+     `indicesCP` dans le stockage (tous les P à 0, `dateCalcul` à 1999), on rend l'aperçu **sans** passer
+     par la Liste — les valeurs justes reviennent et `dateCalcul` est réécrite à l'instant. Le diagnostic
+     d'origine avait été posé **par lecture de code, jamais exécuté**.
+     ⮕ Donc le « Incomplet : 23 » du terrain n'était pas un défaut de fraîcheur : c'était l'aperçu rendant
+     FIDÈLEMENT des données cassées — productions désappariées (#154, réparé le jour même) et contexte de
+     trimestre croisé (#446, corrigé en 1.67.0/1.67.1). Les deux causes ont disparu.
+     ⮕ **Le geste « ouvrir la Liste PUIS l'aperçu » est CADUC.** Il ne servait à rien. Ne plus le redire.
+
+     ✅ **MAIS UN VRAI TROU EXISTAIT À CÔTÉ — trouvé en cherchant, et refermé.** Le cache de lecture de
+     pipeline (#397) promet dans son propre commentaire « jamais de lecture périmée ». Il ne l'assurait que
+     pour les écritures passant par `sauvegarderDonneesSelonMode` — or les propriétaires SSOT écrivent leur
+     clé en `db.setSync`/`db.set` DIRECT, ce qui est légitime, et ces écritures-là ne vidaient rien.
+     ⮕ **Fenêtre RÉELLE, mesurée** : pendant un seul `chargerTableauBordApercu()`, `indicesCP` est écrit à
+     une profondeur de pipeline de **2** — le pipeline extérieur survit à l'écriture et garde sa mémoïsation
+     d'avant. ⮕ **Mais AUCUNE lecture périmée n'était servie** : détecteur posé sur `obtenirDonneesSelonMode`
+     comparant chaque retour à la vérité du stockage, **0 divergence sur quatre parcours réels**. Le défaut
+     était donc **LATENT** — et c'est exactement ce qu'il fallait dire, ni plus ni moins : le prochain lecteur
+     ajouté dans cette fenêtre en aurait reçu une, en silence. Même famille que le 10 août : **une promesse
+     écrite en commentaire que le code ne tenait qu'à moitié.**
+
+     ▣ **L'ARBITRAGE « FRAÎCHEUR vs PERF #397 » QUE L'ITEM DEMANDAIT — TRANCHÉ SUR MESURES, PAS SUR AVIS.**
+     Premier jet : toute écriture vide le cache. Mesuré en A/B **entrelacé** sur le même build (15 rendus
+     alternés, pour annuler la dérive de chauffe) : **+329 ms** sur un rendu d'aperçu à 75 étudiants — soit
+     l'ordre de grandeur du gain que #397 était venu chercher. **Le rabot rendait le cache honnête en le
+     rendant inutile.** Seconde version, invalidation **CIBLÉE sur la clé écrite** : **+22 ms sur 618**,
+     plages entièrement superposées ([548–768] vs [554–790]), et −2 ms à 20 étudiants.
+     ⮕ La leçon de méthode : le premier correctif correct n'était pas le bon ; c'est la MESURE qui l'a dit,
+     pas la relecture. Un correctif de justesse qui annule une optimisation mesurée n'est pas un progrès.
+
+     ▣ **FORME DU CORRECTIF.** `db.js` **émet** (`surEcriture` / `_signalerEcriture`, un seul abonné, pas de
+     liste « au cas où »), `modes.js` **s'abonne** — le sens des dépendances est préservé (la couche basse ne
+     connaît pas la haute). `sauvegarderDonneesSelonMode` garde en plus son invalidation explicite : ce n'est
+     pas de la ceinture-bretelles, c'est une fonction qui tient sa propre promesse sans dépendre d'un
+     abonnement qu'elle ne possède pas. Un abonné qui lève ne casse jamais une écriture (testé).
+
+     ▣ **QUATRE STUBS `db` DE TESTS VOISINS MIS EN ACCORD AVEC LE CONTRAT RÉEL.** Ils décrivaient un `db` qui
+     ne signale pas ses écritures — donc attestaient d'un contrat que l'application n'a plus. Corrigés plutôt
+     que contournés (et le `console.error` qui les dénonçait a été GARDÉ : un crochet manquant doit se voir).
+     ▣ **UN CAS DE LA SENTINELLE CHARGE LE VRAI `js/db.js`** : sans lui, retirer le crochet côté db.js ne
+     ferait rougir personne — les sept autres cas tournent sur un `db` de test qui, lui, signale. Prouvé :
+     BT17 ne fait rougir QUE ce cas-là.
+
+     ▣ **§4 BREAK-TESTS : 5 sur ce cycle (17 sur la session), 5 ROUGE** — abonnement retiré (2 rouges) ·
+     `invaliderCacheLecture` en no-op (4) · invalidation redevenue rabot (1, le cas « ciblée ») · clé de base
+     plus retirée (3) · `db.setSync` cesse de signaler (1, le cas « vrai db.js »). Arbre restauré propre.
+     ▣ **Pas d'entrée au changelog** : rien de visible pour l'utilisateur n'a changé (le défaut était latent).
+     Les règles du changelog écartent explicitement les refactos internes.
+
+     ⮕ **OUVERTS** : #445 (affordance liens + légende) · 📐#443 (wizard, décision) · #353 (200 %).
+     ⏳ **Toujours dû par Grégoire** : `reparer442()` en console, Chrome ET Safari (voir bloc précédent).
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 10 AOÛT 2026, SOIR : #442 LIVRÉ — le magasin de cours cesse d'accumuler des sosies.
+     ÉTAT FINAL : **1.67.2** (build 0810-1406), Vitest **2128/2128** (241 fichiers).
+
+     ▣ **RITUEL DE DÉBUT — ZÉRO ÉCART.** `RELAIS.md` lu en premier (branche `main`, rien en avance), balayage
+     des branches distantes : `claude/poursuite-travail-matin-es3hu9` est à **0 commit d'avance** (résidu du jour,
+     déjà fusionné), les autres sont derrière. Les six lignes de la prémisse du §3 conformes : 1.67.1 / build
+     0810-1304 / Vitest 2111-2111 (239 fichiers) / dernier ID #447 / arbre propre / `origin/main ↔ HEAD : 0 / 0`.
+     ⚠ Le clone est shallow, mais HEAD est **bit-à-bit** le commit d'`origin/main` (`24c448d4`) — le piège de la
+     divergence fictive ne pouvait rien fausser ici. Playwright WebKit toujours hors conteneur : **non exécuté, et c'est dit**.
+
+     ⚠⚠ **#442 — LE MÉCANISME, ET POURQUOI IL PRODUISAIT EXACTEMENT TROIS EXEMPLAIRES.**
+     `_migrerListeCoursVersCoursV2` (`js/trimestre-v2-cours.js`) dédoublonnait la fusion `listeCours`→`cours`
+     par **tuple naturel** (code|SESSION+ANNÉE) et calculait bien un `Set` d'ids… **qu'elle ne consultait QUE
+     dans la branche « pas de tuple »**. Le garde existait donc dans le code sans jamais garder le chemin
+     principal. ⮕ Et le cas n'est pas exotique, il est **structurel** : l'entrée V2 porte `session`+`annee`
+     (tuple complet `601-102-MQ|H2026`), la copie legacy restaurée par un import ancien ne les porte pas
+     (tuple **dégradé** `601-102-MQ`). Deux tuples, un seul id, et `listeCours` étant repeuplée par chaque
+     import puis vidée après fusion : **un exemplaire de plus à chaque passage**.
+
+     ▣ **CE QUI REND LE NETTOYAGE DÉMONTRABLEMENT SÛR, et pourquoi « garder le plus riche » aurait été pire.**
+     Tous les lecteurs du magasin résolvent par `find`/`findIndex`/`some` sur `.id`. Le **premier** exemplaire est
+     donc déjà le seul que l'application atteigne ; les suivants sont **inatteignables par construction** et ne
+     pèsent que sur le budget de stockage (#353). Retirer les suivants est un no-op fonctionnel prouvable —
+     garder « le plus riche » aurait CHANGÉ le comportement sous couvert de l'améliorer. Le script garde le premier.
+     ⮕ Corollaire pour la fusion : écarter un legacy dont l'id existe déjà ne perd rien, puisque cette entrée
+     n'aurait jamais été lue. Le correctif ne troque pas un défaut contre une perte.
+
+     ⚠ **CE QUE LE SCRIPT NE FAIT PAS, ET C'EST VOULU.** Les **homonymes à ids DIFFÉRENTS** (le « IDME et niv 0 »
+     en double d'a2025, sonde #159) ne sont **jamais** retirés : deux modèles au même nom peuvent être deux objets
+     légitimes, et l'un peut être référencé par des cartouches, des grilles ou des évaluations. Ils sont RAPPORTÉS,
+     avec le nombre de clés où chaque id est cité (comptage textuel, honnête sur ce qu'il mesure) — la décision
+     reste humaine. ⮕ Et la signature d'homonymie est **période-consciente pour `cours`** : deux fiches au même
+     intitulé en H26 et A26 sont le cas normal de chaque rentrée, les signaler aurait été une fausse alerte annuelle.
+
+     ▣ **ZÉRO-DETTE — `scripts/dedoublonner-biblios.js` RETIRÉ.** Il visait encore les globales **NUES**
+     `grillesTemplates`/`echellesTemplates`, vidées au boot depuis #358 : il tournait sur du vide. Il n'avait ni
+     dry-run ni annulation. Sa portée réelle (cartouches_*, bibliothèques pratiques/productions) est **reprise** par
+     le nouveau script et **verrouillée par une assertion** — un retrait qui perdrait du terrain serait pire que la dette.
+
+     ▣ **§4 BREAK-TESTS : 12 rejoués, 12 ROUGE sur la bonne assertion**, arbre restauré propre après chacun.
+     Fusion : garde d'identité neutralisé (4 rouges) · `ids.add` retiré du lot (1) · dédoublonnage par tuple retiré (1) ·
+     **export retiré** (8 rouges — la faute du 10 août rejouée exprès). Script : dry-run qui écrit (1) · on garde le
+     dernier au lieu du premier (1) · regroupement par nom (1) · pré-image non enregistrée (1) · portée rétrécie (2).
+     ⮕ **Une observation du BT « export retiré » vaut d'être notée** : le cas F (bout-en-bout) est resté VERT — il
+     pilote `chargerDropdownCoursV2`, qui appelle la fonction *interne*, pas l'export. C'est exactement la division
+     du travail voulue : **F prouve la chaîne, G prouve l'export**. Aucun des deux ne remplace l'autre.
+
+     ⏳ **CE QUI RESTE À GRÉGOIRE POUR CLORE #442** : coller `scripts/reparation-442-doublons.js` en console,
+     `await reparer442()`, **coller le rapport avant d'exécuter**. ⚠ **Dans Chrome ET dans Safari** — chaque
+     navigateur est une île de stockage (leçon #154/#346), et les doublons ont été constatés côté Chrome.
+     ⮕ **OUVERTS** : #447 (fraîcheur aperçu) · #445 (affordance liens + légende) · 📐#443 (wizard, décision) · #353 (200 %).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 10 AOÛT 2026, FIN : #446 LIVRÉ (le contexte cesse de mentir) + RITUEL DE CLÔTURE PASSÉ.
      ÉTAT FINAL : **1.67.1** (build 0810-1304), `main`, arbre propre, `origin/main ↔ HEAD : 0 / 0`. Vitest **2111/2111** (239 fichiers). Dernier ID **#447**. 19 commits sur la journée, 1.65.2 → 1.67.1.
 

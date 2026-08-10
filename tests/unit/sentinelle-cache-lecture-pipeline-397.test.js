@@ -21,9 +21,20 @@ function dbComptable(store) {
                 // copie profonde : simule le re-parse (chaque lecture = objet neuf)
                 return k in store ? JSON.parse(JSON.stringify(store[k])) : (d !== undefined ? d : null);
             },
-            setSync: (k, v) => { store[k] = v; },
+            // #447 : le vrai `db` signale chaque écriture pour que le cache de
+            // lecture puisse s'invalider. Le stub doit en faire autant, sinon il
+            // atteste d'un contrat que l'application n'a pas.
+            _surEcriture: null,
+            surEcriture(rappel) { this._surEcriture = typeof rappel === 'function' ? rappel : null; },
+            setSync(k, v) {
+                if (typeof this._surEcriture === 'function') this._surEcriture(k);
+                store[k] = v;
+            },
             get: async (k, d) => (k in store ? store[k] : (d !== undefined ? d : null)),
-            set: async (k, v) => { store[k] = v; }
+            async set(k, v) {
+                if (typeof this._surEcriture === 'function') this._surEcriture(k);
+                store[k] = v;
+            }
         }
     };
 }

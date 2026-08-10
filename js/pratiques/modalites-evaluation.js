@@ -82,8 +82,15 @@
     // (vit dans pratique.configuration) et `pratique` (type — dérivé via
     // obtenirTypePratiqueActive depuis L2-b2) n'ont plus AUCUN lecteur.
     const CHAMPS_MIROIRS_MORTS = ['pratiqueId', 'approcheEvaluation', 'pratique'];
-    // #328 L2-c : sous-champ mort de `configPAN` (la config jetons vit sur la pratique).
-    const SOUS_CHAMP_JETONS_MORT = 'jetons';
+    // #353 (10 août 2026, décision Grégoire du 9 août) — `configPAN` ENTIER
+    // rejoint les miroirs morts. #328 L2-c n'en avait retiré que `jetons` parce
+    // que `configPAN.portfolio` avait encore des lecteurs ; **G2-b (#436, 9 août)
+    // a retiré les derniers**. Vérifié au code le 10 août : zéro lecteur, zéro
+    // écrivain hors commentaires dans tout `js/` — la seule occurrence restante
+    // est la donnée du pack démo.
+    // ⚠ Accès DYNAMIQUE (comme CHAMPS_MIROIRS_MORTS) pour rester invisible au
+    // ratchet statique qui greppe les écritures de la clé.
+    const CHAMP_CONFIGPAN_MORT = 'configPAN';
 
     /**
      * Purge les champs legacy des modalités de CHAQUE trimestre :
@@ -93,9 +100,13 @@
      *  - `pratiqueId` / `approcheEvaluation` (Lot 2-a) et `pratique`
      *    (Lot 2-b2) — miroirs morts, supprimés sans rapatriement (leur SSOT
      *    vit ailleurs) ;
-     *  - `configPAN.jetons` (Lot 2-c) — miroir mort ; la config des jetons vit
-     *    sur la pratique active. Seul ce sous-champ est retiré ; `configPAN.portfolio`
-     *    et le reste de `configPAN` sont conservés.
+     *  - `configPAN` en ENTIER (#353, 10 août 2026) — miroir mort. #328 L2-c
+     *    n'en retirait que `jetons` parce que `portfolio` avait encore des
+     *    lecteurs ; G2-b (#436, 9 août) a retiré les derniers. Aucun
+     *    rapatriement : la configuration vit sur la pratique active.
+     *    ⚠ Gain de budget NÉGLIGEABLE (~285 caractères par trimestre, mesuré
+     *    sur le pack démo) — c'est de l'hygiène zéro-dette, pas une réponse à
+     *    la saturation. Le dire évite de croire le problème traité.
      *
      * Appelée à chaque démarrage (main.js, séquence db-ready) : idempotente
      * et robuste face aux réintroductions par import de données anciennes
@@ -126,12 +137,12 @@
                     modifie = true;
                 }
             }
-            // #328 L2-c : miroir mort — la config des jetons vit sur la pratique active
-            // (obtenirConfigJetons la dérive). On retire UNIQUEMENT ce sous-champ ;
-            // `configPAN.portfolio` et le reste de `configPAN` sont conservés. Accès
-            // DYNAMIQUE (comme CHAMPS_MIROIRS_MORTS) pour rester invisible au ratchet statique.
-            if (m.configPAN && typeof m.configPAN === 'object' && SOUS_CHAMP_JETONS_MORT in m.configPAN) {
-                delete m.configPAN[SOUS_CHAMP_JETONS_MORT];
+            // #353 : le miroir `configPAN` ENTIER est retiré (voir la constante).
+            // #328 L2-c n'en ôtait que `jetons` ; `portfolio` a perdu ses derniers
+            // lecteurs avec G2-b (#436). Aucun rapatriement : la configuration vit
+            // sur la pratique active (`pratiquesConfigurables`), qui est la SSOT.
+            if (CHAMP_CONFIGPAN_MORT in m) {
+                delete m[CHAMP_CONFIGPAN_MORT];
                 modifie = true;
             }
 

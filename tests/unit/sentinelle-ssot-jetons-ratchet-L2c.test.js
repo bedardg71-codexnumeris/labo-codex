@@ -57,7 +57,15 @@ describe('#328 L2-c · ratchet miroir `configPAN.jetons` (statique)', () => {
     });
 });
 
-describe('#328 L2-c · purgerLegacy retire configPAN.jetons en gardant le reste', () => {
+describe('#353 · purgerLegacy retire le miroir configPAN EN ENTIER', () => {
+    // ⚠ CE BLOC A CHANGÉ D'INVARIANT LE 10 AOÛT, PAS DE CAMP. #328 L2-c ne
+    // retirait que `configPAN.jetons` et CONSERVAIT `portfolio`, parce que
+    // `portfolio` avait encore des lecteurs. G2-b (#436, 9 août) a retiré les
+    // derniers ; décision Grégoire du 9 août : le miroir entier rejoint la
+    // purge, dans la séance #353. Vérifié au code le 10 août : zéro lecteur,
+    // zéro écrivain hors commentaires dans tout `js/`.
+    // ⮕ Le gain de budget est NÉGLIGEABLE (~285 caractères par trimestre) :
+    //   c'est de l'hygiène zéro-dette, pas une réponse à la saturation.
     let store;
     const db = {
         getSync: (k, def) => (k in store ? store[k] : (def !== undefined ? def : null)),
@@ -69,8 +77,9 @@ describe('#328 L2-c · purgerLegacy retire configPAN.jetons en gardant le reste'
 
     beforeEach(() => { store = {}; });
 
-    it('supprime configPAN.jetons, conserve configPAN.portfolio', () => {
+    it('retire configPAN au complet — jetons ET portfolio', () => {
         store['t1_modalitesEvaluation'] = {
+            pratiquesUtilisees: ['garder'],          // le reste des modalités survit
             configPAN: {
                 jetons: { actif: true, delai: { nombre: 9 } },
                 portfolio: { methodeSelection: 'meilleurs', nombreARetenir: 4 },
@@ -80,14 +89,25 @@ describe('#328 L2-c · purgerLegacy retire configPAN.jetons en gardant le reste'
         const n = win.modalitesEvaluation.purgerLegacy();
         expect(n).toBe(1);
         const m = store['t1_modalitesEvaluation'];
-        expect('jetons' in m.configPAN).toBe(false);
-        expect(m.configPAN.portfolio).toEqual({ methodeSelection: 'meilleurs', nombreARetenir: 4 });
-        expect(m.configPAN._migrationV1Complete).toBe(true);
+        expect('configPAN' in m).toBe(false);
+        // Ce qui n'est PAS le miroir n'est pas touché : une purge qui emporte
+        // ses voisins serait une perte, pas un ménage.
+        expect(m.pratiquesUtilisees).toEqual(['garder']);
     });
 
-    it('idempotent : rien à purger si configPAN.jetons absent', () => {
-        store['t1_modalitesEvaluation'] = { configPAN: { portfolio: { methodeSelection: 'meilleurs' } } };
+    it('idempotent : rien à purger si configPAN est déjà absent', () => {
+        store['t1_modalitesEvaluation'] = { pratiquesUtilisees: ['x'] };
         expect(win.modalitesEvaluation.purgerLegacy()).toBe(0);
+    });
+
+    it('résiste à une réintroduction par import (le patron sans drapeau)', () => {
+        // Un backup Codex antérieur PORTE la clé et la réintroduit à l'import.
+        // La purge tourne à chaque démarrage, sans drapeau : elle repasse.
+        store['t1_modalitesEvaluation'] = { configPAN: { portfolio: { x: 1 } } };
+        expect(win.modalitesEvaluation.purgerLegacy()).toBe(1);
+        store['t1_modalitesEvaluation'].configPAN = { portfolio: { x: 1 } };  // réimport
+        expect(win.modalitesEvaluation.purgerLegacy()).toBe(1);
+        expect('configPAN' in store['t1_modalitesEvaluation']).toBe(false);
     });
 });
 
