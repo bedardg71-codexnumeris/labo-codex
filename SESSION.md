@@ -7,6 +7,26 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 10 AOÛT 2026, FIN : #446 LIVRÉ (le contexte cesse de mentir) + RITUEL DE CLÔTURE PASSÉ.
+     ÉTAT FINAL : **1.67.1** (build 0810-1304), `main`, arbre propre, `origin/main ↔ HEAD : 0 / 0`. Vitest **2111/2111** (239 fichiers). Dernier ID **#447**. 19 commits sur la journée, 1.65.2 → 1.67.1.
+
+     ⚠⚠ **#446 — DEUX CAPTURES DE GRÉGOIRE, TROIS DÉFAUTS DISTINCTS, dont un qui dormait depuis des mois.** Trimestre actif « Automne 2026 », et pourtant la barre du Cadre affichait « 2 GC · 51 étud. » (les chiffres de H26, inexistants en A26) et le formulaire proposait un groupe-cours `H2026-…-00008`.
+        A. Le handler de bascule ne rappelait **ni** la barre de progression **ni** le sélecteur de groupes-cours. Les deux lisent pourtant les bonnes clés namespacées : **le DOM gardait simplement le rendu d'avant.** Un bug d'affichage pur, indiscernable d'un bug de données à l'œil.
+        B. ⚠ **Le pointeur `groupeCoursActif` est GLOBAL, donc invalidé à CHAQUE bascule** — et l'auto-sélection se rabattait sur `groupesCours[0]`, le premier de la LISTE. Chez Grégoire, 00002 précède 00008 : **son groupe actif basculait en silence à chaque aller-retour de trimestre**, et tous les écrans de suivi avec lui. Corrigé : on cherche d'abord le groupe **marqué `actif`**, le repli sur le premier restant légitime (un trimestre peut n'en avoir aucun).
+        C. Quatre tris plantaient sur un `nom` absent (import CSV incomplet), dont un JUSTE APRÈS un changement de groupe-cours — donc **sur le chemin de la bascule**. Un champ vide chez UN étudiant coûtait l'écran de tout le groupe, et le tirage au sort échouait en « Uncaught (in promise) ».
+     ⮕ **1.67.1, suite du retour terrain** : le bloc Groupe-cours ne se vidait toujours pas. **Cause : `afficherEtatVideGroupeCoursV2` n'a JAMAIS été exportée de son IIFE.** L'appel était gardé par `typeof … === 'function'` — donc **le correctif #332, livré pour ça, n'a pas tourné une seule fois depuis sa livraison.**
+
+     ▣▣ **LE MOTIF DE LA JOURNÉE, ÉCRIT NOIR SUR BLANC : un garde défensif convertit une erreur de programmation en NON-ÉVÉNEMENT.** Deux fois le même jour, deux `typeof` muets — `sauvegarderPreference` qui n'existe pas (#444, les accordéons ne persistaient pas), `afficherEtatVideGroupeCoursV2` jamais exportée (#446, un correctif mort-né pendant des mois). ⮕ **Règle désormais dans les sentinelles : vérifier l'EXPORT réel, pas la présence de l'appel.** Le maillon manquant ne se voit pas en lisant l'appelant.
+
+     ▣ **RITUEL DE FIN — ce qu'il a donné.** §2 : zéro innerHTML interpolé, zéro handler inline, zéro `eval`, zéro `console.log` ajouté ; zones protégées absentes du diff ; CSP intacte ; les 3 sondes console à 0 écriture, les 2 réparations en dry-run gardé. §3 : **2111/2111** en 239 fichiers, zéro `only`/`skip` ; Playwright WebKit toujours hors conteneur (`/opt/pw-browsers` = Chromium seul) → 1 spec différée CI, **non exécutée, et c'est dit**. §4 : **15 break-tests rejoués SUR L'ARBRE FINAL, 15 ROUGE**, arbre restauré propre après.
+     ⚠ **DEUX BREAK-TESTS SONT D'ABORD RESTÉS VERTS, et les deux fautes étaient dans MES tests** : retirer `&& proche` laissait la variable calculée mais inemployée (assertion resserrée sur le `if` complet) ; renommer une classe en `…-btnX` gardait la sous-chaîne (assertion resserrée sur l'attribut `class="…"` entier). ⮕ **Le piège de la sous-chaîne a mordu QUATRE fois sur la journée**, dont une sur mon propre commentaire explicatif — un commentaire cite forcément l'ancien comportement qu'il décrit, donc la sonde le trouvait AVANT le code et mesurait l'ordre à l'envers. La sentinelle #446 retire désormais les commentaires avant de chercher.
+     ▣ **§4.2 récit↔code** : six affirmations chiffrées confrontées au diff. **Cinq exactes, UNE nuancée** — « ~51 lignes CSS mortes » était une estimation, pas une mesure (95 suppressions au total, la part n'est plus isolable a posteriori). ▣ **§4.3 connexions** : les 13 écrivains de `groupeCoursActif` inspectés un par un (`main.js:736` = migration de `pratiqueId`, hors périmètre) ; tous les créateurs de `metadata.objectifs` passent par `nouvelIdObjectif()` ; zéro-dette honoré (`grep changerGroupeCoursActifV2 js/trimestres.js` → 0).
+
+     ✅ **LA JOURNÉE EN ENTIER** : audit `Plan Accompagnement/` (§4quater, dernier angle mort — 1.65.2) · **#154** productions inaccessibles, sonde + réparation exécutée sur données réelles + le filtre qui avale tout DIT désormais · **#155** les cinq pages de Conception rendaient vide · **#157** l'espacement au dépli des objectifs · **#158** les objectifs sans id · **#444** la carte utilisable au doigt (+1.66.1, familles à 36 px) · **#446** le contexte de trimestre. **Campagne des 81 portes CLOSE : 81/81**, 4 échecs tous versés ou corrigés.
+     ⮕ **OUVERTS** : #447 (fraîcheur aperçu) · #445 (affordance liens + légende !/⚠/✓) · #443 (wizard, décision) · #442 (doublons cours + échelles a2025) · #353 (localStorage à 200 %).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 10 AOÛT 2026, PM : #444 LIVRÉ — la carte devient utilisable au doigt.
      ÉTAT FINAL : **1.66.0** (build 0810-1205), `main`, Vitest **2098/2098** (238 fichiers).
 
@@ -5906,6 +5926,166 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
 ## §3 — Consigne de démarrage pour la prochaine session
 
+> **Réécrite le 10 août 2026 en clôture de journée.** Tout est sur `main`, arbre
+> propre, zéro divergence. Pas de dette de fusion. ⮕ **La campagne des 81 portes
+> terrain est CLOSE (81/81)** — le blocage qui tenait la priorité 0 depuis trois
+> jours a sauté. La priorité 0 change de nature : ce ne sont plus des
+> vérifications dues, ce sont les **défauts que ces vérifications ont trouvés**.
+
+### Prémisse à vérifier au rituel de début (§1)
+
+| Point | Valeur attendue |
+|---|---|
+| Branche | **`main`** — plus rien en avance (`RELAIS.md` le confirme) |
+| Version | `{"build":"0810-1304","beta":"1.67.1"}` |
+| Vitest | **2111/2111** (239 fichiers) |
+| Playwright WebKit | non exécutable en conteneur → CI à la PR |
+| Dernier ID BACKLOG | **#447** |
+| Arbre | propre · `origin/main ↔ HEAD : 0 / 0` |
+
+⚠ **Le clone du conteneur est SHALLOW.** `git fetch --unshallow` AVANT toute
+comparaison **et avant toute fusion**. Sans ça, `main` local paraît vieux de
+plusieurs semaines : `git rev-list --count main...HEAD` annonce une divergence
+**entièrement fictive** (9 août matin : 83/57 annoncés, réel 0/0), et
+`git merge --ff-only` répond **« refusing to merge unrelated histories »** — un
+message qui fait croire à un dépôt corrompu alors qu'il ne dit que « historique
+tronqué » (9 août PM). Vérifier ensuite que le `main` local est bien un
+**ancêtre** d'`origin/main` (`git merge-base --is-ancestor`) : c'est ce qui
+distingue « en retard » de « divergent ».
+
+⚠ **`git fetch` juste avant de pousser**, pas seulement en ouvrant. Un push
+rejeté n'est pas un incident : c'est le filet qui fonctionne.
+
+⚠⚠ **LE BUILD DE GRÉGOIRE N'EST PAS `main`.** Il lance l'app en **`file://`
+depuis son clone Git** sur Mac (donc à la version de son dernier `git pull`) et
+via **app.codexnumeris.org** sur iPad (la prod, elle, suit `main`). ⮕ **Première
+case de toute checklist terrain : `git pull`.** Sur les quatre échecs des
+81 portes, **deux étaient des FAUX ROUGES produits par un build en retard** — et
+un faux rouge de cette famille est indétectable au récit, parce qu'il décrit
+exactement l'état pré-correctif, qui est précisément ce que la porte teste.
+
+---
+
+### Priorité 0 — ce que les 81 portes ont laissé sur la table
+
+Cinq items, dans l'ordre de gêne pour l'utilisateur. **#447 est en tête parce
+qu'il affiche des CHIFFRES FAUX** — pas une gêne d'ergonomie, une erreur lue.
+
+| # | Objet | Pourquoi ce rang |
+|---|---|---|
+| **#447** 🟡 | l'aperçu du groupe lit des indices C/P stockés **sans garantie de fraîcheur** | la Liste recalcule et stocke, l'aperçu lit le stocké (#397, cache de perf). Visiter l'aperçu AVANT la Liste = distribution périmée. Le 10 août : « Incomplet : 23 » à l'aperçu pendant que le profil calculait 69,8 % en direct. ⮕ **Geste de contournement à redire à Grégoire tant que ce n'est pas corrigé : ouvrir « Liste des étudiant·es », PUIS l'aperçu.** À arbitrer contre la perf #397 (~460 ms à 75 étudiants avant les caches) |
+| **#445** 🟡 | affordance du lien objectif↔activité + légende `!` / `⚠` / `✓` | le canevas apprend à glisser des liens partout ; l'utilisateur essaiera toujours de relier une activité à un objectif **en traçant** — canal qui n'existe pas (#403 a choisi les cases déclaratives). Et la légende des pastilles ne vit que dans une infobulle de survol, **inexistante sur iPad** |
+| 📐 **#443** | le wizard offre encore « Par objectifs d'apprentissage » | **décision UX de Grégoire attendue avant de coder** : sauter l'étape (11 → 10) ou la garder à une carte d'information ? Deux surfaces disent deux vérités depuis #396+#435 |
+| **#442** 🟡 | doublons à id identique dans le magasin global `cours` + échelles orphelines en a2025 | ⚠ charger **`SKILL_integrite_globaux.md`** avant d'y toucher — filtrer par identité de la source, jamais par drapeau |
+| **#353** | budget localStorage **à 200 %** (10 239 / 5 120 Ko, 472 clés) | monté d'un cran le 9 août. Gagne un point : purger le miroir `configPAN`, sans lecteur ni écrivain mais toujours dans les données. ⚠ Purge **sans drapeau** (comme #409) : un backup Codex antérieur porte la clé et la réintroduirait à l'import |
+
+### Priorité 1 — QUATRE décisions toujours attendues de Grégoire
+
+**Aucun verdict n'est consigné au 10 août au soir.** Elles sont au **§1 de
+`plans de travail/PORTES-TERRAIN-1.57-1.65.md`**, chacune avec la question de
+fond et l'endroit unique à changer. Aucune ne se code sans lui.
+
+| # | Valeur gelée | Chantier | Nature |
+|---|---|---|---|
+| 1.1 | cible tactile **28 px** de la ligne d'objectif | #437 (carte) | se tranche **en regardant** |
+| 1.2 | sarcelle **`#0891b2`** des cinq étapes | #437 (carte) | se tranche **en regardant** |
+| 1.3 | dénominateur de l'**indice C** = **3** | #436 (pratiques) | se tranche **en raisonnant** — chiffre affiché |
+| 1.4 | **quota affiché des jetons** = **2** | #436 (pratiques) | se tranche **en raisonnant** |
+
+⚠ **Ne pas confondre les deux paires** : 1.1/1.2 viennent de la carte, 1.3/1.4
+des pratiques. La confusion a déjà eu lieu une fois entre les deux sessions du
+9 août.
+
+⮕ **Deux autres décisions dorment** : 📐 **#441** (le chantier 3 de SOLO a-t-il
+encore un objet ? — invisible pour l'utilisateur, ni promesse trahie ni porte
+morte) et `docs/refonte-textes/infobulles-T9/T10` (specs du 19 avril dont le JS
+se dit encore « la source » ; T10 documente une page supprimée — les archiver,
+ou corriger l'en-tête du JS pour dire que le code fait foi).
+
+### Priorité 2 — les chantiers de fond, si le terrain laisse de l'air
+
+- **Le chantier « guides » est à 5 sur 7** (**#439**) : « Enseignement explicite »
+  et `pan-rrec` n'ont jamais été écrits. ⮕ `pan-rrec` **n'est pas un chantier de
+  conception** : ses 4 pages sont **déjà rédigées** au §3 de son plan, prêtes à
+  coller. ⚠ Registre à ne pas diluer : le guide ne dit jamais que l'app
+  *garantit* la conformité (`seuilReussite` est configurable — le promettre
+  serait faux).
+- **#440** 🟡 — SRPNF codé en dur dans l'**affichage** des diagnostics (le calcul,
+  lui, a été généralisé depuis). Deux sites d'affichage + le regex
+  d'`identifierDefiSpecifique`. **À confirmer au terrain avant de dimensionner** :
+  sur une grille non-SRPNF, forces/défis s'affichent mais le tableau de scores et
+  les barres restent vides.
+- **#425** (intégration des productions, D → C → B → A) · **#416** (exports du
+  plan de la leçon présentables) · **#403** (liens objectif → activité/évaluation,
+  design déjà tranché — et **#445 en est le retour terrain**, les traiter ensemble).
+- **#418** — `db-ready` **jamais émis** si IndexedDB est indisponible : toutes les
+  migrations du boot sont sautées.
+- **#428 + #430** — dettes datées de la rentrée, **à retirer ENSEMBLE**.
+- **#427** — refermer l'accès public (Cloudflare Access, OTP courriel).
+  **Échéance reportée à septembre 2026** par Grégoire.
+
+### ◈ Reliquat connu, non corrigé (passe « connexions » du 9 août, toujours vrai)
+
+**Trois bibliothèques tierces portent un `?v=` hors du périmètre de
+`release.mjs`** : `libs/html2canvas.min.js`, `libs/jszip.min.js`,
+`libs/pdf.min.js`. Même classe que #438 — mais **un seul commit sur `libs/`
+depuis le 1er mai**, donc risque faible. À traiter si une mise à jour de lib est
+prévue, pas avant.
+
+---
+
+### Rappel de méthode — ce que le 10 août a coûté et appris
+
+**Six leçons, et les trois premières sont la même famille : une vérification qui
+atteste au lieu de prouver.**
+
+1. ⚠⚠ **Un garde défensif convertit une erreur de programmation en
+   NON-ÉVÉNEMENT.** Deux fois dans la journée : `sauvegarderPreference` n'existe
+   pas (c'est `definirPreference`) — les accordéons se repliaient mais ne
+   persistaient jamais ; `afficherEtatVideGroupeCoursV2` n'a **jamais été
+   exportée** de son IIFE — le correctif #332 livré pour ça **n'a pas tourné une
+   seule fois depuis sa livraison**. Dans les deux cas, un
+   `if (typeof … !== 'function') return;` a avalé l'échec en silence. ⮕ **Vérifier
+   l'EXPORT réel, pas la présence de l'appel.** Le maillon manquant ne se voit
+   pas en lisant l'appelant.
+2. ⚠⚠ **Le piège de la sous-chaîne — QUATRE fois dans la journée.**
+   `.palette-icon {` matchait `.planif-corbeille .palette-icon {` ·
+   `.planif-palette-zone-label {` matchait la règle de COULEUR
+   `[data-zone="…"] …` · `_dernierTap = 0;` matchait sa propre déclaration ·
+   `groupesCours[0]` matchait **mon propre commentaire explicatif** (un
+   commentaire cite forcément l'ancien comportement qu'il décrit : la sonde le
+   trouvait AVANT le code et mesurait l'ordre à l'envers). ⮕ **Toute borne de
+   slice ou motif de sentinelle s'ANCRE** (`^…` multiligne, `\n` en tête, attribut
+   `class="…"` entier) — et **on retire les commentaires avant de chercher du
+   code**.
+3. ⚠ **Vérifier la présence d'un garde ne prouve pas qu'il garde.** Retirer
+   `&& proche` de la condition du double-tap n'a rien fait rougir : l'assertion
+   vérifiait que la borne de distance EXISTAIT (la variable était encore
+   calculée), pas qu'elle était **employée**. Resserrée sur le `if` complet.
+   *Un break-test resté vert est une information sur le TEST, pas sur le code.*
+4. **Chaque navigateur est une île de stockage.** « Assez fréquent » +
+   multi-appareils ⇒ penser îles AVANT de penser code. La réparation #346 de juin
+   a soigné la copie Safari ; Chrome ne l'a jamais reçue, et son état était MIXTE
+   (magasin `cours` migré, productions non) — c'est tout #154. ⮕ Et un correctif
+   « en données » sans **vecteur bouché** revient par la première synchro manuelle
+   venue : d'où le `console.warn` de `modes.js`, qui fait parler le filtre au lieu
+   de le laisser avaler.
+5. **Reproduire avant de demander.** Le conteneur a Chromium : #155 a été
+   reproduit à VIDE en trois minutes, ce qui a prouvé « bug de code » sans
+   toucher aux données de Grégoire, puis daté la régression AU COMMIT par un test
+   d'équilibre de balises sur l'historique.
+6. **Semer des données à la taille du réel.** #157 ne se reproduisait qu'avec des
+   textes LONGS : la hauteur d'un en-tête dépend de la largeur (repli du texte),
+   donc des objectifs courts d'une ligne ne replient pas et **tous les essais à
+   blanc passaient** pendant que les objectifs réels échouaient toujours.
+
+⮕ **Et une leçon de campagne** : les portes passées sur un build en retard
+produisent des faux rouges parfaitement plausibles. La case « git pull d'abord »
+a été ajoutée au §0 de la checklist **après** le début de la campagne — la
+prochaine la met en **case 1**.
+
+## §3ter — Consigne du 9 août (archivée le 10 août — 81 portes closes, #154/#155/#157/#158/#444/#446 livrés, audit `Plan Accompagnement/` versé)
+
 > **Réécrite le 9 août 2026 en clôture**, après la fusion des DEUX branches du
 > jour. Tout est sur `main`. Il n'y a plus de dette de fusion.
 
@@ -6010,7 +6190,11 @@ une mise à jour de lib est prévue, pas avant.
    module croisait un renommage et un retrait de bandeau : prendre un côté aurait
    supprimé l'autre en silence, et aucune sentinelle des deux côtés ne l'aurait vu.
 
-## §3ter — Consigne du 8 août (archivée le 9 août — #424/#431/#432/#433 livrés, #426 et #421 livrés depuis)
+## §3quater — Consigne du 8 août (archivée le 9 août — #424/#431/#432/#433 livrés, #426 et #421 livrés depuis)
+
+> ⮕ **À verser au §3bis à la prochaine réécriture du §3.** Convention tenue :
+> §3 = consigne courante, §3ter = la précédente, §3quater = l'avant-précédente,
+> §3bis = les archives. Trois niveaux vivants au maximum.
 
 > **Réécrite le 8 août 2026 en après-midi, APRÈS la fusion de 1.57.0 vers
 > `main`.** Le portage des exports (#424, lots A→G) est LIVRÉ ; la page

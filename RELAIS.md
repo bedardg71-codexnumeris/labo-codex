@@ -12,34 +12,51 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | **`main`** |
-| **Version** | **1.65.2** — build `0809-1101` |
+| **Version** | **1.67.1** — build `0810-1304` |
 | **Travail en avance sur `main`** | **aucun** |
-| **Dernière mise à jour** | 9 août 2026, **PM** — session de reprise fusionnée (`--ff-only`), sur instruction de Grégoire |
+| **Dernière mise à jour** | 10 août 2026, **fin de journée** — rituel de clôture passé, tout poussé sur `main` |
 
-✅ **Aucune dette de fusion.** La session du 9 août PM (audit de
-`Plan Accompagnement/` → §4quater, versement #439/#440/📐#441, retrait du patron
-`.option-accompagnement`) est dans `main` en fast-forward `02298a4b..acf47e61`.
-Suite rejouée **sur l'arbre fusionné** : Vitest **2062/2062** (233 fichiers),
-arbre propre. Dernier ID utilisé : **#441**.
+✅ **Aucune dette de fusion.** La journée du 10 août (19 commits, **1.65.2 →
+1.67.1**) est intégralement sur `main`. Suite rejouée sur l'arbre final :
+Vitest **2111/2111** (239 fichiers), arbre propre, `origin/main ↔ HEAD : 0 / 0`.
+Dernier ID utilisé : **#447**.
 
-⚠ **PIÈGE D'ENVIRONNEMENT CONFIRMÉ UNE FOIS DE PLUS, et il a mordu à la fusion**
-(pas au rituel de début, où la branche était un calque exact du `main` distant) :
-le clone du conteneur était **shallow**, et `main` LOCAL pointait au **10 juillet**,
-200 commits en retard. `git merge --ff-only` a répondu **« refusing to merge
+⮕ **Ce que la journée a livré** : audit de `Plan Accompagnement/` (le dernier
+angle mort — §4quater), puis **six retours terrain traités en priorité** selon la
+règle de `CLAUDE.md` — **#154** (productions inaccessibles : sonde, réparation
+exécutée sur les données réelles, et le filtre qui avalait tout parle désormais)
+· **#155** (les cinq pages de Conception rendaient vide) · **#157** ·
+**#158** · **#444** (la carte utilisable au doigt) · **#446** (le contexte de
+trimestre cessait de mentir). ⮕ **La campagne des 81 portes terrain est CLOSE :
+81/81.**
+
+⚠ **PIÈGE D'ENVIRONNEMENT — toujours vrai, et il a mordu deux fois autrement le
+9 août.** Le clone du conteneur est **shallow** : `main` LOCAL peut pointer des
+semaines en arrière, `git rev-list --count` annonce alors une divergence
+**entièrement fictive**, et `git merge --ff-only` répond **« refusing to merge
 unrelated histories »** — un message qui fait croire à un dépôt corrompu alors
 qu'il ne dit que « l'historique est tronqué ». ⮕ **`git fetch --unshallow` AVANT
-toute fusion**, pas seulement avant les comparaisons. Vérifier ensuite que le
-`main` local est bien un **ancêtre** d'`origin/main` (`git merge-base --is-ancestor`)
-avant de le faire avancer : c'est ce qui distingue « en retard » de « divergent ».
+toute comparaison ET avant toute fusion.** Vérifier ensuite que le `main` local
+est bien un **ancêtre** d'`origin/main` (`git merge-base --is-ancestor`) : c'est
+ce qui distingue « en retard » de « divergent ».
+
+⚠⚠ **ET LE MÊME PIÈGE, CÔTÉ TESTEUR — c'est la nouveauté du 10 août.** Grégoire
+lance l'app en **`file://` depuis son clone Git** sur Mac : son build est celui
+de son dernier `git pull`, pas celui de `main`. **Deux des quatre échecs des
+81 portes étaient des FAUX ROUGES produits par un build en retard** — et ce
+type de faux rouge est indétectable au récit, parce qu'il décrit exactement
+l'état pré-correctif, qui est précisément ce que la porte teste. ⮕ **`git pull`
+en case 1 de toute checklist terrain.** (Sur iPad il passe par
+**app.codexnumeris.org**, qui suit `main` — pas de pull de ce côté.)
 
 ⮕ **Où lire la suite** : le **§3 de `SESSION.md`** porte la consigne de démarrage
-complète — prémisse chiffrée à vérifier, priorités dans l'ordre, décisions en
-attente, et les cinq leçons de méthode que le 9 août a coûtées. **Ses priorités
-sont inchangées** : les 81 portes terrain et les quatre valeurs gelées restent en
-tête, et rien de cette session n'y touche.
+complète — prémisse chiffrée à vérifier, priorité 0 (les cinq items que les
+81 portes ont laissés : **#447**, **#445**, 📐**#443**, **#442**, **#353**), les
+quatre valeurs gelées toujours sans verdict, et les **six leçons de méthode** du
+10 août.
 
-> ▣ **Tout ce qui suit décrit la journée du 9 août au MATIN** — la collision des
-> deux sessions et sa résolution. C'est de l'historique, conservé pour la méthode
+> ▣ **Tout ce qui suit décrit les journées du 9 août** — la collision des deux
+> sessions et sa résolution. C'est de l'historique, conservé pour la méthode
 > qu'il porte. L'état courant est le tableau ci-dessus.
 
 ✅ **La dette de fusion du 9 août (matin) est SOLDÉE.** Les deux sessions parallèles
