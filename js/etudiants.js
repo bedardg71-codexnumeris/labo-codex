@@ -1070,13 +1070,18 @@ function afficherListeEtudiantsConsultation() {
                 valeurA = a.groupe;
                 valeurB = b.groupe;
                 break;
+            // #446 (trouvaille collatérale, 10 août 2026) : un étudiant sans
+            // `nom` ou sans `prenom` — import CSV incomplet, fiche à moitié
+            // saisie — faisait planter le comparateur, donc le TRI, donc le
+            // rendu de toute la liste. Un champ manquant ne doit jamais coûter
+            // l'écran entier : il trie comme une chaîne vide.
             case 'nom':
-                valeurA = a.nom.toLowerCase();
-                valeurB = b.nom.toLowerCase();
+                valeurA = String(a.nom || '').toLowerCase();
+                valeurB = String(b.nom || '').toLowerCase();
                 break;
             case 'prenom':
-                valeurA = a.prenom.toLowerCase();
-                valeurB = b.prenom.toLowerCase();
+                valeurA = String(a.prenom || '').toLowerCase();
+                valeurB = String(b.prenom || '').toLowerCase();
                 break;
             case 'assiduite':
                 valeurA = a.indicesCalcules.A;
@@ -1103,12 +1108,18 @@ function afficherListeEtudiantsConsultation() {
                 valeurB = b.num;
         }
 
-        // Comparer
+        // Comparer.
+        // #446 (trouvaille collatérale) : `valeurB` peut être `undefined` —
+        // groupe absent, pattern non calculé, fiche incomplète — et
+        // `localeCompare(undefined)` compare alors contre la chaîne "undefined"
+        // au mieux, lève au pire. Le tri entier plantait, donc la liste ne
+        // s'affichait plus : un champ vide chez UN étudiant coûtait l'écran de
+        // TOUT le groupe. On normalise les deux côtés au moment de comparer.
         let comparaison = 0;
-        if (typeof valeurA === 'string') {
-            comparaison = valeurA.localeCompare(valeurB);
+        if (typeof valeurA === 'string' || typeof valeurB === 'string') {
+            comparaison = String(valeurA ?? '').localeCompare(String(valeurB ?? ''));
         } else {
-            comparaison = valeurA - valeurB;
+            comparaison = (valeurA ?? 0) - (valeurB ?? 0);
         }
 
         // Inverser si ordre descendant

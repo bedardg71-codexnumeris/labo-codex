@@ -482,6 +482,25 @@ function changerTrimestreActifV2(valeur) {
                 mettreAJourBandeauArchive();
             }
 
+            // #446 (10 août 2026) — les deux surfaces qui restaient sur le
+            // trimestre QUITTÉ, constatées en capture par Grégoire :
+            //
+            //   · la BARRE DE PROGRESSION du Cadre affichait encore « 2 GC /
+            //     51 étud. » (les chiffres de H26) alors que le trimestre actif
+            //     était A26, qui n'a aucun groupe-cours. Elle lit pourtant les
+            //     bonnes clés namespacées : elle n'était simplement jamais
+            //     rappelée, donc le DOM gardait le rendu d'avant la bascule ;
+            //   · le SÉLECTEUR « Groupe-cours existants » gardait la liste de
+            //     l'ancien trimestre — d'où un « H2026-… » proposé sous A2026.
+            //
+            // Les deux fonctions sont idempotentes et relisent tout : les
+            // appeler ici suffit, il n'y a pas d'état à démêler.
+            if (typeof window.mettreAJourBarreContexte === 'function') {
+                window.mettreAJourBarreContexte();
+            }
+            if (typeof populerDropdownGroupeCoursV2 === 'function') {
+                populerDropdownGroupeCoursV2();
+            }
         }
     } else {
         console.error('[Trimestre V2] Fonction changerTrimestreActif non disponible');
