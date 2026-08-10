@@ -119,6 +119,46 @@ rapporter `projectionSeuils`. C'est l'entrée manquante de la décision.
 
 ---
 
+## 4ter. ✅ OPTION 2 TRANCHÉE — 200 Ki → 25 Ki caractères (10 août 2026)
+
+Relevé terrain des **deux** navigateurs, unité corrigée :
+Chrome **100 %** (475 clés) · Safari **88,3 %** (462 clés).
+
+| seuil | Chrome reste | Safari reste | clés déplacées |
+|---|---|---|---|
+| 200 Ki *(ancien)* | **100 %** | 88 % | **0 / 0** |
+| 100 Ki | 88 % | 84 % | 4 / 2 |
+| 75 Ki | 78 % | 77 % | 10 / 6 |
+| 50 Ki | 70 % | 68 % | 17 / 13 |
+| **25 Ki** *(retenu)* | **44 %** | **44 %** | 60 / 55 |
+| 10 Ki | 9 % | 8 % | 165 / 161 |
+
+▣ **La première ligne est le diagnostic** : à 200 Ki, **zéro clé ne basculait**
+— la plus grosse clé pèse 184 K car. Le mécanisme IDB-first existe depuis
+#334 D et **n'a jamais pu se déclencher**. Un seuil placé au-dessus du plus gros
+objet du magasin n'est pas un seuil, c'est un plafond décoratif.
+
+▣ **Deux jeux de données distincts convergent sur 44 %** : la masse est dans la
+**longue traîne** (475 clés pour 5 119 K car.), pas dans quelques géants. ⮕ Cela
+**écarte l'option 3** (liste blanche de grosses clés) : elle déplacerait peu.
+
+▣ **Vérifié au navigateur** (Chromium, semis au gabarit du terrain) : après
+rechargement, les clés > 25 Ki ont quitté localStorage, sont servies depuis
+`memoryCache`, et **restent lisibles par `getSync`** — seul le lieu change. La
+projection se réalise donc **au rechargement suivant**, sans script de migration :
+`syncToLocalStorageCache` réapplique le seuil à chaque démarrage.
+
+⚠ **Sans IndexedDB**, le routage retombe sur localStorage (garde `idbDispo`,
+break-testé) : abaisser le seuil n'expose rien de neuf. Corollaire assumé : plus
+de clés sont servies depuis `memoryCache`, ce qui élargit la fenêtre « lecture
+avant hydratation du boot » — celle que surveille **#418**. Tout lecteur doit
+passer par `auDbPret`.
+
+⮕ **L'option 4** (quota piloté par `navigator.storage.estimate()`) reste ouverte
+et n'est plus urgente : à 44 %, l'alerte à 80 % a de la marge devant elle.
+
+---
+
 ## 5. Hygiène zéro-dette adjacente (hors #353 strict)
 
 - ~~`libereCacheLocalStorage`~~ — **retiré le 3 juillet** (Option 1).

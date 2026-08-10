@@ -7,6 +7,66 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 10 AOÛT 2026, SOIR (6) : #353 OPTION 2 TRANCHÉE — le seuil était au-dessus de tout.
+     ÉTAT FINAL : **1.71.0** (build 0810-1651), Vitest **2159/2159** (243 fichiers).
+
+     ▣ **LE RELEVÉ TERRAIN A VALIDÉ LA CONVERSION À 0,05 % PRÈS.** Grégoire a collé `db.statsStockage()`
+     depuis son build d'AVANT le correctif : `octets: 10 480 642`, `ratio: 1.9990`. Converti dans la
+     monnaie du quota : **5 240 321 car. / 5 242 880 = 99,95 %**. Les « 200 % » étaient bien 100 %,
+     vérifié cette fois sur ses données réelles et non sur un remplissage synthétique.
+     ⮕ Marge restante à ce moment-là : **2 559 caractères.** L'équivalent d'une ligne de texte.
+
+     ⚠⚠ **ET LE RELEVÉ A DONNÉ LE DIAGNOSTIC QUE LA PROJECTION SEULE NE DONNAIT PAS.**
+     À l'ancien seuil de 200 Ki, **ZÉRO clé ne basculait — sa plus grosse clé pèse 184 K car.**
+     Le mécanisme IDB-first existe depuis #334 D (mars) et **n'avait jamais pu se déclencher chez lui**.
+     ⮕ *Un seuil placé au-dessus du plus gros objet du magasin n'est pas un seuil, c'est un plafond
+     décoratif.* Il a passé cinq mois à ne rien faire sans que rien ne le signale — même famille que le
+     garde muet du 10 août au matin, à une échelle plus grande.
+
+     ▣ **DÉCISION DE GRÉGOIRE, PRISE SUR LA TABLE : 200 Ki → 25 Ki caractères.**
+        seuil      Chrome reste   Safari reste   clés déplacées
+        200 Ki        100 %           88 %          0  /  0      ← l'ancien
+        100 Ki         88 %           84 %          4  /  2
+         50 Ki         70 %           68 %         17  / 13
+         25 Ki         44 %           44 %         60  / 55      ← retenu
+         10 Ki          9 %            8 %        165  /161
+     ⮕ **Deux jeux de données DISTINCTS convergent sur 44 %** : la masse est dans la LONGUE TRAÎNE
+     (475 clés pour 5 119 K car.), pas dans quelques géants. **Cela écarte l'option 3** (liste blanche de
+     grosses clés) sur des chiffres, pas sur une intuition — ce que le rapport réclamait depuis juin.
+
+     ▣ **VÉRIFIÉ AU NAVIGATEUR, pas seulement raisonné** : semis au gabarit du terrain (184 / 46 / 12 / 1 K
+     car.), rechargement, relevé. Les clés > 25 Ki ont **quitté localStorage**, sont servies depuis
+     `memoryCache`, et **restent lisibles par `getSync`** — seul le lieu change, rien n'est perdu.
+     ⮕ Donc **la projection se réalise au rechargement suivant, sans script de migration** :
+     `syncToLocalStorageCache` réapplique le seuil à chaque boot. C'était une promesse lue au code ; elle
+     est maintenant une observation.
+     ⚠ **Sans IndexedDB, le routage retombe sur localStorage** (garde `idbDispo`) : abaisser le seuil
+     n'expose RIEN de neuf. Break-testé (BT42) — et l'assertion a d'abord échoué parce que j'avais écrit
+     l'inverse : dans le bac à sable Node, IDB est ABSENT, donc la clé DOIT rester en localStorage.
+     *Mon assertion était fausse, pas le code.* Corrigée en verrouillant le repli, qui est la propriété
+     de sûreté qui rend la baisse acceptable.
+
+     ⚠ **TROIS FORMES DE CLÉS MORTES TROUVÉES DANS LE TOP 20** — vérifiées au code, pas supposées :
+        · **`a2024_presences` + `a2024_evaluationsSauvegardees` = 363 K car., en CHROME SEULEMENT** (7 % du
+          quota, pour un trimestre d'il y a deux ans ; absentes de Safari — les îles, encore) ;
+        · **`h2026_snapshots_COURS1766455789356` (46 K car.)** — nommée d'après l'id de cours d'AVANT la
+          migration, celui que `reparer154()` a réapparié le 10 août. Les snapshots se nomment
+          `<trim>_snapshots_<coursId>` (`snapshots.js:96`) : **plus aucun lecteur ne reconstruit ce nom.**
+          ⮕ La réparation #154 a soigné les productions ; cette clé-là est restée derrière.
+        · **`simulation_indicesCP` (72 K car.)** — **aucun producteur dans tout `js/`**, vérifié au grep.
+     ⮕ **`scripts/diagnostic-353-cles-orphelines.js`** livré : il confronte chaque clé aux registres
+     VIVANTS (`trimestres`, magasin `cours`) au lieu de deviner, et **n'écrit rien**. Essayé dans l'app
+     avec semis des trois formes ET de deux témoins légitimes : les trois sont classées, aucun témoin ne
+     l'est. ⏳ À lancer par Grégoire dans les DEUX navigateurs.
+
+     ▣ **§4 : 2 break-tests sur ce cycle (48 sur la session), 2 ROUGE.** Seuil remonté à 200 Ki (2 rouges,
+     dont le cas qui porte la table de décision) · garde `idbDispo` retiré (1).
+     ⮕ **Ce qui reste de #353** : l'exécution des purges (orphelines + `db.purgerBackupsV1()`, dry-run par
+     défaut) et `tamponsImages` base64 non namespacé. L'option 4 (quota piloté) n'est plus urgente : à
+     44 %, l'alerte à 80 % a de la marge devant elle.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 10 AOÛT 2026, SOIR (5) : #353 — L'ALERTE CRIAIT DANS LA MAUVAISE MONNAIE.
      ÉTAT FINAL : **1.70.0** (build 0810-1548), Vitest **2158/2158** (243 fichiers).
 

@@ -85,7 +85,39 @@
     // (les accents coûtent 2 octets UTF-8 pour 1 caractère), mais l'incohérence
     // rendait tout arbitrage sur chiffres impossible — or c'est exactement ce
     // que #353 demande.
-    const SEUIL_IDB_FIRST = 200 * 1024; // 200 Ki caractères
+    //
+    // ⮕ VALEUR TRANCHÉE SUR CHIFFRES le 10 août 2026 (option 2 du RAPPORT-353,
+    // décision Grégoire) : 200 Ki → **25 Ki caractères**.
+    //
+    // Le relevé terrain des DEUX navigateurs de Grégoire, une fois l'unité
+    // corrigée (Chrome 100 % / 475 clés · Safari 88,3 % / 462 clés) :
+    //
+    //   seuil       Chrome reste   Safari reste   clés déplacées
+    //   200 Ki         100 %           88 %          0  /  0     ← l'ancien
+    //   100 Ki          88 %           84 %          4  /  2
+    //    50 Ki          70 %           68 %         17  / 13
+    //    25 Ki          44 %           44 %         60  / 55     ← retenu
+    //    10 Ki           9 %            8 %        165  /161
+    //
+    // ▣ CE QUE LA PREMIÈRE LIGNE DIT, ET QUI EXPLIQUE TOUT : à 200 Ki, **zéro
+    // clé ne basculait** — la plus grosse clé de Grégoire pèse 184 K car. Le
+    // mécanisme IDB-first existe depuis #334 D ; il n'avait jamais pu se
+    // déclencher chez lui. Un seuil au-dessus du plus gros objet n'est pas un
+    // seuil, c'est un plafond décoratif.
+    // ▣ Deux jeux de données distincts convergent sur 44 % à 25 Ki : la masse
+    // est dans la LONGUE TRAÎNE (475 clés pour 5 119 K car.), pas dans quelques
+    // géants — ce qui écarte l'option 3 (liste blanche de grosses clés).
+    //
+    // ⚠ Ce que ce changement NE fait pas : il ne déplace rien de lui-même dans
+    // l'instant. C'est `syncToLocalStorageCache` qui, à CHAQUE démarrage,
+    // réapplique le seuil et retire de localStorage ce qui le dépasse — donc la
+    // projection se réalise au rechargement suivant, sans script de migration.
+    // ⚠ Corollaire assumé : plus de clés sont servies depuis `memoryCache`. Ce
+    // n'est pas une exposition neuve quand IndexedDB est absent (le routage est
+    // gardé par `idbDispo` et retombe alors sur localStorage), mais ça élargit
+    // la fenêtre « lecture avant hydratation du boot » — la même que surveille
+    // #418. Tout lecteur doit passer par `auDbPret`.
+    const SEUIL_IDB_FIRST = 25 * 1024; // 25 Ki caractères (voir la table ci-dessus)
 
     /**
      * Classe Database - API unifiée pour stockage
