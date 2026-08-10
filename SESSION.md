@@ -19,7 +19,8 @@
 
      ✅ **#444 ARBITRÉ (Grégoire, 10 août)** : corbeille FLOTTANTE au canevas pendant le drag · Inspecteur = bouton dans la barre + DOUBLE-TAP · accordéons par famille OUI. **Prêt à coder — prochain chantier.**
      ✅ **Bouton « Copier le bilan » de l'artefact réparé** : le presse-papiers est refusé à la page publiée chez Grégoire — repli execCommand + affichage du bilan pré-sélectionné en dernier filet. Republié, même URL.
-     ⮕ **OUVERTS** : #444 (à coder) · re-vérification §2.2/§3.1/§5.3 sur build à jour · #443 (wizard, décision) · DIAG #156 (échelles) attendu · #442 · #353.
+     ✅ **CLÔTURES DE L'APRÈS-MIDI (10 août)** : sonde #159 collée par Grégoire — verdicts : (1) échelles personnelles orphelines en a2025 (en DOUBLE, famille #442), h2026/a2026 sans rien → **copie exécutée et confirmée** (reparer159b : « IDME et niv 0 » 5 niveaux → h2026 + a2026, ids neufs + inspireDe, source intouchée). Le mystère « échelle introuvable » (#156) est CLOS : ni filtre ni drapeau menteur — les modèles n'existaient tout simplement pas dans les magasins de ces trimestres. (2) Contexte croisé photographié en live (trimestreActif=a2026, infoCours=h2026 groupe « 00001 » jamais vu) → #446 confirmé sur pièces. (3) « Pas partout » : la Liste recalcule/stocke, l'aperçu lit le stocké → #447 versé, geste utilisateur documenté (Liste PUIS aperçu). §2.2 élucidé : tracé de lien vers objectif = canal inexistant (#403) → #445 (affordance + légende !/⚠/✓).
+     ⮕ **OUVERTS** : #444 (à coder — arbitré) · #446 🔴 (switch trimestre) · #447 (fraîcheur aperçu) · re-vérification §3.1 par Grégoire (parcours : H26 → réactiver gr.00008 → Liste → aperçu → 6↔4) · #445 · #443 (décision) · #442 (doublons cours + échelles a2025) · #353.
      ===================================================================== -->
 
 <!-- =====================================================================
