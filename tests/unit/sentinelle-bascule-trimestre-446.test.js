@@ -52,6 +52,43 @@ describe('#446 · A — la bascule redessine les deux surfaces du Cadre', () => 
     it('le sélecteur des groupes-cours est repeuplé', () => {
         expect(corpsHandler()).toContain('populerDropdownGroupeCoursV2()');
     });
+
+    it('le formulaire ET la carte de résumé sont remis à vide', () => {
+        const corps = corpsHandler();
+        expect(corps).toContain('afficherEtatVideGroupeCoursV2()');
+        expect(corps).toContain('mettreAJourCarteResumeGroupeCoursV2(null)');
+    });
+
+    it('⚠⚠ tout ce que le handler appelle d’un AUTRE module est atteignable', () => {
+        // Le défaut qui a coûté deux correctifs muets (#332 puis #444) :
+        // `js/trimestre-v2-groupes-cours.js` est une IIFE. Une fonction qui n'y
+        // est pas exportée sur `window` n'existe pas pour l'appelant — et comme
+        // l'appel est gardé par `typeof … === 'function'`, la garde sort en
+        // SILENCE. Le correctif #332, livré pour réinitialiser le formulaire au
+        // changement de trimestre, n'a donc jamais tourné une seule fois.
+        //
+        // On vérifie ici l'EXPORT réel, pas la présence de l'appel : c'est le
+        // maillon qui manquait, et il ne se voit pas à la lecture de l'appelant.
+        const gc = lire('js/trimestre-v2-groupes-cours.js');
+        for (const nom of ['afficherEtatVideGroupeCoursV2',
+                           'mettreAJourCarteResumeGroupeCoursV2',
+                           'populerDropdownGroupeCoursV2']) {
+            expect(gc, `${nom} est appelée depuis un autre module mais pas exportée`)
+                .toMatch(new RegExp('window\\.' + nom + '\\s*='));
+        }
+    });
+
+    it('ces appels passent par `window.` — pas par la chaîne de scope', () => {
+        // Un appel non préfixé résout par la chaîne de scope globale : il MARCHE
+        // tant que l'export existe, et redevient muet le jour où on le retire.
+        // Le préfixe rend la dépendance explicite et le `typeof` honnête.
+        const corps = corpsHandler();
+        for (const nom of ['afficherEtatVideGroupeCoursV2',
+                           'mettreAJourCarteResumeGroupeCoursV2',
+                           'populerDropdownGroupeCoursV2']) {
+            expect(corps, nom + ' appelée sans window.').toContain('window.' + nom);
+        }
+    });
 });
 
 describe('#446 · B — l’auto-sélection respecte le groupe MARQUÉ actif', () => {

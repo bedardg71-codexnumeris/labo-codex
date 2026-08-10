@@ -990,6 +990,14 @@ function afficherGroupeCoursDepuisBibliotheque(gcId) {
 window.ouvrirAideGroupeCours = ouvrirAideGroupeCours;
 window.chargerGroupeCoursV2 = chargerGroupeCoursV2;
 window.populerDropdownGroupeCoursV2 = populerDropdownGroupeCoursV2;
+// #446 (10 août 2026) — ces deux-là étaient APPELÉES depuis
+// `trimestre-v2-liste.js` (bascule de trimestre) sans jamais avoir été
+// exportées : ce fichier est une IIFE, donc le `typeof … === 'function'` de
+// l'appelant valait FAUX et le bloc ne s'exécutait pas. Le correctif #332,
+// qui avait ajouté cet appel pour réinitialiser le formulaire groupe-cours au
+// changement de trimestre, n'a donc JAMAIS tourné depuis sa livraison.
+window.afficherEtatVideGroupeCoursV2 = afficherEtatVideGroupeCoursV2;
+window.mettreAJourCarteResumeGroupeCoursV2 = mettreAJourCarteResumeGroupeCoursV2;
 window.nouveauGroupeCoursV2 = nouveauGroupeCoursV2;
 window.changerGroupeCoursSelectionneV2 = changerGroupeCoursSelectionneV2;
 window.annulerFormGroupeCoursV2 = annulerFormGroupeCoursV2;
