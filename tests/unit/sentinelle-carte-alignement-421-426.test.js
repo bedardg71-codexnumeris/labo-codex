@@ -124,8 +124,13 @@ describe('#421 · le catalogue d’infobulles ne décrit que ce qui existe', () 
     it('la zone « Enseignement explicite » de la palette a enfin son infobulle', () => {
         // Elle était la seule des six zones à ne pas en avoir — ajoutée avec
         // la famille par #422, jamais documentée.
-        expect(sourceIndex).toContain(
-            'class="planif-palette-zone-label" data-tooltip="planif-enseignement-explicite">Enseignement explicite</div>'
+        // ⚠ Retargeté le 10 août 2026 (#444) : l'étiquette de famille est
+        // devenue un <button> d'accordéon (la palette dépassait l'écran iPad).
+        // L'invariant visé — CETTE zone porte SON infobulle — est inchangé ;
+        // seule la balise l'est. Sondé par attribut plutôt que par balisage
+        // littéral, pour ne plus casser au prochain changement de conteneur.
+        expect(sourceIndex).toMatch(
+            /class="planif-palette-zone-label"[^>]*data-tooltip="planif-enseignement-explicite"[^>]*>[\s\S]{0,80}?Enseignement explicite/
         );
     });
 });

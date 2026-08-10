@@ -171,7 +171,9 @@ describe('Palette · les descriptions sont devenues les titres', () => {
         // s'ignore.
         for (const titre of ['Intention curriculaire', 'Types de connaissances', 'Déroulement', 'Preuve de réussite', 'Organisation']) {
             expect(sourceIndex, titre).toMatch(
-                new RegExp('planif-palette-zone-label" data-tooltip="planif-[a-z-]+">' + titre + '</div>')
+                // #444 : <div> → <button> d'accordéon. Le titre et son
+                // infobulle restent les invariants ; le conteneur ne l'est pas.
+                new RegExp('planif-palette-zone-label"[^>]*data-tooltip="planif-[a-z-]+"[^>]*>[\\s\\S]{0,80}?' + titre)
             );
         }
     });
@@ -181,7 +183,9 @@ describe('Palette · les descriptions sont devenues les titres', () => {
         // comme texte de guide — ce n'est pas la redondance visée.
         const palette = sourceIndex.slice(
             sourceIndex.indexOf('planif-palette-contenu'),
-            sourceIndex.indexOf('planif-palette-bas-btns')
+            // #444 : `planif-palette-bas-btns` a été retiré (boutons montés
+            // dans la barre d'outils). La borne devient la fin de la palette.
+            sourceIndex.indexOf('<!-- #444')
         );
         for (const slogan of ['>Pourquoi enseigner<', '>Quoi enseigner<', '>Comment enseigner<', ">Vérifier l'apprentissage<", '>Conception<']) {
             expect(palette, slogan).not.toContain(slogan);

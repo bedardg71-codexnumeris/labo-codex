@@ -313,8 +313,10 @@ source de **neuf lectures**, réparties sur **cinq écrans** de suivi, qui consu
       ⮕ **RÉPONDU le 10 août 2026 : NON.** Et la capture iPad du même jour
       montre que le bouton 🕵️ de secours est LUI-MÊME coupé par la hauteur
       de l'écran (palette trop longue). Les deux constats sont versés en
-      **#444** (chantier tactile : boutons du bas → barre d'outils, corbeille
-      flottante, double-tap), décision de principe actée, arbitrages en cours.
+      **#444** — **CORRIGÉ le 10 août (1.66.0)** : double-tap tactile sur un
+      bloc, boutons montés dans la barre d'outils, palette en accordéons,
+      corbeille flottante au canevas. ⮕ **À REVALIDER À L'IPAD** : le
+      double-tap ouvre-t-il l'Inspecteur ? les 4 boutons sont-ils atteignables ?
 
 > Si **non**, tout l'Inspecteur — durée, semaine, objectifs servis, **et la
 > rétroaction formative de #424 Lot E** — n'est atteignable que par l'icône 🕵️

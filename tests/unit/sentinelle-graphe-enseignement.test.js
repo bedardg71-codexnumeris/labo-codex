@@ -269,7 +269,8 @@ describe('palette · le nœud existe pour l’enseignant, et la famille ne ment 
     it('la famille s’appelle « Déroulement » — plus « Mise en action »', () => {
         // Un nom tourné vers l'élève qui agit mentait sur un membre qui est le
         // temps de parole du prof.
-        expect(sourceIndex).toMatch(/planif-comment-enseigner">Déroulement</);
+        // #444 : l'étiquette est un <button> portant un chevron avant le texte.
+        expect(sourceIndex).toMatch(/planif-comment-enseigner"[^>]*>[\s\S]{0,80}?Déroulement/);
         expect(sourceIndex).not.toContain('>Mise en action<');
     });
 

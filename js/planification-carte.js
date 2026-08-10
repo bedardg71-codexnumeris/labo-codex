@@ -4677,6 +4677,47 @@ function attacherEvenements(el, donnees) {
         ouvrirPanneau(id);
     });
 
+    // #444 (10 août 2026) — DOUBLE-TAP : le même geste, au doigt.
+    //
+    // Réponse à la porte terrain restée ouverte depuis le 8 août : sur iPad,
+    // le `dblclick` ci-dessus n'est JAMAIS émis (constat de Grégoire, 10 août).
+    // Tout l'Inspecteur — durée, semaine, objectifs servis, et la rétroaction
+    // formative de #424 Lot E — n'était donc atteignable qu'au bouton 🕵️…
+    // lui-même coupé par la hauteur de la palette. Deux défauts qui se
+    // verrouillaient l'un l'autre.
+    //
+    // Pourquoi un double-tap MANUEL plutôt qu'un tap long : le tap long se
+    // déclencherait pendant un déplacement (le doigt reste posé pour glisser),
+    // alors que deux appuis brefs ne peuvent pas se confondre avec un drag. La
+    // fenêtre de 300 ms et la tolérance de 30 px sont celles des plateformes.
+    //
+    // ⚠ On écoute au `pointerdown` en phase de CAPTURE, sans consommer
+    // l'événement : le drag de #148 doit continuer de recevoir le sien. Le
+    // second appui n'annule donc rien — il ouvre simplement l'Inspecteur.
+    var _dernierTap = 0;
+    var _dernierTapX = 0;
+    var _dernierTapY = 0;
+    el.addEventListener('pointerdown', function(e) {
+        if (e.pointerType === 'mouse') return;        // la souris a son dblclick
+        if (e.target.isContentEditable) return;       // saisie en cours
+        // Les commandes du bloc (ports, poignée, badges, boutons) gèrent leur
+        // propre geste et arrêtent déjà la propagation ; ce garde-fou couvre
+        // le cas d'un futur contrôle qui ne le ferait pas.
+        if (e.target.closest('button, select, input, textarea, .planif-port, .planif-poignee')) return;
+
+        var maintenant = e.timeStamp || Date.now();
+        var proche = Math.abs(e.clientX - _dernierTapX) < 30 && Math.abs(e.clientY - _dernierTapY) < 30;
+        if (maintenant - _dernierTap < 300 && proche) {
+            _dernierTap = 0;                          // pas de triple-tap en cascade
+            selectionnerNoeud(id);
+            ouvrirPanneau(id);
+            return;
+        }
+        _dernierTap = maintenant;
+        _dernierTapX = e.clientX;
+        _dernierTapY = e.clientY;
+    }, true);
+
     var titreEl = el.querySelector('.planif-noeud-titre');
     collerEnTexteBrut(titreEl);
     titreEl.addEventListener('focus', function() {
@@ -5074,6 +5115,66 @@ function attacherEvenements(el, donnees) {
 // Le dépôt est résolu par GÉOMÉTRIE (rectangle de la corbeille contre le
 // point de relâchement), jamais par la cible de l'événement : pendant un
 // drag, l'élément sous le doigt est le nœud lui-même, pas ce qu'il survole.
+
+// ---------------------------------------------------------------------------
+// #444 — accordéons de la palette Nœuds (10 août 2026)
+// ---------------------------------------------------------------------------
+
+/** Les zones repliées, telles que la préférence les porte (toujours un tableau). */
+function famillesRepliees() {
+    var brut = typeof obtenirPreference === 'function'
+        ? obtenirPreference('planifPaletteFamillesRepliees') : null;
+    return Array.isArray(brut) ? brut.filter(function(z) { return typeof z === 'string'; }) : [];
+}
+
+/**
+ * Applique l'état d'une famille au DOM et le persiste.
+ * `aria-expanded` est la SEULE source d'affichage : le CSS masque le groupe
+ * quand il vaut "false". Pas de classe parallèle qui pourrait diverger.
+ */
+function basculerFamillePalette(bouton, forcer) {
+    var categorie = bouton.closest('.planif-palette-categorie');
+    if (!categorie) return;
+    var zone = categorie.getAttribute('data-zone');
+    if (!zone) return;
+
+    var ouvert = typeof forcer === 'boolean'
+        ? forcer
+        : bouton.getAttribute('aria-expanded') === 'false';
+    bouton.setAttribute('aria-expanded', ouvert ? 'true' : 'false');
+
+    // ⚠ L'écrivain de préférence s'appelle `definirPreference` (preferences.js).
+    // Premier jet : `sauvegarderPreference`, qui n'existe pas — et comme le
+    // garde défensif sortait silencieusement, les familles se repliaient à
+    // l'écran mais l'état n'était JAMAIS persisté. Trouvé par la vérification
+    // navigateur, invisible autrement : un garde sur un nom inexistant ne
+    // proteste pas, il avale.
+    if (typeof definirPreference !== 'function') return;
+    var repliees = famillesRepliees().filter(function(z) { return z !== zone; });
+    if (!ouvert) repliees.push(zone);
+    definirPreference('planifPaletteFamillesRepliees', repliees);
+}
+
+function initialiserAccordeonsPalette() {
+    var boutons = document.querySelectorAll('.planif-palette-zone-label');
+    if (!boutons.length) return;
+    var repliees = famillesRepliees();
+    boutons.forEach(function(bouton) {
+        var categorie = bouton.closest('.planif-palette-categorie');
+        var zone = categorie && categorie.getAttribute('data-zone');
+        // Restauration : replié seulement si la préférence le dit.
+        bouton.setAttribute('aria-expanded', zone && repliees.indexOf(zone) !== -1 ? 'false' : 'true');
+        // Le bouton est DANS la palette, qui est déplaçable à la poignée ⠿ et
+        // dont les pastilles sont `draggable` : on arrête la propagation pour
+        // qu'un appui sur l'en-tête ne démarre pas un déplacement de palette.
+        bouton.addEventListener('pointerdown', function(e) { e.stopPropagation(); });
+        bouton.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            basculerFamillePalette(bouton);
+        });
+    });
+}
 
 function elementCorbeille() {
     return document.getElementById('planif-corbeille');
@@ -5706,6 +5807,18 @@ function initialiser() {
     rendrePaletteFlottante(palette);
     rendrePaletteFlottante(document.getElementById('planif-palette-nav'));
     initialiserDragGrille();
+
+    // #444 — ACCORDÉONS DE LA PALETTE, par famille.
+    //
+    // Les 18 pastilles en 6 familles dépassent la hauteur de l'écran iPad :
+    // la corbeille et les boutons du bas étaient purement et simplement coupés
+    // (capture terrain du 10 août). Replier les familles dont on ne se sert pas
+    // dans la séance ramène la palette à une taille utilisable.
+    //
+    // L'état vit dans la préférence `planifPaletteFamillesRepliees` (liste des
+    // `data-zone` fermées) : il survit au rechargement, et le défaut — tableau
+    // vide — est exactement le comportement d'avant.
+    initialiserAccordeonsPalette();
 
     // Inspecteur — bouton 🔎 de la palette
     var btnInspecteur = document.getElementById('planif-palette-inspecteur-btn');

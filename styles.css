@@ -19240,15 +19240,49 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 .planif-palette-categorie[data-zone="structure"] .planif-palette-zone-label { color: #9333ea; }
 .planif-palette-categorie[data-zone="explicite"] .planif-palette-zone-label { color: #0891b2; }
 
+/* #444 (10 août 2026) : l'étiquette de famille est devenue un BOUTON
+   d'accordéon — la palette compte 18 pastilles en 6 familles et dépassait la
+   hauteur de l'écran iPad. Cible tactile 44 px : c'est un contrôle qu'on vise
+   au doigt, pas seulement un titre qu'on lit. Le fond reste transparent et la
+   couleur reste celle de la famille (règles [data-zone] ci-dessus) — l'accordéon
+   ne change pas le repérage chromatique, il ne fait qu'ajouter un geste. */
 .planif-palette-zone-label {
     display: flex;
     align-items: center;
+    gap: 4px;
+    width: 100%;
     padding: 1px 4px 0;
+    min-height: 44px;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
     font-size: 9px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     white-space: nowrap;
+}
+.planif-palette-zone-label:hover { opacity: 0.8; }
+.planif-palette-zone-label:focus-visible {
+    outline: 2px solid var(--accent-primaire, #3b82f6);
+    outline-offset: 1px;
+    border-radius: 4px;
+}
+
+.planif-zone-chevron {
+    display: inline-block;
+    font-size: 8px;
+    line-height: 1;
+    transition: transform 0.15s;
+}
+/* Repliée : le chevron pointe vers la droite et le groupe disparaît. */
+.planif-palette-zone-label[aria-expanded="false"] .planif-zone-chevron {
+    transform: rotate(-90deg);
+}
+.planif-palette-zone-label[aria-expanded="false"] + .planif-palette-groupe {
+    display: none;
 }
 
 .planif-palette-groupe {
@@ -19704,35 +19738,58 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     padding: 8px 12px;
     overflow: auto;
 }
-/* === CORBEILLE DE LA PALETTE (#433, 8 août 2026) ===
+/* === CORBEILLE FLOTTANTE DU CANEVAS (#433, 8 août — déplacée par #444, 10 août) ===
    Cible de DÉPÔT, pas un bouton : on y glisse un bloc pour le supprimer.
-   Discrète au repos, elle s'ARME dès qu'un déplacement commence (c'est là
-   qu'elle devient utile) et s'OUVRE quand le doigt la survole. Hauteur
-   généreuse : c'est une cible tactile, visée en fin de geste. */
+
+   ▣ Pourquoi elle a quitté la palette (#444). Sur iPad, la palette Nœuds
+   dépasse la hauteur de l'écran : la corbeille et les boutons du bas étaient
+   COUPÉS (capture terrain du 10 août). Les boutons sont montés dans la barre
+   d'outils ; la corbeille, elle, ne pouvait pas y aller — en haut, elle aurait
+   obligé à traverser tout le canevas pour supprimer. Elle est donc ancrée au
+   BAS DU CANEVAS, là où le geste se termine.
+
+   ▣ Elle est INVISIBLE au repos (elle vit sur le canevas, elle ne doit pas
+   l'encombrer) et apparaît dès qu'un déplacement commence — c'est le moment,
+   et le seul, où elle sert. `pointer-events: none` au repos : rien de ce qui
+   se passe sur le canevas ne doit la rencontrer tant qu'elle est cachée. */
 .planif-corbeille {
+    /* ⚠ `fixed`, pas `absolute` : ancrée au wrapper, elle tombait 290 px SOUS
+       le bas de la fenêtre dès que la page défilait — donc invisible au moment
+       précis où elle sert (mesuré au navigateur, viewport iPad). Le repère du
+       viewport est le seul qui garantisse qu'elle reste sous le pouce. La
+       géométrie du dépôt (`pointSurCorbeille`) lit déjà des coordonnées
+       client : rien à changer côté JS. */
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(8px);
+    z-index: 40;                         /* au-dessus du canevas, sous les panneaux flottants */
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    margin: 4px 6px 0;
-    padding: 8px 6px;
+    gap: 8px;
+    padding: 10px 20px;
     min-height: 44px;                    /* cible tactile iPad */
-    border: 1px dashed rgba(106, 172, 184, 0.25);
-    border-radius: 8px;
+    border: 1px dashed var(--planif-couleur-bordure, rgba(106, 172, 184, 0.45));
+    border-radius: 10px;
+    background: var(--surface-element, #244858);
+    box-shadow: 0 6px 20px -8px rgba(0, 0, 0, 0.5);
     color: var(--texte-muted, #5a7a88);
-    font-size: 11px;
-    opacity: 0.55;
-    transition: opacity 0.15s, border-color 0.15s, background 0.15s;
+    font-size: 12px;
+    opacity: 0;                          /* invisible au repos */
+    pointer-events: none;
+    transition: opacity 0.15s, transform 0.15s, border-color 0.15s, background 0.15s, color 0.15s;
     touch-action: none;                  /* #148 : le geste appartient au drag */
 }
-.planif-corbeille .palette-icon { width: 16px; height: 16px; }
+.planif-corbeille .palette-icon { width: 18px; height: 18px; }
 .planif-corbeille-libelle { letter-spacing: 0.02em; }
 
-/* Armée : un déplacement est en cours, le dépôt est possible. */
+/* Armée : un déplacement est en cours — elle se montre. */
 .planif-corbeille-armee {
     opacity: 1;
+    transform: translateX(-50%) translateY(0);
     border-style: solid;
-    border-color: rgba(106, 172, 184, 0.5);
+    border-color: var(--planif-couleur-bordure, rgba(106, 172, 184, 0.6));
 }
 /* Survolée : relâcher ICI supprime — l'avertissement doit être sans ambiguïté. */
 .planif-corbeille-survol {
@@ -19741,7 +19798,10 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     color: var(--rouge-erreur, #dc2626);
     opacity: 1;
 }
-.mode-clair .planif-corbeille { border-color: rgba(6, 93, 187, 0.25); }
+.mode-clair .planif-corbeille {
+    border-color: rgba(6, 93, 187, 0.25);
+    background: var(--surface-carte, #ffffff);
+}
 .mode-clair .planif-corbeille-armee { border-color: rgba(6, 93, 187, 0.5); }
 .mode-clair .planif-corbeille-survol {
     background: rgba(220, 38, 38, 0.08);
@@ -19749,33 +19809,13 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     color: var(--rouge-erreur, #dc2626);
 }
 
-.planif-palette-bas-btns {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-    padding: 4px 0;
-}
-.planif-palette-aide-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    border: 1px solid rgba(106, 172, 184, 0.2);
-    background: var(--surface-carte, #1a3a48);
-    color: var(--texte-muted, #5a7a88);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    padding: 0;
-}
-.planif-palette-aide-btn:hover {
-    background: rgba(106, 172, 184, 0.18);
-    border-color: rgba(106, 172, 184, 0.55);
-    color: var(--texte-secondaire, #8aa4b0);
-}
-/* Icônes SVG dans palette bas — 100 % visibles, l'effet hover porte sur le cercle */
+/* `.planif-palette-bas-btns` et `.planif-palette-aide-btn` (classes) ont été
+   RETIRÉES le 10 août 2026 avec #444 : les quatre boutons qu'elles habillaient
+   sont montés dans la barre d'outils et portent désormais `.planif-btn-vue`
+   comme leurs voisins. Zéro porteur restant — zéro-dette, on ne les garde pas
+   « au cas où ». (Leurs ids, eux, vivent toujours : les handlers les visent.) */
+
+/* Icônes SVG — la corbeille flottante les porte encore. */
 .palette-icon {
     width: 14px;
     height: 14px;
@@ -19785,9 +19825,14 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 .mode-clair .palette-icon {
     filter: brightness(0);
 }
-.mode-clair .planif-palette-aide-btn:hover {
-    background: rgba(10, 74, 126, 0.12);
-    border-color: rgba(10, 74, 126, 0.5);
+
+/* Séparateur de la barre d'outils : marque la frontière entre les commandes
+   de VUE (palettes, zoom, fond) et les OUTILS montés par #444. */
+.planif-toolbar-separateur {
+    width: 1px;
+    align-self: stretch;
+    margin: 4px 2px;
+    background: var(--planif-couleur-bordure, rgba(106, 172, 184, 0.3));
 }
 
 /* === PANNEAU RACCOURCIS FLOTTANT === */

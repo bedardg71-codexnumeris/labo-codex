@@ -7,6 +7,29 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 10 AOÛT 2026, PM : #444 LIVRÉ — la carte devient utilisable au doigt.
+     ÉTAT FINAL : **1.66.0** (build 0810-1205), `main`, Vitest **2098/2098** (238 fichiers).
+
+     ✅ **#444 — les trois arbitrages de Grégoire, honorés.** Le chantier qui clôt la question ouverte depuis le 8 août (« le double-clic ouvre-t-il l'Inspecteur au doigt ? » → NON) ET le défaut qui la rendait insoluble (le bouton 🕵️ de secours, coupé par une palette plus haute que l'écran iPad).
+        1. **Boutons du bas → barre d'outils** (Inspecteur, Raccourcis, Guide, Bibliothèque). Zéro-dette : `.planif-palette-bas-btns` et `.planif-palette-aide-btn` retirées du CSS, sans porteur.
+        2. **Double-tap tactile** → Inspecteur. 300 ms / 30 px, écouté en CAPTURE et sans consommer l'événement : le drag #148 reçoit toujours le sien. ⮕ Tap long ÉCARTÉ et le motif consigné : il se déclencherait pendant un déplacement, le doigt restant posé.
+        3. **Accordéons par famille**, persistés (`planifPaletteFamillesRepliees`, déclarée aux DEFAUTS — pas de clé sauvage). Palette mesurée 801 → 663 px avec deux familles repliées.
+        ⮕ **La corbeille n'a PAS suivi les boutons**, et c'était l'arbitrage à ne pas rater : c'est une CIBLE DE DÉPÔT, pas un bouton. En haut, chaque suppression aurait traversé le canevas. Elle devient flottante au bas du canevas, invisible au repos, révélée pendant le drag. Le JS n'a pas bougé d'une ligne — il résolvait déjà par géométrie (#433).
+
+     ▣ **CE QUE LA VÉRIFICATION NAVIGATEUR A ATTRAPÉ, ET QUE RIEN D'AUTRE N'AURAIT VU.** Deux défauts, tous deux SILENCIEUX :
+        · la corbeille ancrée au wrapper tombait **290 px sous le bas de la fenêtre** — parfaite dans le DOM, invisible à l'usage (→ `position: fixed`, le seul repère qui garantisse qu'elle reste sous le pouce) ;
+        · l'écrivain de préférence s'appelle `definirPreference`, pas `sauvegarderPreference` — et **mon garde défensif `if (typeof … !== 'function') return;` avalait l'échec** : les familles se repliaient à l'écran, l'état n'était jamais persisté. ⮕ **Leçon à retenir : un garde sur un nom de fonction inexistant ne proteste pas, il absorbe.** Vérifier le nom réel de l'API, pas sa plausibilité.
+
+     ⚠⚠ **LE PIÈGE DE LA SOUS-CHAÎNE, TROIS FOIS DANS LA MÊME JOURNÉE** (matin #157, puis deux fois ici) : `.palette-icon {` matchait `.planif-corbeille .palette-icon {` · `.planif-palette-zone-label {` matchait la règle de COULEUR `[data-zone="…"] .planif-palette-zone-label {` · `_dernierTap = 0;` matchait sa propre déclaration. ⮕ **Règle désormais explicite : toute borne de slice ou motif de sentinelle s'ancre** (`^…` en multiligne, ou `\n` en tête). C'est écrit dans les trois sentinelles concernées, au point de bascule.
+     ▣ **ET UN BREAK-TEST RESTÉ VERT — le plus instructif des quatre.** Retirer `&& proche` de la condition du double-tap n'a rien fait rougir : mon assertion vérifiait que la borne de distance EXISTAIT (la variable était encore calculée), pas qu'elle était EMPLOYÉE. Resserrée sur le `if` complet. *Vérifier la présence d'un garde ne prouve pas qu'il garde.*
+
+     ▣ **QUATRE SENTINELLES VOISINES RETARGETÉES** (`<div>` → `<button>` des étiquettes, borne `planif-palette-bas-btns` disparue) — et **re-break-testées** pour prouver qu'elles mordent encore : retirer l'infobulle de la zone explicite ROUGIT, renommer « Déroulement » ROUGIT. Un retarget qui neutralise l'assertion serait pire que l'échec qu'il répare.
+     ▣ **Vérifié au navigateur, viewport iPad** : 4 boutons en barre · corbeille à 21 px du bas pendant le drag · double-tap ouvrant l'Inspecteur (titre lu : « Activité test ») · état des accordéons survivant au rechargement. Sentinelle #444 : 12 cas, 4 break-tests ROUGE. Changelog 1.66.
+     ⮕ **PORTE TERRAIN DUE (iPad, Grégoire)** : le double-tap ouvre-t-il l'Inspecteur ? les 4 boutons sont-ils atteignables ? la corbeille apparaît-elle au bas de la carte pendant un déplacement ? les familles se replient-elles au doigt ?
+     ⮕ **OUVERTS** : #446 🔴 (switch trimestre) · #447 (fraîcheur aperçu) · #445 (affordance liens + légende !/⚠/✓) · #443 (wizard, décision) · #442 (doublons) · #353 (200 %).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 10 AOÛT 2026, MIDI : LE BILAN DES 81 PORTES EST TOMBÉ (4 échecs) + les 3 arbitrages #444.
      ÉTAT FINAL : **1.65.6** (build 0810-0843), `main`, Vitest **2084/2084** (237 fichiers).
 
