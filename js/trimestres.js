@@ -448,7 +448,16 @@
         window.trimestreActif = id;
         db.setSync('trimestreActif', id);
 
-        // Réinitialiser le cours actif — chargerDropdownCoursV2() re-sélectionnera le premier cours
+        // Réinitialiser le contexte : le pointeur `groupeCoursActif` est GLOBAL
+        // (non namespacé), donc invalide dès qu'on change de trimestre.
+        //
+        // #446 (10 août 2026) — la RESTAURATION du bon groupe se fait ensuite,
+        // dans `peuplerDropdownGroupeCoursActif` (trimestre-v2-orchestre.js) :
+        // c'est le seul endroit qui décide quel groupe devient actif quand le
+        // pointeur est invalide, et il choisit désormais celui marqué
+        // `actif===true` dans la liste du trimestre (SSOT #130) plutôt que le
+        // premier venu. Un seul mécanisme, donc — ne pas en rajouter un ici :
+        // deux chemins d'activation, c'est la dette qu'on évite.
         db.setSync('infoCours', null);
         db.setSync('groupeCoursActif', null);
 

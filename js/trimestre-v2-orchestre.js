@@ -132,10 +132,24 @@ async function peuplerDropdownGroupeCoursActif() {
     const gcActifValide = gcActif && tousGroupesCours.some(gc => gc.id === gcActif.id);
 
     if (!gcActifValide && groupesCours.length > 0) {
-        // Sélectionner le premier groupe-cours du trimestre
-        const premierGC = groupesCours[0];
-        await changerGroupeCoursActifV2(premierGC.id);
-        selectHeader.value = premierGC.id;
+        // #446 (10 août 2026) — LE GROUPE MARQUÉ ACTIF D'ABORD, le premier ensuite.
+        //
+        // Ce bloc prenait `groupesCours[0]`, c'est-à-dire le premier de la
+        // LISTE. Chez Grégoire, 00002 précède 00008 : un aller-retour entre
+        // trimestres faisait donc basculer son groupe actif de 00008 à 00002
+        // EN SILENCE — et tous les écrans de suivi avec lui. Le pointeur
+        // `groupeCoursActif` est global (non namespacé) : il devient invalide à
+        // chaque changement de trimestre, donc ce chemin s'emprunte à CHAQUE
+        // bascule, pas dans un cas rare.
+        //
+        // La SSOT du groupe actif est l'entrée `actif===true` de la liste du
+        // trimestre (#130) : elle porte le choix de l'enseignant, et c'est elle
+        // qu'il faut restaurer. Le premier de la liste reste le repli — un
+        // trimestre peut n'avoir aucun groupe marqué (import, création neuve).
+        const gcMarqueActif = groupesCours.find(gc => gc && gc.actif);
+        const cible = gcMarqueActif || groupesCours[0];
+        await changerGroupeCoursActifV2(cible.id);
+        selectHeader.value = cible.id;
     } else if (gcActifValide) {
         // S'assurer que le dropdown reflète la sélection actuelle
         selectHeader.value = gcActif.modeCours ? `cours:${gcActif.coursId}` : gcActif.id;
@@ -265,8 +279,12 @@ function _rafraichirProfilEtudiantSiVisible() {
     }
     if (etudiantsNouveauGC.length === 0) return;
 
-    // Trier et prendre le premier (actif)
-    etudiantsNouveauGC.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+    // Trier et prendre le premier (actif).
+    // #446 : `nom` peut manquer (import CSV incomplet, fiche à moitié saisie)
+    // et ce tri s'exécute JUSTE APRÈS un changement de groupe-cours — donc sur
+    // le chemin de la bascule de trimestre. Non gardé, il levait et laissait le
+    // profil sur l'étudiant du groupe précédent, sans rien signaler.
+    etudiantsNouveauGC.sort((a, b) => String(a.nom || '').localeCompare(String(b.nom || ''), 'fr'));
     const premierActif = etudiantsNouveauGC.find(e => !estEtudiantExclu(e));
     if (premierActif) {
         afficherProfilComplet(premierActif.da);

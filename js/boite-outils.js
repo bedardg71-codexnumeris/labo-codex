@@ -132,8 +132,12 @@ function initialiserTirage() {
             prenom: e.prenom
         }));
 
-    // Trier par nom
-    etatTirage.pool.sort((a, b) => a.nom.localeCompare(b.nom));
+    // Trier par nom.
+    // #446 : un étudiant sans `nom` (import CSV incomplet) faisait lever ce
+    // tri — et comme `initialiserTirage` est appelée dans une promesse non
+    // attendue, l'erreur partait en « Uncaught (in promise) » : le tirage au
+    // sort restait muet, sans trace visible pour l'enseignant.
+    etatTirage.pool.sort((a, b) => String(a.nom || '').localeCompare(String(b.nom || '')));
 
     // Nettoyer les exclus/tirés qui ne sont plus dans le pool
     const dasPool = new Set(etatTirage.pool.map(e => e.da));
