@@ -7,6 +7,22 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 10 AOÛT 2026, MIDI : LE BILAN DES 81 PORTES EST TOMBÉ (4 échecs) + les 3 arbitrages #444.
+     ÉTAT FINAL : **1.65.6** (build 0810-0843), `main`, Vitest **2084/2084** (237 fichiers).
+
+     ✅✅ **LA CAMPAGNE DES 81 PORTES EST TERMINÉE — 77 passées, 4 échecs.** Triage :
+        1. **§2.2 (1.65, objectifs réordonnés → le lien glisse)** : mécanisme VÉRIFIÉ SAIN au Chromium (repro UI : id stable, les 3 couches d'affichage résolvent par id). **MAIS un trou structurel trouvé en cherchant : les objectifs SANS id** (import/fusion/pré-1.34) traversaient la migration sans être complétés — et sans id, chaque édition re-minte des identifiants (passe 3) : les liens meurent ou glissent, LE symptôme de la porte. Colmaté (#158, 1.65.6) : stampage à la migration par carte, vérifié au Chromium (seed sans ids → 3/3 stampés), sentinelle break-testée. ⚠ 2 sentinelles existantes sondaient la CHAÎNE LITTÉRALE du saut sec → adaptées (l'invariant d'ordre inchangé), pas contournées.
+        2. **§3.1 (1.64, trois écrans ensemble)** : audit au code = G2-b EN PLACE, tous les lecteurs de miroir retirés des 3 écrans. **Très probablement le BUILD MAC PÉRIMÉ** (pull antérieur à la fusion de midi du 9 août : les flèches ▲▼ existaient, G2-b non). Re-vérification demandée après pull.
+        3. **§5.3 (1.61, glossaire)** : zéro chemin périmé au grep — le code est correct depuis le 9 août. Même verdict : build périmé, re-vérification demandée.
+        4. **1.60 (double-clic)** : déjà versée en #444 — pas un nouvel échec.
+     ⮕ **LEÇON DE CAMPAGNE, à retenir pour les prochaines** : les portes passées sur un build en retard produisent des FAUX ROUGES parfaitement plausibles (elles décrivent l'état pré-correctif, qui est exactement ce que la porte teste). La case « git pull d'abord » ajoutée au §0 ce matin est arrivée APRÈS le début de la campagne — la prochaine checklist la met en case 1.
+
+     ✅ **#444 ARBITRÉ (Grégoire, 10 août)** : corbeille FLOTTANTE au canevas pendant le drag · Inspecteur = bouton dans la barre + DOUBLE-TAP · accordéons par famille OUI. **Prêt à coder — prochain chantier.**
+     ✅ **Bouton « Copier le bilan » de l'artefact réparé** : le presse-papiers est refusé à la page publiée chez Grégoire — repli execCommand + affichage du bilan pré-sélectionné en dernier filet. Republié, même URL.
+     ⮕ **OUVERTS** : #444 (à coder) · re-vérification §2.2/§3.1/§5.3 sur build à jour · #443 (wizard, décision) · DIAG #156 (échelles) attendu · #442 · #353.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 10 AOÛT 2026, MATIN, SUITE : TROIS RETOURS iPad/Mac EN RAFALE (#157 + #444 + la réponse du 8 août).
      ÉTAT FINAL : **1.65.5** (build 0810-0811), `main`, Vitest **2082/2082** (236 fichiers). Dernier ID **#444**.
 

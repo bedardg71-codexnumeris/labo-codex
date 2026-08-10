@@ -380,7 +380,29 @@ function migrerObjectifsVersMetadata() {
             }
             continue;
         }
-        if (n.metadata && Array.isArray(n.metadata.objectifs)) continue;
+        if (n.metadata && Array.isArray(n.metadata.objectifs)) {
+            // #158 (10 août 2026) — un objectif au format LISTE mais SANS id
+            // (import, fusion, état intermédiaire d'avant 1.34) passait ici
+            // sans être complété. Or TOUT le système de liens (#403 :
+            // objectifsServis, pastilles, cases de l'Inspecteur) résout par
+            // id : sans id, chaque édition de la liste re-minte des
+            // identifiants neufs en passe 3 d'appliquerObjectifs — et les
+            // liens existants meurent ou glissent d'un cran. On stampe ici,
+            // une fois, à la migration par carte : idempotent, additif.
+            var completes = 0;
+            n.metadata.objectifs.forEach(function(o) {
+                if (o && typeof o.texte === 'string' && !o.id) {
+                    o.id = nouvelIdObjectif();
+                    completes++;
+                }
+            });
+            if (completes > 0) {
+                migres.push(n.id);
+                console.warn('[Planification] ' + completes + ' objectif(s) sans id complété(s) sur la leçon '
+                             + n.id + ' (#158) — les liens « objectifs servis » redeviennent stables');
+            }
+            continue;
+        }
 
         // Format 2 (chaîne unique) : bascule en mémoire, rien à purger ailleurs.
         if (n.metadata && typeof n.metadata.objectif === 'string' && n.metadata.objectif.trim() !== '') {
