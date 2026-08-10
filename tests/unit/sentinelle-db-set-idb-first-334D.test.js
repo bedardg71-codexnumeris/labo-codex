@@ -4,7 +4,12 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 // #334 Session D — harmonisation de db.set() avec setSync() sur le seuil
-// IDB-first (SEUIL_IDB_FIRST = 200 Ko, constante unique).
+// IDB-first (SEUIL_IDB_FIRST, constante unique).
+// #353 (10 août 2026) : le seuil vaut désormais 25 Ki CARACTÈRES — l'unité du
+// quota, mesurée au navigateur — et non plus 200 Ko d'octets UTF-8. Les
+// gabarits ci-dessous encadrent largement la valeur : ils testent le ROUTAGE,
+// pas le chiffre. Le chiffre, lui, est verrouillé par
+// `sentinelle-observabilite-budget-353` (avec la table terrain qui l'a tranché).
 //
 // Au-delà du seuil, set() doit aller DIRECTEMENT en memoryCache (+ removeItem)
 // sans tenter localStorage — plus de QuotaExceededError systématique sur les
@@ -43,18 +48,18 @@ function chargerDb() {
     return { db, ls };
 }
 
-const GROSSE = 'x'.repeat(250 * 1024); // > 200 Ko
-const PETITE = { a: 1, b: 'court' };   // < 200 Ko
+const GROSSE = 'x'.repeat(250 * 1024); // très au-dessus du seuil
+const PETITE = { a: 1, b: 'court' };   // très en dessous du seuil
 
 describe('#334 D · db.set() harmonisé sur le seuil IDB-first', () => {
-    it('grosse valeur (>200 Ko) → memoryCache, jamais localStorage', async () => {
+    it('grosse valeur (au-dessus du seuil) → memoryCache, jamais localStorage', async () => {
         const { db, ls } = chargerDb();
         await db.set('GROSSE', GROSSE);
         expect(db.memoryCache.has('GROSSE')).toBe(true);
         expect(ls.getItem('GROSSE')).toBeNull(); // aucune tentative localStorage
     });
 
-    it('petite valeur (<200 Ko) → localStorage (cache synchrone), pas memoryCache', async () => {
+    it('petite valeur (sous le seuil) → localStorage (cache synchrone), pas memoryCache', async () => {
         const { db, ls } = chargerDb();
         await db.set('PETITE', PETITE);
         expect(ls.getItem('PETITE')).not.toBeNull();

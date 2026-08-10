@@ -107,6 +107,32 @@ describe('sentinelle · observabilité du budget localStorage (#353 Option 1)', 
         expect(db._estimateSizeFromString(null)).toBe(-1);
     });
 
+    it('⚠ LE SEUIL EST À 25 Ki — la valeur tranchée sur les chiffres du terrain', () => {
+        // Option 2 du RAPPORT-353, décidée par Grégoire le 10 août sur le relevé
+        // des DEUX navigateurs (Chrome 100 % / 475 clés · Safari 88,3 % / 462) :
+        //
+        //   seuil     Chrome reste   Safari reste
+        //   200 Ki       100 %          88 %   ← ZÉRO clé déplacée : la plus
+        //                                        grosse clé pèse 184 K car., donc
+        //                                        le seuil était au-dessus de tout
+        //    25 Ki        44 %          44 %   ← retenu (les deux convergent)
+        //
+        // ⮕ Ce cas verrouille la VALEUR et son motif. Sans lui, la remonter à
+        //   200 Ki serait indolore pour la suite de tests — et redonnerait un
+        //   seuil qui ne peut jamais se déclencher.
+        const stats = db.statsStockage(1);
+        expect(stats.seuilCourantKi).toBe(25);
+
+        // ⚠ ET LE GARDE QUI REND LA BAISSE SANS DANGER : sans IndexedDB, une
+        // valeur au-dessus du seuil retombe en localStorage au lieu d'aller
+        // nulle part. C'est `idbDispo` dans setSync — ici IDB est absent (bac à
+        // sable Node), donc c'est exactement le cas testé. Abaisser le seuil
+        // n'expose donc RIEN de neuf quand IDB manque.
+        db.setSync('moyenne', 'x'.repeat(30 * 1024));
+        expect(ls.getItem('moyenne')).not.toBeNull();
+        expect(db.getSync('moyenne', null)).not.toBeNull();
+    });
+
     it('la projection de seuils donne de quoi trancher l\'option 2 sur des chiffres', () => {
         ls.clear();
         ls.setItem('enorme', 'z'.repeat(300 * 1024));   // > 200 Ki car.
@@ -114,7 +140,7 @@ describe('sentinelle · observabilité du budget localStorage (#353 Option 1)', 
         ls.setItem('menue', 'w'.repeat(1024));
         const stats = db.statsStockage(5);
 
-        expect(stats.seuilCourantKi).toBe(200);
+        expect(stats.seuilCourantKi).toBe(25);
         const par = Object.fromEntries(stats.projectionSeuils.map(p => [p.seuilKi, p]));
         expect(par[200].nbCles).toBe(1);              // seule l'énorme dépasse
         expect(par[50].nbCles).toBe(2);               // l'énorme + la moyenne
