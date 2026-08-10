@@ -30,7 +30,8 @@
                 'Deux nouvelles flèches ▲▼ sur chaque objectif de leçon : change leur ordre sans les retaper. Les liens entre un objectif et les activités qui le servent suivent le déplacement.',
                 'Un titre collé depuis une autre application prend la typographie de la carte au lieu de garder la sienne.',
                 'Les cinq étapes d’enseignement explicite partagent une seule couleur sarcelle : la famille se repère d’un coup d’œil.',
-                'Le bandeau « Présentement en développement actif » est retiré de l’en-tête du module.'
+                'Le bandeau « Présentement en développement actif » est retiré de l’en-tête du module.',
+                'Correction : les onglets de Conception (Productions, Grilles, Échelles, Cartouches, Pratiques) affichaient une page vide — ils s’affichent de nouveau.'
             ]
         },
         {

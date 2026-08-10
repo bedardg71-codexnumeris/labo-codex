@@ -7,6 +7,17 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 10 AOÛT 2026, MATIN : RETOUR TESTEUR #155 (portes 1.64 en cours chez Grégoire).
+     ÉTAT FINAL : **1.65.4** (build 0810-0718), `main`, Vitest **2078/2078** (235 fichiers).
+
+     ⚠⚠ **#155 — « Rien n'est affiché »** : toutes les pages de Conception sauf la Carte rendaient VIDE (2 captures). Zéro erreur console.
+     ▣ **MÉTHODE, et c'est la leçon du bloc : REPRODUIRE AVANT DE DEMANDER.** Le conteneur a Chromium — repro Playwright à VIDE en 3 minutes : même symptôme sans les données de Grégoire → bug de CODE. Puis sonde DOM : le HTML était LÀ (276 Ko dans #section-conception) mais **les cinq sous-sections vivaient À L'INTÉRIEUR de `conception-carte`** (masquée dès qu'un autre onglet est actif) au lieu d'en être les sœurs. Un test d'équilibre de balises sur l'historique a daté la régression AU COMMIT : `35dd9283` (#424 Lot G, 8 août) — le retrait de la page « Plan de la leçon » a emporté 3 `</div>` structurels ET le span `planif-zoom-info` dont le commentaire disait « conservé pour compatibilité JS » (6 lecteurs).
+     ⮕ **POURQUOI AUCUN FILET NE L'A VU** (à retenir pour la classe entière) : Vitest ne parse pas le DOM ; Playwright est WebKit-only, non exécutable en conteneur ; et AUCUNE spec ne navigue les sous-onglets de Conception. Deux jours et neuf releases sont passés par-dessus un HTML invalide que le premier clic terrain a révélé. **Les portes terrain font exactement le travail qu'on attendait d'elles.**
+     ✅ **LIVRÉ (1.65.4)** : fermetures + span restaurés (avec commentaire de trace #155 dans index.html) · **vérifié AU NAVIGATEUR** (repro re-jouée : les 5 onglets rendent 12-136 Ko de contenu visible chacun) · sentinelle STATIQUE `sentinelle-structure-sous-sections-conception-155.test.js` (10 cas, née ROUGE sur l'état cassé — solde de <div> NUL entre sous-sections sœurs, commentaires HTML exclus du compte, + le span suit ses lecteurs JS ; patron Défense F, le solde rougit au COMMIT, pas au terrain) · item changelog 1.65 (correctif visible).
+     ⮕ **OUVERTS inchangés** : #442 · #353 (200 %) · portes terrain — Grégoire doit refaire `git pull` (file:// local) puis reprendre §3/1.64, débloquée.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 9 AOÛT 2026, PM, SUITE : RETOUR TESTEUR #154 (priorité absolue, plan interrompu).
      ÉTAT FINAL : **1.65.3** (build 0809-1337), `main`, Vitest **2068/2068** (234 fichiers). Dernier ID **#442**.
 

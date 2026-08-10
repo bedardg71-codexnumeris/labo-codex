@@ -4433,6 +4433,17 @@
                                 <button class="planif-btn-cloner" id="planif-btn-cloner" data-tooltip="planif-cloner"><img src="icons/icon-copy.svg" alt="" class="btn-inline-icon"> Cloner</button>
                                 <button class="planif-btn-supprimer" id="planif-btn-supprimer" data-tooltip="planif-supprimer-noeud"><img src="icons/icons8-trash.svg" alt="" class="btn-inline-icon"> Supprimer ce n&oelig;ud</button>
                             </div>
+                        </div><!-- fin planif-zone-wrapper -->
+
+                        <!-- planif-zoom-info conservé pour compatibilité JS (6 lecteurs dans planification-carte.js) -->
+                        <span class="u-hide" id="planif-zoom-info">100%</span>
+
+                    </div><!-- fin planif-wrapper -->
+                </div><!-- fin sous-section conception-carte (#155 : ces fermetures avaient été
+                     emportées par le retrait de la page « Plan de la leçon », #424 Lot G —
+                     les cinq sous-sections suivantes se retrouvaient IMBRIQUÉES dans la carte
+                     masquée, d'où des pages Conception vides. Sentinelle : solde de <div> nul
+                     entre sous-sections sœurs.) -->
 
                 <!-- Panneau guide flottant -->
                 <div id="planif-guide-panel" class="planif-guide-flottante" style="display: none;">
@@ -14422,7 +14433,7 @@
     <script src="js/guidage-demo.js?v=20260808a"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=20260809d"></script> <!-- Entrée 1.56 : trois chantiers Alignement consolidés -->
+    <script src="js/changelog-data.js?v=20260810a"></script> <!-- Entrée 1.56 : trois chantiers Alignement consolidés -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
     <script src="js/etats-vides.js?v=20260808a"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre -->
@@ -14443,11 +14454,11 @@
     <script src="js/export-resultats-finaux.js?v=2026061901"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260809j"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260810a"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260809j"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260810a"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>
