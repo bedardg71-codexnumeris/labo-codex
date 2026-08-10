@@ -76,7 +76,14 @@ describe('obtenirPratiqueActiveGroupeCours — priorité SSOT (fonctionnel)', ()
     let store = {};
     const db = {
         getSync: (k, def) => (k in store ? store[k] : (def !== undefined ? def : null)),
-        setSync: (k, v) => { store[k] = v; }
+        // #447 : le vrai `db` signale chaque écriture (crochet d'invalidation
+        // du cache de lecture #397) — le stub le reproduit pour rester fidèle.
+        _surEcriture: null,
+        surEcriture(rappel) { this._surEcriture = typeof rappel === 'function' ? rappel : null; },
+        setSync(k, v) {
+            if (typeof this._surEcriture === 'function') this._surEcriture(k);
+            store[k] = v;
+        }
     };
     const cle = (k) => 't1_' + k;
 
