@@ -1,5 +1,5 @@
 /* ============================================================================
-   DIAGNOSTIC #353 — clés ORPHELINES de localStorage (lecture seule)
+   #353 — clés ORPHELINES de localStorage : LE MÊME SCRIPT RECENSE ET PURGE
    ----------------------------------------------------------------------------
    Le relevé du 10 août (Chrome 100 % / Safari 88,3 % du quota) a montré, dans
    le top 20, des clés dont plus rien ne devrait dépendre :
@@ -15,16 +15,36 @@
    plus de référent. Il n'écrit RIEN — la suppression est un geste séparé, à
    décider sur ce rapport.
 
-   Usage : console (Cmd+Option+J), coller, Entrée. Puis coller le rapport.
+   ⮕ POURQUOI RECENSER ET PURGER DANS LE MÊME FICHIER. Le 10 août, une
+   première version classait des snapshots VIVANTS comme orphelins (elle les
+   comparait au seul magasin `cours` alors qu'ils sont nommés d'après le
+   GROUPE-COURS). Si le rapport et la purge vivaient dans deux scripts, la
+   correction de l'un pourrait ne pas atteindre l'autre — et on supprimerait
+   sur une classification périmée. Ici, ce qui décide EST ce qui agit.
+
+   - coller le fichier            → DRY-RUN automatique, n'écrit rien
+   - `await reparer353({ executer: true, familles: ['sansProducteur'] })`
+   - `await reparer353({ executer: true, familles: ['snapshots'] })`
+   - `await reparer353({ executer: true, familles: ['trimestres'],
+                         trimestres: ['a2024'] })`   ← à NOMMER explicitement
+   - `annuler353()`               → restaure (même session ; filet durable =
+                                    backup Codex)
+
    ⚠ À lancer dans CHAQUE navigateur : Chrome et Safari sont deux îles de
    stockage distinctes (leçon #154/#346), et leurs orphelines diffèrent.
    ============================================================================ */
 (function () {
     'use strict';
 
+window.reparer353 = async function (opts) {
+    opts = opts || {};
+    var executer = !!opts.executer;
+    var famillesDemandees = opts.familles || [];
+    var trimestresAutorises = opts.trimestres || [];
+
     var out = [];
     var L = function (s) { out.push(s); };
-    L('==== DIAG #353 · clés orphelines (LECTURE SEULE) ====');
+    L('==== #353 · clés orphelines · ' + (executer ? '⚠ EXÉCUTION' : 'DRY-RUN (rien ne sera écrit)') + ' ====');
 
     // ── Registres vivants ────────────────────────────────────────────────
     var trimestres = [];
@@ -139,7 +159,90 @@
     L('RÉCUPÉRABLE identifié : ' + Math.round(recuperable / 1024) + ' K car. (' +
       (100 * recuperable / total).toFixed(1) + ' % de l\'occupation)');
     L('');
-    L('⚠ Rien n\'a été supprimé. Ce rapport est l\'entrée d\'une décision, pas son exécution.');
-    L('==== FIN DIAG #353 ====');
+
+    // ── PURGE — seulement ce qui est demandé NOMMÉMENT ───────────────────
+    // Chaque famille doit être réclamée : rien n'est supprimé « parce que
+    // c'était dans le rapport ». Et un trimestre entier exige EN PLUS d'être
+    // nommé — c'est le geste le plus lourd du lot.
+    var aSupprimer = [];
+    if (famillesDemandees.indexOf('sansProducteur') !== -1) {
+        familles.sansProducteur.forEach(function (x) { aSupprimer.push(x); });
+    }
+    if (famillesDemandees.indexOf('snapshots') !== -1) {
+        if (nbGC === 0) {
+            L('⛔ REFUS (snapshots) : aucun groupe-cours lisible, la classification n\'a pas pu conclure.');
+        } else {
+            familles.snapshotOrphelin.forEach(function (x) { aSupprimer.push(x); });
+        }
+    }
+    if (famillesDemandees.indexOf('trimestres') !== -1) {
+        if (!trimestresAutorises.length) {
+            L('⛔ REFUS (trimestres) : il faut NOMMER les préfixes à purger, ex. { trimestres: [\'a2024\'] }.');
+            L('   Supprimer un trimestre entier sans le nommer serait un geste trop large pour un défaut.');
+        } else {
+            familles.trimestreInconnu.forEach(function (x) {
+                var m2 = PREFIXE_TRIMESTRE.exec(x.cle);
+                if (m2 && trimestresAutorises.indexOf(m2[1]) !== -1) aSupprimer.push(x);
+                else L('   ⤬ ' + x.cle + ' — préfixe non nommé, CONSERVÉ');
+            });
+        }
+    }
+
+    if (!executer) {
+        L('⚠ Rien n\'a été supprimé — ce rapport est l\'entrée d\'une décision.');
+        if (famillesDemandees.length) {
+            L('   (familles demandées : ' + famillesDemandees.join(', ') + ' → ' + aSupprimer.length + ' clé(s) visée(s))');
+        }
+        L('   Pour purger, après backup Codex :');
+        L('     await reparer353({ executer: true, familles: [\'sansProducteur\'] })');
+        L('     await reparer353({ executer: true, familles: [\'snapshots\'] })');
+        L('     await reparer353({ executer: true, familles: [\'trimestres\'], trimestres: [\'a2024\'] })');
+        L('==== FIN #353 ====');
+        console.log(out.join('\n'));
+        return;
+    }
+
+    if (!aSupprimer.length) {
+        L('Rien à supprimer pour les familles demandées.');
+        L('==== FIN #353 ====');
+        console.log(out.join('\n'));
+        return;
+    }
+
+    window._pre353 = {};
+    var libere = 0;
+    for (var s2 = 0; s2 < aSupprimer.length; s2++) {
+        var cible = aSupprimer[s2].cle;
+        try {
+            window._pre353[cible] = await db.get(cible, null);
+            await db.remove(cible);
+            libere += aSupprimer[s2].car;
+            L('✔ supprimée : ' + cible + ' (' + Math.round(aSupprimer[s2].car / 1024) + ' K car.)');
+        } catch (e) {
+            L('⚠ échec sur ' + cible + ' : ' + (e && e.message));
+        }
+    }
+    L('');
+    L('✅ ' + aSupprimer.length + ' clé(s) supprimée(s), ~' + Math.round(libere / 1024) + ' K car. libérés.');
+    L('   RECHARGE la page (Cmd+R). Filet même-session : annuler353().');
+    L('   Filet durable : ton backup Codex.');
+    L('==== FIN #353 ====');
     console.log(out.join('\n'));
+};
+
+window.annuler353 = async function () {
+    if (!window._pre353 || !Object.keys(window._pre353).length) {
+        console.log('#353 : aucune pré-image en mémoire (page rechargée ?). Filet : backup Codex.');
+        return;
+    }
+    for (var k of Object.keys(window._pre353)) {
+        await db.set(k, window._pre353[k]);
+        console.log('↩ ' + k + ' restaurée');
+    }
+    window._pre353 = {};
+    console.log('✅ Annulation faite. Recharge la page.');
+};
+
+// DRY-RUN automatique au collage : lecture seule, aucun risque.
+reparer353();
 })();
