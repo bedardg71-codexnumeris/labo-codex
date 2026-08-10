@@ -131,6 +131,49 @@
         return ecarts;
     }
 
+    function _estVide(v) {
+        return v === undefined || v === null || v === '';
+    }
+
+    /**
+     * #442 (10 août 2026, sur pièces) — CHAMPS À RÉCUPÉRER avant de retirer.
+     *
+     * POURQUOI CETTE FONCTION EXISTE. Sur les données réelles de Grégoire, la
+     * TROISIÈME copie de `h2026-601-102-MQ-00001` portait `heuresContact: 60`
+     * et `ponderation: '2-2-3'` — deux attributs bien réels du cours 601-102-MQ
+     * — alors que l'exemplaire GARDÉ (le 1er) avait ces champs vides.
+     *
+     * ⮕ Le retrait restait un no-op fonctionnel : `find` rend le 1er, donc
+     * l'application ne lisait déjà QUE des champs vides. Mais « ne rien casser »
+     * n'est pas « ne rien perdre » : ces valeurs auraient disparu des données
+     * sans que personne ne s'en aperçoive, puisqu'elles n'étaient déjà affichées
+     * nulle part. C'est le pire profil de perte — invisible avant ET après.
+     *
+     * On récupère donc AVANT de retirer, et seulement là où c'est sans ambiguïté :
+     * champ vide chez le gardé, non vide chez UNE copie. Si deux copies proposent
+     * des valeurs différentes pour le même champ, on REFUSE — le script ne
+     * devine pas (même règle que `reparer154`).
+     */
+    function _champsRecuperables(garde, copies) {
+        const propositions = {};   // champ → Set de valeurs (JSON) proposées
+        copies.forEach(function (copie) {
+            Object.keys(copie || {}).forEach(function (k) {
+                if (!_estVide(garde ? garde[k] : undefined)) return;  // le gardé a déjà une valeur
+                if (_estVide(copie[k])) return;
+                if (!propositions[k]) propositions[k] = new Set();
+                propositions[k].add(JSON.stringify(copie[k]));
+            });
+        });
+        const recuperables = [];
+        const ambigus = [];
+        Object.keys(propositions).forEach(function (k) {
+            const valeurs = Array.from(propositions[k]);
+            if (valeurs.length === 1) recuperables.push({ champ: k, valeurJson: valeurs[0] });
+            else ambigus.push({ champ: k, valeurs: valeurs });
+        });
+        return { recuperables: recuperables, ambigus: ambigus };
+    }
+
     /**
      * Analyse une liste : groupes d'ids en double (retirables) et groupes
      * d'homonymes à ids différents (rapportés seulement).
@@ -160,7 +203,9 @@
                 // Ce qui DIFFÈRE entre l'exemplaire gardé et les autres. Sans ça,
                 // « les copies diffèrent » est une inquiétude sans matière : on ne
                 // peut pas décider d'un retrait qu'on ne voit pas.
-                ecarts: _comparerCopies(garde.item, retires.map(o => o.item))
+                ecarts: _comparerCopies(garde.item, retires.map(o => o.item)),
+                // Ce que le retrait FERAIT PERDRE si on ne le récupérait pas.
+                recuperation: _champsRecuperables(garde.item, retires.map(o => o.item))
             });
         });
 
@@ -234,8 +279,22 @@
                 if (d.ecarts.length) {
                     L('        ⮕ Le retrait reste sans effet sur l\'application : tous les lecteurs');
                     L('          résolvent par `find` sur l\'id, donc SEUL le 1er exemplaire était lu.');
-                    L('          Ces écarts n\'étaient donc déjà visibles nulle part. Mais si l\'un');
-                    L('          d\'eux porte la valeur que tu voulais, corrige le 1er AVANT d\'exécuter.');
+                }
+                const rec = d.recuperation.recuperables;
+                const amb = d.recuperation.ambigus;
+                if (rec.length) {
+                    L('        ⚠ CHAMPS À RÉCUPÉRER — vides chez le gardé, renseignés chez une copie :');
+                    rec.forEach(r => L('            ' + r.champ + ' = ' + r.valeurJson));
+                    L('          ⮕ Sans récupération, ces valeurs DISPARAISSENT des données. Elles');
+                    L('            n\'étaient déjà affichées nulle part (le 1er exemplaire seul est lu),');
+                    L('            donc la perte serait invisible avant ET après — le pire profil.');
+                    L('          ⮕ Pour les verser dans le 1er exemplaire puis retirer les copies :');
+                    L('                await reparer442({ executer: true, fusionnerChamps: true })');
+                }
+                if (amb.length) {
+                    L('        ⛔ CHAMPS AMBIGUS — deux copies proposent des valeurs différentes :');
+                    amb.forEach(a => L('            ' + a.champ + ' : ' + a.valeurs.join('  |  ')));
+                    L('          Le script ne devine pas : corrige le 1er exemplaire à la main.');
                 }
             });
             a.homonymes.forEach(h => {
@@ -271,11 +330,38 @@
             return;
         }
 
+        // Y a-t-il des valeurs qui disparaîtraient sans récupération ?
+        const totalRecuperables = plan.reduce((n, p) =>
+            n + p.analyse.doublonsId.reduce((m, d) => m + d.recuperation.recuperables.length, 0), 0);
+
         if (!executer) {
             L('');
             L('DRY-RUN terminé : ' + totalARetirer + ' exemplaire(s) en trop, dans ' + plan.length + ' collection(s).');
-            L('Si le plan est bon ET que le backup Codex est fait :');
-            L('    await reparer442({ executer: true })');
+            if (totalRecuperables > 0) {
+                L('⚠ ' + totalRecuperables + ' champ(s) seraient PERDUS par un simple retrait (voir ci-dessus).');
+                L('Si le plan est bon ET que le backup Codex est fait :');
+                L('    await reparer442({ executer: true, fusionnerChamps: true })   ← récupère puis retire');
+                L('    await reparer442({ executer: true, ignorerChamps: true })     ← retire SANS récupérer');
+            } else {
+                L('Si le plan est bon ET que le backup Codex est fait :');
+                L('    await reparer442({ executer: true })');
+            }
+            console.log(out.join('\n'));
+            return;
+        }
+
+        // ⛔ REFUS EXPLICITE plutôt que perte silencieuse : si des valeurs
+        // disparaîtraient, l'appelant doit dire ce qu'il en fait. Même posture
+        // que `reparer154`, qui refuse toute cible ambiguë au lieu de deviner.
+        const fusionner = !!(opts && opts.fusionnerChamps);
+        const ignorer = !!(opts && opts.ignorerChamps);
+        if (totalRecuperables > 0 && !fusionner && !ignorer) {
+            L('');
+            L('⛔ REFUS : ' + totalRecuperables + ' champ(s) renseignés chez une copie et VIDES chez');
+            L('   l\'exemplaire gardé disparaîtraient. Rien n\'a été écrit.');
+            L('   Choisis explicitement :');
+            L('     await reparer442({ executer: true, fusionnerChamps: true })   ← récupère puis retire');
+            L('     await reparer442({ executer: true, ignorerChamps: true })     ← retire SANS récupérer');
             console.log(out.join('\n'));
             return;
         }
@@ -285,7 +371,20 @@
         for (const p of plan) {
             window._pre442[p.cle] = JSON.parse(JSON.stringify(p.liste));
             const aRetirer = new Set();
-            p.analyse.doublonsId.forEach(d => d.indicesRetires.forEach(i => aRetirer.add(i)));
+            p.analyse.doublonsId.forEach(d => {
+                // Récupération AVANT retrait : on ne remplit que du vide, donc
+                // aucune valeur en place n'est écrasée.
+                if (fusionner && d.recuperation.recuperables.length) {
+                    const garde = p.liste.find(x => x && x.id === d.id);
+                    d.recuperation.recuperables.forEach(r => {
+                        if (garde && _estVide(garde[r.champ])) {
+                            garde[r.champ] = JSON.parse(r.valeurJson);
+                            L('  ↳ ' + d.id + ' · ' + r.champ + ' récupéré = ' + r.valeurJson);
+                        }
+                    });
+                }
+                d.indicesRetires.forEach(i => aRetirer.add(i));
+            });
             const nettoyee = p.liste.filter((_, i) => !aRetirer.has(i));
             await db.set(p.cle, nettoyee);
             L('✔ ' + p.cle + ' : ' + p.liste.length + ' → ' + nettoyee.length + ' entrée(s)');

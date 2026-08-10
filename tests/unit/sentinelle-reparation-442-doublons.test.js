@@ -72,7 +72,10 @@ describe('#442 · script de nettoyage des doublons', () => {
         const { store, db } = fauxStockage(DONNEES_TERRAIN);
 
         const win = chargerScriptReparation(db);
-        await win.reparer442({ executer: true });
+        // `ignorerChamps` est désormais REQUIS ici : la 3e copie porte `titre`,
+        // absent du gardé, donc l'exécution nue refuse (cas B3). Ce cas-ci teste
+        // le retrait pur — on dit donc explicitement qu'on ne récupère rien.
+        await win.reparer442({ executer: true, ignorerChamps: true });
 
         expect(store.cours).toHaveLength(2);
         // Le premier exemplaire, celui que `find` atteignait déjà, est celui
@@ -116,6 +119,69 @@ describe('#442 · script de nettoyage des doublons', () => {
         expect(rapport).toContain('SEUL le 1er exemplaire était lu');
     });
 
+    // ── Le cas réel du 10 août : la 3e copie portait des champs que le
+    //    1er n'avait pas (heuresContact: 60, ponderation: '2-2-3'). Un simple
+    //    retrait les aurait fait disparaître des données — invisiblement, car
+    //    seul le 1er exemplaire est jamais lu.
+    const TROIS_COPIES = {
+        cours: [
+            { id: 'h2026-601-102-MQ-00001', codeCours: '601-102-MQ', session: 'Hiver', annee: '2026', heuresContact: '', ponderation: '' },
+            { id: 'h2026-601-102-MQ-00001', codeCours: '601-102-MQ', session: 'Hiver', annee: '2026' },
+            { id: 'h2026-601-102-MQ-00001', codeCours: '601-102-MQ', session: 'Hiver', annee: '2026', heuresContact: 60, ponderation: '2-2-3' }
+        ]
+    };
+
+    it('B3 · l\'exécution REFUSE quand des champs disparaîtraient (pas de perte silencieuse)', async () => {
+        const { store, ecritures, db } = fauxStockage(TROIS_COPIES);
+        const win = chargerScriptReparation(db);
+
+        await win.reparer442({ executer: true });   // sans dire quoi faire des champs
+
+        expect(ecritures).toEqual([]);              // rien écrit
+        expect(store.cours).toHaveLength(3);        // rien retiré
+    });
+
+    it('B4 · fusionnerChamps récupère AVANT de retirer — et n\'écrase rien', async () => {
+        const { store, db } = fauxStockage(TROIS_COPIES);
+        const win = chargerScriptReparation(db);
+
+        await win.reparer442({ executer: true, fusionnerChamps: true });
+
+        expect(store.cours).toHaveLength(1);
+        expect(store.cours[0].heuresContact).toBe(60);
+        expect(store.cours[0].ponderation).toBe('2-2-3');
+        // Les champs DÉJÀ renseignés chez le gardé restent les siens.
+        expect(store.cours[0].session).toBe('Hiver');
+        expect(store.cours[0].annee).toBe('2026');
+    });
+
+    it('B5 · ignorerChamps retire sans récupérer — le choix est explicite', async () => {
+        const { store, db } = fauxStockage(TROIS_COPIES);
+        const win = chargerScriptReparation(db);
+
+        await win.reparer442({ executer: true, ignorerChamps: true });
+
+        expect(store.cours).toHaveLength(1);
+        expect(store.cours[0].heuresContact).toBe('');
+    });
+
+    it('B6 · deux copies qui se contredisent sur un champ : AMBIGU, jamais deviné', async () => {
+        const { store, db } = fauxStockage({
+            cours: [
+                { id: 'X', codeCours: '601-102-MQ', ponderation: '' },
+                { id: 'X', codeCours: '601-102-MQ', ponderation: '2-2-3' },
+                { id: 'X', codeCours: '601-102-MQ', ponderation: '1-2-3' }
+            ]
+        });
+        const win = chargerScriptReparation(db);
+
+        await win.reparer442({ executer: true, fusionnerChamps: true });
+
+        // Le champ contesté n'est PAS renseigné au hasard.
+        expect(store.cours).toHaveLength(1);
+        expect(store.cours[0].ponderation).toBe('');
+    });
+
     it('C · deux modèles homonymes à ids DIFFÉRENTS ne sont pas touchés', async () => {
         const donnees = {
             a2025_echellesTemplates: [
@@ -151,7 +217,7 @@ describe('#442 · script de nettoyage des doublons', () => {
         const avant = JSON.stringify(store);
 
         const win = chargerScriptReparation(db);
-        await win.reparer442({ executer: true });
+        await win.reparer442({ executer: true, ignorerChamps: true });
         expect(JSON.stringify(store)).not.toBe(avant);
 
         await win.annuler442();
