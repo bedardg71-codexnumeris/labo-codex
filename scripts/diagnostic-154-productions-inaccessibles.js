@@ -111,9 +111,10 @@
     // ── 5. Budget de stockage (hypothèse A, #353) ─────────────────────────
     if (db.statsStockage) {
         const st = db.statsStockage(5);
-        L('— budget localStorage — ' + Math.round(st.octets / 1024) + ' Ko / ' +
-          Math.round(st.budget / 1024) + ' Ko (' + Math.round(st.ratio * 100) + ' %) · ' + st.nbCles + ' clés');
-        st.topCles.forEach(x => L('  top · ' + x.cle + ' : ' + Math.round(x.octets / 1024) + ' Ko'));
+        // #353 (10 août) : l'unité est le CARACTÈRE UTF-16, monnaie du quota.
+        L('— budget localStorage — ' + Math.round(st.unites / 1024) + ' K car. / ' +
+          Math.round(st.budget / 1024) + ' K car. (' + Math.round(st.ratio * 100) + ' %) · ' + st.nbCles + ' clés');
+        st.topCles.forEach(x => L('  top · ' + x.cle + ' : ' + Math.round(x.unites / 1024) + ' K car.'));
     }
 
     L('==== FIN DIAG #154 ====');

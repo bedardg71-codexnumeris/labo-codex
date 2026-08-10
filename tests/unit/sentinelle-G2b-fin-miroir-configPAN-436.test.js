@@ -101,9 +101,17 @@ describe('G2-b · l’îlot multi-objectifs, dernier consommateur, est retiré',
 });
 
 describe('G2-b · ce qui doit SURVIVRE (le piège du prochain nettoyage)', () => {
-    it('le module propriétaire garde sa purge du sous-champ jetons mort', () => {
+    it('le module propriétaire garde SA PURGE du miroir mort', () => {
+        // ⚠ L'assertion a été DÉPINGLÉE de son implémentation le 10 août (#353).
+        // Elle exigeait littéralement `delete m.configPAN[SOUS_CHAMP_JETONS_MORT]`
+        // — l'ancienne purge, qui ne retirait que `jetons`. Le miroir entier est
+        // désormais purgé (décision Grégoire du 9 août), ce qui sert MIEUX
+        // l'invariant que ce cas protège : « la purge survit au prochain
+        // nettoyage ». Épingler une ligne de code, c'est interdire de faire
+        // mieux — l'invariant, lui, est que le mort ne reste pas dans les données.
         const owner = lire('js', 'pratiques', 'modalites-evaluation.js');
-        expect(owner).toMatch(/delete m\.configPAN\[SOUS_CHAMP_JETONS_MORT\]/);
+        expect(owner).toMatch(/delete m\[CHAMP_CONFIGPAN_MORT\]/);
+        expect(owner).toMatch(/CHAMP_CONFIGPAN_MORT\s*=\s*'configPAN'/);
     });
 
     it('le chemin d’injection de simulation (#307) reste lisible par le moteur', () => {

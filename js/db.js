@@ -48,20 +48,44 @@
 (function() {
     'use strict';
 
+    // ========================================================================
+    // #353 (10 août 2026) — L'UNITÉ DU QUOTA, MESURÉE PLUTÔT QUE SUPPOSÉE
+    // ------------------------------------------------------------------------
+    // Le navigateur facture localStorage en UNITÉS DE CODE UTF-16 (autrement
+    // dit : en caractères), pas en octets. Vérifié au navigateur le 10 août
+    // (Chromium, origine file://) en remplissant jusqu'au QuotaExceededError :
+    //
+    //   · avec 'x' (1 caractère = 1 octet UTF-8)  → 4,94 M caractères tenus
+    //   · avec 'é' (1 caractère = 2 octets UTF-8) → 4,94 M caractères tenus
+    //
+    // Même capacité en caractères des deux côtés : c'est le caractère qui est
+    // compté, pas l'octet. Le plafond nominal est donc 5 Mi CARACTÈRES.
+    //
+    // ⮕ CE QUE CETTE MESURE A CORRIGÉ. `statsStockage` comptait
+    // `(cle + valeur).length * 2` — des octets UTF-16 — et divisait par un
+    // budget de 5 Mi. Le ratio affiché valait donc le DOUBLE de la réalité :
+    // les « 173 % » du 9 août étaient 86 %, et les « 200 % » du 10 août sont
+    // **100 %**. Le chiffre n'était pas absurde, il était dans la mauvaise
+    // monnaie — et un ratio impossible (200 % d'un quota qu'on ne peut pas
+    // dépasser) invite à ne plus le croire, ce qui est le pire résultat pour
+    // une alerte. Toutes les mesures d'occupation sont désormais en caractères.
+    // ========================================================================
+    const BUDGET_LOCALSTORAGE = 5 * 1024 * 1024; // 5 Mi CARACTÈRES (unités UTF-16)
+    const PALIERS_ALERTE_OCCUPATION = [0.8, 0.95];
+
     // Seuil IDB-first (#334 D, zéro-dette) : au-delà, une valeur va directement
     // dans memoryCache + IndexedDB, sans tenter localStorage (évite un
     // QuotaExceededError systématique sur les grosses clés). Source unique —
     // consommé par set(), setSync() et syncToLocalStorageCache().
-    const SEUIL_IDB_FIRST = 200 * 1024; // 200 Ko
-
-    // #353 Option 1 (3 juillet 2026, décision Grégoire du 28 juin) — OBSERVABILITÉ
-    // de la saturation localStorage : on MESURE et on ALERTE, on ne change AUCUN
-    // comportement d'écriture (le choix entre les remédiations 2/3/4 du
-    // RAPPORT-353 se prendra sur ces chiffres). Budget = quota WebKit observé
-    // pour l'origine file:// (~5 Mo) ; chaque palier déclenche UN console.warn
-    // par session, vérification throttlée (au plus 1/min).
-    const BUDGET_LOCALSTORAGE = 5 * 1024 * 1024; // ~5 Mo (WebKit file://)
-    const PALIERS_ALERTE_OCCUPATION = [0.8, 0.95];
+    //
+    // #353 : exprimé dans la MÊME monnaie que le budget (caractères). Il l'était
+    // en octets UTF-8 (`new Blob(...).size`) — une troisième unité, incomparable
+    // aux deux autres : un seuil « 200 Ko » et un budget « 5 Mo » qui ne
+    // parlaient pas de la même chose. L'écart pratique est de quelques pour cent
+    // (les accents coûtent 2 octets UTF-8 pour 1 caractère), mais l'incohérence
+    // rendait tout arbitrage sur chiffres impossible — or c'est exactement ce
+    // que #353 demande.
+    const SEUIL_IDB_FIRST = 200 * 1024; // 200 Ki caractères
 
     /**
      * Classe Database - API unifiée pour stockage
@@ -525,52 +549,82 @@
         }
 
         /**
-         * #401 : taille (octets UTF-8) d'une chaîne déjà sérialisée — même
-         * métrique que _estimateSize, sans re-stringify.
+         * Coût d'une chaîne déjà sérialisée, DANS LA MONNAIE DU QUOTA :
+         * les unités de code UTF-16, c'est-à-dire `.length` (voir la mesure
+         * documentée près de BUDGET_LOCALSTORAGE).
+         *
+         * #401 : pas de re-stringify. #353 (10 août) : plus de `new Blob(...)`
+         * non plus — il rendait des octets UTF-8, une unité que le navigateur
+         * ne facture pas, et allouait un Blob à CHAQUE écriture sur un chemin
+         * chaud pour produire un chiffre incomparable au budget.
          */
         _estimateSizeFromString(jsonString) {
-            try {
-                return new Blob([jsonString]).size;
-            } catch (e) {
-                return -1;
-            }
+            return typeof jsonString === 'string' ? jsonString.length : -1;
         }
 
         /**
-         * #353 Option 1 — mesure FRAÎCHE de l'occupation localStorage.
-         * `.length` d'une chaîne est O(1) : le parcours des ~dizaines de clés
-         * est bon marché. Octets estimés en UTF-16 (clé + valeur) × 2, comme le
-         * snapshot de boot `window._storageStats`.
+         * #353 — mesure FRAÎCHE de l'occupation localStorage, EN CARACTÈRES
+         * UTF-16 (la monnaie du quota, mesurée le 10 août — voir le bloc au-
+         * dessus de BUDGET_LOCALSTORAGE). `.length` est O(1) : le parcours des
+         * quelques centaines de clés est bon marché.
+         *
+         * ⚠ Le champ s'appelle `unites` et non `octets` : il tenait le second
+         * nom en portant la première valeur, ce qui a fait lire « 200 % d'un
+         * quota » là où l'app était à 100 % de son plafond réel.
+         *
          * @param {number} nbTop - nombre de plus grosses clés à détailler
-         * @returns {{octets:number, budget:number, ratio:number, nbCles:number,
-         *            topCles:Array<{cle:string,octets:number}>, contributeursConnus:Object}}
+         * @returns {{unites:number, budget:number, ratio:number, nbCles:number,
+         *            topCles:Array<{cle:string,unites:number}>,
+         *            contributeursConnus:Object, seuilCourantKi:number,
+         *            projectionSeuils:Array}}
          */
         statsStockage(nbTop = 10) {
             const tailles = [];
-            let octets = 0;
+            let unites = 0;
             try {
                 for (let i = 0; i < localStorage.length; i++) {
                     const cle = localStorage.key(i);
                     if (cle === null) continue;
                     const valeur = localStorage.getItem(cle) || '';
-                    const t = (cle.length + valeur.length) * 2; // UTF-16
-                    octets += t;
-                    tailles.push({ cle: cle, octets: t });
+                    // #353 : la clé COMPTE aussi dans le quota, et l'unité est
+                    // le caractère UTF-16 — pas l'octet.
+                    const t = cle.length + valeur.length;
+                    unites += t;
+                    tailles.push({ cle: cle, unites: t });
                 }
             } catch (e) { /* mesure best-effort */ }
-            tailles.sort((a, b) => b.octets - a.octets);
+            tailles.sort((a, b) => b.unites - a.unites);
             // Contributeurs identifiés par le RAPPORT-353 §3, agrégés pour lecture rapide
-            const somme = (pred) => tailles.filter(pred).reduce((acc, x) => acc + x.octets, 0);
+            const somme = (pred) => tailles.filter(pred).reduce((acc, x) => acc + x.unites, 0);
+
+            // #353 — DE QUOI TRANCHER L'OPTION 2 SUR DES CHIFFRES. Pour chaque
+            // seuil candidat : ce que basculer les clés au-dessus libérerait.
+            // Le rapport demandait « mesurer avant de trancher » ; sans cette
+            // projection, choisir un seuil reste une intuition déguisée.
+            const projection = [25, 50, 100, 200].map(function (ko) {
+                const seuil = ko * 1024;
+                const concernees = tailles.filter(x => x.unites > seuil);
+                const liberees = concernees.reduce((acc, x) => acc + x.unites, 0);
+                return {
+                    seuilKi: ko,
+                    nbCles: concernees.length,
+                    uniteesLiberees: liberees,
+                    ratioApres: (unites - liberees) / BUDGET_LOCALSTORAGE
+                };
+            });
+
             return {
-                octets: octets,
+                unites: unites,
                 budget: BUDGET_LOCALSTORAGE,
-                ratio: octets / BUDGET_LOCALSTORAGE,
+                ratio: unites / BUDGET_LOCALSTORAGE,
                 nbCles: tailles.length,
                 topCles: tailles.slice(0, nbTop),
                 contributeursConnus: {
                     backupsV1: somme(x => x.cle.endsWith('_backup_v1')),
                     tamponsImages: somme(x => x.cle.indexOf('tamponsImages') !== -1)
-                }
+                },
+                seuilCourantKi: SEUIL_IDB_FIRST / 1024,
+                projectionSeuils: projection
             };
         }
 
@@ -592,11 +646,11 @@
                 if (stats.ratio >= palier && !this._budgetPaliersEmis[palier]) {
                     this._budgetPaliersEmis[palier] = true;
                     const top = stats.topCles
-                        .map(x => x.cle + ' (' + (x.octets / 1024).toFixed(0) + ' Ko)')
+                        .map(x => x.cle + ' (' + (x.unites / 1024).toFixed(0) + ' K car.)')
                         .join(', ');
                     console.warn(
-                        '[DB #353] localStorage à ' + (stats.ratio * 100).toFixed(0) + ' % du budget ' +
-                        '(' + (stats.octets / 1024).toFixed(0) + ' Ko / ' + (stats.budget / 1024).toFixed(0) + ' Ko, ' +
+                        '[DB #353] localStorage à ' + (stats.ratio * 100).toFixed(0) + ' % du quota ' +
+                        '(' + (stats.unites / 1024).toFixed(0) + ' K car. / ' + (stats.budget / 1024).toFixed(0) + ' K car., ' +
                         stats.nbCles + ' clés). Aucune donnée en danger (durabilité A/B/C) — ' +
                         'au-delà du quota les écritures basculent en memoryCache+IDB. ' +
                         'Top clés : ' + top + '. Détail : db.statsStockage().'
@@ -621,23 +675,24 @@
                     const cle = localStorage.key(i);
                     if (cle && cle.endsWith('_backup_v1')) {
                         const valeur = localStorage.getItem(cle) || '';
-                        cibles.push({ cle: cle, octets: (cle.length + valeur.length) * 2 });
+                        // #353 : caractères UTF-16, comme partout ailleurs.
+                        cibles.push({ cle: cle, unites: cle.length + valeur.length });
                     }
                 }
                 // Les backups refoulés hors localStorage (saturation) vivent en
                 // memoryCache : les couvrir aussi.
                 this.memoryCache.forEach((_, cle) => {
                     if (cle.endsWith('_backup_v1') && !cibles.some(c => c.cle === cle)) {
-                        cibles.push({ cle: cle, octets: -1 });
+                        cibles.push({ cle: cle, unites: -1 });
                     }
                 });
             } catch (e) { /* énumération best-effort */ }
             if (!dryRun) {
                 cibles.forEach(c => this.removeSync(c.cle));
             }
-            const totalKo = (cibles.reduce((acc, c) => acc + Math.max(c.octets, 0), 0) / 1024).toFixed(1);
+            const total = (cibles.reduce((acc, c) => acc + Math.max(c.unites, 0), 0) / 1024).toFixed(1);
             console.warn('[DB #353] purgerBackupsV1 ' + (dryRun ? 'DRY-RUN' : 'EXÉCUTÉ') + ' : ' +
-                cibles.length + ' clé(s) *_backup_v1, ~' + totalKo + ' Ko' +
+                cibles.length + ' clé(s) *_backup_v1, ~' + total + ' K car.' +
                 (dryRun ? ' — rien touché. Exécuter : db.purgerBackupsV1({ dryRun: false })' : ' supprimées.'));
             return { dryRun: dryRun, cibles: cibles };
         }
@@ -989,11 +1044,13 @@
 
 
                 // Diagnostic storage (accessible via window._storageStats)
+                // #353 : même monnaie que statsStockage et que le quota —
+                // le caractère UTF-16, clé comprise.
                 var lsTaille = 0;
                 try {
                     for (var lsKey in localStorage) {
                         if (localStorage.hasOwnProperty(lsKey)) {
-                            lsTaille += (localStorage.getItem(lsKey) || '').length * 2; // UTF-16
+                            lsTaille += lsKey.length + (localStorage.getItem(lsKey) || '').length;
                         }
                     }
                 } catch (e) {}
@@ -1001,7 +1058,7 @@
                     localStorage: {
                         nbCles: Object.keys(localStorage).length,
                         tailleEstimee: lsTaille,
-                        tailleFormatee: (lsTaille / 1024).toFixed(1) + ' Ko',
+                        tailleFormatee: (lsTaille / 1024).toFixed(1) + ' K car.',
                         // #353 Option 1 : situe le snapshot par rapport au budget.
                         // Mesure fraîche + top clés : db.statsStockage().
                         budget: BUDGET_LOCALSTORAGE,
