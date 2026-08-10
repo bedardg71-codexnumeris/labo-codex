@@ -21,6 +21,14 @@
 
     var CHANGELOG = [
         {
+            version: '1.71',
+            couleur: 'orange',
+            titre: 'Le bouton Supprimer d’un groupe-cours réapparaît',
+            items: [
+                'Le bouton « Supprimer » d’un groupe-cours restait invisible quand tu arrivais sur la section : l’application restaurait bien ton groupe actif et ouvrait son formulaire, mais la commande de suppression ne s’affichait pas. Elle n’apparaissait qu’après avoir rouvert le menu déroulant.'
+            ]
+        },
+        {
             version: '1.69',
             couleur: 'orange',
             titre: 'L’assistant ne propose plus « Par objectifs »',
@@ -38,14 +46,6 @@
                 'Tu peux maintenant tracer un lien depuis une activité, un exposé ou une évaluation et le déposer sur la ligne d’un objectif de sa leçon : la case « objectifs servis » se coche toute seule. Les cases de l’Inspecteur restent là — c’est le même geste, par un autre chemin.',
                 'Si le dépôt ne peut pas aboutir (bloc d’une autre leçon, type qui ne sert pas d’objectif), l’application te le dit au lieu de ne rien faire.',
                 'Les pastilles des objectifs (!, ⚠, ✓) ont enfin une légende : dans l’Inspecteur de la leçon et dans la page 5 du guide. Leur sens ne vivait que dans une infobulle au survol — invisible sur iPad.'
-            ]
-        },
-        {
-            version: '1.71',
-            couleur: 'orange',
-            titre: 'Le bouton Supprimer d’un groupe-cours réapparaît',
-            items: [
-                'Le bouton « Supprimer » d’un groupe-cours restait invisible quand tu arrivais sur la section : l’application restaurait bien ton groupe actif et ouvrait son formulaire, mais la commande de suppression ne s’affichait pas. Elle n’apparaissait qu’après avoir rouvert le menu déroulant.'
             ]
         },
         {
