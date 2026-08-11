@@ -102,7 +102,7 @@ celles rattrapées de justesse.
                 [tags]
 ```
 
-### Les quatre règles d'écriture
+### Les cinq règles d'écriture
 
 **1. Le « pourquoi » raconte l'expérience, pas le code.**
 Ce que Grégoire a vu, ou ce qu'il aurait vu sans le correctif. Il peut
@@ -127,16 +127,46 @@ est-il visible ? ». Deux rangées, pas une phrase à deux questions — sinon o
 ne sait pas ce qui a échoué.
 
 **4. Tout script de console dit les trois choses.**
-Quoi copier, où le coller, **et ce qui doit s'afficher si c'est chargé**.
-Toujours donner la commande qui met le fichier dans le presse-papier :
+Quoi copier, où le coller, **et ce qui doit s'afficher si c'est chargé**. Ce
+troisième point n'est pas décoratif : c'est le seul moyen pour lui de
+distinguer « le script a tourné » de « une vieille copie a tourné ». Donner un
+repère textuel exact, pas une paraphrase :
 
-```bash
-cat scripts/<fichier>.js | pbcopy   # → Cmd+V dans la console
-```
+> ✅ « Le rapport doit commencer par `==== #353 · clés orphelines · DRY-RUN`.
+> S'il dit `DIAG #353 … (LECTURE SEULE)`, c'est une **ancienne copie** —
+> refaire `git pull`. »
 
 ⚠ **Et rappeler la règle qui a coûté trois allers-retours le 10 août** : un
 script se colle EN ENTIER, une commande s'appelle APRÈS. Quand la console dit
 `is not defined`, c'est toujours que le fichier n'est pas passé.
+
+**5. Toute commande dit SUR QUELLE SURFACE elle se tape. Non négociable.**
+Il y a deux fenêtres, elles ne se ressemblent pas assez : le **Terminal** de
+macOS et la **console du navigateur**. Rien dans un bloc de code ne dit
+laquelle. Un bloc mal orienté ne produit pas un résultat faux — il produit un
+message d'erreur incompréhensible, et l'utilisateur conclut que le correctif
+est cassé.
+
+> ❌ Donner `cat scripts/<fichier>.js | pbcopy` dans une liste dont tous les
+> autres blocs sont du JavaScript de console.
+> ✅ Étiqueter : « **SEULE commande de Terminal de toute la liste** », tag
+> `Terminal` sur la rangée.
+>
+> *(Erreur réelle, 10 août 2026 au soir : le `cat` collé dans la console de
+> Chrome a donné `SyntaxError: Unexpected identifier 'scripts'`. La règle 4
+> était écrite ; elle n'avait pas été appliquée.)*
+
+**Mieux encore : supprimer la surface en trop.** Charger un script ne demande
+pas de Terminal — il existe une méthode à une seule fenêtre, à préférer par
+défaut :
+
+> Finder → dossier `scripts` → **glisser le `.js` dans un nouvel onglet du
+> navigateur** (il s'affiche en texte) → Cmd+A, Cmd+C → revenir sur l'onglet
+> de l'app → Cmd+V dans la console, Entrée.
+
+⮕ Règle générale : **une porte terrain qui mélange deux surfaces sans le dire
+est un piège, pas une consigne.** Si une seule ligne de la liste sort de la
+console du navigateur, elle doit se signaler elle-même.
 
 ### Les tags marquent la NATURE du geste, pas le module
 
@@ -144,7 +174,8 @@ script se colle EN ENTIER, une commande s'appelle APRÈS. Quand la console dit
 |---|---|
 | `⚠⚠ Données` | touche le corpus réel — backup avant |
 | `iPad` | seul son matériel peut trancher |
-| `Console` | il faut coller un script |
+| `Console` | se tape dans la console du **navigateur** |
+| `Terminal` | se tape dans l'app **Terminal** — à éviter, et à signaler quand c'est inévitable |
 
 ⮕ Ce qui lui permet de filtrer sur **« ce que je peux faire là où je suis »** :
 dans le train avec l'iPad, ou devant le Mac avec la console ouverte.
@@ -187,6 +218,14 @@ pas une note mentale » — le dire dans l'en-tête, et le tenir au retour.
   entier se fait ignorer — constaté le 9 août)*
 - ❌ Publier l'artefact sans le markdown jumeau
 - ❌ Écrire « vérifier que ça marche » : dire QUOI regarder, et où
+- ❌ **Mélanger Terminal et console du navigateur sans le dire** *(règle 5 —
+  a produit `SyntaxError: Unexpected identifier 'scripts'` le 10 août au soir)*
+- ❌ **Annoncer un attendu chiffré issu d'une projection non mesurée.** Un
+  attendu faux est pire que pas d'attendu : l'utilisateur coche ✗ et conclut
+  que le correctif a échoué alors qu'il a marché. Si le chiffre est une
+  prédiction, l'écrire comme telle — ou n'en donner aucun et dire « mesure
+  d'entrée, aucun chiffre n'est un échec ici ». *(10 août : projection à
+  ~44 %, mesure à 100 % — le seuil avait pourtant mordu.)*
 
 ---
 

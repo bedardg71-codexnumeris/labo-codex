@@ -7,6 +7,52 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 10 AOÛT 2026, SOIR (8, POST-CLÔTURE) : SON RELEVÉ A INVALIDÉ MON ATTENDU — PORTES CORRIGÉES.
+     ÉTAT : **1.71.1** inchangé (aucun code applicatif touché) — correction de DOCUMENTS uniquement.
+
+     ⚠⚠ **MA PROJECTION DU SEUIL ÉTAIT FAUSSE, ET C'EST LUI QUI L'A MESURÉE.** La porte 1.1 annonçait
+     « attendu ~44 % ». Son relevé du soir sur 1.71.1 (build `0810-1754`) : **100 %, 586 clés**.
+     ⮕ **Le seuil MORD pourtant**, et la preuve est dans son propre rapport d'orphelines :
+     `a2024_presences` (184 K car.), `a2024_evaluationsSauvegardees` (179 K) et `simulation_indicesCP`
+     (72 K) **ont disparu de la liste** — elles ont quitté localStorage pour IndexedDB.
+     ⮕ **CE QUE MA PROJECTION IGNORAIT** : `syncToLocalStorageCache()` **réécrit** au démarrage dans
+     localStorage tout ce qui passe SOUS le seuil. Les grosses clés sortent, des clés qui vivaient en
+     mémoire seule entrent à leur place — **111 clés de plus pour le même total**. *J'ai modélisé
+     l'éviction, pas le remplissage.* ⚠ **`db.statsStockage().projectionSeuils` porte EXACTEMENT le même
+     angle mort** : ses chiffres sont un PLANCHER, pas une prévision. **Premier point du chantier #353.**
+
+     ▣ **DEUXIÈME CONSÉQUENCE, MOINS VISIBLE ET PLUS DANGEREUSE : LE DÉTECTEUR NE VOIT QUE localStorage.**
+     `diagnostic-353-cles-orphelines.js:102` énumère `localStorage.key(i)`. Les clés parties en IDB lui
+     sont **invisibles**. Donc : (1) a2024 ne pèse plus 448 K car. mais **85 K / 21 clés** — les deux
+     grosses ne seront PAS purgées par `reparer353` ; (2) la famille `sansProducteur` rend **0**, ce qui
+     n'est PAS une panne — `simulation_indicesCP` est en IDB. ⮕ **Les deux portes annonçaient un chiffre
+     et un succès qui ne pouvaient pas arriver.** Sans correction, Grégoire cochait ✗ deux fois et
+     concluait que le correctif avait échoué. Portes 1.2 et 1.3 réécrites en **deux/trois gestes** :
+     `reparer353` pour localStorage, puis `db.keys()` + `db.remove()` pour le reliquat IDB — avec un geste
+     de LECTURE obligatoire entre les deux, et l'avertissement qu'il n'y a **pas d'`annuler353()`** sur ce
+     chemin (filet = backup Codex).
+
+     ⚠ **ET LA RÈGLE 4 DU SKILL A ÉCHOUÉ LE SOIR MÊME OÙ ELLE A ÉTÉ ÉCRITE.** Le `cat scripts/….js |
+     pbcopy` que je donnais — et que le §7 ci-dessous célèbre comme « la seule forme qui a marché du
+     premier coup » — est une commande de **Terminal**, posée au milieu de blocs de **console
+     navigateur**, sans le dire. Collé dans Chrome : `SyntaxError: Unexpected identifier 'scripts'`.
+     ⮕ **`SKILL_portes_terrain.md` gagne une RÈGLE 5** : *toute commande dit sur quelle SURFACE elle se
+     tape.* Et mieux : **supprimer la surface en trop** — glisser le `.js` dans un onglet du navigateur,
+     Cmd+A/Cmd+C, coller dans la console. Une seule fenêtre. Le tag `Terminal` existe désormais, et la
+     seule commande de Terminal de la liste (`git pull`) se signale elle-même.
+     ⮕ **Deuxième anti-pattern versé** : *annoncer un attendu chiffré issu d'une projection non mesurée*.
+     **Un attendu faux est pire que pas d'attendu** — il transforme un succès en échec aux yeux du testeur.
+
+     ▣ **LIVRÉ** : artefact interactif **republié à la même URL** (§0 sans Terminal + repère de version du
+     script, 1.1 rectifiée, 1.2/1.3 réécrites, 4e angle mort en §4) · jumeau markdown
+     `plans de travail/PORTES-TERRAIN-2026-08-10.md` aligné · `SKILL_portes_terrain.md` (règle 5, tag
+     `Terminal`, 2 anti-patterns). **Aucun test touché — Vitest reste 2169/2169.**
+
+     ⮕ **CE QUI RESTE DÛ, INCHANGÉ** : Grégoire fait les portes **demain**. Rien n'est validé au terrain.
+     ===================================================================== -->
+
+
+<!-- =====================================================================
      SESSION — 10 AOÛT 2026, SOIR (7, CLÔTURE) : FUSION SUR MAIN + LE MODÈLE DES PORTES DEVIENT LA RÈGLE.
      ÉTAT FINAL : **1.71.1** (build 0810-1754), `main`, Vitest **2169/2169** (244 fichiers), 18 commits.
 
@@ -6390,8 +6436,14 @@ distingue « en retard » de « divergent ».
 Mac, prod sur iPad. ⮕ **`git pull` en case 1 de toute checklist terrain.**
 ⮕ **Et ses SCRIPTS non plus** : le 10 août au soir il a reçu trois fois
 `is not defined` parce que les outils console vivaient sur une branche non
-fusionnée. **Un script se colle EN ENTIER, une commande s'appelle APRÈS** ;
-donner systématiquement `cat scripts/<fichier>.js | pbcopy`.
+fusionnée. **Un script se colle EN ENTIER, une commande s'appelle APRÈS.**
+⚠⚠ **NE PAS donner `cat scripts/<fichier>.js | pbcopy`** — c'est du **Terminal**
+au milieu de **console navigateur**, et collé dans Chrome ça rend
+`SyntaxError: Unexpected identifier 'scripts'` (arrivé le 10 août au soir).
+⮕ **Méthode à une seule fenêtre** : Finder → `scripts` → glisser le `.js` dans un
+nouvel onglet du navigateur → Cmd+A, Cmd+C → coller dans la console de l'app.
+⮕ **Règle 5 de `SKILL_portes_terrain.md`** : toute commande dit sur quelle
+SURFACE elle se tape.
 
 ---
 
@@ -6406,8 +6458,8 @@ Ce qu'il doit rapporter, dans l'ordre :
 
 | # | Objet | Ce qu'on en attend |
 |---|---|---|
-| 1.1 | occupation du localStorage après rechargement | **~44 %** attendu (était 100 % Chrome / 88,3 % Safari). Si le chiffre ne bouge pas, le seuil ne s'est pas réappliqué → chantier |
-| 1.2-1.5 | purges a2024 · `simulation_indicesCP` · snapshots orphelins, **dans les deux navigateurs** | ⚠ le détecteur a été CORRIGÉ : exiger un dry-run frais, le rapport du 10 août ne vaut plus |
+| 1.1 | occupation du localStorage | ⚠ **DÉJÀ MESURÉ, ET MON ATTENDU ÉTAIT FAUX** : **100 %, 586 clés** sur 1.71.1. Le seuil MORD (3 grosses clés parties en IDB) mais `syncToLocalStorageCache()` **remplit** au boot ce que la projection n'avait pas modélisé. **Chantier, pas porte.** Reste dû : le même relevé dans Safari (était 88,3 %) — aucun chiffre n'y est un échec |
+| 1.2-1.5 | purges a2024 · `simulation_indicesCP` · snapshots orphelins, **dans les deux navigateurs** | ⚠ le détecteur a été CORRIGÉ : exiger un dry-run frais, le rapport du 10 août ne vaut plus. ⚠⚠ **ET IL N'ÉNUMÈRE QUE localStorage** (`diagnostic-353-cles-orphelines.js:102`) : a2024 pèse **85 K / 21 clés** et non 448 K, et `sansProducteur` rend **0** — ce n'est PAS un échec, les clés sont en IDB. Reliquat à retirer par `db.keys()` + `db.remove()`, **sans `annuler353()`** |
 | 2.1-2.5 | bouton Supprimer à l'arrivée · dépôt de lien sur objectif · légende des pastilles · wizard · bibliothèque sans doublon | 2.5 a une **seconde rangée qui teste le VECTEUR** (refaire un import) — c'est elle qui compte |
 | 2.6 | **`a2026` n'existe que dans Chrome** | touche sa RENTRÉE. Décision + peut-être un item |
 

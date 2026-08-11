@@ -14,7 +14,7 @@
 | **Branche à ouvrir** | **`main`** |
 | **Version** | **1.71.1** — build `0810-1754` |
 | **Travail en avance sur `main`** | **aucun** |
-| **Dernière mise à jour** | 10 août 2026, **clôture du cycle du soir** — tout fusionné et poussé |
+| **Dernière mise à jour** | 10 août 2026, **post-clôture** — portes terrain corrigées après son relevé (documents seuls, code inchangé) |
 
 ✅ **Aucune dette de fusion.** Le cycle du soir (**18 commits, 1.67.1 → 1.71.1**) est
 sur `main`. Suite rejouée sur l'arbre fusionné : Vitest **2169/2169** (244 fichiers),
@@ -24,6 +24,20 @@ arbre propre, `origin/main ↔ HEAD : 0 / 0`. Dernier ID utilisé : **#449**.
 Elles sont dans **`plans de travail/PORTES-TERRAIN-2026-08-10.md`** (jumeau markdown
 d'un artefact interactif). **Ne pas ouvrir de chantier de fond avant ses résultats** —
 la règle `CLAUDE.md` est explicite : un retour testeur interrompt le plan.
+
+⚠⚠ **LES PORTES ONT ÉTÉ CORRIGÉES APRÈS COUP — LIRE LA VERSION À JOUR, PAS LE SOUVENIR.**
+Son relevé du soir a **invalidé trois attendus** que j'avais écrits :
+ 1. **1.1 annonçait « ~44 % » ; il a mesuré 100 %.** Le seuil mord pourtant (3 grosses clés
+    parties en IDB) — mais `syncToLocalStorageCache()` **remplit** localStorage au boot avec
+    tout ce qui passe sous le seuil. *J'ai modélisé l'éviction, pas le remplissage.*
+    ⚠ **`db.statsStockage().projectionSeuils` a le même angle mort : un PLANCHER, pas une
+    prévision.** C'est le premier point du chantier #353.
+ 2. **1.2 annonçait 448 K car. pour a2024 ; c'est 85 K / 21 clés.** Le détecteur n'énumère
+    que localStorage (`diagnostic-353-cles-orphelines.js:102`) — les deux grosses clés a2024
+    sont en IDB et lui sont invisibles.
+ 3. **1.3 attendait une purge de `simulation_indicesCP` ; la famille rend 0.** Même cause.
+⮕ **Un attendu faux est PIRE que pas d'attendu** : il transforme un succès en échec aux yeux
+du testeur. Versé comme anti-pattern dans `SKILL_portes_terrain.md`.
 
 ⮕ **Ce que le cycle a livré** : les cinq items de la priorité 0 des 81 portes —
 **#442** (fusion des cours dédoublonnée par identité, + le cours fictif retiré de ses
@@ -69,7 +83,12 @@ depuis son clone : son build est celui de son dernier `git pull`. (2) **Ses SCRI
 aussi** : le 10 août il a reçu trois fois `is not defined` parce que les outils console
 vivaient sur une branche non fusionnée — puis parce qu'il avait collé mes commentaires
 d'usage au lieu du contenu des fichiers. ⮕ **Un script se colle EN ENTIER, une commande
-s'appelle APRÈS**, et on donne toujours `cat scripts/<fichier>.js | pbcopy`.
+s'appelle APRÈS.** ⚠⚠ **(3) Et la parade que j'avais donnée était elle-même le piège** :
+`cat scripts/<fichier>.js | pbcopy` est du **Terminal** posé au milieu de **console
+navigateur** — collé dans Chrome, ça rend `SyntaxError: Unexpected identifier 'scripts'`.
+⮕ **Méthode à une seule fenêtre** : Finder → `scripts` → glisser le `.js` dans un onglet du
+navigateur → Cmd+A, Cmd+C → coller dans la console de l'app. **Règle 5 du skill des portes :
+toute commande dit sur quelle SURFACE elle se tape.**
 
 ⮕ **Où lire la suite** : le **§3 de `SESSION.md`** porte la consigne complète — prémisse
 chiffrée, priorité 0 (les résultats du terrain de demain), les quatre décisions en
