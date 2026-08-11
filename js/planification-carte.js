@@ -2041,7 +2041,11 @@ function creerNoeud(type, x, y) {
     el.innerHTML = contenuNoeudHTML(donnees);
 
     attacherEvenements(el, donnees);
-    coucheNoeuds.appendChild(el);
+    // Même garde que `reconstruireDOM` : sans canevas monté (module pas encore
+    // initialisé, ou bac à sable de test), la DONNÉE reste la vérité et le
+    // rendu suivra au montage. `reconstruireDOM` se gardait déjà, ces deux
+    // sites-ci non — asymétrie relevée en écrivant la sentinelle du 11 août.
+    if (coucheNoeuds) coucheNoeuds.appendChild(el);
 
     const titreEl = el.querySelector('.planif-noeud-titre');
     setTimeout(function() { titreEl.focus(); }, 50);
@@ -2739,9 +2743,12 @@ function propagerModification(noeudId, champ, valeur) {
  * NOUVEAUX ids (l'unicité prépare #403), liens INTERNES recréés entre les
  * copies — les liens vers l'extérieur ne sont PAS copiés : la copie n'est
  * pas encore alignée, ne pas le prétendre.
+ * @param {string} noeudId - conteneur à copier
+ * @param {boolean} [silencieux] - ne pas afficher le toast (duplication en
+ *   lot : un seul message pour tout le geste, pas N messages empilés).
  * @returns {string|null} id de la racine copiée
  */
-function dupliquerConteneurEnProfondeur(noeudId) {
+function dupliquerConteneurEnProfondeur(noeudId, silencieux) {
     var source = etat.noeuds.get(noeudId);
     if (!source) return null;
     var configD = TYPES[source.type];
@@ -2824,18 +2831,20 @@ function dupliquerConteneurEnProfondeur(noeudId) {
     reconstruireDOM();
     sauvegarder();
     if (source.parent) reLayoutAvecAnimation(source.parent);
-    afficherToastLien('Copie indépendante créée — modifie-la sans toucher l\'originale.');
+    if (!silencieux) {
+        afficherToastLien('Copie indépendante créée — modifie-la sans toucher l\'originale.');
+    }
     return racineId;
 }
 
-function clonerNoeud(noeudId) {
+function clonerNoeud(noeudId, silencieux) {
     var source = etat.noeuds.get(noeudId);
     if (!source) return;
     var config = TYPES[source.type];
     if (config && config.conteneur) {
         // Conteneur : copie indépendante en profondeur (le miroir lié reste
         // réservé aux feuilles — cf. dupliquerConteneurEnProfondeur).
-        return dupliquerConteneurEnProfondeur(noeudId);
+        return dupliquerConteneurEnProfondeur(noeudId, silencieux);
     }
     enregistrerPourUndo();
 
@@ -2866,7 +2875,11 @@ function clonerNoeud(noeudId) {
     el.innerHTML = contenuNoeudHTML(donnees);
 
     attacherEvenements(el, donnees);
-    coucheNoeuds.appendChild(el);
+    // Même garde que `reconstruireDOM` : sans canevas monté (module pas encore
+    // initialisé, ou bac à sable de test), la DONNÉE reste la vérité et le
+    // rendu suivra au montage. `reconstruireDOM` se gardait déjà, ces deux
+    // sites-ci non — asymétrie relevée en écrivant la sentinelle du 11 août.
+    if (coucheNoeuds) coucheNoeuds.appendChild(el);
 
     mettreAJourIndicateurClone(donnees);
     var sourceOriginal = etat.noeuds.get(cloneSourceId);
@@ -2882,6 +2895,88 @@ function clonerNoeud(noeudId) {
     selectionnerNoeud(newId);
     sauvegarder();
     return newId;
+}
+
+/**
+ * Dupliquer TOUTE la multi-sélection en un geste (⌘D).
+ *
+ * Demande de Grégoire, 11 août 2026, en préparant son 601-101 : « je voudrais
+ * pouvoir dupliquer d'un coup plusieurs éléments sélectionnés ».
+ *
+ * ▣ Ce n'est pas une fonctionnalité neuve, c'est une ASYMÉTRIE refermée. La
+ * multi-sélection existe depuis longtemps (⌘+clic, ⌘A) et `Supprimer` la
+ * traite déjà en lot, avec le lot d'undo qui va avec (`gererKeydown`, touche
+ * Delete). ⌘D, lui, ne regardait que `etat.selection` — un seul nœud, quel
+ * que soit le nombre de blocs allumés à l'écran. Rien ne le signalait :
+ * l'utilisateur sélectionnait cinq blocs, appuyait, et n'en obtenait qu'un.
+ *
+ * ⚠ **On ne duplique que les RACINES de la sélection.** Un conteneur copie
+ * déjà ses descendants (`dupliquerConteneurEnProfondeur`). Si une leçon ET
+ * l'une de ses activités sont toutes deux sélectionnées, dupliquer l'activité
+ * à part en ferait une SECONDE copie, hors de la leçon copiée — un doublon
+ * orphelin que rien ne rattache. Le filtre par descendance est donc une
+ * condition de justesse, pas une optimisation.
+ *
+ * Un seul instantané d'undo pour tout le geste (`_undoBatch`), comme pour la
+ * suppression multiple : ⌘Z défait la duplication entière, pas bloc par bloc.
+ *
+ * @returns {string[]} ids des copies créées (vide si rien à dupliquer)
+ */
+function dupliquerSelection() {
+    var ids = Array.from(etat.multiSelection);
+
+    // Sélection simple : le chemin d'origine, inchangé.
+    if (ids.length === 0) {
+        if (etat.selection) {
+            var seul = clonerNoeud(etat.selection);
+            return seul ? [seul] : [];
+        }
+        return [];
+    }
+    if (ids.length === 1) {
+        var unique = clonerNoeud(ids[0]);
+        return unique ? [unique] : [];
+    }
+
+    var couverts = new Set();
+    for (var i = 0; i < ids.length; i++) {
+        var nd = etat.noeuds.get(ids[i]);
+        if (!nd || !TYPES[nd.type] || !TYPES[nd.type].conteneur || !nd.enfants) continue;
+        var desc = [];
+        collecterDescendants(nd, nd, desc);
+        for (var d = 0; d < desc.length; d++) couverts.add(desc[d].id);
+    }
+    var racines = ids.filter(function (id) { return !couverts.has(id); });
+    if (racines.length === 0) return [];
+
+    enregistrerPourUndo();
+    _undoBatch = true;
+    var nouveaux = [];
+    try {
+        for (var r = 0; r < racines.length; r++) {
+            var nid = clonerNoeud(racines[r], true);
+            if (nid) nouveaux.push(nid);
+        }
+    } finally {
+        _undoBatch = false;
+    }
+
+    // Les copies deviennent la sélection : le geste suivant (les déplacer,
+    // les aligner) porte sur ce qu'on vient de créer, pas sur les originaux.
+    // Après `dupliquerConteneurEnProfondeur`, le DOM a été reconstruit — d'où
+    // le marquage APRÈS la boucle et non pendant.
+    deselectionnerTout();
+    for (var n = 0; n < nouveaux.length; n++) {
+        etat.multiSelection.add(nouveaux[n]);
+        var elN = document.getElementById(nouveaux[n]);
+        if (elN) elN.classList.add('selected');
+    }
+
+    if (nouveaux.length > 0) {
+        afficherToastLien(nouveaux.length + ' copies créées — elles sont sélectionnées, glisse-les où tu veux.');
+        sauvegarder();
+    }
+    return nouveaux;
 }
 
 function supprimerLien(lienId) {
@@ -6548,7 +6643,10 @@ function gererKeydown(e) {
 
     if ((e.metaKey || e.ctrlKey) && e.key === 'd' && pasDansChamp) {
         e.preventDefault();
-        if (etat.selection) clonerNoeud(etat.selection);
+        // Multi-sélection comprise (11 août 2026) — cf. dupliquerSelection().
+        // Avant : `if (etat.selection) clonerNoeud(etat.selection)`, qui
+        // ignorait en silence tous les autres blocs allumés.
+        dupliquerSelection();
         return;
     }
 
@@ -8249,6 +8347,7 @@ window.planificationCarte = {
     selecteurSemaineHTML: selecteurSemaineHTML,
     peuplerSelecteurSemaine: peuplerSelecteurSemaine,
     dupliquerConteneurEnProfondeur: dupliquerConteneurEnProfondeur,
+    dupliquerSelection: dupliquerSelection,
     clonerNoeud: clonerNoeud,
     deplacerSequenceVersSemaine: deplacerSequenceVersSemaine,
     annuler: annuler,

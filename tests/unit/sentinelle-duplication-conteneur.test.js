@@ -160,7 +160,11 @@ describe('duplication de conteneur · copie indépendante en profondeur', () => 
 
     it('clonerNoeud route les conteneurs vers la duplication (plus de refus)', () => {
         expect(sourceCarte).not.toMatch(/Les conteneurs ne peuvent pas être clonés/);
-        expect(sourceCarte).toMatch(/return dupliquerConteneurEnProfondeur\(noeudId\);/);
+        // Le 2e argument (`silencieux`) est arrivé le 11 août avec la
+        // duplication en lot : un seul message pour tout le geste. L'ancre
+        // tolère un argument optionnel mais continue d'exiger que le premier
+        // soit `noeudId` — c'est le ROUTAGE qu'elle protège, pas la signature.
+        expect(sourceCarte).toMatch(/return dupliquerConteneurEnProfondeur\(noeudId(,[^)]*)?\);/);
     });
 
     it('une feuille garde le clonage-miroir (instance liée) — sémantique inchangée', () => {
