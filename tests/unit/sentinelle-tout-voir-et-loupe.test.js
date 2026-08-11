@@ -136,7 +136,15 @@ describe('Loupe · les invariants qui la rendent utilisable sur iPad', () => {
             sourceCarte.indexOf('function _construireCopieLoupe'),
             sourceCarte.indexOf('function _espaceDepuisEcran')
         );
-        expect(bloc).toMatch(/removeAttribute\('id'\)/);
+        // ⚠ ANCRÉ SUR LA BOUCLE, PAS SUR LE MOTIF. Premier jet :
+        // `toMatch(/removeAttribute\('id'\)/)` — or le bloc en contient TROIS
+        // (l'espace, la boucle, la couche). Retirer la boucle — la seule qui
+        // protège `getElementById` — laissait donc le test VERT. Démasqué au
+        // break-test du rituel de fin de session du 11 août.
+        expect(bloc).toMatch(/var avecId = couche\.querySelectorAll\('\[id\]'\);/);
+        expect(bloc).toMatch(
+            /for \(var i = 0; i < avecId\.length; i\+\+\) avecId\[i\]\.removeAttribute\('id'\);/
+        );
     });
 
     it('⚠ le pointeur est écouté sur DOCUMENT en capture, pas sur la zone', () => {
