@@ -488,6 +488,17 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - ✅ **Décision du 11 août : RENOMMER LES DEUX**, distinctement. Aucune référence n'est touchée : le renommage ne change que le libellé, pas l'id. La fusion aurait exigé de repointer 4 (ou 6) citations — migration de données, écartée pour un problème d'affichage.
   - ⮕ Geste d'interface, aucun code. À faire dans a2025, dans **les deux navigateurs** (les magasins sont des îles — cf. #346).
 
+- [ ] 🔴 **#452** Reprendre une production de la bibliothèque emporte la DATE D'ÉCHÉANCE du trimestre précédent — créé 11 août 2026 (constat terrain Grégoire, après la clôture).
+  - **Symptôme, dans ses mots** : « certaines productions de A25 sont les mêmes reprises à l'H26. Maintenant je constate que les dates de remise des travaux à l'hiver sont celles de l'automne précédent. »
+  - **Mécanisme (LU AU CODE, non reproduit)** : `ajouterProductionIndividuelle` (`productions-bibliotheque-ui.js:264`) construit la copie par `{ ...prodBiblio, id, idOriginal, dansBibliotheque, dateImport }`. Le spread recopie **tout**, et **seuls quatre champs sont réécrits** — aucun n'est une date de calendrier. `dateEcheance` traverse donc intacte.
+  - ⮕ **Vérifié : `dateEcheance` n'est réinitialisée NULLE PART** dans `js/` (grep `dateEcheance: ''` / `: null` / `delete` → 0 occurrence). Ce n'est pas un oubli local, c'est une absence globale.
+  - ⚠⚠ **C'EST DATÉ, ET ÇA REVIENT À CHAQUE RENTRÉE.** Une date d'échéance appartient au CALENDRIER d'un trimestre ; une production reprise d'un trimestre à l'autre ne peut pas garder la sienne. Grégoire prépare A26 **en ce moment** en reprenant ses productions : sans correctif, ses productions A26 naîtront avec les dates de H26.
+  - ⮕ **Un seul champ concerné** parmi les 22 du schéma de production (audit fait) : `dateEcheance`. `dateCreation`/`dateModification`/`dateImport` sont des horodatages techniques, pas des dates de calendrier.
+  - ⮕ **Même patron de spread ailleurs, à auditer dans le même geste** : `cartouches.js:3464`, `echelles.js:2574`, `grilles.js:2573`. Aucune de ces trois ressources ne porte de date de calendrier aujourd'hui — mais le patron est identique, et c'est le patron qui est fautif.
+  - 📐 **Décision avant de coder** : à la reprise, faut-il **vider** `dateEcheance` (l'enseignant la ressaisit, rien ne ment) ou **la reporter** sur le calendrier du trimestre cible (plus malin, mais deviner une date est une promesse qu'on ne peut pas tenir) ? ⮕ Vider est le seul choix qui ne fabrique pas de fausse donnée.
+  - ⏳ **À REPRODUIRE avant de corriger** — le diagnostic est lu au code. Leçon des 10-11 août : quatre diagnostics lus au code se sont révélés faux, la mesure les a corrigés.
+  - ⏳ **Grégoire ressaisit ses dates H26 à la main** (11 août, il les a notées). Le correctif protège les PROCHAINES reprises, pas celles-là.
+
 - [x] **#451 FAIT** ✅ **RENTRÉE A26** — a2026 est porté de Chrome vers Safari — créé et exécuté le 11 août 2026 (porte 2.6 tranchée).
   - ✅ **Vérifié sur pièces, pas sur parole** : `diag448()` en Safari rend `Trimestres déclarés : a2025, h2026, a2026`. La rentrée existe désormais des deux côtés.
   - ⚠ Grégoire a exécuté l'import AVANT le correctif de #448, en connaissance de l'avertissement. Ce que la mesure a trouvé ensuite est consigné dans #448 — et ce n'est pas ce que l'avertissement annonçait.
