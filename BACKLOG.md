@@ -522,7 +522,27 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
     · **TÉMOIN 2 — `bibliothequeProductions`** (globale, hors trimestre) : le gabarit d'origine garde ses références ; la copie porte `idOriginal` qui y remonte.
     ⮕ Verdicts séparés : `PERTE AVÉRÉE` / `INDÉCIDABLE` (aucun témoin — on refuse de conclure) / `sans objet` (portfolio conteneur). Un tableau **RÉCUPÉRABLES** dit quoi rendre, à quel artefact, et si la cible existe encore dans le trimestre.
     ⮕ **Break-test fait** : banc à 8 essais, six gardes retirées une à une (éval remplacée, autre production, homonymes de titre, exclusion démo, vide-sans-témoin, portfolio) — **chacune fait ROUGIR le banc**. Le script discrimine, il ne se contente pas de tourner.
-    ⮕ **Prochaine session** : faire tourner `await diag453()` (r2) dans Chrome ET Safari, puis décider. Si `perdues > 0` → outil de réparation en dry-run relu, comme pour #448. Si tout est `INDÉCIDABLE` → il faut une archive Codex antérieure comme témoin extérieur.
+  - ### 📊 RELEVÉ r2 (11 août, Chrome = SSOT) — **PERTE AVÉRÉE, ET RÉCUPÉRABLE**
+    ```
+    saines 13 · ailleurs 0 · introuvables 0 · PERDUES 27 · indécidables 0 · sans objet 4
+    a2025_productions (11 artefacts, 303 évaluations) · h2026_productions (11 artefacts, 408 évaluations)
+    ```
+    · **27 champs vides que les témoins contredisent, et ZÉRO indécidable.** Ce n'est pas « jamais assigné » : c'est assigné, puis effacé. Les 711 évaluations au dossier nomment encore les ressources.
+    · Le compte ferme : 13 + 27 + 4 = 44.
+    · ⮕ La question qui reste ouverte, et qui commande le correctif : **les cibles retrouvées vivent-elles encore dans le trimestre de l'artefact ?** C'est ce que le dry-run de la réparation rend.
+  - ### 🛠 OUTIL DE RÉPARATION LIVRÉ — `scripts/reparation-453-references-productions.js`
+    Dry-run par défaut (`await reparer453()`), écriture sur `{ executer: true }`, filet même-session `annuler453()`. Même logique de témoins que le diagnostic r2, **volontairement identique** : une réparation qui interroge ses témoins autrement que la mesure répare autre chose que ce qui a été diagnostiqué.
+    · **CAS A** — cible dans le même trimestre ⮕ RESTAURÉE.
+    · **CAS B** — le témoin nomme une cible hors du trimestre ⮕ **REFUS**. Rendre une référence que le formulaire ne sait pas résoudre **réarme le piège** : le prochain enregistrement la reblanchirait, et le témoin pourrait alors avoir disparu. Une réparation qui se re-casse est pire que pas de réparation.
+    · **CAS C** — évaluations contradictoires ⮕ **REFUS**. On ne tranche pas entre deux passés à la majorité.
+    · `cartoucheId` est mesuré **pour la première fois** ici (hors relevé r2) et rapporté à part — une réparation ne fait pas passer en douce du travail que la mesure n'a pas couvert.
+    · ⮕ **Le partage A/B est lui-même un diagnostic** : beaucoup de CAS B ⇒ identifiants périmés (renumérotation à l'import, cf. #448) ; presque que des CAS A ⇒ les références étaient valides et seul le chemin d'écriture les a blanchies.
+    · Rapport en **texte copiable**, pas en `console.table` — le relevé r2 est arrivé amputé de ses tableaux et a coûté un aller-retour. Ce qui doit être relu doit pouvoir être copié.
+    · ⮕ **Break-test fait** : banc à 11 essais, huit gardes retirées une à une (CAS B, CAS C, champ déjà renseigné, portfolios, cartouche joignable, exclusion démo, dry-run, pré-image d'annulation) — **chacune fait rougir le banc**. ⚠ L'essai « pack démo » était INERTE au premier jet : la démo n'ayant pas de grilles à elle, le test « même trimestre » la refusait déjà et l'exclusion n'était jamais sollicitée. Démasqué par le break-test, corrigé en donnant à la démo son propre magasin de grilles.
+  - ### ⏭ RESTE À FAIRE
+    1. `await reparer453()` en **dry-run** dans Chrome, relire le partage A/B **avant** toute écriture.
+    2. Puis exécution après backup Codex, puis **refaire dans Safari** (magasins indépendants).
+    3. **Corriger le chemin d'écriture** (`productions.js:778` + `:988`) : une référence non résolue doit être **préservée et signalée**, jamais blanchie en silence. Défaut réel indépendamment de cette enquête — les 13 références saines y sont exposées aujourd'hui. ⮕ Sentinelle obligatoire.
 
 - [ ] 🔴 **#452** Reprendre une production de la bibliothèque emporte la DATE D'ÉCHÉANCE du trimestre précédent — créé 11 août 2026 (constat terrain Grégoire, après la clôture).
   - **Symptôme, dans ses mots** : « certaines productions de A25 sont les mêmes reprises à l'H26. Maintenant je constate que les dates de remise des travaux à l'hiver sont celles de l'automne précédent. »
