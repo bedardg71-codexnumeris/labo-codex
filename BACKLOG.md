@@ -511,7 +511,24 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
     2. la clé `cartouches_{ancienId}` n'est pas renommée ⇒ **magasin orphelin** (les 6 rapportés le 11 août au matin par `inspecterOrphelins448` — ⚠ **NE PAS LES SUPPRIMER : ce sont les seuls témoins de l'ancien identifiant**) ;
     3. les évaluations gardent l'ancien id tandis que d'autres prennent le nouveau ⇒ **témoins contradictoires** (les 3 CAS C sur cartouches du dry-run #453).
   - 📐 **Ce qu'il faut décider avant de coder** : renommer et remapper (il faut alors un registre des citations : productions, évaluations, clés `cartouches_*`), ou **ne pas renommer du tout** et fusionner par identité comme le fait déjà `fusionnerParIdentite` (#448). ⮕ La seconde est cohérente avec la 1.75.0 : un identifiant identique avec un CONTENU identique n'est pas une collision, c'est la même chose.
-  - ⏳ **À reproduire avant de corriger** (leçon des 10-11 août). Sentinelle obligatoire.
+  - ✅ **IDENTIFICATION FAITE (11 août)** — `scripts/identification-454-grilles-fantomes.js`. Les magasins `cartouches_{ancienId}` survivants portent l'EMPREINTE de la grille disparue : chaque cartouche recopie les critères de sa grille à sa création (`cartouches.js:417`), **identifiants compris**. Les mêmes identifiants de critères se retrouvent dans 3 grilles vivantes de H26 — dont les identifiants portent eux-mêmes la marque de la renumérotation :
+    ```
+    grille_1770742838756_23q82vbsk → GRILLE_1782504228330_a_4b469c6b7b5e  « Grille-4 H26 »        (artefacts 1,3,5,8,9)
+    grille_1772187755149_uq1oiiafa → GRILLE_1782504228322_1_6398d555452d  « Grille-5 FR-HOLIS H26 » (artefacts 2,4,7)
+    GRILLE1759529438501           → GRILLE_1782504228333_f_db90dd7b3554  « Grille-5 FR-ALGO H26 »  (artefacts 6,10)
+    ```
+    ⮕ **PREUVE, pas ressemblance.** HOLIS et ALGO ne partagent PAS leurs identifiants de critères, seulement leurs noms — le classement les sépare correctement. Grégoire a reconnu les trois (11 août).
+    ⚠ **Deux défauts corrigés en r2** : le pack démo est une COPIE du vrai matériel, donc ses grilles sortaient « PREUVE » à égalité (écartées des candidates, mais gardées pour DÉTECTER un orphelin) ; et la grille H26 descendant de celle d'A25, le récapitulatif recommandait la version **A25** pour des artefacts **H26** — soit la contamination #340 fabriquée par l'outil censé la réparer. À preuve égale, le trimestre qui CITE commande désormais.
+    ⮕ Sur les 8 magasins orphelins, **3 seulement** concernent le travail réel ; les 5 autres sont des restes de démo/exemples (bio, chimie, générique).
+    ⮕ L'échelle manquante des 9 artefacts (`1767389426695`) a les niveaux **0 I D M E** — l'échelle « IDME et niveau 0 ». Elle ne se prouve pas par identifiants : indice, pas preuve.
+  - ✅ **RÉASSIGNATION LIVRÉE (11 août)** — `scripts/reassignation-454-grilles-h26.js`, dry-run par défaut, `annuler454()`.
+    ⮕ **Repointer ne suffit pas** : les cartouches vivent encore dans le tiroir de l'ANCIEN identifiant et le sélecteur lit `cartouches_{grilleId}`. Le script les DÉMÉNAGE d'abord (fusion par identité, #448), puis repointe.
+    ⚠ **La table de correspondances est une donnée TAPÉE À LA MAIN — le script la REVÉRIFIE contre les données avant d'agir** (magasin présent, grille vivante présente, critères identiques). Une correspondance qui ne se revérifie pas est refusée, même si elle vient de moi. Un script qui fait confiance à son auteur n'est pas un garde-fou.
+    ⚠ L'échelle n'est écrite que sur ordre explicite `{ echelle: 'ID' }` — les grilles sont établies par preuve, l'échelle non.
+    ⚠ Ne touche jamais : les ÉVALUATIONS (mémoire ET témoin du diagnostic), les tiroirs d'origine, un champ déjà renseigné, le pack démo.
+    ⮕ **Défaut trouvé PAR le banc** : quand un déménagement était refusé (même identifiant, contenu différent), l'identifiant existait quand même dans le tiroir cible — il paraissait « joignable » et l'artefact recevait **la cartouche de quelqu'un d'autre**. « Joignable » veut dire « celle que le témoin désigne », pas « quelque chose qui porte le même numéro ».
+    ⮕ **Break-test** : banc à 13 essais, onze gardes retirées une à une — chacune fait rougir. ⚠ L'essai « copie profonde » était INERTE tant que le banc clonait à chaque lecture ; il ne voyait pas une mutation qui fuit vers le magasin témoin. Corrigé en faisant rendre au faux `db` l'objet VIVANT, comme le cache mémoire de `db.js`.
+  - ⏳ **À reproduire avant de corriger LE VECTEUR** (leçon des 10-11 août) : la réassignation répare les dégâts, elle ne ferme pas la porte. Sentinelle obligatoire.
 
 - [ ] 🔴 **#453** Grille / échelle / cartouche affichent toutes « Aucune » sur les artefacts H26 — créé 11 août 2026 (constat terrain Grégoire, capture).
   - **Symptôme** : sur ses artefacts H26, les TROIS sélecteurs sont vides. Survenu le même jour que #452 (dates d'échéance de l'automne sur les artefacts d'hiver).
