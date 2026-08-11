@@ -18631,6 +18631,115 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 
 /* En mode loupe le canevas ne deplace ni ses blocs ni sa vue. */
 #planif-zone-travail.planif-loupe-mode { cursor: zoom-in; touch-action: none; }
+
+/* ── GUIDES D'ALIGNEMENT (11 aout 2026) ─────────────────────────────────
+   Le trait qui apparait quand un bloc s'aimante sur un autre. Il doit se
+   distinguer de la SELECTION (qui utilise --planif-couleur-selection) :
+   deux traits de la meme couleur au meme moment ne diraient plus rien.
+   D'ou --alerte-bordure-attention, deja dans la palette du projet et
+   lisible dans les deux modes. */
+.planif-guide-alignement {
+    stroke: var(--alerte-bordure-attention, #c8a060);
+    stroke-width: 1;
+    stroke-dasharray: 5 3;
+    /* Le guide est un repere, jamais une cible : il ne doit intercepter
+       aucun geste, surtout au doigt ou il couvrirait le bloc en cours de
+       deplacement. */
+    pointer-events: none;
+    /* L'epaisseur est en unites de CARTE : sans compensation, un trait de
+       1 px devient invisible a 25 % et epais comme un bloc a 300 %. */
+    vector-effect: non-scaling-stroke;
+}
+
+/* ── BARRE D'ALIGNEMENT FLOTTANTE ───────────────────────────────────────
+   Elle apparait au-dessus de la selection des que DEUX blocs sont allumes.
+   Choix assume plutot qu'un menu contextuel : le clic droit n'existe pas au
+   doigt, et l'anti-pattern « masquer derriere une interaction non evidente »
+   est explicite dans les regles du projet. Ici la commande se montre. */
+#planif-barre-alignement {
+    position: fixed;
+    display: none;
+    z-index: 8500;
+    gap: 4px;
+    padding: 5px;
+    border: 1px solid var(--planif-couleur-bordure);
+    border-radius: 10px;
+    background: var(--surface-carte, #1a3040);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+#planif-barre-alignement.planif-barre-visible { display: flex; }
+.mode-clair #planif-barre-alignement {
+    background: #ffffff;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+.planif-btn-aligner {
+    /* Cible tactile iPad : 44 px, non negociable (regles d'accessibilite). */
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--texte-secondaire, #8aa4b0);
+    cursor: pointer;
+    padding: 0;
+}
+.planif-btn-aligner:hover {
+    border-color: var(--planif-couleur-selection);
+    background: color-mix(in srgb, var(--planif-couleur-selection) 14%, transparent);
+}
+.planif-btn-aligner:focus-visible {
+    outline: 2px solid var(--planif-couleur-selection);
+    outline-offset: 1px;
+}
+.planif-barre-separateur {
+    width: 1px;
+    align-self: stretch;
+    margin: 4px 2px;
+    background: var(--planif-couleur-bordure);
+}
+/* Les pictogrammes sont dessines en CSS plutot qu'en SVG importe : six
+   icones d'alignement n'existent pas dans icons/, et le trait + le pave
+   suffisent a dire le sens. `currentColor` les fait suivre l'etat du bouton. */
+.planif-aligner-glyphe {
+    position: relative;
+    width: 18px;
+    height: 18px;
+}
+.planif-aligner-glyphe::before {
+    content: '';
+    position: absolute;
+    background: currentColor;
+    opacity: 0.95;
+}
+.planif-aligner-glyphe::after {
+    content: '';
+    position: absolute;
+    background: currentColor;
+    opacity: 0.5;
+}
+/* Axe vertical : un trait de reference + deux paves de largeurs differentes. */
+.planif-aligner-glyphe[data-mode="gauche"]::before { left: 0; top: 0; width: 2px; height: 18px; }
+.planif-aligner-glyphe[data-mode="gauche"]::after  { left: 4px; top: 3px; width: 13px; height: 4px;
+    box-shadow: 0 8px 0 -1px currentColor; }
+.planif-aligner-glyphe[data-mode="centre"]::before { left: 8px; top: 0; width: 2px; height: 18px; }
+.planif-aligner-glyphe[data-mode="centre"]::after  { left: 2px; top: 3px; width: 14px; height: 4px;
+    box-shadow: 2px 8px 0 -1px currentColor; }
+.planif-aligner-glyphe[data-mode="droite"]::before { right: 0; top: 0; width: 2px; height: 18px; }
+.planif-aligner-glyphe[data-mode="droite"]::after  { right: 4px; top: 3px; width: 13px; height: 4px;
+    box-shadow: 0 8px 0 -1px currentColor; }
+/* Axe horizontal : meme logique, tournee d'un quart de tour. */
+.planif-aligner-glyphe[data-mode="haut"]::before { top: 0; left: 0; width: 18px; height: 2px; }
+.planif-aligner-glyphe[data-mode="haut"]::after  { top: 4px; left: 3px; width: 4px; height: 13px;
+    box-shadow: 8px 0 0 -1px currentColor; }
+.planif-aligner-glyphe[data-mode="milieu"]::before { top: 8px; left: 0; width: 18px; height: 2px; }
+.planif-aligner-glyphe[data-mode="milieu"]::after  { top: 2px; left: 3px; width: 4px; height: 14px;
+    box-shadow: 8px 2px 0 -1px currentColor; }
+.planif-aligner-glyphe[data-mode="bas"]::before { bottom: 0; left: 0; width: 18px; height: 2px; }
+.planif-aligner-glyphe[data-mode="bas"]::after  { bottom: 4px; left: 3px; width: 4px; height: 13px;
+    box-shadow: 8px 0 0 -1px currentColor; }
 /* Icônes SVG dans les boutons planification — pattern « icône 100 %
    + hover sur le bouton » (BACKLOG #289). */
 .planif-icon {

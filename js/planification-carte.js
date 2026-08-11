@@ -1997,6 +1997,9 @@ function clientVersEspace(clientX, clientY) {
 
 // === ZOOM ===
 function appliquerZoom() {
+    // La barre d'alignement est positionnée en pixels d'ÉCRAN à partir des
+    // coordonnées de carte : tout changement d'échelle la laisse derrière.
+    majBarreAlignement();
     espace.style.transform = 'scale(' + etat.zoom + ')';
     espaceWrapper.style.width = (ESPACE_W * etat.zoom) + 'px';
     espaceWrapper.style.height = (ESPACE_H * etat.zoom) + 'px';
@@ -2094,6 +2097,7 @@ function selectionnerNoeud(id) {
         if (el) el.classList.add('selected');
     }
     fermerMenuLien();
+    majBarreAlignement();
 }
 
 function deselectionnerTout() {
@@ -2107,6 +2111,7 @@ function deselectionnerTout() {
         if (el) el.classList.remove('selected');
     }
     etat.multiSelection.clear();
+    majBarreAlignement();
 }
 
 function toggleMultiSelection(id) {
@@ -2122,6 +2127,7 @@ function toggleMultiSelection(id) {
         const el = document.getElementById(id);
         if (el) el.classList.add('selected');
     }
+    majBarreAlignement();
 }
 
 function toutSelectionner() {
@@ -2131,6 +2137,7 @@ function toutSelectionner() {
         const el = document.getElementById(nid);
         if (el) el.classList.add('selected');
     }
+    majBarreAlignement();
 }
 
 function deselectionner() {
@@ -3002,6 +3009,7 @@ function dupliquerSelection() {
 
     if (nouveaux.length > 0) {
         afficherToastLien(nouveaux.length + ' copies créées — elles sont sélectionnées, glisse-les où tu veux.');
+        majBarreAlignement();
         sauvegarder();
     }
     return nouveaux;
@@ -4543,6 +4551,427 @@ function centrerVueSurContenu() {
     }
 }
 
+/* =====================================================================
+   AIMANTATION ET GUIDES D'ALIGNEMENT (11 août 2026, demande de Grégoire)
+
+   « Quand je travaille ma carte et mes blocs, j'aurais besoin que les blocs
+   puissent s'aligner les uns par rapport aux autres, comme c'est le cas dans
+   Keynote. »
+
+   Le principe : pendant qu'on glisse, on compare SIX repères du bloc déplacé
+   (bord gauche, centre, bord droit — bord haut, milieu, bord bas) aux mêmes
+   repères de tous les autres blocs. Sous un seuil, le bloc COLLE et une ligne
+   montre pourquoi.
+
+   ▣ UN SEUL AIMANT POUR QUATRE CHEMINS. Le canevas a quatre glissements
+   distincts (groupe · feuille dans un conteneur · conteneur · feuille libre)
+   et tous les quatre calculent la position de la même façon. Recopier
+   l'aimantation dans chacun garantissait qu'elle divergerait au premier
+   correctif — c'est exactement le motif que ce projet a payé plusieurs fois.
+   D'où `preparerAimantation()` / `appliquerAimantation()`, appelés aux mêmes
+   deux endroits dans les quatre.
+
+   ⚠ LES CIBLES SONT CALCULÉES UNE FOIS, au début du geste. Les recalculer à
+   chaque mouvement coûterait une lecture de mise en page par bloc et par
+   image sur une carte de 150 blocs. Corollaire assumé : un bloc qui bouge
+   n'est pas une cible pour lui-même, et les cibles ne changent pas en cours
+   de geste — c'est ce qu'on veut, sinon les guides sauteraient.
+
+   ⮕ Le seuil est en pixels D'ÉCRAN, divisé par le zoom : à 25 % l'aimant ne
+   doit pas happer tout ce qui traîne à quatre écrans de distance.
+   ===================================================================== */
+
+const AIMANT_SEUIL = 6;   // px écran
+
+let _aimantCiblesX = null;
+let _aimantCiblesY = null;
+let _coucheGuides = null;
+
+/** Bornes d'un nœud en coordonnées de carte, mise en page comprise. */
+function bornesNoeud(nd) {
+    var el = document.getElementById(nd.id);
+    var w = el ? (el.offsetWidth || 140) : 140;
+    var h = el ? (el.offsetHeight || 50) : 50;
+    return { gauche: nd.x, droite: nd.x + w, haut: nd.y, bas: nd.y + h };
+}
+
+/** Union des bornes d'un ensemble d'ids — la boîte d'un groupe déplacé. */
+function bornesEnsemble(ids) {
+    var b = null;
+    for (var id of ids) {
+        var nd = etat.noeuds.get(id);
+        if (!nd) continue;
+        var n = bornesNoeud(nd);
+        if (!b) { b = n; continue; }
+        if (n.gauche < b.gauche) b.gauche = n.gauche;
+        if (n.droite > b.droite) b.droite = n.droite;
+        if (n.haut < b.haut) b.haut = n.haut;
+        if (n.bas > b.bas) b.bas = n.bas;
+    }
+    return b;
+}
+
+/**
+ * Relève les repères de tous les blocs SAUF ceux qu'on déplace.
+ * @param {Set<string>} idsExclus - les blocs en mouvement (et leurs enfants)
+ */
+function preparerAimantation(idsExclus) {
+    _aimantCiblesX = [];
+    _aimantCiblesY = [];
+    for (var entry of etat.noeuds) {
+        var nd = entry[1];
+        if (idsExclus.has(nd.id)) continue;
+        var b = bornesNoeud(nd);
+        var cx = (b.gauche + b.droite) / 2;
+        var cy = (b.haut + b.bas) / 2;
+        // Chaque cible porte l'étendue PERPENDICULAIRE de son bloc source :
+        // c'est ce qui permet de tracer un guide qui relie visiblement les
+        // deux blocs, au lieu d'une ligne qui traverse toute la carte.
+        _aimantCiblesX.push(
+            { v: b.gauche, min: b.haut, max: b.bas },
+            { v: cx, min: b.haut, max: b.bas },
+            { v: b.droite, min: b.haut, max: b.bas }
+        );
+        _aimantCiblesY.push(
+            { v: b.haut, min: b.gauche, max: b.droite },
+            { v: cy, min: b.gauche, max: b.droite },
+            { v: b.bas, min: b.gauche, max: b.droite }
+        );
+    }
+}
+
+function _meilleureCible(candidats, cibles, seuil) {
+    var meilleur = null;
+    for (var i = 0; i < candidats.length; i++) {
+        for (var j = 0; j < cibles.length; j++) {
+            var ecart = cibles[j].v - candidats[i];
+            if (Math.abs(ecart) > seuil) continue;
+            if (!meilleur || Math.abs(ecart) < Math.abs(meilleur.ecart)) {
+                meilleur = { ecart: ecart, cible: cibles[j] };
+            }
+        }
+    }
+    return meilleur;
+}
+
+/**
+ * Cherche un alignement pour la boîte donnée. Rend le décalage à appliquer
+ * et les guides à tracer. Ne modifie rien : l'appelant décide.
+ * @param {{gauche:number,droite:number,haut:number,bas:number}} b
+ * @returns {{dx:number, dy:number, guides:Array}}
+ */
+function appliquerAimantation(b) {
+    var res = { dx: 0, dy: 0, guides: [] };
+    if (!_aimantCiblesX || !b) return res;
+    var seuil = AIMANT_SEUIL / (etat.zoom || 1);
+
+    var cx = (b.gauche + b.droite) / 2;
+    var cy = (b.haut + b.bas) / 2;
+
+    var mx = _meilleureCible([b.gauche, cx, b.droite], _aimantCiblesX, seuil);
+    if (mx) {
+        res.dx = mx.ecart;
+        res.guides.push({
+            axe: 'x', v: mx.cible.v,
+            min: Math.min(mx.cible.min, b.haut),
+            max: Math.max(mx.cible.max, b.bas)
+        });
+    }
+
+    var my = _meilleureCible([b.haut, cy, b.bas], _aimantCiblesY, seuil);
+    if (my) {
+        res.dy = my.ecart;
+        res.guides.push({
+            axe: 'y', v: my.cible.v,
+            min: Math.min(my.cible.min, b.gauche),
+            max: Math.max(my.cible.max, b.droite)
+        });
+    }
+    return res;
+}
+
+function _assurerCoucheGuides() {
+    if (_coucheGuides && _coucheGuides.isConnected) return _coucheGuides;
+    var offset = document.getElementById('planif-couche-svg-offset');
+    if (!offset) return null;
+    _coucheGuides = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    _coucheGuides.setAttribute('id', 'planif-couche-guides');
+    offset.appendChild(_coucheGuides);
+    return _coucheGuides;
+}
+
+function tracerGuides(guides) {
+    var couche = _assurerCoucheGuides();
+    if (!couche) return;
+    couche.textContent = '';
+    for (var i = 0; i < guides.length; i++) {
+        var g = guides[i];
+        var l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        // Une marge de dépassement rend le guide lisible aux extrémités.
+        var d = 12;
+        if (g.axe === 'x') {
+            l.setAttribute('x1', g.v); l.setAttribute('x2', g.v);
+            l.setAttribute('y1', g.min - d); l.setAttribute('y2', g.max + d);
+        } else {
+            l.setAttribute('y1', g.v); l.setAttribute('y2', g.v);
+            l.setAttribute('x1', g.min - d); l.setAttribute('x2', g.max + d);
+        }
+        l.setAttribute('class', 'planif-guide-alignement');
+        couche.appendChild(l);
+    }
+}
+
+function effacerGuides() {
+    if (_coucheGuides) _coucheGuides.textContent = '';
+    _aimantCiblesX = null;
+    _aimantCiblesY = null;
+}
+
+/* =====================================================================
+   ALIGNER LES OBJETS — six commandes (11 août 2026, demande de Grégoire)
+   « À gauche, Au centre, À droite, En haut, Au milieu, En bas. »
+
+   ⮕ On aligne sur l'EXTRÊME, comme Keynote : « À gauche » amène tout le
+   monde sur le bloc le plus à gauche. C'est le seul repère que l'utilisateur
+   peut prédire sans savoir dans quel ordre il a cliqué.
+   ⚠ Un conteneur emporte ses descendants — même règle qu'au glisser de
+   groupe. Sans ça, aligner une leçon la détacherait visuellement de ses
+   activités, qui resteraient sur place.
+   ===================================================================== */
+
+const ALIGNEMENTS = {
+    gauche: { axe: 'x', repere: 'min' },
+    centre: { axe: 'x', repere: 'centre' },
+    droite: { axe: 'x', repere: 'max' },
+    haut: { axe: 'y', repere: 'min' },
+    milieu: { axe: 'y', repere: 'centre' },
+    bas: { axe: 'y', repere: 'max' }
+};
+
+/**
+ * @param {string} mode - une clé de ALIGNEMENTS
+ * @returns {number} nombre de blocs réellement déplacés
+ */
+function alignerSelection(mode) {
+    var config = ALIGNEMENTS[mode];
+    if (!config) return 0;
+
+    var ids = Array.from(etat.multiSelection);
+    if (ids.length < 2) return 0;
+
+    // Comme pour la duplication : seules les RACINES bougent d'elles-mêmes.
+    // Un descendant d'un conteneur sélectionné suit son conteneur — l'aligner
+    // en plus le ferait sortir de son parent.
+    var couverts = new Set();
+    for (var i = 0; i < ids.length; i++) {
+        var nd = etat.noeuds.get(ids[i]);
+        if (!nd || !TYPES[nd.type] || !TYPES[nd.type].conteneur || !nd.enfants) continue;
+        var desc = [];
+        collecterDescendants(nd, nd, desc);
+        for (var d = 0; d < desc.length; d++) couverts.add(desc[d].id);
+    }
+    var racines = ids.filter(function (id) { return !couverts.has(id); });
+    if (racines.length < 2) return 0;
+
+    var boites = racines.map(function (id) {
+        return { id: id, b: bornesNoeud(etat.noeuds.get(id)) };
+    });
+
+    var cible;
+    if (config.axe === 'x') {
+        if (config.repere === 'min') cible = Math.min.apply(null, boites.map(function (o) { return o.b.gauche; }));
+        else if (config.repere === 'max') cible = Math.max.apply(null, boites.map(function (o) { return o.b.droite; }));
+        else {
+            var gMin = Math.min.apply(null, boites.map(function (o) { return o.b.gauche; }));
+            var gMax = Math.max.apply(null, boites.map(function (o) { return o.b.droite; }));
+            cible = (gMin + gMax) / 2;
+        }
+    } else {
+        if (config.repere === 'min') cible = Math.min.apply(null, boites.map(function (o) { return o.b.haut; }));
+        else if (config.repere === 'max') cible = Math.max.apply(null, boites.map(function (o) { return o.b.bas; }));
+        else {
+            var hMin = Math.min.apply(null, boites.map(function (o) { return o.b.haut; }));
+            var hMax = Math.max.apply(null, boites.map(function (o) { return o.b.bas; }));
+            cible = (hMin + hMax) / 2;
+        }
+    }
+
+    // Un seul instantané pour tout l'alignement : ⌘Z le défait d'un coup.
+    // ⚠ PAS de `_undoBatch` ici, contrairement à `dupliquerSelection()` : ce
+    // garde ne sert qu'à museler des `enregistrerPourUndo` IMBRIQUÉS, et
+    // `deplacerNoeudEtDescendants` n'en fait aucun. Il était présent au
+    // premier jet ; un break-test resté vert a montré qu'il ne protégeait
+    // rien. Zéro-dette : on retire.
+    enregistrerPourUndo();
+    var deplaces = 0;
+    {
+        for (var k = 0; k < boites.length; k++) {
+            var o = boites[k];
+            var nd2 = etat.noeuds.get(o.id);
+            if (!nd2) continue;
+            var delta;
+            if (config.axe === 'x') {
+                if (config.repere === 'min') delta = cible - o.b.gauche;
+                else if (config.repere === 'max') delta = cible - o.b.droite;
+                else delta = cible - (o.b.gauche + o.b.droite) / 2;
+            } else {
+                if (config.repere === 'min') delta = cible - o.b.haut;
+                else if (config.repere === 'max') delta = cible - o.b.bas;
+                else delta = cible - (o.b.haut + o.b.bas) / 2;
+            }
+            if (Math.abs(delta) < 0.01) continue;
+            deplacerNoeudEtDescendants(nd2, config.axe === 'x' ? delta : 0, config.axe === 'y' ? delta : 0);
+            deplaces++;
+        }
+    }
+
+    if (deplaces > 0) sauvegarder();
+    return deplaces;
+}
+
+/* ── La barre flottante qui porte les six commandes ──────────────────────
+   Elle apparaît au-dessus de la sélection dès que DEUX blocs sont allumés,
+   et disparaît sinon.
+
+   ⮕ POURQUOI PAS UN MENU CONTEXTUEL, alors que c'est la forme de Keynote :
+   le clic droit n'existe pas au doigt, et remplacer par un appui long serait
+   un geste caché — l'un des anti-patterns écrits noir sur blanc dans les
+   règles d'interface du projet. Une commande qui se MONTRE quand elle
+   devient possible n'a besoin d'aucune découverte.
+   ─────────────────────────────────────────────────────────────────────── */
+
+const BOUTONS_ALIGNEMENT = [
+    { mode: 'gauche', libelle: 'Aligner à gauche' },
+    { mode: 'centre', libelle: 'Aligner au centre' },
+    { mode: 'droite', libelle: 'Aligner à droite' },
+    { separateur: true },
+    { mode: 'haut', libelle: 'Aligner en haut' },
+    { mode: 'milieu', libelle: 'Aligner au milieu' },
+    { mode: 'bas', libelle: 'Aligner en bas' }
+];
+
+let _barreAlignement = null;
+
+function _assurerBarreAlignement() {
+    if (_barreAlignement && _barreAlignement.isConnected) return _barreAlignement;
+    var barre = document.createElement('div');
+    barre.id = 'planif-barre-alignement';
+    barre.setAttribute('role', 'toolbar');
+    barre.setAttribute('aria-label', 'Aligner les objets');
+
+    for (var i = 0; i < BOUTONS_ALIGNEMENT.length; i++) {
+        var def = BOUTONS_ALIGNEMENT[i];
+        if (def.separateur) {
+            var sep = document.createElement('span');
+            sep.className = 'planif-barre-separateur';
+            sep.setAttribute('aria-hidden', 'true');
+            barre.appendChild(sep);
+            continue;
+        }
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'planif-btn-aligner';
+        btn.title = def.libelle;
+        btn.setAttribute('aria-label', def.libelle);
+        btn.dataset.mode = def.mode;
+        var glyphe = document.createElement('span');
+        glyphe.className = 'planif-aligner-glyphe';
+        glyphe.dataset.mode = def.mode;
+        glyphe.setAttribute('aria-hidden', 'true');
+        btn.appendChild(glyphe);
+        barre.appendChild(btn);
+    }
+
+    // Délégation : un seul écouteur, et la barre survit à un re-rendu.
+    barre.addEventListener('click', function (ev) {
+        var cible = ev.target.closest ? ev.target.closest('.planif-btn-aligner') : null;
+        if (!cible) return;
+        ev.preventDefault();
+        var n = alignerSelection(cible.dataset.mode);
+        if (n > 0) majBarreAlignement();
+    });
+    // Le geste appartient à la barre : sans ça, sur iPad, toucher un bouton
+    // commencerait aussi un glissement de la carte dessous.
+    barre.addEventListener('pointerdown', function (ev) { ev.stopPropagation(); });
+
+    document.body.appendChild(barre);
+    _barreAlignement = barre;
+    return barre;
+}
+
+/**
+ * Montre, place ou cache la barre selon la sélection courante.
+ * Appelée à chaque changement de sélection — c'est le seul point d'entrée.
+ */
+function majBarreAlignement() {
+    var barre = _assurerBarreAlignement();
+    if (!barre) return;
+
+    if (etat.multiSelection.size < 2 || etat.loupeActive || !zoneTravail) {
+        barre.classList.remove('planif-barre-visible');
+        return;
+    }
+
+    var b = bornesEnsemble(etat.multiSelection);
+    if (!b) {
+        barre.classList.remove('planif-barre-visible');
+        return;
+    }
+
+    barre.classList.add('planif-barre-visible');
+
+    // Coordonnées de carte → écran.
+    // ⚠ L'OFFSET DU CANEVAS EN FAIT PARTIE. Les x/y des nœuds sont relatifs à
+    // l'origine de la carte, pas à celle de l'espace : la couche des blocs est
+    // décalée de OFFSET_X / OFFSET_Y. L'oublier envoie la barre à des milliers
+    // de pixels hors écran — trouvé au navigateur le 11 août, et c'est le même
+    // oubli que celui qui décalait la loupe deux heures plus tôt.
+    var r = zoneTravail.getBoundingClientRect();
+    var versEcranX = function (mx) { return (mx + OFFSET_X) * etat.zoom - zoneTravail.scrollLeft + r.left; };
+    var versEcranY = function (my) { return (my + OFFSET_Y) * etat.zoom - zoneTravail.scrollTop + r.top; };
+
+    var lb = barre.offsetWidth || 320;
+    var hb = barre.offsetHeight || 54;
+
+    var x = versEcranX((b.gauche + b.droite) / 2) - lb / 2;
+    var y = versEcranY(b.haut) - hb - 14;
+    // Pas de place au-dessus (sélection collée en haut de l'écran) : on passe
+    // sous la sélection.
+    if (y < r.top + 8) y = versEcranY(b.bas) + 14;
+
+    // ⚠ BORNAGE FINAL, sur les DEUX axes et APRÈS le repli. Une première
+    // version bornait avant, puis le repli replaçait la barre hors écran sans
+    // que rien ne le rattrape : la barre existait, était « visible », et
+    // restait injoignable.
+    x = Math.min(Math.max(8, x), Math.max(8, window.innerWidth - lb - 8));
+    y = Math.min(Math.max(8, y), Math.max(8, window.innerHeight - hb - 8));
+
+    barre.style.left = Math.round(x) + 'px';
+    barre.style.top = Math.round(y) + 'px';
+}
+
+/** Déplace un nœud ET sa descendance du même vecteur, DOM compris. */
+function deplacerNoeudEtDescendants(nd, dx, dy) {
+    var liste = [{ id: nd.id }];
+    if (TYPES[nd.type] && TYPES[nd.type].conteneur && nd.enfants) {
+        var desc = [];
+        collecterDescendants(nd, nd, desc);
+        for (var i = 0; i < desc.length; i++) liste.push({ id: desc[i].id });
+    }
+    for (var j = 0; j < liste.length; j++) {
+        var cible = etat.noeuds.get(liste[j].id);
+        if (!cible) continue;
+        cible.x += dx;
+        cible.y += dy;
+        var el = document.getElementById(cible.id);
+        if (el) {
+            el.style.left = cible.x + 'px';
+            el.style.top = cible.y + 'px';
+        }
+        mettreAJourLiens(cible.id);
+    }
+}
+
 // === ATTACHER ÉVÉNEMENTS D'UN NŒUD ===
 function attacherEvenements(el, donnees) {
     var id = donnees.id;
@@ -4619,11 +5048,35 @@ function attacherEvenements(el, donnees) {
             }
 
             el.classList.add('planif-dragging');
+            preparerAimantation(tousNoeuds);
 
             function onMoveGroupe(e2) {
                 if (e2.pointerId !== pid) return;
                 var dx2 = (e2.clientX - startMouseX) / etat.zoom;
                 var dy2 = (e2.clientY - startMouseY) / etat.zoom;
+
+                // Aimantation sur la BOÎTE du groupe, pas bloc par bloc : le
+                // groupe garde sa forme interne, seul l'ensemble colle.
+                var boiteG = null;
+                for (var eG of positionsInitiales) {
+                    var ndG = etat.noeuds.get(eG[0]);
+                    if (!ndG) continue;
+                    var elG = document.getElementById(eG[0]);
+                    var wG = elG ? (elG.offsetWidth || 140) : 140;
+                    var hG = elG ? (elG.offsetHeight || 50) : 50;
+                    var gG = eG[1].x + dx2, hG2 = eG[1].y + dy2;
+                    if (!boiteG) boiteG = { gauche: gG, droite: gG + wG, haut: hG2, bas: hG2 + hG };
+                    else {
+                        if (gG < boiteG.gauche) boiteG.gauche = gG;
+                        if (gG + wG > boiteG.droite) boiteG.droite = gG + wG;
+                        if (hG2 < boiteG.haut) boiteG.haut = hG2;
+                        if (hG2 + hG > boiteG.bas) boiteG.bas = hG2 + hG;
+                    }
+                }
+                var aimG = appliquerAimantation(boiteG);
+                dx2 += aimG.dx;
+                dy2 += aimG.dy;
+                tracerGuides(aimG.guides);
 
                 for (var entry2 of positionsInitiales) {
                     var nid4 = entry2[0];
@@ -4644,6 +5097,8 @@ function attacherEvenements(el, donnees) {
             function onUpGroupe(e2) {
                 if (e2 && e2.pointerId !== pid) return;
                 el.classList.remove('planif-dragging');
+                effacerGuides();
+                majBarreAlignement();
                 document.removeEventListener('pointermove', onMoveGroupeThrottled);
                 document.removeEventListener('pointerup', onUpGroupe);
                 document.removeEventListener('pointercancel', onUpGroupe);
@@ -4676,6 +5131,7 @@ function attacherEvenements(el, donnees) {
         // L'ancien « mode individuel » (rituel de double-clic) est RETIRÉ.
         if (donnees.parent && !estConteneur) {
             el.classList.add('planif-dragging');
+            preparerAimantation(new Set([id]));
             var parentId = donnees.parent;
             var parentData = etat.noeuds.get(parentId);
             var survolConteneurB = null;
@@ -4684,6 +5140,13 @@ function attacherEvenements(el, donnees) {
                 if (e2.pointerId !== pid) return;
                 donnees.x = startDataX + (e2.clientX - startMouseX2) / etat.zoom;
                 donnees.y = startDataY + (e2.clientY - startMouseY2) / etat.zoom;
+                var aim = appliquerAimantation({
+                    gauche: donnees.x, droite: donnees.x + (el.offsetWidth || 140),
+                    haut: donnees.y, bas: donnees.y + (el.offsetHeight || 50)
+                });
+                donnees.x += aim.dx;
+                donnees.y += aim.dy;
+                tracerGuides(aim.guides);
                 el.style.left = donnees.x + 'px';
                 el.style.top = donnees.y + 'px';
                 mettreAJourLiens(id);
@@ -4722,6 +5185,7 @@ function attacherEvenements(el, donnees) {
             function onUpB(e2) {
                 if (e2 && e2.pointerId !== pid) return;
                 el.classList.remove('planif-dragging');
+                effacerGuides();
                 document.removeEventListener('pointermove', onMoveBThrottled);
                 document.removeEventListener('pointerup', onUpB);
                 document.removeEventListener('pointercancel', onUpB);
@@ -4788,6 +5252,12 @@ function attacherEvenements(el, donnees) {
             if (donnees.enfants) {
                 collecterDescendants(donnees, donnees, descendantsInit);
             }
+            // Un conteneur ne s'aimante pas sur SES PROPRES enfants : ils se
+            // déplacent avec lui, l'écart ne change jamais, et le guide
+            // resterait collé à l'écran sans rien vouloir dire.
+            var exclusC = new Set([id]);
+            for (var xC = 0; xC < descendantsInit.length; xC++) exclusC.add(descendantsInit[xC].id);
+            preparerAimantation(exclusC);
 
             // Voie A (6 août 2026) : une séquence peut aussi être déposée dans
             // une séquence — même geste que pour une leçon.
@@ -4798,6 +5268,13 @@ function attacherEvenements(el, donnees) {
                 if (e2.pointerId !== pid) return;
                 donnees.x = startDataX + (e2.clientX - startMouseX2) / etat.zoom;
                 donnees.y = startDataY + (e2.clientY - startMouseY2) / etat.zoom;
+                var aim = appliquerAimantation({
+                    gauche: donnees.x, droite: donnees.x + (el.offsetWidth || 140),
+                    haut: donnees.y, bas: donnees.y + (el.offsetHeight || 50)
+                });
+                donnees.x += aim.dx;
+                donnees.y += aim.dy;
+                tracerGuides(aim.guides);
                 el.style.left = donnees.x + 'px';
                 el.style.top = donnees.y + 'px';
                 mettreAJourLiens(id);
@@ -4839,6 +5316,7 @@ function attacherEvenements(el, donnees) {
             function onUpC(e2) {
                 if (e2 && e2.pointerId !== pid) return;
                 el.classList.remove('planif-dragging');
+                effacerGuides();
                 document.removeEventListener('pointermove', onMoveCThrottled);
                 document.removeEventListener('pointerup', onUpC);
                 document.removeEventListener('pointercancel', onUpC);
@@ -4876,12 +5354,20 @@ function attacherEvenements(el, donnees) {
 
         // CAS D: Noeud libre → drag simple + hover-detection conteneur
         el.classList.add('planif-dragging');
+        preparerAimantation(new Set([id]));
         var survolConteneurD = null;
 
         function onMoveD(e2) {
             if (e2.pointerId !== pid) return;
             donnees.x = startDataX + (e2.clientX - startMouseX2) / etat.zoom;
             donnees.y = startDataY + (e2.clientY - startMouseY2) / etat.zoom;
+            var aim = appliquerAimantation({
+                gauche: donnees.x, droite: donnees.x + (el.offsetWidth || 140),
+                haut: donnees.y, bas: donnees.y + (el.offsetHeight || 50)
+            });
+            donnees.x += aim.dx;
+            donnees.y += aim.dy;
+            tracerGuides(aim.guides);
             el.style.left = donnees.x + 'px';
             el.style.top = donnees.y + 'px';
             mettreAJourLiens(id);
@@ -4907,6 +5393,7 @@ function attacherEvenements(el, donnees) {
         function onUpD(e2) {
             if (e2 && e2.pointerId !== pid) return;
             el.classList.remove('planif-dragging');
+            effacerGuides();
             document.removeEventListener('pointermove', onMoveDThrottled);
             document.removeEventListener('pointerup', onUpD);
             document.removeEventListener('pointercancel', onUpD);
@@ -5842,6 +6329,12 @@ function initialiser() {
 
     // Zoom molette
     var gestureEnCours = false;
+    // La barre d'alignement flotte en coordonnées d'ÉCRAN au-dessus d'une
+    // sélection qui vit en coordonnées de CARTE : tout défilement ou
+    // redimensionnement la décroche. Passif — elle ne fait que suivre.
+    zoneTravail.addEventListener('scroll', function () { majBarreAlignement(); }, { passive: true });
+    window.addEventListener('resize', function () { majBarreAlignement(); }, { passive: true });
+
     zoneTravail.addEventListener('wheel', function(e) {
         if (e.ctrlKey && !gestureEnCours) {
             e.preventDefault();
@@ -8452,6 +8945,7 @@ function activerLoupe() {
 
     _loupeEl.classList.add('planif-loupe-visible');
     zoneTravail.classList.add('planif-loupe-mode');
+    majBarreAlignement();   // la barre s'efface : la loupe passe devant
     // ⚠ EN CAPTURE, SUR LE DOCUMENT — et non sur la zone de travail.
     // Trouvé au navigateur le 11 août : la grille du Planificateur
     // (`planif-grille-nonplanifie`) et les palettes flottantes RECOUVRENT le
@@ -8469,6 +8963,7 @@ function desactiverLoupe() {
     etat.loupeActive = false;
     if (_loupeEl) _loupeEl.classList.remove('planif-loupe-visible');
     if (zoneTravail) zoneTravail.classList.remove('planif-loupe-mode');
+    majBarreAlignement();
     document.removeEventListener('pointermove', _surPointeurLoupe, true);
     document.removeEventListener('pointerdown', _surPointeurLoupe, true);
     majBoutonLoupe();
@@ -8688,6 +9183,12 @@ window.planificationCarte = {
     dupliquerConteneurEnProfondeur: dupliquerConteneurEnProfondeur,
     dupliquerSelection: dupliquerSelection,
     ajusterVueSurTout: ajusterVueSurTout,
+    alignerSelection: alignerSelection,
+    majBarreAlignement: majBarreAlignement,
+    preparerAimantation: preparerAimantation,
+    appliquerAimantation: appliquerAimantation,
+    bornesNoeud: bornesNoeud,
+    bornesEnsemble: bornesEnsemble,
     encadrementContenu: encadrementContenu,
     basculerLoupe: basculerLoupe,
     activerLoupe: activerLoupe,
