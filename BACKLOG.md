@@ -488,6 +488,31 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - ✅ **Décision du 11 août : RENOMMER LES DEUX**, distinctement. Aucune référence n'est touchée : le renommage ne change que le libellé, pas l'id. La fusion aurait exigé de repointer 4 (ou 6) citations — migration de données, écartée pour un problème d'affichage.
   - ⮕ Geste d'interface, aucun code. À faire dans a2025, dans **les deux navigateurs** (les magasins sont des îles — cf. #346).
 
+- [ ] 🔴🔴 **#454** À l'import, une ressource renumérotée n'est REPOINTÉE NULLE PART — créé 11 août 2026 (cause racine de la branche H26 de #453, **encore vivante**).
+  - **Le mécanisme** : `verifierUniciteIds` (`import-export.js:197-216`) traite une collision d'identifiant en RENOMMANT l'entrée entrante :
+    ```js
+    item.id = genererIdUnique(ancienId.replace(/[0-9_]+$/, '').replace(/-+$/, '_'));
+    ```
+    Elle ne repointe **rien** : ni les productions qui citent la grille, ni les évaluations, ni la clé `cartouches_{grilleId}` qui porte l'ancien id dans son NOM.
+  - **La signature se lit à l'œil nu dans les données de Grégoire**, et c'est ce qui transforme l'hypothèse en constat :
+    ```
+    cartouche_1770743136309_jl11zpy74   (l'original, 10 fév. 2026)
+    cartouche_1770743136309_jl11zpy + 1774267023190_a_111810808b56
+                                 ↑ les deux derniers caractères AMPUTÉS par
+                                   replace(/[0-9_]+$/, ''), puis suffixe collé
+    CART_GENERIQUE → CART_GENERIQUE1774267023190_b_9cd25ba93c8b
+    ```
+    Horodatages des suffixes : **23 mars 2026** et **11 avril 2026** — deux imports.
+  - ⚠ **DEUX APPELANTS, ET LE PLUS EXPOSÉ N'EST PAS CELUI QU'ON CROIT** :
+    · `codex.js:632-633` — `chargerCodex` l'applique à toute « bibliothèque partagée » (`grillesTemplates`, `echellesTemplates`, `cartouches_*`, `bibliotheque*`). **Grégoire charge des Codex régulièrement.** Ce chemin est intact et ne remappe rien.
+    · `import-export.js:187` — filet de fin de `fusionnerParIdentite` (livré ce matin en 1.75.0), pour les collisions INTERNES à la liste fusionnée. Le chemin d'import principal, lui, remappe (`remapGrilles`/`remapEchelles`).
+  - ⮕ **UNE CAUSE, TROIS SYMPTÔMES DÉJÀ OBSERVÉS** :
+    1. les grilles/échelles H26 citées par les productions deviennent introuvables ⇒ le formulaire affiche « Aucune » ⇒ le prochain enregistrement blanchit la référence (**branche H26 de #453**) ;
+    2. la clé `cartouches_{ancienId}` n'est pas renommée ⇒ **magasin orphelin** (les 6 rapportés le 11 août au matin par `inspecterOrphelins448` — ⚠ **NE PAS LES SUPPRIMER : ce sont les seuls témoins de l'ancien identifiant**) ;
+    3. les évaluations gardent l'ancien id tandis que d'autres prennent le nouveau ⇒ **témoins contradictoires** (les 3 CAS C sur cartouches du dry-run #453).
+  - 📐 **Ce qu'il faut décider avant de coder** : renommer et remapper (il faut alors un registre des citations : productions, évaluations, clés `cartouches_*`), ou **ne pas renommer du tout** et fusionner par identité comme le fait déjà `fusionnerParIdentite` (#448). ⮕ La seconde est cohérente avec la 1.75.0 : un identifiant identique avec un CONTENU identique n'est pas une collision, c'est la même chose.
+  - ⏳ **À reproduire avant de corriger** (leçon des 10-11 août). Sentinelle obligatoire.
+
 - [ ] 🔴 **#453** Grille / échelle / cartouche affichent toutes « Aucune » sur les artefacts H26 — créé 11 août 2026 (constat terrain Grégoire, capture).
   - **Symptôme** : sur ses artefacts H26, les TROIS sélecteurs sont vides. Survenu le même jour que #452 (dates d'échéance de l'automne sur les artefacts d'hiver).
   - ⮕ **CE N'EST PAS TROIS PERTES, C'EST UNE PERTE ET DEUX CONSÉQUENCES** (cascade lue au code, `productions.js:778-783`) : `selectGrille.value = prod.grilleId || ''` — un `<select>` à qui on assigne un id ABSENT de ses options retombe **silencieusement** sur `''`, c'est-à-dire « Aucune ». Et `peuplerCartouchesProduction(grilleId)` ne peuple rien sans grille résolue. **Une seule référence cassée vide les trois.**
@@ -539,10 +564,19 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
     · ⮕ **Le partage A/B est lui-même un diagnostic** : beaucoup de CAS B ⇒ identifiants périmés (renumérotation à l'import, cf. #448) ; presque que des CAS A ⇒ les références étaient valides et seul le chemin d'écriture les a blanchies.
     · Rapport en **texte copiable**, pas en `console.table` — le relevé r2 est arrivé amputé de ses tableaux et a coûté un aller-retour. Ce qui doit être relu doit pouvoir être copié.
     · ⮕ **Break-test fait** : banc à 11 essais, huit gardes retirées une à une (CAS B, CAS C, champ déjà renseigné, portfolios, cartouche joignable, exclusion démo, dry-run, pré-image d'annulation) — **chacune fait rougir le banc**. ⚠ L'essai « pack démo » était INERTE au premier jet : la démo n'ayant pas de grilles à elle, le test « même trimestre » la refusait déjà et l'exclusion n'était jamais sollicitée. Démasqué par le break-test, corrigé en donnant à la démo son propre magasin de grilles.
+  - ### 📊 DRY-RUN DE RÉPARATION (11 août, Chrome) — **CE N'EST PAS UNE HISTOIRE, C'EN EST DEUX**
+    ```
+    CAS A restaurables 4 · cartouches joignables 9/16 · REFUS 20 + 6 · écritures 13 (a2025 seul)
+    ```
+    · **A25 — réparable.** Ses grilles n'ont jamais bougé (elles font les 13 « saines »). Seules 4 échelles et 9 cartouches ont été blanchies, **toutes les cibles existent**, tous les témoins sont uniques. ⮕ 13 champs à rendre, sans risque.
+    · **H26 — les témoins pointent des FANTÔMES.** Les 20 refus visent des identifiants qui n'existent **dans aucun magasin**. Ce n'est donc PAS « l'écran a effacé une référence valide » : les ressources elles-mêmes ont changé d'identifiant. ⮕ **Voir #454**, qui en est la cause et qui est encore vivante.
+    · Les 6 CAS C recoupent deux autres dossiers : 3 échelles A25 partagées entre les deux homonymes « IDME et niv 0 » (**#450** — les renommer lèvera l'ambiguïté), et 3 cartouches H26 dont les évaluations citent à la fois l'ancien et le nouvel identifiant (**#454**).
+    · ⚠ `ECHELLE_DEMO` et `CART_GENERIQUE` apparaissent dans des évaluations H26 RÉELLES — à regarder à part.
   - ### ⏭ RESTE À FAIRE
-    1. `await reparer453()` en **dry-run** dans Chrome, relire le partage A/B **avant** toute écriture.
-    2. Puis exécution après backup Codex, puis **refaire dans Safari** (magasins indépendants).
+    1. **A25** : `await reparer453({ executer: true })` après backup Codex → 13 champs rendus. Puis **refaire dans Safari** (magasins indépendants).
+    2. **H26** : ne rien faire par script. Les grilles existent toujours, sous de NOUVEAUX identifiants — c'est Grégoire qui sait laquelle va avec quel artefact. Réassignation à la main dans l'interface (10 artefacts). ⚠ Les magasins `cartouches_{ancienId}` survivants sont le fil pour reconnaître l'ancienne grille (ligne « trace » du dry-run r2).
     3. **Corriger le chemin d'écriture** (`productions.js:778` + `:988`) : une référence non résolue doit être **préservée et signalée**, jamais blanchie en silence. Défaut réel indépendamment de cette enquête — les 13 références saines y sont exposées aujourd'hui. ⮕ Sentinelle obligatoire.
+    4. **#454** — sans lui, tout se refera au prochain import.
 
 - [ ] 🔴 **#452** Reprendre une production de la bibliothèque emporte la DATE D'ÉCHÉANCE du trimestre précédent — créé 11 août 2026 (constat terrain Grégoire, après la clôture).
   - **Symptôme, dans ses mots** : « certaines productions de A25 sont les mêmes reprises à l'H26. Maintenant je constate que les dates de remise des travaux à l'hiver sont celles de l'automne précédent. »
