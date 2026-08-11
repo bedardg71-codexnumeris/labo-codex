@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.72',
+            couleur: 'vert',
+            titre: 'Dupliquer plusieurs blocs d’un coup dans la Carte d’alignement',
+            items: [
+                '⌘D duplique désormais TOUS les blocs sélectionnés, et plus seulement le dernier. Sélectionne-en cinq, appuie une fois : tu obtiens cinq copies, déjà sélectionnées pour que tu puisses les glisser où tu veux dans la foulée.',
+                'Un seul ⌘Z défait la duplication entière — pas copie par copie.',
+                'Si tu sélectionnes une leçon ET l’une de ses activités, l’activité n’est pas copiée deux fois : la copie de la leçon emporte déjà son contenu.'
+            ]
+        },
+        {
             version: '1.71',
             couleur: 'orange',
             titre: 'Le bouton Supprimer d’un groupe-cours réapparaît',
