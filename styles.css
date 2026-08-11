@@ -18584,7 +18584,8 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     border-radius: 10px;
     background: var(--surface-page, #0c1a22);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
-    cursor: zoom-in;
+    /* Le pointeur est defini plus bas, avec celui du canevas : les deux
+       surfaces montrent la MEME zone, elles doivent montrer le meme curseur. */
     /* Le geste appartient a la loupe : sans ca Safari cede au defilement
        natif et envoie pointercancel (meme lecon que #148 sur le canevas). */
     touch-action: none;
@@ -18629,8 +18630,27 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     outline-offset: 2px;
 }
 
-/* En mode loupe le canevas ne deplace ni ses blocs ni sa vue. */
-#planif-zone-travail.planif-loupe-mode { cursor: zoom-in; touch-action: none; }
+/* En mode loupe le canevas ne deplace ni ses blocs ni sa vue.
+   ── LE POINTEUR DEVIENT LA ZONE QU'ON EXAMINE (11 aout 2026, demande de
+   Gregoire : « je voudrais que le pointeur se transforme en petit rectangle
+   dans les memes proportions que la loupe »). Une fleche designe un POINT ;
+   ici on ne designe pas un point, on choisit un CADRAGE. Le rectangle est
+   au ratio EXACT du cadre : 420 x 300 = 7:5, donc 42 x 30 au dixieme.
+   (Premier jet a 44 x 32 = 1,375 au lieu de 1,400 — assez proche pour ne pas
+   se voir, et assez faux pour ne pas etre ce qui a ete demande.)
+   Double trait — sombre dessous, clair dessus — pour rester lisible sur un
+   fond clair comme sur un fond sombre : la carte peut porter l'un ou l'autre
+   selon la couleur de fond choisie. Point central = le repere vise.
+   Le point d'accroche est au CENTRE du rectangle (21 15), pas en haut a
+   gauche : c'est le centre qui correspond au centre du cadre de la loupe. */
+#planif-zone-travail.planif-loupe-mode,
+#planif-loupe {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='42' height='30'%3E%3Crect x='2' y='2' width='38' height='26' rx='2' fill='none' stroke='%23000' stroke-opacity='0.55' stroke-width='3'/%3E%3Crect x='2' y='2' width='38' height='26' rx='2' fill='none' stroke='%23fff' stroke-width='1.5'/%3E%3Ccircle cx='21' cy='15' r='1.5' fill='%23fff' stroke='%23000' stroke-opacity='0.55' stroke-width='1'/%3E%3C/svg%3E") 21 15, crosshair;
+}
+#planif-zone-travail.planif-loupe-mode { touch-action: none; }
+/* Le bouton « Aller ici » reste un bouton : il retrouve le pointeur normal,
+   sinon rien ne dit qu'il est cliquable autrement que le reste du cadre. */
+.planif-loupe-aller { cursor: pointer; }
 
 /* ── GUIDES D'ALIGNEMENT (11 aout 2026) ─────────────────────────────────
    Le trait qui apparait quand un bloc s'aimante sur un autre. Il doit se
