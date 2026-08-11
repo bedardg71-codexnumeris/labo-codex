@@ -7,6 +7,65 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 11 AOÛT 2026 : PRÉPARATION DE LA RENTRÉE A26 — 5 versions, et le vecteur de #448 bouché.
+     ÉTAT FINAL : **1.75.0** (build 0811-1319), Vitest **2226/2226** (248 fichiers), 17 commits, FUSIONNÉ SUR MAIN.
+
+     ▣ **LA JOURNÉE A ÉTÉ PILOTÉE PAR SON TRAVAIL RÉEL, pas par le backlog.** Grégoire préparait son
+     601-101 dans la Carte d'alignement ; chaque friction est devenue une livraison le jour même.
+     **1.72.0** ⌘D duplique toute la multi-sélection (asymétrie : Supprimer la traitait déjà, pas ⌘D) ·
+     **1.73.0** « Tout voir » + LOUPE de navigation (sa carte est illisible à 25 %, qui était le plancher) ·
+     **1.74.0** guides magnétiques + six commandes d'alignement · **1.74.1** le clic dans la carte atterrit
+     et le pointeur devient la zone examinée · **1.75.0** #448.
+
+     ⚠⚠ **#448 — LE DÉFAUT ÉTAIT RÉEL, LA PRÉMISSE DE L'ITEM ÉTAIT FAUSSE, ET LA MESURE A TRANCHÉ TROIS FOIS.**
+     Le backlog accusait `ajouterCartouchesABibliotheque` ; c'est `verifierUniciteIds` (import-export.js:69),
+     qui traite une collision d'id comme un accident à RENOMMER au lieu du signe que c'est le MÊME élément.
+     9 sites de fusion, 5 collections. Reproduit en bac à sable sur la ligne réelle : 2 → 4 → 6.
+     ⮕ **Et le relevé terrain a dit ce que le code ne disait pas** : l'import du matin dans Safari n'avait
+     RIEN dupliqué. Chrome et Safari rendaient le même rapport à l'unité près. Pourquoi ? Le renommage
+     exige une COLLISION — Safari ne possédait pas ces magasins, l'écriture s'est faite dans le vide.
+     *Le défaut est CONDITIONNEL au réimport dans un magasin déjà peuplé.* Et Safari l'est désormais.
+     ⮕ Deux formes distinctes dans son corpus : collision sur une CARTOUCHE → jumeau en place (lot du
+     24 mars, 75/0 · 79/0 · 50/0 · 50/0) ; collision sur une GRILLE → magasin FANTÔME que rien ne
+     référence (lot du 27 juin, 8 éléments à 0/0). *La seconde ne double rien à l'écran.*
+
+     ▣ **PURGE FAITE DANS CHROME** : 83 → 78 éléments, 5 copies muettes retirées, échelles « IDME et
+     niv 0 » intactes (344/72 citations — le chiffre a confirmé que RENOMMER valait mieux que fusionner).
+     ⏳ **Safari reste à nettoyer** · ⏳ **6 magasins orphelins en attente de SA décision.**
+
+     ⚠⚠ **CINQ FOIS AUJOURD'HUI, C'EST MON PROPRE OUTIL QUI MENTAIT — ET CHAQUE FOIS C'EST UNE MESURE
+     QUI L'A DIT, JAMAIS UNE RELECTURE.**
+      1. La barre d'alignement partait à des milliers de pixels HORS ÉCRAN — offset du canevas oublié.
+         **Le même oubli que la loupe deux heures plus tôt**, dans la même session.
+      2. « Tout voir » tombait au plancher EN SILENCE quand la zone n'avait pas de taille.
+      3. La loupe restait VIDE sous la grille du Planificateur (écouteur posé sur la zone, pas le
+         document) — symptôme « ça marche parfois », le pire à diagnostiquer.
+      4. Mon inspecteur d'orphelins déclarait « CONTENU UNIQUE » 8 fois dans un magasin de 4 paires :
+         j'excluais le magasin courant de sa propre recherche de jumeaux. Pire, son verdict global
+         ignorait le nouveau compteur et conseillait de SUPPRIMER un contenu qui n'existait que là.
+      5. Mon garde a REFUSÉ les 5 retraits sur `dateImport` — faux positif : le projet a déjà une liste
+         canonique de ces champs (`securite-hash.js:34`), je réinventais une règle à côté.
+
+     ⚠⚠ **ET TROIS BREAK-TESTS SONT RESTÉS VERTS — trois tests trop lâches, aucun hasard :**
+      · piège `indexOf` : `-1` quand le motif est absent, et `-1` < tout index ⇒ une assertion d'ORDRE
+        passe quand le code qu'elle protège DISPARAÎT. **Deux autres assertions du dépôt portaient le
+        même piège**, corrigées au passage ;
+      · valeurs non discriminantes : comparer 4 px et 40 px répond PAREIL avec ou sans division par le
+        zoom. Il fallait une distance tombant ENTRE les deux seuils ;
+      · assertion qui NOMME l'invariant et en teste un plus faible (`removeAttribute('id')` matchait
+        3 lignes, dont 2 non protectrices) — démasquée par le rituel de fin, sur l'arbre final.
+     ⮕ **Les trois ont en commun d'avoir été écrits en même temps que le code qu'ils protègent.**
+
+     ▣ **RITUEL DE FIN** : §2 zéro motif interdit (7 cherchés) · §3 2226/2226, 0 only/skip, Playwright
+     WebKit hors conteneur → **2 specs neuves JAMAIS EXÉCUTÉES**, différées CI · §4 **26 break-tests
+     rejoués SUR L'ARBRE FINAL, 25 rouges + 1 vert corrigé** · §4bis récit↔code : 5 affirmations
+     confrontées au grep, toutes confirmées ; passe connexions faite (les autres écrivains des magasins
+     partagés ajoutent ou filtrent, ils ne fusionnent pas).
+     ⚠ **NON VALIDÉ** : Safari, iPad, et le parcours d'import COMPLET (vrai ZIP) — le correctif #448 est
+     prouvé sur la ligne de fusion, en bac à sable et au navigateur, pas de bout en bout.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 10 AOÛT 2026, SOIR (8, POST-CLÔTURE) : SON RELEVÉ A INVALIDÉ MON ATTENDU — PORTES CORRIGÉES.
      ÉTAT : **1.71.1** inchangé (aucun code applicatif touché) — correction de DOCUMENTS uniquement.
 
@@ -6412,114 +6471,82 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
 ## §3 — Consigne de démarrage pour la prochaine session
 
-> **Réécrite le 10 août 2026 en clôture du cycle du soir.** Tout est sur `main`,
-> arbre propre, zéro divergence. Pas de dette de fusion.
-> ⏳ **RIEN N'EST VALIDÉ AU TERRAIN** : Grégoire fait les vérifications **demain**.
+> **Réécrite le 11 août 2026 en clôture.** Tout est FUSIONNÉ sur `main` et déployé.
+> Arbre propre, zéro divergence, pas de dette de fusion.
+> ⏳ **Prochaine session : JEUDI PROCHAIN** (décision de Grégoire, 11 août).
 
 ### Prémisse à vérifier au rituel de début (§1)
 
 | Point | Valeur attendue |
 |---|---|
 | Branche | **`main`** — plus rien en avance (`RELAIS.md` le confirme) |
-| Version | `{"build":"0810-1754","beta":"1.71.1"}` |
-| Vitest | **2169/2169** (244 fichiers) |
+| Version | `{"build":"0811-1319","beta":"1.75.0"}` |
+| Vitest | **2226/2226** (248 fichiers) |
 | Playwright WebKit | non exécutable en conteneur → CI à la PR |
-| Dernier ID BACKLOG | **#449** |
+| Dernier ID BACKLOG | **#451** |
 | Arbre | propre · `origin/main ↔ HEAD : 0 / 0` |
 
 ⚠ **Le clone du conteneur est SHALLOW.** `git fetch --unshallow` AVANT toute
-comparaison ET avant toute fusion, puis vérifier que le `main` local est bien un
-**ancêtre** d'`origin/main` (`git merge-base --is-ancestor`) : c'est ce qui
-distingue « en retard » de « divergent ».
+comparaison ET avant toute fusion, puis `git merge-base --is-ancestor` : c'est ce
+qui distingue « en retard » de « divergent ».
 
-⚠⚠ **LE BUILD DE GRÉGOIRE N'EST PAS `main`** — `file://` depuis son clone sur
-Mac, prod sur iPad. ⮕ **`git pull` en case 1 de toute checklist terrain.**
-⮕ **Et ses SCRIPTS non plus** : le 10 août au soir il a reçu trois fois
-`is not defined` parce que les outils console vivaient sur une branche non
-fusionnée. **Un script se colle EN ENTIER, une commande s'appelle APRÈS.**
-⚠⚠ **NE PAS donner `cat scripts/<fichier>.js | pbcopy`** — c'est du **Terminal**
-au milieu de **console navigateur**, et collé dans Chrome ça rend
-`SyntaxError: Unexpected identifier 'scripts'` (arrivé le 10 août au soir).
-⮕ **Méthode à une seule fenêtre** : Finder → `scripts` → glisser le `.js` dans un
-nouvel onglet du navigateur → Cmd+A, Cmd+C → coller dans la console de l'app.
-⮕ **Règle 5 de `SKILL_portes_terrain.md`** : toute commande dit sur quelle
-SURFACE elle se tape.
+⚠⚠ **LE BUILD DE GRÉGOIRE N'EST PAS `main`** — `file://` depuis son clone sur Mac,
+prod sur iPad. ⮕ `git pull` en case 1 de toute checklist terrain, et pour ses
+SCRIPTS aussi. Méthode à une seule fenêtre : Finder → `scripts` → glisser le `.js`
+dans un onglet du navigateur → Cmd+A/Cmd+C → coller dans la console de l'app.
+⮕ **Et tout script de console doit porter un REPÈRE DE VERSION** : le 11 août, un
+rapport identique au précédent n'a pas permis de savoir si le correctif avait été
+rechargé. Ajouté depuis (`outil r3 · …`).
 
 ---
 
-### ⏳ PRIORITÉ 0 — le terrain de demain, puis SES retours
+### ⏳ PRIORITÉ 0 — CE QUI TOUCHE SA RENTRÉE (trois semaines)
 
-**Grégoire exécute les portes demain.** Elles sont dans
-`plans de travail/PORTES-TERRAIN-2026-08-10.md` (jumeau markdown de l'artefact).
-**Ne pas ouvrir de chantier de fond avant d'avoir ses résultats** — la règle
-`CLAUDE.md` est explicite : un retour testeur interrompt le plan.
-
-Ce qu'il doit rapporter, dans l'ordre :
-
-| # | Objet | Ce qu'on en attend |
+| # | Objet | État |
 |---|---|---|
-| 1.1 | occupation du localStorage | ⚠ **DÉJÀ MESURÉ, ET MON ATTENDU ÉTAIT FAUX** : **100 %, 586 clés** sur 1.71.1. Le seuil MORD (3 grosses clés parties en IDB) mais `syncToLocalStorageCache()` **remplit** au boot ce que la projection n'avait pas modélisé. **Chantier, pas porte.** Reste dû : le même relevé dans Safari (était 88,3 %) — aucun chiffre n'y est un échec |
-| 1.2-1.5 | purges a2024 · `simulation_indicesCP` · snapshots orphelins, **dans les deux navigateurs** | ⚠ le détecteur a été CORRIGÉ : exiger un dry-run frais, le rapport du 10 août ne vaut plus. ⚠⚠ **ET IL N'ÉNUMÈRE QUE localStorage** (`diagnostic-353-cles-orphelines.js:102`) : a2024 pèse **85 K / 21 clés** et non 448 K, et `sansProducteur` rend **0** — ce n'est PAS un échec, les clés sont en IDB. Reliquat à retirer par `db.keys()` + `db.remove()`, **sans `annuler353()`** |
-| 2.1-2.5 | bouton Supprimer à l'arrivée · dépôt de lien sur objectif · légende des pastilles · wizard · bibliothèque sans doublon | 2.5 a une **seconde rangée qui teste le VECTEUR** (refaire un import) — c'est elle qui compte |
-| 2.6 | **`a2026` n'existe que dans Chrome** | touche sa RENTRÉE. Décision + peut-être un item |
+| ⚠️ **#368** | **La carte 601-101 est-elle vraiment passée de H26 à A26 ?** | ⚠ **À VÉRIFIER EN PREMIER.** Outillé depuis 1.49.0 (un clic : Alignement → Actions → « Importer d'un autre trimestre »). Il a travaillé toute la journée du 11 sur « Écriture et littérature (A26) » — mais c'est le NOM de la carte, pas forcément son trimestre. Et le relevé du 11 montre ses grilles « Grille-4 H26 » et « Grille-5 FR-HOLIS H26 » toujours sous `h2026`. |
+| ⚠️ **#450** | Renommer les deux échelles « IDME et niv 0 » d'a2025 | Geste d'interface, **dans les deux navigateurs**. Citées 344 et 72 fois : renommer, surtout pas fusionner. |
+| ⏳ | **Safari : nettoyer les 5 copies muettes** | Soit `reparer448()` (chirurgical), soit rouvrir un codex Chrome NEUF (remplace les clés). ⚠ **#336** : ouvrir un codex ne PURGE pas ce qui reste à côté — les orphelins survivraient. |
+| ⏳ | **6 magasins orphelins** | Décision de Grégoire, pas de script. Plusieurs ne sont vraisemblablement pas de lui (« Rétroactions rapport de laboratoire » en bio et en chimie — il enseigne le français). Les deux gros appartiennent à des grilles H26 **vivantes**. Aucune urgence : ils vivent en IDB, pas dans le quota. |
+
+### Priorité 1 — dettes DATÉES septembre, bornées, à faible risque
+
+- **#428 + #430** — à retirer **ENSEMBLE**. Code qui n'existe que pour rattraper des backups Codex de la fenêtre 7-8 août. Trois lignes chacun, sans drapeau, avec leurs sentinelles. **Bon chantier de reprise** : borné, et il retire de la dette au lieu d'en ajouter.
+- **#427** — refermer l'accès public (Cloudflare Access, OTP). Reporté à septembre par décision du 8 août. Rien à construire ; c'est une révision d'ADR.
+
+### Priorité 2 — hygiène du backlog
+
+**60 items ouverts, dernière bascule vers l'archive le 19 juin** (presque deux mois).
+Six décisions 📐 dorment depuis mai-juin (#449 et #441 sont tranchées dans le
+principe et n'attendent que le code ; #365, #324, #279, #275 attendent lui).
+⮕ **Proposer une passe de triage** : un backlog qu'on ne relit plus cesse d'être
+un outil de décision.
 
 ---
 
-### Priorité 1 — décisions toujours attendues de lui
+### ⚠⚠ LA LEÇON DU 11 AOÛT — à lire avant d'écrire un test
 
-| # | Objet | Nature |
-|---|---|---|
-| 3.1 | les **quatre valeurs gelées** (28 px · sarcelle `#0891b2` · dénominateur C = 3 · quota jetons = 2) | ⚠ **deux chantiers différents** (#437 carte, #436 pratiques) — la confusion a déjà eu lieu |
-| 📐 **#449** | forme de la suppression dans la bibliothèque de cours | deux conditions écrites dans l'item, à ne pas contourner |
-| 3.3 | les deux « IDME et niv 0 » d'a2025 | **toutes deux référencées** (6 et 4 citations) — pas des doublons |
-| 📐 **#441** | le chantier 3 de la taxonomie SOLO a-t-il encore un objet ? | invisible pour l'utilisateur |
+**Trois break-tests sont restés VERTS, et aucun par hasard.** Les trois avaient été
+écrits en même temps que le code qu'ils protègent :
 
----
+1. **Piège `indexOf`** — rend `-1` quand le motif est absent, et `-1` est inférieur
+   à tout index positif. Une assertion d'ORDRE passe donc quand le code disparaît.
+   Helper `ordreStrict()` créé ; **deux autres assertions du dépôt portaient le même
+   piège**, corrigées au passage.
+2. **Valeurs non discriminantes** — comparer 4 px et 40 px répond PAREIL avec ou
+   sans division par le zoom. Il faut une valeur qui tombe ENTRE les deux seuils.
+3. **Assertion qui nomme l'invariant et en teste un plus faible** —
+   `toMatch(/removeAttribute\('id'\)/)` sur un bloc qui en contient trois, dont
+   deux sans effet protecteur.
 
-### Priorité 2 — si le terrain laisse de l'air
+⮕ **Et le corollaire de la journée** : cinq fois, c'est MON OUTIL qui mentait, et
+chaque fois c'est une MESURE qui l'a dit — jamais une relecture. Deux fois le même
+oubli (l'offset du canevas) dans la même session, à deux heures d'intervalle.
+*Sur les données et sur le DOM, un diagnostic lu au code est une hypothèse.*
 
-- **#448** — les cartouches se dupliquent à l'import. ⚠ **NON REPRODUIT** :
-  mécanisme lu au code (`ajouterCartouchesABibliotheque`, `push` nu avec id
-  neuf) et corroboré par les horodatages des ids. **Rejouer avant de corriger**
-  — c'est exactement la leçon du cycle.
-- **#353, ce qui reste** : `tamponsImages` base64 non namespacé,
-  `db.purgerBackupsV1()` (dry-run par défaut, exécution = décision Grégoire).
-  L'option 4 (quota piloté) n'est plus urgente : à 44 %, l'alerte à 80 % a de
-  la marge.
-- **#439** (guides 5 sur 7) · **#440** (SRPNF en dur dans l'affichage) ·
-  **#425** · **#416** · **#403** · **#418** · **#428 + #430** (à retirer
-  ENSEMBLE, dettes datées de la rentrée) · **#427** (reporté à septembre).
-
----
-
-### ⚠⚠ LA LEÇON DU CYCLE — à lire avant de diagnostiquer quoi que ce soit
-
-**Quatre diagnostics posés par LECTURE DE CODE se sont révélés faux, et c'est la
-MESURE qui les a corrigés :**
-
-1. **#447** — le BACKLOG affirmait « l'aperçu lit le stocké sans recalculer » et
-   prescrivait un contournement à l'utilisateur. `tableau-bord-apercu.js:1069`
-   recalcule à chaque rendu. Prouvé en FAUSSANT le stockage puis en observant.
-2. **#353** — l'alerte criait « 200 % » d'un quota indépassable. Le navigateur
-   facture en **caractères UTF-16**, la mesure comptait des octets. *Un ratio
-   impossible invite à ne plus croire l'alerte* — le pire résultat possible.
-3. **Le détecteur d'orphelines** classait des snapshots VIVANTS comme morts.
-   Rattrapé avant exécution, en relisant le rapport de Grégoire.
-4. **Le bouton Supprimer** — annoncé cassé côté cours (faux), puis raté par mon
-   propre script d'audit (fenêtre trop courte). Trouvé en lisant les quatre
-   sites d'appel un par un.
-
-⮕ **La règle : sur les DONNÉES et sur le DOM, un diagnostic lu au code est une
-HYPOTHÈSE.** Le conteneur a Chromium — reproduire coûte trois minutes.
-⮕ **Corollaire, trouvé sur pièces** : « ne rien casser » n'est pas « ne rien
-perdre ». Un retrait démontrablement sans effet peut quand même effacer des
-valeurs que personne ne lisait.
-⮕ **Et sur les tests** : **quatre break-tests sont restés VERTS au premier jet**
-ce cycle, chaque fois par la faute du TEST — assertion qui vise la variable au
-lieu de son emploi, la sous-chaîne au lieu de l'ancre, l'autre élément de la
-même fonction. *Un break-test resté vert est une information sur le test.*
-
----
+⮕ **Sur les portes terrain** : une case à cocher ne porte NI un nombre NI un
+verdict. Le relevé du 11 est revenu 28/28 sans les trois mesures ni les cinq
+décisions. `SKILL_portes_terrain.md` amendé.
 
 ## §3ter — Consigne du 9 août (archivée le 10 août — 81 portes closes, #154/#155/#157/#158/#444/#446 livrés, audit `Plan Accompagnement/` versé)
 
