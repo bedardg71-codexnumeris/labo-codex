@@ -145,6 +145,163 @@
         return perdus;
     }
 
+    /**
+     * Signature de CONTENU : clés triées récursivement, sans l'id ni les
+     * champs posés par l'app. Deux cartouches de même signature portent la
+     * même chose, quels que soient leurs identifiants.
+     */
+    function signatureDeContenu(valeur) {
+        const visiter = (v) => {
+            if (v === null || typeof v !== 'object') return v;
+            if (Array.isArray(v)) return v.map(visiter);
+            const sortie = {};
+            Object.keys(v).sort().forEach((k) => {
+                if (k === 'id' || k === 'grilleId') return;      // l'appartenance change à l'import
+                if (CHAMPS_POSES_PAR_LAPP.indexOf(k) !== -1) return;
+                sortie[k] = visiter(v[k]);
+            });
+            return sortie;
+        };
+        try { return JSON.stringify(visiter(valeur)); } catch (e) { return null; }
+    }
+
+    /**
+     * LES DEUX QUESTIONS QUI PERMETTENT DE TRANCHER UN MAGASIN ORPHELIN.
+     *
+     * Demande de Grégoire, 11 août : après la purge des copies muettes, il
+     * reste un magasin dont RIEN n'est cité — né d'une grille renumérotée à
+     * l'import du 27 juin. Ses quatre noms sont ceux de sa vraie grille, ce
+     * qui suggère une recopie inutile. **Mais « mêmes noms » n'est pas « même
+     * contenu »**, et on ne supprime pas 76 K caractères sur une ressemblance
+     * de titres.
+     *
+     *   Q1 — la grille parente existe-t-elle encore quelque part ?
+     *   Q2 — le contenu de chaque cartouche existe-t-il DÉJÀ à l'identique
+     *        dans un autre magasin ?
+     *
+     * Si la grille a disparu ET que chaque cartouche a un jumeau vivant
+     * ailleurs, le magasin est redondant : le supprimer ne retire rien qui
+     * n'existe en double. Si une seule cartouche est UNIQUE, c'est du contenu
+     * réel — et il ne se supprime pas, il se récupère.
+     *
+     * LECTURE SEULE.
+     */
+    async function inspecterOrphelins448() {
+        const out = [];
+        const L = (m) => out.push(m);
+        L('==== #448 · magasins orphelins · LECTURE SEULE ====');
+
+        const cles = await toutesLesCles();
+        const magasinsCartouches = cles.filter((c) => c.indexOf('cartouches_') === 0);
+
+        // Toutes les grilles connues, quel que soit le trimestre ou le catalogue.
+        const grillesConnues = new Map();   // id → [clés où on la trouve]
+        for (const c of cles) {
+            if (!/grillesTemplates$|^bibliothequeGrilles$|_bibliothequeGrilles$/.test(c)) continue;
+            let liste = null;
+            try { liste = await db.get(c); } catch (e) { continue; }
+            if (!Array.isArray(liste)) continue;
+            for (const g of liste) {
+                if (!g || !g.id) continue;
+                if (!grillesConnues.has(g.id)) grillesConnues.set(g.id, []);
+                grillesConnues.get(g.id).push(c + (g.nom ? ' — « ' + g.nom + ' »' : ''));
+            }
+        }
+
+        // Corpus des citations, pour retrouver les magasins réellement morts.
+        const corpus = {};
+        for (const c of cles) {
+            try {
+                const v = await db.get(c);
+                corpus[c] = (v === null || v === undefined) ? '' : JSON.stringify(v);
+            } catch (e) { corpus[c] = ''; }
+        }
+
+        // Index des contenus VIVANTS : signature → où on la trouve.
+        const contenusAilleurs = new Map();
+        for (const c of magasinsCartouches) {
+            let liste = null;
+            try { liste = await db.get(c); } catch (e) { continue; }
+            if (!Array.isArray(liste)) continue;
+            for (const item of liste) {
+                const sig = signatureDeContenu(item);
+                if (sig === null) continue;
+                if (!contenusAilleurs.has(sig)) contenusAilleurs.set(sig, []);
+                contenusAilleurs.get(sig).push({
+                    cle: c,
+                    id: item && item.id,
+                    citations: compterCitations(item && item.id ? String(item.id) : ' ', corpus, c)
+                });
+            }
+        }
+
+        let nbOrphelins = 0;
+        for (const cleMag of magasinsCartouches) {
+            let liste = null;
+            try { liste = await db.get(cleMag); } catch (e) { continue; }
+            if (!Array.isArray(liste) || liste.length === 0) continue;
+
+            const cite = liste.some((it) => it && it.id
+                && compterCitations(String(it.id), corpus, cleMag) > 0);
+            if (cite) continue;   // ce magasin sert : ce n'est pas un orphelin
+
+            nbOrphelins++;
+            const idGrille = cleMag.slice('cartouches_'.length);
+            L('');
+            L('▣ ' + cleMag + '  (' + liste.length + ' cartouches, AUCUNE citée)');
+
+            // Q1
+            const ou = grillesConnues.get(idGrille);
+            if (ou && ou.length) {
+                L('   Q1 · la grille parente EXISTE : ' + ou.join(' · '));
+                L('        ⮕ Elle est visible dans ta bibliothèque. Supprimer ce magasin la viderait.');
+            } else {
+                L('   Q1 · la grille parente est INTROUVABLE (aucune bibliothèque ne la porte).');
+                L('        ⮕ Ces cartouches pendent à une grille qui n\'existe plus.');
+            }
+
+            // Q2
+            let uniques = 0;
+            L('   Q2 · le contenu existe-t-il ailleurs ?');
+            for (const item of liste) {
+                const sig = signatureDeContenu(item);
+                const jumeaux = (contenusAilleurs.get(sig) || [])
+                    .filter((j) => j.cle !== cleMag);
+                const nom = nomDe(item);
+                if (jumeaux.length) {
+                    const vivant = jumeaux.find((j) => j.citations > 0) || jumeaux[0];
+                    L('        ✓ « ' + nom + ' » — identique à ' + vivant.id
+                        + ' dans ' + vivant.cle + ' (' + vivant.citations + ' citations)');
+                } else {
+                    uniques++;
+                    L('        ⚠ « ' + nom + ' » — CONTENU UNIQUE, il n\'existe nulle part ailleurs');
+                }
+            }
+
+            L('');
+            if (uniques === 0 && (!ou || !ou.length)) {
+                L('   ⮕ VERDICT : grille disparue, et chacune de ces cartouches existe déjà');
+                L('     ailleurs à l\'identique. Ce magasin est REDONDANT — le supprimer ne');
+                L('     retire rien qui n\'existe en double.');
+                L('     Pour l\'effacer, en toute connaissance de cause :');
+                L('        await db.remove(\'' + cleMag + '\')');
+            } else if (uniques > 0) {
+                L('   ⛔ VERDICT : ' + uniques + ' cartouche(s) portent un contenu QUI N\'EXISTE');
+                L('     NULLE PART AILLEURS. Ce n\'est pas un doublon — c\'est du travail à toi');
+                L('     que rien ne référence. Ne supprime pas : récupère-le d\'abord.');
+            } else {
+                L('   ⚠ VERDICT : le contenu est bien redondant, MAIS la grille parente existe');
+                L('     encore et resterait vide. À trancher : garder, ou supprimer les deux.');
+            }
+        }
+
+        if (nbOrphelins === 0) L('Aucun magasin orphelin. Rien à trancher.');
+        console.log(out.join('\n'));
+        return { orphelins: nbOrphelins };
+    }
+
+    window.inspecterOrphelins448 = inspecterOrphelins448;
+
     async function reparer448(opts) {
         const executer = !!(opts && opts.executer);
         const out = [];
@@ -265,6 +422,8 @@
             L('   ⮕ Ce n\'est pas un doublon : c\'est un magasin entier que rien ne consulte,');
             L('     né d\'une grille renumérotée à l\'import. Le retirer supprime une grille et');
             L('     son contenu. **Décision humaine — ce script n\'y touchera pas.**');
+            L('   ⮕ Pour trancher sur des FAITS plutôt que sur une ressemblance de titres :');
+            L('        await inspecterOrphelins448()      (lecture seule)');
         }
 
         L('');
@@ -320,5 +479,7 @@
         console.log('✅ Annulation faite. Recharge la page.');
     };
 
-    console.log('#448 chargé. D\'abord : await reparer448()  (dry-run, n\'écrit rien)');
+    console.log('#448 chargé.');
+    console.log('  · await reparer448()             → dry-run des copies muettes (n\'écrit rien)');
+    console.log('  · await inspecterOrphelins448()  → trancher les magasins orphelins (lecture seule)');
 })();
