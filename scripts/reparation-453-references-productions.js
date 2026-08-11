@@ -27,18 +27,31 @@
      CAS A — LA CIBLE VIT DANS LE MÊME TRIMESTRE QUE L'ARTEFACT.
        Le `<select>` la listera, donc la référence tiendra. ⮕ RESTAURÉE.
 
-     CAS B — LE TÉMOIN NOMME UNE CIBLE QUI N'EST PAS DANS CE TRIMESTRE.
-       ⮕ **REFUS.** Rapporté avec son nom, pour que Grégoire décide : importer
-       la grille dans le trimestre, ou réassigner. Décider qu'une grille
-       appartient à un trimestre n'est pas une décision de script.
+     CAS B1 — LA CIBLE EXISTE, MAIS DANS UN AUTRE TRIMESTRE.
+       ⮕ **REFUS.** Rapporté avec son nom et son magasin, pour que Grégoire
+       décide : importer la ressource dans le trimestre, ou réassigner.
+       Décider qu'une grille appartient à un trimestre n'est pas une décision
+       de script.
+
+     CAS B2 — LA CIBLE N'EXISTE **NULLE PART**. L'identifiant est un fantôme.
+       ⮕ **REFUS**, et surtout : rien à importer, rien à réassigner tant qu'on
+       n'a pas retrouvé sous QUEL nouvel identifiant la ressource vit
+       aujourd'hui. ⚠ Le premier jet de ce script confondait B1 et B2 et
+       conseillait « importer la ressource dans le trimestre » pour les deux —
+       un conseil impossible à suivre pour B2, qui aurait envoyé Grégoire
+       chercher quelque chose qui n'existe plus.
 
      CAS C — LES TÉMOINS SE CONTREDISENT (évaluations qui ne s'accordent pas).
        ⮕ **REFUS.** On ne tranche pas entre deux passés à la majorité.
 
-   ⮕ Le partage CAS A / CAS B est lui-même un DIAGNOSTIC : beaucoup de CAS B
-   voudrait dire que les identifiants sont périmés (renumérotation à l'import,
-   cf. #448) ; presque que des CAS A voudrait dire que les références étaient
-   valides et que seul le chemin d'écriture les a blanchies.
+   ⮕ Le partage A / B1 / B2 est lui-même un DIAGNOSTIC :
+     · surtout des CAS A ⇒ les références étaient VALIDES et seul le chemin
+       d'écriture les a blanchies ;
+     · surtout des CAS B2 ⇒ les identifiants ont été RENUMÉROTÉS (import,
+       famille #448) et les témoins eux-mêmes pointent désormais des fantômes.
+   ⮕ Pour B2, le script cherche une TRACE SURVIVANTE : un magasin
+   `cartouches_{ancienId}` encore présent atteste que la grille a existé sous
+   cet identifiant et donne un point d'accroche pour la retrouver.
 
    ── TROIS CHAMPS, DONT UN JAMAIS MESURÉ ─────────────────────────────────────
    `grilleId` et `echelleId` sont ceux du relevé r2. `cartoucheId` est mesuré
@@ -68,7 +81,7 @@
     // ⚠ REPÈRE DE VERSION (leçon #448 du 11 août) : un rapport qui ne dit pas
     // QUI l'a produit ne permet pas de conclure. Deux rapports identiques ne
     // prouvent alors rien — ni que le correctif marche, ni qu'il a tourné.
-    const VERSION_OUTIL = 'r1 · 11 août 2026';
+    const VERSION_OUTIL = 'r2 · 11 août 2026 (B1 « ailleurs » séparé de B2 « nulle part »)';
 
     // Les trois champs, dans cet ordre : la cartouche ne peut être résolue
     // qu'une fois la grille connue (elle vit dans `cartouches_{grilleId}`).
@@ -166,9 +179,15 @@
             return { restaurables: 0, refus: 0 };
         }
 
+        // Quels magasins `cartouches_{id}` existent encore ? C'est la seule
+        // trace qui survit à une renumérotation de grille : le magasin garde
+        // l'ANCIEN identifiant dans son nom de clé.
+        const magasinsCartouches = new Set(cles.filter((c) => c.indexOf('cartouches_') === 0));
+
         const plan = [];          // { cle, liste, gestes: [...] }
         const casA = [];          // restaurables
-        const casB = [];          // refus : cible hors trimestre
+        const casB1 = [];         // refus : la cible vit dans un AUTRE trimestre
+        const casB2 = [];         // refus : la cible n'existe NULLE PART
         const casC = [];          // refus : témoins en désaccord
         const cartouches = [];    // hors périmètre du relevé r2
 
@@ -224,7 +243,13 @@
                         cartouches.push({
                             magasin: cleProd, artefact: nomDe(p), productionId: p.id,
                             valeur: temoin.valeur, cible: nomCible,
-                            joignable: joignable ? 'oui' : 'NON', temoin: temoin.source
+                            joignable: joignable ? 'oui' : 'NON', temoin: temoin.source,
+                            // Distinguer « pas de magasin du tout » de « magasin
+                            // présent mais cette cartouche-là n'y est plus » :
+                            // ce n'est pas la même histoire ni le même remède.
+                            magasinPresent: grilleRetenue
+                                ? (magasinsCartouches.has('cartouches_' + grilleRetenue) ? 'oui' : 'NON')
+                                : 'sans grille'
                         });
                         if (joignable) gestes.push({ idx: i, champ: champ, valeur: temoin.valeur, horsR2: true });
                         continue;
@@ -241,7 +266,15 @@
                         temoin: temoin.source
                     };
                     if (joignable) { casA.push(fiche); gestes.push({ idx: i, champ: champ, valeur: temoin.valeur }); }
-                    else casB.push(fiche);
+                    else if (ou && ou.length) casB1.push(fiche);
+                    else {
+                        // Fantôme. Seule trace possible d'une grille renumérotée :
+                        // son magasin de cartouches, qui porte l'ANCIEN id en clé.
+                        fiche.trace = (champ === 'grilleId' && magasinsCartouches.has('cartouches_' + temoin.valeur))
+                            ? 'cartouches_' + temoin.valeur + ' EXISTE ENCORE'
+                            : 'aucune trace';
+                        casB2.push(fiche);
+                    }
 
                     if (champ === 'grilleId' && joignable) grilleRetenue = temoin.valeur;
                 }
@@ -263,14 +296,28 @@
         else casA.forEach((f) => L(ligne(f)));
 
         L('');
-        L('── CAS B · ⛔ REFUS (' + casB.length + ') — le témoin nomme une cible HORS de ce trimestre');
-        if (!casB.length) L('   (aucun)');
+        L('── CAS B1 · ⛔ REFUS (' + casB1.length + ') — la cible EXISTE, mais dans un AUTRE trimestre');
+        if (!casB1.length) L('   (aucun)');
         else {
-            casB.forEach((f) => L(ligne(f)));
+            casB1.forEach((f) => L(ligne(f)));
             L('   ⮕ Rendre ces références réarmerait le piège : le formulaire ne les');
             L('     listant pas, le prochain enregistrement les reblanchirait.');
             L('     ⮕ Décision à prendre : importer la ressource dans le trimestre,');
             L('       ou réassigner l\'artefact à une ressource qui y vit déjà.');
+        }
+
+        L('');
+        L('── CAS B2 · ⛔ REFUS (' + casB2.length + ') — la cible n\'existe NULLE PART (identifiant fantôme)');
+        if (!casB2.length) L('   (aucun)');
+        else {
+            casB2.forEach((f) => L(ligne(f) + (f.trace ? ' | trace : ' + f.trace : '')));
+            L('   ⮕ Ici il n\'y a RIEN à importer ni à réassigner : l\'identifiant lui-même');
+            L('     a disparu. Le témoin pointe un fantôme — la ressource a très');
+            L('     probablement été RENUMÉROTÉE (import, famille #448) et vit aujourd\'hui');
+            L('     sous un autre identifiant.');
+            L('   ⮕ Les lignes « trace : cartouches_… EXISTE ENCORE » sont le fil à tirer :');
+            L('     ce magasin porte l\'ANCIEN identifiant dans son nom et a survécu à la');
+            L('     renumérotation. Son contenu permet de reconnaître la grille d\'origine.');
         }
 
         if (casC.length) {
@@ -286,22 +333,28 @@
         if (!cartouches.length) L('   (aucune)');
         else cartouches.forEach((f) => L('   · ' + f.magasin + ' | ' + f.artefact + ' | → ' + f.valeur
                                          + ' | « ' + f.cible + ' » | joignable ' + f.joignable
+                                         + ' | magasin de la grille : ' + f.magasinPresent
                                          + ' | témoin ' + f.temoin));
 
         const nbGestes = plan.reduce((s, p) => s + p.gestes.length, 0);
+        const parMagasin = plan.map((p) => p.cle + ' (' + p.gestes.length + ')').join(' · ') || '(aucun)';
         L('');
         L('==== BILAN ====');
-        L('CAS A restaurables            : ' + casA.length + '   (grille / échelle)');
-        L('Cartouches joignables         : ' + cartouches.filter((c) => c.joignable === 'oui').length
+        L('CAS A restaurables               : ' + casA.length + '   (grille / échelle)');
+        L('Cartouches joignables            : ' + cartouches.filter((c) => c.joignable === 'oui').length
           + ' / ' + cartouches.length);
-        L('⛔ REFUS cible hors trimestre : ' + casB.length);
-        L('⛔ REFUS témoins contradictoires : ' + casC.length);
-        L('Écritures prévues             : ' + nbGestes + ' champ(s) sur ' + plan.length + ' magasin(s)');
+        L('⛔ REFUS cible dans un autre trim. : ' + casB1.length);
+        L('⛔ REFUS identifiant fantôme       : ' + casB2.length);
+        L('⛔ REFUS témoins contradictoires   : ' + casC.length);
+        L('Écritures prévues                 : ' + nbGestes + ' champ(s) — ' + parMagasin);
         L('');
-        L('⮕ CE QUE LE PARTAGE A/B DIT DE L\'ORIGINE :');
-        L('   beaucoup de CAS B ⇒ les identifiants sont PÉRIMÉS (renumérotation à');
-        L('   l\'import, cf. #448). Presque que des CAS A ⇒ les références étaient');
-        L('   VALIDES, et c\'est bien le chemin d\'écriture qui les a blanchies.');
+        L('⮕ CE QUE LE PARTAGE A / B1 / B2 DIT DE L\'ORIGINE :');
+        L('   surtout des CAS A  ⇒ les références étaient VALIDES, et c\'est le chemin');
+        L('                        d\'écriture qui les a blanchies ;');
+        L('   surtout des CAS B2 ⇒ les identifiants ont été RENUMÉROTÉS (import,');
+        L('                        famille #448) et les témoins pointent des fantômes.');
+        L('   ⚠ Les deux peuvent coexister dans des trimestres DIFFÉRENTS : ce ne serait');
+        L('     alors pas une histoire, mais deux, et elles n\'appellent pas le même geste.');
 
         if (!executer) {
             L('');
@@ -310,7 +363,8 @@
             L('   await reparer453({ executer: true })');
             console.log(out.join('\n'));
             return { restaurables: casA.length, cartouches: cartouches.length,
-                     refusHorsTrimestre: casB.length, refusContradictoires: casC.length, ecritures: nbGestes };
+                     refusAilleurs: casB1.length, refusFantome: casB2.length,
+                     refusContradictoires: casC.length, ecritures: nbGestes };
         }
 
         // ── Exécution ───────────────────────────────────────────────────────
@@ -325,12 +379,15 @@
         L('✅ Terminé. RECHARGE la page (Cmd+R), puis rouvre un artefact pour vérifier.');
         L('   Filet même-session : annuler453(). Filet durable : ton backup Codex.');
         L('   ⚠ À refaire dans l\'AUTRE navigateur : les magasins sont indépendants.');
-        if (casB.length) {
-            L('   ⚠ ' + casB.length + ' référence(s) restent VIDES volontairement (CAS B ci-dessus).');
+        if (casB1.length || casB2.length) {
+            L('   ⚠ ' + (casB1.length + casB2.length) + ' référence(s) restent VIDES volontairement');
+            L('     (CAS B1 / B2 ci-dessus) — les rendre les reblanchirait au prochain');
+            L('     enregistrement. Ce n\'est pas un oubli, c\'est le refus.');
         }
         console.log(out.join('\n'));
         return { restaurables: casA.length, cartouches: cartouches.length,
-                 refusHorsTrimestre: casB.length, refusContradictoires: casC.length, ecritures: nbGestes };
+                 refusAilleurs: casB1.length, refusFantome: casB2.length,
+                 refusContradictoires: casC.length, ecritures: nbGestes };
     }
 
     window.reparer453 = reparer453;
