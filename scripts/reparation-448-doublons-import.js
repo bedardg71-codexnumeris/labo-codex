@@ -59,6 +59,14 @@
 (function () {
     'use strict';
 
+    // ⚠ REPÈRE DE VERSION — ajouté le 11 août 2026 après un aller-retour
+    // perdu. Grégoire a renvoyé un rapport IDENTIQUE au précédent, et rien
+    // dans la sortie ne permettait de savoir si le script corrigé avait été
+    // rechargé ou si l'ancien avait tourné. Un rapport qui ne dit pas QUI
+    // l'a produit ne permet pas de conclure — c'est déjà la règle 4 du skill
+    // des portes terrain, appliquée aux scripts de console.
+    const VERSION_OUTIL = 'r3 · 11 août 2026 (jumelles internes + signature souple + verdict corrigé)';
+
     function nomDe(item) {
         if (!item || typeof item !== 'object') return '(sans objet)';
         return String(item.nom || item.titre || item.libelle || item.name || '(sans nom)');
@@ -198,6 +206,7 @@
         const out = [];
         const L = (m) => out.push(m);
         L('==== #448 · magasins orphelins · LECTURE SEULE ====');
+        L('     outil ' + VERSION_OUTIL);
 
         const cles = await toutesLesCles();
         const magasinsCartouches = cles.filter((c) => c.indexOf('cartouches_') === 0);
@@ -354,6 +363,7 @@
         const L = (m) => out.push(m);
 
         L('==== #448 · copies d\'import · ' + (executer ? '⚠ EXÉCUTION' : 'DRY-RUN (rien ne sera écrit)') + ' ====');
+        L('     outil ' + VERSION_OUTIL);
 
         const cles = await toutesLesCles();
 
@@ -525,7 +535,7 @@
         console.log('✅ Annulation faite. Recharge la page.');
     };
 
-    console.log('#448 chargé.');
+    console.log('#448 chargé — outil ' + VERSION_OUTIL);
     console.log('  · await reparer448()             → dry-run des copies muettes (n\'écrit rien)');
     console.log('  · await inspecterOrphelins448()  → trancher les magasins orphelins (lecture seule)');
 })();
