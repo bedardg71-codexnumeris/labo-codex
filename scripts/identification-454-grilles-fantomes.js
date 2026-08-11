@@ -40,7 +40,7 @@
 (function () {
     'use strict';
 
-    const VERSION_OUTIL = 'r1 · 11 août 2026';
+    const VERSION_OUTIL = 'r2 · 11 août 2026 (démo écartée · même trimestre priorisé)';
 
     function nomDe(o) {
         if (!o || typeof o !== 'object') return '(sans nom)';
@@ -85,7 +85,11 @@
 
         // ── Toutes les grilles VIVANTES, par magasin ────────────────────────
         const vivantes = [];            // { id, nom, cle, prefixe, idsCriteres:Set, nomsCriteres:Set }
-        const idsVivants = new Set();
+        const idsVivants = new Set();   // ⚠ INCLUT la démo : une grille de démo
+                                        // reste « vivante » pour décider si un
+                                        // magasin est orphelin. Elle est écartée
+                                        // plus bas des CANDIDATES seulement.
+        let ecartesDemo = 0;
         for (const c of cles) {
             if (!/grillesTemplates$|bibliothequeGrilles$/.test(c)) continue;
             const liste = await lire(c);
@@ -93,6 +97,13 @@
             for (const g of liste) {
                 if (!g || !g.id) continue;
                 idsVivants.add(g.id);
+                // ⚠ UNE GRILLE DE DÉMONSTRATION N'EST JAMAIS LA RÉPONSE. Le
+                // premier jet les proposait à égalité de preuve — et comme le
+                // pack démo est une COPIE du vrai matériel, ses critères
+                // portent les mêmes identifiants : elle sortait donc « PREUVE ».
+                // Réassigner un artefact réel à une grille de démo, c'est
+                // relier le travail des étudiants à du matériel jetable.
+                if (c.indexOf('demo') === 0) { ecartesDemo++; continue; }
                 const crit = Array.isArray(g.criteres) ? g.criteres : [];
                 vivantes.push({
                     id: g.id, nom: nomDe(g), cle: c,
@@ -102,7 +113,8 @@
                 });
             }
         }
-        L('Grilles vivantes recensées : ' + vivantes.length);
+        L('Grilles vivantes retenues comme candidates : ' + vivantes.length
+          + (ecartesDemo ? '   (' + ecartesDemo + ' écartée(s) : pack démo)' : ''));
 
         // ── Les magasins de cartouches dont la grille n'existe plus ─────────
         const fantomes = [];
@@ -144,9 +156,14 @@
 
         // ── Qui cite ces fantômes ? (productions ET évaluations) ────────────
         const citations = new Map();    // idGrille → Set(description)
-        const ajouterCitation = (id, quoi) => {
+        const trimestreCitant = new Map();  // idGrille → Set(préfixe de trimestre)
+        const ajouterCitation = (id, quoi, prefixe) => {
             if (!citations.has(id)) citations.set(id, new Set());
             citations.get(id).add(quoi);
+            if (prefixe) {
+                if (!trimestreCitant.has(id)) trimestreCitant.set(id, new Set());
+                trimestreCitant.get(id).add(prefixe);
+            }
         };
         for (const c of cles) {
             if (c.indexOf('demo') === 0) continue;
@@ -158,7 +175,8 @@
             for (const item of liste) {
                 if (!item || !item.grilleId) continue;
                 if (idsVivants.has(item.grilleId)) continue;
-                ajouterCitation(item.grilleId, c + (estProd ? ' → ' + nomDe(item) : ' (évaluations)'));
+                ajouterCitation(item.grilleId, c + (estProd ? ' → ' + nomDe(item) : ' (évaluations)'),
+                                c.indexOf('_') !== -1 ? c.split('_')[0] : null);
             }
         }
 
@@ -176,12 +194,23 @@
             const cite = citations.get(f.idGrille);
             L('  cité par : ' + (cite ? [...cite].join(' | ') : '(personne — trace seule)'));
 
+            // ⚠ LE TRIMESTRE QUI CITE COMMANDE LE CLASSEMENT. Une grille d'A25
+            // n'est PAS la réponse pour un artefact d'H26, même si ses critères
+            // portent les mêmes identifiants — c'est justement le cas, puisque
+            // la grille H26 descend de celle d'A25. Le premier jet ignorait ce
+            // point et recommandait des grilles d'A25 pour des artefacts d'H26 :
+            // exactement la contamination inter-trimestre qu'on combat (#340).
+            const trims = trimestreCitant.get(f.idGrille);
+            const memeTrimestre = (v) => (trims && trims.has(v.prefixe) ? 1 : 0);
+
             const candidates = vivantes.map((v) => ({
                 v: v,
                 parId: recouvrement(f.idsCriteres, v.idsCriteres),
-                parNom: recouvrement(f.nomsCriteres, v.nomsCriteres)
+                parNom: recouvrement(f.nomsCriteres, v.nomsCriteres),
+                chezSoi: memeTrimestre(v)
             })).filter((c) => c.parId > 0 || c.parNom > 0)
-              .sort((a, b) => (b.parId - a.parId) || (b.parNom - a.parNom));
+              .sort((a, b) => (b.parId - a.parId) || (b.chezSoi - a.chezSoi) || (b.parNom - a.parNom));
+            if (trims && trims.size) L('  trimestre qui cite ce fantôme : ' + [...trims].join(', '));
 
             if (!candidates.length) {
                 L('  ⮕ AUCUNE grille vivante ne partage un critère avec elle.');
@@ -195,16 +224,19 @@
                 const preuve = c.parId === 1 ? '★ MÊMES identifiants de critères — PREUVE'
                     : c.parId > 0 ? '◆ identifiants de critères partagés (' + Math.round(c.parId * 100) + ' %)'
                     : '· noms de critères seulement (' + Math.round(c.parNom * 100) + ' %) — INDICE';
-                L('     ' + preuve);
+                L('     ' + preuve + (c.chezSoi ? '   ✓ MÊME TRIMESTRE' : '   ⚠ autre trimestre'));
                 L('       « ' + c.v.nom +' »  [' + c.v.cle + ' · ' + c.v.id + ']');
             }
             const t = candidates[0];
+            const alerte = (trims && trims.size && !t.chezSoi)
+                ? '  ⚠ la meilleure candidate vit dans un AUTRE trimestre que les artefacts'
+                  + ' qui la citent — vérifie avant de réassigner.' : '';
             bilan.push({
                 fantome: f.idGrille,
-                meilleure: t.v.nom + ' [' + t.v.id + ']',
-                preuve: t.parId === 1 ? 'PREUVE (identifiants de critères identiques)'
+                meilleure: t.v.nom + ' [' + t.v.id + ']' + (t.chezSoi ? '' : '  ⚠ autre trimestre'),
+                preuve: (t.parId === 1 ? 'PREUVE (identifiants de critères identiques)'
                       : t.parId > 0 ? 'FORTE (' + Math.round(t.parId * 100) + ' % d\'identifiants communs)'
-                      : 'INDICE (' + Math.round(t.parNom * 100) + ' % de noms communs)'
+                      : 'INDICE (' + Math.round(t.parNom * 100) + ' % de noms communs)') + alerte
             });
         }
 
