@@ -28,6 +28,8 @@ const etat = {
     // d'un autre bloc.
     panneauNoeudId: null,
     zoom: 1,
+    // Mode loupe (11 août 2026) : une VUE en survol, pas un second canevas.
+    loupeActive: false,
     initialise: false
 };
 
@@ -1946,9 +1948,35 @@ const OFFSET_Y = 3000;
 const ESPACE_W = 10000;
 const ESPACE_H = 6000;
 
+// Bornes du zoom. ⚠ Le plancher était à 0,25 (trois sites : molette, geste
+// Safari, pincement tactile) — et il MORDAIT : la carte réelle de Grégoire
+// (601-101 A26) ne tient pas à 25 %, du contenu sort de l'écran à droite.
+// « Tout voir » (11 août 2026) doit pouvoir descendre plus bas, sinon il
+// promet ce qu'il ne peut pas tenir. À 0,10 un bloc fait ~14 px : illisible,
+// et c'est assumé — c'est la LOUPE qui lit, pas le zoom arrière.
+const ZOOM_MIN = 0.10;
+const ZOOM_MAX = 3;
+
+// Grossissement de la loupe, et zoom d'atterrissage quand on clique dedans :
+// on arrive exactement à l'échelle qu'on venait de lire.
+const LOUPE_ZOOM = 1;
+
 // === RÉFÉRENCES DOM (initialisées dans initialiser()) ===
 let zoneTravail, espace, espaceWrapper, coucheNoeuds, coucheLiens, canvas, lienTemp;
 let panneau, menuLien, rectSelection;
+
+// Loupe de navigation — déclarée ICI et non près de son code, en bas du
+// fichier : `reconstruireDOM()` (au milieu) invalide la copie, et `let` n'est
+// pas hoisté. Le module se charge de haut en bas avant tout appel, donc rien
+// ne cassait aujourd'hui — mais la dépendance était invisible et un seul
+// déplacement de fonction l'aurait réveillée.
+let _loupeEl = null;           // le cadre (position fixe, au-dessus de tout)
+let _loupeContenu = null;      // l'enveloppe qui porte la copie et la décale
+let _loupeCopieValide = false;
+let _loupeDernierPoint = null; // dernier point d'espace visé {x, y}
+
+const LOUPE_L = 420;   // largeur du cadre, en px écran
+const LOUPE_H = 300;
 
 // === UTILITAIRES DE COORDONNÉES ===
 function clientVersData(clientX, clientY) {
@@ -1976,7 +2004,7 @@ function appliquerZoom() {
 
 function zoomer(clientX, clientY, facteur) {
     const oldZoom = etat.zoom;
-    etat.zoom = Math.max(0.25, Math.min(3, etat.zoom * facteur));
+    etat.zoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, etat.zoom * facteur));
     if (etat.zoom === oldZoom) return;
 
     appliquerZoom();
@@ -4214,6 +4242,10 @@ function badgeObjectifHTML(n) {
 }
 
 function reconstruireDOM() {
+    // La loupe montre une COPIE : elle se périme dès que la carte bouge.
+    // Sans ça, on lirait un état d'avant la modification — le pire des
+    // affichages, celui qui a l'air juste.
+    _loupeCopieValide = false;
     // Sans canevas monté (module pas encore initialisé, ou bac à sable de
     // test), il n'y a rien à reconstruire — les DONNÉES restent la vérité,
     // le rendu suivra au montage.
@@ -5829,7 +5861,7 @@ function initialiser() {
         zoneTravail.addEventListener('gesturechange', function(e) {
             e.preventDefault();
             var oldZoom = etat.zoom;
-            etat.zoom = Math.max(0.25, Math.min(3, gestureBaseZoom * e.scale));
+            etat.zoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, gestureBaseZoom * e.scale));
             appliquerZoom();
             var rect = zoneTravail.getBoundingClientRect();
             var cx = rect.width / 2;
@@ -5866,7 +5898,7 @@ function initialiser() {
             var dist = Math.hypot(dx, dy);
             var scale = dist / touchStartDist;
             var oldZoom = etat.zoom;
-            etat.zoom = Math.max(0.25, Math.min(3, touchStartZoom * scale));
+            etat.zoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, touchStartZoom * scale));
             appliquerZoom();
             var rect = zoneTravail.getBoundingClientRect();
             var midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
@@ -6635,6 +6667,16 @@ function gererKeydown(e) {
         centrerVueSurContenu();
         return;
     }
+    // L — bascule la loupe (11 août 2026). Verrou et non maintien : main
+    // libre pour écrire après avoir atterri, c'est la demande de Grégoire.
+    // ⚠ Sans modificateur : la garde `pasDansChamp` est donc essentielle,
+    // sinon taper « leçon » dans un titre ouvrirait la loupe.
+    if (!e.metaKey && !e.ctrlKey && !e.altKey && (e.key === 'l' || e.key === 'L') && pasDansChamp) {
+        e.preventDefault();
+        basculerLoupe();
+        return;
+    }
+
     if ((e.metaKey || e.ctrlKey) && e.key === '1' && pasDansChamp) {
         e.preventDefault();
         recentrerVue();
@@ -6682,6 +6724,7 @@ function gererKeydown(e) {
         }
     }
     if (e.key === 'Escape') {
+        if (etat.loupeActive) { desactiverLoupe(); return; }
         deselectionner();
         fermerMenuLien();
     }
@@ -8185,6 +8228,302 @@ function recentrerVue() {
     centrerVueSurContenu();
 }
 
+/**
+ * Encadrement réel de la carte, en coordonnées d'espace (OFFSET compris).
+ *
+ * ⚠ À ne pas confondre avec ce que faisait `centrerVueSurContenu` : celle-ci
+ * moyennait les x/y des nœuds. Sur une carte déséquilibrée — une bande dense
+ * de leçons en bas, quelques séquences isolées en haut à droite, exactement la
+ * forme de la carte 601-101 — la moyenne est TIRÉE vers la masse, et le
+ * « centre » obtenu n'est pas le centre de ce qu'on voit. La largeur des blocs
+ * était ignorée aussi : le bord droit tombait toujours court.
+ * @returns {{minX:number,minY:number,maxX:number,maxY:number}|null}
+ */
+function encadrementContenu() {
+    if (etat.noeuds.size === 0) return null;
+    var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (var entry of etat.noeuds) {
+        var nd = entry[1];
+        var el = document.getElementById(nd.id);
+        var w = el ? (el.offsetWidth || 140) : 140;
+        var h = el ? (el.offsetHeight || 50) : 50;
+        if (nd.x < minX) minX = nd.x;
+        if (nd.y < minY) minY = nd.y;
+        if (nd.x + w > maxX) maxX = nd.x + w;
+        if (nd.y + h > maxY) maxY = nd.y + h;
+    }
+    if (minX === Infinity) return null;
+    return { minX: minX, minY: minY, maxX: maxX, maxY: maxY };
+}
+
+/**
+ * TOUT VOIR — ajuste le zoom pour que la carte ENTIÈRE tienne à l'écran, puis
+ * centre dessus. Proposition de Grégoire (11 août 2026) : couplé à la loupe,
+ * ça devient un outil de navigation — on prend du recul, on repère la zone, on
+ * lit à la loupe, on clique pour y aller.
+ *
+ * ⚠ Ce n'est PAS ce que faisait « Recentrer » (⌘1), qui ne touchait jamais au
+ * zoom : il défilait, à l'échelle courante. À 100 % sur une grande carte, il
+ * déposait l'utilisateur au milieu du nuage sans rien lui montrer de plus.
+ * Les deux commandes coexistent — recentrer sans changer d'échelle reste utile.
+ */
+function ajusterVueSurTout() {
+    if (!zoneTravail) return;
+    var box = encadrementContenu();
+    if (!box) {
+        etat.zoom = 1;
+        appliquerZoom();
+        majAffichageZoom();
+        centrerVueSurContenu();
+        return;
+    }
+
+    // ⚠ Zone non encore dimensionnée (section masquée, appel avant la mise en
+    // page) : `clientWidth` vaut 0, et le calcul ci-dessous donnerait 0 — donc
+    // le PLANCHER de zoom, en silence. L'utilisateur cliquerait « Tout voir »
+    // et sa carte partirait à 10 % sans raison visible. Trouvé au navigateur
+    // le 11 août, pas au raisonnement.
+    if (zoneTravail.clientWidth === 0 || zoneTravail.clientHeight === 0) return;
+
+    var MARGE = 48;
+    var largeur = Math.max(1, box.maxX - box.minX);
+    var hauteur = Math.max(1, box.maxY - box.minY);
+    var dispoW = Math.max(1, zoneTravail.clientWidth - MARGE * 2);
+    var dispoH = Math.max(1, zoneTravail.clientHeight - MARGE * 2);
+
+    // Jamais AU-DELÀ de 100 % : une petite carte ne doit pas se retrouver
+    // grossie au point qu'on ne sache plus où on est.
+    etat.zoom = Math.max(ZOOM_MIN, Math.min(1, Math.min(dispoW / largeur, dispoH / hauteur)));
+    appliquerZoom();
+    majAffichageZoom();
+
+    var cx = ((box.minX + box.maxX) / 2 + OFFSET_X) * etat.zoom;
+    var cy = ((box.minY + box.maxY) / 2 + OFFSET_Y) * etat.zoom;
+    zoneTravail.scrollLeft = cx - zoneTravail.clientWidth / 2;
+    zoneTravail.scrollTop = cy - zoneTravail.clientHeight / 2;
+}
+
+/* =====================================================================
+   LOUPE DE NAVIGATION (11 août 2026, demande de Grégoire)
+
+   Le besoin, dans ses mots : « la vue complète de la carte de mon cours est
+   à 25 %, c'est évidemment illisible à ce zoom ». Prendre du recul et lire
+   sont deux exigences contradictoires — la loupe les réconcilie sans
+   toucher au zoom de la carte.
+
+   ▣ CE QUE C'EST, ET CE QUE CE N'EST PAS. C'est une VUE, pas une seconde
+   carte vivante : on y lit, on n'y écrit pas. La copie est prise UNE fois
+   à l'activation, puis on ne fait que la faire glisser — c'est ce qui
+   permet de suivre le doigt sans ramer sur une carte de 150 blocs. Écrire
+   dedans supposerait une seconde instance réellement vivante (ids propres,
+   écritures qui retombent au bon endroit) : un chantier, pas un ajout.
+
+   ⮕ D'où le clic qui ATTERRIT (arbitrage de Grégoire) : on lit dans la
+   loupe, on clique, la carte s'y rend à l'échelle qu'on venait de lire, et
+   la loupe s'éteint. On écrit ensuite normalement, clavier libre. Couplée
+   au bouton « Tout voir », la loupe devient un moyen de sauter d'un bout
+   à l'autre de la carte.
+
+   ⚠ IPAD — deux différences, pas une. (1) Pas de clavier : le bouton de
+   la barre est le chemin principal, la touche L n'est qu'un raccourci.
+   (2) Pas de SURVOL : le doigt n'existe qu'au contact. La loupe suit donc
+   le pointeur en survol à la souris, ET le doigt pendant qu'il glisse. Un
+   doigt levé ne peut pas « cliquer dans la loupe » de façon fiable : la
+   loupe porte donc un bouton « Aller ici » explicite, ≥44 px, qui sert
+   aux deux. Même leçon que #148 et #444 : ce qui n'existe qu'au survol
+   n'existe pas au doigt.
+   ===================================================================== */
+
+/**
+ * Fabrique (ou refait) la copie de la carte affichée dans la loupe.
+ *
+ * ⚠ LES ids SONT RETIRÉS de la copie. Tout le module travaille par
+ * `document.getElementById(id)` : deux éléments portant le même id feraient
+ * répondre le mauvais, et les symptômes seraient tordus — un bloc qui ne se
+ * sélectionne plus, un lien qui se redessine ailleurs. On ne laisse pas ce
+ * piège traîner pour une vue en lecture seule.
+ * Les `id` des `<defs>` SVG (marqueurs de flèche) sont conservés : ils sont
+ * cités par `url(#…)` et l'original, plus haut dans le document, gagne.
+ */
+function _construireCopieLoupe() {
+    if (!espace || !_loupeContenu) return;
+    _loupeContenu.innerHTML = '';
+
+    var copie = espace.cloneNode(true);
+    copie.removeAttribute('id');
+    var couche = copie.querySelector('#planif-couche-noeuds');
+    if (couche) {
+        var avecId = couche.querySelectorAll('[id]');
+        for (var i = 0; i < avecId.length; i++) avecId[i].removeAttribute('id');
+        // ⚠ La position de la couche vient d'une règle CSS keyée sur l'ID
+        // (`#planif-couche-noeuds { transform: translate(5000px, 3000px) }`).
+        // Retirer l'id la ferait donc SAUTER, et la loupe montrerait une zone
+        // décalée de tout l'offset — mesuré au navigateur : 4999 px / 2996 px
+        // hors cible, soit exactement OFFSET_X / OFFSET_Y. On fige la valeur
+        // calculée en ligne AVANT de retirer l'id.
+        var calc = window.getComputedStyle(coucheNoeuds || couche);
+        couche.style.position = 'absolute';
+        couche.style.top = '0';
+        couche.style.left = '0';
+        couche.style.width = '100%';
+        couche.style.height = '100%';
+        couche.style.transform = (calc && calc.transform && calc.transform !== 'none')
+            ? calc.transform
+            : 'translate(' + OFFSET_X + 'px, ' + OFFSET_Y + 'px)';
+        couche.removeAttribute('id');
+    }
+    // La copie se montre à SON échelle, indépendamment du zoom de la carte.
+    copie.style.transform = 'scale(' + LOUPE_ZOOM + ')';
+    copie.style.transformOrigin = '0 0';
+    copie.style.position = 'absolute';
+    copie.style.left = '0';
+    copie.style.top = '0';
+    _loupeContenu.appendChild(copie);
+    _loupeCopieValide = true;
+}
+
+/** Point d'ESPACE (OFFSET compris) sous un point d'écran. */
+function _espaceDepuisEcran(clientX, clientY) {
+    var r = zoneTravail.getBoundingClientRect();
+    return {
+        x: (clientX - r.left + zoneTravail.scrollLeft) / etat.zoom,
+        y: (clientY - r.top + zoneTravail.scrollTop) / etat.zoom
+    };
+}
+
+/** Place le cadre près du pointeur et cadre la copie sur le point visé. */
+function _deplacerLoupe(clientX, clientY) {
+    if (!_loupeEl || !zoneTravail) return;
+    if (!_loupeCopieValide) _construireCopieLoupe();
+
+    var p = _espaceDepuisEcran(clientX, clientY);
+    _loupeDernierPoint = p;
+
+    // Le cadre suit le pointeur mais reste entièrement à l'écran.
+    var gauche = Math.min(Math.max(8, clientX - LOUPE_L / 2), window.innerWidth - LOUPE_L - 8);
+    var haut = Math.min(Math.max(8, clientY - LOUPE_H - 24), window.innerHeight - LOUPE_H - 8);
+    _loupeEl.style.left = gauche + 'px';
+    _loupeEl.style.top = haut + 'px';
+
+    // La copie glisse pour amener le point visé au centre du cadre.
+    _loupeContenu.style.left = (-p.x * LOUPE_ZOOM + LOUPE_L / 2) + 'px';
+    _loupeContenu.style.top = (-p.y * LOUPE_ZOOM + LOUPE_H / 2) + 'px';
+}
+
+/** Atterrir : la carte se rend au point lu, à l'échelle de la loupe. */
+function atterrirDepuisLoupe() {
+    var p = _loupeDernierPoint;
+    desactiverLoupe();
+    if (!p || !zoneTravail) return;
+    etat.zoom = LOUPE_ZOOM;
+    appliquerZoom();
+    majAffichageZoom();
+    zoneTravail.scrollLeft = p.x * etat.zoom - zoneTravail.clientWidth / 2;
+    zoneTravail.scrollTop = p.y * etat.zoom - zoneTravail.clientHeight / 2;
+}
+
+function activerLoupe() {
+    if (etat.loupeActive || !zoneTravail) return;
+    etat.loupeActive = true;
+    _loupeCopieValide = false;
+
+    if (!_loupeEl) {
+        _loupeEl = document.createElement('div');
+        _loupeEl.id = 'planif-loupe';
+        _loupeEl.setAttribute('aria-hidden', 'true');
+        _loupeContenu = document.createElement('div');
+        _loupeContenu.className = 'planif-loupe-contenu';
+        _loupeEl.appendChild(_loupeContenu);
+
+        var aller = document.createElement('button');
+        aller.type = 'button';
+        aller.className = 'planif-loupe-aller';
+        aller.textContent = 'Aller ici';
+        aller.addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            atterrirDepuisLoupe();
+        });
+        _loupeEl.appendChild(aller);
+
+        // À la souris, cliquer n'importe où dans la loupe atterrit aussi.
+        _loupeEl.addEventListener('click', atterrirDepuisLoupe);
+        document.body.appendChild(_loupeEl);
+    }
+
+    _loupeEl.classList.add('planif-loupe-visible');
+    zoneTravail.classList.add('planif-loupe-mode');
+    // ⚠ EN CAPTURE, SUR LE DOCUMENT — et non sur la zone de travail.
+    // Trouvé au navigateur le 11 août : la grille du Planificateur
+    // (`planif-grille-nonplanifie`) et les palettes flottantes RECOUVRENT le
+    // canevas. Un écouteur posé sur `#planif-zone-travail` ne voyait pas le
+    // pointeur sous ces zones-là — la loupe restait vide, exactement là où la
+    // carte est la plus dense. Le symptôme n'aurait pas été « ça plante »,
+    // mais « ça marche parfois », le pire à diagnostiquer.
+    document.addEventListener('pointermove', _surPointeurLoupe, true);
+    document.addEventListener('pointerdown', _surPointeurLoupe, true);
+    majBoutonLoupe();
+}
+
+function desactiverLoupe() {
+    if (!etat.loupeActive) return;
+    etat.loupeActive = false;
+    if (_loupeEl) _loupeEl.classList.remove('planif-loupe-visible');
+    if (zoneTravail) zoneTravail.classList.remove('planif-loupe-mode');
+    document.removeEventListener('pointermove', _surPointeurLoupe, true);
+    document.removeEventListener('pointerdown', _surPointeurLoupe, true);
+    majBoutonLoupe();
+}
+
+function _surPointeurLoupe(e) {
+    if (!etat.loupeActive || !zoneTravail) return;
+
+    // Le cadre lui-même et son bouton « Aller ici » ne pilotent pas la loupe :
+    // sinon, quand le cadre est ramené dans l'écran près d'un bord, il se
+    // poursuivrait tout seul.
+    if (_loupeEl && e.target && _loupeEl.contains(e.target)) return;
+
+    // Hors de la zone de carte (barre d'outils, sélecteur, palettes hors
+    // canevas) : on garde le mode loupe mais on n'affiche rien — montrer une
+    // portion de carte qui ne correspond à rien serait pire que rien.
+    var r = zoneTravail.getBoundingClientRect();
+    var dedans = e.clientX >= r.left && e.clientX <= r.right
+              && e.clientY >= r.top && e.clientY <= r.bottom;
+    if (!dedans) {
+        if (_loupeEl) _loupeEl.classList.remove('planif-loupe-visible');
+        return;
+    }
+    if (_loupeEl) _loupeEl.classList.add('planif-loupe-visible');
+
+    // En mode loupe le canevas ne déplace ni ses blocs ni sa vue : le geste
+    // appartient entièrement à la loupe. Sans ça, sur iPad, glisser le doigt
+    // traînerait un bloc sous la loupe sans qu'on le voie.
+    e.preventDefault();
+    e.stopPropagation();
+    _deplacerLoupe(e.clientX, e.clientY);
+}
+
+function basculerLoupe() {
+    if (etat.loupeActive) desactiverLoupe(); else activerLoupe();
+}
+
+/** Le bouton dit s'il est enfoncé — sur iPad c'est le SEUL indicateur. */
+function majBoutonLoupe() {
+    var btn = document.getElementById('planif-btn-loupe');
+    if (!btn) return;
+    btn.setAttribute('aria-pressed', etat.loupeActive ? 'true' : 'false');
+    btn.title = etat.loupeActive ? 'Quitter la loupe (L ou Échap)' : 'Loupe — lire sans changer le zoom (L)';
+}
+
+/** Les deux afficheurs de zoom + les boutons de préréglage, en un seul appel. */
+function majAffichageZoom() {
+    var pourcent = Math.round(etat.zoom * 100) + '%';
+    var info = document.getElementById('planif-zoom-info');
+    if (info) info.textContent = pourcent;
+    var infoEntete = document.getElementById('planif-zoom-info-header');
+    if (infoEntete) infoEntete.textContent = pourcent;
+    if (typeof mettreAJourBoutonsZoomPreset === 'function') mettreAJourBoutonsZoomPreset();
+}
+
 function centrerVueSurSequence(seqId) {
     var seq = etat.noeuds.get(seqId);
     if (!seq || !zoneTravail) return;
@@ -8348,6 +8687,12 @@ window.planificationCarte = {
     peuplerSelecteurSemaine: peuplerSelecteurSemaine,
     dupliquerConteneurEnProfondeur: dupliquerConteneurEnProfondeur,
     dupliquerSelection: dupliquerSelection,
+    ajusterVueSurTout: ajusterVueSurTout,
+    encadrementContenu: encadrementContenu,
+    basculerLoupe: basculerLoupe,
+    activerLoupe: activerLoupe,
+    desactiverLoupe: desactiverLoupe,
+    atterrirDepuisLoupe: atterrirDepuisLoupe,
     clonerNoeud: clonerNoeud,
     deplacerSequenceVersSemaine: deplacerSequenceVersSemaine,
     annuler: annuler,

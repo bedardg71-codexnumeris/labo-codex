@@ -18555,6 +18555,82 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 @media (hover: none) {
     .planif-btn-palette { min-height: 32px; padding: 0 12px; }
 }
+
+/* ── LOUPE DE NAVIGATION (11 aout 2026) ─────────────────────────────────
+   Une VUE en survol, pas un second canevas : on y lit, on n'y ecrit pas.
+   Le cadre est en position fixe au-dessus de tout, et son contenu est une
+   copie de la carte decalee pour amener le point vise au centre.
+   Meme convention d'etat que les boutons de palette : aria-pressed dit
+   l'etat, le title dit l'effet. */
+.planif-btn-vue[aria-pressed="true"] {
+    border-color: var(--planif-couleur-selection);
+    color: var(--planif-couleur-texte);
+    background: color-mix(in srgb, var(--planif-couleur-selection) 16%, transparent);
+}
+.mode-clair .planif-btn-vue[aria-pressed="true"] {
+    background: color-mix(in srgb, var(--planif-couleur-selection) 12%, #ffffff);
+}
+
+#planif-loupe {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 420px;
+    height: 300px;
+    display: none;
+    overflow: hidden;
+    z-index: 9000;
+    border: 2px solid var(--planif-couleur-selection);
+    border-radius: 10px;
+    background: var(--surface-page, #0c1a22);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    cursor: zoom-in;
+    /* Le geste appartient a la loupe : sans ca Safari cede au defilement
+       natif et envoie pointercancel (meme lecon que #148 sur le canevas). */
+    touch-action: none;
+}
+#planif-loupe.planif-loupe-visible { display: block; }
+.mode-clair #planif-loupe {
+    background: #ffffff;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+}
+
+.planif-loupe-contenu {
+    position: absolute;
+    left: 0;
+    top: 0;
+    /* La copie ne doit jamais intercepter un clic : c'est le CADRE qui porte
+       l'atterrissage, sinon un bloc copie avalerait le geste. */
+    pointer-events: none;
+}
+
+/* « Aller ici » — sur iPad il n'y a pas de survol et un doigt leve ne peut pas
+   « cliquer dans la loupe » de facon fiable. Ce bouton est le chemin explicite,
+   et il respecte la cible tactile de 44 px du projet. */
+.planif-loupe-aller {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0 16px;
+    border: 1px solid var(--planif-couleur-selection);
+    border-radius: 8px;
+    background: var(--planif-couleur-selection);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+.planif-loupe-aller:hover { filter: brightness(1.1); }
+.planif-loupe-aller:focus-visible {
+    outline: 2px solid var(--planif-couleur-texte);
+    outline-offset: 2px;
+}
+
+/* En mode loupe le canevas ne deplace ni ses blocs ni sa vue. */
+#planif-zone-travail.planif-loupe-mode { cursor: zoom-in; touch-action: none; }
 /* Icônes SVG dans les boutons planification — pattern « icône 100 %
    + hover sur le bouton » (BACKLOG #289). */
 .planif-icon {

@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260810c"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
+    <link rel="stylesheet" href="styles.css?v=20260811a"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -4224,6 +4224,12 @@
                                     <button class="planif-btn-vue planif-btn-palette" id="planif-btn-palette-noeuds" title="Masquer la palette « Nœuds »" aria-pressed="true">Nœuds</button>
                                     <button class="planif-btn-vue planif-btn-palette" id="planif-btn-palette-planificateur" title="Masquer la palette « Planificateur »" aria-pressed="true">Planificateur</button>
                                     <button class="planif-btn-vue" id="planif-btn-recentrer" title="Recentrer la carte (⌘1)" data-action="planificationCarte.recentrerVue"><img src="icons/icon-final-state.svg" alt="" class="planif-icon"></button>
+                                    <!-- « Tout voir » et la loupe vont ENSEMBLE (11 août 2026) : on prend
+                                         du recul pour repérer, on lit à la loupe, on clique pour y aller.
+                                         Le bouton loupe n'est pas un doublon du raccourci L : sur iPad il
+                                         n'y a pas de clavier, c'est le seul chemin. -->
+                                    <button class="planif-btn-vue" id="planif-btn-tout-voir" title="Tout voir — ajuster le zoom pour afficher la carte entière" aria-label="Tout voir" data-action="planificationCarte.ajusterVueSurTout"><img src="icons/icon-collapse.svg" alt="" class="planif-icon"></button>
+                                    <button class="planif-btn-vue" id="planif-btn-loupe" title="Loupe — lire sans changer le zoom (L)" aria-label="Loupe" aria-pressed="false" data-action="planificationCarte.basculerLoupe"><img src="icons/icon-advanced-search.svg" alt="" class="planif-icon"></button>
                                     <span id="planif-zoom-info-header" class="planif-zoom-info-header" data-tooltip="planif-zoom">100%</span>
                                     <div class="planif-fond-picker" id="planif-fond-picker">
                                         <button class="planif-btn-vue" id="planif-btn-fond" title="Couleur de fond"><img src="icons/icon-paint-palette.svg" alt="" class="planif-icon"></button>
@@ -14357,7 +14363,7 @@
     <script src="js/planification-donnees.js?v=20260808a"></script> <!-- #425 préalable : vivacité de productionId à la reprise (8 août) -->
 
     <script src="js/planification-bibliotheque.js?v=2026051026"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
-    <script src="js/planification-carte.js?v=20260811a"></script> <!-- Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
+    <script src="js/planification-carte.js?v=20260811b"></script> <!-- Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
     <script src="js/planification-export.js?v=20260808b"></script> <!-- LE générateur d'export : 3 niveaux × 3 formats (portage #424, 8 août) -->
     <script src="js/planification.js?v=20260808a"></script> <!-- Refonte nav SP4 : hooks nomSection 'conception' + idSousSection conception-* -->
 
@@ -14462,11 +14468,11 @@
     <script src="js/export-resultats-finaux.js?v=2026061901"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260811a"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260811b"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260811a"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260811b"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>
