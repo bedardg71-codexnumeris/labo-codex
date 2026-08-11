@@ -278,9 +278,14 @@ describe('Les invariants de source', () => {
             sourceCarte.indexOf('function majBarreAlignement'),
             sourceCarte.indexOf('/** Déplace un nœud ET sa descendance')
         );
-        expect(bloc.indexOf('if (y < r.top + 8)')).toBeLessThan(
-            bloc.indexOf('y = Math.min(Math.max(8, y)')
-        );
+        // ⚠ Même piège `indexOf` que celui trouvé sur #448 : la présence est
+        // exigée AVANT de comparer les positions, sinon un motif retiré
+        // (-1) satisfait l'assertion d'ordre.
+        const i = bloc.indexOf('if (y < r.top + 8)');
+        const j = bloc.indexOf('y = Math.min(Math.max(8, y)');
+        expect(i).toBeGreaterThan(-1);
+        expect(j).toBeGreaterThan(-1);
+        expect(i).toBeLessThan(j);
     });
 
     it('le guide ne capte aucun geste et garde son épaisseur à tout zoom', () => {

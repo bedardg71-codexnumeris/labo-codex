@@ -122,7 +122,10 @@ describe('Loupe · les invariants qui la rendent utilisable sur iPad', () => {
             sourceCarte.indexOf('function _construireCopieLoupe'),
             sourceCarte.indexOf('function _espaceDepuisEcran')
         );
+        // La PRÉSENCE d'abord (sans elle, `indexOf` rend -1 et l'assertion
+        // d'ordre ci-dessous passerait alors que le code a disparu).
         expect(bloc).toMatch(/couche\.style\.transform =/);
+        expect(bloc).toMatch(/couche\.removeAttribute\('id'\)/);
         expect(bloc.indexOf('couche.style.transform')).toBeLessThan(
             bloc.indexOf("couche.removeAttribute('id')")
         );

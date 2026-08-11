@@ -59,6 +59,134 @@ function validerZipSecurite(zip) {
 // Export global pour que codex.js puisse l'utiliser
 window.validerZipSecurite = validerZipSecurite;
 
+/* ============================================================================
+   #448 — UNE COLLISION D'ID À L'IMPORT N'EST PAS UN ACCIDENT À RENOMMER
+   ----------------------------------------------------------------------------
+   Le défaut, mesuré sur les données réelles de Grégoire le 11 août 2026.
+
+   `verifierUniciteIds` (ci-dessous) traite une collision d'identifiant comme
+   un accident : elle renomme le second et GARDE LES DEUX. C'est juste pour
+   deux éléments réellement distincts qui se disputent un id. C'est FAUX pour
+   un réimport, où la collision est précisément la preuve que c'est le MÊME
+   élément — celui qu'on vient de réimporter.
+
+   Ce que ça a produit chez lui, en deux formes distinctes :
+     · collision sur une CARTOUCHE → jumeau en place. L'original garde ses
+       références, la copie naît muette. Lot du 24 mars : quatre paires à
+       75/0, 79/0, 50/0, 50/0 citations.
+     · collision sur une GRILLE → la grille entrante est remappée vers un id
+       neuf, et ses cartouches partent dans un magasin NEUF que rien ne
+       référence. Lot du 27 juin : huit éléments à 0/0. Plus insidieux —
+       ça ne double rien à l'écran, ça fabrique un magasin fantôme.
+
+   ⚠ LA RÈGLE DE PRUDENCE QUI COMMANDE LA COMPARAISON. On ne fusionne que sur
+   contenu STRICTEMENT identique. Se tromper dans un sens ou dans l'autre n'a
+   pas le même prix :
+     · croire à tort que deux éléments sont identiques ⇒ on en ÉCARTE un, et
+       on perd ce qu'il portait de différent. Irréversible.
+     · croire à tort qu'ils diffèrent ⇒ on garde un doublon. C'est le statu
+       quo d'aujourd'hui, et ça se nettoie.
+   D'où l'égalité stricte, et le refus de « normaliser » pour rapprocher deux
+   objets qui ne sont pas les mêmes. C'est la leçon de #442, écrite sur pièces :
+   « ne rien casser » n'est pas « ne rien perdre » — la 3e copie du cours
+   portait deux champs que personne ne lisait.
+   ========================================================================= */
+
+/**
+ * Signature stable d'un objet : JSON aux clés TRIÉES, récursivement.
+ * `JSON.stringify` conserve l'ordre d'insertion — deux objets identiques
+ * écrits dans un ordre différent produiraient deux chaînes différentes, et
+ * on croirait à un conflit là où il n'y en a pas.
+ * @param {*} valeur
+ * @param {string[]} [champsIgnores] - clés à exclure de la comparaison
+ * @returns {string}
+ */
+function signatureContenu(valeur, champsIgnores) {
+    const ignores = champsIgnores || [];
+    const visiter = (v) => {
+        if (v === null || typeof v !== 'object') return v;
+        if (Array.isArray(v)) return v.map(visiter);
+        const sortie = {};
+        Object.keys(v).sort().forEach((k) => {
+            if (ignores.indexOf(k) !== -1) return;
+            sortie[k] = visiter(v[k]);
+        });
+        return sortie;
+    };
+    try {
+        return JSON.stringify(visiter(valeur));
+    } catch (e) {
+        // Cycle ou valeur non sérialisable : on refuse de conclure à
+        // l'identité. Le repli est le comportement d'avant — on garde les deux.
+        return null;
+    }
+}
+
+/**
+ * Fusionne une collection ENTRANTE dans une collection EXISTANTE en traitant
+ * une collision d'id comme une IDENTITÉ, pas comme un accident.
+ *
+ * @param {Array} existants
+ * @param {Array} entrants
+ * @param {string} nomCollection - pour le journal console
+ * @returns {{liste: Array, ajoutes: number, ignores: number, conflits: number}}
+ */
+function fusionnerParIdentite(existants, entrants, nomCollection) {
+    const base = Array.isArray(existants) ? existants.slice() : [];
+    const arrivants = Array.isArray(entrants) ? entrants : [];
+
+    const parId = new Map();
+    for (let i = 0; i < base.length; i++) {
+        const it = base[i];
+        if (it && it.id) parId.set(it.id, it);
+    }
+
+    let ajoutes = 0, ignores = 0, conflits = 0;
+
+    for (let j = 0; j < arrivants.length; j++) {
+        const entrant = arrivants[j];
+        if (!entrant || !entrant.id) { base.push(entrant); ajoutes++; continue; }
+
+        const enPlace = parId.get(entrant.id);
+        if (!enPlace) {
+            base.push(entrant);
+            parId.set(entrant.id, entrant);
+            ajoutes++;
+            continue;
+        }
+
+        // Même id : est-ce le MÊME élément ? L'id est identique par
+        // hypothèse, on ne compare donc que le reste.
+        const sigEnPlace = signatureContenu(enPlace, ['id']);
+        const sigEntrant = signatureContenu(entrant, ['id']);
+        if (sigEnPlace !== null && sigEnPlace === sigEntrant) {
+            ignores++;   // déjà là, à l'identique : rien à faire
+            continue;
+        }
+
+        // Contenus réellement différents : on garde les deux, comme avant,
+        // mais on le DIT — jusqu'ici ça se faisait en silence.
+        const ancienId = entrant.id;
+        entrant.id = genererIdUnique(String(ancienId).replace(/[0-9_]+$/, '').replace(/-+$/, '_'));
+        base.push(entrant);
+        parId.set(entrant.id, entrant);
+        conflits++;
+        console.warn(`⚠️ [${nomCollection}] même id, contenu DIFFÉRENT — les deux sont conservés : ${ancienId} → ${entrant.id}`);
+    }
+
+    if (ignores > 0) {
+        console.warn(`[${nomCollection}] ${ignores} élément(s) déjà présent(s) à l'identique — non réimporté(s).`);
+    }
+    if (conflits > 0) {
+        console.warn(`⚠️ [${nomCollection}] ${conflits} conflit(s) réel(s) : même id, contenu différent.`);
+    }
+
+    // Filet : le lot ENTRANT peut lui-même porter des ids dupliqués en
+    // interne. `fusionnerParIdentite` ne traite que la collision avec
+    // l'existant — celle-là reste du ressort de `verifierUniciteIds`.
+    return { liste: verifierUniciteIds(base, nomCollection), ajoutes, ignores, conflits };
+}
+
 /**
  * Vérifie l'unicité des IDs dans un tableau d'objets.
  * Si des doublons sont détectés, ré-identifie les entrées dupliquées avec genererIdUnique().
@@ -2056,58 +2184,59 @@ async function executerImportConfigComplete() {
         const echellesExistantes = db.getSync(cle('echellesTemplates'), []);
         const grillesExistantes = db.getSync(cle('grillesTemplates'), []);
 
-        // Créer des Sets d'IDs existants pour recherche rapide
-        const idsEchellesExistants = new Set(echellesExistantes.map(e => e.id));
-        const idsGrillesExistants = new Set(grillesExistantes.map(g => g.id));
+        // Index par id pour comparer CONTENU à contenu, pas seulement
+        // constater la collision (#448).
+        const echellesParId = new Map(echellesExistantes.filter(e => e && e.id).map(e => [e.id, e]));
+        const grillesParId = new Map(grillesExistantes.filter(g => g && g.id).map(g => [g.id, g]));
 
         // 1. Importer les échelles avec détection de conflits
         if (contenu.echelles && contenu.echelles.length > 0) {
             const echellesAImporter = contenu.echelles.map(echelle => {
-                // Vérifier si l'ID existe déjà
-                if (idsEchellesExistants.has(echelle.id)) {
-                    // Conflit détecté: générer un nouvel ID
+                const enPlace = echelle && echelle.id ? echellesParId.get(echelle.id) : null;
+                if (enPlace) {
+                    // ⚠ #448 : un id déjà présent ne suffit PAS à conclure au
+                    // conflit. Si le contenu est identique, c'est le MÊME
+                    // élément qui revient — remapper fabriquerait un jumeau.
+                    const sigA = signatureContenu(enPlace, ['id']);
+                    const sigB = signatureContenu(echelle, ['id']);
+                    if (sigA !== null && sigA === sigB) return echelle;   // fusionnerParIdentite l'écartera
+
                     const ancienId = echelle.id;
                     const nouvelId = genererIdUnique('ECH_');
-
-                    // Enregistrer le remapping
                     remapEchelles[ancienId] = nouvelId;
-
-
-                    // Retourner échelle avec nouvel ID
                     return { ...echelle, id: nouvelId };
                 }
-                // Pas de conflit, retourner tel quel
                 return echelle;
             });
 
-            // Fusionner avec échelles existantes
-            const echellesFusionnees = verifierUniciteIds([...echellesExistantes, ...echellesAImporter], 'échelles');
-            db.setSync(cle('echellesTemplates'), echellesFusionnees);
+            const fusionE = fusionnerParIdentite(echellesExistantes, echellesAImporter, 'échelles');
+            db.setSync(cle('echellesTemplates'), fusionE.liste);
         }
 
         // 2. Importer les grilles avec détection de conflits
         if (contenu.grilles && contenu.grilles.length > 0) {
             const grillesAImporter = contenu.grilles.map(grille => {
-                // Vérifier si l'ID existe déjà
-                if (idsGrillesExistants.has(grille.id)) {
-                    // Conflit détecté: générer un nouvel ID
+                const enPlace = grille && grille.id ? grillesParId.get(grille.id) : null;
+                if (enPlace) {
+                    // ⚠⚠ #448, LA FORME LA PLUS INSIDIEUSE. Remapper une
+                    // grille identique déplace SES CARTOUCHES vers un magasin
+                    // `cartouches_<nouvelId>` que plus rien ne référence : un
+                    // magasin fantôme, invisible à l'écran. C'est ce qui est
+                    // arrivé le 27 juin (8 cartouches à 0 citation).
+                    const sigA = signatureContenu(enPlace, ['id']);
+                    const sigB = signatureContenu(grille, ['id']);
+                    if (sigA !== null && sigA === sigB) return grille;   // pas de remap : la grille EST celle-là
+
                     const ancienId = grille.id;
                     const nouvelId = genererIdUnique('GRILLE_');
-
-                    // Enregistrer le remapping
                     remapGrilles[ancienId] = nouvelId;
-
-
-                    // Retourner grille avec nouvel ID
                     return { ...grille, id: nouvelId };
                 }
-                // Pas de conflit, retourner tel quel
                 return grille;
             });
 
-            // Fusionner avec grilles existantes
-            const grillesFusionnees = verifierUniciteIds([...grillesExistantes, ...grillesAImporter], 'grilles');
-            db.setSync(cle('grillesTemplates'), grillesFusionnees);
+            const fusionG = fusionnerParIdentite(grillesExistantes, grillesAImporter, 'grilles');
+            db.setSync(cle('grillesTemplates'), fusionG.liste);
         }
 
         // 3. Importer les productions avec mise à jour des références aux grilles
@@ -2116,16 +2245,23 @@ async function executerImportConfigComplete() {
             const cleProductions = cle('productions');
             const productionsExistantes = db.getSync(cleProductions, []);
 
-            const idsProdsExistants = new Set(productionsExistantes.map(p => p.id));
+            const prodsParId = new Map(productionsExistantes.filter(p => p && p.id).map(p => [p.id, p]));
 
             const productionsAImporter = contenu.productions.map(production => {
                 // Créer une copie de la production
                 const prod = { ...production };
 
-                // Générer un nouvel ID SEULEMENT si conflit d'ID
-                if (idsProdsExistants.has(prod.id)) {
-                    const ancienId = prod.id;
-                    prod.id = genererIdUnique('PROD_');
+                // ⚠ #448 : l'ancien code renommait dès que l'id existait, donc
+                // réimporter le même codex fabriquait une production jumelle.
+                // On ne renomme que si le CONTENU diffère réellement ; à
+                // l'identique, `fusionnerParIdentite` l'écartera plus bas.
+                const prodEnPlace = prod.id ? prodsParId.get(prod.id) : null;
+                if (prodEnPlace) {
+                    const sigA = signatureContenu(prodEnPlace, ['id']);
+                    const sigB = signatureContenu(prod, ['id']);
+                    if (sigA === null || sigA !== sigB) {
+                        prod.id = genererIdUnique('PROD_');
+                    }
                 }
                 // Sinon, garder l'ID original pour préserver les références
 
@@ -2143,8 +2279,8 @@ async function executerImportConfigComplete() {
             });
 
             // Fusionner avec productions existantes
-            const productionsFusionnees = verifierUniciteIds([...productionsExistantes, ...productionsAImporter], 'productions');
-            db.setSync(cleProductions, productionsFusionnees);
+            const fusionP = fusionnerParIdentite(productionsExistantes, productionsAImporter, 'productions');
+            db.setSync(cleProductions, fusionP.liste);
         }
 
         // 4. Importer les cartouches avec mise à jour des clés (grilleId)
@@ -2169,11 +2305,13 @@ async function executerImportConfigComplete() {
                 // le type `mapStrings`. Voir MODELE-MENACES.md §3.1.bis (D-01).
                 const cartouchesAssainis = cartouchesGrille.map(c => assainirObjet(c, SCHEMAS_IMPORT.cartouche));
 
-                // Fusionner (ajouter les nouvelles cartouches)
-                const cartouchesFusionnees = verifierUniciteIds([...cartouchesExistantes, ...cartouchesAssainis], 'cartouches');
-                db.setSync(`cartouches_${grilleIdFinal}`, cartouchesFusionnees);
+                // Fusionner par IDENTITÉ (#448) : une cartouche déjà présente
+                // à l'identique n'est pas réimportée. C'est ce chemin qui a
+                // produit les quatre paires 75/0, 79/0, 50/0, 50/0 du 24 mars.
+                const fusionC = fusionnerParIdentite(cartouchesExistantes, cartouchesAssainis, 'cartouches');
+                db.setSync(`cartouches_${grilleIdFinal}`, fusionC.liste);
 
-                nbCartouchesTotal += cartouchesAssainis.length;
+                nbCartouchesTotal += fusionC.ajoutes;
             });
 
         }
@@ -2378,7 +2516,7 @@ async function executerImportSelectif() {
                         auteurOriginal: assainirChaine(auteurSource || p.auteurOriginal || '', 100)
                     }));
                 if (pratiquesNouvelles.length > 0) {
-                    db.setSync(cle('pratiquesConfigurables'), verifierUniciteIds([...pratiquesExistantes, ...pratiquesNouvelles], 'pratiques'));
+                    db.setSync(cle('pratiquesConfigurables'), fusionnerParIdentite(pratiquesExistantes, pratiquesNouvelles, 'pratiques').liste);
                     compteurs.ressources += pratiquesNouvelles.length;
                     details.push(`${pratiquesNouvelles.length} pratique(s)`);
                 }
@@ -2417,7 +2555,7 @@ async function executerImportSelectif() {
             });
 
             if (grillesNouvelles.length > 0) {
-                db.setSync(cle('grillesTemplates'), verifierUniciteIds([...grillesExistantes, ...grillesNouvelles], 'grilles'));
+                db.setSync(cle('grillesTemplates'), fusionnerParIdentite(grillesExistantes, grillesNouvelles, 'grilles').liste);
                 compteurs.ressources += grillesNouvelles.length;
                 details.push(`${grillesNouvelles.length} grille(s)`);
             }
@@ -2445,7 +2583,7 @@ async function executerImportSelectif() {
                         };
                     });
                 if (echellesNouvelles.length > 0) {
-                    db.setSync(cle('echellesTemplates'), verifierUniciteIds([...echellesExistantes, ...echellesNouvelles], 'échelles'));
+                    db.setSync(cle('echellesTemplates'), fusionnerParIdentite(echellesExistantes, echellesNouvelles, 'échelles').liste);
                     compteurs.ressources += echellesNouvelles.length;
                     details.push(`${echellesNouvelles.length} échelle(s)`);
                 }
@@ -2507,7 +2645,7 @@ async function executerImportSelectif() {
                     };
                 });
             if (prodsNouvelles.length > 0) {
-                db.setSync(cleProductions, verifierUniciteIds([...prodsExistantes, ...prodsNouvelles], 'productions'));
+                db.setSync(cleProductions, fusionnerParIdentite(prodsExistantes, prodsNouvelles, 'productions').liste);
                 compteurs.ressources += prodsNouvelles.length;
                 details.push(`${prodsNouvelles.length} production(s)`);
             }
@@ -2536,7 +2674,7 @@ async function executerImportSelectif() {
                                 auteurOriginal: assainirChaine(auteurSource || c.auteurOriginal || '', 100)
                             }));
                         if (cartouchesSelectionnees.length > 0) {
-                            const cartouchesFusionnees = verifierUniciteIds([...cartouchesExistantes, ...cartouchesSelectionnees], 'cartouches');
+                            const cartouchesFusionnees = fusionnerParIdentite(cartouchesExistantes, cartouchesSelectionnees, 'cartouches').liste;
                             db.setSync(cle, cartouchesFusionnees);
                             nbCartouches += cartouchesSelectionnees.length;
                         }
@@ -3052,5 +3190,7 @@ window.assainirObjet = assainirObjet;
 window.assainirChaine = assainirChaine;
 window.SCHEMAS_IMPORT = SCHEMAS_IMPORT;
 window.verifierUniciteIds = verifierUniciteIds; // #292 : exposé pour chargerCodex (codex.js)
+window.fusionnerParIdentite = fusionnerParIdentite; // #448
+window.signatureContenu = signatureContenu;         // #448
 
 })();

@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            version: '1.75',
+            couleur: 'orange',
+            titre: 'Réimporter un codex n’ajoute plus de doublons',
+            items: [
+                'Quand tu réimportes un codex que tu as déjà importé, l’application reconnaît maintenant ce qui est déjà là et ne le recopie plus. Avant, chaque import ajoutait une couche : cartouches, grilles, échelles, productions et pratiques se dédoublaient en silence.',
+                'Un cas plus sournois est bouché aussi : une grille identique recevait un nouvel identifiant, et ses cartouches partaient dans un magasin que plus rien ne consultait. Rien ne semblait avoir changé à l’écran, mais l’espace se remplissait.',
+                '⚠ Rien n’est jamais écrasé : si deux éléments portent le même identifiant mais un contenu réellement différent, les DEUX sont conservés, et la console le signale.',
+                'Deux ressources qui portent le même nom restent deux ressources : le rapprochement se fait sur le contenu, jamais sur le titre.',
+                'Le message de fin d’import annonce désormais ce qui est réellement entré, pas ce qui a été reçu.'
+            ]
+        },
+        {
             version: '1.74',
             couleur: 'vert',
             titre: 'Les blocs de la Carte d’alignement s’alignent entre eux',
