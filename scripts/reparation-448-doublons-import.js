@@ -150,7 +150,7 @@
      * champs posés par l'app. Deux cartouches de même signature portent la
      * même chose, quels que soient leurs identifiants.
      */
-    function signatureDeContenu(valeur) {
+    function signatureDeContenu(valeur, souple) {
         const visiter = (v) => {
             if (v === null || typeof v !== 'object') return v;
             if (Array.isArray(v)) return v.map(visiter);
@@ -158,6 +158,14 @@
             Object.keys(v).sort().forEach((k) => {
                 if (k === 'id' || k === 'grilleId') return;      // l'appartenance change à l'import
                 if (CHAMPS_POSES_PAR_LAPP.indexOf(k) !== -1) return;
+                // ⚠ MODE SOUPLE — tout identifiant, à toute profondeur.
+                // Un import qui recopie une grille RÉGÉNÈRE aussi les ids de
+                // ses critères. Deux cartouches réellement jumelles portent
+                // alors des ids internes différents, et une comparaison
+                // stricte les déclare « uniques » toutes les deux. C'est ce
+                // qui a produit 8 faux « CONTENU UNIQUE » sur le relevé de
+                // Grégoire du 11 août, dans un magasin de 4 paires.
+                if (souple && /(^|[a-z])[Ii]ds?$/.test(k)) return;
                 sortie[k] = visiter(v[k]);
             });
             return sortie;
@@ -217,22 +225,33 @@
             } catch (e) { corpus[c] = ''; }
         }
 
-        // Index des contenus VIVANTS : signature → où on la trouve.
-        const contenusAilleurs = new Map();
+        // Deux index : contenu STRICT, et contenu à identifiants internes près.
+        // ⚠ Ils incluent le magasin courant : deux jumelles DANS le même
+        // magasin sont exactement ce qu'on cherche, et les exclure faisait
+        // déclarer « unique » chacune des deux (défaut du 11 août).
+        const parStrict = new Map();
+        const parSouple = new Map();
         for (const c of magasinsCartouches) {
             let liste = null;
             try { liste = await db.get(c); } catch (e) { continue; }
             if (!Array.isArray(liste)) continue;
-            for (const item of liste) {
-                const sig = signatureDeContenu(item);
-                if (sig === null) continue;
-                if (!contenusAilleurs.has(sig)) contenusAilleurs.set(sig, []);
-                contenusAilleurs.get(sig).push({
-                    cle: c,
+            liste.forEach((item, idx) => {
+                const fiche = {
+                    cle: c, idx,
                     id: item && item.id,
                     citations: compterCitations(item && item.id ? String(item.id) : ' ', corpus, c)
-                });
-            }
+                };
+                const sS = signatureDeContenu(item, false);
+                if (sS !== null) {
+                    if (!parStrict.has(sS)) parStrict.set(sS, []);
+                    parStrict.get(sS).push(fiche);
+                }
+                const sL = signatureDeContenu(item, true);
+                if (sL !== null) {
+                    if (!parSouple.has(sL)) parSouple.set(sL, []);
+                    parSouple.get(sL).push(fiche);
+                }
+            });
         }
 
         let nbOrphelins = 0;
@@ -261,34 +280,61 @@
             }
 
             // Q2
-            let uniques = 0;
+            let uniques = 0, internes = 0;
             L('   Q2 · le contenu existe-t-il ailleurs ?');
-            for (const item of liste) {
-                const sig = signatureDeContenu(item);
-                const jumeaux = (contenusAilleurs.get(sig) || [])
-                    .filter((j) => j.cle !== cleMag);
+            liste.forEach((item, idx) => {
                 const nom = nomDe(item);
-                if (jumeaux.length) {
-                    const vivant = jumeaux.find((j) => j.citations > 0) || jumeaux[0];
+                const moi = (j) => j.cle === cleMag && j.idx === idx;
+                const strictA = (parStrict.get(signatureDeContenu(item, false)) || []).filter((j) => !moi(j));
+                const soupleA = (parSouple.get(signatureDeContenu(item, true)) || []).filter((j) => !moi(j));
+
+                const dehors = strictA.filter((j) => j.cle !== cleMag);
+                const dedans = strictA.filter((j) => j.cle === cleMag);
+                const soupleDehors = soupleA.filter((j) => j.cle !== cleMag);
+
+                if (dehors.length) {
+                    const vivant = dehors.find((j) => j.citations > 0) || dehors[0];
                     L('        ✓ « ' + nom + ' » — identique à ' + vivant.id
                         + ' dans ' + vivant.cle + ' (' + vivant.citations + ' citations)');
+                } else if (soupleDehors.length) {
+                    const vivant = soupleDehors.find((j) => j.citations > 0) || soupleDehors[0];
+                    L('        ≈ « ' + nom + ' » — même contenu que ' + vivant.id + ' dans '
+                        + vivant.cle + ' (' + vivant.citations + ' citations), aux identifiants');
+                    L('             internes près — signature d\'une recopie par import.');
+                } else if (dedans.length) {
+                    internes++;
+                    L('        ⧉ « ' + nom + ' » — en DOUBLE dans ce magasin même (' + dedans[0].id + '),');
+                    L('             mais ce contenu n\'existe nulle part ailleurs.');
                 } else {
                     uniques++;
                     L('        ⚠ « ' + nom + ' » — CONTENU UNIQUE, il n\'existe nulle part ailleurs');
                 }
-            }
+            });
 
             L('');
-            if (uniques === 0 && (!ou || !ou.length)) {
+            // ⚠⚠ `internes` COMPTE DANS CETTE CONDITION, et l'oublier a produit
+            // le pire verdict possible à l'essai du 11 août : « REDONDANT,
+            // supprime » sur un magasin dont le contenu n'existait QUE là, en
+            // double interne. Deux exemplaires d'une chose unique restent une
+            // chose unique — les supprimer ensemble la perd.
+            if (uniques === 0 && internes === 0 && (!ou || !ou.length)) {
                 L('   ⮕ VERDICT : grille disparue, et chacune de ces cartouches existe déjà');
                 L('     ailleurs à l\'identique. Ce magasin est REDONDANT — le supprimer ne');
                 L('     retire rien qui n\'existe en double.');
                 L('     Pour l\'effacer, en toute connaissance de cause :');
                 L('        await db.remove(\'' + cleMag + '\')');
-            } else if (uniques > 0) {
-                L('   ⛔ VERDICT : ' + uniques + ' cartouche(s) portent un contenu QUI N\'EXISTE');
-                L('     NULLE PART AILLEURS. Ce n\'est pas un doublon — c\'est du travail à toi');
-                L('     que rien ne référence. Ne supprime pas : récupère-le d\'abord.');
+            } else if (uniques > 0 || internes > 0) {
+                if (uniques > 0) {
+                    L('   ⛔ VERDICT : ' + uniques + ' cartouche(s) portent un contenu QUI N\'EXISTE');
+                    L('     NULLE PART AILLEURS. Ce n\'est pas un doublon — c\'est du travail à toi');
+                    L('     que rien ne référence. Ne supprime pas : récupère-le d\'abord.');
+                }
+                if (internes > 0) {
+                    L('   ⧉ ' + internes + ' cartouche(s) sont en double DANS ce magasin, mais leur');
+                    L('     contenu n\'existe pas ailleurs. Retirer le magasin entier les perdrait');
+                    L('     toutes les deux. ⮕ Si ce contenu t\'est utile, il faut le RATTACHER à');
+                    L('     une grille vivante, pas le supprimer.');
+                }
             } else {
                 L('   ⚠ VERDICT : le contenu est bien redondant, MAIS la grille parente existe');
                 L('     encore et resterait vide. À trancher : garder, ou supprimer les deux.');
