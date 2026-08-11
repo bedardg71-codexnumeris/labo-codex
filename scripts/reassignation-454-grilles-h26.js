@@ -65,7 +65,7 @@
 (function () {
     'use strict';
 
-    const VERSION_OUTIL = 'r1 · 11 août 2026';
+    const VERSION_OUTIL = 'r2 · 11 août 2026 (échelle découplée du repointage)';
     const TRIMESTRE = 'h2026';
 
     // ⚠ DONNÉES TAPÉES À LA MAIN — REVÉRIFIÉES PLUS BAS CONTRE LES DONNÉES.
@@ -281,14 +281,36 @@
             L('     ' + e.id + '   « ' + nomDe(e) + ' »   niveaux : ' + (niv.join(' ') || '(aucun)'));
         }
         let echelleOk = null;
+        const gestesEchelle = [];
         if (echelleVoulue) {
             echelleOk = echelles.find((e) => e && e.id === echelleVoulue) || null;
             if (!echelleOk) {
                 L('  ⛔ L\'échelle demandée (' + echelleVoulue + ') n\'existe pas dans '
                   + TRIMESTRE + '_echellesTemplates. Elle ne sera PAS écrite.');
             } else {
-                L('  ⮕ Demandée : « ' + nomDe(echelleOk) + ' » — sera posée sur les '
-                  + gestes.length + ' artefact(s) repointé(s).');
+                // ⚠ PASSE INDÉPENDANTE, et ce n'est pas un détail : après le
+                // premier passage les artefacts ONT une grille, donc l'étape 2
+                // les saute. Accrocher l'échelle au repointage la rendait
+                // impossible à poser en second temps — or c'est exactement le
+                // déroulé prévu (grilles prouvées d'abord, échelle ensuite).
+                const vivantesOk = new Set(valides.map((c) => c.vivante));
+                for (let i = 0; i < productions.length; i++) {
+                    const p = productions[i];
+                    if (!p || !p.id || p.type === 'portfolio') continue;
+                    if (p.echelleId) continue;                 // jamais d'écrasement
+                    const repointe = gestes.some((g) => g.idx === i);
+                    // On ne touche QUE les artefacts de ce dossier : ceux qu'on
+                    // vient de repointer, ou ceux qui portent déjà l'une des
+                    // trois grilles retrouvées.
+                    if (!repointe && !vivantesOk.has(p.grilleId)) continue;
+                    gestesEchelle.push({ idx: i, artefact: nomDe(p) });
+                }
+                L('  ⮕ Demandée : « ' + nomDe(echelleOk) + ' » — sera posée sur '
+                  + gestesEchelle.length + ' artefact(s) : '
+                  + (gestesEchelle.map((g) => g.artefact).join(' · ') || '(aucun)'));
+                if (!gestesEchelle.length) {
+                    L('     (aucun artefact concerné n\'a l\'échelle vide — rien à faire)');
+                }
             }
         } else {
             L('  ⮕ Aucune échelle demandée. Pour l\'ajouter, relancer avec :');
@@ -302,7 +324,7 @@
           + (refusCartouches ? '   (⛔ ' + refusCartouches + ' refus : contenu différent)' : ''));
         L('Artefacts à repointer       : ' + gestes.length
           + (cartoucheInjoignable ? '   (' + cartoucheInjoignable + ' sans cartouche)' : ''));
-        L('Échelle                     : ' + (echelleOk ? nomDe(echelleOk) : 'non demandée'));
+        L('Échelle                     : ' + (echelleOk ? nomDe(echelleOk) + ' → ' + gestesEchelle.length + ' artefact(s)' : 'non demandée'));
 
         if (!executer) {
             L('');
@@ -311,7 +333,8 @@
             L('   await reassigner454({ executer: true })');
             console.log(out.join('\n'));
             return { correspondances: valides.length, cartouches: planCartouches.reduce((s, p) => s + p.ajouts.length, 0),
-                     artefacts: gestes.length, refusCartouches: refusCartouches, echelle: echelleOk ? echelleOk.id : null };
+                     artefacts: gestes.length, refusCartouches: refusCartouches,
+                     echelle: echelleOk ? echelleOk.id : null, artefactsEchelle: gestesEchelle.length };
         }
 
         // ── Exécution ───────────────────────────────────────────────────────
@@ -326,10 +349,17 @@
             for (const g of gestes) {
                 productions[g.idx].grilleId = g.grilleId;
                 if (g.cartoucheId) productions[g.idx].cartoucheId = g.cartoucheId;
-                if (echelleOk) productions[g.idx].echelleId = echelleOk.id;
             }
             await db.set(TRIMESTRE + '_productions', productions);
             L('✔ ' + TRIMESTRE + '_productions : ' + gestes.length + ' artefact(s) repointé(s)');
+        }
+        if (echelleOk && gestesEchelle.length) {
+            if (!window._pre454[TRIMESTRE + '_productions']) {
+                window._pre454[TRIMESTRE + '_productions'] = JSON.parse(JSON.stringify(productions));
+            }
+            for (const g of gestesEchelle) productions[g.idx].echelleId = echelleOk.id;
+            await db.set(TRIMESTRE + '_productions', productions);
+            L('✔ ' + TRIMESTRE + '_productions : échelle posée sur ' + gestesEchelle.length + ' artefact(s)');
         }
         L('');
         L('✅ Terminé. RECHARGE la page (Cmd+R), puis rouvre un artefact pour vérifier.');
@@ -338,7 +368,8 @@
         L('   ⚠ À refaire dans l\'AUTRE navigateur : les magasins sont indépendants.');
         console.log(out.join('\n'));
         return { correspondances: valides.length, cartouches: planCartouches.reduce((s, p) => s + p.ajouts.length, 0),
-                 artefacts: gestes.length, refusCartouches: refusCartouches, echelle: echelleOk ? echelleOk.id : null };
+                 artefacts: gestes.length, refusCartouches: refusCartouches,
+                     echelle: echelleOk ? echelleOk.id : null, artefactsEchelle: gestesEchelle.length };
     }
 
     window.reassigner454 = reassigner454;
