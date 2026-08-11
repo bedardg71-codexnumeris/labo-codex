@@ -49,6 +49,57 @@ liste qui contient des portes sans objet se fait ignorer en entier.
 ne se coche pas. Et une prochaine session qui fait le rituel de début doit
 pouvoir retrouver ce qui reste dû **sans avoir accès à la conversation**.
 
+### ⚠ L'artefact DOIT savoir rendre son relevé — bouton « Copier mes résultats »
+
+**Non négociable depuis le 11 août 2026.** L'avancement vit dans le
+`localStorage` du navigateur de Grégoire : **la session ne peut pas le lire.**
+Sans bouton d'export, « les tests sont complétés » est une phrase sans données,
+et la seule issue est de lui faire retaper les rangées — ce qu'aucun humain ne
+fait en entier. **On ne récupère alors que les échecs, donc on perd les ✓ (quelles
+portes sont réellement closes) et surtout les MESURES.**
+
+Le bouton construit un texte à partir du DOM et de l'état coché : compte
+`passées / échec / non traitées`, puis les rangées groupées par section et par
+porte, préfixées `[v]` `[X]` `[ ]`.
+
+### ⚠⚠ UNE CASE À COCHER NE PEUT PORTER NI UN NOMBRE, NI UN VERDICT
+
+**Constaté sur pièces le 11 août, au premier usage du bouton.** Le relevé est
+revenu **28 passées, 0 échec** — excellent — et pourtant **il ne contenait
+aucune des informations dont le chantier suivant avait besoin** :
+
+- les **trois lignes de mesure** sont revenues **vides** (occupation Safari,
+  cartouches avant/après import). Une case cochée dit *« fait »*, jamais
+  *« combien »* ;
+- les **cinq rangées du §3** sont revenues **cochées ✓**. Or ce sont des
+  DÉCISIONS : ✓ signifie « j'ai tranché », et **le verdict n'est nulle part**.
+  Cocher « Trancher la forme : deux boutons ? un menu ⋮ ? » ne dit pas laquelle.
+
+⮕ **La cause est de conception, pas d'usage** : le §3 est déclaré « ce ne sont
+pas des vérifications » dès la structure (§2 de ce skill), mais l'artefact leur
+donnait quand même des bascules ✓/✗. *La forme contredisait le texte, et c'est
+la forme qui gagne.*
+
+⮕ **Deux corollaires, à appliquer dès la conception de l'artefact** :
+1. **Toute rangée du §3 porte un champ de saisie**, pas une bascule — et
+   l'export reprend ce qui y est écrit. Une décision sans verdict écrit n'est
+   pas une décision prise, c'est une décision perdue.
+2. **Toute rangée qui produit un chiffre porte un champ de saisie à côté de la
+   bascule.** Sinon le nombre reste dans la console, la console se ferme, et il
+   faut refaire le geste. À défaut, l'export pré-remplit les lignes vides — un
+   pis-aller, et il a échoué du premier coup.
+
+⚠ **Le presse-papiers peut être refusé dans un cadre** : toujours doubler d'un
+`<textarea>` visible et présélectionné. Le bouton ne doit jamais échouer en
+silence — c'est le défaut qu'il est censé corriger.
+
+⮕ **Et l'éprouver au navigateur avant de publier.** Le conteneur a Chromium
+(`/opt/pw-browsers/chromium-1194/chrome-linux/chrome` en `executablePath` —
+Playwright cherche par défaut une version qu'il n'a pas). Cocher quelques
+rangées, cliquer, relire le texte produit, vérifier zéro erreur de page. *Un
+bouton d'export non éprouvé est exactement le genre d'affichage muet que ce
+projet a trouvé trois fois en un cycle.*
+
 ---
 
 ## 2. LA STRUCTURE — quatre temps, dans cet ordre
@@ -217,6 +268,12 @@ pas une note mentale » — le dire dans l'en-tête, et le tenir au retour.
 - ❌ Lister des portes invérifiables depuis la branche ouverte *(le document
   entier se fait ignorer — constaté le 9 août)*
 - ❌ Publier l'artefact sans le markdown jumeau
+- ❌ **Publier un artefact sans bouton « Copier mes résultats »** — l'avancement
+  vit dans SON navigateur ; sans export, « les tests sont complétés » arrive
+  sans aucune donnée *(11 août)*
+- ❌ **Donner une bascule ✓/✗ à une rangée du §3 ou à une rangée qui produit un
+  chiffre.** Une case cochée ne porte ni verdict ni nombre : le relevé du
+  11 août est revenu 28/28 avec les cinq décisions « prises » et introuvables
 - ❌ Écrire « vérifier que ça marche » : dire QUOI regarder, et où
 - ❌ **Mélanger Terminal et console du navigateur sans le dire** *(règle 5 —
   a produit `SyntaxError: Unexpected identifier 'scripts'` le 10 août au soir)*
@@ -233,4 +290,5 @@ pas une note mentale » — le dire dans l'en-tête, et le tenir au retour.
 
 | Date | Changement |
 |---|---|
+| 2026-08-11 | Bouton « Copier mes résultats » rendu obligatoire, éprouvé au navigateur avant publication. Et la leçon de son premier usage : une case à cocher ne porte ni un nombre ni un verdict — les rangées du §3 et les rangées de mesure prennent un champ de saisie, pas une bascule. |
 | 2026-08-10 | Création, à la demande de Grégoire (« je veux qu'on utilise dorénavant ce modèle »). Codifie l'artefact du cycle 1.67.1 → 1.71.1, lui-même repris du modèle de captures qu'il avait versé au dépôt le 9 août. La règle 1 (symptôme, pas mécanisme) vient de son rappel « je ne suis pas développeur », dans la même réponse. |
