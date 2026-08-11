@@ -20,14 +20,24 @@
 son clone : elle est à la version de son dernier `git pull`. Deux des quatre
 échecs des 81 portes étaient des faux rouges venus de là.
 
-- [ ] `git checkout main && git pull` — puis vérifier **1.71.1 ou plus récent**
-      en bas de page. Un numéro antérieur invalide tout le reste.
+- [ ] `git checkout main && git pull` — **SEULE commande de Terminal de toute
+      la liste** (app Terminal, dans `Monitorage_v6`). Puis vérifier **1.71.1 ou
+      plus récent** en bas de page. Un numéro antérieur invalide tout le reste.
 - [ ] Faire un **backup Codex** ⚠⚠ — plusieurs portes suppriment des données.
 - [ ] Console Chrome : taper `allow pasting`, Entrée. Une fois par session.
       *(C'est probablement ce qui bloquait ses premiers essais du 10 août.)*
+- [ ] Charger un script **sans Terminal** — corrigé le 10 août au soir. La
+      version précédente donnait `cat … | pbcopy`, une commande de *Terminal*,
+      au milieu de commandes de *console navigateur*, sans le dire : deux
+      erreurs produites. Méthode à une seule fenêtre :
+      Finder → `Monitorage_v6/scripts` → **glisser le `.js` dans un nouvel
+      onglet Chrome** → Cmd+A, Cmd+C → revenir sur l'app → Cmd+V dans la
+      console, Entrée.
+      Repère : le rapport doit commencer par `==== #353 · clés orphelines ·
+      DRY-RUN`. S'il dit `DIAG #353 … (LECTURE SEULE)`, c'est une **ancienne
+      copie** — refaire `git pull`.
 - [ ] Retenir : **un script se colle EN ENTIER, une commande s'appelle APRÈS.**
-      `cat scripts/<fichier>.js | pbcopy` → Cmd+V. Quand la console dit
-      `is not defined`, c'est que le fichier n'est pas passé.
+      Quand la console dit `is not defined`, c'est que le fichier n'est pas passé.
 - [ ] Prévoir **les deux appareils** (Chrome ET Safari sur Mac, iPad) et
       **les deux modes**.
 
@@ -44,25 +54,57 @@ classait des snapshots **vivants** comme morts : ils sont nommés d'après le
 trajectoires a2025/h2026) étaient dans la liste à supprimer. **Le rapport du
 10 août ne vaut plus — relancer le dry-run avec le script à jour.**
 
-### 1.1 · Le seuil a-t-il mordu ? (#353)
-Le seuil IDB-first valait **200 Ki** — au-dessus de sa plus grosse clé
-(184 K car.). Il n'avait donc jamais pu se déclencher depuis mars. Il est à
-**25 Ki**, et se réapplique seul au démarrage.
+### 1.1 · Le seuil a mordu — mais pas comme annoncé (#353)
+⚠ **Cette porte annonçait « attendu ~44 % ». C'était faux, et l'erreur est de
+mon côté.** Le relevé du 10 août au soir sur 1.71.1 dit **100 %, 586 clés**.
 
-- [ ] Après `git pull` + rechargement, relever l'occupation
-      → **attendu ~44 %** (était 100 % Chrome / 88,3 % Safari)
-- [ ] Refaire le relevé **dans Safari**
+**Le seuil fonctionne pourtant**, et la preuve est dans son propre rapport
+d'orphelines : `a2024_presences` (184 K car.), `a2024_evaluationsSauvegardees`
+(179 K) et `simulation_indicesCP` (72 K) **ont disparu de la liste**. Elles
+n'ont pas été supprimées : elles ont *quitté* localStorage pour IndexedDB.
 
-### 1.2 · Purger le trimestre a2024 — 448 K car., Chrome seulement
-23 clés d'un trimestre absent du registre `trimestres`. Confirmé fictif par
-Grégoire. Le script **exige qu'il soit nommé**.
+**Ce que ma projection ignorait** : au démarrage, `syncToLocalStorageCache()`
+**réécrit** dans localStorage tout ce qui passe sous le seuil. Les grosses clés
+sont sorties, des clés qui vivaient en mémoire seule sont entrées à leur place
+— d'où 111 clés de plus pour le même total. J'ai modélisé l'éviction, pas le
+remplissage. **`db.statsStockage().projectionSeuils` a le même angle mort : ses
+chiffres sont un plancher, pas une prévision.**
 
-- [ ] `await reparer353({ executer: true, familles: ['trimestres'], trimestres: ['a2024'] })`
+⮕ Pas dangereux (IndexedDB reste la source de vérité), mais l'objectif de #353
+n'est pas atteint. **Chantier, pas porte à cocher.**
 
-### 1.3 · Purger `simulation_indicesCP` — 72 K car.
+- [ ] Refaire le relevé **dans Safari** (était 88,3 %) — mesure d'entrée du
+      chantier, **aucun chiffre n'est un échec ici**
+
+### 1.2 · Purger le trimestre a2024 — 85 K car. + 2 grosses clés ailleurs
+Trimestre absent du registre `trimestres`. Confirmé fictif par Grégoire. Le
+script **exige qu'il soit nommé**.
+
+⚠ **Chiffre corrigé : 448 K car. → 85 K car.** Rien n'a été supprimé. Les deux
+plus grosses clés du lot — `a2024_presences` (184 K) et
+`a2024_evaluationsSauvegardees` (179 K) — ont quitté localStorage pour IDB au
+passage en 1.71.1. **Le script n'énumère que localStorage** (`localStorage.key(i)`,
+`diagnostic-353-cles-orphelines.js:102`) : il proposera 21 clés au lieu de 23 et
+ne verra jamais les deux grosses. **Deux gestes, pas un.**
+
+- [ ] Geste 1 — `await reparer353({ executer: true, familles: ['trimestres'], trimestres: ['a2024'] })`
+      → attendu ~21 clés, ~85 K car.
+- [ ] Geste 2 — **regarder d'abord** : `console.log((await db.keys()).filter(k => k.indexOf('a2024_') === 0))`
+      → si un nom ne commence pas par `a2024_`, **s'arrêter** et me l'envoyer.
+- [ ] Geste 3 — `for (const k of (await db.keys()).filter(k => k.indexOf('a2024_') === 0)) { await db.remove(k); console.log('supprimé : ' + k); }`
+      ⚠ **pas de `annuler353()` ici** — le filet, c'est le backup Codex.
+
+### 1.3 · Purger `simulation_indicesCP` — 72 K car., déplacée
 Aucun producteur dans tout `js/`, vérifié au grep. Chrome seulement.
 
-- [ ] `await reparer353({ executer: true, familles: ['sansProducteur'] })`
+⚠ **Le rapport du 10 août au soir affiche « SANS PRODUCTEUR : 0 ». Ce n'est
+pas une panne et ce n'est pas un échec.** La clé a elle aussi quitté
+localStorage pour IDB : la famille `sansProducteur` restera à zéro. Il faut la
+retirer par son nom.
+
+- [ ] `console.log('existe :', (await db.keys()).includes('simulation_indicesCP'));`
+      puis `await db.remove('simulation_indicesCP');`
+      → si la première ligne dit `false`, elle est déjà partie : **✓ et passer**.
 
 ### 1.4 · Purger les snapshots réellement orphelins
 ⚠ **Lire la NOUVELLE liste d'abord.** Après correction, restent
@@ -178,16 +220,25 @@ lots datés (24 mars, 27 juin), copies citées zéro fois. Mécanisme **lu au co
 (`ajouterCartouchesABibliotheque` fait un `push` nu avec un id neuf) et
 corroboré par les horodatages — **pas rejoué**.
 
+**Ma projection du seuil était fausse, et Grégoire l'a mesurée avant moi.**
+J'avais annoncé ~44 % ; il a lu **100 %**. Le seuil fonctionne — les grosses
+clés sont bien parties — mais `syncToLocalStorageCache()` *rappelle* au
+démarrage tout ce qui passe sous le seuil, et je n'avais modélisé que la
+sortie. **`db.statsStockage().projectionSeuils` porte le même angle mort** :
+ses chiffres sont un plancher, pas une prévision. Premier point du chantier
+#353 de la prochaine session.
+
 **Le geste « ouvrir la Liste puis l'aperçu » est CADUC.** L'aperçu recalcule à
 chaque rendu, prouvé en faussant le stockage. Le contournement donné le 10 août
 ne servait à rien.
 
 ### ⚠ La leçon du cycle
 
-**Trois diagnostics posés par lecture de code se sont révélés faux, et c'est la
+**Quatre diagnostics posés par lecture de code se sont révélés faux, et c'est la
 mesure qui les a corrigés** : l'aperçu qui « lisait le stocké » recalculait ;
 l'alerte qui criait 200 % d'un quota indépassable comptait dans la mauvaise
-unité ; le détecteur d'orphelines allait faire supprimer des snapshots vivants.
+unité ; le détecteur d'orphelines allait faire supprimer des snapshots vivants ; la
+projection du seuil oubliait le remplissage au boot.
 
 Chaque fois le raisonnement se tenait — sur une question trop étroite.
 ⮕ **Sur les données, un diagnostic lu au code est une hypothèse.** Le conteneur

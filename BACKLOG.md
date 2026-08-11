@@ -62,9 +62,25 @@
 > ⚠ Sans IndexedDB, le routage retombe sur localStorage (garde `idbDispo`, break-testé) : **aucune exposition neuve**.
 >
 > **⚠ #353 — ce qui RESTE après le 10 août** : l'unité est corrigée et le miroir `configPAN` purgé,
-> mais **la saturation elle-même n'est pas traitée** — localStorage est plein à 100 %. Les options 2/3/4
-> du `RAPPORT-353` attendent toujours une décision, et l'entrée manquante est `projectionSeuils`
-> (à faire remonter par Grégoire via `db.statsStockage()`). Restent aussi les candidats d'hygiène :
+> mais **la saturation elle-même n'est pas traitée** — localStorage est plein à 100 %.
+>
+> ⚠⚠ **ET LE SEUIL À 25 Ki N'A PAS DONNÉ CE QUE LA PROJECTION ANNONÇAIT — MESURE DU 10 AOÛT AU SOIR.**
+> Annoncé ~44 % ; **mesuré 100 %, 586 clés** sur 1.71.1. Le seuil MORD pourtant : `a2024_presences`
+> (184 K car.), `a2024_evaluationsSauvegardees` (179 K) et `simulation_indicesCP` (72 K) ont quitté
+> localStorage. **Ce que la projection ignore** : `syncToLocalStorageCache()` **réécrit au démarrage**
+> dans localStorage tout ce qui passe SOUS le seuil — les grosses clés sortent, des clés qui vivaient en
+> memoryCache seul entrent à leur place (**+111 clés pour le même total**). *L'éviction était modélisée,
+> pas le remplissage.* ⮕ **`projectionSeuils` porte le même angle mort : ses chiffres sont un PLANCHER,
+> pas une prévision** — le corriger (ou le dire dans sa sortie) est le **premier geste** de la reprise
+> #353, avant de rouvrir les options 2/3/4.
+>
+> ▣ **Effet de bord à ne pas confondre avec une panne** : `diagnostic-353-cles-orphelines.js:102`
+> n'énumère que `localStorage` — les clés parties en IDB lui sont **invisibles**. D'où a2024 à
+> **85 K / 21 clés** (et non 448 K) et la famille `sansProducteur` à **0**. Le reliquat IDB se retire par
+> `db.keys()` + `db.remove()`, **sans filet `annuler353()`**. *(Si le détecteur doit resservir, lui faire
+> énumérer `db.keys()` ∪ `localStorage` plutôt que localStorage seul.)*
+>
+> Les options 2/3/4 du `RAPPORT-353` attendent toujours une décision. Restent aussi les candidats d'hygiène :
 > `*_backup_v1` (outil `db.purgerBackupsV1()` livré, DRY-RUN par défaut — exécution = décision Grégoire)
 > et `tamponsImages` base64 non namespacé.
 
