@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            version: '1.74',
+            couleur: 'vert',
+            titre: 'Les blocs de la Carte d’alignement s’alignent entre eux',
+            items: [
+                'Guides magnétiques : en glissant un bloc, il colle sur les bords, les centres et les milieux des blocs voisins, et une ligne pointillée montre sur quoi il s’aligne. Elle disparaît dès que tu relâches.',
+                'Six commandes d’alignement — à gauche, au centre, à droite, en haut, au milieu, en bas — dans une petite barre qui apparaît d’elle-même dès que deux blocs sont sélectionnés.',
+                'Une leçon alignée emmène ses activités : elle ne se détache jamais de son contenu.',
+                'Un seul ⌘Z défait un alignement complet.',
+                'Tout fonctionne au doigt sur iPad : les boutons font 44 px et l’aimant tient compte du zoom, pour ne pas happer la carte entière quand tu es en vue d’ensemble.'
+            ]
+        },
+        {
             version: '1.73',
             couleur: 'vert',
             titre: 'Lire une grande carte sans changer de zoom : « Tout voir » et la loupe',
