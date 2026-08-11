@@ -161,6 +161,20 @@ Trois fiches au même id, **deux marquées « Actif »** — visible sur sa capt
 - [ ] ⚠ **Refaire un import de codex**, puis rouvrir → toujours une seule ⚠⚠
       *(C'est cette rangée qui prouve que le VECTEUR est bouché ; la première
       ne prouve que le nettoyage.)*
+- [ ] **Ajoutée le 11 août — compter les cartouches AVANT et APRÈS ce même
+      import** (#448, reproduit le matin du 11). Les cours sont réparés, le
+      reste ne l'est pas. Aucun geste supplémentaire : c'est l'import de la
+      rangée précédente qui sert de vecteur.
+      ```js
+      (async () => { let n = 0, d = 0;
+        for (const k of (await db.keys()).filter(k => k.indexOf('cartouches_') === 0)) {
+          const a = (await db.get(k)) || [], noms = a.map(c => c.nom);
+          n += a.length; d += noms.length - new Set(noms).size; }
+        console.log('cartouches : ' + n + ' au total, dont ' + d + ' portant un nom déjà présent'); })()
+      ```
+      ⮕ Si le second nombre grimpe entre les deux relevés, #448 est confirmé
+      sur les données réelles. **Aucun chiffre n'est un échec** — mesure pure,
+      rien n'est supprimé.
 
 ### 2.6 · Son Safari ne connaît pas `a2026`
 Chrome déclare a2025, h2026, **a2026**. Safari ne déclare qu'a2025 et h2026 —
@@ -215,10 +229,17 @@ le guide pour décrire l'app telle qu'elle est.
 sont structurellement invérifiables en session. Chromium a servi à reproduire
 plutôt qu'à supposer, mais il ne remplace pas son matériel.
 
-**#448 n'est pas reproduit.** Les cartouches se dupliquent à l'import : deux
-lots datés (24 mars, 27 juin), copies citées zéro fois. Mécanisme **lu au code**
-(`ajouterCartouchesABibliotheque` fait un `push` nu avec un id neuf) et
-corroboré par les horodatages — **pas rejoué**.
+**~~#448 n'est pas reproduit.~~ REPRODUIT le 11 août au matin — et le mécanisme
+accusé était le mauvais.** Ce n'est pas `ajouterCartouchesABibliotheque` : c'est
+`verifierUniciteIds` (`import-export.js:69`), qui **renomme** un id en collision
+au lieu de reconnaître le même élément, et **garde les deux**. Réimporter un
+codex déjà importé duplique donc **cartouches, grilles, échelles, productions et
+pratiques** — 10 sites d'appel, croissance linéaire à chaque import (mesuré
+2 → 4 → 6). Les copies ne portent **aucun `idOriginal`** : plus rien ne peut les
+reconnaître après coup, ce qui explique les copies « citées 0 fois » du relevé.
+⮕ Reproduit sur la ligne de fusion RÉELLE avec la vraie fabrique d'ids, en bac à
+sable Node — **le parcours d'import complet au navigateur n'a pas été rejoué**.
+D'où la 3e rangée de la porte 2.5, qui le mesure sur le corpus réel.
 
 **Ma projection du seuil était fausse, et Grégoire l'a mesurée avant moi.**
 J'avais annoncé ~44 % ; il a lu **100 %**. Le seuil fonctionne — les grosses
