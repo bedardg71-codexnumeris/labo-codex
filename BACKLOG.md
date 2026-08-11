@@ -496,8 +496,33 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
     · **H1 — contamination inter-trimestre (#340)** : `h2026_productions` porterait le contenu d'`a2025_productions`. Les `grilleId` viseraient alors des grilles d'A25, absentes du magasin H26 ⇒ « Aucune ». **Cette hypothèse expliquerait AUSSI les dates d'échéance de l'automne (#452) ET les magasins de cartouches H26 à 0 citation. Une seule cause, trois symptômes.**
     · **H2 — références introuvables ou vides** : la perte serait survenue à l'écriture, pas par substitution. Autre cause, autre correctif.
   - ⮕ **La question qui tranche** : l'id référencé existe-t-il AILLEURS (autre trimestre) ou NULLE PART ? Le script rend, par artefact, ce que la référence vise et où la cible se trouve — puis un verdict H1/H2.
-  - ⚠ **Si H1 se confirme, #452 est probablement un SYMPTÔME de #453, pas un défaut distinct** — et le correctif de la reprise-bibliothèque ne serait pas la bonne cible. **Ne pas coder #452 avant d'avoir le relevé.**
   - ⮕ Éprouvé au navigateur sur trois jeux (H1, H2, témoin sain). ⚠ Le pack démo est ÉCARTÉ du verdict : ses 11 productions portent des références vides par construction et faisaient conclure « références vides » sur un jeu parfaitement sain — un diagnostic qui compte la démo diagnostique la démo.
+
+  - ### 📊 RELEVÉ r1 (11 août, données réelles de Grégoire) — **LES DEUX HYPOTHÈSES TOMBENT**
+    ```
+    Saines 13 · ⚠ AILLEURS 0 · ⛔ INTROUVABLES 0 · vides 31
+    a2025_productions (11 artefacts) · h2026_productions (11 artefacts)
+    ```
+    · **H1 — contamination inter-trimestre : RÉFUTÉE.** Zéro référence vise un autre trimestre. C'était l'hypothèse principale ; elle est fausse. **Et #452 n'est donc PAS un symptôme de #453** — les deux défauts sont distincts, la consigne « ne pas coder #452 » tombe avec H1.
+    · **H2 — cibles disparues : RÉFUTÉE.** Zéro référence introuvable ; aucune grille, aucune échelle n'a été effacée. La purge #448 est hors de cause une deuxième fois.
+    · ⚠ **`a2025_productions` est touché autant que `h2026_productions`.** Donc rien de propre à H26, rien de lié à la reprise A25→H26.
+    · Le compte ferme : 22 artefacts × 2 champs = 44 ; 13 saines + 31 vides = 44.
+  - ### ⚠ CORRECTION QUE r1 SE DOIT À LUI-MÊME
+    r1 concluait « la perte s'est produite à l'écriture ». **Il n'en savait rien** : il mesurait **vide** et concluait **perdu**. Un artefact auquel on n'a jamais assigné de grille est vide lui aussi, légitimement. Cinquième diagnostic lu-au-code renversé par la mesure en deux jours — et cette fois c'est le VERDICT du script, pas son mécanisme, qui dépassait sa mesure.
+  - ### 🔎 MÉCANISME SUSPECT — un repli d'affichage qui devient une perte, et qui EFFACE SA PROPRE TRACE
+    ```
+    productions.js:778   selectGrille.value = prod.grilleId || '';   ← l'affichage retombe sur ''
+    productions.js:988   const grilleId = grille ? grille.value : ''; ← l'enregistrement relit '' et l'écrit
+    ```
+    Un `<select>` à qui on assigne un id absent de ses options retombe **silencieusement** sur `''`. Ouvrir un artefact dans cet état, corriger un détail, enregistrer : le `''` de l'AFFICHAGE devient le `''` du DISQUE. ⮕ **C'est pourquoi le diagnostic ne voit plus rien de cassé : l'écriture a effacé la preuve de ce qui l'a causée.** Il ne reste que le vide.
+    ⮕ Défaut réel **indépendamment** de cette enquête : une référence qu'on ne sait pas résoudre doit être **préservée et signalée**, jamais blanchie en silence. (`afficherFormProduction` peuple bien les options AVANT d'assigner — la course est écartée, ce n'est pas l'ordre qui est en cause.)
+  - ### ⏭ PASSE r2 LIVRÉE — vide-par-perte ou vide-d'origine ?
+    Deux témoins vivent **ailleurs** que dans le champ effacé, donc hors d'atteinte de ce chemin d'écriture :
+    · **TÉMOIN 1 — les évaluations.** Chaque évaluation enregistre son propre `grilleId`/`echelleId` (`evaluation-chargement.js:593`). Champ vide + évaluation qui nomme une grille = la production **avait** cette grille. Décisif, et **récupérable**.
+    · **TÉMOIN 2 — `bibliothequeProductions`** (globale, hors trimestre) : le gabarit d'origine garde ses références ; la copie porte `idOriginal` qui y remonte.
+    ⮕ Verdicts séparés : `PERTE AVÉRÉE` / `INDÉCIDABLE` (aucun témoin — on refuse de conclure) / `sans objet` (portfolio conteneur). Un tableau **RÉCUPÉRABLES** dit quoi rendre, à quel artefact, et si la cible existe encore dans le trimestre.
+    ⮕ **Break-test fait** : banc à 8 essais, six gardes retirées une à une (éval remplacée, autre production, homonymes de titre, exclusion démo, vide-sans-témoin, portfolio) — **chacune fait ROUGIR le banc**. Le script discrimine, il ne se contente pas de tourner.
+    ⮕ **Prochaine session** : faire tourner `await diag453()` (r2) dans Chrome ET Safari, puis décider. Si `perdues > 0` → outil de réparation en dry-run relu, comme pour #448. Si tout est `INDÉCIDABLE` → il faut une archive Codex antérieure comme témoin extérieur.
 
 - [ ] 🔴 **#452** Reprendre une production de la bibliothèque emporte la DATE D'ÉCHÉANCE du trimestre précédent — créé 11 août 2026 (constat terrain Grégoire, après la clôture).
   - **Symptôme, dans ses mots** : « certaines productions de A25 sont les mêmes reprises à l'H26. Maintenant je constate que les dates de remise des travaux à l'hiver sont celles de l'automne précédent. »
@@ -505,6 +530,8 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - ⮕ **Vérifié : `dateEcheance` n'est réinitialisée NULLE PART** dans `js/` (grep `dateEcheance: ''` / `: null` / `delete` → 0 occurrence). Ce n'est pas un oubli local, c'est une absence globale.
   - ⚠⚠ **C'EST DATÉ, ET ÇA REVIENT À CHAQUE RENTRÉE.** Une date d'échéance appartient au CALENDRIER d'un trimestre ; une production reprise d'un trimestre à l'autre ne peut pas garder la sienne. Grégoire prépare A26 **en ce moment** en reprenant ses productions : sans correctif, ses productions A26 naîtront avec les dates de H26.
   - ⮕ **Un seul champ concerné** parmi les 22 du schéma de production (audit fait) : `dateEcheance`. `dateCreation`/`dateModification`/`dateImport` sont des horodatages techniques, pas des dates de calendrier.
+  - ⚠ **CORRECTION DE CET AUDIT (11 août, en enquêtant sur #453) : il y a un SECOND porteur de dates, et il est plus dangereux que le premier.** `echeancesParGroupe` (`productions.js:1115`) est un objet `{ [groupeCoursId]: { assignee, date } }` — **une date de calendrier par groupe-cours**. Le spread de la reprise l'emporte lui aussi. Pire : ses `groupeCoursId` désignent des groupes du trimestre PRÉCÉDENT, qui n'existent pas dans le nouveau. Et `lireEcheancesParGroupeDepuisFormulaire` ne lit que les groupes AFFICHÉS ⮕ les entrées périmées survivent en silence à chaque enregistrement. **Un correctif qui ne vide que `dateEcheance` laissera le vrai porteur intact en mode multi-groupe.**
+  - ✅ **BLOCAGE LEVÉ (relevé r1 de #453, 11 août)** : H1 est réfutée, `#452` n'est donc **pas** un symptôme de `#453`. Les deux défauts sont distincts et `#452` peut être repris pour lui-même — après reproduction, comme prévu ci-dessous.
   - ⮕ **Même patron de spread ailleurs, à auditer dans le même geste** : `cartouches.js:3464`, `echelles.js:2574`, `grilles.js:2573`. Aucune de ces trois ressources ne porte de date de calendrier aujourd'hui — mais le patron est identique, et c'est le patron qui est fautif.
   - 📐 **Décision avant de coder** : à la reprise, faut-il **vider** `dateEcheance` (l'enseignant la ressaisit, rien ne ment) ou **la reporter** sur le calendrier du trimestre cible (plus malin, mais deviner une date est une promesse qu'on ne peut pas tenir) ? ⮕ Vider est le seul choix qui ne fabrique pas de fausse donnée.
   - ⏳ **À REPRODUIRE avant de corriger** — le diagnostic est lu au code. Leçon des 10-11 août : quatre diagnostics lus au code se sont révélés faux, la mesure les a corrigés.
