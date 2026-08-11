@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            version: '1.73',
+            couleur: 'vert',
+            titre: 'Lire une grande carte sans changer de zoom : « Tout voir » et la loupe',
+            items: [
+                'Nouveau bouton « Tout voir » dans la barre d’outils de la Carte d’alignement : il ajuste le zoom pour que la carte ENTIÈRE tienne à l’écran, blocs isolés compris. « Recentrer » (⌘1) ne touchait jamais au zoom — les deux commandes coexistent.',
+                'Nouvelle loupe : active-la (bouton, ou touche L), promène le pointeur ou le doigt, et lis à l’échelle normale sans que la carte bouge. Clique — ou tape « Aller ici » — et la carte s’y rend. La loupe s’éteint, le clavier est libre pour écrire.',
+                'Les deux ensemble servent à se déplacer : prendre du recul, repérer la zone, lire à la loupe, sauter à l’endroit voulu.',
+                'La loupe fonctionne au doigt sur iPad, et glisser en mode loupe ne déplace aucun bloc.',
+                'Le zoom arrière descend désormais plus bas que 25 % — une grande carte ne tenait pas à l’écran à cette limite.'
+            ]
+        },
+        {
             version: '1.72',
             couleur: 'vert',
             titre: 'Dupliquer plusieurs blocs d’un coup dans la Carte d’alignement',
