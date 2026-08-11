@@ -164,6 +164,41 @@ describe('Loupe · les invariants qui la rendent utilisable sur iPad', () => {
         expect(sourceIndex).toMatch(/id="planif-btn-loupe"[^>]*aria-pressed="false"[^>]*data-action="planificationCarte\.basculerLoupe"/);
     });
 
+    it('⚠ le clic ATTERRIT depuis la carte, pas seulement depuis le cadre', () => {
+        // Défaut rapporté par Grégoire, capture à l'appui : « quand je clique,
+        // il ne se passe rien ». Le cadre se place AU-DESSUS du pointeur ; le
+        // geste naturel est de cliquer le bloc qu'on vise, DANS la carte. Le
+        // premier jet n'écoutait que le cadre.
+        expect(sourceCarte).toMatch(/document\.addEventListener\('click', _surClicLoupe, true\)/);
+        expect(sourceCarte).toMatch(/document\.removeEventListener\('click', _surClicLoupe, true\)/);
+        const bloc = sourceCarte.slice(
+            sourceCarte.indexOf('function _surClicLoupe'),
+            sourceCarte.indexOf('function _surClicLoupe') + 900
+        );
+        // Il atterrit depuis les DEUX surfaces…
+        expect(bloc).toMatch(/dansCadre/);
+        expect(bloc).toMatch(/dansCarte/);
+        // …et il laisse passer le reste, sinon le bouton qui ÉTEINT la loupe
+        // deviendrait lui-même inatteignable.
+        expect(bloc).toMatch(/if \(!dansCadre && !dansCarte\) return;/);
+    });
+
+    it('le pointeur montre la ZONE examinée, au ratio exact du cadre', () => {
+        // Demande de Grégoire : « un petit rectangle dans les mêmes
+        // proportions que la loupe ». Une flèche désigne un point ; ici on
+        // choisit un cadrage. 420 × 300 → 42 × 30, et le point d'accroche est
+        // au CENTRE — c'est lui qui correspond au centre du cadre.
+        const css = readFileSync(path.join(racineProjet, 'styles.css'), 'utf8');
+        const i = css.indexOf('#planif-zone-travail.planif-loupe-mode,');
+        const bloc = css.slice(i, i + 1400);
+        const m = bloc.match(/width='(\d+)' height='(\d+)'/);
+        expect(m).not.toBeNull();
+        expect(Number(m[1]) / Number(m[2])).toBeCloseTo(420 / 300, 5);
+        expect(bloc).toMatch(/\) 21 15, crosshair/);
+        // Les deux surfaces montrent la même zone : même curseur sur les deux.
+        expect(bloc).toMatch(/#planif-loupe \{/);
+    });
+
     it('« Aller ici » respecte la cible tactile de 44 px', () => {
         const css = readFileSync(path.join(racineProjet, 'styles.css'), 'utf8');
         const bloc = css.slice(css.indexOf('.planif-loupe-aller {'), css.indexOf('.planif-loupe-aller:hover'));

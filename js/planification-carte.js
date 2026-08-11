@@ -8932,14 +8932,11 @@ function activerLoupe() {
         aller.type = 'button';
         aller.className = 'planif-loupe-aller';
         aller.textContent = 'Aller ici';
-        aller.addEventListener('click', function (ev) {
-            ev.stopPropagation();
-            atterrirDepuisLoupe();
-        });
+        // Pas de gestionnaire propre : `_surClicLoupe` (document, capture) le
+        // couvre puisqu'il est DANS le cadre. Deux chemins pour un même geste,
+        // c'est une divergence en attente.
         _loupeEl.appendChild(aller);
 
-        // À la souris, cliquer n'importe où dans la loupe atterrit aussi.
-        _loupeEl.addEventListener('click', atterrirDepuisLoupe);
         document.body.appendChild(_loupeEl);
     }
 
@@ -8955,7 +8952,32 @@ function activerLoupe() {
     // mais « ça marche parfois », le pire à diagnostiquer.
     document.addEventListener('pointermove', _surPointeurLoupe, true);
     document.addEventListener('pointerdown', _surPointeurLoupe, true);
+    // ⚠⚠ LE CLIC S'ÉCOUTE SUR LE CANEVAS, PAS SEULEMENT SUR LE CADRE.
+    // Défaut rapporté par Grégoire le 11 août, capture à l'appui : « quand je
+    // clique, il ne se passe rien ». Le premier jet n'attachait l'atterrissage
+    // qu'au cadre de la loupe — or le cadre se place AU-DESSUS du pointeur, et
+    // le geste naturel est de cliquer sur le bloc qu'on vise, dans la carte.
+    // On regardait au bon endroit et on cliquait au bon endroit ; c'est le
+    // code qui écoutait ailleurs.
+    document.addEventListener('click', _surClicLoupe, true);
     majBoutonLoupe();
+}
+
+/**
+ * Atterrir au clic — que le clic tombe dans la carte ou dans le cadre.
+ * Hors des deux (barre d'outils, palettes), on laisse le clic vivre sa vie :
+ * sinon le bouton qui ÉTEINT la loupe deviendrait inatteignable.
+ */
+function _surClicLoupe(e) {
+    if (!etat.loupeActive || !zoneTravail) return;
+    var dansCadre = _loupeEl && e.target && _loupeEl.contains(e.target);
+    var r = zoneTravail.getBoundingClientRect();
+    var dansCarte = e.clientX >= r.left && e.clientX <= r.right
+                 && e.clientY >= r.top && e.clientY <= r.bottom;
+    if (!dansCadre && !dansCarte) return;
+    e.preventDefault();
+    e.stopPropagation();
+    atterrirDepuisLoupe();
 }
 
 function desactiverLoupe() {
@@ -8966,6 +8988,7 @@ function desactiverLoupe() {
     majBarreAlignement();
     document.removeEventListener('pointermove', _surPointeurLoupe, true);
     document.removeEventListener('pointerdown', _surPointeurLoupe, true);
+    document.removeEventListener('click', _surClicLoupe, true);
     majBoutonLoupe();
 }
 

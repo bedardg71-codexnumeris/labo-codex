@@ -29,7 +29,8 @@
                 'Six commandes d’alignement — à gauche, au centre, à droite, en haut, au milieu, en bas — dans une petite barre qui apparaît d’elle-même dès que deux blocs sont sélectionnés.',
                 'Une leçon alignée emmène ses activités : elle ne se détache jamais de son contenu.',
                 'Un seul ⌘Z défait un alignement complet.',
-                'Tout fonctionne au doigt sur iPad : les boutons font 44 px et l’aimant tient compte du zoom, pour ne pas happer la carte entière quand tu es en vue d’ensemble.'
+                'Tout fonctionne au doigt sur iPad : les boutons font 44 px et l’aimant tient compte du zoom, pour ne pas happer la carte entière quand tu es en vue d’ensemble.',
+                'Loupe : cliquer directement dans la carte t’y emmène — avant, seul un clic dans le cadre de la loupe fonctionnait. Et le pointeur devient un petit rectangle aux proportions de la loupe, qui montre la zone que tu vas examiner.'
             ]
         },
         {
