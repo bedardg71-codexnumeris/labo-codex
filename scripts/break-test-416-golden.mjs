@@ -17,21 +17,40 @@ const EXPORT = path.join(racine, 'js', 'planification-export.js');
 
 const cassures = [
     ['un libellé de colonne change (Pondération → Poids)',
-        "'Évaluation', 'Pondération (%)', 'Échéance'],",
-        "'Évaluation', 'Poids (%)', 'Échéance'],"],
+        "ponderation: { libelle: 'Pondération (%)'",
+        "ponderation: { libelle: 'Poids (%)'"],
     ['une colonne change de place (Semaine avant Leçon)',
-        "sommaire: ['Séquence', 'Leçon', 'Semaine', 'Évaluation'",
-        "sommaire: ['Séquence', 'Semaine', 'Leçon', 'Évaluation'"],
+        "sommaire:    ['sequence', 'lecon', 'semaine', 'evaluation'",
+        "sommaire:    ['sequence', 'semaine', 'lecon', 'evaluation'"],
     ['une espace de plus dans le séparateur des objectifs',
-        "            ? lecon.objectifs.join(' ; ')\n            : (lecon.objectifDerive || '');\n        var cellules = base.concat([",
-        "            ? lecon.objectifs.join(' ;  ')\n            : (lecon.objectifDerive || '');\n        var cellules = base.concat(["],
-    ['le préfixe fixe du personnalisé perd une colonne',
-        "    var colonnes = ['Séquence', 'Leçon', 'Semaine'];",
-        "    var colonnes = ['Séquence', 'Leçon'];"],
+        "? c.lecon.objectifs.join(' ; ')",
+        "? c.lecon.objectifs.join(' ;  ')"],
+    ['le préfixe du gabarit personnalisé perd une colonne',
+        "    var colonnes = ['sequence', 'lecon', 'semaine'];",
+        "    var colonnes = ['sequence', 'lecon'];"],
     ['une durée nulle sort « 0 » au lieu de vide',
-        '            lecon.dureeRollup || \'\',',
-        '            lecon.dureeRollup || 0,'],
+        "        return c.estLecon ? (c.lecon.dureeRollup || '') : (c.el ? (c.el.duree || '') : '');",
+        "        return c.estLecon ? (c.lecon.dureeRollup || 0) : (c.el ? (c.el.duree || 0) : 0);"],
+
+    // --- Invariants introduits par le catalogue (#416 lot G) ---
+    ['une ligne d’ÉLÉMENT répète les objectifs de sa leçon',
+        "        if (!c.estLecon) return '';\n        return c.lecon.objectifs.length > 0",
+        "        return c.lecon.objectifs.length > 0"],
+    ['la séquence vide ne rend plus son étendue dans la colonne Semaine',
+        "        if (c.etendue !== undefined) return etendueTexteTSV(c.etendue);",
+        "        if (false) return etendueTexteTSV(c.etendue);"],
+    ['le plan de cours cesse de n’émettre que les évaluations',
+        "        evaluationsSeulement: niveauId === 'sommaire',",
+        "        evaluationsSeulement: false,"],
 ];
+
+// ⚠ UNE CASSURE RETIRÉE DU BANC, ET POURQUOI. « Retirer `!c.estLecon` de
+// `prodDe` » restait VERTE — et c'est exact : le rendeur ne pose jamais `el`
+// sur une ligne de leçon, donc `c.el && …` suffit déjà. Le `!c.estLecon` dit
+// l'intention sur place (une ligne de leçon ne s'attribue rien de ses
+// éléments) mais ne décide de rien tant que le rendeur tient sa promesse. Le
+// garder au banc aurait exigé un contexte que le code ne construit jamais —
+// c'est-à-dire un test qui n'observe rien.
 
 const original = readFileSync(EXPORT, 'utf8');
 let rouges = 0, verts = [];

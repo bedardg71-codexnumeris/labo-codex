@@ -167,6 +167,27 @@ function poserFixture(api) {
     sseq.enfants = ['lecon-3'];
     seq1.enfants = ['lecon-1', 'lecon-2', 'seq-2'];
 
+    // Une séquence qui n'organise que des SOUS-SÉQUENCES : elle n'a ni leçon
+    // ni élément propre, et sort donc en ligne « sans contenu » — le seul
+    // chemin où la colonne Semaine rend une ÉTENDUE (« 6–8 ») au lieu d'un
+    // numéro (#152). L'étendue est DÉRIVÉE de ses descendants, jamais stockée :
+    // une séquence réellement vide n'en aurait aucune, et ne prouverait rien.
+    // Sans ce cas, le chemin ne sortait dans aucune référence — le banc de
+    // cassure l'a montré en restant vert.
+    const seqChapeau = noeud('seq-chapeau', 'sequence', 'Parcours d’intégration');
+    const sousA = noeud('seq-integ-a', 'sequence', 'Atelier long', { parent: 'seq-chapeau' });
+    const lA = noeud('lecon-integ-a', 'lecon', 'Mise en chantier', {
+        parent: 'seq-integ-a', metadata: { semaine: 6 }
+    });
+    const sousB = noeud('seq-integ-b', 'sequence', 'Présentations', { parent: 'seq-chapeau' });
+    const lB = noeud('lecon-integ-b', 'lecon', 'Soutenance', {
+        parent: 'seq-integ-b', metadata: { semaine: 8, rangSeance: 1 }
+    });
+    sousA.enfants = ['lecon-integ-a'];
+    sousB.enfants = ['lecon-integ-b'];
+    seqChapeau.enfants = ['seq-integ-a', 'seq-integ-b'];
+    void lA; void lB;
+
     noeud('im-1', 'idee-maitresse', 'maîtriser la description réaliste');
     // Ni semaine ni rang : l'autre état dégradé.
     noeud('lecon-orph', 'lecon', 'Récupération libre');
