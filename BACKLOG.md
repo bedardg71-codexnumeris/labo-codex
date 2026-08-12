@@ -674,6 +674,20 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - ~~**Question à Grégoire** : le veut-on encore ?~~
   - ⚠ Ne pas confondre avec `critere.niveauSOLO` (`grilles.js:2958` et `:3254`), qui existe et porte sur les **critères de grille** — autre objet, déjà livré, et déjà relié au guide par la popup `grille-niveau-solo`.
 
+### Modèle du cours — contradiction relevée en Cowork (12 août 2026)
+
+- [ ] **📐 #455** Le cours est-il **global** ou **par session** ? Deux fichiers répondent l'inverse, à trois jours d'écart — créé 12 août 2026 (constat Cowork, en préparant l'export calendrier #416).
+  - **Comment c'est sorti** : Grégoire lit `coursId: "h2026-601-101-MQ-00001"` sur son groupe-cours **A2026** et demande si c'est une erreur. Réponse courte : non, il confondait le NOM du groupe-cours (« A2026-601-101-MQ-00007 ») avec l'ID du cours. Mais la vérification qui suit a trouvé autre chose.
+  - **Les deux énoncés, incompatibles** :
+    1. `js/planification-donnees.js` (7 août, #407, en tête de fichier) : « le cours est une collection **GLOBALE** (`db.getSync('cours', [])`, jamais préfixée) — **601-101 est le même objet d'un trimestre à l'autre** ». C'est ce qui fonde le `coursId` comme « la seule identité de la carte qui survive au changement de trimestre ».
+    2. `js/trimestre-v2-cours.js` (10 août, #442, `_tupleCoursNaturel`) : l'identité naturelle d'un cours est le tuple **`code|SESSION+ANNÉE`**, soit `601-101-MQ|H2026`. Sous cette règle, un 601-101 d'automne est un objet **distinct**.
+  - **L'objet réel de Grégoire** (relevé au navigateur, 12 août) : un seul cours dans le magasin global, `id: h2026-601-101-MQ-00001`, portant `session: "H"`, `annee: 2026`, `trimestreId: "h2026"`, `actif: false`. Son groupe-cours A2026 (`GC_1786388814118_2_3068cb8e2a5b`) pointe dessus.
+  - **Aujourd'hui, aucune conséquence visible** : la résolution des séances passe par le **groupe-cours**, qui vit dans `a2026_groupesCours` — namespacé, donc bien d'automne, avec ses 30 séances du 21 août au 11 décembre 2026.
+  - ⚠ **Demain, si** une session crée un cours 601-101 d'**automne** : le tuple diffère (`601-101-MQ|A2026`), `_fusionnerListeCoursDansCours` le laisse entrer légitimement, et **deux cours coexistent pour la même chose**. Une carte rattachée à l'un ne verra pas les groupes de l'autre — famille de #346 (coursId non migré) et #454 (ressource renumérotée jamais repointée).
+  - **Piège de lecture, à documenter quelle que soit la décision** : l'ID d'un cours **embarque le trimestre de sa création** (`h2026-…`) sans que ce soit une donnée à lire. Il ressemble à de l'information et n'en est pas. Grégoire et la session Cowork y sont tombés tous les deux dans la même conversation — c'est la définition d'un piège, pas d'une maladresse.
+  - **À trancher avant tout code** : lequel des deux modèles fait foi ? Puis mettre l'autre fichier en accord — et, si c'est « global », décider quoi faire des champs `session`/`annee`/`trimestreId` portés par l'objet cours (les retirer, ou les documenter comme historiques et non décisionnels).
+  - ⛔ **Pas un correctif d'export.** Toucher à l'identité du cours touche productions, évaluations, séances et cartes : séance dédiée, backup + dry-run + golden master, comme tout item qui écrit sur des données réelles.
+
 ### Audit performance + logique 5 août 2026 (soir) — versement trié (rapport `Rapports/AUDIT-PERF-LOGIQUE-2026-08-05.md`)
 
 > Chaque item cite ses sections du rapport (gravité, sonde/repro, `fichier:ligne`, correctif
