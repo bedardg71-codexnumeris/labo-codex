@@ -109,22 +109,47 @@ describe('Ce qui a une ligne, et ce qui n’en a pas (#416 lot I)', () => {
 });
 
 describe('Les deux formats, et celui qui est refusé (#416 lot I)', () => {
-    it('le Markdown sort en TABLEAU, pas en sections', () => {
+    it('le Markdown sort en SECTIONS, pas en tableau', () => {
+        // ⚠ CE CAS DISAIT L'INVERSE JUSQU'AU 12 AOÛT. Le lot I produisait un
+        // tableau Markdown ; verdict terrain : « pas vraiment utilisable
+        // puisque les caractères | ne sont pas alignés ». Le vrai motif est
+        // en dessous — Pages n'interprète pas le Markdown, donc aucun
+        // alignement n'aurait produit un tableau à l'arrivée.
         const md = exporteur.genererExport('calendrier', 'markdown', null, AVEC_MATIN);
-        const lignes = md.split('\n');
 
-        expect(lignes[0]).toBe('| Semaine | Séance | Date | Contenu | Évaluations | Travail personnel |');
-        expect(lignes[1]).toBe('| --- | --- | --- | --- | --- | --- |');
-        expect(md).not.toContain('### ');
+        expect(md).toContain('### Semaine 3');
+        expect(md).toContain('- **Date** : 2026-09-08');
+        expect(md).not.toContain('| --- |');
+    });
+
+    it('la PREMIÈRE colonne titre la section, les autres sont des champs', () => {
+        // Règle explicite, pas devinette : l'utilisateur ordonne ses colonnes,
+        // donc il choisit ce qui titre.
+        const md = exporteur.genererExport('calendrier', 'markdown', null, AVEC_MATIN);
+        const bloc = md.split('### ')[1];
+
+        expect(bloc.startsWith('Semaine 3')).toBe(true);
+        expect(bloc).toContain('- **Séance** : A');
+    });
+
+    it('une cellule VIDE est omise — un document n’a pas de colonnes à tenir', () => {
+        const md = exporteur.genererExport('calendrier', 'markdown', null, AVEC_MATIN);
+
+        // La semaine 5 n'a rien : elle garde sa section, avec une mention.
+        expect(md).toContain('### Semaine 5');
+        expect(md).toContain('- *(rien de prévu)*');
+        // Aucun champ vide nulle part.
+        expect(md).not.toMatch(/- \*\*[^*]+\*\* : *$/m);
     });
 
     it('les deux formats disent la MÊME chose, dans deux mises en forme', () => {
         const tsv = exporteur.genererExport('calendrier', 'tsv', null, AVEC_MATIN);
         const md = exporteur.genererExport('calendrier', 'markdown', null, AVEC_MATIN);
 
-        // Une seule traversée de la carte, deux formateurs : le nombre de
-        // lignes doit coïncider (au trait de séparation Markdown près).
-        expect(md.trim().split('\n').length).toBe(tsv.trim().split('\n').length + 1);
+        // Une seule traversée de la carte, deux formateurs : autant de sections
+        // que de lignes de données.
+        const sections = (md.match(/^### /gm) || []).length;
+        expect(sections).toBe(tsv.trim().split('\n').length - 1);
         expect(md).toContain('Exposé magistral sur le réalisme · Atelier d’analyse en équipe');
     });
 
@@ -133,16 +158,16 @@ describe('Les deux formats, et celui qui est refusé (#416 lot I)', () => {
         expect(exporteur.genererExport('calendrier', 'texte', null, AVEC_MATIN)).toBeNull();
     });
 
-    it('une barre verticale dans un titre n’ouvre pas une colonne de plus', () => {
+    it('une barre verticale dans un titre n’a plus besoin d’être échappée', () => {
+        // Le tableau Markdown l'exigeait — la barre y séparait les colonnes.
+        // En sections, elle n'est qu'un caractère : l'échapper ajouterait une
+        // contre-oblique dans le titre de Grégoire sans raison.
         const { carte, exporteur: exp } = monterExportSandbox();
-        const n = carte.etat.noeuds.get('act-2');
-        n.titre = 'Pastiche | descriptif';
+        carte.etat.noeuds.get('act-2').titre = 'Pastiche | descriptif';
 
         const md = exp.genererExport('calendrier', 'markdown', null, AVEC_MATIN);
-        const ligne = md.split('\n').find(function(l) { return l.includes('Pastiche'); });
 
-        expect(ligne).toContain('Pastiche \\| descriptif');
-        // Six colonnes : sept barres, pas huit.
-        expect((ligne.match(/(?<!\\)\|/g) || []).length).toBe(7);
+        expect(md).toContain('Pastiche | descriptif');
+        expect(md).not.toContain('Pastiche \\| descriptif');
     });
 });
