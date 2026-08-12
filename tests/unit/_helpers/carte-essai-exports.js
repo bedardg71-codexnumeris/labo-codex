@@ -158,6 +158,14 @@ function poserFixture(api) {
     });
     l2.enfants = ['act-2'];
 
+    // Un élément posé DIRECTEMENT sous une séquence, sans passer par une
+    // leçon. Il a sa ligne en granularité nœuds ; il ne doit PAS en avoir une
+    // dans un calendrier, où une ligne est une rencontre. Sans lui, ce chemin
+    // ne sortait dans aucune référence — le banc de cassure l'a montré.
+    noeud('act-hors-lecon', 'activite', 'Lecture obligatoire du recueil', {
+        parent: 'seq-1', metadata: { duree: 20 }
+    });
+
     const sseq = noeud('seq-2', 'sequence', 'Sous-parcours poésie', { parent: 'seq-1' });
     // Semaine posée, rang ABSENT : l'état dégradé « pas de rang » doit se voir
     // dans le golden, sinon rien ne le fige.
@@ -165,7 +173,7 @@ function poserFixture(api) {
         parent: 'seq-2', metadata: { semaine: 5 }
     });
     sseq.enfants = ['lecon-3'];
-    seq1.enfants = ['lecon-1', 'lecon-2', 'seq-2'];
+    seq1.enfants = ['lecon-1', 'lecon-2', 'act-hors-lecon', 'seq-2'];
 
     // Une séquence qui n'organise que des SOUS-SÉQUENCES : elle n'a ni leçon
     // ni élément propre, et sort donc en ligne « sans contenu » — le seul
