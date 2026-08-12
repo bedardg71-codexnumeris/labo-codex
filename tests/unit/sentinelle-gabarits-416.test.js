@@ -29,7 +29,7 @@ function monter(prefsInitiales) {
 
 beforeEach(() => { monter(); });
 
-describe('Les gabarits d’usine (#416 lot H)', () => {
+describe('Les gabarits génériques (#416 lot H)', () => {
     it('les quatre sont offerts, sans avoir jamais été persistés', () => {
         expect(exporteur.listerGabarits().map((g) => g.id))
             .toEqual(['sommaire', 'deroulement', 'alignement', 'calendrier']);
@@ -37,11 +37,11 @@ describe('Les gabarits d’usine (#416 lot H)', () => {
         expect(prefs.exportGabarits).toEqual([]);
     });
 
-    it('ils se déclarent d’usine — l’interface doit pouvoir les protéger', () => {
-        expect(exporteur.listerGabarits().every((g) => g.dUsine === true)).toBe(true);
+    it('ils se déclarent génériques — l’interface doit pouvoir les protéger', () => {
+        expect(exporteur.listerGabarits().every((g) => g.generique === true)).toBe(true);
     });
 
-    it('un gabarit d’usine ne s’écrase PAS, même si l’appelant insiste', () => {
+    it('un gabarit générique ne s’écrase PAS, même si l’appelant insiste', () => {
         const resultat = exporteur.enregistrerGabarit({
             id: 'calendrier', nom: 'Détourné', colonnes: ['lecon'], granularite: 'noeuds'
         });
@@ -54,7 +54,7 @@ describe('Les gabarits d’usine (#416 lot H)', () => {
     it('il se DUPLIQUE — le seul chemin vers un gabarit modifiable', () => {
         const copie = exporteur.dupliquerGabarit('calendrier');
 
-        expect(copie.dUsine).toBe(false);
+        expect(copie.generique).toBe(false);
         expect(copie.nom).toBe('Calendrier (copie)');
         expect(copie.colonnes).toEqual(exporteur.trouverGabarit('calendrier').colonnes);
         // La copie est indépendante : modifier l'une ne touche pas l'autre.
@@ -78,7 +78,7 @@ describe('La migration du « Personnalisé » de #431 (#416 lot H)', () => {
         const migre = exporteur.listerGabarits().find((g) => g.id === 'gab-migre-431');
         expect(migre).toBeDefined();
         expect(migre.nom).toBe('Mon export personnalisé');
-        expect(migre.dUsine).toBe(false);
+        expect(migre.generique).toBe(false);
     });
 
     it('il garde l’ORDRE des sections choisi — la traduction n’est pas réinventée', () => {
@@ -163,7 +163,7 @@ describe('La migration du « Personnalisé » de #431 (#416 lot H)', () => {
         exporteur.listerGabarits();
 
         expect(prefs.exportGabarits).toEqual([]);
-        expect(exporteur.listerGabarits().every((g) => g.dUsine)).toBe(true);
+        expect(exporteur.listerGabarits().every((g) => g.generique)).toBe(true);
     });
 });
 
@@ -175,7 +175,7 @@ describe('Ce que le magasin refuse de croire (#416 lot H)', () => {
             { id: 'gab-3', nom: 'Sans colonnes', colonnes: [] }
         ] });
 
-        expect(exporteur.listerGabarits().filter((g) => !g.dUsine).map((g) => g.id)).toEqual(['gab-1']);
+        expect(exporteur.listerGabarits().filter((g) => !g.generique).map((g) => g.id)).toEqual(['gab-1']);
     });
 
     it('une colonne inconnue est retirée sans emporter le gabarit', () => {
@@ -204,7 +204,7 @@ describe('Ce que le magasin refuse de croire (#416 lot H)', () => {
             'pas un objet'
         ] });
 
-        const propres = exporteur.listerGabarits().filter((g) => !g.dUsine);
+        const propres = exporteur.listerGabarits().filter((g) => !g.generique);
         expect(propres).toHaveLength(1);
         expect(propres[0].nom).toBe('Gabarit sans nom');
     });
@@ -239,7 +239,7 @@ describe('Le document d’un gabarit (#416 lot H)', () => {
         expect(exporteur.genererDepuisGabarit('calendrier', 'markdown', { groupeCoursId: 'GC_MATIN' })).toBeTruthy();
     });
 
-    it('le gabarit d’usine « Plan de cours » garde sa règle de lignes', () => {
+    it('le gabarit générique « Plan de cours » garde sa règle de lignes', () => {
         // Il n'émet que les évaluations : c'est une propriété du gabarit, pas
         // de ses colonnes. La perdre en passant par le magasin produirait un
         // document différent sous le même nom.

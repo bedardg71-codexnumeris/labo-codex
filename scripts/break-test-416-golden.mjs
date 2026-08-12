@@ -52,7 +52,7 @@ const cassures = [
 // ⚠ UNE CASSURE DÉPLACÉE, ET POURQUOI. « Le préfixe du gabarit personnalisé
 // perd une colonne » visait `colonnesPersonnalisees`. Au lot H, le niveau
 // « Personnalisé » a disparu et ses références avec lui : casser cette
-// fonction ne change plus AUCUNE sortie d'usine, donc le golden ne pouvait
+// fonction ne change plus AUCUNE sortie générique, donc le golden ne pouvait
 // plus la voir. Elle n'est pas morte pour autant — elle traduit l'ancien
 // réglage de Grégoire en colonnes pendant la MIGRATION. La cassure vit
 // désormais dans `break-test-416-gabarits.mjs`, où elle a un objet.

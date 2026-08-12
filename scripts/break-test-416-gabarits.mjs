@@ -27,7 +27,7 @@ const cassures = [
         '    var suite = gabaritsExistants.concat([migre]);'],
     ['la migration réinvente la traduction au lieu de reprendre celle de #431',
         '    var colonnes = colonnesPersonnalisees(incDepuisConfig(cfg), cfg.ordre);',
-        "    var colonnes = COLONNES_USINE.deroulement.slice();"],
+        "    var colonnes = COLONNES_GENERIQUES.deroulement.slice();"],
 
     // --- Ce que le magasin doit refuser ---
     ['un gabarit sans colonne connue est rendu vide au lieu d’être écarté',
@@ -46,13 +46,13 @@ const cassures = [
         "    var n = 1;\n    var pris = {};\n    existants.forEach(function(g) { pris[g.id] = true; });\n    while (pris['gab-' + n]) n++;\n    return 'gab-' + n;",
         "    return 'gab-1';"],
 
-    // --- Ce qui protège les gabarits d'usine ---
-    ['un gabarit d’usine peut être écrasé',
-        '    if (gaba' + 'ritsDUsine().some(function(g) { return g.id === propre.id; })) return null;',
+    // --- Ce qui protège les gabarits génériques ---
+    ['un gabarit générique peut être écrasé',
+        '    if (gabaritsGeneriques().some(function(g) { return g.id === propre.id; })) return null;',
         '    if (false) return null;'],
-    ['les gabarits d’usine se déclarent modifiables',
-        "        { id: 'calendrier', nom: 'Calendrier', dUsine: true,",
-        "        { id: 'calendrier', nom: 'Calendrier', dUsine: false,"],
+    ['les gabarits génériques se déclarent modifiables',
+        "        { id: 'calendrier', nom: 'Calendrier', generique: true,",
+        "        { id: 'calendrier', nom: 'Calendrier', generique: false,"],
 
     // --- Ce que le gabarit produit ---
     ['un gabarit accepte le format Texte et rend un document dégradé',
@@ -63,13 +63,13 @@ const cassures = [
         '        evaluationsSeulement: false'],
     ['un identifiant inconnu rend un document par défaut',
         '    var gabarit = trouverGabarit(idGabarit);\n    if (!gabarit) return null;',
-        '    var gabarit = trouverGabarit(idGabarit) || gabaritsDUsine()[0];'],
+        '    var gabarit = trouverGabarit(idGabarit) || gabaritsGeneriques()[0];'],
 ];
 
 // ⚠ UNE CASSURE RETIRÉE DU BANC, ET POURQUOI. « La duplication partage les
 // colonnes de l'original » restait VERTE — et c'est exact : ni les gabarits
-// d'usine ni ceux de l'utilisateur ne sont jamais rendus deux fois depuis le
-// même objet. `gabaritsDUsine()` les reconstruit à chaque appel, et
+// générique ni ceux de l'utilisateur ne sont jamais rendus deux fois depuis le
+// même objet. `gabaritsGeneriques()` les reconstruit à chaque appel, et
 // `lireGabaritsUtilisateur` les re-normalise depuis le stockage. Le `.slice()`
 // de la duplication est une troisième ceinture, utile le jour où l'une des
 // deux autres tombera, mais inobservable tant qu'elles tiennent.

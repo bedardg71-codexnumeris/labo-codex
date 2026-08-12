@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { monterExportSandbox } from './_helpers/carte-essai-exports.js';
 
-// LE GABARIT D'USINE « CALENDRIER » (#416 lot I).
+// LE GABARIT GÉNÉRIQUE « CALENDRIER » (#416 lot I).
 //
 // Six colonnes — Semaine · Séance · Date · Contenu · Évaluations · Travail
 // personnel — et une ligne par rencontre. C'est le déroulement que Grégoire

@@ -1,15 +1,15 @@
-// Fige les douze sorties d'usine comme références bit-à-bit (#416 lot G).
+// Fige les douze sorties génériques comme références bit-à-bit (#416 lot G).
 //
 // ⚠ À NE LANCER QUE DÉLIBÉRÉMENT. Ce script ÉCRASE les références. Le lot G
 // fond les préréglages dans les gabarits ; sa preuve est que les quatre
-// sorties d'usine ne bougent pas d'un octet. Régénérer les références pendant
+// sorties génériques ne bougent pas d'un octet. Régénérer les références pendant
 // le refactor reviendrait à valider le résultat avec lui-même.
 //
 // Usage : node scripts/figer-golden-exports-416.mjs
 //         node scripts/figer-golden-exports-416.mjs --verifier   (ne rien écrire)
 import { writeFileSync, readFileSync, mkdirSync, existsSync } from 'node:fs';
 import path from 'node:path';
-import { monterExportSandbox, SORTIES_USINE } from '../tests/unit/_helpers/carte-essai-exports.js';
+import { monterExportSandbox, SORTIES_GENERIQUES } from '../tests/unit/_helpers/carte-essai-exports.js';
 
 const racine = path.resolve(import.meta.dirname, '..');
 const dossier = path.join(racine, 'tests', 'fixtures', 'golden-exports-416');
@@ -21,7 +21,7 @@ const { exporteur } = monterExportSandbox();
 
 let ecrits = 0, identiques = 0, differents = [];
 
-for (const { niveau, format } of SORTIES_USINE) {
+for (const { niveau, format } of SORTIES_GENERIQUES) {
     const nom = `${niveau}.${format}.txt`;
     const chemin = path.join(dossier, nom);
     const sortie = exporteur.genererExport(niveau, format);
@@ -43,7 +43,7 @@ for (const { niveau, format } of SORTIES_USINE) {
 }
 
 if (verifierSeulement) {
-    console.log(`${identiques}/${SORTIES_USINE.length} identiques.`);
+    console.log(`${identiques}/${SORTIES_GENERIQUES.length} identiques.`);
     if (differents.length) {
         console.log('DIFFÈRENT : ' + differents.join(' · '));
         process.exit(1);
