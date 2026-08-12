@@ -118,10 +118,18 @@
         tourGuide_etapes_vues: [],
 
         // Export du plan — niveau « Personnalisé » (#431, 8 août 2026).
-        // null = jamais réglé (la modale part alors du preset « En classe »).
-        // Forme : { contenus: {…8 drapeaux}, ordre: [ids de sections] } —
-        // normalisée par js/planification-export.js à la lecture.
-        exportPlanPersonnalise: null
+        // ⚠ REMPLACÉE par exportGabarits (#416 lot H, 12 août 2026). Elle
+        // subsiste ici le temps que la migration la lise ; elle est effacée
+        // (mise à null) dès qu'un gabarit en a été tiré, et la clé partira
+        // quand plus aucun codex en circulation ne pourra la porter.
+        // Forme : { contenus: {…8 drapeaux}, ordre: [ids de sections] }.
+        exportPlanPersonnalise: null,
+
+        // Gabarits d'export nommés (#416 lot H, 12 août 2026).
+        // [] = aucun gabarit propre ; les gabarits D'USINE ne vivent pas ici,
+        // ils sont dans le code (on ne persiste pas ce qu'on n'édite pas).
+        // Forme : [{ id, nom, granularite, colonnes: [ids], renommages: {} }]
+        exportGabarits: []
     };
 
     // Abonnés : { cle: [callback, callback, ...] }
