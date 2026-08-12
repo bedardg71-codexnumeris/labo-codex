@@ -721,8 +721,42 @@ var CATALOGUE_COLONNES = {
         var p = prodDe(c);
         if (p) return p.nomProduction;
         return c.el ? c.el.titre : '';
+    } },
+
+    // --- Colonnes de la granularité « une ligne par séance » ---------------
+    //
+    // Elles n'ont de sens que sur une ligne de leçon qui AGRÈGE ses éléments :
+    // en granularité « nœuds », chaque élément a déjà sa propre ligne, et
+    // répéter ici la liste complète ferait dire deux fois la même chose.
+    // D'où le vide hors du mode séance — ce n'est pas une valeur manquante,
+    // c'est la même information rendue ailleurs.
+    date:        { libelle: 'Date',            valeur: function(c) {
+        return c.lecon && c.lecon.date ? c.lecon.date : '';
+    } },
+    rangSeance:  { libelle: 'Séance',          valeur: function(c) {
+        if (!c.lecon || !c.lecon.rangSeance) return '';
+        // La LETTRE à l'affichage, l'entier au stockage (#416 lot A, D1).
+        return String.fromCharCode(64 + c.lecon.rangSeance);
+    } },
+    contenu:     { libelle: 'Contenu',         valeur: function(c) {
+        return joindreTitres(elementsAgreges(c, 'activite'));
+    } },
+    evaluations: { libelle: 'Évaluations',     valeur: function(c) {
+        return joindreTitres(elementsAgreges(c, 'evaluation'));
     } }
 };
+
+/** Le séparateur des cellules qui agrègent : lisible en tableur, sur une ligne. */
+function joindreTitres(elements) {
+    return elements.map(function(el) {
+        return el.production ? el.production.nomProduction : el.titre;
+    }).join(' · ');
+}
+
+function elementsAgreges(c, categorie) {
+    if (!c.agregeSaLecon || !c.lecon) return [];
+    return c.lecon.elements.filter(function(el) { return el.categorie === categorie; });
+}
 
 function prodDe(c) {
     return (!c.estLecon && c.el && c.el.production) ? c.el.production : null;
@@ -803,6 +837,15 @@ function rendreTableau(plan, gabarit) {
     }
 
     function pousserLecon(seqTitre, lecon) {
+        // Granularité « une ligne par séance » : la leçon EST la ligne, et ses
+        // éléments sont agrégés dans les cellules au lieu d'avoir chacun la
+        // sienne. C'est une autre forme de document, pas une autre profondeur
+        // — un calendrier de cours, pas un déroulement.
+        if (gabarit.granularite === 'seances') {
+            pousser({ seqTitre: seqTitre, lecon: lecon, estLecon: true, agregeSaLecon: true });
+            return;
+        }
+
         // Plan de cours : la leçon ne sort que par ses évaluations. Sans
         // évaluation, elle sort quand même — une semaine sans évaluation est
         // une information, pas un vide.
@@ -823,15 +866,23 @@ function rendreTableau(plan, gabarit) {
         });
     }
 
+    // ⚠ En granularité « séance », une ligne EST une rencontre. Ce qui n'est
+    // pas une rencontre n'a pas de ligne : ni la séquence sans contenu, ni les
+    // éléments posés hors leçon. Les faire sortir quand même produirait des
+    // lignes sans date ni séance au milieu d'un calendrier — précisément ce
+    // que ce gabarit sert à éviter.
+    var parSeance = gabarit.granularite === 'seances';
+
     plan.sequences.forEach(function(seq) {
         if (seq.lecons.length === 0 && seq.elements.length === 0) {
+            if (parSeance) return;
             // `etendue` posé : la colonne Semaine rend l'étendue au lieu d'un
             // numéro. C'est le seul endroit où une ligne n'a ni leçon ni élément.
             pousser({ seqTitre: seq.titre, lecon: null, estLecon: false, etendue: seq.etendue });
             return;
         }
         seq.lecons.forEach(function(lecon) { pousserLecon(seq.titre, lecon); });
-        if (!gabarit.evaluationsSeulement) {
+        if (!gabarit.evaluationsSeulement && !parSeance) {
             elementsVisibles(seq.elements, inc).forEach(function(el) {
                 pousser({ seqTitre: seq.titre, lecon: null, el: el, estLecon: false });
             });
@@ -848,9 +899,43 @@ function gabaritDUsine(niveauId) {
     return {
         colonnes: COLONNES_USINE[niveauId],
         inclusions: INCLUSIONS[niveauId],
+        granularite: 'noeuds',
         evaluationsSeulement: niveauId === 'sommaire',
         renommages: null
     };
+}
+
+/**
+ * Complète un gabarit partiel. Les défauts sont ceux du document le plus
+ * riche — un gabarit qui ne dit rien montre tout, plutôt que de masquer en
+ * silence ce qu'on a oublié de demander.
+ */
+function normaliserGabarit(gabarit) {
+    var g = gabarit || {};
+    var colonnes = Array.isArray(g.colonnes) ? g.colonnes.filter(function(id) {
+        return !!CATALOGUE_COLONNES[id];
+    }) : [];
+    return {
+        colonnes: colonnes.length > 0 ? colonnes : COLONNES_USINE.alignement,
+        inclusions: g.inclusions || INCLUSIONS.alignement,
+        granularite: g.granularite === 'seances' ? 'seances' : 'noeuds',
+        evaluationsSeulement: !!g.evaluationsSeulement,
+        renommages: g.renommages || null
+    };
+}
+
+/**
+ * LA porte des formats tabulaires (#416 lot G). Un gabarit est une liste
+ * ordonnée de colonnes, une granularité, et des libellés renommables.
+ *
+ * @param {Object} gabarit - { colonnes, granularite, inclusions, renommages }
+ * @param {Object} [options] - passées à construirePlan (dont `groupeCoursId`,
+ *   qui commande la colonne Date — D9)
+ */
+function genererTableau(gabarit, options) {
+    var plan = construirePlan(options);
+    if (!plan) return null;
+    return rendreTableau(plan, normaliserGabarit(gabarit));
 }
 
 function rendreTSV(plan, niveauId) {
@@ -1049,6 +1134,11 @@ window.planificationExport = {
     groupesCoursDeLaCarte: groupesCoursDeLaCarte,
     construireHoraireDeLecons: construireHoraireDeLecons,
     dateDeLecon: dateDeLecon,
+    // #416 lot G — le générateur à trois axes : granularité × colonnes × format.
+    CATALOGUE_COLONNES: CATALOGUE_COLONNES,
+    COLONNES_USINE: COLONNES_USINE,
+    genererTableau: genererTableau,
+    libelleColonne: libelleColonne,
     // #431 — niveau Personnalisé : constantes et portes de la modale.
     SECTIONS_PLAN: SECTIONS_PLAN,
     CONTENUS_PLAN: CONTENUS_PLAN,
