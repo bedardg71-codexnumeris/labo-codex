@@ -21,6 +21,19 @@
 
     var CHANGELOG = [
         {
+            version: '1.77',
+            couleur: 'vert',
+            titre: 'Des gabarits d’export, et un calendrier qui se date tout seul',
+            items: [
+                'Nouveau gabarit « Calendrier » : une ligne par rencontre, avec la semaine, la séance (A, B…), la date, le contenu et les évaluations. C’est le déroulement que tu tiens à la main, produit par l’application.',
+                'La date n’est jamais saisie : elle se déduit de la semaine de la leçon, de son rang dans la semaine et de l’horaire du groupe. Déplace une leçon, corrige un congé — la date suit.',
+                'Quand un cours a plusieurs groupes, l’export demande lequel avant de dater. Avec un seul groupe, il ne demande rien.',
+                'Tu peux créer tes propres gabarits : duplique-en un, choisis les colonnes, mets-les dans l’ordre voulu, renomme-les pour coller aux exigences de ton département.',
+                'Les tableaux s’exportent aussi en Markdown — celui qui se colle dans Pages ou Word en gardant sa forme de tableau.',
+                '⚠ Le niveau « Personnalisé » est remplacé par les gabarits. Ton réglage existant est converti automatiquement en un gabarit nommé « Mon export personnalisé » : rien n’est perdu, tu peux le renommer.'
+            ]
+        },
+        {
             version: '1.76',
             couleur: 'vert',
             titre: 'Une leçon peut dire à quelle séance de la semaine elle a lieu',
