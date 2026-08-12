@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            version: '1.78',
+            couleur: 'vert',
+            titre: 'Le travail hors classe ne compte plus dans le temps de classe',
+            items: [
+                'Dans l’Inspecteur, une activité ou une évaluation peut être marquée « Travail hors classe » : une lecture à faire à la maison, un artefact à remettre entre deux séances.',
+                'Ce temps-là SORT du total de la leçon. Le compteur de l’en-tête et la jauge du planificateur ne disent plus que du temps de classe — c’est ce qui permet de décider quoi couper.',
+                'Un nœud marqué hors classe n’a plus de champ Durée : la question ne se pose pas, plutôt que d’être grisée.',
+                'Dans le gabarit Calendrier, ces éléments remplissent la colonne « Travail personnel » — et ils quittent les colonnes Contenu et Évaluations, pour ne jamais apparaître deux fois sur la même ligne.'
+            ]
+        },
+        {
             version: '1.77',
             couleur: 'vert',
             titre: 'Des gabarits d’export, et un calendrier qui se date tout seul',
