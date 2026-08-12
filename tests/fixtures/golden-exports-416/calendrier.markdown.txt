@@ -1,7 +1,22 @@
-| Semaine | Séance | Date | Contenu | Évaluations | Travail personnel |
-| --- | --- | --- | --- | --- | --- |
-| 3 | A |  | Exposé magistral sur le réalisme · Atelier d’analyse en équipe | Dissertation critique |  |
-| 3 | B |  | Pastiche descriptif |  |  |
-| 5 |  |  |  |  |  |
-| 6 |  |  |  |  |  |
-| 8 | A |  |  |  |  |
+### Semaine 3
+
+- **Séance** : A
+- **Contenu** : Exposé magistral sur le réalisme · Atelier d’analyse en équipe
+- **Évaluations** : Dissertation critique
+
+### Semaine 3
+
+- **Séance** : B
+- **Contenu** : Pastiche descriptif
+
+### Semaine 5
+
+- *(rien de prévu)*
+
+### Semaine 6
+
+- *(rien de prévu)*
+
+### Semaine 8
+
+- **Séance** : A

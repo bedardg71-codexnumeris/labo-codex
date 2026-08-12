@@ -28,7 +28,9 @@
                 'Dans l’Inspecteur, une activité ou une évaluation peut être marquée « Travail hors classe » : une lecture à faire à la maison, un artefact à remettre entre deux séances.',
                 'Ce temps-là SORT du total de la leçon. Le compteur de l’en-tête et la jauge du planificateur ne disent plus que du temps de classe — c’est ce qui permet de décider quoi couper.',
                 'Un nœud marqué hors classe n’a plus de champ Durée : la question ne se pose pas, plutôt que d’être grisée.',
-                'Dans le gabarit Calendrier, ces éléments remplissent la colonne « Travail personnel » — et ils quittent les colonnes Contenu et Évaluations, pour ne jamais apparaître deux fois sur la même ligne.'
+                'Dans le gabarit Calendrier, ces éléments remplissent la colonne « Travail personnel » — et ils quittent les colonnes Contenu et Évaluations, pour ne jamais apparaître deux fois sur la même ligne.',
+                'Le Calendrier exporté en Markdown sort désormais en sections (« ### Semaine 3 », puis les champs) et non plus en tableau : coller un tableau Markdown dans Pages ne produisait pas un tableau, seulement des barres verticales.',
+                'Dans l’éditeur de gabarits, une colonne qui ne peut rien afficher dans la présentation choisie est signalée sur place — plutôt que de sortir vide sans explication.'
             ]
         },
         {

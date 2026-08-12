@@ -1023,25 +1023,43 @@ function formaterTSV(matrice) {
 }
 
 /**
- * Tableau Markdown — celui qui se colle dans Pages ou Word.
+ * Markdown en SECTIONS — le format qui se colle utilement dans Pages ou Word.
  *
- * ⚠ La barre verticale est le séparateur de colonnes du format : une cellule
- * qui en contient une couperait la ligne en deux. Elle est échappée, pas
- * retirée — un titre de leçon appartient à son auteur.
+ * ⚠ CE RENDEUR A REMPLACÉ UN TABLEAU MARKDOWN, et le motif vaut d'être gardé.
+ * Le lot I produisait `| Semaine | Séance | … |`. Verdict terrain du 12 août :
+ * « le tableau md n'est pas vraiment utilisable puisque les caractères | ne
+ * sont pas alignés ». Le vrai problème était en dessous : **Pages
+ * n'interprète pas le Markdown**. Aligner les barres aurait rendu le texte
+ * brut plus joli sans jamais produire un tableau à l'arrivée. Pour un vrai
+ * tableau, il y a le TSV et le tableur ; pour un document, il y a ceci.
+ *
+ * ⚠ LA PREMIÈRE COLONNE TITRE LA SECTION. C'est une règle, pas une devinette :
+ * l'utilisateur ordonne ses colonnes (D8), donc il choisit ce qui titre. Les
+ * autres colonnes deviennent des champs, et **les cellules vides sont
+ * omises** — un document n'a pas de colonnes à respecter.
  */
-function echapperCelluleMD(v) {
-    return String(v == null ? '' : v).replace(/\|/g, '\\|');
-}
+function formaterMarkdownSections(matrice) {
+    var morceaux = [];
 
-function formaterMarkdownTableau(matrice) {
-    var lignes = [
-        '| ' + matrice.entetes.map(echapperCelluleMD).join(' | ') + ' |',
-        '|' + matrice.entetes.map(function() { return ' --- '; }).join('|') + '|'
-    ];
-    matrice.lignes.forEach(function(l) {
-        lignes.push('| ' + l.map(echapperCelluleMD).join(' | ') + ' |');
+    matrice.lignes.forEach(function(cellules) {
+        var titre = String(cellules[0] == null ? '' : cellules[0]).trim();
+        var enTete = matrice.entetes[0] || '';
+        morceaux.push('### ' + (titre ? enTete + ' ' + titre : enTete + ' —'));
+        morceaux.push('');
+
+        var champs = [];
+        for (var i = 1; i < cellules.length; i++) {
+            var v = String(cellules[i] == null ? '' : cellules[i]).trim();
+            if (!v) continue;
+            champs.push('- **' + matrice.entetes[i] + '** : ' + v);
+        }
+        if (champs.length === 0) champs.push('- *(rien de prévu)*');
+
+        morceaux = morceaux.concat(champs);
+        morceaux.push('');
     });
-    return lignes.join('\n') + '\n';
+
+    return morceaux.join('\n');
 }
 
 function rendreTableau(plan, gabarit) {
@@ -1247,7 +1265,7 @@ function genererExport(niveauId, formatId, configEssai, options) {
         plan = construirePlan(options);
         if (!plan) return null;
         var matrice = construireMatrice(plan, normaliserGabarit(GABARIT_CALENDRIER));
-        return formatId === 'markdown' ? formaterMarkdownTableau(matrice) : formaterTSV(matrice);
+        return formatId === 'markdown' ? formaterMarkdownSections(matrice) : formaterTSV(matrice);
     }
 
     if (!INCLUSIONS[niveauId]) return null;
@@ -1510,7 +1528,7 @@ function genererDepuisGabarit(idGabarit, formatId, options) {
         inclusions: INCLUSIONS[gabarit.id] || INCLUSIONS.alignement,
         evaluationsSeulement: gabarit.id === 'sommaire'
     }));
-    return formatId === 'markdown' ? formaterMarkdownTableau(matrice) : formaterTSV(matrice);
+    return formatId === 'markdown' ? formaterMarkdownSections(matrice) : formaterTSV(matrice);
 }
 
 /** Nom de fichier proposé — « <carte>-<niveau><ext> », caractères sûrs. */
@@ -1548,7 +1566,7 @@ window.planificationExport = {
     libelleColonne: libelleColonne,
     // #416 lot I — le gabarit d'usine « Calendrier ».
     GABARIT_CALENDRIER: GABARIT_CALENDRIER,
-    formaterMarkdownTableau: formaterMarkdownTableau,
+    formaterMarkdownSections: formaterMarkdownSections,
     construireMatrice: construireMatrice,
     // #416 lot H — les gabarits nommés.
     listerGabarits: listerGabarits,
