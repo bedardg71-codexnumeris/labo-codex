@@ -882,6 +882,27 @@ function colonnesPersonnalisees(inc, ordre) {
     return colonnes;
 }
 
+/**
+ * Les colonnes qui n'ont de valeur QUE sur une ligne de séance (#416 lot G).
+ *
+ * ⚠ POURQUOI CETTE LISTE EXISTE, et ce qu'elle a coûté de ne pas exister.
+ * `contenu`, `evaluations` et `travailPersonnel` AGRÈGENT les éléments d'une
+ * leçon : en granularité « ligne par élément », chaque élément a déjà sa
+ * propre ligne, et ces cellules sortent VIDES par conception.
+ *
+ * Le code le disait ; l'interface, non. Le 12 août, Grégoire a coché ces trois
+ * colonnes sur un gabarit en « ligne par élément » et a obtenu un tableau dont
+ * la moitié des colonnes étaient vides — sans que rien ne l'avertisse. Un
+ * réglage qui ne peut RIEN produire ne doit pas être offert en silence.
+ */
+var COLONNES_PAR_SEANCE = ['contenu', 'evaluations', 'travailPersonnel'];
+
+/** Cette colonne peut-elle porter une valeur dans cette granularité ? */
+function colonneUtileEn(idColonne, granularite) {
+    if (granularite === 'seances') return true;
+    return COLONNES_PAR_SEANCE.indexOf(idColonne) === -1;
+}
+
 /** Le libellé affiché d'une colonne — renommable par gabarit (D8). */
 function libelleColonne(id, renommages) {
     if (renommages && renommages[id]) return renommages[id];
@@ -1520,6 +1541,8 @@ window.planificationExport = {
     dateDeLecon: dateDeLecon,
     // #416 lot G — le générateur à trois axes : granularité × colonnes × format.
     CATALOGUE_COLONNES: CATALOGUE_COLONNES,
+    COLONNES_PAR_SEANCE: COLONNES_PAR_SEANCE,
+    colonneUtileEn: colonneUtileEn,
     COLONNES_USINE: COLONNES_USINE,
     genererTableau: genererTableau,
     libelleColonne: libelleColonne,

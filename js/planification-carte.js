@@ -2465,15 +2465,12 @@ function ouvrirPanneau(id) {
                     ' Préalable' +
                 '</label>' +
             '</div>';
-        extra.querySelector('#planif-panneau-prealable').addEventListener('change', function(e) {
-            enregistrerPourUndo();
-            if (!donnees.metadata) donnees.metadata = {};
-            donnees.metadata.prealable = e.target.checked;
-            mettreAJourApparenceNoeud(donnees);
-            document.getElementById('planif-panneau-pastille').style.background = obtenirCouleurNoeud(donnees);
-            document.getElementById('planif-panneau-type').textContent = obtenirLabelNoeud(donnees);
-            sauvegarder();
-        });
+        // ⚠ LISTENER POSÉ EN FIN DE `ouvrirPanneau`, pas ici. Il fonctionnait
+        // attaché à cet endroit, mais par CHANCE : aucun bloc ultérieur ne
+        // concerne les types de connaissance, donc aucun `extra.innerHTML +=`
+        // ne venait le détruire. Le jour où l'un d'eux en aurait concerné un,
+        // la case aurait cessé de répondre en silence — c'est exactement ce
+        // qui est arrivé à « Travail hors classe » le 12 août.
     }
 
     // #416 lot B — « Travail hors classe », patron de la case « Préalable ».
@@ -2493,15 +2490,11 @@ function ouvrirPanneau(id) {
                     'Sort du total de la leçon : ce temps n’est pas du temps de classe.' +
                 '</div>' +
             '</div>';
-        extra.querySelector('#planif-panneau-hors-classe').addEventListener('change', function(e) {
-            enregistrerPourUndo();
-            definirHorsClasse(donnees.id, e.target.checked);
-            // Le bloc de la carte porte le champ Durée : cocher le fait
-            // disparaître (D3), décocher le fait revenir. Sans ce re-rendu,
-            // le champ resterait à l'écran jusqu'au prochain passage.
-            reconstruireDOM();
-            ouvrirPanneau(donnees.id);
-        });
+        // ⚠ LISTENER POSÉ EN FIN DE `ouvrirPanneau`, pas ici — même contrainte
+        // d'ordre que « Dans la leçon » et la rétroaction. Chaque
+        // `extra.innerHTML +=` qui suit RE-SÉRIALISE tout le panneau et détruit
+        // les écouteurs déjà attachés. Posé ici, il survivait à l'affichage mais
+        // pas au clic : la case apparaissait, se cochait, et ne faisait RIEN.
     }
 
     // #424 Lot E (veto D2b) : la rétroaction FORMATIVE vit sur l'ACTIVITÉ —
@@ -2709,6 +2702,36 @@ function ouvrirPanneau(id) {
             }
             sauvegarder();
             mettreAJourPlanificateur();
+        });
+    }
+
+    // Case « Préalable » — même contrainte d'ordre (déplacée ici le 12 août).
+    var casePrealable = extra.querySelector('#planif-panneau-prealable');
+    if (casePrealable) {
+        casePrealable.addEventListener('change', function(e) {
+            enregistrerPourUndo();
+            if (!donnees.metadata) donnees.metadata = {};
+            donnees.metadata.prealable = e.target.checked;
+            mettreAJourApparenceNoeud(donnees);
+            document.getElementById('planif-panneau-pastille').style.background = obtenirCouleurNoeud(donnees);
+            document.getElementById('planif-panneau-type').textContent = obtenirLabelNoeud(donnees);
+            sauvegarder();
+        });
+    }
+
+    // #416 lot B : « Travail hors classe » — même contrainte d'ordre. Le HTML
+    // est écrit plus haut avec les autres champs du type ; l'écouteur ne peut
+    // être attaché qu'ICI, une fois que plus rien ne réécrit `extra`.
+    var caseHorsClasse = extra.querySelector('#planif-panneau-hors-classe');
+    if (caseHorsClasse) {
+        caseHorsClasse.addEventListener('change', function(e) {
+            enregistrerPourUndo();
+            definirHorsClasse(donnees.id, e.target.checked);
+            // Le bloc de la carte porte le champ Durée : cocher le fait
+            // disparaître (D3), décocher le fait revenir. Sans ce re-rendu, le
+            // champ resterait à l'écran jusqu'au prochain passage.
+            reconstruireDOM();
+            ouvrirPanneau(donnees.id);
         });
     }
 
@@ -8728,10 +8751,21 @@ function remplirModaleExportPerso() {
         // ⚠ L'ordre des colonnes CHOISIES est une donnée du gabarit ; l'ordre
         // des colonnes disponibles est celui du catalogue. Les mélanger ferait
         // sauter une colonne de place quand on la coche.
+        // ⚠ Une colonne qui ne peut RIEN porter dans la granularité choisie est
+        // signalée sur place. Elle reste cochable — c'est le gabarit de
+        // l'utilisateur, pas le mien — mais il voit pourquoi sa colonne sort
+        // vide, au lieu de le découvrir dans Numbers (constat terrain, 12 août).
+        var inutile = function(id) {
+            return typeof exporteur.colonneUtileEn === 'function'
+                && !exporteur.colonneUtileEn(id, g.granularite);
+        };
+
         var htmlCol = '';
         g.colonnes.forEach(function(id, i) {
             var libelle = (g.renommages && g.renommages[id]) || '';
-            htmlCol += '<div class="export-perso-colonne-ligne" data-colonne="' + echapperHtml(id) + '">' +
+            htmlCol += '<div class="export-perso-colonne-ligne' +
+                (inutile(id) ? ' export-perso-colonne-inerte' : '') +
+                '" data-colonne="' + echapperHtml(id) + '">' +
                 '<label class="planif-checkbox-label export-perso-colonne-case">' +
                 '<input type="checkbox" data-decocher="' + echapperHtml(id) + '" checked' +
                 (g.dUsine ? ' disabled' : '') + '> ' +
@@ -8746,7 +8780,10 @@ function remplirModaleExportPerso() {
                 '<button type="button" class="planif-btn-carte export-perso-descendre" data-i="' + i +
                 '" aria-label="Descendre"' + (g.dUsine || i === g.colonnes.length - 1 ? ' disabled' : '') +
                 '>↓</button>' +
-                '</div>';
+                '</div>' +
+                (inutile(id)
+                    ? '<div class="export-perso-note-inerte">Cette colonne agrège les éléments d’une séance : elle sortira vide tant que le gabarit est « Ligne par élément ».</div>'
+                    : '');
         });
 
         var disponibles = Object.keys(exporteur.CATALOGUE_COLONNES).filter(function(id) {
@@ -8755,10 +8792,12 @@ function remplirModaleExportPerso() {
         if (disponibles.length > 0) {
             htmlCol += '<div class="export-perso-groupe export-perso-groupe-secondaire">À ajouter</div>';
             disponibles.forEach(function(id) {
-                htmlCol += '<label class="planif-checkbox-label export-perso-colonne-case">' +
+                htmlCol += '<label class="planif-checkbox-label export-perso-colonne-case' +
+                    (inutile(id) ? ' export-perso-colonne-inerte' : '') + '">' +
                     '<input type="checkbox" data-cocher="' + echapperHtml(id) + '"' +
                     (g.dUsine ? ' disabled' : '') + '> ' +
                     echapperHtml(exporteur.libelleColonne(id, null)) +
+                    (inutile(id) ? ' <span class="export-perso-badge-usine">par séance</span>' : '') +
                     '</label>';
             });
         }

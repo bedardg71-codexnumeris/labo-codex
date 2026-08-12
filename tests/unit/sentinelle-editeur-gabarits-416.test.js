@@ -146,6 +146,20 @@ describe('Éditeur de gabarits · rendu', () => {
         expect(html).not.toContain('data-format="texte"');
     });
 
+    it('une colonne sans effet dans la granularité est SIGNALÉE à l’écran', () => {
+        // Le gabarit ouvert par défaut est le Calendrier, en « ligne par
+        // séance » : rien n'y est inerte. Ce cas vérifie que le marquage
+        // existe dans le rendu et qu'il porte son explication — le constat
+        // terrain du 12 août était qu'une colonne vide ne s'explique pas
+        // toute seule.
+        const source = readFileSync(path.join(racine, 'js', 'planification-carte.js'), 'utf8');
+        expect(source).toContain('export-perso-colonne-inerte');
+        expect(source).toContain('export-perso-note-inerte');
+        expect(source).toContain('colonneUtileEn');
+        // La colonne reste COCHABLE : le gabarit appartient à l'utilisateur.
+        expect(source).not.toContain('inutile(id) ? \' disabled\'');
+    });
+
     it('l’aperçu est rempli dès l’ouverture', () => {
         expect(elements['export-perso-apercu'].textContent.length).toBeGreaterThan(0);
     });

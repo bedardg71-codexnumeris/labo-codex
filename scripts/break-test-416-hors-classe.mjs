@@ -63,6 +63,23 @@ const cassures = [
         '        horsClasse: false,'],
 ];
 
+// ⚠ LE RATCHET D'ORDRE se casse contre SA propre suite : il ne teste pas le
+// lot B, il teste que la source respecte l'ordre qui rend les contrôles
+// atteignables. Le mêler aux cassures ci-dessus ferait rougir la mauvaise
+// sentinelle.
+const cassuresRatchet = [
+    // ⚠ La cassure doit REMETTRE L'ATTACHE DANS LE BLOC HTML, là où elle
+    // vivait — pas la laisser en fin en changeant sa forme. Une première
+    // version le faisait et restait VERTE, à juste titre : l'attache était
+    // toujours après la dernière écriture, donc toujours correcte.
+    ['l’écouteur « hors classe » retourne à sa place d’origine (trop tôt)',
+        "        // ⚠ LISTENER POSÉ EN FIN DE `ouvrirPanneau`, pas ici — même contrainte",
+        "        extra.querySelector('#planif-panneau-hors-classe').addEventListener('change', function() {});\n        // ⚠ LISTENER POSÉ EN FIN DE `ouvrirPanneau`, pas ici — même contrainte"],
+    ['l’écouteur « préalable » retourne à sa place d’origine (trop tôt)',
+        "        // ⚠ LISTENER POSÉ EN FIN DE `ouvrirPanneau`, pas ici. Il fonctionnait",
+        "        extra.querySelector('#planif-panneau-prealable').addEventListener('change', function() {});\n        // ⚠ LISTENER POSÉ EN FIN DE `ouvrirPanneau`, pas ici. Il fonctionnait"],
+];
+
 const original = { [CARTE]: readFileSync(CARTE, 'utf8'), [EXPORT]: readFileSync(EXPORT, 'utf8') };
 let rouges = 0, verts = [];
 
@@ -85,5 +102,25 @@ for (const [nom, fichier, avant, apres] of cassures) {
     else { verts.push(nom); console.log(`❌ RESTE VERT — ${nom}`); }
 }
 
-console.log(`\n${rouges}/${cassures.length} cassures détectées.`);
+for (const [nom, avant, apres] of cassuresRatchet) {
+    const src = original[CARTE];
+    const n = src.split(avant).length - 1;
+    if (n !== 1) {
+        console.log(`⛔ ANCRE ${n === 0 ? 'ABSENTE' : 'AMBIGUË (' + n + ')'} — ${nom}`);
+        verts.push(nom + ' (ancre)');
+        continue;
+    }
+    writeFileSync(CARTE, src.replace(avant, apres));
+    let rouge = false;
+    try {
+        execSync('npx vitest run unit/sentinelle-ordre-listeners-panneau.test.js --reporter=dot',
+            { cwd: path.join(racine, 'tests'), stdio: 'pipe' });
+    } catch { rouge = true; }
+    writeFileSync(CARTE, src);
+    if (rouge) { rouges++; console.log(`✅ ROUGE — ${nom}`); }
+    else { verts.push(nom); console.log(`❌ RESTE VERT — ${nom}`); }
+}
+
+const total = cassures.length + cassuresRatchet.length;
+console.log(`\n${rouges}/${total} cassures détectées.`);
 if (verts.length) { console.log('À revoir : ' + verts.join(' · ')); process.exit(1); }
