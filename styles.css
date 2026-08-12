@@ -19232,6 +19232,55 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     outline: 2px solid var(--accent-primaire, #3b82f6);
     outline-offset: 1px;
 }
+/* Éditeur de gabarits (#416 lot H) — la modale de #431 réoutillée. Variables
+   existantes seulement ; les deux modes passent par les tokens. */
+.export-perso-liste { display: flex; flex-direction: column; gap: 2px; }
+.export-perso-gabarit-choix { padding: 5px 4px; border-radius: 6px; min-height: 32px; }
+.export-perso-gabarit-choix:hover { background: var(--surface-element, #244858); }
+.mode-clair .export-perso-gabarit-choix:hover { background: rgba(6, 93, 187, 0.06); }
+.export-perso-badge-usine {
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--texte-muted, #5a7a88);
+    border: 1px solid var(--bordure-subtile, rgba(127, 127, 127, 0.3));
+    border-radius: 3px;
+    padding: 0 4px;
+    margin-left: 4px;
+}
+.export-perso-ligne-nom { display: flex; padding: 2px 0 4px; }
+.export-perso-champ-nom, .export-perso-champ-renom {
+    font: inherit;
+    font-size: 12px;
+    min-height: 32px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    border: 1px solid var(--bordure-subtile, rgba(127, 127, 127, 0.3));
+    background: var(--surface-element, #244858);
+    color: var(--planif-couleur-texte);
+}
+.export-perso-champ-nom { flex: 1; }
+.export-perso-champ-renom { flex: 1; min-width: 80px; }
+.mode-clair .export-perso-champ-nom,
+.mode-clair .export-perso-champ-renom {
+    background: var(--surface-carte, #ffffff);
+    color: var(--texte-principal);
+}
+.export-perso-champ-nom:focus, .export-perso-champ-renom:focus {
+    outline: 2px solid var(--accent-primaire, #3b82f6);
+    outline-offset: 1px;
+}
+.export-perso-champ-nom:disabled, .export-perso-champ-renom:disabled { opacity: 0.5; }
+.export-perso-colonne-ligne {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 0;
+}
+.export-perso-colonne-case { flex: 1; min-height: 32px; padding: 4px; border-radius: 6px; }
+.export-perso-colonne-ligne .export-perso-colonne-case { flex: 0 0 34%; }
+.export-perso-groupe-secondaire { margin-top: 8px; }
+
 .planif-export-plan-note {
     font-size: 10.5px;
     color: var(--texte-muted, #5a7a88);
