@@ -557,6 +557,72 @@ function definirSemaineLecon(leconId, semaine) {
     return true;
 }
 
+// === RANG DE SÉANCE DANS LA SEMAINE (12 août 2026, #416 lot A) ===
+//
+// LE REPORT EST LEVÉ. Depuis le 7 août, `analyserRepereTitre` sait détecter
+// « séance 2 » dans un titre mais REFUSE de le retirer, et le backlog en donne
+// le motif : « la séance n'a pas de logement dans le modèle (colonnes
+// reportées) ». Retirer un repère qui compense un concept manquant aurait fait
+// perdre l'information. Ce lot donne le logement ; le lot E pourra alors
+// proposer le retrait, comme il propose déjà celui de « Sem. 11 ».
+//
+// ⚠ UN RANG, PAS UNE LETTRE (décision Grégoire, 12 août). Le stockage est un
+// ENTIER — 1, 2, 3 — et l'affichage seul dit A, B, C. Deux raisons :
+//   1. `obtenirRangSeanceDansSemaine()` (horaire.js) raisonne déjà en rang :
+//      stocker la lettre obligerait à traduire dans l'autre sens à chaque
+//      lecture de l'horaire, c'est-à-dire à chaque résolution de date ;
+//   2. « A/B » suppose deux séances par semaine. C'est vrai du 601-101, et de
+//      personne d'autre nécessairement.
+//
+// ⚠ LEÇONS SEULEMENT — asymétrie DÉLIBÉRÉE avec le sélecteur de semaine, qui
+// sert aussi les séquences. Une séquence s'étend sur des semaines ; elle n'a
+// pas de rang DANS une semaine. Lui en donner un rouvrirait exactement la
+// contradiction séquence/leçons retirée le 6 août.
+
+// Plafond du sélecteur. C'est une CAPACITÉ D'INTERFACE, pas une inférence sur
+// l'horaire : le rang dit « la n-ième rencontre de la semaine » et garde ce
+// sens même sans horaire saisi. On ne le dérive donc pas des séances — ce
+// serait faire dépendre la saisie d'une donnée d'un autre module, et rendre le
+// champ muet chez qui n'a pas encore rempli son cadre de trimestre.
+var RANG_SEANCE_MAX = 4;
+
+/** « A », « B »… pour l'AFFICHAGE. Jamais stocké sous cette forme. */
+function lettreRangSeance(rang) {
+    var r = parseInt(rang, 10);
+    if (isNaN(r) || r < 1 || r > RANG_SEANCE_MAX) return '';
+    return String.fromCharCode(64 + r); // 1 → 'A'
+}
+
+/** Rang d'une leçon dans sa semaine, ou null si non posé / autre type. */
+function rangSeanceDeLecon(n) {
+    if (!n || n.type !== 'lecon' || !n.metadata) return null;
+    var r = parseInt(n.metadata.rangSeance, 10);
+    return (isNaN(r) || r < 1 || r > RANG_SEANCE_MAX) ? null : r;
+}
+
+/**
+ * Écriture — porte de sortie UNIQUE du rang (même patron que
+ * `definirSemaineLecon`). `rang` null/0/'' = repasser en « non posé ».
+ * @returns {boolean} true si la leçon existait et a été mise à jour
+ */
+function definirRangSeance(leconId, rang) {
+    var n = etat.noeuds.get(leconId);
+    if (!n || n.type !== 'lecon') return false;
+    if (!n.metadata) n.metadata = {};
+
+    var r = parseInt(rang, 10);
+    if (isNaN(r) || r < 1 || r > RANG_SEANCE_MAX) {
+        if (!('rangSeance' in n.metadata)) return false;
+        delete n.metadata.rangSeance;
+    } else {
+        if (n.metadata.rangSeance === r) return false;
+        n.metadata.rangSeance = r;
+    }
+    propagerModification(leconId, 'metadata', JSON.parse(JSON.stringify(n.metadata)));
+    sauvegarder();
+    return true;
+}
+
 // === SÉLECTEUR DE SEMAINE DANS LE BLOC (7 août 2026) ===
 //
 // Demande de Grégoire : « à côté du type Leçon ou Séquence, un dropdown avec
@@ -689,6 +755,50 @@ function selecteurSemaineHTML(n) {
         '<option value="' + (courante === null ? '' : courante) + '" selected>' +
         (courante === null ? '—' : 'S' + courante) + '</option>' +
         '</select>';
+}
+
+/**
+ * Sélecteur de rang, à côté de celui de la semaine. Même rendu PARESSEUX :
+ * une seule option au rendu du bloc, la liste au premier contact.
+ *
+ * ⚠ SÉCURITÉ — `rangSeanceDeLecon` coerce par `parseInt` et borne. Ce n'est
+ * pas cosmétique : `metadata.rangSeance` est une donnée PERSISTÉE qui peut
+ * venir d'un import (bibliothèque d'alignements, reprise inter-trimestre).
+ * Sans coercition, une valeur non numérique sortirait dans l'attribut
+ * `value=`, et la CSP ne protège pas l'injection d'attributs. Même invariant
+ * que `metadata.duree` — cf. `sentinelle-inspecteur-duree-coercition`.
+ */
+function selecteurRangSeanceHTML(n) {
+    if (!n || n.type !== 'lecon') return '';
+    var courant = rangSeanceDeLecon(n);
+    return '<select class="planif-noeud-seance" data-seance-noeud="' + echapperHtml(n.id) + '"' +
+        ' title="Rang de cette leçon dans sa semaine (A = 1re rencontre)"' +
+        ' aria-label="Rang de la leçon dans la semaine">' +
+        '<option value="' + (courant === null ? '' : courant) + '" selected>' +
+        (courant === null ? '—' : lettreRangSeance(courant)) + '</option>' +
+        '</select>';
+}
+
+/** Peuple la liste au premier contact. Idempotent. */
+function peuplerSelecteurRangSeance(select) {
+    if (!select || select.dataset.peuple === '1') return;
+    var courant = select.value;
+
+    // Construit en DOM, comme la semaine : pas d'`innerHTML` concaténé.
+    select.textContent = '';
+    var vide = document.createElement('option');
+    vide.value = '';
+    vide.textContent = '—';
+    select.appendChild(vide);
+
+    for (var r = 1; r <= RANG_SEANCE_MAX; r++) {
+        var opt = document.createElement('option');
+        opt.value = String(r);
+        opt.textContent = lettreRangSeance(r);
+        select.appendChild(opt);
+    }
+    select.value = courant;
+    select.dataset.peuple = '1';
 }
 
 // #150 (8 août 2026) — le bloc porte son propre sélecteur de semaine, et une
@@ -4199,7 +4309,7 @@ function contenuNoeudHTML(n) {
         '<div class="planif-noeud-entete">' +
             '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(n) + '">' + obtenirLabelNoeud(n) + '</span>' +
             (estConteneur
-                ? compteurDureeHTML(n) + selecteurSemaineHTML(n) + badgeObjectifHTML(n)
+                ? compteurDureeHTML(n) + selecteurSemaineHTML(n) + selecteurRangSeanceHTML(n) + badgeObjectifHTML(n)
                 : dureeControleHTML(n)) +
         '</div>';
     var ports =
@@ -5717,6 +5827,32 @@ function attacherEvenements(el, donnees) {
             // écrit, sur une séquence elle déplace tout le bloc. Les deux
             // gestes ne peuvent donc pas diverger.
             deposerDansGrille(donnees.type, id, cible);
+            reconstruireDOM();
+        });
+    }
+
+    // === SÉLECTEUR DE RANG DE SÉANCE (leçons seulement, #416 lot A) ===
+    var selSeance = el.querySelector('.planif-noeud-seance');
+    if (selSeance) {
+        // Même précaution que la semaine : sans `stopPropagation`, toucher le
+        // sélecteur démarrerait le déplacement du bloc — geste inutilisable au
+        // doigt, où la pression et le glisser sont le même début de geste.
+        ['pointerdown', 'mousedown', 'click'].forEach(function(evt) {
+            selSeance.addEventListener(evt, function(e) { e.stopPropagation(); });
+        });
+        ['pointerdown', 'focus'].forEach(function(evt) {
+            selSeance.addEventListener(evt, function() { peuplerSelecteurRangSeance(selSeance); });
+        });
+        selSeance.addEventListener('change', function(e) {
+            e.stopPropagation();
+            var brut = selSeance.value;
+            var cible = brut === '' ? null : parseInt(brut, 10);
+            if (brut !== '' && isNaN(cible)) return;
+            // ⚠ PAS `deposerDansGrille` — la grille du planificateur est
+            // organisée par SEMAINE, pas par séance. Le rang n'a pas de geste
+            // de glisser équivalent : sa porte d'écriture unique est celle-ci.
+            enregistrerPourUndo();
+            definirRangSeance(id, cible);
             reconstruireDOM();
         });
     }
@@ -9203,6 +9339,12 @@ window.planificationCarte = {
     retirerRepereTitre: retirerRepereTitre,
     selecteurSemaineHTML: selecteurSemaineHTML,
     peuplerSelecteurSemaine: peuplerSelecteurSemaine,
+    RANG_SEANCE_MAX: RANG_SEANCE_MAX,
+    lettreRangSeance: lettreRangSeance,
+    rangSeanceDeLecon: rangSeanceDeLecon,
+    definirRangSeance: definirRangSeance,
+    selecteurRangSeanceHTML: selecteurRangSeanceHTML,
+    peuplerSelecteurRangSeance: peuplerSelecteurRangSeance,
     dupliquerConteneurEnProfondeur: dupliquerConteneurEnProfondeur,
     dupliquerSelection: dupliquerSelection,
     ajusterVueSurTout: ajusterVueSurTout,
