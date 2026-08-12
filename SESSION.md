@@ -7,6 +7,79 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 12 AOÛT 2026 : #416 CLOS EN SEPT LOTS — et deux défauts que seule la porte terrain a vus.
+     ÉTAT FINAL : **1.78.0** (build 0812-1715), Vitest **2367/2367** (257 fichiers), 16 commits.
+
+     ▣ **LA JOURNÉE A COMMENCÉ PAR UN ÉCART, ET LE RITUEL L'A ATTRAPÉ.** `RELAIS.md` annonçait « aucune
+     dette de fusion, 0/0 » ; `origin/main` avait UN commit d'avance (#454 r2, poussé la veille au soir
+     depuis une session cloud). Et un `.git/index.lock` orphelin de 0 octet bloquait TOUT geste git —
+     le même verrou qui avait empêché la session Cowork de committer. Retiré, commit intégré, puis le
+     lot A de #416 — écrit par Cowork, jamais commité — a été VÉRIFIÉ plutôt que cru : sentinelle 20/20,
+     13 break-tests rouges, harnais 2246/2246 rejoués avant de committer quoi que ce soit.
+
+     ▣ **SEPT LOTS, DANS L'ORDRE : A · C · G · I · H · B · E.** Le rang de séance entre dans le modèle ·
+     la date se DÉRIVE de la semaine + du rang + de l'horaire du groupe, jamais stockée · un catalogue
+     de colonnes remplace deux rendeurs TSV · la granularité devient le 3e axe · le gabarit
+     « Calendrier » · les gabarits NOMMÉS avec migration de #431 · le travail hors classe · les repères
+     de séance quittent enfin les titres.
+
+     ⚠⚠ **LE FAIT MARQUANT DE LA JOURNÉE : LES DEUX DÉFAUTS QUI ONT COMPTÉ ONT ÉTÉ TROUVÉS PAR LA PORTE
+     TERRAIN, PAS PAR LES TESTS.**
+      1. La case « Travail hors classe » se cochait **sans rien déclencher**. Dans `ouvrirPanneau`, chaque
+         `extra.innerHTML +=` re-sérialise le conteneur et DÉTRUIT les écouteurs attachés avant lui.
+         **Troisième occurrence de ce défaut dans ce fichier** — le commentaire qui raconte la deuxième
+         (#424 Lot E) est à SIX LIGNES de l'endroit où je l'ai reproduit. ⮕ Ma sentinelle vérifiait la
+         porte d'écriture, qui était juste. Mes break-tests la cassaient, elle rougissait. **Personne ne
+         vérifiait le FIL entre la case et cette porte.** D'où `sentinelle-ordre-listeners-panneau`, un
+         ratchet qui ferme la classe entière pour les quinze blocs du panneau — et qui a révélé que la
+         case « Préalable » ne fonctionnait que PAR CHANCE.
+      2. Les colonnes qui AGRÈGENT étaient cochables sur un gabarit « ligne par élément », où elles
+         sortent vides par conception. Le code le disait ; l'écran non. Sa capture montrait un tableau
+         à moitié vide qu'aucun test ne pouvait signaler.
+
+     ⚠ **UN LIVRABLE RETIRÉ LE JOUR MÊME, sur son verdict.** Le tableau Markdown du lot I : « pas
+     vraiment utilisable puisque les caractères | ne sont pas alignés ». La cause est plus profonde que
+     l'alignement — **Pages n'interprète pas le Markdown**, donc aucun alignement n'aurait produit un
+     tableau à l'arrivée. Retiré, pas corrigé ; le Calendrier sort en SECTIONS.
+
+     ▣ **LA MÉTHODE QUI A TENU : LE FILET AVANT LE REFACTOR.** Le lot G touchait le SEUL générateur
+     d'export de l'application. Un golden master bit-à-bit des 11 sorties génériques a été posé AVANT,
+     et — quand la carte d'essai a dû s'enrichir — les références ont été figées sur le code d'AVANT le
+     refactor, puis vérifiées avec celui d'après. *Une référence régénérée sur le code qu'elle doit juger
+     ne prouve rien.*
+
+     ⚠⚠ **ONZE TESTS N'OBSERVAIENT PAS CE QU'ILS ANNONÇAIENT, et les bancs de cassure les ont tous
+     démasqués.** Trois causes, qui reviennent :
+      · **la carte d'essai ne couvrait pas le chemin** — aucune séquence sans contenu propre, aucun
+        élément hors leçon. Les deux y sont désormais, avec un cas MIROIR qui vérifie qu'ils sortent là
+        où ils doivent : sinon le test d'exclusion passe pour une raison qui n'est pas la bonne ;
+      · **le mauvais observable** — chercher un titre dans un gabarit qui n'a pas la colonne
+        correspondante ne prouve rien, la ligne parasite y sort toute vide ;
+      · **le magasin trop propre** — sans groupe actif au store, une garde et son absence rendent `{}`
+        pareillement.
+     ⮕ Et une fois, c'était mon HELPER de test : `trim()` mange la tabulation finale, donc la dernière
+     cellule vaut `undefined` au lieu de `''`. Deux cas rouges pendant que le générateur était juste.
+
+     ▣ **SEPT BANCS DE CASSURE, 85 CASSURES, 85 ROUGE** sur l'arbre final. Quatre cassures ont été
+     RETIRÉES de leurs bancs avec leur raison écrite : elles portaient sur des redondances défensives
+     délibérées, inobservables tant que la garde principale tient. Une cinquième a été DÉPLACÉE d'un banc
+     à l'autre — elle visait `colonnesPersonnalisees`, que plus aucune sortie n'emprunte mais que la
+     MIGRATION emprunte encore.
+
+     ⚠ **DEUX INCIDENTS DE SESSION, consignés.** (1) Un octet NUL s'est glissé dans une chaîne de
+     `planification-export.js` : `grep` voyait le fichier comme binaire et mes remplacements échouaient
+     sans raison apparente. Corrigé, dépôt entier balayé, rien n'est parti en ligne avec. (2) J'ai tenté
+     un `git stash` sur son travail non commité alors qu'il n'existait qu'en un exemplaire ; le verrou
+     l'a fait échouer, donc rien n'a bougé — la mesure a été refaite après les commits, ce qui était la
+     bonne façon depuis le début.
+
+     ⏳ **CE QUI RESTE DÛ** : les 5 rangées non traitées de la porte terrain (3.3 supprimer, 4.1 fin,
+     4.3 fin) et les 2 corrections à revérifier · les **5 specs Playwright rouges**, PRÉEXISTANTES et
+     mesurées sur `main` avant le chantier — chantier distinct, toujours à ouvrir · **#455** (le cours
+     est-il global ou par session ?) versé au backlog, hors périmètre.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 11 AOÛT 2026 : PRÉPARATION DE LA RENTRÉE A26 — 5 versions, et le vecteur de #448 bouché.
      ÉTAT FINAL : **1.75.0** (build 0811-1319), Vitest **2226/2226** (248 fichiers), 17 commits, FUSIONNÉ SUR MAIN.
 

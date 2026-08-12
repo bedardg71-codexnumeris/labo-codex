@@ -12,6 +12,36 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | **`main`** |
+| **Version** | **1.78.0** — build `0812-1715` |
+| **Travail en avance sur `main`** | **aucun** |
+| **Dernière mise à jour** | 12 août 2026, clôture — #416 clos en sept lots |
+
+⚠ **VÉRIFIE `origin/main` AVANT DE CROIRE CE TABLEAU.** Le 12 août au matin, ce
+fichier disait « aucune dette de fusion, 0/0 » alors qu'`origin/main` avait un
+commit d'avance, poussé la veille au soir depuis une session cloud. Le rituel de
+début l'a attrapé ; il ne l'aurait pas fait sans `git fetch`.
+
+⏳ **CE QUI RESTE DÛ AU 12 AOÛT** :
+- **5 rangées de porte terrain non traitées** —
+  `plans de travail/PORTES-TERRAIN-2026-08-12-416-lots-CGIHB.md` : 3.3 (supprimer
+  un gabarit) en entier, la fin de 4.1 et de 4.3. **Plus les deux corrections du
+  jour à revérifier** : la case « Travail hors classe » qui ne déclenchait rien,
+  et le Markdown du Calendrier repassé en sections.
+- **5 specs Playwright ROUGES** — versées au backlog en **#456**. Préexistantes,
+  mesurées sur `main` AVANT le chantier, donc aucune régression. Elles ne
+  tournaient nulle part : WebKit manque aux conteneurs, et personne ne les
+  lançait en local.
+- **#455** — le cours est-il global ou par session ? Deux fichiers répondent
+  l'inverse à trois jours d'écart. Aucune conséquence visible aujourd'hui, une
+  collision certaine dès qu'un 601-101 d'automne sera créé.
+
+⮕ **Où lire la suite** : le bloc **12 août** de `SESSION.md`, en tête de fichier.
+Il porte les deux défauts trouvés par la porte terrain — dont le troisième
+retour d'une même classe de bug dans `planification-carte.js` — et les onze
+tests qui n'observaient pas ce qu'ils annonçaient.
+
+---|---|
+| **Branche à ouvrir** | **`main`** |
 | **Version** | **1.75.0** — build `0811-1319` |
 | **Travail en avance sur `main`** | **aucun** |
 | **Prochaine session** | **jeudi prochain** (décision de Grégoire, 11 août) |
