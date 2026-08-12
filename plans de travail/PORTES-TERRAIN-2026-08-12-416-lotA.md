@@ -221,29 +221,41 @@ gabarit Calendrier).
 |---|---|
 | 1.1 · poser, recharger, retirer | ✓ les trois |
 | 2.1 · collé à la semaine (large, étroit, sombre) | ✓ les trois |
-| 2.2 · au doigt sur iPad | **DUE — bloquée, voir ci-dessous** |
+| 2.2 · au doigt sur iPad | ✓ les trois — après déploiement de 1.76.0 |
 | 2.3 · pas de rang sur les séquences | ✓ |
 | 2.4 · annuler | ✓ |
 | 2.5 · la liste ne se dédouble pas | ✓ |
 
 **Verdicts du §3** : 3.2 → **oui, quatre rangs suffisent** (décision close,
 `RANG_SEANCE_MAX = 4` reste). 3.3 → **oui, le tiret se lit** (décision close).
-3.1 → **en attente** : la cible tactile ne peut pas se juger sans l'appareil.
+3.1 → **close par l'usage** : « tout se passe bien sur iPad » (12 août, après
+déploiement). La cible reste à 44 × 28 ; aucune gêne signalée en usage réel,
+donc on ne monte pas à 44 × 44. Si une gêne apparaît plus tard, c'est un
+ajustement de `min-height` dans `.planif-noeud-seance`, rien d'autre.
 
-⚠ **CE QUI BLOQUE LES TROIS DERNIÈRES PORTES.** « Je dois pouvoir déployer le
-travail pour y avoir accès sur iPad ». C'est exact et ce n'est pas contournable :
-sur Mac il ouvre l'app en `file://` depuis son clone, mais son iPad n'accède
-qu'à `app.codexnumeris.org`, alimenté par Netlify **au push sur `main`**
-(`DEPLOY.md` §2.1). Aucune préversion de branche n'est documentée.
+▣ **CE QUI A BLOQUÉ LES TROIS DERNIÈRES PORTES, et qui se reproduira.** « Je dois
+pouvoir déployer le travail pour y avoir accès sur iPad ». C'est exact et ce
+n'est pas contournable : sur Mac il ouvre l'app en `file://` depuis son clone,
+mais son iPad n'accède qu'à `app.codexnumeris.org`, alimenté par Netlify **au
+push sur `main`** (`DEPLOY.md` §2.1). Aucune préversion de branche n'est
+documentée.
 
-⮕ **Conséquence à assumer, pas à masquer** : les portes 2.2 et 3.1 ne peuvent
-être passées qu'**après** la mise en ligne. L'ordre habituel (vérifier, puis
-déployer) s'inverse pour tout ce qui est tactile.
+⮕ **Conséquence à assumer, pas à masquer** : pour tout ce qui se juge au doigt,
+l'ordre habituel s'inverse — **on déploie pour pouvoir vérifier**. C'est ce qui
+a motivé la release 1.76.0 avec trois portes encore ouvertes.
+
+⚠ **Deux détails de la doc de déploiement, relevés au passage le 12 août** :
+`DEPLOY.md` §1.2 donne `labocodex.netlify.app` comme origine Netlify — elle
+répond **404** aujourd'hui, le nom du site a changé. Et `version.json` ouvert
+directement dans la barre d'adresse renvoie une erreur (challenge Cloudflare +
+en-tête `no-store`), alors que la même ressource répond 200 depuis l'app. La
+vérification de version se fait par le bas de page, pas par l'URL du fichier.
 
 | | |
 |---|---|
 | **Portes ouvertes au départ** | 12 vérifications + 4 préalables + 3 décisions |
-| **Fermées** | 9 vérifications + 2 décisions — 12 août |
+| **Fermées** | **TOUTES** — 12 vérifications + 3 décisions, 12 août 2026 |
+| **Échecs** | aucun |
 | **Vitest** | 2246 / 2246 (249 fichiers), rejoué sur l'arbre commité |
 | **Break-tests** | 13 / 13 ROUGE (`node scripts/break-test-416-rang-seance.mjs`) |
 | **Playwright WebKit** | 87 verts, 5 rouges — **préexistants, mesurés sur `main`** |
