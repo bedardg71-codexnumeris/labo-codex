@@ -215,10 +215,35 @@ gabarit Calendrier).
 
 ## ÉTAT
 
+**Relevé de Grégoire, 12 août — 9 passées, 0 échec, 3 dues.**
+
+| Porte | État |
+|---|---|
+| 1.1 · poser, recharger, retirer | ✓ les trois |
+| 2.1 · collé à la semaine (large, étroit, sombre) | ✓ les trois |
+| 2.2 · au doigt sur iPad | **DUE — bloquée, voir ci-dessous** |
+| 2.3 · pas de rang sur les séquences | ✓ |
+| 2.4 · annuler | ✓ |
+| 2.5 · la liste ne se dédouble pas | ✓ |
+
+**Verdicts du §3** : 3.2 → **oui, quatre rangs suffisent** (décision close,
+`RANG_SEANCE_MAX = 4` reste). 3.3 → **oui, le tiret se lit** (décision close).
+3.1 → **en attente** : la cible tactile ne peut pas se juger sans l'appareil.
+
+⚠ **CE QUI BLOQUE LES TROIS DERNIÈRES PORTES.** « Je dois pouvoir déployer le
+travail pour y avoir accès sur iPad ». C'est exact et ce n'est pas contournable :
+sur Mac il ouvre l'app en `file://` depuis son clone, mais son iPad n'accède
+qu'à `app.codexnumeris.org`, alimenté par Netlify **au push sur `main`**
+(`DEPLOY.md` §2.1). Aucune préversion de branche n'est documentée.
+
+⮕ **Conséquence à assumer, pas à masquer** : les portes 2.2 et 3.1 ne peuvent
+être passées qu'**après** la mise en ligne. L'ordre habituel (vérifier, puis
+déployer) s'inverse pour tout ce qui est tactile.
+
 | | |
 |---|---|
-| **Portes ouvertes** | 12 vérifications + 4 préalables + 3 décisions |
-| **Fermées** | 0 — liste émise le 12 août |
+| **Portes ouvertes au départ** | 12 vérifications + 4 préalables + 3 décisions |
+| **Fermées** | 9 vérifications + 2 décisions — 12 août |
 | **Vitest** | 2246 / 2246 (249 fichiers), rejoué sur l'arbre commité |
 | **Break-tests** | 13 / 13 ROUGE (`node scripts/break-test-416-rang-seance.mjs`) |
 | **Playwright WebKit** | 87 verts, 5 rouges — **préexistants, mesurés sur `main`** |

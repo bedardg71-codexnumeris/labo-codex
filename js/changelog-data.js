@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            version: '1.76',
+            couleur: 'vert',
+            titre: 'Une leçon peut dire à quelle séance de la semaine elle a lieu',
+            items: [
+                'Dans la Carte d’alignement, l’en-tête d’un bloc Leçon porte un nouveau sélecteur, juste à côté de celui de la semaine : A, B, C ou D — la première, la deuxième, la troisième rencontre de cette semaine-là.',
+                'Jusqu’ici, cette information ne pouvait vivre que dans le titre de la leçon, écrite à la main. L’application ne pouvait ni la lire ni la retirer sans te faire perdre ce que tu avais noté.',
+                'Les séquences n’ont pas ce sélecteur, et c’est voulu : une séquence s’étend sur plusieurs semaines, elle n’a pas de rang à l’intérieur d’une semaine.',
+                '⚠ Les exports ne montrent pas encore la séance : c’est la prochaine étape. Ce que tu poses maintenant sera repris tel quel.'
+            ]
+        },
+        {
             version: '1.75',
             couleur: 'orange',
             titre: 'Réimporter un codex n’ajoute plus de doublons',
