@@ -557,6 +557,58 @@ function definirSemaineLecon(leconId, semaine) {
     return true;
 }
 
+// === LE TRAVAIL HORS CLASSE (12 août 2026, #416 lot B) ===
+//
+// La sixième colonne du calendrier de Grégoire s'appelle « Travail personnel ».
+// Rien dans le modèle ne disait « ce nœud se fait hors des heures de classe » :
+// le patron le plus proche était `metadata.prealable`, un drapeau booléen avec
+// sa case dans l'Inspecteur. C'est celui-là.
+//
+// ⚠ UN NŒUD HORS CLASSE NE PORTE AUCUNE DURÉE (D3, arbitrée par Grégoire). Ce
+// n'est pas une restriction gratuite : `dureeRollupNoeud` additionne tous les
+// descendants d'une leçon, et la règle du projet dit qu'UNE MINUTE DE CLASSE
+// APPARTIENT À EXACTEMENT UN NŒUD. Une durée hors classe gonflerait le Σ d'une
+// leçon avec du temps qui n'est PAS du temps de classe — un total faux, sans
+// rien pour le signaler. C'est le même raisonnement qui a exclu les
+// connaissances de `TYPES_AVEC_DUREE`.
+//
+// ⚠ DEUX GARDES, PAS UNE, et c'est délibéré : cocher la case RETIRE la durée,
+// et `dureeRollupNoeud` ignore de toute façon les nœuds hors classe. La
+// seconde couvre ce que la première ne voit pas — une durée arrivée par import
+// sur un nœud déjà marqué.
+
+/** Le nœud se fait-il hors des heures de classe ? */
+function estHorsClasseNoeud(n) {
+    return !!(n && n.metadata && n.metadata.horsClasse === true);
+}
+
+/**
+ * Porte d'écriture UNIQUE du drapeau (patron `definirRangSeance`).
+ * @returns {boolean} true si le nœud existait et a été mis à jour
+ */
+function definirHorsClasse(noeudId, horsClasse) {
+    var n = etat.noeuds.get(noeudId);
+    if (!n || TYPES_HORS_CLASSE.indexOf(n.type) === -1) return false;
+    if (!n.metadata) n.metadata = {};
+
+    var vise = horsClasse === true;
+    if (estHorsClasseNoeud(n) === vise) return false;
+
+    if (vise) {
+        n.metadata.horsClasse = true;
+        // D3 : la durée part AVEC la case. La garder « au cas où » ferait
+        // réapparaître du temps de classe le jour où on décoche, sans que
+        // personne ne l'ait demandé.
+        delete n.metadata.duree;
+    } else {
+        delete n.metadata.horsClasse;
+    }
+
+    propagerModification(noeudId, 'metadata', JSON.parse(JSON.stringify(n.metadata)));
+    sauvegarder();
+    return true;
+}
+
 // === RANG DE SÉANCE DANS LA SEMAINE (12 août 2026, #416 lot A) ===
 //
 // LE REPORT EST LEVÉ. Depuis le 7 août, `analyserRepereTitre` sait détecter
@@ -664,6 +716,10 @@ function definirRangSeance(leconId, rang) {
  */
 function dureeControleHTML(n) {
     if (!n || TYPES_AVEC_DUREE.indexOf(n.type) === -1) return '';
+    // D3 : un nœud hors classe n'accepte aucune durée — le champ disparaît
+    // plutôt que d'être grisé. Un champ grisé invite à demander pourquoi ; un
+    // champ absent dit que la question ne se pose pas.
+    if (estHorsClasseNoeud(n)) return '';
     var minutes = parseInt(n.metadata && n.metadata.duree, 10) || '';
     return '<span class="planif-noeud-duree-boite">' +
         '<input type="number" class="planif-noeud-duree" data-duree-noeud="' + echapperHtml(n.id) + '"' +
@@ -1201,6 +1257,19 @@ var TYPES_ACTIVITE = ['expose', 'activite', 'soutien', 'revision',
  * ⮕ Règle qui arbitre : UNE MINUTE DE CLASSE APPARTIENT À EXACTEMENT UN NŒUD.
  */
 var TYPES_AVEC_DUREE = TYPES_ACTIVITE.concat(['evaluation']);
+
+/**
+ * Ce qui peut se faire HORS des heures de classe (#416 lot B, D4).
+ *
+ * ⚠ Liste volontairement IDENTIQUE à `TYPES_AVEC_DUREE`, et pourtant séparée.
+ * Les deux répondent à des questions différentes : « ce nœud consomme-t-il du
+ * temps ? » et « ce temps est-il du temps de classe ? ». Les fondre ferait
+ * qu'ajouter un type à l'une l'ajouterait à l'autre sans que personne ne
+ * l'ait décidé. Le CSV de Grégoire met dans cette colonne des remises
+ * d'artefacts (évaluations) et du travail de lecture ou de rédaction
+ * (activités) — pas des connaissances, qui ne se « font » pas.
+ */
+var TYPES_HORS_CLASSE = TYPES_ACTIVITE.concat(['evaluation']);
 
 function normaliserType(type) {
     if (TYPES_CONNAISSANCE.indexOf(type) !== -1) return 'connaissance';
@@ -2404,6 +2473,34 @@ function ouvrirPanneau(id) {
             document.getElementById('planif-panneau-pastille').style.background = obtenirCouleurNoeud(donnees);
             document.getElementById('planif-panneau-type').textContent = obtenirLabelNoeud(donnees);
             sauvegarder();
+        });
+    }
+
+    // #416 lot B — « Travail hors classe », patron de la case « Préalable ».
+    // La case vit dans l'INSPECTEUR et non dans l'en-tête du bloc : c'est une
+    // propriété qu'on pose une fois en concevant, pas un réglage qu'on ajuste
+    // en déplaçant des blocs. Le sélecteur de semaine et celui de rang sont
+    // dans l'en-tête pour la raison inverse.
+    if (TYPES_HORS_CLASSE.indexOf(donnees.type) !== -1) {
+        var horsClasseCoche = estHorsClasseNoeud(donnees) ? ' checked' : '';
+        extra.innerHTML +=
+            '<div class="planif-panneau-prealable">' +
+                '<label class="planif-checkbox-label">' +
+                    '<input type="checkbox" id="planif-panneau-hors-classe"' + horsClasseCoche + '>' +
+                    ' Travail hors classe' +
+                '</label>' +
+                '<div class="planif-panneau-derive planif-note-hors-classe">' +
+                    'Sort du total de la leçon : ce temps n’est pas du temps de classe.' +
+                '</div>' +
+            '</div>';
+        extra.querySelector('#planif-panneau-hors-classe').addEventListener('change', function(e) {
+            enregistrerPourUndo();
+            definirHorsClasse(donnees.id, e.target.checked);
+            // Le bloc de la carte porte le champ Durée : cocher le fait
+            // disparaître (D3), décocher le fait revenir. Sans ce re-rendu,
+            // le champ resterait à l'écran jusqu'au prochain passage.
+            reconstruireDOM();
+            ouvrirPanneau(donnees.id);
         });
     }
 
@@ -7504,6 +7601,11 @@ function dureePeriodeMinutes() {
 // Somme des durées (metadata.duree) des descendants non-conteneurs.
 function dureeRollupNoeud(nd) {
     if (!nd) return 0;
+    // ⚠ #416 lot B — le temps hors classe n'entre PAS dans le Σ d'une leçon.
+    // Le compteur de l'en-tête et la jauge du planificateur disent du temps de
+    // CLASSE ; y mêler du travail personnel donnerait un total faux là où on
+    // s'en sert pour décider quoi couper.
+    if (estHorsClasseNoeud(nd)) return 0;
     var config = TYPES[nd.type];
     if (!(config && config.conteneur)) {
         return parseInt(nd.metadata && nd.metadata.duree) || 0;
@@ -9576,6 +9678,9 @@ window.planificationCarte = {
     RANG_SEANCE_MAX: RANG_SEANCE_MAX,
     lettreRangSeance: lettreRangSeance,
     rangSeanceDeLecon: rangSeanceDeLecon,
+    estHorsClasseNoeud: estHorsClasseNoeud,
+    definirHorsClasse: definirHorsClasse,
+    TYPES_HORS_CLASSE: TYPES_HORS_CLASSE,
     definirRangSeance: definirRangSeance,
     selecteurRangSeanceHTML: selecteurRangSeanceHTML,
     peuplerSelecteurRangSeance: peuplerSelecteurRangSeance,

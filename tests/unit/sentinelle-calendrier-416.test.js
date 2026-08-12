@@ -11,10 +11,11 @@ import { monterExportSandbox } from './_helpers/carte-essai-exports.js';
 // trois. C'est un GABARIT, le premier à se servir des trois axes à la fois
 // (granularité « séance » × six colonnes × deux formats tabulaires).
 //
-// ⚠ La sixième colonne sort VIDE tant que le lot B n'existe pas. C'est un
-// compromis arbitré le 12 août, pas un défaut : les cas ci-dessous le figent
-// pour qu'il se voie, et pour que le jour où elle se remplit, quelqu'un
-// décide au lieu de constater.
+// ⚠ La sixième colonne est arrivée VIDE — `metadata.horsClasse` n'existait
+// pas — et le lot B l'a remplie le même jour. Ce que ce fichier vérifie
+// maintenant, c'est l'absence de faux positif : la carte d'essai ne marque
+// aucun nœud hors classe, la colonne doit donc rester vide. Son remplissage
+// est couvert par `sentinelle-hors-classe-416`.
 
 let exporteur;
 
@@ -52,7 +53,13 @@ describe('Les six colonnes (#416 lot I)', () => {
         expect(ligne[4]).toBe('Dissertation critique');
     });
 
-    it('TRAVAIL PERSONNEL sort vide — le lot B n’existe pas encore', () => {
+    it('TRAVAIL PERSONNEL reste vide tant qu’aucun nœud n’est marqué', () => {
+        // ⚠ L'intitulé de ce cas disait « le lot B n'existe pas encore ». Il
+        // existe depuis le 12 août : la colonne se remplit dès qu'un nœud
+        // porte `metadata.horsClasse`. Ce qu'il vérifie maintenant, c'est
+        // l'absence de FAUX POSITIF — la carte d'essai n'en marque aucun, la
+        // colonne doit donc rester vide. Le remplissage est couvert par
+        // `sentinelle-hors-classe-416`.
         const table = lignesTSV(exporteur.genererExport('calendrier', 'tsv', null, AVEC_MATIN));
         expect(table.slice(1).every(function(l) { return l[5] === ''; })).toBe(true);
     });

@@ -110,6 +110,7 @@ function construireElement(nd, contexte) {
         titre: nd.titre || 'Sans titre',
         categorie: categorieDe(nd),
         duree: (nd.metadata && parseInt(nd.metadata.duree, 10)) || 0,
+        horsClasse: !!(nd.metadata && nd.metadata.horsClasse === true),
         retroaction: null,        // formative (activité)
         retroactionRendu: null,   // sur le rendu (évaluation)
         production: null,
@@ -750,18 +751,24 @@ var CATALOGUE_COLONNES = {
     // ils sortiront deux fois.
     travailPersonnel: { libelle: 'Travail personnel', valeur: function(c) {
         if (!c.agregeSaLecon || !c.lecon) return '';
-        return joindreTitres(c.lecon.elements.filter(estHorsClasse));
+        // ⚠ Cette colonne MÉLANGE les deux natures — une lecture à faire et un
+        // artefact à remettre s'y côtoient. La règle de nommage s'applique donc
+        // par ÉLÉMENT, pas en bloc : une activité sort par son titre (ce qu'on
+        // fait), une évaluation par le nom de sa production (ce qu'on remet).
+        return c.lecon.elements.filter(estHorsClasse).map(function(el) {
+            return el.categorie === 'evaluation' && el.production
+                ? el.production.nomProduction
+                : el.titre;
+        }).join(SEPARATEUR_AGREGE);
     } }
 };
 
 /**
- * Le nœud se fait-il hors des heures de classe ?
+ * Le nœud se fait-il hors des heures de classe ? (#416 lot B)
  *
- * ⚠ RÉPOND TOUJOURS NON AUJOURD'HUI — `metadata.horsClasse` n'existe pas
- * encore, c'est le lot B. La question est posée ici, et pas dans la colonne,
- * pour qu'il y ait UN seul endroit à changer le jour venu, et pour qu'une
- * colonne « Travail personnel » vide se lise comme une réponse du modèle
- * plutôt que comme un trou dans le générateur.
+ * La question était posée ici avant d'avoir une réponse — la colonne « Travail
+ * personnel » sortait vide, et c'était dit. `metadata.horsClasse` existe
+ * depuis le lot B : un seul endroit a changé.
  */
 function estHorsClasse(el) {
     return !!(el && el.horsClasse);
@@ -795,9 +802,20 @@ function joindreEvaluations(elements) {
     }).join(SEPARATEUR_AGREGE);
 }
 
+/**
+ * Les éléments d'une catégorie, agrégés sur la ligne de leçon.
+ *
+ * ⚠ LE HORS-CLASSE EST EXCLU D'OFFICE (#416 lot B). Sans ça, une lecture
+ * obligatoire marquée « hors classe » sortirait DEUX fois sur la même ligne :
+ * dans Contenu parce que c'est une activité, et dans Travail personnel parce
+ * qu'elle est hors classe. Un calendrier qui compte deux fois la même chose
+ * est pire qu'un calendrier incomplet.
+ */
 function elementsAgreges(c, categorie) {
     if (!c.agregeSaLecon || !c.lecon) return [];
-    return c.lecon.elements.filter(function(el) { return el.categorie === categorie; });
+    return c.lecon.elements.filter(function(el) {
+        return el.categorie === categorie && !estHorsClasse(el);
+    });
 }
 
 function prodDe(c) {
