@@ -59,18 +59,35 @@ function cleHoraire(coursId) {
 
 /**
  * Génère la clé de stockage pour les séances complètes d'un cours
+ *
+ * ⚠ LE COURS NE SUFFIT PAS À DÉSIGNER DES SÉANCES. Les dates vivent par
+ * GROUPE-COURS, jamais par cours : deux groupes du même cours ont deux
+ * horaires, donc deux calendriers de séances. Le paramètre `coursId` n'est
+ * qu'un dernier recours, quand aucun groupe n'est déterminé.
+ *
  * @param {string|null} coursId - ID du cours (null = cours actif)
- * @returns {string} - Clé de stockage (ex: "seancesCompletes_601-101-h2026-94")
+ * @param {string|null} groupeCoursId - Groupe-cours EXPLICITE (#416 lot C).
+ *   Absent = le groupe ACTIF, comportement historique inchangé. Fourni = ce
+ *   groupe-là, sans lire l'état global. Un export doit pouvoir désigner un
+ *   groupe qui n'est pas celui qu'on a sous les yeux : un cours à plusieurs
+ *   groupes est le cas fréquent, et le groupe est choisi au moment de
+ *   l'export (D9, tranchée le 12 août 2026).
+ * @returns {string} - Clé de stockage (ex: "seancesCompletes_gc_GC_1786…")
  */
-function cleSeancesCompletes(coursId) {
+function cleSeancesCompletes(coursId, groupeCoursId = null) {
+    // Groupe explicite : il commande, et on ne consulte pas l'état global.
+    if (groupeCoursId) {
+        return `seancesCompletes_gc_${groupeCoursId}`;
+    }
+
     // 🆕 FIX (3 fév 2026) : Utiliser groupeCoursId pour différencier les groupes
     // Chaque groupe-cours a son propre horaire et donc ses propres dates de séances
     const groupeCoursActif = db.getSync('groupeCoursActif', null);
-    const groupeCoursId = groupeCoursActif?.id || '';
+    const groupeCoursIdActif = groupeCoursActif?.id || '';
 
-    if (groupeCoursId) {
+    if (groupeCoursIdActif) {
         // Clé unique par groupe-cours
-        return `seancesCompletes_gc_${groupeCoursId}`;
+        return `seancesCompletes_gc_${groupeCoursIdActif}`;
     }
 
     // Fallback sur coursId si pas de groupe-cours actif
@@ -630,6 +647,35 @@ function obtenirSeancesCompletes(coursId = null) {
     }
 
     return seancesCompletes;
+}
+
+/**
+ * Séances d'un groupe-cours DÉSIGNÉ, en lecture stricte (#416 lot C).
+ *
+ * ⚠ POURQUOI UNE PORTE SÉPARÉE, ET PAS UN PARAMÈTRE DE PLUS SUR
+ * `obtenirSeancesCompletes`. Cette dernière n'est pas une lecture : quand le
+ * cache manque, elle appelle `genererSeancesCompletes`, qui ÉCRIT. Et ce qu'elle
+ * régénère vient de l'horaire du groupe ACTIF. Lui passer un groupe étranger
+ * reviendrait à écrire les séances de l'un sous la clé de l'autre — un vecteur
+ * de corruption qu'aucun appelant n'atteint aujourd'hui, mais que la colonne
+ * Date rendrait atteignable dès le premier export.
+ *
+ * Ici : on lit, ou on rend vide. Jamais de génération, jamais d'écriture. Une
+ * colonne Date vide est un état dégradé prévu ; une clé écrasée n'en est pas un.
+ *
+ * @param {string} groupeCoursId - Groupe-cours dont on veut les séances
+ * @returns {Object} - Table `date -> [séances]`, ou {} si rien n'est en cache
+ */
+function obtenirSeancesCompletesDuGroupe(groupeCoursId) {
+    if (!groupeCoursId || typeof groupeCoursId !== 'string') return {};
+
+    const seances = db.getSync(cleSeancesCompletes(null, groupeCoursId), null);
+
+    // Un objet non nul mais d'un autre type serait une donnée corrompue : on ne
+    // la propage pas au générateur d'export, qui itérerait dans le vide.
+    if (!seances || typeof seances !== 'object' || Array.isArray(seances)) return {};
+
+    return seances;
 }
 
 /**
@@ -1462,6 +1508,7 @@ function afficherSeancesExistantes() {
 // API publiques (lecture seule)
 window.genererSeancesCompletes = genererSeancesCompletes;
 window.obtenirSeancesCompletes = obtenirSeancesCompletes;
+window.obtenirSeancesCompletesDuGroupe = obtenirSeancesCompletesDuGroupe;
 window.obtenirSeancesJour = obtenirSeancesJour;
 window.obtenirRangSeanceDansSemaine = obtenirRangSeanceDansSemaine;
 

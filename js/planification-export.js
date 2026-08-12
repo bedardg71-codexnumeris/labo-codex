@@ -143,7 +143,108 @@ function construireElement(nd, contexte) {
     return el;
 }
 
-function construireLecon(nd) {
+// ---------------------------------------------------------------------------
+// LA DATE, DÉRIVÉE ET JAMAIS STOCKÉE (#416 lot C)
+//
+// Une leçon ne porte pas de date. Elle porte une SEMAINE (#410) et un RANG dans
+// cette semaine (#416 lot A) ; la date est ce que ces deux-là donnent quand on
+// les confronte à l'horaire. Stocker la date figerait un calcul : déplacer une
+// leçon d'une semaine, ou corriger un congé au calendrier, la rendrait fausse
+// en silence. On la dérive à chaque export, ou on ne l'affiche pas.
+//
+// ⚠ LES SÉANCES VIVENT PAR GROUPE-COURS, PAS PAR COURS. La carte se rattache à
+// un COURS (#407) ; les dates, elles, sont indexées `seancesCompletes_gc_<id>`.
+// Un cours à plusieurs groupes est le cas fréquent — Grégoire en avait deux à
+// l'hiver — et deux groupes du même cours n'ont ni le même horaire ni les mêmes
+// dates. Le groupe est donc CHOISI au moment de l'export (D9), jamais deviné,
+// jamais mémorisé dans un gabarit : trois groupes obligeraient sinon à trois
+// gabarits identiques.
+// ---------------------------------------------------------------------------
+
+/** Groupes-cours rattachés à un cours, dans l'ordre du magasin. [] si aucun. */
+function groupesCoursDuCours(coursId) {
+    if (!coursId || typeof window.cle !== 'function' || !window.db) return [];
+    var tous = window.db.getSync(window.cle('groupesCours'), []);
+    if (!Array.isArray(tous)) return [];
+    return tous
+        .filter(function(g) { return g && g.coursId === coursId; })
+        .map(function(g) { return { id: g.id, nom: g.nom || g.id }; });
+}
+
+/** Le cours de la carte ACTIVE, ou null. N'atteste rien de son existence. */
+function coursDeLaCarteActive() {
+    var pd = window.planificationDonnees;
+    if (!pd || typeof pd.obtenirCoursDeCarte !== 'function') return null;
+    var index = pd.getIndex();
+    if (!index || !index.active) return null;
+    return pd.obtenirCoursDeCarte(index.active);
+}
+
+/** Les groupes entre lesquels l'export doit faire choisir. [] = pas de choix. */
+function groupesCoursDeLaCarte() {
+    return groupesCoursDuCours(coursDeLaCarteActive());
+}
+
+/**
+ * Table `semaine -> [dates triées]` pour UN groupe-cours, lue une seule fois
+ * par export. Null si le groupe n'est pas déterminé ou n'a aucune séance.
+ *
+ * ⚠ Le rang compte les RENCONTRES, pas les blocs horaires : deux périodes le
+ * même jour font une seule séance. C'est le décompte de la source unique
+ * `obtenirRangSeanceDansSemaine`, qui indexe des DATES — s'en écarter ferait
+ * dire « B » ici et « 1re séance » ailleurs pour le même mardi.
+ */
+function construireHoraireDeLecons(groupeCoursId) {
+    if (!groupeCoursId) return null;
+    if (typeof window.obtenirSeancesCompletesDuGroupe !== 'function') return null;
+
+    var parDate = window.obtenirSeancesCompletesDuGroupe(groupeCoursId);
+    var datesParSemaine = {};
+
+    Object.keys(parDate).forEach(function(date) {
+        var seances = parDate[date];
+        if (!Array.isArray(seances) || seances.length === 0) return;
+        // Toutes les séances d'une date portent la même semaine ; la première suffit.
+        var semaine = parseInt(seances[0].numeroSemaine, 10);
+        if (isNaN(semaine)) return;
+        if (!datesParSemaine[semaine]) datesParSemaine[semaine] = [];
+        datesParSemaine[semaine].push(date);
+    });
+
+    var semaines = Object.keys(datesParSemaine);
+    if (semaines.length === 0) return null;
+
+    // Tri lexicographique = tri chronologique en AAAA-MM-JJ.
+    semaines.forEach(function(s) { datesParSemaine[s].sort(); });
+
+    return { groupeCoursId: groupeCoursId, datesParSemaine: datesParSemaine };
+}
+
+/**
+ * La date d'une leçon, ou null. Fonction PURE : tout ce qu'elle lit lui est
+ * passé.
+ *
+ * Trois états dégradés, tous silencieux et non bloquants — une carte reste
+ * utilisable sans horaire, et une colonne vide n'est pas une erreur :
+ *   1. pas d'horaire résolu (carte sans cours, ou groupe non choisi) ;
+ *   2. la leçon n'a pas de semaine, ou pas de rang posé ;
+ *   3. la semaine n'a pas de séance à ce rang (rang 3 sur une semaine à deux
+ *      rencontres, ou semaine hors trimestre).
+ */
+function dateDeLecon(horaire, semaine, rangSeance) {
+    if (!horaire || !horaire.datesParSemaine) return null;
+
+    var s = parseInt(semaine, 10);
+    var r = parseInt(rangSeance, 10);
+    if (isNaN(s) || isNaN(r) || r < 1) return null;
+
+    var dates = horaire.datesParSemaine[s];
+    if (!Array.isArray(dates) || dates.length < r) return null;
+
+    return dates[r - 1];
+}
+
+function construireLecon(nd, horaire) {
     var c = carte();
     var objectifs = c.objectifsDeLeconParId(nd.id); // [{id, texte}]
     var objectifsParId = {};
@@ -155,10 +256,16 @@ function construireLecon(nd) {
         objectifsParId: objectifsParId
     };
 
+    var semaine = c.semaineDeLecon(nd);
+    var rangSeance = c.rangSeanceDeLecon(nd);
+
     var lecon = {
         id: nd.id,
         titre: nd.titre || 'Sans titre',
-        semaine: c.semaineDeLecon(nd),
+        semaine: semaine,
+        rangSeance: rangSeance,
+        // Dérivée à chaque export, jamais écrite dans le modèle (#416 lot C).
+        date: dateDeLecon(horaire, semaine, rangSeance),
         dureeRollup: c.dureeRollupNoeud(nd),
         objectifs: objectifs.map(function(o) { return o.texte; }),
         objectifDerive: null,
@@ -198,10 +305,25 @@ function chargerProductionsUneFois() {
  * LA traversée unique. Rend la structure complète (niveau « alignement ») ;
  * les rendeurs FILTRENT, ils ne relisent jamais la carte.
  */
-function construirePlan() {
+/**
+ * @param {Object} [options]
+ * @param {string} [options.groupeCoursId] - Groupe dont les dates servent à la
+ *   colonne Date (D9). Absent : pris d'office s'il n'y en a qu'un, sinon aucune
+ *   date — l'export ne devine pas lequel des groupes est le bon.
+ */
+function construirePlan(options) {
     var c = carte();
     if (!c || !c.etat) return null;
     _productionsCache = null;
+
+    // Le groupe se résout UNE fois par export, pas une fois par leçon.
+    var opts = options || {};
+    var groupeCoursId = opts.groupeCoursId || null;
+    if (!groupeCoursId) {
+        var candidats = groupesCoursDeLaCarte();
+        if (candidats.length === 1) groupeCoursId = candidats[0].id;
+    }
+    var horaire = construireHoraireDeLecons(groupeCoursId);
 
     var etat = c.etat;
     var index = window.planificationDonnees ? window.planificationDonnees.getIndex() : null;
@@ -234,7 +356,7 @@ function construirePlan() {
         (seq.enfants || []).forEach(function(eid) {
             var enf = etat.noeuds.get(eid);
             if (!enf || enf.type === 'sequence') return; // sections propres plus bas
-            if (enf.type === 'lecon') s.lecons.push(construireLecon(enf));
+            if (enf.type === 'lecon') s.lecons.push(construireLecon(enf, horaire));
             else s.elements.push(construireElement(enf, contexteSeq));
         });
         return s;
@@ -243,7 +365,7 @@ function construirePlan() {
     var leconsOrphelines = [];
     for (var entry of etat.noeuds) {
         var nd = entry[1];
-        if (nd.type === 'lecon' && !nd.parent) leconsOrphelines.push(construireLecon(nd));
+        if (nd.type === 'lecon' && !nd.parent) leconsOrphelines.push(construireLecon(nd, horaire));
     }
 
     return { nomCarte: nomCarte, sequences: sequences, leconsOrphelines: leconsOrphelines };
@@ -907,6 +1029,12 @@ window.planificationExport = {
     construirePlan: construirePlan,
     genererExport: genererExport,
     nomFichierExport: nomFichierExport,
+    // #416 lot C — la date dérivée. `groupesCoursDeLaCarte` sert à POSER la
+    // question du groupe quand il y en a plusieurs ; c'est la présence d'une
+    // colonne Date qui la déclenche, pas l'ouverture du panneau (D9).
+    groupesCoursDeLaCarte: groupesCoursDeLaCarte,
+    construireHoraireDeLecons: construireHoraireDeLecons,
+    dateDeLecon: dateDeLecon,
     // #431 — niveau Personnalisé : constantes et portes de la modale.
     SECTIONS_PLAN: SECTIONS_PLAN,
     CONTENUS_PLAN: CONTENUS_PLAN,
