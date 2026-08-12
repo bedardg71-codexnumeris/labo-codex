@@ -128,9 +128,9 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 - [x] **#411 LIVRÉ 7 août 2026 (1.52.0)** Pastilles du planificateur + nettoyage des repères de semaine dans les titres — fin de la chaîne conçue le 7 août.
   - **Pastilles** : les blocs s'ÉTIRAIENT (`flex: 1 1 auto`) — une seule leçon occupait toute sa rangée. Ils épousent leur contenu (`flex: 0 1 auto`), plancher 150 → 96 px. L'arithmétique du côte à côte n'en souffre pas : la sentinelle exige `utile ≥ 2 × plancher + gouttière`, qu'un plancher plus bas rend seulement plus facile. Contour permanent + rayon 10 px, portés au bloc de GRILLE seulement.
   - **Nettoyage des titres** : PROPOSÉ, jamais appliqué d'office — réciproque de la règle du 6 août (la migration d'ancrage a refusé de LIRE la semaine dans les titres, on ne réécrit donc pas les titres depuis un champ). Quatre catégories : `pret` (concorde → retrait sûr), `ancrable` (non posée → ancrer PUIS retirer, sur confirmation explicite), `conflit` (le titre contredit la semaine posée → **on ne choisit pas**), `vide` (le titre ne dirait plus rien → à réécrire à la main).
-  - ⚠ **Le repère de SÉANCE n'est jamais retiré** : la séance n'a pas de logement dans le modèle (colonnes reportées). Retirer un repère qui compense un concept manquant ferait perdre l'information. « Sem. 1 séance 2 » tombe donc en `vide` — il deviendrait « séance 2 », qui ne nomme rien.
+  - ~~⚠ **Le repère de SÉANCE n'est jamais retiré**~~ : **LEVÉ le 12 août 2026 par le #416 lot E.** Le motif du report était « la séance n'a pas de logement dans le modèle » ; le lot A lui en a donné un (`metadata.rangSeance`). Le repère part désormais — à trois conditions, aucune facultative : le titre porte un rang, le MODÈLE en porte un, et les deux concordent. La réciproque de la règle du 6 août tient : on ne LIT jamais le rang depuis le titre pour le poser d'office.
   - Sentinelle `tests/unit/sentinelle-nettoyage-reperes-titres.test.js` (17 cas), **13 break-tests ROUGE→VERT**, dont un rejeté au 1er jet (la cassure était appliquée mais n'exerçait rien : `sem` ne matche pas « Sém »).
-  - ⮕ La chaîne du 7 août est **close** : dropdown (#410) · contexte (#410) · pastilles (#411) · titres (#411, à la moitié permise par le report des séances).
+  - ⮕ La chaîne du 7 août est **close** : dropdown (#410) · contexte (#410) · pastilles (#411) · titres (#411). ⮕ **Sa seconde moitié, longtemps reportée, est close le 12 août** avec le #416 lot E.
 
 - [x] **#412 LIVRÉ 7 août 2026 (1.53.0)** Disposition de la réserve « Non planifié » : sous la grille ou en colonne à gauche — ferme le ◈ OUVERT « deux vues du planificateur (hauteur / largeur) » de `METHODE-ALIGNEMENT.md`.
   - **Lecture retenue par Grégoire (7 août)** : des deux lectures que le document laissait ouvertes, c'est **la file « Non planifié » à côté de la grille** — pas les semaines déroulées horizontalement. Un bouton permute, la préférence est mémorisée (`planifReserveDisposition`).
@@ -176,7 +176,22 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - **Titres de palette** : la description devient le titre (Intention curriculaire · Types de connaissances · Mise en action · Preuve de réussite · Organisation), sous-titres retirés, guide d'aide recalé (il disait encore « Apprentissage », un libellé disparu).
   - Sentinelle `tests/unit/sentinelle-enseignement-explicite.test.js` (15 cas), 6 break-tests. Une sentinelle de 1.33.0 INVERSÉE avec justification datée : elle exigeait la présence d'org-ee-notes (protection contre un retrait accidentel) ; le retrait est désormais décidé, toute réapparition serait la régression.
 
-- [ ] **#416** Exports du plan de la leçon PRÉSENTABLES — plan de cours, collègues, étudiants — créé 7 août 2026 (demande Grégoire).
+- [x] **#416 LIVRÉ 12 août 2026 (1.76.0 → 1.78.0)** Exports du plan de la leçon PRÉSENTABLES — créé 7 août 2026 (demande Grégoire), clos en sept lots.
+  - **CE QUI A ÉTÉ LIVRÉ, lot par lot** :
+    - **A** — `metadata.rangSeance` sur les leçons, sélecteur dans l'en-tête du bloc. Rang ENTIER, lettre à l'affichage (D1). Leçons seulement : une séquence n'a pas de rang DANS une semaine.
+    - **C** — la date DÉRIVÉE de la semaine + du rang + de l'horaire du groupe, jamais stockée. ⚠ Deux découvertes au code : la chaîne d'horaire IGNORAIT son argument (elle lisait le groupe ACTIF), et sa « lecture » ÉCRIVAIT quand le cache manquait. D'où `obtenirSeancesCompletesDuGroupe`, en lecture stricte.
+    - **G** — UN catalogue de colonnes, UN rendeur tabulaire ; deux rendeurs TSV fondus en un. Le préfixe fixe « Séquence | Leçon | Semaine » est LIBÉRÉ (D8). Troisième axe : la GRANULARITÉ (ligne par élément / par séance).
+    - **I** — gabarit générique « Calendrier » : Semaine · Séance · Date · Contenu · Évaluations · Travail personnel, une ligne par rencontre.
+    - **H** — gabarits NOMMÉS, avec migration du réglage unique de #431. « Personnalisé » disparaît en tant que niveau : zéro-dette, pas d'alias.
+    - **B** — `metadata.horsClasse` : le travail personnel SORT du Σ des leçons. Deux gardes (la durée part avec la case ; le rollup ignore de toute façon les nœuds marqués).
+    - **E** — les repères de séance peuvent enfin quitter les titres, ce que #410/#411 avaient dû reporter.
+  - **PREUVE** : golden master bit-à-bit des 11 sorties génériques, posé AVANT le refactor et figé sur le code d'AVANT. Sept bancs de cassure, **85 cassures / 85 ROUGE**. Vitest 2367/2367.
+  - ⚠ **DEUX DÉFAUTS TROUVÉS PAR LA PORTE TERRAIN, PAS PAR LES TESTS** — et c'est le fait marquant du chantier :
+    1. la case « Travail hors classe » se cochait **sans rien déclencher** : dans `ouvrirPanneau`, chaque `extra.innerHTML +=` re-sérialise le conteneur et DÉTRUIT les écouteurs posés avant. **Troisième occurrence de ce défaut dans ce fichier.** Les tests vérifiaient la porte d'écriture, qui était juste ; personne ne vérifiait le FIL entre la case et cette porte. ⮕ `sentinelle-ordre-listeners-panneau` ferme la classe entière, pour les quinze blocs du panneau.
+    2. les colonnes qui AGRÈGENT étaient cochables sur un gabarit « ligne par élément », où elles sortent vides par conception. Le code le disait, l'écran non.
+  - ⚠ **Le tableau Markdown du lot I a été RETIRÉ le jour même**, sur verdict terrain : coller du Markdown dans Pages ne produit pas un tableau, quel que soit l'alignement des barres. Le Calendrier sort en SECTIONS ; pour un vrai tableau, il y a le TSV.
+  - **Décisions arbitrées par Grégoire le 12 août** : D1 (rang entier) · D3 (aucune durée hors classe) · D5 RENVERSÉE (« Calendrier » = gabarit, pas niveau) · D7 (gabarits nommés) · D8 (préfixe libéré) · D9 (le groupe est un paramètre d'export) · un gabarit ne produit QUE des tableaux · « d'usine » → « générique ».
+  - **Portes terrain** : `PORTES-TERRAIN-2026-08-12-416-lotA.md` (12/12 closes) et `PORTES-TERRAIN-2026-08-12-416-lots-CGIHB.md` (29 passées, 2 échecs corrigés, 5 rangées à reprendre).
   - **Le besoin, dans ses mots** : « ce que l'on exporte est présentable à des collègues et aux étudiants eux-mêmes » — réutilisable directement dans le plan de cours de l'enseignant. C'est une des raisons d'être du chantier alignement.
   - **Trois formats demandés** : (1) **CSV** pour tableur ; (2) **colonnes/rangées pour traitement de texte** (tableau collable dans Word/Pages — HTML presse-papiers ou RTF, à trancher) ; (3) **texte simple**.
   - ~~📐 **À préciser avant de coder**~~ : **LES TROIS QUESTIONS SONT CLOSES le 8 août au soir** par l'arbitrage D1-D6 (§3bis de `AUDIT-carte-alignement-exports-productions-2026-08-08.md`) :
@@ -326,7 +341,9 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - ⮕ **À retirer quand ces backups seront hors rotation — au plus tard à la rentrée (septembre 2026).** Pas de « au cas où » sans date : c'est cette ligne-ci qui en tient lieu, comme #409 l'était pour l'archive elle-même.
   - Retrait = supprimer le bloc `try` marqué `#409 (8 août 2026)` dans `main.js` + les 3 tests de purge de `sentinelle-367-notes-lecon.test.js` (garder ceux qui verrouillent l'absence d'écriture).
 
-- [x] **#431 LIVRÉ 8 août 2026 (1.58.0)** Niveau d'export « Personnalisé » — cases + ordre + aperçu, pour les gabarits départementaux (demande Grégoire, jour même).
+- [x] **#431 LIVRÉ 8 août 2026 (1.58.0), puis REMPLACÉ le 12 août par le #416 lot H** Niveau d'export « Personnalisé » — cases + ordre + aperçu, pour les gabarits départementaux (demande Grégoire, jour même).
+  - ⚠ **Le niveau n'existe plus** : son réglage unique MIGRE en gabarit nommé, sa modale édite désormais des gabarits, son rendeur TSV dédié est supprimé. Zéro-dette — sans ce retrait, l'application porterait deux mécanismes de configuration d'export. La migration est non destructive et idempotente : le gabarit est écrit AVANT que l'ancienne préférence soit effacée.
+  - ⮕ **L'hypothèse posée au journal `USAGE-FORMATS.md` le jour même** — « un seul réglage suffit-il, ou faudra-t-il des gabarits nommés ? » — a été **levée par le terrain le 12 août**. Le mécanisme a fonctionné exactement comme prévu : hypothèse écrite, usage réel, réponse.
   - **Livré** : 4e jeu de réglages sur le générateur unique (D5 inchangé) — 8 cases de contenu, 4 sections ordonnables (texte/MD : sections de la leçon ; TSV : groupes de colonnes, préfixe fixe Séquence|Leçon|Semaine) ; préférence `exportPlanPersonnalise` (DEFAUTS de preferences.js), normalisée à chaque lecture ; modale réglages + aperçu vivant (persistance immédiate — ce qu'on voit est ce que le panneau exportera) ; « Régler le niveau personnalisé… » au panneau Actions.
   - **Décisions actées** (plan `PLAN-export-personnalise-2026-08-08.md`) : l'ordre ne touche JAMAIS la structure séquences→leçons ; UN réglage mémorisé (gabarits nommés = hypothèse au terrain, USAGE-FORMATS) ; modale assumée (un panneau de 380 px ne suffit pas).
   - Au passage : **#152 corrigé** (deux colonnes de semaine au TSV → une seule).
@@ -673,6 +690,16 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - ✅ **TRANCHÉ — 11 août 2026, porte 3.4 : ARCHIVER le chantier 3.** Le reste du plan est livré, le manque est invisible, la page 5 du guide décrit déjà l'app telle qu'elle est. Reste à faire : marquer le chantier 3 comme archivé dans `PLAN_taxonomie_SOLO.md` (avec le motif et la date), puis clore cet item. Aucun code.
   - ~~**Question à Grégoire** : le veut-on encore ?~~
   - ⚠ Ne pas confondre avec `critere.niveauSOLO` (`grilles.js:2958` et `:3254`), qui existe et porte sur les **critères de grille** — autre objet, déjà livré, et déjà relié au guide par la popup `grille-niveau-solo`.
+
+### Tests d'intégration — cinq specs rouges découvertes le 12 août 2026
+
+- [ ] **🔴 #456** Cinq specs Playwright ROUGES, et surtout : **elles ne tournaient nulle part** — créé 12 août 2026 (constat au rituel de début).
+  - **Les cinq** : `planif-alignement.spec.js:59` (un bloc glissé près d'un autre COLLE) · `planif-toolbar.spec.js:58` (plein écran carte mentale) · `:198` (Alt+glisser duplique) · `:271` (comptabilité du temps, rollup) · `:323` (import inter-trimestre).
+  - ⚠ **PRÉEXISTANTES, mesuré et non supposé** : les cinq mêmes échouent sur `main` SANS le chantier #416. Vérifié en basculant sur `main` avec un arbre propre, le 12 août au matin. Aucune régression du chantier.
+  - ⚠⚠ **LA CAUSE GÉNÉRALE VAUT PLUS QUE LES CINQ CAS.** WebKit n'existe pas dans les conteneurs (`webkit-2287` absent de `/opt/pw-browsers`), donc aucune session cloud ne les a jamais lancées ; et personne ne les lançait en local. **Elles ont dérivé en silence pendant que Vitest restait vert.** Le 12 août est la première fois qu'elles tournent réellement — sur le Mac de Grégoire, qui a WebKit.
+  - **Un cas est daté avec certitude** : la spec attend `.planif-badge-evolution`, le badge « 🔧 En évolution » **retiré le 9 août** (#366). Le test n'a pas suivi. Les quatre autres ne sont pas diagnostiquées.
+  - ⮕ **À trancher au passage** : comment ces specs se relancent-elles désormais ? Un hook pré-push local les exécuterait sur le seul poste qui en est capable ; sinon elles rederiveront, et le prochain constat sera le même dans six mois.
+  - ⛔ **Pas un correctif d'export.** Chantier distinct, ouvert le jour où il a été mesuré.
 
 ### Modèle du cours — contradiction relevée en Cowork (12 août 2026)
 

@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            version: '1.79',
+            couleur: 'vert',
+            titre: 'Les repères « séance 2 » peuvent quitter les titres',
+            items: [
+                'Quand une leçon porte son rang de séance dans le modèle, l’outil de nettoyage des titres propose enfin de retirer le « séance 2 » écrit à la main — ce qu’il refusait de faire jusqu’ici, faute d’endroit où ranger l’information.',
+                'Trois conditions, et aucune n’est facultative : le titre annonce un rang, la leçon en porte un, et les deux concordent. Si ta leçon n’a pas de rang posé, le titre reste intact — l’application ne devine jamais un rang à partir de ce que tu as écrit.',
+                'Deux rangs qui se contredisent restent intacts aussi : toi seul sais lequel fait foi.',
+                'Dans les gabarits d’export, « nom d’usine » devient « nom générique ».'
+            ]
+        },
+        {
             version: '1.78',
             couleur: 'vert',
             titre: 'Le travail hors classe ne compte plus dans le temps de classe',
