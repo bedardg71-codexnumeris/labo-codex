@@ -936,12 +936,19 @@ function peuplerSelecteurSemaine(select) {
 // titres de l'enseignant depuis un champ. On PROPOSE, avec aperçu, et il
 // tranche cas par cas.
 //
-// ⚠ Le repère de SÉANCE (« Sem. 1 séance 2 ») n'est pas touché : la séance
-// n'a pas encore de logement dans le modèle (colonnes reportées le 7 août).
-// Retirer un repère qui compense un concept manquant ferait perdre l'info.
+// ⚠ LE REPÈRE DE SÉANCE EST TRAITÉ DEPUIS LE #416 LOT E (12 août 2026). Il ne
+// l'était pas : « la séance n'a pas de logement dans le modèle », donc retirer
+// « séance 2 » d'un titre aurait fait perdre l'information. Le lot A lui a
+// donné ce logement (`metadata.rangSeance`), et le report tombe.
+//
+// ⚠⚠ MAIS LA RÉCIPROQUE DE LA RÈGLE DU 6 AOÛT TIENT, ET ELLE COMMANDE : on ne
+// LIT JAMAIS le rang depuis le titre pour le poser d'office. Le repère n'est
+// retirable que si un rang est DÉJÀ posé dans le modèle ET qu'il concorde avec
+// ce que le titre annonce. Un titre qui dit « séance 2 » sur une leçon sans
+// rang reste intact : c'est peut-être la seule trace de l'intention.
 
 var RE_REPERE_SEMAINE = /^\s*sem(?:aine)?\s*\.?\s*(\d{1,2})\s*(?:[-–—:.·]+\s*)?/i;
-var RE_REPERE_SEANCE = /s[ée]ance\s*\d+/i;
+var RE_REPERE_SEANCE = /s[ée]ance\s*(\d+)/i;
 
 /**
  * Analyse le titre d'un nœud à la recherche d'un repère de semaine.
@@ -969,7 +976,24 @@ function analyserRepereTitre(n) {
     if (isNaN(semaineTitre) || semaineTitre < SEMAINE_MIN) return null;
 
     var reste = titre.slice(m[0].length).trim();
-    var aRepereSeance = RE_REPERE_SEANCE.test(titre);
+
+    // #416 lot E — le repère de séance, et à quelle condition il part.
+    var mSeance = RE_REPERE_SEANCE.exec(titre);
+    var rangTitre = mSeance ? parseInt(mSeance[1], 10) : null;
+    var aRepereSeance = mSeance !== null;
+    var rangAncre = n.type === 'lecon' ? rangSeanceDeLecon(n) : null;
+
+    // ⚠ TROIS CONDITIONS, ET AUCUNE N'EST FACULTATIVE : le titre porte un rang,
+    // le MODÈLE en porte un aussi, et les deux disent la même chose. Il ne
+    // suffit pas qu'un rang existe quelque part — deux rangs qui se
+    // contredisent, c'est un désaccord dont seul l'enseignant sait l'issue.
+    var seanceRetirable = rangTitre !== null && rangAncre !== null && rangTitre === rangAncre;
+
+    // Le repère de séance ne part QUE s'il est retirable ; sinon il reste dans
+    // le titre nettoyé, comme avant le lot E.
+    if (seanceRetirable) {
+        reste = reste.replace(RE_REPERE_SEANCE, '').replace(/^\s*[-–—:.·]+\s*/, '').trim();
+    }
 
     // Une séquence n'a pas de semaine à elle : son étendue est dérivée.
     var semaineAncree = n.type === 'lecon' ? semaineDeLecon(n) : null;
@@ -981,6 +1005,13 @@ function analyserRepereTitre(n) {
     var categorie;
     // Le titre ne doit JAMAIS devenir vide ou réduit à un repère orphelin :
     // « Sem. 1 séance 2 » deviendrait « séance 2 », qui ne nomme rien.
+    //
+    // ⚠ Cette catégorie a MAIGRI au lot E, et c'est ce que le lot devait
+    // produire. « Sem. 3 séance 2 — L'incipit » y tombait : le reste commençait
+    // par un repère orphelin. Le repère de séance partant désormais avec la
+    // semaine (quand le rang est ancré et concorde), le reste est « L'incipit »
+    // et la leçon devient traitable. Ce qui reste dans « vide » y est pour la
+    // bonne raison : retirer laisserait un titre qui ne nomme plus rien.
     if (reste === '' || RE_REPERE_SEANCE.test(reste) && reste.replace(RE_REPERE_SEANCE, '').trim() === '') {
         categorie = 'vide';
     } else if (semaineAncree === null) {
@@ -999,7 +1030,12 @@ function analyserRepereTitre(n) {
         semaineTitre: semaineTitre,
         semaineAncree: semaineAncree,
         categorie: categorie,
-        aRepereSeance: aRepereSeance
+        aRepereSeance: aRepereSeance,
+        // #416 lot E — de quoi expliquer À L'ÉCRAN pourquoi un repère de séance
+        // part ou reste, sans que l'appelant ait à refaire l'analyse.
+        rangTitre: rangTitre,
+        rangAncre: rangAncre,
+        seanceRetirable: seanceRetirable
     };
 }
 
