@@ -630,226 +630,240 @@ function nettoyerTSV(str) {
     return String(str == null ? '' : str).replace(/\t/g, ' ').replace(/\n/g, ' ').replace(/\r/g, '');
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// LE CATALOGUE DE COLONNES (#416 lot G)
+//
+// Avant : deux rendeurs TSV côte à côte — un pour les préréglages (colonnes
+// figées par niveau) et un pour le « Personnalisé » de #431 (groupes de
+// colonnes ordonnés). Ils parcouraient la même structure et divergeaient sur
+// les détails, ce qui est la définition d'une dette qui grossit.
+//
+// Maintenant : UN catalogue de colonnes, UN rendeur. Un gabarit n'est plus
+// qu'une liste ordonnée d'identifiants de colonnes.
+//
+// ⚠ D8 — LE PRÉFIXE EST LIBÉRÉ. « Séquence | Leçon | Semaine » était fixe, en
+// tête de toute sortie, au motif que « la structure EST la carte ». Ce motif
+// vaut pour un export de CONCEPTION ; il ne vaut pas pour un tableau qu'un
+// département impose. Séquence, Leçon et Semaine sont désormais des colonnes
+// comme les autres : retirables, déplaçables, renommables.
+//
+// ⚠ CE QUI N'EST PAS ICI : quelles LIGNES sortent. Le catalogue dit ce que
+// chaque cellule contient, jamais combien de lignes il y a. Le sommaire
+// n'émet que les évaluations, les autres émettent la leçon puis ses éléments
+// — c'est l'axe « granularité », séparé exprès.
+//
 // ⚠ UNE seule colonne « Semaine » (#152, capture Numbers de Grégoire) : la
-// ligne de séquence y met son ÉTENDUE (« 3–5 »), la ligne de leçon son numéro.
-// Deux colonnes disaient deux fois la même dérivation — illisible en tableau.
-var COLONNES_TSV = {
-    sommaire: ['Séquence', 'Leçon', 'Semaine', 'Évaluation', 'Pondération (%)', 'Échéance'],
-    deroulement: ['Séquence', 'Leçon', 'Semaine', 'Type', 'Titre', 'Durée (min)', 'Rétroaction', 'Production', 'Pondération (%)', 'Échéance', 'Objectifs'],
-    alignement: ['Séquence', 'Leçon', 'Semaine', 'Type', 'Titre', 'Durée (min)', 'Rétroaction', 'Production', 'Pondération (%)', 'Échéance', 'Objectifs', 'Objectifs servis', 'Liens', 'Grille', 'Échelle']
-};
+// ligne de séquence y met son ÉTENDUE (« 3–5 »), la ligne de leçon son
+// numéro. Deux colonnes disaient deux fois la même dérivation — illisible.
+// ═══════════════════════════════════════════════════════════════════════════
 
 function etendueTexteTSV(etendue) {
     if (!etendue) return '';
     return etendue.debut + (etendue.fin !== etendue.debut ? '–' + etendue.fin : '');
 }
 
-function rendreTSV(plan, niveauId) {
-    var inc = INCLUSIONS[niveauId];
-    var lignes = [COLONNES_TSV[niveauId].join('\t')];
-
-    function pousser(cellules) {
-        lignes.push(cellules.map(nettoyerTSV).join('\t'));
-    }
-
-    function baseSeq(seq) {
-        return [seq.titre];
-    }
-
-    function ligneElement(base, lecon, el) {
-        var prod = el.production;
-        if (niveauId === 'sommaire') {
-            if (el.categorie !== 'evaluation') return;
-            pousser(base.concat([
-                lecon ? lecon.titre : '',
-                lecon && lecon.semaine !== null ? lecon.semaine : '',
-                prod ? prod.nomProduction : el.titre,
-                prod ? (prod.ponderation || 0) : '',
-                prod && prod.dateEcheance ? prod.dateEcheance : ''
-            ]));
-            return;
-        }
-        var retro = el.retroaction
-            ? libelleRetroaction(el.retroaction)
-            : (el.retroactionRendu ? 'Sur le rendu : ' + libelleRetroaction(el.retroactionRendu) : '');
-        var cellules = base.concat([
-            lecon ? lecon.titre : '',
-            lecon && lecon.semaine !== null ? lecon.semaine : '',
-            el.label,
-            el.titre,
-            el.duree || '',
-            inc.retroactions ? retro : '',
-            prod ? prod.nomProduction : '',
-            prod ? (prod.ponderation || 0) : '',
-            prod && prod.dateEcheance ? prod.dateEcheance : '',
-            '' // Objectifs — portés par la ligne Leçon
-        ]);
-        if (niveauId === 'alignement') {
-            cellules = cellules.concat([
-                el.objectifsServis.join(' ; '),
-                formaterLiens(el.liens).join(' ; '),
-                prod ? prod.nomGrille : '',
-                prod ? prod.nomEchelle : ''
-            ]);
-        }
-        pousser(cellules);
-    }
-
-    function ligneLecon(base, lecon) {
-        if (niveauId === 'sommaire') {
-            var evals = lecon.elements.filter(function(el) { return el.categorie === 'evaluation'; });
-            if (evals.length === 0) {
-                pousser(base.concat([lecon.titre, lecon.semaine !== null ? lecon.semaine : '', '', '', '']));
-            } else {
-                evals.forEach(function(el) { ligneElement(base, lecon, el); });
-            }
-            return;
-        }
-        var objectifs = lecon.objectifs.length > 0
-            ? lecon.objectifs.join(' ; ')
-            : (lecon.objectifDerive || '');
-        var cellules = base.concat([
-            lecon.titre,
-            lecon.semaine !== null ? lecon.semaine : '',
-            'Leçon',
-            lecon.titre,
-            lecon.dureeRollup || '',
-            '',
-            '', '', '',
-            inc.objectifs ? objectifs : ''
-        ]);
-        if (niveauId === 'alignement') {
-            cellules = cellules.concat(['', formaterLiens(lecon.liens).join(' ; '), '', '']);
-        }
-        pousser(cellules);
-        elementsVisibles(lecon.elements, inc).forEach(function(el) {
-            ligneElement(base, lecon, el);
-        });
-    }
-
-    plan.sequences.forEach(function(seq) {
-        var base = baseSeq(seq);
-        var aucunContenu = seq.lecons.length === 0 && seq.elements.length === 0;
-        if (aucunContenu) {
-            // #152 : l'étendue de la séquence vit dans LA colonne Semaine.
-            var vide = COLONNES_TSV[niveauId].length - 3;
-            pousser(base.concat(['', etendueTexteTSV(seq.etendue)]).concat(new Array(vide).fill('')));
-            return;
-        }
-        seq.lecons.forEach(function(lecon) { ligneLecon(base, lecon); });
-        elementsVisibles(seq.elements, inc).forEach(function(el) { ligneElement(base, null, el); });
-    });
-
-    plan.leconsOrphelines.forEach(function(lecon) {
-        ligneLecon(['(Hors séquence)'], lecon);
-    });
-
-    return lignes.join('\n') + '\n';
+function retroTexte(el) {
+    if (!el) return '';
+    if (el.retroaction) return libelleRetroaction(el.retroaction);
+    if (el.retroactionRendu) return 'Sur le rendu : ' + libelleRetroaction(el.retroactionRendu);
+    return '';
 }
 
-// ---------------------------------------------------------------------------
-// FORMAT TSV — PERSONNALISÉ (#431) : colonnes dynamiques par groupes ordonnés
-// ---------------------------------------------------------------------------
-// Préfixe FIXE (Séquence | Leçon | Semaine — la structure est la carte), puis
-// les groupes de colonnes suivent l'ordre des sections de la config.
+/**
+ * Ce que vaut chaque colonne, pour une ligne donnée.
+ *
+ * Le contexte d'une ligne : { seqTitre, lecon, el, estLecon, etendue }.
+ *   - ligne de séquence VIDE : `etendue` est posé, ni `lecon` ni `el` ;
+ *   - ligne de LEÇON        : `estLecon` vrai, `el` absent ;
+ *   - ligne d'ÉLÉMENT       : `el` posé, `lecon` posé (ou null hors leçon).
+ *
+ * Règle qui traverse tout le catalogue : sur une ligne de leçon, ce qui
+ * appartient à un élément est VIDE, et réciproquement. Une cellule qui
+ * répéterait la valeur du parent ferait doubler les totaux à la lecture.
+ */
+var CATALOGUE_COLONNES = {
+    sequence:    { libelle: 'Séquence',        valeur: function(c) { return c.seqTitre; } },
+    lecon:       { libelle: 'Leçon',           valeur: function(c) { return c.lecon ? c.lecon.titre : ''; } },
+    semaine:     { libelle: 'Semaine',         valeur: function(c) {
+        if (c.etendue !== undefined) return etendueTexteTSV(c.etendue);
+        return c.lecon && c.lecon.semaine !== null ? c.lecon.semaine : '';
+    } },
+    type:        { libelle: 'Type',            valeur: function(c) { return c.estLecon ? 'Leçon' : (c.el ? c.el.label : ''); } },
+    titre:       { libelle: 'Titre',           valeur: function(c) { return c.estLecon ? c.lecon.titre : (c.el ? c.el.titre : ''); } },
+    duree:       { libelle: 'Durée (min)',     valeur: function(c) {
+        return c.estLecon ? (c.lecon.dureeRollup || '') : (c.el ? (c.el.duree || '') : '');
+    } },
+    retroaction: { libelle: 'Rétroaction',     valeur: function(c) { return c.estLecon ? '' : retroTexte(c.el); } },
+    production:  { libelle: 'Production',      valeur: function(c) { return prodDe(c) ? prodDe(c).nomProduction : ''; } },
+    ponderation: { libelle: 'Pondération (%)', valeur: function(c) { return prodDe(c) ? (prodDe(c).ponderation || 0) : ''; } },
+    echeance:    { libelle: 'Échéance',        valeur: function(c) {
+        var p = prodDe(c);
+        return p && p.dateEcheance ? p.dateEcheance : '';
+    } },
+    objectifs:   { libelle: 'Objectifs',       valeur: function(c) {
+        if (!c.estLecon) return '';
+        return c.lecon.objectifs.length > 0
+            ? c.lecon.objectifs.join(' ; ')
+            : (c.lecon.objectifDerive || '');
+    } },
+    objectifsServis: { libelle: 'Objectifs servis', valeur: function(c) {
+        return c.estLecon || !c.el ? '' : c.el.objectifsServis.join(' ; ');
+    } },
+    liens:       { libelle: 'Liens',           valeur: function(c) {
+        if (c.estLecon) return formaterLiens(c.lecon.liens).join(' ; ');
+        return c.el ? formaterLiens(c.el.liens).join(' ; ') : '';
+    } },
+    grille:      { libelle: 'Grille',          valeur: function(c) { return prodDe(c) ? prodDe(c).nomGrille : ''; } },
+    echelle:     { libelle: 'Échelle',         valeur: function(c) { return prodDe(c) ? prodDe(c).nomEchelle : ''; } },
+    // Propre au plan de cours : la production si elle existe, sinon le titre
+    // de l'évaluation — c'est ce que le document doit annoncer à l'étudiant.
+    evaluation:  { libelle: 'Évaluation',      valeur: function(c) {
+        var p = prodDe(c);
+        if (p) return p.nomProduction;
+        return c.el ? c.el.titre : '';
+    } }
+};
 
-function groupesColonnesTSV(inc) {
-    return {
-        objectifs: inc.objectifs ? ['Objectifs'] : [],
+function prodDe(c) {
+    return (!c.estLecon && c.el && c.el.production) ? c.el.production : null;
+}
+
+// Les gabarits d'usine, exprimés dans le catalogue. Ce sont EXACTEMENT les
+// colonnes des trois préréglages historiques, dans le même ordre — c'est ce
+// que le golden master vérifie à l'octet près.
+var COLONNES_USINE = {
+    sommaire:    ['sequence', 'lecon', 'semaine', 'evaluation', 'ponderation', 'echeance'],
+    deroulement: ['sequence', 'lecon', 'semaine', 'type', 'titre', 'duree', 'retroaction',
+                  'production', 'ponderation', 'echeance', 'objectifs'],
+    alignement:  ['sequence', 'lecon', 'semaine', 'type', 'titre', 'duree', 'retroaction',
+                  'production', 'ponderation', 'echeance', 'objectifs',
+                  'objectifsServis', 'liens', 'grille', 'echelle']
+};
+
+/**
+ * Les colonnes du gabarit « Personnalisé » (#431), déduites des inclusions et
+ * de l'ordre des sections choisi par l'utilisateur.
+ *
+ * ⚠ Ce n'est PAS une quatrième table de colonnes : c'est une composition du
+ * même catalogue. Le jour où les gabarits nommés arrivent (lot H), c'est
+ * cette fonction qui disparaît — pas le catalogue.
+ */
+function colonnesPersonnalisees(inc, ordre) {
+    var groupes = {
+        objectifs: inc.objectifs ? ['objectifs'] : [],
         deroulement: (function() {
             if (!inc.activites && !inc.evaluations && !inc.connaissances) return [];
-            var c = ['Type', 'Titre'];
-            if (inc.durees) c.push('Durée (min)');
-            if (inc.retroactions) c.push('Rétroaction');
+            var c = ['type', 'titre'];
+            if (inc.durees) c.push('duree');
+            if (inc.retroactions) c.push('retroaction');
             return c;
         })(),
         productions: (function() {
-            var c = ['Production', 'Pondération (%)', 'Échéance'];
-            if (inc.productionsDetail) c.push('Grille', 'Échelle');
+            var c = ['production', 'ponderation', 'echeance'];
+            if (inc.productionsDetail) c.push('grille', 'echelle');
             return c;
         })(),
-        liens: inc.liens ? ['Objectifs servis', 'Liens'] : []
+        liens: inc.liens ? ['objectifsServis', 'liens'] : []
     };
+    var colonnes = ['sequence', 'lecon', 'semaine'];
+    (ordre || []).forEach(function(id) { colonnes = colonnes.concat(groupes[id] || []); });
+    return colonnes;
 }
 
-function rendreTSVPersonnalise(plan, inc, ordre) {
-    var groupes = groupesColonnesTSV(inc);
-    var colonnes = ['Séquence', 'Leçon', 'Semaine'];
-    ordre.forEach(function(id) { colonnes = colonnes.concat(groupes[id] || []); });
-    var lignes = [colonnes.join('\t')];
+/** Le libellé affiché d'une colonne — renommable par gabarit (D8). */
+function libelleColonne(id, renommages) {
+    if (renommages && renommages[id]) return renommages[id];
+    return CATALOGUE_COLONNES[id] ? CATALOGUE_COLONNES[id].libelle : id;
+}
 
-    function cellulesDe(ctx) {
-        // ctx : { seqTitre, lecon, el, estLecon }
-        var valeurs = {
-            objectifs: function() {
-                if (!ctx.estLecon) return [''];
-                return [ctx.lecon.objectifs.length > 0
-                    ? ctx.lecon.objectifs.join(' ; ')
-                    : (ctx.lecon.objectifDerive || '')];
-            },
-            deroulement: function() {
-                var c;
-                if (ctx.estLecon) c = ['Leçon', ctx.lecon.titre];
-                else c = [ctx.el.label, ctx.el.titre];
-                if (inc.durees) c.push(ctx.estLecon ? (ctx.lecon.dureeRollup || '') : (ctx.el.duree || ''));
-                if (inc.retroactions) {
-                    var retro = '';
-                    if (!ctx.estLecon) {
-                        if (ctx.el.retroaction) retro = libelleRetroaction(ctx.el.retroaction);
-                        else if (ctx.el.retroactionRendu) retro = 'Sur le rendu : ' + libelleRetroaction(ctx.el.retroactionRendu);
-                    }
-                    c.push(retro);
-                }
-                return c;
-            },
-            productions: function() {
-                var prod = !ctx.estLecon && ctx.el.production;
-                var c = [
-                    prod ? prod.nomProduction : '',
-                    prod ? (prod.ponderation || 0) : '',
-                    prod && prod.dateEcheance ? prod.dateEcheance : ''
-                ];
-                if (inc.productionsDetail) c.push(prod ? prod.nomGrille : '', prod ? prod.nomEchelle : '');
-                return c;
-            },
-            liens: function() {
-                if (ctx.estLecon) return ['', formaterLiens(ctx.lecon.liens).join(' ; ')];
-                return [ctx.el.objectifsServis.join(' ; '), formaterLiens(ctx.el.liens).join(' ; ')];
-            }
-        };
-        var cellules = [
-            ctx.seqTitre,
-            ctx.lecon ? ctx.lecon.titre : '',
-            ctx.lecon && ctx.lecon.semaine !== null ? ctx.lecon.semaine : ''
-        ];
-        ordre.forEach(function(id) {
-            if ((groupes[id] || []).length > 0) cellules = cellules.concat(valeurs[id]());
-        });
-        lignes.push(cellules.map(nettoyerTSV).join('\t'));
+function cellulesDeLigne(colonnes, ctx) {
+    return colonnes.map(function(id) {
+        var col = CATALOGUE_COLONNES[id];
+        return nettoyerTSV(col ? col.valeur(ctx) : '');
+    });
+}
+
+// ---------------------------------------------------------------------------
+// LE RENDEUR TABULAIRE UNIQUE
+// ---------------------------------------------------------------------------
+
+/**
+ * @param {Object} plan     - structure rendue par construirePlan
+ * @param {Object} gabarit  - { colonnes: [ids], inclusions, evaluationsSeulement, renommages }
+ */
+function rendreTableau(plan, gabarit) {
+    var colonnes = gabarit.colonnes;
+    var inc = gabarit.inclusions;
+    var lignes = [colonnes.map(function(id) {
+        return nettoyerTSV(libelleColonne(id, gabarit.renommages));
+    }).join('\t')];
+
+    function pousser(ctx) {
+        lignes.push(cellulesDeLigne(colonnes, ctx).join('\t'));
     }
 
     function pousserLecon(seqTitre, lecon) {
-        cellulesDe({ seqTitre: seqTitre, lecon: lecon, estLecon: true });
+        // Plan de cours : la leçon ne sort que par ses évaluations. Sans
+        // évaluation, elle sort quand même — une semaine sans évaluation est
+        // une information, pas un vide.
+        if (gabarit.evaluationsSeulement) {
+            var evals = lecon.elements.filter(function(el) { return el.categorie === 'evaluation'; });
+            if (evals.length === 0) {
+                pousser({ seqTitre: seqTitre, lecon: lecon, estLecon: false });
+                return;
+            }
+            evals.forEach(function(el) {
+                pousser({ seqTitre: seqTitre, lecon: lecon, el: el, estLecon: false });
+            });
+            return;
+        }
+        pousser({ seqTitre: seqTitre, lecon: lecon, estLecon: true });
         elementsVisibles(lecon.elements, inc).forEach(function(el) {
-            cellulesDe({ seqTitre: seqTitre, lecon: lecon, el: el, estLecon: false });
+            pousser({ seqTitre: seqTitre, lecon: lecon, el: el, estLecon: false });
         });
     }
 
     plan.sequences.forEach(function(seq) {
         if (seq.lecons.length === 0 && seq.elements.length === 0) {
-            var vides = colonnes.length - 3;
-            lignes.push([nettoyerTSV(seq.titre), '', etendueTexteTSV(seq.etendue)]
-                .concat(new Array(vides).fill('')).join('\t'));
+            // `etendue` posé : la colonne Semaine rend l'étendue au lieu d'un
+            // numéro. C'est le seul endroit où une ligne n'a ni leçon ni élément.
+            pousser({ seqTitre: seq.titre, lecon: null, estLecon: false, etendue: seq.etendue });
             return;
         }
         seq.lecons.forEach(function(lecon) { pousserLecon(seq.titre, lecon); });
-        elementsVisibles(seq.elements, inc).forEach(function(el) {
-            cellulesDe({ seqTitre: seq.titre, lecon: null, el: el, estLecon: false });
-        });
+        if (!gabarit.evaluationsSeulement) {
+            elementsVisibles(seq.elements, inc).forEach(function(el) {
+                pousser({ seqTitre: seq.titre, lecon: null, el: el, estLecon: false });
+            });
+        }
     });
+
     plan.leconsOrphelines.forEach(function(lecon) { pousserLecon('(Hors séquence)', lecon); });
 
     return lignes.join('\n') + '\n';
+}
+
+/** Gabarit d'usine d'un niveau historique. */
+function gabaritDUsine(niveauId) {
+    return {
+        colonnes: COLONNES_USINE[niveauId],
+        inclusions: INCLUSIONS[niveauId],
+        evaluationsSeulement: niveauId === 'sommaire',
+        renommages: null
+    };
+}
+
+function rendreTSV(plan, niveauId) {
+    return rendreTableau(plan, gabaritDUsine(niveauId));
+}
+
+function rendreTSVPersonnalise(plan, inc, ordre) {
+    return rendreTableau(plan, {
+        colonnes: colonnesPersonnalisees(inc, ordre),
+        inclusions: inc,
+        evaluationsSeulement: false,
+        renommages: null
+    });
 }
 
 // ---------------------------------------------------------------------------
