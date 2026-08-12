@@ -1245,6 +1245,260 @@ function genererExport(niveauId, formatId, configEssai, options) {
     return null;
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// LES GABARITS NOMMÉS (#416 lot H)
+//
+// L'hypothèse posée par Grégoire lui-même le 8 août au journal
+// `USAGE-FORMATS.md` — « un seul réglage suffit-il, ou faudra-t-il des
+// gabarits nommés ? » — a été levée par son usage le 12 août : il compose
+// avec des exigences départementales et des habitudes de présentation qui ne
+// sont pas les siennes. Un réglage unique ne couvre pas ça.
+//
+// ⚠ UN GABARIT EST UN TABLEAU (décision du 12 août). Colonnes ordonnées,
+// granularité, libellés renommables — pour TSV et Markdown-tableau. Les trois
+// documents en prose (Plan de cours, En classe, Preuve d'alignement) ne se
+// configurent pas : ils ont leur forme, et c'est elle qu'on choisit.
+//
+// ⚠ ZÉRO-DETTE : le « Personnalisé » de #431 ne cohabite pas, il MIGRE. Sans
+// ça l'application porterait deux mécanismes de configuration d'export —
+// l'empilement exact que D5 refuse.
+// ═══════════════════════════════════════════════════════════════════════════
+
+var CLE_GABARITS = 'exportGabarits';
+var CLE_PERSONNALISE_HERITE = 'exportPlanPersonnalise';
+
+/** Les gabarits d'usine : dans le CODE, jamais persistés — on n'édite pas ce
+ *  qu'on ne modifie pas. Ils se DUPLIQUENT pour devenir modifiables. */
+function gabaritsDUsine() {
+    return [
+        { id: 'sommaire', nom: 'Plan de cours', dUsine: true,
+          granularite: 'noeuds', colonnes: COLONNES_USINE.sommaire.slice(), renommages: null },
+        { id: 'deroulement', nom: 'En classe', dUsine: true,
+          granularite: 'noeuds', colonnes: COLONNES_USINE.deroulement.slice(), renommages: null },
+        { id: 'alignement', nom: 'Preuve d’alignement', dUsine: true,
+          granularite: 'noeuds', colonnes: COLONNES_USINE.alignement.slice(), renommages: null },
+        { id: 'calendrier', nom: 'Calendrier', dUsine: true,
+          granularite: 'seances', colonnes: GABARIT_CALENDRIER.colonnes.slice(), renommages: null }
+    ];
+}
+
+function lirePreference(cle, defaut) {
+    try {
+        if (typeof window.obtenirPreference !== 'function') return defaut;
+        var v = window.obtenirPreference(cle);
+        return v === undefined || v === null ? defaut : v;
+    } catch (e) { return defaut; }
+}
+
+function ecrirePreference(cle, valeur) {
+    try {
+        if (typeof window.definirPreference === 'function') window.definirPreference(cle, valeur);
+    } catch (e) { /* une préférence non écrite ne doit jamais bloquer un export */ }
+}
+
+/**
+ * Remet un gabarit venu du stockage en état d'être utilisé.
+ *
+ * ⚠ Tout ce qui vient du stockage est SUSPECT : un codex réimporté, un
+ * gabarit écrit par une version antérieure, une clé bricolée à la main. On ne
+ * fait pas confiance, on normalise — et un gabarit qui n'a plus aucune colonne
+ * connue est écarté plutôt que rendu vide.
+ */
+function normaliserGabaritNomme(brut) {
+    if (!brut || typeof brut !== 'object') return null;
+    var id = typeof brut.id === 'string' && brut.id ? brut.id : null;
+    if (!id) return null;
+
+    var colonnes = (Array.isArray(brut.colonnes) ? brut.colonnes : []).filter(function(c) {
+        return !!CATALOGUE_COLONNES[c];
+    });
+    if (colonnes.length === 0) return null;
+
+    var renommages = null;
+    if (brut.renommages && typeof brut.renommages === 'object') {
+        renommages = {};
+        Object.keys(brut.renommages).forEach(function(k) {
+            // Un renommage ne vaut que pour une colonne qui existe ET qui est
+            // dans ce gabarit : sinon il survit à la colonne qu'il nommait.
+            if (colonnes.indexOf(k) !== -1 && typeof brut.renommages[k] === 'string') {
+                renommages[k] = brut.renommages[k];
+            }
+        });
+        if (Object.keys(renommages).length === 0) renommages = null;
+    }
+
+    return {
+        id: id,
+        nom: typeof brut.nom === 'string' && brut.nom.trim() ? brut.nom.trim() : 'Gabarit sans nom',
+        dUsine: false,
+        granularite: brut.granularite === 'seances' ? 'seances' : 'noeuds',
+        colonnes: colonnes,
+        renommages: renommages
+    };
+}
+
+/**
+ * LA MIGRATION du réglage unique de #431 vers un gabarit nommé.
+ *
+ * ⚠ IDEMPOTENTE ET NON DESTRUCTIVE DANS CET ORDRE : on crée le gabarit
+ * d'abord, on efface l'ancienne préférence ensuite. Si l'écriture du gabarit
+ * échoue, l'ancienne survit et la migration se rejouera. L'inverse perdrait
+ * le réglage de Grégoire pour un export raté.
+ *
+ * ⚠ Elle ne s'exécute qu'UNE fois : l'ancienne clé est remise à null, donc
+ * relire ne recrée rien. Un utilisateur qui supprime ensuite le gabarit migré
+ * a supprimé son gabarit — on ne le lui réimpose pas au prochain démarrage.
+ *
+ * Fidélité : la config #431 décrit des contenus et un ordre de sections ;
+ * `colonnesPersonnalisees` est exactement la fonction qui en déduisait déjà
+ * les colonnes du TSV. La migration réutilise cette traduction plutôt que
+ * d'en inventer une seconde.
+ */
+function migrerPersonnaliseEnGabarit(gabaritsExistants) {
+    var herite = lirePreference(CLE_PERSONNALISE_HERITE, null);
+    if (!herite || typeof herite !== 'object') return gabaritsExistants;
+
+    var cfg = normaliserConfigPersonnalisee(herite);
+    var colonnes = colonnesPersonnalisees(incDepuisConfig(cfg), cfg.ordre);
+
+    var migre = {
+        id: 'gab-migre-431',
+        nom: 'Mon export personnalisé',
+        dUsine: false,
+        granularite: 'noeuds',
+        colonnes: colonnes,
+        renommages: null
+    };
+
+    // Une deuxième migration ne doit pas produire un doublon : si le gabarit
+    // issu de #431 est déjà là, on efface simplement l'ancienne clé.
+    var deja = gabaritsExistants.some(function(g) { return g.id === migre.id; });
+    var suite = deja ? gabaritsExistants : gabaritsExistants.concat([migre]);
+
+    ecrirePreference(CLE_GABARITS, suite.map(serialiserGabarit));
+    ecrirePreference(CLE_PERSONNALISE_HERITE, null);   // l'ancien ne cohabite pas
+
+    return suite;
+}
+
+function serialiserGabarit(g) {
+    return {
+        id: g.id, nom: g.nom, granularite: g.granularite,
+        colonnes: g.colonnes.slice(), renommages: g.renommages
+    };
+}
+
+/** Les gabarits de l'utilisateur, migration comprise. Jamais les d'usine. */
+function lireGabaritsUtilisateur() {
+    var bruts = lirePreference(CLE_GABARITS, []);
+    var gabarits = (Array.isArray(bruts) ? bruts : [])
+        .map(normaliserGabaritNomme)
+        .filter(Boolean);
+    return migrerPersonnaliseEnGabarit(gabarits);
+}
+
+/** Tous les gabarits offerts : d'usine d'abord, puis ceux de l'utilisateur. */
+function listerGabarits() {
+    return gabaritsDUsine().concat(lireGabaritsUtilisateur());
+}
+
+function trouverGabarit(id) {
+    return listerGabarits().find(function(g) { return g.id === id; }) || null;
+}
+
+function ecrireGabaritsUtilisateur(gabarits) {
+    ecrirePreference(CLE_GABARITS, gabarits.map(serialiserGabarit));
+    return gabarits;
+}
+
+/** Un identifiant qui ne dépend ni de l'horloge ni du hasard : le magasin suffit. */
+function prochainIdGabarit(existants) {
+    var n = 1;
+    var pris = {};
+    existants.forEach(function(g) { pris[g.id] = true; });
+    while (pris['gab-' + n]) n++;
+    return 'gab-' + n;
+}
+
+/**
+ * Duplique un gabarit — le SEUL chemin pour en obtenir un modifiable.
+ *
+ * ⚠ Les gabarits d'usine ne se modifient pas sur place : ce sont les
+ * documents que l'application promet, et un utilisateur qui casse « Plan de
+ * cours » n'a aucun moyen de le retrouver. Dupliquer coûte un clic et rend
+ * l'original intouchable.
+ */
+function dupliquerGabarit(idSource, nomVoulu) {
+    var source = trouverGabarit(idSource);
+    if (!source) return null;
+
+    var utilisateur = lireGabaritsUtilisateur();
+    var copie = {
+        id: prochainIdGabarit(listerGabarits()),
+        nom: (nomVoulu && String(nomVoulu).trim()) || (source.nom + ' (copie)'),
+        dUsine: false,
+        granularite: source.granularite,
+        colonnes: source.colonnes.slice(),
+        renommages: source.renommages ? Object.assign({}, source.renommages) : null
+    };
+    ecrireGabaritsUtilisateur(utilisateur.concat([copie]));
+    return copie;
+}
+
+/** Enregistre les modifications d'un gabarit de l'utilisateur. */
+function enregistrerGabarit(gabarit) {
+    var propre = normaliserGabaritNomme(gabarit);
+    if (!propre) return null;
+    // ⚠ Un gabarit d'usine ne s'écrase pas, même si l'appelant insiste.
+    if (gabaritsDUsine().some(function(g) { return g.id === propre.id; })) return null;
+
+    var utilisateur = lireGabaritsUtilisateur();
+    var i = utilisateur.findIndex(function(g) { return g.id === propre.id; });
+    if (i === -1) utilisateur.push(propre);
+    else utilisateur[i] = propre;
+    ecrireGabaritsUtilisateur(utilisateur);
+    return propre;
+}
+
+function renommerGabarit(id, nom) {
+    var g = lireGabaritsUtilisateur().find(function(x) { return x.id === id; });
+    if (!g) return null;
+    return enregistrerGabarit(Object.assign({}, g, { nom: nom }));
+}
+
+function supprimerGabarit(id) {
+    var utilisateur = lireGabaritsUtilisateur();
+    var reste = utilisateur.filter(function(g) { return g.id !== id; });
+    if (reste.length === utilisateur.length) return false;
+    ecrireGabaritsUtilisateur(reste);
+    return true;
+}
+
+/**
+ * Le document d'un gabarit, dans le format demandé.
+ *
+ * ⚠ Un gabarit ne produit QUE des tableaux (décision du 12 août). Demander du
+ * Texte rend null plutôt qu'un document dégradé — c'est la même règle que
+ * pour le Calendrier, et pour la même raison.
+ */
+function genererDepuisGabarit(idGabarit, formatId, options) {
+    var gabarit = trouverGabarit(idGabarit);
+    if (!gabarit) return null;
+    if (formatId !== 'tsv' && formatId !== 'markdown') return null;
+
+    var plan = construirePlan(options);
+    if (!plan) return null;
+
+    var matrice = construireMatrice(plan, normaliserGabarit({
+        colonnes: gabarit.colonnes,
+        granularite: gabarit.granularite,
+        renommages: gabarit.renommages,
+        inclusions: INCLUSIONS[gabarit.id] || INCLUSIONS.alignement,
+        evaluationsSeulement: gabarit.id === 'sommaire'
+    }));
+    return formatId === 'markdown' ? formaterMarkdownTableau(matrice) : formaterTSV(matrice);
+}
+
 /** Nom de fichier proposé — « <carte>-<niveau><ext> », caractères sûrs. */
 function nomFichierExport(niveauId, formatId) {
     var plan = { nomCarte: 'alignement' };
@@ -1280,6 +1534,14 @@ window.planificationExport = {
     GABARIT_CALENDRIER: GABARIT_CALENDRIER,
     formaterMarkdownTableau: formaterMarkdownTableau,
     construireMatrice: construireMatrice,
+    // #416 lot H — les gabarits nommés.
+    listerGabarits: listerGabarits,
+    trouverGabarit: trouverGabarit,
+    dupliquerGabarit: dupliquerGabarit,
+    enregistrerGabarit: enregistrerGabarit,
+    renommerGabarit: renommerGabarit,
+    supprimerGabarit: supprimerGabarit,
+    genererDepuisGabarit: genererDepuisGabarit,
     // #431 — niveau Personnalisé : constantes et portes de la modale.
     SECTIONS_PLAN: SECTIONS_PLAN,
     CONTENUS_PLAN: CONTENUS_PLAN,
