@@ -212,6 +212,26 @@ describe('Le gabarit, et ce qu’il tolère (#416 lot G)', () => {
         expect(entete).toContain('Échelle');
     });
 
+    it('le moteur SAIT quelles colonnes sont sans effet en granularité nœuds', () => {
+        // ⚠ Constat terrain du 12 août : Grégoire a coché Contenu, Évaluations
+        // et Travail personnel sur un gabarit « ligne par élément » et a obtenu
+        // un tableau dont la moitié des colonnes étaient vides. Le code le
+        // savait ; rien ne le disait à l'écran. La liste est désormais nommée
+        // et exposée, pour que l'interface puisse la signaler.
+        expect(exporteur.COLONNES_PAR_SEANCE).toEqual(['contenu', 'evaluations', 'travailPersonnel']);
+
+        exporteur.COLONNES_PAR_SEANCE.forEach(function(id) {
+            expect(exporteur.colonneUtileEn(id, 'noeuds')).toBe(false);
+            expect(exporteur.colonneUtileEn(id, 'seances')).toBe(true);
+        });
+
+        // Les colonnes ordinaires servent dans les deux granularités.
+        ['semaine', 'lecon', 'date', 'rangSeance', 'duree'].forEach(function(id) {
+            expect(exporteur.colonneUtileEn(id, 'noeuds')).toBe(true);
+            expect(exporteur.colonneUtileEn(id, 'seances')).toBe(true);
+        });
+    });
+
     it('les colonnes d’agrégation restent VIDES en granularité nœuds', () => {
         // Chaque élément a déjà sa ligne : répéter la liste complète sur la
         // ligne de leçon ferait dire deux fois la même chose.

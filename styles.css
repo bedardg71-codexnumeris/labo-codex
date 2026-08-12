@@ -19281,6 +19281,16 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 .export-perso-colonne-ligne .export-perso-colonne-case { flex: 0 0 34%; }
 .export-perso-groupe-secondaire { margin-top: 8px; }
 
+/* Colonne sans effet dans la granularité choisie (#416, constat terrain du
+   12 août) — signalée, jamais interdite : le gabarit appartient à l'utilisateur. */
+.export-perso-colonne-inerte { opacity: 0.62; }
+.export-perso-note-inerte {
+    font-size: 10.5px;
+    line-height: 1.35;
+    color: var(--texte-muted, #5a7a88);
+    padding: 0 4px 6px 26px;
+}
+
 .planif-export-plan-note {
     font-size: 10.5px;
     color: var(--texte-muted, #5a7a88);
