@@ -8343,6 +8343,23 @@ function rendrePanneauImportTrimestre() {
 // change. Défaut : « En classe » en texte — l'usage le plus fréquent (D4).
 var exportPlanNiveau = 'deroulement';
 var exportPlanFormat = 'texte';
+// Le groupe-cours dont les dates alimentent la colonne Date (#416 lot C, D9).
+// Il ne vit PAS dans le gabarit : un cours à trois groupes obligerait sinon à
+// trois gabarits identiques. Il se choisit au moment de l'export.
+var exportPlanGroupe = null;
+
+/** Les formats qu'un gabarit accepte. Sans mention, il les accepte tous. */
+function formatsDuGabarit(exporteur, gabaritId) {
+    var entree = exporteur.NIVEAUX.find(function(n) { return n.id === gabaritId; });
+    if (!entree || !Array.isArray(entree.formats)) return exporteur.FORMATS;
+    return exporteur.FORMATS.filter(function(f) { return entree.formats.indexOf(f.id) !== -1; });
+}
+
+/** L'appel d'export des deux boutons — un seul endroit, pour qu'ils ne divergent pas. */
+function optionsExport(exporteur) {
+    return exporteur.genererExport(exportPlanNiveau, exportPlanFormat, null,
+        exportPlanGroupe ? { groupeCoursId: exportPlanGroupe } : undefined);
+}
 
 function rendrePanneauExportPlan() {
     var panneau = document.getElementById('planif-export-plan-panel');
@@ -8361,12 +8378,49 @@ function rendrePanneauExportPlan() {
         return html;
     }
 
+    // Un gabarit peut refuser un format (le Calendrier n'a pas de sortie Texte
+    // — un tableau en texte suivi n'est que le tableau en moins lisible). Si le
+    // format retenu n'est plus offert, on bascule sur le premier accepté plutôt
+    // que de laisser un choix qui produirait un document vide.
+    var formatsOfferts = formatsDuGabarit(exporteur, exportPlanNiveau);
+    if (!formatsOfferts.some(function(f) { return f.id === exportPlanFormat; })) {
+        exportPlanFormat = formatsOfferts[0].id;
+    }
+
+    // ⚠ C'EST LA COLONNE DATE QUI POSE LA QUESTION DU GROUPE, pas l'ouverture
+    // du panneau (D9). Un gabarit sans date ne la pose pas ; avec un seul
+    // groupe, il est pris sans rien demander.
+    var groupes = typeof exporteur.groupesCoursDeLaCarte === 'function'
+        ? exporteur.groupesCoursDeLaCarte() : [];
+    var demandeLeGroupe = exportPlanNiveau === 'calendrier' && groupes.length > 1;
+    if (!demandeLeGroupe) exportPlanGroupe = null;
+
+    var htmlGroupe = '';
+    if (demandeLeGroupe) {
+        if (!groupes.some(function(g) { return g.id === exportPlanGroupe; })) {
+            exportPlanGroupe = groupes[0].id;
+        }
+        htmlGroupe = '<div class="planif-import-tri-groupe">Groupe</div>' +
+            '<div class="planif-import-tri-ligne">' +
+            '<select id="planif-export-plan-groupe" class="planif-select-carte"' +
+            ' aria-label="Groupe dont les dates alimentent la colonne Date">' +
+            groupes.map(function(g) {
+                // ⚠ Le nom du groupe est une donnée saisie par l'utilisateur.
+                return '<option value="' + echapperHtml(g.id) + '"' +
+                    (g.id === exportPlanGroupe ? ' selected' : '') + '>' +
+                    echapperHtml(g.nom) + '</option>';
+            }).join('') +
+            '</select></div>' +
+            '<div class="planif-export-plan-note">Les dates changent d’un groupe à l’autre.</div>';
+    }
+
     // Libellés statiques des constantes du module — echapperHtml par principe.
-    var html = groupeRadios('Niveau', 'planif-export-niveau', exporteur.NIVEAUX, exportPlanNiveau) +
+    var html = groupeRadios('Gabarit', 'planif-export-niveau', exporteur.NIVEAUX, exportPlanNiveau) +
         '<div class="planif-import-tri-ligne planif-export-plan-actions">' +
         '<button type="button" class="planif-btn-carte" id="planif-export-plan-personnaliser">Régler le niveau personnalisé…</button>' +
         '</div>' +
-        groupeRadios('Format', 'planif-export-format', exporteur.FORMATS, exportPlanFormat) +
+        groupeRadios('Format', 'planif-export-format', formatsOfferts, exportPlanFormat) +
+        htmlGroupe +
         '<div class="planif-import-tri-ligne planif-export-plan-actions">' +
         '<button type="button" class="planif-btn-carte" id="planif-export-plan-copier">Copier</button>' +
         '<button type="button" class="planif-btn-carte" id="planif-export-plan-telecharger">Télécharger</button>' +
@@ -8374,8 +8428,17 @@ function rendrePanneauExportPlan() {
     panneau.innerHTML = html;
 
     panneau.querySelectorAll('input[name="planif-export-niveau"]').forEach(function(radio) {
-        radio.addEventListener('change', function() { exportPlanNiveau = radio.value; });
+        radio.addEventListener('change', function() {
+            exportPlanNiveau = radio.value;
+            // Le gabarit commande les formats offerts et la question du groupe :
+            // le panneau se redessine plutôt que de garder un choix devenu faux.
+            rendrePanneauExportPlan();
+        });
     });
+    var selGroupe = document.getElementById('planif-export-plan-groupe');
+    if (selGroupe) {
+        selGroupe.addEventListener('change', function() { exportPlanGroupe = selGroupe.value; });
+    }
     var btnPersonnaliser = document.getElementById('planif-export-plan-personnaliser');
     if (btnPersonnaliser) {
         btnPersonnaliser.addEventListener('click', function() {
@@ -8389,7 +8452,7 @@ function rendrePanneauExportPlan() {
     });
 
     document.getElementById('planif-export-plan-telecharger').addEventListener('click', function() {
-        var doc = exporteur.genererExport(exportPlanNiveau, exportPlanFormat);
+        var doc = optionsExport(exporteur);
         if (!doc) { afficherToastLien("L'export a échoué — aucune carte active."); return; }
         var format = exporteur.FORMATS.find(function(f) { return f.id === exportPlanFormat; });
         telechargerFichier(doc, exporteur.nomFichierExport(exportPlanNiveau, exportPlanFormat), format.mime);
@@ -8397,7 +8460,7 @@ function rendrePanneauExportPlan() {
     });
 
     document.getElementById('planif-export-plan-copier').addEventListener('click', function() {
-        var doc = exporteur.genererExport(exportPlanNiveau, exportPlanFormat);
+        var doc = optionsExport(exporteur);
         if (!doc) { afficherToastLien("L'export a échoué — aucune carte active."); return; }
         function copieReussie() {
             afficherToastLien('Plan copié — colle-le où tu veux.');
@@ -8467,9 +8530,18 @@ function remplirModaleExportPerso() {
     }
 
     function rendreReglages() {
-        // « Partir de » — les trois presets comme points de départ.
+        // « Partir de » — les niveaux de PROFONDEUR comme points de départ.
+        //
+        // ⚠ Le critère est l'existence d'INCLUSIONS, pas une liste de noms.
+        // Le personnalisé est un document en granularité « nœuds » : il peut
+        // partir de Plan de cours, En classe ou Preuve d'alignement, qui
+        // disent tous les trois QUELLE PROFONDEUR montrer. Il ne peut pas
+        // partir du Calendrier (#416 lot I), qui est une autre FORME — une
+        // ligne par rencontre, des cellules qui agrègent. Le moteur n'a
+        // aucune inclusion pour lui, et une config qui en partirait serait
+        // vide de sens.
         var htmlPartir = '';
-        exporteur.NIVEAUX.filter(function(n) { return n.id !== 'personnalise'; }).forEach(function(n) {
+        exporteur.NIVEAUX.filter(function(n) { return !!exporteur.INCLUSIONS[n.id]; }).forEach(function(n) {
             htmlPartir += '<button type="button" class="planif-btn-carte export-perso-preset" data-preset="' +
                 echapperHtml(n.id) + '">' + echapperHtml(n.label) + '</button>';
         });

@@ -30,7 +30,13 @@ var NIVEAUX = [
     { id: 'sommaire',    label: 'Plan de cours' },
     { id: 'deroulement', label: 'En classe' },
     { id: 'alignement',  label: 'Preuve d’alignement' },
-    { id: 'personnalise', label: 'Personnalisé' }
+    { id: 'personnalise', label: 'Personnalisé' },
+    // ⚠ « Calendrier » N'EST PAS un quatrième niveau de profondeur (#416 lot I,
+    // D4). Il vit dans cette liste parce que c'est là que l'utilisateur choisit
+    // ce qu'il exporte, et que les gabarits nommés (lot H) n'existent pas
+    // encore. Quand ils arriveront, cette liste DEVIENDRA la liste des
+    // gabarits et « Personnalisé » y perdra sa place de niveau.
+    { id: 'calendrier',  label: 'Calendrier', formats: ['tsv', 'markdown'] }
 ];
 var FORMATS = [
     { id: 'texte',    label: 'Texte',    extension: '.txt', mime: 'text/plain' },
@@ -742,15 +748,63 @@ var CATALOGUE_COLONNES = {
         return joindreTitres(elementsAgreges(c, 'activite'));
     } },
     evaluations: { libelle: 'Évaluations',     valeur: function(c) {
-        return joindreTitres(elementsAgreges(c, 'evaluation'));
+        return joindreEvaluations(elementsAgreges(c, 'evaluation'));
+    } },
+    // ⚠ SORT VIDE TANT QUE LE LOT B N'EST PAS LÀ, et c'est une décision, pas
+    // un oubli. Rien dans le modèle ne dit encore « ce nœud se fait hors des
+    // heures de classe » : `metadata.horsClasse` est le lot B. La colonne
+    // existe quand même parce que le calendrier de Grégoire en a six, et
+    // qu'une colonne absente se remarque moins qu'une colonne vide qu'il
+    // remplira à la main en attendant. Compromis arbitré le 12 août.
+    //
+    // Le jour où le lot B arrive : filtrer ici sur `el.horsClasse`, et
+    // RETIRER les nœuds ainsi marqués de `contenu` et `evaluations`, sinon
+    // ils sortiront deux fois.
+    travailPersonnel: { libelle: 'Travail personnel', valeur: function(c) {
+        if (!c.agregeSaLecon || !c.lecon) return '';
+        return joindreTitres(c.lecon.elements.filter(estHorsClasse));
     } }
 };
 
-/** Le séparateur des cellules qui agrègent : lisible en tableur, sur une ligne. */
+/**
+ * Le nœud se fait-il hors des heures de classe ?
+ *
+ * ⚠ RÉPOND TOUJOURS NON AUJOURD'HUI — `metadata.horsClasse` n'existe pas
+ * encore, c'est le lot B. La question est posée ici, et pas dans la colonne,
+ * pour qu'il y ait UN seul endroit à changer le jour venu, et pour qu'une
+ * colonne « Travail personnel » vide se lise comme une réponse du modèle
+ * plutôt que comme un trou dans le générateur.
+ */
+function estHorsClasse(el) {
+    return !!(el && el.horsClasse);
+}
+
+// Le séparateur des cellules qui agrègent : lisible en tableur, sur une ligne.
+var SEPARATEUR_AGREGE = ' · ';
+
+/**
+ * Ce qu'on FAIT pendant la rencontre : le titre de l'activité, toujours.
+ *
+ * ⚠ PAS le nom de sa production, même quand elle en porte une. Une activité
+ * peut être rattachée à une production par l'Organisateur (porteur historique)
+ * — « Pastiche descriptif » rattaché au « Quiz de lecture ». La colonne
+ * Contenu doit dire ce qui se passe en classe, pas ce qui sera remis : sinon
+ * le calendrier annonce un quiz là où l'étudiant vient écrire un pastiche.
+ */
 function joindreTitres(elements) {
+    return elements.map(function(el) { return el.titre; }).join(SEPARATEUR_AGREGE);
+}
+
+/**
+ * Ce qui est ÉVALUÉ : le nom de la production si elle existe, sinon le titre.
+ *
+ * L'inverse de la règle ci-dessus, et pour la même raison : c'est le nom de
+ * la production que l'étudiant reconnaît dans son plan de cours.
+ */
+function joindreEvaluations(elements) {
     return elements.map(function(el) {
         return el.production ? el.production.nomProduction : el.titre;
-    }).join(' · ');
+    }).join(SEPARATEUR_AGREGE);
 }
 
 function elementsAgreges(c, categorie) {
@@ -765,6 +819,24 @@ function prodDe(c) {
 // Les gabarits d'usine, exprimés dans le catalogue. Ce sont EXACTEMENT les
 // colonnes des trois préréglages historiques, dans le même ordre — c'est ce
 // que le golden master vérifie à l'octet près.
+// ⚠ « CALENDRIER » N'EST PAS UN QUATRIÈME NIVEAU. D4 le déconseille
+// explicitement — « au-delà de trois, le choix devient lui-même une friction,
+// et les niveaux intermédiaires se ressemblent ». Ce n'est pas une PROFONDEUR
+// (il montre tout ce qui se passe en classe) mais une FORME : une ligne par
+// rencontre, avec des cellules qui agrègent. C'est un GABARIT, et le premier
+// à se servir des trois axes à la fois.
+//
+// Ses six colonnes viennent du déroulement que Grégoire tient déjà à la main.
+// La sixième sort vide tant que le lot B n'est pas là — arbitré le 12 août
+// pour livrer avant sa rentrée.
+var GABARIT_CALENDRIER = {
+    colonnes: ['semaine', 'rangSeance', 'date', 'contenu', 'evaluations', 'travailPersonnel'],
+    granularite: 'seances',
+    // ⚠ TSV et Markdown, PAS Texte : un calendrier en texte suivi n'est que
+    // le tableau en moins lisible.
+    formats: ['tsv', 'markdown']
+};
+
 var COLONNES_USINE = {
     sommaire:    ['sequence', 'lecon', 'semaine', 'evaluation', 'ponderation', 'echeance'],
     deroulement: ['sequence', 'lecon', 'semaine', 'type', 'titre', 'duree', 'retroaction',
@@ -825,15 +897,16 @@ function cellulesDeLigne(colonnes, ctx) {
  * @param {Object} plan     - structure rendue par construirePlan
  * @param {Object} gabarit  - { colonnes: [ids], inclusions, evaluationsSeulement, renommages }
  */
-function rendreTableau(plan, gabarit) {
+function construireMatrice(plan, gabarit) {
     var colonnes = gabarit.colonnes;
     var inc = gabarit.inclusions;
-    var lignes = [colonnes.map(function(id) {
+    var entetes = colonnes.map(function(id) {
         return nettoyerTSV(libelleColonne(id, gabarit.renommages));
-    }).join('\t')];
+    });
+    var lignes = [];
 
     function pousser(ctx) {
-        lignes.push(cellulesDeLigne(colonnes, ctx).join('\t'));
+        lignes.push(cellulesDeLigne(colonnes, ctx));
     }
 
     function pousserLecon(seqTitre, lecon) {
@@ -891,7 +964,61 @@ function rendreTableau(plan, gabarit) {
 
     plan.leconsOrphelines.forEach(function(lecon) { pousserLecon('(Hors séquence)', lecon); });
 
+    // ⚠ UNE LIGNE ENTIÈREMENT VIDE N'EST PAS UNE INFORMATION, c'est un
+    // artefact. Elle apparaît quand une leçon n'a AUCUNE des colonnes que ce
+    // gabarit-là demande : une leçon sans semaine, sans rang et sans contenu
+    // sort, dans un calendrier à six colonnes, comme six cellules vides.
+    //
+    // Le retrait ne vaut QUE pour ce cas-là. Une leçon qui n'a que sa semaine
+    // garde sa ligne : « semaine 5, rien de prévu » se lit, et c'est
+    // exactement ce qu'un enseignant veut voir dans son calendrier. Retirer
+    // plus large masquerait du travail non planifié — l'inverse du service.
+    var nonVides = lignes.filter(function(l) {
+        return l.some(function(cellule) { return String(cellule) !== ''; });
+    });
+
+    return { entetes: entetes, lignes: nonVides, lignesRetirees: lignes.length - nonVides.length };
+}
+
+// ---------------------------------------------------------------------------
+// LES DEUX MISES EN FORME TABULAIRES
+// ---------------------------------------------------------------------------
+//
+// La matrice ci-dessus ne sait rien du format : elle dit quelles lignes, avec
+// quelles cellules. Ce qui suit ne sait rien du contenu. C'est ce qui permet
+// au gabarit Calendrier de sortir en TSV pour le tableur ET en Markdown pour
+// un document, sans deux parcours de la carte.
+
+function formaterTSV(matrice) {
+    return [matrice.entetes].concat(matrice.lignes).map(function(l) {
+        return l.join('\t');
+    }).join('\n') + '\n';
+}
+
+/**
+ * Tableau Markdown — celui qui se colle dans Pages ou Word.
+ *
+ * ⚠ La barre verticale est le séparateur de colonnes du format : une cellule
+ * qui en contient une couperait la ligne en deux. Elle est échappée, pas
+ * retirée — un titre de leçon appartient à son auteur.
+ */
+function echapperCelluleMD(v) {
+    return String(v == null ? '' : v).replace(/\|/g, '\\|');
+}
+
+function formaterMarkdownTableau(matrice) {
+    var lignes = [
+        '| ' + matrice.entetes.map(echapperCelluleMD).join(' | ') + ' |',
+        '|' + matrice.entetes.map(function() { return ' --- '; }).join('|') + '|'
+    ];
+    matrice.lignes.forEach(function(l) {
+        lignes.push('| ' + l.map(echapperCelluleMD).join(' | ') + ' |');
+    });
     return lignes.join('\n') + '\n';
+}
+
+function rendreTableau(plan, gabarit) {
+    return formaterTSV(construireMatrice(plan, gabarit));
 }
 
 /** Gabarit d'usine d'un niveau historique. */
@@ -1087,7 +1214,7 @@ function rendreMarkdown(plan, niveauId, incPerso, ordrePerso) {
  *   (aperçu de la modale) au lieu de la préférence mémorisée
  * @returns {string|null} le document, ou null sans carte
  */
-function genererExport(niveauId, formatId, configEssai) {
+function genererExport(niveauId, formatId, configEssai, options) {
     var plan;
     if (niveauId === 'personnalise') {
         var cfg = configEssai ? normaliserConfigPersonnalisee(configEssai) : lireConfigPersonnalisee();
@@ -1099,6 +1226,16 @@ function genererExport(niveauId, formatId, configEssai) {
         if (formatId === 'markdown') return rendreMarkdown(plan, niveauId, inc, cfg.ordre);
         return null;
     }
+    if (niveauId === 'calendrier') {
+        // Le format Texte n'est pas proposé pour ce gabarit ; le demander
+        // quand même rend null plutôt qu'un document dégradé silencieux.
+        if (GABARIT_CALENDRIER.formats.indexOf(formatId) === -1) return null;
+        plan = construirePlan(options);
+        if (!plan) return null;
+        var matrice = construireMatrice(plan, normaliserGabarit(GABARIT_CALENDRIER));
+        return formatId === 'markdown' ? formaterMarkdownTableau(matrice) : formaterTSV(matrice);
+    }
+
     if (!INCLUSIONS[niveauId]) return null;
     plan = construirePlan();
     if (!plan) return null;
@@ -1139,6 +1276,10 @@ window.planificationExport = {
     COLONNES_USINE: COLONNES_USINE,
     genererTableau: genererTableau,
     libelleColonne: libelleColonne,
+    // #416 lot I — le gabarit d'usine « Calendrier ».
+    GABARIT_CALENDRIER: GABARIT_CALENDRIER,
+    formaterMarkdownTableau: formaterMarkdownTableau,
+    construireMatrice: construireMatrice,
     // #431 — niveau Personnalisé : constantes et portes de la modale.
     SECTIONS_PLAN: SECTIONS_PLAN,
     CONTENUS_PLAN: CONTENUS_PLAN,

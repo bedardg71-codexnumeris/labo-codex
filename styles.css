@@ -19211,6 +19211,33 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 }
 .planif-export-plan-actions { justify-content: flex-end; margin-top: 6px; }
 
+/* Choix du groupe-cours (#416 lot I) — n'apparaît QUE si le gabarit porte une
+   colonne Date et que le cours a plusieurs groupes (D9). Mêmes tokens que le
+   reste du panneau ; cible tactile à 32 px comme les rangées de radios. */
+.planif-select-carte {
+    flex: 1;
+    min-height: 32px;
+    font-size: 12px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    border: 1px solid var(--bordure-subtile, rgba(127, 127, 127, 0.3));
+    background: var(--surface-element, #244858);
+    color: var(--planif-couleur-texte);
+}
+.mode-clair .planif-select-carte {
+    background: var(--surface-carte, #ffffff);
+    color: var(--texte-principal);
+}
+.planif-select-carte:focus {
+    outline: 2px solid var(--accent-primaire, #3b82f6);
+    outline-offset: 1px;
+}
+.planif-export-plan-note {
+    font-size: 10.5px;
+    color: var(--texte-muted, #5a7a88);
+    padding: 2px 4px 4px;
+}
+
 /* Modale « Export personnalisé » (#431) — réglages + aperçu vivant.
    Variables existantes seulement, deux modes couverts par les tokens. */
 .modal-export-perso {
