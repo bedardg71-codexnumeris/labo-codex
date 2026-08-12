@@ -19878,6 +19878,41 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     }
 }
 
+/* Rang de séance (#416 lot A) — il SUIT la semaine dans le même en-tête.
+   ⚠ Surtout PAS de `margin-left: auto` ici : le piège du 7 août (#412) est
+   que deux éléments qui poussent dans le même en-tête s'éparpillent au lieu
+   de se grouper. La semaine pousse ; la séance se colle contre elle. */
+.planif-noeud-seance {
+    margin-left: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    padding: 1px 3px;
+    width: auto;
+    min-width: 26px;
+    border: 1px solid var(--bordure-subtile, rgba(127,127,127,0.3));
+    border-radius: 4px;
+    background: transparent;
+    color: var(--texte-secondaire, #6aacb8);
+    opacity: 0.65;
+    cursor: pointer;
+    transition: opacity 0.12s;
+}
+.planif-noeud:hover .planif-noeud-seance { opacity: 1; }
+.planif-noeud-seance:focus {
+    opacity: 1;
+    outline: 2px solid var(--planif-couleur-selection, #3b82f6);
+    outline-offset: 1px;
+}
+@media (hover: none) {
+    .planif-noeud-seance {
+        opacity: 1;
+        min-height: 28px;
+        min-width: 44px;
+        padding: 2px 4px;
+    }
+}
+
 .planif-badge-validation {
     position: absolute;
     top: 4px;
