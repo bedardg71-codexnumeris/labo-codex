@@ -206,14 +206,14 @@ function poserFixture(api) {
 }
 
 /**
- * Les sorties d'usine, dans un ordre stable.
+ * Les sorties génériques, dans un ordre stable.
  *
  * ⚠ « personnalise » A DISPARU au lot H, et ce n'est pas une perte de
  * couverture : le niveau n'existe plus, son réglage unique a migré en gabarit
  * nommé. Ses trois références ont été retirées le 12 août, délibérément.
  * « calendrier » prend sa place avec ses DEUX formats — il refuse le Texte.
  */
-export const SORTIES_USINE = (() => {
+export const SORTIES_GENERIQUES = (() => {
     const paires = [];
     ['sommaire', 'deroulement', 'alignement'].forEach((n) => {
         ['texte', 'tsv', 'markdown'].forEach((f) => paires.push({ niveau: n, format: f }));

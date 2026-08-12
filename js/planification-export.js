@@ -822,7 +822,7 @@ function prodDe(c) {
     return (!c.estLecon && c.el && c.el.production) ? c.el.production : null;
 }
 
-// Les gabarits d'usine, exprimés dans le catalogue. Ce sont EXACTEMENT les
+// Les gabarits génériques, exprimés dans le catalogue. Ce sont EXACTEMENT les
 // colonnes des trois préréglages historiques, dans le même ordre — c'est ce
 // que le golden master vérifie à l'octet près.
 // ⚠ « CALENDRIER » N'EST PAS UN QUATRIÈME NIVEAU. D4 le déconseille
@@ -843,7 +843,7 @@ var GABARIT_CALENDRIER = {
     formats: ['tsv', 'markdown']
 };
 
-var COLONNES_USINE = {
+var COLONNES_GENERIQUES = {
     sommaire:    ['sequence', 'lecon', 'semaine', 'evaluation', 'ponderation', 'echeance'],
     deroulement: ['sequence', 'lecon', 'semaine', 'type', 'titre', 'duree', 'retroaction',
                   'production', 'ponderation', 'echeance', 'objectifs'],
@@ -1066,10 +1066,10 @@ function rendreTableau(plan, gabarit) {
     return formaterTSV(construireMatrice(plan, gabarit));
 }
 
-/** Gabarit d'usine d'un niveau historique. */
+/** Gabarit générique d'un niveau historique. */
 function gabaritDUsine(niveauId) {
     return {
-        colonnes: COLONNES_USINE[niveauId],
+        colonnes: COLONNES_GENERIQUES[niveauId],
         inclusions: INCLUSIONS[niveauId],
         granularite: 'noeuds',
         evaluationsSeulement: niveauId === 'sommaire',
@@ -1088,7 +1088,7 @@ function normaliserGabarit(gabarit) {
         return !!CATALOGUE_COLONNES[id];
     }) : [];
     return {
-        colonnes: colonnes.length > 0 ? colonnes : COLONNES_USINE.alignement,
+        colonnes: colonnes.length > 0 ? colonnes : COLONNES_GENERIQUES.alignement,
         inclusions: g.inclusions || INCLUSIONS.alignement,
         granularite: g.granularite === 'seances' ? 'seances' : 'noeuds',
         evaluationsSeulement: !!g.evaluationsSeulement,
@@ -1299,17 +1299,17 @@ function genererExport(niveauId, formatId, configEssai, options) {
 var CLE_GABARITS = 'exportGabarits';
 var CLE_PERSONNALISE_HERITE = 'exportPlanPersonnalise';
 
-/** Les gabarits d'usine : dans le CODE, jamais persistés — on n'édite pas ce
+/** Les gabarits génériques : dans le CODE, jamais persistés — on n'édite pas ce
  *  qu'on ne modifie pas. Ils se DUPLIQUENT pour devenir modifiables. */
-function gabaritsDUsine() {
+function gabaritsGeneriques() {
     return [
-        { id: 'sommaire', nom: 'Plan de cours', dUsine: true,
-          granularite: 'noeuds', colonnes: COLONNES_USINE.sommaire.slice(), renommages: null },
-        { id: 'deroulement', nom: 'En classe', dUsine: true,
-          granularite: 'noeuds', colonnes: COLONNES_USINE.deroulement.slice(), renommages: null },
-        { id: 'alignement', nom: 'Preuve d’alignement', dUsine: true,
-          granularite: 'noeuds', colonnes: COLONNES_USINE.alignement.slice(), renommages: null },
-        { id: 'calendrier', nom: 'Calendrier', dUsine: true,
+        { id: 'sommaire', nom: 'Plan de cours', generique: true,
+          granularite: 'noeuds', colonnes: COLONNES_GENERIQUES.sommaire.slice(), renommages: null },
+        { id: 'deroulement', nom: 'En classe', generique: true,
+          granularite: 'noeuds', colonnes: COLONNES_GENERIQUES.deroulement.slice(), renommages: null },
+        { id: 'alignement', nom: 'Preuve d’alignement', generique: true,
+          granularite: 'noeuds', colonnes: COLONNES_GENERIQUES.alignement.slice(), renommages: null },
+        { id: 'calendrier', nom: 'Calendrier', generique: true,
           granularite: 'seances', colonnes: GABARIT_CALENDRIER.colonnes.slice(), renommages: null }
     ];
 }
@@ -1362,7 +1362,7 @@ function normaliserGabaritNomme(brut) {
     return {
         id: id,
         nom: typeof brut.nom === 'string' && brut.nom.trim() ? brut.nom.trim() : 'Gabarit sans nom',
-        dUsine: false,
+        generique: false,
         granularite: brut.granularite === 'seances' ? 'seances' : 'noeuds',
         colonnes: colonnes,
         renommages: renommages
@@ -1396,7 +1396,7 @@ function migrerPersonnaliseEnGabarit(gabaritsExistants) {
     var migre = {
         id: 'gab-migre-431',
         nom: 'Mon export personnalisé',
-        dUsine: false,
+        generique: false,
         granularite: 'noeuds',
         colonnes: colonnes,
         renommages: null
@@ -1420,7 +1420,7 @@ function serialiserGabarit(g) {
     };
 }
 
-/** Les gabarits de l'utilisateur, migration comprise. Jamais les d'usine. */
+/** Les gabarits de l'utilisateur, migration comprise. Jamais les génériques. */
 function lireGabaritsUtilisateur() {
     var bruts = lirePreference(CLE_GABARITS, []);
     var gabarits = (Array.isArray(bruts) ? bruts : [])
@@ -1429,9 +1429,9 @@ function lireGabaritsUtilisateur() {
     return migrerPersonnaliseEnGabarit(gabarits);
 }
 
-/** Tous les gabarits offerts : d'usine d'abord, puis ceux de l'utilisateur. */
+/** Tous les gabarits offerts : génériques d'abord, puis ceux de l'utilisateur. */
 function listerGabarits() {
-    return gabaritsDUsine().concat(lireGabaritsUtilisateur());
+    return gabaritsGeneriques().concat(lireGabaritsUtilisateur());
 }
 
 function trouverGabarit(id) {
@@ -1455,7 +1455,7 @@ function prochainIdGabarit(existants) {
 /**
  * Duplique un gabarit — le SEUL chemin pour en obtenir un modifiable.
  *
- * ⚠ Les gabarits d'usine ne se modifient pas sur place : ce sont les
+ * ⚠ Les gabarits génériques ne se modifient pas sur place : ce sont les
  * documents que l'application promet, et un utilisateur qui casse « Plan de
  * cours » n'a aucun moyen de le retrouver. Dupliquer coûte un clic et rend
  * l'original intouchable.
@@ -1468,7 +1468,7 @@ function dupliquerGabarit(idSource, nomVoulu) {
     var copie = {
         id: prochainIdGabarit(listerGabarits()),
         nom: (nomVoulu && String(nomVoulu).trim()) || (source.nom + ' (copie)'),
-        dUsine: false,
+        generique: false,
         granularite: source.granularite,
         colonnes: source.colonnes.slice(),
         renommages: source.renommages ? Object.assign({}, source.renommages) : null
@@ -1481,8 +1481,8 @@ function dupliquerGabarit(idSource, nomVoulu) {
 function enregistrerGabarit(gabarit) {
     var propre = normaliserGabaritNomme(gabarit);
     if (!propre) return null;
-    // ⚠ Un gabarit d'usine ne s'écrase pas, même si l'appelant insiste.
-    if (gabaritsDUsine().some(function(g) { return g.id === propre.id; })) return null;
+    // ⚠ Un gabarit générique ne s'écrase pas, même si l'appelant insiste.
+    if (gabaritsGeneriques().some(function(g) { return g.id === propre.id; })) return null;
 
     var utilisateur = lireGabaritsUtilisateur();
     var i = utilisateur.findIndex(function(g) { return g.id === propre.id; });
@@ -1561,10 +1561,10 @@ window.planificationExport = {
     CATALOGUE_COLONNES: CATALOGUE_COLONNES,
     COLONNES_PAR_SEANCE: COLONNES_PAR_SEANCE,
     colonneUtileEn: colonneUtileEn,
-    COLONNES_USINE: COLONNES_USINE,
+    COLONNES_GENERIQUES: COLONNES_GENERIQUES,
     genererTableau: genererTableau,
     libelleColonne: libelleColonne,
-    // #416 lot I — le gabarit d'usine « Calendrier ».
+    // #416 lot I — le gabarit générique « Calendrier ».
     GABARIT_CALENDRIER: GABARIT_CALENDRIER,
     formaterMarkdownSections: formaterMarkdownSections,
     construireMatrice: construireMatrice,

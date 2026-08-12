@@ -110,14 +110,14 @@ describe('Éditeur de gabarits · rendu', () => {
         api.remplirModaleExportPerso();
     });
 
-    it('la liste offre les quatre gabarits d’usine, marqués comme tels', () => {
+    it('la liste offre les quatre gabarits génériques, marqués comme tels', () => {
         const html = elements['export-perso-liste'].innerHTML;
         expect((html.match(/type="radio"/g) || []).length).toBe(4);
-        expect((html.match(/export-perso-badge-usine/g) || []).length).toBe(4);
+        expect((html.match(/export-perso-badge-generique/g) || []).length).toBe(4);
         expect(html).toContain('Calendrier');
     });
 
-    it('un gabarit d’usine a ses contrôles DÉSACTIVÉS — il se duplique, il ne s’édite pas', () => {
+    it('un gabarit générique a ses contrôles DÉSACTIVÉS — il se duplique, il ne s’édite pas', () => {
         expect(elements['export-perso-nom'].disabled).toBe(true);
         const colonnes = elements['export-perso-colonnes'].innerHTML;
         expect(colonnes).toContain('disabled');

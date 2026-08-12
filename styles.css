@@ -19238,7 +19238,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 .export-perso-gabarit-choix { padding: 5px 4px; border-radius: 6px; min-height: 32px; }
 .export-perso-gabarit-choix:hover { background: var(--surface-element, #244858); }
 .mode-clair .export-perso-gabarit-choix:hover { background: rgba(6, 93, 187, 0.06); }
-.export-perso-badge-usine {
+.export-perso-badge-generique {
     font-size: 9.5px;
     text-transform: uppercase;
     letter-spacing: 0.04em;

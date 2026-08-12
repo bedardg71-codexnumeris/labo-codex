@@ -2,10 +2,10 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { monterExportSandbox, SORTIES_USINE } from './_helpers/carte-essai-exports.js';
+import { monterExportSandbox, SORTIES_GENERIQUES } from './_helpers/carte-essai-exports.js';
 
 // =======================================================================
-// GOLDEN MASTER DES SORTIES D'USINE (#416 lot G)
+// GOLDEN MASTER DES SORTIES GÉNÉRIQUES (#416 lot G)
 // =======================================================================
 //
 // Le lot G fond les préréglages dans les gabarits : Plan de cours, En classe,
@@ -13,7 +13,7 @@ import { monterExportSandbox, SORTIES_USINE } from './_helpers/carte-essai-expor
 // devenir des listes de colonnes du générateur unique. C'est un refactor du
 // SEUL générateur d'export de l'application.
 //
-// ⚠ SA PREUVE EST ICI, ET ELLE EST BIT-À-BIT. Si les quatre sorties d'usine
+// ⚠ SA PREUVE EST ICI, ET ELLE EST BIT-À-BIT. Si les quatre sorties génériques
 // sortent identiques à l'octet près, la fonte n'a rien changé POUR
 // L'UTILISATEUR — quoi qu'il soit arrivé à la structure du code.
 //
@@ -36,8 +36,8 @@ let exporteur;
 
 beforeAll(() => { exporteur = monterExportSandbox().exporteur; });
 
-describe('Golden master · les sorties d’usine ne bougent pas d’un octet', () => {
-    for (const { niveau, format } of SORTIES_USINE) {
+describe('Golden master · les sorties génériques ne bougent pas d’un octet', () => {
+    for (const { niveau, format } of SORTIES_GENERIQUES) {
         it(`${niveau} · ${format} — identique à la référence`, () => {
             const chemin = path.join(dossierRef, `${niveau}.${format}.txt`);
             expect(
@@ -50,14 +50,14 @@ describe('Golden master · les sorties d’usine ne bougent pas d’un octet', (
         });
     }
 
-    it('toutes les sorties d’usine sont couvertes — aucune n’échappe au filet', () => {
+    it('toutes les sorties génériques sont couvertes — aucune n’échappe au filet', () => {
         // 3 documents × 3 formats, plus le Calendrier qui refuse le Texte.
         // ⚠ Le compte est passé de 12 à 11 au lot H : « personnalise » n'est
         // plus un niveau, son réglage a migré en gabarit nommé. Ce n'est pas
         // une couverture perdue, c'est un comportement retiré.
-        expect(SORTIES_USINE).toHaveLength(11);
-        expect(SORTIES_USINE.filter((s) => s.niveau === 'calendrier')).toHaveLength(2);
-        expect(SORTIES_USINE.some((s) => s.niveau === 'personnalise')).toBe(false);
+        expect(SORTIES_GENERIQUES).toHaveLength(11);
+        expect(SORTIES_GENERIQUES.filter((s) => s.niveau === 'calendrier')).toHaveLength(2);
+        expect(SORTIES_GENERIQUES.some((s) => s.niveau === 'personnalise')).toBe(false);
     });
 });
 
@@ -91,10 +91,10 @@ describe('Golden master · ce que les références contiennent VRAIMENT', () => 
 
         // ⚠ Le Calendrier PORTE une colonne Date depuis le lot I — et pourtant
         // aucune référence n'en contient. Ce n'est pas une contradiction :
-        // les sorties d'usine sont générées SANS groupe désigné, la carte
+        // les sorties génériques sont générées SANS groupe désigné, la carte
         // d'essai a deux groupes, et l'export ne devine pas lequel (D9). Une
         // date qui apparaîtrait ici serait une date devinée.
-        for (const { niveau, format } of SORTIES_USINE) {
+        for (const { niveau, format } of SORTIES_GENERIQUES) {
             expect(exporteur.genererExport(niveau, format)).not.toContain('2026-09-08');
         }
     });

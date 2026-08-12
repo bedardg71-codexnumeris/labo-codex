@@ -126,7 +126,7 @@
         exportPlanPersonnalise: null,
 
         // Gabarits d'export nommés (#416 lot H, 12 août 2026).
-        // [] = aucun gabarit propre ; les gabarits D'USINE ne vivent pas ici,
+        // [] = aucun gabarit propre ; les gabarits GÉNÉRIQUES ne vivent pas ici,
         // ils sont dans le code (on ne persiste pas ce qu'on n'édite pas).
         // Forme : [{ id, nom, granularite, colonnes: [ids], renommages: {} }]
         exportGabarits: []
