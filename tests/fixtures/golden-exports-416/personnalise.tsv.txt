@@ -1,0 +1,9 @@
+Séquence	Leçon	Semaine	Objectifs	Type	Titre	Durée (min)	Rétroaction	Production	Pondération (%)	Échéance
+Le récit réaliste	L’incipit	3	Analyser un incipit réaliste ; Rédiger un plan de dissertation	Leçon	L’incipit	125				
+Le récit réaliste	L’incipit	3		Exposé	Exposé magistral sur le réalisme	50				
+Le récit réaliste	L’incipit	3		Activité	Atelier d’analyse en équipe	45	Orale			
+Le récit réaliste	L’incipit	3		Évaluation	Évaluation de l’incipit	30	Sur le rendu : Écrite	Dissertation critique	25	2026-10-15
+Le récit réaliste	La description	3	Au terme de la leçon, l’étudiant·e sera capable de maîtriser la description réaliste.	Leçon	La description	30				
+Le récit réaliste	La description	3		Activité	Pastiche descriptif	30	Écrite	Quiz de lecture	10	
+Le récit réaliste › Sous-parcours poésie	Leçon nichée	5		Leçon	Leçon nichée					
+(Hors séquence)	Récupération libre			Leçon	Récupération libre					

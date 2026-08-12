@@ -1,0 +1,10 @@
+Séquence	Leçon	Semaine	Type	Titre	Durée (min)	Rétroaction	Production	Pondération (%)	Échéance	Objectifs	Objectifs servis	Liens	Grille	Échelle
+Le récit réaliste	L’incipit	3	Leçon	L’incipit	125					Analyser un incipit réaliste ; Rédiger un plan de dissertation				
+Le récit réaliste	L’incipit	3	Exposé	Exposé magistral sur le réalisme	50									
+Le récit réaliste	L’incipit	3	Activité	Atelier d’analyse en équipe	45	Orale					Analyser un incipit réaliste	← s'acquiert par : Le narrateur omniscient		
+Le récit réaliste	L’incipit	3	Conceptuelle	Le narrateur omniscient								→ s'acquiert par : Atelier d’analyse en équipe ; → se vérifie par : Évaluation de l’incipit		
+Le récit réaliste	L’incipit	3	Évaluation	Évaluation de l’incipit	30	Sur le rendu : Écrite	Dissertation critique	25	2026-10-15			← se vérifie par : Le narrateur omniscient	Grille SRPNF	Échelle IDME
+Le récit réaliste	La description	3	Leçon	La description	30					Au terme de la leçon, l’étudiant·e sera capable de maîtriser la description réaliste.		← se concrétise dans : maîtriser la description réaliste		
+Le récit réaliste	La description	3	Activité	Pastiche descriptif	30	Écrite	Quiz de lecture	10					Aucune grille	Aucune échelle
+Le récit réaliste › Sous-parcours poésie	Leçon nichée	5	Leçon	Leçon nichée										
+(Hors séquence)	Récupération libre		Leçon	Récupération libre										
