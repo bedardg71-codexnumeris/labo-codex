@@ -5,43 +5,51 @@ import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
 
 // =======================================================================
-// SENTINELLE UI — la modale « Export personnalisé » (#431)
+// SENTINELLE UI — l'éditeur de gabarits (#416 lot H)
 // =======================================================================
 //
-// Modale ASSUMÉE (décision du 8 août, plan #431) : cases + ordre + aperçu
-// ne tiennent pas dans un panneau de 380 px. Deux volets :
-//   1. statique — le chrome existe, le panneau Actions offre le point
-//      d'entrée, aucun listener souris (ratchet #148) ;
-//   2. rendu — la modale rend les 8 cases, les 4 sections ordonnables,
-//      les 3 presets de départ, les 3 formats, et l'aperçu est PEUPLÉ
-//      par textContent (jamais innerHTML : il porte des titres saisis).
+// ⚠ CE FICHIER REMPLACE `sentinelle-modale-export-perso-431`. La modale
+// qu'il gardait — cocher des contenus, ordonner des sections — n'existe plus :
+// elle édite maintenant des GABARITS, et le réglage unique de #431 a migré.
+//
+// DEUX INVARIANTS SONT REPRIS TELS QUELS, et c'est la raison d'être de ce
+// fichier plutôt qu'une simple suppression :
+//   1. l'aperçu est peuplé par textContent, JAMAIS innerHTML — il porte les
+//      titres saisis par l'enseignant (règle de sécurité du projet) ;
+//   2. aucun listener souris dans le code de la modale (ratchet #148).
+// Un chantier qui remplace une interface ne doit pas emporter les gardes
+// transversales qui vivaient dedans.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
 const sourceIndex = readFileSync(path.join(racine, 'index.html'), 'utf8');
 const sourceCarte = readFileSync(path.join(racine, 'js', 'planification-carte.js'), 'utf8');
 
-describe('#431 · statique — le chrome de la modale', () => {
-    it('la modale existe dans le HTML avec ses cinq zones', () => {
+describe('Éditeur de gabarits · statique — le chrome et les gardes', () => {
+    it('la modale existe dans le HTML avec ses zones', () => {
         expect(sourceIndex).toContain('id="modalExportPersonnalise"');
-        for (const id of ['export-perso-partir', 'export-perso-contenus', 'export-perso-ordre',
-                          'export-perso-formats', 'export-perso-apercu']) {
+        for (const id of ['export-perso-liste', 'export-perso-nom', 'export-perso-granularite',
+                          'export-perso-colonnes', 'export-perso-formats', 'export-perso-apercu']) {
             expect(sourceIndex).toContain('id="' + id + '"');
         }
     });
 
-    it('le panneau Actions offre « Régler le niveau personnalisé… »', () => {
-        expect(sourceCarte).toContain('planif-export-plan-personnaliser');
-        expect(sourceCarte).toContain('Régler le niveau personnalisé…');
+    it('les zones de l’ancienne modale #431 ont bien DISPARU', () => {
+        // Zéro-dette : « Personnalisé » ne cohabite pas avec les gabarits.
+        expect(sourceIndex).not.toContain('id="export-perso-contenus"');
+        expect(sourceIndex).not.toContain('id="export-perso-ordre"');
+        expect(sourceIndex).not.toContain('id="export-perso-partir"');
+        expect(sourceCarte).not.toContain('persisterConfigExportPerso');
     });
 
     it('l’aperçu est peuplé par textContent, jamais innerHTML (titres saisis)', () => {
-        // La zone d'aperçu ne doit JAMAIS être une cible innerHTML.
+        // ⚠ REPRIS DE #431 — garde de sécurité, pas de fonctionnalité.
         expect(sourceCarte).toMatch(/apercu\.textContent = /);
         expect(sourceCarte).not.toMatch(/apercu\.innerHTML/);
     });
 
     it('aucun listener souris dans le code de la modale (ratchet #148)', () => {
+        // ⚠ REPRIS DE #431 — ratchet transversal.
         const debut = sourceCarte.indexOf('function ouvrirModaleExportPerso');
         const fin = sourceCarte.indexOf('function copierExportFallback');
         expect(debut).toBeGreaterThan(-1);
@@ -50,7 +58,7 @@ describe('#431 · statique — le chrome de la modale', () => {
     });
 });
 
-describe('#431 · rendu — la modale offre tout ce que le moteur sait faire', () => {
+describe('Éditeur de gabarits · rendu', () => {
     let elements;
     let api;
 
@@ -102,30 +110,43 @@ describe('#431 · rendu — la modale offre tout ce que le moteur sait faire', (
         api.remplirModaleExportPerso();
     });
 
-    it('les HUIT cases de contenu sont rendues, cochées selon « En classe »', () => {
-        const html = elements['export-perso-contenus'].innerHTML;
-        expect((html.match(/type="checkbox"/g) || []).length).toBe(8);
-        expect(html).toMatch(/data-contenu="objectifs" checked/);
-        expect(html).toMatch(/data-contenu="durees" checked/);
-        expect(html).toMatch(/data-contenu="connaissances"(?! checked)/);
+    it('la liste offre les quatre gabarits d’usine, marqués comme tels', () => {
+        const html = elements['export-perso-liste'].innerHTML;
+        expect((html.match(/type="radio"/g) || []).length).toBe(4);
+        expect((html.match(/export-perso-badge-usine/g) || []).length).toBe(4);
+        expect(html).toContain('Calendrier');
     });
 
-    it('les QUATRE sections ordonnables, avec leurs flèches', () => {
-        const html = elements['export-perso-ordre'].innerHTML;
-        expect((html.match(/export-perso-ordre-ligne/g) || []).length).toBe(4);
-        expect(html).toContain('Objectifs');
-        expect(html).toContain('Déroulement');
-        expect(html).toContain('Productions rattachées');
+    it('un gabarit d’usine a ses contrôles DÉSACTIVÉS — il se duplique, il ne s’édite pas', () => {
+        expect(elements['export-perso-nom'].disabled).toBe(true);
+        const colonnes = elements['export-perso-colonnes'].innerHTML;
+        expect(colonnes).toContain('disabled');
+        expect((colonnes.match(/type="checkbox"/g) || []).length).toBeGreaterThan(0);
+    });
+
+    it('les deux granularités sont offertes', () => {
+        const html = elements['export-perso-granularite'].innerHTML;
+        expect(html).toContain('data-granularite="noeuds"');
+        expect(html).toContain('data-granularite="seances"');
+    });
+
+    it('les colonnes du gabarit sont listées, avec leur champ de renommage', () => {
+        const html = elements['export-perso-colonnes'].innerHTML;
+        expect(html).toContain('data-renom=');
         expect(html).toContain('export-perso-monter');
+        expect(html).toContain('export-perso-descendre');
+        // Les colonnes non retenues sont offertes à l'ajout.
+        expect(html).toContain('data-cocher=');
     });
 
-    it('les trois presets de départ et les trois formats d’aperçu', () => {
-        expect((elements['export-perso-partir'].innerHTML.match(/export-perso-preset/g) || []).length).toBe(3);
-        expect((elements['export-perso-formats'].innerHTML.match(/data-format="/g) || []).length).toBe(3);
+    it('le format TEXTE n’est PAS offert — un gabarit ne rend que des tableaux', () => {
+        const html = elements['export-perso-formats'].innerHTML;
+        expect(html).toContain('data-format="tsv"');
+        expect(html).toContain('data-format="markdown"');
+        expect(html).not.toContain('data-format="texte"');
     });
 
     it('l’aperçu est rempli dès l’ouverture', () => {
-        expect(elements['export-perso-apercu'].textContent).toContain('PLAN DE COURS');
-        expect(elements['export-perso-apercu'].textContent).toContain('Niveau : Personnalisé');
+        expect(elements['export-perso-apercu'].textContent.length).toBeGreaterThan(0);
     });
 });

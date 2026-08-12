@@ -30,7 +30,6 @@ var NIVEAUX = [
     { id: 'sommaire',    label: 'Plan de cours' },
     { id: 'deroulement', label: 'En classe' },
     { id: 'alignement',  label: 'Preuve d’alignement' },
-    { id: 'personnalise', label: 'Personnalisé' },
     // ⚠ « Calendrier » N'EST PAS un quatrième niveau de profondeur (#416 lot I,
     // D4). Il vit dans cette liste parce que c'est là que l'utilisateur choisit
     // ce qu'il exporte, et que les gabarits nommés (lot H) n'existent pas
@@ -480,17 +479,6 @@ function normaliserConfigPersonnalisee(brute) {
     });
     ORDRE_DEFAUT.forEach(function(id) { if (!connus[id]) ordre.push(id); });
     return { contenus: contenus, ordre: ordre };
-}
-
-/** La config mémorisée (préférence), normalisée — ou le départ « En classe ». */
-function lireConfigPersonnalisee() {
-    var brute = null;
-    try {
-        if (typeof window.obtenirPreference === 'function') {
-            brute = window.obtenirPreference('exportPlanPersonnalise');
-        }
-    } catch (e) { brute = null; }
-    return normaliserConfigPersonnalisee(brute);
 }
 
 /** Les drapeaux de rendu dérivés d'une config personnalisée. */
@@ -1069,15 +1057,6 @@ function rendreTSV(plan, niveauId) {
     return rendreTableau(plan, gabaritDUsine(niveauId));
 }
 
-function rendreTSVPersonnalise(plan, inc, ordre) {
-    return rendreTableau(plan, {
-        colonnes: colonnesPersonnalisees(inc, ordre),
-        inclusions: inc,
-        evaluationsSeulement: false,
-        renommages: null
-    });
-}
-
 // ---------------------------------------------------------------------------
 // FORMAT MARKDOWN
 // ---------------------------------------------------------------------------
@@ -1216,16 +1195,12 @@ function rendreMarkdown(plan, niveauId, incPerso, ordrePerso) {
  */
 function genererExport(niveauId, formatId, configEssai, options) {
     var plan;
-    if (niveauId === 'personnalise') {
-        var cfg = configEssai ? normaliserConfigPersonnalisee(configEssai) : lireConfigPersonnalisee();
-        var inc = incDepuisConfig(cfg);
-        plan = construirePlan();
-        if (!plan) return null;
-        if (formatId === 'texte') return rendreTexte(plan, niveauId, inc, cfg.ordre);
-        if (formatId === 'tsv') return rendreTSVPersonnalise(plan, inc, cfg.ordre);
-        if (formatId === 'markdown') return rendreMarkdown(plan, niveauId, inc, cfg.ordre);
-        return null;
-    }
+
+    // ⚠ LE NIVEAU « PERSONNALISÉ » DE #431 N'EXISTE PLUS (#416 lot H). Pas
+    // d'alias, pas de repli : son réglage unique a MIGRÉ en gabarit nommé, et
+    // les gabarits se génèrent par `genererDepuisGabarit`. Sans ce retrait,
+    // l'application porterait deux mécanismes de configuration d'export —
+    // l'empilement exact que D5 refuse.
     if (niveauId === 'calendrier') {
         // Le format Texte n'est pas proposé pour ce gabarit ; le demander
         // quand même rend null plutôt qu'un document dégradé silencieux.
@@ -1543,11 +1518,9 @@ window.planificationExport = {
     supprimerGabarit: supprimerGabarit,
     genererDepuisGabarit: genererDepuisGabarit,
     // #431 — niveau Personnalisé : constantes et portes de la modale.
-    SECTIONS_PLAN: SECTIONS_PLAN,
-    CONTENUS_PLAN: CONTENUS_PLAN,
-    configDepuisPreset: configDepuisPreset,
-    normaliserConfigPersonnalisee: normaliserConfigPersonnalisee,
-    lireConfigPersonnalisee: lireConfigPersonnalisee
+    // ⚠ Ce qui reste de #431 sert UNIQUEMENT à la migration : traduire une
+    // config héritée en colonnes. Plus rien n'en dépend à l'écran.
+    normaliserConfigPersonnalisee: normaliserConfigPersonnalisee
 };
 
 })();

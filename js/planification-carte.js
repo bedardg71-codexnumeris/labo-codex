@@ -8348,17 +8348,35 @@ var exportPlanFormat = 'texte';
 // trois gabarits identiques. Il se choisit au moment de l'export.
 var exportPlanGroupe = null;
 
-/** Les formats qu'un gabarit accepte. Sans mention, il les accepte tous. */
+/**
+ * Les formats qu'un gabarit accepte.
+ *
+ * ⚠ Trois cas, et ils ne se devinent pas l'un l'autre :
+ *   - un DOCUMENT d'usine (Plan de cours, En classe, Preuve d'alignement) rend
+ *     les trois formats — c'est sa forme historique ;
+ *   - le Calendrier déclare les siens (`formats`) : pas de Texte ;
+ *   - un gabarit de l'UTILISATEUR ne rend que des tableaux (décision du
+ *     12 août), donc jamais de Texte non plus.
+ */
 function formatsDuGabarit(exporteur, gabaritId) {
     var entree = exporteur.NIVEAUX.find(function(n) { return n.id === gabaritId; });
-    if (!entree || !Array.isArray(entree.formats)) return exporteur.FORMATS;
+    if (!entree) {
+        return exporteur.FORMATS.filter(function(f) { return f.id !== 'texte'; });
+    }
+    if (!Array.isArray(entree.formats)) return exporteur.FORMATS;
     return exporteur.FORMATS.filter(function(f) { return entree.formats.indexOf(f.id) !== -1; });
 }
 
 /** L'appel d'export des deux boutons — un seul endroit, pour qu'ils ne divergent pas. */
 function optionsExport(exporteur) {
-    return exporteur.genererExport(exportPlanNiveau, exportPlanFormat, null,
-        exportPlanGroupe ? { groupeCoursId: exportPlanGroupe } : undefined);
+    var options = exportPlanGroupe ? { groupeCoursId: exportPlanGroupe } : undefined;
+    // Un gabarit de l'utilisateur n'a pas d'entrée dans NIVEAUX : il se génère
+    // par le magasin. Les documents d'usine gardent leur chemin historique,
+    // qui est ce que le golden master fige à l'octet près.
+    var estDUsine = exporteur.NIVEAUX.some(function(n) { return n.id === exportPlanNiveau; });
+    return estDUsine
+        ? exporteur.genererExport(exportPlanNiveau, exportPlanFormat, null, options)
+        : exporteur.genererDepuisGabarit(exportPlanNiveau, exportPlanFormat, options);
 }
 
 function rendrePanneauExportPlan() {
@@ -8415,9 +8433,17 @@ function rendrePanneauExportPlan() {
     }
 
     // Libellés statiques des constantes du module — echapperHtml par principe.
-    var html = groupeRadios('Gabarit', 'planif-export-niveau', exporteur.NIVEAUX, exportPlanNiveau) +
+    // ⚠ La liste vient du MAGASIN, pas de NIVEAUX : sinon les gabarits créés
+    // par l'utilisateur n'apparaîtraient que dans l'éditeur, et il faudrait
+    // ouvrir une modale pour exporter ce qu'on vient d'y définir.
+    var choix = exporteur.listerGabarits().map(function(g) { return { id: g.id, label: g.nom }; });
+    if (!choix.some(function(c) { return c.id === exportPlanNiveau; })) {
+        exportPlanNiveau = choix[0].id;
+    }
+
+    var html = groupeRadios('Gabarit', 'planif-export-niveau', choix, exportPlanNiveau) +
         '<div class="planif-import-tri-ligne planif-export-plan-actions">' +
-        '<button type="button" class="planif-btn-carte" id="planif-export-plan-personnaliser">Régler le niveau personnalisé…</button>' +
+        '<button type="button" class="planif-btn-carte" id="planif-export-plan-personnaliser">Gabarits d’export…</button>' +
         '</div>' +
         groupeRadios('Format', 'planif-export-format', formatsOfferts, exportPlanFormat) +
         htmlGroupe +
@@ -8442,7 +8468,9 @@ function rendrePanneauExportPlan() {
     var btnPersonnaliser = document.getElementById('planif-export-plan-personnaliser');
     if (btnPersonnaliser) {
         btnPersonnaliser.addEventListener('click', function() {
-            exportPlanNiveau = 'personnalise';
+            // L'éditeur s'ouvre SUR le gabarit choisi dans le panneau : on ne
+            // fait pas re-chercher à l'utilisateur ce qu'il vient de désigner.
+            gabaritEnCours = exportPlanNiveau;
             panneau.classList.remove('ouvert');
             ouvrirModaleExportPerso();
         });
@@ -8476,15 +8504,20 @@ function rendrePanneauExportPlan() {
     });
 }
 
-// === EXPORT PERSONNALISÉ — MODALE RÉGLAGES + APERÇU (#431, 8 août 2026) ===
+// === ÉDITEUR DE GABARITS — MODALE RÉGLAGES + APERÇU (#416 lot H) ===
 //
-// La modale est ASSUMÉE (décision du 8 août) : cases + ordre + aperçu ne
+// Cette modale était l'« Export personnalisé » de #431 (8 août). Elle édite
+// maintenant des GABARITS nommés ; le réglage unique a migré en gabarit.
+//
+// La modale reste ASSUMÉE (décision du 8 août) : liste, colonnes et aperçu ne
 // tiennent pas dans un panneau de 380 px — l'anti-pattern « pas de modale »
 // vise les cas où un panneau suffit. Chaque changement est PERSISTÉ
-// immédiatement (préférence exportPlanPersonnalise) et l'aperçu re-rendu :
-// le générateur est une fonction pure, le re-rendu est instantané.
+// immédiatement dans le gabarit et l'aperçu re-rendu : le générateur est une
+// fonction pure, le re-rendu est instantané.
 
-var exportPersoFormatApercu = 'texte';
+// ⚠ Un gabarit ne rend que des tableaux : l'aperçu part en TSV, jamais en
+// texte (décision du 12 août).
+var exportPersoFormatApercu = 'tsv';
 
 function ouvrirModaleExportPerso() {
     var modale = document.getElementById('modalExportPersonnalise');
@@ -8501,111 +8534,204 @@ function fermerModaleExportPerso() {
     if (modale) modale.classList.remove('actif');
 }
 
-function persisterConfigExportPerso(config) {
-    try {
-        if (typeof window.definirPreference === 'function') {
-            window.definirPreference('exportPlanPersonnalise', config);
-        }
-    } catch (e) {
-        console.warn('[Planification] Réglage export personnalisé non persisté :', e);
-    }
-}
+// ═══════════════════════════════════════════════════════════════════════════
+// L'ÉDITEUR DE GABARITS (#416 lot H)
+//
+// Cette modale était l'« Export personnalisé » de #431 : cocher des contenus,
+// ordonner des sections. Elle édite maintenant des GABARITS — un tableau, ses
+// colonnes, leur ordre, leurs noms. Le réglage unique n'existe plus : il a
+// migré en gabarit (voir `migrerPersonnaliseEnGabarit`).
+//
+// ⚠ Les gabarits D'USINE ne s'éditent pas sur place. Leurs contrôles sont
+// désactivés, et « Dupliquer » est le geste qui ouvre la porte. Un utilisateur
+// qui casserait « Plan de cours » n'aurait aucun moyen de le retrouver.
+// ═══════════════════════════════════════════════════════════════════════════
+
+var gabaritEnCours = 'calendrier';
 
 function remplirModaleExportPerso() {
     var exporteur = window.planificationExport;
-    var config = exporteur.lireConfigPersonnalisee();
 
-    var zonePartir = document.getElementById('export-perso-partir');
-    var zoneContenus = document.getElementById('export-perso-contenus');
-    var zoneOrdre = document.getElementById('export-perso-ordre');
+    var zoneListe = document.getElementById('export-perso-liste');
+    var champNom = document.getElementById('export-perso-nom');
+    var zoneGranularite = document.getElementById('export-perso-granularite');
+    var zoneColonnes = document.getElementById('export-perso-colonnes');
     var zoneFormats = document.getElementById('export-perso-formats');
     var apercu = document.getElementById('export-perso-apercu');
-    if (!zonePartir || !zoneContenus || !zoneOrdre || !zoneFormats || !apercu) return;
+    if (!zoneListe || !champNom || !zoneGranularite || !zoneColonnes || !zoneFormats || !apercu) return;
+
+    // Un gabarit ne rend que des tableaux : le Texte n'est pas offert ici.
+    if (exportPersoFormatApercu === 'texte') exportPersoFormatApercu = 'tsv';
+
+    function gabaritCourant() {
+        return exporteur.trouverGabarit(gabaritEnCours) || exporteur.listerGabarits()[0];
+    }
 
     function rafraichirApercu() {
         // ⚠ textContent, jamais innerHTML : l'aperçu porte les TITRES saisis
         // par l'enseignant (règle sécurité — pas de HTML non échappé).
-        var doc = exporteur.genererExport('personnalise', exportPersoFormatApercu, config);
+        var g = gabaritCourant();
+        var doc = exporteur.genererDepuisGabarit(g.id, exportPersoFormatApercu,
+            exportPlanGroupe ? { groupeCoursId: exportPlanGroupe } : undefined);
         apercu.textContent = doc || 'Aucune carte active.';
     }
 
+    /** Enregistre une modification — refusée d'office sur un gabarit d'usine. */
+    function modifier(changements) {
+        var g = gabaritCourant();
+        if (g.dUsine) return;
+        var enregistre = exporteur.enregistrerGabarit(Object.assign({}, g, changements));
+        if (enregistre) gabaritEnCours = enregistre.id;
+        rendreReglages();
+        rafraichirApercu();
+    }
+
     function rendreReglages() {
-        // « Partir de » — les niveaux de PROFONDEUR comme points de départ.
+        var g = gabaritCourant();
+        var tous = exporteur.listerGabarits();
+
+        // --- La liste des gabarits ---------------------------------------
+        var htmlListe = '';
+        tous.forEach(function(x) {
+            // ⚠ Le nom d'un gabarit est saisi par l'utilisateur.
+            htmlListe += '<label class="planif-checkbox-label export-perso-gabarit-choix">' +
+                '<input type="radio" name="export-perso-gabarit" value="' + echapperHtml(x.id) + '"' +
+                (x.id === g.id ? ' checked' : '') + '> ' +
+                echapperHtml(x.nom) +
+                (x.dUsine ? ' <span class="export-perso-badge-usine">d’usine</span>' : '') +
+                '</label>';
+        });
+        zoneListe.innerHTML = htmlListe;
+
+        // --- Le nom -------------------------------------------------------
+        champNom.value = g.nom;
+        champNom.disabled = !!g.dUsine;
+
+        // --- La granularité ----------------------------------------------
+        var granularites = [
+            { id: 'noeuds', label: 'Ligne par élément' },
+            { id: 'seances', label: 'Ligne par séance' }
+        ];
+        var htmlGran = '';
+        granularites.forEach(function(gr) {
+            htmlGran += '<button type="button" class="planif-btn-carte export-perso-granularite' +
+                (gr.id === g.granularite ? ' actif' : '') + '" data-granularite="' +
+                echapperHtml(gr.id) + '"' + (g.dUsine ? ' disabled' : '') + '>' +
+                echapperHtml(gr.label) + '</button>';
+        });
+        zoneGranularite.innerHTML = htmlGran;
+
+        // --- Les colonnes : cochées et ordonnées d'abord, disponibles après
         //
-        // ⚠ Le critère est l'existence d'INCLUSIONS, pas une liste de noms.
-        // Le personnalisé est un document en granularité « nœuds » : il peut
-        // partir de Plan de cours, En classe ou Preuve d'alignement, qui
-        // disent tous les trois QUELLE PROFONDEUR montrer. Il ne peut pas
-        // partir du Calendrier (#416 lot I), qui est une autre FORME — une
-        // ligne par rencontre, des cellules qui agrègent. Le moteur n'a
-        // aucune inclusion pour lui, et une config qui en partirait serait
-        // vide de sens.
-        var htmlPartir = '';
-        exporteur.NIVEAUX.filter(function(n) { return !!exporteur.INCLUSIONS[n.id]; }).forEach(function(n) {
-            htmlPartir += '<button type="button" class="planif-btn-carte export-perso-preset" data-preset="' +
-                echapperHtml(n.id) + '">' + echapperHtml(n.label) + '</button>';
-        });
-        zonePartir.innerHTML = htmlPartir;
-
-        var htmlContenus = '';
-        exporteur.CONTENUS_PLAN.forEach(function(c) {
-            var coche = config.contenus[c.id] ? ' checked' : '';
-            htmlContenus += '<label class="planif-checkbox-label export-perso-choix">' +
-                '<input type="checkbox" class="export-perso-contenu" data-contenu="' + echapperHtml(c.id) + '"' + coche + '> ' +
-                echapperHtml(c.label) + '</label>';
-        });
-        zoneContenus.innerHTML = htmlContenus;
-
-        var htmlOrdre = '';
-        config.ordre.forEach(function(id, rang) {
-            var section = exporteur.SECTIONS_PLAN.find(function(s) { return s.id === id; });
-            htmlOrdre += '<div class="export-perso-ordre-ligne" data-section="' + echapperHtml(id) + '">' +
-                '<span class="export-perso-ordre-nom">' + echapperHtml(section ? section.label : id) + '</span>' +
-                '<button type="button" class="planif-btn-carte export-perso-monter" aria-label="Monter"' + (rang === 0 ? ' disabled' : '') + '>↑</button>' +
-                '<button type="button" class="planif-btn-carte export-perso-descendre" aria-label="Descendre"' + (rang === config.ordre.length - 1 ? ' disabled' : '') + '>↓</button>' +
+        // ⚠ L'ordre des colonnes CHOISIES est une donnée du gabarit ; l'ordre
+        // des colonnes disponibles est celui du catalogue. Les mélanger ferait
+        // sauter une colonne de place quand on la coche.
+        var htmlCol = '';
+        g.colonnes.forEach(function(id, i) {
+            var libelle = (g.renommages && g.renommages[id]) || '';
+            htmlCol += '<div class="export-perso-colonne-ligne" data-colonne="' + echapperHtml(id) + '">' +
+                '<label class="planif-checkbox-label export-perso-colonne-case">' +
+                '<input type="checkbox" data-decocher="' + echapperHtml(id) + '" checked' +
+                (g.dUsine ? ' disabled' : '') + '> ' +
+                echapperHtml(exporteur.libelleColonne(id, null)) +
+                '</label>' +
+                '<input type="text" class="export-perso-champ-renom" data-renom="' + echapperHtml(id) + '"' +
+                ' value="' + echapperHtml(libelle) + '" placeholder="' +
+                echapperHtml(exporteur.libelleColonne(id, null)) + '"' +
+                ' aria-label="Nom de la colonne dans le tableau"' + (g.dUsine ? ' disabled' : '') + '>' +
+                '<button type="button" class="planif-btn-carte export-perso-monter" data-i="' + i +
+                '" aria-label="Monter"' + (g.dUsine || i === 0 ? ' disabled' : '') + '>↑</button>' +
+                '<button type="button" class="planif-btn-carte export-perso-descendre" data-i="' + i +
+                '" aria-label="Descendre"' + (g.dUsine || i === g.colonnes.length - 1 ? ' disabled' : '') +
+                '>↓</button>' +
                 '</div>';
         });
-        zoneOrdre.innerHTML = htmlOrdre;
 
+        var disponibles = Object.keys(exporteur.CATALOGUE_COLONNES).filter(function(id) {
+            return g.colonnes.indexOf(id) === -1;
+        });
+        if (disponibles.length > 0) {
+            htmlCol += '<div class="export-perso-groupe export-perso-groupe-secondaire">À ajouter</div>';
+            disponibles.forEach(function(id) {
+                htmlCol += '<label class="planif-checkbox-label export-perso-colonne-case">' +
+                    '<input type="checkbox" data-cocher="' + echapperHtml(id) + '"' +
+                    (g.dUsine ? ' disabled' : '') + '> ' +
+                    echapperHtml(exporteur.libelleColonne(id, null)) +
+                    '</label>';
+            });
+        }
+        zoneColonnes.innerHTML = htmlCol;
+
+        // --- Les formats d'aperçu (tableaux seulement) --------------------
         var htmlFormats = '';
-        exporteur.FORMATS.forEach(function(f) {
-            var actif = f.id === exportPersoFormatApercu ? ' actif' : '';
-            htmlFormats += '<button type="button" class="planif-btn-carte export-perso-format' + actif + '" data-format="' +
+        exporteur.FORMATS.filter(function(f) { return f.id !== 'texte'; }).forEach(function(f) {
+            htmlFormats += '<button type="button" class="planif-btn-carte export-perso-format' +
+                (f.id === exportPersoFormatApercu ? ' actif' : '') + '" data-format="' +
                 echapperHtml(f.id) + '">' + echapperHtml(f.label) + '</button>';
         });
         zoneFormats.innerHTML = htmlFormats;
 
+        var btnSupprimer = document.getElementById('export-perso-supprimer');
+        if (btnSupprimer) btnSupprimer.disabled = !!g.dUsine;
+
         // Listeners posés APRÈS toutes les écritures innerHTML (contrainte
         // « Dans la leçon », Lot E) — chaque re-rendu les repose.
-        zonePartir.querySelectorAll('.export-perso-preset').forEach(function(btn) {
+        zoneListe.querySelectorAll('input[name="export-perso-gabarit"]').forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                gabaritEnCours = radio.value;
+                rendreReglages();
+                rafraichirApercu();
+            });
+        });
+        zoneGranularite.querySelectorAll('.export-perso-granularite').forEach(function(btn) {
             btn.addEventListener('click', function() {
-                config = exporteur.configDepuisPreset(btn.dataset.preset);
-                persisterConfigExportPerso(config);
-                rendreReglages();
-                rafraichirApercu();
+                modifier({ granularite: btn.dataset.granularite });
             });
         });
-        zoneContenus.querySelectorAll('.export-perso-contenu').forEach(function(caseC) {
-            caseC.addEventListener('change', function() {
-                config.contenus[caseC.dataset.contenu] = caseC.checked;
-                persisterConfigExportPerso(config);
-                rafraichirApercu();
+        zoneColonnes.querySelectorAll('input[data-decocher]').forEach(function(cb) {
+            cb.addEventListener('change', function() {
+                var restantes = gabaritCourant().colonnes.filter(function(c) {
+                    return c !== cb.dataset.decocher;
+                });
+                // Un gabarit sans colonne ne serait plus un tableau : le
+                // magasin l'écarterait à la relecture, et le gabarit
+                // disparaîtrait sous les doigts de l'utilisateur.
+                if (restantes.length === 0) {
+                    afficherToastLien('Un gabarit garde au moins une colonne.');
+                    rendreReglages();
+                    return;
+                }
+                modifier({ colonnes: restantes });
             });
         });
-        zoneOrdre.querySelectorAll('.export-perso-ordre-ligne').forEach(function(ligne) {
-            function deplacer(delta) {
-                var id = ligne.dataset.section;
-                var i = config.ordre.indexOf(id);
-                var j = i + delta;
-                if (i === -1 || j < 0 || j >= config.ordre.length) return;
-                config.ordre[i] = config.ordre[j];
-                config.ordre[j] = id;
-                persisterConfigExportPerso(config);
-                rendreReglages();
-                rafraichirApercu();
-            }
-            ligne.querySelector('.export-perso-monter').addEventListener('click', function() { deplacer(-1); });
-            ligne.querySelector('.export-perso-descendre').addEventListener('click', function() { deplacer(1); });
+        zoneColonnes.querySelectorAll('input[data-cocher]').forEach(function(cb) {
+            cb.addEventListener('change', function() {
+                modifier({ colonnes: gabaritCourant().colonnes.concat([cb.dataset.cocher]) });
+            });
+        });
+        zoneColonnes.querySelectorAll('input[data-renom]').forEach(function(champ) {
+            champ.addEventListener('change', function() {
+                var g2 = gabaritCourant();
+                var renommages = Object.assign({}, g2.renommages || {});
+                var valeur = champ.value.trim();
+                // Vider le champ REND son nom d'usine à la colonne : c'est le
+                // seul geste d'annulation, il ne doit pas laisser de trace.
+                if (valeur) renommages[champ.dataset.renom] = valeur;
+                else delete renommages[champ.dataset.renom];
+                modifier({ renommages: Object.keys(renommages).length ? renommages : null });
+            });
+        });
+        zoneColonnes.querySelectorAll('.export-perso-monter, .export-perso-descendre').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var i = parseInt(btn.dataset.i, 10);
+                var j = btn.classList.contains('export-perso-monter') ? i - 1 : i + 1;
+                var colonnes = gabaritCourant().colonnes.slice();
+                if (j < 0 || j >= colonnes.length) return;
+                var tmp = colonnes[i];
+                colonnes[i] = colonnes[j];
+                colonnes[j] = tmp;
+                modifier({ colonnes: colonnes });
+            });
         });
         zoneFormats.querySelectorAll('.export-perso-format').forEach(function(btn) {
             btn.addEventListener('click', function() {
@@ -8616,14 +8742,50 @@ function remplirModaleExportPerso() {
         });
     }
 
+    champNom.onchange = function() {
+        var nom = champNom.value.trim();
+        if (!nom) { rendreReglages(); return; }
+        modifier({ nom: nom });
+    };
+
     rendreReglages();
     rafraichirApercu();
+
+    var btnDupliquer = document.getElementById('export-perso-dupliquer');
+    if (btnDupliquer) {
+        btnDupliquer.onclick = function() {
+            var copie = exporteur.dupliquerGabarit(gabaritCourant().id);
+            if (!copie) return;
+            gabaritEnCours = copie.id;
+            rendreReglages();
+            rafraichirApercu();
+            afficherToastLien('Gabarit dupliqué — il est modifiable.');
+        };
+    }
+
+    var btnSupprimer = document.getElementById('export-perso-supprimer');
+    if (btnSupprimer) {
+        btnSupprimer.onclick = function() {
+            var g = gabaritCourant();
+            if (g.dUsine) return;
+            if (!exporteur.supprimerGabarit(g.id)) return;
+            gabaritEnCours = exporteur.listerGabarits()[0].id;
+            rendreReglages();
+            rafraichirApercu();
+            afficherToastLien('Gabarit supprimé.');
+        };
+    }
+
+    function documentCourant() {
+        return exporteur.genererDepuisGabarit(gabaritCourant().id, exportPersoFormatApercu,
+            exportPlanGroupe ? { groupeCoursId: exportPlanGroupe } : undefined);
+    }
 
     var btnCopier = document.getElementById('export-perso-copier');
     var btnTelecharger = document.getElementById('export-perso-telecharger');
     if (btnCopier) {
         btnCopier.onclick = function() {
-            var doc = exporteur.genererExport('personnalise', exportPersoFormatApercu, config);
+            var doc = documentCourant();
             if (!doc) return;
             function fini() { afficherToastLien('Plan copié — colle-le où tu veux.'); }
             if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -8637,10 +8799,10 @@ function remplirModaleExportPerso() {
     }
     if (btnTelecharger) {
         btnTelecharger.onclick = function() {
-            var doc = exporteur.genererExport('personnalise', exportPersoFormatApercu, config);
+            var doc = documentCourant();
             if (!doc) return;
             var format = exporteur.FORMATS.find(function(f) { return f.id === exportPersoFormatApercu; });
-            telechargerFichier(doc, exporteur.nomFichierExport('personnalise', exportPersoFormatApercu), format.mime);
+            telechargerFichier(doc, exporteur.nomFichierExport(gabaritCourant().id, exportPersoFormatApercu), format.mime);
         };
     }
 }

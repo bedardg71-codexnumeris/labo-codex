@@ -36,7 +36,7 @@ let exporteur;
 
 beforeAll(() => { exporteur = monterExportSandbox().exporteur; });
 
-describe('Golden master · les douze sorties d’usine ne bougent pas d’un octet', () => {
+describe('Golden master · les sorties d’usine ne bougent pas d’un octet', () => {
     for (const { niveau, format } of SORTIES_USINE) {
         it(`${niveau} · ${format} — identique à la référence`, () => {
             const chemin = path.join(dossierRef, `${niveau}.${format}.txt`);
@@ -50,8 +50,14 @@ describe('Golden master · les douze sorties d’usine ne bougent pas d’un oct
         });
     }
 
-    it('les douze références existent — aucune sortie n’échappe au filet', () => {
-        expect(SORTIES_USINE).toHaveLength(12);
+    it('toutes les sorties d’usine sont couvertes — aucune n’échappe au filet', () => {
+        // 3 documents × 3 formats, plus le Calendrier qui refuse le Texte.
+        // ⚠ Le compte est passé de 12 à 11 au lot H : « personnalise » n'est
+        // plus un niveau, son réglage a migré en gabarit nommé. Ce n'est pas
+        // une couverture perdue, c'est un comportement retiré.
+        expect(SORTIES_USINE).toHaveLength(11);
+        expect(SORTIES_USINE.filter((s) => s.niveau === 'calendrier')).toHaveLength(2);
+        expect(SORTIES_USINE.some((s) => s.niveau === 'personnalise')).toBe(false);
     });
 });
 
@@ -83,9 +89,11 @@ describe('Golden master · ce que les références contiennent VRAIMENT', () => 
         expect(matin.sequences[0].lecons[0].date).toBe('2026-09-08');
         expect(soir.sequences[0].lecons[0].date).toBe('2026-09-09');
 
-        // ⚠ Le lot C dérive la date ; AUCUN rendeur ne la montre encore. Le
-        // jour où une colonne Date apparaît, ce cas rougit — et c'est voulu :
-        // il faudra alors décider ce que les sorties d'usine en font.
+        // ⚠ Le Calendrier PORTE une colonne Date depuis le lot I — et pourtant
+        // aucune référence n'en contient. Ce n'est pas une contradiction :
+        // les sorties d'usine sont générées SANS groupe désigné, la carte
+        // d'essai a deux groupes, et l'export ne devine pas lequel (D9). Une
+        // date qui apparaîtrait ici serait une date devinée.
         for (const { niveau, format } of SORTIES_USINE) {
             expect(exporteur.genererExport(niveau, format)).not.toContain('2026-09-08');
         }

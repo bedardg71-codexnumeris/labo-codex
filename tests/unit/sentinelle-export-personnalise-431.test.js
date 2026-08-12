@@ -1,3 +1,17 @@
+// LA NORMALISATION DE LA CONFIG HÉRITÉE (#431 → #416 lot H).
+//
+// ⚠ CE FICHIER A ÉTÉ RÉDUIT LE 12 AOÛT, et il faut savoir pourquoi. Il
+// verrouillait le niveau « Personnalisé » : ses cases, l'ordre de ses
+// sections, son rendu dans les trois formats. CE NIVEAU N'EXISTE PLUS — son
+// réglage unique a migré en gabarit nommé (lot H), et un niveau retiré n'a
+// plus de comportement à protéger. Ces cas sont partis avec lui.
+//
+// CE QUI RESTE EST CE QUI SERT ENCORE : `normaliserConfigPersonnalisee` est
+// lue par la MIGRATION, qui traduit l'ancien réglage de Grégoire en colonnes.
+// Tant qu'un codex en circulation peut porter cette préférence, cette
+// traduction doit rester juste — et un réglage bricolé, tronqué ou écrit par
+// une version antérieure ne doit jamais faire tomber la migration.
+
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
 
@@ -101,75 +115,6 @@ beforeAll(() => {
 
 beforeEach(() => { prefStore = null; });
 
-describe('#431 · sans réglage mémorisé, le Personnalisé part d’« En classe »', () => {
-    it('même contenu que le preset : objectifs, activités, durées, rétroactions', () => {
-        const doc = exporteur.genererExport('personnalise', 'texte');
-        expect(doc).toContain('Niveau : Personnalisé');
-        expect(doc).toContain('Analyser un incipit réaliste');
-        expect(doc).toContain('Atelier d’analyse en équipe');
-        expect(doc).toContain('45 min');
-        expect(doc).toContain('Rétroaction : Orale');
-        // et pas les contenus de la preuve
-        expect(doc).not.toContain('Le narrateur omniscient');
-    });
-
-    it('la production sort dans SA section, plus sous l’élément', () => {
-        const doc = exporteur.genererExport('personnalise', 'texte');
-        expect(doc).toContain('Évaluation : Dissertation critique (25 %)');
-    });
-});
-
-describe('#431 · les cases filtrent', () => {
-    it('activites décochée → les activités disparaissent, le reste tient', () => {
-        prefStore = { contenus: { activites: false } };
-        const doc = exporteur.genererExport('personnalise', 'texte');
-        expect(doc).not.toContain('Atelier d’analyse en équipe');
-        expect(doc).toContain('Analyser un incipit réaliste');
-    });
-
-    it('evaluations décochée → les lignes ◆ partent, la production de la leçon RESTE', () => {
-        prefStore = { contenus: { evaluations: false } };
-        const doc = exporteur.genererExport('personnalise', 'texte');
-        expect(doc).not.toContain('◆ [Évaluation]');
-        // La production est une information de la LEÇON (section productions).
-        expect(doc).toContain('Dissertation critique (25 %)');
-    });
-
-    it('connaissances cochée → elles entrent, même hors preuve', () => {
-        prefStore = { contenus: { connaissances: true } };
-        const doc = exporteur.genererExport('personnalise', 'texte');
-        expect(doc).toContain('Le narrateur omniscient');
-    });
-});
-
-describe('#431 · l’ordre réordonne les sections — jamais la structure', () => {
-    it('texte : « productions » avant « objectifs » inverse leurs blocs', () => {
-        prefStore = { ordre: ['productions', 'objectifs', 'deroulement', 'liens'] };
-        const doc = exporteur.genererExport('personnalise', 'texte');
-        const iProd = doc.indexOf('Dissertation critique');
-        const iObj = doc.indexOf('Objectifs :');
-        expect(iProd).toBeGreaterThan(-1);
-        expect(iObj).toBeGreaterThan(-1);
-        expect(iProd).toBeLessThan(iObj);
-        // La structure, elle, ne bouge pas : la séquence chapeaute la leçon.
-        expect(doc.indexOf('SÉQUENCE : Le récit réaliste')).toBeLessThan(doc.indexOf('LEÇON : L’incipit'));
-    });
-
-    it('TSV : l’ordre des groupes de colonnes suit la config, préfixe fixe', () => {
-        prefStore = { ordre: ['productions', 'deroulement', 'objectifs', 'liens'] };
-        const entetes = exporteur.genererExport('personnalise', 'tsv').split('\n')[0].split('\t');
-        expect(entetes.slice(0, 3)).toEqual(['Séquence', 'Leçon', 'Semaine']);
-        expect(entetes.indexOf('Production')).toBeLessThan(entetes.indexOf('Type'));
-        expect(entetes.indexOf('Type')).toBeLessThan(entetes.indexOf('Objectifs'));
-    });
-
-    it('markdown : les sections suivent l’ordre aussi', () => {
-        prefStore = { ordre: ['deroulement', 'objectifs', 'productions', 'liens'] };
-        const doc = exporteur.genererExport('personnalise', 'markdown');
-        expect(doc.indexOf('**Déroulement**')).toBeLessThan(doc.indexOf('**Objectifs**'));
-    });
-});
-
 describe('#431 · la config est normalisée — jamais crue sur parole', () => {
     it('ids inconnus retirés, sections manquantes rajoutées en queue', () => {
         const cfg = exporteur.normaliserConfigPersonnalisee({ ordre: ['pirate', 'liens', 'liens'] });
@@ -183,9 +128,4 @@ describe('#431 · la config est normalisée — jamais crue sur parole', () => {
         expect(cfg.contenus.connaissances).toBe(false);
     });
 
-    it('config d’ESSAI (aperçu de la modale) prioritaire sur la préférence', () => {
-        prefStore = { contenus: { activites: false } };
-        const doc = exporteur.genererExport('personnalise', 'texte', { contenus: { activites: true } });
-        expect(doc).toContain('Atelier d’analyse en équipe');
-    });
 });

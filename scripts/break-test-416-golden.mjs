@@ -25,9 +25,6 @@ const cassures = [
     ['une espace de plus dans le séparateur des objectifs',
         "? c.lecon.objectifs.join(' ; ')",
         "? c.lecon.objectifs.join(' ;  ')"],
-    ['le préfixe du gabarit personnalisé perd une colonne',
-        "    var colonnes = ['sequence', 'lecon', 'semaine'];",
-        "    var colonnes = ['sequence', 'lecon'];"],
     ['une durée nulle sort « 0 » au lieu de vide',
         "        return c.estLecon ? (c.lecon.dureeRollup || '') : (c.el ? (c.el.duree || '') : '');",
         "        return c.estLecon ? (c.lecon.dureeRollup || 0) : (c.el ? (c.el.duree || 0) : 0);"],
@@ -51,6 +48,14 @@ const cassures = [
 // éléments) mais ne décide de rien tant que le rendeur tient sa promesse. Le
 // garder au banc aurait exigé un contexte que le code ne construit jamais —
 // c'est-à-dire un test qui n'observe rien.
+//
+// ⚠ UNE CASSURE DÉPLACÉE, ET POURQUOI. « Le préfixe du gabarit personnalisé
+// perd une colonne » visait `colonnesPersonnalisees`. Au lot H, le niveau
+// « Personnalisé » a disparu et ses références avec lui : casser cette
+// fonction ne change plus AUCUNE sortie d'usine, donc le golden ne pouvait
+// plus la voir. Elle n'est pas morte pour autant — elle traduit l'ancien
+// réglage de Grégoire en colonnes pendant la MIGRATION. La cassure vit
+// désormais dans `break-test-416-gabarits.mjs`, où elle a un objet.
 
 const original = readFileSync(EXPORT, 'utf8');
 let rouges = 0, verts = [];

@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260812b"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
+    <link rel="stylesheet" href="styles.css?v=20260812c"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -4082,16 +4082,20 @@
         <div id="modalExportPersonnalise" class="modal-overlay">
             <div class="modal-contenu modal-export-perso" tabindex="-1">
                 <button class="modal-fermer" id="export-perso-fermer" aria-label="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
-                <h2 class="modal-titre">Export personnalisé du plan</h2>
-                <p class="export-perso-intro">Coche les contenus, choisis leur ordre — l'aperçu suit. Ton réglage est mémorisé pour les prochains exports « Personnalisé ».</p>
+                <h2 class="modal-titre">Gabarits d'export</h2>
+                <p class="export-perso-intro">Un gabarit décrit un <strong>tableau</strong> : les colonnes, leur ordre, leurs noms. Les quatre gabarits d'usine se dupliquent pour être modifiés.</p>
                 <div class="export-perso-corps">
                     <div class="export-perso-reglages">
-                        <div class="export-perso-groupe">Partir de</div>
-                        <div id="export-perso-partir" class="export-perso-partir"></div>
-                        <div class="export-perso-groupe">Contenus</div>
-                        <div id="export-perso-contenus"></div>
-                        <div class="export-perso-groupe">Ordre des sections</div>
-                        <div id="export-perso-ordre"></div>
+                        <div class="export-perso-groupe">Gabarit</div>
+                        <div id="export-perso-liste" class="export-perso-liste"></div>
+                        <div class="export-perso-groupe">Nom</div>
+                        <div class="export-perso-ligne-nom">
+                            <input type="text" id="export-perso-nom" class="export-perso-champ-nom" maxlength="60" aria-label="Nom du gabarit">
+                        </div>
+                        <div class="export-perso-groupe">Une ligne par</div>
+                        <div id="export-perso-granularite" class="export-perso-partir"></div>
+                        <div class="export-perso-groupe">Colonnes</div>
+                        <div id="export-perso-colonnes"></div>
                     </div>
                     <div class="export-perso-volet-apercu">
                         <div class="export-perso-groupe">Aperçu</div>
@@ -4100,6 +4104,8 @@
                     </div>
                 </div>
                 <div class="modal-actions-centre">
+                    <button class="btn" id="export-perso-dupliquer">Dupliquer</button>
+                    <button class="btn btn-annuler" id="export-perso-supprimer">Supprimer</button>
                     <button class="btn" id="export-perso-copier">Copier</button>
                     <button class="btn btn-principal" id="export-perso-telecharger">Télécharger</button>
                 </div>
@@ -14363,8 +14369,8 @@
     <script src="js/planification-donnees.js?v=20260808a"></script> <!-- #425 préalable : vivacité de productionId à la reprise (8 août) -->
 
     <script src="js/planification-bibliotheque.js?v=2026051026"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
-    <script src="js/planification-carte.js?v=20260812b"></script> <!-- Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
-    <script src="js/planification-export.js?v=20260812f"></script> <!-- LE générateur d'export : 3 niveaux × 3 formats (portage #424, 8 août) — #416 lot C : la date dérivée du groupe-cours choisi -->
+    <script src="js/planification-carte.js?v=20260812c"></script> <!-- Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
+    <script src="js/planification-export.js?v=20260812g"></script> <!-- LE générateur d'export : 3 niveaux × 3 formats (portage #424, 8 août) — #416 lot C : la date dérivée du groupe-cours choisi -->
     <script src="js/planification.js?v=20260808a"></script> <!-- Refonte nav SP4 : hooks nomSection 'conception' + idSousSection conception-* -->
 
     <!-- BETA 96.3 : Module Travaux (import, annotation, archivage) -->
