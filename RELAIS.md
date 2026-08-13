@@ -14,14 +14,14 @@
 | **Branche à ouvrir** | **`main`** |
 | **Version** | **1.78.0** — build `0812-1715` |
 | **Travail en avance sur `main`** | **aucun** |
-| **Dernière mise à jour** | 12 août 2026, clôture — #416 clos en sept lots |
+| **Dernière mise à jour** | 13 août 2026 matin — golden master dégelé, icône de la Loupe |
 
 ⚠ **VÉRIFIE `origin/main` AVANT DE CROIRE CE TABLEAU.** Le 12 août au matin, ce
 fichier disait « aucune dette de fusion, 0/0 » alors qu'`origin/main` avait un
 commit d'avance, poussé la veille au soir depuis une session cloud. Le rituel de
 début l'a attrapé ; il ne l'aurait pas fait sans `git fetch`.
 
-⏳ **CE QUI RESTE DÛ AU 12 AOÛT** :
+⏳ **CE QUI RESTE DÛ** :
 - **5 rangées de porte terrain non traitées** —
   `plans de travail/PORTES-TERRAIN-2026-08-12-416-lots-CGIHB.md` : 3.3 (supprimer
   un gabarit) en entier, la fin de 4.1 et de 4.3. **Plus les deux corrections du

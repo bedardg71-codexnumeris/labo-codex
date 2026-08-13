@@ -7,6 +7,41 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 13 AOÛT 2026 (MATIN) : LE FILET CRIAIT AU LOUP, ET IL AVAIT TORT.
+     ÉTAT : **1.79.0** — Vitest **2370/2370** (257 fichiers), 2 commits.
+
+     ⚠⚠ **LE HOOK PRÉ-PUSH A REFUSÉ DE POUSSER, SUR UN ARBRE IDENTIQUE À LA VEILLE.**
+     Six sorties du golden master rouges au matin. Rien n'avait changé — sauf la date.
+     Les rendeurs Texte et Markdown écrivent « Exporté le <jour> » ; les références avaient
+     été figées le 12 août. **Le filet posé pour le lot G était PÉRISSABLE : il annonçait
+     une régression qui n'existait pas.**
+
+     ▣ **CE QUE ÇA AURAIT COÛTÉ SI PERSONNE N'AVAIT REGARDÉ.** La sortie facile était de
+     régénérer les références pour faire taire le rouge — geste de dix secondes qui aurait
+     détruit la valeur du filet sans que rien ne le dise. Un filet qui crie au loup chaque
+     matin finit par être contourné, et c'est ce matin-là qu'il manque. ⮕ Corrigé À LA
+     SOURCE : l'horloge du sandbox est FIGÉE au 12 août. Le montage passe ses globaux en
+     paramètres de fonction (`charger-script.js`), donc ce `Date` masque celui de Node dans
+     tout le code chargé, sans toucher au reste de la suite.
+
+     ⚠ **SEUL `new Date()` SANS ARGUMENT est figé.** `new Date(chaîne)` reste intact — figer
+     les deux casserait la dérivation des dates de séance, c'est-à-dire le lot C tout entier.
+     Un cas le vérifie explicitement, et le gel lui-même est break-testé : le retirer fait
+     rougir 7 cas sur 18.
+
+     ▣ **ICÔNE DE LA LOUPE** (canevas d'alignement) : `icon-detective.svg` →
+     `icons8-chercher.svg`, sur sa demande. ⚠ **Le fichier n'était PAS suivi par git** —
+     `sentinelle-icones-suivies-git` l'aurait laissé partir en image cassée au déploiement.
+     Elle a été mise à l'épreuve sur place : désindexer l'icône la fait rougir avec le nom du
+     fichier fautif. Rendu vérifié dans les DEUX modes, à 16 px, contre ses voisines.
+
+     ⮕ **Observation sans action** : `icons/` compte **135 SVG dont 56 non référencés**.
+     `icon-detective.svg` en fait désormais partie. C'est un stock d'actifs, pas de la dette
+     de code — un ménage isolé serait arbitraire ; à faire avec la liste sous les yeux si
+     jamais on le décide.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 12 AOÛT 2026 : #416 CLOS EN SEPT LOTS — et deux défauts que seule la porte terrain a vus.
      ÉTAT FINAL : **1.78.0** (build 0812-1715), Vitest **2367/2367** (257 fichiers), 16 commits.
 
