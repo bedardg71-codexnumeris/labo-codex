@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { monterExportSandbox, SORTIES_GENERIQUES } from './_helpers/carte-essai-exports.js';
+import { monterExportSandbox, SORTIES_GENERIQUES, DATE_ESSAI } from './_helpers/carte-essai-exports.js';
 
 // =======================================================================
 // GOLDEN MASTER DES SORTIES GÉNÉRIQUES (#416 lot G)
@@ -58,6 +58,56 @@ describe('Golden master · les sorties génériques ne bougent pas d’un octet'
         expect(SORTIES_GENERIQUES).toHaveLength(11);
         expect(SORTIES_GENERIQUES.filter((s) => s.niveau === 'calendrier')).toHaveLength(2);
         expect(SORTIES_GENERIQUES.some((s) => s.niveau === 'personnalise')).toBe(false);
+    });
+});
+
+describe('Golden master · il ne doit RIEN devoir au jour où on le lance', () => {
+    // ⚠ CE BLOC EXISTE À CAUSE DU 13 AOÛT 2026 AU MATIN. Le hook pré-push a
+    // refusé de pousser : six sorties rouges, sur un arbre IDENTIQUE à celui
+    // de la veille. Rien n'avait changé — sauf la date. Les rendeurs Texte et
+    // Markdown écrivent « Exporté le <jour> », et le golden master avait figé
+    // le 12 août.
+    //
+    // ⮕ Un filet qui rougit tout seul chaque matin finit par être contourné,
+    // et c'est ce jour-là qu'il aurait manqué. L'horloge du sandbox est donc
+    // figée, et ces cas-ci vérifient qu'elle l'est RESTÉE — sinon la
+    // périssabilité reviendrait sans que personne ne s'en aperçoive avant le
+    // lendemain.
+
+    it('les sorties datées portent la date FIGÉE, pas celle d’aujourd’hui', () => {
+        const attendue = new Date(DATE_ESSAI).toLocaleDateString('fr-CA');
+        const aujourdhui = new Date().toLocaleDateString('fr-CA');
+
+        expect(exporteur.genererExport('sommaire', 'texte')).toContain('Exporté le ' + attendue);
+        expect(exporteur.genererExport('sommaire', 'markdown')).toContain('Exporté le ' + attendue);
+
+        // Le jour où ce cas tombe parce que les deux dates coïncident, il ne
+        // prouve plus rien — mais il ne peut pas mentir non plus.
+        if (aujourdhui !== attendue) {
+            expect(exporteur.genererExport('sommaire', 'texte')).not.toContain(aujourdhui);
+        }
+    });
+
+    it('AUCUNE référence ne contient la date du jour', () => {
+        // La garde générale : si une sortie se remettait à dater du jour, ce
+        // cas le dirait le matin même, avec la raison écrite.
+        const aujourdhui = new Date().toLocaleDateString('fr-CA');
+        if (aujourdhui === new Date(DATE_ESSAI).toLocaleDateString('fr-CA')) return;
+
+        for (const { niveau, format } of SORTIES_GENERIQUES) {
+            expect(
+                readFileSync(path.join(dossierRef, `${niveau}.${format}.txt`), 'utf8'),
+                `${niveau}.${format} contient la date du jour — le golden master est redevenu périssable.`
+            ).not.toContain(aujourdhui);
+        }
+    });
+
+    it('la résolution des dates de séance N’EST PAS figée, elle', () => {
+        // ⚠ L'horloge du sandbox ne fige que `new Date()` SANS argument.
+        // Figer aussi `new Date(chaîne)` casserait la dérivation des dates de
+        // séance — le lot C tout entier.
+        const plan = exporteur.construirePlan({ groupeCoursId: 'GC_MATIN' });
+        expect(plan.sequences[0].lecons[0].date).toBe('2026-09-08');
     });
 });
 

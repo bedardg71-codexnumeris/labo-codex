@@ -18,6 +18,25 @@
 
 import { chargerScript } from './charger-script.js';
 
+/**
+ * L'horloge du sandbox d'export — figée au 12 août 2026.
+ *
+ * ⚠ SANS ARGUMENT, elle rend TOUJOURS la même date ; avec arguments, elle se
+ * comporte comme `Date`. C'est ce que le code attend : `new Date()` pour
+ * horodater un export, `new Date(chaîne)` pour lire une date de séance. Figer
+ * les deux casserait la résolution des dates ; n'en figer aucune rendait le
+ * golden master périssable.
+ */
+export const DATE_ESSAI = '2026-08-12T09:00:00';
+
+class DateFigee extends Date {
+    constructor(...args) {
+        if (args.length === 0) super(DATE_ESSAI);
+        else super(...args);
+    }
+    static now() { return new Date(DATE_ESSAI).getTime(); }
+}
+
 export function monterExportSandbox() {
     const store = {
         'a2026_productions': [
@@ -70,6 +89,17 @@ export function monterExportSandbox() {
 
     const globaux = {
         db,
+        // ⚠ L'HORLOGE EST FIGÉE, ET C'EST INDISPENSABLE AU GOLDEN MASTER.
+        // Les rendeurs Texte et Markdown écrivent « Exporté le <date du jour> ».
+        // Sans ce gel, les références figées un jour rougissaient le lendemain
+        // — ce qui est arrivé le 13 août au matin, sur six sorties, avec un
+        // arbre pourtant identique à la veille. Un filet qui crie au loup
+        // chaque jour finit par être contourné, et c'est alors qu'il manque.
+        //
+        // Le sandbox passe ses globaux en PARAMÈTRES de fonction (voir
+        // `charger-script.js`) : ce `Date` masque donc celui de Node dans tout
+        // le code chargé, sans toucher au reste des tests.
+        Date: DateFigee,
         cle: (k) => `a2026_${k}`,
         echapperHtml: (t) => String(t ?? ''),
         requestAnimationFrame: (fn) => { fn(); return 0; },
