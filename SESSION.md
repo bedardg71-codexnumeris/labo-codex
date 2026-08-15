@@ -49,7 +49,20 @@
      rouges.** Les deux harnais (routage, option) sont fondus en un : j'en avais
      supprimé un au nettoyage d'avant release et failli perdre sa couverture.
 
-     ⏳ **TOUJOURS OUVERT** : le verbe de « Révision et réutilisation ».
+     ✅ **RÉSOLU DEPUIS — « Révision » passe aussi à « se réactive dans »**
+     (1.83.1, décision de Grégoire). ⚠ Il a fallu **RETIRER huit paires
+     explicites** de `VERBES_AUTO` : la table brute est consultée en PREMIER,
+     donc ajouter « revision » à la liste sans les retirer aurait rendu le
+     changement **sans effet**. Un correctif qui a l'air fait et ne fait rien.
+     Les deux paires « révision ↔ évaluation » sont préservées — ce verbe-là
+     n'était pas en cause, et l'emporter aurait été un dommage collatéral muet.
+     ⮕ Une de mes mutations de break-test était INOPÉRANTE : retirer la paire
+     `revision>evaluation` ne change rien, le repli sur la famille rend le même
+     verbe. Muté sur le VERBE, elle rougit. **Une mutation inopérante fait
+     croire qu'on a éprouvé une garde qu'on n'a pas éprouvée.**
+     ⏳ **Reste dû** : les liens DÉJÀ enregistrés gardent leur ancien verbe (le
+     verbe auto ne joue qu'à la création). Aucune migration écrite — c'est sa
+     donnée, et le menu corrige d'un clic.
      ===================================================================== -->
 
 <!-- =====================================================================

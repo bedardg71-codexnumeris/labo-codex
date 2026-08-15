@@ -132,12 +132,11 @@ describe('correctif #415 · les nœuds d’enseignement explicite se relient enf
         // qu'elle est déjà acquise et qu'on la remet en service.
         expect(verbeEntre(api, 'conceptuelle', 'ouverture').verbe).toBe('se_reactive_dans');
 
-        // ⏳ « Révision et réutilisation » a la MÊME nature et garde pourtant
-        // « s'acquiert par » : huit paires explicites de `VERBES_AUTO` le
-        // disent, donc quelqu'un a tranché dans l'autre sens en connaissance
-        // de cause. On verrouille l'état ACTUEL plutôt que de faire comme si
-        // la question était réglée — elle est posée à Grégoire.
-        expect(verbeEntre(api, 'conceptuelle', 'revision').verbe).toBe('s_acquiert_par');
+        // « Révision et réutilisation » a la MÊME nature, et l'a rejointe le
+        // 15 août sur décision de Grégoire : de la pratique répartie sur un
+        // acquis, pas une première rencontre. Les huit paires explicites qui
+        // disaient l'inverse ont été retirées de `VERBES_AUTO`.
+        expect(verbeEntre(api, 'conceptuelle', 'revision').verbe).toBe('se_reactive_dans');
     });
 
     it('les QUATRE autres étapes gardent « s’acquiert par »', () => {

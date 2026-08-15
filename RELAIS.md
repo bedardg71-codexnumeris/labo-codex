@@ -12,9 +12,9 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | **`main`** |
-| **Version** | **1.83.0** — build `0815-1238` |
+| **Version** | **1.83.1** — build `0815-1244` |
 | **Travail en avance sur `main`** | **aucun** |
-| **Dernière mise à jour** | 15 août 2026 — recherche dans la Carte d'alignement (1.81.0), deux correctifs sur retour terrain (1.81.1 teinte du halo, 1.81.2 barre rognée sur iPad), **porte terrain rejouée et close à 45/46**, puis routage des liens + verbe « se réactive dans » (1.82.0) et son réglage dans Actions (1.83.0). Vitest 2440/2440 |
+| **Dernière mise à jour** | 15 août 2026 — recherche dans la Carte d'alignement (1.81.0), deux correctifs sur retour terrain (1.81.1 teinte du halo, 1.81.2 barre rognée sur iPad), **porte terrain rejouée et close à 45/46**, puis routage des liens + verbe « se réactive dans » (1.82.0) son réglage dans Actions (1.83.0) et « Révision » passée à « se réactive dans » (1.83.1). Vitest 2442/2442 |
 
 ⚠⚠ **AVANT TOUTE FUSION EN CONTENEUR : `git fetch --unshallow origin`.** Le clone
 du conteneur est **shallow**, et son `main` LOCAL peut pointer des semaines en
@@ -33,12 +33,12 @@ commit d'avance, poussé la veille au soir depuis une session cloud. Le rituel d
 début l'a attrapé ; il ne l'aurait pas fait sans `git fetch`.
 
 ⏳ **CE QUI RESTE DÛ** :
-- ⏳ **QUESTION EN ATTENTE — le verbe de « Révision et réutilisation ».** Une
-  connaissance reliée à une **Ouverture** prend « se réactive dans » depuis
-  1.82.0. Le type **Révision** a la même nature et garde pourtant « s'acquiert
-  par » : huit paires explicites de `VERBES_AUTO` le disent, donc quelqu'un a
-  tranché en connaissance de cause. **Question posée à Grégoire le 15 août,
-  sans réponse.** Ne pas trancher sans lui — c'est son vocabulaire.
+- ⏳ **LES LIENS DÉJÀ ENREGISTRÉS GARDENT LEUR ANCIEN VERBE.** Le verbe
+  automatique joue à la CRÉATION d'un lien, pas rétroactivement : un lien posé
+  avant le 15 août entre une connaissance et une Ouverture ou une Révision
+  affiche encore « s'acquiert par ». **Aucune migration n'a été écrite** — c'est
+  sa donnée, et le menu du lien (qui offre désormais tous les verbes) corrige
+  d'un clic. Si sa carte en compte beaucoup, une migration reste à proposer.
 - ⏳ **NON ÉPROUVÉ : la BEAUTÉ des tracés de liens sur sa vraie carte.** Le
   routage garantit qu'un lien ne traverse pas de bloc (mesuré : 58/60 libres sur
   carte dense) ; il ne garantit pas que le détour soit joli. Seul son œil peut
