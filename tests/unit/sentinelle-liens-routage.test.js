@@ -353,12 +353,32 @@ describe('liens · D — on RÉACTIVE dans une Ouverture, on n’y acquiert pas'
         expect(posRepli, 'la règle doit précéder le repli sur la famille').toBeGreaterThan(posRegle);
     });
 
-    it('⏳ « révision » garde « s’acquiert par » — question ouverte, pas oubli', () => {
-        // Le type « Révision et réutilisation » a la même nature, mais huit
-        // paires explicites de VERBES_AUTO disent le contraire : quelqu'un a
-        // tranché en connaissance de cause. On verrouille l'état ACTUEL au
-        // lieu de faire comme si la question était réglée.
-        expect(verbe('conceptuelle', 'revision').verbe).toBe('s_acquiert_par');
+    it('⚠ « révision » se réactive AUSSI — décision de Grégoire du 15 août', () => {
+        // Même nature que l'Ouverture : de la pratique répartie sur un acquis,
+        // pas une première rencontre.
+        for (const k of ['factuelle', 'conceptuelle', 'procedurale', 'metacognitive']) {
+            expect(verbe(k, 'revision').verbe, `${k} → revision`).toBe('se_reactive_dans');
+        }
+    });
+
+    it('⚠ les huit paires explicites ont été RETIRÉES de la table', () => {
+        // Cliquet de source, et il est nécessaire : la table brute est
+        // consultée AVANT la règle. Réécrire une seule de ces paires suffirait
+        // à annuler la décision en silence — le changement aurait l'air fait
+        // et ne ferait rien.
+        for (const k of ['factuelle', 'conceptuelle', 'procedurale', 'metacognitive']) {
+            expect(source, `${k}>revision ne doit plus être écrite`)
+                .not.toMatch(new RegExp(`'${k}>revision':`));
+            expect(source, `revision>${k} ne doit plus être écrite`)
+                .not.toMatch(new RegExp(`'revision>${k}':`));
+        }
+    });
+
+    it('… mais « révision ↔ évaluation » garde « se vérifie par »', () => {
+        // Le retrait ne devait toucher que le verbe d'ACQUISITION. Une révision
+        // se vérifie bien par une évaluation : ce verbe n'a jamais été en cause,
+        // et l'emporter au passage aurait été un dommage collatéral silencieux.
+        expect(verbe('revision', 'evaluation').verbe).toBe('se_verifie_par');
     });
 });
 

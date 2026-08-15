@@ -1221,16 +1221,21 @@ var VERBES_AUTO = {
     // Connaissance → Activité (s'acquiert par)
     'factuelle>activite':          { verbe: 's_acquiert_par' },
     'factuelle>soutien':           { verbe: 's_acquiert_par' },
-    'factuelle>revision':          { verbe: 's_acquiert_par' },
     'conceptuelle>activite':       { verbe: 's_acquiert_par' },
     'conceptuelle>soutien':        { verbe: 's_acquiert_par' },
-    'conceptuelle>revision':       { verbe: 's_acquiert_par' },
     'procedurale>activite':        { verbe: 's_acquiert_par' },
     'procedurale>soutien':         { verbe: 's_acquiert_par' },
-    'procedurale>revision':        { verbe: 's_acquiert_par' },
     'metacognitive>activite':      { verbe: 's_acquiert_par' },
     'metacognitive>soutien':       { verbe: 's_acquiert_par' },
-    'metacognitive>revision':      { verbe: 's_acquiert_par' },
+    // ⚠ LES HUIT PAIRES « connaissance ↔ révision » ONT ÉTÉ RETIRÉES d'ici le
+    // 15 août 2026, sur décision de Grégoire. Elles disaient « s'acquiert
+    // par » ; une Révision est de la pratique RÉPARTIE sur un acquis, pas une
+    // première rencontre. La règle `TYPES_REACTIVATION` les remplace, plus bas.
+    // ⮕ RETIRÉES, et pas laissées à côté : la table brute est consultée en
+    // PREMIER, donc les garder aurait rendu la règle sans effet — le genre de
+    // changement qui a l'air fait et ne fait rien. Les deux paires
+    // « révision ↔ évaluation » restent : une révision SE VÉRIFIE bien par une
+    // évaluation, ce verbe-là n'a jamais été en cause.
     'activite>factuelle':          { verbe: 's_acquiert_par', inverser: true },
     'activite>conceptuelle':       { verbe: 's_acquiert_par', inverser: true },
     'activite>procedurale':        { verbe: 's_acquiert_par', inverser: true },
@@ -1239,10 +1244,6 @@ var VERBES_AUTO = {
     'soutien>conceptuelle':        { verbe: 's_acquiert_par', inverser: true },
     'soutien>procedurale':         { verbe: 's_acquiert_par', inverser: true },
     'soutien>metacognitive':       { verbe: 's_acquiert_par', inverser: true },
-    'revision>factuelle':          { verbe: 's_acquiert_par', inverser: true },
-    'revision>conceptuelle':       { verbe: 's_acquiert_par', inverser: true },
-    'revision>procedurale':        { verbe: 's_acquiert_par', inverser: true },
-    'revision>metacognitive':      { verbe: 's_acquiert_par', inverser: true },
     // Idée maîtresse → Évaluation (se vérifie par)
     'idee-maitresse>evaluation':   { verbe: 'se_verifie_par' },
     'evaluation>idee-maitresse':   { verbe: 'se_verifie_par', inverser: true },
@@ -1283,20 +1284,18 @@ var TYPES_CONNAISSANCE = ['factuelle', 'conceptuelle', 'procedurale', 'metacogni
  * l'empilement — et il faudrait recommencer au type suivant. Une liste nommée,
  * consultée AVANT le repli, dit la règle une seule fois.
  *
- * ⏳ « révision » N'Y EST PAS, ET C'EST DÉLIBÉRÉ. Le type « Révision et
- * réutilisation » a pourtant la même nature — de la pratique répartie sur un
- * acquis, pas une première rencontre. Mais `VERBES_AUTO` porte HUIT paires
- * écrites explicitement pour lui (`conceptuelle>revision` et les autres), qui
- * gagnent sur cette liste : quelqu'un a donc tranché dans l'autre sens, en
- * connaissance de cause. Les écraser au passage serait décider à sa place sur
- * son propre vocabulaire. ⮕ QUESTION POSÉE À GRÉGOIRE le 15 août, en attente.
+ * ▣ « révision » Y FIGURE depuis le 15 août, sur décision de Grégoire. Le type
+ * « Révision et réutilisation » a exactement la même nature : des occasions de
+ * pratique réparties sur un acquis, pas une première rencontre.
+ * ⚠ Il a fallu RETIRER les huit paires `connaissance ↔ révision` de
+ * `VERBES_AUTO` pour que cette ligne serve à quelque chose.
  *
  * ⚠ ET UNE OUVERTURE NE RÉACTIVE PAS TOUJOURS : elle introduit parfois du
  * neuf. C'est donc un DÉFAUT, pas une vérité — ce qui le rend acceptable,
  * c'est que le menu du lien offre désormais tous les verbes (même date) :
  * l'utilisateur corrige d'un clic au lieu d'être bloqué.
  */
-var TYPES_REACTIVATION = ['ouverture'];
+var TYPES_REACTIVATION = ['ouverture', 'revision'];
 // « Frère d'Activité » se définit ICI et nulle part ailleurs : tout site qui
 // énumérait le triplet en dur a été rabattu sur cette liste (7 août 2026) —
 // sans quoi chaque nouveau frère devait retrouver tous les triplets.

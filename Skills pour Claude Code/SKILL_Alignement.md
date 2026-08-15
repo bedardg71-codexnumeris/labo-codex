@@ -326,16 +326,26 @@ et gardée en mémoire — `calculerTraceLien` tourne pour chaque lien à chaque
 redessin, l'interroger dedans paierait un accès au stockage par lien et par
 image pendant un glisser.
 
-**2. On RÉACTIVE dans une Ouverture, on n'y acquiert pas.** Une connaissance
-reliée à une **Ouverture** prend « se réactive dans » et non « s'acquiert par » :
-l'Ouverture rappelle les concepts de la leçon précédente, elle ne les enseigne
-pas. Les quatre autres étapes d'enseignement explicite gardent « s'acquiert
-par ». La règle est consultée **après** la table brute et **avant** le repli sur
-la famille (`normaliserType`), qui écraserait l'Ouverture en « activité ».
+**2. On RÉACTIVE, on n'acquiert pas.** Une connaissance reliée à une
+**Ouverture** ou à une **Révision** prend « se réactive dans » et non
+« s'acquiert par » : l'Ouverture rappelle les concepts de la leçon précédente,
+la Révision les réutilise — ni l'une ni l'autre ne les enseigne. Les quatre
+autres étapes d'enseignement explicite (Modélisation, Pratique guidée, Pratique
+autonome, Clôture) gardent « s'acquiert par » : c'est là que la connaissance se
+construit. La liste vit dans `TYPES_REACTIVATION`.
 
-⏳ **« Révision et réutilisation » garde « s'acquiert par »** — même nature
-pourtant, mais huit paires explicites de `VERBES_AUTO` disent le contraire.
-Question posée à Grégoire, non tranchée.
+⚠ **La règle est consultée APRÈS la table brute et AVANT le repli sur la
+famille** (`normaliserType`), qui écraserait l'Ouverture en « activité ». Et il
+a fallu **retirer** les huit paires `connaissance ↔ révision` de `VERBES_AUTO`
+pour que la règle serve : la table brute gagne toujours, donc les y laisser
+aurait rendu le changement sans effet — le genre de correctif qui a l'air fait
+et ne fait rien. Les deux paires `révision ↔ évaluation` restent : une révision
+se vérifie bien par une évaluation.
+
+⚠ **Les liens DÉJÀ ENREGISTRÉS gardent le verbe qu'ils portaient.** Le verbe
+automatique s'applique à la CRÉATION d'un lien, pas rétroactivement. Un lien
+posé avant le 15 août entre une connaissance et une Ouverture affiche donc
+encore « s'acquiert par » — il se corrige d'un clic dans le menu du lien.
 
 ⚠ **Le menu d'un lien offre TOUS les verbes**, sous ceux qu'il suggère. Avant,
 une résolution « verticale » n'en offrait qu'un : quand ce verbe unique était le
