@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            version: '1.85',
+            couleur: 'vert',
+            titre: 'Changer de phase sans refaire le bloc',
+            items: [
+                'Sur un bloc d’enseignement explicite, le nom de la phase devient un menu : « pratique guidée » se change en « pratique autonome » sans recréer le bloc ni y recoller le contenu. Durée, objectifs servis et liens sont conservés.',
+                'Le menu s’arrête aux cinq phases de la méthode — passer à « exposé » ou « activité » serait un changement de nature, pas de phase.',
+                'Ces blocs gagnent une poignée ⠿ à gauche de leur en-tête : c’est par là qu’on les attrape désormais, le nom étant devenu un menu.',
+                'Les leçons sortent enfin dans l’ordre des semaines dans les exports — une leçon planifiée tard mais créée tôt ne remonte plus en tête de document.',
+                'L’aperçu d’un gabarit met ses colonnes en colonnes : leur contenu ne se chevauche plus. Le fichier copié ou téléchargé, lui, reste un vrai TSV.'
+            ]
+        },
+        {
             version: '1.84',
             couleur: 'bleu',
             titre: 'La modale des gabarits d’export, revue',

@@ -20269,6 +20269,11 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 .planif-noeud-entete {
     display: flex;
     align-items: center;
+    /* Passage à la ligne : sur un bloc étroit, la boîte de durée descend sous
+       le sélecteur de phase plutôt que de l'obliger à tronquer son libellé
+       (cf. `.planif-noeud-phase`). Sur un bloc assez large, tout reste sur une
+       ligne — c'est le bloc qui décide, pas une valeur en dur. */
+    flex-wrap: wrap;
     gap: 6px;
     padding: 8px 26px 4px;
     border-bottom: 1px solid rgba(106, 172, 184, 0.15);
@@ -21693,6 +21698,95 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     pointer-events: none;
     white-space: nowrap;
 }
+/* ═══ PRISE ET PHASE — en-tête des blocs d'enseignement explicite ═════════
+   Décision de Grégoire, 15 août : le type d'une phase EE devient un sélecteur,
+   pour changer « pratique guidée » en « pratique autonome » sans recréer le
+   bloc et y recoller le contenu.
+
+   ⚠⚠ LA POIGNÉE PAIE UNE DETTE QUE LE SÉLECTEUR CRÉE. Le libellé de type était
+   une surface de PRISE : inerte, donc saisissable par le glisser du bloc. Un
+   <select> doit couper la propagation du pointerdown, sinon il est inutilisable
+   au doigt. Or l'en-tête d'un bloc de 230 px n'a AUCUN pixel nu (mesuré :
+   174 px utiles, libellé 115, durée 53) et le titre en dessous est
+   contenteditable, donc exclu du glisser lui aussi. Sans poignée, l'en-tête
+   entier cesserait de se saisir.
+   ⮕ `.planif-noeud-prise` ne porte donc AUCUN écouteur : le geste doit remonter
+   au bloc. C'est le seul élément de l'en-tête dans ce cas. */
+.planif-noeud-prise {
+    flex: 0 0 auto;
+    position: relative;
+    cursor: grab;
+    color: var(--texte-muted, #5a7a88);
+    font-size: 13px;
+    line-height: 1;
+    letter-spacing: -2px;
+    padding: 0 2px 0 0;
+    opacity: 0.75;
+    user-select: none;
+    transition: opacity 0.15s;
+}
+.planif-noeud:hover .planif-noeud-prise { opacity: 1; }
+.planif-noeud-prise:active { cursor: grabbing; }
+/* ⚠ LA POIGNÉE DESSINÉE FAIT 10 px. Rendre la prise sans la rendre SAISISSABLE
+   n'aurait rien réglé : on retirait 115 px de surface pour en rendre 10.
+   Le pseudo-élément étend la zone sensible sans peser sur la mise en page.
+   Il déborde à GAUCHE dans le padding de l'en-tête (26 px) — de l'espace nu,
+   déjà saisissable, donc rien n'est volé à personne — et à droite seulement de
+   la valeur du `gap`. Surtout PAS au-delà : le sélecteur commence là, et il
+   coupe la propagation. */
+.planif-noeud-prise::after {
+    content: '';
+    position: absolute;
+    top: -15px;
+    bottom: -15px;
+    left: -28px;
+    right: -6px;
+}
+
+/* Le sélecteur reprend l'allure du libellé qu'il remplace (10 px, majuscules,
+   couleur du type) : un bloc de carte ne doit pas se mettre à ressembler à un
+   formulaire parce qu'une de ses valeurs est devenue modifiable. */
+.planif-noeud-phase {
+    /* `0 1 auto` et NON `1 1 auto` : le sélecteur ne doit pas s'ÉTIRER. Sinon
+       il absorbe toute la largeur disponible et pousse la boîte de durée à la
+       ligne même sur un bloc assez large pour les deux — mesuré : en-tête à
+       57 px y compris sur un bloc de 280 px, où tout tenait. */
+    flex: 0 1 auto;
+    /* ⚠⚠ CE PLANCHER EST LA RAISON POUR LAQUELLE L'EN-TÊTE PEUT PASSER À LA
+       LIGNE, et il n'est pas négociable. LES CINQ PHASES PARTAGENT UNE SEULE
+       COULEUR (`--planif-couleur-enseignement-explicite`, styles.css) : le
+       TEXTE est donc leur unique discriminant. Un premier essai laissait le
+       sélecteur rétrécir — mesuré à 99 px, il affichait « PRATIQUE … » pour
+       Pratique guidée COMME pour Pratique autonome, c'est-à-dire précisément
+       les deux phases que la bascule sert à permuter. Illisible.
+       Le sélecteur garde donc de quoi écrire le plus long libellé ; si la
+       boîte de durée ne tient plus à côté, c'est ELLE qui passe à la ligne. */
+    min-width: 130px;
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-moyen, 6px);
+    padding: 2px 0 2px 2px;
+    min-height: 24px;
+    cursor: pointer;
+    text-overflow: ellipsis;
+}
+.planif-noeud-phase:hover {
+    border-color: var(--bordure-subtile, rgba(127, 127, 127, 0.3));
+    background: var(--surface-element, #244858);
+}
+.mode-clair .planif-noeud-phase:hover {
+    background: rgba(6, 93, 187, 0.06);
+}
+.planif-noeud-phase:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
 /* Badge 🎯 — bascule de l'objectif de leçon (6 août 2026).
    Rendu DANS l'en-tête du bloc leçon. Toujours présent : grisé, il signale
    qu'un objectif peut être posé ; coloré, qu'il en existe un. */
