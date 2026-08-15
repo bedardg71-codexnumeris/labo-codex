@@ -5290,6 +5290,7 @@ function chargerCarte(carteId) {
     // Remap et charger les liens
     var liensListe = donnees.liens || [];
     var liensModifies = false;
+    var reactives = [];
     for (var m = 0; m < liensListe.length; m++) {
         var l = liensListe[m];
         if (!l.id.startsWith('planif-')) l.id = 'planif-' + l.id;
@@ -5312,6 +5313,35 @@ function chargerCarte(carteId) {
             l.type = compat;
             liensModifies = true;
         }
+
+        /* ── BASCULE DES LIENS DÉJÀ ENREGISTRÉS (15 août 2026) ──────────
+           Le verbe automatique ne joue qu'à la CRÉATION d'un lien. Sans ce
+           passage, un lien posé avant aujourd'hui entre une connaissance et
+           une Ouverture ou une Révision garderait « s'acquiert par », et la
+           carte porterait deux verbes pour la même relation selon la date où
+           chaque lien a été tracé. Demande explicite de Grégoire.
+
+           ⚠ CE QUI EST TRANSFORMÉ, ET RIEN D'AUTRE : uniquement les liens qui
+           portent AUJOURD'HUI « s'acquiert par » ET dont le couple résout
+           MAINTENANT « se réactive dans ». Aucun autre verbe n'est touché.
+
+           ⚠ ON NE TOUCHE PAS À LA DIRECTION, même quand la résolution la
+           dirait inversée. Retourner une flèche qu'il a posée est une
+           transformation d'un autre ordre que corriger un libellé : ce n'est
+           pas ce qu'il a demandé, et ça se verrait moins.
+
+           ▣ IDEMPOTENTE par construction : après passage le verbe n'est plus
+           « s'acquiert par », donc la condition ne mord plus. Rejouer le
+           chargement ne rebascule rien. */
+        if (l.type === 's_acquiert_par') {
+            var reso = resoudreVerbe(l.source, l.cible);
+            if (reso && reso.verbe === 'se_reactive_dans') {
+                l.type = 'se_reactive_dans';
+                liensModifies = true;
+                reactives.push(l);
+            }
+        }
+
         etat.liens.set(l.id, l);
     }
 
@@ -5324,6 +5354,24 @@ function chargerCarte(carteId) {
 
     reconstruireDOM();
     if (liensModifies) sauvegarder();
+
+    /* ⚠ UNE TRANSFORMATION DE SES DONNÉES SE DIT. Elle est étroite et
+       réversible d'un clic, mais elle reste une réécriture de ce qu'il a
+       tracé : la faire en silence l'obligerait à découvrir le changement par
+       hasard. Le détail va dans la console pour qu'il puisse auditer QUELS
+       liens ont bougé, pas seulement combien. */
+    if (reactives.length) {
+        console.warn('[Planif-Carte] ' + reactives.length + ' lien(s) passés de'
+            + ' « s\'acquiert par » à « se réactive dans » (Ouverture / Révision) :');
+        reactives.forEach(function(l) {
+            var a = etat.noeuds.get(l.source), b = etat.noeuds.get(l.cible);
+            console.warn('   · ' + ((a && a.titre) || l.source) + '  →  ' + ((b && b.titre) || l.cible));
+        });
+        if (typeof afficherToastLien === 'function') {
+            afficherToastLien(reactives.length + ' lien' + (reactives.length > 1 ? 's' : '')
+                + ' mis à jour : « se réactive dans »');
+        }
+    }
 
     requestAnimationFrame(function() {
         centrerVueSurContenu();
