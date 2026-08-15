@@ -1193,6 +1193,13 @@ const TYPES_LIENS = [
     { id: 'se_decline_en',        label: 'se décline en' },
     { id: 'se_concretise_dans',   label: 'se concrétise dans' },
     { id: 's_acquiert_par',       label: "s'acquiert par" },
+    // « se réactive dans » (15 août 2026, demande de Grégoire). Il PORTE une
+    // distinction que la carte avait perdue : acquérir et réactiver ne sont
+    // pas le même geste. Une Ouverture qui rappelle les concepts de la leçon
+    // précédente ne les fait pas acquérir — ils sont déjà là.
+    // ⮕ Cette distinction a EXISTÉ puis a été fondue : `VERBES_COMPAT` porte
+    // encore `'revise_dans' → 's_acquiert_par'`. On la rétablit.
+    { id: 'se_reactive_dans',     label: 'se réactive dans' },
     { id: 'se_verifie_par',       label: 'se vérifie par' },
     { id: 's_appuie_sur',         label: "s'appuie sur" },
     { id: 'complete',             label: 'complète' },
@@ -1259,6 +1266,37 @@ var VERBES_AUTO = {
 
 // Groupes de types pour normalisation (verbes horizontaux)
 var TYPES_CONNAISSANCE = ['factuelle', 'conceptuelle', 'procedurale', 'metacognitive'];
+
+/**
+ * CE QUI RÉACTIVE UN ACQUIS PLUTÔT QUE DE LE FAIRE ACQUÉRIR (15 août 2026).
+ *
+ * Constat terrain de Grégoire : « comme j'ai en Ouverture une révision de
+ * concepts de la leçon précédente, il faudrait revoir le verbe ». Une
+ * connaissance reliée à une Ouverture recevait « s'acquiert par », c'est-à-dire
+ * le verbe de l'acquisition INITIALE — alors que la connaissance est déjà
+ * acquise et qu'on la remet en service.
+ *
+ * ⚠ POURQUOI UNE LISTE ET NON DES PAIRES ÉCRITES À LA MAIN. Le repli sur la
+ * famille (#415, 8 août) écrase les cinq étapes d'enseignement explicite en un
+ * seul « activite » : `conceptuelle>ouverture` retombait donc sur
+ * `conceptuelle>activite`. Écrire les 16 paires manquantes serait de
+ * l'empilement — et il faudrait recommencer au type suivant. Une liste nommée,
+ * consultée AVANT le repli, dit la règle une seule fois.
+ *
+ * ⏳ « révision » N'Y EST PAS, ET C'EST DÉLIBÉRÉ. Le type « Révision et
+ * réutilisation » a pourtant la même nature — de la pratique répartie sur un
+ * acquis, pas une première rencontre. Mais `VERBES_AUTO` porte HUIT paires
+ * écrites explicitement pour lui (`conceptuelle>revision` et les autres), qui
+ * gagnent sur cette liste : quelqu'un a donc tranché dans l'autre sens, en
+ * connaissance de cause. Les écraser au passage serait décider à sa place sur
+ * son propre vocabulaire. ⮕ QUESTION POSÉE À GRÉGOIRE le 15 août, en attente.
+ *
+ * ⚠ ET UNE OUVERTURE NE RÉACTIVE PAS TOUJOURS : elle introduit parfois du
+ * neuf. C'est donc un DÉFAUT, pas une vérité — ce qui le rend acceptable,
+ * c'est que le menu du lien offre désormais tous les verbes (même date) :
+ * l'utilisateur corrige d'un clic au lieu d'être bloqué.
+ */
+var TYPES_REACTIVATION = ['ouverture'];
 // « Frère d'Activité » se définit ICI et nulle part ailleurs : tout site qui
 // énumérait le triplet en dur a été rabattu sur cette liste (7 août 2026) —
 // sans quoi chaque nouveau frère devait retrouver tous les triplets.
@@ -1643,6 +1681,20 @@ function resoudreVerbe(sourceId, cibleId) {
     // ⚠ C'est un SECOURS, jamais un remplacement : la correspondance brute est
     // consultée d'abord et gagne toujours. Un type de la famille qui mériterait
     // un verbe à lui garde donc le sien.
+    // 1 ter. RÉACTIVATION AVANT REPLI (15 août 2026). Une connaissance reliée
+    // à une Ouverture ou à une Révision se RÉACTIVE, elle ne s'acquiert pas.
+    // ⚠ Placée ici et pas ailleurs : APRÈS la correspondance brute (une paire
+    // écrite explicitement doit continuer de gagner) et AVANT le repli sur la
+    // famille (qui écraserait Ouverture en « activite » et rendrait
+    // « s'acquiert par »).
+    if (!match) {
+        if (TYPES_CONNAISSANCE.indexOf(src.type) !== -1 && TYPES_REACTIVATION.indexOf(cbl.type) !== -1) {
+            match = { verbe: 'se_reactive_dans' };
+        } else if (TYPES_REACTIVATION.indexOf(src.type) !== -1 && TYPES_CONNAISSANCE.indexOf(cbl.type) !== -1) {
+            match = { verbe: 'se_reactive_dans', inverser: true };
+        }
+    }
+
     if (!match) {
         match = VERBES_AUTO[src.type + '>' + normaliserType(cbl.type)]
              || VERBES_AUTO[normaliserType(src.type) + '>' + cbl.type];
@@ -3438,23 +3490,377 @@ function creerLien(sourceId, cibleId, typeLien) {
     return id;
 }
 
+/* =====================================================================
+   ROUTAGE DES LIENS — CONTOURNER LES BLOCS (15 août 2026)
+
+   Demande de Grégoire, captures à l'appui : « je voudrais éviter que les
+   liens passent par-dessus d'autres blocs ».
+
+   ▣ CE QUI SE PASSAIT. Un lien était UNE courbe entre deux ports, et les
+   ports étaient choisis sur le seul axe dominant : si l'écart horizontal
+   l'emportait, ce serait droite→gauche, sinon haut→bas. Rien ne regardait ce
+   qu'il y avait ENTRE les deux. Sur sa carte, « se vérifie par » traversait
+   ainsi toute une leçon et trois blocs en diagonale.
+
+   ▣ CE QU'ON FAIT, ET DANS CET ORDRE — c'est l'ordre qui compte :
+     1. CHOISIR LES PORTS. On essaie les seize combinaisons et on garde celle
+        qui ne traverse rien. À elle seule elle règle la majorité des cas,
+        pour un coût dérisoire : souvent le chemin existait déjà, on le
+        prenait juste par le mauvais côté.
+     2. DÉVIER, seulement si aucune combinaison n'est libre. On ajoute UN
+        point de passage à côté de ce qui gêne, et on relie le tout par une
+        courbe lisse. Le style reste celui d'aujourd'hui (arbitrage de
+        Grégoire : courbes déviées, pas coudes à angle droit).
+     3. ACCEPTER LE MOINS MAUVAIS si même la déviation ne dégage pas. Une
+        carte peut être trop dense pour qu'un passage existe ; on ne fait pas
+        semblant, on prend le tracé qui traverse le moins.
+
+   ⚠ CE QUI N'EST PAS UN OBSTACLE, et c'est essentiel : les CONTENEURS qui
+   contiennent une des deux extrémités. Un lien d'un bloc de la leçon A vers
+   un bloc de la leçon B doit forcément sortir du cadre de A et entrer dans
+   celui de B — les compter comme obstacles rendrait tout tracé impossible et
+   on tomberait toujours dans le cas 3.
+   ===================================================================== */
+
+// Marge autour d'un bloc : le lien ne doit pas le frôler non plus.
+var LIEN_MARGE = 14;
+// Nombre de points échantillonnés le long d'une courbe pour la tester. 18 est
+// le compromis mesuré : en dessous, une courbe traverse un bloc étroit entre
+// deux points sans qu'on le voie.
+var LIEN_ECHANTILLONS = 18;
+var LIEN_PORTS = ['droite', 'gauche', 'haut', 'bas'];
+
+/** Rectangle d'un nœud en coordonnées d'espace, marge comprise. */
+function rectNoeud(id, marge) {
+    var nd = etat.noeuds.get(id);
+    if (!nd) return null;
+    var el = document.getElementById(id);
+    var w = el ? (el.offsetWidth || 140) : 140;
+    var h = el ? (el.offsetHeight || 50) : 50;
+    var m = marge || 0;
+    return { x1: nd.x - m, y1: nd.y - m, x2: nd.x + w + m, y2: nd.y + h + m };
+}
+
+/** Remonte la chaîne des conteneurs d'un nœud (lui-même compris). */
+function _chaineAncetres(id, sortie) {
+    var vus = {};
+    var courant = id;
+    while (courant && !vus[courant]) {
+        vus[courant] = true;
+        sortie[courant] = true;
+        var nd = etat.noeuds.get(courant);
+        courant = nd ? nd.parent : null;
+    }
+}
+
+/**
+ * Les blocs qu'un lien doit contourner.
+ *
+ * Exclut les deux extrémités et TOUS leurs conteneurs ancêtres : traverser le
+ * cadre de sa propre leçon est inévitable quand on en sort.
+ */
+function obstaclesPourLien(sourceId, cibleId) {
+    var exclus = {};
+    _chaineAncetres(sourceId, exclus);
+    _chaineAncetres(cibleId, exclus);
+
+    // Boîte de travail : les deux extrémités, élargies. Un bloc situé à
+    // l'autre bout de la carte ne peut pas gêner ce lien — le tester à chaque
+    // combinaison de ports serait payer 150 blocs pour en écarter 145. Mesuré
+    // le 15 août : c'est ce filtre qui rend le routage tenable sur une carte
+    // dense. La marge généreuse laisse la place à une déviation.
+    var ra = rectNoeud(sourceId, 0), rb = rectNoeud(cibleId, 0);
+    var zone = null;
+    if (ra && rb) {
+        var MARGE_ZONE = 260;
+        zone = {
+            x1: Math.min(ra.x1, rb.x1) - MARGE_ZONE, y1: Math.min(ra.y1, rb.y1) - MARGE_ZONE,
+            x2: Math.max(ra.x2, rb.x2) + MARGE_ZONE, y2: Math.max(ra.y2, rb.y2) + MARGE_ZONE
+        };
+    }
+
+    var liste = [];
+    for (var entree of etat.noeuds) {
+        var id = entree[0];
+        if (exclus[id]) continue;
+        var r = rectNoeud(id, LIEN_MARGE);
+        if (!r) continue;
+        if (zone && (r.x2 < zone.x1 || r.x1 > zone.x2 || r.y2 < zone.y1 || r.y1 > zone.y2)) continue;
+        liste.push(r);
+    }
+    return liste;
+}
+
+function _dansRect(x, y, r) {
+    return x >= r.x1 && x <= r.x2 && y >= r.y1 && y <= r.y2;
+}
+
+/** Vecteur sortant d'un port — la direction dans laquelle le lien démarre. */
+function _directionPort(port) {
+    if (port === 'droite') return { x: 1, y: 0 };
+    if (port === 'gauche') return { x: -1, y: 0 };
+    if (port === 'bas') return { x: 0, y: 1 };
+    return { x: 0, y: -1 };
+}
+
+/**
+ * Courbe lisse passant par TOUS les points donnés, en partant et en arrivant
+ * dans la direction des ports.
+ *
+ * Les points intermédiaires prennent leur tangente de leurs voisins
+ * (Catmull-Rom) : c'est ce qui donne une déviation arrondie plutôt qu'un
+ * angle, et c'est le style que Grégoire a retenu.
+ */
+function cheminLisse(points, dirDepart, dirArrivee) {
+    if (points.length < 2) return '';
+    var total = 0;
+    for (var k = 1; k < points.length; k++) {
+        total += Math.hypot(points[k].x - points[k - 1].x, points[k].y - points[k - 1].y);
+    }
+    var tension = Math.max(Math.min(total * 0.3, 90), 28);
+
+    var d = 'M ' + points[0].x + ' ' + points[0].y;
+    for (var i = 0; i < points.length - 1; i++) {
+        var p0 = points[i], p1 = points[i + 1];
+        var c1, c2;
+        if (i === 0) {
+            c1 = { x: p0.x + dirDepart.x * tension, y: p0.y + dirDepart.y * tension };
+        } else {
+            var avant = points[i - 1];
+            c1 = { x: p0.x + (p1.x - avant.x) / 6, y: p0.y + (p1.y - avant.y) / 6 };
+        }
+        if (i === points.length - 2) {
+            c2 = { x: p1.x + dirArrivee.x * tension, y: p1.y + dirArrivee.y * tension };
+        } else {
+            var apres = points[i + 2];
+            c2 = { x: p1.x - (apres.x - p0.x) / 6, y: p1.y - (apres.y - p0.y) / 6 };
+        }
+        d += ' C ' + c1.x + ' ' + c1.y + ', ' + c2.x + ' ' + c2.y + ', ' + p1.x + ' ' + p1.y;
+    }
+    return d;
+}
+
+/** Points échantillonnés le long du même chemin — sert au test et au libellé. */
+function _echantillonner(points, dirDepart, dirArrivee) {
+    // On rééchantillonne la POLYLIGNE des points de passage enrichie des
+    // milieux : suffisant pour détecter une traversée, et sans dépendance au
+    // DOM (donc utilisable en bac à sable de test).
+    var total = 0;
+    for (var k = 1; k < points.length; k++) {
+        total += Math.hypot(points[k].x - points[k - 1].x, points[k].y - points[k - 1].y);
+    }
+    var tension = Math.max(Math.min(total * 0.3, 90), 28);
+    var sortie = [];
+    for (var i = 0; i < points.length - 1; i++) {
+        var p0 = points[i], p1 = points[i + 1];
+        var c1, c2;
+        if (i === 0) c1 = { x: p0.x + dirDepart.x * tension, y: p0.y + dirDepart.y * tension };
+        else { var av = points[i - 1]; c1 = { x: p0.x + (p1.x - av.x) / 6, y: p0.y + (p1.y - av.y) / 6 }; }
+        if (i === points.length - 2) c2 = { x: p1.x + dirArrivee.x * tension, y: p1.y + dirArrivee.y * tension };
+        else { var ap = points[i + 2]; c2 = { x: p1.x - (ap.x - p0.x) / 6, y: p1.y - (ap.y - p0.y) / 6 }; }
+        var n = Math.max(4, Math.round(LIEN_ECHANTILLONS / (points.length - 1)));
+        for (var s = 0; s <= n; s++) {
+            var t = s / n, u = 1 - t;
+            sortie.push({
+                x: u*u*u*p0.x + 3*u*u*t*c1.x + 3*u*t*t*c2.x + t*t*t*p1.x,
+                y: u*u*u*p0.y + 3*u*u*t*c1.y + 3*u*t*t*c2.y + t*t*t*p1.y
+            });
+        }
+    }
+    return sortie;
+}
+
+/** Combien d'obstacles DISTINCTS le tracé traverse. */
+function _traversees(echantillons, obstacles) {
+    var n = 0;
+    for (var o = 0; o < obstacles.length; o++) {
+        for (var e = 0; e < echantillons.length; e++) {
+            if (_dansRect(echantillons[e].x, echantillons[e].y, obstacles[o])) { n++; break; }
+        }
+    }
+    return n;
+}
+
+function _longueur(echantillons) {
+    var l = 0;
+    for (var i = 1; i < echantillons.length; i++) {
+        l += Math.hypot(echantillons[i].x - echantillons[i-1].x, echantillons[i].y - echantillons[i-1].y);
+    }
+    return l;
+}
+
+/**
+ * Calcule le tracé d'un lien : le chemin SVG, les extrémités, et un point
+ * SUR la courbe pour poser le libellé.
+ *
+ * ⚠ Le libellé se posait jusqu'ici au milieu GÉOMÉTRIQUE des deux extrémités,
+ * un point qui n'appartient pas à la courbe — d'où des libellés atterrissant
+ * sur un bloc sans rapport (« s'acquiert par » dans sa capture). Il suit
+ * désormais la courbe, et s'écarte s'il tombe sur un bloc.
+ */
+function calculerTraceLien(sourceId, cibleId) {
+    var obstacles = obstaclesPourLien(sourceId, cibleId);
+
+    // ── 1. La meilleure paire de ports ────────────────────────────────
+    var meilleur = null;
+    for (var a = 0; a < LIEN_PORTS.length; a++) {
+        for (var b = 0; b < LIEN_PORTS.length; b++) {
+            var q1 = getPortPosition(sourceId, LIEN_PORTS[a]);
+            var q2 = getPortPosition(cibleId, LIEN_PORTS[b]);
+            var d1 = _directionPort(LIEN_PORTS[a]);
+            var d2 = _directionPort(LIEN_PORTS[b]);
+            var pts = [q1, q2];
+            var ech = _echantillonner(pts, d1, d2);
+            var croise = _traversees(ech, obstacles);
+            // La longueur départage à égalité de traversées : sans elle, un
+            // tracé qui fait le tour de la carte vaudrait un tracé direct.
+            var score = croise * 100000 + _longueur(ech);
+            if (!meilleur || score < meilleur.score) {
+                meilleur = { score: score, croise: croise, points: pts, d1: d1, d2: d2, ech: ech };
+            }
+        }
+    }
+    if (!meilleur) return null;
+
+    // ── 2. Dévier, si et seulement si rien n'est libre ────────────────
+    if (meilleur.croise > 0) {
+        var devie = _devier(meilleur, obstacles);
+        if (devie && devie.croise < meilleur.croise) meilleur = devie;
+    }
+
+
+    return {
+        d: cheminLisse(meilleur.points, meilleur.d1, meilleur.d2),
+        p1: meilleur.points[0],
+        p2: meilleur.points[meilleur.points.length - 1],
+        etiquette: _pointEtiquette(meilleur.ech, obstacles),
+        traversees: meilleur.croise
+    };
+}
+
+/**
+ * Ajoute UN point de passage pour éviter ce qui gêne.
+ *
+ * On essaie les quatre côtés de la boîte englobant les obstacles traversés et
+ * on garde le meilleur. Un seul point suffit dans la quasi-totalité des cas
+ * réels ; en empiler davantage produirait des méandres illisibles, ce qui
+ * remplacerait un défaut par un autre.
+ */
+function _devier(candidat, obstacles) {
+    var p1 = candidat.points[0];
+    var p2 = candidat.points[candidat.points.length - 1];
+    var milieuX = (p1.x + p2.x) / 2, milieuY = (p1.y + p2.y) / 2;
+    var ECART = 16;
+
+    var quiGene = function(ech) {
+        return obstacles.filter(function(o) {
+            for (var e = 0; e < ech.length; e++) {
+                if (_dansRect(ech[e].x, ech[e].y, o)) return true;
+            }
+            return false;
+        });
+    };
+
+    // ⚠ L'OBSTRUCTION S'ACCUMULE D'UN ESSAI À L'AUTRE, et c'est LE point.
+    // Une première version calculait le détour autour des seuls blocs
+    // traversés : contourner deux blocs d'un mur fait atterrir sur leurs
+    // VOISINS, et le lien traversait toujours. Mesuré au navigateur sur un mur
+    // de quatorze blocs sans interstice — la déviation s'y déclenchait et
+    // n'améliorait rien. En gardant tout ce qui a gêné jusqu'ici, la boîte à
+    // contourner grossit jusqu'à couvrir l'obstruction entière.
+    var accumules = quiGene(candidat.ech);
+    if (!accumules.length) return null;
+
+    var meilleur = null;
+    for (var essai = 0; essai < 4; essai++) {
+        var bx1 = Math.min.apply(null, accumules.map(function(o) { return o.x1; }));
+        var by1 = Math.min.apply(null, accumules.map(function(o) { return o.y1; }));
+        var bx2 = Math.max.apply(null, accumules.map(function(o) { return o.x2; }));
+        var by2 = Math.max.apply(null, accumules.map(function(o) { return o.y2; }));
+
+        // UN point de passage, pour les obstructions étroites…
+        var candidats = [
+            [{ x: bx1 - ECART, y: milieuY }],   // par la gauche
+            [{ x: bx2 + ECART, y: milieuY }],   // par la droite
+            [{ x: milieuX, y: by1 - ECART }],   // par le haut
+            [{ x: milieuX, y: by2 + ECART }]    // par le bas
+        ];
+
+        // …et DEUX points, aux coins, pour les contourner vraiment.
+        //
+        // ⚠ UN SEUL POINT NE CONTOURNE PAS UNE BOÎTE. Mesuré au navigateur :
+        // sur un mur de quatorze blocs, le point « par le haut » est posé au
+        // MILIEU horizontal de l'obstruction — le lien montait au-dessus puis
+        // replongeait aussitôt dedans. Il faut monter, TRAVERSER en longeant,
+        // puis redescendre : c'est ce que disent les deux coins.
+        //
+        // Les coins sont ordonnés du plus proche de la source au plus proche
+        // de la cible : c'est ce qui rend le sens du contournement correct
+        // quel que soit le côté d'où l'on vient, sans avoir à le tester.
+        var parProximite = function(a, b) {
+            return Math.hypot(a.x - p1.x, a.y - p1.y) - Math.hypot(b.x - p1.x, b.y - p1.y);
+        };
+        candidats.push([{ x: bx1 - ECART, y: by1 - ECART }, { x: bx2 + ECART, y: by1 - ECART }].sort(parProximite));
+        candidats.push([{ x: bx1 - ECART, y: by2 + ECART }, { x: bx2 + ECART, y: by2 + ECART }].sort(parProximite));
+        candidats.push([{ x: bx1 - ECART, y: by1 - ECART }, { x: bx1 - ECART, y: by2 + ECART }].sort(parProximite));
+        candidats.push([{ x: bx2 + ECART, y: by1 - ECART }, { x: bx2 + ECART, y: by2 + ECART }].sort(parProximite));
+
+        var nouveaux = [];
+        for (var i = 0; i < candidats.length; i++) {
+            var pts = [p1].concat(candidats[i], [p2]);
+            var ech = _echantillonner(pts, candidat.d1, candidat.d2);
+            var croise = _traversees(ech, obstacles);
+            var score = croise * 100000 + _longueur(ech);
+            if (!meilleur || score < meilleur.score) {
+                meilleur = { score: score, croise: croise, points: pts, d1: candidat.d1, d2: candidat.d2, ech: ech };
+            }
+            if (croise > 0) nouveaux = nouveaux.concat(quiGene(ech));
+        }
+
+        if (meilleur.croise === 0) break;
+
+        // Grossir l'obstruction avec ce qui vient de gêner. Si rien de neuf
+        // n'apparaît, un essai de plus donnerait la même boîte : on s'arrête.
+        var avant = accumules.length;
+        for (var k = 0; k < nouveaux.length; k++) {
+            if (accumules.indexOf(nouveaux[k]) === -1) accumules.push(nouveaux[k]);
+        }
+        if (accumules.length === avant) break;
+    }
+    return meilleur;
+}
+
+/** Un point de la courbe où poser le libellé, en évitant les blocs. */
+function _pointEtiquette(echantillons, obstacles) {
+    if (!echantillons.length) return { x: 0, y: 0 };
+    var milieu = Math.floor(echantillons.length / 2);
+    // On part du milieu et on s'écarte de part et d'autre jusqu'à trouver un
+    // point libre : le milieu reste le choix par défaut, ce n'est un compromis
+    // que lorsqu'il tombe effectivement sur un bloc.
+    for (var pas = 0; pas < milieu; pas++) {
+        for (var s = 0; s < 2; s++) {
+            var i = milieu + (s === 0 ? pas : -pas);
+            if (i < 0 || i >= echantillons.length) continue;
+            var pt = echantillons[i];
+            var libre = true;
+            for (var o = 0; o < obstacles.length; o++) {
+                if (_dansRect(pt.x, pt.y, obstacles[o])) { libre = false; break; }
+            }
+            if (libre) return pt;
+        }
+    }
+    return echantillons[milieu];
+}
+
 function dessinerLien(donnees) {
     var sourceEl = document.getElementById(donnees.source);
     var cibleEl = document.getElementById(donnees.cible);
     if (!sourceEl || !cibleEl) return;
 
-    var ports = trouverMeilleursPorts(donnees.source, donnees.cible);
-    var p1 = getPortPosition(donnees.source, ports.portSource);
-    var p2 = getPortPosition(donnees.cible, ports.portCible);
-
-    var dx = p2.x - p1.x;
-    var dy = p2.y - p1.y;
-    var dist = Math.sqrt(dx * dx + dy * dy);
-    var tension = Math.max(Math.min(dist * 0.35, 80), 30);
-    var cx1 = ports.portSource === 'droite' ? p1.x + tension : ports.portSource === 'gauche' ? p1.x - tension : p1.x;
-    var cy1 = ports.portSource === 'bas' ? p1.y + tension : ports.portSource === 'haut' ? p1.y - tension : p1.y;
-    var cx2 = ports.portCible === 'droite' ? p2.x + tension : ports.portCible === 'gauche' ? p2.x - tension : p2.x;
-    var cy2 = ports.portCible === 'bas' ? p2.y + tension : ports.portCible === 'haut' ? p2.y - tension : p2.y;
+    var trace = calculerTraceLien(donnees.source, donnees.cible);
+    if (!trace) return;
+    var p1 = trace.p1;
+    var p2 = trace.p2;
 
     var ancien = document.getElementById(donnees.id + '-groupe');
     if (ancien) ancien.remove();
@@ -3465,7 +3871,7 @@ function dessinerLien(donnees) {
 
     var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.id = donnees.id;
-    path.setAttribute('d', 'M ' + p1.x + ' ' + p1.y + ' C ' + cx1 + ' ' + cy1 + ', ' + cx2 + ' ' + cy2 + ', ' + p2.x + ' ' + p2.y);
+    path.setAttribute('d', trace.d);
     path.setAttribute('class', 'planif-lien');
 
     var sourceData = etat.noeuds.get(donnees.source);
@@ -3501,8 +3907,12 @@ function dessinerLien(donnees) {
 
     var typeLienConfig = trouverConfigLien(donnees.type);
     if (typeLienConfig) {
-        var mx = (p1.x + p2.x) / 2;
-        var my = (p1.y + p2.y) / 2;
+        // Le libellé suit la COURBE (et s'écarte s'il tombe sur un bloc). Il
+        // se posait au milieu géométrique des deux extrémités — un point qui
+        // n'appartient pas au tracé, d'où des libellés atterrissant sur un
+        // bloc sans rapport.
+        var mx = trace.etiquette.x;
+        var my = trace.etiquette.y;
         // Fond blanc derrière le libellé pour la lisibilité
         var bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         bg.setAttribute('class', 'planif-lien-label-bg');
@@ -3693,12 +4103,27 @@ function afficherMenuLienExistant(x, y, lienId) {
         verbesPertinents.push(verbeNormalise);
     }
 
+    // TOUS LES AUTRES VERBES, sous les pertinents (15 août 2026).
+    //
+    // ⚠ LE MENU ÉTAIT UN CUL-DE-SAC. Pour une résolution « verticale » il
+    // n'offrait qu'UN verbe : `verbesPertinents = [resolution.verbe]`. Quand
+    // ce verbe unique était le mauvais — le cas de l'Ouverture qui réactive —
+    // l'utilisateur n'avait AUCUN moyen de le corriger. Un défaut de la table
+    // devenait une impasse pour lui.
+    //
+    // ⮕ Arbitrage de Grégoire : garder le guidage (les pertinents d'abord,
+    // c'est le cadre théorique qui parle) mais ne jamais bloquer. Ce qui suit
+    // le séparateur est le reste des verbes, dans l'ordre du référentiel.
+    var autresVerbes = TYPES_LIENS
+        .map(function(t) { return t.id; })
+        .filter(function(id) { return verbesPertinents.indexOf(id) === -1; });
+
     menuLien.innerHTML = '';
 
     // Titre du menu
     var titre = document.createElement('div');
     titre.style.cssText = 'padding: 4px 8px 2px; font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;';
-    titre.textContent = 'Verbe du lien';
+    titre.textContent = verbesPertinents.length > 1 ? 'Verbes suggérés' : 'Verbe suggéré';
     menuLien.appendChild(titre);
 
     // Boutons pour chaque verbe pertinent
@@ -3719,6 +4144,38 @@ function afficherMenuLienExistant(x, y, lienId) {
             });
             menuLien.appendChild(btn);
         })(verbesPertinents[vi]);
+    }
+
+    // Les autres verbes, sous leur propre titre : le guidage reste lisible,
+    // mais la sortie de secours existe.
+    if (autresVerbes.length) {
+        var sepAutres = document.createElement('hr');
+        sepAutres.style.cssText = 'border: none; border-top: 1px solid #e2e8f0; margin: 4px 0;';
+        menuLien.appendChild(sepAutres);
+
+        var titreAutres = document.createElement('div');
+        titreAutres.style.cssText = 'padding: 4px 8px 2px; font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;';
+        titreAutres.textContent = 'Autres verbes';
+        menuLien.appendChild(titreAutres);
+
+        for (var vj = 0; vj < autresVerbes.length; vj++) {
+            (function(verbeId) {
+                var cfg = trouverConfigLien(verbeId);
+                var btn = document.createElement('button');
+                btn.textContent = cfg ? cfg.label : verbeId;
+                if (lien.type === verbeId) btn.classList.add('actif');
+                btn.addEventListener('click', function() {
+                    if (lien.type !== verbeId) {
+                        enregistrerPourUndo();
+                        lien.type = verbeId;
+                        dessinerLien(lien);
+                        sauvegarder();
+                    }
+                    fermerMenuLien();
+                });
+                menuLien.appendChild(btn);
+            })(autresVerbes[vj]);
+        }
     }
 
     var sep = document.createElement('hr');
@@ -10216,6 +10673,14 @@ window.planificationCarte = {
     // moteur pur — pas de DOM, donc éprouvable en bac à sable ; les trois
     // autres sont exposées pour que la sentinelle observe l'état réel plutôt
     // que de le reconstituer.
+    // Routage des liens (15 août 2026). `calculerTraceLien` est le point
+    // d'entrée : il rend le chemin SVG, les extrémités, le point du libellé
+    // et le NOMBRE de blocs encore traversés — c'est ce compte que la
+    // sentinelle observe, plutôt que la forme du chemin.
+    calculerTraceLien: calculerTraceLien,
+    obstaclesPourLien: obstaclesPourLien,
+    resoudreVerbe: resoudreVerbe,
+    TYPES_REACTIVATION: TYPES_REACTIVATION,
     chercherDansCarte: chercherDansCarte,
     normaliserRecherche: normaliserRecherche,
     champsCherchables: champsCherchables,

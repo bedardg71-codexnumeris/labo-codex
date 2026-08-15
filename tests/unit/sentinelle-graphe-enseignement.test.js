@@ -112,11 +112,51 @@ describe('correctif #415 · les nœuds d’enseignement explicite se relient enf
     });
 
     it('les cinq étapes de la méthode sont couvertes, pas seulement la modélisation', () => {
+        // ⚠ L'INVARIANT DE #415 EST « ELLES SE RELIENT », PAS « ELLES PORTENT
+        // CE VERBE-LÀ ». Le verbe unique était la CONSÉQUENCE du repli sur la
+        // famille, pas le propos du correctif : le défaut d'origine était un
+        // `null`, c'est-à-dire « ce lien n'est pas possible ».
+        // Aucune des cinq ne doit donc rendre null — c'est ce qui est verrouillé.
         for (const etape of ['ouverture', 'modelisation', 'pratique-guidee', 'pratique-autonome', 'cloture']) {
             const r = verbeEntre(api, 'conceptuelle', etape);
             expect(r, `conceptuelle → ${etape}`).not.toBeNull();
-            expect(r.verbe, `conceptuelle → ${etape}`).toBe('s_acquiert_par');
+            expect(r.type, `conceptuelle → ${etape}`).toBe('vertical');
         }
+    });
+
+    it('⚠ l’OUVERTURE fait exception : on y RÉACTIVE, on n’y acquiert pas', () => {
+        // Retour terrain de Grégoire, 15 août 2026 : « comme j'ai en Ouverture
+        // une révision de concepts de la leçon précédente, il faudrait revoir
+        // le verbe ». Une connaissance reliée à une Ouverture recevait
+        // « s'acquiert par » — le verbe de l'acquisition INITIALE — alors
+        // qu'elle est déjà acquise et qu'on la remet en service.
+        expect(verbeEntre(api, 'conceptuelle', 'ouverture').verbe).toBe('se_reactive_dans');
+
+        // ⏳ « Révision et réutilisation » a la MÊME nature et garde pourtant
+        // « s'acquiert par » : huit paires explicites de `VERBES_AUTO` le
+        // disent, donc quelqu'un a tranché dans l'autre sens en connaissance
+        // de cause. On verrouille l'état ACTUEL plutôt que de faire comme si
+        // la question était réglée — elle est posée à Grégoire.
+        expect(verbeEntre(api, 'conceptuelle', 'revision').verbe).toBe('s_acquiert_par');
+    });
+
+    it('les QUATRE autres étapes gardent « s’acquiert par »', () => {
+        // La contrepartie du cas précédent : l'exception doit rester une
+        // exception. Une Modélisation ou une Pratique guidée fait bien
+        // ACQUÉRIR — c'est là que la connaissance se construit.
+        for (const etape of ['modelisation', 'pratique-guidee', 'pratique-autonome', 'cloture']) {
+            expect(verbeEntre(api, 'conceptuelle', etape).verbe, `conceptuelle → ${etape}`)
+                .toBe('s_acquiert_par');
+        }
+    });
+
+    it('la réactivation INVERSE aussi la direction du lien', () => {
+        // Quel que soit le sens du geste, le lien se pose de la connaissance
+        // vers l'étape — même règle que pour « s'acquiert par ».
+        const r = verbeEntre(api, 'ouverture', 'metacognitive');
+        expect(r.verbe).toBe('se_reactive_dans');
+        expect(r.source).toBe('n-cbl');   // la connaissance devient la source
+        expect(r.cible).toBe('n-src');
     });
 
     it('le sens inverse marche aussi, et il INVERSE la direction du lien', () => {
