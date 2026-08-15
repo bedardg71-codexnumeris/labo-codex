@@ -12,9 +12,9 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | **`main`** |
-| **Version** | **1.83.1** — build `0815-1244` |
+| **Version** | **1.83.2** — build `0815-1255` |
 | **Travail en avance sur `main`** | **aucun** |
-| **Dernière mise à jour** | 15 août 2026 — recherche dans la Carte d'alignement (1.81.0), deux correctifs sur retour terrain (1.81.1 teinte du halo, 1.81.2 barre rognée sur iPad), **porte terrain rejouée et close à 45/46**, puis routage des liens + verbe « se réactive dans » (1.82.0) son réglage dans Actions (1.83.0) et « Révision » passée à « se réactive dans » (1.83.1). Vitest 2442/2442 |
+| **Dernière mise à jour** | 15 août 2026 — recherche dans la Carte d'alignement (1.81.0), deux correctifs sur retour terrain (1.81.1 teinte du halo, 1.81.2 barre rognée sur iPad), **porte terrain rejouée et close à 45/46**, puis routage des liens + verbe « se réactive dans » (1.82.0) son réglage dans Actions (1.83.0) « Révision » passée à « se réactive dans » (1.83.1) et bascule des liens existants (1.83.2). Vitest 2448/2448 |
 
 ⚠⚠ **AVANT TOUTE FUSION EN CONTENEUR : `git fetch --unshallow origin`.** Le clone
 du conteneur est **shallow**, et son `main` LOCAL peut pointer des semaines en
@@ -33,12 +33,11 @@ commit d'avance, poussé la veille au soir depuis une session cloud. Le rituel d
 début l'a attrapé ; il ne l'aurait pas fait sans `git fetch`.
 
 ⏳ **CE QUI RESTE DÛ** :
-- ⏳ **LES LIENS DÉJÀ ENREGISTRÉS GARDENT LEUR ANCIEN VERBE.** Le verbe
-  automatique joue à la CRÉATION d'un lien, pas rétroactivement : un lien posé
-  avant le 15 août entre une connaissance et une Ouverture ou une Révision
-  affiche encore « s'acquiert par ». **Aucune migration n'a été écrite** — c'est
-  sa donnée, et le menu du lien (qui offre désormais tous les verbes) corrige
-  d'un clic. Si sa carte en compte beaucoup, une migration reste à proposer.
+- ▣ **BASCULE DES LIENS EXISTANTS : LIVRÉE en 1.83.2.** Elle joue au chargement
+  de chaque carte, une seule fois, et se DIT (console + toast). Elle ne touche
+  ni la direction des liens ni aucun autre verbe. ⏳ **À observer sur sa vraie
+  carte** : le compte annoncé au premier chargement doit correspondre à ce
+  qu'il attend — c'est la seule vérification qui reste, et elle est de son côté.
 - ⏳ **NON ÉPROUVÉ : la BEAUTÉ des tracés de liens sur sa vraie carte.** Le
   routage garantit qu'un lien ne traverse pas de bloc (mesuré : 58/60 libres sur
   carte dense) ; il ne garantit pas que le détour soit joli. Seul son œil peut

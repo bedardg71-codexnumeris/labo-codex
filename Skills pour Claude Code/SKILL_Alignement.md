@@ -342,10 +342,24 @@ aurait rendu le changement sans effet — le genre de correctif qui a l'air fait
 et ne fait rien. Les deux paires `révision ↔ évaluation` restent : une révision
 se vérifie bien par une évaluation.
 
-⚠ **Les liens DÉJÀ ENREGISTRÉS gardent le verbe qu'ils portaient.** Le verbe
-automatique s'applique à la CRÉATION d'un lien, pas rétroactivement. Un lien
-posé avant le 15 août entre une connaissance et une Ouverture affiche donc
-encore « s'acquiert par » — il se corrige d'un clic dans le menu du lien.
+▣ **Les liens DÉJÀ ENREGISTRÉS sont basculés au chargement de la carte**
+(15 août 2026, demande de Grégoire). Le verbe automatique ne joue qu'à la
+CRÉATION d'un lien : sans cette bascule, une carte porterait deux verbes pour la
+même relation selon la date où chaque lien a été tracé. La bascule vit dans la
+boucle de migration de `chargerCarte`, avec les autres.
+
+Trois bornes, et elles sont testées :
+
+- **elle ne touche QUE** les liens portant aujourd'hui « s'acquiert par » ET
+  dont le couple résout maintenant « se réactive dans » ;
+- **elle ne touche PAS à la direction**, même quand la résolution la dirait
+  inversée : retourner une flèche qu'il a posée est une transformation d'un
+  autre ordre que corriger un libellé, et elle se verrait moins ;
+- **elle se DIT** — compte + liste des liens en console, et un toast à l'écran.
+  Une réécriture silencieuse de ses données est interdite, même étroite.
+
+Idempotente par construction : après passage le verbe n'est plus « s'acquiert
+par », donc rien ne rebascule et plus rien n'est annoncé.
 
 ⚠ **Le menu d'un lien offre TOUS les verbes**, sous ceux qu'il suggère. Avant,
 une résolution « verticale » n'en offrait qu'un : quand ce verbe unique était le

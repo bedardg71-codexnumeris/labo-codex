@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -41,10 +41,14 @@ let api;
  * tous les blocs sont au même point : les tests passeraient sans rien
  * exercer. La taille des blocs est ce qui rend la géométrie observable.
  */
-function monterModule(tailles) {
+function monterModule(opts) {
     const elements = new Map();
+    // Ce que le module ajoute au <body> : c'est là que passent les toasts.
+    // Un `appendChild` qui ne fait rien rendrait le toast INOBSERVABLE, et un
+    // test qui ne peut pas le voir ne peut pas le protéger.
+    const ajoutesAuBody = [];
     const faire = (id) => {
-        const t = (tailles && tailles[id]) || { w: 160, h: 60 };
+        const t = (opts && opts.tailles && opts.tailles[id]) || { w: 160, h: 60 };
         return {
             id, style: {}, dataset: {}, innerHTML: '', textContent: '',
             offsetWidth: t.w, offsetHeight: t.h,
@@ -61,6 +65,11 @@ function monterModule(tailles) {
         cle: (k) => `a2026_${k}`,
         echapperHtml: (t) => String(t ?? ''),
         requestAnimationFrame: (fn) => { fn(); return 0; },
+        // Le rendu des badges resout des couleurs CSS : sans ce bouchon,
+        // tout chargement de carte casse sur « getComputedStyle is not defined ».
+        getComputedStyle: () => ({ getPropertyValue: () => '' }),
+        setTimeout: () => 0,
+        clearTimeout: () => {},
         document: {
             getElementById: (id) => {
                 if (!api || !api.etat.noeuds.has(id)) return null;
@@ -71,7 +80,7 @@ function monterModule(tailles) {
             addEventListener: () => {},
             createElement: () => faire('x'), createElementNS: () => faire('x'),
             execCommand: () => true,
-            body: { appendChild() {}, removeChild() {} }
+            body: { appendChild(el) { ajoutesAuBody.push(el); }, removeChild() {} }
         }
     });
     win.cle = (k) => `a2026_${k}`;
@@ -80,7 +89,11 @@ function monterModule(tailles) {
         sauvegarderCarte: () => {}, chargerCarte: () => null
     };
     api = win.planificationCarte;
-    return api;
+    win._ajoutesAuBody = ajoutesAuBody;
+    // On rend `win` (et non `api`) : les cas de bout en bout ont besoin de
+    // remplacer `planificationDonnees` DANS le bac à sable, et de relire ce
+    // qui a été ajouté au <body>.
+    return win;
 }
 
 function poser(id, type, x, y, extra) {
@@ -379,6 +392,150 @@ describe('liens · D — on RÉACTIVE dans une Ouverture, on n’y acquiert pas'
         // se vérifie bien par une évaluation : ce verbe n'a jamais été en cause,
         // et l'emporter au passage aurait été un dommage collatéral silencieux.
         expect(verbe('revision', 'evaluation').verbe).toBe('se_verifie_par');
+    });
+});
+
+// -----------------------------------------------------------------------
+describe('liens · D bis — la bascule des liens DÉJÀ enregistrés', () => {
+    // ⚠ CETTE BASCULE RÉÉCRIT SES DONNÉES. Elle est étroite et réversible d'un
+    // clic, mais elle touche ce qu'il a tracé : ce sont les cas qui disent ce
+    // qu'elle a le droit de transformer — et surtout ce qu'elle n'a pas le
+    // droit de toucher.
+    const bloc = () => source.slice(
+        source.indexOf("if (l.type === 's_acquiert_par') {"),
+        source.indexOf("etat.liens.set(l.id, l);")
+    );
+
+    it('elle ne touche QUE les liens portant « s’acquiert par »', () => {
+        const b = bloc();
+        expect(b.length).toBeGreaterThan(50);
+        expect(b, 'la condition d’entrée est le verbe actuel').toContain("l.type === 's_acquiert_par'");
+        expect(b, 'et la résolution doit dire « réactive »').toContain("reso.verbe === 'se_reactive_dans'");
+    });
+
+    it('⚠ elle NE TOUCHE PAS à la direction du lien', () => {
+        // `resoudreVerbe` peut dire que la direction devrait être inversée.
+        // Retourner une flèche qu'il a posée est une transformation d'un autre
+        // ordre que corriger un libellé — et elle se verrait moins.
+        const b = bloc();
+        expect(b).not.toContain('l.source =');
+        expect(b).not.toContain('l.cible =');
+    });
+
+    it('elle est IDEMPOTENTE par construction', () => {
+        // Après passage, le verbe n'est plus « s'acquiert par » : la condition
+        // ne mord plus. Rejouer le chargement ne rebascule rien — ce qui rend
+        // aussi le compte rendu silencieux à partir du second chargement.
+        const b = bloc();
+        expect(b).toContain("l.type = 'se_reactive_dans'");
+        expect(b).toContain("l.type === 's_acquiert_par'");
+    });
+
+    it('⚠ BOUT EN BOUT : charger une carte d’AVANT bascule les bons liens, et le DIT', () => {
+        // ⚠ CE CAS REMPLACE DES ASSERTIONS SUR LA SOURCE, et le break-test a
+        // dit pourquoi : neutraliser un appel (`void 0 &&`, `if (false)`)
+        // laisse le TEXTE en place. Un `toContain('console.warn')` reste donc
+        // vert alors que plus rien n'est annoncé — et une réécriture
+        // silencieuse des données est exactement ce qu'on veut interdire.
+        // On charge donc une vraie carte et on observe ce qui se passe.
+        const dits = [];
+        const sauvees = [];
+        const carte = {
+            compteur: 9, compteurLiens: 9,
+            noeuds: [
+                { id: 'planif-k1', type: 'conceptuelle', titre: 'Paratexte', x: 0, y: 0, parent: null, enfants: [], metadata: {} },
+                { id: 'planif-o1', type: 'ouverture', titre: 'Rappel', x: 500, y: 0, parent: null, enfants: [], metadata: {} },
+                { id: 'planif-k2', type: 'procedurale', titre: 'Annoter', x: 0, y: 300, parent: null, enfants: [], metadata: {} },
+                { id: 'planif-r1', type: 'revision', titre: 'Transfert', x: 500, y: 300, parent: null, enfants: [], metadata: {} },
+                { id: 'planif-k3', type: 'factuelle', titre: 'Marqueurs', x: 0, y: 600, parent: null, enfants: [], metadata: {} },
+                { id: 'planif-m1', type: 'modelisation', titre: 'Modelage', x: 500, y: 600, parent: null, enfants: [], metadata: {} }
+            ],
+            liens: [
+                { id: 'planif-L1', source: 'planif-k1', cible: 'planif-o1', type: 's_acquiert_par' },
+                { id: 'planif-L2', source: 'planif-k2', cible: 'planif-r1', type: 's_acquiert_par' },
+                { id: 'planif-L3', source: 'planif-k3', cible: 'planif-m1', type: 's_acquiert_par' }
+            ]
+        };
+        // ⚠ ON ESPIONNE LA MÉTHODE, on ne remplace pas l'objet. Le module
+        // capture `console` comme paramètre au chargement : le réassigner sur
+        // window n'a aucun effet, et le test conclurait « rien n'a été
+        // annoncé » alors qu'il n'écoutait simplement pas.
+        const win = monterModule();
+        const espion = vi.spyOn(console, 'warn').mockImplementation((...a) => dits.push(a.join(' ')));
+        win.planificationDonnees = {
+            getIndex: () => ({ active: 'c1', cartes: [{ id: 'c1', nom: 'T' }] }),
+            chargerCarte: () => JSON.parse(JSON.stringify(carte)),
+            sauvegarderCarte: (id, d) => sauvees.push(d)
+        };
+        api.chargerCarte('c1');
+        espion.mockRestore();
+
+        const lien = (id) => api.etat.liens.get(id).type;
+        expect(lien('planif-L1'), 'connaissance → Ouverture').toBe('se_reactive_dans');
+        expect(lien('planif-L2'), 'connaissance → Révision').toBe('se_reactive_dans');
+        expect(lien('planif-L3'), 'connaissance → Modélisation NE bouge PAS').toBe('s_acquiert_par');
+
+        // La direction est intacte : on corrige un libellé, on ne retourne
+        // pas une flèche qu'il a posée.
+        expect(api.etat.liens.get('planif-L1').source).toBe('planif-k1');
+        expect(api.etat.liens.get('planif-L1').cible).toBe('planif-o1');
+
+        // Ça se DIT, et ça dit QUOI : le compte, puis chaque lien par son titre.
+        const rapport = dits.join('\n');
+        expect(rapport, 'le compte rendu doit exister').toMatch(/2 lien\(s\) passés/);
+        expect(rapport, 'et nommer les liens, pas seulement les compter').toContain('Paratexte');
+        expect(rapport).toContain('Rappel');
+
+        // Un signal À L'ÉCRAN aussi : la console ne suffit pas, il ne l'ouvre
+        // pas. Sans ça, la seule trace d'une réécriture de ses données serait
+        // dans un panneau qu'il ne regarde jamais.
+        const toasts = win._ajoutesAuBody.filter((e) => /toast/.test(e.className || ''));
+        expect(toasts.length, 'un toast doit annoncer la bascule').toBeGreaterThan(0);
+        expect(toasts.map((t) => t.textContent).join(' '), 'et porter le compte')
+            .toMatch(/2 liens? mis à jour/);
+
+        // Et c'est ÉCRIT, pas seulement en mémoire.
+        expect(sauvees.length, 'la carte doit être sauvegardée').toBeGreaterThan(0);
+        const ecrits = sauvees[sauvees.length - 1].liens;
+        expect(ecrits.find((l) => l.id === 'planif-L1').type).toBe('se_reactive_dans');
+        expect(ecrits.find((l) => l.id === 'planif-L3').type).toBe('s_acquiert_par');
+    });
+
+    it('⚠ … et un SECOND chargement ne rebascule ni ne réannonce rien', () => {
+        // L'idempotence n'est pas un détail : sans elle, il verrait le message
+        // à chaque ouverture de sa carte, pour un changement déjà fait.
+        const dits = [];
+        let carte = {
+            compteur: 9, compteurLiens: 9,
+            noeuds: [
+                { id: 'planif-k1', type: 'conceptuelle', titre: 'Paratexte', x: 0, y: 0, parent: null, enfants: [], metadata: {} },
+                { id: 'planif-o1', type: 'ouverture', titre: 'Rappel', x: 500, y: 0, parent: null, enfants: [], metadata: {} }
+            ],
+            liens: [{ id: 'planif-L1', source: 'planif-k1', cible: 'planif-o1', type: 's_acquiert_par' }]
+        };
+        const win = monterModule();
+        const espion = vi.spyOn(console, 'warn').mockImplementation((...a) => dits.push(a.join(' ')));
+        win.planificationDonnees = {
+            getIndex: () => ({ active: 'c1', cartes: [{ id: 'c1', nom: 'T' }] }),
+            chargerCarte: () => JSON.parse(JSON.stringify(carte)),
+            sauvegarderCarte: (id, d) => { carte = JSON.parse(JSON.stringify(d)); }
+        };
+        api.chargerCarte('c1');
+        expect(dits.filter((d) => /passés/.test(d)).length, 'annoncé une fois').toBe(1);
+
+        dits.length = 0;
+        api.chargerCarte('c1');
+        espion.mockRestore();
+        expect(api.etat.liens.get('planif-L1').type).toBe('se_reactive_dans');
+        expect(dits.filter((d) => /passés/.test(d)).length, 'plus rien à annoncer').toBe(0);
+    });
+
+    it('le changement est persisté, pas seulement mis en mémoire', () => {
+        // Muter l'état sans écrire, c'est perdre la bascule au rechargement —
+        // et la refaire à chaque ouverture, en réannonçant à chaque fois.
+        const b = bloc();
+        expect(b).toContain('liensModifies = true');
+        expect(source).toContain('if (liensModifies) sauvegarder();');
     });
 });
 

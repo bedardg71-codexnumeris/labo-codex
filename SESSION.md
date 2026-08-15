@@ -60,9 +60,23 @@
      `revision>evaluation` ne change rien, le repli sur la famille rend le même
      verbe. Muté sur le VERBE, elle rougit. **Une mutation inopérante fait
      croire qu'on a éprouvé une garde qu'on n'a pas éprouvée.**
-     ⏳ **Reste dû** : les liens DÉJÀ enregistrés gardent leur ancien verbe (le
-     verbe auto ne joue qu'à la création). Aucune migration écrite — c'est sa
-     donnée, et le menu corrige d'un clic.
+     ✅ **BASCULE DES LIENS EXISTANTS LIVRÉE** (1.83.2, à sa demande). Trois
+     bornes, toutes éprouvées : elle ne touche QUE « s'acquiert par » quand le
+     couple résout « se réactive dans » ; elle NE TOUCHE PAS à la direction
+     (retourner une flèche qu'il a posée est d'un autre ordre que corriger un
+     libellé, et se verrait moins) ; et elle SE DIT — compte, liste des liens
+     en console, toast à l'écran. Idempotente : rien ne rebascule au second
+     chargement, et plus rien n'est annoncé.
+
+     ⚠⚠ **DEUX DE MES GARDES NE POUVAIENT PAS VOIR CE QU'ELLES PROTÉGEAIENT.**
+     Elles lisaient la SOURCE (`toContain('console.warn')`) : neutraliser
+     l'appel (`void 0 &&`, `if (false)`) laisse le texte en place, donc le test
+     reste vert alors que plus rien n'est annoncé. Remplacées par un cas de
+     BOUT EN BOUT qui charge une vraie carte d'avant et observe ce qui se
+     passe. ⮕ Deux pièges de harnais au passage : le module capture `console`
+     comme PARAMÈTRE au chargement (le remplacer sur window n'a aucun effet —
+     il faut espionner la méthode), et mon faux `document.body.appendChild`
+     avalait le toast, le rendant inobservable.
      ===================================================================== -->
 
 <!-- =====================================================================
