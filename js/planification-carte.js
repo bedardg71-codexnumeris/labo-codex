@@ -1303,6 +1303,61 @@ var TYPES_ACTIVITE = ['expose', 'activite', 'soutien', 'revision',
     'ouverture', 'modelisation', 'pratique-guidee', 'pratique-autonome', 'cloture'];
 
 /**
+ * LES CINQ PHASES DE L'ENSEIGNEMENT EXPLICITE — et seulement elles.
+ *
+ * Besoin de Grégoire, 15 août : « quand je monte un alignement, il serait
+ * pratique de pouvoir changer de phase d'enseignement sans nécessairement
+ * créer un nouveau bloc et y coller le contenu ».
+ *
+ * ▣ POURQUOI CETTE BASCULE EST SÛRE, ET POURQUOI ELLE S'ARRÊTE ICI. Les cinq
+ * phases sont sœurs par construction (décision du 7 août : « FRÈRES
+ * D'ACTIVITÉ — mêmes contenants, même durée, mêmes liens »), et les trois
+ * tables du module le confirment : elles sont toutes dans `TYPES_ACTIVITE`,
+ * toutes dans `TYPES_AVEC_DUREE`, toutes dans `TYPES_SERVANTS_OBJECTIF`.
+ * Passer de l'une à l'autre ne peut donc ni perdre une durée, ni orpheliner un
+ * objectif servi, ni rendre un parent illégal.
+ *
+ * ⚠ CE N'EST PAS VRAI DE LA FAMILLE ENTIÈRE. `TYPES_ACTIVITE` contient aussi
+ * Exposé, Activité, Soutien et Révision — techniquement interchangeables, mais
+ * passer de « pratique autonome » à « exposé » n'est plus un changement de
+ * PHASE, c'est un changement de NATURE. Bornage décidé par Grégoire le 15 août.
+ *
+ * ⏳ Une conséquence assumée : les VERBES des liens déjà tracés ne sont pas
+ * réécrits. `resoudreVerbe` suggère selon le type, mais un verbe posé est une
+ * donnée de l'enseignant — le réécrire en douce à chaque bascule serait pire
+ * que de le laisser inexact. Cas concret : « se réactive dans » se suggère sur
+ * une Ouverture ; devenue Pratique guidée, le lien garde son verbe jusqu'à ce
+ * que Grégoire le change. Rien n'est cassé (les deux types sont des activités,
+ * donc tous les liens restent structurellement valides), seule la suggestion
+ * diverge.
+ */
+var PHASES_EE = ['ouverture', 'modelisation', 'pratique-guidee', 'pratique-autonome', 'cloture'];
+
+function estPhaseEE(type) {
+    return PHASES_EE.indexOf(type) !== -1;
+}
+
+/**
+ * Écriture — porte de sortie UNIQUE de la phase (même patron que
+ * `definirSemaineLecon` et `definirObjectifsLecon`).
+ * Refuse tout ce qui n'est pas une phase → phase : la borne est DANS la porte,
+ * pas seulement dans l'interface qui l'appelle.
+ * @returns {boolean} true si le nœud existait et a changé de phase
+ */
+function definirPhaseEE(noeudId, nouveauType) {
+    var n = etat.noeuds.get(noeudId);
+    if (!n || !estPhaseEE(n.type) || !estPhaseEE(nouveauType)) return false;
+    if (n.type === nouveauType) return false;
+    enregistrerPourUndo();
+    n.type = nouveauType;
+    // Un clone est une INSTANCE LIÉE : sa phase suit celle de sa source, comme
+    // son titre et sa durée.
+    propagerModification(noeudId, 'type', nouveauType);
+    sauvegarder();
+    return true;
+}
+
+/**
  * Ce qui CONSOMME DU TEMPS DE CLASSE (8 août 2026).
  *
  * ⚠ Liste SÉPARÉE de `TYPES_ACTIVITE`, et non un ajout dedans. Les deux disent
@@ -4987,11 +5042,52 @@ function objectifsLeconHTML(n) {
  * l'en-tête est visible par construction, quel que soit le chemin qui a créé
  * le nœud. Sentinelle : `sentinelle-carte-rendu-unique-437`.
  */
+/**
+ * L'IDENTITÉ DU BLOC DANS SON EN-TÊTE — libellé inerte, ou poignée + sélecteur.
+ *
+ * ⚠⚠ LA POIGNÉE N'EST PAS UNE DÉCORATION : ELLE REMPLACE UNE PRISE QU'ON RETIRE.
+ * Le glisser d'un bloc part d'un `pointerdown` sur le bloc ENTIER, avec deux
+ * exceptions seulement (les ports, et tout ce qui est `contenteditable`). Le
+ * libellé de type est donc, aujourd'hui, une surface de PRISE — inerte, donc
+ * saisissable. Un `<select>` ne peut pas l'être : il doit couper la propagation
+ * du `pointerdown`, comme le font déjà les sélecteurs de semaine et de rang.
+ *
+ * MESURÉ sur un bloc de 230 px : en-tête utile 174 px, libellé « Pratique
+ * autonome » 115 px, boîte de durée 53 px — soit ZÉRO pixel nu. Et le titre en
+ * dessous est `contenteditable`, donc exclu du glisser lui aussi. Échanger le
+ * libellé contre un sélecteur SANS rien rendre en retour laisserait un bloc
+ * dont l'en-tête entier ne se saisit plus.
+ * ⮕ D'où la poignée, et d'où le fait qu'elle NE coupe PAS la propagation :
+ * c'est le seul élément de l'en-tête qui doit laisser passer le geste.
+ *
+ * (Option retenue par Grégoire le 15 août parmi trois. Bénéfice au-delà de ce
+ * chantier : la prise d'un bloc était implicite, et chaque contrôle ajouté à
+ * l'en-tête l'a grignotée sans que personne ne le décide.)
+ */
+function enTeteIdentiteHTML(n) {
+    if (!estPhaseEE(n.type)) {
+        return '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(n) + '">' +
+            obtenirLabelNoeud(n) + '</span>';
+    }
+    var html = '<span class="planif-noeud-prise" title="Glisser pour déplacer ce bloc"' +
+        ' aria-hidden="true">⠿</span>' +
+        '<select class="planif-noeud-phase" data-phase-noeud="' + echapperHtml(n.id) + '"' +
+        ' style="color: ' + obtenirCouleurNoeud(n) + '"' +
+        ' title="Phase d’enseignement explicite"' +
+        ' aria-label="Phase d’enseignement explicite de ce bloc">';
+    for (var i = 0; i < PHASES_EE.length; i++) {
+        var t = PHASES_EE[i];
+        html += '<option value="' + t + '"' + (t === n.type ? ' selected' : '') + '>' +
+            echapperHtml(TYPES[t].label) + '</option>';
+    }
+    return html + '</select>';
+}
+
 function contenuNoeudHTML(n) {
     var estConteneur = !!(TYPES[n.type] && TYPES[n.type].conteneur);
     var enTete =
         '<div class="planif-noeud-entete">' +
-            '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(n) + '">' + obtenirLabelNoeud(n) + '</span>' +
+            enTeteIdentiteHTML(n) +
             (estConteneur
                 ? compteurDureeHTML(n) + selecteurSemaineHTML(n) + selecteurRangSeanceHTML(n) + badgeObjectifHTML(n)
                 : dureeControleHTML(n)) +
@@ -5288,6 +5384,19 @@ function chargerCarte(carteId) {
             n.enfants = n.enfants.map(function(eid) {
                 return eid.startsWith('planif-') ? eid : 'planif-' + eid;
             });
+            // ⚠ ET LE LIEN DE CLONAGE — oublié jusqu'au 15 août 2026. Trouvé en
+            // écrivant la sentinelle de la bascule de phase : le cas chargeait
+            // une carte contenant un clone et l'assertion tombait sur un
+            // `cloneSourceId` resté à l'ancien id.
+            // ⮕ Conséquence sur une carte à l'ANCIEN format : le clone pointe
+            // vers un id qui n'existe plus, `_reconstruireCloneIndex` l'indexe
+            // sous cette clé morte, et `trouverClones` ne le retrouve jamais.
+            // Les instances liées cessent alors de se propager — SANS message,
+            // sans rien de cassé à l'écran. On ne s'en aperçoit qu'en modifiant
+            // un bloc et en constatant que sa copie n'a pas suivi.
+            if (n.cloneSourceId && !n.cloneSourceId.startsWith('planif-')) {
+                n.cloneSourceId = 'planif-' + n.cloneSourceId;
+            }
         }
 
         etat.noeuds.set(n.id, n);
@@ -6553,6 +6662,32 @@ function attacherEvenements(el, donnees) {
             demarrerLien(id, port.dataset.dir, e);
         });
     });
+
+    // === SÉLECTEUR DE PHASE (les cinq étapes de l'enseignement explicite) ===
+    var selPhase = el.querySelector('.planif-noeud-phase');
+    if (selPhase) {
+        // Même précaution que les deux sélecteurs ci-dessous : sans elle,
+        // toucher le sélecteur démarrerait le déplacement du bloc.
+        // ⚠ Et c'est PRÉCISÉMENT ce que la poignée `.planif-noeud-prise`
+        // compense : elle, on ne lui pose AUCUN écouteur, pour que le geste
+        // remonte au bloc et déclenche le glisser. Ne pas « harmoniser » les
+        // deux — leur asymétrie est le correctif.
+        ['pointerdown', 'mousedown', 'click'].forEach(function(evt) {
+            selPhase.addEventListener(evt, function(e) { e.stopPropagation(); });
+        });
+        selPhase.addEventListener('change', function() {
+            if (!definirPhaseEE(id, selPhase.value)) return;
+            // La couleur, la classe du bloc et le libellé dérivent tous du type :
+            // on re-rend plutôt que de les retoucher un à un, comme la bascule
+            // des objectifs. Le focus revient sur le sélecteur reconstruit —
+            // sans quoi une correction en deux temps obligerait à le repointer.
+            reconstruireDOM();
+            mettreAJourTousLesBadges();
+            var frais = document.getElementById(id);
+            var repose = frais && frais.querySelector('.planif-noeud-phase');
+            if (repose) repose.focus();
+        });
+    }
 
     // === SÉLECTEUR DE SEMAINE (leçons et séquences) ===
     var selSemaine = el.querySelector('.planif-noeud-semaine');
@@ -10776,6 +10911,12 @@ window.planificationCarte = {
     formaterEtendue: formaterEtendue,
     rangTemporel: rangTemporel,
     definirSemaineLecon: definirSemaineLecon,
+    // Exposés pour la sentinelle : ce que fait une bascule de phase se vérifie
+    // en la DEMANDANT au module, jamais en relisant sa table de types.
+    PHASES_EE: PHASES_EE,
+    estPhaseEE: estPhaseEE,
+    definirPhaseEE: definirPhaseEE,
+    enTeteIdentiteHTML: enTeteIdentiteHTML,
     // Séquences de séquences (voie A) : lecture hiérarchique partagée
     listerSequencesHierarchie: listerSequencesHierarchie,
     cheminSequence: cheminSequence,
