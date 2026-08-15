@@ -610,7 +610,21 @@ let etat = {};
 try { etat = JSON.parse(localStorage.getItem(CLE) || '{}'); } catch (e) { etat = {}; }
 const sauver = () => { try { localStorage.setItem(CLE, JSON.stringify(etat)); } catch (e) {} };
 
-const esc = (s) => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+/* ⚠ LE GUILLEMET DROIT AUSSI — trouvé au rituel de clôture du 15 août.
+   Cette valeur est injectée dans `value="${val}"` : sans échapper le
+   guillemet, il FERME l'attribut. Mesuré — en saisissant
+   « il a dit "non" au 3e essai » dans un champ de mesure, le champ ne
+   réaffichait que « il a dit ». Pas une faille (sa page, son texte, son
+   navigateur) mais une PERTE SILENCIEUSE : rééditer le champ tronqué écrase
+   la valeur complète. Et ça frappait les MESURES, ce que le modèle des portes
+   terrain dit justement de ne jamais perdre.
+   ▣ L'apostrophe suit, par principe : le jour où un attribut passe en
+   guillemets simples, la même faille rouvrirait sans prévenir.
+   ⚠ L'ordre compte : `&` EN PREMIER, sinon on ré-échapperait les entités
+   qu'on vient d'écrire. */
+const esc = (s) => String(s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 const sansHtml = (s) => String(s).replace(/<[^>]*>/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/\s+/g,' ').trim();
 
 // ── Rendu ────────────────────────────────────────────────────────────

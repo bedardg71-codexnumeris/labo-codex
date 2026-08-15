@@ -33,6 +33,12 @@ commit d'avance, poussé la veille au soir depuis une session cloud. Le rituel d
 début l'a attrapé ; il ne l'aurait pas fait sans `git fetch`.
 
 ⏳ **CE QUI RESTE DÛ** :
+- ⚠ **ARTEFACT DE PORTE TERRAIN — un guillemet tronquait les MESURES.** Trouvé
+  au rituel de clôture du 15 août, corrigé et republié : `esc()` n'échappait pas
+  le guillemet droit, injecté dans `value="…"`. Le stockage était intact, mais
+  rééditer un champ tronqué aurait écrasé la valeur complète. ⏳ **Si Grégoire a
+  saisi une mesure contenant un guillemet avant la correction, elle est à
+  revérifier sur la page.**
 - ▣ **BASCULE DES LIENS EXISTANTS : LIVRÉE en 1.83.2.** Elle joue au chargement
   de chaque carte, une seule fois, et se DIT (console + toast). Elle ne touche
   ni la direction des liens ni aucun autre verbe. ⏳ **À observer sur sa vraie
