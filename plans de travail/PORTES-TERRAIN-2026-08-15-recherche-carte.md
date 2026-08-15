@@ -64,14 +64,15 @@ exactement le périmètre de cette liste.
 ## §2 · INTERFACE — ce qui se vérifie à l'écran
 
 ### 2.1 · Le champ est là, et il n'a rien poussé dehors
-`1.81.2` · **corrigé après ton échec du 15 août**
+`1.81.2` · ✅ **CLOSE — revalidée sur iPad le 15 août 2026**
 
-> ⚠⚠ **À REFAIRE — c'était le seul échec de tes 46 rangées, et il est corrigé.**
-> Sur iPad en portrait la barre était rognée au bord : l'Inspecteur, les
-> Raccourcis, le Guide et la Bibliothèque n'existaient plus à l'écran. Mesuré
-> avant de corriger : **le débordement PRÉEXISTAIT au champ de recherche**
-> (783 px requis pour 728 disponibles dès 1.80.0) — le champ l'a aggravé, pas
-> créé. La barre passe désormais à la ligne au lieu de couper.
+> ✅ **RÉSULTAT TERRAIN.** C'était le seul échec de ses 46 rangées : sur iPad en
+> portrait la barre était rognée au bord, et l'Inspecteur, les Raccourcis, le
+> Guide et la Bibliothèque n'existaient plus à l'écran. Mesuré avant de
+> corriger : **le débordement PRÉEXISTAIT au champ de recherche** (783 px
+> requis pour 728 disponibles dès 1.80.0) — le champ l'a aggravé, pas créé.
+> La barre passe à la ligne au lieu de couper depuis 1.81.2. **Rejouée sur son
+> iPad, en portrait et en paysage : les onze boutons sont là.**
 
 > **POURQUOI.** La barre d'outils de la carte est déjà pleine : le sélecteur de
 > carte, le menu Actions, Annuler à gauche ; onze boutons à droite. Y ajouter un
@@ -179,13 +180,13 @@ exactement le périmètre de cette liste.
 ---
 
 ### 2.6 · ⚠⚠ Le halo se voit-il sur TON fond de canevas ?
-`1.81.1` · **la porte la plus importante de la liste**
+`1.81.1` · ✅ **CLOSE — revalidée sur iPad le 15 août 2026**
 
-> ⚠⚠ **À REFAIRE — validée le 15 août avec l'ANCIENNE teinte.** Ton retour
-> (« c'est davantage gris que ambre ») a fait remplacer l'ocre désaturé par un
-> **jaune vif** en 1.81.1. Le halo n'a plus la même couleur : les cinq rangées
-> ci-dessous doivent être rejouées. Le contraste a été re-mesuré sur les douze
-> fonds (24/24 au-dessus du seuil, minimum 4,22:1), mais mesuré n'est pas vu.
+> ✅ **RÉSULTAT TERRAIN.** Première validation faite avec l'ancienne teinte —
+> l'ocre désaturé, dont il a dit « c'est davantage gris que ambre ». Remplacé
+> par un **jaune vif** en 1.81.1, contraste re-mesuré sur les douze fonds
+> (24/24 au-dessus du seuil, minimum 4,22:1). **Les cinq rangées ont été
+> rejouées sur son iPad le 15 août : le halo se voit sur tous les fonds.**
 
 > **POURQUOI.** Le fond du canevas, c'est toi qui le choisis — douze teintes, du
 > presque noir au presque blanc — et ce choix est indépendant du mode clair ou
@@ -416,7 +417,8 @@ autre chose.
 
 | | |
 |---|---|
-| **État** | ⏳ 44 passées · 1 échec (2.1c, iPad portrait) · restent : 2.2m, la 2e rangée de 2.4, et **toute la 2.6 à refaire** (teinte changée en 1.81.1) |
+| **État** | ✅ **45 / 46 passées, zéro échec.** Les portes 2.1 et 2.6, rouvertes après correctifs, ont été rejouées sur iPad le 15 août et passent. ⏳ **Restent dues** : la rangée « taper `lecon` puis `expose` » de la **2.4**, et la mesure **2.2m** (mot cherché + nombre trouvé). |
 | **Rangées** | 14 portes · 46 vérifications · 4 mesures · 5 décisions |
 | **Version visée** | 1.81.2 — build `0815-1054` |
+| **Dernier passage terrain** | 15 août 2026 — Mac + iPad, deux modes |
 | **Branche** | fusionnée dans `main` le 15 août 2026 (fast-forward, Vitest 2408/2408 rejoué sur l'arbre fusionné) |

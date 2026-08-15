@@ -58,8 +58,16 @@
      ▣ **#3.2 CLOS** : « je me suis trompé, le seuil de 2 caractères est bon. »
      Aucun changement à `RECHERCHE_MIN`.
 
-     ⚠ **NON ÉPROUVÉ** : le rendu réel sur Safari iPad. Les cinq largeurs sont
-     mesurées dans Chromium — c'est la géométrie, pas son matériel.
+     ✅ **ÉPROUVÉ DEPUIS, SUR SON MATÉRIEL.** Grégoire a rejoué les portes 2.1 et
+     2.6 sur son iPad le 15 août : les deux passent. Le passage terrain se clôt
+     à **45/46, zéro échec** — restent la rangée « taper lecon puis expose » de
+     la 2.4 et la mesure 2.2m, toutes deux mineures.
+
+     ⮕ **LES DEUX DÉFAUTS DU CYCLE VIENNENT DU TERRAIN, PAS DES TESTS.** 2414 cas
+     verts et 24 break-tests rouges n'ont vu ni l'ocre terne ni la barre rognée :
+     le premier est un jugement d'œil, le second demande un iPad. C'est
+     exactement le périmètre que `SKILL_portes_terrain.md` décrit, et la liste
+     l'a rempli des deux fois.
      ===================================================================== -->
 
 <!-- =====================================================================
