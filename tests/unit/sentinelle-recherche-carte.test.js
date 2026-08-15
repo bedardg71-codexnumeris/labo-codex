@@ -428,6 +428,34 @@ describe('recherche · F — cliquets de source et de cascade', () => {
         expect(html).toMatch(/<input type="search" id="planif-recherche-champ"/);
     });
 
+    it('⚠ la barre d’outils PASSE À LA LIGNE au lieu de couper', () => {
+        // Défaut trouvé par la porte terrain 2.1c, capture d'iPad à l'appui —
+        // et PRÉEXISTANT au champ de recherche : mesuré sur iPad Air en
+        // portrait (820 px), la barre réclamait déjà 783 px pour 728
+        // disponibles en 1.80.0, et le Guide et la Bibliothèque tombaient
+        // hors cadre. Le champ a porté le besoin à 901 px : il a aggravé un
+        // débordement, il ne l'a pas créé.
+        //
+        // ⮕ Rien ne le SIGNALAIT — la rangée ne défile pas, elle est rognée.
+        // Un bouton hors cadre a l'air de ne pas exister.
+        const barre = blocCss('.planif-header-toolbar {', '}');
+        expect(barre).toMatch(/flex-wrap:\s*wrap/);
+    });
+
+    it('⚠ le champ a une base COURTE et un plafond — sinon il force le retour à la ligne', () => {
+        // Le passage à la ligne se décide sur `flex-basis` AVANT tout
+        // rétrécissement. Une base de 260 px faisait descendre le groupe de
+        // droite sur iPad en PAYSAGE, alors que la rangée y tenait. Base
+        // courte + grow + plafond : une seule rangée tant que c'est possible.
+        const zone = blocCss('.planif-toolbar-recherche {', '}');
+        const flex = zone.match(/flex:\s*(\d+)\s+(\d+)\s+(\d+)px/);
+        expect(flex, 'la zone doit déclarer un `flex` à trois valeurs').toBeTruthy();
+        expect(Number(flex[1]), 'flex-grow : le champ doit pouvoir s’étirer').toBeGreaterThan(0);
+        expect(Number(flex[3]), 'flex-basis doit rester courte').toBeLessThanOrEqual(200);
+        expect(zone).toMatch(/max-width:\s*\d+px/);
+        expect(zone).toMatch(/min-width:\s*\d+px/);
+    });
+
     it('le champ vit DANS la barre d’outils de la carte', () => {
         // C'est la demande, littéralement : « dans la toolbar ».
         const barre = html.slice(

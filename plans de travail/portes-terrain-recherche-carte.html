@@ -316,7 +316,7 @@ ol.erreurs b { color: var(--ink); }
 <div class="enveloppe">
 
 <header class="chapeau">
-  <p class="eyebrow">Portes terrain · 15 août 2026 · mise à jour 1.81.1</p>
+  <p class="eyebrow">Portes terrain · 15 août 2026 · mise à jour 1.81.2</p>
   <h1>Chercher un mot dans la carte</h1>
   <p class="sous-titre">
     Le champ de recherche de la Carte d'alignement, livré en 1.81.0. Ce que les
@@ -325,7 +325,7 @@ ol.erreurs b { color: var(--ink); }
     utile ou noyé sur <em>ta</em> carte.
   </p>
   <div class="meta">
-    <span>1.81.1</span><span>build 0815-1041</span><span>14 portes</span>
+    <span>1.81.2</span><span>build 0815-1054</span><span>14 portes</span>
     <span>46 vérifications</span><span>4 mesures</span><span>5 décisions</span>
   </div>
 </header>
@@ -418,16 +418,16 @@ const DATA = [
 ]},
 
 { num: '§2', titre: 'Interface', note: "Ce qui se vérifie à l'écran. Un geste par rangée.", portes: [
-  { ref: '2.1', t: '1.81.0 · nouveau', titre: "Le champ est là, et il n'a rien poussé dehors",
-    pourquoi: "La barre d'outils de la carte est déjà pleine : onze boutons à droite. Y ajouter un champ risquait de repousser les derniers hors de l'écran — et sur iPad en portrait, <b>l'Inspecteur et la Bibliothèque seraient partis les premiers, sans que rien ne le signale</b>.",
+  { ref: '2.1', t: '1.81.2 · ⚠⚠ À REFAIRE — corrigé depuis ton échec', titre: "Le champ est là, et il n'a rien poussé dehors",
+    pourquoi: "<b>C'était le seul échec de tes 46 rangées, et il est corrigé.</b> Sur iPad en portrait la barre était rognée au bord : l'Inspecteur, les Raccourcis, le Guide et la Bibliothèque n'existaient plus à l'écran — et rien ne le signalait, parce qu'un bouton hors cadre n'a pas l'air cassé, il a l'air de ne pas exister.<br><br>Mesuré avant de corriger : <b>le débordement PRÉEXISTAIT au champ de recherche</b> (783 px requis pour 728 disponibles dès 1.80.0). Le champ l'a aggravé, pas créé. La barre passe désormais à la ligne au lieu de couper.",
     rangs: [
-      { id:'2.1a', tags:['Mac'], geste:"Regarder la barre d'outils de la carte.",
+      { id:'2.1a-v2', tags:['Mac'], geste:"Regarder la barre d'outils de la carte.",
         attendu:"Entre le bouton <b>Annuler</b> et le bouton <b>Nœuds</b>, un champ qui affiche « Rechercher dans la carte… »." },
-      { id:'2.1b', tags:['Mac'], geste:"Compter les boutons à <b>droite</b> de la barre.",
+      { id:'2.1b-v2', tags:['Mac'], geste:"Compter les boutons à <b>droite</b> de la barre.",
         attendu:"Nœuds · Planificateur · ◎ · Tout voir · Loupe · le pourcentage · palette de fond · plein écran · puis, après un séparateur, <b>Inspecteur · Raccourcis · Guide · Bibliothèque</b>. Aucun coupé au bord droit." },
-      { id:'2.1c', tags:['iPad'], geste:"Refaire le compte sur iPad, <b>en PORTRAIT</b>. C'est le cas le plus serré.",
+      { id:'2.1c-v2', tags:['iPad'], geste:"Refaire le compte sur iPad, <b>en PORTRAIT</b>. C'est le cas le plus serré.",
         attendu:"Le champ rétrécit (c'est lui qui cède la place), mais les quatre derniers boutons restent visibles et touchables." },
-      { id:'2.1d', tags:['iPad'], geste:"Refaire en <b>paysage</b>.", attendu:"Même chose, avec le champ plus large." }
+      { id:'2.1d-v2', tags:['iPad'], geste:"Refaire en <b>paysage</b>.", attendu:"Même chose, avec le champ plus large." }
     ]},
 
   { ref: '2.2', t: '1.81.0 · le geste principal', titre: 'Trouver un mot sur ta vraie carte',
@@ -745,7 +745,7 @@ function construireReleve() {
   const ko = verifs.filter(r => (etat[r.id]||{}).etat === 'ko').length;
   const L = [];
   L.push('PORTES TERRAIN — Recherche dans la Carte d\'alignement (15 août 2026)');
-  L.push('Version visée : 1.81.1 · build 0815-1041');
+  L.push('Version visée : 1.81.2 · build 0815-1054');
   L.push('Fusionné dans main le 15 août 2026');
   L.push('');
   L.push(`BILAN : ${ok} passées · ${ko} échec · ${verifs.length - ok - ko} non traitées (sur ${verifs.length})`);

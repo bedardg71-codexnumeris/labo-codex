@@ -12,9 +12,9 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | **`main`** |
-| **Version** | **1.81.1** — build `0815-1041` |
+| **Version** | **1.81.2** — build `0815-1054` |
 | **Travail en avance sur `main`** | **aucun** |
-| **Dernière mise à jour** | 15 août 2026 — recherche dans la Carte d'alignement (1.81.0) puis correctif de teinte du halo sur retour terrain (1.81.1). Vitest 2412/2412 |
+| **Dernière mise à jour** | 15 août 2026 — recherche dans la Carte d'alignement (1.81.0) puis deux correctifs sur retour terrain — teinte du halo (1.81.1), barre d'outils rognée sur iPad (1.81.2). Vitest 2414/2414 |
 
 ⚠⚠ **AVANT TOUTE FUSION EN CONTENEUR : `git fetch --unshallow origin`.** Le clone
 du conteneur est **shallow**, et son `main` LOCAL peut pointer des semaines en
@@ -47,9 +47,11 @@ début l'a attrapé ; il ne l'aurait pas fait sans `git fetch`.
   de la barre ne sont pas tous là), la rangée « taper lecon puis expose » de la
   **2.4**, la mesure **2.2m**, et **la 2.6 ENTIÈRE À REFAIRE** — elle a été
   validée avec l'ancienne teinte du halo, remplacée depuis en 1.81.1.
-- ⚠ **#3.2 — le seuil de deux lettres : son verdict est « non », sans
-  contre-proposition.** Il ne veut pas 2, mais on ne sait pas s'il veut 1 ou 3.
-  À lui redemander avant de toucher à `RECHERCHE_MIN`.
+  ⮕ **La 2.1c est CORRIGÉE en 1.81.2** (la barre passe à la ligne au lieu de
+  couper — le débordement était PRÉEXISTANT au champ, mesuré à 783 px pour 728
+  disponibles dès 1.80.0). À rejouer sur son iPad : c'est de la géométrie
+  mesurée dans Chromium, pas du rendu Safari.
+  ⮕ **#3.2 est CLOS** : « je me suis trompé, le seuil de 2 caractères est bon. »
 - **5 rangées de porte terrain non traitées** —
   `plans de travail/PORTES-TERRAIN-2026-08-12-416-lots-CGIHB.md` : 3.3 (supprimer
   un gabarit) en entier, la fin de 4.1 et de 4.3. **Plus les deux corrections du
