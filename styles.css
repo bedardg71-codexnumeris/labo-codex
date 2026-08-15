@@ -21605,13 +21605,41 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     opacity: 0.9;
     border-radius: 4px;
     padding: 2px;
-    /* Cible tactile iPad : 44px sans peser sur la hauteur de l'en-tête. */
+    /* Boîte VISUELLE. La cible TACTILE de 44 px est portée par ::after —
+       l'en-tête ne fait que 37 px de haut (mesuré), donc 44 px ne peuvent pas
+       y tenir sans grossir tous les blocs de la carte. */
     min-width: 24px;
     min-height: 24px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    position: relative;
     transition: opacity 0.15s, filter 0.15s;
+}
+/* Cible tactile iPad — 44 x 44 (règle du projet), sans peser d'un pixel sur la
+   mise en page : le pseudo-élément est hors flux, donc il n'est PAS un item du
+   flex parent et l'en-tête garde ses 37 px.
+
+   ⚠ LES DÉBORDS SONT ASYMÉTRIQUES, ET CHAQUE VALEUR EST MESURÉE. Centrer
+   bêtement 44 px sur un badge de 24 px vole 4 px au <select> du rang de séance,
+   qui n'est qu'à 6 px à gauche. À droite, au contraire, il y a 23 px de marge
+   morte (le padding de l'en-tête) : le débord y va donc chercher ce qu'il ne
+   peut pas prendre à gauche. 6 + 24 + 14 = 44.
+   ⮕ Si l'espacement de l'en-tête change (gap, padding, contrôles ajoutés),
+   REMESURER : `left` doit rester <= au gap qui sépare le badge de son voisin.
+
+   Verticalement, aucun arbitrage n'existe : 44 px ne tiennent ni dans
+   l'en-tête (37) ni dans l'espace jusqu'au titre (41 depuis le bord du bloc).
+   Le débord symétrique mord donc 3 px sur le haut du titre — le texte du titre
+   est centré bien plus bas, et c'est le moindre mal face à un débord hors du
+   bloc, qui atterrirait sur la carte ou sur le bloc voisin. */
+.planif-badge-objectif::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    bottom: -10px;
+    left: -6px;
+    right: -14px;
 }
 .planif-badge-objectif:hover {
     opacity: 1;

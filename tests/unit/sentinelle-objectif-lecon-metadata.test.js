@@ -333,6 +333,57 @@ describe('F1 · invariants de rendu et de routage', () => {
         expect(blocGlyphe[0]).toMatch(/grayscale/);
     });
 
+    it('le badge 🎯 offre 44 px de cible tactile SANS grossir l’en-tête', () => {
+        // Règle du projet (CLAUDE.md) : cibles tactiles >= 44 px sur iPad. Le
+        // badge n'en offrait que 24 — et le commentaire CSS affirmait « 44px »
+        // au-dessus d'un `min-height: 24px`, donc la règle était violée par un
+        // code qui se déclarait conforme. Mesuré au navigateur : 24 x 24.
+        //
+        // L'en-tête ne fait que 37 px de haut : 44 px ne peuvent PAS y tenir.
+        // La cible est donc portée par un ::after hors flux — grossir la boîte
+        // elle-même aurait allongé tous les blocs de la carte, un effet de bord
+        // que personne n'a demandé.
+        const base = sourceCss.match(/\.planif-badge-objectif\s*\{[^}]*\}/);
+        const apres = sourceCss.match(/\.planif-badge-objectif::after\s*\{[^}]*\}/);
+        expect(base, 'règle de base du badge introuvable').toBeTruthy();
+        expect(apres, 'la cible tactile ::after a disparu').toBeTruthy();
+
+        const px = (bloc, prop) => {
+            const m = bloc.match(new RegExp(prop + ':\\s*(-?[\\d.]+)px'));
+            return m ? parseFloat(m[1]) : null;
+        };
+        const boiteL = px(base[0], 'min-width');
+        const boiteH = px(base[0], 'min-height');
+
+        // 1. La cible atteint bien 44 px sur les DEUX axes.
+        expect(boiteL + -px(apres[0], 'left') + -px(apres[0], 'right'),
+            'cible tactile horizontale').toBeGreaterThanOrEqual(44);
+        expect(boiteH + -px(apres[0], 'top') + -px(apres[0], 'bottom'),
+            'cible tactile verticale').toBeGreaterThanOrEqual(44);
+
+        // 2. Elle ne pèse RIEN sur la mise en page : hors flux, donc pas un item
+        //    du flex parent. Sans `absolute`, le ::after deviendrait un item et
+        //    l'en-tête grandirait — exactement ce qu'on évite.
+        expect(apres[0]).toMatch(/position:\s*absolute/);
+
+        // 3. ⚠ ET LE BADGE DOIT ÊTRE POSITIONNÉ. Sans `position: relative`, les
+        //    décalages se résolvent contre le premier ancêtre positionné — le
+        //    bloc entier, qui est en `absolute` sur le canevas. La zone tactile
+        //    atterrirait alors à un tout autre endroit, en silence : rien ne
+        //    casse, rien ne se voit, et le badge redevient intouchable.
+        expect(base[0], 'le badge doit être positionné pour ancrer sa cible tactile')
+            .toMatch(/position:\s*relative/);
+
+        // 4. Le débord GAUCHE ne dépasse pas le gap de l'en-tête, sinon la cible
+        //    recouvre le <select> du rang de séance et lui vole ses clics. Lié
+        //    au gap réel : si l'en-tête se resserre, la sentinelle le dira.
+        const entete = sourceCss.match(/\.planif-noeud-entete\s*\{[^}]*\}/);
+        const gap = px(entete[0], 'gap');
+        expect(gap, 'gap de l’en-tête introuvable').toBeTruthy();
+        expect(-px(apres[0], 'left'),
+            'le débord gauche mange le contrôle voisin').toBeLessThanOrEqual(gap);
+    });
+
     it('le badge 🎯 enveloppe son emoji — sans quoi le gris ne vise RIEN', () => {
         // Couplage RENDU ↔ STYLE, et il est silencieux dans les deux sens :
         // retirer le `<span>` intérieur laisse la règle CSS valide mais sans
