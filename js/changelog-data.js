@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.80',
+            couleur: 'bleu',
+            titre: 'La tâche se termine, l’objectif se poursuit',
+            items: [
+                'Les info-bulles du gabarit des productions disent enfin en quoi la tâche et l’objectif diffèrent. La tâche est locale et bornée : ce qui est produit ici, sur quoi, en quelle quantité — on peut cocher qu’elle est faite.',
+                'L’objectif est transférable et sans terme : la capacité qui servira à l’artefact suivant, au cours suivant, ailleurs. On ne coche pas un objectif atteint, on en observe la progression.',
+                'Le champ « Détail de la tâche » a maintenant sa propre info-bulle et sa fiche d’aide : cinq critères pour relire ses consignes avant de publier — dont celui qui coûte le plus cher à l’étudiant·e, une exigence qui n’apparaît que dans le détail et qu’il découvre après avoir planifié son travail.'
+            ]
+        },
+        {
             version: '1.79',
             couleur: 'vert',
             titre: 'Les repères « séance 2 » peuvent quitter les titres',

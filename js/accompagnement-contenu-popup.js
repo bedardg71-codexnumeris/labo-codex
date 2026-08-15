@@ -973,6 +973,31 @@ const AIDE_CONTEXTUELLE = {
         ],
         voirAussi: ['planification-alignement', 'conception-productions']
     },
+    'detail-tache-qualite': {
+        titre: 'Un détail de tâche bien construit',
+        sections: [
+            {
+                type: 'texte',
+                contenu: 'La <strong>description de la tâche</strong> annonce ce qui est demandé ; le <strong>détail</strong> le rend exécutable. Les deux doivent dire la même chose, l’un en résumé, l’autre pas à pas.'
+            },
+            {
+                type: 'liste',
+                titre: 'À relire avant de publier la production',
+                items: [
+                    '<strong>Rien n’est laissé de côté</strong> — chaque élément annoncé par la tâche est traité dans le détail.',
+                    '<strong>Rien n’arrive par surprise</strong> — le détail n’exige rien que la tâche n’annonce. C’est le défaut le plus coûteux : l’étudiant·e découvre l’exigence après avoir planifié son travail.',
+                    '<strong>L’ordre est celui du travail réel</strong> — une amorce, puis des étapes numérotées, une seule action par étape.',
+                    '<strong>Ça reste simple</strong> — un seul niveau de liste si possible, pas de redite d’une étape à l’autre.',
+                    '<strong>C’est comparable d’une production à l’autre</strong> — deux tâches de complexité semblable méritent un détail de profondeur semblable.',
+                ]
+            },
+            {
+                type: 'conseil',
+                contenu: 'Le détail décrit le <strong>travail à faire</strong>, pas la <strong>capacité visée</strong>. Si une consigne commence à ressembler à « sera capable de… », sa place est dans l’objectif d’apprentissage.'
+            },
+        ],
+        voirAussi: ['objectif-verbes-actifs', 'conception-productions']
+    },
     'echeance-indices': {
         titre: 'Date d’échéance et indices',
         sections: [

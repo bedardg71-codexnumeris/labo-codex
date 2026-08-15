@@ -239,9 +239,11 @@ const TOOLTIPS = {
     'cn-prod-grille':
         'Associe une grille d\'évaluation à cette production. Définit les critères utilisés lors de la correction.',
     'cn-prod-objectif':
-        'Ce que l\'étudiant·e sera capable de faire. Apparaît dans la rétroaction et le dossier PDF.',
+        'Transférable et sans terme : la capacité qui servira à l\'artefact suivant, au cours suivant, ailleurs. On ne coche pas un objectif atteint — on en observe la progression. Apparaît dans la rétroaction et le dossier PDF.',
     'cn-prod-tache':
-        'Ce qui est demandé concrètement à l\'étudiant·e. Apparaît dans le dossier PDF de rétroaction.',
+        'Locale et bornée : ce que l\'étudiant·e produit ici — sur quoi, en quelle quantité, sur quel support. Une tâche se termine : on peut cocher qu\'elle est faite. Apparaît dans le dossier PDF de rétroaction.',
+    'cn-prod-detail-tache':
+        'Les consignes qui rendent la tâche exécutable : étapes, contraintes, format. N\'y exige rien que la description de la tâche n\'annonce pas — l\'étudiant·e planifie son travail à partir de l\'annonce.',
     'cn-prod-ponderation':
         'Poids dans la note finale. L\'ensemble des productions se partage le 100 %.',
     'cn-prod-echeance':
