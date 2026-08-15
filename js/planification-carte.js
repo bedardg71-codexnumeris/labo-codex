@@ -4520,6 +4520,9 @@ function reconstruireDOM() {
     // Sans ça, on lirait un état d'avant la modification — le pire des
     // affichages, celui qui a l'air juste.
     _loupeCopieValide = false;
+    // Les textes de la carte viennent peut-être de changer : le cache de
+    // normalisation de la recherche porte sur eux, il se périme ici.
+    _cacheNormalisation.clear();
     // Sans canevas monté (module pas encore initialisé, ou bac à sable de
     // test), il n'y a rien à reconstruire — les DONNÉES restent la vérité,
     // le rendu suivra au montage.
@@ -4608,6 +4611,12 @@ function reconstruireDOM() {
             dessinerLien(entry3[1]);
         }
         mettreAJourPlanificateur();
+        // Les halos de recherche vivent sur des éléments que la boucle
+        // ci-dessus vient de recréer : sans ce rappel, une recherche ouverte
+        // s'éteindrait au premier déplacement de bloc. On RECALCULE plutôt
+        // que de re-poser les anciens halos — un bloc supprimé entre-temps
+        // resterait sinon listé comme trouvé.
+        rafraichirRecherche();
     });
 }
 
@@ -7287,6 +7296,8 @@ function initialiser() {
     });
     appliquerAffichagePalettes();
 
+    brancherRecherche();
+
     var btnNettoyage = document.getElementById('planif-btn-nettoyer-titres');
     var panneauNettoyage = document.getElementById('planif-nettoyage-titres-panel');
     if (btnNettoyage && panneauNettoyage) {
@@ -9622,6 +9633,437 @@ function centrerVueSurSequence(seqId) {
     });
 }
 
+/* =====================================================================
+   RECHERCHE DANS LA CARTE (15 août 2026, demande de Grégoire)
+
+   Le besoin, dans ses mots : « un champ de recherche dans la toolbar de la
+   carte d'alignement afin de trouver des mots clés dans la carte ».
+
+   ▣ CE QU'ELLE CHERCHE. Le titre du bloc, sa description (Inspecteur), les
+   objectifs 🎯 des leçons, ET le libellé du type (« Leçon », « Exposé »,
+   « Compétence »…). Le type est un choix explicite de Grégoire : il permet
+   « montre-moi toutes les évaluations ». Il est bruyant par nature — un mot
+   comme « leçon » allume alors des dizaines de blocs d'un coup — d'où la
+   colonne « où » de chaque résultat : une correspondance de TYPE se lit
+   comme telle et ne se confond pas avec une correspondance de contenu.
+
+   ▣ CE QU'ELLE FAIT DU RÉSULTAT. Deux choses ensemble, et c'est le couple
+   qui est utile : les blocs trouvés s'allument SUR le canevas (halo), et la
+   liste sous le champ dit lesquels. À 25 % de zoom — la vue complète de sa
+   carte 601-101 — les halos seuls ne se lisent pas ; la liste seule ne dit
+   pas OÙ c'est. Même logique que « Tout voir » + la loupe du 11 août : on
+   prend du recul, on repère, on atterrit.
+
+   ⚠ ACCENTS ET CASSE. `normaliserRecherche` replie les deux, sinon
+   « littérature » resterait introuvable en tapant « litterature ». Elle
+   normalise CARACTÈRE PAR CARACTÈRE et non d'un bloc : un `normalize('NFD')`
+   global change la LONGUEUR de la chaîne (é → e + accent combinant), et les
+   index trouvés dans le texte normalisé ne désigneraient plus les mêmes
+   lettres dans le texte d'origine — l'extrait affiché serait décalé d'autant
+   de lettres accentuées que le texte en compte avant la trouvaille. En
+   français, ce n'est pas un cas limite.
+   ===================================================================== */
+
+// Deux lettres au minimum. À une seule, et avec les libellés de type dans le
+// corpus, la quasi-totalité de la carte s'allume : le résultat n'apprend
+// rien et le surlignage devient du bruit. Le seuil est DIT à l'écran, jamais
+// subi en silence.
+var RECHERCHE_MIN = 2;
+
+var etatRecherche = {
+    terme: '',
+    resultats: [],
+    courant: -1   // -1 = aucun résultat visité ; sinon index dans `resultats`
+};
+
+// Normaliser coûte un passage par caractère, et la frappe le redemande à
+// chaque lettre. Le cache porte sur les textes de la CARTE (titres,
+// descriptions, objectifs), qui ne changent qu'à la reconstruction du DOM —
+// c'est là qu'il est vidé.
+var _cacheNormalisation = new Map();
+
+/**
+ * Replie casse et accents, ET garde la trace d'où vient chaque caractère.
+ *
+ * ⚠⚠ POURQUOI UNE TABLE D'INDEX ET NON UNE SIMPLE CHAÎNE. On cherche dans le
+ * texte replié, mais on AFFICHE un extrait découpé dans le texte d'origine :
+ * il faut donc savoir, pour chaque lettre repliée, d'où elle vient. Un
+ * `normalize('NFD')` global ne le permet pas, parce qu'il ne conserve aucune
+ * correspondance — et l'extrait sortirait décalé.
+ *
+ * ⚠ ET SURTOUT, LE CAS QUI COMMANDE CE CHOIX : un accent peut arriver DÉJÀ
+ * SÉPARÉ de sa lettre (« e » + U+0301 au lieu de « é »). C'est la forme
+ * décomposée que produit macOS — celle de Grégoire — et elle voyage par
+ * copier-coller depuis le Finder, un PDF ou une note. Ces marques se replient
+ * en RIEN : une lettre d'origine peut donc donner zéro ou plusieurs
+ * caractères repliés, et aucune égalité de longueur ne tient. La table dit la
+ * vérité dans tous les cas.
+ *
+ * @returns {{norme: string, index: number[]}} `index[k]` = position, dans le
+ *          texte d'origine, du k-ième caractère de `norme`. La table porte un
+ *          élément de plus (la longueur du texte), pour qu'une trouvaille qui
+ *          finit en bout de chaîne ait toujours une borne de fin.
+ */
+function indexerPourRecherche(texte) {
+    var s = String(texte === null || texte === undefined ? '' : texte);
+    var norme = '';
+    var index = [];
+    for (var i = 0; i < s.length; i++) {
+        var plie = s[i].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        for (var j = 0; j < plie.length; j++) {
+            norme += plie[j];
+            index.push(i);
+        }
+    }
+    index.push(s.length);
+    return { norme: norme, index: index };
+}
+
+/** Le texte replié seul — ce qu'il faut pour le TERME saisi. */
+function normaliserRecherche(texte) {
+    return indexerPourRecherche(texte).norme;
+}
+
+/** Même chose, mémoïsé — réservé aux textes de la carte, pas au terme saisi. */
+function indexerTexteCarte(texte) {
+    var brut = String(texte === null || texte === undefined ? '' : texte);
+    var cache = _cacheNormalisation.get(brut);
+    if (cache !== undefined) return cache;
+    var indexe = indexerPourRecherche(brut);
+    _cacheNormalisation.set(brut, indexe);
+    return indexe;
+}
+
+/**
+ * Les textes d'un nœud où la recherche a le droit de mordre, chacun étiqueté
+ * par ce qu'il EST. C'est cette étiquette que le résultat affiche : savoir
+ * que le mot a été trouvé dans une description et non dans un titre change
+ * ce qu'on va faire du résultat.
+ */
+function champsCherchables(n) {
+    var champs = [];
+    if (n.titre) champs.push({ ou: 'titre', libelle: 'titre', texte: n.titre });
+    if (n.description) champs.push({ ou: 'description', libelle: 'description', texte: n.description });
+    var objs = objectifsDeLecon(n);
+    for (var i = 0; i < objs.length; i++) {
+        if (objs[i].texte) champs.push({ ou: 'objectif', libelle: 'objectif', texte: objs[i].texte });
+    }
+    // Le libellé du type vient EN DERNIER : quand un bloc correspond à la
+    // fois par son contenu et par son type, c'est le contenu qui fournit
+    // l'extrait affiché. Le type est le repli, pas la vedette.
+    var label = obtenirLabelNoeud(n);
+    if (label) champs.push({ ou: 'type', libelle: 'type de bloc', texte: label });
+    return champs;
+}
+
+/**
+ * Cherche `terme` dans toute la carte.
+ * @returns {Array} résultats triés dans l'ordre de LECTURE de la carte
+ *          (de haut en bas, puis de gauche à droite) — pas dans l'ordre de
+ *          création, qui ne veut rien dire à l'œil. C'est cet ordre que
+ *          suit « Entrée = résultat suivant ».
+ */
+function chercherDansCarte(terme) {
+    var q = normaliserRecherche(String(terme || '').trim());
+    if (q.length < RECHERCHE_MIN) return [];
+
+    var trouves = [];
+    for (var entry of etat.noeuds) {
+        var n = entry[1];
+        var champs = champsCherchables(n);
+        var ou = [];
+        var extrait = null;
+        for (var i = 0; i < champs.length; i++) {
+            var indexe = indexerTexteCarte(champs[i].texte);
+            var pos = indexe.norme.indexOf(q);
+            if (pos === -1) continue;
+            if (ou.indexOf(champs[i].ou) === -1) ou.push(champs[i].ou);
+            // L'extrait est resolu ICI, en morceaux prets a afficher : le
+            // rendu n'a plus qu'a les echapper. Il ne peut donc pas se
+            // tromper d'espace d'index, ce qui etait le seul moyen de le
+            // decaler.
+            if (!extrait) extrait = extraitAutour(champs[i], indexe, pos, q.length);
+        }
+        if (ou.length === 0) continue;
+        trouves.push({
+            id: n.id,
+            type: n.type,
+            titre: n.titre || '',
+            label: obtenirLabelNoeud(n),
+            couleur: obtenirCouleurNoeud(n),
+            ou: ou,
+            extrait: extrait,
+            x: n.x,
+            y: n.y
+        });
+    }
+    trouves.sort(function(a, b) {
+        if (a.y !== b.y) return a.y - b.y;
+        if (a.x !== b.x) return a.x - b.x;
+        return 0;
+    });
+    return trouves;
+}
+
+/**
+ * Fenêtre de texte autour de la trouvaille, découpée dans le texte D'ORIGINE.
+ *
+ * `posNorme` et `longueurNorme` sont exprimés dans l'espace du texte REPLIÉ :
+ * la table d'index les ramène aux positions réelles. C'est ce passage-là qui
+ * fait que « société » s'affiche avec son accent, et que la fenêtre ne glisse
+ * pas d'une lettre par accent rencontré avant elle.
+ */
+function extraitAutour(champ, indexe, posNorme, longueurNorme) {
+    var texte = champ.texte;
+    var debutMotif = indexe.index[posNorme];
+    var finMotif = indexe.index[posNorme + longueurNorme];
+    if (debutMotif === undefined) debutMotif = 0;
+    if (finMotif === undefined) finMotif = texte.length;
+
+    var AVANT = 26, APRES = 44;
+    var debut = Math.max(0, debutMotif - AVANT);
+    var fin = Math.min(texte.length, finMotif + APRES);
+    return {
+        libelle: champ.libelle,
+        avant: (debut > 0 ? '…' : '') + texte.slice(debut, debutMotif),
+        motif: texte.slice(debutMotif, finMotif),
+        apres: texte.slice(finMotif, fin) + (fin < texte.length ? '…' : '')
+    };
+}
+
+/**
+ * Recalcule les résultats et remet l'affichage d'aplomb.
+ *
+ * Appelée à la frappe ET à la fin de `reconstruireDOM` : la carte peut
+ * changer sous une recherche ouverte (annulation, import, changement de
+ * carte). Recalculer plutôt que re-poser les anciens halos, sinon un bloc
+ * supprimé resterait « trouvé » dans la liste.
+ */
+function rafraichirRecherche() {
+    var champ = document.getElementById('planif-recherche-champ');
+    if (!champ) return;   // module pas encore monté (chargement, bac à sable)
+
+    etatRecherche.terme = champ.value || '';
+    var ancienId = (etatRecherche.courant >= 0 && etatRecherche.resultats[etatRecherche.courant])
+        ? etatRecherche.resultats[etatRecherche.courant].id
+        : null;
+    etatRecherche.resultats = chercherDansCarte(etatRecherche.terme);
+
+    // Garder le résultat courant s'il survit au recalcul : sans ça, une
+    // reconstruction du DOM (chaque déplacement de bloc en déclenche une)
+    // renverrait l'utilisateur au début de sa liste.
+    etatRecherche.courant = -1;
+    if (ancienId) {
+        for (var i = 0; i < etatRecherche.resultats.length; i++) {
+            if (etatRecherche.resultats[i].id === ancienId) { etatRecherche.courant = i; break; }
+        }
+    }
+
+    rendreResultatsRecherche();
+    appliquerSurlignageRecherche();
+}
+
+/** Pose les halos sur le canevas — et périme la copie de la loupe. */
+function appliquerSurlignageRecherche() {
+    if (!coucheNoeuds) return;
+    var anciens = coucheNoeuds.querySelectorAll('.planif-noeud--trouve, .planif-noeud--trouve-actif');
+    for (var i = 0; i < anciens.length; i++) {
+        anciens[i].classList.remove('planif-noeud--trouve');
+        anciens[i].classList.remove('planif-noeud--trouve-actif');
+    }
+    for (var j = 0; j < etatRecherche.resultats.length; j++) {
+        var el = document.getElementById(etatRecherche.resultats[j].id);
+        if (!el) continue;
+        el.classList.add('planif-noeud--trouve');
+        if (j === etatRecherche.courant) el.classList.add('planif-noeud--trouve-actif');
+    }
+    // La loupe montre une COPIE de la carte, prise une fois. Sans cette
+    // ligne elle afficherait la carte d'AVANT la recherche : les halos y
+    // seraient absents alors que c'est justement là qu'on veut les lire.
+    _loupeCopieValide = false;
+}
+
+/** Ce que la liste dit quand elle n'a pas de résultats à donner. */
+function messageRecherche() {
+    var terme = (etatRecherche.terme || '').trim();
+    if (terme.length === 0) return null;
+    if (terme.length < RECHERCHE_MIN) {
+        return 'Encore une lettre — la recherche démarre à ' + RECHERCHE_MIN + ' caractères.';
+    }
+    return 'Aucun bloc ne contient « ' + terme + ' ».';
+}
+
+function rendreResultatsRecherche() {
+    var panneau = document.getElementById('planif-recherche-resultats');
+    var compteur = document.getElementById('planif-recherche-compteur');
+    var effacer = document.getElementById('planif-recherche-effacer');
+    if (!panneau) return;
+
+    var aDuTexte = (etatRecherche.terme || '').trim().length > 0;
+    if (effacer) effacer.hidden = !aDuTexte;
+
+    var n = etatRecherche.resultats.length;
+    if (compteur) {
+        if (!aDuTexte || n === 0) compteur.textContent = '';
+        else if (etatRecherche.courant >= 0) compteur.textContent = (etatRecherche.courant + 1) + '/' + n;
+        else compteur.textContent = String(n);
+    }
+
+    if (!aDuTexte) {
+        panneau.innerHTML = '';
+        panneau.hidden = true;
+        return;
+    }
+
+    if (n === 0) {
+        panneau.innerHTML = '<p class="planif-recherche-vide">' + echapperHtml(messageRecherche()) + '</p>';
+        panneau.hidden = false;
+        return;
+    }
+
+    var html = '<p class="planif-recherche-entete">' + n + ' bloc' + (n > 1 ? 's' : '') +
+               ' trouvé' + (n > 1 ? 's' : '') + '</p>';
+    for (var i = 0; i < n; i++) {
+        var r = etatRecherche.resultats[i];
+        var titre = r.titre.trim() !== '' ? r.titre : '(bloc sans titre)';
+
+        // Une correspondance qui ne tient QU'au libellé du type n'a pas
+        // d'extrait à montrer : le libellé est déjà affiché à côté du titre,
+        // le répéter en dessous ferait croire à une seconde trouvaille.
+        var seulementType = (r.ou.length === 1 && r.ou[0] === 'type');
+        var lignes = '';
+        if (!seulementType && r.extrait) {
+            var ex = r.extrait;
+            lignes = '<span class="planif-recherche-extrait">' +
+                     '<span class="planif-recherche-ou">' + echapperHtml(ex.libelle) + '</span>' +
+                     echapperHtml(ex.avant) +
+                     '<mark>' + echapperHtml(ex.motif) + '</mark>' +
+                     echapperHtml(ex.apres) +
+                     '</span>';
+        } else if (seulementType) {
+            lignes = '<span class="planif-recherche-extrait">' +
+                     '<span class="planif-recherche-ou">type de bloc</span>' +
+                     '</span>';
+        }
+
+        html += '<button type="button" class="planif-recherche-item' +
+                (i === etatRecherche.courant ? ' planif-recherche-item--actif' : '') +
+                '" data-index="' + i + '" data-id="' + echapperHtml(r.id) + '">' +
+                    '<span class="planif-recherche-item-titre">' +
+                        '<span class="planif-pastille" style="background:' + echapperHtml(r.couleur) + '"></span>' +
+                        echapperHtml(titre) +
+                        '<span class="planif-recherche-type">' + echapperHtml(r.label) + '</span>' +
+                    '</span>' +
+                    lignes +
+                '</button>';
+    }
+    panneau.innerHTML = html;
+    panneau.hidden = false;
+}
+
+/** Amène le résultat `index` à l'écran, le sélectionne, et suit dans la liste. */
+function allerAuResultat(index) {
+    var n = etatRecherche.resultats.length;
+    if (n === 0) return;
+    // Bouclage aux deux bouts : « suivant » depuis le dernier revient au
+    // premier, et l'inverse. Sur une carte, l'ordre est circulaire par nature.
+    etatRecherche.courant = ((index % n) + n) % n;
+    var r = etatRecherche.resultats[etatRecherche.courant];
+    naviguerVers(r.id);
+    rendreResultatsRecherche();
+    appliquerSurlignageRecherche();
+    var actif = document.querySelector('.planif-recherche-item--actif');
+    if (actif && actif.scrollIntoView) actif.scrollIntoView({ block: 'nearest' });
+}
+
+function resultatSuivant() { allerAuResultat(etatRecherche.courant + 1); }
+function resultatPrecedent() {
+    allerAuResultat(etatRecherche.courant < 0 ? -1 : etatRecherche.courant - 1);
+}
+
+/** Vide le champ, les halos et la liste. Le geste d'Échap et du bouton ✕. */
+function effacerRecherche(garderFocus) {
+    var champ = document.getElementById('planif-recherche-champ');
+    if (champ) champ.value = '';
+    etatRecherche.terme = '';
+    etatRecherche.resultats = [];
+    etatRecherche.courant = -1;
+    rendreResultatsRecherche();
+    appliquerSurlignageRecherche();
+    if (garderFocus && champ) champ.focus();
+}
+
+function fermerListeRecherche() {
+    var panneau = document.getElementById('planif-recherche-resultats');
+    if (panneau) panneau.hidden = true;
+}
+
+/** Écouteurs du champ de recherche. Appelée une fois, depuis `initialiser`. */
+function brancherRecherche() {
+    var champ = document.getElementById('planif-recherche-champ');
+    var panneau = document.getElementById('planif-recherche-resultats');
+    var effacer = document.getElementById('planif-recherche-effacer');
+    var zone = document.getElementById('planif-recherche-zone');
+    if (!champ || !panneau || !zone) return;
+
+    champ.addEventListener('input', function() {
+        etatRecherche.courant = -1;
+        rafraichirRecherche();
+    });
+
+    champ.addEventListener('keydown', function(e) {
+        // Le champ est un INPUT : la garde `pasDansChamp` de `gererKeydown`
+        // met déjà les raccourcis de la carte (L, ⌘D, Suppr…) hors jeu. On
+        // arrête quand même la propagation des touches qu'on consomme, pour
+        // qu'Échap ne ferme pas AUSSI la loupe ou un panneau derrière.
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            e.stopPropagation();
+            if (e.shiftKey) resultatPrecedent(); else resultatSuivant();
+            return;
+        }
+        if (e.key === 'ArrowDown') { e.preventDefault(); e.stopPropagation(); resultatSuivant(); return; }
+        if (e.key === 'ArrowUp')   { e.preventDefault(); e.stopPropagation(); resultatPrecedent(); return; }
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+            // Premier Échap : on ferme la liste mais on GARDE les halos —
+            // ils servent à lire la carte, et on veut pouvoir y revenir.
+            // Second Échap (liste déjà fermée) : on efface tout.
+            if (!panneau.hidden) fermerListeRecherche();
+            else effacerRecherche(true);
+        }
+    });
+
+    champ.addEventListener('focus', function() {
+        if ((etatRecherche.terme || '').trim().length > 0) rendreResultatsRecherche();
+    });
+
+    if (effacer) {
+        effacer.addEventListener('click', function(e) {
+            e.stopPropagation();
+            effacerRecherche(true);
+        });
+    }
+
+    // Délégation : la liste est reconstruite à chaque frappe, un écouteur par
+    // bouton se réattacherait autant de fois.
+    panneau.addEventListener('click', function(e) {
+        var item = e.target.closest ? e.target.closest('.planif-recherche-item') : null;
+        if (!item) return;
+        e.stopPropagation();
+        allerAuResultat(parseInt(item.getAttribute('data-index'), 10) || 0);
+    });
+
+    // Cliquer ailleurs referme la liste — mais laisse les halos allumés :
+    // c'est le point de la fonction, on va cliquer DANS la carte ensuite.
+    document.addEventListener('click', function(e) {
+        if (zone.contains(e.target)) return;
+        fermerListeRecherche();
+    });
+    zone.addEventListener('click', function(e) { e.stopPropagation(); });
+}
+
 // =========== FIN NAVIGATION ===========
 
 window.planificationCarte = {
@@ -9770,6 +10212,14 @@ window.planificationCarte = {
     bornesEnsemble: bornesEnsemble,
     encadrementContenu: encadrementContenu,
     basculerLoupe: basculerLoupe,
+    // Recherche dans la carte (15 août 2026). `chercherDansCarte` est le
+    // moteur pur — pas de DOM, donc éprouvable en bac à sable ; les trois
+    // autres sont exposées pour que la sentinelle observe l'état réel plutôt
+    // que de le reconstituer.
+    chercherDansCarte: chercherDansCarte,
+    normaliserRecherche: normaliserRecherche,
+    champsCherchables: champsCherchables,
+    etatRecherche: etatRecherche,
     activerLoupe: activerLoupe,
     desactiverLoupe: desactiverLoupe,
     atterrirDepuisLoupe: atterrirDepuisLoupe,

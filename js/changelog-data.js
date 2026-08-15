@@ -21,6 +21,19 @@
 
     var CHANGELOG = [
         {
+            version: '1.81',
+            couleur: 'vert',
+            titre: 'Chercher un mot dans la carte',
+            items: [
+                'Un champ de recherche dans la barre d’outils de la Carte d’alignement : tape un mot, les blocs qui le contiennent s’allument sur le canevas et la liste dit lesquels.',
+                'La recherche fouille le titre du bloc, sa description, les objectifs des leçons — et le type de bloc, pour retrouver d’un coup toutes les évaluations ou toutes les leçons.',
+                'Chaque résultat dit OÙ le mot a été trouvé, et montre la phrase autour : on reconnaît le bon bloc sans avoir à y aller.',
+                'Les accents sont indifférents : « litterature » trouve « littérature », et l’inverse.',
+                'Clic sur un résultat pour s’y rendre, Entrée pour passer au suivant (Maj+Entrée pour revenir), Échap pour refermer la liste puis effacer.',
+                'Les blocs trouvés restent allumés quand la liste se referme — de quoi prendre du recul avec « Tout voir » et les relire à la loupe.'
+            ]
+        },
+        {
             version: '1.80',
             couleur: 'bleu',
             titre: 'La tâche se termine, l’objectif se poursuit',

@@ -251,6 +251,45 @@ accueille tous les chemins de pensée. Voici un parcours typique :
 
 8. **Vérifier l'alignement** — L'application signale les incohérences
 
+### Se retrouver dans une grande carte (navigation)
+
+Une carte de cours réelle dépasse largement l'écran : celle du 601-101 de
+Grégoire tient entière à 25 % de zoom, taille à laquelle elle est illisible.
+Quatre outils travaillent ENSEMBLE, et il faut les penser comme un tout —
+prendre du recul, repérer, lire, atterrir :
+
+| Outil | Ce qu'il fait | Où |
+|-------|---------------|-----|
+| **Recentrer** (⌘1) | défile jusqu'au contenu, SANS toucher au zoom | barre d'outils |
+| **Tout voir** | ajuste le zoom pour que la carte entière tienne (plafonné à 100 %) | barre d'outils |
+| **Loupe** (L) | grossit une zone sous le pointeur sans changer le zoom de la carte ; c'est une VUE, on n'y écrit pas | barre d'outils |
+| **Recherche** | trouve les blocs par mot-clé, les allume sur le canevas, les liste | barre d'outils |
+| **Planificateur** | navigue par semaine / séquence / leçon | palette flottante |
+
+**La recherche** (`chercherDansCarte`, 15 août 2026) fouille quatre gisements
+de texte : le **titre**, la **description** (Inspecteur), les **objectifs** des
+leçons, et le **libellé du type de bloc**. Ce dernier est un arbitrage explicite
+de Grégoire — il permet « montre-moi toutes les évaluations » — et il est
+bruyant par nature, d'où l'étiquette « où » portée par chaque résultat : une
+correspondance de type ne doit pas se lire comme une correspondance de contenu.
+
+Trois points à connaître avant d'y toucher :
+
+- **Le repli des accents passe par une table d'index**, pas par un
+  `normalize('NFD')` global. Motif : on cherche dans le texte replié mais on
+  AFFICHE un extrait découpé dans le texte d'origine ; sans table, la fenêtre
+  glisse d'une lettre par accent rencontré avant la trouvaille. Et un accent
+  peut arriver DÉJÀ SÉPARÉ de sa lettre (forme décomposée de macOS, celle de
+  Grégoire), auquel cas aucune égalité de longueur ne tient.
+- **Le halo des blocs trouvés porte deux liserés**, un clair et un sombre,
+  autour de l'ambre. Le fond du canevas est choisi par l'enseignant parmi douze
+  teintes, indépendamment du mode clair/sombre : aucune couleur fixe ne
+  contraste contre les douze. Mesure du 15 août — ambre seul, 7 cas sur 24 sous
+  le seuil WCAG de 3:1, jusqu'à 1,19:1 sur « Brume ». Ne pas « simplifier ».
+- **Les halos survivent à `reconstruireDOM`** parce que la recherche est
+  RECALCULÉE à la fin de celle-ci. Re-poser les anciens halos laisserait un
+  bloc supprimé listé comme trouvé.
+
 ### Vérifications automatiques
 
 L'application peut signaler :
