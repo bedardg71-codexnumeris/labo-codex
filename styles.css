@@ -18556,6 +18556,217 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     .planif-btn-palette { min-height: 32px; padding: 0 12px; }
 }
 
+/* ── RECHERCHE DANS LA CARTE (15 aout 2026) ─────────────────────────────
+   Le champ occupe l'espace laisse LIBRE entre le groupe de gauche (selecteur
+   de carte) et celui de droite (boutons de vue), et c'est LUI qui retrecit
+   quand la barre manque de place : `flex: 0 1 <base>` avec un `min-width`
+   court. Sur l'iPad en portrait, c'est ce qui empeche la rangee de pousser
+   les boutons de vue hors de l'ecran — un champ etroit reste utilisable,
+   un bouton hors cadre ne l'est pas.
+   Aucune couleur nouvelle : bordures et surfaces de la barre, ambre
+   d'attention du systeme (--alerte-*) pour ce qui est TROUVE. */
+.planif-toolbar-recherche {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 0 1 260px;
+    min-width: 110px;
+    height: 28px;
+    padding: 0 6px 0 10px;
+    border: 1px solid var(--planif-couleur-bordure);
+    border-radius: 6px;
+    background: var(--surface-carte, #1a3040);
+    transition: border-color 0.15s;
+}
+.planif-toolbar-recherche:hover { border-color: var(--planif-couleur-selection); }
+.planif-toolbar-recherche:focus-within {
+    border-color: var(--planif-couleur-selection);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--planif-couleur-selection) 30%, transparent);
+}
+
+#planif-recherche-champ {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: none;
+    background: none;
+    padding: 0;
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--planif-couleur-texte);
+    outline: none;   /* l'anneau de focus est porte par le conteneur ci-dessus */
+    -webkit-appearance: none;
+    appearance: none;
+}
+#planif-recherche-champ::placeholder { color: var(--texte-muted, #5a7a88); }
+/* Safari pose sa propre croix sur un input[type=search] : on garde la notre,
+   qui sait aussi vider les halos. Deux croix cote a cote en feraient une de
+   trop, et celle de Safari ne previendrait pas le module. */
+#planif-recherche-champ::-webkit-search-decoration,
+#planif-recherche-champ::-webkit-search-cancel-button { -webkit-appearance: none; display: none; }
+
+.planif-recherche-compteur {
+    flex: 0 0 auto;
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+    color: var(--texte-muted, #5a7a88);
+    white-space: nowrap;
+}
+
+.planif-recherche-effacer {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border: none;
+    border-radius: 4px;
+    background: none;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.12s, background 0.12s;
+}
+.planif-recherche-effacer:hover { opacity: 1; background: rgba(106, 172, 184, 0.12); }
+.planif-recherche-effacer[hidden] { display: none; }
+.planif-recherche-effacer .modal-close-icon { width: 11px; height: 11px; }
+
+/* Liste des resultats : meme boite que .planif-actions-dropdown (surface,
+   rayon, ombre), pour qu'un panneau de la barre ressemble aux autres. */
+.planif-recherche-resultats {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    width: max(320px, 100%);
+    max-height: 340px;
+    overflow-y: auto;
+    padding: 4px 0;
+    background: var(--surface-carte, #1a3040);
+    border: 1px solid var(--planif-couleur-bordure);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    z-index: 1000;
+}
+.planif-recherche-resultats[hidden] { display: none; }
+
+.planif-recherche-entete,
+.planif-recherche-vide {
+    margin: 0;
+    padding: 6px 12px;
+    font-size: 11px;
+    color: var(--texte-muted, #5a7a88);
+}
+.planif-recherche-vide { padding: 10px 12px; }
+
+.planif-recherche-item {
+    display: block;
+    width: 100%;
+    padding: 7px 12px;
+    border: none;
+    border-left: 3px solid transparent;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.12s;
+}
+.planif-recherche-item:hover { background: rgba(106, 172, 184, 0.1); }
+.planif-recherche-item--actif {
+    background: rgba(106, 172, 184, 0.14);
+    border-left-color: var(--planif-couleur-selection);
+}
+.planif-recherche-item:focus-visible {
+    outline: 2px solid var(--planif-couleur-selection);
+    outline-offset: -2px;
+}
+
+.planif-recherche-item-titre {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: var(--planif-couleur-texte);
+}
+/* `.planif-pastille` n'existe qu'en version PORTEE (palette, Inspecteur) :
+   il n'y a pas de regle nue qui lui donne une taille. La sienne se pose donc
+   ici, comme les deux autres le font chez elles. */
+.planif-recherche-item-titre .planif-pastille {
+    flex: 0 0 auto;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+}
+
+.planif-recherche-type {
+    margin-left: auto;
+    padding-left: 8px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--texte-muted, #5a7a88);
+    white-space: nowrap;
+}
+
+.planif-recherche-extrait {
+    display: block;
+    margin-top: 2px;
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--texte-secondaire, #8aa4b0);
+}
+/* L'etiquette dit OU le mot a ete trouve : titre, description, objectif, ou
+   type de bloc. Sans elle, une correspondance de TYPE (« montre-moi toutes
+   les evaluations ») se lirait comme une correspondance de contenu. */
+.planif-recherche-ou {
+    display: inline-block;
+    margin-right: 6px;
+    padding: 0 5px;
+    border-radius: 3px;
+    background: rgba(106, 172, 184, 0.14);
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: var(--texte-muted, #5a7a88);
+    vertical-align: 1px;
+}
+.planif-recherche-extrait mark {
+    padding: 0 1px;
+    border-radius: 2px;
+    background: var(--alerte-fond-attention);
+    color: var(--alerte-texte-attention);
+    font-weight: 600;
+}
+
+/* ⚠ Le halo des blocs trouves n'est PAS ici : il vit avec les autres etats du
+   noeud (`:hover`, `.selected`), plus bas dans ce fichier. Motif de cascade —
+   `.planif-noeud:hover` pese autant que `.planif-noeud.planif-noeud--trouve`,
+   et c'est alors l'ORDRE qui tranche : pose ici, le halo s'eteignait des que
+   le curseur passait sur le bloc trouve. Chercher « planif-noeud--trouve ». */
+
+/* iPad : la liste des resultats se touche au doigt — 44 px de haut. */
+@media (hover: none) {
+    .planif-toolbar-recherche { height: 32px; }
+    .planif-recherche-item { padding: 11px 12px; min-height: 44px; }
+    .planif-recherche-effacer { width: 28px; height: 28px; }
+    .planif-recherche-effacer .modal-close-icon { width: 13px; height: 13px; }
+}
+
+/* Mode clair — memes tokens, surfaces du mode. */
+.mode-clair .planif-toolbar-recherche {
+    background: #ffffff;
+    border-color: rgba(3, 46, 92, 0.15);
+}
+.mode-clair #planif-recherche-champ { color: var(--texte-principal); }
+.mode-clair .planif-recherche-resultats {
+    background: #ffffff;
+    border-color: rgba(3, 46, 92, 0.12);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+.mode-clair .planif-recherche-item-titre { color: var(--texte-principal); }
+.mode-clair .planif-recherche-item:hover { background: rgba(6, 93, 187, 0.08); }
+.mode-clair .planif-recherche-item--actif { background: rgba(6, 93, 187, 0.12); }
+.mode-clair .planif-recherche-ou { background: rgba(6, 93, 187, 0.1); }
+
 /* ── LOUPE DE NAVIGATION (11 aout 2026) ─────────────────────────────────
    Une VUE en survol, pas un second canevas : on y lit, on n'y ecrit pas.
    Le cadre est en position fixe au-dessus de tout, et son contenu est une
@@ -19777,6 +19988,57 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 }
 .planif-noeud.selected:not(.planif-conteneur) {
     background: color-mix(in srgb, var(--planif-couleur-selection) 10%, var(--surface-conteneur, #142428));
+}
+
+/* ── HALO DE RECHERCHE (15 aout 2026) ───────────────────────────────────
+   ⚠ CES REGLES DOIVENT RESTER APRES `.planif-noeud:hover`. Elles pesent
+   exactement le meme poids (0,2,0) : c'est l'ORDRE qui tranche, et posees
+   avant, le halo s'eteignait des que le curseur touchait le bloc trouve.
+
+   L'ambre d'attention du systeme (--alerte-*), jamais le bleu de la
+   selection : la recherche allume justement des blocs qu'on n'a PAS
+   selectionnes, les confondre viderait les deux etats de leur sens. Le halo
+   est un anneau EXTERIEUR — il ne touche pas a la bordure, qui porte deja la
+   couleur du type de bloc.
+
+   ⚠⚠ POURQUOI UN LISERE BICOLORE AUTOUR DE L'AMBRE. Le fond du canevas est
+   CHOISI par l'enseignant parmi douze teintes, du « Ocean » presque noir au
+   « Creme » presque blanc — et ce choix est INDEPENDANT du mode clair/sombre.
+   Aucune couleur fixe ne peut contraster contre les douze. Mesure du 15 aout,
+   sur les 12 fonds reels x 2 modes :
+     · ambre seul .................... 7 cas sur 24 sous 3:1, « Brume » a 1,19
+       (un halo qu'on ne voit litteralement pas) ;
+     · ambre + lisere sombre ......... 7 cas sur 24 sous 3:1 — les fonds
+       MI-TONS (Ardoise, Acier, Graphite, Sepia, Lichen) echappent aux deux ;
+     · ambre + lisere CLAIR + SOMBRE . aucun cas sous le seuil.
+   C'est l'indicateur bicolore de WCAG 2.2 : pour toute luminance de fond, le
+   blanc et le noir ne peuvent pas etre faibles EN MEME TEMPS — leur crossover
+   plancher est autour de 4,5:1. L'ambre reste la couleur qui SIGNIFIE
+   « trouve » ; les deux liseres d'1 px ne font que garantir qu'on la voit.
+   ⮕ Ne pas « simplifier » en retirant un lisere : chacun couvre une moitie du
+   nuancier, et la mesure ci-dessus dit laquelle. */
+.planif-noeud.planif-noeud--trouve {
+    box-shadow: 0 0 0 3px var(--alerte-bordure-attention),
+                0 0 0 4px rgba(255, 255, 255, 0.95),
+                0 0 0 5px rgba(0, 0, 0, 0.8),
+                0 0 18px color-mix(in srgb, var(--alerte-bordure-attention) 45%, transparent);
+}
+.planif-noeud.planif-noeud--trouve-actif {
+    box-shadow: 0 0 0 4px var(--alerte-bordure-attention),
+                0 0 0 5px rgba(255, 255, 255, 0.95),
+                0 0 0 6px rgba(0, 0, 0, 0.8),
+                0 0 26px color-mix(in srgb, var(--alerte-bordure-attention) 70%, transparent);
+}
+/* Trouve ET selectionne : les deux anneaux se lisent, concentriques — le bleu
+   de la selection au contact du bloc, l'ambre du trouve autour, les liseres
+   en dernier. Sans cette regle, l'un des deux etats disparaissait en silence. */
+.planif-noeud.selected.planif-noeud--trouve,
+.planif-noeud.selected.planif-noeud--trouve-actif {
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.35),
+                0 0 0 7px var(--alerte-bordure-attention),
+                0 0 0 8px rgba(255, 255, 255, 0.95),
+                0 0 0 9px rgba(0, 0, 0, 0.8),
+                0 4px 16px rgba(59, 130, 246, 0.15);
 }
 
 /* Conteneurs */

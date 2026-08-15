@@ -7,6 +7,96 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 15 AOÛT 2026 (MATIN) : CHERCHER UN MOT DANS LA CARTE.
+     ÉTAT : **1.81.0** — Vitest **2408/2408** (259 fichiers), 1 commit de code.
+
+     ▣ **LA DEMANDE**, dans ses mots : « un champ de recherche dans la toolbar de
+     la carte d'alignement afin de trouver des mots clés dans la carte ». Deux
+     arbitrages pris par lui avant de coder : la recherche mord AUSSI sur le
+     libellé du type de bloc (« montre-moi toutes les évaluations »), et les
+     résultats s'affichent en LISTE **et** en halos sur le canevas.
+
+     ▣ **CE QUI EST LIVRÉ.** `#planif-recherche-zone` entre les deux groupes de la
+     barre. Quatre gisements fouillés : titre, description, objectifs de leçon,
+     libellé du type. Chaque résultat dit OÙ le mot a été trouvé et montre la
+     phrase autour. Clic = on y va (`naviguerVers`), Entrée = suivant avec
+     bouclage, Maj+Entrée = précédent, Échap = referme la liste PUIS efface.
+     Les halos survivent à la fermeture de la liste : c'est le point, on va
+     cliquer dans la carte ensuite.
+
+     ⚠ **AUCUNE ICÔNE DE LOUPE SUR LE CHAMP**, volontairement : la barre en porte
+     déjà deux (bouton Loupe, Inspecteur). Une troisième les aurait rendues
+     indistinctes.
+
+     ═══ TROIS DÉFAUTS TROUVÉS PAR LA MESURE, AUCUN PAR LA RELECTURE ═══
+
+     ⚠⚠ **1. LE HALO S'ÉTEIGNAIT AU SURVOL — piège de CASCADE, pas de logique.**
+     `.planif-noeud:hover` et `.planif-noeud.planif-noeud--trouve` pèsent
+     EXACTEMENT le même poids (0,2,0) : c'est l'ORDRE de déclaration qui tranche.
+     Mes règles étaient posées 1 200 lignes plus haut, donc le survol gagnait —
+     le halo disparaissait au moment précis où on pose le curseur dessus. Les
+     règles vivent désormais avec `.selected`, avec un cliquet de position dans
+     la sentinelle.
+
+     ⚠⚠ **2. L'AMBRE SEUL ÉTAIT INVISIBLE SUR LA MOITIÉ DES FONDS.** Le fond du
+     canevas est CHOISI parmi douze teintes, INDÉPENDAMMENT du mode clair/sombre :
+     aucune couleur fixe ne peut contraster contre les douze. Mesuré sur les 12
+     fonds × 2 modes :
+       · ambre seul .................... 7 cas /24 sous 3:1, « Brume » à **1,19:1** ;
+       · ambre + un liseré sombre ...... 7 cas /24 — les fonds MI-TONS (Ardoise,
+         Acier, Graphite, Sépia, Lichen) échappent aux deux ;
+       · ambre + liseré CLAIR + SOMBRE . **0 cas**, minimum 4,22:1.
+     C'est l'indicateur bicolore de WCAG 2.2 : blanc et noir ne peuvent pas être
+     faibles en même temps. ⮕ **Ma première correction était insuffisante et la
+     seconde mesure l'a dit.** Corriger sans re-mesurer aurait livré un halo
+     encore invisible sur cinq fonds.
+
+     ⚠⚠ **3. LA NORMALISATION DES ACCENTS ÉTAIT FAUSSE — et mon test le disait
+     vert.** Mon break-test a fait survivre UNE mutation sur seize : remplacer la
+     normalisation caractère-par-caractère par un `normalize('NFD')` global ne
+     rougissait rien. Cause : mon cas de test affirmait « la longueur est
+     préservée » avec des ÉCHANTILLONS NON DISCRIMINANTS — « é » → NFD → retrait
+     des marques redonne bien 1 caractère, donc les DEUX implémentations
+     s'accordaient. Le test protégeait un invariant qu'aucune de ses valeurs ne
+     pouvait mettre en défaut.
+     ⮕ **En cherchant ce qui les sépare vraiment, j'ai trouvé un vrai défaut de
+     mon code** : un texte DÉJÀ DÉCOMPOSÉ (« e » + U+0301, la forme que produit
+     macOS et qui voyage par copier-coller depuis le Finder ou un PDF) n'était
+     **pas trouvé du tout**. À l'écran les deux formes sont identiques : un titre
+     introuvable aurait été incompréhensible pour lui.
+     ⮕ Refait sur une **table d'index** (`indexerPourRecherche`) : on cherche
+     dans le texte replié, on découpe l'extrait dans le texte d'origine, et la
+     table fait le pont. Ni égalité de longueur ni hypothèse — les deux formes
+     sont trouvées et l'extrait tombe juste dans les deux cas.
+
+     ▣ **SENTINELLE** : `tests/unit/sentinelle-recherche-carte.test.js`, 30 cas.
+     **BREAK-TESTÉE EN 17 MUTATIONS — 17 vues rouges** (gisements retirés un à
+     un, type replacé avant le contenu, table d'index naïve, repli d'accents
+     retiré, marques combinantes non repliées, seuil à 1, message du seuil
+     dénombré, tri retiré, cache non vidé, rafraîchissement retiré, loupe non
+     périmée, titre non échappé, chaque liseré retiré, bleu de sélection).
+
+     ▣ **ÉPROUVÉ AU NAVIGATEUR** (Chromium, 24 cas fonctionnels) : place dans la
+     barre sans pousser les boutons de vue hors écran, seuil annoncé, accents
+     dans les deux sens, description et objectif fouillés, type étiqueté, Entrée
+     qui boucle aux deux bouts, halo qui survit au survol ET à une reconstruction
+     du DOM, clic qui sélectionne, double Échap, et la touche « L » qui n'ouvre
+     PAS la loupe quand on tape dans le champ. Zéro erreur console.
+
+     ⚠ **PIÈGE DE HARNAIS, noté pour la prochaine fois** : `naviguerVers` pose une
+     ombre EN LIGNE (le flash d'atterrissage) pendant 1 200 ms. Mon cas « le halo
+     survit au survol » mesurait dedans et échouait alors que le code était juste.
+     Il attend maintenant l'extinction ET VÉRIFIE qu'elle a eu lieu avant de
+     conclure. Deux autres cas ont d'abord échoué sur des DONNÉES fausses de ma
+     part (« litterature » n'est pas dans « littéraire ») — le code n'y était
+     pour rien.
+
+     ⚠ **NON ÉPROUVÉ** : Safari et iPad (WebKit manque au conteneur, #456
+     préexistant). Les cibles tactiles de 44 px et le repli du champ en portrait
+     sont écrits mais jamais vus sur son matériel.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 15 AOÛT 2026 : LA TÂCHE SE TERMINE, L'OBJECTIF SE POURSUIT.
      ÉTAT : **1.80.0** — Vitest **2378/2378** (258 fichiers), 1 commit de code.
 
