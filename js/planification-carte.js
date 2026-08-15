@@ -3522,6 +3522,61 @@ function creerLien(sourceId, cibleId, typeLien) {
    on tomberait toujours dans le cas 3.
    ===================================================================== */
 
+/* ── LE CONTOURNEMENT EST UN CHOIX (15 août 2026, demande de Grégoire) ──
+   « Est-ce que ce serait beaucoup de travail que d'offrir l'option, de sorte
+   que s'il préfère la version antérieure les deux s'offrent à lui ? »
+
+   ▣ Le tracé direct N'EST PAS un repli de compatibilité — ce serait
+   exactement l'empilement « au cas où » que la règle zéro-dette du projet
+   refuse. C'est un réglage que l'enseignant pose et voit : sur une carte
+   aérée, la courbe directe se lit mieux qu'un contournement qui s'écarte pour
+   rien. Les deux chemins sont donc vivants, et tous deux éprouvés.
+
+   ⚠ LE DÉFAUT EST « CONTOURNER » : c'est le comportement que Grégoire a jugé
+   « beaucoup mieux ». Une carte existante s'ouvre donc contournée sans qu'il
+   ait rien à faire.
+
+   ⚠ LU UNE FOIS, PAS À CHAQUE LIEN. `calculerTraceLien` est appelée pour
+   CHAQUE lien à chaque redessin ; interroger le stockage à chaque appel
+   paierait un accès disque par lien et par image pendant un glisser. */
+var CLE_PREF_CONTOURNER = 'planif-liens-contourner';
+var _lienContourner = true;
+
+function chargerPrefContournement() {
+    var v = db.getSync(CLE_PREF_CONTOURNER, null);
+    _lienContourner = (v === null || v === undefined) ? true : !!v;
+    return _lienContourner;
+}
+
+function definirContournement(actif) {
+    _lienContourner = !!actif;
+    db.setSync(CLE_PREF_CONTOURNER, _lienContourner);
+    majItemContournement();
+    // Redessiner TOUS les liens : le réglage change leur tracé, pas leur
+    // contenu — inutile de reconstruire la carte entière.
+    for (var e of etat.liens) dessinerLien(e[1]);
+}
+
+function contournementActif() { return _lienContourner; }
+
+/**
+ * L'item du menu porte son ÉTAT, pas seulement son nom.
+ *
+ * ⚠ Un item de menu qui dit « Liens : contourner les blocs » sans rien
+ * d'autre ne répond pas à la question qu'on se pose en l'ouvrant — « est-ce
+ * que c'est actif en ce moment ? ». La coche le dit ; le sous-titre dit ce
+ * qu'on obtiendra en cliquant, pour qu'on n'ait pas à essayer pour savoir.
+ */
+function majItemContournement() {
+    var btn = document.getElementById('planif-btn-liens-contourner');
+    if (!btn) return;
+    btn.textContent = (_lienContourner ? '✓ ' : '') + 'Liens : contourner les blocs';
+    btn.title = _lienContourner
+        ? 'Actif — les liens évitent les blocs. Cliquer pour revenir au tracé direct.'
+        : 'Inactif — les liens vont droit au but. Cliquer pour qu\'ils contournent.';
+    btn.setAttribute('aria-pressed', _lienContourner ? 'true' : 'false');
+}
+
 // Marge autour d'un bloc : le lien ne doit pas le frôler non plus.
 var LIEN_MARGE = 14;
 // Nombre de points échantillonnés le long d'une courbe pour la tester. 18 est
@@ -3699,6 +3754,23 @@ function _longueur(echantillons) {
  * désormais la courbe, et s'écarte s'il tombe sur un bloc.
  */
 function calculerTraceLien(sourceId, cibleId) {
+    // ── TRACÉ DIRECT — le comportement d'avant le 15 août, offert en option.
+    // Ports choisis sur le seul axe dominant, une courbe, libellé au milieu
+    // géométrique. On ne calcule AUCUN obstacle : c'est ce qui rend ce mode
+    // moins coûteux, et c'est aussi pourquoi `traversees` vaut null plutôt
+    // que 0 — non mesuré n'est pas « aucune ».
+    if (!_lienContourner) {
+        var pd = trouverMeilleursPorts(sourceId, cibleId);
+        var a = getPortPosition(sourceId, pd.portSource);
+        var b2 = getPortPosition(cibleId, pd.portCible);
+        return {
+            d: cheminLisse([a, b2], _directionPort(pd.portSource), _directionPort(pd.portCible)),
+            p1: a, p2: b2,
+            etiquette: { x: (a.x + b2.x) / 2, y: (a.y + b2.y) / 2 },
+            traversees: null
+        };
+    }
+
     var obstacles = obstaclesPourLien(sourceId, cibleId);
 
     // ── 1. La meilleure paire de ports ────────────────────────────────
@@ -7755,6 +7827,23 @@ function initialiser() {
 
     brancherRecherche();
 
+    var btnContourner = document.getElementById('planif-btn-liens-contourner');
+    if (btnContourner) {
+        chargerPrefContournement();
+        majItemContournement();
+        btnContourner.addEventListener('click', function(e) {
+            // ⚠ ON NE REFERME PAS LE MENU, contrairement à tous ses voisins.
+            // Le panneau se referme au moindre clic à l'intérieur — parfait
+            // pour une ACTION (« Dupliquer », « Exporter »), mauvais pour un
+            // ÉTAT : la coche changerait et disparaîtrait dans le même geste,
+            // et il faudrait rouvrir le menu pour savoir ce qu'on vient de
+            // faire. Ici on la voit basculer, et les liens se retracent
+            // derrière. Un clic ailleurs referme, comme d'habitude.
+            e.stopPropagation();
+            definirContournement(!_lienContourner);
+        });
+    }
+
     var btnNettoyage = document.getElementById('planif-btn-nettoyer-titres');
     var panneauNettoyage = document.getElementById('planif-nettoyage-titres-panel');
     if (btnNettoyage && panneauNettoyage) {
@@ -10678,6 +10767,13 @@ window.planificationCarte = {
     // et le NOMBRE de blocs encore traversés — c'est ce compte que la
     // sentinelle observe, plutôt que la forme du chemin.
     calculerTraceLien: calculerTraceLien,
+    definirContournement: definirContournement,
+    // Exposée pour la sentinelle : le défaut du STOCKAGE (aucune préférence
+    // enregistrée → contourner) ne se voit qu'en appelant cette fonction. Sans
+    // elle, un test qui lit la variable du module croit couvrir le défaut et
+    // ne couvre rien — c'est le break-test du 15 août qui l'a dit.
+    chargerPrefContournement: chargerPrefContournement,
+    contournementActif: contournementActif,
     obstaclesPourLien: obstaclesPourLien,
     resoudreVerbe: resoudreVerbe,
     TYPES_REACTIVATION: TYPES_REACTIVATION,

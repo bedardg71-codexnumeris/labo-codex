@@ -12,9 +12,9 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | **`main`** |
-| **Version** | **1.82.0** — build `0815-1130` |
+| **Version** | **1.83.0** — build `0815-1238` |
 | **Travail en avance sur `main`** | **aucun** |
-| **Dernière mise à jour** | 15 août 2026 — recherche dans la Carte d'alignement (1.81.0), deux correctifs sur retour terrain (1.81.1 teinte du halo, 1.81.2 barre rognée sur iPad), **porte terrain rejouée et close à 45/46**, puis routage des liens + verbe « se réactive dans » (1.82.0). Vitest 2432/2432 |
+| **Dernière mise à jour** | 15 août 2026 — recherche dans la Carte d'alignement (1.81.0), deux correctifs sur retour terrain (1.81.1 teinte du halo, 1.81.2 barre rognée sur iPad), **porte terrain rejouée et close à 45/46**, puis routage des liens + verbe « se réactive dans » (1.82.0) et son réglage dans Actions (1.83.0). Vitest 2440/2440 |
 
 ⚠⚠ **AVANT TOUTE FUSION EN CONTENEUR : `git fetch --unshallow origin`.** Le clone
 du conteneur est **shallow**, et son `main` LOCAL peut pointer des semaines en

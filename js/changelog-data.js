@@ -21,14 +21,15 @@
 
     var CHANGELOG = [
         {
-            version: '1.82',
+            version: '1.83',
             couleur: 'vert',
             titre: 'Les liens contournent, et disent mieux',
             items: [
                 'Les liens ne passent plus par-dessus les blocs : ils choisissent leur côté de départ et d’arrivée, et contournent ce qui gêne quand aucun passage direct n’existe.',
                 'Le libellé d’un lien se pose maintenant SUR la courbe, et s’écarte s’il tombe sur un bloc — avant, il se posait à mi-chemin entre les deux extrémités, un point qui n’appartenait pas au tracé.',
                 'Nouveau verbe « se réactive dans » : une connaissance reliée à une Ouverture ne s’y acquiert pas, elle y est remise en service. C’est le rappel de début de leçon.',
-                'Le menu d’un lien offre désormais TOUS les verbes, sous ceux qu’il suggère. Un verbe suggéré qui ne convient pas ne bloque plus.'
+                'Le menu d’un lien offre désormais TOUS les verbes, sous ceux qu’il suggère. Un verbe suggéré qui ne convient pas ne bloque plus.',
+                'Le contournement se règle : Actions ▸ « Liens : contourner les blocs ». Actif par défaut ; le décocher redonne le tracé direct d’avant, pour les cartes assez aérées pour s’en passer.'
             ]
         },
         {

@@ -7,6 +7,52 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 15 AOÛT 2026 (SUITE 4) : LE CONTOURNEMENT DEVIENT UN CHOIX.
+     ÉTAT : **1.83.0** — Vitest **2440/2440** (260 fichiers), 1 commit.
+
+     ▣ **SA QUESTION ÉTAIT UNE QUESTION DE COÛT** : « est-ce que ce serait
+     beaucoup de travail d'offrir l'option, de sorte que s'il préfère la version
+     antérieure les deux s'offrent à lui ? » Réponse mesurée sur le code, pas
+     estimée : `calculerTraceLien` n'a **qu'un seul appelant**, et le stockage
+     d'une préférence a déjà son patron dans le module. Une sortie anticipée,
+     une clé, un item de menu.
+
+     ⮕ **ET UN ARGUMENT QUE JE N'AVAIS PAS VU AVANT DE REGARDER** :
+     `trouverMeilleursPorts` — l'ancien choix de ports — n'avait plus AUCUN
+     appelant depuis le matin. Du code mort que la règle zéro-dette obligeait à
+     nettoyer dans la même session. L'option lui rend un appelant au lieu de le
+     supprimer : dans les deux cas il fallait trancher, et c'est sa décision qui
+     l'a fait.
+
+     ▣ **DÉFAUT = CONTOURNER**, ce qu'il a jugé « beaucoup mieux » : une carte
+     existante s'ouvre corrigée sans qu'il ait à choisir. Le réglage vit dans
+     **Actions**, pas dans la barre d'outils — elle débordait déjà sur iPad ce
+     matin, je n'y ajoute pas un douzième bouton.
+
+     ⚠ **L'ITEM NE REFERME PAS LE MENU, contrairement à tous ses voisins.** Le
+     panneau se referme au moindre clic dedans : parfait pour une ACTION,
+     mauvais pour un ÉTAT — la coche changerait et disparaîtrait dans le même
+     geste, et il faudrait rouvrir pour savoir ce qu'on vient de faire.
+
+     ⚠ **`traversees` vaut `null` en tracé direct, pas `0`.** Aucun obstacle
+     n'est calculé dans ce mode : rendre 0 ferait croire à une garantie qu'on
+     n'a pas prise. Non mesuré n'est pas « aucune ».
+
+     ⚠⚠ **ENCORE UNE GARDE DÉCORATIVE, ET TOUJOURS LA MÊME FAMILLE.** Mon test
+     « le défaut est contourner » lisait la VARIABLE du module — que la fonction
+     de chargement n'avait jamais touchée. Basculer le défaut du STOCKAGE le
+     laissait vert. **Un test qui n'appelle pas le code qu'il prétend couvrir ne
+     couvre rien.** `chargerPrefContournement` est désormais exposée et
+     réellement appelée.
+
+     ▣ **SENTINELLE portée à 22 cas, BREAK-TEST UNIFIÉ À 19 MUTATIONS — 19
+     rouges.** Les deux harnais (routage, option) sont fondus en un : j'en avais
+     supprimé un au nettoyage d'avant release et failli perdre sa couverture.
+
+     ⏳ **TOUJOURS OUVERT** : le verbe de « Révision et réutilisation ».
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 15 AOÛT 2026 (SUITE 3) : LES LIENS CONTOURNENT, ET DISENT MIEUX.
      ÉTAT : **1.82.0** — Vitest **2432/2432** (260 fichiers), 1 commit.
 
