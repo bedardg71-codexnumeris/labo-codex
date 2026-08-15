@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            version: '1.84',
+            couleur: 'bleu',
+            titre: 'La modale des gabarits d’export, revue',
+            items: [
+                'Elle s’ouvre enfin par-dessus le plein écran de la Carte d’alignement : plus besoin d’en sortir pour la voir.',
+                'Elle est nettement plus courte — les colonnes « à ajouter » se rangent maintenant côte à côte, en blocs qui se serrent, au lieu de s’empiler une par ligne.',
+                'Elle tient toujours dans l’écran, quel que soit le nombre de colonnes : les boutons Copier et Télécharger restent atteignables sans faire défiler la page.',
+                'Les colonnes gardent une position fixe : une case ne change plus de place d’un affichage à l’autre.'
+            ]
+        },
+        {
             version: '1.83',
             couleur: 'vert',
             titre: 'Les liens contournent, et disent mieux',
@@ -30,7 +41,9 @@
                 'Nouveau verbe « se réactive dans » : une connaissance reliée à une Ouverture ou à une Révision ne s’y acquiert pas, elle y est remise en service. C’est le rappel de début de leçon, et la pratique répartie.',
                 'Le menu d’un lien offre désormais TOUS les verbes, sous ceux qu’il suggère. Un verbe suggéré qui ne convient pas ne bloque plus.',
                 'Le contournement se règle : Actions ▸ « Liens : contourner les blocs ». Actif par défaut ; le décocher redonne le tracé direct d’avant, pour les cartes assez aérées pour s’en passer.',
-                'Tes liens déjà tracés sont mis à jour tout seuls : ceux qui reliaient une connaissance à une Ouverture ou à une Révision passent de « s’acquiert par » à « se réactive dans » à l’ouverture de la carte. Un message te dit combien, et lesquels.'
+                'Tes liens déjà tracés sont mis à jour tout seuls : ceux qui reliaient une connaissance à une Ouverture ou à une Révision passent de « s’acquiert par » à « se réactive dans » à l’ouverture de la carte. Un message te dit combien, et lesquels.',
+                'Le badge 🎯 d’une leçon est de nouveau gris tant qu’aucun objectif n’est posé, et en couleur dès qu’il y en a un. Il reste repérable : son liséré pointillé garde la teinte de la leçon.',
+                'Ce même badge est plus facile à toucher sur iPad — sa zone sensible passe à 44 px sans que les blocs de la carte grandissent.'
             ]
         },
         {
