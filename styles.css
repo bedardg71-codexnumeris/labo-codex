@@ -18501,10 +18501,29 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     flex-shrink: 0;
 }
 
+/* ⚠⚠ LA BARRE PASSE À LA LIGNE PLUTÔT QUE DE COUPER (15 août 2026).
+   Défaut trouvé par la porte terrain 2.1c, capture d'iPad à l'appui — et
+   PRÉEXISTANT au champ de recherche : mesuré sur iPad Air en portrait
+   (820 px), la barre réclamait déjà 783 px pour 728 disponibles en 1.80.0,
+   et le Guide et la Bibliothèque tombaient hors cadre. Le champ de recherche
+   a porté le besoin à 901 px, donc aggravé un débordement qui existait.
+
+   ▣ Rien ne le SIGNALAIT : la rangée ne défile pas, elle est simplement
+   rognée au bord. Un bouton hors cadre n'a l'air de rien — il a l'air de ne
+   pas exister. C'est le même symptôme que #444 en août, quand la palette
+   coupait l'Inspecteur sur iPad.
+
+   ⮕ `flex-wrap` est le remède qui ne cache RIEN : sur écran large la rangée
+   reste unique (rien ne change), et dès qu'elle ne tient plus, le groupe de
+   droite descend d'une ligne au lieu de sortir de l'écran. Préféré à un
+   défilement horizontal, qui aurait laissé les mêmes boutons invisibles
+   derrière un geste que rien n'annonce. */
 .planif-header-toolbar {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 8px;
+    row-gap: 6px;
     width: 100%;
 }
 
@@ -18596,8 +18615,15 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     display: flex;
     align-items: center;
     gap: 4px;
-    flex: 0 1 260px;
+    /* ⚠ BASE COURTE, PUIS ÉTIREMENT — et l'ordre compte. Le passage à la
+       ligne se décide sur la base `flex-basis` AVANT tout rétrécissement :
+       une base de 260 px faisait donc descendre le groupe de droite sur
+       iPad en PAYSAGE, alors que la rangée y tenait très bien. Base courte
+       + `flex-grow` + plafond : la rangée reste unique tant qu'elle peut,
+       et le champ occupe quand même toute la place libre. */
+    flex: 1 1 170px;
     min-width: 110px;
+    max-width: 280px;
     height: 28px;
     padding: 0 6px 0 10px;
     border: 1px solid var(--planif-couleur-bordure);

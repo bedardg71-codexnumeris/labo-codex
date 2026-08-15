@@ -7,6 +7,62 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 15 AOÛT 2026 (SUITE 2) : LA BARRE COUPAIT DÉJÀ, ET PERSONNE NE
+     L'AVAIT VU. ÉTAT : **1.81.2** — Vitest **2414/2414**, 1 commit.
+
+     ▣ **LA PORTE TERRAIN 2.1c A MORDU** — la seule rangée en échec de ses 46.
+     Capture d'iPad en portrait : la barre d'outils de la carte est rognée au
+     bord droit, l'Inspecteur, les Raccourcis, le Guide et la Bibliothèque
+     n'existent tout simplement plus à l'écran.
+
+     ⚠⚠ **ET LA MESURE M'A DÉTROMPÉ SUR MA PROPRE RESPONSABILITÉ.** Avant de
+     corriger, j'ai mesuré la barre AVEC et SANS le champ de recherche, sur
+     iPad Air en portrait (820 px, soit 728 px utiles) :
+       · **SANS le champ (état 1.80.0)** : 783 px requis → **DÉBORDAIT DÉJÀ**,
+         le Guide et la Bibliothèque hors cadre ;
+       · **AVEC le champ (1.81.1)** : 901 px requis, quatre boutons de plus.
+     ⮕ **Le défaut est PRÉEXISTANT ; mon champ l'a aggravé, pas créé.** Sans
+     cette mesure j'aurais écrit « défaut introduit par la recherche », ce qui
+     était faux — et on aurait cherché la cause au mauvais endroit.
+
+     ▣ **POURQUOI PERSONNE NE L'AVAIT VU** : la rangée ne défile pas, elle est
+     rognée. Un bouton hors cadre n'a pas l'air cassé, il a l'air de ne pas
+     exister. Même symptôme que #444 en août, quand la palette coupait
+     l'Inspecteur sur iPad.
+
+     ▣ **CORRECTIF** : `flex-wrap: wrap` sur la barre. Rien ne se cache — sur
+     écran large la rangée reste unique, et dès qu'elle ne tient plus le groupe
+     de droite descend d'une ligne. Préféré à un défilement horizontal, qui
+     aurait laissé les mêmes boutons invisibles derrière un geste que rien
+     n'annonce.
+
+     ⚠ **UN EFFET DE BORD, ATTRAPÉ PAR LA MESURE SUIVANTE** : en PAYSAGE la
+     barre s'est mise à passer à deux lignes alors qu'elle tenait. Cause : le
+     retour à la ligne se décide sur `flex-basis` AVANT tout rétrécissement, et
+     mon champ en réservait 260. Base ramenée à 170 + `flex-grow` + plafond de
+     280. Vérifié à CINQ largeurs — 744, 820, 1180, 1440, 1920 : **aucun bouton
+     hors cadre nulle part**, et la seconde ligne n'apparaît qu'en portrait.
+
+     ⚠⚠ **ET J'AI FAILLI PERDRE DEUX MUTATIONS EN SILENCE.** J'avais recopié le
+     break-test depuis un dossier de travail : une version PÉRIMÉE. Mon
+     `replace` d'ajout n'a rien trouvé et n'a rien fait — sans assertion, un
+     no-op silencieux. Le script s'arrêtait à une mutation devenue inopérante,
+     et j'ai failli lire « 1 non détectée » comme un défaut de code au lieu
+     d'un défaut d'outil. ⮕ Le break-test est reconstruit avec une GARDE : tout
+     motif absent du fichier réel est un ÉCHEC, jamais un avertissement.
+
+     ▣ **SENTINELLE à 36 cas, BREAK-TESTÉE EN 24 MUTATIONS — 24 rouges.** Deux
+     neuves : la barre passe à la ligne, et le champ garde une base courte avec
+     plafond (sinon il force le retour à la ligne en paysage).
+
+     ▣ **#3.2 CLOS** : « je me suis trompé, le seuil de 2 caractères est bon. »
+     Aucun changement à `RECHERCHE_MIN`.
+
+     ⚠ **NON ÉPROUVÉ** : le rendu réel sur Safari iPad. Les cinq largeurs sont
+     mesurées dans Chromium — c'est la géométrie, pas son matériel.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 15 AOÛT 2026 (SUITE) : LE HALO ÉTAIT GRIS, ET IL AVAIT RAISON.
      ÉTAT : **1.81.1** — Vitest **2412/2412** (259 fichiers), 1 commit.
 
