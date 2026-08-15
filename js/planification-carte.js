@@ -9291,6 +9291,51 @@ function rendrePanneauExportPlan() {
 // texte (décision du 12 août).
 var exportPersoFormatApercu = 'tsv';
 
+/**
+ * Aperçu TSV mis en colonnes — AFFICHAGE SEULEMENT.
+ *
+ * Retour terrain du 15 août : « pourrais-tu espacer les colonnes de manière à
+ * ce que leur contenu ne se chevauche pas avec celui des autres ? » Un TSV
+ * sépare par UNE tabulation ; rendu dans un <pre>, les taquets tombent tous
+ * les 8 caractères, donc une cellule un peu longue déborde sur le taquet
+ * suivant et vient coller la colonne d'à côté. Ce n'est pas un défaut du
+ * fichier, c'est un défaut de l'aperçu.
+ *
+ * ⚠⚠ NE JAMAIS APPLIQUER CECI AU DOCUMENT PRODUIT. Un TSV rembourré d'espaces
+ * n'est plus un TSV : collé dans Numbers ou Excel, chaque cellule traînerait
+ * son remplissage. Copier et Télécharger passent par `documentCourant()`,
+ * c'est-à-dire par le générateur — cette fonction ne touche QUE le <pre>.
+ * C'est la seule raison pour laquelle elle a le droit d'exister.
+ *
+ * Le calcul de largeur compte des UNITÉS DE CODE, pas des graphèmes : un
+ * emoji ou un caractère accentué décomposé peut donc décaler d'une colonne.
+ * Acceptable pour un aperçu en police à chasse fixe ; ça ne le serait pas
+ * pour un document.
+ */
+function alignerApercuTSV(tsv) {
+    var lignes = tsv.replace(/\n+$/, '').split('\n').map(function(l) { return l.split('\t'); });
+    if (lignes.length === 0) return tsv;
+    var nbColonnes = lignes.reduce(function(m, l) { return Math.max(m, l.length); }, 0);
+    var largeurs = [];
+    for (var c = 0; c < nbColonnes; c++) {
+        largeurs[c] = lignes.reduce(function(m, l) {
+            return Math.max(m, (l[c] || '').length);
+        }, 0);
+    }
+    return lignes.map(function(l) {
+        var rendu = [];
+        for (var i = 0; i < nbColonnes; i++) {
+            var cellule = l[i] || '';
+            // La dernière colonne n'est pas rembourrée : sinon chaque ligne
+            // traînerait des espaces jusqu'à la largeur de la plus longue, et
+            // la barre de défilement horizontale irait toujours au maximum.
+            rendu.push(i === nbColonnes - 1 ? cellule
+                : cellule + Array(largeurs[i] - cellule.length + 1).join(' '));
+        }
+        return rendu.join('  ').replace(/\s+$/, '');
+    }).join('\n');
+}
+
 function ouvrirModaleExportPerso() {
     var modale = document.getElementById('modalExportPersonnalise');
     var exporteur = window.planificationExport;
@@ -9345,7 +9390,8 @@ function remplirModaleExportPerso() {
         var g = gabaritCourant();
         var doc = exporteur.genererDepuisGabarit(g.id, exportPersoFormatApercu,
             exportPlanGroupe ? { groupeCoursId: exportPlanGroupe } : undefined);
-        apercu.textContent = doc || 'Aucune carte active.';
+        if (!doc) { apercu.textContent = 'Aucune carte active.'; return; }
+        apercu.textContent = exportPersoFormatApercu === 'tsv' ? alignerApercuTSV(doc) : doc;
     }
 
     /** Enregistre une modification — refusée d'office sur un gabarit générique. */
@@ -10773,6 +10819,9 @@ window.planificationCarte = {
     // Exposées pour la sentinelle de la modale personnalisée (#431).
     remplirModaleExportPerso: remplirModaleExportPerso,
     ouvrirModaleExportPerso: ouvrirModaleExportPerso,
+    // Exposée pour la sentinelle : ce que produit une mise en colonnes se
+    // vérifie en la LUI FAISANT FAIRE, pas en relisant sa source.
+    alignerApercuTSV: alignerApercuTSV,
     // Exposées pour la sentinelle de la rétroaction formative (#424 Lot E) :
     // les deux libellés se vérifient en RENDANT le sélecteur, l'écriture en
     // EXERÇANT la porte unique.

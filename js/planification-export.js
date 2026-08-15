@@ -250,6 +250,47 @@ function dateDeLecon(horaire, semaine, rangSeance) {
     return dates[r - 1];
 }
 
+/**
+ * Ordre de lecture des leçons dans un document : la SEMAINE, puis le rang de
+ * séance, puis la position sur la carte.
+ *
+ * ⚠ CE TRI MANQUAIT, ET SON ABSENCE NE RESSEMBLAIT PAS À UN DÉFAUT DE TRI.
+ * Retour terrain du 15 août : « la leçon 11 se range bizarrement après la
+ * rangée 1 plutôt que 10 ». Les leçons sortaient dans l'ordre BRUT de
+ * `seq.enfants` — c'est-à-dire l'ordre de CRÉATION. Ni temporel, ni spatial :
+ * l'ordre dans lequel les blocs avaient été posés, des mois plus tôt.
+ * Une seule leçon créée tôt et planifiée tard suffit à la faire surgir en
+ * tête, ce qui se lit comme un tri alphabétique cassé (« 11 après 1 ») alors
+ * qu'il n'y avait aucun tri du tout.
+ *
+ * Mesuré avant correction sur une carte d'essai : ["11","3","3","5","6","8"].
+ *
+ * ⮕ Les SÉQUENCES, elles, étaient déjà triées temporellement
+ * (`listerSequencesHierarchie('temporel')`). Le document mélangeait donc deux
+ * ordres selon le niveau — d'où une liste qui a l'air presque triée, ce qui
+ * est plus déroutant qu'une liste franchement en désordre.
+ *
+ * Les leçons non planifiées vont EN FIN, jamais en tête : même règle que
+ * `rangTemporel`, pour que l'absence de semaine ne se lise pas comme « semaine
+ * zéro ».
+ */
+function trierLeconsTemporel(noeuds) {
+    var c = carte();
+    var loin = Number.MAX_SAFE_INTEGER;
+    return noeuds.slice().sort(function(a, b) {
+        var sa = c.semaineDeLecon(a), sb = c.semaineDeLecon(b);
+        var ka = sa === null ? loin : sa, kb = sb === null ? loin : sb;
+        if (ka !== kb) return ka - kb;
+        var ra = c.rangSeanceDeLecon(a), rb = c.rangSeanceDeLecon(b);
+        var qa = ra === null ? loin : ra, qb = rb === null ? loin : rb;
+        if (qa !== qb) return qa - qb;
+        // Départage : lecture de la carte, gauche → droite puis haut → bas.
+        // Sans lui, deux leçons de même semaine ET même rang garderaient
+        // l'ordre de création — le désordre qu'on vient de retirer.
+        return ((a.x || 0) - (b.x || 0)) || ((a.y || 0) - (b.y || 0));
+    });
+}
+
 function construireLecon(nd, horaire) {
     var c = carte();
     var objectifs = c.objectifsDeLeconParId(nd.id); // [{id, texte}]
@@ -359,20 +400,32 @@ function construirePlan(options) {
             activitesLegacy: {},
             objectifsParId: null
         };
+        // Les leçons sont collectées en NŒUDS puis triées, et pas construites
+        // au passage : le tri a besoin de `x`/`y`, que l'objet construit ne
+        // porte pas.
+        var noeudsLecons = [];
         (seq.enfants || []).forEach(function(eid) {
             var enf = etat.noeuds.get(eid);
             if (!enf || enf.type === 'sequence') return; // sections propres plus bas
-            if (enf.type === 'lecon') s.lecons.push(construireLecon(enf, horaire));
+            if (enf.type === 'lecon') noeudsLecons.push(enf);
             else s.elements.push(construireElement(enf, contexteSeq));
+        });
+        s.lecons = trierLeconsTemporel(noeudsLecons).map(function(nd) {
+            return construireLecon(nd, horaire);
         });
         return s;
     });
 
-    var leconsOrphelines = [];
+    // Hors séquence : l'itération de `etat.noeuds` rend l'ordre d'INSERTION,
+    // encore moins signifiant qu'ailleurs. Même tri, même raison.
+    var noeudsOrphelins = [];
     for (var entry of etat.noeuds) {
         var nd = entry[1];
-        if (nd.type === 'lecon' && !nd.parent) leconsOrphelines.push(construireLecon(nd, horaire));
+        if (nd.type === 'lecon' && !nd.parent) noeudsOrphelins.push(nd);
     }
+    var leconsOrphelines = trierLeconsTemporel(noeudsOrphelins).map(function(n2) {
+        return construireLecon(n2, horaire);
+    });
 
     return { nomCarte: nomCarte, sequences: sequences, leconsOrphelines: leconsOrphelines };
 }
