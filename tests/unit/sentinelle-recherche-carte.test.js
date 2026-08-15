@@ -91,6 +91,25 @@ function poserNoeud(id, type, extra) {
 
 const ids = (res) => res.map((r) => r.id);
 
+/**
+ * Découpe un bloc CSS entre deux ancres — et REFUSE de rendre une tranche vide.
+ *
+ * ⚠ C'est la garde qui manquait le 15 août : `css.indexOf(fin)` peut rendre une
+ * position ANTÉRIEURE au début (l'ancre existe, mais ailleurs dans le fichier),
+ * et `slice` rend alors la chaîne vide. Un `expect(bloc).not.toContain(...)` sur
+ * une chaîne vide passe TOUJOURS — le test protège alors du vide, pas du code.
+ * Deux de mes assertions sont restées vertes sous mutation pour cette raison.
+ */
+function blocCss(debut, fin) {
+    const i = css.indexOf(debut);
+    const j = css.indexOf(fin, i + debut.length);
+    expect(i, `ancre de début introuvable : ${debut}`).toBeGreaterThan(-1);
+    expect(j, `ancre de fin introuvable APRÈS le début : ${fin}`).toBeGreaterThan(i);
+    const bloc = css.slice(i, j);
+    expect(bloc.length, 'la tranche CSS ne doit pas être vide').toBeGreaterThan(20);
+    return bloc;
+}
+
 beforeEach(() => {
     monterModule();
 });
@@ -300,26 +319,87 @@ describe('recherche · F — cliquets de source et de cascade', () => {
     });
 
     it('⚠ le halo porte DEUX liserés, un clair et un sombre', () => {
-        // Mesuré le 15 août sur les 12 fonds du canevas × 2 modes : l'ambre
-        // seul tombait à 1,19:1 sur « Brume » (invisible), et l'ambre + un
+        // Mesuré le 15 août sur les 12 fonds du canevas × 2 modes : la teinte
+        // seule tombait à 1,19:1 sur « Brume » (invisible), et teinte + un
         // seul liseré laissait passer les cinq fonds mi-tons. Retirer un
         // liseré rouvrirait exactement ces cas — d'où ce cliquet.
-        const bloc = css.slice(
-            css.indexOf('.planif-noeud.planif-noeud--trouve {'),
-            css.indexOf('.planif-noeud.planif-noeud--trouve-actif {')
-        );
-        expect(bloc).toContain('var(--alerte-bordure-attention)');
+        const bloc = blocCss('.planif-noeud.planif-noeud--trouve {',
+                             '.planif-noeud.planif-noeud--trouve-actif {');
+        expect(bloc).toContain('var(--planif-couleur-trouve)');
         expect(bloc).toMatch(/rgba\(255,\s*255,\s*255/);
         expect(bloc).toMatch(/rgba\(0,\s*0,\s*0/);
+    });
+
+    it('⚠ le halo a son PROPRE jeton — pas celui des alertes', () => {
+        // Retour terrain de Grégoire, captures à l'appui : le halo était
+        // « davantage gris que ambre ». Il empruntait
+        // `--alerte-bordure-attention`, un ocre DÉSATURÉ calibré pour border
+        // un encadré d'alerte — et qui appartient à la famille des alertes
+        // RaI, que le projet interdit de confondre avec autre chose.
+        // La tranche couvre les TROIS règles du halo (normal, actif, et le
+        // cas « trouvé ET sélectionné »), jusqu'à la règle suivante du fichier.
+        const halo = blocCss('.planif-noeud.planif-noeud--trouve {', '\n/* ');
+        expect(css).toMatch(/--planif-couleur-trouve:\s*#[0-9a-f]{6}/i);
+        expect(halo, 'les trois règles du halo').toContain('planif-noeud--trouve-actif');
+        expect(halo).not.toContain('--alerte-bordure-attention');
+    });
+
+    it('⚠ la teinte du halo est VIVE — sa saturation est mesurée, pas décrétée', () => {
+        // « Je voudrais une couleur plus saturée. » C'est une exigence
+        // vérifiable : on la vérifie, plutôt que de faire confiance au nom
+        // qu'on donne à la couleur. L'ocre d'origine (#a07830) tombe à 54 %
+        // de saturation et 41 % de luminosité — il échouerait ici.
+        const m = css.match(/--planif-couleur-trouve:\s*#([0-9a-f]{6})/i);
+        expect(m, 'le jeton doit exister').toBeTruthy();
+        const [r, g, b] = [0, 2, 4].map((i) => parseInt(m[1].substr(i, 2), 16) / 255);
+        const max = Math.max(r, g, b), min = Math.min(r, g, b);
+        const l = (max + min) / 2;
+        const sat = max === min ? 0 : (max - min) / (1 - Math.abs(2 * l - 1));
+        expect(sat, `saturation de #${m[1]}`).toBeGreaterThan(0.85);
+        expect(l, `luminosité de #${m[1]}`).toBeGreaterThan(0.45);
+    });
+
+    it('⚠ la teinte du halo ne tombe pas dans la bande des CINQ types orange', () => {
+        // factuelle, conceptuelle, procédurale, métacognitive, préalable
+        // occupent toute la bande ambre-orange. Un halo qui y retomberait se
+        // lirait comme « ce bloc est une connaissance procédurale » — c'est
+        // ce qui disqualifiait un ambre saturé, comparé à l'écran à 22 %.
+        const teinteDe = (hex) => {
+            const [r, g, b] = [0, 2, 4].map((i) => parseInt(hex.substr(i, 2), 16) / 255);
+            const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+            if (d === 0) return 0;
+            let h;
+            if (max === r) h = ((g - b) / d) % 6;
+            else if (max === g) h = (b - r) / d + 2;
+            else h = (r - g) / d + 4;
+            return (h * 60 + 360) % 360;
+        };
+        const halo = teinteDe(css.match(/--planif-couleur-trouve:\s*#([0-9a-f]{6})/i)[1]);
+        const orangesTypes = ['fb923c', 'f97316', 'ea580c', 'd97706', 'c2410c'].map(teinteDe);
+        const plusProche = Math.min(...orangesTypes.map((t) => Math.abs(t - halo)));
+        expect(plusProche, `teinte du halo ${Math.round(halo)}°, orange le plus proche à ${Math.round(plusProche)}°`)
+            .toBeGreaterThan(10);
+    });
+
+    it('le mot surligné dans la liste porte la MÊME couleur que le halo', () => {
+        // Même fait — « voilà ce que tu cherchais » — donc même couleur.
+        // Deux teintes auraient laissé croire à deux choses différentes.
+        // ⚠ La tranche s'arrête à l'accolade fermante de la PREMIÈRE règle.
+        // Englober la variante `.mode-clair` la rendrait complaisante : cette
+        // variante porte aussi le jeton, et suffisait à faire passer le test
+        // alors que la règle de base ne l'utilisait plus.
+        const base = blocCss('.planif-recherche-extrait mark {', '}');
+        expect(base).toContain('var(--planif-couleur-trouve)');
+        expect(base).not.toContain('--alerte-fond-attention');
+        const clair = blocCss('.mode-clair .planif-recherche-extrait mark {', '}');
+        expect(clair).toContain('var(--planif-couleur-trouve)');
     });
 
     it('le halo N’UTILISE PAS le bleu de la sélection', () => {
         // « Trouvé » et « sélectionné » sont deux états distincts : la
         // recherche allume justement des blocs qu'on n'a pas sélectionnés.
-        const bloc = css.slice(
-            css.indexOf('.planif-noeud.planif-noeud--trouve {'),
-            css.indexOf('.planif-noeud.selected.planif-noeud--trouve,')
-        );
+        const bloc = blocCss('.planif-noeud.planif-noeud--trouve {',
+                             '.planif-noeud.selected.planif-noeud--trouve,');
         expect(bloc).not.toContain('--planif-couleur-selection');
     });
 

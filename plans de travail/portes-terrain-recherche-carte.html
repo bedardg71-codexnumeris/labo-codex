@@ -316,7 +316,7 @@ ol.erreurs b { color: var(--ink); }
 <div class="enveloppe">
 
 <header class="chapeau">
-  <p class="eyebrow">Portes terrain · 15 août 2026</p>
+  <p class="eyebrow">Portes terrain · 15 août 2026 · mise à jour 1.81.1</p>
   <h1>Chercher un mot dans la carte</h1>
   <p class="sous-titre">
     Le champ de recherche de la Carte d'alignement, livré en 1.81.0. Ce que les
@@ -325,7 +325,7 @@ ol.erreurs b { color: var(--ink); }
     utile ou noyé sur <em>ta</em> carte.
   </p>
   <div class="meta">
-    <span>1.81.0</span><span>build 0815-0920</span><span>14 portes</span>
+    <span>1.81.1</span><span>build 0815-1041</span><span>14 portes</span>
     <span>46 vérifications</span><span>4 mesures</span><span>5 décisions</span>
   </div>
 </header>
@@ -477,17 +477,17 @@ const DATA = [
       { id:'2.5d', tags:['Données'], geste:"<b>Supprimer le bloc d'essai.</b>", attendu:"La carte revient à son état d'avant." }
     ]},
 
-  { ref: '2.6', t: '1.81.0 · la porte la plus importante', titre: 'Le halo se voit-il sur TON fond de canevas ?',
-    pourquoi: "Le fond du canevas, c'est toi qui le choisis — douze teintes, du presque noir au presque blanc — et ce choix est indépendant du mode clair ou sombre. <b>La première version du halo était invisible sur plusieurs de ces fonds.</b> Sur « Brume », il se confondait complètement : tu aurais cherché un mot, l'outil aurait dit « 6 blocs trouvés », et tu n'en aurais vu aucun. C'est corrigé et mesuré sur les douze — mais mesuré n'est pas vu.",
+  { ref: '2.6', t: '1.81.1 · ⚠⚠ À REFAIRE — la teinte a changé', titre: 'Le halo se voit-il sur TON fond de canevas ?',
+    pourquoi: "<b>Tu as déjà coché cette porte, mais avec l'ANCIENNE couleur.</b> Ton retour — « c'est davantage gris que ambre » — a fait remplacer l'ocre désaturé par un <b>jaune vif</b> en 1.81.1. Les cinq rangées sont donc à rejouer.<br><br>Le fond du canevas, c'est toi qui le choisis — douze teintes, du presque noir au presque blanc — et ce choix est indépendant du mode. La toute première version du halo était <b>invisible</b> sur plusieurs : sur « Brume », tu aurais cherché un mot, l'outil aurait dit « 6 blocs trouvés », et tu n'en aurais vu aucun. Le contraste est re-mesuré sur les douze après le changement de teinte (24/24, minimum 4,22:1) — mais mesuré n'est pas vu.",
     rangs: [
-      { id:'2.6a', geste:"Chercher un mot, <b>avec ton fond habituel</b>, en mode <b>sombre</b>.",
-        attendu:"Chaque bloc trouvé porte un anneau <b>ambre</b>, bordé d'un fin liseré clair et d'un fin liseré sombre. Il doit sauter aux yeux sans qu'on le cherche." },
-      { id:'2.6b', geste:"Même chose en mode <b>clair</b>.", attendu:"Même lisibilité." },
-      { id:'2.6c', geste:"Ouvrir la <b>palette de fond</b> (icône de palette) et essayer <b>Brume</b>, <b>Givre</b>, <b>Parchemin</b>, <b>Crème</b>.",
-        attendu:"Les quatre fonds clairs, ceux où l'ambre est le plus en difficulté. Le halo reste repérable sur les quatre." },
-      { id:'2.6d', geste:"Essayer <b>Ardoise</b>, <b>Acier</b>, <b>Graphite</b>, <b>Sépia</b>, <b>Lichen</b>.",
+      { id:'2.6a-v2', geste:"Chercher un mot, <b>avec ton fond habituel</b>, en mode <b>sombre</b>.",
+        attendu:"Chaque bloc trouvé porte un anneau <b>jaune vif</b>, bordé d'un fin liseré clair et d'un fin liseré sombre. Il doit sauter aux yeux sans qu'on le cherche — et ne pas se confondre avec la bordure orange des blocs Factuelle / Conceptuelle / Procédurale / Métacognitive." },
+      { id:'2.6b-v2', geste:"Même chose en mode <b>clair</b>.", attendu:"Même lisibilité." },
+      { id:'2.6c-v2', geste:"Ouvrir la <b>palette de fond</b> (icône de palette) et essayer <b>Brume</b>, <b>Givre</b>, <b>Parchemin</b>, <b>Crème</b>.",
+        attendu:"Les quatre fonds clairs, ceux où la teinte est le plus en difficulté. Le halo reste repérable sur les quatre." },
+      { id:'2.6d-v2', geste:"Essayer <b>Ardoise</b>, <b>Acier</b>, <b>Graphite</b>, <b>Sépia</b>, <b>Lichen</b>.",
         attendu:"Les fonds mi-tons — ceux qui résistaient encore à ma première correction. Repérable sur les cinq." },
-      { id:'2.6e', geste:"<b>Remettre ton fond habituel.</b>",
+      { id:'2.6e-v2', geste:"<b>Remettre ton fond habituel.</b>",
         attendu:"S'il y a <b>un seul</b> fond où tu dois chercher le halo des yeux, coche ✗ et note lequel : c'est un défaut, pas une préférence." }
     ]},
 
@@ -745,7 +745,7 @@ function construireReleve() {
   const ko = verifs.filter(r => (etat[r.id]||{}).etat === 'ko').length;
   const L = [];
   L.push('PORTES TERRAIN — Recherche dans la Carte d\'alignement (15 août 2026)');
-  L.push('Version visée : 1.81.0 · build 0815-0920');
+  L.push('Version visée : 1.81.1 · build 0815-1041');
   L.push('Fusionné dans main le 15 août 2026');
   L.push('');
   L.push(`BILAN : ${ok} passées · ${ko} échec · ${verifs.length - ok - ko} non traitées (sur ${verifs.length})`);

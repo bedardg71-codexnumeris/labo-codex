@@ -18416,6 +18416,32 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     /* Évaluation — Rose/magenta */
     --planif-couleur-evaluation: #D946EF;
 
+    /* ── TROUVÉ PAR LA RECHERCHE (15 août 2026) ──────────────────────────
+       Jeton PROPRE, et non `--alerte-bordure-attention` comme à la livraison.
+       Deux raisons, toutes deux constatées :
+
+       1. Ce jeton-là est un ocre DÉSATURÉ (#a07830 / #c8a060), calibré pour
+          border un encadré d'alerte — pas pour repérer un bloc. Retour de
+          Grégoire, captures à l'appui : « c'est davantage gris que ambre ».
+       2. Il appartient à la famille des ALERTES (niveaux RaI compris). Le
+          projet interdit de confondre ces alertes avec autre chose ; le halo
+          de recherche n'est pas une alerte, c'est un repère.
+
+       ⚠ POURQUOI UN JAUNE ET NON UN AMBRE, malgré le mot « ambre ». La bande
+       ambre-orange est DÉJÀ prise par CINQ types de blocs (factuelle,
+       conceptuelle, procédurale, métacognitive, préalable) : un halo ambre
+       saturé se lit comme « ce bloc est une connaissance procédurale ».
+       Comparé à l'écran sur une carte dense à 22 % — le zoom réel de travail
+       de Grégoire — un ambre saturé reste confusable avec ces bordures ;
+       ce jaune s'en détache d'un coup d'œil. Il ne touche ni au bleu de la
+       sélection, ni au magenta d'Évaluation, ni aux verts, ni aux violets,
+       ni à la sarcelle de l'enseignement explicite.
+
+       ⮕ La même valeur dans les DEUX modes : « trouvé » doit être UNE couleur
+       reconnaissable, pas deux. Ce qui porte la visibilité contre les douze
+       fonds de canevas, ce sont les liserés bicolores du halo, pas la teinte. */
+    --planif-couleur-trouve: #ffd60a;
+
     /* Enseignement explicite — UNE sarcelle pour les cinq étapes
        (9 août 2026, décision Grégoire : « pour simplifier la lecture »).
 
@@ -18729,12 +18755,21 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     color: var(--texte-muted, #5a7a88);
     vertical-align: 1px;
 }
+/* Le mot surligne dans la liste porte la MEME couleur que le halo sur le
+   canevas : c'est le meme fait — « voila ce que tu cherchais ». Deux teintes
+   differentes auraient laisse croire a deux choses differentes.
+   Le fond est le jaune a faible opacite, le texte reste celui du theme :
+   un jaune plein sous du texte est illisible dans les deux modes. */
 .planif-recherche-extrait mark {
-    padding: 0 1px;
+    padding: 0 2px;
     border-radius: 2px;
-    background: var(--alerte-fond-attention);
-    color: var(--alerte-texte-attention);
-    font-weight: 600;
+    background: color-mix(in srgb, var(--planif-couleur-trouve) 30%, transparent);
+    color: var(--planif-couleur-texte);
+    font-weight: 700;
+}
+.mode-clair .planif-recherche-extrait mark {
+    background: color-mix(in srgb, var(--planif-couleur-trouve) 55%, transparent);
+    color: var(--texte-principal);
 }
 
 /* ⚠ Le halo des blocs trouves n'est PAS ici : il vit avec les autres etats du
@@ -20018,16 +20053,16 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
    ⮕ Ne pas « simplifier » en retirant un lisere : chacun couvre une moitie du
    nuancier, et la mesure ci-dessus dit laquelle. */
 .planif-noeud.planif-noeud--trouve {
-    box-shadow: 0 0 0 3px var(--alerte-bordure-attention),
+    box-shadow: 0 0 0 3px var(--planif-couleur-trouve),
                 0 0 0 4px rgba(255, 255, 255, 0.95),
                 0 0 0 5px rgba(0, 0, 0, 0.8),
-                0 0 18px color-mix(in srgb, var(--alerte-bordure-attention) 45%, transparent);
+                0 0 18px color-mix(in srgb, var(--planif-couleur-trouve) 45%, transparent);
 }
 .planif-noeud.planif-noeud--trouve-actif {
-    box-shadow: 0 0 0 4px var(--alerte-bordure-attention),
+    box-shadow: 0 0 0 4px var(--planif-couleur-trouve),
                 0 0 0 5px rgba(255, 255, 255, 0.95),
                 0 0 0 6px rgba(0, 0, 0, 0.8),
-                0 0 26px color-mix(in srgb, var(--alerte-bordure-attention) 70%, transparent);
+                0 0 26px color-mix(in srgb, var(--planif-couleur-trouve) 70%, transparent);
 }
 /* Trouve ET selectionne : les deux anneaux se lisent, concentriques — le bleu
    de la selection au contact du bloc, l'ambre du trouve autour, les liseres
@@ -20035,7 +20070,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 .planif-noeud.selected.planif-noeud--trouve,
 .planif-noeud.selected.planif-noeud--trouve-actif {
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.35),
-                0 0 0 7px var(--alerte-bordure-attention),
+                0 0 0 7px var(--planif-couleur-trouve),
                 0 0 0 8px rgba(255, 255, 255, 0.95),
                 0 0 0 9px rgba(0, 0, 0, 0.8),
                 0 4px 16px rgba(59, 130, 246, 0.15);

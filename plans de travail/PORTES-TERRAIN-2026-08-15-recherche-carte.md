@@ -172,7 +172,13 @@ exactement le périmètre de cette liste.
 ---
 
 ### 2.6 · ⚠⚠ Le halo se voit-il sur TON fond de canevas ?
-`1.81.0` · **la porte la plus importante de la liste**
+`1.81.1` · **la porte la plus importante de la liste**
+
+> ⚠⚠ **À REFAIRE — validée le 15 août avec l'ANCIENNE teinte.** Ton retour
+> (« c'est davantage gris que ambre ») a fait remplacer l'ocre désaturé par un
+> **jaune vif** en 1.81.1. Le halo n'a plus la même couleur : les cinq rangées
+> ci-dessous doivent être rejouées. Le contraste a été re-mesuré sur les douze
+> fonds (24/24 au-dessus du seuil, minimum 4,22:1), mais mesuré n'est pas vu.
 
 > **POURQUOI.** Le fond du canevas, c'est toi qui le choisis — douze teintes, du
 > presque noir au presque blanc — et ce choix est indépendant du mode clair ou
@@ -182,9 +188,10 @@ exactement le périmètre de cette liste.
 > C'est corrigé et mesuré sur les douze fonds, mais **mesuré n'est pas vu**.
 
 - [ ] Chercher un mot, **avec ton fond habituel**, en mode **sombre**.
-      ⮕ **Attendu** : chaque bloc trouvé porte un anneau **ambre**, bordé d'un
-      fin liseré clair et d'un fin liseré sombre. Il doit sauter aux yeux sans
-      qu'on le cherche.
+      ⮕ **Attendu** : chaque bloc trouvé porte un anneau **jaune vif**, bordé
+      d'un fin liseré clair et d'un fin liseré sombre. Il doit sauter aux yeux
+      sans qu'on le cherche — et ne pas se confondre avec la bordure orange
+      des blocs Factuelle / Conceptuelle / Procédurale / Métacognitive.
 - [ ] Même chose en mode **clair**.
 - [ ] Ouvrir la **palette de fond** (l'icône de palette dans la barre) et
       essayer **Brume**, **Givre**, **Parchemin**, **Crème** — les quatre fonds
@@ -402,7 +409,7 @@ autre chose.
 
 | | |
 |---|---|
-| **État** | ⏳ non traitée |
+| **État** | ⏳ 44 passées · 1 échec (2.1c, iPad portrait) · restent : 2.2m, la 2e rangée de 2.4, et **toute la 2.6 à refaire** (teinte changée en 1.81.1) |
 | **Rangées** | 14 portes · 46 vérifications · 4 mesures · 5 décisions |
-| **Version visée** | 1.81.0 — build `0815-0920` |
+| **Version visée** | 1.81.1 — build `0815-1041` |
 | **Branche** | fusionnée dans `main` le 15 août 2026 (fast-forward, Vitest 2408/2408 rejoué sur l'arbre fusionné) |
