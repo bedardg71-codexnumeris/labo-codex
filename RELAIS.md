@@ -14,7 +14,7 @@
 | **Branche à ouvrir** | **`main`** |
 | **Version** | **1.81.2** — build `0815-1054` |
 | **Travail en avance sur `main`** | **aucun** |
-| **Dernière mise à jour** | 15 août 2026 — recherche dans la Carte d'alignement (1.81.0) puis deux correctifs sur retour terrain — teinte du halo (1.81.1), barre d'outils rognée sur iPad (1.81.2). Vitest 2414/2414 |
+| **Dernière mise à jour** | 15 août 2026 — recherche dans la Carte d'alignement (1.81.0), deux correctifs sur retour terrain (1.81.1 teinte du halo, 1.81.2 barre rognée sur iPad), **porte terrain rejouée et close à 45/46**. Vitest 2414/2414 |
 
 ⚠⚠ **AVANT TOUTE FUSION EN CONTENEUR : `git fetch --unshallow origin`.** Le clone
 du conteneur est **shallow**, et son `main` LOCAL peut pointer des semaines en
@@ -33,7 +33,18 @@ commit d'avance, poussé la veille au soir depuis une session cloud. Le rituel d
 début l'a attrapé ; il ne l'aurait pas fait sans `git fetch`.
 
 ⏳ **CE QUI RESTE DÛ** :
-- ⚠ **UNE PORTE TERRAIN NEUVE, ENTIÈREMENT NON TRAITÉE** —
+- ✅ **PORTE TERRAIN DE LA RECHERCHE : PASSAGE CLOS, 45/46, ZÉRO ÉCHEC.**
+  Deux défauts trouvés par le terrain, corrigés et **revalidés sur son iPad**
+  le 15 août : la **teinte du halo** (ocre désaturé emprunté au jeton d'alerte
+  → jaune vif, 1.81.1) et la **barre d'outils rognée sur iPad en portrait**
+  (débordement PRÉEXISTANT au champ, mesuré à 783 px pour 728 dès 1.80.0 →
+  passage à la ligne, 1.81.2). ⏳ **Restent dues, mineures** : la rangée
+  « taper `lecon` puis `expose` » de la **2.4**, et la mesure **2.2m**.
+  ⮕ **Ses verdicts §3, tous rendus** : ⌘F non branché (3.1), seuil de 2
+  caractères conservé (3.2, après correction de sa part), type de bloc gardé
+  tel quel malgré 22 évaluations et 32 leçons remontées (3.3), largeur du champ
+  bonne (3.4), épaisseur du halo bonne (3.5). **Aucune décision en suspens.**
+- ~~Porte terrain neuve à traiter~~ (close, ci-dessus) —
   `plans de travail/PORTES-TERRAIN-2026-08-15-recherche-carte.md` (artefact :
   <https://claude.ai/code/artifact/508d3560-7111-4f1d-85c1-9a6b7c5323cc>).
   14 portes, **46 vérifications, 4 mesures, 5 décisions**. Elle porte la
@@ -47,11 +58,7 @@ début l'a attrapé ; il ne l'aurait pas fait sans `git fetch`.
   de la barre ne sont pas tous là), la rangée « taper lecon puis expose » de la
   **2.4**, la mesure **2.2m**, et **la 2.6 ENTIÈRE À REFAIRE** — elle a été
   validée avec l'ancienne teinte du halo, remplacée depuis en 1.81.1.
-  ⮕ **La 2.1c est CORRIGÉE en 1.81.2** (la barre passe à la ligne au lieu de
-  couper — le débordement était PRÉEXISTANT au champ, mesuré à 783 px pour 728
-  disponibles dès 1.80.0). À rejouer sur son iPad : c'est de la géométrie
-  mesurée dans Chromium, pas du rendu Safari.
-  ⮕ **#3.2 est CLOS** : « je me suis trompé, le seuil de 2 caractères est bon. »
+  ⮕ **Les deux ont été REJOUÉES SUR SON IPAD le 15 août et passent.**
 - **5 rangées de porte terrain non traitées** —
   `plans de travail/PORTES-TERRAIN-2026-08-12-416-lots-CGIHB.md` : 3.3 (supprimer
   un gabarit) en entier, la fin de 4.1 et de 4.3. **Plus les deux corrections du
