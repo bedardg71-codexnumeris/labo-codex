@@ -5029,9 +5029,15 @@ function contenuNoeudHTML(n) {
 
 /**
  * Badge 🎯 des objectifs — leçons uniquement.
- * Grisé, il signale qu'un objectif PEUT être posé : l'ancien badge
- * n'apparaissait qu'une fois l'objectif saisi, la fonction était donc
- * indécouvrable (friction F1).
+ * Toujours rendu : l'ancien badge n'apparaissait qu'une fois l'objectif saisi,
+ * la fonction était donc indécouvrable (friction F1). Gris tant qu'aucun
+ * objectif n'est posé, en couleur dès qu'il y en a un (décision de Grégoire,
+ * 15 août 2026).
+ *
+ * L'emoji est enveloppé dans un `<span>` DÉDIÉ, et ce n'est pas cosmétique :
+ * la désaturation de l'état vide s'y applique. Posée sur le badge, elle
+ * grisait aussi son liséré pointillé — le seul repère de couleur qui rend
+ * l'affordance trouvable quand il y a zéro objectif (cf. #151, styles.css).
  */
 function badgeObjectifHTML(n) {
     if (n.type !== 'lecon') return '';
@@ -5040,7 +5046,8 @@ function badgeObjectifHTML(n) {
     return '<span class="planif-badge-objectif' + (objs.length ? '' : ' planif-badge-objectif--vide') + '"' +
            ' role="button" tabindex="0" aria-expanded="' + (deplie ? 'true' : 'false') + '"' +
            ' title="' + (objs.length ? objs.length + ' objectif' + (objs.length > 1 ? 's' : '') : 'Aucun objectif') +
-           ' — cliquer pour ' + (deplie ? 'replier' : 'déplier') + '">🎯</span>';
+           ' — cliquer pour ' + (deplie ? 'replier' : 'déplier') + '">' +
+           '<span class="planif-badge-objectif__glyphe">🎯</span></span>';
 }
 
 function reconstruireDOM() {
