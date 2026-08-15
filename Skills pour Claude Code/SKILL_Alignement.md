@@ -316,6 +316,16 @@ Trois points à connaître avant d'y toucher :
   extrémités — ce point n'appartient pas au tracé, et le libellé atterrissait
   sur des blocs sans rapport.
 
+⚙ **Le contournement est un RÉGLAGE** (Actions ▸ « Liens : contourner les
+blocs »), actif par défaut. Le décocher redonne le tracé direct : ports choisis
+sur le seul axe dominant, une courbe, libellé au milieu géométrique — et aucun
+obstacle calculé, d'où `traversees: null` et non `0` (non mesuré n'est pas
+« aucune »). Les deux chemins sont VIVANTS et éprouvés : ce n'est pas un repli
+de compatibilité, c'est un choix d'affichage. La préférence est lue **une fois**
+et gardée en mémoire — `calculerTraceLien` tourne pour chaque lien à chaque
+redessin, l'interroger dedans paierait un accès au stockage par lien et par
+image pendant un glisser.
+
 **2. On RÉACTIVE dans une Ouverture, on n'y acquiert pas.** Une connaissance
 reliée à une **Ouverture** prend « se réactive dans » et non « s'acquiert par » :
 l'Ouverture rappelle les concepts de la leçon précédente, elle ne les enseigne

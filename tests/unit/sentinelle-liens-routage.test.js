@@ -158,6 +158,100 @@ describe('liens · A — le tracé contourne les blocs', () => {
 });
 
 // -----------------------------------------------------------------------
+describe('liens · A bis — le contournement est un CHOIX', () => {
+    it('le défaut est « contourner » — une carte existante s’ouvre corrigée', () => {
+        // Grégoire a jugé le contournement « beaucoup mieux ». Le réglage
+        // existe pour qui préfère l'autre, pas pour lui demander de choisir
+        // avant de profiter du correctif.
+        expect(api.contournementActif()).toBe(true);
+    });
+
+    it('⚠ AUCUNE préférence enregistrée = contourner', () => {
+        // Le cas d'un utilisateur qui n'a jamais touché au réglage — c'est
+        // celui de tout le monde au premier lancement.
+        //
+        // ⮕ Ce cas manquait, et le break-test l'a dit : le précédent lisait la
+        // variable du module, que la fonction de chargement n'avait jamais
+        // touchée. Basculer le défaut du STOCKAGE le laissait vert. Un test
+        // qui n'appelle pas le code qu'il prétend couvrir ne couvre rien.
+        expect(api.chargerPrefContournement(), 'db ne rend rien → défaut').toBe(true);
+        expect(api.contournementActif()).toBe(true);
+    });
+
+    it('⚠ le tracé direct ne calcule AUCUN obstacle', () => {
+        // C'est ce qui le rend moins coûteux — et c'est pourquoi `traversees`
+        // vaut null et non 0 : non mesuré n'est pas « aucune ». Rendre 0
+        // ferait croire à une garantie qu'on n'a pas prise.
+        poser('src', 'conceptuelle', 0, 300);
+        poser('cbl', 'evaluation', 800, 300);
+        poser('mur', 'expose', 380, 280);
+        api.definirContournement(false);
+        const t = api.calculerTraceLien('src', 'cbl');
+        expect(t.traversees).toBeNull();
+        expect((t.d.match(/C /g) || []).length, 'jamais de point de passage').toBe(1);
+        api.definirContournement(true);
+    });
+
+    it('en tracé direct, le libellé revient au milieu géométrique', () => {
+        // Le comportement d'avant, à l'identique : c'est ce qu'on offre.
+        poser('src', 'conceptuelle', 0, 300);
+        poser('cbl', 'evaluation', 800, 300);
+        poser('mur', 'expose', 380, 280);
+        api.definirContournement(false);
+        const t = api.calculerTraceLien('src', 'cbl');
+        expect(t.etiquette.x).toBe((t.p1.x + t.p2.x) / 2);
+        expect(t.etiquette.y).toBe((t.p1.y + t.p2.y) / 2);
+        api.definirContournement(true);
+    });
+
+    it('⚠ les DEUX modes produisent un tracé — aucun n’est un chemin mort', () => {
+        // La règle zéro-dette interdit d'empiler un chemin « au cas où ». Les
+        // deux doivent donc être vivants et éprouvés : ce cas les exerce l'un
+        // après l'autre sur la même géométrie.
+        poser('src', 'conceptuelle', 0, 300);
+        poser('cbl', 'evaluation', 800, 300);
+        poser('mur', 'expose', 380, 280);
+        api.definirContournement(false);
+        const direct = api.calculerTraceLien('src', 'cbl');
+        api.definirContournement(true);
+        const contourne = api.calculerTraceLien('src', 'cbl');
+        expect(direct.d.length).toBeGreaterThan(10);
+        expect(contourne.d.length).toBeGreaterThan(10);
+        expect(direct.d, 'les deux modes doivent différer sur cette géométrie').not.toBe(contourne.d);
+    });
+
+    it('le réglage passe par le stockage, sous une clé nommée', () => {
+        // Sans persistance, le choix se perdrait à chaque rechargement — et
+        // un réglage qu'on doit reposer chaque fois n'est pas un réglage.
+        expect(source).toContain("var CLE_PREF_CONTOURNER = 'planif-liens-contourner'");
+        expect(source).toMatch(/db\.setSync\(CLE_PREF_CONTOURNER/);
+        expect(source).toMatch(/db\.getSync\(CLE_PREF_CONTOURNER/);
+    });
+
+    it('⚠ la préférence est lue UNE fois, pas à chaque lien', () => {
+        // `calculerTraceLien` tourne pour chaque lien à chaque redessin :
+        // interroger le stockage à l'intérieur paierait un accès par lien et
+        // par image pendant un glisser.
+        const fn = source.slice(
+            source.indexOf('function calculerTraceLien'),
+            source.indexOf('function _devier')
+        );
+        expect(fn.length).toBeGreaterThan(200);
+        expect(fn, 'aucune lecture du stockage dans le calcul').not.toContain('getSync');
+    });
+
+    it('⚠ basculer le réglage RETRACE les liens', () => {
+        // Un réglage qui ne se voit qu'au prochain rechargement passe pour
+        // cassé. Le cliquet garde la boucle de redessin dans `definirContournement`.
+        const fn = source.slice(
+            source.indexOf('function definirContournement'),
+            source.indexOf('function contournementActif')
+        );
+        expect(fn).toContain('dessinerLien');
+    });
+});
+
+// -----------------------------------------------------------------------
 describe('liens · B — ce qui n’est PAS un obstacle', () => {
     it('⚠ le conteneur qui contient une extrémité est exclu', () => {
         // Un lien d'un bloc de la leçon A vers un bloc de la leçon B doit
