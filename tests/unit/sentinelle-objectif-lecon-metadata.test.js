@@ -296,13 +296,58 @@ describe('F1 · invariants de rendu et de routage', () => {
         // F1 avait été corrigée au RENDU (test ci-dessus, resté vert) et était
         // revenue par le STYLE. Cette assertion couvre le second chemin :
         // l'état « aucun objectif » a le droit d'être discret, jamais estompé.
-        const blocs = sourceCss.match(/\.planif-badge-objectif--vide[^{]*\{[^}]*\}/g) || [];
-        expect(blocs.length).toBeGreaterThan(0);
-        blocs.forEach(function (b) {
-            expect(b).not.toMatch(/grayscale/);
+        //
+        // ▣ 15 AOÛT 2026 — L'INVARIANT EST RÉÉCRIT, PAS AFFAIBLI. Grégoire veut
+        // le signal CHROMATIQUE (gris vide / couleur dès un objectif) : la
+        // désaturation redevient donc légitime. Ce qui reste interdit, c'est ce
+        // qui avait RÉELLEMENT causé #151 — l'effacement. L'ancienne assertion
+        // verrouillait le REMÈDE de l'époque (« pas de grayscale ») au lieu du
+        // MAL qu'il traitait (« le badge vide doit rester trouvable »), et
+        // aurait donc bloqué une décision produit légitime en prétendant
+        // protéger l'utilisateur.
+        const blocVide = sourceCss.match(/\.planif-badge-objectif--vide\s*\{[^}]*\}/);
+        expect(blocVide, 'la règle .planif-badge-objectif--vide a disparu').toBeTruthy();
+
+        // 1. Jamais estompé — la cause mesurée de #151, sur TOUS les blocs de
+        //    l'état vide (l'état de base comme le survol).
+        const tousBlocsVide = sourceCss.match(/\.planif-badge-objectif--vide[^{]*\{[^}]*\}/g) || [];
+        expect(tousBlocsVide.length).toBeGreaterThan(0);
+        tousBlocsVide.forEach(function (b) {
             const op = b.match(/opacity:\s*([\d.]+)/);
-            if (op) expect(parseFloat(op[1])).toBeGreaterThanOrEqual(0.7);
+            if (op) expect(parseFloat(op[1]), b).toBeGreaterThanOrEqual(0.7);
         });
+
+        // 2. Le repère de couleur SURVIT à la désaturation. `filter` s'applique
+        //    à l'élément entier : posé sur le badge, il grise aussi le liséré
+        //    pointillé — le seul indice coloré qui rend l'affordance trouvable
+        //    quand il y a zéro objectif. Il doit donc viser le glyphe SEUL.
+        expect(blocVide[0], 'la désaturation ne doit pas être posée sur le badge lui-même')
+            .not.toMatch(/grayscale/);
+        expect(blocVide[0], 'le liséré qui rend le badge vide trouvable a disparu')
+            .toMatch(/outline:\s*[^;]*dashed/);
+
+        // 3. Et le gris demandé est bien là, sur le glyphe.
+        const blocGlyphe = sourceCss.match(
+            /\.planif-badge-objectif--vide\s+\.planif-badge-objectif__glyphe\s*\{[^}]*\}/);
+        expect(blocGlyphe, 'la règle de désaturation du glyphe a disparu').toBeTruthy();
+        expect(blocGlyphe[0]).toMatch(/grayscale/);
+    });
+
+    it('le badge 🎯 enveloppe son emoji — sans quoi le gris ne vise RIEN', () => {
+        // Couplage RENDU ↔ STYLE, et il est silencieux dans les deux sens :
+        // retirer le `<span>` intérieur laisse la règle CSS valide mais sans
+        // cible, donc le badge vide repasse en couleur sans qu'aucune
+        // assertion de style ne bronche. Vérifié sur le HTML PRODUIT, pas sur
+        // la source : c'est ce que voit le navigateur.
+        const api = monterModule();
+        poserLecon(api, 'planif-n1');
+        const htmlVide = api.contenuNoeudHTML(api.etat.noeuds.get('planif-n1'));
+        expect(htmlVide).toContain('planif-badge-objectif--vide');
+        expect(htmlVide).toMatch(/<span class="planif-badge-objectif__glyphe">🎯<\/span>/);
+
+        // Et l'emoji n'est PAS un enfant direct du badge : s'il l'était, il
+        // échapperait à la désaturation.
+        expect(htmlVide).not.toMatch(/aria-expanded="[^"]*"[^>]*>🎯/);
     });
 
     it('ne réintroduit pas l’ancien badge conditionné aux données de séances', () => {

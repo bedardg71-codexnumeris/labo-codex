@@ -21621,16 +21621,32 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     outline: none;
     box-shadow: var(--focus-ring);
 }
-/* Aucun objectif encore posé : DISCRET mais JAMAIS estompé (#151, 8 août).
-   L'ancien retrait (grayscale + opacity .45 en 12 px) rendait le badge
-   introuvable — F1 revenue par le style après avoir été corrigée au rendu :
-   l'affordance qui crée le PREMIER objectif disparaissait précisément quand
-   il y en avait zéro. Le « à remplir » se dit désormais par un liséré
-   pointillé (même langage que les zones de dépôt vides), pas par l'effacement. */
+/* Aucun objectif encore posé : GRIS, mais jamais estompé.
+   Décision de Grégoire, 15 août 2026 : le signal qu'il attend est CHROMATIQUE
+   — gris tant qu'aucun objectif n'est posé, en couleur dès qu'il y en a un.
+   C'est une révision assumée du traitement retenu le 8 août pour #151.
+
+   ⚠ CE QUI AVAIT COÛTÉ #151, C'EST L'OPACITÉ, PAS LA DÉSATURATION. L'ancien
+   état vide cumulait `grayscale(1)` ET `opacity: .45` sur 12 px : mesuré
+   introuvable en mode clair, sur capture. Le gris revient donc SEUL. L'opacité
+   reste haute et le liséré pointillé (langage des zones à remplir) est
+   conservé : c'est LUI qui porte la découvrabilité, pas la couleur du glyphe.
+   ⮕ Ne jamais « finir » le gris en rebaissant l'opacité — c'est exactement le
+   geste qui a rendu l'affordance invisible quand il y avait zéro objectif,
+   c'est-à-dire précisément quand elle sert.
+
+   ⚠ La désaturation NE PEUT PAS être posée sur le badge lui-même : `filter`
+   s'applique à l'élément ENTIER, liséré compris, et un pointillé gris perd le
+   repère de couleur qui le rend repérable sur l'en-tête d'une leçon. Elle est
+   donc portée par un `<span>` intérieur (`.planif-badge-objectif__glyphe`) qui
+   n'enveloppe QUE l'emoji — le liséré reste en couleur de leçon. */
 .planif-badge-objectif--vide {
     opacity: 0.8;
     outline: 1px dashed color-mix(in srgb, var(--planif-couleur-lecon) 55%, transparent);
     outline-offset: 1px;
+}
+.planif-badge-objectif--vide .planif-badge-objectif__glyphe {
+    filter: grayscale(1);
 }
 .planif-badge-objectif--vide:hover {
     opacity: 1;
