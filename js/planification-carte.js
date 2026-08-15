@@ -9407,7 +9407,13 @@ function remplirModaleExportPerso() {
                 && !exporteur.colonneUtileEn(id, g.granularite);
         };
 
-        var htmlCol = '';
+        // Les deux familles sont ENVELOPPÉES, et pas seulement pour le style :
+        // elles ne se disposent pas pareil. Les colonnes CHOISIES portent un
+        // rang (donc une ligne par colonne, et des flèches), les DISPONIBLES
+        // n'en ont pas — elles se rangent en blocs qui se serrent (« tétris »),
+        // ce qui reprenait 320 px de haut à la modale (mesuré : 15 cases
+        // empilées faisaient 480 px, soit 37 % de sa hauteur totale).
+        var htmlCol = '<div class="export-perso-choisies">';
         g.colonnes.forEach(function(id, i) {
             var libelle = (g.renommages && g.renommages[id]) || '';
             htmlCol += '<div class="export-perso-colonne-ligne' +
@@ -9433,11 +9439,17 @@ function remplirModaleExportPerso() {
                     : '');
         });
 
+        htmlCol += '</div>';
+
+        // ⚠ L'ordre reste celui du CATALOGUE, jamais l'alphabet (décision de
+        // Grégoire, 15 août) : une case qui change de place entre deux rendus
+        // se recherche à chaque fois. Position fixe = mémoire du geste.
         var disponibles = Object.keys(exporteur.CATALOGUE_COLONNES).filter(function(id) {
             return g.colonnes.indexOf(id) === -1;
         });
         if (disponibles.length > 0) {
-            htmlCol += '<div class="export-perso-groupe export-perso-groupe-secondaire">À ajouter</div>';
+            htmlCol += '<div class="export-perso-groupe export-perso-groupe-secondaire">À ajouter</div>' +
+                '<div class="export-perso-tetris">';
             disponibles.forEach(function(id) {
                 htmlCol += '<label class="planif-checkbox-label export-perso-colonne-case' +
                     (inutile(id) ? ' export-perso-colonne-inerte' : '') + '">' +
@@ -9447,6 +9459,7 @@ function remplirModaleExportPerso() {
                     (inutile(id) ? ' <span class="export-perso-badge-generique">par séance</span>' : '') +
                     '</label>';
             });
+            htmlCol += '</div>';
         }
         zoneColonnes.innerHTML = htmlCol;
 

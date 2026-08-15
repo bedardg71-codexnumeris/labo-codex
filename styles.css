@@ -17349,7 +17349,23 @@ body.travaux-plein-ecran-actif .sous-nav {
 #conception-carte.planif-plein-ecran {
     position: fixed !important;
     top: 0; left: 0; right: 0; bottom: 0;
-    z-index: 9999;
+    /* ⚠ 8000, ET SURTOUT PAS 9999 (retour terrain du 15 août : « il faut fermer
+       le plein écran pour voir la modale »). Le plein écran était à 9999, comme
+       `.modal-overlay` — et à z-index ÉGAL, c'est l'ordre du DOM qui tranche.
+       `#conception-carte` (index.html:4187) vient après la modale (4082), donc
+       il la recouvrait. Mesuré : `#planif-zone-travail` était l'élément atteint
+       au centre de la modale.
+
+       ⮕ Ce n'était pas le défaut d'UNE modale : le plein écran faisait
+       COUVERCLE sur toute l'interface flottante attachée au <body> — la barre
+       d'alignement (8500) et la loupe (9000) passaient dessous elles aussi.
+       D'où une valeur sous TOUTE cette bande plutôt qu'un correctif par modale.
+
+       Un plein écran reste du CONTENU de page, pas une surcouche : il doit
+       masquer la page (dont le z-index plafonne à 1200) et rien d'autre. Ses
+       propres descendants gardent leur ordre — il crée un contexte
+       d'empilement, leurs valeurs sont relatives à lui. */
+    z-index: 8000;
     background: var(--surface-page, #0c1a22);
 }
 /* FIX terrain #carte-mentale (16 juin) : l'en-tête réel est <header class="entete">,
@@ -19507,18 +19523,23 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 /* Éditeur de gabarits (#416 lot H) — la modale de #431 réoutillée. Variables
    existantes seulement ; les deux modes passent par les tokens. */
 .export-perso-liste { display: flex; flex-direction: column; gap: 2px; }
-.export-perso-gabarit-choix { padding: 5px 4px; border-radius: 6px; min-height: 32px; }
+.export-perso-gabarit-choix { padding: 3px 4px; border-radius: var(--radius-moyen, 6px); min-height: 32px; }
 .export-perso-gabarit-choix:hover { background: var(--surface-element, #244858); }
 .mode-clair .export-perso-gabarit-choix:hover { background: rgba(6, 93, 187, 0.06); }
+/* Aligné sur la spec « Badges Tetris » du DS (section 12 de design-system.html) :
+   padding 3px 8px, 0.75rem, radius 5px. Le badge était auparavant à 9.5px /
+   radius 3px / padding 0 4px — trois valeurs inventées sur place, hors barème. */
 .export-perso-badge-generique {
-    font-size: 9.5px;
+    display: inline-block;
+    font-size: 0.75rem;
+    line-height: 1.2;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--texte-muted, #5a7a88);
     border: 1px solid var(--bordure-subtile, rgba(127, 127, 127, 0.3));
-    border-radius: 3px;
-    padding: 0 4px;
-    margin-left: 4px;
+    border-radius: var(--radius-petit, 5px);
+    padding: 3px 8px;
+    margin-left: 6px;
 }
 .export-perso-ligne-nom { display: flex; padding: 2px 0 4px; }
 .export-perso-champ-nom, .export-perso-champ-renom {
@@ -19526,13 +19547,16 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     font-size: 12px;
     min-height: 32px;
     padding: 4px 6px;
-    border-radius: 6px;
+    border-radius: var(--radius-moyen, 6px);
     border: 1px solid var(--bordure-subtile, rgba(127, 127, 127, 0.3));
     background: var(--surface-element, #244858);
     color: var(--planif-couleur-texte);
 }
 .export-perso-champ-nom { flex: 1; }
-.export-perso-champ-renom { flex: 1; min-width: 80px; }
+/* Le champ de renommage rétrécit : il partageait la ligne à parts égales avec
+   la case à cocher, ce qui étirait chaque ligne de colonne sans rien gagner —
+   un nom de colonne fait rarement plus de vingt caractères. */
+.export-perso-champ-renom { flex: 1 1 110px; min-width: 70px; }
 .mode-clair .export-perso-champ-nom,
 .mode-clair .export-perso-champ-renom {
     background: var(--surface-carte, #ffffff);
@@ -19546,12 +19570,62 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 .export-perso-colonne-ligne {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 2px 0;
+    gap: 5px;
+    padding: 1px 0;
 }
-.export-perso-colonne-case { flex: 1; min-height: 32px; padding: 4px; border-radius: 6px; }
+.export-perso-colonne-case {
+    flex: 1;
+    min-height: 32px;
+    padding: 3px 4px;
+    border-radius: var(--radius-moyen, 6px);
+}
 .export-perso-colonne-ligne .export-perso-colonne-case { flex: 0 0 34%; }
 .export-perso-groupe-secondaire { margin-top: 8px; }
+
+/* ═══ DISPOSITION « TÉTRIS » DES COLONNES DISPONIBLES ═══════════════════════
+   Demande de Grégoire, 15 août : « la modale prend beaucoup d'espace
+   verticalement — on pourrait disposer les cases à cocher comme des blocs
+   tétris, l'un à côté de l'autre ».
+
+   MESURÉ AVANT : 15 cases empilées = 480 px, soit 37 % des 1283 px de la
+   modale, sur un écran de 900. C'est le poste le plus lourd, loin devant.
+
+   Chaque bloc se dimensionne à SON contenu (`flex: 0 1 auto`) au lieu de
+   prendre la ligne entière : « Type » et « Durée (min) » n'occupent plus la
+   même largeur, et la rangée se remplit comme un tétris. Un `grid` à colonnes
+   égales aurait aligné les bords mais gaspillé la place des libellés courts —
+   c'est justement ce qu'on cherche à récupérer.
+
+   ⚠ L'ordre reste celui du catalogue (décision de Grégoire) : les blocs ne se
+   reclassent JAMAIS, ni à l'alphabet ni à la longueur. Une case qui change de
+   place entre deux rendus se recherche à chaque fois. */
+.export-perso-tetris {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+.export-perso-tetris .export-perso-colonne-case {
+    /* Jetons du DS « Badges Tetris » (section 12) : radius-petit, 0.75rem. */
+    flex: 0 1 auto;
+    min-height: 34px;
+    padding: 3px 8px;
+    font-size: 0.75rem;
+    border: 1px solid var(--bordure-subtile, rgba(127, 127, 127, 0.3));
+    border-radius: var(--radius-petit, 5px);
+    background: var(--surface-element, #244858);
+    transition: border-color 0.15s, background 0.15s;
+}
+.export-perso-tetris .export-perso-colonne-case:hover {
+    border-color: var(--accent-primaire, #3b82f6);
+}
+.mode-clair .export-perso-tetris .export-perso-colonne-case {
+    background: var(--surface-carte, #ffffff);
+}
+/* Une case cochée quitte « À ajouter » au rendu suivant : l'état coché n'est
+   qu'un instant de transition, mais il doit se voir pendant cet instant. */
+.export-perso-tetris .export-perso-colonne-case:has(input:checked) {
+    border-color: var(--accent-primaire, #3b82f6);
+}
 
 /* Colonne sans effet dans la granularité choisie (#416, constat terrain du
    12 août) — signalée, jamais interdite : le gabarit appartient à l'utilisateur. */
@@ -19571,9 +19645,32 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 
 /* Modale « Export personnalisé » (#431) — réglages + aperçu vivant.
    Variables existantes seulement, deux modes couverts par les tokens. */
+/* ⚠ LA MODALE NE DÉPASSE PLUS L'ÉCRAN, ET C'EST STRUCTUREL. Mesurée à 1283 px
+   de haut sur un écran de 900 : il fallait défiler la page pour atteindre les
+   boutons. Le tétris reprend ~320 px, mais un gabarit à vingt colonnes
+   redéborderait — un plafond en `vh` tient quel que soit le contenu.
+   En colonne flex : l'intro et les actions gardent leur taille, le CORPS prend
+   ce qui reste et défile à l'intérieur. `min-height: 0` est obligatoire — sans
+   lui, un enfant flex refuse de rétrécir sous son contenu et le plafond ne
+   s'applique jamais (le défaut `min-height: auto`). */
 .modal-export-perso {
     max-width: 980px;
     width: min(96vw, 980px);
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+}
+/* ⚠ C'EST LE CORPS QUI DÉFILE, PAS CHAQUE VOLET — et ce n'est pas un détail de
+   goût. Premier essai : `overflow-y: auto` sur les deux volets. Ça déborde,
+   MESURÉ (blocs et boutons rendus hors de la modale). Le corps est en
+   `flex-wrap: wrap` (les volets s'empilent sur iPad portrait), et dans un flex
+   MULTILIGNE la taille d'une ligne vient de son CONTENU : les volets étaient
+   donc étirés à 1058 px et sortaient de la boîte au lieu de défiler.
+   Un seul défilement, sur le corps, ne dépend pas du nombre de lignes. */
+.modal-export-perso > .export-perso-corps {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
 }
 .export-perso-intro {
     font-size: 13px;
@@ -19602,7 +19699,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--texte-muted, #5a7a88);
-    padding: 10px 0 4px;
+    padding: 8px 0 3px;
 }
 .export-perso-partir {
     display: flex;
@@ -19655,8 +19752,10 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     line-height: 1.45;
     white-space: pre;
     overflow: auto;
-    max-height: 55vh;
-    min-height: 220px;
+    /* Plafonné : sans ça l'aperçu pousse le corps et impose un défilement
+       même quand les réglages tiendraient à l'écran. */
+    max-height: 46vh;
+    min-height: 140px;
 }
 .mode-clair .export-perso-apercu {
     background: var(--surface-page, #f6f8fa);
