@@ -7,6 +7,73 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 15 AOÛT 2026 (SUITE 3) : LES LIENS CONTOURNENT, ET DISENT MIEUX.
+     ÉTAT : **1.82.0** — Vitest **2432/2432** (260 fichiers), 1 commit.
+
+     ▣ **DEUX DEMANDES, CAPTURES À L'APPUI.** « Je voudrais éviter que les liens
+     passent par-dessus d'autres blocs » et « comme j'ai en Ouverture une
+     révision de concepts de la leçon précédente, il faudrait revoir le verbe
+     (« s'acquiert par » n'est pas approprié ici) ». Arbitrages pris par lui
+     avant le code : **courbes déviées** (pas de coudes à angle droit),
+     **« se réactive dans »**, et **menu guidé mais jamais bloquant**.
+
+     ▣ **CE QUI SE PASSAIT, ET QUE LE CODE A CONFIRMÉ.** Un lien était UNE courbe
+     entre deux ports choisis sur le seul axe dominant. Rien ne regardait ce
+     qu'il y avait ENTRE les deux. Et le libellé se posait au milieu GÉOMÉTRIQUE
+     des extrémités — un point qui n'appartient pas au tracé, d'où des libellés
+     sur des blocs sans rapport.
+
+     ⚠⚠ **ET J'AI TROUVÉ PIRE QUE LE DÉFAUT SIGNALÉ.** Pour une résolution
+     « verticale », le menu du lien n'offrait qu'UN SEUL verbe. Quand ce verbe
+     était le mauvais — son cas exactement — il n'avait AUCUN moyen de le
+     corriger. Ce n'était pas un mauvais défaut, c'était un cul-de-sac. Le menu
+     offre désormais tous les verbes sous les suggérés.
+
+     ▣ **LE ROUTAGE EN TROIS ÉTAGES** : choix des ports (16 combinaisons ; règle
+     la majorité des cas à lui seul, pour un coût dérisoire), puis déviation par
+     points de passage, puis « moins mauvais » assumé. Mesuré : la diagonale de
+     sa capture passe de **2 traversées à 0** ; sur carte dense de 150 blocs,
+     **58/60 liens totalement libres**, à **1,16 ms par lien**.
+
+     ⚠ **DEUX DÉFAUTS DE MON PROPRE ROUTAGE, TROUVÉS PAR LA MESURE** :
+       1. je calculais le détour autour des SEULS blocs traversés — contourner
+          deux blocs d'un mur fait atterrir sur leurs voisins. L'obstruction
+          s'accumule maintenant d'un essai à l'autre ;
+       2. un point de passage unique posé au milieu de l'obstruction montait
+          au-dessus puis y REPLONGEAIT. Il faut deux points, aux coins.
+     Les deux se voyaient sur un mur de quatorze blocs sans interstice — mon
+     premier mur en avait, et le lien s'y faufilait : **la capture avait l'air
+     d'un succès alors que la déviation n'était jamais exercée.**
+
+     ═══ TROIS TESTS COMPLAISANTS, ET UNE MUTATION INOPÉRANTE ═══
+
+     ⚠⚠ **Le break-test a laissé passer DEUX gardes, et c'était mes tests.**
+     Mes géométries n'étaient pas discriminantes : la déviation rattrapait tout,
+     donc l'étage « choix des ports » n'était protégé par rien, et mon mur d'une
+     seule colonne se contournait sans les coins. Corrigé par deux cas conçus
+     POUR séparer les étages.
+     ⮕ **Et une de mes mutations était elle-même inopérante** : elle ne retirait
+     qu'une paire de coins sur quatre, les trois autres rattrapaient, et la
+     garde passait pour décorative alors qu'elle ne l'est pas. **Un break-test
+     qui ne casse pas vraiment ment autant qu'un test qui ne teste rien.**
+
+     ▣ **SENTINELLE** : `tests/unit/sentinelle-liens-routage.test.js`, 15 cas.
+     **BREAK-TESTÉE EN 11 MUTATIONS — 11 rouges.** Plus la sentinelle #415 mise
+     à jour : son invariant était « les cinq étapes SE RELIENT », pas « elles
+     portent ce verbe-là » — le verbe unique était la conséquence du repli sur
+     la famille, pas le propos du correctif.
+
+     ⏳ **QUESTION OUVERTE** : « Révision et réutilisation » garde « s'acquiert
+     par ». Même nature que l'Ouverture, mais HUIT paires explicites de
+     `VERBES_AUTO` disent le contraire — quelqu'un a tranché en connaissance de
+     cause, et c'est son vocabulaire. Posée, pas décidée.
+
+     ⚠ **NON ÉPROUVÉ** : Safari et iPad (#456). Et la BEAUTÉ des tracés sur sa
+     vraie carte — un lien peut ne traverser aucun bloc et faire un détour
+     absurde ; ça, seul son œil le dira.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 15 AOÛT 2026 (SUITE 2) : LA BARRE COUPAIT DÉJÀ, ET PERSONNE NE
      L'AVAIT VU. ÉTAT : **1.81.2** — Vitest **2414/2414**, 1 commit.
 

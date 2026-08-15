@@ -290,6 +290,48 @@ Trois points à connaître avant d'y toucher :
   RECALCULÉE à la fin de celle-ci. Re-poser les anciens halos laisserait un
   bloc supprimé listé comme trouvé.
 
+### Les règles des liens (15 août 2026)
+
+Deux règles, posées sur retour terrain de Grégoire.
+
+**1. Un lien contourne, il ne traverse pas.** Le tracé se décide en trois
+étages, dans cet ordre — et l'ordre est le fond de l'affaire :
+
+| Étage | Ce qu'il fait | Quand |
+|-------|---------------|-------|
+| **Choix des ports** | essaie les 16 combinaisons et garde celle qui ne traverse rien | toujours ; règle la majorité des cas seul |
+| **Déviation** | ajoute un ou deux points de passage à côté de l'obstruction | seulement si aucune combinaison n'est libre |
+| **Moins mauvais** | garde le tracé qui traverse le moins | si même la déviation ne dégage pas |
+
+Trois points à connaître avant d'y toucher :
+
+- **Les conteneurs ancêtres ne sont PAS des obstacles.** Un lien d'un bloc de
+  la leçon A vers un bloc de la leçon B doit sortir du cadre de A et entrer
+  dans celui de B. Les compter rendrait tout tracé impossible.
+- **L'obstruction s'ACCUMULE d'un essai à l'autre.** Contourner les seuls blocs
+  traversés fait atterrir sur leurs voisins ; la boîte grossit jusqu'à couvrir
+  l'obstruction entière. Et il faut **deux** points de passage (les coins) pour
+  contourner une boîte large : un seul, posé au milieu, replonge dedans.
+- **Le libellé se pose SUR la courbe**, pas au milieu géométrique des deux
+  extrémités — ce point n'appartient pas au tracé, et le libellé atterrissait
+  sur des blocs sans rapport.
+
+**2. On RÉACTIVE dans une Ouverture, on n'y acquiert pas.** Une connaissance
+reliée à une **Ouverture** prend « se réactive dans » et non « s'acquiert par » :
+l'Ouverture rappelle les concepts de la leçon précédente, elle ne les enseigne
+pas. Les quatre autres étapes d'enseignement explicite gardent « s'acquiert
+par ». La règle est consultée **après** la table brute et **avant** le repli sur
+la famille (`normaliserType`), qui écraserait l'Ouverture en « activité ».
+
+⏳ **« Révision et réutilisation » garde « s'acquiert par »** — même nature
+pourtant, mais huit paires explicites de `VERBES_AUTO` disent le contraire.
+Question posée à Grégoire, non tranchée.
+
+⚠ **Le menu d'un lien offre TOUS les verbes**, sous ceux qu'il suggère. Avant,
+une résolution « verticale » n'en offrait qu'un : quand ce verbe unique était le
+mauvais, l'utilisateur n'avait aucun moyen de le corriger. Un défaut de la table
+devenait une impasse — c'est ce qui rendait le cas de l'Ouverture insoluble.
+
 ### Vérifications automatiques
 
 L'application peut signaler :

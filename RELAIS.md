@@ -12,9 +12,9 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | **`main`** |
-| **Version** | **1.81.2** — build `0815-1054` |
+| **Version** | **1.82.0** — build `0815-1130` |
 | **Travail en avance sur `main`** | **aucun** |
-| **Dernière mise à jour** | 15 août 2026 — recherche dans la Carte d'alignement (1.81.0), deux correctifs sur retour terrain (1.81.1 teinte du halo, 1.81.2 barre rognée sur iPad), **porte terrain rejouée et close à 45/46**. Vitest 2414/2414 |
+| **Dernière mise à jour** | 15 août 2026 — recherche dans la Carte d'alignement (1.81.0), deux correctifs sur retour terrain (1.81.1 teinte du halo, 1.81.2 barre rognée sur iPad), **porte terrain rejouée et close à 45/46**, puis routage des liens + verbe « se réactive dans » (1.82.0). Vitest 2432/2432 |
 
 ⚠⚠ **AVANT TOUTE FUSION EN CONTENEUR : `git fetch --unshallow origin`.** Le clone
 du conteneur est **shallow**, et son `main` LOCAL peut pointer des semaines en
@@ -33,6 +33,16 @@ commit d'avance, poussé la veille au soir depuis une session cloud. Le rituel d
 début l'a attrapé ; il ne l'aurait pas fait sans `git fetch`.
 
 ⏳ **CE QUI RESTE DÛ** :
+- ⏳ **QUESTION EN ATTENTE — le verbe de « Révision et réutilisation ».** Une
+  connaissance reliée à une **Ouverture** prend « se réactive dans » depuis
+  1.82.0. Le type **Révision** a la même nature et garde pourtant « s'acquiert
+  par » : huit paires explicites de `VERBES_AUTO` le disent, donc quelqu'un a
+  tranché en connaissance de cause. **Question posée à Grégoire le 15 août,
+  sans réponse.** Ne pas trancher sans lui — c'est son vocabulaire.
+- ⏳ **NON ÉPROUVÉ : la BEAUTÉ des tracés de liens sur sa vraie carte.** Le
+  routage garantit qu'un lien ne traverse pas de bloc (mesuré : 58/60 libres sur
+  carte dense) ; il ne garantit pas que le détour soit joli. Seul son œil peut
+  le dire, et aucune porte terrain ne couvre encore ce point.
 - ✅ **PORTE TERRAIN DE LA RECHERCHE : PASSAGE CLOS, 45/46, ZÉRO ÉCHEC.**
   Deux défauts trouvés par le terrain, corrigés et **revalidés sur son iPad**
   le 15 août : la **teinte du halo** (ocre désaturé emprunté au jeton d'alerte
