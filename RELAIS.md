@@ -16,6 +16,17 @@
 | **Travail en avance sur `main`** | **aucun** |
 | **Dernière mise à jour** | 15 août 2026 — nuance tâche/objectif dans le gabarit des productions, fusionnée |
 
+⚠⚠ **AVANT TOUTE FUSION EN CONTENEUR : `git fetch --unshallow origin`.** Le clone
+du conteneur est **shallow**, et son `main` LOCAL peut pointer des semaines en
+arrière (15 août : 89 commits de retard, greffe au 3 août). `git merge --ff-only`
+répond alors **« refusing to merge unrelated histories »** — un message qui fait
+croire à un dépôt corrompu alors qu'il ne dit que « l'historique est tronqué ».
+Ensuite, vérifier que le `main` local est bien un **ancêtre** d'`origin/main`
+(`git merge-base --is-ancestor main origin/main`) : c'est ce qui distingue « en
+retard » de « divergent ». ⮕ Cette mise en garde avait été écrite le 9 août, puis
+**perdue** dans une réécriture du fichier ; elle a mordu de nouveau le 15. Ne pas
+la retirer.
+
 ⚠ **VÉRIFIE `origin/main` AVANT DE CROIRE CE TABLEAU.** Le 12 août au matin, ce
 fichier disait « aucune dette de fusion, 0/0 » alors qu'`origin/main` avait un
 commit d'avance, poussé la veille au soir depuis une session cloud. Le rituel de
@@ -43,7 +54,15 @@ Il porte les deux défauts trouvés par la porte terrain — dont le troisième
 retour d'une même classe de bug dans `planification-carte.js` — et les onze
 tests qui n'observaient pas ce qu'ils annonçaient.
 
----|---|
+---
+
+> ▣ **HISTORIQUE — état du 11 août, conservé pour la méthode.** L'état courant est
+> le tableau en tête de fichier ; celui-ci ne vaut plus. (Son en-tête de tableau
+> avait été mangé par une réécriture, ce qui le faisait passer pour la suite du
+> bloc courant — réparé le 15 août.)
+
+| | |
+|---|---|
 | **Branche à ouvrir** | **`main`** |
 | **Version** | **1.75.0** — build `0811-1319` |
 | **Travail en avance sur `main`** | **aucun** |
