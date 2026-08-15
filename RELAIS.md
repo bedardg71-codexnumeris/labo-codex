@@ -12,9 +12,9 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | **`main`** |
-| **Version** | **1.81.0** — build `0815-0920` |
+| **Version** | **1.81.1** — build `0815-1041` |
 | **Travail en avance sur `main`** | **aucun** |
-| **Dernière mise à jour** | 15 août 2026 (matin) — recherche dans la Carte d'alignement, fusionnée en fast-forward, Vitest 2408/2408 rejoué sur l'arbre fusionné |
+| **Dernière mise à jour** | 15 août 2026 — recherche dans la Carte d'alignement (1.81.0) puis correctif de teinte du halo sur retour terrain (1.81.1). Vitest 2412/2412 |
 
 ⚠⚠ **AVANT TOUTE FUSION EN CONTENEUR : `git fetch --unshallow origin`.** Le clone
 du conteneur est **shallow**, et son `main` LOCAL peut pointer des semaines en
@@ -42,7 +42,14 @@ début l'a attrapé ; il ne l'aurait pas fait sans `git fetch`.
   canevas — l'ambre seul en ratait la moitié, mesuré), la **2.12** (iPad, rien
   n'a jamais été vu), et les **deux mesures de la 2.4** dont dépend la
   décision **3.3** (chercher par type de bloc reste-t-il lisible sur sa vraie
-  carte).
+  carte). ⮕ **ÉTAT AU RETOUR DU TERRAIN : 44 passées, 1 échec, 1 non traitée.**
+  Restent dus : la **2.1c** (ÉCHEC — sur iPad en PORTRAIT, les boutons de droite
+  de la barre ne sont pas tous là), la rangée « taper lecon puis expose » de la
+  **2.4**, la mesure **2.2m**, et **la 2.6 ENTIÈRE À REFAIRE** — elle a été
+  validée avec l'ancienne teinte du halo, remplacée depuis en 1.81.1.
+- ⚠ **#3.2 — le seuil de deux lettres : son verdict est « non », sans
+  contre-proposition.** Il ne veut pas 2, mais on ne sait pas s'il veut 1 ou 3.
+  À lui redemander avant de toucher à `RECHERCHE_MIN`.
 - **5 rangées de porte terrain non traitées** —
   `plans de travail/PORTES-TERRAIN-2026-08-12-416-lots-CGIHB.md` : 3.3 (supprimer
   un gabarit) en entier, la fin de 4.1 et de 4.3. **Plus les deux corrections du

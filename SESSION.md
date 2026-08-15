@@ -7,6 +7,60 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 15 AOÛT 2026 (SUITE) : LE HALO ÉTAIT GRIS, ET IL AVAIT RAISON.
+     ÉTAT : **1.81.1** — Vitest **2412/2412** (259 fichiers), 1 commit.
+
+     ▣ **RETOUR TERRAIN, CAPTURES À L'APPUI** : « C'est davantage gris que ambre,
+     non ? Je voudrais une couleur plus saturée. » Il avait raison, et la cause
+     était dans le choix du jeton, pas dans le rendu : le halo empruntait
+     `--alerte-bordure-attention` — un ocre DÉSATURÉ (#a07830 / #c8a060) calibré
+     pour border un encadré d'alerte, jamais pour repérer un bloc.
+
+     ⚠ **ET CE JETON N'ÉTAIT PAS SEULEMENT TERNE, IL ÉTAIT MAL EMPRUNTÉ.** Il
+     appartient à la famille des ALERTES, niveaux RaI compris — que le projet
+     interdit explicitement de confondre avec autre chose. Le halo de recherche
+     n'est pas une alerte, c'est un repère. Nouveau jeton : `--planif-couleur-trouve`.
+
+     ⚠⚠ **POURQUOI UN JAUNE ET NON UN AMBRE, malgré le mot qu'il emploie.** La
+     bande ambre-orange est DÉJÀ prise par CINQ types de blocs (factuelle,
+     conceptuelle, procédurale, métacognitive, préalable). Comparé à l'écran —
+     quatre candidats, à 100 % puis sur une carte dense à 22 % — un ambre saturé
+     reste confusable avec ces bordures ; le jaune #ffd60a s'en détache d'un
+     coup d'œil. Le pire cas était sous les yeux : le bloc trouvé de la capture
+     est une PROCÉDURALE, bordure orange.
+
+     ▣ **CONTRASTE RE-MESURÉ** sur les 12 fonds × 2 modes après le changement de
+     teinte : **24/24 au-dessus du seuil, minimum 4,22:1**. Les liserés bicolores
+     portent la visibilité, la teinte porte le SENS — c'est ce découplage qui
+     permet de changer la couleur sans rouvrir le dossier du contraste.
+
+     ▣ Le `<mark>` de la liste suit désormais la même couleur que le halo : même
+     fait, même couleur. Deux teintes laissaient croire à deux choses.
+
+     ═══ MES DEUX ASSERTIONS SONT RESTÉES VERTES SOUS MUTATION ═══
+
+     ⚠⚠ **ET C'EST LE MÊME PIÈGE QUE CELUI DÉJÀ CONSIGNÉ POUR `indexOf`.**
+     Mes deux tests neufs découpaient une tranche de CSS entre deux ancres.
+     Le premier prenait une ancre de fin qui existe AILLEURS dans le fichier,
+     donc AVANT le début : `slice(20050, 18790)` rend la chaîne VIDE, et
+     `expect('').not.toContain(...)` passe toujours. Le second englobait la
+     variante `.mode-clair`, qui portait encore le jeton et suffisait à faire
+     passer l'assertion alors que la règle de base ne l'utilisait plus.
+     ⮕ Correctif de FOND : un helper `blocCss(debut, fin)` qui cherche la fin
+     APRÈS le début et refuse une tranche vide. Les quatre découpes du fichier
+     y passent. **Une tranche vide ne peut plus produire un test complaisant.**
+
+     ▣ **SENTINELLE portée à 34 cas, BREAK-TESTÉE EN 22 MUTATIONS — 22 rouges.**
+     Cinq neuves encodent le retour terrain : jeton propre (pas celui des
+     alertes), **saturation MESURÉE** (> 0,85 — l'ocre d'origine échoue à 0,54),
+     **teinte à plus de 10° des cinq oranges de types**, et le `<mark>` qui suit
+     le halo. « Plus saturée » est devenu vérifiable au lieu d'être un adjectif.
+
+     ⚠ **NON ÉPROUVÉ** : Safari et iPad (#456). Et **la porte 2.6 avait été
+     validée avec l'ANCIENNE teinte** — elle est à refaire sur les douze fonds.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 15 AOÛT 2026 (MATIN) : CHERCHER UN MOT DANS LA CARTE.
      ÉTAT : **1.81.0** — Vitest **2408/2408** (259 fichiers), 1 commit de code.
 
