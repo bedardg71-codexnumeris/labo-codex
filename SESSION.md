@@ -7,6 +7,42 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     RITUEL DE CLÔTURE — 15 AOÛT 2026. Vitest **2448/2448**, arbre propre,
+     `origin/main ↔ HEAD : 0/0`, 4 points de version synchrones (1.83.2).
+
+     ▣ **12 BREAK-TESTS REJOUÉS SUR L'ARBRE FINAL — 12 rouges.** Pas les runs de
+     la journée : re-exécutés à la clôture, un échantillon par chantier, priorité
+     aux correctifs données / sécurité / SSOT (échappement, table d'index,
+     accents décomposés, bascule des liens sous ses quatre angles, règle de
+     réactivation, défaut de préférence, obstacles).
+
+     ▣ **PASSE CONNEXIONS — aucun trou.** Les quatre écrivains de `etat.liens` et
+     les CINQ chemins d'import finissent tous par `chargerCarte`, qui porte la
+     bascule. L'annulation ne peut pas ressusciter un état d'avant : `chargerCarte`
+     purge la pile. Une carte dormant en bibliothèque garde l'ancien verbe jusqu'à
+     son ouverture — patron par carte, identique à `migrerObjectifsVersMetadata`.
+
+     ⚠⚠ **LE RITUEL A TROUVÉ UN DÉFAUT QUE PERSONNE N'AVAIT VU — dans un livrable
+     que j'avais publié.** `esc()` de l'artefact de porte terrain n'échappait pas
+     le guillemet droit, injecté dans `value="…"`. Mesuré : saisir
+     « il a dit "non" au 3e essai » dans un champ de MESURE ne réaffichait que
+     « il a dit ». Le stockage restait intact, mais rééditer le champ tronqué
+     aurait écrasé la valeur complète — une perte silencieuse, et précisément sur
+     les mesures que `SKILL_portes_terrain.md` dit de ne jamais perdre.
+     ⮕ Corrigé, break-testé (l'ancienne `esc()` fait bien rougir la
+     vérification), republié.
+
+     ⚠ **DEUX DE MES CONTRÔLES DE RITUEL NE PROUVAIENT RIEN** : `grep … | head`
+     rend toujours 0, donc le `|| echo "inchangé"` ne pouvait jamais se
+     déclencher — j'affirmais « inchangé » sans preuve. Refaits avec un vrai
+     test de vacuité. Et l'affirmation « 58/60 liens libres » a été RE-MESURÉE
+     sur l'arbre final plutôt que reportée : **60/60 à 1,16 ms**.
+
+     ⏳ **Playwright non exécutable en conteneur** (92 tests / 41 fichiers,
+     WebKit absent) — confirmé en lançant `setup.spec.js`, pas supposé. CI.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 15 AOÛT 2026 (SUITE 4) : LE CONTOURNEMENT DEVIENT UN CHOIX.
      ÉTAT : **1.83.0** — Vitest **2440/2440** (260 fichiers), 1 commit.
 

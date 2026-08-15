@@ -8,6 +8,11 @@
 > **Ce qui échoue devient un item de BACKLOG, pas une note mentale.**
 
 **Artefact interactif** : <https://claude.ai/code/artifact/508d3560-7111-4f1d-85c1-9a6b7c5323cc>
+⚠ **Corrigé le 15 août au rituel de clôture** : un guillemet droit saisi dans un
+champ de MESURE tronquait la valeur à l'affichage (`value="…"` refermé trop
+tôt). Rien n'était perdu dans le stockage, mais rééditer un champ tronqué aurait
+écrasé la valeur complète. Si tu as saisi une mesure contenant un guillemet
+avant cette correction, **rouvre la page et vérifie-la**.
 (publié le 15 août 2026 ; éprouvé au navigateur Chromium avant publication —
 46 rangées, 4 champs de mesure et 5 champs de verdict qui remontent dans le
 relevé, filtres par tag, persistance vérifiée après rechargement, zéro erreur
