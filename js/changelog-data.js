@@ -29,7 +29,7 @@
                 'Le libellé d’un lien se pose maintenant SUR la courbe, et s’écarte s’il tombe sur un bloc — avant, il se posait à mi-chemin entre les deux extrémités, un point qui n’appartenait pas au tracé.',
                 'Nouveau verbe « se réactive dans » : une connaissance reliée à une Ouverture ou à une Révision ne s’y acquiert pas, elle y est remise en service. C’est le rappel de début de leçon, et la pratique répartie.',
                 'Le menu d’un lien offre désormais TOUS les verbes, sous ceux qu’il suggère. Un verbe suggéré qui ne convient pas ne bloque plus.',
-                'Le contournement se règle : Actions ▸ « Liens : contourner les blocs ». Actif par défaut ; le décocher redonne le tracé direct d’avant, pour les cartes assez aérées pour s’en passer.,
+                'Le contournement se règle : Actions ▸ « Liens : contourner les blocs ». Actif par défaut ; le décocher redonne le tracé direct d’avant, pour les cartes assez aérées pour s’en passer.',
                 'Tes liens déjà tracés sont mis à jour tout seuls : ceux qui reliaient une connaissance à une Ouverture ou à une Révision passent de « s’acquiert par » à « se réactive dans » à l’ouverture de la carte. Un message te dit combien, et lesquels.'
             ]
         },
