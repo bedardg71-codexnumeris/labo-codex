@@ -331,13 +331,17 @@ ol.erreurs b { color: var(--ink); }
 </header>
 
 <div class="alerte">
-  <h3>⚠⚠ Cette livraison n'est pas sur main</h3>
+  <h3>⚠⚠ Commence par le §0 : mets-toi à jour</h3>
   <p>
-    Elle vit sur la branche <code>claude/alignment-map-search-field-gi57ob</code>,
-    non fusionnée. <b>Sans la première rangée du §0, toute la liste est
-    invérifiable</b> — l'app affichera 1.80.0 et le champ n'existera pas.
+    La livraison est <b>fusionnée dans <code>main</code></b> (1.81.0). Mais ton
+    clone local, lui, est à la version de ton dernier <code>git pull</code> :
+    <b>sans la première rangée du §0, toute la liste est invérifiable</b> —
+    l'app affichera 1.80.0 et le champ n'existera pas.
   </p>
-  <p>C'est l'erreur qui avait fait ignorer une liste entière le 9 août.</p>
+  <p>
+    Ce faux rouge est indétectable au récit : il décrit exactement l'état
+    d'avant la livraison, qui est précisément ce que la liste teste.
+  </p>
 </div>
 
 <div class="alerte attention">
@@ -397,11 +401,11 @@ ol.erreurs b { color: var(--ink); }
 // =====================================================================
 const DATA = [
 { num: '§0', titre: 'Avant de commencer', note: "La première rangée n'est pas une vérification, c'est un déploiement.", portes: [
-  { ref: '0.1', t: 'récupérer la branche', titre: 'Passer sur la branche de la livraison',
-    pourquoi: "Le champ de recherche n'est pas sur <b>main</b>. Tant que tu n'as pas fait ce geste, l'app que tu ouvres est celle d'hier, et chaque porte de cette liste échouera pour la même mauvaise raison.",
+  { ref: '0.1', t: 'mise à jour du clone', titre: 'Récupérer la livraison sur ton Mac',
+    pourquoi: "La livraison est dans <b>main</b>, mais ton clone local est à la version de ton dernier <code>git pull</code>. Tant que tu n'as pas fait ce geste, l'app que tu ouvres est celle d'hier, et chaque porte de cette liste échouera pour la même mauvaise raison.",
     rangs: [
-      { id:'0.1a', tags:['Terminal'], geste:"<b>SEULE commande de Terminal de toute la liste</b> — dans l'app <b>Terminal</b>, pas la console du navigateur, depuis le dossier <code>Monitorage_v6</code> :<span class='bloc-cmd'>git fetch origin &amp;&amp; git checkout claude/alignment-map-search-field-gi57ob &amp;&amp; git pull</span>",
-        attendu:"Terminal répond <b>Switched to branch 'claude/alignment-map-search-field-gi57ob'</b>. S'il répond <code>error: Your local changes would be overwritten</code>, <b>arrête-toi et dis-le-moi</b> : il y a du travail local non commité." },
+      { id:'0.1a', tags:['Terminal'], geste:"<b>SEULE commande de Terminal de toute la liste</b> — dans l'app <b>Terminal</b>, pas la console du navigateur, depuis le dossier <code>Monitorage_v6</code> :<span class='bloc-cmd'>git checkout main &amp;&amp; git pull origin main</span>",
+        attendu:"Terminal liste les fichiers reçus et finit sur <code>Fast-forward</code>. S'il répond <code>error: Your local changes would be overwritten</code>, <b>arrête-toi et dis-le-moi</b> : il y a du travail local non commité." },
       { id:'0.1b', geste:"Recharger l'app et lire le numéro de version <b>en bas de page</b>.",
         attendu:"<b>1.81.0</b>, build <code>0815-0920</code>. Si tu lis 1.80.0, la commande n'a pas pris — rien d'autre ne marchera." },
       { id:'0.1c', tags:['iPad'], geste:"Sur iPad, si le numéro reste à 1.80.0 : ouvrir en <b>onglet privé</b>.",
@@ -742,7 +746,7 @@ function construireReleve() {
   const L = [];
   L.push('PORTES TERRAIN — Recherche dans la Carte d\'alignement (15 août 2026)');
   L.push('Version visée : 1.81.0 · build 0815-0920');
-  L.push('Branche : claude/alignment-map-search-field-gi57ob');
+  L.push('Fusionné dans main le 15 août 2026');
   L.push('');
   L.push(`BILAN : ${ok} passées · ${ko} échec · ${verifs.length - ok - ko} non traitées (sur ${verifs.length})`);
   L.push('');

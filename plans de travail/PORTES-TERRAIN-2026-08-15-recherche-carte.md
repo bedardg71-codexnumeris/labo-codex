@@ -17,10 +17,12 @@ Carte d'alignement. 14 portes, 46 vérifications, 4 mesures, 5 décisions.
 **Précédente liste** : `PORTES-TERRAIN-2026-08-12-416-lots-CGIHB.md` (5 rangées
 encore dues : 3.3 en entier, la fin de 4.1 et de 4.3).
 
-⚠⚠ **CETTE LIVRAISON N'EST PAS SUR `main`.** Elle vit sur la branche
-`claude/alignment-map-search-field-gi57ob`, non fusionnée. **Sans le §0, toute
-la liste est invérifiable** — l'app affichera 1.80.0 et le champ n'existera
-pas. C'est l'erreur qui a fait ignorer une liste entière le 9 août.
+⚠⚠ **COMMENCE PAR LE §0.** La livraison est **fusionnée dans `main`** (1.81.0,
+le 15 août). Mais le clone local de Grégoire est à la version de son dernier
+`git pull` : **sans le §0, toute la liste est invérifiable** — l'app affichera
+1.80.0 et le champ n'existera pas. Ce faux rouge est indétectable au récit,
+parce qu'il décrit exactement l'état d'avant la livraison, qui est précisément
+ce que la liste teste.
 
 ⚠ **Ce que les tests ne peuvent PAS dire.** 2408 cas verts et 17 break-tests
 rouges disent que le moteur trouve les bons blocs. Ils ne disent pas si le halo
@@ -37,9 +39,9 @@ exactement le périmètre de cette liste.
 - [ ] **SEULE commande de Terminal de toute la liste** (app **Terminal**, pas
       la console du navigateur — dans le dossier `Monitorage_v6`) :
 
-      git fetch origin && git checkout claude/alignment-map-search-field-gi57ob && git pull
+      git checkout main && git pull origin main
 
-      ⮕ **Attendu** : `Switched to branch 'claude/alignment-map-search-field-gi57ob'`.
+      ⮕ **Attendu** : la liste des fichiers reçus, puis `Fast-forward`.
       Si Terminal répond `error: Your local changes would be overwritten`,
       **arrête-toi et dis-le-moi** — il y a du travail local non commité.
       `Terminal`
@@ -403,4 +405,4 @@ autre chose.
 | **État** | ⏳ non traitée |
 | **Rangées** | 14 portes · 46 vérifications · 4 mesures · 5 décisions |
 | **Version visée** | 1.81.0 — build `0815-0920` |
-| **Branche** | `claude/alignment-map-search-field-gi57ob` (non fusionnée) |
+| **Branche** | fusionnée dans `main` le 15 août 2026 (fast-forward, Vitest 2408/2408 rejoué sur l'arbre fusionné) |
