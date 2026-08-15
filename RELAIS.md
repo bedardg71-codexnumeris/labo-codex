@@ -12,9 +12,9 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | **`main`** |
-| **Version** | **1.78.0** — build `0812-1715` |
+| **Version** | **1.80.0** — build `0815-0740` |
 | **Travail en avance sur `main`** | **aucun** |
-| **Dernière mise à jour** | 13 août 2026 matin — golden master dégelé, icône de la Loupe |
+| **Dernière mise à jour** | 15 août 2026 — nuance tâche/objectif dans le gabarit des productions, fusionnée |
 
 ⚠ **VÉRIFIE `origin/main` AVANT DE CROIRE CE TABLEAU.** Le 12 août au matin, ce
 fichier disait « aucune dette de fusion, 0/0 » alors qu'`origin/main` avait un
@@ -31,6 +31,9 @@ début l'a attrapé ; il ne l'aurait pas fait sans `git fetch`.
   mesurées sur `main` AVANT le chantier, donc aucune régression. Elles ne
   tournaient nulle part : WebKit manque aux conteneurs, et personne ne les
   lançait en local.
+- **Les trois info-bulles du gabarit des productions (1.80.0) n'ont jamais été VUES** —
+  199 à 238 caractères dans une bulle de 320 px, et sur iPad elles s'ouvrent au
+  long-press, pas au survol. À éprouver sur son matériel, dans les deux modes.
 - **#455** — le cours est-il global ou par session ? Deux fichiers répondent
   l'inverse à trois jours d'écart. Aucune conséquence visible aujourd'hui, une
   collision certaine dès qu'un 601-101 d'automne sera créé.

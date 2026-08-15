@@ -7,6 +7,51 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 15 AOÛT 2026 : LA TÂCHE SE TERMINE, L'OBJECTIF SE POURSUIT.
+     ÉTAT : **1.80.0** — Vitest **2378/2378** (258 fichiers), 1 commit de code.
+
+     ▣ **CE QUI MANQUAIT.** Les deux info-bulles du gabarit des productions disaient la
+     MÊME chose sous deux angles — « ce que l'étudiant·e sera capable de faire » d'un
+     côté, « ce qui est demandé concrètement » de l'autre. Rien n'y opposait la tâche
+     (locale, bornée, cochable) à l'objectif (transférable, sans terme, seulement
+     observable). C'est pourtant cette distinction qui décide de ce qu'on écrit dans
+     chaque champ. Demande de Grégoire, formulée avec la distinction déjà faite.
+
+     ▣ **CE QUI EST LIVRÉ.** `cn-prod-tache` et `cn-prod-objectif` réécrites, chacune
+     portant sa moitié du contraste et lisible seule. Nouvelle clé `cn-prod-detail-tache` :
+     le champ « Détail de la tâche » n'avait AUCUNE info-bulle (vérifié sur `origin/main`,
+     `index.html:4702`). Nouvelle pop-up `detail-tache-qualite` derrière un bouton d'aide,
+     avec les cinq critères de relecture proposés par Grégoire.
+
+     ⚠ **POURQUOI UNE POP-UP ET PAS LA BULLE.** Les cinq critères ne POUVAIENT pas tenir
+     au survol : le mode hover rend du **texte brut** (`accompagnement.js:344`,
+     `textContent`) dans **320 px** (`HOVER_LARGEUR_MAX`), s'efface au retrait du curseur
+     et exige un long-press sur iPad. Une liste y devient un pavé sans puces. Même geste
+     que « verbes actifs » pour l'objectif, juste à côté.
+
+     ▣ **CRITÈRES NOMMÉS PAR LEUR SYMPTÔME**, sur arbitrage retenu par Grégoire :
+     « rien n'arrive par surprise » plutôt que « débordement ascendant ». La fiche se lit
+     en rédigeant, pas en auditant.
+
+     ⮕ **RÉSERVE ASSUMÉE — l'homogénéité.** Le 5e critère (profondeur comparable d'une
+     production à l'autre) est le seul qu'on ne peut PAS juger depuis le formulaire d'une
+     production : il faut voir les autres. Gardé comme rappel ; s'il doit devenir
+     vérifiable, sa place est le tableau des productions. Chantier NON ouvert.
+
+     ⚠ **NON ÉPROUVÉ À L'ÉCRAN** : les trois bulles font 199 à 238 caractères pour 320 px
+     de large, et sur iPad elles s'ouvrent au long-press. Aucun rendu observé — WebKit
+     manque au conteneur (condition préexistante, #456).
+
+     ▣ **SENTINELLE** : `tests/unit/nuance-tache-objectif.test.js`, 8 cas.
+     **BREAK-TESTÉE EN CINQ MUTATIONS** — retour au texte générique (2 rouges), clé hover
+     retirée (2), `data-tooltip` retiré du libellé (1), critère de liste supprimé +
+     renvoi « voir aussi » cassé (2), entrée pop-up retirée en entier (3). **8 cas sur 8
+     ont été vus rouges.** Passe « connexions » : le formulaire des productions n'a qu'UN
+     chemin de rendu (`index.html` statique, peuplé par `productions.js:787-789`) — aucun
+     second gabarit à câbler.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 13 AOÛT 2026 (MATIN) : LE FILET CRIAIT AU LOUP, ET IL AVAIT TORT.
      ÉTAT : **1.79.0** — Vitest **2370/2370** (257 fichiers), 2 commits.
 
