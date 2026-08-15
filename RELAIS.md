@@ -12,9 +12,9 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | **`main`** |
-| **Version** | **1.80.0** — build `0815-0740` |
+| **Version** | **1.81.0** — build `0815-0920` |
 | **Travail en avance sur `main`** | **aucun** |
-| **Dernière mise à jour** | 15 août 2026 — nuance tâche/objectif dans le gabarit des productions, fusionnée |
+| **Dernière mise à jour** | 15 août 2026 (matin) — recherche dans la Carte d'alignement, fusionnée en fast-forward, Vitest 2408/2408 rejoué sur l'arbre fusionné |
 
 ⚠⚠ **AVANT TOUTE FUSION EN CONTENEUR : `git fetch --unshallow origin`.** Le clone
 du conteneur est **shallow**, et son `main` LOCAL peut pointer des semaines en
@@ -33,6 +33,16 @@ commit d'avance, poussé la veille au soir depuis une session cloud. Le rituel d
 début l'a attrapé ; il ne l'aurait pas fait sans `git fetch`.
 
 ⏳ **CE QUI RESTE DÛ** :
+- ⚠ **UNE PORTE TERRAIN NEUVE, ENTIÈREMENT NON TRAITÉE** —
+  `plans de travail/PORTES-TERRAIN-2026-08-15-recherche-carte.md` (artefact :
+  <https://claude.ai/code/artifact/508d3560-7111-4f1d-85c1-9a6b7c5323cc>).
+  14 portes, **46 vérifications, 4 mesures, 5 décisions**. Elle porte la
+  recherche de la Carte d'alignement (1.81.0). Trois points y sont bloquants
+  pour la suite : la **2.6** (le halo se voit-il sur ses douze fonds de
+  canevas — l'ambre seul en ratait la moitié, mesuré), la **2.12** (iPad, rien
+  n'a jamais été vu), et les **deux mesures de la 2.4** dont dépend la
+  décision **3.3** (chercher par type de bloc reste-t-il lisible sur sa vraie
+  carte).
 - **5 rangées de porte terrain non traitées** —
   `plans de travail/PORTES-TERRAIN-2026-08-12-416-lots-CGIHB.md` : 3.3 (supprimer
   un gabarit) en entier, la fin de 4.1 et de 4.3. **Plus les deux corrections du
@@ -49,7 +59,12 @@ début l'a attrapé ; il ne l'aurait pas fait sans `git fetch`.
   l'inverse à trois jours d'écart. Aucune conséquence visible aujourd'hui, une
   collision certaine dès qu'un 601-101 d'automne sera créé.
 
-⮕ **Où lire la suite** : le bloc **12 août** de `SESSION.md`, en tête de fichier.
+⮕ **Où lire la suite** : le bloc **15 août (matin)** de `SESSION.md`, en tête de
+fichier. Il porte les trois défauts que seule la MESURE a trouvés sur la
+recherche — dont une normalisation d'accents que mon propre test déclarait
+verte parce que ses exemples ne pouvaient pas la mettre en défaut, et une
+première correction de contraste qui était insuffisante et que seule la
+SECONDE mesure a démasquée. Puis le bloc **12 août**.
 Il porte les deux défauts trouvés par la porte terrain — dont le troisième
 retour d'une même classe de bug dans `planification-carte.js` — et les onze
 tests qui n'observaient pas ce qu'ils annonçaient.
