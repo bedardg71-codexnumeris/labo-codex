@@ -66,12 +66,12 @@ const CARTE_DEMO_ALIGNEMENT = {
                 { id: 'planif-noeud_26', type: 'procedurale', titre: 'Appliquer une méthode d’annotation efficace', description: '', x: -1566.3487399504672, y: 492.3295775285154, parent: 'planif-noeud_9', enfants: [], metadata: {}, cloneSourceId: null },
                 { id: 'planif-noeud_17', type: 'procedurale', titre: 'Noter ses réactions spontanées', description: '', x: -1558.3487399504672, y: 637.3295775285154, parent: 'planif-noeud_9', enfants: [], metadata: {}, cloneSourceId: null },
                 { id: 'planif-noeud_12', type: 'activite', titre: 'Analyser «Pour que nous puissions vivre»', description: '', x: -1566.3487399504672, y: 762.3295775285154, parent: 'planif-noeud_9', enfants: [], metadata: {}, cloneSourceId: null },
-                { id: 'planif-noeud_24', type: 'evaluation', titre: 'Rétroaction formative', description: '', x: -1526.8487399504672, y: 907.3295775285154, parent: 'planif-noeud_9', enfants: [], metadata: {}, cloneSourceId: null },
+                { id: 'planif-noeud_24', type: 'evaluation', titre: 'Rétroaction formative', description: '', x: -1526.8487399504672, y: 907.3295775285154, parent: 'planif-noeud_9', enfants: [], metadata: { visee: 'formative' }, cloneSourceId: null },
                 { id: 'planif-noeud_8', type: 'factuelle', titre: 'Reconnaitre différents procédés littéraires (insistance et opposition)', description: '', x: -1254.9499182684067, y: 353.46050312184747, parent: 'planif-noeud_10', enfants: [], metadata: { prealable: true }, cloneSourceId: null },
                 { id: 'planif-noeud_18', type: 'procedurale', titre: 'Observer le paratexte', description: '', x: -1215.4499182684067, y: 518.4605031218475, parent: 'planif-noeud_10', enfants: [], metadata: {}, cloneSourceId: null },
                 { id: 'planif-noeud_3', type: 'procedurale', titre: 'Observer les motifs et les contrastes', description: '', x: -1254.9499182684067, y: 643.4605031218475, parent: 'planif-noeud_10', enfants: [], metadata: {}, cloneSourceId: null },
                 { id: 'planif-noeud_13', type: 'activite', titre: 'Annoter le texte «Marine»', description: '', x: -1229.4499182684067, y: 788.4605031218475, parent: 'planif-noeud_10', enfants: [], metadata: {}, cloneSourceId: null },
-                { id: 'planif-noeud_22', type: 'evaluation', titre: 'Rétroaction formative', description: '', x: -1215.4499182684067, y: 913.4605031218475, parent: 'planif-noeud_10', enfants: [], metadata: {}, cloneSourceId: null }
+                { id: 'planif-noeud_22', type: 'evaluation', titre: 'Rétroaction formative', description: '', x: -1215.4499182684067, y: 913.4605031218475, parent: 'planif-noeud_10', enfants: [], metadata: { visee: 'formative' }, cloneSourceId: null }
             ],
             liens: [
                 { id: 'planif-lien_38', source: 'planif-noeud_1', cible: 'planif-noeud_2', type: 'se_decline_en' },

@@ -1338,19 +1338,174 @@ function estPhaseEE(type) {
 }
 
 /**
- * Écriture — porte de sortie UNIQUE de la phase (même patron que
- * `definirSemaineLecon` et `definirObjectifsLecon`).
- * Refuse tout ce qui n'est pas une phase → phase : la borne est DANS la porte,
- * pas seulement dans l'interface qui l'appelle.
- * @returns {boolean} true si le nœud existait et a changé de phase
+ * Les frères d'Activité qui ne sont PAS des phases de méthode.
+ * ⚠ DÉRIVÉ de `TYPES_ACTIVITE`, jamais réécrit à la main : « frère d'activité »
+ * se définit à un seul endroit (règle posée le 7 août). Un frère ajouté là-bas
+ * rejoint cette famille tout seul ; recopier le quatuor ici le ferait manquer.
  */
-function definirPhaseEE(noeudId, nouveauType) {
+var TYPES_DEROULEMENT = TYPES_ACTIVITE.filter(function(t) { return !estPhaseEE(t); });
+
+/** L'intention curriculaire — les deux nœuds du « pourquoi ». */
+var TYPES_INTENTION = ['competence', 'idee-maitresse'];
+
+/**
+ * LES FAMILLES PERMUTABLES — dans quelle liste un bloc peut-il changer de type
+ * sans quitter sa nature (16 août 2026, demande de Grégoire).
+ *
+ * ▣ CE QUI EST GÉNÉRALISÉ, ET POURQUOI C'EST SÛR. Le sélecteur de phase du
+ * 15 août était borné aux cinq étapes parce que les cinq sont sœurs par
+ * construction. Grégoire demande le même geste pour tous les types ; la
+ * question n'est donc plus « est-ce une phase ? » mais « ces deux types
+ * répondent-ils pareil à toutes les tables du module ? ».
+ *
+ * ⮕ VÉRIFIÉ TABLE PAR TABLE, et c'est ce qui borne les familles ci-dessous :
+ * `TYPES_AVEC_DUREE`, `TYPES_HORS_CLASSE`, `TYPES_AVEC_NIVEAU_COGNITIF`,
+ * `TYPES_SERVANTS_OBJECTIF`, `TYPES_PREALABLE` et la règle de parent légal
+ * (`accepteEnfant`) répondent TOUTES de façon uniforme à l'intérieur de chacune
+ * des quatre familles. Une permutation ne peut donc ni perdre une durée, ni
+ * orpheliner un objectif servi, ni rendre un parent illégal.
+ *
+ * ⚠ UNE SEULE TABLE N'EST PAS UNIFORME : `normaliserType`, qui résout les
+ * VERBES des liens. Compétence et Idée maîtresse s'y résolvent chacune sur
+ * elle-même, et `TYPES_REACTIVATION` ne contient qu'Ouverture et Révision. Une
+ * permutation peut donc laisser un lien porter un verbe que le nouveau type ne
+ * suggérerait plus. Le verbe n'est PAS réécrit — c'est une donnée de
+ * l'enseignant — mais le changement est DIT (`signalerVerbesDevenusInexacts`,
+ * verdict 3.4 de Grégoire, porte terrain du 16 août).
+ *
+ * ⚠ CE QUI N'A DÉLIBÉRÉMENT PAS DE FAMILLE :
+ * - **Séquence et Leçon** : une leçon porte une semaine, un rang de séance et
+ *   des objectifs qu'une séquence n'a pas. Permuter orphelinerait ces données.
+ *   « Elles ne sont pas intervertibles » — Grégoire, 16 août. Libellé inerte.
+ * - **Évaluation** : elle est seule de son type. Sa nuance formative /
+ *   certificative est un MODIFICATEUR (`metadata.visee`), pas un type — voir
+ *   `VISEES_EVALUATION`. C'est ce qui préserve le pont vers les productions.
+ */
+var FAMILLES_PERMUTABLES = [TYPES_INTENTION, TYPES_CONNAISSANCE, TYPES_DEROULEMENT, PHASES_EE];
+
+/**
+ * LA VISÉE D'UNE ÉVALUATION — formative ou certificative (16 août 2026).
+ *
+ * ⚠⚠ POURQUOI UN MODIFICATEUR ET NON DEUX TYPES. Grégoire a demandé deux
+ * entrées au menu de l'en-tête. Deux TYPES auraient été la lecture naïve de sa
+ * demande, et elle casse trois choses mesurées avant d'écrire une ligne :
+ *
+ * 1. `evaluation` est le SEUL type qui porte `metadata.productionId` — le pont
+ *    entre la carte et les vraies productions du Codex. La moisson de `main.js`
+ *    cherche « le nœud Évaluation unique de la leçon » : deux types nommés
+ *    autrement, et elle n'en trouve plus aucun, EN SILENCE.
+ * 2. `planification-export.js` classe par `type === 'evaluation'` — marqueur ◆,
+ *    section Évaluation, colonnes pondération et échéance, agrégation du
+ *    sommaire.
+ * 3. `evaluerObjectif` coche un objectif comme « vérifié » via ce type.
+ *
+ * ⮕ Le projet a déjà le patron : `metadata.prealable` et `metadata.retroaction`
+ * sont des nuances posées À CÔTÉ du type. La visée en est une de plus. Le menu
+ * de l'en-tête est identique à l'écran, et les trois mécanismes ci-dessus
+ * continuent de fonctionner sans être touchés.
+ *
+ * ▣ TROIS ÉTATS EN MÉMOIRE, DEUX ENTRÉES AU MENU — et cet écart est délibéré.
+ * Le champ absent ne veut pas dire « certificative », il veut dire « Grégoire
+ * ne s'est pas encore prononcé ». La distinction compte parce que le libellé
+ * part dans son PLAN DE COURS : écrire « Évaluation certificative » sur un bloc
+ * qu'il n'a jamais qualifié mettrait dans un document destiné à ses étudiants
+ * une affirmation qu'il n'a pas faite.
+ * ⮕ Tant qu'il n'a rien choisi, l'export dit « Évaluation », comme avant. Le
+ * menu, lui, doit bien afficher quelque chose : il montre « Certificative »,
+ * qui est le comportement effectif. Dès qu'il touche au menu, le choix est
+ * ÉCRIT — y compris « certificative ».
+ *
+ * ⚠ C'EST UN ÉCART ASSUMÉ À L'IDIOME DU MODULE. `appliquerRetroactionNoeud`
+ * RETIRE le champ quand la valeur vaut le défaut (« un défaut n'est pas un
+ * rattachement »). Ici, « il a choisi certificative » et « il n'a rien choisi »
+ * ne produisent pas le même document : l'un est une donnée, l'autre une
+ * absence. Le raccourci coûterait la différence.
+ *
+ * ⮕ Conséquence heureuse et mesurée : le golden master des exports (#416) et la
+ * sentinelle de granularité restent VERTS sans être retouchés. Une conception
+ * qui n'oblige pas à refiger un golden master est une conception qui ne change
+ * rien à ce que Grégoire reçoit — c'est le contrôle, pas la commodité.
+ *
+ * ▣ DEUX LIBELLÉS, ET C'EST VOULU. Le menu de l'en-tête dit « Formative » /
+ * « Certificative » ; `obtenirLabelNoeud` (Inspecteur, exports, recherche) dit
+ * « Évaluation formative » / « Évaluation certificative ». La leçon de la porte
+ * 2.7 est que deux libellés de même couleur qui se tronquent deviennent
+ * indiscernables — or « Évaluation certificative » fait 24 caractères, contre
+ * 17 pour « Pratique autonome » qui passait déjà à la ligne. Tronqués à huit
+ * lettres, « FORMATIVE » et « CERTIFICAT… » restent distincts.
+ *
+ * ⚠ Décision de Grégoire, 16 août : une évaluation formative VÉRIFIE un
+ * objectif au même titre qu'une certificative. `evaluerObjectif` n'est donc pas
+ * touchée — sa carte se lit demain comme elle se lit aujourd'hui.
+ */
+var VISEES_EVALUATION = [
+    ['certificative', 'Certificative', 'Évaluation certificative'],
+    ['formative',     'Formative',     'Évaluation formative']
+];
+
+/**
+ * Ce que Grégoire a RÉELLEMENT choisi — null tant qu'il ne s'est pas prononcé.
+ * C'est cette lecture-ci qui commande le libellé des exports.
+ */
+function viseeChoisie(donnees) {
+    var v = donnees && donnees.metadata && donnees.metadata.visee;
+    return (v === 'formative' || v === 'certificative') ? v : null;
+}
+
+/**
+ * Ce que le MENU affiche — jamais null : sans choix, le comportement effectif
+ * est « certificative », et un `<select>` doit bien montrer une entrée.
+ */
+function viseeEvaluation(donnees) {
+    return viseeChoisie(donnees) || 'certificative';
+}
+
+/**
+ * Écriture — porte de sortie UNIQUE de la visée.
+ * ⚠ La comparaison porte sur `viseeChoisie` et NON sur `viseeEvaluation` :
+ * sur un bloc jamais qualifié, choisir « certificative » doit ÉCRIRE le champ.
+ * Comparer la valeur affichée refuserait ce geste en silence, et le libellé de
+ * l'export ne se préciserait jamais.
+ * @returns {boolean} true si le nœud existait et a changé de visée
+ */
+function definirViseeEvaluation(noeudId, visee) {
     var n = etat.noeuds.get(noeudId);
-    if (!n || !estPhaseEE(n.type) || !estPhaseEE(nouveauType)) return false;
+    if (!n || n.type !== 'evaluation') return false;
+    if (visee !== 'formative' && visee !== 'certificative') return false;
+    if (viseeChoisie(n) === visee) return false;
+    enregistrerPourUndo();
+    if (!n.metadata) n.metadata = {};
+    n.metadata.visee = visee;
+    // Un clone est une INSTANCE LIÉE : sa visée suit celle de sa source.
+    propagerModification(noeudId, 'metadata', n.metadata);
+    sauvegarder();
+    return true;
+}
+
+/** La famille permutable d'un type, ou null s'il n'en a pas. */
+function famillePermutableDe(type) {
+    for (var fi = 0; fi < FAMILLES_PERMUTABLES.length; fi++) {
+        if (FAMILLES_PERMUTABLES[fi].indexOf(type) !== -1) return FAMILLES_PERMUTABLES[fi];
+    }
+    return null;
+}
+
+/**
+ * Écriture — porte de sortie UNIQUE du type d'un nœud (même patron que
+ * `definirSemaineLecon` et `definirObjectifsLecon`).
+ * Refuse toute permutation qui sort de la famille : la borne est DANS la porte,
+ * pas seulement dans l'interface qui l'appelle.
+ * @returns {boolean} true si le nœud existait et a changé de type
+ */
+function definirTypeNoeud(noeudId, nouveauType) {
+    var n = etat.noeuds.get(noeudId);
+    if (!n) return false;
+    var famille = famillePermutableDe(n.type);
+    if (!famille || famille.indexOf(nouveauType) === -1) return false;
     if (n.type === nouveauType) return false;
     enregistrerPourUndo();
     n.type = nouveauType;
-    // Un clone est une INSTANCE LIÉE : sa phase suit celle de sa source, comme
+    // Un clone est une INSTANCE LIÉE : son type suit celui de sa source, comme
     // son titre et sa durée.
     propagerModification(noeudId, 'type', nouveauType);
     sauvegarder();
@@ -1773,6 +1928,65 @@ function resoudreVerbe(sourceId, cibleId) {
     return null;
 }
 
+/**
+ * SIGNALER UN VERBE DEVENU INEXACT — verdict 3.4 de Grégoire (porte terrain du
+ * 16 août 2026 : « signaler »).
+ *
+ * ⚠ CE QUE CETTE FONCTION NE FAIT PAS, ET C'EST L'ESSENTIEL : elle ne réécrit
+ * AUCUN verbe. Un verbe posé est une donnée de l'enseignant ; le corriger en
+ * douce à chaque permutation serait pire que de le laisser inexact, parce que
+ * la correction serait invisible. Elle se contente de DIRE, et le menu du lien
+ * offre déjà tous les verbes pour corriger d'un clic.
+ *
+ * ▣ ELLE NE SIGNALE QUE LA BASCULE « accordé → désaccordé ». Un lien dont le
+ * verbe divergeait DÉJÀ de la suggestion avant le geste est un choix délibéré,
+ * pas une conséquence : le compter reviendrait à reprocher à Grégoire, à chaque
+ * permutation, un verbe qu'il a choisi exprès. C'est la raison du relevé pris
+ * AVANT le changement.
+ *
+ * ⮕ Vaut pour TOUS les changements de type, pas seulement les phases : c'est la
+ * généralisation du 16 août qui rend le signalement nécessaire ailleurs que
+ * dans l'enseignement explicite. Compétence ↔ Idée maîtresse change la
+ * résolution (les deux se résolvent sur elles-mêmes dans `normaliserType`), et
+ * Ouverture ou Révision quittant `TYPES_REACTIVATION` fait perdre au lien le
+ * verbe « se réactive dans ».
+ */
+function verbeEstSuggere(lien) {
+    var resolution = resoudreVerbe(lien.source, lien.cible);
+    if (!resolution) return false;
+    if (resolution.type === 'horizontal') return resolution.verbes.indexOf(lien.type) !== -1;
+    return resolution.verbe === lien.type;
+}
+
+/** Relevé AVANT permutation : quels liens du nœud portaient un verbe accordé. */
+function releverVerbesDeNoeud(noeudId) {
+    var releve = [];
+    for (var entryRV of etat.liens) {
+        var lien = entryRV[1];
+        if (lien.source !== noeudId && lien.cible !== noeudId) continue;
+        releve.push({ id: entryRV[0], accorde: verbeEstSuggere(lien) });
+    }
+    return releve;
+}
+
+/** Compte APRÈS permutation, et le dit une seule fois pour tout le geste. */
+function signalerVerbesDevenusInexacts(noeudId, releveAvant) {
+    var accordeAvant = {};
+    for (var ri = 0; ri < releveAvant.length; ri++) {
+        if (releveAvant[ri].accorde) accordeAvant[releveAvant[ri].id] = true;
+    }
+    var devenus = 0;
+    for (var entrySV of etat.liens) {
+        var lienSV = entrySV[1];
+        if (lienSV.source !== noeudId && lienSV.cible !== noeudId) continue;
+        if (accordeAvant[entrySV[0]] && !verbeEstSuggere(lienSV)) devenus++;
+    }
+    if (devenus === 0) return;
+    afficherToastLien(devenus === 1
+        ? 'Un lien de ce bloc garde un verbe qui ne correspond plus à son nouveau type — clique le lien pour le changer.'
+        : devenus + ' liens de ce bloc gardent un verbe qui ne correspond plus à son nouveau type — clique un lien pour le changer.');
+}
+
 // Migration anciens verbes → nouveaux verbes
 var MIGRATION_VERBES = {
     'developpe':    { nouveauVerbe: 'se_decline_en',      inverserDirection: true },
@@ -1810,15 +2024,30 @@ function obtenirLabelNoeud(donnees) {
     if (TYPES_PREALABLE[donnees.type] && donnees.metadata && donnees.metadata.prealable) {
         return config.label + ' préalable';
     }
+    // La visée dit le nom COMPLET partout où il y a de la place — Inspecteur,
+    // exports, recherche. L'en-tête du bloc, lui, montre la forme courte du
+    // menu (cf. `VISEES_EVALUATION`).
+    // ⚠ `viseeChoisie` et NON `viseeEvaluation` : sans choix explicite, le
+    // libellé reste « Évaluation », comme avant le 16 août. Le plan de cours ne
+    // doit affirmer que ce que Grégoire a posé.
+    if (donnees.type === 'evaluation') {
+        var v = viseeChoisie(donnees);
+        for (var vi = 0; v && vi < VISEES_EVALUATION.length; vi++) {
+            if (VISEES_EVALUATION[vi][0] === v) return VISEES_EVALUATION[vi][2];
+        }
+    }
     return config.label;
 }
 
 function obtenirCouleurNoeud(donnees) {
     var config = TYPES[donnees.type];
     if (!config) return '#94a3b8';
-    if (TYPES_PREALABLE[donnees.type] && donnees.metadata && donnees.metadata.prealable) {
-        return 'var(--planif-couleur-prerequis)';
-    }
+    // ▣ PLUS DE TEINTE POUR « PRÉALABLE » (16 août 2026). Une connaissance
+    // préalable prenait l'orange le plus foncé de la famille — la dernière
+    // nuance intra-famille du module. Grégoire l'a tranché en même temps que
+    // les autres : « j'accepte qu'un préalable ne se distingue plus du tout sur
+    // la carte ; c'est une fonction théorique non utilisée, elle va
+    // probablement disparaître ». L'état reste écrit dans l'Inspecteur.
     return config.couleur;
 }
 
@@ -1827,11 +2056,16 @@ function mettreAJourApparenceNoeud(donnees) {
     if (!el) return;
     var couleur = obtenirCouleurNoeud(donnees);
     el.style.borderColor = couleur;
-    var typeEl = el.querySelector('.planif-noeud-type');
-    if (typeEl) {
-        typeEl.textContent = obtenirLabelNoeud(donnees);
-        typeEl.style.color = couleur;
-    }
+    // ▣ LE LIBELLÉ D'EN-TÊTE N'EST PLUS RETOUCHÉ ICI (16 août 2026, nettoyage
+    // de la généralisation du sélecteur). Une seule chose le faisait varier :
+    // la case « Préalable », qui ajoutait « préalable » au libellé et changeait
+    // la teinte. Or les connaissances portent désormais un `<select>`, dont
+    // l'option sélectionnée ne peut pas dire « Factuelle préalable » — et la
+    // couleur ne varie plus, une famille n'ayant qu'un jeton. Le seul en-tête
+    // qui garde un libellé inerte (Séquence, Leçon) n'a ni préalable ni teinte
+    // variable. Ces trois lignes ne pouvaient donc plus rien changer.
+    // ⮕ L'état « préalable » reste DIT dans l'Inspecteur, qui écrit son propre
+    // libellé et sa pastille (cf. la case `#planif-panneau-prealable`).
     // Badge niveau cognitif
     var badgeCognitif = el.querySelector('.planif-badge-cognitif');
     if (donnees.metadata && donnees.metadata.niveauCognitif && TYPES_AVEC_NIVEAU_COGNITIF.indexOf(donnees.type) !== -1) {
@@ -2175,7 +2409,10 @@ function evaluerBadge(noeud) {
                 entree: lieeActiviteOuContenu
                     ? { valide: true, message: "Vérifie un objectif, une connaissance ou une activité" }
                     : { valide: false, message: "Aucun élément relié (tracer un lien vers une activité ou un contenu)" },
-                sortie: { valide: true, message: "Preuve de réussite" }
+                // Le message de sortie DIT la visée : c'est la seule surface où
+                // la nuance formative / certificative se lit en toutes lettres
+                // sur la carte, l'en-tête ne montrant que la forme courte.
+                sortie: { valide: true, message: obtenirLabelNoeud(noeud) }
             };
 
         default:
@@ -5064,23 +5301,84 @@ function objectifsLeconHTML(n) {
  * chantier : la prise d'un bloc était implicite, et chaque contrôle ajouté à
  * l'en-tête l'a grignotée sans que personne ne le décide.)
  */
-function enTeteIdentiteHTML(n) {
-    if (!estPhaseEE(n.type)) {
-        return '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(n) + '">' +
-            obtenirLabelNoeud(n) + '</span>';
+/**
+ * La poignée — PREMIER élément de TOUTE en-tête (16 août 2026, demande de
+ * Grégoire : « je veux qu'elle soit le premier élément à gauche dans l'entête »).
+ *
+ * ▣ ELLE EST DÉSORMAIS PARTOUT, y compris sur Séquence et Leçon dont le libellé
+ * reste inerte et donc saisissable. Ce n'est pas de la décoration : c'est la
+ * seule prise dont la position ne dépend PAS du contenu de l'en-tête. La prise
+ * d'un bloc était implicite, et chaque contrôle ajouté depuis un an l'a
+ * grignotée sans que personne ne le décide.
+ *
+ * ⮕ Elle ne porte AUCUN écouteur : le geste doit remonter au bloc pour
+ * déclencher le glisser. C'est le seul élément de l'en-tête dans ce cas — ne
+ * pas « harmoniser » avec les sélecteurs, qui eux coupent la propagation.
+ */
+function poigneeHTML() {
+    return '<span class="planif-noeud-prise" title="Glisser pour déplacer ce bloc"' +
+        ' aria-hidden="true">⠿</span>';
+}
+
+/**
+ * Le plancher de largeur d'un sélecteur d'en-tête, dit en CARACTÈRES.
+ *
+ * ⚠ POURQUOI PAS UN PLANCHER UNIQUE. Les 130 px du sélecteur de phase étaient
+ * calibrés pour « Pratique autonome », le plus long libellé du module. Les
+ * appliquer à « Exposé » réserverait 130 px pour six lettres et pousserait la
+ * boîte de durée à la ligne sur des blocs où tout tient aujourd'hui — une
+ * régression visible sur toute la carte, au moment précis où le sélecteur
+ * s'étend à tous les types.
+ * ⮕ Le plancher suit donc le plus long libellé de CHAQUE famille. Le facteur
+ * de conversion est mesuré au navigateur, pas estimé (cf. `--planif-select-ch`
+ * dans styles.css).
+ */
+function plancherSelecteur(libelles) {
+    var max = 0;
+    for (var i = 0; i < libelles.length; i++) {
+        if (libelles[i].length > max) max = libelles[i].length;
     }
-    var html = '<span class="planif-noeud-prise" title="Glisser pour déplacer ce bloc"' +
-        ' aria-hidden="true">⠿</span>' +
-        '<select class="planif-noeud-phase" data-phase-noeud="' + echapperHtml(n.id) + '"' +
-        ' style="color: ' + obtenirCouleurNoeud(n) + '"' +
-        ' title="Phase d’enseignement explicite"' +
-        ' aria-label="Phase d’enseignement explicite de ce bloc">';
-    for (var i = 0; i < PHASES_EE.length; i++) {
-        var t = PHASES_EE[i];
-        html += '<option value="' + t + '"' + (t === n.type ? ' selected' : '') + '>' +
-            echapperHtml(TYPES[t].label) + '</option>';
+    return max;
+}
+
+function selecteurEnTeteHTML(n, classe, attributDonnee, entrees, valeurCourante, titre) {
+    var libelles = entrees.map(function(e) { return e[1]; });
+    var html = '<select class="' + classe + '" ' + attributDonnee + '="' + echapperHtml(n.id) + '"' +
+        ' style="color: ' + obtenirCouleurNoeud(n) + '; --planif-select-ch: ' + plancherSelecteur(libelles) + '"' +
+        ' title="' + echapperHtml(titre) + '"' +
+        ' aria-label="' + echapperHtml(titre) + ' de ce bloc">';
+    for (var i = 0; i < entrees.length; i++) {
+        html += '<option value="' + echapperHtml(entrees[i][0]) + '"' +
+            (entrees[i][0] === valeurCourante ? ' selected' : '') + '>' +
+            echapperHtml(entrees[i][1]) + '</option>';
     }
     return html + '</select>';
+}
+
+function enTeteIdentiteHTML(n) {
+    var prise = poigneeHTML();
+
+    // Évaluation : la nuance est une VISÉE, pas un type — le menu écrit
+    // `metadata.visee` et le type reste `evaluation` (cf. VISEES_EVALUATION).
+    if (n.type === 'evaluation') {
+        return prise + selecteurEnTeteHTML(n, 'planif-noeud-visee', 'data-visee-noeud',
+            VISEES_EVALUATION.map(function(v) { return [v[0], v[1]]; }),
+            viseeEvaluation(n), 'Visée de l’évaluation');
+    }
+
+    // Familles permutables : le menu écrit le TYPE, borné à la famille.
+    var famille = famillePermutableDe(n.type);
+    if (famille) {
+        return prise + selecteurEnTeteHTML(n, 'planif-noeud-type-select', 'data-type-noeud',
+            famille.map(function(t) { return [t, TYPES[t].label]; }),
+            n.type, 'Type de ce bloc');
+    }
+
+    // Séquence et Leçon : pas de famille, donc pas de menu. Le libellé reste
+    // inerte — et donc saisissable, ce qui ne coûte rien puisque la poignée
+    // est là de toute façon.
+    return prise + '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(n) + '">' +
+        obtenirLabelNoeud(n) + '</span>';
 }
 
 function contenuNoeudHTML(n) {
@@ -6663,9 +6961,16 @@ function attacherEvenements(el, donnees) {
         });
     });
 
-    // === SÉLECTEUR DE PHASE (les cinq étapes de l'enseignement explicite) ===
-    var selPhase = el.querySelector('.planif-noeud-phase');
-    if (selPhase) {
+    // === SÉLECTEUR D'IDENTITÉ DE L'EN-TÊTE ===
+    // Deux sélecteurs, deux portes d'écriture, un seul comportement d'interface :
+    // le type (borné à la famille) et la visée d'une évaluation. Ils sont traités
+    // ensemble parce que tout ce qui les distingue est la porte appelée.
+    [
+        ['.planif-noeud-type-select', definirTypeNoeud],
+        ['.planif-noeud-visee', definirViseeEvaluation]
+    ].forEach(function(paire) {
+        var selecteur = el.querySelector(paire[0]);
+        if (!selecteur) return;
         // Même précaution que les deux sélecteurs ci-dessous : sans elle,
         // toucher le sélecteur démarrerait le déplacement du bloc.
         // ⚠ Et c'est PRÉCISÉMENT ce que la poignée `.planif-noeud-prise`
@@ -6673,21 +6978,24 @@ function attacherEvenements(el, donnees) {
         // remonte au bloc et déclenche le glisser. Ne pas « harmoniser » les
         // deux — leur asymétrie est le correctif.
         ['pointerdown', 'mousedown', 'click'].forEach(function(evt) {
-            selPhase.addEventListener(evt, function(e) { e.stopPropagation(); });
+            selecteur.addEventListener(evt, function(e) { e.stopPropagation(); });
         });
-        selPhase.addEventListener('change', function() {
-            if (!definirPhaseEE(id, selPhase.value)) return;
+        selecteur.addEventListener('change', function() {
+            var avant = etat.noeuds.get(id);
+            var verbesAvant = avant ? releverVerbesDeNoeud(id) : [];
+            if (!paire[1](id, selecteur.value)) return;
             // La couleur, la classe du bloc et le libellé dérivent tous du type :
             // on re-rend plutôt que de les retoucher un à un, comme la bascule
             // des objectifs. Le focus revient sur le sélecteur reconstruit —
             // sans quoi une correction en deux temps obligerait à le repointer.
             reconstruireDOM();
             mettreAJourTousLesBadges();
+            signalerVerbesDevenusInexacts(id, verbesAvant);
             var frais = document.getElementById(id);
-            var repose = frais && frais.querySelector('.planif-noeud-phase');
+            var repose = frais && frais.querySelector(paire[0]);
             if (repose) repose.focus();
         });
-    }
+    });
 
     // === SÉLECTEUR DE SEMAINE (leçons et séquences) ===
     var selSemaine = el.querySelector('.planif-noeud-semaine');
@@ -10915,7 +11223,13 @@ window.planificationCarte = {
     // en la DEMANDANT au module, jamais en relisant sa table de types.
     PHASES_EE: PHASES_EE,
     estPhaseEE: estPhaseEE,
-    definirPhaseEE: definirPhaseEE,
+    FAMILLES_PERMUTABLES: FAMILLES_PERMUTABLES,
+    famillePermutableDe: famillePermutableDe,
+    definirTypeNoeud: definirTypeNoeud,
+    viseeChoisie: viseeChoisie,
+    viseeEvaluation: viseeEvaluation,
+    definirViseeEvaluation: definirViseeEvaluation,
+    verbeEstSuggere: verbeEstSuggere,
     enTeteIdentiteHTML: enTeteIdentiteHTML,
     // Séquences de séquences (voie A) : lecture hiérarchique partagée
     listerSequencesHierarchie: listerSequencesHierarchie,
@@ -11001,6 +11315,7 @@ window.planificationCarte = {
     estHorsClasseNoeud: estHorsClasseNoeud,
     definirHorsClasse: definirHorsClasse,
     TYPES_HORS_CLASSE: TYPES_HORS_CLASSE,
+    TYPES_AVEC_NIVEAU_COGNITIF: TYPES_AVEC_NIVEAU_COGNITIF,
     definirRangSeance: definirRangSeance,
     selecteurRangSeanceHTML: selecteurRangSeanceHTML,
     peuplerSelecteurRangSeance: peuplerSelecteurRangSeance,
