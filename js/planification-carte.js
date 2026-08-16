@@ -3047,16 +3047,33 @@ function ouvrirPanneau(id) {
         }
     }
 
-    // Bouton cloner/dupliquer : feuille = instance liée (« Cloner »),
-    // conteneur = copie indépendante en profondeur (« Dupliquer »).
+    // ▣ CE BOUTON N'A PAS DE MODIFICATEUR, DONC IL NOMME LA DISTINCTION.
+    // Les raccourcis encodent le choix dans ⇧ ; ici il n'y a rien à enfoncer,
+    // et un bouton unique devrait donc décider à la place de Grégoire. Il
+    // devient « Copier » — l'issue indépendante, celle qu'un geste sans
+    // modificateur doit produire d'après sa règle du 16 août.
+    // ⚠ Le clonage n'est PAS retiré pour autant : il reste sous ⇧⌥ + glisser et
+    // ⇧⌘D, et le bouton voisin le dit (`planif-btn-cloner-lie`, cf. index.html).
+    // Retirer une capacité en silence aurait été pire que de ne rien changer.
+    // Un CONTENEUR n'a jamais eu de miroir : il garde son seul « Dupliquer ».
+    var estConteneurP = config && config.conteneur;
     var btnCloner = document.getElementById('planif-btn-cloner');
     if (btnCloner) {
-        var estConteneurP = config && config.conteneur;
         btnCloner.disabled = false;
         btnCloner.innerHTML = '<img src="icons/icon-copy.svg" alt="" class="btn-inline-icon"> ' + // security-ok: ternaire de deux littéraux statiques, aucune donnée utilisateur
-            (estConteneurP ? 'Dupliquer' : 'Cloner');
+            (estConteneurP ? 'Dupliquer' : 'Copier');
         btnCloner.onclick = function() {
-            clonerNoeud(id);
+            dupliquerNoeud(id, false, false);
+            fermerPanneau();
+        };
+    }
+    var btnClonerLie = document.getElementById('planif-btn-cloner-lie');
+    if (btnClonerLie) {
+        // Sur un conteneur, le clone lié n'existe pas : le bouton disparaît
+        // plutôt que d'être désactivé sans explication.
+        btnClonerLie.style.display = estConteneurP ? 'none' : '';
+        btnClonerLie.onclick = function() {
+            dupliquerNoeud(id, false, true);
             fermerPanneau();
         };
     }
@@ -3481,20 +3498,54 @@ function dupliquerConteneurEnProfondeur(noeudId, silencieux) {
     return racineId;
 }
 
-function clonerNoeud(noeudId, silencieux) {
+/**
+ * DUPLIQUER UN BLOC — copie indépendante, ou clone lié (16 août 2026).
+ *
+ * ⚠⚠ LA DISTINCTION EST DE GRÉGOIRE, ET ELLE ÉTAIT ABSENTE DU CODE. Ses mots :
+ * « une COPIE est indépendante de l'originale ; un CLONE en est dépendant.
+ * Quand modifier le deuxième altère aussi l'original, ce n'est pas une copie,
+ * c'est un clone. » Or `⌥ + glisser` sur une FEUILLE produisait un clone lié
+ * depuis le 4 août, sous un geste qui laissait croire à une copie — et rien à
+ * l'écran ne le disait avant que le bloc ne se mette à changer tout seul.
+ *
+ * ▣ CE N'EST PAS UNE RÉGRESSION DU 16 AOÛT, mais c'est lui qui l'a révélée :
+ * jusqu'à la généralisation du sélecteur, seuls le titre, la durée et la
+ * metadata se propageaient. Le TYPE s'y est ajouté, et un clone qui change de
+ * type sous les yeux de son jumeau ne peut plus passer inaperçu.
+ *
+ * ⮕ LA RÈGLE, UNE SEULE POUR TOUS LES GESTES (décision de Grégoire) :
+ *   **sans ⇧ → copie indépendante · avec ⇧ → clone lié.**
+ *   `⌥ glisser` / `⌘D` → copie ; `⇧⌥ glisser` / `⇧⌘D` → clone.
+ *
+ * ⚠ `lie` est FAUX PAR DÉFAUT, et c'est délibéré. Un appelant qu'on oublierait
+ * de mettre à jour produira une copie indépendante — l'issue inoffensive. Le
+ * défaut inverse ferait qu'un oubli relie silencieusement deux blocs, c'est-à-dire
+ * exactement le défaut qu'on vient de corriger.
+ *
+ * @param {string} noeudId - le bloc à dupliquer
+ * @param {boolean} [silencieux] - ne pas afficher le toast (duplication en lot)
+ * @param {boolean} [lie] - true = clone lié (miroir) ; défaut = copie indépendante
+ * @returns {string|null} id du nouveau bloc
+ */
+function dupliquerNoeud(noeudId, silencieux, lie) {
     var source = etat.noeuds.get(noeudId);
     if (!source) return;
     var config = TYPES[source.type];
     if (config && config.conteneur) {
-        // Conteneur : copie indépendante en profondeur (le miroir lié reste
-        // réservé aux feuilles — cf. dupliquerConteneurEnProfondeur).
+        // Conteneur : copie indépendante en profondeur, TOUJOURS. Le miroir lié
+        // reste réservé aux feuilles — la synchronisation des ENFANTS entre deux
+        // instances n'a pas de réponse simple, et la metadata propagée
+        // embarquerait la semaine (décision du 6 août, inchangée).
         return dupliquerConteneurEnProfondeur(noeudId, silencieux);
     }
     enregistrerPourUndo();
 
     var DECALAGE = 60;
     var newId = 'planif-noeud_' + (++etat.compteur);
-    var cloneSourceId = source.cloneSourceId || source.id;
+    // ⚠ Un clone DE clone rejoint la même famille (on remonte à la source),
+    // alors qu'une copie ne rejoint rien : `null` la rend indépendante, même
+    // quand elle est faite depuis un bloc qui est lui-même un clone.
+    var cloneSourceId = lie ? (source.cloneSourceId || source.id) : null;
 
     var donnees = {
         id: newId, type: source.type,
@@ -3507,7 +3558,7 @@ function clonerNoeud(noeudId, silencieux) {
         cloneSourceId: cloneSourceId
     };
     etat.noeuds.set(newId, donnees);
-    _indexerClone(donnees);
+    if (cloneSourceId) _indexerClone(donnees);
 
     var el = document.createElement('div');
     el.className = 'planif-noeud planif-type-' + source.type;
@@ -3525,14 +3576,20 @@ function clonerNoeud(noeudId, silencieux) {
     // sites-ci non — asymétrie relevée en écrivant la sentinelle du 11 août.
     if (coucheNoeuds) coucheNoeuds.appendChild(el);
 
-    mettreAJourIndicateurClone(donnees);
-    var sourceOriginal = etat.noeuds.get(cloneSourceId);
-    if (sourceOriginal) mettreAJourIndicateurClone(sourceOriginal);
-    // Also update other clones' indicators
-    var tousClones = trouverClones(newId);
-    for (var ci = 0; ci < tousClones.length; ci++) {
-        if (tousClones[ci].id !== newId && tousClones[ci].id !== cloneSourceId) {
-            mettreAJourIndicateurClone(tousClones[ci]);
+    // L'indicateur 🧬 ne concerne QUE les clones : une copie indépendante n'a
+    // aucune famille à signaler, et lui en poser un serait dire le contraire de
+    // ce qu'elle est.
+    if (cloneSourceId) {
+        mettreAJourIndicateurClone(donnees);
+        var sourceOriginal = etat.noeuds.get(cloneSourceId);
+        if (sourceOriginal) mettreAJourIndicateurClone(sourceOriginal);
+        // Les autres membres de la famille : leur indicateur compte un membre
+        // de plus.
+        var tousClones = trouverClones(newId);
+        for (var ci = 0; ci < tousClones.length; ci++) {
+            if (tousClones[ci].id !== newId && tousClones[ci].id !== cloneSourceId) {
+                mettreAJourIndicateurClone(tousClones[ci]);
+            }
         }
     }
 
@@ -3566,19 +3623,19 @@ function clonerNoeud(noeudId, silencieux) {
  *
  * @returns {string[]} ids des copies créées (vide si rien à dupliquer)
  */
-function dupliquerSelection() {
+function dupliquerSelection(lie) {
     var ids = Array.from(etat.multiSelection);
 
     // Sélection simple : le chemin d'origine, inchangé.
     if (ids.length === 0) {
         if (etat.selection) {
-            var seul = clonerNoeud(etat.selection);
+            var seul = dupliquerNoeud(etat.selection, false, lie);
             return seul ? [seul] : [];
         }
         return [];
     }
     if (ids.length === 1) {
-        var unique = clonerNoeud(ids[0]);
+        var unique = dupliquerNoeud(ids[0], false, lie);
         return unique ? [unique] : [];
     }
 
@@ -3598,7 +3655,7 @@ function dupliquerSelection() {
     var nouveaux = [];
     try {
         for (var r = 0; r < racines.length; r++) {
-            var nid = clonerNoeud(racines[r], true);
+            var nid = dupliquerNoeud(racines[r], true, lie);
             if (nid) nouveaux.push(nid);
         }
     } finally {
@@ -6259,11 +6316,16 @@ function attacherEvenements(el, donnees) {
             return;
         }
 
-        // ⌥ (Mac) / Alt (Windows) + glisser : dupliquer le bloc et glisser le
-        // doublon (4 août 2026, exercice 601-101). Feuille = instance liée ;
-        // conteneur = copie indépendante en profondeur (6 août soir).
+        // ⌥ + glisser : dupliquer le bloc et glisser le doublon (4 août 2026,
+        // exercice 601-101).
+        // ⚠⚠ ⇧ COMMANDE LA NATURE DU DOUBLON (16 août 2026, décision de
+        // Grégoire) : `⌥` seul rend une COPIE INDÉPENDANTE, `⇧⌥` un CLONE LIÉ.
+        // Jusqu'ici, `⌥` sur une feuille rendait un clone — un geste qui laissait
+        // croire à une copie, et rien ne le disait avant que le doublon ne se
+        // mette à suivre son original. Un conteneur, lui, reste toujours une
+        // copie indépendante en profondeur (le miroir n'a jamais existé pour eux).
         if (e.altKey) {
-            var cloneId = clonerNoeud(id);
+            var cloneId = dupliquerNoeud(id, false, e.shiftKey);
             if (cloneId) {
                 var clone = etat.noeuds.get(cloneId);
                 var cloneEl = document.getElementById(cloneId);
@@ -8522,12 +8584,18 @@ function gererKeydown(e) {
         return;
     }
 
-    if ((e.metaKey || e.ctrlKey) && e.key === 'd' && pasDansChamp) {
+    if ((e.metaKey || e.ctrlKey) && (e.key === 'd' || e.key === 'D') && pasDansChamp) {
         e.preventDefault();
         // Multi-sélection comprise (11 août 2026) — cf. dupliquerSelection().
         // Avant : `if (etat.selection) clonerNoeud(etat.selection)`, qui
         // ignorait en silence tous les autres blocs allumés.
-        dupliquerSelection();
+        // ⚠ ⇧ commande la nature du doublon, MÊME RÈGLE que ⌥ + glisser
+        // (16 août) : ⌘D rend des copies indépendantes, ⇧⌘D des clones liés.
+        // ⚠ Et `e.key` devient 'D' majuscule quand ⇧ est enfoncée : sans le
+        // second test, ⇧⌘D ne déclencherait RIEN — le raccourci de clonage
+        // serait muet, ce qui est précisément le genre d'échec silencieux que
+        // ce module a déjà payé.
+        dupliquerSelection(e.shiftKey);
         return;
     }
 
@@ -11356,7 +11424,7 @@ window.planificationCarte = {
     activerLoupe: activerLoupe,
     desactiverLoupe: desactiverLoupe,
     atterrirDepuisLoupe: atterrirDepuisLoupe,
-    clonerNoeud: clonerNoeud,
+    dupliquerNoeud: dupliquerNoeud,
     deplacerSequenceVersSemaine: deplacerSequenceVersSemaine,
     annuler: annuler,
     retablir: retablir,

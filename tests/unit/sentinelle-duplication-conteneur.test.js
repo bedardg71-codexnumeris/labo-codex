@@ -11,12 +11,21 @@ import { chargerScript } from './_helpers/charger-script.js';
 // titre/description/metadata se propagent. Un conteneur ne peut pas être une
 // instance liée (la synchronisation des ENFANTS n'a pas de réponse simple, et
 // la metadata propagée embarquerait la semaine) — il se DUPLIQUE : copie
-// INDÉPENDANTE en profondeur. Même geste (⌘D, ⌥+glisser, bouton), deux
-// sémantiques nommées différemment dans l'inspecteur.
+// INDÉPENDANTE en profondeur.
+//
+// ⚠⚠ RÉVISÉ LE 16 AOÛT 2026 — le geste ne décidait pas, il subissait. Grégoire :
+// « une COPIE est indépendante de l'originale ; un CLONE en est dépendant.
+// Quand modifier le deuxième altère aussi l'original, ce n'est pas une copie,
+// c'est un clone. » Sur une FEUILLE, tous les gestes rendaient un clone — ⌥,
+// ⌘D et le bouton — sous des noms qui laissaient croire à une copie.
+// ⮕ Désormais : **sans ⇧ → copie indépendante · avec ⇧ → clone lié**, la même
+// règle pour ⌥ + glisser et pour ⌘D. L'Inspecteur, qui n'a pas de modificateur,
+// NOMME les deux au lieu d'en choisir un.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
 const sourceCarte = readFileSync(path.join(racineProjet, 'js', 'planification-carte.js'), 'utf8');
+const sourceHtml = readFileSync(path.join(racineProjet, 'index.html'), 'utf8');
 
 let store;
 let elements;
@@ -158,7 +167,7 @@ describe('duplication de conteneur · copie indépendante en profondeur', () => 
         expect(leconCopie.enfants).toHaveLength(2);
     });
 
-    it('clonerNoeud route les conteneurs vers la duplication (plus de refus)', () => {
+    it('dupliquerNoeud route les conteneurs vers la duplication (plus de refus)', () => {
         expect(sourceCarte).not.toMatch(/Les conteneurs ne peuvent pas être clonés/);
         // Le 2e argument (`silencieux`) est arrivé le 11 août avec la
         // duplication en lot : un seul message pour tout le geste. L'ancre
@@ -167,22 +176,70 @@ describe('duplication de conteneur · copie indépendante en profondeur', () => 
         expect(sourceCarte).toMatch(/return dupliquerConteneurEnProfondeur\(noeudId(,[^)]*)?\);/);
     });
 
-    it('une feuille garde le clonage-miroir (instance liée) — sémantique inchangée', () => {
-        // Statique : le chemin feuille de clonerNoeud pose toujours cloneSourceId.
-        const corps = sourceCarte.slice(sourceCarte.indexOf('function clonerNoeud'), sourceCarte.indexOf('function attacherEvenements'));
-        expect(corps).toMatch(/var cloneSourceId = source\.cloneSourceId \|\| source\.id;/);
-        expect(corps).toMatch(/cloneSourceId: cloneSourceId/);
+    // ═══════════════════════════════════════════════════════════════════════
+    // ⚠⚠ SÉMANTIQUE REVUE LE 16 AOÛT 2026, à la demande de Grégoire.
+    //
+    // Ses mots : « une COPIE est indépendante de l'originale ; un CLONE en est
+    // dépendant. » Or `⌥ + glisser` sur une feuille rendait un CLONE depuis le
+    // 4 août — sous un geste qui laissait croire à une copie. Ce test-ci
+    // affirmait cette sémantique (« une feuille garde le clonage-miroir ») :
+    // il est retourné, pas supprimé, parce que l'invariant a changé de valeur
+    // sur DÉCISION et non par accident.
+    //
+    // ⮕ LA RÈGLE : sans ⇧ → copie indépendante · avec ⇧ → clone lié.
+    // ═══════════════════════════════════════════════════════════════════════
+
+    it('⚠ une feuille rend une COPIE INDÉPENDANTE par défaut', () => {
+        const corps = sourceCarte.slice(sourceCarte.indexOf('function dupliquerNoeud'),
+            sourceCarte.indexOf('function attacherEvenements'));
+        // Le lien de clonage n'est posé que si `lie` est vrai.
+        expect(corps).toMatch(/var cloneSourceId = lie \? \(source\.cloneSourceId \|\| source\.id\) : null;/);
+        // Et il n'est INDEXÉ que dans ce cas : indexer une copie la ferait
+        // apparaître dans la famille de sa source sans en être membre.
+        expect(corps).toMatch(/if \(cloneSourceId\) _indexerClone\(donnees\);/);
     });
 
-    it('l’inspecteur nomme le geste selon la sémantique : Dupliquer / Cloner', () => {
-        expect(sourceCarte).toMatch(/estConteneurP \? 'Dupliquer' : 'Cloner'/);
+    it('⚠⚠ le défaut tombe du côté INOFFENSIF — un appelant oublié fait une copie', () => {
+        // Un défaut « lié » ferait qu'un appelant non migré relie silencieusement
+        // deux blocs : exactement le défaut qu'on vient de corriger. Le défaut
+        // « copie » ne peut, au pire, que faire perdre un lien qu'on refera.
+        const signature = sourceCarte.match(/function dupliquerNoeud\(([^)]*)\)/);
+        expect(signature, 'dupliquerNoeud a disparu').toBeTruthy();
+        expect(signature[1]).toMatch(/lie/);
+        // Aucune valeur par défaut assignée à `lie` : `undefined` est faux, donc copie.
+        expect(signature[1]).not.toMatch(/lie\s*=/);
+    });
+
+    it('⚠ les DEUX raccourcis suivent la même règle, ⇧ commande la nature', () => {
+        // Si l'un des deux gestes divergeait, l'utilisateur ne pourrait plus
+        // prédire ce qu'il obtient — et rien à l'écran ne le dirait.
+        expect(sourceCarte, '⌥ + glisser ne lit pas ⇧')
+            .toMatch(/dupliquerNoeud\(id, false, e\.shiftKey\)/);
+        expect(sourceCarte, '⌘D ne lit pas ⇧')
+            .toMatch(/dupliquerSelection\(e\.shiftKey\)/);
+        // ⚠ `e.key` passe à 'D' majuscule quand ⇧ est enfoncée : sans ce second
+        // test, ⇧⌘D serait MUET. Défaut mesuré au navigateur, pas supposé.
+        expect(sourceCarte, '⇧⌘D serait muet : e.key vaut « D » majuscule')
+            .toMatch(/e\.key === 'd' \|\| e\.key === 'D'/);
+    });
+
+    it('l’inspecteur NOMME la distinction, faute de modificateur', () => {
+        // Un bouton sans ⇧ ne peut pas encoder le choix : il doit le dire.
+        expect(sourceCarte).toMatch(/estConteneurP \? 'Dupliquer' : 'Copier'/);
         expect(sourceCarte).toMatch(/btnCloner\.disabled = false;/);
+        // Le bouton « Copier » fait bien une copie, et le second un clone.
+        expect(sourceCarte).toMatch(/dupliquerNoeud\(id, false, false\)/);
+        expect(sourceCarte).toMatch(/dupliquerNoeud\(id, false, true\)/);
+        // ⚠ Le clonage n'a PAS été retiré en même temps que le renommage :
+        // retirer une capacité en silence est pire que de ne rien changer.
+        expect(sourceHtml, 'le bouton de clonage lié a disparu de l’Inspecteur')
+            .toMatch(/id="planif-btn-cloner-lie"/);
     });
 
     it('l’annulation est enregistrée AVANT la copie', () => {
         const corps = sourceCarte.slice(
             sourceCarte.indexOf('function dupliquerConteneurEnProfondeur'),
-            sourceCarte.indexOf('function clonerNoeud')
+            sourceCarte.indexOf('function dupliquerNoeud')
         );
         expect(corps.indexOf('enregistrerPourUndo()')).toBeGreaterThan(-1);
         expect(corps.indexOf('enregistrerPourUndo()')).toBeLessThan(corps.indexOf('function copier'));

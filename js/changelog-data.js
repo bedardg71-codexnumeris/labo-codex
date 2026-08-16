@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            version: '1.87',
+            couleur: 'vert',
+            titre: 'Copier et cloner deviennent deux gestes distincts',
+            items: [
+                'Une copie est indépendante : la modifier ne touche plus l’original. Un clone reste lié : titre, durée et type se propagent entre ses instances.',
+                'Une seule règle pour les deux raccourcis : sans ⇧ c’est une copie, avec ⇧ c’est un clone. ⌥ en glissant ou ⌘D copient ; ⇧⌥ ou ⇧⌘D clonent.',
+                'Avant, ⌥ en glissant produisait toujours un clone sur une activité ou une connaissance — sans que rien ne le dise, jusqu’à ce que le doublon se mette à suivre son original.',
+                'L’Inspecteur offre les deux boutons côte à côte : « Copier » et « Cloner (lié) ». Tes cartes existantes ne sont pas touchées.'
+            ]
+        },
+        {
             version: '1.86',
             couleur: 'vert',
             titre: 'Chaque bloc change de type dans son en-tête',
