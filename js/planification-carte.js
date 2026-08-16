@@ -5486,10 +5486,17 @@ function enTeteIdentiteHTML(n) {
 
     // Évaluation : la nuance est une VISÉE, pas un type — le menu écrit
     // `metadata.visee` et le type reste `evaluation` (cf. VISEES_EVALUATION).
+    // ⚠ LES `title` SONT L'ACCOMPAGNEMENT DE CES DEUX MENUS, et volontairement.
+    // Le système d'infobulles du projet est délégué, donc il ATTEINDRAIT un
+    // `data-tooltip` posé ici — mais il s'ajouterait au `title` natif d'un
+    // <select> qu'on est en train d'ouvrir : deux bulles sur l'élément le plus
+    // manipulé de la carte. Le `title` dit donc ce que le menu fait ET sa borne,
+    // là où il ne disait que « Type de ce bloc ».
     if (n.type === 'evaluation') {
         return prise + selecteurEnTeteHTML(n, 'planif-noeud-visee', 'data-visee-noeud',
             VISEES_EVALUATION.map(function(v) { return [v[0], v[1]]; }),
-            viseeEvaluation(n), 'Visée de l’évaluation');
+            viseeEvaluation(n),
+            'Visée de cette évaluation — formative ou certificative. Tant que rien n’est choisi, les exports écrivent « Évaluation »');
     }
 
     // Familles permutables : le menu écrit le TYPE, borné à la famille.
@@ -5497,7 +5504,8 @@ function enTeteIdentiteHTML(n) {
     if (famille) {
         return prise + selecteurEnTeteHTML(n, 'planif-noeud-type-select', 'data-type-noeud',
             famille.map(function(t) { return [t, TYPES[t].label]; }),
-            n.type, 'Type de ce bloc');
+            n.type,
+            'Changer le type de ce bloc, à l’intérieur de sa famille — le titre, la durée et les liens restent en place');
     }
 
     // Séquence et Leçon : pas de famille, donc pas de menu. Le libellé reste
