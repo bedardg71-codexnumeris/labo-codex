@@ -236,6 +236,31 @@ describe('duplication de conteneur · copie indépendante en profondeur', () => 
             .toMatch(/id="planif-btn-cloner-lie"/);
     });
 
+    it('⚠⚠ COUTURE — un conteneur qui contient des CLONES se copie en enfants INDÉPENDANTS', () => {
+        // Trouvé par la passe « connexions » du 16 août (P4 de
+        // SKILL_verification_adverse), et c'est le seul endroit où la règle
+        // « un conteneur produit toujours une copie indépendante » pouvait
+        // fuir : si la copie profonde recopiait le `cloneSourceId` de ses
+        // enfants, dupliquer une leçon fabriquerait des clones EN SILENCE —
+        // exactement le défaut qu'on vient de corriger, par une autre porte.
+        const corps = sourceCarte.slice(
+            sourceCarte.indexOf('function dupliquerConteneurEnProfondeur'),
+            sourceCarte.indexOf('function detacherDeLaFamille'));
+        const debut = corps.indexOf('function copier(');
+        expect(debut, 'la fonction de copie profonde a disparu').toBeGreaterThan(-1);
+        // ⚠ Fenêtre de taille fixe, et NON un découpage à la première accolade
+        // fermante : le premier jet coupait à l'intérieur d'un bloc imbriqué et
+        // rougissait sur du code parfaitement correct. Un oracle mal découpé
+        // accuse le code au lieu de le protéger.
+        const litteralCopie = corps.slice(debut, debut + 900);
+        expect(litteralCopie,
+            'la copie profonde ne remet pas cloneSourceId à null : elle fabrique des clones'
+        ).toMatch(/cloneSourceId:\s*null/);
+        expect(litteralCopie,
+            'la copie profonde propage le lien de clonage de la source'
+        ).not.toMatch(/cloneSourceId:\s*(source|n)\.cloneSourceId/);
+    });
+
     it('l’annulation est enregistrée AVANT la copie', () => {
         const corps = sourceCarte.slice(
             sourceCarte.indexOf('function dupliquerConteneurEnProfondeur'),

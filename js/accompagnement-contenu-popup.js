@@ -901,7 +901,17 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'texte',
-                contenu: 'Les évaluations servent à livrer une rétroaction et peuvent prendre plusieurs formes (orale, écrite, etc.).'
+                contenu: 'Les évaluations servent à livrer une rétroaction et peuvent prendre plusieurs formes (orale, écrite, etc.). Le menu de l’en-tête d’un bloc Évaluation choisit sa <strong>visée</strong> : formative ou certificative. Tant que tu n’as rien choisi, tes exports écrivent « Évaluation », comme avant.'
+            },
+            {
+                type: 'texte',
+                titre: 'Changer le type d’un bloc',
+                contenu: 'Le nom du type, dans l’en-tête d’un bloc, est un <strong>menu</strong> : une connaissance factuelle devient conceptuelle, un exposé devient une activité, sans recréer le bloc ni recoller son contenu. Le menu n’offre que les types de la <strong>même famille</strong> — le titre, la durée et les liens restent en place. <strong>Séquence</strong> et <strong>Leçon</strong> font exception : elles n’ont pas de menu, parce qu’elles ne sont pas interchangeables.'
+            },
+            {
+                type: 'alerte',
+                niveau: 'attention',
+                contenu: 'Une <strong>copie</strong> et un <strong>clone</strong> ne sont pas la même chose. Une copie est indépendante : la modifier ne touche pas l’original. Un clone reste lié — titre, durée et type se propagent entre toutes ses instances, et un 🧬 apparaît sur chacune. La règle est la même pour les deux gestes : <strong>sans ⇧ c’est une copie, avec ⇧ c’est un clone</strong>. Pour libérer un clone déjà créé : <em>Actions ▸ Détacher de sa famille de clones</em>.'
             },
         ],
         voirAussi: ['conception-productions', 'construction-grilles']

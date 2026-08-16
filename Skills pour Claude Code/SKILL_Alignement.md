@@ -366,6 +366,84 @@ une résolution « verticale » n'en offrait qu'un : quand ce verbe unique étai
 mauvais, l'utilisateur n'avait aucun moyen de le corriger. Un défaut de la table
 devenait une impasse — c'est ce qui rendait le cas de l'Ouverture insoluble.
 
+### Les types de blocs sont PERMUTABLES dans leur famille (16 août 2026)
+
+Demande de Grégoire, généralisant deux décisions qu'il avait déjà prises pour
+l'enseignement explicite (le sélecteur d'en-tête du 15 août, la couleur unique
+du 9 août). **Le nom du type, dans l'en-tête d'un bloc, est un menu.**
+
+| Famille | Membres permutables | Jeton de couleur |
+|---|---|---|
+| Intention curriculaire | Compétence, Idée maîtresse | `--planif-couleur-intention` |
+| Connaissances | Factuelle, Conceptuelle, Procédurale, Métacognitive | `--planif-couleur-connaissance` |
+| Déroulement | Exposé, Activité, Soutien, Révision | `--planif-couleur-deroulement` |
+| Enseignement explicite | les cinq phases | `--planif-couleur-enseignement-explicite` |
+| Organisation | Séquence, Leçon — **PAS permutables** | `--planif-couleur-organisation` |
+| Vérification | Évaluation (seule) | `--planif-couleur-verification` |
+
+▣ **CE QUI AUTORISE LA PERMUTATION, et il faut le revérifier avant d'élargir une
+famille** : `TYPES_AVEC_DUREE`, `TYPES_HORS_CLASSE`, `TYPES_AVEC_NIVEAU_COGNITIF`,
+`TYPES_SERVANTS_OBJECTIF`, `TYPES_PREALABLE` et la règle de parent légal
+répondent toutes **uniformément** à l'intérieur de chaque famille. Une sentinelle
+l'exige : un type ajouté sans ses frères ferait perdre une durée en silence.
+
+⚠ **Une seule table n'est pas uniforme** : `normaliserType`, qui résout les
+verbes. D'où `signalerVerbesDevenusInexacts` — le verbe n'est jamais réécrit,
+mais la divergence est DITE (verdict 3.4 de Grégoire). Voir la règle 2 ci-dessus.
+
+⚠ **Séquence et Leçon n'ont pas de famille**, et ce n'est pas un oubli : une
+leçon porte une semaine, un rang de séance et des objectifs qu'une séquence n'a
+pas. Les permuter les orphelinerait.
+
+### La visée d'une évaluation — un MODIFICATEUR, pas un type
+
+`metadata.visee` vaut `'formative'`, `'certificative'`, ou est **absent**
+(= « pas encore choisi »). Trois états en mémoire, deux entrées au menu.
+
+⚠⚠ **NE JAMAIS transformer ça en deux types.** `evaluation` est le seul type qui
+porte `metadata.productionId`, le pont vers les vraies productions du Codex.
+Mesuré : la moisson de `main.js` cherche « le nœud Évaluation unique de la
+leçon », `planification-export.js` classe ses sections par `type === 'evaluation'`,
+et `evaluerObjectif` coche par lui. Deux types nommés autrement tuent les trois,
+**en silence**.
+
+⚠ **L'absence n'est pas « certificative ».** `viseeChoisie()` rend `null` tant que
+rien n'est posé, et `obtenirLabelNoeud` écrit alors « Évaluation » tout court :
+le plan de cours ne doit affirmer que ce que l'enseignant a choisi. `viseeEvaluation()`,
+elle, rend toujours une valeur — c'est ce que le menu AFFICHE. Ne pas confondre
+les deux lectures. (Le golden master des exports #416 est ce qui a démasqué la
+première version, qui labellisait tout « certificative ».)
+
+### Copie et clone — deux gestes, une règle
+
+Distinction posée par Grégoire le 16 août : « une COPIE est indépendante de
+l'originale ; un CLONE en est dépendant ». Jusque-là, **tous** les gestes
+rendaient un clone sur une feuille, sous des noms qui laissaient croire à une
+copie.
+
+> **Sans ⇧ → copie indépendante · avec ⇧ → clone lié.**
+> `⌥ glisser` / `⌘D` copient ; `⇧⌥ glisser` / `⇧⌘D` clonent.
+
+- Porte unique : `dupliquerNoeud(noeudId, silencieux, lie)`. **`lie` est faux par
+  défaut** — un appelant oublié fera une copie, l'issue inoffensive.
+- Un **conteneur** produit toujours une copie indépendante, enfants compris
+  (`dupliquerConteneurEnProfondeur` remet `cloneSourceId: null` sur chaque
+  enfant — couture testée).
+- `detacherDeLaFamille(ids)` libère un clone déjà créé (Actions ▸ Détacher). Sur
+  l'**original**, la famille se dissout : il ne peut pas partir en laissant ses
+  clones pointés vers lui. Détacher **arrête les propagations futures, il ne
+  défait pas les passées.**
+- ⚠ `e.key` vaut `'D'` **majuscule** quand ⇧ est enfoncée. Sans ce test, `⇧⌘D`
+  est muet.
+
+⚠ **Conséquence sur le §2 de ce skill.** Les « connaissances préalables » y
+figurent comme catégorie du cadre théorique. Depuis le 16 août elles n'ont **plus
+de couleur propre** sur la carte (`--planif-couleur-prerequis` retiré, décision
+de Grégoire) : l'état reste dit dans l'Inspecteur et dans les exports, mais un
+préalable ne se distingue plus à l'œil. Il a par ailleurs tranché « on ne retire
+pas » la fonction elle-même. ⏳ **Le cadre théorique et l'affichage divergent
+donc ici — à réconcilier avec lui.**
+
 ### Vérifications automatiques
 
 L'application peut signaler :

@@ -4207,7 +4207,7 @@
                                                  barre d'outils : c'est un réglage de la carte entière, comme ses
                                                  voisins — et la barre débordait déjà sur iPad en portrait. -->
                                             <button class="planif-action-item" id="planif-btn-liens-contourner">Liens : contourner les blocs</button>
-                                            <button class="planif-action-item" id="planif-btn-detacher-clone">D&eacute;tacher de sa famille de clones</button>
+                                            <button class="planif-action-item" id="planif-btn-detacher-clone" data-tooltip="planif-detacher-clone">D&eacute;tacher de sa famille de clones</button>
                                             <button class="planif-action-item" id="planif-btn-dupliquer-carte">Dupliquer cette carte</button>
                                             <button class="planif-action-item" id="planif-btn-importer-carte">Importer une carte (fichier)</button>
                                             <button class="planif-action-item" id="planif-btn-import-trimestre">Importer d'un autre trimestre…</button>
@@ -4481,7 +4481,7 @@
                                 <div id="planif-panneau-extra"></div>
                                 <div id="planif-panneau-clone-info" style="display:none"></div>
                                 <button class="planif-btn-cloner" id="planif-btn-cloner" data-tooltip="planif-cloner"><img src="icons/icon-copy.svg" alt="" class="btn-inline-icon"> Copier</button>
-                                <button class="planif-btn-cloner" id="planif-btn-cloner-lie" title="Cr&eacute;er un clone LI&Eacute; &mdash; modifier l'un modifie l'autre (&#8679;&#8997; en glissant, ou &#8679;&#8984;D)"><img src="icons/icon-copy.svg" alt="" class="btn-inline-icon"> Cloner (li&eacute;)</button>
+                                <button class="planif-btn-cloner" id="planif-btn-cloner-lie" data-tooltip="planif-cloner-lie"><img src="icons/icon-copy.svg" alt="" class="btn-inline-icon"> Cloner (li&eacute;)</button>
                                 <button class="planif-btn-supprimer" id="planif-btn-supprimer" data-tooltip="planif-supprimer-noeud"><img src="icons/icons8-trash.svg" alt="" class="btn-inline-icon"> Supprimer ce n&oelig;ud</button>
                             </div>
                         </div><!-- fin planif-zone-wrapper -->
@@ -14410,7 +14410,7 @@
     <script src="js/planification-donnees.js?v=20260808a"></script> <!-- #425 préalable : vivacité de productionId à la reprise (8 août) -->
 
     <script src="js/planification-bibliotheque.js?v=2026051026"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
-    <script src="js/planification-carte.js?v=20260816c"></script> <!-- Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
+    <script src="js/planification-carte.js?v=20260816d"></script> <!-- Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
     <script src="js/planification-export.js?v=20260815a"></script> <!-- LE générateur d'export : 3 niveaux × 3 formats (portage #424, 8 août) — #416 lot C : la date dérivée du groupe-cours choisi -->
     <script src="js/planification.js?v=20260808a"></script> <!-- Refonte nav SP4 : hooks nomSection 'conception' + idSousSection conception-* -->
 
@@ -14507,19 +14507,19 @@
     <script src="js/accompagnement.js?v=20260809a"></script> <!-- #305 (2 juil.) : popup Conseil — nom accessible + focus -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
-    <script src="js/accompagnement-contenu-hover.js?v=20260815a"></script> <!-- Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
-    <script src="js/accompagnement-contenu-popup.js?v=20260815a"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
+    <script src="js/accompagnement-contenu-hover.js?v=20260816a"></script> <!-- Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
+    <script src="js/accompagnement-contenu-popup.js?v=20260816a"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
     <script src="js/accompagnement-contenu-terme.js?v=20260809a"></script>
     <script src="js/guides-pedagogiques.js?v=20260629a"></script> <!-- Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->
     <script src="js/comparateur-pratiques.js?v=20260629a"></script> <!-- Comparateur de pratiques (lot C1-a : squelette + garde démo, 6 juin 2026) -->
     <script src="js/export-resultats-finaux.js?v=2026061901"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260816c"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260816d"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260816c"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260816d"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>

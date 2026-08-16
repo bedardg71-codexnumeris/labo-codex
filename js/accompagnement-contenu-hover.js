@@ -607,9 +607,9 @@ const TOOLTIPS = {
     'planif-canevas':
         'Espace de travail de la carte. Glisse des nœuds (les éléments de ton cours), crée des liens, organise visuellement ton enseignement.',
     'planif-palette':
-        'Glisse un élément vers le canevas pour l\'ajouter à la carte. Glisse un bloc sur la corbeille pour le supprimer.',
+        'Glisse un élément vers le canevas pour l\'ajouter à la carte. Glisse un bloc sur la corbeille pour le supprimer. Un bloc posé n\'est pas figé : le menu de son en-tête le change en un autre type de la MÊME famille, sans perdre son titre, sa durée ni ses liens.',
     'planif-boutons-action':
-        'Choisis la carte affichée, ouvre le menu Actions (nouvelle carte, cours rattaché, imports, export du plan) et annule le dernier geste.',
+        'Choisis la carte affichée, ouvre le menu Actions (nouvelle carte, cours rattaché, imports, export du plan, détacher un clone) et annule le dernier geste.',
     'planif-zoom':
         'Niveau de zoom courant. Zoome à la molette ou au pincement ; « Recentrer » (⌘1) ramène toute la carte à l\'écran.',
 
@@ -624,20 +624,29 @@ const TOOLTIPS = {
     'planif-enseignement-explicite':
         'Les cinq étapes du modèle : Ouverture, Modélisation, Pratique guidée, Pratique autonome, Clôture. Ce sont des activités à part entière — elles se placent dans une leçon, et rien ne t\'oblige à les utiliser.',
     'planif-structure':
-        'Quand enseigner : la séquence regroupe des leçons qui poursuivent les mêmes idées maîtresses ; c\'est la leçon qui porte sa semaine.',
+        'Quand enseigner : la séquence regroupe des leçons qui poursuivent les mêmes idées maîtresses ; c\'est la leçon qui porte sa semaine. Ces deux-là n\'ont PAS de menu de type dans leur en-tête : elles ne sont pas interchangeables, une leçon portant une semaine et un rang de séance qu\'une séquence n\'a pas.',
     'planif-design-apprentissages':
-        'L\'évaluation ferme la boucle : relie-la à ce qu\'elle vérifie — idées maîtresses, connaissances ou activités.',
+        'Vérification : l\'évaluation ferme la boucle — relie-la à ce qu\'elle vérifie (idées maîtresses, connaissances ou activités). Le menu de son en-tête choisit sa visée : formative ou certificative. Tant que tu n\'as rien choisi, tes exports écrivent « Évaluation », comme avant.',
 
     // --- Nœuds ---
 
     'planif-panneau-proprietes':
-        'Inspecteur : ce qui se règle sur le bloc sélectionné — titre, description, et selon son type la semaine, la leçon d\'accueil, les objectifs qu\'il sert, son niveau cognitif ou sa rétroaction formative.',
+        'Inspecteur : ce qui se règle sur le bloc sélectionné — titre, description, et selon son type la semaine, la leçon d\'accueil, les objectifs qu\'il sert, son niveau cognitif ou sa rétroaction. Le TYPE du bloc, lui, se change directement dans son en-tête sur la carte.',
     'planif-titre-noeud':
         'Nom du nœud tel qu\'il apparaît sur la carte.',
     'planif-description-noeud':
         'Notes ou précisions sur cet élément. Champ libre.',
+    // ⚠ CETTE INFOBULLE DISAIT L'INVERSE DE CE QUE FAIT LE BOUTON (16 août 2026).
+    // Elle affirmait « Crée un clone… les modifications se propagent à toutes
+    // les copies » sur un bouton devenu « Copier », qui produit précisément une
+    // copie INDÉPENDANTE. Une infobulle fausse est pire qu'une infobulle
+    // absente : elle est crue.
     'planif-cloner':
-        'Crée un clone de ce nœud. Les modifications se propagent à toutes les copies.',
+        'Crée une copie INDÉPENDANTE de ce bloc : la modifier ne touchera pas l\'original. Raccourci : ⌥ en glissant le bloc, ou ⌘D.',
+    'planif-cloner-lie':
+        'Crée un CLONE lié : titre, durée et type se propagent entre toutes ses instances, et un 🧬 apparaît sur chacune. Raccourci : ⇧⌥ en glissant, ou ⇧⌘D. Réservé aux blocs simples — une séquence ou une leçon se copie toujours à l\'indépendant.',
+    'planif-detacher-clone':
+        'Libère le bloc sélectionné de sa famille de clones : il cesse de suivre son original. Son contenu ne change pas — détacher arrête ce qui se propagerait ensuite, sans défaire ce qui s\'est déjà propagé. Sur l\'original, c\'est toute la famille qui se dissout.',
     'planif-supprimer-noeud':
         'Supprime ce nœud et ses liens de la carte.',
 
