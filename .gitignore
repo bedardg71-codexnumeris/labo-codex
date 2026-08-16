@@ -104,3 +104,13 @@ CODEX problématiques juin/
 codex-*.zip
 codex-*/
 test-results/
+
+# Bancs d'essai jetables des sessions Claude Code (15 août 2026).
+# `repro.html` et `undefined/` sont arrivés jusque dans un commit : les scripts
+# de mesure écrivent à la RACINE du dépôt, et `git add -A` les ramasse.
+# ⚠ La règle avait d'abord été posée dans `tests/.gitignore` — donc nulle part,
+# puisqu'un .gitignore ne couvre que son propre sous-arbre. Elle vit ici, à la
+# racine, et sans « / » initial : ainsi elle attrape aussi un banc d'essai écrit
+# depuis `tests/` si un script y est lancé un jour.
+repro.html
+undefined/
