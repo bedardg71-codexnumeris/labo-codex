@@ -4207,6 +4207,7 @@
                                                  barre d'outils : c'est un réglage de la carte entière, comme ses
                                                  voisins — et la barre débordait déjà sur iPad en portrait. -->
                                             <button class="planif-action-item" id="planif-btn-liens-contourner">Liens : contourner les blocs</button>
+                                            <button class="planif-action-item" id="planif-btn-detacher-clone">D&eacute;tacher de sa famille de clones</button>
                                             <button class="planif-action-item" id="planif-btn-dupliquer-carte">Dupliquer cette carte</button>
                                             <button class="planif-action-item" id="planif-btn-importer-carte">Importer une carte (fichier)</button>
                                             <button class="planif-action-item" id="planif-btn-import-trimestre">Importer d'un autre trimestre…</button>
@@ -11519,6 +11520,8 @@
 
                             <p><strong>Copier ou cloner un bloc :</strong> ce sont deux choses diff&eacute;rentes. Une <strong>copie</strong> est ind&eacute;pendante : la modifier ne touche pas l'original. Un <strong>clone</strong> est li&eacute; : titre, dur&eacute;e et type se propagent entre toutes ses instances, et un &#129516; appara&icirc;t sur chacune. La r&egrave;gle est la m&ecirc;me pour les deux gestes &mdash; <strong>sans &#8679; c'est une copie, avec &#8679; c'est un clone</strong> : <code>&#8997;</code> en glissant ou <code>&#8984;D</code> copient ; <code>&#8679;&#8997;</code> en glissant ou <code>&#8679;&#8984;D</code> clonent. L'Inspecteur, lui, offre les deux boutons c&ocirc;te &agrave; c&ocirc;te. Une <strong>S&eacute;quence</strong> ou une <strong>Le&ccedil;on</strong> se duplique toujours en copie ind&eacute;pendante, avec tout son contenu.</p>
 
+                            <p><strong>D&eacute;tacher un clone :</strong> s&eacute;lectionne le bloc, puis <strong>Actions &#9656; D&eacute;tacher de sa famille de clones</strong>. Il cesse de suivre son original &mdash; et son contenu ne bouge pas : d&eacute;tacher arr&ecirc;te les propagations &agrave; venir, il ne d&eacute;fait pas celles qui ont eu lieu. Si tu s&eacute;lectionnes l'<strong>original</strong>, c'est toute la famille qui se dissout, puisqu'il ne peut pas partir en laissant ses clones point&eacute;s vers lui.</p>
+
                             <p><strong>D&eacute;placer un bloc :</strong> la poign&eacute;e <strong>&#10303;</strong>, au coin sup&eacute;rieur gauche de chaque en-t&ecirc;te, sert de prise &mdash; utile au doigt, et n&eacute;cessaire l&agrave; o&ugrave; l'en-t&ecirc;te porte un menu. Le reste du bloc se glisse aussi.</p>
 
                             <p><strong>Régler un élément :</strong> sélectionne-le, puis ouvre l'<strong>Inspecteur</strong> (bouton 🕵️ de la palette, ou double-clic sur le bloc). Selon le type du bloc : la semaine, la leçon d'accueil, les objectifs qu'il sert, son niveau cognitif, sa rétroaction formative. La <strong>durée estimée</strong>, elle, se saisit dans l'en-tête du bloc — la leçon en affiche le total.</p>
@@ -14407,7 +14410,7 @@
     <script src="js/planification-donnees.js?v=20260808a"></script> <!-- #425 préalable : vivacité de productionId à la reprise (8 août) -->
 
     <script src="js/planification-bibliotheque.js?v=2026051026"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
-    <script src="js/planification-carte.js?v=20260816b"></script> <!-- Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
+    <script src="js/planification-carte.js?v=20260816c"></script> <!-- Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
     <script src="js/planification-export.js?v=20260815a"></script> <!-- LE générateur d'export : 3 niveaux × 3 formats (portage #424, 8 août) — #416 lot C : la date dérivée du groupe-cours choisi -->
     <script src="js/planification.js?v=20260808a"></script> <!-- Refonte nav SP4 : hooks nomSection 'conception' + idSousSection conception-* -->
 
@@ -14491,7 +14494,7 @@
     <script src="js/guidage-demo.js?v=20260808a"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=20260816b"></script> <!-- Entrée 1.56 : trois chantiers Alignement consolidés -->
+    <script src="js/changelog-data.js?v=20260816c"></script> <!-- Entrée 1.56 : trois chantiers Alignement consolidés -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
     <script src="js/etats-vides.js?v=20260808a"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre -->
@@ -14512,11 +14515,11 @@
     <script src="js/export-resultats-finaux.js?v=2026061901"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260816b"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260816c"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260816b"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260816c"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>

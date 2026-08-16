@@ -3599,6 +3599,75 @@ function dupliquerNoeud(noeudId, silencieux, lie) {
 }
 
 /**
+ * DÉTACHER UN BLOC DE SA FAMILLE DE CLONES (16 août 2026, demande de Grégoire).
+ *
+ * ⚠⚠ POURQUOI ÇA MANQUAIT. La distinction copie / clone est livrée le même jour,
+ * mais elle ne vaut que pour les gestes À VENIR. Les blocs qu'il a dupliqués
+ * avant — avec un `⌥` qui rendait un clone sans le dire — restent liés, et il a
+ * choisi de ne PAS les convertir en masse (« on n'y touche pas »). Sans porte de
+ * sortie, ce choix l'enfermait : aucun moyen de rompre un lien sur un bloc
+ * précis, celui qui le surprend.
+ *
+ * ▣ DEUX SENS, PARCE QU'UNE FAMILLE A DEUX RÔLES — et c'est ce qu'il faut avoir
+ * en tête avant de lire le code :
+ *   • sur un CLONE (`cloneSourceId` posé) → lui seul quitte la famille ;
+ *   • sur l'ORIGINAL (pas de `cloneSourceId`, mais des clones qui le visent) →
+ *     la famille se DISSOUT, tous ses clones deviennent indépendants.
+ * ⮕ Le second cas n'est pas un choix esthétique : un original ne peut pas
+ * « partir » en laissant ses clones pointer vers lui. Ou il reste, ou la famille
+ * n'existe plus. Prétendre le détacher seul laisserait des clones orphelins
+ * pointant vers un id qui n'est plus une source — un état que rien ne sait lire.
+ *
+ * ⚠ AUCUNE AUTRE DONNÉE N'EST TOUCHÉE. Titre, durée, type, metadata, position,
+ * liens : tout reste. Détacher ne défait pas les propagations passées, il arrête
+ * les propagations futures. Un bloc détaché garde ce qu'il avait reçu.
+ *
+ * @param {string[]} noeudIds - blocs sur lesquels le geste porte (la sélection)
+ * @returns {number} nombre de blocs réellement détachés
+ */
+function detacherDeLaFamille(noeudIds) {
+    if (!noeudIds || !noeudIds.length) return 0;
+
+    // On calcule d'ABORD l'ensemble à détacher, puis on écrit. Sans cette
+    // séparation, dissoudre une famille pendant qu'on la parcourt ferait
+    // dépendre le résultat de l'ordre de la sélection.
+    var aDetacher = new Set();
+    for (var i = 0; i < noeudIds.length; i++) {
+        var n = etat.noeuds.get(noeudIds[i]);
+        if (!n) continue;
+        if (n.cloneSourceId) {
+            aDetacher.add(n.id);
+        } else if (aDesClones(n.id)) {
+            // L'original : la famille entière se dissout.
+            var membres = trouverClones(n.id);
+            for (var m = 0; m < membres.length; m++) {
+                if (membres[m].cloneSourceId) aDetacher.add(membres[m].id);
+            }
+        }
+    }
+    if (aDetacher.size === 0) return 0;
+
+    enregistrerPourUndo();
+    // Les originaux dont la famille change : leur indicateur 🧬 doit être
+    // recalculé APRÈS coup — un original sans plus aucun clone n'en porte plus.
+    var originauxTouches = new Set();
+    aDetacher.forEach(function(id) {
+        var n = etat.noeuds.get(id);
+        if (!n) return;
+        originauxTouches.add(n.cloneSourceId);
+        _desindexerClone(n);
+        n.cloneSourceId = null;
+        mettreAJourIndicateurClone(n);
+    });
+    originauxTouches.forEach(function(id) {
+        var o = etat.noeuds.get(id);
+        if (o) mettreAJourIndicateurClone(o);
+    });
+    sauvegarder();
+    return aDetacher.size;
+}
+
+/**
  * Dupliquer TOUTE la multi-sélection en un geste (⌘D).
  *
  * Demande de Grégoire, 11 août 2026, en préparant son 601-101 : « je voudrais
@@ -8386,6 +8455,32 @@ function initialiser() {
 
     brancherRecherche();
 
+    // ── Détacher de sa famille de clones (16 août 2026) ──────────────────
+    // ⚠ C'est le SEUL item du menu Actions qui porte sur la SÉLECTION et non
+    // sur la carte. Son libellé le dit donc explicitement, et il se désactive
+    // quand rien de sélectionné n'appartient à une famille — sans quoi le clic
+    // ne produirait rien et Grégoire chercherait la panne du mauvais côté.
+    var btnDetacher = document.getElementById('planif-btn-detacher-clone');
+    if (btnDetacher) {
+        btnDetacher.addEventListener('click', function() {
+            var cibles = etat.multiSelection.size > 0
+                ? Array.from(etat.multiSelection)
+                : (etat.selection ? [etat.selection] : []);
+            if (!cibles.length) {
+                afficherToastLien('Sélectionne d’abord un bloc marqué 🧬 — c’est lui qui appartient à une famille.');
+                return;
+            }
+            var n = detacherDeLaFamille(cibles);
+            if (n === 0) {
+                afficherToastLien('Rien à détacher : aucun des blocs sélectionnés n’appartient à une famille de clones.');
+                return;
+            }
+            afficherToastLien(n === 1
+                ? 'Bloc détaché — il ne suivra plus son original, et son original ne le suivra plus. Son contenu est inchangé.'
+                : n + ' blocs détachés — ils ne se suivent plus. Leur contenu est inchangé.');
+        });
+    }
+
     var btnContourner = document.getElementById('planif-btn-liens-contourner');
     if (btnContourner) {
         chargerPrefContournement();
@@ -11425,6 +11520,7 @@ window.planificationCarte = {
     desactiverLoupe: desactiverLoupe,
     atterrirDepuisLoupe: atterrirDepuisLoupe,
     dupliquerNoeud: dupliquerNoeud,
+    detacherDeLaFamille: detacherDeLaFamille,
     deplacerSequenceVersSemaine: deplacerSequenceVersSemaine,
     annuler: annuler,
     retablir: retablir,

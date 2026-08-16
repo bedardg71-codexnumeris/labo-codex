@@ -25,6 +25,7 @@
             couleur: 'vert',
             titre: 'Copier et cloner deviennent deux gestes distincts',
             items: [
+                'Actions ▸ « Détacher de sa famille de clones » libère un bloc déjà cloné : il cesse de suivre son original, et son contenu ne change pas. Sur l’original, c’est toute la famille qui se dissout.',
                 'Une copie est indépendante : la modifier ne touche plus l’original. Un clone reste lié : titre, durée et type se propagent entre ses instances.',
                 'Une seule règle pour les deux raccourcis : sans ⇧ c’est une copie, avec ⇧ c’est un clone. ⌥ en glissant ou ⌘D copient ; ⇧⌥ ou ⇧⌘D clonent.',
                 'Avant, ⌥ en glissant produisait toujours un clone sur une activité ou une connaissance — sans que rien ne le dise, jusqu’à ce que le doublon se mette à suivre son original.',
