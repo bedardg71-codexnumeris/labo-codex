@@ -12,9 +12,9 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | **`main`** |
-| **Version** | **1.83.2** — build `0815-1255` |
+| **Version** | **1.86.0** — build `0816-0710` |
 | **Travail en avance sur `main`** | **aucun** |
-| **Dernière mise à jour** | 15 août 2026 — recherche dans la Carte d'alignement (1.81.0), deux correctifs sur retour terrain (1.81.1 teinte du halo, 1.81.2 barre rognée sur iPad), **porte terrain rejouée et close à 45/46**, puis routage des liens + verbe « se réactive dans » (1.82.0) son réglage dans Actions (1.83.0) « Révision » passée à « se réactive dans » (1.83.1) et bascule des liens existants (1.83.2). Vitest 2448/2448 |
+| **Dernière mise à jour** | 16 août 2026 — **porte terrain du cycle 1.85 close à 33/33, zéro échec**, puis les quatre demandes d'interface de Grégoire livrées en **1.86.0** : le menu de type s'étend à tous les blocs (borné à la famille), la visée formative/certificative des évaluations, une couleur par famille, la poignée ⠿ au coin supérieur gauche de toute en-tête. Plus son **verdict 3.4** : un verbe de lien devenu inexact est DIT, jamais réécrit. Vitest **2673/2673**, 8 break-tests rouges |
 
 ⚠⚠ **AVANT TOUTE FUSION EN CONTENEUR : `git fetch --unshallow origin`.** Le clone
 du conteneur est **shallow**, et son `main` LOCAL peut pointer des semaines en
@@ -33,6 +33,31 @@ commit d'avance, poussé la veille au soir depuis une session cloud. Le rituel d
 début l'a attrapé ; il ne l'aurait pas fait sans `git fetch`.
 
 ⏳ **CE QUI RESTE DÛ** :
+
+- ⏳ **PORTE TERRAIN NEUVE, NON TRAITÉE** —
+  `plans de travail/PORTES-TERRAIN-2026-08-16-types-familles.md` (artefact :
+  <https://claude.ai/code/artifact/06b361a7-e0ce-4cf0-b6a1-6cb7c11dbce3>).
+  **14 portes, 41 vérifications, 2 mesures, 5 décisions**, sur le cycle 1.86.0.
+  ⮕ **Trois points y sont bloquants pour la suite** : la **2.7** (une famille se
+  repère-t-elle mieux avec UNE couleur qu'avec quatre nuances sur sa vraie
+  carte — aucune mesure ne tranche ça), la **2.8** iPad (la poignée ⠿ au doigt,
+  cible mesurée à 44,53 px, atteinte d'un demi-pixel), et la **2.6** (ses
+  exports ne doivent PAS avoir bougé tant qu'il n'a rien choisi).
+  ⮕ **Cinq décisions attendent un verdict écrit**, dont deux teintes : le violet
+  neuf de l'Organisation (3.1) et le vert le moins équilibré des cinq (3.2).
+- ✅ **PORTE TERRAIN DU CYCLE 1.85 : CLOSE À 33/33, ZÉRO ÉCHEC** (16 août).
+  Les deux rangées iPad les plus risquées — la poignée ⠿ au doigt et le TSV
+  ouvert dans Numbers — passent. Son verdict **3.4 « signaler »** est livré dans
+  1.86.0. ⏳ **Restent dues, mineures** : la mesure **2.6m** (ordre des séquences
+  — sans objet, il n'avait pas créé de séquence) et la mesure **2.8m**, reprise
+  dans la liste du 16 août parce qu'elle y compte davantage.
+- ▣ **RÈGLE ANTI-BANCS-D'ESSAI : réparée.** `repro.html` et `undefined/` étaient
+  ignorés dans `tests/.gitignore` alors que les scripts écrivent à la RACINE —
+  donc nulle part. Motifs déplacés, sentinelle `git check-ignore` posée
+  (5 cas, break-testée trois fois). ⚠ Sa contre-épreuve était d'abord INERTE :
+  elle interrogeait un fichier SUIVI, or `git check-ignore` consulte l'index et
+  répond « non ignoré » pour tout chemin suivi, quels que soient les motifs.
+  Seul le 3ᵉ break-test l'a dit.
 - ⚠ **ARTEFACT DE PORTE TERRAIN — un guillemet tronquait les MESURES.** Trouvé
   au rituel de clôture du 15 août, corrigé et republié : `esc()` n'échappait pas
   le guillemet droit, injecté dans `value="…"`. Le stockage était intact, mais

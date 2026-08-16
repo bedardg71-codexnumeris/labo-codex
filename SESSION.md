@@ -7,6 +7,92 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 16 AOÛT 2026 : TYPES, FAMILLES, ET UNE COULEUR PAR FAMILLE.
+     ÉTAT : **1.86.0** (build 0816-0710) — Vitest **2673/2673** (265 fichiers).
+
+     ▣ **LA JOURNÉE A COMMENCÉ PAR UN RETOUR TERRAIN CLOS À 33/33, ZÉRO ÉCHEC.**
+     Les deux rangées que j'avais désignées comme les plus risquées — la poignée
+     ⠿ au doigt sur iPad, et le TSV ouvert dans Numbers — passent. Son verdict
+     **3.4 « signaler »** était le seul qui appelait du code ; il est livré ici.
+
+     ▣ **QUATRE DEMANDES, UN SEUL CHANTIER.** Ses points 1 et 4 (menu d'en-tête
+     partout, une couleur par type) sont la GÉNÉRALISATION de deux décisions
+     qu'il avait déjà prises pour l'enseignement explicite — le sélecteur du
+     15 août et la sarcelle unique du 9 août (« pour simplifier la lecture »).
+     Le code portait déjà les deux patrons ; il ne restait qu'à les étendre.
+
+     ⚠⚠ **CE QUE LA MESURE A CORRIGÉ, ET QUE LA RELECTURE N'AURAIT PAS VU.**
+
+     1. **Ma conception écrivait dans son PLAN DE COURS.** Prendre sa demande
+        « deux entrées : formative et certificative » au pied de la lettre
+        donnait deux TYPES — or `evaluation` est le seul type qui porte
+        `productionId`, le pont vers ses vraies productions. Mesuré avant
+        d'écrire : la moisson de `main.js` cherche « le nœud Évaluation unique
+        de la leçon », l'export classe par ce type, `evaluerObjectif` coche par
+        lui. Deux types neufs = trois mécanismes morts EN SILENCE. D'où le
+        modificateur `metadata.visee` — 78 sites intacts.
+        ⮕ **Mais mon premier jet du modificateur était encore trop agressif** :
+        il labellisait « Évaluation certificative » les blocs jamais qualifiés,
+        donc une affirmation qu'il n'a pas faite, dans un document destiné à ses
+        étudiants. **C'est le golden master des exports qui l'a dit**, en
+        refusant de rester vert — sa consigne interne (« ne pas régénérer : un
+        octet qui bouge est un comportement qui a changé sans avoir été
+        décidé ») a fonctionné exactement comme prévu. Corrigé par TROIS états
+        en mémoire pour DEUX entrées au menu : l'absence veut dire « pas encore
+        choisi », pas « certificative ». **Le golden repasse au vert sans être
+        refigé** — c'est le contrôle, pas la commodité.
+
+     2. **La cible tactile de la poignée a demandé DEUX mesures.** Le calcul à la
+        main annonçait 44×54 px ; le banc a répondu **42×43** (le glyphe ⠿ fait
+        9,5 px, pas 12 ; sa hauteur de ligne 13, pas 24). **La première
+        correction a rendu 43,53** — toujours sous le seuil, et parfaitement
+        invisible à la relecture. Seule la seconde mesure l'a démasquée. Final :
+        44,53 × 45,00, sur treize types et dans les deux modes.
+        ⮕ **Même forme que le halo de recherche du 15 août** : une première
+        correction insuffisante qu'une seule mesure aurait laissée passer.
+
+     3. **MON PREMIER CRITÈRE DE COULEUR ÉTAIT FAUX.** Je cherchais 3:1 de la
+        bordure contre les douze fonds de canevas — arithmétiquement impossible,
+        aucune teinte ne se détache à la fois de `#0c1a22` et de `#e8e4da`. Le
+        projet le savait déjà et l'avait écrit (« ce qui porte la visibilité
+        contre les douze fonds, ce sont les liserés bicolores, pas la teinte »).
+        Critère refait : maximiser le PIRE des deux fonds de BLOC, avec la
+        sarcelle validée comme étalon (3,68). Quatre familles sur cinq y sont
+        avec une teinte déjà dans la palette.
+
+     4. **MES PROPRES COMMENTAIRES CASSAIENT MES PROPRES TESTS.** En documentant
+        le CSS, j'ai écrit des renvois de la forme `.planif-noeud-prise
+        { margin-right }` — et l'oracle, qui lit le fichier comme du texte,
+        attrapait le COMMENTAIRE avant la vraie règle. Deux contrôles
+        rougissaient en désignant une accolade de prose, avec un message qui ne
+        pouvait pas mettre sur la piste. ⮕ Les commentaires sont désormais
+        dépouillés avant lecture : **mieux documenter le projet ne doit jamais
+        casser ses tests.**
+
+     ▣ **CE QUI AUTORISE LA GÉNÉRALISATION, VÉRIFIÉ TABLE PAR TABLE.**
+     `TYPES_AVEC_DUREE`, `TYPES_HORS_CLASSE`, `TYPES_AVEC_NIVEAU_COGNITIF`,
+     `TYPES_SERVANTS_OBJECTIF`, `TYPES_PREALABLE` et le parent légal répondent
+     TOUS uniformément à l'intérieur de chaque famille. Une sentinelle l'exige
+     désormais — sans quoi un type ajouté demain sans ses frères ferait perdre
+     une durée en silence. **Une seule table n'est pas uniforme** :
+     `normaliserType`, qui résout les verbes. C'est exactement ce que le verdict
+     3.4 demande de signaler.
+
+     ▣ **8 BREAK-TESTS, 8 ROUGES.** Et le tout éprouvé au navigateur, pas
+     seulement en bac à sable : le menu permute, le verbe reste intact, le
+     message se déclenche, la visée s'écrit, zéro erreur console. Comparaison
+     avant/après des hauteurs d'en-tête sur les treize types — **seule
+     l'Évaluation gagne une deuxième ligne**, l'arbitrage qu'il a accepté en 3.3.
+
+     ⏳ **PORTE TERRAIN NEUVE, NON TRAITÉE** :
+     `plans de travail/PORTES-TERRAIN-2026-08-16-types-familles.md`
+     (14 portes, 41 vérifications, 2 mesures, 5 décisions). Trois points
+     bloquants : la 2.7 (une famille se repère-t-elle mieux avec UNE couleur sur
+     sa vraie carte), la 2.8 iPad (la poignée au doigt), la 2.6 (ses exports ne
+     doivent PAS avoir bougé). Cinq verdicts attendus, dont deux teintes.
+     ===================================================================== -->
+
+<!-- =====================================================================
      RITUEL DE CLÔTURE — 15 AOÛT 2026. Vitest **2448/2448**, arbre propre,
      `origin/main ↔ HEAD : 0/0`, 4 points de version synchrones (1.83.2).
 

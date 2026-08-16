@@ -1,0 +1,891 @@
+<title>Portes terrain · Types et familles</title>
+<style>
+/* ── Palette : celle de Labo Codex lui-même (sarcelle « Océan »), plus
+   l'ambre qui EST la couleur du halo livré. Les neutres tirent vers le
+   sarcelle, jamais un gris pur. ───────────────────────────────────────── */
+:root {
+  --ground:      #f4f7f8;
+  --surface:     #ffffff;
+  --surface-2:   #eaf0f2;
+  --ink:         #10242c;
+  --ink-2:       #3d5a64;
+  --ink-3:       #6b858e;
+  --rule:        #d2dee2;
+  --accent:      #14707f;
+  --accent-soft: #e0eef1;
+  --ambre:       #a07830;
+  --ambre-soft:  #f7efdf;
+  --ok:          #1e7e34;
+  --ok-soft:     #e2f2e6;
+  --ko:          #c03040;
+  --ko-soft:     #fbe8ea;
+  --ombre:       0 1px 2px rgba(16,36,44,.06), 0 8px 24px rgba(16,36,44,.05);
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground:      #0b191f;
+    --surface:     #12262e;
+    --surface-2:   #17303a;
+    --ink:         #e7f0f2;
+    --ink-2:       #a9c2c9;
+    --ink-3:       #7b979f;
+    --rule:        #22414c;
+    --accent:      #6aacb8;
+    --accent-soft: #16333c;
+    --ambre:       #c8a060;
+    --ambre-soft:  #2c2517;
+    --ok:          #5ae080;
+    --ok-soft:     #12301c;
+    --ko:          #f0788a;
+    --ko-soft:     #331419;
+    --ombre:       0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.28);
+  }
+}
+:root[data-theme="dark"] {
+  --ground:      #0b191f;
+  --surface:     #12262e;
+  --surface-2:   #17303a;
+  --ink:         #e7f0f2;
+  --ink-2:       #a9c2c9;
+  --ink-3:       #7b979f;
+  --rule:        #22414c;
+  --accent:      #6aacb8;
+  --accent-soft: #16333c;
+  --ambre:       #c8a060;
+  --ambre-soft:  #2c2517;
+  --ok:          #5ae080;
+  --ok-soft:     #12301c;
+  --ko:          #f0788a;
+  --ko-soft:     #331419;
+  --ombre:       0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.28);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-text-size-adjust: 100%;
+}
+.enveloppe { max-width: 60rem; margin: 0 auto; padding: 0 1.25rem 6rem; }
+
+/* ── En-tête ─────────────────────────────────────────────────────────── */
+.chapeau { padding: 2.75rem 0 1.5rem; }
+.eyebrow {
+  font-family: var(--mono); font-size: .72rem; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--accent); margin: 0 0 .6rem;
+}
+h1 {
+  font-size: clamp(1.8rem, 4.2vw, 2.7rem); line-height: 1.1; margin: 0 0 .7rem;
+  letter-spacing: -.021em; font-weight: 700; text-wrap: balance;
+}
+.sous-titre { color: var(--ink-2); margin: 0 0 1.25rem; max-width: 48rem; }
+.meta {
+  display: flex; flex-wrap: wrap; gap: .4rem .5rem;
+  font-family: var(--mono); font-size: .74rem;
+}
+.meta span {
+  padding: .2rem .5rem; border: 1px solid var(--rule); border-radius: 4px;
+  color: var(--ink-2); background: var(--surface);
+}
+
+/* ── Bandeau d'alerte ────────────────────────────────────────────────── */
+.alerte {
+  border-left: 3px solid var(--ko); background: var(--ko-soft);
+  padding: 1rem 1.1rem; border-radius: 0 8px 8px 0; margin: 1.5rem 0;
+}
+.alerte.attention { border-left-color: var(--ambre); background: var(--ambre-soft); }
+.alerte h3 {
+  margin: 0 0 .35rem; font-size: .78rem; letter-spacing: .1em;
+  text-transform: uppercase; font-family: var(--mono);
+}
+.alerte p { margin: 0 0 .5rem; font-size: .93rem; color: var(--ink-2); }
+.alerte p:last-child { margin-bottom: 0; }
+
+/* ── Tableau de bord collant ─────────────────────────────────────────── */
+.bord {
+  position: sticky; top: 0; z-index: 20; background: var(--ground);
+  border-bottom: 1px solid var(--rule); padding: .7rem 0;
+  margin-bottom: 1.5rem;
+}
+.compteurs { display: flex; flex-wrap: wrap; gap: .45rem; align-items: center; }
+.jeton {
+  display: inline-flex; align-items: baseline; gap: .38rem;
+  padding: .3rem .62rem; border-radius: 999px; font-size: .8rem;
+  border: 1px solid var(--rule); background: var(--surface);
+}
+.jeton b { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: .92rem; }
+.jeton.ok { border-color: var(--ok); color: var(--ok); background: var(--ok-soft); }
+.jeton.ko { border-color: var(--ko); color: var(--ko); background: var(--ko-soft); }
+.barre-progres {
+  height: 5px; border-radius: 3px; background: var(--surface-2);
+  overflow: hidden; margin-top: .6rem; display: flex;
+}
+.barre-progres i { display: block; height: 100%; transition: width .25s ease; }
+.barre-progres .p-ok { background: var(--ok); }
+.barre-progres .p-ko { background: var(--ko); }
+
+.filtres { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .65rem; }
+.filtres button {
+  font: inherit; font-size: .78rem; padding: .3rem .68rem; cursor: pointer;
+  border: 1px solid var(--rule); border-radius: 999px;
+  background: var(--surface); color: var(--ink-2);
+}
+.filtres button:hover { border-color: var(--accent); color: var(--ink); }
+.filtres button[aria-pressed="true"] {
+  background: var(--accent); border-color: var(--accent);
+  color: var(--ground); font-weight: 600;
+}
+.filtres button:focus-visible,
+.bascule:focus-visible, .btn:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+
+/* ── Sections ────────────────────────────────────────────────────────── */
+section { margin: 2.5rem 0 0; }
+.titre-section {
+  display: flex; align-items: baseline; gap: .7rem;
+  padding-bottom: .5rem; border-bottom: 2px solid var(--ink);
+  margin-bottom: 1.1rem;
+}
+.titre-section .num {
+  font-family: var(--mono); font-size: .95rem; color: var(--accent); font-weight: 700;
+}
+.titre-section h2 {
+  margin: 0; font-size: 1.12rem; letter-spacing: .01em;
+  text-transform: uppercase; font-weight: 700;
+}
+.note-section {
+  font-size: .92rem; color: var(--ink-2); margin: -.4rem 0 1.1rem;
+  padding-left: .1rem;
+}
+
+/* ── Porte ───────────────────────────────────────────────────────────── */
+.porte {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 10px; box-shadow: var(--ombre); margin-bottom: 1.1rem;
+  overflow: hidden;
+}
+.porte.masquee { display: none; }
+/* Le bandeau de bord est collant : sans cette marge, une porte amenée à
+   l'écran par un filtre passe SOUS lui et on en perd le titre. */
+.porte, .decision { scroll-margin-top: 7.5rem; }
+.porte-tete { padding: 1rem 1.15rem .3rem; }
+.porte-tete .ref {
+  font-family: var(--mono); font-size: .74rem; color: var(--ink-3);
+  letter-spacing: .04em;
+}
+.porte-tete h3 {
+  margin: .15rem 0 .1rem; font-size: 1.05rem; font-weight: 700;
+  letter-spacing: -.008em; text-wrap: balance;
+}
+.pourquoi {
+  margin: .75rem 1.15rem .35rem; padding: .7rem .9rem;
+  background: var(--ambre-soft); border-left: 3px solid var(--ambre);
+  border-radius: 0 6px 6px 0; font-size: .91rem; color: var(--ink-2);
+}
+.pourquoi b { color: var(--ink); }
+.pourquoi .etiq {
+  display: block; font-family: var(--mono); font-size: .68rem;
+  letter-spacing: .13em; text-transform: uppercase; color: var(--ambre);
+  margin-bottom: .25rem; font-weight: 700;
+}
+.rangs { list-style: none; margin: .5rem 0 0; padding: 0; }
+.rang {
+  display: grid; grid-template-columns: auto 1fr; gap: .75rem;
+  padding: .7rem 1.15rem; border-top: 1px solid var(--rule);
+}
+.rang.faite  { background: var(--ok-soft); }
+.rang.ratee  { background: var(--ko-soft); }
+.bascules { display: flex; gap: .3rem; padding-top: .1rem; }
+.bascule {
+  width: 34px; height: 34px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--rule); background: var(--surface);
+  font-size: 1rem; line-height: 1; display: grid; place-items: center;
+  color: var(--ink-3); padding: 0; font-family: var(--sans);
+}
+.bascule:hover { border-color: var(--accent); color: var(--ink); }
+.bascule[aria-pressed="true"][data-etat="ok"] {
+  background: var(--ok); border-color: var(--ok); color: var(--surface);
+}
+.bascule[aria-pressed="true"][data-etat="ko"] {
+  background: var(--ko); border-color: var(--ko); color: var(--surface);
+}
+.geste { font-size: .95rem; }
+.attendu {
+  display: block; margin-top: .3rem; font-size: .88rem; color: var(--ink-2);
+  padding-left: .85rem; border-left: 2px solid var(--accent-soft);
+}
+.attendu b { color: var(--ink); }
+code, .cmd {
+  font-family: var(--mono); font-size: .86em;
+  background: var(--surface-2); padding: .1em .35em; border-radius: 4px;
+}
+.bloc-cmd {
+  display: block; margin: .55rem 0 .2rem; padding: .7rem .8rem;
+  background: var(--surface-2); border: 1px solid var(--rule);
+  border-radius: 6px; font-family: var(--mono); font-size: .82rem;
+  overflow-x: auto; white-space: pre; color: var(--ink);
+}
+.tags { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .45rem; }
+.tag {
+  font-family: var(--mono); font-size: .66rem; letter-spacing: .07em;
+  text-transform: uppercase; padding: .16rem .45rem; border-radius: 4px;
+  border: 1px solid var(--rule); color: var(--ink-3); background: var(--surface);
+}
+.tag.ipad     { border-color: var(--accent); color: var(--accent); }
+.tag.terminal { border-color: var(--ko); color: var(--ko); }
+.tag.donnees  { border-color: var(--ambre); color: var(--ambre); }
+
+/* ── Champs de saisie (mesures et décisions) ─────────────────────────── */
+.champ { grid-column: 1 / -1; margin-top: .1rem; }
+.rang.saisie { grid-template-columns: 1fr; }
+.champ label {
+  display: block; font-family: var(--mono); font-size: .68rem;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--accent);
+  margin-bottom: .3rem; font-weight: 700;
+}
+.champ input, .champ textarea {
+  width: 100%; font: inherit; font-size: .93rem; padding: .5rem .65rem;
+  border: 1px solid var(--rule); border-radius: 6px;
+  background: var(--ground); color: var(--ink); font-family: var(--mono);
+}
+.champ textarea { min-height: 4.5rem; resize: vertical; line-height: 1.5; font-family: var(--sans); }
+.champ input::placeholder, .champ textarea::placeholder { color: var(--ink-3); }
+
+/* ── Décisions ───────────────────────────────────────────────────────── */
+.decision {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 10px 10px 0; padding: 1rem 1.15rem; margin-bottom: 1rem;
+  box-shadow: var(--ombre);
+}
+.decision h3 { margin: 0 0 .4rem; font-size: 1.02rem; }
+.decision .ref { font-family: var(--mono); font-size: .74rem; color: var(--ink-3); }
+.decision p { margin: .35rem 0 .7rem; font-size: .93rem; color: var(--ink-2); }
+
+/* ── Angles morts ────────────────────────────────────────────────────── */
+.angle-mort {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 10px; padding: 1rem 1.15rem; margin-bottom: .9rem;
+}
+.angle-mort h3 { margin: 0 0 .35rem; font-size: 1rem; }
+.angle-mort p { margin: 0; font-size: .93rem; color: var(--ink-2); }
+ol.erreurs { padding-left: 1.15rem; margin: .5rem 0 0; }
+ol.erreurs li { margin-bottom: .55rem; font-size: .93rem; color: var(--ink-2); }
+ol.erreurs b { color: var(--ink); }
+
+/* ── Relevé ──────────────────────────────────────────────────────────── */
+.releve {
+  margin-top: 2.5rem; background: var(--surface);
+  border: 2px solid var(--accent); border-radius: 10px; padding: 1.2rem;
+}
+.releve h2 { margin: 0 0 .3rem; font-size: 1.1rem; }
+.releve p { margin: 0 0 .8rem; font-size: .92rem; color: var(--ink-2); }
+.actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .8rem; }
+.btn {
+  font: inherit; font-size: .9rem; font-weight: 600; cursor: pointer;
+  padding: .58rem 1rem; border-radius: 8px; border: 1px solid var(--accent);
+  background: var(--accent); color: var(--ground);
+}
+.btn.secondaire { background: var(--surface); color: var(--ink-2); border-color: var(--rule); }
+.btn.secondaire:hover { border-color: var(--accent); color: var(--ink); }
+#sortie {
+  width: 100%; min-height: 15rem; font-family: var(--mono); font-size: .78rem;
+  line-height: 1.5; padding: .8rem; border-radius: 8px;
+  border: 1px solid var(--rule); background: var(--ground); color: var(--ink);
+  white-space: pre; resize: vertical;
+}
+.dit-copie { font-size: .85rem; color: var(--ok); margin-left: .3rem; }
+
+/* ── Les cinq familles livrées deviennent le codage de cette page.
+   Mêmes valeurs exactes que `styles.css` — si elles divergent, c'est la
+   page qui ment sur ce qu'elle fait vérifier. ─────────────────────── */
+.porte[data-fam] { border-left: 3px solid var(--fam, var(--rule)); }
+.porte[data-fam="intention"]    { --fam: #3b82f6; }
+.porte[data-fam="connaissance"] { --fam: #ea580c; }
+.porte[data-fam="deroulement"]  { --fam: #16a34a; }
+.porte[data-fam="organisation"] { --fam: #a855f7; }
+.porte[data-fam="verification"] { --fam: #d946ef; }
+.porte[data-fam="explicite"]    { --fam: #0891b2; }
+.porte[data-fam="toutes"]       { --fam: var(--accent); }
+.pastille-fam {
+  display: inline-block; width: .65rem; height: .65rem; border-radius: 50%;
+  vertical-align: baseline; margin-right: .35rem;
+}
+.legende-fam { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin: .4rem 0 0;
+  font-size: .82rem; color: var(--ink-2); list-style: none; padding: 0; }
+.legende-fam li { display: flex; align-items: center; gap: .35rem; }
+
+@media (max-width: 34rem) {
+  .rang { grid-template-columns: 1fr; }
+  .bascules { padding-top: 0; }
+  .enveloppe { padding: 0 .9rem 5rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+</style>
+
+<div class="enveloppe">
+
+<header class="chapeau">
+  <p class="eyebrow">Portes terrain · 16 août 2026 · cycle 1.86.0</p>
+  <h1>Chaque bloc change de type dans son en-tête</h1>
+  <p class="sous-titre">
+    Tes quatre demandes du 16 août, plus ton verdict 3.4. Ce que les tests ne
+    peuvent pas dire : si une famille se repère mieux avec <em>une</em> couleur
+    qu'avec quatre nuances sur <em>ta</em> carte, si la poignée ⠿ se saisit au
+    doigt sur <em>ton</em> iPad, et si le violet neuf de l'Organisation te
+    convient dans <em>tes</em> deux modes.
+  </p>
+  <div class="meta">
+    <span>1.86.0</span><span>build 0816-0710</span><span>14 portes</span>
+    <span>41 vérifications</span><span>2 mesures</span><span>5 décisions</span>
+  </div>
+  <ul class="legende-fam" aria-label="Les six familles">
+    <li><span class="pastille-fam" style="background:#3b82f6"></span>Intention curriculaire</li>
+    <li><span class="pastille-fam" style="background:#ea580c"></span>Connaissances</li>
+    <li><span class="pastille-fam" style="background:#16a34a"></span>Déroulement</li>
+    <li><span class="pastille-fam" style="background:#a855f7"></span>Organisation</li>
+    <li><span class="pastille-fam" style="background:#d946ef"></span>Vérification</li>
+    <li><span class="pastille-fam" style="background:#0891b2"></span>Enseignement explicite</li>
+  </ul>
+</header>
+
+<div class="alerte">
+  <h3>⚠⚠ Commence par le §0 — sinon toute la liste est invérifiable</h3>
+  <p>
+    Tout est livré en <b>1.86.0</b>. Mais ton clone local est à la version de ton
+    dernier <code>git pull</code> : sans la première rangée, l'app affichera
+    <b>1.85.0</b>, aucun bloc n'aura de menu sauf les phases, et tu cocheras ✗ sur
+    des livraisons qui marchent.
+  </p>
+  <p>
+    Ce faux rouge est <b>indétectable au récit</b> : il décrit exactement l'état
+    d'avant la livraison, qui est précisément ce que la liste teste.
+  </p>
+</div>
+
+<div class="alerte" style="border-left-color:var(--ok);background:var(--ok-soft)">
+  <h3>Ce que j'ai déjà pu vérifier — pour que tu ne le refasses pas</h3>
+  <p>
+    <b>2673 cas de test verts</b>, <b>8 break-tests rouges</b>, et le tout éprouvé
+    au navigateur Chromium : le menu permute, le verbe n'est pas réécrit, le
+    message se déclenche, la visée s'écrit, zéro erreur console. La cible tactile
+    de la poignée est mesurée à <b>44,53 × 45,00 px</b> sur les treize types et
+    dans les deux modes.
+  </p>
+  <p>
+    ⮕ Ce qui reste, c'est ce qu'aucune mesure ne tranche : <b>ton œil, ton iPad,
+    ta vraie carte.</b>
+  </p>
+</div>
+
+<div class="alerte attention">
+  <h3>Ce qui échoue devient un item de backlog</h3>
+  <p>
+    Pas une note mentale. Coche ✗ et écris ce que tu as vu : le relevé remonte
+    tout, y compris les mesures et les verdicts.
+  </p>
+</div>
+
+<div class="bord">
+  <div class="compteurs">
+    <span class="jeton ok">passées <b id="n-ok">0</b></span>
+    <span class="jeton ko">échec <b id="n-ko">0</b></span>
+    <span class="jeton">restantes <b id="n-reste">0</b></span>
+    <span class="jeton">mesures <b id="n-mes">0</b></span>
+    <span class="jeton">décisions <b id="n-dec">0</b></span>
+  </div>
+  <div class="barre-progres" aria-hidden="true">
+    <i class="p-ok" id="p-ok" style="width:0"></i><i class="p-ko" id="p-ko" style="width:0"></i>
+  </div>
+  <div class="filtres" id="filtres">
+    <button data-f="tout" aria-pressed="true">Tout</button>
+    <button data-f="reste" aria-pressed="false">Non traitées</button>
+    <button data-f="Mac" aria-pressed="false">Mac</button>
+    <button data-f="iPad" aria-pressed="false">iPad</button>
+    <button data-f="Données" aria-pressed="false">Données</button>
+    <button data-f="Terminal" aria-pressed="false">Terminal</button>
+  </div>
+</div>
+
+<main id="contenu"></main>
+
+<section class="releve">
+  <h2>Copier mes résultats</h2>
+  <p>
+    Ton avancement vit dans <b>ton</b> navigateur : je ne peux pas le lire.
+    Clique, puis colle-moi le texte. Il contient les ✓, les ✗, les mesures
+    chiffrées et les cinq verdicts — sans ça, « c'est complété » arrive sans
+    aucune donnée.
+  </p>
+  <div class="actions">
+    <button class="btn" id="btn-copier">Copier mes résultats</button>
+    <button class="btn secondaire" id="btn-tout-effacer">Tout réinitialiser</button>
+    <span class="dit-copie" id="dit-copie" role="status" aria-live="polite"></span>
+  </div>
+  <textarea id="sortie" readonly aria-label="Relevé à copier"></textarea>
+</section>
+
+</div>
+
+<script>
+// =====================================================================
+// Les portes. `t` = tags ; `mesure` = champ chiffré (pas de bascule seule) ;
+// `decision` = champ de verdict, SANS bascule (une case ne porte pas un
+// verdict — leçon du 11 août).
+// =====================================================================
+const DATA = [
+{ num:"§0", titre:"Avant de commencer", portes:[
+  { ref:"0.1", t:"préalable", fam:"toutes", titre:"Récupérer la version",
+    pourquoi:"Sans ça, rien de ce qui suit n'existe sur ton écran. Tu verrais l'app d'hier et tu conclurais que rien n'a été livré.",
+    rangs:[
+      { id:"0.1a", geste:"<b>SEULE commande de Terminal de toute la liste</b> — app <b>Terminal</b>, pas la console du navigateur, dans le dossier <code>Monitorage_v6</code> :<br><code>git checkout main &amp;&amp; git pull origin main</code>",
+        attendu:"la liste des fichiers reçus, puis <code>Fast-forward</code>. Si Terminal répond <code>error: Your local changes would be overwritten</code>, <b>arrête-toi et dis-le-moi</b>.", tags:["Terminal"] },
+      { id:"0.1b", geste:"Recharger l'app et lire le numéro <b>en bas de page</b>.",
+        attendu:"<b>1.86.0</b>, build <code>0816-0710</code>. Si tu lis 1.85.0 ou moins, la commande n'a pas pris — rien d'autre ne vaut tant que ce numéro n'est pas le bon." },
+      { id:"0.1c", geste:"Prévoir les <b>deux appareils</b> (MacBook + iPad) et les <b>deux modes</b> (sombre + clair).",
+        attendu:"quatre rangées de cette liste ne se tranchent que sur l'iPad ; cinq ne se tranchent qu'en comparant les deux modes." }
+    ]}
+]},
+
+{ num:"§1", titre:"Données — ce qui touche ton corpus", portes:[
+  { ref:"1.1", t:"⚠⚠ Données", fam:"toutes", titre:"Backup avant de changer des types",
+    pourquoi:"Changer le type d'un bloc <b>modifie ta carte</b> : ce n'est pas un réglage d'affichage. Le geste est annulable (⌘Z) tant que tu n'as pas rechargé, mais un backup coûte trente secondes.",
+    rangs:[
+      { id:"1.1a", geste:"Faire un <b>backup Codex</b> avant d'ouvrir la porte 2.1.",
+        attendu:"archive créée, date du jour.", tags:["Données"] }
+    ]},
+  { ref:"1.2", t:"⚠⚠ Données", fam:"toutes", titre:"Un type changé suit les copies liées",
+    pourquoi:"Quand tu dupliques un bloc, la copie reste liée à l'original : son titre et sa durée suivent. Son <b>type</b> doit suivre aussi, sinon deux blocs censés être le même bloc diraient deux choses différentes.",
+    rangs:[
+      { id:"1.2a", geste:"Sur une carte qui contient un bloc <b>dupliqué</b> (copie liée), changer le type de l'original par le menu de son en-tête.",
+        attendu:"la copie prend le même type, tout de suite.", tags:["Données"] },
+      { id:"1.2b", geste:"Faire <b>⌘Z</b>.",
+        attendu:"les deux reviennent à leur type précédent, ensemble.", tags:["Données"] }
+    ]}
+]},
+
+{ num:"§2", titre:"Interface — ce que tu vérifies à l'écran", portes:[
+
+  { ref:"2.1", t:"1.86.0", fam:"connaissance", titre:"Changer le type d'une connaissance",
+    pourquoi:"Ta demande : le menu qu'on avait mis sur l'enseignement explicite, partout. Jusqu'ici, transformer une Factuelle en Conceptuelle voulait dire recréer le bloc et y recoller le contenu.",
+    rangs:[
+      { id:"2.1a", geste:"Sur un bloc <b>Factuelle</b>, cliquer le nom du type dans l'en-tête.",
+        attendu:"un menu s'ouvre avec <b>quatre</b> entrées : Factuelle, Conceptuelle, Procédurale, Métacognitive." },
+      { id:"2.1b", geste:"Vérifier que le menu ne propose <b>ni</b> « Compétence », <b>ni</b> « Activité », <b>ni</b> « Évaluation ».",
+        attendu:"seulement les quatre connaissances — c'est la borne : un menu ne sort jamais de sa famille." },
+      { id:"2.1c", geste:"Choisir <b>Métacognitive</b>, puis regarder le bloc.",
+        attendu:"le nom change, <b>le titre reste</b>, et les liens que tu avais tracés sont toujours là." },
+      { id:"2.1d", geste:"Faire <b>⌘Z</b>.",
+        attendu:"le bloc revient à son type précédent." }
+    ]},
+
+  { ref:"2.2", t:"1.86.0", fam:"intention", titre:"Changer une Compétence en Idée maîtresse",
+    pourquoi:"Même geste, sur la famille du « pourquoi ». C'est la famille où le changement a le plus d'effet : une Compétence est un point de départ, une Idée maîtresse doit être reliée à une compétence — les pastilles de validation vont donc se recalculer.",
+    rangs:[
+      { id:"2.2a", geste:"Sur un bloc <b>Compétence</b>, ouvrir le menu de l'en-tête.",
+        attendu:"deux entrées : Compétence, Idée maîtresse." },
+      { id:"2.2b", geste:"Passer en <b>Idée maîtresse</b>, puis survoler les <b>pastilles de validation</b> (les ronds aux deux coins du haut).",
+        attendu:"leur message a changé — il dit maintenant ce qu'on attend d'une idée maîtresse. C'est voulu : la carte se relit toute seule." }
+    ]},
+
+  { ref:"2.3", t:"1.86.0", fam:"deroulement", titre:"Changer un Exposé en Activité",
+    pourquoi:"La famille du temps de classe. Attention : ces quatre-là ne se mélangent pas avec les cinq phases de l'enseignement explicite — passer d'une Pratique guidée à un Exposé serait un changement de méthode, pas de type.",
+    rangs:[
+      { id:"2.3a", geste:"Sur un bloc <b>Exposé</b>, ouvrir le menu.",
+        attendu:"quatre entrées : Exposé, Activité, Soutien, Révision. <b>Aucune phase</b> d'enseignement explicite." },
+      { id:"2.3b", geste:"Sur un bloc de <b>Pratique guidée</b>, ouvrir le menu.",
+        attendu:"les cinq phases, et rien d'autre — exactement comme hier. Cette borne-là n'a pas bougé." },
+      { id:"2.3c", geste:"Passer un Exposé en Activité, puis vérifier sa <b>durée</b> dans l'en-tête.",
+        attendu:"la durée est intacte. Elle doit survivre à tout changement de type." }
+    ]},
+
+  { ref:"2.4", t:"1.86.0", fam:"organisation", titre:"Séquence et Leçon n'ont PAS de menu",
+    pourquoi:"Tu l'as tranché toi-même : elles ne sont pas intervertibles. Une Leçon porte une semaine, un rang de séance et des objectifs qu'une Séquence n'a pas — les échanger les laisserait dans le vide.",
+    rangs:[
+      { id:"2.4a", geste:"Cliquer le mot <b>« Leçon »</b> dans l'en-tête d'une leçon.",
+        attendu:"<b>rien ne s'ouvre</b>. C'est voulu, ce n'est pas un menu cassé." },
+      { id:"2.4b", geste:"Même chose sur une <b>Séquence</b>.",
+        attendu:"rien ne s'ouvre non plus." }
+    ]},
+
+  { ref:"2.5", t:"1.86.0", fam:"verification", titre:"La visée d'une évaluation",
+    pourquoi:"Ta demande : deux entrées dans cette famille. Une évaluation choisit maintenant si elle est <b>formative</b> ou <b>certificative</b>, dans son en-tête, sans changer de nature.",
+    rangs:[
+      { id:"2.5a", geste:"Sur un bloc <b>Évaluation</b>, ouvrir le menu de l'en-tête.",
+        attendu:"deux entrées : <b>Certificative</b> et <b>Formative</b>." },
+      { id:"2.5b", geste:"Choisir <b>Formative</b>, puis survoler la pastille de validation du coin <b>supérieur droit</b>.",
+        attendu:"elle dit « Évaluation formative ». C'est le seul endroit de la carte où le nom complet se lit." },
+      { id:"2.5c", geste:"Ouvrir l'<b>Inspecteur</b> de ce bloc (double-clic).",
+        attendu:"les réglages d'évaluation sont tous là — Production, Rétroaction sur le rendu, pondération. Le bloc reste une évaluation à part entière." }
+    ]},
+
+  { ref:"2.6", t:"⚠⚠ 1.86.0", fam:"verification", titre:"Tes exports n'ont pas bougé tant que tu n'as rien choisi",
+    pourquoi:"<b>C'est la rangée qui compte le plus de cette liste.</b> Mon premier jet écrivait « Évaluation certificative » dans ton plan de cours pour des blocs que tu n'as jamais qualifiés — donc une affirmation que tu n'as pas faite, dans un document qui va à tes étudiants. C'est corrigé : tant que tu ne touches pas au menu, l'export dit « Évaluation », comme avant.",
+    rangs:[
+      { id:"2.6a", geste:"Sur une carte où tu n'as <b>encore rien changé</b>, ouvrir <b>Actions ▸ Exporter le plan… ▸ Gabarits d'export…</b> et regarder la colonne <b>Type</b> d'une ligne d'évaluation.",
+        attendu:"elle dit <b>« Évaluation »</b>, tout court — exactement comme avant la mise à jour." },
+      { id:"2.6b", geste:"Choisir <b>Formative</b> sur ce bloc, puis rouvrir l'aperçu de l'export.",
+        attendu:"la colonne dit maintenant <b>« Évaluation formative »</b>. Le libellé ne se précise que quand tu l'as décidé." },
+      { id:"2.6c", geste:"Comparer un export complet avec un export que tu aurais gardé d'avant, si tu en as un.",
+        attendu:"aucune autre différence. Ce chantier ne devait rien changer d'autre à tes sorties." }
+    ]},
+
+  { ref:"2.7", t:"1.86.0", fam:"toutes", titre:"Une seule couleur par famille",
+    pourquoi:"Ta demande, et la généralisation de ce que tu avais tranché le 9 août pour les cinq phases (« pour simplifier la lecture »). Chaque famille avait un dégradé : quatre oranges pour les connaissances, quatre verts pour le déroulement. Il faut désormais lire le <b>nom</b> pour savoir lequel c'est.",
+    rangs:[
+      { id:"2.7a", geste:"Regarder ta carte d'ensemble, dézoomée, en <b>mode sombre</b>.",
+        attendu:"chaque famille se repère comme un bloc de couleur homogène. C'est le gain qu'on cherche." },
+      { id:"2.7b", geste:"Refaire le même coup d'œil en <b>mode clair</b>.",
+        attendu:"même lisibilité. Les teintes ont été choisies pour tenir dans les deux modes, pas dans un seul." },
+      { id:"2.7c", geste:"Regarder de près deux blocs <b>voisins de la même famille</b> (par exemple une Factuelle à côté d'une Métacognitive).",
+        attendu:"tu les distingues par leur <b>nom</b>, plus par leur teinte. ⚠ Si tu n'arrives pas à les distinguer d'un coup d'œil, coche ✗ : c'est le risque connu de ce changement." },
+      { id:"2.7d", geste:"Regarder une <b>Séquence</b> et une <b>Leçon</b> côte à côte.",
+        attendu:"elles partagent maintenant le même violet. ⚠ C'est le cas le plus discutable du lot : elles ne sont pas de même niveau, l'une contient l'autre." },
+      { id:"2.7m", mesure:true, label:"MESURE — combien de paires de blocs voisins deviennent difficiles à distinguer sur ta vraie carte ?",
+        placeholder:"un nombre, ou « aucune »", aide:"Aucun chiffre n'est un échec ici : c'est une mesure d'entrée qui dira s'il faut réintroduire une nuance." }
+    ]},
+
+  { ref:"2.8", t:"1.86.0", fam:"toutes", titre:"La poignée ⠿ passe au coin supérieur gauche",
+    pourquoi:"Ta demande, capture à l'appui : elle doit être le premier élément de l'en-tête, à gauche de la pastille de validation. Et elle est maintenant sur <b>tous</b> les blocs, pas seulement ceux qui ont un menu.",
+    rangs:[
+      { id:"2.8a", geste:"Regarder l'en-tête de n'importe quel bloc.",
+        attendu:"⠿ tout à gauche, <b>puis</b> la pastille ronde, <b>puis</b> le nom du type." },
+      { id:"2.8b", geste:"Attraper un bloc <b>par la poignée</b> et le déplacer.",
+        attendu:"il suit le curseur normalement." },
+      { id:"2.8c", geste:"Cliquer le <b>nom du type</b> et glisser sans lâcher.",
+        attendu:"le menu s'ouvre, <b>le bloc ne bouge pas</b>. C'est voulu." },
+      { id:"2.8d", geste:"Cliquer la <b>pastille ronde</b> de validation.",
+        attendu:"son message s'affiche. La poignée ne lui a pas volé son clic — les deux se touchent de près." },
+      { id:"2.8e", geste:"Sur l'<b>iPad</b>, poser le doigt sur la poignée ⠿ et déplacer le bloc, <b>sans viser précisément</b>.",
+        attendu:"il suit le doigt. ⚠ <b>La rangée la plus importante de la liste</b> : la cible mesure 44 px, atteints d'un demi-pixel.", tags:["iPad"] },
+      { id:"2.8f", geste:"Sur l'<b>iPad</b>, toucher le nom du type.",
+        attendu:"le menu s'ouvre et le bloc ne se met pas à suivre le doigt.", tags:["iPad"] },
+      { id:"2.8m", mesure:true, label:"MESURE — combien de tes blocs ont un en-tête sur deux lignes ?",
+        placeholder:"un nombre", aide:"Tu ne l'avais pas renseignée hier. Elle compte davantage aujourd'hui : c'est elle qui dira si l'arbitrage tient sur ta vraie carte." }
+    ]},
+
+  { ref:"2.9", t:"verdict 3.4", fam:"toutes", titre:"Le verbe d'un lien devenu inexact est signalé",
+    pourquoi:"Ton verdict d'hier : « signaler ». Quand tu changes le type d'un bloc, un lien que tu avais tracé peut garder un verbe qui ne lui correspond plus. L'app te le dit maintenant — et elle ne réécrit <b>jamais</b> un verbe que tu as posé.",
+    rangs:[
+      { id:"2.9a", geste:"Trouver (ou tracer) un lien entre une <b>connaissance</b> et une <b>Ouverture</b> : il porte « se réactive dans ».",
+        attendu:"le verbe est bien « se réactive dans »." },
+      { id:"2.9b", geste:"Changer l'Ouverture en <b>Modélisation</b> par le menu de son en-tête.",
+        attendu:"un message apparaît en bas : « Un lien de ce bloc garde un verbe qui ne correspond plus à son nouveau type… »" },
+      { id:"2.9c", geste:"Regarder le lien lui-même.",
+        attendu:"il dit <b>toujours</b> « se réactive dans ». C'est voulu : ton verbe n'est pas réécrit dans ton dos, on te signale seulement qu'il mérite un coup d'œil." },
+      { id:"2.9d", geste:"Refaire un changement de type sur un bloc dont les liens sont <b>déjà</b> comme tu les veux.",
+        attendu:"aucun message si rien ne bascule. On ne te signale que ce que <b>ce geste-là</b> a rendu inexact." }
+    ]},
+
+  { ref:"2.10", t:"1.86.0", fam:"verification", titre:"« Preuve de réussite » devient « Vérification »",
+    pourquoi:"Ta demande. Le mot élargit la famille : une évaluation formative vérifie un apprentissage sans être une preuve de réussite.",
+    rangs:[
+      { id:"2.10a", geste:"Ouvrir la <b>palette</b> des nœuds et lire les titres de sections.",
+        attendu:"la section s'appelle <b>« Vérification »</b>." },
+      { id:"2.10b", geste:"Ouvrir le <b>guide</b> de la Carte (bouton 📖) et chercher la liste des types.",
+        attendu:"elle dit « Vérification », et mentionne la visée formative ou certificative." }
+    ]},
+
+  { ref:"2.11", t:"1.86.0", fam:"connaissance", titre:"Le « préalable » ne se distingue plus sur la carte",
+    pourquoi:"Tu l'as accepté : c'est une fonction théorique que tu n'utilises pas. Une connaissance cochée « préalable » prenait un orange plus foncé ; elle prend maintenant l'orange de sa famille comme les autres. <b>Ce n'est pas un bug</b> — cette rangée est là pour que tu confirmes que ça ne te manque pas.",
+    rangs:[
+      { id:"2.11a", geste:"Si tu as un bloc coché « Préalable » dans l'Inspecteur, le regarder sur la carte.",
+        attendu:"il a la même couleur que les autres connaissances." },
+      { id:"2.11b", geste:"Ouvrir son <b>Inspecteur</b>.",
+        attendu:"il dit toujours « Factuelle préalable » (ou l'équivalent), et la case est toujours cochée. L'information n'est pas perdue, elle ne se voit plus sur la carte." }
+    ]}
+]},
+
+{ num:"§3", titre:"Décisions — ce qui attend ton verdict", note:"⚠ <b>Ce ne sont PAS des vérifications.</b> Ce sont des choix que j'ai posés faute de pouvoir les trancher à ta place. Chaque rangée attend une <b>phrase écrite</b>, pas une coche — une décision sans verdict écrit est une décision perdue.", decisions:[
+  { id:"3.1", titre:"Le violet de l'Organisation est une teinte NEUVE",
+    texte:"Séquence était violet foncé, Leçon violet clair. Aucune des deux ne tenait dans tes deux modes : le foncé tombe à 1,95 sur fond sombre, le clair à 2,64 sur fond blanc. J'ai pris le milieu de la même gamme (<code>#a855f7</code>), qui donne 3,44 et 3,96. C'est la seule famille dont la couleur n'existait pas avant. Est-ce qu'elle te convient dans les deux modes ?" },
+  { id:"3.2", titre:"Le vert du Déroulement est la famille la moins équilibrée",
+    texte:"Les cinq familles visent l'équilibre de la sarcelle que tu as validée en août (3,68). Quatre y sont ; le vert est à 3,30. Un vert légèrement différent aurait donné 3,48, mais il sortait de la gamme de la palette — et 0,18 ne m'a pas paru valoir ça. Est-ce que le vert te paraît plus faible que les autres à l'écran, ou est-ce que ça ne se voit pas ?" },
+  { id:"3.3", titre:"Seul le bloc Évaluation gagne une deuxième ligne d'en-tête",
+    texte:"Mesuré avant/après sur les treize types : tous gardent leur nombre de lignes, sauf l'Évaluation, qui passe à deux. « Certificative » plus la poignée ne tiennent pas à côté de la boîte de durée sur un bloc de 230 px. Élargir le bloc les ramène sur une ligne. C'est le même arbitrage que tu as accepté hier en 3.3 — le confirmes-tu ici aussi, ou faut-il raccourcir le mot ?" },
+  { id:"3.4", titre:"La palette garde UNE seule pastille « Évaluation »",
+    texte:"Tu as demandé deux entrées ; elles sont dans le menu de l'en-tête. Les mettre aussi dans la palette obligerait la visée à voyager par quatre points de passage entre le glisser et le bloc créé — c'est exactement la forme de bug que ce module a déjà payée (trois chemins de création qui avaient divergé). Un bloc neuf naît donc non qualifié et tu choisis dans son en-tête. Est-ce que ça te va, ou veux-tu les deux pastilles malgré le risque ?" },
+  { id:"3.5", titre:"Faut-il retirer « Préalable » pour de bon ?",
+    texte:"Tu as écrit qu'elle est théorique, inutilisée, et qu'elle va probablement disparaître. Elle n'a plus de couleur, mais elle occupe encore une case dans l'Inspecteur et une ligne dans les exports. Je peux la retirer entièrement au prochain cycle — dis-moi si je le fais, ou si on la garde encore." }
+]},
+
+{ num:"§4", titre:"Ce que je n'ai pas pu vérifier", angles:[
+  { titre:"Rien n'a été éprouvé sur ton matériel",
+    texte:"WebKit n'existe pas dans le conteneur : les menus, la poignée, les couleurs et les deux modes ont tous été mesurés dans <b>Chromium</b>, sur un banc d'essai — pas dans Safari, pas sur l'iPad, pas sur ta vraie carte. Les rangées <code>iPad</code> de cette liste sont exactement les trous." },
+  { titre:"Les couleurs sont mesurées, pas jugées",
+    texte:"J'ai calculé le contraste de chaque teinte contre les deux fonds de bloc. Un chiffre de contraste ne dit pas si une couleur est <b>agréable</b>, ni si deux familles se confondent au coin de l'œil sur une carte dense à 22 %. C'est le point de tout le §3." },
+  { titre:"92 tests Playwright ne tournent nulle part",
+    texte:"Confirmé en les lançant, pas supposé : WebKit manque au conteneur. Ils partent en intégration continue." },
+  { titre:"Je n'ai pas pu voir le site en ligne",
+    texte:"La politique réseau du conteneur refuse <code>app.codexnumeris.org</code> : je n'ai pas pu charger la page déployée pour vérifier ce qu'elle sert réellement. Ton premier rechargement le dira." }
+]}
+];
+
+const ERREURS = [
+  "<b>Ma première conception écrivait dans ton plan de cours.</b> Elle labellisait « Évaluation certificative » tous les blocs que tu n'as jamais qualifiés — donc une affirmation que tu n'as pas faite, dans un document destiné à tes étudiants. Je ne l'ai pas vue en la relisant : c'est le <b>golden master des exports</b> qui l'a dit, en refusant de rester vert. Sa consigne interne est « ne pas régénérer les références : un octet qui bouge est un comportement qui a changé sans avoir été décidé ». Corrigé — et il repasse au vert <b>sans avoir été refigé</b>, ce qui est la preuve que tes sorties ne bougent pas.",
+  "<b>La cible tactile de la poignée a demandé DEUX mesures.</b> Mon calcul à la main annonçait 44×54 px ; le banc a répondu <b>42×43</b>. Ma première correction a donné <b>43,53</b> — toujours sous le seuil, et parfaitement invisible à la relecture. Seule la seconde mesure l'a démasquée. Contrôle final : 44,53 × 45,00. <b>Si je n'avais mesuré qu'une fois, tu recevrais aujourd'hui une poignée trop petite au doigt</b>, sur le geste que tu as toi-même signalé comme le plus risqué.",
+  "<b>Mes propres commentaires cassaient mes propres tests.</b> En documentant le CSS, j'ai écrit des renvois de la forme <code>.planif-noeud-prise { margin-right }</code> — et le test, qui lit le fichier comme du texte, attrapait le <b>commentaire</b> au lieu de la vraie règle. Deux contrôles rougissaient en désignant une accolade de prose. Mieux documenter le projet ne doit jamais casser ses tests : les commentaires sont désormais retirés avant lecture.",
+  "<b>Une faute de frappe qui aurait cassé la carte au chargement.</b> En faisant dire à une pastille de validation le nom complet de la visée, j'ai écrit le mauvais nom de variable — une erreur qui aurait vidé l'écran. Attrapée par une relecture du code avant l'exécution, pas par un test."
+];
+
+// ── État ─────────────────────────────────────────────────────────────
+const CLE = 'portes-types-familles-2026-08-16';
+let etat = {};
+try { etat = JSON.parse(localStorage.getItem(CLE) || '{}'); } catch (e) { etat = {}; }
+const sauver = () => { try { localStorage.setItem(CLE, JSON.stringify(etat)); } catch (e) {} };
+
+/* ⚠ LE GUILLEMET DROIT AUSSI — trouvé au rituel de clôture du 15 août.
+   Cette valeur est injectée dans `value="${val}"` : sans échapper le
+   guillemet, il FERME l'attribut. Mesuré — en saisissant
+   « il a dit "non" au 3e essai » dans un champ de mesure, le champ ne
+   réaffichait que « il a dit ». Pas une faille (sa page, son texte, son
+   navigateur) mais une PERTE SILENCIEUSE : rééditer le champ tronqué écrase
+   la valeur complète. Et ça frappait les MESURES, ce que le modèle des portes
+   terrain dit justement de ne jamais perdre.
+   ▣ L'apostrophe suit, par principe : le jour où un attribut passe en
+   guillemets simples, la même faille rouvrirait sans prévenir.
+   ⚠ L'ordre compte : `&` EN PREMIER, sinon on ré-échapperait les entités
+   qu'on vient d'écrire. */
+const esc = (s) => String(s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+const sansHtml = (s) => String(s).replace(/<[^>]*>/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/\s+/g,' ').trim();
+
+// ── Rendu ────────────────────────────────────────────────────────────
+function tagHTML(t) {
+  const cls = t === 'iPad' ? 'ipad' : t === 'Terminal' ? 'terminal' : t === 'Données' ? 'donnees' : '';
+  const txt = t === 'Données' ? '⚠⚠ Données' : t;
+  return `<span class="tag ${cls}">${txt}</span>`;
+}
+
+function rangHTML(r) {
+  if (r.mesure || r.decision) {
+    /* ⚠⚠ AUCUNE VALEUR DANS LE HTML — on retire le besoin d'échapper au lieu
+       de corriger l'échappement. Le 15 août, un guillemet droit saisi dans une
+       mesure FERMAIT l'attribut `value="…"` : le champ ne réaffichait qu'un
+       bout du texte, et le rééditer écrasait la valeur complète. Une perte
+       silencieuse, et précisément sur les mesures. Les champs sont désormais
+       remplis par `peuplerSaisies()` après le rendu : aucun texte de Grégoire
+       ne traverse jamais du HTML. */
+    const gros = r.decision;
+    return `<li class="rang saisie" data-id="${r.id}" data-tags="">
+      <div class="champ">
+        <label for="i-${r.id}">${esc(r.label)}</label>
+        ${gros
+          ? `<textarea id="i-${r.id}" data-saisie="${r.id}" placeholder="${esc(r.placeholder||'Écris ton verdict ici…')}"></textarea>`
+          : `<input id="i-${r.id}" type="text" data-saisie="${r.id}" placeholder="${esc(r.placeholder||'')}">`}
+        ${r.aide ? `<span class="attendu">${r.aide}</span>` : ''}
+      </div></li>`;
+  }
+  const e = etat[r.id] && etat[r.id].etat || '';
+  const tags = r.tags || [];
+  return `<li class="rang ${e==='ok'?'faite':e==='ko'?'ratee':''}" data-id="${r.id}" data-tags="${tags.join(',')}">
+    <div class="bascules">
+      <button class="bascule" data-etat="ok" data-cible="${r.id}" aria-pressed="${e==='ok'}" aria-label="Passée" title="Passée">✓</button>
+      <button class="bascule" data-etat="ko" data-cible="${r.id}" aria-pressed="${e==='ko'}" aria-label="Échec" title="Échec">✗</button>
+    </div>
+    <div class="geste">${r.geste}
+      ${r.attendu ? `<span class="attendu"><b>Attendu :</b> ${r.attendu}</span>` : ''}
+      ${tags.length ? `<div class="tags">${tags.map(tagHTML).join('')}</div>` : ''}
+    </div></li>`;
+}
+
+function porteHTML(p) {
+  return `<article class="porte" data-ref="${p.ref}" data-fam="${p.fam || 'toutes'}">
+    <div class="porte-tete">
+      <span class="ref">${p.ref} · ${p.t}</span>
+      <h3>${p.titre}</h3>
+    </div>
+    <div class="pourquoi"><span class="etiq">Pourquoi</span>${p.pourquoi}</div>
+    <ul class="rangs">${p.rangs.map(rangHTML).join('')}</ul>
+  </article>`;
+}
+
+function rendre() {
+  let html = '';
+  for (const s of DATA) {
+    html += `<section><div class="titre-section"><span class="num">${s.num}</span><h2>${s.titre}</h2></div>`;
+    if (s.note) html += `<p class="note-section">${s.note}</p>`;
+    if (s.portes) html += s.portes.map(porteHTML).join('');
+    if (s.decisions) html += s.decisions.map(d => `
+      <div class="decision"><span class="ref">${d.id}</span><h3>${d.titre}</h3><p>${d.texte}</p>
+      ${rangHTML({ id: d.id, decision: true, label: 'Ton verdict', placeholder: 'Écris ta décision ici — elle remonte dans le relevé.' })}</div>`).join('');
+    if (s.angles) {
+      html += s.angles.map(a => `<div class="angle-mort"><h3>${a.titre}</h3><p>${a.texte}</p></div>`).join('');
+      html += `<div class="angle-mort"><h3>Mes erreurs de la session, y compris celles rattrapées de justesse</h3>
+        <ol class="erreurs">${ERREURS.map(e => `<li>${e}</li>`).join('')}</ol></div>`;
+    }
+    html += '</section>';
+  }
+  document.getElementById('contenu').innerHTML = html.replace(/<ul class="rangs"><\/ul>/g, '');
+  peuplerSaisies();
+  majCompteurs();
+}
+
+/* Les champs reçoivent leur valeur ICI, par la propriété `.value` — jamais par
+   un attribut. C'est ce qui rend impossible la troncature du 15 août. */
+function peuplerSaisies() {
+  document.querySelectorAll('[data-saisie]').forEach((el) => {
+    el.value = (etat[el.dataset.saisie] || {}).texte || '';
+  });
+}
+
+// ── Compteurs ────────────────────────────────────────────────────────
+function toutesLesRangs() {
+  const out = [];
+  for (const s of DATA) {
+    for (const p of (s.portes || [])) for (const r of p.rangs) out.push({ ...r, section: s.num, porte: p.ref, porteTitre: p.titre });
+    for (const d of (s.decisions || [])) out.push({ id: d.id, decision: true, label: d.titre, section: s.num, porte: d.id, porteTitre: d.titre });
+  }
+  return out;
+}
+
+function majCompteurs() {
+  const rangs = toutesLesRangs();
+  const verifs = rangs.filter(r => !r.mesure && !r.decision);
+  const mesures = rangs.filter(r => r.mesure);
+  const decisions = rangs.filter(r => r.decision);
+  const ok = verifs.filter(r => (etat[r.id]||{}).etat === 'ok').length;
+  const ko = verifs.filter(r => (etat[r.id]||{}).etat === 'ko').length;
+  const rempli = (l) => l.filter(r => ((etat[r.id]||{}).texte || '').trim()).length;
+  document.getElementById('n-ok').textContent = ok;
+  document.getElementById('n-ko').textContent = ko;
+  document.getElementById('n-reste').textContent = verifs.length - ok - ko;
+  document.getElementById('n-mes').textContent = rempli(mesures) + '/' + mesures.length;
+  document.getElementById('n-dec').textContent = rempli(decisions) + '/' + decisions.length;
+  const t = verifs.length || 1;
+  document.getElementById('p-ok').style.width = (ok / t * 100) + '%';
+  document.getElementById('p-ko').style.width = (ko / t * 100) + '%';
+}
+
+// ── Interactions ─────────────────────────────────────────────────────
+document.getElementById('contenu').addEventListener('click', (ev) => {
+  const b = ev.target.closest('.bascule');
+  if (!b) return;
+  const id = b.dataset.cible, veut = b.dataset.etat;
+  const actuel = (etat[id] || {}).etat || '';
+  etat[id] = Object.assign({}, etat[id], { etat: actuel === veut ? '' : veut });
+  sauver();
+  const li = b.closest('.rang');
+  const e = etat[id].etat;
+  li.classList.toggle('faite', e === 'ok');
+  li.classList.toggle('ratee', e === 'ko');
+  li.querySelectorAll('.bascule').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.etat === e)));
+  majCompteurs(); appliquerFiltre();
+});
+
+document.getElementById('contenu').addEventListener('input', (ev) => {
+  const el = ev.target.closest('[data-saisie]');
+  if (!el) return;
+  const id = el.dataset.saisie;
+  etat[id] = Object.assign({}, etat[id], { texte: el.value });
+  sauver(); majCompteurs();
+});
+
+// ── Filtres ──────────────────────────────────────────────────────────
+let filtre = 'tout';
+document.getElementById('filtres').addEventListener('click', (ev) => {
+  const b = ev.target.closest('button'); if (!b) return;
+  filtre = b.dataset.f;
+  document.querySelectorAll('#filtres button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  appliquerFiltre();
+});
+
+function appliquerFiltre() {
+  document.querySelectorAll('.porte').forEach(p => {
+    const rangs = [...p.querySelectorAll('.rang')];
+    let garde;
+    if (filtre === 'tout') garde = true;
+    else if (filtre === 'reste') garde = rangs.some(r => !r.classList.contains('saisie') && !r.classList.contains('faite') && !r.classList.contains('ratee'));
+    else garde = rangs.some(r => (r.dataset.tags || '').split(',').includes(filtre));
+    p.classList.toggle('masquee', !garde);
+  });
+}
+
+// ── Relevé ───────────────────────────────────────────────────────────
+function construireReleve() {
+  const rangs = toutesLesRangs();
+  const verifs = rangs.filter(r => !r.mesure && !r.decision);
+  const ok = verifs.filter(r => (etat[r.id]||{}).etat === 'ok').length;
+  const ko = verifs.filter(r => (etat[r.id]||{}).etat === 'ko').length;
+  const L = [];
+  L.push('PORTES TERRAIN — Types et familles de blocs (16 août 2026)');
+  L.push('Version visée : 1.86.0 · build 0816-0710');
+  L.push('Cycle 1.85.0 → 1.86.0');
+  L.push('');
+  L.push(`BILAN : ${ok} passées · ${ko} échec · ${verifs.length - ok - ko} non traitées (sur ${verifs.length})`);
+  L.push('');
+
+  for (const s of DATA) {
+    if (s.portes) {
+      L.push('════ ' + s.num + ' · ' + s.titre.toUpperCase() + ' ════');
+      for (const p of s.portes) {
+        L.push('');
+        L.push(`── ${p.ref} · ${sansHtml(p.titre)}`);
+        for (const r of p.rangs) {
+          if (r.mesure) {
+            const v = ((etat[r.id]||{}).texte || '').trim();
+            L.push(`   [MESURE] ${sansHtml(r.label)} : ${v || '(non renseignée)'}`);
+          } else {
+            const e = (etat[r.id]||{}).etat;
+            const m = e === 'ok' ? '[v]' : e === 'ko' ? '[X]' : '[ ]';
+            L.push(`   ${m} ${sansHtml(r.geste)}`);
+          }
+        }
+      }
+      L.push('');
+    }
+    if (s.decisions) {
+      L.push('════ ' + s.num + ' · ' + s.titre.toUpperCase() + ' ════');
+      for (const d of s.decisions) {
+        const v = ((etat[d.id]||{}).texte || '').trim();
+        L.push('');
+        L.push(`── ${d.id} · ${sansHtml(d.titre)}`);
+        L.push(`   VERDICT : ${v || '(non tranché)'}`);
+      }
+      L.push('');
+    }
+  }
+  const nonRens = rangs.filter(r => (r.mesure || r.decision) && !((etat[r.id]||{}).texte || '').trim());
+  if (nonRens.length) {
+    L.push('⚠ À COMPLÉTER : ' + nonRens.map(r => r.id).join(', '));
+  }
+  return L.join('\n');
+}
+
+const sortie = document.getElementById('sortie');
+const ditCopie = document.getElementById('dit-copie');
+
+document.getElementById('btn-copier').addEventListener('click', async () => {
+  const texte = construireReleve();
+  sortie.value = texte;               // toujours visible, même si le presse-papiers refuse
+  sortie.focus(); sortie.select();
+  let copie = false;
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(texte); copie = true;
+    }
+  } catch (e) { copie = false; }
+  if (!copie) { try { copie = document.execCommand('copy'); } catch (e) { copie = false; } }
+  ditCopie.textContent = copie
+    ? '✓ Copié — colle-le dans la conversation.'
+    : '↓ Sélectionné ci-dessous : ⌘C pour copier.';
+});
+
+document.getElementById('btn-tout-effacer').addEventListener('click', () => {
+  if (!confirm('Effacer toutes tes coches, mesures et verdicts ?')) return;
+  etat = {}; sauver(); ditCopie.textContent = ''; sortie.value = '';
+  rendre(); appliquerFiltre();
+});
+
+rendre();
+</script>
