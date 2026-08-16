@@ -169,7 +169,7 @@ describe('Palette · les descriptions sont devenues les titres', () => {
         // elle répétait cinq fois le même contrôle. Resserrée en même temps —
         // une assertion qui ne varie pas dans une boucle est un faux-vert qui
         // s'ignore.
-        for (const titre of ['Intention curriculaire', 'Types de connaissances', 'Déroulement', 'Preuve de réussite', 'Organisation']) {
+        for (const titre of ['Intention curriculaire', 'Types de connaissances', 'Déroulement', 'Vérification', 'Organisation']) {
             expect(sourceIndex, titre).toMatch(
                 // #444 : <div> → <button> d'accordéon. Le titre et son
                 // infobulle restent les invariants ; le conteneur ne l'est pas.

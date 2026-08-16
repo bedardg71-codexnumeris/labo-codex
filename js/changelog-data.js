@@ -21,6 +21,20 @@
 
     var CHANGELOG = [
         {
+            version: '1.86',
+            couleur: 'vert',
+            titre: 'Chaque bloc change de type dans son en-tête',
+            items: [
+                'Le menu de l’en-tête s’étend à TOUS les blocs : une Factuelle devient Conceptuelle, un Exposé devient une Activité, une Compétence devient une Idée maîtresse — sans recréer le bloc. Le titre, la durée et les objectifs servis restent en place.',
+                'Le menu n’offre que les types de la même famille. Séquence et Leçon n’en ont pas : elles ne sont pas interchangeables.',
+                'Un bloc Évaluation choisit désormais sa visée : formative ou certificative. Tant que tu n’as rien choisi, les exports continuent d’écrire « Évaluation », comme avant.',
+                'Quand un changement de type laisse un lien avec un verbe qui ne lui correspond plus, l’app te le dit — elle ne réécrit jamais un verbe que tu as posé.',
+                'Une seule couleur par famille au lieu d’un dégradé par bloc : la famille se repère d’un coup d’œil, le nom dit lequel c’est.',
+                'La poignée ⠿ passe au coin supérieur gauche de tous les blocs, et devient le premier élément de chaque en-tête.',
+                'La section « Preuve de réussite » de la palette s’appelle maintenant « Vérification ».'
+            ]
+        },
+        {
             version: '1.85',
             couleur: 'vert',
             titre: 'Changer de phase sans refaire le bloc',

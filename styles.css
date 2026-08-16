@@ -18409,28 +18409,71 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 
 /* === TOKENS COULEUR NŒUDS (ajoutés au :root existant) === */
 :root {
-    /* Objectifs — Bleu */
-    --planif-couleur-competence: #2563eb;
-    --planif-couleur-idee-maitresse: #3b82f6;
-    /* Types de connaissances (Anderson) — Orange */
-    --planif-couleur-factuelle: #fb923c;
-    --planif-couleur-conceptuelle: #f97316;
-    --planif-couleur-procedurale: #ea580c;
-    --planif-couleur-metacognitive: #d97706;
-    --planif-couleur-prerequis: #c2410c;
-    /* Conteneurs — Violet */
-    --planif-couleur-sequence: #7e22ce;
-    --planif-couleur-lecon: #c084fc;
-    /* Déroulement — Vert. « Exposé » (8 aout 2026) est le temps de parole du
-       prof : il reste dans la famille du temps de classe, mais prend le vert
-       le plus sombre pour se distinguer d'un coup d'oeil des trois nœuds
-       tournés vers l'élève qui agit. */
-    --planif-couleur-expose: #065f46;
-    --planif-couleur-activite: #16a34a;
-    --planif-couleur-soutien: #22c55e;
-    --planif-couleur-revision: #15803d;
-    /* Évaluation — Rose/magenta */
-    --planif-couleur-evaluation: #D946EF;
+    /* ── UNE COULEUR PAR FAMILLE (16 août 2026, décision de Grégoire) ────────
+       Généralisation de ce qui avait été tranché le 9 août pour l'enseignement
+       explicite (« UNE sarcelle pour les cinq étapes, pour simplifier la
+       lecture »). Chaque famille portait un dégradé dont l'ordre encodait une
+       nuance ; comme pour les cinq phases, l'encodage était juste mais il
+       demandait de comparer des teintes voisines pour se lire — sur une carte
+       dense, une famille se repère mieux qu'elle ne se décompose. Les libellés
+       n'ont jamais eu besoin de la couleur pour dire lequel est lequel.
+
+       ⮕ UN SEUL jeton par famille, et les types y pointent : cinq copies d'une
+       même valeur divergent au premier ajustement, et on se retrouve avec le
+       dégradé involontaire qu'on vient précisément de retirer.
+
+       ▣ VALEURS MESURÉES, PAS CHOISIES À L'ŒIL. Le texte de l'en-tête se lit
+       sur le fond du BLOC, qui vaut #1a3040 en sombre et #ffffff en clair —
+       deux fonds séparés de 13:1. Viser 4,5:1 des deux côtés en demanderait
+       20:1 : c'est impossible par construction, et c'est pourquoi la sarcelle
+       validée en août se tient à 3,68. On maximise donc le PIRE des deux, avec
+       cette sarcelle comme étalon :
+         intention    #3b82f6 → 3,71 sombre · 3,68 clair
+         connaissance #ea580c → 3,83 · 3,56
+         verification #d946ef → 3,94 · 3,46   (valeur inchangée)
+         organisation #a855f7 → 3,44 · 3,96
+         deroulement  #16a34a → 4,14 · 3,30   ⚠ la moins équilibrée des cinq
+       ⚠ Le vert garde la valeur d'Activité plutôt qu'un #199447 mesuré à 3,48 :
+       0,18 de mieux ne valait pas une teinte hors de la rampe de la palette.
+       À rejuger sur son écran s'il le trouve faible.
+
+       ⚠ NE PAS chercher un contraste de la BORDURE contre le canevas : ses
+       douze fonds vont de #0c1a22 à #e8e4da, donc aucune teinte unique ne peut
+       s'en détacher partout. Ce qui porte la visibilité contre les douze fonds,
+       ce sont les liserés bicolores — même raisonnement que le halo de
+       recherche, ci-dessous. */
+
+    /* Intention curriculaire — Bleu */
+    --planif-couleur-intention: #3b82f6;
+    --planif-couleur-competence: var(--planif-couleur-intention);
+    --planif-couleur-idee-maitresse: var(--planif-couleur-intention);
+    /* Types de connaissances (Anderson) — Orange.
+       ⚠ `--planif-couleur-prerequis` est RETIRÉ : une connaissance « préalable »
+       ne se distinguait que par cette teinte, et Grégoire a accepté le 16 août
+       qu'elle ne se distingue plus sur la carte (fonction théorique, non
+       utilisée, appelée à disparaître). L'état reste DIT dans l'Inspecteur. */
+    --planif-couleur-connaissance: #ea580c;
+    --planif-couleur-factuelle: var(--planif-couleur-connaissance);
+    --planif-couleur-conceptuelle: var(--planif-couleur-connaissance);
+    --planif-couleur-procedurale: var(--planif-couleur-connaissance);
+    --planif-couleur-metacognitive: var(--planif-couleur-connaissance);
+    /* Organisation — Violet. Séquence et Leçon n'étaient séparées que par la
+       nuance ; elles restent séparées par leur libellé, qui reste inerte
+       (elles n'ont PAS de menu : elles ne sont pas intervertibles). */
+    --planif-couleur-organisation: #a855f7;
+    --planif-couleur-sequence: var(--planif-couleur-organisation);
+    --planif-couleur-lecon: var(--planif-couleur-organisation);
+    /* Déroulement — Vert */
+    --planif-couleur-deroulement: #16a34a;
+    --planif-couleur-expose: var(--planif-couleur-deroulement);
+    --planif-couleur-activite: var(--planif-couleur-deroulement);
+    --planif-couleur-soutien: var(--planif-couleur-deroulement);
+    --planif-couleur-revision: var(--planif-couleur-deroulement);
+    /* Vérification — Rose/magenta. Une seule famille, un seul type : la nuance
+       formative / certificative est un MODIFICATEUR, pas un type, donc elle ne
+       prend pas de couleur (cf. VISEES_EVALUATION dans planification-carte.js). */
+    --planif-couleur-verification: #d946ef;
+    --planif-couleur-evaluation: var(--planif-couleur-verification);
 
     /* ── TROUVÉ PAR LA RECHERCHE (15 août 2026) ──────────────────────────
        Jeton PROPRE, et non `--alerte-bordure-attention` comme à la livraison.
@@ -20271,11 +20314,18 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     align-items: center;
     /* Passage à la ligne : sur un bloc étroit, la boîte de durée descend sous
        le sélecteur de phase plutôt que de l'obliger à tronquer son libellé
-       (cf. `.planif-noeud-phase`). Sur un bloc assez large, tout reste sur une
+       (cf. `.planif-noeud-type-select`). Sur un bloc assez large, tout reste sur une
        ligne — c'est le bloc qui décide, pas une valeur en dur. */
     flex-wrap: wrap;
     gap: 6px;
-    padding: 8px 26px 4px;
+    /* ⚠ GAUCHE À 8 px, ET PLUS 26 (16 août 2026). Les 26 px réservaient un
+       couloir nu pour la pastille de validation d'entrée, posée en absolu à
+       `left: 4px`. Grégoire a demandé que la poignée ⠿ soit le PREMIER élément
+       de l'en-tête, donc à gauche de cette pastille : le couloir passe de
+       l'autre côté de la poignée (cf. `.planif-noeud-prise { margin-right }`
+       et `.planif-badge-entree { left }`, calibrés ensemble et mesurés).
+       La droite garde ses 26 px — la pastille de SORTIE, elle, n'a pas bougé. */
+    padding: 8px 26px 4px 8px;
     border-bottom: 1px solid rgba(106, 172, 184, 0.15);
     margin-bottom: 2px;
 }
@@ -20446,7 +20496,11 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     border: 1.5px solid rgba(255,255,255,0.8);
     box-shadow: 0 1px 3px rgba(0,0,0,0.15);
 }
-.planif-badge-entree { left: 4px; }
+/* ⚠ L'ENTRÉE EST DÉCALÉE, LA SORTIE NON (16 août 2026). La poignée ⠿ occupe
+   désormais le coin supérieur gauche : la pastille d'entrée se range juste à sa
+   droite. Valeur calibrée avec `.planif-noeud-prise { margin-right }` — les
+   deux se lisent ensemble, changer l'une sans l'autre les fait se chevaucher. */
+.planif-badge-entree { left: 25px; }
 .planif-badge-sortie { right: 4px; }
 .planif-badge-avertissement {
     position: absolute;
@@ -21610,7 +21664,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     display: flex; align-items: center; gap: 6px;
     font-size: 13px; color: var(--planif-couleur-texte); cursor: pointer;
 }
-.planif-checkbox-label input[type="checkbox"] { width: auto; margin: 0; accent-color: var(--planif-couleur-prerequis); }
+.planif-checkbox-label input[type="checkbox"] { width: auto; margin: 0; accent-color: var(--planif-couleur-connaissance); }
 
 /* ⚠ Re-déclaration au poids d'un ID, obligatoire. `#planif-panneau label`
    (plus haut) impose display:block + MAJUSCULES + gris à TOUT label de
@@ -21653,7 +21707,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     width: auto;
     padding: 0;
     margin: 0;
-    accent-color: var(--planif-couleur-prerequis);
+    accent-color: var(--planif-couleur-connaissance);
 }
 /* Le texte occupe le reste : un objectif long doit se replier sous lui-même,
    pas déborder ni pousser la case. */
@@ -21720,7 +21774,14 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     font-size: 13px;
     line-height: 1;
     letter-spacing: -2px;
-    padding: 0 2px 0 0;
+    /* 4 px à droite et non 2 : c'est ce qui porte la cible tactile de 42 à
+       44 px (cf. `::after`). Mesuré au navigateur — le glyphe dessiné fait
+       9,5 px — ni les 12 d’un premier calcul, ni les 10 d’un second. */
+    padding: 0 5px 0 0;
+    /* Le couloir de la pastille d'entrée, qui vivait dans le padding gauche de
+       l'en-tête avant que la poignée ne prenne le coin. Sans lui, le sélecteur
+       démarrerait SOUS la pastille (mesuré au navigateur, pas déduit). */
+    margin-right: 18px;
     opacity: 0.75;
     user-select: none;
     transition: opacity 0.15s;
@@ -21730,38 +21791,66 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 /* ⚠ LA POIGNÉE DESSINÉE FAIT 10 px. Rendre la prise sans la rendre SAISISSABLE
    n'aurait rien réglé : on retirait 115 px de surface pour en rendre 10.
    Le pseudo-élément étend la zone sensible sans peser sur la mise en page.
-   Il déborde à GAUCHE dans le padding de l'en-tête (26 px) — de l'espace nu,
-   déjà saisissable, donc rien n'est volé à personne — et à droite seulement de
-   la valeur du `gap`. Surtout PAS au-delà : le sélecteur commence là, et il
-   coupe la propagation. */
+
+   ⚠⚠ RECALIBRÉ LE 16 AOÛT, ET LA CONTRAINTE A CHANGÉ DE CÔTÉ. La poignée
+   débordait de 28 px à GAUCHE, dans le couloir nu que l'en-tête réservait à la
+   pastille d'entrée. Ce couloir n'existe plus à gauche : la poignée EST le
+   premier élément, il ne reste que 8 px de padding avant le bord du bloc.
+   ⮕ La surface se reprend donc à DROITE, sur le couloir de 18 px de la
+   pastille. La pastille garde ses propres événements — elle est au-dessus
+   (`z-index: 5`), et ce pseudo-élément n'en a pas : il ne ramasse que ce
+   qu'elle laisse, c'est-à-dire tout le dessous de l'en-tête.
+   ⚠ Le débord droit s'arrête AVANT le sélecteur, qui coupe la propagation.
+
+   ▣ VALEURS MESURÉES AU NAVIGATEUR, ET IL A FALLU DEUX PASSES. Un calcul « à
+   la main » annonçait 44×54 ; le banc a répondu 42×43. Le glyphe ⠿ ne fait pas
+   les 12 px supposés mais 9,5, et sa hauteur de ligne 13 px et non 24. Une
+   PREMIÈRE correction (padding droit à 4 px) a rendu 43,53 — toujours sous le
+   seuil, et invisible à la relecture : seule la seconde mesure l'a dit.
+   ⮕ Contrôle final : 44,53 × 45,00 px, dans les deux modes et sur les treize
+   types. C'est le minimum tactile du projet, atteint d'un demi-pixel — ne
+   rogner AUCUNE de ces valeurs sans relancer le banc. */
 .planif-noeud-prise::after {
     content: '';
     position: absolute;
-    top: -15px;
-    bottom: -15px;
-    left: -28px;
-    right: -6px;
+    top: -16px;
+    bottom: -16px;
+    left: -8px;
+    right: -24px;
 }
 
 /* Le sélecteur reprend l'allure du libellé qu'il remplace (10 px, majuscules,
    couleur du type) : un bloc de carte ne doit pas se mettre à ressembler à un
    formulaire parce qu'une de ses valeurs est devenue modifiable. */
-.planif-noeud-phase {
+.planif-noeud-type-select,
+.planif-noeud-visee {
     /* `0 1 auto` et NON `1 1 auto` : le sélecteur ne doit pas s'ÉTIRER. Sinon
        il absorbe toute la largeur disponible et pousse la boîte de durée à la
        ligne même sur un bloc assez large pour les deux — mesuré : en-tête à
        57 px y compris sur un bloc de 280 px, où tout tenait. */
     flex: 0 1 auto;
     /* ⚠⚠ CE PLANCHER EST LA RAISON POUR LAQUELLE L'EN-TÊTE PEUT PASSER À LA
-       LIGNE, et il n'est pas négociable. LES CINQ PHASES PARTAGENT UNE SEULE
-       COULEUR (`--planif-couleur-enseignement-explicite`, styles.css) : le
-       TEXTE est donc leur unique discriminant. Un premier essai laissait le
-       sélecteur rétrécir — mesuré à 99 px, il affichait « PRATIQUE … » pour
-       Pratique guidée COMME pour Pratique autonome, c'est-à-dire précisément
-       les deux phases que la bascule sert à permuter. Illisible.
-       Le sélecteur garde donc de quoi écrire le plus long libellé ; si la
-       boîte de durée ne tient plus à côté, c'est ELLE qui passe à la ligne. */
-    min-width: 130px;
+       LIGNE, et il n'est pas négociable. UNE FAMILLE PARTAGE UNE SEULE COULEUR :
+       le TEXTE est donc l'unique discriminant entre deux blocs voisins. Un
+       premier essai laissait le sélecteur rétrécir — mesuré à 99 px, il
+       affichait « PRATIQUE … » pour Pratique guidée COMME pour Pratique
+       autonome, c'est-à-dire précisément les deux phases que la bascule sert à
+       permuter. Illisible.
+
+       ⚠⚠ PROPORTIONNEL À LA FAMILLE DEPUIS LE 16 AOÛT, et c'est une correction
+       de régression, pas un raffinement. Les 130 px étaient calibrés pour
+       « Pratique autonome », le plus long libellé du module. Le sélecteur
+       s'étendant à TOUS les types, les appliquer tels quels aurait réservé
+       130 px à « Exposé » — six lettres — et poussé la boîte de durée à la
+       ligne sur des blocs où tout tient aujourd'hui. Le plancher suit donc le
+       plus long libellé de CHAQUE famille, que le JS pose en caractères
+       (`--planif-select-ch`, cf. `plancherSelecteur`).
+
+       ▣ LE FACTEUR EST MESURÉ AU NAVIGATEUR, PAS ESTIMÉ : 7,1 px par caractère
+       en 10 px gras majuscules avec 0,5 px d'interlettrage, plus 22 px pour le
+       chevron et les paddings. Le repli à 17 vaut « Pratique autonome », donc
+       l'ancien comportement si l'attribut manque. */
+    min-width: calc(var(--planif-select-ch, 17) * 7.1px + 22px);
     font-family: inherit;
     font-size: 10px;
     font-weight: 600;
@@ -21775,14 +21864,17 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     cursor: pointer;
     text-overflow: ellipsis;
 }
-.planif-noeud-phase:hover {
+.planif-noeud-type-select:hover,
+.planif-noeud-visee:hover {
     border-color: var(--bordure-subtile, rgba(127, 127, 127, 0.3));
     background: var(--surface-element, #244858);
 }
-.mode-clair .planif-noeud-phase:hover {
+.mode-clair .planif-noeud-type-select:hover,
+.mode-clair .planif-noeud-visee:hover {
     background: rgba(6, 93, 187, 0.06);
 }
-.planif-noeud-phase:focus-visible {
+.planif-noeud-type-select:focus-visible,
+.planif-noeud-visee:focus-visible {
     outline: none;
     box-shadow: var(--focus-ring);
 }

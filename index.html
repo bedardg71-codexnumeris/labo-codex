@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260815h"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
+    <link rel="stylesheet" href="styles.css?v=20260816a"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -4348,7 +4348,7 @@
                                         </div>
                                     </div>
                                     <div class="planif-palette-categorie" data-zone="verifier">
-                                        <button type="button" class="planif-palette-zone-label" aria-expanded="true" data-tooltip="planif-design-apprentissages"><span class="planif-zone-chevron" aria-hidden="true">▾</span>Preuve de réussite</button>
+                                        <button type="button" class="planif-palette-zone-label" aria-expanded="true" data-tooltip="planif-design-apprentissages"><span class="planif-zone-chevron" aria-hidden="true">▾</span>Vérification</button>
                                         <div class="planif-palette-groupe">
                                             <button class="planif-palette-btn" data-type="evaluation" draggable="true">
                                                 <span class="planif-pastille" style="background: var(--planif-couleur-evaluation)"></span>Évaluation
@@ -11507,12 +11507,16 @@
                                 <li><strong>Intention curriculaire</strong> : Compétence, Idée maîtresse</li>
                                 <li><strong>Types de connaissances</strong> : Factuelle, Conceptuelle, Procédurale, Métacognitive</li>
                                 <li><strong>Déroulement</strong> : Exposé, Activité, Soutien, Révision</li>
-                                <li><strong>Preuve de réussite</strong> : Évaluation</li>
+                                <li><strong>Vérification</strong> : Évaluation (formative ou certificative — le menu de l&rsquo;en-t&ecirc;te du bloc choisit)</li>
                                 <li><strong>Organisation</strong> : Séquence, Leçon</li>
                                 <li><strong>Enseignement explicite</strong> : Ouverture, Modélisation, Pratique guidée, Pratique autonome, Clôture</li>
                             </ul>
 
                             <p><strong>L'objectif d'une leçon :</strong> le badge 🎯 dans l'en-tête du bloc <strong>Leçon</strong> déplie la zone des objectifs — grisé, il indique qu'aucun objectif n'est encore posé. Le <strong>+</strong> en ajoute un, le <strong>−</strong> le retire. Une leçon peut en porter plusieurs.</p>
+
+                            <p><strong>Changer le type d'un bloc :</strong> le nom du type, dans l'en-tête, est un <strong>menu</strong> : une Factuelle devient Conceptuelle, une Pratique guid&eacute;e devient Pratique autonome, sans recr&eacute;er le bloc ni recoller son contenu. Le menu n'offre que les types de la <strong>m&ecirc;me famille</strong> &mdash; le titre, la dur&eacute;e et les objectifs servis restent en place. S&eacute;quence et Le&ccedil;on n'en ont pas : elles ne sont pas interchangeables. Sur un bloc &Eacute;valuation, le menu choisit plut&ocirc;t sa <strong>vis&eacute;e</strong> (formative ou certificative).</p>
+
+                            <p><strong>D&eacute;placer un bloc :</strong> la poign&eacute;e <strong>&#10303;</strong>, au coin sup&eacute;rieur gauche de chaque en-t&ecirc;te, sert de prise &mdash; utile au doigt, et n&eacute;cessaire l&agrave; o&ugrave; l'en-t&ecirc;te porte un menu. Le reste du bloc se glisse aussi.</p>
 
                             <p><strong>Régler un élément :</strong> sélectionne-le, puis ouvre l'<strong>Inspecteur</strong> (bouton 🕵️ de la palette, ou double-clic sur le bloc). Selon le type du bloc : la semaine, la leçon d'accueil, les objectifs qu'il sert, son niveau cognitif, sa rétroaction formative. La <strong>durée estimée</strong>, elle, se saisit dans l'en-tête du bloc — la leçon en affiche le total.</p>
 
@@ -14271,7 +14275,7 @@
 
     <!-- PLAN 1 — Autonomisation Phase 1 : namespace demo_* permanent
          (idempotent via flag demo-version-installee) -->
-    <script src="js/demo-namespace.js?v=2026042403"></script>
+    <script src="js/demo-namespace.js?v=20260816a"></script>
     <!-- PLAN 1 — Autonomisation Phases 5.B, 5.C et 5.D : seule source de
          vérité pour l'activation/désactivation du mode démo. Le legacy
          js/donnees-demo.js a été retiré en Phase 5.D.
@@ -14400,7 +14404,7 @@
     <script src="js/planification-donnees.js?v=20260808a"></script> <!-- #425 préalable : vivacité de productionId à la reprise (8 août) -->
 
     <script src="js/planification-bibliotheque.js?v=2026051026"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
-    <script src="js/planification-carte.js?v=20260815j"></script> <!-- Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
+    <script src="js/planification-carte.js?v=20260816a"></script> <!-- Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
     <script src="js/planification-export.js?v=20260815a"></script> <!-- LE générateur d'export : 3 niveaux × 3 formats (portage #424, 8 août) — #416 lot C : la date dérivée du groupe-cours choisi -->
     <script src="js/planification.js?v=20260808a"></script> <!-- Refonte nav SP4 : hooks nomSection 'conception' + idSousSection conception-* -->
 
@@ -14484,7 +14488,7 @@
     <script src="js/guidage-demo.js?v=20260808a"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=20260815e"></script> <!-- Entrée 1.56 : trois chantiers Alignement consolidés -->
+    <script src="js/changelog-data.js?v=20260816a"></script> <!-- Entrée 1.56 : trois chantiers Alignement consolidés -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
     <script src="js/etats-vides.js?v=20260808a"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre -->
@@ -14505,11 +14509,11 @@
     <script src="js/export-resultats-finaux.js?v=2026061901"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260815o"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260816a"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260815o"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260816a"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>
