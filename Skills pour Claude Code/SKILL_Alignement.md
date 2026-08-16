@@ -108,19 +108,67 @@ Elles sont regroupées en trois niveaux :
 | **Leçons** | Unités d'enseignement avec structure interne | Leçon : Repérer les marqueurs de relation |
 | **Activités** | Actions concrètes dans une leçon | Modelage (10 min), pratique guidée (15 min) |
 
+### ⚠⚠ Le cadre ci-dessus et les TYPES implémentés ne coïncident pas
+
+Constat du 16 août 2026, en relisant ce skill après un chantier sur les types.
+Les trois tableaux décrivent le cadre **théorique** ; l'application implémente un
+sous-ensemble, sous d'autres noms. Une session qui prend ces tableaux pour la
+liste des types de nœuds se trompe. Correspondance réelle :
+
+| Catégorie du cadre | Type de nœud | État |
+|---|---|---|
+| Compétence | `competence` | ✅ |
+| Idées maîtresses | `idee-maitresse` | ✅ |
+| Connaissances **D/P/C** | `factuelle` `conceptuelle` `procedurale` `metacognitive` | ⚠ **taxonomie différente** — l'app suit Anderson & Krathwohl (4 catégories), le cadre ci-dessus suit déclaratif/procédural/conditionnel (3) |
+| Connaissances préalables | *(aucun type)* — case « Préalable » de l'Inspecteur | ⚠ modificateur, plus une couleur depuis le 16 août |
+| Stratégies cognitives | *(aucun type)* | ❌ **jamais implémenté** |
+| Dispositifs de soutien | `soutien` | ✅ (renommé) |
+| Révision et réutilisation | `revision` | ✅ (renommé) |
+| Séquences · Leçons · Activités | `sequence` `lecon` `activite` | ✅ |
+| Séances | *(aucun type)* — héritées du calendrier | ✅ par conception |
+| — | `expose` | ⚠ **absent du cadre** (ajouté le 8 août : le temps de parole du prof) |
+| — | `evaluation` | ⚠ **absent du cadre**, alors que c'est le pivot de la vérification |
+| — | les 5 phases d'enseignement explicite | ⚠ absentes du cadre (ajoutées le 7 août) |
+
+⏳ **Trois questions ouvertes, à trancher avec Grégoire — ce ne sont pas des bugs :**
+1. Le cadre parle de connaissances **D/P/C**, l'app propose **Anderson**. Lequel
+   fait foi ? (Le §5 « Parcours suggéré » dit encore « (D/P/C) ».)
+2. Les **stratégies cognitives** n'ont jamais eu de type de nœud. Manque à
+   combler, ou catégorie à retirer du cadre ?
+3. **Exposé**, **Évaluation** et les cinq phases existent dans l'app sans figurer
+   au cadre. Le cadre doit-il les accueillir ?
+
+⮕ Tant que ces trois points ne sont pas tranchés, **le code fait foi pour les
+types de nœuds** ; ce cadre reste la référence pédagogique, pas le schéma de
+données.
+
 ### L'alignement comme réseau de liens
 
 Les liens entre nœuds sont typés :
 
+> ⚠⚠ **CE TABLEAU A ÉTÉ FAUX PENDANT DES MOIS — corrigé le 16 août 2026.**
+> Il listait sept identifiants (`vise`, `mobilise`, `prerequis_de`, `evalue_par`,
+> `soutenu_par`, `revise_dans`, `sequence_avant`) dont **aucun** n'existait plus
+> dans `TYPES_LIENS` : tous avaient été renommés, et ne survivent que dans
+> `MIGRATION_VERBES` / `VERBES_COMPAT`, qui migrent les vieilles cartes. Une
+> session qui s'y fiait écrivait des identifiants morts.
+> ⮕ La source de vérité est `TYPES_LIENS` dans `js/planification-carte.js`.
+
 | Type de lien | Signification | Exemple |
 |--------------|---------------|---------|
-| `vise` | L'activité vise cet objectif | Leçon → Élément de compétence |
-| `mobilise` | L'activité mobilise cette connaissance | Activité → Connaissance procédurale |
-| `prerequis_de` | Cette connaissance est prérequise à | Conn. préalable → Conn. nouvelle |
-| `evalue_par` | Cet objectif est évalué par | Élément de compétence → Production |
-| `soutenu_par` | Cet apprentissage est soutenu par | Stratégie → Dispositif de soutien |
-| `revise_dans` | Cette connaissance est révisée dans | Connaissance → Activité de révision |
-| `sequence_avant` | Cette séquence précède | Séquence A → Séquence B |
+| `se_decline_en` | La compétence se décline en | Compétence → Idée maîtresse |
+| `se_concretise_dans` | L'idée maîtresse se concrétise dans | Idée maîtresse → Séquence / Leçon |
+| `s_acquiert_par` | La connaissance s'acquiert par | Connaissance → Activité |
+| `se_reactive_dans` | La connaissance se réactive dans | Connaissance → Ouverture / Révision |
+| `se_verifie_par` | L'objectif se vérifie par | Idée maîtresse / Connaissance → Évaluation |
+| `s_appuie_sur` | S'appuie sur (préalable) | Conn. nouvelle → Conn. préalable |
+| `complete` | Complète (horizontal) | Connaissance ↔ Connaissance |
+| `conduit_a` | Conduit à (horizontal) | Activité ↔ Activité |
+| `est_mobilise_par` | Est mobilisé par (horizontal) | Connaissance ↔ Connaissance |
+
+Anciens identifiants (`vise`, `mobilise`, `prerequis_de`, `evalue_par`,
+`soutenu_par`, `revise_dans`, `sequence_avant`, `developpe`, `requiert`) :
+**legacy uniquement**, migrés au chargement. Ne jamais en écrire de nouveaux.
 
 L'application peut vérifier la cohérence de l'alignement en analysant ce réseau :
 un élément de compétence sans production liée signale un trou dans l'évaluation ;
@@ -203,13 +251,20 @@ obligatoires — l'enseignant peut en ajouter, en retirer, ou en modifier l'ordr
 
 ### Phases suggérées
 
-| Phase | Rôle | Durée type | Enseignant | Élèves |
+> ⚠ **DEUX NOMS SUR CINQ NE SONT PAS CEUX DE L'APPLICATION** — aligné le 16 août
+> 2026. Le tableau disait « Modelage » et « Objectivation » ; l'application dit
+> **Modélisation** et **Clôture** depuis leur entrée dans `TYPES` le 7 août, et
+> ce sont ces libellés que Grégoire lit dans le menu de l'en-tête. Les noms de
+> la littérature sont conservés entre parenthèses : ils restent justes, ils ne
+> sont simplement pas ce qui s'affiche. Source : `PHASES_EE` + `TYPES`.
+
+| Phase (app) | Rôle | Durée type | Enseignant | Élèves |
 |-------|------|------------|------------|--------|
 | **Ouverture** | Lancer | 5 min | Capter l'attention, objectif, préalables, justification | Écoute active |
-| **Modelage** | Démontrer | 10 min | Verbaliser sa pensée (« je fais »), exemples, vérifier | Observer les processus |
+| **Modélisation** *(modelage)* | Démontrer | 10 min | Verbaliser sa pensée (« je fais »), exemples, vérifier | Observer les processus |
 | **Pratique guidée** | Accompagner | 15 min | Guider, questionner, circuler, rétroaction (« nous faisons ») | Pratiquer avec soutien |
 | **Pratique autonome** | Consolider | 15 min | Superviser, vérifier la fluidité (« vous faites ») | Pratiquer seul |
-| **Objectivation** | Clore | 5 min | Synthétiser (Quoi ? Quand ? Comment ?), annoncer la suite | Consolider |
+| **Clôture** *(objectivation)* | Clore | 5 min | Synthétiser (Quoi ? Quand ? Comment ?), annoncer la suite | Consolider |
 
 > **Note sur le modèle de données.** Le stockage réel d'une leçon est celui d'un
 > **nœud de la carte** (`noeuds[]` : id, type, position, contenu, liens vers
