@@ -4,3 +4,9 @@ test-results/
 playwright-report/
 playwright/.cache/
 .vitest-cache/
+
+# Bancs d'essai jetables des sessions Claude Code (15 août 2026).
+# `repro.html` et `undefined/` sont arrivés jusque dans un commit : les scripts
+# de mesure écrivent à la racine du dépôt, et `git add -A` les ramasse.
+repro.html
+undefined/
