@@ -1,0 +1,499 @@
+<title>Portes terrain 1.85</title>
+<style>
+:root{
+  --papier:#f7f9fa; --carte:#ffffff; --encre:#12232e; --encre-doux:#4a6472;
+  --trait:#dbe4e8; --trait-fort:#c2d1d8;
+  --sarcelle:#217a88; --sarcelle-doux:#e3f1f3;
+  --ambre:#a4650f; --ambre-doux:#fbf1de;
+  --vert:#286b47; --vert-doux:#e2f1e8;
+  --rouge:#a93b32; --rouge-doux:#fbe9e7;
+  --ombre:0 1px 2px rgba(18,35,46,.06),0 8px 24px -12px rgba(18,35,46,.18);
+  --r-s:5px; --r-m:8px; --r-g:14px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --papier:#0d1b24; --carte:#14262f; --encre:#e4eef1; --encre-doux:#93aeb8;
+    --trait:#24404c; --trait-fort:#31525f;
+    --sarcelle:#5fc0cd; --sarcelle-doux:#123039;
+    --ambre:#e0a84e; --ambre-doux:#33260f;
+    --vert:#6bc493; --vert-doux:#122c1f;
+    --rouge:#e78078; --rouge-doux:#301715;
+    --ombre:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.55);
+  }
+}
+:root[data-theme="dark"]{
+  --papier:#0d1b24; --carte:#14262f; --encre:#e4eef1; --encre-doux:#93aeb8;
+  --trait:#24404c; --trait-fort:#31525f;
+  --sarcelle:#5fc0cd; --sarcelle-doux:#123039;
+  --ambre:#e0a84e; --ambre-doux:#33260f;
+  --vert:#6bc493; --vert-doux:#122c1f;
+  --rouge:#e78078; --rouge-doux:#301715;
+  --ombre:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.55);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--papier);color:var(--encre);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+  font-size:16px;line-height:1.55;-webkit-text-size-adjust:100%;
+}
+.mono{font-family:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace}
+.enveloppe{max-width:860px;margin:0 auto;padding:0 20px 80px}
+
+/* ── En-tête ─────────────────────────────────────────────── */
+header.tete{padding:40px 0 22px}
+.surtitre{
+  font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--sarcelle);font-weight:700;margin:0 0 10px;
+}
+h1{font-size:clamp(28px,5vw,40px);line-height:1.12;margin:0 0 14px;text-wrap:balance;letter-spacing:-.02em}
+.chapeau{color:var(--encre-doux);max-width:64ch;margin:0 0 6px}
+.chapeau strong{color:var(--encre)}
+
+/* ── Barre collante ──────────────────────────────────────── */
+.barre{
+  position:sticky;top:0;z-index:20;background:var(--papier);
+  border-bottom:1px solid var(--trait);padding:10px 0;margin-bottom:26px;
+}
+.barre-inner{max-width:860px;margin:0 auto;padding:0 20px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.compteur{display:flex;gap:6px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.jeton{
+  font-size:12px;font-weight:700;padding:5px 10px;border-radius:var(--r-s);
+  border:1px solid var(--trait-fort);white-space:nowrap;
+}
+.jeton.ok{background:var(--vert-doux);border-color:var(--vert);color:var(--vert)}
+.jeton.ko{background:var(--rouge-doux);border-color:var(--rouge);color:var(--rouge)}
+.jeton.reste{background:transparent;color:var(--encre-doux)}
+.pousse{flex:1 1 auto}
+.filtres{display:flex;gap:6px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;border-radius:var(--r-s);border:1px solid var(--trait-fort);
+  background:var(--carte);color:var(--encre);padding:8px 12px;min-height:40px;transition:background .12s,border-color .12s}
+button:hover{border-color:var(--sarcelle)}
+button:focus-visible{outline:2px solid var(--sarcelle);outline-offset:2px}
+.filtre.actif{background:var(--sarcelle-doux);border-color:var(--sarcelle);color:var(--sarcelle);font-weight:700}
+.btn-export{background:var(--sarcelle);border-color:var(--sarcelle);color:#fff;font-weight:700}
+:root[data-theme="dark"] .btn-export,
+:root:not([data-theme="light"]) .btn-export{color:#0d1b24}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .btn-export{color:#fff}}
+
+/* ── Sections ────────────────────────────────────────────── */
+section.bloc{margin:0 0 38px}
+.bloc-tete{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:0 0 6px;padding-bottom:8px;border-bottom:2px solid var(--trait)}
+.bloc-num{font-size:13px;font-weight:700;color:var(--sarcelle)}
+.bloc-titre{font-size:20px;font-weight:700;margin:0;letter-spacing:-.01em}
+.bloc-note{color:var(--encre-doux);font-size:14.5px;margin:10px 0 18px;max-width:66ch}
+.bloc-note.alerte{
+  background:var(--ambre-doux);border-left:3px solid var(--ambre);
+  padding:12px 14px;border-radius:0 var(--r-m) var(--r-m) 0;color:var(--encre);
+}
+
+/* ── Porte ───────────────────────────────────────────────── */
+.porte{
+  background:var(--carte);border:1px solid var(--trait);border-radius:var(--r-g);
+  box-shadow:var(--ombre);margin:0 0 16px;overflow:hidden;
+}
+.porte-tete{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;padding:16px 18px 0}
+.porte-num{font-size:13px;font-weight:700;color:var(--sarcelle)}
+.porte-titre{font-size:17px;font-weight:700;margin:0;flex:1 1 220px;letter-spacing:-.01em}
+.version{font-size:11.5px;color:var(--encre-doux);border:1px solid var(--trait-fort);
+  padding:2px 7px;border-radius:var(--r-s)}
+.pourquoi{
+  margin:12px 18px 4px;padding:12px 14px;background:var(--sarcelle-doux);
+  border-radius:var(--r-m);font-size:14.5px;color:var(--encre);max-width:none;
+}
+.pourquoi b{font-weight:700}
+.rangees{list-style:none;margin:10px 0 0;padding:0}
+.rangee{display:flex;gap:12px;padding:12px 18px;border-top:1px solid var(--trait);align-items:flex-start}
+.rangee:first-child{border-top:1px solid var(--trait)}
+.bascule{display:flex;gap:5px;flex:0 0 auto;padding-top:1px}
+.bascule button{min-width:44px;min-height:44px;padding:0;font-size:16px;font-weight:700;line-height:1}
+.bascule button[aria-pressed="true"][data-v="ok"]{background:var(--vert);border-color:var(--vert);color:var(--carte)}
+.bascule button[aria-pressed="true"][data-v="ko"]{background:var(--rouge);border-color:var(--rouge);color:var(--carte)}
+.corps{flex:1 1 auto;min-width:0}
+.geste{margin:0;font-weight:600}
+.attendu{margin:6px 0 0;color:var(--encre-doux);font-size:14.5px}
+.attendu b{color:var(--encre)}
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  padding:3px 7px;border-radius:var(--r-s);border:1px solid var(--trait-fort);color:var(--encre-doux)}
+.tag.donnees{background:var(--rouge-doux);border-color:var(--rouge);color:var(--rouge)}
+.tag.ipad{background:var(--sarcelle-doux);border-color:var(--sarcelle);color:var(--sarcelle)}
+.tag.terminal{background:var(--ambre-doux);border-color:var(--ambre);color:var(--ambre)}
+pre.cmd{margin:8px 0 0;padding:11px 13px;background:var(--papier);border:1px solid var(--trait-fort);
+  border-radius:var(--r-m);overflow-x:auto;font-size:13.5px}
+
+/* Rangées à SAISIE — jamais de bascule (leçon du 11 août) */
+.rangee.saisie{background:var(--ambre-doux);border-top:1px solid var(--ambre)}
+.etiq-saisie{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ambre);flex:0 0 auto;padding-top:12px;min-width:66px}
+input[type="text"],textarea{
+  font:inherit;width:100%;padding:11px 12px;min-height:44px;border-radius:var(--r-m);
+  border:1px solid var(--trait-fort);background:var(--carte);color:var(--encre);
+}
+input[type="text"]:focus,textarea:focus{outline:2px solid var(--ambre);outline-offset:1px;border-color:var(--ambre)}
+.decision{background:var(--carte);border:1px solid var(--trait);border-left:4px solid var(--ambre);
+  border-radius:var(--r-m);padding:16px 18px;margin:0 0 14px}
+.decision h3{margin:0 0 8px;font-size:16px;font-weight:700}
+.decision p{margin:0 0 12px;color:var(--encre-doux);font-size:14.5px}
+ol.angles{padding-left:22px;margin:0}
+ol.angles li{margin-bottom:14px;color:var(--encre-doux);max-width:66ch}
+ol.angles li b{color:var(--encre)}
+.masque{display:none !important}
+#zone-relevé{margin-top:14px}
+#releve{min-height:220px;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:13px;white-space:pre}
+footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--trait);color:var(--encre-doux);font-size:13.5px}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+
+<div class="barre">
+  <div class="barre-inner">
+    <div class="compteur">
+      <span class="jeton ok mono" id="c-ok">✓ 0</span>
+      <span class="jeton ko mono" id="c-ko">✗ 0</span>
+      <span class="jeton reste mono" id="c-reste">— 0</span>
+    </div>
+    <div class="pousse"></div>
+    <div class="filtres">
+      <button class="filtre actif" data-f="tout">Tout</button>
+      <button class="filtre" data-f="ipad">iPad</button>
+      <button class="filtre" data-f="mac">Mac</button>
+      <button class="filtre" data-f="reste">À faire</button>
+    </div>
+    <button class="btn-export" id="btn-export">Copier mes résultats</button>
+  </div>
+</div>
+
+<div class="enveloppe">
+  <header class="tete">
+    <p class="surtitre">Labo&nbsp;Codex · porte terrain</p>
+    <h1>Cycle 1.83.3 → 1.85.0</h1>
+    <p class="chapeau">Six livraisons du 15 août : le badge 🎯 redevenu gris, sa cible tactile, la section « Nouvelles » réparée, la modale des gabarits, l’ordre des semaines, et le sélecteur de phase avec sa poignée.</p>
+    <p class="chapeau"><strong>Ce qui échoue devient un item de backlog, pas une note mentale.</strong> Le relevé se récupère avec le bouton <em>Copier mes résultats</em> — ton avancement vit dans ce navigateur, je ne peux pas le lire.</p>
+  </header>
+  <main id="racine"></main>
+  <div id="zone-relevé" class="masque">
+    <p class="bloc-note"><strong>Ton relevé.</strong> Il est déjà sélectionné : <span class="mono">⌘C</span> pour le copier si le bouton n’a pas suffi.</p>
+    <textarea id="releve" readonly></textarea>
+  </div>
+  <footer>
+    Jumeau markdown : <span class="mono">plans de travail/PORTES-TERRAIN-2026-08-16-cycle-1.85.md</span><br>
+    Version visée : <span class="mono">1.85.0</span>, build <span class="mono">0815-1704</span>.
+  </footer>
+</div>
+
+<script>
+const DONNEES = [
+ {num:"§0", titre:"Avant de commencer",
+  alerte:"La première rangée n’est pas une vérification, c’est un déploiement. Ton clone local est à la version de ton dernier git pull : sans ce §0, toute la liste est invérifiable — l’app affichera 1.83.2, le sélecteur de phase n’existera pas, et tu cocheras ✗ sur des correctifs qui marchent.",
+  portes:[{num:"0.1", titre:"Récupérer la version", version:"", pourquoi:null, rangees:[
+    {geste:"SEULE commande de Terminal de toute la liste — dans l’app Terminal, pas la console du navigateur, dans le dossier Monitorage_v6.",
+     cmd:"git checkout main && git pull origin main",
+     attendu:"la liste des fichiers reçus, puis Fast-forward. Si Terminal répond « error: Your local changes would be overwritten », arrête-toi et dis-le-moi.", tags:["terminal","mac"]},
+    {geste:"Recharger l’app et lire le numéro en bas de page.",
+     attendu:"1.85.0, build 0815-1704. Si tu lis 1.83.2 ou moins, la commande ci-dessus n’a pas pris — rien d’autre dans cette liste ne vaut.", tags:["mac"]},
+    {geste:"Prévoir les deux appareils et les deux modes.",
+     attendu:"MacBook + iPad, sombre + clair. Cinq rangées ne se tranchent que sur l’iPad — filtre « iPad » ci-dessus.", tags:[]}
+  ]}]},
+
+ {num:"§1", titre:"Données — ce qui touche ton corpus",
+  alerte:null,
+  portes:[
+   {num:"1.1", titre:"Backup avant de toucher aux phases", version:"⚠⚠",
+    pourquoi:"Changer la phase d’un bloc <b>modifie ta carte</b> : ce n’est pas un réglage d’affichage. Le geste s’annule (⌘Z) tant que tu n’as pas rechargé, mais un backup coûte trente secondes.",
+    rangees:[{geste:"Faire un backup Codex avant d’ouvrir la porte 2.7.", attendu:"archive créée, date du jour.", tags:["donnees","mac"]}]},
+   {num:"1.2", titre:"Les copies liées de tes vieilles cartes", version:"⚠⚠",
+    pourquoi:"Quand tu dupliques un bloc, la copie reste <b>liée</b> à l’original. Sur les cartes créées avant l’été, ce lien pouvait être rompu <b>silencieusement à l’ouverture</b> — tu modifiais un bloc et sa copie ne suivait plus, sans aucun message. C’est réparé, et la réparation se fait toute seule à l’ouverture.",
+    rangees:[
+     {geste:"Ouvrir ta plus ancienne carte d’alignement, celle qui contient des blocs dupliqués.", attendu:"elle s’ouvre normalement, rien d’anormal à l’écran.", tags:["donnees","mac"]},
+     {geste:"Modifier le titre d’un bloc qui a une copie liée, puis regarder la copie.", attendu:"la copie prend le même titre, tout de suite. Avant, sur une vieille carte, elle pouvait ne pas suivre. Si elle ne suit pas : vrai échec — dis-moi de quelle carte il s’agit.", tags:["donnees","mac"]}]}
+  ]},
+
+ {num:"§2", titre:"Interface — ce que tu vérifies à l’écran",
+  alerte:null,
+  portes:[
+   {num:"2.1", titre:"Le badge 🎯 est gris quand la leçon n’a aucun objectif", version:"1.83.3",
+    pourquoi:"Ta demande d’hier matin : le badge restait <b>en couleur</b> sur une leçon sans objectif, donc rien ne distinguait « objectif à poser » de « objectif posé ». Il avait déjà été gris début août, puis le gris avait été retiré parce qu’il rendait le badge <b>introuvable</b>. Il revient — sans l’effacement qui l’avait fait disparaître.",
+    rangees:[
+     {geste:"Sur une leçon sans objectif, regarder le badge 🎯 de son en-tête.", attendu:"la cible est grise, entourée d’un liséré pointillé violet.", tags:["mac"]},
+     {geste:"Poser un objectif sur cette leçon.", attendu:"la cible passe en couleur et le liséré pointillé disparaît.", tags:["mac"]},
+     {geste:"Retirer l’objectif.", attendu:"la cible redevient grise, le pointillé revient.", tags:["mac"]},
+     {geste:"Refaire les trois rangées ci-dessus en mode clair.", attendu:"même comportement. Le gris doit rester repérable sur fond blanc — c’est précisément là que le badge s’était perdu début août.", tags:["mac"]}]},
+   {num:"2.2", titre:"Toucher le badge 🎯 sur l’iPad", version:"1.83.4",
+    pourquoi:"Le badge se touchait dans une zone de 24 px, sous le seuil confortable. Il en offre maintenant 44, sans que les blocs aient grandi.",
+    rangees:[
+     {geste:"Sur l’iPad, toucher le badge 🎯 sans viser précisément — du gras du doigt.", attendu:"la zone des objectifs se déplie.", tags:["ipad"]},
+     {geste:"Vérifier que les blocs de la carte n’ont pas grandi.", attendu:"les en-têtes de leçon ont exactement la même hauteur qu’avant.", tags:["ipad"]}]},
+   {num:"2.3", titre:"La section « Nouvelles » de l’accueil", version:"1.83.5",
+    pourquoi:"Elle était <b>vide</b>, et sans le dire. Un caractère manquant dans le fichier des nouveautés empêchait toute la liste de s’afficher : aucun message d’erreur, juste une section blanche qui avait l’air d’un choix. C’était en ligne depuis hier matin.",
+    rangees:[
+     {geste:"Aller à l’accueil et regarder la section « Nouvelles ».", attendu:"la liste des versions s’affiche, 1.85 en tête.", tags:["mac"]},
+     {geste:"Vérifier que l’entrée 1.83 mentionne les liens qui contournent les blocs.", attendu:"elle est là. Avant, aucune entrée n’apparaissait.", tags:["mac"]}]},
+   {num:"2.4", titre:"La modale des gabarits s’ouvre en plein écran", version:"1.84.0",
+    pourquoi:"Ta demande d’hier : il fallait <b>sortir du plein écran</b> de la carte pour voir la modale des gabarits d’export. Elle s’ouvrait bien, mais derrière.",
+    rangees:[
+     {geste:"Passer la Carte d’alignement en plein écran.", attendu:"la carte occupe tout l’écran.", tags:["mac"]},
+     {geste:"Ouvrir Actions ▸ Exporter le plan… ▸ Gabarits d’export…", attendu:"la modale s’affiche par-dessus la carte, lisible immédiatement. Avant, l’écran ne changeait pas.", tags:["mac"]},
+     {geste:"Fermer la modale (le ✕), rester en plein écran, la rouvrir.", attendu:"même résultat, à chaque fois.", tags:["mac"]}]},
+   {num:"2.5", titre:"La modale tient dans l’écran", version:"1.84.0",
+    pourquoi:"Elle dépassait le bas de l’écran : il fallait faire défiler la <b>page entière</b> pour atteindre Copier et Télécharger. Les cases « À ajouter » s’empilaient une par ligne ; elles se rangent maintenant côte à côte.",
+    rangees:[
+     {geste:"Ouvrir la modale des gabarits et regarder sans rien faire défiler.", attendu:"les boutons Copier et Télécharger sont visibles en bas de la modale.", tags:["mac"]},
+     {geste:"Regarder la section « À ajouter ».", attendu:"les cases sont côte à côte, plusieurs par rangée, chacune à la largeur de son mot. Avant : une par ligne.", tags:["mac"]},
+     {geste:"Sur l’iPad, en portrait, ouvrir la même modale.", attendu:"elle tient à l’écran, les boutons du bas sont atteignables.", tags:["ipad"]},
+     {mesure:true, geste:"MESURE — combien de rangées occupe la section « À ajouter » chez toi ?", attendu:"aucun chiffre n’est un échec ici : c’est une mesure d’entrée.", tags:["mac"]}]},
+   {num:"2.6", titre:"L’aperçu et l’ordre des semaines", version:"1.84.1",
+    pourquoi:"Deux choses que tu as signalées sur la même capture. Les colonnes de l’aperçu <b>se chevauchaient</b> dès qu’une cellule était longue. Et la <b>leçon 11 se rangeait après la rangée 1</b> au lieu d’être après la 10 — elle sortait en fait dans l’ordre où les blocs avaient été <b>créés</b>, pas dans l’ordre du calendrier.",
+    rangees:[
+     {geste:"Ouvrir Gabarits d’export, choisir un gabarit, format Tableau (TSV).", attendu:"dans l’aperçu, les colonnes sont alignées — le contenu d’une colonne ne déborde plus sur la suivante.", tags:["mac"]},
+     {geste:"Regarder la première colonne (les semaines) de haut en bas.", attendu:"1, 2, 3… puis 10, 11, 12 — dans l’ordre. La 11 est entre la 10 et la 12.", tags:["mac"]},
+     {geste:"Cliquer Télécharger, ouvrir le fichier dans Numbers.", attendu:"les colonnes tombent proprement dans les cellules. C’est la rangée qui compte le plus : l’alignement de l’aperçu ne doit PAS être passé dans le fichier. Des espaces en trop dans les cellules = vrai échec.", tags:["mac"]},
+     {mesure:true, geste:"MESURE — dans quel ordre sortent tes séquences les unes par rapport aux autres ?", attendu:"les leçons sont triées à l’intérieur de chaque séquence ; les séquences se suivent selon leur étendue. Si cet ordre-là te surprend, c’est un point à trancher, pas un bug.", tags:["mac"]}]},
+   {num:"2.7", titre:"Changer la phase d’un bloc", version:"1.85.0",
+    pourquoi:"Ta demande d’hier : pouvoir passer un bloc de « pratique guidée » à « pratique autonome » <b>sans recréer un bloc</b> et y recoller le contenu. Le nom de la phase devient un menu déroulant.",
+    rangees:[
+     {geste:"Sur un bloc d’enseignement explicite, cliquer le nom de la phase.", attendu:"un menu s’ouvre avec cinq entrées : Ouverture, Modélisation, Pratique guidée, Pratique autonome, Clôture.", tags:["donnees","mac"]},
+     {geste:"Vérifier que le menu ne propose ni « Activité », ni « Exposé », ni « Évaluation ».", attendu:"seulement les cinq phases — c’est la borne que tu as demandée.", tags:["mac"]},
+     {geste:"Choisir une autre phase, puis regarder le bloc.", attendu:"le nom change, le titre et la durée restent, et les objectifs servis cochés dans l’Inspecteur restent cochés.", tags:["donnees","mac"]},
+     {geste:"Faire ⌘Z.", attendu:"le bloc revient à sa phase précédente.", tags:["mac"]},
+     {geste:"Lire le nom de la phase en entier sur tes vrais blocs.", attendu:"« Pratique autonome » et « Pratique guidée » se lisent complètement et se distinguent. Elles ont la MÊME couleur : si le texte est coupé, plus rien ne les sépare. Si tu lis « PRATIQUE … », c’est un échec.", tags:["mac"]}]},
+   {num:"2.8", titre:"La poignée ⠿ — attraper un bloc de phase", version:"1.85.0",
+    pourquoi:"Avant, tu attrapais un bloc en cliquant <b>son nom de phase</b>. Ce nom est devenu un menu : il ne peut plus servir de prise. La petite poignée ⠿ à gauche de l’en-tête la remplace. <b>C’est le point le plus risqué de la livraison</b> : si elle se saisit mal, déplacer un bloc devient pénible.",
+    rangees:[
+     {geste:"Attraper un bloc de phase par la poignée ⠿ et le déplacer.", attendu:"il suit le curseur normalement.", tags:["mac"]},
+     {geste:"Cliquer le nom de la phase et le glisser sans lâcher.", attendu:"le menu s’ouvre, le bloc ne bouge pas. C’est voulu.", tags:["mac"]},
+     {geste:"Sur l’iPad, poser le doigt sur la poignée ⠿ et déplacer le bloc.", attendu:"il suit le doigt. LA RANGÉE LA PLUS IMPORTANTE DE TOUTE LA LISTE — c’est le seul geste que je n’ai pas pu éprouver sur ton matériel.", tags:["ipad"]},
+     {geste:"Sur l’iPad, toucher le nom de la phase.", attendu:"le menu s’ouvre, le bloc ne se met pas à suivre le doigt.", tags:["ipad"]},
+     {geste:"Regarder un bloc de phase étroit, s’il y en a.", attendu:"si le bloc est étroit, la durée passe sous le nom de la phase — l’en-tête prend deux lignes. Élargis-le : vers 290 px, tout revient sur une ligne. Ce n’est pas un bug, c’est l’arbitrage qui garde le nom lisible.", tags:["mac"]},
+     {mesure:true, geste:"MESURE — combien de tes blocs de phase passent en deux lignes ?", attendu:"aucun chiffre n’est un échec ici.", tags:["mac"]}]}
+  ]}
+];
+
+const DECISIONS = [
+ {id:"3.1", titre:"Les blocs « À ajouter » de la modale font 34 px de haut, pas 44",
+  texte:"Les serrer à 44 annulerait une bonne part du gain de compacité que tu as demandé. J’ai tranché pour la compacité. Est-ce que ça se touche bien sur l’iPad, ou faut-il les grossir ?"},
+ {id:"3.2", titre:"La zone tactile du badge 🎯 mord 3 px sur le haut du titre",
+  texte:"44 px ne tiennent ni dans l’en-tête (37 px) ni dans l’espace jusqu’au titre. L’autre option était de déborder hors du bloc, sur la carte. Est-ce que ça te gêne pour renommer une leçon ?"},
+ {id:"3.3", titre:"L’en-tête d’un bloc de phase étroit passe sur deux lignes",
+  texte:"C’est le prix pour que « Pratique autonome » se lise en entier. L’alternative serait d’abréger les noms (« Prat. autonome »), ce qui touche au vocabulaire de la méthode. Deux lignes, ou abréger ?"},
+ {id:"3.4", titre:"Après un changement de phase, les liens gardent leur verbe",
+  texte:"Si tu passes une Ouverture en Pratique guidée, un lien qui disait « se réactive dans » le dit toujours. Je n’ai pas voulu réécrire en douce un verbe que tu as posé. Faut-il te le signaler par un message quand ça arrive, ou laisser tel quel ?"},
+ {id:"3.5", titre:"Dans la modale, la rangée de blocs du bas peut être coupée",
+  texte:"Quand les réglages dépassent la hauteur disponible, la dernière rangée visible est tronquée et il faut faire défiler à l’intérieur de la modale. C’est du défilement normal, mais ça peut se lire comme un affichage cassé. Gênant à l’usage ?"}
+];
+
+const ANGLES = [
+ "<b>Rien n’a été éprouvé sur ton matériel.</b> WebKit n’existe pas dans le conteneur : le badge gris, la poignée ⠿, le sélecteur de phase et la modale ont tous été mesurés dans Chromium, sur un banc d’essai — pas dans Safari, pas sur l’iPad, pas sur ta vraie carte. Les cinq rangées iPad de cette liste sont exactement les trous.",
+ "<b>Je n’ai pas pu voir le site en ligne.</b> Le déploiement Netlify est confirmé (ready, commit e28f6c75, publié à 03:25), mais la politique réseau du conteneur refuse app.codexnumeris.org : je n’ai pas pu charger la page pour vérifier ce qu’elle sert réellement. Ton premier rechargement le dira.",
+ "<b>92 tests Playwright ne tournent nulle part.</b> Confirmé en les lançant, pas supposé : WebKit manque au conteneur. Ils partent en CI.",
+ "<b>La réparation des copies liées (porte 1.2) est diagnostiquée, pas reproduite sur ton corpus.</b> J’ai trouvé le défaut en écrivant un test, je l’ai corrigé et le correctif est verrouillé — mais je n’ai jamais vu le symptôme sur une de tes vraies cartes. Si aucune de tes cartes n’est à l’ancien format, la porte 1.2 passera sans rien prouver.",
+ "<b>Une erreur de ma part, encore ouverte.</b> En nettoyant deux fichiers de banc d’essai que j’avais commités par accident, j’ai écrit la règle qui devait empêcher la récidive au mauvais endroit — dans tests/.gitignore au lieu du .gitignore de la racine. Le message de commit affirme que la porte est fermée ; elle ne l’est pas. C’est le rituel de fin de session qui l’a attrapé, en éprouvant la règle au lieu de la relire. Rien à faire de ton côté.",
+ "<b>L’ordre des séquences entre elles n’a pas été rejugé.</b> J’ai corrigé l’ordre des leçons à l’intérieur d’une séquence. Les séquences se suivent selon leur étendue temporelle — comportement d’origine, non touché. La mesure de la porte 2.6 est là pour voir s’il te surprend."
+];
+
+const CLE = "portes-terrain-2026-08-16";
+let etat = {};
+try { etat = JSON.parse(localStorage.getItem(CLE) || "{}"); } catch(e) { etat = {}; }
+const sauver = () => { try { localStorage.setItem(CLE, JSON.stringify(etat)); } catch(e){} };
+
+/* ⚠ Aucune valeur d'utilisateur n'est injectée dans du HTML : les champs
+   reçoivent leur contenu par .value en JS. C'est ce qui rend impossible le
+   défaut du 15 août, où un guillemet droit refermait `value="…"` trop tôt et
+   tronquait une mesure. On ne corrige pas l'échappement — on retire le
+   besoin d'échapper. */
+const el = (t, cls, txt) => { const n = document.createElement(t); if (cls) n.className = cls; if (txt != null) n.textContent = txt; return n; };
+
+/* Rendu du gras SANS innerHTML. Le hook pré-commit du dépôt (Défense J) refuse
+   toute interpolation dans innerHTML — à raison, même quand la chaîne est un
+   littéral de ce fichier : la règle ne peut pas distinguer, et une règle qu'on
+   contourne « juste cette fois » cesse d'être une règle. On retire donc le
+   besoin plutôt que d'ajouter une dérogation. Sous-ensemble reconnu : <b>…</b>,
+   rien d'autre. Tout le reste sort en TEXTE, donc inerte par construction. */
+function riche(parent, chaine, prefixe) {
+  if (prefixe) { const b = document.createElement("b"); b.textContent = prefixe; parent.append(b); }
+  String(chaine).split(/(<b>|<\/b>)/).reduce((gras, morceau) => {
+    if (morceau === "<b>") return true;
+    if (morceau === "</b>") return false;
+    if (morceau === "") return gras;
+    if (gras) { const b = document.createElement("b"); b.textContent = morceau; parent.append(b); }
+    else parent.append(document.createTextNode(morceau));
+    return gras;
+  }, false);
+  return parent;
+}
+
+const racine = document.getElementById("racine");
+let idRangee = 0;
+
+DONNEES.forEach(sec => {
+  const s = el("section","bloc");
+  const t = el("div","bloc-tete");
+  t.append(el("span","bloc-num mono",sec.num), el("h2","bloc-titre",sec.titre));
+  s.append(t);
+  if (sec.alerte) { const a = el("p","bloc-note alerte", sec.alerte); s.append(a); }
+  sec.portes.forEach(p => {
+    const c = el("article","porte");
+    const pt = el("div","porte-tete");
+    pt.append(el("span","porte-num mono",p.num), el("h3","porte-titre",p.titre));
+    if (p.version) pt.append(el("span","version mono",p.version));
+    c.append(pt);
+    if (p.pourquoi) { const w = el("div","pourquoi"); riche(w, " — " + p.pourquoi, "Pourquoi"); c.append(w); }
+    const ul = el("ul","rangees");
+    p.rangees.forEach(r => {
+      const id = "r" + (++idRangee);
+      const li = el("li","rangee" + (r.mesure ? " saisie" : ""));
+      li.dataset.id = id;
+      li.dataset.tags = (r.tags || []).join(" ") + (r.mesure ? " mesure" : "");
+      if (r.mesure) {
+        li.append(el("span","etiq-saisie","Mesure"));
+      } else {
+        const b = el("div","bascule");
+        ["ok","ko"].forEach(v => {
+          const btn = el("button", null, v === "ok" ? "✓" : "✗");
+          btn.dataset.v = v; btn.type = "button";
+          btn.setAttribute("aria-label", v === "ok" ? "Passée" : "Échec");
+          btn.setAttribute("aria-pressed", etat[id] === v ? "true" : "false");
+          btn.addEventListener("click", () => {
+            etat[id] = etat[id] === v ? null : v;
+            b.querySelectorAll("button").forEach(x =>
+              x.setAttribute("aria-pressed", etat[id] === x.dataset.v ? "true" : "false"));
+            sauver(); majCompteur(); appliquerFiltre();
+          });
+          b.append(btn);
+        });
+        li.append(b);
+      }
+      const corps = el("div","corps");
+      corps.append(el("p","geste", r.geste));
+      if (r.cmd) { const pre = el("pre","cmd mono", r.cmd); corps.append(pre); }
+      if (r.attendu) { const a = el("p","attendu"); riche(a, " : " + r.attendu, "Attendu"); corps.append(a); }
+      if (r.mesure) {
+        const inp = document.createElement("input");
+        inp.type = "text"; inp.placeholder = "Ta mesure…";
+        inp.style.marginTop = "8px";
+        inp.value = etat["m_" + id] || "";
+        inp.addEventListener("input", () => { etat["m_" + id] = inp.value; sauver(); });
+        corps.append(inp);
+      }
+      if ((r.tags || []).length) {
+        const tg = el("div","tags");
+        r.tags.forEach(x => tg.append(el("span","tag " + x, x === "donnees" ? "⚠⚠ Données" : x === "ipad" ? "iPad" : x === "terminal" ? "Terminal" : "Mac")));
+        corps.append(tg);
+      }
+      li.append(corps);
+      ul.append(li);
+    });
+    c.append(ul);
+    s.append(c);
+  });
+  racine.append(s);
+});
+
+/* §3 — DÉCISIONS : champ de saisie, jamais de bascule. La forme ne doit pas
+   contredire le texte (leçon du 11 août : cinq décisions « cochées » et
+   introuvables dans le relevé). */
+const s3 = el("section","bloc");
+const t3 = el("div","bloc-tete");
+t3.append(el("span","bloc-num mono","§3"), el("h2","bloc-titre","Décisions — ce qui attend ton verdict"));
+s3.append(t3);
+s3.append(el("p","bloc-note alerte","Ce ne sont PAS des vérifications. Ce sont des choix que j’ai posés faute de pouvoir les trancher à ta place. Chaque rangée attend une phrase écrite, pas une coche : une décision sans verdict écrit est une décision perdue."));
+DECISIONS.forEach(d => {
+  const box = el("div","decision");
+  box.append(el("h3", null, d.id + " — " + d.titre), el("p", null, d.texte));
+  const inp = document.createElement("input");
+  inp.type = "text"; inp.placeholder = "Ton verdict…";
+  inp.value = etat["d_" + d.id] || "";
+  inp.addEventListener("input", () => { etat["d_" + d.id] = inp.value; sauver(); });
+  box.append(inp);
+  s3.append(box);
+});
+racine.append(s3);
+
+const s4 = el("section","bloc");
+const t4 = el("div","bloc-tete");
+t4.append(el("span","bloc-num mono","§4"), el("h2","bloc-titre","Ce que je n’ai pas pu vérifier"));
+s4.append(t4);
+s4.append(el("p","bloc-note","Une liste qui ne déclare pas ses angles morts se fait croire complète."));
+const ol = el("ol","angles");
+ANGLES.forEach(a => { const li = document.createElement("li"); riche(li, a); ol.append(li); });
+s4.append(ol);
+racine.append(s4);
+
+function toutesRangees(){ return [...document.querySelectorAll(".rangee")]; }
+function majCompteur(){
+  const r = toutesRangees().filter(x => !x.classList.contains("saisie"));
+  const ok = r.filter(x => etat[x.dataset.id] === "ok").length;
+  const ko = r.filter(x => etat[x.dataset.id] === "ko").length;
+  document.getElementById("c-ok").textContent = "✓ " + ok;
+  document.getElementById("c-ko").textContent = "✗ " + ko;
+  document.getElementById("c-reste").textContent = "— " + (r.length - ok - ko);
+}
+let filtre = "tout";
+function appliquerFiltre(){
+  toutesRangees().forEach(x => {
+    const tags = x.dataset.tags || "";
+    let visible = true;
+    if (filtre === "ipad") visible = tags.includes("ipad");
+    else if (filtre === "mac") visible = !tags.includes("ipad");
+    else if (filtre === "reste") visible = x.classList.contains("saisie")
+      ? !(etat["m_" + x.dataset.id] || "").trim()
+      : !etat[x.dataset.id];
+    x.classList.toggle("masque", !visible);
+  });
+  document.querySelectorAll(".porte").forEach(p => {
+    const reste = [...p.querySelectorAll(".rangee")].some(r => !r.classList.contains("masque"));
+    p.classList.toggle("masque", !reste);
+  });
+}
+document.querySelectorAll(".filtre").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".filtre").forEach(x => x.classList.remove("actif"));
+  b.classList.add("actif"); filtre = b.dataset.f; appliquerFiltre();
+}));
+
+document.getElementById("btn-export").addEventListener("click", () => {
+  const r = toutesRangees().filter(x => !x.classList.contains("saisie"));
+  const ok = r.filter(x => etat[x.dataset.id] === "ok").length;
+  const ko = r.filter(x => etat[x.dataset.id] === "ko").length;
+  const lignes = [];
+  lignes.push("PORTES TERRAIN — cycle 1.83.3 → 1.85.0 (16 août 2026)");
+  lignes.push(ok + " passées · " + ko + " échec(s) · " + (r.length - ok - ko) + " non traitée(s)");
+  lignes.push("");
+  DONNEES.forEach(sec => {
+    lignes.push("═══ " + sec.num + " · " + sec.titre + " ═══");
+    sec.portes.forEach(p => {
+      lignes.push("  " + p.num + " — " + p.titre + (p.version ? "  [" + p.version + "]" : ""));
+      p.rangees.forEach(rg => {
+        const li = toutesRangees().find(x => x.querySelector(".geste").textContent === rg.geste);
+        const id = li ? li.dataset.id : null;
+        if (rg.mesure) {
+          const v = (id && etat["m_" + id] || "").trim();
+          lignes.push("    [mesure] " + rg.geste + "  →  " + (v || "(NON RENSEIGNÉE)"));
+        } else {
+          const v = id ? etat[id] : null;
+          lignes.push("    [" + (v === "ok" ? "v" : v === "ko" ? "X" : " ") + "] " + rg.geste);
+        }
+      });
+    });
+    lignes.push("");
+  });
+  lignes.push("═══ §3 · DÉCISIONS ═══");
+  DECISIONS.forEach(d => {
+    const v = (etat["d_" + d.id] || "").trim();
+    lignes.push("  " + d.id + " — " + d.titre);
+    lignes.push("      VERDICT : " + (v || "(NON RENDU)"));
+  });
+  const texte = lignes.join("\n");
+  const zone = document.getElementById("zone-relevé");
+  const ta = document.getElementById("releve");
+  zone.classList.remove("masque");
+  ta.value = texte;
+  ta.focus(); ta.select();
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(texte).catch(() => {});
+    }
+  } catch(e) {}
+  zone.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+majCompteur();
+appliquerFiltre();
+</script>
