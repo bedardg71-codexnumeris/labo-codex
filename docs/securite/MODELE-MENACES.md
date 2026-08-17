@@ -8,7 +8,7 @@
 >
 > **Périmètre couvert** : vecteurs prioritaires identifiés par Grégoire — partage entre enseignants (bibliothèques type Voûte, grilles) et import codex / codex data / archives. Tous profils d'attaquants confondus (collègue malveillant, attaquant externe, IA assistant un attaquant, contributeur interne au code).
 >
-> **Hors périmètre** : interaction étudiante (horizon lointain, voir `SKILL_Securite_donnees.md` §7), sécurité physique du Mac de l'enseignant (responsabilité OS), accès non autorisé via session déverrouillée.
+> **Hors périmètre** : interaction étudiante (horizon lointain, voir `.claude/skills/securite-donnees/SKILL.md` §7), sécurité physique du Mac de l'enseignant (responsabilité OS), accès non autorisé via session déverrouillée.
 
 ---
 
@@ -54,7 +54,7 @@ Le modèle s'inspire des cadres standards de threat modeling (STRIDE, kill chain
 - Les **limites** de chaque défense.
 - Les **zones d'incertitude** quand l'audit n'est pas exhaustif.
 
-Le modèle s'appuie sur la lecture du code réel (modules `import-export.js`, `grilles-bibliotheque.js`, `db.js`, `travaux-stockage.js`, `reserve.js`, `codex.js`, `travaux-import.js`) et sur les skills `SKILL_Securite_donnees.md`, `SKILL_hygiene_donnees_partagees.md`, `SKILL_integrite_globaux.md`. Les capacités d'attaque décrites correspondent à ce que la stack permet aujourd'hui — pas à des hypothèses générales.
+Le modèle s'appuie sur la lecture du code réel (modules `import-export.js`, `grilles-bibliotheque.js`, `db.js`, `travaux-stockage.js`, `reserve.js`, `codex.js`, `travaux-import.js`) et sur les skills `.claude/skills/securite-donnees/SKILL.md`, `.claude/skills/hygiene-donnees-partagees/SKILL.md`, `.claude/skills/integrite-globaux/SKILL.md`. Les capacités d'attaque décrites correspondent à ce que la stack permet aujourd'hui — pas à des hypothèses générales.
 
 ### 1.3 Limites du modèle
 
@@ -187,7 +187,7 @@ L'effort « 4-6 h » initialement chiffré pour la Défense B doit être révis�
 **Failles connues** :
 - `SCHEMAS_IMPORT.grille.criteres` n'a pas de sous-schéma → critères copiés bruts.
 - `assainirChaine` retire les balises par regex `/<[^>]*>/g` qui peut être contournée par des malformations HTML imbriquées (à valider).
-- `verifierUniciteIds` régénère les IDs sans préfixe distinctif, créant un risque de collision avec items utilisateur (anti-pattern AP-1 du `SKILL_integrite_globaux.md`).
+- `verifierUniciteIds` régénère les IDs sans préfixe distinctif, créant un risque de collision avec items utilisateur (anti-pattern AP-1 du `.claude/skills/integrite-globaux/SKILL.md`).
 - Pas de validation cryptographique de l'origine.
 
 **Surface immense** : un codex complet peut contenir des dizaines de bibliothèques, des centaines de productions, des milliers de blobs. Chaque point doit être validé.
@@ -200,7 +200,7 @@ L'effort « 4-6 h » initialement chiffré pour la Défense B doit être révis�
 
 **Risque** : ouvre un nouveau canal de propagation entre comptes. Si l'anonymisation est imparfaite, fuite de données identifiantes. Si la validation à l'import est incomplète, vecteur d'injection.
 
-**Statut** : non implémenté à ce jour. À traiter avant mise en production. Référence : `SKILL_integrite_globaux.md` §4.3 (anti-patterns à anticiper pour cette troisième source).
+**Statut** : non implémenté à ce jour. À traiter avant mise en production. Référence : `.claude/skills/integrite-globaux/SKILL.md` §4.3 (anti-patterns à anticiper pour cette troisième source).
 
 ### 3.4 Réserve sur disque (FSAPI)
 
@@ -220,7 +220,7 @@ L'effort « 4-6 h » initialement chiffré pour la Défense B doit être révis�
 
 **Mécanisme** : `showDirectoryPicker()` (`travaux-stockage.js:54`) demande l'accès à un dossier (typiquement `Documents`), puis crée ou ouvre `Monitorage_Travaux` dedans (`travaux-stockage.js:60`). Le handle est persisté via `db.storeFSAPIHandle(handle)` (`db.js:766`).
 
-**Contenu** : photos manuscrites des copies d'étudiants, PDFs originaux. Données biométriques (écriture manuscrite) — classées CRITIQUE dans le `SKILL_Securite_donnees.md` §1.3.
+**Contenu** : photos manuscrites des copies d'étudiants, PDFs originaux. Données biométriques (écriture manuscrite) — classées CRITIQUE dans le `.claude/skills/securite-donnees/SKILL.md` §1.3.
 
 **Risque** : identique à 3.4 — destruction possible sans nouvelle permission.
 
@@ -284,7 +284,7 @@ Quatre profils sont modélisés. Chacun a une motivation, une capacité techniqu
 
 **Spécificité** : c'est le profil **le plus probable** parce qu'il a déjà le pied dans la porte. C'est aussi le plus difficile à filtrer en amont — la modération humaine doit être prête à recevoir des dépôts apparemment légitimes qui contiennent une menace.
 
-**Référence skill** : `SKILL_Securite_donnees.md` §2.1, ligne « Collègue malveillant ».
+**Référence skill** : `.claude/skills/securite-donnees/SKILL.md` §2.1, ligne « Collègue malveillant ».
 
 ### 5.2 Attaquant externe via fichier
 
@@ -312,11 +312,11 @@ Quatre profils sont modélisés. Chacun a une motivation, une capacité techniqu
 
 **Spécificité** : ce profil **élève le plancher de la menace**. Une attaque qui aurait demandé un développeur senior il y a cinq ans est aujourd'hui à la portée d'un enseignant déterminé en quelques heures avec une IA. La conséquence pour le modèle de défense : il faut viser une protection robuste contre des payloads sophistiqués, pas seulement des injections naïves.
 
-**Référence skill** : `SKILL_hygiene_donnees_partagees.md` §1, paragraphe « Pourquoi l'IA est particulièrement vulnérable ». Le même raisonnement s'applique côté offensif.
+**Référence skill** : `.claude/skills/hygiene-donnees-partagees/SKILL.md` §1, paragraphe « Pourquoi l'IA est particulièrement vulnérable ». Le même raisonnement s'applique côté offensif.
 
 ### 5.4 Contributeur interne au code (régression involontaire)
 
-**Description** : ce profil ne cherche pas à nuire. Il introduit une faille par inattention, sous pression de livraison, ou en suivant aveuglément une suggestion d'IA. C'est la cause d'incident la plus fréquente dans la plupart des projets — y compris Labo Codex (l'incident du 24 avril 2026 documenté dans `SKILL_integrite_globaux.md` §3.1 est de ce type).
+**Description** : ce profil ne cherche pas à nuire. Il introduit une faille par inattention, sous pression de livraison, ou en suivant aveuglément une suggestion d'IA. C'est la cause d'incident la plus fréquente dans la plupart des projets — y compris Labo Codex (l'incident du 24 avril 2026 documenté dans `.claude/skills/integrite-globaux/SKILL.md` §3.1 est de ce type).
 
 **Acteurs possibles** : Grégoire lui-même (vibe coding rapide, fatigue, « ça doit marcher »), une IA assistant Grégoire (Claude Code, ChatGPT) qui suggère du code qui contourne les protections existantes, un futur collaborateur qui ne connaît pas l'historique des défenses.
 
@@ -422,11 +422,11 @@ Pendant ces deux mois, Sébastien avait re-partagé sa bibliothèque enrichie av
 
 ##### Cause racine
 
-**C1 — Sanitisation incomplète à l'import** : `SCHEMAS_IMPORT.grille.criteres` est `{ type: 'array' }` sans sous-schéma. Violation directe du Principe 2 du `SKILL_hygiene_donnees_partagees.md` (transformer explicitement à l'écriture).
+**C1 — Sanitisation incomplète à l'import** : `SCHEMAS_IMPORT.grille.criteres` est `{ type: 'array' }` sans sous-schéma. Violation directe du Principe 2 du `.claude/skills/hygiene-donnees-partagees/SKILL.md` (transformer explicitement à l'écriture).
 
 **C2 — Pas de point de passage obligatoire pour l'ingestion** : `ajouterGrilleALaBibliotheque` (`grilles-bibliotheque.js:77`) et `importerGrillesDansBibliotheque` (`grilles-bibliotheque.js:125`) font un spread brut de l'item reçu (`...grille` à `grilles-bibliotheque.js:91`) sans appel local à `assainirObjet`. La sanitisation effective est portée par `import-export.js:2447` côté ZIP, mais tout futur chemin d'ajout (création locale, partage direct sans passer par le pipeline ZIP) contourne cette protection. La défense ne tient que par discipline du call-site, pas par construction de la fonction d'ingestion.
 
-**C3 — Permissions FSAPI rémanentes** : `db.js:773` persiste le `FileSystemDirectoryHandle` du dossier Travaux dans IndexedDB. Un script qui s'exécute dans le contexte peut réutiliser cette permission sans intervention de l'utilisateur. Le `SKILL_Securite_donnees.md` n'aborde pas explicitement ce vecteur — à ajouter au modèle officiel.
+**C3 — Permissions FSAPI rémanentes** : `db.js:773` persiste le `FileSystemDirectoryHandle` du dossier Travaux dans IndexedDB. Un script qui s'exécute dans le contexte peut réutiliser cette permission sans intervention de l'utilisateur. Le `.claude/skills/securite-donnees/SKILL.md` n'aborde pas explicitement ce vecteur — à ajouter au modèle officiel.
 
 **C4 — `innerHTML` legacy non échappés** : l'audit du 26 mars 2026 (CLAUDE.md §Règles de sécurité) impose `echapperHtml()` sur tout nouveau `innerHTML`. Audit ciblé du 6 mai 2026 sur les modules sensibles (`grilles.js`, `evaluation.js`, `evaluations-apercu.js`, `cartouches.js`, `bibliotheque-ui.js`, `echelles.js`) : la quasi-totalité des `.innerHTML =` interpolant des données pédagogiques utilise déjà `echapperHtml()` ou consomme du contenu statique. La dette résiduelle est faible (estimation < 5 % de cas suspects), mais une seule occurrence non échappée suffit à activer le scénario, et l'audit n'est pas exhaustif (les modules d'aperçu/wizard et les chemins indirects via `setAttribute` ne sont pas couverts). La protection P5 reste indispensable, et la défense en profondeur P1 (sandbox iframe) reste prioritaire — elle ne dépend pas du taux de couverture `echapperHtml`.
 
@@ -471,7 +471,7 @@ Pendant ces deux mois, Sébastien avait re-partagé sa bibliothèque enrichie av
 *Limite* : ne traite pas le payload côté ingestion, seulement côté affichage. Combinaison avec P2 nécessaire.
 
 **P6 — Signature ECDSA des grilles partagées (long terme).**
-*Quoi* : implémenter le mécanisme prévu dans `SKILL_Securite_donnees.md` §6.4. Chaque grille partagée signée par l'auteur. Vérification à l'import.
+*Quoi* : implémenter le mécanisme prévu dans `.claude/skills/securite-donnees/SKILL.md` §6.4. Chaque grille partagée signée par l'auteur. Vérification à l'import.
 *Où* : nouveau module `js/signature.js`. Intégration dans `grilles-bibliotheque.js`, `import-export.js`, futur pipeline Voûte.
 *Effort estimé* : 1-2 semaines + implications gouvernance.
 *Limite* : protège authenticité et intégrité, pas l'innocuité. Caroline T. malveillante peut signer une grille empoisonnée. À combiner avec P1 et modération humaine.
@@ -553,7 +553,7 @@ Au comité d'évaluation final en décembre, on constate des incohérences inter
 
 **C1 — Pas de signature ni de hash de référence**. Aucune façon, à l'import, de comparer la grille reçue à la grille originale signée par Marie-Hélène. Toute modification non autorisée passe.
 
-**C2 — Régénération automatique d'IDs masque la collision**. `verifierUniciteIds` (`import-export.js:66`) régénère les IDs en doublon avec un suffixe aléatoire au lieu d'alerter. Conséquence : un import qui collisionne devient un ajout silencieux. C'est exactement l'anti-pattern AP-3 (« Upsert silencieux ») revisité du `SKILL_integrite_globaux.md` §3.3, mais inversé — au lieu d'écraser, on duplique sans signal.
+**C2 — Régénération automatique d'IDs masque la collision**. `verifierUniciteIds` (`import-export.js:66`) régénère les IDs en doublon avec un suffixe aléatoire au lieu d'alerter. Conséquence : un import qui collisionne devient un ajout silencieux. C'est exactement l'anti-pattern AP-3 (« Upsert silencieux ») revisité du `.claude/skills/integrite-globaux/SKILL.md` §3.3, mais inversé — au lieu d'écraser, on duplique sans signal.
 
 **C3 — Pas de versioning ni de provenance**. Une grille n'a pas de chaîne de version vérifiable (« v3 modifiée par Marie-Hélène à telle date à partir de v2 »). Toute version se présente comme autonome, sans traçabilité.
 
@@ -1107,7 +1107,7 @@ Les noms de fichiers Lea (cas légitime, `parserNomFichierLea` dans `travaux-imp
 
 Trois scénarios. Un complet (U-01), deux courts (U-02, U-03).
 
-L'usurpation d'identité est la priorité #1 explicitement formulée par Grégoire dans le `SKILL_Securite_donnees.md` §2.2 (M1). Cette catégorie traite les attaques où la **paternité** d'un contenu est falsifiée, indépendamment de ce que ce contenu fait par ailleurs. Une grille usurpée peut être inoffensive techniquement et toujours nuire — par discrédit de l'auteur prétendu, ou par tromperie sur la source.
+L'usurpation d'identité est la priorité #1 explicitement formulée par Grégoire dans le `.claude/skills/securite-donnees/SKILL.md` §2.2 (M1). Cette catégorie traite les attaques où la **paternité** d'un contenu est falsifiée, indépendamment de ce que ce contenu fait par ailleurs. Une grille usurpée peut être inoffensive techniquement et toujours nuire — par discrédit de l'auteur prétendu, ou par tromperie sur la source.
 
 ---
 
@@ -1137,7 +1137,7 @@ Pas de payload exécutable, pas de destruction de données, pas de fuite. Une at
 | Probabilité (estimation) | Élevée dès l'ouverture de la Voûte multi-cégep sans vérification d'identité. |
 | Impact | Élevé sur le plan réputationnel et institutionnel. Différent de D ou X — pas de perte technique, mais perte de confiance et d'adoption. |
 | Données touchées | Aucune au sens strict — l'identité n'est pas une donnée stockée par la victime. C'est sa réputation publique qui est attaquée. |
-| Statut défensif actuel | Aucun. Signature ECDSA prévue dans le `SKILL_Securite_donnees.md` §6.4 mais pas implémentée. |
+| Statut défensif actuel | Aucun. Signature ECDSA prévue dans le `.claude/skills/securite-donnees/SKILL.md` §6.4 mais pas implémentée. |
 
 ##### Étapes
 
@@ -1161,7 +1161,7 @@ Pas de payload exécutable, pas de destruction de données, pas de fuite. Une at
 
 **C2 — Pas de répertoire des identités vérifiées**. Aucune liste centrale qui dirait « Robert Tremblay du Cégep de l'Outaouais a tel courriel et telle clé publique ». L'attribution est purement déclarative.
 
-**C3 — Pas de signature ECDSA**. La spécification du `SKILL_Securite_donnees.md` §6.4 prévoit ce mécanisme, mais il n'est pas implémenté.
+**C3 — Pas de signature ECDSA**. La spécification du `.claude/skills/securite-donnees/SKILL.md` §6.4 prévoit ce mécanisme, mais il n'est pas implémenté.
 
 **C4 — Pas de mécanisme de révocation / takedown**. Une fois une grille distribuée, il n'existe aucun moyen de la révoquer dans les bibliothèques des destinataires. Pas de kill list (cf. D-01 P7).
 
@@ -1170,7 +1170,7 @@ Pas de payload exécutable, pas de destruction de données, pas de fuite. Une at
 ##### Défenses requises
 
 **P1 — Signature ECDSA avec annuaire de clés publiques (priorité ABSOLUE pour ce vecteur).**
-*Quoi* : implémenter complètement le mécanisme du `SKILL_Securite_donnees.md` §6.4. Génération de paire de clés à la création du compte. Clé publique enregistrée dans un annuaire (côté Voûte, côté institution garante, ou décentralisé). Chaque grille partagée signée. À l'import, vérification.
+*Quoi* : implémenter complètement le mécanisme du `.claude/skills/securite-donnees/SKILL.md` §6.4. Génération de paire de clés à la création du compte. Clé publique enregistrée dans un annuaire (côté Voûte, côté institution garante, ou décentralisé). Chaque grille partagée signée. À l'import, vérification.
 *Où* : nouveau module `js/signature.js`. Annuaire des clés publiques (à concevoir). Intégration dans tout pipeline de partage.
 *Effort estimé* : 2-3 semaines pour le code. Plusieurs mois pour la mise en place de l'annuaire et de la gouvernance.
 *Limite* : ne dit pas que le contenu est sain (cf. D-01 P6). Combinable avec modération.
@@ -1211,7 +1211,7 @@ Pas de payload exécutable, pas de destruction de données, pas de fuite. Une at
 
 ##### Zones d'incertitude
 
-1. **Quelle gouvernance** pour l'annuaire des clés publiques ? Centralisé via une institution garante ? Décentralisé ? PGP-style ? À discuter avec les Sept questions ouvertes du `SKILL_Securite_donnees.md` §6.2.
+1. **Quelle gouvernance** pour l'annuaire des clés publiques ? Centralisé via une institution garante ? Décentralisé ? PGP-style ? À discuter avec les Sept questions ouvertes du `.claude/skills/securite-donnees/SKILL.md` §6.2.
 2. **Quel délai de modération** acceptable pour la Voûte ? 24 h ? 7 jours ? À calibrer en fonction de la vitesse de partage souhaitée.
 3. **Comment éduquer** les utilisateurs à la méfiance sans dégrader l'adoption ? Question UX et pédagogique.
 
@@ -1236,7 +1236,7 @@ Un attaquant fabrique un fichier `pack-demo-21.js` (numéro plausible suite à `
 
 ##### Cause racine principale
 
-Le pack démo officiel utilise depuis Beta 95+ des IDs préfixés (`GRILLE_DEMO_*`, `ECH_DEMO_*`, etc.), documenté dans `SKILL_integrite_globaux.md` §3.1. C'est une protection contre les collisions d'IDs avec le matériel utilisateur. **Mais** il n'y a pas de signature ni de hash officiel publié pour le fichier `pack-demo-XX.js`. Un attaquant peut produire un faux pack avec des IDs préfixés (la convention est publique) et il sera traité comme légitime.
+Le pack démo officiel utilise depuis Beta 95+ des IDs préfixés (`GRILLE_DEMO_*`, `ECH_DEMO_*`, etc.), documenté dans `.claude/skills/integrite-globaux/SKILL.md` §3.1. C'est une protection contre les collisions d'IDs avec le matériel utilisateur. **Mais** il n'y a pas de signature ni de hash officiel publié pour le fichier `pack-demo-XX.js`. Un attaquant peut produire un faux pack avec des IDs préfixés (la convention est publique) et il sera traité comme légitime.
 
 ##### Défense principale
 
@@ -1295,7 +1295,7 @@ Quel poids les `metadata_cc` ont-elles aujourd'hui dans l'UI ? Si elles n'influe
 
 Deux scénarios. Un complet (C-01), un court (C-02).
 
-C'est la catégorie la plus fréquente en pratique mais la moins spectaculaire. Les régressions de sécurité par contributeur interne sont la cause d'incident la plus courante dans la plupart des projets — Labo Codex y compris (cf. l'incident du 24 avril 2026 documenté dans `SKILL_integrite_globaux.md` §3.1, qui correspond à ce profil).
+C'est la catégorie la plus fréquente en pratique mais la moins spectaculaire. Les régressions de sécurité par contributeur interne sont la cause d'incident la plus courante dans la plupart des projets — Labo Codex y compris (cf. l'incident du 24 avril 2026 documenté dans `.claude/skills/integrite-globaux/SKILL.md` §3.1, qui correspond à ce profil).
 
 ---
 
@@ -1373,7 +1373,7 @@ Trois mois plus tard, un attaquant exploite cette régression dans un scénario 
 *Où* : `docs/securite/audits/AUDIT-<date>.md`.
 *Effort estimé* : 1 jour par audit.
 
-**P5 — Skills système (`SKILL_Securite_donnees.md`, etc.) chargés systématiquement avant tout chantier sécurité.**
+**P5 — Skills système (`.claude/skills/securite-donnees/SKILL.md`, etc.) chargés systématiquement avant tout chantier sécurité.**
 *Quoi* : convention obligatoire — toute IA qui assiste Grégoire sur un module sensible charge le skill correspondant **avant** de proposer du code. Le `CLAUDE.md` §Avant de coder est explicite mais peut être oublié. Ajouter un check explicite dans le prompt initial des sessions.
 *Où* : pratique de session, instructions dans `CLAUDE.md`.
 
@@ -1427,7 +1427,7 @@ Une IA qui génère du code optimise pour le prompt explicite (« ajoute un nouv
 ##### Défense principale
 
 **P1 — Pré-amorçage systématique des sessions sensibles.**
-*Quoi* : tout prompt initial à une IA qui touche les bibliothèques partagées doit charger les skills `SKILL_Securite_donnees.md`, `SKILL_hygiene_donnees_partagees.md`, `SKILL_integrite_globaux.md` ET ce document `MODELE-MENACES.md`. Le `CLAUDE.md` §Avant de coder le formalise. À ajouter explicitement à `CLAUDE.md` une règle « pour tout module touchant les bibliothèques, lire MODELE-MENACES.md avant de proposer du code ».
+*Quoi* : tout prompt initial à une IA qui touche les bibliothèques partagées doit charger les skills `.claude/skills/securite-donnees/SKILL.md`, `.claude/skills/hygiene-donnees-partagees/SKILL.md`, `.claude/skills/integrite-globaux/SKILL.md` ET ce document `MODELE-MENACES.md`. Le `CLAUDE.md` §Avant de coder le formalise. À ajouter explicitement à `CLAUDE.md` une règle « pour tout module touchant les bibliothèques, lire MODELE-MENACES.md avant de proposer du code ».
 *Effort estimé* : modification de `CLAUDE.md`, 30 minutes.
 
 **P2 — Audit post-IA systématique.**
@@ -1506,7 +1506,7 @@ Défenses qui exigent une refonte ou un effort soutenu, à planifier par chantie
 
 #### Phase 2 — Défenses long terme et signature (3-6 mois, conjointement avec décisions de gouvernance)
 
-10. **Défense F** — Signature ECDSA + annuaire de clés publiques. Mécanisme complet de la `SKILL_Securite_donnees.md` §6.4. Implication gouvernance majeure : qui distribue les clés publiques, qui révoque ? **Effort technique : 2-3 semaines. Effort gouvernance : indéterminé.**
+10. **Défense F** — Signature ECDSA + annuaire de clés publiques. Mécanisme complet de la `.claude/skills/securite-donnees/SKILL.md` §6.4. Implication gouvernance majeure : qui distribue les clés publiques, qui révoque ? **Effort technique : 2-3 semaines. Effort gouvernance : indéterminé.**
 11. **Défense G** — Kill list + quarantaine + audit rétroactif. Module `js/quarantaine.js`. **Effort : 1 semaine + maintenance continue.**
 12. **Défense L** — Modération humaine Voûte. Mécanisme et comité. **Effort : variable, dépend des partenariats institutionnels.**
 13. **Défense M** — Détection à l'import des collisions par contenu (diff visuel). **Effort : 3-4 jours.**
@@ -1633,7 +1633,7 @@ Procédure d'investigation si tu suspectes une compromission.
 #### B.5 Renforcement (priorité 4, dans le mois)
 
 15. **Mettre à jour ce modèle de menaces** : si l'incident révèle un scénario non anticipé, l'ajouter au §7. Mettre à jour le tableau récapitulatif §6.
-16. **Mettre à jour le `SKILL_Securite_donnees.md`** si une catégorie de menace doit être renforcée dans la doc maître.
+16. **Mettre à jour le `.claude/skills/securite-donnees/SKILL.md`** si une catégorie de menace doit être renforcée dans la doc maître.
 17. **Implémenter la défense correspondante** si elle n'était pas en place ou prioritaire.
 
 ### C. Checklist code review sécurité
@@ -1736,10 +1736,10 @@ Ajouter le scénario au tableau récapitulatif §6 avec une ligne formatée comm
 
 #### Documents internes Labo Codex
 
-- `Skills pour Claude Code/SKILL_Securite_donnees.md` — Document fondateur (26 avril 2026). Classification des données, modèle M1-M8, anonymisation, intégrité, gouvernance Voûte, questions Loi 25.
-- `Skills pour Claude Code/SKILL_hygiene_donnees_partagees.md` — Principes universels (5 principes, 5 anti-patterns, checklist 4 points). Source des règles de fusion / merge / import sur stockage partagé.
-- `Skills pour Claude Code/SKILL_integrite_globaux.md` — Instanciation Labo Codex de l'hygiène. Incidents réels, regex testées, commits de référence.
-- `docs/architecture/ECOSYSTEME-DONNEES.md` (à vérifier — référencé dans `SKILL_Securite_donnees.md`).
+- `.claude/skills/securite-donnees/SKILL.md` — Document fondateur (26 avril 2026). Classification des données, modèle M1-M8, anonymisation, intégrité, gouvernance Voûte, questions Loi 25.
+- `.claude/skills/hygiene-donnees-partagees/SKILL.md` — Principes universels (5 principes, 5 anti-patterns, checklist 4 points). Source des règles de fusion / merge / import sur stockage partagé.
+- `.claude/skills/integrite-globaux/SKILL.md` — Instanciation Labo Codex de l'hygiène. Incidents réels, regex testées, commits de référence.
+- `docs/architecture/ECOSYSTEME-DONNEES.md` (à vérifier — référencé dans `.claude/skills/securite-donnees/SKILL.md`).
 - `docs/architecture/SPEC-RESERVE-V1.md` — Spécification du format Réserve.
 - `docs/PLAN2-PHASE1-SPEC.md` — Spec partage CC entre utilisateurs (à protéger avant ouverture).
 - `docs/audit-securite-imports-tier2.5.md` — Audit existant des imports.

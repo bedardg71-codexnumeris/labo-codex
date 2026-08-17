@@ -83,7 +83,7 @@ Aurait été le plus orthodoxe. **Écartée** parce que la distinction préstruc
 ## Références
 
 - Biggs, J. B., & Collis, K. F. (1982). *Evaluating the Quality of Learning: The SOLO Taxonomy*.
-- `SKILL_Ecosysteme_classe.md` — cadre pédagogique du projet.
+- `.claude/skills/ecosysteme-classe/SKILL.md` — cadre pédagogique du projet.
 - `README.md` §"Taxonomie SOLO" — tableau IDME ↔ SOLO.
 - Audit annuel 2026, sous-audit 1.1 Traçabilité — matrice 40 concepts.
 - Mémoire utilisateur `project-idme-logique-niveau-global` (14 mai 2026, reportée par Grégoire).

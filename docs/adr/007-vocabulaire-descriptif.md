@@ -91,8 +91,8 @@ Garder « préventif / intensif » comme niveaux RàI mais autoriser ailleurs un
 ## Références
 
 - Bédard, G. (2024). « Observer pour mieux accompagner ». *Pédagogie collégiale*, vol. 37, n° 3.
-- `SKILL_RaI.md` — patterns et vocabulaire descriptif.
-- `SKILL_Ecosysteme_classe.md` §"Posture" — déclaration officielle.
+- `.claude/skills/depistage-rai/SKILL.md` — patterns et vocabulaire descriptif.
+- `.claude/skills/ecosysteme-classe/SKILL.md` §"Posture" — déclaration officielle.
 - Audit annuel 2026, sous-audit 1.3 Cohérence lexicale — recensement T-L1 et chantiers de correction.
 - `ds-update/passe-2-diff/decisions-actees-*.md` — décisions D-D6, 01a:Q9, 02c:Q2/Q14, 05:Q4/Q7 (renommages de classes alarmistes).
 

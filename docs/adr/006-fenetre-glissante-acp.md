@@ -77,8 +77,8 @@ Aurait été techniquement défendable. **Écartée** parce qu'elle aurait intro
 
 ## Références
 
-- `SKILL_RaI.md` — diagnostic croisé, patterns d'apprentissage.
-- `SKILL_labo_codex.md` — architecture, indices A-C-P.
+- `.claude/skills/depistage-rai/SKILL.md` — diagnostic croisé, patterns d'apprentissage.
+- `.claude/skills/labo-codex/SKILL.md` — architecture, indices A-C-P.
 - Audit annuel 2026, sous-audit 1.2 Validation numérique — confirmation de la formule IPB.
 - Pratique de notation modulaire (PAN-Standards, PAN-Spécifications) — implémentation de la pondération par pratique.
 

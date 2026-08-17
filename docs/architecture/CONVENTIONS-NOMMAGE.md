@@ -94,7 +94,7 @@ Lettre courte uniquement, distincte de `nb`.
 
 ## 5. Indices A-C-P et termes pédagogiques
 
-Domaine pédagogique : utiliser les **termes exacts** du projet (voir `SKILL_Ecosysteme_classe.md`).
+Domaine pédagogique : utiliser les **termes exacts** du projet (voir `.claude/skills/ecosysteme-classe/SKILL.md`).
 
 | Terme canonique | Sens |
 |---|---|
@@ -161,5 +161,5 @@ Ces noms violent la convention mais leur changement casserait la sérialisation 
 
 - `noms_stables.json` — identifiants protégés (44 entrées)
 - `docs/architecture/ECOSYSTEME-DONNEES.md` — Codex / Réserve / Voûte
-- `SKILL_Ecosysteme_classe.md` — vocabulaire pédagogique exact (ELLAC, SOLO, PAN, SRPNF×IDME, cartouches)
+- `.claude/skills/ecosysteme-classe/SKILL.md` — vocabulaire pédagogique exact (ELLAC, SOLO, PAN, SRPNF×IDME, cartouches)
 - `CLAUDE.md` §règles de design d'interface — usage des termes pédagogiques

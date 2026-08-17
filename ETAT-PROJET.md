@@ -644,7 +644,7 @@ Synthèse :
 
 - **Reprise d'août sur Plan Pro, après un congé de juillet.** Mémoire personnelle dégradée + budget réduit
   (Pro ≪ Max 20x, usage partagé Cowork + Claude Code). Mitigations : s'appuyer sur le rituel
-  `SKILL_Debut_de_session.md` et sur `PLAN-mi-aout-2026.md` plutôt que sur la mémoire ; défaut **Sonnet**
+  `.claude/skills/debut-de-session-labo-codex/SKILL.md` et sur `PLAN-mi-aout-2026.md` plutôt que sur la mémoire ; défaut **Sonnet**
   pour le codage ; viser un dépôt **propre et poussé** avant le départ (cf. §10 bis).
 - **Multi-agents.** Plusieurs agents (Cowork + Claude Code) opèrent sur le même dépôt ; une collision de
   rebase a déjà eu lieu le 28 juin (résolue en merge, sans perte). Vérifier `git status` / verrous `.git/*.lock`

@@ -9,8 +9,8 @@
     {
       "name": "productivite-labo-codex",
       "source": "./plugins/productivite-labo-codex",
-      "description": "Couche légère (Cowork + Code) au-dessus des vrais fichiers du projet : pilotage des tâches via BACKLOG.md et index de la mémoire (CLAUDE.md, ETAT-PROJET.md, SESSION.md, dossier « Skills pour Claude Code/ »). Commandes /start et /update ; skills memory-management et task-management.",
-      "version": "3.0.0",
+      "description": "Couche légère (Cowork + Code) au-dessus des vrais fichiers du projet : pilotage des tâches via BACKLOG.md et index de la mémoire (CLAUDE.md, ETAT-PROJET.md, SESSION.md, dossier « .claude/skills/ »). Commandes /start et /update ; skills memory-management, task-management et gestion-projet.",
+      "version": "3.1.0",
       "author": {
         "name": "Grégoire Bédard"
       }
