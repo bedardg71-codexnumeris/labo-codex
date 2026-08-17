@@ -6,7 +6,7 @@ description: Orientation Cowork — lire les fichiers de cadrage et rapporter l'
 
 Donner à Claude (et à Grégoire) une vue d'ensemble du projet en début de session Cowork, **à partir des vrais fichiers**. Cette commande ne crée rien : elle lit et rapporte.
 
-> En Claude Code, le rituel complet et exécutable vit dans `Skills pour Claude Code/SKILL_Debut_de_session.md` (audit git + tests + version + lecture SESSION/BACKLOG). `/start` en est la version légère, orientée Cowork.
+> En Claude Code, le rituel complet et exécutable vit dans le skill `debut-de-session-labo-codex` (audit git + tests + version + lecture SESSION/BACKLOG). `/start` en est la version légère, orientée Cowork.
 
 ## Instructions
 
@@ -14,7 +14,7 @@ Donner à Claude (et à Grégoire) une vue d'ensemble du projet en début de ses
 
 Le projet vit sur deux dossiers à rôles distincts :
 
-- **Dépôt de code** – reconnaissable à `CLAUDE.md`, `BACKLOG.md`, `version.json`, `Skills pour Claude Code/` (typiquement `Monitorage_v6`).
+- **Dépôt de code** – reconnaissable à `CLAUDE.md`, `BACKLOG.md`, `version.json`, `.claude/skills/` (typiquement `Monitorage_v6`).
 - **Dossier Cowork** – reconnaissable à `communauté/`, `Ressources partagées/`, plans de travail pédagogiques (typiquement `Claude H2026 cowork…`).
 
 Si un seul est connecté, travailler avec ; si aucun n'a les fichiers attendus, le signaler et proposer de connecter le bon dossier.

@@ -4,7 +4,7 @@ description: >
   Résolution structurée de bugs dans Labo Codex. Utiliser ce skill dès que
   Grégoire signale un bug, un comportement inattendu, un décalage de données,
   une régression, ou dit «ça marche pas», «c'est cassé», «y'a un problème».
-  Prérequis : lire aussi SKILL_labo_codex.md pour le contexte architectural.
+  Prérequis : lire aussi le skill `labo-codex` pour le contexte architectural.
 ---
 
 # SKILL : Debug — Labo Codex
@@ -13,7 +13,7 @@ description: >
 
 ## 0. AVANT DE COMMENCER
 
-Lire `SKILL_labo_codex.md` si ce n'est pas déjà fait. Tu dois connaître :
+Lire le skill `labo-codex` si ce n'est pas déjà fait. Tu dois connaître :
 - La hiérarchie TRIMESTRE → COURS → GROUPE → ÉTUDIANTS
 - Le namespacing par trimestre via `window.cle('nomCle')`
 - La communication indirecte entre modules (localStorage / IndexedDB, jamais d'appels directs)

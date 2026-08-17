@@ -283,7 +283,7 @@ verte mais décorative. C'est exactement le piège AP-2 transposé à l'ablation
 | UI / rendu / microcopy | Balayage mécanique + test de rendu présent ; pas de break-test exigé |
 | Docs / commentaires | Confronter au code décrit (couture récit↔code, P4) ; rien d'autre |
 
-> Calqué sur le barème de réversibilité de `SKILL_hygiene_donnees_partagees`
+> Calqué sur le barème de réversibilité du skill `hygiene-donnees-partagees`
 > (§2/P5) : la protection se dose à l'impact, pas uniformément.
 
 ---
@@ -403,18 +403,18 @@ Chaque projet l'instancie via ses rituels et ses cas concrets.
 
 | Posture | Instanciation projet | Rôle |
 |---|---|---|
-| Mode A (auto, avant commit) | `SKILL_Fin_de_session.md` §4 | Applique le break-test aux tests neufs/modifiés + confronte les affirmations de session au diff. Le balayage mécanique (P3) y est déjà couvert par §2 (audit sécurité statique). |
-| Mode A (baseline d'entrée) | `SKILL_Debut_de_session.md` | Re-dérive l'état factuel (P1) : git/tests/version, prémisse vs réel. |
+| Mode A (auto, avant commit) | le skill `fin-de-session-labo-codex` §4 | Applique le break-test aux tests neufs/modifiés + confronte les affirmations de session au diff. Le balayage mécanique (P3) y est déjà couvert par §2 (audit sécurité statique). |
+| Mode A (baseline d'entrée) | le skill `debut-de-session-labo-codex` | Re-dérive l'état factuel (P1) : git/tests/version, prémisse vs réel. |
 | Mode B (audit tiers) | Rapports `Rapports/AUDIT-*` | Gabarits de rapport : verdict par chantier (Confirmé/Réserve/Problème) + risques résiduels + preuves reproductibles (break-tests réalisés). |
 
 ### Consignes de chargement (réciproques)
 
-- **Si un rituel projet l'invoque** (`SKILL_Fin_de_session.md` §4), charger ce
+- **Si un rituel projet l'invoque** (le skill `fin-de-session-labo-codex` §4), charger ce
   parent pour le « pourquoi » et la procédure de break-test (§4) — ne pas la
   dupliquer dans le rituel.
-- **En mode B**, charger aussi `SKILL_Debut_de_session.md` (baseline factuel) et,
-  si le travail touche les données, `SKILL_hygiene_donnees_partagees.md` /
-  `SKILL_integrite_globaux.md` (les invariants à vérifier aux coutures, P4).
+- **En mode B**, charger aussi le skill `debut-de-session-labo-codex` (baseline factuel) et,
+  si le travail touche les données, le skill `hygiene-donnees-partagees` /
+  le skill `integrite-globaux` (les invariants à vérifier aux coutures, P4).
 
 ### Co-évolution
 
@@ -456,7 +456,7 @@ roder le skill. Résultat : ~1987 lignes mortes retirées sur 3 passages
    est désormais documenté au **§4 (cas « ratchet »)** et ci-dessous au §9.
 2. **Déclenchement non automatique.** Le skill a été appliqué « d'instinct » + via
    le cadrage, mais il n'était ni dans la liste de skills de `CLAUDE.md`, ni câblé
-   dans `SKILL_Fin_de_session.md` §4 de façon contraignante. C'est probablement la
+   dans le skill `fin-de-session-labo-codex` §4 de façon contraignante. C'est probablement la
    cause racine de la friction nº 1 : sans déclencheur ferme, l'étape la plus
    importante (P2) est celle que le biais d'auteur saute. **Action de suivi** : une
    fois ce skill mergé sur `main`, l'ajouter à la liste « Charger les skills » de
@@ -475,6 +475,6 @@ le cœur du skill, pas un principe parmi d'autres.
 13-14 juin 2026 (travail autonome puis collaboratif de l'IA), où 7 break-tests
 ont qualifié les sentinelles et où le défaut le plus utile (#340, protection à
 l'import mais pas au changement de trimestre) a émergé d'une couture entre
-chantiers. Analyse complète : `Skills pour Claude Code/ANALYSE-verification-adverse.md`.
+chantiers. Analyse complète : `.claude/skills/ANALYSE-verification-adverse.md`.
 **Révision attendue** : à chaque découverte d'un nouveau motif d'attestation
 trompeuse ou de défaut transversal, quel que soit le projet.

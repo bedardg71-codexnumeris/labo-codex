@@ -10,7 +10,7 @@ description: >
   argent comptant, et signaler tout écart entre la prémisse reçue et
   l'état mesuré.
   Lecture seule — aucune modification de fichier, aucun commit, aucun push.
-  Pendant inverse de SKILL_Fin_de_session.md.
+  Pendant inverse du skill `fin-de-session-labo-codex`.
 ---
 
 # SKILL : Rituel de début de session — Labo Codex
@@ -32,7 +32,7 @@ description: >
 >
 > **Lien** : quand la demande est d'**auditer** le travail d'une session
 > antérieure (et pas seulement d'ouvrir la journée), ce baseline factuel est
-> l'étape 0 du mode B (audit tiers) de `SKILL_verification_adverse.md` —
+> l'étape 0 du mode B (audit tiers) du skill `verification-adverse` —
 > enchaîner ensuite sur le break-test et la relecture des coutures.
 
 ---
@@ -262,7 +262,7 @@ aucun commit, aucun push. En particulier :
 - Ne corrige pas la documentation périmée (SESSION.md, BACKLOG.md…) —
   seulement la signaler, et proposer une note de relance que Grégoire validera
 - Ne décide pas du chantier à attaquer — prérogative de Grégoire
-- Ne se substitue pas à SKILL_Fin_de_session.md (qui audite le code
+- Ne se substitue pas au skill `fin-de-session-labo-codex` (qui audite le code
   modifié contre les règles de sécurité)
 - Ne lit pas tout SESSION.md (fichier de >1000 lignes en moyenne) —
   seulement le bloc d'identification et le §0 le plus récent
@@ -288,5 +288,5 @@ aucun commit, aucun push. En particulier :
 
 | Date       | Changement                                                |
 |------------|-----------------------------------------------------------|
-| 2026-05-28 | Création. Pendant inverse de SKILL_Fin_de_session.md. Acté après écart de 24 h sur le Lot A ✴ : prémisse demandait un travail déjà livré au commit `11f87a1`. |
+| 2026-05-28 | Création. Pendant inverse du skill `fin-de-session-labo-codex`. Acté après écart de 24 h sur le Lot A ✴ : prémisse demandait un travail déjà livré au commit `11f87a1`. |
 | 2026-06-11 | Format de version aligné sur SemVer (`X.Y.Z`). Déduplication : §8 et ANTI-PATTERNS resserrés (la consigne « lecture seule / ne pas prendre la prémisse pour argent comptant » n'est plus répétée 3×, elle renvoie à la Justification). |

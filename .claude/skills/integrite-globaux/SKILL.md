@@ -16,7 +16,7 @@ description: >
 
 # SKILL : Intégrité des collections globales (Labo Codex)
 
-> **Instanciation concrète** de `SKILL_hygiene_donnees_partagees.md` pour
+> **Instanciation concrète** du skill `hygiene-donnees-partagees` pour
 > le projet Labo Codex. Le skill parent porte les principes abstraits,
 > les anti-patterns génériques et le « pourquoi ». Ce skill-ci ne garde
 > que le contextuel projet : noms de clés réels, modules et fonctions
@@ -316,7 +316,7 @@ le code pour détecter les régressions ou nouveaux call-sites à risque.
 
 ---
 
-**Skill parent** : `SKILL_hygiene_donnees_partagees.md` (principes
+**Skill parent** : le skill `hygiene-donnees-partagees` (principes
 abstraits, agnostique au projet).
 
 **Date de création** : 26 avril 2026, suite à l'incident du 24 avril.

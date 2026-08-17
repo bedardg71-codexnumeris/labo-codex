@@ -84,7 +84,7 @@ Le backlog est classé **par thème, pas par ordre d'exécution** (le plan d'ex�
 ## Conventions d'écriture
 
 - Respecter la graphie existante du backlog (gras sur `**#XX**`, sous-puces de contexte, décisions datées).
-- Ne pas inventer d'étiquettes de module : le backlog s'organise par **section + emoji + #ID**, pas par tags `[XXX]`. Les noms de modules, eux, sont documentés dans `SKILL_labo_codex.md`.
+- Ne pas inventer d'étiquettes de module : le backlog s'organise par **section + emoji + #ID**, pas par tags `[XXX]`. Les noms de modules, eux, sont documentés dans le skill `labo-codex`.
 - Ne jamais marquer un chantier « post-AQPC » ou « à reporter » dans le code : principe zéro-dette (`CLAUDE.md`). Le report explicite d'un *item de backlog* se fait avec 📦.
 
 ## Extraction de tâches

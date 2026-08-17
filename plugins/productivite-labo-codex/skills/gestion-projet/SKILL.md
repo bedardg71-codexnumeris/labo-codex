@@ -12,7 +12,7 @@ Piloter le versant **administratif et institutionnel** du projet : échéances, 
 | La demande porte sur | Skill | Fichier source |
 |---|---|---|
 | Bug, tâche de code, version, refactoring | `task-management` | `BACKLOG.md` (dépôt de code) |
-| Vocabulaire, concept pédagogique ou technique | `memory-management` | `CLAUDE.md`, `Skills pour Claude Code/` |
+| Vocabulaire, concept pédagogique ou technique | `memory-management` | `CLAUDE.md`, `.claude/skills/` |
 | Échéance, rencontre, jalon | **ce skill** | `Gestion du projet/ECHEANCIER.md` |
 | Dépense, coût, budget | **ce skill** | `Gestion du projet/DEPENSES.md` |
 | Démarche institutionnelle, interlocuteur | **ce skill** | `Institutionnalisation de Labo Codex/` |

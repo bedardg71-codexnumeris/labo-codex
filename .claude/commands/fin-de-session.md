@@ -1,6 +1,6 @@
 Exécute le **rituel de fin de session** de Labo Codex en suivant
-`Skills pour Claude Code/SKILL_Fin_de_session.md` (§1 → §6), appuyé sur
-`SKILL_verification_adverse.md` (§4 break-test, §8 checklist de sortie).
+le skill `fin-de-session-labo-codex` (§1 → §6), appuyé sur
+le skill `verification-adverse` (§4 break-test, §8 checklist de sortie).
 
 NE te contente PAS de « la suite est verte » :
 

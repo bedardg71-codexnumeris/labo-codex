@@ -11,8 +11,8 @@ description: >
   planification des leçons, à la conception pédagogique, au design curriculaire,
   à l'organisation des séquences d'enseignement, ou au module Alignement.
   Pour le cadre théorique (ELLAC, SOLO, PAN, cartouches), voir
-  SKILL_Ecosysteme_classe.md. Pour l'architecture technique et les autres
-  modules, voir SKILL_labo_codex.md.
+  le skill `ecosysteme-classe`. Pour l'architecture technique et les autres
+  modules, voir le skill `labo-codex`.
 ---
 
 # Module Alignement — Labo Codex
@@ -537,7 +537,7 @@ vanilla JS, sans bibliothèque externe (voir `js/planification-carte.js`).
 
 ## 8. Échelle IDME et critères SRPNF
 
-I/D/M/E et S/R/P/N/F sont définis dans `SKILL_Ecosysteme_classe.md`
+I/D/M/E et S/R/P/N/F sont définis dans le skill `ecosysteme-classe`
 (propriétaire désigné par `CLAUDE.md`). S'y reporter pour les seuils, la
 validation empirique et les cartouches.
 
@@ -547,5 +547,5 @@ validation empirique et les cartouches.
 
 | Skill | Rôle | Quand le consulter |
 |-------|------|--------------------|
-| `SKILL_Ecosysteme_classe.md` | Cadre pédagogique : ELLAC, SOLO, PAN, cartouches, manuel élève | Cohérence des catégories avec le cadre théorique |
-| `SKILL_labo_codex.md` | Architecture technique, modules, indices A-C-P-E, pratiques de notation | Intégration technique du module, clés de stockage, principes SSOT |
+| le skill `ecosysteme-classe` | Cadre pédagogique : ELLAC, SOLO, PAN, cartouches, manuel élève | Cohérence des catégories avec le cadre théorique |
+| le skill `labo-codex` | Architecture technique, modules, indices A-C-P-E, pratiques de notation | Intégration technique du module, clés de stockage, principes SSOT |

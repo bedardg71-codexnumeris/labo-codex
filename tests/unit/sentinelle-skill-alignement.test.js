@@ -27,7 +27,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
 const skill = readFileSync(
-    path.join(racine, 'Skills pour Claude Code', 'SKILL_Alignement.md'), 'utf8');
+    path.join(racine, '.claude', 'skills', 'alignement', 'SKILL.md'), 'utf8');
 const carte = readFileSync(path.join(racine, 'js', 'planification-carte.js'), 'utf8');
 
 /** Les identifiants de liens RÉELLEMENT vivants, lus dans TYPES_LIENS. */

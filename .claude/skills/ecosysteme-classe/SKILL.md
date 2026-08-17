@@ -8,8 +8,8 @@ description: >
   touchant au cadre théorique, à l'évaluation des artefacts, à la rédaction
   de cartouches, aux stratégies d'enseignement explicite, ou à la notation
   alternative basée sur des standards. Pour l'application Labo Codex elle-même,
-  voir SKILL_labo_codex.md. Pour l'alignement pédagogique et la planification,
-  voir SKILL_Alignement.md.
+  voir le skill `labo-codex`. Pour l'alignement pédagogique et la planification,
+  voir le skill `alignement`.
 ---
 
 # SKILL : Cadre pédagogique — Enseignement de la littérature au collégial
@@ -26,7 +26,7 @@ description: >
 > compte vraiment* (2018), qui questionne la notation sommative **traditionnelle** (somme de
 > points + note chiffrée sans rétroaction explicite) — **sans nommer les PAN** ni hiérarchiser
 > les familles. Comme Labo Codex sert à **simuler et comparer** les pratiques, la sommative
-> reste une option de premier rang. Panorama neutre : `SKILL_pratiques_notation` §2 bis.
+> reste une option de premier rang. Panorama neutre : le skill `pratiques-notation` §2 bis.
 > Recadrage complet planifié (moves A-F) : `plans de travail/PLAN_recadrage_skill_ecosysteme.md`.
 
 ## Vue d'ensemble
@@ -37,10 +37,10 @@ Ce skill documente le cadre pédagogique du cours **601-101-MQ Écriture et litt
 2. **Cartouches de rétroaction** : Commentaires structurés et cohérents (SRPNF × IDME)
 
 **Skills complémentaires** (ne pas dupliquer leur contenu ici) :
-- `SKILL_labo_codex.md` : Application Labo Codex — architecture, modules, indices A-C-P, pratiques de notation, workflow enseignant dans l'app
-- `SKILL_Alignement.md` : Module Alignement — planification, carte mentale, design curriculaire, structure des leçons
-- `SKILL_RaI.md` : Dépistage SOLO, IPB, diagnostic croisé, patterns, interventions RàI
-- `SKILL_Securite_donnees.md` : Sécurité, anonymisation, intégrité, modèle de menaces, Loi 25
+- le skill `labo-codex` : Application Labo Codex — architecture, modules, indices A-C-P, pratiques de notation, workflow enseignant dans l'app
+- le skill `alignement` : Module Alignement — planification, carte mentale, design curriculaire, structure des leçons
+- le skill `depistage-rai` : Dépistage SOLO, IPB, diagnostic croisé, patterns, interventions RàI
+- le skill `securite-donnees` : Sécurité, anonymisation, intégrité, modèle de menaces, Loi 25
 
 **Coordination avec le plugin Productivité** : Le glossaire de `memory-management` et les tâches de `task-management` s'appuient sur les définitions de ce skill comme source de référence pour le vocabulaire pédagogique (ELLAC, SOLO, IDME, SRPNF, PAN).
 
@@ -120,7 +120,7 @@ Ce skill documente le cadre pédagogique du cours **601-101-MQ Écriture et litt
 > Grégoire est **une** réponse possible à cette critique, dans son contexte (601-101) ; d'autres
 > réponses existent. Et comme Labo Codex sert à **simuler et comparer** les pratiques, la
 > sommative traditionnelle reste une **option pleinement servie** : toutes les options sont
-> ouvertes à l'utilisateur. Panorama neutre des familles : `SKILL_pratiques_notation` §2 bis
+> ouvertes à l'utilisateur. Panorama neutre des familles : le skill `pratiques-notation` §2 bis
 > (« aucune famille n'est la bonne »). Rappel : « PAN » = libellé de **famille** (Session A) ;
 > la pratique décrite ici est la variante **STD-portfolio**, pas « la » PAN.
 
@@ -477,11 +477,11 @@ FIN DU CARTOUCHE - ARTEFACT N°X
 
 ## PARTIE 4 : LABO CODEX ET MONITORAGE
 
-> **Cette partie est documentée dans `SKILL_labo_codex.md`.**
+> **Cette partie est documentée dans le skill `labo-codex`.**
 > Consulter ce skill pour : indices A-C-P, IPB et portraits dynamiques, workflow
 > enseignant dans l'application, pratiques de notation, architecture technique.
-> Pour le dépistage SOLO et les interventions RàI, voir `SKILL_RaI.md`.
-> Pour la sécurité des données et l'anonymisation, voir `SKILL_Securite_donnees.md`.
+> Pour le dépistage SOLO et les interventions RàI, voir le skill `depistage-rai`.
+> Pour la sécurité des données et l'anonymisation, voir le skill `securite-donnees`.
 
 ---
 
@@ -489,7 +489,7 @@ FIN DU CARTOUCHE - ARTEFACT N°X
 
 ### 5.1 Alignement pédagogique
 
-> **Le design de l'alignement est documenté dans `SKILL_Alignement.md`.**
+> **Le design de l'alignement est documenté dans le skill `alignement`.**
 > Consulter ce skill pour : carte mentale, catégories de la planification,
 > types de liens, structure des leçons, vérifications automatiques.
 
@@ -598,7 +598,7 @@ l'application qui rend cette cohérence visible et vérifiable.
 
 **À court terme** :
 - Tester clarté nouveaux objectifs d'apprentissage
-- Affiner le dépistage SOLO et les portraits dynamiques (voir `SKILL_RaI.md`)
+- Affiner le dépistage SOLO et les portraits dynamiques (voir le skill `depistage-rai`)
 
 **À moyen terme** :
 - Version web Labo Codex publiée (bêta publique en SemVer depuis le 3 juin 2026 ; voir `version.json`)
@@ -671,7 +671,7 @@ sans superlatif, 65-75 mots). Ne pas redupliquer ici.
 ### 7.3 Pour utiliser Labo Codex
 
 > **Le workflow enseignant dans l'application est documenté dans
-> `SKILL_labo_codex.md`.** Consulter ce skill pour : saisie des évaluations,
+> le skill `labo-codex`.** Consulter ce skill pour : saisie des évaluations,
 > consultation des indices, interprétation des patterns, actions selon le profil.
 
 ---
@@ -710,7 +710,7 @@ Chroniques pertinentes (55 au total, dont) :
 
 ### 8.3 Outils disponibles
 
-**Labo Codex** : Voir `SKILL_labo_codex.md` pour l'état actuel, l'architecture et les fonctionnalités
+**Labo Codex** : Voir le skill `labo-codex` pour l'état actuel, l'architecture et les fonctionnalités
 
 **Manuel élève** : Développé avec IA (Claude)
 - Stratégies explicites
@@ -735,7 +735,7 @@ Ce skill documente le cadre pédagogique qui fonde l'ensemble du projet :
 
 **Principe directeur** : Un système pédagogique cohérent où chaque élément renforce les autres, centré sur l'apprentissage réel plutôt que sur la performance apparente.
 
-L'alignement pédagogique et le monitorage dans l'application sont documentés dans les skills complémentaires (`SKILL_Alignement.md`, `SKILL_labo_codex.md`, `SKILL_RaI.md`, `SKILL_Securite_donnees.md`).
+L'alignement pédagogique et le monitorage dans l'application sont documentés dans les skills complémentaires (le skill `alignement`, le skill `labo-codex`, le skill `depistage-rai`, le skill `securite-donnees`).
 
 ---
 

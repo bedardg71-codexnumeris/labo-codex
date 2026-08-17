@@ -6,20 +6,20 @@ description: >
   commit», «j'ai fini pour aujourd'hui», «vérifie avant de pousser», ou toute
   formulation signalant la clôture d'une session de travail. Audit du code
   modifié contre les règles non négociables de CLAUDE.md (section sécurité)
-  et SKILL_Securite_donnees.md §9, exécution de la suite de tests, vérification
+  et le skill `securite-donnees` §9, exécution de la suite de tests, vérification
   adverse des tests neufs/modifiés (break-test : le test doit pouvoir échouer) et
   confrontation des affirmations de session au diff réel, bump de version par
   `scripts/release.mjs` si nécessaire. Rapport sans modification automatique —
   toute correction reste à la décision de Grégoire.
-  Prérequis : SKILL_Securite_donnees.md pour le contexte des règles vérifiées ;
-  SKILL_verification_adverse.md pour le « pourquoi » et la procédure du break-test (§4).
+  Prérequis : le skill `securite-donnees` pour le contexte des règles vérifiées ;
+  le skill `verification-adverse` pour le « pourquoi » et la procédure du break-test (§4).
 ---
 
 # SKILL : Rituel de fin de session — Labo Codex
 
 > Cette skill est une procédure exécutable, pas une référence. Elle automatise
 > ce qu'un développeur consciencieux ferait avant chaque commit, en s'appuyant
-> sur les règles déjà documentées (CLAUDE.md section sécurité, SKILL_Securite_donnees.md §9).
+> sur les règles déjà documentées (CLAUDE.md section sécurité, le skill `securite-donnees` §9).
 > Elle est en lecture seule : aucune modification de fichier, aucun commit, aucun push.
 
 ---
@@ -31,7 +31,7 @@ description: >
 - Avant tout `git push`
 - À la demande explicite de Grégoire
 
-Ne PAS déclencher pendant un debug en cours (utiliser SKILL_Debug.md),
+Ne PAS déclencher pendant un debug en cours (utiliser le skill `debug-labo-codex`),
 pendant une exploration de code, ou pendant la planification d'une fonctionnalité.
 
 ---
@@ -67,7 +67,7 @@ veux vérifier», ajuster avant de passer à l'étape 2.
 
 **Objectif** : sur chaque fichier JS et HTML modifié, chercher les motifs
 interdits par CLAUDE.md (section « Regles de securite ») et
-SKILL_Securite_donnees.md §9. Signaler sans corriger.
+le skill `securite-donnees` §9. Signaler sans corriger.
 
 > Les règles vérifiées ci-dessous sont définies dans CLAUDE.md — s'y référer
 > pour l'énoncé canonique et les exemples conformes. Ce qui suit est la
@@ -109,7 +109,7 @@ Recherche dans les fichiers modifiés :
 - Tout nouveau traitement de blob image ou PDF doit être précédé d'un appel
   à `validerMagicBytes(blob)` (défini dans `travaux-import.js`).
 - Tout nouveau `JSON.parse(` sur du contenu importé devrait être suivi
-  d'une validation de schéma (cf. SKILL_Securite_donnees.md §6.3, règle 14).
+  d'une validation de schéma (cf. le skill `securite-donnees` §6.3, règle 14).
 
 Si un nouveau code d'import est présent sans la validation correspondante,
 le signaler avec fichier et ligne.
@@ -161,7 +161,7 @@ Cas particuliers à signaler explicitement :
 - Snapshots Playwright désynchronisés
 
 ⏸ Si des tests échouent, demander à Grégoire s'il veut investiguer maintenant
-(basculer vers SKILL_Debug.md) ou continuer le rituel pour avoir le rapport
+(basculer vers le skill `debug-labo-codex`) ou continuer le rituel pour avoir le rapport
 complet d'abord.
 
 ---
@@ -170,7 +170,7 @@ complet d'abord.
 
 **Objectif** : prouver que les tests neufs/modifiés protègent vraiment, et que ce
 que la session s'apprête à écrire dans SESSION.md correspond au diff réel. Applique
-`SKILL_verification_adverse.md` (mode A — auto-vérification) : ce parent porte le
+le skill `verification-adverse` (mode A — auto-vérification) : ce parent porte le
 « pourquoi » et la procédure complète du break-test (§4 du parent). Ici, la version
 courte projet.
 
@@ -377,7 +377,7 @@ Prochaines étapes possibles (à choisir par Grégoire) :
 - N'édite pas les 4 points de vérité à la main — le bump passe par `release.mjs`
 - N'exécute pas `git add`, `git commit`, `git push`
 - Ne décide pas seul de l'intention de version — `major` se confirme avec Grégoire
-- Ne se substitue pas à SKILL_Debug.md si un bug réel est découvert
+- Ne se substitue pas au skill `debug-labo-codex` si un bug réel est découvert
 - Ne remplace pas la lecture humaine du diff avant commit — c'est un filet,
   pas une garantie
 
@@ -403,7 +403,7 @@ Prochaines étapes possibles (à choisir par Grégoire) :
   à arbitrer par Grégoire
 - ❌ Modifier le code en cours de rituel — le rituel est en lecture seule
 - ❌ Mélanger ce rituel avec un debug actif — si un bug surface, le rituel
-  s'arrête, on passe à SKILL_Debug.md, on reprend le rituel après
+  s'arrête, on passe au skill `debug-labo-codex`, on reprend le rituel après
 
 ---
 
@@ -413,4 +413,4 @@ Prochaines étapes possibles (à choisir par Grégoire) :
 |------------|-----------------------------------------------------------|
 | 2026-05-11 | Création. Audit statique, tests, cohérence version, rapport sans modification automatique. |
 | 2026-06-11 | §4 réécrite : bump de version par `scripts/release.mjs` (4 points de vérité, `--dry-run`) au lieu de l'édition manuelle de `index.html` (fallbacks déplacés dans `init-inline.js`). Renvoi CLAUDE.md pour §2.1-2.3, dispatcher recité (`[data-action]` ≈ 780-836). |
-| 2026-06-14 | Nouveau §4 « Vérification adverse » (break-test des tests neufs/modifiés + confrontation récit↔diff + passe « connexions »), instanciant `SKILL_verification_adverse.md` (mode A). Renumérotation §4-6 → §5-7. Né des audits du 13-14 juin (7 break-tests, défaut transversal #340). |
+| 2026-06-14 | Nouveau §4 « Vérification adverse » (break-test des tests neufs/modifiés + confrontation récit↔diff + passe « connexions »), instanciant le skill `verification-adverse` (mode A). Renumérotation §4-6 → §5-7. Né des audits du 13-14 juin (7 break-tests, défaut transversal #340). |
