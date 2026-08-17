@@ -33,7 +33,7 @@ vérité pour :
 - la navigation, les tableaux, alertes et badges.
 
 L'ancien design system modulaire (01a-07) est archivé dans
-`Design system - Modules/_archives/`.
+`Design system - Modules/_archives/`. Ne pas y puiser.
 
 ---
 
@@ -141,3 +141,23 @@ Points blancs dans les barres graduées de l'aperçu :
 
 - **CSS** : `styles.css` (`.barre-etudiant`, `@keyframes float-vertical`).
 - **Effet 3D** : gradient + box-shadow avec lumière gauche → droite.
+
+> Les numéros de ligne d'origine ont été retirés : ils étaient périmés à chaque
+> édition. Chercher par nom de sélecteur ou de fonction.
+
+---
+
+## 9. Livrer du changement visuel non éprouvable
+
+Dès qu'un cycle produit du changement que la session ne peut pas éprouver
+elle-même (Safari, iPad, corpus réel), charger le skill `portes-terrain` : le
+modèle de liste de vérifications destinée à Grégoire est obligatoire.
+
+---
+
+## HISTORIQUE
+
+| Date | Changement |
+|---|---|
+| 2026-08-17 | Création. Extrait de `CLAUDE.md` (sections « Référence visuelle obligatoire », « Références visuelles importantes », « Règles de design d'interface ») et de `section-design-claude-md.md`, désormais retirés au profit de ce skill. Numéros de ligne des références visuelles supprimés (périmés). |
+| 2026-08-17 | **Ce fichier fait foi.** Une copie divergente existait dans les skills du compte claude.ai ; ses deux blocs propres (§9 portes terrain, HISTORIQUE) sont rapatriés ici. La copie du compte est à supprimer ou à réaligner sur ce fichier. |
