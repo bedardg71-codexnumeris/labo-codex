@@ -12,9 +12,9 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | **`main`** |
-| **Version** | **1.86.0** — build `0816-0710` |
+| **Version** | **1.87.2** — build `0816-0846` |
 | **Travail en avance sur `main`** | **aucun** |
-| **Dernière mise à jour** | 16 août 2026 — **porte terrain du cycle 1.85 close à 33/33, zéro échec**, puis les quatre demandes d'interface de Grégoire livrées en **1.86.0** : le menu de type s'étend à tous les blocs (borné à la famille), la visée formative/certificative des évaluations, une couleur par famille, la poignée ⠿ au coin supérieur gauche de toute en-tête. Plus son **verdict 3.4** : un verbe de lien devenu inexact est DIT, jamais réécrit. Vitest **2673/2673**, 8 break-tests rouges |
+| **Dernière mise à jour** | 17 août 2026 — **`chantier/skills-claude-code` FUSIONNÉ dans `main`** (fast-forward, 2 commits). Les 13 skills vivent en `.claude/skills/<nom>/SKILL.md` et se déclenchent seuls ; `CLAUDE.md` passe de 394 à 191 lignes ; deux skills neufs extraits (`design-interface`, `release-et-changelog`). Le test de déclenchement 4 (« on commence » → `debut-de-session-labo-codex`) est **PASSÉ en réel** au début de la session de fusion ; les 15 skills projet sont vus par la session. ⏳ Tests 2 et 3 de `FICHE-RELECTURE.md` non probants dans cette session (les réponses attendues avaient été lues) — à rejouer dans une session neuve, sans dire « on commence » d'abord. Vitest **2701/2701** (268 fichiers). Pas de bump : aucun code applicatif touché. ⚠ Entre le 16 et cette fusion, `main` a aussi reçu le cycle **1.87.0 → 1.87.2** (copier vs cloner, détacher un clone, infobulles d'accompagnement) — ce tableau l'avait manqué |
 
 ⚠⚠ **AVANT TOUTE FUSION EN CONTENEUR : `git fetch --unshallow origin`.** Le clone
 du conteneur est **shallow**, et son `main` LOCAL peut pointer des semaines en
