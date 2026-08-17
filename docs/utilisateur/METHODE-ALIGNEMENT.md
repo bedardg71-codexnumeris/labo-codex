@@ -301,13 +301,13 @@ automatiquement** du type des deux nœuds reliés (`VERBES_AUTO`) :
 | s'appuie sur / complète / conduit à / est mobilisé(e) par | Liens horizontaux (connaissance↔connaissance, activité↔activité) |
 
 > **Note de maintenance.** Ces verbes **ne correspondent pas** à ceux
-> documentés dans `SKILL_Alignement.md` §2 (`vise`, `mobilise`, `prerequis_de`,
+> documentés dans `.claude/skills/alignement/SKILL.md` §2 (`vise`, `mobilise`, `prerequis_de`,
 > `evalue_par`, `soutenu_par`, `revise_dans`, `sequence_avant`). Le skill est
 > **périmé** sur ce point ; le code fait foi. À corriger dans le skill.
 
 ### Dette de documentation à reprendre plus tard
 
-`SKILL_Alignement.md` devra être remis à jour **à la fin du chantier**, pas au
+`.claude/skills/alignement/SKILL.md` devra être remis à jour **à la fin du chantier**, pas au
 fil de l'eau — les concepts bougent encore. Écarts relevés à ce jour :
 
 | # | Écart | Référence |
@@ -1595,7 +1595,7 @@ le code y retrouve des modules déjà éprouvés.
 ### ⚠ Le piège identifié
 
 **Ne pas** mettre cartes et leçons dans la même collection avec un champ
-`type`. `SKILL_integrite_globaux.md` est catégorique : *ne jamais filtrer par
+`type`. `.claude/skills/integrite-globaux/SKILL.md` est catégorique : *ne jamais filtrer par
 flag, toujours par identité de la source*. Donc **deux clés**
 (`bibliothequeAlignements` + une nouvelle `bibliothequeLecons`) et **une seule
 modale** à deux sections — l'unité est dans l'interface, pas dans le tableau.

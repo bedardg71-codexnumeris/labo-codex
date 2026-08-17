@@ -43,7 +43,7 @@ Ces trois situations partagent un point commun : **les données sont accessibles
 
 ### 1.1 Pertinence pour la Loi 25 (Québec)
 
-Le `SKILL_Securite_donnees.md` §1.1 classe les noms, DA, numéros de groupe comme CRITIQUE — des renseignements personnels identifiants. Le DA est particulièrement sensible (identifiant inter-institutionnel, fuite permettrait le croisement avec d'autres systèmes). La Loi 25, dans son article 10, exige que les responsables du traitement de renseignements personnels « prennent les mesures de sécurité propres à assurer la protection des renseignements personnels collectés [...] et qui sont raisonnables compte tenu, notamment, de leur sensibilité, de la finalité de leur utilisation, de leur quantité, de leur répartition et de leur support ».
+Le `.claude/skills/securite-donnees/SKILL.md` §1.1 classe les noms, DA, numéros de groupe comme CRITIQUE — des renseignements personnels identifiants. Le DA est particulièrement sensible (identifiant inter-institutionnel, fuite permettrait le croisement avec d'autres systèmes). La Loi 25, dans son article 10, exige que les responsables du traitement de renseignements personnels « prennent les mesures de sécurité propres à assurer la protection des renseignements personnels collectés [...] et qui sont raisonnables compte tenu, notamment, de leur sensibilité, de la finalité de leur utilisation, de leur quantité, de leur répartition et de leur support ».
 
 Le chiffrement n'est pas explicitement requis par la loi, mais la jurisprudence et les guides d'application de la CPVP (Commission d'accès à l'information) le considèrent comme une mesure « raisonnable » pour les renseignements identifiants stockés numériquement, surtout sur des supports portables comme un MacBook.
 
@@ -170,7 +170,7 @@ Tout chiffrer est tentant mais a un coût : performance, complexité, ergonomie.
 
 ### 4.1 Classification appliquée à Labo Codex
 
-En reprenant la classification du `SKILL_Securite_donnees.md` §1 :
+En reprenant la classification du `.claude/skills/securite-donnees/SKILL.md` §1 :
 
 | Clé IndexedDB (exemples) | Contenu | Classification | À chiffrer ? |
 |---|---|---|---|
@@ -199,7 +199,7 @@ Avantages :
 
 ### 4.3 Cas des photos manuscrites
 
-Les blobs (photos de copies) sont classés CRITIQUE parce que l'écriture manuscrite est biométriquement identifiante (`SKILL_Securite_donnees.md` §1.3). Les chiffrer est techniquement faisable mais a un coût plus élevé :
+Les blobs (photos de copies) sont classés CRITIQUE parce que l'écriture manuscrite est biométriquement identifiante (`.claude/skills/securite-donnees/SKILL.md` §1.3). Les chiffrer est techniquement faisable mais a un coût plus élevé :
 
 - Volume : un dossier `Monitorage_Travaux` peut peser plusieurs Go. Chiffrement/déchiffrement de chaque photo à chaque consultation = latence visible.
 - Stockage : les blobs vivent souvent hors IndexedDB (via FSAPI sur disque, dans `Monitorage_Travaux`). Chiffrer ces fichiers est faisable mais nécessite une couche d'abstraction supplémentaire dans `travaux-stockage.js`.

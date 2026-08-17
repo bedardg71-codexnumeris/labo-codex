@@ -8,7 +8,7 @@
 >
 > **Distinction importante avec les autres angles** : le chiffrement et le versioning protègent les données **dans leur état complet et identifiant**, sur ta machine. L'anonymisation **transforme** les données pour qu'elles puissent voyager — vers la Voûte, vers la recherche pédagogique, vers un collègue — sans révéler l'identité des étudiants.
 >
-> **Liens avec d'autres docs** : ce document concrétise le §3 du `SKILL_Securite_donnees.md` (Anonymisation), §1.2 (Données indirectement identifiantes), §1.4 (Données pédagogiques partageables). Et la mention X-01 P3 (anonymisation comme défense contre l'exfiltration) du `MODELE-MENACES.md`.
+> **Liens avec d'autres docs** : ce document concrétise le §3 du `.claude/skills/securite-donnees/SKILL.md` (Anonymisation), §1.2 (Données indirectement identifiantes), §1.4 (Données pédagogiques partageables). Et la mention X-01 P3 (anonymisation comme défense contre l'exfiltration) du `MODELE-MENACES.md`.
 
 ---
 
@@ -127,7 +127,7 @@ Conséquence légale : les données pseudonymisées **restent des renseignements
 
 ### 3.3 Décision en suspens (cf. SKILL_Securite_donnees §3.1)
 
-Le `SKILL_Securite_donnees.md` §3.1 marque explicitement la décision en suspens entre :
+Le `.claude/skills/securite-donnees/SKILL.md` §3.1 marque explicitement la décision en suspens entre :
 - **Pseudonymisation réversible** : table de correspondance chiffrée localement, l'enseignant peut inverser.
 - **Anonymisation irréversible** : correspondance détruite, plus personne ne peut remonter.
 
@@ -149,7 +149,7 @@ Cette décision relève de l'avis Loi 25 que tu prévoyais consulter. Pour ce do
 
 ## 4. Les données à transformer (inventaire détaillé)
 
-Reprise et extension du `SKILL_Securite_donnees.md` §3.2.
+Reprise et extension du `.claude/skills/securite-donnees/SKILL.md` §3.2.
 
 ### 4.1 Données directement identifiantes (à transformer obligatoirement)
 
@@ -183,7 +183,7 @@ Données qui, combinées, permettent la ré-identification dans un petit groupe.
 | Photos de travaux manuscrits | Écriture manuscrite = biométrique. Nom souvent écrit sur la copie. | **Exclusion par défaut** du codex data anonymisé. Pas anonymisable sans OCR + masquage du nom écrit. |
 | PDF de travaux natifs | Métadonnées (auteur, timestamps) | Strip metadata + exclusion par défaut |
 
-Les blobs (photos, PDF) ne sont pas anonymisables par renommage seul. Le `SKILL_Securite_donnees.md` §1.3 et §3.2 sont explicites sur ce point. La décision opérationnelle est : par défaut, les blobs sont **exclus** du codex data anonymisé. Exception possible avec consentement explicite et traitement supplémentaire (masquage des noms écrits, conversion en transcription textuelle).
+Les blobs (photos, PDF) ne sont pas anonymisables par renommage seul. Le `.claude/skills/securite-donnees/SKILL.md` §1.3 et §3.2 sont explicites sur ce point. La décision opérationnelle est : par défaut, les blobs sont **exclus** du codex data anonymisé. Exception possible avec consentement explicite et traitement supplémentaire (masquage des noms écrits, conversion en transcription textuelle).
 
 ### 4.4 Données pédagogiques (partageables presque sans transformation)
 
@@ -195,7 +195,7 @@ Les blobs (photos, PDF) ne sont pas anonymisables par renommage seul. Le `SKILL_
 | Productions (gabarits) | Structure pédagogique | Aucune |
 | Séquences, objectifs | Idem | Aucune |
 
-Pour ces données, le mécanisme de protection est la **licence CC BY-NC-SA** (cf. `SKILL_Securite_donnees.md` §1.4 et `cc-license.js`), pas l'anonymisation. Tu acceptes que ton travail soit attribué à toi (par opposition à anonymisé) parce que c'est ton travail intellectuel — l'anonymisation aurait l'effet inverse de te dépouiller de la paternité.
+Pour ces données, le mécanisme de protection est la **licence CC BY-NC-SA** (cf. `.claude/skills/securite-donnees/SKILL.md` §1.4 et `cc-license.js`), pas l'anonymisation. Tu acceptes que ton travail soit attribué à toi (par opposition à anonymisé) parce que c'est ton travail intellectuel — l'anonymisation aurait l'effet inverse de te dépouiller de la paternité.
 
 ### 4.5 Métadonnées de contexte (à décider au cas par cas)
 
@@ -245,7 +245,7 @@ Cinq stratégies utilisables seules ou combinées selon le cas.
 
 **Mise en œuvre** : nécessite de **généraliser** les quasi-identifiants jusqu'à ce que la condition soit remplie. Itératif et parfois lossy.
 
-**Pour quoi** : approche rigoureuse pour la publication de données. **Difficile à atteindre dans un petit groupe** (25 étudiants) — `SKILL_Securite_donnees.md` §3.3 le note explicitement.
+**Pour quoi** : approche rigoureuse pour la publication de données. **Difficile à atteindre dans un petit groupe** (25 étudiants) — `.claude/skills/securite-donnees/SKILL.md` §3.3 le note explicitement.
 
 ### 5.4 Stratégie D — Bruit différentiel
 
@@ -297,7 +297,7 @@ Combien de profils différents sont possibles avec 25 valeurs ? Mathématiquemen
 
 Quelqu'un qui connaît la composition du groupe (un collègue, un parent, un autre enseignant) peut, en regardant le profil anonymisé « Étudiant-001 a eu 72 / 65 / 88 / 70... », souvent l'identifier (« ça correspond aux résultats de Marie-Hélène »).
 
-C'est noté dans le `SKILL_Securite_donnees.md` §3.3.
+C'est noté dans le `.claude/skills/securite-donnees/SKILL.md` §3.3.
 
 ### 6.2 Mitigation 1 — Limiter l'accès
 
@@ -333,7 +333,7 @@ Ces protections **complètent** l'anonymisation technique. Elles ne la remplacen
 
 ### 7.1 Photos de travaux manuscrits
 
-Position du `SKILL_Securite_donnees.md` §1.3 et §3.2 : les blobs sont **exclus par défaut** du codex data anonymisé.
+Position du `.claude/skills/securite-donnees/SKILL.md` §1.3 et §3.2 : les blobs sont **exclus par défaut** du codex data anonymisé.
 
 Justifications :
 - Écriture manuscrite = biométrique. Identifie l'auteur même sans nom.
@@ -597,7 +597,7 @@ Si l'utilisateur a choisi la pseudonymisation, une fonctionnalité dédiée perm
 
 ### 10.1 La distinction Loi 25 reste à confirmer
 
-Le `SKILL_Securite_donnees.md` §10 liste comme question ouverte : « L'anonymisation par pseudonymisation (remplaçable par l'auteur) est-elle suffisante au sens de la Loi 25, ou faut-il une anonymisation irréversible ? »
+Le `.claude/skills/securite-donnees/SKILL.md` §10 liste comme question ouverte : « L'anonymisation par pseudonymisation (remplaçable par l'auteur) est-elle suffisante au sens de la Loi 25, ou faut-il une anonymisation irréversible ? »
 
 C'est une question pour un juriste ou un responsable de la protection des renseignements personnels. Les éléments à clarifier :
 
@@ -612,7 +612,7 @@ C'est une question pour un juriste ou un responsable de la protection des rensei
 Pour la recherche publique, le passage par un CÉR cégépial peut être obligatoire selon la nature de la recherche. Le CÉR évalue notamment :
 
 - La qualité de l'anonymisation.
-- Le consentement des étudiants (cf. `SKILL_Securite_donnees.md` §8 question 3).
+- Le consentement des étudiants (cf. `.claude/skills/securite-donnees/SKILL.md` §8 question 3).
 - La durée de conservation des données.
 - Les mesures de sécurité pendant la recherche.
 
@@ -620,7 +620,7 @@ L'outil d'anonymisation Labo Codex ne remplace pas le CÉR. Il **produit** les d
 
 ### 10.3 Consentement étudiant
 
-Le `SKILL_Securite_donnees.md` §8 question 3 le marque comme en suspens. Position raisonnable : pour toute recherche publique, consentement éclairé des étudiants. Pour usage purement personnel (suivi pédagogique de l'enseignant), pas de consentement nécessaire car les données restent dans le contexte de prestation du service éducatif.
+Le `.claude/skills/securite-donnees/SKILL.md` §8 question 3 le marque comme en suspens. Position raisonnable : pour toute recherche publique, consentement éclairé des étudiants. Pour usage purement personnel (suivi pédagogique de l'enseignant), pas de consentement nécessaire car les données restent dans le contexte de prestation du service éducatif.
 
 L'anonymisation **n'élimine pas** l'obligation de consentement — elle la **réduit** dans certains cas (Loi 25, article 12 — usage statistique sans consentement individuel sous condition).
 

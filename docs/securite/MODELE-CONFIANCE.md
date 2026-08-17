@@ -7,7 +7,7 @@
 > Références : `DECISIONS-ARCHITECTURALES-2026-05-11.md` (D2, D3, D4),
 > `BENCHMARK-OBSIDIAN.md` §8 (cercles de confiance, R2),
 > `AUDIT-ETAT-REFLEXION-2026-05-11.md` (E8), `MODELE-MENACES.md` (M1-M8),
-> `SKILL_Securite_donnees.md` §6.
+> `.claude/skills/securite-donnees/SKILL.md` §6.
 >
 > **Statut de la Voûte serveur** : ce document couvre la phase ACTUELLE — le
 > partage par fichiers `.lcz`, sans serveur. La section 6 fixe ce qui devra
@@ -29,7 +29,7 @@ externe. Changer de cercle exige un geste explicite — jamais automatique.
 Deux règles de passage entre cercles :
 
 1. **Du cercle 1 vers le 2** : seules les ressources pédagogiques (données
-   NON SENSIBLES, classification §1.4 de `SKILL_Securite_donnees.md`)
+   NON SENSIBLES, classification §1.4 de `.claude/skills/securite-donnees/SKILL.md`)
    peuvent sortir. L'export `.lcz` projette sur des schémas fermés qui
    excluent par construction les champs locaux et identifiants ; les
    données étudiantes n'ont aucun chemin vers un package.

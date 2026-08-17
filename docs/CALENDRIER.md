@@ -597,7 +597,7 @@ Quand Grégoire reprend Labo Codex après une coupure (vacances, autre projet) :
 - `docs/formation/Plan de formation — Labo Codex Claude Design.pdf` — référence des 8 rencontres.
 
 **Skills métier** :
-- `Skills pour Claude Code/SKILL_*.md`
+- `.claude/skills/*/SKILL.md`
 
 ### B. Glossaire
 

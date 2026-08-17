@@ -2,7 +2,7 @@
 
 > **Date** : 11 mai 2026 (Beta 99.40, build b0510-1500)
 > **Auteur** : Claude (Cowork), à la demande de Grégoire Bédard
-> **Périmètre** : `docs/securite/` (~6 200 l. cumulé) + `SKILL_Securite_donnees.md` + `docs/architecture/PLAN2-PHASE1-SPEC.md`
+> **Périmètre** : `docs/securite/` (~6 200 l. cumulé) + `.claude/skills/securite-donnees/SKILL.md` + `docs/architecture/PLAN2-PHASE1-SPEC.md`
 > **Méthode** : croisement docs ↔ code réel (cartographie des 102 modules JS) ↔ skills métier
 > **Angle** : prospectif Voûte — anticiper les défis architecturaux avant que la Phase 2 ne soit codée
 > **Statut** : diagnostic + ébauche de plan, à la base d'un futur plan de sécurité détaillé
@@ -13,7 +13,7 @@
 
 ### Verdict global
 
-La réflexion sécurité de Labo Codex est **mature pour un projet de cette taille**. `MODELE-MENACES.md` (1792 l.) est un threat model d'excellente facture — précis sur le code, scénarios bien construits, plan livré méthodique. Les 4 docs `PROTECTION-*.md` (~2 800 l. cumulé) forment une trilogie cohérente (chiffrement, versioning, anonymisation) plus un singleton transversal (fichiers d'export). Le `SKILL_Securite_donnees.md` (532 l.) sert de source de vérité interne et est correctement référencé par les autres docs.
+La réflexion sécurité de Labo Codex est **mature pour un projet de cette taille**. `MODELE-MENACES.md` (1792 l.) est un threat model d'excellente facture — précis sur le code, scénarios bien construits, plan livré méthodique. Les 4 docs `PROTECTION-*.md` (~2 800 l. cumulé) forment une trilogie cohérente (chiffrement, versioning, anonymisation) plus un singleton transversal (fichiers d'export). Le `.claude/skills/securite-donnees/SKILL.md` (532 l.) sert de source de vérité interne et est correctement référencé par les autres docs.
 
 **Phase 0 livrée intégralement le 6 mai** (7 défenses, 6 commits sur `main` en une journée) et **Défenses A + I livrées le 8 mai** (sandbox iframe + suite de 29 tests). C'est un acquis réel, vérifié par 9 vecteurs d'évasion tous bloqués et par un audit a priori sur les bibliothèques (0 trouvaille suspecte au 6 mai).
 
@@ -182,9 +182,9 @@ Légende :
 
 ## 3. Validation des sources de vérité
 
-### 3.1 SKILL_Securite_donnees.md ↔ docs/securite/
+### 3.1 .claude/skills/securite-donnees/SKILL.md ↔ docs/securite/
 
-`SKILL_Securite_donnees.md` (26 avril 2026, 532 l.) est antérieur aux docs `docs/securite/` (rédigés autour du 6 mai 2026, ~6 000 l.).
+`.claude/skills/securite-donnees/SKILL.md` (26 avril 2026, 532 l.) est antérieur aux docs `docs/securite/` (rédigés autour du 6 mai 2026, ~6 000 l.).
 
 **Relation effective** :
 - Les 4 docs `PROTECTION-*` étendent le skill : ils prennent un thème du skill (chiffrement, anonymisation, versioning, fichiers) et le détaillent en architecture complète. Pas de contradiction majeure.
@@ -270,7 +270,7 @@ Le mécanisme passe par le pipeline `chargerCodex()` donc bénéficie de `valide
 - Défense D (révocation FSAPI par défaut + opt-in) **n'a aucun effet visible sur Safari** parce que les handles FSAPI n'existent pas
 - Scénario D-03 (effacement disque via FSAPI rémanent) **ne s'applique pas dans le workflow Grégoire** mais s'applique aux utilisateurs Chrome/Edge
 
-**Implication pour l'audit** : le MODELE-MENACES traite FSAPI comme une surface universelle ; en réalité, c'est une surface **conditionnelle au navigateur**. Cette nuance n'apparaît qu'en §9 du benchmark, jamais dans la cartographie §3 du modèle ni dans `SKILL_Securite_donnees.md`.
+**Implication pour l'audit** : le MODELE-MENACES traite FSAPI comme une surface universelle ; en réalité, c'est une surface **conditionnelle au navigateur**. Cette nuance n'apparaît qu'en §9 du benchmark, jamais dans la cartographie §3 du modèle ni dans `.claude/skills/securite-donnees/SKILL.md`.
 
 **Question structurelle à trancher** (citée dans benchmark §9.4) :
 > Quel navigateur cible Labo Codex ? Safari only (cohérent avec workflow Grégoire, mais alors `reserve.js` et `travaux-stockage.js` doivent avoir un fallback ZIP pleinement supporté) ou multi-navigateurs (asymétrique, à documenter clairement pour les futurs utilisateurs) ?
@@ -288,8 +288,8 @@ Le MODELE-MENACES §3.6 mentionne db.js mais traite localStorage + IDB. memoryCa
 ### 4.5 Codex data référencé mais inexistant
 
 Le format `.codex-data.json` (codex anonymisé pour la recherche) est référencé dans :
-- `SKILL_labo_codex.md` §3 (tableau des 4 concepts de données)
-- `SKILL_Securite_donnees.md` §3.2 (anonymisation)
+- `.claude/skills/labo-codex/SKILL.md` §3 (tableau des 4 concepts de données)
+- `.claude/skills/securite-donnees/SKILL.md` §3.2 (anonymisation)
 - `MODELE-MENACES.md` §3.3 (« futur Plan 2 »)
 - `PROTECTION-DONNEES-ANONYMISATION.md` (architecture complète proposée)
 - `docs/architecture/ECOSYSTEME-DONNEES.md` (présumément)
@@ -412,7 +412,7 @@ Voir §4.3. Décision structurelle qui affecte FSAPI, tests Playwright, et la ca
 
 `PLAN2-PHASE1-SPEC.md §9` ouvre cette question. La recommandation de la spec est « conserver à l'import + ré-attribuer en cas de collision Phase 3 ». 
 
-Compatible avec `SKILL_integrite_globaux.md` AP-1 (préfixer à la conception, pas en runtime). À confirmer : préfixe `PARTAGE_*` à l'import dans tous les cas, plutôt que conserver l'ID original avec collision potentielle.
+Compatible avec `.claude/skills/integrite-globaux/SKILL.md` AP-1 (préfixer à la conception, pas en runtime). À confirmer : préfixe `PARTAGE_*` à l'import dans tous les cas, plutôt que conserver l'ID original avec collision potentielle.
 
 **Recommandation pour la décision** : **préfixer à l'import** systématiquement. Décollement de l'ID Voûte et de l'ID local. Simple, conforme au skill, élimine la classe d'anti-pattern AP-1.
 
@@ -422,7 +422,7 @@ Décisions qui ne peuvent pas être tranchées par Claude ou par le code. Elles 
 
 #### G1 — Avis Loi 25 : pseudonymisation réversible acceptable, ou anonymisation irréversible obligatoire ?
 
-**Source** : `PROTECTION-DONNEES-ANONYMISATION.md` §10.1 et §12 Q1 ; `SKILL_Securite_donnees.md` §3.1.
+**Source** : `PROTECTION-DONNEES-ANONYMISATION.md` §10.1 et §12 Q1 ; `.claude/skills/securite-donnees/SKILL.md` §3.1.
 
 **Conséquence si « irréversible » imposée** : retirer la table de correspondance, simplifier le module, mais Grégoire perd la possibilité de corriger un export après publication.
 
@@ -430,13 +430,13 @@ Décisions qui ne peuvent pas être tranchées par Claude ou par le code. Elles 
 
 #### G2 — Consentement étudiant pour la recherche : requis et sous quelle forme ?
 
-**Source** : `SKILL_Securite_donnees.md` §8 question 3 ; `PROTECTION-DONNEES-ANONYMISATION.md` §10.3.
+**Source** : `.claude/skills/securite-donnees/SKILL.md` §8 question 3 ; `PROTECTION-DONNEES-ANONYMISATION.md` §10.3.
 
 **Action** : avis CER (comité d'éthique de la recherche) + position de l'institution. Bloque la Voûte « codex data » mais pas la Voûte « bibliothèques pédagogiques » (qui n'a pas de données étudiantes).
 
 #### G3 — Propriété intellectuelle des grilles créées dans le cadre de l'emploi
 
-**Source** : `SKILL_Securite_donnees.md` §8 question 5.
+**Source** : `.claude/skills/securite-donnees/SKILL.md` §8 question 5.
 
 **Conséquence** : qui peut publier dans la Voûte ? L'enseignant seul ? Avec accord du cégep ?
 
@@ -444,7 +444,7 @@ Décisions qui ne peuvent pas être tranchées par Claude ou par le code. Elles 
 
 #### G4 — Hébergement de la Voûte : qui héberge, qui paie, qui contrôle ?
 
-**Source** : `SKILL_Securite_donnees.md` §6.2 questions 4 et 5.
+**Source** : `.claude/skills/securite-donnees/SKILL.md` §6.2 questions 4 et 5.
 
 **Liée à D1**. Si serveur centralisé, qui ? AQPC ? Un cégep ? Le ministère ? Un consortium ?
 
@@ -452,13 +452,13 @@ Décisions qui ne peuvent pas être tranchées par Claude ou par le code. Elles 
 
 #### G5 — Modération de la Voûte : qui modère, sur quelles règles, avec quel recours ?
 
-**Source** : `SKILL_Securite_donnees.md` §6.2 questions 1, 2, 3, 6.
+**Source** : `.claude/skills/securite-donnees/SKILL.md` §6.2 questions 1, 2, 3, 6.
 
 **Liée à D4**. À documenter dans un `MODELE-CONFIANCE.md` (recommandé par `BENCHMARK-OBSIDIAN.md` §8) **avant** ouverture Voûte. Inclut : procédure de signalement, autorité de décision, droit d'appel, révocation d'accès.
 
 #### G6 — Continuité de la Voûte en cas de disparition de l'institution garante
 
-**Source** : `SKILL_Securite_donnees.md` §6.2 question 5.
+**Source** : `.claude/skills/securite-donnees/SKILL.md` §6.2 question 5.
 
 **Conséquence** : plan de migration des données et des clés publiques si Labo Codex change de mainteneur ou de financement. Important pour la confiance des contributeurs.
 
@@ -603,8 +603,8 @@ Selon ce que tu décides :
 | MODELE-MENACES.md | §4 cartographie destruction | Ajouter ligne « memoryCache (Map JS) » avec capacité « Lecture, écriture, perte au rechargement » |
 | Lignes citées | Plusieurs | Rafraîchir `db.js:773` → `db.js:766` et autres dérives 2-7 lignes |
 | MODELE-MENACES.md | Défense E §8.1 | Recalibrer : sandbox A en défense en profondeur, migration `innerHTML` ciblée plutôt que globale |
-| SKILL_labo_codex.md | §3 tableau | Mention « codex data non implémenté » sur la ligne Codex data |
-| SKILL_Securite_donnees.md | §3.2 | Mention « format codex data non implémenté » |
+| .claude/skills/labo-codex/SKILL.md | §3 tableau | Mention « codex data non implémenté » sur la ligne Codex data |
+| .claude/skills/securite-donnees/SKILL.md | §3.2 | Mention « format codex data non implémenté » |
 | MODELE-MENACES.md | §3.3 | Préciser « format non implémenté au 10 mai 2026 » |
 | PROTECTION-DONNEES-ANONYMISATION.md | Introduction | Idem |
 
@@ -713,4 +713,4 @@ Le bon ordre opérationnel suggéré par ce diagnostic :
 
 | Date | Version | Changement |
 |---|---|---|
-| 2026-05-11 | 1.0 | Création. Audit de l'état de la réflexion sécurité au 10-11 mai 2026, croisement docs ↔ code ↔ skills, angle prospectif Voûte. Inputs : SKILL_Securite_donnees.md + MODELE-MENACES.md (1792 l.) + 4 PROTECTION-*.md (~2 800 l.) + BENCHMARK-OBSIDIAN.md (499 l.) + 4 audits (~800 l.) + PLAN2-PHASE1-SPEC.md + cartographie code 102 modules JS. Méthode : agents Explore + lecture directe + croisement matrices. Livrable destiné à alimenter le plan de sécurité Labo Codex. |
+| 2026-05-11 | 1.0 | Création. Audit de l'état de la réflexion sécurité au 10-11 mai 2026, croisement docs ↔ code ↔ skills, angle prospectif Voûte. Inputs : .claude/skills/securite-donnees/SKILL.md + MODELE-MENACES.md (1792 l.) + 4 PROTECTION-*.md (~2 800 l.) + BENCHMARK-OBSIDIAN.md (499 l.) + 4 audits (~800 l.) + PLAN2-PHASE1-SPEC.md + cartographie code 102 modules JS. Méthode : agents Explore + lecture directe + croisement matrices. Livrable destiné à alimenter le plan de sécurité Labo Codex. |

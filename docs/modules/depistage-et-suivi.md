@@ -6,7 +6,7 @@
 - `js/consolidation.js` — matrice de consolidation des apprentissages
 - `js/graphiques-progression.js` — graphiques d'evolution des criteres
 
-**Skill de reference** : `Skills pour Claude Code/SKILL_RaI.md`
+**Skill de reference** : `.claude/skills/depistage-rai/SKILL.md`
 **Plan de refonte** : `plans de travail/PLAN-REFONTE-MODULE-INTERVENTIONS.md`
 **Derniere mise a jour** : 11 avril 2026 (Beta 99.11)
 
@@ -480,7 +480,7 @@ fonctionnement cross-modules :
 
 ## References
 
-- **Skill pedagogique** : `Skills pour Claude Code/SKILL_RaI.md`
+- **Skill pedagogique** : `.claude/skills/depistage-rai/SKILL.md`
 - **Plan de refonte** : `plans de travail/PLAN-REFONTE-MODULE-INTERVENTIONS.md`
 - **Spec consolidation** : `SPEC-CONSOLIDATION-APPRENTISSAGES.md`
 - **Desrochers (2021)** : L'approche de la reponse a l'intervention

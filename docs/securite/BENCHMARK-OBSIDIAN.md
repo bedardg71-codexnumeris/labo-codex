@@ -76,7 +76,7 @@ Vue d'ensemble — chaque ligne est développée dans les sections suivantes.
 | **Revue humaine des contenus partagés** | Revue initiale des greffons, pas continue | Aucune | Modération Voûte (Défense L) + signature ECDSA (Défense F) | Convergence planifiée |
 | **Bac à sable plateforme** | Faible (Electron desktop), fort (iOS mobile) | Fort sur Safari (Mac + iPad), Chrome/Edge sur Mac | Idem | Labo Codex plus protégé sur Mac |
 | **Permissions granulaires** | Aucune (critique communautaire 2025-2026) | Aucune | Cloisonnement modules (Défense D dans doc précédent, angle D non priorisé) | Lacune partagée |
-| **Modèle de confiance** | Quatre cercles : utilisateur seul → partage manuel → greffons revus → communauté tierce | Codex individuel + futur Voûte multi-cégep | Voûte avec gouvernance à définir (`SKILL_Securite_donnees.md` §6.2) | À construire |
+| **Modèle de confiance** | Quatre cercles : utilisateur seul → partage manuel → greffons revus → communauté tierce | Codex individuel + futur Voûte multi-cégep | Voûte avec gouvernance à définir (`.claude/skills/securite-donnees/SKILL.md` §6.2) | À construire |
 | **Chiffrement au repos** | Pas par défaut. Chiffrement applicatif via greffon tiers ou FileVault macOS | Aucun | AES-GCM-256 (doc A de la trilogie « Protection des données vivantes ») | **Labo Codex sera plus protecteur** |
 | **Versioning et résilience** | Pas par défaut. Greffon tiers ou Time Machine | Manuel via backups USB/iCloud | Snapshots automatiques + journal + externalisation Réserve (doc B) | **Labo Codex sera plus protecteur** |
 | **Anonymisation pour partage** | Pas pertinent (pas de partage de données identifiantes) | Aucune | Module d'anonymisation (doc C) | **Labo Codex sera plus complet** |
@@ -179,7 +179,7 @@ C'est l'**équivalent fonctionnel** du Restricted Mode d'Obsidian, mais appliqu�
 
 ### 5.3 Labo Codex planifié
 
-**Défense L du `MODELE-MENACES.md`** : modération humaine pour les dépôts publics dans la Voûte. Tout dépôt passe par une étape de validation avant d'être accessible aux autres enseignants. La spécification est partielle dans le `SKILL_Securite_donnees.md` §6.2 (six questions ouvertes sur la gouvernance).
+**Défense L du `MODELE-MENACES.md`** : modération humaine pour les dépôts publics dans la Voûte. Tout dépôt passe par une étape de validation avant d'être accessible aux autres enseignants. La spécification est partielle dans le `.claude/skills/securite-donnees/SKILL.md` §6.2 (six questions ouvertes sur la gouvernance).
 
 **Défense F** : signature ECDSA des contenus partagés. Authentification de l'auteur. Couplée à un annuaire de clés publiques.
 
@@ -284,7 +284,7 @@ Trois cercles implicites :
 
 ### 8.3 Labo Codex planifié
 
-Le `SKILL_Securite_donnees.md` §6.2 liste six questions ouvertes sur la gouvernance Voûte. Une fois ces questions tranchées, le modèle de confiance prendra forme. Probablement :
+Le `.claude/skills/securite-donnees/SKILL.md` §6.2 liste six questions ouvertes sur la gouvernance Voûte. Une fois ces questions tranchées, le modèle de confiance prendra forme. Probablement :
 
 1. **Codex personnel** — comme aujourd'hui.
 2. **Partage direct** — entre enseignants identifiés, avec signature ECDSA.
@@ -484,7 +484,7 @@ Le benchmark confirme la pertinence des défenses planifiées dans le `MODELE-ME
 - `docs/securite/PROTECTION-DONNEES-CHIFFREMENT-REPOS.md` — Document A trilogie données vivantes.
 - `docs/securite/PROTECTION-DONNEES-VERSIONING-RESILIENCE.md` — Document B trilogie.
 - `docs/securite/PROTECTION-DONNEES-ANONYMISATION.md` — Document C trilogie.
-- `Skills pour Claude Code/SKILL_Securite_donnees.md` — Skill sécurité, §6.2 questions gouvernance Voûte.
+- `.claude/skills/securite-donnees/SKILL.md` — Skill sécurité, §6.2 questions gouvernance Voûte.
 
 ---
 

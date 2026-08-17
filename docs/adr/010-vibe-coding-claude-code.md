@@ -26,7 +26,7 @@ L'auteur a fait le choix conscient d'adopter Claude Code comme **partenaire de d
 
 - **Claude Code génère le code**, l'auteur valide à chaque étape.
 - **Discussions en français**, avec un cadre méthodologique formalisé dans `CLAUDE.md` (procédure de développement, principes directeurs, zéro-dette, vigilance sur les régressions).
-- **Skills dédiés** dans `Skills pour Claude Code/` pour préserver le contexte métier entre sessions (`SKILL_labo_codex.md`, `SKILL_Ecosysteme_classe.md`, `SKILL_Alignement.md`, `SKILL_RaI.md`, `SKILL_Securite_donnees.md`, `SKILL_integrite_globaux.md`, `SKILL_hygiene_donnees_partagees.md`).
+- **Skills dédiés** dans `.claude/skills/<nom>/SKILL.md` pour préserver le contexte métier entre sessions (`labo-codex`, `ecosysteme-classe`, `alignement`, `depistage-rai`, `securite-donnees`, `integrite-globaux`, `hygiene-donnees-partagees`).
 - **Mémoire de session** dans `MEMORY.md` (préférences, leçons, conventions) qui persiste à travers les conversations.
 - **CLAUDE.md à la racine** comme point d'entrée léger qui oriente vers `docs/00-START-HERE.md` puis vers les modules.
 - **Mode itératif strict** : un fichier à la fois, validation fonctionnelle après chaque changement, debug avant de passer à l'étape suivante.
@@ -49,7 +49,7 @@ L'auteur a fait le choix conscient d'adopter Claude Code comme **partenaire de d
 - **Qualité variable selon le contexte** : Claude Code peut produire du code subtil ou élégant comme du code redondant ou maladroit. La vigilance du mainteneur est essentielle.
 - **Risque de patchage par-dessus** : sans discipline, Claude Code tend à ajouter plutôt que refactorer. La politique zéro-dette (cf. `CLAUDE.md` §"Stabilité zéro-dette") contre ce biais.
 - **Trace écrite limitée du raisonnement** : les conversations ne sont pas systématiquement archivées. La documentation des décisions doit être faite explicitement (ADRs, SESSION.md, mémoire).
-- **Confidentialité des prompts** : tout ce qui est envoyé à Claude Code transite par les serveurs Anthropic. Conséquence : ne jamais coller de données nominatives d'étudiants dans une conversation (politique respectée, cf. `SKILL_Securite_donnees.md`).
+- **Confidentialité des prompts** : tout ce qui est envoyé à Claude Code transite par les serveurs Anthropic. Conséquence : ne jamais coller de données nominatives d'étudiants dans une conversation (politique respectée, cf. `.claude/skills/securite-donnees/SKILL.md`).
 
 ### Neutres
 
@@ -81,7 +81,7 @@ L'auteur a fait le choix conscient d'adopter Claude Code comme **partenaire de d
 ## Références
 
 - `CLAUDE.md` à la racine — cadre de collaboration avec Claude Code.
-- `Skills pour Claude Code/` — skills métier du projet.
+- `.claude/skills/` — skills métier du projet.
 - `MEMORY.md` dans `~/.claude/projects/.../memory/` — mémoire persistante.
 - `SESSION.md` à la racine — contexte de session active.
 

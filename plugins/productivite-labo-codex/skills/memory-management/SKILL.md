@@ -3,8 +3,8 @@ name: memory-management
 description: >
   Décodage du vocabulaire pédagogique et technique de Labo Codex pour que Claude
   comprenne les demandes comme un collègue. La mémoire n'est pas un cache propre
-  au plugin : elle indexe les sources canoniques (CLAUDE.md, le dossier « Skills
-  pour Claude Code/ », ETAT-PROJET.md, SESSION.md). Déclencher dès que Grégoire
+  au plugin : elle indexe les sources canoniques (CLAUDE.md, le dossier
+  « .claude/skills/ », ETAT-PROJET.md, SESSION.md). Déclencher dès que Grégoire
   utilise du jargon projet (ELLAC, SOLO, IDME, RàI, PAN, Voûte, Codex…), demande
   « c'est quoi X », ou dit « retiens ça ».
 ---

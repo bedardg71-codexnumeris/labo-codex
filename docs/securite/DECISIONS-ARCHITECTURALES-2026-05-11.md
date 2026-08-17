@@ -101,7 +101,7 @@ Décision à prendre **avant l'automne 2026** si l'objectif est une ouverture mu
 ### 2.8 Documents impactés
 
 - `docs/architecture/PLAN2-PHASE1-SPEC.md` : reste valide pour le **format**. La section infrastructure devra être complétée quand D1 sera tranchée.
-- `SKILL_Securite_donnees.md` §6.2 : les 6 questions de gouvernance restent ouvertes.
+- `.claude/skills/securite-donnees/SKILL.md` §6.2 : les 6 questions de gouvernance restent ouvertes.
 
 ---
 
@@ -485,7 +485,7 @@ Quel(s) navigateur(s) cible Labo Codex : Safari only (cohérent avec workflow Gr
 
 ### 8.3 Raisonnement
 
-**Argument anti-pattern** : le `SKILL_integrite_globaux.md` §3.1 documente l'anti-pattern AP-1 (« Source dérivée de la cible »). Incident du 24 avril 2026 : 3 grilles utilisateur écrasées parce que le pack démo partageait des IDs avec le matériel personnel de Grégoire. Le préfixage systématique élimine cette classe d'erreur **par construction**.
+**Argument anti-pattern** : le `.claude/skills/integrite-globaux/SKILL.md` §3.1 documente l'anti-pattern AP-1 (« Source dérivée de la cible »). Incident du 24 avril 2026 : 3 grilles utilisateur écrasées parce que le pack démo partageait des IDs avec le matériel personnel de Grégoire. Le préfixage systématique élimine cette classe d'erreur **par construction**.
 
 **Argument simplicité** : « préfixer à la conception, pas en runtime » est la règle d'or du skill. Aucun code de détection de collision n'est nécessaire si la collision est impossible par construction du préfixe.
 
@@ -496,7 +496,7 @@ Quel(s) navigateur(s) cible Labo Codex : Safari only (cohérent avec workflow Gr
 **Conserver l'ID original, gérer les collisions au cas par cas** :
 - Avantage : continuité du concept d'identité (même grille = même ID partout).
 - Inconvénient : nécessite logique de détection + résolution des collisions à chaque import. Reproduit l'erreur du 24 avril si la logique de résolution est imparfaite.
-- Raison du rejet : `SKILL_integrite_globaux.md` AP-1 explicite.
+- Raison du rejet : `.claude/skills/integrite-globaux/SKILL.md` AP-1 explicite.
 
 ### 8.5 Conséquences code
 
@@ -747,9 +747,9 @@ Chaque décision sera **réexaminée** dans les conditions suivantes :
 - `docs/securite/MODELE-CONFIANCE.md` — Cercles de confiance Labo Codex (avant ouverture Voûte).
 
 **Skills métier** :
-- `Skills pour Claude Code/SKILL_Securite_donnees.md` — Source de vérité interne (classification, M1-M8, anonymisation, gouvernance).
-- `Skills pour Claude Code/SKILL_integrite_globaux.md` — Anti-patterns AP-1 à AP-5, justifie D7.
-- `Skills pour Claude Code/SKILL_hygiene_donnees_partagees.md` — Principes universels.
+- `.claude/skills/securite-donnees/SKILL.md` — Source de vérité interne (classification, M1-M8, anonymisation, gouvernance).
+- `.claude/skills/integrite-globaux/SKILL.md` — Anti-patterns AP-1 à AP-5, justifie D7.
+- `.claude/skills/hygiene-donnees-partagees/SKILL.md` — Principes universels.
 
 **Spec Voûte** :
 - `docs/architecture/PLAN2-PHASE1-SPEC.md` — Format de partage `labo-codex-partage-v1`. À mettre à jour suite aux décisions D2 et D7.

@@ -421,7 +421,7 @@ Le `manifeste.json` contient :
 }
 ```
 
-Le `README.txt` est un fichier texte lisible expliquant ce qu'est le conteneur, comment vérifier l'intégrité manuellement, et où trouver l'app Labo Codex. Cela rend le format **auto-descriptif** (cf. `SKILL_Securite_donnees.md` §4 sur la pérennité du format).
+Le `README.txt` est un fichier texte lisible expliquant ce qu'est le conteneur, comment vérifier l'intégrité manuellement, et où trouver l'app Labo Codex. Cela rend le format **auto-descriptif** (cf. `.claude/skills/securite-donnees/SKILL.md` §4 sur la pérennité du format).
 
 ### 7.2 Pourquoi le ZIP est plus protecteur qu'un JSON nu
 
@@ -637,7 +637,7 @@ Indépendamment de toute défense technique, garder une vigilance humaine : aute
 
 ### 10.6 Garder une copie de sauvegarde indépendante
 
-Avant d'importer un export potentiellement suspect, faire un backup de son codex et de sa bibliothèque. La sauvegarde Codex sur clé USB recommandée dans `SKILL_Securite_donnees.md` §5.2 sert exactement à ça.
+Avant d'importer un export potentiellement suspect, faire un backup de son codex et de sa bibliothèque. La sauvegarde Codex sur clé USB recommandée dans `.claude/skills/securite-donnees/SKILL.md` §5.2 sert exactement à ça.
 
 ---
 
