@@ -7,6 +7,54 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 17 AOÛT 2026 : LES SKILLS DEVIENNENT DÉCLENCHABLES.
+     ÉTAT : **1.87.2** (build 0816-0846) — Vitest **2701/2701** (268 fichiers).
+     Branche **`chantier/skills-claude-code`**, commit `8d5b517a` — PAS MERGÉE.
+
+     ▣ **LE PATCH DE LA FICHE DE RELECTURE EST APPLIQUÉ ET COMMITÉ.** Les 13
+     fichiers de `Skills pour Claude Code/` vivent désormais dans
+     `.claude/skills/<nom>/SKILL.md`, en `git mv` (similarité 87-100 %,
+     l'historique suit). 12 frontmatters existaient déjà — écrits par Grégoire
+     au bon format, dans le mauvais dossier ; seul `depistage-rai` en a reçu
+     un, tiré de sa propre ligne « Déclenchement ». Aucune description
+     réécrite : déménagement, pas refonte.
+
+     ▣ **CLAUDE.md : 394 → 191 lignes** (6 440 → 2 641 tokens par session ET
+     par compaction). Deux skills neufs en sont extraits :
+     `design-interface` et `release-et-changelog`.
+     `section-design-claude-md.md`, remplacé, est retiré (zéro-dette).
+     Références croisées réparées : `/fin-de-session`, 4 fichiers du plugin
+     `productivite-labo-codex`, sentinelle alignement sur le nouveau chemin.
+     `FICHE-RELECTURE.md` versionnée à la racine comme trace du chantier.
+
+     ⚠ **FAUSSE ALERTE ÉVITÉE AU RITUEL D'AUDIT** : `npx vitest run` lancé
+     depuis la RACINE rend 217 fichiers rouges — il balaie les 5 worktrees de
+     `.claude/worktrees/` sans la config. La vraie suite se lance DEPUIS
+     `tests/` : 2701/2701. À retenir pour tout audit de début de session.
+
+     ⏳ **LE CHANTIER N'EST PAS FINI — la fiche elle-même le dit.** La
+     vérification qui compte est le DÉCLENCHEMENT, et elle exige une session
+     Claude Code NEUVE ouverte à la racine du dépôt (celle du 17 août venait
+     de `~`, skills projet non chargés). Les 4 tests de la fiche :
+     1. `/context` → 15 skills sous « Project » ;
+     2. « je travaille sur `js/pratiques/` » → `pratiques-notation` SEUL ;
+     3. « je touche à `import-export.js` » → `integrite-globaux` +
+        `securite-donnees` SEULS ;
+     4. « on commence » → `debut-de-session-labo-codex`.
+     Un skill muet = sa `description` à enrichir, pas le principe en cause.
+     APRÈS les 4 verts : merger `chantier/skills-claude-code` dans `main`.
+
+     ⏳ **4 DÉCISIONS OUVERTES, consignées dans `FICHE-RELECTURE.md`** (aucune
+     bloquante) : A-C-P ou A-C-P-E dans `design-interface` (contenu métier) ;
+     garder ou archiver `debug-labo-codex` (dormant, référencé nulle part) ;
+     aligner ou non les citations `SKILL_*` en commentaire de `js/*.js`
+     (laissées telles quelles, lisibles) ; la procédure de dev restée dans
+     `CLAUDE.md` (8 lignes, s'applique à chaque chantier).
+
+     Pas de bump : aucun code applicatif touché (docs/skills/tests seulement).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 16 AOÛT 2026 : TYPES, FAMILLES, ET UNE COULEUR PAR FAMILLE.
      ÉTAT : **1.86.0** (build 0816-0710) — Vitest **2673/2673** (265 fichiers).
 
