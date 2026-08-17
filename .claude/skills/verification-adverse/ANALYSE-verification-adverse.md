@@ -1,6 +1,6 @@
 # Analyse fondatrice — la vérification adverse
 
-> Document de rationale derrière `SKILL_verification_adverse.md` (le « pourquoi »
+> Document de rationale derrière le skill `verification-adverse` (le « pourquoi »
 > behind le skill). Né de l'examen de la méthode appliquée dans les deux audits du
 > 13-14 juin 2026 — travail autonome de l'IA puis travail collaboratif IA + Grégoire
 > (`Rapports/AUDIT-travail-IA-11-13juin-2026.md`,
@@ -86,7 +86,7 @@ un **tronc commun** et **deux modes** courts dans le skill, pas deux skills jume
 ## 5. Proportionnalité
 
 La profondeur (B/D, chère) se dose au risque, calqué sur le barème de réversibilité de
-`SKILL_hygiene_donnees_partagees` (§2/P5) : break-test **obligatoire** sur
+le skill `hygiene-donnees-partagees` (§2/P5) : break-test **obligatoire** sur
 données/sécurité/SSOT/garde-fous ; échantillon sur la logique métier ; rien de plus que
 le balayage mécanique sur l'UI/microcopy ; couture récit↔code seule sur les docs.
 
@@ -96,18 +96,18 @@ le balayage mécanique sur l'UI/microcopy ; couture récit↔code seule sur les 
 
 Le gap réel comblé = la discipline adverse (mouvements **B** break-test + **D** coutures,
 et P1/P7 attestation-vs-preuve). Ce que l'existant couvrait déjà, et qu'on ne redit pas :
-- `SKILL_Fin_de_session` §2 = mouvement **C** (balayage mécanique) en auto-posture →
+- le skill `fin-de-session-labo-codex` §2 = mouvement **C** (balayage mécanique) en auto-posture →
   le skill l'**étend** d'un §4 adverse au lieu de le dupliquer.
-- `SKILL_Debut_de_session` = une partie de **A** (re-dériver le baseline factuel).
-- `SKILL_hygiene_donnees_partagees` ↔ `SKILL_integrite_globaux` = le **patron**
+- le skill `debut-de-session-labo-codex` = une partie de **A** (re-dériver le baseline factuel).
+- le skill `hygiene-donnees-partagees` ↔ le skill `integrite-globaux` = le **patron**
   parent abstrait / enfant concret imité ici.
 - ADR-012 (audit annuel) = holistique, orthogonal.
 
-**Forme retenue** : un nouveau skill parent abstrait (`SKILL_verification_adverse.md`)
-+ extension de `SKILL_Fin_de_session.md` (§4). Un fichier neuf, un fichier étendu — pas
+**Forme retenue** : un nouveau skill parent abstrait (le skill `verification-adverse`)
++ extension du skill `fin-de-session-labo-codex` (§4). Un fichier neuf, un fichier étendu — pas
 d'empilement.
 
 ---
 
-**Date** : 14 juin 2026. **Statut** : appliqué — a produit `SKILL_verification_adverse.md`
-et l'extension `SKILL_Fin_de_session.md` §4.
+**Date** : 14 juin 2026. **Statut** : appliqué — a produit le skill `verification-adverse`
+et l'extension le skill `fin-de-session-labo-codex` §4.

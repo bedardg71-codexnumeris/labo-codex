@@ -7,10 +7,10 @@ description: >
   Grégoire mentionne Labo Codex, une de ses composantes (modules, pratiques,
   indices, travaux, annotation), ou demande une réflexion sur l'application.
   Pour le cadre théorique (ELLAC, SOLO, PAN, cartouches), voir
-  SKILL_Ecosysteme_classe.md. Pour le module Alignement (planification, carte
-  mentale, leçons), voir SKILL_Alignement.md. Pour le dépistage et le modèle
-  RàI, voir SKILL_RaI.md. Pour la sécurité et l'anonymisation des données,
-  voir SKILL_Securite_donnees.md.
+  le skill `ecosysteme-classe`. Pour le module Alignement (planification, carte
+  mentale, leçons), voir le skill `alignement`. Pour le dépistage et le modèle
+  RàI, voir le skill `depistage-rai`. Pour la sécurité et l'anonymisation des données,
+  voir le skill `securite-donnees`.
 ---
 
 # SKILL : Labo Codex — Application et développement
@@ -122,15 +122,15 @@ Convention de nommage : `{trimestre}-{cours}-gr{groupe}` (ex. `a2025-601-101-gr0
 Chaque versement porte un UUID v4 unique.
 
 > **Spécification technique** : `docs/architecture/SPEC-RESERVE-V1.md`
-> **Sécurité des données** : `Skills pour Claude Code/SKILL_Securite_donnees.md`
+> **Sécurité des données** : le skill `securite-donnees`
 
 ---
 
 ## 4. CADRE PÉDAGOGIQUE DANS L'APPLICATION
 
-> **Cadre théorique complet** : voir `SKILL_Ecosysteme_classe.md` pour les fondements
+> **Cadre théorique complet** : voir le skill `ecosysteme-classe` pour les fondements
 > (ELLAC, SOLO, PAN), les cartouches de rétroaction et le manuel élève.
-> **Dépistage et intervention** : voir `SKILL_RaI.md`.
+> **Dépistage et intervention** : voir le skill `depistage-rai`.
 
 ### Flux de données pédagogiques
 ```
@@ -162,7 +162,7 @@ portfolio) : nombre d'artefacts à retenir, mode de sélection (`meilleurs`, `re
 `recents-meilleurs`, `tous`), artefacts terminaux configurables. La config portfolio est
 lue **uniquement** depuis `pratiquesConfigurables` (depuis la Phase G2-a, 24 mai 2026 —
 plus de `modalitesEvaluation.configPAN.portfolio`). Détail technique (résolution, deux
-systèmes de calcul, `simulerIndices`, pièges) : **`SKILL_pratiques_notation.md` §5/§10.**
+systèmes de calcul, `simulerIndices`, pièges) : **le skill `pratiques-notation` §5/§10.**
 
 ### Suivi des fondamentaux, IPB et portraits dynamiques
 
@@ -170,12 +170,12 @@ Le suivi porte sur les **fondamentaux multistructurels** S-R-F (score par artefa
 `0.35×S + 0.35×F + 0.30×R`), **par artefact et non en moyenne** : c'est la **trajectoire**
 qui révèle le portrait. L'**indice de persistance (IPB)**, les seuils, le tableau des
 portraits dynamiques (IPB × direction) et le vocabulaire descriptif appartiennent au
-**dépistage RàI** → **voir `SKILL_RaI.md`** (ne pas dupliquer ici).
+**dépistage RàI** → **voir le skill `depistage-rai`** (ne pas dupliquer ici).
 
 **Échelle IDME / critères SRPNF** (rappel minimal) : I (0.01–0.64), D (0.65–0.74),
 M (0.75–0.84), E (0.85–1.00), alignés SOLO ; 0.75 = seuil garantissant ≥60 % au cours
 suivant. SRPNF = Structure, Rigueur, Plausibilité, Nuance, Français. **Définitions
-complètes et validation empirique** : `SKILL_Ecosysteme_classe.md`.
+complètes et validation empirique** : le skill `ecosysteme-classe`.
 
 ### Workflow enseignant dans l'application
 
@@ -193,7 +193,7 @@ complètes et validation empirique** : `SKILL_Ecosysteme_classe.md`.
 ## 5. PRATIQUES DE NOTATION SUPPORTÉES
 
 > **Moteur de calcul, résolution, simulation et pièges** : voir
-> `SKILL_pratiques_notation.md` (volet technique). Cette section n'est qu'un aperçu.
+> le skill `pratiques-notation` (volet technique). Cette section n'est qu'un aperçu.
 > Les identifiants ci-dessous sont les libellés legacy ; les **id canoniques neutres**
 > (`sommative`/`standards`/`specifications`/`denotation`, sans préfixe `pan-`) datent de
 > la canonicalisation Session A — détail dans le skill dédié.
@@ -238,7 +238,7 @@ L'application supporte 4 familles. 14 modules dans `js/pratiques/` (compter par
   note saisie). Pas de saisie → non calculable, jamais un zéro.
 - **Fichiers** : `js/pratiques/denotation-jugements.js`, `js/pratiques/denotation-saisie-ui.js` ;
   moteur `_calculerPerformanceDenotation` dans `js/pratiques/pratique-configurable.js`
-- **Références** : Blum (2020), Stommel (2023) ; détail technique : `SKILL_pratiques_notation.md` §8
+- **Références** : Blum (2020), Stommel (2023) ; détail technique : le skill `pratiques-notation` §8
 
 ### Fichiers pratiques (infrastructure)
 ```
@@ -346,15 +346,15 @@ en dur, conformité dans les deux modes, accessibilité) : **voir CLAUDE.md**.
 
 | Skill | Rôle | Quand le consulter |
 |-------|------|--------------------|
-| `SKILL_pratiques_notation.md` | Moteur de calcul des pratiques : résolution, deux systèmes de calcul, `simulerIndices`, configs exécutables, pièges | Tout chantier touchant `js/pratiques/`, le calcul de la note ou la simulation/comparaison de pratiques |
-| `SKILL_Ecosysteme_classe.md` | Cadre pédagogique : ELLAC, SOLO, PAN, cartouches SRPNF×IDME, manuel élève | Rédaction de cartouches, validation pédagogique, conception d'artefacts |
-| `SKILL_Alignement.md` | Module Alignement : carte mentale, leçons, séquences, design curriculaire | Travail sur le module Planification, cohérence objectifs-activités-évaluations |
-| `SKILL_RaI.md` | Dépistage SOLO, IPB, diagnostic croisé, patterns, interventions RàI | Travail sur les indices, les portraits dynamiques, les interventions |
-| `SKILL_Securite_donnees.md` | Sécurité, anonymisation, intégrité, modèle de menaces, Loi 25 | Tout travail sur les données (codex, réserve, import/export, anonymisation) |
+| le skill `pratiques-notation` | Moteur de calcul des pratiques : résolution, deux systèmes de calcul, `simulerIndices`, configs exécutables, pièges | Tout chantier touchant `js/pratiques/`, le calcul de la note ou la simulation/comparaison de pratiques |
+| le skill `ecosysteme-classe` | Cadre pédagogique : ELLAC, SOLO, PAN, cartouches SRPNF×IDME, manuel élève | Rédaction de cartouches, validation pédagogique, conception d'artefacts |
+| le skill `alignement` | Module Alignement : carte mentale, leçons, séquences, design curriculaire | Travail sur le module Planification, cohérence objectifs-activités-évaluations |
+| le skill `depistage-rai` | Dépistage SOLO, IPB, diagnostic croisé, patterns, interventions RàI | Travail sur les indices, les portraits dynamiques, les interventions |
+| le skill `securite-donnees` | Sécurité, anonymisation, intégrité, modèle de menaces, Loi 25 | Tout travail sur les données (codex, réserve, import/export, anonymisation) |
 
 **Plugin Productivité** : Les skills `memory-management` et `task-management` gèrent
 le glossaire et les tâches de développement. Le vocabulaire pédagogique du glossaire
-provient de `SKILL_Ecosysteme_classe.md` ; les étiquettes de modules dans les tâches
+provient du skill `ecosysteme-classe` ; les étiquettes de modules dans les tâches
 correspondent aux modules décrits dans ce skill (section 2).
 
 **Documents d'architecture** :
@@ -371,4 +371,4 @@ correspondent aux modules décrits dans ce skill (section 2).
 |------------|------------|
 | 2026-02-28 | Création (Beta 98.3) |
 | 2026-04-26 | Refonte complète. Retrait indice E, écosystème de données (Codex/Réserve/Codex data/Voûte), PAN-Spécifications complet, portfolio configurable, synthèse de rétroaction, principe zéro-dette, 8 libs, références croisées aux 5 skills, section design system. |
-| 2026-06-11 | Corrections factuelles. Version → renvoi `version.json` (SemVer ; fin du figé « Beta 99.25 »). §4 : config portfolio lue depuis `pratiquesConfigurables` (plus `configPAN.portfolio`) ; IPB/portraits → renvoi `SKILL_RaI`. §5 : DEN passé « non implémenté » → **implémenté** (#318) ; compte `js/pratiques/` corrigé (14) ; comptes modules/lignes rendus indicatifs. §7/§9 zéro-dette + design system → renvois CLAUDE.md. |
+| 2026-06-11 | Corrections factuelles. Version → renvoi `version.json` (SemVer ; fin du figé « Beta 99.25 »). §4 : config portfolio lue depuis `pratiquesConfigurables` (plus `configPAN.portfolio`) ; IPB/portraits → renvoi le skill `depistage-rai`. §5 : DEN passé « non implémenté » → **implémenté** (#318) ; compte `js/pratiques/` corrigé (14) ; comptes modules/lignes rendus indicatifs. §7/§9 zéro-dette + design system → renvois CLAUDE.md. |

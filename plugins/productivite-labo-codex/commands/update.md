@@ -72,7 +72,7 @@ Faire remonter les éléments qui ressemblent à des tâches non présentes dans
 
 ### Repérer le vocabulaire et les skills nouveaux
 
-Faire remonter les termes ou skills apparus dans les sources mais pas encore reflétés dans la mémoire de référence (ex. nouvel acronyme, nouvelle pratique, nouveau skill dans `Skills pour Claude Code/`). Présenter pour confirmation.
+Faire remonter les termes ou skills apparus dans les sources mais pas encore reflétés dans la mémoire de référence (ex. nouvel acronyme, nouvelle pratique, nouveau skill dans `.claude/skills/`). Présenter pour confirmation.
 
 ## Notes
 

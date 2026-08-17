@@ -7,10 +7,10 @@ description: >
   exécutables, badges et représentations. Déclencher dès qu'un chantier touche
   `js/pratiques/`, `calculerDetailsNoteFinale`, `simulerIndices`,
   `obtenirPratiqueParId`, `pratiquesConfigurables`, ou le calcul de l'indice P.
-  Pour l'APERÇU des familles et l'architecture générale : SKILL_labo_codex §5.
+  Pour l'APERÇU des familles et l'architecture générale : le skill `labo-codex` §5.
   Ce skill ancre aussi le moteur dans la pratique et la recherche documentées (§2 bis)
   et signale les écarts entre le code et ce que la recherche propose — il ne se limite
-  pas à décrire l'app. Pour l'instanciation de référence de Grégoire : SKILL_Ecosysteme_classe.
+  pas à décrire l'app. Pour l'instanciation de référence de Grégoire : le skill `ecosysteme-classe`.
   Pour l'assistant de configuration : voir BACKLOG #317 (livré) / #319 (refonte).
 ---
 
@@ -22,7 +22,7 @@ description: >
 > **Nature** : volet **technique**, mais **pas un simple miroir du code**. Le §2 bis ancre
 > chaque famille dans la pratique et la recherche documentées (corpus GfG + CoP-PAN) et
 > nomme les **écarts** entre le code et ce que la recherche propose. La doctrine de l'outil
-> est **pluraliste** (SOM/STD/SPE/DEN, sans hiérarchie) ; `SKILL_Ecosysteme_classe` décrit
+> est **pluraliste** (SOM/STD/SPE/DEN, sans hiérarchie) ; le skill `ecosysteme-classe` décrit
 > UNE instanciation (la pratique STD de Grégoire), pas la doctrine.
 > **Avertissement** : ce skill repère les fonctions par **nom** (retrouvable par grep),
 > pas par numéro de ligne (les `fichier:NNN` dérivaient à chaque édition du code). Toujours
@@ -37,8 +37,8 @@ une pratique est résolue depuis un identifiant ; les deux systèmes de calcul c
 la simulation lecture seule (`simulerIndices`) ; les représentations (badges, codes,
 couleurs) ; les pièges vérifiés.
 
-**Ne couvre pas** : la pédagogie des pratiques (SKILL_Ecosysteme_classe), l'aperçu
-descriptif des familles (SKILL_labo_codex §5), l'assistant/wizard de configuration
+**Ne couvre pas** : la pédagogie des pratiques (le skill `ecosysteme-classe`), l'aperçu
+descriptif des familles (le skill `labo-codex` §5), l'assistant/wizard de configuration
 (`wizard-pratique-v2.js` ; bugs #131-#135 livrés en #317, refonte #319), les indices
 A et C (cf. `indices.js`, `portfolio.js`).
 
@@ -69,7 +69,7 @@ pan-denotation     → denotation
 ⚠️ **`pan-objectifs` a été foldé dans `standards`** (Session C Lot 4, PR #27, 5 juin 2026) :
 l'instance séparée `pratique-pan-objectifs.js` (645 l.) a été **supprimée**. La variante
 « par-objectifs » vit désormais dans Standards. Toute doc qui liste encore ce fichier est
-périmée (c'est le cas de SKILL_labo_codex §5.2 au 5 juin).
+périmée (c'est le cas du skill `labo-codex` §5.2 au 5 juin).
 
 ---
 
@@ -575,9 +575,9 @@ mécanisme mais raté le workflow.** La refonte se découpe en `#343 → R1∥R2
 
 | Skill / doc | Quand |
 |---|---|
-| SKILL_labo_codex §5 | aperçu des familles, identifiants, place des pratiques dans l'app |
-| SKILL_Ecosysteme_classe | **UNE instanciation** (la pratique STD de Grégoire) — exemple de référence, **pas** la doctrine ni le panorama des familles. ⚠️ recadrage prévu (`plans de travail/PLAN_recadrage_skill_ecosysteme.md`) : au 5 juin il présente encore « PAN » ≈ son STD et une posture SOM/PAN partisane — ne pas en tirer de doctrine. |
-| SKILL_RaI | indices A-C-P, portraits, interventions |
+| le skill `labo-codex` §5 | aperçu des familles, identifiants, place des pratiques dans l'app |
+| le skill `ecosysteme-classe` | **UNE instanciation** (la pratique STD de Grégoire) — exemple de référence, **pas** la doctrine ni le panorama des familles. ⚠️ recadrage prévu (`plans de travail/PLAN_recadrage_skill_ecosysteme.md`) : au 5 juin il présente encore « PAN » ≈ son STD et une posture SOM/PAN partisane — ne pas en tirer de doctrine. |
+| le skill `depistage-rai` | indices A-C-P, portraits, interventions |
 | `docs/architecture/…` PLAN_architecture_pratiques_SSOT §7 | décisions SSOT des pratiques, séquence des sessions #303 |
 
 **Sources du §2 bis** (corpus pratique/recherche, archivé hors dépôt dans le dossier Cowork

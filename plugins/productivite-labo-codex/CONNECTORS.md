@@ -9,7 +9,7 @@ Ce plugin fonctionne **sans connecteur obligatoire**. Toutes les sources de vér
 - `BACKLOG.md` / `BACKLOG-ARCHIVE.md` – tâches ouvertes / livrées
 - `SESSION.md` – contexte de la session courante
 - `ETAT-PROJET.md` – état vis-à-vis stabilité / pérennité / qualité
-- `Skills pour Claude Code/` – référence métier (skills)
+- `.claude/skills/` – référence métier (skills)
 - `Retours des testeurs/` – `SUIVI-BUGS.md`, `USAGE-FORMATS.md`
 - `docs/`, `plans de travail/`, `version.json`
 

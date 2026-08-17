@@ -29,7 +29,7 @@ Grégoire : « le calcul IDME bugge pour la pratique STD quand un artefact a un 
 | Ordre | Source | Pour quoi |
 |-------|--------|-----------|
 | 1 | `CLAUDE.md` (dépôt) | Point d'entrée : principes (zéro-dette), zones protégées, versionnage, écosystème de données, liste des skills |
-| 2 | `Skills pour Claude Code/` | Définitions canoniques (voir table ci-dessous) |
+| 2 | `.claude/skills/` | Définitions canoniques (voir table ci-dessous) |
 | 3 | `ETAT-PROJET.md` / `SESSION.md` | État courant, avancement, contexte de session |
 | 4 | `Retours des testeurs/` | Bugs et usages signalés par la première vague d'utilisateurs |
 | 5 | Demander à Grégoire | Terme inconnu de toutes les sources |
@@ -38,14 +38,14 @@ Quel skill pour quel domaine :
 
 | Domaine | Skill |
 |---------|-------|
-| Cadre pédagogique (ELLAC, SOLO, PAN, SRPNF, IDME, cartouches) | `SKILL_Ecosysteme_classe.md` |
-| Architecture, indices A-C-P-E, modules, workflow | `SKILL_labo_codex.md` |
-| Moteur de notation (familles SOM/STD/SPE/DEN, simulation, comparateur) | `SKILL_pratiques_notation.md` |
-| Dépistage, IPB, patterns, interventions | `SKILL_RaI.md` |
-| Module Alignement (carte mentale, leçons) | `SKILL_Alignement.md` |
-| Sécurité, anonymisation, intégrité, Loi 25 | `SKILL_Securite_donnees.md` |
-| Clés globales partagées | `SKILL_integrite_globaux.md`, `SKILL_hygiene_donnees_partagees.md` |
-| Vérifier un travail (auto / audit tiers) | `SKILL_verification_adverse.md` |
+| Cadre pédagogique (ELLAC, SOLO, PAN, SRPNF, IDME, cartouches) | le skill `ecosysteme-classe` |
+| Architecture, indices A-C-P-E, modules, workflow | le skill `labo-codex` |
+| Moteur de notation (familles SOM/STD/SPE/DEN, simulation, comparateur) | le skill `pratiques-notation` |
+| Dépistage, IPB, patterns, interventions | le skill `depistage-rai` |
+| Module Alignement (carte mentale, leçons) | le skill `alignement` |
+| Sécurité, anonymisation, intégrité, Loi 25 | le skill `securite-donnees` |
+| Clés globales partagées | le skill `integrite-globaux`, le skill `hygiene-donnees-partagees` |
+| Vérifier un travail (auto / audit tiers) | le skill `verification-adverse` |
 
 ## Aide-mémoire (pointeur, pas source)
 
@@ -55,7 +55,7 @@ Décodage rapide ; en cas de doute, consulter le skill canonique correspondant.
 
 **Indices** : A-C-P-E = Assiduité, Complétion, Performance, Engagement.
 
-**Familles de pratiques** : SOM (Sommative) · STD (PAN-Standards) · SPE (PAN-Spécifications) · DEN (PAN-Dénotation). *Statut d'implémentation : volatil – le lire dans `BACKLOG.md` / `SKILL_pratiques_notation.md`, ne pas le figer ici.*
+**Familles de pratiques** : SOM (Sommative) · STD (PAN-Standards) · SPE (PAN-Spécifications) · DEN (PAN-Dénotation). *Statut d'implémentation : volatil – le lire dans `BACKLOG.md` / le skill `pratiques-notation`, ne pas le figer ici.*
 
 **Écosystème de données** (4 concepts, `docs/architecture/ECOSYSTEME-DONNEES.md`) :
 - **Codex** – espace de travail actif
@@ -84,7 +84,7 @@ Suivre l'ordre de consultation ci-dessus. Couvrir CLAUDE.md + l'aide-mémoire po
 
 ### « retiens ça » / nouveau terme
 Ne **pas** créer de cache parallèle. Router vers le domicile canonique, **avec confirmation** :
-- Terme pédagogique → `SKILL_Ecosysteme_classe.md` (ou le skill du domaine).
+- Terme pédagogique → le skill `ecosysteme-classe` (ou le skill du domaine).
 - Terme/règle technique → le skill concerné, ou `CLAUDE.md` si c'est un principe transverse.
 - Fait de contexte projet → `memory/context/` (dépôt) ou `ETAT-PROJET.md`.
 - Préférence de travail de Grégoire → `SKILL_profil_gregoire.md` (dossier Cowork) si présent.

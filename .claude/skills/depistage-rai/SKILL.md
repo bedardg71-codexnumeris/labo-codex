@@ -1,3 +1,14 @@
+---
+name: depistage-rai
+description: >
+  Dépistage SOLO et réponse à l'intervention (RàI) dans Labo Codex. Utiliser ce
+  skill dès qu'il est question de dépistage, d'interventions, de suivi des
+  élèves, de niveaux RàI, d'IPB, de patterns d'apprentissage, de trajectoire de
+  progression, de SOLO appliqué au dépistage, ou du module interventions.js.
+  Aussi quand Grégoire ou un utilisateur mentionne le formulaire
+  d'intervention, les sous-groupes, ou le suivi à travers les productions.
+---
+
 # Skill — Réponse à l'intervention (RàI) dans Labo Codex
 
 > **Déclenchement** : Utiliser ce skill dès qu'il est question de dépistage, d'interventions, de suivi des élèves, de niveaux RàI, d'IPB, de patterns d'apprentissage, de trajectoire de progression, de SOLO appliqué au dépistage, ou du module interventions.js. Aussi quand Grégoire ou un utilisateur mentionne le formulaire d'intervention, les sous-groupes, ou le suivi à travers les productions.
@@ -55,7 +66,7 @@ Le processus teach-test-revise-test de Fuchs : enseigner, évaluer la réponse, 
 
 ### La taxonomie SOLO comme fondement universel
 
-Le dépistage repose sur les niveaux taxonomiques SOLO, qui sont indépendants de la discipline. La correspondance complète SOLO ↔ IDME (seuils et valeurs normalisées) est définie dans `SKILL_Ecosysteme_classe.md` (propriétaire désigné par `CLAUDE.md`). Interprétation propre au dépistage :
+Le dépistage repose sur les niveaux taxonomiques SOLO, qui sont indépendants de la discipline. La correspondance complète SOLO ↔ IDME (seuils et valeurs normalisées) est définie dans le skill `ecosysteme-classe` (propriétaire désigné par `CLAUDE.md`). Interprétation propre au dépistage :
 
 | Niveau SOLO | Seuil IDME | Interprétation dans le dépistage |
 |-------------|-----------|----------------------------------|

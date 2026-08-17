@@ -309,7 +309,7 @@ Expressions qui doivent déclencher une pause et une vérification :
 > opérationnels : adapter au langage cible, construire des regex valides
 > (échapper `.` et `(`, gérer les espaces avec `\s*`), tester chaque regex
 > sur des fichiers connus avant de s'en servir comme audit. **Voir le skill
-> projet** pour les regex testées : ex. `SKILL_integrite_globaux.md` §5
+> projet** pour les regex testées : ex. le skill `integrite-globaux` §5
 > (commandes `grep` exactes pour Labo Codex).
 
 ---
@@ -324,7 +324,7 @@ modules, incidents réels, fonctions de référence).
 
 | Projet | Skill enfant | Domaine d'instanciation |
 |---|---|---|
-| Labo Codex | `SKILL_integrite_globaux.md` | Collections globales `cours`, `enseignants`, `cartouches_*` + collections multi-sources namespacées `grillesTemplates`, `echellesTemplates` (namespacées par trimestre depuis #358, 28 juin 2026). Modules : `demo-activation.js`, `reserve.js`, `import-export.js`. |
+| Labo Codex | le skill `integrite-globaux` | Collections globales `cours`, `enseignants`, `cartouches_*` + collections multi-sources namespacées `grillesTemplates`, `echellesTemplates` (namespacées par trimestre depuis #358, 28 juin 2026). Modules : `demo-activation.js`, `reserve.js`, `import-export.js`. |
 
 (Mettre à jour quand un nouveau skill enfant naît.)
 
@@ -333,7 +333,7 @@ modules, incidents réels, fonctions de référence).
 - **Si un skill enfant existe pour le projet en cours, le charger EN
   COMPLÉMENT de ce parent**, pas en remplacement. Le parent fournit les
   principes universels ; l'enfant la connaissance contextuelle.
-- **Si tu charges un skill enfant** (ex. `SKILL_integrite_globaux.md`),
+- **Si tu charges un skill enfant** (ex. le skill `integrite-globaux`),
   charger aussi automatiquement ce parent (principes + barème §2/P5).
 - Ordre de lecture en urgence : (1) parent §4 checklist + gate de sortie ;
   (2) enfant §3-5 patterns concrets et regex testées ; (3) parent §2/§3 si
@@ -350,7 +350,7 @@ pour vérifier qu'il en tient compte.
 ---
 
 **Date de création** : 26 avril 2026
-**Origine** : extraction des principes de `SKILL_integrite_globaux.md`,
+**Origine** : extraction des principes du skill `integrite-globaux`,
 lui-même né de l'incident du 24 avril 2026 (perte silencieuse de données
 par collision d'IDs dans un stockage partagé).
 **Révision attendue** : à chaque découverte d'un nouveau pattern
