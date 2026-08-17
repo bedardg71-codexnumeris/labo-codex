@@ -475,6 +475,6 @@ le cœur du skill, pas un principe parmi d'autres.
 13-14 juin 2026 (travail autonome puis collaboratif de l'IA), où 7 break-tests
 ont qualifié les sentinelles et où le défaut le plus utile (#340, protection à
 l'import mais pas au changement de trimestre) a émergé d'une couture entre
-chantiers. Analyse complète : `.claude/skills/ANALYSE-verification-adverse.md`.
+chantiers. Analyse complète : `.claude/skills/verification-adverse/ANALYSE-verification-adverse.md`.
 **Révision attendue** : à chaque découverte d'un nouveau motif d'attestation
 trompeuse ou de défaut transversal, quel que soit le projet.
