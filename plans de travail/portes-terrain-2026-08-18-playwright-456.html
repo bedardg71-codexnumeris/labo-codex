@@ -335,52 +335,55 @@ ol.erreurs b { color: var(--ink); }
 <div class="enveloppe">
 
 <header class="chapeau">
-  <p class="eyebrow">Portes terrain · 18 août 2026 · #456 + #418 · 4ᵉ passe</p>
+  <p class="eyebrow">Portes terrain · 18 août 2026 · #456 + #418 · CLOSE</p>
   <h1>La passe WebKit des specs Playwright</h1>
   <p class="sous-titre">
-    Ton diagnostic embarqué a parlé : <b>433, zéro guide, drag vivant</b> —
-    ni aimantation, ni frame en retard : WebKit avale le dernier mouvement
-    d'un trajet groupé. Le trajet est maintenant livré pas à pas, dernier
-    mouvement doublé. <b>Deux minutes, deux fichiers — et si tout est vert,
-    la baseline tombe à 0 et #456 se ferme.</b>
+    <b>Close en quatre passes, toutes le même jour : 9/9 en WebKit, baseline
+    à 0, #456 fermé.</b> Les six rouges du 12 août étaient toutes des dérives
+    de test ou des défauts de harnais — <b>zéro bug d'application</b>. Cette
+    page reste comme trace ; plus aucune rangée n'est due.
   </p>
   <div class="meta">
-    <span>app 1.87.5 (inchangée)</span><span>4ᵉ passe</span>
-    <span>3 vérifications</span><span>2 mesures</span><span>0 décision</span>
+    <span>app 1.87.5</span><span>CLOSE</span>
+    <span>4 passes</span><span>9/9 WebKit</span><span>baseline 0</span>
   </div>
 </header>
 
 <div class="alerte" style="border-left-color:var(--ok);background:var(--ok-soft)">
-  <h3>Ce que ta 3ᵉ passe a établi</h3>
+  <h3>Le bilan des quatre passes — tes relevés ont tout tranché</h3>
   <p>
-    <b>Alt/⌥ est VERTE en WebKit</b> — la réécriture tient. (⚠ Ta porte 2.10
-    est revenue cochée ✗, mais ta mesure la contredit : « 8 passés / 1 échec,
-    l'échec : planif-alignement » — Alt/⌥ n'était pas dans les échecs. La
-    mesure fait foi.) Et ton relevé du diagnostic a départagé tes deux
-    hypothèses de la 2ᵉ passe : <b>c'est la première</b> — 433 = 440 moins
-    UN pas de souris (~6,7 px), zéro guide (donc aucun snap), drag vivant.
-    Le 426 de la 1ʳᵉ passe manquait deux pas, le 433 en manquait un :
-    <b>WebKit ne livre pas le dernier <code>pointermove</code> d'un trajet
-    groupé.</b> L'app est hors de cause.
+    <b>1ʳᵉ</b> (91/2) : quatre réparations confirmées, le « 5 des 6 » démasqué,
+    l'aimantation mesurée. <b>2ᵉ</b> (7/2 + suite complète stable) : ta ligne
+    SONDE a prouvé qu'Alt/⌥ n'était pas un bug d'app ; ton 400 a posé la bonne
+    question. <b>3ᵉ</b> (8/1) : Alt/⌥ verte ; ton diagnostic (433, zéro guide,
+    drag vivant) a désigné le dernier <code>pointermove</code> avalé par
+    WebKit. <b>4ᵉ</b> : <b>9 passés, 54,1 s, aucun échec.</b>
   </p>
 </div>
 
 <div class="alerte">
-  <h3>Ce qui a changé depuis</h3>
+  <h3>La baseline est à 0 — et le garde-fou redevient strict</h3>
   <p>
-    Le trajet du test est livré <b>pas à pas</b> (le patron du CAS D, vert
-    chez toi), le mouvement final émis <b>deux fois</b>. Et l'assertion vise
-    l'invariant réel : « aucune aimantation à 40 px » s'affirme par
-    <b>zéro guide + position loin de 400</b> (un snap rendrait 400), plus
-    par l'arrivée au pixel près. La phase « à 4 px » garde son égalité
-    stricte : c'est le snap lui-même qui pose la position. 3/3 verts en
-    Chromium.
+    Transcrite de deux mesures : ton 9/9 sur les deux dernières specs, et ta
+    passe complète de la 2ᵉ passe (diff vide sur 87 tests) — rien d'autre n'a
+    changé entre les deux. Désormais, <b>toute</b> rougeur Playwright bloque
+    le push sur ton Mac. La sentinelle lancée en conteneur répond « WebKit
+    introuvable » et n'écrit rien (vérifié) : si tu relances
+    <code>--ecrire</code> sur le Mac, l'attendu est identique — 0 — et c'est
+    lui qui fait foi.
   </p>
 </div>
 
 <div class="alerte attention">
-  <h3>Toute la liste est du Terminal</h3>
-  <p>App <b>Terminal</b>, jamais la console du navigateur.</p>
+  <h3>Ce que la campagne laisse derrière elle</h3>
+  <p>
+    La config <code>tests/playwright.chromium.config.js</code> donne aux
+    sessions cloud un moteur de reproduction ciblée, avec sa leçon écrite
+    dedans : <b>un vert Chromium est un indice, jamais un verdict Safari</b> —
+    deux prédictions de vert sont tombées en une journée pour l'avoir oublié.
+    Et #418 (livré en 1.87.5) garde son angle mort documenté : éprouvé au
+    banc, pas sur un vrai Safari en navigation privée.
+  </p>
 </div>
 
 <div class="bord">
@@ -392,7 +395,7 @@ ol.erreurs b { color: var(--ink); }
     <span class="jeton">décisions <b id="n-dec">0</b></span>
   </div>
   <div class="barre-progres" aria-hidden="true">
-    <i class="p-ok" id="p-ok" style="width:0"></i><i class="p-ko" id="p-ko" style="width:0"></i>
+    <i class="p-ok" id="p-ok" style="width:100%"></i><i class="p-ko" id="p-ko" style="width:0"></i>
   </div>
   <div class="filtres" id="filtres">
     <button data-f="tout" aria-pressed="true">Tout</button>
@@ -405,10 +408,8 @@ ol.erreurs b { color: var(--ink); }
 
 <section class="releve">
   <h2>Copier mes résultats</h2>
-  <p>
-    Ton avancement vit dans <b>ton</b> navigateur : je ne peux pas le lire.
-    Clique, puis colle-moi le texte.
-  </p>
+  <p>Porte close — plus rien à relever. Le bouton reste fonctionnel si tu
+  veux recopier l'état final.</p>
   <div class="actions">
     <button class="btn" id="btn-copier">Copier mes résultats</button>
     <button class="btn secondaire" id="btn-tout-effacer">Tout réinitialiser</button>
@@ -421,48 +422,20 @@ ol.erreurs b { color: var(--ink); }
 
 <script>
 // =====================================================================
-// 4ᵉ passe — possiblement la dernière.
+// PORTE CLOSE — aucune rangée due. La trace complète vit dans
+// plans de travail/PORTES-TERRAIN-2026-08-18-playwright-456.md.
 // =====================================================================
 const DATA = [
-{ num:"§0", titre:"Avant de commencer", portes:[
-  { ref:"0.1", t:"préalable", fam:"toutes", titre:"Récupérer le correctif de trajet",
-    pourquoi:"La réparation vit dans les fichiers de test de ton clone. L'app ne bouge pas.",
-    rangs:[
-      { id:"p4-01a", geste:"App <b>Terminal</b>, dossier <code>Monitorage_v6</code> :<br><code>git checkout main &amp;&amp; git pull origin main</code>, puis <code>git log --oneline -1</code>",
-        attendu:"<code>Fast-forward</code>, et le dernier commit mentionne la <b>4ᵉ passe</b>.", tags:["Terminal"] }
-    ]}
-]},
-
-{ num:"§2", titre:"La 4ᵉ passe — deux fichiers, ~2 minutes", portes:[
-  { ref:"2.12", t:"#456", fam:"toutes", titre:"Relancer les deux fichiers",
-    pourquoi:"Ton diagnostic a désigné le trajet groupé de la souris ; le correctif livre les pas un à un et double le dernier. ⚠ Prédiction éprouvée en Chromium seulement — un ✗ est une information, et son message contiendra le diagnostic.",
-    rangs:[
-      { id:"p4-12a", geste:"App <b>Terminal</b>, dossier <code>Monitorage_v6/tests</code> :<br><code>npx playwright test integration/planif-alignement.spec.js integration/planif-toolbar.spec.js</code>",
-        attendu:"<b>9 passed / 0 failed</b> (~2 minutes).", tags:["Terminal"] },
-      { id:"p4-12m", mesure:true, label:"MESURE — recopie la ligne de bilan ; si un échec subsiste, son message EN ENTIER (avec la ligne « diagnostic : {…} »)",
-        placeholder:"ex. « 9 passed (1.9m) » — ou le bloc d'erreur complet", aide:"La mesure fait foi, pas la prédiction." }
-    ]},
-
-  { ref:"2.13", t:"baseline → 0", fam:"toutes", titre:"Éteindre la dette — seulement si 2.12 est 9/9",
-    pourquoi:"Une baseline vide, c'est #456 fermé : plus aucune rougeur connue, et le garde-fou de push redevient strict sur TOUTE rougeur. C'est la fin visée depuis le 12 août.",
-    rangs:[
-      { id:"p4-13a", geste:"<b>SEULEMENT si 2.12 est 9/9</b> — app <b>Terminal</b>, dossier <code>Monitorage_v6</code> :<br><code>node scripts/verifier-playwright.mjs --ecrire</code>, puis committer/pousser (ou le demander à ta session Claude du Mac).",
-        attendu:"la suite complète tourne (~4 min) puis : <b>totalEchecsConnus : 0</b>.", tags:["Terminal"] },
-      { id:"p4-13m", mesure:true, label:"MESURE — recopie le nouveau « totalEchecsConnus » (et la liste s'il en reste)",
-        placeholder:"ex. totalEchecsConnus: 0", aide:"À 0, #456 se ferme — je cocherai l'item au BACKLOG au retour de ce relevé." }
-    ]}
-]},
-
-{ num:"§4", titre:"Ce que je n'ai pas pu vérifier", angles:[
-  { titre:"Le correctif de trajet n'a tourné qu'en Chromium",
-    texte:"Il suit ton diagnostic mesuré (433 = un pas manquant, zéro guide, drag vivant) et le patron du CAS D, vert chez toi. Mais WebKit reste le juge — c'est la rangée 2.12." },
-  { titre:"Si WebKit avalait AUSSI le mouvement doublé",
-    texte:"Rien ne l'indique, rien ne l'exclut. L'assertion tolérante (position > 425, zéro guide) tient tant qu'au moins 4 pas sur 6 sont livrés — tes deux passes mesurées en livraient 4 et 5." }
+{ num:"✅", titre:"Close le 18 août 2026 — rien n'est dû", angles:[
+  { titre:"Quatre passes, un jour, zéro bug d'app",
+    texte:"Badge #366 retiré qu'une spec attendait · API <code>mettreAJourSommaire</code> renommée · fixture au format d'avant #367 · prise de drag sur le menu de type 1.86 · modificateur ⌥ non transporté par Playwright-WebKit (prouvé par ta sonde) · dernier <code>pointermove</code> d'un trajet groupé avalé par WebKit (prouvé par ton diagnostic : 433 = un pas manquant, zéro guide, drag vivant)." },
+  { titre:"Notes de relevé, pour la méthode",
+    texte:"3ᵉ passe : la coche ✗ de la porte 2.10 contredisait la mesure jointe — la mesure fait foi, pas la coche. 4ᵉ passe : le bilan a été saisi dans le champ 2.13m au lieu de 2.12m — sans conséquence, les données y étaient. Le modèle tient : ce sont les MESURES recopiées qui ont porté les quatre diagnostics, jamais les coches." }
 ]}
 ];
 
 const ERREURS = [
-  "<b>Deux prédictions de vert infirmées en deux passes (Alt/⌥ à la 1ʳᵉ, l'aimantation à la 2ᵉ)</b> — chaque fois sur la foi du seul moteur du conteneur. La leçon est actée dans la config Chromium elle-même : un vert Chromium est un indice, jamais un verdict Safari. C'est pour ça que cette 4ᵉ passe annonce sa prédiction comme telle, avec le diagnostic embarqué en filet."
+  "<b>Deux prédictions de vert infirmées (Alt/⌥ à la 1ʳᵉ passe, l'aimantation à la 2ᵉ)</b>, chaque fois sur la foi du seul moteur du conteneur — leçon désormais écrite dans la config Chromium elle-même."
 ];
 
 // ── État ─────────────────────────────────────────────────────────────
@@ -646,7 +619,7 @@ function construireReleve() {
   const ok = verifs.filter(r => (etat[r.id]||{}).etat === 'ok').length;
   const ko = verifs.filter(r => (etat[r.id]||{}).etat === 'ko').length;
   const L = [];
-  L.push('PORTES TERRAIN — Passe WebKit des specs Playwright, #456 + #418 — 4ᵉ passe (18 août 2026)');
+  L.push('PORTES TERRAIN — Passe WebKit des specs Playwright, #456 + #418 — CLOSE (18 août 2026)');
   L.push('Version visée : 1.87.5 · build 0818-1113');
   L.push('Cycle 1.87.3 → 1.87.5');
   L.push('');
