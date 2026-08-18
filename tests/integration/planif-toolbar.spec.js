@@ -231,77 +231,65 @@ test('Alt/⌥+glisser un bloc — crée un doublon qui suit la souris, la source
         const n = window.planificationCarte.etat.noeuds.get('actAlt1');
         return { x: n.x, y: n.y };
     });
-    // ⚠ Saisir le bloc par sa POIGNÉE ⠿ (coin supérieur gauche, 1.85-1.86) :
-    // c'est la seule prise SÛRE. Le centre de l'en-tête porte désormais le
-    // MENU DE TYPE (1.86), qui stoppe la propagation par conception — y
-    // pointer ne déclenche ni glissement ni duplication. Mesuré à la sonde
-    // (#456) : elementFromPoint(centre-haut) = select.planif-noeud-type-select.
-    const prise = await page.locator('#actAlt1 .planif-noeud-prise').boundingBox();
-    expect(prise).not.toBeNull();
-    const px = prise.x + prise.width / 2;
-    const py = prise.y + prise.height / 2;
-    await page.keyboard.down('Alt');
-    await page.mouse.move(px, py);
-    await page.mouse.down();
-    await page.mouse.move(px + 150, py + 90, { steps: 5 });
-    // Laisser le dernier pointermove passer son requestAnimationFrame AVANT
-    // de mesurer : en headless, mesurer trop tôt rend la position d'une
-    // frame intermédiaire.
-    await page.waitForTimeout(250);
-    // Mesurer PENDANT le drag (même idiome que le CAS D de
-    // planif-drag-pointer-148) : au relâchement, un dépôt sur un conteneur de
-    // la carte démo re-layouterait la copie et fausserait la position.
-    const apres = await page.evaluate(() => {
+    // ⚠⚠ GESTE PILOTÉ AU NIVEAU DES POINTEREVENT — décision fondée sur la
+    // SONDE de la 2ᵉ passe Mac (18 août 2026), verdict mesuré en WebKit :
+    // « un pointerdown synthétique altKey:true CRÉE la copie — le chemin
+    // applicatif marche dans ce moteur ; c'est le modificateur ⌥ qui ne
+    // voyage pas avec la souris du harnais. » Autrement dit :
+    // `keyboard.down('Alt')` + `mouse.*` de Playwright n'attachent PAS
+    // altKey aux événements de pointeur en WebKit — le même geste réel
+    // marche dans Safari, et le même chemin de code répond aux événements.
+    // On dispatche donc les événements que le navigateur AURAIT produits :
+    //   · pointerdown altKey:true sur la POIGNÉE ⠿ (le centre de l'en-tête
+    //     porte le MENU DE TYPE 1.86, qui stoppe la propagation) ;
+    //   · pointermove sur document (c'est là que le drag écoute), même
+    //     pointerId — le drag filtre dessus —, une frame rAF entre chaque
+    //     (le déplacement est throttlé par requestAnimationFrame) ;
+    //   · mesure PENDANT le drag (un dépôt re-layouterait), puis pointerup.
+    // La mécanique du drag à la VRAIE souris reste couverte par le CAS D de
+    // planif-drag-pointer-148, vert en WebKit.
+    const apres = await page.evaluate(async () => {
+        const attendreFrame = () => new Promise((r) => requestAnimationFrame(() => r()));
+        const el = document.getElementById('actAlt1');
+        const poignee = el && el.querySelector('.planif-noeud-prise');
+        if (!poignee) return { erreur: 'poignée .planif-noeud-prise introuvable' };
+        const r = poignee.getBoundingClientRect();
+        const x0 = r.x + r.width / 2, y0 = r.y + r.height / 2;
+        const opts = {
+            bubbles: true, cancelable: true, button: 0, isPrimary: true,
+            pointerId: 77, pointerType: 'mouse'
+        };
+        poignee.dispatchEvent(new PointerEvent('pointerdown', {
+            ...opts, altKey: true, clientX: x0, clientY: y0
+        }));
+        for (let i = 1; i <= 5; i++) {
+            document.dispatchEvent(new PointerEvent('pointermove', {
+                ...opts, clientX: x0 + i * 30, clientY: y0 + i * 18
+            }));
+            await attendreFrame();
+            await attendreFrame();
+        }
         const noeuds = Array.from(window.planificationCarte.etat.noeuds.values());
         const source = noeuds.find(n => n.id === 'actAlt1');
         const copie = noeuds.find(n => n.id !== 'actAlt1' && n.titre === 'Activité à dupliquer');
-        return {
+        const mesure = {
             total: noeuds.length,
             source: { x: source.x, y: source.y },
             copie: copie ? { titre: copie.titre, x: copie.x, y: copie.y, cloneSourceId: copie.cloneSourceId || null } : null
         };
+        document.dispatchEvent(new PointerEvent('pointerup', {
+            ...opts, clientX: x0 + 150, clientY: y0 + 90
+        }));
+        return mesure;
     });
-    await page.mouse.up();
-    await page.keyboard.up('Alt');
     await page.waitForTimeout(300);
-
-    // ⚠ SONDE DE DIAGNOSTIC (relevé Mac du 18 août 2026 : « le clone
-    // Alt+glisser jamais créé » en WEBKIT, alors que ce même test est vert en
-    // Chromium — et que le CAS D, même prise sans Alt, passe en WebKit).
-    // Elle ne s'exécute QUE si le geste n'a rien créé, et son verdict part
-    // dans le message d'échec : un pointerdown SYNTHÉTIQUE altKey:true sur la
-    // poignée emprunte le même chemin applicatif SANS passer par l'entrée
-    // souris du harnais. S'il crée la copie, c'est le MODIFICATEUR ⌥ qui ne
-    // voyage pas avec la souris dans ce moteur (harnais) ; s'il ne crée rien,
-    // c'est le chemin applicatif lui-même qui ne duplique pas dans ce moteur.
-    let diagnostic = '';
-    if (!apres.copie) {
-        diagnostic = await page.evaluate(() => {
-            const el = document.getElementById('actAlt1');
-            const poignee = el && el.querySelector('.planif-noeud-prise');
-            if (!poignee) return 'SONDE : poignée .planif-noeud-prise INTROUVABLE sur le bloc.';
-            const r = poignee.getBoundingClientRect();
-            const avantSonde = window.planificationCarte.etat.noeuds.size;
-            poignee.dispatchEvent(new PointerEvent('pointerdown', {
-                bubbles: true, cancelable: true, button: 0, isPrimary: true,
-                pointerId: 99, pointerType: 'mouse', altKey: true,
-                clientX: r.x + r.width / 2, clientY: r.y + r.height / 2
-            }));
-            window.dispatchEvent(new PointerEvent('pointerup', {
-                bubbles: true, pointerId: 99, pointerType: 'mouse'
-            }));
-            const apresSonde = window.planificationCarte.etat.noeuds.size;
-            return apresSonde > avantSonde
-                ? 'SONDE : un pointerdown synthétique altKey:true CRÉE la copie — le chemin applicatif marche dans ce moteur ; c\'est le modificateur ⌥ qui ne voyage pas avec la souris du harnais.'
-                : 'SONDE : même un pointerdown synthétique altKey:true ne crée RIEN — le chemin applicatif lui-même ne duplique pas dans ce moteur.';
-        });
-    }
 
     // Un doublon existe. ⚠ Depuis 1.87 (décision du 16 août), ⌥ SEUL rend une
     // COPIE INDÉPENDANTE — pas un clone lié : cloneSourceId doit être vide.
     // (⇧⌥ rend le clone ; l'ancienne assertion `cloneSourceId === source` est
     // précisément ce que la 1.87 a changé.)
-    expect(apres.copie, 'aucun doublon créé par ⌥+glisser. ' + diagnostic).not.toBeNull();
+    expect(apres.erreur).toBeUndefined();
+    expect(apres.copie, 'aucun doublon créé par ⌥+glisser (pointerdown altKey dispatché sur la poignée)').not.toBeNull();
     expect(apres.total).toBe(avant + 1);
     expect(apres.copie.titre).toBe('Activité à dupliquer');
     expect(apres.copie.cloneSourceId).toBeNull();
