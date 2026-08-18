@@ -76,6 +76,12 @@ fi
 
 # Quels fichiers ce push emporte-t-il ? git alimente stdin avec une ligne par
 # ref : « <ref locale> <sha local> <ref distante> <sha distant> ».
+#
+# ⚠ Sur un push REJETÉ (non-fast-forward, branche en retard), git n'envoie
+# AUCUNE ligne : la boucle ne tourne pas, et la sentinelle annonce « sans objet »
+# alors qu'elle aurait dû partir. Observé le 18 août 2026, et d'abord pris pour
+# un bug du filtrage. Ce n'en est pas un — le push échoue de toute façon, et la
+# sentinelle fait son travail au push suivant, celui qui aboutit.
 NUL='0000000000000000000000000000000000000000'
 FICHIERS=''
 LANCER=0
