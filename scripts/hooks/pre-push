@@ -6,10 +6,23 @@
 # push si un test rouge — c'est la dernière ligne de défense avant que
 # du code régressé atteigne origin.
 #
-# La suite Playwright (intégration browser-real) n'est PAS dans ce hook
-# parce qu'elle prend ~4 s et que la suite unit (~9 s) couvre déjà le
-# cœur des régressions sécurité (sanitisation, validation imports,
-# whitelist exports, hash CSP, lint statique).
+# La suite Playwright (intégration browser-real) EST dans ce hook depuis le
+# 18 août 2026, en seconde étape et sous conditions. Le commentaire qu'elle
+# remplace disait qu'elle « prend ~4 s » : c'était vrai en mai, elle prend
+# aujourd'hui ~4 MINUTES. Personne ne l'a relancée entre les deux, ce qui est
+# précisément le défaut décrit en #456 — six specs ont rougi en silence
+# pendant que Vitest restait vert.
+#
+# Trois conditions, parce qu'un hook inapplicable se contourne au lieu de
+# servir :
+#   1. il ne part QUE si le push touche du code observable au navigateur
+#      (js/, index.html, styles.css, tests/integration/) — un push
+#      documentaire ne paie pas 4 minutes ;
+#   2. il ne juge que par rapport à `scripts/playwright-baseline.json`, le
+#      cliché de la dette connue de #456 : seule une rougeur NOUVELLE bloque,
+#      sinon il refuserait tout push dès son installation ;
+#   3. il passe (fail-open) là où WebKit n'existe pas — tous les conteneurs.
+#      Le Mac de Grégoire est le seul poste capable de rendre ce verdict.
 #
 # Pré-requis : `tests/node_modules/` installé. Si absent, le hook le
 # détecte et passe (fail-open) — un développeur qui n'a pas installé
@@ -51,4 +64,63 @@ if [ $CODE -ne 0 ]; then
 fi
 
 printf "${VERT}✓ Hook pré-push : suite Vitest verte.${RAZ}\n"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Étape 2 — sentinelle Playwright (#456)
+# ─────────────────────────────────────────────────────────────────────────────
+
+if [ "${SKIP_PLAYWRIGHT:-0}" = "1" ]; then
+    printf "${JAUNE}⚠ Sentinelle Playwright : sautée (SKIP_PLAYWRIGHT=1).${RAZ}\n"
+    exit 0
+fi
+
+# Quels fichiers ce push emporte-t-il ? git alimente stdin avec une ligne par
+# ref : « <ref locale> <sha local> <ref distante> <sha distant> ».
+NUL='0000000000000000000000000000000000000000'
+FICHIERS=''
+LANCER=0
+
+while read -r _ref_locale sha_local _ref_distante sha_distant; do
+    # Suppression de branche : rien n'est poussé, rien à vérifier.
+    [ "$sha_local" = "$NUL" ] && continue
+
+    if [ "$sha_distant" = "$NUL" ]; then
+        # Branche neuve : aucune plage calculable. On lance — se taire ici
+        # reviendrait à ne jamais vérifier une branche fraîche, ce qui est
+        # exactement le cas où une régression passe.
+        LANCER=1
+        break
+    fi
+
+    FICHIERS="$FICHIERS$(git diff --name-only "$sha_distant" "$sha_local" 2>/dev/null)
+"
+done
+
+if [ $LANCER -eq 0 ]; then
+    if printf '%s' "$FICHIERS" | grep -qE '^(js/|index\.html|styles\.css|tests/integration/|scripts/verifier-playwright\.mjs|scripts/playwright-baseline\.json)'; then
+        LANCER=1
+    fi
+fi
+
+if [ $LANCER -eq 0 ]; then
+    printf "${VERT}✓ Sentinelle Playwright : sans objet (aucun fichier observable au navigateur dans ce push).${RAZ}\n"
+    exit 0
+fi
+
+node "$REPO_ROOT/scripts/verifier-playwright.mjs"
+CODE_PW=$?
+
+# 1 = rougeur NOUVELLE, la seule qui bloque.
+if [ $CODE_PW -eq 1 ]; then
+    exit 1
+fi
+
+# 2 = verdict impossible (WebKit absent, suite qui ne démarre pas). On laisse
+# passer, mais on le DIT : un « impossible à juger » silencieux se confond avec
+# un « tout va bien », et c'est comme ça que #456 est né.
+if [ $CODE_PW -eq 2 ]; then
+    printf "${JAUNE}⚠ Sentinelle Playwright : verdict impossible ici — push laissé passer.${RAZ}\n"
+    printf "  Ces specs ne sont vérifiables que sur un poste avec WebKit.\n"
+fi
+
 exit 0
