@@ -16,12 +16,15 @@
      (exécution de `finaliser-chantier.sh`, parties A puis B) :
      `workers:1` et le chantier Cowork commités (`9be1daf7`) · les 114 lignes
      dormantes commitées ET poussées (`wonderful-galileo` 4 fichiers — Brique C
-     `inspireDe` structuré + copie profonde, NON FUSIONNÉ dans main, à relire
-     avant intégration ; `zen-lichterman` 1 fichier) · `git gc` des 3
+     `inspireDe` structuré + copie profonde, **INTÉGRÉE dans `main`** par le
+     cherry-pick `ca7564bb` : la branche distante a été SUPPRIMÉE le 18 août,
+     il n'y a plus rien à relire ; `zen-lichterman` 1 fichier, même HEAD
+     `8aa0afc3` — le même doublon mort, lui toujours sur origin) · `git gc` des 3
      `tmp_obj_*` · purge de l'en-tête `BACKLOG.md` · subagent
      `audit-debut-session` en place · **les 5 worktrees sont RETIRÉS**
      (~375 Mo libérés, `.claude` = 428 Ko). Toutes les branches `claude/*`
-     sont sur origin ; le point « triage des worktrees » du signet est RÉGLÉ.
+     sont sur origin — moins `wonderful-galileo-cb9785`, retirée depuis ;
+     le point « triage des worktrees » du signet est RÉGLÉ.
      ⚠ Correctif préalable à la purge : `bold-wilson` et `lucid-lovelace`
      portaient un symlink `tests/node_modules` commité (mode 120000) mais
      absent de l'arbre — le ` D` bloquait le garde-fou ; retiré par un
@@ -41,9 +44,14 @@
 
      ⏳ **RESTE** : (Grégoire, sur claude.ai) supprimer le skill compte
      `design-interface` (source custom, modifié 2026-08-17 18:05) — son
-     contenu est rapatrié dans le dépôt depuis `76c74fb8` · relire/intégrer
-     la Brique C de `claude/wonderful-galileo-cb9785` · validations terrain
+     contenu est rapatrié dans le dépôt depuis `76c74fb8` · validations terrain
      du signet. `finaliser-chantier.sh` supprimé après usage (jamais versionné).
+     ⮕ **La Brique C sort du RESTE.** Contrôle du 18 août : ses cinq fonctions
+     (`listerTrimestresAvecPratiques`, `copierPratiqueDepuisTrimestre`,
+     `afficherPratiquesTrimestreModal`, `importerUnePratiqueTrimestre`,
+     `verifierDependancesPratique`) et sa spec sont dans `main` — le pas 5 par
+     squash-merge (`a1e42328` #62, `e38d71a9` #64), `inspireDe` par `ca7564bb`.
+     Branche supprimée d'origin dans la foulée.
      ===================================================================== -->
 
 <!-- =====================================================================
