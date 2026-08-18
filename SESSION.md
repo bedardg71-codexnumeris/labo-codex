@@ -7,9 +7,80 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 17 AOÛT 2026 (SUITE, COWORK) : FUSION, WORKTREES, SAUVEGARDE.
+     ÉTAT : **1.87.2** (build 0816-0846) — Vitest **2701/2701** (depuis `tests/`).
+     `main` @ `1307c06f`. **Le chantier skills est CLOS et FUSIONNÉ.**
+
+     ▣ **CE QUI CORRIGE LE BLOC CI-DESSOUS.** Il dit « PAS MERGÉE » : c'est
+     périmé. Les 4 tests de déclenchement sont verts (`1ad94e32`), la branche
+     est fusionnée (`adb9d744`), `main` redevient la seule branche.
+
+     ▣ **UN DÉFAUT TROUVÉ À L'AUDIT ADVERSE, CORRIGÉ (`1307c06f`).**
+     `verification-adverse/SKILL.md` ligne 478 citait
+     `.claude/skills/ANALYSE-verification-adverse.md` — chemin FAUX, le fichier
+     vit dans `verification-adverse/`. Le `perl` de migration réécrivait le
+     préfixe sans savoir que ce fichier-là partait dans un sous-dossier. Seul
+     chemin cassé sur 31 fichiers inspectés (contrôle Python avec break-test :
+     un chemin bidon est bien vu comme absent, donc le vert n'est pas aveugle).
+
+     ▣ **LES 5 WORKTREES PORTENT LA NOUVELLE STRUCTURE.** Chacun a reçu le
+     `CLAUDE.md` de 190 lignes et les 15 skills — vérifié par **SHA-256**,
+     identiques à la racine (`2676763b…`), pas par comptage de lignes. Motif :
+     ils gardaient l'ancien `CLAUDE.md` de 376 lignes, qui ORDONNE de charger
+     les 84 300 tokens de `Skills pour Claude Code/` ; toute session y
+     démarrant annulait l'économie du chantier. HEAD inchangés, aucun commit
+     créé, travail non commité intact (vérifié APRÈS coup). Réversible par
+     `git checkout -- CLAUDE.md` dans chaque worktree.
+     ⚠ Le dossier `Skills pour Claude Code/` reste PHYSIQUEMENT dans les 5
+     worktrees (le pont Cowork ne peut pas supprimer) : ~375 Mo dormants. Sans
+     effet sur les tokens — le coût venait de l'instruction, pas des fichiers.
+
+     ⚠⚠ **CE QUE L'AUDIT DES WORKTREES A RÉVÉLÉ, ET QUI VALAIT PLUS QUE LES
+     TOKENS.** 24 commits distincts n'avaient AUCUNE sauvegarde hors du Mac :
+     `bold-wilson` 20, `wonderful-galileo` 3, `zen-lichterman` 3 (les MÊMES
+     que wonderful, même HEAD `8aa0afc3`), `lucid-lovelace` 1 ;
+     `distracted-swanson` 0 (absorbé, confirme l'inventaire de juillet).
+     Dormants depuis fin juin, soit sept semaines. **Les 4 branches sont
+     maintenant poussées** (0 commit local en retard).
+     ⏳ **MAIS 114 LIGNES NE SONT TOUJOURS PAS SAUVEGARDÉES** : un `push`
+     sauve les commits, pas l'arbre de travail. `wonderful-galileo` porte
+     107 insertions/16 suppressions non commitées (Brique C : `inspireDe`
+     structuré au lieu d'une string brute, qui affichait « Inspiré de Inconnu
+     par Inconnu » ; copie PROFONDE de pratique pour garantir structurellement
+     l'invariant « source immuable »). `zen-lichterman` porte 7 insertions.
+
+     ▣ **`workers: 1` RÉCUPÉRÉ DE `zen-lichterman` VERS `main`** (fichier
+     modifié et indexé, **commit à faire en local**). `main` n'avait aucun
+     `workers` : sans lui, Playwright lance ≈ CPU/2 workers malgré
+     `fullyParallel:false`, et les specs qui partagent le localStorage de
+     l'origine `file://` se polluent → échecs non déterministes.
+
+     ⚠ **PIÈGE DE MÉTHODE À RETENIR (Cowork).** Le premier audit des worktrees
+     a rendu « 0 commit non fusionné » pour les cinq — **c'était un faux vert**.
+     Leur fichier `.git` pointe vers un chemin absolu du Mac qui n'existe pas
+     dans la VM du pont : chaque `git -C` échouait EN SILENCE et l'échec se
+     lisait comme un zéro. La bonne méthode passe par le répertoire
+     administratif du dépôt principal :
+     `git --git-dir=.git/worktrees/<nom> --work-tree=.claude/worktrees/<nom>`.
+     Sans la contre-mesure, la conclusion aurait été « worktrees vides, à
+     supprimer » — sur 24 commits non sauvegardés.
+
+     ⚠ **LIMITE DU PONT COWORK POUR GIT.** Deux incidents : un `.git/index.lock`
+     orphelin (non supprimable côté pont), puis un `git commit` refusé faute
+     d'identité (`~/.gitconfig` hors de portée), laissant 3 `tmp_obj_*` dans
+     `.git/objects/`. ⮕ **Toute opération git d'ÉCRITURE se fait dans le
+     terminal local.** Cowork édite les fichiers, le Mac commit.
+
+     ⏳ **RESTE À FAIRE** : committer `playwright.config.js` · sauver les
+     114 lignes de `wonderful`/`zen` · `git gc --prune=now` (3 `tmp_obj_*`) ·
+     purge de l'en-tête `BACKLOG.md` (21 blocs « État courant ») · subagent de
+     début de session · retrait des 5 worktrees (375 Mo).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 17 AOÛT 2026 : LES SKILLS DEVIENNENT DÉCLENCHABLES.
      ÉTAT : **1.87.2** (build 0816-0846) — Vitest **2701/2701** (268 fichiers).
-     Branche **`chantier/skills-claude-code`**, commit `8d5b517a` — PAS MERGÉE.
+     Branche **`chantier/skills-claude-code`**, commit `8d5b517a` — PAS MERGÉE. ⮕ **PÉRIMÉ : fusionnée, voir bloc ci-dessus.**
 
      ▣ **LE PATCH DE LA FICHE DE RELECTURE EST APPLIQUÉ ET COMMITÉ.** Les 13
      fichiers de `Skills pour Claude Code/` vivent désormais dans

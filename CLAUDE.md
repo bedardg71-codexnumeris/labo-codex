@@ -22,11 +22,16 @@ commit sans se voir, chacune a livré une « 1.55.0 » différente et pris les m
 identifiants de backlog. `RELAIS.md` est le seul point que toute session lit,
 quelle que soit la branche ouverte.
 
-**EN TOUT PREMIER, AU DÉBUT DE CHAQUE SESSION** : exécuter le rituel de début de
-session (skill `debut-de-session-labo-codex`). Audit factuel git + tests + version,
+**EN TOUT PREMIER, AU DÉBUT DE CHAQUE SESSION** : **déléguer le rituel au
+subagent `audit-debut-session`**, qui exécute le skill `debut-de-session-labo-codex`
+dans un contexte isolé et ne renvoie que son rapport (~500 tokens au lieu de
+~135 000 de bruit relu à chaque tour). Audit factuel git + tests + version,
 lecture ciblée de `SESSION.md`/`BACKLOG.md`, comparaison avec la prémisse de
 relance reçue. Lecture seule, aucune modification. Acté le 28 mai 2026 après un
 écart de 24 h sur le Lot A ✴.
+
+⚠ **Vitest se lance DEPUIS `tests/`**, jamais de la racine : de la racine il
+balaie `.claude/worktrees/` sans la config et rend 217 fichiers rouges.
 
 ⚠ **Lectures ciblées obligatoires.** `SESSION.md` fait ~7 600 lignes et
 `BACKLOG.md` ~1 300, avec des lignes de plusieurs milliers de caractères. **Ne
