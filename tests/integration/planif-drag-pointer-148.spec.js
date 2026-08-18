@@ -81,16 +81,26 @@ test('CAS D — un drag souris déplace un nœud libre', async ({ page }) => {
         const n = window.planificationCarte.etat.noeuds.get('p148d');
         return { x: n.x, y: n.y };
     });
-    const box = await page.locator('#p148d').boundingBox();
-    expect(box).not.toBeNull();
-    await page.mouse.move(box.x + box.width / 2, box.y + 10);
+    // ⚠ Saisir le bloc par sa POIGNÉE ⠿ (coin supérieur gauche, 1.85-1.86) :
+    // le centre de l'en-tête porte désormais le MENU DE TYPE (1.86), qui
+    // stoppe la propagation par conception — y pointer ne glisse pas (#456).
+    const prise = await page.locator('#p148d .planif-noeud-prise').boundingBox();
+    expect(prise).not.toBeNull();
+    const px = prise.x + prise.width / 2;
+    const py = prise.y + prise.height / 2;
+    await page.mouse.move(px, py);
     await page.mouse.down();
     // Pas espacés d'attentes : le drag est throttlé par requestAnimationFrame,
     // et le headless ne produit pas de frame entre des moves consécutifs.
     for (let i = 1; i <= 7; i++) {
-        await page.mouse.move(box.x + box.width / 2 + i * 20, box.y + 10 + i * 13);
+        await page.mouse.move(px + i * 20, py + i * 13);
         await page.waitForTimeout(40);
     }
+    // Laisser le DERNIER pointermove passer son requestAnimationFrame avant de
+    // mesurer : mesuré trop tôt, l'état rend la position d'une frame
+    // intermédiaire — le 18 août, le test échouait à la frontière exacte
+    // (+100 mesuré pour un seuil strict à +100, 5 frames sur 7 traitées).
+    await page.waitForTimeout(250);
     // Mesurer PENDANT le drag : au relâchement, un dépôt sur un conteneur de
     // la carte démo re-layouterait le bloc et fausserait la position.
     const pendant = await page.evaluate(() => {

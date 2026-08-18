@@ -62,22 +62,20 @@ test('plein écran carte mentale — titre de section masqué, module seul visib
     await montrerCarteMentale(page);
 
     const h2 = page.locator('#conception-carte > h2');
-    // Deux lignes text-muted depuis le 4 août : sous-titre + note « En évolution » (#366).
+    // Le badge « En évolution » (#366) est RETIRÉ depuis le 9 août 2026 — la
+    // spec l'attendait encore et c'est ce qui l'a mise en rouge (#456).
     const sousTitres = page.locator('#conception-carte > p.text-muted');
-    const badge = page.locator('#conception-carte .planif-badge-evolution');
 
-    // État normal : titre, badge « En évolution » (#366) et sous-titres sont là.
+    // État normal : titre et sous-titre sont là.
     await expect(h2).toBeVisible();
-    await expect(badge).toBeVisible();
     await expect(sousTitres.first()).toBeVisible();
 
     // Entrer en plein écran par le vrai bouton (dispatcher data-action).
     await page.click('#planif-btn-plein-ecran');
     await page.waitForTimeout(300);
 
-    // 1. Le titre, le badge et les deux lignes de sous-titre disparaissent.
+    // 1. Le titre et le sous-titre disparaissent.
     await expect(h2).toBeHidden();
-    await expect(badge).toBeHidden();
     const nbSousTitres = await sousTitres.count();
     for (let i = 0; i < nbSousTitres; i++) {
         await expect(sousTitres.nth(i)).toBeHidden();
@@ -229,41 +227,57 @@ test('Alt/⌥+glisser un bloc — crée un doublon qui suit la souris, la source
         el.style.top = n.y + 'px';
     });
     await page.waitForTimeout(200);
-    const box = await page.locator('#actAlt1').boundingBox();
     const posAvant = await page.evaluate(() => {
         const n = window.planificationCarte.etat.noeuds.get('actAlt1');
         return { x: n.x, y: n.y };
     });
-    // Saisir le bloc par son EN-TÊTE : le centre est le titre contenteditable,
-    // que le drag (normal comme Alt) ignore par conception (clic = édition).
+    // ⚠ Saisir le bloc par sa POIGNÉE ⠿ (coin supérieur gauche, 1.85-1.86) :
+    // c'est la seule prise SÛRE. Le centre de l'en-tête porte désormais le
+    // MENU DE TYPE (1.86), qui stoppe la propagation par conception — y
+    // pointer ne déclenche ni glissement ni duplication. Mesuré à la sonde
+    // (#456) : elementFromPoint(centre-haut) = select.planif-noeud-type-select.
+    const prise = await page.locator('#actAlt1 .planif-noeud-prise').boundingBox();
+    expect(prise).not.toBeNull();
+    const px = prise.x + prise.width / 2;
+    const py = prise.y + prise.height / 2;
     await page.keyboard.down('Alt');
-    await page.mouse.move(box.x + box.width / 2, box.y + 10);
+    await page.mouse.move(px, py);
     await page.mouse.down();
-    await page.mouse.move(box.x + box.width / 2 + 150, box.y + 10 + 90, { steps: 5 });
-    await page.mouse.up();
-    await page.keyboard.up('Alt');
-    await page.waitForTimeout(400);
-
+    await page.mouse.move(px + 150, py + 90, { steps: 5 });
+    // Laisser le dernier pointermove passer son requestAnimationFrame AVANT
+    // de mesurer : en headless, mesurer trop tôt rend la position d'une
+    // frame intermédiaire.
+    await page.waitForTimeout(250);
+    // Mesurer PENDANT le drag (même idiome que le CAS D de
+    // planif-drag-pointer-148) : au relâchement, un dépôt sur un conteneur de
+    // la carte démo re-layouterait la copie et fausserait la position.
     const apres = await page.evaluate(() => {
         const noeuds = Array.from(window.planificationCarte.etat.noeuds.values());
         const source = noeuds.find(n => n.id === 'actAlt1');
-        const clone = noeuds.find(n => n.id !== 'actAlt1' && n.cloneSourceId === 'actAlt1');
+        const copie = noeuds.find(n => n.id !== 'actAlt1' && n.titre === 'Activité à dupliquer');
         return {
             total: noeuds.length,
             source: { x: source.x, y: source.y },
-            clone: clone ? { titre: clone.titre, x: clone.x, y: clone.y } : null
+            copie: copie ? { titre: copie.titre, x: copie.x, y: copie.y, cloneSourceId: copie.cloneSourceId || null } : null
         };
     });
+    await page.mouse.up();
+    await page.keyboard.up('Alt');
+    await page.waitForTimeout(300);
 
-    // Un doublon existe, marqué clone de la source (indicateur 🎯 existant).
+    // Un doublon existe. ⚠ Depuis 1.87 (décision du 16 août), ⌥ SEUL rend une
+    // COPIE INDÉPENDANTE — pas un clone lié : cloneSourceId doit être vide.
+    // (⇧⌥ rend le clone ; l'ancienne assertion `cloneSourceId === source` est
+    // précisément ce que la 1.87 a changé.)
     expect(apres.total).toBe(avant + 1);
-    expect(apres.clone).not.toBeNull();
-    expect(apres.clone.titre).toBe('Activité à dupliquer');
-    // La source n'a pas bougé ; le clone a suivi la souris (+150/+90 px écran).
+    expect(apres.copie).not.toBeNull();
+    expect(apres.copie.titre).toBe('Activité à dupliquer');
+    expect(apres.copie.cloneSourceId).toBeNull();
+    // La source n'a pas bougé ; la copie a suivi la souris (+150/+90 px écran).
     expect(apres.source.x).toBe(posAvant.x);
     expect(apres.source.y).toBe(posAvant.y);
-    expect(apres.clone.x).toBeGreaterThan(posAvant.x + 100);
-    expect(apres.clone.y).toBeGreaterThan(posAvant.y + 50);
+    expect(apres.copie.x).toBeGreaterThan(posAvant.x + 100);
+    expect(apres.copie.y).toBeGreaterThan(posAvant.y + 50);
 
     expect(erreurs).toEqual([]);
 });
@@ -311,7 +325,10 @@ test('comptabilité du temps — rollup activités→leçon→séquence, périod
     // → les mêmes 95 min deviennent 3,8 pér. après rafraîchissement.
     await page.evaluate(() => {
         db.setSync(window.cle('dureePeriode'), 25);
-        window.planificationCarte.mettreAJourSommaire();
+        // `mettreAJourSommaire` n'existe plus : le sommaire et la jauge se
+        // rafraîchissent par `mettreAJourPlanificateur` (refonte planificateur,
+        // lots 1-3 d'août 2026). C'était la cause du rouge #456 sur ce test.
+        window.planificationCarte.mettreAJourPlanificateur();
     });
     await page.waitForTimeout(300);
     await expect(pillLecon).toHaveText(/3,8\s*pér\./);
@@ -343,11 +360,12 @@ test('import inter-trimestre — copie vers le trimestre actif, source intacte, 
             ], liens: [] } }
         };
         db.setSync('h9099_planification_mindmap', doc); // security-ok: fixture de test locale
-        // NB (re-diagnostic 4 août) : en PRODUCTION, planification_seances est
-        // aujourd'hui une clé NUE partagée entre trimestres (cf. BACKLOG #367) —
-        // cette fixture préfixée teste le monde POST-migration ; d'ici là, la
-        // copie est un no-op et les notes suivent via la clé partagée.
-        db.setSync('h9099_planification_seances', { pl_lec1: { objectifPersonnalise: 'Objectif migré', notes: 'Note migrée' } }); // security-ok: fixture de test locale
+        // ✅ #367 LIVRÉ (7 août) : la clé est namespacée ET son dictionnaire est
+        // COMPOSITE `<carteId>::<leconId>` — la note se lit sous la carte
+        // SOURCE et s'écrit sous la carte d'ARRIVÉE. Cette fixture semait
+        // encore l'ancien format plat (`pl_lec1`) : c'était la cause du rouge
+        // #456 sur ce test (noteSuivie null).
+        db.setSync('h9099_planification_seances', { 'carte_1::pl_lec1': { objectifPersonnalise: 'Objectif migré', notes: 'Note migrée' } }); // security-ok: fixture de test locale
         return JSON.stringify(db.getSync('h9099_planification_mindmap'));
     });
 
@@ -369,11 +387,14 @@ test('import inter-trimestre — copie vers le trimestre actif, source intacte, 
         const index = window.planificationDonnees.getIndex();
         const entree = index.cartes.find(c => c.id === index.active);
         const seances = db.getSync(window.cle('planification_seances'), {});
+        // #367 : la note arrive sous la clé composite de la NOUVELLE carte
+        // (id de leçon préservé, id de carte régénéré par l'index cible).
+        const noteArrivee = seances[index.active + '::pl_lec1'];
         return {
             nomActif: sel.options[sel.selectedIndex]?.textContent,
             importeDe: entree && entree.importeDe ? entree.importeDe.trimestre : null,
             nbNoeudsCharges: window.planificationCarte.etat.noeuds.size,
-            noteSuivie: seances.pl_lec1 ? seances.pl_lec1.notes : null,
+            noteSuivie: noteArrivee ? noteArrivee.notes : null,
             sourceApres: JSON.stringify(db.getSync('h9099_planification_mindmap'))
         };
     });
