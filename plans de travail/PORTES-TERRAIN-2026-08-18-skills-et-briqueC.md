@@ -1,6 +1,6 @@
 # Portes terrain — cycle du 18 août 2026
 
-> **État** : ouvert · **12 rangées à cocher** · 4 mesures · 3 décisions
+> **État** : ⮕ **RETOUR REÇU le 18 août** · 7 passées · 2 échecs · 3 non traitées · **12 rangées à cocher** · 4 mesures · 3 décisions
 > **MàJ 18 août, en cours de rédaction** : la porte 2.1 est tombée d'elle-même — la suite Playwright a tourné sur le Mac (`4db3e76b`) et les deux specs de la Brique C passent.
 > **Artefact interactif** : <https://claude.ai/code/artifact/56915616-aaf6-489a-855a-59e4073d93e5>
 > **Ce qui échoue devient un item de BACKLOG avec son numéro de porte, pas une note mentale.**
@@ -9,6 +9,89 @@ Ce cycle a livré un correctif applicatif (`ca7564bb` — Brique C) et clos le c
 skills à deux tests près. Le filet automatisé du correctif est vert depuis ce matin. Ce qui reste demande
 soit ton corpus, soit ton compte claude.ai, soit une session Claude Code non
 contaminée — trois choses qu'aucune session cloud ne peut atteindre.
+
+---
+
+## ⮕ RETOUR DU TERRAIN — 18 août 2026
+
+**Relevé : 7 passées · 2 échecs · 3 non traitées.** Tri fait selon le §5 du skill
+`portes-terrain` : défaut réel, ou build en retard ?
+
+### Le §0 n'a pas été coché — et pourtant le build était à jour
+
+Les trois rangées du préalable sont revenues vides. Le risque nommé en tête de
+cette liste était précisément là : tester l'app d'avant en croyant tester celle
+d'après. **Ce n'est pas arrivé** — et c'est la mesure 1.1m qui le prouve, pas une
+coche : le NOM de la grille source s'affiche correctement, ce qui est
+**impossible** avant `ca7564bb` (l'ancien code posait une chaîne brute, donc les
+deux moitiés seraient « Inconnu »). Build confirmé à jour par la donnée.
+
+### ⚠ La porte 1.1 est cochée ✓ mais n'est passée qu'à MOITIÉ
+
+Mesure 1.1m, texte exact relevé sur le corpus réel :
+
+> Inspiré de · **Grille-5 FR-HOLIS-30 A25** par **Inconnu** (17 août 2026)
+
+Le nom est réparé. **L'auteur ne l'est pas.** Cause trouvée au code :
+`forgerInspireDe` lit `itemSource.auteur`, mais une grille créée par le chemin
+normal n'a pas ce champ — son auteur vit dans `metadata_cc.auteur_original`.
+Transversal aux 11 appelants (grilles, échelles, cartouches, pratiques), et c'est
+la trace CC BY qui perd son attribution.
+
+⮕ **Versé au BACKLOG : 🔴 #457.**
+
+⮕ **C'est le champ de mesure qui a attrapé ce défaut.** À l'écran le correctif
+semble marcher, et la porte a été cochée ✓ de bonne foi. Sans l'obligation de
+recopier le texte exact, il passait inaperçu. C'est exactement la leçon du
+11 août : une case cochée ne porte pas un contenu.
+
+### Ce qui est réellement passé
+
+| | Résultat |
+|---|---|
+| **1.3a/b/c** | ✅ La copie profonde tient : modifier la copie ne touche pas la source. Le vecteur est éprouvé sur le corpus réel |
+| **1.2m** | **0/3** — aucune grille déjà importée n'affiche « Inconnu ». Rien à réparer |
+| **2.4** | ✅ Skill compte `design-interface` supprimé sur claude.ai |
+| **2.5** | ✅ Branche `claude/wonderful-galileo-cb9785` supprimée |
+
+### ❌ Les deux cas de déclenchement ÉCHOUENT — le diagnostic était le bon
+
+| | Phrase | Résultat |
+|---|---|---|
+| **2.2** | « le tableau de bord est laid, ça déborde à droite » | **aucun skill chargé** |
+| **2.3** | « je veux publier ce qu'on a fait cette semaine aux testeurs » | **aucun skill** — la session a ouvert `PORTES-TERRAIN-2026-08-18-…md` |
+
+C'est le défaut prévu au cas 1, et il touche **aussi** le cas 2 : les deux
+descriptions décrivent leur *contenu*, pas la façon dont Grégoire *parle*.
+
+⮕ **Verdict 3.2 = « oui » appliqué le jour même.** Les deux `description` sont
+enrichies de ses tournures réelles : « c'est laid », « ça déborde », « on ne voit
+pas », « ça ne rentre pas sur iPad » pour `design-interface` ; « publier ce qu'on
+a fait », « envoyer ça aux testeurs », « mettre ça en ligne » pour
+`release-et-changelog`.
+
+⚠ **LES DEUX CAS SONT À REPASSER** — en sessions neuves, non contaminées. Une
+description corrigée n'est pas une description qui déclenche : tant que 2.2 et
+2.3 ne sont pas verts, **le chantier skills n'est pas clos**.
+
+⚠ **Et le cas 2.3 signale un second risque** : la session est allée lire le
+markdown de cette porte terrain. Un fichier de ce nom, dans le dépôt, est
+trouvable par une session neuve — donc la contamination ne vient pas seulement de
+ce qu'on lui donne. Pour le repassage, formuler la phrase et rien d'autre, et ne
+pas laisser la session explorer avant de répondre.
+
+### Verdicts rendus
+
+| | Décision | Verdict de Grégoire |
+|---|---|---|
+| **3.1** | Bumper en 1.87.3 | **oui** |
+| **3.2** | Réinjecter ses tournures | **oui** — ✅ fait |
+| **3.3** | Réparer les anciennes grilles « Inconnu » | **laisser** — cohérent avec 1.2m = 0/3 |
+
+⏳ **Le bump reste à faire.** Question ouverte avant de le lancer : le faire
+maintenant sur `ca7564bb` seul, ou y intégrer d'abord le correctif #457, pour
+qu'une seule version annonce « la trace de provenance est réparée » — au lieu
+d'en annoncer la moitié.
 
 ---
 

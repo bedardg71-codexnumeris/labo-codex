@@ -11,6 +11,14 @@ description: >
   obligatoire pour tout changement visuel, la hiérarchie visuelle, l'UX copy
   et le ton, les minimums d'accessibilité, les anti-patterns, et les deux
   références visuelles animées (bulles parallaxe, points 3D).
+  Déclencher AUSSI sur la façon dont Grégoire signale un problème visuel, qui
+  passe rarement par le vocabulaire technique : « c'est laid », « c'est moche »,
+  « ça déborde », « ça dépasse », « on ne voit pas », « c'est illisible », « c'est
+  trop petit », « c'est serré », « ça ne rentre pas sur iPad », « le tableau de
+  bord est laid », « la carte est illisible », « c'est mal placé », « ça se
+  chevauche », « c'est trop pâle », « ça saute aux yeux ». Toute plainte sur
+  l'apparence, la lisibilité ou la mise en page d'un écran relève de ce skill,
+  même sans qu'un fichier ni un composant soit nommé.
 ---
 
 # SKILL : Design d'interface — Labo Codex

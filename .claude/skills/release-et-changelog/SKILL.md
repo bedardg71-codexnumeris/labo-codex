@@ -7,6 +7,12 @@ description: >
   Déclencher dès que Grégoire dit « on livre », « bump », « nouvelle version »,
   « release », « changelog », « nouvelles », « qu'est-ce qu'on annonce »,
   « c'est quelle version », ou demande de préparer une livraison publique.
+  Déclencher AUSSI quand la livraison est décrite sans le vocabulaire de release :
+  « je veux publier ce qu'on a fait », « envoyer ça aux testeurs », « mettre ça en
+  ligne », « rendre ça disponible », « faire sortir ça », « qu'est-ce que les
+  testeurs vont voir », « prépare la sortie », « on met ça dans les mains des
+  profs ». Toute intention de rendre le travail visible aux utilisateurs relève
+  de ce skill, même si ni « version » ni « release » n'est prononcé.
   Couvre : l'intention SemVer (patch/minor/major), le script `scripts/release.mjs`
   comme écriture atomique des quatre points de vérité, et les règles éditoriales
   du changelog affiché aux utilisateurs dans la section « Nouvelles ».
