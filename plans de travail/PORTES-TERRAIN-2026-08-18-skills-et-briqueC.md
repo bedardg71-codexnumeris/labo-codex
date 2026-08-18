@@ -38,7 +38,7 @@ normal n'a pas ce champ — son auteur vit dans `metadata_cc.auteur_original`.
 Transversal aux 11 appelants (grilles, échelles, cartouches, pratiques), et c'est
 la trace CC BY qui perd son attribution.
 
-⮕ **Versé au BACKLOG : 🔴 #457.**
+⮕ **Versé au BACKLOG puis CLOS le jour même : ✅ #457, livré en 1.87.3.**
 
 ⮕ **C'est le champ de mesure qui a attrapé ce défaut.** À l'écran le correctif
 semble marcher, et la porte a été cochée ✓ de bonne foi. Sans l'obligation de
@@ -88,10 +88,12 @@ pas laisser la session explorer avant de répondre.
 | **3.2** | Réinjecter ses tournures | **oui** — ✅ fait |
 | **3.3** | Réparer les anciennes grilles « Inconnu » | **laisser** — cohérent avec 1.2m = 0/3 |
 
-⏳ **Le bump reste à faire.** Question ouverte avant de le lancer : le faire
-maintenant sur `ca7564bb` seul, ou y intégrer d'abord le correctif #457, pour
-qu'une seule version annonce « la trace de provenance est réparée » — au lieu
-d'en annoncer la moitié.
+✅ **BUMP FAIT — 1.87.3, build `0818-0918`.** Décision retenue : corriger #457
+d'abord, puis bumper une seule fois. Une version qui annonce « la trace de
+provenance est réparée » alors que l'auteur reste « Inconnu » aurait annoncé la
+moitié du correctif. Le changelog utilisateur porte l'entrée consolidée dans
+`1.87`, et l'anti-cache de `bibliotheque-ui.js` est bumpé avec — sans quoi le
+build `file://` de Grégoire aurait gardé l'ancien script.
 
 ---
 
