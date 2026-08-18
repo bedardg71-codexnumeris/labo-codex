@@ -104,10 +104,17 @@ début l'a attrapé ; il ne l'aurait pas fait sans `git fetch`.
   un gabarit) en entier, la fin de 4.1 et de 4.3. **Plus les deux corrections du
   jour à revérifier** : la case « Travail hors classe » qui ne déclenchait rien,
   et le Markdown du Calendrier repassé en sections.
-- **5 specs Playwright ROUGES** — versées au backlog en **#456**. Préexistantes,
-  mesurées sur `main` AVANT le chantier, donc aucune régression. Elles ne
-  tournaient nulle part : WebKit manque aux conteneurs, et personne ne les
-  lançait en local.
+- **6 specs Playwright ROUGES** — versées au backlog en **#456**. ⚠ **Ce fichier
+  a dit « 5 » du 12 au 18 août : le compte était faux d'une unité.** La suite
+  complète a été lancée pour de vrai le **18 août sur le Mac** (WebKit, 3 min 42)
+  et rend **87 passées / 6 échecs** ; `planif-drag-pointer-148.spec.js:70`
+  manquait à la liste. C'est exactement le défaut que l'item décrit : elles ne
+  tournaient nulle part — WebKit manque aux conteneurs, personne ne les lançait
+  en local — donc le chiffre se recopiait sans jamais être reproduit.
+  ⮕ **Ne pas réécrire ce compte sans relancer `npm run test:int` depuis `tests/`.**
+  Préexistantes, oui : les 6 mêmes échouent sur `d27659e3` comme sur `1fafa5d5`
+  (contre-épreuve en worktree, 18 août) — **la Brique C n'a rien cassé**, et ses
+  deux specs passent.
 - **Les trois info-bulles du gabarit des productions (1.80.0) n'ont jamais été VUES** —
   199 à 238 caractères dans une bulle de 320 px, et sur iPad elles s'ouvrent au
   long-press, pas au survol. À éprouver sur son matériel, dans les deux modes.
