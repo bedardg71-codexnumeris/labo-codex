@@ -164,11 +164,41 @@
     BibliothequeUI.forgerInspireDe = function (itemSource) {
         var meta = {
             nom: (itemSource && itemSource.nom) || 'Inconnu',
-            auteur: (itemSource && itemSource.auteur) || 'Inconnu',
+            auteur: BibliothequeUI.resoudreAuteurSource(itemSource),
             date: new Date().toISOString().slice(0, 10)
         };
         if (itemSource && itemSource.id) meta.sourceId = itemSource.id;
         return meta;
+    };
+
+    /**
+     * Retrouve l'auteur d'un item, où qu'il soit rangé (#457, 18 août 2026).
+     *
+     * `forgerInspireDe` ne lisait que `item.auteur`. Or ce champ racine n'existe
+     * QUE sur les copies faites par `dupliquerGrille` / `dupliquerPratique…` :
+     * un item créé par le chemin normal (`sauvegarderGrilleTemplate` et ses
+     * équivalents échelles / cartouches / pratiques) range son auteur dans
+     * `metadata_cc.auteur_original`, et un item reçu d'un autre enseignant le
+     * range dans `auteurOriginal`. Le fallback « Inconnu » mordait donc à tous
+     * les coups sur le matériel réel — la trace CC BY perdait précisément ce
+     * qu'elle existe pour conserver.
+     *
+     * Trouvé par la porte terrain 1.1 du 18 août : « Inspiré de Grille-5
+     * FR-HOLIS-30 A25 par Inconnu ». Le nom était juste, l'auteur non.
+     *
+     * Ordre : `auteur` (le plus spécifique, posé à la duplication) →
+     * `metadata_cc.auteur_original` (bloc CC canonique, chemin de création) →
+     * `auteurOriginal` (matériel importé) → 'Inconnu'.
+     *
+     * @param {Object} itemSource - grille, échelle, cartouche ou pratique
+     * @returns {string} l'auteur, ou 'Inconnu' si aucune source ne le porte
+     */
+    BibliothequeUI.resoudreAuteurSource = function (itemSource) {
+        if (!itemSource) return 'Inconnu';
+        return itemSource.auteur
+            || (itemSource.metadata_cc && itemSource.metadata_cc.auteur_original)
+            || itemSource.auteurOriginal
+            || 'Inconnu';
     };
 
     /**
