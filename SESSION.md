@@ -7,6 +7,46 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 18 AOÛT 2026 (TERMINAL MAC) : CONSIGNE PLUGIN + CHANTIER DU
+     17 AOÛT SOLDÉ + WORKTREES RETIRÉS.
+     ÉTAT : **1.87.2** (inchangée, sessions documentaires) — Vitest
+     **2701/2701** (depuis `tests/`). `main` poussée, arbre propre.
+
+     ▣ **LE « RESTE À FAIRE » DU BLOC DU 17 AOÛT EST ENTIÈREMENT SOLDÉ**
+     (exécution de `finaliser-chantier.sh`, parties A puis B) :
+     `workers:1` et le chantier Cowork commités (`9be1daf7`) · les 114 lignes
+     dormantes commitées ET poussées (`wonderful-galileo` 4 fichiers — Brique C
+     `inspireDe` structuré + copie profonde, NON FUSIONNÉ dans main, à relire
+     avant intégration ; `zen-lichterman` 1 fichier) · `git gc` des 3
+     `tmp_obj_*` · purge de l'en-tête `BACKLOG.md` · subagent
+     `audit-debut-session` en place · **les 5 worktrees sont RETIRÉS**
+     (~375 Mo libérés, `.claude` = 428 Ko). Toutes les branches `claude/*`
+     sont sur origin ; le point « triage des worktrees » du signet est RÉGLÉ.
+     ⚠ Correctif préalable à la purge : `bold-wilson` et `lucid-lovelace`
+     portaient un symlink `tests/node_modules` commité (mode 120000) mais
+     absent de l'arbre — le ` D` bloquait le garde-fou ; retiré par un
+     micro-commit poussé sur chaque branche.
+
+     ▣ **CONSIGNE PLUGIN EXÉCUTÉE** (`plans de travail/
+     CONSIGNE-plugin-et-skill-compte-2026-08-18.md`, verdict commité
+     `27d45d52`). Tâche A : marketplace `labo-codex` enregistrée sur le Mac +
+     plugin `productivite-labo-codex` 3.1.0 installé, PROUVÉ par inventaire
+     (5 composants, ~798 tokens) et session neuve headless qui voit
+     `productivite-labo-codex:start`. §5 TRANCHÉ : `extraKnownMarketplaces`
+     en chemin relatif dans le settings du dépôt NE RÉSOUT PAS →
+     l'enregistrement reste manuel par machine (`claude plugin marketplace
+     add ./` puis `claude plugin install productivite-labo-codex@labo-codex`,
+     depuis la racine). Piège documenté : `marketplace remove` VIDE
+     `enabledPlugins` du `.claude/settings.json` du PROJET (fichier versionné).
+
+     ⏳ **RESTE** : (Grégoire, sur claude.ai) supprimer le skill compte
+     `design-interface` (source custom, modifié 2026-08-17 18:05) — son
+     contenu est rapatrié dans le dépôt depuis `76c74fb8` · relire/intégrer
+     la Brique C de `claude/wonderful-galileo-cb9785` · validations terrain
+     du signet. `finaliser-chantier.sh` supprimé après usage (jamais versionné).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 17 AOÛT 2026 (SUITE, COWORK) : FUSION, WORKTREES, SAUVEGARDE.
      ÉTAT : **1.87.2** (build 0816-0846) — Vitest **2701/2701** (depuis `tests/`).
      `main` @ `1307c06f`. **Le chantier skills est CLOS et FUSIONNÉ.**
