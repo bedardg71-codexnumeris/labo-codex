@@ -205,14 +205,36 @@ avait été tenue le 17 août (« deux sessions neuves distinctes, non contamin�
 
 Concrètement :
 
-1. Ouvrir une session Claude Code **neuve**, à la racine du dépôt, dans un autre
-   terminal. Ne rien lui donner d'autre.
-2. Y taper **une seule** des phrases ci-dessous, telle quelle.
-3. Observer si le skill attendu se charge **sans qu'on le nomme**.
-4. Fermer la session. **Une session neuve par cas** — la première est contaminée
+1. ⚠⚠ **`cd` DANS LE DÉPÔT AVANT de lancer `claude`**, puis vérifier que
+   l'en-tête de Claude Code affiche bien le chemin du dépôt sous le logo —
+   `…/Monitorage_v6`, **pas `/Users/kuekatsheu`**.
+2. Ouvrir la session **neuve** dans un autre terminal. Ne rien lui donner d'autre.
+3. Y taper **une seule** des phrases ci-dessous, telle quelle.
+4. Observer si le skill attendu se charge **sans qu'on le nomme**.
+5. Fermer la session. **Une session neuve par cas** — la première est contaminée
    dès qu'elle a vu le résultat.
 
 Ne jamais faire passer ces tests par la session qui exécute cette consigne.
+
+#### ⚠⚠ Les deux façons de rater ce test sans s'en apercevoir
+
+**A. Lancer depuis le mauvais dossier.** Les skills du projet vivent dans
+`<dépôt>/.claude/skills/` et ne sont chargés **que si le dépôt est le dossier de
+travail**. Lancée depuis `/Users/kuekatsheu`, une session n'a **aucun** skill du
+projet — le test rend « rien ne se charge » quelles que soient les descriptions.
+C'est arrivé au premier repassage du 18 août : les deux cas ont été déclarés en
+échec, et **le défaut était dans le protocole, pas dans les skills**.
+
+**B. Confondre une LECTURE avec un DÉCLENCHEMENT.** Un skill qui se déclenche
+apparaît comme une invocation de skill. Si tu vois à la place une commande
+`cat …/SKILL.md`, ou un `cd` en chemin absolu vers le dépôt, **le skill ne s'est
+pas déclenché** : la session est allée lire le fichier comme un document
+ordinaire. C'est un résultat NÉGATIF, même si le bon nom de skill apparaît à
+l'écran.
+
+⮕ **Repère simple** : un `cd` en chemin **absolu** vers le dépôt prouve à lui
+seul que la session n'était pas dedans. Si elle y était, elle n'aurait rien eu
+à `cd`.
 
 ### Cas 1 — `design-interface`
 
