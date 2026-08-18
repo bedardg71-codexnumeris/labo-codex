@@ -1,13 +1,9 @@
 {
     "_lisezMoi": "Cliché des specs Playwright rouges CONNUES (#456). Une rougeur absente de cette liste bloque le push. Cette liste doit RÉTRÉCIR : chaque spec réparée s'en retire. Régénérer : node scripts/verifier-playwright.mjs --ecrire",
     "genereLe": "2026-08-18",
-    "totalEchecsConnus": 6,
+    "totalEchecsConnus": 2,
     "echecsConnus": [
         "planif-alignement.spec.js › ⚠ un bloc glissé près d’un autre COLLE, et un guide dit pourquoi",
-        "planif-drag-pointer-148.spec.js › CAS D — un drag souris déplace un nœud libre",
-        "planif-toolbar.spec.js › Alt/⌥+glisser un bloc — crée un doublon qui suit la souris, la source ne bouge pas",
-        "planif-toolbar.spec.js › comptabilité du temps — rollup activités→leçon→séquence, périodes du cadre, jauge indicative",
-        "planif-toolbar.spec.js › import inter-trimestre — copie vers le trimestre actif, source intacte, notes de séance suivies",
-        "planif-toolbar.spec.js › plein écran carte mentale — titre de section masqué, module seul visible, retour propre"
+        "planif-toolbar.spec.js › Alt/⌥+glisser un bloc — crée un doublon qui suit la souris, la source ne bouge pas"
     ]
 }

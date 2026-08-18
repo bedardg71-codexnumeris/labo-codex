@@ -265,12 +265,44 @@ test('Alt/⌥+glisser un bloc — crée un doublon qui suit la souris, la source
     await page.keyboard.up('Alt');
     await page.waitForTimeout(300);
 
+    // ⚠ SONDE DE DIAGNOSTIC (relevé Mac du 18 août 2026 : « le clone
+    // Alt+glisser jamais créé » en WEBKIT, alors que ce même test est vert en
+    // Chromium — et que le CAS D, même prise sans Alt, passe en WebKit).
+    // Elle ne s'exécute QUE si le geste n'a rien créé, et son verdict part
+    // dans le message d'échec : un pointerdown SYNTHÉTIQUE altKey:true sur la
+    // poignée emprunte le même chemin applicatif SANS passer par l'entrée
+    // souris du harnais. S'il crée la copie, c'est le MODIFICATEUR ⌥ qui ne
+    // voyage pas avec la souris dans ce moteur (harnais) ; s'il ne crée rien,
+    // c'est le chemin applicatif lui-même qui ne duplique pas dans ce moteur.
+    let diagnostic = '';
+    if (!apres.copie) {
+        diagnostic = await page.evaluate(() => {
+            const el = document.getElementById('actAlt1');
+            const poignee = el && el.querySelector('.planif-noeud-prise');
+            if (!poignee) return 'SONDE : poignée .planif-noeud-prise INTROUVABLE sur le bloc.';
+            const r = poignee.getBoundingClientRect();
+            const avantSonde = window.planificationCarte.etat.noeuds.size;
+            poignee.dispatchEvent(new PointerEvent('pointerdown', {
+                bubbles: true, cancelable: true, button: 0, isPrimary: true,
+                pointerId: 99, pointerType: 'mouse', altKey: true,
+                clientX: r.x + r.width / 2, clientY: r.y + r.height / 2
+            }));
+            window.dispatchEvent(new PointerEvent('pointerup', {
+                bubbles: true, pointerId: 99, pointerType: 'mouse'
+            }));
+            const apresSonde = window.planificationCarte.etat.noeuds.size;
+            return apresSonde > avantSonde
+                ? 'SONDE : un pointerdown synthétique altKey:true CRÉE la copie — le chemin applicatif marche dans ce moteur ; c\'est le modificateur ⌥ qui ne voyage pas avec la souris du harnais.'
+                : 'SONDE : même un pointerdown synthétique altKey:true ne crée RIEN — le chemin applicatif lui-même ne duplique pas dans ce moteur.';
+        });
+    }
+
     // Un doublon existe. ⚠ Depuis 1.87 (décision du 16 août), ⌥ SEUL rend une
     // COPIE INDÉPENDANTE — pas un clone lié : cloneSourceId doit être vide.
     // (⇧⌥ rend le clone ; l'ancienne assertion `cloneSourceId === source` est
     // précisément ce que la 1.87 a changé.)
+    expect(apres.copie, 'aucun doublon créé par ⌥+glisser. ' + diagnostic).not.toBeNull();
     expect(apres.total).toBe(avant + 1);
-    expect(apres.copie).not.toBeNull();
     expect(apres.copie.titre).toBe('Activité à dupliquer');
     expect(apres.copie.cloneSourceId).toBeNull();
     // La source n'a pas bougé ; la copie a suivi la souris (+150/+90 px écran).
