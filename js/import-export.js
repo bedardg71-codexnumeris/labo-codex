@@ -189,30 +189,58 @@ function fusionnerParIdentite(existants, entrants, nomCollection) {
 
 /**
  * Vérifie l'unicité des IDs dans un tableau d'objets.
- * Si des doublons sont détectés, ré-identifie les entrées dupliquées avec genererIdUnique().
+ *
+ * #454 — un doublon interne au contenu IDENTIQUE est ÉCARTÉ, plus jamais
+ * renommé. Renommer une copie identique fabriquait une ressource fantôme :
+ * rien ne repointe les productions, les évaluations ni la clé
+ * `cartouches_{id}` vers le nouvel identifiant (deux imports mesurés chez
+ * Grégoire, 23 mars et 11 avril 2026). Même règle d'identité que
+ * `fusionnerParIdentite` (#448) : un id identique avec un contenu identique
+ * n'est pas une collision, c'est la même chose. Le renommage ne subsiste que
+ * pour un VRAI conflit (même id, contenu différent) — là, garder les deux
+ * reste le seul choix qui ne perd rien, et la console le dit.
+ *
  * @param {Array} tableau - Tableau d'objets avec propriété .id
  * @param {string} nomCollection - Nom pour le log console (ex: 'productions')
- * @returns {Array} - Le même tableau, sans doublons d'ID
+ * @returns {Array} - Tableau sans doublons d'ID (filtré : ne pas ignorer le retour)
  */
 function verifierUniciteIds(tableau, nomCollection) {
     if (!Array.isArray(tableau)) return tableau;
-    const idsVus = new Set();
-    let nbDoublons = 0;
+    const premiersParId = new Map();
+    const garde = [];
+    let nbEcartes = 0, nbConflits = 0;
     for (let i = 0; i < tableau.length; i++) {
         const item = tableau[i];
-        if (!item || !item.id) continue;
-        if (idsVus.has(item.id)) {
-            const ancienId = item.id;
-            item.id = genererIdUnique(ancienId.replace(/[0-9_]+$/, '').replace(/-+$/, '_'));
-            console.warn(`⚠️ [${nomCollection}] ID dupliqué corrigé: ${ancienId} → ${item.id}`);
-            nbDoublons++;
+        if (!item || !item.id) { garde.push(item); continue; }
+        const premier = premiersParId.get(item.id);
+        if (!premier) {
+            premiersParId.set(item.id, item);
+            garde.push(item);
+            continue;
         }
-        idsVus.add(item.id);
+        // Doublon interne : même chose, ou vrai conflit ? L'id est identique
+        // par hypothèse — on ne compare que le reste. `null` (non sérialisable)
+        // ne conclut JAMAIS à l'identité : dans le doute, on garde.
+        const sigPremier = signatureContenu(premier, ['id']);
+        const sigItem = signatureContenu(item, ['id']);
+        if (sigPremier !== null && sigPremier === sigItem) {
+            nbEcartes++;   // copie à l'identique : écartée, rien à repointer
+            continue;
+        }
+        const ancienId = item.id;
+        item.id = genererIdUnique(ancienId.replace(/[0-9_]+$/, '').replace(/-+$/, '_'));
+        premiersParId.set(item.id, item);
+        garde.push(item);
+        console.warn(`⚠️ [${nomCollection}] même id, contenu DIFFÉRENT — les deux sont conservés : ${ancienId} → ${item.id}`);
+        nbConflits++;
     }
-    if (nbDoublons > 0) {
-        console.warn(`⚠️ [${nomCollection}] ${nbDoublons} doublon(s) d'ID corrigé(s) sur ${tableau.length} éléments`);
+    if (nbEcartes > 0) {
+        console.warn(`[${nomCollection}] ${nbEcartes} doublon(s) interne(s) au contenu identique écarté(s) sur ${tableau.length} éléments (#454).`);
     }
-    return tableau;
+    if (nbConflits > 0) {
+        console.warn(`⚠️ [${nomCollection}] ${nbConflits} conflit(s) réel(s) interne(s) : même id, contenu différent.`);
+    }
+    return garde;
 }
 
 /**
