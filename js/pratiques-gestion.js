@@ -949,6 +949,7 @@ async function supprimerPratiqueDeBibliothequePartagee(pratiqueId) {
 /**
  * ✅ AJOUT (28 janvier 2026) : Dupliquer une pratique dans la bibliothèque
  * @param {string} pratiqueId - ID de la pratique à dupliquer
+ * @returns {Promise<Object|undefined>} la copie créée (undefined si pratique introuvable)
  */
 async function dupliquerPratiqueBibliotheque(pratiqueId) {
     const configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
@@ -962,16 +963,20 @@ async function dupliquerPratiqueBibliotheque(pratiqueId) {
     // Créer une copie avec un nouvel ID. La copie devient un nouvel original
     // de l'utilisateur ; trace d'origine `inspireDe` (respect CC BY). Si la
     // source était une démo, la copie perd le flag isDemo.
-    const nouvellePratique = {
-        ...pratique,
-        id: genererIdUnique('pratique_'),
-        nom: `${pratique.nom} (copie)`,
-        auteur: BibliothequeUI.obtenirAuteurActif(),
-        isDemo: false,
-        inspireDe: BibliothequeUI.forgerInspireDe(pratique),
-        dansBibliotheque: true,
-        dateCreation: new Date().toISOString()
-    };
+    //
+    // Copie PROFONDE (et non `{...pratique}`) : aucune référence partagée avec la
+    // source (sous-objets configuration / jetons / objectifs). Garantit
+    // STRUCTURELLEMENT l'invariant « source immuable » (zéro-dette), pas seulement
+    // par la sérialisation de la persistance. Aligné sur copierPratiqueDepuisTrimestre
+    // (Brique C pas 5). Une pratique est full-JSON (localStorage) → round-trip sans perte.
+    const nouvellePratique = JSON.parse(JSON.stringify(pratique));
+    nouvellePratique.id = genererIdUnique('pratique_');
+    nouvellePratique.nom = `${pratique.nom} (copie)`;
+    nouvellePratique.auteur = BibliothequeUI.obtenirAuteurActif();
+    nouvellePratique.isDemo = false;
+    nouvellePratique.inspireDe = BibliothequeUI.forgerInspireDe(pratique);
+    nouvellePratique.dansBibliotheque = true;
+    nouvellePratique.dateCreation = new Date().toISOString();
 
     // Supprimer les métadonnées de partage
     delete nouvellePratique.metadata_cc;
@@ -987,6 +992,9 @@ async function dupliquerPratiqueBibliotheque(pratiqueId) {
     await afficherListePratiquesMateriel();
     await afficherBibliothequePratiques();
 
+    // Retourne la copie (parité avec copierPratiqueDepuisTrimestre) : le dispatcher
+    // data-action ignore le retour, mais la sentinelle d'indépendance s'en sert.
+    return nouvellePratique;
 }
 
 /* ===============================

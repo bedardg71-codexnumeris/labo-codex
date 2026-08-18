@@ -33,6 +33,10 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 //      destination = cle('pratiquesConfigurables') ; SOURCE intacte byte-à-byte.
 //   5. OPTION A (dépendances) — echelleId/grilleId NON remappés ; verifier renvoie
 //      les dépendances absentes du catalogue actif (échelle / grille) pour avertir.
+//   6. COPIE PROFONDE — la copie ne partage aucune référence de sous-objet avec la
+//      source (deep-clone, pas `{...source}`). Verrouillé en INTER-trimestre par le
+//      cas 6, et en INTRA-trimestre (dupliquerPratiqueBibliotheque) par la sentinelle
+//      sœur en fin de fichier (durcissement révélé par la revue adverse du pas 5).
 //
 // BREAK-TEST (vérif adverse) — ce test DOIT pouvoir rougir :
 //   - Poser inspireDe sur la source au lieu d'une copie → `srcIntacte` rouge (#4).
@@ -326,6 +330,74 @@ test('Brique C pas 5 · copie PROFONDE : muter la copie ne touche pas la source 
     expect(res.copieEchelleId).toBe('MUTANT');
     expect(res.copieJetonsNombre).toBe(99);
     // …mais la source en mémoire est restée intacte (aucune référence partagée).
+    expect(res.sourceEchelleId).toBe('ECH_ORIG');
+    expect(res.sourceJetonsNombre).toBe(2);
+});
+
+test('Durcissement intra-trimestre · dupliquerPratiqueBibliotheque fait une copie PROFONDE (muter la copie ne touche pas la source)', async ({ page }) => {
+    // SENTINELLE SŒUR du cas 6, pour la duplication INTRA-trimestre
+    // dupliquerPratiqueBibliotheque (durcissement révélé par la revue adverse du
+    // pas 5). Une copie superficielle ({...source}) partagerait configuration/jetons
+    // par référence avec la source ; le deep-clone (JSON round-trip) l'interdit.
+    //
+    // Subtilité : la source n'est pas injectée (lookup interne par id) et un getSync
+    // depuis localStorage rend un objet FRAIS (round-trip → aliasing déjà rompu, le
+    // test ne pourrait plus rougir). On amorce donc memoryCache avec l'array source :
+    // le getSync interne rend CETTE référence, si bien que la copie aliase (ou non)
+    // l'objet source que le test détient. La fonction RETOURNE la copie → on mute ses
+    // sous-objets et on vérifie que la source détenue n'a pas bougé.
+    //
+    // BREAK-TEST : revenir à `{...pratique}` → copie superficielle → muter
+    // copie.configuration mute aussi source.configuration → assertions source rouges.
+    await page.goto(indexHtml);
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
+
+    const res = await page.evaluate(async () => {
+        // UI neutralisée : la sentinelle ne teste que l'indépendance des données.
+        window.fermerModalBibliothequePratiques = () => {};
+        window.afficherListePratiquesMateriel = async () => {};
+        window.afficherBibliothequePratiques = async () => {};
+
+        const source = {
+            id: 'PR_LOCAL', nom: 'Source locale', dansBibliotheque: true,
+            configuration: { echelleId: 'ECH_ORIG', type: 'standard' },
+            jetons: { actif: true, nombre: 2 }
+        };
+
+        // Amorce memoryCache pour que le getSync interne rende l'array PAR RÉFÉRENCE
+        // (sinon localStorage → JSON.parse → objet frais, aliasing rompu d'office).
+        const cleDest = window.cle('pratiquesConfigurables');
+        db.memoryCache.set(cleDest, [source]);
+
+        const copie = await window.dupliquerPratiqueBibliotheque('PR_LOCAL');
+        if (!copie) return { copieExiste: false };
+
+        // Muter des SOUS-OBJETS de la copie ne doit PAS atteindre la source détenue.
+        copie.configuration.echelleId = 'MUTANT';
+        copie.jetons.nombre = 99;
+
+        return {
+            copieExiste: true,
+            copieId: copie.id,
+            copieInspireSource: copie.inspireDe ? copie.inspireDe.sourceId : null,
+            copieIsDemo: copie.isDemo,
+            sourceEchelleId: source.configuration.echelleId,
+            sourceJetonsNombre: source.jetons.nombre,
+            copieEchelleId: copie.configuration.echelleId,
+            copieJetonsNombre: copie.jetons.nombre
+        };
+    });
+
+    // La copie existe, id NEUF, trace de provenance posée (objet inspireDe).
+    expect(res.copieExiste).toBe(true);
+    expect(res.copieId).not.toBe('PR_LOCAL');
+    expect(res.copieInspireSource).toBe('PR_LOCAL');
+    expect(res.copieIsDemo).toBe(false);
+    // La copie a bien muté…
+    expect(res.copieEchelleId).toBe('MUTANT');
+    expect(res.copieJetonsNombre).toBe(99);
+    // …mais la source détenue est restée intacte (aucune référence partagée).
     expect(res.sourceEchelleId).toBe('ECH_ORIG');
     expect(res.sourceJetonsNombre).toBe(2);
 });

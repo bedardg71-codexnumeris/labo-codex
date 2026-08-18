@@ -2438,8 +2438,12 @@ function listerTrimestresAvecGrilles() {
  * @returns {{grille:Object, nbCartouches:number}}
  */
 function copierGrilleDepuisTrimestre(grilleSource, srcId) {
+    // Trace de provenance : OBJET inspireDe structuré (schéma CC transversal lu par
+    // formaterInspireDe / cc-license : {nom, auteur, date, sourceId}) + trimestre
+    // source. NB : une STRING brute (grilleSource.id) afficherait « Inspiré de
+    // Inconnu par Inconnu » sur la carte (formaterInspireDe lit src.nom/src.auteur).
     const source = Object.assign({}, grilleSource, {
-        inspireDe: grilleSource.id,
+        inspireDe: BibliothequeUI.forgerInspireDe(grilleSource),
         inspireDeTrimestre: srcId
     });
     const lireCartouchesParCle = (g) => db.getSync(cleSource('cartouches_' + g.id, srcId), []) || [];

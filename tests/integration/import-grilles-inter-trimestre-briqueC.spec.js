@@ -20,16 +20,21 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 //   1. LISTING — listerTrimestresAvecGrilles() ne retient que les trimestres
 //      ayant une COPIE PROPRE (<id>_grillesTemplates), exclut l'actif et ceux
 //      qui n'ont que le catalogue global.
-//   2. COPIE — id neuf, inspireDe = id source, inspireDeTrimestre = source ;
-//      cartouches copiées et réancrées sur l'id de la copie.
+//   2. COPIE — id neuf, inspireDe = OBJET {nom, auteur, date, sourceId} (schéma CC
+//      transversal lu par formaterInspireDe, PAS une chaîne brute), sourceId = id
+//      source, inspireDeTrimestre = source ; cartouches copiées et réancrées sur
+//      l'id de la copie.
 //   3. SOURCE IMMUABLE — l'objet lu ET le stockage source intacts byte-à-byte
 //      (la trace inspireDe est posée sur une COPIE, jamais sur la source).
 //   4. TÉMOIN D-C4 — l'echelleId d'une cartouche copiée N'EST PAS remappé au
 //      pas 4 (périmètre « grilles + cartouches » ; remappage = report assumé).
 //
 // BREAK-TEST (vérif adverse) — ce test DOIT pouvoir rougir :
+//   - Reposer une CHAÎNE brute (grilleSource.id) au lieu de l'objet forgé →
+//     `copie.inspireDe.sourceId` undefined → assertion #2 rouge (et la carte
+//     afficherait « Inspiré de Inconnu par Inconnu »).
 //   - Poser inspireDe sur la source au lieu d'une copie → `grilleLueInspireDe`
-//     devient 'GR_SRC' → assertion #3 rouge.
+//     devient un objet défini → assertion #3 rouge.
 //   - Remapper l'echelleId à la copie → `cartoucheEchelleId` change → #4 rouge.
 //   - Câbler la destination sur cle() au lieu de la clé nue → la copie
 //     n'apparaît plus dans 'grillesTemplates' → assertion #2 rouge.
@@ -187,7 +192,7 @@ test('Brique C pas 4 · copie inter-trimestre : id neuf + inspireDe + cartouches
         const resultat = window.copierGrilleDepuisTrimestre(grilleLue, 'a2025');
 
         const destApres = db.getSync('grillesTemplates', []);
-        const copie = destApres.find(g => g.inspireDe === 'GR_SRC');
+        const copie = destApres.find(g => g.inspireDe && g.inspireDe.sourceId === 'GR_SRC');
         const cartouchesCopie = copie ? db.getSync('cartouches_' + copie.id, []) : [];
 
         return {
@@ -212,7 +217,9 @@ test('Brique C pas 4 · copie inter-trimestre : id neuf + inspireDe + cartouches
     expect(res.copieExiste).toBe(true);
     expect(res.copieId).not.toBe('GR_SRC');
     expect(res.nbDestApres).toBe(res.nbDestAvant + 1);
-    expect(res.copieInspireDe).toBe('GR_SRC');
+    // inspireDe = OBJET structuré (schéma CC), pas une chaîne brute.
+    expect(res.copieInspireDe.sourceId).toBe('GR_SRC');
+    expect(res.copieInspireDe.nom).toBe('Dissertation A25');
     expect(res.copieInspireDeTrimestre).toBe('a2025');
     // Cartouche copiée, réancrée sur l'id de la copie.
     expect(res.nbCartouchesCopie).toBe(1);
