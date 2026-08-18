@@ -12,9 +12,9 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | **`main`** |
-| **Version** | **1.87.2** — build `0816-0846` |
+| **Version** | **1.87.3** — build `0818-0918` |
 | **Travail en avance sur `main`** | **aucun** |
-| **Dernière mise à jour** | 17 août 2026 — **`chantier/skills-claude-code` FUSIONNÉ dans `main`** (fast-forward, 2 commits). Les 13 skills vivent en `.claude/skills/<nom>/SKILL.md` et se déclenchent seuls ; `CLAUDE.md` passe de 394 à 191 lignes ; deux skills neufs extraits (`design-interface`, `release-et-changelog`). **Les 4 tests de déclenchement de `FICHE-RELECTURE.md` sont PASSÉS** : le test 4 (« on commence » → `debut-de-session-labo-codex`) en réel au début de la session de fusion, les tests 2 et 3 (`pratiques-notation` seul ; `integrite-globaux` + `securite-donnees`) dans deux sessions neuves distinctes le 17 août — non contaminées, elles n'avaient pas lu les réponses attendues. **Le chantier skills est CLOS.** Vitest **2701/2701** (268 fichiers). Pas de bump : aucun code applicatif touché. ⚠ Entre le 16 et cette fusion, `main` a aussi reçu le cycle **1.87.0 → 1.87.2** (copier vs cloner, détacher un clone, infobulles d'accompagnement) — ce tableau l'avait manqué |
+| **Dernière mise à jour** | 18 août 2026 (session cloud) — **CHANTIER SKILLS CLOS POUR DE BON**, et le cycle du jour fusionné dans `main` (`8d6f637e`). **Les 15 skills se chargent, se résolvent ET SE DÉCLENCHENT SEULS.** Les deux skills créés le 17 (`design-interface`, `release-et-changelog`) n'avaient jamais été testés au déclenchement — les 4 tests de `FICHE-RELECTURE.md` ne portaient que sur les 13 MIGRÉS. Ils sont verts, sur vraies invocations `Skill(...)`, en sessions neuves lancées **depuis le dépôt**. ⚠⚠ **Un premier repassage les donnait tous deux en ÉCHEC : il avait été lancé depuis `/Users/kuekatsheu`.** Les skills de projet ne se chargent QUE si le dépôt est le dossier de travail — et une session qui fait `cat .../SKILL.md` LIT le fichier, elle ne déclenche pas le skill. Protocole durci dans la consigne (§5). ⮕ **Livré aussi ce jour** : **1.87.3** = **#457** (la trace `inspireDe` affichait « par Inconnu » — `forgerInspireDe` ne lisait que `item.auteur`, or l'auteur vit dans `metadata_cc.auteur_original` ; **trouvé par une PORTE TERRAIN, sur une rangée cochée ✓ — c'est le champ de MESURE qui l'a attrapé**) · cherry-pick Brique C `ca7564bb` (relu, pas fusionné : la branche avait 417 commits de retard) · **92 pointeurs morts** vers `Skills pour Claude Code/` réparés · cadrage Briques C/D remis d'aplomb (son §2.5 envoyait vers une branche morte ; **le §3 Brique D est PÉRIMÉ et demande son propre audit**) · plugin `productivite-labo-codex` qui charge enfin (**l'enregistrement de la marketplace est MANUEL PAR MACHINE** — `extraKnownMarketplaces` vit dans les réglages utilisateur, non versionnés ; le chemin relatif versionné NE RÉSOUT PAS, testé). ⚠ **Piège coûteux, éprouvé deux fois** : `claude plugin marketplace remove` **vide `enabledPlugins` dans le `.claude/settings.json` DU PROJET** — fichier versionné — et déplace la clé en fin de fichier, si bien que le diff passe pour un réordonnancement anodin. Vérifier `git status .claude/settings.json` après TOUTE commande `claude plugin`. Vitest **2710/2710** (269 fichiers) |
 
 ⚠⚠ **AVANT TOUTE FUSION EN CONTENEUR : `git fetch --unshallow origin`.** Le clone
 du conteneur est **shallow**, et son `main` LOCAL peut pointer des semaines en
@@ -33,6 +33,18 @@ commit d'avance, poussé la veille au soir depuis une session cloud. Le rituel d
 début l'a attrapé ; il ne l'aurait pas fait sans `git fetch`.
 
 ⏳ **CE QUI RESTE DÛ** :
+
+- ⏳ **RIEN N'EST DÛ DU CYCLE DU 18 AOÛT.** Sa porte terrain
+  (`plans de travail/PORTES-TERRAIN-2026-08-18-skills-et-briqueC.md`, artefact :
+  <https://claude.ai/code/artifact/56915616-aaf6-489a-855a-59e4073d93e5>) est
+  **retournée et traitée** : 3 verdicts rendus, l'échec réel corrigé (#457,
+  livré en 1.87.3), les deux ménages faits (skill compte supprimé,
+  `claude/wonderful-galileo-cb9785` supprimée). ⮕ **Une seule question y reste
+  ouverte, et elle n'est PAS bloquante** : les deux cas de déclenchement passent
+  AVEC les descriptions enrichies (`edda3f27`) ; on ne sait pas s'ils passaient
+  déjà sans, faute d'un test valide avant enrichissement. C'est une attribution
+  non prouvée, pas un défaut. Le break-test tient en deux commandes, écrites dans
+  la porte. **Grégoire a choisi de passer au backlog** — ne pas rouvrir ça de soi-même.
 
 - ⏳ **PORTE TERRAIN NEUVE, NON TRAITÉE** —
   `plans de travail/PORTES-TERRAIN-2026-08-16-types-familles.md` (artefact :
