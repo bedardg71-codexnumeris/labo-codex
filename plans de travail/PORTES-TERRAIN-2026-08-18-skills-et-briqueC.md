@@ -74,6 +74,42 @@ a fait », « envoyer ça aux testeurs », « mettre ça en ligne » pour
 description corrigée n'est pas une description qui déclenche : tant que 2.2 et
 2.3 ne sont pas verts, **le chantier skills n'est pas clos**.
 
+### ⚠⚠ REPASSAGE DU 18 AOÛT — LE TEST ÉTAIT INVALIDE, PAS LES SKILLS
+
+Capture du terminal à l'appui, deux faits qui annulent le verdict :
+
+1. **La session tournait depuis `/Users/kuekatsheu`, pas depuis le dépôt.**
+   L'en-tête de Claude Code l'affiche sous le logo. Or les skills du projet
+   vivent dans `<dépôt>/.claude/skills/` et ne sont chargés que si le dépôt est
+   le dossier de travail. **Aucun skill du projet n'était disponible** — d'où
+   « 2.2 ne charge rien », quelles que soient les descriptions.
+2. **Ce qu'on a pris pour un déclenchement au 2.3 est une lecture de fichier.**
+   La ligne montre un `cd` en chemin **absolu** vers le dépôt puis un
+   `cat release-et-changelog/SKILL.md` — du Bash, pas une invocation de skill.
+   Si le dépôt avait été le dossier de travail, il n'y aurait eu ni `cd`
+   absolu, ni `cat`.
+
+⮕ **Les deux résultats sont donc SANS VALEUR, dans les deux sens** : ni échec des
+descriptions au 2.2, ni succès au 2.3. Le premier échec du matin (avant
+enrichissement) est lui aussi suspect pour la même raison — rien ne dit qu'il
+avait été lancé depuis le dépôt.
+
+⮕ **Nuance à ne pas surinterpréter** : au 2.3, la session a tout de même décidé
+d'aller consulter `release-et-changelog` **par son nom**, sur une phrase qui ne
+contient aucun mot de sa description. C'est encourageant sur l'appariement
+d'intention — mais ce n'est **pas une preuve** : elle peut avoir trouvé le nom
+en explorant le dépôt, qu'elle sait lire.
+
+⮕ **Le protocole est durci** dans la consigne (§5) : `cd` dans le dépôt avant de
+lancer, vérification du chemin affiché sous le logo, et le repère qui distingue
+une lecture d'un déclenchement — un `cd` absolu vers le dépôt prouve à lui seul
+que la session n'était pas dedans.
+
+⮕ **Conséquence sur l'enrichissement des descriptions** (`edda3f27`) : il a été
+appliqué sur une prémisse fausse. Il n'est pas nuisible — ajouter les tournures
+réelles de Grégoire aux déclencheurs se défend en soi — mais **il n'a jamais été
+démontré nécessaire**. À retester dans les règles.
+
 ⚠ **Et le cas 2.3 signale un second risque** : la session est allée lire le
 markdown de cette porte terrain. Un fichier de ce nom, dans le dépôt, est
 trouvable par une session neuve — donc la contamination ne vient pas seulement de
