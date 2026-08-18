@@ -170,11 +170,28 @@ elle-même est périmée).
 
 **Objectif** : connaître les items prioritaires actuels.
 
-Lire les 25 premières lignes (en-tête + légende) :
+⚠ **NE PAS lire « les 25 premières lignes ».** Cette consigne datait d'un
+fichier aux lignes courtes ; l'en-tête actuel a des lignes de plus de
+10 000 caractères, et `head -25` coûte ~22 000 octets (~7 400 tokens).
+
+**Lire UNIQUEMENT le premier bloc « État courant »** — le plus récent, en
+tête de fichier, ~900 octets. Il contient l'essentiel : version, ce qui vient
+d'être clos, ce qui reste dû.
+
+```bash
+grep -m1 -n "État courant" BACKLOG.md      # localiser
+sed -n "<n>p" BACKLOG.md                   # lire cette ligne seule
+```
+
+En tirer :
 - État courant annoncé (HEAD + items ouverts + dernier ID)
-- Présentation AQPC date + J−N
 - Si la ligne « État courant » mentionne un HEAD différent du HEAD réel,
-  le signaler
+  le signaler comme **écart documentaire**
+
+⚠ **Le « Dernier ID utilisé » de l'en-tête est contradictoire** : une ligne
+annonce `#359`, le bloc courant annonce un ID bien plus élevé. Faire foi au
+bloc « État courant » le plus récent, et signaler la contradiction à Grégoire
+plutôt que de la propager.
 
 Puis parcourir les sections (≤ 1 ligne par section) pour repérer :
 - Items ⚠️ priorité haute actée
