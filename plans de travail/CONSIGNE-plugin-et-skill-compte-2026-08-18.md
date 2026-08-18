@@ -161,6 +161,21 @@ une recommandation.
 - S'il ne résout pas → **ne rien committer**, et documenter en une ligne dans
   cette consigne que l'enregistrement reste une étape manuelle par machine.
 
+> **TRANCHÉ (18 août 2026, terminal du Mac) : le chemin relatif ne résout PAS.**
+> Testé pour de vrai depuis un état propre : `extraKnownMarketplaces` avec
+> `{"source": "directory", "path": "."}` dans le `.claude/settings.json` du
+> dépôt → la marketplace n'apparaît pas dans `claude plugin marketplace list`
+> et une session headless lancée de la racine ne charge aucun des 5 composants.
+> **L'enregistrement de la marketplace reste une étape manuelle par machine**
+> (`claude plugin marketplace add ./` puis
+> `claude plugin install productivite-labo-codex@labo-codex`, depuis la racine).
+> Piège observé en passant : `claude plugin marketplace remove labo-codex`
+> **vide aussi `enabledPlugins` dans le `.claude/settings.json` du projet**
+> (fichier versionné). Après le test, la réinstallation a restitué l'état de
+> HEAD à l'octet près — rien à committer côté settings. Si un jour la
+> marketplace est retirée sans être réinstallée, penser à
+> `git restore .claude/settings.json`.
+
 ---
 
 ## 6. Ce qu'il ne faut pas faire
