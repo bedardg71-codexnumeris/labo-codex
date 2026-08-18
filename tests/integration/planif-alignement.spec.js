@@ -72,15 +72,22 @@ test('⚠ un bloc glissé près d’un autre COLLE, et un guide dit pourquoi', a
     await page.mouse.down();
 
     // Loin du repère : aucune aimantation, aucun guide.
+    // ⚠ 300 ms de repos AVANT de mesurer (réparation sur mesure, relevé Mac du
+    // 18 août 2026) : en WebKit headless la mesure à 80 ms rendait 426 au lieu
+    // de 440 — 14 px manquants sur un geste de +40, la position d'une frame
+    // INTERMÉDIAIRE, le drag étant throttlé par requestAnimationFrame. Même
+    // classe (et même correctif) que le CAS D de planif-drag-pointer-148, qui
+    // repasse au vert en WebKit depuis. Le repos garantit que le DERNIER
+    // pointermove a passé sa frame ; l'assertion exacte, elle, ne bouge pas.
     await page.mouse.move(prise[0] + 40, prise[1] - 10, { steps: 6 });
-    await page.waitForTimeout(80);
+    await page.waitForTimeout(300);
     const loin = await positions(page);
     expect(loin['planif-noeud_mob'][0]).toBe(440);
     expect(await page.locator('.planif-guide-alignement').count()).toBe(0);
 
     // À 4 px du bord gauche de REF : le bloc est ramené dessus.
     await page.mouse.move(prise[0] + 4, prise[1] - 10, { steps: 6 });
-    await page.waitForTimeout(120);
+    await page.waitForTimeout(300);
     const proche = await positions(page);
     expect(proche['planif-noeud_mob'][0]).toBe(400);
 

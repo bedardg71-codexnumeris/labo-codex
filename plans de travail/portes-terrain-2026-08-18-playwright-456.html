@@ -335,51 +335,51 @@ ol.erreurs b { color: var(--ink); }
 <div class="enveloppe">
 
 <header class="chapeau">
-  <p class="eyebrow">Portes terrain · 18 août 2026 · cycle 1.87.3 → 1.87.5</p>
+  <p class="eyebrow">Portes terrain · 18 août 2026 · #456 + #418 · 2ᵉ passe</p>
   <h1>La passe WebKit des specs Playwright</h1>
   <p class="sous-titre">
-    Cinq des six specs rouges de #456 sont réparées — c'étaient des tests
-    restés à une version antérieure de l'app, pas des bugs. Mais elles sont
-    éprouvées dans <em>Chromium</em>, le seul navigateur du conteneur :
-    <b>seule une passe sur ton Mac, dans WebKit, est un verdict Safari</b> —
-    et seule elle autorise à rétrécir la liste des échecs connus.
+    Ta 1ʳᵉ passe a tout tranché : quatre réparations tiennent en WebKit, la
+    baseline est passée de 6 à 2, et tes deux mesures ont permis de réparer
+    l'aimantation et d'instrumenter Alt/⌥. <b>Cette 2ᵉ passe est courte :
+    deux fichiers, environ deux minutes</b> — elle juge la réparation de
+    l'aimantation et recueille le verdict de la sonde.
   </p>
   <div class="meta">
-    <span>1.87.5</span><span>build 0818-1113</span><span>4 portes</span>
-    <span>10 vérifications</span><span>3 mesures</span><span>1 décision</span>
+    <span>app 1.87.5 (inchangée)</span><span>2ᵉ passe</span>
+    <span>6 vérifications</span><span>2 mesures</span><span>0 décision</span>
   </div>
 </header>
 
-<div class="alerte">
-  <h3>⚠⚠ Toute cette liste est du Terminal — exception assumée au modèle</h3>
+<div class="alerte" style="border-left-color:var(--ok);background:var(--ok-soft)">
+  <h3>Ce que ta 1ʳᵉ passe a établi — rien de tout ça n'est à refaire</h3>
   <p>
-    C'est une passe de suite de tests : <b>aucune</b> commande ne va dans la
-    console du navigateur. Tout se tape dans l'app <b>Terminal</b> de macOS,
-    dans le dossier <code>Monitorage_v6</code> (ou <code>tests</code> quand la
-    rangée le dit). Si une commande répond <code>command not found</code>,
-    c'est presque toujours le mauvais dossier.
+    <b>91 passés / 2 échecs</b> en WebKit (3,7 min). Plein écran, comptabilité
+    du temps, import inter-trimestre et CAS D : <b>réparées et confirmées</b>.
+    Ta mesure « 426 au lieu de 440 » a diagnostiqué l'aimantation (14 px
+    manquants = position d'une frame intermédiaire, mesurée trop tôt) — même
+    classe que le CAS D, réparée pareil, selon ton verdict 3.1 (voie 1).
+    La baseline mesurée (2 échecs connus) est <b>transcrite et poussée</b> :
+    si ta session Mac garde encore ce diff non committé, <b>jette-le</b>, il
+    est identique.
   </p>
 </div>
 
-<div class="alerte" style="border-left-color:var(--ok);background:var(--ok-soft)">
-  <h3>Ce que j'ai déjà pu vérifier — pour que tu ne le refasses pas</h3>
+<div class="alerte">
+  <h3>⚠ Alt/⌥+glisser reste attendue ROUGE — mais elle parle, maintenant</h3>
   <p>
-    Les six rouges du 18 août ont été <b>reproduits dans Chromium</b> (mêmes
-    échecs, mêmes lignes, sauf l'aimantation qui y passe). Les cinq réparées
-    sont <b>vertes en Chromium</b>, et Vitest rend <b>2738/2738</b>. Le correctif #418 (l'app qui ne démarrait
-    pas sans stockage avancé) est éprouvé au banc, break-testé.
-  </p>
-  <p>
-    ⮕ Ce qui reste, c'est le seul juge qui compte : <b>WebKit, sur ton Mac.</b>
+    Verte en Chromium, « clone jamais créé » chez toi : c'est la réparation
+    annoncée qui ne tenait pas en WebKit — tu avais raison de tiquer sur le
+    « 5 des 6 ». Plutôt que de la réparer à l'aveugle, la spec porte
+    désormais une <b>sonde</b> : quand le geste ne crée rien, son message
+    d'échec dit lequel des deux mondes casse. La rangée 2.7m recopie ce
+    verdict — c'est la seule donnée qui manque encore.
   </p>
 </div>
 
 <div class="alerte attention">
-  <h3>Ce qui échoue devient un item de backlog</h3>
-  <p>
-    Pas une note mentale. Coche ✗, et surtout : <b>les trois mesures</b> de
-    cette liste valent plus que les coches — recopie-les telles quelles.
-  </p>
+  <h3>Toute la liste est du Terminal</h3>
+  <p>App <b>Terminal</b>, jamais la console du navigateur. Ce qui échoue
+  devient un item de backlog, pas une note mentale.</p>
 </div>
 
 <div class="bord">
@@ -406,9 +406,8 @@ ol.erreurs b { color: var(--ink); }
   <h2>Copier mes résultats</h2>
   <p>
     Ton avancement vit dans <b>ton</b> navigateur : je ne peux pas le lire.
-    Clique, puis colle-moi le texte. Il contient les ✓, les ✗, les trois
-    mesures et ton verdict — sans ça, « la passe est faite » arrive sans
-    aucune donnée.
+    Clique, puis colle-moi le texte — surtout la ligne <code>SONDE :</code>
+    de 2.7m, c'est elle qui décide de la suite.
   </p>
   <div class="actions">
     <button class="btn" id="btn-copier">Copier mes résultats</button>
@@ -422,84 +421,65 @@ ol.erreurs b { color: var(--ink); }
 
 <script>
 // =====================================================================
-// Les portes. `t` = tags ; `mesure` = champ chiffré (pas de bascule seule) ;
-// `decision` = champ de verdict, SANS bascule (une case ne porte pas un
-// verdict — leçon du 11 août).
+// 2ᵉ passe. `t` = tags ; `mesure` = champ de saisie (jamais de bascule
+// seule pour un chiffre ou un verdict — leçon du 11 août).
 // =====================================================================
 const DATA = [
 { num:"§0", titre:"Avant de commencer", portes:[
-  { ref:"0.1", t:"préalable", fam:"toutes", titre:"Récupérer la version",
-    pourquoi:"Les réparations sont dans les fichiers de test de ton clone. Sans ce préalable, tu relancerais exactement les specs d'hier et tu retrouverais les six rouges — en concluant que rien n'a été réparé.",
+  { ref:"0.1", t:"préalable", fam:"toutes", titre:"Récupérer les correctifs de tests",
+    pourquoi:"Les réparations vivent dans les fichiers de test de ton clone. La version de l'app ne bouge pas (correctifs de tests seuls) : c'est le dernier commit qui dit si tu es à jour, pas le numéro en bas de page.",
     rangs:[
-      { id:"0.1a", geste:"App <b>Terminal</b>, dans le dossier <code>Monitorage_v6</code> :<br><code>git checkout main &amp;&amp; git pull origin main</code>",
-        attendu:"la liste des fichiers reçus, puis <code>Fast-forward</code>. Si Terminal répond <code>error: Your local changes would be overwritten</code>, <b>arrête-toi et dis-le-moi</b>.", tags:["Terminal"] },
-      { id:"0.1b", geste:"Recharger l'app et lire le numéro <b>en bas de page</b>.",
-        attendu:"<b>1.87.5</b>, build <code>0818-1113</code>. Si tu lis moins, la commande n'a pas pris." }
+      { id:"p2-01a", geste:"App <b>Terminal</b>, dossier <code>Monitorage_v6</code> :<br><code>git checkout main &amp;&amp; git pull origin main</code>, puis <code>git log --oneline -1</code>",
+        attendu:"<code>Fast-forward</code>, et la dernière ligne du log mentionne <b>« retour de terrain #456 »</b>.", tags:["Terminal"] }
     ]}
 ]},
 
-{ num:"§2", titre:"La passe WebKit — le seul juge", portes:[
-  { ref:"2.1", t:"#456", fam:"toutes", titre:"Relancer la suite d'intégration, pour de vrai",
-    pourquoi:"C'est le défaut fondateur de #456 : un chiffre d'échecs recopié six jours sans être reproduit, et faux d'une unité. La règle depuis : on ne réécrit jamais ce compte sans relancer la suite.",
+{ num:"§2", titre:"La 2ᵉ passe — deux fichiers, ~2 minutes", portes:[
+  { ref:"2.5", t:"#456", fam:"toutes", titre:"Relancer les deux fichiers concernés",
+    pourquoi:"Inutile de repayer les 4 minutes de la suite entière : seules deux specs ont changé depuis ta passe. La suite complète reviendra avec la baseline (2.8).",
     rangs:[
-      { id:"2.1a", geste:"App <b>Terminal</b>, dans le dossier <code>Monitorage_v6/tests</code> :<br><code>npm run test:int</code>",
-        attendu:"la suite tourne (~4 minutes, 93 tests) et se termine par une ligne de bilan du type <code>N passed</code> / <code>M failed</code>.", tags:["Terminal"] },
-      { id:"2.1m", mesure:true, label:"MESURE — recopie la ligne de bilan EXACTE, et la liste des « failed » s'il y en a",
-        placeholder:"ex. « 6 failed … 87 passed (3.7m) » + les noms", aide:"Aucun chiffre n'est un échec ici : c'est cette mesure qui commande tout le reste de la liste." }
+      { id:"p2-05a", geste:"App <b>Terminal</b>, dossier <code>Monitorage_v6/tests</code> :<br><code>npx playwright test integration/planif-alignement.spec.js integration/planif-toolbar.spec.js</code>",
+        attendu:"~2 minutes, 9 tests, un bilan <code>N passed / M failed</code>.", tags:["Terminal"] }
     ]},
 
-  { ref:"2.2", t:"réparées en Chromium", fam:"toutes", titre:"Les cinq specs réparées ne sont plus rouges",
-    pourquoi:"Les cinq étaient des tests restés à une version antérieure de l'app : un badge retiré le 9 août qu'une spec attendait encore, une fonction renommée, un format de données d'avant le correctif #367, et deux gestes de souris qui saisissaient le bloc à l'endroit où vit maintenant le menu de type. ⚠ C'est une PRÉDICTION : elles sont vertes en Chromium, pas encore en WebKit — un ✗ ici n'est pas une surprise interdite, c'est ce que la porte cherche.",
+  { ref:"2.6", t:"réparée sur TA mesure", fam:"toutes", titre:"L'aimantation est verte",
+    pourquoi:"Ta mesure (426 au lieu de 440) a montré que le test lisait la position d'une frame intermédiaire : il mesurait 80 ms après le geste, avant que le dernier mouvement ait été traité. Il attend maintenant 300 ms — l'assertion exacte, elle, n'a pas bougé. ⚠ Prédiction éprouvée en Chromium seulement : un ✗ ici est une information, pas une catastrophe.",
     rangs:[
-      { id:"2.2a", geste:"Dans le bilan de 2.1 : <b>« plein écran carte mentale »</b> (planif-toolbar) n'est plus dans les échecs.",
-        attendu:"absente de la liste des failed." },
-      { id:"2.2b", geste:"<b>« Alt/⌥+glisser un bloc »</b> (planif-toolbar) n'y est plus.",
-        attendu:"absente des failed." },
-      { id:"2.2c", geste:"<b>« comptabilité du temps »</b> (planif-toolbar) n'y est plus.",
-        attendu:"absente des failed." },
-      { id:"2.2d", geste:"<b>« import inter-trimestre »</b> (planif-toolbar) n'y est plus.",
-        attendu:"absente des failed." },
-      { id:"2.2e", geste:"<b>« CAS D — un drag souris déplace un nœud libre »</b> (planif-drag-pointer-148) n'y est plus.",
-        attendu:"absente des failed." }
+      { id:"p2-06a", geste:"Dans le bilan de 2.5 : <b>« un bloc glissé près d'un autre COLLE »</b> (planif-alignement) est passée.",
+        attendu:"verte. Si elle est rouge, recopie le nouveau message d'erreur dans 2.7m avec l'autre." }
     ]},
 
-  { ref:"2.3", t:"non réparée", fam:"toutes", titre:"La sixième : recueillir son message, pas la deviner",
-    pourquoi:"« Un bloc glissé près d'un autre COLLE » (planif-alignement) PASSE dans Chromium ici : son rouge n'existe que dans WebKit, et je n'ai jamais vu son message d'erreur. La réparer « au jugé » serait réécrire un test sans savoir ce qu'il refuse — c'est comme ça qu'on fabrique des tests décoratifs.",
+  { ref:"2.7", t:"sonde", fam:"toutes", titre:"Alt/⌥+glisser : rouge attendu, verdict à recopier",
+    pourquoi:"On ne l'a pas réparée à l'aveugle : la seule chose qu'on sait de son rouge WebKit, c'est « aucun doublon créé ». La sonde tranche entre deux mondes — le modificateur ⌥ qui ne voyage pas avec la souris du harnais de test, ou le chemin de duplication de l'app qui ne répond pas dans ce moteur. Les deux suites sont très différentes : la première se répare dans le test, la seconde est un bug d'app à verser au backlog.",
     rangs:[
-      { id:"2.3m", mesure:true, label:"MESURE — si cette spec est rouge dans le bilan, recopie son message d'erreur EN ENTIER (les lignes Error / Expected / Received)",
-        placeholder:"colle le bloc d'erreur ici — ou écris « verte » si elle passe", aide:"C'est la donnée qui manque pour la diagnostiquer. Si elle est verte en WebKit aussi, c'est une information tout aussi précieuse : écris « verte »." }
+      { id:"p2-07a", geste:"Dans le bilan de 2.5 : <b>« Alt/⌥+glisser un bloc »</b> (planif-toolbar) échoue encore.",
+        attendu:"rouge, ET son message d'échec contient une ligne qui commence par <code>SONDE :</code>. Si elle est VERTE, coche ✓ et écris-le en 2.7m : ce serait la meilleure nouvelle du jour." },
+      { id:"p2-07m", mesure:true, label:"MESURE — recopie la ligne « SONDE : … » en entier (ou « verte » si la spec passe)",
+        placeholder:"SONDE : …", aide:"C'est la donnée qui décide de la suite : réparation de harnais, ou item de backlog." }
     ]},
 
-  { ref:"2.4", t:"baseline", fam:"toutes", titre:"Rétrécir la liste des échecs connus — seulement si 2.2 est verte",
-    pourquoi:"Le garde-fou de push compare la suite à une liste d'échecs CONNUS. Une liste qui couvre du vert est un mensonge silencieux : chaque spec réparée doit s'en retirer. Mais on ne la réécrit que sur une passe réelle — jamais pour « faire propre ».",
+  { ref:"2.8", t:"baseline", fam:"toutes", titre:"Rétrécir la baseline — seulement si 2.6 est verte",
+    pourquoi:"La liste des échecs connus doit suivre le réel : si l'aimantation est verte, elle n'a plus rien à y faire. Et on ne réécrit jamais cette liste sans relancer la suite — c'est le défaut fondateur de #456.",
     rangs:[
-      { id:"2.4a", geste:"<b>SEULEMENT si les cinq rangées de 2.2 sont ✓</b> — app <b>Terminal</b>, dossier <code>Monitorage_v6</code> :<br><code>node scripts/verifier-playwright.mjs --ecrire</code>",
-        attendu:"le script relance la suite puis réécrit <code>scripts/playwright-baseline.json</code> avec les seuls échecs encore réels.", tags:["Terminal"] },
-      { id:"2.4m", mesure:true, label:"MESURE — recopie le nouveau « totalEchecsConnus » et la liste « echecsConnus » du fichier réécrit",
-        placeholder:"ex. totalEchecsConnus: 1 + la liste", aide:"Attendu si tout s'est passé comme prévu : 1 (l'aimantation) — mais c'est la mesure qui fait foi, pas la prédiction." },
-      { id:"2.4b", geste:"Demander à ta session Claude du Mac de <b>committer et pousser</b> la baseline réécrite (elle fait partie du dépôt).",
+      { id:"p2-08a", geste:"<b>SEULEMENT si 2.6 est ✓</b> — app <b>Terminal</b>, dossier <code>Monitorage_v6</code> :<br><code>node scripts/verifier-playwright.mjs --ecrire</code>",
+        attendu:"la suite complète tourne (~4 min) puis la baseline est réécrite — normalement à <b>1</b> échec connu (Alt/⌥).", tags:["Terminal"] },
+      { id:"p2-08m", mesure:true, label:"MESURE — recopie le nouveau « totalEchecsConnus » et la liste",
+        placeholder:"ex. totalEchecsConnus: 1 + la liste", aide:"C'est la mesure qui fait foi, pas la prédiction." },
+      { id:"p2-08b", geste:"Committer et pousser la baseline réécrite (ou le demander à ta session Claude du Mac).",
         attendu:"un commit sur main qui ne touche que <code>scripts/playwright-baseline.json</code>.", tags:["Terminal"] }
     ]}
 ]},
 
-{ num:"§3", titre:"Décision — ce qui attend ton verdict", note:"⚠ <b>Ce n'est PAS une vérification.</b> C'est un choix que je ne peux pas trancher à ta place. Une phrase écrite, pas une coche.", decisions:[
-  { id:"3.1", titre:"Que faire de la spec d'aimantation, une fois son message recueilli ?",
-    texte:"Deux voies. <b>La réparer sur mesure</b> : une prochaine session part de ton relevé 2.3m et corrige la spec (ou l'app, si le message révèle un vrai défaut WebKit de l'aimantation — auquel cas c'est un item de backlog, pas un correctif de test). <b>Ou la réécrire/retirer</b> si le message montre que son assertion est intestable en WebKit headless (position au pixel près pendant un drag synthétique). Ma recommandation : la voie 1 d'abord — on ne retire pas un test avant d'avoir compris ce qu'il refuse." }
-]},
-
 { num:"§4", titre:"Ce que je n'ai pas pu vérifier", angles:[
-  { titre:"Tout est éprouvé en Chromium, rien en WebKit",
-    texte:"WebKit n'existe pas dans le conteneur. Les cinq réparations sont des <b>verts Chromium</b> : mêmes tests, autre moteur. La passe 2.1 est le seul juge — c'est exactement pour ça que cette liste existe." },
-  { titre:"La sixième spec n'a pas été touchée",
-    texte:"Elle passe en Chromium ici, et je n'ai aucun message d'erreur WebKit. Rien n'a été « réparé au jugé » : la rangée 2.3m recueille la donnée qui manque." },
-  { titre:"#418 : le banc reproduit le mode, pas le navigateur",
-    texte:"Le correctif « l'app démarre même sans stockage avancé » est éprouvé en exécutant le vrai démarrage de <code>db.js</code> sans IndexedDB, break-testé (4 rouges garde retirée). Mais aucun vrai Safari en navigation privée ne l'a exercé — le mode ne se déclenche pas à la demande. Si un testeur signale un écran qui ne charge pas en navigation privée, c'est le premier suspect à écarter." }
+  { titre:"La réparation de l'aimantation est un vert Chromium",
+    texte:"Elle suit TA mesure WebKit (426/440) et le précédent du CAS D — qui, réparé pareil, est passé au vert chez toi. Mais le conteneur n'a toujours pas WebKit : la rangée 2.6 est le juge." },
+  { titre:"La sonde n'a jamais tourné en WebKit",
+    texte:"Sa mécanique est éprouvée en Chromium (le dispatch synthétique y crée bien la copie, 18 → 19 nœuds). En WebKit, son verdict est précisément ce qu'on attend — aucun des deux mondes n'est présumé." }
 ]}
 ];
 
 const ERREURS = [
-  "<b>Ma première réparation d'⌥+glisser mesurait après le relâchement.</b> Au dépôt, un conteneur de la carte démo re-layoutait la copie : le test restait rouge pour une mauvaise raison. Le test voisin documentait déjà le piège — je ne l'avais pas appliqué. Corrigé en mesurant PENDANT le drag.",
-  "<b>Le premier banc du correctif #418 ne testait rien.</b> Il découpait le code du démarrage entre deux repères, et le second repère existait AUSSI dans le commentaire d'en-tête du fichier : le bloc découpé était vide, l'assertion passait sur du néant. Corrigé avec des bornes qui exigent leur propre présence — et le banc a rougi au break-test, comme il devait."
+  "<b>Le « 5 des 6 réparées » du commit précédent surestimait.</b> Quatre tiennent en WebKit ; la cinquième (Alt/⌥) était verte dans le seul moteur que le conteneur possède. C'est toi qui l'as attrapé, dans ton relevé — et c'est exactement le genre d'écart que la porte terrain existe pour mesurer. La spec porte maintenant une sonde au lieu d'une nouvelle réparation à l'aveugle."
 ];
 
 // ── État ─────────────────────────────────────────────────────────────
@@ -683,7 +663,7 @@ function construireReleve() {
   const ok = verifs.filter(r => (etat[r.id]||{}).etat === 'ok').length;
   const ko = verifs.filter(r => (etat[r.id]||{}).etat === 'ko').length;
   const L = [];
-  L.push('PORTES TERRAIN — Passe WebKit des specs Playwright, #456 + #418 (18 août 2026)');
+  L.push('PORTES TERRAIN — Passe WebKit des specs Playwright, #456 + #418 — 2ᵉ passe (18 août 2026)');
   L.push('Version visée : 1.87.5 · build 0818-1113');
   L.push('Cycle 1.87.3 → 1.87.5');
   L.push('');
