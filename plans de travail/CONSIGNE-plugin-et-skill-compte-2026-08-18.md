@@ -1,10 +1,13 @@
-# Consigne — Plugin de productivité et copie compte de `design-interface`
+# Consigne — Plugin, copie compte de `design-interface`, et déclenchement des skills neufs
 
 > Document de travail destiné à une session **Claude Code lancée depuis le
 > terminal du Mac de Grégoire**. Préparé le 18 août 2026 par une session cloud
-> qui a pu *diagnostiquer* ces deux points mais pas les *appliquer* : ils
-> touchent des réglages hors dépôt. Supprimable après usage — ne fait pas
-> partie du code applicatif.
+> qui a pu *diagnostiquer* ces trois points mais pas les *appliquer* : ils
+> touchent des réglages hors dépôt, ou exigent une session non contaminée.
+> Supprimable après usage — ne fait pas partie du code applicatif.
+>
+> ⚠ **Tâche C : ne pas la faire exécuter par la session qui lit ce document.**
+> Elle y aurait lu les réponses attendues. Voir le protocole au §5.
 
 ---
 
@@ -18,6 +21,11 @@ parce qu'ils vivent dans des réglages **non versionnés** ou sur **claude.ai** 
 - **A.** Le plugin `productivite-labo-codex` ne se charge pas côté Claude Code.
 - **B.** Une copie divergente du skill `design-interface` subsiste dans les
   skills du compte claude.ai.
+- **C.** `design-interface` et `release-et-changelog` — les deux skills **créés**
+  le 17 août — n'ont jamais été testés au **déclenchement**. Les 4 tests de
+  `FICHE-RELECTURE.md` ne portaient que sur les 13 skills migrés. Une session
+  cloud ne peut pas s'auto-tester là-dessus de façon crédible : elle connaît la
+  réponse attendue.
 
 ---
 
@@ -178,7 +186,77 @@ que le **répertoire de base annoncé** est bien
 
 ---
 
-## 5. Question ouverte — à trancher, pas à supposer
+## 5. Tâche C — les deux déclenchements jamais éprouvés
+
+### Pourquoi cette tâche existe
+
+Les 4 tests de déclenchement de `FICHE-RELECTURE.md` (17 août) portaient sur les
+**13 skills migrés**. Les deux skills **créés** ce jour-là — `design-interface` et
+`release-et-changelog` — n'ont jamais été testés au déclenchement. On sait qu'ils
+se chargent et se résolvent ; on ne sait pas qu'ils **partent seuls**.
+
+C'est la dernière pièce manquante avant de déclarer le chantier skills clos.
+
+### ⚠ Protocole — sinon le test ne vaut rien
+
+**La session qui subit le test ne doit PAS avoir lu cette consigne.** Elle y
+lirait la réponse attendue et le résultat serait sans valeur. C'est la règle qui
+avait été tenue le 17 août (« deux sessions neuves distinctes, non contaminées »).
+
+Concrètement :
+
+1. Ouvrir une session Claude Code **neuve**, à la racine du dépôt, dans un autre
+   terminal. Ne rien lui donner d'autre.
+2. Y taper **une seule** des phrases ci-dessous, telle quelle.
+3. Observer si le skill attendu se charge **sans qu'on le nomme**.
+4. Fermer la session. **Une session neuve par cas** — la première est contaminée
+   dès qu'elle a vu le résultat.
+
+Ne jamais faire passer ces tests par la session qui exécute cette consigne.
+
+### Cas 1 — `design-interface`
+
+> Phrase à taper : **« le tableau de bord est laid, ça déborde à droite »**
+
+Attendu : `design-interface` se charge seul.
+
+Ce cas est choisi exprès. La description du skill **dans le dépôt** est formelle
+et technique (`styles.css`, contraste, responsive, microcopy). La copie qui vivait
+sur le compte claude.ai, elle, listait tes tournures réelles — « c'est laid »,
+« ça déborde », « on ne voit pas », « ça ne rentre pas sur iPad ». On a tranché en
+faveur du dépôt (tâche B) : **il faut donc vérifier que la version retenue part
+quand même sur ta façon de parler.**
+
+⮕ **Si le skill ne part pas**, le correctif est connu et local : ajouter ces
+tournures aux déclencheurs de la `description` dans
+`.claude/skills/design-interface/SKILL.md`. Ce n'est pas le principe qui est en
+cause, c'est un frontmatter à enrichir.
+
+### Cas 2 — `release-et-changelog`
+
+> Phrase à taper : **« je veux publier ce qu'on a fait cette semaine aux
+> testeurs »**
+
+Attendu : `release-et-changelog` se charge seul.
+
+Ce cas évite volontairement les mots que la `description` contient déjà
+(« on livre », « bump », « release », « changelog », « nouvelles », « version ») :
+un test qui recopie la description ne prouve rien d'autre qu'une correspondance
+littérale. On teste l'intention, pas le mot-clé.
+
+⮕ **Si le skill ne part pas**, même correctif : enrichir les déclencheurs de sa
+`description`.
+
+### Consigner le résultat
+
+Les deux cas, passés ou non, se notent dans `SESSION.md` avec la phrase employée
+et le skill effectivement chargé. Un « ça a marché » sans la phrase n'est pas
+reproductible — et c'est reproductible qu'on veut, puisque toute modification
+future d'une `description` peut casser le déclenchement.
+
+---
+
+## 6. Question ouverte — à trancher, pas à supposer
 
 **Peut-on versionner l'enregistrement de la marketplace**, pour que la tâche A
 n'ait plus jamais à être refaite (ni sur une autre machine, ni dans une session
@@ -224,7 +302,7 @@ une recommandation.
 
 ---
 
-## 6. Ce qu'il ne faut pas faire
+## 7. Ce qu'il ne faut pas faire
 
 - **Ne pas** modifier les 15 skills de `.claude/skills/` : ils sont vérifiés et
   fonctionnels.
@@ -241,12 +319,16 @@ une recommandation.
 
 ---
 
-## 7. En terminant
+## 8. En terminant
 
-Règle de relais du projet : fusionner vers `main` en fin de session. Si un seul
-fichier change (cette consigne, ou `.claude/settings.json` si le §5 aboutit),
-c'est un `patch` documentaire — **aucun bump de version**, aucun code applicatif
-touché.
+Règle de relais du projet : fusionner vers `main` en fin de session. Ce qui peut
+changer ici est documentaire — cette consigne, `SESSION.md`, et au plus une
+`description` de frontmatter si un cas de la tâche C échoue. **Aucun bump de
+version**, aucun code applicatif touché.
+
+⮕ **Le chantier skills n'est clos que quand les deux cas de la tâche C sont
+passés**, ou que leurs `description` ont été corrigées et les cas repassés. Tout
+le reste est déjà acquis et mesuré (§2).
 
 Référence de la suite de tests au moment de la rédaction : **Vitest 2701/2701**
 (268 fichiers).
