@@ -70,6 +70,53 @@ absolu.
 écrit un chemin **absolu** dans les réglages. Le chemin du conteneur cloud
 (`/home/user/Monitorage_v6`) n'a aucun sens sur le Mac.
 
+### ⚠⚠ Le piège : `marketplace remove` touche un fichier VERSIONNÉ
+
+**`claude plugin marketplace remove labo-codex` vide `enabledPlugins` dans le
+`.claude/settings.json` du PROJET** — pas dans les réglages utilisateur, dans le
+fichier suivi par git. Observé le 18 août 2026 sur le Mac.
+
+C'est le pire genre d'effet de bord : silencieux, dans un fichier de config que
+personne ne relit, et qui part au prochain `git add -A` sans que le message de
+commit le mentionne. Il désactiverait le plugin **pour toutes les machines et
+toutes les sessions cloud**, en se faisant passer pour un commit documentaire.
+
+**Reproduit en conteneur le 18 août** (contre-épreuve, pas reprise sur parole).
+La clé n'est pas seulement vidée en `"enabledPlugins": {}` — elle est aussi
+**déplacée en fin de fichier**. Le diff ressemble donc à un réordonnancement
+anodin de JSON, ce qui le rend d'autant plus facile à laisser passer en
+relecture rapide :
+
+```diff
+-  "enabledPlugins": {
+-    "productivite-labo-codex@labo-codex": true
+-  },
+   "hooks": { … }
++  "enabledPlugins": {}
+```
+
+Réinstaller la marketplace **restitue** le fichier à l'octet près (vérifié) —
+donc un cycle `remove` → `add` → `install` complet ne laisse pas de trace. C'est
+un `remove` **laissé en plan** qui est dangereux.
+
+**Règle** : après TOUTE commande `claude plugin ...` lancée depuis le dépôt —
+`remove`, `add`, `install`, `uninstall` — vérifier immédiatement :
+
+```bash
+git status --short .claude/settings.json    # attendu : rien
+git diff .claude/settings.json              # attendu : vide
+```
+
+Si le fichier a bougé et que ce n'était pas voulu :
+
+```bash
+git restore .claude/settings.json
+```
+
+⮕ Ne jamais committer une modification de `.claude/settings.json` qui n'a pas
+été **décidée**. Une modification qui apparaît comme *conséquence* d'une
+commande plugin est un dégât, pas un changement.
+
 ### Vérification — ce qui compte comme preuve
 
 Ne pas se contenter d'un « installé avec succès ». Exiger l'inventaire :
@@ -169,12 +216,11 @@ une recommandation.
 > **L'enregistrement de la marketplace reste une étape manuelle par machine**
 > (`claude plugin marketplace add ./` puis
 > `claude plugin install productivite-labo-codex@labo-codex`, depuis la racine).
-> Piège observé en passant : `claude plugin marketplace remove labo-codex`
-> **vide aussi `enabledPlugins` dans le `.claude/settings.json` du projet**
-> (fichier versionné). Après le test, la réinstallation a restitué l'état de
-> HEAD à l'octet près — rien à committer côté settings. Si un jour la
-> marketplace est retirée sans être réinstallée, penser à
-> `git restore .claude/settings.json`.
+> C'est ce test qui a mis au jour le piège du `marketplace remove` sur le
+> `.claude/settings.json` versionné — **décrit et outillé au §3**, parce qu'il
+> mord sur toutes les commandes plugin, pas seulement sur cette
+> question-ci. Ici, la réinstallation avait restitué l'état de HEAD à l'octet
+> près : rien à committer côté settings.
 
 ---
 
@@ -186,6 +232,9 @@ une recommandation.
   `Rapports/`, `plans de travail/_archives/` et `audit/` : ce sont des traces
   datées, laissées telles quelles **volontairement**.
 - **Ne pas** committer `~/.claude/settings.json` ni quoi que ce soit hors dépôt.
+- **Ne pas** committer un `.claude/settings.json` du projet modifié par une
+  commande `claude plugin ...` : voir le piège du §3. Vérifier après chaque
+  commande, restaurer si besoin.
 - **Ne pas** conclure « ça marche » sur la foi d'un message de succès du CLI.
   La preuve, c'est l'inventaire des composants et l'existence de `/start` dans
   une session neuve.
