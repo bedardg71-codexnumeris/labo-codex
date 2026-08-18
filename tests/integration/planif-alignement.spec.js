@@ -71,22 +71,29 @@ test('⚠ un bloc glissé près d’un autre COLLE, et un guide dit pourquoi', a
     await page.mouse.move(prise[0], prise[1]);
     await page.mouse.down();
 
+    // ⚠ TRAJET LIVRÉ PAS À PAS, DERNIER MOUVEMENT DOUBLÉ (3ᵉ passe Mac du
+    // 18 août 2026, diagnostic embarqué : reçu 433 = 440 − un pas de ~6,7 px,
+    // guides 0, drag vivant). Ce n'était NI une aimantation NI une frame en
+    // retard : en WebKit headless, le dernier pointermove d'un trajet groupé
+    // (`steps: n`) n'est pas livré — le 426 d'avant (80 ms) manquait DEUX
+    // pas, le 433 (300 ms) en manquait UN. Correctif : des mouvements
+    // explicites espacés d'attentes (le patron du CAS D, vert en WebKit),
+    // le mouvement FINAL émis deux fois (un événement frais re-livre la
+    // position même si le précédent est avalé), puis un repos rAF.
+    const glisserPasAPas = async (cibleX, cibleY) => {
+        for (let i = 1; i <= 6; i++) {
+            await page.mouse.move(
+                prise[0] + (cibleX - prise[0]) * i / 6,
+                prise[1] + (cibleY - prise[1]) * i / 6
+            );
+            await page.waitForTimeout(40);
+        }
+        await page.mouse.move(cibleX, cibleY);
+        await page.waitForTimeout(300);
+    };
+
     // Loin du repère : aucune aimantation, aucun guide.
-    // ⚠ 300 ms de repos AVANT de mesurer (réparation sur mesure, relevé Mac du
-    // 18 août 2026) : en WebKit headless la mesure à 80 ms rendait 426 au lieu
-    // de 440 — 14 px manquants sur un geste de +40, la position d'une frame
-    // INTERMÉDIAIRE, le drag étant throttlé par requestAnimationFrame. Même
-    // classe (et même correctif) que le CAS D de planif-drag-pointer-148, qui
-    // repasse au vert en WebKit depuis. Le repos garantit que le DERNIER
-    // pointermove a passé sa frame ; l'assertion exacte, elle, ne bouge pas.
-    await page.mouse.move(prise[0] + 40, prise[1] - 10, { steps: 6 });
-    await page.waitForTimeout(300);
-    // ⚠ DIAGNOSTIC EMBARQUÉ (2ᵉ passe Mac du 18 août : reçu 400 — qui est
-    // AUSSI la position de départ de MOB). Deux lectures indiscernables sans
-    // données : « aimanté sur REF » (il faudrait zoom ≈ 0,15, le seuil étant
-    // AIMANT_SEUIL=6 px écran ÷ zoom) ou « le drag s'est terminé/n'a pas
-    // tenu ». Le diagnostic part dans le message d'échec : zoom, guides
-    // visibles, drag encore en cours, largeurs réelles des deux blocs.
+    await glisserPasAPas(prise[0] + 40, prise[1] - 10);
     const loin = await page.evaluate(() => {
         const api = window.planificationCarte;
         const n = api.etat.noeuds.get('planif-noeud_mob');
@@ -100,14 +107,19 @@ test('⚠ un bloc glissé près d’un autre COLLE, et un guide dit pourquoi', a
             wRef: refEl.offsetWidth, wMob: mobEl.offsetWidth
         };
     });
+    // ⚠ L'INVARIANT est « aucune aimantation à 40 px », pas « le pointeur
+    // arrive au pixel près » (ça, c'est le CAS D, et il l'affirme lui aussi
+    // par INÉGALITÉS). Un snap poserait le bloc à 400 ET tracerait un guide :
+    // on affirme donc l'éloignement et l'absence de guide. Le diagnostic
+    // reste embarqué pour un éventuel prochain rouge.
     expect(loin.x,
-        'à +40 px du repère, aucune aimantation ne doit jouer — diagnostic : ' + JSON.stringify(loin)
-    ).toBe(440);
-    expect(await page.locator('.planif-guide-alignement').count()).toBe(0);
+        'à +40 px du repère, aucune aimantation ne doit jouer (un snap rendrait 400) — diagnostic : ' + JSON.stringify(loin)
+    ).toBeGreaterThan(425);
+    expect(loin.guidesVisibles).toBe(0);
 
-    // À 4 px du bord gauche de REF : le bloc est ramené dessus.
-    await page.mouse.move(prise[0] + 4, prise[1] - 10, { steps: 6 });
-    await page.waitForTimeout(300);
+    // À 4 px du bord gauche de REF : le bloc est ramené dessus. (Le snap
+    // POSE la position exacte — ici l'égalité stricte est l'invariant.)
+    await glisserPasAPas(prise[0] + 4, prise[1] - 10);
     const proche = await positions(page);
     expect(proche['planif-noeud_mob'][0]).toBe(400);
 

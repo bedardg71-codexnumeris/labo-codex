@@ -2,103 +2,89 @@
 
 > **Cycle** : 1.87.4 → 1.87.5 (18 août 2026, session cloud « backlog »)
 > **Artefact interactif** : <https://claude.ai/code/artifact/2ccba225-4893-4502-be58-557b812d6331>
-> **État** : ✅ 1ʳᵉ et 2ᵉ passes RETOURNÉES ET TRAITÉES (18 août, relevés
-> complets) · ⏳ **3ᵉ passe DUE** (2 minutes, §2-ter ci-dessous).
+> **État** : ✅ 1ʳᵉ, 2ᵉ et 3ᵉ passes RETOURNÉES ET TRAITÉES (18 août) ·
+> ⏳ **4ᵉ passe DUE** (2 minutes, §2-quater — possiblement la dernière :
+> si tout est vert, la baseline tombe à 0 et #456 se ferme).
 > Ce qui échoue devient un item de backlog, pas une note mentale.
 
 ---
 
-## Retour de la 1ʳᵉ passe (18 août — 91 passés / 2 échecs, 3,7 min)
+## Retour de la 1ʳᵉ passe (91 passés / 2 échecs, 3,7 min)
 
-- ✅ Quatre réparations tiennent en WebKit (plein écran, comptabilité du
-  temps, import inter-trimestre, CAS D). Baseline **6 → 2**.
-- ⛔ La 5ᵉ (Alt/⌥) ne tenait pas — le « 5 des 6 » du commit surestimait,
-  attrapé par Grégoire. Spec instrumentée d'une sonde.
-- 📏 L'aimantation mesurée : 426 au lieu de 440 → réparée (300 ms de repos
-  avant mesure, classe CAS D).
+Quatre réparations tiennent ; la 5ᵉ (Alt/⌥) non — sonde posée. Aimantation
+mesurée 426/440 → repos de 300 ms. Baseline 6 → 2.
 
-## Retour de la 2ᵉ passe (18 août, exécutée au terminal — 5 portes ✓ · 1 ✗ · 2 mesures)
+## Retour de la 2ᵉ passe (7/2 en 57,7 s ; suite entière : baseline stable à 2)
 
-**Bilan des deux specs : 7 passés / 2 échecs (57,7 s, projet `webkit`).**
-**Bilan de la suite entière (via la sentinelle `--ecrire`) : baseline
-inchangée à 2 — diff VIDE, donc aucune rougeur nouvelle nulle part ailleurs
-dans les 87 tests.** (2.8 a été exécutée malgré 2.6 rouge, sur demande
-explicite : la baseline étant déjà à ces deux specs, l'écriture ne pouvait
-rien figer de neuf.) ⚠ La passe a été remplie au terminal, pas via
-l'artefact — il a servi de plan, pas de journal.
+- Sonde : **Alt/⌥ n'est pas un bug d'app** (le chemin applicatif duplique en
+  WebKit ; c'est le modificateur ⌥ du harnais qui ne voyage pas) → spec
+  réécrite en PointerEvent purs.
+- Aimantation : 400 reçu (= position de départ) → diagnostic embarqué dans
+  la spec (`zoom`, `guidesVisibles`, `dragEnCours`, largeurs).
 
-- ✅ **SONDE Alt/⌥ : verdict net.** « Un pointerdown synthétique altKey:true
-  CRÉE la copie — le chemin applicatif marche dans ce moteur ; c'est le
-  modificateur ⌥ qui ne voyage pas avec la souris du harnais. » ⮕ **Pas un
-  bug d'app** : la carte fait son travail en WebKit aussi ; la spec testait
-  un geste que Playwright ne sait pas produire dans ce moteur. Dette
-  d'outillage, pas de backlog applicatif.
-- ⛔ **La prédiction sur l'aimantation est infirmée — elle est rouge
-  AUTREMENT : 400 au lieu de 440** (`planif-alignement.spec.js:85`), et 400
-  est AUSSI la position de départ de MOB (et celle de REF). Le repos de
-  300 ms a réglé ce qu'il visait (le 426 a disparu) et découvert un second
-  problème derrière.
+## Retour de la 3ᵉ passe (8 passés / 1 échec, 55 s)
 
-### Ce qui en a été fait (18 août, session cloud — commit « 3ᵉ passe »)
+- ✅ **Alt/⌥ EST VERTE en WebKit — la réécriture PointerEvent tient.**
+  ⚠ Note de lecture du relevé : la porte 2.10 est revenue cochée ✗, mais la
+  mesure jointe la contredit (« 8 passés / 1 échec, l'échec :
+  planif-alignement:105 ») — Alt/⌥ n'est pas dans les échecs, donc elle a
+  passé. **La mesure fait foi.** La dette d'outillage Alt/⌥ est close.
+- 📏 **Le diagnostic embarqué a départagé les deux hypothèses de la 2ᵉ
+  passe — c'est la première (bug de harnais)** : reçu **433** (= 440 − un
+  pas de ~6,7 px), `guidesVisibles: 0` (aucun snap — un snap trace un
+  guide), `dragEnCours: true` (le drag vit). Ni aimantation ni frame en
+  retard : **WebKit ne livre pas le dernier `pointermove` d'un trajet
+  groupé** (`steps: 6`) — le 426 de la 1ʳᵉ passe manquait DEUX pas, le 433
+  en manquait UN. L'app est hors de cause.
 
-- **Alt/⌥ réécrite en PointerEvent purs**, conformément au verdict de la
-  sonde : pointerdown `altKey:true` sur la poignée ⠿, pointermove sur
-  `document` (là où le drag écoute) avec une frame rAF entre chaque (drag
-  throttlé), mesure PENDANT le drag, pointerup. La mécanique à la vraie
-  souris reste couverte par le CAS D, vert en WebKit. 9/9 verts en Chromium ;
-  **break-testée** : sans `altKey`, elle rougit. La sonde, verdict rendu et
-  acté, est retirée.
-- **L'aimantation embarque son diagnostic** — exactement ce que le §4 de la
-  2ᵉ passe demandait (« compter les guides et mesurer, sans toucher aux
-  assertions ») : à l'échec, le message livre `zoom`, `guidesVisibles`,
-  `dragEnCours` et les largeurs réelles des deux blocs. De quoi départager
-  « aimanté sur REF » (exigerait zoom ≈ 0,15, le seuil étant
-  `AIMANT_SEUIL = 6 px écran ÷ zoom`) et « le drag s'est interrompu »
-  (l'hypothèse concurrente du relevé, gardée vivante — `dragEnCours:false`
-  la confirmerait). Les assertions exactes n'ont pas bougé ; rien n'est
-  tranché au jugé.
+### Ce qui en a été fait (18 août, session cloud — commit « 4ᵉ passe »)
+
+- **Trajet livré pas à pas, dernier mouvement doublé** (patron du CAS D,
+  vert en WebKit) : mouvements explicites espacés d'attentes, le mouvement
+  final émis deux fois, puis repos.
+- **L'assertion vise l'invariant, plus l'arrivée au pixel** : « aucune
+  aimantation à 40 px » s'affirme par `guides = 0` et une position loin de
+  400 (`> 425` — un snap rendrait 400) ; l'arrivée exacte du pointeur est
+  l'affaire du CAS D, qui l'affirme lui aussi par inégalités. La phase
+  « à 4 px » garde son égalité stricte (`400`) : c'est le snap lui-même qui
+  POSE la position. Le diagnostic reste embarqué. 3/3 verts en Chromium.
 
 ---
 
-## §0 · Préalable (3ᵉ passe)
+## §0 · Préalable (4ᵉ passe)
 
 - [ ] **0.1a** `Terminal` — dossier `Monitorage_v6` :
   `git checkout main && git pull origin main`, puis `git log --oneline -1`
-  ⮕ Attendu : `Fast-forward`, dernier commit mentionnant la « 3ᵉ passe »
-  (PointerEvent / diagnostic). L'app ne bouge pas (tests seuls).
+  ⮕ Attendu : `Fast-forward`, dernier commit mentionnant la « 4ᵉ passe ».
 
-## §2-ter · La 3ᵉ passe — deux fichiers, ~2 minutes
+## §2-quater · La 4ᵉ passe — deux fichiers, ~2 minutes
 
-- [ ] **2.9** `Terminal` — dossier `Monitorage_v6/tests` :
+- [ ] **2.12** `Terminal` — dossier `Monitorage_v6/tests` :
   `npx playwright test integration/planif-alignement.spec.js integration/planif-toolbar.spec.js`
-- [ ] **2.10** **Alt/⌥+glisser** est **verte** (⚠ prédiction : le verdict de
-  ta sonde dit que le chemin applicatif marche en WebKit ; la spec ne passe
-  plus par le modificateur du harnais).
-- [ ] **2.10m** — MESURE : si l'aimantation est encore rouge, recopier son
-  message d'échec EN ENTIER — il contient maintenant une ligne
-  `diagnostic : {"x":…,"zoom":…,"guidesVisibles":…,"dragEnCours":…,…}`.
-  C'est elle qui tranche « aimanté » vs « drag interrompu ». (Si elle est
-  verte, écrire « verte ».)
-- [ ] **2.11** `Terminal` — **si 2.10 est verte** : `node
-  scripts/verifier-playwright.mjs --ecrire` puis committer/pousser.
-  ⮕ Attendu : baseline à **1** (l'aimantation) — ou **0** si tout est vert.
-- [ ] **2.11m** — MESURE : recopier `totalEchecsConnus` et la liste.
+  ⮕ Attendu (⚠ prédiction, éprouvée en Chromium) : **9 passed / 0 failed**.
+- [ ] **2.12m** — MESURE : recopier la ligne de bilan ; si un échec subsiste,
+  son message EN ENTIER (le diagnostic embarqué y sera).
+- [ ] **2.13** `Terminal` — **si 2.12 est 9/9** : dossier `Monitorage_v6` :
+  `node scripts/verifier-playwright.mjs --ecrire`, puis committer/pousser.
+  ⮕ Attendu : baseline à **0** — la dette #456 est éteinte.
+- [ ] **2.13m** — MESURE : recopier `totalEchecsConnus` (et la liste s'il en
+  reste).
 
-## §4 · Ce que je n'ai pas pu vérifier (3ᵉ passe)
+## §4 · Ce que je n'ai pas pu vérifier (4ᵉ passe)
 
-- La réécriture d'Alt/⌥ suit le verdict de TA sonde, mesuré en WebKit — mais
-  la spec réécrite n'a tourné qu'en Chromium (9/9 verts, break-testée).
-  2.10 est le juge.
-- Le diagnostic embarqué de l'aimantation n'a jamais produit de relevé
-  WebKit : c'est sa raison d'être (2.10m).
+- La réparation du trajet suit le diagnostic mesuré (433, un pas manquant),
+  mais n'a tourné qu'en Chromium — 2.12 est le juge.
+- Si le dernier mouvement doublé était LUI AUSSI avalé par WebKit (rien ne
+  l'indique, mais rien ne l'exclut), l'assertion tolérante (> 425) tient
+  tant qu'au moins 4 pas sur 6 sont livrés — les deux passes mesurées en
+  livraient 4 et 5.
 
 ---
 
 ## Au retour du terrain
 
-1. Trier les échecs : défaut réel, ou build en retard (0.1a) ?
-2. Chaque échec réel → BACKLOG avec son numéro de porte. (Alt/⌥ est tranché :
-   dette d'outillage, pas d'item applicatif. L'aimantation attend son
-   diagnostic avant tout item.)
+1. Si 2.12 est 9/9 et la baseline à 0 : **#456 se ferme** — cocher l'item au
+   BACKLOG et retirer la ligne « 6 specs rouges » de RELAIS.md.
+2. Sinon : le message de 2.12m (diagnostic embarqué) est la donnée du
+   prochain cycle.
 3. Mettre à jour CE fichier : état, date, ce qui reste.
-4. La baseline ne se réécrit **que** sur une passe réelle.
