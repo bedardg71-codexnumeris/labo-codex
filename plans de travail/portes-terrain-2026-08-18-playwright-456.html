@@ -335,44 +335,46 @@ ol.erreurs b { color: var(--ink); }
 <div class="enveloppe">
 
 <header class="chapeau">
-  <p class="eyebrow">Portes terrain · 18 août 2026 · #456 + #418 · 3ᵉ passe</p>
+  <p class="eyebrow">Portes terrain · 18 août 2026 · #456 + #418 · 4ᵉ passe</p>
   <h1>La passe WebKit des specs Playwright</h1>
   <p class="sous-titre">
-    Ta sonde a rendu son verdict : <b>le chemin applicatif marche en WebKit</b> —
-    c'est le modificateur ⌥ du harnais qui ne voyageait pas. La spec Alt/⌥ est
-    réécrite en conséquence, et l'aimantation embarque maintenant son propre
-    diagnostic. <b>Deux minutes, deux fichiers</b> : juger la réécriture, et
-    recueillir le diagnostic de l'aimantation si elle est encore rouge.
+    Ton diagnostic embarqué a parlé : <b>433, zéro guide, drag vivant</b> —
+    ni aimantation, ni frame en retard : WebKit avale le dernier mouvement
+    d'un trajet groupé. Le trajet est maintenant livré pas à pas, dernier
+    mouvement doublé. <b>Deux minutes, deux fichiers — et si tout est vert,
+    la baseline tombe à 0 et #456 se ferme.</b>
   </p>
   <div class="meta">
-    <span>app 1.87.5 (inchangée)</span><span>3ᵉ passe</span>
-    <span>4 vérifications</span><span>2 mesures</span><span>0 décision</span>
+    <span>app 1.87.5 (inchangée)</span><span>4ᵉ passe</span>
+    <span>3 vérifications</span><span>2 mesures</span><span>0 décision</span>
   </div>
 </header>
 
 <div class="alerte" style="border-left-color:var(--ok);background:var(--ok-soft)">
-  <h3>Ce que tes deux passes ont établi — rien n'est à refaire</h3>
+  <h3>Ce que ta 3ᵉ passe a établi</h3>
   <p>
-    <b>1ʳᵉ passe</b> : 91/2, quatre réparations confirmées, baseline 6 → 2.
-    <b>2ᵉ passe</b> : ta ligne SONDE a tranché — Alt/⌥ n'est <b>pas</b> un bug
-    d'app, c'est le harnais ; et ton « 400 au lieu de 440 » a montré que le
-    repos a réglé la frame intermédiaire (le 426 a disparu) en révélant une
-    question nouvelle, que ton relevé pose exactement : aimanté, ou drag
-    interrompu ? Les deux specs sont réécrites depuis tes mesures,
-    <b>9/9 vertes en Chromium</b>, la réécriture Alt/⌥ break-testée (sans
-    <code>altKey</code>, elle rougit).
+    <b>Alt/⌥ est VERTE en WebKit</b> — la réécriture tient. (⚠ Ta porte 2.10
+    est revenue cochée ✗, mais ta mesure la contredit : « 8 passés / 1 échec,
+    l'échec : planif-alignement » — Alt/⌥ n'était pas dans les échecs. La
+    mesure fait foi.) Et ton relevé du diagnostic a départagé tes deux
+    hypothèses de la 2ᵉ passe : <b>c'est la première</b> — 433 = 440 moins
+    UN pas de souris (~6,7 px), zéro guide (donc aucun snap), drag vivant.
+    Le 426 de la 1ʳᵉ passe manquait deux pas, le 433 en manquait un :
+    <b>WebKit ne livre pas le dernier <code>pointermove</code> d'un trajet
+    groupé.</b> L'app est hors de cause.
   </p>
 </div>
 
 <div class="alerte">
-  <h3>⚠ L'aimantation : si elle est rouge, son message CONTIENT le verdict</h3>
+  <h3>Ce qui a changé depuis</h3>
   <p>
-    Ton hypothèse « aimanté sur REF » et l'hypothèse concurrente « le drag
-    s'est interrompu » sont indiscernables sans données — 400 est aussi la
-    position de départ du bloc. Le test livre maintenant, dans son message
-    d'échec, une ligne <code>diagnostic : {…}</code> avec le zoom, les guides
-    visibles, l'état du drag et les largeurs réelles des blocs. La rangée
-    2.10m la recopie : c'est elle qui départage.
+    Le trajet du test est livré <b>pas à pas</b> (le patron du CAS D, vert
+    chez toi), le mouvement final émis <b>deux fois</b>. Et l'assertion vise
+    l'invariant réel : « aucune aimantation à 40 px » s'affirme par
+    <b>zéro guide + position loin de 400</b> (un snap rendrait 400), plus
+    par l'arrivée au pixel près. La phase « à 4 px » garde son égalité
+    stricte : c'est le snap lui-même qui pose la position. 3/3 verts en
+    Chromium.
   </p>
 </div>
 
@@ -405,8 +407,7 @@ ol.erreurs b { color: var(--ink); }
   <h2>Copier mes résultats</h2>
   <p>
     Ton avancement vit dans <b>ton</b> navigateur : je ne peux pas le lire.
-    Clique, puis colle-moi le texte — surtout la ligne
-    <code>diagnostic : {…}</code> de 2.10m si l'aimantation est rouge.
+    Clique, puis colle-moi le texte.
   </p>
   <div class="actions">
     <button class="btn" id="btn-copier">Copier mes résultats</button>
@@ -420,56 +421,48 @@ ol.erreurs b { color: var(--ink); }
 
 <script>
 // =====================================================================
-// 3ᵉ passe. `t` = tags ; `mesure` = champ de saisie (jamais de bascule
-// seule pour un chiffre ou un verdict — leçon du 11 août).
+// 4ᵉ passe — possiblement la dernière.
 // =====================================================================
 const DATA = [
 { num:"§0", titre:"Avant de commencer", portes:[
-  { ref:"0.1", t:"préalable", fam:"toutes", titre:"Récupérer les correctifs de tests",
-    pourquoi:"Les deux specs réécrites vivent dans ton clone. L'app ne bouge pas (tests seuls) : c'est le dernier commit qui dit si tu es à jour.",
+  { ref:"0.1", t:"préalable", fam:"toutes", titre:"Récupérer le correctif de trajet",
+    pourquoi:"La réparation vit dans les fichiers de test de ton clone. L'app ne bouge pas.",
     rangs:[
-      { id:"p3-01a", geste:"App <b>Terminal</b>, dossier <code>Monitorage_v6</code> :<br><code>git checkout main &amp;&amp; git pull origin main</code>, puis <code>git log --oneline -1</code>",
-        attendu:"<code>Fast-forward</code>, et le dernier commit mentionne la <b>3ᵉ passe</b> (PointerEvent / diagnostic).", tags:["Terminal"] }
+      { id:"p4-01a", geste:"App <b>Terminal</b>, dossier <code>Monitorage_v6</code> :<br><code>git checkout main &amp;&amp; git pull origin main</code>, puis <code>git log --oneline -1</code>",
+        attendu:"<code>Fast-forward</code>, et le dernier commit mentionne la <b>4ᵉ passe</b>.", tags:["Terminal"] }
     ]}
 ]},
 
-{ num:"§2", titre:"La 3ᵉ passe — deux fichiers, ~2 minutes", portes:[
-  { ref:"2.9", t:"#456", fam:"toutes", titre:"Relancer les deux fichiers",
-    pourquoi:"Seules deux specs ont changé. La suite complète reviendra avec la baseline (2.11).",
+{ num:"§2", titre:"La 4ᵉ passe — deux fichiers, ~2 minutes", portes:[
+  { ref:"2.12", t:"#456", fam:"toutes", titre:"Relancer les deux fichiers",
+    pourquoi:"Ton diagnostic a désigné le trajet groupé de la souris ; le correctif livre les pas un à un et double le dernier. ⚠ Prédiction éprouvée en Chromium seulement — un ✗ est une information, et son message contiendra le diagnostic.",
     rangs:[
-      { id:"p3-09a", geste:"App <b>Terminal</b>, dossier <code>Monitorage_v6/tests</code> :<br><code>npx playwright test integration/planif-alignement.spec.js integration/planif-toolbar.spec.js</code>",
-        attendu:"~2 minutes, 9 tests, un bilan <code>N passed / M failed</code>.", tags:["Terminal"] }
+      { id:"p4-12a", geste:"App <b>Terminal</b>, dossier <code>Monitorage_v6/tests</code> :<br><code>npx playwright test integration/planif-alignement.spec.js integration/planif-toolbar.spec.js</code>",
+        attendu:"<b>9 passed / 0 failed</b> (~2 minutes).", tags:["Terminal"] },
+      { id:"p4-12m", mesure:true, label:"MESURE — recopie la ligne de bilan ; si un échec subsiste, son message EN ENTIER (avec la ligne « diagnostic : {…} »)",
+        placeholder:"ex. « 9 passed (1.9m) » — ou le bloc d'erreur complet", aide:"La mesure fait foi, pas la prédiction." }
     ]},
 
-  { ref:"2.10", t:"réécrite sur TA sonde", fam:"toutes", titre:"Alt/⌥+glisser est verte",
-    pourquoi:"Ta sonde a prouvé que le chemin applicatif duplique en WebKit ; la spec pilote donc le geste au niveau des événements de pointeur (ceux que Safari produirait), au lieu du modificateur ⌥ du harnais qui ne voyage pas. ⚠ Prédiction éprouvée en Chromium : un ✗ est une information.",
+  { ref:"2.13", t:"baseline → 0", fam:"toutes", titre:"Éteindre la dette — seulement si 2.12 est 9/9",
+    pourquoi:"Une baseline vide, c'est #456 fermé : plus aucune rougeur connue, et le garde-fou de push redevient strict sur TOUTE rougeur. C'est la fin visée depuis le 12 août.",
     rangs:[
-      { id:"p3-10a", geste:"Dans le bilan de 2.9 : <b>« Alt/⌥+glisser un bloc »</b> (planif-toolbar) est passée.",
-        attendu:"verte. Si elle est rouge, recopie son message avec celui de 2.10m." },
-      { id:"p3-10m", mesure:true, label:"MESURE — si l'aimantation est ROUGE, recopie son message d'échec EN ENTIER (il contient une ligne « diagnostic : {…} ») ; si elle est verte, écris « verte »",
-        placeholder:"diagnostic : {\"x\":…, \"zoom\":…, \"guidesVisibles\":…, \"dragEnCours\":…} — ou « verte »", aide:"C'est la donnée qui départage « aimanté sur REF » et « drag interrompu ». Aucun résultat n'est un échec ici." }
-    ]},
-
-  { ref:"2.11", t:"baseline", fam:"toutes", titre:"Rétrécir la baseline — seulement si 2.10 est verte",
-    pourquoi:"La liste des échecs connus suit le réel, et ne se réécrit que sur une passe complète relancée.",
-    rangs:[
-      { id:"p3-11a", geste:"<b>SEULEMENT si 2.10 est ✓</b> — app <b>Terminal</b>, dossier <code>Monitorage_v6</code> :<br><code>node scripts/verifier-playwright.mjs --ecrire</code>, puis committer/pousser (ou le demander à ta session Claude du Mac).",
-        attendu:"baseline réécrite : <b>1</b> échec connu (l'aimantation) — ou <b>0</b> si tout est vert.", tags:["Terminal"] },
-      { id:"p3-11m", mesure:true, label:"MESURE — recopie le nouveau « totalEchecsConnus » et la liste",
-        placeholder:"ex. totalEchecsConnus: 1 + la liste", aide:"La mesure fait foi, pas la prédiction." }
+      { id:"p4-13a", geste:"<b>SEULEMENT si 2.12 est 9/9</b> — app <b>Terminal</b>, dossier <code>Monitorage_v6</code> :<br><code>node scripts/verifier-playwright.mjs --ecrire</code>, puis committer/pousser (ou le demander à ta session Claude du Mac).",
+        attendu:"la suite complète tourne (~4 min) puis : <b>totalEchecsConnus : 0</b>.", tags:["Terminal"] },
+      { id:"p4-13m", mesure:true, label:"MESURE — recopie le nouveau « totalEchecsConnus » (et la liste s'il en reste)",
+        placeholder:"ex. totalEchecsConnus: 0", aide:"À 0, #456 se ferme — je cocherai l'item au BACKLOG au retour de ce relevé." }
     ]}
 ]},
 
 { num:"§4", titre:"Ce que je n'ai pas pu vérifier", angles:[
-  { titre:"La réécriture Alt/⌥ suit ta sonde, pas une passe WebKit",
-    texte:"Le verdict vient de TON relevé, mesuré en WebKit — mais la spec réécrite n'a tourné qu'en Chromium (9/9, break-testée : sans <code>altKey</code> elle rougit). La rangée 2.10 est le juge." },
-  { titre:"Le diagnostic de l'aimantation n'a jamais produit de relevé WebKit",
-    texte:"C'est sa raison d'être : je n'ai pas tranché entre tes deux hypothèses — j'ai donné au test les moyens de le faire. Ton hypothèse concurrente (« le drag ne démarre pas ») reste vivante : <code>dragEnCours:false</code> la confirmerait." }
+  { titre:"Le correctif de trajet n'a tourné qu'en Chromium",
+    texte:"Il suit ton diagnostic mesuré (433 = un pas manquant, zéro guide, drag vivant) et le patron du CAS D, vert chez toi. Mais WebKit reste le juge — c'est la rangée 2.12." },
+  { titre:"Si WebKit avalait AUSSI le mouvement doublé",
+    texte:"Rien ne l'indique, rien ne l'exclut. L'assertion tolérante (position > 425, zéro guide) tient tant qu'au moins 4 pas sur 6 sont livrés — tes deux passes mesurées en livraient 4 et 5." }
 ]}
 ];
 
 const ERREURS = [
-  "<b>Le « 5 des 6 réparées » du commit 8511ad44 surestimait</b> — quatre tenaient en WebKit, la cinquième n'était verte que dans le moteur du conteneur. Attrapé par ton relevé de 1ʳᵉ passe ; acté depuis : un vert Chromium est un indice, jamais un verdict Safari."
+  "<b>Deux prédictions de vert infirmées en deux passes (Alt/⌥ à la 1ʳᵉ, l'aimantation à la 2ᵉ)</b> — chaque fois sur la foi du seul moteur du conteneur. La leçon est actée dans la config Chromium elle-même : un vert Chromium est un indice, jamais un verdict Safari. C'est pour ça que cette 4ᵉ passe annonce sa prédiction comme telle, avec le diagnostic embarqué en filet."
 ];
 
 // ── État ─────────────────────────────────────────────────────────────
@@ -653,7 +646,7 @@ function construireReleve() {
   const ok = verifs.filter(r => (etat[r.id]||{}).etat === 'ok').length;
   const ko = verifs.filter(r => (etat[r.id]||{}).etat === 'ko').length;
   const L = [];
-  L.push('PORTES TERRAIN — Passe WebKit des specs Playwright, #456 + #418 — 3ᵉ passe (18 août 2026)');
+  L.push('PORTES TERRAIN — Passe WebKit des specs Playwright, #456 + #418 — 4ᵉ passe (18 août 2026)');
   L.push('Version visée : 1.87.5 · build 0818-1113');
   L.push('Cycle 1.87.3 → 1.87.5');
   L.push('');
