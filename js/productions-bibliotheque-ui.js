@@ -266,8 +266,19 @@ async function ajouterProductionIndividuelle(id) {
                 id: nouvelId,
                 idOriginal: prodBiblio.id, // Garder trace de l'original
                 dansBibliotheque: true,
-                dateImport: new Date().toISOString()
+                dateImport: new Date().toISOString(),
+                // #452 — une date d'échéance appartient au CALENDRIER d'un
+                // trimestre : la copie reprise ne peut pas hériter de celle du
+                // trimestre précédent. VIDER, pas deviner — reporter une date
+                // sur le nouveau calendrier serait fabriquer une fausse donnée.
+                dateEcheance: null
             };
+            // #452 — second porteur de dates, le plus dangereux : ses
+            // groupeCoursId désignent des groupes du trimestre PRÉCÉDENT
+            // (inexistants ici), et le formulaire ne relisant que les groupes
+            // affichés, ces entrées périmées survivraient en silence à chaque
+            // enregistrement.
+            delete prod.echeancesParGroupe;
 
             // Ajouter aux productions du cours
             productions.push(prod);

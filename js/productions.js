@@ -759,6 +759,28 @@ async function peuplerCartouchesProduction(grilleId) {
         cartouches.map(c => `<option value="${echapperHtml(c.id)}">${echapperHtml(c.nom)}</option>`).join('');
 }
 
+// #453 §3 — pose une référence (grilleId/echelleId/cartoucheId) dans un
+// <select> en la PRÉSERVANT quand elle ne se résout pas. Un <select> à qui on
+// assigne un id absent de ses options retombe SILENCIEUSEMENT sur '' ; le
+// prochain enregistrement relisait ce '' et l'écrivait — la référence était
+// blanchie sur disque, et la preuve de la cause effacée avec elle (27 champs
+// perdus mesurés le 11 août 2026, relevé r2). Ici, l'id non résolu est
+// réinjecté comme option visible « ⚠ introuvable » : il fait l'aller-retour
+// affichage → disque intact, et seul un choix EXPLICITE de l'utilisateur
+// peut désormais l'effacer.
+function poserReferenceSelect(select, id, libelle) {
+    if (!select) return;
+    select.value = id || '';
+    if (!id || select.value === id) return;
+    const opt = document.createElement('option');
+    opt.value = id;
+    opt.textContent = '⚠ ' + libelle + ' introuvable (' + id + ')';
+    opt.className = 'option-reference-introuvable';
+    select.appendChild(opt);
+    select.value = id;
+    console.warn(`⚠️ [productions] ${libelle} référencée mais introuvable dans les options — référence préservée, jamais blanchie (#453) : ${id}`);
+}
+
 // Pré-remplit le formulaire en mode modification (refactor étape 4, 16 mai 2026)
 async function prerenseignerFormulaireProduction(prod) {
     const titre = document.getElementById('titreFormEvaluation');
@@ -775,13 +797,13 @@ async function prerenseignerFormulaireProduction(prod) {
     document.getElementById('productionActivite').value = prod.activiteApprentissage || prod.description || '';
     document.getElementById('productionType').value = prod.type;
     document.getElementById('productionPonderation').value = prod.ponderation;
-    if (selectGrille) selectGrille.value = prod.grilleId || '';
+    poserReferenceSelect(selectGrille, prod.grilleId, 'grille');
 
     // 🆕 Pré-remplir échelle et cartouche depuis la production
-    if (selectEchelle && prod.echelleId) selectEchelle.value = prod.echelleId;
+    if (prod.echelleId) poserReferenceSelect(selectEchelle, prod.echelleId, 'échelle');
     if (prod.grilleId) {
         await peuplerCartouchesProduction(prod.grilleId);
-        if (selectCartouche && prod.cartoucheId) selectCartouche.value = prod.cartoucheId;
+        if (prod.cartoucheId) poserReferenceSelect(selectCartouche, prod.cartoucheId, 'cartouche');
     }
 
     document.getElementById('productionObjectif').value = prod.objectif || '';
@@ -800,7 +822,7 @@ async function prerenseignerFormulaireProduction(prod) {
     // Synchroniser la grille inline si c'est un artefact de portfolio
     const selectGrilleInline = document.getElementById('productionGrilleInline');
     if (selectGrilleInline && prod.type === 'artefact-portfolio') {
-        selectGrilleInline.value = prod.grilleId || '';
+        poserReferenceSelect(selectGrilleInline, prod.grilleId, 'grille');
     }
 
     // Afficher les checkboxes de pratiques compatibles
@@ -2107,6 +2129,7 @@ window.getTypeLabel = getTypeLabel;
 window.gererPortfolio = gererPortfolio;
 window.initialiserModuleProductions = initialiserModuleProductions;
 window.getCleProductions = getCleProductions; // Exposé pour sous-module productions-import-export.js
+window.poserReferenceSelect = poserReferenceSelect; // #453 §3 — exposé pour la sentinelle (tests/unit)
 window.detecterDoublonsProductions = detecterDoublonsProductions; // Exposé pour sous-module productions-bibliotheque-ui.js
 
 // Export/Import avec licence CC → extraits dans productions-import-export.js (refactor 16 mai 2026)
