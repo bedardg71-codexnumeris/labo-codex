@@ -186,7 +186,7 @@ que le **répertoire de base annoncé** est bien
 
 ---
 
-## 5. Tâche C — les deux déclenchements jamais éprouvés
+## 5. Tâche C — les deux déclenchements ✅ ÉPROUVÉS ET VERTS (18 août)
 
 ### Pourquoi cette tâche existe
 
@@ -348,9 +348,17 @@ changer ici est documentaire — cette consigne, `SESSION.md`, et au plus une
 `description` de frontmatter si un cas de la tâche C échoue. **Aucun bump de
 version**, aucun code applicatif touché.
 
-⮕ **Le chantier skills n'est clos que quand les deux cas de la tâche C sont
-passés**, ou que leurs `description` ont été corrigées et les cas repassés. Tout
-le reste est déjà acquis et mesuré (§2).
+⮕ ✅ **LE CHANTIER SKILLS EST CLOS (18 août 2026).** Les deux cas de la tâche C
+sont passés, en sessions neuves lancées depuis le dépôt, sous forme de vraies
+invocations (`Skill(design-interface)`, `Skill(release-et-changelog)`) — pas de
+`cat`, pas de `cd` absolu. Le premier repassage, qui les donnait en échec, avait
+été lancé depuis `/Users/kuekatsheu` : c'est le protocole qui était en défaut,
+pas les skills.
+
+⚠ **Une seule chose reste indéterminée** : les deux cas passent AVEC les
+descriptions enrichies ; on ne sait pas s'ils passaient déjà sans, faute d'un
+test valide avant enrichissement. Détail consigné dans
+`plans de travail/PORTES-TERRAIN-2026-08-18-skills-et-briqueC.md`.
 
 Référence de la suite de tests au moment de la rédaction : **Vitest 2701/2701**
 (268 fichiers).
