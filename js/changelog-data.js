@@ -32,7 +32,8 @@
                 'L’Inspecteur offre les deux boutons côte à côte : « Copier » et « Cloner (lié) ». Tes cartes existantes ne sont pas touchées.',
                 'Une grille, une échelle, une cartouche ou une pratique copiée nomme enfin son origine : « Inspiré de … par … » affiche le titre et l’auteur réels. Cette ligne annonçait « par Inconnu », et souvent « Inspiré de Inconnu », même quand les deux étaient connus.',
                 'Reprendre une production de la bibliothèque n’emporte plus les dates de remise du trimestre précédent : la copie arrive sans date d’échéance, et tu saisis celles de ton nouveau calendrier.',
-                'Une grille, une échelle ou une cartouche que l’app ne retrouve plus s’affiche « ⚠ introuvable » au lieu de retomber en silence sur « Aucune » — et enregistrer ne l’efface plus. À la source, recharger un codex ne renumérote plus une ressource en double identique : c’est ce qui coupait ces références.'
+                'Une grille, une échelle ou une cartouche que l’app ne retrouve plus s’affiche « ⚠ introuvable » au lieu de retomber en silence sur « Aucune » — et enregistrer ne l’efface plus. À la source, recharger un codex ne renumérote plus une ressource en double identique : c’est ce qui coupait ces références.',
+                'L’app démarre maintenant complètement même quand le stockage avancé du navigateur est indisponible (navigation privée, réglages stricts) : plus aucune initialisation n’était lancée dans ce mode, sans message.'
             ]
         },
         {

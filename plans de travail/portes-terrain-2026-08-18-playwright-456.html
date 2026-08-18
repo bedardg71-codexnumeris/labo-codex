@@ -1,0 +1,756 @@
+<title>Portes terrain · Passe WebKit Playwright</title>
+<style>
+/* ── Palette : celle de Labo Codex lui-même (sarcelle « Océan »), plus
+   l'ambre qui EST la couleur du halo livré. Les neutres tirent vers le
+   sarcelle, jamais un gris pur. ───────────────────────────────────────── */
+:root {
+  --ground:      #f4f7f8;
+  --surface:     #ffffff;
+  --surface-2:   #eaf0f2;
+  --ink:         #10242c;
+  --ink-2:       #3d5a64;
+  --ink-3:       #6b858e;
+  --rule:        #d2dee2;
+  --accent:      #14707f;
+  --accent-soft: #e0eef1;
+  --ambre:       #a07830;
+  --ambre-soft:  #f7efdf;
+  --ok:          #1e7e34;
+  --ok-soft:     #e2f2e6;
+  --ko:          #c03040;
+  --ko-soft:     #fbe8ea;
+  --ombre:       0 1px 2px rgba(16,36,44,.06), 0 8px 24px rgba(16,36,44,.05);
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground:      #0b191f;
+    --surface:     #12262e;
+    --surface-2:   #17303a;
+    --ink:         #e7f0f2;
+    --ink-2:       #a9c2c9;
+    --ink-3:       #7b979f;
+    --rule:        #22414c;
+    --accent:      #6aacb8;
+    --accent-soft: #16333c;
+    --ambre:       #c8a060;
+    --ambre-soft:  #2c2517;
+    --ok:          #5ae080;
+    --ok-soft:     #12301c;
+    --ko:          #f0788a;
+    --ko-soft:     #331419;
+    --ombre:       0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.28);
+  }
+}
+:root[data-theme="dark"] {
+  --ground:      #0b191f;
+  --surface:     #12262e;
+  --surface-2:   #17303a;
+  --ink:         #e7f0f2;
+  --ink-2:       #a9c2c9;
+  --ink-3:       #7b979f;
+  --rule:        #22414c;
+  --accent:      #6aacb8;
+  --accent-soft: #16333c;
+  --ambre:       #c8a060;
+  --ambre-soft:  #2c2517;
+  --ok:          #5ae080;
+  --ok-soft:     #12301c;
+  --ko:          #f0788a;
+  --ko-soft:     #331419;
+  --ombre:       0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.28);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-text-size-adjust: 100%;
+}
+.enveloppe { max-width: 60rem; margin: 0 auto; padding: 0 1.25rem 6rem; }
+
+/* ── En-tête ─────────────────────────────────────────────────────────── */
+.chapeau { padding: 2.75rem 0 1.5rem; }
+.eyebrow {
+  font-family: var(--mono); font-size: .72rem; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--accent); margin: 0 0 .6rem;
+}
+h1 {
+  font-size: clamp(1.8rem, 4.2vw, 2.7rem); line-height: 1.1; margin: 0 0 .7rem;
+  letter-spacing: -.021em; font-weight: 700; text-wrap: balance;
+}
+.sous-titre { color: var(--ink-2); margin: 0 0 1.25rem; max-width: 48rem; }
+.meta {
+  display: flex; flex-wrap: wrap; gap: .4rem .5rem;
+  font-family: var(--mono); font-size: .74rem;
+}
+.meta span {
+  padding: .2rem .5rem; border: 1px solid var(--rule); border-radius: 4px;
+  color: var(--ink-2); background: var(--surface);
+}
+
+/* ── Bandeau d'alerte ────────────────────────────────────────────────── */
+.alerte {
+  border-left: 3px solid var(--ko); background: var(--ko-soft);
+  padding: 1rem 1.1rem; border-radius: 0 8px 8px 0; margin: 1.5rem 0;
+}
+.alerte.attention { border-left-color: var(--ambre); background: var(--ambre-soft); }
+.alerte h3 {
+  margin: 0 0 .35rem; font-size: .78rem; letter-spacing: .1em;
+  text-transform: uppercase; font-family: var(--mono);
+}
+.alerte p { margin: 0 0 .5rem; font-size: .93rem; color: var(--ink-2); }
+.alerte p:last-child { margin-bottom: 0; }
+
+/* ── Tableau de bord collant ─────────────────────────────────────────── */
+.bord {
+  position: sticky; top: 0; z-index: 20; background: var(--ground);
+  border-bottom: 1px solid var(--rule); padding: .7rem 0;
+  margin-bottom: 1.5rem;
+}
+.compteurs { display: flex; flex-wrap: wrap; gap: .45rem; align-items: center; }
+.jeton {
+  display: inline-flex; align-items: baseline; gap: .38rem;
+  padding: .3rem .62rem; border-radius: 999px; font-size: .8rem;
+  border: 1px solid var(--rule); background: var(--surface);
+}
+.jeton b { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: .92rem; }
+.jeton.ok { border-color: var(--ok); color: var(--ok); background: var(--ok-soft); }
+.jeton.ko { border-color: var(--ko); color: var(--ko); background: var(--ko-soft); }
+.barre-progres {
+  height: 5px; border-radius: 3px; background: var(--surface-2);
+  overflow: hidden; margin-top: .6rem; display: flex;
+}
+.barre-progres i { display: block; height: 100%; transition: width .25s ease; }
+.barre-progres .p-ok { background: var(--ok); }
+.barre-progres .p-ko { background: var(--ko); }
+
+.filtres { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .65rem; }
+.filtres button {
+  font: inherit; font-size: .78rem; padding: .3rem .68rem; cursor: pointer;
+  border: 1px solid var(--rule); border-radius: 999px;
+  background: var(--surface); color: var(--ink-2);
+}
+.filtres button:hover { border-color: var(--accent); color: var(--ink); }
+.filtres button[aria-pressed="true"] {
+  background: var(--accent); border-color: var(--accent);
+  color: var(--ground); font-weight: 600;
+}
+.filtres button:focus-visible,
+.bascule:focus-visible, .btn:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+
+/* ── Sections ────────────────────────────────────────────────────────── */
+section { margin: 2.5rem 0 0; }
+.titre-section {
+  display: flex; align-items: baseline; gap: .7rem;
+  padding-bottom: .5rem; border-bottom: 2px solid var(--ink);
+  margin-bottom: 1.1rem;
+}
+.titre-section .num {
+  font-family: var(--mono); font-size: .95rem; color: var(--accent); font-weight: 700;
+}
+.titre-section h2 {
+  margin: 0; font-size: 1.12rem; letter-spacing: .01em;
+  text-transform: uppercase; font-weight: 700;
+}
+.note-section {
+  font-size: .92rem; color: var(--ink-2); margin: -.4rem 0 1.1rem;
+  padding-left: .1rem;
+}
+
+/* ── Porte ───────────────────────────────────────────────────────────── */
+.porte {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 10px; box-shadow: var(--ombre); margin-bottom: 1.1rem;
+  overflow: hidden;
+}
+.porte.masquee { display: none; }
+/* Le bandeau de bord est collant : sans cette marge, une porte amenée à
+   l'écran par un filtre passe SOUS lui et on en perd le titre. */
+.porte, .decision { scroll-margin-top: 7.5rem; }
+.porte-tete { padding: 1rem 1.15rem .3rem; }
+.porte-tete .ref {
+  font-family: var(--mono); font-size: .74rem; color: var(--ink-3);
+  letter-spacing: .04em;
+}
+.porte-tete h3 {
+  margin: .15rem 0 .1rem; font-size: 1.05rem; font-weight: 700;
+  letter-spacing: -.008em; text-wrap: balance;
+}
+.pourquoi {
+  margin: .75rem 1.15rem .35rem; padding: .7rem .9rem;
+  background: var(--ambre-soft); border-left: 3px solid var(--ambre);
+  border-radius: 0 6px 6px 0; font-size: .91rem; color: var(--ink-2);
+}
+.pourquoi b { color: var(--ink); }
+.pourquoi .etiq {
+  display: block; font-family: var(--mono); font-size: .68rem;
+  letter-spacing: .13em; text-transform: uppercase; color: var(--ambre);
+  margin-bottom: .25rem; font-weight: 700;
+}
+.rangs { list-style: none; margin: .5rem 0 0; padding: 0; }
+.rang {
+  display: grid; grid-template-columns: auto 1fr; gap: .75rem;
+  padding: .7rem 1.15rem; border-top: 1px solid var(--rule);
+}
+.rang.faite  { background: var(--ok-soft); }
+.rang.ratee  { background: var(--ko-soft); }
+.bascules { display: flex; gap: .3rem; padding-top: .1rem; }
+.bascule {
+  width: 34px; height: 34px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--rule); background: var(--surface);
+  font-size: 1rem; line-height: 1; display: grid; place-items: center;
+  color: var(--ink-3); padding: 0; font-family: var(--sans);
+}
+.bascule:hover { border-color: var(--accent); color: var(--ink); }
+.bascule[aria-pressed="true"][data-etat="ok"] {
+  background: var(--ok); border-color: var(--ok); color: var(--surface);
+}
+.bascule[aria-pressed="true"][data-etat="ko"] {
+  background: var(--ko); border-color: var(--ko); color: var(--surface);
+}
+.geste { font-size: .95rem; }
+.attendu {
+  display: block; margin-top: .3rem; font-size: .88rem; color: var(--ink-2);
+  padding-left: .85rem; border-left: 2px solid var(--accent-soft);
+}
+.attendu b { color: var(--ink); }
+code, .cmd {
+  font-family: var(--mono); font-size: .86em;
+  background: var(--surface-2); padding: .1em .35em; border-radius: 4px;
+}
+.bloc-cmd {
+  display: block; margin: .55rem 0 .2rem; padding: .7rem .8rem;
+  background: var(--surface-2); border: 1px solid var(--rule);
+  border-radius: 6px; font-family: var(--mono); font-size: .82rem;
+  overflow-x: auto; white-space: pre; color: var(--ink);
+}
+.tags { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .45rem; }
+.tag {
+  font-family: var(--mono); font-size: .66rem; letter-spacing: .07em;
+  text-transform: uppercase; padding: .16rem .45rem; border-radius: 4px;
+  border: 1px solid var(--rule); color: var(--ink-3); background: var(--surface);
+}
+.tag.ipad     { border-color: var(--accent); color: var(--accent); }
+.tag.terminal { border-color: var(--ko); color: var(--ko); }
+.tag.donnees  { border-color: var(--ambre); color: var(--ambre); }
+
+/* ── Champs de saisie (mesures et décisions) ─────────────────────────── */
+.champ { grid-column: 1 / -1; margin-top: .1rem; }
+.rang.saisie { grid-template-columns: 1fr; }
+.champ label {
+  display: block; font-family: var(--mono); font-size: .68rem;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--accent);
+  margin-bottom: .3rem; font-weight: 700;
+}
+.champ input, .champ textarea {
+  width: 100%; font: inherit; font-size: .93rem; padding: .5rem .65rem;
+  border: 1px solid var(--rule); border-radius: 6px;
+  background: var(--ground); color: var(--ink); font-family: var(--mono);
+}
+.champ textarea { min-height: 4.5rem; resize: vertical; line-height: 1.5; font-family: var(--sans); }
+.champ input::placeholder, .champ textarea::placeholder { color: var(--ink-3); }
+
+/* ── Décisions ───────────────────────────────────────────────────────── */
+.decision {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 10px 10px 0; padding: 1rem 1.15rem; margin-bottom: 1rem;
+  box-shadow: var(--ombre);
+}
+.decision h3 { margin: 0 0 .4rem; font-size: 1.02rem; }
+.decision .ref { font-family: var(--mono); font-size: .74rem; color: var(--ink-3); }
+.decision p { margin: .35rem 0 .7rem; font-size: .93rem; color: var(--ink-2); }
+
+/* ── Angles morts ────────────────────────────────────────────────────── */
+.angle-mort {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 10px; padding: 1rem 1.15rem; margin-bottom: .9rem;
+}
+.angle-mort h3 { margin: 0 0 .35rem; font-size: 1rem; }
+.angle-mort p { margin: 0; font-size: .93rem; color: var(--ink-2); }
+ol.erreurs { padding-left: 1.15rem; margin: .5rem 0 0; }
+ol.erreurs li { margin-bottom: .55rem; font-size: .93rem; color: var(--ink-2); }
+ol.erreurs b { color: var(--ink); }
+
+/* ── Relevé ──────────────────────────────────────────────────────────── */
+.releve {
+  margin-top: 2.5rem; background: var(--surface);
+  border: 2px solid var(--accent); border-radius: 10px; padding: 1.2rem;
+}
+.releve h2 { margin: 0 0 .3rem; font-size: 1.1rem; }
+.releve p { margin: 0 0 .8rem; font-size: .92rem; color: var(--ink-2); }
+.actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .8rem; }
+.btn {
+  font: inherit; font-size: .9rem; font-weight: 600; cursor: pointer;
+  padding: .58rem 1rem; border-radius: 8px; border: 1px solid var(--accent);
+  background: var(--accent); color: var(--ground);
+}
+.btn.secondaire { background: var(--surface); color: var(--ink-2); border-color: var(--rule); }
+.btn.secondaire:hover { border-color: var(--accent); color: var(--ink); }
+#sortie {
+  width: 100%; min-height: 15rem; font-family: var(--mono); font-size: .78rem;
+  line-height: 1.5; padding: .8rem; border-radius: 8px;
+  border: 1px solid var(--rule); background: var(--ground); color: var(--ink);
+  white-space: pre; resize: vertical;
+}
+.dit-copie { font-size: .85rem; color: var(--ok); margin-left: .3rem; }
+
+/* ── Les cinq familles livrées deviennent le codage de cette page.
+   Mêmes valeurs exactes que `styles.css` — si elles divergent, c'est la
+   page qui ment sur ce qu'elle fait vérifier. ─────────────────────── */
+.porte[data-fam] { border-left: 3px solid var(--fam, var(--rule)); }
+.porte[data-fam="intention"]    { --fam: #3b82f6; }
+.porte[data-fam="connaissance"] { --fam: #ea580c; }
+.porte[data-fam="deroulement"]  { --fam: #16a34a; }
+.porte[data-fam="organisation"] { --fam: #a855f7; }
+.porte[data-fam="verification"] { --fam: #d946ef; }
+.porte[data-fam="explicite"]    { --fam: #0891b2; }
+.porte[data-fam="toutes"]       { --fam: var(--accent); }
+.pastille-fam {
+  display: inline-block; width: .65rem; height: .65rem; border-radius: 50%;
+  vertical-align: baseline; margin-right: .35rem;
+}
+.legende-fam { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin: .4rem 0 0;
+  font-size: .82rem; color: var(--ink-2); list-style: none; padding: 0; }
+.legende-fam li { display: flex; align-items: center; gap: .35rem; }
+
+@media (max-width: 34rem) {
+  .rang { grid-template-columns: 1fr; }
+  .bascules { padding-top: 0; }
+  .enveloppe { padding: 0 .9rem 5rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+</style>
+
+<div class="enveloppe">
+
+<header class="chapeau">
+  <p class="eyebrow">Portes terrain · 18 août 2026 · cycle 1.87.3 → 1.87.5</p>
+  <h1>La passe WebKit des specs Playwright</h1>
+  <p class="sous-titre">
+    Cinq des six specs rouges de #456 sont réparées — c'étaient des tests
+    restés à une version antérieure de l'app, pas des bugs. Mais elles sont
+    éprouvées dans <em>Chromium</em>, le seul navigateur du conteneur :
+    <b>seule une passe sur ton Mac, dans WebKit, est un verdict Safari</b> —
+    et seule elle autorise à rétrécir la liste des échecs connus.
+  </p>
+  <div class="meta">
+    <span>1.87.5</span><span>build 0818-1113</span><span>4 portes</span>
+    <span>10 vérifications</span><span>3 mesures</span><span>1 décision</span>
+  </div>
+</header>
+
+<div class="alerte">
+  <h3>⚠⚠ Toute cette liste est du Terminal — exception assumée au modèle</h3>
+  <p>
+    C'est une passe de suite de tests : <b>aucune</b> commande ne va dans la
+    console du navigateur. Tout se tape dans l'app <b>Terminal</b> de macOS,
+    dans le dossier <code>Monitorage_v6</code> (ou <code>tests</code> quand la
+    rangée le dit). Si une commande répond <code>command not found</code>,
+    c'est presque toujours le mauvais dossier.
+  </p>
+</div>
+
+<div class="alerte" style="border-left-color:var(--ok);background:var(--ok-soft)">
+  <h3>Ce que j'ai déjà pu vérifier — pour que tu ne le refasses pas</h3>
+  <p>
+    Les six rouges du 18 août ont été <b>reproduits dans Chromium</b> (mêmes
+    échecs, mêmes lignes, sauf l'aimantation qui y passe). Les cinq réparées
+    sont <b>vertes en Chromium</b>, et Vitest rend <b>2738/2738</b>. Le correctif #418 (l'app qui ne démarrait
+    pas sans stockage avancé) est éprouvé au banc, break-testé.
+  </p>
+  <p>
+    ⮕ Ce qui reste, c'est le seul juge qui compte : <b>WebKit, sur ton Mac.</b>
+  </p>
+</div>
+
+<div class="alerte attention">
+  <h3>Ce qui échoue devient un item de backlog</h3>
+  <p>
+    Pas une note mentale. Coche ✗, et surtout : <b>les trois mesures</b> de
+    cette liste valent plus que les coches — recopie-les telles quelles.
+  </p>
+</div>
+
+<div class="bord">
+  <div class="compteurs">
+    <span class="jeton ok">passées <b id="n-ok">0</b></span>
+    <span class="jeton ko">échec <b id="n-ko">0</b></span>
+    <span class="jeton">restantes <b id="n-reste">0</b></span>
+    <span class="jeton">mesures <b id="n-mes">0</b></span>
+    <span class="jeton">décisions <b id="n-dec">0</b></span>
+  </div>
+  <div class="barre-progres" aria-hidden="true">
+    <i class="p-ok" id="p-ok" style="width:0"></i><i class="p-ko" id="p-ko" style="width:0"></i>
+  </div>
+  <div class="filtres" id="filtres">
+    <button data-f="tout" aria-pressed="true">Tout</button>
+    <button data-f="reste" aria-pressed="false">Non traitées</button>
+    <button data-f="Terminal" aria-pressed="false">Terminal</button>
+  </div>
+</div>
+
+<main id="contenu"></main>
+
+<section class="releve">
+  <h2>Copier mes résultats</h2>
+  <p>
+    Ton avancement vit dans <b>ton</b> navigateur : je ne peux pas le lire.
+    Clique, puis colle-moi le texte. Il contient les ✓, les ✗, les trois
+    mesures et ton verdict — sans ça, « la passe est faite » arrive sans
+    aucune donnée.
+  </p>
+  <div class="actions">
+    <button class="btn" id="btn-copier">Copier mes résultats</button>
+    <button class="btn secondaire" id="btn-tout-effacer">Tout réinitialiser</button>
+    <span class="dit-copie" id="dit-copie" role="status" aria-live="polite"></span>
+  </div>
+  <textarea id="sortie" readonly aria-label="Relevé à copier"></textarea>
+</section>
+
+</div>
+
+<script>
+// =====================================================================
+// Les portes. `t` = tags ; `mesure` = champ chiffré (pas de bascule seule) ;
+// `decision` = champ de verdict, SANS bascule (une case ne porte pas un
+// verdict — leçon du 11 août).
+// =====================================================================
+const DATA = [
+{ num:"§0", titre:"Avant de commencer", portes:[
+  { ref:"0.1", t:"préalable", fam:"toutes", titre:"Récupérer la version",
+    pourquoi:"Les réparations sont dans les fichiers de test de ton clone. Sans ce préalable, tu relancerais exactement les specs d'hier et tu retrouverais les six rouges — en concluant que rien n'a été réparé.",
+    rangs:[
+      { id:"0.1a", geste:"App <b>Terminal</b>, dans le dossier <code>Monitorage_v6</code> :<br><code>git checkout main &amp;&amp; git pull origin main</code>",
+        attendu:"la liste des fichiers reçus, puis <code>Fast-forward</code>. Si Terminal répond <code>error: Your local changes would be overwritten</code>, <b>arrête-toi et dis-le-moi</b>.", tags:["Terminal"] },
+      { id:"0.1b", geste:"Recharger l'app et lire le numéro <b>en bas de page</b>.",
+        attendu:"<b>1.87.5</b>, build <code>0818-1113</code>. Si tu lis moins, la commande n'a pas pris." }
+    ]}
+]},
+
+{ num:"§2", titre:"La passe WebKit — le seul juge", portes:[
+  { ref:"2.1", t:"#456", fam:"toutes", titre:"Relancer la suite d'intégration, pour de vrai",
+    pourquoi:"C'est le défaut fondateur de #456 : un chiffre d'échecs recopié six jours sans être reproduit, et faux d'une unité. La règle depuis : on ne réécrit jamais ce compte sans relancer la suite.",
+    rangs:[
+      { id:"2.1a", geste:"App <b>Terminal</b>, dans le dossier <code>Monitorage_v6/tests</code> :<br><code>npm run test:int</code>",
+        attendu:"la suite tourne (~4 minutes, 93 tests) et se termine par une ligne de bilan du type <code>N passed</code> / <code>M failed</code>.", tags:["Terminal"] },
+      { id:"2.1m", mesure:true, label:"MESURE — recopie la ligne de bilan EXACTE, et la liste des « failed » s'il y en a",
+        placeholder:"ex. « 6 failed … 87 passed (3.7m) » + les noms", aide:"Aucun chiffre n'est un échec ici : c'est cette mesure qui commande tout le reste de la liste." }
+    ]},
+
+  { ref:"2.2", t:"réparées en Chromium", fam:"toutes", titre:"Les cinq specs réparées ne sont plus rouges",
+    pourquoi:"Les cinq étaient des tests restés à une version antérieure de l'app : un badge retiré le 9 août qu'une spec attendait encore, une fonction renommée, un format de données d'avant le correctif #367, et deux gestes de souris qui saisissaient le bloc à l'endroit où vit maintenant le menu de type. ⚠ C'est une PRÉDICTION : elles sont vertes en Chromium, pas encore en WebKit — un ✗ ici n'est pas une surprise interdite, c'est ce que la porte cherche.",
+    rangs:[
+      { id:"2.2a", geste:"Dans le bilan de 2.1 : <b>« plein écran carte mentale »</b> (planif-toolbar) n'est plus dans les échecs.",
+        attendu:"absente de la liste des failed." },
+      { id:"2.2b", geste:"<b>« Alt/⌥+glisser un bloc »</b> (planif-toolbar) n'y est plus.",
+        attendu:"absente des failed." },
+      { id:"2.2c", geste:"<b>« comptabilité du temps »</b> (planif-toolbar) n'y est plus.",
+        attendu:"absente des failed." },
+      { id:"2.2d", geste:"<b>« import inter-trimestre »</b> (planif-toolbar) n'y est plus.",
+        attendu:"absente des failed." },
+      { id:"2.2e", geste:"<b>« CAS D — un drag souris déplace un nœud libre »</b> (planif-drag-pointer-148) n'y est plus.",
+        attendu:"absente des failed." }
+    ]},
+
+  { ref:"2.3", t:"non réparée", fam:"toutes", titre:"La sixième : recueillir son message, pas la deviner",
+    pourquoi:"« Un bloc glissé près d'un autre COLLE » (planif-alignement) PASSE dans Chromium ici : son rouge n'existe que dans WebKit, et je n'ai jamais vu son message d'erreur. La réparer « au jugé » serait réécrire un test sans savoir ce qu'il refuse — c'est comme ça qu'on fabrique des tests décoratifs.",
+    rangs:[
+      { id:"2.3m", mesure:true, label:"MESURE — si cette spec est rouge dans le bilan, recopie son message d'erreur EN ENTIER (les lignes Error / Expected / Received)",
+        placeholder:"colle le bloc d'erreur ici — ou écris « verte » si elle passe", aide:"C'est la donnée qui manque pour la diagnostiquer. Si elle est verte en WebKit aussi, c'est une information tout aussi précieuse : écris « verte »." }
+    ]},
+
+  { ref:"2.4", t:"baseline", fam:"toutes", titre:"Rétrécir la liste des échecs connus — seulement si 2.2 est verte",
+    pourquoi:"Le garde-fou de push compare la suite à une liste d'échecs CONNUS. Une liste qui couvre du vert est un mensonge silencieux : chaque spec réparée doit s'en retirer. Mais on ne la réécrit que sur une passe réelle — jamais pour « faire propre ».",
+    rangs:[
+      { id:"2.4a", geste:"<b>SEULEMENT si les cinq rangées de 2.2 sont ✓</b> — app <b>Terminal</b>, dossier <code>Monitorage_v6</code> :<br><code>node scripts/verifier-playwright.mjs --ecrire</code>",
+        attendu:"le script relance la suite puis réécrit <code>scripts/playwright-baseline.json</code> avec les seuls échecs encore réels.", tags:["Terminal"] },
+      { id:"2.4m", mesure:true, label:"MESURE — recopie le nouveau « totalEchecsConnus » et la liste « echecsConnus » du fichier réécrit",
+        placeholder:"ex. totalEchecsConnus: 1 + la liste", aide:"Attendu si tout s'est passé comme prévu : 1 (l'aimantation) — mais c'est la mesure qui fait foi, pas la prédiction." },
+      { id:"2.4b", geste:"Demander à ta session Claude du Mac de <b>committer et pousser</b> la baseline réécrite (elle fait partie du dépôt).",
+        attendu:"un commit sur main qui ne touche que <code>scripts/playwright-baseline.json</code>.", tags:["Terminal"] }
+    ]}
+]},
+
+{ num:"§3", titre:"Décision — ce qui attend ton verdict", note:"⚠ <b>Ce n'est PAS une vérification.</b> C'est un choix que je ne peux pas trancher à ta place. Une phrase écrite, pas une coche.", decisions:[
+  { id:"3.1", titre:"Que faire de la spec d'aimantation, une fois son message recueilli ?",
+    texte:"Deux voies. <b>La réparer sur mesure</b> : une prochaine session part de ton relevé 2.3m et corrige la spec (ou l'app, si le message révèle un vrai défaut WebKit de l'aimantation — auquel cas c'est un item de backlog, pas un correctif de test). <b>Ou la réécrire/retirer</b> si le message montre que son assertion est intestable en WebKit headless (position au pixel près pendant un drag synthétique). Ma recommandation : la voie 1 d'abord — on ne retire pas un test avant d'avoir compris ce qu'il refuse." }
+]},
+
+{ num:"§4", titre:"Ce que je n'ai pas pu vérifier", angles:[
+  { titre:"Tout est éprouvé en Chromium, rien en WebKit",
+    texte:"WebKit n'existe pas dans le conteneur. Les cinq réparations sont des <b>verts Chromium</b> : mêmes tests, autre moteur. La passe 2.1 est le seul juge — c'est exactement pour ça que cette liste existe." },
+  { titre:"La sixième spec n'a pas été touchée",
+    texte:"Elle passe en Chromium ici, et je n'ai aucun message d'erreur WebKit. Rien n'a été « réparé au jugé » : la rangée 2.3m recueille la donnée qui manque." },
+  { titre:"#418 : le banc reproduit le mode, pas le navigateur",
+    texte:"Le correctif « l'app démarre même sans stockage avancé » est éprouvé en exécutant le vrai démarrage de <code>db.js</code> sans IndexedDB, break-testé (4 rouges garde retirée). Mais aucun vrai Safari en navigation privée ne l'a exercé — le mode ne se déclenche pas à la demande. Si un testeur signale un écran qui ne charge pas en navigation privée, c'est le premier suspect à écarter." }
+]}
+];
+
+const ERREURS = [
+  "<b>Ma première réparation d'⌥+glisser mesurait après le relâchement.</b> Au dépôt, un conteneur de la carte démo re-layoutait la copie : le test restait rouge pour une mauvaise raison. Le test voisin documentait déjà le piège — je ne l'avais pas appliqué. Corrigé en mesurant PENDANT le drag.",
+  "<b>Le premier banc du correctif #418 ne testait rien.</b> Il découpait le code du démarrage entre deux repères, et le second repère existait AUSSI dans le commentaire d'en-tête du fichier : le bloc découpé était vide, l'assertion passait sur du néant. Corrigé avec des bornes qui exigent leur propre présence — et le banc a rougi au break-test, comme il devait."
+];
+
+// ── État ─────────────────────────────────────────────────────────────
+const CLE = 'portes-playwright-456-2026-08-18';
+let etat = {};
+try { etat = JSON.parse(localStorage.getItem(CLE) || '{}'); } catch (e) { etat = {}; }
+const sauver = () => { try { localStorage.setItem(CLE, JSON.stringify(etat)); } catch (e) {} };
+
+/* ⚠ LE GUILLEMET DROIT AUSSI — trouvé au rituel de clôture du 15 août.
+   Cette valeur est injectée dans `value="${val}"` : sans échapper le
+   guillemet, il FERME l'attribut. Mesuré — en saisissant
+   « il a dit "non" au 3e essai » dans un champ de mesure, le champ ne
+   réaffichait que « il a dit ». Pas une faille (sa page, son texte, son
+   navigateur) mais une PERTE SILENCIEUSE : rééditer le champ tronqué écrase
+   la valeur complète. Et ça frappait les MESURES, ce que le modèle des portes
+   terrain dit justement de ne jamais perdre.
+   ▣ L'apostrophe suit, par principe : le jour où un attribut passe en
+   guillemets simples, la même faille rouvrirait sans prévenir.
+   ⚠ L'ordre compte : `&` EN PREMIER, sinon on ré-échapperait les entités
+   qu'on vient d'écrire. */
+const esc = (s) => String(s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+const sansHtml = (s) => String(s).replace(/<[^>]*>/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/\s+/g,' ').trim();
+
+// ── Rendu ────────────────────────────────────────────────────────────
+function tagHTML(t) {
+  const cls = t === 'iPad' ? 'ipad' : t === 'Terminal' ? 'terminal' : t === 'Données' ? 'donnees' : '';
+  const txt = t === 'Données' ? '⚠⚠ Données' : t;
+  return `<span class="tag ${cls}">${txt}</span>`;
+}
+
+function rangHTML(r) {
+  if (r.mesure || r.decision) {
+    /* ⚠⚠ AUCUNE VALEUR DANS LE HTML — on retire le besoin d'échapper au lieu
+       de corriger l'échappement. Le 15 août, un guillemet droit saisi dans une
+       mesure FERMAIT l'attribut `value="…"` : le champ ne réaffichait qu'un
+       bout du texte, et le rééditer écrasait la valeur complète. Une perte
+       silencieuse, et précisément sur les mesures. Les champs sont désormais
+       remplis par `peuplerSaisies()` après le rendu : aucun texte de Grégoire
+       ne traverse jamais du HTML. */
+    const gros = r.decision;
+    return `<li class="rang saisie" data-id="${r.id}" data-tags="">
+      <div class="champ">
+        <label for="i-${r.id}">${esc(r.label)}</label>
+        ${gros
+          ? `<textarea id="i-${r.id}" data-saisie="${r.id}" placeholder="${esc(r.placeholder||'Écris ton verdict ici…')}"></textarea>`
+          : `<input id="i-${r.id}" type="text" data-saisie="${r.id}" placeholder="${esc(r.placeholder||'')}">`}
+        ${r.aide ? `<span class="attendu">${r.aide}</span>` : ''}
+      </div></li>`;
+  }
+  const e = etat[r.id] && etat[r.id].etat || '';
+  const tags = r.tags || [];
+  return `<li class="rang ${e==='ok'?'faite':e==='ko'?'ratee':''}" data-id="${r.id}" data-tags="${tags.join(',')}">
+    <div class="bascules">
+      <button class="bascule" data-etat="ok" data-cible="${r.id}" aria-pressed="${e==='ok'}" aria-label="Passée" title="Passée">✓</button>
+      <button class="bascule" data-etat="ko" data-cible="${r.id}" aria-pressed="${e==='ko'}" aria-label="Échec" title="Échec">✗</button>
+    </div>
+    <div class="geste">${r.geste}
+      ${r.attendu ? `<span class="attendu"><b>Attendu :</b> ${r.attendu}</span>` : ''}
+      ${tags.length ? `<div class="tags">${tags.map(tagHTML).join('')}</div>` : ''}
+    </div></li>`;
+}
+
+function porteHTML(p) {
+  return `<article class="porte" data-ref="${p.ref}" data-fam="${p.fam || 'toutes'}">
+    <div class="porte-tete">
+      <span class="ref">${p.ref} · ${p.t}</span>
+      <h3>${p.titre}</h3>
+    </div>
+    <div class="pourquoi"><span class="etiq">Pourquoi</span>${p.pourquoi}</div>
+    <ul class="rangs">${p.rangs.map(rangHTML).join('')}</ul>
+  </article>`;
+}
+
+function rendre() {
+  let html = '';
+  for (const s of DATA) {
+    html += `<section><div class="titre-section"><span class="num">${s.num}</span><h2>${s.titre}</h2></div>`;
+    if (s.note) html += `<p class="note-section">${s.note}</p>`;
+    if (s.portes) html += s.portes.map(porteHTML).join('');
+    if (s.decisions) html += s.decisions.map(d => `
+      <div class="decision"><span class="ref">${d.id}</span><h3>${d.titre}</h3><p>${d.texte}</p>
+      ${rangHTML({ id: d.id, decision: true, label: 'Ton verdict', placeholder: 'Écris ta décision ici — elle remonte dans le relevé.' })}</div>`).join('');
+    if (s.angles) {
+      html += s.angles.map(a => `<div class="angle-mort"><h3>${a.titre}</h3><p>${a.texte}</p></div>`).join('');
+      html += `<div class="angle-mort"><h3>Mes erreurs de la session, y compris celles rattrapées de justesse</h3>
+        <ol class="erreurs">${ERREURS.map(e => `<li>${e}</li>`).join('')}</ol></div>`;
+    }
+    html += '</section>';
+  }
+  document.getElementById('contenu').innerHTML = html.replace(/<ul class="rangs"><\/ul>/g, '');
+  peuplerSaisies();
+  majCompteurs();
+}
+
+/* Les champs reçoivent leur valeur ICI, par la propriété `.value` — jamais par
+   un attribut. C'est ce qui rend impossible la troncature du 15 août. */
+function peuplerSaisies() {
+  document.querySelectorAll('[data-saisie]').forEach((el) => {
+    el.value = (etat[el.dataset.saisie] || {}).texte || '';
+  });
+}
+
+// ── Compteurs ────────────────────────────────────────────────────────
+function toutesLesRangs() {
+  const out = [];
+  for (const s of DATA) {
+    for (const p of (s.portes || [])) for (const r of p.rangs) out.push({ ...r, section: s.num, porte: p.ref, porteTitre: p.titre });
+    for (const d of (s.decisions || [])) out.push({ id: d.id, decision: true, label: d.titre, section: s.num, porte: d.id, porteTitre: d.titre });
+  }
+  return out;
+}
+
+function majCompteurs() {
+  const rangs = toutesLesRangs();
+  const verifs = rangs.filter(r => !r.mesure && !r.decision);
+  const mesures = rangs.filter(r => r.mesure);
+  const decisions = rangs.filter(r => r.decision);
+  const ok = verifs.filter(r => (etat[r.id]||{}).etat === 'ok').length;
+  const ko = verifs.filter(r => (etat[r.id]||{}).etat === 'ko').length;
+  const rempli = (l) => l.filter(r => ((etat[r.id]||{}).texte || '').trim()).length;
+  document.getElementById('n-ok').textContent = ok;
+  document.getElementById('n-ko').textContent = ko;
+  document.getElementById('n-reste').textContent = verifs.length - ok - ko;
+  document.getElementById('n-mes').textContent = rempli(mesures) + '/' + mesures.length;
+  document.getElementById('n-dec').textContent = rempli(decisions) + '/' + decisions.length;
+  const t = verifs.length || 1;
+  document.getElementById('p-ok').style.width = (ok / t * 100) + '%';
+  document.getElementById('p-ko').style.width = (ko / t * 100) + '%';
+}
+
+// ── Interactions ─────────────────────────────────────────────────────
+document.getElementById('contenu').addEventListener('click', (ev) => {
+  const b = ev.target.closest('.bascule');
+  if (!b) return;
+  const id = b.dataset.cible, veut = b.dataset.etat;
+  const actuel = (etat[id] || {}).etat || '';
+  etat[id] = Object.assign({}, etat[id], { etat: actuel === veut ? '' : veut });
+  sauver();
+  const li = b.closest('.rang');
+  const e = etat[id].etat;
+  li.classList.toggle('faite', e === 'ok');
+  li.classList.toggle('ratee', e === 'ko');
+  li.querySelectorAll('.bascule').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.etat === e)));
+  majCompteurs(); appliquerFiltre();
+});
+
+document.getElementById('contenu').addEventListener('input', (ev) => {
+  const el = ev.target.closest('[data-saisie]');
+  if (!el) return;
+  const id = el.dataset.saisie;
+  etat[id] = Object.assign({}, etat[id], { texte: el.value });
+  sauver(); majCompteurs();
+});
+
+// ── Filtres ──────────────────────────────────────────────────────────
+let filtre = 'tout';
+document.getElementById('filtres').addEventListener('click', (ev) => {
+  const b = ev.target.closest('button'); if (!b) return;
+  filtre = b.dataset.f;
+  document.querySelectorAll('#filtres button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  appliquerFiltre();
+});
+
+function appliquerFiltre() {
+  document.querySelectorAll('.porte').forEach(p => {
+    const rangs = [...p.querySelectorAll('.rang')];
+    let garde;
+    if (filtre === 'tout') garde = true;
+    else if (filtre === 'reste') garde = rangs.some(r => !r.classList.contains('saisie') && !r.classList.contains('faite') && !r.classList.contains('ratee'));
+    else garde = rangs.some(r => (r.dataset.tags || '').split(',').includes(filtre));
+    p.classList.toggle('masquee', !garde);
+  });
+}
+
+// ── Relevé ───────────────────────────────────────────────────────────
+function construireReleve() {
+  const rangs = toutesLesRangs();
+  const verifs = rangs.filter(r => !r.mesure && !r.decision);
+  const ok = verifs.filter(r => (etat[r.id]||{}).etat === 'ok').length;
+  const ko = verifs.filter(r => (etat[r.id]||{}).etat === 'ko').length;
+  const L = [];
+  L.push('PORTES TERRAIN — Passe WebKit des specs Playwright, #456 + #418 (18 août 2026)');
+  L.push('Version visée : 1.87.5 · build 0818-1113');
+  L.push('Cycle 1.87.3 → 1.87.5');
+  L.push('');
+  L.push(`BILAN : ${ok} passées · ${ko} échec · ${verifs.length - ok - ko} non traitées (sur ${verifs.length})`);
+  L.push('');
+
+  for (const s of DATA) {
+    if (s.portes) {
+      L.push('════ ' + s.num + ' · ' + s.titre.toUpperCase() + ' ════');
+      for (const p of s.portes) {
+        L.push('');
+        L.push(`── ${p.ref} · ${sansHtml(p.titre)}`);
+        for (const r of p.rangs) {
+          if (r.mesure) {
+            const v = ((etat[r.id]||{}).texte || '').trim();
+            L.push(`   [MESURE] ${sansHtml(r.label)} : ${v || '(non renseignée)'}`);
+          } else {
+            const e = (etat[r.id]||{}).etat;
+            const m = e === 'ok' ? '[v]' : e === 'ko' ? '[X]' : '[ ]';
+            L.push(`   ${m} ${sansHtml(r.geste)}`);
+          }
+        }
+      }
+      L.push('');
+    }
+    if (s.decisions) {
+      L.push('════ ' + s.num + ' · ' + s.titre.toUpperCase() + ' ════');
+      for (const d of s.decisions) {
+        const v = ((etat[d.id]||{}).texte || '').trim();
+        L.push('');
+        L.push(`── ${d.id} · ${sansHtml(d.titre)}`);
+        L.push(`   VERDICT : ${v || '(non tranché)'}`);
+      }
+      L.push('');
+    }
+  }
+  const nonRens = rangs.filter(r => (r.mesure || r.decision) && !((etat[r.id]||{}).texte || '').trim());
+  if (nonRens.length) {
+    L.push('⚠ À COMPLÉTER : ' + nonRens.map(r => r.id).join(', '));
+  }
+  return L.join('\n');
+}
+
+const sortie = document.getElementById('sortie');
+const ditCopie = document.getElementById('dit-copie');
+
+document.getElementById('btn-copier').addEventListener('click', async () => {
+  const texte = construireReleve();
+  sortie.value = texte;               // toujours visible, même si le presse-papiers refuse
+  sortie.focus(); sortie.select();
+  let copie = false;
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(texte); copie = true;
+    }
+  } catch (e) { copie = false; }
+  if (!copie) { try { copie = document.execCommand('copy'); } catch (e) { copie = false; } }
+  ditCopie.textContent = copie
+    ? '✓ Copié — colle-le dans la conversation.'
+    : '↓ Sélectionné ci-dessous : ⌘C pour copier.';
+});
+
+document.getElementById('btn-tout-effacer').addEventListener('click', () => {
+  if (!confirm('Effacer toutes tes coches, mesures et verdicts ?')) return;
+  etat = {}; sauver(); ditCopie.textContent = ''; sortie.value = '';
+  rendre(); appliquerFiltre();
+});
+
+rendre();
+</script>

@@ -1716,6 +1716,19 @@
 
             // Migration one-shot des blobs depuis l'ancienne base MonitorageFichiers
             await _migrerMonitorageFichiers();
+        } else {
+            // #418 — mode localStorage-seul : les données SONT lisibles dès la
+            // fin d'init() (localStorage est synchrone, pas de cache à
+            // hydrater). Sans cette branche, `window.dbReady` n'était JAMAIS
+            // posé et `db-ready` jamais émis : aucun rappel `auDbPret` ne
+            // partait — donc toutes les migrations du boot étaient sautées en
+            // silence, sans limite de durée (navigation privée Safari, IDB
+            // bloqué). L'ORDRE compte : le drapeau AVANT l'événement, comme
+            // dans syncToLocalStorageCache (#414).
+            window.dbReady = true;
+            window.dispatchEvent(new CustomEvent('db-ready', {
+                detail: { modeLocalStorageSeul: true }
+            }));
         }
     }).catch((error) => {
         console.error('❌ [DB] Erreur initialisation:', error);
