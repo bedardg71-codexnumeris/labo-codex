@@ -154,6 +154,30 @@ bash scripts/install-hooks.sh
 
 Idempotent. Pour désactiver : `git config --unset core.hooksPath`.
 
+### 7.1 Sentinelle Playwright (18 août 2026)
+
+Le hook comporte une **seconde étape**, après Vitest : `scripts/verifier-playwright.mjs`, qui lance la suite WebKit et la compare à `scripts/playwright-baseline.json`.
+
+**Pourquoi une baseline plutôt qu'un simple « bloque si rouge »** : six specs sont déjà rouges (#456). Un hook bloquant sur toute rougeur aurait refusé tous les pushes dès son installation, à commencer par le sien ; il aurait été contourné au `--no-verify` en trois jours. Seule une rougeur **absente de la baseline** bloque.
+
+⚠ **La baseline doit RÉTRÉCIR.** Ce n'est pas un permis de laisser pourrir : c'est un cliché daté de la dette de #456. Chaque spec réparée s'en retire. Quand une spec de la liste redevient verte, le script le dit et demande de régénérer :
+
+```bash
+node scripts/verifier-playwright.mjs --ecrire
+```
+
+**Trois garde-fous**, parce qu'un hook inapplicable ne sert à rien :
+
+| Condition | Comportement |
+|---|---|
+| Push sans fichier observable au navigateur (`js/`, `index.html`, `styles.css`, `tests/integration/`) | sauté — un push documentaire ne paie pas 4 minutes |
+| WebKit absent (**tous les conteneurs**) | passe, **en le disant** — code 2, « verdict impossible » ≠ « tout va bien » |
+| Urgence | `SKIP_PLAYWRIGHT=1 git push`, ou `--no-verify` |
+
+**Codes de sortie du script** : `0` rien de neuf · `1` rougeur nouvelle (bloque) · `2` impossible à juger.
+
+⚠ **Piège rencontré en écrivant cette sentinelle** : la sonde « WebKit est-il installé ? » a d'abord été **inerte**. Elle lisait le code de retour de `playwright install --dry-run webkit` en cherchant « not installed » — or `--dry-run` imprime l'emplacement où le navigateur *irait* et rend `0` dans tous les cas. En conteneur, elle aurait répondu « WebKit est là » et la suite aurait échoué pour une autre raison. Seule la présence du dossier sur le disque répond à la question. Même famille que la contre-épreuve inerte du 15 août sur `git check-ignore`.
+
 ---
 
 ## 8. Références
