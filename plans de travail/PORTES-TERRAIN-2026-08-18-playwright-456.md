@@ -8,7 +8,7 @@
 
 ---
 
-## Retour de la 1ʳᵉ passe (18 août — 91 passés / 2 échecs)
+## Retour de la 1ʳᵉ passe (18 août — 91 passés / 2 échecs, 3,7 min)
 
 - ✅ Quatre réparations tiennent en WebKit (plein écran, comptabilité du
   temps, import inter-trimestre, CAS D). Baseline **6 → 2**.
@@ -17,27 +17,46 @@
 - 📏 L'aimantation mesurée : 426 au lieu de 440 → réparée (300 ms de repos
   avant mesure, classe CAS D).
 
-## Retour de la 2ᵉ passe (18 août — relevé complet, 6/6 portes traitées)
+## Retour de la 2ᵉ passe (18 août, exécutée au terminal — 5 portes ✓ · 1 ✗ · 2 mesures)
 
-- ✅ **SONDE : verdict net.** « Un pointerdown synthétique altKey:true CRÉE
-  la copie — le chemin applicatif marche dans ce moteur ; c'est le
+**Bilan des deux specs : 7 passés / 2 échecs (57,7 s, projet `webkit`).**
+**Bilan de la suite entière (via la sentinelle `--ecrire`) : baseline
+inchangée à 2 — diff VIDE, donc aucune rougeur nouvelle nulle part ailleurs
+dans les 87 tests.** (2.8 a été exécutée malgré 2.6 rouge, sur demande
+explicite : la baseline étant déjà à ces deux specs, l'écriture ne pouvait
+rien figer de neuf.) ⚠ La passe a été remplie au terminal, pas via
+l'artefact — il a servi de plan, pas de journal.
+
+- ✅ **SONDE Alt/⌥ : verdict net.** « Un pointerdown synthétique altKey:true
+  CRÉE la copie — le chemin applicatif marche dans ce moteur ; c'est le
   modificateur ⌥ qui ne voyage pas avec la souris du harnais. » ⮕ **Pas un
-  bug d'app.** La spec est réécrite : le geste est piloté au niveau des
-  `PointerEvent` (ceux que le navigateur produirait — pointerdown altKey sur
-  la poignée, pointermove sur document avec une frame rAF entre chaque,
-  mesure pendant le drag, pointerup). La vraie souris reste couverte par le
-  CAS D, vert en WebKit. Break-testée : sans `altKey`, elle rougit.
-- ⚠ **L'aimantation a changé de nature d'échec : 400 au lieu de 440** — et
-  400 est AUSSI la position de départ de MOB. Le repos a bien réglé la frame
-  intermédiaire (le 426 a disparu) ; ce qui reste est indiscernable sans
-  données : « aimanté sur REF » (il faudrait zoom ≈ 0,15, le seuil étant
-  `AIMANT_SEUIL = 6 px écran ÷ zoom`) ou « le drag s'est terminé/n'a pas
-  tenu ». L'hypothèse concurrente de Grégoire est gardée vivante. ⮕ **La
-  spec embarque désormais son diagnostic** : à l'échec, le message livre
-  `zoom`, `guidesVisibles`, `dragEnCours`, largeurs réelles des deux blocs
-  — de quoi trancher entre les lectures.
-- ✅ Baseline confirmée à 2 par la passe complète (`--ecrire`) : aucune
-  rougeur nouvelle ailleurs dans la suite.
+  bug d'app** : la carte fait son travail en WebKit aussi ; la spec testait
+  un geste que Playwright ne sait pas produire dans ce moteur. Dette
+  d'outillage, pas de backlog applicatif.
+- ⛔ **La prédiction sur l'aimantation est infirmée — elle est rouge
+  AUTREMENT : 400 au lieu de 440** (`planif-alignement.spec.js:85`), et 400
+  est AUSSI la position de départ de MOB (et celle de REF). Le repos de
+  300 ms a réglé ce qu'il visait (le 426 a disparu) et découvert un second
+  problème derrière.
+
+### Ce qui en a été fait (18 août, session cloud — commit « 3ᵉ passe »)
+
+- **Alt/⌥ réécrite en PointerEvent purs**, conformément au verdict de la
+  sonde : pointerdown `altKey:true` sur la poignée ⠿, pointermove sur
+  `document` (là où le drag écoute) avec une frame rAF entre chaque (drag
+  throttlé), mesure PENDANT le drag, pointerup. La mécanique à la vraie
+  souris reste couverte par le CAS D, vert en WebKit. 9/9 verts en Chromium ;
+  **break-testée** : sans `altKey`, elle rougit. La sonde, verdict rendu et
+  acté, est retirée.
+- **L'aimantation embarque son diagnostic** — exactement ce que le §4 de la
+  2ᵉ passe demandait (« compter les guides et mesurer, sans toucher aux
+  assertions ») : à l'échec, le message livre `zoom`, `guidesVisibles`,
+  `dragEnCours` et les largeurs réelles des deux blocs. De quoi départager
+  « aimanté sur REF » (exigerait zoom ≈ 0,15, le seuil étant
+  `AIMANT_SEUIL = 6 px écran ÷ zoom`) et « le drag s'est interrompu »
+  (l'hypothèse concurrente du relevé, gardée vivante — `dragEnCours:false`
+  la confirmerait). Les assertions exactes n'ont pas bougé ; rien n'est
+  tranché au jugé.
 
 ---
 
@@ -45,8 +64,8 @@
 
 - [ ] **0.1a** `Terminal` — dossier `Monitorage_v6` :
   `git checkout main && git pull origin main`, puis `git log --oneline -1`
-  ⮕ Attendu : `Fast-forward`, dernier commit mentionnant « 3ᵉ passe » ou
-  « pointerevent ». L'app ne bouge pas (tests seuls).
+  ⮕ Attendu : `Fast-forward`, dernier commit mentionnant la « 3ᵉ passe »
+  (PointerEvent / diagnostic). L'app ne bouge pas (tests seuls).
 
 ## §2-ter · La 3ᵉ passe — deux fichiers, ~2 minutes
 
@@ -78,6 +97,8 @@
 ## Au retour du terrain
 
 1. Trier les échecs : défaut réel, ou build en retard (0.1a) ?
-2. Chaque échec réel → BACKLOG avec son numéro de porte.
+2. Chaque échec réel → BACKLOG avec son numéro de porte. (Alt/⌥ est tranché :
+   dette d'outillage, pas d'item applicatif. L'aimantation attend son
+   diagnostic avant tout item.)
 3. Mettre à jour CE fichier : état, date, ce qui reste.
 4. La baseline ne se réécrit **que** sur une passe réelle.
