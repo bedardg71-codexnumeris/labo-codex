@@ -15,7 +15,24 @@
 
 ---
 
-## 0. État acquis (Briques A, B livrées ; C pas 1-3 livrés)
+## 0. État acquis (Briques A, B livrées ; **C livrée en entier**, dette soldée le 18 août)
+
+> **⮕ POINT D'ENTRÉE POUR UNE REPRISE (à jour au 18 août 2026).** La **Brique C est
+> CLOSE** : pas 1-3, pas 4 (grilles) et pas 5 (pratiques) sont livrés **sur `main`**,
+> et les trois dettes flaguées au §2.5 sont soldées. Il n'en reste que le report
+> **assumé** D-C4 (remappage `echelleId`, §2.4), verrouillé par un test-témoin.
+> **Aucune branche à rouvrir : tout est sur `main`.**
+>
+> ⚠ **LE §3 (BRIQUE D) N'EST PLUS FIABLE — IL DEMANDE SON PROPRE AUDIT AVANT
+> REPRISE.** Ce cadrage décrit la Brique D comme à peine entamée (instrumentation
+> + dry-run d'observation). C'est faux : `main` a reçu depuis au moins
+> `92805192` (instrumentation, L2 étendu, cliquet `pratiquesConfigurables`),
+> `50a62291` (hygiène Bloc 1 anti-re-pollution + Bloc 2 remap références
+> productions), `e7f4645f` (consolidation namespacing-D, 1.23.0) et `3efd8f99`
+> (#358 — modèles d'évaluation namespacés, migration validée en live, 1.25.0).
+> Le « RESTE pour la session dédiée » écrit en fin de §3.2 est donc à
+> reconfronter au code **avant** d'y engager quoi que ce soit. Ne pas le prendre
+> pour argent comptant : c'est un état de juin, et la Brique D a bougé tout l'été.
 
 - **Brique A** (lecture des écrans d'analyse/consultation) et **Brique B** (éditeurs de
   Conception : `grilles.js`, `echelles.js`, `wizard-pratique-v2.js`) branchées sur `cle()`
@@ -23,7 +40,12 @@
 - **Brique C — pas 1-3 livrés (26 juin)** : D-D1 tranchée (hybride globale-partagée + copie-locale) ;
   `window.cleSource(nomCle, trimestreSourceId)` (lecture inter-trimestre sans swap, commit `b6ea9443`) ;
   `dupliquerGrillePartagee(grilleSource, lireCartouchesDe)` généralisée par un lecteur de cartouches
-  injecté (commit `db16227f`). Reste **pas 4** (modale import grilles) + **pas 5** (modale pratiques).
+  injecté (commit `db16227f`). **Pas 4** (modale import grilles) et **pas 5** (modale
+  pratiques) livrés depuis. ⚠ Les SHA de branche cités dans ce document (`b6ea9443`,
+  `db16227f`, `82fd4e9f`, `2e2aaf95`) **ne sont pas des ancêtres de `main`** : le
+  travail y est arrivé par squash-merge de PR — pas 1-3 via `a1e42328` (#62), pas 5
+  via `e38d71a9` (#64, 1.21.2). Chercher par ces derniers, pas par les premiers.
+  Dette soldée le 18 août (`ca7564bb`, `9be1daf7`).
 - Sentinelles : `sentinelle-cle-modeles-trimestre-briqueA.test.js` (ratchet 2 fichiers /
   3 clés), `sentinelle-cle-conception-namespacee-briqueB.test.js` (B1/B2/B3, break-testées),
   `sentinelle-clesource-trimestre-briqueC.test.js` (5 cas), `sentinelle-duplication-source-briqueC.test.js`
@@ -94,13 +116,13 @@ trimestre actif : duplicata avec id neuf + trace `inspireDe`, source jamais mut�
 
 ### 2.4 Ordre + filet
 1. ✓ Trancher D-C1 ⇄ D-D1 (hybride, 26 juin). 2. ✓ `cleSource` + test de routage (commit `b6ea9443`, 5 cas, break-testée).
-3. ✓ Généraliser `dupliquerGrillePartagee` — lecteur de cartouches injecté ; `copiePropre` laissée intacte (déjà source-agnostique) (commit `db16227f`, sentinelle 11 cas, break-testée). **4. ✓ Import grilles dans la modale** (commit `82fd4e9f` : `listerTrimestresAvecGrilles`/`copierGrilleDepuisTrimestre`/`afficherGrillesTrimestreModal`/`importerToutGrillesTrimestreModal` + garde D-C7 + fix preview ; sentinelle `import-grilles-inter-trimestre-briqueC`, 4 cas ; validé terrain A25→H26). **5. ✓ Import pratiques (LIVRÉ sur branche `claude/brique-C-pas5-import-pratiques`)** — voir §2.5.
+3. ✓ Généraliser `dupliquerGrillePartagee` — lecteur de cartouches injecté ; `copiePropre` laissée intacte (déjà source-agnostique) (commit `db16227f`, sentinelle 11 cas, break-testée). **4. ✓ Import grilles dans la modale** (commit `82fd4e9f` : `listerTrimestresAvecGrilles`/`copierGrilleDepuisTrimestre`/`afficherGrillesTrimestreModal`/`importerToutGrillesTrimestreModal` + garde D-C7 + fix preview ; sentinelle `import-grilles-inter-trimestre-briqueC`, 4 cas ; validé terrain A25→H26). **5. ✓ Import pratiques (LIVRÉ — sur `main`, dette soldée le 18 août)** — voir §2.5.
 - **Filet** : test « source intacte byte-à-byte après copie » (break-test : forcer une réécriture de la source doit ROUGIR) — ✓ livré dans `sentinelle-duplication-source-briqueC` ; L2 VERT (id neuf) ; L0 VERT (aucune note touchée).
 - **Report assumé D-C4** (pas 4) : `echelleId` d'une copie n'est pas remappé au pas 3, verrouillé par un test-témoin qui RUGIRA au pas 4 (= signal attendu, mettre à jour le témoin). NB vérifié au code : `grille.echelleId` n'est PAS un champ racine général (1 seule occurrence, la grille générique `grilles.js:1538` ; `dupliquerGrille` ne le construit pas) — le lien grille↔échelle passe par la **production** (grilleId + echelleId séparés) et par `cartouche.echelleId` (optionnel). D-C4 plus léger que craint pour le chemin grille+cartouches ; à statuer au pas 4.
 
 **Effort M / risque MOYEN** (patron existant ; danger = remappage incomplet des dépendances).
 
-### 2.5 Pas 5 — Import pratiques (✓ LIVRÉ 26 juin 2026 sur branche `claude/brique-C-pas5-import-pratiques`)
+### 2.5 Pas 5 — Import pratiques (✓ LIVRÉ 26 juin 2026 — **sur `main`**, dette soldée le 18 août)
 
 > **Statut : LIVRÉ** (commit `2e2aaf95`). `js/pratiques-gestion.js` : `listerTrimestresAvecPratiques`,
 > `verifierDependancesPratique`, `copierPratiqueDepuisTrimestre`, `afficherPratiquesTrimestreModal`,
@@ -110,8 +132,33 @@ trimestre actif : duplicata avec id neuf + trace `inspireDe`, source jamais mut�
 > (et non chaîne brute, sinon carte « Inspiré de Inconnu ») ; copie PROFONDE (JSON round-trip) pour
 > garantir §5.5 ; `verifierDependancesPratique` filtre `dansBibliotheque` (aligné sur les dropdowns).
 > 973 Vitest + 67 Playwright verts. **Pas de bump** (patch au merge sur main, après validation terrain).
-> Dette flaguée hors périmètre : même défaut `inspireDe` au pas 4 (grilles) ; `dupliquerPratiqueBibliotheque`
-> à durcir (deep-clone) ; `workers: 1` manquant dans `playwright.config`.
+>
+> ⮕ **OÙ VIT CE TRAVAIL : sur `main`.** Il a longtemps été annoncé « sur branche
+> `claude/brique-C-pas5-import-pratiques` » — c'est PÉRIMÉ. Cette branche est
+> restée à la version 1.21.2 et accuse 417 commits de retard ; sa
+> `copierPratiqueDepuisTrimestre` est identique au byte à celle de `main`, et son
+> spec est en RETARD sur celui de `main` (durcissement du 18 août). **Ne pas y
+> retourner chercher quoi que ce soit** : elle ne contient rien que `main` n'ait.
+> Idem pour `claude/wonderful-galileo-cb9785`, dont l'apport a été intégré par
+> cherry-pick (`ca7564bb`).
+>
+> ⮕ **DETTE FLAGUÉE LE 26 JUIN : LES TROIS POINTS SONT SOLDÉS (18 août 2026).**
+>
+> | Dette | État | Où |
+> |---|---|---|
+> | même défaut `inspireDe` au pas 4 (grilles) | ✓ soldée | `js/grilles.js` → `copierGrilleDepuisTrimestre` pose `forgerInspireDe` |
+> | `dupliquerPratiqueBibliotheque` à durcir (deep-clone) | ✓ soldée | `js/pratiques-gestion.js` → `JSON.parse(JSON.stringify(pratique))` |
+> | `workers: 1` manquant dans `playwright.config` | ✓ soldée | `tests/playwright.config.js` (isolation `file://` commentée) |
+>
+> Les deux premières par le cherry-pick `ca7564bb` (relecture du 18 août), la
+> troisième par `9be1daf7`. ⚠ Les deux specs Playwright touchés par `ca7564bb`
+> **n'ont jamais été exécutés** : la config est webkit-only et webkit n'existe pas
+> en conteneur cloud. À faire tourner sur le Mac ou en CI avant de considérer le
+> filet du pas 5 comme éprouvé de bout en bout.
+>
+> ⮕ **Il ne reste, pour la Brique C, que le report assumé D-C4** (remappage
+> `echelleId`, cf. §2.4) — verrouillé par un test-témoin destiné à rougir le jour
+> où on le traite. **Le chantier réellement en pause est la Brique D (§3).**
 
 Cadrage initial (conservé pour référence) :
 
