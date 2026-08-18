@@ -84,9 +84,6 @@
     /* Couleurs de tableau */
     --table-hover: rgba(106, 172, 184, 0.12);
 
-    /* Sous-navigation - Fonds par mode */
-    --sous-nav-bg-anonymisation: #0e1e28;
-
     /* === BOUTONS D'ACTION - Palette Océan & Boussole === */
     --btn-principal: #1a4a5e;
     --btn-principal-hover: #246478;
@@ -373,19 +370,31 @@ body.mode-demo:not(.mode-clair) .sous-navigation {
 }
 
 /* ===============================
-   MODE ANONYMISÉ - BLEUS DÉSATURÉS
+   MODE ANONYMISÉ - BRUME ARDOISE (deux thèmes)
+
+   Une palette désaturée PAR THÈME, teinte ardoise commune (~hue 205), pour
+   que l'écran entier dise « identités masquées » en sombre comme en clair.
+   NB : le scope par thème est obligatoire, même leçon que le mode démo
+   (bloc sarcelle ci-dessus) — un bloc unique non scopé était annulé par la
+   cascade de .mode-clair, et il ne survivait en clair qu'une sidebar quasi
+   noire (--sous-nav-bg-anonymisation, retirée le 18 août).
    =============================== */
 
-[data-mode="anonymisation"] {
-    /* Désaturation sarcelle → gris-bleu ocean pour mode anonymisé */
+/* Thème sombre — ocean désaturé vers l'ardoise */
+body[data-mode="anonymisation"]:not(.mode-clair) {
     --bleu-principal: #1a3040;
     --bleu-fonce: #0a1418;
     --bleu-moyen: #1e3848;
-    --bleu-clair: #5a8a94;
-    --bleu-leger: #4a7080;
+    --bleu-clair: #5b7f94;
+    --bleu-leger: #4a6a80;
     --bleu-carte: #162a34;
     --bleu-pale: #1a3040;
     --bleu-tres-pale: #0c1820;
+    --bleu-meta: #a9bccb;
+
+    /* Accent (titres h2, liens, focus ring via --focus-ring-color) — suit la
+       brume ; les signaux pédagogiques (RàI, succès, erreur) restent intacts */
+    --accent-primaire: #7f9aa8;
 
     /* Boutons */
     --btn-principal: #1a3040;
@@ -394,6 +403,41 @@ body.mode-demo:not(.mode-clair) .sous-navigation {
     /* Fond de page désaturé ocean */
     --fond-page-sature: #0c1820;
     --fond-page-clair: #0a1418;
+
+    /* Tableaux */
+    --table-hover: rgba(90, 122, 136, 0.12);
+}
+
+/* Thème clair — marine désaturé vers l'ardoise. Contrastes AA vérifiés :
+   #2c3d4e 9,2:1 et #48657a 5,1:1 sur #e9edf1 ; #5f7c96 3,7:1 (rôle graphique,
+   équivalent au 3,7:1 du #3a7cc6 qu'il remplace). Spécif (0,2,1) : bat
+   .mode-clair (0,1,0) et les overrides inline body.mode-clair d'index.html
+   (0,1,1), quel que soit l'ordre des feuilles. */
+body.mode-clair[data-mode="anonymisation"] {
+    --bleu-principal: #2c3d4e;
+    --bleu-fonce: #1e2833;
+    --bleu-moyen: #3e5266;
+    --bleu-clair: #48657a;
+    --bleu-leger: #5f7c96;
+    --bleu-carte: #e9edf1;
+    --bleu-pale: #e9edf1;
+    --bleu-tres-pale: #f2f5f7;
+    --bleu-meta: #5f7c96;
+
+    /* Accent (titres h2, liens, focus ring) — 5,1:1 sur #e9edf1, AA ✓ ;
+       signaux pédagogiques (RàI, succès, erreur) intacts */
+    --accent-primaire: #48657a;
+
+    /* Boutons */
+    --btn-principal: #2c3d4e;
+    --btn-principal-hover: #3e5266;
+
+    /* Fond de page brume */
+    --fond-page-sature: #d9dfe5;
+    --fond-page-clair: #e9edf1;
+
+    /* Tableaux */
+    --table-hover: rgba(44, 61, 78, 0.08);
 }
 
 /* ===============================
@@ -6008,11 +6052,6 @@ body[data-mode="anonymisation"] .etudiant-nom,
 body[data-mode="anonymisation"] .profil-sidebar-nom,
 body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
     font-style: italic;
-}
-
-/* Adaptation des sidebars aux modes */
-body[data-mode="anonymisation"] .sidebar-navigation {
-    background: var(--sous-nav-bg-anonymisation);
 }
 
 /* ===============================================
