@@ -81,8 +81,28 @@ test('⚠ un bloc glissé près d’un autre COLLE, et un guide dit pourquoi', a
     // pointermove a passé sa frame ; l'assertion exacte, elle, ne bouge pas.
     await page.mouse.move(prise[0] + 40, prise[1] - 10, { steps: 6 });
     await page.waitForTimeout(300);
-    const loin = await positions(page);
-    expect(loin['planif-noeud_mob'][0]).toBe(440);
+    // ⚠ DIAGNOSTIC EMBARQUÉ (2ᵉ passe Mac du 18 août : reçu 400 — qui est
+    // AUSSI la position de départ de MOB). Deux lectures indiscernables sans
+    // données : « aimanté sur REF » (il faudrait zoom ≈ 0,15, le seuil étant
+    // AIMANT_SEUIL=6 px écran ÷ zoom) ou « le drag s'est terminé/n'a pas
+    // tenu ». Le diagnostic part dans le message d'échec : zoom, guides
+    // visibles, drag encore en cours, largeurs réelles des deux blocs.
+    const loin = await page.evaluate(() => {
+        const api = window.planificationCarte;
+        const n = api.etat.noeuds.get('planif-noeud_mob');
+        const refEl = document.getElementById('planif-noeud_ref');
+        const mobEl = document.getElementById('planif-noeud_mob');
+        return {
+            x: Math.round(n.x), y: Math.round(n.y),
+            zoom: api.etat.zoom,
+            guidesVisibles: document.querySelectorAll('.planif-guide-alignement').length,
+            dragEnCours: mobEl.classList.contains('planif-dragging'),
+            wRef: refEl.offsetWidth, wMob: mobEl.offsetWidth
+        };
+    });
+    expect(loin.x,
+        'à +40 px du repère, aucune aimantation ne doit jouer — diagnostic : ' + JSON.stringify(loin)
+    ).toBe(440);
     expect(await page.locator('.planif-guide-alignement').count()).toBe(0);
 
     // À 4 px du bord gauche de REF : le bloc est ramené dessus.
