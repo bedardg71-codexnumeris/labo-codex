@@ -110,6 +110,33 @@ appliqué sur une prémisse fausse. Il n'est pas nuisible — ajouter les tournu
 réelles de Grégoire aux déclencheurs se défend en soi — mais **il n'a jamais été
 démontré nécessaire**. À retester dans les règles.
 
+### ✅ SECOND REPASSAGE — LES DEUX CAS PASSENT, LE CHANTIER SKILLS EST CLOS
+
+Capture à l'appui, protocole durci respecté :
+
+| | Contrôle | Résultat |
+|---|---|---|
+| **dossier** | `~/Documents/GitHub/Monitorage_v6` affiché sous le logo, dans les DEUX sessions | ✅ |
+| **2.2** | « le tableau de bord est laid, ça déborde à droite » → `Skill(design-interface)` · *Successfully loaded skill* | ✅ **PASSÉ** |
+| **2.3** | « je veux publier ce qu'on a fait cette semaine aux testeurs » → `Skill(release-et-changelog)` | ✅ **PASSÉ** |
+| **forme** | Invocations de skill, **pas** de `cat`, **pas** de `cd` absolu | ✅ |
+
+⮕ **Bonus non testé, observé au passage** : la session du cas 2.3 a AUSSI déclenché
+`audit-debut-session (Rituel début de session)` — le subagent de début de session
+part seul, comme `CLAUDE.md` l'ordonne depuis le 28 mai. Personne ne l'avait
+vérifié ; c'est fait, par accident.
+
+⮕ **CE QUI RESTE INDÉTERMINÉ, ET DOIT ÊTRE DIT** : les deux cas passent **avec**
+les descriptions enrichies. On ne sait **pas** s'ils passaient déjà sans. Le seul
+test qui a jamais échoué était invalide. L'enrichissement est donc en place sans
+que sa nécessité ait été démontrée — ~240 tokens toujours chargés, pour un gain
+non mesuré. Ce n'est pas un défaut ; c'est une **attribution non prouvée**, et
+elle est écrite comme telle plutôt que comptée comme un correctif validé.
+
+⮕ Trancher demanderait un break-test : rétablir les descriptions d'avant
+`edda3f27` sur une branche jetable, repasser les deux cas, restaurer. Deux
+sessions de terminal pour une question de provenance, pas de fonctionnement.
+
 ⚠ **Et le cas 2.3 signale un second risque** : la session est allée lire le
 markdown de cette porte terrain. Un fichier de ce nom, dans le dépôt, est
 trouvable par une session neuve — donc la contamination ne vient pas seulement de
