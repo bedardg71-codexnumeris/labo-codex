@@ -21,6 +21,19 @@
 
     var CHANGELOG = [
         {
+            version: '1.88',
+            couleur: 'vert',
+            titre: 'Supprimer une fiche de cours, depuis la Bibliothèque',
+            items: [
+                'Le menu ⋮ de chaque fiche de la Bibliothèque de cours offre deux gestes distincts : « Retirer de ma sélection » (réversible — la fiche reste disponible à ajouter) et « Supprimer la fiche » (définitif). Avant, supprimer exigeait de passer par le formulaire du Cadre, en mode modification.',
+                'La suppression est refusée tant que le cours porte des données : groupes-cours avec étudiant·es, évaluations, présences, productions ou captures hebdomadaires. Le message liste ce qui s’y rattache encore, trimestre par trimestre.',
+                'Le cours étant global, la confirmation le dit en toutes lettres : la fiche disparaît de tous les trimestres.',
+                'Le bouton Supprimer du Cadre passe par le même garde : plus aucune suppression de cours ne peut laisser de données orphelines.',
+                'En amont, créer un cours dont le code existe déjà demande confirmation — le devis ministériel ne change pas d’un trimestre à l’autre, une seule fiche sert toutes les sessions.',
+                'Le formulaire Enseignant·e du Cadre suit maintenant le patron des autres sections : tant que rien n’est sélectionné, un message guide vers « + Nouveau profil » au lieu d’un formulaire vide toujours affiché.'
+            ]
+        },
+        {
             version: '1.87',
             couleur: 'vert',
             titre: 'Copier et cloner deviennent deux gestes distincts',

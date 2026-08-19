@@ -329,7 +329,7 @@ function changerCoursSelectionneV2(coursId) {
  * Supprime le cours actuellement sélectionné
  * Beta 95.2 (8 jan 2026)
  */
-function supprimerCoursV2() {
+async function supprimerCoursV2() {
     if (!coursEnEditionV2) {
         console.warn('[Trimestre V2] Aucun cours sélectionné pour suppression');
         return;
@@ -344,23 +344,22 @@ function supprimerCoursV2() {
         return;
     }
 
-    // Confirmation
-    // 🆕 FIX (4 fév 2026) : Priorité codeCours
     const nomCours = coursObj.codeCours || coursObj.sigle || coursObj.code || coursObj.id;
     const titreCours = coursObj.nomCours || coursObj.nom || coursObj.titre || '';
-    if (!confirm(`Supprimer le cours "${nomCours} - ${titreCours}" ?\n\nCette action est irréversible.`)) {
+
+    // #449 (19 août 2026) : le Cadre passe par le MÊME garde que la
+    // Bibliothèque — recensement, refus si le cours porte des données,
+    // confirmation « tous trimestres », exécution. L'ancienne suppression
+    // nue laissait orphelins groupes-cours, productions, évaluations et
+    // présences (famille #154). Pas de garde `typeof` silencieux (leçon
+    // #161/#444) : si la fonction manque, on le DIT et on refuse.
+    if (typeof window.supprimerFicheCoursAvecGarde !== 'function') {
+        console.error('[Trimestre V2] Garde #449 introuvable (cours.js non chargé ?) — suppression refusée');
+        alert('La suppression est indisponible : recharge la page et réessaie.');
         return;
     }
-
-    // Supprimer de la liste
-    const coursFiltres = cours.filter(c => c.id !== coursEnEditionV2);
-    db.setSync('cours', coursFiltres);
-
-    // Nettoyer infoCours si le cours supprimé était le cours actif
-    const coursActif = db.getSync('infoCours', null);
-    if (coursActif && coursActif.id === coursEnEditionV2) {
-        db.setSync('infoCours', null);
-    }
+    const supprime = await window.supprimerFicheCoursAvecGarde(coursEnEditionV2);
+    if (!supprime) return;
 
     // Réinitialiser l'interface
     coursEnEditionV2 = null;

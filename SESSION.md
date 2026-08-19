@@ -7,6 +7,34 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 19 AOÛT 2026 (SUITE) : #449 LIVRÉ — LA SUPPRESSION DE FICHE
+     DE COURS ENTRE DANS LA BIBLIOTHÈQUE, GARDÉE PAR RECENSEMENT.
+     ÉTAT : **1.88.0** (build 0819-0826) — Vitest **2762/2762** (276
+     fichiers). Fusionné dans `main` (permission « fusionne vers main »
+     du jour maintenue).
+
+     ✅ **#449 (1.88.0)** — la décision du 11 août (porte 3.2) exécutée,
+     ses deux conditions dans le même geste : menu ⋮ des DEUX sections de
+     la Bibliothèque avec « Retirer de ma sélection » (réversible, neutre)
+     + « Supprimer la fiche » (danger, « tous trimestres ») · garde
+     `recenserDependancesCours`/`supprimerFicheCoursAvecGarde` (cours.js,
+     registre SUFFIXES_FK_COURS partagé) — REFUS dès la moindre donnée
+     (productions/étudiants/évals/présences/snapshots), PLUS STRICT que
+     l'outil console qui garde le chemin {forcer} · cas supprimable =
+     fiche + GC vides, doublons #442 partent ensemble, infoCours nulifié.
+     **`supprimerCoursV2` (Cadre) passe par le MÊME garde** — son écriture
+     directe du magasin est retirée, absence de la fonction = refus
+     BRUYANT (leçon #161/#444). Vérif demandée faite :
+     `retirerCoursDeBibliotheque` inchangé (actif=false cohérent).
+     Sentinelle 9 cas, **5 break-tests ROUGE** ; parcours Chromium (menu
+     3 entrées, refus, confirm refusé n'écrit rien, suppression ciblée,
+     zéro erreur). Changelog **1.88** (entrée utilisateur, + l'état vide
+     Enseignant·e du matin). ⏳ **PORTE TERRAIN NEUVE** :
+     `plans de travail/PORTES-TERRAIN-2026-08-19-suppression-fiche-cours-449.md`
+     (10 rangées dont 1 iPad ; artefact jumeau éprouvé).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 19 AOÛT 2026 (CLOUD) : REPASSAGE SUIVI-BUGS + LE FIL DES
      DÉCISIONS — #455 TRANCHÉ (LE COURS EST GLOBAL), #441 ET #365 CLOS.
      ÉTAT FINAL : **1.87.9** (build 0819-0700) — Vitest **2753/2753**

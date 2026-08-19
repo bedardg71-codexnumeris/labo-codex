@@ -300,9 +300,12 @@ async function ouvrirModalBibliothequeCours() {
                 metadonnees: meta,
                 description: cours.competence || '',
                 boutonPrincipal: { label: 'Reprendre dans ce trimestre', action: 'reprendreCoursDansTrimestreActif', param: cours.id, classe: 'btn-confirmer', title: 'Créer un groupe-cours pour ce cours dans le trimestre actif (sans dupliquer le cours)' },
+                // #449 : le réversible et le définitif coexistent — l'écart
+                // se voit (libellés + seule la suppression est en rouge).
                 actionsMenu: [
                     { label: 'Exporter', action: 'partagerCours', param: cours.id, classe: 'btn-secondaire', title: 'Exporter ce cours en JSON pour le partager' },
-                    { label: 'Retirer', action: 'retirerCoursDeBibliotheque', param: cours.id, classe: 'btn-supprimer', title: 'Retirer de ta sélection' }
+                    { label: 'Retirer de ma sélection', action: 'retirerCoursDeBibliotheque', param: cours.id, classe: 'btn-secondaire', title: 'Réversible : la fiche reste disponible dans « à ajouter »' },
+                    { label: 'Supprimer la fiche', action: 'supprimerFicheCours', param: cours.id, classe: 'btn-supprimer', title: 'Définitif, TOUS les trimestres — refusé si le cours porte des données' }
                 ]
             });
         });
@@ -326,7 +329,11 @@ async function ouvrirModalBibliothequeCours() {
                 metadonnees: sess,
                 description: cours.competence || '',
                 dejaPresent: false,
-                boutonPrincipal: { label: 'Ajouter à ma sélection', action: 'ajouterCoursIndividuel', param: cours.id, classe: 'btn-confirmer', title: 'Ajouter ce cours à ta sélection' }
+                boutonPrincipal: { label: 'Ajouter à ma sélection', action: 'ajouterCoursIndividuel', param: cours.id, classe: 'btn-confirmer', title: 'Ajouter ce cours à ta sélection' },
+                // #449 : une fiche déjà hors sélection se supprime aussi d'ici.
+                actionsMenu: [
+                    { label: 'Supprimer la fiche', action: 'supprimerFicheCours', param: cours.id, classe: 'btn-supprimer', title: 'Définitif, TOUS les trimestres — refusé si le cours porte des données' }
+                ]
             });
         });
         contenuSection2 += '<div style="text-align: center; margin-top: 15px;">' +
@@ -374,6 +381,164 @@ async function retirerCoursDeBibliotheque(id) {
         fermerModalBibliothequeCours();
         alert('Cours retiré de ta sélection');
     }
+}
+
+/* ===============================
+   #449 — SUPPRESSION D'UNE FICHE DE COURS, GARDÉE PAR RECENSEMENT
+   (décision Grégoire, 11 août 2026, porte 3.2 ; livrée 19 août 2026)
+
+   Le magasin `cours` est GLOBAL (#455) : supprimer une fiche la retire de
+   TOUS les trimestres. Deux règles, tenues dans le même geste :
+   1. le réversible (« Retirer de ma sélection ») et le définitif
+      (« Supprimer la fiche ») coexistent dans le menu ⋮ — l'écart doit se
+      voir au premier coup d'œil ;
+   2. le définitif n'existe QUE gardé : recensement d'abord, REFUS dès que
+      la fiche porte la moindre donnée (productions, étudiants, évaluations,
+      présences, snapshots) — famille #154, les orphelins silencieux.
+   L'interface est PLUS STRICTE que l'outil console
+   `scripts/reparation-retirer-cours.js` : elle ne supprime qu'une fiche aux
+   groupes-cours vides et n'a pas de { forcer } — le ménage de données de
+   test reste le travail de l'outil console, en session.
+   =============================== */
+
+// Registre du projet : suffixes de clés namespacées dont les items portent
+// un champ .coursId (partagé avec _diagnostiquerModeleCours et l'outil
+// console — ne pas réinventer la liste ailleurs).
+const SUFFIXES_FK_COURS = ['presences', 'productions', 'groupeEtudiants', 'groupesCours', 'evaluationsSauvegardees'];
+
+async function _toutesClesStockage() {
+    try {
+        const idbKeys = await db.keys();
+        return Array.from(new Set([...Object.keys(localStorage), ...idbKeys]));
+    } catch (e) {
+        return Object.keys(localStorage);
+    }
+}
+
+/**
+ * Recense tout ce qui pend à une fiche de cours. LECTURE SEULE.
+ *
+ * @param {string} coursId
+ * @returns {Promise<{fiches: Array, refs: Array, gcDependants: Array,
+ *   porteDonnees: Array, risqueGC: Array, clesSnapshots: string[],
+ *   pointeurVise: boolean}>}
+ */
+async function recenserDependancesCours(coursId) {
+    const magasin = db.getSync('cours', []) || [];
+    const fiches = magasin.filter(c => c && c.id === coursId);
+
+    const toutes = await _toutesClesStockage();
+    const refs = [];            // { cle, retire, garde, total }
+    const gcDependants = [];    // { gc, trim, nbEtu, nbEval, nbPres }
+
+    for (const k of toutes) {
+        if (!SUFFIXES_FK_COURS.some(s => k === s || k.endsWith('_' + s))) continue;
+        let valeur = null;
+        try { valeur = await db.get(k, null); } catch (e) { continue; }
+        if (!Array.isArray(valeur)) continue;
+        const retire = valeur.filter(it => it && it.coursId === coursId);
+        if (retire.length === 0) continue;
+        refs.push({
+            cle: k,
+            retire: retire,
+            garde: valeur.filter(it => !(it && it.coursId === coursId)),
+            total: valeur.length
+        });
+        if (k === 'groupesCours' || k.endsWith('_groupesCours')) {
+            retire.forEach(g => { if (g && g.id) gcDependants.push({ gc: g, trim: k.replace(/_?groupesCours$/, '') || '(sans trimestre)' }); });
+        }
+    }
+
+    // Toute clé qui n'est pas un groupe-cours porte des DONNÉES, pas de la
+    // structure : sa seule présence est un motif de refus.
+    const porteDonnees = refs.filter(r => !(r.cle === 'groupesCours' || r.cle.endsWith('_groupesCours')));
+
+    // Ce que chaque groupe-cours dépendant porte réellement.
+    const risqueGC = [];
+    const clesSnapshots = [];
+    for (const d of gcDependants) {
+        d.nbEtu = 0; d.nbEval = 0; d.nbPres = 0;
+        try {
+            const etu = await db.get(d.trim + '_groupeEtudiants', []) || [];
+            d.nbEtu = (Array.isArray(etu) ? etu : []).filter(e => e && (e.groupeCoursId === d.gc.id || e.coursId === coursId)).length;
+            const ev = await db.get(d.trim + '_evaluationsSauvegardees', []) || [];
+            d.nbEval = (Array.isArray(ev) ? ev : []).filter(e => e && e.coursId === coursId).length;
+            const pr = await db.get(d.trim + '_presences', []) || [];
+            d.nbPres = (Array.isArray(pr) ? pr : []).filter(p => p && p.coursId === coursId).length;
+        } catch (e) { /* comptage best-effort */ }
+        if (d.nbEtu || d.nbEval || d.nbPres) risqueGC.push(d);
+        const cleSnap = d.trim + '_snapshots_' + d.gc.id;
+        if (toutes.indexOf(cleSnap) !== -1) clesSnapshots.push(cleSnap);
+    }
+
+    const infoCours = db.getSync('infoCours', null);
+    const pointeurVise = !!(infoCours && (infoCours.id === coursId || infoCours.coursId === coursId));
+
+    return { fiches, refs, gcDependants, porteDonnees, risqueGC, clesSnapshots, pointeurVise };
+}
+
+/**
+ * Le geste complet : recense, REFUSE ou confirme, exécute.
+ * Partagé par la Bibliothèque (menu ⋮) et le Cadre (`supprimerCoursV2`) —
+ * un seul mécanisme, zéro suppression nue.
+ *
+ * @param {string} coursId
+ * @returns {Promise<boolean>} true si la fiche a été supprimée
+ */
+async function supprimerFicheCoursAvecGarde(coursId) {
+    const plan = await recenserDependancesCours(coursId);
+    if (plan.fiches.length === 0) {
+        alert('Cette fiche de cours est introuvable — elle a peut-être déjà été supprimée. Recharge la page.');
+        return false;
+    }
+    const f = plan.fiches[0];
+    const nom = (f.codeCours || f.sigle || f.code || coursId) + (f.nomCours ? ' — ' + f.nomCours : '');
+
+    const motifs = [];
+    plan.porteDonnees.forEach(r => motifs.push('· ' + r.cle + ' : ' + r.retire.length + ' élément(s)'));
+    plan.risqueGC.forEach(d => motifs.push('· ' + d.trim + ' · groupe ' + (d.gc.groupeNum || d.gc.groupe || d.gc.id) +
+        ' — ' + d.nbEtu + ' étudiant·e(s), ' + d.nbEval + ' évaluation(s), ' + d.nbPres + ' présence(s)'));
+    plan.clesSnapshots.forEach(k => motifs.push('· captures hebdomadaires : ' + k));
+
+    if (motifs.length > 0) {
+        alert('Impossible de supprimer « ' + nom + ' ».\n\n' +
+            'Ce cours porte encore des données :\n' + motifs.join('\n') + '\n\n' +
+            'Supprimer la fiche laisserait ces données orphelines — c\'est le\n' +
+            'mécanisme du bug des productions inaccessibles d\'août. Retire\n' +
+            'd\'abord ce qui s\'y rattache, ou dis-le-moi en session s\'il\n' +
+            's\'agit de données de test à nettoyer.');
+        return false;
+    }
+
+    const details = plan.refs.map(r => '· ' + r.cle + ' : ' + r.retire.length + ' groupe(s)-cours vide(s) retiré(s)');
+    if (!confirm('Supprimer la fiche « ' + nom + ' » ?\n\n' +
+        'Le cours est global : la fiche disparaît de TOUS les trimestres.\n' +
+        (details.length ? '\nSera aussi retiré (aucune donnée d\'étudiant, d\'évaluation ou de présence) :\n' + details.join('\n') + '\n' : '') +
+        '\nCette action est irréversible (filet : ton backup Codex).')) {
+        return false;
+    }
+
+    // Exécution — les références d'abord, la fiche ensuite, le pointeur en
+    // dernier. Tous les exemplaires portant cet id partent ensemble (les
+    // doublons #442 ne doivent pas survivre à leur fiche).
+    for (const r of plan.refs) { await db.set(r.cle, r.garde); }
+    const magasin = db.getSync('cours', []) || [];
+    db.setSync('cours', magasin.filter(c => !(c && c.id === coursId)));
+    if (plan.pointeurVise) db.setSync('infoCours', null);
+    if (typeof db.flush === 'function') { try { await db.flush(); } catch (e) { /* durabilité best-effort */ } }
+    return true;
+}
+
+/**
+ * Entrée du menu ⋮ de la Bibliothèque (#449).
+ */
+async function supprimerFicheCours(id) {
+    const fait = await supprimerFicheCoursAvecGarde(id);
+    if (!fait) return;
+    fermerModalBibliothequeCours();
+    if (typeof window.chargerDropdownCoursV2 === 'function') window.chargerDropdownCoursV2();
+    if (typeof window.populerDropdownsAssemblageV2 === 'function') window.populerDropdownsAssemblageV2();
+    alert('Fiche supprimée (tous trimestres).');
 }
 
 /**
@@ -686,7 +851,8 @@ async function _diagnostiquerModeleCours() {
     const trimestres = db.getSync('trimestres', []);
 
     // Suffixes de clés namespacées dont les items portent un champ .coursId
-    const SUFFIXES_FK = ['presences', 'productions', 'groupeEtudiants', 'groupesCours', 'evaluationsSauvegardees'];
+    // (#449 : registre unique du module, partagé avec le recensement)
+    const SUFFIXES_FK = SUFFIXES_FK_COURS;
 
     // coursId -> compteur par type de donnée
     const scores = {};
@@ -783,6 +949,10 @@ window.initialiserModuleCours = initialiserModuleCours;
 window.ouvrirModalBibliothequeCours = ouvrirModalBibliothequeCours;
 window.fermerModalBibliothequeCours = fermerModalBibliothequeCours;
 window.retirerCoursDeBibliotheque = retirerCoursDeBibliotheque;
+// #449 — vérifier l'EXPORT réel, pas la présence de l'appel (leçon du 10 août)
+window.recenserDependancesCours = recenserDependancesCours;
+window.supprimerFicheCoursAvecGarde = supprimerFicheCoursAvecGarde;
+window.supprimerFicheCours = supprimerFicheCours;
 window.ajouterCoursIndividuel = ajouterCoursIndividuel;
 window.exporterCoursSimple = exporterCoursSimple;
 window.importerCoursSimple = importerCoursSimple;
