@@ -9,7 +9,13 @@
 > donné dans la conversation du 19 août. Ce fichier est la TRACE versionnée.
 > **Ce qui échoue devient un item de backlog, pas une note mentale.**
 >
-> État : **NON TRAITÉE** (créée le 19 août 2026).
+> État : **✅ CLOSE — 12/12, ZÉRO ÉCHEC** (relevé de Grégoire, 19 août 2026,
+> exporté par le bouton de l'artefact). Les trois rangées iPad et la rangée
+> deux-modes passent ; le garde #455 a été éprouvé sur ses données réelles
+> (avertissement affiché sur `601-101-MQ`, « Annuler » n'a rien écrit).
+> Les angles morts §4 restants (suppression de trimestre, import JSON de
+> cours, cas limite de fusion legacy) sont couverts par sentinelles et
+> restent théoriques — rien de dû.
 
 ---
 

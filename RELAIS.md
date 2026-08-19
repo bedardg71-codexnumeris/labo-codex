@@ -43,12 +43,11 @@ début l'a attrapé ; il ne l'aurait pas fait sans `git fetch`.
 
 ⏳ **CE QUI RESTE DÛ** :
 
-- ⏳ **PORTE TERRAIN NEUVE, NON TRAITÉE (19 août)** —
-  `plans de travail/PORTES-TERRAIN-2026-08-19-etat-vide-et-cours-global.md`
-  (artefact jumeau publié le 19 août). **12 rangées, dont 3 iPad** : le
-  formulaire Enseignant·e en « état vide masqué » (#306, 1.87.9) et le garde
-  anti-seconde-fiche de cours (#455, 1.87.8) sur les données réelles. Aucune
-  rangée ne touche aux données (le test du garde s'annule).
+- ✅ **PORTE TERRAIN DU 19 AOÛT : CLOSE À 12/12, ZÉRO ÉCHEC** (relevé exporté
+  le jour même) — Enseignant·e en « état vide masqué » (#306, 1.87.9) validé
+  Mac + iPad + deux modes, et le garde anti-seconde-fiche de cours (#455,
+  1.87.8) éprouvé sur les données réelles. **Rien de dû de ce cycle.**
+  `plans de travail/PORTES-TERRAIN-2026-08-19-etat-vide-et-cours-global.md`.
 
 - ✅ **PORTE TERRAIN BRUME ARDOISE : CLOSE À 8/8, ZÉRO ÉCHEC** (19 août, les
   deux appareils) — `plans de travail/PORTES-TERRAIN-2026-08-18-brume-ardoise.md`.
