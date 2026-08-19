@@ -7,6 +7,56 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 18-19 AOÛT 2026 (CLOUD, DESIGN) : MODE ANONYMISATION
+     « BRUME ARDOISE » (1.87.6 → 1.87.7), CHANTIER CLOS TERRAIN COMPRIS.
+     ÉTAT : **1.87.7** (build 0818-2014) — Vitest **2738/2738** (273 fichiers,
+     depuis `tests/`). `main` = `57acf1aa`, poussée, arbre propre, branche de
+     session `claude/labo-codex-anonyme-colors-ztk8gl` fusionnée (ff).
+
+     ▣ **LE BUG DE LA CAPTURE DE GRÉGOIRE** (sidebar quasi noire du profil
+     étudiant en thème clair + mode anonymisation, la veille de sa
+     présentation aux collègues du 19 août) : la palette désaturée du mode
+     anonymisation n'existait PAS en clair — le bloc `[data-mode=
+     "anonymisation"]` était annulé par la cascade de `.mode-clair` (même
+     spécificité, plus bas dans la feuille), et il ne survivait qu'une règle
+     sidebar forcée à `#0e1e28`, un noir conçu pour le thème sombre.
+
+     ▣ **1.87.6 — deux palettes « brume ardoise » scopées par thème**
+     (`body[data-mode]:not(.mode-clair)` / `body.mode-clair[data-mode]`,
+     même leçon que le mode démo), teinte commune ~hue 205, contrastes AA
+     vérifiés (9,2:1 / 5,1:1 sur #e9edf1). Retiré zéro-dette : la règle
+     sidebar, `--sous-nav-bg-anonymisation` + `--sous-nav-bg-normal`
+     (mortes), le bloc inline redondant d'`index.html`.
+
+     ▣ **1.87.7 — verdict D2 de la porte terrain** (« désaturer toute
+     l'interface, même l'entête ? », option A) : en-tête, nav et sous-nav
+     suivent la brume dans les DEUX thèmes ; couleurs de section et signaux
+     pédagogiques restent vifs (repérage). Moyen : 11 marine codés en dur du
+     chrome clair (#032e5c/#0a4a7e/#0f1e3a) convertis vers
+     `var(--bleu-principal)`/`var(--btn-principal-hover)`/`var(--bleu-fonce)`
+     — mode normal PROUVÉ inchangé au computed style ; gradient océan sombre
+     overridé en ardoise ; `--bg-bandeau-mediane` par thème (blends des
+     boutons de section). `.apercu-pdf-page` garde ses couleurs d'impression,
+     volontairement. ⚠ Écart récit↔diff attrapé au rituel : le message de
+     commit disait « 10 sites », le diff en re-dérive 11.
+
+     ▣ **PORTE TERRAIN CLOSE À 8/8, ZÉRO ÉCHEC, LES DEUX APPAREILS**
+     (`plans de travail/PORTES-TERRAIN-2026-08-18-brume-ardoise.md`).
+     D1 « garde » · D2 livré en 1.87.7 · **l'extension 1.87.7 revérifiée par
+     Grégoire sur Safari ET iPad le 19 août : « tout est beau »**. Zéro item
+     de backlog versé. Pas d'entrée changelog (correction CSS, règle
+     éditoriale) ; pas de bump au commit documentaire de clôture.
+
+     ⚠ LEÇONS : (1) un bloc de mode non scopé par thème ne survit à la
+     cascade que par accident — scoper comme le mode démo ; (2) les hex
+     dupliqués du chrome clair étaient EXACTEMENT les variables existantes :
+     les convertir a fait cascader la brume sans un seul override de
+     spécificité. ⏳ RESTE : rien de ce chantier. Dettes antérieures :
+     `RELAIS.md`. ⮕ design-system.html ne documente toujours pas le mode
+     anonymisation (signalé à Grégoire, sans décision — item potentiel).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 18 AOÛT 2026 (TERMINAL MAC) : CONSIGNE PLUGIN + CHANTIER DU
      17 AOÛT SOLDÉ + WORKTREES RETIRÉS.
      ÉTAT : **1.87.2** (inchangée, sessions documentaires) — Vitest
