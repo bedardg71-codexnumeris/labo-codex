@@ -245,6 +245,15 @@ if (catId === 'comprehension' && soloActif) {
 
 ## 5. Chantier 3 — Association explicite SOLO dans l'éditeur d'échelle
 
+> ⛔ **CHANTIER ARCHIVÉ — décision #441, tranchée le 11 août 2026 (porte 3.4), exécutée le 19 août 2026.**
+> Jamais amorcé (`echelles.js` n'a ni sélecteur ni pictogramme), et le manque est
+> invisible pour l'utilisateur : la révision de contenu du 4 juin a réécrit la
+> page 5 du guide SOLO pour décrire l'app telle qu'elle est, sans mentionner
+> l'éditeur d'échelle — ni promesse trahie, ni porte morte. Le reste du plan est
+> livré. Ne pas confondre avec `critere.niveauSOLO` des **critères de grille**
+> (`grilles.js`), autre objet, déjà livré et relié au guide.
+> Les sections 5.x ci-dessous sont conservées comme trace de l'intention de mai 2026.
+
 ### 5.1 Principe directeur
 
 Chaque niveau d'une échelle de performance peut être **explicitement associé** par l'enseignant à un niveau cognitif SOLO. L'association est stockée dans un nouveau champ `niveauSOLO` sur chaque niveau d'échelle. Quand SOLO est activé dans les réglages, un sélecteur déroulant apparaît à côté de chaque niveau dans l'éditeur, et le pictogramme + nom SOLO de l'association choisie s'affichent en sous-texte.
