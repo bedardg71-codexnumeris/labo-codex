@@ -18,6 +18,19 @@
 (function() {
 'use strict';
 
+/**
+ * #306 (décision Grégoire, 19 août 2026) : Enseignant·e suit le patron
+ * « état vide masqué » de Cours/Horaire/Groupe-cours — le formulaire
+ * n'apparaît que sur une sélection ou « + Nouveau profil » ; sans rien,
+ * l'état vide guide vers l'action.
+ */
+function _basculerFormulaireEnseignant(visible) {
+    const etatVide = document.getElementById('enseignant-etat-vide');
+    const formulaire = document.getElementById('enseignant-formulaire-edition');
+    if (etatVide) etatVide.classList.toggle('u-hide', !!visible);
+    if (formulaire) formulaire.classList.toggle('u-hide', !visible);
+}
+
 function chargerProfilEnseignantV2() {
     // Migration: copier profilEnseignant vers enseignants si nécessaire
     const profilAncien = db.getSync('profilEnseignant', null);
@@ -50,9 +63,9 @@ function chargerProfilEnseignantV2() {
             chargerEnseignantSelectionneV2();
         }
     } else {
-        // Aucun enseignant - préparer pour nouveau
-        const titre = document.getElementById('v2-titreFormEnseignant');
-        if (titre) titre.textContent = 'Nouveau profil';
+        // Aucun enseignant : état vide (#306) — la création passe par
+        // « + Nouveau profil », comme chez Cours.
+        _basculerFormulaireEnseignant(false);
         mettreAJourCarteEnseignant();
     }
 }
@@ -121,10 +134,11 @@ function chargerEnseignantSelectionneV2() {
     const btnTexte = document.getElementById('v2-btnTexteEnseignant');
 
     if (!enseignantId) {
-        // Aucune sélection - vider le formulaire (mode création)
+        // Aucune sélection : état vide (#306)
         viderFormulaireEnseignantV2();
         enseignantEnEditionId = null;
         if (btnTexte) btnTexte.textContent = 'Créer';
+        _basculerFormulaireEnseignant(false);
         return;
     }
 
@@ -135,10 +149,12 @@ function chargerEnseignantSelectionneV2() {
         viderFormulaireEnseignantV2();
         enseignantEnEditionId = null;
         if (btnTexte) btnTexte.textContent = 'Créer';
+        _basculerFormulaireEnseignant(false);
         return;
     }
 
     enseignantEnEditionId = enseignantId;
+    _basculerFormulaireEnseignant(true);
 
     // Remplir le formulaire
     const setValue = (id, val) => {
@@ -182,6 +198,9 @@ function nouveauProfilEnseignantV2() {
     // #306 Lot 1 : libellé canonique « Créer » en création
     const btnTexte = document.getElementById('v2-btnTexteEnseignant');
     if (btnTexte) btnTexte.textContent = 'Créer';
+
+    // #306 : le geste explicite ouvre le formulaire
+    _basculerFormulaireEnseignant(true);
 
     // Focus sur le premier champ
     document.getElementById('v2-ens-prenom')?.focus();
@@ -270,14 +289,17 @@ async function sauvegarderEnseignantV2() {
 }
 
 /**
- * Annule les modifications et recharge le profil depuis le stockage
+ * Annule et revient à l'état vide (#306 : même geste que chez Cours —
+ * désélection + formulaire refermé, en édition comme en création).
  */
 function annulerFormEnseignantV2() {
-    if (enseignantEnEditionId) {
-        chargerEnseignantSelectionneV2();
-    } else {
-        viderFormulaireEnseignantV2();
-    }
+    enseignantEnEditionId = null;
+
+    const select = document.getElementById('v2-selectEnseignant');
+    if (select) select.value = '';
+
+    viderFormulaireEnseignantV2();
+    _basculerFormulaireEnseignant(false);
     notifications.succes('Modifications annulées');
 }
 
@@ -320,9 +342,9 @@ async function supprimerProfilEnseignantV2() {
         window.populerDropdownsAssemblageV2();
     }
 
-    // Mettre à jour le titre
-    const titre = document.getElementById('v2-titreFormEnseignant');
-    if (titre) titre.textContent = 'Nouveau profil';
+    // #306 : après suppression, retour à l'état vide (le titre sera reposé
+    // par la prochaine entrée — sélection ou « + Nouveau profil »)
+    _basculerFormulaireEnseignant(false);
 
     notifications.succes('Profil enseignant supprimé');
 }

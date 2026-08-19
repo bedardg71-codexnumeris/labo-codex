@@ -1,0 +1,377 @@
+<title>Portes terrain 1.87.9</title>
+<style>
+:root{
+  --papier:#f7f9fa; --carte:#ffffff; --encre:#12232e; --encre-doux:#4a6472;
+  --trait:#dbe4e8; --trait-fort:#c2d1d8;
+  --sarcelle:#217a88; --sarcelle-doux:#e3f1f3;
+  --ambre:#a4650f; --ambre-doux:#fbf1de;
+  --vert:#286b47; --vert-doux:#e2f1e8;
+  --rouge:#a93b32; --rouge-doux:#fbe9e7;
+  --ombre:0 1px 2px rgba(18,35,46,.06),0 8px 24px -12px rgba(18,35,46,.18);
+  --r-s:5px; --r-m:8px; --r-g:14px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --papier:#0d1b24; --carte:#14262f; --encre:#e4eef1; --encre-doux:#93aeb8;
+    --trait:#24404c; --trait-fort:#31525f;
+    --sarcelle:#5fc0cd; --sarcelle-doux:#123039;
+    --ambre:#e0a84e; --ambre-doux:#33260f;
+    --vert:#6bc493; --vert-doux:#122c1f;
+    --rouge:#e78078; --rouge-doux:#301715;
+    --ombre:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.55);
+  }
+}
+:root[data-theme="dark"]{
+  --papier:#0d1b24; --carte:#14262f; --encre:#e4eef1; --encre-doux:#93aeb8;
+  --trait:#24404c; --trait-fort:#31525f;
+  --sarcelle:#5fc0cd; --sarcelle-doux:#123039;
+  --ambre:#e0a84e; --ambre-doux:#33260f;
+  --vert:#6bc493; --vert-doux:#122c1f;
+  --rouge:#e78078; --rouge-doux:#301715;
+  --ombre:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.55);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--papier);color:var(--encre);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+  font-size:16px;line-height:1.55;-webkit-text-size-adjust:100%;
+}
+.mono{font-family:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace}
+.enveloppe{max-width:860px;margin:0 auto;padding:0 20px 80px}
+header.tete{padding:40px 0 22px}
+.surtitre{
+  font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--sarcelle);font-weight:700;margin:0 0 10px;
+}
+h1{font-size:clamp(28px,5vw,40px);line-height:1.12;margin:0 0 14px;text-wrap:balance;letter-spacing:-.02em}
+.chapeau{color:var(--encre-doux);max-width:64ch;margin:0 0 6px}
+.chapeau strong{color:var(--encre)}
+.barre{
+  position:sticky;top:0;z-index:20;background:var(--papier);
+  border-bottom:1px solid var(--trait);padding:10px 0;margin-bottom:26px;
+}
+.barre-inner{max-width:860px;margin:0 auto;padding:0 20px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.compteur{display:flex;gap:6px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.jeton{
+  font-size:12px;font-weight:700;padding:5px 10px;border-radius:var(--r-s);
+  border:1px solid var(--trait-fort);white-space:nowrap;
+}
+.jeton.ok{background:var(--vert-doux);border-color:var(--vert);color:var(--vert)}
+.jeton.ko{background:var(--rouge-doux);border-color:var(--rouge);color:var(--rouge)}
+.jeton.reste{background:transparent;color:var(--encre-doux)}
+.pousse{flex:1 1 auto}
+.filtres{display:flex;gap:6px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;border-radius:var(--r-s);border:1px solid var(--trait-fort);
+  background:var(--carte);color:var(--encre);padding:8px 12px;min-height:40px;transition:background .12s,border-color .12s}
+button:hover{border-color:var(--sarcelle)}
+button:focus-visible{outline:2px solid var(--sarcelle);outline-offset:2px}
+.filtre.actif{background:var(--sarcelle-doux);border-color:var(--sarcelle);color:var(--sarcelle);font-weight:700}
+.btn-export{background:var(--sarcelle);border-color:var(--sarcelle);color:#fff;font-weight:700}
+:root[data-theme="dark"] .btn-export,
+:root:not([data-theme="light"]) .btn-export{color:#0d1b24}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .btn-export{color:#fff}}
+section.bloc{margin:0 0 38px}
+.bloc-tete{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:0 0 6px;padding-bottom:8px;border-bottom:2px solid var(--trait)}
+.bloc-num{font-size:13px;font-weight:700;color:var(--sarcelle)}
+.bloc-titre{font-size:20px;font-weight:700;margin:0;letter-spacing:-.01em}
+.bloc-note{color:var(--encre-doux);font-size:14.5px;margin:10px 0 18px;max-width:66ch}
+.bloc-note.alerte{
+  background:var(--ambre-doux);border-left:3px solid var(--ambre);
+  padding:12px 14px;border-radius:0 var(--r-m) var(--r-m) 0;color:var(--encre);
+}
+.porte{
+  background:var(--carte);border:1px solid var(--trait);border-radius:var(--r-g);
+  box-shadow:var(--ombre);margin:0 0 16px;overflow:hidden;
+}
+.porte-tete{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;padding:16px 18px 0}
+.porte-num{font-size:13px;font-weight:700;color:var(--sarcelle)}
+.porte-titre{font-size:17px;font-weight:700;margin:0;flex:1 1 220px;letter-spacing:-.01em}
+.version{font-size:11.5px;color:var(--encre-doux);border:1px solid var(--trait-fort);
+  padding:2px 7px;border-radius:var(--r-s)}
+.pourquoi{
+  margin:12px 18px 4px;padding:12px 14px;background:var(--sarcelle-doux);
+  border-radius:var(--r-m);font-size:14.5px;color:var(--encre);max-width:none;
+}
+.pourquoi b{font-weight:700}
+.rangees{list-style:none;margin:10px 0 0;padding:0}
+.rangee{display:flex;gap:12px;padding:12px 18px;border-top:1px solid var(--trait);align-items:flex-start}
+.bascule{display:flex;gap:5px;flex:0 0 auto;padding-top:1px}
+.bascule button{min-width:44px;min-height:44px;padding:0;font-size:16px;font-weight:700;line-height:1}
+.bascule button[aria-pressed="true"][data-v="ok"]{background:var(--vert);border-color:var(--vert);color:var(--carte)}
+.bascule button[aria-pressed="true"][data-v="ko"]{background:var(--rouge);border-color:var(--rouge);color:var(--carte)}
+.corps{flex:1 1 auto;min-width:0}
+.geste{margin:0;font-weight:600}
+.attendu{margin:6px 0 0;color:var(--encre-doux);font-size:14.5px}
+.attendu b{color:var(--encre)}
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  padding:3px 7px;border-radius:var(--r-s);border:1px solid var(--trait-fort);color:var(--encre-doux)}
+.tag.donnees{background:var(--rouge-doux);border-color:var(--rouge);color:var(--rouge)}
+.tag.ipad{background:var(--sarcelle-doux);border-color:var(--sarcelle);color:var(--sarcelle)}
+.tag.terminal{background:var(--ambre-doux);border-color:var(--ambre);color:var(--ambre)}
+pre.cmd{margin:8px 0 0;padding:11px 13px;background:var(--papier);border:1px solid var(--trait-fort);
+  border-radius:var(--r-m);overflow-x:auto;font-size:13.5px}
+ol.angles{padding-left:22px;margin:0}
+ol.angles li{margin-bottom:14px;color:var(--encre-doux);max-width:66ch}
+ol.angles li b{color:var(--encre)}
+.masque{display:none !important}
+#zone-releve{margin-top:14px}
+#releve{font:inherit;width:100%;padding:11px 12px;border-radius:var(--r-m);
+  border:1px solid var(--trait-fort);background:var(--carte);color:var(--encre);
+  min-height:220px;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:13px;white-space:pre}
+#releve:focus{outline:2px solid var(--sarcelle);outline-offset:1px}
+footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--trait);color:var(--encre-doux);font-size:13.5px}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+
+<div class="barre">
+  <div class="barre-inner">
+    <div class="compteur">
+      <span class="jeton ok mono" id="c-ok">✓ 0</span>
+      <span class="jeton ko mono" id="c-ko">✗ 0</span>
+      <span class="jeton reste mono" id="c-reste">— 0</span>
+    </div>
+    <div class="pousse"></div>
+    <div class="filtres">
+      <button class="filtre actif" data-f="tout">Tout</button>
+      <button class="filtre" data-f="ipad">iPad</button>
+      <button class="filtre" data-f="mac">Mac</button>
+      <button class="filtre" data-f="reste">À faire</button>
+    </div>
+    <button class="btn-export" id="btn-export">Copier mes résultats</button>
+  </div>
+</div>
+
+<div class="enveloppe">
+  <header class="tete">
+    <p class="surtitre">Labo&nbsp;Codex · porte terrain</p>
+    <h1>Tes deux décisions du 19 août, livrées</h1>
+    <p class="chapeau">Le formulaire Enseignant·e suit maintenant le patron des trois autres sections du Cadre (état vide, formulaire masqué), et une seconde fiche de cours au même code est interceptée — parce que le cours est global, comme tu l’as tranché.</p>
+    <p class="chapeau"><strong>Ce qui échoue devient un item de backlog, pas une note mentale.</strong> Le relevé se récupère avec le bouton <em>Copier mes résultats</em> — ton avancement vit dans ce navigateur, je ne peux pas le lire.</p>
+  </header>
+  <main id="racine"></main>
+  <div id="zone-releve" class="masque">
+    <p class="bloc-note"><strong>Ton relevé.</strong> Il est déjà sélectionné : <span class="mono">⌘C</span> pour le copier si le bouton n’a pas suffi.</p>
+    <textarea id="releve" readonly></textarea>
+  </div>
+  <footer>
+    Jumeau markdown : <span class="mono">plans de travail/PORTES-TERRAIN-2026-08-19-etat-vide-et-cours-global.md</span><br>
+    Version visée : <span class="mono">1.87.9</span>, build <span class="mono">0819-0700</span>.
+  </footer>
+</div>
+
+<script>
+const DONNEES = [
+ {num:"§0", titre:"Avant de commencer",
+  alerte:"La première rangée n’est pas une vérification, c’est un déploiement. Ton clone local est à la version de ton dernier git pull : sans ce §0, l’app affichera 1.87.7 ou moins, le formulaire Enseignant·e sera toujours visible, et tu cocheras ✗ sur des correctifs qui marchent.",
+  portes:[{num:"0.1", titre:"Récupérer la version", version:"", pourquoi:null, rangees:[
+    {geste:"SEULE commande de Terminal de toute la liste — dans l’app Terminal, pas la console du navigateur, dans le dossier Monitorage_v6.",
+     cmd:"git checkout main && git pull origin main",
+     attendu:"la liste des fichiers reçus, puis Fast-forward. Si Terminal répond « error: Your local changes would be overwritten », arrête-toi et dis-le-moi.", tags:["terminal","mac"]},
+    {geste:"Recharger l’app et lire le numéro en bas de page.",
+     attendu:"1.87.9, build 0819-0700. Si tu lis 1.87.7 ou moins, la commande ci-dessus n’a pas pris — rien d’autre dans cette liste ne vaut.", tags:["mac"]},
+    {geste:"Prévoir les deux appareils et les deux modes (sombre + clair).",
+     attendu:"MacBook + iPad. Trois rangées ne se tranchent que sur l’iPad — filtre « iPad » ci-dessus.", tags:[]}
+  ]}]},
+
+ {num:"§2", titre:"Interface — ce que tu vérifies à l’écran",
+  alerte:null,
+  portes:[
+   {num:"2.1", titre:"Enseignant·e : le formulaire n’apparaît plus tout seul", version:"1.87.9",
+    pourquoi:"Le formulaire du profil s’affichait <b>en permanence</b>, même vide — alors que Cours, Horaire et Groupe-cours cachent le leur tant que rien n’est sélectionné. Ta décision du 19 août : <b>aligner sur le patron des trois autres</b>.",
+    rangees:[
+     {geste:"Ouvrir le Cadre (Réglages → Trimestre), déplier « Enseignant·e » sans rien toucher.",
+      attendu:"ton profil existant est auto-sélectionné et le formulaire s’affiche REMPLI — quand un profil existe, rien ne change pour toi.", tags:["mac"]},
+     {geste:"Dans le menu « Profil enseignant », revenir à « — Sélectionner — ».",
+      attendu:"le formulaire disparaît ; à sa place, le message « Sélectionne un profil pour le modifier, ou crée ton profil avec + Nouveau profil ». Avant : le formulaire restait affiché, vide.", tags:["mac"]},
+     {geste:"Cliquer « + Nouveau profil ».",
+      attendu:"le formulaire s’ouvre vide, titre « Nouveau profil », bouton « Créer », curseur dans Prénom.", tags:["mac"]},
+     {geste:"Cliquer « Annuler ».",
+      attendu:"retour au message d’état vide, menu revenu à « — Sélectionner — ». Avant : le formulaire restait là.", tags:["mac"]},
+     {geste:"Re-sélectionner ton profil dans le menu.",
+      attendu:"formulaire rempli, titre « Modifier le profil », bouton « Enregistrer ».", tags:["mac"]},
+     {geste:"Sur l’iPad, rejouer les trois rangées : désélectionner, + Nouveau profil, Annuler.",
+      attendu:"mêmes comportements au doigt.", tags:["ipad"]},
+     {geste:"Regarder le message d’état vide dans les DEUX modes (sombre et clair).",
+      attendu:"lisible dans les deux — c’est le même bloc gris que « Sélectionne un cours pour l’éditer » de la section Cours.", tags:["mac","ipad"]}]},
+   {num:"2.2", titre:"Une seconde fiche de cours au même code est interceptée", version:"1.87.8",
+    pourquoi:"Ta décision du 19 août : « le devis ministériel ne change pas d’un trimestre à l’autre — le cours est <b>global</b> ». Avant, rien n’empêchait de créer une seconde fiche « 601-101-MQ » : deux fiches pour la même chose, et les écrans de suivi rattachés à l’une ne voyaient plus les groupes de l’autre — la famille du bug « productions H26 inaccessibles » du 9 août.",
+    rangees:[
+     {geste:"Cadre → Cours → « + Nouveau cours ». Saisir le code 601-101-MQ (ton code EXISTANT) et une discipline, cliquer « Créer ».",
+      attendu:"un avertissement : « Une fiche « 601-101-MQ » existe déjà. Le cours est global : la même fiche sert tous les trimestres… Créer quand même une seconde fiche ? ». Avant : la fiche se créait sans un mot.", tags:["mac"]},
+     {geste:"Dans cet avertissement, cliquer « Annuler ».",
+      attendu:"AUCUNE fiche neuve — le menu des cours n’a pas grandi. Rien n’est écrit tant que tu annules : ce test ne touche pas tes données.", tags:["mac"]}]}
+  ]}
+];
+
+const DECISIONS = [];
+
+const ANGLES = [
+ "<b>Rien n’a été éprouvé sur ton matériel.</b> WebKit n’existe pas dans le conteneur : le parcours Enseignant·e complet (6 transitions) et l’avertissement de fiche en double ont été mesurés au Chromium, zéro erreur de page — pas dans Safari, pas sur l’iPad. Les rangées iPad et la rangée deux-modes sont exactement les trous.",
+ "<b>Le thème n’a été mesuré que d’un côté.</b> Le bloc d’état vide réutilise la classe déjà en place chez Cours/Horaire/Groupe-cours, validée dans les deux modes — mais ton œil fait foi (dernière rangée de 2.1).",
+ "<b>La suppression d’un trimestre n’efface plus les fiches de cours</b> (elles sont globales, elles survivent). Vérifié par test automatique et contre-épreuve, PAS rejoué en réel — supprimer un trimestre sur ton corpus n’est pas un test raisonnable.",
+ "<b>L’import de fiches de cours (fichier JSON) refuse maintenant les doublons par code seul.</b> Verrouillé par test, non rejoué de bout en bout avec un vrai fichier.",
+ "<b>Cas limite théorique</b> : si deux VRAIS cours distincts partageaient un même code (ça ne devrait pas exister — le code EST le devis), la migration des très vieilles données n’en garderait qu’un. Si ce cas existe chez toi, dis-le-moi avant tout import d’archives."
+];
+
+const CLE = "portes-terrain-2026-08-19";
+let etat = {};
+try { etat = JSON.parse(localStorage.getItem(CLE) || "{}"); } catch(e) { etat = {}; }
+const sauver = () => { try { localStorage.setItem(CLE, JSON.stringify(etat)); } catch(e){} };
+
+/* ⚠ Aucune valeur d'utilisateur n'est injectée dans du HTML : les champs
+   reçoivent leur contenu par .value en JS (leçon du 15 août — un guillemet
+   droit tronquait les mesures). */
+const el = (t, cls, txt) => { const n = document.createElement(t); if (cls) n.className = cls; if (txt != null) n.textContent = txt; return n; };
+
+/* Rendu du gras SANS innerHTML (règle innerHTML du dépôt, Défense J).
+   Sous-ensemble reconnu : <b>…</b>, rien d'autre — tout le reste sort en
+   TEXTE, donc inerte par construction. */
+function riche(parent, chaine, prefixe) {
+  if (prefixe) { const b = document.createElement("b"); b.textContent = prefixe; parent.append(b); }
+  String(chaine).split(/(<b>|<\/b>)/).reduce((gras, morceau) => {
+    if (morceau === "<b>") return true;
+    if (morceau === "</b>") return false;
+    if (morceau === "") return gras;
+    if (gras) { const b = document.createElement("b"); b.textContent = morceau; parent.append(b); }
+    else parent.append(document.createTextNode(morceau));
+    return gras;
+  }, false);
+  return parent;
+}
+
+const racine = document.getElementById("racine");
+let idRangee = 0;
+
+DONNEES.forEach(sec => {
+  const s = el("section","bloc");
+  const t = el("div","bloc-tete");
+  t.append(el("span","bloc-num mono",sec.num), el("h2","bloc-titre",sec.titre));
+  s.append(t);
+  if (sec.alerte) { const a = el("p","bloc-note alerte", sec.alerte); s.append(a); }
+  sec.portes.forEach(p => {
+    const c = el("article","porte");
+    const pt = el("div","porte-tete");
+    pt.append(el("span","porte-num mono",p.num), el("h3","porte-titre",p.titre));
+    if (p.version) pt.append(el("span","version mono",p.version));
+    c.append(pt);
+    if (p.pourquoi) { const w = el("div","pourquoi"); riche(w, " — " + p.pourquoi, "Pourquoi"); c.append(w); }
+    const ul = el("ul","rangees");
+    p.rangees.forEach(r => {
+      const id = "r" + (++idRangee);
+      const li = el("li","rangee");
+      li.dataset.id = id;
+      li.dataset.tags = (r.tags || []).join(" ");
+      const b = el("div","bascule");
+      ["ok","ko"].forEach(v => {
+        const btn = el("button", null, v === "ok" ? "✓" : "✗");
+        btn.dataset.v = v; btn.type = "button";
+        btn.setAttribute("aria-label", v === "ok" ? "Passée" : "Échec");
+        btn.setAttribute("aria-pressed", etat[id] === v ? "true" : "false");
+        btn.addEventListener("click", () => {
+          etat[id] = etat[id] === v ? null : v;
+          b.querySelectorAll("button").forEach(x =>
+            x.setAttribute("aria-pressed", etat[id] === x.dataset.v ? "true" : "false"));
+          sauver(); majCompteur(); appliquerFiltre();
+        });
+        b.append(btn);
+      });
+      li.append(b);
+      const corps = el("div","corps");
+      corps.append(el("p","geste", r.geste));
+      if (r.cmd) { const pre = el("pre","cmd mono", r.cmd); corps.append(pre); }
+      if (r.attendu) { const a = el("p","attendu"); riche(a, " : " + r.attendu, "Attendu"); corps.append(a); }
+      if ((r.tags || []).length) {
+        const tg = el("div","tags");
+        r.tags.forEach(x => tg.append(el("span","tag " + x, x === "donnees" ? "⚠⚠ Données" : x === "ipad" ? "iPad" : x === "terminal" ? "Terminal" : "Mac")));
+        corps.append(tg);
+      }
+      li.append(corps);
+      ul.append(li);
+    });
+    c.append(ul);
+    s.append(c);
+  });
+  racine.append(s);
+});
+
+/* §3 absent de ce cycle : les deux décisions sont déjà tranchées (c'est
+   même l'objet de la liste). Le squelette DECISIONS reste pour le jour où
+   un cycle en aura — vide, il ne rend rien. */
+
+const s4 = el("section","bloc");
+const t4 = el("div","bloc-tete");
+t4.append(el("span","bloc-num mono","§4"), el("h2","bloc-titre","Ce que je n’ai pas pu vérifier"));
+s4.append(t4);
+s4.append(el("p","bloc-note","Une liste qui ne déclare pas ses angles morts se fait croire complète."));
+const ol = el("ol","angles");
+ANGLES.forEach(a => { const li = document.createElement("li"); riche(li, a); ol.append(li); });
+s4.append(ol);
+racine.append(s4);
+
+function toutesRangees(){ return [...document.querySelectorAll(".rangee")]; }
+function majCompteur(){
+  const r = toutesRangees();
+  const ok = r.filter(x => etat[x.dataset.id] === "ok").length;
+  const ko = r.filter(x => etat[x.dataset.id] === "ko").length;
+  document.getElementById("c-ok").textContent = "✓ " + ok;
+  document.getElementById("c-ko").textContent = "✗ " + ko;
+  document.getElementById("c-reste").textContent = "— " + (r.length - ok - ko);
+}
+let filtre = "tout";
+function appliquerFiltre(){
+  toutesRangees().forEach(x => {
+    const tags = x.dataset.tags || "";
+    let visible = true;
+    if (filtre === "ipad") visible = tags.includes("ipad");
+    else if (filtre === "mac") visible = !tags.includes("ipad");
+    else if (filtre === "reste") visible = !etat[x.dataset.id];
+    x.classList.toggle("masque", !visible);
+  });
+  document.querySelectorAll(".porte").forEach(p => {
+    const reste = [...p.querySelectorAll(".rangee")].some(r => !r.classList.contains("masque"));
+    p.classList.toggle("masque", !reste);
+  });
+}
+document.querySelectorAll(".filtre").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".filtre").forEach(x => x.classList.remove("actif"));
+  b.classList.add("actif"); filtre = b.dataset.f; appliquerFiltre();
+}));
+
+document.getElementById("btn-export").addEventListener("click", () => {
+  const r = toutesRangees();
+  const ok = r.filter(x => etat[x.dataset.id] === "ok").length;
+  const ko = r.filter(x => etat[x.dataset.id] === "ko").length;
+  const lignes = [];
+  lignes.push("PORTES TERRAIN — état vide Enseignant·e + cours global (19 août 2026, 1.87.9)");
+  lignes.push(ok + " passées · " + ko + " échec(s) · " + (r.length - ok - ko) + " non traitée(s)");
+  lignes.push("");
+  DONNEES.forEach(sec => {
+    lignes.push("═══ " + sec.num + " · " + sec.titre + " ═══");
+    sec.portes.forEach(p => {
+      lignes.push("  " + p.num + " — " + p.titre + (p.version ? "  [" + p.version + "]" : ""));
+      p.rangees.forEach(rg => {
+        const li = toutesRangees().find(x => x.querySelector(".geste").textContent === rg.geste);
+        const v = li ? etat[li.dataset.id] : null;
+        lignes.push("    [" + (v === "ok" ? "v" : v === "ko" ? "X" : " ") + "] " + rg.geste);
+      });
+    });
+    lignes.push("");
+  });
+  const texte = lignes.join("\n");
+  const zone = document.getElementById("zone-releve");
+  const ta = document.getElementById("releve");
+  zone.classList.remove("masque");
+  ta.value = texte;
+  ta.focus(); ta.select();
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(texte).catch(() => {});
+    }
+  } catch(e) {}
+  zone.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+majCompteur();
+appliquerFiltre();
+</script>

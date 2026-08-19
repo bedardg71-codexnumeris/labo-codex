@@ -9,10 +9,26 @@
 <!-- =====================================================================
      SESSION — 19 AOÛT 2026 (CLOUD) : REPASSAGE SUIVI-BUGS + LE FIL DES
      DÉCISIONS — #455 TRANCHÉ (LE COURS EST GLOBAL), #441 ET #365 CLOS.
-     ÉTAT : **1.87.8** (build 0819-0615) — Vitest **2745/2745** (274 fichiers,
-     depuis `tests/`). Branche `claude/chantiers-en-cours-wra1r7`, ⚠ NON
-     FUSIONNÉE à la clôture (session distante sans permission de pousser
-     `main`) — fusion ff à faire, `RELAIS.md` mis à jour SUR LA BRANCHE.
+     ÉTAT FINAL : **1.87.9** (build 0819-0700) — Vitest **2753/2753**
+     (275 fichiers, depuis `tests/`). ✅ **FUSIONNÉ DANS `main`** (permission
+     explicite de Grégoire « fusionne vers main » ; premier ff à `84f7d268`
+     pour le cycle 1.87.8, second ff en clôture pour 1.87.9).
+
+     ✅ **#306 — DÉCISION UX TRANCHÉE ET LIVRÉE (1.87.9)** : « aligner
+     Enseignant·e sur le patron des trois autres » (Grégoire, 19 août). État
+     vide + formulaire masqué jusqu'à sélection ou « + Nouveau profil » ;
+     « Annuler » referme ET désélectionne (patron Cours) ; l'auto-sélection
+     du premier profil au chargement CONSERVÉE. `index.html` (wrapper +
+     état vide), `trimestre-v2-enseignants.js` (bascule aux 5 entrées).
+     Sentinelle 8 cas, **4 break-tests ROUGE**, parcours complet éprouvé au
+     Chromium (6 transitions, zéro erreur). ⏳ **PORTE TERRAIN NEUVE** :
+     `plans de travail/PORTES-TERRAIN-2026-08-19-etat-vide-et-cours-global.md`
+     (+ artefact jumeau, bouton d'export éprouvé au navigateur) — couvre
+     aussi le garde #455 sur les données réelles (2.2).
+
+     ⏸ **Rétroaction du nœud Évaluation (#424) : REPORTÉE par Grégoire** —
+     « je vais trancher à la lumière des discussions avec la CoP ». Consigné
+     au BACKLOG ; ne pas relancer de session en session.
 
      ✅ **REPASSAGE DE LA TABLE DES BUGS OUVERTS contre 1.87.7** (demande du
      jour) : 8 entrées des 8-10 août déjà corrigées (1.56.2→1.67.1) mais
