@@ -466,11 +466,14 @@ async function importerCoursSimple(eventOuEl) {
             let nbDoublons = 0;
 
             coursImportes.forEach(coursImporte => {
-                // Vérifier doublon (même code + session + année)
+                // #455 : doublon = même CODE, point. Le cours est global (le
+                // devis ministériel ne change pas d'un trimestre à l'autre) ;
+                // comparer aussi session/année laissait entrer un « 601-101
+                // d'automne » à côté du 601-101 existant — deux fiches pour la
+                // même chose (famille #346/#454). session/annee sur les fiches
+                // legacy sont historiques, non décisionnels.
                 const doublon = coursExistants.find(c =>
-                    c.codeCours === coursImporte.codeCours &&
-                    c.session === coursImporte.session &&
-                    c.annee === coursImporte.annee
+                    c.codeCours === coursImporte.codeCours
                 );
 
                 if (doublon) {

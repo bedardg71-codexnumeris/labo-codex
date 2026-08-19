@@ -30,13 +30,22 @@
  * Charge la liste des cours dans le dropdown
  * Filtre par trimestre actif (Beta 95)
  */
+/**
+ * #455 (19 août 2026, décision Grégoire) : l'identité naturelle d'un cours est
+ * son CODE seul. Le cours est une fiche GLOBALE — le devis ministériel ne
+ * change pas d'un trimestre à l'autre, 601-101 est le même objet en hiver
+ * comme en automne (doctrine #407, `planification-donnees.js`, ici mise en
+ * accord ; la période vit dans le GROUPE-COURS, jamais dans le cours).
+ * Un `601-101|A2026` distinct du `601-101|H2026` fabriquait deux fiches pour
+ * la même chose : une carte rattachée à l'une ne voyait pas les groupes de
+ * l'autre (famille #346/#454).
+ * ⚠ `session`/`annee`/`trimestreId` encore portés par des fiches legacy sont
+ * HISTORIQUES et non décisionnels — comme le préfixe d'un id (`h2026-…`), qui
+ * ressemble à de l'information et n'en est pas.
+ */
 function _tupleCoursNaturel(c) {
     const code = (c.codeCours || c.sigle || c.code || '').toString().trim().toUpperCase();
-    if (!code) return null;
-    const session = (c.session || '').toString().charAt(0).toUpperCase();
-    const annee = (c.annee || '').toString().trim();
-    if (!session || !annee) return code; // tuple dégradé (legacy minimal)
-    return `${code}|${session}${annee}`;
+    return code || null;
 }
 
 /**
@@ -60,9 +69,10 @@ function _tupleCoursNaturel(c) {
  *     `601-102-MQ|H2026`), la copie legacy restaurée par un import ancien
  *     ne les porte pas (tuple dégradé `601-102-MQ`). Deux tuples, un seul id.
  *
- *  2. par TUPLE NATUREL (code|SESSION+ANNÉE) — le critère d'origine,
- *     conservé tel quel : il attrape les doublons qui portent des ids
- *     DIFFÉRENTS, que le point 1 ne peut pas voir.
+ *  2. par TUPLE NATUREL — il attrape les doublons qui portent des ids
+ *     DIFFÉRENTS, que le point 1 ne peut pas voir. Depuis #455 (19 août
+ *     2026), le tuple est le CODE seul : `session`/`annee` n'entrent plus
+ *     dans l'identité (le cours est global, cf. doc de `_tupleCoursNaturel`).
  *
  * ▣ Pourquoi écarter par id ne perd RIEN : tous les lecteurs du magasin
  *   résolvent par `find`/`findIndex`/`some` sur `.id` (cours.js, contexte.js,
@@ -1122,6 +1132,23 @@ async function sauvegarderCoursV2() {
         }
         _resyncInfoCoursSiActif(coursSauve);
     } else {
+        // #455 : le cours est GLOBAL — une fiche par code, servie à tous les
+        // trimestres. Créer une seconde fiche au même code fabriquerait deux
+        // « 601-101 » dont les groupes-cours ne se verraient pas (famille
+        // #346/#154). Le geste reste possible (confirm), jamais silencieux.
+        const codeNeuf = _tupleCoursNaturel(d);
+        const dejaLa = codeNeuf
+            ? (db.getSync('cours', []) || []).find(c => c && _tupleCoursNaturel(c) === codeNeuf)
+            : null;
+        if (dejaLa) {
+            const creerQuandMeme = confirm(
+                'Une fiche « ' + d.codeCours + ' » existe déjà.\n\n' +
+                'Le cours est global : la même fiche sert tous les trimestres — ' +
+                'inutile d\'en créer une par session.\n\n' +
+                'Créer quand même une seconde fiche ?'
+            );
+            if (!creerQuandMeme) return;
+        }
         coursSauve = await CoursEntite.creer(d);
         _activerSiPremierCours(coursSauve);
     }
