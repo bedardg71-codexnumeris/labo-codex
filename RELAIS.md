@@ -45,9 +45,8 @@ début l'a attrapé ; il ne l'aurait pas fait sans `git fetch`.
 - ✅ **PORTE TERRAIN BRUME ARDOISE : CLOSE À 8/8, ZÉRO ÉCHEC** (19 août, les
   deux appareils) — `plans de travail/PORTES-TERRAIN-2026-08-18-brume-ardoise.md`.
   Verdicts rendus : D1 « garde », D2 livré en 1.87.7 (chrome en brume).
-  ⏳ **Seul reste dû, mineur** : revoir l'extension 1.87.7 (en-tête/nav en
-  brume) sur Safari et iPad — elle est postérieure au passage terrain, validée
-  en Chromium seulement ; le mode normal est prouvé inchangé au computed style.
+  ✅ **L'extension 1.87.7 aussi : revérifiée par Grégoire sur Safari ET iPad
+  le 19 août (« tout est beau »). RIEN N'EST DÛ de ce chantier.**
 - ⏳ **RIEN D'AUTRE N'EST DÛ DES CYCLES 1 À 6 DU 18 AOÛT.** Sa porte terrain
   (`plans de travail/PORTES-TERRAIN-2026-08-18-skills-et-briqueC.md`, artefact :
   <https://claude.ai/code/artifact/56915616-aaf6-489a-855a-59e4073d93e5>) est

@@ -24,6 +24,9 @@
   pédagogiques restent vifs (repérage). Vérifié en Chromium : le mode normal
   est inchangé au pixel (conversion des marine codés en dur vers
   `var(--bleu-principal)` etc., valeurs identiques hors anonymisation).
+- **19 août** : l'extension 1.87.7 (chrome en brume) **revérifiée par
+  Grégoire sur Safari et iPad — « tout est beau »**. Chantier entièrement
+  clos, terrain compris.
 
 ---
 
