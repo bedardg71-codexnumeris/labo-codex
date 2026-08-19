@@ -14,8 +14,16 @@
 
 ## État
 
-- [ ] Exécutée le : ______
-- Résultat : ______ passées / ______ échecs / ______ non traitées
+- [x] Exécutée le : **19 août 2026** (relevé exporté par l'artefact)
+- Résultat : **8 passées / 0 échec / 0 non traitée** — PORTE CLOSE, les deux
+  appareils, zéro item de backlog à verser.
+- Verdicts : **D1** « oui, garde. » — **D2** « oui, on garde, mais pourrait-on
+  désaturer toute l'interface ? Même l'entête ? » ⮕ tranché en discussion
+  (option A) et **livré en 1.87.7** : l'en-tête, la nav et la sous-nav suivent
+  la brume dans les deux thèmes ; les couleurs de section et les signaux
+  pédagogiques restent vifs (repérage). Vérifié en Chromium : le mode normal
+  est inchangé au pixel (conversion des marine codés en dur vers
+  `var(--bleu-principal)` etc., valeurs identiques hors anonymisation).
 
 ---
 

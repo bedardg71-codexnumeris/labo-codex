@@ -404,6 +404,10 @@ body[data-mode="anonymisation"]:not(.mode-clair) {
     --fond-page-sature: #0c1820;
     --fond-page-clair: #0a1418;
 
+    /* Médiane des blends multiply (boutons de section, aide/réglages) —
+       milieu du gradient ardoise de l'en-tête (override plus bas) */
+    --bg-bandeau-mediane: #202b36;
+
     /* Tableaux */
     --table-hover: rgba(90, 122, 136, 0.12);
 }
@@ -436,8 +440,27 @@ body.mode-clair[data-mode="anonymisation"] {
     --fond-page-sature: #d9dfe5;
     --fond-page-clair: #e9edf1;
 
+    /* Médiane des blends multiply — milieu de #2c3d4e → #1e2833 (l'en-tête
+       clair suit var(--bleu-principal/fonce), donc la brume, verdict D2) */
+    --bg-bandeau-mediane: #25323f;
+
     /* Tableaux */
     --table-hover: rgba(44, 61, 78, 0.08);
+}
+
+/* En-tête et nav en thème sombre : leur gradient océan est codé en dur
+   (.entete / .navigation-principale) — version ardoise, mêmes clartés,
+   pour que le cadre suive la brume (verdict D2, porte terrain du 18 août).
+   En clair, rien à scoper ici : le chrome suit les variables. */
+body[data-mode="anonymisation"]:not(.mode-clair) .entete,
+body[data-mode="anonymisation"]:not(.mode-clair) .navigation-principale {
+    background: linear-gradient(135deg, #0f151a 0%, #1c2530 40%, #24303c 70%, #151c23 100%);
+}
+
+/* Sous-nav claire : le hover translucide est un marine vif codé en dur
+   (rgba(10,74,126)) — version ardoise, même opacité */
+body.mode-clair[data-mode="anonymisation"] .sous-navigation button:hover {
+    background: rgba(62, 82, 102, 0.55);
 }
 
 /* ===============================
@@ -22593,7 +22616,9 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 
 /* EN-TÊTE — gradient bleu pur design system */
 .mode-clair .entete {
-    background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
+    /* var(--bleu-principal/fonce) = #032e5c → #0f1e3a en clair normal ; le
+       mode anonymisation les redéfinit (brume ardoise), l'en-tête suit (D2) */
+    background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%);
     color: white;
 }
 
@@ -22721,36 +22746,36 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 
 /* Navigation principale mode clair — continuation du gradient de l'entête */
 .mode-clair .navigation-principale {
-    background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
+    background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%);
 }
 
 /* Navigation principale — bleu principal solide */
 .mode-clair .navigation-principale button {
-    background: #032e5c;
+    background: var(--bleu-principal);
     border: 1px solid rgba(255, 255, 255, 0.15);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
 }
 
 .mode-clair .navigation-principale button:hover {
-    background: #0a4a7e;
+    background: var(--btn-principal-hover);
     border-color: rgba(255, 255, 255, 0.3);
 }
 
 /* Lien externe CoP AQPC — même bleu que les boutons en mode clair. */
 .mode-clair .navigation-boutons .nav-bouton-lien {
-    background: #032e5c;
+    background: var(--bleu-principal);
     border: 1px solid rgba(255, 255, 255, 0.15);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
 }
 .mode-clair .navigation-boutons .nav-bouton-lien:hover {
-    background: #0a4a7e;
+    background: var(--btn-principal-hover);
     border-color: rgba(255, 255, 255, 0.3);
 }
 
 .mode-clair .navigation-principale button.actif {
-    background: #0a4a7e;
+    background: var(--btn-principal-hover);
     border-color: rgba(255, 255, 255, 0.4);
     box-shadow: 0 4px 12px rgba(3, 46, 92, 0.3);
 }
@@ -22817,7 +22842,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 /* État ACTIF en mode clair — bleu solide neutre.
    Sélecteur .actif[data-onglet] = (0,4,1), bat [data-onglet="X"] = (0,3,1). */
 .mode-clair .navigation-principale button.actif[data-onglet] {
-    background: #0a4a7e;
+    background: var(--btn-principal-hover);
     border: 1px solid rgba(255, 255, 255, 0.4);
     box-shadow: 0 4px 12px rgba(3, 46, 92, 0.3);
 }
@@ -22895,7 +22920,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 /* Sous-navigation — même bleu principal solide */
 .mode-clair .sous-navigation button {
     color: white;
-    background: #032e5c;
+    background: var(--bleu-principal);
     border: 1px solid rgba(255, 255, 255, 0.15);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
@@ -22910,7 +22935,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 .mode-clair .sous-navigation button.active,
 .mode-clair .sous-navigation button.actif {
     color: white;
-    background: #0a4a7e;
+    background: var(--btn-principal-hover);
     border-color: rgba(255, 255, 255, 0.4);
     box-shadow: 0 4px 12px rgba(3, 46, 92, 0.3);
 }
@@ -22934,7 +22959,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 .mode-clair .info-trimestre-groupe-cours,
 .mode-clair .cartouche-gradient-bleu,
 .mode-clair .outil-carte-header {
-    background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
+    background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%);
     color: white;
 }
 
