@@ -452,7 +452,7 @@
 
 ### Pour ajouter un bug
 1. Créer une entrée dans la section "Ouverts"
-2. Assigner un numéro séquentiel — la séquence est PARTAGÉE avec BACKLOG.md : prendre le « Dernier ID » du BACKLOG + 1 (au 19 août 2026 : dernier ID **#456**)
+2. Assigner un numéro séquentiel — la séquence est PARTAGÉE avec BACKLOG.md : prendre le « Dernier ID » du BACKLOG + 1, et le VÉRIFIER par grep (au 19 août 2026 : dernier ID **#457**)
 3. Documenter dans le sous-dossier du testeur si fichiers/screenshots fournis
 
 ### Pour marquer comme corrigé

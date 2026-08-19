@@ -1184,14 +1184,15 @@
             // Retirer l'entrée du registre
             db.setSync('trimestres', trimestres.filter(t => !t || t.id !== id));
 
-            // Nettoyer le global `cours` (items rattachés au trimestre supprimé)
-            const listeCours = db.getSync('cours', []);
-            if (Array.isArray(listeCours)) {
-                const coursRestants = listeCours.filter(c => !c || c.trimestreId !== id);
-                if (coursRestants.length !== listeCours.length) {
-                    db.setSync('cours', coursRestants);
-                }
-            }
+            // #455 (19 août 2026) : le magasin global `cours` N'EST PLUS touché.
+            // La fiche de cours est globale (le devis ministériel ne change pas
+            // d'un trimestre à l'autre) : elle survit à la suppression de tout
+            // trimestre. L'ancien nettoyage filtrait par `trimestreId` — un
+            // champ HISTORIQUE de fiches legacy — et aurait détruit la fiche
+            // partagée que les autres trimestres pointent encore (la fiche
+            // réelle de Grégoire porte `trimestreId: "h2026"` et sert A26).
+            // Supprimer une fiche de cours est un geste distinct, avec garde de
+            // dépendances : chantier #449 (Bibliothèque, menu ⋮).
 
             // Durabilité : drainer les écritures avant de rendre la main
             if (typeof db.flush === 'function') {

@@ -9,8 +9,11 @@ import { chargerScript } from './_helpers/charger-script.js';
 //  2. la suppression d'un trimestre inactif efface UNIQUEMENT ses clés
 //     (union IDB + localStorage + memoryCache ; id exact, préfixe `<id>_`,
 //     id inclus), jamais celles des autres trimestres ni le registre ;
-//  3. le registre `trimestres` et le global `cours` sont nettoyés de leurs
-//     entrées, db.flush() est appelé (durabilité) ;
+//  3. le registre `trimestres` est nettoyé de son entrée, db.flush() est
+//     appelé (durabilité) — et le global `cours` N'EST PLUS touché (#455,
+//     19 août 2026 : la fiche de cours est globale, son `trimestreId` legacy
+//     est historique et non décisionnel ; l'ancien nettoyage aurait détruit
+//     la fiche partagée que les autres trimestres pointent encore) ;
 //  4. parcours UI : garde anti-actif AVANT toute confirmation ; nom ressaisi
 //     inexact → annulation sans suppression ; parcours complet → export de
 //     sauvegarde PUIS suppression.
@@ -101,13 +104,17 @@ describe('#361 · supprimerTrimestre (cœur, trimestres.js)', () => {
         expect(supprimees).not.toContain('cleSansRapport');
     });
 
-    it('nettoie le registre + le global cours, et draine (flush)', async () => {
+    it('nettoie le registre, PRÉSERVE le global cours (#455), et draine (flush)', async () => {
         const res = await win.supprimerTrimestre('a2024');
 
         expect(res.success).toBe(true);
         expect(res.nbCles).toBe(4);
         expect(stores.get('trimestres').map(t => t.id)).toEqual(['h2026']);
-        expect(stores.get('cours').map(c => c.id)).toEqual(['C-H26']);
+        // #455 : la fiche de cours est GLOBALE — même celle dont le
+        // `trimestreId` legacy pointe le trimestre supprimé SURVIT (c'est un
+        // champ historique ; la fiche réelle de Grégoire porte "h2026" et
+        // sert A26). L'ancien contrat la détruisait.
+        expect(stores.get('cours').map(c => c.id)).toEqual(['C-A24', 'C-H26']);
         expect(flushAppele).toBe(true);
     });
 });

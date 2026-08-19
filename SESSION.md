@@ -7,6 +7,52 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 19 AOÛT 2026 (CLOUD) : REPASSAGE SUIVI-BUGS + LE FIL DES
+     DÉCISIONS — #455 TRANCHÉ (LE COURS EST GLOBAL), #441 ET #365 CLOS.
+     ÉTAT : **1.87.8** (build 0819-0615) — Vitest **2745/2745** (274 fichiers,
+     depuis `tests/`). Branche `claude/chantiers-en-cours-wra1r7`, ⚠ NON
+     FUSIONNÉE à la clôture (session distante sans permission de pousser
+     `main`) — fusion ff à faire, `RELAIS.md` mis à jour SUR LA BRANCHE.
+
+     ✅ **REPASSAGE DE LA TABLE DES BUGS OUVERTS contre 1.87.7** (demande du
+     jour) : 8 entrées des 8-10 août déjà corrigées (1.56.2→1.67.1) mais
+     jamais basculées → section « Corrigés (8-10 août) », `[VERT]` pour
+     #154/#159/#153 (confirmés terrain). Restent OUVERTS : **#158** (sain au
+     Chromium, re-vérification terrain due sur build à jour), **#121**
+     (confirmation visuelle due), **#114** (décision config Cloudflare).
+     Toilettage : note `resolutions.json` retirée (workflow disparu du code,
+     vérifié — aucun consommateur), séquence des numéros documentée.
+
+     ✅ **#455 TRANCHÉ PAR GRÉGOIRE : « Le devis ministériel ne change pas
+     d'un trimestre à l'autre. Le cours est GLOBAL. »** Livré 1.87.8, quatre
+     sites mis en accord : `_tupleCoursNaturel` = CODE seul · import de cours
+     dédoublonne par code · **`supprimerTrimestre` ne purge plus le magasin
+     global `cours`** (l'ancien filtre par `trimestreId` aurait détruit la
+     fiche partagée — la fiche réelle porte "h2026" et sert A26) · garde
+     anti-seconde-fiche au formulaire (confirm explicite). Champs
+     `session`/`annee`/`trimestreId` documentés HISTORIQUES, zéro migration
+     de données. Sentinelle 7 cas ; **sentinelle #361 mise en accord** (le
+     global SURVIT à la suppression d'un trimestre). **5 break-tests ROUGE**
+     (tuple, import, purge ×2, garde). Queue des lecteurs legacy de
+     `trimestreId` consignée dans l'entrée #455 (aucun destructeur restant).
+
+     ✅ **#441 CLOS** (décision du 11 août exécutée : chantier 3 archivé dans
+     `PLAN_taxonomie_SOLO.md`). ✅ **#365 CLOS** (exigence confirmée « namespacé
+     par trimestre » : c'est DÉJÀ le cas — 4 clés via `cle()`, aucun
+     contournement ; nuance consignée : par trimestre, PAS par cours).
+
+     ⚠ **DEUX COMPTEURS « Dernier ID » MENTAIENT (#456)** alors que #457 est
+     consommé depuis le 18 août — corrigés (BACKLOG ×2, SUIVI-BUGS), consigne
+     durcie : grep avant de prendre un numéro.
+
+     📐 **RESTENT À TRANCHER (présentés à Grégoire)** : sélecteur de
+     rétroaction du nœud Évaluation (#424 — l'entrée porte à la fois « D2b
+     résolue option 2 » et « non tranché », à confirmer) · apparition du
+     formulaire Enseignant·e (#306, « état vide masqué », expliqué). #449 :
+     décision prise le 11 août, chantier PRÊT À CODER.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 18-19 AOÛT 2026 (CLOUD, DESIGN) : MODE ANONYMISATION
      « BRUME ARDOISE » (1.87.6 → 1.87.7), CHANTIER CLOS TERRAIN COMPRIS.
      ÉTAT : **1.87.7** (build 0818-2014) — Vitest **2738/2738** (273 fichiers,
