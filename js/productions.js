@@ -1513,7 +1513,9 @@ function gererChangementTypeProduction() {
     // Pondération : actif et visible par défaut
     const groupePonderation = inputPonderation?.closest('.groupe-form');
     if (groupePonderation) {
-        groupePonderation.style.display = ''; // Réafficher si masqué
+        // u-hide est posé par le type artefact ; style.display ne peut pas
+        // l'annuler (u-hide est !important), il faut retirer la classe.
+        groupePonderation.classList.remove('u-hide');
     }
     if (inputPonderation) {
         inputPonderation.disabled = false;
