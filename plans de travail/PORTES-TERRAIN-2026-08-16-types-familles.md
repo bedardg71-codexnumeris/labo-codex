@@ -32,6 +32,29 @@ qu'elle compte davantage depuis ce cycle.
 
 ---
 
+> ✅ **CLOSE — 43/43, ZÉRO ÉCHEC** (relevé de Grégoire, 20 août 2026, exporté
+> par l'artefact ; passée sous 1.88.2, iPad et deux modes compris — dont la
+> rangée la plus risquée, la poignée ⠿ au doigt).
+>
+> **LES CINQ VERDICTS SONT RENDUS (§3)** :
+> - **3.1** violet de l'Organisation (`#a855f7`) : « c'est bien » — GARDÉ.
+> - **3.2** vert du Déroulement (équilibre 3,30) : « c'est bien » — GARDÉ.
+> - **3.3** deuxième ligne d'en-tête de l'Évaluation : « c'est bien » — GARDÉ.
+> - **3.4** pastille « Évaluation » unique dans la palette : « c'est bien » — GARDÉ.
+> - **3.5** « Préalable » : « **on ne retire pas** » — la fonction RESTE
+>   (case Inspecteur + ligne d'export conservées ; sans couleur propre sur la
+>   carte, validé en 2.11). La question du retrait est CLOSE, ne pas la rouvrir.
+>
+> **Mesures** : 2.7m = « aucun » (aucune paire de blocs voisins difficile à
+> distinguer — la couleur unique par famille tient sur sa vraie carte).
+> ⏳ **SEUL RELIQUAT : la mesure 2.8m** (combien de blocs ont un en-tête sur
+> deux lignes) — non renseignée, signalée « à compléter » par Grégoire
+> lui-même. Due depuis le cycle 1.85 ; mineure, aucune décision n'en dépend
+> depuis que 3.3 est tranchée.
+>
+> En chemin, la porte 1.2 a trouvé **#459** (⇧ avalé en silence sur les
+> conteneurs — corrigé 1.88.2, revalidé par ce relevé même).
+
 > ⚠ **MISE À JOUR DU 20 AOÛT 2026 (reprise de la porte sous 1.88.1)** : la
 > liste teste les livraisons de 1.86.0, toutes en place ; le §0 attend
 > désormais **1.88.2** (build `0820-0745`). **Une seule porte a changé de
