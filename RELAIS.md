@@ -66,17 +66,17 @@ début l'a attrapé ; il ne l'aurait pas fait sans `git fetch`.
   non prouvée, pas un défaut. Le break-test tient en deux commandes, écrites dans
   la porte. **Grégoire a choisi de passer au backlog** — ne pas rouvrir ça de soi-même.
 
-- ⏳ **PORTE TERRAIN NEUVE, NON TRAITÉE** —
-  `plans de travail/PORTES-TERRAIN-2026-08-16-types-familles.md` (artefact :
-  <https://claude.ai/code/artifact/06b361a7-e0ce-4cf0-b6a1-6cb7c11dbce3>).
-  **14 portes, 41 vérifications, 2 mesures, 5 décisions**, sur le cycle 1.86.0.
-  ⮕ **Trois points y sont bloquants pour la suite** : la **2.7** (une famille se
-  repère-t-elle mieux avec UNE couleur qu'avec quatre nuances sur sa vraie
-  carte — aucune mesure ne tranche ça), la **2.8** iPad (la poignée ⠿ au doigt,
-  cible mesurée à 44,53 px, atteinte d'un demi-pixel), et la **2.6** (ses
-  exports ne doivent PAS avoir bougé tant qu'il n'a rien choisi).
-  ⮕ **Cinq décisions attendent un verdict écrit**, dont deux teintes : le violet
-  neuf de l'Organisation (3.1) et le vert le moins équilibré des cinq (3.2).
+- ✅ **PORTE TERRAIN TYPES-FAMILLES : CLOSE le 20 août — 43/43, ZÉRO ÉCHEC,
+  LES CINQ VERDICTS RENDUS** (relevé exporté ; reprise sous 1.88.2 après mise
+  à jour de la liste). Les trois points bloquants passent : 2.7 couleur
+  unique par famille (mesure 2.7m = « aucune » paire confondue), 2.8 poignée
+  ⠿ au doigt sur iPad, 2.6 exports intacts sans choix. **Verdicts §3 : 3.1 à
+  3.4 « c'est bien » (tout est GARDÉ tel que livré) ; 3.5 « on ne retire
+  pas » — Préalable RESTE, question close.** En chemin, la 1.2 a trouvé
+  **#459** (⇧ avalé en silence sur les conteneurs, corrigé 1.88.2, revalidé).
+  ⏳ **Seul reliquat : la mesure 2.8m** (blocs à en-tête sur deux lignes),
+  signalée « à compléter » par Grégoire — mineure, aucune décision n'en
+  dépend. `plans de travail/PORTES-TERRAIN-2026-08-16-types-familles.md`.
 - ✅ **PORTE TERRAIN DU CYCLE 1.85 : CLOSE À 33/33, ZÉRO ÉCHEC** (16 août).
   Les deux rangées iPad les plus risquées — la poignée ⠿ au doigt et le TSV
   ouvert dans Numbers — passent. Son verdict **3.4 « signaler »** est livré dans
