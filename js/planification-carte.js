@@ -3409,7 +3409,7 @@ function propagerModification(noeudId, champ, valeur) {
  *   lot : un seul message pour tout le geste, pas N messages empilés).
  * @returns {string|null} id de la racine copiée
  */
-function dupliquerConteneurEnProfondeur(noeudId, silencieux) {
+function dupliquerConteneurEnProfondeur(noeudId, silencieux, cloneDemande) {
     var source = etat.noeuds.get(noeudId);
     if (!source) return null;
     var configD = TYPES[source.type];
@@ -3493,7 +3493,13 @@ function dupliquerConteneurEnProfondeur(noeudId, silencieux) {
     sauvegarder();
     if (source.parent) reLayoutAvecAnimation(source.parent);
     if (!silencieux) {
-        afficherToastLien('Copie indépendante créée — modifie-la sans toucher l\'originale.');
+        // #459 (20 août 2026, porte types-familles 1.2) : quand ⇧ était tenu,
+        // l'app faisait la copie SANS dire pourquoi le clone n'avait pas eu
+        // lieu — Grégoire a conclu que ⇧⌥ ne clonait pas du tout. Un geste
+        // ignoré se DIT, il ne s'avale pas.
+        afficherToastLien(cloneDemande
+            ? 'Copie indépendante créée — une leçon ou une séquence ne se clone jamais : le clone lié (⇧) est réservé aux blocs simples.'
+            : 'Copie indépendante créée — modifie-la sans toucher l\'originale.');
     }
     return racineId;
 }
@@ -3536,7 +3542,9 @@ function dupliquerNoeud(noeudId, silencieux, lie) {
         // reste réservé aux feuilles — la synchronisation des ENFANTS entre deux
         // instances n'a pas de réponse simple, et la metadata propagée
         // embarquerait la semaine (décision du 6 août, inchangée).
-        return dupliquerConteneurEnProfondeur(noeudId, silencieux);
+        // #459 : `lie` est transmis pour que le toast DISE que le ⇧ a été
+        // ignoré, au lieu de l'avaler en silence.
+        return dupliquerConteneurEnProfondeur(noeudId, silencieux, lie);
     }
     enregistrerPourUndo();
 
@@ -3595,6 +3603,14 @@ function dupliquerNoeud(noeudId, silencieux, lie) {
 
     selectionnerNoeud(newId);
     sauvegarder();
+    // #459 : le chemin feuille était MUET — clone comme copie se créaient sans
+    // un mot, et seul l'indicateur 🧬 distinguait les deux. Le geste dit
+    // maintenant ce qu'il vient de faire (même règle que les conteneurs).
+    if (!silencieux) {
+        afficherToastLien(cloneSourceId
+            ? 'Clone lié créé — titre, durée et type suivront l\'original (indicateur 🧬).'
+            : 'Copie indépendante créée — modifie-la sans toucher l\'originale.');
+    }
     return newId;
 }
 

@@ -34,7 +34,7 @@ qu'elle compte davantage depuis ce cycle.
 
 > ⚠ **MISE À JOUR DU 20 AOÛT 2026 (reprise de la porte sous 1.88.1)** : la
 > liste teste les livraisons de 1.86.0, toutes en place ; le §0 attend
-> désormais **1.88.1** (build `0820-0721`). **Une seule porte a changé de
+> désormais **1.88.2** (build `0820-0745`). **Une seule porte a changé de
 > sens : la 1.2** — depuis 1.87, une *copie* (⌥ / ⌘D) est INDÉPENDANTE et ne
 > suit plus son original (c'est voulu) ; seul un *clone* (⇧⌥ / ⇧⌘D / bouton
 > « Cloner (lié) ») propage titre, durée et type. La porte 1.2 se joue donc
@@ -44,7 +44,7 @@ qu'elle compte davantage depuis ce cycle.
 ## ⚠⚠ COMMENCE PAR LE §0
 
 Tout ce que cette liste teste est livré depuis **1.86.0** ; l'app doit
-afficher **1.88.1** (build `0820-0721`). Sans la première rangée, toute la
+afficher **1.88.2** (build `0820-0745`). Sans la première rangée, toute la
 liste est invérifiable — un clone local en retard cocherait ✗ sur des
 livraisons qui marchent, et ce faux rouge est **indétectable au récit**,
 parce qu'il décrit exactement l'état d'avant la livraison, qui est
@@ -105,7 +105,9 @@ touchée.
       Si Terminal répond `error: Your local changes would be overwritten`,
       **arrête-toi et dis-le-moi**. `Terminal`
 - [ ] Recharger l'app et lire le numéro **en bas de page**.
-      ⮕ **Attendu** : **1.86.0**, build `0816-0710`.
+      ⮕ **Attendu** : **1.88.2**, build `0820-0745` (reprise du 20 août — les
+      livraisons de 1.86.0 sont toujours en place, et 1.88.2 fait parler les
+      gestes de duplication, cf. 1.2).
 - [ ] Prévoir les **deux appareils** et les **deux modes**. Quatre rangées ne se
       tranchent que sur l'iPad ; cinq, qu'en comparant les deux modes.
 
@@ -121,17 +123,24 @@ touchée.
 
 - [ ] Backup Codex avant d'ouvrir la porte 2.1. ⮕ archive créée, date du jour.
 
-### 1.2 Un type changé suit les CLONES `⚠⚠ Données` *(mise à jour 1.87)*
+### 1.2 Un type changé suit les CLONES `⚠⚠ Données` *(reprise du 20 août, 1.88.2)*
 
 > **POURQUOI** — Un clone reste lié à son original : titre, durée et **type**
-> se propagent, sinon deux blocs censés être le même bloc diraient deux choses
-> différentes. ⚠ Depuis 1.87, une **copie** (⌥ / ⌘D) est INDÉPENDANTE — elle
-> ne suit plus, et c'est voulu ; seul un **clone** (⇧⌥ / ⇧⌘D / « Cloner
-> (lié) ») suit.
+> se propagent. ⚠ Depuis 1.87, une **copie** (⌥ / ⌘D) est INDÉPENDANTE ; seul
+> un **clone** (⇧⌥ / ⇧⌘D / « Cloner (lié) ») suit. ⚠⚠ **Et le clone n'existe
+> que sur un bloc SIMPLE** : une leçon ou une séquence se copie TOUJOURS,
+> ⇧ ou pas (décision du 6 août) — c'est ce que la capture de Grégoire du
+> 20 août a montré, et l'app ne le disait pas (**#459**, corrigé 1.88.2 :
+> chaque geste annonce maintenant « Clone lié créé » / « Copie indépendante
+> créée » / « …une leçon ne se clone jamais »).
 
-- [ ] Créer un CLONE (⇧⌥ en glissant, ou ⇧⌘D), changer le type de l'original.
-      ⮕ le clone suit, tout de suite. (Une copie simple ne doit PAS suivre.)
+- [ ] Sur un bloc SIMPLE (activité, exposé — PAS une leçon), ⇧⌥ en glissant.
+      ⮕ toast « Clone lié créé », indicateur 🧬 sur le bloc neuf.
+- [ ] Changer le type de l'original. ⮕ le clone suit, tout de suite.
 - [ ] **⌘Z**. ⮕ les deux reviennent ensemble.
+- [ ] ⇧⌥ sur une LEÇON (le geste de la capture). ⮕ le toast dit POURQUOI :
+      « …une leçon ou une séquence ne se clone jamais : le clone lié (⇧) est
+      réservé aux blocs simples. »
 
 ---
 

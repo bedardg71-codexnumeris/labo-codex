@@ -451,7 +451,7 @@ const DATA = [
       { id:"0.1a", geste:"<b>SEULE commande de Terminal de toute la liste</b> — app <b>Terminal</b>, pas la console du navigateur, dans le dossier <code>Monitorage_v6</code> :<br><code>git checkout main &amp;&amp; git pull origin main</code>",
         attendu:"la liste des fichiers reçus, puis <code>Fast-forward</code>. Si Terminal répond <code>error: Your local changes would be overwritten</code>, <b>arrête-toi et dis-le-moi</b>.", tags:["Terminal"] },
       { id:"0.1b", geste:"Recharger l'app et lire le numéro <b>en bas de page</b>.",
-        attendu:"<b>1.88.1</b>, build <code>0820-0721</code> (mise à jour du 20 août — la liste teste les livraisons de 1.86.0, toujours en place). En dessous, rien d'autre ne vaut." },
+        attendu:"<b>1.88.2</b>, build <code>0820-0745</code> (mise à jour du 20 août — la liste teste les livraisons de 1.86.0, toujours en place ; la 1.88.2 fait PARLER les gestes de duplication, cf. porte 1.2). En dessous, rien d'autre ne vaut." },
       { id:"0.1c", geste:"Prévoir les <b>deux appareils</b> (MacBook + iPad) et les <b>deux modes</b> (sombre + clair).",
         attendu:"quatre rangées de cette liste ne se tranchent que sur l'iPad ; cinq ne se tranchent qu'en comparant les deux modes." }
     ]}
@@ -464,13 +464,17 @@ const DATA = [
       { id:"1.1a", geste:"Faire un <b>backup Codex</b> avant d'ouvrir la porte 2.1.",
         attendu:"archive créée, date du jour.", tags:["Données"] }
     ]},
-  { ref:"1.2", t:"⚠⚠ Données", fam:"toutes", titre:"Un type changé suit les CLONES (mise à jour 1.87)",
-    pourquoi:"⚠ Le vocabulaire a changé depuis l'écriture de cette porte : depuis 1.87, une <b>copie</b> (⌥ en glissant, ou ⌘D) est <b>indépendante</b> — elle ne suit PLUS son original, et c'est voulu. Seul un <b>clone</b> (⇧⌥ en glissant, ⇧⌘D, ou le bouton « Cloner (lié) » de l'Inspecteur) reste lié : titre, durée et <b>type</b> se propagent entre ses instances.",
+  { ref:"1.2", t:"⚠⚠ Données", fam:"toutes", titre:"Un type changé suit les CLONES (repris le 20 août, 1.88.2)",
+    pourquoi:"⚠ Depuis 1.87 : une <b>copie</b> (⌥ / ⌘D) est <b>indépendante</b>, seul un <b>clone</b> (⇧⌥ / ⇧⌘D / « Cloner (lié) ») propage titre, durée et type. ⚠⚠ <b>Et le clone n'existe que sur un bloc SIMPLE</b> (activité, exposé, connaissance…) : une <b>leçon ou une séquence se copie toujours</b>, ⇧ ou pas — c'est ce que ta capture du 20 août a montré, et l'app ne le disait pas. Depuis 1.88.2, chaque geste l'annonce : « Clone lié créé » / « Copie indépendante créée » / « …une leçon ne se clone jamais ».",
     rangs:[
-      { id:"1.2a", geste:"Créer un <b>clone</b> d'un bloc (⇧⌥ en le glissant, ou ⇧⌘D), puis changer le type de l'original par le menu de son en-tête.",
-        attendu:"le clone prend le même type, tout de suite. ⚠ Une COPIE simple (⌥ sans ⇧) ne doit PAS suivre — si elle suit, c'est un échec de 1.87, pas de cette porte.", tags:["Données"] },
-      { id:"1.2b", geste:"Faire <b>⌘Z</b>.",
-        attendu:"l'original et le clone reviennent à leur type précédent, ensemble.", tags:["Données"] }
+      { id:"1.2a", geste:"Sur un bloc <b>SIMPLE</b> (une activité, un exposé — PAS une leçon), faire ⇧⌥ en le glissant.",
+        attendu:"le toast dit « <b>Clone lié créé</b> » et le bloc neuf porte l'indicateur 🧬.", tags:["Données"] },
+      { id:"1.2b", geste:"Changer le type de l'original par le menu de son en-tête.",
+        attendu:"le clone prend le même type, tout de suite.", tags:["Données"] },
+      { id:"1.2c", geste:"Faire <b>⌘Z</b>.",
+        attendu:"l'original et le clone reviennent à leur type précédent, ensemble.", tags:["Données"] },
+      { id:"1.2d", geste:"Refaire ⇧⌥ en glissant sur une <b>leçon</b> — le geste de ta capture.",
+        attendu:"le toast dit maintenant POURQUOI : « Copie indépendante créée — une leçon ou une séquence ne se clone jamais : le clone lié (⇧) est réservé aux blocs simples. »", tags:["Données"] }
     ]}
 ]},
 
