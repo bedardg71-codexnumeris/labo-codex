@@ -74,9 +74,9 @@ début l'a attrapé ; il ne l'aurait pas fait sans `git fetch`.
   3.4 « c'est bien » (tout est GARDÉ tel que livré) ; 3.5 « on ne retire
   pas » — Préalable RESTE, question close.** En chemin, la 1.2 a trouvé
   **#459** (⇧ avalé en silence sur les conteneurs, corrigé 1.88.2, revalidé).
-  ⏳ **Seul reliquat : la mesure 2.8m** (blocs à en-tête sur deux lignes),
-  signalée « à compléter » par Grégoire — mineure, aucune décision n'en
-  dépend. `plans de travail/PORTES-TERRAIN-2026-08-16-types-familles.md`.
+  ✅ **2.8m renseignée dans la foulée : 0** bloc à en-tête sur deux lignes —
+  **la porte est entièrement soldée, mesures comprises** (la 2.8m traînait
+  depuis le cycle 1.85). `plans de travail/PORTES-TERRAIN-2026-08-16-types-familles.md`.
 - ✅ **PORTE TERRAIN DU CYCLE 1.85 : CLOSE À 33/33, ZÉRO ÉCHEC** (16 août).
   Les deux rangées iPad les plus risquées — la poignée ⠿ au doigt et le TSV
   ouvert dans Numbers — passent. Son verdict **3.4 « signaler »** est livré dans

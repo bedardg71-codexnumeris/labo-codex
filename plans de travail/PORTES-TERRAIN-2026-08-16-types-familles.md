@@ -47,10 +47,11 @@ qu'elle compte davantage depuis ce cycle.
 >
 > **Mesures** : 2.7m = « aucun » (aucune paire de blocs voisins difficile à
 > distinguer — la couleur unique par famille tient sur sa vraie carte).
-> ⏳ **SEUL RELIQUAT : la mesure 2.8m** (combien de blocs ont un en-tête sur
-> deux lignes) — non renseignée, signalée « à compléter » par Grégoire
-> lui-même. Due depuis le cycle 1.85 ; mineure, aucune décision n'en dépend
-> depuis que 3.3 est tranchée.
+> ✅ **2.8m RENSEIGNÉE (20 août, après le relevé) : 0** — aucun bloc à
+> en-tête sur deux lignes sur sa vraie carte. L'arbitrage 3.3 (seule
+> l'Évaluation peut y passer) ne coûte rien en pratique. **PLUS AUCUN
+> RELIQUAT : cette porte est entièrement soldée**, mesures comprises (la
+> 2.8m était due depuis le cycle 1.85).
 >
 > En chemin, la porte 1.2 a trouvé **#459** (⇧ avalé en silence sur les
 > conteneurs — corrigé 1.88.2, revalidé par ce relevé même).
