@@ -279,7 +279,12 @@ async function reprendreCoursDansTrimestreActif(coursId) {
  */
 async function ouvrirModalBibliothequeCours() {
     const tousLesCours = await db.get('cours') || [];
-    const coursDansBibliotheque = tousLesCours.filter(c => c.dansBibliotheque === true);
+    // #458 : « ta sélection » tolère le champ ABSENT (fiche née en cours de
+    // session avant que la migration de boot pose le drapeau, ou tout futur
+    // chemin de création qui l'oublierait). Seul un retrait EXPLICITE
+    // (dansBibliotheque === false) envoie une fiche dans « disponibles » —
+    // une fiche ne doit jamais être invisible des DEUX sections.
+    const coursDansBibliotheque = tousLesCours.filter(c => c.dansBibliotheque !== false);
     const coursDisponibles = tousLesCours.filter(c => c.dansBibliotheque === false);
 
     // Phase C #267 — migration vers BibliothequeUI (carte + menu ⋮)
