@@ -7,6 +7,44 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 20 AOÛT 2026 (CLÔTURE) : DEUX PORTES SOLDÉES, DEUX BUGS DU
+     TERRAIN CORRIGÉS LE JOUR MÊME, RITUEL DE FIN PASSÉ.
+     ÉTAT FINAL : **1.88.2** (build 0820-0745) — Vitest **2768/2768**
+     (278 fichiers, 29,7 s). Fusionné dans `main`, RELAIS à « aucun ».
+
+     ✅ **PORTE #449 CLOSE 11/11** (refus sur la vraie fiche depuis les deux
+     surfaces, cycle complet sur fiche de test, iPad). En chemin : **#458**
+     (fiche neuve invisible de la Bibliothèque — champ `dansBibliotheque`
+     jamais posé à la création + filtres stricts ===true/===false de la
+     modale ; corrigé 1.88.1 aux deux bouts, confirmé terrain).
+     ✅ **PORTE TYPES-FAMILLES CLOSE 43/43, mesures comprises** (2.7m
+     « aucune » paire confondue, 2.8m = **0** en-tête sur deux lignes).
+     **Cinq verdicts rendus : 3.1-3.4 « c'est bien » (tout GARDÉ), 3.5
+     « on ne retire pas » — Préalable RESTE, question close.** En chemin :
+     **#459** (⇧ avalé en silence — le mécanisme copie/clone était SAIN,
+     prouvé au Chromium : un conteneur se copie toujours ; correctif de
+     PAROLE en 1.88.2, trois toasts qui disent le geste, revalidé terrain).
+     La porte avait été REMISE À JOUR avant reprise (§0 1.86.0→1.88.x,
+     porte 1.2 réécrite pour la sémantique copie/clone de 1.87) — sans quoi
+     deux faux rouges garantis.
+
+     ▣ **RITUEL DE FIN (20 août)** : §2 zéro motif sur les lignes ajoutées
+     du jour (innerHTML/handlers/eval/console.log = 0 ; zones protégées,
+     modules sensibles, CSP intacts ; zéro only/skip). §3 **2768/2768**.
+     §4.1 : **18 break-tests ROUGE sur la journée** (5 #455, 4 #306, 5 #449,
+     2 #458, 2 #459) + 1 échantillon REJOUÉ sur l'arbre final (#449 refus
+     aveugle → ROUGE). §5 : 4 points synchrones 1.88.2/0820-0745.
+     ⚠ **DEUX INCIDENTS DE SESSION, consignés** : (1) deux restaurations de
+     backup de break-test ratées par CHEMIN RELATIF depuis `tests/` (l'arbre
+     est resté muté jusqu'au constat) — attrapées les deux fois, mais la
+     leçon est : restaurer en chemin ABSOLU, vérifier `git status` après
+     CHAQUE break-test ; (2) un break-test #459 resté VERT par mutation
+     INERTE (un `replace` python sans assertion n'avait pas matché) — repris
+     avec assertion, ROUGE obtenu. *Une mutation sans preuve d'application
+     ne break-teste rien.*
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 19 AOÛT 2026 (SUITE) : #449 LIVRÉ — LA SUPPRESSION DE FICHE
      DE COURS ENTRE DANS LA BIBLIOTHÈQUE, GARDÉE PAR RECENSEMENT.
      ÉTAT : **1.88.0** (build 0819-0826) — Vitest **2762/2762** (276
