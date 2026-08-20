@@ -7,6 +7,39 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 20 AOÛT 2026 (APRÈS-MIDI, cloud) : POLICE UNIFORME DES
+     CHAMPS DE FORMULAIRE (signalement Grégoire, capture Chrome).
+     ÉTAT FINAL : **1.88.3** (build 0820-1443) — Vitest **2768/2768**.
+     Branche `claude/uniform-text-field-font-0vy832` (session cloud limitée
+     à sa branche : MERGE VERS MAIN DÛ au relais).
+
+     ✅ **BUG** : textareas Objectif/Tâche (Productions) en monospace.
+     Cause : les contrôles de formulaire n'héritent PAS de la police du
+     document — Chrome rend les `textarea` en monospace et les
+     inputs/selects/boutons sans classe en Arial. Seuls les composants
+     ayant un `font-family: inherit` local étaient corrects.
+     **Correctif (styles.css)** : règle globale `button, input, select,
+     textarea { font-family: inherit; }` dans RESET ET BASE + retrait
+     zéro-dette des 17 `font-family: inherit` locaux devenus redondants
+     (classes vérifiées une à une : toutes sur des contrôles de
+     formulaire). Conservés : les 3 `kbd` (ils annulent le monospace natif
+     de l'élément, pas un héritage) et tous les monospaces VOULUS (classes
+     explicites, spécificité supérieure — badges, formules, raccourcis,
+     textarea d'import texte en style inline).
+     ▣ **PREUVE** : sonde Chromium sur l'app réelle (computed styles) —
+     VERTE avec le correctif (6 sondes alignées sur la pile du body,
+     2 monospaces voulus intacts), break-test ROUGE sans (stash → textarea
+     monospace, input Arial → pop). Vitest 2768/2768 avant et après bump.
+     Playwright : 93 échecs ENVIRONNEMENTAUX (WebKit absent du conteneur
+     cloud), antérieurs et étrangers au diff.
+     ⚠ **SIGNALÉ, NON TRAITÉ** : (1) `.planif-btn-zoom-preset` = CSS/JS
+     orphelins (aucun élément ne porte plus la classe, querySelectorAll à
+     vide) ; (2) double déclaration de la police du body (styles.css §RESET
+     vs <style> inline d'index.html, piles quasi identiques — l'inline
+     gagne). Deux candidats ménage pour un prochain cycle.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 20 AOÛT 2026 (CLÔTURE) : DEUX PORTES SOLDÉES, DEUX BUGS DU
      TERRAIN CORRIGÉS LE JOUR MÊME, RITUEL DE FIN PASSÉ.
      ÉTAT FINAL : **1.88.2** (build 0820-0745) — Vitest **2768/2768**

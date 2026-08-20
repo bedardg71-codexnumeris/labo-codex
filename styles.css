@@ -903,6 +903,16 @@ body {
     padding: 30px;  /* Augmenté de 20px → 30px pour cadre bleu plus visible */
 }
 
+/* Les contrôles de formulaire n'héritent pas de la police du document
+   (Chrome rend les textarea en monospace). Point unique d'héritage :
+   les usages monospace volontaires gardent leur font-family de classe. */
+button,
+input,
+select,
+textarea {
+    font-family: inherit;
+}
+
 /* ===============================
    TYPOGRAPHIE GLOBALE (01b-typographie)
    =============================== */
@@ -3855,7 +3865,6 @@ body:not(.mode-clair) .badge-source--partage {
     border: 1px solid var(--bleu-leger);
     border-radius: var(--radius-moyen);
     font-size: 0.95rem;
-    font-family: inherit;
     line-height: 1.5;
     resize: vertical;
     background: var(--surface-conteneur);
@@ -10269,7 +10278,6 @@ body.mode-clair .bloc-rlo-separateur {
     border: 1px solid rgba(106, 172, 184, 0.25);
     border-radius: var(--radius-moyen);
     font-size: 0.85rem;
-    font-family: inherit;
     resize: vertical;
     color: var(--texte-principal, #d0e0e4); /* Force texte sombre - fix texte invisible */
     background: var(--surface-element, #244858); /* Force fond blanc */
@@ -14024,7 +14032,6 @@ tr.etudiant-inactif td {
     border: 1px solid var(--bleu-pale, #e8f2fd);
     border-radius: 6px;
     padding: 10px;
-    font-family: inherit;
     font-size: 0.9rem;
 }
 
@@ -14181,7 +14188,6 @@ tr.etudiant-inactif td {
     border: 1px solid var(--bleu-pale, #e8f2fd);
     border-radius: 6px;
     padding: 10px;
-    font-family: inherit;
     font-size: 0.9rem;
 }
 
@@ -15288,7 +15294,6 @@ tr.etudiant-inactif td {
     padding: 8px;
     border-radius: var(--radius-moyen, 5px);
     border: 1px solid var(--bordure-claire);
-    font-family: inherit;
     resize: vertical;
     font-size: 0.8rem;
     line-height: 1.4;
@@ -17252,7 +17257,6 @@ tr.etudiant-inactif td {
     font-size: 11px;
     cursor: pointer;
     transition: all 0.15s;
-    font-family: inherit;
 }
 .travaux-btn-zoom:hover {
     background: rgba(106, 172, 184, 0.1);
@@ -18764,7 +18768,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     border: none;
     background: none;
     padding: 0;
-    font-family: inherit;
     font-size: 12px;
     color: var(--planif-couleur-texte);
     outline: none;   /* l'anneau de focus est porte par le conteneur ci-dessus */
@@ -20030,7 +20033,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     border: 0;
     cursor: pointer;
     text-align: left;
-    font-family: inherit;
     font-size: 9px;
     font-weight: 700;
     text-transform: uppercase;
@@ -20429,7 +20431,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     border-radius: 4px;
     background: transparent;
     color: var(--texte-secondaire, #8aa4b0);
-    font-family: inherit;
     font-size: 10px;
     font-weight: 600;
     text-align: right;
@@ -21666,7 +21667,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     border: 1px solid var(--planif-couleur-bordure);
     border-radius: 6px;
     font-size: 13px;
-    font-family: inherit;
     resize: vertical;
     background: var(--surface-element, #244858);
     color: var(--planif-couleur-texte);
@@ -21913,7 +21913,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
        chevron et les paddings. Le repli à 17 vaut « Pratique autonome », donc
        l'ancien comportement si l'attribut manque. */
     min-width: calc(var(--planif-select-ch, 17) * 7.1px + 22px);
-    font-family: inherit;
     font-size: 10px;
     font-weight: 600;
     text-transform: uppercase;
@@ -22453,7 +22452,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     font-size: 11px;
     cursor: pointer;
     transition: all 0.15s;
-    font-family: inherit;
 }
 #planif-btn-recentrer:hover { background: rgba(106, 172, 184, 0.1); color: var(--planif-couleur-texte); }
 
@@ -22470,7 +22468,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     font-size: 11px;
     cursor: pointer;
     transition: all 0.15s;
-    font-family: inherit;
     min-width: 0;
 }
 .planif-btn-zoom-preset:hover { background: rgba(106, 172, 184, 0.1); color: var(--planif-couleur-texte); }
@@ -22488,7 +22485,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     border: 1px solid var(--planif-couleur-bordure);
     border-radius: 6px;
     font-size: 13px;
-    font-family: inherit;
     background: var(--surface-carte, #1a3040);
     color: var(--planif-couleur-texte);
     max-width: 200px;
@@ -23970,7 +23966,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     width: 100%;
     min-height: 150px;
     resize: vertical;
-    font-family: inherit;
     font-size: 0.9rem;
     padding: 10px;
     border: 1px solid var(--bordure-claire);
@@ -24700,7 +24695,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     flex: 1;
     min-height: 60px;
     resize: vertical;
-    font-family: inherit;
     font-size: 0.82rem;
     padding: 8px;
     border: 1px solid var(--bordure-claire);
@@ -24771,7 +24765,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     border-radius: var(--radius-moyen);
     background: var(--surface-input, var(--surface-carte));
     color: var(--texte-principal);
-    font-family: inherit;
 }
 
 .travaux-retro-nom-input:focus {
