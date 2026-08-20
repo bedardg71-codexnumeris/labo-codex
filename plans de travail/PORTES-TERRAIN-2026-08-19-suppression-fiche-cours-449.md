@@ -8,14 +8,18 @@
 > **Artefact interactif** : lien donné dans la conversation du 19 août.
 > **Ce qui échoue devient un item de backlog, pas une note mentale.**
 >
-> État : **EN COURS — un échec trouvé et corrigé, re-vérification due.**
-> À la rangée 2.2a, la fiche « 000-TEST-ZZ » créée n'apparaissait NULLE PART
-> dans la Bibliothèque (capture de Grégoire) → **#458, corrigé en 1.88.1**
-> (le champ `dansBibliotheque` n'était pas posé à la création + filtre strict
-> de la modale ; corrigé aux deux bouts, sentinelle 3 cas). ⮕ **Reprise** :
-> refaire `git pull` (attendu : **1.88.1**, build **0820-0721**), recharger,
-> rouvrir la Bibliothèque — « 000-TEST-ZZ » doit maintenant s'y voir dans
-> « ta sélection », puis reprendre les rangées 2.2b → 2.4.
+> État : **✅ CLOSE — 11/11, ZÉRO ÉCHEC** (relevé de Grégoire, 20 août 2026,
+> exporté par le bouton de l'artefact). Le refus a protégé sa vraie fiche
+> 601-101 depuis la Bibliothèque ET depuis le Cadre ; le cycle complet sur
+> « 000-TEST-ZZ » passe (création sans avertissement, **visible sans
+> recharger — le correctif #458 revalidé au terrain**, confirmation « tous
+> trimestres », suppression) ; le menu ⋮ à trois entrées se touche bien sur
+> l'iPad. Rien de dû de ce cycle.
+>
+> Historique : à la première passe (19 août), la rangée 2.2a a révélé
+> **#458** — fiche neuve invisible de la Bibliothèque (champ
+> `dansBibliotheque` jamais posé à la création + filtres stricts de la
+> modale), corrigé en **1.88.1** aux deux bouts, sentinelle 3 cas.
 
 ---
 
