@@ -54,6 +54,12 @@ async function creerCours(donnees) {
         elementsCompetence: donnees.elementsCompetence || '',
         heuresContact: (donnees.heuresContact === 0 || donnees.heuresContact) ? donnees.heuresContact : null,
         ponderation: donnees.ponderation || '',
+        // #458 (19 août 2026) : une fiche que tu crées est dans ta sélection.
+        // Sans ce champ, la Bibliothèque (filtres stricts ===true/===false) ne
+        // la montrait dans AUCUNE section avant le prochain rechargement — la
+        // migration de boot posait le drapeau trop tard. Trouvé par la porte
+        // terrain #449, à la création de la fiche de test.
+        dansBibliotheque: true,
         dateCreation: new Date().toISOString(),
         dateModification: new Date().toISOString()
     };

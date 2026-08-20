@@ -156,7 +156,7 @@ footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--trait);color:
   </div>
   <footer>
     Jumeau markdown : <span class="mono">plans de travail/PORTES-TERRAIN-2026-08-19-suppression-fiche-cours-449.md</span><br>
-    Version visée : <span class="mono">1.88.0</span>, build <span class="mono">0819-0826</span>.
+    Version visée : <span class="mono">1.88.1</span>, build <span class="mono">0820-0721</span> (correctif #458 inclus).
   </footer>
 </div>
 
@@ -169,7 +169,7 @@ const DONNEES = [
      cmd:"git checkout main && git pull origin main",
      attendu:"la liste des fichiers reçus, puis Fast-forward.", tags:["terminal","mac"]},
     {geste:"Recharger l’app et lire le numéro en bas de page.",
-     attendu:"1.88.0, build 0819-0826. En dessous, rien de cette liste ne vaut.", tags:["mac"]}
+     attendu:"1.88.1, build 0820-0721 (la 1.88.1 porte le correctif #458 trouvé par TA capture — en dessous, la fiche de test restera invisible dans la Bibliothèque).", tags:["mac"]}
   ]}]},
 
  {num:"§1", titre:"Données — le filet d’abord",
@@ -191,8 +191,10 @@ const DONNEES = [
    {num:"2.2", titre:"Le cycle complet, sur une fiche de test", version:"1.88.0",
     pourquoi:"Le garde ne doit pas mordre le cas légitime : une fiche neuve se crée sans avertissement, et une fiche qui ne porte rien se supprime — avec la confirmation qui dit « TOUS les trimestres ».",
     rangees:[
-     {geste:"Cadre → Cours → « + Nouveau cours » : code 000-TEST-ZZ, une discipline, « Créer ».",
+     {geste:"Cadre → Cours → « + Nouveau cours » : code 000-TEST-ZZ, une discipline, « Créer ». (Si elle existe déjà de ton premier essai, passe à la rangée suivante.)",
       attendu:"la fiche se crée SANS avertissement (code neuf).", tags:["donnees","mac"]},
+     {geste:"Ouvrir la Bibliothèque : « 000-TEST-ZZ » doit s’y voir, dans « ta sélection », SANS recharger.",
+      attendu:"c’est le correctif #458, né de ta capture — avant, la fiche n’apparaissait dans AUCUNE des deux sections avant le prochain rechargement.", tags:["mac"]},
      {geste:"Bibliothèque → menu ⋮ de « 000-TEST-ZZ » → « Supprimer la fiche ».",
       attendu:"confirmation : « la fiche disparaît de TOUS les trimestres… irréversible ».", tags:["mac"]},
      {geste:"Confirmer.",
@@ -348,7 +350,7 @@ document.getElementById("btn-export").addEventListener("click", () => {
   const ok = r.filter(x => etat[x.dataset.id] === "ok").length;
   const ko = r.filter(x => etat[x.dataset.id] === "ko").length;
   const lignes = [];
-  lignes.push("PORTES TERRAIN — suppression de fiche de cours #449 (19 août 2026, 1.88.0)");
+  lignes.push("PORTES TERRAIN — suppression de fiche de cours #449 (19-20 août 2026, 1.88.1)");
   lignes.push(ok + " passées · " + ko + " échec(s) · " + (r.length - ok - ko) + " non traitée(s)");
   lignes.push("");
   DONNEES.forEach(sec => {
