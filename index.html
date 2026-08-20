@@ -4646,51 +4646,56 @@
                                 </div>
 
                                 <!-- ═══════════════════════════════════════════════════════════
-                                     DÉFINITION (dynamique selon le type sélectionné)
-                                     ═══════════════════════════════════════════════════════════ -->
-                                <div id="carteDefinitionType" class="u-mb-15 u-p-15 u-hide" style="background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-principal)">
-                                    <p id="texteDefinitionType" class="u-texte-09" style="margin: 0; line-height: 1.6; color: var(--gris-fonce)">
-                                        <!-- Contenu généré dynamiquement par JS -->
-                                    </p>
-                                </div>
-
-                                <!-- ═══════════════════════════════════════════════════════════
-                                     SECTION 3 : PONDÉRATION ET GRILLE
+                                     SECTION 3 : DÉFINITION + PONDÉRATION ET GRILLE
+                                     Encadré descriptif (dynamique selon le type) à gauche ;
+                                     pondération puis grille/échelle/cartouche à droite,
+                                     le tout aligné sur le bas (20 août 2026).
                                      ═══════════════════════════════════════════════════════════ -->
                                 <div class="u-mb-20" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
-                                    <!-- Pondération + Note explicative -->
-                                    <div id="champPonderation" style="display: grid; grid-template-columns: 150px 1fr; gap: 15px; align-items: start;">
-                                        <div class="groupe-form" style="margin: 0;">
-                                            <label data-tooltip="cn-prod-ponderation">Pondération (%)</label>
-                                            <input type="number" id="productionPonderation" class="controle-form" min="0"
-                                                max="100" placeholder="Ex: 20">
-                                        </div>
-                                        <p id="notePonderation" class="u-hide u-texte-petit" style="color: var(--gris-moyen); margin: 0; padding-top: 28px; line-height: 1.5"></p>
-                                    </div>
-                                    <!-- Grille de critères + Échelle + Cartouche -->
-                                    <div id="champGrille" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; align-items: start;">
-                                        <div class="groupe-form" style="margin: 0;">
-                                            <label data-tooltip="cn-prod-grille">Grille de critères
-                                                <button class="btn-aide-contextuelle" data-aide="apc-grille-individuel" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>
-                                            </label>
-                                            <select id="productionGrille" class="controle-form">
-                                                <option value="">Aucune</option>
-                                            </select>
-                                        </div>
-                                        <div class="groupe-form" style="margin: 0;">
-                                            <label>Échelle de performance</label>
-                                            <select id="productionEchelle" class="controle-form">
-                                                <option value="">Aucune</option>
-                                            </select>
-                                        </div>
-                                        <div class="groupe-form" style="margin: 0;">
-                                            <label>Cartouche de rétroaction</label>
-                                            <select id="productionCartouche" class="controle-form">
-                                                <option value="">Aucune</option>
-                                            </select>
+                                    <!-- Colonne gauche : définition du type sélectionné -->
+                                    <div style="display: flex; flex-direction: column; justify-content: flex-end">
+                                        <div id="carteDefinitionType" class="u-p-15 u-hide" style="background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-principal)">
+                                            <p id="texteDefinitionType" class="u-texte-09" style="margin: 0; line-height: 1.6; color: var(--gris-fonce)">
+                                                <!-- Contenu généré dynamiquement par JS -->
+                                            </p>
                                         </div>
                                     </div>
-                                    <p id="noteGrille" class="u-hide u-texte-petit" style="color: var(--gris-moyen); margin: 0; line-height: 1.5"></p>
+                                    <!-- Colonne droite : pondération, puis grille + échelle + cartouche -->
+                                    <div style="display: flex; flex-direction: column; gap: 15px; justify-content: flex-end">
+                                        <!-- Pondération + Note explicative -->
+                                        <div id="champPonderation" style="display: grid; grid-template-columns: 150px 1fr; gap: 15px; align-items: start;">
+                                            <div class="groupe-form" style="margin: 0;">
+                                                <label data-tooltip="cn-prod-ponderation">Pondération (%)</label>
+                                                <input type="number" id="productionPonderation" class="controle-form" min="0"
+                                                    max="100" placeholder="Ex: 20">
+                                            </div>
+                                            <p id="notePonderation" class="u-hide u-texte-petit" style="color: var(--gris-moyen); margin: 0; padding-top: 28px; line-height: 1.5"></p>
+                                        </div>
+                                        <!-- Grille de critères + Échelle + Cartouche -->
+                                        <div id="champGrille" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; align-items: end;">
+                                            <div class="groupe-form" style="margin: 0;">
+                                                <label data-tooltip="cn-prod-grille">Grille de critères d'évaluation
+                                                    <button class="btn-aide-contextuelle" data-aide="apc-grille-individuel" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>
+                                                </label>
+                                                <select id="productionGrille" class="controle-form">
+                                                    <option value="">Aucune</option>
+                                                </select>
+                                            </div>
+                                            <div class="groupe-form" style="margin: 0;">
+                                                <label>Échelle de performance</label>
+                                                <select id="productionEchelle" class="controle-form">
+                                                    <option value="">Aucune</option>
+                                                </select>
+                                            </div>
+                                            <div class="groupe-form" style="margin: 0;">
+                                                <label>Cartouche de rétroaction</label>
+                                                <select id="productionCartouche" class="controle-form">
+                                                    <option value="">Aucune</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <p id="noteGrille" class="u-hide u-texte-petit" style="color: var(--gris-moyen); margin: 0; line-height: 1.5"></p>
+                                    </div>
                                 </div>
 
                                 <!-- ═══════════════════════════════════════════════════════════
@@ -14320,7 +14325,7 @@
     <script src="js/donnees-v2.js?v=20260808b"></script> <!-- Refonte nav SP5 : afficherSection calendrier -->
     <script src="js/etudiants.js?v=20260810a"></script>
     <script src="js/productions-bibliotheque.js?v=2026050617"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/productions.js?v=20260818a"></script> <!-- Beta 99.41 b0511-1215 : #216 data-tooltip sur dates échéance multi-groupe -->
+    <script src="js/productions.js?v=20260820a"></script> <!-- Beta 99.41 b0511-1215 : #216 data-tooltip sur dates échéance multi-groupe -->
     <script src="js/productions-import-export.js?v=20260629a"></script> <!-- Refactor étape 3 (16 mai 2026) : extrait de productions.js (lignes 2630-3276) -->
     <script src="js/productions-liste.js?v=20260516b"></script> <!-- Refactor étape 3 (16 mai 2026) : sidebar + CRUD utilisateur extraits de productions.js -->
     <script src="js/productions-bibliotheque-ui.js?v=20260818a"></script> <!-- Fix preview « Voir les productions » : display:none inline → classe u-hide -->
@@ -14515,11 +14520,11 @@
     <script src="js/export-resultats-finaux.js?v=2026061901"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260820c"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260820d"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260820c"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260820d"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>

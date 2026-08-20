@@ -8,10 +8,27 @@
 
 <!-- =====================================================================
      SESSION — 20 AOÛT 2026 (APRÈS-MIDI, cloud) : POLICE UNIFORME DES
-     CHAMPS DE FORMULAIRE (signalement Grégoire, capture Chrome).
-     ÉTAT FINAL : **1.88.3** (build 0820-1443) — Vitest **2768/2768**.
-     Branche `claude/uniform-text-field-font-0vy832` (session cloud limitée
-     à sa branche : MERGE VERS MAIN DÛ au relais).
+     CHAMPS DE FORMULAIRE + MISE EN PAGE DÉFINITION/CHAMPS DES PRODUCTIONS
+     (signalements Grégoire, captures Chrome).
+     ÉTAT FINAL : **1.88.4** (build 0820-1458) — Vitest **2768/2768**.
+     Branche `claude/uniform-text-field-font-0vy832`, PR ouverte et
+     FUSIONNÉE VERS MAIN sur instruction explicite de Grégoire.
+
+     ✅ **RETOUCHE 2 — formulaire Productions (1.88.4)** : l'encadré bleu
+     de définition du type occupe la moitié gauche ; pondération puis
+     grille/échelle/cartouche dans la moitié droite, le tout ALIGNÉ SUR LE
+     BAS (grid 1fr/1fr + colonnes flex justify-end ; `align-items: end`
+     sur les trois champs ; `#noteGrille` déplacé sous les sélecteurs).
+     Libellé allongé « Grille de critères d'évaluation » (suggestion
+     Grégoire, harmonise les hauteurs de libellés). EN CHEMIN, bug
+     PRÉEXISTANT corrigé (`productions.js`) : après passage par le type
+     Artefact, la Pondération ne réapparaissait JAMAIS pour les autres
+     types — la branche artefact pose `u-hide` (!important) que le reset
+     tentait d'annuler par `style.display=''` ; le reset retire désormais
+     la classe. ▣ PREUVE : captures Chromium des trois cas (artefact,
+     examen, portfolio) à 1680 px et 1024 px (iPad) — sélecteurs alignés
+     (bas mesurés égaux), pondération de retour après artefact→examen
+     (rouge avant correctif, la capture examen montrait le champ absent).
 
      ✅ **BUG** : textareas Objectif/Tâche (Productions) en monospace.
      Cause : les contrôles de formulaire n'héritent PAS de la police du
