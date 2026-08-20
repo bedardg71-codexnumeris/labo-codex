@@ -7,6 +7,56 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 20 AOÛT 2026 (SOIR, cloud) : AUDIT « CALENDRIER › TRIMESTRE »
+     (SESSION 1 DU PLAN-AUDIT-cadre-conception-2026-08-20, CONSTATS SEULEMENT).
+     ÉTAT FINAL : aucun code applicatif modifié, AUCUN BUMP (conforme au
+     plan §4.1). Livrable : `plans de travail/AUDIT-cadre-trimestre-2026-08-20.md`
+     — 29 constats (1 Bloquant, 12 Majeurs, 9 Mineurs, 7 Notes), fusionné
+     vers main. Base auditée : **1.88.2** (`584834ef`), la référence exacte
+     du plan ; PENDANT l'audit, Grégoire a fusionné la PR #79 (1.88.3
+     police des champs + 1.88.4 mise en page Productions) — deux commits
+     UI hors périmètre Cadre, notés au rapport ; la session 2 (Conception)
+     auditera un HEAD ≥ 1.88.4 qui INCLUT la retouche Productions.
+
+     ▣ MÉTHODE : rituel de début par subagent (écart détecté : la 1.88.3
+     alors orpheline — réglé par la fusion de Grégoire en cours de session) ;
+     revue de code 6 axes en 4 passes parallèles PUIS contre-vérification
+     aux lignes citées ; 8 scénarios Chromium §5.3 reproduits sur profil
+     vierge (harnais file:// jetable en scratchpad, jamais les données
+     réelles). Chaque constat du rapport porte son niveau de preuve
+     [NAV]/[CODE]/[AGENT].
+
+     ⚠ **LE BLOQUANT (CT-01, reproduit)** : en ÉDITION d'un horaire,
+     changer « Nombre de séances » (ou périodes/séance) régénère les
+     lignes avec les DÉFAUTS (Lundi 08:00, local vide) — les séances
+     saisies disparaissent et « Enregistrer » persiste les défauts avec
+     toast de succès (trimestre-v2-horaires.js:797-831).
+     ✅ VERDICTS des « à recouper » : **#328-T1 durée→selects vides NON
+     REPRODUIT** sur 1.88.2 (la durée ne recrée plus les horaires depuis
+     le modèle du 29 mai) ; son volet « désync sidebar/nom » CONFIRMÉ,
+     autre cause : le nom du GC est une hydratation PERSISTÉE (CT-03) ;
+     **#282-T1 doublons de cours : chemin FERMÉ** (confirm #455 reproduit) ;
+     **#449 CONFIRMÉ** en vérification indépendante (refus explicite avec
+     données réalistes ; nuance CT-08 : familles fichiersTravaux et
+     mindmap hors recensement, appariement id strict).
+     ⮕ Majeurs saillants, tous reproduits au navigateur : suppressions
+     d'horaire/enseignant SANS garde (les verifierSuppression* existent,
+     ZÉRO appelant) ; fusion horaireHebdo PAR JOUR qui écarte la 2e séance
+     d'un même jour ; chemin « + Nouveau trimestre » avec activation qui ne
+     réinitialise PAS le contexte (GC/infoCours de l'ancien trimestre
+     offerts sous le nouveau) et GC actif non restauré au retour ;
+     « Journée modifiée » en FAUX SUCCÈS après bascule ; dureePeriode
+     absente de CLES_NAMESPACEES (migration purgerLegacy ORPHELINE, fuite
+     réel→démo) ; « Exporter » un cours qui n'exporte rien.
+
+     ⏳ SUITE : session 2 « Conception » (plan §6) — elle DOIT lire le
+     rapport d'abord (section « À transmettre à la session 2 » : pièges
+     cle() hors registre, patrons récurrents, hypothèse
+     verifierReferencesPasDemo/pratiques à trancher). Le TRI des 29
+     constats se fait AVEC Grégoire — rien n'a été écrit au BACKLOG.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 20 AOÛT 2026 (APRÈS-MIDI, cloud) : POLICE UNIFORME DES
      CHAMPS DE FORMULAIRE + MISE EN PAGE DÉFINITION/CHAMPS DES PRODUCTIONS
      (signalements Grégoire, captures Chrome).
