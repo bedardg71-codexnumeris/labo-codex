@@ -32,14 +32,23 @@ qu'elle compte davantage depuis ce cycle.
 
 ---
 
+> ⚠ **MISE À JOUR DU 20 AOÛT 2026 (reprise de la porte sous 1.88.1)** : la
+> liste teste les livraisons de 1.86.0, toutes en place ; le §0 attend
+> désormais **1.88.1** (build `0820-0721`). **Une seule porte a changé de
+> sens : la 1.2** — depuis 1.87, une *copie* (⌥ / ⌘D) est INDÉPENDANTE et ne
+> suit plus son original (c'est voulu) ; seul un *clone* (⇧⌥ / ⇧⌘D / bouton
+> « Cloner (lié) ») propage titre, durée et type. La porte 1.2 se joue donc
+> sur un CLONE ; une copie qui suivrait serait un échec de 1.87, pas de 1.86.
+> Artefact republié, même URL, coches conservées.
+
 ## ⚠⚠ COMMENCE PAR LE §0
 
-Tout est livré en **1.86.0** (build `0816-0710`). Mais le clone local de
-Grégoire est à la version de son dernier `git pull` : **sans la première rangée,
-toute la liste est invérifiable** — l'app affichera 1.85.0, aucun bloc n'aura de
-menu sauf les phases, et il cochera ✗ sur des livraisons qui marchent. Ce faux
-rouge est **indétectable au récit**, parce qu'il décrit exactement l'état
-d'avant la livraison, qui est précisément ce que la liste teste.
+Tout ce que cette liste teste est livré depuis **1.86.0** ; l'app doit
+afficher **1.88.1** (build `0820-0721`). Sans la première rangée, toute la
+liste est invérifiable — un clone local en retard cocherait ✗ sur des
+livraisons qui marchent, et ce faux rouge est **indétectable au récit**,
+parce qu'il décrit exactement l'état d'avant la livraison, qui est
+précisément ce que la liste teste.
 
 ---
 
@@ -112,13 +121,16 @@ touchée.
 
 - [ ] Backup Codex avant d'ouvrir la porte 2.1. ⮕ archive créée, date du jour.
 
-### 1.2 Un type changé suit les copies liées `⚠⚠ Données`
+### 1.2 Un type changé suit les CLONES `⚠⚠ Données` *(mise à jour 1.87)*
 
-> **POURQUOI** — Une copie liée suit le titre et la durée de son original. Son
-> **type** doit suivre aussi, sinon deux blocs censés être le même bloc diraient
-> deux choses différentes.
+> **POURQUOI** — Un clone reste lié à son original : titre, durée et **type**
+> se propagent, sinon deux blocs censés être le même bloc diraient deux choses
+> différentes. ⚠ Depuis 1.87, une **copie** (⌥ / ⌘D) est INDÉPENDANTE — elle
+> ne suit plus, et c'est voulu ; seul un **clone** (⇧⌥ / ⇧⌘D / « Cloner
+> (lié) ») suit.
 
-- [ ] Changer le type de l'original d'une copie liée. ⮕ la copie suit, tout de suite.
+- [ ] Créer un CLONE (⇧⌥ en glissant, ou ⇧⌘D), changer le type de l'original.
+      ⮕ le clone suit, tout de suite. (Une copie simple ne doit PAS suivre.)
 - [ ] **⌘Z**. ⮕ les deux reviennent ensemble.
 
 ---

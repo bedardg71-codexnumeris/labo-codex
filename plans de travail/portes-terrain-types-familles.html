@@ -345,7 +345,7 @@ ol.erreurs b { color: var(--ink); }
     convient dans <em>tes</em> deux modes.
   </p>
   <div class="meta">
-    <span>1.86.0</span><span>build 0816-0710</span><span>14 portes</span>
+    <span>1.88.1</span><span>build 0820-0721</span><span>14 portes</span>
     <span>41 vérifications</span><span>2 mesures</span><span>5 décisions</span>
   </div>
   <ul class="legende-fam" aria-label="Les six familles">
@@ -361,10 +361,11 @@ ol.erreurs b { color: var(--ink); }
 <div class="alerte">
   <h3>⚠⚠ Commence par le §0 — sinon toute la liste est invérifiable</h3>
   <p>
-    Tout est livré en <b>1.86.0</b>. Mais ton clone local est à la version de ton
-    dernier <code>git pull</code> : sans la première rangée, l'app affichera
-    <b>1.85.0</b>, aucun bloc n'aura de menu sauf les phases, et tu cocheras ✗ sur
-    des livraisons qui marchent.
+    Tout ce que cette liste teste est livré depuis <b>1.86.0</b> — et ton app
+    doit être à <b>1.88.1</b> (mise à jour du 20 août : les cycles 1.87-1.88
+    sont passés par là sans toucher ces livraisons, sauf UNE précision à la
+    porte 1.2). Sans la première rangée, tu cocherais ✗ sur des livraisons qui
+    marchent.
   </p>
   <p>
     Ce faux rouge est <b>indétectable au récit</b> : il décrit exactement l'état
@@ -450,7 +451,7 @@ const DATA = [
       { id:"0.1a", geste:"<b>SEULE commande de Terminal de toute la liste</b> — app <b>Terminal</b>, pas la console du navigateur, dans le dossier <code>Monitorage_v6</code> :<br><code>git checkout main &amp;&amp; git pull origin main</code>",
         attendu:"la liste des fichiers reçus, puis <code>Fast-forward</code>. Si Terminal répond <code>error: Your local changes would be overwritten</code>, <b>arrête-toi et dis-le-moi</b>.", tags:["Terminal"] },
       { id:"0.1b", geste:"Recharger l'app et lire le numéro <b>en bas de page</b>.",
-        attendu:"<b>1.86.0</b>, build <code>0816-0710</code>. Si tu lis 1.85.0 ou moins, la commande n'a pas pris — rien d'autre ne vaut tant que ce numéro n'est pas le bon." },
+        attendu:"<b>1.88.1</b>, build <code>0820-0721</code> (mise à jour du 20 août — la liste teste les livraisons de 1.86.0, toujours en place). En dessous, rien d'autre ne vaut." },
       { id:"0.1c", geste:"Prévoir les <b>deux appareils</b> (MacBook + iPad) et les <b>deux modes</b> (sombre + clair).",
         attendu:"quatre rangées de cette liste ne se tranchent que sur l'iPad ; cinq ne se tranchent qu'en comparant les deux modes." }
     ]}
@@ -463,13 +464,13 @@ const DATA = [
       { id:"1.1a", geste:"Faire un <b>backup Codex</b> avant d'ouvrir la porte 2.1.",
         attendu:"archive créée, date du jour.", tags:["Données"] }
     ]},
-  { ref:"1.2", t:"⚠⚠ Données", fam:"toutes", titre:"Un type changé suit les copies liées",
-    pourquoi:"Quand tu dupliques un bloc, la copie reste liée à l'original : son titre et sa durée suivent. Son <b>type</b> doit suivre aussi, sinon deux blocs censés être le même bloc diraient deux choses différentes.",
+  { ref:"1.2", t:"⚠⚠ Données", fam:"toutes", titre:"Un type changé suit les CLONES (mise à jour 1.87)",
+    pourquoi:"⚠ Le vocabulaire a changé depuis l'écriture de cette porte : depuis 1.87, une <b>copie</b> (⌥ en glissant, ou ⌘D) est <b>indépendante</b> — elle ne suit PLUS son original, et c'est voulu. Seul un <b>clone</b> (⇧⌥ en glissant, ⇧⌘D, ou le bouton « Cloner (lié) » de l'Inspecteur) reste lié : titre, durée et <b>type</b> se propagent entre ses instances.",
     rangs:[
-      { id:"1.2a", geste:"Sur une carte qui contient un bloc <b>dupliqué</b> (copie liée), changer le type de l'original par le menu de son en-tête.",
-        attendu:"la copie prend le même type, tout de suite.", tags:["Données"] },
+      { id:"1.2a", geste:"Créer un <b>clone</b> d'un bloc (⇧⌥ en le glissant, ou ⇧⌘D), puis changer le type de l'original par le menu de son en-tête.",
+        attendu:"le clone prend le même type, tout de suite. ⚠ Une COPIE simple (⌥ sans ⇧) ne doit PAS suivre — si elle suit, c'est un échec de 1.87, pas de cette porte.", tags:["Données"] },
       { id:"1.2b", geste:"Faire <b>⌘Z</b>.",
-        attendu:"les deux reviennent à leur type précédent, ensemble.", tags:["Données"] }
+        attendu:"l'original et le clone reviennent à leur type précédent, ensemble.", tags:["Données"] }
     ]}
 ]},
 
@@ -819,7 +820,7 @@ function construireReleve() {
   const ko = verifs.filter(r => (etat[r.id]||{}).etat === 'ko').length;
   const L = [];
   L.push('PORTES TERRAIN — Types et familles de blocs (16 août 2026)');
-  L.push('Version visée : 1.86.0 · build 0816-0710');
+  L.push('Version visée : 1.88.1 · build 0820-0721 (livraisons de 1.86.0, reprise du 20 août)');
   L.push('Cycle 1.85.0 → 1.86.0');
   L.push('');
   L.push(`BILAN : ${ok} passées · ${ko} échec · ${verifs.length - ok - ko} non traitées (sur ${verifs.length})`);
