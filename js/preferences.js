@@ -77,6 +77,18 @@
         modeClair: true,
         accompagnementActif: true,
         banniereAccueilRepliee: false,
+        // #485 (21 août 2026) — Grille imprimable des présences : colonnes à
+        // inclure et portée (groupe actif ou tous les groupes-cours). Lu et
+        // écrit uniquement par presences-rapport.js, cloné à la lecture.
+        rapportPresencesOptions: {
+            da: false,
+            sousGroupe: false,
+            programme: true,
+            nomProgramme: false,
+            sa: true,
+            portee: 'actif'
+        },
+
         // Disposition de la réserve « Non planifié » du planificateur
         // (7 août 2026) : 'bas' = sous la grille (défaut historique),
         // 'gauche' = en colonne à côté. Choix de l'utilisateur selon l'espace

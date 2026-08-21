@@ -7,6 +7,49 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 21 AOÛT 2026 (4e cycle) : GRILLE IMPRIMABLE DES PRÉSENCES
+     (#485, 1.90.0, minor) — demande directe de Grégoire (passe devant le
+     cap #464+ annoncé, règle « retours avant backlog »).
+     ▣ LE BESOIN : une grille élèves × séances qui serve à la fois de
+     RAPPORT (qu'est-ce qui est saisi ?) et de FORMULAIRE papier (saisie
+     manuelle en classe, report différé dans l'app). Modelée sur sa feuille
+     réelle H2026 (photo IMG_3171.jpg, transférée via un push sur main puis
+     RETIRÉE du dépôt — reste dans l'historique git, effacement = décision
+     séparée) : codes 1a…15b + colonnes Prog./SA reproduits, dates enfin
+     IMPRIMÉES (il les recopiait à la main au-dessus de chaque colonne).
+     ▣ CONVENTIONS DÉCIDÉES PAR GRÉGOIRE : ✓ présence complète · ✗ absence
+     · chiffre = périodes partielles · case VIDE = non saisi (à remplir au
+     crayon) ; colonnes = TOUT le trimestre ; éléments par élève cochables
+     (patron liste Omnivox) : DA / sous-groupe / programme / nom du
+     programme / SA — défauts = sa feuille (Prog.+SA), mémorisés via
+     preferences.js (`rapportPresencesOptions`, cloné à la lecture) ;
+     1 feuille par groupe, en-tête cours · groupe · trimestre · générée le.
+     ▣ ARCHITECTURE : module LECTEUR strict `js/presences-rapport.js` —
+     fonction PURE construireModeleRapportPresences (testable sans DOM ni
+     db) + collecte + rendu jsPDF/autotable paysage lettre. Séances des
+     groupes désignés par la porte STRICTE obtenirSeancesCompletesDuGroupe
+     (#416) : un groupe sans cache = feuille SAUTÉE ET DITE (statut inline
+     rp-statut), jamais générée fausse. Périodes attendues = parité
+     obtenirNombrePeriodesSeance (agrégation multi-séances, legacy heures
+     reconverties). Présences facultatives (RàI) EXCLUES, parité aperçu.
+     ✓/✗ TRACÉS AU TRAIT dans didDrawCell — helvetica WinAnsi n'a pas
+     U+2713 ; colonnes de séances découpées en pages si < 5,5 mm.
+     ▣ UI : panneau accordéon fermé dans Saisie des présences (pas de
+     modale — anti-pattern design-interface), data-action/data-on-change,
+     zéro handler inline, zéro innerHTML. ExportPDF expose infosCours +
+     nomTrimestre (réutilisés, pas dupliqués).
+     ▣ PREUVES : 9 cas Vitest neufs (presences-rapport-485.test.js, patron
+     chargerScript) ; break-test = mutation absent→present, la sentinelle
+     ROUGIT, restaurée. Suite complète 2797/2797 (281 fichiers) depuis
+     tests/. Playwright non exécutable en cloud — PORTE TERRAIN DUE :
+     générer le PDF sur Mac (Chrome+Safari) et iPad, vérifier lisibilité
+     30 colonnes, options, portée « tous mes groupes ».
+     ▣ Branche claude/student-attendance-report-4jjnx7 (dérivée de main
+     22ffd640). Cache-busters : presences-rapport (neuf), preferences,
+     export-pdf.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 21 AOÛT 2026 (3e cycle) : LOT L2 « CLÉS NUES » LIVRÉ
      (#464, 1.89.0, minor) — rang 2 de l'ordre du triage.
      ▣ CT-26/INVENTAIRE : toutes les clés passées à cle() confrontées aux
