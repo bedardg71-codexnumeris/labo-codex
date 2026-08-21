@@ -7,6 +7,42 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 21 AOÛT 2026 (matin, locale Mac) : FUSION SESSION 2 + PASSE
+     COMPLÉMENTAIRE + LE BLOQUANT CO-01 CORRIGÉ (1.88.6, #461).
+     Prémisse « Exécute le plan de la session 2 » — le rituel a révélé que la
+     session 2 était DÉJÀ FAITE (session cloud de la veille au soir, branche
+     claude/audit-conception-session-1-arkmi2, 35 constats) mais NON fusionnée,
+     avec un RELAIS périmé (« ff possible » — faux, main avait 2 commits
+     d'avance) et un « le plan n'existe nulle part » vrai de sa base seulement.
+
+     ▣ 1. FUSION (merge afd208bf, conflits RELAIS/SESSION réconciliés à la
+     main) : version 1.88.5 conservée, blocs des deux sessions gardés, écarts
+     corrigés — la reconstitution du §6 par la session cloud est CONFORME au
+     plan réel (l'exclusion de la Carte d'alignement est dans le plan §3).
+     ▣ 2. PASSE COMPLÉMENTAIRE (3fd83cee) : confrontation au VRAI §6.3 → cinq
+     exigences manquées par la reconstitution, fermées par 3 passes parallèles
+     (addendum au rapport, CO-36..CO-40 + table de verdicts). Saillant :
+     #326-T3/T4 NON REPRODUITS (corrigés 21 juin) ; #343-T3/T4a/T4d TOUJOURS
+     PRÉSENTS — et ⚠⚠ CO-36 : LA PR #63 QUI LES CORRIGE N'A JAMAIS ÉTÉ
+     FUSIONNÉE (OPEN depuis ~2 mois) alors que BACKLOG-ARCHIVE:2465 la dit
+     « RÉSOLUS » ; pondérations ≠ 100 % non bloquées mais auto-normalisées ;
+     cartouche SUIT le renommage de grille ; exports JSON hors assainissement
+     (CO-39) ; fallback « || 1 » SOM (CO-40, zéro-fallback-arbitraire).
+     ▣ 3. CO-01 CORRIGÉ (1.88.6, #461) : fusion d'enveloppe dans
+     sauvegarderPratique (inspireDe/estMaquette/metadata_cc/isDemo/dateCreation/
+     dansBibliotheque préservés, auteur jamais remplacé par du vide) +
+     rechargement prenom/nomAuteur dans chargerPratiqueExistante. Le .config
+     snapshot N'est PAS préservé (voulu — le préserver figerait les retouches,
+     cf. CO-07). Sentinelle 2 cas ÉCRITE AVANT LE FIX : rouge sur 1.88.5
+     (reproduction), verte après — break-test par construction.
+
+     ⏳ RESTE : TRI des constats des DEUX audits avec Grégoire (28 CT + 39 CO
+     après addendum ; 8 lots transverses proposés, 3 décisions de fond, CO-36
+     PR #63 à statuer en priorité) · portes terrain iPad des deux rapports ·
+     4 SVG non suivis autocollants/solo/ (toujours pas touchés).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 20 AOÛT 2026 (SOIR/NUIT, cloud) : AUDIT « CONCEPTION »
      (SESSION 2 DE 2 DU PLAN-AUDIT-cadre-conception-2026-08-20, CONSTATS SEULEMENT).
      ÉTAT FINAL : aucun code applicatif modifié, AUCUN BUMP. Livrable :
