@@ -68,7 +68,7 @@
 > `*_backup_v1` (outil `db.purgerBackupsV1()` livré, DRY-RUN par défaut — exécution = décision Grégoire)
 > et `tamponsImages` base64 non namespacé.
 
-> **Pour ajouter un item** : `- [ ] **#XX** Description courte` + sous-puces de contexte. Dernier ID utilisé : **#460** (20 août 2026, CT-01 de l'audit Cadre/Trimestre, livré 1.88.5 ; avant : #459, 20 août 2026, SUIVI-BUGS — ⇧ avalé en silence sur les conteneurs, trouvé par la porte types-familles ; avant : #458, porte #449 — TOUJOURS vérifier aussi l'« État courant » en tête ET grep `#45[0-9]` avant de prendre un numéro : le 19 août, deux points du fichier disaient « #456 » alors que #457 était consommé depuis la veille). *(⚠ #437 = « carte d'alignement » de la session parallèle du 9 août, fusionné sur `main` — pris pendant que cette branche vivait. Voir `RELAIS.md`.)*
+> **Pour ajouter un item** : `- [ ] **#XX** Description courte` + sous-puces de contexte. Dernier ID utilisé : **#461** (21 août 2026, CO-01 de l'audit Conception, livré 1.88.6 ; avant : #460, 20 août 2026, CT-01 de l'audit Cadre/Trimestre, livré 1.88.5 ; avant : #459, 20 août 2026, SUIVI-BUGS — ⇧ avalé en silence sur les conteneurs, trouvé par la porte types-familles ; avant : #458, porte #449 — TOUJOURS vérifier aussi l'« État courant » en tête ET grep `#45[0-9]` avant de prendre un numéro : le 19 août, deux points du fichier disaient « #456 » alors que #457 était consommé depuis la veille). *(⚠ #437 = « carte d'alignement » de la session parallèle du 9 août, fusionné sur `main` — pris pendant que cette branche vivait. Voir `RELAIS.md`.)*
 
 ---
 
@@ -86,7 +86,21 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 ## A faire
 
-### Audit « Calendrier › Trimestre » — 20 août 2026 (rapport `plans de travail/AUDIT-cadre-trimestre-2026-08-20.md`)
+### Audit « Conception » — 20-21 août 2026 (rapport `plans de travail/AUDIT-conception-2026-08-20.md` + addendum)
+
+> ⚠ **Versement PARTIEL** : seul le Bloquant CO-01 est versé (et livré). Les 39 autres constats
+> (CO-02 à CO-40 : 19 Majeurs avec l'addendum, 12 Mineurs, 6 Notes, plus les verdicts #326/#343)
+> attendent le **tri avec Grégoire**, conjointement avec CT-02..CT-29 de la session 1 — le rapport
+> propose HUIT lots transverses et TROIS décisions de fond (régime des cartouches, échelles
+> collègues codées en dur, politique de suppression façon #449). Ne pas les verser d'office.
+> ⚠ À statuer au tri, en priorité : **CO-36** — la PR #63 (fixes #343-T3/T4) n'a JAMAIS été
+> fusionnée alors que BACKLOG-ARCHIVE:2465 la dit « RÉSOLUS ».
+
+- [x] **#461 LIVRÉ 21 août 2026 (1.88.6)** CO-01 — éditer une pratique via l'assistant détruisait l'enveloppe : `inspireDe`, `estMaquette`, `metadata_cc`, `isDemo`, `dateCreation`, `dansBibliotheque` et l'auteur d'origine (Bloquant de l'audit Conception ; jumeau du CT-01 : un « Enregistrer » qui détruit en confirmant).
+  - **Cause** : `creerPratiqueV2` reconstruit l'objet à neuf (seul l'id survit, `dansBibliotheque` forcé true, `dateCreation` réécrite) et `sauvegarderPratique` remplaçait intégralement (`pratiques[index] = pratique`) ; en prime `chargerPratiqueExistante` ne remplissait pas `prenom`/`nomAuteur` (les clés que lit la construction) — l'auteur d'origine était remplacé ou vidé. Violation de l'invariant CC de la SPEC D §3.1 (« inspireDe jamais effacé », CC BY).
+  - **Fix** : fusion d'enveloppe dans la branche « modification » de `sauvegarderPratique` (préserve `inspireDe`/`estMaquette`/`metadata_cc`/`isDemo` si absents du nouvel objet ; `dateCreation` et `dansBibliotheque` toujours repris de l'existante ; auteur/établissement jamais remplacés par du vide) + rechargement de l'auteur dans `chargerPratiqueExistante` (split `prenom`/`nomAuteur`). Le `.config` snapshot n'est PAS préservé — voulu : le préserver figerait les retouches (cf. CO-07, la config résolue prime) ; l'édition re-résout par `configuration.*`.
+  - **Sentinelle** : `tests/integration/pratique-edition-preserve-enveloppe.spec.js` (2 cas : round-trip d'édition complet + contrôle création non affectée). **Break-test par construction : écrite AVANT le fix, ROUGE sur 1.88.5** (reproduction [NAV] du constat), verte après.
+
 
 > ⚠ **Versement PARTIEL** : seul le Bloquant CT-01 est versé (et livré). Les 28 autres constats
 > (CT-02 à CT-29 : 12 Majeurs, 9 Mineurs, 7 Notes) attendent le **tri avec Grégoire** — voir

@@ -31,7 +31,8 @@
                 'Le bouton Supprimer du Cadre passe par le même garde : plus aucune suppression de cours ne peut laisser de données orphelines.',
                 'En amont, créer un cours dont le code existe déjà demande confirmation — le devis ministériel ne change pas d’un trimestre à l’autre, une seule fiche sert toutes les sessions.',
                 'Le formulaire Enseignant·e du Cadre suit maintenant le patron des autres sections : tant que rien n’est sélectionné, un message guide vers « + Nouveau profil » au lieu d’un formulaire vide toujours affiché.',
-                'Modifier le format d’un horaire existant (séances par semaine, périodes par séance) ne remet plus les séances déjà saisies aux valeurs par défaut : jours, heures et locaux sont conservés, seules les lignes ajoutées repartent des défauts.'
+                'Modifier le format d’un horaire existant (séances par semaine, périodes par séance) ne remet plus les séances déjà saisies aux valeurs par défaut : jours, heures et locaux sont conservés, seules les lignes ajoutées repartent des défauts.',
+                'Rouvrir une pratique de notation dans l’assistant pour la retoucher ne détruit plus sa fiche d’identité : la mention « Inspiré de … », le statut de maquette, la licence et l’auteur d’origine survivent maintenant à « Enregistrer ».'
             ]
         },
         {

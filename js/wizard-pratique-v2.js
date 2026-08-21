@@ -2723,6 +2723,24 @@ async function sauvegarderPratique(pratique) {
     // Mise à jour ou ajout
     const index = pratiques.findIndex(p => p.id === pratique.id);
     if (index >= 0) {
+        // CO-01 (Bloquant, audit Conception 20-21 août 2026) : l'édition wizard
+        // reconstruit l'objet à neuf — on FUSIONNE ici l'enveloppe que l'assistant
+        // ne sait pas éditer, au lieu de la détruire. Invariant CC (SPEC D §3.1) :
+        // inspireDe n'est JAMAIS effacé.
+        const existante = pratiques[index];
+        ['inspireDe', 'estMaquette', 'metadata_cc', 'isDemo'].forEach((champ) => {
+            if (pratique[champ] === undefined && existante[champ] !== undefined) {
+                pratique[champ] = existante[champ];
+            }
+        });
+        // La construction réécrit dateCreation et force dansBibliotheque:true —
+        // l'édition ne change ni la date de naissance, ni le statut de sidebar
+        // (une maquette adoptée passe par « Adopter », pas par « Enregistrer »).
+        if (existante.dateCreation) pratique.dateCreation = existante.dateCreation;
+        if (existante.dansBibliotheque !== undefined) pratique.dansBibliotheque = existante.dansBibliotheque;
+        // L'étape auteur peut être sautée en édition : ne jamais remplacer par du vide.
+        if (!pratique.auteur && existante.auteur) pratique.auteur = existante.auteur;
+        if (!pratique.etablissement && existante.etablissement) pratique.etablissement = existante.etablissement;
         pratiques[index] = pratique;
     } else {
         pratiques.push(pratique);
@@ -2863,9 +2881,16 @@ function chargerPratiqueExistante(pratiqueId) {
         'denotation': 'jugement'   // #319 Lot 5 : sans ça, une DEN retombait sur 'moyenne' → badge SOM
     };
 
+    // CO-01 : recharger l'AUTEUR dans les clés que lit la construction
+    // (prenom/nomAuteur) — sinon l'auteur d'origine est remplacé par ce que
+    // l'éditeur retape, ou par du vide quand l'étape infos est sautée.
+    const morceauxAuteur = (pratique.auteur || '').trim().split(/\s+/).filter(Boolean);
+
     wizardState.reponses = {
         nom: pratique.nom,
         auteur: pratique.auteur,
+        prenom: morceauxAuteur.length > 1 ? morceauxAuteur[0] : '',
+        nomAuteur: morceauxAuteur.length > 1 ? morceauxAuteur.slice(1).join(' ') : (morceauxAuteur[0] || ''),
         etablissement: pratique.etablissement,
         description: pratique.description,
         discipline: pratique.discipline,
