@@ -484,20 +484,50 @@ function changerTrimestreActifV2(valeur) {
             }
 
             // 🆕 BETA 95.2 : Rafraîchir le dropdown groupe-cours actif
-            if (typeof peuplerDropdownGroupeCoursActif === 'function') {
+            // ⚠⚠ #466/CT-05 (21 août 2026) — LES TROIS GARDES CI-DESSOUS ÉTAIENT
+            // MORTS : ils testaient le nom NU (`typeof peuplerDropdown… `) alors
+            // que les trois fonctions vivent dans des IIFE (orchestre, contexte,
+            // trimestres) et ne sont accessibles que par `window.`. À CHAQUE
+            // bascule : pas de restauration du groupe-cours actif (le pointeur
+            // restait null — volet 2 de CT-05), pas de rafraîchissement des vues,
+            // pas de bandeau d'archive. 3e occurrence du piège #444/#446 dans CE
+            // fichier — le commentaire de #446, 40 lignes plus haut, décrivait
+            // déjà exactement cette erreur.
+            if (typeof window.peuplerDropdownGroupeCoursActif === 'function') {
                 window.peuplerDropdownGroupeCoursActif();
             }
 
             // 🆕 BETA 95 FIX : Rafraîchir toutes les vues après changement de cours
             // (la liste d'étudiants, le tableau de bord, etc.)
-            if (typeof rafraichirVuesApresCours === 'function') {
-                rafraichirVuesApresCours();
+            if (typeof window.rafraichirVuesApresCours === 'function') {
+                window.rafraichirVuesApresCours();
             }
 
             // Mettre à jour le bandeau d'archivage si applicable
-            if (typeof mettreAJourBandeauArchive === 'function') {
-                mettreAJourBandeauArchive();
+            if (typeof window.mettreAJourBandeauArchive === 'function') {
+                window.mettreAJourBandeauArchive();
             }
+
+            // 🆕 #466/CT-06 (21 août 2026) : réinitialiser AUSSI le formulaire
+            // « Journées sans cours » — 3e formulaire de la même famille (#332
+            // horaire, #446 groupe-cours) : un événement resté en édition à
+            // cheval sur la bascule produisait « Journée modifiée » sans rien
+            // écrire (findIndex raté en silence dans le nouveau namespace).
+            if (typeof window.annulerFormEvenementV2 === 'function') {
+                window.annulerFormEvenementV2();
+            }
+
+            // 🆕 #466/CO-16 (21 août 2026) : réinitialiser les QUATRE éditeurs de
+            // Conception (grilles, échelles, cartouches, pratiques) — leurs
+            // pointeurs d'édition survivaient à la bascule : « sauvegardée ! »
+            // sans écriture (findIndex raté sur le nouveau namespace), ou pire,
+            // édition fantôme d'une entité de l'ancien trimestre.
+            ['reinitialiserEditeurGrillesApresBascule',
+             'reinitialiserEditeurEchellesApresBascule',
+             'reinitialiserEditeurCartouchesApresBascule',
+             'reinitialiserEditeurPratiquesApresBascule'].forEach(function (fn) {
+                if (typeof window[fn] === 'function') window[fn]();
+            });
 
             // #446 (10 août 2026) — les deux surfaces qui restaient sur le
             // trimestre QUITTÉ, constatées en capture par Grégoire :
@@ -587,15 +617,16 @@ function ouvrirModalNouveauTrimestre() {
         populerDropdownTrimestreV2();
 
         if (activer) {
-            // Recharger les données du nouveau trimestre.
-            // #379 (audit 5 août) : l'identification AUSSI — sans elle, les champs
-            // nom/session/année affichaient l'ANCIEN trimestre et un « Enregistrer »
-            // réécrivait l'id du nouveau trimestre actif avec ces valeurs périmées
-            // (même trou déjà corrigé dans changerTrimestreActifV2, cf. FIX ci-dessus).
-            window.chargerIdentificationTrimestreV2();
-            window.chargerCadreCalendrierV2();
-            window.chargerJourneesSansCoursV2();
-            window.afficherStatistiquesTrimestreV2();
+            // 🔧 #466/CT-05 (21 août 2026) : la création-avec-activation passait
+            // par 4 recharges PARTIELLES (identification/cadre/journées/stats) au
+            // lieu du chemin complet — le contexte de l'ANCIEN trimestre survivait
+            // partout ailleurs : groupeCoursActif et infoCours pointaient l'ancien,
+            // le miroir trimestreActif restait périmé, le dropdown Horaire offrait
+            // les horaires de l'ancien namespace (édition ensuite REFUSÉE par le
+            // garde du 29 mai, sans explication), l'en-tête listait l'ancien GC.
+            // C'est le scénario type d'une rentrée. UN SEUL chemin de bascule
+            // désormais : le même que le sélecteur (recharges + resets + miroirs).
+            changerTrimestreActifV2(id);
         }
     } else {
         alert('Erreur lors de la création du trimestre.');

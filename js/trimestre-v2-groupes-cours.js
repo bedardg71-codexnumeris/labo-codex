@@ -328,6 +328,16 @@ function changerGroupeCoursSelectionneV2(gcId) {
     const groupesCours = db.getSync(cleGC, []);
     const gc = groupesCours.find(g => g.id === gcId);
 
+    // 🔧 #466/CT-17 (21 août 2026) : id non résolvable = refus DIT (patron commun
+    // aux 3 accordéons — le formulaire précédent restait affiché en silence).
+    if (!gc) {
+        console.warn('[GC V2] Sélection non résolue :', gcId);
+        notifications.erreur('Groupe-cours introuvable', 'Il n\'existe plus dans ce trimestre. La liste va se rafraîchir.');
+        if (typeof window.populerDropdownGroupeCoursV2 === 'function') window.populerDropdownGroupeCoursV2();
+        afficherEtatVideGroupeCoursV2();
+        return;
+    }
+
     if (gc) {
         mettreAJourCarteResumeGroupeCoursV2(gc);
         editerGroupeCoursV2(gc);

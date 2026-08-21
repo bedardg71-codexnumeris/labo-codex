@@ -27,7 +27,10 @@
             items: [
                 'La grille imprimable s’ouvre maintenant d’un bouton bien en vue dans l’en-tête de la saisie des présences, qui affiche ses options dans une fenêtre — fini le panneau replié en bas de page.',
                 'Choisis la notation des cases : crochets (✓ présence, ✗ absence), X sur les absences seulement, périodes de présence (2 / 1 / 0) ou périodes d’absence. La légende imprimée suit ton choix, et ta préférence est mémorisée.',
-                'Les dates d’en-tête ne sont plus coupées (« 21… ») : le jour et le mois sont toujours complets, et la police du tableau a été réduite pour une grille plus aérée — retouches issues du premier essai d’impression réel.'
+                'Les dates d’en-tête ne sont plus coupées (« 21… ») : le jour et le mois sont toujours complets, et la police du tableau a été réduite pour une grille plus aérée — retouches issues du premier essai d’impression réel.',
+                'Changer de trimestre remet vraiment tout à zéro : créer un trimestre et l’activer utilise le même chemin complet que le sélecteur (plus de groupe-cours ni d’horaires de l’ancien trimestre qui traînent), et les éditeurs restés ouverts (journée sans cours, grille, échelle, cartouche, pratique) sont refermés au passage.',
+                'Modifier une fiche à cheval sur un changement de trimestre ne « réussit » plus en silence : l’app le dit clairement et n’écrit rien au mauvais endroit ; sélectionner un élément qui n’existe plus est refusé à voix haute au lieu de laisser l’ancien formulaire affiché.',
+                'Changer le type d’un critère de grille n’affiche plus « Aucun critère défini » par erreur.'
             ]
         },
         {

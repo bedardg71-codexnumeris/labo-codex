@@ -50,6 +50,46 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 21 AOÛT 2026 (après-midi, locale Mac) : LOT L4 « BASCULE DE
+     TRIMESTRE » LIVRÉ (#466, 1.91.1) — rang 3 de l'ordre du triage.
+     ▣ CT-05 v1 : « + Nouveau trimestre » avec activation passe par le chemin
+     COMPLET (changerTrimestreActifV2) — miroir suivi, contexte de l'ancien
+     trimestre purgé (le scénario type d'une rentrée).
+     ▣ ⚠⚠ CT-05 v2 : LES TROIS GARDES typeof NOM-NU DE LA BASCULE ÉTAIENT
+     MORTS (3e occurrence du piège #444/#446, dans le fichier même qui
+     documentait la leçon) : peupler GC, rafraichirVuesApresCours, bandeau
+     d'archive — réanimés en window. Sur le code actuel, deux avaient des
+     routes indirectes vivantes (#446) ; rafraichirVuesApresCours n'en avait
+     AUCUNE (les vues n'étaient jamais rafraîchies à la bascule, depuis des
+     mois).
+     ▣ CT-06/CO-16 : formulaire Journées refermé à la bascule + 4 pointeurs
+     d'édition Conception remis à null (reinitialiserEditeur*ApresBascule,
+     un par module) ; else des findIndex journées/grilles/échelles — refus
+     BRUYANT, patron sentinelle horaire (fini « sauvegardée ! » sans
+     écriture). ▣ CT-17 : sélection non résolue = refus DIT + état vide
+     (3 accordéons ; en chemin, MON premier jet appelait une fonction
+     inexistante — attrapé par grep avant tout commit, réutilisé la branche
+     état-vide existante). ▣ CO-20 : écritures nues de cartoucheActuel
+     synchronisent window.cartoucheActuel (5 lecteurs) — symptôme fermé,
+     unification UNE-source → L7. ▣ CO-21 : await du changement de type de
+     critère (fini « Aucun critère défini »).
+     ▣ PREUVES : bascule-trimestre-466.spec.js (4 cas), 4 BREAK-TESTS
+     4 ROUGES — ⚠ le 1er jet du cas 1 restait VERT gardes tués (2 routes
+     indirectes le satisfaisaient) : re-cassé à sa SOURCE (restauration #446
+     de l'orchestre) et spec requalifiée honnêtement (gardes = ceinture).
+     Sentinelle #379-B2 RÉALIGNÉE (le harnais fournit le chemin complet ;
+     piège relevé : les globals de chargerScript sont lexicaux, pas des
+     propriétés window). Vitest 2798/2798 (281 fichiers), Playwright 101/101.
+     Changelog 1.91 complété (3 items bascule).
+     ⏳ PORTE TERRAIN NEUVE : PORTES-TERRAIN-2026-08-21-466-bascule.md
+     (7 gestes, artefact publié, pas de migration — backup non requis).
+     Prochain chantier de l'ordre : #468 (L6, boutons qui mentent).
+     NB : journée à SESSIONS PARALLÈLES (cloud #485/1.90.0/1.91.0 + locale) —
+     git fetch et relecture de RELAIS avant CHAQUE écriture partagée, deux
+     collisions évitées ainsi.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 21 AOÛT 2026 (3e cycle) : LOT L2 « CLÉS NUES » LIVRÉ
      (#464, 1.89.0, minor) — rang 2 de l'ordre du triage.
      ▣ CT-26/INVENTAIRE : toutes les clés passées à cle() confrontées aux

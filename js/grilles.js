@@ -692,9 +692,19 @@ async function sauvegarderGrilleTemplate(silencieux = false) {
         }
 
         const index = grilles.findIndex(g => g.id === grilleTemplateActuelle.id);
-        if (index !== -1) {
-            grilles[index] = grilleTemplateActuelle;
+        if (index === -1) {
+            // 🔧 #466/CO-16 (21 août 2026) : la branche absente produisait un
+            // « sauvegardée ! » SANS écriture quand la grille éditée n'est pas
+            // dans le namespace du trimestre actif (édition à cheval sur une
+            // bascule). Refus bruyant, patron de la sentinelle horaire (29 mai).
+            console.warn('[Grilles] Sauvegarde refusée : grille', grilleTemplateActuelle.id, 'absente du trimestre actif', cle('grillesTemplates'));
+            notifications.erreur(
+                'Impossible d\'enregistrer cette grille',
+                'Elle n\'appartient pas au trimestre actif. Bascule sur son trimestre pour la modifier.'
+            );
+            return;
         }
+        grilles[index] = grilleTemplateActuelle;
     } else {
         // Mode création
         // 🆕 Beta 95.3 : Capturer discipline depuis infoCours
@@ -2092,6 +2102,11 @@ window.supprimerCritere = supprimerCritere;
 window.afficherListeCriteres = afficherListeCriteres;
 window.afficherChampFormule = afficherChampFormule;
 window.sauvegarderGrilleTemplate = sauvegarderGrilleTemplate;
+// 🆕 #466/CO-16 (21 août 2026) : appelé par changerTrimestreActifV2 — le pointeur
+// d'édition ne survit pas à la bascule (sinon : « sauvegardée ! » sans écriture,
+// ou édition fantôme d'une grille de l'ancien trimestre).
+function reinitialiserEditeurGrillesApresBascule() { grilleTemplateActuelle = null; }
+window.reinitialiserEditeurGrillesApresBascule = reinitialiserEditeurGrillesApresBascule;
 window.sauvegarderNomGrille = sauvegarderNomGrille;
 window.afficherGrillesCriteres = afficherGrillesCriteres;
 window.fermerModalGrilles = fermerModalGrilles;
@@ -4088,11 +4103,14 @@ function modifierCritereGrilleHandler(el) {
 }
 
 /** Handler délégué pour modifierCritereGrille type + refresh */
-function modifierTypeCritereGrilleHandler(el) {
+async function modifierTypeCritereGrilleHandler(el) {
     var grilleId = el.dataset.grilleId;
     var index = parseInt(el.dataset.critereIndex);
     modifierCritereGrille(grilleId, index, 'type', el.value);
-    afficherCriteresGrille(obtenirGrilleParId(grilleId));
+    // 🔧 #466/CO-21 (21 août 2026) : obtenirGrilleParId est ASYNC — le renderer
+    // recevait une Promise et affichait « Aucun critère défini » (les données
+    // étaient sauves, l'écran mentait ; retour au rechargement seulement).
+    afficherCriteresGrille(await obtenirGrilleParId(grilleId));
 }
 
 /** Handler délégué pour modifierSousCritere(grilleId, critereIndex, scIndex, champ, valeur) */
