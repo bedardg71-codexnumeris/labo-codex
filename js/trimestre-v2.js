@@ -303,7 +303,8 @@ function populerDropdownsAssemblageV2() {
         let html = '<option value="">— Choisir un groupe —</option>';
         groupesTries.forEach(grp => {
             const nbEtudiants = etudiants.filter(e => String(e.groupe).padStart(5, '0') === grp).length;
-            html += `<option value="${grp}">${grp} (${nbEtudiants} étud.)</option>`;
+            // CT-09 : grp vient du collage CSV des étudiants.
+            html += `<option value="${echapperAttribut(grp)}">${echapperHtml(grp)} (${nbEtudiants} étud.)</option>`;
         });
         selectGroupe.innerHTML = html;
     } else {

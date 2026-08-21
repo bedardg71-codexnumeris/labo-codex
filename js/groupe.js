@@ -544,7 +544,8 @@ function mettreAJourStatistiquesGroupes() {
                 const detailHtml = groupesTriés.map(groupe => {
                     const effectif = groupes[groupe];
                     const pluriel = effectif > 1 ? 's' : '';
-                    return `<strong>Groupe ${groupe}</strong> : ${effectif} étudiant·e${pluriel}`;
+                    // CT-09 : `groupe` vient du collage CSV des étudiants.
+                    return `<strong>Groupe ${echapperHtml(groupe)}</strong> : ${effectif} étudiant·e${pluriel}`;
                 }).join(' • ');
 
                 detailGroupes.innerHTML = detailHtml;

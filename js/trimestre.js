@@ -61,21 +61,14 @@ function genererCalendrierComplet() {
 
     // 🆕 FIX (16 fév 2026) : Synchroniser horaireHebdo depuis TOUTES les entités horaire
     // avant de générer le calendrier. Garantit que le calendrier reflète tous les groupes-cours.
+    // CT-04 (21 août 2026) : source unique fusionnerSeancesHoraires (dédup par
+    // jour ET heure). Cette copie-ci s'exécute APRÈS la sauvegarde d'un horaire
+    // (trimestre-v2-horaires.js appelle genererCalendrierComplet juste après) :
+    // tant qu'elle dédupliquait par jour seul, elle réécrasait le résultat
+    // correct et la 2e séance d'un même jour disparaissait quand même.
     const horairesEntites = db.getSync(cle('horaires'), []);
     if (horairesEntites.length > 0) {
-        const toutesSeances = [];
-        const joursDejaVus = new Set();
-        horairesEntites.forEach(h => {
-            if (h.seances && Array.isArray(h.seances)) {
-                h.seances.forEach(s => {
-                    const jourNormalise = s.jour.toLowerCase();
-                    if (!joursDejaVus.has(jourNormalise)) {
-                        joursDejaVus.add(jourNormalise);
-                        toutesSeances.push(s);
-                    }
-                });
-            }
-        });
+        const toutesSeances = fusionnerSeancesHoraires(horairesEntites);
         if (toutesSeances.length > 0) {
             db.setSync(cle('horaireHebdo'), toutesSeances);
         }
