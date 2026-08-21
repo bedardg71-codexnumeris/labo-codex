@@ -89,8 +89,14 @@ test('#326 · la bibliothèque signale les maquettes masquées et pointe vers le
         const btn = modal ? modal.querySelector('[data-action="ouvrirExplorationMaquettes"]') : null;
         // La maquette « essai 1 » ne doit PAS apparaître comme carte de la biblio (D-2).
         const carteMaquette = modal ? modal.querySelector('[data-id="p_maquette_test"]') : null;
+        // #345 : la bannière de découvrabilité (et son bouton) pointe vers le comparateur ;
+        // elle est masquée tant que COMPARATEUR_VISIBLE === false (sinon = lien entrant vers
+        // une page masquée). On lit le flag EXACTEMENT comme pratiques-gestion.js, pour que
+        // l'assertion reste cohérente quelle que soit la valeur du flag.
+        const comparateurVisible = (typeof COMPARATEUR_VISIBLE === 'undefined' || COMPARATEUR_VISIBLE);
         return {
             aModal: !!modal,
+            comparateurVisible,
             aBanniere: txt.includes('maquette') && txt.includes('Labo'),
             aBouton: !!btn,
             maquetteMasquee: !carteMaquette
@@ -99,8 +105,12 @@ test('#326 · la bibliothèque signale les maquettes masquées et pointe vers le
 
     expect(res.erreur, `Erreur eval : ${res.erreur}`).toBeUndefined();
     expect(res.aModal).toBe(true);
-    expect(res.aBanniere).toBe(true);
-    expect(res.aBouton).toBe(true);
+    // La bannière + son bouton ne sont présents QUE si le comparateur est visible (#345).
+    // Avec le gating actif (COMPARATEUR_VISIBLE=false), la bibliothèque ne signale pas les
+    // maquettes ici ; quand le flag rebascule à true, la bannière réapparaît.
+    expect(res.aBanniere).toBe(res.comparateurVisible);
+    expect(res.aBouton).toBe(res.comparateurVisible);
+    // Dans tous les cas, la maquette reste masquée des cartes de la bibliothèque (D-2).
     expect(res.maquetteMasquee).toBe(true);
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });

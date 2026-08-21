@@ -7,6 +7,34 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 21 AOÛT 2026 (matin, 2e cycle) : TRIAGE 27/27 + VERSEMENT
+     #462-#484 + PR #63 ENFIN LIVRÉE (1.88.7, #462).
+     ▣ TRIAGE : artefact interactif modèle portes-terrain (décisions + notes,
+     JAMAIS de bascule ✓/✗ ; export du relevé ; éprouvé au navigateur avant
+     publication — piège attrapé : meta charset absente = accents cassés en
+     file://). Relevé de Grégoire : 27/27, TOUT « Maintenant ». Verdicts de
+     fond : D1 cartouches NAMESPACÉES · D2 échelles collègues RETIRÉES du
+     code · D3 recensement #449 GÉNÉRALISÉ (7 familles) · D4 PR #63
+     rebasée-fusionnée. Trace : plans de travail/TRIAGE-audits-2026-08-21.md
+     (verdicts reportés, ordre d'exécution §5). Versement BACKLOG :
+     #462 (D4) · #463-#471 (lots L1-L9) · #472-#484 (items I1-I13 ; I14
+     « reformer le diagnostic » replié dans L7/#469).
+     ▣ #462 LIVRÉ (1.88.7) : la PR #63 pointait la branche de JUIN ; sa
+     refonte 31f6b995 (2 août, rejouée depuis 1.27.3) intégrée par
+     cherry-pick -n — conflits SEULEMENT sur les 4 points de version
+     (résolus --ours, re-bump release.mjs) ; le code (T3 infobulles de
+     famille, T4a variante DEN masquée, T4b calculerProgression borne
+     total ≥ numéro, T4d « statistique » unifié) est tombé proprement HORS
+     des zones CO-01 du matin. SUIVI-BUGS re-daté (livré 21 août, 1.88.7,
+     pas « 2 août 1.27.4 ») ; BACKLOG-ARCHIVE:2465 corrigée (elle disait
+     « RÉSOLUS » depuis 2 mois pour un code jamais fusionné — CO-36) ;
+     PR #63 fermée en référence au commit livré. Sentinelle
+     den-reliquats-343 adoptée (41 essais unitaires verts + #326 + CO-01).
+     ⏳ PROCHAIN CHANTIER : #464 (L2, clés nues) — un lot à la fois,
+     porte terrain à chaque livraison. Reste aussi : 4 SVG non suivis.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 21 AOÛT 2026 (matin, locale Mac) : FUSION SESSION 2 + PASSE
      COMPLÉMENTAIRE + LE BLOQUANT CO-01 CORRIGÉ (1.88.6, #461).
      Prémisse « Exécute le plan de la session 2 » — le rituel a révélé que la

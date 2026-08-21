@@ -250,7 +250,7 @@
             return 'Le mode de dénotation passe de « ' + _lib(LIBELLE_MODE_DEN, e.valeurA) + ' » à « ' + _lib(LIBELLE_MODE_DEN, e.valeurB) + ' » : la façon de composer la note finale se déplace.';
         },
         'suggestion.methode': function (e) {
-            return 'L\'ancrage proposé à la saisie change de méthode (' + String(e.valeurA) + ' → ' + String(e.valeurB) + ') : la suggestion holistique se calcule autrement, mais elle ne fait que proposer — la note finale reste ton jugement.';
+            return 'L\'ancrage proposé à la saisie change de méthode (' + String(e.valeurA) + ' → ' + String(e.valeurB) + ') : la suggestion statistique se calcule autrement, mais elle ne fait que proposer — la note finale reste ton jugement.';
         }
     };
 

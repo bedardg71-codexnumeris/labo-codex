@@ -226,8 +226,33 @@ describe('#319 Lot 2 (a2) — voie rapide', () => {
         expect(win.obtenirEtapeSuivante('voie-rapide', { calcNoteFinale: 'acceptable' })).toBe('nb-evaluations');
     });
 
-    it('DEN n\'est pas un parcours créable (pas de route)', () => {
-        expect(win.obtenirEtapeSuivante('voie-rapide', { calcNoteFinale: 'denotation' })).toBeNull();
+    it('DEN est un parcours créable depuis la voie rapide (#318, 1.21.0)', () => {
+        // Mise à jour #343 : DEN est devenue une famille de 1er rang. La valeur du champ
+        // est 'jugement' (pas 'denotation'), routée vers la configuration DEN.
+        expect(win.obtenirEtapeSuivante('voie-rapide', { calcNoteFinale: 'jugement' })).toBe('config-denotation');
+        expect(win.obtenirEtapeSuivante('voie-rapide', { calcNoteFinale: 'inconnu' })).toBeNull();
+    });
+
+    it('#343-T4b — compteur jamais « numéro > total » sur le chemin DEN (voie-rapide hors-graphe)', () => {
+        // Repro de la divergence : on est sur config-denotation atteinte via voie-rapide
+        // (historique = [entrée, voie-rapide] → numéro 3), mais la projection depuis
+        // etapeInitiale re-marche la branche calcul-note-finale ; si elle s'arrête plus tôt,
+        // l'ancien total tombait à 2 (« 3/2 »). Le total corrigé doit rester ≥ au numéro.
+        win.wizardState.etapeInitiale = 'entree-pratique';
+        win.wizardState.etapeActuelle = 'config-denotation';
+        win.wizardState.historique = ['entree-pratique', 'voie-rapide'];
+        win.wizardState.reponses = { porteEntree: 'decrire' }; // calcNoteFinale absent → projection courte
+        // Ancien bug : calculerNbEtapes (projection depuis etapeInitiale) tombait à 2,
+        // tandis que le numéro courant valait 3 → « 3 sur 2 ». calculerProgression borne
+        // le total au numéro courant.
+        expect(win.calculerNbEtapes()).toBeLessThan(3); // la projection seule diverge encore
+        const { numActuel, numTotal } = win.calculerProgression();
+        expect(numActuel).toBe(3);
+        expect(numTotal).toBeGreaterThanOrEqual(numActuel); // invariant : jamais « 3/2 »
+        // Nettoyage de l'état partagé pour ne pas contaminer les tests suivants.
+        win.wizardState.etapeActuelle = undefined;
+        win.wizardState.historique = [];
+        win.wizardState.reponses = {};
     });
 
     it('wizardV2VoieRapide n\'empile pas Q1 — voie-rapide prend sa position (compteur cohérent)', () => {
