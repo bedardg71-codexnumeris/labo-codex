@@ -88,6 +88,12 @@ describe('#306 · Enseignant·e : patron « état vide masqué »', () => {
                 setSync(k, v) { this._stores[k] = v; }
             },
             echapperHtml: (s) => String(s),
+            // CT-09 (21 août 2026) : le dropdown échappe désormais l'id en
+            // contexte d'attribut. Dans le navigateur, echapperAttribut est un
+            // global de js/securite-echappement.js ; ici on le stubbe comme
+            // echapperHtml, ce test-ci portant sur l'état vide, pas sur
+            // l'échappement (couvert par securite-echappement-CT29.test.js).
+            echapperAttribut: (s) => String(s),
             genererIdUnique: (p) => p + 'X1',
             notifications: { succes() {}, erreur() {} },
             confirm: () => { confirms.push(1); return true; }

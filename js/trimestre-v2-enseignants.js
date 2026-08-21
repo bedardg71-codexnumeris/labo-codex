@@ -109,7 +109,8 @@ function populerDropdownEnseignantsV2() {
     reels.forEach(e => {
         const nomComplet = `${e.prenom || ''} ${e.nom || ''}`.trim() || 'Sans nom';
         const selected = (e.id === enseignantEnEditionId) ? ' selected' : '';
-        html += `<option value="${echapperHtml(e.id)}"${selected}>${nomComplet}</option>`;
+        // CT-09 : l'id était échappé, pas le nom — asymétrie sur la même ligne.
+        html += `<option value="${echapperAttribut(e.id)}"${selected}>${echapperHtml(nomComplet)}</option>`;
     });
 
     select.innerHTML = html;

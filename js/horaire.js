@@ -1189,7 +1189,8 @@ function genererCarteSeance(seance, index) {
     const localEchappe = echapperHtml(seance.local || '');
 
     // Afficher la lettre (nouveau format) ou le nom (ancien format)
-    const nomSeance = seance.lettre || seance.nom || '?';
+    // CT-09 : jour/début/fin/local étaient échappés, pas la lettre ni le nom.
+    const nomSeance = echapperHtml(seance.lettre || seance.nom || '?');
 
     // 🆕 BETA 95.1 : Afficher périodes si disponible, sinon durée
     let dureeAffichage = '';
@@ -1226,7 +1227,8 @@ function genererCarteSeance(seance, index) {
  * @returns {string} HTML de la carte en mode édition
  */
 function genererCarteSeanceEdition(seance, index) {
-    const nomSeance = seance.lettre || seance.nom || '?';
+    // CT-09 : `nom` est le repli des données antérieures et n'était pas échappé.
+    const nomSeance = echapperHtml(seance.lettre || seance.nom || '?');
     const groupeEchappe = echapperHtml(seance.groupe || '');
 
     return `
@@ -1253,7 +1255,7 @@ function genererCarteSeanceEdition(seance, index) {
         <div class="groupe-form">
             <label>Heure début</label>
             <input type="time" class="controle-form controle-form-compact" id="edit-debut-${index}"
-                   value="${echapperHtml(seance.debut || '')}">
+                   value="${echapperAttribut(seance.debut || '')}">
         </div>
         <div class="groupe-form">
             <label>Périodes</label>
@@ -1264,12 +1266,12 @@ function genererCarteSeanceEdition(seance, index) {
         <div class="groupe-form">
             <label>Local</label>
             <input type="text" class="controle-form controle-form-compact" id="edit-local-${index}"
-                   value="${echapperHtml(seance.local || '')}" placeholder="Ex: 1709">
+                   value="${echapperAttribut(seance.local || '')}" placeholder="Ex: 1709">
         </div>
     </div>
-    <input type="hidden" id="edit-lettre-${index}" value="${seance.lettre || ''}">
-    <input type="hidden" id="edit-groupe-${index}" value="${seance.groupe || ''}">
-    <input type="hidden" id="edit-nombrePeriodes-${index}" value="${seance.nombrePeriodes || ''}">
+    <input type="hidden" id="edit-lettre-${index}" value="${echapperAttribut(seance.lettre || '')}">
+    <input type="hidden" id="edit-groupe-${index}" value="${echapperAttribut(seance.groupe || '')}">
+    <input type="hidden" id="edit-nombrePeriodes-${index}" value="${echapperAttribut(seance.nombrePeriodes || '')}">
 </div>
 `;
 }

@@ -22,11 +22,26 @@ const scriptAudit = path.join(racineProjet, 'scripts', 'audit-innerhtml.sh');
 // 3. Mettre à jour SEUIL_SUSPECTS_MAX ci-dessous
 // 4. Documenter dans le commit
 
-// Baseline mise à jour le 12 mai 2026 (post Défense E pragmatique « Phase 1 close »).
+// Baseline mise à jour le 21 août 2026 (CT-09, passe d'échappement du Cadre).
 // Snapshot de référence : docs/securite/DEFENSE-E-CLOSE.md
-// (125 suspects 6 mai → 120 le 8 mai après E-α/E-β → 112 le 12 mai
-// après substitution mécanique value="${X.Y}" sur 20 fichiers).
-const SEUIL_SUSPECTS_MAX = 115;
+// (125 suspects 6 mai → 120 le 8 mai après E-α/E-β → 112 le 12 mai après
+// substitution mécanique value="${X.Y}" sur 20 fichiers.)
+//
+// MESURÉ le 21 août avant toute modification : 107, pas 112 — le chiffre de
+// mai avait dérivé et le seuil de 115 tolérait donc HUIT cas de plus que
+// mesuré. Le seuil est désormais ÉGAL à la mesure (106), sans marge : une
+// marge défait le but énoncé juste au-dessus (« si un commit ajoute un
+// nouveau cas, le test échoue »).
+//
+// ⚠ CE QUE CE COMPTEUR NE VOIT PAS. Le script est une heuristique d'UNE
+// LIGNE sur les instructions `.innerHTML =` / `+=` (cf. son en-tête,
+// « Limites »). Un gabarit littéral construit sur plusieurs lignes puis
+// affecté par `conteneur.innerHTML = html` compte pour « statique », quel
+// que soit le nombre d'interpolations non échappées à l'intérieur. La passe
+// CT-09 a échappé ~13 sites d'interpolation ; ce compteur n'en a enregistré
+// qu'UN (107 → 106). Il garde la porte d'entrée, pas le contenu : ne pas le
+// lire comme une mesure de la dette d'échappement réelle.
+const SEUIL_SUSPECTS_MAX = 106;
 
 describe('Défense I · F · lint sécurité statique', () => {
     // Le script audite ~112 fichiers .js (~8 s sur Mac M3). On invoque

@@ -39,8 +39,10 @@ function chargerSeancesV2() {
             const infoCours = db.getSync('infoCours', null);
             if (infoCours) {
                 // 🆕 FIX (4 fév 2026) : Priorité codeCours
-                const sigle = infoCours.codeCours || infoCours.sigle || infoCours.code || '';
-                const groupe = infoCours.groupe || '';
+                // CT-09 : infoCours vient d'un import (ZIP, collage CSV,
+                // restauration Codex) et atterrit en innerHTML plus bas.
+                const sigle = echapperHtml(infoCours.codeCours || infoCours.sigle || infoCours.code || '');
+                const groupe = echapperHtml(infoCours.groupe || '');
                 coursActifInfo = groupe ? `${sigle} (${groupe})` : sigle;
             }
         }
@@ -98,9 +100,9 @@ function chargerSeancesV2() {
 
         html += `
             <div class="item-carte-compact" style="display: flex; align-items: center; padding: 10px 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                <span style="width: 90px; font-weight: 600; color: var(--accent-primaire);">${jourNom}</span>
-                <span style="flex: 1;">${heureDebut} (${periodes} pér.)</span>
-                <span class="text-muted" style="width: 80px;">${local}</span>
+                <span style="width: 90px; font-weight: 600; color: var(--accent-primaire);">${echapperHtml(jourNom)}</span>
+                <span style="flex: 1;">${echapperHtml(heureDebut)} (${periodes} pér.)</span>
+                <span class="text-muted" style="width: 80px;">${echapperHtml(local)}</span>
                 <div style="display: flex; gap: 5px;">
                     <button class="btn btn-modifier btn-sm" data-action="modifierSeanceV2" data-param="${index}" title="Modifier">Modifier</button>
                     <button class="btn btn-annuler btn-sm" data-action="supprimerSeanceV2" data-param="${index}" title="Supprimer">Suppr.</button>
@@ -362,7 +364,8 @@ function populerDropdownHorairesV2() {
 
     let html = '<option value="">Sélectionner...</option>';
     reels.forEach(h => {
-        html += `<option value="${echapperHtml(h.id)}">${h.nom || 'Sans nom'}</option>`;
+        // CT-09 : l'id était échappé, pas le nom — asymétrie sur la même ligne.
+        html += `<option value="${echapperAttribut(h.id)}">${echapperHtml(h.nom || 'Sans nom')}</option>`;
     });
     select.innerHTML = html;
 
@@ -427,14 +430,14 @@ function mettreAJourCarteResumeHoraireV2(horaire) {
             const heureFin = s.heureFin || calculerHeureFin(s.heureDebut, periodesParSeance);
             // Afficher le local par séance (ou fallback vers local global pour anciennes données)
             const localSeance = s.local || horaire.local || '';
-            const localInfo = localSeance ? ` (${localSeance})` : '';
-            seancesHtml += `<li>${s.jour} ${s.heureDebut} - ${heureFin}${localInfo}</li>`;
+            const localInfo = localSeance ? ` (${echapperHtml(localSeance)})` : '';
+            seancesHtml += `<li>${echapperHtml(s.jour)} ${echapperHtml(s.heureDebut)} - ${echapperHtml(heureFin)}${localInfo}</li>`;
         });
         seancesHtml += '</ul>';
     }
 
     carte.innerHTML = `
-        <div class="resume-horaire-nom">${horaire.nom || 'Sans nom'}</div>
+        <div class="resume-horaire-nom">${echapperHtml(horaire.nom || 'Sans nom')}</div>
         <div class="resume-horaire-details">
             <div>Format : ${nbSeances}×${periodesParSeance}</div>
             <div>${totalPeriodes} périodes/semaine</div>
@@ -485,7 +488,8 @@ function populerDropdownGroupesHoraireV2(etudiantsOpt) {
     let html = '<option value="">— Sélectionner un groupe —</option>';
     groupesTries.forEach(grp => {
         const nbEtudiants = etudiants.filter(e => String(e.groupe).padStart(5, '0') === grp).length;
-        html += `<option value="${grp}">${grp} (${nbEtudiants} étud.)</option>`;
+        // CT-09 : grp vient du collage CSV des étudiants.
+        html += `<option value="${echapperAttribut(grp)}">${echapperHtml(grp)} (${nbEtudiants} étud.)</option>`;
     });
     select.innerHTML = html;
 
@@ -689,20 +693,10 @@ function sauvegarderHoraireV2() {
 
     // 🆕 FIX (22 jan 2026) : Synchroniser horaireHebdo pour que le calendrier reconnaisse les jours de cours
     // Fusionner les séances de TOUS les horaires pour couvrir tous les groupes-cours
-    const toutesSeances = [];
-    const joursDejaVus = new Set();
-    horaires.forEach(h => {
-        if (h.seances && Array.isArray(h.seances)) {
-            h.seances.forEach(s => {
-                // Éviter les doublons de jours (un seul horaire par jour suffit pour le calendrier)
-                const jourNormalise = s.jour.toLowerCase();
-                if (!joursDejaVus.has(jourNormalise)) {
-                    joursDejaVus.add(jourNormalise);
-                    toutesSeances.push(s);
-                }
-            });
-        }
-    });
+    // CT-04 (21 août 2026) : dédup par (jour, heure) via la source unique
+    // fusionnerSeancesHoraires — la dédup par jour seul perdait la 2e séance
+    // d'un même jour (deux groupes, deux heures).
+    const toutesSeances = fusionnerSeancesHoraires(horaires);
     const cleHoraireHebdo = cle('horaireHebdo');
     db.setSync(cleHoraireHebdo, toutesSeances);
 
@@ -754,19 +748,8 @@ function supprimerHoraireV2() {
     db.setSync(cleHoraires, horaires);
 
     // 🆕 FIX (22 jan 2026) : Resynchroniser horaireHebdo après suppression
-    const toutesSeances = [];
-    const joursDejaVus = new Set();
-    horaires.forEach(h => {
-        if (h.seances && Array.isArray(h.seances)) {
-            h.seances.forEach(s => {
-                const jourNormalise = s.jour.toLowerCase();
-                if (!joursDejaVus.has(jourNormalise)) {
-                    joursDejaVus.add(jourNormalise);
-                    toutesSeances.push(s);
-                }
-            });
-        }
-    });
+    // CT-04 : même source unique qu'à la sauvegarde.
+    const toutesSeances = fusionnerSeancesHoraires(horaires);
     const cleHoraireHebdo = cle('horaireHebdo');
     db.setSync(cleHoraireHebdo, toutesSeances);
     if (typeof genererCalendrierComplet === 'function') {
