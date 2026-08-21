@@ -714,6 +714,17 @@ async function sauvegarderNomEchelle() {
         // Mettre à jour dans localStorage - SAUVEGARDER TOUTE L'ÉCHELLE (y compris les niveaux)
         let echelles = await db.get(cle('echellesTemplates')) ||  [];
         const index = echelles.findIndex(e => e.id === echelleTemplateActuelle.id);
+        if (index === -1) {
+            // 🔧 #466/CO-16 (21 août 2026) : silence total quand l'échelle éditée
+            // n'est pas dans le namespace du trimestre actif (édition à cheval
+            // sur une bascule). Refus bruyant, patron de la sentinelle horaire.
+            console.warn('[Échelles] Sauvegarde refusée : échelle', echelleTemplateActuelle.id, 'absente du trimestre actif', cle('echellesTemplates'));
+            notifications.erreur(
+                'Impossible d\'enregistrer cette échelle',
+                'Elle n\'appartient pas au trimestre actif. Bascule sur son trimestre pour la modifier.'
+            );
+            return;
+        }
         if (index !== -1) {
             echelles[index] = { ...echelleTemplateActuelle };
             await db.set(cle('echellesTemplates'),  echelles);
@@ -3798,6 +3809,10 @@ function ouvrirFilePickerImportEchelles() {
 
 // Export global
 window.afficherListeEchelles = afficherListeEchelles;
+// 🆕 #466/CO-16 (21 août 2026) : appelé par changerTrimestreActifV2 (même patron
+// que grilles) — le pointeur d'édition ne survit pas à la bascule.
+function reinitialiserEditeurEchellesApresBascule() { echelleTemplateActuelle = null; }
+window.reinitialiserEditeurEchellesApresBascule = reinitialiserEditeurEchellesApresBascule;
 window.creerNouvelleEchelle = creerNouvelleEchelle;
 window.annulerFormEchelle = annulerFormEchelle;
 window.chargerEchellePourModif = chargerEchellePourModif;

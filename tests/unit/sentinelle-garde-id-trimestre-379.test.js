@@ -132,7 +132,13 @@ describe('#379 — gardes sur le changement d\'id du trimestre actif', () => {
 });
 
 describe('#379 volet B2 — création+activation recharge l\'identification affichée', () => {
-    it('ouvrirModalNouveauTrimestre(activer) appelle chargerIdentificationTrimestreV2', () => {
+    // RÉALIGNÉE #466/CT-05 (21 août 2026) : la création+activation ne fait plus
+    // ses 4 recharges partielles — elle passe par le chemin COMPLET de bascule
+    // (changerTrimestreActifV2), qui appelle les mêmes recharges parmi toutes
+    // les autres. L'invariant de #379 (l'identification est rechargée) reste
+    // exercé, à travers le chemin unique ; le harnais fournit désormais
+    // changerTrimestreActif (succès) que le chemin complet exige.
+    it('ouvrirModalNouveauTrimestre(activer) recharge l\'identification via le chemin complet de bascule', () => {
         const reponsesPrompt = ['A', '2027'];
         const win = chargerScript('js/trimestre-v2-liste.js', {
             db: { getSync: () => [], setSync: () => {} },
@@ -144,10 +150,14 @@ describe('#379 volet B2 — création+activation recharge l\'identification affi
             obtenirTrimestres: () => [],
             cle: (k) => k
         });
+        // #466 : le chemin complet exige window.changerTrimestreActif — le poser
+        // sur win (les globals de chargerScript sont lexicaux, pas des propriétés window).
+        win.changerTrimestreActif = () => true;
         win.chargerIdentificationTrimestreV2 = vi.fn();
         win.chargerCadreCalendrierV2 = vi.fn();
         win.chargerJourneesSansCoursV2 = vi.fn();
         win.afficherStatistiquesTrimestreV2 = vi.fn();
+        win.chargerDropdownCoursV2 = vi.fn();    // appel non gardé du chemin complet
 
         win.ouvrirModalNouveauTrimestre();
 

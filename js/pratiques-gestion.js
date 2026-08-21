@@ -2738,6 +2738,11 @@ function confirmerEtFermerImportPratiques() {
 // Module principal
 window.initialiserModulePratiquesMateriel = initialiserModulePratiquesMateriel;
 window.afficherListePratiquesMateriel = afficherListePratiquesMateriel;
+// 🆕 #466/CO-16 (21 août 2026) : appelé par changerTrimestreActifV2 (même patron
+// que grilles/échelles) — le pointeur d'édition ne survit pas à la bascule
+// (l'auto-save avalait ses échecs en console.warn : modifications perdues).
+function reinitialiserEditeurPratiquesApresBascule() { pratiqueEnEditionMateriel = null; }
+window.reinitialiserEditeurPratiquesApresBascule = reinitialiserEditeurPratiquesApresBascule;
 window.afficherBibliothequePratiques = afficherBibliothequePratiques;
 window.fermerModalBibliothequePratiques = fermerModalBibliothequePratiques;
 window.ouvrirExplorationMaquettes = ouvrirExplorationMaquettes;

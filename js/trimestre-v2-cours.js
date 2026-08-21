@@ -301,6 +301,17 @@ function changerCoursSelectionneV2(coursId) {
     const cours = db.getSync('cours', []);
     let coursSelectionne = cours.find(c => c.id === coursId);
 
+    // 🔧 #466/CT-17 (21 août 2026) : un id non résolvable laissait le formulaire
+    // PRÉCÉDENT affiché sans un mot (option périmée, donnée restaurée/corrompue) —
+    // l'utilisateur croyait éditer l'élément cliqué. Patron commun aux 3 accordéons.
+    if (!coursSelectionne) {
+        console.warn('[Cours V2] Sélection non résolue :', coursId);
+        notifications.erreur('Cours introuvable', 'La fiche sélectionnée n\'existe plus. La liste va se rafraîchir.');
+        chargerDropdownCoursV2();
+        changerCoursSelectionneV2(null); // rejoue la branche « état vide » ci-dessus
+        return;
+    }
+
     if (coursSelectionne) {
         // Afficher le formulaire en mode édition
         coursEnEditionV2 = coursId;

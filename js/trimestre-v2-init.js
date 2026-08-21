@@ -651,16 +651,28 @@ function confirmerEvenementV2() {
 
     if (evenementEnEditionV2) {
         const index = evenements.findIndex(e => e.id === evenementEnEditionV2);
-        if (index !== -1) {
-            evenements[index] = {
-                id: evenementEnEditionV2,
-                dateEvenement,
-                description,
-                categorie,
-                horaireReprise,
-                dateReprise
-            };
+        if (index === -1) {
+            // 🔧 #466/CT-06 (21 août 2026) : la branche absente avalait tout —
+            // l'événement édité n'est pas dans la liste du trimestre ACTIF
+            // (édition à cheval sur une bascule) : rien n'était écrit, mais le
+            // toast « Journée modifiée » s'affichait quand même. Même sentinelle
+            // défensive que l'horaire (29 mai) : refus BRUYANT, pas de faux succès.
+            console.warn('[Journées V2] Sauvegarde refusée : journée', evenementEnEditionV2, 'absente du trimestre actif', cle('journeesSansCours'));
+            notifications.erreur(
+                'Impossible d\'enregistrer cette journée',
+                'Elle n\'appartient pas au trimestre actif. Bascule sur son trimestre pour la modifier.'
+            );
+            annulerFormEvenementV2();
+            return;
         }
+        evenements[index] = {
+            id: evenementEnEditionV2,
+            dateEvenement,
+            description,
+            categorie,
+            horaireReprise,
+            dateReprise
+        };
     } else {
         evenements.push({
             id: genererIdUnique('EVT_'),
