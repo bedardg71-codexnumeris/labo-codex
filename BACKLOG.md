@@ -68,7 +68,7 @@
 > `*_backup_v1` (outil `db.purgerBackupsV1()` livré, DRY-RUN par défaut — exécution = décision Grégoire)
 > et `tamponsImages` base64 non namespacé.
 
-> **Pour ajouter un item** : `- [ ] **#XX** Description courte` + sous-puces de contexte. Dernier ID utilisé : **#459** (20 août 2026, SUIVI-BUGS — ⇧ avalé en silence sur les conteneurs, trouvé par la porte types-familles ; avant : #458, porte #449 — TOUJOURS vérifier aussi l'« État courant » en tête ET grep `#45[0-9]` avant de prendre un numéro : le 19 août, deux points du fichier disaient « #456 » alors que #457 était consommé depuis la veille). *(⚠ #437 = « carte d'alignement » de la session parallèle du 9 août, fusionné sur `main` — pris pendant que cette branche vivait. Voir `RELAIS.md`.)*
+> **Pour ajouter un item** : `- [ ] **#XX** Description courte` + sous-puces de contexte. Dernier ID utilisé : **#460** (20 août 2026, CT-01 de l'audit Cadre/Trimestre, livré 1.88.5 ; avant : #459, 20 août 2026, SUIVI-BUGS — ⇧ avalé en silence sur les conteneurs, trouvé par la porte types-familles ; avant : #458, porte #449 — TOUJOURS vérifier aussi l'« État courant » en tête ET grep `#45[0-9]` avant de prendre un numéro : le 19 août, deux points du fichier disaient « #456 » alors que #457 était consommé depuis la veille). *(⚠ #437 = « carte d'alignement » de la session parallèle du 9 août, fusionné sur `main` — pris pendant que cette branche vivait. Voir `RELAIS.md`.)*
 
 ---
 
@@ -85,6 +85,18 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 ---
 
 ## A faire
+
+### Audit « Calendrier › Trimestre » — 20 août 2026 (rapport `plans de travail/AUDIT-cadre-trimestre-2026-08-20.md`)
+
+> ⚠ **Versement PARTIEL** : seul le Bloquant CT-01 est versé (et livré). Les 28 autres constats
+> (CT-02 à CT-29 : 12 Majeurs, 9 Mineurs, 7 Notes) attendent le **tri avec Grégoire** — voir
+> l'annexe « items BACKLOG candidats » du rapport. Ne pas les verser d'office.
+
+- [x] **#460 LIVRÉ 20 août 2026 (1.88.5)** CT-01 — édition d'horaire : changer le format écrasait les séances saisies par les défauts (Bloquant de l'audit).
+  - **Cause** : la régénération `innerHTML` des lignes de séance (`mettreAJourSeancesHoraireV2`) repart des défauts ; le re-remplissage n'existait que dans `editerHoraireV2`, pas dans le handler des selects « Séances par semaine » et « Périodes par séance » — « Enregistrer » persistait ensuite les défauts en silence (toast de succès mensonger).
+  - **Fix** : nouveau handler `changerFormatSeancesHoraireV2` (photographie des valeurs du DOM avant régénération, restitution ligne à ligne ; les lignes ajoutées seules prennent les défauts), câblé en `data-on-change` sur les deux selects d'`index.html`. `nouveauHoraireV2` et `editerHoraireV2` gardent la régénération aux défauts (comportement voulu).
+  - **Sentinelle** : `tests/integration/horaire-format-preserve-seances.spec.js` (3 cas, dont persistance après « Enregistrer » et garde-fou inverse « Nouvel horaire repart des défauts ») ; passe par de VRAIS événements `change` pour verrouiller aussi le câblage `data-on-change`. **Break-test : câblage réverti → 3 ROUGES**, restauré → verts.
+  - ⚠ Piège de harnais documenté : `cle()` dérive le préfixe du flag `actif: true` du REGISTRE `trimestres`, pas du miroir `trimestreActif` — un setup de test sans le flag écrit/lit les clés nues.
 
 ### Chantier alignement — session du 6 août 2026 (branche `claude/pedagogical-alignment-planner-y7eppc`)
 

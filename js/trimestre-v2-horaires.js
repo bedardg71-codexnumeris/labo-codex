@@ -831,6 +831,40 @@ function mettreAJourSeancesHoraireV2() {
 }
 
 /**
+ * Handler des selects « Nombre de séances » et « Périodes par séance » (CT-01).
+ * La régénération des lignes repart des défauts : sans capture préalable, un
+ * simple changement de format écrasait les séances déjà saisies et
+ * « Enregistrer » persistait les défauts en silence. On photographie donc les
+ * valeurs du DOM avant la régénération, puis on les restitue ligne à ligne ;
+ * seules les lignes ajoutées prennent les défauts.
+ */
+function changerFormatSeancesHoraireV2() {
+    const saisies = [];
+    for (let i = 0; document.getElementById(`v2-hor-seance-${i}-jour`); i++) {
+        saisies.push({
+            jour: document.getElementById(`v2-hor-seance-${i}-jour`).value,
+            heureDebut: document.getElementById(`v2-hor-seance-${i}-debut`)?.value || '',
+            heureFin: document.getElementById(`v2-hor-seance-${i}-fin`)?.value || '',
+            local: document.getElementById(`v2-hor-seance-${i}-local`)?.value || ''
+        });
+    }
+
+    mettreAJourSeancesHoraireV2();
+
+    saisies.forEach((s, i) => {
+        const selectJour = document.getElementById(`v2-hor-seance-${i}-jour`);
+        if (!selectJour) return; // ligne retirée par la réduction du nombre de séances
+        selectJour.value = s.jour;
+        const inputDebut = document.getElementById(`v2-hor-seance-${i}-debut`);
+        const inputFin = document.getElementById(`v2-hor-seance-${i}-fin`);
+        const inputLocal = document.getElementById(`v2-hor-seance-${i}-local`);
+        if (inputDebut) inputDebut.value = s.heureDebut;
+        if (inputFin) inputFin.value = s.heureFin;
+        if (inputLocal) inputLocal.value = s.local;
+    });
+}
+
+/**
  * Calcule l'heure de fin à partir de l'heure de début et du nombre de périodes
  */
 function calculerHeureFin(heureDebut, nbPeriodes) {
@@ -849,6 +883,7 @@ window.changerHoraireSelectionneV2 = changerHoraireSelectionneV2;
 window.annulerFormHoraireV2 = annulerFormHoraireV2;
 window.sauvegarderHoraireV2 = sauvegarderHoraireV2;
 window.mettreAJourSeancesHoraireV2 = mettreAJourSeancesHoraireV2;
+window.changerFormatSeancesHoraireV2 = changerFormatSeancesHoraireV2;
 window.chargerHorairesV2 = chargerHorairesV2;
 // Exports migrés du bloc principal résidu (lignes 4524-4530 originelles).
 window.chargerHoraireGroupeActifV2 = chargerHoraireGroupeActifV2;

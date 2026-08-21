@@ -7,6 +7,42 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 20 AOÛT 2026 (SOIR, suite) : LE BLOQUANT CT-01 EST CORRIGÉ
+     (1.88.5, build 0820-2001, #460). Prémisse de Grégoire « Exécute le plan :
+     AUDIT-cadre-trimestre-2026-08-20.md » — ambiguë (le fichier est un rapport
+     de CONSTATS) ⮕ tranchée par question fermée : CORRIGER CT-01 d'abord
+     (conforme au plan §7 : un Bloquant passe avant la session 2), le tri des
+     28 autres constats reste À FAIRE avec lui.
+
+     ▣ FIX CT-01 : nouveau handler `changerFormatSeancesHoraireV2`
+     (trimestre-v2-horaires.js) — photographie les valeurs du DOM avant la
+     régénération innerHTML des lignes de séance, les restitue ligne à ligne ;
+     seules les lignes AJOUTÉES prennent les défauts. Câblé en data-on-change
+     sur les DEUX selects d'index.html (« Séances par semaine » ET « Périodes
+     par séance » — les deux écrasaient). `nouveauHoraireV2`/`editerHoraireV2`
+     gardent la régénération aux défauts (voulu ; le 3e cas de la sentinelle
+     verrouille que « Nouvel horaire » n'hérite PAS des séances précédentes).
+     ▣ SENTINELLE : tests/integration/horaire-format-preserve-seances.spec.js
+     (3 cas, VRAIS événements change ⇒ le câblage index.html est verrouillé
+     aussi). BREAK-TEST : câblage réverti ⇒ 3 ROUGES, restauré ⇒ verts.
+     Vitest 2768/2768, Playwright 96/96 (93 + 3 neufs).
+     ⚠ Piège de harnais consigné au BACKLOG #460 : cle() dérive le préfixe du
+     flag actif:true du REGISTRE trimestres, PAS du miroir trimestreActif —
+     setup de test sans le flag = clés nues.
+
+     ▣ AUSSI RÉGLÉ : `plans de travail/PLAN-AUDIT-cadre-conception-2026-08-20.md`
+     n'existait dans AUCUN commit — seulement stash@{0} (GitHub Desktop,
+     20 août 14h59) ; restauré et committé sur main (42a8ab1c) avec l'accord
+     de Grégoire. La session 2 « Conception » dépend de son §6.
+
+     ⏳ RESTE : session 2 « Conception » (plan §6, lire d'abord « À
+     transmettre ») · TRI des constats CT-02..CT-29 AVEC Grégoire · porte
+     terrain iPad du geste CT-01 (le repro Chromium ne couvre pas le picker
+     time iOS — cf. « Portes terrain iPad à prévoir » du rapport) · 4 SVG non
+     suivis dans autocollants/solo/ (pas touchés, à trancher par Grégoire).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 20 AOÛT 2026 (SOIR, cloud) : AUDIT « CALENDRIER › TRIMESTRE »
      (SESSION 1 DU PLAN-AUDIT-cadre-conception-2026-08-20, CONSTATS SEULEMENT).
      ÉTAT FINAL : aucun code applicatif modifié, AUCUN BUMP (conforme au
