@@ -34,7 +34,12 @@
 const PAGE_LARGEUR = 279.4;
 const PAGE_HAUTEUR = 215.9;
 const MARGE = 10;
-const LARGEUR_MIN_COL_SEANCE = 5.5;   // sous ce seuil, on coupe en plusieurs pages
+// Largeur minimale d'une colonne de séance. Porte terrain #485 (21 août) :
+// à 5,5 mm la date d'en-tête « jj/mm » ne tenait pas et autotable la coupait
+// en « 21… ». 6,5 mm = « jj/mm » complet à 5,5 pt AVEC le padding, et un
+// horaire 2×2 (30 séances) tient encore sur une seule page en options par
+// défaut (197,4 mm ÷ 30 = 6,58 mm). Sous ce seuil, on coupe en pages.
+const LARGEUR_MIN_COL_SEANCE = 6.5;
 const LARGEURS_COLONNES_FIXES = {
     nom: 38,
     da: 16,
@@ -50,7 +55,12 @@ const OPTIONS_DEFAUT = {
     programme: true,
     nomProgramme: false,
     sa: true,
-    portee: 'actif'
+    portee: 'actif',
+    // Notation des cases saisies (retouche terrain, 21 août) :
+    // 'crochet' = ✓ complète · ✗ absence · chiffre partielle
+    // 'x'       = X absence · chiffre partielle · rien = présence complète
+    // 'chiffre' = périodes présentes partout (2 / 1 / 0), style feuille papier
+    notation: 'crochet'
 };
 
 /* ===============================
@@ -141,9 +151,10 @@ function construireModeleRapportPresences(etudiants, seancesParDate, presences, 
                 }
                 periodes = Math.round(periodes * 10) / 10;
 
-                if (periodes <= 0) return { etat: 'absent', texte: '' };
-                if (periodes >= col.periodesAttendues) return { etat: 'present', texte: '' };
-                return { etat: 'partiel', texte: String(periodes).replace('.', ',') };
+                const texteChiffre = String(periodes).replace('.', ',');
+                if (periodes <= 0) return { etat: 'absent', texte: '', periodes: periodes };
+                if (periodes >= col.periodesAttendues) return { etat: 'present', texte: '', periodes: periodes };
+                return { etat: 'partiel', texte: texteChiffre, periodes: periodes };
             });
             return { etudiant, cellules };
         });
@@ -253,6 +264,10 @@ function restaurerOptionsRapportPresences() {
     });
     const selectPortee = document.getElementById('rp-portee');
     if (selectPortee) selectPortee.value = opts.portee === 'tous' ? 'tous' : 'actif';
+    const selectNotation = document.getElementById('rp-notation');
+    if (selectNotation) {
+        selectNotation.value = (opts.notation === 'x' || opts.notation === 'chiffre') ? opts.notation : 'crochet';
+    }
 }
 
 /** Lit le panneau et persiste le choix (appelée par data-on-change). */
@@ -264,6 +279,9 @@ function sauvegarderOptionsRapportPresences() {
     });
     const selectPortee = document.getElementById('rp-portee');
     opts.portee = selectPortee && selectPortee.value === 'tous' ? 'tous' : 'actif';
+    const selectNotation = document.getElementById('rp-notation');
+    opts.notation = selectNotation && (selectNotation.value === 'x' || selectNotation.value === 'chiffre')
+        ? selectNotation.value : 'crochet';
     if (typeof definirPreference === 'function') {
         definirPreference('rapportPresencesOptions', opts);
     }
@@ -281,6 +299,16 @@ function afficherStatutRapport(message) {
 /* ===============================
    RENDU PDF
    =============================== */
+
+/** « 2026-08-21 » → « 21 août 2026 » (l'en-tête parle français, porte 2.14). */
+function formaterDateFrancaise(ymd) {
+    const morceaux = String(ymd || '').split('-');
+    if (morceaux.length !== 3) return ymd;
+    const MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+        'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+    const mois = MOIS[parseInt(morceaux[1], 10) - 1];
+    return mois ? `${parseInt(morceaux[2], 10)} ${mois} ${morceaux[0]}` : ymd;
+}
 
 /** Crochet ✓ tracé au trait (les polices standard jsPDF n'ont pas U+2713). */
 function dessinerCrochet(doc, cx, cy, t) {
@@ -330,6 +358,7 @@ function valeurColonneFixe(etudiant, cleCol) {
  * de séances sur plusieurs pages si elles ne tiennent pas lisiblement.
  */
 function dessinerFeuilleGroupe(doc, modele, opts, entete) {
+    const notation = opts.notation === 'x' || opts.notation === 'chiffre' ? opts.notation : 'crochet';
     const fixes = colonnesFixes(opts);
     const largeurFixes = fixes.reduce((acc, c) => acc + c.largeur, 0);
     const utilisable = PAGE_LARGEUR - (2 * MARGE) - largeurFixes;
@@ -376,9 +405,11 @@ function dessinerFeuilleGroupe(doc, modele, opts, entete) {
             head: [tete],
             body: corps,
             theme: 'grid',
+            // Tailles réduites au retour de la porte terrain #485 (verdict 3.1 :
+            // « réduire seulement la taille de la police dans les cases »).
             styles: {
-                fontSize: 6.5,
-                cellPadding: 0.9,
+                fontSize: 6,
+                cellPadding: 0.7,
                 lineColor: [150, 150, 150],
                 lineWidth: 0.15,
                 textColor: [0, 0, 0],
@@ -390,7 +421,7 @@ function dessinerFeuilleGroupe(doc, modele, opts, entete) {
                 textColor: [0, 0, 0],
                 fontStyle: 'bold',
                 halign: 'center',
-                fontSize: 6.5
+                fontSize: 5.5
             },
             columnStyles: stylesColonnes,
             didDrawCell: function(data) {
@@ -403,28 +434,71 @@ function dessinerFeuilleGroupe(doc, modele, opts, entete) {
                 if (!cellule) return;
                 const cx = data.cell.x + data.cell.width / 2;
                 const cy = data.cell.y + data.cell.height / 2;
-                if (cellule.etat === 'present') dessinerCrochet(doc, cx, cy, 2.2);
-                else if (cellule.etat === 'absent') dessinerCroix(doc, cx, cy, 2.0);
-                else if (cellule.etat === 'partiel' && cellule.texte) {
+                const ecrire = function(texte) {
                     doc.setFont('helvetica', 'normal');
-                    doc.setFontSize(6.5);
+                    doc.setFontSize(5.5);
                     doc.setTextColor(0, 0, 0);
-                    doc.text(cellule.texte, cx, cy + 0.8, { align: 'center' });
+                    doc.text(texte, cx, cy + 0.7, { align: 'center' });
+                };
+                if (notation === 'chiffre') {
+                    if (cellule.etat !== 'vide') ecrire(String(cellule.periodes).replace('.', ','));
+                } else if (notation === 'x') {
+                    // Convention « marquer les absences » : présence complète = rien
+                    if (cellule.etat === 'absent') dessinerCroix(doc, cx, cy, 1.8);
+                    else if (cellule.etat === 'partiel' && cellule.texte) ecrire(cellule.texte);
+                } else {
+                    if (cellule.etat === 'present') dessinerCrochet(doc, cx, cy, 2.0);
+                    else if (cellule.etat === 'absent') dessinerCroix(doc, cx, cy, 1.8);
+                    else if (cellule.etat === 'partiel' && cellule.texte) ecrire(cellule.texte);
                 }
             }
         });
 
-        // Légende sous le tableau
+        // Légende sous le tableau, adaptée à la notation choisie
         const yLegende = Math.min(doc.lastAutoTable.finalY + 6, PAGE_HAUTEUR - 8);
-        doc.setFontSize(7.5);
-        doc.setTextColor(70, 70, 70);
-        dessinerCrochet(doc, MARGE + 2, yLegende - 1, 2.2);
-        doc.text('présence complète', MARGE + 5, yLegende);
-        dessinerCroix(doc, MARGE + 34, yLegende - 1, 2.0);
-        doc.text('absence', MARGE + 37, yLegende);
-        doc.text('chiffre = périodes présentes (partielle)', MARGE + 53, yLegende);
-        doc.text('case vide = séance à saisir (remplir au crayon, reporter dans Labo Codex)', MARGE + 105, yLegende);
+        dessinerLegende(doc, yLegende, notation);
     }
+}
+
+/**
+ * Légende de bas de feuille, selon la notation des cases.
+ * Segments dessinés de gauche à droite avec largeurs mesurées.
+ */
+function dessinerLegende(doc, y, notation) {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(70, 70, 70);
+
+    const finPapier = 'case vide = séance à saisir (remplir au crayon, reporter dans Labo Codex)';
+    let segments;
+    if (notation === 'chiffre') {
+        segments = [
+            { texte: 'chiffre = périodes présentes (0 = absence)' },
+            { texte: finPapier }
+        ];
+    } else if (notation === 'x') {
+        segments = [
+            { marque: 'croix', texte: 'absence' },
+            { texte: 'chiffre = présence partielle (périodes)' },
+            { texte: 'sans marque = présence complète' },
+            { texte: finPapier }
+        ];
+    } else {
+        segments = [
+            { marque: 'crochet', texte: 'présence complète' },
+            { marque: 'croix', texte: 'absence' },
+            { texte: 'chiffre = périodes présentes (partielle)' },
+            { texte: finPapier }
+        ];
+    }
+
+    let x = MARGE;
+    segments.forEach(function(segment) {
+        if (segment.marque === 'crochet') { dessinerCrochet(doc, x + 1.2, y - 1, 2.0); x += 3.4; }
+        else if (segment.marque === 'croix') { dessinerCroix(doc, x + 1.2, y - 1, 1.8); x += 3.4; }
+        doc.text(segment.texte, x, y);
+        x += doc.getTextWidth(segment.texte) + 5;
+    });
 }
 
 /** Pagination « p. X/Y » sur toutes les pages, en pied de page. */
@@ -499,7 +573,7 @@ function genererRapportPresencesPDF() {
 
         dessinerFeuilleGroupe(doc, modele, opts, {
             cours: infosCours.sigleTitre || infosCours.sigle || 'cours actif',
-            sousTitre: `${libelleGroupe}${nomTrimestre ? ' · ' + nomTrimestre : ''} · générée le ${aujourdhui}`
+            sousTitre: `${libelleGroupe}${nomTrimestre ? ' · ' + nomTrimestre : ''} · générée le ${formaterDateFrancaise(aujourdhui)}`
         });
     });
 

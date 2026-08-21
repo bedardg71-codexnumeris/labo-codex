@@ -3,7 +3,17 @@
 > **Créées le** : 21 août 2026 (session cloud, branche fusionnée dans `main`)
 > **Artefact interactif (l'opération — cocher, mesurer, copier le relevé)** :
 > <https://claude.ai/code/artifact/8f29a55c-76ef-4e8d-8c0f-66d9ea1c2011>
-> **État** : ⏳ AUCUNE porte traitée — tout est dû.
+> **État** : ✅ RELEVÉ REÇU le 21 août (même jour) — **14 passées · 1 échec ·
+> 0 non traitée**. L'échec (2.14, épreuve du papier : dates d'en-tête
+> tronquées « 21… » + police trop grande) est **corrigé en 1.91.0** ; les
+> verdicts 3.1 (réduire la police des cases — appliqué) et 3.2 (nom « Grille
+> imprimable » gardé) sont actés. 1.91.0 ajoute aussi la notation des cases
+> au choix (crochet / X / chiffre), demandée au retour du relevé.
+> ⏳ **REPRISE DUE** : refaire 0.1 (`git pull`, attendu ≥ 1.91.0) puis 2.14
+> (impression réelle — dates complètes, police réduite) et vérifier le
+> nouveau sélecteur « Notation des cases » (3 PDF, légende assortie).
+> D'autres retouches sont annoncées par Grégoire — la liste de reprise
+> sera consolidée après leur livraison.
 > **Règle** : ce qui échoue devient un item de backlog avec son numéro de
 > porte, pas une note mentale.
 

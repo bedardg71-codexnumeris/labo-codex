@@ -86,7 +86,8 @@
             programme: true,
             nomProgramme: false,
             sa: true,
-            portee: 'actif'
+            portee: 'actif',
+            notation: 'crochet'
         },
 
         // Disposition de la réserve « Non planifié » du planificateur
