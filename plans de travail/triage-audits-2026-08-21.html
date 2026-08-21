@@ -1,0 +1,834 @@
+<meta charset="utf-8">
+<title>Triage des audits d'août</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@600;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    --papier: #f5f7f9; --carte: #ffffff; --encre: #1d2b38; --encre-douce: #5b6b7a;
+    --ligne: #dbe3e9; --accent: #0e6e6e; --accent-fond: #e3f0ef; --accent-vif: #0e6e6e;
+    --majeur: #b4560a; --majeur-fond: #f9ede2; --mineur: #64748c; --mineur-fond: #eef1f5;
+    --fait: #2e7d4f; --fait-fond: #e6f2ea; --note-sev: #8794a1;
+    --champ: #fbfcfd; --ombre: 0 1px 3px rgba(29, 43, 56, .08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --papier: #131a21; --carte: #1a232c; --encre: #e6edf3; --encre-douce: #93a4b3;
+      --ligne: #2a3641; --accent: #4cc4c0; --accent-fond: #12312f; --accent-vif: #4cc4c0;
+      --majeur: #e8925a; --majeur-fond: #33220f; --mineur: #94a6ba; --mineur-fond: #222c37;
+      --fait: #5fbf8a; --fait-fond: #12291b; --note-sev: #7c8894;
+      --champ: #141d25; --ombre: 0 1px 3px rgba(0, 0, 0, .4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --papier: #131a21; --carte: #1a232c; --encre: #e6edf3; --encre-douce: #93a4b3;
+    --ligne: #2a3641; --accent: #4cc4c0; --accent-fond: #12312f; --accent-vif: #4cc4c0;
+    --majeur: #e8925a; --majeur-fond: #33220f; --mineur: #94a6ba; --mineur-fond: #222c37;
+    --fait: #5fbf8a; --fait-fond: #12291b; --note-sev: #7c8894;
+    --champ: #141d25; --ombre: 0 1px 3px rgba(0, 0, 0, .4);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--papier); color: var(--encre);
+    font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+    font-size: 16px; line-height: 1.55;
+  }
+  .cadre { max-width: 900px; margin: 0 auto; padding: 0 20px 80px; }
+  h1, h2, h3 { font-family: "Bitter", Georgia, serif; text-wrap: balance; }
+  h1 { font-size: 1.7rem; font-weight: 700; margin: 28px 0 4px; }
+  h2 { font-size: 1.25rem; font-weight: 700; margin: 42px 0 6px; padding-top: 18px; border-top: 3px solid var(--encre); }
+  .sous-titre { color: var(--encre-douce); margin: 0 0 6px; }
+  .contexte { color: var(--encre-douce); font-size: .95rem; max-width: 66ch; }
+  .mono, .puce-id, #compteur { font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+
+  /* Barre collante */
+  .barre {
+    position: sticky; top: 0; z-index: 10; background: var(--papier);
+    border-bottom: 1px solid var(--ligne); padding: 10px 0; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  }
+  #compteur { font-size: .95rem; font-weight: 600; }
+  #compteur .plein { color: var(--accent); }
+  .filtres { display: flex; gap: 6px; }
+  .filtres button {
+    font: inherit; font-size: .85rem; padding: 4px 12px; border-radius: 999px;
+    border: 1px solid var(--ligne); background: var(--carte); color: var(--encre-douce); cursor: pointer;
+  }
+  .filtres button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--papier); }
+  .btn-export {
+    font: inherit; font-size: .9rem; font-weight: 600; margin-left: auto;
+    padding: 7px 16px; border-radius: 8px; border: none; cursor: pointer;
+    background: var(--accent); color: var(--papier);
+  }
+  .btn-export:focus-visible, .filtres button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* Rangée de décision */
+  .rangee {
+    background: var(--carte); border: 1px solid var(--ligne); border-left: 5px solid var(--mineur);
+    border-radius: 10px; box-shadow: var(--ombre); padding: 16px 18px; margin: 14px 0;
+  }
+  .rangee[data-sev="majeur"] { border-left-color: var(--majeur); }
+  .rangee[data-sev="fond"] { border-left-color: var(--accent); }
+  .rangee[data-sev="fait"] { border-left-color: var(--fait); }
+  .rangee.tranchee { outline: 1px solid var(--accent); outline-offset: -1px; }
+  .rangee-tete { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .puce-id {
+    font-size: .78rem; font-weight: 600; letter-spacing: .03em;
+    background: var(--mineur-fond); color: var(--mineur); border-radius: 6px; padding: 2px 8px;
+  }
+  .rangee[data-sev="majeur"] .puce-id { background: var(--majeur-fond); color: var(--majeur); }
+  .rangee[data-sev="fond"] .puce-id { background: var(--accent-fond); color: var(--accent); }
+  .rangee[data-sev="fait"] .puce-id { background: var(--fait-fond); color: var(--fait); }
+  .rangee-titre { font-weight: 700; font-size: 1.02rem; }
+  .etat-rangee { margin-left: auto; font-size: .78rem; color: var(--encre-douce); }
+  .rangee.tranchee .etat-rangee { color: var(--accent); font-weight: 600; }
+  .pourquoi { margin: 8px 0 4px; color: var(--encre-douce); font-size: .95rem; max-width: 70ch; }
+  details { margin: 8px 0 2px; }
+  summary { cursor: pointer; color: var(--accent); font-size: .9rem; font-weight: 600; }
+  details ul { margin: 8px 0 4px; padding-left: 20px; font-size: .92rem; color: var(--encre-douce); }
+  details li { margin: 3px 0; }
+  details li b { color: var(--encre); font-weight: 600; }
+
+  /* Choix (radios en pastilles) */
+  .choix { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 10px; }
+  .choix label {
+    display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
+    border: 1.5px solid var(--ligne); border-radius: 8px; padding: 6px 12px;
+    font-size: .92rem; background: var(--champ);
+  }
+  .choix input { accent-color: var(--accent); margin: 0; }
+  .choix label:has(input:checked) { border-color: var(--accent); background: var(--accent-fond); font-weight: 600; }
+  .choix label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .note-champ { width: 100%; }
+  .note-champ textarea {
+    width: 100%; font: inherit; font-size: .92rem; color: var(--encre);
+    background: var(--champ); border: 1px solid var(--ligne); border-radius: 8px;
+    padding: 8px 10px; min-height: 38px; resize: vertical;
+  }
+  .note-champ textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  /* Export */
+  #zone-export { display: none; margin: 16px 0; }
+  #zone-export.visible { display: block; }
+  #texte-export {
+    width: 100%; height: 260px; font-family: "IBM Plex Mono", monospace; font-size: .8rem;
+    background: var(--champ); color: var(--encre); border: 1px solid var(--accent); border-radius: 8px; padding: 10px;
+  }
+  .msg-export { font-size: .9rem; color: var(--fait); font-weight: 600; }
+
+  .legende { display: flex; gap: 14px; flex-wrap: wrap; font-size: .85rem; color: var(--encre-douce); margin: 10px 0 0; }
+  .legende span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; }
+  .legende .l-fond::before { background: var(--accent); }
+  .legende .l-majeur::before { background: var(--majeur); }
+  .legende .l-mineur::before { background: var(--mineur); }
+  .legende .l-fait::before { background: var(--fait); }
+  .encart {
+    background: var(--accent-fond); border: 1px solid var(--accent); border-radius: 10px;
+    padding: 12px 16px; margin: 14px 0; font-size: .95rem; max-width: 74ch;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .rangee { transition: outline-color .15s ease; }
+  }
+</style>
+
+<div class="cadre">
+  <h1>Triage des audits d'août</h1>
+  <p class="sous-titre">Cadre du trimestre (session 1) + Conception (session 2 et addendum) · référence 1.88.6</p>
+  <p class="contexte">
+    Les deux audits ont produit <b>67 constats</b>. Les deux Bloquants sont déjà corrigés
+    (CT-01 en 1.88.5, CO-01 en 1.88.6) ; quatre entrées de juin sont réglées ou résorbées.
+    Reste <b>27 décisions</b> : 4 décisions de fond, 9 lots de correctifs, et 14 items isolés.
+    Chaque rangée attend un <b>choix explicite</b> — rien n'est coché d'avance, et une rangée
+    sans choix compte comme « non tranchée ». Tes réponses restent dans ce navigateur ;
+    termine par <b>« Copier mes décisions »</b> et colle le relevé dans la conversation.
+  </p>
+  <div class="legende">
+    <span class="l-fond">décision de fond</span>
+    <span class="l-majeur">lot ou item majeur</span>
+    <span class="l-mineur">item mineur</span>
+    <span class="l-fait">déjà réglé</span>
+  </div>
+
+  <div class="barre">
+    <span id="compteur" role="status"><span class="plein">0</span>/27 tranchées</span>
+    <div class="filtres" role="group" aria-label="Filtrer les rangées">
+      <button type="button" data-filtre="toutes" aria-pressed="true">Toutes</button>
+      <button type="button" data-filtre="a-faire" aria-pressed="false">À trancher</button>
+      <button type="button" data-filtre="tranchees" aria-pressed="false">Tranchées</button>
+    </div>
+    <button type="button" class="btn-export" id="btn-export">Copier mes décisions</button>
+  </div>
+  <div id="zone-export">
+    <p class="msg-export" id="msg-export"></p>
+    <textarea id="texte-export" readonly aria-label="Relevé des décisions"></textarea>
+  </div>
+
+  <!-- ======================= §1 DÉCISIONS DE FOND ======================= -->
+  <h2>§1 · Quatre décisions de fond</h2>
+  <p class="contexte">Elles commandent le reste : plusieurs lots du §2 changent de forme selon
+  ce que tu choisis ici. Le champ de notes accueille toute autre option que celles proposées.</p>
+
+  <div class="rangee" data-sev="fond" data-id="D1">
+    <div class="rangee-tete"><span class="puce-id">D1</span>
+      <span class="rangee-titre">Le régime des cartouches de rétroaction</span>
+      <span class="etat-rangee">non tranchée</span></div>
+    <p class="pourquoi">Les cartouches sont la seule famille encore partagée entre tous les
+    trimestres ET avec la démo. Conséquences vécues : une cartouche survit à la suppression de
+    sa grille (magasin fantôme, exporté quand même), une cartouche créée pendant la démo peut
+    apparaître dans le réel, et en trimestre archivé l'éditeur écrit ailleurs que là où
+    l'évaluation lit. (CO-33, CO-04, CO-38)</p>
+    <div class="choix" role="radiogroup" aria-label="Décision D1">
+      <label><input type="radio" name="D1" value="Namespacer par trimestre, comme les grilles et échelles (chantier migration)"> Namespacer par trimestre (comme le reste)</label>
+      <label><input type="radio" name="D1" value="Rester globale, mais assumée : documenter le régime et fermer les trous (suppression, archive, démo)"> Rester globale, mais fermer les trous</label>
+      <label><input type="radio" name="D1" value="À discuter en session dédiée avant de trancher"> À discuter en session dédiée</label>
+    </div>
+    <div class="note-champ"><textarea data-note="D1" placeholder="Nuance, condition, autre option…"></textarea></div>
+  </div>
+
+  <div class="rangee" data-sev="fond" data-id="D2">
+    <div class="rangee-tete"><span class="puce-id">D2</span>
+      <span class="rangee-titre">Les huit échelles de collègues embarquées dans le code</span>
+      <span class="etat-rangee">non tranchée</span></div>
+    <p class="pourquoi">Huit échelles nominatives (Bruno, Xavier, Isabelle, Hélène…) sont
+    recréées par le code à chaque démarrage et semées dans chaque nouveau trimestre : 9 échelles
+    avant ta première action. Impossible de les mettre à jour sans release, et leur semis viole
+    la règle #358 (le global nu se re-remplit). À l'ère du partage signé et de la Voûte, du
+    matériel de collègues dans le code interroge. (CO-31, CO-11)</p>
+    <div class="choix" role="radiogroup" aria-label="Décision D2">
+      <label><input type="radio" name="D2" value="Retirer du code et migrer vers la bibliothèque partagée ou des packages de partage"> Retirer du code → bibliothèque/partage</label>
+      <label><input type="radio" name="D2" value="Garder, mais ne plus semer : garde anti-resemage + présence dans la Bibliothèque seulement"> Garder, mais ne plus semer d'office</label>
+      <label><input type="radio" name="D2" value="Garder tel quel (assumé)"> Garder tel quel</label>
+    </div>
+    <div class="note-champ"><textarea data-note="D2" placeholder="Nuance, condition, autre option…"></textarea></div>
+  </div>
+
+  <div class="rangee" data-sev="fond" data-id="D3">
+    <div class="rangee-tete"><span class="puce-id">D3</span>
+      <span class="rangee-titre">Une politique de suppression unifiée (façon #449)</span>
+      <span class="etat-rangee">non tranchée</span></div>
+    <p class="pourquoi">Supprimer une fiche de cours est bien gardé depuis #449 (refus explicite
+    qui nomme ce qui s'y rattache). Mais supprimer une grille, une échelle, une pratique, une
+    production, une cartouche, un horaire ou un profil d'enseignant passe avec un simple
+    « Cette action est irréversible » — même référencés partout. Résultat vécu : des sélecteurs
+    qui se vident sans explication, des notes calculées sur une échelle disparue. (CT-02, CO-03)</p>
+    <div class="choix" role="radiogroup" aria-label="Décision D3">
+      <label><input type="radio" name="D3" value="Recensement façon #449 généralisé aux 7 familles (un seul patron, gros chantier)"> Recensement #449 sur les 7 familles</label>
+      <label><input type="radio" name="D3" value="D'abord des gardes minimales (nommer les référents dans la confirmation), recensement complet plus tard"> Gardes minimales d'abord, recensement ensuite</label>
+      <label><input type="radio" name="D3" value="À discuter en session dédiée"> À discuter en session dédiée</label>
+    </div>
+    <div class="note-champ"><textarea data-note="D3" placeholder="Nuance, condition, autre option…"></textarea></div>
+  </div>
+
+  <div class="rangee" data-sev="fond" data-id="D4">
+    <div class="rangee-tete"><span class="puce-id">D4</span>
+      <span class="rangee-titre">La PR #63 oubliée (finitions du wizard, juin)</span>
+      <span class="etat-rangee">non tranchée</span></div>
+    <p class="pourquoi">L'archive du backlog dit « #343-T3/T4 RÉSOLUS le 23 juin » — mais la
+    correction n'a jamais été fusionnée : la PR #63 est restée ouverte presque deux mois. Trois
+    de tes reliquats de juin sont donc encore là : pas d'infobulle sur les tags de famille,
+    « Variante : eliminee » affiché brut, « suggestion statistique » ici et « holistique » là.
+    Quel que soit ton choix, la mention trompeuse de l'archive sera corrigée. (CO-36)</p>
+    <div class="choix" role="radiogroup" aria-label="Décision D4">
+      <label><input type="radio" name="D4" value="Rebaser la PR #63 sur 1.88.6 et la fusionner"> Rebaser et fusionner la PR #63</label>
+      <label><input type="radio" name="D4" value="Fermer la PR #63 et rejouer les 3 micro-fixes à neuf (T3, T4a, T4d)"> Fermer la PR, rejouer les 3 micro-fixes</label>
+      <label><input type="radio" name="D4" value="Laisser la PR en attente (motif en note)"> Laisser en attente (dire pourquoi)</label>
+    </div>
+    <div class="note-champ"><textarea data-note="D4" placeholder="Nuance, condition, autre option…"></textarea></div>
+  </div>
+
+  <!-- ======================= §2 LOTS ======================= -->
+  <h2>§2 · Neuf lots de correctifs</h2>
+  <p class="contexte">Les deux audits ont trouvé les <b>mêmes familles de défauts</b> des deux
+  côtés — d'où des lots transverses plutôt que 60 correctifs isolés. Pour chaque lot : une
+  priorité. « Maintenant » = prochain cycle de travail ; les lots se feront un par un, dans
+  l'ordre que tes réponses dessinent.</p>
+
+  <div class="rangee" data-sev="majeur" data-id="L1">
+    <div class="rangee-tete"><span class="puce-id">L1</span>
+      <span class="rangee-titre">Suppressions gardées (dépend de D3)</span>
+      <span class="etat-rangee">non tranchée</span></div>
+    <p class="pourquoi">Brancher des gardes sur toutes les suppressions d'entités référencées,
+    et régler le sort des magasins de cartouches quand leur grille disparaît.</p>
+    <details><summary>Contenu du lot (6 constats)</summary><ul>
+      <li><b>CT-02</b> — supprimer un horaire ou un profil d'enseignant référencé : aucun avertissement, le groupe-cours se vide en silence.</li>
+      <li><b>CO-03</b> — même chose pour grille/échelle/pratique/production/cartouche ; « écraser » un doublon supprime par NOM tous les homonymes.</li>
+      <li><b>CO-04</b> — les cartouches survivent à la suppression de leur grille (magasin fantôme exporté).</li>
+      <li><b>CO-38</b> — idem quand la grille disparaît par « écraser » un homonyme.</li>
+      <li><b>CT-08</b> — le recensement #449 ignore les fichiers de travaux et la carte mentale (un cours peut être supprimé en les laissant orphelins).</li>
+      <li><b>CT-21</b> — supprimer le dernier trimestre fait retomber l'app sur les vieilles clés ; une grille archivée référencée ailleurs peut disparaître.</li>
+    </ul></details>
+    <div class="choix" role="radiogroup" aria-label="Priorité L1">
+      <label><input type="radio" name="L1" value="Maintenant"> Maintenant</label>
+      <label><input type="radio" name="L1" value="Bientôt"> Bientôt</label>
+      <label><input type="radio" name="L1" value="Plus tard"> Plus tard</label>
+      <label><input type="radio" name="L1" value="Écarter"> Écarter</label>
+    </div>
+    <div class="note-champ"><textarea data-note="L1" placeholder="Ordre interne, réserve…"></textarea></div>
+  </div>
+
+  <div class="rangee" data-sev="majeur" data-id="L2">
+    <div class="rangee-tete"><span class="puce-id">L2</span>
+      <span class="rangee-titre">Clés nues : résurrections, replis et migrations écrasantes</span>
+      <span class="etat-rangee">non tranchée</span></div>
+    <p class="pourquoi">La vieille génération de clés (« avant les trimestres ») ressuscite par
+    plusieurs chemins : des données périmées réapparaissent dans un trimestre neuf, une durée de
+    période « migrée » retombe à 55 min, la démo lit ta vraie durée, et une migration au
+    démarrage peut écraser des données vivantes.</p>
+    <details><summary>Contenu du lot (8 constats)</summary><ul>
+      <li><b>CT-07</b> — la durée de période vit dans une clé partagée entre tous les trimestres ; sa migration écrit dans le vide, la démo lit la vraie valeur.</li>
+      <li><b>CO-09</b> — ~50 lectures de pratiques retombent sur la liste d'avant le 24 mai : un trimestre neuf ressuscite des pratiques périmées.</li>
+      <li><b>CO-10</b> — une migration à CHAQUE démarrage recopie tout résidu ancien dans le trimestre actif, en écrasant ce qui s'y trouve.</li>
+      <li><b>CO-11</b> — le semis des 8 échelles collègues recrée la clé nue interdite à chaque boot (lié à D2).</li>
+      <li><b>CT-11</b> — deux systèmes d'horaire coexistent ; un trimestre neuf peut resservir les séances du précédent.</li>
+      <li><b>CT-12</b> — entité Horaires dormante sur la clé nue, prête à se réveiller.</li>
+      <li><b>CO-19</b> — un résidu d'échelle ancien PRIME sur l'échelle du trimestre dans les conversions des profils étudiants.</li>
+      <li><b>CT-26 / CO-02</b> — toute clé inconnue passe sans bruit (mécanique commune), et la garde anti-démo interroge les mauvaises clés : elle ne protège plus grilles/échelles.</li>
+    </ul></details>
+    <div class="choix" role="radiogroup" aria-label="Priorité L2">
+      <label><input type="radio" name="L2" value="Maintenant"> Maintenant</label>
+      <label><input type="radio" name="L2" value="Bientôt"> Bientôt</label>
+      <label><input type="radio" name="L2" value="Plus tard"> Plus tard</label>
+      <label><input type="radio" name="L2" value="Écarter"> Écarter</label>
+    </div>
+    <div class="note-champ"><textarea data-note="L2" placeholder="Ordre interne, réserve…"></textarea></div>
+  </div>
+
+  <div class="rangee" data-sev="majeur" data-id="L3">
+    <div class="rangee-tete"><span class="puce-id">L3</span>
+      <span class="rangee-titre">Moteur des pratiques : ce que tu configures n'est pas ce qui calcule</span>
+      <span class="etat-rangee">non tranchée</span></div>
+    <p class="pourquoi">Le plus lourd côté Conception : des réglages qui n'atteignent jamais le
+    calcul, des zéros certifiés à tort, des erreurs affichées sur des gestes réussis.</p>
+    <details><summary>Contenu du lot (7 constats)</summary><ul>
+      <li><b>CO-07</b> — une pratique Spécifications créée par toi ne calcule JAMAIS par paliers (seule la démo y arrive) ; désactiver les jetons ne les désactive pas ; retoucher une copie ne change pas sa note.</li>
+      <li><b>CO-06</b> — en Dénotation, enregistrer un jugement sans note produit un vrai 0 certifié ; rééditer la pratique peut replafonner des jugements déjà rendus.</li>
+      <li><b>CO-08</b> — activer une pratique créée à l'assistant affiche « Erreur » alors que l'activation a réussi.</li>
+      <li><b>CO-13</b> — une échelle disparue est remplacée en silence par une échelle codée en dur : notes altérées sans signal.</li>
+      <li><b>CO-22</b> — l'instance en cache sert des calculs périmés après une bascule ou une retouche.</li>
+      <li><b>CO-23</b> — diagnostics faussés (assiduité figée à 0,85 en SOM, cible d'intervention toujours « Aucun » en SPE).</li>
+      <li><b>#326 résiduel</b> — les copies d'avant le 21 juin s'ouvrent encore vides dans l'assistant (cas de données legacy).</li>
+    </ul></details>
+    <div class="choix" role="radiogroup" aria-label="Priorité L3">
+      <label><input type="radio" name="L3" value="Maintenant"> Maintenant</label>
+      <label><input type="radio" name="L3" value="Bientôt"> Bientôt</label>
+      <label><input type="radio" name="L3" value="Plus tard"> Plus tard</label>
+      <label><input type="radio" name="L3" value="Écarter"> Écarter</label>
+    </div>
+    <div class="note-champ"><textarea data-note="L3" placeholder="Ordre interne, réserve…"></textarea></div>
+  </div>
+
+  <div class="rangee" data-sev="majeur" data-id="L4">
+    <div class="rangee-tete"><span class="puce-id">L4</span>
+      <span class="rangee-titre">Bascule de trimestre : formulaires et contexte non réinitialisés</span>
+      <span class="etat-rangee">non tranchée</span></div>
+    <p class="pourquoi">Le scénario type d'une rentrée : préparer le trimestre suivant en
+    consultant l'actuel. Aujourd'hui, plusieurs surfaces gardent l'ancien contexte et des
+    modifications se perdent avec un message de succès.</p>
+    <details><summary>Contenu du lot (6 constats)</summary><ul>
+      <li><b>CT-05</b> — « + Nouveau trimestre » avec activation garde le groupe-cours et le cours de l'ANCIEN trimestre ; au retour, le groupe actif n'est pas restauré.</li>
+      <li><b>CT-06</b> — modifier une « journée sans cours » à cheval sur une bascule : « Journée modifiée » affiché, rien d'enregistré.</li>
+      <li><b>CO-16</b> — les quatre éditeurs de Conception ne sont ni rechargés ni réinitialisés à la bascule : « sauvegardée ! » sans écriture.</li>
+      <li><b>CT-17</b> — sélectionner un élément disparu laisse le formulaire précédent affiché, sans retour.</li>
+      <li><b>CO-20</b> — la sauvegarde d'une cartouche peut recharger la MAUVAISE cartouche dans le formulaire.</li>
+      <li><b>CO-21</b> — changer le type d'un critère affiche « Aucun critère défini » (les données sont sauves, l'écran ment).</li>
+    </ul></details>
+    <div class="choix" role="radiogroup" aria-label="Priorité L4">
+      <label><input type="radio" name="L4" value="Maintenant"> Maintenant</label>
+      <label><input type="radio" name="L4" value="Bientôt"> Bientôt</label>
+      <label><input type="radio" name="L4" value="Plus tard"> Plus tard</label>
+      <label><input type="radio" name="L4" value="Écarter"> Écarter</label>
+    </div>
+    <div class="note-champ"><textarea data-note="L4" placeholder="Ordre interne, réserve…"></textarea></div>
+  </div>
+
+  <div class="rangee" data-sev="majeur" data-id="L5">
+    <div class="rangee-tete"><span class="puce-id">L5</span>
+      <span class="rangee-titre">Sécurité : échappement et imports non assainis</span>
+      <span class="etat-rangee">non tranchée</span></div>
+    <p class="pourquoi">La règle n°1 du projet (échapper toute donnée affichée) a des oublis
+    ponctuels sur les écrans les plus visibles, et les vieux imports JSON contournent toute la
+    couche d'assainissement construite pour le partage signé.</p>
+    <details><summary>Contenu du lot (4 constats)</summary><ul>
+      <li><b>CT-09</b> — sites non échappés côté Cadre (horaires, enseignants, listes) + 3 gabarits morts prêts à se réveiller.</li>
+      <li><b>CO-14</b> — idem côté Conception (barres latérales, modales de bibliothèque, sous-critères) ; deux imports peuvent REMPLACER des items légitimes par collision d'identifiant.</li>
+      <li><b>CO-39</b> — exports/imports JSON des bibliothèques : aucun assainissement, écrasement silencieux par id — seul le chemin signé .lcz est protégé.</li>
+      <li><b>CT-29</b> — le helper d'échappement n'encode pas les guillemets (limite structurelle, à garder pour la Voûte).</li>
+    </ul></details>
+    <div class="choix" role="radiogroup" aria-label="Priorité L5">
+      <label><input type="radio" name="L5" value="Maintenant"> Maintenant</label>
+      <label><input type="radio" name="L5" value="Bientôt"> Bientôt</label>
+      <label><input type="radio" name="L5" value="Plus tard"> Plus tard</label>
+      <label><input type="radio" name="L5" value="Écarter"> Écarter</label>
+    </div>
+    <div class="note-champ"><textarea data-note="L5" placeholder="Ordre interne, réserve…"></textarea></div>
+  </div>
+
+  <div class="rangee" data-sev="majeur" data-id="L6">
+    <div class="rangee-tete"><span class="puce-id">L6</span>
+      <span class="rangee-titre">Boutons qui mentent et gestes qui plantent</span>
+      <span class="etat-rangee">non tranchée</span></div>
+    <p class="pourquoi">Des actions dont le résultat contredit le libellé, et deux gestes
+    nominaux qui déclenchent une erreur invisible.</p>
+    <details><summary>Contenu du lot (6 constats)</summary><ul>
+      <li><b>CT-13</b> — « Exporter » un cours n'exporte rien et retire la fiche de ta sélection.</li>
+      <li><b>CO-05</b> — supprimer une échelle : la suppression marche mais l'écran ne réagit plus (erreur interne) ; ajouter/retirer un niveau laisse un compteur périmé.</li>
+      <li><b>CO-12</b> — « Dupliquer » et « Adopter la maquette » réussissent… et la pratique reste invisible de la barre latérale.</li>
+      <li><b>CO-17</b> — chaque enregistrement d'une production la déverrouille, la réassigne au cours actif et peut effacer les échéances par groupe.</li>
+      <li><b>CO-18</b> — les cases à cocher du mode hybride ne s'affichent jamais (balise non fermée) : l'assignation des productions est impossible.</li>
+      <li><b>CO-25</b> — un gabarit supprimé de la bibliothèque revient au prochain chargement ; les gabarits de cartouches créent des coquilles vides.</li>
+    </ul></details>
+    <div class="choix" role="radiogroup" aria-label="Priorité L6">
+      <label><input type="radio" name="L6" value="Maintenant"> Maintenant</label>
+      <label><input type="radio" name="L6" value="Bientôt"> Bientôt</label>
+      <label><input type="radio" name="L6" value="Plus tard"> Plus tard</label>
+      <label><input type="radio" name="L6" value="Écarter"> Écarter</label>
+    </div>
+    <div class="note-champ"><textarea data-note="L6" placeholder="Ordre interne, réserve…"></textarea></div>
+  </div>
+
+  <div class="rangee" data-sev="majeur" data-id="L7">
+    <div class="rangee-tete"><span class="puce-id">L7</span>
+      <span class="rangee-titre">Grand retrait du code mort (zéro-dette)</span>
+      <span class="etat-rangee">non tranchée</span></div>
+    <p class="pourquoi">Les deux audits ont trouvé des pans entiers de code inactif mais ARMÉ :
+    d'anciennes générations d'écrans qui partagent les mêmes conteneurs que les vivants, une
+    pratique « test » chargée en production, des correctifs déclarés livrés mais posés dans du
+    code qui ne s'exécute jamais. Le cas d'école du projet (primo-accueil réveillé) est né
+    exactement de ça.</p>
+    <details><summary>Contenu du lot (3 constats)</summary><ul>
+      <li><b>CO-15</b> — îlot mort de pratiques.js (~la moitié du fichier), moteur descriptif sans appelant, pratique factice « test » en prod, config nominative chargée, ancienne génération grilles/échelles/cartouches, module pratique-notation-v2 aux cibles disparues.</li>
+      <li><b>CT-12</b> — entité Horaires + chaîne de migration morte (recoupe L2 : retrait = la moitié du correctif).</li>
+      <li><b>CT-23 / CT-24 / CO-34</b> — résidus ponctuels (variable morte, console résiduels, blocs vides).</li>
+    </ul></details>
+    <div class="choix" role="radiogroup" aria-label="Priorité L7">
+      <label><input type="radio" name="L7" value="Maintenant"> Maintenant</label>
+      <label><input type="radio" name="L7" value="Bientôt"> Bientôt</label>
+      <label><input type="radio" name="L7" value="Plus tard"> Plus tard</label>
+      <label><input type="radio" name="L7" value="Écarter"> Écarter</label>
+    </div>
+    <div class="note-champ"><textarea data-note="L7" placeholder="Ordre interne, réserve…"></textarea></div>
+  </div>
+
+  <div class="rangee" data-sev="mineur" data-id="L8">
+    <div class="rangee-tete"><span class="puce-id">L8</span>
+      <span class="rangee-titre">Vitesse : rendu différé et modales ménagées</span>
+      <span class="etat-rangee">non tranchée</span></div>
+    <p class="pourquoi">Au démarrage, tous les onglets sont dessinés en entier même masqués
+    (~148 Ko rien que pour Échelles) ; chaque action de bibliothèque détruit et reconstruit sa
+    modale (perte du défilement — sensible au doigt sur iPad).</p>
+    <details><summary>Contenu du lot (3 constats)</summary><ul>
+      <li><b>CT-20</b> — boot et bascule : travail différable, double rendu.</li>
+      <li><b>CT-18</b> — modales reconstruites à chaque action (Cadre).</li>
+      <li><b>CO-26</b> — six onglets Conception rendus au boot, magasins de cartouches réécrits à chaque visite.</li>
+    </ul></details>
+    <div class="choix" role="radiogroup" aria-label="Priorité L8">
+      <label><input type="radio" name="L8" value="Maintenant"> Maintenant</label>
+      <label><input type="radio" name="L8" value="Bientôt"> Bientôt</label>
+      <label><input type="radio" name="L8" value="Plus tard"> Plus tard</label>
+      <label><input type="radio" name="L8" value="Écarter"> Écarter</label>
+    </div>
+    <div class="note-champ"><textarea data-note="L8" placeholder="Ordre interne, réserve…"></textarea></div>
+  </div>
+
+  <div class="rangee" data-sev="mineur" data-id="L9">
+    <div class="rangee-tete"><span class="puce-id">L9</span>
+      <span class="rangee-titre">Documentation et registre des clés</span>
+      <span class="etat-rangee">non tranchée</span></div>
+    <p class="pourquoi">Les deux docs de janvier sont périmées sur l'essentiel (~15 points
+    chacune) et le registre de propriété des clés a pris du retard mesuré — toute session qui
+    s'y fie part sur de fausses prémisses.</p>
+    <details><summary>Contenu du lot (4 constats)</summary><ul>
+      <li><b>CT-25</b> — docs trimestres et pattern bibliothèque (janvier) : périmées.</li>
+      <li><b>CO-30</b> — docs évaluations-productions et pratiques : périmées aussi.</li>
+      <li><b>CT-27 / CO-32</b> — registre DATA-OWNERSHIP : écrivains manquants et deltas mesurés, à régénérer.</li>
+      <li>Corriger aussi la mention « RÉSOLUS » de BACKLOG-ARCHIVE:2465 (cf. D4).</li>
+    </ul></details>
+    <div class="choix" role="radiogroup" aria-label="Priorité L9">
+      <label><input type="radio" name="L9" value="Maintenant"> Maintenant</label>
+      <label><input type="radio" name="L9" value="Bientôt"> Bientôt</label>
+      <label><input type="radio" name="L9" value="Plus tard"> Plus tard</label>
+      <label><input type="radio" name="L9" value="Écarter"> Écarter</label>
+    </div>
+    <div class="note-champ"><textarea data-note="L9" placeholder="Ordre interne, réserve…"></textarea></div>
+  </div>
+
+  <!-- ======================= §3 ITEMS ISOLÉS ======================= -->
+  <h2>§3 · Quatorze items isolés</h2>
+  <p class="contexte">Hors des lots : chacun se traite seul. Même échelle de priorité.</p>
+
+  <div class="rangee" data-sev="majeur" data-id="I1">
+    <div class="rangee-tete"><span class="puce-id">I1 · CT-03</span>
+      <span class="rangee-titre">Le nom du groupe-cours se contredit à l'écran</span>
+      <span class="etat-rangee">non tranchée</span></div>
+    <p class="pourquoi">Le nom généré est figé à la sauvegarde : après un changement d'horaire,
+    la même carte affiche « (Mar-AM / Jeu-PM) » dans le titre et « Lun-Ven » dans la ligne
+    Horaire. C'est la cause du volet « désynchronisation » de ton signalement #328-T1.</p>
+    <div class="choix" role="radiogroup" aria-label="Priorité I1">
+      <label><input type="radio" name="I1" value="Maintenant"> Maintenant</label>
+      <label><input type="radio" name="I1" value="Bientôt"> Bientôt</label>
+      <label><input type="radio" name="I1" value="Plus tard"> Plus tard</label>
+      <label><input type="radio" name="I1" value="Écarter"> Écarter</label>
+    </div>
+    <div class="note-champ"><textarea data-note="I1" placeholder="Note…"></textarea></div>
+  </div>
+
+  <div class="rangee" data-sev="majeur" data-id="I2">
+    <div class="rangee-tete"><span class="puce-id">I2 · CT-04</span>
+      <span class="rangee-titre">Deux groupes le même jour : la 2ᵉ séance disparaît du calendrier</span>
+      <span class="etat-rangee">non tranchée</span></div>
+    <p class="pourquoi">La fusion des horaires ne garde qu'une séance par jour : si deux groupes
+    ont cours le mardi à des heures différentes, le calendrier et les présences ne voient jamais
+    la seconde.</p>
+    <div class="choix" role="radiogroup" aria-label="Priorité I2">
+      <label><input type="radio" name="I2" value="Maintenant"> Maintenant</label>
+      <label><input type="radio" name="I2" value="Bientôt"> Bientôt</label>
+      <label><input type="radio" name="I2" value="Plus tard"> Plus tard</label>
+      <label><input type="radio" name="I2" value="Écarter"> Écarter</label>
+    </div>
+    <div class="note-champ"><textarea data-note="I2" placeholder="Note…"></textarea></div>
+  </div>
+
+  <div class="rangee" data-sev="majeur" data-id="I3">
+    <div class="rangee-tete"><span class="puce-id">I3 · CT-10</span>
+      <span class="rangee-titre">Ton profil d'auteur écrasé par n'importe quel profil</span>
+      <span class="etat-rangee">non tranchée</span></div>
+    <p class="pourquoi">Sauvegarder le profil d'un·e collègue écrase « le profil de
+    l'utilisateur » : l'attribution d'auteur (exports PDF, licence CC) devient le dernier profil
+    édité — et un profil supprimé continue de s'afficher sur la carte du groupe-cours.</p>
+    <div class="choix" role="radiogroup" aria-label="Priorité I3">
+      <label><input type="radio" name="I3" value="Maintenant"> Maintenant</label>
+      <label><input type="radio" name="I3" value="Bientôt"> Bientôt</label>
+      <label><input type="radio" name="I3" value="Plus tard"> Plus tard</label>
+      <label><input type="radio" name="I3" value="Écarter"> Écarter</label>
+    </div>
+    <div class="note-champ"><textarea data-note="I3" placeholder="Note…"></textarea></div>
+  </div>
+
+  <div class="rangee" data-sev="mineur" data-id="I4">
+    <div class="rangee-tete"><span class="puce-id">I4 · CT-14</span>
+      <span class="rangee-titre">Le badge « 4/5 configurés » masque une référence brisée</span>
+      <span class="etat-rangee">non tranchée</span></div>
+    <p class="pourquoi">Cours et horaire ne comptent que s'ils se résolvent ; enseignant et
+    pratique comptent dès qu'un identifiant existe — même cassé.</p>
+    <div class="choix" role="radiogroup" aria-label="Priorité I4">
+      <label><input type="radio" name="I4" value="Maintenant"> Maintenant</label>
+      <label><input type="radio" name="I4" value="Bientôt"> Bientôt</label>
+      <label><input type="radio" name="I4" value="Plus tard"> Plus tard</label>
+      <label><input type="radio" name="I4" value="Écarter"> Écarter</label>
+    </div>
+    <div class="note-champ"><textarea data-note="I4" placeholder="Note…"></textarea></div>
+  </div>
+
+  <div class="rangee" data-sev="mineur" data-id="I5">
+    <div class="rangee-tete"><span class="puce-id">I5 · CT-15 + CO-24</span>
+      <span class="rangee-titre">Doublons créables en silence (avec le #291 déjà ouvert)</span>
+      <span class="etat-rangee">non tranchée</span></div>
+    <p class="pourquoi">Deux groupes-cours identiques, deux profils au même courriel, des
+    copies « X (copie) (copie) » qui s'empilent : les gardes de doublon ne couvrent que les
+    sauvegardes de formulaire, pas les duplications ni les imports.</p>
+    <div class="choix" role="radiogroup" aria-label="Priorité I5">
+      <label><input type="radio" name="I5" value="Maintenant"> Maintenant</label>
+      <label><input type="radio" name="I5" value="Bientôt"> Bientôt</label>
+      <label><input type="radio" name="I5" value="Plus tard"> Plus tard</label>
+      <label><input type="radio" name="I5" value="Écarter"> Écarter</label>
+    </div>
+    <div class="note-champ"><textarea data-note="I5" placeholder="Note…"></textarea></div>
+  </div>
+
+  <div class="rangee" data-sev="mineur" data-id="I6">
+    <div class="rangee-tete"><span class="puce-id">I6 · CT-16 + CT-19 + CT-22</span>
+      <span class="rangee-titre">Petit lot Cadre : annulations, doublons de nom, outil de diagnostic</span>
+      <span class="etat-rangee">non tranchée</span></div>
+    <p class="pourquoi">« Annuler » un horaire le rouvre au prochain passage ; deux trimestres
+    au même nom déclenchent une réécriture en boucle ; l'outil console de diagnostic sous-compte.</p>
+    <div class="choix" role="radiogroup" aria-label="Priorité I6">
+      <label><input type="radio" name="I6" value="Maintenant"> Maintenant</label>
+      <label><input type="radio" name="I6" value="Bientôt"> Bientôt</label>
+      <label><input type="radio" name="I6" value="Plus tard"> Plus tard</label>
+      <label><input type="radio" name="I6" value="Écarter"> Écarter</label>
+    </div>
+    <div class="note-champ"><textarea data-note="I6" placeholder="Note…"></textarea></div>
+  </div>
+
+  <div class="rangee" data-sev="mineur" data-id="I7">
+    <div class="rangee-tete"><span class="puce-id">I7 · CT-28</span>
+      <span class="rangee-titre">Micro-UX du parcours de rentrée (avec le regard design)</span>
+      <span class="etat-rangee">non tranchée</span></div>
+    <p class="pourquoi">Création de trimestre par fenêtres système, toast d'erreur qui ne dit
+    pas où créer le groupe, trimestre actif non présélectionné, aide en alert() de 12 lignes.</p>
+    <div class="choix" role="radiogroup" aria-label="Priorité I7">
+      <label><input type="radio" name="I7" value="Maintenant"> Maintenant</label>
+      <label><input type="radio" name="I7" value="Bientôt"> Bientôt</label>
+      <label><input type="radio" name="I7" value="Plus tard"> Plus tard</label>
+      <label><input type="radio" name="I7" value="Écarter"> Écarter</label>
+    </div>
+    <div class="note-champ"><textarea data-note="I7" placeholder="Note…"></textarea></div>
+  </div>
+
+  <div class="rangee" data-sev="mineur" data-id="I8">
+    <div class="rangee-tete"><span class="puce-id">I8 · CO-27</span>
+      <span class="rangee-titre">Importer des échelles d'un autre trimestre : aveugle aux archives</span>
+      <span class="etat-rangee">non tranchée</span></div>
+    <p class="pourquoi">La section « Importer d'un autre trimestre » ne voit jamais un trimestre
+    archivé côté échelles (elle cherche sous l'ancien nom de clé) ; grilles et échelles n'ont
+    pas le même comportement sous le même libellé.</p>
+    <div class="choix" role="radiogroup" aria-label="Priorité I8">
+      <label><input type="radio" name="I8" value="Maintenant"> Maintenant</label>
+      <label><input type="radio" name="I8" value="Bientôt"> Bientôt</label>
+      <label><input type="radio" name="I8" value="Plus tard"> Plus tard</label>
+      <label><input type="radio" name="I8" value="Écarter"> Écarter</label>
+    </div>
+    <div class="note-champ"><textarea data-note="I8" placeholder="Note…"></textarea></div>
+  </div>
+
+  <div class="rangee" data-sev="mineur" data-id="I9">
+    <div class="rangee-tete"><span class="puce-id">I9 · CO-28</span>
+      <span class="rangee-titre">Banc de décision : la terminale pèse 1 % de la note</span>
+      <span class="etat-rangee">non tranchée</span></div>
+    <p class="pourquoi">Dans le corpus généré du banc, toutes les productions pèsent 1 — le
+    portfolio fait 99 % et la terminale 1 %. Le Comparateur neutralise précisément ce qu'il
+    doit faire voir.</p>
+    <div class="choix" role="radiogroup" aria-label="Priorité I9">
+      <label><input type="radio" name="I9" value="Maintenant"> Maintenant</label>
+      <label><input type="radio" name="I9" value="Bientôt"> Bientôt</label>
+      <label><input type="radio" name="I9" value="Plus tard"> Plus tard</label>
+      <label><input type="radio" name="I9" value="Écarter"> Écarter</label>
+    </div>
+    <div class="note-champ"><textarea data-note="I9" placeholder="Note…"></textarea></div>
+  </div>
+
+  <div class="rangee" data-sev="mineur" data-id="I10">
+    <div class="rangee-tete"><span class="puce-id">I10 · CO-29</span>
+      <span class="rangee-titre">Robustesse diverse (faible exposition)</span>
+      <span class="etat-rangee">non tranchée</span></div>
+    <p class="pourquoi">Critères créés sans identifiant, deux modales au même id, réinitialisation
+    d'imports par un mécanisme déprécié (comportement iPad à éprouver), liste de suppressions qui
+    grossit sans borne.</p>
+    <div class="choix" role="radiogroup" aria-label="Priorité I10">
+      <label><input type="radio" name="I10" value="Maintenant"> Maintenant</label>
+      <label><input type="radio" name="I10" value="Bientôt"> Bientôt</label>
+      <label><input type="radio" name="I10" value="Plus tard"> Plus tard</label>
+      <label><input type="radio" name="I10" value="Écarter"> Écarter</label>
+    </div>
+    <div class="note-champ"><textarea data-note="I10" placeholder="Note…"></textarea></div>
+  </div>
+
+  <div class="rangee" data-sev="mineur" data-id="I11">
+    <div class="rangee-tete"><span class="puce-id">I11 · CO-35</span>
+      <span class="rangee-titre">Archiver un trimestre non actif embarquerait les mauvaises pratiques</span>
+      <span class="etat-rangee">non tranchée</span></div>
+    <p class="pourquoi">Le instantané d'archivage lit les pratiques du trimestre ACTIF, pas du
+    trimestre archivé (signalé par une passe, non contre-vérifié — à recouper avant tout
+    chantier d'archivage).</p>
+    <div class="choix" role="radiogroup" aria-label="Priorité I11">
+      <label><input type="radio" name="I11" value="Maintenant"> Maintenant</label>
+      <label><input type="radio" name="I11" value="Bientôt"> Bientôt</label>
+      <label><input type="radio" name="I11" value="Plus tard"> Plus tard</label>
+      <label><input type="radio" name="I11" value="Écarter"> Écarter</label>
+    </div>
+    <div class="note-champ"><textarea data-note="I11" placeholder="Note…"></textarea></div>
+  </div>
+
+  <div class="rangee" data-sev="mineur" data-id="I12">
+    <div class="rangee-tete"><span class="puce-id">I12 · CO-37 + CO-40</span>
+      <span class="rangee-titre">Pondérations : confirmation à ≠ 100 % et poids fantôme « 1 »</span>
+      <span class="etat-rangee">non tranchée</span></div>
+    <p class="pourquoi">Une grille dont les pondérations ne font pas 100 % se sauvegarde sans
+    question (le calcul se rattrape tout seul, mais rien ne te le dit) ; et une évaluation dont
+    la production a disparu entre au poids 1 dans la moyenne, en silence.</p>
+    <div class="choix" role="radiogroup" aria-label="Priorité I12">
+      <label><input type="radio" name="I12" value="Maintenant"> Maintenant</label>
+      <label><input type="radio" name="I12" value="Bientôt"> Bientôt</label>
+      <label><input type="radio" name="I12" value="Plus tard"> Plus tard</label>
+      <label><input type="radio" name="I12" value="Écarter"> Écarter</label>
+    </div>
+    <div class="note-champ"><textarea data-note="I12" placeholder="Note…"></textarea></div>
+  </div>
+
+  <div class="rangee" data-sev="mineur" data-id="I13">
+    <div class="rangee-tete"><span class="puce-id">I13 · #343-T5</span>
+      <span class="rangee-titre">Assistant : remonter les deux portes d'entrée enfouies</span>
+      <span class="etat-rangee">non tranchée</span></div>
+    <p class="pourquoi">« Je sais déjà ce que je veux » et « Je ne suis pas certain·e » restent
+    cachées à l'étape 2 — le parcours expert et le parcours hésitant passent par un écran de
+    trop. (Ta suggestion de juin, reportée à l'époque ; validation visuelle sur Mac requise.)</p>
+    <div class="choix" role="radiogroup" aria-label="Priorité I13">
+      <label><input type="radio" name="I13" value="Maintenant"> Maintenant</label>
+      <label><input type="radio" name="I13" value="Bientôt"> Bientôt</label>
+      <label><input type="radio" name="I13" value="Plus tard"> Plus tard</label>
+      <label><input type="radio" name="I13" value="Écarter"> Écarter</label>
+    </div>
+    <div class="note-champ"><textarea data-note="I13" placeholder="Note…"></textarea></div>
+  </div>
+
+  <div class="rangee" data-sev="mineur" data-id="I14">
+    <div class="rangee-tete"><span class="puce-id">I14 · CT-24 + CO-34</span>
+      <span class="rangee-titre">Trancher le sort de l'outil console de diagnostic</span>
+      <span class="etat-rangee">non tranchée</span></div>
+    <p class="pourquoi">L'outil de diagnostic des cours écrit dans la console (sa sortie EST sa
+    fonction) — violation littérale de la règle n°5 du projet, à assumer ou à reformer.</p>
+    <div class="choix" role="radiogroup" aria-label="Priorité I14">
+      <label><input type="radio" name="I14" value="Assumer (exception documentée à la règle n°5)"> Assumer (exception documentée)</label>
+      <label><input type="radio" name="I14" value="Reformer (sortie ailleurs que la console)"> Reformer</label>
+      <label><input type="radio" name="I14" value="Écarter"> Écarter</label>
+    </div>
+    <div class="note-champ"><textarea data-note="I14" placeholder="Note…"></textarea></div>
+  </div>
+
+  <!-- ======================= §4 ======================= -->
+  <h2>§4 · Déjà réglé, et ce que ce triage ne couvre pas</h2>
+
+  <div class="rangee" data-sev="fait" data-id="F1">
+    <div class="rangee-tete"><span class="puce-id">réglé</span>
+      <span class="rangee-titre">Corrigé ou résorbé — aucune action à décider</span></div>
+    <details open><summary>Détail (6 entrées)</summary><ul>
+      <li><b>CT-01</b> ✓ corrigé en 1.88.5 (#460) — changer le format d'un horaire n'écrase plus les séances saisies (sentinelle break-testée).</li>
+      <li><b>CO-01</b> ✓ corrigé en 1.88.6 (#461) — rouvrir une pratique dans l'assistant ne détruit plus sa fiche d'identité (sentinelle écrite avant le fix : rouge, puis verte).</li>
+      <li><b>#326-T3</b> ✓ déjà corrigé le 21 juin — l'édition depuis le banc est préremplie (vérifié par reproduction).</li>
+      <li><b>#326-T4</b> ✓ déjà corrigé le 21 juin — dériver une maquette n'ouvre plus l'assistant complet.</li>
+      <li><b>#343-T4b</b> ✓ résorbé (1.21.0) — le compteur d'étapes ne dépasse plus son total.</li>
+      <li><b>#343-T4c</b> ✓ résorbé — le libellé dit désormais « SOM, STD, SPE ou DEN ».</li>
+    </ul></details>
+  </div>
+
+  <div class="rangee" data-sev="mineur" data-id="F2">
+    <div class="rangee-tete"><span class="puce-id">angles morts</span>
+      <span class="rangee-titre">Ce que ce triage ne couvre pas</span></div>
+    <details open><summary>Détail</summary><ul>
+      <li>Les constats marqués [AGENT] dans les rapports n'ont pas tous été contre-vérifiés ligne à ligne ; quelques-uns [CODE] n'ont pas été rejoués à l'écran (bascule CO-16, cartouche croisée CO-20).</li>
+      <li>La <b>Carte d'alignement</b> est hors périmètre (auditée le 8 août, portes actives) ; la chaîne évaluation/annotation, le partage .lcz et l'écosystème Codex n'ont été audités qu'à leurs jonctions.</li>
+      <li>Rien n'a été éprouvé sur <b>Safari ni iPad</b> : chaque lot retenu ici recevra sa propre porte terrain à la livraison.</li>
+      <li>Les gestes navigateur encore dus des cycles précédents (réparation A25, réassignations H26, #450…) ne sont pas dans ce triage — ils restent listés au BACKLOG.</li>
+    </ul></details>
+  </div>
+
+  <p class="contexte" style="margin-top: 28px;">Quand tu as terminé (même partiellement) :
+  <b>« Copier mes décisions »</b> en haut, puis colle le relevé dans la conversation. Ce qui
+  reste non tranché reviendra au prochain passage — rien ne se perd, tout est réécrit dans le
+  markdown jumeau <span class="mono">plans de travail/TRIAGE-audits-2026-08-21.md</span>.</p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var CLE = 'triage-audits-2026-08-21';
+  var etat = {};
+  try { etat = JSON.parse(localStorage.getItem(CLE) || '{}'); } catch (e) { etat = {}; }
+
+  var rangees = Array.prototype.slice.call(document.querySelectorAll('.rangee[data-id]'))
+    .filter(function (r) { return r.querySelector('.choix'); });
+  var TOTAL = rangees.length;
+
+  function sauver() { try { localStorage.setItem(CLE, JSON.stringify(etat)); } catch (e) {} }
+
+  function majRangee(r) {
+    var id = r.getAttribute('data-id');
+    var coche = r.querySelector('input[type="radio"]:checked');
+    var badge = r.querySelector('.etat-rangee');
+    if (coche) { r.classList.add('tranchee'); if (badge) badge.textContent = 'tranchée'; }
+    else { r.classList.remove('tranchee'); if (badge) badge.textContent = 'non tranchée'; }
+  }
+
+  function majCompteur() {
+    var n = rangees.filter(function (r) { return r.querySelector('input[type="radio"]:checked'); }).length;
+    document.getElementById('compteur').innerHTML =
+      '<span class="plein">' + n + '</span>/' + TOTAL + ' tranchées';
+  }
+
+  // Restauration
+  rangees.forEach(function (r) {
+    var id = r.getAttribute('data-id');
+    var memo = etat[id] || {};
+    if (memo.choix) {
+      var radio = r.querySelector('input[type="radio"][value="' + memo.choix.replace(/"/g, '\\"') + '"]');
+      if (!radio) {
+        Array.prototype.forEach.call(r.querySelectorAll('input[type="radio"]'), function (x) {
+          if (x.value === memo.choix) radio = x;
+        });
+      }
+      if (radio) radio.checked = true;
+    }
+    var note = r.querySelector('textarea[data-note]');
+    if (note && memo.note) note.value = memo.note;
+    majRangee(r);
+  });
+  majCompteur();
+
+  // Écoute
+  document.addEventListener('change', function (e) {
+    var r = e.target.closest('.rangee[data-id]');
+    if (!r) return;
+    var id = r.getAttribute('data-id');
+    etat[id] = etat[id] || {};
+    if (e.target.type === 'radio') etat[id].choix = e.target.value;
+    sauver(); majRangee(r); majCompteur();
+  });
+  document.addEventListener('input', function (e) {
+    if (!e.target.matches('textarea[data-note]')) return;
+    var id = e.target.getAttribute('data-note');
+    etat[id] = etat[id] || {};
+    etat[id].note = e.target.value;
+    sauver();
+  });
+
+  // Filtres
+  var boutonsFiltre = document.querySelectorAll('.filtres button');
+  Array.prototype.forEach.call(boutonsFiltre, function (b) {
+    b.addEventListener('click', function () {
+      Array.prototype.forEach.call(boutonsFiltre, function (x) { x.setAttribute('aria-pressed', 'false'); });
+      b.setAttribute('aria-pressed', 'true');
+      var mode = b.getAttribute('data-filtre');
+      rangees.forEach(function (r) {
+        var t = r.classList.contains('tranchee');
+        r.style.display = (mode === 'toutes' || (mode === 'tranchees' && t) || (mode === 'a-faire' && !t)) ? '' : 'none';
+      });
+    });
+  });
+
+  // Export
+  document.getElementById('btn-export').addEventListener('click', function () {
+    var lignes = [];
+    var n = 0;
+    lignes.push('=== TRIAGE DES AUDITS CADRE + CONCEPTION — relevé ===');
+    lignes.push('Référence : 1.88.6 · artefact du 21 août 2026');
+    var sections = [
+      { titre: '§1 Décisions de fond', prefixe: 'D' },
+      { titre: '§2 Lots de correctifs', prefixe: 'L' },
+      { titre: '§3 Items isolés', prefixe: 'I' }
+    ];
+    sections.forEach(function (s) {
+      lignes.push('');
+      lignes.push('--- ' + s.titre + ' ---');
+      rangees.forEach(function (r) {
+        var id = r.getAttribute('data-id');
+        if (id.charAt(0) !== s.prefixe) return;
+        var titre = r.querySelector('.rangee-titre').textContent.trim();
+        var puce = r.querySelector('.puce-id').textContent.trim();
+        var coche = r.querySelector('input[type="radio"]:checked');
+        var note = (r.querySelector('textarea[data-note]') || {}).value || '';
+        if (coche) n++;
+        lignes.push('[' + (coche ? 'v' : ' ') + '] ' + puce + ' — ' + titre);
+        lignes.push('      → ' + (coche ? coche.value : 'NON TRANCHÉ'));
+        if (note.trim()) lignes.push('      note : ' + note.trim().replace(/\n/g, ' / '));
+      });
+    });
+    lignes.splice(2, 0, 'Décisions prises : ' + n + '/' + TOTAL);
+    var texte = lignes.join('\n');
+
+    var zone = document.getElementById('zone-export');
+    var ta = document.getElementById('texte-export');
+    var msg = document.getElementById('msg-export');
+    zone.classList.add('visible');
+    ta.value = texte;
+    ta.focus(); ta.select();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(texte).then(function () {
+        msg.textContent = 'Copié dans le presse-papiers — colle le relevé dans la conversation. (Le texte reste ci-dessous au besoin.)';
+      }, function () {
+        msg.textContent = 'Le presse-papiers a été refusé : le texte est sélectionné ci-dessous — Cmd+C pour le copier.';
+      });
+    } else {
+      msg.textContent = 'Le texte est sélectionné ci-dessous — Cmd+C pour le copier.';
+    }
+  });
+}());
+</script>
