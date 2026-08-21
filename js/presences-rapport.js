@@ -56,12 +56,15 @@ const OPTIONS_DEFAUT = {
     nomProgramme: false,
     sa: true,
     portee: 'actif',
-    // Notation des cases saisies (retouche terrain, 21 août) :
-    // 'crochet' = ✓ complète · ✗ absence · chiffre partielle
-    // 'x'       = X absence · chiffre partielle · rien = présence complète
-    // 'chiffre' = périodes présentes partout (2 / 1 / 0), style feuille papier
+    // Notation des cases saisies (retouches terrain, 21 août) :
+    // 'crochet'  = ✓ complète · ✗ absence · chiffre partielle
+    // 'x'        = X absence · chiffre partielle · rien = présence complète
+    // 'presence' = périodes de présence partout (2 / 1 / 0), style feuille papier
+    // 'absence'  = périodes d'absence quand il y en a, rien si présence complète
     notation: 'crochet'
 };
+
+const NOTATIONS_VALIDES = ['crochet', 'x', 'presence', 'absence'];
 
 /* ===============================
    FONCTION PURE — MODÈLE DE LA GRILLE
@@ -264,10 +267,9 @@ function restaurerOptionsRapportPresences() {
     });
     const selectPortee = document.getElementById('rp-portee');
     if (selectPortee) selectPortee.value = opts.portee === 'tous' ? 'tous' : 'actif';
-    const selectNotation = document.getElementById('rp-notation');
-    if (selectNotation) {
-        selectNotation.value = (opts.notation === 'x' || opts.notation === 'chiffre') ? opts.notation : 'crochet';
-    }
+    const notation = NOTATIONS_VALIDES.includes(opts.notation) ? opts.notation : 'crochet';
+    const radioNotation = document.querySelector(`input[name="rp-notation"][value="${notation}"]`);
+    if (radioNotation) radioNotation.checked = true;
 }
 
 /** Lit le panneau et persiste le choix (appelée par data-on-change). */
@@ -279,13 +281,26 @@ function sauvegarderOptionsRapportPresences() {
     });
     const selectPortee = document.getElementById('rp-portee');
     opts.portee = selectPortee && selectPortee.value === 'tous' ? 'tous' : 'actif';
-    const selectNotation = document.getElementById('rp-notation');
-    opts.notation = selectNotation && (selectNotation.value === 'x' || selectNotation.value === 'chiffre')
-        ? selectNotation.value : 'crochet';
+    const radioNotation = document.querySelector('input[name="rp-notation"]:checked');
+    opts.notation = radioNotation && NOTATIONS_VALIDES.includes(radioNotation.value)
+        ? radioNotation.value : 'crochet';
     if (typeof definirPreference === 'function') {
         definirPreference('rapportPresencesOptions', opts);
     }
     return opts;
+}
+
+/** Ouvre la modale (bouton « Grille imprimable » de l'en-tête Enregistrement). */
+function ouvrirModaleRapportPresences() {
+    restaurerOptionsRapportPresences();
+    afficherStatutRapport('');
+    const modale = document.getElementById('modaleRapportPresences');
+    if (modale) modale.classList.add('actif');
+}
+
+function fermerModaleRapportPresences() {
+    const modale = document.getElementById('modaleRapportPresences');
+    if (modale) modale.classList.remove('actif');
 }
 
 function afficherStatutRapport(message) {
@@ -358,7 +373,7 @@ function valeurColonneFixe(etudiant, cleCol) {
  * de séances sur plusieurs pages si elles ne tiennent pas lisiblement.
  */
 function dessinerFeuilleGroupe(doc, modele, opts, entete) {
-    const notation = opts.notation === 'x' || opts.notation === 'chiffre' ? opts.notation : 'crochet';
+    const notation = NOTATIONS_VALIDES.includes(opts.notation) ? opts.notation : 'crochet';
     const fixes = colonnesFixes(opts);
     const largeurFixes = fixes.reduce((acc, c) => acc + c.largeur, 0);
     const utilisable = PAGE_LARGEUR - (2 * MARGE) - largeurFixes;
@@ -440,8 +455,15 @@ function dessinerFeuilleGroupe(doc, modele, opts, entete) {
                     doc.setTextColor(0, 0, 0);
                     doc.text(texte, cx, cy + 0.7, { align: 'center' });
                 };
-                if (notation === 'chiffre') {
+                if (notation === 'presence') {
                     if (cellule.etat !== 'vide') ecrire(String(cellule.periodes).replace('.', ','));
+                } else if (notation === 'absence') {
+                    // Périodes manquées : rien quand la présence est complète
+                    if (cellule.etat !== 'vide') {
+                        const attendues = colTranche[indexSeance].periodesAttendues;
+                        const manquees = Math.round((attendues - cellule.periodes) * 10) / 10;
+                        if (manquees > 0) ecrire(String(manquees).replace('.', ','));
+                    }
                 } else if (notation === 'x') {
                     // Convention « marquer les absences » : présence complète = rien
                     if (cellule.etat === 'absent') dessinerCroix(doc, cx, cy, 1.8);
@@ -471,9 +493,15 @@ function dessinerLegende(doc, y, notation) {
 
     const finPapier = 'case vide = séance à saisir (remplir au crayon, reporter dans Labo Codex)';
     let segments;
-    if (notation === 'chiffre') {
+    if (notation === 'presence') {
         segments = [
-            { texte: 'chiffre = périodes présentes (0 = absence)' },
+            { texte: 'chiffre = périodes de présence (0 = absence)' },
+            { texte: finPapier }
+        ];
+    } else if (notation === 'absence') {
+        segments = [
+            { texte: 'chiffre = périodes d’absence' },
+            { texte: 'sans marque = présence complète' },
             { texte: finPapier }
         ];
     } else if (notation === 'x') {
@@ -614,5 +642,7 @@ window.construireModeleRapportPresences = construireModeleRapportPresences;
 window.genererRapportPresencesPDF = genererRapportPresencesPDF;
 window.restaurerOptionsRapportPresences = restaurerOptionsRapportPresences;
 window.sauvegarderOptionsRapportPresences = sauvegarderOptionsRapportPresences;
+window.ouvrirModaleRapportPresences = ouvrirModaleRapportPresences;
+window.fermerModaleRapportPresences = fermerModaleRapportPresences;
 
 })();

@@ -7892,8 +7892,12 @@
                     <div class="carte">
                         <h3 class="carte-titre-bleu u-flex-between">
                             <span data-tooltip="presences-saisie">Enregistrement</span>
-                            <span id="nbEtudiantsPresences" class="badge-compteur-header">
-                                (0 étudiant·e)
+                            <span class="u-flex-gap-8 u-align-center">
+                                <button class="btn btn-principal btn-compact"
+                                    data-action="ouvrirModaleRapportPresences">Grille imprimable</button>
+                                <span id="nbEtudiantsPresences" class="badge-compteur-header">
+                                    (0 étudiant·e)
+                                </span>
                             </span>
                         </h3>
 
@@ -7993,18 +7997,15 @@
 
                     </div>
 
-                    <!-- Grille imprimable (#485) : rapport de saisie + formulaire papier -->
-                    <div class="carte accordeon ferme" id="accordeon-grille-imprimable">
-                        <div class="accordeon-header">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Grille imprimable
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu">
+                    <!-- Modale Grille imprimable (#485) : rapport de saisie + formulaire papier -->
+                    <div id="modaleRapportPresences" class="modal-overlay">
+                        <div class="modal-contenu modal-compact">
+                            <button data-action="fermerModaleRapportPresences" class="modal-fermer" aria-label="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
+                            <h2 class="modal-titre">Grille imprimable</h2>
                             <p class="text-muted">
-                                Imprime la grille du trimestre (lettre, paysage, une feuille par groupe) :
-                                les séances déjà saisies sont cochées, les cases vides se remplissent au
-                                crayon en classe puis se reportent ici, séance par séance.
+                                Un PDF lettre paysage, une feuille par groupe : les séances déjà saisies
+                                sont marquées, les cases vides se remplissent au crayon en classe puis se
+                                reportent dans l'écran de saisie.
                             </p>
                             <div class="grid-auto-180">
                                 <div class="groupe-form">
@@ -8031,25 +8032,39 @@
                                     </label>
                                 </div>
                                 <div class="groupe-form">
+                                    <span class="label-formulaire">Notation des cases</span>
+                                    <label class="u-flex-gap-10 u-align-center" style="cursor: pointer">
+                                        <input type="radio" name="rp-notation" value="crochet" data-on-change="sauvegarderOptionsRapportPresences">
+                                        <span>Crochets (✓ présence · ✗ absence)</span>
+                                    </label>
+                                    <label class="u-flex-gap-10 u-align-center" style="cursor: pointer">
+                                        <input type="radio" name="rp-notation" value="x" data-on-change="sauvegarderOptionsRapportPresences">
+                                        <span>X sur les absences seulement</span>
+                                    </label>
+                                    <label class="u-flex-gap-10 u-align-center" style="cursor: pointer">
+                                        <input type="radio" name="rp-notation" value="presence" data-on-change="sauvegarderOptionsRapportPresences">
+                                        <span>Périodes de présence (2 / 1 / 0)</span>
+                                    </label>
+                                    <label class="u-flex-gap-10 u-align-center" style="cursor: pointer">
+                                        <input type="radio" name="rp-notation" value="absence" data-on-change="sauvegarderOptionsRapportPresences">
+                                        <span>Périodes d'absence (vide si présent)</span>
+                                    </label>
+                                </div>
+                                <div class="groupe-form">
                                     <label for="rp-portee" class="label-formulaire">Groupes</label>
                                     <select id="rp-portee" class="controle-form"
                                         data-on-change="sauvegarderOptionsRapportPresences">
                                         <option value="actif">Groupe actif</option>
                                         <option value="tous">Tous mes groupes-cours</option>
                                     </select>
-                                    <label for="rp-notation" class="label-formulaire u-mt-15">Notation des cases</label>
-                                    <select id="rp-notation" class="controle-form"
-                                        data-on-change="sauvegarderOptionsRapportPresences">
-                                        <option value="crochet">Crochet (✓ présente · ✗ absente · chiffre partielle)</option>
-                                        <option value="x">X (marquer les absences seulement)</option>
-                                        <option value="chiffre">Chiffre (périodes présentes : 2 / 1 / 0)</option>
-                                    </select>
-                                    <button class="btn btn-confirmer u-mt-15" data-action="genererRapportPresencesPDF">
-                                        Générer le PDF
-                                    </button>
                                 </div>
                             </div>
                             <p id="rp-statut" class="text-muted u-texte-petit u-hide" role="status"></p>
+                            <div class="modal-actions-centre">
+                                <button class="btn btn-confirmer" data-action="genererRapportPresencesPDF">
+                                    Générer le PDF
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div><!-- fin sous-section suivi-saisie -->
@@ -14457,7 +14472,7 @@
     <script src="js/profil-etudiant-actions.js?v=20260821a"></script> <!-- Refactor session C : actions cascade consulterEvaluation + calculerDetailsNoteFinale + jetons + patterns groupe (8 fonctions, ~560 LOC) -->
     <script src="js/profil-etudiant-sections-affichage.js?v=20260809b"></script> <!-- Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
     <script src="js/presences-apercu.js?v=2025121017"></script>
-    <script src="js/presences-rapport.js?v=20260821c"></script> <!-- #485 : grille imprimable des présences (rapport + formulaire papier) -->
+    <script src="js/presences-rapport.js?v=20260821d"></script> <!-- #485 : grille imprimable des présences (rapport + formulaire papier) -->
     <script src="js/boite-outils.js?v=20260810a"></script> <!-- Beta 96.1 : Boîte à outils pédagogiques -->
     <script src="js/modelisation.js?v=2026022201"></script> <!-- Modélisation : annotation en projection -->
     <script src="js/rythme.js?v=20260806a"></script> <!-- Semaine dimanche→samedi (format direction des études, 6 août) -->
@@ -14561,7 +14576,7 @@
     <script src="js/guidage-demo.js?v=20260808a"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=20260821d"></script> <!-- Entrée 1.56 : trois chantiers Alignement consolidés -->
+    <script src="js/changelog-data.js?v=20260821e"></script> <!-- Entrée 1.56 : trois chantiers Alignement consolidés -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
     <script src="js/etats-vides.js?v=20260808a"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre -->
@@ -14582,11 +14597,11 @@
     <script src="js/export-resultats-finaux.js?v=2026061901"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260821e"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260821f"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260821e"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260821f"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>
