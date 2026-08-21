@@ -4,13 +4,14 @@
 > **Artefact interactif** (l'OPÉRATION — ce fichier est la TRACE) :
 > `portes-terrain-464-cles-nues.html`, publié : <https://claude.ai/code/artifact/20854df0-6124-4ed5-b45c-48b643e3fa7a>.
 > **Règle** : ce qui échoue devient un item de backlog, pas une note mentale.
-> **État : RELEVÉ REÇU le 21 août 2026 — 8 passées · 1 échec (2.1) · 1 mesure (2.5).**
+> **État : CLOSE le 21 août 2026 — 10/10 traitées, ZÉRO défaut du lot.**
 > · §1 : 5/5 ✓ (migration silencieuse — « aucune » ligne : les résidus historiques avaient
 >   déjà été purgés par l'ancienne forcerMigration ; durée 50 min préservée ; Safari ✓).
-> · **2.1 ✗ (4 échelles au lieu de 8)** : diagnostic probable = tombstones réels de Grégoire
->   (échelles supprimées par le passé, `ressourcesSupprimees`) que la migration RESPECTE —
->   comportement voulu, attendu de la porte mal calibré. Script console de confirmation envoyé ;
->   verdict en attente. Si les tombstones ne couvrent pas les 8 → enquête à rouvrir.
+> · **2.1 requalifiée CONFORME (diag console du 21 août, 15h05)** : les 8 ids sont TOUS dans
+>   `ressourcesSupprimees` (Grégoire avait supprimé tous les exemples — générique et cartouche
+>   comprises) ; la migration a RESPECTÉ ses suppressions, flag posé. Le défaut était l'attendu
+>   de la porte (écrit pour un profil sans tombstones), pas le code. Leçon versée au modèle :
+>   un attendu de porte doit prévoir l'état RÉEL du profil, pas le profil neuf.
 > · **2.5 (mesure)** : warn `cle(chaîne vide)` attrapé → VRAI BUG : la file d'attente d'import
 >   des travaux n'a jamais été namespacée (travaux-import.js:750/787 — le hack rendait '').
 >   **CORRIGÉ dans la foulée (1.90.1)** : clé réelle `pipeline_queue` inscrite au registre,

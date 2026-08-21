@@ -142,3 +142,17 @@ trancher à sa place. Un verdict s'écrit, il ne se coche pas.
 2. Verser chaque échec réel au BACKLOG avec son numéro de porte.
 3. Mettre à jour CE fichier — état, date, ce qui reste.
 4. Aucune porte « probablement passée » : cochée, ou due.
+
+
+## Signaux console observés en usage réel (21 août, 15 h 05 — session locale, hors porte)
+
+Relevés sur la capture de Grégoire pendant l'usage de la grille (données réelles, file://) :
+
+- **« ⚠️ Format de séance non reconnu » ×6** (`saisie-presences.js:338`) — PRÉ-EXISTANT à #485
+  (code de 1.31.x) : 6 séances de l'horaire réel ont un format que le calcul d'heures ne
+  reconnaît pas → repli 2 h avec warn. À recouper avec le cluster horaire legacy (lot L7/#469) ;
+  le repli lit en outre la clé NUE `formatHoraire` (famille #464, notée pour L7).
+- **« Unsafe attempt to load URL file://… from frame »** (`index.html:1`) — vraisemblablement
+  l'aperçu/impression de la grille dans un iframe sous `file:` (origines uniques). À vérifier
+  par la porte d'impression de cette liste : si le PDF sort correctement, message bénin ;
+  sinon, c'est le symptôme à verser.
