@@ -21,6 +21,15 @@
 
     var CHANGELOG = [
         {
+            version: '1.91',
+            couleur: 'bleu',
+            titre: 'La grille des présences, ajustée après l’essai papier',
+            items: [
+                'Nouvelle option « Notation des cases » : crochet (✓ présente, ✗ absente), X (marquer les absences seulement) ou chiffre (les périodes présentes : 2 / 1 / 0, comme les feuilles maison). La légende imprimée suit ton choix.',
+                'Les dates d’en-tête ne sont plus coupées (« 21… ») : le jour et le mois sont toujours complets, et la police du tableau a été réduite pour une grille plus aérée — retouches issues du premier essai d’impression réel.'
+            ]
+        },
+        {
             version: '1.90',
             couleur: 'vert',
             titre: 'La grille des présences s’imprime',

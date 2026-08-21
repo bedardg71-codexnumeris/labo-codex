@@ -78,6 +78,8 @@ describe('Cases — les quatre états', () => {
         const ligneLeo = modele.lignes.find(l => l.etudiant.da === '1111111');
         expect(ligneLeo.cellules.map(c => c.etat)).toEqual(['present', 'absent', 'partiel']);
         expect(ligneLeo.cellules[2].texte).toBe('1');
+        // Le champ periodes alimente la notation « chiffre » (2 / 1 / 0)
+        expect(ligneLeo.cellules.map(c => c.periodes)).toEqual([2, 0, 1]);
 
         const ligneZoe = modele.lignes.find(l => l.etudiant.da === '2222222');
         expect(ligneZoe.cellules.map(c => c.etat)).toEqual(['vide', 'vide', 'vide']);
