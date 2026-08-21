@@ -747,7 +747,13 @@
      */
     function persisterFileDAttente() {
         try {
-            const cleSession = 'pipeline_queue_' + (typeof cle === 'function' ? cle('') : 'default');
+            // #464 suite de porte (21 août 2026, relevé 2.5 de Grégoire) : ce site
+            // appelait cle(chaîne vide) en croyant obtenir le préfixe du trimestre —
+            // ce qui a toujours rendu la chaîne vide (fallthrough) : la file était PARTAGÉE entre
+            // trimestres. 'pipeline_queue' est désormais une clé du registre
+            // (CLES_NAMESPACEES) : cle() la préfixe réellement. File transitoire
+            // (sessionStorage, métadonnées seules) — aucune migration nécessaire.
+            const cleSession = (typeof cle === 'function') ? cle('pipeline_queue') : 'pipeline_queue';
             const donnees = fichiersEnAttente.map(f => ({
                 nomFichier: f.nomFichier,
                 typeMIME: f.typeMIME,
@@ -784,7 +790,13 @@
      */
     function restaurerFileDAttente() {
         try {
-            const cleSession = 'pipeline_queue_' + (typeof cle === 'function' ? cle('') : 'default');
+            // #464 suite de porte (21 août 2026, relevé 2.5 de Grégoire) : ce site
+            // appelait cle(chaîne vide) en croyant obtenir le préfixe du trimestre —
+            // ce qui a toujours rendu la chaîne vide (fallthrough) : la file était PARTAGÉE entre
+            // trimestres. 'pipeline_queue' est désormais une clé du registre
+            // (CLES_NAMESPACEES) : cle() la préfixe réellement. File transitoire
+            // (sessionStorage, métadonnées seules) — aucune migration nécessaire.
+            const cleSession = (typeof cle === 'function') ? cle('pipeline_queue') : 'pipeline_queue';
             const json = sessionStorage.getItem(cleSession);
             if (!json) return;
 

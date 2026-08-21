@@ -131,6 +131,10 @@
         'fichiersTravaux_backup_v1',
         'migration_snapshot_v1',
         'migration_fichierId_supprime_v1',
+        // 🆕 #464 suite de porte (21 août 2026, relevé 2.5) : la file d'attente
+        // d'import des travaux (sessionStorage) composait sa clé avec cle(chaîne vide) —
+        // qui rend '' — et restait partagée entre trimestres. Clé réelle inscrite.
+        'pipeline_queue',
         // 🆕 #464/CT-07 : la durée de période est PAR TRIMESTRE (modèle « horaire
         // propre au trimestre », 29 mai ; DATA-OWNERSHIP la déclarait déjà NS).
         // Rend enfin lues les écritures existantes de purgerLegacy()
