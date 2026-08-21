@@ -879,7 +879,112 @@ du trimestre actif. Non contre-vérifié ; à recouper avant tout chantier d'arc
 
 ---
 
+# ADDENDUM — Passe complémentaire (21 août 2026, session locale)
+
+> **Contexte** : le plan `PLAN-AUDIT-cadre-conception-2026-08-20.md` a été retrouvé (il ne
+> vivait que dans un stash GitHub Desktop, commité sur `main` en `42a8ab1c` — l'écart de
+> prémisse en tête de rapport est donc résolu : la reconstitution du §6 était CONFORME,
+> l'exclusion de la Carte d'alignement est dans le plan §3). La confrontation au **vrai** §6.3
+> a révélé cinq exigences non couvertes par la reconstitution ; cette passe les ferme
+> (3 passes parallèles, reproduction WebKit sur profil vierge + code aux lignes citées).
+> HEAD audité : **1.88.5** (`afd208bf`).
+
+## Verdicts complémentaires (« à recouper » du §6.3 réel)
+
+| Entrée | Verdict sur 1.88.5 | Preuve |
+|---|---|---|
+| **#326-T3** — édition non préremplie depuis le banc | **NON REPRODUIT (corrigé le 21 juin)** : `editerPratique` depuis le banc ouvre le wizard prérempli (nb évaluations, seuils, type). Fix tracé : `js/pratiques.js:975-995` (copie en forme canonique). **Résiduel données** : une copie legacy « `.config` seulement » (pré-21-juin) s'ouvre encore vide — cas à fusionner avec la proposition CO-08 (un seul résolveur). | [NAV] 3/3 + [CODE] |
+| **#326-T4** — dérivation de maquette parasite | **NON REPRODUIT (corrigé le 21 juin)** : `deriverMaquette` ne déroule plus le wizard (js/pratiques.js:1087-1094) ; maquette créée avec `estMaquette:true` et `inspireDe.sourceId` corrects, modal fermé. | [NAV] |
+| **#343-T3** — hover du tag DEN absent | **TOUJOURS PRÉSENT** : `genererBadgeTypePratique` (js/pratiques-gestion.js:307) ne pose aucun `title`. Le fix existe… dans la PR #63 jamais fusionnée (CO-36). | [CODE] |
+| **#343-T4a** — « eliminee » brut au récap | **TOUJOURS PRÉSENT** : `varianteLabels` (js/wizard-pratique-v2.js:1877-1891) n'a pas de clé `eliminee` ; `LIBELLE_MODE_DEN` (pratiques-exploration.js:154) existe mais n'est pas utilisé là. | [CODE] |
+| **#343-T4b** — compteur « 3/2 » | **RÉSORBÉ de facto** (1.21.0 : `config-denotation` est entré dans le graphe, `calculerNbEtapes` dérive du graphe réel — 3/5 mesuré sur les deux chemins DEN). | [NAV] |
+| **#343-T4c** — « SOM, STD ou SPE » sans DEN | **RÉSORBÉ** : le libellé dit « SOM, STD, SPE ou DEN » (wizard-pratique-v2.js:377) ; grep de l'ancien libellé = 0. | [CODE] |
+| **#343-T4d** — « statistique » vs « holistique » | **TOUJOURS PRÉSENT** : wizard = « Suggestion statistique » (:257, :1994), banc = « holistique » (construction-attributs.js:166), + « Ancrage statistique » (denotation-saisie-ui.js:148). | [CODE] |
+| **#343-T5** — portes d'entrée enfouies | **TOUJOURS PRÉSENT** (statut cohérent : reporté par la PR #63) : « Je sais déjà ce que je veux » et « pas certain·e » restent à l'étape 2 (wizard-pratique-v2.js:146-171, 371, 377). | [CODE] |
+| §6.3 pt 2 (1ʳᵉ moitié) — le cartouche suit-il le renommage de grille ? | **OUI** : le renommage mute `nom` sans toucher `id` (grilles.js:684-699, :767) ; l'ancrage `cartouches_{grilleId}` reste valide et le nom affiché est résolu en direct (cartouches.js:2726-2729). Défaut connexe : CO-38. | [CODE] |
+
+## Constats complémentaires
+
+```
+[CO-36] La PR #63 (fixes #343-T3/T4) n'a JAMAIS été fusionnée — mais
+        BACKLOG-ARCHIVE.md:2465 la documente « RÉSOLUS »  [CODE]
+Gravité   : Majeur (écart archive↔réalité qui masque des reliquats terrain depuis ~2 mois)
+Où        : BACKLOG-ARCHIVE.md:2465 (« RELIQUATS TERRAIN #343-T3/T4 RÉSOLUS (23 juin,
+            1.21.1, commit 6d901fa5) ») vs git : 6d901fa5 (branche
+            origin/claude/project-access-zyxt6n) et sa refonte 31f6b995 (1.27.4, 2 août,
+            branche claude/preparation-seance-2026-08-02-bhlxq1) sont HORS de l'ascendance
+            de HEAD (merge-base --is-ancestor) ; gh pr view 63 : state OPEN, mergedAt null.
+Constat   : FAIT (git). T3, T4a et T4d sont encore présents sur 1.88.5 (table ci-dessus).
+            INFÉRENCE (à trancher avec Grégoire, cf. PREPARATION-SEANCE-2026-08-02.md §3) :
+            oubli de merge plutôt que mise en attente délibérée.
+Impact    : l'archive atteste un travail non livré ; toute session qui s'y fie croit les
+            reliquats fermés.
+Proposition : BACKLOG — statuer sur la PR #63 (rebaser sur 1.88.5 et merger, ou fermer et
+            rejouer les 3 micro-fixes) ; corriger la mention de BACKLOG-ARCHIVE:2465.
+```
+
+```
+[CO-37] Grille : la somme des pondérations ≠ 100 % passe sans confirmation  [CODE]
+Gravité   : Mineur (le calcul aval s'AUTO-NORMALISE — pas de corruption)
+Où        : js/grilles.js:641-720 (sauvegarderGrilleTemplate : aucun test de somme) ;
+            :1208-1227, :3046, :3407 (indicateur coloré, éditeur seulement) ;
+            js/evaluation-calcul.js:568-616 (pourcentage = noteTotal / ponderationTotal —
+            une grille à 80 ou 120 % donne les mêmes notes relatives qu'à 100).
+Constat   : FAIT (code). Réponse au §6.3 pt 1 du plan : sauvegarde permise, signal visuel
+            non bloquant, note finale non faussée.
+Proposition : BACKLOG — confirmation non bloquante à la sauvegarde quand la somme ≠ 100.
+```
+
+```
+[CO-38] Écrasement d'une grille homonyme : les cartouches de la grille écrasée
+        deviennent orphelines (extension de CO-04)  [CODE]
+Gravité   : Majeur (même famille que CO-04)
+Où        : js/grilles.js:672-675 (« écraser » = filter par NOM, la grille disparaît) ;
+            aucune migration/purge de cartouches_{id} ; l'affichage itère sur les grilles
+            existantes (js/cartouches.js:2715) → magasin invisible mais exporté.
+Constat   : FAIT (code). S'ajoute au périmètre de CO-04 (sort des cartouches à la
+            disparition d'une grille — ici par écrasement, pas par suppression).
+Proposition : BACKLOG — même item que CO-04 (migrer ou purger cartouches_{id} à tout
+            retrait de grille, y compris « écraser »).
+```
+
+```
+[CO-39] Exports/imports JSON des bibliothèques : AUCUN passage par la couche
+        d'assainissement — seul le chemin signé .lcz est protégé (extension de CO-14)  [CODE]
+Gravité   : Majeur
+Où        : exports = Blob JSON simples (js/grilles.js:1725, js/cartouches.js:1668,
+            js/productions-import-export.js:69 — zéro JSZip, donc validerZipSecurite sans
+            objet sur CE chemin, réponse au §6.3 pt 7) ; imports = FileReader → JSON.parse →
+            fusion sans assainirObjet pour cartouches (js/cartouches.js:1706-1895) et
+            productions (js/productions-import-export.js:301-442) — étend CO-14
+            (grilles/échelles) aux deux familles restantes ; fusion par id STRICT : même id
+            = écrasement silencieux compté « mise à jour », nom identique + id différent =
+            doublon sans détection ; le chemin officiel .lcz, lui, passe bien par
+            validerZipSecurite (js/partage-import.js:344-357) pour les 5 familles.
+Constat   : FAIT (code, 5 fichiers grepés).
+Proposition : BACKLOG — appliquer assainirObjet + détection de doublons par nom aux imports
+            JSON (aligner sur .lcz), ou déprécier le chemin JSON au profit du .lcz.
+```
+
+```
+[CO-40] SOM : pondération de repli « || 1 » codée en dur pour les évaluations
+        orphelines  [CODE]
+Gravité   : Mineur (violation du principe « zéro fallback arbitraire »)
+Où        : js/pratiques/pratique-sommative.js:92-99, :141, :291 (production introuvable ou
+            pondérée 0 ⇒ poids 1 silencieux) ; réponse au §6.3 pt 9 : le signalement des
+            pondérations vit dans l'onglet Productions (productions.js:1705-1726, visuel non
+            bloquant, hors artefacts-portfolio) ; le calcul SOM s'auto-normalise, donc une
+            somme ≠ 100 ne fausse pas la note relative — le vrai trou est l'évaluation
+            orpheline entrée au poids 1 sans signal. STD a ses avertissements dédiés
+            (validerProductionsStd), SOM n'a aucun équivalent.
+Proposition : BACKLOG — exclure et DIRE (récit de calcul) les évaluations orphelines ou à
+            pondération nulle, plutôt que le poids 1 implicite.
+```
+
+---
+
 *Rapport produit par la session 2 de l'audit (Claude Code, 20 août 2026, soir — nuit du 20 au
-21 UTC). Aucun fichier de js/, css/ ou index.html modifié. Scripts de reproduction Chromium en
-scratchpad de session (jetables) ; chaque scénario repart d'un profil vierge ensemencé, jamais
-les données réelles.*
+21 UTC) ; addendum par la session locale du 21 août 2026 (passe complémentaire §6.3, verdicts
+#326/#343, CO-36 à CO-40). Aucun fichier de js/, css/ ou index.html modifié par l'audit.
+Scripts de reproduction en scratchpad de session (jetables) ; chaque scénario repart d'un
+profil vierge ensemencé, jamais les données réelles.*
