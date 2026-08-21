@@ -25,7 +25,8 @@
             couleur: 'bleu',
             titre: 'La grille des présences, ajustée après l’essai papier',
             items: [
-                'Nouvelle option « Notation des cases » : crochet (✓ présente, ✗ absente), X (marquer les absences seulement) ou chiffre (les périodes présentes : 2 / 1 / 0, comme les feuilles maison). La légende imprimée suit ton choix.',
+                'La grille imprimable s’ouvre maintenant d’un bouton bien en vue dans l’en-tête de la saisie des présences, qui affiche ses options dans une fenêtre — fini le panneau replié en bas de page.',
+                'Choisis la notation des cases : crochets (✓ présence, ✗ absence), X sur les absences seulement, périodes de présence (2 / 1 / 0) ou périodes d’absence. La légende imprimée suit ton choix, et ta préférence est mémorisée.',
                 'Les dates d’en-tête ne sont plus coupées (« 21… ») : le jour et le mois sont toujours complets, et la police du tableau a été réduite pour une grille plus aérée — retouches issues du premier essai d’impression réel.'
             ]
         },

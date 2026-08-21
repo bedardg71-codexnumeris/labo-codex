@@ -7,13 +7,13 @@
 > 0 non traitée**. L'échec (2.14, épreuve du papier : dates d'en-tête
 > tronquées « 21… » + police trop grande) est **corrigé en 1.91.0** ; les
 > verdicts 3.1 (réduire la police des cases — appliqué) et 3.2 (nom « Grille
-> imprimable » gardé) sont actés. 1.91.0 ajoute aussi la notation des cases
-> au choix (crochet / X / chiffre), demandée au retour du relevé.
-> ⏳ **REPRISE DUE** : refaire 0.1 (`git pull`, attendu ≥ 1.91.0) puis 2.14
-> (impression réelle — dates complètes, police réduite) et vérifier le
-> nouveau sélecteur « Notation des cases » (3 PDF, légende assortie).
-> D'autres retouches sont annoncées par Grégoire — la liste de reprise
-> sera consolidée après leur livraison.
+> imprimable » gardé) sont actés. 1.91.0 livre aussi les deux retouches
+> demandées au retour du relevé : **bouton « Grille imprimable » dans
+> l'en-tête d'Enregistrement + modale** (l'accordéon du bas est retiré) et
+> **notation des cases en 4 choix radio** (crochets ✓/✗ · X absences
+> seulement · périodes de présence 2/1/0 · périodes d'absence).
+> ⏳ **REPRISE DUE — voir « Reprise 1.91.0 » ci-dessous** (aussi ajoutée à
+> l'artefact).
 > **Règle** : ce qui échoue devient un item de backlog avec son numéro de
 > porte, pas une note mentale.
 
@@ -108,6 +108,31 @@ trancher à sa place. Un verdict s'écrit, il ne se coche pas.
   (`/` au lieu de `//`) dans preferences.js, corrigé avant les tests ; la
   note d'ordre de chargement du script preferences.js effacée par une
   édition d'index.html, restaurée dans la minute. Aucune n'a atteint le dépôt.
+
+---
+
+## Reprise 1.91.0 — après les retouches du 21 août
+
+- [ ] **R1 Build à jour** — `git pull`, bas de page. ⮕ **1.91.0** (build
+  0821-1238) ou plus récent.
+- [ ] **R2 Le bouton et la modale** — Suivi → Saisie des présences. ⮕ Un
+  bouton « Grille imprimable » dans l'en-tête de la carte Enregistrement (à
+  côté du compteur d'étudiants) ; il ouvre une fenêtre avec les cases, les
+  4 notations et le choix de groupes ; le X la referme. L'ancien panneau
+  replié du bas de page a disparu.
+- [ ] **R3 Les quatre notations** — générer 4 PDF, un par notation. ⮕
+  crochets : ✓/✗/chiffre partiel · X : croix sur absences seulement ·
+  périodes de présence : 2/1/0 partout · périodes d'absence : chiffre
+  seulement quand il manque du temps. La légende du bas suit chaque choix.
+- [ ] **R4 MESURE — l'épreuve du papier, reprise** — imprimer (8,5 × 11,
+  paysage). ⮕ Dates d'en-tête complètes (« 21/08 », plus de « 21… »),
+  police plus petite, écriture au crayon confortable. → noter :
+  `____________________`
+- **R5 DÉCISION — l'unité des chiffres** : tu as demandé « le nombre
+  d'HEURES de présence/absence » ; j'ai livré des **périodes** (l'unité de
+  ta saisie et de ta feuille : « 2 » = séance complète ; en heures d'horloge,
+  2 périodes de 55 min feraient « 1,8 »). Garder les périodes, ou vraiment
+  les heures ? → verdict : `____________________`
 
 ---
 
