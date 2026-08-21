@@ -1260,6 +1260,21 @@ function calculerNbEtapes() {
 }
 
 /**
+ * Progression affichée (numéro courant + total), avec l'invariant total ≥ numéro.
+ * #343-T4b : 'voie-rapide' est atteinte HORS-GRAPHE (wizardV2VoieRapide ne passe pas
+ * par obtenirEtapeSuivante), donc la projection de calculerNbEtapes (depuis etapeInitiale)
+ * peut être plus courte que le chemin réellement parcouru lorsque les réponses courantes
+ * ne reproduisent pas la branche prise → on observait « 3 sur 2 » sur le parcours DEN.
+ * Le total affiché ne doit jamais être inférieur au numéro de l'étape courante.
+ * @returns {{numActuel: number, numTotal: number}}
+ */
+function calculerProgression() {
+    const numActuel = calculerNumeroEtape();
+    const numTotal = Math.max(calculerNbEtapes(), numActuel);
+    return { numActuel, numTotal };
+}
+
+/**
  * Calcule le numéro de l'étape actuelle
  * @returns {number} - Numéro de l'étape (1-indexed)
  */
@@ -1873,7 +1888,11 @@ function genererRecapitulatif() {
             </div>
             <p class="wizard-v2-recap-diagnostic-desc">${badge.description}</p>
     `;
-    if (classification.variante) {
+    // #343-T4a — en DEN, la « variante » est un mode technique (eliminee/reduite/differee),
+    // pas une variante de calcul lisible par l'enseignant ; le récap affiche déjà une
+    // description DEN complète juste au-dessus → on n'ajoute pas une ligne redondante et
+    // cryptique (« Variante : eliminee »). Les autres familles gardent la ligne.
+    if (classification.variante && classification.type !== 'denotation') {
         const varianteLabels = {
             'classique': 'Classique',
             'progressive': 'Avec remplacement progressif',
@@ -2070,8 +2089,7 @@ function ouvrirComparateurDepuisWizard() {
  * Met à jour l'indicateur de progression
  */
 function mettreAJourProgression() {
-    const numActuel = calculerNumeroEtape();
-    const numTotal = calculerNbEtapes();
+    const { numActuel, numTotal } = calculerProgression();
 
     // Mettre à jour le texte
     const numEl = document.getElementById('wizard-v2-etape-num');
@@ -2996,6 +3014,7 @@ window.ouvrirComparateurDepuisWizard = ouvrirComparateurDepuisWizard;
 // est exposé pour permettre aux tests de poser les réponses et de lire le résultat.
 window.chargerPratiqueExistante = chargerPratiqueExistante;
 window.calculerNbEtapes = calculerNbEtapes;
+window.calculerProgression = calculerProgression;               // #343-T4b (testabilité de l'invariant total ≥ numéro)
 window.obtenirEtapeSuivante = obtenirEtapeSuivante;
 window.wizardState = wizardState;
 // #319 Lot 3 : testabilité des configs de champs (défaut reprises a3, garde-fou a4).

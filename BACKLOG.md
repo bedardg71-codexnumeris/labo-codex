@@ -68,7 +68,7 @@
 > `*_backup_v1` (outil `db.purgerBackupsV1()` livré, DRY-RUN par défaut — exécution = décision Grégoire)
 > et `tamponsImages` base64 non namespacé.
 
-> **Pour ajouter un item** : `- [ ] **#XX** Description courte` + sous-puces de contexte. Dernier ID utilisé : **#461** (21 août 2026, CO-01 de l'audit Conception, livré 1.88.6 ; avant : #460, 20 août 2026, CT-01 de l'audit Cadre/Trimestre, livré 1.88.5 ; avant : #459, 20 août 2026, SUIVI-BUGS — ⇧ avalé en silence sur les conteneurs, trouvé par la porte types-familles ; avant : #458, porte #449 — TOUJOURS vérifier aussi l'« État courant » en tête ET grep `#45[0-9]` avant de prendre un numéro : le 19 août, deux points du fichier disaient « #456 » alors que #457 était consommé depuis la veille). *(⚠ #437 = « carte d'alignement » de la session parallèle du 9 août, fusionné sur `main` — pris pendant que cette branche vivait. Voir `RELAIS.md`.)*
+> **Pour ajouter un item** : `- [ ] **#XX** Description courte` + sous-puces de contexte. Dernier ID utilisé : **#484** (21 août 2026, versement du triage des deux audits : #462-#484 — D4 + lots L1-L9 + items I1-I13 ; avant : #461, CO-01 livré 1.88.6 ; avant : #460, 20 août 2026, CT-01 de l'audit Cadre/Trimestre, livré 1.88.5 ; avant : #459, 20 août 2026, SUIVI-BUGS — ⇧ avalé en silence sur les conteneurs, trouvé par la porte types-familles ; avant : #458, porte #449 — TOUJOURS vérifier aussi l'« État courant » en tête ET grep `#45[0-9]` avant de prendre un numéro : le 19 août, deux points du fichier disaient « #456 » alors que #457 était consommé depuis la veille). *(⚠ #437 = « carte d'alignement » de la session parallèle du 9 août, fusionné sur `main` — pris pendant que cette branche vivait. Voir `RELAIS.md`.)*
 
 ---
 
@@ -88,13 +88,38 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 ### Audit « Conception » — 20-21 août 2026 (rapport `plans de travail/AUDIT-conception-2026-08-20.md` + addendum)
 
-> ⚠ **Versement PARTIEL** : seul le Bloquant CO-01 est versé (et livré). Les 39 autres constats
-> (CO-02 à CO-40 : 19 Majeurs avec l'addendum, 12 Mineurs, 6 Notes, plus les verdicts #326/#343)
-> attendent le **tri avec Grégoire**, conjointement avec CT-02..CT-29 de la session 1 — le rapport
-> propose HUIT lots transverses et TROIS décisions de fond (régime des cartouches, échelles
-> collègues codées en dur, politique de suppression façon #449). Ne pas les verser d'office.
-> ⚠ À statuer au tri, en priorité : **CO-36** — la PR #63 (fixes #343-T3/T4) n'a JAMAIS été
-> fusionnée alors que BACKLOG-ARCHIVE:2465 la dit « RÉSOLUS ».
+> ✅ **TRI FAIT le 21 août 2026** (relevé 27/27 de Grégoire, artefact + trace
+> `plans de travail/TRIAGE-audits-2026-08-21.md`) : TOUT est retenu « Maintenant », versé en
+> **#462-#484** ci-dessous. Décisions de fond : **D1 cartouches NAMESPACÉES** · **D2 échelles
+> collègues RETIRÉES du code** (→ bibliothèque/partage) · **D3 recensement #449 GÉNÉRALISÉ aux
+> 7 familles** · **D4 PR #63 rebasée et fusionnée**. Ordre d'exécution : §5 de la trace
+> (1: #462 · 2: #464-L2 · 3: #466-L4 · 4: #468-L6 · 5: #463-L1 · 6: #465-L3 · 7: #469-L7 ·
+> 8: #467-L5 · 9: #470/#471 · puis #472-#484 intercalés). Chaque lot livré = sentinelles +
+> break-tests + porte terrain avant le suivant.
+
+- [x] **#462 LIVRÉ 21 août 2026 (1.88.7)** D4 — PR #63 intégrée à main par cherry-pick de sa refonte `31f6b995` (T3 infobulles de famille, T4a « Variante : eliminee » masquée en DEN, T4b borne total ≥ numéro, T4d « statistique » unifié + sentinelle den-reliquats-343 break-testée) ; conflits résolus sur les 4 points de version (bump par release.mjs) ; SUIVI-BUGS re-daté (livré 21 août, pas 2 août) ; BACKLOG-ARCHIVE:2465 corrigée (CO-36) ; PR #63 fermée en référençant le commit livré.
+- [ ] **#463** L1 — Suppressions gardées : recensement façon #449 généralisé aux 7 familles (grille/échelle/pratique/production/cartouche/horaire/enseignant), « écraser » par id gardé, sort des magasins de cartouches à tout retrait de grille (CT-02, CT-08, CT-21, CO-03, CO-04, CO-38 ; verdict D3).
+- [ ] **#464** L2 — Clés nues : purge des résidus + retrait des fallbacks (~50 sites pratiques), `forcerMigration` copie-seulement-si-vide + flag one-shot, garde anti-resemage sur les échelles semées, garde démo re-câblée via `cle()`, priorité `cle()` sur `niveauxEchelle`, warn sur clé hors registre (CT-07, CT-11, CT-12, CT-26, CO-02, CO-09, CO-10, CO-11, CO-19).
+- [ ] **#465** L3 — Moteur des pratiques « configuré ≠ calculé » : DEN note absente ⇒ null + ids de cibles stables ; schéma SPE unifié + un seul emplacement jetons + primauté `configuration.*` sur `.config` ; PratiqueManager routé par `construireConfigComplete` ; échelle irrésolue ⇒ refus diagnostiqué ; invalidation du cache à la bascule/sauvegarde ; diagnostics SOM/SPE re-branchés ; repli `.config`→wizard pour les copies legacy (CO-06, CO-07, CO-08, CO-13, CO-22, CO-23, résiduel #326).
+- [ ] **#466** L4 — Bascule de trimestre : création+activation alignée sur `changerTrimestreActifV2`, restauration du GC actif, réinitialisation des éditeurs (journées + 4 onglets Conception), branche else des find/findIndex, cartouche courante unifiée, await du changement de type de critère (CT-05, CT-06, CT-17, CO-16, CO-20, CO-21).
+- [ ] **#467** L5 — Sécurité : passe d'échappement (Cadre + Conception, sidebars/modales/sous-critères), retrait des renderers morts non échappés, imports JSON par les fonctions assainies + confirmation avant remplacement par id, `echapperHtml` et les guillemets (CT-09, CT-29, CO-14, CO-39).
+- [ ] **#468** L6 — Boutons qui mentent, gestes qui plantent : « Exporter » un cours exporte ; crashs échelles (fonction inexistante, compteur niveaux) ; dupliquer/adopter posent `dansBibliotheque:true` ; production — préserver `verrouille`/`coursId`/échéances à la modification ; balise label du mode hybride ; gabarits zombies honorant les tombstones (CT-13, CO-05, CO-12, CO-17, CO-18, CO-25).
+- [ ] **#469** L7 — Grand retrait du code mort : îlot pratiques.js, grappe descriptive du configurable, pratique-test + config-francois, ancienne génération grilles/échelles/cartouches, pratique-notation-v2, HorairesEntite + chaîne Beta96, scories ; + I14 : REFORMER l'outil de diagnostic (sortie hors console, règle n°5) (CO-15, CT-12, CT-23, CT-24, CO-34 ; grep d'appelants avant chaque retrait).
+- [ ] **#470** L8 — Vitesse : rendu des onglets différé à la première ouverture (boot et bascule), mises à jour ciblées des modales de bibliothèque, arrêt des réécritures inconditionnelles (cartouches à chaque visite) (CT-18, CT-20, CO-26).
+- [ ] **#471** L9 — Documentation et registre : réviser les 4 docs de janvier (ou bandeau « périmée »), re-générer DATA-OWNERSHIP (audit-ssot.py), retirer ordre-chargement.txt, documenter les verdicts D1 (cartouches namespacées — chantier de migration à cadrer ici) et D2 (échelles collègues : plan de retrait vers bibliothèque/partage) (CT-25, CT-27, CO-30, CO-32).
+- [ ] **#472** I1 — Nom du groupe-cours recalculé à l'affichage + rafraîchir carte/en-tête après sauvegarde d'entité référencée (CT-03 ; cause du volet désync de #328-T1).
+- [ ] **#473** I2 — `horaireHebdo` fusionné par (jour, heure) : la 2ᵉ séance d'un même jour doit exister (CT-04).
+- [ ] **#474** I3 — `profilEnseignant` réservé au profil de l'utilisateur (marqueur explicite), purge à la suppression (CT-10).
+- [ ] **#475** I4 — Badge « X/5 configurés » : compter sur résolution pour les 4 références (CT-14).
+- [ ] **#476** I5 — Gardes de doublon sur duplications et imports (GC identiques, courriels, « (copie) (copie) ») — à traiter avec le #291 ouvert (CT-15, CO-24).
+- [ ] **#477** I6 — Petit lot Cadre : annulation d'horaire qui colle, dédup trimestres par id + mémoïsation, schéma du diagnostic corrigé (CT-16, CT-19, CT-22).
+- [ ] **#478** I7 — Micro-UX du parcours de rentrée, avec le skill design-interface (CT-28).
+- [ ] **#479** I8 — Import échelles inter-trimestre : porter le patron grilles (`cleSource`) (CO-27).
+- [ ] **#480** I9 — Banc : pondérer la terminale du corpus généré de façon réaliste (CO-28).
+- [ ] **#481** I10 — Robustesse diverse : ids de critères, modales au même id, `window.event`, borne sur `ressourcesSupprimees` (CO-29).
+- [ ] **#482** I11 — Snapshot d'archivage : pratiques du trimestre archivé, pas de l'actif — À RECOUPER d'abord (CO-35, [AGENT]).
+- [ ] **#483** I12 — Pondérations : confirmation non bloquante à ≠ 100 % ; SOM — exclure et dire les évaluations orphelines au lieu du poids 1 (CO-37, CO-40).
+- [ ] **#484** I13 — Assistant : remonter « Je sais déjà ce que je veux » et « Je ne suis pas certain·e » en portes de la 1ʳᵉ modale — validation visuelle Mac (#343-T5).
 
 - [x] **#461 LIVRÉ 21 août 2026 (1.88.6)** CO-01 — éditer une pratique via l'assistant détruisait l'enveloppe : `inspireDe`, `estMaquette`, `metadata_cc`, `isDemo`, `dateCreation`, `dansBibliotheque` et l'auteur d'origine (Bloquant de l'audit Conception ; jumeau du CT-01 : un « Enregistrer » qui détruit en confirmant).
   - **Cause** : `creerPratiqueV2` reconstruit l'objet à neuf (seul l'id survit, `dansBibliotheque` forcé true, `dateCreation` réécrite) et `sauvegarderPratique` remplaçait intégralement (`pratiques[index] = pratique`) ; en prime `chargerPratiqueExistante` ne remplissait pas `prenom`/`nomAuteur` (les clés que lit la construction) — l'auteur d'origine était remplacé ou vidé. Violation de l'invariant CC de la SPEC D §3.1 (« inspireDe jamais effacé », CC BY).
@@ -102,9 +127,8 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - **Sentinelle** : `tests/integration/pratique-edition-preserve-enveloppe.spec.js` (2 cas : round-trip d'édition complet + contrôle création non affectée). **Break-test par construction : écrite AVANT le fix, ROUGE sur 1.88.5** (reproduction [NAV] du constat), verte après.
 
 
-> ⚠ **Versement PARTIEL** : seul le Bloquant CT-01 est versé (et livré). Les 28 autres constats
-> (CT-02 à CT-29 : 12 Majeurs, 9 Mineurs, 7 Notes) attendent le **tri avec Grégoire** — voir
-> l'annexe « items BACKLOG candidats » du rapport. Ne pas les verser d'office.
+> ✅ **TRI FAIT le 21 août 2026** : les constats CT-02..CT-29 sont versés via les lots et items
+> **#462-#484** de la section « Audit Conception » ci-dessus (lots transverses aux deux audits).
 
 - [x] **#460 LIVRÉ 20 août 2026 (1.88.5)** CT-01 — édition d'horaire : changer le format écrasait les séances saisies par les défauts (Bloquant de l'audit).
   - **Cause** : la régénération `innerHTML` des lignes de séance (`mettreAJourSeancesHoraireV2`) repart des défauts ; le re-remplissage n'existait que dans `editerHoraireV2`, pas dans le handler des selects « Séances par semaine » et « Périodes par séance » — « Enregistrer » persistait ensuite les défauts en silence (toast de succès mensonger).

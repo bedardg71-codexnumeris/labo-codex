@@ -303,8 +303,21 @@ function genererBadgeTypePratique(pratique) {
     const typesValides = ['SOM', 'STD', 'SPE', 'DEN', 'PAN'];
     if (!typesValides.includes(type)) return '';
 
+    // #343-T3 — infobulle au survol du tag de famille (les explications existaient
+    // déjà dans le wizard ; on les rend découvrables ici aussi). Textes STATIQUES
+    // (pas de donnée utilisateur) repris des cartes « voie rapide » du wizard, donc
+    // pas d'échappement requis. Apostrophes seules → sûres dans un attribut "double".
+    const TOOLTIPS_FAMILLE = {
+        SOM: 'Sommative — note finale par moyenne pondérée des évaluations.',
+        STD: 'PAN – Standards — niveaux de maîtrise (ex. I-D-M-E) convertis en note.',
+        SPE: 'PAN – Spécifications — travaux acceptables ou non ; note selon les forfaits réussis.',
+        DEN: 'PAN – Dénotation — note finale certificative posée (non calculée) selon l\'atteinte de cibles d\'apprentissage explicites ; abandonne la fonction de tri.',
+        PAN: 'Pratique alternative de notation (STD, SPE ou DEN).'
+    };
+    const infobulle = TOOLTIPS_FAMILLE[type] || '';
+
     // Utilise la classe CSS .badge-type-pratique avec modificateur
-    return `<span class="badge-type-pratique badge-type-${type.toLowerCase()}">${type}</span>`;
+    return `<span class="badge-type-pratique badge-type-${type.toLowerCase()}" title="${infobulle}">${type}</span>`;
 }
 
 /* ===============================

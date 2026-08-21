@@ -5,7 +5,7 @@
  * `jugementsDenotation`. Une pratique DEN ne CALCULE pas la note depuis les
  * artefacts : l'enseignant la SAISIT (jugement certificatif), elle est GARDÉE
  * par la confirmation que chaque cible d'apprentissage est atteinte (garde-fou
- * d'équité Dyer, natif), et ANCRÉE par une suggestion holistique optionnelle.
+ * d'équité Dyer, natif), et ANCRÉE par une suggestion statistique optionnelle.
  *
  * Responsabilités :
  *  - reconnaissance d'une pratique DEN + validation du schéma de config « éliminée » (DEN-0) ;
@@ -29,7 +29,7 @@
     // Clé de stockage (namespacée par trimestre via window.cle).
     const CLE_JUGEMENTS = 'jugementsDenotation';
 
-    // Méthodes de suggestion holistique réutilisées de STD (mode/médiane/moyenne).
+    // Méthodes de suggestion statistique réutilisées de STD (mode/médiane/moyenne).
     const METHODES_SUGGESTION = ['mode', 'mediane', 'moyenne'];
 
     // Seul mode offert au premier lot ; 'reduite' viendra plus tard (décision DEN-A).

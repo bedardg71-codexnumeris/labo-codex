@@ -163,7 +163,7 @@
         out.push(_row('noteFinale', 'Note finale', 'Jugement saisi, gardé par l\'atteinte des cibles (RREC 60/59)'));
         var sug = _lire(config, 'suggestion') || {};
         var methode = sug.methode || _lire(config, 'methodeSuggestion');
-        out.push(_row('suggestion', 'Suggestion holistique', methode ? String(methode) : '—'));
+        out.push(_row('suggestion', 'Suggestion statistique', methode ? String(methode) : '—'));
         // #343 (b) : DEN porte désormais échelle + grille OPTIONNELLES, pour la
         // rétroaction formative (elles n'entrent pas dans le calcul = jugement). On
         // les affiche comme « critères explicites » plutôt que « s.o. ».
