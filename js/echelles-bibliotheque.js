@@ -91,6 +91,68 @@ async function ajouterEchelleALaBibliotheque(echelle) {
 }
 
 /**
+ * 🆕 #464 / décision D2 du triage (21 août 2026) — Versement ONE-SHOT des huit
+ * échelles « collègues » dans la bibliothèque partagée. Elles étaient CODÉES EN
+ * DUR dans echelles.js (assurerEchellesPersonnalisees, retirée) et re-semées
+ * dans CHAQUE trimestre à chaque boot — en recréant au passage la clé nue
+ * echellesTemplates que #358 interdit (CO-11). Désormais : contenu de CATALOGUE,
+ * versé une fois ici, supprimable et modifiable comme le reste. Les copies déjà
+ * semées dans les trimestres existants restent (données utilisateur désormais).
+ * Passe par ajouterEchelleALaBibliotheque (assainissement + push sans replace) ;
+ * les suppressions passées (ressourcesSupprimees) sont respectées.
+ */
+async function migrerEchellesColleguesVersBibliotheque() {
+    const FLAG = 'migration_echelles_collegues_biblio_done';
+    if (db.getSync(FLAG, false)) return;
+
+    const DEFS = [
+        { id: 'ECHELLE_BRUNO_CHIMIE', nom: 'Échelle Chimie organique', description: 'Échelle 4 niveaux pour standards. Seuil maîtrise: 75%.', discipline: 'Chimie',
+          niveaux: [ { code: 'I', nom: 'Incomplet', min: 0, max: 54, valeur: 40, couleur: '#dc3545' }, { code: 'D', nom: 'en Développement', min: 55, max: 74, valeur: 65, couleur: '#fd7e14' }, { code: 'M', nom: 'Maîtrisé', min: 75, max: 89, valeur: 82, couleur: '#28a745' }, { code: 'E', nom: 'Étendu', min: 90, max: 100, valeur: 95, couleur: '#007bff' } ] },
+        { id: 'ECHELLE_XAVIER_INFO', nom: 'Échelle Interfaces/BD', description: 'Échelle 4 niveaux numériques. Niveau 3 = seuil passage, niveau 4 = bonus.', discipline: 'Informatique',
+          niveaux: [ { code: '1', nom: 'Non atteint', min: 0, max: 49, valeur: 40, couleur: '#dc3545' }, { code: '2', nom: 'En développement', min: 50, max: 64, valeur: 55, couleur: '#fd7e14' }, { code: '3', nom: 'Maîtrisé', min: 65, max: 84, valeur: 80, couleur: '#28a745' }, { code: '4', nom: 'Excellence', min: 85, max: 100, valeur: 95, couleur: '#007bff' } ] },
+        { id: 'ECHELLE_ISABELLE_BIO', nom: 'Échelle Anatomie', description: 'Échelle IDME qualitative pour jugement global. Pas de seuils chiffrés stricts.', discipline: 'Biologie', avertissement: 'Échelle pour jugement professionnel - les seuils sont indicatifs',
+          niveaux: [ { code: 'I', nom: 'Incomplet', min: 0, max: 49, valeur: 40, couleur: '#dc3545' }, { code: 'D', nom: 'en Développement', min: 50, max: 64, valeur: 57, couleur: '#fd7e14' }, { code: 'M', nom: 'Maîtrisé', min: 65, max: 84, valeur: 75, couleur: '#28a745' }, { code: 'E', nom: 'Étendu', min: 85, max: 100, valeur: 92, couleur: '#007bff' } ] },
+        { id: 'ECHELLE_HELENE_PHILO', nom: 'Échelle Philosophie', description: 'Échelle 4 niveaux pour cours de philosophie. Seuils: 70/60/50.', discipline: 'Philosophie',
+          niveaux: [ { code: 'I', nom: 'Incomplet', min: 0, max: 49, valeur: 35, couleur: '#dc3545' }, { code: 'D', nom: 'en Développement', min: 50, max: 59, valeur: 55, couleur: '#fd7e14' }, { code: 'M', nom: 'Maîtrisé', min: 60, max: 79, valeur: 70, couleur: '#28a745' }, { code: 'E', nom: 'Étendu', min: 80, max: 100, valeur: 90, couleur: '#007bff' } ] },
+        { id: 'ECHELLE_MARIEHELENE_LITT', nom: 'Échelle Littérature', description: 'Échelle 4 niveaux pour cours de littérature. Seuils: 75/65/55.', discipline: 'Littérature',
+          niveaux: [ { code: 'I', nom: 'Incomplet', min: 0, max: 54, valeur: 40, couleur: '#dc3545' }, { code: 'D', nom: 'en Développement', min: 55, max: 64, valeur: 60, couleur: '#fd7e14' }, { code: 'M', nom: 'Maîtrisé', min: 65, max: 84, valeur: 75, couleur: '#28a745' }, { code: 'E', nom: 'Étendu', min: 85, max: 100, valeur: 92, couleur: '#007bff' } ] },
+        { id: 'ECHELLE_ETIENNE_ADMIN', nom: 'Échelle Comptabilité', description: 'Échelle 4 niveaux pour cours d\'administration. Seuils: 80/70/60.', discipline: 'Administration',
+          niveaux: [ { code: 'I', nom: 'Incomplet', min: 0, max: 59, valeur: 45, couleur: '#dc3545' }, { code: 'D', nom: 'en Développement', min: 60, max: 69, valeur: 65, couleur: '#fd7e14' }, { code: 'M', nom: 'Maîtrisé', min: 70, max: 89, valeur: 80, couleur: '#28a745' }, { code: 'E', nom: 'Étendu', min: 90, max: 100, valeur: 95, couleur: '#007bff' } ] },
+        { id: 'ECHELLE_OLIVIER_GEO', nom: 'Échelle Géographie', description: 'Échelle 4 niveaux pour cours de géographie. Seuils: 70/65/55.', discipline: 'Géographie',
+          niveaux: [ { code: 'I', nom: 'Incomplet', min: 0, max: 54, valeur: 40, couleur: '#dc3545' }, { code: 'D', nom: 'en Développement', min: 55, max: 64, valeur: 60, couleur: '#fd7e14' }, { code: 'M', nom: 'Maîtrisé', min: 65, max: 79, valeur: 72, couleur: '#28a745' }, { code: 'E', nom: 'Étendu', min: 80, max: 100, valeur: 90, couleur: '#007bff' } ] },
+        { id: 'ECHELLE_JORDAN_PHILO', nom: 'Échelle Philosophie 101', description: 'Échelle 4 niveaux pour cours de philosophie. Seuils: 80/60/50.', discipline: 'Philosophie',
+          niveaux: [ { code: 'I', nom: 'Incomplet', min: 0, max: 49, valeur: 35, couleur: '#dc3545' }, { code: 'D', nom: 'en Développement', min: 50, max: 59, valeur: 55, couleur: '#fd7e14' }, { code: 'M', nom: 'Maîtrisé', min: 60, max: 79, valeur: 70, couleur: '#28a745' }, { code: 'E', nom: 'Étendu', min: 80, max: 100, valeur: 90, couleur: '#007bff' } ] }
+    ];
+
+    // Versement en LOT (1 lecture + 1 écriture) : la boucle par
+    // ajouterEchelleALaBibliotheque coûtait ~17 allers-retours IndexedDB
+    // séquentiels au boot — mesuré au harnais Playwright (chaque test au
+    // storage vierge les payait). Même contrat : push sans replace (jamais
+    // d'écrasement d'une version présente), tombstones respectés. Contenu
+    // interne sûr (littéraux ci-dessus) — pas d'assainissement requis.
+    const supprimees = (await db.get('ressourcesSupprimees')) || [];
+    const bibliotheque = (await db.get(CLE_BIBLIOTHEQUE_ECHELLES)) || [];
+    let nbVersees = 0;
+    for (const def of DEFS) {
+        if (supprimees.includes(def.id)) continue;
+        if (bibliotheque.some(e => e.id === def.id)) continue;
+        bibliotheque.push(Object.assign({}, def, {
+            auteur: 'Labo Codex',
+            verrouille: false,
+            dansBibliotheque: true,
+            dateCreation: '2026-01-03T00:00:00.000Z',
+            dateAjoutBiblio: new Date().toISOString()
+        }));
+        nbVersees++;
+    }
+    if (nbVersees > 0) {
+        await db.set(CLE_BIBLIOTHEQUE_ECHELLES, bibliotheque);
+    }
+    db.setSync(FLAG, true);
+}
+window.migrerEchellesColleguesVersBibliotheque = migrerEchellesColleguesVersBibliotheque;
+
+/**
  * Retirer une échelle de la bibliothèque
  * @param {string} echelleId - ID de l'échelle à retirer
  * @returns {Promise<boolean>} true si retirée, false si non trouvée

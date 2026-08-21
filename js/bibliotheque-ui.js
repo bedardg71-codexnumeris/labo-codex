@@ -354,9 +354,14 @@
                 };
             }
 
-            // Lookup dans la collection
+            // Lookup dans la collection — via cle() : #464/CO-02 (21 août 2026).
+            // La collection était lue en clé NUE alors que grillesTemplates/
+            // echellesTemplates/pratiquesConfigurables sont namespacées (#358,
+            // 24 mai) : le lookup ne résolvait plus rien, la garde était inerte
+            // aux trois quarts (hypothèse session 1, confirmée session 2).
             if (ref.collection && typeof db !== 'undefined' && db.getSync) {
-                var items = db.getSync(ref.collection, []) || [];
+                var cleCollection = (typeof cle === 'function') ? cle(ref.collection) : ref.collection;
+                var items = db.getSync(cleCollection, []) || [];
                 var item = items.find(function (x) { return x && x.id === ref.id; });
                 if (item && BibliothequeUI.estItemDemo(item)) {
                     var nom = item.nom || item.titre || '';

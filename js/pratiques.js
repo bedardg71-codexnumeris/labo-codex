@@ -71,7 +71,7 @@ function _normPratique(p) {
  * qui n'en ont pas encore, avec des valeurs par défaut.
  */
 function migrerConfigurationsSpecifiques() {
-    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
     const migrationEffectuee = db.getSync('migrationConfigsSpecifiques', false);
 
     if (migrationEffectuee) {
@@ -472,7 +472,7 @@ function chargerGrillesDisponibles() {
  * Migration: Ajoute les établissements manquants aux pratiques existantes
  */
 function migrerEtablissementsPratiques() {
-    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
     let modifie = false;
 
     // Mapping des auteurs vers établissements
@@ -725,7 +725,7 @@ async function activerPratique(id, confirmer = true) {
 function chargerConfigurationPratique(id) {
 
     // Charger la pratique depuis pratiquesConfigurables
-    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
     const pratique = pratiques.find(p => p.id === id);
 
     if (!pratique || !pratique.config) {
@@ -923,7 +923,7 @@ async function activerPratiqueAffichee() {
  */
 async function editerPratique(id) {
     try {
-        const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+        const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
         const pratique = pratiques.find(p => p.id === id);
         if (!pratique) {
             throw new Error('Pratique introuvable');
@@ -951,7 +951,7 @@ async function dupliquerPratique(id, options = {}) {
     if (!nouveauNom) return;
 
     try {
-        const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+        const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
         const original = pratiques.find(p => p.id === id);
 
         if (!original) {
@@ -1050,7 +1050,7 @@ async function dupliquerPratique(id, options = {}) {
  * @returns {Promise<string|null>} id de la maquette créée, ou null.
  */
 async function deriverMaquette(sourceId) {
-    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
     const source = pratiques.find(p => p.id === sourceId);
     if (!source) {
         if (typeof notifications !== 'undefined' && notifications.erreur) notifications.erreur('Pratique source introuvable.');
@@ -1094,7 +1094,7 @@ async function deriverMaquette(sourceId) {
  * @param {string} id - ID de la pratique à supprimer
  */
 async function supprimerPratique(id) {
-    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
     const pratique = pratiques.find(p => p.id === id);
 
     // Vérifier que la pratique n'est pas active (#328 L2-b2 : SSOT, plus le miroir)
@@ -1144,7 +1144,7 @@ async function supprimerPratique(id) {
  * @returns {Promise<boolean>} true si adoptée ; false si introuvable ou déjà aboutie.
  */
 async function adopterMaquette(id) {
-    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
     const pratique = pratiques.find(p => p.id === id);
     if (!pratique || pratique.estMaquette !== true) return false;
 
@@ -1311,7 +1311,7 @@ window.traiterImportPratique = traiterImportPratique;
  * Filtre uniquement les pratiques avec dansBibliotheque !== false
  */
 async function afficherListePratiquesSidebar() {
-    const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+    const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || [];
 
     // IDs des 3 CANEVAS DE BASE (pratiques codées) qui ne doivent PAS apparaître dans la sidebar
     // (ils sont dans le modal "Bibliothèque de pratiques" > section "Canevas de base")
@@ -1372,7 +1372,7 @@ async function afficherListePratiquesSidebar() {
  * ✅ AVEC Creative Commons (pratiques personnalisées)
  */
 async function ouvrirModalBibliothequePratiques() {
-    const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+    const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || [];
 
     // Définir les 3 CANEVAS DE BASE (structures fondamentales codées - templates immuables)
     // Ces IDs correspondent aux pratiques codées en JavaScript (pas aux configurations JSON)
@@ -1581,7 +1581,7 @@ function fermerModalBibliothequePratiques() {
  * Retire une pratique de la bibliothèque
  */
 async function retirerPratiqueDeBibliotheque(pratiqueId) {
-    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
     const pratique = pratiques.find(p => p.id === pratiqueId);
 
     if (!pratique) {
@@ -1605,7 +1605,7 @@ async function retirerPratiqueDeBibliotheque(pratiqueId) {
  * Ajoute une pratique individuelle à la bibliothèque
  */
 async function ajouterPratiqueIndividuelle(pratiqueId) {
-    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
     const pratique = pratiques.find(p => p.id === pratiqueId);
 
     if (!pratique) {
@@ -1631,7 +1631,7 @@ async function ajouterPratiqueIndividuelle(pratiqueId) {
  * Permet de supprimer des pratiques qui ne sont pas dans la sidebar
  */
 async function supprimerPratiqueHorsBibliotheque(pratiqueId) {
-    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
     const pratique = pratiques.find(p => p.id === pratiqueId);
 
     if (!pratique) {
@@ -1694,7 +1694,7 @@ async function supprimerPratiqueHorsBibliotheque(pratiqueId) {
  */
 async function partagerPratique(pratiqueId) {
     try {
-        const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+        const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
         const pratique = pratiques.find(p => p.id === pratiqueId);
 
         if (!pratique) {
@@ -1736,7 +1736,7 @@ async function partagerPratique(pratiqueId) {
  */
 async function exporterPratiqueActive(pratiqueId) {
     try {
-        const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+        const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
         const pratique = pratiques.find(p => p.id === pratiqueId);
 
         if (!pratique) {
@@ -1973,7 +1973,7 @@ window.genererObjectifsSpec = genererObjectifsSpec;
  * Utile pour identifier les IDs de pratiques à supprimer
  */
 function listerPratiquesConfigurables() {
-    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
     console.table(pratiques.map(p => ({
         id: p.id,
         nom: p.nom,
@@ -1988,7 +1988,7 @@ function listerPratiquesConfigurables() {
  * @param {string} nomRecherche - Partie du nom à rechercher (ex: "Littérature")
  */
 async function supprimerPratiqueParNom(nomRecherche) {
-    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
     const pratiqueTrouvee = pratiques.find(p =>
         p.nom && p.nom.toLowerCase().includes(nomRecherche.toLowerCase())
     );
@@ -2346,7 +2346,7 @@ window.importerPratiquesExternes = function(nouvellesPratiques, options) {
     if (!nouvellesPratiques || nouvellesPratiques.length === 0) return 0;
     options = options || {};
 
-    var pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []) || [];
+    var pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [] || [];
     if (!Array.isArray(pratiques)) pratiques = [];
     var compteur = 0;
 

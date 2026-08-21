@@ -1072,7 +1072,7 @@ function calculerNoteAvecCategories(da, configCategories) {
  * @returns {object|null} - Objet configuration { portfolio, categories, ... } ou null
  */
 function obtenirConfigPratiqueActive(pratiqueIdDemande = null) {
-    const pratiquesConfig = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+    const pratiquesConfig = db.getSync(cle('pratiquesConfigurables'), null) || [];
 
     // #307 (simulation) : si une pratique est explicitement demandée, on résout SA
     // config sans changer l'état global. Sinon, repli sur la pratique active du

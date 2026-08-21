@@ -90,7 +90,7 @@ function cocherOptionsParDefaut() {
     try {
         const pratiqueId = typeof obtenirPratiqueActiveGroupeCours === 'function'
             ? obtenirPratiqueActiveGroupeCours() : null;
-        const configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+        const configurations = db.getSync(cle('pratiquesConfigurables'), null) || [];
         // ✅ CORRIGÉ (16 mars 2026) : chercher par id, puis fallback par type
         // (les anciens groupe-cours stockent le type 'pan-standards' au lieu de l'ID unique)
         var pratiqueActive = pratiqueId ? configurations.find(function(p) { return p.id === pratiqueId; }) : null;
@@ -1141,7 +1141,7 @@ function restaurerSelectionsEvaluation() {
                 try {
                     var _pratiqueId = typeof obtenirPratiqueActiveGroupeCours === 'function'
                         ? obtenirPratiqueActiveGroupeCours() : null;
-                    var _configs = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+                    var _configs = db.getSync(cle('pratiquesConfigurables'), null) || [];
                     var _pratique = _pratiqueId ? _configs.find(function(p) { return p.id === _pratiqueId; }) : null;
                     if (!_pratique && _pratiqueId) {
                         _pratique = _configs.find(function(p) { return p.type === _pratiqueId; });
@@ -1725,7 +1725,7 @@ function _afficherCriteresDepuisEvaluation(evaluation) {
     const echelleId = evaluation.echelleId;
     if (echelleId && echelleId.startsWith('pratique-')) {
         const pratiqueId = echelleId.replace('pratique-', '');
-        const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+        const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
         const p = pratiques.find(pr => pr.id === pratiqueId);
         if (p?.config?.echelle?.niveaux) {
             p.config.echelle.niveaux.forEach(n => { niveauxMap[n.code] = n.nom || n.code; });

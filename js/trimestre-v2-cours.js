@@ -946,7 +946,7 @@ function afficherSyntheseGroupeCours(gc) {
     // 🆕 FIX (1er fév 2026) : Utiliser cle() pour namespacing (horaires est dans CLES_NAMESPACEES)
     const cleHoraires = cle('horaires');
     const horaires = db.getSync(cleHoraires, []);
-    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
 
     const coursInfo = cours.find(c => c.id === gc.coursId);
     const ens = enseignants.find(e => e.id === gc.enseignantId);

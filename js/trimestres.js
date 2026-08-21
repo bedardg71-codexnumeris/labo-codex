@@ -109,8 +109,39 @@
         // collection DISJOINTE, intouchée. Le retrait de la clé globale héritée est
         // la TOUTE DERNIÈRE étape (live, sur backup) — voir PLAN-358 §0bis.
         'grillesTemplates',
-        'echellesTemplates'
+        'echellesTemplates',
+        // 🆕 #464/CT-26 (21 août 2026) : inventaire exhaustif des clés passées à cle()
+        // — ces 15 clés étaient appelées via cle() par leurs modules (intention de
+        // namespacing) mais ABSENTES des registres : le fallthrough les rendait NUES,
+        // donc partagées entre tous les trimestres ET avec la démo (classe de bug
+        // #367 ; rouvre le constat de #365 : le bilan réflexif n'était PAS namespacé).
+        // Vérifié clé par clé : AUCUN accès nu direct concurrent (pas de cerveau
+        // divisé). Les résidus nus existants sont rapatriés par migrerResidusClesNues().
+        'autoreflexionBilan',
+        'parcoursBilan',
+        'questionnaireBilan',
+        'resultatsBilan',
+        'chronoEvaluations',
+        'confidentielEtudiants',
+        'groupeSelectionne',
+        'migrationRLO_evals_v1_done',
+        'productionsPedagogiques',   // legacy en extinction — sa migration flaguée compose ses deux formes elle-même
+        'corbeilleFichiers_backup_v1',
+        'evaluationsSauvegardees_backup_v1',
+        'fichiersTravaux_backup_v1',
+        'migration_snapshot_v1',
+        'migration_fichierId_supprime_v1',
+        // 🆕 #464/CT-07 : la durée de période est PAR TRIMESTRE (modèle « horaire
+        // propre au trimestre », 29 mai ; DATA-OWNERSHIP la déclarait déjà NS).
+        // Rend enfin lues les écritures existantes de purgerLegacy()
+        // ({id}_dureePeriode) et du pack démo (demo_dureePeriode). La valeur nue
+        // héritée est copiée vers TOUS les trimestres par migrerResidusClesNues().
+        'dureePeriode'
     ];
+
+    // 🆕 #464/CT-26 : clés inconnues déjà signalées (un seul warn par clé et par
+    // session — cle() est la primitive la plus appelée de l'app).
+    const _clesInconnuesSignalees = new Set();
 
     // Clés globales (partagées entre trimestres)
     // Ces clés ne sont JAMAIS préfixées (sauf si archivées)
@@ -320,7 +351,14 @@
             return `${trimestreId}_${nomCle}`;
         }
 
-        // Clé non reconnue, retourner telle quelle
+        // Clé non reconnue : fallthrough BRUYANT (#464/CT-26 — le silence de ce
+        // chemin est la mécanique commune de #367, CT-07, CT-12, CO-09 : une clé
+        // que son appelant CROIT namespacée devient globale de fait, partagée
+        // entre trimestres et avec la démo). Un warn par clé et par session.
+        if (!_clesInconnuesSignalees.has(nomCle)) {
+            _clesInconnuesSignalees.add(nomCle);
+            console.warn(`[Trimestres] cle('${nomCle}') : clé ABSENTE des registres CLES_NAMESPACEES/CLES_GLOBALES — rendue nue (non namespacée). Inscrire la clé au registre.`);
+        }
         return nomCle;
     }
 
@@ -698,7 +736,7 @@
             // + l'écriture vers `${trimestreId}_*` (plus bas) restent inchangés.
             const toutesGrilles = db.getSync(`${trimestreId}_grillesTemplates`, []);
             const toutesEchelles = db.getSync(`${trimestreId}_echellesTemplates`, []);
-            const toutesPratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+            const toutesPratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
 
             // Filtrer pour ne garder que les utilisés
             const grillesUtilisees = toutesGrilles.filter(g => grilleIds.has(g.id));
@@ -1220,18 +1258,81 @@
      */
     function forcerMigration(trimestreId) {
 
+        // 🔧 #464/CO-10 (21 août 2026) : l'écriture était INCONDITIONNELLE — tout
+        // résidu de clé nue ÉCRASAIT la copie namespacée du trimestre actif
+        // (étudiants/présences/évaluations compris) à chaque boot où le déclencheur
+        // s'armait. Politique alignée sur copie-SEULEMENT-si-cible-vide ; le résidu
+        // est purgé dans TOUS les cas (copie faite, ou refus journalisé) : la purge
+        // auto-éteint le déclencheur — pas besoin de flag, et la capture bénéfique
+        // du travail pré-trimestre (reproductible) est préservée.
         let clesMigrees = 0;
         CLES_NAMESPACEES.forEach(nomCle => {
             const valeur = db.getSync(nomCle, null);
             if (valeur !== null) {
                 const nouvelleCle = `${trimestreId}_${nomCle}`;
-                db.setSync(nouvelleCle, valeur);
+                const cible = db.getSync(nouvelleCle, null);
+                const cibleVide = cible === null || (Array.isArray(cible) && cible.length === 0);
+                if (cibleVide) {
+                    db.setSync(nouvelleCle, valeur);
+                    clesMigrees++;
+                } else {
+                    console.warn(`[Trimestres] forcerMigration : résidu nu « ${nomCle} » NON copié (la cible ${nouvelleCle} porte déjà des données) — résidu purgé sans copie.`);
+                }
                 db.removeSync(nomCle);
-                clesMigrees++;
             }
         });
 
         return { success: true, clesMigrees: clesMigrees };
+    }
+
+    /**
+     * 🆕 #464 (21 août 2026) — Rapatriement ONE-SHOT des résidus de clés nues.
+     * Pour chaque clé de CLES_NAMESPACEES dont il reste un résidu nu (données
+     * d'avant le namespacing, ou clés nouvellement inscrites au registre par
+     * CT-26) : copie vers le trimestre ACTIF si la cible est vide (warn sinon),
+     * puis purge du nu. Cas spécial dureePeriode : la valeur nue est copiée vers
+     * TOUS les trimestres du registre qui n'en ont pas (comportement identique
+     * préservé partout), puis purgée.
+     * Ferme CO-09 (fallback pratiques), CT-11/CT-12 (résidus horaires) côté données.
+     */
+    function migrerResidusClesNues() {
+        const FLAG = 'migration_residus_cles_nues_done';
+        if (db.getSync(FLAG, false)) return { success: true, dejaFait: true };
+        const trimestres = obtenirTrimestres();
+        const actif = obtenirTrimestreActif();
+        if (!actif) return { success: true, sansTrimestre: true }; // pré-trimestre : rien à rapatrier (le flag n'est PAS posé)
+
+        // dureePeriode : copie vers tous les trimestres, jamais d'écrasement
+        const dureeNue = db.getSync('dureePeriode', null);
+        if (dureeNue !== null) {
+            trimestres.forEach(t => {
+                if (db.getSync(`${t.id}_dureePeriode`, null) === null) {
+                    db.setSync(`${t.id}_dureePeriode`, dureeNue);
+                }
+            });
+            db.removeSync('dureePeriode');
+        }
+
+        let rapatriees = 0;
+        CLES_NAMESPACEES.forEach(nomCle => {
+            if (nomCle === 'dureePeriode') return;
+            const valeur = db.getSync(nomCle, null);
+            if (valeur === null) return;
+            const nouvelleCle = `${actif.id}_${nomCle}`;
+            const cible = db.getSync(nouvelleCle, null);
+            const cibleVide = cible === null || (Array.isArray(cible) && cible.length === 0);
+            if (cibleVide) {
+                db.setSync(nouvelleCle, valeur);
+                rapatriees++;
+                console.warn(`[Trimestres] #464 : résidu nu « ${nomCle} » rapatrié vers ${nouvelleCle}.`);
+            } else {
+                console.warn(`[Trimestres] #464 : résidu nu « ${nomCle} » NON copié (${nouvelleCle} porte déjà des données) — purgé sans copie.`);
+            }
+            db.removeSync(nomCle);
+        });
+
+        db.setSync(FLAG, true);
+        return { success: true, rapatriees };
     }
 
     /**
@@ -1427,38 +1528,11 @@
         db.setSync('migration-cles-globales-done', '1');
     }
 
-    /**
-     * Migre les horaires et groupesCours vers le trimestre actif
-     * 🆕 FIX (21 jan 2026) : Ces clés ont été ajoutées à CLES_NAMESPACEES
-     * mais les données existantes étaient stockées sans préfixe
-     */
-    function migrerHorairesEtGroupesCours() {
-        const trimestreActif = obtenirTrimestreActif();
-        if (!trimestreActif) return;
-
-        const prefixe = trimestreActif.id + '_';
-        const clesAMigrer = ['horaires', 'groupesCours'];
-        let clesMigrees = 0;
-
-        clesAMigrer.forEach(nomCle => {
-            const donneesAnciennes = db.getSync(nomCle, null);
-
-            // Si des données existent dans l'ancienne clé (sans préfixe)
-            if (donneesAnciennes !== null && Array.isArray(donneesAnciennes) && donneesAnciennes.length > 0) {
-                const cleNouvelle = prefixe + nomCle;
-                const existantes = db.getSync(cleNouvelle, null);
-
-                // Ne migrer que si la clé namespacée n'existe pas ou est vide
-                if (existantes === null || (Array.isArray(existantes) && existantes.length === 0)) {
-                    db.setSync(cleNouvelle, donneesAnciennes);
-                    clesMigrees++;
-                }
-            }
-        });
-
-        if (clesMigrees > 0) {
-        }
-    }
+    // #464/CT-12 (21 août 2026) : migrerHorairesEtGroupesCours RETIRÉE — elle
+    // recopiait à CHAQUE boot tout résidu nu horaires/groupesCours vers le
+    // trimestre actif SANS jamais purger (le résidu ressuscitait dans tout
+    // trimestre au namespace vide). Remplacée par migrerResidusClesNues()
+    // (one-shot, copie-si-vide + purge), qui couvre TOUTES les clés du registre.
 
     /* ===============================
        INITIALISATION
@@ -1472,8 +1546,10 @@
         // Migration ponctuelle des clés vers A2025
         migrerClesVersA2025();
 
-        // 🆕 FIX (21 jan 2026) : Migration horaires et groupesCours vers trimestre actif
-        migrerHorairesEtGroupesCours();
+        // 🆕 #464 (21 août 2026) : rapatriement one-shot des résidus de clés nues
+        // (remplace migrerHorairesEtGroupesCours, et couvre les 15 clés inscrites
+        // au registre par l'inventaire CT-26 + dureePeriode).
+        migrerResidusClesNues();
 
         // Synchroniser les miroirs window.trimestreActif + clé storage avec le tableau .actif
         const actif = obtenirTrimestreActif();
@@ -2315,6 +2391,7 @@
     window.creerTrimestre = creerTrimestre;
     window.changerTrimestreActif = changerTrimestreActif;
     window.forcerMigration = forcerMigration;
+    window.migrerResidusClesNues = migrerResidusClesNues;   // #464 (testabilité + relance console si besoin)
     window.migrerVersMultiTrimestres = migrerVersMultiTrimestres;
     window.initialiserModuleTrimestres = initialiserModuleTrimestres;
 

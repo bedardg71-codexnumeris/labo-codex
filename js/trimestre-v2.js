@@ -353,7 +353,7 @@ function populerDropdownsAssemblageV2() {
     const selectPratique = document.getElementById('v2-gc-pratique');
     if (selectPratique) {
         // Les pratiques sont stockées dans 'pratiquesConfigurables' (module pratiques-gestion.js)
-        const toutesPratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+        const toutesPratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
         // Filtrer pour n'afficher que les pratiques dans la sidebar
         const pratiques = enDemoLegacy
             ? toutesPratiques.filter(p => p.dansBibliotheque !== false)

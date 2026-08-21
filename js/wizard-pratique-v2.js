@@ -2736,7 +2736,7 @@ async function finaliserCreationPratique(pratique) {
  */
 async function sauvegarderPratique(pratique) {
     // Récupérer les pratiques existantes
-    let pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+    let pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
 
     // Mise à jour ou ajout
     const index = pratiques.findIndex(p => p.id === pratique.id);
@@ -2877,7 +2877,7 @@ function fermerWizardV2() {
  * @param {string} pratiqueId - ID de la pratique
  */
 function chargerPratiqueExistante(pratiqueId) {
-    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
     const pratique = pratiques.find(p => p.id === pratiqueId);
 
     if (!pratique) {

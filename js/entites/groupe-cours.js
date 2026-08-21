@@ -242,8 +242,8 @@ async function synchroniserInfoCours(trimestreId) {
         const cleSeances = cle('seancesHoraire');
         await db.set(cleSeances, gcComplet.horaire.seances);
 
-        // Également la clé legacy non namespacée (pour certains modules)
-        await db.set('seancesHoraire', gcComplet.horaire.seances);
+        // #464/CT-11 : l'écriture legacy dans la clé NUE 'seancesHoraire' est
+        // retirée (fuite inter-trimestre ; les lecteurs passent par cle()).
 
         // 🔧 FIX (30 mars 2026) : Synchroniser horaireHebdo avec le groupe actif
         // genererCalendrierComplet() lit cette clé pour marquer les jours de cours.

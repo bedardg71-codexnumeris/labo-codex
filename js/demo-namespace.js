@@ -153,7 +153,19 @@ function peuplerNamespace(pack) {
     for (let i = 0; i < collectionsDuPack.length; i++) {
         const nom = collectionsDuPack[i];
         if (pack[nom] !== undefined) {
-            db.setSync(cleDemo(nom), pack[nom]);
+            let valeur = pack[nom];
+            // 🆕 #464/CO-02 (21 août 2026) : estampiller isDemo:true sur chaque item
+            // du pack À L'ÉCRITURE du namespace démo. Sans le flag, estItemDemo()
+            // rendait false pour les modèles du pack (aucun item ne portait isDemo,
+            // 2 seulement portaient l'auteur « Demo Labo Codex ») — la moitié
+            // « lookup » de la garde anti-référence-démo était inerte. Patron
+            // « identité + flag » du retrait démo (skill integrite-globaux §3.3).
+            if (Array.isArray(valeur)) {
+                valeur = valeur.map(item =>
+                    (item && typeof item === 'object' && item.id) ? Object.assign({}, item, { isDemo: true }) : item
+                );
+            }
+            db.setSync(cleDemo(nom), valeur);
         }
     }
 

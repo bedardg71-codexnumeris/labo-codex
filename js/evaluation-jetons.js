@@ -98,7 +98,7 @@ function obtenirConfigJetonsPratique(pratiqueIdDemande = null) {
         || (typeof obtenirPratiqueActiveGroupeCours === 'function' ? obtenirPratiqueActiveGroupeCours() : null);
     if (!pratiqueId) return null;
 
-    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
     if (!Array.isArray(pratiques)) return null;
     const pratique = pratiques.find(p => p && p.id === pratiqueId);
     if (!pratique) return null;

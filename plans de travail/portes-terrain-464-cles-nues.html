@@ -1,0 +1,345 @@
+<meta charset="utf-8">
+<title>Porte terrain · clés nues 1.89</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@600;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    --papier: #f5f7f9; --carte: #ffffff; --encre: #1d2b38; --encre-douce: #5b6b7a;
+    --ligne: #dbe3e9; --accent: #0e6e6e; --accent-fond: #e3f0ef;
+    --danger: #b3382f; --danger-fond: #f9e8e6; --ok: #2e7d4f; --ok-fond: #e6f2ea;
+    --avert: #b4560a; --avert-fond: #f9ede2;
+    --champ: #fbfcfd; --ombre: 0 1px 3px rgba(29, 43, 56, .08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --papier: #131a21; --carte: #1a232c; --encre: #e6edf3; --encre-douce: #93a4b3;
+      --ligne: #2a3641; --accent: #4cc4c0; --accent-fond: #12312f;
+      --danger: #e0685e; --danger-fond: #351512; --ok: #5fbf8a; --ok-fond: #12291b;
+      --avert: #e8925a; --avert-fond: #33220f;
+      --champ: #141d25; --ombre: 0 1px 3px rgba(0, 0, 0, .4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --papier: #131a21; --carte: #1a232c; --encre: #e6edf3; --encre-douce: #93a4b3;
+    --ligne: #2a3641; --accent: #4cc4c0; --accent-fond: #12312f;
+    --danger: #e0685e; --danger-fond: #351512; --ok: #5fbf8a; --ok-fond: #12291b;
+    --avert: #e8925a; --avert-fond: #33220f;
+    --champ: #141d25; --ombre: 0 1px 3px rgba(0, 0, 0, .4);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--papier); color: var(--encre);
+    font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif; font-size: 16px; line-height: 1.55; }
+  .cadre { max-width: 880px; margin: 0 auto; padding: 0 20px 80px; }
+  h1, h2 { font-family: "Bitter", Georgia, serif; text-wrap: balance; }
+  h1 { font-size: 1.6rem; margin: 26px 0 4px; }
+  h2 { font-size: 1.2rem; margin: 38px 0 6px; padding-top: 16px; border-top: 3px solid var(--encre); }
+  .sous-titre, .contexte { color: var(--encre-douce); }
+  .contexte { font-size: .95rem; max-width: 68ch; }
+  .mono, #compteur, .num { font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+
+  .barre { position: sticky; top: 0; z-index: 10; background: var(--papier); border-bottom: 1px solid var(--ligne);
+    padding: 10px 0; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  #compteur { font-size: .92rem; font-weight: 600; }
+  #compteur .ok-n { color: var(--ok); } #compteur .ko-n { color: var(--danger); }
+  .btn-export { font: inherit; font-size: .9rem; font-weight: 600; margin-left: auto; padding: 7px 16px;
+    border-radius: 8px; border: none; cursor: pointer; background: var(--accent); color: var(--papier); }
+  .btn-export:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #zone-export { display: none; margin: 14px 0; }
+  #zone-export.visible { display: block; }
+  #texte-export { width: 100%; height: 240px; font-family: "IBM Plex Mono", monospace; font-size: .78rem;
+    background: var(--champ); color: var(--encre); border: 1px solid var(--accent); border-radius: 8px; padding: 10px; }
+  .msg-export { font-size: .9rem; color: var(--ok); font-weight: 600; }
+
+  .porte { background: var(--carte); border: 1px solid var(--ligne); border-left: 5px solid var(--encre-douce);
+    border-radius: 10px; box-shadow: var(--ombre); padding: 14px 16px; margin: 12px 0; }
+  .porte[data-tag="donnees"] { border-left-color: var(--danger); }
+  .porte[data-tag="console"] { border-left-color: var(--avert); }
+  .porte.v { border-left-color: var(--ok); } .porte.x { border-left-color: var(--danger); background: var(--danger-fond); }
+  .porte-tete { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .num { font-size: .82rem; font-weight: 600; color: var(--encre-douce); }
+  .porte-titre { font-weight: 700; }
+  .tags { margin-left: auto; display: flex; gap: 6px; }
+  .tag { font-size: .72rem; font-weight: 700; letter-spacing: .04em; border-radius: 5px; padding: 2px 7px; }
+  .tag-donnees { background: var(--danger-fond); color: var(--danger); }
+  .tag-console { background: var(--avert-fond); color: var(--avert); }
+  .tag-safari { background: var(--accent-fond); color: var(--accent); }
+  .geste { margin: 8px 0 4px; max-width: 70ch; }
+  .attendu { color: var(--encre-douce); font-size: .93rem; max-width: 70ch; }
+  .attendu b { color: var(--encre); }
+  .controles { display: flex; gap: 8px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+  .bascule { display: inline-flex; border: 1.5px solid var(--ligne); border-radius: 8px; overflow: hidden; }
+  .bascule button { font: inherit; font-size: .95rem; font-weight: 700; padding: 5px 16px; border: none;
+    background: var(--champ); color: var(--encre-douce); cursor: pointer; }
+  .bascule button[aria-pressed="true"].b-v { background: var(--ok); color: #fff; }
+  .bascule button[aria-pressed="true"].b-x { background: var(--danger); color: #fff; }
+  .bascule button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .mesure { flex: 1; min-width: 240px; }
+  .mesure textarea, .mesure input { width: 100%; font: inherit; font-size: .9rem; color: var(--encre);
+    background: var(--champ); border: 1px solid var(--ligne); border-radius: 8px; padding: 7px 10px; }
+  .mesure textarea { min-height: 36px; resize: vertical; }
+  .mesure textarea:focus-visible, .mesure input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .encart { background: var(--avert-fond); border: 1px solid var(--avert); border-radius: 10px;
+    padding: 12px 16px; margin: 14px 0; font-size: .95rem; max-width: 74ch; }
+  details ul { margin: 6px 0; padding-left: 20px; color: var(--encre-douce); font-size: .93rem; }
+  summary { cursor: pointer; color: var(--accent); font-weight: 600; font-size: .92rem; }
+</style>
+
+<div class="cadre">
+  <h1>Porte terrain · clés nues (1.89.0)</h1>
+  <p class="sous-titre">Lot #464 du triage des audits — migrations one-shot sur tes données réelles</p>
+  <p class="contexte">Chaque porte : un geste, son attendu, une bascule ✓/✗ — et un champ quand un
+  chiffre ou un texte doit revenir. Ce qui échoue devient un item de backlog. Termine par
+  <b>« Copier mes résultats »</b>.</p>
+
+  <div class="barre">
+    <span id="compteur" role="status"></span>
+    <button type="button" class="btn-export" id="btn-export">Copier mes résultats</button>
+  </div>
+  <div id="zone-export"><p class="msg-export" id="msg-export"></p>
+    <textarea id="texte-export" readonly aria-label="Relevé"></textarea></div>
+
+  <h2>§0 · Préalable — dans cet ordre</h2>
+  <div class="encart">⚠⚠ <b>Backup Codex AVANT tout</b> : les migrations tournent au premier
+  démarrage après la mise à jour. Puis <span class="mono">git pull</span>, et <b>vérifier
+  « 1.89.0 » en bas de page</b> — un build en retard produit des faux rouges indétectables.
+  Ouvre la <b>console du navigateur AVANT</b> le premier rechargement : les messages de
+  migration ne s'affichent qu'une fois.</div>
+
+  <h2>§1 · ⚠⚠ Données — le premier démarrage</h2>
+  <p class="contexte">La migration est <b>par navigateur</b> : Chrome d'abord, puis refaire
+  sur Safari (porte 1.5). L'iPad migrera quand tu l'ouvriras.</p>
+
+  <div class="porte" data-id="1.1" data-tag="donnees">
+    <div class="porte-tete"><span class="num">1.1</span>
+      <span class="porte-titre">Premier rechargement : lire la console</span>
+      <span class="tags"><span class="tag tag-donnees">⚠⚠ Données</span><span class="tag tag-console">Console</span></span></div>
+    <p class="geste">Recharge l'app (console ouverte) et cherche les lignes qui commencent par
+    <span class="mono">[Trimestres] #464</span>.</p>
+    <p class="attendu">⮕ Attendu : zéro, une ou plusieurs lignes « résidu nu « … » rapatrié / purgé ».
+    <b>Aucune ligne est une réponse valable</b> — c'est une mesure, pas un verdict.</p>
+    <div class="controles">
+      <span class="bascule"><button type="button" class="b-v">✓</button><button type="button" class="b-x">✗</button></span>
+      <span class="mesure"><textarea data-mesure="1.1" placeholder="Coller ici les lignes [Trimestres] #464 (ou écrire « aucune »)"></textarea></span>
+    </div>
+  </div>
+
+  <div class="porte" data-id="1.2" data-tag="donnees">
+    <div class="porte-tete"><span class="num">1.2</span>
+      <span class="porte-titre">La durée de période n'a pas bougé</span>
+      <span class="tags"><span class="tag tag-donnees">⚠⚠ Données</span></span></div>
+    <p class="geste">Calendrier › Trimestre › réglages de l'horaire : lire « Durée d'une période ».</p>
+    <p class="attendu">⮕ Attendu : la même valeur qu'avant la mise à jour (le réglage est devenu
+    propre au trimestre, la valeur ne doit pas avoir changé).</p>
+    <div class="controles">
+      <span class="bascule"><button type="button" class="b-v">✓</button><button type="button" class="b-x">✗</button></span>
+      <span class="mesure"><input type="text" data-mesure="1.2" placeholder="Valeur affichée (min)"></span>
+    </div>
+  </div>
+
+  <div class="porte" data-id="1.3" data-tag="donnees">
+    <div class="porte-tete"><span class="num">1.3</span>
+      <span class="porte-titre">Le bilan réflexif est toujours là</span>
+      <span class="tags"><span class="tag tag-donnees">⚠⚠ Données</span></span></div>
+    <p class="geste">Ouvrir la section du bilan réflexif du trimestre actif.</p>
+    <p class="attendu">⮕ Attendu : questionnaires et résultats existants présents. (Avant, ces
+    données étaient partagées entre tous les trimestres ; elles ont été rangées sous le
+    trimestre actif.)</p>
+    <div class="controles">
+      <span class="bascule"><button type="button" class="b-v">✓</button><button type="button" class="b-x">✗</button></span>
+      <span class="mesure"><textarea data-mesure="1.3" placeholder="Note (facultatif)"></textarea></span>
+    </div>
+  </div>
+
+  <div class="porte" data-id="1.4" data-tag="donnees">
+    <div class="porte-tete"><span class="num">1.4</span>
+      <span class="porte-titre">Les pratiques du trimestre sont identiques</span>
+      <span class="tags"><span class="tag tag-donnees">⚠⚠ Données</span></span></div>
+    <p class="geste">Conception › Pratiques : parcourir la liste de la sidebar.</p>
+    <p class="attendu">⮕ Attendu : la même liste qu'avant — <b>aucune pratique disparue, aucune
+    ancienne ressuscitée</b>.</p>
+    <div class="controles">
+      <span class="bascule"><button type="button" class="b-v">✓</button><button type="button" class="b-x">✗</button></span>
+      <span class="mesure"><textarea data-mesure="1.4" placeholder="Note (facultatif)"></textarea></span>
+    </div>
+  </div>
+
+  <div class="porte" data-id="1.5" data-tag="donnees">
+    <div class="porte-tete"><span class="num">1.5</span>
+      <span class="porte-titre">Refaire 1.1 à 1.4 sur Safari</span>
+      <span class="tags"><span class="tag tag-donnees">⚠⚠ Données</span><span class="tag tag-safari">Safari</span></span></div>
+    <p class="geste">Ouvrir la copie Safari (console ouverte avant), recharger, repasser les
+    quatre portes.</p>
+    <p class="attendu">⮕ Attendu : mêmes résultats — la migration de Safari est indépendante.</p>
+    <div class="controles">
+      <span class="bascule"><button type="button" class="b-v">✓</button><button type="button" class="b-x">✗</button></span>
+      <span class="mesure"><textarea data-mesure="1.5" placeholder="Lignes console Safari + écarts éventuels"></textarea></span>
+    </div>
+  </div>
+
+  <h2>§2 · Interface</h2>
+
+  <div class="porte" data-id="2.1">
+    <div class="porte-tete"><span class="num">2.1</span>
+      <span class="porte-titre">Les 8 échelles d'exemple vivent dans la bibliothèque</span></div>
+    <p class="geste">Conception › Échelles › « Consulter la bibliothèque ».</p>
+    <p class="attendu">⮕ Attendu : les huit échelles (Chimie organique, Interfaces/BD, Anatomie,
+    Philosophie, Littérature, Comptabilité, Géographie, Philosophie 101), auteur « Labo Codex ».
+    Avant, elles étaient recréées d'office dans chaque trimestre.</p>
+    <div class="controles">
+      <span class="bascule"><button type="button" class="b-v">✓</button><button type="button" class="b-x">✗</button></span>
+      <span class="mesure"><textarea data-mesure="2.1" placeholder="Manquantes, s'il y en a"></textarea></span>
+    </div>
+  </div>
+
+  <div class="porte" data-id="2.2">
+    <div class="porte-tete"><span class="num">2.2</span>
+      <span class="porte-titre">Un trimestre neuf naît sans les 8 échelles</span></div>
+    <p class="geste">Créer un trimestre de test, ouvrir Conception › Échelles, puis supprimer le
+    trimestre de test.</p>
+    <p class="attendu">⮕ Attendu : le trimestre neuf ne contient QUE « Échelle générique
+    (exemple) ». Avant, il naissait avec 9 échelles.</p>
+    <div class="controles">
+      <span class="bascule"><button type="button" class="b-v">✓</button><button type="button" class="b-x">✗</button></span>
+      <span class="mesure"><textarea data-mesure="2.2" placeholder="Note (facultatif)"></textarea></span>
+    </div>
+  </div>
+
+  <div class="porte" data-id="2.3">
+    <div class="porte-tete"><span class="num">2.3</span>
+      <span class="porte-titre">Le mode démonstration s'active et se referme proprement</span></div>
+    <p class="geste">Activer le mode démonstration, naviguer un peu, le désactiver.</p>
+    <p class="attendu">⮕ Attendu : tout s'affiche normalement (un message console « rafraîchi
+    depuis 20.8 » est normal) ; au retour, rien de la démo ne traîne dans tes données.</p>
+    <div class="controles">
+      <span class="bascule"><button type="button" class="b-v">✓</button><button type="button" class="b-x">✗</button></span>
+      <span class="mesure"><textarea data-mesure="2.3" placeholder="Note (facultatif)"></textarea></span>
+    </div>
+  </div>
+
+  <div class="porte" data-id="2.4">
+    <div class="porte-tete"><span class="num">2.4</span>
+      <span class="porte-titre">Les niveaux d'un profil étudiant n'ont pas bougé</span></div>
+    <p class="geste">Ouvrir le profil d'un étudiant au hasard et comparer niveaux I-D-M-E et note
+    avec ce que tu connais d'avant.</p>
+    <p class="attendu">⮕ Attendu : identiques. (Les conversions lisent maintenant l'échelle du
+    trimestre en cours — chez toi, c'était déjà la bonne, rien ne doit changer.)</p>
+    <div class="controles">
+      <span class="bascule"><button type="button" class="b-v">✓</button><button type="button" class="b-x">✗</button></span>
+      <span class="mesure"><input type="text" data-mesure="2.4" placeholder="DA (anonyme) + note vérifiée"></span>
+    </div>
+  </div>
+
+  <div class="porte" data-id="2.5" data-tag="console">
+    <div class="porte-tete"><span class="num">2.5</span>
+      <span class="porte-titre">Après 5 minutes d'usage : chasse aux clés inconnues</span>
+      <span class="tags"><span class="tag tag-console">Console</span></span></div>
+    <p class="geste">Naviguer normalement 5 minutes (évaluations, profils, calendrier), puis
+    chercher en console les lignes « cle('…') : clé ABSENTE des registres ».</p>
+    <p class="attendu">⮕ Attendu : <b>mesure d'entrée — une ligne n'est PAS un échec.</b> Chaque
+    ligne copiée est une clé qu'on inscrira au registre (l'app la signale désormais au lieu de
+    se taire).</p>
+    <div class="controles">
+      <span class="bascule"><button type="button" class="b-v">✓</button><button type="button" class="b-x">✗</button></span>
+      <span class="mesure"><textarea data-mesure="2.5" placeholder="Coller chaque ligne « clé ABSENTE » (ou « aucune »)"></textarea></span>
+    </div>
+  </div>
+
+  <h2>§4 · Ce que la session n'a pas pu vérifier</h2>
+  <details open><summary>Angles morts déclarés</summary><ul>
+    <li>La migration sur tes données réelles — c'est exactement le §1 (par navigateur, par appareil ; l'iPad migrera à sa première ouverture).</li>
+    <li>Le régime « clés nues » après suppression du dernier trimestre : fermé par le lot L1/#463, pas celui-ci.</li>
+    <li>Les lecteurs morts restants de l'ancien système d'horaire : retrait au lot L7/#469.</li>
+    <li>Le relevé de la porte 2.5 dépend de TES parcours réels — la session n'a balayé que les chemins de test.</li>
+  </ul></details>
+
+  <p class="contexte" style="margin-top: 24px;">Au retour : chaque ✗ devient un item de backlog
+  avec son numéro de porte ; chaque ligne de la porte 2.5 devient une inscription au registre.
+  Trace versionnée : <span class="mono">plans de travail/PORTES-TERRAIN-2026-08-21-464-cles-nues.md</span>.</p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var CLE = 'porte-464-2026-08-21';
+  var etat = {};
+  try { etat = JSON.parse(localStorage.getItem(CLE) || '{}'); } catch (e) { etat = {}; }
+  var portes = Array.prototype.slice.call(document.querySelectorAll('.porte[data-id]'));
+  function sauver() { try { localStorage.setItem(CLE, JSON.stringify(etat)); } catch (e) {} }
+
+  function majPorte(p) {
+    var id = p.getAttribute('data-id');
+    var v = (etat[id] || {}).verdict;
+    p.classList.toggle('v', v === 'v');
+    p.classList.toggle('x', v === 'x');
+    var bs = p.querySelectorAll('.bascule button');
+    bs[0].setAttribute('aria-pressed', v === 'v' ? 'true' : 'false');
+    bs[1].setAttribute('aria-pressed', v === 'x' ? 'true' : 'false');
+  }
+  function majCompteur() {
+    var ok = 0, ko = 0;
+    portes.forEach(function (p) { var v = (etat[p.getAttribute('data-id')] || {}).verdict;
+      if (v === 'v') ok++; else if (v === 'x') ko++; });
+    document.getElementById('compteur').innerHTML =
+      '<span class="ok-n">' + ok + ' passée' + (ok > 1 ? 's' : '') + '</span> · ' +
+      '<span class="ko-n">' + ko + ' échec' + (ko > 1 ? 's' : '') + '</span> · ' +
+      (portes.length - ok - ko) + ' non traitée' + (portes.length - ok - ko > 1 ? 's' : '');
+  }
+
+  portes.forEach(function (p) {
+    var id = p.getAttribute('data-id');
+    var bs = p.querySelectorAll('.bascule button');
+    bs[0].addEventListener('click', function () {
+      etat[id] = etat[id] || {};
+      etat[id].verdict = etat[id].verdict === 'v' ? null : 'v';
+      sauver(); majPorte(p); majCompteur();
+    });
+    bs[1].addEventListener('click', function () {
+      etat[id] = etat[id] || {};
+      etat[id].verdict = etat[id].verdict === 'x' ? null : 'x';
+      sauver(); majPorte(p); majCompteur();
+    });
+    var champ = p.querySelector('[data-mesure]');
+    if (champ) {
+      var memo = etat[id] || {};
+      if (memo.mesure) champ.value = memo.mesure;
+      champ.addEventListener('input', function () {
+        etat[id] = etat[id] || {};
+        etat[id].mesure = champ.value;
+        sauver();
+      });
+    }
+    majPorte(p);
+  });
+  majCompteur();
+
+  document.getElementById('btn-export').addEventListener('click', function () {
+    var ok = 0, ko = 0, nt = 0;
+    var lignes = ['=== PORTE TERRAIN #464 · clés nues (1.89.0) — relevé ==='];
+    var sections = { '1': '§1 Données (premier démarrage)', '2': '§2 Interface' };
+    var derniere = '';
+    portes.forEach(function (p) {
+      var id = p.getAttribute('data-id');
+      var sec = sections[id.charAt(0)] || '';
+      if (sec !== derniere) { lignes.push(''); lignes.push('--- ' + sec + ' ---'); derniere = sec; }
+      var e = etat[id] || {};
+      var marque = e.verdict === 'v' ? '[v]' : (e.verdict === 'x' ? '[X]' : '[ ]');
+      if (e.verdict === 'v') ok++; else if (e.verdict === 'x') ko++; else nt++;
+      lignes.push(marque + ' ' + id + ' — ' + p.querySelector('.porte-titre').textContent.trim());
+      var mesure = (p.querySelector('[data-mesure]') || {}).value || '';
+      if (mesure.trim()) lignes.push('      mesure : ' + mesure.trim().replace(/\n/g, ' / '));
+    });
+    lignes.splice(1, 0, ok + ' passées · ' + ko + ' échec(s) · ' + nt + ' non traitée(s)');
+    var texte = lignes.join('\n');
+    var zone = document.getElementById('zone-export'), ta = document.getElementById('texte-export'),
+        msg = document.getElementById('msg-export');
+    zone.classList.add('visible'); ta.value = texte; ta.focus(); ta.select();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(texte).then(function () {
+        msg.textContent = 'Copié — colle le relevé dans la conversation. (Le texte reste ci-dessous au besoin.)';
+      }, function () {
+        msg.textContent = 'Presse-papiers refusé : le texte est sélectionné ci-dessous — Cmd+C.';
+      });
+    } else { msg.textContent = 'Le texte est sélectionné ci-dessous — Cmd+C.'; }
+  });
+}());
+</script>

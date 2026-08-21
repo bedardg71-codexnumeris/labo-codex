@@ -31,24 +31,15 @@
  * @returns {Object} - { I: 0.40, D: 0.65, M: 0.75, E: 1.00 }
  */
 function obtenirTableConversionIDME(echelleId = null) {
-    // PRIORITÉ 1 : Charger l'échelle active depuis niveauxEchelle
-    let niveaux = db.getSync('niveauxEchelle', []);
+    // 🔧 #464/CO-19 (21 août 2026) : PRIORITÉ INVERSÉE. L'ancien ordre lisait
+    // D'ABORD la clé NUE `niveauxEchelle` — un instantané d'une manipulation
+    // ancienne de l'éditeur (potentiellement d'un AUTRE trimestre) primait sur
+    // l'échelle du trimestre actif dans les conversions I/D/M/E des profils.
+    // Ordre corrigé : échelle du trimestre d'abord ; le résidu `niveauxEchelle`
+    // ne sert plus qu'en dernier recours (ses écrivains sont des chemins morts,
+    // retrait complet au lot L7/#469).
 
-    // Si on a des niveaux IDME actifs, les utiliser
-    if (niveaux.length > 0 && niveaux.some(n => ['0', 'I', 'D', 'M', 'E'].includes(n.code))) {
-        const table = {};
-        niveaux.forEach(niveau => {
-            const code = niveau.code.toUpperCase();
-            if (['0', 'I', 'D', 'M', 'E'].includes(code)) {
-                // valeurCalcul peut être string ou number, on convertit en 0-1
-                const valeur = parseFloat(niveau.valeurCalcul || niveau.valeurPonctuelle || 0) / 100;
-                table[code] = valeur;
-            }
-        });
-        return table;
-    }
-
-    // PRIORITÉ 2 : Charger depuis echellesTemplates si niveauxEchelle est vide
+    // PRIORITÉ 1 : l'échelle du trimestre (echellesTemplates namespacée)
     let echelles = db.getSync(cle('echellesTemplates'), []);
     let echelle;
 
@@ -65,6 +56,21 @@ function obtenirTableConversionIDME(echelleId = null) {
     if (echelle && echelle.niveaux) {
         const table = {};
         echelle.niveaux.forEach(niveau => {
+            const code = niveau.code.toUpperCase();
+            if (['0', 'I', 'D', 'M', 'E'].includes(code)) {
+                const valeur = parseFloat(niveau.valeurCalcul || niveau.valeurPonctuelle || 0) / 100;
+                table[code] = valeur;
+            }
+        });
+        return table;
+    }
+
+    // PRIORITÉ 2 (dernier recours) : résidu `niveauxEchelle` — clé nue héritée,
+    // conservée seulement pour un profil sans aucune échelle de trimestre.
+    let niveaux = db.getSync('niveauxEchelle', []);
+    if (niveaux.length > 0 && niveaux.some(n => ['0', 'I', 'D', 'M', 'E'].includes(n.code))) {
+        const table = {};
+        niveaux.forEach(niveau => {
             const code = niveau.code.toUpperCase();
             if (['0', 'I', 'D', 'M', 'E'].includes(code)) {
                 const valeur = parseFloat(niveau.valeurCalcul || niveau.valeurPonctuelle || 0) / 100;

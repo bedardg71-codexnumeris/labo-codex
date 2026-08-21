@@ -494,213 +494,14 @@ async function assurerEchelleGenerique() {
     await db.set(cle('echellesTemplates'), echelles);
 }
 
-/**
- * Assure la présence des échelles personnalisées des enseignants
- * Ces échelles sont identifiées par auteur pour un export futur personnalisé
- * ✅ AJOUT (3 janvier 2026)
- */
-async function assurerEchellesPersonnalisees() {
-    const echelles = await db.get(cle('echellesTemplates')) || [];
-    const supprimees = await db.get('ressourcesSupprimees') || [];
-    let nbAjoutees = 0;
-
-    // ============================================================================
-    // ÉCHELLE BRUNO V. (Chimie organique)
-    // Standards avec comptage, seuil maîtrise 75%
-    // ============================================================================
-    if (!echelles.some(e => e.id === 'ECHELLE_BRUNO_CHIMIE') && !supprimees.includes('ECHELLE_BRUNO_CHIMIE')) {
-        echelles.push({
-            id: 'ECHELLE_BRUNO_CHIMIE',
-            nom: 'Échelle Chimie organique',
-            description: 'Échelle 4 niveaux pour standards. Seuil maîtrise: 75%.',
-            auteur: 'Labo Codex',
-            discipline: 'Chimie',
-            niveaux: [
-                { code: 'I', nom: 'Incomplet', min: 0, max: 54, valeur: 40, couleur: '#dc3545' },
-                { code: 'D', nom: 'en Développement', min: 55, max: 74, valeur: 65, couleur: '#fd7e14' },
-                { code: 'M', nom: 'Maîtrisé', min: 75, max: 89, valeur: 82, couleur: '#28a745' },
-                { code: 'E', nom: 'Étendu', min: 90, max: 100, valeur: 95, couleur: '#007bff' }
-            ],
-            verrouille: false,
-            dansBibliotheque: true,
-            dateCreation: new Date().toISOString()
-        });
-        nbAjoutees++;
-    }
-
-    // ============================================================================
-    // ÉCHELLE XAVIER C.-T. (Informatique)
-    // STD+SPE hybride, 4 niveaux numériques (1-4), seuil niveau 3
-    // ============================================================================
-    if (!echelles.some(e => e.id === 'ECHELLE_XAVIER_INFO') && !supprimees.includes('ECHELLE_XAVIER_INFO')) {
-        echelles.push({
-            id: 'ECHELLE_XAVIER_INFO',
-            nom: 'Échelle Interfaces/BD',
-            description: 'Échelle 4 niveaux numériques. Niveau 3 = seuil passage, niveau 4 = bonus.',
-            auteur: 'Labo Codex',
-            discipline: 'Informatique',
-            niveaux: [
-                { code: '1', nom: 'Non atteint', min: 0, max: 49, valeur: 40, couleur: '#dc3545' },
-                { code: '2', nom: 'En développement', min: 50, max: 64, valeur: 55, couleur: '#fd7e14' },
-                { code: '3', nom: 'Maîtrisé', min: 65, max: 84, valeur: 80, couleur: '#28a745' },
-                { code: '4', nom: 'Excellence', min: 85, max: 100, valeur: 95, couleur: '#007bff' }
-            ],
-            verrouille: false,
-            dansBibliotheque: true,
-            dateCreation: new Date().toISOString()
-        });
-        nbAjoutees++;
-    }
-
-    // ============================================================================
-    // ÉCHELLE ISABELLE M. (Biologie)
-    // PAN-Standards holistique, 4 niveaux IDME qualitatifs
-    // ============================================================================
-    if (!echelles.some(e => e.id === 'ECHELLE_ISABELLE_BIO') && !supprimees.includes('ECHELLE_ISABELLE_BIO')) {
-        echelles.push({
-            id: 'ECHELLE_ISABELLE_BIO',
-            nom: 'Échelle Anatomie',
-            description: 'Échelle IDME qualitative pour jugement global. Pas de seuils chiffrés stricts.',
-            auteur: 'Labo Codex',
-            discipline: 'Biologie',
-            niveaux: [
-                { code: 'I', nom: 'Incomplet', min: 0, max: 49, valeur: 40, couleur: '#dc3545' },
-                { code: 'D', nom: 'en Développement', min: 50, max: 64, valeur: 57, couleur: '#fd7e14' },
-                { code: 'M', nom: 'Maîtrisé', min: 65, max: 84, valeur: 75, couleur: '#28a745' },
-                { code: 'E', nom: 'Étendu', min: 85, max: 100, valeur: 92, couleur: '#007bff' }
-            ],
-            verrouille: false,
-            dansBibliotheque: true,
-            dateCreation: new Date().toISOString(),
-            avertissement: 'Échelle pour jugement professionnel - les seuils sont indicatifs'
-        });
-        nbAjoutees++;
-    }
-
-    // ============================================================================
-    // ÉCHELLE HÉLÈNE C. (Philosophie)
-    // Sommative avec portfolio, échelle pourcentages standard
-    // ============================================================================
-    if (!echelles.some(e => e.id === 'ECHELLE_HELENE_PHILO') && !supprimees.includes('ECHELLE_HELENE_PHILO')) {
-        echelles.push({
-            id: 'ECHELLE_HELENE_PHILO',
-            nom: 'Échelle Philosophie',
-            description: 'Échelle 4 niveaux pour cours de philosophie. Seuils: 70/60/50.',
-            auteur: 'Labo Codex',
-            discipline: 'Philosophie',
-            niveaux: [
-                { code: 'I', nom: 'Incomplet', min: 0, max: 49, valeur: 35, couleur: '#dc3545' },
-                { code: 'D', nom: 'en Développement', min: 50, max: 59, valeur: 55, couleur: '#fd7e14' },
-                { code: 'M', nom: 'Maîtrisé', min: 60, max: 79, valeur: 70, couleur: '#28a745' },
-                { code: 'E', nom: 'Étendu', min: 80, max: 100, valeur: 90, couleur: '#007bff' }
-            ],
-            verrouille: false,
-            dansBibliotheque: true,
-            dateCreation: new Date().toISOString()
-        });
-        nbAjoutees++;
-    }
-
-    // ============================================================================
-    // ÉCHELLE MARIE-HÉLÈNE L. (Littérature)
-    // Sommative avec critères fixes, échelle pourcentages
-    // ============================================================================
-    if (!echelles.some(e => e.id === 'ECHELLE_MARIEHELENE_LITT') && !supprimees.includes('ECHELLE_MARIEHELENE_LITT')) {
-        echelles.push({
-            id: 'ECHELLE_MARIEHELENE_LITT',
-            nom: 'Échelle Littérature',
-            description: 'Échelle 4 niveaux pour cours de littérature. Seuils: 75/65/55.',
-            auteur: 'Labo Codex',
-            discipline: 'Littérature',
-            niveaux: [
-                { code: 'I', nom: 'Incomplet', min: 0, max: 54, valeur: 40, couleur: '#dc3545' },
-                { code: 'D', nom: 'en Développement', min: 55, max: 64, valeur: 60, couleur: '#fd7e14' },
-                { code: 'M', nom: 'Maîtrisé', min: 65, max: 84, valeur: 75, couleur: '#28a745' },
-                { code: 'E', nom: 'Étendu', min: 85, max: 100, valeur: 92, couleur: '#007bff' }
-            ],
-            verrouille: false,
-            dansBibliotheque: true,
-            dateCreation: new Date().toISOString()
-        });
-        nbAjoutees++;
-    }
-
-    // ============================================================================
-    // ÉCHELLE ÉTIENNE L. (Administration)
-    // Sommative traditionnelle, échelle pourcentages
-    // ============================================================================
-    if (!echelles.some(e => e.id === 'ECHELLE_ETIENNE_ADMIN') && !supprimees.includes('ECHELLE_ETIENNE_ADMIN')) {
-        echelles.push({
-            id: 'ECHELLE_ETIENNE_ADMIN',
-            nom: 'Échelle Comptabilité',
-            description: 'Échelle 4 niveaux pour cours d\'administration. Seuils: 80/70/60.',
-            auteur: 'Labo Codex',
-            discipline: 'Administration',
-            niveaux: [
-                { code: 'I', nom: 'Incomplet', min: 0, max: 59, valeur: 45, couleur: '#dc3545' },
-                { code: 'D', nom: 'en Développement', min: 60, max: 69, valeur: 65, couleur: '#fd7e14' },
-                { code: 'M', nom: 'Maîtrisé', min: 70, max: 89, valeur: 80, couleur: '#28a745' },
-                { code: 'E', nom: 'Étendu', min: 90, max: 100, valeur: 95, couleur: '#007bff' }
-            ],
-            verrouille: false,
-            dansBibliotheque: true,
-            dateCreation: new Date().toISOString()
-        });
-        nbAjoutees++;
-    }
-
-    // ============================================================================
-    // ÉCHELLE OLIVIER L. (Géographie)
-    // Sommative traditionnelle, échelle pourcentages
-    // ============================================================================
-    if (!echelles.some(e => e.id === 'ECHELLE_OLIVIER_GEO') && !supprimees.includes('ECHELLE_OLIVIER_GEO')) {
-        echelles.push({
-            id: 'ECHELLE_OLIVIER_GEO',
-            nom: 'Échelle Géographie',
-            description: 'Échelle 4 niveaux pour cours de géographie. Seuils: 70/65/55.',
-            auteur: 'Labo Codex',
-            discipline: 'Géographie',
-            niveaux: [
-                { code: 'I', nom: 'Incomplet', min: 0, max: 54, valeur: 40, couleur: '#dc3545' },
-                { code: 'D', nom: 'en Développement', min: 55, max: 64, valeur: 60, couleur: '#fd7e14' },
-                { code: 'M', nom: 'Maîtrisé', min: 65, max: 79, valeur: 72, couleur: '#28a745' },
-                { code: 'E', nom: 'Étendu', min: 80, max: 100, valeur: 90, couleur: '#007bff' }
-            ],
-            verrouille: false,
-            dansBibliotheque: true,
-            dateCreation: new Date().toISOString()
-        });
-        nbAjoutees++;
-    }
-
-    // ============================================================================
-    // ÉCHELLE JORDAN R. (Philosophie)
-    // Sommative avec remplacement, échelle pourcentages
-    // ============================================================================
-    if (!echelles.some(e => e.id === 'ECHELLE_JORDAN_PHILO') && !supprimees.includes('ECHELLE_JORDAN_PHILO')) {
-        echelles.push({
-            id: 'ECHELLE_JORDAN_PHILO',
-            nom: 'Échelle Philosophie 101',
-            description: 'Échelle 4 niveaux pour cours de philosophie. Seuils: 80/60/50.',
-            auteur: 'Labo Codex',
-            discipline: 'Philosophie',
-            niveaux: [
-                { code: 'I', nom: 'Incomplet', min: 0, max: 49, valeur: 35, couleur: '#dc3545' },
-                { code: 'D', nom: 'en Développement', min: 50, max: 59, valeur: 55, couleur: '#fd7e14' },
-                { code: 'M', nom: 'Maîtrisé', min: 60, max: 79, valeur: 70, couleur: '#28a745' },
-                { code: 'E', nom: 'Étendu', min: 80, max: 100, valeur: 90, couleur: '#007bff' }
-            ],
-            verrouille: false,
-            dansBibliotheque: true,
-            dateCreation: new Date().toISOString()
-        });
-        nbAjoutees++;
-    }
-
-    if (nbAjoutees > 0) {
-        await db.set(cle('echellesTemplates'), echelles);
-    }
-}
+// #464 / décision D2 du triage (21 août 2026) : assurerEchellesPersonnalisees
+// RETIRÉE (~200 lignes, 8 échelles « collègues » codées en dur). Elle re-semait
+// les 8 échelles dans CHAQUE trimestre à chaque boot et, appelée avant que le
+// trimestre actif soit établi, recréait la clé NUE echellesTemplates que #358
+// interdit (CO-11 — sa jumelle assurerEchelleGenerique portait la garde, pas
+// elle). Le contenu est devenu du CATALOGUE : versé une fois dans la
+// bibliothèque partagée par migrerEchellesColleguesVersBibliotheque()
+// (echelles-bibliotheque.js), supprimable et modifiable comme le reste.
 
 async function initialiserModuleEchelles() {
 
@@ -714,9 +515,14 @@ async function initialiserModuleEchelles() {
 
         // ✅ AJOUT (3 janvier 2026) : Assurer présence de l'échelle générique
         await assurerEchelleGenerique();
+    }
 
-        // ✅ AJOUT (3 janvier 2026) : Assurer présence des échelles personnalisées (Bruno, Xavier)
-        await assurerEchellesPersonnalisees();
+    // 🆕 #464/D2 (21 août 2026) : versement one-shot des 8 échelles « collègues »
+    // dans la bibliothèque partagée (globale — indépendante du trimestre actif,
+    // donc HORS de la garde archivé ci-dessus). Remplace l'ancien semis par
+    // trimestre d'assurerEchellesPersonnalisees, retirée.
+    if (typeof migrerEchellesColleguesVersBibliotheque === 'function') {
+        await migrerEchellesColleguesVersBibliotheque();
     }
 
     // Afficher la sidebar avec la liste des échelles (Beta 80.5+)

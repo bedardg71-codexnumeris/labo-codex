@@ -243,7 +243,7 @@
 
     function _configsPratiques() {
         var ns = (typeof cle === 'function') ? db.getSync(cle('pratiquesConfigurables'), null) : null;
-        return ns || db.getSync('pratiquesConfigurables', []) || [];
+        return ns || [];
     }
 
     function _nomPratique(id) {
@@ -459,7 +459,7 @@
     function _lirePratiquesConfigurablesReelles() {
         if (typeof db === 'undefined') return [];
         var k = (typeof cle === 'function') ? cle('pratiquesConfigurables') : 'pratiquesConfigurables';
-        return (db.getSync(k, null) || db.getSync('pratiquesConfigurables', []) || []);
+        return (db.getSync(k, null) || []);
     }
 
     function _sousArbreContientMaquette(noeud) {

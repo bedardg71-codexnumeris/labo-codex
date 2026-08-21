@@ -176,7 +176,7 @@ function _diagnostiquerNoteNonCalculable() {
     if (!pratiqueId) {
         return 'Aucune pratique de notation n\'est assignée à ce groupe-cours. Choisis-en une dans Conception → Pratiques de notation.';
     }
-    const pratiquesCfg = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+    const pratiquesCfg = db.getSync(cle('pratiquesConfigurables'), null) || [];
     const pratiqueData = pratiquesCfg.find(p => p.id === pratiqueId) || null;
     if (!pratiqueData) {
         return 'La pratique assignée à ce groupe-cours est introuvable dans la bibliothèque (supprimée, ou assignation vers un identifiant obsolète). Réassigne une pratique dans Conception → Pratiques de notation.';
@@ -417,7 +417,7 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     // privilégie ; sinon repli sur la pratique active du groupe-cours (identique à avant).
     const pratiqueId = pratiqueIdDemande
         || ((typeof obtenirPratiqueActiveGroupeCours === 'function') ? obtenirPratiqueActiveGroupeCours() : null);
-    const _pratiquesCfg = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+    const _pratiquesCfg = db.getSync(cle('pratiquesConfigurables'), null) || [];
     const pratiqueNom = (_pratiquesCfg.find(p => p.id === pratiqueId)?.nom) || null;
 
     // Lecture config portfolio (source canonique : pratiquesConfigurables, via

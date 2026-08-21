@@ -7,6 +7,51 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 21 AOÛT 2026 (3e cycle) : LOT L2 « CLÉS NUES » LIVRÉ
+     (#464, 1.89.0, minor) — rang 2 de l'ordre du triage.
+     ▣ CT-26/INVENTAIRE : toutes les clés passées à cle() confrontées aux
+     registres → 16 clés inscrites à CLES_NAMESPACEES. ⚠⚠ DÉCOUVERTE : LES
+     4 CLÉS DU BILAN RÉFLEXIF ÉTAIENT NUES DE FACTO — #365 (« déjà
+     namespacé, re-vérifié au code ») avait été clos À TORT le 19 août :
+     la vérification avait vu les appels cle() et cru le registre — le
+     piège exact que CT-26 décrit. Rouvert et fermé ici. Aussi nues :
+     chronoEvaluations, confidentielEtudiants, groupeSelectionne, 5 clés
+     migration-diagnostic. cle() émet désormais un WARN (1×/clé) sur tout
+     fallthrough hors registres.
+     ▣ MIGRATIONS RENDUES CONSERVATRICES : forcerMigration = copie-si-
+     cible-vide + purge (CO-10, l'écrasement des données vivantes est
+     mort) — pas de flag : la purge auto-éteint le déclencheur et la
+     capture pré-trimestre reste reproductible (écart motivé à l'audit).
+     migrerResidusClesNues() one-shot rapatrie les résidus (dureePeriode :
+     vers TOUS les trimestres — CT-07, la durée est enfin PAR TRIMESTRE et
+     purgerLegacy/pack démo enfin lus) ; migrerHorairesEtGroupesCours
+     RETIRÉE (CT-12).
+     ▣ 86 REPLIS NUS pratiquesConfigurables retirés (CO-09) : 55 littéraux
+     + 31 via la constante opaque CLE_PRATIQUES_CONFIGURATIONS (invisible
+     d'audit-ssot.py — l'audit n'en voyait ~50) ; constante+export retirés ;
+     seule reste la migration flaguée main.js:591.
+     ▣ D2 EXÉCUTÉE (CO-11) : assurerEchellesPersonnalisees RETIRÉE
+     (~200 l., resemait 8 échelles nominatives par trimestre en recréant
+     la clé nue #358) → versement one-shot dans bibliothequeEchelles via
+     la fonction canonique assainie (push sans replace, tombstones) ;
+     garde anti-global-nu sur migrerCategoriesVersSousCriteres (grilles).
+     ▣ AUSSI : garde démo réparée (CO-02 : lookup via cle() + pack 20.9
+     estampillé isDemo à l'écriture — patron identité+flag) ; écritures
+     miroir nues seancesHoraire retirées + fallback n°5 (CT-11 tranche —
+     accordéon legacy → L7) ; priorité IDME inversée (CO-19 : échelle du
+     trimestre d'abord, résidu niveauxEchelle en dernier recours).
+     ▣ PREUVES : sentinelle-464-cles-nues (12 essais : registre, warn,
+     migrations, ratchets, versement D2), 4 BREAK-TESTS 4 ROUGES (registre
+     amputé, écrasement réintroduit, repli réintroduit, tombstone ignoré).
+     Vitest 2787/2787 (280 fichiers), Playwright 98/98. Changelog 1.89.
+     Plan du lot : plans de travail/PLAN-464-L2-cles-nues.md.
+     ⏳ PORTE TERRAIN NEUVE : PORTES-TERRAIN-2026-08-21-464-cles-nues.md
+     (10 portes, artefact publié) — ⚠⚠ BACKUP CODEX AVANT le premier
+     boot post-pull (migrations one-shot, par navigateur). Prochain
+     chantier de l'ordre : #466 (L4, bascule) après le relevé.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 21 AOÛT 2026 (matin, 2e cycle) : TRIAGE 27/27 + VERSEMENT
      #462-#484 + PR #63 ENFIN LIVRÉE (1.88.7, #462).
      ▣ TRIAGE : artefact interactif modèle portes-terrain (décisions + notes,

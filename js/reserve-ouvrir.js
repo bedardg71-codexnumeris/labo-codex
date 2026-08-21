@@ -221,7 +221,7 @@ function _extraireRessources(donnees) {
     var productionsActives = (window.db && db.getSync(cleProdActive, [])) || [];
     if (!Array.isArray(productionsActives)) productionsActives = [];
 
-    var pratiquesActives = (window.db && db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', [])) || [];
+    var pratiquesActives = (window.db && db.getSync(cle('pratiquesConfigurables'), null) || []) || [];
     if (!Array.isArray(pratiquesActives)) pratiquesActives = [];
 
     var idsGrillesActives = new Set(grillesActives.map(function(g) { return g.id; }));
