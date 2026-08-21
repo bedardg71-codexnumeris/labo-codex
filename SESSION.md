@@ -7,6 +7,59 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 20 AOÛT 2026 (SOIR/NUIT, cloud) : AUDIT « CONCEPTION »
+     (SESSION 2 DE 2 DU PLAN-AUDIT-cadre-conception-2026-08-20, CONSTATS SEULEMENT).
+     ÉTAT FINAL : aucun code applicatif modifié, AUCUN BUMP. Livrable :
+     `plans de travail/AUDIT-conception-2026-08-20.md` — 35 constats
+     (1 Bloquant, 18 Majeurs, 10 Mineurs, 6 Notes), sur la branche
+     `claude/audit-conception-session-1-arkmi2` (recréée — l'ancienne avait
+     été fusionnée et supprimée d'origin). Base auditée : **1.88.4**
+     (`156e3dc8` = origin/main, retouche Productions INCLUSE comme prévu).
+
+     ⚠⚠ ÉCART DE PRÉMISSE MAJEUR : le fichier
+     `PLAN-AUDIT-cadre-conception-2026-08-20.md` N'EXISTE NULLE PART —
+     ni dans l'arbre ni dans les 4310 commits de l'historique complet
+     (unshallow fait). Le cadre §6 a été RECONSTITUÉ depuis la prémisse de
+     relance + la section « À transmettre » du rapport session 1. À valider
+     avec Grégoire (notamment : la Carte d'alignement a été EXCLUE du
+     périmètre — auditée le 8 août, portes actives).
+
+     ▣ MÉTHODE : rituel par subagent ; 4 passes de revue parallèles sur
+     ~36 400 l. (grilles/échelles, cartouches/productions, UI pratiques,
+     moteur js/pratiques/) PUIS contre-vérification aux lignes citées ;
+     scénarios Chromium sur profils vierges ensemencés (harnais file://
+     jetable). Niveaux de preuve [NAV]/[CODE]/[AGENT] par constat.
+
+     ⚠ **LE BLOQUANT (CO-01)** : éditer une pratique via l'assistant
+     REMPLACE l'enveloppe — inspireDe (invariant CC « jamais effacé »),
+     estMaquette, metadata_cc, auteur d'origine DÉTRUITS par « Éditer puis
+     Enregistrer » (wizard-pratique-v2.js:2451-2468, 2719-2733).
+     ✅ VERDICTS des points transmis : hypothèse verifierReferencesPasDemo
+     CONFIRMÉE ET ÉLARGIE [NAV] (3 littéraux nus + 4e appelant + pack sans
+     flag isDemo — garde inerte pour grilles/échelles) ; orphelin
+     cartouches_{grilleId} (§6.4) CONFIRMÉ [NAV] ; #453 §3 CONFIRMÉ
+     fonctionnel [NAV] ; perf CT-20 CONFIRMÉE [NAV] (6 onglets rendus au
+     boot, ~148 Ko pour Échelles) ; #346 : mécanisme d'entretien identifié
+     (chaque save réécrit coursId).
+     ⮕ Majeurs saillants, reproduits [NAV] : suppressions sans garde sur
+     les 5 familles (gardes vivantes = code mort ou GC actif seul) ;
+     supprimerEchelle PLANTE (fonction inexistante) sur chemin vivant ;
+     DEN : saisie sans note → VRAI ZÉRO certifié (vs null sans saisie) ;
+     SPE : AUCUN schéma utilisateur n'atteint le moteur à paliers (seul le
+     pack démo calcule) ; activation pratique wizard → TypeError APRÈS
+     écriture SSOT ; copie/maquette adoptée INVISIBLES (dansBibliotheque
+     false) ; forcerMigration ÉCRASANTE à chaque boot (famille CT-12
+     généralisée) ; semis du global nu sans garde #358 (8 échelles
+     collègues codées en dur, par trimestre).
+
+     ⏳ SUITE : le TRI des constats des DEUX sessions (29 + 36) se fait
+     AVEC Grégoire — rien au BACKLOG. Trois décisions de fond d'abord :
+     régime des cartouches (seule famille globale), sort des échelles
+     collègues embarquées, politique de suppression unifiée façon #449.
+     Fusionner la branche vers main (rapport seul + SESSION/RELAIS).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 20 AOÛT 2026 (SOIR, cloud) : AUDIT « CALENDRIER › TRIMESTRE »
      (SESSION 1 DU PLAN-AUDIT-cadre-conception-2026-08-20, CONSTATS SEULEMENT).
      ÉTAT FINAL : aucun code applicatif modifié, AUCUN BUMP (conforme au
