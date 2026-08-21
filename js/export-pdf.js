@@ -1241,6 +1241,10 @@ window.ExportPDF = {
     // Config
     config: PDF_CONFIG,
 
+    // #485 : helpers d'en-tête réutilisés par presences-rapport.js (lecture seule)
+    infosCours: obtenirInfosCoursPDF,
+    nomTrimestre: obtenirNomTrimestre,
+
     // Productions
     exporterProductions: exporterProductionsPDF,
 

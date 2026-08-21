@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            version: '1.90',
+            couleur: 'vert',
+            titre: 'La grille des présences s’imprime',
+            items: [
+                'Nouveau dans Suivi › Saisie des présences : « Grille imprimable » génère un PDF format lettre en paysage — les élèves en rangées, une colonne par séance du trimestre avec son code (1a, 1b…) et sa date.',
+                'Les séances déjà saisies se lisent d’un coup d’œil : un crochet pour une présence complète, une croix pour une absence, le nombre de périodes pour une présence partielle.',
+                'Les cases vides sont les séances non saisies : la feuille sert de liste de présences papier en classe, à reporter ensuite dans l’écran de saisie, séance par séance.',
+                'Tu choisis les colonnes d’identification à imprimer — numéro de DA, sous-groupe, programme, services adaptés — et tes choix sont mémorisés pour la prochaine fois.',
+                'Plusieurs groupes ? Une feuille par groupe dans le même PDF, chacune avec son en-tête cours · groupe · trimestre.'
+            ]
+        },
+        {
             version: '1.89',
             couleur: 'bleu',
             titre: 'Chaque trimestre garde ses données pour lui',
