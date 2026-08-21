@@ -147,6 +147,13 @@ describe('#464 · 5 — ratchets statiques (CO-09, CO-11, CT-11)', () => {
         expect(fautifs, 'replis nus réintroduits').toEqual([]);
     });
 
+    it('suite de porte 2.5 : plus AUCUN appel cle(\'\') dans js/ (il rend \'\' — jamais un préfixe)', () => {
+        const { readdirSync } = require('node:fs');
+        const fichiers = readdirSync(path.join(racineProjet, 'js')).filter(f => f.endsWith('.js'));
+        const fautifs = fichiers.filter(f => js(f).includes("cle('')"));
+        expect(fautifs, 'cle(chaîne vide) réintroduit').toEqual([]);
+    });
+
     it('CO-11/D2 : echelles.js ne porte plus le semis des échelles collègues', () => {
         const src = js('echelles.js');
         expect(src.includes('async function assurerEchellesPersonnalisees')).toBe(false);
