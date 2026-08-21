@@ -395,7 +395,7 @@ function obtenirPratiqueActive() {
     // MISE À JOUR (Beta 96.2): Utilise construireConfigComplete pour normaliser les formats
     if (!instance && window.PratiqueManager) {
 
-        const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+        const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || [];
         const pratiqueData = pratiquesConfigurables.find(p => p.id === idActif);
 
         if (pratiqueData) {
@@ -506,7 +506,7 @@ function obtenirPratiqueParId(id) {
 
     // Si non trouvée dans le registre, chercher dans les pratiques configurables
     if (!instance && window.PratiqueManager) {
-        const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+        const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || [];
         const pratiqueData = pratiquesConfigurables.find(p => p.id === idCanonique);
 
         if (pratiqueData) {

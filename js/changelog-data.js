@@ -21,6 +21,19 @@
 
     var CHANGELOG = [
         {
+            version: '1.89',
+            couleur: 'bleu',
+            titre: 'Chaque trimestre garde ses données pour lui',
+            items: [
+                'La durée de période se règle maintenant par trimestre : changer la tienne pour l’automne ne touche plus les calculs des sessions passées, et le mode démonstration utilise la sienne au lieu de la tienne.',
+                'Un nouveau trimestre naît vraiment vide : il ne ressuscite plus d’anciennes pratiques de notation ni les séances d’horaire de la session précédente.',
+                'Les huit échelles d’exemple (chimie, informatique, philosophie…) ne sont plus recréées d’office dans chaque trimestre : elles vivent désormais dans la bibliothèque partagée, où tu peux les consulter, les dupliquer ou les supprimer pour de bon.',
+                'Le bilan réflexif, le chronomètre d’évaluation et les notes confidentielles d’étudiants sont maintenant propres à chaque trimestre, au lieu d’être partagés entre toutes les sessions et la démonstration.',
+                'La protection qui empêche d’utiliser un exemple de démonstration dans un vrai groupe-cours fonctionne à nouveau pour les grilles et les échelles.',
+                'Les conversions de niveaux des profils étudiants lisent l’échelle du trimestre en cours, plus un réglage résiduel d’une ancienne manipulation.'
+            ]
+        },
+        {
             version: '1.88',
             couleur: 'vert',
             titre: 'Supprimer une fiche de cours, depuis la Bibliothèque',

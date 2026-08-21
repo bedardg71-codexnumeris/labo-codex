@@ -4006,6 +4006,12 @@ window.sauvegarderGrilleComplete = sauvegarderGrilleComplete;
  * Exécuté au chargement du module
  */
 async function migrerCategoriesVersSousCriteres() {
+    // 🆕 #464/CO-11 (21 août 2026) : garde anti-global-nu (jumelle de celle
+    // d'assurerEchelleGenerique). Cette migration s'exécute AU PARSE du script,
+    // avant que le trimestre actif soit établi — cle() retomberait alors sur la
+    // clé GLOBALE nue que #358 interdit de réécrire. Sans effet aujourd'hui
+    // (global vide), mais c'est la famille « code dormant qui se réveille ».
+    if (cle('grillesTemplates') === 'grillesTemplates') return;
     const grilles = await db.get(cle('grillesTemplates')) || [];
     let nbMigrations = 0;
 

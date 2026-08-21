@@ -2531,7 +2531,7 @@ async function executerImportSelectif() {
             const selectedIds = getCheckedItemIds('pratiques');
 
             if (Array.isArray(pratiquesImport) && pratiquesImport.length > 0) {
-                const pratiquesExistantes = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+                const pratiquesExistantes = db.getSync(cle('pratiquesConfigurables'), null) || [];
                 const idsPratiquesExistants = new Set(pratiquesExistantes.map(p => p.id));
                 // 🆕 FIX (31 jan 2026) : Filtrer par ID (pas par nom) pour préserver les références
                 const pratiquesNouvelles = pratiquesImport

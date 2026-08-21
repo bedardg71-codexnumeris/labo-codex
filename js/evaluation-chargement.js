@@ -253,7 +253,7 @@ function _resoudreEchellePratique() {
     const pratiqueId = _obtenirPratiqueIdActive();
     const pratiquesCodeesDur = ['pan-standards', 'pan-maitrise', 'sommative', 'pan-specifications'];
     if (!pratiqueId || pratiquesCodeesDur.includes(pratiqueId)) return null;
-    const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+    const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || [];
     const pratiqueData = pratiquesConfigurables.find(p => p.id === pratiqueId);
     if (!pratiqueData) return null;
     if (!pratiqueData.config || !pratiqueData.config.echelle) return null;
@@ -824,7 +824,7 @@ function cartoucheSelectionnee() {
     // Vérifier si c'est une échelle de pratique configurable
     if (echelleId && echelleId.startsWith('pratique-')) {
         const pratiqueId = echelleId.replace('pratique-', '');
-        const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+        const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || [];
         const pratiqueData = pratiquesConfigurables.find(p => p.id === pratiqueId);
 
         if (pratiqueData && pratiqueData.config && pratiqueData.config.echelle) {
@@ -1023,7 +1023,7 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
 
     if (echelleId && echelleId.startsWith('pratique-')) {
         const pratiqueId = echelleId.replace('pratique-', '');
-        const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+        const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || [];
         const pratiqueData = pratiquesConfigurables.find(p => p.id === pratiqueId);
         if (pratiqueData?.config?.echelle?.niveaux) {
             niveauxDisponibles = pratiqueData.config.echelle.niveaux;

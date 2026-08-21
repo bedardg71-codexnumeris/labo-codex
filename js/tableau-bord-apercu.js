@@ -1436,7 +1436,7 @@ function afficherMetriquesGlobales(etudiants) {
     // 1. Chercher dans la configuration de la pratique active
     if (groupeActif && groupeActif.pratiqueId) {
         // 1a. Chercher dans pratiquesConfigurables
-        const pratiquesConfig = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+        const pratiquesConfig = db.getSync(cle('pratiquesConfigurables'), null) || [];
         let pratiqueActive = pratiquesConfig.find(p => p.id === groupeActif.pratiqueId);
 
         // 1b. Si pas trouvée, chercher dans la bibliothèque partagée

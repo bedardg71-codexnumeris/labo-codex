@@ -6409,7 +6409,7 @@
         try {
             const pratiqueId = typeof obtenirPratiqueActiveGroupeCours === 'function'
                 ? obtenirPratiqueActiveGroupeCours() : null;
-            const configurations = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+            const configurations = db.getSync(cle('pratiquesConfigurables'), null) || [];
             const pratiqueActive = pratiqueId ? configurations.find(p => p.id === pratiqueId) : null;
             if (pratiqueActive?.affichageNote === 'lettre') modeNote = 'lettre';
         } catch(e) { console.warn('[Travaux-UI] pratique affichageNote fallback:', e.message || e); }

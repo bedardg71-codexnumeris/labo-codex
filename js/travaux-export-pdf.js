@@ -895,7 +895,7 @@
                 modeNotePreview = evaluation.optionsAffichage.affichageNote;
             } else {
                 try {
-                    const cfgs = db.getSync(cle('pratiquesConfigurables'), null) || db.getSync('pratiquesConfigurables', []);
+                    const cfgs = db.getSync(cle('pratiquesConfigurables'), null) || [];
                     // #328 L2-b2 : id dérivé de la SSOT groupesCours[].pratiqueId.
                     const pId = (typeof obtenirPratiqueActiveGroupeCours === 'function') ? obtenirPratiqueActiveGroupeCours() : null;
                     const pActive = pId ? (cfgs.find(p => p.id === pId) || cfgs.find(p => p.type === pId)) : null;

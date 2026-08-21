@@ -245,7 +245,9 @@ async function _definirInfoCoursModeGroupeCours(gc, trimestreActif, groupesCours
         if (horaireGC && horaireGC.seances && horaireGC.seances.length > 0) {
             db.setSync(cle('horaireHebdo'), horaireGC.seances);
             db.setSync(cle('seancesHoraire'), horaireGC.seances);
-            db.setSync('seancesHoraire', horaireGC.seances);
+            // #464/CT-11 : l'écriture MIROIR dans la clé NUE 'seancesHoraire' est
+            // retirée — elle recréait le résidu inter-trimestre que la migration
+            // #464 purge (fuite : un trimestre neuf resservait ces séances).
         }
     }
 }

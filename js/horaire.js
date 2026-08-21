@@ -164,9 +164,11 @@ function obtenirSeancesHoraire(coursId) {
         return seances;
     }
 
-    // 5. Fallback sur clé legacy non namespacée
-    seances = db.getSync('seancesHoraire', []);
-    return seances || [];
+    // #464/CT-11 (21 août 2026) : le fallback n°5 (clé legacy NUE) est RETIRÉ —
+    // sur un trimestre neuf sans horaire, il resservait les séances du trimestre
+    // PRÉCÉDENT restées dans le résidu nu. Le résidu est rapatrié une fois par
+    // migrerResidusClesNues() ; un trimestre sans horaire rend désormais vide.
+    return [];
 }
 
 /* ===============================
