@@ -280,6 +280,75 @@
         }
         console.log(LIGNE);
 
+        /* ------------------------------------------------------------------
+           G. IDENTIFIANTS PARTAGÉS ENTRE COLLECTIONS
+           ------------------------------------------------------------------
+           Deux collections qui portent les MÊMES identifiants ne sont pas
+           forcément un défaut : « Importer » dépose une production dans la
+           bibliothèque en CONSERVANT son identifiant, donc le recouvrement
+           entre un trimestre et la bibliothèque est normal.
+
+           Ce qui n'est PAS normal, c'est qu'un même identifiant porte deux
+           TITRES différents selon la collection : l'un des deux a été renommé
+           après la copie, et plus rien ne dit lequel fait foi.
+           ------------------------------------------------------------------ */
+        console.log('G. IDENTIFIANTS PARTAGÉS ENTRE COLLECTIONS');
+
+        const collections = {};
+        for (const k of clesProd) {
+            const v = (await db.get(k)) || [];
+            if (Array.isArray(v)) collections[k] = v;
+        }
+
+        const noms = Object.keys(collections);
+        let divergences = 0;
+        for (let i = 0; i < noms.length; i++) {
+            for (let j = i + 1; j < noms.length; j++) {
+                const A = collections[noms[i]], B = collections[noms[j]];
+                const parId = new Map(B.map(x => [x.id, x]));
+                const communs = A.filter(x => parId.has(x.id));
+                if (communs.length === 0) continue;
+
+                console.log('   ' + noms[i] + '  ∩  ' + noms[j] + '  : ' +
+                    communs.length + ' identifiant(s) en commun');
+
+                communs.forEach(a => {
+                    const b = parId.get(a.id);
+                    const ta = (a.titre || a.nom || ''), tb = (b.titre || b.nom || '');
+                    if (normaliserTitre(ta) !== normaliserTitre(tb)) {
+                        divergences++;
+                        console.log('       ⚠ MÊME id, TITRES DIFFÉRENTS  [' + a.id + ']');
+                        console.log('           ' + noms[i] + ' : « ' + ta + ' »');
+                        console.log('           ' + noms[j] + ' : « ' + tb + ' »');
+                    }
+                });
+            }
+        }
+        if (divergences === 0) {
+            console.log('   Aucune divergence de titre sur un identifiant partagé.');
+        } else {
+            console.log('   ⮕ ' + divergences + ' divergence(s) : un renommage n\'a pas suivi la copie.');
+        }
+
+        // Sens de la copie + nature des items du trimestre a2025 (pack démo ?)
+        console.log('');
+        console.log('   NATURE DES ITEMS (pour distinguer une vraie donnée d\'une copie du pack démo)');
+        noms.forEach(k => {
+            const v = collections[k];
+            if (!v.length) return;
+            const nDemo = v.filter(estDemo).length;
+            const dates = v.map(x => x.dateCreation || x.dateModification || x.dateAjoutBiblio || x.dateImport)
+                .filter(Boolean).sort();
+            console.log('   ' + k + ' : ' + v.length + ' item(s), ' + nDemo + ' marqué(s) démo' +
+                (dates.length ? '  · dates ' + String(dates[0]).slice(0, 10) + ' → ' + String(dates[dates.length - 1]).slice(0, 10)
+                              : '  · aucune date'));
+        });
+        console.log('   ⮕ « marqué démo » = isDemo:true ou auteur « Demo Labo Codex ». L\'estampille');
+        console.log('     isDemo n\'existe que depuis le 21 août 2026 : des items démo SEMÉS AVANT');
+        console.log('     cette date ne la portent pas et sont donc indiscernables de tes vraies');
+        console.log('     productions. Les dates aident alors à trancher le sens de la copie.');
+        console.log(LIGNE);
+
         console.log('D. RÉSUMÉ');
         console.log('   Productions du trimestre : ' + productions.length +
             '  (visibles ' + visibles + ', masquées ' + masquees.length + ')');
