@@ -349,6 +349,62 @@
         console.log('     productions. Les dates aident alors à trancher le sens de la copie.');
         console.log(LIGNE);
 
+        /* ------------------------------------------------------------------
+           H. LE TEST DÉCISIF — tes évaluations pointent-elles vers ces
+              productions ?
+           ------------------------------------------------------------------
+           Savoir qu'une collection porte les identifiants du pack démo ne dit
+           PAS qui a copié qui : le pack a pu être authoré depuis un vrai cours.
+
+           Ce qui tranche, c'est le TRAVAIL DES ÉTUDIANTS. Chaque évaluation
+           enregistrée porte un `productionId`. Si les évaluations d'un
+           trimestre pointent vers les productions de ce trimestre, ces
+           productions sont bien celles sur lesquelles tu as évalué — quelle
+           que soit l'origine de leurs identifiants, il n'y a rien à réparer.
+           Si elles pointent ailleurs, les productions ont été remplacées et
+           les évaluations sont orphelines.
+           ------------------------------------------------------------------ */
+        console.log('H. TES ÉVALUATIONS POINTENT-ELLES VERS CES PRODUCTIONS ?');
+
+        var trimestresListe = db.getSync('trimestres', []) || [];
+        let auMoinsUn = false;
+
+        for (const t of trimestresListe) {
+            if (!t || !t.id) continue;
+            const evals = (await db.get(t.id + '_evaluationsSauvegardees')) || [];
+            if (!Array.isArray(evals) || evals.length === 0) continue;
+            auMoinsUn = true;
+
+            const prods = collections[t.id + '_productions'] || [];
+            const idsProds = new Set(prods.map(x => x.id));
+
+            const refs = evals.map(e => e && e.productionId).filter(Boolean);
+            const resolues = refs.filter(id => idsProds.has(id));
+            const orphelines = refs.filter(id => !idsProds.has(id));
+            const idsOrphelins = [...new Set(orphelines)];
+
+            console.log('   ' + t.id + ' : ' + evals.length + ' évaluation(s), ' +
+                refs.length + ' avec production · ' + resolues.length + ' résolue(s), ' +
+                orphelines.length + ' orpheline(s)');
+
+            if (idsOrphelins.length) {
+                console.log('       ⚠ productions RÉFÉRENCÉES MAIS ABSENTES de ' + t.id + '_productions :');
+                idsOrphelins.slice(0, 12).forEach(id => console.log('           ' + id));
+                if (idsOrphelins.length > 12) console.log('           … et ' + (idsOrphelins.length - 12) + ' autre(s)');
+                console.log('       ⮕ les productions de ce trimestre ne sont PAS celles sur');
+                console.log('         lesquelles tu as évalué : elles ont été remplacées.');
+            } else if (refs.length) {
+                console.log('       ✓ Toutes les évaluations retrouvent leur production.');
+                console.log('         ⮕ Ces productions sont bien les tiennes. Rien à réparer ici,');
+                console.log('           même si leurs identifiants se retrouvent dans le pack démo.');
+            }
+        }
+
+        if (!auMoinsUn) {
+            console.log('   Aucune évaluation enregistrée : ce test ne peut rien trancher.');
+        }
+        console.log(LIGNE);
+
         console.log('D. RÉSUMÉ');
         console.log('   Productions du trimestre : ' + productions.length +
             '  (visibles ' + visibles + ', masquées ' + masquees.length + ')');
