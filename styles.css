@@ -9134,6 +9134,18 @@ body.mode-clair .bloc-rlo-separateur {
     }
 }
 
+/* Barre d'actions de la saisie des présences — Rapport · Enregistrer · Annuler.
+   Ces trois boutons portent `btn-compact` (27 px de haut) et restaient sous le
+   minimum tactile iPad de 44 px que le projet s'impose. Relevés ensemble, à la
+   demande de Grégoire (22 août 2026) : les monter séparément aurait désaligné
+   la barre. Le padding horizontal est conservé — c'est la hauteur qui manquait. */
+#actions-presences-bar .btn {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
 /* --- Groupe-cours (Beta 95.2) --- */
 
 .carte-resume-groupe-cours {
