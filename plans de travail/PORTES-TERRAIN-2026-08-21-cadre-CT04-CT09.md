@@ -281,12 +281,87 @@ la session qui tient déjà ces fichiers.
 
 ---
 
+## RETOUR DU TERRAIN — relevé reçu le 22 août 2026
+
+**9 passées · 0 échec · 3 sans objet · 27/27 rangées traitées.** Aucune porte
+n'a échoué. Mais trois notes portaient plus d'information que les coches, et
+deux d'entre elles ouvrent du travail neuf.
+
+### Verdicts du §3
+
+| # | Verdict de Grégoire | Suite donnée |
+|---|---|---|
+| 3.1 | « 1.90.2 » | ⚠ **en attente** — 1.90.2 est *derrière* la 1.91.0 déjà livrée (`version.json`, et le changelog porte déjà une entrée `1.91`). Numéro à reconfirmer avant tout bump. |
+| 3.2 | « garder 106 » | ✅ appliqué — seuil strict conservé, sans marge. |
+| 3.3 | « tu mets le relais à jour maintenant » | ✅ `RELAIS.md` mis à jour sur `main`, poussé seul. |
+| 3.4 | « ils seront vus dans leurs sessions respectives » | ✅ aucun travail ici ; les sites CT-09 de `trimestre-v2-cours.js` (dont les 3 renderers morts) et `trimestre-v2-liste.js` restent aux lots L6 et L4. |
+
+### Ce que les notes ont révélé
+
+**A. Porte 2.4 — un horaire créé était insupprimable.** *(corrigé)*
+Note reçue : « Il n'y a pas de possibilité de supprimer l'horaire `<b>ZZ</b>` ».
+Le bouton Supprimer porte `u-hide` dans `index.html` et n'est démasqué que par
+`editerHoraireV2` (mode édition). Après une **création**, la sauvegarde
+repositionnait le menu déroulant sur le nouvel horaire — mais poser
+`select.value` par code **ne déclenche pas** l'événement `change`, donc
+`changerHoraireSelectionneV2` n'était jamais appelée : le formulaire restait en
+mode création, sans bouton Supprimer, jusqu'à ce qu'on sélectionne un *autre*
+horaire puis qu'on revienne. Corrigé en basculant explicitement en mode édition
+après la sauvegarde, par la même fonction que le dropdown (source unique).
+Sentinelle : `tests/unit/sentinelle-horaire-creation-supprimable.test.js`
+(4 cas, break-test ROUGE sur A et B).
+⏳ **Reste dû** : l'horaire `<b>ZZ</b>` est toujours dans les données réelles.
+
+**B. Porte 2.1 — pourquoi « activer les deux groupes ne change rien ».** *(à trancher)*
+Note reçue : « j'avais deux groupes le jeudi […] si j'active les deux groupes,
+il n'y a pas de différence ». Ce n'est pas un défaut du correctif CT-04 : c'est
+un **second écrivain** qui repasse derrière. `js/entites/groupe-cours.js:252`
+(`synchroniserInfoCours`, fix du 30 mars 2026) écrit dans `horaireHebdo` **les
+seules séances du groupe actif**, en écrasant la liste fusionnée — son
+commentaire le dit en toutes lettres : « Sans cette sync, horaireHebdo contient
+les horaires fusionnés de tous les groupes → le calendrier affiche les mauvais
+jours ». Il y a donc **deux intentions contradictoires** sur la même clé :
+CT-04 veut *tous* les groupes, le fix de mars veut *le groupe actif seul*.
+Le correctif CT-04 reste juste et utile (il gouverne la sauvegarde, la
+suppression et `genererCalendrierComplet`), mais la scène que la porte 2.1
+demandait d'observer est gouvernée par l'autre écrivain.
+⏳ **Décision due** : que doit montrer le calendrier — le groupe actif, ou tous
+les groupes du trimestre ? Tant qu'elle n'est pas prise, la clé a deux
+propriétaires qui se contredisent (violation #7 du registre).
+
+**C. Porte 1.1 — la durée de période retombée à 55 min.** *(à verser)*
+Note reçue : « la durée de la période était à 55 minutes alors que je l'avais
+réglée à 50 ». Mécanisme trouvé : `obtenirDureePeriode()` (`horaire.js:305`)
+rend `db.getSync(cle('dureePeriode'), null) || 55` — la valeur **55 est un
+repli en dur**. La migration #464 (`trimestres.js:1310-1314`) recopie bien
+l'ancienne valeur nue vers les trimestres, mais **seulement vers ceux qui
+existaient au moment de la migration**, et jamais par-dessus une valeur
+présente. Un trimestre créé **après** n'a donc aucune valeur et retombe à 55.
+Deux sites de `migrations.js` (`:347`, `:412`) recalculent des périodes avec le
+même repli : une conversion faite avec 55 alors que la réalité est 50.
+Correction manuelle faite par Grégoire pour ce trimestre-là ; **le prochain
+trimestre neuf retombera à 55**. Non corrigé ici : la création de trimestre est
+dans le rayon du lot L4 (#466, session Mac).
+
+### Angles morts du relevé lui-même
+
+- Les portes 2.1, 2.2 et 2.3 sont revenues **sans objet** : le corpus de
+  Grégoire n'a, dans le trimestre actif, aucun cas de deux groupes le même jour
+  (mesure 1.2 : `['Mardi 08:00', 'Vendredi 08:00']`). **Le scénario exact de
+  CT-04 n'a donc jamais été rejoué sur données réelles** — il n'est prouvé que
+  par les 9 cas Vitest. La porte 2.3 (suppression) n'a pas été jouée non plus.
+- L'échappement est vérifié (2.4 à 2.6 vertes, iPad et Safari verts) ; la
+  fusion des séances ne l'est pas.
+
+---
+
 ## ÉTAT
 
 | | |
 |---|---|
-| **Portes** | 13 vérifications (§0 : 1 · §1 : 2 · §2 : 8 · §3 : 4 décisions) |
-| **Relevé** | ⏳ **AUCUNE porte jouée à cette heure** |
-| **Bloquant** | ⚠ les portes ne sont pas exécutables tant que la branche n'est pas fusionnée ou ouverte (§0.1) |
-| **Vitest** | 2817/2817 (283 fichiers), lancé depuis `tests/` |
-| **Break-tests** | 2 joués, 2 ROUGES (sentinelle CT-04, sentinelle CT-29) |
+| **Portes** | 16 rangées (12 vérifications + 4 décisions) |
+| **Relevé** | ✅ reçu le 22 août 2026 — **9 passées · 0 échec · 3 sans objet** |
+| **Décisions** | 4/4 tranchées — ⚠ 3.1 (version) à reconfirmer, le numéro donné est antérieur au livré |
+| **Reste dû** | supprimer l'horaire `<b>ZZ</b>` des données · décision B (propriétaire de `horaireHebdo`) · verser C (durée de période) au backlog |
+| **Vitest** | 2821/2821 (284 fichiers), lancé depuis `tests/` |
+| **Break-tests** | 3 joués, 3 ROUGES (sentinelle CT-04, sentinelle CT-29, sentinelle horaire supprimable) |
