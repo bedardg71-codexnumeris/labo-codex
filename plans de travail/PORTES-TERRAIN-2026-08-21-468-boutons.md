@@ -1,6 +1,16 @@
 # PORTES TERRAIN — #468 (L6, boutons qui mentent) · 1.91.2
 
 > **Date** : 21 août 2026 · **Livraison** : 1.91.2 (lot L6 du triage des audits)
+> **Artefact interactif** (l'OPÉRATION — ce fichier est la TRACE) :
+> <https://claude.ai/code/artifact/4162dce1-e72d-4587-8441-2c2113330218>
+> Construit le 22 août par la session cloud depuis CE fichier : la porte n'avait que
+> sa moitié versionnée, pas son jumeau opérable. 15 vérifications + 2 décisions
+> (D-a et 3.1 portent un champ de saisie, jamais une case — une case ne rend pas un
+> verdict). Éprouvé dans Chromium avant publication : 15 bascules, **0 bascule sur les
+> décisions**, filtres et export vérifiés, zéro erreur de page dans les deux thèmes.
+> ⚠ Le repère de version du §0 dit désormais « **1.91.2 ou plus récent** » : `main` est
+> passé à 1.91.8 depuis, et un numéro supérieur ne doit pas se lire comme un échec.
+>
 > **État : EN ATTENTE DU RELEVÉ.** Ce qui échoue devient un item de backlog.
 > Aucune migration de données dans ce lot — backup non requis (le réflexe Codex reste bon).
 > ⚠ Deux gestes de ce lot sont IRRÉVERSIBLES sur tes données : 2.2 (dépôt d'une fiche
