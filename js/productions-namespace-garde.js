@@ -97,16 +97,73 @@ function evaluerCoherenceProductions(cleEcrite, valeur, mapCoursTrimestre, valeu
 /**
  * Garde branchée sur db : reconstruit la map cours et lit l'état actuel.
  */
+/**
+ * Construit la table `coursId -> trimestreId`.
+ *
+ * ⚠⚠ NE PAS REVENIR au magasin GLOBAL `cours` (22 aout 2026).
+ *
+ * Cette garde date du 30 mars 2026, quand une fiche de cours appartenait a UN
+ * trimestre et portait un `trimestreId` qui voulait dire quelque chose. La
+ * decision #455 (aout) a rendu le magasin `cours` GLOBAL : « identite = code
+ * seul » (cf. js/cours.js). Une meme fiche « 601-101-MQ » sert desormais TOUS
+ * les trimestres, et son champ `trimestreId` ne dit plus que le trimestre ou
+ * elle a ete creee.
+ *
+ * La garde attribuait donc les productions au mauvais trimestre. Constate sur
+ * les donnees reelles de Gregoire le 22 aout : une seule fiche de cours, dont
+ * le `trimestreId` ne valait pas le trimestre actif ⇒ sa collection entiere
+ * comptait comme ETRANGERE ⇒ la garde refusait TOUTE ecriture, des la
+ * premiere, et son trimestre ne pouvait plus jamais recevoir de production.
+ *
+ * La source correcte est `<trimestre>_groupesCours`, qui est NAMESPACEE : un
+ * groupe-cours ne vit que dans son trimestre. Regle d'attribution :
+ *   · un coursId vu dans UN SEUL trimestre  -> attribuable a ce trimestre ;
+ *   · un coursId vu dans PLUSIEURS          -> NON attribuable (neutre), ce
+ *     qui est la verite d'un cours global reutilise d'un trimestre a l'autre ;
+ *   · aucun groupe-cours nulle part         -> aucune attribution possible :
+ *     la garde reste inerte plutot que de bloquer sur une base fausse.
+ *
+ * @returns {Object} coursId -> trimestreId (uniquement les cas non ambigus)
+ */
+function construireMapCoursTrimestre() {
+    var map = {};
+    if (typeof db === 'undefined' || !db.getSync) return map;
+
+    var trimestres = db.getSync('trimestres', []) || [];
+    if (!Array.isArray(trimestres) || trimestres.length === 0) return map;
+
+    var vus = {};   // coursId -> { trimestreId: true }
+    for (var i = 0; i < trimestres.length; i++) {
+        var t = trimestres[i];
+        if (!t || !t.id) continue;
+        var groupes = db.getSync(t.id + '_groupesCours', []) || [];
+        if (!Array.isArray(groupes)) continue;
+        for (var j = 0; j < groupes.length; j++) {
+            var gc = groupes[j];
+            if (!gc || !gc.coursId) continue;
+            if (!vus[gc.coursId]) vus[gc.coursId] = {};
+            vus[gc.coursId][t.id] = true;
+        }
+    }
+
+    Object.keys(vus).forEach(function (coursId) {
+        var ts = Object.keys(vus[coursId]);
+        if (ts.length === 1) map[coursId] = ts[0];   // sans ambiguite seulement
+    });
+
+    return map;
+}
+
+/**
+ * Garde branchée sur db : reconstruit la map cours et lit l'état actuel.
+ */
 function gardeProductions(cleEcrite, valeur) {
     if (typeof db === 'undefined' || !db.getSync) return { coherent: true };
 
-    var cours = db.getSync('cours', []) || [];
-    if (!Array.isArray(cours) || cours.length === 0) return { coherent: true };
-
-    var mapCoursTrimestre = {};
-    for (var i = 0; i < cours.length; i++) {
-        var c = cours[i];
-        if (c && c.id && c.trimestreId) mapCoursTrimestre[c.id] = c.trimestreId;
+    var mapCoursTrimestre = construireMapCoursTrimestre();
+    if (Object.keys(mapCoursTrimestre).length === 0) {
+        // Rien d'attribuable : ne jamais bloquer sur une base vide.
+        return { coherent: true };
     }
 
     var valeurActuelle = db.getSync(cleEcrite, null);
@@ -116,6 +173,7 @@ function gardeProductions(cleEcrite, valeur) {
 // Exposer la logique pure pour les tests (sentinelle #340).
 window.evaluerCoherenceProductions = evaluerCoherenceProductions;
 window.gardeNamespaceProductions = gardeProductions;
+window.construireMapCoursTrimestre = construireMapCoursTrimestre;
 
 // Enregistrer la garde dès que db est disponible.
 if (typeof db !== 'undefined' && db.enregistrerGardeEcriture) {

@@ -34,18 +34,35 @@ function chargerGarde(store) {
     return { fauxWindow, garde: gardeEnregistree, evaluer: fauxWindow.evaluerCoherenceProductions };
 }
 
-// Cours témoins : un cours A25 (le fautif du terrain) + un cours H26 sain.
-const COURS = [
-    { id: 'COURS1766455789356', trimestreId: 'a2025' },
-    { id: 'h2026-601-101-MQ-00001', trimestreId: 'h2026' }
-];
+// ⚠ L'ATTRIBUTION NE PASSE PLUS PAR LE MAGASIN GLOBAL `cours` (22 août 2026).
+//
+// La garde datait du 30 mars, quand une fiche de cours appartenait à UN
+// trimestre. La décision #455 a rendu `cours` GLOBAL — « identité = code seul » —
+// et son `trimestreId` ne dit plus que le trimestre de CRÉATION. Constaté sur
+// les données réelles de Grégoire : une seule fiche de cours, dont le
+// trimestreId ne valait pas le trimestre actif ⇒ toute sa collection comptait
+// comme étrangère ⇒ la garde refusait TOUTE écriture, dès la première.
+//
+// La source correcte est `<trimestre>_groupesCours`, qui est NAMESPACÉE.
+// Ces témoins l'expriment donc ainsi. Le scénario du terrain (#340) reste
+// verrouillé à l'identique — c'est ce que les deux premiers cas prouvent.
+const TRIMESTRES = [{ id: 'a2025' }, { id: 'h2026' }];
+
+// Un cours par trimestre : attribution SANS ambiguïté.
+const GROUPES = {
+    a2025_groupesCours: [{ id: 'GC_A25', coursId: 'COURS1766455789356' }],
+    h2026_groupesCours: [{ id: 'GC_H26', coursId: 'h2026-601-101-MQ-00001' }]
+};
+
+const CONTEXTE = Object.assign({ trimestres: TRIMESTRES }, GROUPES);
+
 const prodA25 = (id) => ({ id, coursId: 'COURS1766455789356' });
 const prodH26 = (id) => ({ id, coursId: 'h2026-601-101-MQ-00001' });
 
 describe('#340 · garde-fou anti-contamination productions inter-trimestres', () => {
     it('BLOQUE la signature exacte du terrain : tableau A25 écrit sous h2026_productions (cible avait du natif)', () => {
         const store = {
-            cours: COURS,
+            ...CONTEXTE,
             // État sain avant la corruption : 10 artefacts H26.
             h2026_productions: [prodH26('p1'), prodH26('p2')]
         };
@@ -62,21 +79,21 @@ describe('#340 · garde-fou anti-contamination productions inter-trimestres', ()
     });
 
     it('BLOQUE un dump 100 % étranger même sur cible vide (≥ 2 items étrangers)', () => {
-        const store = { cours: COURS, h2026_productions: [] };
+        const store = { ...CONTEXTE, h2026_productions: [] };
         const { garde } = chargerGarde(store);
         const res = garde('h2026_productions', [prodA25('a1'), prodA25('a2')]);
         expect(res.coherent).toBe(false);
     });
 
     it('AUTORISE une écriture native saine (productions du bon trimestre)', () => {
-        const store = { cours: COURS, h2026_productions: [prodH26('p1')] };
+        const store = { ...CONTEXTE, h2026_productions: [prodH26('p1')] };
         const { garde } = chargerGarde(store);
         const res = garde('h2026_productions', [prodH26('p1'), prodH26('p2')]);
         expect(res.coherent).toBe(true);
     });
 
     it('AUTORISE l\'ajout d\'UN item de bibliothèque inter-trimestres à un cours peuplé', () => {
-        const store = { cours: COURS, h2026_productions: [prodH26('p1')] };
+        const store = { ...CONTEXTE, h2026_productions: [prodH26('p1')] };
         const { garde } = chargerGarde(store);
         // Un item étranger ajouté MAIS du natif coexiste → légitime, pas bloqué.
         const res = garde('h2026_productions', [prodH26('p1'), prodA25('copie-biblio')]);
@@ -84,27 +101,56 @@ describe('#340 · garde-fou anti-contamination productions inter-trimestres', ()
     });
 
     it('AUTORISE l\'ajout d\'UN seul item de bibliothèque sur un cours vide (1re production)', () => {
-        const store = { cours: COURS, h2026_productions: [] };
+        const store = { ...CONTEXTE, h2026_productions: [] };
         const { garde } = chargerGarde(store);
         const res = garde('h2026_productions', [prodA25('copie-biblio')]);
         expect(res.coherent).toBe(true);
     });
 
     it('NEUTRE : productions sans coursId (bibliothèque/démo) jamais bloquées', () => {
-        const store = { cours: COURS, h2026_productions: [] };
+        const store = { ...CONTEXTE, h2026_productions: [] };
         const { garde } = chargerGarde(store);
         const res = garde('h2026_productions', [{ id: 'x' }, { id: 'y' }]);
         expect(res.coherent).toBe(true);
     });
 
+    it('POST-#455 · un cours GLOBAL réutilisé dans deux trimestres n\'est plus attribuable', () => {
+        // C'est le cas réel de Grégoire : une seule fiche « 601-101-MQ » qui
+        // sert A26 et H26. L'attribuer à un trimestre serait faux ; la garde
+        // doit donc le traiter comme neutre et laisser passer, au lieu de
+        // condamner un trimestre entier à ne plus rien recevoir.
+        const store = {
+            trimestres: TRIMESTRES,
+            a2025_groupesCours: [{ id: 'GC1', coursId: 'COURS_GLOBAL' }],
+            h2026_groupesCours: [{ id: 'GC2', coursId: 'COURS_GLOBAL' }],
+            h2026_productions: []
+        };
+        const { garde, fauxWindow } = chargerGarde(store);
+
+        expect(fauxWindow.construireMapCoursTrimestre()['COURS_GLOBAL'],
+            'un cours vu dans deux trimestres ne doit être attribué à aucun').toBeUndefined();
+
+        const res = garde('h2026_productions', [
+            { id: 'x', coursId: 'COURS_GLOBAL' },
+            { id: 'y', coursId: 'COURS_GLOBAL' }
+        ]);
+        expect(res.coherent, 'ne jamais bloquer sur une attribution ambiguë').toBe(true);
+    });
+
+    it('AUCUN groupe-cours nulle part : la garde reste inerte plutôt que de bloquer à tort', () => {
+        const store = { trimestres: TRIMESTRES, h2026_productions: [prodH26('p1')] };
+        const { garde } = chargerGarde(store);
+        expect(garde('h2026_productions', [prodA25('a1'), prodA25('a2')]).coherent).toBe(true);
+    });
+
     it('NE BLOQUE PAS une clé non namespacée (boot/legacy)', () => {
-        const store = { cours: COURS };
+        const store = { ...CONTEXTE };
         const { garde } = chargerGarde(store);
         expect(garde('productions', [prodA25('a1'), prodA25('a2')]).coherent).toBe(true);
     });
 
     it('fonction pure evaluerCoherenceProductions : cours inconnu = indéterminé = autorisé', () => {
-        const { evaluer } = chargerGarde({ cours: COURS });
+        const { evaluer } = chargerGarde({ ...CONTEXTE });
         const map = { 'COURS1766455789356': 'a2025' };
         // coursId absent de la map → neutre.
         const res = evaluer('h2026_productions', [{ id: 'z', coursId: 'COURS_DISPARU' }], map, []);
