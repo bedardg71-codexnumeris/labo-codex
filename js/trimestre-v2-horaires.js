@@ -19,6 +19,21 @@
    =============================== */
 
 /**
+ * Duree de periode du trimestre courant, en minutes.
+ *
+ * ⚠ Les quatre conversions heures <-> periodes de ce fichier divisaient par un
+ * `55` ECRIT EN DUR : le reglage « Duree d'une periode » ne les atteignait pas.
+ * Regler 50 minutes ne changeait donc rien a l'affichage des seances ni au
+ * total « per./semaine ». Corrige le 22 aout 2026 avec le passage du defaut a
+ * 50 (demande de Gregoire) : ces calculs lisent desormais la valeur configuree.
+ */
+function dureePeriodeCourante() {
+    return (typeof obtenirDureePeriode === 'function'
+        ? obtenirDureePeriode()
+        : (window.DUREE_PERIODE_DEFAUT || 50));
+}
+
+/**
  * Charge et affiche les séances dans l'accordéon Horaire v2
  * 🆕 BETA 95 : Affiche le cours actif et utilise obtenirSeancesHoraire()
  */
@@ -80,7 +95,7 @@ function chargerSeancesV2() {
     // 🆕 BETA 95.1 : Calculer le total en périodes
     const totalPeriodes = horaire.reduce((sum, s) => {
         if (s.nombrePeriodes) return sum + s.nombrePeriodes;
-        if (s.duree) return sum + Math.round((parseFloat(s.duree) * 60) / 55);
+        if (s.duree) return sum + Math.round((parseFloat(s.duree) * 60) / dureePeriodeCourante());
         return sum + 2; // Défaut 2 périodes
     }, 0);
 
@@ -95,7 +110,7 @@ function chargerSeancesV2() {
         const jourNom = s.jour || joursInverse[s.jourNum] || '?';
         const heureDebut = s.heureDebut || s.debut || '?';
         // 🆕 BETA 95.1 : Afficher en périodes
-        const periodes = s.nombrePeriodes || (s.duree ? Math.round((parseFloat(s.duree) * 60) / 55) : 2);
+        const periodes = s.nombrePeriodes || (s.duree ? Math.round((parseFloat(s.duree) * 60) / dureePeriodeCourante()) : 2);
         const local = s.local || '';
 
         html += `
@@ -174,7 +189,7 @@ function modifierSeanceV2(index) {
         setValue('v2-debutSeance', seance.heureDebut || seance.debut || '');
         // 🆕 BETA 95.1 : Utiliser nombrePeriodes si disponible, sinon convertir depuis duree
         const periodesValue = seance.nombrePeriodes
-            || (seance.duree ? Math.round((parseFloat(seance.duree) * 60) / 55) : 2);
+            || (seance.duree ? Math.round((parseFloat(seance.duree) * 60) / dureePeriodeCourante()) : 2);
         setValue('v2-periodesSeance', String(periodesValue));
         setValue('v2-localSeance', seance.local || '');
 
@@ -219,7 +234,7 @@ function confirmerSeanceV2() {
     const nombrePeriodes = parseInt(periodes);
     const dureeHeures = typeof periodesVersHeures === 'function'
         ? periodesVersHeures(nombrePeriodes)
-        : (nombrePeriodes * 55) / 60; // Fallback: 55 min par période
+        : (nombrePeriodes * dureePeriodeCourante()) / 60; // Repli : duree configuree
 
     // Calculer l'heure de fin
     const [heures, minutes] = debut.split(':').map(Number);
@@ -874,7 +889,7 @@ function changerFormatSeancesHoraireV2() {
  */
 function calculerHeureFin(heureDebut, nbPeriodes) {
     if (!heureDebut) return '';
-    const dureePeriode = parseInt(document.getElementById('v2-dureePeriode')?.value) || 55;
+    const dureePeriode = parseInt(document.getElementById('v2-dureePeriode')?.value) || (window.DUREE_PERIODE_DEFAUT || 50);
     const [h, m] = heureDebut.split(':').map(Number);
     const totalMinutes = h * 60 + m + (nbPeriodes * dureePeriode);
     const heures = Math.floor(totalMinutes / 60);

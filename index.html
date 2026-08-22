@@ -7136,8 +7136,8 @@
                                     <div class="section-config-periode">
                                         <label class="label-compact">Durée d'une période :</label>
                                         <select id="v2-dureePeriode" class="controle-form" data-on-change="modifierDureePeriodeV2">
-                                            <option value="50">50 minutes</option>
-                                            <option value="55" selected>55 minutes</option>
+                                            <option value="50" selected>50 minutes</option>
+                                            <option value="55">55 minutes</option>
                                             <option value="60">60 minutes</option>
                                             <option value="75">75 minutes</option>
                                             <option value="90">90 minutes</option>
@@ -14378,7 +14378,7 @@
     <script src="js/trimestre-v2.js?v=20260821a"></script> <!-- #366+#369+#374 relais : stats, validations, clé unique (5 août) -->
     <script src="js/trimestre-v2-init.js?v=20260821a"></script> <!-- Fusion #374 : jeu unique de fonctions Journées sans cours (5 août) -->
     <script src="js/trimestre-v2-enseignants.js?v=20260819a"></script> <!-- #306 Lot 1 (3 juil.) : bascule Créer/Enregistrer du bouton profil -->
-    <script src="js/trimestre-v2-horaires.js?v=20260821a"></script> <!-- #306 Lot 1 (3 juil.) : création d'horaire = « Créer » (séance garde « Ajouter ») -->
+    <script src="js/trimestre-v2-horaires.js?v=20260822a"></script> <!-- #306 Lot 1 (3 juil.) : création d'horaire = « Créer » (séance garde « Ajouter ») -->
     <script src="js/trimestre-v2-liste.js?v=20260821a"></script> <!-- Fusion #374 : appel chargerJourneesSansCoursV2 (5 août) -->
     <script src="js/trimestre-v2-cours.js?v=20260821b"></script> <!-- #306 Lot 1 (3 juil.) : création de cours = « Créer » -->
     <script src="js/trimestre-v2-etudiants.js?v=20260517a"></script> <!-- Refactor étape 3 session B (17 mai 2026) : extrait de trimestre-v2.js (lignes 119-1014 + handlers 2188-2200, zone 4) -->
@@ -14399,9 +14399,9 @@
     <script src="js/repertoires-bibliotheque.js"></script> <!-- #320 L0 : répertoires de classement (couche par-dessus les biblios) -->
     <script src="js/pratiques-bibliotheque.js?v=20260809b"></script> <!-- #318 (22 juin) : gabarit DEN « Modèle de base » ; Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/pratiques-gestion.js?v=20260821d"></script> <!-- Brique C namespacing pas 5 : import inter-trimestre de pratiques (modèle COPIE) + vérif dépendances echelleId/grilleId (option A : avertir) -->
-    <script src="js/preferences-v2.js?v=20260808b"></script> <!-- Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
+    <script src="js/preferences-v2.js?v=20260822a"></script> <!-- Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
     <script src="js/donnees-v2.js?v=20260821a"></script> <!-- Refonte nav SP5 : afficherSection calendrier -->
-    <script src="js/etudiants.js?v=20260810a"></script>
+    <script src="js/etudiants.js?v=20260822a"></script>
     <script src="js/productions-bibliotheque.js?v=2026050617"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/productions.js?v=20260821a"></script> <!-- Beta 99.41 b0511-1215 : #216 data-tooltip sur dates échéance multi-groupe -->
     <script src="js/productions-import-export.js?v=20260629a"></script> <!-- Refactor étape 3 (16 mai 2026) : extrait de productions.js (lignes 2630-3276) -->
@@ -14461,8 +14461,8 @@
     <script src="js/objectifs.js?v=20260809b"></script> <!-- Beta 99.39 b0509-0719 : #262 Phase 2 + precisionDate:minute -->
 
     <script src="js/portfolio.js?v=20260821a"></script> <!-- #326 (28 juin) : T1 simulerIndices — note STD non bâtie = « non constructible » (plus de 0 trompeur du repli) -->
-    <script src="js/saisie-presences.js?v=2026061101"></script> <!-- Refonte nav SP5 : naviguerVers calendrier -->
-    <script src="js/indices.js?v=20260805c"></script>
+    <script src="js/saisie-presences.js?v=20260822a"></script> <!-- Refonte nav SP5 : naviguerVers calendrier -->
+    <script src="js/indices.js?v=20260822a"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
     <script src="js/tableau-bord-apercu.js?v=20260821a"></script> <!-- Refonte nav SP5 : faux ami CSS class préservée -->
@@ -14472,9 +14472,9 @@
     <script src="js/profil-etudiant-diagnostics.js?v=20260518a"></script> <!-- Refactor session B : zone diagnostics SRPNF/Critères + blocs RLO + onglets (11 fonctions, ~830 LOC) -->
     <script src="js/profil-etudiant-confidentiel.js?v=20260518a"></script> <!-- Refactor session B : modal PII confidentiel + services adaptés + sous-catégories médicales (8 fonctions, ~300 LOC) -->
     <script src="js/profil-etudiant-actions.js?v=20260821a"></script> <!-- Refactor session C : actions cascade consulterEvaluation + calculerDetailsNoteFinale + jetons + patterns groupe (8 fonctions, ~560 LOC) -->
-    <script src="js/profil-etudiant-sections-affichage.js?v=20260809b"></script> <!-- Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
+    <script src="js/profil-etudiant-sections-affichage.js?v=20260822a"></script> <!-- Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
     <script src="js/presences-apercu.js?v=2025121017"></script>
-    <script src="js/presences-rapport.js?v=20260821d"></script> <!-- #485 : grille imprimable des présences (rapport + formulaire papier) -->
+    <script src="js/presences-rapport.js?v=20260822a"></script> <!-- #485 : grille imprimable des présences (rapport + formulaire papier) -->
     <script src="js/boite-outils.js?v=20260810a"></script> <!-- Beta 96.1 : Boîte à outils pédagogiques -->
     <script src="js/modelisation.js?v=2026022201"></script> <!-- Modélisation : annotation en projection -->
     <script src="js/rythme.js?v=20260806a"></script> <!-- Semaine dimanche→samedi (format direction des études, 6 août) -->
@@ -14494,7 +14494,7 @@
     <script src="js/planification-donnees.js?v=20260808a"></script> <!-- #425 préalable : vivacité de productionId à la reprise (8 août) -->
 
     <script src="js/planification-bibliotheque.js?v=2026051026"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
-    <script src="js/planification-carte.js?v=20260820a"></script> <!-- Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
+    <script src="js/planification-carte.js?v=20260822a"></script> <!-- Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
     <script src="js/planification-export.js?v=20260815a"></script> <!-- LE générateur d'export : 3 niveaux × 3 formats (portage #424, 8 août) — #416 lot C : la date dérivée du groupe-cours choisi -->
     <script src="js/planification.js?v=20260808a"></script> <!-- Refonte nav SP4 : hooks nomSection 'conception' + idSousSection conception-* -->
 
@@ -14528,7 +14528,7 @@
 
     <!-- PRIORITÉ 5: Modules fonctionnels -->
     <script src="js/calendrier-vue.js?v=20260805b"></script> <!-- #366+#374 relais : stats fonction pure + clé unique (5 août) -->
-    <script src="js/horaire.js?v=20260821a"></script> <!-- #416 lot C : lecture stricte des séances d'un groupe DÉSIGNÉ (jamais de génération) -->
+    <script src="js/horaire.js?v=20260822a"></script> <!-- #416 lot C : lecture stricte des séances d'un groupe DÉSIGNÉ (jamais de génération) -->
     <script src="js/groupe.js?v=2026032600"></script>
     <script src="js/interventions.js?v=20260512b"></script>
 
@@ -14570,7 +14570,7 @@
     <script src="js/modal-backup-reminder.js?v=2025122803"></script>
 
     <!-- MIGRATIONS BETA 93.5 - Ajout coursId aux données (Beta 93.5) -->
-    <script src="js/migrations.js?v=20260806a"></script> <!-- #374-bis : dédoublonnage par contenu (congés recréés à la main, 6 août) -->
+    <script src="js/migrations.js?v=20260822a"></script> <!-- #374-bis : dédoublonnage par contenu (congés recréés à la main, 6 août) -->
 
     <!-- Page d'accueil (Chantier 3) -->
     <script src="js/accueil.js?v=20260808b"></script> <!-- Refonte nav SP5 : data-param calendrier -->
@@ -14599,11 +14599,11 @@
     <script src="js/export-resultats-finaux.js?v=2026061901"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260822a"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260822b"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260822a"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260822b"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>

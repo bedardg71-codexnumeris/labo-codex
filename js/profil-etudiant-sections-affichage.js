@@ -1414,7 +1414,7 @@ function obtenirDetailsAssiduite(da) {
     const seances = typeof obtenirSeancesHoraire === 'function'
         ? obtenirSeancesHoraire()
         : db.getSync(cle('seancesHoraire'), []);
-    const dureePeriodeMin = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
+    const dureePeriodeMin = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : (window.DUREE_PERIODE_DEFAUT || 50);
 
     // Détecter les absences (totales ET partielles)
     const absences = [];

@@ -420,7 +420,7 @@
      */
     function formaterTotalPresence(heures, modeForce = null) {
         const mode = modeForce || obtenirUniteAffichageAssiduite();
-        const dureePeriode = typeof window.obtenirDureePeriode === 'function' ? window.obtenirDureePeriode() : 55;
+        const dureePeriode = typeof window.obtenirDureePeriode === 'function' ? window.obtenirDureePeriode() : (window.DUREE_PERIODE_DEFAUT || 50);
         const periodes = Math.round((heures * 60) / dureePeriode);
 
         switch (mode) {

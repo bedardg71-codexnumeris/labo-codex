@@ -175,7 +175,7 @@ function calculerAssiduite(da, dateLimite) {
     var totalPeriodesOffertes = 0;
     var totalPeriodesPresentes = 0;
     var nombreSeances = 0;
-    var dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
+    var dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : (window.DUREE_PERIODE_DEFAUT || 50);
 
     dates.forEach(function(date) {
         var nombrePeriodesSeance = typeof obtenirNombrePeriodesSeance === 'function'
@@ -300,7 +300,7 @@ function calculerAssiduitePourAffichage(da, dateStr, periodesSeanceActuelle) {
     var seancesCompletes = typeof obtenirSeancesCompletes === 'function'
         ? obtenirSeancesCompletes() : {};
 
-    var dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
+    var dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : (window.DUREE_PERIODE_DEFAUT || 50);
 
     // FIX #220 + #330 : dates saisies du groupe de l'étudiant·e (helper partagé)
     var datesSaisies = construireDatesSaisiesGroupe(da, presences);

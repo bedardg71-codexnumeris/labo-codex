@@ -234,7 +234,7 @@ function calculerAssiduitéGlobale(da) {
             periodesPresentes += p.periodesPresentes;
         } else if (p.heures !== undefined && p.heures !== null) {
             // Rétrocompatibilité : convertir heures en périodes
-            const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
+            const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : (window.DUREE_PERIODE_DEFAUT || 50);
             periodesPresentes += (p.heures * 60) / dureePeriode;
         }
     });

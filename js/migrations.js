@@ -344,7 +344,7 @@ function migrerSeancesVersPeriodes() {
     // Obtenir la durée de période (défaut: 55 min) — clé SSOT du domaine
     // horaire depuis le Lot 0 #328 (l'ancien champ legacy des modalités
     // d'évaluation est purgé au Lot 3)
-    const dureePeriode = db.getSync(cle('dureePeriode'), null) || 55;
+    const dureePeriode = db.getSync(cle('dureePeriode'), null) || (window.DUREE_PERIODE_DEFAUT || 50);
 
     let nbSeancesMigrees = 0;
     let nbCoursMigres = 0;
@@ -409,7 +409,7 @@ function migrerPresencesVersPeriodes() {
     // Obtenir la durée de période (défaut: 55 min) — clé SSOT du domaine
     // horaire depuis le Lot 0 #328 (l'ancien champ legacy des modalités
     // d'évaluation est purgé au Lot 3)
-    const dureePeriode = db.getSync(cle('dureePeriode'), null) || 55;
+    const dureePeriode = db.getSync(cle('dureePeriode'), null) || (window.DUREE_PERIODE_DEFAUT || 50);
 
     // Lire les présences (utiliser clé namespacée si disponible)
     const clePresences = cle('presences');

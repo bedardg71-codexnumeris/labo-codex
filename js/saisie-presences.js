@@ -431,7 +431,7 @@ function obtenirNombrePeriodesSeance(dateStr) {
         // deja avec forEach. Avant : seul seancesDuJour[0].nombrePeriodes etait
         // retourne, sous-comptant les jours multi-seances et polluant l'indice
         // d'assiduite.
-        const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
+        const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : (window.DUREE_PERIODE_DEFAUT || 50);
         const total = seancesDuJour.reduce((acc, s) => {
             if (s.nombrePeriodes) return acc + s.nombrePeriodes;
             if (s.duree) return acc + Math.round((s.duree * 60) / dureePeriode);
@@ -451,7 +451,7 @@ function obtenirNombrePeriodesSeance(dateStr) {
  */
 function genererOptionsPeriodesPresentes(nombrePeriodesMax, valeurSelectionnee = null) {
     let options = '';
-    const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
+    const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : (window.DUREE_PERIODE_DEFAUT || 50);
 
     for (let p = 0; p <= nombrePeriodesMax; p++) {
         const selected = (valeurSelectionnee !== null && p === valeurSelectionnee) ? 'selected' : '';
@@ -634,7 +634,7 @@ function sauvegarderPresencesSansValidation(dateStr) {
     if (!Array.isArray(presences)) presences = [];
 
     const coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
-    const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
+    const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : (window.DUREE_PERIODE_DEFAUT || 50);
 
     // Filtrer par sous-groupe si sélectionné
     const selectGroupe = document.getElementById('selectGroupePresences');
@@ -967,7 +967,7 @@ function chargerTableauPresences(dateStr, estVerrouille) {
     const dureeSeance = obtenirHeuresSeance(dateStr);
     // 🆕 BETA 95.1 : Obtenir le nombre de périodes de la séance
     const nombrePeriodesSeance = obtenirNombrePeriodesSeance(dateStr);
-    const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
+    const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : (window.DUREE_PERIODE_DEFAUT || 50);
 
     tbody.innerHTML = '';
 
@@ -1226,7 +1226,7 @@ function mettreAJourLigne(da, dateStr) {
     appliquerCodeCouleurSaisie(inputHeures, dureeMax);
 
     // #224 : Convertir heures → périodes pour la fonction canonique
-    var dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
+    var dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : (window.DUREE_PERIODE_DEFAUT || 50);
     var periodesSeance = (heuresSeance * 60) / dureePeriode;
     var resultatAff = calculerAssiduitePourAffichage(da, dateStr, periodesSeance);
 
@@ -1310,7 +1310,7 @@ function enregistrerPresences() {
     // Ajouter les nouvelles présences
 
     // 🆕 BETA 95.1 : Utiliser les périodes au lieu des heures
-    const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
+    const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : (window.DUREE_PERIODE_DEFAUT || 50);
 
     etudiantsATraiter.forEach(etudiant => {
         // 🆕 BETA 95.7 : Chercher l'input de périodes
