@@ -214,6 +214,72 @@
             return total + [...parOrigine.values()].reduce((n, c) => n + Math.max(0, c - 1), 0);
         }, 0);
 
+        /* ------------------------------------------------------------------
+           E. OÙ SONT PASSÉES MES PRODUCTIONS ? (toutes les clés)
+           ------------------------------------------------------------------ */
+        console.log('E. TOUTES LES COLLECTIONS DE PRODUCTIONS DU STOCKAGE');
+        console.log('   (si un ajout a atterri ailleurs, il apparaît ici)');
+        let toutesCles = [];
+        try {
+            toutesCles = (await db.keys()) || [];
+        } catch (e) {
+            console.warn('   db.keys() indisponible : ' + (e && e.message));
+        }
+        const clesProd = toutesCles.filter(k => /(^|_)productions$/.test(k) || k === 'bibliothequeProductions');
+        for (const k of clesProd) {
+            const v = (await db.get(k)) || [];
+            const n = Array.isArray(v) ? v.length : '(pas un tableau)';
+            console.log('   ' + k + ' : ' + n);
+            if (Array.isArray(v) && v.length && v.length <= 20) {
+                v.forEach(x => console.log('       · ' + (x.titre || x.nom || '(sans titre)') + '  [' + x.id + ']'));
+            }
+        }
+        console.log(LIGNE);
+
+        /* ------------------------------------------------------------------
+           F. LA GARDE #340 BLOQUE-T-ELLE TES AJOUTS ?
+           ------------------------------------------------------------------
+           Une garde d'écriture refuse d'enregistrer un tableau de productions
+           qui n'appartiendrait pas au trimestre visé. Quand elle refuse, elle
+           écrit « [DB][GARDE #340] Écriture BLOQUÉE » dans la console — mais
+           l'app affiche quand même « ajoutée à ton cours ! ». C'est le seul
+           mécanisme connu qui produit exactement ce symptôme.
+           ------------------------------------------------------------------ */
+        console.log('F. GARDE D\'ÉCRITURE #340 — peut-elle refuser tes ajouts ?');
+        const cours = (typeof db.getSync === 'function') ? (db.getSync('cours', []) || []) : [];
+        console.log('   Fiches de cours connues : ' + cours.length);
+
+        if (cours.length === 0) {
+            console.log('   ⮕ Aucune fiche de cours : la garde ne s\'active jamais. Elle est hors de cause.');
+        } else {
+            const map = {};
+            cours.forEach(c => { if (c && c.id && c.trimestreId) map[c.id] = c.trimestreId; });
+
+            let natifs = 0, etrangers = 0, neutres = 0;
+            productions.forEach(p => {
+                if (!p.coursId) { neutres++; return; }
+                const tr = map[p.coursId];
+                if (!tr) { neutres++; return; }
+                if (tr === trimestre) natifs++; else etrangers++;
+            });
+
+            console.log('   Dans ' + cleProd + ' : ' + natifs + ' native(s), ' +
+                etrangers + ' étrangère(s), ' + neutres + ' neutre(s) (sans cours résolvable)');
+
+            if (natifs > 0) {
+                console.log('   ⮕ Au moins une production NATIVE est présente : la garde AUTORISE');
+                console.log('     toutes les écritures. Elle est hors de cause.');
+            } else {
+                console.log('   ⚠ AUCUNE production native. Dans cet état, la garde REFUSE toute');
+                console.log('     écriture d\'un tableau contenant 2 productions étrangères ou plus —');
+                console.log('     et l\'app affiche quand même un message de succès.');
+                console.log('     ⮕ C\'est le suspect n°1 de « mes ajouts n\'apparaissent pas ».');
+                console.log('     Vérifie : reclique « Ajouter à ma sélection » et cherche dans la');
+                console.log('     console une ligne rouge « [DB][GARDE #340] Écriture BLOQUÉE ».');
+            }
+        }
+        console.log(LIGNE);
+
         console.log('D. RÉSUMÉ');
         console.log('   Productions du trimestre : ' + productions.length +
             '  (visibles ' + visibles + ', masquées ' + masquees.length + ')');
