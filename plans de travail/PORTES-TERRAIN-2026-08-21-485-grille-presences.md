@@ -156,3 +156,15 @@ Relevés sur la capture de Grégoire pendant l'usage de la grille (données rée
   l'aperçu/impression de la grille dans un iframe sous `file:` (origines uniques). À vérifier
   par la porte d'impression de cette liste : si le PDF sort correctement, message bénin ;
   sinon, c'est le symptôme à verser.
+  ⮕ **VERDICT (21 août, soir — rituel de clôture)** : BÉNIN. Les PDF sortent et s'impriment
+  (relevé 14/15 du jour + confirmation en conversation après 1.91.0 : « C'est présent et tout
+  fonctionne bien »). Rien à verser.
+
+## État de la reprise 1.91.0 (21 août, soir — rituel de clôture)
+
+- **R2 confirmé en conversation** : après `git pull` (1.91.0), « C'est présent et tout
+  fonctionne bien » — bouton d'en-tête + modale opérationnels. (Sa capture précédente sans
+  bouton = build en retard, le faux rouge classique du §0.)
+- **R3** vraisemblablement couvert par le même retour, mais non détaillé notation par
+  notation — laissé formellement OUVERT.
+- ⏳ **R4** (épreuve du papier ≥ 1.91.0) et **R5** (verdict périodes vs heures) : **DUS**.
