@@ -7,6 +7,96 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 21 AOÛT 2026 (8e cycle) : LOT L6 « BOUTONS QUI MENTENT,
+     GESTES QUI PLANTENT » (#468, 1.91.2) — rang 4 de l'ordre du triage.
+     ▣ SIX CONSTATS, SIX GESTES QUE L'UTILISATEUR FAISAIT POUR RIEN.
+       · CT-13 — « Exporter » un cours ne téléchargeait AUCUN fichier : il
+         déposait la fiche dans « à ajouter » et la sortait de la sélection,
+         sans le dire. VERDICT GRÉGOIRE : deux entrées distinctes. Moyen
+         zéro-dette : `exporterCoursSimple` était MORTE (jamais branchée) et
+         doublonnait `partagerTousLesCours` (qui, elle, télécharge la
+         sélection entière) ⇒ reconvertie en `exporterUnCours(id)`, même
+         contrat que l'export global. Bord fermé : `partagerCours` pose
+         aussi `actif = false`, comme « Retirer de ma sélection » — un cours
+         déposé pouvait rester le cours actif.
+       · CO-05 — trois appels fantômes, trois gestes qui MOURAIENT APRÈS
+         AVOIR AGI. `afficherEchellesPerformance()` n'a jamais existé dans
+         le dépôt : l'échelle partait vraiment, la notification ne venait
+         jamais. `#nbNiveauxEchelle` n'est nulle part dans index.html : un
+         TypeError à CHAQUE ajout/retrait de niveau. Fix par RETRAIT (règle
+         « un dead code qui n'a jamais servi doit être retiré, pas activé »).
+       · CO-12 — la copie et la maquette adoptée restaient invisibles :
+         `PratiqueManager.sauvegarderPratique` rabat un `dansBibliotheque`
+         absent sur `false`. Les deux gestes le posent maintenant à `true`.
+         Fin subtile : une MAQUETTE aussi — c'est `filtrerParMaquette` qui la
+         masque, et c'est ce qui lui permet de PARAÎTRE une fois adoptée.
+       · CO-17 — le plus grave du lot : `construireProductionData` posait
+         `verrouille:false` / `dansBibliotheque:true` / `coursId` de façon
+         INCONDITIONNELLE, et l'objet est fusionné par spread. Toute retouche
+         de titre déverrouillait, refaisait apparaître, et RÉASSIGNAIT la
+         production au cours actif du moment. Signature élargie
+         (`idEnEdition`) : ces trois champs ne sont posés qu'à la CRÉATION.
+         `echeancesParGroupe` n'est écrite que si le formulaire a quelque
+         chose à dire — `undefined` dans un spread ÉCRASE, et le formulaire
+         rend `null` dès que le bloc multi-groupes est masqué.
+         ⚠ #346 N'EST PAS FERMÉ : le mécanisme d'entretien l'est, pas les
+         données déjà déviées.
+       · CO-18 — un `>` manquant après `class="hover-fond-subtil"` : le
+         parseur avalait l'`<input>` comme attribut du `<label>`, les cases
+         du mode hybride ne se rendaient JAMAIS (depuis Beta 95.4), et
+         `toggleProductionCategorieHandler` était inatteignable.
+       · CO-25 — VERDICT GRÉGOIRE : retirer les 2 gabarits de cartouches
+         (schéma `sections[]` sans grilleId ni commentaires : « 0
+         commentaire(s) », cul-de-sac). Plus : tombstones honorés au semis,
+         5 `GABARIT_*` inscrits dans IDS_GABARITS_HARDCODES.
+     ▣ DEUX REQUALIFICATIONS — l'audit avait raison sur le symptôme, pas
+       sur le lieu. À retenir pour les lots suivants : vérifier le CHEMIN
+       RÉEL de l'utilisateur, pas la fonction qui porte le bon nom.
+       (1) CO-17 point 3 accusait `reinitialiserFormulaireProduction`, qui
+           appelle POURTANT déjà `peuplerEcheancesParGroupe(null)`. Le vrai
+           chemin de « + Nouvelle production » est `creerNouvelleProduction`
+           (productions-liste.js) : elle vide le formulaire champ par champ
+           et ne passait pas par là. Le bloc multi-groupes gardait donc les
+           cases de la production précédente. Corrigé LÀ + le conteneur
+           masqué est aussi vidé (défense en profondeur).
+       (2) CO-25 ne décrivait que le semis. Or les trois
+           `supprimerXDeBibliothequePartagee` (grilles/échelles/cartouches)
+           ne posaient AUCUN tombstone : honorer les tombstones au semis
+           n'aurait rien changé, faute de tombstone à honorer. C'était
+           l'autre moitié du circuit.
+     ▣ OUTIL NEUF DANS LA SENTINELLE : un VÉRIFICATEUR DE BALISES BÉANTES
+       (`baliseNonFermee(html)`) plutôt qu'une assertion sur le caractère
+       manquant. Il saute ce qui vit entre guillemets (un `>` dans une
+       valeur d'attribut ne ferme pas la balise) et attrape toute la famille
+       CO-18, pas seulement l'occurrence corrigée. Réutilisable tel quel sur
+       n'importe quel générateur de HTML du projet.
+     ▣ SENTINELLE `tests/unit/sentinelle-468-boutons-qui-mentent.test.js`,
+       30 essais, une section par sous-lot. 4 BREAK-TESTS, 11 ROUGES
+       (CO-18 : 3 balises béantes ; CO-05 : ReferenceError + 2 TypeError,
+       exactement les messages de l'audit ; CO-12 : 3 ; CO-17 : 3 puis 2 ;
+       CT-13 : 2 ; CO-25 : 3). Vitest 2828/2828 (282 fichiers).
+     ▣ PIÈGE D'ÉCRITURE DE RATCHET, rencontré deux fois : un ratchet
+       « le nom X n'apparaît plus » rougit sur LE COMMENTAIRE QUI EXPLIQUE
+       LE RETRAIT. Dépouiller les commentaires avant l'assertion (deux
+       regex), sinon on est poussé à ne pas documenter son propre retrait.
+     ▣ MERGE OUVERT TROUVÉ EN COURS DE ROUTE — une autre session (cloud,
+       `e391f5ec`) a lancé un `git pull` à 19h18 alors que l'arbre était
+       propre à 19h16 : conflit `RELAIS.md` laissé en plan, un fichier de
+       porte déjà stagé. Résolu sur décision de Grégoire : les deux récits
+       du 7e cycle coexistent (le Mac garde la version, le cloud apporte le
+       RELEVÉ DE LA PORTE #466 — 7/7, zéro échec), la dette « 1.91.1 non
+       poussé » que le cloud signalait est soldée par ce push.
+       ⮕ Confirmation de la règle des sessions parallèles : `git status`
+         AVANT chaque staging, jamais de `git add -A`.
+     ▣ CE QUI RESTE DÛ : porte terrain
+       `PORTES-TERRAIN-2026-08-21-468-boutons.md` (14 gestes, 2 décisions —
+       ⚠ 2.2 et 2.8 sont irréversibles, à faire sur des éléments de TEST).
+       `verrouillerEvaluation` reste sans point d'entrée UI (constat noté,
+       hors périmètre). Prochain chantier de l'ordre : #463 (L1).
+     ===================================================================== -->
+
+
+<!-- =====================================================================
      SESSION — 21 AOÛT 2026 (4e cycle) : GRILLE IMPRIMABLE DES PRÉSENCES
      (#485, 1.90.0, minor) — demande directe de Grégoire (passe devant le
      cap #464+ annoncé, règle « retours avant backlog »).

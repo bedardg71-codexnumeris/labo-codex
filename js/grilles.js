@@ -2698,6 +2698,13 @@ async function supprimerGrilleDeBibliothequePartagee(id) {
 
     if (!confirm(`Supprimer définitivement «${grille.nom || 'Sans titre'}» de la bibliothèque partagée ?\n\nCette action est irréversible.`)) return;
 
+    // #468/CO-25 (21 août 2026) : poser le tombstone AVANT le retrait. Sans lui,
+    // un gabarit fourni par défaut revenait au prochain chargement — la
+    // suppression semblait marcher, puis se défaisait toute seule.
+    if (window.IDS_GABARITS_HARDCODES && window.IDS_GABARITS_HARDCODES.includes(id)) {
+        window.marquerRessourceSupprimee(id);
+    }
+
     await retirerGrilleDeLaBibliotheque(id);
 
     fermerModalBibliothequeGrilles();
