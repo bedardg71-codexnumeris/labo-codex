@@ -20,7 +20,7 @@
 // init-inline.js compare cette valeur au BUILD_ID lu depuis version.json :
 // si différent, Safari file:// a probablement un main.js périmé en cache,
 // et la séquence reload+bandeau s'enclenche. SYNCHRONISER À CHAQUE BUMP.
-window._SCRIPT_BUILD_main = '0821-1247';
+window._SCRIPT_BUILD_main = '0821-2055';
 
 /* ===============================
    FONCTION GLOBALE: Génération d'ID uniques
@@ -92,12 +92,19 @@ window.marquerRessourceSupprimee = function(id) {
     }
 };
 
-// IDs des gabarits hardcodés (réinjectés par assurer*() si absents)
+// IDs des gabarits hardcodés (réinjectés par assurer*() si absents).
+// #468/CO-25 (21 août 2026) : les GABARIT_* de gabarits-utils.js y entrent aussi.
+// Ils étaient re-semés à CHAQUE chargement sans que leur suppression laisse la
+// moindre trace — cette liste est ce qui fait poser le tombstone, donc ce qui
+// rend la suppression durable.
 window.IDS_GABARITS_HARDCODES = [
     'ECHELLE_GENERIQUE', 'ECHELLE_BRUNO_CHIMIE', 'ECHELLE_XAVIER_INFO',
     'ECHELLE_ISABELLE_BIO', 'ECHELLE_HELENE_PHILO', 'ECHELLE_MARIEHELENE_LITT',
     'ECHELLE_ETIENNE_ADMIN', 'ECHELLE_OLIVIER_GEO', 'ECHELLE_JORDAN_PHILO',
-    'GRILLE_GENERIQUE', 'CART_GENERIQUE'
+    'GRILLE_GENERIQUE', 'CART_GENERIQUE',
+    'GABARIT_ECHELLE_IDME', 'GABARIT_ECHELLE_STD_MASTERY',
+    'GABARIT_GRILLE_ANALYTIQUE', 'GABARIT_GRILLE_CHECKLIST_SPE',
+    'GABARIT_GRILLE_STD_OBJECTIFS'
 ];
 
 /* ===============================

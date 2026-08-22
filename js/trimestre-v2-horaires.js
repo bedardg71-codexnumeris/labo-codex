@@ -398,6 +398,17 @@ function changerHoraireSelectionneV2(horaireId) {
     const horaires = db.getSync(cleHoraires, []);
     const horaire = horaires.find(h => h.id === horaireId);
 
+    // 🔧 #466/CT-17 (21 août 2026) : id non résolvable = refus DIT (patron commun
+    // aux 3 accordéons — le formulaire précédent restait affiché en silence).
+    if (!horaire) {
+        console.warn('[Horaire V2] Sélection non résolue :', horaireId);
+        notifications.erreur('Horaire introuvable', 'Il n\'existe plus dans ce trimestre. La liste va se rafraîchir.');
+        db.setSync(cle('horaireSelectionne'), null);
+        populerDropdownHorairesV2();
+        afficherEtatVideHoraireV2();
+        return;
+    }
+
     if (horaire) {
         // Sauvegarder la sélection pour persistance (Beta 95.2)
         db.setSync(cle('horaireSelectionne'), horaireId);

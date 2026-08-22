@@ -429,6 +429,14 @@ async function initialiserNouveauCartouche(grilleId) {
         date_creation: new Date().toISOString().split('T')[0],
         contributeurs: []
     };
+    // 🔧 #466/CO-20 (21 août 2026) : synchroniser la 2e source. La sauvegarde
+    // (sauvegarderCartoucheComplete) et 4 autres lecteurs lisent
+    // window.cartoucheActuel ; ce chemin de CRÉATION n'écrivait que la variable
+    // globale → « créer une nouvelle cartouche après en avoir ouvert une autre »
+    // faisait recharger l'ANCIENNE après sauvegarde. L'unification sur UNE seule
+    // source (retrait de la variable globale) part au lot L7/#469 — ici on ferme
+    // le symptôme en gardant les deux mondes alignés.
+    window.cartoucheActuel = cartoucheActuel;
 
 
     // Réinitialiser les champs
@@ -2615,6 +2623,11 @@ window.importerDansCartoucheActive = importerDansCartoucheActive;
 window.supprimerCartoucheActive = supprimerCartoucheActive;
 window.annulerFormCartouche = annulerFormCartouche;
 window.sauvegarderCartoucheComplete = sauvegarderCartoucheComplete;
+// 🆕 #466/CO-16+CO-20 (21 août 2026) : appelé par changerTrimestreActifV2 — les
+// DEUX sources de la cartouche courante (variable globale + window.cartoucheActuel,
+// cf. CO-20) sont remises à null ensemble à la bascule.
+function reinitialiserEditeurCartouchesApresBascule() { cartoucheActuel = null; window.cartoucheActuel = null; }
+window.reinitialiserEditeurCartouchesApresBascule = reinitialiserEditeurCartouchesApresBascule;
 
 // Wrappers délégation (Phase 5)
 window.fermerModalImportCartouches = fermerModalImportCartouches;
@@ -2930,6 +2943,7 @@ async function initialiserNouveauCartoucheAvecEchelle(grilleId, echelleId) {
         verrouille: false,
         dansBibliotheque: true
     };
+    window.cartoucheActuel = cartoucheActuel; // #466/CO-20 : garder les 2 sources alignées (cf. note à la création)
 
     // Afficher la matrice
     await afficherMatriceRetroaction();
@@ -3551,6 +3565,13 @@ async function supprimerCartoucheDeBibliothequePartagee(id) {
     if (!cartouche) return;
 
     if (!confirm(`Supprimer définitivement «${cartouche.nom || 'Sans titre'}» de la bibliothèque partagée ?\n\nCette action est irréversible.`)) return;
+
+    // #468/CO-25 (21 août 2026) : poser le tombstone AVANT le retrait. Sans lui,
+    // un gabarit fourni par défaut revenait au prochain chargement — la
+    // suppression semblait marcher, puis se défaisait toute seule.
+    if (window.IDS_GABARITS_HARDCODES && window.IDS_GABARITS_HARDCODES.includes(id)) {
+        window.marquerRessourceSupprimee(id);
+    }
 
     await retirerCartoucheDeLaBibliotheque(id);
 

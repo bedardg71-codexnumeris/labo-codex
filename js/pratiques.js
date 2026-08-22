@@ -990,6 +990,14 @@ async function dupliquerPratique(id, options = {}) {
             description: original.description,
             discipline: original.discipline || configResolue.discipline || '',
             isDemo: false,
+            // #468/CO-12 (21 août 2026) : la copie naît DANS la bibliothèque.
+            // Sans ce champ, PratiqueManager.sauvegarderPratique le rabattait sur
+            // `false` (règle des pratiques prédéfinies) et la copie n'apparaissait
+            // ni dans la sidebar ni en Section 1 — malgré le « ajoutée à tes
+            // pratiques » de l'alerte. Une maquette dérivée reste masquée par son
+            // propre flag `estMaquette` (filtrerParMaquette), pas par un rangement
+            // hors bibliothèque : c'est ce qui lui permet de PARAÎTRE une fois adoptée.
+            dansBibliotheque: true,
             inspireDe: BibliothequeUI.forgerInspireDe(original),
             type: configResolue.type,
             variante: configResolue.variante || null,
@@ -1148,8 +1156,13 @@ async function adopterMaquette(id) {
     const pratique = pratiques.find(p => p.id === id);
     if (!pratique || pratique.estMaquette !== true) return false;
 
-    // SEUL estMaquette change ; tout le reste (inspireDe/sourceId inclus) est préservé.
+    // estMaquette bascule ; tout le reste (inspireDe/sourceId inclus) est préservé.
     pratique.estMaquette = false;
+    // #468/CO-12 (21 août 2026) : l'adoption remet aussi la pratique DANS la
+    // bibliothèque. Les maquettes créées avant le correctif de dupliquerPratique
+    // portent `dansBibliotheque:false` : sans cette ligne, « Maquette adoptée »
+    // s'affichait sur une pratique qui restait introuvable dans la sidebar.
+    pratique.dansBibliotheque = true;
     db.setSync(cle('pratiquesConfigurables'), pratiques);
     if (db.set) await db.set(cle('pratiquesConfigurables'), pratiques);
 

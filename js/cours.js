@@ -308,7 +308,12 @@ async function ouvrirModalBibliothequeCours() {
                 // #449 : le réversible et le définitif coexistent — l'écart
                 // se voit (libellés + seule la suppression est en rouge).
                 actionsMenu: [
-                    { label: 'Exporter', action: 'partagerCours', param: cours.id, classe: 'btn-secondaire', title: 'Exporter ce cours en JSON pour le partager' },
+                    // #468/CT-13 : « Exporter » téléchargeait ZÉRO fichier — il
+                    // déposait la fiche dans « à ajouter » et la sortait de la
+                    // sélection, sans le dire. Les deux gestes existent
+                    // maintenant côte à côte, chacun sous son vrai nom.
+                    { label: 'Exporter', action: 'exporterUnCours', param: cours.id, classe: 'btn-secondaire', title: 'Télécharger ce cours en JSON (fichier à partager)' },
+                    { label: 'Déposer dans les cours disponibles', action: 'partagerCours', param: cours.id, classe: 'btn-secondaire', title: 'Réversible : la fiche quitte ta sélection et rejoint « Cours disponibles à ajouter », avec ses métadonnées Creative Commons' },
                     { label: 'Retirer de ma sélection', action: 'retirerCoursDeBibliotheque', param: cours.id, classe: 'btn-secondaire', title: 'Réversible : la fiche reste disponible dans « à ajouter »' },
                     { label: 'Supprimer la fiche', action: 'supprimerFicheCours', param: cours.id, classe: 'btn-supprimer', title: 'Définitif, TOUS les trimestres — refusé si le cours porte des données' }
                 ]
@@ -576,24 +581,38 @@ async function ajouterCoursIndividuel(id) {
  * - Format JSON simple sans métadonnées CC (données ministérielles)
  * - Nom fichier : cours-YYYY-MM-DD.json
  */
-async function exporterCoursSimple() {
+async function exporterUnCours(id) {
     const tousLesCours = await db.get('cours') || [];
-    const coursDansBibliotheque = tousLesCours.filter(c => c.dansBibliotheque === true);
+    const cours = tousLesCours.find(c => c.id === id);
 
-    if (coursDansBibliotheque.length === 0) {
-        alert('Aucun cours à exporter dans ta sélection');
+    if (!cours) {
+        alert('Cours introuvable');
         return;
     }
 
-    // Créer le JSON
-    const dataStr = JSON.stringify(coursDansBibliotheque, null, 2);
+    // Même contrat que « Exporter tous mes cours » : métadonnées CC d'abord,
+    // même enveloppe, même forme de fichier — un import ne fait pas la
+    // différence entre un export d'un cours et un export de la sélection.
+    const nomAffiche = `${cours.codeCours} - ${cours.nomCours}`;
+    const metadata = await demanderMetadonneesEnrichies('cours', nomAffiche);
+    if (!metadata) return;  // annulé par l'utilisateur
+
+    const exportData = {
+        metadata_cc: metadata,
+        type: 'cours',
+        nbCours: 1,
+        dateExport: new Date().toISOString(),
+        cours: [cours]
+    };
+
+    const dataStr = JSON.stringify(exportData, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
 
-    // Générer nom de fichier avec date
+    // Nom de fichier : le code du cours, épuré de ce qui ne passe pas en nom de fichier
     const dateStr = new Date().toISOString().split('T')[0];
-    const nomFichier = `cours-${dateStr}.json`;
+    const codeEpure = String(cours.codeCours || 'cours').replace(/[^a-zA-Z0-9_-]/g, '-');
+    const nomFichier = `cours-${codeEpure}-${dateStr}.json`;
 
-    // Télécharger
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
     link.href = url;
@@ -601,7 +620,7 @@ async function exporterCoursSimple() {
     link.click();
     URL.revokeObjectURL(url);
 
-    alert(`${coursDansBibliotheque.length} cours exportés avec succès !`);
+    alert(`« ${nomAffiche} » exporté avec métadonnées Creative Commons !`);
 }
 
 /**
@@ -724,8 +743,11 @@ async function partagerCours(id) {
             return; // Annulé par l'utilisateur
         }
 
-        // Marquer comme partagé (retirer de ma sélection)
+        // Marquer comme partagé (retirer de ma sélection).
+        // #468/CT-13 : `actif` suit, comme dans retirerCoursDeBibliotheque — un
+        // cours qui a quitté la sélection ne peut pas rester le cours actif.
         coursAPartager.dansBibliotheque = false;
+        coursAPartager.actif = false;
 
         // Ajouter métadonnées CC
         coursAPartager.metadata_cc = metadata;
@@ -959,7 +981,7 @@ window.recenserDependancesCours = recenserDependancesCours;
 window.supprimerFicheCoursAvecGarde = supprimerFicheCoursAvecGarde;
 window.supprimerFicheCours = supprimerFicheCours;
 window.ajouterCoursIndividuel = ajouterCoursIndividuel;
-window.exporterCoursSimple = exporterCoursSimple;
+window.exporterUnCours = exporterUnCours;
 window.importerCoursSimple = importerCoursSimple;
 window.partagerCours = partagerCours;
 window.partagerTousLesCours = partagerTousLesCours;

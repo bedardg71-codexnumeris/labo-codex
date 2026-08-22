@@ -439,6 +439,10 @@ function peuplerEcheancesParGroupe(production) {
         // Pas de cours identifié — mode simple
         containerMulti.classList.add('u-hide');
         champSimple.style.display = '';
+        // #468/CO-17 : masquer ne suffit pas — on VIDE. Un conteneur masqué qui
+        // garde les cases de la production précédente est une ligne de plus où
+        // des échéances peuvent repasser.
+        listeContainer.innerHTML = '';
         return;
     }
 
@@ -453,6 +457,7 @@ function peuplerEcheancesParGroupe(production) {
         // Un seul groupe — mode simple
         containerMulti.classList.add('u-hide');
         champSimple.style.display = '';
+        listeContainer.innerHTML = '';  // #468/CO-17 : voir plus haut
 
         // 🆕 Beta 98.4 : Indicateur de séance en mode simple
         if (inputSimple) {
@@ -1106,10 +1111,20 @@ async function gererDoublonProduction(titre, evaluations, idActuel) {
 }
 
 // Construit l'objet productionData prêt à être inséré dans evaluations.
-function construireProductionData(d, evaluations) {
+//
+// #468/CO-17 (21 août 2026) — `idEnEdition` décide de ce que l'objet CONTIENT.
+// L'objet est fusionné par spread sur la production existante
+// (`{...existante, ...productionData}`) : tout champ présent ici ÉCRASE. Les
+// champs d'ÉTAT (verrouille / dansBibliotheque / coursId) n'ont donc leur place
+// qu'à la CRÉATION — sinon la moindre retouche de titre déverrouillait la
+// production, la faisait réapparaître si elle avait été retirée, et la
+// RÉASSIGNAIT au cours actif du moment (mécanisme d'entretien du bug #346).
+function construireProductionData(d, evaluations, idEnEdition) {
+    const estModification = !!idEnEdition;
+
     // ✅ CORRECTION CRITIQUE (Beta 95 - 27 déc 2025) : Ajouter coursId
     const coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
-    if (!coursId) {
+    if (!coursId && !estModification) {
         console.warn('[Productions] ⚠️ Aucun cours actif - production créée sans coursId');
     }
 
@@ -1118,7 +1133,7 @@ function construireProductionData(d, evaluations) {
         : [];
 
     // 🆕 Beta 95.4 : Préserver la catégorie existante si modification, sinon null
-    const existingProd = evaluations.find(p => p.id === productionEnEdition);
+    const existingProd = evaluations.find(p => p.id === idEnEdition);
     const categorieExistante = existingProd?.categorie || null;
 
     const productionData = {
@@ -1134,13 +1149,27 @@ function construireProductionData(d, evaluations) {
         echelleId: d.echelleId,        // 🆕 Persistance échelle dans le gabarit
         cartoucheId: d.cartoucheId,    // 🆕 Persistance cartouche dans le gabarit
         dateEcheance: d.dateEcheance,  // ✨ NOUVEAU (Beta 94 - 10 déc 2025)
-        echeancesParGroupe: d.echeancesParGroupe || undefined,  // 🆕 Beta 98.3 : multi-groupe
         pratiquesCompatibles,
-        verrouille: false,
-        dansBibliotheque: true,  // ✅ AJOUT (8 décembre 2025)
-        coursId,  // ✅ CRITIQUE (Beta 95)
         categorie: categorieExistante  // 🆕 Beta 95.4
     };
+
+    // 🆕 Beta 98.3 : multi-groupe.
+    // #468/CO-17 : la clé n'est POSÉE que si le formulaire a quelque chose à
+    // dire. `lireEcheancesParGroupeDepuisFormulaire` rend `null` quand le
+    // conteneur multi est masqué (mode simple, un seul groupe frère, cours non
+    // résolu) — c'est « je ne sais pas », jamais « efface ». Or un `undefined`
+    // dans un spread ÉCRASE : une retouche de titre détruisait les dates par
+    // groupe sans le dire.
+    if (d.echeancesParGroupe) {
+        productionData.echeancesParGroupe = d.echeancesParGroupe;
+    }
+
+    // #468/CO-17 : champs d'ÉTAT — à la création seulement (voir l'entête).
+    if (!estModification) {
+        productionData.verrouille = false;
+        productionData.dansBibliotheque = true;  // ✅ AJOUT (8 décembre 2025)
+        productionData.coursId = coursId;        // ✅ CRITIQUE (Beta 95)
+    }
 
     if (d.type === 'portfolio') {
         // ✅ CORRECTION Phase 3: Les règles de calcul sont configurées dans Réglages
@@ -1189,7 +1218,7 @@ async function sauvegarderProduction() {
     evaluations = resultatDoublons.evaluations;
     donnees.titre = resultatDoublons.titre;
 
-    const productionData = construireProductionData(donnees, evaluations);
+    const productionData = construireProductionData(donnees, evaluations, productionEnEdition);
 
     if (productionEnEdition) {
         // Modifier la production existante
@@ -2118,6 +2147,11 @@ window.afficherToutesLesProductionsParType = afficherToutesLesProductionsParType
 window.ajouterProductionAuType = ajouterProductionAuType;
 window.afficherFormProduction = afficherFormProduction;
 window.sauvegarderProduction = sauvegarderProduction;
+// #468/CO-17 : exportée pour la sentinelle (création vs modification).
+window.construireProductionData = construireProductionData;
+// #468/CO-17 : exportée pour la sentinelle ET pour creerNouvelleProduction
+// (productions-liste.js), qui doit remettre le bloc d'échéances à neuf.
+window.peuplerEcheancesParGroupe = peuplerEcheancesParGroupe;
 window.annulerFormProduction = annulerFormProduction;
 window.modifierProduction = modifierProduction;
 window.supprimerProduction = supprimerProduction;

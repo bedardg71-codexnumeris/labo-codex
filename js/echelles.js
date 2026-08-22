@@ -714,6 +714,17 @@ async function sauvegarderNomEchelle() {
         // Mettre à jour dans localStorage - SAUVEGARDER TOUTE L'ÉCHELLE (y compris les niveaux)
         let echelles = await db.get(cle('echellesTemplates')) ||  [];
         const index = echelles.findIndex(e => e.id === echelleTemplateActuelle.id);
+        if (index === -1) {
+            // 🔧 #466/CO-16 (21 août 2026) : silence total quand l'échelle éditée
+            // n'est pas dans le namespace du trimestre actif (édition à cheval
+            // sur une bascule). Refus bruyant, patron de la sentinelle horaire.
+            console.warn('[Échelles] Sauvegarde refusée : échelle', echelleTemplateActuelle.id, 'absente du trimestre actif', cle('echellesTemplates'));
+            notifications.erreur(
+                'Impossible d\'enregistrer cette échelle',
+                'Elle n\'appartient pas au trimestre actif. Bascule sur son trimestre pour la modifier.'
+            );
+            return;
+        }
         if (index !== -1) {
             echelles[index] = { ...echelleTemplateActuelle };
             await db.set(cle('echellesTemplates'),  echelles);
@@ -884,7 +895,10 @@ async function supprimerEchelle(echelleId) {
     // ✅ AJOUT (8 décembre 2025) : Rafraîchir la barre latérale
     await afficherListeEchelles();
 
-    afficherEchellesPerformance();
+    // #468/CO-05 (21 août 2026) : l'appel à afficherEchellesPerformance() est
+    // RETIRÉ — la fonction n'a jamais existé dans le dépôt. Il levait un
+    // ReferenceError juste AVANT la notification : l'échelle partait vraiment,
+    // sans que l'utilisateur en soit averti. Retrait, pas réanimation.
     notifications.succes('Échelle supprimée');
 }
 
@@ -2472,6 +2486,13 @@ async function supprimerEchelleDeBibliothequePartagee(id) {
 
     if (!confirm(`Supprimer définitivement «${echelle.nom || 'Sans titre'}» de la bibliothèque partagée ?\n\nCette action est irréversible.`)) return;
 
+    // #468/CO-25 (21 août 2026) : poser le tombstone AVANT le retrait. Sans lui,
+    // un gabarit fourni par défaut revenait au prochain chargement — la
+    // suppression semblait marcher, puis se défaisait toute seule.
+    if (window.IDS_GABARITS_HARDCODES && window.IDS_GABARITS_HARDCODES.includes(id)) {
+        window.marquerRessourceSupprimee(id);
+    }
+
     await retirerEchelleDeLaBibliotheque(id);
 
     fermerModalBibliothequeEchelles();
@@ -3333,8 +3354,10 @@ async function ajouterNiveauEchelle(echelleId) {
     // Réafficher la liste des niveaux
     afficherNiveauxEchelle(echelleTemplateActuelle);
 
-    // Mettre à jour les métriques et la sidebar
-    document.getElementById('nbNiveauxEchelle').textContent = echelleTemplateActuelle.niveaux.length;
+    // Mettre à jour la sidebar.
+    // #468/CO-05 (21 août 2026) : l'écriture dans #nbNiveauxEchelle est RETIRÉE —
+    // l'élément n'existe nulle part dans index.html, si bien que chaque ajout ou
+    // retrait de niveau levait un TypeError et n'allait jamais jusqu'au bout.
     await afficherListeEchelles();
 
     // Notification de succès
@@ -3378,8 +3401,10 @@ async function supprimerNiveauEchelle(echelleId, index) {
     // Réafficher la liste des niveaux
     afficherNiveauxEchelle(echelleTemplateActuelle);
 
-    // Mettre à jour les métriques et la sidebar
-    document.getElementById('nbNiveauxEchelle').textContent = echelleTemplateActuelle.niveaux.length;
+    // Mettre à jour la sidebar.
+    // #468/CO-05 (21 août 2026) : l'écriture dans #nbNiveauxEchelle est RETIRÉE —
+    // l'élément n'existe nulle part dans index.html, si bien que chaque ajout ou
+    // retrait de niveau levait un TypeError et n'allait jamais jusqu'au bout.
     await afficherListeEchelles();
 }
 
@@ -3798,6 +3823,10 @@ function ouvrirFilePickerImportEchelles() {
 
 // Export global
 window.afficherListeEchelles = afficherListeEchelles;
+// 🆕 #466/CO-16 (21 août 2026) : appelé par changerTrimestreActifV2 (même patron
+// que grilles) — le pointeur d'édition ne survit pas à la bascule.
+function reinitialiserEditeurEchellesApresBascule() { echelleTemplateActuelle = null; }
+window.reinitialiserEditeurEchellesApresBascule = reinitialiserEditeurEchellesApresBascule;
 window.creerNouvelleEchelle = creerNouvelleEchelle;
 window.annulerFormEchelle = annulerFormEchelle;
 window.chargerEchellePourModif = chargerEchellePourModif;
