@@ -713,6 +713,17 @@ function sauvegarderHoraireV2() {
     const horaire = horaires.find(h => h.id === horaireEnEditionId);
     mettreAJourCarteResumeHoraireV2(horaire);
 
+    // Porte terrain 2.4 (21 août 2026) : apres une CREATION, le formulaire
+    // restait en mode creation — titre « Nouvel horaire », bouton « Creer », et
+    // surtout AUCUN bouton Supprimer. Poser `select.value` par code ne declenche
+    // pas l'evenement `change`, donc `changerHoraireSelectionneV2` ne passait
+    // jamais le formulaire en mode edition : l'horaire qu'on venait de creer
+    // etait insupprimable tant qu'on n'avait pas selectionne un AUTRE horaire
+    // puis fait demi-tour. Signale au terrain : « il n'y a pas de possibilite de
+    // supprimer l'horaire ». On bascule donc explicitement en mode edition, par
+    // la meme fonction que le dropdown (source unique, pas de logique doublee).
+    if (horaire) editerHoraireV2(horaire);
+
     // 🆕 (10 jan 2026) : Rafraîchir le dropdown horaires dans Groupe-cours
     window.populerDropdownsAssemblageV2();
 
