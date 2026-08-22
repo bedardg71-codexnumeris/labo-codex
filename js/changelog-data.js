@@ -25,6 +25,8 @@
             couleur: 'bleu',
             titre: 'La grille des présences ajustée, et des boutons qui tiennent parole',
             items: [
+                'Dans Suivi › Saisie des présences, « Grille imprimable » s’appelle maintenant « Rapport », et son bouton est passé dans la barre d’actions, juste à gauche d’« Enregistrer ».',
+                'Les séances d’un horaire tiennent enfin sur une seule ligne : les heures ont la place de s’afficher en entier et le local ne bascule plus à la ligne suivante.',
                 'La durée d’une période est maintenant de 50 minutes par défaut, et ce réglage atteint enfin tous les calculs : le nombre de périodes affiché pour une séance et le total hebdomadaire suivent la durée que tu as choisie, au lieu de rester figés sur 55 minutes.',
                 'Deux groupes qui ont cours le même jour à des heures différentes gardent désormais leurs deux séances : la seconde n’est plus perdue au passage, ni pour le calendrier ni pour la saisie des présences.',
                 'Un horaire que tu viens de créer peut être supprimé tout de suite : le bouton Supprimer apparaît dès l’enregistrement, sans devoir passer par un autre horaire et revenir.',
