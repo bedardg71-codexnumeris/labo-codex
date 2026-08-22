@@ -25,6 +25,7 @@
             couleur: 'bleu',
             titre: 'La grille des présences ajustée, et des boutons qui tiennent parole',
             items: [
+                'Bibliothèque de productions : « Ajouter à ma sélection » a enfin un effet visible — la production quitte la liste des disponibles dès qu’elle est ajoutée, et le bouton ne peut plus être recliqué pour en empiler un second exemplaire sans le dire.',
                 'Dans Suivi › Saisie des présences, « Grille imprimable » s’appelle maintenant « Rapport », et son bouton est passé dans la barre d’actions, juste à gauche d’« Enregistrer ».',
                 'Les séances d’un horaire tiennent enfin sur une seule ligne : les heures ont la place de s’afficher en entier et le local ne bascule plus à la ligne suivante.',
                 'La durée d’une période est maintenant de 50 minutes par défaut, et ce réglage atteint enfin tous les calculs : le nombre de périodes affiché pour une séance et le total hebdomadaire suivent la durée que tu as choisie, au lieu de rester figés sur 55 minutes.',

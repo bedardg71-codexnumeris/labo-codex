@@ -79,9 +79,32 @@ async function preparerDonneesBibliothequeProductions() {
     const repParProduction = {};
     repsProductions.forEach(r => (r.itemIds || []).forEach(id => { repParProduction[id] = r.id; }));
 
+    // Identités déjà présentes dans la sélection.
+    //
+    // ⚠ L'exclusion se faisait par `id` NU. Or `ajouterProductionIndividuelle`
+    // ne déplace pas l'item de la bibliothèque : il en fait une COPIE avec un
+    // `id` tout neuf, et range l'ancien dans `idOriginal`. L'original ne
+    // correspondait donc à aucun id de la sélection et RESTAIT listé ici.
+    //
+    // Vécu au terrain (Grégoire, 22 août 2026) : « quand je clique "ajouter à
+    // ma sélection", il semble rien se passer ». L'ajout marchait — la section
+    // « ta sélection » passait bien de (1) à (2) — mais la liste où il venait
+    // de cliquer était identique, donc le geste paraissait sans effet. Et
+    // recliquer empilait un exemplaire de plus, en silence (recoupe CO-24, qui
+    // notait les boutons « re-cliquables » sans en trouver la cause).
+    //
+    // On compare donc sur l'IDENTITÉ : l'id propre ET l'id d'origine, des deux
+    // côtés.
+    const identitesEnSelection = new Set();
+    productionsDansSelection.forEach(p => {
+        if (p.id) identitesEnSelection.add(p.id);
+        if (p.idOriginal) identitesEnSelection.add(p.idOriginal);
+    });
+
     const cartesSection2 = [];
     toutesProductionsDisponibles.forEach(prod => {
-        if (productionsDansSelection.find(p => p.id === prod.id)) return;
+        if (identitesEnSelection.has(prod.id)) return;
+        if (prod.idOriginal && identitesEnSelection.has(prod.idOriginal)) return;
 
         const repCourant = repParProduction[prod.id] || null;
         const actionsMenu = [];
