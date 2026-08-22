@@ -25,6 +25,9 @@
             couleur: 'bleu',
             titre: 'La grille des présences ajustée, et des boutons qui tiennent parole',
             items: [
+                'Deux groupes qui ont cours le même jour à des heures différentes gardent désormais leurs deux séances : la seconde n’est plus perdue au passage, ni pour le calendrier ni pour la saisie des présences.',
+                'Un horaire que tu viens de créer peut être supprimé tout de suite : le bouton Supprimer apparaît dès l’enregistrement, sans devoir passer par un autre horaire et revenir.',
+                'Les noms venus d’un import (horaires, profils d’enseignant·e, locaux de séance) s’affichent toujours tels que tu les as écrits, même s’ils contiennent des caractères spéciaux.',
                 'La grille imprimable s’ouvre maintenant d’un bouton bien en vue dans l’en-tête de la saisie des présences, qui affiche ses options dans une fenêtre — fini le panneau replié en bas de page.',
                 'Choisis la notation des cases : crochets (✓ présence, ✗ absence), X sur les absences seulement, périodes de présence (2 / 1 / 0) ou périodes d’absence. La légende imprimée suit ton choix, et ta préférence est mémorisée.',
                 'Les dates d’en-tête ne sont plus coupées (« 21… ») : le jour et le mois sont toujours complets, et la police du tableau a été réduite pour une grille plus aérée — retouches issues du premier essai d’impression réel.',

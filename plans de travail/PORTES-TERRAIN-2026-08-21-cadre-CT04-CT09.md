@@ -291,7 +291,7 @@ deux d'entre elles ouvrent du travail neuf.
 
 | # | Verdict de Grégoire | Suite donnée |
 |---|---|---|
-| 3.1 | « 1.90.2 » | ⚠ **en attente** — 1.90.2 est *derrière* la 1.91.0 déjà livrée (`version.json`, et le changelog porte déjà une entrée `1.91`). Numéro à reconfirmer avant tout bump. |
+| 3.1 | « 1.90.2 », puis **1.91.3 (patch)** après reprise | ✅ appliqué. Le premier numéro était *derrière* le livré : pendant ce cycle, `main` est passé à **1.91.2** (L4 = 1.91.1, L6 = 1.91.2 fusionnés par les deux autres sessions). Repris avec Grégoire → `node scripts/release.mjs patch` → **1.91.3**, build `0822-0631`. |
 | 3.2 | « garder 106 » | ✅ appliqué — seuil strict conservé, sans marge. |
 | 3.3 | « tu mets le relais à jour maintenant » | ✅ `RELAIS.md` mis à jour sur `main`, poussé seul. |
 | 3.4 | « ils seront vus dans leurs sessions respectives » | ✅ aucun travail ici ; les sites CT-09 de `trimestre-v2-cours.js` (dont les 3 renderers morts) et `trimestre-v2-liste.js` restent aux lots L6 et L4. |
@@ -325,9 +325,14 @@ CT-04 veut *tous* les groupes, le fix de mars veut *le groupe actif seul*.
 Le correctif CT-04 reste juste et utile (il gouverne la sauvegarde, la
 suppression et `genererCalendrierComplet`), mais la scène que la porte 2.1
 demandait d'observer est gouvernée par l'autre écrivain.
-⏳ **Décision due** : que doit montrer le calendrier — le groupe actif, ou tous
-les groupes du trimestre ? Tant qu'elle n'est pas prise, la clé a deux
-propriétaires qui se contredisent (violation #7 du registre).
+✅ **DÉCISION PRISE (Grégoire, 22 août)** : **le groupe actif prime** — statu quo
+du fix de mars. Le calendrier et la saisie des présences montrent le groupe
+actif, pas tout le trimestre. Conséquence consignée au registre
+`docs/DATA-OWNERSHIP.md` : la fusion CT-04 gouverne la **sauvegarde** d'un
+horaire, sa **suppression** et `genererCalendrierComplet` ; la synchro du groupe
+actif gouverne l'**affichage** et écrase volontairement la liste fusionnée. La
+clé a donc deux écrivains, mais plus deux intentions : l'ordre de priorité est
+écrit. **Ne pas « corriger » cet écrasement sans rouvrir la décision.**
 
 **C. Porte 1.1 — la durée de période retombée à 55 min.** *(à verser)*
 Note reçue : « la durée de la période était à 55 minutes alors que je l'avais
@@ -361,7 +366,7 @@ dans le rayon du lot L4 (#466, session Mac).
 |---|---|
 | **Portes** | 16 rangées (12 vérifications + 4 décisions) |
 | **Relevé** | ✅ reçu le 22 août 2026 — **9 passées · 0 échec · 3 sans objet** |
-| **Décisions** | 4/4 tranchées — ⚠ 3.1 (version) à reconfirmer, le numéro donné est antérieur au livré |
-| **Reste dû** | supprimer l'horaire `<b>ZZ</b>` des données · décision B (propriétaire de `horaireHebdo`) · verser C (durée de période) au backlog |
-| **Vitest** | 2821/2821 (284 fichiers), lancé depuis `tests/` |
+| **Décisions** | 4/4 tranchées, plus les deux reprises du 22 août (version → **1.91.3** ; calendrier → **groupe actif**) |
+| **Reste dû** | supprimer l'horaire `<b>ZZ</b>` des données réelles · verser C (durée de période à 55 min dans tout trimestre créé après #464) au backlog |
+| **Vitest** | **2851/2851** (285 fichiers) sur l'état FUSIONNÉ avec `main` (1.91.2 → 1.91.3), lancé depuis `tests/` |
 | **Break-tests** | 3 joués, 3 ROUGES (sentinelle CT-04, sentinelle CT-29, sentinelle horaire supprimable) |
