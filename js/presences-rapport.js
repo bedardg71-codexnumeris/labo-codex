@@ -290,7 +290,7 @@ function sauvegarderOptionsRapportPresences() {
     return opts;
 }
 
-/** Ouvre la modale (bouton « Grille imprimable » de l'en-tête Enregistrement). */
+/** Ouvre la modale (bouton « Rapport » de la barre d'actions, a gauche d'Enregistrer). */
 function ouvrirModaleRapportPresences() {
     restaurerOptionsRapportPresences();
     afficherStatutRapport('');

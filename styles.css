@@ -9078,9 +9078,15 @@ body.mode-clair .bloc-rlo-separateur {
     gap: 10px;
 }
 
+/* Une ligne = SIX champs : Séance N · jour · début · « à » · fin · local.
+   La grille n'en déclarait que CINQ : le local était rejeté sur une deuxième
+   rangée implicite (signalé au terrain le 22 août, capture à l'appui). Et les
+   80 px des heures tronquaient la valeur — « 08:0 » au lieu de « 08:00 ».
+   Les champs montent aussi à 44 px de haut : c'est le minimum tactile iPad du
+   projet, que cette rangée n'atteignait pas (≈30 px). */
 .seance-horaire-ligne {
     display: grid;
-    grid-template-columns: auto 1fr 80px auto 80px;
+    grid-template-columns: auto minmax(110px, 1fr) 124px auto 124px minmax(90px, 130px);
     gap: 10px;
     align-items: center;
     padding: 10px;
@@ -9096,18 +9102,34 @@ body.mode-clair .bloc-rlo-separateur {
 }
 
 .seance-horaire-ligne select,
-.seance-horaire-ligne input[type="time"] {
-    padding: 6px 8px;
-    font-size: 0.85rem;
+.seance-horaire-ligne input[type="time"],
+.seance-horaire-ligne input[type="text"] {
+    padding: 8px 10px;
+    font-size: 0.9rem;
+    min-height: 44px;
+    min-width: 0; /* sans quoi le contenu impose sa largeur et déborde la colonne */
+    width: 100%;
 }
 
-@media (max-width: 600px) {
+/* En dessous, la rangée ne tient plus d'un trait : deux colonnes, le libellé
+   en tête, et « à » masqué (les deux heures se suivent, la préposition n'a
+   plus de sens sur deux lignes). */
+@media (max-width: 720px) {
     .seance-horaire-ligne {
         grid-template-columns: 1fr 1fr;
         gap: 8px;
     }
 
     .seance-horaire-ligne label {
+        grid-column: 1 / -1;
+    }
+
+    .seance-horaire-ligne > span {
+        display: none;
+    }
+
+    .seance-horaire-ligne select,
+    .seance-horaire-ligne input[type="text"] {
         grid-column: 1 / -1;
     }
 }

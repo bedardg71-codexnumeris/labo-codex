@@ -842,7 +842,7 @@ function mettreAJourSeancesHoraireV2() {
                 <input type="time" id="v2-hor-seance-${i}-debut" class="controle-form" value="08:00">
                 <span>à</span>
                 <input type="time" id="v2-hor-seance-${i}-fin" class="controle-form" value="10:00">
-                <input type="text" id="v2-hor-seance-${i}-local" class="controle-form" placeholder="Local" style="width: 80px;">
+                <input type="text" id="v2-hor-seance-${i}-local" class="controle-form" placeholder="Local">
             </div>
         `;
     }
