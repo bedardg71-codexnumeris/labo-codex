@@ -313,10 +313,35 @@ async function ajouterProductionIndividuelle(id) {
             await db.set(cleProductions, productions);
         }
 
+        // ⚠ NE PAS ANNONCER UN SUCCÈS SANS L'AVOIR VÉRIFIÉ.
+        //
+        // `db.set` peut REFUSER l'écriture sans que l'appelant l'apprenne : la
+        // garde #340 (js/productions-namespace-garde.js) bloque un tableau de
+        // productions jugé étranger au trimestre visé, journalise
+        // « [DB][GARDE #340] Écriture BLOQUÉE » — et `set` fait alors un simple
+        // `return;`. La valeur de retour ne distingue donc pas le refus du
+        // succès. Jusqu'ici on affichait « ajoutée à ton cours ! » dans les deux
+        // cas : l'utilisateur voyait un succès, et rien n'arrivait.
+        //
+        // On relit donc la collection et on cherche la production. C'est la
+        // seule preuve qui vaille.
+        const verification = await db.get(cleProductions) || [];
+        const bienEcrite = verification.some(p => p.id === prod.id);
+
         // Rafraîchir modal et sidebar
         fermerModalBibliothequeProductions();
         await afficherListeProductions();
         await afficherBibliothequeProductions();
+
+        if (!bienEcrite) {
+            console.error('[productions] Écriture non confirmée sur', cleProductions,
+                '— production', prod.id, 'absente après db.set.');
+            notifications.erreur(
+                `"${prod.titre}" n'a PAS pu être ajoutée.`,
+                'L\'enregistrement a été refusé. Ouvre la console : une ligne « [DB][GARDE #340] Écriture BLOQUÉE » en donne la raison.'
+            );
+            return;
+        }
 
         notifications.succes(`"${prod.titre}" ajoutée à ton cours !`);
     } catch (error) {

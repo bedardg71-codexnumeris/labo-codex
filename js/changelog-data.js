@@ -25,6 +25,7 @@
             couleur: 'bleu',
             titre: 'La grille des présences ajustée, et des boutons qui tiennent parole',
             items: [
+                'Un ajout de production refusé par la protection anti-mélange de trimestres ne s’annonce plus comme un succès : l’app dit clairement que l’enregistrement n’a pas eu lieu, au lieu d’afficher « ajoutée à ton cours » sans rien enregistrer.',
                 'Bibliothèque de productions : « Ajouter à ma sélection » a enfin un effet visible — la production quitte la liste des disponibles dès qu’elle est ajoutée, et le bouton ne peut plus être recliqué pour en empiler un second exemplaire sans le dire.',
                 'Dans Suivi › Saisie des présences, « Grille imprimable » s’appelle maintenant « Rapport », et son bouton est passé dans la barre d’actions, juste à gauche d’« Enregistrer ».',
                 'Les séances d’un horaire tiennent enfin sur une seule ligne : les heures ont la place de s’afficher en entier et le local ne bascule plus à la ligne suivante.',
