@@ -2573,7 +2573,7 @@ function genererCheckboxesCategorie(productions, categorie) {
             <label style="display: flex; align-items: center; gap: 10px; padding: 8px 12px;
                          border-bottom: 1px solid var(--gris-tres-clair); cursor: ${estDansAutre ? 'not-allowed' : 'pointer'};
                          opacity: ${opacite}; transition: background 0.15s;"
-                   class="hover-fond-subtil"
+                   class="hover-fond-subtil">
                 <input type="checkbox" ${checked}
                        data-on-change="toggleProductionCategorieHandler" data-prod-id="${prod.id}" data-categorie="${categorie}"
                        style="width: 16px; height: 16px; accent-color: ${colorCategorie};"
@@ -2738,6 +2738,11 @@ function confirmerEtFermerImportPratiques() {
 // Module principal
 window.initialiserModulePratiquesMateriel = initialiserModulePratiquesMateriel;
 window.afficherListePratiquesMateriel = afficherListePratiquesMateriel;
+// 🆕 #466/CO-16 (21 août 2026) : appelé par changerTrimestreActifV2 (même patron
+// que grilles/échelles) — le pointeur d'édition ne survit pas à la bascule
+// (l'auto-save avalait ses échecs en console.warn : modifications perdues).
+function reinitialiserEditeurPratiquesApresBascule() { pratiqueEnEditionMateriel = null; }
+window.reinitialiserEditeurPratiquesApresBascule = reinitialiserEditeurPratiquesApresBascule;
 window.afficherBibliothequePratiques = afficherBibliothequePratiques;
 window.fermerModalBibliothequePratiques = fermerModalBibliothequePratiques;
 window.ouvrirExplorationMaquettes = ouvrirExplorationMaquettes;
@@ -2836,6 +2841,9 @@ window.modifierTypeTravailMatHandler = modifierTypeTravailMatHandler;
 window.modifierForfaitMatHandler = modifierForfaitMatHandler;
 window.modifierTravailForfaitMatHandler = modifierTravailForfaitMatHandler;
 window.toggleProductionCategorieHandler = toggleProductionCategorieHandler;
+// #468/CO-18 : exporté pour la sentinelle de rendu (le HTML des cases du mode
+// hybride est vérifié hors navigateur — une balise laissée béante y est fatale).
+window.genererCheckboxesCategorie = genererCheckboxesCategorie;
 window.ouvrirFilePickerImportPratiques = ouvrirFilePickerImportPratiques;
 window.fermerModalImportPratiques = fermerModalImportPratiques;
 window.confirmerEtFermerImportPratiques = confirmerEtFermerImportPratiques;

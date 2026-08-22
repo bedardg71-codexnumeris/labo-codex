@@ -1,0 +1,295 @@
+<meta charset="utf-8">
+<title>Porte terrain · bascule 1.91</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@600;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    --papier: #f5f7f9; --carte: #ffffff; --encre: #1d2b38; --encre-douce: #5b6b7a;
+    --ligne: #dbe3e9; --accent: #0e6e6e; --accent-fond: #e3f0ef;
+    --danger: #b3382f; --danger-fond: #f9e8e6; --ok: #2e7d4f; --ok-fond: #e6f2ea;
+    --avert: #b4560a; --avert-fond: #f9ede2;
+    --champ: #fbfcfd; --ombre: 0 1px 3px rgba(29, 43, 56, .08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --papier: #131a21; --carte: #1a232c; --encre: #e6edf3; --encre-douce: #93a4b3;
+      --ligne: #2a3641; --accent: #4cc4c0; --accent-fond: #12312f;
+      --danger: #e0685e; --danger-fond: #351512; --ok: #5fbf8a; --ok-fond: #12291b;
+      --avert: #e8925a; --avert-fond: #33220f;
+      --champ: #141d25; --ombre: 0 1px 3px rgba(0, 0, 0, .4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --papier: #131a21; --carte: #1a232c; --encre: #e6edf3; --encre-douce: #93a4b3;
+    --ligne: #2a3641; --accent: #4cc4c0; --accent-fond: #12312f;
+    --danger: #e0685e; --danger-fond: #351512; --ok: #5fbf8a; --ok-fond: #12291b;
+    --avert: #e8925a; --avert-fond: #33220f;
+    --champ: #141d25; --ombre: 0 1px 3px rgba(0, 0, 0, .4);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--papier); color: var(--encre);
+    font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif; font-size: 16px; line-height: 1.55; }
+  .cadre { max-width: 880px; margin: 0 auto; padding: 0 20px 80px; }
+  h1, h2 { font-family: "Bitter", Georgia, serif; text-wrap: balance; }
+  h1 { font-size: 1.6rem; margin: 26px 0 4px; }
+  h2 { font-size: 1.2rem; margin: 38px 0 6px; padding-top: 16px; border-top: 3px solid var(--encre); }
+  .sous-titre, .contexte { color: var(--encre-douce); }
+  .contexte { font-size: .95rem; max-width: 68ch; }
+  .mono, #compteur, .num { font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+
+  .barre { position: sticky; top: 0; z-index: 10; background: var(--papier); border-bottom: 1px solid var(--ligne);
+    padding: 10px 0; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  #compteur { font-size: .92rem; font-weight: 600; }
+  #compteur .ok-n { color: var(--ok); } #compteur .ko-n { color: var(--danger); }
+  .btn-export { font: inherit; font-size: .9rem; font-weight: 600; margin-left: auto; padding: 7px 16px;
+    border-radius: 8px; border: none; cursor: pointer; background: var(--accent); color: var(--papier); }
+  .btn-export:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #zone-export { display: none; margin: 14px 0; }
+  #zone-export.visible { display: block; }
+  #texte-export { width: 100%; height: 240px; font-family: "IBM Plex Mono", monospace; font-size: .78rem;
+    background: var(--champ); color: var(--encre); border: 1px solid var(--accent); border-radius: 8px; padding: 10px; }
+  .msg-export { font-size: .9rem; color: var(--ok); font-weight: 600; }
+
+  .porte { background: var(--carte); border: 1px solid var(--ligne); border-left: 5px solid var(--encre-douce);
+    border-radius: 10px; box-shadow: var(--ombre); padding: 14px 16px; margin: 12px 0; }
+  .porte[data-tag="donnees"] { border-left-color: var(--danger); }
+  .porte[data-tag="console"] { border-left-color: var(--avert); }
+  .porte.v { border-left-color: var(--ok); } .porte.x { border-left-color: var(--danger); background: var(--danger-fond); }
+  .porte-tete { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .num { font-size: .82rem; font-weight: 600; color: var(--encre-douce); }
+  .porte-titre { font-weight: 700; }
+  .tags { margin-left: auto; display: flex; gap: 6px; }
+  .tag { font-size: .72rem; font-weight: 700; letter-spacing: .04em; border-radius: 5px; padding: 2px 7px; }
+  .tag-donnees { background: var(--danger-fond); color: var(--danger); }
+  .tag-console { background: var(--avert-fond); color: var(--avert); }
+  .tag-safari { background: var(--accent-fond); color: var(--accent); }
+  .geste { margin: 8px 0 4px; max-width: 70ch; }
+  .attendu { color: var(--encre-douce); font-size: .93rem; max-width: 70ch; }
+  .attendu b { color: var(--encre); }
+  .controles { display: flex; gap: 8px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+  .bascule { display: inline-flex; border: 1.5px solid var(--ligne); border-radius: 8px; overflow: hidden; }
+  .bascule button { font: inherit; font-size: .95rem; font-weight: 700; padding: 5px 16px; border: none;
+    background: var(--champ); color: var(--encre-douce); cursor: pointer; }
+  .bascule button[aria-pressed="true"].b-v { background: var(--ok); color: #fff; }
+  .bascule button[aria-pressed="true"].b-x { background: var(--danger); color: #fff; }
+  .bascule button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .mesure { flex: 1; min-width: 240px; }
+  .mesure textarea, .mesure input { width: 100%; font: inherit; font-size: .9rem; color: var(--encre);
+    background: var(--champ); border: 1px solid var(--ligne); border-radius: 8px; padding: 7px 10px; }
+  .mesure textarea { min-height: 36px; resize: vertical; }
+  .mesure textarea:focus-visible, .mesure input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .encart { background: var(--avert-fond); border: 1px solid var(--avert); border-radius: 10px;
+    padding: 12px 16px; margin: 14px 0; font-size: .95rem; max-width: 74ch; }
+  details ul { margin: 6px 0; padding-left: 20px; color: var(--encre-douce); font-size: .93rem; }
+  summary { cursor: pointer; color: var(--accent); font-weight: 600; font-size: .92rem; }
+</style>
+
+<div class="cadre">
+  <h1>Porte terrain · bascule de trimestre (1.91.1)</h1>
+  <p class="sous-titre">Lot #466 du triage des audits — le scénario d'une rentrée, en 7 gestes</p>
+  <p class="contexte">Pas de migration de données dans ce lot. Chaque porte : un geste, son
+  attendu, une bascule ✓/✗ — et un champ quand un texte doit revenir. Termine par
+  <b>« Copier mes résultats »</b>.</p>
+
+  <div class="barre">
+    <span id="compteur" role="status"></span>
+    <button type="button" class="btn-export" id="btn-export">Copier mes résultats</button>
+  </div>
+  <div id="zone-export"><p class="msg-export" id="msg-export"></p>
+    <textarea id="texte-export" readonly aria-label="Relevé"></textarea></div>
+
+  <h2>§0 · Préalable</h2>
+  <div class="encart"><span class="mono">git pull</span>, puis <b>vérifier « 1.91.1 » en bas
+  de page</b> après rechargement — un build en retard produit des faux rouges indétectables.</div>
+
+  <h2>§2 · Interface</h2>
+
+  <div class="porte" data-id="2.1">
+    <div class="porte-tete"><span class="num">2.1</span>
+      <span class="porte-titre">Créer un trimestre de TEST avec activation immédiate</span></div>
+    <p class="geste">« + Nouveau trimestre », répondre OUI à « l'activer immédiatement ».</p>
+    <p class="attendu">⮕ Attendu : l'en-tête ne propose PLUS le groupe-cours de ton vrai
+    trimestre ; le formulaire d'assemblage n'offre plus les horaires de l'ancien ; l'écran
+    Trimestre montre le nouveau partout. <b>Avant, le contexte de l'ancien survivait.</b></p>
+    <div class="controles">
+      <span class="bascule"><button type="button" class="b-v">✓</button><button type="button" class="b-x">✗</button></span>
+      <span class="mesure"><textarea data-mesure="2.1" placeholder="Note (facultatif)"></textarea></span>
+    </div>
+  </div>
+
+  <div class="porte" data-id="2.2">
+    <div class="porte-tete"><span class="num">2.2</span>
+      <span class="porte-titre">Revenir à ton vrai trimestre : le groupe actif revient</span></div>
+    <p class="geste">Re-basculer par le sélecteur de trimestre, puis supprimer le trimestre de test.</p>
+    <p class="attendu">⮕ Attendu : ton groupe-cours actif est restauré partout (en-tête, carte
+    résumé) — pas de « Aucun groupe-cours sélectionné ».</p>
+    <div class="controles">
+      <span class="bascule"><button type="button" class="b-v">✓</button><button type="button" class="b-x">✗</button></span>
+      <span class="mesure"><textarea data-mesure="2.2" placeholder="Note (facultatif)"></textarea></span>
+    </div>
+  </div>
+
+  <div class="porte" data-id="2.3">
+    <div class="porte-tete"><span class="num">2.3</span>
+      <span class="porte-titre">Journée sans cours à cheval sur une bascule</span></div>
+    <p class="geste">Ouvrir une « journée sans cours » en Modifier, puis basculer de trimestre
+    SANS enregistrer.</p>
+    <p class="attendu">⮕ Attendu : le formulaire se referme tout seul à la bascule.
+    <b>Avant : « Journée modifiée » ensuite, sans rien écrire nulle part.</b></p>
+    <div class="controles">
+      <span class="bascule"><button type="button" class="b-v">✓</button><button type="button" class="b-x">✗</button></span>
+      <span class="mesure"><textarea data-mesure="2.3" placeholder="Note (facultatif)"></textarea></span>
+    </div>
+  </div>
+
+  <div class="porte" data-id="2.4">
+    <div class="porte-tete"><span class="num">2.4</span>
+      <span class="porte-titre">Grille à cheval : plus jamais de faux succès</span></div>
+    <p class="geste">Ouvrir une grille en édition, basculer de trimestre, puis « Enregistrer ».</p>
+    <p class="attendu">⮕ Attendu : SOIT une nouvelle grille est créée dans le trimestre courant
+    (copie locale, aucune perte), SOIT un message « n'appartient pas au trimestre actif ».
+    <b>Ce qui ne doit PLUS arriver : « sauvegardée ! » sans aucune écriture.</b></p>
+    <div class="controles">
+      <span class="bascule"><button type="button" class="b-v">✓</button><button type="button" class="b-x">✗</button></span>
+      <span class="mesure"><textarea data-mesure="2.4" placeholder="Ce qui s'est affiché"></textarea></span>
+    </div>
+  </div>
+
+  <div class="porte" data-id="2.5">
+    <div class="porte-tete"><span class="num">2.5</span>
+      <span class="porte-titre">Changer le type d'un critère de grille</span></div>
+    <p class="geste">Dans l'éditeur de grille, changer le type d'un critère (ex. holistique →
+    algorithmique).</p>
+    <p class="attendu">⮕ Attendu : la liste des critères reste affichée.
+    <b>Avant : « Aucun critère défini » jusqu'au rechargement.</b></p>
+    <div class="controles">
+      <span class="bascule"><button type="button" class="b-v">✓</button><button type="button" class="b-x">✗</button></span>
+      <span class="mesure"><textarea data-mesure="2.5" placeholder="Note (facultatif)"></textarea></span>
+    </div>
+  </div>
+
+  <div class="porte" data-id="2.6" data-tag="console">
+    <div class="porte-tete"><span class="num">2.6</span>
+      <span class="porte-titre">Console pendant ces gestes</span>
+      <span class="tags"><span class="tag tag-console">Console</span></span></div>
+    <p class="geste">Garder la console ouverte pendant 2.1 à 2.5.</p>
+    <p class="attendu">⮕ Attendu : rien de rouge, et aucune nouvelle ligne « clé ABSENTE des
+    registres ». Toute ligne inattendue est une mesure, pas un échec.</p>
+    <div class="controles">
+      <span class="bascule"><button type="button" class="b-v">✓</button><button type="button" class="b-x">✗</button></span>
+      <span class="mesure"><textarea data-mesure="2.6" placeholder="Coller toute ligne inattendue (ou « rien »)"></textarea></span>
+    </div>
+  </div>
+
+  <div class="porte" data-id="2.7">
+    <div class="porte-tete"><span class="num">2.7</span>
+      <span class="porte-titre">iPad, léger : la bascule au doigt</span>
+      <span class="tags"><span class="tag tag-safari">iPad</span></span></div>
+    <p class="geste">Quand l'iPad sera ouvert : refaire 2.1-2.2 au doigt.</p>
+    <p class="attendu">⮕ Attendu : le sélecteur d'en-tête et la carte suivent pareil.</p>
+    <div class="controles">
+      <span class="bascule"><button type="button" class="b-v">✓</button><button type="button" class="b-x">✗</button></span>
+      <span class="mesure"><textarea data-mesure="2.7" placeholder="Note (facultatif)"></textarea></span>
+    </div>
+  </div>
+
+  <h2>§4 · Ce que la session n'a pas pu vérifier</h2>
+  <details open><summary>Angles morts déclarés</summary><ul>
+    <li>Le croisement de cartouches (CO-20) est fermé au code et par sentinelle, mais le geste
+    réel (« créer une NOUVELLE cartouche après en avoir ouvert une autre, puis sauvegarder »)
+    n'a pas été rejoué à l'écran — à faire au passage si tu es dans Rétroactions.</li>
+    <li>Le rafraîchissement des vues à la bascule était MORT depuis des mois et revit : si un
+    écran fait quelque chose d'inhabituel JUSTE après une bascule, le dire.</li>
+    <li>Safari/iPad : rien d'éprouvé en session (porte 2.7).</li>
+  </ul></details>
+
+  <p class="contexte" style="margin-top: 24px;">Au retour : chaque ✗ devient un item de backlog
+  avec son numéro de porte. Trace versionnée :
+  <span class="mono">plans de travail/PORTES-TERRAIN-2026-08-21-466-bascule.md</span>.</p>
+</div>
+<script>
+(function () {
+  'use strict';
+  var CLE = 'porte-466-2026-08-21';
+  var etat = {};
+  try { etat = JSON.parse(localStorage.getItem(CLE) || '{}'); } catch (e) { etat = {}; }
+  var portes = Array.prototype.slice.call(document.querySelectorAll('.porte[data-id]'));
+  function sauver() { try { localStorage.setItem(CLE, JSON.stringify(etat)); } catch (e) {} }
+
+  function majPorte(p) {
+    var id = p.getAttribute('data-id');
+    var v = (etat[id] || {}).verdict;
+    p.classList.toggle('v', v === 'v');
+    p.classList.toggle('x', v === 'x');
+    var bs = p.querySelectorAll('.bascule button');
+    bs[0].setAttribute('aria-pressed', v === 'v' ? 'true' : 'false');
+    bs[1].setAttribute('aria-pressed', v === 'x' ? 'true' : 'false');
+  }
+  function majCompteur() {
+    var ok = 0, ko = 0;
+    portes.forEach(function (p) { var v = (etat[p.getAttribute('data-id')] || {}).verdict;
+      if (v === 'v') ok++; else if (v === 'x') ko++; });
+    document.getElementById('compteur').innerHTML =
+      '<span class="ok-n">' + ok + ' passée' + (ok > 1 ? 's' : '') + '</span> · ' +
+      '<span class="ko-n">' + ko + ' échec' + (ko > 1 ? 's' : '') + '</span> · ' +
+      (portes.length - ok - ko) + ' non traitée' + (portes.length - ok - ko > 1 ? 's' : '');
+  }
+
+  portes.forEach(function (p) {
+    var id = p.getAttribute('data-id');
+    var bs = p.querySelectorAll('.bascule button');
+    bs[0].addEventListener('click', function () {
+      etat[id] = etat[id] || {};
+      etat[id].verdict = etat[id].verdict === 'v' ? null : 'v';
+      sauver(); majPorte(p); majCompteur();
+    });
+    bs[1].addEventListener('click', function () {
+      etat[id] = etat[id] || {};
+      etat[id].verdict = etat[id].verdict === 'x' ? null : 'x';
+      sauver(); majPorte(p); majCompteur();
+    });
+    var champ = p.querySelector('[data-mesure]');
+    if (champ) {
+      var memo = etat[id] || {};
+      if (memo.mesure) champ.value = memo.mesure;
+      champ.addEventListener('input', function () {
+        etat[id] = etat[id] || {};
+        etat[id].mesure = champ.value;
+        sauver();
+      });
+    }
+    majPorte(p);
+  });
+  majCompteur();
+
+  document.getElementById('btn-export').addEventListener('click', function () {
+    var ok = 0, ko = 0, nt = 0;
+    var lignes = ['=== PORTE TERRAIN #466 · bascule de trimestre (1.91.1) — relevé ==='];
+    var sections = { '2': '§2 Interface' };
+    var derniere = '';
+    portes.forEach(function (p) {
+      var id = p.getAttribute('data-id');
+      var sec = sections[id.charAt(0)] || '';
+      if (sec !== derniere) { lignes.push(''); lignes.push('--- ' + sec + ' ---'); derniere = sec; }
+      var e = etat[id] || {};
+      var marque = e.verdict === 'v' ? '[v]' : (e.verdict === 'x' ? '[X]' : '[ ]');
+      if (e.verdict === 'v') ok++; else if (e.verdict === 'x') ko++; else nt++;
+      lignes.push(marque + ' ' + id + ' — ' + p.querySelector('.porte-titre').textContent.trim());
+      var mesure = (p.querySelector('[data-mesure]') || {}).value || '';
+      if (mesure.trim()) lignes.push('      mesure : ' + mesure.trim().replace(/\n/g, ' / '));
+    });
+    lignes.splice(1, 0, ok + ' passées · ' + ko + ' échec(s) · ' + nt + ' non traitée(s)');
+    var texte = lignes.join('\n');
+    var zone = document.getElementById('zone-export'), ta = document.getElementById('texte-export'),
+        msg = document.getElementById('msg-export');
+    zone.classList.add('visible'); ta.value = texte; ta.focus(); ta.select();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(texte).then(function () {
+        msg.textContent = 'Copié — colle le relevé dans la conversation. (Le texte reste ci-dessous au besoin.)';
+      }, function () {
+        msg.textContent = 'Presse-papiers refusé : le texte est sélectionné ci-dessous — Cmd+C.';
+      });
+    } else { msg.textContent = 'Le texte est sélectionné ci-dessous — Cmd+C.'; }
+  });
+}());
+</script>
