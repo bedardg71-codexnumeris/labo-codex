@@ -25,6 +25,7 @@
             couleur: 'bleu',
             titre: 'La grille des présences ajustée, et des boutons qui tiennent parole',
             items: [
+                'La durée d’une période est maintenant de 50 minutes par défaut, et ce réglage atteint enfin tous les calculs : le nombre de périodes affiché pour une séance et le total hebdomadaire suivent la durée que tu as choisie, au lieu de rester figés sur 55 minutes.',
                 'Deux groupes qui ont cours le même jour à des heures différentes gardent désormais leurs deux séances : la seconde n’est plus perdue au passage, ni pour le calendrier ni pour la saisie des présences.',
                 'Un horaire que tu viens de créer peut être supprimé tout de suite : le bouton Supprimer apparaît dès l’enregistrement, sans devoir passer par un autre horaire et revenir.',
                 'Les noms venus d’un import (horaires, profils d’enseignant·e, locaux de séance) s’affichent toujours tels que tu les as écrits, même s’ils contiennent des caractères spéciaux.',

@@ -8895,7 +8895,7 @@ function obtenirLeconsDeSequence(seq) {
 // source unique obtenirDureePeriode(), jamais de valeur en dur.
 
 function dureePeriodeMinutes() {
-    return (typeof obtenirDureePeriode === 'function' && obtenirDureePeriode()) || 55;
+    return (typeof obtenirDureePeriode === 'function' && obtenirDureePeriode()) || (window.DUREE_PERIODE_DEFAUT || 50);
 }
 
 // Somme des durées (metadata.duree) des descendants non-conteneurs.

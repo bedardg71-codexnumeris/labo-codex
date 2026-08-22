@@ -301,8 +301,25 @@ function calculerHeureFin(debut, duree) {
  * migration paresseuse ici.
  * @returns {number} Durée en minutes (défaut: 55)
  */
+/**
+ * Duree d'une periode d'enseignement, en minutes, quand le trimestre courant
+ * n'en declare aucune.
+ *
+ * SOURCE UNIQUE du defaut. Il vivait auparavant en litteral `55` dans quatorze
+ * sites de calcul et une option `selected` d'index.html : le meme defaut ecrit
+ * quinze fois, donc quinze occasions de diverger.
+ *
+ * Porte a 50 le 22 aout 2026, a la demande de Gregoire (ses periodes durent
+ * 50 minutes). Le repli ne s'applique QU'A defaut de valeur enregistree : un
+ * trimestre qui declare la sienne n'est pas touche.
+ *
+ * ⚠ NE PAS confondre avec les `55` de la notation (plafondVerrou,
+ * grande_difficulte, seuils d'echelle) : ce sont des NOTES, pas des minutes.
+ */
+const DUREE_PERIODE_DEFAUT = 50;
+
 function obtenirDureePeriode() {
-    return db.getSync(cle('dureePeriode'), null) || 55;
+    return db.getSync(cle('dureePeriode'), null) || DUREE_PERIODE_DEFAUT;
 }
 
 /**
@@ -310,7 +327,7 @@ function obtenirDureePeriode() {
  * @param {number} minutes - Durée en minutes (50, 55, 60...)
  */
 function definirDureePeriode(minutes) {
-    db.setSync(cle('dureePeriode'), parseInt(minutes) || 55);
+    db.setSync(cle('dureePeriode'), parseInt(minutes) || DUREE_PERIODE_DEFAUT);
 }
 
 /**
@@ -1525,6 +1542,7 @@ window.obtenirSeancesHoraire = obtenirSeancesHoraire;
 window.calculerHeureFin = calculerHeureFin;
 
 // 🆕 BETA 95.1 : Gestion des périodes
+window.DUREE_PERIODE_DEFAUT = DUREE_PERIODE_DEFAUT;
 window.obtenirDureePeriode = obtenirDureePeriode;
 window.definirDureePeriode = definirDureePeriode;
 window.periodesVersHeures = periodesVersHeures;

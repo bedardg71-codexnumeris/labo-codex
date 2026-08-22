@@ -85,7 +85,7 @@ const NOTATIONS_VALIDES = ['crochet', 'x', 'presence', 'absence'];
  */
 function construireModeleRapportPresences(etudiants, seancesParDate, presences, options) {
     const coursId = options && options.coursId ? options.coursId : null;
-    const dureePeriode = options && options.dureePeriode > 0 ? options.dureePeriode : 55;
+    const dureePeriode = options && options.dureePeriode > 0 ? options.dureePeriode : (window.DUREE_PERIODE_DEFAUT || 50);
 
     // --- Colonnes : une par date de séance réelle, triées ---
     const dates = Object.keys(seancesParDate || {})
@@ -568,7 +568,7 @@ function genererRapportPresencesPDF() {
         ? window.ExportPDF.infosCours() : { sigleTitre: '' };
     const nomTrimestre = window.ExportPDF && typeof window.ExportPDF.nomTrimestre === 'function'
         ? window.ExportPDF.nomTrimestre() : '';
-    const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
+    const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : (window.DUREE_PERIODE_DEFAUT || 50);
     const presences = (typeof obtenirDonneesSelonMode === 'function'
         ? obtenirDonneesSelonMode('presences')
         : db.getSync(cle('presences'), [])) || [];
