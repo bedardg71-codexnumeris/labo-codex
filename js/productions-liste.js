@@ -253,6 +253,13 @@ function creerNouvelleProduction() {
     const inputDateEcheance = document.getElementById('productionDateEcheance');
     if (inputDateEcheance) inputDateEcheance.value = '';
 
+    // #468/CO-17 (21 août 2026) : remettre à neuf le bloc des échéances PAR GROUPE.
+    // Cette fonction vide le formulaire champ par champ et ne passait PAS par
+    // reinitialiserFormulaireProduction (productions.js) : le conteneur
+    // multi-groupes gardait donc les cases cochées et les dates de la production
+    // précédemment ouverte, et la NOUVELLE production en héritait en silence.
+    if (typeof peuplerEcheancesParGroupe === 'function') peuplerEcheancesParGroupe(null);
+
     // Réinitialiser le contexte facultatif
     const productionContexte = document.getElementById('productionContexte');
     if (productionContexte) productionContexte.value = '';

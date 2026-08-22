@@ -895,7 +895,10 @@ async function supprimerEchelle(echelleId) {
     // ✅ AJOUT (8 décembre 2025) : Rafraîchir la barre latérale
     await afficherListeEchelles();
 
-    afficherEchellesPerformance();
+    // #468/CO-05 (21 août 2026) : l'appel à afficherEchellesPerformance() est
+    // RETIRÉ — la fonction n'a jamais existé dans le dépôt. Il levait un
+    // ReferenceError juste AVANT la notification : l'échelle partait vraiment,
+    // sans que l'utilisateur en soit averti. Retrait, pas réanimation.
     notifications.succes('Échelle supprimée');
 }
 
@@ -2483,6 +2486,13 @@ async function supprimerEchelleDeBibliothequePartagee(id) {
 
     if (!confirm(`Supprimer définitivement «${echelle.nom || 'Sans titre'}» de la bibliothèque partagée ?\n\nCette action est irréversible.`)) return;
 
+    // #468/CO-25 (21 août 2026) : poser le tombstone AVANT le retrait. Sans lui,
+    // un gabarit fourni par défaut revenait au prochain chargement — la
+    // suppression semblait marcher, puis se défaisait toute seule.
+    if (window.IDS_GABARITS_HARDCODES && window.IDS_GABARITS_HARDCODES.includes(id)) {
+        window.marquerRessourceSupprimee(id);
+    }
+
     await retirerEchelleDeLaBibliotheque(id);
 
     fermerModalBibliothequeEchelles();
@@ -3344,8 +3354,10 @@ async function ajouterNiveauEchelle(echelleId) {
     // Réafficher la liste des niveaux
     afficherNiveauxEchelle(echelleTemplateActuelle);
 
-    // Mettre à jour les métriques et la sidebar
-    document.getElementById('nbNiveauxEchelle').textContent = echelleTemplateActuelle.niveaux.length;
+    // Mettre à jour la sidebar.
+    // #468/CO-05 (21 août 2026) : l'écriture dans #nbNiveauxEchelle est RETIRÉE —
+    // l'élément n'existe nulle part dans index.html, si bien que chaque ajout ou
+    // retrait de niveau levait un TypeError et n'allait jamais jusqu'au bout.
     await afficherListeEchelles();
 
     // Notification de succès
@@ -3389,8 +3401,10 @@ async function supprimerNiveauEchelle(echelleId, index) {
     // Réafficher la liste des niveaux
     afficherNiveauxEchelle(echelleTemplateActuelle);
 
-    // Mettre à jour les métriques et la sidebar
-    document.getElementById('nbNiveauxEchelle').textContent = echelleTemplateActuelle.niveaux.length;
+    // Mettre à jour la sidebar.
+    // #468/CO-05 (21 août 2026) : l'écriture dans #nbNiveauxEchelle est RETIRÉE —
+    // l'élément n'existe nulle part dans index.html, si bien que chaque ajout ou
+    // retrait de niveau levait un TypeError et n'allait jamais jusqu'au bout.
     await afficherListeEchelles();
 }
 

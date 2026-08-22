@@ -388,43 +388,12 @@
         // Ici on peut ajouter d'autres gabarits spécifiques si nécessaire
     ];
 
-    /**
-     * Gabarits de cartouches multi-pratiques
-     */
-    const GABARITS_CARTOUCHES_DEFAUT = [
-        {
-            id: 'GABARIT_CART_ANALYTIQUE',
-            nom: '[Multi] Rétroaction analytique',
-            type: 'analytique',
-            description: 'Gabarit multi-pratiques : Commentaires par critère et niveau de performance',
-            sections: [
-                { id: 'forces', titre: 'Forces', contenu: '' },
-                { id: 'ameliorations', titre: 'Points à améliorer', contenu: '' },
-                { id: 'conseils', titre: 'Conseils pour la suite', contenu: '' }
-            ],
-            estGabarit: true,
-            pratiques: ['all'],
-            dansBibliotheque: true,
-            dateCreation: '2026-01-02T00:00:00.000Z',
-            auteur: 'Labo Codex'
-        },
-        {
-            id: 'GABARIT_CART_SPE_REVISION',
-            nom: '[SPE] Feedback pour révision',
-            type: 'spe-revision',
-            description: 'Gabarit SPE : Commentaires pour guider la révision (Acceptable / Non acceptable)',
-            sections: [
-                { id: 'verdict', titre: 'Verdict', contenu: '' },
-                { id: 'specs_non_conformes', titre: 'Spécifications non conformes', contenu: '' },
-                { id: 'corrections', titre: 'Corrections requises', contenu: '' }
-            ],
-            estGabarit: true,
-            pratiques: ['SPE'],
-            dansBibliotheque: true,
-            dateCreation: '2026-01-02T00:00:00.000Z',
-            auteur: 'Labo Codex'
-        }
-    ];
+    // #468/CO-25 (21 août 2026) : les deux gabarits de cartouches par défaut
+    // (GABARIT_CART_ANALYTIQUE, GABARIT_CART_SPE_REVISION) sont RETIRÉS — verdict
+    // Grégoire du 21 août. Ils portaient un schéma `sections[]` sans `grilleId`
+    // ni `commentaires` : les ajouter affichait « 0 commentaire(s) » et menait
+    // à un cul-de-sac. Zéro-dette : on retire ce qui ne peut pas servir plutôt
+    // que d'inventer l'ancrage à une grille qu'ils n'ont jamais eu.
 
     // =========================================================================
     // FONCTIONS D'INITIALISATION DES GABARITS
@@ -446,6 +415,14 @@
 
         let modifie = false;
         gabaritsDefaut.forEach(gabarit => {
+            // #468/CO-25 (21 août 2026) : un gabarit que l'utilisateur a supprimé
+            // NE REVIENT PAS. Cette fonction tourne à chaque chargement : sans
+            // cette garde, la suppression ne tenait que jusqu'au rafraîchissement
+            // suivant — le geste marchait, et se défaisait tout seul.
+            if (typeof window !== 'undefined' && typeof window.estRessourceSupprimee === 'function'
+                && window.estRessourceSupprimee(gabarit.id)) {
+                return;
+            }
             const existe = bibliotheque.some(e => e.id === gabarit.id);
             if (!existe) {
                 bibliotheque.push(gabarit);
@@ -512,7 +489,6 @@
         ajouterGabaritsDefautSiManquants('bibliothequeEchelles', GABARITS_ECHELLES_DEFAUT);
         ajouterGabaritsDefautSiManquants('bibliothequeGrilles', GABARITS_GRILLES_DEFAUT);
         ajouterGabaritsDefautSiManquants('bibliothequeProductions', GABARITS_PRODUCTIONS_DEFAUT);
-        ajouterGabaritsDefautSiManquants('bibliothequeCartouches', GABARITS_CARTOUCHES_DEFAUT);
 
     }
 
@@ -528,7 +504,6 @@
         GABARITS_ECHELLES_DEFAUT,
         GABARITS_GRILLES_DEFAUT,
         GABARITS_PRODUCTIONS_DEFAUT,
-        GABARITS_CARTOUCHES_DEFAUT,
 
         // Fonctions de détection
         estUnGabarit,
