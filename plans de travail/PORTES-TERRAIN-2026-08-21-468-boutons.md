@@ -18,7 +18,10 @@
 
 ## §0 · Préalable
 
-- [ ] 0.1 `git pull`, puis **vérifier « 1.91.2 » en bas de page** après rechargement.
+- [ ] 0.1 `git pull`, puis **vérifier « 1.91.2 ou plus récent » en bas de page** après
+      rechargement. `main` est passé à 1.91.8 depuis la livraison de ce lot : un numéro
+      supérieur est NORMAL et ne doit pas se cocher comme un échec. Ce qui compte est
+      que l'app soit à jour, pas qu'elle affiche exactement 1.91.2.
 
 ## §2 · Interface — les six gestes qui mentaient
 
