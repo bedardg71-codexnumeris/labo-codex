@@ -43,34 +43,6 @@ let enChargementFormulaire = false;
    =============================== */
 
 /**
- * Détecter les doublons potentiels dans les pratiques
- * @param {Array} pratiquesLocales - Pratiques de l'utilisateur
- * @param {Array} pratiquesBibliotheque - Pratiques de la bibliothèque partagée
- * @returns {Array} Liste des doublons {nom, count, ids}
- */
-function detecterDoublonsPratiques(pratiquesLocales, pratiquesBibliotheque) {
-    const parId = new Map();
-    [...pratiquesLocales, ...pratiquesBibliotheque].forEach(pratique => {
-        if (pratique && pratique.id && !parId.has(pratique.id)) {
-            parId.set(pratique.id, pratique);
-        }
-    });
-
-    const parNom = {};
-    parId.forEach(pratique => {
-        const nom = (pratique.nom || '').trim().toLowerCase();
-        if (!nom) return;
-        if (!parNom[nom]) {
-            parNom[nom] = { nom: pratique.nom, count: 0, ids: [] };
-        }
-        parNom[nom].count++;
-        parNom[nom].ids.push(pratique.id);
-    });
-
-    return Object.values(parNom).filter(d => d.count > 1);
-}
-
-/**
  * Générer un badge de source pour une pratique
  * @param {Object} pratique - La pratique
  * @param {Array} pratiquesLocales - Pratiques locales pour vérifier la source
@@ -362,7 +334,9 @@ async function afficherBibliothequePratiques() {
     }
     pratiquesDisponibles = BibliothequeUI.filtrerParMaquette(BibliothequeUI.filtrerParModeDemo(pratiquesDisponibles));
 
-    const doublonsDetectes = detecterDoublonsPratiques(pratiquesDansBibliotheque, pratiquesDisponibles);
+    // #291 — réunion des deux magasins avant analyse (cf. grilles.js).
+    const doublonsDetectes = analyserDoublons(
+        reunirSources(pratiquesDansBibliotheque, pratiquesDisponibles), 'nom');
 
     // Section 1 : pratiques dans la sélection
     let contenuSection1 = '';
@@ -373,6 +347,7 @@ async function afficherBibliothequePratiques() {
             contenuSection1 += BibliothequeUI.renderCarteSelection({
                 nom: BibliothequeUI.formaterTitre(pratique.nom || 'Sans titre'),
                 id: pratique.id,
+                afficherId: true,
                 badgesPratiques: genererBadgeTypePratique(pratique),
                 badgeSource: genererBadgeSourcePratique(pratique, pratiquesDansBibliotheque),
                 metadonnees: BibliothequeUI.formaterMetadonnees(pratique, { discipline: true }),
@@ -496,6 +471,7 @@ async function afficherBibliothequePratiques() {
         return BibliothequeUI.renderCarteDisponible({
             nom: BibliothequeUI.formaterTitre(pratique.nom || 'Sans titre'),
             id: pratique.id,
+            afficherId: true,
             badgesPratiques: genererBadgeTypePratique(pratique),
             badgeSource: genererBadgeSourcePratique(pratique, pratiquesDansBibliotheque),
             metadonnees: BibliothequeUI.formaterMetadonnees(pratique, { discipline: true }),
@@ -548,7 +524,14 @@ async function afficherBibliothequePratiques() {
         titre: 'Bibliothèque de pratiques de notation',
         sousTitre: 'Gérez les pratiques affichées dans la barre latérale.',
         onFermer: 'fermerModalBibliothequePratiques',
-        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(doublonsDetectes),
+        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(doublonsDetectes, {
+            itemsSelection: pratiquesDansBibliotheque,
+            actions: {
+                retirer: 'retirerPratiqueDeBibliothequeMateriel',
+                supprimer: 'supprimerPratiqueDefinitivement',
+                supprimerPartagee: 'supprimerPratiqueDeBibliothequePartagee'
+            }
+        }),
         titreSection1: 'Pratiques dans la barre latérale',
         contenuIdListe1: 'listePratiquesDansBibliotheque',
         contenuSection1: contenuSection1,

@@ -68,34 +68,6 @@ let critereEnEdition = null;
    =============================== */
 
 /**
- * Détecter les doublons potentiels dans les grilles
- * @param {Array} grillesLocales - Grilles de l'utilisateur
- * @param {Array} grillesBibliotheque - Grilles de la bibliothèque partagée
- * @returns {Array} Liste des doublons {nom, count, ids}
- */
-function detecterDoublonsGrilles(grillesLocales, grillesBibliotheque) {
-    const parId = new Map();
-    [...grillesLocales, ...grillesBibliotheque].forEach(grille => {
-        if (grille && grille.id && !parId.has(grille.id)) {
-            parId.set(grille.id, grille);
-        }
-    });
-
-    const parNom = {};
-    parId.forEach(grille => {
-        const nom = (grille.nom || '').trim().toLowerCase();
-        if (!nom) return;
-        if (!parNom[nom]) {
-            parNom[nom] = { nom: grille.nom, count: 0, ids: [] };
-        }
-        parNom[nom].count++;
-        parNom[nom].ids.push(grille.id);
-    });
-
-    return Object.values(parNom).filter(d => d.count > 1);
-}
-
-/**
  * Générer un badge de source pour une grille
  * @param {Object} grille - La grille
  * @param {Array} grillesLocales - Grilles locales pour vérifier la source
@@ -2225,7 +2197,11 @@ async function preparerDonneesBibliothequeGrilles() {
     const grillesDisponibles = BibliothequeUI.filtrerParModeDemo(
         await obtenirToutesLesGrillesBibliotheque()
     );
-    const doublonsDetectes = detecterDoublonsGrilles(grillesDansBibliotheque, grillesDisponibles);
+    // #291 — `reunirSources` évite la fausse collision : la même grille vit
+    // légitimement dans la sélection ET dans la bibliothèque partagée, avec
+    // le même `id` (ajouterGrilleALaBibliotheque le conserve).
+    const doublonsDetectes = analyserDoublons(
+        reunirSources(grillesDansBibliotheque, grillesDisponibles), 'nom');
 
     // #327 — dossiers de classement (couche par-dessus, range par identité).
     const repsGrilles = (window.repertoiresBibliotheque && typeof window.repertoiresBibliotheque.obtenir === 'function')
@@ -2238,6 +2214,7 @@ async function preparerDonneesBibliothequeGrilles() {
     const cartesSection1 = grillesDansBibliotheque.map(grille => ({
         nom: BibliothequeUI.formaterTitreDemo(grille.nom || 'Sans titre', BibliothequeUI.estItemDemo(grille)),
         id: grille.id,
+        afficherId: true,
         badgeSource: BibliothequeUI.genererBadgeSource(grille, grillesDansBibliotheque),
         badgesPratiques: typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(grille) : '',
         metadonnees: BibliothequeUI.formaterMetadonnees(grille, {
@@ -2274,6 +2251,7 @@ async function preparerDonneesBibliothequeGrilles() {
         return {
             nom: BibliothequeUI.formaterTitreDemo(grille.nom || 'Sans titre', BibliothequeUI.estItemDemo(grille)),
             id: grille.id,
+            afficherId: true,
             badgeSource: BibliothequeUI.genererBadgeSource(grille, grillesDansBibliotheque),
             badgesPratiques: (typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(grille) : '') + genererBadgeGrilleDepistage(grille),
             metadonnees: BibliothequeUI.formaterMetadonnees(grille, {
@@ -2289,7 +2267,7 @@ async function preparerDonneesBibliothequeGrilles() {
         };
     });
 
-    return { cartesSection1, cartesSection2, doublonsDetectes, repsGrilles };
+    return { cartesSection1, cartesSection2, doublonsDetectes, repsGrilles, grillesDansBibliotheque };
 }
 
 async function afficherBibliothequeGrilles() {
@@ -2386,7 +2364,14 @@ async function afficherBibliothequeGrilles() {
         titre: 'Bibliothèque de grilles de critères',
         sousTitre: 'Gérez les grilles de critères affichées dans la barre latérale.',
         onFermer: 'fermerModalBibliothequeGrilles',
-        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes),
+        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes, {
+            itemsSelection: data.grillesDansBibliotheque,
+            actions: {
+                retirer: 'retirerGrilleDeBibliotheque',
+                supprimer: 'supprimerGrilleDefinitivement',
+                supprimerPartagee: 'supprimerGrilleDeBibliothequePartagee'
+            }
+        }),
         titreSection1: 'Grilles dans la barre latérale',
         contenuIdListe1: 'listeGrillesDansBibliotheque',
         contenuSection1: contenuSection1,

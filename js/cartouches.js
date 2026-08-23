@@ -80,34 +80,6 @@ async function obtenirCartouchesGrille(grilleId) {
    =============================== */
 
 /**
- * Détecter les doublons potentiels dans les cartouches
- * @param {Array} cartouchesLocales - Cartouches de l'utilisateur
- * @param {Array} cartouchesBibliotheque - Cartouches de la bibliothèque partagée
- * @returns {Array} Liste des doublons {nom, count, ids}
- */
-function detecterDoublonsCartouches(cartouchesLocales, cartouchesBibliotheque) {
-    const parId = new Map();
-    [...cartouchesLocales, ...cartouchesBibliotheque].forEach(cartouche => {
-        if (cartouche && cartouche.id && !parId.has(cartouche.id)) {
-            parId.set(cartouche.id, cartouche);
-        }
-    });
-
-    const parNom = {};
-    parId.forEach(cartouche => {
-        const nom = (cartouche.nom || '').trim().toLowerCase();
-        if (!nom) return;
-        if (!parNom[nom]) {
-            parNom[nom] = { nom: cartouche.nom, count: 0, ids: [] };
-        }
-        parNom[nom].count++;
-        parNom[nom].ids.push(cartouche.id);
-    });
-
-    return Object.values(parNom).filter(d => d.count > 1);
-}
-
-/**
  * Générer un badge de source pour une cartouche
  * @param {Object} cartouche - La cartouche
  * @param {Array} cartouchesLocales - Cartouches locales pour vérifier la source
@@ -3302,7 +3274,11 @@ async function preparerDonneesBibliothequeCartouches() {
     }
     cartouchesDisponibles = BibliothequeUI.filtrerParModeDemo(cartouchesDisponibles);
 
-    const doublonsDetectes = detecterDoublonsCartouches(cartouchesDansBibliotheque, cartouchesDisponibles);
+    // #291 — voir le commentaire de grilles.js : réunion des deux magasins
+    // avant analyse, sinon un même objet vu des deux côtés passerait pour
+    // une collision d'identifiant.
+    const doublonsDetectes = analyserDoublons(
+        reunirSources(cartouchesDansBibliotheque, cartouchesDisponibles), 'nom');
     const toutesLesGrilleNoms = [...cartouchesLocales, ...cartouchesDisponibles].map(c => c.grilleNom || 'Autre');
     const disciplines = [...new Set(toutesLesGrilleNoms)].sort();
 
@@ -3320,6 +3296,7 @@ async function preparerDonneesBibliothequeCartouches() {
             cartesSection1.push({
                 nom: BibliothequeUI.formaterTitreDemo(cartouche.nom || 'Sans titre', BibliothequeUI.estItemDemo(cartouche)),
                 id: cartouche.id,
+                afficherId: true,
                 badgeSource: BibliothequeUI.genererBadgeSource(cartouche, cartouchesDansBibliotheque),
                 metadonnees: BibliothequeUI.formaterMetadonnees(cartouche, {
                     quantite: `${Object.keys(cartouche.commentaires || {}).length} commentaire(s)`
@@ -3352,6 +3329,7 @@ async function preparerDonneesBibliothequeCartouches() {
             cartesSection2.push({
                 nom: BibliothequeUI.formaterTitreDemo(cartouche.nom || 'Sans titre', BibliothequeUI.estItemDemo(cartouche)),
                 id: cartouche.id,
+                afficherId: true,
                 badgeSource: BibliothequeUI.genererBadgeSource(cartouche, cartouchesDansBibliotheque),
                 metadonnees: BibliothequeUI.formaterMetadonnees(cartouche, {
                     quantite: `${Object.keys(cartouche.commentaires || {}).length} commentaire(s)`
@@ -3370,7 +3348,7 @@ async function preparerDonneesBibliothequeCartouches() {
         });
     });
 
-    return { cartesSection1, cartesSection2, doublonsDetectes, disciplines };
+    return { cartesSection1, cartesSection2, doublonsDetectes, disciplines, cartouchesDansBibliotheque };
 }
 
 async function afficherBibliothequeCartouches() {
@@ -3427,7 +3405,17 @@ async function afficherBibliothequeCartouches() {
         titre: 'Bibliothèque de cartouches de rétroaction',
         sousTitre: 'Gérez les cartouches de rétroaction affichées dans la barre latérale.',
         onFermer: 'fermerModalBibliothequeCartouches',
-        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes),
+        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes, {
+            itemsSelection: data.cartouchesDansBibliotheque,
+            actions: {
+                retirer: 'retirerCartoucheDeBibliotheque',
+                supprimer: 'supprimerCartoucheDefinitivement',
+                supprimerPartagee: 'supprimerCartoucheDeBibliothequePartagee',
+                // Ces deux actions prennent (id, grilleId) : le magasin des
+                // cartouches est `cartouches_<grilleId>`, pas une clé unique.
+                champParam2: 'grilleId'
+            }
+        }),
         titreSection1: 'Cartouches dans la barre latérale',
         contenuIdListe1: 'listeCartouchesDansBibliotheque',
         contenuSection1: contenuSection1,
