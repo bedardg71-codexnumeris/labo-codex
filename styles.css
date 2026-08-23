@@ -80,6 +80,15 @@
     --hybride-violet: #9c27b0;  /* Hybride (obsolète) */
 
     --bleu-meta: #9fc5e8;        /* Bleu pâle pour méta-infos, logos, liens secondaires */
+    /* Puce d'identifiant des cartes de bibliothèque (#291). Jetons PROPRES et
+       non `--bleu-meta` : mesuré le 23 août sur le retour de porte 2.1d, la
+       paire `--bleu-meta` sur `--bleu-tres-pale` tombait à 4,01:1 en mode
+       clair — sous le minimum WCAG AA de 4,5:1. Ici : 8,86:1 en sombre,
+       5,87:1 en clair. Toucher à `--bleu-meta` aurait déplacé le problème
+       ailleurs, la variable servant aussi aux méta-infos et aux liens. */
+    --biblio-id-texte: #9fc5e8;
+    --biblio-id-fond: #142428;
+    --biblio-id-bord: rgba(106, 172, 184, 0.35);
 
     /* Couleurs de tableau */
     --table-hover: rgba(106, 172, 184, 0.12);
@@ -479,6 +488,10 @@ body.mode-clair[data-mode="anonymisation"] .sous-navigation button:hover {
     --bleu-pale: #e8f2fd;
     --bleu-tres-pale: #f0f8ff;
     --bleu-meta: #3a7cc6;
+    /* Puce d'identifiant — 5,87:1, mesuré (porte 2.1d). */
+    --biblio-id-texte: #2b5f8f;
+    --biblio-id-fond: #eaf1f7;
+    --biblio-id-bord: #b4cadb;
 
     /* Fond de page */
     --fond-page-sature: #d4e6f5;
@@ -4021,13 +4034,18 @@ body:not(.mode-clair) .badge-source--partage {
 .biblio-id-court {
     display: inline-block;
     margin-left: 8px;
-    padding: 1px 6px;
-    border: 1px solid var(--bordure-claire);
+    padding: 2px 7px;
+    border: 1px solid var(--biblio-id-bord);
     border-radius: 3px;
-    background: var(--bleu-tres-pale);
-    color: var(--bleu-meta);
+    background: var(--biblio-id-fond);
+    color: var(--biblio-id-texte);
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 0.82em;
+    /* ⚠ EN `rem`, PAS EN `em` — retour de porte 2.1c, 23 août. En `em`, la
+       puce héritait de `.biblio-carte-meta` (0.9em) et tombait à 11,8 px
+       mesurés : illisible sur iPad sans zoomer. Un identifiant en chasse fixe
+       se lit plus petit qu'il n'est ; 14 px est le plancher tenable. */
+    font-size: 0.875rem;
+    line-height: 1.4;
     letter-spacing: 0.02em;
     cursor: help;
 }
@@ -4635,6 +4653,26 @@ body:not(.mode-clair) .badge-source--partage {
    doivent passer au-dessus. Précédent : aide accompagnement à 10002
    (css/accompagnement.css). Bug terrain Grégoire 10 juin 2026. */
 .modal-overlay--partage {
+    z-index: 10005;
+}
+
+/* #291 — RETOUR DE PORTE 2.5, 23 août 2026 : « la modale "Supprimer de la
+   bibliothèque partagée" apparaît SOUS la modale de la bibliothèque ».
+
+   Mesuré : `uiDialogues` construit un `.modal-overlay` (z-index 9999), alors
+   que les modales de bibliothèque sont posées à 10000 en style en ligne
+   (bibliotheque-ui.js, `creerModal`). La confirmation naissait donc DERRIÈRE
+   ce qui venait de la demander — inaccessible, et le geste paraissait mort.
+
+   Défaut préexistant : `supprimerProductionDeBibliothequePartagee` est la
+   seule des cinq familles à confirmer par une modale (les quatre autres
+   utilisent `confirm()` natif, que rien ne peut recouvrir). Le bandeau de
+   doublons l'a simplement rendu facile à rencontrer.
+
+   ⮕ Une confirmation doit TOUJOURS passer au-dessus de ce qui la déclenche :
+   la règle vaut pour tout `uiDialogues`, pas seulement depuis une biblio.
+   Même valeur que le précédent de partage ci-dessus. */
+#overlay-ui-dialogue {
     z-index: 10005;
 }
 
