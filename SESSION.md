@@ -98,6 +98,7 @@
 
      ▣ PORTE TERRAIN DUE :
        `plans de travail/PORTES-TERRAIN-2026-08-23-doublons-cadre.md`
+       + artefact https://claude.ai/code/artifact/bdb3f1b9-f4bb-4f11-9156-64f63bc77efa
        Trois dialogues neufs à voir sur Mac ET iPad. Trois décisions au §3,
        dont : avertir ou REFUSER fermement sur le groupe-cours ?
      ===================================================================== -->
