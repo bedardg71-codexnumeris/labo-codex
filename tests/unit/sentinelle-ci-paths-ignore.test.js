@@ -1,0 +1,136 @@
+import { describe, it, expect } from 'vitest';
+import { readFileSync, readdirSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+// SENTINELLE-CLIQUET — 23 AOÛT 2026 · L'OPTIMISATION DE LA CI NE DOIT PAS
+// CRÉER D'ANGLE MORT.
+//
+// POURQUOI CE FICHIER EXISTE. Depuis le 21 août, le workflow Actions ne
+// démarre plus : aucun runner ne lui est assigné et il « échoue » en 3-5 s.
+// La cause exacte n'est pas établissable depuis le dépôt (voir l'en-tête de
+// .github/workflows/tests.yml), mais une chose l'est : ce workflow coûtait
+// **12,5 minutes par run** — mesuré sur le dernier run complet du 18 août — et
+// sur les 87 derniers runs, 61 ont été annulés et aucun n'a réussi. Une bonne
+// part partait sur des commits PUREMENT DOCUMENTAIRES.
+//
+// D'où un `paths-ignore` : un commit qui ne touche que de la doc ne déclenche
+// plus la CI. C'est un gain réel, ET UN RISQUE : si un test se met un jour à
+// LIRE un fichier de ces dossiers, sa régression passerait inaperçue — la CI
+// ne tournerait pas sur le commit qui l'a causée.
+//
+// ⮕ Ce cliquet lie les deux : la liste `paths-ignore` du workflow et ce que
+//   les tests lisent réellement. L'une ne peut plus bouger sans l'autre.
+//
+// ⚠ `.claude/**` EST VOLONTAIREMENT ABSENT de `paths-ignore` :
+// `sentinelle-skill-alignement.test.js` lit
+// `.claude/skills/alignement/SKILL.md`. C'est précisément le cas que ce cliquet
+// existe pour empêcher de reproduire ailleurs.
+//
+// BREAK-TEST (fait le 23 août 2026) — faire lire `docs/DEPLOY.md` à un test
+// (`readFileSync(path.join(racine, 'docs', 'x.md'))`) → le cliquet rougit en
+// nommant le fichier et le chemin ignoré.
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const racineProjet = path.resolve(__dirname, '..', '..');
+const dossierTests = path.join(racineProjet, 'tests');
+
+const workflow = readFileSync(
+    path.join(racineProjet, '.github', 'workflows', 'tests.yml'), 'utf8');
+
+/** Les entrées `paths-ignore` déclarées par le workflow. */
+function cheminsIgnores() {
+    const bloc = /paths-ignore:\s*&doc\n([\s\S]*?)\n  pull_request:/.exec(workflow);
+    if (!bloc) return null;
+    return bloc[1]
+        .split('\n')
+        .map((l) => l.trim())
+        .filter((l) => l.startsWith("- '"))
+        .map((l) => l.slice(3, -1));       // - 'docs/**'  →  docs/**
+}
+
+/**
+ * Retire commentaires de bloc et lignes de commentaire.
+ * Les `//` en fin de ligne de code sont conservés : les couper demanderait de
+ * distinguer une URL (`https://`) d'un commentaire, et aucun cas réel ne
+ * l'exige ici.
+ */
+function sansCommentaires(src) {
+    return src
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .split('\n')
+        .filter((l) => !l.trim().startsWith('//'))
+        .join('\n');
+}
+
+/** Tous les fichiers de test, récursivement. */
+function fichiersDeTest(dossier = dossierTests, acc = []) {
+    for (const entree of readdirSync(dossier, { withFileTypes: true })) {
+        if (entree.name === 'node_modules' || entree.name === 'test-results') continue;
+        const complet = path.join(dossier, entree.name);
+        if (entree.isDirectory()) fichiersDeTest(complet, acc);
+        else if (/\.(test|spec)\.js$/.test(entree.name) || entree.name.endsWith('.js')) acc.push(complet);
+    }
+    return acc;
+}
+
+describe('CI · le `paths-ignore` du workflow ne masque aucun test', () => {
+    it('le workflow déclare bien une liste `paths-ignore`', () => {
+        const liste = cheminsIgnores();
+        expect(liste, 'bloc `paths-ignore: &doc` introuvable dans .github/workflows/tests.yml')
+            .not.toBeNull();
+        expect(liste.length, 'la liste ignorée est vide — le gain de minutes disparaît')
+            .toBeGreaterThan(0);
+    });
+
+    it('l\'ancre YAML est réutilisée par `pull_request` (une seule liste, pas deux)', () => {
+        // Deux listes qui divergent, c'est la porte ouverte à un `push` ignoré
+        // et une `pull_request` déclenchée — ou l'inverse, en silence.
+        expect(workflow).toMatch(/pull_request:[\s\S]{0,120}paths-ignore: \*doc/);
+    });
+
+    it('AUCUN test ne LIT un chemin déclaré dans `paths-ignore`', () => {
+        const ignores = cheminsIgnores() || [];
+        // `docs/**` → `docs`, `RELAIS.md` → `RELAIS.md`
+        const racines = ignores.map((p) => p.replace(/\/\*\*$/, ''));
+
+        const coupables = [];
+        for (const fichier of fichiersDeTest()) {
+            // On lit le CODE, pas les commentaires. Des dizaines de fichiers
+            // citent `docs/securite/…` ou le BACKLOG dans leur en-tête, et le
+            // break-test de CE fichier écrit lui-même un appel d'exemple :
+            // sans ce nettoyage, le cliquet s'attrape lui-même (constaté au
+            // premier lancement, 23 août).
+            const src = sansCommentaires(readFileSync(fichier, 'utf8'));
+            // On ne cherche que dans les APPELS de lecture / construction de
+            // chemin : une simple mention en commentaire est légitime, et il y
+            // en a des dizaines (références à docs/securite/, au BACKLOG…).
+            const appels = src.match(/(?:readFileSync|existsSync|readdirSync|path\.join)\([^)]*\)/g) || [];
+            for (const appel of appels) {
+                for (const r of racines) {
+                    // On exige le chemin ENTRE GUILLEMETS pour éviter les
+                    // faux positifs sur des fragments de mots.
+                    if (appel.includes(`'${r}'`) || appel.includes(`"${r}"`) ||
+                        appel.includes(`'${r}/`) || appel.includes(`"${r}/`)) {
+                        coupables.push(`${path.relative(racineProjet, fichier)} → ${r}\n      ${appel.trim()}`);
+                    }
+                }
+            }
+        }
+
+        expect(
+            coupables,
+            'Ces tests LISENT un chemin que la CI ignore : leur régression ne serait pas\n' +
+            'attrapée, puisque le commit fautif ne déclencherait aucun run.\n' +
+            'Deux issues : retirer ce chemin de `paths-ignore`, ou cesser de le lire.\n  ' +
+            coupables.join('\n  ')
+        ).toEqual([]);
+    });
+
+    it('`.claude/**` n\'est PAS ignoré — un test y lit un skill', () => {
+        const ignores = cheminsIgnores() || [];
+        expect(ignores.some((p) => p.startsWith('.claude')),
+            'sentinelle-skill-alignement.test.js lit .claude/skills/alignement/SKILL.md : ' +
+            'ignorer ce dossier rendrait sa régression invisible').toBe(false);
+    });
+});

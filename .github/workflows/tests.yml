@@ -1,9 +1,50 @@
 # Tests Vitest + Playwright (Défense I) en intégration continue
 #
-# Trigger : push sur main + toute pull request vers main.
-# Runner : ubuntu-latest (gratuit illimité repos publics).
+# Trigger : push sur main + toute pull request vers main — SAUF quand le commit
+# ne touche que de la documentation (voir `paths-ignore` et son cliquet).
+# Runner : ubuntu-latest.
 # Note : Playwright WebKit Linux ≠ Safari macOS — la validation device-
 # spécifique (Safari Mac, iPad Air) reste manuelle locale par Grégoire.
+#
+# ⚠ ÉTAT DE CETTE CI AU 23 AOÛT 2026 — CE QUI EST MESURÉ, ET CE QUI NE L'EST PAS.
+#
+# (1) DEPUIS LE 21 AOÛT 16 H 21 UTC, LE JOB NE DÉMARRE PLUS. Vingt-six runs
+#     d'affilée « échouent » en 3 à 5 secondes avec `runner_id: 0` et
+#     `runner_name: ""` dans l'API, et aucune étape enregistrée : le job n'est
+#     jamais dispatché. Le workflow, lui, est `state: active`, et aucun commit
+#     n'a touché ce fichier ni `tests/package-lock.json` dans la fenêtre.
+#
+#     ⮕ CAUSE NON ÉTABLIE DEPUIS LE DÉPÔT. Cette signature est typiquement
+#       celle de minutes Actions indisponibles sur un dépôt privé (quota du
+#       mois épuisé, ou plafond de dépense atteint) — le dépôt est privé depuis
+#       le 23 juin (cf. DEPLOY.md §8.3). Mais l'API ne le confirme pas : le
+#       champ `billable` renvoie 0 pour TOUS les runs, y compris un run qui a
+#       réellement tourné 868 s, il est donc inexploitable ici. À vérifier dans
+#       Settings › Billing › Actions. AUCUN réglage de ce fichier ne peut
+#       rétablir des minutes épuisées.
+#
+# (2) AVANT DE S'ARRÊTER, ELLE ÉTAIT DÉJÀ ROUGE. Dernier run complet, 18 août :
+#     Vitest 2738/2738 vert, puis Playwright **88 passés, 5 échoués** en 12,5 min.
+#     Les cinq sont des specs de glisser-déposer et de mise en page du
+#     planificateur (planif-alignement, planif-drag-pointer-148 ×2,
+#     planif-toolbar, portes-relais-cadre). La veille, le run 543 — une montée
+#     de version de Playwright proposée par Dependabot — échouait déjà.
+#     ⮕ Rétablir les minutes ne rendra pas la CI verte. Voir BACKLOG.
+#
+# (3) LE GASPILLAGE EST STRUCTUREL, ET C'EST CE QUE CE FICHIER PEUT CORRIGER.
+#     Sur les 87 derniers runs : **61 annulés, 26 en échec, zéro succès**. Le
+#     `cancel-in-progress` fauche la majorité des exécutions — Grégoire pousse
+#     plus vite que les 12,5 min du job — et une bonne part de ces runs partait
+#     sur des commits PUREMENT DOCUMENTAIRES.
+#
+# Deux leviers, dans l'ordre de poids :
+#   1. `paths-ignore` — un commit qui ne touche que de la doc ne déclenche plus
+#      rien. ⚠ La liste est VÉRIFIÉE par un cliquet
+#      (tests/unit/sentinelle-ci-paths-ignore.test.js) : si un test se met un
+#      jour à LIRE un fichier de ces dossiers, la sentinelle rougit — sans quoi
+#      l'optimisation créerait un angle mort silencieux.
+#   2. Cache du binaire WebKit — les dépendances système (apt) restent
+#      réinstallées à chaque run, elles ne se cachent pas ; le navigateur, si.
 #
 # Référence : audit/PLAN-MOYEN-TERME.md §5.3 (OpenSSF Scorecard).
 
@@ -12,8 +53,34 @@ name: Tests
 on:
   push:
     branches: [main]
+    paths-ignore: &doc
+      # ⚠ Toute entrée ajoutée ici doit l'être AUSSI dans le cliquet
+      # tests/unit/sentinelle-ci-paths-ignore.test.js, qui vérifie qu'aucun
+      # test ne lit ces chemins. `.claude/**` en est VOLONTAIREMENT absent :
+      # sentinelle-skill-alignement.test.js lit `.claude/skills/alignement/SKILL.md`.
+      - 'docs/**'
+      - 'plans de travail/**'
+      - 'Retours des testeurs/**'
+      - 'Rapports/**'
+      - 'AUDIT.md'
+      - 'BACKLOG.md'
+      - 'BACKLOG-ARCHIVE.md'
+      - 'CLAUDE.md'
+      - 'DEPLOY.md'
+      - 'ETAT-PROJET.md'
+      - 'FICHE-RELECTURE.md'
+      - 'INCIDENTS.md'
+      - 'INFO-ELEVES.md'
+      - 'LICENSE.md'
+      - 'NOTES-DE-VERSION.md'
+      - 'PRIVACY.md'
+      - 'README.md'
+      - 'RELAIS.md'
+      - 'SECURITY.md'
+      - 'SESSION.md'
   pull_request:
     branches: [main]
+    paths-ignore: *doc
   workflow_dispatch:
 
 permissions:
@@ -44,9 +111,25 @@ jobs:
         working-directory: tests
         run: npm ci
 
-      - name: Install Playwright WebKit + system deps
+      # Le binaire WebKit (~100 Mo) est identique tant que la version de
+      # Playwright ne bouge pas : la clé du cache est donc le lock des tests.
+      - name: Cache du navigateur WebKit
+        id: cache-webkit
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-webkit-${{ runner.os }}-${{ hashFiles('tests/package-lock.json') }}
+
+      # Les dépendances SYSTÈME (apt) ne se cachent pas utilement : elles
+      # s'installent hors du workspace. On les repose à chaque run.
+      - name: Dépendances système de WebKit
         working-directory: tests
-        run: npx playwright install --with-deps webkit
+        run: npx playwright install-deps webkit
+
+      - name: Navigateur WebKit (seulement si absent du cache)
+        if: steps.cache-webkit.outputs.cache-hit != 'true'
+        working-directory: tests
+        run: npx playwright install webkit
 
       - name: Run unit tests (Vitest)
         working-directory: tests

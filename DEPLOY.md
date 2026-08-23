@@ -1,6 +1,6 @@
 # Guide de déploiement — Labo Codex
 
-> **Version** : 1.4 (2 juin 2026 — Cloudflare Access désactivé par défaut, pas de refermage planifié ; voir §3, §3.6 et historique)
+> **Version** : 1.5 (23 août 2026 — nom réel du site Netlify corrigé, aperçus de PR documentés, procédure de bump alignée sur `scripts/release.mjs`, état de la CI ; voir historique)
 > **Public** : Grégoire Bédard (mainteneur principal) + co-mainteneur éventuel
 > **Document apparenté** : [`PRIVACY.md`](PRIVACY.md), [`INCIDENTS.md`](INCIDENTS.md)
 
@@ -46,7 +46,7 @@ pour les personnes invitées.
 
 | Composant | Rôle | Plan / coût |
 |---|---|---|
-| **GitHub** | Dépôt source, branche `main` = vérité | Gratuit (dépôt public) |
+| **GitHub** | Dépôt source, branche `main` = vérité | Plan gratuit — ⚠ **dépôt PRIVÉ depuis le 23 juin 2026** (cf. §8.3). Les minutes Actions sont dès lors décomptées d'un quota mensuel. |
 | **Netlify** | Build + hébergement statique de l'application | Plan gratuit |
 | **Cloudflare DNS** | Résolution DNS du domaine `app.codexnumeris.org` | Gratuit |
 | **Cloudflare Access** | ~~Contrôle d'accès Zero Trust (OTP par courriel)~~ **Retiré le 28 mai 2026 en préparation AQPC** — voir §3 | n/a |
@@ -55,9 +55,22 @@ pour les personnes invitées.
 
 | URL | Rôle | Accessible |
 |---|---|---|
-| `labocodex.netlify.app` | URL Netlify par défaut | Accessible — origin Netlify, derrière le DNS Cloudflare via CNAME |
 | `app.codexnumeris.org` | URL publique principale | **Publique** depuis le 28 mai 2026 (Cloudflare Access retiré) |
-| `github.com/bedardg71-codexnumeris/Monitorage_v6` | Code source | Public en lecture |
+| `main--codexnumeris-051225.netlify.app` | Origin Netlify de la production | Accessible — c'est la branche `main` servie par Netlify |
+| `deploy-preview-<N>--codexnumeris-051225.netlify.app` | **Aperçu automatique de la pull request n° N** | Accessible dès que la PR est ouverte, ~30 s après le push |
+| `github.com/bedardg71-codexnumeris/Monitorage_v6` | Code source | **Privé** |
+
+⚠️ **Le site Netlify s'appelle `codexnumeris-051225`, pas `labocodex`.** Les
+versions 1.0 à 1.4 de ce document annonçaient `labocodex.netlify.app` : ce nom
+ne correspond à rien dans le compte. Vérifié le 23 août 2026 par l'API Netlify
+(`site_id f06b34ab-3511-4bf5-9beb-4736cc56ca8c`). C'est le nom à chercher dans
+le tableau de bord, notamment pour un rollback (§5.2) ou une reprise (§6.3).
+
+💡 **Les aperçus de PR sont actifs.** Toute pull request vers `main` reçoit une
+URL complète et isolée, sans toucher à la production. C'est le moyen d'éprouver
+un chantier sur iPad avant de fusionner. ⚠ C'est une **origine différente**
+d'`app.codexnumeris.org` : le stockage du navigateur n'y est pas partagé, l'app
+y démarre donc vide.
 
 ⚠️ L'ancien sous-domaine `labo.codexnumeris.org` (référencé dans la
 version 1.0 de ce document) n'a plus d'enregistrement DNS et n'est
@@ -124,14 +137,31 @@ surinvoqué et préciser le régime réel»).
 ### 2.1 Cycle normal
 
 1. **Travailler** sur une branche dédiée (ex : `cat-b/track-X`, `aqpc/privacy`).
-2. **Tester localement** :
+2. **Tester localement** — ⚠ **depuis `tests/`, jamais de la racine** :
    ```bash
    cd tests && npm test
-   # Attendu : 97/97 verts (85 Vitest + 12 Playwright)
    ```
-3. **Bumper la version** : éditer `version.json` ET les fallback de
-   `js/init-inline.js` lignes 121-122. *Voir CLAUDE.md « Avant chaque
-   commit » pour le pattern complet.*
+   L'ordre de grandeur au 23 août 2026 : ~2 970 tests Vitest et ~110 specs
+   Playwright. *Le compte exact n'est pas figé ici : il change à chaque
+   chantier, et un chiffre périmé dans une consigne se fait ignorer.*
+3. **Bumper la version** :
+   ```bash
+   node scripts/release.mjs patch|minor|major
+   ```
+   Le script écrit les **quatre points de vérité** d'un coup (`version.json`,
+   les deux fallbacks de `js/init-inline.js`, le snapshot de `js/main.js`) et
+   bump le `?v=` anti-cache des fichiers modifiés dans `index.html`.
+   *Ne plus éditer ces fichiers à la main : c'est ce qui les désynchronisait.*
+
+   ⚠ **INCIDENT DU 23 AOÛT 2026, À CONNAÎTRE.** Le script ne bumpait le `?v=`
+   que des fichiers vus par `git status`, donc **non commités**. Un chantier
+   commité AVANT la release passait au travers : seuls `init-inline.js` et
+   `main.js` étaient bumpés — c'est-à-dire exactement les deux fichiers qui
+   AFFICHENT le numéro de version. Résultat mesuré sur l'iPad : « 1.92.0 ·
+   build 0823-1013 » en bas de page, et l'ANCIEN code à l'écran. Corrigé le
+   jour même — `fichiersModifies` compare désormais aussi à la release
+   précédente — et verrouillé par
+   `tests/unit/sentinelle-anticache-fichiers-modifies.test.js`.
 4. **Commit** :
    ```bash
    git commit -m "feat(<scope>): <description>"
@@ -164,6 +194,28 @@ Le fichier [`netlify.toml`](netlify.toml) versionné définit :
 
 Toute modification de cette configuration **doit passer par un commit**
 sur `main` — pas de configuration ad hoc dans le dashboard Netlify.
+
+### 2.4 État de l'intégration continue (23 août 2026)
+
+⚠ **La CI GitHub Actions ne démarre plus depuis le 21 août, 16 h 21 UTC.** Le
+job « échoue » en 3-5 secondes sans qu'aucun runner ne lui soit assigné
+(`runner_id: 0` dans l'API) : il n'est jamais dispatché. Le workflow est
+pourtant `active` et aucun commit n'a touché `.github/workflows/tests.yml` dans
+la fenêtre. La signature est celle de minutes Actions indisponibles sur un
+dépôt privé — **à vérifier dans Settings › Billing › Actions**. Rien dans le
+dépôt ne peut rétablir des minutes épuisées.
+
+⚠ **Et avant de s'arrêter, elle était déjà rouge.** Dernier run complet
+(18 août) : Vitest vert de bout en bout, puis Playwright **88 passés,
+5 échoués** en 12,5 minutes — cinq specs de glisser-déposer et de mise en page
+du planificateur. Rétablir les minutes ne rendra donc pas la CI verte.
+
+**Ce qui a été fait le 23 août pour cesser de gaspiller** : le workflow ignore
+désormais les commits purement documentaires (`paths-ignore`, liste verrouillée
+par `tests/unit/sentinelle-ci-paths-ignore.test.js`) et met en cache le binaire
+WebKit. Sur les 87 runs précédents, **61 avaient été annulés et aucun n'avait
+réussi** — le `cancel-in-progress` fauchant les runs plus vite qu'ils ne
+finissaient.
 
 ---
 
@@ -302,13 +354,29 @@ des personnes concernées (voir [`PRIVACY.md`](PRIVACY.md) §6.2).
 
 `DNS → Records` (tableau de bord Cloudflare classique, pas Zero Trust)
 
+⚠️ **CETTE TABLE EST HISTORIQUE — elle décrit l'état d'avant le 28 mai 2026,
+et DEUX de ses trois colonnes sont périmées.**
+
 | Type | Nom | Cible | Proxy |
 |---|---|---|---|
-| `CNAME` | `labo` | `labocodex.netlify.app` | **Orange (proxy activé)** |
+| `CNAME` | ~~`labo`~~ | ~~`labocodex.netlify.app`~~ | **Orange (proxy activé)** |
 
-⚠️ Le proxy orange est **obligatoire** pour que Cloudflare Access intercepte
+- Le sous-domaine était **`labo`** ; c'est **`app`** depuis le 28 mai (§1.2), et
+  `labo.codexnumeris.org` n'a plus d'enregistrement.
+- La cible annoncée, **`labocodex.netlify.app`, n'a jamais correspondu au site
+  réel** : il s'appelle `codexnumeris-051225` (vérifié le 23 août par l'API
+  Netlify). Une reprise DNS qui recopierait cette ligne telle quelle pointerait
+  dans le vide.
+
+⮕ **L'état courant à reconstituer en cas de reprise (§6.3)** : un enregistrement
+pour `app` visant l'origin Netlify du site `codexnumeris-051225`. Relever la
+valeur exacte dans le tableau de bord Netlify (`Domain management`) plutôt que
+de la recopier d'ici — c'est ce document qui a menti, pas le tableau de bord.
+
+⚠️ Le proxy orange était **obligatoire** pour que Cloudflare Access intercepte
 les requêtes. Si le proxy est gris (DNS only), Cloudflare Access est
-contourné et l'app est accessible sans authentification.
+contourné et l'app est accessible sans authentification. *Access étant retiré
+depuis le 28 mai, ce point ne vaut que pour une réactivation (§3.6).*
 
 ### 3.5 Vérification
 
@@ -592,6 +660,7 @@ supprimé le 26 juin).
 | Date | Version | Modification |
 |---|---|---|
 | 2026-05-22 | 1.0 DRAFT | Rédaction initiale, soumis à validation. Placeholders à confirmer sur 5 points marqués `[À COMPLÉTER]`. |
+| 2026-08-23 | 1.5 | (a) §1.2 : le site Netlify s'appelle **`codexnumeris-051225`**, pas `labocodex` — vérifié par l'API ; l'ancien nom ne correspondait à rien dans le compte. (b) §1.2 : aperçus de PR documentés (`deploy-preview-<N>--…`), avec l'avertissement que c'est une **origine différente**, donc sans les données. (c) §1.1 : le dépôt est **privé**, avec sa conséquence sur les minutes Actions. (d) §2.1 : le bump passe par `scripts/release.mjs`, plus par une édition manuelle ; incident du jour consigné. (e) §2.4 (neuf) : état réel de la CI — ne démarre plus, et était déjà rouge. |
 | 2026-05-28 | 1.1 | (a) Substitution `labo.codexnumeris.org` → `app.codexnumeris.org` partout. L'ancien sous-domaine n'a plus d'enregistrement DNS. (b) Retrait du Cloudflare Access acté en préparation de l'AQPC du 3 juin. Sections 3 et 4 marquées historiques. PRIVACY.md à réviser séparément (BACKLOG #298). Cf. ADR-008 révisé. |
 | 2026-05-28 | 1.2 | Recadrage du référentiel Loi 25 après consultation Cowork. §1.4 ajoutée : Labo Codex, en configuration actuelle (mainteneur individuel, pas d'activité économique organisée, app 100 % hors-ligne), n'engage vraisemblablement pas la *Loi sur la protection des renseignements personnels dans le secteur privé*. §3 «Conséquences acceptées» et §4.3 réécrites en conséquence. ADR-008 (révision du 28 mai 2026) et PRIVACY.md à aligner ; BACKLOG `#298` à reformuler – pas «mettre à jour la posture Loi 25», mais «clarifier que le cadre a été surinvoqué et préciser le régime réel». |
 | 2026-05-28 | 1.3 | Cadrage de la levée Access comme **fenêtre d'ouverture publique du 3 juin au 30 juin 2026**, pas comme retrait indéfini. §3 retitrée «SUSPENDU», intro réécrite pour acter la date de refermage, ajout d'une note sur l'usage hors-ligne (l'app reste téléchargeable en tout temps – le refermage ne coupe l'accès web qu'aux personnes hors liste blanche reconstituée) et d'une note sur le précédent alpha de janvier 2026 (paramètres défavorables aujourd'hui levés : beta stable, fin de session, dispositif CoP). Nouvelle §3.6 «Refermage planifié — 1er juillet 2026» : sources de reconstitution de la liste blanche (Cohorte 1 pilote 2026-2027 + demandeurs CoP + mainteneur), procédure technique, points à documenter au moment du refermage. §4 retitrée «SUSPENDU». §3.5 et §4.1 actualisées pour refléter les états successifs du quota. ADR-008 à aligner. |
