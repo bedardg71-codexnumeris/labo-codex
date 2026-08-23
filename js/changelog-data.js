@@ -21,6 +21,20 @@
 
     var CHANGELOG = [
         {
+            version: '1.92',
+            couleur: 'vert',
+            titre: 'Les doublons : savoir enfin lesquels sont lesquels',
+            items: [
+                'Le bandeau des doublons ne se contente plus d\u2019annoncer un nombre : il dit ce que chaque groupe EST. Une collision d\u2019identifiant (anomalie \u00e0 signaler), des copies issues d\u2019un m\u00eame original (tu peux n\u2019en garder qu\u2019une), ou de simples homonymes \u2014 deux \u00e9l\u00e9ments distincts qui portent le m\u00eame nom, ce qui n\u2019est pas un d\u00e9faut. L\u2019ancienne consigne, qui affirmait le contraire de la r\u00e9alit\u00e9, a \u00e9t\u00e9 retir\u00e9e.',
+                'Chaque carte de biblioth\u00e8que affiche d\u00e9sormais son identifiant court, avec l\u2019identifiant complet au survol. Le bandeau citait des identifiants que rien \u00e0 l\u2019\u00e9cran ne permettait de retrouver.',
+                'Un bouton \u00ab\u00a0Voir\u00a0\u00bb sur chaque exemplaire du bandeau am\u00e8ne directement \u00e0 la bonne carte et la met en \u00e9vidence deux secondes \u2014 fini la recherche \u00e0 la main par num\u00e9ro.',
+                '\u00ab\u00a0Retirer\u00a0\u00bb et \u00ab\u00a0Supprimer\u00a0\u00bb sont accessibles sur place, depuis le bandeau, au lieu d\u2019exiger d\u2019ouvrir le menu \u22ee de la bonne carte. Retirer conserve les donn\u00e9es\u00a0; supprimer demande toujours confirmation.',
+                'Un deuxi\u00e8me \u00ab\u00a0Ajouter \u00e0 ma s\u00e9lection\u00a0\u00bb refuse maintenant, et nomme l\u2019exemplaire d\u00e9j\u00e0 pr\u00e9sent au lieu d\u2019en empiler un second en silence. Le blocage porte sur l\u2019identit\u00e9 de l\u2019\u00e9l\u00e9ment, jamais sur son nom\u00a0: deux \u00e9chelles homonymes restent parfaitement l\u00e9gitimes. Et \u00ab\u00a0Dupliquer\u00a0\u00bb, lui, n\u2019est jamais bloqu\u00e9.',
+                'Dupliquer une copie ne donne plus \u00ab\u00a0X (copie) (copie) (copie)\u00a0\u00bb\u00a0: les copies se num\u00e9rotent \u2014 \u00ab\u00a0X (copie)\u00a0\u00bb, \u00ab\u00a0X (copie 2)\u00a0\u00bb, \u00ab\u00a0X (copie 3)\u00a0\u00bb.',
+                'Les cinq biblioth\u00e8ques (grilles, \u00e9chelles, cartouches, productions, pratiques) v\u00e9rifient d\u00e9sormais que l\u2019ajout a r\u00e9ellement \u00e9t\u00e9 enregistr\u00e9 avant d\u2019annoncer un succ\u00e8s. Un enregistrement refus\u00e9 le dit, au lieu d\u2019afficher \u00ab\u00a0ajout\u00e9e\u00a0\u00bb sans rien \u00e9crire.'
+            ]
+        },
+        {
             version: '1.91',
             couleur: 'bleu',
             titre: 'La grille des présences ajustée, et des boutons qui tiennent parole',
