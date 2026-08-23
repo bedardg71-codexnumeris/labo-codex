@@ -42,11 +42,14 @@
  * ⚠ `session`/`annee`/`trimestreId` encore portés par des fiches legacy sont
  * HISTORIQUES et non décisionnels — comme le préfixe d'un id (`h2026-…`), qui
  * ressemble à de l'information et n'en est pas.
+ *
+ * CT-15 (23 août 2026) — `_tupleCoursNaturel` vivait ICI, et deux autres
+ * versions de la même idée vivaient ailleurs : l'import de `cours.js`
+ * comparait en `===` brut (« 601-101-mq » entrait donc à côté de
+ * « 601-101-MQ »), et `creerCours` ne comparait rien du tout. La fonction est
+ * désormais unique, dans `js/identite-naturelle.js` — trois réponses possibles
+ * à « est-ce le même cours ? », c'était zéro source de vérité.
  */
-function _tupleCoursNaturel(c) {
-    const code = (c.codeCours || c.sigle || c.code || '').toString().trim().toUpperCase();
-    return code || null;
-}
 
 /**
  * Décide de la fusion `listeCours` (legacy) → `cours` (canonique).
@@ -72,7 +75,7 @@ function _tupleCoursNaturel(c) {
  *  2. par TUPLE NATUREL — il attrape les doublons qui portent des ids
  *     DIFFÉRENTS, que le point 1 ne peut pas voir. Depuis #455 (19 août
  *     2026), le tuple est le CODE seul : `session`/`annee` n'entrent plus
- *     dans l'identité (le cours est global, cf. doc de `_tupleCoursNaturel`).
+ *     dans l'identité (le cours est global, cf. `cleNaturelleCours`).
  *
  * ▣ Pourquoi écarter par id ne perd RIEN : tous les lecteurs du magasin
  *   résolvent par `find`/`findIndex`/`some` sur `.id` (cours.js, contexte.js,
@@ -92,7 +95,7 @@ function _fusionnerListeCoursDansCours(coursExistants, anciensListeCours) {
     const tuples = new Map();
     existants.forEach(c => {
         if (!c) return;
-        const t = _tupleCoursNaturel(c);
+        const t = cleNaturelleCours(c);
         if (t) tuples.set(t, c);
     });
     const ids = new Set(existants.filter(c => c && c.id).map(c => c.id));
@@ -103,7 +106,7 @@ function _fusionnerListeCoursDansCours(coursExistants, anciensListeCours) {
 
     legacy.forEach(c => {
         if (!c) return;
-        const t = _tupleCoursNaturel(c);
+        const t = cleNaturelleCours(c);
 
         // 1. Identité d'abord — un id déjà présent n'est JAMAIS réinjecté.
         if (c.id && ids.has(c.id)) {
@@ -1129,37 +1132,55 @@ async function sauvegarderCoursV2() {
         return;
     }
 
+    // #455 : le cours est GLOBAL — une fiche par code, servie à tous les
+    // trimestres. Une seconde fiche au même code fabriquerait deux « 601-101 »
+    // dont les groupes-cours ne se verraient pas (famille #346/#154).
+    // Le geste reste possible (confirm), jamais silencieux.
+    //
+    // CT-15 (23 août 2026) : la DÉTECTION est passée à `CoursEntite`, qui la
+    // refait de son côté au point d'écriture. Ici on ne fait plus que PARLER à
+    // Grégoire — et son oui est reporté à l'entité par `doublonAssume`.
+    // Deux détections, une seule règle : celle de `cleNaturelleCours`.
+    //
+    // ⚠ L'ÉDITION EST GARDÉE ELLE AUSSI. Renommer le code d'une fiche pour lui
+    // donner celui d'une autre fabrique exactement le doublon que la création
+    // refuse, par un chemin que personne ne surveillait avant CT-15.
+    const dejaLa = await CoursEntite.chercherDoublonCode(
+        d, coursEnEditionV2 ? { exclureId: coursEnEditionV2 } : undefined);
+    let doublonAssume = false;
+    if (dejaLa) {
+        const quandMeme = confirm(
+            'Une fiche « ' + d.codeCours + ' » existe déjà.\n\n' +
+            'Le cours est global : la même fiche sert tous les trimestres — ' +
+            'inutile d\'en créer une par session.\n\n' +
+            (coursEnEditionV2
+                ? 'Donner quand même ce code à cette fiche ?'
+                : 'Créer quand même une seconde fiche ?')
+        );
+        if (!quandMeme) return;
+        doublonAssume = true;
+    }
+
     // Refonte chantier C : persistance routée par CoursEntite (source unique du modèle
     // cours = description ministérielle pure, ID COURS_*). Plus de fabrication d'objet
     // gras ni d'ID embarquant la période. Édition = ID préservé (coursEnEditionV2),
     // champs legacy conservés par mettreAJour jusqu'au chantier D.
     let coursSauve;
     if (coursEnEditionV2) {
-        coursSauve = await CoursEntite.mettreAJour(coursEnEditionV2, d);
+        coursSauve = await CoursEntite.mettreAJour(coursEnEditionV2, d, { doublonAssume });
         if (!coursSauve) {
             alert('Cours introuvable pour la mise à jour.');
             return;
         }
         _resyncInfoCoursSiActif(coursSauve);
     } else {
-        // #455 : le cours est GLOBAL — une fiche par code, servie à tous les
-        // trimestres. Créer une seconde fiche au même code fabriquerait deux
-        // « 601-101 » dont les groupes-cours ne se verraient pas (famille
-        // #346/#154). Le geste reste possible (confirm), jamais silencieux.
-        const codeNeuf = _tupleCoursNaturel(d);
-        const dejaLa = codeNeuf
-            ? (db.getSync('cours', []) || []).find(c => c && _tupleCoursNaturel(c) === codeNeuf)
-            : null;
-        if (dejaLa) {
-            const creerQuandMeme = confirm(
-                'Une fiche « ' + d.codeCours + ' » existe déjà.\n\n' +
-                'Le cours est global : la même fiche sert tous les trimestres — ' +
-                'inutile d\'en créer une par session.\n\n' +
-                'Créer quand même une seconde fiche ?'
-            );
-            if (!creerQuandMeme) return;
+        coursSauve = await CoursEntite.creer(d, { doublonAssume });
+        if (!coursSauve) {
+            // La garde de l'entité a refusé alors qu'on venait de demander :
+            // état incohérent, on le DIT plutôt que d'annoncer un succès.
+            alert('Création refusée : une fiche porte déjà ce code.');
+            return;
         }
-        coursSauve = await CoursEntite.creer(d);
         _activerSiPremierCours(coursSauve);
     }
 

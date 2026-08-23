@@ -400,9 +400,30 @@ déjà présent. Branché au point d'écriture, pas dans les 24 fonctions.
 **Sentinelle** : la chaîne des trois premiers appels ; un nom contenant déjà
 « (copie) » ; un nom vide. **Break-test** : rétablir la concaténation naïve → rouge.
 
-### Lot 6 — Hors bibliothèques (CT-15, #476 volet 2) — OPTIONNEL
+### Lot 6 — Hors bibliothèques (CT-15, #476 volet 2) — ✅ LIVRÉ le 23 août 2026
 
-Seulement si les Lots 0-5 sont livrés et verts :
+Les trois sites sont gardés. Ce que le lot a livré, et ce qu'il a trouvé en route :
+
+- **Un module de plus, pas trois gardes copiées** — `js/identite-naturelle.js`,
+  fonctions pures. ⚠ À ne pas confondre avec `identite-item.js` : celui-là dit
+  la LIGNÉE (« cet item descend-il de celui-là ? »), celui-ci l'identité
+  NATURELLE (« ces deux fiches désignent-elles la même chose ? »).
+- **Trois normalisations concurrentes, trouvées en chemin.** Le plan attendait
+  « `creerCours` sans contrôle ». La mesure a donné pire : le formulaire
+  comparait `trim().toUpperCase()`, l'import comparait `===` BRUT, l'entité ne
+  comparait rien. Un « 601-101-mq » importé à côté d'un « 601-101-MQ » existant
+  n'était donc pas vu comme un doublon — **refusé à la main, accepté par
+  fichier**. Une clé unique referme ça.
+- **L'édition était le quatrième trou**, non listé par l'audit : renommer le
+  code d'une fiche pour lui donner celui d'une autre fabriquait exactement le
+  doublon que la création refusait.
+- **La décision #455 est appliquée, pas contournée** : l'identité du cours
+  reste son code seul, et la garde ne bloque pas — elle avertit. Même règle
+  pour les trois : le geste reste possible, jamais silencieux. C'est ce qui
+  permet le co-enseignement (deux GC de même triplet, enseignants différents)
+  et le double rattachement institutionnel (un courriel, deux profils).
+
+Sites traités :
 
 - `js/trimestre-v2-groupes-cours.js:654-677` — pousse un groupe-cours sans vérifier
   le triplet (trimestre, cours, groupe) ;
@@ -411,6 +432,14 @@ Seulement si les Lots 0-5 sont livrés et verts :
 - `js/entites/cours-entite.js:44-71` — `creerCours` sans contrôle d'unicité. ⚠ Le
   magasin `cours` est **GLOBAL** depuis la décision #455 (identité = le code seul) :
   toute garde ici doit respecter cette décision, pas la contourner.
+
+**Vérification** : `sentinelle-ct15-identite-naturelle.test.js` (16 cas) +
+porte navigateur `doublons-cadre-ct15.spec.js`. **Sept break-tests rouges**
+avant de faire confiance aux sentinelles — dont celui qui compte le plus :
+inclure horaire+enseignant dans le triplet du GC (le désarmement qui aurait
+rendu la garde muette au moment exact où elle doit parler).
+
+**Porte terrain** : `plans de travail/PORTES-TERRAIN-2026-08-23-doublons-cadre.md`.
 
 ---
 

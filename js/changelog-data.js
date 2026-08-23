@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.93',
+            couleur: 'vert',
+            titre: 'Le Cadre te prévient avant de créer un double',
+            items: [
+                'Créer un second groupe-cours pour le même trimestre, le même cours et le même groupe d\u2019étudiants demande maintenant confirmation. Les deux porteraient le même nom dans tous les menus, et tes présences comme tes évaluations pourraient se répartir entre les deux sans que rien ne le signale. Le geste reste possible \u2014 deux enseignants sur un même groupe, c\u2019est légitime \u2014 mais il n\u2019est plus silencieux.',
+                'Créer un second profil d\u2019enseignant\u00b7e avec un courriel déjà utilisé demande confirmation, et nomme le profil en place. C\u2019est le courriel qui fait l\u2019identité, jamais le nom : deux homonymes restent deux personnes distinctes, et l\u2019app ne s\u2019en mêle pas.',
+                'Le contrôle qui empêche deux fiches de cours au même code s\u2019applique désormais partout, y compris à l\u2019import d\u2019un fichier et quand tu modifies le code d\u2019une fiche existante. La casse ne compte plus : \u00ab\u00a0601-101-mq\u00a0\u00bb et \u00ab\u00a0601-101-MQ\u00a0\u00bb sont le même cours, alors qu\u2019un import pouvait auparavant en installer deux côte à côte.'
+            ]
+        },
+        {
             version: '1.92',
             couleur: 'vert',
             titre: 'Les doublons : savoir enfin lesquels sont lesquels',

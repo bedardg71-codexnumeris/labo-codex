@@ -37,12 +37,53 @@ const CLE_COURS = 'cours';
 // ============================================
 
 /**
- * Crée un nouveau cours
- * @param {Object} donnees - Données du cours
- * @returns {Promise<Cours>} - Le cours créé avec son ID
+ * Cherche une fiche de cours portant DÉJÀ le même code (décision #455 :
+ * l'identité d'un cours est son code, seul — le devis ministériel ne change
+ * pas d'un trimestre à l'autre).
+ *
+ * Exposé pour que l'appelant puisse DEMANDER avant d'écrire : c'est le
+ * formulaire qui parle à l'humain, l'entité ne fait qu'appliquer.
+ *
+ * @param {Object} donnees - le cours qu'on s'apprête à écrire
+ * @param {Object} [opts]
+ * @param {string} [opts.exclureId] - id à ignorer (l'item lui-même en édition)
+ * @returns {Promise<Cours|null>} - la fiche en place, ou null
  */
-async function creerCours(donnees) {
+async function chercherDoublonCode(donnees, opts) {
     const cours = await db.get(CLE_COURS) || [];
+    return trouverDoublonNaturel(cours, donnees, cleNaturelleCours, opts);
+}
+
+/**
+ * Crée un nouveau cours.
+ *
+ * CT-15 (23 août 2026) — GARDE AU POINT D'ÉCRITURE. Cette fonction créait
+ * sans rien vérifier : l'invariant #455 (une fiche par code) n'était défendu
+ * qu'au formulaire (`sauvegarderCoursV2`) et à l'import (`cours.js`), chacun
+ * avec sa propre comparaison — dont une, à l'import, en `===` brut qui
+ * laissait « 601-101-mq » s'installer à côté de « 601-101-MQ ».
+ *
+ * ⚠ CETTE GARDE NE DÉCIDE PAS À LA PLACE DE GRÉGOIRE. Décision #455 : le
+ * geste reste possible, jamais silencieux. L'appelant qui a POSÉ la question
+ * et reçu un oui passe `{ doublonAssume: true }` ; celui qui ne l'a pas posée
+ * se voit refuser — c'est un filet, pas un veto.
+ *
+ * @param {Object} donnees - Données du cours
+ * @param {Object} [options]
+ * @param {boolean} [options.doublonAssume] - true = l'utilisateur a confirmé
+ * @returns {Promise<Cours|null>} - Le cours créé, ou null si la garde a refusé
+ */
+async function creerCours(donnees, options) {
+    const cours = await db.get(CLE_COURS) || [];
+
+    const dejaLa = trouverDoublonNaturel(cours, donnees, cleNaturelleCours);
+    if (dejaLa && !(options && options.doublonAssume === true)) {
+        console.warn(
+            '[Cours] Création refusée : une fiche « ' +
+            (dejaLa.codeCours || dejaLa.id) + ' » existe déjà (#455). ' +
+            'Demander confirmation, puis rappeler avec { doublonAssume: true }.');
+        return null;
+    }
 
     const nouveauCours = {
         id: genererIdUnique('COURS_'),
@@ -107,7 +148,12 @@ async function obtenirCoursParId(coursId) {
  */
 async function obtenirCoursParCode(codeCours) {
     const cours = await db.get(CLE_COURS) || [];
-    return cours.find(c => c.codeCours === codeCours) || null;
+    // Même normalisation que la garde d'unicité : sans quoi la garde et la
+    // recherche répondraient différemment à « est-ce le même cours ? », et
+    // « 601-101-mq » serait introuvable après avoir été refusé comme doublon.
+    const cible = cleNaturelle(codeCours);
+    if (!cible) return null;
+    return cours.find(c => cleNaturelleCours(c) === cible) || null;
 }
 
 /**
@@ -140,17 +186,39 @@ async function obtenirDisciplinesCours() {
 
 /**
  * Met à jour un cours existant
+ *
+ * CT-15 : la garde #455 vaut AUSSI en édition. Renommer le code d'une fiche
+ * pour lui donner celui d'une autre fabrique exactement le doublon que la
+ * création refuse — par un chemin que personne ne surveillait.
+ *
  * @param {string} coursId - ID du cours à mettre à jour
  * @param {Object} modifications - Champs à modifier
- * @returns {Promise<Cours|null>} - Le cours modifié ou null si non trouvé
+ * @param {Object} [options]
+ * @param {boolean} [options.doublonAssume] - true = l'utilisateur a confirmé
+ * @returns {Promise<Cours|null>} - Le cours modifié, ou null (introuvable, ou
+ *          garde refusée — les deux cas sont distingués par `console.warn`)
  */
-async function mettreAJourCours(coursId, modifications) {
+async function mettreAJourCours(coursId, modifications, options) {
     const cours = await db.get(CLE_COURS) || [];
     const index = cours.findIndex(c => c.id === coursId);
 
     if (index === -1) {
         console.warn('[Cours] Non trouvé pour mise à jour:', coursId);
         return null;
+    }
+
+    // On s'exclut soi-même : sans `exclureId`, enregistrer une fiche sans
+    // toucher son code la ferait rougir contre elle-même à chaque fois.
+    if (modifications && modifications.codeCours !== undefined) {
+        const dejaLa = trouverDoublonNaturel(
+            cours, modifications, cleNaturelleCours, { exclureId: coursId });
+        if (dejaLa && !(options && options.doublonAssume === true)) {
+            console.warn(
+                '[Cours] Mise à jour refusée : « ' +
+                (dejaLa.codeCours || dejaLa.id) + ' » est déjà porté par une ' +
+                'autre fiche (#455).');
+            return null;
+        }
     }
 
     // Mettre à jour les champs (sauf id et dateCreation)
@@ -273,6 +341,7 @@ window.CoursEntite = {
     obtenirTousSync: obtenirTousLesCoursSync,
     obtenirParId: obtenirCoursParId,
     obtenirParCode: obtenirCoursParCode,
+    chercherDoublonCode: chercherDoublonCode,
     obtenirParDiscipline: obtenirCoursParDiscipline,
     mettreAJour: mettreAJourCours,
     supprimer: supprimerCours,

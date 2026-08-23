@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
+import { globauxIdentiteNaturelle } from './_helpers/identite-naturelle.js';
 
 // =======================================================================
 // SENTINELLE #442 — la fusion legacy→canonique dédoublonne par IDENTITÉ
@@ -46,6 +47,8 @@ function chargerModule(globauxSupp = {}) {
         db: { getSync: (k, d) => d, setSync: () => {} },
         cle: (k) => k,
         toggleDisplay: () => {},
+        // CT-15 : l'identité du cours vit désormais dans identite-naturelle.js.
+        ...globauxIdentiteNaturelle(),
         ...globauxSupp
     });
 }
