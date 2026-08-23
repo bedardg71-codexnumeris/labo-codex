@@ -968,7 +968,7 @@ async function dupliquerGrille(grilleId) {
     fermerModalGrilles();
 
     // Demander le nom de la nouvelle grille
-    const nouveauNom = prompt('Nom de la nouvelle grille :', grilleOriginale.nom + ' (copie)');
+    const nouveauNom = prompt('Nom de la nouvelle grille :', nommerCopie(grilleOriginale.nom, grilles));
 
     if (!nouveauNom || nouveauNom.trim() === '') {
         return;
@@ -1039,8 +1039,12 @@ async function dupliquerGrilleActuelle() {
         return;
     }
 
+    // CO-24 — la collection est lue AVANT l'invite : `nommerCopie` doit
+    // connaître les noms déjà pris pour proposer le premier rang libre.
+    let grilles = await db.get(cle('grillesTemplates')) || [];
+
     // Demander le nom de la nouvelle grille
-    const nouveauNom = prompt('Nom de la nouvelle grille :', grilleTemplateActuelle.nom + ' (copie)');
+    const nouveauNom = prompt('Nom de la nouvelle grille :', nommerCopie(grilleTemplateActuelle.nom, grilles));
 
     if (!nouveauNom || nouveauNom.trim() === '') {
         return;
@@ -1061,7 +1065,6 @@ async function dupliquerGrilleActuelle() {
     };
 
     // Sauvegarder la nouvelle grille
-    let grilles = await db.get(cle('grillesTemplates')) || [];
     grilles.push(nouvelleGrille);
     await db.set(cle('grillesTemplates'), grilles);
 
@@ -2557,7 +2560,7 @@ async function importerUneGrilleTrimestre(srcId, grilleId) {
  */
 async function ajouterGrilleIndividuelle(id) {
     try {
-        const grilles = await db.get(cle('grillesTemplates')) || [];
+        let grilles = await db.get(cle('grillesTemplates')) || [];
 
         // Vérifier si la grille existe déjà (par ID direct ou par idOriginal pour les imports)
         let grille = grilles.find(g => g.id === id);
@@ -2580,7 +2583,17 @@ async function ajouterGrilleIndividuelle(id) {
                     dansBibliotheque: true,
                     dateImport: new Date().toISOString()
                 };
-                grilles.push(grille);
+                // #476 — garde d'identité au point d'écriture. Les recherches
+                // ci-dessus ne couvrent que `id` et `idOriginal` ; un exemplaire
+                // arrivé par un paquet collègue porte son ascendance dans
+                // `inspireDe`, et passait donc au travers.
+                const gardeGrille = ajouterAvecGardeIdentite(grilles, grille);
+                if (!gardeGrille.ajoute) {
+                    const nomEnPlace = (gardeGrille.conflit && gardeGrille.conflit.nom) || 'Une grille';
+                    alert(`« ${nomEnPlace} » est déjà dans ta sélection.\n\nPour en avoir un second exemplaire, utilise « Dupliquer ».`);
+                    return;
+                }
+                grilles = gardeGrille.liste;
             } else {
                 alert('Grille introuvable');
                 return;
@@ -2593,10 +2606,22 @@ async function ajouterGrilleIndividuelle(id) {
         // Sauvegarder
         await db.set(cle('grillesTemplates'), grilles);
 
+        // ⚠ NE PAS ANNONCER UN SUCCÈS SANS L'AVOIR VÉRIFIÉ (patron du 22 août).
+        // `db.set` fait un `return;` NU quand une garde refuse l'écriture
+        // (js/db.js:449) : la valeur de retour ne distingue pas le refus du
+        // succès. On relit donc la collection — c'est la seule preuve qui vaille.
+        const verifGrille = await db.get(cle('grillesTemplates')) || [];
+
         // Rafraîchir modal et sidebar
         fermerModalBibliothequeGrilles();
         await afficherListeGrilles();
         await afficherBibliothequeGrilles();
+
+        if (!verifGrille.some(g => g.id === grille.id)) {
+            console.error('[grilles] Écriture non confirmée —', grille.id, 'absente après db.set.');
+            alert(`« ${grille.nom || 'Grille'} » n'a PAS pu être ajoutée.\n\nL'enregistrement a été refusé. Ouvre la console : une ligne « [DB][GARDE] Écriture BLOQUÉE » en donne la raison.`);
+            return;
+        }
 
         alert('Grille ajoutée à ta sélection avec succès !');
     } catch (error) {
@@ -2751,7 +2776,7 @@ async function dupliquerGrilleBibliotheque(id) {
     const nouvelleGrille = {
         ...grille,
         id: genererIdUnique('GRILLE_'),
-        nom: `${grille.nom} (copie)`,
+        nom: nommerCopie(grille.nom, grilles),
         auteur: auteurActif,
         isDemo: false,
         inspireDe: {
@@ -3179,7 +3204,7 @@ async function dupliquerEtEditerGrille(id) {
     const grille = grilles.find(g => g.id === id);
     if (!grille) return;
 
-    const copie = BibliothequeUI.forkerItem(grille, 'GRILLE_');
+    const copie = BibliothequeUI.forkerItem(grille, 'GRILLE_', grilles);
     grilles.push(copie);
     await db.set(cle('grillesTemplates'), grilles);
 
@@ -3745,7 +3770,7 @@ async function dupliquerGrilleDepuisSidebar(id) {
     const copie = {
         ...grille,
         id: genererIdUnique('GRILLE_'),
-        nom: grille.nom + ' (copie)',
+        nom: nommerCopie(grille.nom, grilles),
         verrouille: false
     };
 

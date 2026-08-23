@@ -361,7 +361,7 @@ async function dupliquerEchelle(echelleId) {
         return;
     }
 
-    const nouveauNom = prompt('Nom de la nouvelle échelle :', echelle.nom + ' (copie)');
+    const nouveauNom = prompt('Nom de la nouvelle échelle :', nommerCopie(echelle.nom, echelles));
     if (!nouveauNom) return;
 
     const nouvelleEchelle = {
@@ -807,7 +807,12 @@ async function enregistrerCommeEchelle() {
 async function dupliquerEchelleActuelle() {
     if (!echelleTemplateActuelle) return;
 
-    const nouveauNom = prompt('Nom de la nouvelle échelle :', echelleTemplateActuelle.nom + ' (copie)');
+    // CO-24 — lecture AVANT l'invite : `nommerCopie` doit connaître les noms
+    // déjà pris. La déclaration vivait plus bas, ce qui plaçait cet appel dans
+    // la zone morte temporelle du `let`.
+    let echelles = await db.get(cle('echellesTemplates')) ||  [];
+
+    const nouveauNom = prompt('Nom de la nouvelle échelle :', nommerCopie(echelleTemplateActuelle.nom, echelles));
     if (!nouveauNom) return;
 
     const nouvelleEchelle = {
@@ -820,7 +825,6 @@ async function dupliquerEchelleActuelle() {
         baseSur: echelleTemplateActuelle.nom
     };
 
-    let echelles = await db.get(cle('echellesTemplates')) ||  [];
     echelles.push(nouvelleEchelle);
     await db.set(cle('echellesTemplates'),  echelles);
 
@@ -2361,7 +2365,7 @@ async function afficherBibliothequeEchelles() {
  */
 async function ajouterEchelleIndividuelle(id) {
     try {
-        const echelles = await db.get(cle('echellesTemplates')) || [];
+        let echelles = await db.get(cle('echellesTemplates')) || [];
         let echelle = echelles.find(e => e.id === id);
         if (!echelle) {
             echelle = echelles.find(e => e.idOriginal === id);
@@ -2380,7 +2384,14 @@ async function ajouterEchelleIndividuelle(id) {
                     dansBibliotheque: true,
                     dateImport: new Date().toISOString()
                 };
-                echelles.push(echelle);
+                // #476 — garde d'identité au point d'écriture (cf. grilles.js).
+                const gardeEchelle = ajouterAvecGardeIdentite(echelles, echelle);
+                if (!gardeEchelle.ajoute) {
+                    const nomEnPlace = (gardeEchelle.conflit && gardeEchelle.conflit.nom) || 'Une échelle';
+                    alert(`« ${nomEnPlace} » est déjà dans ta sélection.\n\nPour en avoir un second exemplaire, utilise « Dupliquer ».`);
+                    return;
+                }
+                echelles = gardeEchelle.liste;
             } else {
                 alert('Échelle introuvable');
                 return;
@@ -2390,9 +2401,20 @@ async function ajouterEchelleIndividuelle(id) {
         }
 
         await db.set(cle('echellesTemplates'), echelles);
+
+        // ⚠ Relecture-vérification : `db.set` refuse en silence (cf. grilles.js).
+        const verifEchelle = await db.get(cle('echellesTemplates')) || [];
+
         fermerModalBibliothequeEchelles();
         await afficherListeEchelles();
         await afficherBibliothequeEchelles();
+
+        if (!verifEchelle.some(e => e.id === echelle.id)) {
+            console.error('[echelles] Écriture non confirmée —', echelle.id, 'absente après db.set.');
+            alert(`« ${echelle.nom || 'Échelle'} » n'a PAS pu être ajoutée.\n\nL'enregistrement a été refusé. Ouvre la console pour la raison.`);
+            return;
+        }
+
         alert('Échelle ajoutée à ta sélection avec succès !');
     } catch (error) {
         console.error('Erreur lors de l\'ajout:', error);
@@ -2532,7 +2554,7 @@ async function dupliquerEchelleBibliotheque(id) {
     const nouvelleEchelle = {
         ...echelle,
         id: genererIdUnique('ECH_'),
-        nom: `${echelle.nom} (copie)`,
+        nom: nommerCopie(echelle.nom, echelles),
         auteur: BibliothequeUI.obtenirAuteurActif(),
         isDemo: false,
         inspireDe: BibliothequeUI.forgerInspireDe(echelle),
@@ -3097,7 +3119,7 @@ async function dupliquerEtEditerEchelle(id) {
     const echelle = echelles.find(e => e.id === id);
     if (!echelle) return;
 
-    const copie = BibliothequeUI.forkerItem(echelle, 'ECH_');
+    const copie = BibliothequeUI.forkerItem(echelle, 'ECH_', echelles);
     echelles.push(copie);
     await db.set(cle('echellesTemplates'), echelles);
 
@@ -3477,7 +3499,7 @@ async function dupliquerEchelleDepuisSidebar(id) {
     const copie = {
         ...echelle,
         id: genererIdUnique('ECH_'),
-        nom: echelle.nom + ' (copie)',
+        nom: nommerCopie(echelle.nom, echelles),
         verrouille: false
     };
 

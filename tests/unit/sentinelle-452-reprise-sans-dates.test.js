@@ -58,7 +58,18 @@ function monterBanc({ productionsDuCours = [], bibliotheque = [] } = {}) {
         getCleProductions: () => 'test_productions',
         obtenirToutesLesProductionsBibliotheque: async () => bibliotheque,
         afficherListeProductions: async () => {},
-        detecterDoublonsProductions: () => [],
+        // #291/#476 — le module s'appuie désormais sur js/identite-item.js.
+        // On injecte les VRAIES fonctions : un faux qui accepterait tout
+        // ferait passer ce banc à côté de la garde qu'il traverse.
+        ...(() => {
+            const id = chargerScript('js/identite-item.js');
+            return {
+                ajouterAvecGardeIdentite: id.ajouterAvecGardeIdentite,
+                analyserDoublons: id.analyserDoublons,
+                reunirSources: id.reunirSources,
+                nommerCopie: id.nommerCopie
+            };
+        })(),
         getTypeLabel: (t) => String(t || ''),
         listerTrimestresAvecProductions: () => [],
         obtenirCoursActifId: () => null,

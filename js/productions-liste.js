@@ -36,7 +36,7 @@ async function dupliquerEtEditerProduction(id) {
     const production = productions.find(p => p.id === id);
     if (!production) return;
 
-    const copie = BibliothequeUI.forkerItem(production, 'PROD_');
+    const copie = BibliothequeUI.forkerItem(production, 'PROD_', productions);
     // Les productions utilisent `titre` plutôt que `nom`
     if (production.titre) copie.titre = production.titre + ' (copie)';
     productions.push(copie);
